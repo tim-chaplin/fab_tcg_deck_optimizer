@@ -162,6 +162,7 @@ func main() {
 	nameFilter := flag.String("name", "", "only print cards whose name contains this substring (case insensitive)")
 	typeFilter := flag.String("type", "", "only print cards whose Types field contains this substring (case insensitive), e.g. 'Aura'")
 	format := flag.String("format", "pretty", "output format: pretty | json")
+	namesOnly := flag.Bool("names_only", false, "print only unique card names, one per line")
 	flag.Parse()
 
 	nameNeedle := strings.ToLower(*nameFilter)
@@ -188,17 +189,30 @@ func main() {
 		if c.SilverAgeLegal != "Yes" && c.SilverAgeLegal != "" {
 			continue
 		}
-		if !strings.Contains(c.Types, "Runeblade") {
+		if !strings.Contains(c.Types, "Runeblade") && !strings.Contains(c.Types, "Generic") {
 			continue
 		}
 		if strings.Contains(c.Types, "Shadow") ||
 			strings.Contains(c.Types, "Elemental") ||
 			strings.Contains(c.Types, "Lightning") ||
 			strings.Contains(c.Types, "Earth") ||
-			strings.Contains(c.Types, "Token") {
+			strings.Contains(c.Types, "Token") ||
+			strings.Contains(c.Types, "Equipment") {
 			continue
 		}
 		matched = append(matched, c)
+	}
+
+	if *namesOnly {
+		seen := map[string]bool{}
+		for _, c := range matched {
+			if seen[c.Name] {
+				continue
+			}
+			seen[c.Name] = true
+			fmt.Println(c.Name)
+		}
+		return
 	}
 
 	switch *format {
