@@ -48,6 +48,17 @@ type Stats struct {
 	TotalValue  float64
 	FirstCycle  CycleStats
 	SecondCycle CycleStats
+	// Best is the single highest-value hand seen across all runs (ties broken by first occurrence).
+	// Hand is in canonical (post-sort) order aligned with Play.Roles. Zero-valued if no hands have
+	// been evaluated.
+	Best BestHand
+}
+
+// BestHand records a single hand and its optimal play — used to surface the peak draw a deck saw
+// during simulation.
+type BestHand struct {
+	Hand []card.Card
+	Play hand.Play
 }
 
 // CycleStats tracks total value and hand count for a single deck cycle.
@@ -105,6 +116,18 @@ func (d *Deck) Evaluate(runs int, incomingDamage int, rng *rand.Rand) Stats {
 
 			d.Stats.TotalValue += v
 			d.Stats.Hands++
+			if play.Value() > d.Stats.Best.Play.Value() || d.Stats.Best.Hand == nil {
+				// Clone both slices — h aliases the working deck and play.Roles is owned by the
+				// returned Play, which a later Best() call could reuse.
+				handCopy := make([]card.Card, len(h))
+				copy(handCopy, h)
+				rolesCopy := make([]hand.Role, len(play.Roles))
+				copy(rolesCopy, play.Roles)
+				d.Stats.Best = BestHand{
+					Hand: handCopy,
+					Play: hand.Play{Roles: rolesCopy, Dealt: play.Dealt, Prevented: play.Prevented},
+				}
+			}
 			switch handIdx / handsPerCycle {
 			case 0:
 				d.Stats.FirstCycle.Hands++

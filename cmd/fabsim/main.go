@@ -10,6 +10,7 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card/runeblade"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/deck"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/hand"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/hero"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/weapon"
 )
@@ -36,6 +37,11 @@ func main() {
 	fmt.Printf("Avg hand value (overall):       %.3f\n", stats.Avg())
 	fmt.Printf("Avg hand value (cycle 1):       %.3f  (%d hands)\n", stats.FirstCycle.Avg(), stats.FirstCycle.Hands)
 	fmt.Printf("Avg hand value (cycle 2):       %.3f  (%d hands)\n", stats.SecondCycle.Avg(), stats.SecondCycle.Hands)
+	if b := stats.Best; b.Hand != nil {
+		fmt.Println()
+		fmt.Printf("Best hand seen (value %d; dealt %d, prevented %d):\n", b.Play.Value(), b.Play.Dealt, b.Play.Prevented)
+		fmt.Printf("  %s\n", hand.FormatRoles(b.Hand, b.Play.Roles))
+	}
 }
 
 func weaponNames(ws []weapon.Weapon) string {
