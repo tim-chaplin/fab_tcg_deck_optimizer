@@ -13,6 +13,9 @@ type TurnState struct {
 	// which are auras). Effects that check "if you've played or created an aura this turn" should
 	// OR this with CardsPlayed containing an Aura-typed card.
 	AuraCreated bool
+	// Overpower is set when an attack with the Overpower keyword is being played. Not yet consumed by
+	// the solver — blocked damage should eventually be forwarded to the hero when Overpower is true.
+	Overpower bool
 }
 
 // HasPlayedType reports whether any card played this turn has the given type in its Types() set.
