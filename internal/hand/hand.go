@@ -78,28 +78,41 @@ func FormatRoles(hand []card.Card, roles []Role) string {
 // that repeated evaluations of the same hand across shuffles short-circuit. The hand is sorted
 // in place into canonical order first — Roles in the returned Play align with that post-sort
 // order. Every card in the hand must be registered in package cards; Best panics otherwise.
-func Best(hero hero.Hero, weapons []weapon.Weapon, hand []card.Card, incomingDamage int) Play {
+func Best(hero hero.Hero, weapons []weapon.Weapon, hand []card.Card, incomingDamage int, deck []card.Card) Play {
 	ids := handIDs(hand)
 	sort.Sort(&handByID{hand: hand, ids: ids})
+
+	// Unmemoable hands skip the cache read but still write — the stale entry is harmless since
+	// future unmemoable lookups will skip the read too.
 	key := formatMemoKey(hero, weapons, ids, incomingDamage)
-
-	memoMu.RLock()
-	cached, hit := memo[key]
-	memoMu.RUnlock()
-	if hit {
-		// Clone Roles so callers can't mutate the cached slice.
-		roles := make([]Role, len(cached.Roles))
-		copy(roles, cached.Roles)
-		return Play{Roles: roles, Dealt: cached.Dealt, Prevented: cached.Prevented}
+	if isMemoable(hand) {
+		memoMu.RLock()
+		cached, hit := memo[key]
+		memoMu.RUnlock()
+		if hit {
+			// Clone Roles so callers can't mutate the cached slice.
+			roles := make([]Role, len(cached.Roles))
+			copy(roles, cached.Roles)
+			return Play{Roles: roles, Dealt: cached.Dealt, Prevented: cached.Prevented}
+		}
 	}
-
-	result := bestUncached(hero, weapons, hand, incomingDamage)
-
+	result := bestUncached(hero, weapons, hand, incomingDamage, deck)
 	memoMu.Lock()
 	memo[key] = result
 	memoMu.Unlock()
-
 	return result
+}
+
+// isMemoable reports whether a hand's Best result can be cached. Any card implementing
+// card.NoMemo (e.g. one whose Play depends on deck composition not captured by the memo key)
+// disqualifies the whole hand.
+func isMemoable(hand []card.Card) bool {
+	for _, c := range hand {
+		if _, ok := c.(card.NoMemo); ok {
+			return false
+		}
+	}
+	return true
 }
 
 // handIDs returns the registry IDs for each card in hand, preserving order. Panics if any card
@@ -160,7 +173,7 @@ func formatMemoKey(hero hero.Hero, weapons []weapon.Weapon, sortedIDs []cards.ID
 	return b.String()
 }
 
-func bestUncached(hero hero.Hero, weapons []weapon.Weapon, hand []card.Card, incomingDamage int) Play {
+func bestUncached(hero hero.Hero, weapons []weapon.Weapon, hand []card.Card, incomingDamage int, deck []card.Card) Play {
 	n := len(hand)
 	best := Play{Roles: make([]Role, n)}
 	roles := make([]Role, n)
@@ -168,7 +181,7 @@ func bestUncached(hero hero.Hero, weapons []weapon.Weapon, hand []card.Card, inc
 	var recurse func(i int)
 	recurse = func(i int) {
 		if i == n {
-			evalPartition(hero, weapons, hand, roles, incomingDamage, &best)
+			evalPartition(hero, weapons, hand, roles, incomingDamage, deck, &best)
 			return
 		}
 		for r := Role(0); r <= Defend; r++ {
@@ -195,7 +208,7 @@ func canAfford(pitched, attackers []card.Card) bool {
 	return resources >= cost
 }
 
-func evalPartition(hero hero.Hero, weapons []weapon.Weapon, hand []card.Card, roles []Role, incoming int, best *Play) {
+func evalPartition(hero hero.Hero, weapons []weapon.Weapon, hand []card.Card, roles []Role, incoming int, deck []card.Card, best *Play) {
 	var defense int
 	var cardAttackers, pitched, defenders []card.Card
 	for i, c := range hand {
@@ -225,7 +238,7 @@ func evalPartition(hero hero.Hero, weapons []weapon.Weapon, hand []card.Card, ro
 		if !d.Types()["Defense Reaction"] {
 			continue
 		}
-		state := card.TurnState{Pitched: pitched}
+		state := card.TurnState{Pitched: pitched, Deck: deck}
 		defenseDealt += d.Play(&state)
 	}
 
@@ -242,7 +255,7 @@ func evalPartition(hero hero.Hero, weapons []weapon.Weapon, hand []card.Card, ro
 		if !canAfford(pitched, allAttackers) {
 			continue
 		}
-		if dealt := bestAttackDamage(hero, allAttackers, pitched); dealt > bestAttack {
+		if dealt := bestAttackDamage(hero, allAttackers, pitched, deck); dealt > bestAttack {
 			bestAttack = dealt
 		}
 	}
@@ -263,7 +276,7 @@ func evalPartition(hero hero.Hero, weapons []weapon.Weapon, hand []card.Card, ro
 //
 // Each permutation gets its own freshly-allocated []*PlayedCard so that any grants applied via
 // CardsRemaining mutation don't leak across permutations.
-func bestAttackDamage(hero hero.Hero, attackers, pitched []card.Card) int {
+func bestAttackDamage(hero hero.Hero, attackers, pitched, deck []card.Card) int {
 	if len(attackers) == 0 {
 		return 0
 	}
@@ -277,7 +290,7 @@ func bestAttackDamage(hero hero.Hero, attackers, pitched []card.Card) int {
 			played[i] = &card.PlayedCard{Card: c}
 		}
 
-		state := card.TurnState{Pitched: pitched}
+		state := card.TurnState{Pitched: pitched, Deck: deck}
 		total := 0
 		for i, pc := range played {
 			// Chain legality: non-final cards need an action point, which comes from printed Go

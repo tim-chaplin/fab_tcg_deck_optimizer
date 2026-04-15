@@ -104,6 +104,7 @@ const (
 	SigilOfSufferingRed
 	SigilOfSufferingYellow
 	SigilOfSufferingBlue
+	SigilOfTheArknightBlue
 	SingeingSteelbladeRed
 	SingeingSteelbladeYellow
 	SingeingSteelbladeBlue
@@ -261,6 +262,8 @@ var byID = []card.Card{
 	SigilOfSufferingRed:    runeblade.SigilOfSufferingRed{},
 	SigilOfSufferingYellow: runeblade.SigilOfSufferingYellow{},
 	SigilOfSufferingBlue:   runeblade.SigilOfSufferingBlue{},
+
+	SigilOfTheArknightBlue: runeblade.SigilOfTheArknightBlue{},
 
 	SingeingSteelbladeRed:    runeblade.SingeingSteelbladeRed{},
 	SingeingSteelbladeYellow: runeblade.SingeingSteelbladeYellow{},

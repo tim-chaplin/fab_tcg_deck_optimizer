@@ -111,7 +111,7 @@ func (d *Deck) Evaluate(runs int, incomingDamage int, rng *rand.Rand) Stats {
 		handIdx := 0
 		for len(working) >= handSize {
 			h := working[:handSize]
-			play := hand.Best(d.Hero, d.Weapons, h, incomingDamage)
+			play := hand.Best(d.Hero, d.Weapons, h, incomingDamage, working[handSize:])
 			v := float64(play.Value())
 
 			d.Stats.TotalValue += v

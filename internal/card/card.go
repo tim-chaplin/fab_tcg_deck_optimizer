@@ -47,6 +47,10 @@ type TurnState struct {
 	// Overpower is set when an attack with the Overpower keyword is being played. Not yet consumed by
 	// the solver — blocked damage should eventually be forwarded to the hero when Overpower is true.
 	Overpower bool
+	// Deck is the cards remaining in the deck (excluding the current hand). Effects that reveal
+	// or draw the top card (e.g. Sigil of the Arknight) inspect this to estimate the expected
+	// value of the reveal. Nil when unknown / not provided. Implementations must not mutate it.
+	Deck []Card
 }
 
 // HasPlayedType reports whether any card played this turn has the given type in its Types() set.
@@ -81,5 +85,12 @@ type Card interface {
 	// is added to the turn's dealt total uncapped (the incoming-damage prevention cap applies only
 	// to Defense()).
 	Play(s *TurnState) int
+}
+
+// NoMemo is an optional marker. Cards that implement it signal that hands containing them must
+// not be served from or written to the hand-evaluation memo — typically because the card's Play
+// output depends on context (e.g. remaining deck composition) that the memo key doesn't capture.
+type NoMemo interface {
+	NoMemo()
 }
 

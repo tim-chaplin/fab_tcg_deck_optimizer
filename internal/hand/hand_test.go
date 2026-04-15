@@ -23,7 +23,7 @@ func (stubHero) OnCardPlayed(card.Card, *card.TurnState) int { return 0 }
 func TestBest_AllRedHand(t *testing.T) {
 	// Best: pitch 2 reds (2 res) to attack with the other 2 (cost 2, dealt 6). Value = 6.
 	h := []card.Card{fake.RedAttack{}, fake.RedAttack{}, fake.RedAttack{}, fake.RedAttack{}}
-	got := Best(stubHero{}, nil, h, 4)
+	got := Best(stubHero{}, nil, h, 4, nil)
 	if got.Value() != 6 {
 		t.Fatalf("want value 6, got %d (dealt=%d prevented=%d)", got.Value(), got.Dealt, got.Prevented)
 	}
@@ -33,7 +33,7 @@ func TestBest_AllBlueHand(t *testing.T) {
 	// Best: pitch 1 blue (3 res), attack with 2 blues (cost 2, dealt 2), defend with 1 blue (prevented
 	// 3). Value = 5.
 	h := []card.Card{fake.BlueAttack{}, fake.BlueAttack{}, fake.BlueAttack{}, fake.BlueAttack{}}
-	got := Best(stubHero{}, nil, h, 4)
+	got := Best(stubHero{}, nil, h, 4, nil)
 	if got.Value() != 5 {
 		t.Fatalf("want value 5, got %d (dealt=%d prevented=%d)", got.Value(), got.Dealt, got.Prevented)
 	}
@@ -43,7 +43,7 @@ func TestBest_MixedHand(t *testing.T) {
 	// Best: pitch 1 blue (3 res), attack with 2 reds (cost 2, dealt 6), defend with 1 blue (prevented
 	// 3). Value = 9.
 	h := []card.Card{fake.BlueAttack{}, fake.BlueAttack{}, fake.RedAttack{}, fake.RedAttack{}}
-	got := Best(stubHero{}, nil, h, 4)
+	got := Best(stubHero{}, nil, h, 4, nil)
 	if got.Value() != 9 {
 		t.Fatalf("want value 9, got %d (dealt=%d prevented=%d)", got.Value(), got.Dealt, got.Prevented)
 	}
@@ -53,7 +53,7 @@ func TestBest_DefenseCappedAtIncoming(t *testing.T) {
 	// Best: pitch 1 blue, attack with 2 blues (dealt 2), defend with 1 blue (prevented capped at
 	// incoming=2). Value = 4.
 	h := []card.Card{fake.BlueAttack{}, fake.BlueAttack{}, fake.BlueAttack{}, fake.BlueAttack{}}
-	got := Best(stubHero{}, nil, h, 2)
+	got := Best(stubHero{}, nil, h, 2, nil)
 	if got.Value() != 4 {
 		t.Fatalf("want value 4, got %d (dealt=%d prevented=%d)", got.Value(), got.Dealt, got.Prevented)
 	}
@@ -68,7 +68,7 @@ func TestBest_ViseraiMaleficShrillCombo(t *testing.T) {
 		runeblade.MaleficIncantationRed{},
 		runeblade.ShrillOfSkullformRed{},
 	}
-	got := Best(hero.Viserai{}, nil, h, 4)
+	got := Best(hero.Viserai{}, nil, h, 4, nil)
 	if got.Value() != 15 {
 		t.Fatalf("want value 15, got %d (dealt=%d prevented=%d roles=[%s])",
 			got.Value(), got.Dealt, got.Prevented, FormatRoles(h, got.Roles))
@@ -85,7 +85,7 @@ func TestBest_ViseraiReapingBladeBlueMalefics(t *testing.T) {
 		runeblade.MaleficIncantationBlue{},
 	}
 	weapons := []weapon.Weapon{weapon.ReapingBlade{}}
-	got := Best(hero.Viserai{}, weapons, h, 0)
+	got := Best(hero.Viserai{}, weapons, h, 0, nil)
 	if got.Value() != 8 {
 		t.Fatalf("want value 8, got %d (dealt=%d prevented=%d roles=[%s])",
 			got.Value(), got.Dealt, got.Prevented, FormatRoles(h, got.Roles))
@@ -103,7 +103,7 @@ func TestBest_ViseraiReapingBladeMaleficsPlusShrill(t *testing.T) {
 		runeblade.ShrillOfSkullformRed{},
 	}
 	weapons := []weapon.Weapon{weapon.ReapingBlade{}}
-	got := Best(hero.Viserai{}, weapons, h, 0)
+	got := Best(hero.Viserai{}, weapons, h, 0, nil)
 	if got.Value() != 11 {
 		t.Fatalf("want value 11, got %d (dealt=%d prevented=%d roles=[%s])",
 			got.Value(), got.Dealt, got.Prevented, FormatRoles(h, got.Roles))
@@ -120,7 +120,7 @@ func TestBest_ViseraiOathBlueHocusRedMalefic(t *testing.T) {
 		runeblade.MaleficIncantationRed{},
 	}
 	weapons := []weapon.Weapon{weapon.ReapingBlade{}}
-	got := Best(hero.Viserai{}, weapons, h, 0)
+	got := Best(hero.Viserai{}, weapons, h, 0, nil)
 	if got.Value() != 11 {
 		t.Fatalf("want value 11, got %d (dealt=%d prevented=%d roles=[%s])",
 			got.Value(), got.Dealt, got.Prevented, FormatRoles(h, got.Roles))
@@ -139,7 +139,7 @@ func TestBest_RunicReapingPrefersAttackPitch(t *testing.T) {
 		runeblade.RunicReapingRed{},
 		runeblade.ShrillOfSkullformRed{},
 	}
-	got := Best(hero.Viserai{}, nil, h, 0)
+	got := Best(hero.Viserai{}, nil, h, 0, nil)
 	if got.Value() != 14 {
 		t.Fatalf("want value 14, got %d (dealt=%d prevented=%d roles=[%s])",
 			got.Value(), got.Dealt, got.Prevented, FormatRoles(h, got.Roles))
@@ -160,7 +160,7 @@ func TestBest_ViseraiMauvrionGrantsGoAgainToShrill(t *testing.T) {
 		runeblade.ShrillOfSkullformRed{},
 	}
 	weapons := []weapon.Weapon{weapon.ReapingBlade{}}
-	got := Best(hero.Viserai{}, weapons, h, 0)
+	got := Best(hero.Viserai{}, weapons, h, 0, nil)
 	if got.Value() != 16 {
 		t.Fatalf("want value 16, got %d (dealt=%d prevented=%d roles=[%s])",
 			got.Value(), got.Dealt, got.Prevented, FormatRoles(h, got.Roles))
@@ -226,7 +226,7 @@ func TestBest_ViseraiMauvrionChainsShrillIntoRuneragerIntoWeapon(t *testing.T) {
 		runeblade.ShrillOfSkullformRed{},
 	}
 	weapons := []weapon.Weapon{weapon.ReapingBlade{}}
-	got := Best(hero.Viserai{}, weapons, h, 0)
+	got := Best(hero.Viserai{}, weapons, h, 0, nil)
 	if got.Value() != 18 {
 		t.Fatalf("want value 18, got %d (dealt=%d prevented=%d roles=[%s])",
 			got.Value(), got.Dealt, got.Prevented, FormatRoles(h, got.Roles))
@@ -290,7 +290,7 @@ func TestBestAttackDamage_PlayedCardGrantsDontLeakAcrossPermutations(t *testing.
 	// If the wrappers were reused across permutations the spy would see leaked grants and trip.
 	var sawLeak bool
 	attackers := []card.Card{grantAll{}, grantSpy{saw: &sawLeak}, grantAll{}}
-	_ = bestAttackDamage(stubHero{}, attackers, nil)
+	_ = bestAttackDamage(stubHero{}, attackers, nil, nil)
 	if sawLeak {
 		t.Fatalf("PlayedCard wrapper state leaked across permutations: grantSpy saw a pre-existing GrantedGoAgain when playing first")
 	}
@@ -300,7 +300,7 @@ func TestBest_RespectsResourceConstraint(t *testing.T) {
 	// Best: pitch 2 reds (2 res) to attack with 2 reds (cost 2, dealt 6). Value = 6. Resources must
 	// cover costs.
 	h := []card.Card{fake.RedAttack{}, fake.RedAttack{}, fake.RedAttack{}, fake.RedAttack{}}
-	got := Best(stubHero{}, nil, h, 0)
+	got := Best(stubHero{}, nil, h, 0, nil)
 	if got.Value() != 6 {
 		t.Fatalf("want value 6, got %d", got.Value())
 	}
