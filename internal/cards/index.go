@@ -60,6 +60,9 @@ const (
 	DrawnToTheDarkDimensionRed
 	DrawnToTheDarkDimensionYellow
 	DrawnToTheDarkDimensionBlue
+	DrowningDireRed
+	DrowningDireYellow
+	DrowningDireBlue
 	HitTheHighNotesRed
 	HitTheHighNotesYellow
 	HitTheHighNotesBlue
@@ -84,6 +87,9 @@ const (
 	ReduceToRunechantRed
 	ReduceToRunechantYellow
 	ReduceToRunechantBlue
+	ReekOfCorruptionRed
+	ReekOfCorruptionYellow
+	ReekOfCorruptionBlue
 	RuneFlashRed
 	RuneFlashYellow
 	RuneFlashBlue
@@ -93,6 +99,9 @@ const (
 	RuneragerSwarmRed
 	RuneragerSwarmYellow
 	RuneragerSwarmBlue
+	RunicFellingsongRed
+	RunicFellingsongYellow
+	RunicFellingsongBlue
 	RunicReapingRed
 	RunicReapingYellow
 	RunicReapingBlue
@@ -108,6 +117,9 @@ const (
 	SingeingSteelbladeRed
 	SingeingSteelbladeYellow
 	SingeingSteelbladeBlue
+	SkyFireLanternsRed
+	SkyFireLanternsYellow
+	SkyFireLanternsBlue
 	SpellbladeAssaultRed
 	SpellbladeAssaultYellow
 	SpellbladeAssaultBlue
@@ -117,6 +129,9 @@ const (
 	SplinteringDeadwoodRed
 	SplinteringDeadwoodYellow
 	SplinteringDeadwoodBlue
+	SutcliffesResearchNotesRed
+	SutcliffesResearchNotesYellow
+	SutcliffesResearchNotesBlue
 	VantagePointRed
 	VantagePointYellow
 	VantagePointBlue
@@ -203,6 +218,10 @@ var byID = []card.Card{
 	DrawnToTheDarkDimensionYellow: runeblade.DrawnToTheDarkDimensionYellow{},
 	DrawnToTheDarkDimensionBlue:   runeblade.DrawnToTheDarkDimensionBlue{},
 
+	DrowningDireRed:    runeblade.DrowningDireRed{},
+	DrowningDireYellow: runeblade.DrowningDireYellow{},
+	DrowningDireBlue:   runeblade.DrowningDireBlue{},
+
 	HitTheHighNotesRed:    runeblade.HitTheHighNotesRed{},
 	HitTheHighNotesYellow: runeblade.HitTheHighNotesYellow{},
 	HitTheHighNotesBlue:   runeblade.HitTheHighNotesBlue{},
@@ -235,6 +254,10 @@ var byID = []card.Card{
 	ReduceToRunechantYellow: runeblade.ReduceToRunechantYellow{},
 	ReduceToRunechantBlue:   runeblade.ReduceToRunechantBlue{},
 
+	ReekOfCorruptionRed:    runeblade.ReekOfCorruptionRed{},
+	ReekOfCorruptionYellow: runeblade.ReekOfCorruptionYellow{},
+	ReekOfCorruptionBlue:   runeblade.ReekOfCorruptionBlue{},
+
 	RuneFlashRed:    runeblade.RuneFlashRed{},
 	RuneFlashYellow: runeblade.RuneFlashYellow{},
 	RuneFlashBlue:   runeblade.RuneFlashBlue{},
@@ -246,6 +269,10 @@ var byID = []card.Card{
 	RuneragerSwarmRed:    runeblade.RuneragerSwarmRed{},
 	RuneragerSwarmYellow: runeblade.RuneragerSwarmYellow{},
 	RuneragerSwarmBlue:   runeblade.RuneragerSwarmBlue{},
+
+	RunicFellingsongRed:    runeblade.RunicFellingsongRed{},
+	RunicFellingsongYellow: runeblade.RunicFellingsongYellow{},
+	RunicFellingsongBlue:   runeblade.RunicFellingsongBlue{},
 
 	RunicReapingRed:    runeblade.RunicReapingRed{},
 	RunicReapingYellow: runeblade.RunicReapingYellow{},
@@ -269,6 +296,10 @@ var byID = []card.Card{
 	SingeingSteelbladeYellow: runeblade.SingeingSteelbladeYellow{},
 	SingeingSteelbladeBlue:   runeblade.SingeingSteelbladeBlue{},
 
+	SkyFireLanternsRed:    runeblade.SkyFireLanternsRed{},
+	SkyFireLanternsYellow: runeblade.SkyFireLanternsYellow{},
+	SkyFireLanternsBlue:   runeblade.SkyFireLanternsBlue{},
+
 	SpellbladeAssaultRed:    runeblade.SpellbladeAssaultRed{},
 	SpellbladeAssaultYellow: runeblade.SpellbladeAssaultYellow{},
 	SpellbladeAssaultBlue:   runeblade.SpellbladeAssaultBlue{},
@@ -280,6 +311,10 @@ var byID = []card.Card{
 	SplinteringDeadwoodRed:    runeblade.SplinteringDeadwoodRed{},
 	SplinteringDeadwoodYellow: runeblade.SplinteringDeadwoodYellow{},
 	SplinteringDeadwoodBlue:   runeblade.SplinteringDeadwoodBlue{},
+
+	SutcliffesResearchNotesRed:    runeblade.SutcliffesResearchNotesRed{},
+	SutcliffesResearchNotesYellow: runeblade.SutcliffesResearchNotesYellow{},
+	SutcliffesResearchNotesBlue:   runeblade.SutcliffesResearchNotesBlue{},
 
 	VantagePointRed:    runeblade.VantagePointRed{},
 	VantagePointYellow: runeblade.VantagePointYellow{},
