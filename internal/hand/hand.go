@@ -275,6 +275,30 @@ func bestAttackDamage(hero hero.Hero, attackers, pitched []card.Card) int {
 	return best
 }
 
+// isLegalOrder plays `order` as an attack sequence (same loop as bestAttackDamage's permutation
+// callback) and reports whether every non-final card had EffectiveGoAgain when it finished
+// playing. Damage is not tallied — this is a pure legality check, useful for asserting that
+// specific orderings the solver would have to consider are rejected. Each call allocates fresh
+// *PlayedCard wrappers.
+func isLegalOrder(hero hero.Hero, pitched []card.Card, order []card.Card) bool {
+	played := make([]*card.PlayedCard, len(order))
+	for i, c := range order {
+		played[i] = &card.PlayedCard{Card: c}
+	}
+	state := card.TurnState{Pitched: pitched}
+	for i, pc := range played {
+		state.CardsRemaining = played[i+1:]
+		state.Self = pc
+		pc.Card.Play(&state)
+		hero.OnCardPlayed(pc.Card, &state)
+		state.CardsPlayed = append(state.CardsPlayed, pc.Card)
+		if i < len(played)-1 && !pc.EffectiveGoAgain() {
+			return false
+		}
+	}
+	return true
+}
+
 func permute(a []card.Card, k int, emit func([]card.Card)) {
 	if k == len(a)-1 {
 		emit(a)

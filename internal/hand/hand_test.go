@@ -167,6 +167,31 @@ func TestBest_ViseraiMauvrionGrantsGoAgainToShrill(t *testing.T) {
 	}
 }
 
+func TestIsLegalOrder_MauvrionCantSaveShrillWhenRuneragerIsAhead(t *testing.T) {
+	// Mauvrion's grant lands on the first matching Runeblade attack action card in CardsRemaining.
+	// In the ordering Mauvrion → Runerager → Shrill → weapon, Runerager is that first match, so
+	// Shrill never gets the grant. Shrill has no printed go-again, so the Shrill → weapon chain
+	// must break — isLegalOrder rejects the ordering.
+	order := []card.Card{
+		runeblade.MauvrionSkiesRed{},
+		runeblade.RuneragerSwarmRed{},
+		runeblade.ShrillOfSkullformRed{},
+		weapon.ReapingBlade{},
+	}
+	if isLegalOrder(hero.Viserai{}, nil, order) {
+		t.Fatalf("ordering %v should be illegal (Shrill has no go-again and Mauvrion granted Runerager instead)",
+			cardNames(order))
+	}
+}
+
+func cardNames(cs []card.Card) []string {
+	out := make([]string, len(cs))
+	for i, c := range cs {
+		out[i] = c.Name()
+	}
+	return out
+}
+
 func TestBest_ViseraiMauvrionChainsShrillIntoRuneragerIntoWeapon(t *testing.T) {
 	// Pitch Blue Hocus → Mauvrion → Shrill → Runerager → Reaping Blade. Value = 3 + 7 + 3 + 3 + 2
 	// Viserai runechants = 18.
