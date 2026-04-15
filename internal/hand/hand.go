@@ -209,44 +209,75 @@ func canAfford(pitched, attackers []card.Card) bool {
 }
 
 func evalPartition(hero hero.Hero, weapons []weapon.Weapon, hand []card.Card, roles []Role, incoming int, deck []card.Card, best *Play) {
-	var defense int
-	var cardAttackers, pitched, defenders []card.Card
+	pitched, attackers, defenders := groupByRole(hand, roles)
+	if !canAfford(pitched, attackers) {
+		return
+	}
+	prevented := preventedDamage(defenders, incoming)
+	defenseDealt := defenseReactionDamage(defenders, pitched, deck)
+	attackDealt := bestAttackWithWeapons(hero, weapons, attackers, pitched, deck)
+
+	totalDealt := attackDealt + defenseDealt
+	v := totalDealt + prevented
+	if v > best.Dealt+best.Prevented {
+		best.Dealt = totalDealt
+		best.Prevented = prevented
+		copy(best.Roles, roles)
+	}
+}
+
+// groupByRole buckets `hand` by `roles` (parallel slices) into pitchers, attackers, and
+// defenders. Order within each bucket matches the cards' positions in `hand`.
+func groupByRole(hand []card.Card, roles []Role) (pitched, attackers, defenders []card.Card) {
 	for i, c := range hand {
 		switch roles[i] {
 		case Pitch:
 			pitched = append(pitched, c)
 		case Attack:
-			cardAttackers = append(cardAttackers, c)
+			attackers = append(attackers, c)
 		case Defend:
-			defense += c.Defense()
 			defenders = append(defenders, c)
 		}
 	}
-	if !canAfford(pitched, cardAttackers) {
-		return
+	return
+}
+
+// preventedDamage is the damage a wall of `defenders` blocks against `incoming`: the sum of
+// printed Defense, capped at incoming (excess block is wasted).
+func preventedDamage(defenders []card.Card, incoming int) int {
+	total := 0
+	for _, d := range defenders {
+		total += d.Defense()
 	}
-	prevented := defense
-	if prevented > incoming {
-		prevented = incoming
+	if total > incoming {
+		return incoming
 	}
-	// Defense reactions that also deal damage to the attacker (e.g. Weeping Battleground's 1
-	// arcane on banish) contribute uncapped dealt damage via their Play() hook. Played in
-	// isolation with no attack ordering — TurnState only carries Pitched so effects that check
-	// "what was pitched" work.
-	defenseDealt := 0
+	return total
+}
+
+// defenseReactionDamage runs the Play() hook of every Defense Reaction in `defenders` and sums
+// the damage they deal back to the attacker (e.g. Weeping Battleground's 1 arcane on banish).
+// Played in isolation — no attack ordering; TurnState only carries Pitched/Deck so effects that
+// check "what was pitched" work. Uncapped: this damage is dealt, not prevented.
+func defenseReactionDamage(defenders, pitched, deck []card.Card) int {
+	total := 0
 	for _, d := range defenders {
 		if !d.Types()["Defense Reaction"] {
 			continue
 		}
 		state := card.TurnState{Pitched: pitched, Deck: deck}
-		defenseDealt += d.Play(&state)
+		total += d.Play(&state)
 	}
+	return total
+}
 
-	// Enumerate every subset of weapons to swing. Each selected weapon adds its Cost and joins the
-	// attacker permutation.
-	bestAttack := 0
+// bestAttackWithWeapons enumerates every subset of `weapons` to swing alongside `attackers` and
+// returns the max damage over all (affordable) weapon masks. Each selected weapon adds its Cost
+// and joins the attacker permutation inside bestAttackDamage.
+func bestAttackWithWeapons(hero hero.Hero, weapons []weapon.Weapon, attackers, pitched, deck []card.Card) int {
+	best := 0
 	for mask := 0; mask < 1<<len(weapons); mask++ {
-		allAttackers := append([]card.Card(nil), cardAttackers...)
+		allAttackers := append([]card.Card(nil), attackers...)
 		for i, w := range weapons {
 			if mask&(1<<i) != 0 {
 				allAttackers = append(allAttackers, w)
@@ -255,18 +286,11 @@ func evalPartition(hero hero.Hero, weapons []weapon.Weapon, hand []card.Card, ro
 		if !canAfford(pitched, allAttackers) {
 			continue
 		}
-		if dealt := bestAttackDamage(hero, allAttackers, pitched, deck); dealt > bestAttack {
-			bestAttack = dealt
+		if dealt := bestAttackDamage(hero, allAttackers, pitched, deck); dealt > best {
+			best = dealt
 		}
 	}
-
-	totalDealt := bestAttack + defenseDealt
-	v := totalDealt + prevented
-	if v > best.Dealt+best.Prevented {
-		best.Dealt = totalDealt
-		best.Prevented = prevented
-		copy(best.Roles, roles)
-	}
+	return best
 }
 
 // bestAttackDamage tries every ordering of attackers and returns the max total damage after Play
