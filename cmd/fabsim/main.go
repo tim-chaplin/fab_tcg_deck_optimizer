@@ -11,6 +11,7 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card/runeblade"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/deck"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/hero"
 )
 
 func main() {
@@ -19,10 +20,11 @@ func main() {
 	seed := flag.Int64("seed", time.Now().UnixNano(), "RNG seed")
 	flag.Parse()
 
-	d := deck.New(buildDeck())
+	d := deck.New(hero.Viserai{}, buildDeck())
 	rng := rand.New(rand.NewSource(*seed))
 	stats := d.Evaluate(*shuffles, *incoming, rng)
 
+	fmt.Printf("Hero:           %s\n", d.Hero.Name())
 	fmt.Printf("Deck:           %d cards (Shrill of Skullform + Malefic Incantation, all colors)\n", len(d.Cards))
 	fmt.Printf("Shuffles:       %d\n", stats.Runs)
 	fmt.Printf("Hands:          %d\n", stats.Hands)

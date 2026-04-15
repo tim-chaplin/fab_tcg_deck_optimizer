@@ -11,7 +11,7 @@ import (
 func TestRun_AllRedDeckRecycles(t *testing.T) {
 	// 40 reds. Optimal play for any 4-red hand is pitch 2, attack 2:
 	// dealt 6, prevented 0 = 6. So 2 cards are pitched back per hand,
-	// and the deck never empties to fewer than HandSize until many hands.
+	// and the deck never empties to fewer than a full hand until many hands.
 	deck := make([]card.Card, 40)
 	for i := range deck {
 		deck[i] = fake.Red{}

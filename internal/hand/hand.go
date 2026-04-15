@@ -2,7 +2,10 @@
 // played in isolation.
 package hand
 
-import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+import (
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/hero"
+)
 
 // Role is what a card does on a given turn cycle.
 type Role uint8
@@ -12,9 +15,6 @@ const (
 	Attack
 	Defend
 )
-
-// HandSize is the fixed number of cards in a hand.
-const HandSize = 4
 
 // Play is the chosen partition for a hand: one role per card, plus the
 // resulting damage dealt and damage prevented. Roles are aligned to the
@@ -42,7 +42,7 @@ func (p Play) Value() int { return p.Dealt + p.Prevented }
 // The optimizer brute-forces all 3^N partitions, and for each legal
 // partition tries every ordering of the attackers to let order-sensitive
 // Play effects compound. For N=4 this is ~81 × 24 = ~2000 evaluations.
-func Best(hand []card.Card, incomingDamage int) Play {
+func Best(h hero.Hero, hand []card.Card, incomingDamage int) Play {
 	n := len(hand)
 	best := Play{Roles: make([]Role, n)}
 	roles := make([]Role, n)
@@ -50,7 +50,7 @@ func Best(hand []card.Card, incomingDamage int) Play {
 	var recurse func(i int)
 	recurse = func(i int) {
 		if i == n {
-			evalPartition(hand, roles, incomingDamage, &best)
+			evalPartition(h, hand, roles, incomingDamage, &best)
 			return
 		}
 		for r := Role(0); r <= Defend; r++ {
@@ -62,7 +62,7 @@ func Best(hand []card.Card, incomingDamage int) Play {
 	return best
 }
 
-func evalPartition(hand []card.Card, roles []Role, incoming int, best *Play) {
+func evalPartition(h hero.Hero, hand []card.Card, roles []Role, incoming int, best *Play) {
 	var resources, costs, defense int
 	var attackers []int
 	for i, c := range hand {
@@ -84,7 +84,7 @@ func evalPartition(hand []card.Card, roles []Role, incoming int, best *Play) {
 		prevented = incoming
 	}
 
-	dealt := bestAttackDamage(hand, attackers)
+	dealt := bestAttackDamage(h, hand, attackers)
 
 	v := dealt + prevented
 	if v > best.Dealt+best.Prevented {
@@ -96,8 +96,10 @@ func evalPartition(hand []card.Card, roles []Role, incoming int, best *Play) {
 
 // bestAttackDamage tries every ordering of `attackers` (indices into
 // hand) and returns the max total damage after Play is called on each
-// in sequence.
-func bestAttackDamage(hand []card.Card, attackers []int) int {
+// in sequence. Between each card's Play() and its append to CardsPlayed,
+// the hero's OnCardPlayed hook fires so triggered abilities (e.g.
+// Viserai's Runechants) contribute.
+func bestAttackDamage(h hero.Hero, hand []card.Card, attackers []int) int {
 	if len(attackers) == 0 {
 		return 0
 	}
@@ -109,6 +111,7 @@ func bestAttackDamage(hand []card.Card, attackers []int) int {
 		for _, idx := range order {
 			c := hand[idx]
 			total += c.Play(&state)
+			total += h.OnCardPlayed(c, &state)
 			state.CardsPlayed = append(state.CardsPlayed, c)
 		}
 		if total > best {

@@ -8,9 +8,12 @@ import (
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/deck"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/hero"
 )
 
-// Run is a convenience wrapper around deck.New(cards).Evaluate(...).
+// Run is a convenience wrapper that evaluates the given cards under a
+// default Viserai hero. Useful for tests that don't care about hero
+// selection yet.
 func Run(cards []card.Card, runs int, incomingDamage int, rng *rand.Rand) deck.Stats {
-	return deck.New(cards).Evaluate(runs, incomingDamage, rng)
+	return deck.New(hero.Viserai{}, cards).Evaluate(runs, incomingDamage, rng)
 }
