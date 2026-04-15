@@ -13,6 +13,10 @@ type TurnState struct {
 	// which are auras). Effects that check "if you've played or created an aura this turn" should
 	// OR this with CardsPlayed containing an Aura-typed card.
 	AuraCreated bool
+	// CardsRemaining is the cards that will be played after the current one in the turn's ordering.
+	// Populated by the solver before each Play so an effect can peek forward (e.g. Condemn to
+	// Slaughter buffing the "next Runeblade attack"). Read-only from Play.
+	CardsRemaining []Card
 	// Overpower is set when an attack with the Overpower keyword is being played. Not yet consumed by
 	// the solver — blocked damage should eventually be forwarded to the hero when Overpower is true.
 	Overpower bool

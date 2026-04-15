@@ -110,6 +110,23 @@ func TestBest_ViseraiReapingBladeMaleficsPlusShrill(t *testing.T) {
 	}
 }
 
+func TestBest_ViseraiOathBlueHocusRedMalefic(t *testing.T) {
+	// Pitch Blue Hocus Pocus (3 res). Play Red Malefic (3 dmg, go again). Play Red Oath (+1
+	// Runechant, peeks ahead and sees the Blade swing = +3 bonus, +1 Viserai Runechant from prior
+	// non-attack action = 5). Swing Reaping Blade (cost 1, 3 dmg). Value = 3 + 5 + 3 = 11.
+	h := []card.Card{
+		runeblade.HocusPocusBlue{},
+		runeblade.OathOfTheArknightRed{},
+		runeblade.MaleficIncantationRed{},
+	}
+	weapons := []weapon.Weapon{weapon.ReapingBlade{}}
+	got := Best(hero.Viserai{}, weapons, h, 0)
+	if got.Value() != 11 {
+		t.Fatalf("want value 11, got %d (dealt=%d prevented=%d roles=%v)",
+			got.Value(), got.Dealt, got.Prevented, got.Roles)
+	}
+}
+
 func TestBest_RespectsResourceConstraint(t *testing.T) {
 	// Best: pitch 2 reds (2 res) to attack with 2 reds (cost 2, dealt 6). Value = 6. Resources must
 	// cover costs.

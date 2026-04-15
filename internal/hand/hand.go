@@ -132,7 +132,8 @@ func bestAttackDamage(h hero.Hero, attackers []card.Card) int {
 		}
 		var state card.TurnState
 		total := 0
-		for _, c := range order {
+		for i, c := range order {
+			state.CardsRemaining = order[i+1:]
 			total += c.Play(&state)
 			total += h.OnCardPlayed(c, &state)
 			state.CardsPlayed = append(state.CardsPlayed, c)
