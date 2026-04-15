@@ -10,21 +10,21 @@ import (
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card/runeblade"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/deck"
 )
 
 func main() {
-	runs := flag.Int("runs", 10000, "number of simulation runs (shuffles)")
+	shuffles := flag.Int("shuffles", 10000, "number of shuffles to simulate for this deck")
 	incoming := flag.Int("incoming", 4, "opponent damage per turn")
 	seed := flag.Int64("seed", time.Now().UnixNano(), "RNG seed")
 	flag.Parse()
 
-	deck := buildDeck()
+	d := deck.New(buildDeck())
 	rng := rand.New(rand.NewSource(*seed))
-	stats := sim.Run(deck, *runs, *incoming, rng)
+	stats := d.Evaluate(*shuffles, *incoming, rng)
 
-	fmt.Printf("Deck:           %d cards (Shrill of Skullform + Malefic Incantation, all colors)\n", len(deck))
-	fmt.Printf("Runs:           %d\n", stats.Runs)
+	fmt.Printf("Deck:           %d cards (Shrill of Skullform + Malefic Incantation, all colors)\n", len(d.Cards))
+	fmt.Printf("Shuffles:       %d\n", stats.Runs)
 	fmt.Printf("Hands:          %d\n", stats.Hands)
 	fmt.Printf("Incoming/turn:  %d\n", *incoming)
 	fmt.Printf("Seed:           %d\n", *seed)
