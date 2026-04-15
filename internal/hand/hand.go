@@ -2,6 +2,8 @@
 package hand
 
 import (
+	"strings"
+
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/hero"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/weapon"
@@ -27,6 +29,29 @@ type Play struct {
 
 // Value returns the total value of the play (damage dealt + damage prevented).
 func (p Play) Value() int { return p.Dealt + p.Prevented }
+
+// String returns a human-readable role name ("PITCH", "ATTACK", "DEFEND").
+func (r Role) String() string {
+	switch r {
+	case Pitch:
+		return "PITCH"
+	case Attack:
+		return "ATTACK"
+	case Defend:
+		return "DEFEND"
+	}
+	return "UNKNOWN"
+}
+
+// FormatRoles pairs each card in hand with its assigned role for debug output, e.g.
+// "Hocus Pocus (Blue): PITCH, Runic Reaping (Red): ATTACK".
+func FormatRoles(hand []card.Card, roles []Role) string {
+	parts := make([]string, len(hand))
+	for i, c := range hand {
+		parts[i] = c.Name() + ": " + roles[i].String()
+	}
+	return strings.Join(parts, ", ")
+}
 
 // Best returns the optimal Play for the given hand against an opponent that will attack for
 // incomingDamage on their next turn. Any equipped weapons may also be swung for their Cost if

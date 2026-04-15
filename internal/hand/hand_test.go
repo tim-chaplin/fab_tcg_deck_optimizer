@@ -70,8 +70,8 @@ func TestBest_ViseraiMaleficShrillCombo(t *testing.T) {
 	}
 	got := Best(hero.Viserai{}, nil, h, 4)
 	if got.Value() != 15 {
-		t.Fatalf("want value 15, got %d (dealt=%d prevented=%d roles=%v)",
-			got.Value(), got.Dealt, got.Prevented, got.Roles)
+		t.Fatalf("want value 15, got %d (dealt=%d prevented=%d roles=[%s])",
+			got.Value(), got.Dealt, got.Prevented, FormatRoles(h, got.Roles))
 	}
 }
 
@@ -87,8 +87,8 @@ func TestBest_ViseraiReapingBladeBlueMalefics(t *testing.T) {
 	weapons := []weapon.Weapon{weapon.ReapingBlade{}}
 	got := Best(hero.Viserai{}, weapons, h, 0)
 	if got.Value() != 8 {
-		t.Fatalf("want value 8, got %d (dealt=%d prevented=%d roles=%v)",
-			got.Value(), got.Dealt, got.Prevented, got.Roles)
+		t.Fatalf("want value 8, got %d (dealt=%d prevented=%d roles=[%s])",
+			got.Value(), got.Dealt, got.Prevented, FormatRoles(h, got.Roles))
 	}
 }
 
@@ -105,8 +105,8 @@ func TestBest_ViseraiReapingBladeMaleficsPlusShrill(t *testing.T) {
 	weapons := []weapon.Weapon{weapon.ReapingBlade{}}
 	got := Best(hero.Viserai{}, weapons, h, 0)
 	if got.Value() != 11 {
-		t.Fatalf("want value 11, got %d (dealt=%d prevented=%d roles=%v)",
-			got.Value(), got.Dealt, got.Prevented, got.Roles)
+		t.Fatalf("want value 11, got %d (dealt=%d prevented=%d roles=[%s])",
+			got.Value(), got.Dealt, got.Prevented, FormatRoles(h, got.Roles))
 	}
 }
 
@@ -122,8 +122,8 @@ func TestBest_ViseraiOathBlueHocusRedMalefic(t *testing.T) {
 	weapons := []weapon.Weapon{weapon.ReapingBlade{}}
 	got := Best(hero.Viserai{}, weapons, h, 0)
 	if got.Value() != 11 {
-		t.Fatalf("want value 11, got %d (dealt=%d prevented=%d roles=%v)",
-			got.Value(), got.Dealt, got.Prevented, got.Roles)
+		t.Fatalf("want value 11, got %d (dealt=%d prevented=%d roles=[%s])",
+			got.Value(), got.Dealt, got.Prevented, FormatRoles(h, got.Roles))
 	}
 }
 
@@ -141,8 +141,8 @@ func TestBest_RunicReapingPrefersAttackPitch(t *testing.T) {
 	}
 	got := Best(hero.Viserai{}, nil, h, 0)
 	if got.Value() != 14 {
-		t.Fatalf("want value 14, got %d (dealt=%d prevented=%d roles=%v)",
-			got.Value(), got.Dealt, got.Prevented, got.Roles)
+		t.Fatalf("want value 14, got %d (dealt=%d prevented=%d roles=[%s])",
+			got.Value(), got.Dealt, got.Prevented, FormatRoles(h, got.Roles))
 	}
 }
 
