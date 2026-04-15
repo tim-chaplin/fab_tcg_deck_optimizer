@@ -26,7 +26,10 @@ const Invalid ID = 0
 // Runeblade card IDs. Ordered alphabetically by card name, Red → Yellow → Blue within each family.
 // Sigil of Deadwood only has a Blue variant (no R/Y printings).
 const (
-	ArcaneCussingRed ID = iota + 1
+	AetherSlashRed ID = iota + 1
+	AetherSlashYellow
+	AetherSlashBlue
+	ArcaneCussingRed
 	ArcaneCussingYellow
 	ArcaneCussingBlue
 	ArcanicCrackleRed
@@ -41,6 +44,9 @@ const (
 	CondemnToSlaughterRed
 	CondemnToSlaughterYellow
 	CondemnToSlaughterBlue
+	DeathlyDuetRed
+	DeathlyDuetYellow
+	DeathlyDuetBlue
 	HitTheHighNotesRed
 	HitTheHighNotesYellow
 	HitTheHighNotesBlue
@@ -101,6 +107,10 @@ const (
 var byID = []card.Card{
 	Invalid: nil,
 
+	AetherSlashRed:    runeblade.AetherSlashRed{},
+	AetherSlashYellow: runeblade.AetherSlashYellow{},
+	AetherSlashBlue:   runeblade.AetherSlashBlue{},
+
 	ArcaneCussingRed:    runeblade.ArcaneCussingRed{},
 	ArcaneCussingYellow: runeblade.ArcaneCussingYellow{},
 	ArcaneCussingBlue:   runeblade.ArcaneCussingBlue{},
@@ -120,6 +130,10 @@ var byID = []card.Card{
 	CondemnToSlaughterRed:    runeblade.CondemnToSlaughterRed{},
 	CondemnToSlaughterYellow: runeblade.CondemnToSlaughterYellow{},
 	CondemnToSlaughterBlue:   runeblade.CondemnToSlaughterBlue{},
+
+	DeathlyDuetRed:    runeblade.DeathlyDuetRed{},
+	DeathlyDuetYellow: runeblade.DeathlyDuetYellow{},
+	DeathlyDuetBlue:   runeblade.DeathlyDuetBlue{},
 
 	HitTheHighNotesRed:    runeblade.HitTheHighNotesRed{},
 	HitTheHighNotesYellow: runeblade.HitTheHighNotesYellow{},
