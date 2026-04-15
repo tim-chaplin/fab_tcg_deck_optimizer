@@ -180,22 +180,35 @@ func bestUncached(hero hero.Hero, weapons []weapon.Weapon, hand []card.Card, inc
 	return best
 }
 
+// canAfford reports whether the pitch resources produced by pitched cover the combined Cost of
+// every card in attackers. A partition is legal only if its attackers (hand cards plus any weapon
+// swings joined into the same list) can all be paid for.
+func canAfford(pitched, attackers []card.Card) bool {
+	resources := 0
+	for _, c := range pitched {
+		resources += c.Pitch()
+	}
+	cost := 0
+	for _, c := range attackers {
+		cost += c.Cost()
+	}
+	return resources >= cost
+}
+
 func evalPartition(hero hero.Hero, weapons []weapon.Weapon, hand []card.Card, roles []Role, incoming int, best *Play) {
-	var resources, cardCosts, defense int
+	var defense int
 	var cardAttackers, pitched []card.Card
 	for i, c := range hand {
 		switch roles[i] {
 		case Pitch:
-			resources += c.Pitch()
 			pitched = append(pitched, c)
 		case Attack:
-			cardCosts += c.Cost()
 			cardAttackers = append(cardAttackers, c)
 		case Defend:
 			defense += c.Defense()
 		}
 	}
-	if resources < cardCosts {
+	if !canAfford(pitched, cardAttackers) {
 		return
 	}
 	prevented := defense
@@ -207,18 +220,16 @@ func evalPartition(hero hero.Hero, weapons []weapon.Weapon, hand []card.Card, ro
 	// attacker permutation.
 	bestDealt := 0
 	for mask := 0; mask < 1<<len(weapons); mask++ {
-		totalCost := cardCosts
-		attackers := append([]card.Card(nil), cardAttackers...)
+		allAttackers := append([]card.Card(nil), cardAttackers...)
 		for i, w := range weapons {
 			if mask&(1<<i) != 0 {
-				totalCost += w.Cost()
-				attackers = append(attackers, w)
+				allAttackers = append(allAttackers, w)
 			}
 		}
-		if resources < totalCost {
+		if !canAfford(pitched, allAttackers) {
 			continue
 		}
-		if dealt := bestAttackDamage(hero, attackers, pitched); dealt > bestDealt {
+		if dealt := bestAttackDamage(hero, allAttackers, pitched); dealt > bestDealt {
 			bestDealt = dealt
 		}
 	}
