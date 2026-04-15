@@ -28,7 +28,7 @@ func main() {
 
 	fmt.Printf("Hero:           %s\n", d.Hero.Name())
 	fmt.Printf("Weapons:        %s\n", weaponNames(d.Weapons))
-	fmt.Printf("Deck:           %d cards (Shrill of Skullform + Malefic Incantation, all colors)\n", len(d.Cards))
+	fmt.Printf("Deck:           %d cards (hand-picked variety, max 2 copies each)\n", len(d.Cards))
 	fmt.Printf("Shuffles:       %d\n", stats.Runs)
 	fmt.Printf("Hands:          %d\n", stats.Hands)
 	fmt.Printf("Incoming/turn:  %d\n", *incoming)
@@ -52,21 +52,34 @@ func weaponNames(ws []weapon.Weapon) string {
 	return fmt.Sprintf("%v", names)
 }
 
-// buildDeck assembles the demo deck from every card we've implemented so far. Each unique card
-// variant gets the FaB per-name maximum of 3 copies. This currently produces fewer than 40 cards —
-// more variants will be added as they're implemented.
+// buildDeck returns an arbitrary 40-card demo deck: two copies each of 20 different printings.
+// Hand-picked for variety (not tuned for strength) so fabsim has something realistic to chew on.
 func buildDeck() []card.Card {
 	variants := []card.Card{
-		runeblade.ShrillOfSkullformRed{},
-		runeblade.ShrillOfSkullformYellow{},
-		runeblade.ShrillOfSkullformBlue{},
 		runeblade.MaleficIncantationRed{},
 		runeblade.MaleficIncantationYellow{},
 		runeblade.MaleficIncantationBlue{},
+		runeblade.ShrillOfSkullformRed{},
+		runeblade.ShrillOfSkullformYellow{},
+		runeblade.ShrillOfSkullformBlue{},
+		runeblade.RunicReapingRed{},
+		runeblade.RunicReapingYellow{},
+		runeblade.RunicReapingBlue{},
+		runeblade.AetherSlashRed{},
+		runeblade.AetherSlashYellow{},
+		runeblade.AetherSlashBlue{},
+		runeblade.HocusPocusRed{},
+		runeblade.HocusPocusYellow{},
+		runeblade.HocusPocusBlue{},
+		runeblade.MauvrionSkiesRed{},
+		runeblade.MauvrionSkiesYellow{},
+		runeblade.MauvrionSkiesBlue{},
+		runeblade.DeathlyDuetRed{},
+		runeblade.DeathlyDuetYellow{},
 	}
-	deck := make([]card.Card, 0, len(variants)*3)
+	deck := make([]card.Card, 0, len(variants)*2)
 	for _, v := range variants {
-		for i := 0; i < 3; i++ {
+		for i := 0; i < 2; i++ {
 			deck = append(deck, v)
 		}
 	}
