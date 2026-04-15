@@ -2,6 +2,24 @@
 // implementations.
 package card
 
+// PlayedCard wraps a Card with per-turn mutable flags that other cards' effects can toggle during
+// the chain. Instances are created by the solver at the start of each attack chain and live only
+// for that chain. Effects that grant keywords to "the next X" scan TurnState.CardsRemaining and
+// flip flags on the matching entry — no special-cased fields on TurnState required.
+type PlayedCard struct {
+	Card Card
+	// GrantedGoAgain is set by a prior card's effect to give this specific card Go again even if
+	// its printed text doesn't (e.g. Mauvrion Skies targeting the next Runeblade attack action).
+	// The solver's chain-legality check ORs this with Card.GoAgain().
+	GrantedGoAgain bool
+}
+
+// EffectiveGoAgain reports whether this card has Go again for the current turn, whether from its
+// printed text or a grant from a prior card's effect.
+func (p *PlayedCard) EffectiveGoAgain() bool {
+	return p.Card.GoAgain() || p.GrantedGoAgain
+}
+
 // TurnState is the context passed to Card.Play. Cards read it to decide what effects to apply;
 // the solver appends each played card to CardsPlayed after its Play method returns, so later cards
 // this turn can see what was played before them.
@@ -15,8 +33,9 @@ type TurnState struct {
 	AuraCreated bool
 	// CardsRemaining is the cards that will be played after the current one in the turn's ordering.
 	// Populated by the solver before each Play so an effect can peek forward (e.g. Condemn to
-	// Slaughter buffing the "next Runeblade attack"). Read-only from Play.
-	CardsRemaining []Card
+	// Slaughter buffing the "next Runeblade attack") OR grant keywords to a later card by flipping
+	// flags on its PlayedCard entry (e.g. Mauvrion Skies granting Go again).
+	CardsRemaining []*PlayedCard
 	// Pitched is the set of cards pitched this turn to generate resources. Populated by the solver
 	// before any Play is called. Effects that check "if an attack card was pitched" scan this list.
 	Pitched []Card

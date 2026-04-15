@@ -231,9 +231,13 @@ func evalPartition(hero hero.Hero, weapons []weapon.Weapon, hand []card.Card, ro
 	}
 }
 
-// bestAttackDamage tries every ordering of attackers and returns the max total damage after Play is
-// called on each in sequence. Between each attacker's Play() and its append to CardsPlayed, the
-// hero's OnCardPlayed hook fires so triggered abilities (e.g. Viserai's Runechants) contribute.
+// bestAttackDamage tries every ordering of attackers and returns the max total damage after Play
+// is called on each in sequence. Between each attacker's Play() and its append to CardsPlayed,
+// the hero's OnCardPlayed hook fires so triggered abilities (e.g. Viserai's Runechants)
+// contribute.
+//
+// Each permutation gets its own freshly-allocated []*PlayedCard so that any grants applied via
+// CardsRemaining mutation don't leak across permutations.
 func bestAttackDamage(hero hero.Hero, attackers, pitched []card.Card) int {
 	if len(attackers) == 0 {
 		return 0
@@ -242,19 +246,26 @@ func bestAttackDamage(hero hero.Hero, attackers, pitched []card.Card) int {
 	copy(perm, attackers)
 	best := 0
 	permute(perm, 0, func(order []card.Card) {
-		// Illegal: any card without Go again ends the chain, so all but the last must have GoAgain.
-		for i := 0; i < len(order)-1; i++ {
-			if !order[i].GoAgain() {
-				return
-			}
+		// Fresh PlayedCard wrappers per permutation so prior permutations' grants don't carry over.
+		played := make([]*card.PlayedCard, len(order))
+		for i, c := range order {
+			played[i] = &card.PlayedCard{Card: c}
 		}
+
 		state := card.TurnState{Pitched: pitched}
 		total := 0
-		for i, c := range order {
-			state.CardsRemaining = order[i+1:]
-			total += c.Play(&state)
-			total += hero.OnCardPlayed(c, &state)
-			state.CardsPlayed = append(state.CardsPlayed, c)
+		for i, pc := range played {
+			// Chain legality: non-final cards need an action point, which comes from printed Go
+			// again OR from a grant applied to this PlayedCard by a prior card's Play (e.g.
+			// Mauvrion Skies flipping pc.GrantedGoAgain on a matching later entry).
+			state.CardsRemaining = played[i+1:]
+			total += pc.Card.Play(&state)
+			total += hero.OnCardPlayed(pc.Card, &state)
+			state.CardsPlayed = append(state.CardsPlayed, pc.Card)
+
+			if i < len(played)-1 && !pc.EffectiveGoAgain() {
+				return
+			}
 		}
 		if total > best {
 			best = total

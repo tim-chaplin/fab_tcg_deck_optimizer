@@ -6,47 +6,6 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 )
 
-// stubRunebladeAttack is a minimal Runeblade Action-Attack used to satisfy Runic Reaping's
-// lookahead for a qualifying next attack.
-type stubRunebladeAttack struct{}
-
-func (stubRunebladeAttack) Name() string  { return "StubRunebladeAttack" }
-func (stubRunebladeAttack) Cost() int     { return 0 }
-func (stubRunebladeAttack) Pitch() int    { return 0 }
-func (stubRunebladeAttack) Attack() int   { return 0 }
-func (stubRunebladeAttack) Defense() int  { return 0 }
-func (stubRunebladeAttack) Types() map[string]bool {
-	return map[string]bool{"Runeblade": true, "Action": true, "Attack": true}
-}
-func (stubRunebladeAttack) GoAgain() bool           { return true }
-func (stubRunebladeAttack) Play(*card.TurnState) int { return 0 }
-
-// stubRunebladeWeapon is a Runeblade weapon — not an attack action card.
-type stubRunebladeWeapon struct{}
-
-func (stubRunebladeWeapon) Name() string  { return "StubRunebladeWeapon" }
-func (stubRunebladeWeapon) Cost() int     { return 0 }
-func (stubRunebladeWeapon) Pitch() int    { return 0 }
-func (stubRunebladeWeapon) Attack() int   { return 0 }
-func (stubRunebladeWeapon) Defense() int  { return 0 }
-func (stubRunebladeWeapon) Types() map[string]bool {
-	return map[string]bool{"Runeblade": true, "Weapon": true}
-}
-func (stubRunebladeWeapon) GoAgain() bool            { return false }
-func (stubRunebladeWeapon) Play(*card.TurnState) int { return 0 }
-
-// stubNonAttackPitch is a non-attack card used to confirm the pitched-attack rider does NOT fire.
-type stubNonAttackPitch struct{}
-
-func (stubNonAttackPitch) Name() string                { return "StubNonAttackPitch" }
-func (stubNonAttackPitch) Cost() int                   { return 0 }
-func (stubNonAttackPitch) Pitch() int                  { return 0 }
-func (stubNonAttackPitch) Attack() int                 { return 0 }
-func (stubNonAttackPitch) Defense() int                { return 0 }
-func (stubNonAttackPitch) Types() map[string]bool      { return map[string]bool{"Action": true} }
-func (stubNonAttackPitch) GoAgain() bool               { return false }
-func (stubNonAttackPitch) Play(*card.TurnState) int    { return 0 }
-
 func TestRunicReaping_NoNextAttackReturnsZero(t *testing.T) {
 	// No attack action following → no bonus at all, and AuraCreated must remain false.
 	s := card.TurnState{Pitched: []card.Card{stubRunebladeAttack{}}}
@@ -61,7 +20,7 @@ func TestRunicReaping_NoNextAttackReturnsZero(t *testing.T) {
 func TestRunicReaping_WeaponNextDoesNotQualify(t *testing.T) {
 	// A Runeblade weapon swing later in the turn is not an attack action card, so the rider doesn't
 	// trigger.
-	s := card.TurnState{CardsRemaining: []card.Card{stubRunebladeWeapon{}}}
+	s := card.TurnState{CardsRemaining: []*card.PlayedCard{{Card: stubRunebladeWeapon{}}}}
 	if got := (RunicReapingRed{}).Play(&s); got != 0 {
 		t.Fatalf("want 0 with weapon-only next, got %d", got)
 	}
@@ -80,8 +39,8 @@ func TestRunicReaping_NextAttackNoPitchedAttack(t *testing.T) {
 	}
 	for _, tc := range cases {
 		s := card.TurnState{
-			CardsRemaining: []card.Card{stubRunebladeAttack{}},
-			Pitched:        []card.Card{stubNonAttackPitch{}},
+			CardsRemaining: []*card.PlayedCard{{Card: stubRunebladeAttack{}}},
+			Pitched:        []card.Card{stubNonAttack{}},
 		}
 		if got := tc.c.Play(&s); got != tc.want {
 			t.Errorf("%s: Play() = %d, want %d", tc.c.Name(), got, tc.want)
@@ -105,7 +64,7 @@ func TestRunicReaping_NextAttackWithPitchedAttack(t *testing.T) {
 	}
 	for _, tc := range cases {
 		s := card.TurnState{
-			CardsRemaining: []card.Card{stubRunebladeAttack{}},
+			CardsRemaining: []*card.PlayedCard{{Card: stubRunebladeAttack{}}},
 			Pitched:        []card.Card{stubRunebladeAttack{}},
 		}
 		if got := tc.c.Play(&s); got != tc.want {

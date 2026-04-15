@@ -54,8 +54,8 @@ func (RunicReapingBlue) Play(s *card.TurnState) int { return runicReapingPlay(s,
 
 func runicReapingPlay(s *card.TurnState, n int) int {
 	hasNextAttack := false
-	for _, c := range s.CardsRemaining {
-		t := c.Types()
+	for _, pc := range s.CardsRemaining {
+		t := pc.Card.Types()
 		if t["Runeblade"] && t["Action"] && t["Attack"] {
 			hasNextAttack = true
 			break

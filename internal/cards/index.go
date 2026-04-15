@@ -50,6 +50,9 @@ const (
 	MaleficIncantationRed
 	MaleficIncantationYellow
 	MaleficIncantationBlue
+	MauvrionSkiesRed
+	MauvrionSkiesYellow
+	MauvrionSkiesBlue
 	OathOfTheArknightRed
 	OathOfTheArknightYellow
 	OathOfTheArknightBlue
@@ -126,6 +129,10 @@ var byID = []card.Card{
 	MaleficIncantationRed:    runeblade.MaleficIncantationRed{},
 	MaleficIncantationYellow: runeblade.MaleficIncantationYellow{},
 	MaleficIncantationBlue:   runeblade.MaleficIncantationBlue{},
+
+	MauvrionSkiesRed:    runeblade.MauvrionSkiesRed{},
+	MauvrionSkiesYellow: runeblade.MauvrionSkiesYellow{},
+	MauvrionSkiesBlue:   runeblade.MauvrionSkiesBlue{},
 
 	OathOfTheArknightRed:    runeblade.OathOfTheArknightRed{},
 	OathOfTheArknightYellow: runeblade.OathOfTheArknightYellow{},

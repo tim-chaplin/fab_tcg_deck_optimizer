@@ -53,8 +53,8 @@ func (CondemnToSlaughterBlue) Play(s *card.TurnState) int { return condemnToSlau
 // condemnToSlaughterBonus returns n if some Runeblade attack (attack action card or weapon swing)
 // is scheduled later this turn, otherwise 0.
 func condemnToSlaughterBonus(s *card.TurnState, n int) int {
-	for _, c := range s.CardsRemaining {
-		t := c.Types()
+	for _, pc := range s.CardsRemaining {
+		t := pc.Card.Types()
 		if !t["Runeblade"] {
 			continue
 		}

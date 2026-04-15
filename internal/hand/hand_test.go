@@ -146,6 +146,90 @@ func TestBest_RunicReapingPrefersAttackPitch(t *testing.T) {
 	}
 }
 
+func TestBest_ViseraiMauvrionGrantsGoAgainToShrill(t *testing.T) {
+	// Pitch Blue Hocus Pocus (3 res). Play Blue Malefic (1 arcane, go again). Play Red Mauvrion
+	// Skies (0 cost, go again; grants go-again to the next Runeblade attack action card = Shrill,
+	// and emits 3 runechants). Play Red Shrill (cost 2, 4 base + 3 aura-created bonus = 7; chains
+	// thanks to Mauvrion's grant). Swing Reaping Blade (cost 1, 3 dmg). Viserai fires +1 on
+	// Mauvrion (prior Malefic is a non-attack action) and +1 on Shrill (priors include non-attack
+	// actions). Value = 1 + 3 + 7 + 3 + 2 = 16.
+	h := []card.Card{
+		runeblade.HocusPocusBlue{},
+		runeblade.MaleficIncantationBlue{},
+		runeblade.MauvrionSkiesRed{},
+		runeblade.ShrillOfSkullformRed{},
+	}
+	weapons := []weapon.Weapon{weapon.ReapingBlade{}}
+	got := Best(hero.Viserai{}, weapons, h, 0)
+	if got.Value() != 16 {
+		t.Fatalf("want value 16, got %d (dealt=%d prevented=%d roles=[%s])",
+			got.Value(), got.Dealt, got.Prevented, FormatRoles(h, got.Roles))
+	}
+}
+
+// grantAll is a test-only attacker that sets GrantedGoAgain=true on every PlayedCard remaining in
+// CardsRemaining. Used with grantSpy to detect cross-permutation PlayedCard wrapper leakage.
+type grantAll struct{}
+
+func (grantAll) Name() string           { return "grantAll" }
+func (grantAll) Cost() int              { return 0 }
+func (grantAll) Pitch() int              { return 0 }
+func (grantAll) Attack() int            { return 0 }
+func (grantAll) Defense() int           { return 0 }
+func (grantAll) Types() map[string]bool { return map[string]bool{"Runeblade": true, "Action": true, "Attack": true} }
+func (grantAll) GoAgain() bool          { return true }
+func (grantAll) Play(s *card.TurnState) int {
+	for _, pc := range s.CardsRemaining {
+		pc.GrantedGoAgain = true
+	}
+	return 0
+}
+
+// grantSpy is a test-only attacker that, when it plays FIRST in a permutation, records whether
+// any PlayedCard in CardsRemaining already has GrantedGoAgain=true. With per-permutation fresh
+// wrappers, that should never happen (no prior card in this permutation has run yet). If wrappers
+// leak across permutations, a grant applied by a previous permutation's grantAll will still be
+// visible here — tripping the spy.
+type grantSpy struct{ saw *bool }
+
+func (grantSpy) Name() string             { return "grantSpy" }
+func (grantSpy) Cost() int                { return 0 }
+func (grantSpy) Pitch() int               { return 0 }
+func (grantSpy) Attack() int              { return 0 }
+func (grantSpy) Defense() int             { return 0 }
+func (grantSpy) Types() map[string]bool   { return map[string]bool{"Runeblade": true, "Action": true, "Attack": true} }
+func (grantSpy) GoAgain() bool            { return true }
+func (g grantSpy) Play(s *card.TurnState) int {
+	if len(s.CardsPlayed) != 0 {
+		return 0
+	}
+	for _, pc := range s.CardsRemaining {
+		if pc.GrantedGoAgain {
+			*g.saw = true
+		}
+	}
+	return 0
+}
+
+func TestBestAttackDamage_PlayedCardGrantsDontLeakAcrossPermutations(t *testing.T) {
+	// The permutation loop in bestAttackDamage must allocate fresh *PlayedCard wrappers per
+	// permutation so a grant applied by one permutation's Play() can't bleed into a later
+	// permutation's legality/effect checks.
+	//
+	// Setup: attackers = [grantAll, grantSpy, grantAll]. The permute order emits grantAll-first
+	// permutations before the first grantSpy-first permutation. Each grantAll-first permutation
+	// mutates GrantedGoAgain on the wrappers for the cards behind it. When grantSpy later plays
+	// FIRST in its own permutation, its CardsRemaining contains the other two cards' wrappers —
+	// which must be fresh (GrantedGoAgain=false), since no card has played yet in this permutation.
+	// If the wrappers were reused across permutations the spy would see leaked grants and trip.
+	var sawLeak bool
+	attackers := []card.Card{grantAll{}, grantSpy{saw: &sawLeak}, grantAll{}}
+	_ = bestAttackDamage(stubHero{}, attackers, nil)
+	if sawLeak {
+		t.Fatalf("PlayedCard wrapper state leaked across permutations: grantSpy saw a pre-existing GrantedGoAgain when playing first")
+	}
+}
+
 func TestBest_RespectsResourceConstraint(t *testing.T) {
 	// Best: pitch 2 reds (2 res) to attack with 2 reds (cost 2, dealt 6). Value = 6. Resources must
 	// cover costs.

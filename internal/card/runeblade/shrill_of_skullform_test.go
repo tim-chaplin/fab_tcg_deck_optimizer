@@ -6,18 +6,6 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 )
 
-// stubAura is a minimal Card with the "Aura" type for tests.
-type stubAura struct{}
-
-func (stubAura) Name() string                { return "StubAura" }
-func (stubAura) Cost() int                   { return 0 }
-func (stubAura) Pitch() int                  { return 0 }
-func (stubAura) Attack() int                 { return 0 }
-func (stubAura) Defense() int                { return 0 }
-func (stubAura) Types() map[string]bool      { return map[string]bool{"Aura": true} }
-func (stubAura) GoAgain() bool               { return true }
-func (stubAura) Play(*card.TurnState) int    { return 0 }
-
 func TestShrillOfSkullform_BaseDamage(t *testing.T) {
 	// Without any auras played this turn, Shrill returns its printed power.
 	cases := []struct {

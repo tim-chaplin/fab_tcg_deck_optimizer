@@ -51,8 +51,8 @@ func (OathOfTheArknightBlue) Play(s *card.TurnState) int { return oathPlay(s, 1)
 func oathPlay(s *card.TurnState, n int) int {
 	s.AuraCreated = true
 	bonus := 0
-	for _, c := range s.CardsRemaining {
-		t := c.Types()
+	for _, pc := range s.CardsRemaining {
+		t := pc.Card.Types()
 		if !t["Runeblade"] {
 			continue
 		}
