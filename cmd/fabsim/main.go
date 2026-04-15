@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/card/runeblade"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 )
 
@@ -22,7 +23,7 @@ func main() {
 	rng := rand.New(rand.NewSource(*seed))
 	stats := sim.Run(deck, *runs, *incoming, rng)
 
-	fmt.Printf("Deck:           %d cards (hardcoded 20 blue / 20 red)\n", len(deck))
+	fmt.Printf("Deck:           %d cards (Shrill of Skullform + Malefic Incantation, all colors)\n", len(deck))
 	fmt.Printf("Runs:           %d\n", stats.Runs)
 	fmt.Printf("Hands:          %d\n", stats.Hands)
 	fmt.Printf("Incoming/turn:  %d\n", *incoming)
@@ -33,13 +34,24 @@ func main() {
 	fmt.Printf("Avg hand value (cycle 2):       %.3f  (%d hands)\n", stats.SecondCycle.Avg(), stats.SecondCycle.Hands)
 }
 
+// buildDeck assembles the demo deck from every card we've implemented so
+// far. Each unique card variant gets the FaB per-name maximum of 3
+// copies. This currently produces fewer than 40 cards — more variants
+// will be added as they're implemented.
 func buildDeck() []card.Card {
-	deck := make([]card.Card, 0, 40)
-	for i := 0; i < 20; i++ {
-		deck = append(deck, card.TestCardBlue{})
+	variants := []card.Card{
+		runeblade.ShrillOfSkullformRed{},
+		runeblade.ShrillOfSkullformYellow{},
+		runeblade.ShrillOfSkullformBlue{},
+		runeblade.MaleficIncantationRed{},
+		runeblade.MaleficIncantationYellow{},
+		runeblade.MaleficIncantationBlue{},
 	}
-	for i := 0; i < 20; i++ {
-		deck = append(deck, card.TestCardRed{})
+	deck := make([]card.Card, 0, len(variants)*3)
+	for _, v := range variants {
+		for i := 0; i < 3; i++ {
+			deck = append(deck, v)
+		}
 	}
 	return deck
 }

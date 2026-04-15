@@ -44,28 +44,3 @@ type Card interface {
 	Play(s *TurnState) int
 }
 
-// --- test cards (used by unit tests and the default sim deck) ---
-
-// TestCardBlue is a generic blue action: pitches 3, defends 3, attacks 1, costs 1.
-type TestCardBlue struct{}
-
-func (TestCardBlue) Name() string           { return "TestCardBlue" }
-func (TestCardBlue) Cost() int              { return 1 }
-func (TestCardBlue) Pitch() int             { return 3 }
-func (TestCardBlue) Attack() int            { return 1 }
-func (TestCardBlue) Defense() int           { return 3 }
-func (TestCardBlue) Types() map[string]bool { return genericAttackTypes }
-func (c TestCardBlue) Play(*TurnState) int  { return c.Attack() }
-
-// TestCardRed is a generic red action: pitches 1, defends 1, attacks 3, costs 1.
-type TestCardRed struct{}
-
-func (TestCardRed) Name() string           { return "TestCardRed" }
-func (TestCardRed) Cost() int              { return 1 }
-func (TestCardRed) Pitch() int             { return 1 }
-func (TestCardRed) Attack() int            { return 3 }
-func (TestCardRed) Defense() int           { return 1 }
-func (TestCardRed) Types() map[string]bool { return genericAttackTypes }
-
-var genericAttackTypes = map[string]bool{"Generic": true, "Action": true, "Attack": true}
-func (c TestCardRed) Play(*TurnState) int  { return c.Attack() }
