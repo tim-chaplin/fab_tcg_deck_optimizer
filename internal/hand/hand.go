@@ -65,11 +65,12 @@ func Best(h hero.Hero, weapons []weapon.Weapon, hand []card.Card, incomingDamage
 
 func evalPartition(h hero.Hero, weapons []weapon.Weapon, hand []card.Card, roles []Role, incoming int, best *Play) {
 	var resources, cardCosts, defense int
-	var cardAttackers []card.Card
+	var cardAttackers, pitched []card.Card
 	for i, c := range hand {
 		switch roles[i] {
 		case Pitch:
 			resources += c.Pitch()
+			pitched = append(pitched, c)
 		case Attack:
 			cardCosts += c.Cost()
 			cardAttackers = append(cardAttackers, c)
@@ -100,7 +101,7 @@ func evalPartition(h hero.Hero, weapons []weapon.Weapon, hand []card.Card, roles
 		if resources < totalCost {
 			continue
 		}
-		if dealt := bestAttackDamage(h, attackers); dealt > bestDealt {
+		if dealt := bestAttackDamage(h, attackers, pitched); dealt > bestDealt {
 			bestDealt = dealt
 		}
 	}
@@ -116,7 +117,7 @@ func evalPartition(h hero.Hero, weapons []weapon.Weapon, hand []card.Card, roles
 // bestAttackDamage tries every ordering of attackers and returns the max total damage after Play is
 // called on each in sequence. Between each attacker's Play() and its append to CardsPlayed, the
 // hero's OnCardPlayed hook fires so triggered abilities (e.g. Viserai's Runechants) contribute.
-func bestAttackDamage(h hero.Hero, attackers []card.Card) int {
+func bestAttackDamage(h hero.Hero, attackers, pitched []card.Card) int {
 	if len(attackers) == 0 {
 		return 0
 	}
@@ -130,7 +131,7 @@ func bestAttackDamage(h hero.Hero, attackers []card.Card) int {
 				return
 			}
 		}
-		var state card.TurnState
+		state := card.TurnState{Pitched: pitched}
 		total := 0
 		for i, c := range order {
 			state.CardsRemaining = order[i+1:]

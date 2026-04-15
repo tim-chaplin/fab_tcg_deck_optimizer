@@ -17,6 +17,9 @@ type TurnState struct {
 	// Populated by the solver before each Play so an effect can peek forward (e.g. Condemn to
 	// Slaughter buffing the "next Runeblade attack"). Read-only from Play.
 	CardsRemaining []Card
+	// Pitched is the set of cards pitched this turn to generate resources. Populated by the solver
+	// before any Play is called. Effects that check "if an attack card was pitched" scan this list.
+	Pitched []Card
 	// Overpower is set when an attack with the Overpower keyword is being played. Not yet consumed by
 	// the solver — blocked damage should eventually be forwarded to the hero when Overpower is true.
 	Overpower bool

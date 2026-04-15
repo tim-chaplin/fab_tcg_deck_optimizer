@@ -127,6 +127,25 @@ func TestBest_ViseraiOathBlueHocusRedMalefic(t *testing.T) {
 	}
 }
 
+func TestBest_RunicReapingPrefersAttackPitch(t *testing.T) {
+	// Pitching the Blue Hocus Pocus (attack-typed, pitch 3) pays for Runic Reaping + Shrill AND
+	// satisfies Runic Reaping's pitched-attack rider. Pitching the Blue Malefic Aura instead would
+	// lose the rider. Blue Malefic (1 arcane + 1 Viserai runechant = 2) → Runic Reaping (3 + 1
+	// rider + 1 Viserai runechant = 5) → Shrill (4 base + 3 aura-created bonus = 7). Value = 2 + 5
+	// + 7 = 14.
+	h := []card.Card{
+		runeblade.HocusPocusBlue{},
+		runeblade.MaleficIncantationBlue{},
+		runeblade.RunicReapingRed{},
+		runeblade.ShrillOfSkullformRed{},
+	}
+	got := Best(hero.Viserai{}, nil, h, 0)
+	if got.Value() != 14 {
+		t.Fatalf("want value 14, got %d (dealt=%d prevented=%d roles=%v)",
+			got.Value(), got.Dealt, got.Prevented, got.Roles)
+	}
+}
+
 func TestBest_RespectsResourceConstraint(t *testing.T) {
 	// Best: pitch 2 reds (2 res) to attack with 2 reds (cost 2, dealt 6). Value = 6. Resources must
 	// cover costs.
