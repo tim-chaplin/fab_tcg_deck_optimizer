@@ -18,3 +18,4 @@ Thumbs.db
 # Local-only
 *.pdf
 .claude/
+/data_sources/*.csv
