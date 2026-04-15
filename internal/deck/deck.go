@@ -9,6 +9,7 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/hand"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/hero"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/simstate"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/weapon"
 )
 
@@ -94,6 +95,7 @@ func (s Stats) Avg() float64 {
 // Results accumulate into d.Stats and are also returned for convenience.
 func (d *Deck) Evaluate(runs int, incomingDamage int, rng *rand.Rand) Stats {
 	d.Stats.Runs += runs
+	simstate.CurrentHero = d.Hero
 	handSize := d.Hero.Intelligence()
 	deckSize := len(d.Cards)
 	if handSize <= 0 || deckSize < handSize {

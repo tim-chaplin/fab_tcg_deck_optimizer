@@ -4,10 +4,19 @@ import (
 	"testing"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/simstate"
 )
 
+// stubHero4 is a minimal card.Hero with Intelligence 4 for tests.
+type stubHero4 struct{}
+
+func (stubHero4) Name() string       { return "stubHero4" }
+func (stubHero4) Intelligence() int  { return 4 }
+
 func TestSigilOfTheArknight_EmptyDeckReturnsZero(t *testing.T) {
-	// With no deck to reveal from, the expected value collapses to 0. AuraCreated still flips.
+	// No deck → can't reach the reveal index, so 0. AuraCreated still flips.
+	simstate.CurrentHero = stubHero4{}
+	defer func() { simstate.CurrentHero = nil }()
 	var s card.TurnState
 	if got := (SigilOfTheArknightBlue{}).Play(&s); got != 0 {
 		t.Errorf("Play() with empty deck = %d, want 0", got)
@@ -17,26 +26,44 @@ func TestSigilOfTheArknight_EmptyDeckReturnsZero(t *testing.T) {
 	}
 }
 
-func TestSigilOfTheArknight_ExpectedValueFromDeck(t *testing.T) {
-	// Deck of 4: 2 attack actions, 2 non-attack. EV = (2*3)/4 = 1 (integer truncation).
+func TestSigilOfTheArknight_RevealsAttackActionAtIntelligenceIndex(t *testing.T) {
+	// Intelligence=4: first 4 cards go to next hand; the card at index 4 is revealed. Here that's
+	// an attack action → +3.
+	simstate.CurrentHero = stubHero4{}
+	defer func() { simstate.CurrentHero = nil }()
 	deck := []card.Card{
+		stubNonAttack{}, stubNonAttack{}, stubNonAttack{}, stubNonAttack{},
 		stubRunebladeAttack{},
-		stubRunebladeAttack{},
-		stubNonAttack{},
-		stubAura{},
 	}
 	s := card.TurnState{Deck: deck}
-	if got := (SigilOfTheArknightBlue{}).Play(&s); got != 1 {
-		t.Errorf("Play() = %d, want 1 (2 attack actions of 4 cards × 3 / 4)", got)
+	if got := (SigilOfTheArknightBlue{}).Play(&s); got != 3 {
+		t.Errorf("Play() = %d, want 3 (attack action at deck[Intelligence])", got)
 	}
 }
 
-func TestSigilOfTheArknight_AllAttackActionsDeck(t *testing.T) {
-	// Every card in the deck is an attack action → EV = 1.0 × 3 = 3.
+func TestSigilOfTheArknight_RevealsNonAttackAtIntelligenceIndex(t *testing.T) {
+	// Deck[Intelligence] is a non-attack card → 0, even though attack actions sit elsewhere in
+	// the deck.
+	simstate.CurrentHero = stubHero4{}
+	defer func() { simstate.CurrentHero = nil }()
+	deck := []card.Card{
+		stubRunebladeAttack{}, stubRunebladeAttack{}, stubRunebladeAttack{}, stubRunebladeAttack{},
+		stubAura{},
+	}
+	s := card.TurnState{Deck: deck}
+	if got := (SigilOfTheArknightBlue{}).Play(&s); got != 0 {
+		t.Errorf("Play() = %d, want 0 (revealed card at index 4 is non-attack)", got)
+	}
+}
+
+func TestSigilOfTheArknight_DeckTooShortReturnsZero(t *testing.T) {
+	// Intelligence=4 but only 3 cards remain — can't reach the reveal index → 0.
+	simstate.CurrentHero = stubHero4{}
+	defer func() { simstate.CurrentHero = nil }()
 	deck := []card.Card{stubRunebladeAttack{}, stubRunebladeAttack{}, stubRunebladeAttack{}}
 	s := card.TurnState{Deck: deck}
-	if got := (SigilOfTheArknightBlue{}).Play(&s); got != 3 {
-		t.Errorf("Play() = %d, want 3", got)
+	if got := (SigilOfTheArknightBlue{}).Play(&s); got != 0 {
+		t.Errorf("Play() = %d, want 0 (deck too short)", got)
 	}
 }
 

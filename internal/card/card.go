@@ -47,10 +47,17 @@ type TurnState struct {
 	// Overpower is set when an attack with the Overpower keyword is being played. Not yet consumed by
 	// the solver — blocked damage should eventually be forwarded to the hero when Overpower is true.
 	Overpower bool
-	// Deck is the cards remaining in the deck (excluding the current hand). Effects that reveal
-	// or draw the top card (e.g. Sigil of the Arknight) inspect this to estimate the expected
-	// value of the reveal. Nil when unknown / not provided. Implementations must not mutate it.
+	// Deck is the cards remaining in the deck (excluding the current hand), in top-of-deck order.
+	// Effects that reveal or draw the top card (e.g. Sigil of the Arknight) inspect this. Nil when
+	// unknown / not provided. Implementations must not mutate it.
 	Deck []Card
+}
+
+// Hero is the minimal hero profile card effects need. It's intentionally narrower than
+// hero.Hero to avoid an import cycle. Package simstate holds the active hero for the run.
+type Hero interface {
+	Name() string
+	Intelligence() int
 }
 
 // HasPlayedType reports whether any card played this turn has the given type in its Types() set.

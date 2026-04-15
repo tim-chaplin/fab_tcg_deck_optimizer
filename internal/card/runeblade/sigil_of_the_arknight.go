@@ -3,16 +3,23 @@
 // Text: "At the beginning of your action phase, destroy this. When this leaves the arena, reveal
 // the top card of your deck. If it's an attack action card, put it into your hand."
 //
-// Simplification: assume the Sigil enters then leaves next turn; the expected value of the
-// reveal is (fraction of attack action cards remaining in the deck) × 3, where 3 is the value we
-// ascribe to a drawn card (matching Drawn to the Dark Dimension's draw-a-card valuation). Cross-
-// turn aura-persistence isn't modelled; the value is collapsed to an immediate return on play.
+// Simplification: assume the Sigil enters then leaves at the start of next turn. By then the
+// hero has drawn Intelligence cards into their next hand, so the revealed card is the one at
+// index Intelligence (0-indexed) in the remaining deck — the (Intelligence+1)th from the top.
+// If it's an attack action, credit +3 value (matching Drawn to the Dark Dimension's draw-a-card
+// valuation); otherwise 0. Cross-turn aura-persistence isn't modelled; the value is collapsed to
+// an immediate return on play. If the deck is too short to reach that index, the bonus is 0.
 //
 // Source: github.com/the-fab-cube/flesh-and-blood-cards (card.csv).
 
 package runeblade
 
-import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+import (
+	"log"
+
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/simstate"
+)
 
 var sigilOfTheArknightTypes = map[string]bool{"Runeblade": true, "Action": true, "Aura": true}
 
@@ -28,16 +35,17 @@ func (SigilOfTheArknightBlue) GoAgain() bool          { return true }
 func (SigilOfTheArknightBlue) NoMemo()                {}  // value depends on the state of the deck
 func (SigilOfTheArknightBlue) Play(s *card.TurnState) int {
 	s.AuraCreated = true
-	if len(s.Deck) == 0 {
+	// Next turn's draw takes the first Intelligence cards; the reveal then peeks at the next one.
+	if simstate.CurrentHero == nil {
+		log.Fatal("Sigil of the Arknight played with simstate.CurrentHero unset")
+	}
+	idx := simstate.CurrentHero.Intelligence()
+	if idx >= len(s.Deck) {
 		return 0
 	}
-	attackActions := 0
-	for _, c := range s.Deck {
-		t := c.Types()
-		if t["Attack"] && t["Action"] {
-			attackActions++
-		}
+	t := s.Deck[idx].Types()
+	if t["Attack"] && t["Action"] {
+		return 3
 	}
-	// Expected value: P(top card is attack action) × 3.
-	return (attackActions * 3) / len(s.Deck)
+	return 0
 }
