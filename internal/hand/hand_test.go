@@ -167,6 +167,23 @@ func TestBest_ViseraiMauvrionGrantsGoAgainToShrill(t *testing.T) {
 	}
 }
 
+func TestBest_ViseraiMauvrionChainsShrillIntoRuneragerIntoWeapon(t *testing.T) {
+	// Pitch Blue Hocus → Mauvrion → Shrill → Runerager → Reaping Blade. Value = 3 + 7 + 3 + 3 + 2
+	// Viserai runechants = 18.
+	h := []card.Card{
+		runeblade.HocusPocusBlue{},
+		runeblade.MauvrionSkiesRed{},
+		runeblade.RuneragerSwarmRed{},
+		runeblade.ShrillOfSkullformRed{},
+	}
+	weapons := []weapon.Weapon{weapon.ReapingBlade{}}
+	got := Best(hero.Viserai{}, weapons, h, 0)
+	if got.Value() != 18 {
+		t.Fatalf("want value 18, got %d (dealt=%d prevented=%d roles=[%s])",
+			got.Value(), got.Dealt, got.Prevented, FormatRoles(h, got.Roles))
+	}
+}
+
 // grantAll is a test-only attacker that sets GrantedGoAgain=true on every PlayedCard remaining in
 // CardsRemaining. Used with grantSpy to detect cross-permutation PlayedCard wrapper leakage.
 type grantAll struct{}

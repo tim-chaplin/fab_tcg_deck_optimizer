@@ -39,6 +39,11 @@ type TurnState struct {
 	// Pitched is the set of cards pitched this turn to generate resources. Populated by the solver
 	// before any Play is called. Effects that check "if an attack card was pitched" scan this list.
 	Pitched []Card
+	// Self is the PlayedCard wrapper for the card currently being played. Effects that conditionally
+	// grant the played card itself Go again (e.g. Runerager Swarm: "If you've played or created an
+	// aura this turn, this gets go again") flip Self.GrantedGoAgain. The solver populates this
+	// before each Play and consults EffectiveGoAgain after.
+	Self *PlayedCard
 	// Overpower is set when an attack with the Overpower keyword is being played. Not yet consumed by
 	// the solver — blocked damage should eventually be forwarded to the hero when Overpower is true.
 	Overpower bool

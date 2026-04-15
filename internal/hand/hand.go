@@ -259,6 +259,7 @@ func bestAttackDamage(hero hero.Hero, attackers, pitched []card.Card) int {
 			// again OR from a grant applied to this PlayedCard by a prior card's Play (e.g.
 			// Mauvrion Skies flipping pc.GrantedGoAgain on a matching later entry).
 			state.CardsRemaining = played[i+1:]
+			state.Self = pc
 			total += pc.Card.Play(&state)
 			total += hero.OnCardPlayed(pc.Card, &state)
 			state.CardsPlayed = append(state.CardsPlayed, pc.Card)

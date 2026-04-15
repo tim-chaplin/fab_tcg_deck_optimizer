@@ -62,6 +62,9 @@ const (
 	RunebloodIncantationRed
 	RunebloodIncantationYellow
 	RunebloodIncantationBlue
+	RuneragerSwarmRed
+	RuneragerSwarmYellow
+	RuneragerSwarmBlue
 	RunicReapingRed
 	RunicReapingYellow
 	RunicReapingBlue
@@ -145,6 +148,10 @@ var byID = []card.Card{
 	RunebloodIncantationRed:    runeblade.RunebloodIncantationRed{},
 	RunebloodIncantationYellow: runeblade.RunebloodIncantationYellow{},
 	RunebloodIncantationBlue:   runeblade.RunebloodIncantationBlue{},
+
+	RuneragerSwarmRed:    runeblade.RuneragerSwarmRed{},
+	RuneragerSwarmYellow: runeblade.RuneragerSwarmYellow{},
+	RuneragerSwarmBlue:   runeblade.RuneragerSwarmBlue{},
 
 	RunicReapingRed:    runeblade.RunicReapingRed{},
 	RunicReapingYellow: runeblade.RunicReapingYellow{},

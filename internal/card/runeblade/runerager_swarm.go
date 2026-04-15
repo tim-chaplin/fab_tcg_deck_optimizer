@@ -1,0 +1,61 @@
+// Runerager Swarm — Runeblade Action - Attack. Cost 0, Defense 3.
+// Printed power: Red 3, Yellow 2, Blue 1.
+// Text: "If you've played or created an aura this turn, this gets go again."
+//
+// Go again is CONDITIONAL — it's not a printed keyword but a text-granted effect. Play flips
+// TurnState.Self.GrantedGoAgain when the aura condition is met so the chain-legality check sees
+// the grant.
+//
+// Source: github.com/the-fab-cube/flesh-and-blood-cards (card.csv).
+
+package runeblade
+
+import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+
+var runeragerSwarmTypes = map[string]bool{"Runeblade": true, "Action": true, "Attack": true}
+
+type RuneragerSwarmRed struct{}
+
+func (RuneragerSwarmRed) Name() string             { return "Runerager Swarm (Red)" }
+func (RuneragerSwarmRed) Cost() int                { return 0 }
+func (RuneragerSwarmRed) Pitch() int               { return 1 }
+func (RuneragerSwarmRed) Attack() int              { return 3 }
+func (RuneragerSwarmRed) Defense() int             { return 3 }
+func (RuneragerSwarmRed) Types() map[string]bool   { return runeragerSwarmTypes }
+func (RuneragerSwarmRed) GoAgain() bool            { return false }
+func (c RuneragerSwarmRed) Play(s *card.TurnState) int {
+	return runeragerSwarmPlay(c.Attack(), s)
+}
+
+type RuneragerSwarmYellow struct{}
+
+func (RuneragerSwarmYellow) Name() string             { return "Runerager Swarm (Yellow)" }
+func (RuneragerSwarmYellow) Cost() int                { return 0 }
+func (RuneragerSwarmYellow) Pitch() int               { return 2 }
+func (RuneragerSwarmYellow) Attack() int              { return 2 }
+func (RuneragerSwarmYellow) Defense() int             { return 3 }
+func (RuneragerSwarmYellow) Types() map[string]bool   { return runeragerSwarmTypes }
+func (RuneragerSwarmYellow) GoAgain() bool            { return false }
+func (c RuneragerSwarmYellow) Play(s *card.TurnState) int {
+	return runeragerSwarmPlay(c.Attack(), s)
+}
+
+type RuneragerSwarmBlue struct{}
+
+func (RuneragerSwarmBlue) Name() string             { return "Runerager Swarm (Blue)" }
+func (RuneragerSwarmBlue) Cost() int                { return 0 }
+func (RuneragerSwarmBlue) Pitch() int               { return 3 }
+func (RuneragerSwarmBlue) Attack() int              { return 1 }
+func (RuneragerSwarmBlue) Defense() int             { return 3 }
+func (RuneragerSwarmBlue) Types() map[string]bool   { return runeragerSwarmTypes }
+func (RuneragerSwarmBlue) GoAgain() bool            { return false }
+func (c RuneragerSwarmBlue) Play(s *card.TurnState) int {
+	return runeragerSwarmPlay(c.Attack(), s)
+}
+
+func runeragerSwarmPlay(base int, s *card.TurnState) int {
+	if s.AuraCreated || s.HasPlayedType("Aura") {
+		s.Self.GrantedGoAgain = true
+	}
+	return base
+}
