@@ -22,7 +22,7 @@ func (stubHero) OnCardPlayed(card.Card, *card.TurnState) int { return 0 }
 
 func TestBest_AllRedHand(t *testing.T) {
 	// Best: pitch 2 reds (2 res) to attack with the other 2 (cost 2, dealt 6). Value = 6.
-	h := []card.Card{fake.Red{}, fake.Red{}, fake.Red{}, fake.Red{}}
+	h := []card.Card{fake.RedAttack{}, fake.RedAttack{}, fake.RedAttack{}, fake.RedAttack{}}
 	got := Best(stubHero{}, nil, h, 4)
 	if got.Value() != 6 {
 		t.Fatalf("want value 6, got %d (dealt=%d prevented=%d)", got.Value(), got.Dealt, got.Prevented)
@@ -32,7 +32,7 @@ func TestBest_AllRedHand(t *testing.T) {
 func TestBest_AllBlueHand(t *testing.T) {
 	// Best: pitch 1 blue (3 res), attack with 2 blues (cost 2, dealt 2), defend with 1 blue (prevented
 	// 3). Value = 5.
-	h := []card.Card{fake.Blue{}, fake.Blue{}, fake.Blue{}, fake.Blue{}}
+	h := []card.Card{fake.BlueAttack{}, fake.BlueAttack{}, fake.BlueAttack{}, fake.BlueAttack{}}
 	got := Best(stubHero{}, nil, h, 4)
 	if got.Value() != 5 {
 		t.Fatalf("want value 5, got %d (dealt=%d prevented=%d)", got.Value(), got.Dealt, got.Prevented)
@@ -42,7 +42,7 @@ func TestBest_AllBlueHand(t *testing.T) {
 func TestBest_MixedHand(t *testing.T) {
 	// Best: pitch 1 blue (3 res), attack with 2 reds (cost 2, dealt 6), defend with 1 blue (prevented
 	// 3). Value = 9.
-	h := []card.Card{fake.Blue{}, fake.Blue{}, fake.Red{}, fake.Red{}}
+	h := []card.Card{fake.BlueAttack{}, fake.BlueAttack{}, fake.RedAttack{}, fake.RedAttack{}}
 	got := Best(stubHero{}, nil, h, 4)
 	if got.Value() != 9 {
 		t.Fatalf("want value 9, got %d (dealt=%d prevented=%d)", got.Value(), got.Dealt, got.Prevented)
@@ -52,7 +52,7 @@ func TestBest_MixedHand(t *testing.T) {
 func TestBest_DefenseCappedAtIncoming(t *testing.T) {
 	// Best: pitch 1 blue, attack with 2 blues (dealt 2), defend with 1 blue (prevented capped at
 	// incoming=2). Value = 4.
-	h := []card.Card{fake.Blue{}, fake.Blue{}, fake.Blue{}, fake.Blue{}}
+	h := []card.Card{fake.BlueAttack{}, fake.BlueAttack{}, fake.BlueAttack{}, fake.BlueAttack{}}
 	got := Best(stubHero{}, nil, h, 2)
 	if got.Value() != 4 {
 		t.Fatalf("want value 4, got %d (dealt=%d prevented=%d)", got.Value(), got.Dealt, got.Prevented)
@@ -177,12 +177,12 @@ func TestCanAfford(t *testing.T) {
 	}{
 		{"empty/empty is trivially affordable", nil, nil, true},
 		{"zero pitch covers zero cost", nil, nil, true},
-		{"1 Red pitched covers 1 Red attacker (1 == 1)", []card.Card{fake.Red{}}, []card.Card{fake.Red{}}, true},
-		{"1 Red pitched can't cover 2 Red attackers (1 < 2)", []card.Card{fake.Red{}}, []card.Card{fake.Red{}, fake.Red{}}, false},
-		{"1 Blue pitched covers 3 Red attackers (3 >= 3)", []card.Card{fake.Blue{}}, []card.Card{fake.Red{}, fake.Red{}, fake.Red{}}, true},
-		{"1 Blue pitched can't cover 4 Red attackers (3 < 4)", []card.Card{fake.Blue{}}, []card.Card{fake.Red{}, fake.Red{}, fake.Red{}, fake.Red{}}, false},
+		{"1 Red pitched covers 1 Red attacker (1 == 1)", []card.Card{fake.RedAttack{}}, []card.Card{fake.RedAttack{}}, true},
+		{"1 Red pitched can't cover 2 Red attackers (1 < 2)", []card.Card{fake.RedAttack{}}, []card.Card{fake.RedAttack{}, fake.RedAttack{}}, false},
+		{"1 Blue pitched covers 3 Red attackers (3 >= 3)", []card.Card{fake.BlueAttack{}}, []card.Card{fake.RedAttack{}, fake.RedAttack{}, fake.RedAttack{}}, true},
+		{"1 Blue pitched can't cover 4 Red attackers (3 < 4)", []card.Card{fake.BlueAttack{}}, []card.Card{fake.RedAttack{}, fake.RedAttack{}, fake.RedAttack{}, fake.RedAttack{}}, false},
 		{"attackers with 0 cost are always affordable", nil, []card.Card{runeblade.MauvrionSkiesRed{}}, true},
-		{"excess resources are fine", []card.Card{fake.Blue{}, fake.Blue{}}, []card.Card{fake.Red{}}, true},
+		{"excess resources are fine", []card.Card{fake.BlueAttack{}, fake.BlueAttack{}}, []card.Card{fake.RedAttack{}}, true},
 	}
 	for _, tc := range cases {
 		if got := canAfford(tc.pitched, tc.attackers); got != tc.want {
@@ -299,7 +299,7 @@ func TestBestAttackDamage_PlayedCardGrantsDontLeakAcrossPermutations(t *testing.
 func TestBest_RespectsResourceConstraint(t *testing.T) {
 	// Best: pitch 2 reds (2 res) to attack with 2 reds (cost 2, dealt 6). Value = 6. Resources must
 	// cover costs.
-	h := []card.Card{fake.Red{}, fake.Red{}, fake.Red{}, fake.Red{}}
+	h := []card.Card{fake.RedAttack{}, fake.RedAttack{}, fake.RedAttack{}, fake.RedAttack{}}
 	got := Best(stubHero{}, nil, h, 0)
 	if got.Value() != 6 {
 		t.Fatalf("want value 6, got %d", got.Value())

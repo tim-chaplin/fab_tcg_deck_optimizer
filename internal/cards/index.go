@@ -13,6 +13,7 @@ package cards
 import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card/fake"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/card/generic"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card/runeblade"
 )
 
@@ -97,10 +98,32 @@ const (
 	VexingMaliceYellow
 	VexingMaliceBlue
 
+	// Generic card IDs. Ordered alphabetically by card name, Red → Yellow → Blue within each family.
+	DodgeBlue
+	EvasiveLeapRed
+	EvasiveLeapYellow
+	EvasiveLeapBlue
+	FateForeseenRed
+	FateForeseenYellow
+	FateForeseenBlue
+	LayLowYellow
+	PutInContextBlue
+	RiseAboveRed
+	RiseAboveYellow
+	RiseAboveBlue
+	SinkBelowRed
+	SinkBelowYellow
+	SinkBelowBlue
+	SpringboardSomersaultYellow
+	ToughenUpBlue
+	UnmovableRed
+	UnmovableYellow
+	UnmovableBlue
+
 	// Test-only synthetic cards. Registered so that hand.Best's cache key lookup doesn't panic on
 	// them. Not real FaB cards and should not be used in production decks.
-	FakeRed
-	FakeBlue
+	FakeRedAttack
+	FakeBlueAttack
 )
 
 // byID is indexed directly by ID. Index 0 (Invalid) is nil.
@@ -201,8 +224,38 @@ var byID = []card.Card{
 	VexingMaliceYellow: runeblade.VexingMaliceYellow{},
 	VexingMaliceBlue:   runeblade.VexingMaliceBlue{},
 
-	FakeRed:  fake.Red{},
-	FakeBlue: fake.Blue{},
+	DodgeBlue: generic.DodgeBlue{},
+
+	EvasiveLeapRed:    generic.EvasiveLeapRed{},
+	EvasiveLeapYellow: generic.EvasiveLeapYellow{},
+	EvasiveLeapBlue:   generic.EvasiveLeapBlue{},
+
+	FateForeseenRed:    generic.FateForeseenRed{},
+	FateForeseenYellow: generic.FateForeseenYellow{},
+	FateForeseenBlue:   generic.FateForeseenBlue{},
+
+	LayLowYellow: generic.LayLowYellow{},
+
+	PutInContextBlue: generic.PutInContextBlue{},
+
+	RiseAboveRed:    generic.RiseAboveRed{},
+	RiseAboveYellow: generic.RiseAboveYellow{},
+	RiseAboveBlue:   generic.RiseAboveBlue{},
+
+	SinkBelowRed:    generic.SinkBelowRed{},
+	SinkBelowYellow: generic.SinkBelowYellow{},
+	SinkBelowBlue:   generic.SinkBelowBlue{},
+
+	SpringboardSomersaultYellow: generic.SpringboardSomersaultYellow{},
+
+	ToughenUpBlue: generic.ToughenUpBlue{},
+
+	UnmovableRed:    generic.UnmovableRed{},
+	UnmovableYellow: generic.UnmovableYellow{},
+	UnmovableBlue:   generic.UnmovableBlue{},
+
+	FakeRedAttack:  fake.RedAttack{},
+	FakeBlueAttack: fake.BlueAttack{},
 }
 
 // byName maps Card.Name() → ID for reverse lookup. Built once at init.

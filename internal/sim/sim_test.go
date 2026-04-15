@@ -14,7 +14,7 @@ func TestRun_AllRedDeckRecycles(t *testing.T) {
 	// hands.
 	deck := make([]card.Card, 40)
 	for i := range deck {
-		deck[i] = fake.Red{}
+		deck[i] = fake.RedAttack{}
 	}
 	rng := rand.New(rand.NewSource(1))
 	stats := Run(deck, 1, 4, rng)
@@ -38,7 +38,7 @@ func TestRun_DeckEventuallyEmpties(t *testing.T) {
 	// terminate in finite time.
 	deck := make([]card.Card, 40)
 	for i := range deck {
-		deck[i] = fake.Red{}
+		deck[i] = fake.RedAttack{}
 	}
 	rng := rand.New(rand.NewSource(2))
 	stats := Run(deck, 1, 4, rng)
@@ -77,10 +77,10 @@ func TestRun_MultipleRunsAggregate(t *testing.T) {
 func mixedDeck() []card.Card {
 	d := make([]card.Card, 0, 40)
 	for i := 0; i < 20; i++ {
-		d = append(d, fake.Blue{})
+		d = append(d, fake.BlueAttack{})
 	}
 	for i := 0; i < 20; i++ {
-		d = append(d, fake.Red{})
+		d = append(d, fake.RedAttack{})
 	}
 	return d
 }
