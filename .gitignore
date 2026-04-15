@@ -1,0 +1,20 @@
+# Binaries
+*.exe
+*.out
+/fabsim
+/bin/
+
+# Test/coverage
+*.test
+coverage.out
+coverage.html
+
+# Editor / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Local-only
+*.pdf
+.claude/
