@@ -73,6 +73,29 @@ func TestViserai_PlayedCardNotRuneblade(t *testing.T) {
 	}
 }
 
+// stubRuneWeapon is a Runeblade weapon — tagged with Types["Weapon"]
+// so Viserai should NOT trigger when it swings.
+type stubRuneWeapon struct{}
+
+func (stubRuneWeapon) Name() string             { return "StubRuneWeapon" }
+func (stubRuneWeapon) Cost() int                { return 0 }
+func (stubRuneWeapon) Pitch() int               { return 0 }
+func (stubRuneWeapon) Attack() int              { return 0 }
+func (stubRuneWeapon) Defense() int             { return 0 }
+func (stubRuneWeapon) Types() map[string]bool {
+	return map[string]bool{"Runeblade": true, "Weapon": true}
+}
+func (stubRuneWeapon) Play(*card.TurnState) int { return 0 }
+
+func TestViserai_WeaponSwingDoesNotTrigger(t *testing.T) {
+	// Even with a prior non-attack action in CardsPlayed, swinging a
+	// Runeblade weapon isn't "playing a card" and must not trigger.
+	s := card.TurnState{CardsPlayed: []card.Card{stubRuneAura{}}}
+	if got := (Viserai{}).OnCardPlayed(stubRuneWeapon{}, &s); got != 0 {
+		t.Fatalf("expected 0 for weapon swing, got %d", got)
+	}
+}
+
 func TestViserai_EmptyTurn(t *testing.T) {
 	// First card of the turn: no prior plays, nothing to trigger on.
 	var s card.TurnState

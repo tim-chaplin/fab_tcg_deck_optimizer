@@ -5,6 +5,7 @@ package hand
 import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/hero"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/weapon"
 )
 
 // Role is what a card does on a given turn cycle.
@@ -18,7 +19,8 @@ const (
 
 // Play is the chosen partition for a hand: one role per card, plus the
 // resulting damage dealt and damage prevented. Roles are aligned to the
-// caller's hand order.
+// caller's hand order. (Weapon swing decisions are not reported in
+// Roles — they're consumed only for their damage contribution.)
 type Play struct {
 	Roles     []Role
 	Dealt     int
@@ -29,7 +31,8 @@ type Play struct {
 func (p Play) Value() int { return p.Dealt + p.Prevented }
 
 // Best returns the optimal Play for the given hand against an opponent
-// that will attack for incomingDamage on their next turn.
+// that will attack for incomingDamage on their next turn. Any equipped
+// weapons may also be swung for their Cost if resources allow.
 //
 // Cards are partitioned into three roles:
 //   - Pitch: contributes its Pitch value as resources.
@@ -39,10 +42,11 @@ func (p Play) Value() int { return p.Dealt + p.Prevented }
 //   - Defend: contributes Defense to damage prevented (capped at
 //     incomingDamage; excess block is wasted).
 //
-// The optimizer brute-forces all 3^N partitions, and for each legal
-// partition tries every ordering of the attackers to let order-sensitive
-// Play effects compound. For N=4 this is ~81 × 24 = ~2000 evaluations.
-func Best(h hero.Hero, hand []card.Card, incomingDamage int) Play {
+// The optimizer brute-forces all 3^N partitions, then for each legal
+// partition enumerates every subset of weapons to swing and every
+// ordering of the combined attacker list. For N=4 with 0–2 weapons that
+// remains well under 10k evaluations.
+func Best(h hero.Hero, weapons []weapon.Weapon, hand []card.Card, incomingDamage int) Play {
 	n := len(hand)
 	best := Play{Roles: make([]Role, n)}
 	roles := make([]Role, n)
@@ -50,7 +54,7 @@ func Best(h hero.Hero, hand []card.Card, incomingDamage int) Play {
 	var recurse func(i int)
 	recurse = func(i int) {
 		if i == n {
-			evalPartition(h, hand, roles, incomingDamage, &best)
+			evalPartition(h, weapons, hand, roles, incomingDamage, &best)
 			return
 		}
 		for r := Role(0); r <= Defend; r++ {
@@ -62,21 +66,21 @@ func Best(h hero.Hero, hand []card.Card, incomingDamage int) Play {
 	return best
 }
 
-func evalPartition(h hero.Hero, hand []card.Card, roles []Role, incoming int, best *Play) {
-	var resources, costs, defense int
-	var attackers []int
+func evalPartition(h hero.Hero, weapons []weapon.Weapon, hand []card.Card, roles []Role, incoming int, best *Play) {
+	var resources, cardCosts, defense int
+	var cardAttackers []card.Card
 	for i, c := range hand {
 		switch roles[i] {
 		case Pitch:
 			resources += c.Pitch()
 		case Attack:
-			costs += c.Cost()
-			attackers = append(attackers, i)
+			cardCosts += c.Cost()
+			cardAttackers = append(cardAttackers, c)
 		case Defend:
 			defense += c.Defense()
 		}
 	}
-	if resources < costs {
+	if resources < cardCosts {
 		return
 	}
 	prevented := defense
@@ -84,32 +88,50 @@ func evalPartition(h hero.Hero, hand []card.Card, roles []Role, incoming int, be
 		prevented = incoming
 	}
 
-	dealt := bestAttackDamage(h, hand, attackers)
+	// Enumerate every subset of weapons to swing. Each selected weapon
+	// adds its Cost and joins the attacker permutation.
+	bestDealt := 0
+	for mask := 0; mask < 1<<len(weapons); mask++ {
+		totalCost := cardCosts
+		attackers := append([]card.Card(nil), cardAttackers...)
+		for i, w := range weapons {
+			if mask&(1<<i) != 0 {
+				totalCost += w.Cost()
+				attackers = append(attackers, w)
+			}
+		}
+		if resources < totalCost {
+			continue
+		}
+		if dealt := bestAttackDamage(h, attackers); dealt > bestDealt {
+			bestDealt = dealt
+		}
+	}
 
-	v := dealt + prevented
+	v := bestDealt + prevented
 	if v > best.Dealt+best.Prevented {
-		best.Dealt = dealt
+		best.Dealt = bestDealt
 		best.Prevented = prevented
 		copy(best.Roles, roles)
 	}
 }
 
-// bestAttackDamage tries every ordering of `attackers` (indices into
-// hand) and returns the max total damage after Play is called on each
-// in sequence. Between each card's Play() and its append to CardsPlayed,
-// the hero's OnCardPlayed hook fires so triggered abilities (e.g.
-// Viserai's Runechants) contribute.
-func bestAttackDamage(h hero.Hero, hand []card.Card, attackers []int) int {
+// bestAttackDamage tries every ordering of attackers and returns the max
+// total damage after Play is called on each in sequence. Between each
+// attacker's Play() and its append to CardsPlayed, the hero's
+// OnCardPlayed hook fires so triggered abilities (e.g. Viserai's
+// Runechants) contribute.
+func bestAttackDamage(h hero.Hero, attackers []card.Card) int {
 	if len(attackers) == 0 {
 		return 0
 	}
-	perm := append([]int(nil), attackers...)
+	perm := make([]card.Card, len(attackers))
+	copy(perm, attackers)
 	best := 0
-	permute(perm, 0, func(order []int) {
+	permute(perm, 0, func(order []card.Card) {
 		var state card.TurnState
 		total := 0
-		for _, idx := range order {
-			c := hand[idx]
+		for _, c := range order {
 			total += c.Play(&state)
 			total += h.OnCardPlayed(c, &state)
 			state.CardsPlayed = append(state.CardsPlayed, c)
@@ -121,7 +143,7 @@ func bestAttackDamage(h hero.Hero, hand []card.Card, attackers []int) int {
 	return best
 }
 
-func permute(a []int, k int, emit func([]int)) {
+func permute(a []card.Card, k int, emit func([]card.Card)) {
 	if k == len(a)-1 {
 		emit(a)
 		return

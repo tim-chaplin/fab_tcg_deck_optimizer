@@ -4,24 +4,43 @@
 package deck
 
 import (
+	"fmt"
 	"math/rand"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/hand"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/hero"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/weapon"
 )
 
-// Deck is a hero plus a deck of cards, along with the hand-value stats
-// accumulated from simulating it.
+// Deck is a hero plus equipped weapons and a deck of cards, along with
+// the hand-value stats accumulated from simulating it.
 type Deck struct {
-	Hero  hero.Hero
-	Cards []card.Card
-	Stats Stats
+	Hero    hero.Hero
+	Weapons []weapon.Weapon
+	Cards   []card.Card
+	Stats   Stats
 }
 
-// New constructs a Deck with the given hero and cards and zeroed stats.
-func New(h hero.Hero, cards []card.Card) *Deck {
-	return &Deck{Hero: h, Cards: cards}
+// New constructs a Deck with the given hero, weapons, and cards. Panics
+// if the weapon loadout violates the "0–2 weapons; if 2, both must be
+// 1H" equipment rule.
+func New(h hero.Hero, weapons []weapon.Weapon, cards []card.Card) *Deck {
+	validateWeapons(weapons)
+	return &Deck{Hero: h, Weapons: weapons, Cards: cards}
+}
+
+func validateWeapons(weapons []weapon.Weapon) {
+	switch len(weapons) {
+	case 0, 1:
+		return
+	case 2:
+		if weapons[0].Hands() != 1 || weapons[1].Hands() != 1 {
+			panic("deck: two-weapon loadout requires both weapons to be 1H")
+		}
+	default:
+		panic(fmt.Sprintf("deck: invalid weapon count %d (max 2)", len(weapons)))
+	}
 }
 
 // Stats holds aggregate hand-value statistics across all simulated runs.
@@ -86,7 +105,7 @@ func (d *Deck) Evaluate(runs int, incomingDamage int, rng *rand.Rand) Stats {
 		handIdx := 0
 		for len(working) >= handSize {
 			h := working[:handSize]
-			play := hand.Best(d.Hero, h, incomingDamage)
+			play := hand.Best(d.Hero, d.Weapons, h, incomingDamage)
 			v := float64(play.Value())
 
 			d.Stats.TotalValue += v

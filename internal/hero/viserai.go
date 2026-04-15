@@ -23,12 +23,14 @@ func (Viserai) Types() map[string]bool { return viseraiTypes }
 // also an Attack) has already been played this turn, create a Runechant
 // token (modelled as +1 damage).
 func (Viserai) OnCardPlayed(played card.Card, s *card.TurnState) int {
-	if !played.Types()["Runeblade"] {
+	t := played.Types()
+	// Weapon swings are not "playing a card" and don't trigger Viserai.
+	if !t["Runeblade"] || t["Weapon"] {
 		return 0
 	}
 	for _, c := range s.CardsPlayed {
-		t := c.Types()
-		if t["Action"] && !t["Attack"] {
+		ct := c.Types()
+		if ct["Action"] && !ct["Attack"] {
 			return 1
 		}
 	}

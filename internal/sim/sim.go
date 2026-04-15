@@ -15,5 +15,5 @@ import (
 // default Viserai hero. Useful for tests that don't care about hero
 // selection yet.
 func Run(cards []card.Card, runs int, incomingDamage int, rng *rand.Rand) deck.Stats {
-	return deck.New(hero.Viserai{}, cards).Evaluate(runs, incomingDamage, rng)
+	return deck.New(hero.Viserai{}, nil, cards).Evaluate(runs, incomingDamage, rng)
 }
