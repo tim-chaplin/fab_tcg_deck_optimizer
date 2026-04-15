@@ -9,9 +9,9 @@ import (
 )
 
 func TestRun_AllRedDeckRecycles(t *testing.T) {
-	// 40 reds. Optimal play for any 4-red hand is pitch 2, attack 2:
-	// dealt 6, prevented 0 = 6. So 2 cards are pitched back per hand,
-	// and the deck never empties to fewer than a full hand until many hands.
+	// 40 reds. Optimal play for any 4-red hand is pitch 2, attack 2: dealt 6, prevented 0 = 6. So 2
+	// cards are pitched back per hand, and the deck never empties to fewer than a full hand until many
+	// hands.
 	deck := make([]card.Card, 40)
 	for i := range deck {
 		deck[i] = fake.Red{}
@@ -34,8 +34,8 @@ func TestRun_AllRedDeckRecycles(t *testing.T) {
 }
 
 func TestRun_DeckEventuallyEmpties(t *testing.T) {
-	// All-red deck pitches 2 per hand and burns 2 per hand. Deck shrinks
-	// by 2 each turn, so it should terminate in finite time.
+	// All-red deck pitches 2 per hand and burns 2 per hand. Deck shrinks by 2 each turn, so it should
+	// terminate in finite time.
 	deck := make([]card.Card, 40)
 	for i := range deck {
 		deck[i] = fake.Red{}
@@ -43,8 +43,8 @@ func TestRun_DeckEventuallyEmpties(t *testing.T) {
 	rng := rand.New(rand.NewSource(2))
 	stats := Run(deck, 1, 4, rng)
 
-	// Bound: cards consumed = 2 per hand, starting from 40, stops when <4 left.
-	// So roughly (40-3)/2 ~= 19 hands max.
+	// Bound: cards consumed = 2 per hand, starting from 40, stops when <4 left. So roughly (40-3)/2
+	// ~= 19 hands max.
 	if stats.Hands > 25 {
 		t.Fatalf("simulation did not terminate cleanly: %d hands", stats.Hands)
 	}

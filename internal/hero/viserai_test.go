@@ -32,8 +32,7 @@ func (stubRuneAura) Types() map[string]bool {
 }
 func (stubRuneAura) Play(*card.TurnState) int { return 0 }
 
-// stubNonRuneblade is an Action-Attack with no Runeblade type — should
-// never trigger Viserai.
+// stubNonRuneblade is an Action-Attack with no Runeblade type — should never trigger Viserai.
 type stubNonRuneblade struct{}
 
 func (stubNonRuneblade) Name() string             { return "StubGeneric" }
@@ -47,9 +46,8 @@ func (stubNonRuneblade) Types() map[string]bool {
 func (stubNonRuneblade) Play(*card.TurnState) int { return 0 }
 
 func TestViserai_RunebladeAfterNonAttackActionTriggers(t *testing.T) {
-	// Non-attack action played first, then a Runeblade attack. The
-	// second play's OnCardPlayed sees the prior non-attack action and
-	// awards a Runechant (+1).
+	// Non-attack action played first, then a Runeblade attack. The second play's OnCardPlayed sees
+	// the prior non-attack action and awards a Runechant (+1).
 	s := card.TurnState{CardsPlayed: []card.Card{stubRuneAura{}}}
 	if got := (Viserai{}).OnCardPlayed(stubRuneAttack{}, &s); got != 1 {
 		t.Fatalf("expected +1 Runechant, got %d", got)
@@ -65,16 +63,16 @@ func TestViserai_NoPriorNonAttackAction(t *testing.T) {
 }
 
 func TestViserai_PlayedCardNotRuneblade(t *testing.T) {
-	// Played card isn't Runeblade — Viserai's ability doesn't trigger
-	// even if a non-attack action was played earlier.
+	// Played card isn't Runeblade — Viserai's ability doesn't trigger even if a non-attack action was
+	// played earlier.
 	s := card.TurnState{CardsPlayed: []card.Card{stubRuneAura{}}}
 	if got := (Viserai{}).OnCardPlayed(stubNonRuneblade{}, &s); got != 0 {
 		t.Fatalf("expected 0 (non-Runeblade played), got %d", got)
 	}
 }
 
-// stubRuneWeapon is a Runeblade weapon — tagged with Types["Weapon"]
-// so Viserai should NOT trigger when it swings.
+// stubRuneWeapon is a Runeblade weapon — tagged with Types["Weapon"] so Viserai should NOT trigger
+// when it swings.
 type stubRuneWeapon struct{}
 
 func (stubRuneWeapon) Name() string             { return "StubRuneWeapon" }
@@ -88,8 +86,8 @@ func (stubRuneWeapon) Types() map[string]bool {
 func (stubRuneWeapon) Play(*card.TurnState) int { return 0 }
 
 func TestViserai_WeaponSwingDoesNotTrigger(t *testing.T) {
-	// Even with a prior non-attack action in CardsPlayed, swinging a
-	// Runeblade weapon isn't "playing a card" and must not trigger.
+	// Even with a prior non-attack action in CardsPlayed, swinging a Runeblade weapon isn't "playing a
+	// card" and must not trigger.
 	s := card.TurnState{CardsPlayed: []card.Card{stubRuneAura{}}}
 	if got := (Viserai{}).OnCardPlayed(stubRuneWeapon{}, &s); got != 0 {
 		t.Fatalf("expected 0 for weapon swing, got %d", got)

@@ -1,24 +1,20 @@
-// Package hero defines the Hero interface for Flesh and Blood heroes.
-// A deck is built around exactly one hero, whose class/talents gate
-// which cards are legal and whose printed ability shapes the
-// simulation.
+// Package hero defines the Hero interface for Flesh and Blood heroes. A deck is built around
+// exactly one hero, whose class/talents gate which cards are legal and whose printed ability
+// shapes the simulation.
 package hero
 
 import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 
-// Hero is a FaB hero card. Intelligence is the hand size drawn per turn
-// (currently always 4 for heroes we simulate); Health is starting life
-// total; Types is the hero's class/talent/age set (e.g. Runeblade,
-// Hero, Young) for O(1) lookup.
+// Hero is a FaB hero card. Intelligence is the hand size drawn per turn (currently always 4 for
+// heroes we simulate); Health is starting life total; Types is the hero's class/talent/age set
+// (e.g. Runeblade, Hero, Young) for O(1) lookup.
 type Hero interface {
 	Name() string
 	Health() int
 	Intelligence() int
 	Types() map[string]bool
-	// OnCardPlayed is invoked by the hand evaluator after each card's
-	// Play() resolves and before the card is appended to
-	// s.CardsPlayed. It returns any bonus damage the hero's printed
-	// ability contributes (e.g. Runechant tokens). Heroes without a
-	// relevant triggered ability return 0.
+	// OnCardPlayed is invoked by the hand evaluator after each card's Play() resolves and before the
+	// card is appended to s.CardsPlayed. It returns any bonus damage the hero's printed ability
+	// contributes (e.g. Runechant tokens). Heroes without a relevant triggered ability return 0.
 	OnCardPlayed(played card.Card, s *card.TurnState) int
 }

@@ -1,5 +1,4 @@
-// Package hand evaluates the value of a hand of Flesh and Blood cards
-// played in isolation.
+// Package hand evaluates the value of a hand of Flesh and Blood cards played in isolation.
 package hand
 
 import (
@@ -17,10 +16,9 @@ const (
 	Defend
 )
 
-// Play is the chosen partition for a hand: one role per card, plus the
-// resulting damage dealt and damage prevented. Roles are aligned to the
-// caller's hand order. (Weapon swing decisions are not reported in
-// Roles — they're consumed only for their damage contribution.)
+// Play is the chosen partition for a hand: one role per card, plus the resulting damage dealt and
+// damage prevented. Roles are aligned to the caller's hand order. (Weapon swing decisions are not
+// reported in Roles — they're consumed only for their damage contribution.)
 type Play struct {
 	Roles     []Role
 	Dealt     int
@@ -30,22 +28,21 @@ type Play struct {
 // Value returns the total value of the play (damage dealt + damage prevented).
 func (p Play) Value() int { return p.Dealt + p.Prevented }
 
-// Best returns the optimal Play for the given hand against an opponent
-// that will attack for incomingDamage on their next turn. Any equipped
-// weapons may also be swung for their Cost if resources allow.
+// Best returns the optimal Play for the given hand against an opponent that will attack for
+// incomingDamage on their next turn. Any equipped weapons may also be swung for their Cost if
+// resources allow.
 //
 // Cards are partitioned into three roles:
 //   - Pitch: contributes its Pitch value as resources.
-//   - Attack: consumes Cost resources; the attack is resolved by calling
-//     Card.Play in some order the optimizer chooses. Effects on TurnState
-//     carry forward to later attacks in the same sequence.
-//   - Defend: contributes Defense to damage prevented (capped at
-//     incomingDamage; excess block is wasted).
+//   - Attack: consumes Cost resources; the attack is resolved by calling Card.Play in some order
+//     the optimizer chooses. Effects on TurnState carry forward to later attacks in the same
+//     sequence.
+//   - Defend: contributes Defense to damage prevented (capped at incomingDamage; excess block is
+//     wasted).
 //
-// The optimizer brute-forces all 3^N partitions, then for each legal
-// partition enumerates every subset of weapons to swing and every
-// ordering of the combined attacker list. For N=4 with 0–2 weapons that
-// remains well under 10k evaluations.
+// The optimizer brute-forces all 3^N partitions, then for each legal partition enumerates every
+// subset of weapons to swing and every ordering of the combined attacker list. For N=4 with 0–2
+// weapons that remains well under 10k evaluations.
 func Best(h hero.Hero, weapons []weapon.Weapon, hand []card.Card, incomingDamage int) Play {
 	n := len(hand)
 	best := Play{Roles: make([]Role, n)}
@@ -88,8 +85,8 @@ func evalPartition(h hero.Hero, weapons []weapon.Weapon, hand []card.Card, roles
 		prevented = incoming
 	}
 
-	// Enumerate every subset of weapons to swing. Each selected weapon
-	// adds its Cost and joins the attacker permutation.
+	// Enumerate every subset of weapons to swing. Each selected weapon adds its Cost and joins the
+	// attacker permutation.
 	bestDealt := 0
 	for mask := 0; mask < 1<<len(weapons); mask++ {
 		totalCost := cardCosts
@@ -116,11 +113,9 @@ func evalPartition(h hero.Hero, weapons []weapon.Weapon, hand []card.Card, roles
 	}
 }
 
-// bestAttackDamage tries every ordering of attackers and returns the max
-// total damage after Play is called on each in sequence. Between each
-// attacker's Play() and its append to CardsPlayed, the hero's
-// OnCardPlayed hook fires so triggered abilities (e.g. Viserai's
-// Runechants) contribute.
+// bestAttackDamage tries every ordering of attackers and returns the max total damage after Play is
+// called on each in sequence. Between each attacker's Play() and its append to CardsPlayed, the
+// hero's OnCardPlayed hook fires so triggered abilities (e.g. Viserai's Runechants) contribute.
 func bestAttackDamage(h hero.Hero, attackers []card.Card) int {
 	if len(attackers) == 0 {
 		return 0

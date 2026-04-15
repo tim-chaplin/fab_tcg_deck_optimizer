@@ -1,7 +1,6 @@
-// Package fake provides generic stub Card implementations used by
-// tests in multiple packages (hand, sim). These are not real FaB cards —
-// they're deliberately simple attack actions with known stat lines so
-// partition/ordering tests have predictable optimal values.
+// Package fake provides generic stub Card implementations used by tests in multiple packages (hand,
+// sim). These are not real FaB cards — they're deliberately simple attack actions with known stat
+// lines so partition/ordering tests have predictable optimal values.
 package fake
 
 import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"

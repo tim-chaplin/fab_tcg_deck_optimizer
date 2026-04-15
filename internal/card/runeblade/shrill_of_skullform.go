@@ -1,7 +1,6 @@
 // Shrill of Skullform — Runeblade Action - Attack. Cost 2, Defense 3.
 // Printed power: Red 4, Yellow 3, Blue 2.
-// Text: "If you have played or created an aura this turn, Shrill of
-// Skullform gains +3{p}."
+// Text: "If you have played or created an aura this turn, Shrill of Skullform gains +3{p}."
 //
 // Source: github.com/the-fab-cube/flesh-and-blood-cards (card.csv).
 

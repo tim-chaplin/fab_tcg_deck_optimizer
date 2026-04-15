@@ -1,6 +1,6 @@
 // Viserai — Runeblade Hero, Young. Health 20, Intelligence 4.
-// Text: "Whenever you play a Runeblade card, if you have played another
-// 'non-attack' action card this turn, create a Runechant token."
+// Text: "Whenever you play a Runeblade card, if you have played another 'non-attack' action card
+// this turn, create a Runechant token."
 //
 // Source: github.com/the-fab-cube/flesh-and-blood-cards (card.csv).
 
@@ -18,10 +18,9 @@ func (Viserai) Health() int            { return 20 }
 func (Viserai) Intelligence() int      { return 4 }
 func (Viserai) Types() map[string]bool { return viseraiTypes }
 
-// OnCardPlayed implements Viserai's hero ability: whenever a Runeblade
-// card is played, if another "non-attack action" (an Action that is not
-// also an Attack) has already been played this turn, create a Runechant
-// token (modelled as +1 damage).
+// OnCardPlayed implements Viserai's hero ability: whenever a Runeblade card is played, if another
+// "non-attack action" (an Action that is not also an Attack) has already been played this turn,
+// create a Runechant token (modelled as +1 damage).
 func (Viserai) OnCardPlayed(played card.Card, s *card.TurnState) int {
 	t := played.Types()
 	// Weapon swings are not "playing a card" and don't trigger Viserai.

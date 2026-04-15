@@ -1,5 +1,4 @@
-// Command fabsim simulates a Flesh and Blood deck and reports average
-// hand value per cycle.
+// Command fabsim simulates a Flesh and Blood deck and reports average hand value per cycle.
 package main
 
 import (
@@ -47,10 +46,9 @@ func weaponNames(ws []weapon.Weapon) string {
 	return fmt.Sprintf("%v", names)
 }
 
-// buildDeck assembles the demo deck from every card we've implemented so
-// far. Each unique card variant gets the FaB per-name maximum of 3
-// copies. This currently produces fewer than 40 cards — more variants
-// will be added as they're implemented.
+// buildDeck assembles the demo deck from every card we've implemented so far. Each unique card
+// variant gets the FaB per-name maximum of 3 copies. This currently produces fewer than 40 cards —
+// more variants will be added as they're implemented.
 func buildDeck() []card.Card {
 	variants := []card.Card{
 		runeblade.ShrillOfSkullformRed{},

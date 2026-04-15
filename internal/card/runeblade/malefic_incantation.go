@@ -1,14 +1,12 @@
 // Malefic Incantation — Runeblade Action - Aura. Cost 0, Defense 2, Go again.
 // Printed pitch variants: Red 1, Yellow 2, Blue 3.
-// Text: "This enters the arena with N verse counters. When it has none,
-// destroy it. Once per turn, when you play an attack action card, remove
-// a verse counter from this. If you do, create a Runechant token."
-// (Red N=3, Yellow N=2, Blue N=1.)
+// Text: "This enters the arena with N verse counters. When it has none, destroy it. Once per turn,
+// when you play an attack action card, remove a verse counter from this. If you do, create a
+// Runechant token." (Red N=3, Yellow N=2, Blue N=1.)
 //
-// Simplification: assume every verse counter will eventually be spent
-// to create a Runechant (+1 damage each) on some future turn, so
-// Malefic's Play value is a flat N — Red=3, Yellow=2, Blue=1. Turn
-// timing and destruction when counters hit zero are not modelled.
+// Simplification: assume every verse counter will eventually be spent to create a Runechant (+1
+// damage each) on some future turn, so Malefic's Play value is a flat N — Red=3, Yellow=2, Blue=1.
+// Turn timing and destruction when counters hit zero are not modelled.
 //
 // Source: github.com/the-fab-cube/flesh-and-blood-cards (card.csv).
 

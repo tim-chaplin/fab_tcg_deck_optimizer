@@ -1,6 +1,5 @@
-// Package deck represents a candidate FaB deck and the hand-value stats
-// accumulated from simulating it. Future deck-search code will create
-// many Decks, evaluate each, and compare their Stats.
+// Package deck represents a candidate FaB deck and the hand-value stats accumulated from simulating
+// it. Future deck-search code will create many Decks, evaluate each, and compare their Stats.
 package deck
 
 import (
@@ -13,8 +12,8 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/weapon"
 )
 
-// Deck is a hero plus equipped weapons and a deck of cards, along with
-// the hand-value stats accumulated from simulating it.
+// Deck is a hero plus equipped weapons and a deck of cards, along with the hand-value stats
+// accumulated from simulating it.
 type Deck struct {
 	Hero    hero.Hero
 	Weapons []weapon.Weapon
@@ -22,9 +21,8 @@ type Deck struct {
 	Stats   Stats
 }
 
-// New constructs a Deck with the given hero, weapons, and cards. Panics
-// if the weapon loadout violates the "0–2 weapons; if 2, both must be
-// 1H" equipment rule.
+// New constructs a Deck with the given hero, weapons, and cards. Panics if the weapon loadout
+// violates the "0–2 weapons; if 2, both must be 1H" equipment rule.
 func New(h hero.Hero, weapons []weapon.Weapon, cards []card.Card) *Deck {
 	validateWeapons(weapons)
 	return &Deck{Hero: h, Weapons: weapons, Cards: cards}
@@ -74,16 +72,13 @@ func (s Stats) Avg() float64 {
 	return s.TotalValue / float64(s.Hands)
 }
 
-// Evaluate simulates `runs` shuffles of the deck. For each run it draws
-// successive hands of d.Hero.Intelligence() cards from the top, computes
-// the optimal play against an opponent attacking for incomingDamage,
-// and returns Pitched cards to the bottom of the deck (in hand order).
-// Played and defended cards are spent. Each run ends when fewer than
-// a full hand's worth of cards remain.
+// Evaluate simulates `runs` shuffles of the deck. For each run it draws successive hands of
+// d.Hero.Intelligence() cards from the top, computes the optimal play against an opponent attacking
+// for incomingDamage, and returns Pitched cards to the bottom of the deck (in hand order). Played
+// and defended cards are spent. Each run ends when fewer than a full hand's worth of cards remain.
 //
-// A "cycle" is one pass through the original deck size: cumulative hands
-// 0..(deckSize/handSize - 1) are cycle 1, the next deckSize/handSize
-// hands are cycle 2.
+// A "cycle" is one pass through the original deck size: cumulative hands 0..(deckSize/handSize - 1)
+// are cycle 1, the next deckSize/handSize hands are cycle 2.
 //
 // Results accumulate into d.Stats and are also returned for convenience.
 func (d *Deck) Evaluate(runs int, incomingDamage int, rng *rand.Rand) Stats {
@@ -119,9 +114,8 @@ func (d *Deck) Evaluate(runs int, incomingDamage int, rng *rand.Rand) Stats {
 				d.Stats.SecondCycle.Total += v
 			}
 
-			// Recycle: pitched cards go to the bottom (in hand order);
-			// attacked and defended cards are spent. If nothing was
-			// pitched, the deck shrinks by handSize this turn.
+			// Recycle: pitched cards go to the bottom (in hand order); attacked and defended cards are
+			// spent. If nothing was pitched, the deck shrinks by handSize this turn.
 			pitched := make([]card.Card, 0, handSize)
 			for i, c := range h {
 				if play.Roles[i] == hand.Pitch {

@@ -1,5 +1,5 @@
-// Command parsecarddb parses the flesh-and-blood-cards card.csv and
-// prints matching cards in either pretty or JSON form.
+// Command parsecarddb parses the flesh-and-blood-cards card.csv and prints matching cards in either
+// pretty or JSON form.
 package main
 
 import (
@@ -43,8 +43,8 @@ type Card struct {
 	LLLegal                 string
 }
 
-// String pretty-prints a Card, omitting blank fields. Implements
-// fmt.Stringer so fmt.Printf("%v", c) uses this format automatically.
+// String pretty-prints a Card, omitting blank fields. Implements fmt.Stringer so fmt.Printf("%v",
+// c) uses this format automatically.
 func (c Card) String() string {
 	var b strings.Builder
 	add := func(label, value string) {
@@ -78,9 +78,9 @@ func (c Card) String() string {
 	return b.String()
 }
 
-// cardCSVColumns maps CSV header names to the Card field they populate.
-// Keeping this adjacent to Card makes it obvious when a new column is
-// added upstream — the compiler will complain if the field is missing.
+// cardCSVColumns maps CSV header names to the Card field they populate. Keeping this adjacent to
+// Card makes it obvious when a new column is added upstream — the compiler will complain if the
+// field is missing.
 var cardCSVColumns = []struct {
 	Header string
 	Assign func(*Card, string)

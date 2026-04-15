@@ -1,10 +1,9 @@
 // Reaping Blade — Runeblade Weapon - Sword (2H). Power 3.
-// Text: "Once per Turn Action - {r}: Attack.
-// If a hero has more {h} than any other hero, they can't gain {h}."
+// Text: "Once per Turn Action - {r}: Attack. If a hero has more {h} than any other hero, they can't
+// gain {h}."
 //
-// Simulation: modelled as an attack source costing 1 resource, dealing
-// 3 damage. The health-symmetry rider is ignored (irrelevant to
-// single-turn damage evaluation).
+// Simulation: modelled as an attack source costing 1 resource, dealing 3 damage. The
+// health-symmetry rider is ignored (irrelevant to single-turn damage evaluation).
 //
 // Source: github.com/the-fab-cube/flesh-and-blood-cards (card.csv).
 
