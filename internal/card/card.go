@@ -75,8 +75,11 @@ type Card interface {
 	// GoAgain reports whether playing this card grants an additional action point this turn. Cards
 	// printed with "Go again" return true.
 	GoAgain() bool
-	// Play is called when the card is played as an attack. It returns the actual damage dealt (which
-	// may differ from Attack() after conditional bonuses) and may read state to decide effects.
+	// Play is called when the card is played — as an attack or as a defense reaction. It returns
+	// damage dealt to the opposing hero (which may differ from Attack() after conditional bonuses)
+	// and may read state to decide effects. When called on a defense reaction, the returned damage
+	// is added to the turn's dealt total uncapped (the incoming-damage prevention cap applies only
+	// to Defense()).
 	Play(s *TurnState) int
 }
 

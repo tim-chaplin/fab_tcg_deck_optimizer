@@ -66,6 +66,9 @@ const (
 	ReadTheRunesRed
 	ReadTheRunesYellow
 	ReadTheRunesBlue
+	ReduceToRunechantRed
+	ReduceToRunechantYellow
+	ReduceToRunechantBlue
 	RunebloodIncantationRed
 	RunebloodIncantationYellow
 	RunebloodIncantationBlue
@@ -79,6 +82,9 @@ const (
 	ShrillOfSkullformYellow
 	ShrillOfSkullformBlue
 	SigilOfDeadwoodBlue
+	SigilOfSufferingRed
+	SigilOfSufferingYellow
+	SigilOfSufferingBlue
 	SingeingSteelbladeRed
 	SingeingSteelbladeYellow
 	SingeingSteelbladeBlue
@@ -97,6 +103,9 @@ const (
 	VexingMaliceRed
 	VexingMaliceYellow
 	VexingMaliceBlue
+	WeepingBattlegroundRed
+	WeepingBattlegroundYellow
+	WeepingBattlegroundBlue
 
 	// Generic card IDs. Ordered alphabetically by card name, Red → Yellow → Blue within each family.
 	DodgeBlue
@@ -182,6 +191,10 @@ var byID = []card.Card{
 	ReadTheRunesYellow: runeblade.ReadTheRunesYellow{},
 	ReadTheRunesBlue:   runeblade.ReadTheRunesBlue{},
 
+	ReduceToRunechantRed:    runeblade.ReduceToRunechantRed{},
+	ReduceToRunechantYellow: runeblade.ReduceToRunechantYellow{},
+	ReduceToRunechantBlue:   runeblade.ReduceToRunechantBlue{},
+
 	RunebloodIncantationRed:    runeblade.RunebloodIncantationRed{},
 	RunebloodIncantationYellow: runeblade.RunebloodIncantationYellow{},
 	RunebloodIncantationBlue:   runeblade.RunebloodIncantationBlue{},
@@ -199,6 +212,10 @@ var byID = []card.Card{
 	ShrillOfSkullformBlue:   runeblade.ShrillOfSkullformBlue{},
 
 	SigilOfDeadwoodBlue: runeblade.SigilOfDeadwoodBlue{},
+
+	SigilOfSufferingRed:    runeblade.SigilOfSufferingRed{},
+	SigilOfSufferingYellow: runeblade.SigilOfSufferingYellow{},
+	SigilOfSufferingBlue:   runeblade.SigilOfSufferingBlue{},
 
 	SingeingSteelbladeRed:    runeblade.SingeingSteelbladeRed{},
 	SingeingSteelbladeYellow: runeblade.SingeingSteelbladeYellow{},
@@ -223,6 +240,10 @@ var byID = []card.Card{
 	VexingMaliceRed:    runeblade.VexingMaliceRed{},
 	VexingMaliceYellow: runeblade.VexingMaliceYellow{},
 	VexingMaliceBlue:   runeblade.VexingMaliceBlue{},
+
+	WeepingBattlegroundRed:    runeblade.WeepingBattlegroundRed{},
+	WeepingBattlegroundYellow: runeblade.WeepingBattlegroundYellow{},
+	WeepingBattlegroundBlue:   runeblade.WeepingBattlegroundBlue{},
 
 	DodgeBlue: generic.DodgeBlue{},
 

@@ -1,0 +1,50 @@
+// Sigil of Suffering — Runeblade Defense Reaction. Cost 0, Arcane 1.
+// Printed pitch variants: Red 1, Yellow 2, Blue 3.
+// Printed defense: Red 3, Yellow 2, Blue 1.
+// Text: "Deal 1 arcane damage to the attacking hero. If you have dealt arcane damage this turn,
+// Sigil of Suffering gains +1{d}."
+// Simplification: the 1 arcane damage to the attacking hero is always dealt (reported as Play()'s
+// return so it counts toward dealt damage). The conditional +1{d} is always assumed to trigger
+// (i.e. assume arcane damage has already been dealt this turn) and is baked into the printed
+// Defense values below.
+//
+// Source: github.com/the-fab-cube/flesh-and-blood-cards (card.csv).
+
+package runeblade
+
+import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+
+var sigilOfSufferingTypes = map[string]bool{"Runeblade": true, "Defense Reaction": true}
+
+type SigilOfSufferingRed struct{}
+
+func (SigilOfSufferingRed) Name() string             { return "Sigil of Suffering (Red)" }
+func (SigilOfSufferingRed) Cost() int                { return 0 }
+func (SigilOfSufferingRed) Pitch() int               { return 1 }
+func (SigilOfSufferingRed) Attack() int              { return 0 }
+func (SigilOfSufferingRed) Defense() int             { return 4 }
+func (SigilOfSufferingRed) Types() map[string]bool   { return sigilOfSufferingTypes }
+func (SigilOfSufferingRed) GoAgain() bool            { return false }
+func (SigilOfSufferingRed) Play(*card.TurnState) int { return 1 }
+
+type SigilOfSufferingYellow struct{}
+
+func (SigilOfSufferingYellow) Name() string             { return "Sigil of Suffering (Yellow)" }
+func (SigilOfSufferingYellow) Cost() int                { return 0 }
+func (SigilOfSufferingYellow) Pitch() int               { return 2 }
+func (SigilOfSufferingYellow) Attack() int              { return 0 }
+func (SigilOfSufferingYellow) Defense() int             { return 3 }
+func (SigilOfSufferingYellow) Types() map[string]bool   { return sigilOfSufferingTypes }
+func (SigilOfSufferingYellow) GoAgain() bool            { return false }
+func (SigilOfSufferingYellow) Play(*card.TurnState) int { return 1 }
+
+type SigilOfSufferingBlue struct{}
+
+func (SigilOfSufferingBlue) Name() string             { return "Sigil of Suffering (Blue)" }
+func (SigilOfSufferingBlue) Cost() int                { return 0 }
+func (SigilOfSufferingBlue) Pitch() int               { return 3 }
+func (SigilOfSufferingBlue) Attack() int              { return 0 }
+func (SigilOfSufferingBlue) Defense() int             { return 2 }
+func (SigilOfSufferingBlue) Types() map[string]bool   { return sigilOfSufferingTypes }
+func (SigilOfSufferingBlue) GoAgain() bool            { return false }
+func (SigilOfSufferingBlue) Play(*card.TurnState) int { return 1 }

@@ -197,7 +197,7 @@ func canAfford(pitched, attackers []card.Card) bool {
 
 func evalPartition(hero hero.Hero, weapons []weapon.Weapon, hand []card.Card, roles []Role, incoming int, best *Play) {
 	var defense int
-	var cardAttackers, pitched []card.Card
+	var cardAttackers, pitched, defenders []card.Card
 	for i, c := range hand {
 		switch roles[i] {
 		case Pitch:
@@ -206,6 +206,7 @@ func evalPartition(hero hero.Hero, weapons []weapon.Weapon, hand []card.Card, ro
 			cardAttackers = append(cardAttackers, c)
 		case Defend:
 			defense += c.Defense()
+			defenders = append(defenders, c)
 		}
 	}
 	if !canAfford(pitched, cardAttackers) {
@@ -215,10 +216,22 @@ func evalPartition(hero hero.Hero, weapons []weapon.Weapon, hand []card.Card, ro
 	if prevented > incoming {
 		prevented = incoming
 	}
+	// Defense reactions that also deal damage to the attacker (e.g. Weeping Battleground's 1
+	// arcane on banish) contribute uncapped dealt damage via their Play() hook. Played in
+	// isolation with no attack ordering — TurnState only carries Pitched so effects that check
+	// "what was pitched" work.
+	defenseDealt := 0
+	for _, d := range defenders {
+		if !d.Types()["Defense Reaction"] {
+			continue
+		}
+		state := card.TurnState{Pitched: pitched}
+		defenseDealt += d.Play(&state)
+	}
 
 	// Enumerate every subset of weapons to swing. Each selected weapon adds its Cost and joins the
 	// attacker permutation.
-	bestDealt := 0
+	bestAttack := 0
 	for mask := 0; mask < 1<<len(weapons); mask++ {
 		allAttackers := append([]card.Card(nil), cardAttackers...)
 		for i, w := range weapons {
@@ -229,14 +242,15 @@ func evalPartition(hero hero.Hero, weapons []weapon.Weapon, hand []card.Card, ro
 		if !canAfford(pitched, allAttackers) {
 			continue
 		}
-		if dealt := bestAttackDamage(hero, allAttackers, pitched); dealt > bestDealt {
-			bestDealt = dealt
+		if dealt := bestAttackDamage(hero, allAttackers, pitched); dealt > bestAttack {
+			bestAttack = dealt
 		}
 	}
 
-	v := bestDealt + prevented
+	totalDealt := bestAttack + defenseDealt
+	v := totalDealt + prevented
 	if v > best.Dealt+best.Prevented {
-		best.Dealt = bestDealt
+		best.Dealt = totalDealt
 		best.Prevented = prevented
 		copy(best.Roles, roles)
 	}
