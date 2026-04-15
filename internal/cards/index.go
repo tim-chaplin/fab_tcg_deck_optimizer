@@ -30,6 +30,9 @@ const (
 	AetherSlashRed ID = iota + 1
 	AetherSlashYellow
 	AetherSlashBlue
+	AmplifyTheArknightRed
+	AmplifyTheArknightYellow
+	AmplifyTheArknightBlue
 	ArcaneCussingRed
 	ArcaneCussingYellow
 	ArcaneCussingBlue
@@ -48,6 +51,9 @@ const (
 	DeathlyDuetRed
 	DeathlyDuetYellow
 	DeathlyDuetBlue
+	DrawnToTheDarkDimensionRed
+	DrawnToTheDarkDimensionYellow
+	DrawnToTheDarkDimensionBlue
 	HitTheHighNotesRed
 	HitTheHighNotesYellow
 	HitTheHighNotesBlue
@@ -69,6 +75,9 @@ const (
 	ReduceToRunechantRed
 	ReduceToRunechantYellow
 	ReduceToRunechantBlue
+	RuneFlashRed
+	RuneFlashYellow
+	RuneFlashBlue
 	RunebloodIncantationRed
 	RunebloodIncantationYellow
 	RunebloodIncantationBlue
@@ -143,6 +152,10 @@ var byID = []card.Card{
 	AetherSlashYellow: runeblade.AetherSlashYellow{},
 	AetherSlashBlue:   runeblade.AetherSlashBlue{},
 
+	AmplifyTheArknightRed:    runeblade.AmplifyTheArknightRed{},
+	AmplifyTheArknightYellow: runeblade.AmplifyTheArknightYellow{},
+	AmplifyTheArknightBlue:   runeblade.AmplifyTheArknightBlue{},
+
 	ArcaneCussingRed:    runeblade.ArcaneCussingRed{},
 	ArcaneCussingYellow: runeblade.ArcaneCussingYellow{},
 	ArcaneCussingBlue:   runeblade.ArcaneCussingBlue{},
@@ -166,6 +179,10 @@ var byID = []card.Card{
 	DeathlyDuetRed:    runeblade.DeathlyDuetRed{},
 	DeathlyDuetYellow: runeblade.DeathlyDuetYellow{},
 	DeathlyDuetBlue:   runeblade.DeathlyDuetBlue{},
+
+	DrawnToTheDarkDimensionRed:    runeblade.DrawnToTheDarkDimensionRed{},
+	DrawnToTheDarkDimensionYellow: runeblade.DrawnToTheDarkDimensionYellow{},
+	DrawnToTheDarkDimensionBlue:   runeblade.DrawnToTheDarkDimensionBlue{},
 
 	HitTheHighNotesRed:    runeblade.HitTheHighNotesRed{},
 	HitTheHighNotesYellow: runeblade.HitTheHighNotesYellow{},
@@ -194,6 +211,10 @@ var byID = []card.Card{
 	ReduceToRunechantRed:    runeblade.ReduceToRunechantRed{},
 	ReduceToRunechantYellow: runeblade.ReduceToRunechantYellow{},
 	ReduceToRunechantBlue:   runeblade.ReduceToRunechantBlue{},
+
+	RuneFlashRed:    runeblade.RuneFlashRed{},
+	RuneFlashYellow: runeblade.RuneFlashYellow{},
+	RuneFlashBlue:   runeblade.RuneFlashBlue{},
 
 	RunebloodIncantationRed:    runeblade.RunebloodIncantationRed{},
 	RunebloodIncantationYellow: runeblade.RunebloodIncantationYellow{},
