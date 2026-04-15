@@ -39,6 +39,9 @@ const (
 	ArcanicCrackleRed
 	ArcanicCrackleYellow
 	ArcanicCrackleBlue
+	ArcanicSpikeRed
+	ArcanicSpikeYellow
+	ArcanicSpikeBlue
 	BlessingOfOccultRed
 	BlessingOfOccultYellow
 	BlessingOfOccultBlue
@@ -48,6 +51,9 @@ const (
 	CondemnToSlaughterRed
 	CondemnToSlaughterYellow
 	CondemnToSlaughterBlue
+	ConsumingVolitionRed
+	ConsumingVolitionYellow
+	ConsumingVolitionBlue
 	DeathlyDuetRed
 	DeathlyDuetYellow
 	DeathlyDuetBlue
@@ -66,6 +72,9 @@ const (
 	MauvrionSkiesRed
 	MauvrionSkiesYellow
 	MauvrionSkiesBlue
+	MeatAndGreetRed
+	MeatAndGreetYellow
+	MeatAndGreetBlue
 	OathOfTheArknightRed
 	OathOfTheArknightYellow
 	OathOfTheArknightBlue
@@ -164,6 +173,10 @@ var byID = []card.Card{
 	ArcanicCrackleYellow: runeblade.ArcanicCrackleYellow{},
 	ArcanicCrackleBlue:   runeblade.ArcanicCrackleBlue{},
 
+	ArcanicSpikeRed:    runeblade.ArcanicSpikeRed{},
+	ArcanicSpikeYellow: runeblade.ArcanicSpikeYellow{},
+	ArcanicSpikeBlue:   runeblade.ArcanicSpikeBlue{},
+
 	BlessingOfOccultRed:    runeblade.BlessingOfOccultRed{},
 	BlessingOfOccultYellow: runeblade.BlessingOfOccultYellow{},
 	BlessingOfOccultBlue:   runeblade.BlessingOfOccultBlue{},
@@ -175,6 +188,10 @@ var byID = []card.Card{
 	CondemnToSlaughterRed:    runeblade.CondemnToSlaughterRed{},
 	CondemnToSlaughterYellow: runeblade.CondemnToSlaughterYellow{},
 	CondemnToSlaughterBlue:   runeblade.CondemnToSlaughterBlue{},
+
+	ConsumingVolitionRed:    runeblade.ConsumingVolitionRed{},
+	ConsumingVolitionYellow: runeblade.ConsumingVolitionYellow{},
+	ConsumingVolitionBlue:   runeblade.ConsumingVolitionBlue{},
 
 	DeathlyDuetRed:    runeblade.DeathlyDuetRed{},
 	DeathlyDuetYellow: runeblade.DeathlyDuetYellow{},
@@ -199,6 +216,10 @@ var byID = []card.Card{
 	MauvrionSkiesRed:    runeblade.MauvrionSkiesRed{},
 	MauvrionSkiesYellow: runeblade.MauvrionSkiesYellow{},
 	MauvrionSkiesBlue:   runeblade.MauvrionSkiesBlue{},
+
+	MeatAndGreetRed:    runeblade.MeatAndGreetRed{},
+	MeatAndGreetYellow: runeblade.MeatAndGreetYellow{},
+	MeatAndGreetBlue:   runeblade.MeatAndGreetBlue{},
 
 	OathOfTheArknightRed:    runeblade.OathOfTheArknightRed{},
 	OathOfTheArknightYellow: runeblade.OathOfTheArknightYellow{},
