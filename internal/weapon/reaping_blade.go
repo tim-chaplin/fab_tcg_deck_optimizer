@@ -26,5 +26,6 @@ func (ReapingBlade) Pitch() int                   { return 0 }
 func (ReapingBlade) Attack() int                  { return 3 }
 func (ReapingBlade) Defense() int                 { return 0 }
 func (ReapingBlade) Types() map[string]bool       { return reapingBladeTypes }
+func (ReapingBlade) GoAgain() bool                { return false }
 func (ReapingBlade) Hands() int                   { return 2 }
 func (c ReapingBlade) Play(*card.TurnState) int   { return c.Attack() }

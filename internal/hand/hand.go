@@ -124,6 +124,12 @@ func bestAttackDamage(h hero.Hero, attackers []card.Card) int {
 	copy(perm, attackers)
 	best := 0
 	permute(perm, 0, func(order []card.Card) {
+		// Illegal: any card without Go again ends the chain, so all but the last must have GoAgain.
+		for i := 0; i < len(order)-1; i++ {
+			if !order[i].GoAgain() {
+				return
+			}
+		}
 		var state card.TurnState
 		total := 0
 		for _, c := range order {

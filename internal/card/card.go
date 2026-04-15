@@ -34,6 +34,9 @@ type Card interface {
 	// "Attack": true}. Implementations should return the same map each call (not a fresh literal) —
 	// the map is read, never mutated.
 	Types() map[string]bool
+	// GoAgain reports whether playing this card grants an additional action point this turn. Cards
+	// printed with "Go again" return true.
+	GoAgain() bool
 	// Play is called when the card is played as an attack. It returns the actual damage dealt (which
 	// may differ from Attack() after conditional bonuses) and may read state to decide effects.
 	Play(s *TurnState) int

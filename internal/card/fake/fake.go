@@ -16,6 +16,7 @@ func (Blue) Pitch() int                  { return 3 }
 func (Blue) Attack() int                 { return 1 }
 func (Blue) Defense() int                { return 3 }
 func (Blue) Types() map[string]bool      { return genericAttackTypes }
+func (Blue) GoAgain() bool               { return true }
 func (c Blue) Play(*card.TurnState) int  { return c.Attack() }
 
 // Red is a generic red action: pitches 1, defends 1, attacks 3, costs 1.
@@ -27,4 +28,5 @@ func (Red) Pitch() int                  { return 1 }
 func (Red) Attack() int                 { return 3 }
 func (Red) Defense() int                { return 1 }
 func (Red) Types() map[string]bool      { return genericAttackTypes }
+func (Red) GoAgain() bool               { return true }
 func (c Red) Play(*card.TurnState) int  { return c.Attack() }

@@ -15,6 +15,7 @@ func (stubAura) Pitch() int                  { return 0 }
 func (stubAura) Attack() int                 { return 0 }
 func (stubAura) Defense() int                { return 0 }
 func (stubAura) Types() map[string]bool      { return map[string]bool{"Aura": true} }
+func (stubAura) GoAgain() bool               { return true }
 func (stubAura) Play(*card.TurnState) int    { return 0 }
 
 func TestShrillOfSkullform_BaseDamage(t *testing.T) {

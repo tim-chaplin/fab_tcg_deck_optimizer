@@ -7,6 +7,7 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card/fake"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card/runeblade"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/hero"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/weapon"
 )
 
 // stubHero is a no-op Hero used by tests that want to measure raw hand
@@ -70,6 +71,41 @@ func TestBest_ViseraiMaleficShrillCombo(t *testing.T) {
 	got := Best(hero.Viserai{}, nil, h, 4)
 	if got.Value() != 15 {
 		t.Fatalf("want value 15, got %d (dealt=%d prevented=%d roles=%v)",
+			got.Value(), got.Dealt, got.Prevented, got.Roles)
+	}
+}
+
+func TestBest_ViseraiReapingBladeBlueMalefics(t *testing.T) {
+	// Pitch 1 Blue Malefic (3 res), play the other 3 Blue Malefics (Runechants from Viserai on #2
+	// and #3), then swing Reaping Blade (cost 1, 3 dmg). Value = 3 + 2 + 3 = 8.
+	h := []card.Card{
+		runeblade.MaleficIncantationBlue{},
+		runeblade.MaleficIncantationBlue{},
+		runeblade.MaleficIncantationBlue{},
+		runeblade.MaleficIncantationBlue{},
+	}
+	weapons := []weapon.Weapon{weapon.ReapingBlade{}}
+	got := Best(hero.Viserai{}, weapons, h, 0)
+	if got.Value() != 8 {
+		t.Fatalf("want value 8, got %d (dealt=%d prevented=%d roles=%v)",
+			got.Value(), got.Dealt, got.Prevented, got.Roles)
+	}
+}
+
+func TestBest_ViseraiReapingBladeMaleficsPlusShrill(t *testing.T) {
+	// Pitch 1 Blue Malefic (3 res), play 2 Blue Malefics (2 dmg + 1 Runechant), then Red Shrill
+	// (cost 2, 4+3 aura bonus + 1 Runechant = 8). Reaping Blade stays holstered — Shrill has no
+	// Go again, so nothing can follow it. Value = 2 + 1 + 8 = 11.
+	h := []card.Card{
+		runeblade.MaleficIncantationBlue{},
+		runeblade.MaleficIncantationBlue{},
+		runeblade.MaleficIncantationBlue{},
+		runeblade.ShrillOfSkullformRed{},
+	}
+	weapons := []weapon.Weapon{weapon.ReapingBlade{}}
+	got := Best(hero.Viserai{}, weapons, h, 0)
+	if got.Value() != 11 {
+		t.Fatalf("want value 11, got %d (dealt=%d prevented=%d roles=%v)",
 			got.Value(), got.Dealt, got.Prevented, got.Roles)
 	}
 }

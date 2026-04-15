@@ -17,6 +17,7 @@ func (stubRuneAttack) Defense() int                { return 0 }
 func (stubRuneAttack) Types() map[string]bool {
 	return map[string]bool{"Runeblade": true, "Action": true, "Attack": true}
 }
+func (stubRuneAttack) GoAgain() bool            { return true }
 func (stubRuneAttack) Play(*card.TurnState) int { return 0 }
 
 // stubRuneAura is a minimal Runeblade non-attack action (an Aura).
@@ -30,6 +31,7 @@ func (stubRuneAura) Defense() int                { return 0 }
 func (stubRuneAura) Types() map[string]bool {
 	return map[string]bool{"Runeblade": true, "Action": true, "Aura": true}
 }
+func (stubRuneAura) GoAgain() bool            { return true }
 func (stubRuneAura) Play(*card.TurnState) int { return 0 }
 
 // stubNonRuneblade is an Action-Attack with no Runeblade type — should never trigger Viserai.
@@ -43,6 +45,7 @@ func (stubNonRuneblade) Defense() int             { return 0 }
 func (stubNonRuneblade) Types() map[string]bool {
 	return map[string]bool{"Generic": true, "Action": true, "Attack": true}
 }
+func (stubNonRuneblade) GoAgain() bool            { return true }
 func (stubNonRuneblade) Play(*card.TurnState) int { return 0 }
 
 func TestViserai_RunebladeAfterNonAttackActionTriggers(t *testing.T) {
@@ -83,6 +86,7 @@ func (stubRuneWeapon) Defense() int             { return 0 }
 func (stubRuneWeapon) Types() map[string]bool {
 	return map[string]bool{"Runeblade": true, "Weapon": true}
 }
+func (stubRuneWeapon) GoAgain() bool            { return true }
 func (stubRuneWeapon) Play(*card.TurnState) int { return 0 }
 
 func TestViserai_WeaponSwingDoesNotTrigger(t *testing.T) {
