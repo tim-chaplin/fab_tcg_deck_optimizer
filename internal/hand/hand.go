@@ -27,13 +27,11 @@ const (
 // aligned to that post-sort order. (Weapon swing decisions are not reported in Roles — they're
 // consumed only for their damage contribution.)
 type Play struct {
-	Roles     []Role
-	Dealt     int
-	Prevented int
+	Roles []Role
+	// Value is the play's total score (damage dealt + damage prevented). The breakdown is not
+	// tracked on Play directly — a future stats object may reintroduce it.
+	Value int
 }
-
-// Value returns the total value of the play (damage dealt + damage prevented).
-func (p Play) Value() int { return p.Dealt + p.Prevented }
 
 // String returns a human-readable role name ("PITCH", "ATTACK", "DEFEND").
 func (r Role) String() string {
@@ -93,7 +91,7 @@ func Best(hero hero.Hero, weapons []weapon.Weapon, hand []card.Card, incomingDam
 			// Clone Roles so callers can't mutate the cached slice.
 			roles := make([]Role, len(cached.Roles))
 			copy(roles, cached.Roles)
-			return Play{Roles: roles, Dealt: cached.Dealt, Prevented: cached.Prevented}
+			return Play{Roles: roles, Value: cached.Value}
 		}
 	}
 	result := bestUncached(hero, weapons, hand, incomingDamage, deck)
@@ -217,11 +215,9 @@ func evalPartition(hero hero.Hero, weapons []weapon.Weapon, hand []card.Card, ro
 	defenseDealt := defenseReactionDamage(defenders, pitched, deck)
 	attackDealt := bestAttackWithWeapons(hero, weapons, attackers, pitched, deck)
 
-	totalDealt := attackDealt + defenseDealt
-	v := totalDealt + prevented
-	if v > best.Dealt+best.Prevented {
-		best.Dealt = totalDealt
-		best.Prevented = prevented
+	v := attackDealt + defenseDealt + prevented
+	if v > best.Value {
+		best.Value = v
 		copy(best.Roles, roles)
 	}
 }

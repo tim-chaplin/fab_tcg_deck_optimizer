@@ -114,11 +114,11 @@ func (d *Deck) Evaluate(runs int, incomingDamage int, rng *rand.Rand) Stats {
 		for len(working) >= handSize {
 			h := working[:handSize]
 			play := hand.Best(d.Hero, d.Weapons, h, incomingDamage, working[handSize:])
-			v := float64(play.Value())
+			v := float64(play.Value)
 
 			d.Stats.TotalValue += v
 			d.Stats.Hands++
-			if play.Value() > d.Stats.Best.Play.Value() || d.Stats.Best.Hand == nil {
+			if play.Value > d.Stats.Best.Play.Value || d.Stats.Best.Hand == nil {
 				// Clone both slices — h aliases the working deck and play.Roles is owned by the
 				// returned Play, which a later Best() call could reuse.
 				handCopy := make([]card.Card, len(h))
@@ -127,7 +127,7 @@ func (d *Deck) Evaluate(runs int, incomingDamage int, rng *rand.Rand) Stats {
 				copy(rolesCopy, play.Roles)
 				d.Stats.Best = BestHand{
 					Hand: handCopy,
-					Play: hand.Play{Roles: rolesCopy, Dealt: play.Dealt, Prevented: play.Prevented},
+					Play: hand.Play{Roles: rolesCopy, Value: play.Value},
 				}
 			}
 			switch handIdx / handsPerCycle {
