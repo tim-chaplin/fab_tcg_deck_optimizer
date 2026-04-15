@@ -21,7 +21,7 @@ func (HocusPocusRed) Attack() int                { return 3 }
 func (HocusPocusRed) Defense() int               { return 3 }
 func (HocusPocusRed) Types() map[string]bool     { return hocusPocusTypes }
 func (HocusPocusRed) GoAgain() bool              { return false }
-func (c HocusPocusRed) Play(*card.TurnState) int { return c.Attack() + 1 }
+func (c HocusPocusRed) Play(s *card.TurnState) int { s.AuraCreated = true; return c.Attack() + 1 }
 
 type HocusPocusYellow struct{}
 
@@ -32,7 +32,7 @@ func (HocusPocusYellow) Attack() int                { return 2 }
 func (HocusPocusYellow) Defense() int               { return 3 }
 func (HocusPocusYellow) Types() map[string]bool     { return hocusPocusTypes }
 func (HocusPocusYellow) GoAgain() bool              { return false }
-func (c HocusPocusYellow) Play(*card.TurnState) int { return c.Attack() + 1 }
+func (c HocusPocusYellow) Play(s *card.TurnState) int { s.AuraCreated = true; return c.Attack() + 1 }
 
 type HocusPocusBlue struct{}
 
@@ -43,4 +43,4 @@ func (HocusPocusBlue) Attack() int                { return 1 }
 func (HocusPocusBlue) Defense() int               { return 3 }
 func (HocusPocusBlue) Types() map[string]bool     { return hocusPocusTypes }
 func (HocusPocusBlue) GoAgain() bool              { return false }
-func (c HocusPocusBlue) Play(*card.TurnState) int { return c.Attack() + 1 }
+func (c HocusPocusBlue) Play(s *card.TurnState) int { s.AuraCreated = true; return c.Attack() + 1 }

@@ -21,7 +21,7 @@ func (SpellbladeAssaultRed) Attack() int                { return 4 }
 func (SpellbladeAssaultRed) Defense() int               { return 3 }
 func (SpellbladeAssaultRed) Types() map[string]bool     { return spellbladeAssaultTypes }
 func (SpellbladeAssaultRed) GoAgain() bool              { return false }
-func (c SpellbladeAssaultRed) Play(*card.TurnState) int { return c.Attack() + 2 }
+func (c SpellbladeAssaultRed) Play(s *card.TurnState) int { s.AuraCreated = true; return c.Attack() + 2 }
 
 type SpellbladeAssaultYellow struct{}
 
@@ -32,7 +32,7 @@ func (SpellbladeAssaultYellow) Attack() int                { return 3 }
 func (SpellbladeAssaultYellow) Defense() int               { return 3 }
 func (SpellbladeAssaultYellow) Types() map[string]bool     { return spellbladeAssaultTypes }
 func (SpellbladeAssaultYellow) GoAgain() bool              { return false }
-func (c SpellbladeAssaultYellow) Play(*card.TurnState) int { return c.Attack() + 2 }
+func (c SpellbladeAssaultYellow) Play(s *card.TurnState) int { s.AuraCreated = true; return c.Attack() + 2 }
 
 type SpellbladeAssaultBlue struct{}
 
@@ -43,4 +43,4 @@ func (SpellbladeAssaultBlue) Attack() int                { return 2 }
 func (SpellbladeAssaultBlue) Defense() int               { return 3 }
 func (SpellbladeAssaultBlue) Types() map[string]bool     { return spellbladeAssaultTypes }
 func (SpellbladeAssaultBlue) GoAgain() bool              { return false }
-func (c SpellbladeAssaultBlue) Play(*card.TurnState) int { return c.Attack() + 2 }
+func (c SpellbladeAssaultBlue) Play(s *card.TurnState) int { s.AuraCreated = true; return c.Attack() + 2 }

@@ -30,6 +30,7 @@ func (Viserai) OnCardPlayed(played card.Card, s *card.TurnState) int {
 	for _, c := range s.CardsPlayed {
 		ct := c.Types()
 		if ct["Action"] && !ct["Attack"] {
+			s.AuraCreated = true
 			return 1
 		}
 	}

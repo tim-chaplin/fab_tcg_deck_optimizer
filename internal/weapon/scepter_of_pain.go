@@ -30,4 +30,4 @@ func (ScepterOfPain) Defense() int                 { return 0 }
 func (ScepterOfPain) Types() map[string]bool       { return scepterOfPainTypes }
 func (ScepterOfPain) GoAgain() bool                { return false }
 func (ScepterOfPain) Hands() int                   { return 1 }
-func (c ScepterOfPain) Play(*card.TurnState) int   { return c.Attack() }
+func (c ScepterOfPain) Play(s *card.TurnState) int { s.AuraCreated = true; return c.Attack() }

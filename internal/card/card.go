@@ -9,6 +9,10 @@ type TurnState struct {
 	// CardsPlayed is the sequence of cards played (as attacks) this turn, in order. Populated by the
 	// solver, not by Play itself.
 	CardsPlayed []Card
+	// AuraCreated is set when a card or ability creates an aura this turn (e.g. Runechant tokens,
+	// which are auras). Effects that check "if you've played or created an aura this turn" should
+	// OR this with CardsPlayed containing an Aura-typed card.
+	AuraCreated bool
 }
 
 // HasPlayedType reports whether any card played this turn has the given type in its Types() set.

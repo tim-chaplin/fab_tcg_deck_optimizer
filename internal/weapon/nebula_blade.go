@@ -30,6 +30,7 @@ func (NebulaBlade) Types() map[string]bool    { return nebulaBladeTypes }
 func (NebulaBlade) GoAgain() bool             { return false }
 func (NebulaBlade) Hands() int                { return 2 }
 func (c NebulaBlade) Play(s *card.TurnState) int {
+	s.AuraCreated = true   // Runechant on hit
 	dmg := c.Attack() + 1 // hit creates 1 Runechant (+1 future damage)
 	for _, pc := range s.CardsPlayed {
 		pt := pc.Types()
