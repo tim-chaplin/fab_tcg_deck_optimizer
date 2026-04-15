@@ -2,9 +2,13 @@
 package hand
 
 import (
+	"sort"
+	"strconv"
 	"strings"
+	"sync"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/cards"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/hero"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/weapon"
 )
@@ -19,8 +23,9 @@ const (
 )
 
 // Play is the chosen partition for a hand: one role per card, plus the resulting damage dealt and
-// damage prevented. Roles are aligned to the caller's hand order. (Weapon swing decisions are not
-// reported in Roles — they're consumed only for their damage contribution.)
+// damage prevented. Best sorts the caller's hand into canonical order in place, and Roles are
+// aligned to that post-sort order. (Weapon swing decisions are not reported in Roles — they're
+// consumed only for their damage contribution.)
 type Play struct {
 	Roles     []Role
 	Dealt     int
@@ -68,7 +73,94 @@ func FormatRoles(hand []card.Card, roles []Role) string {
 // The optimizer brute-forces all 3^N partitions, then for each legal partition enumerates every
 // subset of weapons to swing and every ordering of the combined attacker list. For N=4 with 0–2
 // weapons that remains well under 10k evaluations.
-func Best(h hero.Hero, weapons []weapon.Weapon, hand []card.Card, incomingDamage int) Play {
+//
+// Results are memoized on (hero name, sorted weapon names, sorted card IDs, incomingDamage) so
+// that repeated evaluations of the same hand across shuffles short-circuit. The hand is sorted
+// in place into canonical order first — Roles in the returned Play align with that post-sort
+// order. Every card in the hand must be registered in package cards; Best panics otherwise.
+func Best(hero hero.Hero, weapons []weapon.Weapon, hand []card.Card, incomingDamage int) Play {
+	ids := handIDs(hand)
+	sort.Sort(&handByID{hand: hand, ids: ids})
+	key := formatMemoKey(hero, weapons, ids, incomingDamage)
+
+	memoMu.RLock()
+	cached, hit := memo[key]
+	memoMu.RUnlock()
+	if hit {
+		// Clone Roles so callers can't mutate the cached slice.
+		roles := make([]Role, len(cached.Roles))
+		copy(roles, cached.Roles)
+		return Play{Roles: roles, Dealt: cached.Dealt, Prevented: cached.Prevented}
+	}
+
+	result := bestUncached(hero, weapons, hand, incomingDamage)
+
+	memoMu.Lock()
+	memo[key] = result
+	memoMu.Unlock()
+
+	return result
+}
+
+// handIDs returns the registry IDs for each card in hand, preserving order. Panics if any card
+// isn't registered in package cards.
+func handIDs(hand []card.Card) []cards.ID {
+	ids := make([]cards.ID, len(hand))
+	for i, c := range hand {
+		id, found := cards.ByName(c.Name())
+		if !found {
+			panic("hand: card not in index: " + c.Name())
+		}
+		ids[i] = id
+	}
+	return ids
+}
+
+// handByID sorts a parallel (hand, ids) pair by ascending ID.
+type handByID struct {
+	hand []card.Card
+	ids  []cards.ID
+}
+
+func (h *handByID) Len() int           { return len(h.ids) }
+func (h *handByID) Less(i, j int) bool { return h.ids[i] < h.ids[j] }
+func (h *handByID) Swap(i, j int) {
+	h.ids[i], h.ids[j] = h.ids[j], h.ids[i]
+	h.hand[i], h.hand[j] = h.hand[j], h.hand[i]
+}
+
+// memo caches canonical-order results keyed by formatMemoKey.
+var (
+	memoMu sync.RWMutex
+	memo   = map[string]Play{}
+)
+
+// formatMemoKey serializes the canonical key fields into a string. The hand must already be
+// sorted by card ID; weapon names are sorted here.
+func formatMemoKey(hero hero.Hero, weapons []weapon.Weapon, sortedIDs []cards.ID, incoming int) string {
+	wnames := make([]string, len(weapons))
+	for i, w := range weapons {
+		wnames[i] = w.Name()
+	}
+	sort.Strings(wnames)
+
+	var b strings.Builder
+	b.WriteString(hero.Name())
+	b.WriteByte('|')
+	b.WriteString(strings.Join(wnames, ","))
+	b.WriteByte('|')
+	for i, id := range sortedIDs {
+		if i > 0 {
+			b.WriteByte(',')
+		}
+		b.WriteString(strconv.FormatUint(uint64(id), 10))
+	}
+	b.WriteByte('|')
+	b.WriteString(strconv.Itoa(incoming))
+	return b.String()
+}
+
+func bestUncached(hero hero.Hero, weapons []weapon.Weapon, hand []card.Card, incomingDamage int) Play {
 	n := len(hand)
 	best := Play{Roles: make([]Role, n)}
 	roles := make([]Role, n)
@@ -76,7 +168,7 @@ func Best(h hero.Hero, weapons []weapon.Weapon, hand []card.Card, incomingDamage
 	var recurse func(i int)
 	recurse = func(i int) {
 		if i == n {
-			evalPartition(h, weapons, hand, roles, incomingDamage, &best)
+			evalPartition(hero, weapons, hand, roles, incomingDamage, &best)
 			return
 		}
 		for r := Role(0); r <= Defend; r++ {
@@ -88,7 +180,7 @@ func Best(h hero.Hero, weapons []weapon.Weapon, hand []card.Card, incomingDamage
 	return best
 }
 
-func evalPartition(h hero.Hero, weapons []weapon.Weapon, hand []card.Card, roles []Role, incoming int, best *Play) {
+func evalPartition(hero hero.Hero, weapons []weapon.Weapon, hand []card.Card, roles []Role, incoming int, best *Play) {
 	var resources, cardCosts, defense int
 	var cardAttackers, pitched []card.Card
 	for i, c := range hand {
@@ -126,7 +218,7 @@ func evalPartition(h hero.Hero, weapons []weapon.Weapon, hand []card.Card, roles
 		if resources < totalCost {
 			continue
 		}
-		if dealt := bestAttackDamage(h, attackers, pitched); dealt > bestDealt {
+		if dealt := bestAttackDamage(hero, attackers, pitched); dealt > bestDealt {
 			bestDealt = dealt
 		}
 	}
@@ -142,7 +234,7 @@ func evalPartition(h hero.Hero, weapons []weapon.Weapon, hand []card.Card, roles
 // bestAttackDamage tries every ordering of attackers and returns the max total damage after Play is
 // called on each in sequence. Between each attacker's Play() and its append to CardsPlayed, the
 // hero's OnCardPlayed hook fires so triggered abilities (e.g. Viserai's Runechants) contribute.
-func bestAttackDamage(h hero.Hero, attackers, pitched []card.Card) int {
+func bestAttackDamage(hero hero.Hero, attackers, pitched []card.Card) int {
 	if len(attackers) == 0 {
 		return 0
 	}
@@ -161,7 +253,7 @@ func bestAttackDamage(h hero.Hero, attackers, pitched []card.Card) int {
 		for i, c := range order {
 			state.CardsRemaining = order[i+1:]
 			total += c.Play(&state)
-			total += h.OnCardPlayed(c, &state)
+			total += hero.OnCardPlayed(c, &state)
 			state.CardsPlayed = append(state.CardsPlayed, c)
 		}
 		if total > best {

@@ -12,6 +12,7 @@ package cards
 
 import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/card/fake"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card/runeblade"
 )
 
@@ -83,6 +84,11 @@ const (
 	VexingMaliceRed
 	VexingMaliceYellow
 	VexingMaliceBlue
+
+	// Test-only synthetic cards. Registered so that hand.Best's cache key lookup doesn't panic on
+	// them. Not real FaB cards and should not be used in production decks.
+	FakeRed
+	FakeBlue
 )
 
 // byID is indexed directly by ID. Index 0 (Invalid) is nil.
@@ -166,6 +172,9 @@ var byID = []card.Card{
 	VexingMaliceRed:    runeblade.VexingMaliceRed{},
 	VexingMaliceYellow: runeblade.VexingMaliceYellow{},
 	VexingMaliceBlue:   runeblade.VexingMaliceBlue{},
+
+	FakeRed:  fake.Red{},
+	FakeBlue: fake.Blue{},
 }
 
 // byName maps Card.Name() → ID for reverse lookup. Built once at init.
