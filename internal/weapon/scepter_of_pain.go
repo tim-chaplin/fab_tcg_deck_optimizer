@@ -2,8 +2,8 @@
 // Text: "Once per Turn Action - {r}{r}: Deal 1 arcane damage to any opposing target. Create a
 // Runechant token for each damage dealt this way."
 //
-// Simplification: modelled as an attack source dealing 1 arcane + 1 Runechant (+1 future damage,
-// per the Malefic convention) = 2 damage total. The ability is not strictly an attack in FaB terms
+// Simplification: modelled as an attack source dealing 1 arcane + 1 Runechant (+1 future damage)
+// = 2 damage total. The ability is not strictly an attack in FaB terms
 // (the card has no "Attack" type), but the simulator treats any weapon swing as the turn's
 // damage-dealing action.
 //
