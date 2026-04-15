@@ -160,10 +160,12 @@ func loadCards(path string) ([]Card, error) {
 func main() {
 	in := flag.String("in", "data_sources/card.csv", "path to card.csv")
 	nameFilter := flag.String("name", "", "only print cards whose name contains this substring (case insensitive)")
+	typeFilter := flag.String("type", "", "only print cards whose Types field contains this substring (case insensitive), e.g. 'Aura'")
 	format := flag.String("format", "pretty", "output format: pretty | json")
 	flag.Parse()
 
 	nameNeedle := strings.ToLower(*nameFilter)
+	typeNeedle := strings.ToLower(*typeFilter)
 	switch *format {
 	case "pretty", "json":
 	default:
@@ -180,6 +182,9 @@ func main() {
 		if nameNeedle != "" && !strings.Contains(strings.ToLower(c.Name), nameNeedle) {
 			continue
 		}
+		if typeNeedle != "" && !strings.Contains(strings.ToLower(c.Types), typeNeedle) {
+			continue
+		}
 		if c.SilverAgeLegal != "Yes" && c.SilverAgeLegal != "" {
 			continue
 		}
@@ -189,7 +194,8 @@ func main() {
 		if strings.Contains(c.Types, "Shadow") ||
 			strings.Contains(c.Types, "Elemental") ||
 			strings.Contains(c.Types, "Lightning") ||
-			strings.Contains(c.Types, "Earth") {
+			strings.Contains(c.Types, "Earth") ||
+			strings.Contains(c.Types, "Token") {
 			continue
 		}
 		matched = append(matched, c)
