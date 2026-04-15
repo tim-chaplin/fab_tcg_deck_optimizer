@@ -13,7 +13,7 @@ func TestRun_AllRedDeckRecycles(t *testing.T) {
 	// and the deck never empties to fewer than HandSize until many hands.
 	deck := make([]card.Card, 40)
 	for i := range deck {
-		deck[i] = card.TestCardRed
+		deck[i] = card.TestCardRed{}
 	}
 	rng := rand.New(rand.NewSource(1))
 	stats := Run(deck, 1, 4, rng)
@@ -37,7 +37,7 @@ func TestRun_DeckEventuallyEmpties(t *testing.T) {
 	// by 2 each turn, so it should terminate in finite time.
 	deck := make([]card.Card, 40)
 	for i := range deck {
-		deck[i] = card.TestCardRed
+		deck[i] = card.TestCardRed{}
 	}
 	rng := rand.New(rand.NewSource(2))
 	stats := Run(deck, 1, 4, rng)
@@ -76,10 +76,10 @@ func TestRun_MultipleRunsAggregate(t *testing.T) {
 func mixedDeck() []card.Card {
 	d := make([]card.Card, 0, 40)
 	for i := 0; i < 20; i++ {
-		d = append(d, card.TestCardBlue)
+		d = append(d, card.TestCardBlue{})
 	}
 	for i := 0; i < 20; i++ {
-		d = append(d, card.TestCardRed)
+		d = append(d, card.TestCardRed{})
 	}
 	return d
 }

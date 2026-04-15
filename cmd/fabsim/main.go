@@ -36,10 +36,10 @@ func main() {
 func buildDeck() []card.Card {
 	deck := make([]card.Card, 0, 40)
 	for i := 0; i < 20; i++ {
-		deck = append(deck, card.TestCardBlue)
+		deck = append(deck, card.TestCardBlue{})
 	}
 	for i := 0; i < 20; i++ {
-		deck = append(deck, card.TestCardRed)
+		deck = append(deck, card.TestCardRed{})
 	}
 	return deck
 }
