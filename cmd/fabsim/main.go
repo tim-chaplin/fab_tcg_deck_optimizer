@@ -8,8 +8,8 @@ import (
 	"math/rand"
 	"time"
 
-	"github.com/timch/fab-deck-optimizer/internal/card"
-	"github.com/timch/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 )
 
 func main() {

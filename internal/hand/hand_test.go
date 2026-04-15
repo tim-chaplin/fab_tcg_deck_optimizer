@@ -3,7 +3,7 @@ package hand
 import (
 	"testing"
 
-	"github.com/timch/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 )
 
 func TestBest_AllRedHand(t *testing.T) {

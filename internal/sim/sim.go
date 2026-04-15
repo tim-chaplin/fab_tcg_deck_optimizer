@@ -6,8 +6,8 @@ package sim
 import (
 	"math/rand"
 
-	"github.com/timch/fab-deck-optimizer/internal/card"
-	"github.com/timch/fab-deck-optimizer/internal/hand"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/hand"
 )
 
 // HandSize is the number of cards drawn per hand.

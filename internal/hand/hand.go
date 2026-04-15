@@ -7,7 +7,7 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/timch/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 )
 
 // Role is what a card does on a given turn cycle.
