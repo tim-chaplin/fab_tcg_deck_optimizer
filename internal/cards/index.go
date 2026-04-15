@@ -100,6 +100,7 @@ const (
 	ShrillOfSkullformYellow
 	ShrillOfSkullformBlue
 	SigilOfDeadwoodBlue
+	SigilOfSilphidaeBlue
 	SigilOfSufferingRed
 	SigilOfSufferingYellow
 	SigilOfSufferingBlue
@@ -254,6 +255,8 @@ var byID = []card.Card{
 	ShrillOfSkullformBlue:   runeblade.ShrillOfSkullformBlue{},
 
 	SigilOfDeadwoodBlue: runeblade.SigilOfDeadwoodBlue{},
+
+	SigilOfSilphidaeBlue: runeblade.SigilOfSilphidaeBlue{},
 
 	SigilOfSufferingRed:    runeblade.SigilOfSufferingRed{},
 	SigilOfSufferingYellow: runeblade.SigilOfSufferingYellow{},
