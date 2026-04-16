@@ -20,6 +20,7 @@ var meatAndGreetTypes = card.NewTypeSet(card.TypeRuneblade, card.TypeAction, car
 
 type MeatAndGreetRed struct{}
 
+func (MeatAndGreetRed) ID() card.ID                 { return card.MeatAndGreetRed }
 func (MeatAndGreetRed) Name() string                 { return "Meat and Greet (Red)" }
 func (MeatAndGreetRed) Cost() int                    { return 1 }
 func (MeatAndGreetRed) Pitch() int                   { return 1 }
@@ -31,6 +32,7 @@ func (c MeatAndGreetRed) Play(s *card.TurnState) int { s.AuraCreated = true; ret
 
 type MeatAndGreetYellow struct{}
 
+func (MeatAndGreetYellow) ID() card.ID                 { return card.MeatAndGreetYellow }
 func (MeatAndGreetYellow) Name() string                 { return "Meat and Greet (Yellow)" }
 func (MeatAndGreetYellow) Cost() int                    { return 1 }
 func (MeatAndGreetYellow) Pitch() int                   { return 2 }
@@ -42,6 +44,7 @@ func (c MeatAndGreetYellow) Play(s *card.TurnState) int { s.AuraCreated = true; 
 
 type MeatAndGreetBlue struct{}
 
+func (MeatAndGreetBlue) ID() card.ID                 { return card.MeatAndGreetBlue }
 func (MeatAndGreetBlue) Name() string                 { return "Meat and Greet (Blue)" }
 func (MeatAndGreetBlue) Cost() int                    { return 1 }
 func (MeatAndGreetBlue) Pitch() int                   { return 3 }

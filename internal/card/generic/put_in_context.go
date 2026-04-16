@@ -11,6 +11,7 @@ import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 
 type PutInContextBlue struct{}
 
+func (PutInContextBlue) ID() card.ID                 { return card.PutInContextBlue }
 func (PutInContextBlue) Name() string             { return "Put in Context (Blue)" }
 func (PutInContextBlue) Cost() int                { return 0 }
 func (PutInContextBlue) Pitch() int               { return 3 }

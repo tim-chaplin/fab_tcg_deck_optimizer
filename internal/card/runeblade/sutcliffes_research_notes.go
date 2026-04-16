@@ -37,6 +37,7 @@ func sutcliffesResearchNotesPlay(revealCount int, s *card.TurnState) int {
 
 type SutcliffesResearchNotesRed struct{}
 
+func (SutcliffesResearchNotesRed) ID() card.ID                 { return card.SutcliffesResearchNotesRed }
 func (SutcliffesResearchNotesRed) Name() string                 { return "Sutcliffe's Research Notes (Red)" }
 func (SutcliffesResearchNotesRed) Cost() int                    { return 1 }
 func (SutcliffesResearchNotesRed) Pitch() int                   { return 1 }
@@ -49,6 +50,7 @@ func (SutcliffesResearchNotesRed) Play(s *card.TurnState) int   { return sutclif
 
 type SutcliffesResearchNotesYellow struct{}
 
+func (SutcliffesResearchNotesYellow) ID() card.ID                 { return card.SutcliffesResearchNotesYellow }
 func (SutcliffesResearchNotesYellow) Name() string                 { return "Sutcliffe's Research Notes (Yellow)" }
 func (SutcliffesResearchNotesYellow) Cost() int                    { return 1 }
 func (SutcliffesResearchNotesYellow) Pitch() int                   { return 2 }
@@ -61,6 +63,7 @@ func (SutcliffesResearchNotesYellow) Play(s *card.TurnState) int   { return sutc
 
 type SutcliffesResearchNotesBlue struct{}
 
+func (SutcliffesResearchNotesBlue) ID() card.ID                 { return card.SutcliffesResearchNotesBlue }
 func (SutcliffesResearchNotesBlue) Name() string                 { return "Sutcliffe's Research Notes (Blue)" }
 func (SutcliffesResearchNotesBlue) Cost() int                    { return 1 }
 func (SutcliffesResearchNotesBlue) Pitch() int                   { return 3 }

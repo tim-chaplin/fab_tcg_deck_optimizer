@@ -12,6 +12,7 @@ import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 
 type SinkBelowRed struct{}
 
+func (SinkBelowRed) ID() card.ID                 { return card.SinkBelowRed }
 func (SinkBelowRed) Name() string             { return "Sink Below (Red)" }
 func (SinkBelowRed) Cost() int                { return 0 }
 func (SinkBelowRed) Pitch() int               { return 1 }
@@ -23,6 +24,7 @@ func (SinkBelowRed) Play(*card.TurnState) int { return 0 }
 
 type SinkBelowYellow struct{}
 
+func (SinkBelowYellow) ID() card.ID                 { return card.SinkBelowYellow }
 func (SinkBelowYellow) Name() string             { return "Sink Below (Yellow)" }
 func (SinkBelowYellow) Cost() int                { return 0 }
 func (SinkBelowYellow) Pitch() int               { return 2 }
@@ -34,6 +36,7 @@ func (SinkBelowYellow) Play(*card.TurnState) int { return 0 }
 
 type SinkBelowBlue struct{}
 
+func (SinkBelowBlue) ID() card.ID                 { return card.SinkBelowBlue }
 func (SinkBelowBlue) Name() string             { return "Sink Below (Blue)" }
 func (SinkBelowBlue) Cost() int                { return 0 }
 func (SinkBelowBlue) Pitch() int               { return 3 }

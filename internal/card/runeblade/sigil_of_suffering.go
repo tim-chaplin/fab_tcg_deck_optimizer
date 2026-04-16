@@ -18,6 +18,7 @@ var sigilOfSufferingTypes = card.NewTypeSet(card.TypeRuneblade, card.TypeDefense
 
 type SigilOfSufferingRed struct{}
 
+func (SigilOfSufferingRed) ID() card.ID                 { return card.SigilOfSufferingRed }
 func (SigilOfSufferingRed) Name() string             { return "Sigil of Suffering (Red)" }
 func (SigilOfSufferingRed) Cost() int                { return 0 }
 func (SigilOfSufferingRed) Pitch() int               { return 1 }
@@ -29,6 +30,7 @@ func (SigilOfSufferingRed) Play(*card.TurnState) int { return 1 }
 
 type SigilOfSufferingYellow struct{}
 
+func (SigilOfSufferingYellow) ID() card.ID                 { return card.SigilOfSufferingYellow }
 func (SigilOfSufferingYellow) Name() string             { return "Sigil of Suffering (Yellow)" }
 func (SigilOfSufferingYellow) Cost() int                { return 0 }
 func (SigilOfSufferingYellow) Pitch() int               { return 2 }
@@ -40,6 +42,7 @@ func (SigilOfSufferingYellow) Play(*card.TurnState) int { return 1 }
 
 type SigilOfSufferingBlue struct{}
 
+func (SigilOfSufferingBlue) ID() card.ID                 { return card.SigilOfSufferingBlue }
 func (SigilOfSufferingBlue) Name() string             { return "Sigil of Suffering (Blue)" }
 func (SigilOfSufferingBlue) Cost() int                { return 0 }
 func (SigilOfSufferingBlue) Pitch() int               { return 3 }

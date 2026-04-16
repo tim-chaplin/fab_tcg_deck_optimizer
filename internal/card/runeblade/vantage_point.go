@@ -14,6 +14,7 @@ var vantagePointTypes = card.NewTypeSet(card.TypeRuneblade, card.TypeAction, car
 
 type VantagePointRed struct{}
 
+func (VantagePointRed) ID() card.ID                 { return card.VantagePointRed }
 func (VantagePointRed) Name() string               { return "Vantage Point (Red)" }
 func (VantagePointRed) Cost() int                  { return 3 }
 func (VantagePointRed) Pitch() int                 { return 1 }
@@ -25,6 +26,7 @@ func (c VantagePointRed) Play(s *card.TurnState) int { return vantagePointPlay(c
 
 type VantagePointYellow struct{}
 
+func (VantagePointYellow) ID() card.ID                 { return card.VantagePointYellow }
 func (VantagePointYellow) Name() string                 { return "Vantage Point (Yellow)" }
 func (VantagePointYellow) Cost() int                    { return 3 }
 func (VantagePointYellow) Pitch() int                   { return 2 }
@@ -36,6 +38,7 @@ func (c VantagePointYellow) Play(s *card.TurnState) int { return vantagePointPla
 
 type VantagePointBlue struct{}
 
+func (VantagePointBlue) ID() card.ID                 { return card.VantagePointBlue }
 func (VantagePointBlue) Name() string                 { return "Vantage Point (Blue)" }
 func (VantagePointBlue) Cost() int                    { return 3 }
 func (VantagePointBlue) Pitch() int                   { return 3 }

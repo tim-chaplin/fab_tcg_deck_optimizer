@@ -1,13 +1,10 @@
-// Package cards is the master registry of every implemented card. It assigns each printed card a
-// stable unique ID and provides lookup / iteration helpers — useful for random deck generation,
-// serialization, and compact equality checks.
+// Package cards is the master registry of every implemented card. The canonical ID type and
+// constants live in package card; this package maps IDs to concrete Card values and provides
+// lookup / iteration helpers useful for random deck generation, serialization, and compact
+// equality checks.
 //
-// IDs are stable within a single build but are NOT a persistence format: adding or removing cards
-// may renumber existing entries. Treat IDs as opaque in-process handles.
-//
-// Each pitch variant (Red / Yellow / Blue) of a card is a distinct printed card and gets its own
-// ID. Weapons aren't ID-indexed (decks are built from cards; weapons are equipment) but the full
-// roster is exposed here via AllWeapons for convenience.
+// Weapons aren't ID-indexed here (decks are built from cards; weapons are equipment) but the full
+// roster is exposed via AllWeapons for convenience.
 package cards
 
 import (
@@ -25,349 +22,202 @@ var AllWeapons = []weapon.Weapon{
 	weapon.ScepterOfPain{},
 }
 
-// ID uniquely identifies a printed card. The zero value (Invalid) is reserved so that a zero-
-// valued ID in other data structures can be detected as "unset".
-type ID uint16
+// ID aliases card.ID so callers of this package don't need two imports just to hold IDs.
+type ID = card.ID
 
-// Sentinel for "no card". Valid IDs start at 1.
-const Invalid ID = 0
-
-// Runeblade card IDs. Ordered alphabetically by card name, Red → Yellow → Blue within each family.
-// Sigil of Deadwood only has a Blue variant (no R/Y printings).
-const (
-	AetherSlashRed ID = iota + 1
-	AetherSlashYellow
-	AetherSlashBlue
-	AmplifyTheArknightRed
-	AmplifyTheArknightYellow
-	AmplifyTheArknightBlue
-	ArcaneCussingRed
-	ArcaneCussingYellow
-	ArcaneCussingBlue
-	ArcanicCrackleRed
-	ArcanicCrackleYellow
-	ArcanicCrackleBlue
-	ArcanicSpikeRed
-	ArcanicSpikeYellow
-	ArcanicSpikeBlue
-	BlessingOfOccultRed
-	BlessingOfOccultYellow
-	BlessingOfOccultBlue
-	BloodspillInvocationRed
-	BloodspillInvocationYellow
-	BloodspillInvocationBlue
-	CondemnToSlaughterRed
-	CondemnToSlaughterYellow
-	CondemnToSlaughterBlue
-	ConsumingVolitionRed
-	ConsumingVolitionYellow
-	ConsumingVolitionBlue
-	DeathlyDuetRed
-	DeathlyDuetYellow
-	DeathlyDuetBlue
-	DrawnToTheDarkDimensionRed
-	DrawnToTheDarkDimensionYellow
-	DrawnToTheDarkDimensionBlue
-	DrowningDireRed
-	DrowningDireYellow
-	DrowningDireBlue
-	HitTheHighNotesRed
-	HitTheHighNotesYellow
-	HitTheHighNotesBlue
-	HocusPocusRed
-	HocusPocusYellow
-	HocusPocusBlue
-	MaleficIncantationRed
-	MaleficIncantationYellow
-	MaleficIncantationBlue
-	MauvrionSkiesRed
-	MauvrionSkiesYellow
-	MauvrionSkiesBlue
-	MeatAndGreetRed
-	MeatAndGreetYellow
-	MeatAndGreetBlue
-	OathOfTheArknightRed
-	OathOfTheArknightYellow
-	OathOfTheArknightBlue
-	ReadTheRunesRed
-	ReadTheRunesYellow
-	ReadTheRunesBlue
-	ReduceToRunechantRed
-	ReduceToRunechantYellow
-	ReduceToRunechantBlue
-	ReekOfCorruptionRed
-	ReekOfCorruptionYellow
-	ReekOfCorruptionBlue
-	RuneFlashRed
-	RuneFlashYellow
-	RuneFlashBlue
-	RunebloodIncantationRed
-	RunebloodIncantationYellow
-	RunebloodIncantationBlue
-	RuneragerSwarmRed
-	RuneragerSwarmYellow
-	RuneragerSwarmBlue
-	RunicFellingsongRed
-	RunicFellingsongYellow
-	RunicFellingsongBlue
-	RunicReapingRed
-	RunicReapingYellow
-	RunicReapingBlue
-	ShrillOfSkullformRed
-	ShrillOfSkullformYellow
-	ShrillOfSkullformBlue
-	SigilOfDeadwoodBlue
-	SigilOfSilphidaeBlue
-	SigilOfSufferingRed
-	SigilOfSufferingYellow
-	SigilOfSufferingBlue
-	SigilOfTheArknightBlue
-	SingeingSteelbladeRed
-	SingeingSteelbladeYellow
-	SingeingSteelbladeBlue
-	SkyFireLanternsRed
-	SkyFireLanternsYellow
-	SkyFireLanternsBlue
-	SpellbladeAssaultRed
-	SpellbladeAssaultYellow
-	SpellbladeAssaultBlue
-	SpellbladeStrikeRed
-	SpellbladeStrikeYellow
-	SpellbladeStrikeBlue
-	SplinteringDeadwoodRed
-	SplinteringDeadwoodYellow
-	SplinteringDeadwoodBlue
-	SutcliffesResearchNotesRed
-	SutcliffesResearchNotesYellow
-	SutcliffesResearchNotesBlue
-	VantagePointRed
-	VantagePointYellow
-	VantagePointBlue
-	VexingMaliceRed
-	VexingMaliceYellow
-	VexingMaliceBlue
-	WeepingBattlegroundRed
-	WeepingBattlegroundYellow
-	WeepingBattlegroundBlue
-
-	// Generic card IDs. Ordered alphabetically by card name, Red → Yellow → Blue within each family.
-	DodgeBlue
-	EvasiveLeapRed
-	EvasiveLeapYellow
-	EvasiveLeapBlue
-	FateForeseenRed
-	FateForeseenYellow
-	FateForeseenBlue
-	LayLowYellow
-	PutInContextBlue
-	RiseAboveRed
-	RiseAboveYellow
-	RiseAboveBlue
-	SinkBelowRed
-	SinkBelowYellow
-	SinkBelowBlue
-	SpringboardSomersaultYellow
-	ToughenUpBlue
-	UnmovableRed
-	UnmovableYellow
-	UnmovableBlue
-
-	// Test-only synthetic cards. Registered so that hand.Best's cache key lookup doesn't panic on
-	// them. Not real FaB cards and should not be used in production decks.
-	FakeRedAttack
-	FakeBlueAttack
-)
+// Invalid aliases card.Invalid — the sentinel zero value.
+const Invalid = card.Invalid
 
 // byID is indexed directly by ID. Index 0 (Invalid) is nil.
 var byID = []card.Card{
-	Invalid: nil,
+	card.Invalid: nil,
 
-	AetherSlashRed:    runeblade.AetherSlashRed{},
-	AetherSlashYellow: runeblade.AetherSlashYellow{},
-	AetherSlashBlue:   runeblade.AetherSlashBlue{},
+	card.AetherSlashRed:    runeblade.AetherSlashRed{},
+	card.AetherSlashYellow: runeblade.AetherSlashYellow{},
+	card.AetherSlashBlue:   runeblade.AetherSlashBlue{},
 
-	AmplifyTheArknightRed:    runeblade.AmplifyTheArknightRed{},
-	AmplifyTheArknightYellow: runeblade.AmplifyTheArknightYellow{},
-	AmplifyTheArknightBlue:   runeblade.AmplifyTheArknightBlue{},
+	card.AmplifyTheArknightRed:    runeblade.AmplifyTheArknightRed{},
+	card.AmplifyTheArknightYellow: runeblade.AmplifyTheArknightYellow{},
+	card.AmplifyTheArknightBlue:   runeblade.AmplifyTheArknightBlue{},
 
-	ArcaneCussingRed:    runeblade.ArcaneCussingRed{},
-	ArcaneCussingYellow: runeblade.ArcaneCussingYellow{},
-	ArcaneCussingBlue:   runeblade.ArcaneCussingBlue{},
+	card.ArcaneCussingRed:    runeblade.ArcaneCussingRed{},
+	card.ArcaneCussingYellow: runeblade.ArcaneCussingYellow{},
+	card.ArcaneCussingBlue:   runeblade.ArcaneCussingBlue{},
 
-	ArcanicCrackleRed:    runeblade.ArcanicCrackleRed{},
-	ArcanicCrackleYellow: runeblade.ArcanicCrackleYellow{},
-	ArcanicCrackleBlue:   runeblade.ArcanicCrackleBlue{},
+	card.ArcanicCrackleRed:    runeblade.ArcanicCrackleRed{},
+	card.ArcanicCrackleYellow: runeblade.ArcanicCrackleYellow{},
+	card.ArcanicCrackleBlue:   runeblade.ArcanicCrackleBlue{},
 
-	ArcanicSpikeRed:    runeblade.ArcanicSpikeRed{},
-	ArcanicSpikeYellow: runeblade.ArcanicSpikeYellow{},
-	ArcanicSpikeBlue:   runeblade.ArcanicSpikeBlue{},
+	card.ArcanicSpikeRed:    runeblade.ArcanicSpikeRed{},
+	card.ArcanicSpikeYellow: runeblade.ArcanicSpikeYellow{},
+	card.ArcanicSpikeBlue:   runeblade.ArcanicSpikeBlue{},
 
-	BlessingOfOccultRed:    runeblade.BlessingOfOccultRed{},
-	BlessingOfOccultYellow: runeblade.BlessingOfOccultYellow{},
-	BlessingOfOccultBlue:   runeblade.BlessingOfOccultBlue{},
+	card.BlessingOfOccultRed:    runeblade.BlessingOfOccultRed{},
+	card.BlessingOfOccultYellow: runeblade.BlessingOfOccultYellow{},
+	card.BlessingOfOccultBlue:   runeblade.BlessingOfOccultBlue{},
 
-	BloodspillInvocationRed:    runeblade.BloodspillInvocationRed{},
-	BloodspillInvocationYellow: runeblade.BloodspillInvocationYellow{},
-	BloodspillInvocationBlue:   runeblade.BloodspillInvocationBlue{},
+	card.BloodspillInvocationRed:    runeblade.BloodspillInvocationRed{},
+	card.BloodspillInvocationYellow: runeblade.BloodspillInvocationYellow{},
+	card.BloodspillInvocationBlue:   runeblade.BloodspillInvocationBlue{},
 
-	CondemnToSlaughterRed:    runeblade.CondemnToSlaughterRed{},
-	CondemnToSlaughterYellow: runeblade.CondemnToSlaughterYellow{},
-	CondemnToSlaughterBlue:   runeblade.CondemnToSlaughterBlue{},
+	card.CondemnToSlaughterRed:    runeblade.CondemnToSlaughterRed{},
+	card.CondemnToSlaughterYellow: runeblade.CondemnToSlaughterYellow{},
+	card.CondemnToSlaughterBlue:   runeblade.CondemnToSlaughterBlue{},
 
-	ConsumingVolitionRed:    runeblade.ConsumingVolitionRed{},
-	ConsumingVolitionYellow: runeblade.ConsumingVolitionYellow{},
-	ConsumingVolitionBlue:   runeblade.ConsumingVolitionBlue{},
+	card.ConsumingVolitionRed:    runeblade.ConsumingVolitionRed{},
+	card.ConsumingVolitionYellow: runeblade.ConsumingVolitionYellow{},
+	card.ConsumingVolitionBlue:   runeblade.ConsumingVolitionBlue{},
 
-	DeathlyDuetRed:    runeblade.DeathlyDuetRed{},
-	DeathlyDuetYellow: runeblade.DeathlyDuetYellow{},
-	DeathlyDuetBlue:   runeblade.DeathlyDuetBlue{},
+	card.DeathlyDuetRed:    runeblade.DeathlyDuetRed{},
+	card.DeathlyDuetYellow: runeblade.DeathlyDuetYellow{},
+	card.DeathlyDuetBlue:   runeblade.DeathlyDuetBlue{},
 
-	DrawnToTheDarkDimensionRed:    runeblade.DrawnToTheDarkDimensionRed{},
-	DrawnToTheDarkDimensionYellow: runeblade.DrawnToTheDarkDimensionYellow{},
-	DrawnToTheDarkDimensionBlue:   runeblade.DrawnToTheDarkDimensionBlue{},
+	card.DrawnToTheDarkDimensionRed:    runeblade.DrawnToTheDarkDimensionRed{},
+	card.DrawnToTheDarkDimensionYellow: runeblade.DrawnToTheDarkDimensionYellow{},
+	card.DrawnToTheDarkDimensionBlue:   runeblade.DrawnToTheDarkDimensionBlue{},
 
-	DrowningDireRed:    runeblade.DrowningDireRed{},
-	DrowningDireYellow: runeblade.DrowningDireYellow{},
-	DrowningDireBlue:   runeblade.DrowningDireBlue{},
+	card.DrowningDireRed:    runeblade.DrowningDireRed{},
+	card.DrowningDireYellow: runeblade.DrowningDireYellow{},
+	card.DrowningDireBlue:   runeblade.DrowningDireBlue{},
 
-	HitTheHighNotesRed:    runeblade.HitTheHighNotesRed{},
-	HitTheHighNotesYellow: runeblade.HitTheHighNotesYellow{},
-	HitTheHighNotesBlue:   runeblade.HitTheHighNotesBlue{},
+	card.HitTheHighNotesRed:    runeblade.HitTheHighNotesRed{},
+	card.HitTheHighNotesYellow: runeblade.HitTheHighNotesYellow{},
+	card.HitTheHighNotesBlue:   runeblade.HitTheHighNotesBlue{},
 
-	HocusPocusRed:    runeblade.HocusPocusRed{},
-	HocusPocusYellow: runeblade.HocusPocusYellow{},
-	HocusPocusBlue:   runeblade.HocusPocusBlue{},
+	card.HocusPocusRed:    runeblade.HocusPocusRed{},
+	card.HocusPocusYellow: runeblade.HocusPocusYellow{},
+	card.HocusPocusBlue:   runeblade.HocusPocusBlue{},
 
-	MaleficIncantationRed:    runeblade.MaleficIncantationRed{},
-	MaleficIncantationYellow: runeblade.MaleficIncantationYellow{},
-	MaleficIncantationBlue:   runeblade.MaleficIncantationBlue{},
+	card.MaleficIncantationRed:    runeblade.MaleficIncantationRed{},
+	card.MaleficIncantationYellow: runeblade.MaleficIncantationYellow{},
+	card.MaleficIncantationBlue:   runeblade.MaleficIncantationBlue{},
 
-	MauvrionSkiesRed:    runeblade.MauvrionSkiesRed{},
-	MauvrionSkiesYellow: runeblade.MauvrionSkiesYellow{},
-	MauvrionSkiesBlue:   runeblade.MauvrionSkiesBlue{},
+	card.MauvrionSkiesRed:    runeblade.MauvrionSkiesRed{},
+	card.MauvrionSkiesYellow: runeblade.MauvrionSkiesYellow{},
+	card.MauvrionSkiesBlue:   runeblade.MauvrionSkiesBlue{},
 
-	MeatAndGreetRed:    runeblade.MeatAndGreetRed{},
-	MeatAndGreetYellow: runeblade.MeatAndGreetYellow{},
-	MeatAndGreetBlue:   runeblade.MeatAndGreetBlue{},
+	card.MeatAndGreetRed:    runeblade.MeatAndGreetRed{},
+	card.MeatAndGreetYellow: runeblade.MeatAndGreetYellow{},
+	card.MeatAndGreetBlue:   runeblade.MeatAndGreetBlue{},
 
-	OathOfTheArknightRed:    runeblade.OathOfTheArknightRed{},
-	OathOfTheArknightYellow: runeblade.OathOfTheArknightYellow{},
-	OathOfTheArknightBlue:   runeblade.OathOfTheArknightBlue{},
+	card.OathOfTheArknightRed:    runeblade.OathOfTheArknightRed{},
+	card.OathOfTheArknightYellow: runeblade.OathOfTheArknightYellow{},
+	card.OathOfTheArknightBlue:   runeblade.OathOfTheArknightBlue{},
 
-	ReadTheRunesRed:    runeblade.ReadTheRunesRed{},
-	ReadTheRunesYellow: runeblade.ReadTheRunesYellow{},
-	ReadTheRunesBlue:   runeblade.ReadTheRunesBlue{},
+	card.ReadTheRunesRed:    runeblade.ReadTheRunesRed{},
+	card.ReadTheRunesYellow: runeblade.ReadTheRunesYellow{},
+	card.ReadTheRunesBlue:   runeblade.ReadTheRunesBlue{},
 
-	ReduceToRunechantRed:    runeblade.ReduceToRunechantRed{},
-	ReduceToRunechantYellow: runeblade.ReduceToRunechantYellow{},
-	ReduceToRunechantBlue:   runeblade.ReduceToRunechantBlue{},
+	card.ReduceToRunechantRed:    runeblade.ReduceToRunechantRed{},
+	card.ReduceToRunechantYellow: runeblade.ReduceToRunechantYellow{},
+	card.ReduceToRunechantBlue:   runeblade.ReduceToRunechantBlue{},
 
-	ReekOfCorruptionRed:    runeblade.ReekOfCorruptionRed{},
-	ReekOfCorruptionYellow: runeblade.ReekOfCorruptionYellow{},
-	ReekOfCorruptionBlue:   runeblade.ReekOfCorruptionBlue{},
+	card.ReekOfCorruptionRed:    runeblade.ReekOfCorruptionRed{},
+	card.ReekOfCorruptionYellow: runeblade.ReekOfCorruptionYellow{},
+	card.ReekOfCorruptionBlue:   runeblade.ReekOfCorruptionBlue{},
 
-	RuneFlashRed:    runeblade.RuneFlashRed{},
-	RuneFlashYellow: runeblade.RuneFlashYellow{},
-	RuneFlashBlue:   runeblade.RuneFlashBlue{},
+	card.RuneFlashRed:    runeblade.RuneFlashRed{},
+	card.RuneFlashYellow: runeblade.RuneFlashYellow{},
+	card.RuneFlashBlue:   runeblade.RuneFlashBlue{},
 
-	RunebloodIncantationRed:    runeblade.RunebloodIncantationRed{},
-	RunebloodIncantationYellow: runeblade.RunebloodIncantationYellow{},
-	RunebloodIncantationBlue:   runeblade.RunebloodIncantationBlue{},
+	card.RunebloodIncantationRed:    runeblade.RunebloodIncantationRed{},
+	card.RunebloodIncantationYellow: runeblade.RunebloodIncantationYellow{},
+	card.RunebloodIncantationBlue:   runeblade.RunebloodIncantationBlue{},
 
-	RuneragerSwarmRed:    runeblade.RuneragerSwarmRed{},
-	RuneragerSwarmYellow: runeblade.RuneragerSwarmYellow{},
-	RuneragerSwarmBlue:   runeblade.RuneragerSwarmBlue{},
+	card.RuneragerSwarmRed:    runeblade.RuneragerSwarmRed{},
+	card.RuneragerSwarmYellow: runeblade.RuneragerSwarmYellow{},
+	card.RuneragerSwarmBlue:   runeblade.RuneragerSwarmBlue{},
 
-	RunicFellingsongRed:    runeblade.RunicFellingsongRed{},
-	RunicFellingsongYellow: runeblade.RunicFellingsongYellow{},
-	RunicFellingsongBlue:   runeblade.RunicFellingsongBlue{},
+	card.RunicFellingsongRed:    runeblade.RunicFellingsongRed{},
+	card.RunicFellingsongYellow: runeblade.RunicFellingsongYellow{},
+	card.RunicFellingsongBlue:   runeblade.RunicFellingsongBlue{},
 
-	RunicReapingRed:    runeblade.RunicReapingRed{},
-	RunicReapingYellow: runeblade.RunicReapingYellow{},
-	RunicReapingBlue:   runeblade.RunicReapingBlue{},
+	card.RunicReapingRed:    runeblade.RunicReapingRed{},
+	card.RunicReapingYellow: runeblade.RunicReapingYellow{},
+	card.RunicReapingBlue:   runeblade.RunicReapingBlue{},
 
-	ShrillOfSkullformRed:    runeblade.ShrillOfSkullformRed{},
-	ShrillOfSkullformYellow: runeblade.ShrillOfSkullformYellow{},
-	ShrillOfSkullformBlue:   runeblade.ShrillOfSkullformBlue{},
+	card.ShrillOfSkullformRed:    runeblade.ShrillOfSkullformRed{},
+	card.ShrillOfSkullformYellow: runeblade.ShrillOfSkullformYellow{},
+	card.ShrillOfSkullformBlue:   runeblade.ShrillOfSkullformBlue{},
 
-	SigilOfDeadwoodBlue: runeblade.SigilOfDeadwoodBlue{},
+	card.SigilOfDeadwoodBlue: runeblade.SigilOfDeadwoodBlue{},
 
-	SigilOfSilphidaeBlue: runeblade.SigilOfSilphidaeBlue{},
+	card.SigilOfSilphidaeBlue: runeblade.SigilOfSilphidaeBlue{},
 
-	SigilOfSufferingRed:    runeblade.SigilOfSufferingRed{},
-	SigilOfSufferingYellow: runeblade.SigilOfSufferingYellow{},
-	SigilOfSufferingBlue:   runeblade.SigilOfSufferingBlue{},
+	card.SigilOfSufferingRed:    runeblade.SigilOfSufferingRed{},
+	card.SigilOfSufferingYellow: runeblade.SigilOfSufferingYellow{},
+	card.SigilOfSufferingBlue:   runeblade.SigilOfSufferingBlue{},
 
-	SigilOfTheArknightBlue: runeblade.SigilOfTheArknightBlue{},
+	card.SigilOfTheArknightBlue: runeblade.SigilOfTheArknightBlue{},
 
-	SingeingSteelbladeRed:    runeblade.SingeingSteelbladeRed{},
-	SingeingSteelbladeYellow: runeblade.SingeingSteelbladeYellow{},
-	SingeingSteelbladeBlue:   runeblade.SingeingSteelbladeBlue{},
+	card.SingeingSteelbladeRed:    runeblade.SingeingSteelbladeRed{},
+	card.SingeingSteelbladeYellow: runeblade.SingeingSteelbladeYellow{},
+	card.SingeingSteelbladeBlue:   runeblade.SingeingSteelbladeBlue{},
 
-	SkyFireLanternsRed:    runeblade.SkyFireLanternsRed{},
-	SkyFireLanternsYellow: runeblade.SkyFireLanternsYellow{},
-	SkyFireLanternsBlue:   runeblade.SkyFireLanternsBlue{},
+	card.SkyFireLanternsRed:    runeblade.SkyFireLanternsRed{},
+	card.SkyFireLanternsYellow: runeblade.SkyFireLanternsYellow{},
+	card.SkyFireLanternsBlue:   runeblade.SkyFireLanternsBlue{},
 
-	SpellbladeAssaultRed:    runeblade.SpellbladeAssaultRed{},
-	SpellbladeAssaultYellow: runeblade.SpellbladeAssaultYellow{},
-	SpellbladeAssaultBlue:   runeblade.SpellbladeAssaultBlue{},
+	card.SpellbladeAssaultRed:    runeblade.SpellbladeAssaultRed{},
+	card.SpellbladeAssaultYellow: runeblade.SpellbladeAssaultYellow{},
+	card.SpellbladeAssaultBlue:   runeblade.SpellbladeAssaultBlue{},
 
-	SpellbladeStrikeRed:    runeblade.SpellbladeStrikeRed{},
-	SpellbladeStrikeYellow: runeblade.SpellbladeStrikeYellow{},
-	SpellbladeStrikeBlue:   runeblade.SpellbladeStrikeBlue{},
+	card.SpellbladeStrikeRed:    runeblade.SpellbladeStrikeRed{},
+	card.SpellbladeStrikeYellow: runeblade.SpellbladeStrikeYellow{},
+	card.SpellbladeStrikeBlue:   runeblade.SpellbladeStrikeBlue{},
 
-	SplinteringDeadwoodRed:    runeblade.SplinteringDeadwoodRed{},
-	SplinteringDeadwoodYellow: runeblade.SplinteringDeadwoodYellow{},
-	SplinteringDeadwoodBlue:   runeblade.SplinteringDeadwoodBlue{},
+	card.SplinteringDeadwoodRed:    runeblade.SplinteringDeadwoodRed{},
+	card.SplinteringDeadwoodYellow: runeblade.SplinteringDeadwoodYellow{},
+	card.SplinteringDeadwoodBlue:   runeblade.SplinteringDeadwoodBlue{},
 
-	SutcliffesResearchNotesRed:    runeblade.SutcliffesResearchNotesRed{},
-	SutcliffesResearchNotesYellow: runeblade.SutcliffesResearchNotesYellow{},
-	SutcliffesResearchNotesBlue:   runeblade.SutcliffesResearchNotesBlue{},
+	card.SutcliffesResearchNotesRed:    runeblade.SutcliffesResearchNotesRed{},
+	card.SutcliffesResearchNotesYellow: runeblade.SutcliffesResearchNotesYellow{},
+	card.SutcliffesResearchNotesBlue:   runeblade.SutcliffesResearchNotesBlue{},
 
-	VantagePointRed:    runeblade.VantagePointRed{},
-	VantagePointYellow: runeblade.VantagePointYellow{},
-	VantagePointBlue:   runeblade.VantagePointBlue{},
+	card.VantagePointRed:    runeblade.VantagePointRed{},
+	card.VantagePointYellow: runeblade.VantagePointYellow{},
+	card.VantagePointBlue:   runeblade.VantagePointBlue{},
 
-	VexingMaliceRed:    runeblade.VexingMaliceRed{},
-	VexingMaliceYellow: runeblade.VexingMaliceYellow{},
-	VexingMaliceBlue:   runeblade.VexingMaliceBlue{},
+	card.VexingMaliceRed:    runeblade.VexingMaliceRed{},
+	card.VexingMaliceYellow: runeblade.VexingMaliceYellow{},
+	card.VexingMaliceBlue:   runeblade.VexingMaliceBlue{},
 
-	WeepingBattlegroundRed:    runeblade.WeepingBattlegroundRed{},
-	WeepingBattlegroundYellow: runeblade.WeepingBattlegroundYellow{},
-	WeepingBattlegroundBlue:   runeblade.WeepingBattlegroundBlue{},
+	card.WeepingBattlegroundRed:    runeblade.WeepingBattlegroundRed{},
+	card.WeepingBattlegroundYellow: runeblade.WeepingBattlegroundYellow{},
+	card.WeepingBattlegroundBlue:   runeblade.WeepingBattlegroundBlue{},
 
-	DodgeBlue: generic.DodgeBlue{},
+	card.DodgeBlue: generic.DodgeBlue{},
 
-	EvasiveLeapRed:    generic.EvasiveLeapRed{},
-	EvasiveLeapYellow: generic.EvasiveLeapYellow{},
-	EvasiveLeapBlue:   generic.EvasiveLeapBlue{},
+	card.EvasiveLeapRed:    generic.EvasiveLeapRed{},
+	card.EvasiveLeapYellow: generic.EvasiveLeapYellow{},
+	card.EvasiveLeapBlue:   generic.EvasiveLeapBlue{},
 
-	FateForeseenRed:    generic.FateForeseenRed{},
-	FateForeseenYellow: generic.FateForeseenYellow{},
-	FateForeseenBlue:   generic.FateForeseenBlue{},
+	card.FateForeseenRed:    generic.FateForeseenRed{},
+	card.FateForeseenYellow: generic.FateForeseenYellow{},
+	card.FateForeseenBlue:   generic.FateForeseenBlue{},
 
-	LayLowYellow: generic.LayLowYellow{},
+	card.LayLowYellow: generic.LayLowYellow{},
 
-	PutInContextBlue: generic.PutInContextBlue{},
+	card.PutInContextBlue: generic.PutInContextBlue{},
 
-	RiseAboveRed:    generic.RiseAboveRed{},
-	RiseAboveYellow: generic.RiseAboveYellow{},
-	RiseAboveBlue:   generic.RiseAboveBlue{},
+	card.RiseAboveRed:    generic.RiseAboveRed{},
+	card.RiseAboveYellow: generic.RiseAboveYellow{},
+	card.RiseAboveBlue:   generic.RiseAboveBlue{},
 
-	SinkBelowRed:    generic.SinkBelowRed{},
-	SinkBelowYellow: generic.SinkBelowYellow{},
-	SinkBelowBlue:   generic.SinkBelowBlue{},
+	card.SinkBelowRed:    generic.SinkBelowRed{},
+	card.SinkBelowYellow: generic.SinkBelowYellow{},
+	card.SinkBelowBlue:   generic.SinkBelowBlue{},
 
-	SpringboardSomersaultYellow: generic.SpringboardSomersaultYellow{},
+	card.SpringboardSomersaultYellow: generic.SpringboardSomersaultYellow{},
 
-	ToughenUpBlue: generic.ToughenUpBlue{},
+	card.ToughenUpBlue: generic.ToughenUpBlue{},
 
-	UnmovableRed:    generic.UnmovableRed{},
-	UnmovableYellow: generic.UnmovableYellow{},
-	UnmovableBlue:   generic.UnmovableBlue{},
+	card.UnmovableRed:    generic.UnmovableRed{},
+	card.UnmovableYellow: generic.UnmovableYellow{},
+	card.UnmovableBlue:   generic.UnmovableBlue{},
 
-	FakeRedAttack:  fake.RedAttack{},
-	FakeBlueAttack: fake.BlueAttack{},
+	card.FakeRedAttack:  fake.RedAttack{},
+	card.FakeBlueAttack: fake.BlueAttack{},
 }
 
 // byName maps Card.Name() → ID for reverse lookup. Built once at init.
@@ -385,7 +235,7 @@ var byName = func() map[string]ID {
 // Get returns the card for the given ID. Panics if id is Invalid or out of range — callers should
 // only pass IDs they got from this package.
 func Get(id ID) card.Card {
-	if id == Invalid || int(id) >= len(byID) {
+	if id == card.Invalid || int(id) >= len(byID) || byID[id] == nil {
 		panic("cardindex: invalid card ID")
 	}
 	return byID[id]
@@ -402,21 +252,35 @@ func ByName(name string) (ID, bool) {
 func All() []ID {
 	out := make([]ID, 0, len(byID)-1)
 	for id := 1; id < len(byID); id++ {
+		if byID[id] == nil {
+			continue
+		}
 		out = append(out, ID(id))
 	}
 	return out
 }
 
 // Count is the number of registered cards (excluding Invalid).
-func Count() int { return len(byID) - 1 }
+func Count() int {
+	n := 0
+	for id := 1; id < len(byID); id++ {
+		if byID[id] != nil {
+			n++
+		}
+	}
+	return n
+}
 
 // Deckable returns every registered card ID that's legal to put in a real deck — i.e. every
 // registered card except the test-only fakes. Freshly allocated; safe to mutate.
 func Deckable() []ID {
 	out := make([]ID, 0, len(byID)-1)
 	for id := 1; id < len(byID); id++ {
+		if byID[id] == nil {
+			continue
+		}
 		switch ID(id) {
-		case FakeRedAttack, FakeBlueAttack:
+		case card.FakeRedAttack, card.FakeBlueAttack:
 			continue
 		}
 		out = append(out, ID(id))

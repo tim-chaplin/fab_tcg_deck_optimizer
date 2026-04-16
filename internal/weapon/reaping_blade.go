@@ -15,6 +15,7 @@ var reapingBladeTypes = card.NewTypeSet(card.TypeRuneblade, card.TypeWeapon, car
 
 type ReapingBlade struct{}
 
+func (ReapingBlade) ID() card.ID                  { return card.ReapingBladeID }
 func (ReapingBlade) Name() string                 { return "Reaping Blade" }
 func (ReapingBlade) Cost() int                    { return 1 }
 func (ReapingBlade) Pitch() int                   { return 0 }

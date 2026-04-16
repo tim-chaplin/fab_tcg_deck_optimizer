@@ -29,6 +29,7 @@ func skyFireLanternsPlay(selfPitch int, s *card.TurnState) int {
 
 type SkyFireLanternsRed struct{}
 
+func (SkyFireLanternsRed) ID() card.ID                 { return card.SkyFireLanternsRed }
 func (SkyFireLanternsRed) Name() string                 { return "Sky Fire Lanterns (Red)" }
 func (SkyFireLanternsRed) Cost() int                    { return 0 }
 func (SkyFireLanternsRed) Pitch() int                   { return 1 }
@@ -41,6 +42,7 @@ func (c SkyFireLanternsRed) Play(s *card.TurnState) int { return skyFireLanterns
 
 type SkyFireLanternsYellow struct{}
 
+func (SkyFireLanternsYellow) ID() card.ID                 { return card.SkyFireLanternsYellow }
 func (SkyFireLanternsYellow) Name() string                 { return "Sky Fire Lanterns (Yellow)" }
 func (SkyFireLanternsYellow) Cost() int                    { return 0 }
 func (SkyFireLanternsYellow) Pitch() int                   { return 2 }
@@ -53,6 +55,7 @@ func (c SkyFireLanternsYellow) Play(s *card.TurnState) int { return skyFireLante
 
 type SkyFireLanternsBlue struct{}
 
+func (SkyFireLanternsBlue) ID() card.ID                 { return card.SkyFireLanternsBlue }
 func (SkyFireLanternsBlue) Name() string                 { return "Sky Fire Lanterns (Blue)" }
 func (SkyFireLanternsBlue) Cost() int                    { return 0 }
 func (SkyFireLanternsBlue) Pitch() int                   { return 3 }

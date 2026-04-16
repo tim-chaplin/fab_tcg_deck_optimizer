@@ -15,6 +15,7 @@ var sigilOfDeadwoodTypes = card.NewTypeSet(card.TypeRuneblade, card.TypeAction, 
 
 type SigilOfDeadwoodBlue struct{}
 
+func (SigilOfDeadwoodBlue) ID() card.ID                 { return card.SigilOfDeadwoodBlue }
 func (SigilOfDeadwoodBlue) Name() string             { return "Sigil of Deadwood (Blue)" }
 func (SigilOfDeadwoodBlue) Cost() int                { return 0 }
 func (SigilOfDeadwoodBlue) Pitch() int               { return 3 }

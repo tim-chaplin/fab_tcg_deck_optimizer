@@ -12,6 +12,7 @@ import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 
 type LayLowYellow struct{}
 
+func (LayLowYellow) ID() card.ID                 { return card.LayLowYellow }
 func (LayLowYellow) Name() string             { return "Lay Low (Yellow)" }
 func (LayLowYellow) Cost() int                { return 0 }
 func (LayLowYellow) Pitch() int               { return 2 }

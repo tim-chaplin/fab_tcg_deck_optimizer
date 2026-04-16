@@ -14,6 +14,7 @@ var hocusPocusTypes = card.NewTypeSet(card.TypeRuneblade, card.TypeAction, card.
 
 type HocusPocusRed struct{}
 
+func (HocusPocusRed) ID() card.ID                 { return card.HocusPocusRed }
 func (HocusPocusRed) Name() string               { return "Hocus Pocus (Red)" }
 func (HocusPocusRed) Cost() int                  { return 0 }
 func (HocusPocusRed) Pitch() int                 { return 1 }
@@ -25,6 +26,7 @@ func (c HocusPocusRed) Play(s *card.TurnState) int { s.AuraCreated = true; retur
 
 type HocusPocusYellow struct{}
 
+func (HocusPocusYellow) ID() card.ID                 { return card.HocusPocusYellow }
 func (HocusPocusYellow) Name() string               { return "Hocus Pocus (Yellow)" }
 func (HocusPocusYellow) Cost() int                  { return 0 }
 func (HocusPocusYellow) Pitch() int                 { return 2 }
@@ -36,6 +38,7 @@ func (c HocusPocusYellow) Play(s *card.TurnState) int { s.AuraCreated = true; re
 
 type HocusPocusBlue struct{}
 
+func (HocusPocusBlue) ID() card.ID                 { return card.HocusPocusBlue }
 func (HocusPocusBlue) Name() string               { return "Hocus Pocus (Blue)" }
 func (HocusPocusBlue) Cost() int                  { return 0 }
 func (HocusPocusBlue) Pitch() int                 { return 3 }

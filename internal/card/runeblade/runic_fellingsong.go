@@ -18,6 +18,7 @@ var runicFellingsongTypes = card.NewTypeSet(card.TypeRuneblade, card.TypeAction,
 
 type RunicFellingsongRed struct{}
 
+func (RunicFellingsongRed) ID() card.ID                 { return card.RunicFellingsongRed }
 func (RunicFellingsongRed) Name() string               { return "Runic Fellingsong (Red)" }
 func (RunicFellingsongRed) Cost() int                  { return 3 }
 func (RunicFellingsongRed) Pitch() int                 { return 1 }
@@ -29,6 +30,7 @@ func (c RunicFellingsongRed) Play(*card.TurnState) int { return c.Attack() + 1 }
 
 type RunicFellingsongYellow struct{}
 
+func (RunicFellingsongYellow) ID() card.ID                 { return card.RunicFellingsongYellow }
 func (RunicFellingsongYellow) Name() string               { return "Runic Fellingsong (Yellow)" }
 func (RunicFellingsongYellow) Cost() int                  { return 3 }
 func (RunicFellingsongYellow) Pitch() int                 { return 2 }
@@ -40,6 +42,7 @@ func (c RunicFellingsongYellow) Play(*card.TurnState) int { return c.Attack() + 
 
 type RunicFellingsongBlue struct{}
 
+func (RunicFellingsongBlue) ID() card.ID                 { return card.RunicFellingsongBlue }
 func (RunicFellingsongBlue) Name() string               { return "Runic Fellingsong (Blue)" }
 func (RunicFellingsongBlue) Cost() int                  { return 3 }
 func (RunicFellingsongBlue) Pitch() int                 { return 3 }

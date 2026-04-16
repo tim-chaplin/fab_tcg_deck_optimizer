@@ -12,6 +12,7 @@ import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 
 type UnmovableRed struct{}
 
+func (UnmovableRed) ID() card.ID                 { return card.UnmovableRed }
 func (UnmovableRed) Name() string             { return "Unmovable (Red)" }
 func (UnmovableRed) Cost() int                { return 3 }
 func (UnmovableRed) Pitch() int               { return 1 }
@@ -23,6 +24,7 @@ func (UnmovableRed) Play(*card.TurnState) int { return 0 }
 
 type UnmovableYellow struct{}
 
+func (UnmovableYellow) ID() card.ID                 { return card.UnmovableYellow }
 func (UnmovableYellow) Name() string             { return "Unmovable (Yellow)" }
 func (UnmovableYellow) Cost() int                { return 3 }
 func (UnmovableYellow) Pitch() int               { return 2 }
@@ -34,6 +36,7 @@ func (UnmovableYellow) Play(*card.TurnState) int { return 0 }
 
 type UnmovableBlue struct{}
 
+func (UnmovableBlue) ID() card.ID                 { return card.UnmovableBlue }
 func (UnmovableBlue) Name() string             { return "Unmovable (Blue)" }
 func (UnmovableBlue) Cost() int                { return 3 }
 func (UnmovableBlue) Pitch() int               { return 3 }

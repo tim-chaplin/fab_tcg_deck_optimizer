@@ -21,6 +21,7 @@ var deathlyDuetTypes = card.NewTypeSet(card.TypeRuneblade, card.TypeAction, card
 
 type DeathlyDuetRed struct{}
 
+func (DeathlyDuetRed) ID() card.ID                 { return card.DeathlyDuetRed }
 func (DeathlyDuetRed) Name() string                 { return "Deathly Duet (Red)" }
 func (DeathlyDuetRed) Cost() int                    { return 2 }
 func (DeathlyDuetRed) Pitch() int                   { return 1 }
@@ -32,6 +33,7 @@ func (c DeathlyDuetRed) Play(s *card.TurnState) int { return deathlyDuetPlay(c.A
 
 type DeathlyDuetYellow struct{}
 
+func (DeathlyDuetYellow) ID() card.ID                 { return card.DeathlyDuetYellow }
 func (DeathlyDuetYellow) Name() string                 { return "Deathly Duet (Yellow)" }
 func (DeathlyDuetYellow) Cost() int                    { return 2 }
 func (DeathlyDuetYellow) Pitch() int                   { return 2 }
@@ -43,6 +45,7 @@ func (c DeathlyDuetYellow) Play(s *card.TurnState) int { return deathlyDuetPlay(
 
 type DeathlyDuetBlue struct{}
 
+func (DeathlyDuetBlue) ID() card.ID                 { return card.DeathlyDuetBlue }
 func (DeathlyDuetBlue) Name() string                 { return "Deathly Duet (Blue)" }
 func (DeathlyDuetBlue) Cost() int                    { return 2 }
 func (DeathlyDuetBlue) Pitch() int                   { return 3 }

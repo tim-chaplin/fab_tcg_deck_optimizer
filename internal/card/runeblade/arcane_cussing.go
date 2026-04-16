@@ -16,6 +16,7 @@ var arcaneCussingTypes = card.NewTypeSet(card.TypeRuneblade, card.TypeAction, ca
 
 type ArcaneCussingRed struct{}
 
+func (ArcaneCussingRed) ID() card.ID                 { return card.ArcaneCussingRed }
 func (ArcaneCussingRed) Name() string              { return "Arcane Cussing (Red)" }
 func (ArcaneCussingRed) Cost() int                 { return 1 }
 func (ArcaneCussingRed) Pitch() int                { return 1 }
@@ -27,6 +28,7 @@ func (ArcaneCussingRed) Play(*card.TurnState) int  { return 3 }
 
 type ArcaneCussingYellow struct{}
 
+func (ArcaneCussingYellow) ID() card.ID                 { return card.ArcaneCussingYellow }
 func (ArcaneCussingYellow) Name() string             { return "Arcane Cussing (Yellow)" }
 func (ArcaneCussingYellow) Cost() int                { return 1 }
 func (ArcaneCussingYellow) Pitch() int               { return 2 }
@@ -38,6 +40,7 @@ func (ArcaneCussingYellow) Play(*card.TurnState) int { return 2 }
 
 type ArcaneCussingBlue struct{}
 
+func (ArcaneCussingBlue) ID() card.ID                 { return card.ArcaneCussingBlue }
 func (ArcaneCussingBlue) Name() string             { return "Arcane Cussing (Blue)" }
 func (ArcaneCussingBlue) Cost() int                { return 1 }
 func (ArcaneCussingBlue) Pitch() int               { return 3 }

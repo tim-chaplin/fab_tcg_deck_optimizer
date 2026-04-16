@@ -14,6 +14,7 @@ var spellbladeAssaultTypes = card.NewTypeSet(card.TypeRuneblade, card.TypeAction
 
 type SpellbladeAssaultRed struct{}
 
+func (SpellbladeAssaultRed) ID() card.ID                 { return card.SpellbladeAssaultRed }
 func (SpellbladeAssaultRed) Name() string               { return "Spellblade Assault (Red)" }
 func (SpellbladeAssaultRed) Cost() int                  { return 2 }
 func (SpellbladeAssaultRed) Pitch() int                 { return 1 }
@@ -25,6 +26,7 @@ func (c SpellbladeAssaultRed) Play(s *card.TurnState) int { s.AuraCreated = true
 
 type SpellbladeAssaultYellow struct{}
 
+func (SpellbladeAssaultYellow) ID() card.ID                 { return card.SpellbladeAssaultYellow }
 func (SpellbladeAssaultYellow) Name() string               { return "Spellblade Assault (Yellow)" }
 func (SpellbladeAssaultYellow) Cost() int                  { return 2 }
 func (SpellbladeAssaultYellow) Pitch() int                 { return 2 }
@@ -36,6 +38,7 @@ func (c SpellbladeAssaultYellow) Play(s *card.TurnState) int { s.AuraCreated = t
 
 type SpellbladeAssaultBlue struct{}
 
+func (SpellbladeAssaultBlue) ID() card.ID                 { return card.SpellbladeAssaultBlue }
 func (SpellbladeAssaultBlue) Name() string               { return "Spellblade Assault (Blue)" }
 func (SpellbladeAssaultBlue) Cost() int                  { return 2 }
 func (SpellbladeAssaultBlue) Pitch() int                 { return 3 }

@@ -6,7 +6,6 @@ import (
 	"strings"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/cards"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/hero"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/weapon"
 )
@@ -105,16 +104,12 @@ func isMemoable(hand []card.Card) bool {
 	return true
 }
 
-// handIDs returns the registry IDs for each card in hand, preserving order. Panics if any card
-// isn't registered in package cards.
-func handIDs(hand []card.Card) []cards.ID {
-	ids := make([]cards.ID, len(hand))
+// handIDs returns the registry IDs for each card in hand, preserving order. The ID lives on the
+// Card itself, so this is a direct method call — no map lookup or string hashing.
+func handIDs(hand []card.Card) []card.ID {
+	ids := make([]card.ID, len(hand))
 	for i, c := range hand {
-		id, found := cards.ByName(c.Name())
-		if !found {
-			panic("hand: card not in index: " + c.Name())
-		}
-		ids[i] = id
+		ids[i] = c.ID()
 	}
 	return ids
 }
@@ -122,7 +117,7 @@ func handIDs(hand []card.Card) []cards.ID {
 // handByID sorts a parallel (hand, ids) pair by ascending ID.
 type handByID struct {
 	hand []card.Card
-	ids  []cards.ID
+	ids  []card.ID
 }
 
 func (h *handByID) Len() int           { return len(h.ids) }
@@ -139,7 +134,7 @@ type memoKey struct {
 	hero      string
 	weapon0   string
 	weapon1   string
-	cardIDs   [8]cards.ID
+	cardIDs   [8]card.ID
 	cardCount uint8
 	incoming  int
 }
@@ -150,7 +145,7 @@ var memo = map[memoKey]Play{}
 
 // makeMemoKey builds a comparable memo key. The hand must already be sorted by card ID; weapon
 // names are sorted lexicographically into the two fixed slots.
-func makeMemoKey(hero hero.Hero, weapons []weapon.Weapon, sortedIDs []cards.ID, incoming int) memoKey {
+func makeMemoKey(hero hero.Hero, weapons []weapon.Weapon, sortedIDs []card.ID, incoming int) memoKey {
 	k := memoKey{hero: hero.Name(), incoming: incoming, cardCount: uint8(len(sortedIDs))}
 	for i, id := range sortedIDs {
 		k.cardIDs[i] = id

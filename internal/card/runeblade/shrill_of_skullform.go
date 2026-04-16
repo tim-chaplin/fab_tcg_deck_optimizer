@@ -12,6 +12,7 @@ var shrillTypes = card.NewTypeSet(card.TypeRuneblade, card.TypeAction, card.Type
 
 type ShrillOfSkullformRed struct{}
 
+func (ShrillOfSkullformRed) ID() card.ID                 { return card.ShrillOfSkullformRed }
 func (ShrillOfSkullformRed) Name() string              { return "Shrill of Skullform (Red)" }
 func (ShrillOfSkullformRed) Cost() int                 { return 2 }
 func (ShrillOfSkullformRed) Pitch() int                { return 1 }
@@ -25,6 +26,7 @@ func (c ShrillOfSkullformRed) Play(s *card.TurnState) int {
 
 type ShrillOfSkullformYellow struct{}
 
+func (ShrillOfSkullformYellow) ID() card.ID                 { return card.ShrillOfSkullformYellow }
 func (ShrillOfSkullformYellow) Name() string           { return "Shrill of Skullform (Yellow)" }
 func (ShrillOfSkullformYellow) Cost() int              { return 2 }
 func (ShrillOfSkullformYellow) Pitch() int             { return 2 }
@@ -38,6 +40,7 @@ func (c ShrillOfSkullformYellow) Play(s *card.TurnState) int {
 
 type ShrillOfSkullformBlue struct{}
 
+func (ShrillOfSkullformBlue) ID() card.ID                 { return card.ShrillOfSkullformBlue }
 func (ShrillOfSkullformBlue) Name() string             { return "Shrill of Skullform (Blue)" }
 func (ShrillOfSkullformBlue) Cost() int                { return 2 }
 func (ShrillOfSkullformBlue) Pitch() int               { return 3 }
