@@ -4,9 +4,11 @@
 // when you play an attack action card, remove a verse counter from this. If you do, create a
 // Runechant token." (Red N=3, Yellow N=2, Blue N=1.)
 //
-// Simplification: front-load all N verse counters' worth of Runechants on play rather than one
-// per attack action card over multiple turns. The once-per-turn and counter-depletion timing
-// isn't modelled.
+// Simplification: if this turn has exactly one future attack (card or weapon) in CardsRemaining
+// after Malefic, 1 Runechant is routed through DelayRunechants (matching "once per turn" —
+// Malefic creates at most one rune this turn, and we route it to next turn's carryover so it
+// doesn't feed this turn's DiscountPerRunechant cards); the remaining N-1 are credited as flat
+// future-turn damage. Any other count of future attacks (zero or 2+) falls back to flat N.
 //
 // Source: github.com/the-fab-cube/flesh-and-blood-cards (card.csv).
 
@@ -26,7 +28,7 @@ func (MaleficIncantationRed) Attack() int               { return 0 }
 func (MaleficIncantationRed) Defense() int              { return 2 }
 func (MaleficIncantationRed) Types() card.TypeSet        { return maleficTypes }
 func (MaleficIncantationRed) GoAgain() bool             { return true }
-func (MaleficIncantationRed) Play(s *card.TurnState) int { return s.CreateRunechants(3) }
+func (MaleficIncantationRed) Play(s *card.TurnState) int { return maleficPlay(s, 3) }
 
 type MaleficIncantationYellow struct{}
 
@@ -38,7 +40,7 @@ func (MaleficIncantationYellow) Attack() int               { return 0 }
 func (MaleficIncantationYellow) Defense() int              { return 2 }
 func (MaleficIncantationYellow) Types() card.TypeSet        { return maleficTypes }
 func (MaleficIncantationYellow) GoAgain() bool             { return true }
-func (MaleficIncantationYellow) Play(s *card.TurnState) int { return s.CreateRunechants(2) }
+func (MaleficIncantationYellow) Play(s *card.TurnState) int { return maleficPlay(s, 2) }
 
 type MaleficIncantationBlue struct{}
 
@@ -50,4 +52,21 @@ func (MaleficIncantationBlue) Attack() int               { return 0 }
 func (MaleficIncantationBlue) Defense() int              { return 2 }
 func (MaleficIncantationBlue) Types() card.TypeSet        { return maleficTypes }
 func (MaleficIncantationBlue) GoAgain() bool             { return true }
-func (MaleficIncantationBlue) Play(s *card.TurnState) int { return s.CreateRunechants(1) }
+func (MaleficIncantationBlue) Play(s *card.TurnState) int { return maleficPlay(s, 1) }
+
+// maleficPlay routes 1 Runechant through DelayRunechants (first rune, to next turn's carryover)
+// iff exactly one future attack (card or weapon) follows this turn; remaining n-1 are flat
+// future-turn damage. Any other follow-up count yields flat n.
+func maleficPlay(s *card.TurnState, n int) int {
+	attacks := 0
+	for _, pc := range s.CardsRemaining {
+		t := pc.Card.Types()
+		if t.Has(card.TypeAttack) || t.Has(card.TypeWeapon) {
+			attacks++
+		}
+	}
+	if attacks == 1 {
+		return s.DelayRunechants(1) + (n - 1)
+	}
+	return n
+}
