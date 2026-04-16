@@ -1,6 +1,7 @@
 package deck
 
 import (
+	"math/rand"
 	"testing"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
@@ -78,6 +79,37 @@ func TestAllMutations_NoDuplicateOfSource(t *testing.T) {
 		if deckFingerprint(m.Deck) == srcKey {
 			t.Errorf("mutation %d equals the source deck", i)
 		}
+	}
+}
+
+// TestEvaluate_BestHandStartingRunechantsIsPreHandCarryover pins down a subtle bug: Evaluate
+// used to write the post-hand LeftoverRunechants into BestHand.StartingRunechants, so the field
+// surfaced the wrong turn's count. The field is documented as "the Runechant count carried in
+// from the previous turn when this hand was played", which for the first hand of a run is
+// always 0 — even if the hand itself creates runechants that leftover into the next turn.
+//
+// Without the snapshot fix this test fails: StartingRunechants equals LeftoverRunechants (nonzero)
+// instead of 0.
+func TestEvaluate_BestHandStartingRunechantsIsPreHandCarryover(t *testing.T) {
+	// Viserai has Intelligence 4. A 4-card deck gives exactly one hand per run, so the Best
+	// record always reflects that first hand — no previous turn ever existed.
+	read := cards.Get(card.ReadTheRunesRed)
+	d := New(hero.Viserai{}, nil, []card.Card{read, read, read, read})
+
+	// Seed doesn't matter (all cards identical), but fix it for determinism.
+	d.Evaluate(1, 0, rand.New(rand.NewSource(1)))
+
+	if d.Stats.Best.Hand == nil {
+		t.Fatalf("expected Best to be populated after Evaluate")
+	}
+	// Sanity: the hand should have left runechants on the table (otherwise the bug couldn't
+	// manifest — pre-hand and post-hand counts would both be 0).
+	if d.Stats.Best.Play.Value == 0 {
+		t.Fatalf("expected nonzero Value from a hand of Read the Runes; got 0")
+	}
+	if d.Stats.Best.StartingRunechants != 0 {
+		t.Errorf("StartingRunechants = %d, want 0 (first hand of the run has no previous-turn carryover)",
+			d.Stats.Best.StartingRunechants)
 	}
 }
 
