@@ -340,8 +340,7 @@ func (d *Deck) Evaluate(runs int, incomingDamage int, rng *rand.Rand) Stats {
 	// consumed by advancing head; pitched cards are re-appended at tail. Sized 2×deckSize so there
 	// is always room to append pitched cards before we need to compact head back to 0; compaction
 	// (which shifts [head:tail] down) happens at most once every deckSize/handSize iterations.
-	// This replaces the old working = append(working[handSize:], pitched...) pattern, which
-	// re-allocated its backing array on every hand.
+	// The head/tail pointers and one-shot allocation keep the per-hand path allocation-free.
 	buf := make([]card.Card, deckSize*2)
 	for r := 0; r < runs; r++ {
 		copy(buf, d.Cards)
