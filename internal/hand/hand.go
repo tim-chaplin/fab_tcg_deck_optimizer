@@ -64,7 +64,12 @@ func FormatRoles(hand []card.Card, roles []Role) string {
 //     the optimizer chooses. Effects on TurnState carry forward to later attacks in the same
 //     sequence.
 //   - Defend: contributes Defense to damage prevented (capped at incomingDamage; excess block is
-//     wasted).
+//     wasted). Plain blocking is free; Defense-Reaction-typed cards must have their Cost paid to
+//     resolve and also contribute any Play() damage.
+//
+// Pitch resources are a shared pool — attackers and Defense Reactions draw from the same
+// pitchSum, so partitions whose combined cost exceeds pitchSum are illegal and pruned at the
+// leaf.
 //
 // The optimizer brute-forces all 3^N partitions, then for each legal partition enumerates every
 // subset of weapons to swing and every ordering of the combined attacker list. For N=4 with 0–2
@@ -215,12 +220,17 @@ func bestUncached(hero hero.Hero, weapons []weapon.Weapon, hand []card.Card, inc
 	roles := make([]Role, n)
 
 	// Pre-compute per-card pitch and cost values so the recursion can track sums incrementally
-	// without interface dispatch at each partition leaf.
+	// without interface dispatch at each partition leaf. defendCostVals carries Cost only for
+	// Defense-Reaction-typed cards; non-reactions defend for free (plain blocking).
 	pitchVals := make([]int, n)
 	costVals := make([]int, n)
+	defendCostVals := make([]int, n)
 	for i, c := range hand {
 		pitchVals[i] = c.Pitch()
 		costVals[i] = c.Cost()
+		if c.Types().Has(card.TypeDefenseReaction) {
+			defendCostVals[i] = costVals[i]
+		}
 	}
 
 	// Pre-allocate all buffers once for the entire partition search.
@@ -255,8 +265,11 @@ func bestUncached(hero hero.Hero, weapons []weapon.Weapon, hand []card.Card, inc
 				recurse(i+1, pitchSum+pitchVals[i], costSum)
 			case Attack:
 				recurse(i+1, pitchSum, costSum+costVals[i])
-			default:
-				recurse(i+1, pitchSum, costSum)
+			case Defend:
+				// Plain blocking (any card's Defense used to absorb damage) costs nothing.
+				// Defense Reactions must have their Cost paid to resolve — defendCostVals carries
+				// that cost for reaction cards and is zero otherwise.
+				recurse(i+1, pitchSum, costSum+defendCostVals[i])
 			}
 		}
 	}
