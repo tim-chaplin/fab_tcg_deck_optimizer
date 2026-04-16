@@ -339,13 +339,6 @@ func playSequence(hero hero.Hero, pitched, deck, order []card.Card) (damage int,
 	return
 }
 
-// isLegalOrder reports whether `order` is a legal attack chain (every non-final card has Go
-// Again). Exposed for tests; the solver uses playSequence directly.
-func isLegalOrder(hero hero.Hero, pitched, deck, order []card.Card) bool {
-	_, legal := playSequence(hero, pitched, deck, order)
-	return legal
-}
-
 func permute(a []card.Card, k int, emit func([]card.Card)) {
 	if k == len(a)-1 {
 		emit(a)
