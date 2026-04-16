@@ -29,10 +29,18 @@ func TestMarshalUnmarshalRoundTrip(t *testing.T) {
 	if len(got.Cards) != len(d.Cards) {
 		t.Fatalf("cards len: got %d want %d", len(got.Cards), len(d.Cards))
 	}
-	for i := range d.Cards {
-		if got.Cards[i].Name() != d.Cards[i].Name() {
-			t.Errorf("card[%d]: got %q want %q", i, got.Cards[i].Name(), d.Cards[i].Name())
-		}
+	// Compare as multisets — the JSON form sorts card names, so order isn't preserved across a
+	// round trip. What matters is that the same cards (with the same counts) come back.
+	wantCounts := map[string]int{}
+	for _, c := range d.Cards {
+		wantCounts[c.Name()]++
+	}
+	gotCounts := map[string]int{}
+	for _, c := range got.Cards {
+		gotCounts[c.Name()]++
+	}
+	if !reflect.DeepEqual(gotCounts, wantCounts) {
+		t.Errorf("card counts: got %v want %v", gotCounts, wantCounts)
 	}
 	if !reflect.DeepEqual(got.Stats.FirstCycle, d.Stats.FirstCycle) {
 		t.Errorf("first cycle: got %+v want %+v", got.Stats.FirstCycle, d.Stats.FirstCycle)
