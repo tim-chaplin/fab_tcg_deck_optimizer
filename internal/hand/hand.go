@@ -3,7 +3,6 @@ package hand
 
 import (
 	"sort"
-	"strconv"
 	"strings"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
@@ -82,7 +81,7 @@ func Best(hero hero.Hero, weapons []weapon.Weapon, hand []card.Card, incomingDam
 
 	// Unmemoable hands skip the cache read but still write — the stale entry is harmless since
 	// future unmemoable lookups will skip the read too.
-	key := formatMemoKey(hero, weapons, ids, incomingDamage)
+	key := makeMemoKey(hero, weapons, ids, incomingDamage)
 	if isMemoable(hand) {
 		if cached, hit := memo[key]; hit {
 			// Returned Play aliases the cached slices — callers must not mutate Roles or Weapons.
@@ -133,33 +132,40 @@ func (h *handByID) Swap(i, j int) {
 	h.hand[i], h.hand[j] = h.hand[j], h.hand[i]
 }
 
-// memo caches canonical-order results keyed by formatMemoKey. Not goroutine-safe — the simulator
-// is single-threaded so no lock is needed.
-var memo = map[string]Play{}
+// memoKey is a comparable struct used as the map key for memo — avoids the string allocations
+// that a formatted key would require on every hand evaluation. Hand size is capped at 8 cards;
+// weapon count at 2.
+type memoKey struct {
+	hero      string
+	weapon0   string
+	weapon1   string
+	cardIDs   [8]cards.ID
+	cardCount uint8
+	incoming  int
+}
 
-// formatMemoKey serializes the canonical key fields into a string. The hand must already be
-// sorted by card ID; weapon names are sorted here.
-func formatMemoKey(hero hero.Hero, weapons []weapon.Weapon, sortedIDs []cards.ID, incoming int) string {
-	wnames := make([]string, len(weapons))
-	for i, w := range weapons {
-		wnames[i] = w.Name()
-	}
-	sort.Strings(wnames)
+// memo caches canonical-order results keyed by memoKey. Not goroutine-safe — the simulator is
+// single-threaded so no lock is needed.
+var memo = map[memoKey]Play{}
 
-	var b strings.Builder
-	b.WriteString(hero.Name())
-	b.WriteByte('|')
-	b.WriteString(strings.Join(wnames, ","))
-	b.WriteByte('|')
+// makeMemoKey builds a comparable memo key. The hand must already be sorted by card ID; weapon
+// names are sorted lexicographically into the two fixed slots.
+func makeMemoKey(hero hero.Hero, weapons []weapon.Weapon, sortedIDs []cards.ID, incoming int) memoKey {
+	k := memoKey{hero: hero.Name(), incoming: incoming, cardCount: uint8(len(sortedIDs))}
 	for i, id := range sortedIDs {
-		if i > 0 {
-			b.WriteByte(',')
-		}
-		b.WriteString(strconv.FormatUint(uint64(id), 10))
+		k.cardIDs[i] = id
 	}
-	b.WriteByte('|')
-	b.WriteString(strconv.Itoa(incoming))
-	return b.String()
+	switch len(weapons) {
+	case 1:
+		k.weapon0 = weapons[0].Name()
+	case 2:
+		a, b := weapons[0].Name(), weapons[1].Name()
+		if a > b {
+			a, b = b, a
+		}
+		k.weapon0, k.weapon1 = a, b
+	}
+	return k
 }
 
 func bestUncached(hero hero.Hero, weapons []weapon.Weapon, hand []card.Card, incomingDamage int, deck []card.Card) Play {
