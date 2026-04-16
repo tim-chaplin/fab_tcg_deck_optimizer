@@ -26,6 +26,19 @@ func runIterate(cfg config) {
 			os.WriteFile(cfg.outPath, data, 0o644)
 		}
 		fmt.Printf("Starting deck avg %.3f, saved to %s\n", bestAvg, cfg.outPath)
+	} else if best.Stats.Runs < cfg.deepShuffles {
+		// The loaded baseline was evaluated with a shallower sample than the hill climb will
+		// use for each mutation. Re-evaluate at the current depth so bestAvg is apples-to-apples
+		// with the mutation scores the climber will compare against.
+		fmt.Printf("Loaded best deck (avg %.3f from %d shuffles); re-evaluating at %d shuffles for an apples-to-apples baseline\n",
+			bestAvg, best.Stats.Runs, cfg.deepShuffles)
+		best = deck.New(best.Hero, best.Weapons, best.Cards)
+		stats := best.Evaluate(cfg.deepShuffles, cfg.incoming, rng)
+		bestAvg = stats.Avg()
+		if data, err := deckio.Marshal(best); err == nil {
+			os.WriteFile(cfg.outPath, data, 0o644)
+		}
+		fmt.Printf("Re-evaluated baseline avg %.3f, saved to %s\n", bestAvg, cfg.outPath)
 	} else {
 		fmt.Printf("Loaded best deck (avg %.3f) from %s\n", bestAvg, cfg.outPath)
 	}
