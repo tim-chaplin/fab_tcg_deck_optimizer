@@ -161,8 +161,9 @@ func TestBest_BlessingOfOccultTokensOnlyAppearNextTurn(t *testing.T) {
 // three Reduces plus an Aether Slash; before the fix, the solver could block with all three
 // Reduces at Cost()=0 each while Aether attacked, scoring 13 (5 damage + 8 prevented). With the
 // discount correctly modeled, Aether's attack consumes the carryover (none here) and leaves 0
-// runechants, so each Reduce really costs 1. The best feasible partition drops to 9: one Reduce
-// block + two Reduce pitch (paying for attack) + Aether attack = 5 damage + 4 prevented.
+// runechants, so each Reduce really costs 1 — the 3-Reduce full-block partition is rejected.
+// Best feasible partition: 2 Reduce block + 1 Reduce pitch + Aether pitch = prevent 8 + 2 damage
+// credits from the two Reduce reactions creating runechants = 10.
 func TestBest_ReduceToRunechantRejectsInsufficientBudget(t *testing.T) {
 	h := []card.Card{
 		runeblade.ReduceToRunechantRed{},
@@ -171,15 +172,16 @@ func TestBest_ReduceToRunechantRejectsInsufficientBudget(t *testing.T) {
 		runeblade.AetherSlashRed{},
 	}
 	got := Best(hero.Viserai{}, nil, h, 12, nil, 0)
-	if got.Value != 9 {
-		t.Errorf("Value = %d, want 9 (Reduce costs 1 per copy without runechants in play)", got.Value)
+	if got.Value != 10 {
+		t.Errorf("Value = %d, want 10 (3-Reduce block rejected without runechants; 2-Reduce block with each creating a runechant reaches 10). roles=[%s]",
+			got.Value, FormatRoles(h, got.Roles))
 	}
 }
 
 // TestBest_ReduceToRunechantDiscountedByCarryover pins the other side: when the previous turn
 // left 3 runechants behind and no attack this turn consumes them, Reduce's effective cost is
 // max(1-3, 0) = 0, and a full three-Reduce block becomes affordable again. Optimal: Aether pitch,
-// all three Reduces block → prevent 12 damage (capped at incoming).
+// all three Reduces block → prevent 12 + 3 damage credits (one per Reduce's Runechant creation).
 func TestBest_ReduceToRunechantDiscountedByCarryover(t *testing.T) {
 	h := []card.Card{
 		runeblade.ReduceToRunechantRed{},
@@ -188,8 +190,8 @@ func TestBest_ReduceToRunechantDiscountedByCarryover(t *testing.T) {
 		runeblade.AetherSlashRed{},
 	}
 	got := Best(hero.Viserai{}, nil, h, 12, nil, 3)
-	if got.Value != 12 {
-		t.Errorf("Value = %d, want 12 (carryover discounts all three Reduces to cost 0)", got.Value)
+	if got.Value != 15 {
+		t.Errorf("Value = %d, want 15 (12 prevented + 3 Runechant-creation credits)", got.Value)
 	}
 }
 

@@ -8,8 +8,10 @@
 // so the solver re-prices the reaction at max(0, 1 - leftoverRunechants) after the optimal
 // attack line is chosen — partitions that can't afford the actual cost get rejected.
 //
-// Simplification: the created Runechant token isn't modelled. Defense reactions resolve on the
-// opponent's turn, so the token would add to next-turn carryover but it's currently dropped.
+// Play() calls CreateRunechant, which credits +1 damage at creation (matching every other
+// Runechant-creating card). Simplification: defense-reaction state is reset between reactions in
+// defenseReactionDamage, so the token itself doesn't carry forward into the next turn's
+// carryover — only its damage credit lands.
 //
 // Source: github.com/the-fab-cube/flesh-and-blood-cards (card.csv).
 
@@ -32,7 +34,7 @@ func (ReduceToRunechantRed) Attack() int              { return 0 }
 func (ReduceToRunechantRed) Defense() int             { return 4 }
 func (ReduceToRunechantRed) Types() card.TypeSet      { return reduceToRunechantTypes }
 func (ReduceToRunechantRed) GoAgain() bool            { return false }
-func (ReduceToRunechantRed) Play(*card.TurnState) int { return 0 }
+func (ReduceToRunechantRed) Play(s *card.TurnState) int { return s.CreateRunechant() }
 
 type ReduceToRunechantYellow struct{}
 
@@ -45,7 +47,7 @@ func (ReduceToRunechantYellow) Attack() int              { return 0 }
 func (ReduceToRunechantYellow) Defense() int             { return 3 }
 func (ReduceToRunechantYellow) Types() card.TypeSet      { return reduceToRunechantTypes }
 func (ReduceToRunechantYellow) GoAgain() bool            { return false }
-func (ReduceToRunechantYellow) Play(*card.TurnState) int { return 0 }
+func (ReduceToRunechantYellow) Play(s *card.TurnState) int { return s.CreateRunechant() }
 
 type ReduceToRunechantBlue struct{}
 
@@ -58,4 +60,4 @@ func (ReduceToRunechantBlue) Attack() int              { return 0 }
 func (ReduceToRunechantBlue) Defense() int             { return 2 }
 func (ReduceToRunechantBlue) Types() card.TypeSet      { return reduceToRunechantTypes }
 func (ReduceToRunechantBlue) GoAgain() bool            { return false }
-func (ReduceToRunechantBlue) Play(*card.TurnState) int { return 0 }
+func (ReduceToRunechantBlue) Play(s *card.TurnState) int { return s.CreateRunechant() }

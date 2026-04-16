@@ -370,12 +370,20 @@ func bestUncached(hero hero.Hero, weapons []weapon.Weapon, hand []card.Card, inc
 			}
 			return
 		}
+		// Defense Reactions have strict timing in FaB — they can only be played in response to an
+		// opponent's attack, not chained during our own attack phase. Pruning the Attack role here
+		// keeps the solver from picking partitions that use a reaction's Play effect for its
+		// damage/runechant credit in offense.
+		isDefenseReaction := hand[i].Types().Has(card.TypeDefenseReaction)
 		for r := Role(0); r <= Defend; r++ {
 			roles[i] = r
 			switch r {
 			case Pitch:
 				recurse(i+1, pitchSum+pitchVals[i], costSum, defenseSum, defenderCostSum)
 			case Attack:
+				if isDefenseReaction {
+					continue
+				}
 				recurse(i+1, pitchSum, costSum+costVals[i], defenseSum, defenderCostSum)
 			case Defend:
 				// Plain blocking (any card's Defense used to absorb damage) costs nothing.
