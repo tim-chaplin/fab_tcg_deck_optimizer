@@ -22,10 +22,8 @@ const (
 	Defend
 )
 
-// Play is the chosen partition for a hand: one role per card, plus the resulting damage dealt and
-// damage prevented. Best sorts the caller's hand into canonical order in place, and Roles are
-// aligned to that post-sort order. (Weapon swing decisions are not reported in Roles — they're
-// consumed only for their damage contribution.)
+// Play is the chosen partition for a hand: one role per card plus a total value score. Best sorts
+// the caller's hand into canonical order in place, and Roles are aligned to that post-sort order.
 type Play struct {
 	Roles []Role
 	// Weapons holds the names of equipped weapons that were swung in the optimal attack sequence,
@@ -311,59 +309,34 @@ func bestAttackDamage(hero hero.Hero, attackers, pitched, deck []card.Card) int 
 	copy(perm, attackers)
 	best := 0
 	permute(perm, 0, func(order []card.Card) {
-		if !isLegalOrder(hero, pitched, deck, order) {
-			return
-		}
-		if d := evaluateAttackDamage(hero, pitched, deck, order); d > best {
-			best = d
+		if dmg, legal := playSequence(hero, pitched, deck, order); legal && dmg > best {
+			best = dmg
 		}
 	})
 	return best
 }
 
-// evaluateAttackDamage plays `order` as an attack sequence and returns total damage dealt —
-// every card's Play() plus the hero's OnCardPlayed trigger. Assumes the ordering is legal (see
-// isLegalOrder); chain-legality is not rechecked here. Each call allocates fresh *PlayedCard
-// wrappers so nothing leaks back to the caller.
-func evaluateAttackDamage(hero hero.Hero, pitched, deck []card.Card, order []card.Card) int {
+// playSequence plays `order` as an attack chain and returns the total damage dealt plus whether
+// the ordering is legal (every non-final card has Go Again). Each call allocates fresh
+// *PlayedCard wrappers so nothing leaks back to the caller.
+func playSequence(hero hero.Hero, pitched, deck, order []card.Card) (damage int, legal bool) {
 	played := make([]*card.PlayedCard, len(order))
 	for i, c := range order {
 		played[i] = &card.PlayedCard{Card: c}
 	}
 	state := card.TurnState{Pitched: pitched, Deck: deck}
-	total := 0
+	legal = true
 	for i, pc := range played {
 		state.CardsRemaining = played[i+1:]
 		state.Self = pc
-		total += pc.Card.Play(&state)
-		total += hero.OnCardPlayed(pc.Card, &state)
-		state.CardsPlayed = append(state.CardsPlayed, pc.Card)
-	}
-	return total
-}
-
-// isLegalOrder plays `order` as an attack sequence (same loop as bestAttackDamage's permutation
-// callback) and reports whether every non-final card had EffectiveGoAgain when it finished
-// playing. Damage is not tallied — this is a pure legality check, useful for asserting that
-// specific orderings the solver would have to consider are rejected. Each call allocates fresh
-// *PlayedCard wrappers.
-func isLegalOrder(hero hero.Hero, pitched, deck []card.Card, order []card.Card) bool {
-	played := make([]*card.PlayedCard, len(order))
-	for i, c := range order {
-		played[i] = &card.PlayedCard{Card: c}
-	}
-	state := card.TurnState{Pitched: pitched, Deck: deck}
-	for i, pc := range played {
-		state.CardsRemaining = played[i+1:]
-		state.Self = pc
-		pc.Card.Play(&state)
-		hero.OnCardPlayed(pc.Card, &state)
+		damage += pc.Card.Play(&state)
+		damage += hero.OnCardPlayed(pc.Card, &state)
 		state.CardsPlayed = append(state.CardsPlayed, pc.Card)
 		if i < len(played)-1 && !pc.EffectiveGoAgain() {
-			return false
+			legal = false
 		}
 	}
-	return true
+	return
 }
 
 func permute(a []card.Card, k int, emit func([]card.Card)) {

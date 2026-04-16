@@ -202,7 +202,7 @@ func TestIsLegalOrder_MauvrionCantSaveShrillWhenRuneragerIsAhead(t *testing.T) {
 		runeblade.ShrillOfSkullformRed{},
 		weapon.ReapingBlade{},
 	}
-	if isLegalOrder(hero.Viserai{}, nil, nil, order) {
+	if _, legal := playSequence(hero.Viserai{}, nil, nil, order); legal {
 		t.Fatalf("ordering %v should be illegal (Shrill has no go-again and Mauvrion granted Runerager instead)",
 			cardNames(order))
 	}
