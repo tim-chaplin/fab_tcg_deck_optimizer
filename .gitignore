@@ -19,3 +19,4 @@ Thumbs.db
 *.pdf
 .claude/
 /data_sources/*.csv
+best_deck.json

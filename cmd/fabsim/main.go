@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/deck"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/deckio"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/hand"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/hero"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/weapon"
@@ -23,6 +24,7 @@ func main() {
 	deckSize := flag.Int("deck-size", 40, "number of cards per deck")
 	maxCopies := flag.Int("max-copies", 2, "maximum copies of any single card printing per deck")
 	seed := flag.Int64("seed", time.Now().UnixNano(), "RNG seed")
+	outPath := flag.String("out", "best_deck.json", "path to write the best deck as JSON")
 	flag.Parse()
 
 	rng := rand.New(rand.NewSource(*seed))
@@ -51,6 +53,19 @@ func main() {
 	fmt.Printf("Deck value distribution: min %.3f  median %.3f  max %.3f\n", min, median, max)
 	fmt.Println()
 	printBestDeck(bestDeck)
+
+	if *outPath != "" {
+		data, err := deckio.Marshal(bestDeck)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "marshal best deck: %v\n", err)
+			os.Exit(1)
+		}
+		if err := os.WriteFile(*outPath, data, 0o644); err != nil {
+			fmt.Fprintf(os.Stderr, "write %s: %v\n", *outPath, err)
+			os.Exit(1)
+		}
+		fmt.Printf("\nWrote best deck to %s\n", *outPath)
+	}
 }
 
 // summarize returns (min, median, max) of vs. Panics if vs is empty. Median of an even-length
