@@ -50,6 +50,18 @@ func printBestDeck(d *deck.Deck) {
 	fmt.Printf("  Weapons: %s\n", weaponNames(d.Weapons))
 	fmt.Printf("  Cycle 1 avg: %.3f  (%d hands)\n", s.FirstCycle.Avg(), s.FirstCycle.Hands)
 	fmt.Printf("  Cycle 2 avg: %.3f  (%d hands)\n", s.SecondCycle.Avg(), s.SecondCycle.Hands)
+	var red, yellow, blue int
+	for _, c := range d.Cards {
+		switch c.Pitch() {
+		case 1:
+			red++
+		case 2:
+			yellow++
+		case 3:
+			blue++
+		}
+	}
+	fmt.Printf("  Pitch:   %d red / %d yellow / %d blue\n", red, yellow, blue)
 	if b := s.Best; b.Hand != nil {
 		fmt.Printf("  Best hand seen (value %d): %s\n", b.Play.Value, hand.FormatRoles(b.Hand, b.Play.Roles))
 	}
