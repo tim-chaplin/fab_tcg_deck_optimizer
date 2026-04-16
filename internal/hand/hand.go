@@ -272,8 +272,11 @@ func defenseReactionDamage(defenders, pitched, deck []card.Card) int {
 func bestAttackWithWeapons(hero hero.Hero, weapons []weapon.Weapon, attackers, pitched, deck []card.Card) (int, []string) {
 	best := 0
 	var bestSwung []string
+	// Pre-allocate a buffer large enough for attackers + all weapons to avoid per-mask allocation.
+	buf := make([]card.Card, len(attackers), len(attackers)+len(weapons))
+	copy(buf, attackers)
 	for mask := 0; mask < 1<<len(weapons); mask++ {
-		allAttackers := append([]card.Card(nil), attackers...)
+		allAttackers := buf[:len(attackers)]
 		var swung []string
 		for i, w := range weapons {
 			if mask&(1<<i) != 0 {
