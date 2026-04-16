@@ -52,6 +52,22 @@ func (stubNonAttack) Types() card.TypeSet       { return card.NewTypeSet(card.Ty
 func (stubNonAttack) GoAgain() bool            { return false }
 func (stubNonAttack) Play(*card.TurnState) int { return 0 }
 
+// stubNonRunebladeAttack is a Generic Action-Attack — used to confirm Runeblade-gated lookaheads
+// (Condemn, Oath, Runic Reaping, Mauvrion) don't fire on non-Runeblade attacks.
+type stubNonRunebladeAttack struct{}
+
+func (stubNonRunebladeAttack) ID() card.ID  { return card.Invalid }
+func (stubNonRunebladeAttack) Name() string { return "StubNonRunebladeAttack" }
+func (stubNonRunebladeAttack) Cost() int    { return 0 }
+func (stubNonRunebladeAttack) Pitch() int   { return 0 }
+func (stubNonRunebladeAttack) Attack() int  { return 0 }
+func (stubNonRunebladeAttack) Defense() int { return 0 }
+func (stubNonRunebladeAttack) Types() card.TypeSet {
+	return card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeAttack)
+}
+func (stubNonRunebladeAttack) GoAgain() bool            { return true }
+func (stubNonRunebladeAttack) Play(*card.TurnState) int { return 0 }
+
 // stubAura is a minimal Aura-typed card — used to test "aura played this turn" checks (Shrill of
 // Skullform's +3 bonus).
 type stubAura struct{}
