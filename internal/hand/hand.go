@@ -5,7 +5,6 @@ import (
 	"sort"
 	"strconv"
 	"strings"
-	"sync"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/cards"
@@ -85,18 +84,13 @@ func Best(hero hero.Hero, weapons []weapon.Weapon, hand []card.Card, incomingDam
 	// future unmemoable lookups will skip the read too.
 	key := formatMemoKey(hero, weapons, ids, incomingDamage)
 	if isMemoable(hand) {
-		memoMu.RLock()
-		cached, hit := memo[key]
-		memoMu.RUnlock()
-		if hit {
+		if cached, hit := memo[key]; hit {
 			// Returned Play aliases the cached slices — callers must not mutate Roles or Weapons.
 			return cached
 		}
 	}
 	result := bestUncached(hero, weapons, hand, incomingDamage, deck)
-	memoMu.Lock()
 	memo[key] = result
-	memoMu.Unlock()
 	return result
 }
 
@@ -139,11 +133,9 @@ func (h *handByID) Swap(i, j int) {
 	h.hand[i], h.hand[j] = h.hand[j], h.hand[i]
 }
 
-// memo caches canonical-order results keyed by formatMemoKey.
-var (
-	memoMu sync.RWMutex
-	memo   = map[string]Play{}
-)
+// memo caches canonical-order results keyed by formatMemoKey. Not goroutine-safe — the simulator
+// is single-threaded so no lock is needed.
+var memo = map[string]Play{}
 
 // formatMemoKey serializes the canonical key fields into a string. The hand must already be
 // sorted by card ID; weapon names are sorted here.
