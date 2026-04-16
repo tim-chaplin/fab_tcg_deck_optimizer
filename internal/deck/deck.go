@@ -16,7 +16,6 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/weapon"
 )
 
-
 // Deck is a hero plus equipped weapons and a deck of cards, along with the hand-value stats
 // accumulated from simulating it.
 type Deck struct {
