@@ -6,8 +6,8 @@
 // may renumber existing entries. Treat IDs as opaque in-process handles.
 //
 // Each pitch variant (Red / Yellow / Blue) of a card is a distinct printed card and gets its own
-// ID. Weapons live in the weapon package and are intentionally not indexed here — decks are built
-// from cards; weapons are equipment.
+// ID. Weapons aren't ID-indexed (decks are built from cards; weapons are equipment) but the full
+// roster is exposed here via AllWeapons for convenience.
 package cards
 
 import (
@@ -15,7 +15,15 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card/fake"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card/generic"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card/runeblade"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/weapon"
 )
+
+// AllWeapons lists every implemented weapon. Used by deck-search code to enumerate loadouts.
+var AllWeapons = []weapon.Weapon{
+	weapon.NebulaBlade{},
+	weapon.ReapingBlade{},
+	weapon.ScepterOfPain{},
+}
 
 // ID uniquely identifies a printed card. The zero value (Invalid) is reserved so that a zero-
 // valued ID in other data structures can be detected as "unset".
@@ -401,3 +409,17 @@ func All() []ID {
 
 // Count is the number of registered cards (excluding Invalid).
 func Count() int { return len(byID) - 1 }
+
+// Deckable returns every registered card ID that's legal to put in a real deck — i.e. every
+// registered card except the test-only fakes. Freshly allocated; safe to mutate.
+func Deckable() []ID {
+	out := make([]ID, 0, len(byID)-1)
+	for id := 1; id < len(byID); id++ {
+		switch ID(id) {
+		case FakeRedAttack, FakeBlueAttack:
+			continue
+		}
+		out = append(out, ID(id))
+	}
+	return out
+}

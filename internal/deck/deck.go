@@ -7,11 +7,13 @@ import (
 	"math/rand"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/cards"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/hand"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/hero"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/simstate"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/weapon"
 )
+
 
 // Deck is a hero plus equipped weapons and a deck of cards, along with the hand-value stats
 // accumulated from simulating it.
@@ -27,6 +29,50 @@ type Deck struct {
 func New(h hero.Hero, weapons []weapon.Weapon, cards []card.Card) *Deck {
 	validateWeapons(weapons)
 	return &Deck{Hero: h, Weapons: weapons, Cards: cards}
+}
+
+// Random generates a random legal deck for `h`: a random weapon loadout from cards.AllWeapons
+// (one 2H or two 1H, dual-wielding the same weapon allowed) and `size` cards drawn uniformly
+// from cards.Deckable() with at most `maxCopies` of any single printing.
+func Random(h hero.Hero, size, maxCopies int, rng *rand.Rand) *Deck {
+	loadouts := weaponLoadouts(cards.AllWeapons)
+	weapons := loadouts[rng.Intn(len(loadouts))]
+
+	pool := cards.Deckable()
+	counts := map[cards.ID]int{}
+	picks := make([]card.Card, 0, size)
+	for len(picks) < size {
+		id := pool[rng.Intn(len(pool))]
+		if counts[id] >= maxCopies {
+			continue
+		}
+		counts[id]++
+		picks = append(picks, cards.Get(id))
+	}
+	return New(h, weapons, picks)
+}
+
+// weaponLoadouts enumerates every legal equip combination from `ws`: each 2H weapon as a solo
+// loadout, plus every unordered pair of 1H weapons (including dual-wielding the same weapon).
+func weaponLoadouts(ws []weapon.Weapon) [][]weapon.Weapon {
+	var oneHand, twoHand []weapon.Weapon
+	for _, w := range ws {
+		if w.Hands() == 1 {
+			oneHand = append(oneHand, w)
+		} else {
+			twoHand = append(twoHand, w)
+		}
+	}
+	var out [][]weapon.Weapon
+	for _, w := range twoHand {
+		out = append(out, []weapon.Weapon{w})
+	}
+	for i := 0; i < len(oneHand); i++ {
+		for j := i; j < len(oneHand); j++ {
+			out = append(out, []weapon.Weapon{oneHand[i], oneHand[j]})
+		}
+	}
+	return out
 }
 
 func validateWeapons(weapons []weapon.Weapon) {

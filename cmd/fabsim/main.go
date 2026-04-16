@@ -1,14 +1,13 @@
-// Command fabsim simulates a Flesh and Blood deck and reports average hand value per cycle.
+// Command fabsim generates N random Viserai decks, evaluates each, and reports the best one.
 package main
 
 import (
 	"flag"
 	"fmt"
 	"math/rand"
+	"sort"
 	"time"
 
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/card/runeblade"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/deck"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/hand"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/hero"
@@ -16,31 +15,57 @@ import (
 )
 
 func main() {
-	shuffles := flag.Int("shuffles", 10000, "number of shuffles to simulate for this deck")
+	numDecks := flag.Int("decks", 100, "number of random decks to generate and evaluate")
+	shuffles := flag.Int("shuffles", 1000, "number of shuffles to simulate per deck")
 	incoming := flag.Int("incoming", 4, "opponent damage per turn")
+	deckSize := flag.Int("deck-size", 40, "number of cards per deck")
+	maxCopies := flag.Int("max-copies", 2, "maximum copies of any single card printing per deck")
 	seed := flag.Int64("seed", time.Now().UnixNano(), "RNG seed")
 	flag.Parse()
 
-	weapons := []weapon.Weapon{weapon.ReapingBlade{}}
-	d := deck.New(hero.Viserai{}, weapons, buildDeck())
 	rng := rand.New(rand.NewSource(*seed))
-	stats := d.Evaluate(*shuffles, *incoming, rng)
 
-	fmt.Printf("Hero:           %s\n", d.Hero.Name())
-	fmt.Printf("Weapons:        %s\n", weaponNames(d.Weapons))
-	fmt.Printf("Deck:           %d cards (hand-picked variety, max 2 copies each)\n", len(d.Cards))
-	fmt.Printf("Shuffles:       %d\n", stats.Runs)
-	fmt.Printf("Hands:          %d\n", stats.Hands)
-	fmt.Printf("Incoming/turn:  %d\n", *incoming)
-	fmt.Printf("Seed:           %d\n", *seed)
+	var bestDeck *deck.Deck
+	bestAvg := -1.0
+
+	for i := 0; i < *numDecks; i++ {
+		d := deck.Random(hero.Viserai{}, *deckSize, *maxCopies, rng)
+		stats := d.Evaluate(*shuffles, *incoming, rng)
+		if stats.Avg() > bestAvg {
+			bestAvg = stats.Avg()
+			bestDeck = d
+		}
+	}
+
+	fmt.Printf("Generated %d decks, %d shuffles each, incoming=%d, seed=%d\n",
+		*numDecks, *shuffles, *incoming, *seed)
 	fmt.Println()
-	fmt.Printf("Avg hand value (overall):       %.3f\n", stats.Avg())
-	fmt.Printf("Avg hand value (cycle 1):       %.3f  (%d hands)\n", stats.FirstCycle.Avg(), stats.FirstCycle.Hands)
-	fmt.Printf("Avg hand value (cycle 2):       %.3f  (%d hands)\n", stats.SecondCycle.Avg(), stats.SecondCycle.Hands)
-	if b := stats.Best; b.Hand != nil {
-		fmt.Println()
-		fmt.Printf("Best hand seen (value %d):\n", b.Play.Value)
-		fmt.Printf("  %s\n", hand.FormatRoles(b.Hand, b.Play.Roles))
+	printBestDeck(bestDeck)
+}
+
+func printBestDeck(d *deck.Deck) {
+	s := d.Stats
+	fmt.Printf("Best deck (avg %.3f over %d hands)\n", s.Avg(), s.Hands)
+	fmt.Printf("  Hero:    %s\n", d.Hero.Name())
+	fmt.Printf("  Weapons: %s\n", weaponNames(d.Weapons))
+	fmt.Printf("  Cycle 1 avg: %.3f  (%d hands)\n", s.FirstCycle.Avg(), s.FirstCycle.Hands)
+	fmt.Printf("  Cycle 2 avg: %.3f  (%d hands)\n", s.SecondCycle.Avg(), s.SecondCycle.Hands)
+	if b := s.Best; b.Hand != nil {
+		fmt.Printf("  Best hand seen (value %d): %s\n", b.Play.Value, hand.FormatRoles(b.Hand, b.Play.Roles))
+	}
+	fmt.Println()
+	fmt.Println("Card list:")
+	counts := map[string]int{}
+	for _, c := range d.Cards {
+		counts[c.Name()]++
+	}
+	names := make([]string, 0, len(counts))
+	for n := range counts {
+		names = append(names, n)
+	}
+	sort.Strings(names)
+	for _, n := range names {
+		fmt.Printf("  %dx %s\n", counts[n], n)
 	}
 }
 
@@ -50,38 +75,4 @@ func weaponNames(ws []weapon.Weapon) string {
 		names[i] = w.Name()
 	}
 	return fmt.Sprintf("%v", names)
-}
-
-// buildDeck returns an arbitrary 40-card demo deck: two copies each of 20 different printings.
-// Hand-picked for variety (not tuned for strength) so fabsim has something realistic to chew on.
-func buildDeck() []card.Card {
-	variants := []card.Card{
-		runeblade.MaleficIncantationRed{},
-		runeblade.MaleficIncantationYellow{},
-		runeblade.MaleficIncantationBlue{},
-		runeblade.ShrillOfSkullformRed{},
-		runeblade.ShrillOfSkullformYellow{},
-		runeblade.ShrillOfSkullformBlue{},
-		runeblade.RunicReapingRed{},
-		runeblade.RunicReapingYellow{},
-		runeblade.RunicReapingBlue{},
-		runeblade.AetherSlashRed{},
-		runeblade.AetherSlashYellow{},
-		runeblade.AetherSlashBlue{},
-		runeblade.HocusPocusRed{},
-		runeblade.HocusPocusYellow{},
-		runeblade.HocusPocusBlue{},
-		runeblade.MauvrionSkiesRed{},
-		runeblade.MauvrionSkiesYellow{},
-		runeblade.MauvrionSkiesBlue{},
-		runeblade.DeathlyDuetRed{},
-		runeblade.DeathlyDuetYellow{},
-	}
-	deck := make([]card.Card, 0, len(variants)*2)
-	for _, v := range variants {
-		for i := 0; i < 2; i++ {
-			deck = append(deck, v)
-		}
-	}
-	return deck
 }
