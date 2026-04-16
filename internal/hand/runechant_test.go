@@ -134,6 +134,26 @@ func TestBest_AetherSlashAloneConsumesCarryover(t *testing.T) {
 	}
 }
 
+// TestBest_BlessingOfOccultTokensOnlyAppearNextTurn shows Blessing of Occult's tokens sit in
+// DelayedRunechants and don't interact with same-turn attacks or discount checks: they only
+// surface as LeftoverRunechants into the next turn. A same-turn live Runechant from another
+// card (Malefic Blue) stays separate and also carries over since no attack consumes it.
+func TestBest_BlessingOfOccultTokensOnlyAppearNextTurn(t *testing.T) {
+	// Pitch Blue Hocus Pocus (3 res) to cover Blessing's cost 1. Chain: Malefic Blue (creates 1
+	// live Runechant, Go again) → Blessing Red (creates 3 delayed Runechants, no Go again).
+	// Neither is an attack, so nothing consumes the live Runechant. Leftover = 1 + 3 = 4.
+	h := []card.Card{
+		runeblade.HocusPocusBlue{},
+		runeblade.MaleficIncantationBlue{},
+		runeblade.BlessingOfOccultRed{},
+	}
+	got := Best(stubHero{}, nil, h, 0, nil, 0)
+	if got.LeftoverRunechants != 4 {
+		t.Errorf("LeftoverRunechants = %d, want 4 (1 live from Malefic + 3 delayed from Blessing)",
+			got.LeftoverRunechants)
+	}
+}
+
 // TestBest_CarryoverFeedsDiscount verifies end-to-end: a hand containing a discount attacker is
 // playable when the previous turn left enough runechants behind.
 func TestBest_CarryoverFeedsDiscount(t *testing.T) {

@@ -579,7 +579,9 @@ func playSequence(hero hero.Hero, pitched, deck, order []card.Card, pcBuf []card
 			return 0, 0, false
 		}
 	}
-	return damage, state.Runechants, true
+	// Delayed tokens (e.g. from Blessing of Occult) skip this turn and go straight to next
+	// turn's carryover.
+	return damage, state.Runechants + state.DelayedRunechants, true
 }
 
 

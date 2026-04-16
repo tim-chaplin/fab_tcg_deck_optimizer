@@ -90,9 +90,14 @@ type TurnState struct {
 	// Runechants is the live count of Runechant aura tokens in play right now. The solver seeds it
 	// with the number carried over from the previous turn, CreateRunechants increments it, and
 	// the attack pipeline consumes the running total on each attack card / weapon swing (each
-	// token fires for 1 arcane and is destroyed). At end of the chain, whatever remains carries
-	// into the next turn. DiscountPerRunechant cards read this to compute their effective cost.
+	// token fires for 1 arcane and is destroyed). DiscountPerRunechant cards read this to compute
+	// their effective cost.
 	Runechants int
+	// DelayedRunechants are tokens that won't be available this turn — they skip straight to the
+	// next turn's carryover. DelayRunechants adds here; same-turn attacks don't consume them and
+	// discount checks don't see them. playSequence folds Runechants + DelayedRunechants into the
+	// turn's LeftoverRunechants.
+	DelayedRunechants int
 }
 
 // Hero is the minimal hero profile card effects need. It's intentionally narrower than
@@ -129,6 +134,19 @@ func (s *TurnState) CreateRunechants(n int) int {
 // CreateRunechant is shorthand for CreateRunechants(1) for the common single-token case.
 func (s *TurnState) CreateRunechant() int {
 	return s.CreateRunechants(1)
+}
+
+// DelayRunechants adds n Runechant tokens that skip this turn entirely — they go straight to
+// the next turn's carryover without being available to same-turn attacks or DiscountPerRunechant
+// checks. Used by cards whose text fires at the start of a future turn (e.g. Blessing of Occult,
+// whose "at start of your turn, create N Runechant tokens" resolves on the following upkeep).
+// Returns n — each token is credited as +1 damage at creation, same as CreateRunechants.
+func (s *TurnState) DelayRunechants(n int) int {
+	if n > 0 {
+		s.AuraCreated = true
+		s.DelayedRunechants += n
+	}
+	return n
 }
 
 // Card is any Flesh and Blood card that can be in a deck. Methods return the card's static profile

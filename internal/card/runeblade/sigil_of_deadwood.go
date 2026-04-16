@@ -3,7 +3,8 @@
 // Text: "Go again. At the beginning of your action phase, destroy this. When this leaves the
 // arena, create a Runechant token."
 //
-// Simplification: assume the aura resolves next turn and produces a Runechant. Play returns 1.
+// Simplification: the Runechant is strictly next-turn, so route it through DelayRunechants —
+// it shows up in next turn's carryover rather than being available in the current chain.
 //
 // Source: github.com/the-fab-cube/flesh-and-blood-cards (card.csv).
 
@@ -23,4 +24,4 @@ func (SigilOfDeadwoodBlue) Attack() int              { return 0 }
 func (SigilOfDeadwoodBlue) Defense() int             { return 2 }
 func (SigilOfDeadwoodBlue) Types() card.TypeSet      { return sigilOfDeadwoodTypes }
 func (SigilOfDeadwoodBlue) GoAgain() bool            { return true }
-func (SigilOfDeadwoodBlue) Play(*card.TurnState) int { return 1 }
+func (SigilOfDeadwoodBlue) Play(s *card.TurnState) int { return s.DelayRunechants(1) }
