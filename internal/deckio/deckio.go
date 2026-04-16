@@ -6,6 +6,7 @@ package deckio
 import (
 	"encoding/json"
 	"fmt"
+	"sort"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/cards"
@@ -73,6 +74,7 @@ func toJSON(d *deck.Deck) *DeckJSON {
 	for i, c := range d.Cards {
 		cardNames[i] = c.Name()
 	}
+	sort.Strings(cardNames)
 	return &DeckJSON{
 		Hero:    d.Hero.Name(),
 		Weapons: weapons,
