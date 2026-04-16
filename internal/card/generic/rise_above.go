@@ -18,7 +18,7 @@ func (RiseAboveRed) Cost() int                { return 2 }
 func (RiseAboveRed) Pitch() int               { return 1 }
 func (RiseAboveRed) Attack() int              { return 0 }
 func (RiseAboveRed) Defense() int             { return 4 }
-func (RiseAboveRed) Types() map[string]bool   { return defenseReactionTypes }
+func (RiseAboveRed) Types() card.TypeSet      { return defenseReactionTypes }
 func (RiseAboveRed) GoAgain() bool            { return false }
 func (RiseAboveRed) Play(*card.TurnState) int { return 0 }
 
@@ -29,7 +29,7 @@ func (RiseAboveYellow) Cost() int                { return 2 }
 func (RiseAboveYellow) Pitch() int               { return 2 }
 func (RiseAboveYellow) Attack() int              { return 0 }
 func (RiseAboveYellow) Defense() int             { return 3 }
-func (RiseAboveYellow) Types() map[string]bool   { return defenseReactionTypes }
+func (RiseAboveYellow) Types() card.TypeSet      { return defenseReactionTypes }
 func (RiseAboveYellow) GoAgain() bool            { return false }
 func (RiseAboveYellow) Play(*card.TurnState) int { return 0 }
 
@@ -40,6 +40,6 @@ func (RiseAboveBlue) Cost() int                { return 2 }
 func (RiseAboveBlue) Pitch() int               { return 3 }
 func (RiseAboveBlue) Attack() int              { return 0 }
 func (RiseAboveBlue) Defense() int             { return 2 }
-func (RiseAboveBlue) Types() map[string]bool   { return defenseReactionTypes }
+func (RiseAboveBlue) Types() card.TypeSet      { return defenseReactionTypes }
 func (RiseAboveBlue) GoAgain() bool            { return false }
 func (RiseAboveBlue) Play(*card.TurnState) int { return 0 }

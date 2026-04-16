@@ -12,7 +12,7 @@ package runeblade
 
 import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 
-var arcaneCussingTypes = map[string]bool{"Runeblade": true, "Action": true, "Aura": true}
+var arcaneCussingTypes = card.NewTypeSet(card.TypeRuneblade, card.TypeAction, card.TypeAura)
 
 type ArcaneCussingRed struct{}
 
@@ -21,7 +21,7 @@ func (ArcaneCussingRed) Cost() int                 { return 1 }
 func (ArcaneCussingRed) Pitch() int                { return 1 }
 func (ArcaneCussingRed) Attack() int               { return 0 }
 func (ArcaneCussingRed) Defense() int              { return 2 }
-func (ArcaneCussingRed) Types() map[string]bool    { return arcaneCussingTypes }
+func (ArcaneCussingRed) Types() card.TypeSet    { return arcaneCussingTypes }
 func (ArcaneCussingRed) GoAgain() bool             { return true }
 func (ArcaneCussingRed) Play(*card.TurnState) int  { return 3 }
 
@@ -32,7 +32,7 @@ func (ArcaneCussingYellow) Cost() int                { return 1 }
 func (ArcaneCussingYellow) Pitch() int               { return 2 }
 func (ArcaneCussingYellow) Attack() int              { return 0 }
 func (ArcaneCussingYellow) Defense() int             { return 2 }
-func (ArcaneCussingYellow) Types() map[string]bool   { return arcaneCussingTypes }
+func (ArcaneCussingYellow) Types() card.TypeSet   { return arcaneCussingTypes }
 func (ArcaneCussingYellow) GoAgain() bool            { return true }
 func (ArcaneCussingYellow) Play(*card.TurnState) int { return 2 }
 
@@ -43,6 +43,6 @@ func (ArcaneCussingBlue) Cost() int                { return 1 }
 func (ArcaneCussingBlue) Pitch() int               { return 3 }
 func (ArcaneCussingBlue) Attack() int              { return 0 }
 func (ArcaneCussingBlue) Defense() int             { return 2 }
-func (ArcaneCussingBlue) Types() map[string]bool   { return arcaneCussingTypes }
+func (ArcaneCussingBlue) Types() card.TypeSet   { return arcaneCussingTypes }
 func (ArcaneCussingBlue) GoAgain() bool            { return true }
 func (ArcaneCussingBlue) Play(*card.TurnState) int { return 1 }

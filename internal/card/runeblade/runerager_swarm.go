@@ -12,7 +12,7 @@ package runeblade
 
 import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 
-var runeragerSwarmTypes = map[string]bool{"Runeblade": true, "Action": true, "Attack": true}
+var runeragerSwarmTypes = card.NewTypeSet(card.TypeRuneblade, card.TypeAction, card.TypeAttack)
 
 type RuneragerSwarmRed struct{}
 
@@ -21,7 +21,7 @@ func (RuneragerSwarmRed) Cost() int                { return 0 }
 func (RuneragerSwarmRed) Pitch() int               { return 1 }
 func (RuneragerSwarmRed) Attack() int              { return 3 }
 func (RuneragerSwarmRed) Defense() int             { return 3 }
-func (RuneragerSwarmRed) Types() map[string]bool   { return runeragerSwarmTypes }
+func (RuneragerSwarmRed) Types() card.TypeSet      { return runeragerSwarmTypes }
 func (RuneragerSwarmRed) GoAgain() bool            { return false }
 func (c RuneragerSwarmRed) Play(s *card.TurnState) int {
 	return runeragerSwarmPlay(c.Attack(), s)
@@ -34,7 +34,7 @@ func (RuneragerSwarmYellow) Cost() int                { return 0 }
 func (RuneragerSwarmYellow) Pitch() int               { return 2 }
 func (RuneragerSwarmYellow) Attack() int              { return 2 }
 func (RuneragerSwarmYellow) Defense() int             { return 3 }
-func (RuneragerSwarmYellow) Types() map[string]bool   { return runeragerSwarmTypes }
+func (RuneragerSwarmYellow) Types() card.TypeSet      { return runeragerSwarmTypes }
 func (RuneragerSwarmYellow) GoAgain() bool            { return false }
 func (c RuneragerSwarmYellow) Play(s *card.TurnState) int {
 	return runeragerSwarmPlay(c.Attack(), s)
@@ -47,14 +47,14 @@ func (RuneragerSwarmBlue) Cost() int                { return 0 }
 func (RuneragerSwarmBlue) Pitch() int               { return 3 }
 func (RuneragerSwarmBlue) Attack() int              { return 1 }
 func (RuneragerSwarmBlue) Defense() int             { return 3 }
-func (RuneragerSwarmBlue) Types() map[string]bool   { return runeragerSwarmTypes }
+func (RuneragerSwarmBlue) Types() card.TypeSet      { return runeragerSwarmTypes }
 func (RuneragerSwarmBlue) GoAgain() bool            { return false }
 func (c RuneragerSwarmBlue) Play(s *card.TurnState) int {
 	return runeragerSwarmPlay(c.Attack(), s)
 }
 
 func runeragerSwarmPlay(base int, s *card.TurnState) int {
-	if s.AuraCreated || s.HasPlayedType("Aura") {
+	if s.AuraCreated || s.HasPlayedType(card.TypeAura) {
 		s.Self.GrantedGoAgain = true
 	}
 	return base

@@ -10,7 +10,7 @@ package runeblade
 
 import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 
-var readTheRunesTypes = map[string]bool{"Runeblade": true, "Action": true}
+var readTheRunesTypes = card.NewTypeSet(card.TypeRuneblade, card.TypeAction)
 
 type ReadTheRunesRed struct{}
 
@@ -19,7 +19,7 @@ func (ReadTheRunesRed) Cost() int                  { return 0 }
 func (ReadTheRunesRed) Pitch() int                 { return 1 }
 func (ReadTheRunesRed) Attack() int                { return 0 }
 func (ReadTheRunesRed) Defense() int               { return 2 }
-func (ReadTheRunesRed) Types() map[string]bool     { return readTheRunesTypes }
+func (ReadTheRunesRed) Types() card.TypeSet        { return readTheRunesTypes }
 func (ReadTheRunesRed) GoAgain() bool              { return false }
 func (ReadTheRunesRed) Play(s *card.TurnState) int { s.AuraCreated = true; return 3 }
 
@@ -30,7 +30,7 @@ func (ReadTheRunesYellow) Cost() int                  { return 0 }
 func (ReadTheRunesYellow) Pitch() int                 { return 2 }
 func (ReadTheRunesYellow) Attack() int                { return 0 }
 func (ReadTheRunesYellow) Defense() int               { return 2 }
-func (ReadTheRunesYellow) Types() map[string]bool     { return readTheRunesTypes }
+func (ReadTheRunesYellow) Types() card.TypeSet        { return readTheRunesTypes }
 func (ReadTheRunesYellow) GoAgain() bool              { return false }
 func (ReadTheRunesYellow) Play(s *card.TurnState) int { s.AuraCreated = true; return 2 }
 
@@ -41,6 +41,6 @@ func (ReadTheRunesBlue) Cost() int                  { return 0 }
 func (ReadTheRunesBlue) Pitch() int                 { return 3 }
 func (ReadTheRunesBlue) Attack() int                { return 0 }
 func (ReadTheRunesBlue) Defense() int               { return 2 }
-func (ReadTheRunesBlue) Types() map[string]bool     { return readTheRunesTypes }
+func (ReadTheRunesBlue) Types() card.TypeSet        { return readTheRunesTypes }
 func (ReadTheRunesBlue) GoAgain() bool              { return false }
 func (ReadTheRunesBlue) Play(s *card.TurnState) int { s.AuraCreated = true; return 1 }

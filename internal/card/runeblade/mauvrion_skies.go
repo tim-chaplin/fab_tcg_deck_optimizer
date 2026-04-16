@@ -16,7 +16,7 @@ package runeblade
 
 import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 
-var mauvrionSkiesTypes = map[string]bool{"Runeblade": true, "Action": true}
+var mauvrionSkiesTypes = card.NewTypeSet(card.TypeRuneblade, card.TypeAction)
 
 type MauvrionSkiesRed struct{}
 
@@ -25,7 +25,7 @@ func (MauvrionSkiesRed) Cost() int                  { return 0 }
 func (MauvrionSkiesRed) Pitch() int                 { return 1 }
 func (MauvrionSkiesRed) Attack() int                { return 0 }
 func (MauvrionSkiesRed) Defense() int               { return 2 }
-func (MauvrionSkiesRed) Types() map[string]bool     { return mauvrionSkiesTypes }
+func (MauvrionSkiesRed) Types() card.TypeSet        { return mauvrionSkiesTypes }
 func (MauvrionSkiesRed) GoAgain() bool              { return true }
 func (MauvrionSkiesRed) Play(s *card.TurnState) int { return mauvrionSkiesPlay(s, 3) }
 
@@ -36,7 +36,7 @@ func (MauvrionSkiesYellow) Cost() int                  { return 0 }
 func (MauvrionSkiesYellow) Pitch() int                 { return 2 }
 func (MauvrionSkiesYellow) Attack() int                { return 0 }
 func (MauvrionSkiesYellow) Defense() int               { return 2 }
-func (MauvrionSkiesYellow) Types() map[string]bool     { return mauvrionSkiesTypes }
+func (MauvrionSkiesYellow) Types() card.TypeSet        { return mauvrionSkiesTypes }
 func (MauvrionSkiesYellow) GoAgain() bool              { return true }
 func (MauvrionSkiesYellow) Play(s *card.TurnState) int { return mauvrionSkiesPlay(s, 2) }
 
@@ -47,14 +47,14 @@ func (MauvrionSkiesBlue) Cost() int                  { return 0 }
 func (MauvrionSkiesBlue) Pitch() int                 { return 3 }
 func (MauvrionSkiesBlue) Attack() int                { return 0 }
 func (MauvrionSkiesBlue) Defense() int               { return 2 }
-func (MauvrionSkiesBlue) Types() map[string]bool     { return mauvrionSkiesTypes }
+func (MauvrionSkiesBlue) Types() card.TypeSet        { return mauvrionSkiesTypes }
 func (MauvrionSkiesBlue) GoAgain() bool              { return true }
 func (MauvrionSkiesBlue) Play(s *card.TurnState) int { return mauvrionSkiesPlay(s, 1) }
 
 func mauvrionSkiesPlay(s *card.TurnState, n int) int {
 	for _, pc := range s.CardsRemaining {
 		t := pc.Card.Types()
-		if t["Runeblade"] && t["Action"] && t["Attack"] {
+		if t.Has(card.TypeRuneblade) && t.Has(card.TypeAction) && t.Has(card.TypeAttack) {
 			pc.GrantedGoAgain = true
 			s.AuraCreated = true
 			return n

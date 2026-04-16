@@ -14,8 +14,8 @@ func (stubRunebladeAttack) Cost() int    { return 0 }
 func (stubRunebladeAttack) Pitch() int   { return 0 }
 func (stubRunebladeAttack) Attack() int  { return 0 }
 func (stubRunebladeAttack) Defense() int { return 0 }
-func (stubRunebladeAttack) Types() map[string]bool {
-	return map[string]bool{"Runeblade": true, "Action": true, "Attack": true}
+func (stubRunebladeAttack) Types() card.TypeSet {
+	return card.NewTypeSet(card.TypeRuneblade, card.TypeAction, card.TypeAttack)
 }
 func (stubRunebladeAttack) GoAgain() bool            { return true }
 func (stubRunebladeAttack) Play(*card.TurnState) int { return 0 }
@@ -30,8 +30,8 @@ func (stubRunebladeWeapon) Cost() int    { return 0 }
 func (stubRunebladeWeapon) Pitch() int   { return 0 }
 func (stubRunebladeWeapon) Attack() int  { return 0 }
 func (stubRunebladeWeapon) Defense() int { return 0 }
-func (stubRunebladeWeapon) Types() map[string]bool {
-	return map[string]bool{"Runeblade": true, "Weapon": true}
+func (stubRunebladeWeapon) Types() card.TypeSet {
+	return card.NewTypeSet(card.TypeRuneblade, card.TypeWeapon)
 }
 func (stubRunebladeWeapon) GoAgain() bool            { return false }
 func (stubRunebladeWeapon) Play(*card.TurnState) int { return 0 }
@@ -45,7 +45,7 @@ func (stubNonAttack) Cost() int                { return 0 }
 func (stubNonAttack) Pitch() int               { return 0 }
 func (stubNonAttack) Attack() int              { return 0 }
 func (stubNonAttack) Defense() int             { return 0 }
-func (stubNonAttack) Types() map[string]bool   { return map[string]bool{"Action": true} }
+func (stubNonAttack) Types() card.TypeSet       { return card.NewTypeSet(card.TypeAction) }
 func (stubNonAttack) GoAgain() bool            { return false }
 func (stubNonAttack) Play(*card.TurnState) int { return 0 }
 
@@ -58,6 +58,6 @@ func (stubAura) Cost() int                { return 0 }
 func (stubAura) Pitch() int               { return 0 }
 func (stubAura) Attack() int              { return 0 }
 func (stubAura) Defense() int             { return 0 }
-func (stubAura) Types() map[string]bool   { return map[string]bool{"Aura": true} }
+func (stubAura) Types() card.TypeSet       { return card.NewTypeSet(card.TypeAura) }
 func (stubAura) GoAgain() bool            { return true }
 func (stubAura) Play(*card.TurnState) int { return 0 }

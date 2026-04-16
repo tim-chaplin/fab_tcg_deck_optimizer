@@ -13,7 +13,7 @@ package runeblade
 
 import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 
-var bloodspillInvocationTypes = map[string]bool{"Runeblade": true, "Action": true, "Aura": true}
+var bloodspillInvocationTypes = card.NewTypeSet(card.TypeRuneblade, card.TypeAction, card.TypeAura)
 
 type BloodspillInvocationRed struct{}
 
@@ -22,7 +22,7 @@ func (BloodspillInvocationRed) Cost() int                 { return 1 }
 func (BloodspillInvocationRed) Pitch() int                { return 1 }
 func (BloodspillInvocationRed) Attack() int               { return 0 }
 func (BloodspillInvocationRed) Defense() int              { return 2 }
-func (BloodspillInvocationRed) Types() map[string]bool    { return bloodspillInvocationTypes }
+func (BloodspillInvocationRed) Types() card.TypeSet    { return bloodspillInvocationTypes }
 func (BloodspillInvocationRed) GoAgain() bool             { return true }
 func (BloodspillInvocationRed) Play(*card.TurnState) int  { return 3 }
 
@@ -33,7 +33,7 @@ func (BloodspillInvocationYellow) Cost() int                { return 1 }
 func (BloodspillInvocationYellow) Pitch() int               { return 2 }
 func (BloodspillInvocationYellow) Attack() int              { return 0 }
 func (BloodspillInvocationYellow) Defense() int             { return 2 }
-func (BloodspillInvocationYellow) Types() map[string]bool   { return bloodspillInvocationTypes }
+func (BloodspillInvocationYellow) Types() card.TypeSet   { return bloodspillInvocationTypes }
 func (BloodspillInvocationYellow) GoAgain() bool            { return true }
 func (BloodspillInvocationYellow) Play(*card.TurnState) int { return 2 }
 
@@ -44,6 +44,6 @@ func (BloodspillInvocationBlue) Cost() int                { return 1 }
 func (BloodspillInvocationBlue) Pitch() int               { return 3 }
 func (BloodspillInvocationBlue) Attack() int              { return 0 }
 func (BloodspillInvocationBlue) Defense() int             { return 2 }
-func (BloodspillInvocationBlue) Types() map[string]bool   { return bloodspillInvocationTypes }
+func (BloodspillInvocationBlue) Types() card.TypeSet   { return bloodspillInvocationTypes }
 func (BloodspillInvocationBlue) GoAgain() bool            { return true }
 func (BloodspillInvocationBlue) Play(*card.TurnState) int { return 1 }

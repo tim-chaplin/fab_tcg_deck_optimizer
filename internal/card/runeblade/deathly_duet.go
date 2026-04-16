@@ -17,7 +17,7 @@ package runeblade
 
 import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 
-var deathlyDuetTypes = map[string]bool{"Runeblade": true, "Action": true, "Attack": true}
+var deathlyDuetTypes = card.NewTypeSet(card.TypeRuneblade, card.TypeAction, card.TypeAttack)
 
 type DeathlyDuetRed struct{}
 
@@ -26,7 +26,7 @@ func (DeathlyDuetRed) Cost() int                    { return 2 }
 func (DeathlyDuetRed) Pitch() int                   { return 1 }
 func (DeathlyDuetRed) Attack() int                  { return 4 }
 func (DeathlyDuetRed) Defense() int                 { return 3 }
-func (DeathlyDuetRed) Types() map[string]bool       { return deathlyDuetTypes }
+func (DeathlyDuetRed) Types() card.TypeSet       { return deathlyDuetTypes }
 func (DeathlyDuetRed) GoAgain() bool                { return false }
 func (c DeathlyDuetRed) Play(s *card.TurnState) int { return deathlyDuetPlay(c.Attack(), s) }
 
@@ -37,7 +37,7 @@ func (DeathlyDuetYellow) Cost() int                    { return 2 }
 func (DeathlyDuetYellow) Pitch() int                   { return 2 }
 func (DeathlyDuetYellow) Attack() int                  { return 3 }
 func (DeathlyDuetYellow) Defense() int                 { return 3 }
-func (DeathlyDuetYellow) Types() map[string]bool       { return deathlyDuetTypes }
+func (DeathlyDuetYellow) Types() card.TypeSet       { return deathlyDuetTypes }
 func (DeathlyDuetYellow) GoAgain() bool                { return false }
 func (c DeathlyDuetYellow) Play(s *card.TurnState) int { return deathlyDuetPlay(c.Attack(), s) }
 
@@ -48,7 +48,7 @@ func (DeathlyDuetBlue) Cost() int                    { return 2 }
 func (DeathlyDuetBlue) Pitch() int                   { return 3 }
 func (DeathlyDuetBlue) Attack() int                  { return 2 }
 func (DeathlyDuetBlue) Defense() int                 { return 3 }
-func (DeathlyDuetBlue) Types() map[string]bool       { return deathlyDuetTypes }
+func (DeathlyDuetBlue) Types() card.TypeSet       { return deathlyDuetTypes }
 func (DeathlyDuetBlue) GoAgain() bool                { return false }
 func (c DeathlyDuetBlue) Play(s *card.TurnState) int { return deathlyDuetPlay(c.Attack(), s) }
 
@@ -56,10 +56,10 @@ func deathlyDuetPlay(base int, s *card.TurnState) int {
 	var attackPitched, nonAttackActionPitched bool
 	for _, p := range s.Pitched {
 		t := p.Types()
-		if t["Attack"] {
+		if t.Has(card.TypeAttack) {
 			attackPitched = true
 		}
-		if t["Action"] && !t["Attack"] {
+		if t.Has(card.TypeAction) && !t.Has(card.TypeAttack) {
 			nonAttackActionPitched = true
 		}
 	}
@@ -81,7 +81,7 @@ func deathlyDuetPlay(base int, s *card.TurnState) int {
 func hasFollowingAttack(s *card.TurnState) bool {
 	for _, pc := range s.CardsRemaining {
 		t := pc.Card.Types()
-		if t["Attack"] || t["Weapon"] {
+		if t.Has(card.TypeAttack) || t.Has(card.TypeWeapon) {
 			return true
 		}
 	}

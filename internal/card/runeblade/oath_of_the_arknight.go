@@ -13,7 +13,7 @@ package runeblade
 
 import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 
-var oathOfTheArknightTypes = map[string]bool{"Runeblade": true, "Action": true}
+var oathOfTheArknightTypes = card.NewTypeSet(card.TypeRuneblade, card.TypeAction)
 
 type OathOfTheArknightRed struct{}
 
@@ -22,7 +22,7 @@ func (OathOfTheArknightRed) Cost() int                  { return 2 }
 func (OathOfTheArknightRed) Pitch() int                 { return 1 }
 func (OathOfTheArknightRed) Attack() int                { return 0 }
 func (OathOfTheArknightRed) Defense() int               { return 3 }
-func (OathOfTheArknightRed) Types() map[string]bool     { return oathOfTheArknightTypes }
+func (OathOfTheArknightRed) Types() card.TypeSet        { return oathOfTheArknightTypes }
 func (OathOfTheArknightRed) GoAgain() bool              { return true }
 func (OathOfTheArknightRed) Play(s *card.TurnState) int { return oathPlay(s, 3) }
 
@@ -33,7 +33,7 @@ func (OathOfTheArknightYellow) Cost() int                  { return 2 }
 func (OathOfTheArknightYellow) Pitch() int                 { return 2 }
 func (OathOfTheArknightYellow) Attack() int                { return 0 }
 func (OathOfTheArknightYellow) Defense() int               { return 3 }
-func (OathOfTheArknightYellow) Types() map[string]bool     { return oathOfTheArknightTypes }
+func (OathOfTheArknightYellow) Types() card.TypeSet        { return oathOfTheArknightTypes }
 func (OathOfTheArknightYellow) GoAgain() bool              { return true }
 func (OathOfTheArknightYellow) Play(s *card.TurnState) int { return oathPlay(s, 2) }
 
@@ -44,7 +44,7 @@ func (OathOfTheArknightBlue) Cost() int                  { return 2 }
 func (OathOfTheArknightBlue) Pitch() int                 { return 3 }
 func (OathOfTheArknightBlue) Attack() int                { return 0 }
 func (OathOfTheArknightBlue) Defense() int               { return 3 }
-func (OathOfTheArknightBlue) Types() map[string]bool     { return oathOfTheArknightTypes }
+func (OathOfTheArknightBlue) Types() card.TypeSet        { return oathOfTheArknightTypes }
 func (OathOfTheArknightBlue) GoAgain() bool              { return true }
 func (OathOfTheArknightBlue) Play(s *card.TurnState) int { return oathPlay(s, 1) }
 
@@ -53,10 +53,10 @@ func oathPlay(s *card.TurnState, n int) int {
 	bonus := 0
 	for _, pc := range s.CardsRemaining {
 		t := pc.Card.Types()
-		if !t["Runeblade"] {
+		if !t.Has(card.TypeRuneblade) {
 			continue
 		}
-		if t["Attack"] || t["Weapon"] {
+		if t.Has(card.TypeAttack) || t.Has(card.TypeWeapon) {
 			bonus = n
 			break
 		}

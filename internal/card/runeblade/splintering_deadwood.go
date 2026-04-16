@@ -12,7 +12,7 @@ package runeblade
 
 import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 
-var splinteringDeadwoodTypes = map[string]bool{"Runeblade": true, "Action": true, "Attack": true}
+var splinteringDeadwoodTypes = card.NewTypeSet(card.TypeRuneblade, card.TypeAction, card.TypeAttack)
 
 type SplinteringDeadwoodRed struct{}
 
@@ -21,7 +21,7 @@ func (SplinteringDeadwoodRed) Cost() int                  { return 3 }
 func (SplinteringDeadwoodRed) Pitch() int                 { return 1 }
 func (SplinteringDeadwoodRed) Attack() int                { return 7 }
 func (SplinteringDeadwoodRed) Defense() int               { return 3 }
-func (SplinteringDeadwoodRed) Types() map[string]bool     { return splinteringDeadwoodTypes }
+func (SplinteringDeadwoodRed) Types() card.TypeSet        { return splinteringDeadwoodTypes }
 func (SplinteringDeadwoodRed) GoAgain() bool              { return false }
 func (c SplinteringDeadwoodRed) Play(*card.TurnState) int { return c.Attack() }
 
@@ -32,7 +32,7 @@ func (SplinteringDeadwoodYellow) Cost() int                  { return 3 }
 func (SplinteringDeadwoodYellow) Pitch() int                 { return 2 }
 func (SplinteringDeadwoodYellow) Attack() int                { return 6 }
 func (SplinteringDeadwoodYellow) Defense() int               { return 3 }
-func (SplinteringDeadwoodYellow) Types() map[string]bool     { return splinteringDeadwoodTypes }
+func (SplinteringDeadwoodYellow) Types() card.TypeSet        { return splinteringDeadwoodTypes }
 func (SplinteringDeadwoodYellow) GoAgain() bool              { return false }
 func (c SplinteringDeadwoodYellow) Play(*card.TurnState) int { return c.Attack() }
 
@@ -43,6 +43,6 @@ func (SplinteringDeadwoodBlue) Cost() int                  { return 3 }
 func (SplinteringDeadwoodBlue) Pitch() int                 { return 3 }
 func (SplinteringDeadwoodBlue) Attack() int                { return 5 }
 func (SplinteringDeadwoodBlue) Defense() int               { return 3 }
-func (SplinteringDeadwoodBlue) Types() map[string]bool     { return splinteringDeadwoodTypes }
+func (SplinteringDeadwoodBlue) Types() card.TypeSet        { return splinteringDeadwoodTypes }
 func (SplinteringDeadwoodBlue) GoAgain() bool              { return false }
 func (c SplinteringDeadwoodBlue) Play(*card.TurnState) int { return c.Attack() }

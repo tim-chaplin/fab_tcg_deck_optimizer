@@ -13,7 +13,7 @@ package runeblade
 
 import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 
-var aetherSlashTypes = map[string]bool{"Runeblade": true, "Action": true, "Attack": true}
+var aetherSlashTypes = card.NewTypeSet(card.TypeRuneblade, card.TypeAction, card.TypeAttack)
 
 type AetherSlashRed struct{}
 
@@ -22,7 +22,7 @@ func (AetherSlashRed) Cost() int                    { return 1 }
 func (AetherSlashRed) Pitch() int                   { return 1 }
 func (AetherSlashRed) Attack() int                  { return 4 }
 func (AetherSlashRed) Defense() int                 { return 3 }
-func (AetherSlashRed) Types() map[string]bool       { return aetherSlashTypes }
+func (AetherSlashRed) Types() card.TypeSet       { return aetherSlashTypes }
 func (AetherSlashRed) GoAgain() bool                { return false }
 func (c AetherSlashRed) Play(s *card.TurnState) int { return aetherSlashPlay(c.Attack(), s) }
 
@@ -33,7 +33,7 @@ func (AetherSlashYellow) Cost() int                    { return 1 }
 func (AetherSlashYellow) Pitch() int                   { return 2 }
 func (AetherSlashYellow) Attack() int                  { return 3 }
 func (AetherSlashYellow) Defense() int                 { return 3 }
-func (AetherSlashYellow) Types() map[string]bool       { return aetherSlashTypes }
+func (AetherSlashYellow) Types() card.TypeSet       { return aetherSlashTypes }
 func (AetherSlashYellow) GoAgain() bool                { return false }
 func (c AetherSlashYellow) Play(s *card.TurnState) int { return aetherSlashPlay(c.Attack(), s) }
 
@@ -44,7 +44,7 @@ func (AetherSlashBlue) Cost() int                    { return 1 }
 func (AetherSlashBlue) Pitch() int                   { return 3 }
 func (AetherSlashBlue) Attack() int                  { return 2 }
 func (AetherSlashBlue) Defense() int                 { return 3 }
-func (AetherSlashBlue) Types() map[string]bool       { return aetherSlashTypes }
+func (AetherSlashBlue) Types() card.TypeSet       { return aetherSlashTypes }
 func (AetherSlashBlue) GoAgain() bool                { return false }
 func (c AetherSlashBlue) Play(s *card.TurnState) int { return aetherSlashPlay(c.Attack(), s) }
 
@@ -52,7 +52,7 @@ func aetherSlashPlay(base int, s *card.TurnState) int {
 	dmg := base + 1 // printed arcane
 	for _, p := range s.Pitched {
 		t := p.Types()
-		if t["Action"] && !t["Attack"] {
+		if t.Has(card.TypeAction) && !t.Has(card.TypeAttack) {
 			dmg++
 			break
 		}

@@ -10,7 +10,7 @@ package runeblade
 
 import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 
-var arcanicCrackleTypes = map[string]bool{"Runeblade": true, "Action": true, "Attack": true}
+var arcanicCrackleTypes = card.NewTypeSet(card.TypeRuneblade, card.TypeAction, card.TypeAttack)
 
 type ArcanicCrackleRed struct{}
 
@@ -19,7 +19,7 @@ func (ArcanicCrackleRed) Cost() int                    { return 0 }
 func (ArcanicCrackleRed) Pitch() int                   { return 1 }
 func (ArcanicCrackleRed) Attack() int                  { return 3 }
 func (ArcanicCrackleRed) Defense() int                 { return 3 }
-func (ArcanicCrackleRed) Types() map[string]bool       { return arcanicCrackleTypes }
+func (ArcanicCrackleRed) Types() card.TypeSet       { return arcanicCrackleTypes }
 func (ArcanicCrackleRed) GoAgain() bool                { return false }
 func (c ArcanicCrackleRed) Play(*card.TurnState) int   { return c.Attack() + 1 }
 
@@ -30,7 +30,7 @@ func (ArcanicCrackleYellow) Cost() int                  { return 0 }
 func (ArcanicCrackleYellow) Pitch() int                 { return 2 }
 func (ArcanicCrackleYellow) Attack() int                { return 2 }
 func (ArcanicCrackleYellow) Defense() int               { return 3 }
-func (ArcanicCrackleYellow) Types() map[string]bool     { return arcanicCrackleTypes }
+func (ArcanicCrackleYellow) Types() card.TypeSet     { return arcanicCrackleTypes }
 func (ArcanicCrackleYellow) GoAgain() bool              { return false }
 func (c ArcanicCrackleYellow) Play(*card.TurnState) int { return c.Attack() + 1 }
 
@@ -41,6 +41,6 @@ func (ArcanicCrackleBlue) Cost() int                  { return 0 }
 func (ArcanicCrackleBlue) Pitch() int                 { return 3 }
 func (ArcanicCrackleBlue) Attack() int                { return 1 }
 func (ArcanicCrackleBlue) Defense() int               { return 3 }
-func (ArcanicCrackleBlue) Types() map[string]bool     { return arcanicCrackleTypes }
+func (ArcanicCrackleBlue) Types() card.TypeSet     { return arcanicCrackleTypes }
 func (ArcanicCrackleBlue) GoAgain() bool              { return false }
 func (c ArcanicCrackleBlue) Play(*card.TurnState) int { return c.Attack() + 1 }

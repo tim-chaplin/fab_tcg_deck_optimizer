@@ -15,7 +15,7 @@ package runeblade
 
 import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 
-var condemnToSlaughterTypes = map[string]bool{"Runeblade": true, "Action": true}
+var condemnToSlaughterTypes = card.NewTypeSet(card.TypeRuneblade, card.TypeAction)
 
 type CondemnToSlaughterRed struct{}
 
@@ -24,7 +24,7 @@ func (CondemnToSlaughterRed) Cost() int                  { return 1 }
 func (CondemnToSlaughterRed) Pitch() int                 { return 1 }
 func (CondemnToSlaughterRed) Attack() int                { return 0 }
 func (CondemnToSlaughterRed) Defense() int               { return 3 }
-func (CondemnToSlaughterRed) Types() map[string]bool     { return condemnToSlaughterTypes }
+func (CondemnToSlaughterRed) Types() card.TypeSet     { return condemnToSlaughterTypes }
 func (CondemnToSlaughterRed) GoAgain() bool              { return true }
 func (CondemnToSlaughterRed) Play(s *card.TurnState) int { return condemnToSlaughterBonus(s, 3) }
 
@@ -35,7 +35,7 @@ func (CondemnToSlaughterYellow) Cost() int                  { return 1 }
 func (CondemnToSlaughterYellow) Pitch() int                 { return 2 }
 func (CondemnToSlaughterYellow) Attack() int                { return 0 }
 func (CondemnToSlaughterYellow) Defense() int               { return 3 }
-func (CondemnToSlaughterYellow) Types() map[string]bool     { return condemnToSlaughterTypes }
+func (CondemnToSlaughterYellow) Types() card.TypeSet     { return condemnToSlaughterTypes }
 func (CondemnToSlaughterYellow) GoAgain() bool              { return true }
 func (CondemnToSlaughterYellow) Play(s *card.TurnState) int { return condemnToSlaughterBonus(s, 2) }
 
@@ -46,7 +46,7 @@ func (CondemnToSlaughterBlue) Cost() int                  { return 1 }
 func (CondemnToSlaughterBlue) Pitch() int                 { return 3 }
 func (CondemnToSlaughterBlue) Attack() int                { return 0 }
 func (CondemnToSlaughterBlue) Defense() int               { return 3 }
-func (CondemnToSlaughterBlue) Types() map[string]bool     { return condemnToSlaughterTypes }
+func (CondemnToSlaughterBlue) Types() card.TypeSet     { return condemnToSlaughterTypes }
 func (CondemnToSlaughterBlue) GoAgain() bool              { return true }
 func (CondemnToSlaughterBlue) Play(s *card.TurnState) int { return condemnToSlaughterBonus(s, 1) }
 
@@ -55,10 +55,10 @@ func (CondemnToSlaughterBlue) Play(s *card.TurnState) int { return condemnToSlau
 func condemnToSlaughterBonus(s *card.TurnState, n int) int {
 	for _, pc := range s.CardsRemaining {
 		t := pc.Card.Types()
-		if !t["Runeblade"] {
+		if !t.Has(card.TypeRuneblade) {
 			continue
 		}
-		if t["Attack"] || t["Weapon"] {
+		if t.Has(card.TypeAttack) || t.Has(card.TypeWeapon) {
 			return n
 		}
 	}

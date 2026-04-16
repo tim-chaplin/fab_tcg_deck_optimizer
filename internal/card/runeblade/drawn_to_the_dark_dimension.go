@@ -13,7 +13,7 @@ package runeblade
 
 import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 
-var drawnToTheDarkDimensionTypes = map[string]bool{"Runeblade": true, "Action": true, "Attack": true}
+var drawnToTheDarkDimensionTypes = card.NewTypeSet(card.TypeRuneblade, card.TypeAction, card.TypeAttack)
 
 type DrawnToTheDarkDimensionRed struct{}
 
@@ -22,7 +22,7 @@ func (DrawnToTheDarkDimensionRed) Cost() int                  { return 0 }
 func (DrawnToTheDarkDimensionRed) Pitch() int                 { return 1 }
 func (DrawnToTheDarkDimensionRed) Attack() int                { return 3 }
 func (DrawnToTheDarkDimensionRed) Defense() int               { return 3 }
-func (DrawnToTheDarkDimensionRed) Types() map[string]bool     { return drawnToTheDarkDimensionTypes }
+func (DrawnToTheDarkDimensionRed) Types() card.TypeSet     { return drawnToTheDarkDimensionTypes }
 func (DrawnToTheDarkDimensionRed) GoAgain() bool              { return false }
 func (c DrawnToTheDarkDimensionRed) Play(*card.TurnState) int { return c.Attack() + 3 }
 
@@ -33,7 +33,7 @@ func (DrawnToTheDarkDimensionYellow) Cost() int                  { return 0 }
 func (DrawnToTheDarkDimensionYellow) Pitch() int                 { return 2 }
 func (DrawnToTheDarkDimensionYellow) Attack() int                { return 2 }
 func (DrawnToTheDarkDimensionYellow) Defense() int               { return 3 }
-func (DrawnToTheDarkDimensionYellow) Types() map[string]bool     { return drawnToTheDarkDimensionTypes }
+func (DrawnToTheDarkDimensionYellow) Types() card.TypeSet     { return drawnToTheDarkDimensionTypes }
 func (DrawnToTheDarkDimensionYellow) GoAgain() bool              { return false }
 func (c DrawnToTheDarkDimensionYellow) Play(*card.TurnState) int { return c.Attack() + 3 }
 
@@ -44,6 +44,6 @@ func (DrawnToTheDarkDimensionBlue) Cost() int                  { return 0 }
 func (DrawnToTheDarkDimensionBlue) Pitch() int                 { return 3 }
 func (DrawnToTheDarkDimensionBlue) Attack() int                { return 1 }
 func (DrawnToTheDarkDimensionBlue) Defense() int               { return 3 }
-func (DrawnToTheDarkDimensionBlue) Types() map[string]bool     { return drawnToTheDarkDimensionTypes }
+func (DrawnToTheDarkDimensionBlue) Types() card.TypeSet     { return drawnToTheDarkDimensionTypes }
 func (DrawnToTheDarkDimensionBlue) GoAgain() bool              { return false }
 func (c DrawnToTheDarkDimensionBlue) Play(*card.TurnState) int { return c.Attack() + 3 }

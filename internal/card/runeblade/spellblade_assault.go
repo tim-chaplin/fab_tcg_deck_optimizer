@@ -10,7 +10,7 @@ package runeblade
 
 import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 
-var spellbladeAssaultTypes = map[string]bool{"Runeblade": true, "Action": true, "Attack": true}
+var spellbladeAssaultTypes = card.NewTypeSet(card.TypeRuneblade, card.TypeAction, card.TypeAttack)
 
 type SpellbladeAssaultRed struct{}
 
@@ -19,7 +19,7 @@ func (SpellbladeAssaultRed) Cost() int                  { return 2 }
 func (SpellbladeAssaultRed) Pitch() int                 { return 1 }
 func (SpellbladeAssaultRed) Attack() int                { return 4 }
 func (SpellbladeAssaultRed) Defense() int               { return 3 }
-func (SpellbladeAssaultRed) Types() map[string]bool     { return spellbladeAssaultTypes }
+func (SpellbladeAssaultRed) Types() card.TypeSet        { return spellbladeAssaultTypes }
 func (SpellbladeAssaultRed) GoAgain() bool              { return false }
 func (c SpellbladeAssaultRed) Play(s *card.TurnState) int { s.AuraCreated = true; return c.Attack() + 2 }
 
@@ -30,7 +30,7 @@ func (SpellbladeAssaultYellow) Cost() int                  { return 2 }
 func (SpellbladeAssaultYellow) Pitch() int                 { return 2 }
 func (SpellbladeAssaultYellow) Attack() int                { return 3 }
 func (SpellbladeAssaultYellow) Defense() int               { return 3 }
-func (SpellbladeAssaultYellow) Types() map[string]bool     { return spellbladeAssaultTypes }
+func (SpellbladeAssaultYellow) Types() card.TypeSet        { return spellbladeAssaultTypes }
 func (SpellbladeAssaultYellow) GoAgain() bool              { return false }
 func (c SpellbladeAssaultYellow) Play(s *card.TurnState) int { s.AuraCreated = true; return c.Attack() + 2 }
 
@@ -41,6 +41,6 @@ func (SpellbladeAssaultBlue) Cost() int                  { return 2 }
 func (SpellbladeAssaultBlue) Pitch() int                 { return 3 }
 func (SpellbladeAssaultBlue) Attack() int                { return 2 }
 func (SpellbladeAssaultBlue) Defense() int               { return 3 }
-func (SpellbladeAssaultBlue) Types() map[string]bool     { return spellbladeAssaultTypes }
+func (SpellbladeAssaultBlue) Types() card.TypeSet        { return spellbladeAssaultTypes }
 func (SpellbladeAssaultBlue) GoAgain() bool              { return false }
 func (c SpellbladeAssaultBlue) Play(s *card.TurnState) int { s.AuraCreated = true; return c.Attack() + 2 }

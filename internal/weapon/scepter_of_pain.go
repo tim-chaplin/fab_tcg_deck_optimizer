@@ -13,12 +13,7 @@ package weapon
 
 import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 
-var scepterOfPainTypes = map[string]bool{
-	"Runeblade": true,
-	"Weapon":    true,
-	"Scepter":   true,
-	"1H":        true,
-}
+var scepterOfPainTypes = card.NewTypeSet(card.TypeRuneblade, card.TypeWeapon, card.TypeScepter, card.TypeOneHand)
 
 type ScepterOfPain struct{}
 
@@ -27,7 +22,7 @@ func (ScepterOfPain) Cost() int                    { return 2 }
 func (ScepterOfPain) Pitch() int                   { return 0 }
 func (ScepterOfPain) Attack() int                  { return 2 }
 func (ScepterOfPain) Defense() int                 { return 0 }
-func (ScepterOfPain) Types() map[string]bool       { return scepterOfPainTypes }
+func (ScepterOfPain) Types() card.TypeSet           { return scepterOfPainTypes }
 func (ScepterOfPain) GoAgain() bool                { return false }
 func (ScepterOfPain) Hands() int                   { return 1 }
 func (c ScepterOfPain) Play(s *card.TurnState) int { s.AuraCreated = true; return c.Attack() }

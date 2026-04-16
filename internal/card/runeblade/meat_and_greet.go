@@ -16,7 +16,7 @@ package runeblade
 
 import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 
-var meatAndGreetTypes = map[string]bool{"Runeblade": true, "Action": true, "Attack": true}
+var meatAndGreetTypes = card.NewTypeSet(card.TypeRuneblade, card.TypeAction, card.TypeAttack)
 
 type MeatAndGreetRed struct{}
 
@@ -25,7 +25,7 @@ func (MeatAndGreetRed) Cost() int                    { return 1 }
 func (MeatAndGreetRed) Pitch() int                   { return 1 }
 func (MeatAndGreetRed) Attack() int                  { return 4 }
 func (MeatAndGreetRed) Defense() int                 { return 3 }
-func (MeatAndGreetRed) Types() map[string]bool       { return meatAndGreetTypes }
+func (MeatAndGreetRed) Types() card.TypeSet          { return meatAndGreetTypes }
 func (MeatAndGreetRed) GoAgain() bool                { return true }
 func (c MeatAndGreetRed) Play(s *card.TurnState) int { s.AuraCreated = true; return c.Attack() + 1 }
 
@@ -36,7 +36,7 @@ func (MeatAndGreetYellow) Cost() int                    { return 1 }
 func (MeatAndGreetYellow) Pitch() int                   { return 2 }
 func (MeatAndGreetYellow) Attack() int                  { return 3 }
 func (MeatAndGreetYellow) Defense() int                 { return 3 }
-func (MeatAndGreetYellow) Types() map[string]bool       { return meatAndGreetTypes }
+func (MeatAndGreetYellow) Types() card.TypeSet          { return meatAndGreetTypes }
 func (MeatAndGreetYellow) GoAgain() bool                { return true }
 func (c MeatAndGreetYellow) Play(s *card.TurnState) int { s.AuraCreated = true; return c.Attack() + 1 }
 
@@ -47,6 +47,6 @@ func (MeatAndGreetBlue) Cost() int                    { return 1 }
 func (MeatAndGreetBlue) Pitch() int                   { return 3 }
 func (MeatAndGreetBlue) Attack() int                  { return 2 }
 func (MeatAndGreetBlue) Defense() int                 { return 3 }
-func (MeatAndGreetBlue) Types() map[string]bool       { return meatAndGreetTypes }
+func (MeatAndGreetBlue) Types() card.TypeSet          { return meatAndGreetTypes }
 func (MeatAndGreetBlue) GoAgain() bool                { return true }
 func (c MeatAndGreetBlue) Play(s *card.TurnState) int { s.AuraCreated = true; return c.Attack() + 1 }

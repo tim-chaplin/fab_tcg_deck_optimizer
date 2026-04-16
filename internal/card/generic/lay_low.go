@@ -17,6 +17,6 @@ func (LayLowYellow) Cost() int                { return 0 }
 func (LayLowYellow) Pitch() int               { return 2 }
 func (LayLowYellow) Attack() int              { return 0 }
 func (LayLowYellow) Defense() int             { return 3 }
-func (LayLowYellow) Types() map[string]bool   { return defenseReactionTypes }
+func (LayLowYellow) Types() card.TypeSet      { return defenseReactionTypes }
 func (LayLowYellow) GoAgain() bool            { return false }
 func (LayLowYellow) Play(*card.TurnState) int { return 0 }

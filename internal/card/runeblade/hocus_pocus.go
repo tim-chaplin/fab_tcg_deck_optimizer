@@ -10,7 +10,7 @@ package runeblade
 
 import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 
-var hocusPocusTypes = map[string]bool{"Runeblade": true, "Action": true, "Attack": true}
+var hocusPocusTypes = card.NewTypeSet(card.TypeRuneblade, card.TypeAction, card.TypeAttack)
 
 type HocusPocusRed struct{}
 
@@ -19,7 +19,7 @@ func (HocusPocusRed) Cost() int                  { return 0 }
 func (HocusPocusRed) Pitch() int                 { return 1 }
 func (HocusPocusRed) Attack() int                { return 3 }
 func (HocusPocusRed) Defense() int               { return 3 }
-func (HocusPocusRed) Types() map[string]bool     { return hocusPocusTypes }
+func (HocusPocusRed) Types() card.TypeSet     { return hocusPocusTypes }
 func (HocusPocusRed) GoAgain() bool              { return false }
 func (c HocusPocusRed) Play(s *card.TurnState) int { s.AuraCreated = true; return c.Attack() + 1 }
 
@@ -30,7 +30,7 @@ func (HocusPocusYellow) Cost() int                  { return 0 }
 func (HocusPocusYellow) Pitch() int                 { return 2 }
 func (HocusPocusYellow) Attack() int                { return 2 }
 func (HocusPocusYellow) Defense() int               { return 3 }
-func (HocusPocusYellow) Types() map[string]bool     { return hocusPocusTypes }
+func (HocusPocusYellow) Types() card.TypeSet     { return hocusPocusTypes }
 func (HocusPocusYellow) GoAgain() bool              { return false }
 func (c HocusPocusYellow) Play(s *card.TurnState) int { s.AuraCreated = true; return c.Attack() + 1 }
 
@@ -41,6 +41,6 @@ func (HocusPocusBlue) Cost() int                  { return 0 }
 func (HocusPocusBlue) Pitch() int                 { return 3 }
 func (HocusPocusBlue) Attack() int                { return 1 }
 func (HocusPocusBlue) Defense() int               { return 3 }
-func (HocusPocusBlue) Types() map[string]bool     { return hocusPocusTypes }
+func (HocusPocusBlue) Types() card.TypeSet     { return hocusPocusTypes }
 func (HocusPocusBlue) GoAgain() bool              { return false }
 func (c HocusPocusBlue) Play(s *card.TurnState) int { s.AuraCreated = true; return c.Attack() + 1 }

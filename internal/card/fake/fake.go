@@ -5,7 +5,7 @@ package fake
 
 import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 
-var genericAttackTypes = map[string]bool{"Generic": true, "Action": true, "Attack": true}
+var genericAttackTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeAttack)
 
 // BlueAttack is a generic blue attack action: pitches 3, defends 3, attacks 1, costs 1.
 type BlueAttack struct{}
@@ -15,7 +15,7 @@ func (BlueAttack) Cost() int                  { return 1 }
 func (BlueAttack) Pitch() int                 { return 3 }
 func (BlueAttack) Attack() int                { return 1 }
 func (BlueAttack) Defense() int               { return 3 }
-func (BlueAttack) Types() map[string]bool     { return genericAttackTypes }
+func (BlueAttack) Types() card.TypeSet        { return genericAttackTypes }
 func (BlueAttack) GoAgain() bool              { return true }
 func (c BlueAttack) Play(*card.TurnState) int { return c.Attack() }
 
@@ -27,6 +27,6 @@ func (RedAttack) Cost() int                  { return 1 }
 func (RedAttack) Pitch() int                 { return 1 }
 func (RedAttack) Attack() int                { return 3 }
 func (RedAttack) Defense() int               { return 1 }
-func (RedAttack) Types() map[string]bool     { return genericAttackTypes }
+func (RedAttack) Types() card.TypeSet        { return genericAttackTypes }
 func (RedAttack) GoAgain() bool              { return true }
 func (c RedAttack) Play(*card.TurnState) int { return c.Attack() }

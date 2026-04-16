@@ -12,7 +12,7 @@ type Hero interface {
 	Name() string
 	Health() int
 	Intelligence() int
-	Types() map[string]bool
+	Types() card.TypeSet
 	// OnCardPlayed is invoked by the hand evaluator after each card's Play() resolves and before the
 	// card is appended to s.CardsPlayed. It returns any bonus damage the hero's printed ability
 	// contributes (e.g. Runechant tokens). Heroes without a relevant triggered ability return 0.

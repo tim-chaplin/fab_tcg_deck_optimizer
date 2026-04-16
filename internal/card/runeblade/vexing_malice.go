@@ -10,7 +10,7 @@ package runeblade
 
 import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 
-var vexingMaliceTypes = map[string]bool{"Runeblade": true, "Action": true, "Attack": true}
+var vexingMaliceTypes = card.NewTypeSet(card.TypeRuneblade, card.TypeAction, card.TypeAttack)
 
 type VexingMaliceRed struct{}
 
@@ -19,7 +19,7 @@ func (VexingMaliceRed) Cost() int                  { return 1 }
 func (VexingMaliceRed) Pitch() int                 { return 1 }
 func (VexingMaliceRed) Attack() int                { return 3 }
 func (VexingMaliceRed) Defense() int               { return 3 }
-func (VexingMaliceRed) Types() map[string]bool     { return vexingMaliceTypes }
+func (VexingMaliceRed) Types() card.TypeSet        { return vexingMaliceTypes }
 func (VexingMaliceRed) GoAgain() bool              { return false }
 func (c VexingMaliceRed) Play(*card.TurnState) int { return c.Attack() + 2 }
 
@@ -30,7 +30,7 @@ func (VexingMaliceYellow) Cost() int                  { return 1 }
 func (VexingMaliceYellow) Pitch() int                 { return 2 }
 func (VexingMaliceYellow) Attack() int                { return 2 }
 func (VexingMaliceYellow) Defense() int               { return 3 }
-func (VexingMaliceYellow) Types() map[string]bool     { return vexingMaliceTypes }
+func (VexingMaliceYellow) Types() card.TypeSet        { return vexingMaliceTypes }
 func (VexingMaliceYellow) GoAgain() bool              { return false }
 func (c VexingMaliceYellow) Play(*card.TurnState) int { return c.Attack() + 2 }
 
@@ -41,6 +41,6 @@ func (VexingMaliceBlue) Cost() int                  { return 1 }
 func (VexingMaliceBlue) Pitch() int                 { return 3 }
 func (VexingMaliceBlue) Attack() int                { return 1 }
 func (VexingMaliceBlue) Defense() int               { return 3 }
-func (VexingMaliceBlue) Types() map[string]bool     { return vexingMaliceTypes }
+func (VexingMaliceBlue) Types() card.TypeSet        { return vexingMaliceTypes }
 func (VexingMaliceBlue) GoAgain() bool              { return false }
 func (c VexingMaliceBlue) Play(*card.TurnState) int { return c.Attack() + 2 }

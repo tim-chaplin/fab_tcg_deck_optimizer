@@ -14,7 +14,7 @@ package runeblade
 
 import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 
-var runicFellingsongTypes = map[string]bool{"Runeblade": true, "Action": true, "Attack": true}
+var runicFellingsongTypes = card.NewTypeSet(card.TypeRuneblade, card.TypeAction, card.TypeAttack)
 
 type RunicFellingsongRed struct{}
 
@@ -23,7 +23,7 @@ func (RunicFellingsongRed) Cost() int                  { return 3 }
 func (RunicFellingsongRed) Pitch() int                 { return 1 }
 func (RunicFellingsongRed) Attack() int                { return 7 }
 func (RunicFellingsongRed) Defense() int               { return 3 }
-func (RunicFellingsongRed) Types() map[string]bool     { return runicFellingsongTypes }
+func (RunicFellingsongRed) Types() card.TypeSet        { return runicFellingsongTypes }
 func (RunicFellingsongRed) GoAgain() bool              { return false }
 func (c RunicFellingsongRed) Play(*card.TurnState) int { return c.Attack() + 1 }
 
@@ -34,7 +34,7 @@ func (RunicFellingsongYellow) Cost() int                  { return 3 }
 func (RunicFellingsongYellow) Pitch() int                 { return 2 }
 func (RunicFellingsongYellow) Attack() int                { return 6 }
 func (RunicFellingsongYellow) Defense() int               { return 3 }
-func (RunicFellingsongYellow) Types() map[string]bool     { return runicFellingsongTypes }
+func (RunicFellingsongYellow) Types() card.TypeSet        { return runicFellingsongTypes }
 func (RunicFellingsongYellow) GoAgain() bool              { return false }
 func (c RunicFellingsongYellow) Play(*card.TurnState) int { return c.Attack() + 1 }
 
@@ -45,6 +45,6 @@ func (RunicFellingsongBlue) Cost() int                  { return 3 }
 func (RunicFellingsongBlue) Pitch() int                 { return 3 }
 func (RunicFellingsongBlue) Attack() int                { return 5 }
 func (RunicFellingsongBlue) Defense() int               { return 3 }
-func (RunicFellingsongBlue) Types() map[string]bool     { return runicFellingsongTypes }
+func (RunicFellingsongBlue) Types() card.TypeSet        { return runicFellingsongTypes }
 func (RunicFellingsongBlue) GoAgain() bool              { return false }
 func (c RunicFellingsongBlue) Play(*card.TurnState) int { return c.Attack() + 1 }

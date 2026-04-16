@@ -17,7 +17,7 @@ func (SinkBelowRed) Cost() int                { return 0 }
 func (SinkBelowRed) Pitch() int               { return 1 }
 func (SinkBelowRed) Attack() int              { return 0 }
 func (SinkBelowRed) Defense() int             { return 4 }
-func (SinkBelowRed) Types() map[string]bool   { return defenseReactionTypes }
+func (SinkBelowRed) Types() card.TypeSet      { return defenseReactionTypes }
 func (SinkBelowRed) GoAgain() bool            { return false }
 func (SinkBelowRed) Play(*card.TurnState) int { return 0 }
 
@@ -28,7 +28,7 @@ func (SinkBelowYellow) Cost() int                { return 0 }
 func (SinkBelowYellow) Pitch() int               { return 2 }
 func (SinkBelowYellow) Attack() int              { return 0 }
 func (SinkBelowYellow) Defense() int             { return 3 }
-func (SinkBelowYellow) Types() map[string]bool   { return defenseReactionTypes }
+func (SinkBelowYellow) Types() card.TypeSet      { return defenseReactionTypes }
 func (SinkBelowYellow) GoAgain() bool            { return false }
 func (SinkBelowYellow) Play(*card.TurnState) int { return 0 }
 
@@ -39,6 +39,6 @@ func (SinkBelowBlue) Cost() int                { return 0 }
 func (SinkBelowBlue) Pitch() int               { return 3 }
 func (SinkBelowBlue) Attack() int              { return 0 }
 func (SinkBelowBlue) Defense() int             { return 2 }
-func (SinkBelowBlue) Types() map[string]bool   { return defenseReactionTypes }
+func (SinkBelowBlue) Types() card.TypeSet      { return defenseReactionTypes }
 func (SinkBelowBlue) GoAgain() bool            { return false }
 func (SinkBelowBlue) Play(*card.TurnState) int { return 0 }

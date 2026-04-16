@@ -17,7 +17,7 @@ type stubHero struct{}
 func (stubHero) Name() string                          { return "stubHero" }
 func (stubHero) Health() int                           { return 20 }
 func (stubHero) Intelligence() int                     { return 4 }
-func (stubHero) Types() map[string]bool                { return map[string]bool{} }
+func (stubHero) Types() card.TypeSet                   { return 0 }
 func (stubHero) OnCardPlayed(card.Card, *card.TurnState) int { return 0 }
 
 func TestBest_AllRedHand(t *testing.T) {
@@ -247,7 +247,7 @@ func (grantAll) Cost() int              { return 0 }
 func (grantAll) Pitch() int              { return 0 }
 func (grantAll) Attack() int            { return 0 }
 func (grantAll) Defense() int           { return 0 }
-func (grantAll) Types() map[string]bool { return map[string]bool{"Runeblade": true, "Action": true, "Attack": true} }
+func (grantAll) Types() card.TypeSet    { return card.NewTypeSet(card.TypeRuneblade, card.TypeAction, card.TypeAttack) }
 func (grantAll) GoAgain() bool          { return true }
 func (grantAll) Play(s *card.TurnState) int {
 	for _, pc := range s.CardsRemaining {
@@ -268,7 +268,7 @@ func (grantSpy) Cost() int                { return 0 }
 func (grantSpy) Pitch() int               { return 0 }
 func (grantSpy) Attack() int              { return 0 }
 func (grantSpy) Defense() int             { return 0 }
-func (grantSpy) Types() map[string]bool   { return map[string]bool{"Runeblade": true, "Action": true, "Attack": true} }
+func (grantSpy) Types() card.TypeSet      { return card.NewTypeSet(card.TypeRuneblade, card.TypeAction, card.TypeAttack) }
 func (grantSpy) GoAgain() bool            { return true }
 func (g grantSpy) Play(s *card.TurnState) int {
 	if len(s.CardsPlayed) != 0 {
