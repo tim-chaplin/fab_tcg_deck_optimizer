@@ -43,15 +43,41 @@ This is a work in progress. The current model is deliberately narrow:
 
 ## Usage
 
+`fabsim` has three run modes, selected with `-mode`:
+
+- **`random`** (default) — two-phase search. Generates `-decks` random decks and evaluates each
+  shallowly (`-shallow-shuffles` shuffles); takes the top `-top-n` and re-evaluates them with more
+  shuffles (`-deep-shuffles`). Writes the winner to `-out` if it beats whatever's already there.
+- **`iterate`** — loads the deck at `-out` and hill-climbs on it: repeatedly mutates one card,
+  re-evaluates, and saves whenever a mutation improves. Press Enter to stop. Requires a saved deck
+  to exist — run `random` first.
+- **`print_only`** — prints the deck at `-out` without running any simulation.
+
+### Suggested workflow
+
+Start with a wide random search to seed `best_deck.json`, then hill-climb from there:
+
 ```
-go run ./cmd/fabsim -shuffles=10000 -incoming=4
+go run ./cmd/fabsim -mode=random  -decks=10000 -shallow-shuffles=10 -top-n=100 -deep-shuffles=1000
+go run ./cmd/fabsim -mode=iterate -deep-shuffles=1000
 ```
 
-Flags:
+`random` explores the space; `iterate` refines the best find. Re-run either stage as often as you
+like — each run only overwrites `best_deck.json` if it finds something better.
 
-- `-shuffles` — number of shuffles (default 10000)
+### Flags
+
+- `-mode` — `random`, `iterate`, or `print_only` (default `random`)
+- `-decks` — number of random decks to generate in phase 1 of `random` (default 10000)
+- `-shallow-shuffles` — shuffles per deck in phase 1 wide search (default 10)
+- `-top-n` — number of phase-1 decks to advance to phase 2 (default 100)
+- `-deep-shuffles` — shuffles per deck in phase 2 deep eval (also used per mutation in `iterate`)
+  (default 1000)
 - `-incoming` — opponent damage per turn (default 4)
+- `-deck-size` — cards per deck (default 40)
+- `-max-copies` — max copies of any single card printing (default 2)
 - `-seed` — RNG seed (default: time-based)
+- `-out` — path to read/write the best deck JSON (default `best_deck.json`)
 
 Helper tool for exploring the upstream card database:
 
