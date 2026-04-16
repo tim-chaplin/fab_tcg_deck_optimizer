@@ -90,7 +90,11 @@ func printBestDeck(d *deck.Deck) {
 	}
 	fmt.Printf("  Pitch:   %d red / %d yellow / %d blue\n", red, yellow, blue)
 	if b := s.Best; b.Hand != nil {
-		fmt.Printf("  Best hand seen (value %d): %s\n", b.Play.Value, hand.FormatRoles(b.Hand, b.Play.Roles))
+		line := hand.FormatRoles(b.Hand, b.Play.Roles)
+		for _, w := range b.Play.Weapons {
+			line += ", " + w + ": ATTACK"
+		}
+		fmt.Printf("  Best hand seen (value %d): %s\n", b.Play.Value, line)
 	}
 	fmt.Println()
 	fmt.Println("Card list:")

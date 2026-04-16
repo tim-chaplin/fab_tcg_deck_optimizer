@@ -28,6 +28,9 @@ const (
 // consumed only for their damage contribution.)
 type Play struct {
 	Roles []Role
+	// Weapons holds the names of equipped weapons that were swung in the optimal attack sequence,
+	// in the order they appear in the input weapons slice. Empty if no weapon was swung.
+	Weapons []string
 	// Value is the play's total score (damage dealt + damage prevented). The breakdown is not
 	// tracked on Play directly — a future stats object may reintroduce it.
 	Value int
@@ -88,10 +91,15 @@ func Best(hero hero.Hero, weapons []weapon.Weapon, hand []card.Card, incomingDam
 		cached, hit := memo[key]
 		memoMu.RUnlock()
 		if hit {
-			// Clone Roles so callers can't mutate the cached slice.
+			// Clone Roles and Weapons so callers can't mutate the cached slices.
 			roles := make([]Role, len(cached.Roles))
 			copy(roles, cached.Roles)
-			return Play{Roles: roles, Value: cached.Value}
+			var ws []string
+			if len(cached.Weapons) > 0 {
+				ws = make([]string, len(cached.Weapons))
+				copy(ws, cached.Weapons)
+			}
+			return Play{Roles: roles, Weapons: ws, Value: cached.Value}
 		}
 	}
 	result := bestUncached(hero, weapons, hand, incomingDamage, deck)
@@ -213,12 +221,13 @@ func evalPartition(hero hero.Hero, weapons []weapon.Weapon, hand []card.Card, ro
 	}
 	prevented := preventedDamage(defenders, incoming)
 	defenseDealt := defenseReactionDamage(defenders, pitched, deck)
-	attackDealt := bestAttackWithWeapons(hero, weapons, attackers, pitched, deck)
+	attackDealt, swung := bestAttackWithWeapons(hero, weapons, attackers, pitched, deck)
 
 	v := attackDealt + defenseDealt + prevented
 	if v > best.Value {
 		best.Value = v
 		copy(best.Roles, roles)
+		best.Weapons = swung
 	}
 }
 
@@ -268,15 +277,19 @@ func defenseReactionDamage(defenders, pitched, deck []card.Card) int {
 }
 
 // bestAttackWithWeapons enumerates every subset of `weapons` to swing alongside `attackers` and
-// returns the max damage over all (affordable) weapon masks. Each selected weapon adds its Cost
-// and joins the attacker permutation inside bestAttackDamage.
-func bestAttackWithWeapons(hero hero.Hero, weapons []weapon.Weapon, attackers, pitched, deck []card.Card) int {
+// returns the max damage over all (affordable) weapon masks, plus the swung weapons from the
+// winning mask (in input order). Each selected weapon adds its Cost and joins the attacker
+// permutation inside bestAttackDamage.
+func bestAttackWithWeapons(hero hero.Hero, weapons []weapon.Weapon, attackers, pitched, deck []card.Card) (int, []string) {
 	best := 0
+	var bestSwung []string
 	for mask := 0; mask < 1<<len(weapons); mask++ {
 		allAttackers := append([]card.Card(nil), attackers...)
+		var swung []string
 		for i, w := range weapons {
 			if mask&(1<<i) != 0 {
 				allAttackers = append(allAttackers, w)
+				swung = append(swung, w.Name())
 			}
 		}
 		if !canAfford(pitched, allAttackers) {
@@ -284,9 +297,10 @@ func bestAttackWithWeapons(hero hero.Hero, weapons []weapon.Weapon, attackers, p
 		}
 		if dealt := bestAttackDamage(hero, allAttackers, pitched, deck); dealt > best {
 			best = dealt
+			bestSwung = swung
 		}
 	}
-	return best
+	return best, bestSwung
 }
 
 // bestAttackDamage tries every ordering of attackers and returns the max total damage after Play

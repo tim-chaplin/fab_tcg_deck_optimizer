@@ -180,9 +180,14 @@ func (d *Deck) Evaluate(runs int, incomingDamage int, rng *rand.Rand) Stats {
 				copy(handCopy, h)
 				rolesCopy := make([]hand.Role, len(play.Roles))
 				copy(rolesCopy, play.Roles)
+				var weaponsCopy []string
+				if len(play.Weapons) > 0 {
+					weaponsCopy = make([]string, len(play.Weapons))
+					copy(weaponsCopy, play.Weapons)
+				}
 				d.Stats.Best = BestHand{
 					Hand: handCopy,
-					Play: hand.Play{Roles: rolesCopy, Value: play.Value},
+					Play: hand.Play{Roles: rolesCopy, Weapons: weaponsCopy, Value: play.Value},
 				}
 			}
 			switch handIdx / handsPerCycle {
