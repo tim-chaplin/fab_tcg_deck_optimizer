@@ -3,9 +3,7 @@ package hand
 
 import (
 	"sort"
-	"strconv"
 	"strings"
-	"sync"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/cards"
@@ -83,20 +81,15 @@ func Best(hero hero.Hero, weapons []weapon.Weapon, hand []card.Card, incomingDam
 
 	// Unmemoable hands skip the cache read but still write — the stale entry is harmless since
 	// future unmemoable lookups will skip the read too.
-	key := formatMemoKey(hero, weapons, ids, incomingDamage)
+	key := makeMemoKey(hero, weapons, ids, incomingDamage)
 	if isMemoable(hand) {
-		memoMu.RLock()
-		cached, hit := memo[key]
-		memoMu.RUnlock()
-		if hit {
+		if cached, hit := memo[key]; hit {
 			// Returned Play aliases the cached slices — callers must not mutate Roles or Weapons.
 			return cached
 		}
 	}
 	result := bestUncached(hero, weapons, hand, incomingDamage, deck)
-	memoMu.Lock()
 	memo[key] = result
-	memoMu.Unlock()
 	return result
 }
 
@@ -139,35 +132,40 @@ func (h *handByID) Swap(i, j int) {
 	h.hand[i], h.hand[j] = h.hand[j], h.hand[i]
 }
 
-// memo caches canonical-order results keyed by formatMemoKey.
-var (
-	memoMu sync.RWMutex
-	memo   = map[string]Play{}
-)
+// memoKey is a comparable struct used as the map key for memo — avoids the string allocations
+// that a formatted key would require on every hand evaluation. Hand size is capped at 8 cards;
+// weapon count at 2.
+type memoKey struct {
+	hero      string
+	weapon0   string
+	weapon1   string
+	cardIDs   [8]cards.ID
+	cardCount uint8
+	incoming  int
+}
 
-// formatMemoKey serializes the canonical key fields into a string. The hand must already be
-// sorted by card ID; weapon names are sorted here.
-func formatMemoKey(hero hero.Hero, weapons []weapon.Weapon, sortedIDs []cards.ID, incoming int) string {
-	wnames := make([]string, len(weapons))
-	for i, w := range weapons {
-		wnames[i] = w.Name()
-	}
-	sort.Strings(wnames)
+// memo caches canonical-order results keyed by memoKey. Not goroutine-safe — the simulator is
+// single-threaded so no lock is needed.
+var memo = map[memoKey]Play{}
 
-	var b strings.Builder
-	b.WriteString(hero.Name())
-	b.WriteByte('|')
-	b.WriteString(strings.Join(wnames, ","))
-	b.WriteByte('|')
+// makeMemoKey builds a comparable memo key. The hand must already be sorted by card ID; weapon
+// names are sorted lexicographically into the two fixed slots.
+func makeMemoKey(hero hero.Hero, weapons []weapon.Weapon, sortedIDs []cards.ID, incoming int) memoKey {
+	k := memoKey{hero: hero.Name(), incoming: incoming, cardCount: uint8(len(sortedIDs))}
 	for i, id := range sortedIDs {
-		if i > 0 {
-			b.WriteByte(',')
-		}
-		b.WriteString(strconv.FormatUint(uint64(id), 10))
+		k.cardIDs[i] = id
 	}
-	b.WriteByte('|')
-	b.WriteString(strconv.Itoa(incoming))
-	return b.String()
+	switch len(weapons) {
+	case 1:
+		k.weapon0 = weapons[0].Name()
+	case 2:
+		a, b := weapons[0].Name(), weapons[1].Name()
+		if a > b {
+			a, b = b, a
+		}
+		k.weapon0, k.weapon1 = a, b
+	}
+	return k
 }
 
 func bestUncached(hero hero.Hero, weapons []weapon.Weapon, hand []card.Card, incomingDamage int, deck []card.Card) Play {
@@ -274,8 +272,11 @@ func defenseReactionDamage(defenders, pitched, deck []card.Card) int {
 func bestAttackWithWeapons(hero hero.Hero, weapons []weapon.Weapon, attackers, pitched, deck []card.Card) (int, []string) {
 	best := 0
 	var bestSwung []string
+	// Pre-allocate a buffer large enough for attackers + all weapons to avoid per-mask allocation.
+	buf := make([]card.Card, len(attackers), len(attackers)+len(weapons))
+	copy(buf, attackers)
 	for mask := 0; mask < 1<<len(weapons); mask++ {
-		allAttackers := append([]card.Card(nil), attackers...)
+		allAttackers := buf[:len(attackers)]
 		var swung []string
 		for i, w := range weapons {
 			if mask&(1<<i) != 0 {
@@ -299,45 +300,58 @@ func bestAttackWithWeapons(hero hero.Hero, weapons []weapon.Weapon, attackers, p
 // the hero's OnCardPlayed hook fires so triggered abilities (e.g. Viserai's Runechants)
 // contribute.
 //
-// Each permutation gets its own freshly-allocated []*PlayedCard so that any grants applied via
-// CardsRemaining mutation don't leak across permutations.
+// Buffers for PlayedCard wrappers and CardsPlayed are pre-allocated once and reset per
+// permutation so that grants applied via CardsRemaining don't leak across orderings.
 func bestAttackDamage(hero hero.Hero, attackers, pitched, deck []card.Card) int {
-	if len(attackers) == 0 {
+	n := len(attackers)
+	if n == 0 {
 		return 0
 	}
-	perm := make([]card.Card, len(attackers))
+	perm := make([]card.Card, n)
 	copy(perm, attackers)
+
+	// Pre-allocate buffers reused across all permutations, including the TurnState (which the
+	// compiler would otherwise heap-allocate each call since &state escapes through interface
+	// methods).
+	pcBuf := make([]card.PlayedCard, n)
+	ptrBuf := make([]*card.PlayedCard, n)
+	cardsPlayedBuf := make([]card.Card, 0, n)
+	state := &card.TurnState{}
+
 	best := 0
 	permute(perm, 0, func(order []card.Card) {
-		if dmg, legal := playSequence(hero, pitched, deck, order); legal && dmg > best {
+		if dmg, legal := playSequence(hero, pitched, deck, order, pcBuf, ptrBuf, cardsPlayedBuf, state); legal && dmg > best {
 			best = dmg
 		}
 	})
 	return best
 }
 
-// playSequence plays `order` as an attack chain and returns the total damage dealt plus whether
-// the ordering is legal (every non-final card has Go Again). Each call allocates fresh
-// *PlayedCard wrappers so nothing leaks back to the caller.
-func playSequence(hero hero.Hero, pitched, deck, order []card.Card) (damage int, legal bool) {
-	played := make([]*card.PlayedCard, len(order))
+// playSequence plays `order` as an attack chain, reusing caller-provided buffers to avoid
+// per-permutation heap allocation. pcBuf and ptrBuf must be at least len(order); cardsPlayedBuf
+// is reset to length 0 each call. state is reset and reused each call. The buffers are mutated
+// in place; the caller must not read them concurrently.
+func playSequence(hero hero.Hero, pitched, deck, order []card.Card, pcBuf []card.PlayedCard, ptrBuf []*card.PlayedCard, cardsPlayedBuf []card.Card, state *card.TurnState) (damage int, legal bool) {
+	n := len(order)
 	for i, c := range order {
-		played[i] = &card.PlayedCard{Card: c}
+		pcBuf[i] = card.PlayedCard{Card: c}
+		ptrBuf[i] = &pcBuf[i]
 	}
-	state := card.TurnState{Pitched: pitched, Deck: deck}
-	legal = true
+	played := ptrBuf[:n]
+	*state = card.TurnState{Pitched: pitched, Deck: deck, CardsPlayed: cardsPlayedBuf[:0]}
 	for i, pc := range played {
 		state.CardsRemaining = played[i+1:]
 		state.Self = pc
-		damage += pc.Card.Play(&state)
-		damage += hero.OnCardPlayed(pc.Card, &state)
+		damage += pc.Card.Play(state)
+		damage += hero.OnCardPlayed(pc.Card, state)
 		state.CardsPlayed = append(state.CardsPlayed, pc.Card)
-		if i < len(played)-1 && !pc.EffectiveGoAgain() {
-			legal = false
+		if i < n-1 && !pc.EffectiveGoAgain() {
+			return 0, false
 		}
 	}
-	return
+	return damage, true
 }
+
 
 func permute(a []card.Card, k int, emit func([]card.Card)) {
 	if k == len(a)-1 {
