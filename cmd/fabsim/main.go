@@ -177,7 +177,7 @@ func runIterate(cfg config) {
 			round, len(mutations), bestAvg)
 
 		improved := false
-		for i, cand := range mutations {
+		for i, mut := range mutations {
 			select {
 			case <-stop:
 				fmt.Fprintf(os.Stderr, "\nAborted mid-round after %d rounds / %d improvements in %s\n",
@@ -188,13 +188,13 @@ func runIterate(cfg config) {
 			default:
 			}
 
-			d := deck.New(cand.Hero, cand.Weapons, cand.Cards)
+			d := deck.New(mut.Deck.Hero, mut.Deck.Weapons, mut.Deck.Cards)
 			stats := d.Evaluate(cfg.deepShuffles, cfg.incoming, rng)
 			avg := stats.Avg()
 			if avg > bestAvg {
 				improvements++
-				fmt.Fprintf(os.Stderr, "\r[round %d] improvement at %d/%d: %.3f → %.3f, restarting        \n",
-					round, i+1, len(mutations), bestAvg, avg)
+				fmt.Fprintf(os.Stderr, "\r[round %d] improvement at %d/%d: %.3f → %.3f (%s), restarting        \n",
+					round, i+1, len(mutations), bestAvg, avg, mut.Description)
 				bestAvg = avg
 				best = d
 				if data, err := deckio.Marshal(best); err == nil {
