@@ -3,13 +3,10 @@
 // Text: "When Deathly Duet attacks, if an attack action card was pitched to play it, it gains
 // +2{p}. If a 'non-attack' action card was pitched to play it, create 2 Runechant tokens."
 //
-// Simplifications:
-//   - Both riders scan Pitched (we don't track which pitched card paid for which play; any attack
-//     in Pitched satisfies the +2{p} branch, any non-attack action satisfies the runechant branch,
-//     and both can fire if both kinds were pitched).
-//   - The 2 Runechants are counted as +2 flat damage only if another attack (card OR weapon)
-//     follows in CardsRemaining; otherwise the runechants fizzle at end of turn. AuraCreated is
-//     set in the same case so following aura-conditional cards (e.g. Shrill of Skullform) see it.
+// Simplification: both riders scan Pitched (we don't track which pitched card paid for which
+// play; any attack in Pitched satisfies the +2{p} branch, any non-attack action satisfies the
+// runechant branch, and both can fire if both kinds were pitched). The 2 Runechants enter state
+// via CreateRunechants — they fire on Deathly Duet's own attack resolution downstream.
 //
 // Source: github.com/the-fab-cube/flesh-and-blood-cards (card.csv).
 
@@ -71,21 +68,11 @@ func deathlyDuetPlay(base int, s *card.TurnState) int {
 	if attackPitched {
 		dmg += 2
 	}
-	if nonAttackActionPitched && hasFollowingAttack(s) {
-		dmg += s.CreateRunechants(2) // two Runechants, each dealing 1 when the next attack hits.
+	if nonAttackActionPitched {
+		// Two Runechants enter during Deathly Duet's own attack resolution; they fire on that
+		// same attack (the solver's consume-on-attack step) for +2 damage. No need to guard on a
+		// following attack existing — Deathly Duet itself is the attack.
+		s.CreateRunechants(2)
 	}
 	return dmg
-}
-
-// hasFollowingAttack reports whether any card in CardsRemaining is an attack — either an attack
-// action card (Types["Attack"]) or a weapon (Types["Weapon"]). Used to decide whether a Runechant
-// created by the current attack will land before end of turn.
-func hasFollowingAttack(s *card.TurnState) bool {
-	for _, pc := range s.CardsRemaining {
-		t := pc.Card.Types()
-		if t.Has(card.TypeAttack) || t.Has(card.TypeWeapon) {
-			return true
-		}
-	}
-	return false
 }

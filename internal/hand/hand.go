@@ -28,6 +28,10 @@ type Play struct {
 	// Value is the play's total score (damage dealt + damage prevented). The breakdown is not
 	// tracked on Play directly — a future stats object may reintroduce it.
 	Value int
+	// LeftoverRunechants is the number of Runechant tokens in play at the end of the chosen
+	// chain, which carry into the next turn's Best call. For partitions with no attacks, this
+	// equals the carryover the caller passed in.
+	LeftoverRunechants int
 }
 
 // String returns a human-readable role name ("PITCH", "ATTACK", "DEFEND").
@@ -74,11 +78,16 @@ func FormatRoles(hand []card.Card, roles []Role) string {
 // subset of weapons to swing and every ordering of the combined attacker list. For N=4 with 0–2
 // weapons that remains well under 10k evaluations.
 //
-// Results are memoized on (hero name, sorted weapon names, sorted card IDs, incomingDamage) so
-// that repeated evaluations of the same hand across shuffles short-circuit. The hand is sorted
-// in place into canonical order first — Roles in the returned Play align with that post-sort
-// order. Every card in the hand must be registered in package cards; Best panics otherwise.
-func Best(hero hero.Hero, weapons []weapon.Weapon, hand []card.Card, incomingDamage int, deck []card.Card) Play {
+// Results are memoized on (hero name, sorted weapon names, sorted card IDs, incomingDamage,
+// runechantCarryover) so that repeated evaluations of the same hand across shuffles
+// short-circuit. The hand is sorted in place into canonical order first — Roles in the returned
+// Play align with that post-sort order. Every card in the hand must be registered in package
+// cards; Best panics otherwise.
+//
+// runechantCarryover is the number of Runechant tokens carrying in from the previous turn. The
+// returned Play.Leftover is the count remaining at end of the chosen chain, which the caller
+// should feed back as the next turn's carryover.
+func Best(hero hero.Hero, weapons []weapon.Weapon, hand []card.Card, incomingDamage int, deck []card.Card, runechantCarryover int) Play {
 	// Fetch IDs into a fixed-size stack array to avoid a per-call slice allocation. Hand size is
 	// capped at 8 (matches memoKey.cardIDs); larger hands panic out of the inner loops elsewhere.
 	n := len(hand)
@@ -102,14 +111,14 @@ func Best(hero hero.Hero, weapons []weapon.Weapon, hand []card.Card, incomingDam
 
 	// Unmemoable hands skip the cache read but still write — the stale entry is harmless since
 	// future unmemoable lookups will skip the read too.
-	key := makeMemoKey(hero, weapons, &ids, n, incomingDamage)
+	key := makeMemoKey(hero, weapons, &ids, n, incomingDamage, runechantCarryover)
 	if memoable {
 		if cached, hit := memo[key]; hit {
 			// Returned Play aliases the cached slices — callers must not mutate Roles or Weapons.
 			return cached
 		}
 	}
-	result := bestUncached(hero, weapons, hand, incomingDamage, deck)
+	result := bestUncached(hero, weapons, hand, incomingDamage, deck, runechantCarryover)
 	memo[key] = result
 	return result
 }
@@ -118,11 +127,12 @@ func Best(hero hero.Hero, weapons []weapon.Weapon, hand []card.Card, incomingDam
 // weapon count at 2. Weapons reference by card.ID (not name) so map hashing and equality only
 // touch fixed-size integer fields plus one hero name — no string hashing per card.
 type memoKey struct {
-	hero      string
-	weaponIDs [2]card.ID
-	cardIDs   [8]card.ID
-	cardCount uint8
-	incoming  int
+	hero               string
+	weaponIDs          [2]card.ID
+	cardIDs            [8]card.ID
+	cardCount          uint8
+	incoming           int
+	runechantCarryover int
 }
 
 // memo caches canonical-order results keyed by memoKey. Not goroutine-safe — the simulator is
@@ -132,8 +142,8 @@ var memo = map[memoKey]Play{}
 // makeMemoKey builds a comparable memo key. The hand must already be sorted by card ID; weapon
 // IDs are sorted numerically into the two fixed slots. sortedIDs is passed as a pointer to the
 // caller's [8]card.ID stack array to avoid a slice-header escape.
-func makeMemoKey(hero hero.Hero, weapons []weapon.Weapon, sortedIDs *[8]card.ID, n int, incoming int) memoKey {
-	k := memoKey{hero: hero.Name(), incoming: incoming, cardCount: uint8(n), cardIDs: *sortedIDs}
+func makeMemoKey(hero hero.Hero, weapons []weapon.Weapon, sortedIDs *[8]card.ID, n int, incoming int, runechantCarryover int) memoKey {
+	k := memoKey{hero: hero.Name(), incoming: incoming, runechantCarryover: runechantCarryover, cardCount: uint8(n), cardIDs: *sortedIDs}
 	switch len(weapons) {
 	case 1:
 		k.weaponIDs[0] = weapons[0].ID()
@@ -245,9 +255,11 @@ func getAttackBufs(handSize int, weapons []weapon.Weapon) *attackBufs {
 	return cachedBufs
 }
 
-func bestUncached(hero hero.Hero, weapons []weapon.Weapon, hand []card.Card, incomingDamage int, deck []card.Card) Play {
+func bestUncached(hero hero.Hero, weapons []weapon.Weapon, hand []card.Card, incomingDamage int, deck []card.Card, runechantCarryover int) Play {
 	n := len(hand)
-	best := Play{Roles: make([]Role, n)}
+	// Seed best.LeftoverRunechants with the carryover — partitions with no attacks don't reduce
+	// the count, so carryover is the natural baseline to beat.
+	best := Play{Roles: make([]Role, n), LeftoverRunechants: runechantCarryover}
 
 	// bufs is the pooled scratch space for this deck evaluation (see getAttackBufs).
 	bufs := getAttackBufs(n, weapons)
@@ -278,8 +290,10 @@ func bestUncached(hero hero.Hero, weapons []weapon.Weapon, hand []card.Card, inc
 	attackers := bufs.attackersBuf
 	defenders := bufs.defendersBuf
 
-	var recurse func(i, pitchSum, costSum, defenseSum int)
-	recurse = func(i, pitchSum, costSum, defenseSum int) {
+	// recurse tracks defenderCostSum separately so the leaf can hand the attack pipeline a
+	// resource budget of (pitchSum - defenderCostSum) to deduct chain-card effective costs from.
+	var recurse func(i, pitchSum, costSum, defenseSum, defenderCostSum int)
+	recurse = func(i, pitchSum, costSum, defenseSum, defenderCostSum int) {
 		if i == n {
 			if pitchSum < costSum {
 				return
@@ -297,13 +311,17 @@ func bestUncached(hero hero.Hero, weapons []weapon.Weapon, hand []card.Card, inc
 			} else {
 				p, a = groupPitchAttack(hand, roles, pitched[:0], attackers[:0])
 			}
-			attackDealt, swung := bestAttackWithWeapons(hero, weapons, a, p, deck, bufs, pitchSum, costSum)
+			attackDealt, leftoverRunechants, swung := bestAttackWithWeapons(hero, weapons, a, p, deck, bufs, pitchSum, costSum, defenderCostSum, runechantCarryover)
 
 			v := attackDealt + defenseDealt + prevented
-			if v > best.Value {
+			// Prefer higher Value; on ties prefer more leftover runechants — they're future
+			// damage on the next turn, so they're strictly additional value over the carryover
+			// baseline even when this turn's Value doesn't differentiate.
+			if v > best.Value || (v == best.Value && leftoverRunechants > best.LeftoverRunechants) {
 				best.Value = v
 				copy(best.Roles, roles)
 				best.Weapons = swung
+				best.LeftoverRunechants = leftoverRunechants
 			}
 			return
 		}
@@ -311,18 +329,18 @@ func bestUncached(hero hero.Hero, weapons []weapon.Weapon, hand []card.Card, inc
 			roles[i] = r
 			switch r {
 			case Pitch:
-				recurse(i+1, pitchSum+pitchVals[i], costSum, defenseSum)
+				recurse(i+1, pitchSum+pitchVals[i], costSum, defenseSum, defenderCostSum)
 			case Attack:
-				recurse(i+1, pitchSum, costSum+costVals[i], defenseSum)
+				recurse(i+1, pitchSum, costSum+costVals[i], defenseSum, defenderCostSum)
 			case Defend:
 				// Plain blocking (any card's Defense used to absorb damage) costs nothing.
 				// Defense Reactions must have their Cost paid to resolve — defendCostVals carries
 				// that cost for reaction cards and is zero otherwise.
-				recurse(i+1, pitchSum, costSum+defendCostVals[i], defenseSum+defenseVals[i])
+				recurse(i+1, pitchSum, costSum+defendCostVals[i], defenseSum+defenseVals[i], defenderCostSum+defendCostVals[i])
 			}
 		}
 	}
-	recurse(0, 0, 0, 0)
+	recurse(0, 0, 0, 0, 0)
 	return best
 }
 
@@ -405,11 +423,18 @@ func defenseReactionDamage(defenders, pitched, deck []card.Card, state *card.Tur
 }
 
 // bestAttackWithWeapons enumerates every subset of `weapons` to swing alongside `attackers` and
-// returns the max damage over all (affordable) weapon masks, plus the swung weapons from the
-// winning mask (in input order). Each selected weapon adds its Cost and joins the attacker
-// permutation inside bestAttackDamage.
-func bestAttackWithWeapons(hero hero.Hero, weapons []weapon.Weapon, attackers, pitched, deck []card.Card, bufs *attackBufs, pitchSum, costSum int) (int, []string) {
+// returns the max damage over all (affordable) weapon masks, plus the runechant leftover from
+// that winning mask and the swung weapons (in input order). Each selected weapon adds its Cost
+// and joins the attacker permutation inside bestAttackDamage.
+//
+// resourceBudget passed down to the chain pipeline is pitchSum - defenderCostSum - weaponCosts
+// for this mask; the chain then deducts each attacker's effective cost (which for
+// DiscountPerRunechant cards is max(0, PrintedCost() - runechantCount at play-time)) and rejects
+// orderings that run negative.
+func bestAttackWithWeapons(hero hero.Hero, weapons []weapon.Weapon, attackers, pitched, deck []card.Card, bufs *attackBufs, pitchSum, costSum, defenderCostSum, runechantCarryover int) (int, int, []string) {
+	// Baseline: no attacks played. Leftover runechants stay at the caller's carryover.
 	best := 0
+	bestLeftoverRunechants := runechantCarryover
 	var bestSwung []string
 	// Reuse the shared attacker buffer across mask iterations.
 	copy(bufs.attackerBuf, attackers)
@@ -424,33 +449,50 @@ func bestAttackWithWeapons(hero hero.Hero, weapons []weapon.Weapon, attackers, p
 				allAttackers = append(allAttackers, w)
 			}
 		}
-		if dealt := bestAttackDamage(hero, allAttackers, pitched, deck, bufs); dealt > best {
+		// Chain budget = pitchSum minus defender costs. Every chain card (attackers AND the
+		// swung weapons) deducts its own effective cost from this budget inside playSequence,
+		// so we don't pre-deduct weapon cost here.
+		chainBudget := pitchSum - defenderCostSum
+		dealt, leftoverRunechants := bestAttackDamage(hero, allAttackers, pitched, deck, bufs, chainBudget, runechantCarryover)
+		// Prefer higher damage; on ties prefer more leftover runechants for future turns.
+		if dealt > best || (dealt == best && leftoverRunechants > bestLeftoverRunechants) {
 			best = dealt
+			bestLeftoverRunechants = leftoverRunechants
 			bestSwung = bufs.weaponNames[mask]
 		}
 	}
-	return best, bestSwung
+	return best, bestLeftoverRunechants, bestSwung
 }
 
 // bestAttackDamage tries every ordering of attackers and returns the max total damage after Play
-// is called on each in sequence. Between each attacker's Play() and its append to CardsPlayed,
-// the hero's OnCardPlayed hook fires so triggered abilities (e.g. Viserai's Runechants)
-// contribute.
+// is called on each in sequence plus the runechant count at end of that winning permutation.
+// Between each attacker's Play() and its append to CardsPlayed, the hero's OnCardPlayed hook
+// fires so triggered abilities (e.g. Viserai's Runechants) contribute.
 //
 // Uses Heap's algorithm (iterative) for permutation generation. That saves a closure/callback
 // allocation and a recursive call per permutation vs. a callback-style permuter.
-func bestAttackDamage(hero hero.Hero, attackers, pitched, deck []card.Card, bufs *attackBufs) int {
+//
+// chainBudget is the resource pool available to cover chain-card effective costs. For orderings
+// that run out of resources partway through, playSequence returns legal=false and contributes 0.
+func bestAttackDamage(hero hero.Hero, attackers, pitched, deck []card.Card, bufs *attackBufs, chainBudget, runechantCarryover int) (int, int) {
 	n := len(attackers)
 	if n == 0 {
-		return 0
+		return 0, runechantCarryover
 	}
 	perm := bufs.perm[:n]
 	copy(perm, attackers)
 
 	best := 0
+	bestLeftoverRunechants := runechantCarryover
 	eval := func() {
-		if dmg, legal := playSequence(hero, pitched, deck, perm, bufs.pcBuf, bufs.ptrBuf, bufs.cardsPlayedBuf, bufs.state); legal && dmg > best {
+		dmg, leftoverRunechants, legal := playSequence(hero, pitched, deck, perm, bufs.pcBuf, bufs.ptrBuf, bufs.cardsPlayedBuf, bufs.state, chainBudget, runechantCarryover)
+		if !legal {
+			return
+		}
+		// Prefer higher damage; on ties prefer more leftover runechants for future turns.
+		if dmg > best || (dmg == best && leftoverRunechants > bestLeftoverRunechants) {
 			best = dmg
+			bestLeftoverRunechants = leftoverRunechants
 		}
 	}
 	eval()
@@ -472,32 +514,70 @@ func bestAttackDamage(hero hero.Hero, attackers, pitched, deck []card.Card, bufs
 			i++
 		}
 	}
-	return best
+	return best, bestLeftoverRunechants
 }
 
 // playSequence plays `order` as an attack chain, reusing caller-provided buffers to avoid
 // per-permutation heap allocation. pcBuf and ptrBuf must be at least len(order); cardsPlayedBuf
 // is reset to length 0 each call. state is reset and reused each call. The buffers are mutated
 // in place; the caller must not read them concurrently.
-func playSequence(hero hero.Hero, pitched, deck, order []card.Card, pcBuf []card.PlayedCard, ptrBuf []*card.PlayedCard, cardsPlayedBuf []card.Card, state *card.TurnState) (damage int, legal bool) {
+//
+// Runechant flow:
+//   - state.Runechants starts at runechantCarryover (tokens from the previous turn).
+//   - Each card's Play / hero OnCardPlayed may call CreateRunechants, incrementing the count.
+//   - After each Attack- or Weapon-typed card's Play+OnCardPlayed resolve, all current tokens
+//     fire: damage += state.Runechants and the count zeroes. This matches real FaB timing (the
+//     attack declaration triggers can create tokens that then fire on the same attack's hit).
+//   - At end of chain, state.Runechants is the leftover count that carries into the next turn.
+//
+// Resource flow:
+//   - chainBudget starts the chain; each card deducts its effective cost. For cards implementing
+//     DiscountPerRunechant, effective cost is max(0, PrintedCost() - state.Runechants) at the
+//     moment it's played; for everyone else it's Cost(). A negative remaining budget returns
+//     legal=false (the caller treats this ordering as zero damage).
+func playSequence(hero hero.Hero, pitched, deck, order []card.Card, pcBuf []card.PlayedCard, ptrBuf []*card.PlayedCard, cardsPlayedBuf []card.Card, state *card.TurnState, chainBudget, runechantCarryover int) (damage int, leftoverRunechants int, legal bool) {
 	n := len(order)
 	for i, c := range order {
 		pcBuf[i] = card.PlayedCard{Card: c}
 		ptrBuf[i] = &pcBuf[i]
 	}
 	played := ptrBuf[:n]
-	*state = card.TurnState{Pitched: pitched, Deck: deck, CardsPlayed: cardsPlayedBuf[:0]}
+	*state = card.TurnState{Pitched: pitched, Deck: deck, CardsPlayed: cardsPlayedBuf[:0], Runechants: runechantCarryover}
+	resources := chainBudget
 	for i, pc := range played {
+		// Effective cost: discount cards drop by runechant count (floored at 0); others pay printed.
+		var effCost int
+		if d, ok := pc.Card.(card.DiscountPerRunechant); ok {
+			effCost = d.PrintedCost() - state.Runechants
+			if effCost < 0 {
+				effCost = 0
+			}
+		} else {
+			effCost = pc.Card.Cost()
+		}
+		resources -= effCost
+		if resources < 0 {
+			return 0, 0, false
+		}
+
 		state.CardsRemaining = played[i+1:]
 		state.Self = pc
 		damage += pc.Card.Play(state)
 		damage += hero.OnCardPlayed(pc.Card, state)
 		state.CardsPlayed = append(state.CardsPlayed, pc.Card)
+
+		// Attacks and weapon swings consume all runechants in play — each fires for 1 arcane.
+		t := pc.Card.Types()
+		if t.Has(card.TypeAttack) || t.Has(card.TypeWeapon) {
+			damage += state.Runechants
+			state.Runechants = 0
+		}
+
 		if i < n-1 && !pc.EffectiveGoAgain() {
-			return 0, false
+			return 0, 0, false
 		}
 	}
-	return damage, true
+	return damage, state.Runechants, true
 }
 
 

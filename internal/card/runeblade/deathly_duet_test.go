@@ -32,51 +32,30 @@ func TestDeathlyDuet_AttackPitchedAddsPower(t *testing.T) {
 	}
 }
 
-func TestDeathlyDuet_NonAttackActionPitchedWithFollowupAddsRunechants(t *testing.T) {
-	// Non-attack action pitched + a following attack → +2 damage (two Runechants) and
-	// AuraCreated set for following aura-conditional cards.
-	s := card.TurnState{
-		Pitched:        []card.Card{stubNonAttack{}},
-		CardsRemaining: []*card.PlayedCard{{Card: stubRunebladeAttack{}}},
+func TestDeathlyDuet_NonAttackActionPitchedCreatesRunechants(t *testing.T) {
+	// Non-attack action pitched → 2 Runechant tokens enter play. Play() returns just the base
+	// power (the Runechant damage lands when some attack consumes the tokens — here it'd be
+	// Deathly Duet's own attack, done downstream by playSequence).
+	s := card.TurnState{Pitched: []card.Card{stubNonAttack{}}}
+	if got := (DeathlyDuetRed{}).Play(&s); got != 4 {
+		t.Errorf("Deathly Duet Red with non-attack pitched: Play() = %d, want 4", got)
 	}
-	if got := (DeathlyDuetRed{}).Play(&s); got != 6 {
-		t.Errorf("Deathly Duet Red with non-attack pitched + follow-up: Play() = %d, want 6", got)
+	if s.Runechants != 2 {
+		t.Errorf("Runechants = %d, want 2", s.Runechants)
 	}
 	if !s.AuraCreated {
 		t.Errorf("AuraCreated should be set when Runechants are created")
 	}
 }
 
-func TestDeathlyDuet_NonAttackActionPitchedNoFollowupFizzles(t *testing.T) {
-	// Non-attack action pitched but nothing follows → Runechants fizzle, only base damage.
-	s := card.TurnState{Pitched: []card.Card{stubNonAttack{}}}
-	if got := (DeathlyDuetRed{}).Play(&s); got != 4 {
-		t.Errorf("Deathly Duet Red, no follow-up: Play() = %d, want 4", got)
-	}
-	if s.AuraCreated {
-		t.Errorf("AuraCreated should NOT be set when Runechants have no follow-up")
-	}
-}
-
-func TestDeathlyDuet_WeaponCountsAsFollowingAttack(t *testing.T) {
-	// A weapon after Deathly Duet counts as a following attack — Runechants land on the swing.
-	s := card.TurnState{
-		Pitched:        []card.Card{stubNonAttack{}},
-		CardsRemaining: []*card.PlayedCard{{Card: stubRunebladeWeapon{}}},
-	}
-	if got := (DeathlyDuetRed{}).Play(&s); got != 6 {
-		t.Errorf("Deathly Duet Red with weapon follow-up: Play() = %d, want 6", got)
-	}
-}
-
 func TestDeathlyDuet_BothBranchesFire(t *testing.T) {
-	// Both an attack AND a non-attack action in Pitched → both riders fire (+2{p} AND +2 from
-	// Runechants when there's a follow-up).
-	s := card.TurnState{
-		Pitched: []card.Card{stubRunebladeAttack{}, stubNonAttack{}},
-		CardsRemaining: []*card.PlayedCard{{Card: stubRunebladeAttack{}}},
+	// Both an attack AND a non-attack action in Pitched → both riders fire: +2 power bonus baked
+	// into Play's return, plus 2 Runechants on state (consumed later when an attack resolves).
+	s := card.TurnState{Pitched: []card.Card{stubRunebladeAttack{}, stubNonAttack{}}}
+	if got := (DeathlyDuetRed{}).Play(&s); got != 6 {
+		t.Errorf("Deathly Duet Red with both pitched: Play() = %d, want 6", got)
 	}
-	if got := (DeathlyDuetRed{}).Play(&s); got != 8 {
-		t.Errorf("Deathly Duet Red with both pitched + follow-up: Play() = %d, want 8", got)
+	if s.Runechants != 2 {
+		t.Errorf("Runechants = %d, want 2", s.Runechants)
 	}
 }
