@@ -33,8 +33,16 @@ func New(h hero.Hero, weapons []weapon.Weapon, cards []card.Card) *Deck {
 
 // Random generates a random legal deck for `h`: a random weapon loadout from cards.AllWeapons
 // (one 2H or two 1H, dual-wielding the same weapon allowed) and `size` cards drawn uniformly
-// from cards.Deckable() with at most `maxCopies` of any single printing.
+// from cards.Deckable() in pairs — every included printing appears exactly twice (or more, up
+// to `maxCopies`, if the same printing is rolled on multiple picks). `size` must be even and
+// `maxCopies` must be at least 2.
 func Random(h hero.Hero, size, maxCopies int, rng *rand.Rand) *Deck {
+	if size%2 != 0 {
+		panic(fmt.Sprintf("deck: Random requires even size (got %d) — cards are added in pairs", size))
+	}
+	if maxCopies < 2 {
+		panic(fmt.Sprintf("deck: Random requires maxCopies >= 2 (got %d) — cards are added in pairs", maxCopies))
+	}
 	loadouts := weaponLoadouts(cards.AllWeapons)
 	weapons := loadouts[rng.Intn(len(loadouts))]
 
@@ -43,11 +51,12 @@ func Random(h hero.Hero, size, maxCopies int, rng *rand.Rand) *Deck {
 	picks := make([]card.Card, 0, size)
 	for len(picks) < size {
 		id := pool[rng.Intn(len(pool))]
-		if counts[id] >= maxCopies {
+		if counts[id]+2 > maxCopies {
 			continue
 		}
-		counts[id]++
-		picks = append(picks, cards.Get(id))
+		counts[id] += 2
+		c := cards.Get(id)
+		picks = append(picks, c, c)
 	}
 	return New(h, weapons, picks)
 }
