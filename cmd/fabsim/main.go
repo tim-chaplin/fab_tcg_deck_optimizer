@@ -18,7 +18,7 @@ import (
 )
 
 func main() {
-	mode := flag.String("mode", "random", "run mode: random (generate+evaluate decks) or print_only (load and print best_deck.json)")
+	mode := flag.String("mode", "random", "run mode: random, iterate, or print_only")
 	numDecks := flag.Int("decks", 10000, "number of random decks to generate (phase 1)")
 	shallowShuffles := flag.Int("shallow-shuffles", 10, "shuffles per deck in phase 1 (wide search)")
 	topN := flag.Int("top-n", 100, "number of top decks to advance to phase 2")
@@ -33,10 +33,12 @@ func main() {
 	switch *mode {
 	case "random":
 		runRandom(*numDecks, *shallowShuffles, *topN, *deepShuffles, *incoming, *deckSize, *maxCopies, *seed, *outPath)
+	case "iterate":
+		runIterate(*deepShuffles, *incoming, *seed, *outPath)
 	case "print_only":
 		runPrintOnly(*outPath)
 	default:
-		fmt.Fprintf(os.Stderr, "unknown mode %q (want random or print_only)\n", *mode)
+		fmt.Fprintf(os.Stderr, "unknown mode %q (want random, iterate, or print_only)\n", *mode)
 		os.Exit(1)
 	}
 }
@@ -120,6 +122,63 @@ func runRandom(numDecks, shallowShuffles, topN, deepShuffles, incoming, deckSize
 			}
 		} else {
 			fmt.Printf("\nPrevious best (%.3f) >= current (%.3f), %s unchanged\n", prevAvg, bestDeck.Stats.Avg(), outPath)
+		}
+	}
+}
+
+func runIterate(shuffles, incoming int, seed int64, outPath string) {
+	best, bestAvg := loadExisting(outPath)
+	if best == nil {
+		fmt.Fprintf(os.Stderr, "no existing deck at %s — run with --mode=random first\n", outPath)
+		os.Exit(1)
+	}
+	fmt.Printf("Loaded best deck (avg %.3f) from %s\n", bestAvg, outPath)
+	fmt.Println("Press Enter to stop.")
+
+	rng := rand.New(rand.NewSource(seed))
+
+	// Signal channel: background goroutine reads stdin and sends on stop.
+	stop := make(chan struct{}, 1)
+	go func() {
+		buf := make([]byte, 1)
+		os.Stdin.Read(buf)
+		stop <- struct{}{}
+	}()
+
+	iter := 0
+	improvements := 0
+	start := time.Now()
+	for {
+		select {
+		case <-stop:
+			fmt.Fprintf(os.Stderr, "\nStopping after %d iterations (%d improvements) in %s\n",
+				iter, improvements, time.Since(start).Truncate(time.Second))
+			fmt.Println()
+			printBestDeck(best)
+			return
+		default:
+		}
+
+		iter++
+		candidate := deck.Mutate(best, rng)
+		d := deck.New(candidate.Hero, candidate.Weapons, candidate.Cards)
+		stats := d.Evaluate(shuffles, incoming, rng)
+		avg := stats.Avg()
+
+		if avg > bestAvg {
+			improvements++
+			bestAvg = avg
+			best = d
+			data, err := deckio.Marshal(best)
+			if err == nil {
+				os.WriteFile(outPath, data, 0o644)
+			}
+			fmt.Fprintf(os.Stderr, "\r[iter %d] new best: %.3f (+%d improvements)        \n",
+				iter, bestAvg, improvements)
+		}
+		if iter%100 == 0 {
+			fmt.Fprintf(os.Stderr, "\r[iter %d] best: %.3f (%d improvements, %s elapsed)        ",
+				iter, bestAvg, improvements, time.Since(start).Truncate(time.Second))
 		}
 	}
 }

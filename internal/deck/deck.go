@@ -61,6 +61,46 @@ func Random(h hero.Hero, size, maxCopies int, rng *rand.Rand) *Deck {
 	return New(h, weapons, picks)
 }
 
+// Mutate creates a new deck by swapping one card (both copies) from `d` with a random card from
+// the deckable pool that isn't already in the deck. The new deck has fresh (zero) stats. Weapons
+// and hero are preserved.
+func Mutate(d *Deck, rng *rand.Rand) *Deck {
+	// Build a set of unique card names in the deck.
+	inDeck := map[string]bool{}
+	for _, c := range d.Cards {
+		inDeck[c.Name()] = true
+	}
+
+	// Pick which unique card to remove.
+	uniq := make([]string, 0, len(inDeck))
+	for name := range inDeck {
+		uniq = append(uniq, name)
+	}
+	removeName := uniq[rng.Intn(len(uniq))]
+
+	// Pick a replacement from the pool that isn't already in the deck.
+	pool := cards.Deckable()
+	var replaceID cards.ID
+	for {
+		id := pool[rng.Intn(len(pool))]
+		if !inDeck[cards.Get(id).Name()] {
+			replaceID = id
+			break
+		}
+	}
+	replacement := cards.Get(replaceID)
+
+	// Build the new card list: drop both copies of removeName, add two of replacement.
+	newCards := make([]card.Card, 0, len(d.Cards))
+	for _, c := range d.Cards {
+		if c.Name() != removeName {
+			newCards = append(newCards, c)
+		}
+	}
+	newCards = append(newCards, replacement, replacement)
+	return New(d.Hero, d.Weapons, newCards)
+}
+
 // weaponLoadouts enumerates every legal equip combination from `ws`: each 2H weapon as a solo
 // loadout, plus every unordered pair of 1H weapons (including dual-wielding the same weapon).
 func weaponLoadouts(ws []weapon.Weapon) [][]weapon.Weapon {
