@@ -236,17 +236,35 @@ func (d *Deck) Evaluate(runs int, incomingDamage int, rng *rand.Rand) Stats {
 	}
 	handsPerCycle := deckSize / handSize
 
-	working := make([]card.Card, 0, deckSize)
+	// `buf` is a single-allocation reusable slab holding the current "deck state" for the run.
+	// [head:tail] is the remaining deck in top-to-bottom order. Each iteration dealt cards are
+	// consumed by advancing head; pitched cards are re-appended at tail. Sized 2×deckSize so there
+	// is always room to append pitched cards before we need to compact head back to 0; compaction
+	// (which shifts [head:tail] down) happens at most once every deckSize/handSize iterations.
+	// This replaces the old working = append(working[handSize:], pitched...) pattern, which
+	// re-allocated its backing array on every hand.
+	buf := make([]card.Card, deckSize*2)
 	for r := 0; r < runs; r++ {
-		working = append(working[:0], d.Cards...)
-		rng.Shuffle(len(working), func(i, j int) {
-			working[i], working[j] = working[j], working[i]
-		})
+		copy(buf, d.Cards)
+		// Inline Fisher-Yates: the closure-based rng.Shuffle would heap-allocate a func value
+		// capturing buf on every run.
+		for i := deckSize - 1; i > 0; i-- {
+			j := rng.Intn(i + 1)
+			buf[i], buf[j] = buf[j], buf[i]
+		}
 
+		head, tail := 0, deckSize
 		handIdx := 0
-		for len(working) >= handSize {
-			h := working[:handSize]
-			play := hand.Best(d.Hero, d.Weapons, h, incomingDamage, working[handSize:])
+		for tail-head >= handSize {
+			// Compact when there isn't room at the bottom to append a full hand's worth of
+			// pitched cards without overrunning buf.
+			if tail+handSize > len(buf) {
+				copy(buf, buf[head:tail])
+				tail -= head
+				head = 0
+			}
+			h := buf[head : head+handSize]
+			play := hand.Best(d.Hero, d.Weapons, h, incomingDamage, buf[head+handSize:tail])
 			v := float64(play.Value)
 
 			d.Stats.TotalValue += v
@@ -277,15 +295,16 @@ func (d *Deck) Evaluate(runs int, incomingDamage int, rng *rand.Rand) Stats {
 				d.Stats.SecondCycle.Total += v
 			}
 
-			// Recycle: pitched cards go to the bottom (in hand order); attacked and defended cards are
-			// spent. If nothing was pitched, the deck shrinks by handSize this turn.
-			pitched := make([]card.Card, 0, handSize)
+			// Recycle: pitched cards go to the bottom of the remaining deck (buf[tail:]) in hand
+			// order; attacked and defended cards are spent. The backing array has room since the
+			// cards being "moved" are a subset of those we just consumed.
 			for i, c := range h {
 				if play.Roles[i] == hand.Pitch {
-					pitched = append(pitched, c)
+					buf[tail] = c
+					tail++
 				}
 			}
-			working = append(working[handSize:], pitched...)
+			head += handSize
 			handIdx++
 		}
 	}
