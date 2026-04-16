@@ -5,9 +5,9 @@
 // Runechant token."
 //
 // Cost() returns 0 for the partition-level minimum (fully-discounted case); PrintedCost() is 1
-// for future per-play effective-cost checks. Defense reactions currently run in a separate
-// pipeline that doesn't track runechants, so the created Runechant isn't modelled here either —
-// the cost reduction is effectively assumed full, matching the prior simplification.
+// for future per-play effective-cost checks. Defense reactions run in a separate pipeline that
+// doesn't track runechants, so the created Runechant isn't modelled here either — the cost
+// reduction is approximated as full.
 //
 // Source: github.com/the-fab-cube/flesh-and-blood-cards (card.csv).
 

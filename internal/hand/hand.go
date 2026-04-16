@@ -424,7 +424,8 @@ func bestAttackWithWeapons(hero hero.Hero, weapons []weapon.Weapon, attackers, p
 	// Reuse the shared attacker buffer across mask iterations.
 	copy(bufs.attackerBuf, attackers)
 	for mask := 0; mask < 1<<len(weapons); mask++ {
-		// Use pre-computed weapon costs instead of iterating through interface calls.
+		// bufs.weaponCosts[mask] is the pre-summed Cost of the selected weapons — avoids an
+		// interface dispatch per weapon on every mask.
 		if pitchSum < costSum+bufs.weaponCosts[mask] {
 			continue
 		}

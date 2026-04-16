@@ -22,8 +22,8 @@ const (
 	TypeYoung                                // "Young"
 )
 
-// TypeSet is a bitfield of CardType values. It replaces map[string]bool for card type checks,
-// eliminating string hashing on every lookup.
+// TypeSet is a bitfield of CardType values — card type checks become a single-word bitmask AND,
+// with no string hashing or map lookup on the hot path.
 type TypeSet uint64
 
 // NewTypeSet returns a TypeSet containing all of the given types.
