@@ -24,10 +24,19 @@ var heroesByName = map[string]hero.Hero{
 
 // DeckJSON is the on-disk shape of a Deck with its Stats.
 type DeckJSON struct {
-	Hero    string    `json:"hero"`
-	Weapons []string  `json:"weapons"`
-	Cards   []string  `json:"cards"`
-	Stats   StatsJSON `json:"stats"`
+	Hero    string           `json:"hero"`
+	Weapons []string         `json:"weapons"`
+	Cards   []string         `json:"cards"`
+	Pitch   PitchCountsJSON  `json:"pitch"`
+	Stats   StatsJSON        `json:"stats"`
+}
+
+// PitchCountsJSON reports how many cards of each pitch colour are in the deck. Derived from
+// Cards on marshal and ignored on unmarshal (kept in the file purely for human readability).
+type PitchCountsJSON struct {
+	Red    int `json:"red"`
+	Yellow int `json:"yellow"`
+	Blue   int `json:"blue"`
 }
 
 // StatsJSON mirrors deck.Stats with card references flattened to names.
@@ -71,14 +80,24 @@ func toJSON(d *deck.Deck) *DeckJSON {
 		weapons[i] = w.Name()
 	}
 	cardNames := make([]string, len(d.Cards))
+	var pitchCounts PitchCountsJSON
 	for i, c := range d.Cards {
 		cardNames[i] = c.Name()
+		switch c.Pitch() {
+		case 1:
+			pitchCounts.Red++
+		case 2:
+			pitchCounts.Yellow++
+		case 3:
+			pitchCounts.Blue++
+		}
 	}
 	sort.Strings(cardNames)
 	return &DeckJSON{
 		Hero:    d.Hero.Name(),
 		Weapons: weapons,
 		Cards:   cardNames,
+		Pitch:   pitchCounts,
 		Stats:   statsToJSON(d.Stats),
 	}
 }
