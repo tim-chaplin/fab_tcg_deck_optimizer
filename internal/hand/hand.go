@@ -91,15 +91,8 @@ func Best(hero hero.Hero, weapons []weapon.Weapon, hand []card.Card, incomingDam
 		cached, hit := memo[key]
 		memoMu.RUnlock()
 		if hit {
-			// Clone Roles and Weapons so callers can't mutate the cached slices.
-			roles := make([]Role, len(cached.Roles))
-			copy(roles, cached.Roles)
-			var ws []string
-			if len(cached.Weapons) > 0 {
-				ws = make([]string, len(cached.Weapons))
-				copy(ws, cached.Weapons)
-			}
-			return Play{Roles: roles, Weapons: ws, Value: cached.Value}
+			// Returned Play aliases the cached slices — callers must not mutate Roles or Weapons.
+			return cached
 		}
 	}
 	result := bestUncached(hero, weapons, hand, incomingDamage, deck)
