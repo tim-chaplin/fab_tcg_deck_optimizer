@@ -5,6 +5,8 @@ package deck
 import (
 	"fmt"
 	"math/rand"
+	"sort"
+	"strings"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/cards"
@@ -59,6 +61,83 @@ func Random(h hero.Hero, size, maxCopies int, rng *rand.Rand) *Deck {
 		picks = append(picks, c, c)
 	}
 	return New(h, weapons, picks)
+}
+
+// Mutate creates a new deck by randomly changing one "slot": either swapping one card pair with a
+// random card not already in the deck, or swapping the weapon loadout. Each unique card slot and
+// the weapon slot have equal probability of being chosen (e.g. 20 unique cards + 1 weapon = 1/21
+// chance to mutate weapons). The new deck has fresh (zero) stats.
+func Mutate(d *Deck, rng *rand.Rand) *Deck {
+	// Build a set of unique card names in the deck.
+	inDeck := map[string]bool{}
+	for _, c := range d.Cards {
+		inDeck[c.Name()] = true
+	}
+	uniqueCards := len(inDeck)
+
+	// Equal probability: uniqueCards card slots + 1 weapon slot.
+	if rng.Intn(uniqueCards+1) == 0 {
+		return mutateWeapons(d, rng)
+	}
+	return mutateCard(d, inDeck, rng)
+}
+
+func mutateWeapons(d *Deck, rng *rand.Rand) *Deck {
+	loadouts := weaponLoadouts(cards.AllWeapons)
+	// Pick a loadout different from the current one.
+	currentNames := weaponKey(d.Weapons)
+	var newWeapons []weapon.Weapon
+	for {
+		candidate := loadouts[rng.Intn(len(loadouts))]
+		if weaponKey(candidate) != currentNames {
+			newWeapons = candidate
+			break
+		}
+	}
+	newCards := make([]card.Card, len(d.Cards))
+	copy(newCards, d.Cards)
+	return New(d.Hero, newWeapons, newCards)
+}
+
+// weaponKey returns a comparable string for a weapon loadout so we can check equality.
+func weaponKey(ws []weapon.Weapon) string {
+	names := make([]string, len(ws))
+	for i, w := range ws {
+		names[i] = w.Name()
+	}
+	sort.Strings(names)
+	return strings.Join(names, ",")
+}
+
+func mutateCard(d *Deck, inDeck map[string]bool, rng *rand.Rand) *Deck {
+	// Pick which unique card to remove.
+	uniq := make([]string, 0, len(inDeck))
+	for name := range inDeck {
+		uniq = append(uniq, name)
+	}
+	removeName := uniq[rng.Intn(len(uniq))]
+
+	// Pick a replacement from the pool that isn't already in the deck.
+	pool := cards.Deckable()
+	var replaceID cards.ID
+	for {
+		id := pool[rng.Intn(len(pool))]
+		if !inDeck[cards.Get(id).Name()] {
+			replaceID = id
+			break
+		}
+	}
+	replacement := cards.Get(replaceID)
+
+	// Build the new card list: drop both copies of removeName, add two of replacement.
+	newCards := make([]card.Card, 0, len(d.Cards))
+	for _, c := range d.Cards {
+		if c.Name() != removeName {
+			newCards = append(newCards, c)
+		}
+	}
+	newCards = append(newCards, replacement, replacement)
+	return New(d.Hero, d.Weapons, newCards)
 }
 
 // weaponLoadouts enumerates every legal equip combination from `ws`: each 2H weapon as a solo
