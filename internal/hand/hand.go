@@ -178,10 +178,30 @@ type attackBufs struct {
 	cardsPlayedBuf []card.Card
 	state          *card.TurnState
 	attackerBuf    []card.Card // for bestAttackWithWeapons mask iteration
+	// Pre-computed weapon data: weaponCosts[mask] is the total Cost of weapons in that mask;
+	// weaponNames[mask] is the pre-built []string of weapon names for the mask. Indexed by bitmask
+	// (0 to 2^len(weapons)-1).
+	weaponCosts []int
+	weaponNames [][]string
 }
 
-func newAttackBufs(handSize, weaponCount int) *attackBufs {
+func newAttackBufs(handSize, weaponCount int, weapons []weapon.Weapon) *attackBufs {
 	maxAttackers := handSize + weaponCount
+	numMasks := 1 << weaponCount
+	weaponCosts := make([]int, numMasks)
+	weaponNames := make([][]string, numMasks)
+	for mask := 0; mask < numMasks; mask++ {
+		cost := 0
+		var names []string
+		for i, w := range weapons {
+			if mask&(1<<i) != 0 {
+				cost += w.Cost()
+				names = append(names, w.Name())
+			}
+		}
+		weaponCosts[mask] = cost
+		weaponNames[mask] = names
+	}
 	return &attackBufs{
 		perm:           make([]card.Card, maxAttackers),
 		pcBuf:          make([]card.PlayedCard, maxAttackers),
@@ -189,6 +209,8 @@ func newAttackBufs(handSize, weaponCount int) *attackBufs {
 		cardsPlayedBuf: make([]card.Card, 0, maxAttackers),
 		state:          &card.TurnState{},
 		attackerBuf:    make([]card.Card, maxAttackers),
+		weaponCosts:    weaponCosts,
+		weaponNames:    weaponNames,
 	}
 }
 
@@ -197,22 +219,31 @@ func bestUncached(hero hero.Hero, weapons []weapon.Weapon, hand []card.Card, inc
 	best := Play{Roles: make([]Role, n)}
 	roles := make([]Role, n)
 
+	// Pre-compute per-card pitch and cost values so the recursion can track sums incrementally
+	// without interface dispatch at each partition leaf.
+	pitchVals := make([]int, n)
+	costVals := make([]int, n)
+	for i, c := range hand {
+		pitchVals[i] = c.Pitch()
+		costVals[i] = c.Cost()
+	}
+
 	// Pre-allocate all buffers once for the entire partition search.
-	bufs := newAttackBufs(n, len(weapons))
+	bufs := newAttackBufs(n, len(weapons), weapons)
 	pitched := make([]card.Card, 0, n)
 	attackers := make([]card.Card, 0, n)
 	defenders := make([]card.Card, 0, n)
 
-	var recurse func(i int)
-	recurse = func(i int) {
+	var recurse func(i, pitchSum, costSum int)
+	recurse = func(i, pitchSum, costSum int) {
 		if i == n {
-			p, a, d := groupByRoleInto(hand, roles, pitched[:0], attackers[:0], defenders[:0])
-			if !canAfford(p, a) {
+			if pitchSum < costSum {
 				return
 			}
+			p, a, d := groupByRoleInto(hand, roles, pitched[:0], attackers[:0], defenders[:0])
 			prevented := preventedDamage(d, incomingDamage)
 			defenseDealt := defenseReactionDamage(d, p, deck)
-			attackDealt, swung := bestAttackWithWeapons(hero, weapons, a, p, deck, bufs)
+			attackDealt, swung := bestAttackWithWeapons(hero, weapons, a, p, deck, bufs, pitchSum, costSum)
 
 			v := attackDealt + defenseDealt + prevented
 			if v > best.Value {
@@ -224,10 +255,17 @@ func bestUncached(hero hero.Hero, weapons []weapon.Weapon, hand []card.Card, inc
 		}
 		for r := Role(0); r <= Defend; r++ {
 			roles[i] = r
-			recurse(i + 1)
+			switch r {
+			case Pitch:
+				recurse(i+1, pitchSum+pitchVals[i], costSum)
+			case Attack:
+				recurse(i+1, pitchSum, costSum+costVals[i])
+			default:
+				recurse(i+1, pitchSum, costSum)
+			}
 		}
 	}
-	recurse(0)
+	recurse(0, 0, 0)
 	return best
 }
 
@@ -295,26 +333,25 @@ func defenseReactionDamage(defenders, pitched, deck []card.Card) int {
 // returns the max damage over all (affordable) weapon masks, plus the swung weapons from the
 // winning mask (in input order). Each selected weapon adds its Cost and joins the attacker
 // permutation inside bestAttackDamage.
-func bestAttackWithWeapons(hero hero.Hero, weapons []weapon.Weapon, attackers, pitched, deck []card.Card, bufs *attackBufs) (int, []string) {
+func bestAttackWithWeapons(hero hero.Hero, weapons []weapon.Weapon, attackers, pitched, deck []card.Card, bufs *attackBufs, pitchSum, costSum int) (int, []string) {
 	best := 0
 	var bestSwung []string
 	// Reuse the shared attacker buffer across mask iterations.
 	copy(bufs.attackerBuf, attackers)
 	for mask := 0; mask < 1<<len(weapons); mask++ {
+		// Use pre-computed weapon costs instead of iterating through interface calls.
+		if pitchSum < costSum+bufs.weaponCosts[mask] {
+			continue
+		}
 		allAttackers := bufs.attackerBuf[:len(attackers)]
-		var swung []string
 		for i, w := range weapons {
 			if mask&(1<<i) != 0 {
 				allAttackers = append(allAttackers, w)
-				swung = append(swung, w.Name())
 			}
-		}
-		if !canAfford(pitched, allAttackers) {
-			continue
 		}
 		if dealt := bestAttackDamage(hero, allAttackers, pitched, deck, bufs); dealt > best {
 			best = dealt
-			bestSwung = swung
+			bestSwung = bufs.weaponNames[mask]
 		}
 	}
 	return best, bestSwung
