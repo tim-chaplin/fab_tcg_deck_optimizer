@@ -10,6 +10,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/deck"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/deckio"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/hand"
@@ -307,7 +308,11 @@ func printBestDeck(d *deck.Deck) {
 		for _, w := range b.Play.Weapons {
 			line += ", " + w + ": ATTACK"
 		}
-		fmt.Printf("  Best hand seen (value %d): %s\n", b.Play.Value, line)
+		prefix := fmt.Sprintf("  Best hand seen (value %d", b.Play.Value)
+		if d.Hero.Types().Has(card.TypeRuneblade) {
+			prefix += fmt.Sprintf(", %d carryover runechants", b.StartingRunechants)
+		}
+		fmt.Printf("%s): %s\n", prefix, line)
 	}
 	fmt.Println()
 	fmt.Println("Card list:")

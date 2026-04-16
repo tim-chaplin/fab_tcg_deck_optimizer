@@ -289,6 +289,9 @@ type Stats struct {
 type BestHand struct {
 	Hand []card.Card
 	Play hand.Play
+	// StartingRunechants is the Runechant count carried in from the previous turn when this hand
+	// was played. Only meaningful for Runeblade heroes.
+	StartingRunechants int
 }
 
 // CycleStats tracks total value and hand count for a single deck cycle.
@@ -380,8 +383,9 @@ func (d *Deck) Evaluate(runs int, incomingDamage int, rng *rand.Rand) Stats {
 					copy(weaponsCopy, play.Weapons)
 				}
 				d.Stats.Best = BestHand{
-					Hand: handCopy,
-					Play: hand.Play{Roles: rolesCopy, Weapons: weaponsCopy, Value: play.Value},
+					Hand:               handCopy,
+					Play:               hand.Play{Roles: rolesCopy, Weapons: weaponsCopy, Value: play.Value},
+					StartingRunechants: runechantCarryover,
 				}
 			}
 			switch handIdx / handsPerCycle {

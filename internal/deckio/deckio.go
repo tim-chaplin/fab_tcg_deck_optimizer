@@ -52,10 +52,11 @@ type StatsJSON struct {
 // BestHandJSON is the JSON form of deck.BestHand: card names and role names instead of interface
 // values.
 type BestHandJSON struct {
-	Hand    []string `json:"hand"`
-	Roles   []string `json:"roles"`
-	Weapons []string `json:"weapons"`
-	Value   int      `json:"value"`
+	Hand               []string `json:"hand"`
+	Roles              []string `json:"roles"`
+	Weapons            []string `json:"weapons"`
+	Value              int      `json:"value"`
+	StartingRunechants int      `json:"starting_runechants"`
 }
 
 // Marshal returns the JSON encoding of `d` (indented) with card/weapon/hero names in place of
@@ -126,10 +127,11 @@ func bestHandToJSON(b deck.BestHand) BestHandJSON {
 		roles[i] = r.String()
 	}
 	return BestHandJSON{
-		Hand:    handNames,
-		Roles:   roles,
-		Weapons: append([]string(nil), b.Play.Weapons...),
-		Value:   b.Play.Value,
+		Hand:               handNames,
+		Roles:              roles,
+		Weapons:            append([]string(nil), b.Play.Weapons...),
+		Value:              b.Play.Value,
+		StartingRunechants: b.StartingRunechants,
 	}
 }
 
@@ -201,6 +203,7 @@ func bestHandFromJSON(bj BestHandJSON) (deck.BestHand, error) {
 			Weapons: append([]string(nil), bj.Weapons...),
 			Value:   bj.Value,
 		},
+		StartingRunechants: bj.StartingRunechants,
 	}, nil
 }
 
