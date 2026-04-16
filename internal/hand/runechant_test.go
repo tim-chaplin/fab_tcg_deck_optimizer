@@ -18,7 +18,7 @@ func TestPlaySequence_DiscountRejectsInsufficientBudget(t *testing.T) {
 	cpBuf := make([]card.Card, 0, len(order))
 	state := &card.TurnState{}
 	// Chain budget 0, carryover 0 → effective cost = 3 - 0 = 3 > 0, chain illegal.
-	dmg, leftover, legal := playSequence(hero.Viserai{}, nil, nil, order, pcBuf, ptrBuf, cpBuf, state, 0, 0)
+	dmg, leftover, _, legal := playSequence(hero.Viserai{}, nil, nil, order, pcBuf, ptrBuf, cpBuf, state, 0, 0)
 	if legal {
 		t.Fatalf("expected illegal chain, got legal (dmg=%d, leftover=%d)", dmg, leftover)
 	}
@@ -34,7 +34,7 @@ func TestPlaySequence_DiscountAffordableWithBudget(t *testing.T) {
 	state := &card.TurnState{}
 	// Chain budget 3, carryover 0 → effective cost 3, budget just covers it. Amplify's Attack(6)
 	// is the only damage; no runechants to consume.
-	dmg, leftover, legal := playSequence(hero.Viserai{}, nil, nil, order, pcBuf, ptrBuf, cpBuf, state, 3, 0)
+	dmg, leftover, _, legal := playSequence(hero.Viserai{}, nil, nil, order, pcBuf, ptrBuf, cpBuf, state, 3, 0)
 	if !legal {
 		t.Fatalf("expected legal chain")
 	}
@@ -57,7 +57,7 @@ func TestPlaySequence_DiscountUsesCarryoverRunechants(t *testing.T) {
 	// Chain budget 0, carryover 3 → effective cost 3-3 = 0, legal. Damage is just Amplify's
 	// Attack(); the consumed carryover tokens aren't re-credited (they were credited on the
 	// previous turn when they were created).
-	dmg, leftover, legal := playSequence(hero.Viserai{}, nil, nil, order, pcBuf, ptrBuf, cpBuf, state, 0, 3)
+	dmg, leftover, _, legal := playSequence(hero.Viserai{}, nil, nil, order, pcBuf, ptrBuf, cpBuf, state, 0, 3)
 	if !legal {
 		t.Fatalf("expected legal chain")
 	}
@@ -77,7 +77,7 @@ func TestPlaySequence_LeftoverFromNonAttackAction(t *testing.T) {
 	ptrBuf := make([]*card.PlayedCard, len(order))
 	cpBuf := make([]card.Card, 0, len(order))
 	state := &card.TurnState{}
-	dmg, leftover, legal := playSequence(hero.Viserai{}, nil, nil, order, pcBuf, ptrBuf, cpBuf, state, 0, 0)
+	dmg, leftover, _, legal := playSequence(hero.Viserai{}, nil, nil, order, pcBuf, ptrBuf, cpBuf, state, 0, 0)
 	if !legal {
 		t.Fatalf("expected legal chain")
 	}
@@ -153,6 +153,28 @@ func TestBest_BlessingOfOccultTokensOnlyAppearNextTurn(t *testing.T) {
 	if got.LeftoverRunechants != 3 {
 		t.Errorf("LeftoverRunechants = %d, want 3 (0 live + 3 delayed from Blessing)",
 			got.LeftoverRunechants)
+	}
+}
+
+// TestBest_ReduceToRunechantAffordableWithCarryover: a solo Reduce in hand with one Runechant
+// already in play can defend — the single carryover discounts PrintedCost 1 down to 0, so the
+// partition is affordable with no pitch. Value = 4 prevented + 1 from the token Reduce creates.
+func TestBest_ReduceToRunechantAffordableWithCarryover(t *testing.T) {
+	h := []card.Card{runeblade.ReduceToRunechantRed{}}
+	got := Best(hero.Viserai{}, nil, h, 4, nil, 1)
+	if got.Value != 5 {
+		t.Errorf("Value = %d, want 5 (Reduce defends at cost 0 thanks to 1 carryover Runechant)", got.Value)
+	}
+}
+
+// TestBest_ReduceToRunechantUnaffordableWithoutCarryover: the same solo Reduce with zero
+// Runechants in play can't be played at all — effective cost is 1 and there's no pitch to cover
+// it. The Defend partition is rejected and the best feasible line is pitching Reduce (value 0).
+func TestBest_ReduceToRunechantUnaffordableWithoutCarryover(t *testing.T) {
+	h := []card.Card{runeblade.ReduceToRunechantRed{}}
+	got := Best(hero.Viserai{}, nil, h, 4, nil, 0)
+	if got.Value != 0 {
+		t.Errorf("Value = %d, want 0 (Reduce can't pay its cost without Runechants or pitch)", got.Value)
 	}
 }
 
