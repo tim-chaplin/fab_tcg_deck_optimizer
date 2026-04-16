@@ -364,6 +364,9 @@ func (d *Deck) Evaluate(runs int, incomingDamage int, rng *rand.Rand) Stats {
 				head = 0
 			}
 			h := buf[head : head+handSize]
+			// Snapshot the starting carryover before Best overwrites it — the best-hand record
+			// wants the count in play *when the hand was dealt*, not what remained after.
+			startingRunechants := runechantCarryover
 			play := hand.Best(d.Hero, d.Weapons, h, incomingDamage, buf[head+handSize:tail], runechantCarryover)
 			runechantCarryover = play.LeftoverRunechants
 			v := float64(play.Value)
@@ -385,7 +388,7 @@ func (d *Deck) Evaluate(runs int, incomingDamage int, rng *rand.Rand) Stats {
 				d.Stats.Best = BestHand{
 					Hand:               handCopy,
 					Play:               hand.Play{Roles: rolesCopy, Weapons: weaponsCopy, Value: play.Value},
-					StartingRunechants: runechantCarryover,
+					StartingRunechants: startingRunechants,
 				}
 			}
 			switch handIdx / handsPerCycle {
