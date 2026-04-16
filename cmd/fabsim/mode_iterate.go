@@ -1,0 +1,98 @@
+package main
+
+import (
+	"fmt"
+	"math/rand"
+	"os"
+	"time"
+
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/deck"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/deckio"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/hero"
+)
+
+func runIterate(cfg config) {
+	rng := rand.New(rand.NewSource(cfg.seed))
+
+	best, bestAvg := loadExisting(cfg.outPath)
+	if best == nil {
+		// No starting point on disk — bootstrap with a single random deck, evaluated at the same
+		// -deep-shuffles depth the hill climb uses so bestAvg is comparable to future mutations.
+		fmt.Fprintf(os.Stderr, "no deck at %s; generating a random starting deck\n", cfg.outPath)
+		best = deck.Random(hero.Viserai{}, cfg.deckSize, cfg.maxCopies, rng)
+		stats := best.Evaluate(cfg.deepShuffles, cfg.incoming, rng)
+		bestAvg = stats.Avg()
+		if data, err := deckio.Marshal(best); err == nil {
+			os.WriteFile(cfg.outPath, data, 0o644)
+		}
+		fmt.Printf("Starting deck avg %.3f, saved to %s\n", bestAvg, cfg.outPath)
+	} else {
+		fmt.Printf("Loaded best deck (avg %.3f) from %s\n", bestAvg, cfg.outPath)
+	}
+	fmt.Println("Press Enter to abort.")
+
+	// Signal channel: background goroutine reads stdin and sends on stop. EOF / closed stdin
+	// isn't an abort signal (otherwise iterate would exit immediately when stdin isn't a TTY) —
+	// only an actual read of at least one byte counts.
+	stop := make(chan struct{}, 1)
+	go func() {
+		buf := make([]byte, 1)
+		if n, err := os.Stdin.Read(buf); err == nil && n > 0 {
+			stop <- struct{}{}
+		}
+	}()
+
+	// Deterministic hill-climb: enumerate every single-slot mutation of the current best. On the
+	// first mutation that scores higher, adopt it and restart enumeration from the new best. If
+	// we exhaust every mutation with no improvement, we're at a local maximum.
+	round := 0
+	improvements := 0
+	start := time.Now()
+	for {
+		round++
+		mutations := deck.AllMutations(best)
+		fmt.Fprintf(os.Stderr, "\n[round %d] evaluating %d mutations of avg %.3f\n",
+			round, len(mutations), bestAvg)
+
+		improved := false
+		for i, mut := range mutations {
+			select {
+			case <-stop:
+				fmt.Fprintf(os.Stderr, "\nAborted mid-round after %d rounds / %d improvements in %s\n",
+					round, improvements, time.Since(start).Truncate(time.Second))
+				fmt.Println()
+				printBestDeck(best)
+				return
+			default:
+			}
+
+			d := deck.New(mut.Deck.Hero, mut.Deck.Weapons, mut.Deck.Cards)
+			stats := d.Evaluate(cfg.deepShuffles, cfg.incoming, rng)
+			avg := stats.Avg()
+			if avg > bestAvg {
+				improvements++
+				fmt.Fprintf(os.Stderr, "\r[round %d] improvement at %d/%d: %.3f → %.3f (%s), restarting        \n",
+					round, i+1, len(mutations), bestAvg, avg, mut.Description)
+				bestAvg = avg
+				best = d
+				if data, err := deckio.Marshal(best); err == nil {
+					os.WriteFile(cfg.outPath, data, 0o644)
+				}
+				improved = true
+				break
+			}
+			if (i+1)%50 == 0 {
+				fmt.Fprintf(os.Stderr, "\r[round %d] %d/%d evaluated, best still %.3f (%s elapsed)        ",
+					round, i+1, len(mutations), bestAvg, time.Since(start).Truncate(time.Second))
+			}
+		}
+
+		if !improved {
+			fmt.Fprintf(os.Stderr, "\nLocal maximum reached after %d rounds / %d improvements in %s\n",
+				round, improvements, time.Since(start).Truncate(time.Second))
+			fmt.Println()
+			printBestDeck(best)
+			return
+		}
+	}
+}
