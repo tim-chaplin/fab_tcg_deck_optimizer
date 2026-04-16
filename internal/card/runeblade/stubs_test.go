@@ -9,6 +9,7 @@ import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 // for "next Runeblade attack action card" (Runic Reaping, Mauvrion Skies).
 type stubRunebladeAttack struct{}
 
+func (stubRunebladeAttack) ID() card.ID  { return card.Invalid }
 func (stubRunebladeAttack) Name() string { return "StubRunebladeAttack" }
 func (stubRunebladeAttack) Cost() int    { return 0 }
 func (stubRunebladeAttack) Pitch() int   { return 0 }
@@ -25,6 +26,7 @@ func (stubRunebladeAttack) Play(*card.TurnState) int { return 0 }
 // Mauvrion Skies).
 type stubRunebladeWeapon struct{}
 
+func (stubRunebladeWeapon) ID() card.ID  { return card.Invalid }
 func (stubRunebladeWeapon) Name() string { return "StubRunebladeWeapon" }
 func (stubRunebladeWeapon) Cost() int    { return 0 }
 func (stubRunebladeWeapon) Pitch() int   { return 0 }
@@ -40,6 +42,7 @@ func (stubRunebladeWeapon) Play(*card.TurnState) int { return 0 }
 // pitched-attack +1{p} rider) do NOT fire on non-attack cards.
 type stubNonAttack struct{}
 
+func (stubNonAttack) ID() card.ID              { return card.Invalid }
 func (stubNonAttack) Name() string             { return "StubNonAttack" }
 func (stubNonAttack) Cost() int                { return 0 }
 func (stubNonAttack) Pitch() int               { return 0 }
@@ -53,6 +56,7 @@ func (stubNonAttack) Play(*card.TurnState) int { return 0 }
 // Skullform's +3 bonus).
 type stubAura struct{}
 
+func (stubAura) ID() card.ID              { return card.Invalid }
 func (stubAura) Name() string             { return "StubAura" }
 func (stubAura) Cost() int                { return 0 }
 func (stubAura) Pitch() int               { return 0 }

@@ -17,6 +17,7 @@ var bloodspillInvocationTypes = card.NewTypeSet(card.TypeRuneblade, card.TypeAct
 
 type BloodspillInvocationRed struct{}
 
+func (BloodspillInvocationRed) ID() card.ID                 { return card.BloodspillInvocationRed }
 func (BloodspillInvocationRed) Name() string              { return "Bloodspill Invocation (Red)" }
 func (BloodspillInvocationRed) Cost() int                 { return 1 }
 func (BloodspillInvocationRed) Pitch() int                { return 1 }
@@ -28,6 +29,7 @@ func (BloodspillInvocationRed) Play(*card.TurnState) int  { return 3 }
 
 type BloodspillInvocationYellow struct{}
 
+func (BloodspillInvocationYellow) ID() card.ID                 { return card.BloodspillInvocationYellow }
 func (BloodspillInvocationYellow) Name() string             { return "Bloodspill Invocation (Yellow)" }
 func (BloodspillInvocationYellow) Cost() int                { return 1 }
 func (BloodspillInvocationYellow) Pitch() int               { return 2 }
@@ -39,6 +41,7 @@ func (BloodspillInvocationYellow) Play(*card.TurnState) int { return 2 }
 
 type BloodspillInvocationBlue struct{}
 
+func (BloodspillInvocationBlue) ID() card.ID                 { return card.BloodspillInvocationBlue }
 func (BloodspillInvocationBlue) Name() string             { return "Bloodspill Invocation (Blue)" }
 func (BloodspillInvocationBlue) Cost() int                { return 1 }
 func (BloodspillInvocationBlue) Pitch() int               { return 3 }

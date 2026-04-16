@@ -16,6 +16,7 @@ var runeragerSwarmTypes = card.NewTypeSet(card.TypeRuneblade, card.TypeAction, c
 
 type RuneragerSwarmRed struct{}
 
+func (RuneragerSwarmRed) ID() card.ID                 { return card.RuneragerSwarmRed }
 func (RuneragerSwarmRed) Name() string             { return "Runerager Swarm (Red)" }
 func (RuneragerSwarmRed) Cost() int                { return 0 }
 func (RuneragerSwarmRed) Pitch() int               { return 1 }
@@ -29,6 +30,7 @@ func (c RuneragerSwarmRed) Play(s *card.TurnState) int {
 
 type RuneragerSwarmYellow struct{}
 
+func (RuneragerSwarmYellow) ID() card.ID                 { return card.RuneragerSwarmYellow }
 func (RuneragerSwarmYellow) Name() string             { return "Runerager Swarm (Yellow)" }
 func (RuneragerSwarmYellow) Cost() int                { return 0 }
 func (RuneragerSwarmYellow) Pitch() int               { return 2 }
@@ -42,6 +44,7 @@ func (c RuneragerSwarmYellow) Play(s *card.TurnState) int {
 
 type RuneragerSwarmBlue struct{}
 
+func (RuneragerSwarmBlue) ID() card.ID                 { return card.RuneragerSwarmBlue }
 func (RuneragerSwarmBlue) Name() string             { return "Runerager Swarm (Blue)" }
 func (RuneragerSwarmBlue) Cost() int                { return 0 }
 func (RuneragerSwarmBlue) Pitch() int               { return 3 }

@@ -17,6 +17,7 @@ var reekOfCorruptionTypes = card.NewTypeSet(card.TypeRuneblade, card.TypeAction,
 
 type ReekOfCorruptionRed struct{}
 
+func (ReekOfCorruptionRed) ID() card.ID                 { return card.ReekOfCorruptionRed }
 func (ReekOfCorruptionRed) Name() string               { return "Reek of Corruption (Red)" }
 func (ReekOfCorruptionRed) Cost() int                  { return 2 }
 func (ReekOfCorruptionRed) Pitch() int                 { return 1 }
@@ -28,6 +29,7 @@ func (c ReekOfCorruptionRed) Play(*card.TurnState) int { return c.Attack() + 3 }
 
 type ReekOfCorruptionYellow struct{}
 
+func (ReekOfCorruptionYellow) ID() card.ID                 { return card.ReekOfCorruptionYellow }
 func (ReekOfCorruptionYellow) Name() string               { return "Reek of Corruption (Yellow)" }
 func (ReekOfCorruptionYellow) Cost() int                  { return 2 }
 func (ReekOfCorruptionYellow) Pitch() int                 { return 2 }
@@ -39,6 +41,7 @@ func (c ReekOfCorruptionYellow) Play(*card.TurnState) int { return c.Attack() + 
 
 type ReekOfCorruptionBlue struct{}
 
+func (ReekOfCorruptionBlue) ID() card.ID                 { return card.ReekOfCorruptionBlue }
 func (ReekOfCorruptionBlue) Name() string               { return "Reek of Corruption (Blue)" }
 func (ReekOfCorruptionBlue) Cost() int                  { return 2 }
 func (ReekOfCorruptionBlue) Pitch() int                 { return 3 }

@@ -9,6 +9,7 @@ import (
 // stubRuneAttack is a minimal Runeblade attack-action card.
 type stubRuneAttack struct{}
 
+func (stubRuneAttack) ID() card.ID             { return card.Invalid }
 func (stubRuneAttack) Name() string                { return "StubRuneAttack" }
 func (stubRuneAttack) Cost() int                   { return 0 }
 func (stubRuneAttack) Pitch() int                  { return 0 }
@@ -23,6 +24,7 @@ func (stubRuneAttack) Play(*card.TurnState) int { return 0 }
 // stubRuneAura is a minimal Runeblade non-attack action (an Aura).
 type stubRuneAura struct{}
 
+func (stubRuneAura) ID() card.ID             { return card.Invalid }
 func (stubRuneAura) Name() string                { return "StubRuneAura" }
 func (stubRuneAura) Cost() int                   { return 0 }
 func (stubRuneAura) Pitch() int                  { return 0 }
@@ -37,6 +39,7 @@ func (stubRuneAura) Play(*card.TurnState) int { return 0 }
 // stubNonRuneblade is an Action-Attack with no Runeblade type — should never trigger Viserai.
 type stubNonRuneblade struct{}
 
+func (stubNonRuneblade) ID() card.ID             { return card.Invalid }
 func (stubNonRuneblade) Name() string             { return "StubGeneric" }
 func (stubNonRuneblade) Cost() int                { return 0 }
 func (stubNonRuneblade) Pitch() int               { return 0 }
@@ -78,6 +81,7 @@ func TestViserai_PlayedCardNotRuneblade(t *testing.T) {
 // when it swings.
 type stubRuneWeapon struct{}
 
+func (stubRuneWeapon) ID() card.ID             { return card.Invalid }
 func (stubRuneWeapon) Name() string             { return "StubRuneWeapon" }
 func (stubRuneWeapon) Cost() int                { return 0 }
 func (stubRuneWeapon) Pitch() int               { return 0 }

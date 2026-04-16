@@ -20,6 +20,7 @@ var mauvrionSkiesTypes = card.NewTypeSet(card.TypeRuneblade, card.TypeAction)
 
 type MauvrionSkiesRed struct{}
 
+func (MauvrionSkiesRed) ID() card.ID                 { return card.MauvrionSkiesRed }
 func (MauvrionSkiesRed) Name() string               { return "Mauvrion Skies (Red)" }
 func (MauvrionSkiesRed) Cost() int                  { return 0 }
 func (MauvrionSkiesRed) Pitch() int                 { return 1 }
@@ -31,6 +32,7 @@ func (MauvrionSkiesRed) Play(s *card.TurnState) int { return mauvrionSkiesPlay(s
 
 type MauvrionSkiesYellow struct{}
 
+func (MauvrionSkiesYellow) ID() card.ID                 { return card.MauvrionSkiesYellow }
 func (MauvrionSkiesYellow) Name() string               { return "Mauvrion Skies (Yellow)" }
 func (MauvrionSkiesYellow) Cost() int                  { return 0 }
 func (MauvrionSkiesYellow) Pitch() int                 { return 2 }
@@ -42,6 +44,7 @@ func (MauvrionSkiesYellow) Play(s *card.TurnState) int { return mauvrionSkiesPla
 
 type MauvrionSkiesBlue struct{}
 
+func (MauvrionSkiesBlue) ID() card.ID                 { return card.MauvrionSkiesBlue }
 func (MauvrionSkiesBlue) Name() string               { return "Mauvrion Skies (Blue)" }
 func (MauvrionSkiesBlue) Cost() int                  { return 0 }
 func (MauvrionSkiesBlue) Pitch() int                 { return 3 }

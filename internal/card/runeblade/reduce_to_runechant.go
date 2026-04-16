@@ -16,6 +16,7 @@ var reduceToRunechantTypes = card.NewTypeSet(card.TypeRuneblade, card.TypeDefens
 
 type ReduceToRunechantRed struct{}
 
+func (ReduceToRunechantRed) ID() card.ID                 { return card.ReduceToRunechantRed }
 func (ReduceToRunechantRed) Name() string             { return "Reduce to Runechant (Red)" }
 func (ReduceToRunechantRed) Cost() int                { return 0 }
 func (ReduceToRunechantRed) Pitch() int               { return 1 }
@@ -27,6 +28,7 @@ func (ReduceToRunechantRed) Play(*card.TurnState) int { return 0 }
 
 type ReduceToRunechantYellow struct{}
 
+func (ReduceToRunechantYellow) ID() card.ID                 { return card.ReduceToRunechantYellow }
 func (ReduceToRunechantYellow) Name() string             { return "Reduce to Runechant (Yellow)" }
 func (ReduceToRunechantYellow) Cost() int                { return 0 }
 func (ReduceToRunechantYellow) Pitch() int               { return 2 }
@@ -38,6 +40,7 @@ func (ReduceToRunechantYellow) Play(*card.TurnState) int { return 0 }
 
 type ReduceToRunechantBlue struct{}
 
+func (ReduceToRunechantBlue) ID() card.ID                 { return card.ReduceToRunechantBlue }
 func (ReduceToRunechantBlue) Name() string             { return "Reduce to Runechant (Blue)" }
 func (ReduceToRunechantBlue) Cost() int                { return 0 }
 func (ReduceToRunechantBlue) Pitch() int               { return 3 }

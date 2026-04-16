@@ -14,6 +14,7 @@ var arcanicCrackleTypes = card.NewTypeSet(card.TypeRuneblade, card.TypeAction, c
 
 type ArcanicCrackleRed struct{}
 
+func (ArcanicCrackleRed) ID() card.ID                 { return card.ArcanicCrackleRed }
 func (ArcanicCrackleRed) Name() string                 { return "Arcanic Crackle (Red)" }
 func (ArcanicCrackleRed) Cost() int                    { return 0 }
 func (ArcanicCrackleRed) Pitch() int                   { return 1 }
@@ -25,6 +26,7 @@ func (c ArcanicCrackleRed) Play(*card.TurnState) int   { return c.Attack() + 1 }
 
 type ArcanicCrackleYellow struct{}
 
+func (ArcanicCrackleYellow) ID() card.ID                 { return card.ArcanicCrackleYellow }
 func (ArcanicCrackleYellow) Name() string               { return "Arcanic Crackle (Yellow)" }
 func (ArcanicCrackleYellow) Cost() int                  { return 0 }
 func (ArcanicCrackleYellow) Pitch() int                 { return 2 }
@@ -36,6 +38,7 @@ func (c ArcanicCrackleYellow) Play(*card.TurnState) int { return c.Attack() + 1 
 
 type ArcanicCrackleBlue struct{}
 
+func (ArcanicCrackleBlue) ID() card.ID                 { return card.ArcanicCrackleBlue }
 func (ArcanicCrackleBlue) Name() string               { return "Arcanic Crackle (Blue)" }
 func (ArcanicCrackleBlue) Cost() int                  { return 0 }
 func (ArcanicCrackleBlue) Pitch() int                 { return 3 }

@@ -242,6 +242,7 @@ func TestBest_ViseraiMauvrionChainsShrillIntoRuneragerIntoWeapon(t *testing.T) {
 // CardsRemaining. Used with grantSpy to detect cross-permutation PlayedCard wrapper leakage.
 type grantAll struct{}
 
+func (grantAll) ID() card.ID            { return card.Invalid }
 func (grantAll) Name() string           { return "grantAll" }
 func (grantAll) Cost() int              { return 0 }
 func (grantAll) Pitch() int              { return 0 }
@@ -263,6 +264,7 @@ func (grantAll) Play(s *card.TurnState) int {
 // visible here — tripping the spy.
 type grantSpy struct{ saw *bool }
 
+func (grantSpy) ID() card.ID              { return card.Invalid }
 func (grantSpy) Name() string             { return "grantSpy" }
 func (grantSpy) Cost() int                { return 0 }
 func (grantSpy) Pitch() int               { return 0 }

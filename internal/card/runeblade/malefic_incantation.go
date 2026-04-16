@@ -18,6 +18,7 @@ var maleficTypes = card.NewTypeSet(card.TypeRuneblade, card.TypeAction, card.Typ
 
 type MaleficIncantationRed struct{}
 
+func (MaleficIncantationRed) ID() card.ID                 { return card.MaleficIncantationRed }
 func (MaleficIncantationRed) Name() string              { return "Malefic Incantation (Red)" }
 func (MaleficIncantationRed) Cost() int                 { return 0 }
 func (MaleficIncantationRed) Pitch() int                { return 1 }
@@ -29,6 +30,7 @@ func (MaleficIncantationRed) Play(*card.TurnState) int { return 3 }
 
 type MaleficIncantationYellow struct{}
 
+func (MaleficIncantationYellow) ID() card.ID                 { return card.MaleficIncantationYellow }
 func (MaleficIncantationYellow) Name() string              { return "Malefic Incantation (Yellow)" }
 func (MaleficIncantationYellow) Cost() int                 { return 0 }
 func (MaleficIncantationYellow) Pitch() int                { return 2 }
@@ -40,6 +42,7 @@ func (MaleficIncantationYellow) Play(*card.TurnState) int { return 2 }
 
 type MaleficIncantationBlue struct{}
 
+func (MaleficIncantationBlue) ID() card.ID                 { return card.MaleficIncantationBlue }
 func (MaleficIncantationBlue) Name() string              { return "Malefic Incantation (Blue)" }
 func (MaleficIncantationBlue) Cost() int                 { return 0 }
 func (MaleficIncantationBlue) Pitch() int                { return 3 }

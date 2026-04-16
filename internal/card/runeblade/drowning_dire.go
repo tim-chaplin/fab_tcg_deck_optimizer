@@ -17,6 +17,7 @@ var drowningDireTypes = card.NewTypeSet(card.TypeRuneblade, card.TypeAction, car
 
 type DrowningDireRed struct{}
 
+func (DrowningDireRed) ID() card.ID                 { return card.DrowningDireRed }
 func (DrowningDireRed) Name() string                 { return "Drowning Dire (Red)" }
 func (DrowningDireRed) Cost() int                    { return 2 }
 func (DrowningDireRed) Pitch() int                   { return 1 }
@@ -28,6 +29,7 @@ func (c DrowningDireRed) Play(*card.TurnState) int   { return c.Attack() }
 
 type DrowningDireYellow struct{}
 
+func (DrowningDireYellow) ID() card.ID                 { return card.DrowningDireYellow }
 func (DrowningDireYellow) Name() string                 { return "Drowning Dire (Yellow)" }
 func (DrowningDireYellow) Cost() int                    { return 2 }
 func (DrowningDireYellow) Pitch() int                   { return 2 }
@@ -39,6 +41,7 @@ func (c DrowningDireYellow) Play(*card.TurnState) int   { return c.Attack() }
 
 type DrowningDireBlue struct{}
 
+func (DrowningDireBlue) ID() card.ID                 { return card.DrowningDireBlue }
 func (DrowningDireBlue) Name() string                 { return "Drowning Dire (Blue)" }
 func (DrowningDireBlue) Cost() int                    { return 2 }
 func (DrowningDireBlue) Pitch() int                   { return 3 }

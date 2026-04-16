@@ -14,6 +14,7 @@ var singeingSteelbladeTypes = card.NewTypeSet(card.TypeRuneblade, card.TypeActio
 
 type SingeingSteelbladeRed struct{}
 
+func (SingeingSteelbladeRed) ID() card.ID                 { return card.SingeingSteelbladeRed }
 func (SingeingSteelbladeRed) Name() string               { return "Singeing Steelblade (Red)" }
 func (SingeingSteelbladeRed) Cost() int                  { return 1 }
 func (SingeingSteelbladeRed) Pitch() int                 { return 1 }
@@ -25,6 +26,7 @@ func (c SingeingSteelbladeRed) Play(*card.TurnState) int { return c.Attack() + 1
 
 type SingeingSteelbladeYellow struct{}
 
+func (SingeingSteelbladeYellow) ID() card.ID                 { return card.SingeingSteelbladeYellow }
 func (SingeingSteelbladeYellow) Name() string               { return "Singeing Steelblade (Yellow)" }
 func (SingeingSteelbladeYellow) Cost() int                  { return 1 }
 func (SingeingSteelbladeYellow) Pitch() int                 { return 2 }
@@ -36,6 +38,7 @@ func (c SingeingSteelbladeYellow) Play(*card.TurnState) int { return c.Attack() 
 
 type SingeingSteelbladeBlue struct{}
 
+func (SingeingSteelbladeBlue) ID() card.ID                 { return card.SingeingSteelbladeBlue }
 func (SingeingSteelbladeBlue) Name() string               { return "Singeing Steelblade (Blue)" }
 func (SingeingSteelbladeBlue) Cost() int                  { return 1 }
 func (SingeingSteelbladeBlue) Pitch() int                 { return 3 }

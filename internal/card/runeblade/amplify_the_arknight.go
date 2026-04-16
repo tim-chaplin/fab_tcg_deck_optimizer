@@ -14,6 +14,7 @@ var amplifyTheArknightTypes = card.NewTypeSet(card.TypeRuneblade, card.TypeActio
 
 type AmplifyTheArknightRed struct{}
 
+func (AmplifyTheArknightRed) ID() card.ID                 { return card.AmplifyTheArknightRed }
 func (AmplifyTheArknightRed) Name() string             { return "Amplify the Arknight (Red)" }
 func (AmplifyTheArknightRed) Cost() int                { return 0 }
 func (AmplifyTheArknightRed) Pitch() int               { return 1 }
@@ -25,6 +26,7 @@ func (c AmplifyTheArknightRed) Play(*card.TurnState) int { return c.Attack() }
 
 type AmplifyTheArknightYellow struct{}
 
+func (AmplifyTheArknightYellow) ID() card.ID                 { return card.AmplifyTheArknightYellow }
 func (AmplifyTheArknightYellow) Name() string             { return "Amplify the Arknight (Yellow)" }
 func (AmplifyTheArknightYellow) Cost() int                { return 0 }
 func (AmplifyTheArknightYellow) Pitch() int               { return 2 }
@@ -36,6 +38,7 @@ func (c AmplifyTheArknightYellow) Play(*card.TurnState) int { return c.Attack() 
 
 type AmplifyTheArknightBlue struct{}
 
+func (AmplifyTheArknightBlue) ID() card.ID                 { return card.AmplifyTheArknightBlue }
 func (AmplifyTheArknightBlue) Name() string             { return "Amplify the Arknight (Blue)" }
 func (AmplifyTheArknightBlue) Cost() int                { return 0 }
 func (AmplifyTheArknightBlue) Pitch() int               { return 3 }

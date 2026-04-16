@@ -17,6 +17,7 @@ var runebloodIncantationTypes = card.NewTypeSet(card.TypeRuneblade, card.TypeAct
 
 type RunebloodIncantationRed struct{}
 
+func (RunebloodIncantationRed) ID() card.ID                 { return card.RunebloodIncantationRed }
 func (RunebloodIncantationRed) Name() string              { return "Runeblood Incantation (Red)" }
 func (RunebloodIncantationRed) Cost() int                 { return 1 }
 func (RunebloodIncantationRed) Pitch() int                { return 1 }
@@ -28,6 +29,7 @@ func (RunebloodIncantationRed) Play(*card.TurnState) int  { return 3 }
 
 type RunebloodIncantationYellow struct{}
 
+func (RunebloodIncantationYellow) ID() card.ID                 { return card.RunebloodIncantationYellow }
 func (RunebloodIncantationYellow) Name() string             { return "Runeblood Incantation (Yellow)" }
 func (RunebloodIncantationYellow) Cost() int                { return 1 }
 func (RunebloodIncantationYellow) Pitch() int               { return 2 }
@@ -39,6 +41,7 @@ func (RunebloodIncantationYellow) Play(*card.TurnState) int { return 2 }
 
 type RunebloodIncantationBlue struct{}
 
+func (RunebloodIncantationBlue) ID() card.ID                 { return card.RunebloodIncantationBlue }
 func (RunebloodIncantationBlue) Name() string             { return "Runeblood Incantation (Blue)" }
 func (RunebloodIncantationBlue) Cost() int                { return 1 }
 func (RunebloodIncantationBlue) Pitch() int               { return 3 }

@@ -17,6 +17,7 @@ var drawnToTheDarkDimensionTypes = card.NewTypeSet(card.TypeRuneblade, card.Type
 
 type DrawnToTheDarkDimensionRed struct{}
 
+func (DrawnToTheDarkDimensionRed) ID() card.ID                 { return card.DrawnToTheDarkDimensionRed }
 func (DrawnToTheDarkDimensionRed) Name() string               { return "Drawn to the Dark Dimension (Red)" }
 func (DrawnToTheDarkDimensionRed) Cost() int                  { return 0 }
 func (DrawnToTheDarkDimensionRed) Pitch() int                 { return 1 }
@@ -28,6 +29,7 @@ func (c DrawnToTheDarkDimensionRed) Play(*card.TurnState) int { return c.Attack(
 
 type DrawnToTheDarkDimensionYellow struct{}
 
+func (DrawnToTheDarkDimensionYellow) ID() card.ID                 { return card.DrawnToTheDarkDimensionYellow }
 func (DrawnToTheDarkDimensionYellow) Name() string               { return "Drawn to the Dark Dimension (Yellow)" }
 func (DrawnToTheDarkDimensionYellow) Cost() int                  { return 0 }
 func (DrawnToTheDarkDimensionYellow) Pitch() int                 { return 2 }
@@ -39,6 +41,7 @@ func (c DrawnToTheDarkDimensionYellow) Play(*card.TurnState) int { return c.Atta
 
 type DrawnToTheDarkDimensionBlue struct{}
 
+func (DrawnToTheDarkDimensionBlue) ID() card.ID                 { return card.DrawnToTheDarkDimensionBlue }
 func (DrawnToTheDarkDimensionBlue) Name() string               { return "Drawn to the Dark Dimension (Blue)" }
 func (DrawnToTheDarkDimensionBlue) Cost() int                  { return 0 }
 func (DrawnToTheDarkDimensionBlue) Pitch() int                 { return 3 }

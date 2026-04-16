@@ -109,6 +109,9 @@ func (s *TurnState) HasPlayedType(t CardType) bool {
 // Card is any Flesh and Blood card that can be in a deck. Methods return the card's static profile
 // plus a Play hook for on-play logic.
 type Card interface {
+	// ID returns the card's canonical registry identifier. Stable within a build. Lets callers
+	// key maps / slices on cards without string-hashing Name().
+	ID() ID
 	Name() string
 	Cost() int
 	Pitch() int

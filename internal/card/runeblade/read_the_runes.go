@@ -14,6 +14,7 @@ var readTheRunesTypes = card.NewTypeSet(card.TypeRuneblade, card.TypeAction)
 
 type ReadTheRunesRed struct{}
 
+func (ReadTheRunesRed) ID() card.ID                 { return card.ReadTheRunesRed }
 func (ReadTheRunesRed) Name() string               { return "Read the Runes (Red)" }
 func (ReadTheRunesRed) Cost() int                  { return 0 }
 func (ReadTheRunesRed) Pitch() int                 { return 1 }
@@ -25,6 +26,7 @@ func (ReadTheRunesRed) Play(s *card.TurnState) int { s.AuraCreated = true; retur
 
 type ReadTheRunesYellow struct{}
 
+func (ReadTheRunesYellow) ID() card.ID                 { return card.ReadTheRunesYellow }
 func (ReadTheRunesYellow) Name() string               { return "Read the Runes (Yellow)" }
 func (ReadTheRunesYellow) Cost() int                  { return 0 }
 func (ReadTheRunesYellow) Pitch() int                 { return 2 }
@@ -36,6 +38,7 @@ func (ReadTheRunesYellow) Play(s *card.TurnState) int { s.AuraCreated = true; re
 
 type ReadTheRunesBlue struct{}
 
+func (ReadTheRunesBlue) ID() card.ID                 { return card.ReadTheRunesBlue }
 func (ReadTheRunesBlue) Name() string               { return "Read the Runes (Blue)" }
 func (ReadTheRunesBlue) Cost() int                  { return 0 }
 func (ReadTheRunesBlue) Pitch() int                 { return 3 }

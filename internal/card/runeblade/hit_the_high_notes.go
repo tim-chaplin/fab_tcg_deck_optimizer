@@ -12,6 +12,7 @@ var hitTheHighNotesTypes = card.NewTypeSet(card.TypeRuneblade, card.TypeAction, 
 
 type HitTheHighNotesRed struct{}
 
+func (HitTheHighNotesRed) ID() card.ID                 { return card.HitTheHighNotesRed }
 func (HitTheHighNotesRed) Name() string                  { return "Hit the High Notes (Red)" }
 func (HitTheHighNotesRed) Cost() int                     { return 1 }
 func (HitTheHighNotesRed) Pitch() int                    { return 1 }
@@ -23,6 +24,7 @@ func (c HitTheHighNotesRed) Play(s *card.TurnState) int  { return hitTheHighNote
 
 type HitTheHighNotesYellow struct{}
 
+func (HitTheHighNotesYellow) ID() card.ID                 { return card.HitTheHighNotesYellow }
 func (HitTheHighNotesYellow) Name() string                 { return "Hit the High Notes (Yellow)" }
 func (HitTheHighNotesYellow) Cost() int                    { return 1 }
 func (HitTheHighNotesYellow) Pitch() int                   { return 2 }
@@ -34,6 +36,7 @@ func (c HitTheHighNotesYellow) Play(s *card.TurnState) int { return hitTheHighNo
 
 type HitTheHighNotesBlue struct{}
 
+func (HitTheHighNotesBlue) ID() card.ID                 { return card.HitTheHighNotesBlue }
 func (HitTheHighNotesBlue) Name() string                 { return "Hit the High Notes (Blue)" }
 func (HitTheHighNotesBlue) Cost() int                    { return 1 }
 func (HitTheHighNotesBlue) Pitch() int                   { return 3 }

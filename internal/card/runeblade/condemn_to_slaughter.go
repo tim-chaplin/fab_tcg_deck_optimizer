@@ -19,6 +19,7 @@ var condemnToSlaughterTypes = card.NewTypeSet(card.TypeRuneblade, card.TypeActio
 
 type CondemnToSlaughterRed struct{}
 
+func (CondemnToSlaughterRed) ID() card.ID                 { return card.CondemnToSlaughterRed }
 func (CondemnToSlaughterRed) Name() string               { return "Condemn to Slaughter (Red)" }
 func (CondemnToSlaughterRed) Cost() int                  { return 1 }
 func (CondemnToSlaughterRed) Pitch() int                 { return 1 }
@@ -30,6 +31,7 @@ func (CondemnToSlaughterRed) Play(s *card.TurnState) int { return condemnToSlaug
 
 type CondemnToSlaughterYellow struct{}
 
+func (CondemnToSlaughterYellow) ID() card.ID                 { return card.CondemnToSlaughterYellow }
 func (CondemnToSlaughterYellow) Name() string               { return "Condemn to Slaughter (Yellow)" }
 func (CondemnToSlaughterYellow) Cost() int                  { return 1 }
 func (CondemnToSlaughterYellow) Pitch() int                 { return 2 }
@@ -41,6 +43,7 @@ func (CondemnToSlaughterYellow) Play(s *card.TurnState) int { return condemnToSl
 
 type CondemnToSlaughterBlue struct{}
 
+func (CondemnToSlaughterBlue) ID() card.ID                 { return card.CondemnToSlaughterBlue }
 func (CondemnToSlaughterBlue) Name() string               { return "Condemn to Slaughter (Blue)" }
 func (CondemnToSlaughterBlue) Cost() int                  { return 1 }
 func (CondemnToSlaughterBlue) Pitch() int                 { return 3 }
