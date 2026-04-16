@@ -22,10 +22,8 @@ const (
 	Defend
 )
 
-// Play is the chosen partition for a hand: one role per card, plus the resulting damage dealt and
-// damage prevented. Best sorts the caller's hand into canonical order in place, and Roles are
-// aligned to that post-sort order. (Weapon swing decisions are not reported in Roles — they're
-// consumed only for their damage contribution.)
+// Play is the chosen partition for a hand: one role per card plus a total value score. Best sorts
+// the caller's hand into canonical order in place, and Roles are aligned to that post-sort order.
 type Play struct {
 	Roles []Role
 	// Weapons holds the names of equipped weapons that were swung in the optimal attack sequence,
