@@ -156,42 +156,25 @@ func TestBest_BlessingOfOccultTokensOnlyAppearNextTurn(t *testing.T) {
 	}
 }
 
-// TestBest_ReduceToRunechantRejectsInsufficientBudget verifies that Reduce to Runechant's
-// per-runechant discount is re-priced against the attack line's leftoverRunechants. The hand has
-// three Reduces plus an Aether Slash; before the fix, the solver could block with all three
-// Reduces at Cost()=0 each while Aether attacked, scoring 13 (5 damage + 8 prevented). With the
-// discount correctly modeled, Aether's attack consumes the carryover (none here) and leaves 0
-// runechants, so each Reduce really costs 1 — the 3-Reduce full-block partition is rejected.
-// Best feasible partition: 2 Reduce block + 1 Reduce pitch + Aether pitch = prevent 8 + 2 damage
-// credits from the two Reduce reactions creating runechants = 10.
-func TestBest_ReduceToRunechantRejectsInsufficientBudget(t *testing.T) {
-	h := []card.Card{
-		runeblade.ReduceToRunechantRed{},
-		runeblade.ReduceToRunechantRed{},
-		runeblade.ReduceToRunechantRed{},
-		runeblade.AetherSlashRed{},
-	}
-	got := Best(hero.Viserai{}, nil, h, 12, nil, 0)
-	if got.Value != 10 {
-		t.Errorf("Value = %d, want 10 (3-Reduce block rejected without runechants; 2-Reduce block with each creating a runechant reaches 10). roles=[%s]",
-			got.Value, FormatRoles(h, got.Roles))
+// TestBest_ReduceToRunechantAffordableWithCarryover: a solo Reduce in hand with one Runechant
+// already in play can defend — the single carryover discounts PrintedCost 1 down to 0, so the
+// partition is affordable with no pitch. Value = 4 prevented + 1 from the token Reduce creates.
+func TestBest_ReduceToRunechantAffordableWithCarryover(t *testing.T) {
+	h := []card.Card{runeblade.ReduceToRunechantRed{}}
+	got := Best(hero.Viserai{}, nil, h, 4, nil, 1)
+	if got.Value != 5 {
+		t.Errorf("Value = %d, want 5 (Reduce defends at cost 0 thanks to 1 carryover Runechant)", got.Value)
 	}
 }
 
-// TestBest_ReduceToRunechantDiscountedByCarryover pins the other side: when the previous turn
-// left 3 runechants behind and no attack this turn consumes them, Reduce's effective cost is
-// max(1-3, 0) = 0, and a full three-Reduce block becomes affordable again. Optimal: Aether pitch,
-// all three Reduces block → prevent 12 + 3 damage credits (one per Reduce's Runechant creation).
-func TestBest_ReduceToRunechantDiscountedByCarryover(t *testing.T) {
-	h := []card.Card{
-		runeblade.ReduceToRunechantRed{},
-		runeblade.ReduceToRunechantRed{},
-		runeblade.ReduceToRunechantRed{},
-		runeblade.AetherSlashRed{},
-	}
-	got := Best(hero.Viserai{}, nil, h, 12, nil, 3)
-	if got.Value != 15 {
-		t.Errorf("Value = %d, want 15 (12 prevented + 3 Runechant-creation credits)", got.Value)
+// TestBest_ReduceToRunechantUnaffordableWithoutCarryover: the same solo Reduce with zero
+// Runechants in play can't be played at all — effective cost is 1 and there's no pitch to cover
+// it. The Defend partition is rejected and the best feasible line is pitching Reduce (value 0).
+func TestBest_ReduceToRunechantUnaffordableWithoutCarryover(t *testing.T) {
+	h := []card.Card{runeblade.ReduceToRunechantRed{}}
+	got := Best(hero.Viserai{}, nil, h, 4, nil, 0)
+	if got.Value != 0 {
+		t.Errorf("Value = %d, want 0 (Reduce can't pay its cost without Runechants or pitch)", got.Value)
 	}
 }
 
