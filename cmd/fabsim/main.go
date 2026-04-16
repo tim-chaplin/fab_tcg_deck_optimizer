@@ -104,25 +104,7 @@ func runRandom(numDecks, shallowShuffles, topN, deepShuffles, incoming, deckSize
 	printBestDeck(bestDeck)
 
 	if outPath != "" {
-		prev, prevAvg := loadExisting(outPath)
-		if prev == nil || bestDeck.Stats.Avg() > prevAvg {
-			data, err := deckio.Marshal(bestDeck)
-			if err != nil {
-				fmt.Fprintf(os.Stderr, "marshal best deck: %v\n", err)
-				os.Exit(1)
-			}
-			if err := os.WriteFile(outPath, data, 0o644); err != nil {
-				fmt.Fprintf(os.Stderr, "write %s: %v\n", outPath, err)
-				os.Exit(1)
-			}
-			if prev != nil {
-				fmt.Printf("\nNew best (%.3f) beats previous (%.3f), wrote %s\n", bestDeck.Stats.Avg(), prevAvg, outPath)
-			} else {
-				fmt.Printf("\nWrote best deck to %s\n", outPath)
-			}
-		} else {
-			fmt.Printf("\nPrevious best (%.3f) >= current (%.3f), %s unchanged\n", prevAvg, bestDeck.Stats.Avg(), outPath)
-		}
+		saveIfBetter(bestDeck, outPath)
 	}
 }
 
@@ -197,15 +179,34 @@ func loadExisting(path string) (*deck.Deck, float64) {
 	return d, d.Stats.Avg()
 }
 
-func runPrintOnly(path string) {
-	data, err := os.ReadFile(path)
+// saveIfBetter writes d to outPath if its average exceeds the previously saved deck (or if no
+// previous deck exists). Prints a status line either way.
+func saveIfBetter(d *deck.Deck, outPath string) {
+	prev, prevAvg := loadExisting(outPath)
+	if prev != nil && d.Stats.Avg() <= prevAvg {
+		fmt.Printf("\nPrevious best (%.3f) >= current (%.3f), %s unchanged\n", prevAvg, d.Stats.Avg(), outPath)
+		return
+	}
+	data, err := deckio.Marshal(d)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "read %s: %v\n", path, err)
+		fmt.Fprintf(os.Stderr, "marshal best deck: %v\n", err)
 		os.Exit(1)
 	}
-	d, err := deckio.Unmarshal(data)
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "unmarshal %s: %v\n", path, err)
+	if err := os.WriteFile(outPath, data, 0o644); err != nil {
+		fmt.Fprintf(os.Stderr, "write %s: %v\n", outPath, err)
+		os.Exit(1)
+	}
+	if prev != nil {
+		fmt.Printf("\nNew best (%.3f) beats previous (%.3f), wrote %s\n", d.Stats.Avg(), prevAvg, outPath)
+	} else {
+		fmt.Printf("\nWrote best deck to %s\n", outPath)
+	}
+}
+
+func runPrintOnly(path string) {
+	d, _ := loadExisting(path)
+	if d == nil {
+		fmt.Fprintf(os.Stderr, "could not load deck from %s\n", path)
 		os.Exit(1)
 	}
 	printBestDeck(d)
