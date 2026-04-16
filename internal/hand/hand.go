@@ -300,21 +300,53 @@ func bestAttackWithWeapons(hero hero.Hero, weapons []weapon.Weapon, attackers, p
 // the hero's OnCardPlayed hook fires so triggered abilities (e.g. Viserai's Runechants)
 // contribute.
 //
-// Each permutation gets its own freshly-allocated []*PlayedCard so that any grants applied via
-// CardsRemaining mutation don't leak across permutations.
+// Buffers for PlayedCard wrappers and CardsPlayed are pre-allocated once and reset per
+// permutation so that grants applied via CardsRemaining don't leak across orderings.
 func bestAttackDamage(hero hero.Hero, attackers, pitched, deck []card.Card) int {
-	if len(attackers) == 0 {
+	n := len(attackers)
+	if n == 0 {
 		return 0
 	}
-	perm := make([]card.Card, len(attackers))
+	perm := make([]card.Card, n)
 	copy(perm, attackers)
+
+	// Pre-allocate buffers reused across all permutations.
+	pcBuf := make([]card.PlayedCard, n)
+	ptrBuf := make([]*card.PlayedCard, n)
+	cardsPlayedBuf := make([]card.Card, 0, n)
+
 	best := 0
 	permute(perm, 0, func(order []card.Card) {
-		if dmg, legal := playSequence(hero, pitched, deck, order); legal && dmg > best {
+		if dmg, legal := playSequenceReuse(hero, pitched, deck, order, pcBuf, ptrBuf, cardsPlayedBuf); legal && dmg > best {
 			best = dmg
 		}
 	})
 	return best
+}
+
+// playSequenceReuse plays `order` as an attack chain, reusing caller-provided buffers to avoid
+// per-permutation heap allocation. pcBuf and ptrBuf must be at least len(order); cardsPlayedBuf
+// is reset to length 0 each call. The buffers are mutated in place; the caller must not read them
+// concurrently.
+func playSequenceReuse(hero hero.Hero, pitched, deck, order []card.Card, pcBuf []card.PlayedCard, ptrBuf []*card.PlayedCard, cardsPlayedBuf []card.Card) (damage int, legal bool) {
+	n := len(order)
+	for i, c := range order {
+		pcBuf[i] = card.PlayedCard{Card: c}
+		ptrBuf[i] = &pcBuf[i]
+	}
+	played := ptrBuf[:n]
+	state := card.TurnState{Pitched: pitched, Deck: deck, CardsPlayed: cardsPlayedBuf[:0]}
+	for i, pc := range played {
+		state.CardsRemaining = played[i+1:]
+		state.Self = pc
+		damage += pc.Card.Play(&state)
+		damage += hero.OnCardPlayed(pc.Card, &state)
+		state.CardsPlayed = append(state.CardsPlayed, pc.Card)
+		if i < n-1 && !pc.EffectiveGoAgain() {
+			return 0, false
+		}
+	}
+	return damage, true
 }
 
 // playSequence plays `order` as an attack chain and returns the total damage dealt plus whether
