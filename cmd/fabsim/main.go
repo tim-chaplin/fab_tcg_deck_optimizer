@@ -30,36 +30,60 @@ func main() {
 	outPath := flag.String("out", "best_deck.json", "path to write/read the best deck JSON")
 	flag.Parse()
 
+	cfg := config{
+		numDecks:        *numDecks,
+		shallowShuffles: *shallowShuffles,
+		topN:            *topN,
+		deepShuffles:    *deepShuffles,
+		incoming:        *incoming,
+		deckSize:        *deckSize,
+		maxCopies:       *maxCopies,
+		seed:            *seed,
+		outPath:         *outPath,
+	}
+
 	switch *mode {
 	case "random":
-		runRandom(*numDecks, *shallowShuffles, *topN, *deepShuffles, *incoming, *deckSize, *maxCopies, *seed, *outPath)
+		runRandom(cfg)
 	case "iterate":
-		runIterate(*deepShuffles, *incoming, *seed, *outPath)
+		runIterate(cfg)
 	case "print_only":
-		runPrintOnly(*outPath)
+		runPrintOnly(cfg.outPath)
 	default:
 		fmt.Fprintf(os.Stderr, "unknown mode %q (want random, iterate, or print_only)\n", *mode)
 		os.Exit(1)
 	}
 }
 
-func runRandom(numDecks, shallowShuffles, topN, deepShuffles, incoming, deckSize, maxCopies int, seed int64, outPath string) {
-	rng := rand.New(rand.NewSource(seed))
+type config struct {
+	numDecks        int
+	shallowShuffles int
+	topN            int
+	deepShuffles    int
+	incoming        int
+	deckSize        int
+	maxCopies       int
+	seed            int64
+	outPath         string
+}
+
+func runRandom(cfg config) {
+	rng := rand.New(rand.NewSource(cfg.seed))
 
 	// Phase 1: wide shallow search.
 	type candidate struct {
 		deck *deck.Deck
 		avg  float64
 	}
-	candidates := make([]candidate, 0, numDecks)
+	candidates := make([]candidate, 0, cfg.numDecks)
 
-	fmt.Fprintf(os.Stderr, "Phase 1: evaluating %d decks (%d shuffles each)\n", numDecks, shallowShuffles)
+	fmt.Fprintf(os.Stderr, "Phase 1: evaluating %d decks (%d shuffles each)\n", cfg.numDecks, cfg.shallowShuffles)
 	start := time.Now()
-	for i := 0; i < numDecks; i++ {
-		d := deck.Random(hero.Viserai{}, deckSize, maxCopies, rng)
-		stats := d.Evaluate(shallowShuffles, incoming, rng)
+	for i := 0; i < cfg.numDecks; i++ {
+		d := deck.Random(hero.Viserai{}, cfg.deckSize, cfg.maxCopies, rng)
+		stats := d.Evaluate(cfg.shallowShuffles, cfg.incoming, rng)
 		candidates = append(candidates, candidate{deck: d, avg: stats.Avg()})
-		printProgress(i+1, numDecks, time.Since(start))
+		printProgress(i+1, cfg.numDecks, time.Since(start))
 	}
 	fmt.Fprintln(os.Stderr)
 
@@ -69,7 +93,7 @@ func runRandom(numDecks, shallowShuffles, topN, deepShuffles, incoming, deckSize
 	}
 	min, median, max := summarize(avgs)
 	fmt.Printf("Phase 1: %d decks, %d shuffles each, incoming=%d, seed=%d\n",
-		numDecks, shallowShuffles, incoming, seed)
+		cfg.numDecks, cfg.shallowShuffles, cfg.incoming, cfg.seed)
 	fmt.Printf("Deck value distribution: min %.3f  median %.3f  max %.3f\n", min, median, max)
 	fmt.Println()
 
@@ -77,19 +101,20 @@ func runRandom(numDecks, shallowShuffles, topN, deepShuffles, incoming, deckSize
 	sort.Slice(candidates, func(i, j int) bool {
 		return candidates[i].avg > candidates[j].avg
 	})
+	topN := cfg.topN
 	if topN > len(candidates) {
 		topN = len(candidates)
 	}
 	finalists := candidates[:topN]
 
 	// Phase 2: deep evaluation of finalists with fresh stats.
-	fmt.Fprintf(os.Stderr, "Phase 2: re-evaluating top %d decks (%d shuffles each)\n", topN, deepShuffles)
+	fmt.Fprintf(os.Stderr, "Phase 2: re-evaluating top %d decks (%d shuffles each)\n", topN, cfg.deepShuffles)
 	var bestDeck *deck.Deck
 	bestAvg := -1.0
 	start = time.Now()
 	for i, c := range finalists {
 		d := deck.New(c.deck.Hero, c.deck.Weapons, c.deck.Cards)
-		stats := d.Evaluate(deepShuffles, incoming, rng)
+		stats := d.Evaluate(cfg.deepShuffles, cfg.incoming, rng)
 		avg := stats.Avg()
 		if avg > bestAvg {
 			bestAvg = avg
@@ -99,25 +124,25 @@ func runRandom(numDecks, shallowShuffles, topN, deepShuffles, incoming, deckSize
 	}
 	fmt.Fprintln(os.Stderr)
 
-	fmt.Printf("Phase 2: re-evaluated top %d decks with %d shuffles\n", topN, deepShuffles)
+	fmt.Printf("Phase 2: re-evaluated top %d decks with %d shuffles\n", topN, cfg.deepShuffles)
 	fmt.Println()
 	printBestDeck(bestDeck)
 
-	if outPath != "" {
-		saveIfBetter(bestDeck, outPath)
+	if cfg.outPath != "" {
+		saveIfBetter(bestDeck, cfg.outPath)
 	}
 }
 
-func runIterate(shuffles, incoming int, seed int64, outPath string) {
-	best, bestAvg := loadExisting(outPath)
+func runIterate(cfg config) {
+	best, bestAvg := loadExisting(cfg.outPath)
 	if best == nil {
-		fmt.Fprintf(os.Stderr, "no existing deck at %s — run with --mode=random first\n", outPath)
+		fmt.Fprintf(os.Stderr, "no existing deck at %s — run with --mode=random first\n", cfg.outPath)
 		os.Exit(1)
 	}
-	fmt.Printf("Loaded best deck (avg %.3f) from %s\n", bestAvg, outPath)
+	fmt.Printf("Loaded best deck (avg %.3f) from %s\n", bestAvg, cfg.outPath)
 	fmt.Println("Press Enter to stop.")
 
-	rng := rand.New(rand.NewSource(seed))
+	rng := rand.New(rand.NewSource(cfg.seed))
 
 	// Signal channel: background goroutine reads stdin and sends on stop.
 	stop := make(chan struct{}, 1)
@@ -144,7 +169,7 @@ func runIterate(shuffles, incoming int, seed int64, outPath string) {
 		iter++
 		candidate := deck.Mutate(best, rng)
 		d := deck.New(candidate.Hero, candidate.Weapons, candidate.Cards)
-		stats := d.Evaluate(shuffles, incoming, rng)
+		stats := d.Evaluate(cfg.deepShuffles, cfg.incoming, rng)
 		avg := stats.Avg()
 
 		if avg > bestAvg {
@@ -153,7 +178,7 @@ func runIterate(shuffles, incoming int, seed int64, outPath string) {
 			best = d
 			data, err := deckio.Marshal(best)
 			if err == nil {
-				os.WriteFile(outPath, data, 0o644)
+				os.WriteFile(cfg.outPath, data, 0o644)
 			}
 			fmt.Fprintf(os.Stderr, "\r[iter %d] new best: %.3f (+%d improvements)        \n",
 				iter, bestAvg, improvements)
