@@ -52,7 +52,8 @@ This is a work in progress. The current model is deliberately narrow:
   enumerates every single-slot mutation (every alternative weapon loadout + every (card-in-deck,
   card-out-of-deck) swap), adopts the first one that scores higher, and restarts. When a full
   round finishes without finding an improvement, the deck is at a local maximum and `iterate`
-  exits. Press Enter to abort mid-round. Requires a saved deck to exist — run `random` first.
+  exits. Press Enter to abort mid-round. If `-out` doesn't exist yet, `iterate` bootstraps with a
+  single random deck and climbs from there — you don't have to run `random` first.
 - **`print_only`** — prints the deck at `-out` without running any simulation.
 
 ### Suggested workflow
