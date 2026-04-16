@@ -68,17 +68,40 @@ func runRandom(numDecks, shuffles, incoming, deckSize, maxCopies int, seed int64
 	printBestDeck(bestDeck)
 
 	if outPath != "" {
-		data, err := deckio.Marshal(bestDeck)
-		if err != nil {
-			fmt.Fprintf(os.Stderr, "marshal best deck: %v\n", err)
-			os.Exit(1)
+		prev, prevAvg := loadExisting(outPath)
+		if prev == nil || bestDeck.Stats.Avg() > prevAvg {
+			data, err := deckio.Marshal(bestDeck)
+			if err != nil {
+				fmt.Fprintf(os.Stderr, "marshal best deck: %v\n", err)
+				os.Exit(1)
+			}
+			if err := os.WriteFile(outPath, data, 0o644); err != nil {
+				fmt.Fprintf(os.Stderr, "write %s: %v\n", outPath, err)
+				os.Exit(1)
+			}
+			if prev != nil {
+				fmt.Printf("\nNew best (%.3f) beats previous (%.3f), wrote %s\n", bestDeck.Stats.Avg(), prevAvg, outPath)
+			} else {
+				fmt.Printf("\nWrote best deck to %s\n", outPath)
+			}
+		} else {
+			fmt.Printf("\nPrevious best (%.3f) >= current (%.3f), %s unchanged\n", prevAvg, bestDeck.Stats.Avg(), outPath)
 		}
-		if err := os.WriteFile(outPath, data, 0o644); err != nil {
-			fmt.Fprintf(os.Stderr, "write %s: %v\n", outPath, err)
-			os.Exit(1)
-		}
-		fmt.Printf("\nWrote best deck to %s\n", outPath)
 	}
+}
+
+// loadExisting reads and deserializes the deck at path. Returns (nil, 0) if the file doesn't
+// exist or can't be parsed — the caller treats that as "no previous best".
+func loadExisting(path string) (*deck.Deck, float64) {
+	data, err := os.ReadFile(path)
+	if err != nil {
+		return nil, 0
+	}
+	d, err := deckio.Unmarshal(data)
+	if err != nil {
+		return nil, 0
+	}
+	return d, d.Stats.Avg()
 }
 
 func runPrintOnly(path string) {
