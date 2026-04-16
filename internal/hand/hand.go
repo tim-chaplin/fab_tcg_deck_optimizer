@@ -323,7 +323,6 @@ func playSequence(hero hero.Hero, pitched, deck, order []card.Card) (damage int,
 		played[i] = &card.PlayedCard{Card: c}
 	}
 	state := card.TurnState{Pitched: pitched, Deck: deck}
-	legal = true
 	for i, pc := range played {
 		state.CardsRemaining = played[i+1:]
 		state.Self = pc
@@ -331,10 +330,10 @@ func playSequence(hero hero.Hero, pitched, deck, order []card.Card) (damage int,
 		damage += hero.OnCardPlayed(pc.Card, &state)
 		state.CardsPlayed = append(state.CardsPlayed, pc.Card)
 		if i < len(played)-1 && !pc.EffectiveGoAgain() {
-			legal = false
+			return 0, false
 		}
 	}
-	return
+	return damage, true
 }
 
 func permute(a []card.Card, k int, emit func([]card.Card)) {
