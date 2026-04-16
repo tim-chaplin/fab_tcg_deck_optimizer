@@ -17,8 +17,8 @@ import (
 )
 
 func main() {
-	numDecks := flag.Int("decks", 100, "number of random decks to generate and evaluate")
-	shuffles := flag.Int("shuffles", 1000, "number of shuffles to simulate per deck")
+	numDecks := flag.Int("decks", 1000, "number of random decks to generate and evaluate")
+	shuffles := flag.Int("shuffles", 100, "number of shuffles to simulate per deck")
 	incoming := flag.Int("incoming", 4, "opponent damage per turn")
 	deckSize := flag.Int("deck-size", 40, "number of cards per deck")
 	maxCopies := flag.Int("max-copies", 2, "maximum copies of any single card printing per deck")
@@ -29,13 +29,16 @@ func main() {
 
 	var bestDeck *deck.Deck
 	bestAvg := -1.0
+	avgs := make([]float64, 0, *numDecks)
 
 	start := time.Now()
 	for i := 0; i < *numDecks; i++ {
 		d := deck.Random(hero.Viserai{}, *deckSize, *maxCopies, rng)
 		stats := d.Evaluate(*shuffles, *incoming, rng)
-		if stats.Avg() > bestAvg {
-			bestAvg = stats.Avg()
+		avg := stats.Avg()
+		avgs = append(avgs, avg)
+		if avg > bestAvg {
+			bestAvg = avg
 			bestDeck = d
 		}
 		printProgress(i+1, *numDecks, time.Since(start))
@@ -44,8 +47,27 @@ func main() {
 
 	fmt.Printf("Generated %d decks, %d shuffles each, incoming=%d, seed=%d\n",
 		*numDecks, *shuffles, *incoming, *seed)
+	min, median, max := summarize(avgs)
+	fmt.Printf("Deck value distribution: min %.3f  median %.3f  max %.3f\n", min, median, max)
 	fmt.Println()
 	printBestDeck(bestDeck)
+}
+
+// summarize returns (min, median, max) of vs. Panics if vs is empty. Median of an even-length
+// slice is the mean of the two middle elements.
+func summarize(vs []float64) (min, median, max float64) {
+	sorted := make([]float64, len(vs))
+	copy(sorted, vs)
+	sort.Float64s(sorted)
+	n := len(sorted)
+	min = sorted[0]
+	max = sorted[n-1]
+	if n%2 == 1 {
+		median = sorted[n/2]
+	} else {
+		median = (sorted[n/2-1] + sorted[n/2]) / 2
+	}
+	return
 }
 
 func printBestDeck(d *deck.Deck) {
