@@ -168,15 +168,58 @@ func makeMemoKey(hero hero.Hero, weapons []weapon.Weapon, sortedIDs []cards.ID, 
 	return k
 }
 
+// attackBufs holds pre-allocated buffers for the attack-evaluation pipeline (bestAttackDamage →
+// playSequence). Allocated once per bestUncached call and reused across all partitions and weapon
+// masks to avoid repeated heap allocation.
+type attackBufs struct {
+	perm           []card.Card
+	pcBuf          []card.PlayedCard
+	ptrBuf         []*card.PlayedCard
+	cardsPlayedBuf []card.Card
+	state          *card.TurnState
+	attackerBuf    []card.Card // for bestAttackWithWeapons mask iteration
+}
+
+func newAttackBufs(handSize, weaponCount int) *attackBufs {
+	maxAttackers := handSize + weaponCount
+	return &attackBufs{
+		perm:           make([]card.Card, maxAttackers),
+		pcBuf:          make([]card.PlayedCard, maxAttackers),
+		ptrBuf:         make([]*card.PlayedCard, maxAttackers),
+		cardsPlayedBuf: make([]card.Card, 0, maxAttackers),
+		state:          &card.TurnState{},
+		attackerBuf:    make([]card.Card, maxAttackers),
+	}
+}
+
 func bestUncached(hero hero.Hero, weapons []weapon.Weapon, hand []card.Card, incomingDamage int, deck []card.Card) Play {
 	n := len(hand)
 	best := Play{Roles: make([]Role, n)}
 	roles := make([]Role, n)
 
+	// Pre-allocate all buffers once for the entire partition search.
+	bufs := newAttackBufs(n, len(weapons))
+	pitched := make([]card.Card, 0, n)
+	attackers := make([]card.Card, 0, n)
+	defenders := make([]card.Card, 0, n)
+
 	var recurse func(i int)
 	recurse = func(i int) {
 		if i == n {
-			evalPartition(hero, weapons, hand, roles, incomingDamage, deck, &best)
+			p, a, d := groupByRoleInto(hand, roles, pitched[:0], attackers[:0], defenders[:0])
+			if !canAfford(p, a) {
+				return
+			}
+			prevented := preventedDamage(d, incomingDamage)
+			defenseDealt := defenseReactionDamage(d, p, deck)
+			attackDealt, swung := bestAttackWithWeapons(hero, weapons, a, p, deck, bufs)
+
+			v := attackDealt + defenseDealt + prevented
+			if v > best.Value {
+				best.Value = v
+				copy(best.Roles, roles)
+				best.Weapons = swung
+			}
 			return
 		}
 		for r := Role(0); r <= Defend; r++ {
@@ -186,6 +229,22 @@ func bestUncached(hero hero.Hero, weapons []weapon.Weapon, hand []card.Card, inc
 	}
 	recurse(0)
 	return best
+}
+
+// groupByRoleInto is like groupByRole but appends into caller-provided slices (which should be
+// passed pre-reset to length 0) to avoid per-partition heap allocation.
+func groupByRoleInto(hand []card.Card, roles []Role, pitched, attackers, defenders []card.Card) ([]card.Card, []card.Card, []card.Card) {
+	for i, c := range hand {
+		switch roles[i] {
+		case Pitch:
+			pitched = append(pitched, c)
+		case Attack:
+			attackers = append(attackers, c)
+		case Defend:
+			defenders = append(defenders, c)
+		}
+	}
+	return pitched, attackers, defenders
 }
 
 // canAfford reports whether the pitch resources produced by pitched cover the combined Cost of
@@ -201,39 +260,6 @@ func canAfford(pitched, attackers []card.Card) bool {
 		cost += c.Cost()
 	}
 	return resources >= cost
-}
-
-func evalPartition(hero hero.Hero, weapons []weapon.Weapon, hand []card.Card, roles []Role, incoming int, deck []card.Card, best *Play) {
-	pitched, attackers, defenders := groupByRole(hand, roles)
-	if !canAfford(pitched, attackers) {
-		return
-	}
-	prevented := preventedDamage(defenders, incoming)
-	defenseDealt := defenseReactionDamage(defenders, pitched, deck)
-	attackDealt, swung := bestAttackWithWeapons(hero, weapons, attackers, pitched, deck)
-
-	v := attackDealt + defenseDealt + prevented
-	if v > best.Value {
-		best.Value = v
-		copy(best.Roles, roles)
-		best.Weapons = swung
-	}
-}
-
-// groupByRole buckets `hand` by `roles` (parallel slices) into pitchers, attackers, and
-// defenders. Order within each bucket matches the cards' positions in `hand`.
-func groupByRole(hand []card.Card, roles []Role) (pitched, attackers, defenders []card.Card) {
-	for i, c := range hand {
-		switch roles[i] {
-		case Pitch:
-			pitched = append(pitched, c)
-		case Attack:
-			attackers = append(attackers, c)
-		case Defend:
-			defenders = append(defenders, c)
-		}
-	}
-	return
 }
 
 // preventedDamage is the damage a wall of `defenders` blocks against `incoming`: the sum of
@@ -269,14 +295,13 @@ func defenseReactionDamage(defenders, pitched, deck []card.Card) int {
 // returns the max damage over all (affordable) weapon masks, plus the swung weapons from the
 // winning mask (in input order). Each selected weapon adds its Cost and joins the attacker
 // permutation inside bestAttackDamage.
-func bestAttackWithWeapons(hero hero.Hero, weapons []weapon.Weapon, attackers, pitched, deck []card.Card) (int, []string) {
+func bestAttackWithWeapons(hero hero.Hero, weapons []weapon.Weapon, attackers, pitched, deck []card.Card, bufs *attackBufs) (int, []string) {
 	best := 0
 	var bestSwung []string
-	// Pre-allocate a buffer large enough for attackers + all weapons to avoid per-mask allocation.
-	buf := make([]card.Card, len(attackers), len(attackers)+len(weapons))
-	copy(buf, attackers)
+	// Reuse the shared attacker buffer across mask iterations.
+	copy(bufs.attackerBuf, attackers)
 	for mask := 0; mask < 1<<len(weapons); mask++ {
-		allAttackers := buf[:len(attackers)]
+		allAttackers := bufs.attackerBuf[:len(attackers)]
 		var swung []string
 		for i, w := range weapons {
 			if mask&(1<<i) != 0 {
@@ -287,7 +312,7 @@ func bestAttackWithWeapons(hero hero.Hero, weapons []weapon.Weapon, attackers, p
 		if !canAfford(pitched, allAttackers) {
 			continue
 		}
-		if dealt := bestAttackDamage(hero, allAttackers, pitched, deck); dealt > best {
+		if dealt := bestAttackDamage(hero, allAttackers, pitched, deck, bufs); dealt > best {
 			best = dealt
 			bestSwung = swung
 		}
@@ -300,27 +325,19 @@ func bestAttackWithWeapons(hero hero.Hero, weapons []weapon.Weapon, attackers, p
 // the hero's OnCardPlayed hook fires so triggered abilities (e.g. Viserai's Runechants)
 // contribute.
 //
-// Buffers for PlayedCard wrappers and CardsPlayed are pre-allocated once and reset per
-// permutation so that grants applied via CardsRemaining don't leak across orderings.
-func bestAttackDamage(hero hero.Hero, attackers, pitched, deck []card.Card) int {
+// All buffers come from the shared attackBufs allocated once per bestUncached call; only the
+// permutation array is reset per call.
+func bestAttackDamage(hero hero.Hero, attackers, pitched, deck []card.Card, bufs *attackBufs) int {
 	n := len(attackers)
 	if n == 0 {
 		return 0
 	}
-	perm := make([]card.Card, n)
+	perm := bufs.perm[:n]
 	copy(perm, attackers)
-
-	// Pre-allocate buffers reused across all permutations, including the TurnState (which the
-	// compiler would otherwise heap-allocate each call since &state escapes through interface
-	// methods).
-	pcBuf := make([]card.PlayedCard, n)
-	ptrBuf := make([]*card.PlayedCard, n)
-	cardsPlayedBuf := make([]card.Card, 0, n)
-	state := &card.TurnState{}
 
 	best := 0
 	permute(perm, 0, func(order []card.Card) {
-		if dmg, legal := playSequence(hero, pitched, deck, order, pcBuf, ptrBuf, cardsPlayedBuf, state); legal && dmg > best {
+		if dmg, legal := playSequence(hero, pitched, deck, order, bufs.pcBuf, bufs.ptrBuf, bufs.cardsPlayedBuf, bufs.state); legal && dmg > best {
 			best = dmg
 		}
 	})

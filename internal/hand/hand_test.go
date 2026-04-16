@@ -295,7 +295,7 @@ func TestBestAttackDamage_PlayedCardGrantsDontLeakAcrossPermutations(t *testing.
 	// If the wrappers were reused across permutations the spy would see leaked grants and trip.
 	var sawLeak bool
 	attackers := []card.Card{grantAll{}, grantSpy{saw: &sawLeak}, grantAll{}}
-	_ = bestAttackDamage(stubHero{}, attackers, nil, nil)
+	_ = bestAttackDamage(stubHero{}, attackers, nil, nil, newAttackBufs(0, len(attackers)))
 	if sawLeak {
 		t.Fatalf("PlayedCard wrapper state leaked across permutations: grantSpy saw a pre-existing GrantedGoAgain when playing first")
 	}
