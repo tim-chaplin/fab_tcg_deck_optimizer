@@ -18,54 +18,81 @@ import (
 )
 
 func main() {
+	mode := flag.String("mode", "random", "run mode: random (generate+evaluate decks) or print_only (load and print best_deck.json)")
 	numDecks := flag.Int("decks", 1000, "number of random decks to generate and evaluate")
 	shuffles := flag.Int("shuffles", 100, "number of shuffles to simulate per deck")
 	incoming := flag.Int("incoming", 4, "opponent damage per turn")
 	deckSize := flag.Int("deck-size", 40, "number of cards per deck")
 	maxCopies := flag.Int("max-copies", 2, "maximum copies of any single card printing per deck")
 	seed := flag.Int64("seed", time.Now().UnixNano(), "RNG seed")
-	outPath := flag.String("out", "best_deck.json", "path to write the best deck as JSON")
+	outPath := flag.String("out", "best_deck.json", "path to write/read the best deck JSON")
 	flag.Parse()
 
-	rng := rand.New(rand.NewSource(*seed))
+	switch *mode {
+	case "random":
+		runRandom(*numDecks, *shuffles, *incoming, *deckSize, *maxCopies, *seed, *outPath)
+	case "print_only":
+		runPrintOnly(*outPath)
+	default:
+		fmt.Fprintf(os.Stderr, "unknown mode %q (want random or print_only)\n", *mode)
+		os.Exit(1)
+	}
+}
+
+func runRandom(numDecks, shuffles, incoming, deckSize, maxCopies int, seed int64, outPath string) {
+	rng := rand.New(rand.NewSource(seed))
 
 	var bestDeck *deck.Deck
 	bestAvg := -1.0
-	avgs := make([]float64, 0, *numDecks)
+	avgs := make([]float64, 0, numDecks)
 
 	start := time.Now()
-	for i := 0; i < *numDecks; i++ {
-		d := deck.Random(hero.Viserai{}, *deckSize, *maxCopies, rng)
-		stats := d.Evaluate(*shuffles, *incoming, rng)
+	for i := 0; i < numDecks; i++ {
+		d := deck.Random(hero.Viserai{}, deckSize, maxCopies, rng)
+		stats := d.Evaluate(shuffles, incoming, rng)
 		avg := stats.Avg()
 		avgs = append(avgs, avg)
 		if avg > bestAvg {
 			bestAvg = avg
 			bestDeck = d
 		}
-		printProgress(i+1, *numDecks, time.Since(start))
+		printProgress(i+1, numDecks, time.Since(start))
 	}
 	fmt.Fprintln(os.Stderr)
 
 	fmt.Printf("Generated %d decks, %d shuffles each, incoming=%d, seed=%d\n",
-		*numDecks, *shuffles, *incoming, *seed)
+		numDecks, shuffles, incoming, seed)
 	min, median, max := summarize(avgs)
 	fmt.Printf("Deck value distribution: min %.3f  median %.3f  max %.3f\n", min, median, max)
 	fmt.Println()
 	printBestDeck(bestDeck)
 
-	if *outPath != "" {
+	if outPath != "" {
 		data, err := deckio.Marshal(bestDeck)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "marshal best deck: %v\n", err)
 			os.Exit(1)
 		}
-		if err := os.WriteFile(*outPath, data, 0o644); err != nil {
-			fmt.Fprintf(os.Stderr, "write %s: %v\n", *outPath, err)
+		if err := os.WriteFile(outPath, data, 0o644); err != nil {
+			fmt.Fprintf(os.Stderr, "write %s: %v\n", outPath, err)
 			os.Exit(1)
 		}
-		fmt.Printf("\nWrote best deck to %s\n", *outPath)
+		fmt.Printf("\nWrote best deck to %s\n", outPath)
 	}
+}
+
+func runPrintOnly(path string) {
+	data, err := os.ReadFile(path)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "read %s: %v\n", path, err)
+		os.Exit(1)
+	}
+	d, err := deckio.Unmarshal(data)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "unmarshal %s: %v\n", path, err)
+		os.Exit(1)
+	}
+	printBestDeck(d)
 }
 
 // summarize returns (min, median, max) of vs. Panics if vs is empty. Median of an even-length
