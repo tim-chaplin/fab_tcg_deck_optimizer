@@ -100,14 +100,7 @@ func Best(hero hero.Hero, weapons []weapon.Weapon, hand []card.Card, incomingDam
 		}
 	}
 
-	// Insertion sort on (ids, hand) in parallel by ascending id. For n ≤ 8 this is faster than
-	// sort.Sort, and — more importantly — doesn't box the receiver through sort.Interface.
-	for i := 1; i < n; i++ {
-		for j := i; j > 0 && ids[j-1] > ids[j]; j-- {
-			ids[j-1], ids[j] = ids[j], ids[j-1]
-			hand[j-1], hand[j] = hand[j], hand[j-1]
-		}
-	}
+	sortHandByID(hand, ids[:], n)
 
 	// Unmemoable hands skip the cache read but still write — the stale entry is harmless since
 	// future unmemoable lookups will skip the read too.
@@ -121,6 +114,19 @@ func Best(hero hero.Hero, weapons []weapon.Weapon, hand []card.Card, incomingDam
 	result := bestUncached(hero, weapons, hand, incomingDamage, deck, runechantCarryover)
 	memo[key] = result
 	return result
+}
+
+// sortHandByID sorts the first n entries of `hand` and `ids` in parallel by ascending id, in
+// place. Insertion sort — for n ≤ 8 this is faster than sort.Sort and avoids boxing the slices
+// through sort.Interface on every call. Canonicalizing the hand order is what lets the memo key
+// collapse permutations of the same cards onto a single entry.
+func sortHandByID(hand []card.Card, ids []card.ID, n int) {
+	for i := 1; i < n; i++ {
+		for j := i; j > 0 && ids[j-1] > ids[j]; j-- {
+			ids[j-1], ids[j] = ids[j], ids[j-1]
+			hand[j-1], hand[j] = hand[j], hand[j-1]
+		}
+	}
 }
 
 // memoKey is a comparable struct used as the map key for memo. Hand size is capped at 8 cards;
