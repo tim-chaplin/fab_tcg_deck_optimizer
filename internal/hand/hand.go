@@ -310,37 +310,40 @@ func bestAttackDamage(hero hero.Hero, attackers, pitched, deck []card.Card) int 
 	perm := make([]card.Card, n)
 	copy(perm, attackers)
 
-	// Pre-allocate buffers reused across all permutations.
+	// Pre-allocate buffers reused across all permutations, including the TurnState (which the
+	// compiler would otherwise heap-allocate each call since &state escapes through interface
+	// methods).
 	pcBuf := make([]card.PlayedCard, n)
 	ptrBuf := make([]*card.PlayedCard, n)
 	cardsPlayedBuf := make([]card.Card, 0, n)
+	state := &card.TurnState{}
 
 	best := 0
 	permute(perm, 0, func(order []card.Card) {
-		if dmg, legal := playSequenceReuse(hero, pitched, deck, order, pcBuf, ptrBuf, cardsPlayedBuf); legal && dmg > best {
+		if dmg, legal := playSequence(hero, pitched, deck, order, pcBuf, ptrBuf, cardsPlayedBuf, state); legal && dmg > best {
 			best = dmg
 		}
 	})
 	return best
 }
 
-// playSequenceReuse plays `order` as an attack chain, reusing caller-provided buffers to avoid
+// playSequence plays `order` as an attack chain, reusing caller-provided buffers to avoid
 // per-permutation heap allocation. pcBuf and ptrBuf must be at least len(order); cardsPlayedBuf
-// is reset to length 0 each call. The buffers are mutated in place; the caller must not read them
-// concurrently.
-func playSequenceReuse(hero hero.Hero, pitched, deck, order []card.Card, pcBuf []card.PlayedCard, ptrBuf []*card.PlayedCard, cardsPlayedBuf []card.Card) (damage int, legal bool) {
+// is reset to length 0 each call. state is reset and reused each call. The buffers are mutated
+// in place; the caller must not read them concurrently.
+func playSequence(hero hero.Hero, pitched, deck, order []card.Card, pcBuf []card.PlayedCard, ptrBuf []*card.PlayedCard, cardsPlayedBuf []card.Card, state *card.TurnState) (damage int, legal bool) {
 	n := len(order)
 	for i, c := range order {
 		pcBuf[i] = card.PlayedCard{Card: c}
 		ptrBuf[i] = &pcBuf[i]
 	}
 	played := ptrBuf[:n]
-	state := card.TurnState{Pitched: pitched, Deck: deck, CardsPlayed: cardsPlayedBuf[:0]}
+	*state = card.TurnState{Pitched: pitched, Deck: deck, CardsPlayed: cardsPlayedBuf[:0]}
 	for i, pc := range played {
 		state.CardsRemaining = played[i+1:]
 		state.Self = pc
-		damage += pc.Card.Play(&state)
-		damage += hero.OnCardPlayed(pc.Card, &state)
+		damage += pc.Card.Play(state)
+		damage += hero.OnCardPlayed(pc.Card, state)
 		state.CardsPlayed = append(state.CardsPlayed, pc.Card)
 		if i < n-1 && !pc.EffectiveGoAgain() {
 			return 0, false
@@ -349,27 +352,6 @@ func playSequenceReuse(hero hero.Hero, pitched, deck, order []card.Card, pcBuf [
 	return damage, true
 }
 
-// playSequence plays `order` as an attack chain and returns the total damage dealt plus whether
-// the ordering is legal (every non-final card has Go Again). Each call allocates fresh
-// *PlayedCard wrappers so nothing leaks back to the caller.
-func playSequence(hero hero.Hero, pitched, deck, order []card.Card) (damage int, legal bool) {
-	played := make([]*card.PlayedCard, len(order))
-	for i, c := range order {
-		played[i] = &card.PlayedCard{Card: c}
-	}
-	state := card.TurnState{Pitched: pitched, Deck: deck}
-	for i, pc := range played {
-		state.CardsRemaining = played[i+1:]
-		state.Self = pc
-		damage += pc.Card.Play(&state)
-		damage += hero.OnCardPlayed(pc.Card, &state)
-		state.CardsPlayed = append(state.CardsPlayed, pc.Card)
-		if i < len(played)-1 && !pc.EffectiveGoAgain() {
-			return 0, false
-		}
-	}
-	return damage, true
-}
 
 func permute(a []card.Card, k int, emit func([]card.Card)) {
 	if k == len(a)-1 {
