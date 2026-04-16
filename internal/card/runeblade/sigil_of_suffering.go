@@ -14,7 +14,7 @@ package runeblade
 
 import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 
-var sigilOfSufferingTypes = map[string]bool{"Runeblade": true, "Defense Reaction": true}
+var sigilOfSufferingTypes = card.NewTypeSet(card.TypeRuneblade, card.TypeDefenseReaction)
 
 type SigilOfSufferingRed struct{}
 
@@ -23,7 +23,7 @@ func (SigilOfSufferingRed) Cost() int                { return 0 }
 func (SigilOfSufferingRed) Pitch() int               { return 1 }
 func (SigilOfSufferingRed) Attack() int              { return 0 }
 func (SigilOfSufferingRed) Defense() int             { return 4 }
-func (SigilOfSufferingRed) Types() map[string]bool   { return sigilOfSufferingTypes }
+func (SigilOfSufferingRed) Types() card.TypeSet       { return sigilOfSufferingTypes }
 func (SigilOfSufferingRed) GoAgain() bool            { return false }
 func (SigilOfSufferingRed) Play(*card.TurnState) int { return 1 }
 
@@ -34,7 +34,7 @@ func (SigilOfSufferingYellow) Cost() int                { return 0 }
 func (SigilOfSufferingYellow) Pitch() int               { return 2 }
 func (SigilOfSufferingYellow) Attack() int              { return 0 }
 func (SigilOfSufferingYellow) Defense() int             { return 3 }
-func (SigilOfSufferingYellow) Types() map[string]bool   { return sigilOfSufferingTypes }
+func (SigilOfSufferingYellow) Types() card.TypeSet       { return sigilOfSufferingTypes }
 func (SigilOfSufferingYellow) GoAgain() bool            { return false }
 func (SigilOfSufferingYellow) Play(*card.TurnState) int { return 1 }
 
@@ -45,6 +45,6 @@ func (SigilOfSufferingBlue) Cost() int                { return 0 }
 func (SigilOfSufferingBlue) Pitch() int               { return 3 }
 func (SigilOfSufferingBlue) Attack() int              { return 0 }
 func (SigilOfSufferingBlue) Defense() int             { return 2 }
-func (SigilOfSufferingBlue) Types() map[string]bool   { return sigilOfSufferingTypes }
+func (SigilOfSufferingBlue) Types() card.TypeSet       { return sigilOfSufferingTypes }
 func (SigilOfSufferingBlue) GoAgain() bool            { return false }
 func (SigilOfSufferingBlue) Play(*card.TurnState) int { return 1 }

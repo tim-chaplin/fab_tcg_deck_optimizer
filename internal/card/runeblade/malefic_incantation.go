@@ -14,7 +14,7 @@ package runeblade
 
 import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 
-var maleficTypes = map[string]bool{"Runeblade": true, "Action": true, "Aura": true}
+var maleficTypes = card.NewTypeSet(card.TypeRuneblade, card.TypeAction, card.TypeAura)
 
 type MaleficIncantationRed struct{}
 
@@ -23,7 +23,7 @@ func (MaleficIncantationRed) Cost() int                 { return 0 }
 func (MaleficIncantationRed) Pitch() int                { return 1 }
 func (MaleficIncantationRed) Attack() int               { return 0 }
 func (MaleficIncantationRed) Defense() int              { return 2 }
-func (MaleficIncantationRed) Types() map[string]bool    { return maleficTypes }
+func (MaleficIncantationRed) Types() card.TypeSet        { return maleficTypes }
 func (MaleficIncantationRed) GoAgain() bool             { return true }
 func (MaleficIncantationRed) Play(*card.TurnState) int { return 3 }
 
@@ -34,7 +34,7 @@ func (MaleficIncantationYellow) Cost() int                 { return 0 }
 func (MaleficIncantationYellow) Pitch() int                { return 2 }
 func (MaleficIncantationYellow) Attack() int               { return 0 }
 func (MaleficIncantationYellow) Defense() int              { return 2 }
-func (MaleficIncantationYellow) Types() map[string]bool    { return maleficTypes }
+func (MaleficIncantationYellow) Types() card.TypeSet        { return maleficTypes }
 func (MaleficIncantationYellow) GoAgain() bool             { return true }
 func (MaleficIncantationYellow) Play(*card.TurnState) int { return 2 }
 
@@ -45,6 +45,6 @@ func (MaleficIncantationBlue) Cost() int                 { return 0 }
 func (MaleficIncantationBlue) Pitch() int                { return 3 }
 func (MaleficIncantationBlue) Attack() int               { return 0 }
 func (MaleficIncantationBlue) Defense() int              { return 2 }
-func (MaleficIncantationBlue) Types() map[string]bool    { return maleficTypes }
+func (MaleficIncantationBlue) Types() card.TypeSet        { return maleficTypes }
 func (MaleficIncantationBlue) GoAgain() bool             { return true }
 func (MaleficIncantationBlue) Play(*card.TurnState) int { return 1 }

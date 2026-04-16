@@ -8,7 +8,7 @@ package runeblade
 
 import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 
-var shrillTypes = map[string]bool{"Runeblade": true, "Action": true, "Attack": true}
+var shrillTypes = card.NewTypeSet(card.TypeRuneblade, card.TypeAction, card.TypeAttack)
 
 type ShrillOfSkullformRed struct{}
 
@@ -17,7 +17,7 @@ func (ShrillOfSkullformRed) Cost() int                 { return 2 }
 func (ShrillOfSkullformRed) Pitch() int                { return 1 }
 func (ShrillOfSkullformRed) Attack() int               { return 4 }
 func (ShrillOfSkullformRed) Defense() int              { return 3 }
-func (ShrillOfSkullformRed) Types() map[string]bool    { return shrillTypes }
+func (ShrillOfSkullformRed) Types() card.TypeSet       { return shrillTypes }
 func (ShrillOfSkullformRed) GoAgain() bool             { return false }
 func (c ShrillOfSkullformRed) Play(s *card.TurnState) int {
 	return shrillPlay(c.Attack(), s)
@@ -30,7 +30,7 @@ func (ShrillOfSkullformYellow) Cost() int              { return 2 }
 func (ShrillOfSkullformYellow) Pitch() int             { return 2 }
 func (ShrillOfSkullformYellow) Attack() int            { return 3 }
 func (ShrillOfSkullformYellow) Defense() int           { return 3 }
-func (ShrillOfSkullformYellow) Types() map[string]bool { return shrillTypes }
+func (ShrillOfSkullformYellow) Types() card.TypeSet    { return shrillTypes }
 func (ShrillOfSkullformYellow) GoAgain() bool          { return false }
 func (c ShrillOfSkullformYellow) Play(s *card.TurnState) int {
 	return shrillPlay(c.Attack(), s)
@@ -43,14 +43,14 @@ func (ShrillOfSkullformBlue) Cost() int                { return 2 }
 func (ShrillOfSkullformBlue) Pitch() int               { return 3 }
 func (ShrillOfSkullformBlue) Attack() int              { return 2 }
 func (ShrillOfSkullformBlue) Defense() int             { return 3 }
-func (ShrillOfSkullformBlue) Types() map[string]bool   { return shrillTypes }
+func (ShrillOfSkullformBlue) Types() card.TypeSet      { return shrillTypes }
 func (ShrillOfSkullformBlue) GoAgain() bool            { return false }
 func (c ShrillOfSkullformBlue) Play(s *card.TurnState) int {
 	return shrillPlay(c.Attack(), s)
 }
 
 func shrillPlay(base int, s *card.TurnState) int {
-	if s.AuraCreated || s.HasPlayedType("Aura") {
+	if s.AuraCreated || s.HasPlayedType(card.TypeAura) {
 		return base + 3
 	}
 	return base

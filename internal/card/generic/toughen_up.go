@@ -13,6 +13,6 @@ func (ToughenUpBlue) Cost() int                { return 2 }
 func (ToughenUpBlue) Pitch() int               { return 3 }
 func (ToughenUpBlue) Attack() int              { return 0 }
 func (ToughenUpBlue) Defense() int             { return 4 }
-func (ToughenUpBlue) Types() map[string]bool   { return defenseReactionTypes }
+func (ToughenUpBlue) Types() card.TypeSet      { return defenseReactionTypes }
 func (ToughenUpBlue) GoAgain() bool            { return false }
 func (ToughenUpBlue) Play(*card.TurnState) int { return 0 }

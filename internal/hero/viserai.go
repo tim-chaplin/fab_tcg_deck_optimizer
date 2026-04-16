@@ -8,7 +8,7 @@ package hero
 
 import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 
-var viseraiTypes = map[string]bool{"Runeblade": true, "Hero": true, "Young": true}
+var viseraiTypes = card.NewTypeSet(card.TypeRuneblade, card.TypeHero, card.TypeYoung)
 
 // Viserai is Young Viserai.
 type Viserai struct{}
@@ -16,7 +16,7 @@ type Viserai struct{}
 func (Viserai) Name() string           { return "Viserai" }
 func (Viserai) Health() int            { return 20 }
 func (Viserai) Intelligence() int      { return 4 }
-func (Viserai) Types() map[string]bool { return viseraiTypes }
+func (Viserai) Types() card.TypeSet    { return viseraiTypes }
 
 // OnCardPlayed implements Viserai's hero ability: whenever a Runeblade card is played, if another
 // "non-attack action" (an Action that is not also an Attack) has already been played this turn,
@@ -24,12 +24,12 @@ func (Viserai) Types() map[string]bool { return viseraiTypes }
 func (Viserai) OnCardPlayed(played card.Card, s *card.TurnState) int {
 	t := played.Types()
 	// Weapon swings are not "playing a card" and don't trigger Viserai.
-	if !t["Runeblade"] || t["Weapon"] {
+	if !t.Has(card.TypeRuneblade) || t.Has(card.TypeWeapon) {
 		return 0
 	}
 	for _, c := range s.CardsPlayed {
 		ct := c.Types()
-		if ct["Action"] && !ct["Attack"] {
+		if ct.Has(card.TypeAction) && !ct.Has(card.TypeAttack) {
 			s.AuraCreated = true
 			return 1
 		}

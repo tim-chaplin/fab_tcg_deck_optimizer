@@ -10,7 +10,7 @@ package runeblade
 
 import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 
-var amplifyTheArknightTypes = map[string]bool{"Runeblade": true, "Action": true, "Attack": true}
+var amplifyTheArknightTypes = card.NewTypeSet(card.TypeRuneblade, card.TypeAction, card.TypeAttack)
 
 type AmplifyTheArknightRed struct{}
 
@@ -19,7 +19,7 @@ func (AmplifyTheArknightRed) Cost() int                { return 0 }
 func (AmplifyTheArknightRed) Pitch() int               { return 1 }
 func (AmplifyTheArknightRed) Attack() int              { return 6 }
 func (AmplifyTheArknightRed) Defense() int             { return 3 }
-func (AmplifyTheArknightRed) Types() map[string]bool   { return amplifyTheArknightTypes }
+func (AmplifyTheArknightRed) Types() card.TypeSet   { return amplifyTheArknightTypes }
 func (AmplifyTheArknightRed) GoAgain() bool            { return false }
 func (c AmplifyTheArknightRed) Play(*card.TurnState) int { return c.Attack() }
 
@@ -30,7 +30,7 @@ func (AmplifyTheArknightYellow) Cost() int                { return 0 }
 func (AmplifyTheArknightYellow) Pitch() int               { return 2 }
 func (AmplifyTheArknightYellow) Attack() int              { return 5 }
 func (AmplifyTheArknightYellow) Defense() int             { return 3 }
-func (AmplifyTheArknightYellow) Types() map[string]bool   { return amplifyTheArknightTypes }
+func (AmplifyTheArknightYellow) Types() card.TypeSet   { return amplifyTheArknightTypes }
 func (AmplifyTheArknightYellow) GoAgain() bool            { return false }
 func (c AmplifyTheArknightYellow) Play(*card.TurnState) int { return c.Attack() }
 
@@ -41,6 +41,6 @@ func (AmplifyTheArknightBlue) Cost() int                { return 0 }
 func (AmplifyTheArknightBlue) Pitch() int               { return 3 }
 func (AmplifyTheArknightBlue) Attack() int              { return 4 }
 func (AmplifyTheArknightBlue) Defense() int             { return 3 }
-func (AmplifyTheArknightBlue) Types() map[string]bool   { return amplifyTheArknightTypes }
+func (AmplifyTheArknightBlue) Types() card.TypeSet   { return amplifyTheArknightTypes }
 func (AmplifyTheArknightBlue) GoAgain() bool            { return false }
 func (c AmplifyTheArknightBlue) Play(*card.TurnState) int { return c.Attack() }

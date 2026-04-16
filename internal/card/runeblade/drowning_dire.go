@@ -13,7 +13,7 @@ package runeblade
 
 import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 
-var drowningDireTypes = map[string]bool{"Runeblade": true, "Action": true, "Attack": true}
+var drowningDireTypes = card.NewTypeSet(card.TypeRuneblade, card.TypeAction, card.TypeAttack)
 
 type DrowningDireRed struct{}
 
@@ -22,7 +22,7 @@ func (DrowningDireRed) Cost() int                    { return 2 }
 func (DrowningDireRed) Pitch() int                   { return 1 }
 func (DrowningDireRed) Attack() int                  { return 5 }
 func (DrowningDireRed) Defense() int                 { return 3 }
-func (DrowningDireRed) Types() map[string]bool       { return drowningDireTypes }
+func (DrowningDireRed) Types() card.TypeSet       { return drowningDireTypes }
 func (DrowningDireRed) GoAgain() bool                { return false }
 func (c DrowningDireRed) Play(*card.TurnState) int   { return c.Attack() }
 
@@ -33,7 +33,7 @@ func (DrowningDireYellow) Cost() int                    { return 2 }
 func (DrowningDireYellow) Pitch() int                   { return 2 }
 func (DrowningDireYellow) Attack() int                  { return 4 }
 func (DrowningDireYellow) Defense() int                 { return 3 }
-func (DrowningDireYellow) Types() map[string]bool       { return drowningDireTypes }
+func (DrowningDireYellow) Types() card.TypeSet       { return drowningDireTypes }
 func (DrowningDireYellow) GoAgain() bool                { return false }
 func (c DrowningDireYellow) Play(*card.TurnState) int   { return c.Attack() }
 
@@ -44,6 +44,6 @@ func (DrowningDireBlue) Cost() int                    { return 2 }
 func (DrowningDireBlue) Pitch() int                   { return 3 }
 func (DrowningDireBlue) Attack() int                  { return 3 }
 func (DrowningDireBlue) Defense() int                 { return 3 }
-func (DrowningDireBlue) Types() map[string]bool       { return drowningDireTypes }
+func (DrowningDireBlue) Types() card.TypeSet       { return drowningDireTypes }
 func (DrowningDireBlue) GoAgain() bool                { return false }
 func (c DrowningDireBlue) Play(*card.TurnState) int   { return c.Attack() }

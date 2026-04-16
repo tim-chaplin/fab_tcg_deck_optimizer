@@ -11,12 +11,7 @@ package weapon
 
 import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 
-var reapingBladeTypes = map[string]bool{
-	"Runeblade": true,
-	"Weapon":    true,
-	"Sword":     true,
-	"2H":        true,
-}
+var reapingBladeTypes = card.NewTypeSet(card.TypeRuneblade, card.TypeWeapon, card.TypeSword, card.TypeTwoHand)
 
 type ReapingBlade struct{}
 
@@ -25,7 +20,7 @@ func (ReapingBlade) Cost() int                    { return 1 }
 func (ReapingBlade) Pitch() int                   { return 0 }
 func (ReapingBlade) Attack() int                  { return 3 }
 func (ReapingBlade) Defense() int                 { return 0 }
-func (ReapingBlade) Types() map[string]bool       { return reapingBladeTypes }
+func (ReapingBlade) Types() card.TypeSet           { return reapingBladeTypes }
 func (ReapingBlade) GoAgain() bool                { return false }
 func (ReapingBlade) Hands() int                   { return 2 }
 func (c ReapingBlade) Play(*card.TurnState) int   { return c.Attack() }

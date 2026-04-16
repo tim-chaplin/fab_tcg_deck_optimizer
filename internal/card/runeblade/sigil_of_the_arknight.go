@@ -21,7 +21,7 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/simstate"
 )
 
-var sigilOfTheArknightTypes = map[string]bool{"Runeblade": true, "Action": true, "Aura": true}
+var sigilOfTheArknightTypes = card.NewTypeSet(card.TypeRuneblade, card.TypeAction, card.TypeAura)
 
 type SigilOfTheArknightBlue struct{}
 
@@ -30,7 +30,7 @@ func (SigilOfTheArknightBlue) Cost() int              { return 0 }
 func (SigilOfTheArknightBlue) Pitch() int             { return 3 }
 func (SigilOfTheArknightBlue) Attack() int            { return 0 }
 func (SigilOfTheArknightBlue) Defense() int           { return 2 }
-func (SigilOfTheArknightBlue) Types() map[string]bool { return sigilOfTheArknightTypes }
+func (SigilOfTheArknightBlue) Types() card.TypeSet    { return sigilOfTheArknightTypes }
 func (SigilOfTheArknightBlue) GoAgain() bool          { return true }
 func (SigilOfTheArknightBlue) NoMemo()                {}  // value depends on the state of the deck
 func (SigilOfTheArknightBlue) Play(s *card.TurnState) int {
@@ -44,7 +44,7 @@ func (SigilOfTheArknightBlue) Play(s *card.TurnState) int {
 		return 0
 	}
 	t := s.Deck[idx].Types()
-	if t["Attack"] && t["Action"] {
+	if t.Has(card.TypeAttack) && t.Has(card.TypeAction) {
 		return 3
 	}
 	return 0

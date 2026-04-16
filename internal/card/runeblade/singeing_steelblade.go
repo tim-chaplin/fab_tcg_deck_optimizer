@@ -10,7 +10,7 @@ package runeblade
 
 import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 
-var singeingSteelbladeTypes = map[string]bool{"Runeblade": true, "Action": true, "Attack": true}
+var singeingSteelbladeTypes = card.NewTypeSet(card.TypeRuneblade, card.TypeAction, card.TypeAttack)
 
 type SingeingSteelbladeRed struct{}
 
@@ -19,7 +19,7 @@ func (SingeingSteelbladeRed) Cost() int                  { return 1 }
 func (SingeingSteelbladeRed) Pitch() int                 { return 1 }
 func (SingeingSteelbladeRed) Attack() int                { return 4 }
 func (SingeingSteelbladeRed) Defense() int               { return 3 }
-func (SingeingSteelbladeRed) Types() map[string]bool     { return singeingSteelbladeTypes }
+func (SingeingSteelbladeRed) Types() card.TypeSet        { return singeingSteelbladeTypes }
 func (SingeingSteelbladeRed) GoAgain() bool              { return false }
 func (c SingeingSteelbladeRed) Play(*card.TurnState) int { return c.Attack() + 1 }
 
@@ -30,7 +30,7 @@ func (SingeingSteelbladeYellow) Cost() int                  { return 1 }
 func (SingeingSteelbladeYellow) Pitch() int                 { return 2 }
 func (SingeingSteelbladeYellow) Attack() int                { return 3 }
 func (SingeingSteelbladeYellow) Defense() int               { return 3 }
-func (SingeingSteelbladeYellow) Types() map[string]bool     { return singeingSteelbladeTypes }
+func (SingeingSteelbladeYellow) Types() card.TypeSet        { return singeingSteelbladeTypes }
 func (SingeingSteelbladeYellow) GoAgain() bool              { return false }
 func (c SingeingSteelbladeYellow) Play(*card.TurnState) int { return c.Attack() + 1 }
 
@@ -41,6 +41,6 @@ func (SingeingSteelbladeBlue) Cost() int                  { return 1 }
 func (SingeingSteelbladeBlue) Pitch() int                 { return 3 }
 func (SingeingSteelbladeBlue) Attack() int                { return 2 }
 func (SingeingSteelbladeBlue) Defense() int               { return 3 }
-func (SingeingSteelbladeBlue) Types() map[string]bool     { return singeingSteelbladeTypes }
+func (SingeingSteelbladeBlue) Types() card.TypeSet        { return singeingSteelbladeTypes }
 func (SingeingSteelbladeBlue) GoAgain() bool              { return false }
 func (c SingeingSteelbladeBlue) Play(*card.TurnState) int { return c.Attack() + 1 }

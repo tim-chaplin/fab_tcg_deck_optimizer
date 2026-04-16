@@ -14,7 +14,7 @@ package runeblade
 
 import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 
-var skyFireLanternsTypes = map[string]bool{"Runeblade": true, "Action": true}
+var skyFireLanternsTypes = card.NewTypeSet(card.TypeRuneblade, card.TypeAction)
 
 func skyFireLanternsPlay(selfPitch int, s *card.TurnState) int {
 	if len(s.Deck) == 0 {
@@ -34,7 +34,7 @@ func (SkyFireLanternsRed) Cost() int                    { return 0 }
 func (SkyFireLanternsRed) Pitch() int                   { return 1 }
 func (SkyFireLanternsRed) Attack() int                  { return 0 }
 func (SkyFireLanternsRed) Defense() int                 { return 2 }
-func (SkyFireLanternsRed) Types() map[string]bool       { return skyFireLanternsTypes }
+func (SkyFireLanternsRed) Types() card.TypeSet          { return skyFireLanternsTypes }
 func (SkyFireLanternsRed) GoAgain() bool                { return true }
 func (SkyFireLanternsRed) NoMemo()                      {} // value depends on top of deck
 func (c SkyFireLanternsRed) Play(s *card.TurnState) int { return skyFireLanternsPlay(c.Pitch(), s) }
@@ -46,7 +46,7 @@ func (SkyFireLanternsYellow) Cost() int                    { return 0 }
 func (SkyFireLanternsYellow) Pitch() int                   { return 2 }
 func (SkyFireLanternsYellow) Attack() int                  { return 0 }
 func (SkyFireLanternsYellow) Defense() int                 { return 2 }
-func (SkyFireLanternsYellow) Types() map[string]bool       { return skyFireLanternsTypes }
+func (SkyFireLanternsYellow) Types() card.TypeSet          { return skyFireLanternsTypes }
 func (SkyFireLanternsYellow) GoAgain() bool                { return true }
 func (SkyFireLanternsYellow) NoMemo()                      {}
 func (c SkyFireLanternsYellow) Play(s *card.TurnState) int { return skyFireLanternsPlay(c.Pitch(), s) }
@@ -58,7 +58,7 @@ func (SkyFireLanternsBlue) Cost() int                    { return 0 }
 func (SkyFireLanternsBlue) Pitch() int                   { return 3 }
 func (SkyFireLanternsBlue) Attack() int                  { return 0 }
 func (SkyFireLanternsBlue) Defense() int                 { return 2 }
-func (SkyFireLanternsBlue) Types() map[string]bool       { return skyFireLanternsTypes }
+func (SkyFireLanternsBlue) Types() card.TypeSet          { return skyFireLanternsTypes }
 func (SkyFireLanternsBlue) GoAgain() bool                { return true }
 func (SkyFireLanternsBlue) NoMemo()                      {}
 func (c SkyFireLanternsBlue) Play(s *card.TurnState) int { return skyFireLanternsPlay(c.Pitch(), s) }

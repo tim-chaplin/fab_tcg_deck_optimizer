@@ -10,7 +10,7 @@ package runeblade
 
 import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 
-var runeFlashTypes = map[string]bool{"Runeblade": true, "Action": true, "Attack": true}
+var runeFlashTypes = card.NewTypeSet(card.TypeRuneblade, card.TypeAction, card.TypeAttack)
 
 type RuneFlashRed struct{}
 
@@ -19,7 +19,7 @@ func (RuneFlashRed) Cost() int                  { return 0 }
 func (RuneFlashRed) Pitch() int                 { return 1 }
 func (RuneFlashRed) Attack() int                { return 4 }
 func (RuneFlashRed) Defense() int               { return 3 }
-func (RuneFlashRed) Types() map[string]bool     { return runeFlashTypes }
+func (RuneFlashRed) Types() card.TypeSet        { return runeFlashTypes }
 func (RuneFlashRed) GoAgain() bool              { return true }
 func (c RuneFlashRed) Play(*card.TurnState) int { return c.Attack() }
 
@@ -30,7 +30,7 @@ func (RuneFlashYellow) Cost() int                  { return 0 }
 func (RuneFlashYellow) Pitch() int                 { return 2 }
 func (RuneFlashYellow) Attack() int                { return 3 }
 func (RuneFlashYellow) Defense() int               { return 3 }
-func (RuneFlashYellow) Types() map[string]bool     { return runeFlashTypes }
+func (RuneFlashYellow) Types() card.TypeSet        { return runeFlashTypes }
 func (RuneFlashYellow) GoAgain() bool              { return true }
 func (c RuneFlashYellow) Play(*card.TurnState) int { return c.Attack() }
 
@@ -41,6 +41,6 @@ func (RuneFlashBlue) Cost() int                  { return 0 }
 func (RuneFlashBlue) Pitch() int                 { return 3 }
 func (RuneFlashBlue) Attack() int                { return 2 }
 func (RuneFlashBlue) Defense() int               { return 3 }
-func (RuneFlashBlue) Types() map[string]bool     { return runeFlashTypes }
+func (RuneFlashBlue) Types() card.TypeSet        { return runeFlashTypes }
 func (RuneFlashBlue) GoAgain() bool              { return true }
 func (c RuneFlashBlue) Play(*card.TurnState) int { return c.Attack() }

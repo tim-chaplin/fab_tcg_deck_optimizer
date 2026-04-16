@@ -16,7 +16,7 @@ package runeblade
 
 import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 
-var consumingVolitionTypes = map[string]bool{"Runeblade": true, "Action": true, "Attack": true}
+var consumingVolitionTypes = card.NewTypeSet(card.TypeRuneblade, card.TypeAction, card.TypeAttack)
 
 type ConsumingVolitionRed struct{}
 
@@ -25,7 +25,7 @@ func (ConsumingVolitionRed) Cost() int                  { return 1 }
 func (ConsumingVolitionRed) Pitch() int                 { return 1 }
 func (ConsumingVolitionRed) Attack() int                { return 4 }
 func (ConsumingVolitionRed) Defense() int               { return 3 }
-func (ConsumingVolitionRed) Types() map[string]bool     { return consumingVolitionTypes }
+func (ConsumingVolitionRed) Types() card.TypeSet     { return consumingVolitionTypes }
 func (ConsumingVolitionRed) GoAgain() bool              { return false }
 func (c ConsumingVolitionRed) Play(*card.TurnState) int { return c.Attack() + 3 }
 
@@ -36,7 +36,7 @@ func (ConsumingVolitionYellow) Cost() int                  { return 1 }
 func (ConsumingVolitionYellow) Pitch() int                 { return 2 }
 func (ConsumingVolitionYellow) Attack() int                { return 3 }
 func (ConsumingVolitionYellow) Defense() int               { return 3 }
-func (ConsumingVolitionYellow) Types() map[string]bool     { return consumingVolitionTypes }
+func (ConsumingVolitionYellow) Types() card.TypeSet     { return consumingVolitionTypes }
 func (ConsumingVolitionYellow) GoAgain() bool              { return false }
 func (c ConsumingVolitionYellow) Play(*card.TurnState) int { return c.Attack() + 3 }
 
@@ -47,6 +47,6 @@ func (ConsumingVolitionBlue) Cost() int                  { return 1 }
 func (ConsumingVolitionBlue) Pitch() int                 { return 3 }
 func (ConsumingVolitionBlue) Attack() int                { return 2 }
 func (ConsumingVolitionBlue) Defense() int               { return 3 }
-func (ConsumingVolitionBlue) Types() map[string]bool     { return consumingVolitionTypes }
+func (ConsumingVolitionBlue) Types() card.TypeSet     { return consumingVolitionTypes }
 func (ConsumingVolitionBlue) GoAgain() bool              { return false }
 func (c ConsumingVolitionBlue) Play(*card.TurnState) int { return c.Attack() + 3 }

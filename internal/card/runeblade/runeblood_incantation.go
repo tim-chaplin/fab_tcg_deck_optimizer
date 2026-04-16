@@ -13,7 +13,7 @@ package runeblade
 
 import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 
-var runebloodIncantationTypes = map[string]bool{"Runeblade": true, "Action": true, "Aura": true}
+var runebloodIncantationTypes = card.NewTypeSet(card.TypeRuneblade, card.TypeAction, card.TypeAura)
 
 type RunebloodIncantationRed struct{}
 
@@ -22,7 +22,7 @@ func (RunebloodIncantationRed) Cost() int                 { return 1 }
 func (RunebloodIncantationRed) Pitch() int                { return 1 }
 func (RunebloodIncantationRed) Attack() int               { return 0 }
 func (RunebloodIncantationRed) Defense() int              { return 2 }
-func (RunebloodIncantationRed) Types() map[string]bool    { return runebloodIncantationTypes }
+func (RunebloodIncantationRed) Types() card.TypeSet       { return runebloodIncantationTypes }
 func (RunebloodIncantationRed) GoAgain() bool             { return true }
 func (RunebloodIncantationRed) Play(*card.TurnState) int  { return 3 }
 
@@ -33,7 +33,7 @@ func (RunebloodIncantationYellow) Cost() int                { return 1 }
 func (RunebloodIncantationYellow) Pitch() int               { return 2 }
 func (RunebloodIncantationYellow) Attack() int              { return 0 }
 func (RunebloodIncantationYellow) Defense() int             { return 2 }
-func (RunebloodIncantationYellow) Types() map[string]bool   { return runebloodIncantationTypes }
+func (RunebloodIncantationYellow) Types() card.TypeSet      { return runebloodIncantationTypes }
 func (RunebloodIncantationYellow) GoAgain() bool            { return true }
 func (RunebloodIncantationYellow) Play(*card.TurnState) int { return 2 }
 
@@ -44,6 +44,6 @@ func (RunebloodIncantationBlue) Cost() int                { return 1 }
 func (RunebloodIncantationBlue) Pitch() int               { return 3 }
 func (RunebloodIncantationBlue) Attack() int              { return 0 }
 func (RunebloodIncantationBlue) Defense() int             { return 2 }
-func (RunebloodIncantationBlue) Types() map[string]bool   { return runebloodIncantationTypes }
+func (RunebloodIncantationBlue) Types() card.TypeSet      { return runebloodIncantationTypes }
 func (RunebloodIncantationBlue) GoAgain() bool            { return true }
 func (RunebloodIncantationBlue) Play(*card.TurnState) int { return 1 }

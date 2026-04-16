@@ -16,6 +16,6 @@ func (PutInContextBlue) Cost() int                { return 0 }
 func (PutInContextBlue) Pitch() int               { return 3 }
 func (PutInContextBlue) Attack() int              { return 0 }
 func (PutInContextBlue) Defense() int             { return 3 }
-func (PutInContextBlue) Types() map[string]bool   { return defenseReactionTypes }
+func (PutInContextBlue) Types() card.TypeSet      { return defenseReactionTypes }
 func (PutInContextBlue) GoAgain() bool            { return false }
 func (PutInContextBlue) Play(*card.TurnState) int { return 0 }

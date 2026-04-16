@@ -13,7 +13,7 @@ package runeblade
 
 import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 
-var reekOfCorruptionTypes = map[string]bool{"Runeblade": true, "Action": true, "Attack": true}
+var reekOfCorruptionTypes = card.NewTypeSet(card.TypeRuneblade, card.TypeAction, card.TypeAttack)
 
 type ReekOfCorruptionRed struct{}
 
@@ -22,7 +22,7 @@ func (ReekOfCorruptionRed) Cost() int                  { return 2 }
 func (ReekOfCorruptionRed) Pitch() int                 { return 1 }
 func (ReekOfCorruptionRed) Attack() int                { return 4 }
 func (ReekOfCorruptionRed) Defense() int               { return 3 }
-func (ReekOfCorruptionRed) Types() map[string]bool     { return reekOfCorruptionTypes }
+func (ReekOfCorruptionRed) Types() card.TypeSet        { return reekOfCorruptionTypes }
 func (ReekOfCorruptionRed) GoAgain() bool              { return false }
 func (c ReekOfCorruptionRed) Play(*card.TurnState) int { return c.Attack() + 3 }
 
@@ -33,7 +33,7 @@ func (ReekOfCorruptionYellow) Cost() int                  { return 2 }
 func (ReekOfCorruptionYellow) Pitch() int                 { return 2 }
 func (ReekOfCorruptionYellow) Attack() int                { return 3 }
 func (ReekOfCorruptionYellow) Defense() int               { return 3 }
-func (ReekOfCorruptionYellow) Types() map[string]bool     { return reekOfCorruptionTypes }
+func (ReekOfCorruptionYellow) Types() card.TypeSet        { return reekOfCorruptionTypes }
 func (ReekOfCorruptionYellow) GoAgain() bool              { return false }
 func (c ReekOfCorruptionYellow) Play(*card.TurnState) int { return c.Attack() + 3 }
 
@@ -44,6 +44,6 @@ func (ReekOfCorruptionBlue) Cost() int                  { return 2 }
 func (ReekOfCorruptionBlue) Pitch() int                 { return 3 }
 func (ReekOfCorruptionBlue) Attack() int                { return 2 }
 func (ReekOfCorruptionBlue) Defense() int               { return 3 }
-func (ReekOfCorruptionBlue) Types() map[string]bool     { return reekOfCorruptionTypes }
+func (ReekOfCorruptionBlue) Types() card.TypeSet        { return reekOfCorruptionTypes }
 func (ReekOfCorruptionBlue) GoAgain() bool              { return false }
 func (c ReekOfCorruptionBlue) Play(*card.TurnState) int { return c.Attack() + 3 }

@@ -17,7 +17,7 @@ package runeblade
 
 import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 
-var runicReapingTypes = map[string]bool{"Runeblade": true, "Action": true}
+var runicReapingTypes = card.NewTypeSet(card.TypeRuneblade, card.TypeAction)
 
 type RunicReapingRed struct{}
 
@@ -26,7 +26,7 @@ func (RunicReapingRed) Cost() int                  { return 1 }
 func (RunicReapingRed) Pitch() int                 { return 1 }
 func (RunicReapingRed) Attack() int                { return 0 }
 func (RunicReapingRed) Defense() int               { return 2 }
-func (RunicReapingRed) Types() map[string]bool     { return runicReapingTypes }
+func (RunicReapingRed) Types() card.TypeSet        { return runicReapingTypes }
 func (RunicReapingRed) GoAgain() bool              { return true }
 func (RunicReapingRed) Play(s *card.TurnState) int { return runicReapingPlay(s, 3) }
 
@@ -37,7 +37,7 @@ func (RunicReapingYellow) Cost() int                  { return 1 }
 func (RunicReapingYellow) Pitch() int                 { return 2 }
 func (RunicReapingYellow) Attack() int                { return 0 }
 func (RunicReapingYellow) Defense() int               { return 2 }
-func (RunicReapingYellow) Types() map[string]bool     { return runicReapingTypes }
+func (RunicReapingYellow) Types() card.TypeSet        { return runicReapingTypes }
 func (RunicReapingYellow) GoAgain() bool              { return true }
 func (RunicReapingYellow) Play(s *card.TurnState) int { return runicReapingPlay(s, 2) }
 
@@ -48,7 +48,7 @@ func (RunicReapingBlue) Cost() int                  { return 1 }
 func (RunicReapingBlue) Pitch() int                 { return 3 }
 func (RunicReapingBlue) Attack() int                { return 0 }
 func (RunicReapingBlue) Defense() int               { return 2 }
-func (RunicReapingBlue) Types() map[string]bool     { return runicReapingTypes }
+func (RunicReapingBlue) Types() card.TypeSet        { return runicReapingTypes }
 func (RunicReapingBlue) GoAgain() bool              { return true }
 func (RunicReapingBlue) Play(s *card.TurnState) int { return runicReapingPlay(s, 1) }
 
@@ -56,7 +56,7 @@ func runicReapingPlay(s *card.TurnState, n int) int {
 	hasNextAttack := false
 	for _, pc := range s.CardsRemaining {
 		t := pc.Card.Types()
-		if t["Runeblade"] && t["Action"] && t["Attack"] {
+		if t.Has(card.TypeRuneblade) && t.Has(card.TypeAction) && t.Has(card.TypeAttack) {
 			hasNextAttack = true
 			break
 		}
@@ -67,7 +67,7 @@ func runicReapingPlay(s *card.TurnState, n int) int {
 	s.AuraCreated = true
 	bonus := 0
 	for _, p := range s.Pitched {
-		if p.Types()["Attack"] {
+		if p.Types().Has(card.TypeAttack) {
 			bonus = 1
 			break
 		}

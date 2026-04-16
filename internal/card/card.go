@@ -2,6 +2,42 @@
 // implementations.
 package card
 
+// CardType is an enumerated card-type descriptor. Each constant corresponds to a single keyword
+// from a FaB card's type line (e.g. "Runeblade", "Action", "Attack").
+type CardType uint64
+
+const (
+	TypeAction          CardType = 1 << iota // "Action"
+	TypeAttack                               // "Attack"
+	TypeAura                                 // "Aura"
+	TypeDefenseReaction                      // "Defense Reaction"
+	TypeGeneric                              // "Generic"
+	TypeHero                                 // "Hero"
+	TypeOneHand                              // "1H"
+	TypeRuneblade                            // "Runeblade"
+	TypeScepter                              // "Scepter"
+	TypeSword                                // "Sword"
+	TypeTwoHand                              // "2H"
+	TypeWeapon                               // "Weapon"
+	TypeYoung                                // "Young"
+)
+
+// TypeSet is a bitfield of CardType values. It replaces map[string]bool for card type checks,
+// eliminating string hashing on every lookup.
+type TypeSet uint64
+
+// NewTypeSet returns a TypeSet containing all of the given types.
+func NewTypeSet(types ...CardType) TypeSet {
+	var s TypeSet
+	for _, t := range types {
+		s |= TypeSet(t)
+	}
+	return s
+}
+
+// Has reports whether s contains the given type.
+func (s TypeSet) Has(t CardType) bool { return s&TypeSet(t) != 0 }
+
 // PlayedCard wraps a Card with per-turn mutable flags that other cards' effects can toggle during
 // the chain. Instances are created by the solver at the start of each attack chain and live only
 // for that chain. Effects that grant keywords to "the next X" scan TurnState.CardsRemaining and
@@ -61,9 +97,9 @@ type Hero interface {
 }
 
 // HasPlayedType reports whether any card played this turn has the given type in its Types() set.
-func (s *TurnState) HasPlayedType(t string) bool {
+func (s *TurnState) HasPlayedType(t CardType) bool {
 	for _, c := range s.CardsPlayed {
-		if c.Types()[t] {
+		if c.Types().Has(t) {
 			return true
 		}
 	}
@@ -79,10 +115,9 @@ type Card interface {
 	// Attack is the card's base (printed) attack value. Conditional bonuses belong in Play, not here.
 	Attack() int
 	Defense() int
-	// Types is the card's type-line descriptors as a set, e.g. {"Runeblade": true, "Action": true,
-	// "Attack": true}. Implementations should return the same map each call (not a fresh literal) —
-	// the map is read, never mutated.
-	Types() map[string]bool
+	// Types returns the card's type-line descriptors as a TypeSet bitfield, e.g.
+	// NewTypeSet(TypeRuneblade, TypeAction, TypeAttack).
+	Types() TypeSet
 	// GoAgain reports whether playing this card grants an additional action point this turn. Cards
 	// printed with "Go again" return true.
 	GoAgain() bool

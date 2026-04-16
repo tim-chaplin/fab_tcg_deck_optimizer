@@ -11,7 +11,7 @@ package runeblade
 
 import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 
-var sigilOfDeadwoodTypes = map[string]bool{"Runeblade": true, "Action": true, "Aura": true}
+var sigilOfDeadwoodTypes = card.NewTypeSet(card.TypeRuneblade, card.TypeAction, card.TypeAura)
 
 type SigilOfDeadwoodBlue struct{}
 
@@ -20,6 +20,6 @@ func (SigilOfDeadwoodBlue) Cost() int                { return 0 }
 func (SigilOfDeadwoodBlue) Pitch() int               { return 3 }
 func (SigilOfDeadwoodBlue) Attack() int              { return 0 }
 func (SigilOfDeadwoodBlue) Defense() int             { return 2 }
-func (SigilOfDeadwoodBlue) Types() map[string]bool   { return sigilOfDeadwoodTypes }
+func (SigilOfDeadwoodBlue) Types() card.TypeSet      { return sigilOfDeadwoodTypes }
 func (SigilOfDeadwoodBlue) GoAgain() bool            { return true }
 func (SigilOfDeadwoodBlue) Play(*card.TurnState) int { return 1 }

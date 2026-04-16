@@ -12,12 +12,7 @@ package weapon
 
 import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 
-var nebulaBladeTypes = map[string]bool{
-	"Runeblade": true,
-	"Weapon":    true,
-	"Sword":     true,
-	"2H":        true,
-}
+var nebulaBladeTypes = card.NewTypeSet(card.TypeRuneblade, card.TypeWeapon, card.TypeSword, card.TypeTwoHand)
 
 type NebulaBlade struct{}
 
@@ -26,7 +21,7 @@ func (NebulaBlade) Cost() int                 { return 2 }
 func (NebulaBlade) Pitch() int                { return 0 }
 func (NebulaBlade) Attack() int               { return 1 }
 func (NebulaBlade) Defense() int              { return 0 }
-func (NebulaBlade) Types() map[string]bool    { return nebulaBladeTypes }
+func (NebulaBlade) Types() card.TypeSet        { return nebulaBladeTypes }
 func (NebulaBlade) GoAgain() bool             { return false }
 func (NebulaBlade) Hands() int                { return 2 }
 func (c NebulaBlade) Play(s *card.TurnState) int {
@@ -34,7 +29,7 @@ func (c NebulaBlade) Play(s *card.TurnState) int {
 	dmg := c.Attack() + 1 // hit creates 1 Runechant (+1 future damage)
 	for _, pc := range s.CardsPlayed {
 		pt := pc.Types()
-		if pt["Action"] && !pt["Attack"] {
+		if pt.Has(card.TypeAction) && !pt.Has(card.TypeAttack) {
 			dmg += 3
 			break
 		}

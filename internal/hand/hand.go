@@ -320,7 +320,7 @@ func preventedDamage(defenders []card.Card, incoming int) int {
 func defenseReactionDamage(defenders, pitched, deck []card.Card) int {
 	total := 0
 	for _, d := range defenders {
-		if !d.Types()["Defense Reaction"] {
+		if !d.Types().Has(card.TypeDefenseReaction) {
 			continue
 		}
 		state := card.TurnState{Pitched: pitched, Deck: deck}

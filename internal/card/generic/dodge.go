@@ -6,7 +6,7 @@ package generic
 
 import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 
-var defenseReactionTypes = map[string]bool{"Generic": true, "Defense Reaction": true}
+var defenseReactionTypes = card.NewTypeSet(card.TypeGeneric, card.TypeDefenseReaction)
 
 type DodgeBlue struct{}
 
@@ -15,6 +15,6 @@ func (DodgeBlue) Cost() int                { return 0 }
 func (DodgeBlue) Pitch() int               { return 3 }
 func (DodgeBlue) Attack() int              { return 0 }
 func (DodgeBlue) Defense() int             { return 2 }
-func (DodgeBlue) Types() map[string]bool   { return defenseReactionTypes }
+func (DodgeBlue) Types() card.TypeSet      { return defenseReactionTypes }
 func (DodgeBlue) GoAgain() bool            { return false }
 func (DodgeBlue) Play(*card.TurnState) int { return 0 }

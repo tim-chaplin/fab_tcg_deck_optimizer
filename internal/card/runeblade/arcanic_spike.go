@@ -12,7 +12,7 @@ package runeblade
 
 import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 
-var arcanicSpikeTypes = map[string]bool{"Runeblade": true, "Action": true, "Attack": true}
+var arcanicSpikeTypes = card.NewTypeSet(card.TypeRuneblade, card.TypeAction, card.TypeAttack)
 
 type ArcanicSpikeRed struct{}
 
@@ -21,7 +21,7 @@ func (ArcanicSpikeRed) Cost() int                    { return 2 }
 func (ArcanicSpikeRed) Pitch() int                   { return 1 }
 func (ArcanicSpikeRed) Attack() int                  { return 7 }
 func (ArcanicSpikeRed) Defense() int                 { return 3 }
-func (ArcanicSpikeRed) Types() map[string]bool       { return arcanicSpikeTypes }
+func (ArcanicSpikeRed) Types() card.TypeSet       { return arcanicSpikeTypes }
 func (ArcanicSpikeRed) GoAgain() bool                { return false }
 func (c ArcanicSpikeRed) Play(*card.TurnState) int   { return c.Attack() }
 
@@ -32,7 +32,7 @@ func (ArcanicSpikeYellow) Cost() int                    { return 2 }
 func (ArcanicSpikeYellow) Pitch() int                   { return 2 }
 func (ArcanicSpikeYellow) Attack() int                  { return 6 }
 func (ArcanicSpikeYellow) Defense() int                 { return 3 }
-func (ArcanicSpikeYellow) Types() map[string]bool       { return arcanicSpikeTypes }
+func (ArcanicSpikeYellow) Types() card.TypeSet       { return arcanicSpikeTypes }
 func (ArcanicSpikeYellow) GoAgain() bool                { return false }
 func (c ArcanicSpikeYellow) Play(*card.TurnState) int   { return c.Attack() }
 
@@ -43,6 +43,6 @@ func (ArcanicSpikeBlue) Cost() int                    { return 2 }
 func (ArcanicSpikeBlue) Pitch() int                   { return 3 }
 func (ArcanicSpikeBlue) Attack() int                  { return 5 }
 func (ArcanicSpikeBlue) Defense() int                 { return 3 }
-func (ArcanicSpikeBlue) Types() map[string]bool       { return arcanicSpikeTypes }
+func (ArcanicSpikeBlue) Types() card.TypeSet       { return arcanicSpikeTypes }
 func (ArcanicSpikeBlue) GoAgain() bool                { return false }
 func (c ArcanicSpikeBlue) Play(*card.TurnState) int   { return c.Attack() }

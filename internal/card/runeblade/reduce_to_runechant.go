@@ -12,7 +12,7 @@ package runeblade
 
 import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 
-var reduceToRunechantTypes = map[string]bool{"Runeblade": true, "Defense Reaction": true}
+var reduceToRunechantTypes = card.NewTypeSet(card.TypeRuneblade, card.TypeDefenseReaction)
 
 type ReduceToRunechantRed struct{}
 
@@ -21,7 +21,7 @@ func (ReduceToRunechantRed) Cost() int                { return 0 }
 func (ReduceToRunechantRed) Pitch() int               { return 1 }
 func (ReduceToRunechantRed) Attack() int              { return 0 }
 func (ReduceToRunechantRed) Defense() int             { return 4 }
-func (ReduceToRunechantRed) Types() map[string]bool   { return reduceToRunechantTypes }
+func (ReduceToRunechantRed) Types() card.TypeSet      { return reduceToRunechantTypes }
 func (ReduceToRunechantRed) GoAgain() bool            { return false }
 func (ReduceToRunechantRed) Play(*card.TurnState) int { return 0 }
 
@@ -32,7 +32,7 @@ func (ReduceToRunechantYellow) Cost() int                { return 0 }
 func (ReduceToRunechantYellow) Pitch() int               { return 2 }
 func (ReduceToRunechantYellow) Attack() int              { return 0 }
 func (ReduceToRunechantYellow) Defense() int             { return 3 }
-func (ReduceToRunechantYellow) Types() map[string]bool   { return reduceToRunechantTypes }
+func (ReduceToRunechantYellow) Types() card.TypeSet      { return reduceToRunechantTypes }
 func (ReduceToRunechantYellow) GoAgain() bool            { return false }
 func (ReduceToRunechantYellow) Play(*card.TurnState) int { return 0 }
 
@@ -43,6 +43,6 @@ func (ReduceToRunechantBlue) Cost() int                { return 0 }
 func (ReduceToRunechantBlue) Pitch() int               { return 3 }
 func (ReduceToRunechantBlue) Attack() int              { return 0 }
 func (ReduceToRunechantBlue) Defense() int             { return 2 }
-func (ReduceToRunechantBlue) Types() map[string]bool   { return reduceToRunechantTypes }
+func (ReduceToRunechantBlue) Types() card.TypeSet      { return reduceToRunechantTypes }
 func (ReduceToRunechantBlue) GoAgain() bool            { return false }
 func (ReduceToRunechantBlue) Play(*card.TurnState) int { return 0 }
