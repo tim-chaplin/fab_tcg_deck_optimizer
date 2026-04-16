@@ -48,9 +48,11 @@ This is a work in progress. The current model is deliberately narrow:
 - **`random`** (default) — two-phase search. Generates `-decks` random decks and evaluates each
   shallowly (`-shallow-shuffles` shuffles); takes the top `-top-n` and re-evaluates them with more
   shuffles (`-deep-shuffles`). Writes the winner to `-out` if it beats whatever's already there.
-- **`iterate`** — loads the deck at `-out` and hill-climbs on it: repeatedly mutates one card,
-  re-evaluates, and saves whenever a mutation improves. Press Enter to stop. Requires a saved deck
-  to exist — run `random` first.
+- **`iterate`** — loads the deck at `-out` and hill-climbs on it deterministically: each round
+  enumerates every single-slot mutation (every alternative weapon loadout + every (card-in-deck,
+  card-out-of-deck) swap), adopts the first one that scores higher, and restarts. When a full
+  round finishes without finding an improvement, the deck is at a local maximum and `iterate`
+  exits. Press Enter to abort mid-round. Requires a saved deck to exist — run `random` first.
 - **`print_only`** — prints the deck at `-out` without running any simulation.
 
 ### Suggested workflow
