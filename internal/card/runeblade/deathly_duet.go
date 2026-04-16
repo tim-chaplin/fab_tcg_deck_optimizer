@@ -72,8 +72,7 @@ func deathlyDuetPlay(base int, s *card.TurnState) int {
 		dmg += 2
 	}
 	if nonAttackActionPitched && hasFollowingAttack(s) {
-		s.AuraCreated = true
-		dmg += 2 // two Runechants, each dealing 1 when the next attack hits.
+		dmg += s.CreateRunechants(2) // two Runechants, each dealing 1 when the next attack hits.
 	}
 	return dmg
 }

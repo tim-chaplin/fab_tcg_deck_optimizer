@@ -23,8 +23,7 @@ func skyFireLanternsPlay(selfPitch int, s *card.TurnState) int {
 	if s.Deck[0].Pitch() != selfPitch {
 		return 0
 	}
-	s.AuraCreated = true
-	return 1
+	return s.CreateRunechant()
 }
 
 type SkyFireLanternsRed struct{}

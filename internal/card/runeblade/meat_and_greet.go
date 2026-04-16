@@ -28,7 +28,7 @@ func (MeatAndGreetRed) Attack() int                  { return 4 }
 func (MeatAndGreetRed) Defense() int                 { return 3 }
 func (MeatAndGreetRed) Types() card.TypeSet          { return meatAndGreetTypes }
 func (MeatAndGreetRed) GoAgain() bool                { return true }
-func (c MeatAndGreetRed) Play(s *card.TurnState) int { s.AuraCreated = true; return c.Attack() + 1 }
+func (c MeatAndGreetRed) Play(s *card.TurnState) int { return c.Attack() + s.CreateRunechant() }
 
 type MeatAndGreetYellow struct{}
 
@@ -40,7 +40,7 @@ func (MeatAndGreetYellow) Attack() int                  { return 3 }
 func (MeatAndGreetYellow) Defense() int                 { return 3 }
 func (MeatAndGreetYellow) Types() card.TypeSet          { return meatAndGreetTypes }
 func (MeatAndGreetYellow) GoAgain() bool                { return true }
-func (c MeatAndGreetYellow) Play(s *card.TurnState) int { s.AuraCreated = true; return c.Attack() + 1 }
+func (c MeatAndGreetYellow) Play(s *card.TurnState) int { return c.Attack() + s.CreateRunechant() }
 
 type MeatAndGreetBlue struct{}
 
@@ -52,4 +52,4 @@ func (MeatAndGreetBlue) Attack() int                  { return 2 }
 func (MeatAndGreetBlue) Defense() int                 { return 3 }
 func (MeatAndGreetBlue) Types() card.TypeSet          { return meatAndGreetTypes }
 func (MeatAndGreetBlue) GoAgain() bool                { return true }
-func (c MeatAndGreetBlue) Play(s *card.TurnState) int { s.AuraCreated = true; return c.Attack() + 1 }
+func (c MeatAndGreetBlue) Play(s *card.TurnState) int { return c.Attack() + s.CreateRunechant() }

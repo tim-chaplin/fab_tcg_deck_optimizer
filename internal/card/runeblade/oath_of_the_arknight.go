@@ -52,7 +52,6 @@ func (OathOfTheArknightBlue) GoAgain() bool              { return true }
 func (OathOfTheArknightBlue) Play(s *card.TurnState) int { return oathPlay(s, 1) }
 
 func oathPlay(s *card.TurnState, n int) int {
-	s.AuraCreated = true
 	bonus := 0
 	for _, pc := range s.CardsRemaining {
 		t := pc.Card.Types()
@@ -64,5 +63,5 @@ func oathPlay(s *card.TurnState, n int) int {
 			break
 		}
 	}
-	return 1 + bonus
+	return s.CreateRunechant() + bonus
 }

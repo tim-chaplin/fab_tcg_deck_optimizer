@@ -29,10 +29,7 @@ func sutcliffesResearchNotesPlay(revealCount int, s *card.TurnState) int {
 			count++
 		}
 	}
-	if count > 0 {
-		s.AuraCreated = true
-	}
-	return count
+	return s.CreateRunechants(count)
 }
 
 type SutcliffesResearchNotesRed struct{}
