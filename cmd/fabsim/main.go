@@ -134,15 +134,24 @@ func runRandom(cfg config) {
 }
 
 func runIterate(cfg config) {
+	rng := rand.New(rand.NewSource(cfg.seed))
+
 	best, bestAvg := loadExisting(cfg.outPath)
 	if best == nil {
-		fmt.Fprintf(os.Stderr, "no existing deck at %s — run with --mode=random first\n", cfg.outPath)
-		os.Exit(1)
+		// No starting point on disk — bootstrap with a single random deck, evaluated at the same
+		// -deep-shuffles depth the hill climb uses so bestAvg is comparable to future mutations.
+		fmt.Fprintf(os.Stderr, "no deck at %s; generating a random starting deck\n", cfg.outPath)
+		best = deck.Random(hero.Viserai{}, cfg.deckSize, cfg.maxCopies, rng)
+		stats := best.Evaluate(cfg.deepShuffles, cfg.incoming, rng)
+		bestAvg = stats.Avg()
+		if data, err := deckio.Marshal(best); err == nil {
+			os.WriteFile(cfg.outPath, data, 0o644)
+		}
+		fmt.Printf("Starting deck avg %.3f, saved to %s\n", bestAvg, cfg.outPath)
+	} else {
+		fmt.Printf("Loaded best deck (avg %.3f) from %s\n", bestAvg, cfg.outPath)
 	}
-	fmt.Printf("Loaded best deck (avg %.3f) from %s\n", bestAvg, cfg.outPath)
 	fmt.Println("Press Enter to abort.")
-
-	rng := rand.New(rand.NewSource(cfg.seed))
 
 	// Signal channel: background goroutine reads stdin and sends on stop. EOF / closed stdin
 	// isn't an abort signal (otherwise iterate would exit immediately when stdin isn't a TTY) —
