@@ -5,6 +5,7 @@ import (
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card/fake"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/card/generic"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card/runeblade"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/hero"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/weapon"
@@ -56,6 +57,37 @@ func TestBest_DefenseCappedAtIncoming(t *testing.T) {
 	got := Best(stubHero{}, nil, h, 2, nil)
 	if got.Value != 4 {
 		t.Fatalf("want value 4, got %d", got.Value)
+	}
+}
+
+func TestBest_DefenseReactionRequiresCostPaid(t *testing.T) {
+	// Toughen Up (Blue): Cost 2, Pitch 3, Defense 4. A hand of just this card can't pay its own
+	// 2-resource cost to play as a Defense Reaction (there's nothing else to pitch). The only
+	// legal lines are to pitch it (0 damage prevented) or do nothing — Value must be 0.
+	h := []card.Card{generic.ToughenUpBlue{}}
+	got := Best(stubHero{}, nil, h, 4, nil)
+	if got.Value != 0 {
+		t.Fatalf("want value 0 (cost unpaid), got %d", got.Value)
+	}
+}
+
+func TestBest_DefenseReactionAffordableResolves(t *testing.T) {
+	// Pitch 1 Blue Malefic (3 res), pay Toughen Up (Blue)'s cost 2, prevent 4 damage (capped at
+	// incoming=4). Value = 4.
+	h := []card.Card{runeblade.MaleficIncantationBlue{}, generic.ToughenUpBlue{}}
+	got := Best(stubHero{}, nil, h, 4, nil)
+	if got.Value != 4 {
+		t.Fatalf("want value 4 (cost paid, full block), got %d", got.Value)
+	}
+}
+
+func TestBest_PlainBlockStillFree(t *testing.T) {
+	// Attack cards have no Defense-Reaction type, so using them as blockers costs nothing. One
+	// Red attacker (Defense 1) alone, used as a blocker against 1 incoming, prevents 1. Value = 1.
+	h := []card.Card{fake.RedAttack{}}
+	got := Best(stubHero{}, nil, h, 1, nil)
+	if got.Value != 1 {
+		t.Fatalf("want value 1 (free plain block), got %d", got.Value)
 	}
 }
 
