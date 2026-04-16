@@ -2,7 +2,7 @@
 
 A deck-building and simulation tool for the Flesh and Blood TCG, written in Go.
 
-Built with Claude Opus 4.6 (not vibe coded, all code reviewed by hand).
+Built with Claude Opus 4.6.
 
 ## Goal
 
