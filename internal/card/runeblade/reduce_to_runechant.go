@@ -5,9 +5,11 @@
 // Runechant token."
 //
 // Cost() returns 0 for the partition-level minimum (fully-discounted case); PrintedCost() is 1
-// for future per-play effective-cost checks. Defense reactions run in a separate pipeline that
-// doesn't track runechants, so the created Runechant isn't modelled here either — the cost
-// reduction is approximated as full.
+// so the solver re-prices the reaction at max(0, 1 - leftoverRunechants) after the optimal
+// attack line is chosen — partitions that can't afford the actual cost get rejected.
+//
+// Simplification: the created Runechant token isn't modelled. Defense reactions resolve on the
+// opponent's turn, so the token would add to next-turn carryover but it's currently dropped.
 //
 // Source: github.com/the-fab-cube/flesh-and-blood-cards (card.csv).
 

@@ -18,7 +18,7 @@ func TestPlaySequence_DiscountRejectsInsufficientBudget(t *testing.T) {
 	cpBuf := make([]card.Card, 0, len(order))
 	state := &card.TurnState{}
 	// Chain budget 0, carryover 0 → effective cost = 3 - 0 = 3 > 0, chain illegal.
-	dmg, leftover, legal := playSequence(hero.Viserai{}, nil, nil, order, pcBuf, ptrBuf, cpBuf, state, 0, 0)
+	dmg, leftover, _, legal := playSequence(hero.Viserai{}, nil, nil, order, pcBuf, ptrBuf, cpBuf, state, 0, 0)
 	if legal {
 		t.Fatalf("expected illegal chain, got legal (dmg=%d, leftover=%d)", dmg, leftover)
 	}
@@ -34,7 +34,7 @@ func TestPlaySequence_DiscountAffordableWithBudget(t *testing.T) {
 	state := &card.TurnState{}
 	// Chain budget 3, carryover 0 → effective cost 3, budget just covers it. Amplify's Attack(6)
 	// is the only damage; no runechants to consume.
-	dmg, leftover, legal := playSequence(hero.Viserai{}, nil, nil, order, pcBuf, ptrBuf, cpBuf, state, 3, 0)
+	dmg, leftover, _, legal := playSequence(hero.Viserai{}, nil, nil, order, pcBuf, ptrBuf, cpBuf, state, 3, 0)
 	if !legal {
 		t.Fatalf("expected legal chain")
 	}
@@ -57,7 +57,7 @@ func TestPlaySequence_DiscountUsesCarryoverRunechants(t *testing.T) {
 	// Chain budget 0, carryover 3 → effective cost 3-3 = 0, legal. Damage is just Amplify's
 	// Attack(); the consumed carryover tokens aren't re-credited (they were credited on the
 	// previous turn when they were created).
-	dmg, leftover, legal := playSequence(hero.Viserai{}, nil, nil, order, pcBuf, ptrBuf, cpBuf, state, 0, 3)
+	dmg, leftover, _, legal := playSequence(hero.Viserai{}, nil, nil, order, pcBuf, ptrBuf, cpBuf, state, 0, 3)
 	if !legal {
 		t.Fatalf("expected legal chain")
 	}
@@ -77,7 +77,7 @@ func TestPlaySequence_LeftoverFromNonAttackAction(t *testing.T) {
 	ptrBuf := make([]*card.PlayedCard, len(order))
 	cpBuf := make([]card.Card, 0, len(order))
 	state := &card.TurnState{}
-	dmg, leftover, legal := playSequence(hero.Viserai{}, nil, nil, order, pcBuf, ptrBuf, cpBuf, state, 0, 0)
+	dmg, leftover, _, legal := playSequence(hero.Viserai{}, nil, nil, order, pcBuf, ptrBuf, cpBuf, state, 0, 0)
 	if !legal {
 		t.Fatalf("expected legal chain")
 	}
@@ -153,6 +153,43 @@ func TestBest_BlessingOfOccultTokensOnlyAppearNextTurn(t *testing.T) {
 	if got.LeftoverRunechants != 3 {
 		t.Errorf("LeftoverRunechants = %d, want 3 (0 live + 3 delayed from Blessing)",
 			got.LeftoverRunechants)
+	}
+}
+
+// TestBest_ReduceToRunechantRejectsInsufficientBudget verifies that Reduce to Runechant's
+// per-runechant discount is re-priced against the attack line's leftoverRunechants. The hand has
+// three Reduces plus an Aether Slash; before the fix, the solver could block with all three
+// Reduces at Cost()=0 each while Aether attacked, scoring 13 (5 damage + 8 prevented). With the
+// discount correctly modeled, Aether's attack consumes the carryover (none here) and leaves 0
+// runechants, so each Reduce really costs 1. The best feasible partition drops to 9: one Reduce
+// block + two Reduce pitch (paying for attack) + Aether attack = 5 damage + 4 prevented.
+func TestBest_ReduceToRunechantRejectsInsufficientBudget(t *testing.T) {
+	h := []card.Card{
+		runeblade.ReduceToRunechantRed{},
+		runeblade.ReduceToRunechantRed{},
+		runeblade.ReduceToRunechantRed{},
+		runeblade.AetherSlashRed{},
+	}
+	got := Best(hero.Viserai{}, nil, h, 12, nil, 0)
+	if got.Value != 9 {
+		t.Errorf("Value = %d, want 9 (Reduce costs 1 per copy without runechants in play)", got.Value)
+	}
+}
+
+// TestBest_ReduceToRunechantDiscountedByCarryover pins the other side: when the previous turn
+// left 3 runechants behind and no attack this turn consumes them, Reduce's effective cost is
+// max(1-3, 0) = 0, and a full three-Reduce block becomes affordable again. Optimal: Aether pitch,
+// all three Reduces block → prevent 12 damage (capped at incoming).
+func TestBest_ReduceToRunechantDiscountedByCarryover(t *testing.T) {
+	h := []card.Card{
+		runeblade.ReduceToRunechantRed{},
+		runeblade.ReduceToRunechantRed{},
+		runeblade.ReduceToRunechantRed{},
+		runeblade.AetherSlashRed{},
+	}
+	got := Best(hero.Viserai{}, nil, h, 12, nil, 3)
+	if got.Value != 12 {
+		t.Errorf("Value = %d, want 12 (carryover discounts all three Reduces to cost 0)", got.Value)
 	}
 }
 

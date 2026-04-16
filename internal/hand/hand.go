@@ -172,17 +172,20 @@ type attackBufs struct {
 	// (0 to 2^len(weapons)-1).
 	weaponCosts []int
 	weaponNames [][]string
-	// Partition-loop buffers. rolesBuf/pitchVals/costVals/defendCostVals are sized exactly
-	// handSize; pitchedBuf/attackersBuf/defendersBuf are sized 0 with cap handSize and re-sliced
-	// empty at the start of each partition leaf.
-	rolesBuf       []Role
-	pitchVals      []int
-	costVals       []int
-	defendCostVals []int
-	defenseVals    []int
-	pitchedBuf     []card.Card
-	attackersBuf   []card.Card
-	defendersBuf   []card.Card
+	// Partition-loop buffers. rolesBuf/pitchVals/costVals/defendCostVals/defendPrintedVals are
+	// sized exactly handSize; pitchedBuf/attackersBuf/defendersBuf are sized 0 with cap handSize
+	// and re-sliced empty at the start of each partition leaf. defendPrintedVals holds the
+	// PrintedCost of DiscountPerRunechant defense reactions for the leaf's post-attack discount
+	// check; slot is 0 for cards that aren't both a defense reaction AND DiscountPerRunechant.
+	rolesBuf          []Role
+	pitchVals         []int
+	costVals          []int
+	defendCostVals    []int
+	defendPrintedVals []int
+	defenseVals       []int
+	pitchedBuf        []card.Card
+	attackersBuf      []card.Card
+	defendersBuf      []card.Card
 }
 
 func newAttackBufs(handSize, weaponCount int, weapons []weapon.Weapon) *attackBufs {
@@ -211,14 +214,15 @@ func newAttackBufs(handSize, weaponCount int, weapons []weapon.Weapon) *attackBu
 		attackerBuf:    make([]card.Card, maxAttackers),
 		weaponCosts:    weaponCosts,
 		weaponNames:    weaponNames,
-		rolesBuf:       make([]Role, handSize),
-		pitchVals:      make([]int, handSize),
-		costVals:       make([]int, handSize),
-		defendCostVals: make([]int, handSize),
-		defenseVals:    make([]int, handSize),
-		pitchedBuf:     make([]card.Card, 0, handSize),
-		attackersBuf:   make([]card.Card, 0, handSize),
-		defendersBuf:   make([]card.Card, 0, handSize),
+		rolesBuf:          make([]Role, handSize),
+		pitchVals:         make([]int, handSize),
+		costVals:          make([]int, handSize),
+		defendCostVals:    make([]int, handSize),
+		defendPrintedVals: make([]int, handSize),
+		defenseVals:       make([]int, handSize),
+		pitchedBuf:        make([]card.Card, 0, handSize),
+		attackersBuf:      make([]card.Card, 0, handSize),
+		defendersBuf:      make([]card.Card, 0, handSize),
 	}
 }
 
@@ -267,6 +271,7 @@ func bestUncached(hero hero.Hero, weapons []weapon.Weapon, hand []card.Card, inc
 	pitchVals := bufs.pitchVals[:n]
 	costVals := bufs.costVals[:n]
 	defendCostVals := bufs.defendCostVals[:n]
+	defendPrintedVals := bufs.defendPrintedVals[:n]
 	defenseVals := bufs.defenseVals[:n]
 
 	// Pre-compute per-card pitch, cost, and defense values so the recursion can track sums
@@ -274,14 +279,25 @@ func bestUncached(hero hero.Hero, weapons []weapon.Weapon, hand []card.Card, inc
 	// Cost only for Defense-Reaction-typed cards; non-reactions defend for free (plain blocking).
 	// hasReactions lets the leaf skip groupByRoleInto's defenders bucket and the reaction-Play
 	// dispatch when no card in the hand can fire a reaction — the common case.
+	// defendPrintedVals[i] carries PrintedCost for defense reactions that implement
+	// DiscountPerRunechant (e.g. Reduce to Runechant); hasDiscountReactions flags that any such
+	// card is present, so the leaf re-checks affordability using leftoverRunechants. Slot is 0
+	// for every other card, including non-discount reactions (their cost is already in
+	// defendCostVals and doesn't change post-attack).
 	hasReactions := false
+	hasDiscountReactions := false
 	for i, c := range hand {
 		pitchVals[i] = c.Pitch()
 		costVals[i] = c.Cost()
 		defenseVals[i] = c.Defense()
+		defendPrintedVals[i] = 0
 		if c.Types().Has(card.TypeDefenseReaction) {
 			defendCostVals[i] = costVals[i]
 			hasReactions = true
+			if d, ok := c.(card.DiscountPerRunechant); ok {
+				defendPrintedVals[i] = d.PrintedCost()
+				hasDiscountReactions = true
+			}
 		} else {
 			defendCostVals[i] = 0
 		}
@@ -311,7 +327,36 @@ func bestUncached(hero hero.Hero, weapons []weapon.Weapon, hand []card.Card, inc
 			} else {
 				p, a = groupPitchAttack(hand, roles, pitched[:0], attackers[:0])
 			}
-			attackDealt, leftoverRunechants, swung := bestAttackWithWeapons(hero, weapons, a, p, deck, bufs, pitchSum, costSum, defenderCostSum, runechantCarryover)
+			attackDealt, leftoverRunechants, residualBudget, swung := bestAttackWithWeapons(hero, weapons, a, p, deck, bufs, pitchSum, costSum, defenderCostSum, runechantCarryover)
+
+			// DiscountPerRunechant defense reactions reserved 0 in defenderCostSum (their Cost() is
+			// the fully-discounted minimum). Now that the attack chain has resolved and left
+			// `leftoverRunechants` runechants available for defense, re-price each discounted
+			// defender at its actual effective cost and reject this partition if the chain didn't
+			// leave enough residual budget to cover the delta. Runechants aren't consumed by the
+			// discount check — multiple discount defenders can all read the same leftover pool.
+			// DiscountPerRunechant defense reactions reserved 0 in defenderCostSum (their Cost() is
+			// the fully-discounted minimum). Now that the attack chain has resolved and left
+			// `leftoverRunechants` runechants available for defense, re-price each discounted
+			// defender at its actual effective cost and reject this partition if the chain didn't
+			// leave enough residual budget to cover the delta. Runechants aren't consumed by the
+			// discount check — multiple discount defenders can all read the same leftover pool.
+			if hasDiscountReactions {
+				extraCost := 0
+				for j := 0; j < n; j++ {
+					if roles[j] != Defend || defendPrintedVals[j] == 0 {
+						continue
+					}
+					actualCost := defendPrintedVals[j] - leftoverRunechants
+					if actualCost < 0 {
+						actualCost = 0
+					}
+					extraCost += actualCost
+				}
+				if extraCost > residualBudget {
+					return
+				}
+			}
 
 			v := attackDealt + defenseDealt + prevented
 			// Prefer higher Value; on ties prefer more leftover runechants — they're future
@@ -408,18 +453,21 @@ func defenseReactionDamage(defenders, pitched, deck []card.Card, state *card.Tur
 }
 
 // bestAttackWithWeapons enumerates every subset of `weapons` to swing alongside `attackers` and
-// returns the max damage over all (affordable) weapon masks, plus the runechant leftover from
-// that winning mask and the swung weapons (in input order). Each selected weapon adds its Cost
-// and joins the attacker permutation inside bestAttackDamage.
+// returns the max damage over all (affordable) weapon masks, plus the runechant leftover, the
+// residual chain budget (pitch not consumed by the winning line — used by bestUncached to re-check
+// DiscountPerRunechant defense affordability), and the swung weapons (in input order).
 //
 // resourceBudget passed down to the chain pipeline is pitchSum - defenderCostSum - weaponCosts
 // for this mask; the chain then deducts each attacker's effective cost (which for
 // DiscountPerRunechant cards is max(0, PrintedCost() - runechantCount at play-time)) and rejects
 // orderings that run negative.
-func bestAttackWithWeapons(hero hero.Hero, weapons []weapon.Weapon, attackers, pitched, deck []card.Card, bufs *attackBufs, pitchSum, costSum, defenderCostSum, runechantCarryover int) (int, int, []string) {
-	// Baseline: no attacks played. Leftover runechants stay at the caller's carryover.
+func bestAttackWithWeapons(hero hero.Hero, weapons []weapon.Weapon, attackers, pitched, deck []card.Card, bufs *attackBufs, pitchSum, costSum, defenderCostSum, runechantCarryover int) (int, int, int, []string) {
+	// Baseline: no attacks played — carryover runechants stay, and the whole chainBudget is
+	// available for defense affordability checks.
+	chainBudget := pitchSum - defenderCostSum
 	best := 0
 	bestLeftoverRunechants := runechantCarryover
+	bestResidualBudget := chainBudget
 	var bestSwung []string
 	// Reuse the shared attacker buffer across mask iterations.
 	copy(bufs.attackerBuf, attackers)
@@ -435,19 +483,21 @@ func bestAttackWithWeapons(hero hero.Hero, weapons []weapon.Weapon, attackers, p
 				allAttackers = append(allAttackers, w)
 			}
 		}
-		// Chain budget = pitchSum minus defender costs. Every chain card (attackers AND the
-		// swung weapons) deducts its own effective cost from this budget inside playSequence,
-		// so we don't pre-deduct weapon cost here.
-		chainBudget := pitchSum - defenderCostSum
-		dealt, leftoverRunechants := bestAttackDamage(hero, allAttackers, pitched, deck, bufs, chainBudget, runechantCarryover)
-		// Prefer higher damage; on ties prefer more leftover runechants for future turns.
-		if dealt > best || (dealt == best && leftoverRunechants > bestLeftoverRunechants) {
+		// Every chain card (attackers AND the swung weapons) deducts its own effective cost
+		// from chainBudget inside playSequence, so we don't pre-deduct weapon cost here.
+		dealt, leftoverRunechants, residualBudget := bestAttackDamage(hero, allAttackers, pitched, deck, bufs, chainBudget, runechantCarryover)
+		// Prefer higher damage; on ties prefer more leftover runechants; then more residual
+		// budget — both are extra slack that can enable discount defense reactions.
+		if dealt > best ||
+			(dealt == best && leftoverRunechants > bestLeftoverRunechants) ||
+			(dealt == best && leftoverRunechants == bestLeftoverRunechants && residualBudget > bestResidualBudget) {
 			best = dealt
 			bestLeftoverRunechants = leftoverRunechants
+			bestResidualBudget = residualBudget
 			bestSwung = bufs.weaponNames[mask]
 		}
 	}
-	return best, bestLeftoverRunechants, bestSwung
+	return best, bestLeftoverRunechants, bestResidualBudget, bestSwung
 }
 
 // bestAttackDamage tries every ordering of attackers and returns the max total damage after Play
@@ -460,25 +510,30 @@ func bestAttackWithWeapons(hero hero.Hero, weapons []weapon.Weapon, attackers, p
 //
 // chainBudget is the resource pool available to cover chain-card effective costs. For orderings
 // that run out of resources partway through, playSequence returns legal=false and contributes 0.
-func bestAttackDamage(hero hero.Hero, attackers, pitched, deck []card.Card, bufs *attackBufs, chainBudget, runechantCarryover int) (int, int) {
+func bestAttackDamage(hero hero.Hero, attackers, pitched, deck []card.Card, bufs *attackBufs, chainBudget, runechantCarryover int) (int, int, int) {
 	n := len(attackers)
 	if n == 0 {
-		return 0, runechantCarryover
+		return 0, runechantCarryover, chainBudget
 	}
 	perm := bufs.perm[:n]
 	copy(perm, attackers)
 
 	best := 0
 	bestLeftoverRunechants := runechantCarryover
+	bestResidualBudget := chainBudget
 	eval := func() {
-		dmg, leftoverRunechants, legal := playSequence(hero, pitched, deck, perm, bufs.pcBuf, bufs.ptrBuf, bufs.cardsPlayedBuf, bufs.state, chainBudget, runechantCarryover)
+		dmg, leftoverRunechants, residualBudget, legal := playSequence(hero, pitched, deck, perm, bufs.pcBuf, bufs.ptrBuf, bufs.cardsPlayedBuf, bufs.state, chainBudget, runechantCarryover)
 		if !legal {
 			return
 		}
-		// Prefer higher damage; on ties prefer more leftover runechants for future turns.
-		if dmg > best || (dmg == best && leftoverRunechants > bestLeftoverRunechants) {
+		// Prefer higher damage; on ties prefer more leftover runechants; then more residual
+		// budget — both are extra slack that can enable discount defense reactions.
+		if dmg > best ||
+			(dmg == best && leftoverRunechants > bestLeftoverRunechants) ||
+			(dmg == best && leftoverRunechants == bestLeftoverRunechants && residualBudget > bestResidualBudget) {
 			best = dmg
 			bestLeftoverRunechants = leftoverRunechants
+			bestResidualBudget = residualBudget
 		}
 	}
 	eval()
@@ -500,7 +555,7 @@ func bestAttackDamage(hero hero.Hero, attackers, pitched, deck []card.Card, bufs
 			i++
 		}
 	}
-	return best, bestLeftoverRunechants
+	return best, bestLeftoverRunechants, bestResidualBudget
 }
 
 // playSequence plays `order` as an attack chain, reusing caller-provided buffers to avoid
@@ -522,7 +577,7 @@ func bestAttackDamage(hero hero.Hero, attackers, pitched, deck []card.Card, bufs
 //     DiscountPerRunechant, effective cost is max(0, PrintedCost() - state.Runechants) at the
 //     moment it's played; for everyone else it's Cost(). A negative remaining budget returns
 //     legal=false (the caller treats this ordering as zero damage).
-func playSequence(hero hero.Hero, pitched, deck, order []card.Card, pcBuf []card.PlayedCard, ptrBuf []*card.PlayedCard, cardsPlayedBuf []card.Card, state *card.TurnState, chainBudget, runechantCarryover int) (damage int, leftoverRunechants int, legal bool) {
+func playSequence(hero hero.Hero, pitched, deck, order []card.Card, pcBuf []card.PlayedCard, ptrBuf []*card.PlayedCard, cardsPlayedBuf []card.Card, state *card.TurnState, chainBudget, runechantCarryover int) (damage int, leftoverRunechants int, residualBudget int, legal bool) {
 	n := len(order)
 	for i, c := range order {
 		pcBuf[i] = card.PlayedCard{Card: c}
@@ -544,7 +599,7 @@ func playSequence(hero hero.Hero, pitched, deck, order []card.Card, pcBuf []card
 		}
 		resources -= effCost
 		if resources < 0 {
-			return 0, 0, false
+			return 0, 0, 0, false
 		}
 
 		state.CardsRemaining = played[i+1:]
@@ -562,12 +617,12 @@ func playSequence(hero hero.Hero, pitched, deck, order []card.Card, pcBuf []card
 		}
 
 		if i < n-1 && !pc.EffectiveGoAgain() {
-			return 0, 0, false
+			return 0, 0, 0, false
 		}
 	}
 	// Delayed tokens (e.g. from Blessing of Occult) skip this turn and go straight to next
 	// turn's carryover.
-	return damage, state.Runechants + state.DelayedRunechants, true
+	return damage, state.Runechants + state.DelayedRunechants, resources, true
 }
 
 
