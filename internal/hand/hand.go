@@ -374,21 +374,6 @@ func groupPitchAttack(hand []card.Card, roles []Role, pitched, attackers []card.
 	return pitched, attackers
 }
 
-// canAfford reports whether the pitch resources produced by pitched cover the combined Cost of
-// every card in attackers. A partition is legal only if its attackers (hand cards plus any weapon
-// swings joined into the same list) can all be paid for.
-func canAfford(pitched, attackers []card.Card) bool {
-	resources := 0
-	for _, c := range pitched {
-		resources += c.Pitch()
-	}
-	cost := 0
-	for _, c := range attackers {
-		cost += c.Cost()
-	}
-	return resources >= cost
-}
-
 // preventedDamage is the damage a wall of `defenders` blocks against `incoming`: the sum of
 // printed Defense, capped at incoming (excess block is wasted).
 func preventedDamage(defenders []card.Card, incoming int) int {

@@ -199,30 +199,6 @@ func TestBest_ViseraiMauvrionGrantsGoAgainToShrill(t *testing.T) {
 	}
 }
 
-func TestCanAfford(t *testing.T) {
-	// fake.Red: Cost 1, Pitch 1. fake.Blue: Cost 1, Pitch 3.
-	cases := []struct {
-		name      string
-		pitched   []card.Card
-		attackers []card.Card
-		want      bool
-	}{
-		{"empty/empty is trivially affordable", nil, nil, true},
-		{"zero pitch covers zero cost", nil, nil, true},
-		{"1 Red pitched covers 1 Red attacker (1 == 1)", []card.Card{fake.RedAttack{}}, []card.Card{fake.RedAttack{}}, true},
-		{"1 Red pitched can't cover 2 Red attackers (1 < 2)", []card.Card{fake.RedAttack{}}, []card.Card{fake.RedAttack{}, fake.RedAttack{}}, false},
-		{"1 Blue pitched covers 3 Red attackers (3 >= 3)", []card.Card{fake.BlueAttack{}}, []card.Card{fake.RedAttack{}, fake.RedAttack{}, fake.RedAttack{}}, true},
-		{"1 Blue pitched can't cover 4 Red attackers (3 < 4)", []card.Card{fake.BlueAttack{}}, []card.Card{fake.RedAttack{}, fake.RedAttack{}, fake.RedAttack{}, fake.RedAttack{}}, false},
-		{"attackers with 0 cost are always affordable", nil, []card.Card{runeblade.MauvrionSkiesRed{}}, true},
-		{"excess resources are fine", []card.Card{fake.BlueAttack{}, fake.BlueAttack{}}, []card.Card{fake.RedAttack{}}, true},
-	}
-	for _, tc := range cases {
-		if got := canAfford(tc.pitched, tc.attackers); got != tc.want {
-			t.Errorf("%s: canAfford() = %v, want %v", tc.name, got, tc.want)
-		}
-	}
-}
-
 func TestIsLegalOrder_MauvrionCantSaveShrillWhenRuneragerIsAhead(t *testing.T) {
 	// Mauvrion's grant lands on the first matching Runeblade attack action card in CardsRemaining.
 	// In the ordering Mauvrion → Runerager → Shrill → weapon, Runerager is that first match, so
