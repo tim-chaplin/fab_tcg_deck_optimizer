@@ -106,6 +106,26 @@ func (s *TurnState) HasPlayedType(t CardType) bool {
 	return false
 }
 
+// CreateRunechants models the Runeblade mechanic of creating n Runechant token auras. Sets
+// AuraCreated so effects that key on "aura created this turn" see it, and returns the damage the
+// tokens will contribute this chain — currently 1 per token, since the solver assumes a following
+// attack always arrives and triggers them. Callers add the returned value to whatever damage
+// they're reporting back to the solver.
+//
+// Centralising creation in one call site makes it the only place to touch when we later track
+// runechant counts for discount-per-token cards (e.g. Malefic Incantation's cost reduction).
+func (s *TurnState) CreateRunechants(n int) int {
+	if n > 0 {
+		s.AuraCreated = true
+	}
+	return n
+}
+
+// CreateRunechant is shorthand for CreateRunechants(1) for the common single-token case.
+func (s *TurnState) CreateRunechant() int {
+	return s.CreateRunechants(1)
+}
+
 // Card is any Flesh and Blood card that can be in a deck. Methods return the card's static profile
 // plus a Play hook for on-play logic.
 type Card interface {

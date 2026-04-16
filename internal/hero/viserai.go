@@ -30,8 +30,7 @@ func (Viserai) OnCardPlayed(played card.Card, s *card.TurnState) int {
 	for _, c := range s.CardsPlayed {
 		ct := c.Types()
 		if ct.Has(card.TypeAction) && !ct.Has(card.TypeAttack) {
-			s.AuraCreated = true
-			return 1
+			return s.CreateRunechant()
 		}
 	}
 	return 0

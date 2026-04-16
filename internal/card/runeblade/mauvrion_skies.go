@@ -59,8 +59,7 @@ func mauvrionSkiesPlay(s *card.TurnState, n int) int {
 		t := pc.Card.Types()
 		if t.Has(card.TypeRuneblade) && t.Has(card.TypeAction) && t.Has(card.TypeAttack) {
 			pc.GrantedGoAgain = true
-			s.AuraCreated = true
-			return n
+			return s.CreateRunechants(n)
 		}
 	}
 	// No qualifying target — both the go-again grant and the runechant rider fizzle.

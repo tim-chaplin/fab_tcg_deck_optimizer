@@ -67,7 +67,6 @@ func runicReapingPlay(s *card.TurnState, n int) int {
 	if !hasNextAttack {
 		return 0
 	}
-	s.AuraCreated = true
 	bonus := 0
 	for _, p := range s.Pitched {
 		if p.Types().Has(card.TypeAttack) {
@@ -75,5 +74,5 @@ func runicReapingPlay(s *card.TurnState, n int) int {
 			break
 		}
 	}
-	return n + bonus
+	return s.CreateRunechants(n) + bonus
 }
