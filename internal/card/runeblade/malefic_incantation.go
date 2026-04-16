@@ -4,9 +4,9 @@
 // when you play an attack action card, remove a verse counter from this. If you do, create a
 // Runechant token." (Red N=3, Yellow N=2, Blue N=1.)
 //
-// Simplification: assume every verse counter will eventually be spent to create a Runechant (+1
-// damage each) on some future turn, so Malefic's Play value is a flat N — Red=3, Yellow=2, Blue=1.
-// Turn timing and destruction when counters hit zero are not modelled.
+// Simplification: front-load all N verse counters' worth of Runechants on play rather than one
+// per attack action card over multiple turns. The once-per-turn and counter-depletion timing
+// isn't modelled.
 //
 // Source: github.com/the-fab-cube/flesh-and-blood-cards (card.csv).
 
@@ -26,7 +26,7 @@ func (MaleficIncantationRed) Attack() int               { return 0 }
 func (MaleficIncantationRed) Defense() int              { return 2 }
 func (MaleficIncantationRed) Types() card.TypeSet        { return maleficTypes }
 func (MaleficIncantationRed) GoAgain() bool             { return true }
-func (MaleficIncantationRed) Play(*card.TurnState) int { return 3 }
+func (MaleficIncantationRed) Play(s *card.TurnState) int { return s.CreateRunechants(3) }
 
 type MaleficIncantationYellow struct{}
 
@@ -38,7 +38,7 @@ func (MaleficIncantationYellow) Attack() int               { return 0 }
 func (MaleficIncantationYellow) Defense() int              { return 2 }
 func (MaleficIncantationYellow) Types() card.TypeSet        { return maleficTypes }
 func (MaleficIncantationYellow) GoAgain() bool             { return true }
-func (MaleficIncantationYellow) Play(*card.TurnState) int { return 2 }
+func (MaleficIncantationYellow) Play(s *card.TurnState) int { return s.CreateRunechants(2) }
 
 type MaleficIncantationBlue struct{}
 
@@ -50,4 +50,4 @@ func (MaleficIncantationBlue) Attack() int               { return 0 }
 func (MaleficIncantationBlue) Defense() int              { return 2 }
 func (MaleficIncantationBlue) Types() card.TypeSet        { return maleficTypes }
 func (MaleficIncantationBlue) GoAgain() bool             { return true }
-func (MaleficIncantationBlue) Play(*card.TurnState) int { return 1 }
+func (MaleficIncantationBlue) Play(s *card.TurnState) int { return s.CreateRunechants(1) }

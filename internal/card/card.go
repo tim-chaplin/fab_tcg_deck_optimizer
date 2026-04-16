@@ -112,16 +112,18 @@ func (s *TurnState) HasPlayedType(t CardType) bool {
 	return false
 }
 
-// CreateRunechants adds n Runechant token auras to the current count and sets AuraCreated so
-// effects that key on "aura created this turn" see it. Returns 0 — the damage is accounted for
-// downstream when an attack consumes the tokens. Callers can still write `dmg += s.CreateRunechant()`
-// for legibility; the `+ 0` folds away.
+// CreateRunechants adds n Runechant token auras to the current count, sets AuraCreated so
+// effects that key on "aura created this turn" see it, and returns n — each token is credited
+// as +1 damage at creation time (it'll fire on some future attack, possibly next turn via
+// carryover). The attack pipeline consumes state.Runechants without re-crediting damage, so
+// every token is counted exactly once. Tokens that neither fire nor carry over (end-of-sim
+// leftovers) are slightly over-credited — an accepted approximation.
 func (s *TurnState) CreateRunechants(n int) int {
 	if n > 0 {
 		s.AuraCreated = true
 		s.Runechants += n
 	}
-	return 0
+	return n
 }
 
 // CreateRunechant is shorthand for CreateRunechants(1) for the common single-token case.

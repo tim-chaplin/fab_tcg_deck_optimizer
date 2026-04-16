@@ -69,10 +69,9 @@ func deathlyDuetPlay(base int, s *card.TurnState) int {
 		dmg += 2
 	}
 	if nonAttackActionPitched {
-		// Two Runechants enter during Deathly Duet's own attack resolution; they fire on that
-		// same attack (the solver's consume-on-attack step) for +2 damage. No need to guard on a
+		// Two Runechants enter during Deathly Duet's own attack resolution. No guard on a
 		// following attack existing — Deathly Duet itself is the attack.
-		s.CreateRunechants(2)
+		dmg += s.CreateRunechants(2)
 	}
 	return dmg
 }

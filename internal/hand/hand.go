@@ -524,10 +524,11 @@ func bestAttackDamage(hero hero.Hero, attackers, pitched, deck []card.Card, bufs
 //
 // Runechant flow:
 //   - state.Runechants starts at runechantCarryover (tokens from the previous turn).
-//   - Each card's Play / hero OnCardPlayed may call CreateRunechants, incrementing the count.
+//   - Each card's Play / hero OnCardPlayed may call CreateRunechants, incrementing the count AND
+//     returning n damage — tokens are credited exactly once, at creation.
 //   - After each Attack- or Weapon-typed card's Play+OnCardPlayed resolve, all current tokens
-//     fire: damage += state.Runechants and the count zeroes. This matches real FaB timing (the
-//     attack declaration triggers can create tokens that then fire on the same attack's hit).
+//     fire and are destroyed: state.Runechants is zeroed but damage is NOT re-added (that would
+//     double-count tokens whose value was already credited on creation).
 //   - At end of chain, state.Runechants is the leftover count that carries into the next turn.
 //
 // Resource flow:
@@ -566,10 +567,11 @@ func playSequence(hero hero.Hero, pitched, deck, order []card.Card, pcBuf []card
 		damage += hero.OnCardPlayed(pc.Card, state)
 		state.CardsPlayed = append(state.CardsPlayed, pc.Card)
 
-		// Attacks and weapon swings consume all runechants in play — each fires for 1 arcane.
+		// Attacks and weapon swings consume all runechants in play. Damage isn't re-added here:
+		// each token was already credited as +1 at creation time (see CreateRunechants), so
+		// consuming them is purely state cleanup.
 		t := pc.Card.Types()
 		if t.Has(card.TypeAttack) || t.Has(card.TypeWeapon) {
-			damage += state.Runechants
 			state.Runechants = 0
 		}
 

@@ -6,6 +6,7 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card/runeblade"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/hero"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/weapon"
 )
 
 // TestPlaySequence_DiscountRejectsInsufficientBudget verifies that a DiscountPerRunechant card
@@ -46,21 +47,22 @@ func TestPlaySequence_DiscountAffordableWithBudget(t *testing.T) {
 }
 
 // TestPlaySequence_DiscountUsesCarryoverRunechants shows the discount applies from carryover
-// tokens — no budget needed when there are enough runechants already in play.
+// tokens — no chain budget needed when there are enough runechants already in play.
 func TestPlaySequence_DiscountUsesCarryoverRunechants(t *testing.T) {
 	order := []card.Card{runeblade.AmplifyTheArknightRed{}}
 	pcBuf := make([]card.PlayedCard, len(order))
 	ptrBuf := make([]*card.PlayedCard, len(order))
 	cpBuf := make([]card.Card, 0, len(order))
 	state := &card.TurnState{}
-	// Chain budget 0, carryover 3 → effective cost 3-3 = 0, legal. Amplify's attack consumes
-	// the 3 runechants for +3 damage, on top of its Attack() of 6.
+	// Chain budget 0, carryover 3 → effective cost 3-3 = 0, legal. Damage is just Amplify's
+	// Attack(); the consumed carryover tokens aren't re-credited (they were credited on the
+	// previous turn when they were created).
 	dmg, leftover, legal := playSequence(hero.Viserai{}, nil, nil, order, pcBuf, ptrBuf, cpBuf, state, 0, 3)
 	if !legal {
 		t.Fatalf("expected legal chain")
 	}
-	if dmg != 9 {
-		t.Errorf("dmg = %d, want 9 (6 power + 3 consumed runechants)", dmg)
+	if dmg != 6 {
+		t.Errorf("dmg = %d, want 6 (Attack only; consumed carryover isn't re-credited)", dmg)
 	}
 	if leftover != 0 {
 		t.Errorf("leftover = %d, want 0 (attack consumes all runechants)", leftover)
@@ -68,7 +70,7 @@ func TestPlaySequence_DiscountUsesCarryoverRunechants(t *testing.T) {
 }
 
 // TestPlaySequence_LeftoverFromNonAttackAction confirms that runechants created by a non-attack
-// action with no following attack persist as leftover.
+// action with no following attack persist as leftover, and that their creation credits damage.
 func TestPlaySequence_LeftoverFromNonAttackAction(t *testing.T) {
 	order := []card.Card{runeblade.ReadTheRunesRed{}} // creates 3 runechants, not an attack
 	pcBuf := make([]card.PlayedCard, len(order))
@@ -79,11 +81,56 @@ func TestPlaySequence_LeftoverFromNonAttackAction(t *testing.T) {
 	if !legal {
 		t.Fatalf("expected legal chain")
 	}
-	if dmg != 0 {
-		t.Errorf("dmg = %d, want 0 (Read the Runes isn't an attack)", dmg)
+	if dmg != 3 {
+		t.Errorf("dmg = %d, want 3 (3 tokens created, each credited +1)", dmg)
 	}
 	if leftover != 3 {
 		t.Errorf("leftover = %d, want 3", leftover)
+	}
+}
+
+// TestBest_MauvrionReadNoCarryover exercises carryover bookkeeping end-to-end. Hand is Red
+// Mauvrion Skies + Red Read the Runes with Viserai and no starting runechants. Optimal line:
+// attack with Mauvrion then Read the Runes — Mauvrion's rider doesn't match (Read isn't an
+// attack action), so Mauvrion contributes 0 tokens; Read then creates 3 tokens, and Viserai
+// fires on Read (prior Mauvrion is a non-attack action) for +1 more. Total tokens created = 4,
+// Value = 4 (each token credited +1 at creation), no attack consumes them → leftover = 4.
+func TestBest_MauvrionReadNoCarryover(t *testing.T) {
+	h := []card.Card{runeblade.MauvrionSkiesRed{}, runeblade.ReadTheRunesRed{}}
+	got := Best(hero.Viserai{}, nil, h, 0, nil, 0)
+	if got.Value != 4 {
+		t.Errorf("Value = %d, want 4 (3 Read tokens + 1 Viserai token)", got.Value)
+	}
+	if got.LeftoverRunechants != 4 {
+		t.Errorf("LeftoverRunechants = %d, want 4", got.LeftoverRunechants)
+	}
+}
+
+// TestBest_MauvrionReadWithCarryover is the same hand with 1 runechant carried in from the
+// previous turn. The hand still creates 4 tokens this turn, and the 1 carryover token doesn't
+// get consumed (no attack in the chain), so leftover = 5.
+func TestBest_MauvrionReadWithCarryover(t *testing.T) {
+	h := []card.Card{runeblade.MauvrionSkiesRed{}, runeblade.ReadTheRunesRed{}}
+	got := Best(hero.Viserai{}, nil, h, 0, nil, 1)
+	if got.LeftoverRunechants != 5 {
+		t.Errorf("LeftoverRunechants = %d, want 5 (1 carryover + 4 created)", got.LeftoverRunechants)
+	}
+}
+
+// TestBest_AetherSlashAloneConsumesCarryover covers the attack-consumes case. Hand is a single
+// Red Aether Slash with Reaping Blade equipped and 1 runechant carried in. Pitching Aether Slash
+// (pitch 1) and swinging the weapon (cost 1, attack 3) is the only legal line. The weapon's
+// attack consumes the 1 carryover token without re-crediting damage (the token was credited on
+// the turn it was created), so Value = 3 and leftover = 0.
+func TestBest_AetherSlashAloneConsumesCarryover(t *testing.T) {
+	h := []card.Card{runeblade.AetherSlashRed{}}
+	weapons := []weapon.Weapon{weapon.ReapingBlade{}}
+	got := Best(hero.Viserai{}, weapons, h, 0, nil, 1)
+	if got.Value != 3 {
+		t.Errorf("Value = %d, want 3 (Reaping Blade attack; carryover consumed without credit)", got.Value)
+	}
+	if got.LeftoverRunechants != 0 {
+		t.Errorf("LeftoverRunechants = %d, want 0 (weapon swing consumed the carryover)", got.LeftoverRunechants)
 	}
 }
 
@@ -98,26 +145,14 @@ func TestBest_CarryoverFeedsDiscount(t *testing.T) {
 	if got.Value != 0 {
 		t.Errorf("no carryover: Value = %d, want 0 (discount insufficient without runechants)", got.Value)
 	}
-	// With 3 runechants carried in, the discount fully covers the cost. Amplify attacks for
-	// Attack()(6) + consumed tokens(3) = 9.
+	// With 3 runechants carried in, the discount fully covers the cost. Value is just the
+	// Attack() power — consumed carryover runechants aren't re-credited.
 	got = Best(stubHero{}, nil, h, 0, nil, 3)
-	if got.Value != 9 {
-		t.Errorf("carryover=3: Value = %d, want 9", got.Value)
+	if got.Value != 6 {
+		t.Errorf("carryover=3: Value = %d, want 6 (Attack only; carryover tokens don't re-credit)", got.Value)
 	}
 	if got.LeftoverRunechants != 0 {
 		t.Errorf("carryover=3: LeftoverRunechants = %d, want 0 (attack consumes tokens)", got.LeftoverRunechants)
-	}
-}
-
-// TestBest_LeftoverIntoNextTurn demonstrates that a hand whose optimal play leaves runechants in
-// play (e.g. non-attack-action chain) returns them via Play.LeftoverRunechants for the next turn.
-func TestBest_LeftoverIntoNextTurn(t *testing.T) {
-	// Read the Runes (Red) alone: Pitch 1, creates 3 Runechants, not an attack. Best play is
-	// ATTACK (play the card); no damage is dealt but 3 tokens carry into next turn.
-	h := []card.Card{runeblade.ReadTheRunesRed{}}
-	got := Best(stubHero{}, nil, h, 0, nil, 0)
-	if got.LeftoverRunechants != 3 {
-		t.Errorf("LeftoverRunechants = %d, want 3", got.LeftoverRunechants)
 	}
 }
 

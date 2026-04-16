@@ -3,8 +3,8 @@
 // Text: "Go again. When you deal or are dealt damage, destroy this. When this leaves the arena
 // during your turn, create N Runechant tokens." (Red N=3, Yellow N=2, Blue N=1.)
 //
-// Simplification: assume the aura resolves during our turn and produces its full Runechant payout,
-// so Play returns N (Red=3, Yellow=2, Blue=1).
+// Simplification: assume the aura resolves during our turn and creates all N Runechants
+// immediately on play (we don't track the "destroyed by damage" trigger or next-turn timing).
 //
 // Source: github.com/the-fab-cube/flesh-and-blood-cards (card.csv).
 
@@ -24,7 +24,7 @@ func (ArcaneCussingRed) Attack() int               { return 0 }
 func (ArcaneCussingRed) Defense() int              { return 2 }
 func (ArcaneCussingRed) Types() card.TypeSet    { return arcaneCussingTypes }
 func (ArcaneCussingRed) GoAgain() bool             { return true }
-func (ArcaneCussingRed) Play(*card.TurnState) int  { return 3 }
+func (ArcaneCussingRed) Play(s *card.TurnState) int  { return s.CreateRunechants(3) }
 
 type ArcaneCussingYellow struct{}
 
@@ -36,7 +36,7 @@ func (ArcaneCussingYellow) Attack() int              { return 0 }
 func (ArcaneCussingYellow) Defense() int             { return 2 }
 func (ArcaneCussingYellow) Types() card.TypeSet   { return arcaneCussingTypes }
 func (ArcaneCussingYellow) GoAgain() bool            { return true }
-func (ArcaneCussingYellow) Play(*card.TurnState) int { return 2 }
+func (ArcaneCussingYellow) Play(s *card.TurnState) int { return s.CreateRunechants(2) }
 
 type ArcaneCussingBlue struct{}
 
@@ -48,4 +48,4 @@ func (ArcaneCussingBlue) Attack() int              { return 0 }
 func (ArcaneCussingBlue) Defense() int             { return 2 }
 func (ArcaneCussingBlue) Types() card.TypeSet   { return arcaneCussingTypes }
 func (ArcaneCussingBlue) GoAgain() bool            { return true }
-func (ArcaneCussingBlue) Play(*card.TurnState) int { return 1 }
+func (ArcaneCussingBlue) Play(s *card.TurnState) int { return s.CreateRunechants(1) }

@@ -27,12 +27,12 @@ func TestRunicReaping_WeaponNextDoesNotQualify(t *testing.T) {
 }
 
 func TestRunicReaping_NextAttackNoPitchedAttack(t *testing.T) {
-	// Next attack exists, but nothing attack-typed was pitched → N Runechant tokens created on
-	// state (consumed downstream by the attack pipeline). Play itself returns 0 damage; the +1
-	// pitched-attack rider also doesn't fire.
+	// Next attack exists, but nothing attack-typed was pitched → N Runechant tokens created.
+	// Play returns N (each token credited +1 at creation); the pitched-attack +1 rider doesn't
+	// fire. state.Runechants tracks the tokens for downstream consume.
 	cases := []struct {
-		c             card.Card
-		wantRunechant int
+		c card.Card
+		n int
 	}{
 		{RunicReapingRed{}, 3},
 		{RunicReapingYellow{}, 2},
@@ -43,11 +43,11 @@ func TestRunicReaping_NextAttackNoPitchedAttack(t *testing.T) {
 			CardsRemaining: []*card.PlayedCard{{Card: stubRunebladeAttack{}}},
 			Pitched:        []card.Card{stubNonAttack{}},
 		}
-		if got := tc.c.Play(&s); got != 0 {
-			t.Errorf("%s: Play() = %d, want 0", tc.c.Name(), got)
+		if got := tc.c.Play(&s); got != tc.n {
+			t.Errorf("%s: Play() = %d, want %d", tc.c.Name(), got, tc.n)
 		}
-		if s.Runechants != tc.wantRunechant {
-			t.Errorf("%s: Runechants = %d, want %d", tc.c.Name(), s.Runechants, tc.wantRunechant)
+		if s.Runechants != tc.n {
+			t.Errorf("%s: Runechants = %d, want %d", tc.c.Name(), s.Runechants, tc.n)
 		}
 		if !s.AuraCreated {
 			t.Errorf("%s: AuraCreated should be set when bonus fires", tc.c.Name())
@@ -56,11 +56,12 @@ func TestRunicReaping_NextAttackNoPitchedAttack(t *testing.T) {
 }
 
 func TestRunicReaping_NextAttackWithPitchedAttack(t *testing.T) {
-	// Next attack exists AND an attack card was pitched → Play returns the +1{p} rider damage;
-	// the Runechant count is unaffected by that rider (only by the create-runechants branch).
+	// Next attack exists AND an attack card was pitched → Play returns N (token credits) plus 1
+	// (the pitched-attack rider). state.Runechants holds only the N tokens — the rider damage is
+	// direct, not a runechant.
 	cases := []struct {
-		c             card.Card
-		wantRunechant int
+		c card.Card
+		n int
 	}{
 		{RunicReapingRed{}, 3},
 		{RunicReapingYellow{}, 2},
@@ -71,11 +72,11 @@ func TestRunicReaping_NextAttackWithPitchedAttack(t *testing.T) {
 			CardsRemaining: []*card.PlayedCard{{Card: stubRunebladeAttack{}}},
 			Pitched:        []card.Card{stubRunebladeAttack{}},
 		}
-		if got := tc.c.Play(&s); got != 1 {
-			t.Errorf("%s: Play() = %d, want 1 (pitched-attack bonus only)", tc.c.Name(), got)
+		if got := tc.c.Play(&s); got != tc.n+1 {
+			t.Errorf("%s: Play() = %d, want %d (N tokens + 1 pitched-attack bonus)", tc.c.Name(), got, tc.n+1)
 		}
-		if s.Runechants != tc.wantRunechant {
-			t.Errorf("%s: Runechants = %d, want %d", tc.c.Name(), s.Runechants, tc.wantRunechant)
+		if s.Runechants != tc.n {
+			t.Errorf("%s: Runechants = %d, want %d", tc.c.Name(), s.Runechants, tc.n)
 		}
 	}
 }

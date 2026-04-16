@@ -4,8 +4,8 @@
 // beginning of your action phase, remove a verse counter. If you do, create a Runechant token.
 // Otherwise, destroy Runeblood Incantation." (Red N=3, Yellow N=2, Blue N=1.)
 //
-// Simplification: assume every verse counter eventually produces a Runechant. Play returns N
-// (Red=3, Yellow=2, Blue=1).
+// Simplification: front-load all N Runechants on play rather than one per future turn's action
+// phase. Cross-turn verse-counter ticking isn't modelled.
 //
 // Source: github.com/the-fab-cube/flesh-and-blood-cards (card.csv).
 
@@ -25,7 +25,7 @@ func (RunebloodIncantationRed) Attack() int               { return 0 }
 func (RunebloodIncantationRed) Defense() int              { return 2 }
 func (RunebloodIncantationRed) Types() card.TypeSet       { return runebloodIncantationTypes }
 func (RunebloodIncantationRed) GoAgain() bool             { return true }
-func (RunebloodIncantationRed) Play(*card.TurnState) int  { return 3 }
+func (RunebloodIncantationRed) Play(s *card.TurnState) int  { return s.CreateRunechants(3) }
 
 type RunebloodIncantationYellow struct{}
 
@@ -37,7 +37,7 @@ func (RunebloodIncantationYellow) Attack() int              { return 0 }
 func (RunebloodIncantationYellow) Defense() int             { return 2 }
 func (RunebloodIncantationYellow) Types() card.TypeSet      { return runebloodIncantationTypes }
 func (RunebloodIncantationYellow) GoAgain() bool            { return true }
-func (RunebloodIncantationYellow) Play(*card.TurnState) int { return 2 }
+func (RunebloodIncantationYellow) Play(s *card.TurnState) int { return s.CreateRunechants(2) }
 
 type RunebloodIncantationBlue struct{}
 
@@ -49,4 +49,4 @@ func (RunebloodIncantationBlue) Attack() int              { return 0 }
 func (RunebloodIncantationBlue) Defense() int             { return 2 }
 func (RunebloodIncantationBlue) Types() card.TypeSet      { return runebloodIncantationTypes }
 func (RunebloodIncantationBlue) GoAgain() bool            { return true }
-func (RunebloodIncantationBlue) Play(*card.TurnState) int { return 1 }
+func (RunebloodIncantationBlue) Play(s *card.TurnState) int { return s.CreateRunechants(1) }
