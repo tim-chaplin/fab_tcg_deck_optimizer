@@ -62,6 +62,73 @@ func Random(h hero.Hero, size, maxCopies int, rng *rand.Rand) *Deck {
 	return New(h, weapons, picks)
 }
 
+// AllMutations returns every single-slot mutation of d in a deterministic order: first every
+// alternative weapon loadout (sorted by loadout key), then every (removeID, replaceID) pair where
+// removeID is a card currently in the deck and replaceID is a card in the Deckable pool that
+// isn't in the deck. Outer loop iterates removeID; inner loop iterates replaceID. Both are
+// sorted by card.ID.
+//
+// The returned decks have fresh (zero) stats and share no backing slices with d or each other.
+func AllMutations(d *Deck) []*Deck {
+	var out []*Deck
+
+	// Weapon mutations: every loadout different from the current one.
+	loadouts := weaponLoadouts(cards.AllWeapons)
+	currentKey := weaponKey(d.Weapons)
+	type keyedLoadout struct {
+		key     string
+		weapons []weapon.Weapon
+	}
+	sortedLoadouts := make([]keyedLoadout, 0, len(loadouts))
+	for _, l := range loadouts {
+		sortedLoadouts = append(sortedLoadouts, keyedLoadout{key: weaponKey(l), weapons: l})
+	}
+	sort.Slice(sortedLoadouts, func(i, j int) bool { return sortedLoadouts[i].key < sortedLoadouts[j].key })
+	for _, l := range sortedLoadouts {
+		if l.key == currentKey {
+			continue
+		}
+		newCards := make([]card.Card, len(d.Cards))
+		copy(newCards, d.Cards)
+		out = append(out, New(d.Hero, l.weapons, newCards))
+	}
+
+	// Card mutations: for each unique card in the deck, try replacing with each Deckable card
+	// not already in the deck.
+	inDeck := map[card.ID]bool{}
+	var uniqueIDs []card.ID
+	for _, c := range d.Cards {
+		id := c.ID()
+		if !inDeck[id] {
+			inDeck[id] = true
+			uniqueIDs = append(uniqueIDs, id)
+		}
+	}
+	sort.Slice(uniqueIDs, func(i, j int) bool { return uniqueIDs[i] < uniqueIDs[j] })
+
+	pool := cards.Deckable()
+	sort.Slice(pool, func(i, j int) bool { return pool[i] < pool[j] })
+
+	for _, removeID := range uniqueIDs {
+		for _, replaceID := range pool {
+			if inDeck[replaceID] {
+				continue
+			}
+			replacement := cards.Get(replaceID)
+			newCards := make([]card.Card, 0, len(d.Cards))
+			for _, c := range d.Cards {
+				if c.ID() != removeID {
+					newCards = append(newCards, c)
+				}
+			}
+			newCards = append(newCards, replacement, replacement)
+			out = append(out, New(d.Hero, d.Weapons, newCards))
+		}
+	}
+
+	return out
+}
+
 // Mutate creates a new deck by randomly changing one "slot": either swapping one card pair with a
 // random card not already in the deck, or swapping the weapon loadout. Each unique card slot and
 // the weapon slot have equal probability of being chosen (e.g. 20 unique cards + 1 weapon = 1/21
