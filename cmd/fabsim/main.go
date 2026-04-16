@@ -5,7 +5,9 @@ import (
 	"flag"
 	"fmt"
 	"math/rand"
+	"os"
 	"sort"
+	"strings"
 	"time"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/deck"
@@ -28,6 +30,7 @@ func main() {
 	var bestDeck *deck.Deck
 	bestAvg := -1.0
 
+	start := time.Now()
 	for i := 0; i < *numDecks; i++ {
 		d := deck.Random(hero.Viserai{}, *deckSize, *maxCopies, rng)
 		stats := d.Evaluate(*shuffles, *incoming, rng)
@@ -35,7 +38,9 @@ func main() {
 			bestAvg = stats.Avg()
 			bestDeck = d
 		}
+		printProgress(i+1, *numDecks, time.Since(start))
 	}
+	fmt.Fprintln(os.Stderr)
 
 	fmt.Printf("Generated %d decks, %d shuffles each, incoming=%d, seed=%d\n",
 		*numDecks, *shuffles, *incoming, *seed)
@@ -79,6 +84,21 @@ func printBestDeck(d *deck.Deck) {
 	for _, n := range names {
 		fmt.Printf("  %dx %s\n", counts[n], n)
 	}
+}
+
+// printProgress renders a single-line progress bar to stderr, overwriting itself with \r.
+// Shows deck count, percent, elapsed time, and ETA based on the average per-deck time so far.
+func printProgress(done, total int, elapsed time.Duration) {
+	const width = 30
+	frac := float64(done) / float64(total)
+	filled := int(frac * float64(width))
+	bar := strings.Repeat("=", filled) + strings.Repeat(" ", width-filled)
+	var eta time.Duration
+	if done > 0 {
+		eta = time.Duration(float64(elapsed) * float64(total-done) / float64(done))
+	}
+	fmt.Fprintf(os.Stderr, "\r[%s] %d/%d (%.0f%%) elapsed %s eta %s",
+		bar, done, total, frac*100, elapsed.Truncate(time.Second), eta.Truncate(time.Second))
 }
 
 func weaponNames(ws []weapon.Weapon) string {
