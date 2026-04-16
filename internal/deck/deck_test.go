@@ -30,11 +30,14 @@ func TestAllMutations_CountsAndShape(t *testing.T) {
 			len(muts), want, wantWeaponMuts, wantCardMuts)
 	}
 	for i, m := range muts {
-		if len(m.Cards) != 4 {
-			t.Errorf("mutation %d: card count %d, want 4", i, len(m.Cards))
+		if len(m.Deck.Cards) != 4 {
+			t.Errorf("mutation %d: card count %d, want 4", i, len(m.Deck.Cards))
 		}
-		if m.Hero.Name() != d.Hero.Name() {
+		if m.Deck.Hero.Name() != d.Hero.Name() {
 			t.Errorf("mutation %d: hero changed", i)
+		}
+		if m.Description == "" {
+			t.Errorf("mutation %d: empty description", i)
 		}
 	}
 }
@@ -51,13 +54,17 @@ func TestAllMutations_Deterministic(t *testing.T) {
 		t.Fatalf("mutation counts differ between calls: %d vs %d", len(first), len(second))
 	}
 	for i := range first {
-		if weaponKey(first[i].Weapons) != weaponKey(second[i].Weapons) {
+		if weaponKey(first[i].Deck.Weapons) != weaponKey(second[i].Deck.Weapons) {
 			t.Errorf("mutation %d weapons differ between calls", i)
 		}
-		for j, c := range first[i].Cards {
-			if c.ID() != second[i].Cards[j].ID() {
+		if first[i].Description != second[i].Description {
+			t.Errorf("mutation %d descriptions differ: %q vs %q",
+				i, first[i].Description, second[i].Description)
+		}
+		for j, c := range first[i].Deck.Cards {
+			if c.ID() != second[i].Deck.Cards[j].ID() {
 				t.Errorf("mutation %d card[%d] differs between calls: %v vs %v",
-					i, j, c.ID(), second[i].Cards[j].ID())
+					i, j, c.ID(), second[i].Deck.Cards[j].ID())
 			}
 		}
 	}
@@ -68,7 +75,7 @@ func TestAllMutations_NoDuplicateOfSource(t *testing.T) {
 	d := New(hero.Viserai{}, []weapon.Weapon{weapon.NebulaBlade{}}, []card.Card{a, a, a, a})
 	srcKey := deckFingerprint(d)
 	for i, m := range AllMutations(d) {
-		if deckFingerprint(m) == srcKey {
+		if deckFingerprint(m.Deck) == srcKey {
 			t.Errorf("mutation %d equals the source deck", i)
 		}
 	}

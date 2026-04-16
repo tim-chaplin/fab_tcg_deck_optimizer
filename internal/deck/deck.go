@@ -62,6 +62,14 @@ func Random(h hero.Hero, size, maxCopies int, rng *rand.Rand) *Deck {
 	return New(h, weapons, picks)
 }
 
+// Mutation is one candidate single-slot change to a deck: the mutated Deck plus a human-readable
+// summary of what changed (e.g. "swapped Aether Slash (Red) for Arcanic Spike (Red)"). Consumers
+// use Deck to evaluate and Description for logging.
+type Mutation struct {
+	Deck        *Deck
+	Description string
+}
+
 // AllMutations returns every single-slot mutation of d in a deterministic order: first every
 // alternative weapon loadout (sorted by loadout key), then every (removeID, replaceID) pair where
 // removeID is a card currently in the deck and replaceID is a card in the Deckable pool that
@@ -69,8 +77,8 @@ func Random(h hero.Hero, size, maxCopies int, rng *rand.Rand) *Deck {
 // sorted by card.ID.
 //
 // The returned decks have fresh (zero) stats and share no backing slices with d or each other.
-func AllMutations(d *Deck) []*Deck {
-	var out []*Deck
+func AllMutations(d *Deck) []Mutation {
+	var out []Mutation
 
 	// Weapon mutations: every loadout different from the current one.
 	loadouts := weaponLoadouts(cards.AllWeapons)
@@ -90,7 +98,10 @@ func AllMutations(d *Deck) []*Deck {
 		}
 		newCards := make([]card.Card, len(d.Cards))
 		copy(newCards, d.Cards)
-		out = append(out, New(d.Hero, l.weapons, newCards))
+		out = append(out, Mutation{
+			Deck:        New(d.Hero, l.weapons, newCards),
+			Description: fmt.Sprintf("swapped weapons from %s to %s", loadoutLabel(d.Weapons), loadoutLabel(l.weapons)),
+		})
 	}
 
 	// Card mutations: for each unique card in the deck, try replacing with each Deckable card
@@ -110,6 +121,7 @@ func AllMutations(d *Deck) []*Deck {
 	sort.Slice(pool, func(i, j int) bool { return pool[i] < pool[j] })
 
 	for _, removeID := range uniqueIDs {
+		removed := cards.Get(removeID)
 		for _, replaceID := range pool {
 			if inDeck[replaceID] {
 				continue
@@ -122,11 +134,28 @@ func AllMutations(d *Deck) []*Deck {
 				}
 			}
 			newCards = append(newCards, replacement, replacement)
-			out = append(out, New(d.Hero, d.Weapons, newCards))
+			out = append(out, Mutation{
+				Deck:        New(d.Hero, d.Weapons, newCards),
+				Description: fmt.Sprintf("swapped %s for %s", removed.Name(), replacement.Name()),
+			})
 		}
 	}
 
 	return out
+}
+
+// loadoutLabel formats a weapon loadout for mutation descriptions, e.g. "[Nebula Blade]" or
+// "[Reaping Blade, Scepter of Pain]".
+func loadoutLabel(ws []weapon.Weapon) string {
+	if len(ws) == 0 {
+		return "[]"
+	}
+	names := make([]string, len(ws))
+	for i, w := range ws {
+		names[i] = w.Name()
+	}
+	sort.Strings(names)
+	return "[" + strings.Join(names, ", ") + "]"
 }
 
 // Mutate creates a new deck by randomly changing one "slot": either swapping one card pair with a
