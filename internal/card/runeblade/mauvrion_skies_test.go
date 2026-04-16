@@ -33,11 +33,12 @@ func TestMauvrionSkies_WeaponNextDoesNotQualify(t *testing.T) {
 }
 
 func TestMauvrionSkies_NextAttackGrantsGoAgainAndRunechants(t *testing.T) {
-	// Qualifying next attack exists → each variant contributes its printed runechant count,
-	// flips GrantedGoAgain on the target PlayedCard, and sets AuraCreated.
+	// Qualifying next attack exists → each variant creates its printed number of Runechant
+	// tokens. Play returns N (tokens credited +1 each at creation); state.Runechants holds the
+	// tokens for downstream consume; target.GrantedGoAgain is flipped; AuraCreated is set.
 	cases := []struct {
-		c    card.Card
-		want int
+		c card.Card
+		n int
 	}{
 		{MauvrionSkiesRed{}, 3},
 		{MauvrionSkiesYellow{}, 2},
@@ -46,8 +47,11 @@ func TestMauvrionSkies_NextAttackGrantsGoAgainAndRunechants(t *testing.T) {
 	for _, tc := range cases {
 		target := &card.PlayedCard{Card: stubRunebladeAttack{}}
 		s := card.TurnState{CardsRemaining: []*card.PlayedCard{target}}
-		if got := tc.c.Play(&s); got != tc.want {
-			t.Errorf("%s: Play() = %d, want %d", tc.c.Name(), got, tc.want)
+		if got := tc.c.Play(&s); got != tc.n {
+			t.Errorf("%s: Play() = %d, want %d", tc.c.Name(), got, tc.n)
+		}
+		if s.Runechants != tc.n {
+			t.Errorf("%s: Runechants = %d, want %d", tc.c.Name(), s.Runechants, tc.n)
 		}
 		if !target.GrantedGoAgain {
 			t.Errorf("%s: target GrantedGoAgain should be set", tc.c.Name())

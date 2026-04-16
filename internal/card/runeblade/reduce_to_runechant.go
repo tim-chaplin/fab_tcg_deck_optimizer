@@ -3,8 +3,11 @@
 // Printed defense: Red 4, Yellow 3, Blue 2.
 // Text: "Reduce to Runechant costs {r} less to play for each Runechant you control. Create a
 // Runechant token."
-// Simplification: assume we always have (at least) 1 Runechant, so the cost is effectively 0.
-// The created Runechant token isn't tracked across turns.
+//
+// Cost() returns 0 for the partition-level minimum (fully-discounted case); PrintedCost() is 1
+// for future per-play effective-cost checks. Defense reactions currently run in a separate
+// pipeline that doesn't track runechants, so the created Runechant isn't modelled here either —
+// the cost reduction is effectively assumed full, matching the prior simplification.
 //
 // Source: github.com/the-fab-cube/flesh-and-blood-cards (card.csv).
 
@@ -14,11 +17,14 @@ import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 
 var reduceToRunechantTypes = card.NewTypeSet(card.TypeRuneblade, card.TypeDefenseReaction)
 
+const reduceToRunechantPrintedCost = 1
+
 type ReduceToRunechantRed struct{}
 
 func (ReduceToRunechantRed) ID() card.ID                 { return card.ReduceToRunechantRed }
 func (ReduceToRunechantRed) Name() string             { return "Reduce to Runechant (Red)" }
 func (ReduceToRunechantRed) Cost() int                { return 0 }
+func (ReduceToRunechantRed) PrintedCost() int         { return reduceToRunechantPrintedCost }
 func (ReduceToRunechantRed) Pitch() int               { return 1 }
 func (ReduceToRunechantRed) Attack() int              { return 0 }
 func (ReduceToRunechantRed) Defense() int             { return 4 }
@@ -31,6 +37,7 @@ type ReduceToRunechantYellow struct{}
 func (ReduceToRunechantYellow) ID() card.ID                 { return card.ReduceToRunechantYellow }
 func (ReduceToRunechantYellow) Name() string             { return "Reduce to Runechant (Yellow)" }
 func (ReduceToRunechantYellow) Cost() int                { return 0 }
+func (ReduceToRunechantYellow) PrintedCost() int         { return reduceToRunechantPrintedCost }
 func (ReduceToRunechantYellow) Pitch() int               { return 2 }
 func (ReduceToRunechantYellow) Attack() int              { return 0 }
 func (ReduceToRunechantYellow) Defense() int             { return 3 }
@@ -43,6 +50,7 @@ type ReduceToRunechantBlue struct{}
 func (ReduceToRunechantBlue) ID() card.ID                 { return card.ReduceToRunechantBlue }
 func (ReduceToRunechantBlue) Name() string             { return "Reduce to Runechant (Blue)" }
 func (ReduceToRunechantBlue) Cost() int                { return 0 }
+func (ReduceToRunechantBlue) PrintedCost() int         { return reduceToRunechantPrintedCost }
 func (ReduceToRunechantBlue) Pitch() int               { return 3 }
 func (ReduceToRunechantBlue) Attack() int              { return 0 }
 func (ReduceToRunechantBlue) Defense() int             { return 2 }

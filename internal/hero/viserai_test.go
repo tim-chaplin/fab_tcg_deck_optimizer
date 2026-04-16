@@ -52,11 +52,15 @@ func (stubNonRuneblade) GoAgain() bool            { return true }
 func (stubNonRuneblade) Play(*card.TurnState) int { return 0 }
 
 func TestViserai_RunebladeAfterNonAttackActionTriggers(t *testing.T) {
-	// Non-attack action played first, then a Runeblade attack. The second play's OnCardPlayed sees
-	// the prior non-attack action and awards a Runechant (+1).
+	// Non-attack action played first, then a Runeblade attack. Viserai's OnCardPlayed creates a
+	// Runechant token: returns +1 damage (each token credited +1 at creation) and leaves a
+	// token on state.Runechants for downstream consume or carryover.
 	s := card.TurnState{CardsPlayed: []card.Card{stubRuneAura{}}}
 	if got := (Viserai{}).OnCardPlayed(stubRuneAttack{}, &s); got != 1 {
-		t.Fatalf("expected +1 Runechant, got %d", got)
+		t.Fatalf("expected +1 damage from OnCardPlayed, got %d", got)
+	}
+	if s.Runechants != 1 {
+		t.Fatalf("expected 1 Runechant on state, got %d", s.Runechants)
 	}
 }
 

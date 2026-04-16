@@ -351,6 +351,7 @@ func (d *Deck) Evaluate(runs int, incomingDamage int, rng *rand.Rand) Stats {
 
 		head, tail := 0, deckSize
 		handIdx := 0
+		runechantCarryover := 0
 		for tail-head >= handSize {
 			// Compact when there isn't room at the bottom to append a full hand's worth of
 			// pitched cards without overrunning buf.
@@ -360,7 +361,8 @@ func (d *Deck) Evaluate(runs int, incomingDamage int, rng *rand.Rand) Stats {
 				head = 0
 			}
 			h := buf[head : head+handSize]
-			play := hand.Best(d.Hero, d.Weapons, h, incomingDamage, buf[head+handSize:tail])
+			play := hand.Best(d.Hero, d.Weapons, h, incomingDamage, buf[head+handSize:tail], runechantCarryover)
+			runechantCarryover = play.LeftoverRunechants
 			v := float64(play.Value)
 
 			d.Stats.TotalValue += v

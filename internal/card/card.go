@@ -87,6 +87,17 @@ type TurnState struct {
 	// Effects that reveal or draw the top card (e.g. Sigil of the Arknight) inspect this. Nil when
 	// unknown / not provided. Implementations must not mutate it.
 	Deck []Card
+	// Runechants is the live count of Runechant aura tokens in play right now. The solver seeds it
+	// with the number carried over from the previous turn, CreateRunechants increments it, and
+	// the attack pipeline consumes the running total on each attack card / weapon swing (each
+	// token fires for 1 arcane and is destroyed). DiscountPerRunechant cards read this to compute
+	// their effective cost.
+	Runechants int
+	// DelayedRunechants are tokens that won't be available this turn — they skip straight to the
+	// next turn's carryover. DelayRunechants adds here; same-turn attacks don't consume them and
+	// discount checks don't see them. playSequence folds Runechants + DelayedRunechants into the
+	// turn's LeftoverRunechants.
+	DelayedRunechants int
 }
 
 // Hero is the minimal hero profile card effects need. It's intentionally narrower than
@@ -106,17 +117,16 @@ func (s *TurnState) HasPlayedType(t CardType) bool {
 	return false
 }
 
-// CreateRunechants models the Runeblade mechanic of creating n Runechant token auras. Sets
-// AuraCreated so effects that key on "aura created this turn" see it, and returns the damage the
-// tokens will contribute this chain — currently 1 per token, since the solver assumes a following
-// attack always arrives and triggers them. Callers add the returned value to whatever damage
-// they're reporting back to the solver.
-//
-// Centralising creation in one call site makes it the only place to touch when we later track
-// runechant counts for discount-per-token cards (e.g. Malefic Incantation's cost reduction).
+// CreateRunechants adds n Runechant token auras to the current count, sets AuraCreated so
+// effects that key on "aura created this turn" see it, and returns n — each token is credited
+// as +1 damage at creation time (it'll fire on some future attack, possibly next turn via
+// carryover). The attack pipeline consumes state.Runechants without re-crediting damage, so
+// every token is counted exactly once. Tokens that neither fire nor carry over (end-of-sim
+// leftovers) are slightly over-credited — an accepted approximation.
 func (s *TurnState) CreateRunechants(n int) int {
 	if n > 0 {
 		s.AuraCreated = true
+		s.Runechants += n
 	}
 	return n
 }
@@ -124,6 +134,19 @@ func (s *TurnState) CreateRunechants(n int) int {
 // CreateRunechant is shorthand for CreateRunechants(1) for the common single-token case.
 func (s *TurnState) CreateRunechant() int {
 	return s.CreateRunechants(1)
+}
+
+// DelayRunechants adds n Runechant tokens that skip this turn entirely — they go straight to
+// the next turn's carryover without being available to same-turn attacks or DiscountPerRunechant
+// checks. Used by cards whose text fires at the start of a future turn (e.g. Blessing of Occult,
+// whose "at start of your turn, create N Runechant tokens" resolves on the following upkeep).
+// Returns n — each token is credited as +1 damage at creation, same as CreateRunechants.
+func (s *TurnState) DelayRunechants(n int) int {
+	if n > 0 {
+		s.AuraCreated = true
+		s.DelayedRunechants += n
+	}
+	return n
 }
 
 // Card is any Flesh and Blood card that can be in a deck. Methods return the card's static profile
@@ -157,5 +180,17 @@ type Card interface {
 // output depends on context (e.g. remaining deck composition) that the memo key doesn't capture.
 type NoMemo interface {
 	NoMemo()
+}
+
+// DiscountPerRunechant is optionally implemented by cards whose printed cost is reduced by 1 per
+// Runechant the controller has in play (e.g. Amplify the Arknight, Reduce to Runechant, Rune
+// Flash). PrintedCost returns the undiscounted cost; the solver computes the effective per-play
+// cost as max(0, PrintedCost() - TurnState.Runechants) at the moment the card is played.
+//
+// Cost() on these cards still returns 0 so the partition-level affordability check treats them
+// as their minimum possible cost (0, when fully discounted). The permutation pipeline enforces
+// the actual per-play cost against the running resource pool.
+type DiscountPerRunechant interface {
+	PrintedCost() int
 }
 

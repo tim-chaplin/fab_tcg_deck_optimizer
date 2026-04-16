@@ -4,8 +4,8 @@
 // create N Runechant tokens. When your hero is dealt damage, destroy Bloodspill Invocation."
 // (Red N=3, Yellow N=2, Blue N=1.)
 //
-// Simplification: assume an attack will land before we take damage, so the aura pays out fully.
-// Play returns N (Red=3, Yellow=2, Blue=1).
+// Simplification: assume an attack action card will hit before we take damage, and create all
+// N Runechants immediately on play.
 //
 // Source: github.com/the-fab-cube/flesh-and-blood-cards (card.csv).
 
@@ -25,7 +25,7 @@ func (BloodspillInvocationRed) Attack() int               { return 0 }
 func (BloodspillInvocationRed) Defense() int              { return 2 }
 func (BloodspillInvocationRed) Types() card.TypeSet    { return bloodspillInvocationTypes }
 func (BloodspillInvocationRed) GoAgain() bool             { return true }
-func (BloodspillInvocationRed) Play(*card.TurnState) int  { return 3 }
+func (BloodspillInvocationRed) Play(s *card.TurnState) int  { return s.CreateRunechants(3) }
 
 type BloodspillInvocationYellow struct{}
 
@@ -37,7 +37,7 @@ func (BloodspillInvocationYellow) Attack() int              { return 0 }
 func (BloodspillInvocationYellow) Defense() int             { return 2 }
 func (BloodspillInvocationYellow) Types() card.TypeSet   { return bloodspillInvocationTypes }
 func (BloodspillInvocationYellow) GoAgain() bool            { return true }
-func (BloodspillInvocationYellow) Play(*card.TurnState) int { return 2 }
+func (BloodspillInvocationYellow) Play(s *card.TurnState) int { return s.CreateRunechants(2) }
 
 type BloodspillInvocationBlue struct{}
 
@@ -49,4 +49,4 @@ func (BloodspillInvocationBlue) Attack() int              { return 0 }
 func (BloodspillInvocationBlue) Defense() int             { return 2 }
 func (BloodspillInvocationBlue) Types() card.TypeSet   { return bloodspillInvocationTypes }
 func (BloodspillInvocationBlue) GoAgain() bool            { return true }
-func (BloodspillInvocationBlue) Play(*card.TurnState) int { return 1 }
+func (BloodspillInvocationBlue) Play(s *card.TurnState) int { return s.CreateRunechants(1) }

@@ -27,11 +27,12 @@ func TestRunicReaping_WeaponNextDoesNotQualify(t *testing.T) {
 }
 
 func TestRunicReaping_NextAttackNoPitchedAttack(t *testing.T) {
-	// Next attack exists, but nothing attack-typed was pitched → just N runechants. Each variant
-	// contributes its printed count.
+	// Next attack exists, but nothing attack-typed was pitched → N Runechant tokens created.
+	// Play returns N (each token credited +1 at creation); the pitched-attack +1 rider doesn't
+	// fire. state.Runechants tracks the tokens for downstream consume.
 	cases := []struct {
-		c    card.Card
-		want int
+		c card.Card
+		n int
 	}{
 		{RunicReapingRed{}, 3},
 		{RunicReapingYellow{}, 2},
@@ -42,8 +43,11 @@ func TestRunicReaping_NextAttackNoPitchedAttack(t *testing.T) {
 			CardsRemaining: []*card.PlayedCard{{Card: stubRunebladeAttack{}}},
 			Pitched:        []card.Card{stubNonAttack{}},
 		}
-		if got := tc.c.Play(&s); got != tc.want {
-			t.Errorf("%s: Play() = %d, want %d", tc.c.Name(), got, tc.want)
+		if got := tc.c.Play(&s); got != tc.n {
+			t.Errorf("%s: Play() = %d, want %d", tc.c.Name(), got, tc.n)
+		}
+		if s.Runechants != tc.n {
+			t.Errorf("%s: Runechants = %d, want %d", tc.c.Name(), s.Runechants, tc.n)
 		}
 		if !s.AuraCreated {
 			t.Errorf("%s: AuraCreated should be set when bonus fires", tc.c.Name())
@@ -52,23 +56,27 @@ func TestRunicReaping_NextAttackNoPitchedAttack(t *testing.T) {
 }
 
 func TestRunicReaping_NextAttackWithPitchedAttack(t *testing.T) {
-	// Next attack exists AND an attack card was pitched → N+1 (the +1{p} rider stacks on the
-	// runechant count).
+	// Next attack exists AND an attack card was pitched → Play returns N (token credits) plus 1
+	// (the pitched-attack rider). state.Runechants holds only the N tokens — the rider damage is
+	// direct, not a runechant.
 	cases := []struct {
-		c    card.Card
-		want int
+		c card.Card
+		n int
 	}{
-		{RunicReapingRed{}, 4},
-		{RunicReapingYellow{}, 3},
-		{RunicReapingBlue{}, 2},
+		{RunicReapingRed{}, 3},
+		{RunicReapingYellow{}, 2},
+		{RunicReapingBlue{}, 1},
 	}
 	for _, tc := range cases {
 		s := card.TurnState{
 			CardsRemaining: []*card.PlayedCard{{Card: stubRunebladeAttack{}}},
 			Pitched:        []card.Card{stubRunebladeAttack{}},
 		}
-		if got := tc.c.Play(&s); got != tc.want {
-			t.Errorf("%s: Play() = %d, want %d", tc.c.Name(), got, tc.want)
+		if got := tc.c.Play(&s); got != tc.n+1 {
+			t.Errorf("%s: Play() = %d, want %d (N tokens + 1 pitched-attack bonus)", tc.c.Name(), got, tc.n+1)
+		}
+		if s.Runechants != tc.n {
+			t.Errorf("%s: Runechants = %d, want %d", tc.c.Name(), s.Runechants, tc.n)
 		}
 	}
 }

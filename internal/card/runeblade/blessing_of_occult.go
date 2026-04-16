@@ -3,8 +3,8 @@
 // Text: "At the start of your turn, destroy Blessing of Occult then create N Runechant tokens."
 // (Red N=3, Yellow N=2, Blue N=1.)
 //
-// Simplification: assume the aura ticks down and produces its full Runechant payout. Play returns
-// N (Red=3, Yellow=2, Blue=1).
+// Simplification: the tokens fire on the NEXT turn's upkeep, so we push them into the
+// carryover via DelayRunechants — they don't interact with this turn's chain or discount cards.
 //
 // Source: github.com/the-fab-cube/flesh-and-blood-cards (card.csv).
 
@@ -24,7 +24,7 @@ func (BlessingOfOccultRed) Attack() int               { return 0 }
 func (BlessingOfOccultRed) Defense() int              { return 2 }
 func (BlessingOfOccultRed) Types() card.TypeSet    { return blessingOfOccultTypes }
 func (BlessingOfOccultRed) GoAgain() bool             { return false }
-func (BlessingOfOccultRed) Play(*card.TurnState) int  { return 3 }
+func (BlessingOfOccultRed) Play(s *card.TurnState) int  { return s.DelayRunechants(3) }
 
 type BlessingOfOccultYellow struct{}
 
@@ -36,7 +36,7 @@ func (BlessingOfOccultYellow) Attack() int              { return 0 }
 func (BlessingOfOccultYellow) Defense() int             { return 2 }
 func (BlessingOfOccultYellow) Types() card.TypeSet   { return blessingOfOccultTypes }
 func (BlessingOfOccultYellow) GoAgain() bool            { return false }
-func (BlessingOfOccultYellow) Play(*card.TurnState) int { return 2 }
+func (BlessingOfOccultYellow) Play(s *card.TurnState) int { return s.DelayRunechants(2) }
 
 type BlessingOfOccultBlue struct{}
 
@@ -48,4 +48,4 @@ func (BlessingOfOccultBlue) Attack() int              { return 0 }
 func (BlessingOfOccultBlue) Defense() int             { return 2 }
 func (BlessingOfOccultBlue) Types() card.TypeSet   { return blessingOfOccultTypes }
 func (BlessingOfOccultBlue) GoAgain() bool            { return false }
-func (BlessingOfOccultBlue) Play(*card.TurnState) int { return 1 }
+func (BlessingOfOccultBlue) Play(s *card.TurnState) int { return s.DelayRunechants(1) }

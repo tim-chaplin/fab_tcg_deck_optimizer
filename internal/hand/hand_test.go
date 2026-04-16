@@ -24,7 +24,7 @@ func (stubHero) OnCardPlayed(card.Card, *card.TurnState) int { return 0 }
 func TestBest_AllRedHand(t *testing.T) {
 	// Best: pitch 2 reds (2 res) to attack with the other 2 (cost 2, dealt 6). Value = 6.
 	h := []card.Card{fake.RedAttack{}, fake.RedAttack{}, fake.RedAttack{}, fake.RedAttack{}}
-	got := Best(stubHero{}, nil, h, 4, nil)
+	got := Best(stubHero{}, nil, h, 4, nil, 0)
 	if got.Value != 6 {
 		t.Fatalf("want value 6, got %d", got.Value)
 	}
@@ -34,7 +34,7 @@ func TestBest_AllBlueHand(t *testing.T) {
 	// Best: pitch 1 blue (3 res), attack with 2 blues (cost 2, dealt 2), defend with 1 blue (prevented
 	// 3). Value = 5.
 	h := []card.Card{fake.BlueAttack{}, fake.BlueAttack{}, fake.BlueAttack{}, fake.BlueAttack{}}
-	got := Best(stubHero{}, nil, h, 4, nil)
+	got := Best(stubHero{}, nil, h, 4, nil, 0)
 	if got.Value != 5 {
 		t.Fatalf("want value 5, got %d", got.Value)
 	}
@@ -44,7 +44,7 @@ func TestBest_MixedHand(t *testing.T) {
 	// Best: pitch 1 blue (3 res), attack with 2 reds (cost 2, dealt 6), defend with 1 blue (prevented
 	// 3). Value = 9.
 	h := []card.Card{fake.BlueAttack{}, fake.BlueAttack{}, fake.RedAttack{}, fake.RedAttack{}}
-	got := Best(stubHero{}, nil, h, 4, nil)
+	got := Best(stubHero{}, nil, h, 4, nil, 0)
 	if got.Value != 9 {
 		t.Fatalf("want value 9, got %d", got.Value)
 	}
@@ -54,7 +54,7 @@ func TestBest_DefenseCappedAtIncoming(t *testing.T) {
 	// Best: pitch 1 blue, attack with 2 blues (dealt 2), defend with 1 blue (prevented capped at
 	// incoming=2). Value = 4.
 	h := []card.Card{fake.BlueAttack{}, fake.BlueAttack{}, fake.BlueAttack{}, fake.BlueAttack{}}
-	got := Best(stubHero{}, nil, h, 2, nil)
+	got := Best(stubHero{}, nil, h, 2, nil, 0)
 	if got.Value != 4 {
 		t.Fatalf("want value 4, got %d", got.Value)
 	}
@@ -65,7 +65,7 @@ func TestBest_DefenseReactionRequiresCostPaid(t *testing.T) {
 	// 2-resource cost to play as a Defense Reaction (there's nothing else to pitch). The only
 	// legal lines are to pitch it (0 damage prevented) or do nothing — Value must be 0.
 	h := []card.Card{generic.ToughenUpBlue{}}
-	got := Best(stubHero{}, nil, h, 4, nil)
+	got := Best(stubHero{}, nil, h, 4, nil, 0)
 	if got.Value != 0 {
 		t.Fatalf("want value 0 (cost unpaid), got %d", got.Value)
 	}
@@ -75,7 +75,7 @@ func TestBest_DefenseReactionAffordableResolves(t *testing.T) {
 	// Pitch 1 Blue Malefic (3 res), pay Toughen Up (Blue)'s cost 2, prevent 4 damage (capped at
 	// incoming=4). Value = 4.
 	h := []card.Card{runeblade.MaleficIncantationBlue{}, generic.ToughenUpBlue{}}
-	got := Best(stubHero{}, nil, h, 4, nil)
+	got := Best(stubHero{}, nil, h, 4, nil, 0)
 	if got.Value != 4 {
 		t.Fatalf("want value 4 (cost paid, full block), got %d", got.Value)
 	}
@@ -85,7 +85,7 @@ func TestBest_PlainBlockStillFree(t *testing.T) {
 	// Attack cards have no Defense-Reaction type, so using them as blockers costs nothing. One
 	// Red attacker (Defense 1) alone, used as a blocker against 1 incoming, prevents 1. Value = 1.
 	h := []card.Card{fake.RedAttack{}}
-	got := Best(stubHero{}, nil, h, 1, nil)
+	got := Best(stubHero{}, nil, h, 1, nil, 0)
 	if got.Value != 1 {
 		t.Fatalf("want value 1 (free plain block), got %d", got.Value)
 	}
@@ -100,7 +100,7 @@ func TestBest_ViseraiMaleficShrillCombo(t *testing.T) {
 		runeblade.MaleficIncantationRed{},
 		runeblade.ShrillOfSkullformRed{},
 	}
-	got := Best(hero.Viserai{}, nil, h, 4, nil)
+	got := Best(hero.Viserai{}, nil, h, 4, nil, 0)
 	if got.Value != 15 {
 		t.Fatalf("want value 15, got %d (roles=[%s])",
 			got.Value, FormatRoles(h, got.Roles))
@@ -117,7 +117,7 @@ func TestBest_ViseraiReapingBladeBlueMalefics(t *testing.T) {
 		runeblade.MaleficIncantationBlue{},
 	}
 	weapons := []weapon.Weapon{weapon.ReapingBlade{}}
-	got := Best(hero.Viserai{}, weapons, h, 0, nil)
+	got := Best(hero.Viserai{}, weapons, h, 0, nil, 0)
 	if got.Value != 8 {
 		t.Fatalf("want value 8, got %d (roles=[%s])",
 			got.Value, FormatRoles(h, got.Roles))
@@ -135,7 +135,7 @@ func TestBest_ViseraiReapingBladeMaleficsPlusShrill(t *testing.T) {
 		runeblade.ShrillOfSkullformRed{},
 	}
 	weapons := []weapon.Weapon{weapon.ReapingBlade{}}
-	got := Best(hero.Viserai{}, weapons, h, 0, nil)
+	got := Best(hero.Viserai{}, weapons, h, 0, nil, 0)
 	if got.Value != 11 {
 		t.Fatalf("want value 11, got %d (roles=[%s])",
 			got.Value, FormatRoles(h, got.Roles))
@@ -152,7 +152,7 @@ func TestBest_ViseraiOathBlueHocusRedMalefic(t *testing.T) {
 		runeblade.MaleficIncantationRed{},
 	}
 	weapons := []weapon.Weapon{weapon.ReapingBlade{}}
-	got := Best(hero.Viserai{}, weapons, h, 0, nil)
+	got := Best(hero.Viserai{}, weapons, h, 0, nil, 0)
 	if got.Value != 11 {
 		t.Fatalf("want value 11, got %d (roles=[%s])",
 			got.Value, FormatRoles(h, got.Roles))
@@ -171,7 +171,7 @@ func TestBest_RunicReapingPrefersAttackPitch(t *testing.T) {
 		runeblade.RunicReapingRed{},
 		runeblade.ShrillOfSkullformRed{},
 	}
-	got := Best(hero.Viserai{}, nil, h, 0, nil)
+	got := Best(hero.Viserai{}, nil, h, 0, nil, 0)
 	if got.Value != 14 {
 		t.Fatalf("want value 14, got %d (roles=[%s])",
 			got.Value, FormatRoles(h, got.Roles))
@@ -192,7 +192,7 @@ func TestBest_ViseraiMauvrionGrantsGoAgainToShrill(t *testing.T) {
 		runeblade.ShrillOfSkullformRed{},
 	}
 	weapons := []weapon.Weapon{weapon.ReapingBlade{}}
-	got := Best(hero.Viserai{}, weapons, h, 0, nil)
+	got := Best(hero.Viserai{}, weapons, h, 0, nil, 0)
 	if got.Value != 16 {
 		t.Fatalf("want value 16, got %d (roles=[%s])",
 			got.Value, FormatRoles(h, got.Roles))
@@ -239,7 +239,7 @@ func TestIsLegalOrder_MauvrionCantSaveShrillWhenRuneragerIsAhead(t *testing.T) {
 	ptrBuf := make([]*card.PlayedCard, n)
 	cpBuf := make([]card.Card, 0, n)
 	state := &card.TurnState{}
-	if _, legal := playSequence(hero.Viserai{}, nil, nil, order, pcBuf, ptrBuf, cpBuf, state); legal {
+	if _, _, legal := playSequence(hero.Viserai{}, nil, nil, order, pcBuf, ptrBuf, cpBuf, state, 1_000_000, 0); legal {
 		t.Fatalf("ordering %v should be illegal (Shrill has no go-again and Mauvrion granted Runerager instead)",
 			cardNames(order))
 	}
@@ -263,7 +263,7 @@ func TestBest_ViseraiMauvrionChainsShrillIntoRuneragerIntoWeapon(t *testing.T) {
 		runeblade.ShrillOfSkullformRed{},
 	}
 	weapons := []weapon.Weapon{weapon.ReapingBlade{}}
-	got := Best(hero.Viserai{}, weapons, h, 0, nil)
+	got := Best(hero.Viserai{}, weapons, h, 0, nil, 0)
 	if got.Value != 18 {
 		t.Fatalf("want value 18, got %d (roles=[%s])",
 			got.Value, FormatRoles(h, got.Roles))
@@ -329,7 +329,7 @@ func TestBestAttackDamage_PlayedCardGrantsDontLeakAcrossPermutations(t *testing.
 	// If the wrappers were reused across permutations the spy would see leaked grants and trip.
 	var sawLeak bool
 	attackers := []card.Card{grantAll{}, grantSpy{saw: &sawLeak}, grantAll{}}
-	_ = bestAttackDamage(stubHero{}, attackers, nil, nil, newAttackBufs(0, len(attackers), nil))
+	_, _ = bestAttackDamage(stubHero{}, attackers, nil, nil, newAttackBufs(0, len(attackers), nil), 1_000_000, 0)
 	if sawLeak {
 		t.Fatalf("PlayedCard wrapper state leaked across permutations: grantSpy saw a pre-existing GrantedGoAgain when playing first")
 	}
@@ -339,7 +339,7 @@ func TestBest_RespectsResourceConstraint(t *testing.T) {
 	// Best: pitch 2 reds (2 res) to attack with 2 reds (cost 2, dealt 6). Value = 6. Resources must
 	// cover costs.
 	h := []card.Card{fake.RedAttack{}, fake.RedAttack{}, fake.RedAttack{}, fake.RedAttack{}}
-	got := Best(stubHero{}, nil, h, 0, nil)
+	got := Best(stubHero{}, nil, h, 0, nil, 0)
 	if got.Value != 6 {
 		t.Fatalf("want value 6, got %d", got.Value)
 	}
