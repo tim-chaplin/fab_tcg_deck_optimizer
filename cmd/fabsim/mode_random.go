@@ -9,7 +9,6 @@ import (
 	"time"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/deck"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/deckio"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/hero"
 )
 
@@ -119,13 +118,8 @@ func saveIfBetter(d *deck.Deck, outPath string) {
 		fmt.Printf("\nPrevious best (%.3f) >= current (%.3f), %s unchanged\n", prevAvg, d.Stats.Avg(), outPath)
 		return
 	}
-	data, err := deckio.Marshal(d)
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "marshal best deck: %v\n", err)
-		os.Exit(1)
-	}
-	if err := os.WriteFile(outPath, data, 0o644); err != nil {
-		fmt.Fprintf(os.Stderr, "write %s: %v\n", outPath, err)
+	if err := writeDeck(d, outPath); err != nil {
+		fmt.Fprintf(os.Stderr, "%v\n", err)
 		os.Exit(1)
 	}
 	if prev != nil {

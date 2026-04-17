@@ -7,11 +7,13 @@ import (
 	"os"
 	"path/filepath"
 	"sort"
+	"strings"
 	"time"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/deck"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/deckio"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/fabrary"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/hand"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/weapon"
 )
@@ -87,6 +89,33 @@ func loadExisting(path string) (*deck.Deck, float64) {
 		return nil, 0
 	}
 	return d, d.Stats.Avg()
+}
+
+// writeDeck persists d as JSON at path plus a sibling fabrary-format .txt ("x.json" → "x.txt"),
+// so the saved best deck is ready to paste into fabrary.net without a second export step.
+func writeDeck(d *deck.Deck, path string) error {
+	data, err := deckio.Marshal(d)
+	if err != nil {
+		return fmt.Errorf("marshal: %w", err)
+	}
+	if err := os.WriteFile(path, data, 0o644); err != nil {
+		return fmt.Errorf("write %s: %w", path, err)
+	}
+	txtPath := fabraryPathFor(path)
+	if err := os.WriteFile(txtPath, []byte(fabrary.Marshal(d)), 0o644); err != nil {
+		return fmt.Errorf("write %s: %w", txtPath, err)
+	}
+	return nil
+}
+
+// fabraryPathFor derives the sibling .txt path. A ".json" extension is replaced; anything else
+// gets ".txt" appended rather than clobbered, so an unusual "-out deck.data" still yields a
+// "deck.data.txt" sibling instead of overwriting the JSON.
+func fabraryPathFor(jsonPath string) string {
+	if ext := filepath.Ext(jsonPath); ext == ".json" {
+		return strings.TrimSuffix(jsonPath, ext) + ".txt"
+	}
+	return jsonPath + ".txt"
 }
 
 func printBestDeck(d *deck.Deck) {

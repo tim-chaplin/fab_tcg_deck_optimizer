@@ -7,7 +7,6 @@ import (
 	"time"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/deck"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/deckio"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/hero"
 )
 
@@ -22,9 +21,7 @@ func runIterate(cfg config) {
 		best = deck.Random(hero.Viserai{}, cfg.deckSize, cfg.maxCopies, rng)
 		stats := best.Evaluate(cfg.deepShuffles, cfg.incoming, rng)
 		bestAvg = stats.Avg()
-		if data, err := deckio.Marshal(best); err == nil {
-			os.WriteFile(cfg.outPath, data, 0o644)
-		}
+		_ = writeDeck(best, cfg.outPath)
 		fmt.Printf("Starting deck avg %.3f, saved to %s\n", bestAvg, cfg.outPath)
 	} else if best.Stats.Runs < cfg.deepShuffles {
 		// The loaded baseline was evaluated with a shallower sample than the hill climb will
@@ -35,9 +32,7 @@ func runIterate(cfg config) {
 		best = deck.New(best.Hero, best.Weapons, best.Cards)
 		stats := best.Evaluate(cfg.deepShuffles, cfg.incoming, rng)
 		bestAvg = stats.Avg()
-		if data, err := deckio.Marshal(best); err == nil {
-			os.WriteFile(cfg.outPath, data, 0o644)
-		}
+		_ = writeDeck(best, cfg.outPath)
 		fmt.Printf("Re-evaluated baseline avg %.3f, saved to %s\n", bestAvg, cfg.outPath)
 	} else {
 		fmt.Printf("Loaded best deck (avg %.3f) from %s\n", bestAvg, cfg.outPath)
@@ -88,9 +83,7 @@ func runIterate(cfg config) {
 					round, i+1, len(mutations), bestAvg, avg, mut.Description)
 				bestAvg = avg
 				best = d
-				if data, err := deckio.Marshal(best); err == nil {
-					os.WriteFile(cfg.outPath, data, 0o644)
-				}
+				_ = writeDeck(best, cfg.outPath)
 				improved = true
 				break
 			}
