@@ -1,14 +1,17 @@
 // Command fabrary imports a fabrary.net plain-text deck (the thing you get from Export → Plain
 // Text on fabrary, or copy out of its Import tab) into the optimizer's JSON format.
 //
+// Every import lands in mydecks/ — the same directory fabsim writes to — so local decks all live
+// in one place.
+//
 // Usage:
 //
-//	fabrary                                 # paste into stdin; interactive name prompt
-//	fabrary -in paste.txt                   # read from file; still prompts for a deck name
-//	fabrary -in paste.txt -out custom.json  # -out bypasses the mydecks/<name>.json default
+//	fabrary                          # paste into stdin; interactive name prompt
+//	fabrary -deck viserai-v2         # same, but skip the prompt (useful for scripts/pipes)
+//	fabrary -in paste.txt            # read from file; still prompts for a name
+//	fabrary -in paste.txt -deck foo  # read from file, name from flag, no prompting
 //
-// When -in is empty or "-" stdin is read. When -out is empty, the deck is saved to
-// mydecks/<prompted-name>.json.
+// When -in is empty or "-" stdin is read. The ".json" suffix on -deck is optional.
 //
 // Exporting in the other direction isn't a separate command — fabsim writes a sibling .txt in
 // fabrary format next to every best_deck.json it saves, so the file is already ready to paste
@@ -34,10 +37,10 @@ import (
 
 func main() {
 	inPath := flag.String("in", "", "input path; \"-\" or empty reads from stdin")
-	outPath := flag.String("out", "", "output path; empty saves to mydecks/<prompted-name>.json")
+	deckName := flag.String("deck", "", "deck name; resolved to mydecks/<name>.json. Empty = prompt interactively")
 	flag.Parse()
 
-	data, name, err := readImport(*inPath, *outPath == "")
+	data, resolvedName, err := readImport(*inPath, *deckName)
 	if err != nil {
 		die("%v", err)
 	}
@@ -51,24 +54,18 @@ func main() {
 	}
 	out = append(out, '\n')
 
-	dest := *outPath
-	if dest == "" {
-		if err := os.MkdirAll(mydecks.Dir, 0o755); err != nil {
-			die("mkdir %s: %v", mydecks.Dir, err)
-		}
-		p, err := mydecks.Path(name)
-		if err != nil {
-			die("%v", err)
-		}
-		dest = p
+	if err := os.MkdirAll(mydecks.Dir, 0o755); err != nil {
+		die("mkdir %s: %v", mydecks.Dir, err)
 	}
-	if err := writeOut(dest, out); err != nil {
+	dest, err := mydecks.Path(resolvedName)
+	if err != nil {
+		die("%v", err)
+	}
+	if err := os.WriteFile(dest, out, 0o644); err != nil {
 		die("write %s: %v", dest, err)
 	}
-	if dest != "-" {
-		fmt.Fprintf(os.Stderr, "wrote %s\n", dest)
-		summarizeDeck(d)
-	}
+	fmt.Fprintf(os.Stderr, "wrote %s\n", dest)
+	summarizeDeck(d)
 	warnSkipped(skipped)
 }
 
@@ -91,11 +88,12 @@ func warnSkipped(skipped map[string]int) {
 	}
 }
 
-// readImport reads fabrary text plus — if needDeckName — a deck name from the same stdin. The name
-// must be prompted before the paste because Ctrl-Z / Ctrl-D closes stdin permanently, leaving no
-// way to ask afterward. When -in points at a file, the name is still prompted interactively so the
-// user gets to choose the filename.
-func readImport(inPath string, needDeckName bool) ([]byte, string, error) {
+// readImport reads fabrary text plus a deck name. When deckFlag is set it's used directly (after
+// name validation); otherwise the name is prompted interactively. In the stdin-paste workflow the
+// name must be collected before the paste because Ctrl-Z / Ctrl-D closes stdin permanently — if
+// the user didn't pass -deck and stdin isn't a terminal (e.g. piped from a file) we error out
+// rather than leaving the import without a filename.
+func readImport(inPath, deckFlag string) ([]byte, string, error) {
 	fromStdin := inPath == "" || inPath == "-"
 
 	if !fromStdin {
@@ -103,34 +101,19 @@ func readImport(inPath string, needDeckName bool) ([]byte, string, error) {
 		if err != nil {
 			return nil, "", fmt.Errorf("read %s: %w", inPath, err)
 		}
-		var name string
-		if needDeckName {
-			if !isTerminal(os.Stdin) {
-				return nil, "", fmt.Errorf("need a deck name but stdin is not a terminal — pass -out to skip the prompt")
-			}
-			n, err := promptLine(os.Stdin, "Deck name: ")
-			if err != nil {
-				return nil, "", err
-			}
-			name = n
+		name, err := resolveDeckName(deckFlag, os.Stdin)
+		if err != nil {
+			return nil, "", err
 		}
 		return data, name, nil
 	}
 
-	// Pasted workflow: name first (one line), paste second (until fabrary footer or EOF). A single
-	// bufio.Reader owns stdin for both reads so any bytes buffered past the newline flow into the
-	// paste reader instead of being dropped.
+	// Pasted workflow: name first, paste second. A single bufio.Reader owns stdin for both reads
+	// so any bytes buffered past the newline flow into the paste reader instead of being dropped.
 	reader := bufio.NewReader(os.Stdin)
-	var name string
-	if needDeckName {
-		if !isTerminal(os.Stdin) {
-			return nil, "", fmt.Errorf("need a deck name but stdin is not a terminal — pass -out to skip the prompt")
-		}
-		n, err := promptLineReader(reader, "Deck name: ")
-		if err != nil {
-			return nil, "", err
-		}
-		name = n
+	name, err := resolveDeckNameFromReader(deckFlag, reader)
+	if err != nil {
+		return nil, "", err
 	}
 	if isTerminal(os.Stdin) {
 		promptPaste()
@@ -140,6 +123,39 @@ func readImport(inPath string, needDeckName bool) ([]byte, string, error) {
 		return nil, "", fmt.Errorf("read stdin: %w", err)
 	}
 	return data, name, nil
+}
+
+// resolveDeckName returns the deck name to save under: validated -deck flag value, or the result
+// of an interactive prompt on src. Errors if -deck is empty and src isn't a terminal (piping
+// fabrary text without also passing -deck would leave us with no filename to use).
+func resolveDeckName(deckFlag string, src *os.File) (string, error) {
+	if deckFlag != "" {
+		return sanitizeDeckFlag(deckFlag)
+	}
+	if !isTerminal(src) {
+		return "", fmt.Errorf("no deck name: pass -deck <name> when stdin isn't a terminal")
+	}
+	return promptLine(src, "Deck name: ")
+}
+
+func resolveDeckNameFromReader(deckFlag string, r *bufio.Reader) (string, error) {
+	if deckFlag != "" {
+		return sanitizeDeckFlag(deckFlag)
+	}
+	if !isTerminal(os.Stdin) {
+		return "", fmt.Errorf("no deck name: pass -deck <name> when stdin isn't a terminal")
+	}
+	return promptLineReader(r, "Deck name: ")
+}
+
+// sanitizeDeckFlag trims the optional .json suffix and validates the rest, matching the same
+// rules the interactive prompt applies.
+func sanitizeDeckFlag(name string) (string, error) {
+	name = strings.TrimSuffix(name, ".json")
+	if err := mydecks.ValidateName(name); err != nil {
+		return "", err
+	}
+	return name, nil
 }
 
 // fabraryFooterPrefix is the last line of every fabrary plain-text export. Seeing it means the
@@ -199,14 +215,6 @@ func isTerminal(f *os.File) bool {
 		return false
 	}
 	return fi.Mode()&os.ModeCharDevice != 0
-}
-
-func writeOut(path string, data []byte) error {
-	if path == "-" || path == "" {
-		_, err := os.Stdout.Write(data)
-		return err
-	}
-	return os.WriteFile(path, data, 0o644)
 }
 
 // summarizeDeck prints a short confirmation — hero, weapon count, card count — to stderr after a
