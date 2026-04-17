@@ -86,6 +86,44 @@ func TestAllMutations_OddCountsAllowed(t *testing.T) {
 	}
 }
 
+// TestAllMutations_OrdersByAscendingAvg pins the iterate-friendly ordering: the removed card in
+// the first card-mutation batch should be the one with the lowest per-card Avg in the current
+// deck's stats. This lets iterate try swaps involving weak cards before strong ones.
+func TestAllMutations_OrdersByAscendingAvg(t *testing.T) {
+	low := cards.Get(card.AetherSlashRed)
+	high := cards.Get(card.ArcanicSpikeRed)
+	d := New(hero.Viserai{}, []weapon.Weapon{weapon.NebulaBlade{}}, []card.Card{low, low, high, high})
+	// Stub PerCard so `low` has a worse avg than `high`. Both get the same Plays / Pitches so
+	// only Avg (= TotalContribution / (Plays+Pitches)) drives the ordering.
+	d.Stats.PerCard = map[card.ID]CardPlayStats{
+		low.ID():  {Plays: 10, TotalContribution: 10}, // Avg 1.0
+		high.ID(): {Plays: 10, TotalContribution: 80}, // Avg 8.0
+	}
+
+	muts := AllMutations(d, 2)
+	// Skip the weapon-mutation block; the first card-swap mutation should remove `low`.
+	loadouts := weaponLoadouts(cards.AllWeapons)
+	firstCardMut := muts[len(loadouts)-1]
+	if firstCardMut.Description == "" {
+		t.Fatalf("expected a card mutation after %d weapon mutations; got %q",
+			len(loadouts)-1, firstCardMut.Description)
+	}
+	if got, want := firstCardMut.Description[:5], "-1 "+low.Name()[:2]; got != want {
+		// Exact description: "-1 Aether Slash (Red), +1 <something>"
+		// Check the remove-target prefix, not the full string.
+		if !containsPrefix(firstCardMut.Description, "-1 "+low.Name()+",") {
+			t.Errorf("first card mutation removes wrong card: %q (expected to remove %q)",
+				firstCardMut.Description, low.Name())
+		}
+	}
+}
+
+// containsPrefix is a tiny helper so the test doesn't pull strings.HasPrefix into scope for
+// just one check.
+func containsPrefix(s, prefix string) bool {
+	return len(s) >= len(prefix) && s[:len(prefix)] == prefix
+}
+
 func TestAllMutations_Deterministic(t *testing.T) {
 	a := cards.Get(card.AetherSlashRed)
 	b := cards.Get(card.ArcanicSpikeRed)
