@@ -668,6 +668,18 @@ func playSequence(hero hero.Hero, pitched, deck, order []card.Card, pcBuf []card
 
 		state.CardsRemaining = played[i+1:]
 		state.Self = pc
+
+		// If this card is an attack or weapon and any Runechant is currently live, those tokens
+		// will fire on its damage step. Set ArcaneDamageDealt now — *before* Play and the hero's
+		// OnCardPlayed trigger — so Play effects that read "if you've dealt arcane damage this
+		// turn" see the flag for same-hand triggers. Cards that deal arcane damage directly via
+		// their Play text flip the flag themselves inside Play.
+		t := pc.Card.Types()
+		isAttackOrWeapon := t.Has(card.TypeAttack) || t.Has(card.TypeWeapon)
+		if isAttackOrWeapon && state.Runechants > 0 {
+			state.ArcaneDamageDealt = true
+		}
+
 		playDmg := pc.Card.Play(state)
 		triggerDmg := hero.OnCardPlayed(pc.Card, state)
 		damage += playDmg + triggerDmg
@@ -679,8 +691,7 @@ func playSequence(hero hero.Hero, pitched, deck, order []card.Card, pcBuf []card
 		// Attacks and weapon swings consume all runechants in play. Damage isn't re-added here:
 		// each token was already credited as +1 at creation time (see CreateRunechants), so
 		// consuming them is purely state cleanup.
-		t := pc.Card.Types()
-		if t.Has(card.TypeAttack) || t.Has(card.TypeWeapon) {
+		if isAttackOrWeapon {
 			state.Runechants = 0
 		}
 

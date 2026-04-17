@@ -28,5 +28,6 @@ func (SigilOfSilphidaeBlue) Types() card.TypeSet    { return sigilOfSilphidaeTyp
 func (SigilOfSilphidaeBlue) GoAgain() bool          { return true }
 func (SigilOfSilphidaeBlue) Play(s *card.TurnState) int {
 	s.AuraCreated = true
+	s.ArcaneDamageDealt = true // the aura-banish riders deal 1 arcane each (enter + leave)
 	return 2
 }

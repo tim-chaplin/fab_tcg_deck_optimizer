@@ -2,7 +2,8 @@
 // Printed power: Red 4, Yellow 3, Blue 2.
 // Text: "When you attack with Singeing Steelblade, deal 1 arcane damage to target hero."
 //
-// Simplification: arcane damage counts as regular damage. Play returns power + 1.
+// Simplification: the printed 1 arcane is added to base damage unconditionally. Play sets
+// ArcaneDamageDealt so later-this-turn triggers see the flag.
 //
 // Source: github.com/the-fab-cube/flesh-and-blood-cards (card.csv).
 
@@ -11,6 +12,12 @@ package runeblade
 import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 
 var singeingSteelbladeTypes = card.NewTypeSet(card.TypeRuneblade, card.TypeAction, card.TypeAttack)
+
+// singeingSteelbladePlay adds the 1 arcane to base damage and marks ArcaneDamageDealt.
+func singeingSteelbladePlay(attack int, s *card.TurnState) int {
+	s.ArcaneDamageDealt = true
+	return attack + 1
+}
 
 type SingeingSteelbladeRed struct{}
 
@@ -22,7 +29,7 @@ func (SingeingSteelbladeRed) Attack() int                { return 4 }
 func (SingeingSteelbladeRed) Defense() int               { return 3 }
 func (SingeingSteelbladeRed) Types() card.TypeSet        { return singeingSteelbladeTypes }
 func (SingeingSteelbladeRed) GoAgain() bool              { return false }
-func (c SingeingSteelbladeRed) Play(*card.TurnState) int { return c.Attack() + 1 }
+func (c SingeingSteelbladeRed) Play(s *card.TurnState) int { return singeingSteelbladePlay(c.Attack(), s) }
 
 type SingeingSteelbladeYellow struct{}
 
@@ -34,7 +41,7 @@ func (SingeingSteelbladeYellow) Attack() int                { return 3 }
 func (SingeingSteelbladeYellow) Defense() int               { return 3 }
 func (SingeingSteelbladeYellow) Types() card.TypeSet        { return singeingSteelbladeTypes }
 func (SingeingSteelbladeYellow) GoAgain() bool              { return false }
-func (c SingeingSteelbladeYellow) Play(*card.TurnState) int { return c.Attack() + 1 }
+func (c SingeingSteelbladeYellow) Play(s *card.TurnState) int { return singeingSteelbladePlay(c.Attack(), s) }
 
 type SingeingSteelbladeBlue struct{}
 
@@ -46,4 +53,4 @@ func (SingeingSteelbladeBlue) Attack() int                { return 2 }
 func (SingeingSteelbladeBlue) Defense() int               { return 3 }
 func (SingeingSteelbladeBlue) Types() card.TypeSet        { return singeingSteelbladeTypes }
 func (SingeingSteelbladeBlue) GoAgain() bool              { return false }
-func (c SingeingSteelbladeBlue) Play(*card.TurnState) int { return c.Attack() + 1 }
+func (c SingeingSteelbladeBlue) Play(s *card.TurnState) int { return singeingSteelbladePlay(c.Attack(), s) }

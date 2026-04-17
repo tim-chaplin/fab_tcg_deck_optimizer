@@ -4,10 +4,37 @@ import (
 	"testing"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/card/fake"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card/runeblade"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/hero"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/weapon"
 )
+
+// TestPlaySequence_SetsArcaneDamageDealtWhenRunechantsFire pins the sim-wide contract: when an
+// attack or weapon plays with Runechants live, playSequence flips ArcaneDamageDealt on before
+// calling the card's Play (so same-hand triggers reading the flag see it). A chain with no
+// runechants leaves the flag false. Uses the fake generic attack (package fake) so the test
+// observes the playSequence pre-Play hook, not a card's own flag-setting inside its Play.
+func TestPlaySequence_SetsArcaneDamageDealtWhenRunechantsFire(t *testing.T) {
+	order := []card.Card{fake.RedAttack{}}
+	pcBuf := make([]card.PlayedCard, len(order))
+	ptrBuf := make([]*card.PlayedCard, len(order))
+	cpBuf := make([]card.Card, 0, len(order))
+
+	// No runechants → flag stays false.
+	state := &card.TurnState{}
+	_, _, _, _ = playSequence(hero.Viserai{}, nil, nil, order, pcBuf, ptrBuf, cpBuf, state, 10, 0, nil)
+	if state.ArcaneDamageDealt {
+		t.Errorf("no runechants carried over; expected ArcaneDamageDealt=false, got true")
+	}
+
+	// Carryover runechant → fires on the attack → flag set.
+	state = &card.TurnState{}
+	_, _, _, _ = playSequence(hero.Viserai{}, nil, nil, order, pcBuf, ptrBuf, cpBuf, state, 10, 1, nil)
+	if !state.ArcaneDamageDealt {
+		t.Errorf("runechant carryover fired on attack; expected ArcaneDamageDealt=true, got false")
+	}
+}
 
 // TestPlaySequence_DiscountRejectsInsufficientBudget verifies that a DiscountPerRunechant card
 // fails its per-play cost check when the chain budget can't cover the effective cost.

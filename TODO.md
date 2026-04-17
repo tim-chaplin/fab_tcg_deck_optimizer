@@ -22,7 +22,9 @@ them as fully active.
 ### "If you've dealt arcane damage this turn"
 
 Consuming Volition, Arcanic Spike, and Meat and Greet now gate their arcane-damage riders on
-`state.Runechants > 0` at Play time. The same clause still fires unconditionally for:
+`TurnState.ArcaneDamageDealt`, which playSequence flips on when a Runechant fires on an
+attack/weapon and which direct-arcane cards set themselves in Play. The same clause still fires
+unconditionally for:
 
 - **Sigil of Suffering** — +1{d} on defense reactions treated as always active.
 

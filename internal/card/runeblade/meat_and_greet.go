@@ -7,11 +7,12 @@
 // Simplifications:
 //   - The "on hit, create a Runechant" is baked in as +1 damage (the Runechant's future value)
 //     via CreateRunechant, which also sets AuraCreated for any later-in-chain effects that care.
-//   - "Dealt arcane damage this turn" is approximated by `state.Runechants > 0` at Play time,
-//     checked BEFORE this card's own CreateRunechant runs — so the check reflects runechants
-//     already in play from earlier effects, not the one we're about to create. When the check
-//     passes, the go-again rider is granted via Self.GrantedGoAgain so the solver's chain
-//     legality reflects the conditional.
+//   - "Dealt arcane damage this turn" reads TurnState.ArcaneDamageDealt. playSequence flips it
+//     pre-Play when an earlier-chain attack/weapon fires a Runechant, and direct-arcane cards
+//     set it in their own Play. When it's live at Play time the go-again rider is granted via
+//     Self.GrantedGoAgain so the solver's chain legality reflects the conditional. Meat and
+//     Greet's own CreateRunechant makes a future-turn firing token, not a same-hand one, so
+//     there's no self-satisfaction concern.
 //
 // Source: github.com/the-fab-cube/flesh-and-blood-cards (card.csv).
 
@@ -25,7 +26,7 @@ var meatAndGreetTypes = card.NewTypeSet(card.TypeRuneblade, card.TypeAction, car
 // (rather than hardcoding GoAgain to true) keeps the rider conditional while still participating
 // in the solver's EffectiveGoAgain chain check.
 func meatAndGreetPlay(c card.Card, s *card.TurnState) int {
-	if s.Runechants > 0 && s.Self != nil {
+	if s.ArcaneDamageDealt && s.Self != nil {
 		s.Self.GrantedGoAgain = true
 	}
 	return c.Attack() + s.CreateRunechant()

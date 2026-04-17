@@ -3,13 +3,10 @@
 // Printed power: Red 5, Yellow 4, Blue 3.
 // Text: "If you've dealt arcane damage this turn, this gets +2{p}."
 //
-// Simplification: the "dealt arcane damage this turn" clause is approximated by
-// `state.Runechants > 0` at Play time — the same live-count signal Consuming Volition uses for
-// its discard rider (see PR #41). When a Runechant is live it'll fire on this attack, so arcane
-// damage will be dealt this turn and the +2{p} bonus applies; otherwise Play returns the base
-// printed attack alone. We don't track "arcane damage was already dealt earlier in the chain";
-// the common Runeblade play pattern is create-then-attack, where tokens are still live when
-// Arcanic Spike resolves.
+// The "dealt arcane damage this turn" clause reads TurnState.ArcaneDamageDealt, which
+// playSequence flips on whenever a Runechant fires on an attack/weapon earlier in the chain and
+// which direct-arcane cards set themselves when they resolve. When the flag is live at Play
+// time, the +2{p} bonus applies; otherwise Play returns the printed attack alone.
 //
 // Source: github.com/the-fab-cube/flesh-and-blood-cards (card.csv).
 
@@ -22,10 +19,10 @@ var arcanicSpikeTypes = card.NewTypeSet(card.TypeRuneblade, card.TypeAction, car
 // arcaneDamageBonus is the +2{p} gained when the "dealt arcane damage this turn" clause is live.
 const arcaneDamageBonus = 2
 
-// arcanicSpikeDamage returns the base attack plus the +2{p} rider when there's a live Runechant
-// to fire on this attack. Extracted so all three printings share one implementation.
+// arcanicSpikeDamage returns the base attack plus the +2{p} rider when ArcaneDamageDealt is set.
+// Extracted so all three printings share one implementation.
 func arcanicSpikeDamage(attack int, s *card.TurnState) int {
-	if s != nil && s.Runechants > 0 {
+	if s != nil && s.ArcaneDamageDealt {
 		return attack + arcaneDamageBonus
 	}
 	return attack

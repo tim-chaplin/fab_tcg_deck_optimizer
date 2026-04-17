@@ -52,6 +52,7 @@ func (AetherSlashBlue) GoAgain() bool                { return false }
 func (c AetherSlashBlue) Play(s *card.TurnState) int { return aetherSlashPlay(c.Attack(), s) }
 
 func aetherSlashPlay(base int, s *card.TurnState) int {
+	s.ArcaneDamageDealt = true
 	dmg := base + 1 // printed arcane
 	for _, p := range s.Pitched {
 		t := p.Types()

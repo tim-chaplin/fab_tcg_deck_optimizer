@@ -98,6 +98,18 @@ type TurnState struct {
 	// discount checks don't see them. playSequence folds Runechants + DelayedRunechants into the
 	// turn's LeftoverRunechants.
 	DelayedRunechants int
+	// ArcaneDamageDealt is set once any source of arcane damage fires this turn: a Runechant
+	// token consuming itself during an attack / weapon swing, or a card whose Play directly deals
+	// arcane damage (e.g. Arcanic Crackle, Vexing Malice, Sigil of Suffering). Sticks true once
+	// set — same-turn scope. Effects that read "if you've dealt arcane damage this turn" consult
+	// this flag instead of inspecting Runechants (which only reflects tokens currently alive,
+	// not history).
+	//
+	// playSequence sets this automatically for the Runechant-firing case by checking
+	// `Runechants > 0` *before* each attack/weapon's Play runs, so Play effects that care see
+	// the flag in the current hand. Cards that deal arcane via their Play text are responsible
+	// for flipping the flag themselves.
+	ArcaneDamageDealt bool
 }
 
 // Hero is the minimal hero profile card effects need. It's intentionally narrower than
