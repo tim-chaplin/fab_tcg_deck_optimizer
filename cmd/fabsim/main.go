@@ -19,9 +19,9 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/weapon"
 )
 
-// defaultOutPath is fabsim's fallback when neither -deck nor -out is supplied. Kept as a constant
-// so the "explicit -out" detection below can compare strings reliably.
-const defaultOutPath = "mydecks/best_deck.json"
+// defaultDeckName is the deck fabsim reads from / writes to when -deck isn't supplied. Matches the
+// historical "best_deck" muscle memory.
+const defaultDeckName = "best_deck"
 
 func main() {
 	mode := flag.String("mode", "random", "run mode: random, iterate, eval, or print")
@@ -33,24 +33,20 @@ func main() {
 	deckSize := flag.Int("deck-size", 40, "number of cards per deck")
 	maxCopies := flag.Int("max-copies", 2, "maximum copies of any single card printing per deck")
 	seed := flag.Int64("seed", time.Now().UnixNano(), "RNG seed")
-	outPath := flag.String("out", defaultOutPath, "path to write/read the best deck JSON (overridden by -deck)")
-	deckName := flag.String("deck", "", "deck name resolved to mydecks/<name>.json; \".json\" suffix is optional")
+	deckName := flag.String("deck", defaultDeckName, "deck name; resolved to mydecks/<name>.json (\".json\" suffix optional)")
 	flag.Parse()
 
-	resolved, err := resolveOutPath(*outPath, *deckName)
+	outPath, err := mydecks.Path(*deckName)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "%v\n", err)
 		os.Exit(1)
 	}
-	*outPath = resolved
 
-	// Create the parent directory of -out up front so downstream WriteFile calls in the search
-	// loops can't fail on a missing dir after a long run. Harmless if it already exists.
-	if dir := filepath.Dir(*outPath); dir != "" && dir != "." {
-		if err := os.MkdirAll(dir, 0o755); err != nil {
-			fmt.Fprintf(os.Stderr, "mkdir %s: %v\n", dir, err)
-			os.Exit(1)
-		}
+	// Create mydecks/ up front so downstream WriteFile calls in the search loops can't fail on
+	// a missing dir after a long run. Harmless if it already exists.
+	if err := os.MkdirAll(mydecks.Dir, 0o755); err != nil {
+		fmt.Fprintf(os.Stderr, "mkdir %s: %v\n", mydecks.Dir, err)
+		os.Exit(1)
 	}
 
 	cfg := config{
@@ -62,7 +58,7 @@ func main() {
 		deckSize:        *deckSize,
 		maxCopies:       *maxCopies,
 		seed:            *seed,
-		outPath:         *outPath,
+		outPath:         outPath,
 	}
 
 	switch *mode {
@@ -104,20 +100,6 @@ func loadExisting(path string) (*deck.Deck, float64) {
 		return nil, 0
 	}
 	return d, d.Stats.Avg()
-}
-
-// resolveOutPath picks the effective output path given the two overlapping flags. -deck is a
-// convenience shortcut that resolves to mydecks/<name>.json; -out is the escape hatch for arbitrary
-// paths. Passing both is a conflict (ambiguous intent) and is rejected so a silent winner can't
-// surprise the user. When -deck is empty, -out (possibly its default) is returned as-is.
-func resolveOutPath(outFlag, deckFlag string) (string, error) {
-	if deckFlag == "" {
-		return outFlag, nil
-	}
-	if outFlag != defaultOutPath {
-		return "", fmt.Errorf("-deck and -out are mutually exclusive — pick one")
-	}
-	return mydecks.Path(deckFlag)
 }
 
 // writeDeck persists d as JSON at path plus a sibling fabrary-format .txt ("x.json" → "x.txt"),

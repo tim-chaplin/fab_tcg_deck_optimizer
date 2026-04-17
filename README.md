@@ -45,20 +45,23 @@ This is a work in progress. The current model is deliberately narrow:
 
 `fabsim` has four run modes, selected with `-mode`:
 
+All modes read and write `mydecks/<deck>.json` where `<deck>` comes from `-deck` (default
+`best_deck`). The `.json` suffix on `-deck` is optional.
+
 - **`random`** (default) — two-phase search. Generates `-decks` random decks and evaluates each
   shallowly (`-shallow-shuffles` shuffles); takes the top `-top-n` and re-evaluates them with more
-  shuffles (`-deep-shuffles`). Writes the winner to `-out` if it beats whatever's already there.
-- **`iterate`** — loads the deck at `-out` and hill-climbs on it deterministically: each round
+  shuffles (`-deep-shuffles`). Writes the winner to the deck file if it beats whatever's already
+  there.
+- **`iterate`** — loads the deck file and hill-climbs on it deterministically: each round
   enumerates every single-slot mutation (every alternative weapon loadout + every (card-in-deck,
   card-out-of-deck) swap), adopts the first one that scores higher, and restarts. When a full
   round finishes without finding an improvement, the deck is at a local maximum and `iterate`
-  exits. Press Enter to abort mid-round. If `-out` doesn't exist yet, `iterate` bootstraps with a
-  single random deck and climbs from there — you don't have to run `random` first.
-- **`eval`** — loads the deck at `-out` (or `-deck`), simulates it for `-deep-shuffles` hands
-  against `-incoming` damage, and prints the resulting stats. Does **not** overwrite the file —
-  use this to re-score a saved deck at a new shuffle depth or against a different opponent pressure
-  without clobbering whatever's on disk.
-- **`print`** — prints the deck at `-out` without running any simulation.
+  exits. Press Enter to abort mid-round. If the deck file doesn't exist yet, `iterate` bootstraps
+  with a single random deck and climbs from there — you don't have to run `random` first.
+- **`eval`** — loads the deck file, simulates it for `-deep-shuffles` hands against `-incoming`
+  damage, and prints the resulting stats. Does **not** overwrite the file — use this to re-score a
+  saved deck at a new shuffle depth or opponent pressure without clobbering whatever's on disk.
+- **`print`** — prints the deck without running any simulation.
 
 ### Suggested workflow
 
@@ -84,8 +87,8 @@ like — each run only overwrites `mydecks/best_deck.json` if it finds something
 - `-deck-size` — cards per deck (default 40)
 - `-max-copies` — max copies of any single card printing (default 2)
 - `-seed` — RNG seed (default: time-based)
-- `-out` — path to read/write the best deck JSON (default `mydecks/best_deck.json`; the parent
-  directory is created automatically)
+- `-deck` — deck name; resolved to `mydecks/<name>.json` (default `best_deck`). The `mydecks/`
+  directory is created automatically.
 
 Helper tool for exploring the upstream card database:
 
