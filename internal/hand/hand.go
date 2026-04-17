@@ -365,12 +365,6 @@ func bestUncached(hero hero.Hero, weapons []weapon.Weapon, hand []card.Card, inc
 			// defender at its actual effective cost and reject this partition if the chain didn't
 			// leave enough residual budget to cover the delta. Runechants aren't consumed by the
 			// discount check — multiple discount defenders can all read the same leftover pool.
-			// DiscountPerRunechant defense reactions reserved 0 in defenderCostSum (their Cost() is
-			// the fully-discounted minimum). Now that the attack chain has resolved and left
-			// `leftoverRunechants` runechants available for defense, re-price each discounted
-			// defender at its actual effective cost and reject this partition if the chain didn't
-			// leave enough residual budget to cover the delta. Runechants aren't consumed by the
-			// discount check — multiple discount defenders can all read the same leftover pool.
 			if hasDiscountReactions {
 				extraCost := 0
 				for j := 0; j < n; j++ {
