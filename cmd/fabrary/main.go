@@ -23,18 +23,14 @@ import (
 	"fmt"
 	"io"
 	"os"
-	"path/filepath"
 	"sort"
 	"strings"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/deck"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/deckio"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/fabrary"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/mydecks"
 )
-
-// myDecksDir is the directory imported decks default to. Matches fabsim's default output
-// location (mydecks/best_deck.json) so all local decks land in one place.
-const myDecksDir = "mydecks"
 
 func main() {
 	inPath := flag.String("in", "", "input path; \"-\" or empty reads from stdin")
@@ -57,10 +53,14 @@ func main() {
 
 	dest := *outPath
 	if dest == "" {
-		if err := os.MkdirAll(myDecksDir, 0o755); err != nil {
-			die("mkdir %s: %v", myDecksDir, err)
+		if err := os.MkdirAll(mydecks.Dir, 0o755); err != nil {
+			die("mkdir %s: %v", mydecks.Dir, err)
 		}
-		dest = filepath.Join(myDecksDir, name+".json")
+		p, err := mydecks.Path(name)
+		if err != nil {
+			die("%v", err)
+		}
+		dest = p
 	}
 	if err := writeOut(dest, out); err != nil {
 		die("write %s: %v", dest, err)
@@ -184,26 +184,12 @@ func promptLineReader(r *bufio.Reader, prompt string) (string, error) {
 	}
 	name := strings.TrimSpace(line)
 	name = strings.TrimSuffix(name, ".json")
-	if err := validateDeckName(name); err != nil {
+	if err := mydecks.ValidateName(name); err != nil {
 		return "", err
 	}
 	return name, nil
 }
 
-// validateDeckName rejects names that would escape mydecks/ or otherwise produce an unusable file
-// path. Kept conservative — any unusual character the user actually wants can be passed via -out.
-func validateDeckName(name string) error {
-	if name == "" {
-		return fmt.Errorf("deck name is empty")
-	}
-	if name == "." || name == ".." {
-		return fmt.Errorf("deck name %q is reserved", name)
-	}
-	if strings.ContainsAny(name, `/\:*?"<>|`) {
-		return fmt.Errorf("deck name %q contains an invalid character (one of /\\:*?\"<>|)", name)
-	}
-	return nil
-}
 
 // isTerminal reports whether f is an interactive character device (as opposed to a pipe or file).
 // Uses the portable os.FileInfo mode bits — no syscall import needed.
