@@ -32,8 +32,10 @@ PR #41). The same clause still fires unconditionally for:
 
 - **Aura presence in graveyard is assumed.** Sigil of Silphidae, Weeping Battleground, and Runic
   Fellingsong (partly) assume there's always an aura available to banish.
-- **"Played or created an aura this turn" is assumed true.** Reek of Corruption always gets its
-  discard rider.
+- **"Played or created an aura this turn" is assumed true** for cards that don't yet use the
+  live `AuraCreated` / `HasPlayedType(TypeAura)` check. Reek of Corruption, Hit the High Notes,
+  and Shrill of Skullform all gate this correctly; nothing else on the roster currently reads the
+  clause.
 - **Cross-turn aura lifecycles are collapsed.** Blessing of Occult, Sigil of Deadwood, and Sigil
   of the Arknight credit their benefits immediately (via DelayRunechants or flat damage) rather
   than modelling the full enter/leave sequence across turns.
@@ -70,7 +72,7 @@ Hit the High Notes / Shrill of Skullform pattern for the aura one.
   again clause is assumed always-true. Gate the Go again on `state.Runechants > 0` via
   `PlayedCard.GrantedGoAgain`.
 - **Sigil of Suffering** (`internal/card/runeblade/sigil_of_suffering.go`) — +1{d} buff on
-  defense reactions is assumed always-true. Gate on `state.Runechants > 0` at Play time.
-- **Reek of Corruption** (`internal/card/runeblade/reek_of_corruption.go`) — "played or created
-  an aura this turn" is assumed always-true. Use `s.AuraCreated || s.HasPlayedType(card.TypeAura)`,
-  matching Hit the High Notes / Shrill of Skullform.
+  defense reactions is assumed always-true. Unlike the +{p} / on-hit riders, this one gates on
+  `Defense()` which is consumed by the solver's partition scoring before `Play()` runs. Dropping
+  the assumption needs a new `ConditionalDefense(state)` hook (or equivalent) so the block
+  capacity can react to `state.Runechants > 0`.
