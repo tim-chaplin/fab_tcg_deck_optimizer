@@ -232,10 +232,10 @@ func printBestDeck(d *deck.Deck) {
 	}
 }
 
-// printPerCardStats renders the per-card averages collected by deck.Evaluate: mean hand value
-// across every hand the card appeared in (whether played or pitched), sorted highest first.
-// Value is the hand's total score — damage dealt plus damage prevented by blocks — so defense
-// contributions already feed in.
+// printPerCardStats renders the per-card averages collected by deck.Evaluate: mean per-card
+// contribution across every hand the card appeared in. Contribution is role-based — Attack() on
+// attacks, proportional share of prevented damage on defends, Pitch() on pitches — so the
+// ranking is about what each card typically does in its hand, not the hand's total value.
 func printPerCardStats(d *deck.Deck) {
 	type row struct {
 		name           string
@@ -269,7 +269,7 @@ func printPerCardStats(d *deck.Deck) {
 	})
 
 	fmt.Println()
-	fmt.Println("Card value (avg hand value when card appeared, played or pitched):")
+	fmt.Println("Card value (avg contribution per appearance: attack=power, defend=share of block, pitch=resource):")
 	for _, r := range rows {
 		fmt.Printf("  %-35s avg %6.3f over %4d hands (%4d plays, %4d pitches, %dx in deck)\n",
 			r.name, r.avg, r.plays+r.pitches, r.plays, r.pitches, r.deckCount)

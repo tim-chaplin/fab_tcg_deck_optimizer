@@ -244,28 +244,33 @@ type BestHand struct {
 }
 
 // CardPlayStats captures how a single card contributed to the decks it appeared in. Plays counts
-// hands where the card was played as an attack or defense; Pitches counts hands where it was
-// spent for resources; TotalValue sums the parent hand's overall Value (damage dealt plus damage
-// prevented) across every hand the card appeared in, regardless of role — pitching matters too
-// because the resource enables everything else.
+// hands where it was played as an attack or defense; Pitches counts hands where it was spent for
+// resources. TotalContribution sums a per-role estimate of what the card did on each appearance:
 //
-// Avg is an approximation: the hand value lumps together contributions from every card in the
-// hand. A card will look good if it tends to appear in strong hands whether by attacking,
-// blocking, or pitching. Useful as a directional signal over many runs, not a precise MVP score.
+//   - Pitch   → Card.Pitch()   (1/2/3 resource value, treated as damage-equivalent per convention)
+//   - Attack  → Card.Attack()  (printed base power; conditional riders aren't attributed here)
+//   - Defend  → the card's proportional share of min(sum_defense, incomingDamage)
+//
+// So the metric is "how much value does this card usually contribute, itself, to its hand" — as
+// opposed to the hand's total value lumping every card together. It's still an approximation:
+// riders like Sigil effects or Runechant-gated bonuses land in the hand's overall Value via the
+// solver but aren't split back to the specific card here, and defense-reaction Play damage is
+// lumped into hand Value without per-card attribution. Useful as a directional per-card signal,
+// not a precise MVP score.
 type CardPlayStats struct {
-	Plays      int
-	Pitches    int
-	TotalValue float64
+	Plays             int
+	Pitches           int
+	TotalContribution float64
 }
 
-// Avg returns mean hand value across every hand where this card appeared (Plays + Pitches).
-// Returns 0 when the card was never seen.
+// Avg returns mean per-card contribution across every hand where this card appeared (Plays +
+// Pitches). Returns 0 when the card was never seen.
 func (c CardPlayStats) Avg() float64 {
 	n := c.Plays + c.Pitches
 	if n == 0 {
 		return 0
 	}
-	return c.TotalValue / float64(n)
+	return c.TotalContribution / float64(n)
 }
 
 // CycleStats tracks total value and hand count for a single deck cycle.
@@ -373,10 +378,9 @@ func (d *Deck) Evaluate(runs int, incomingDamage int, rng *rand.Rand) Stats {
 				d.Stats.SecondCycle.Total += v
 			}
 
-			// Attribute this hand's outcome to each card in it, regardless of role — pitched cards
-			// enabled the plays, so they share the credit. Roles align with the (now sorted) hand,
-			// so iterating h and play.Roles by index is correct. Runs once per hand; the
-			// permutation search inside hand.Best doesn't touch this map.
+			// Attribute per-card contribution using play.Contributions, which hand.Best fills in
+			// from the winning attack-chain replay (accurate per-card damage including riders and
+			// hero triggers) plus role-based shares for pitch and defense.
 			if d.Stats.PerCard == nil {
 				d.Stats.PerCard = map[card.ID]CardPlayStats{}
 			}
@@ -387,7 +391,9 @@ func (d *Deck) Evaluate(runs int, incomingDamage int, rng *rand.Rand) Stats {
 				} else {
 					stat.Plays++
 				}
-				stat.TotalValue += v
+				if i < len(play.Contributions) {
+					stat.TotalContribution += play.Contributions[i]
+				}
 				d.Stats.PerCard[c.ID()] = stat
 			}
 

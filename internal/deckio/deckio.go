@@ -54,11 +54,11 @@ type StatsJSON struct {
 // even though it's derivable from the other fields — it's what a human reader actually wants
 // when skimming the file.
 type CardPlayStatsJSON struct {
-	Card       string  `json:"card"`
-	Plays      int     `json:"plays"`
-	Pitches    int     `json:"pitches"`
-	TotalValue float64 `json:"total_value"`
-	Avg        float64 `json:"avg"`
+	Card              string  `json:"card"`
+	Plays             int     `json:"plays"`
+	Pitches           int     `json:"pitches"`
+	TotalContribution float64 `json:"total_contribution"`
+	Avg               float64 `json:"avg"`
 }
 
 // BestHandJSON is the JSON form of deck.BestHand: card names and role names instead of interface
@@ -137,11 +137,11 @@ func perCardToJSON(m map[card.ID]deck.CardPlayStats) []CardPlayStatsJSON {
 	out := make([]CardPlayStatsJSON, 0, len(m))
 	for id, s := range m {
 		out = append(out, CardPlayStatsJSON{
-			Card:       cards.Get(id).Name(),
-			Plays:      s.Plays,
-			Pitches:    s.Pitches,
-			TotalValue: s.TotalValue,
-			Avg:        s.Avg(),
+			Card:              cards.Get(id).Name(),
+			Plays:             s.Plays,
+			Pitches:           s.Pitches,
+			TotalContribution: s.TotalContribution,
+			Avg:               s.Avg(),
 		})
 	}
 	sort.Slice(out, func(i, j int) bool {
@@ -232,9 +232,9 @@ func perCardFromJSON(entries []CardPlayStatsJSON) (map[card.ID]deck.CardPlayStat
 			return nil, fmt.Errorf("deckio: unknown card %q in per_card stats", e.Card)
 		}
 		out[id] = deck.CardPlayStats{
-			Plays:      e.Plays,
-			Pitches:    e.Pitches,
-			TotalValue: e.TotalValue,
+			Plays:             e.Plays,
+			Pitches:           e.Pitches,
+			TotalContribution: e.TotalContribution,
 		}
 	}
 	return out, nil
