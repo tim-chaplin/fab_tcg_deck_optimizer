@@ -24,7 +24,7 @@ import (
 const defaultDeckName = "best_deck"
 
 func main() {
-	mode := flag.String("mode", "random", "run mode: random, iterate, eval, or print")
+	mode := flag.String("mode", "random", "run mode: random, iterate, eval, print, or import")
 	numDecks := flag.Int("decks", 10000, "number of random decks to generate (phase 1)")
 	shallowShuffles := flag.Int("shallow-shuffles", 10, "shuffles per deck in phase 1 (wide search)")
 	topN := flag.Int("top-n", 100, "number of top decks to advance to phase 2")
@@ -33,20 +33,23 @@ func main() {
 	deckSize := flag.Int("deck-size", 40, "number of cards per deck")
 	maxCopies := flag.Int("max-copies", 2, "maximum copies of any single card printing per deck")
 	seed := flag.Int64("seed", time.Now().UnixNano(), "RNG seed")
-	deckName := flag.String("deck", defaultDeckName, "deck name; resolved to mydecks/<name>.json (\".json\" suffix optional)")
+	deckName := flag.String("deck", defaultDeckName, "deck name; resolved to mydecks/<name>.json (\".json\" suffix optional). Ignored by -mode=import, which always prompts interactively.")
 	flag.Parse()
-
-	outPath, err := mydecks.Path(*deckName)
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "%v\n", err)
-		os.Exit(1)
-	}
 
 	// Create mydecks/ up front so downstream WriteFile calls in the search loops can't fail on
 	// a missing dir after a long run. Harmless if it already exists.
 	if err := os.MkdirAll(mydecks.Dir, 0o755); err != nil {
-		fmt.Fprintf(os.Stderr, "mkdir %s: %v\n", mydecks.Dir, err)
-		os.Exit(1)
+		die("mkdir %s: %v", mydecks.Dir, err)
+	}
+
+	if *mode == "import" {
+		runImport()
+		return
+	}
+
+	outPath, err := mydecks.Path(*deckName)
+	if err != nil {
+		die("%v", err)
 	}
 
 	cfg := config{
@@ -71,9 +74,13 @@ func main() {
 	case "print":
 		runPrint(cfg.outPath)
 	default:
-		fmt.Fprintf(os.Stderr, "unknown mode %q (want random, iterate, eval, or print)\n", *mode)
-		os.Exit(1)
+		die("unknown mode %q (want random, iterate, eval, print, or import)", *mode)
 	}
+}
+
+func die(format string, args ...any) {
+	fmt.Fprintf(os.Stderr, format+"\n", args...)
+	os.Exit(1)
 }
 
 type config struct {
