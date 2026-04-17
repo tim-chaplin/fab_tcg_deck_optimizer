@@ -73,9 +73,18 @@ type Mutation struct {
 // AllMutations returns every single-card mutation of d in a deterministic order: first every
 // alternative weapon loadout (sorted by loadout key), then every (removeID, addID) pair where
 // one copy of removeID is dropped from the deck and one copy of addID is added. removeID must
-// currently be in the deck; addID's post-mutation count must not exceed maxCopies. The outer
-// loop iterates removeID, the inner loop addID, both sorted by card.ID; pairs that would leave
-// the deck unchanged (removeID == addID) are skipped.
+// currently be in the deck; addID's post-mutation count must not exceed maxCopies. Pairs that
+// would leave the deck unchanged (removeID == addID) are skipped.
+//
+// Ordering of card mutations: the outer loop iterates uniqueIDs by ascending per-card average
+// contribution (d.Stats.PerCard[id].Avg()), so the cards carrying the least value in the current
+// deck get swap candidates tried first. Cards without stats (the deck hasn't been evaluated
+// yet) all tie at 0 and fall back to the card.ID tiebreak. The inner loop iterates the addID
+// pool by card.ID.
+//
+// Iterate mode's hill climb adopts the FIRST mutation that beats the current best, so putting
+// cheap-to-replace cards up front makes the early-improvement rounds meaningful rather than
+// churn through high-value cards that are unlikely to lose their slot.
 //
 // Single-card swaps let the hill climber reach decks with odd per-card counts (e.g. 1× X +
 // 3× Y at maxCopies=3, or 1× X with a hole filled elsewhere). The earlier "swap a whole pair
@@ -121,7 +130,17 @@ func AllMutations(d *Deck, maxCopies int) []Mutation {
 	for id := range counts {
 		uniqueIDs = append(uniqueIDs, id)
 	}
-	sort.Slice(uniqueIDs, func(i, j int) bool { return uniqueIDs[i] < uniqueIDs[j] })
+	// Order removeID by ascending per-card avg contribution, tiebreaker on card.ID. When the
+	// current deck has no stats (PerCard is nil / unseen id), Avg() returns 0 so every card ties
+	// and the tiebreak falls through to stable card.ID order — same behaviour as before.
+	sort.Slice(uniqueIDs, func(i, j int) bool {
+		ai := d.Stats.PerCard[uniqueIDs[i]].Avg()
+		aj := d.Stats.PerCard[uniqueIDs[j]].Avg()
+		if ai != aj {
+			return ai < aj
+		}
+		return uniqueIDs[i] < uniqueIDs[j]
+	})
 
 	pool := cards.Deckable()
 	sort.Slice(pool, func(i, j int) bool { return pool[i] < pool[j] })
