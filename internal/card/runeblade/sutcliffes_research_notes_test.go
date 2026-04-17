@@ -36,6 +36,25 @@ func TestSutcliffesResearchNotes_DeckShorterThanRevealCount(t *testing.T) {
 	}
 }
 
+func TestSutcliffesResearchNotes_RunebladeNonAttackIgnored(t *testing.T) {
+	// A Runeblade card that isn't an attack action (e.g. Read the Runes: Runeblade + Action, no
+	// Attack type) shouldn't count toward the Runechant creation.
+	deck := []card.Card{ReadTheRunesRed{}}
+	s := &card.TurnState{Deck: deck}
+	if got := (SutcliffesResearchNotesRed{}).Play(s); got != 0 {
+		t.Errorf("Play() = %d, want 0 (Runeblade non-attack card shouldn't count)", got)
+	}
+}
+
+func TestSutcliffesResearchNotes_NonRunebladeAttackIgnored(t *testing.T) {
+	// An attack action that isn't Runeblade-classed shouldn't count.
+	deck := []card.Card{stubNonRunebladeAttack{}}
+	s := &card.TurnState{Deck: deck}
+	if got := (SutcliffesResearchNotesRed{}).Play(s); got != 0 {
+		t.Errorf("Play() = %d, want 0 (non-Runeblade attack shouldn't count)", got)
+	}
+}
+
 func TestSutcliffesResearchNotes_VariantRevealCounts(t *testing.T) {
 	deck := []card.Card{
 		stubRunebladeAttack{},
