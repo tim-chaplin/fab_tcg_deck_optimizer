@@ -58,7 +58,7 @@ func runIterate(cfg config) {
 	start := time.Now()
 	for {
 		round++
-		mutations := deck.AllMutations(best)
+		mutations := deck.AllMutations(best, cfg.maxCopies)
 		fmt.Fprintf(os.Stderr, "\n[round %d] evaluating %d mutations of avg %.3f\n",
 			round, len(mutations), bestAvg)
 

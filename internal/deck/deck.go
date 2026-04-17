@@ -70,14 +70,20 @@ type Mutation struct {
 	Description string
 }
 
-// AllMutations returns every single-slot mutation of d in a deterministic order: first every
-// alternative weapon loadout (sorted by loadout key), then every (removeID, replaceID) pair where
-// removeID is a card currently in the deck and replaceID is a card in the Deckable pool that
-// isn't in the deck. Outer loop iterates removeID; inner loop iterates replaceID. Both are
-// sorted by card.ID.
+// AllMutations returns every single-card mutation of d in a deterministic order: first every
+// alternative weapon loadout (sorted by loadout key), then every (removeID, addID) pair where
+// one copy of removeID is dropped from the deck and one copy of addID is added. removeID must
+// currently be in the deck; addID's post-mutation count must not exceed maxCopies. The outer
+// loop iterates removeID, the inner loop addID, both sorted by card.ID; pairs that would leave
+// the deck unchanged (removeID == addID) are skipped.
+//
+// Single-card swaps let the hill climber reach decks with odd per-card counts (e.g. 1× X +
+// 3× Y at maxCopies=3, or 1× X with a hole filled elsewhere). The earlier "swap a whole pair
+// for a whole pair" rule enforced 2-per-card artificially — with the sim fast enough, we let
+// composition fall out of which configurations actually score higher.
 //
 // The returned decks have fresh (zero) stats and share no backing slices with d or each other.
-func AllMutations(d *Deck) []Mutation {
+func AllMutations(d *Deck, maxCopies int) []Mutation {
 	var out []Mutation
 
 	// Weapon mutations: every loadout different from the current one.
@@ -104,16 +110,16 @@ func AllMutations(d *Deck) []Mutation {
 		})
 	}
 
-	// Card mutations: for each unique card in the deck, try replacing with each Deckable card
-	// not already in the deck.
-	inDeck := map[card.ID]bool{}
-	var uniqueIDs []card.ID
+	// Card mutations: for each unique card in the deck, try adding any Deckable card whose
+	// post-mutation count is still within maxCopies (including cards already in the deck below
+	// the cap).
+	counts := map[card.ID]int{}
 	for _, c := range d.Cards {
-		id := c.ID()
-		if !inDeck[id] {
-			inDeck[id] = true
-			uniqueIDs = append(uniqueIDs, id)
-		}
+		counts[c.ID()]++
+	}
+	uniqueIDs := make([]card.ID, 0, len(counts))
+	for id := range counts {
+		uniqueIDs = append(uniqueIDs, id)
 	}
 	sort.Slice(uniqueIDs, func(i, j int) bool { return uniqueIDs[i] < uniqueIDs[j] })
 
@@ -122,21 +128,27 @@ func AllMutations(d *Deck) []Mutation {
 
 	for _, removeID := range uniqueIDs {
 		removed := cards.Get(removeID)
-		for _, replaceID := range pool {
-			if inDeck[replaceID] {
-				continue
+		for _, addID := range pool {
+			if addID == removeID {
+				continue // no-op: remove one, add one of the same card.
 			}
-			replacement := cards.Get(replaceID)
+			if counts[addID] >= maxCopies {
+				continue // already at max copies; can't add another.
+			}
+			replacement := cards.Get(addID)
 			newCards := make([]card.Card, 0, len(d.Cards))
+			removed1 := false
 			for _, c := range d.Cards {
-				if c.ID() != removeID {
-					newCards = append(newCards, c)
+				if !removed1 && c.ID() == removeID {
+					removed1 = true
+					continue
 				}
+				newCards = append(newCards, c)
 			}
-			newCards = append(newCards, replacement, replacement)
+			newCards = append(newCards, replacement)
 			out = append(out, Mutation{
 				Deck:        New(d.Hero, d.Weapons, newCards),
-				Description: fmt.Sprintf("swapped %s for %s", removed.Name(), replacement.Name()),
+				Description: fmt.Sprintf("-1 %s, +1 %s", removed.Name(), replacement.Name()),
 			})
 		}
 	}
@@ -158,42 +170,6 @@ func loadoutLabel(ws []weapon.Weapon) string {
 	return "[" + strings.Join(names, ", ") + "]"
 }
 
-// Mutate creates a new deck by randomly changing one "slot": either swapping one card pair with a
-// random card not already in the deck, or swapping the weapon loadout. Each unique card slot and
-// the weapon slot have equal probability of being chosen (e.g. 20 unique cards + 1 weapon = 1/21
-// chance to mutate weapons). The new deck has fresh (zero) stats.
-func Mutate(d *Deck, rng *rand.Rand) *Deck {
-	// Build a set of unique card names in the deck.
-	inDeck := map[string]bool{}
-	for _, c := range d.Cards {
-		inDeck[c.Name()] = true
-	}
-	uniqueCards := len(inDeck)
-
-	// Equal probability: uniqueCards card slots + 1 weapon slot.
-	if rng.Intn(uniqueCards+1) == 0 {
-		return mutateWeapons(d, rng)
-	}
-	return mutateCard(d, inDeck, rng)
-}
-
-func mutateWeapons(d *Deck, rng *rand.Rand) *Deck {
-	loadouts := weaponLoadouts(cards.AllWeapons)
-	// Pick a loadout different from the current one.
-	currentNames := weaponKey(d.Weapons)
-	var newWeapons []weapon.Weapon
-	for {
-		candidate := loadouts[rng.Intn(len(loadouts))]
-		if weaponKey(candidate) != currentNames {
-			newWeapons = candidate
-			break
-		}
-	}
-	newCards := make([]card.Card, len(d.Cards))
-	copy(newCards, d.Cards)
-	return New(d.Hero, newWeapons, newCards)
-}
-
 // weaponKey returns a comparable string for a weapon loadout so we can check equality.
 func weaponKey(ws []weapon.Weapon) string {
 	names := make([]string, len(ws))
@@ -202,37 +178,6 @@ func weaponKey(ws []weapon.Weapon) string {
 	}
 	sort.Strings(names)
 	return strings.Join(names, ",")
-}
-
-func mutateCard(d *Deck, inDeck map[string]bool, rng *rand.Rand) *Deck {
-	// Pick which unique card to remove.
-	uniq := make([]string, 0, len(inDeck))
-	for name := range inDeck {
-		uniq = append(uniq, name)
-	}
-	removeName := uniq[rng.Intn(len(uniq))]
-
-	// Pick a replacement from the pool that isn't already in the deck.
-	pool := cards.Deckable()
-	var replaceID cards.ID
-	for {
-		id := pool[rng.Intn(len(pool))]
-		if !inDeck[cards.Get(id).Name()] {
-			replaceID = id
-			break
-		}
-	}
-	replacement := cards.Get(replaceID)
-
-	// Build the new card list: drop both copies of removeName, add two of replacement.
-	newCards := make([]card.Card, 0, len(d.Cards))
-	for _, c := range d.Cards {
-		if c.Name() != removeName {
-			newCards = append(newCards, c)
-		}
-	}
-	newCards = append(newCards, replacement, replacement)
-	return New(d.Hero, d.Weapons, newCards)
 }
 
 // weaponLoadouts enumerates every legal equip combination from `ws`: each 2H weapon as a solo
