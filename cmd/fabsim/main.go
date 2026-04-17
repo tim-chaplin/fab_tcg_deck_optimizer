@@ -24,7 +24,7 @@ import (
 const defaultOutPath = "mydecks/best_deck.json"
 
 func main() {
-	mode := flag.String("mode", "random", "run mode: random, iterate, or print_only")
+	mode := flag.String("mode", "random", "run mode: random, iterate, eval, or print")
 	numDecks := flag.Int("decks", 10000, "number of random decks to generate (phase 1)")
 	shallowShuffles := flag.Int("shallow-shuffles", 10, "shuffles per deck in phase 1 (wide search)")
 	topN := flag.Int("top-n", 100, "number of top decks to advance to phase 2")
@@ -70,10 +70,12 @@ func main() {
 		runRandom(cfg)
 	case "iterate":
 		runIterate(cfg)
-	case "print_only":
-		runPrintOnly(cfg.outPath)
+	case "eval":
+		runEval(cfg)
+	case "print":
+		runPrint(cfg.outPath)
 	default:
-		fmt.Fprintf(os.Stderr, "unknown mode %q (want random, iterate, or print_only)\n", *mode)
+		fmt.Fprintf(os.Stderr, "unknown mode %q (want random, iterate, eval, or print)\n", *mode)
 		os.Exit(1)
 	}
 }
