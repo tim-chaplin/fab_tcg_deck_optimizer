@@ -43,7 +43,7 @@ This is a work in progress. The current model is deliberately narrow:
 
 ## Usage
 
-`fabsim` has three run modes, selected with `-mode`:
+`fabsim` has four run modes, selected with `-mode`:
 
 - **`random`** (default) — two-phase search. Generates `-decks` random decks and evaluates each
   shallowly (`-shallow-shuffles` shuffles); takes the top `-top-n` and re-evaluates them with more
@@ -54,7 +54,11 @@ This is a work in progress. The current model is deliberately narrow:
   round finishes without finding an improvement, the deck is at a local maximum and `iterate`
   exits. Press Enter to abort mid-round. If `-out` doesn't exist yet, `iterate` bootstraps with a
   single random deck and climbs from there — you don't have to run `random` first.
-- **`print_only`** — prints the deck at `-out` without running any simulation.
+- **`eval`** — loads the deck at `-out` (or `-deck`), simulates it for `-deep-shuffles` hands
+  against `-incoming` damage, and prints the resulting stats. Does **not** overwrite the file —
+  use this to re-score a saved deck at a new shuffle depth or against a different opponent pressure
+  without clobbering whatever's on disk.
+- **`print`** — prints the deck at `-out` without running any simulation.
 
 ### Suggested workflow
 
@@ -70,7 +74,7 @@ like — each run only overwrites `mydecks/best_deck.json` if it finds something
 
 ### Flags
 
-- `-mode` — `random`, `iterate`, or `print_only` (default `random`)
+- `-mode` — `random`, `iterate`, `eval`, or `print` (default `random`)
 - `-decks` — number of random decks to generate in phase 1 of `random` (default 10000)
 - `-shallow-shuffles` — shuffles per deck in phase 1 wide search (default 10)
 - `-top-n` — number of phase-1 decks to advance to phase 2 (default 100)
