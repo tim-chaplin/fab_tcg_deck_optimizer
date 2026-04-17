@@ -20,3 +20,4 @@ Thumbs.db
 .claude/
 /data_sources/*.csv
 best_deck*.json
+/mydecks/
