@@ -1,19 +1,18 @@
-// Command fabrary converts decks between the optimizer's JSON format and fabrary.net's plain-text
-// format (the text you get from Export → Plain Text on fabrary, or paste into its Import tab).
+// Command fabrary imports a fabrary.net plain-text deck (the thing you get from Export → Plain
+// Text on fabrary, or copy out of its Import tab) into the optimizer's JSON format.
 //
-// Export:
+// Usage:
 //
-//	fabrary -mode export -in best_deck.json            # writes fabrary text to stdout
-//	fabrary -mode export -in best_deck.json -out x.txt
+//	fabrary                                 # paste into stdin; interactive name prompt
+//	fabrary -in paste.txt                   # read from file; still prompts for a deck name
+//	fabrary -in paste.txt -out custom.json  # -out bypasses the mydecks/<name>.json default
 //
-// Import (default: prompt for a deck name, save to mydecks/<name>.json):
+// When -in is empty or "-" stdin is read. When -out is empty, the deck is saved to
+// mydecks/<prompted-name>.json.
 //
-//	fabrary -mode import                                 # paste into stdin; interactive name prompt
-//	fabrary -mode import -in paste.txt                   # read from file; still prompts for name
-//	fabrary -mode import -in paste.txt -out custom.json  # -out bypasses the mydecks/ default
-//
-// When -in is empty or "-" stdin is read. When -out is empty, export writes to stdout and import
-// saves to mydecks/<prompted-name>.json.
+// Exporting in the other direction isn't a separate command — fabsim writes a sibling .txt in
+// fabrary format next to every best_deck.json it saves, so the file is already ready to paste
+// into fabrary.net.
 package main
 
 import (
@@ -33,47 +32,16 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/fabrary"
 )
 
-// myDecksDir is the directory imported decks default to. Kept relative so the command behaves the
-// same regardless of where the user runs it from, matching fabsim's "-out best_deck.json" default.
+// myDecksDir is the directory imported decks default to. Matches fabsim's default output
+// location (mydecks/best_deck.json) so all local decks land in one place.
 const myDecksDir = "mydecks"
 
 func main() {
-	mode := flag.String("mode", "export", "conversion direction: export (json→fabrary) or import (fabrary→json)")
 	inPath := flag.String("in", "", "input path; \"-\" or empty reads from stdin")
-	outPath := flag.String("out", "", "output path; empty = stdout for export / mydecks/<name>.json for import")
+	outPath := flag.String("out", "", "output path; empty saves to mydecks/<prompted-name>.json")
 	flag.Parse()
 
-	switch *mode {
-	case "export":
-		runExport(*inPath, *outPath)
-	case "import":
-		runImport(*inPath, *outPath)
-	default:
-		die("unknown mode %q (want export or import)", *mode)
-	}
-}
-
-func runExport(inPath, outPath string) {
-	data, err := readAllFrom(inPath, "deck JSON")
-	if err != nil {
-		die("read input: %v", err)
-	}
-	d, err := deckio.Unmarshal(data)
-	if err != nil {
-		die("parse deck JSON: %v", err)
-	}
-	out := []byte(fabrary.Marshal(d))
-	dest := outPath
-	if dest == "" {
-		dest = "-"
-	}
-	if err := writeOut(dest, out); err != nil {
-		die("write %s: %v", dest, err)
-	}
-}
-
-func runImport(inPath, outPath string) {
-	data, name, err := readImport(inPath, outPath == "")
+	data, name, err := readImport(*inPath, *outPath == "")
 	if err != nil {
 		die("%v", err)
 	}
@@ -87,7 +55,7 @@ func runImport(inPath, outPath string) {
 	}
 	out = append(out, '\n')
 
-	dest := outPath
+	dest := *outPath
 	if dest == "" {
 		if err := os.MkdirAll(myDecksDir, 0o755); err != nil {
 			die("mkdir %s: %v", myDecksDir, err)
@@ -99,14 +67,13 @@ func runImport(inPath, outPath string) {
 	}
 	if dest != "-" {
 		fmt.Fprintf(os.Stderr, "wrote %s\n", dest)
-		summarizeDeck(d, dest)
+		summarizeDeck(d)
 	}
 	warnSkipped(skipped)
 }
 
 // warnSkipped prints a stderr notice for any fabrary cards the optimizer's registry doesn't yet
-// cover. Without this the imported deck would silently be smaller than the user pasted, which is
-// exactly the hazard the strict-unmarshal behaviour used to guard against.
+// cover. Without this the imported deck would silently be smaller than the user pasted.
 func warnSkipped(skipped map[string]int) {
 	if len(skipped) == 0 {
 		return
@@ -198,18 +165,6 @@ func readUntilFabraryFooter(r *bufio.Reader) ([]byte, error) {
 	}
 }
 
-// readAllFrom reads from a file path, stdin, or "-"-stdin. Shared by export mode where there's no
-// interactive name prompt.
-func readAllFrom(path, what string) ([]byte, error) {
-	if path != "" && path != "-" {
-		return os.ReadFile(path)
-	}
-	if isTerminal(os.Stdin) {
-		fmt.Fprintf(os.Stderr, "Paste %s and press Enter. End with Ctrl-Z then Enter (Windows) or Ctrl-D (macOS/Linux):\n", what)
-	}
-	return io.ReadAll(os.Stdin)
-}
-
 func promptPaste() {
 	fmt.Fprintln(os.Stderr, "Paste fabrary deck text below — input ends automatically at the 'See the full deck @ …' footer:")
 }
@@ -270,7 +225,7 @@ func writeOut(path string, data []byte) error {
 
 // summarizeDeck prints a short confirmation — hero, weapon count, card count — to stderr after a
 // successful import, so the user can sanity-check the paste without opening the file.
-func summarizeDeck(d *deck.Deck, _ string) {
+func summarizeDeck(d *deck.Deck) {
 	weapons := make([]string, len(d.Weapons))
 	for i, w := range d.Weapons {
 		weapons[i] = w.Name()
