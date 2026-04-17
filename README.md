@@ -43,7 +43,7 @@ This is a work in progress. The current model is deliberately narrow:
 
 ## Usage
 
-`fabsim` has four run modes, selected with `-mode`:
+`fabsim` has five run modes, selected with `-mode`:
 
 All modes read and write `mydecks/<deck>.json` where `<deck>` comes from `-deck` (default
 `best_deck`). The `.json` suffix on `-deck` is optional.
@@ -62,6 +62,11 @@ All modes read and write `mydecks/<deck>.json` where `<deck>` comes from `-deck`
   damage, and prints the resulting stats. Does **not** overwrite the file — use this to re-score a
   saved deck at a new shuffle depth or opponent pressure without clobbering whatever's on disk.
 - **`print`** — prints the deck without running any simulation.
+- **`import`** — interactively imports a deck from fabrary.net. Prompts for a deck name, then
+  asks you to paste the plain-text export; input ends automatically at fabrary's
+  `See the full deck @ …` footer. Saves the result as `mydecks/<name>.json`. The `-deck` flag is
+  ignored in this mode — the name always comes from the prompt. Cards the optimizer hasn't
+  implemented yet are skipped with a warning rather than blocking the import.
 
 ### Suggested workflow
 
@@ -77,7 +82,7 @@ like — each run only overwrites `mydecks/best_deck.json` if it finds something
 
 ### Flags
 
-- `-mode` — `random`, `iterate`, `eval`, or `print` (default `random`)
+- `-mode` — `random`, `iterate`, `eval`, `print`, or `import` (default `random`)
 - `-decks` — number of random decks to generate in phase 1 of `random` (default 10000)
 - `-shallow-shuffles` — shuffles per deck in phase 1 wide search (default 10)
 - `-top-n` — number of phase-1 decks to advance to phase 2 (default 100)
