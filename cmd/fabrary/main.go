@@ -3,8 +3,8 @@
 //
 // Export:
 //
-//	fabrary -mode export -in best_deck.json            # writes fabrary text to stdout
-//	fabrary -mode export -in best_deck.json -out x.txt
+//	fabrary -mode export -in mydecks/best_deck.json            # writes fabrary text to stdout
+//	fabrary -mode export -in mydecks/best_deck.json -out x.txt
 //
 // Import (default: prompt for a deck name, save to mydecks/<name>.json):
 //
@@ -33,8 +33,8 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/fabrary"
 )
 
-// myDecksDir is the directory imported decks default to. Kept relative so the command behaves the
-// same regardless of where the user runs it from, matching fabsim's "-out best_deck.json" default.
+// myDecksDir is the directory imported decks default to. Matches fabsim's default output
+// location (mydecks/best_deck.json) so all local decks land in one place.
 const myDecksDir = "mydecks"
 
 func main() {

@@ -5,6 +5,7 @@ import (
 	"flag"
 	"fmt"
 	"os"
+	"path/filepath"
 	"sort"
 	"time"
 
@@ -25,8 +26,17 @@ func main() {
 	deckSize := flag.Int("deck-size", 40, "number of cards per deck")
 	maxCopies := flag.Int("max-copies", 2, "maximum copies of any single card printing per deck")
 	seed := flag.Int64("seed", time.Now().UnixNano(), "RNG seed")
-	outPath := flag.String("out", "best_deck.json", "path to write/read the best deck JSON")
+	outPath := flag.String("out", "mydecks/best_deck.json", "path to write/read the best deck JSON")
 	flag.Parse()
+
+	// Create the parent directory of -out up front so downstream WriteFile calls in the search
+	// loops can't fail on a missing dir after a long run. Harmless if it already exists.
+	if dir := filepath.Dir(*outPath); dir != "" && dir != "." {
+		if err := os.MkdirAll(dir, 0o755); err != nil {
+			fmt.Fprintf(os.Stderr, "mkdir %s: %v\n", dir, err)
+			os.Exit(1)
+		}
+	}
 
 	cfg := config{
 		numDecks:        *numDecks,

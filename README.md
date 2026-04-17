@@ -58,7 +58,7 @@ This is a work in progress. The current model is deliberately narrow:
 
 ### Suggested workflow
 
-Start with a wide random search to seed `best_deck.json`, then hill-climb from there:
+Start with a wide random search to seed `mydecks/best_deck.json`, then hill-climb from there:
 
 ```
 go run ./cmd/fabsim -mode=random  -decks=10000 -shallow-shuffles=10 -top-n=100 -deep-shuffles=1000
@@ -66,7 +66,7 @@ go run ./cmd/fabsim -mode=iterate -deep-shuffles=1000
 ```
 
 `random` explores the space; `iterate` refines the best find. Re-run either stage as often as you
-like — each run only overwrites `best_deck.json` if it finds something better.
+like — each run only overwrites `mydecks/best_deck.json` if it finds something better.
 
 ### Flags
 
@@ -80,7 +80,8 @@ like — each run only overwrites `best_deck.json` if it finds something better.
 - `-deck-size` — cards per deck (default 40)
 - `-max-copies` — max copies of any single card printing (default 2)
 - `-seed` — RNG seed (default: time-based)
-- `-out` — path to read/write the best deck JSON (default `best_deck.json`)
+- `-out` — path to read/write the best deck JSON (default `mydecks/best_deck.json`; the parent
+  directory is created automatically)
 
 Helper tool for exploring the upstream card database:
 
