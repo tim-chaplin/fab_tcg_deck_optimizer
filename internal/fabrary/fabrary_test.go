@@ -6,7 +6,6 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/cards"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/deck"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/hero"
 )
@@ -18,9 +17,12 @@ func TestMarshalUnmarshalRoundTrip(t *testing.T) {
 	d := deck.Random(hero.Viserai{}, 40, 2, rng)
 
 	text := Marshal(d)
-	got, err := Unmarshal(text)
+	got, skipped, err := Unmarshal(text)
 	if err != nil {
 		t.Fatalf("Unmarshal: %v\n---\n%s", err, text)
+	}
+	if len(skipped) != 0 {
+		t.Errorf("unexpected skipped cards on registered-only round trip: %v", skipped)
 	}
 
 	if got.Hero.Name() != d.Hero.Name() {
@@ -105,12 +107,7 @@ Deck cards
 Made with ❤️ at the FaBrary
 See the full deck @ https://fabrary.net/decks/01KP1AZ5SAS425YN30WB779M41
 `
-	// "Arcane Polarity" is not yet in the card registry — this test uses a subset of the sample
-	// that the registry actually covers so we can assert on parse success without tying the test
-	// to the full Silver Age roster.
-	reduced := removeUnimplementedLines(t, sample)
-
-	d, err := Unmarshal(reduced)
+	d, skipped, err := Unmarshal(sample)
 	if err != nil {
 		t.Fatalf("Unmarshal: %v", err)
 	}
@@ -129,11 +126,19 @@ See the full deck @ https://fabrary.net/decks/01KP1AZ5SAS425YN30WB779M41
 	if len(d.Cards) == 0 {
 		t.Fatalf("expected deck cards, got none")
 	}
+	// "Arcane Polarity" isn't in the registry yet; the sample has 2 red copies, so the skip map
+	// should report it. If/when it gets implemented this expectation needs to move to whichever
+	// card remains unimplemented in the sample.
+	if skipped["Arcane Polarity (Red)"] != 2 {
+		t.Errorf("skipped map should report Arcane Polarity (Red) x2; got %v", skipped)
+	}
 }
 
-// TestUnmarshalUnknownCardFails guards the "silent drop in Deck section" hazard: an unknown card
-// name must surface as an error so deck composition can't change behind the user's back.
-func TestUnmarshalUnknownCardFails(t *testing.T) {
+// TestUnmarshalUnknownCardSkipped pins the lenient behaviour: unknown deck-section cards do NOT
+// abort the parse; they're reported in the returned skip map so the caller can warn. fabrary
+// decks routinely reference cards the optimizer hasn't implemented yet, so a strict failure would
+// make import unusable in practice.
+func TestUnmarshalUnknownCardSkipped(t *testing.T) {
 	const text = `Name: Viserai
 Hero: Viserai
 Format: Silver Age
@@ -144,16 +149,20 @@ Arena cards
 Deck cards
 2x Not A Real Card (red)
 `
-	_, err := Unmarshal(text)
-	if err == nil {
-		t.Fatal("expected error for unknown card, got nil")
+	d, skipped, err := Unmarshal(text)
+	if err != nil {
+		t.Fatalf("Unmarshal: %v", err)
 	}
-	if !strings.Contains(err.Error(), "Not A Real Card") {
-		t.Errorf("error should name the unknown card; got %v", err)
+	if len(d.Cards) != 0 {
+		t.Errorf("expected 0 known cards, got %d", len(d.Cards))
+	}
+	if skipped["Not A Real Card (Red)"] != 2 {
+		t.Errorf("skipped should contain Not A Real Card (Red) x2; got %v", skipped)
 	}
 }
 
-// TestUnmarshalUnknownHeroFails guards the other silent-drop hazard on the hero header.
+// TestUnmarshalUnknownHeroFails guards the one remaining hard failure: without a known hero, we
+// can't build a deck at all, so this must still be an error (not a silent drop).
 func TestUnmarshalUnknownHeroFails(t *testing.T) {
 	const text = `Name: Someone
 Hero: Not A Hero
@@ -163,7 +172,7 @@ Arena cards
 
 Deck cards
 `
-	_, err := Unmarshal(text)
+	_, _, err := Unmarshal(text)
 	if err == nil {
 		t.Fatal("expected error for unknown hero, got nil")
 	}
@@ -185,35 +194,3 @@ func weaponNameCounts(d *deck.Deck) map[string]int {
 	return m
 }
 
-// removeUnimplementedLines drops "Deck cards" lines whose card name isn't in the registry. Keeps
-// the test focused on parser behaviour rather than the Silver Age roster's coverage.
-func removeUnimplementedLines(t *testing.T, text string) string {
-	t.Helper()
-	lines := strings.Split(text, "\n")
-	inDeck := false
-	out := make([]string, 0, len(lines))
-	for _, line := range lines {
-		trimmed := strings.TrimSpace(line)
-		if trimmed == "Deck cards" {
-			inDeck = true
-			out = append(out, line)
-			continue
-		}
-		if !inDeck {
-			out = append(out, line)
-			continue
-		}
-		qty, name, ok := parseCountedLine(trimmed)
-		if !ok {
-			out = append(out, line)
-			continue
-		}
-		canon := fromFabraryCardName(name)
-		if _, known := cards.ByName(canon); known {
-			out = append(out, line)
-			continue
-		}
-		_ = qty
-	}
-	return strings.Join(out, "\n")
-}

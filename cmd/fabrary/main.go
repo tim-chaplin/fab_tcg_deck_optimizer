@@ -25,6 +25,7 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"sort"
 	"strings"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/deck"
@@ -76,7 +77,7 @@ func runImport(inPath, outPath string) {
 	if err != nil {
 		die("%v", err)
 	}
-	d, err := fabrary.Unmarshal(string(data))
+	d, skipped, err := fabrary.Unmarshal(string(data))
 	if err != nil {
 		die("parse fabrary text: %v", err)
 	}
@@ -99,6 +100,27 @@ func runImport(inPath, outPath string) {
 	if dest != "-" {
 		fmt.Fprintf(os.Stderr, "wrote %s\n", dest)
 		summarizeDeck(d, dest)
+	}
+	warnSkipped(skipped)
+}
+
+// warnSkipped prints a stderr notice for any fabrary cards the optimizer's registry doesn't yet
+// cover. Without this the imported deck would silently be smaller than the user pasted, which is
+// exactly the hazard the strict-unmarshal behaviour used to guard against.
+func warnSkipped(skipped map[string]int) {
+	if len(skipped) == 0 {
+		return
+	}
+	total := 0
+	names := make([]string, 0, len(skipped))
+	for name, qty := range skipped {
+		total += qty
+		names = append(names, name)
+	}
+	sort.Strings(names)
+	fmt.Fprintf(os.Stderr, "warning: skipped %d unimplemented card(s):\n", total)
+	for _, n := range names {
+		fmt.Fprintf(os.Stderr, "  %dx %s\n", skipped[n], n)
 	}
 }
 

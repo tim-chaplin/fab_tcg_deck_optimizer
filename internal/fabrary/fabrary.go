@@ -51,17 +51,22 @@ func Marshal(d *deck.Deck) string {
 	return b.String()
 }
 
-// Unmarshal parses fabrary-style deck text and returns a *deck.Deck. The deck has no stats —
-// stats are a simulation artifact and are not round-tripped through fabrary.
+// Unmarshal parses fabrary-style deck text and returns a *deck.Deck plus a count-keyed map of
+// deck cards whose names aren't in the optimizer's registry (typically cards implemented in
+// fabrary but not yet in this project). Callers should surface the skipped map so users aren't
+// surprised by silently-reduced deck size. Stats aren't round-tripped (they're a simulation
+// artifact).
 //
-// Unknown Arena-section lines (non-weapon equipment) are silently skipped. Unknown Deck-section
-// card names cause an error, since a silent drop there would quietly change deck composition.
-func Unmarshal(text string) (*deck.Deck, error) {
+// Unknown Arena-section lines (non-weapon equipment) are silently skipped and NOT reported, since
+// the optimizer doesn't model non-weapon equipment at all and reporting would be noise.
+// Hero/format parse errors still abort — a missing hero means we can't build a deck.
+func Unmarshal(text string) (*deck.Deck, map[string]int, error) {
 	var (
 		heroName string
 		section  string
 		weapons  []weapon.Weapon
 		cardList []card.Card
+		skipped  = map[string]int{}
 	)
 	wReg := weaponsByName()
 
@@ -107,7 +112,8 @@ func Unmarshal(text string) (*deck.Deck, error) {
 			canon := fromFabraryCardName(name)
 			id, ok := cards.ByName(canon)
 			if !ok {
-				return nil, fmt.Errorf("fabrary: unknown card %q", canon)
+				skipped[canon] += qty
+				continue
 			}
 			c := cards.Get(id)
 			for i := 0; i < qty; i++ {
@@ -116,13 +122,13 @@ func Unmarshal(text string) (*deck.Deck, error) {
 		}
 	}
 	if err := sc.Err(); err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 	h, ok := heroesByName[heroName]
 	if !ok {
-		return nil, fmt.Errorf("fabrary: unknown hero %q", heroName)
+		return nil, nil, fmt.Errorf("fabrary: unknown hero %q", heroName)
 	}
-	return deck.New(h, weapons, cardList), nil
+	return deck.New(h, weapons, cardList), skipped, nil
 }
 
 // countedLine matches "<N>x <name>" — fabrary always uses a lowercase "x" with no spaces around it.
