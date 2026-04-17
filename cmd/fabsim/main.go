@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/cards"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/deck"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/deckio"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/fabrary"
@@ -224,6 +225,54 @@ func printBestDeck(d *deck.Deck) {
 	sort.Strings(names)
 	for _, n := range names {
 		fmt.Printf("  %dx %s\n", counts[n], n)
+	}
+
+	if len(s.PerCard) > 0 {
+		printPerCardStats(d)
+	}
+}
+
+// printPerCardStats renders the per-card averages collected by deck.Evaluate: mean per-card
+// contribution across every hand the card appeared in. Contribution is role-based — Attack() on
+// attacks, proportional share of prevented damage on defends, Pitch() on pitches — so the
+// ranking is about what each card typically does in its hand, not the hand's total value.
+func printPerCardStats(d *deck.Deck) {
+	type row struct {
+		name           string
+		deckCount      int
+		plays, pitches int
+		avg            float64
+	}
+	deckCounts := map[card.ID]int{}
+	for _, c := range d.Cards {
+		deckCounts[c.ID()]++
+	}
+	rows := make([]row, 0, len(d.Stats.PerCard))
+	for id, s := range d.Stats.PerCard {
+		rows = append(rows, row{
+			name:      cards.Get(id).Name(),
+			deckCount: deckCounts[id],
+			plays:     s.Plays,
+			pitches:   s.Pitches,
+			avg:       s.Avg(),
+		})
+	}
+	sort.Slice(rows, func(i, j int) bool {
+		if rows[i].avg != rows[j].avg {
+			return rows[i].avg > rows[j].avg
+		}
+		ni, nj := rows[i].plays+rows[i].pitches, rows[j].plays+rows[j].pitches
+		if ni != nj {
+			return ni > nj
+		}
+		return rows[i].name < rows[j].name
+	})
+
+	fmt.Println()
+	fmt.Println("Card value (avg contribution per appearance: attack=power, defend=share of block, pitch=resource):")
+	for _, r := range rows {
+		fmt.Printf("  %-35s avg %6.3f over %4d hands (%4d plays, %4d pitches, %dx in deck)\n",
+			r.name, r.avg, r.plays+r.pitches, r.plays, r.pitches, r.deckCount)
 	}
 }
 

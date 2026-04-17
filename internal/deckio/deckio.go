@@ -41,12 +41,24 @@ type PitchCountsJSON struct {
 
 // StatsJSON mirrors deck.Stats with card references flattened to names.
 type StatsJSON struct {
-	Runs        int            `json:"runs"`
-	Hands       int            `json:"hands"`
-	TotalValue  float64        `json:"total_value"`
-	FirstCycle  deck.CycleStats `json:"first_cycle"`
-	SecondCycle deck.CycleStats `json:"second_cycle"`
-	Best        BestHandJSON   `json:"best"`
+	Runs        int                    `json:"runs"`
+	Hands       int                    `json:"hands"`
+	TotalValue  float64                `json:"total_value"`
+	FirstCycle  deck.CycleStats        `json:"first_cycle"`
+	SecondCycle deck.CycleStats        `json:"second_cycle"`
+	Best        BestHandJSON           `json:"best"`
+	PerCard     []CardPlayStatsJSON    `json:"per_card,omitempty"`
+}
+
+// CardPlayStatsJSON is the JSON form of deck.CardPlayStats keyed by card name. Avg is included
+// even though it's derivable from the other fields — it's what a human reader actually wants
+// when skimming the file.
+type CardPlayStatsJSON struct {
+	Card              string  `json:"card"`
+	Plays             int     `json:"plays"`
+	Pitches           int     `json:"pitches"`
+	TotalContribution float64 `json:"total_contribution"`
+	Avg               float64 `json:"avg"`
 }
 
 // BestHandJSON is the JSON form of deck.BestHand: card names and role names instead of interface
@@ -111,7 +123,38 @@ func statsToJSON(s deck.Stats) StatsJSON {
 		FirstCycle:  s.FirstCycle,
 		SecondCycle: s.SecondCycle,
 		Best:        bestHandToJSON(s.Best),
+		PerCard:     perCardToJSON(s.PerCard),
 	}
+}
+
+// perCardToJSON flattens the card.ID-keyed map into a slice sorted by Avg descending, total
+// appearances descending, then card name — so the JSON output is stable and the best-performing
+// cards surface at the top.
+func perCardToJSON(m map[card.ID]deck.CardPlayStats) []CardPlayStatsJSON {
+	if len(m) == 0 {
+		return nil
+	}
+	out := make([]CardPlayStatsJSON, 0, len(m))
+	for id, s := range m {
+		out = append(out, CardPlayStatsJSON{
+			Card:              cards.Get(id).Name(),
+			Plays:             s.Plays,
+			Pitches:           s.Pitches,
+			TotalContribution: s.TotalContribution,
+			Avg:               s.Avg(),
+		})
+	}
+	sort.Slice(out, func(i, j int) bool {
+		if out[i].Avg != out[j].Avg {
+			return out[i].Avg > out[j].Avg
+		}
+		ni, nj := out[i].Plays+out[i].Pitches, out[j].Plays+out[j].Pitches
+		if ni != nj {
+			return ni > nj
+		}
+		return out[i].Card < out[j].Card
+	})
+	return out
 }
 
 func bestHandToJSON(b deck.BestHand) BestHandJSON {
@@ -161,6 +204,10 @@ func fromJSON(dj *DeckJSON) (*deck.Deck, error) {
 	if err != nil {
 		return nil, err
 	}
+	perCard, err := perCardFromJSON(dj.Stats.PerCard)
+	if err != nil {
+		return nil, err
+	}
 	d := deck.New(h, weapons, cs)
 	d.Stats = deck.Stats{
 		Runs:        dj.Stats.Runs,
@@ -169,8 +216,28 @@ func fromJSON(dj *DeckJSON) (*deck.Deck, error) {
 		FirstCycle:  dj.Stats.FirstCycle,
 		SecondCycle: dj.Stats.SecondCycle,
 		Best:        best,
+		PerCard:     perCard,
 	}
 	return d, nil
+}
+
+func perCardFromJSON(entries []CardPlayStatsJSON) (map[card.ID]deck.CardPlayStats, error) {
+	if len(entries) == 0 {
+		return nil, nil
+	}
+	out := make(map[card.ID]deck.CardPlayStats, len(entries))
+	for _, e := range entries {
+		id, ok := cards.ByName(e.Card)
+		if !ok {
+			return nil, fmt.Errorf("deckio: unknown card %q in per_card stats", e.Card)
+		}
+		out[id] = deck.CardPlayStats{
+			Plays:             e.Plays,
+			Pitches:           e.Pitches,
+			TotalContribution: e.TotalContribution,
+		}
+	}
+	return out, nil
 }
 
 func bestHandFromJSON(bj BestHandJSON) (deck.BestHand, error) {

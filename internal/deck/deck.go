@@ -227,6 +227,10 @@ type Stats struct {
 	// Hand is in canonical (post-sort) order aligned with Play.Roles. Zero-valued if no hands have
 	// been evaluated.
 	Best BestHand
+	// PerCard attributes hand-level outcomes back to the cards that appeared in those hands. The
+	// map is populated once per hand (after hand.Best picks the winning play), not per permutation
+	// — attribution cost is negligible compared to the underlying search.
+	PerCard map[card.ID]CardPlayStats
 }
 
 // BestHand records a single hand and its optimal play — used to surface the peak draw a deck saw
@@ -237,6 +241,36 @@ type BestHand struct {
 	// StartingRunechants is the Runechant count carried in from the previous turn when this hand
 	// was played. Only meaningful for Runeblade heroes.
 	StartingRunechants int
+}
+
+// CardPlayStats captures how a single card contributed to the decks it appeared in. Plays counts
+// hands where it was played as an attack or defense; Pitches counts hands where it was spent for
+// resources. TotalContribution sums a per-role estimate of what the card did on each appearance:
+//
+//   - Pitch   → Card.Pitch()   (1/2/3 resource value, treated as damage-equivalent per convention)
+//   - Attack  → Card.Attack()  (printed base power; conditional riders aren't attributed here)
+//   - Defend  → the card's proportional share of min(sum_defense, incomingDamage)
+//
+// So the metric is "how much value does this card usually contribute, itself, to its hand" — as
+// opposed to the hand's total value lumping every card together. It's still an approximation:
+// riders like Sigil effects or Runechant-gated bonuses land in the hand's overall Value via the
+// solver but aren't split back to the specific card here, and defense-reaction Play damage is
+// lumped into hand Value without per-card attribution. Useful as a directional per-card signal,
+// not a precise MVP score.
+type CardPlayStats struct {
+	Plays             int
+	Pitches           int
+	TotalContribution float64
+}
+
+// Avg returns mean per-card contribution across every hand where this card appeared (Plays +
+// Pitches). Returns 0 when the card was never seen.
+func (c CardPlayStats) Avg() float64 {
+	n := c.Plays + c.Pitches
+	if n == 0 {
+		return 0
+	}
+	return c.TotalContribution / float64(n)
 }
 
 // CycleStats tracks total value and hand count for a single deck cycle.
@@ -342,6 +376,25 @@ func (d *Deck) Evaluate(runs int, incomingDamage int, rng *rand.Rand) Stats {
 			case 1:
 				d.Stats.SecondCycle.Hands++
 				d.Stats.SecondCycle.Total += v
+			}
+
+			// Attribute per-card contribution using play.Contributions, which hand.Best fills in
+			// from the winning attack-chain replay (accurate per-card damage including riders and
+			// hero triggers) plus role-based shares for pitch and defense.
+			if d.Stats.PerCard == nil {
+				d.Stats.PerCard = map[card.ID]CardPlayStats{}
+			}
+			for i, c := range h {
+				stat := d.Stats.PerCard[c.ID()]
+				if play.Roles[i] == hand.Pitch {
+					stat.Pitches++
+				} else {
+					stat.Plays++
+				}
+				if i < len(play.Contributions) {
+					stat.TotalContribution += play.Contributions[i]
+				}
+				d.Stats.PerCard[c.ID()] = stat
 			}
 
 			// Recycle: pitched cards go to the bottom of the remaining deck (buf[tail:]) in hand

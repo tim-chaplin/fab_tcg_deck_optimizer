@@ -125,6 +125,37 @@ func TestAllMutations_NoDuplicateOfSource(t *testing.T) {
 	}
 }
 
+// TestEvaluate_PerCardStatsPopulated pins per-card attribution: every card appearance (played or
+// pitched) contributes to Plays+Pitches, and TotalContribution sums role-based per-card credit:
+// Attack → Card.Attack(), Defend → proportional share of block, Pitch → Card.Pitch(). A
+// single-printing deck makes the totals easy to assert against the card's printed stats.
+func TestEvaluate_PerCardStatsPopulated(t *testing.T) {
+	read := cards.Get(card.ReadTheRunesRed)
+	d := New(hero.Viserai{}, nil, []card.Card{read, read, read, read})
+	d.Evaluate(1, 0, rand.New(rand.NewSource(1)))
+
+	if d.Stats.PerCard == nil {
+		t.Fatalf("PerCard should be initialised after Evaluate")
+	}
+	stat, ok := d.Stats.PerCard[card.ReadTheRunesRed]
+	if !ok {
+		t.Fatalf("PerCard missing entry for Read the Runes (Red)")
+	}
+	if got := stat.Plays + stat.Pitches; got != 4 {
+		t.Errorf("Plays+Pitches = %d, want 4 (one 4-card hand of the same card)", got)
+	}
+	// Contributions come from the winning chain replay (Play returns + hero triggers) plus
+	// role-based shares for pitch/defend. The exact total depends on rider/trigger damage, so
+	// assert the weaker property that it's positive and produces a positive Avg.
+	if stat.TotalContribution <= 0 {
+		t.Errorf("TotalContribution = %v, want >0 (played Read the Runes deals at least Attack+rider)",
+			stat.TotalContribution)
+	}
+	if stat.Avg() <= 0 {
+		t.Errorf("Avg() = %v, want >0", stat.Avg())
+	}
+}
+
 // TestEvaluate_BestHandStartingRunechantsIsPreHandCarryover pins down a subtle bug: Evaluate
 // used to write the post-hand LeftoverRunechants into BestHand.StartingRunechants, so the field
 // surfaced the wrong turn's count. The field is documented as "the Runechant count carried in
