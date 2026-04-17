@@ -6,10 +6,10 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 )
 
-// TestConsumingVolition_NoRunechantsReturnsBaseAttack covers the fix: if no Runechant exists at
-// Play time there's no source of arcane damage this turn, so the discard rider can't fire and
-// Play returns only the printed attack — no flat +3.
-func TestConsumingVolition_NoRunechantsReturnsBaseAttack(t *testing.T) {
+// TestConsumingVolition_ArcaneDamageNotDealtReturnsBaseAttack covers the unsatisfied branch:
+// when ArcaneDamageDealt is false the discard rider can't fire and Play returns only the
+// printed attack.
+func TestConsumingVolition_ArcaneDamageNotDealtReturnsBaseAttack(t *testing.T) {
 	cases := []struct {
 		c    card.Card
 		want int
@@ -21,15 +21,15 @@ func TestConsumingVolition_NoRunechantsReturnsBaseAttack(t *testing.T) {
 	for _, tc := range cases {
 		s := card.TurnState{}
 		if got := tc.c.Play(&s); got != tc.want {
-			t.Errorf("%s: Play() = %d, want %d (base attack, no runechants)", tc.c.Name(), got, tc.want)
+			t.Errorf("%s: Play() = %d, want %d (base attack, ArcaneDamageDealt=false)", tc.c.Name(), got, tc.want)
 		}
 	}
 }
 
-// TestConsumingVolition_RunechantsTriggerDiscardRider exercises the satisfied path: any live
-// Runechant means arcane damage will fire on this attack, so the discard rider activates and
-// Play returns attack + 3.
-func TestConsumingVolition_RunechantsTriggerDiscardRider(t *testing.T) {
+// TestConsumingVolition_ArcaneDamageDealtTriggersDiscardRider exercises the satisfied path:
+// when ArcaneDamageDealt is set (a prior attack fired a Runechant, or a direct-arcane card
+// flipped the flag), the discard rider activates and Play returns attack + 3.
+func TestConsumingVolition_ArcaneDamageDealtTriggersDiscardRider(t *testing.T) {
 	cases := []struct {
 		c    card.Card
 		want int
@@ -39,7 +39,7 @@ func TestConsumingVolition_RunechantsTriggerDiscardRider(t *testing.T) {
 		{ConsumingVolitionBlue{}, 2 + 3},
 	}
 	for _, tc := range cases {
-		s := card.TurnState{Runechants: 1}
+		s := card.TurnState{ArcaneDamageDealt: true}
 		if got := tc.c.Play(&s); got != tc.want {
 			t.Errorf("%s: Play() = %d, want %d (attack + discard rider)", tc.c.Name(), got, tc.want)
 		}

@@ -4,16 +4,13 @@
 // Text: "If you've dealt arcane damage this turn, this gets 'When this hits a hero, they discard
 // a card.'"
 //
-// Simplifications:
-//   - "Dealt arcane damage this turn" is approximated as "a Runechant exists in play at the
-//     moment Consuming Volition is played" — the same live-count check DiscountPerRunechant uses.
-//     Runechants left in play will fire on this attack's damage step, so if any exist we know
-//     arcane damage will occur this turn. We don't track whether arcane damage was already dealt
-//     earlier in the chain; the common Runeblade play pattern is create-then-attack, where the
-//     tokens are still live when Consuming Volition resolves.
-//   - Assume the attack hits and the opponent discards when the rider is active. A discarded
-//     card is valued at 3, mirroring the value we assign a drawn card for Drawn to the Dark
-//     Dimension.
+// The "dealt arcane damage this turn" clause reads TurnState.ArcaneDamageDealt. playSequence
+// flips it on when a Runechant fires on an earlier attack/weapon in the chain, and direct-arcane
+// cards set it themselves when they resolve. When the flag is live at Play time the discard
+// rider fires (valued at +3, matching Drawn to the Dark Dimension's draw); otherwise Play
+// returns the printed attack alone.
+//
+// Assume the attack hits and the opponent discards when the rider is active.
 //
 // Source: github.com/the-fab-cube/flesh-and-blood-cards (card.csv).
 
@@ -27,10 +24,10 @@ var consumingVolitionTypes = card.NewTypeSet(card.TypeRuneblade, card.TypeAction
 // Matches the "draw a card" value used by Drawn to the Dark Dimension.
 const discardRiderValue = 3
 
-// consumingVolitionDamage returns the base attack plus the discard rider when there's a live
-// Runechant to fire on this attack. Extracted so all three printings share one implementation.
+// consumingVolitionDamage returns the base attack plus the discard rider when
+// ArcaneDamageDealt is set. Extracted so all three printings share one implementation.
 func consumingVolitionDamage(attack int, s *card.TurnState) int {
-	if s != nil && s.Runechants > 0 {
+	if s != nil && s.ArcaneDamageDealt {
 		return attack + discardRiderValue
 	}
 	return attack
