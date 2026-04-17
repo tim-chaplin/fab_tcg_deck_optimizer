@@ -4,6 +4,7 @@ package main
 import (
 	"flag"
 	"fmt"
+	"io"
 	"os"
 	"path/filepath"
 	"sort"
@@ -24,7 +25,12 @@ import (
 const defaultDeckName = "best_deck"
 
 func main() {
-	mode := flag.String("mode", "random", "run mode: random, iterate, eval, print, or import")
+	subcommand, ok := extractSubcommand()
+	if !ok {
+		printSubcommands(os.Stdout)
+		return
+	}
+
 	numDecks := flag.Int("decks", 10000, "number of random decks to generate (phase 1)")
 	shallowShuffles := flag.Int("shallow-shuffles", 10, "shuffles per deck in phase 1 (wide search)")
 	topN := flag.Int("top-n", 100, "number of top decks to advance to phase 2")
@@ -33,7 +39,7 @@ func main() {
 	deckSize := flag.Int("deck-size", 40, "number of cards per deck")
 	maxCopies := flag.Int("max-copies", 2, "maximum copies of any single card printing per deck")
 	seed := flag.Int64("seed", time.Now().UnixNano(), "RNG seed")
-	deckName := flag.String("deck", defaultDeckName, "deck name; resolved to mydecks/<name>.json (\".json\" suffix optional). Ignored by -mode=import, which always prompts interactively.")
+	deckName := flag.String("deck", defaultDeckName, "deck name; resolved to mydecks/<name>.json (\".json\" suffix optional). Ignored by the import subcommand, which always prompts interactively.")
 	flag.Parse()
 
 	// Create mydecks/ up front so downstream WriteFile calls in the search loops can't fail on
@@ -42,7 +48,11 @@ func main() {
 		die("mkdir %s: %v", mydecks.Dir, err)
 	}
 
-	if *mode == "import" {
+	switch subcommand {
+	case "help":
+		printSubcommands(os.Stdout)
+		return
+	case "import":
 		runImport()
 		return
 	}
@@ -64,7 +74,7 @@ func main() {
 		outPath:         outPath,
 	}
 
-	switch *mode {
+	switch subcommand {
 	case "random":
 		runRandom(cfg)
 	case "iterate":
@@ -74,8 +84,43 @@ func main() {
 	case "print":
 		runPrint(cfg.outPath)
 	default:
-		die("unknown mode %q (want random, iterate, eval, print, or import)", *mode)
+		fmt.Fprintf(os.Stderr, "unknown subcommand %q\n\n", subcommand)
+		printSubcommands(os.Stderr)
+		os.Exit(2)
 	}
+}
+
+// extractSubcommand pulls os.Args[1] as the subcommand name and rewrites os.Args so flag.Parse
+// only sees flags. Returns (_, false) when no subcommand is given or the first arg looks like a
+// flag (e.g. bare `fabsim`, `fabsim -help`) — the caller prints the subcommand list in that case.
+func extractSubcommand() (string, bool) {
+	if len(os.Args) < 2 {
+		return "", false
+	}
+	first := os.Args[1]
+	if strings.HasPrefix(first, "-") {
+		return "", false
+	}
+	os.Args = append([]string{os.Args[0]}, os.Args[2:]...)
+	return first, true
+}
+
+// printSubcommands writes the one-liner catalogue we show when no subcommand is given. Flag
+// details live behind `fabsim <subcommand> -help`, which invokes the standard flag package's
+// usage printer.
+func printSubcommands(w io.Writer) {
+	fmt.Fprintln(w, "fabsim: Flesh and Blood goldfishing deck optimizer")
+	fmt.Fprintln(w)
+	fmt.Fprintln(w, "Usage: fabsim <subcommand> [flags]")
+	fmt.Fprintln(w)
+	fmt.Fprintln(w, "Subcommands:")
+	fmt.Fprintln(w, "  random    Search for a new best deck via two-phase random sampling")
+	fmt.Fprintln(w, "  iterate   Hill-climb on the saved deck until a local maximum")
+	fmt.Fprintln(w, "  eval      Re-score the saved deck at -deep-shuffles without overwriting it")
+	fmt.Fprintln(w, "  print     Print the saved deck without simulating")
+	fmt.Fprintln(w, "  import    Paste a fabrary.net deck into mydecks/<name>.json")
+	fmt.Fprintln(w)
+	fmt.Fprintln(w, "Run 'fabsim <subcommand> -help' for flag details.")
 }
 
 func die(format string, args ...any) {

@@ -43,21 +43,21 @@ This is a work in progress. The current model is deliberately narrow:
 
 ## Usage
 
-`fabsim` has five run modes, selected with `-mode`:
+`fabsim` takes a subcommand as its first argument. Running `fabsim` with no subcommand prints the
+catalogue.
 
-All modes read and write `mydecks/<deck>.json` where `<deck>` comes from `-deck` (default
+All subcommands read and write `mydecks/<deck>.json` where `<deck>` comes from `-deck` (default
 `best_deck`). The `.json` suffix on `-deck` is optional.
 
-- **`random`** (default) — two-phase search. Generates `-decks` random decks and evaluates each
-  shallowly (`-shallow-shuffles` shuffles); takes the top `-top-n` and re-evaluates them with more
-  shuffles (`-deep-shuffles`). Writes the winner to the deck file if it beats whatever's already
-  there.
-- **`iterate`** — loads the deck file and hill-climbs on it deterministically: each round
+- **`random`** — two-phase search. Generates `-decks` random decks and evaluates each shallowly
+  (`-shallow-shuffles` shuffles); takes the top `-top-n` and re-evaluates them with more shuffles
+  (`-deep-shuffles`). Writes the winner to the deck file if it beats whatever's already there.
+- **`iterate`** — hill-climbs deterministically on the deck at `-deck`, or on a fresh random
+  deck if the file doesn't exist yet (so you don't need to run `random` first). Each round
   enumerates every single-slot mutation (every alternative weapon loadout + every (card-in-deck,
   card-out-of-deck) swap), adopts the first one that scores higher, and restarts. When a full
   round finishes without finding an improvement, the deck is at a local maximum and `iterate`
-  exits. Press Enter to abort mid-round. If the deck file doesn't exist yet, `iterate` bootstraps
-  with a single random deck and climbs from there — you don't have to run `random` first.
+  exits. Press Enter to abort mid-round.
 - **`eval`** — loads the deck file, simulates it for `-deep-shuffles` hands against `-incoming`
   damage, and prints the resulting stats. Does **not** overwrite the file — use this to re-score a
   saved deck at a new shuffle depth or opponent pressure without clobbering whatever's on disk.
@@ -65,16 +65,16 @@ All modes read and write `mydecks/<deck>.json` where `<deck>` comes from `-deck`
 - **`import`** — interactively imports a deck from fabrary.net. Prompts for a deck name, then
   asks you to paste the plain-text export; input ends automatically at fabrary's
   `See the full deck @ …` footer. Saves the result as `mydecks/<name>.json`. The `-deck` flag is
-  ignored in this mode — the name always comes from the prompt. Cards the optimizer hasn't
-  implemented yet are skipped with a warning rather than blocking the import.
+  ignored — the name always comes from the prompt. Cards the optimizer hasn't implemented yet are
+  skipped with a warning rather than blocking the import.
 
 ### Suggested workflow
 
 Start with a wide random search to seed `mydecks/best_deck.json`, then hill-climb from there:
 
 ```
-go run ./cmd/fabsim -mode=random  -decks=10000 -shallow-shuffles=10 -top-n=100 -deep-shuffles=1000
-go run ./cmd/fabsim -mode=iterate -deep-shuffles=1000
+go run ./cmd/fabsim random  -decks=10000 -shallow-shuffles=10 -top-n=100 -deep-shuffles=1000
+go run ./cmd/fabsim iterate -deep-shuffles=1000
 ```
 
 `random` explores the space; `iterate` refines the best find. Re-run either stage as often as you
@@ -82,7 +82,6 @@ like — each run only overwrites `mydecks/best_deck.json` if it finds something
 
 ### Flags
 
-- `-mode` — `random`, `iterate`, `eval`, `print`, or `import` (default `random`)
 - `-decks` — number of random decks to generate in phase 1 of `random` (default 10000)
 - `-shallow-shuffles` — shuffles per deck in phase 1 wide search (default 10)
 - `-top-n` — number of phase-1 decks to advance to phase 2 (default 100)
