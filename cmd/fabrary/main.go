@@ -18,6 +18,8 @@ package main
 
 import (
 	"bufio"
+	"bytes"
+	"errors"
 	"flag"
 	"fmt"
 	"io"
@@ -126,9 +128,9 @@ func readImport(inPath string, needDeckName bool) ([]byte, string, error) {
 		return data, name, nil
 	}
 
-	// Pasted workflow: name first (one line), paste second (rest of stdin). A single bufio.Reader
-	// owns stdin for both reads so any bytes the line scanner buffers past the newline flow into
-	// the io.ReadAll below instead of being dropped.
+	// Pasted workflow: name first (one line), paste second (until fabrary footer or EOF). A single
+	// bufio.Reader owns stdin for both reads so any bytes buffered past the newline flow into the
+	// paste reader instead of being dropped.
 	reader := bufio.NewReader(os.Stdin)
 	var name string
 	if needDeckName {
@@ -144,11 +146,34 @@ func readImport(inPath string, needDeckName bool) ([]byte, string, error) {
 	if isTerminal(os.Stdin) {
 		promptPaste()
 	}
-	data, err := io.ReadAll(reader)
+	data, err := readUntilFabraryFooter(reader)
 	if err != nil {
 		return nil, "", fmt.Errorf("read stdin: %w", err)
 	}
 	return data, name, nil
+}
+
+// fabraryFooterPrefix is the last line of every fabrary plain-text export. Seeing it means the
+// user is done pasting — we stop reading so they don't have to send EOF by hand (Ctrl-Z on
+// Windows is especially awkward). EOF is still honored for pastes that have been edited to strip
+// the footer.
+const fabraryFooterPrefix = "See the full deck"
+
+func readUntilFabraryFooter(r *bufio.Reader) ([]byte, error) {
+	var buf bytes.Buffer
+	for {
+		line, err := r.ReadString('\n')
+		buf.WriteString(line)
+		if strings.HasPrefix(strings.TrimSpace(line), fabraryFooterPrefix) {
+			return buf.Bytes(), nil
+		}
+		if err != nil {
+			if errors.Is(err, io.EOF) {
+				return buf.Bytes(), nil
+			}
+			return nil, err
+		}
+	}
 }
 
 // readAllFrom reads from a file path, stdin, or "-"-stdin. Shared by export mode where there's no
@@ -164,7 +189,7 @@ func readAllFrom(path, what string) ([]byte, error) {
 }
 
 func promptPaste() {
-	fmt.Fprintln(os.Stderr, "Paste fabrary deck text and press Enter. End with Ctrl-Z then Enter (Windows) or Ctrl-D (macOS/Linux):")
+	fmt.Fprintln(os.Stderr, "Paste fabrary deck text below — input ends automatically at the 'See the full deck @ …' footer:")
 }
 
 func promptLine(f *os.File, prompt string) (string, error) {
