@@ -232,10 +232,10 @@ func printBestDeck(d *deck.Deck) {
 	}
 }
 
-// printPerCardStats renders the per-card averages collected by deck.Evaluate: average hand value
-// in the hands where the card was played (attack or defense), sorted highest first. Pitch-only
-// appearances are surfaced separately at the bottom so "never played" cards don't pollute the
-// ranking but aren't invisible either.
+// printPerCardStats renders the per-card averages collected by deck.Evaluate: mean hand value
+// across every hand the card appeared in (whether played or pitched), sorted highest first.
+// Value is the hand's total score — damage dealt plus damage prevented by blocks — so defense
+// contributions already feed in.
 func printPerCardStats(d *deck.Deck) {
 	type row struct {
 		name           string
@@ -247,43 +247,32 @@ func printPerCardStats(d *deck.Deck) {
 	for _, c := range d.Cards {
 		deckCounts[c.ID()]++
 	}
-	var played, pitchedOnly []row
+	rows := make([]row, 0, len(d.Stats.PerCard))
 	for id, s := range d.Stats.PerCard {
-		r := row{
+		rows = append(rows, row{
 			name:      cards.Get(id).Name(),
 			deckCount: deckCounts[id],
 			plays:     s.Plays,
 			pitches:   s.Pitches,
-			avg:       s.AvgPlayed(),
-		}
-		if s.Plays > 0 {
-			played = append(played, r)
-		} else if s.Pitches > 0 {
-			pitchedOnly = append(pitchedOnly, r)
-		}
+			avg:       s.Avg(),
+		})
 	}
-	sort.Slice(played, func(i, j int) bool {
-		if played[i].avg != played[j].avg {
-			return played[i].avg > played[j].avg
+	sort.Slice(rows, func(i, j int) bool {
+		if rows[i].avg != rows[j].avg {
+			return rows[i].avg > rows[j].avg
 		}
-		if played[i].plays != played[j].plays {
-			return played[i].plays > played[j].plays
+		ni, nj := rows[i].plays+rows[i].pitches, rows[j].plays+rows[j].pitches
+		if ni != nj {
+			return ni > nj
 		}
-		return played[i].name < played[j].name
+		return rows[i].name < rows[j].name
 	})
-	sort.Slice(pitchedOnly, func(i, j int) bool { return pitchedOnly[i].name < pitchedOnly[j].name })
 
 	fmt.Println()
-	fmt.Println("Card value (avg hand value when played):")
-	for _, r := range played {
-		fmt.Printf("  %-35s avg %6.3f over %4d plays (%4d pitches, %dx in deck)\n",
-			r.name, r.avg, r.plays, r.pitches, r.deckCount)
-	}
-	if len(pitchedOnly) > 0 {
-		fmt.Println("  --- pitched-only (never played) ---")
-		for _, r := range pitchedOnly {
-			fmt.Printf("  %-35s %4d pitches, %dx in deck\n", r.name, r.pitches, r.deckCount)
-		}
+	fmt.Println("Card value (avg hand value when card appeared, played or pitched):")
+	for _, r := range rows {
+		fmt.Printf("  %-35s avg %6.3f over %4d hands (%4d plays, %4d pitches, %dx in deck)\n",
+			r.name, r.avg, r.plays+r.pitches, r.plays, r.pitches, r.deckCount)
 	}
 }
 

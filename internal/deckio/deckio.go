@@ -50,15 +50,15 @@ type StatsJSON struct {
 	PerCard     []CardPlayStatsJSON    `json:"per_card,omitempty"`
 }
 
-// CardPlayStatsJSON is the JSON form of deck.CardPlayStats keyed by card name. AvgPlayed is
-// included even though it's derivable from the other fields — it's what a human reader actually
-// wants when skimming the file.
+// CardPlayStatsJSON is the JSON form of deck.CardPlayStats keyed by card name. Avg is included
+// even though it's derivable from the other fields — it's what a human reader actually wants
+// when skimming the file.
 type CardPlayStatsJSON struct {
 	Card       string  `json:"card"`
 	Plays      int     `json:"plays"`
 	Pitches    int     `json:"pitches"`
 	TotalValue float64 `json:"total_value"`
-	AvgPlayed  float64 `json:"avg_played"`
+	Avg        float64 `json:"avg"`
 }
 
 // BestHandJSON is the JSON form of deck.BestHand: card names and role names instead of interface
@@ -127,9 +127,9 @@ func statsToJSON(s deck.Stats) StatsJSON {
 	}
 }
 
-// perCardToJSON flattens the card.ID-keyed map into a slice sorted by AvgPlayed descending,
-// Plays descending, then card name — so the JSON output is stable and the best-performing cards
-// surface at the top.
+// perCardToJSON flattens the card.ID-keyed map into a slice sorted by Avg descending, total
+// appearances descending, then card name — so the JSON output is stable and the best-performing
+// cards surface at the top.
 func perCardToJSON(m map[card.ID]deck.CardPlayStats) []CardPlayStatsJSON {
 	if len(m) == 0 {
 		return nil
@@ -141,15 +141,16 @@ func perCardToJSON(m map[card.ID]deck.CardPlayStats) []CardPlayStatsJSON {
 			Plays:      s.Plays,
 			Pitches:    s.Pitches,
 			TotalValue: s.TotalValue,
-			AvgPlayed:  s.AvgPlayed(),
+			Avg:        s.Avg(),
 		})
 	}
 	sort.Slice(out, func(i, j int) bool {
-		if out[i].AvgPlayed != out[j].AvgPlayed {
-			return out[i].AvgPlayed > out[j].AvgPlayed
+		if out[i].Avg != out[j].Avg {
+			return out[i].Avg > out[j].Avg
 		}
-		if out[i].Plays != out[j].Plays {
-			return out[i].Plays > out[j].Plays
+		ni, nj := out[i].Plays+out[i].Pitches, out[j].Plays+out[j].Pitches
+		if ni != nj {
+			return ni > nj
 		}
 		return out[i].Card < out[j].Card
 	})

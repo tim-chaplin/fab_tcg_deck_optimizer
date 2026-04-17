@@ -245,27 +245,27 @@ type BestHand struct {
 
 // CardPlayStats captures how a single card contributed to the decks it appeared in. Plays counts
 // hands where the card was played as an attack or defense; Pitches counts hands where it was
-// spent for resources; TotalValue sums the parent hand's overall value across the Plays hands
-// only (pitched hands are tracked but not scored, since the card itself wasn't the thing doing
-// the damaging).
+// spent for resources; TotalValue sums the parent hand's overall Value (damage dealt plus damage
+// prevented) across every hand the card appeared in, regardless of role — pitching matters too
+// because the resource enables everything else.
 //
-// AvgPlayed is an approximation — the hand value lumps together contributions from every card in
-// the hand. A card that enables big plays by pitching will look low here even if it's pulling its
-// weight. Useful as a directional signal over many runs, not as a precise contribution score.
+// Avg is an approximation: the hand value lumps together contributions from every card in the
+// hand. A card will look good if it tends to appear in strong hands whether by attacking,
+// blocking, or pitching. Useful as a directional signal over many runs, not a precise MVP score.
 type CardPlayStats struct {
 	Plays      int
 	Pitches    int
 	TotalValue float64
 }
 
-// AvgPlayed returns mean hand value across the hands where this card was played (non-pitch).
-// Returns 0 when the card was never played, so a card that only ever gets pitched reports 0 —
-// consult Plays/Pitches to tell "never played" from "played badly".
-func (c CardPlayStats) AvgPlayed() float64 {
-	if c.Plays == 0 {
+// Avg returns mean hand value across every hand where this card appeared (Plays + Pitches).
+// Returns 0 when the card was never seen.
+func (c CardPlayStats) Avg() float64 {
+	n := c.Plays + c.Pitches
+	if n == 0 {
 		return 0
 	}
-	return c.TotalValue / float64(c.Plays)
+	return c.TotalValue / float64(n)
 }
 
 // CycleStats tracks total value and hand count for a single deck cycle.
@@ -373,8 +373,9 @@ func (d *Deck) Evaluate(runs int, incomingDamage int, rng *rand.Rand) Stats {
 				d.Stats.SecondCycle.Total += v
 			}
 
-			// Attribute this hand's outcome to each card in it. Roles align with the (now sorted)
-			// hand, so iterating h and play.Roles by index is correct. Runs once per hand — the
+			// Attribute this hand's outcome to each card in it, regardless of role — pitched cards
+			// enabled the plays, so they share the credit. Roles align with the (now sorted) hand,
+			// so iterating h and play.Roles by index is correct. Runs once per hand; the
 			// permutation search inside hand.Best doesn't touch this map.
 			if d.Stats.PerCard == nil {
 				d.Stats.PerCard = map[card.ID]CardPlayStats{}
@@ -385,8 +386,8 @@ func (d *Deck) Evaluate(runs int, incomingDamage int, rng *rand.Rand) Stats {
 					stat.Pitches++
 				} else {
 					stat.Plays++
-					stat.TotalValue += v
 				}
+				stat.TotalValue += v
 				d.Stats.PerCard[c.ID()] = stat
 			}
 

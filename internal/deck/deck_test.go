@@ -125,10 +125,10 @@ func TestAllMutations_NoDuplicateOfSource(t *testing.T) {
 	}
 }
 
-// TestEvaluate_PerCardStatsPopulated pins per-card attribution: every card in the deck shows up
-// in Stats.PerCard after Evaluate, and Plays+Pitches equals the count of hand appearances. With
-// a 4-card deck of a single printing, one run produces one hand — so the total is 4 on that
-// single ID, and TotalValue is nonzero when the card was played (not just pitched).
+// TestEvaluate_PerCardStatsPopulated pins per-card attribution: every card appearance (played or
+// pitched) contributes to Plays+Pitches, TotalValue sums the parent hand value across all
+// appearances, and Avg equals TotalValue / (Plays + Pitches). A 4-card single-printing deck
+// makes one hand per run, so the totals are easy to assert against play.Value directly.
 func TestEvaluate_PerCardStatsPopulated(t *testing.T) {
 	read := cards.Get(card.ReadTheRunesRed)
 	d := New(hero.Viserai{}, nil, []card.Card{read, read, read, read})
@@ -141,11 +141,20 @@ func TestEvaluate_PerCardStatsPopulated(t *testing.T) {
 	if !ok {
 		t.Fatalf("PerCard missing entry for Read the Runes (Red)")
 	}
-	if got := stat.Plays + stat.Pitches; got != 4 {
-		t.Errorf("Plays+Pitches = %d, want 4 (one 4-card hand of the same card)", got)
+	appearances := stat.Plays + stat.Pitches
+	if appearances != 4 {
+		t.Errorf("Plays+Pitches = %d, want 4 (one 4-card hand of the same card)", appearances)
 	}
-	if stat.Plays > 0 && stat.TotalValue == 0 {
-		t.Errorf("Plays=%d but TotalValue=0 — non-zero plays should accumulate value", stat.Plays)
+	// The hand's total value got credited to every one of its cards, so TotalValue should equal
+	// handValue * 4. hand.Best returned d.Stats.Best.Play.Value — reuse it as the source of truth
+	// instead of re-simulating.
+	want := float64(d.Stats.Best.Play.Value) * float64(appearances)
+	if stat.TotalValue != want {
+		t.Errorf("TotalValue = %v, want %v (= Play.Value * appearances)", stat.TotalValue, want)
+	}
+	if got := stat.Avg(); got != float64(d.Stats.Best.Play.Value) {
+		t.Errorf("Avg() = %v, want %v (= Play.Value, since every card appeared in the same one hand)",
+			got, float64(d.Stats.Best.Play.Value))
 	}
 }
 
