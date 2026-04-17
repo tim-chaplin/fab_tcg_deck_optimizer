@@ -21,10 +21,9 @@ them as fully active.
 
 ### "If you've dealt arcane damage this turn"
 
-Consuming Volition now gates its discard rider on `state.Runechants > 0` at Play time (see
-PR #41). The same clause still fires unconditionally for:
+Consuming Volition and Arcanic Spike now gate their arcane-damage riders on `state.Runechants > 0`
+at Play time. The same clause still fires unconditionally for:
 
-- **Arcanic Spike** — +2{p} baked into Attack().
 - **Meat and Greet** — conditional Go again treated as printed.
 - **Sigil of Suffering** — +1{d} on defense reactions treated as always active.
 
@@ -63,9 +62,6 @@ available as a one-line condition; the fix is a single Play function plus a mirr
 pattern to follow is the Consuming Volition fix (PR #41) for the arcane-damage items, and the
 Hit the High Notes / Shrill of Skullform pattern for the aura one.
 
-- **Arcanic Spike** (`internal/card/runeblade/arcanic_spike.go`) — +2{p} rider for "dealt arcane
-  damage this turn" is baked into Attack(). Gate on `state.Runechants > 0` at Play time; return
-  the un-bonused attack otherwise.
 - **Meat and Greet** (`internal/card/runeblade/meat_and_greet.go`) — "dealt arcane damage" Go
   again clause is assumed always-true. Gate the Go again on `state.Runechants > 0` via
   `PlayedCard.GrantedGoAgain`.
