@@ -16,10 +16,11 @@ func TestAllMutations_CountsAndShape(t *testing.T) {
 	b := cards.Get(card.ArcanicSpikeRed)
 	d := New(hero.Viserai{}, []weapon.Weapon{weapon.NebulaBlade{}}, []card.Card{a, a, b, b})
 
-	muts := AllMutations(d)
+	muts := AllMutations(d, 2)
 
-	// Weapon mutations: every loadout except NebulaBlade. Card mutations: 2 unique in deck ×
-	// (pool size − 2 in-deck) replacements.
+	// Weapon mutations: every loadout except the current one. Card mutations at maxCopies=2:
+	// for each of the 2 unique removals, every pool entry except self (no-op) and the other
+	// in-deck card (already at cap) is a valid add — so 2 × (pool - 2).
 	loadouts := weaponLoadouts(cards.AllWeapons)
 	pool := cards.Deckable()
 	wantWeaponMuts := len(loadouts) - 1
@@ -43,13 +44,55 @@ func TestAllMutations_CountsAndShape(t *testing.T) {
 	}
 }
 
+// TestAllMutations_OddCountsAllowed exercises the single-card-swap semantics: a mutation may leave
+// the deck with an odd number of any given printing (e.g. 1×A + 3×B at maxCopies=3), and raising
+// maxCopies should open up adds to cards already in the deck that are below the cap.
+func TestAllMutations_OddCountsAllowed(t *testing.T) {
+	a := cards.Get(card.AetherSlashRed)
+	b := cards.Get(card.ArcanicSpikeRed)
+	d := New(hero.Viserai{}, []weapon.Weapon{weapon.NebulaBlade{}}, []card.Card{a, a, b, b})
+
+	// At maxCopies=3, each of the 2 in-deck cards (a, b) is below the cap, so "remove a, add b"
+	// (and the mirror) become legal. That's 2 more card mutations than the maxCopies=2 case.
+	mutsLow := AllMutations(d, 2)
+	mutsHigh := AllMutations(d, 3)
+	if len(mutsHigh)-len(mutsLow) != 2 {
+		t.Errorf("maxCopies=3 should produce exactly 2 more mutations than maxCopies=2; got diff=%d",
+			len(mutsHigh)-len(mutsLow))
+	}
+
+	// Every mutation at maxCopies=3 still has exactly 4 cards; some should have an odd count of
+	// one card (that's the whole point — no longer forced to keep pairs).
+	sawOdd := false
+	for _, m := range mutsHigh {
+		if len(m.Deck.Cards) != 4 {
+			t.Errorf("card count %d, want 4", len(m.Deck.Cards))
+		}
+		counts := map[card.ID]int{}
+		for _, c := range m.Deck.Cards {
+			counts[c.ID()]++
+		}
+		for _, n := range counts {
+			if n%2 == 1 {
+				sawOdd = true
+			}
+			if n > 3 {
+				t.Errorf("card count %d exceeds maxCopies=3: %v", n, m.Description)
+			}
+		}
+	}
+	if !sawOdd {
+		t.Errorf("expected at least one mutation with an odd-count card; single-card swaps always produce odd counts from a 2/2 starting deck")
+	}
+}
+
 func TestAllMutations_Deterministic(t *testing.T) {
 	a := cards.Get(card.AetherSlashRed)
 	b := cards.Get(card.ArcanicSpikeRed)
 	d := New(hero.Viserai{}, []weapon.Weapon{weapon.NebulaBlade{}}, []card.Card{a, a, b, b})
 
-	first := AllMutations(d)
-	second := AllMutations(d)
+	first := AllMutations(d, 2)
+	second := AllMutations(d, 2)
 
 	if len(first) != len(second) {
 		t.Fatalf("mutation counts differ between calls: %d vs %d", len(first), len(second))
@@ -75,7 +118,7 @@ func TestAllMutations_NoDuplicateOfSource(t *testing.T) {
 	a := cards.Get(card.AetherSlashRed)
 	d := New(hero.Viserai{}, []weapon.Weapon{weapon.NebulaBlade{}}, []card.Card{a, a, a, a})
 	srcKey := deckFingerprint(d)
-	for i, m := range AllMutations(d) {
+	for i, m := range AllMutations(d, 2) {
 		if deckFingerprint(m.Deck) == srcKey {
 			t.Errorf("mutation %d equals the source deck", i)
 		}
