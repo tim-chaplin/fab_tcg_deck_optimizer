@@ -245,18 +245,21 @@ type BestHand struct {
 
 // CardPlayStats captures how a single card contributed to the decks it appeared in. Plays counts
 // hands where it was played as an attack or defense; Pitches counts hands where it was spent for
-// resources. TotalContribution sums a per-role estimate of what the card did on each appearance:
+// resources. TotalContribution sums a per-role accounting of what the card did on each
+// appearance, filled in by hand.Best's tracked replay of the winning line:
 //
-//   - Pitch   → Card.Pitch()   (1/2/3 resource value, treated as damage-equivalent per convention)
-//   - Attack  → Card.Attack()  (printed base power; conditional riders aren't attributed here)
-//   - Defend  → the card's proportional share of min(sum_defense, incomingDamage)
+//   - Pitch   → Card.Pitch() (1/2/3 resource value, treated as damage-equivalent per convention).
+//   - Attack  → Card.Play() return plus the hero's OnCardPlayed trigger chained off it, captured
+//     at the moment the card resolved in the winning attacker permutation — so conditional
+//     riders, Runechant creations, and all other Play-time damage are attributed to the card
+//     that actually did them.
+//   - Defend  → the card's proportional share of min(sum_defense, incomingDamage), plus the
+//     card's own Play return if it's a defense reaction.
 //
 // So the metric is "how much value does this card usually contribute, itself, to its hand" — as
-// opposed to the hand's total value lumping every card together. It's still an approximation:
-// riders like Sigil effects or Runechant-gated bonuses land in the hand's overall Value via the
-// solver but aren't split back to the specific card here, and defense-reaction Play damage is
-// lumped into hand Value without per-card attribution. Useful as a directional per-card signal,
-// not a precise MVP score.
+// opposed to the hand's total value lumping every card together. Useful as a directional
+// per-card signal; the Defense share is proportional rather than causal, so a defender that
+// soaks all the block will look equal to a weaker one padding the same partition.
 type CardPlayStats struct {
 	Plays             int
 	Pitches           int
