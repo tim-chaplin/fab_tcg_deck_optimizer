@@ -2,6 +2,7 @@ package deck
 
 import (
 	"math/rand"
+	"strings"
 	"testing"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
@@ -88,40 +89,42 @@ func TestAllMutations_OddCountsAllowed(t *testing.T) {
 
 // TestAllMutations_OrdersByAscendingAvg pins the iterate-friendly ordering: the removed card in
 // the first card-mutation batch should be the one with the lowest per-card Avg in the current
-// deck's stats. This lets iterate try swaps involving weak cards before strong ones.
+// deck's stats. Run with both (lower-ID is low-avg) and (higher-ID is low-avg) so the test fails
+// if the implementation accidentally sorts only by card.ID and gets a free pass from whichever
+// direction happens to align.
 func TestAllMutations_OrdersByAscendingAvg(t *testing.T) {
-	low := cards.Get(card.AetherSlashRed)
-	high := cards.Get(card.ArcanicSpikeRed)
-	d := New(hero.Viserai{}, []weapon.Weapon{weapon.NebulaBlade{}}, []card.Card{low, low, high, high})
-	// Stub PerCard so `low` has a worse avg than `high`. Both get the same Plays / Pitches so
-	// only Avg (= TotalContribution / (Plays+Pitches)) drives the ordering.
-	d.Stats.PerCard = map[card.ID]CardPlayStats{
-		low.ID():  {Plays: 10, TotalContribution: 10}, // Avg 1.0
-		high.ID(): {Plays: 10, TotalContribution: 80}, // Avg 8.0
-	}
+	a := cards.Get(card.AetherSlashRed)   // lower card.ID
+	b := cards.Get(card.ArcanicSpikeRed)  // higher card.ID
 
-	muts := AllMutations(d, 2)
-	// Skip the weapon-mutation block; the first card-swap mutation should remove `low`.
-	loadouts := weaponLoadouts(cards.AllWeapons)
-	firstCardMut := muts[len(loadouts)-1]
-	if firstCardMut.Description == "" {
-		t.Fatalf("expected a card mutation after %d weapon mutations; got %q",
-			len(loadouts)-1, firstCardMut.Description)
+	cases := []struct {
+		name             string
+		lowAvgCard       card.Card
+		highAvgCard      card.Card
+	}{
+		{"low-avg card has lower ID", a, b},
+		{"low-avg card has higher ID", b, a},
 	}
-	if got, want := firstCardMut.Description[:5], "-1 "+low.Name()[:2]; got != want {
-		// Exact description: "-1 Aether Slash (Red), +1 <something>"
-		// Check the remove-target prefix, not the full string.
-		if !containsPrefix(firstCardMut.Description, "-1 "+low.Name()+",") {
-			t.Errorf("first card mutation removes wrong card: %q (expected to remove %q)",
-				firstCardMut.Description, low.Name())
-		}
-	}
-}
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			d := New(hero.Viserai{}, []weapon.Weapon{weapon.NebulaBlade{}},
+				[]card.Card{a, a, b, b})
+			// Both cards see the same Plays so only Avg (= TotalContribution / Plays) drives the
+			// ordering — no path for card.ID to sneak in via a sub-ordering rule.
+			d.Stats.PerCard = map[card.ID]CardPlayStats{
+				tc.lowAvgCard.ID():  {Plays: 10, TotalContribution: 10},   // Avg 1.0
+				tc.highAvgCard.ID(): {Plays: 10, TotalContribution: 80},  // Avg 8.0
+			}
 
-// containsPrefix is a tiny helper so the test doesn't pull strings.HasPrefix into scope for
-// just one check.
-func containsPrefix(s, prefix string) bool {
-	return len(s) >= len(prefix) && s[:len(prefix)] == prefix
+			muts := AllMutations(d, 2)
+			// Skip the weapon-mutation block (len(loadouts)-1 entries, one per alternative loadout).
+			firstCardMut := muts[len(weaponLoadouts(cards.AllWeapons))-1]
+			wantPrefix := "-1 " + tc.lowAvgCard.Name() + ","
+			if !strings.HasPrefix(firstCardMut.Description, wantPrefix) {
+				t.Errorf("first card mutation removed wrong card\n  got:  %q\n  want prefix: %q",
+					firstCardMut.Description, wantPrefix)
+			}
+		})
+	}
 }
 
 func TestAllMutations_Deterministic(t *testing.T) {
