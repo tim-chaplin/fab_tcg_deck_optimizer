@@ -21,18 +21,19 @@ them as fully active.
 
 ### "If you've dealt arcane damage this turn"
 
-Consuming Volition and Arcanic Spike now gate their arcane-damage riders on `state.Runechants > 0`
-at Play time. The same clause still fires unconditionally for:
+Consuming Volition, Arcanic Spike, and Meat and Greet now gate their arcane-damage riders on
+`state.Runechants > 0` at Play time. The same clause still fires unconditionally for:
 
-- **Meat and Greet** — conditional Go again treated as printed.
 - **Sigil of Suffering** — +1{d} on defense reactions treated as always active.
 
 ### Aura / graveyard state
 
 - **Aura presence in graveyard is assumed.** Sigil of Silphidae, Weeping Battleground, and Runic
   Fellingsong (partly) assume there's always an aura available to banish.
-- **"Played or created an aura this turn" is assumed true.** Reek of Corruption always gets its
-  discard rider.
+- **"Played or created an aura this turn" is assumed true** for cards that don't yet use the
+  live `AuraCreated` / `HasPlayedType(TypeAura)` check. Reek of Corruption, Hit the High Notes,
+  and Shrill of Skullform all gate this correctly; nothing else on the roster currently reads the
+  clause.
 - **Cross-turn aura lifecycles are collapsed.** Blessing of Occult, Sigil of Deadwood, and Sigil
   of the Arknight credit their benefits immediately (via DelayRunechants or flat damage) rather
   than modelling the full enter/leave sequence across turns.
@@ -62,11 +63,8 @@ available as a one-line condition; the fix is a single Play function plus a mirr
 pattern to follow is the Consuming Volition fix (PR #41) for the arcane-damage items, and the
 Hit the High Notes / Shrill of Skullform pattern for the aura one.
 
-- **Meat and Greet** (`internal/card/runeblade/meat_and_greet.go`) — "dealt arcane damage" Go
-  again clause is assumed always-true. Gate the Go again on `state.Runechants > 0` via
-  `PlayedCard.GrantedGoAgain`.
 - **Sigil of Suffering** (`internal/card/runeblade/sigil_of_suffering.go`) — +1{d} buff on
-  defense reactions is assumed always-true. Gate on `state.Runechants > 0` at Play time.
-- **Reek of Corruption** (`internal/card/runeblade/reek_of_corruption.go`) — "played or created
-  an aura this turn" is assumed always-true. Use `s.AuraCreated || s.HasPlayedType(card.TypeAura)`,
-  matching Hit the High Notes / Shrill of Skullform.
+  defense reactions is assumed always-true. Unlike the +{p} / on-hit riders, this one gates on
+  `Defense()` which is consumed by the solver's partition scoring before `Play()` runs. Dropping
+  the assumption needs a new `ConditionalDefense(state)` hook (or equivalent) so the block
+  capacity can react to `state.Runechants > 0`.
