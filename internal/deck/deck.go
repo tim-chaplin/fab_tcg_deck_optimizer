@@ -227,6 +227,10 @@ type Stats struct {
 	// Hand is in canonical (post-sort) order aligned with Play.Roles. Zero-valued if no hands have
 	// been evaluated.
 	Best BestHand
+	// PerCard attributes hand-level outcomes back to the cards that appeared in those hands. The
+	// map is populated once per hand (after hand.Best picks the winning play), not per permutation
+	// — attribution cost is negligible compared to the underlying search.
+	PerCard map[card.ID]CardPlayStats
 }
 
 // BestHand records a single hand and its optimal play — used to surface the peak draw a deck saw
@@ -237,6 +241,31 @@ type BestHand struct {
 	// StartingRunechants is the Runechant count carried in from the previous turn when this hand
 	// was played. Only meaningful for Runeblade heroes.
 	StartingRunechants int
+}
+
+// CardPlayStats captures how a single card contributed to the decks it appeared in. Plays counts
+// hands where the card was played as an attack or defense; Pitches counts hands where it was
+// spent for resources; TotalValue sums the parent hand's overall value across the Plays hands
+// only (pitched hands are tracked but not scored, since the card itself wasn't the thing doing
+// the damaging).
+//
+// AvgPlayed is an approximation — the hand value lumps together contributions from every card in
+// the hand. A card that enables big plays by pitching will look low here even if it's pulling its
+// weight. Useful as a directional signal over many runs, not as a precise contribution score.
+type CardPlayStats struct {
+	Plays      int
+	Pitches    int
+	TotalValue float64
+}
+
+// AvgPlayed returns mean hand value across the hands where this card was played (non-pitch).
+// Returns 0 when the card was never played, so a card that only ever gets pitched reports 0 —
+// consult Plays/Pitches to tell "never played" from "played badly".
+func (c CardPlayStats) AvgPlayed() float64 {
+	if c.Plays == 0 {
+		return 0
+	}
+	return c.TotalValue / float64(c.Plays)
 }
 
 // CycleStats tracks total value and hand count for a single deck cycle.
@@ -342,6 +371,23 @@ func (d *Deck) Evaluate(runs int, incomingDamage int, rng *rand.Rand) Stats {
 			case 1:
 				d.Stats.SecondCycle.Hands++
 				d.Stats.SecondCycle.Total += v
+			}
+
+			// Attribute this hand's outcome to each card in it. Roles align with the (now sorted)
+			// hand, so iterating h and play.Roles by index is correct. Runs once per hand — the
+			// permutation search inside hand.Best doesn't touch this map.
+			if d.Stats.PerCard == nil {
+				d.Stats.PerCard = map[card.ID]CardPlayStats{}
+			}
+			for i, c := range h {
+				stat := d.Stats.PerCard[c.ID()]
+				if play.Roles[i] == hand.Pitch {
+					stat.Pitches++
+				} else {
+					stat.Plays++
+					stat.TotalValue += v
+				}
+				d.Stats.PerCard[c.ID()] = stat
 			}
 
 			// Recycle: pitched cards go to the bottom of the remaining deck (buf[tail:]) in hand

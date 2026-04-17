@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/cards"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/deck"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/deckio"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/fabrary"
@@ -224,6 +225,65 @@ func printBestDeck(d *deck.Deck) {
 	sort.Strings(names)
 	for _, n := range names {
 		fmt.Printf("  %dx %s\n", counts[n], n)
+	}
+
+	if len(s.PerCard) > 0 {
+		printPerCardStats(d)
+	}
+}
+
+// printPerCardStats renders the per-card averages collected by deck.Evaluate: average hand value
+// in the hands where the card was played (attack or defense), sorted highest first. Pitch-only
+// appearances are surfaced separately at the bottom so "never played" cards don't pollute the
+// ranking but aren't invisible either.
+func printPerCardStats(d *deck.Deck) {
+	type row struct {
+		name           string
+		deckCount      int
+		plays, pitches int
+		avg            float64
+	}
+	deckCounts := map[card.ID]int{}
+	for _, c := range d.Cards {
+		deckCounts[c.ID()]++
+	}
+	var played, pitchedOnly []row
+	for id, s := range d.Stats.PerCard {
+		r := row{
+			name:      cards.Get(id).Name(),
+			deckCount: deckCounts[id],
+			plays:     s.Plays,
+			pitches:   s.Pitches,
+			avg:       s.AvgPlayed(),
+		}
+		if s.Plays > 0 {
+			played = append(played, r)
+		} else if s.Pitches > 0 {
+			pitchedOnly = append(pitchedOnly, r)
+		}
+	}
+	sort.Slice(played, func(i, j int) bool {
+		if played[i].avg != played[j].avg {
+			return played[i].avg > played[j].avg
+		}
+		if played[i].plays != played[j].plays {
+			return played[i].plays > played[j].plays
+		}
+		return played[i].name < played[j].name
+	})
+	sort.Slice(pitchedOnly, func(i, j int) bool { return pitchedOnly[i].name < pitchedOnly[j].name })
+
+	fmt.Println()
+	fmt.Println("Card value (avg hand value when played):")
+	for _, r := range played {
+		fmt.Printf("  %-35s avg %6.3f over %4d plays (%4d pitches, %dx in deck)\n",
+			r.name, r.avg, r.plays, r.pitches, r.deckCount)
+	}
+	if len(pitchedOnly) > 0 {
+		fmt.Println("  --- pitched-only (never played) ---")
+		for _, r := range pitchedOnly {
+			fmt.Printf("  %-35s %4d pitches, %dx in deck\n", r.name, r.pitches, r.deckCount)
+		}
 	}
 }
 
