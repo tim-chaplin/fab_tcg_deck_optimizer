@@ -3,9 +3,11 @@
 // Text: "When Aether Slash attacks, if a 'non-attack' action card was pitched to play it, deal 1
 // arcane damage to any target."
 //
-// Simplification: the printed 1 arcane is added to base damage unconditionally. The rider's +1
-// arcane fires if any non-attack action card appears in Pitched (we don't track which pitched
-// card paid for which play, so any qualifier suffices). Both land as flat damage.
+// The CSV's printed "Arcane: 1" stat is the SAME damage as the text's "deal 1 arcane damage" —
+// the convention elsewhere in this codebase (Arcanic Crackle, Vexing Malice, etc.) is to add the
+// printed arcane to base damage exactly once, matching the text rider. Aether Slash's arcane is
+// conditional on a non-attack action being pitched; with no qualifying pitch the card deals only
+// its printed power, no arcane bonus.
 //
 // Source: github.com/the-fab-cube/flesh-and-blood-cards (card.csv).
 
@@ -52,14 +54,12 @@ func (AetherSlashBlue) GoAgain() bool                { return false }
 func (c AetherSlashBlue) Play(s *card.TurnState) int { return aetherSlashPlay(c.Attack(), s) }
 
 func aetherSlashPlay(base int, s *card.TurnState) int {
-	s.ArcaneDamageDealt = true
-	dmg := base + 1 // printed arcane
 	for _, p := range s.Pitched {
 		t := p.Types()
 		if t.Has(card.TypeAction) && !t.Has(card.TypeAttack) {
-			dmg++
-			break
+			s.ArcaneDamageDealt = true
+			return base + 1
 		}
 	}
-	return dmg
+	return base
 }
