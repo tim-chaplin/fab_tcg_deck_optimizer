@@ -27,12 +27,8 @@ import (
 // hero, format, and the -incoming value. Different opponent-pressure settings produce meaningfully
 // different optimal decks, and different formats open up different card pools — keying the
 // filename off all three keeps regimes in separate files and avoids accidentally hill-climbing
-// one regime's best deck under another regime's objective. Unrestricted format produces the
-// legacy hero_incoming name with no format segment.
+// one regime's best deck under another regime's objective.
 func defaultDeckNameFor(h hero.Hero, f fmtpkg.Format, incoming int) string {
-	if f == fmtpkg.Unrestricted {
-		return fmt.Sprintf("%s_%d_incoming", strings.ToLower(h.Name()), incoming)
-	}
 	return fmt.Sprintf("%s_%s_%d_incoming", strings.ToLower(h.Name()), f, incoming)
 }
 
@@ -52,7 +48,7 @@ func main() {
 	maxCopies := flag.Int("max-copies", 2, "maximum copies of any single card printing per deck")
 	seed := flag.Int64("seed", time.Now().UnixNano(), "RNG seed")
 	deckName := flag.String("deck", "", "deck name; resolved to mydecks/<name>.json (\".json\" suffix optional). Defaults to <hero>_<format>_<incoming>_incoming so different (hero, format, -incoming) regimes keep separate deck files. Ignored by the import subcommand, which always prompts interactively.")
-	formatFlag := flag.String("format", string(fmtpkg.SilverAge), "constructed format whose banlist restricts the card pool during search (\"silver_age\" — default, or \"\" to allow every implemented card)")
+	formatFlag := flag.String("format", string(fmtpkg.SilverAge), "constructed format whose banlist restricts the card pool during search (only \"silver_age\" is supported today)")
 	flag.Parse()
 	// Positional args after the subcommand are rejected — `fabsim eval mydeck` silently ignoring
 	// the deck name (rather than treating it as -deck mydeck) wasted a long run during testing.
@@ -167,12 +163,10 @@ type config struct {
 	format          fmtpkg.Format
 }
 
-// legalFilter returns the card-pool predicate for this run's format, or nil when the format is
-// Unrestricted. Passed to deck.Random and deck.AllMutations.
+// legalFilter returns the card-pool predicate for this run's format. Passed to deck.Random and
+// deck.AllMutations, which accept nil for "no filtering" — but fabsim always runs under a
+// format, so this always returns a non-nil predicate.
 func (c config) legalFilter() func(card.Card) bool {
-	if c.format == fmtpkg.Unrestricted {
-		return nil
-	}
 	return c.format.IsLegal
 }
 

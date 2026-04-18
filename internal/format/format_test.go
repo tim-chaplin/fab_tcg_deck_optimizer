@@ -16,10 +16,10 @@ func TestParse(t *testing.T) {
 		want    Format
 		wantErr bool
 	}{
-		{"", Unrestricted, false},
 		{"silver_age", SilverAge, false},
-		{"classic", "", true},
-		{"SilverAge", "", true}, // case-sensitive — we're comparing to the exact flag tokens
+		{"", "", true},          // empty string is not a format — every run must specify one
+		{"classic", "", true},   // unknown format name
+		{"SilverAge", "", true}, // case-sensitive — compared against exact flag tokens
 	}
 	for _, c := range cases {
 		got, err := Parse(c.in)
@@ -95,7 +95,7 @@ func normalizeName(s string) string {
 }
 
 // TestIsLegal uses two concrete cards: Plunder Run (Red) which implements NotSilverAgeLegal, and
-// Nimblism (Red) which doesn't. Unrestricted accepts both; Silver Age rejects the banned one.
+// Nimblism (Red) which doesn't. Silver Age rejects the banned one and accepts the other.
 func TestIsLegal(t *testing.T) {
 	banned := generic.PlunderRunRed{}
 	legal := generic.NimblismRed{}
@@ -114,8 +114,6 @@ func TestIsLegal(t *testing.T) {
 		c    card.Card
 		want bool
 	}{
-		{Unrestricted, banned, true},
-		{Unrestricted, legal, true},
 		{SilverAge, banned, false},
 		{SilverAge, legal, true},
 	}

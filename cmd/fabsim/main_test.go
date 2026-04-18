@@ -26,17 +26,14 @@ func TestFabraryPathFor(t *testing.T) {
 	}
 }
 
-// TestDefaultDeckNameFor pins the filename shape for each format. Unrestricted keeps the legacy
-// hero_incoming name (so old deck files stay compatible); Silver Age inserts the format between
-// hero and incoming so regimes don't clobber each other's saved decks.
+// TestDefaultDeckNameFor pins the filename shape: hero_format_incoming. Every run is scoped to
+// exactly one format, so the format segment is always present.
 func TestDefaultDeckNameFor(t *testing.T) {
 	cases := []struct {
 		f    fmtpkg.Format
 		in   int
 		want string
 	}{
-		{fmtpkg.Unrestricted, 0, "viserai_0_incoming"},
-		{fmtpkg.Unrestricted, 4, "viserai_4_incoming"},
 		{fmtpkg.SilverAge, 0, "viserai_silver_age_0_incoming"},
 		{fmtpkg.SilverAge, 4, "viserai_silver_age_4_incoming"},
 	}

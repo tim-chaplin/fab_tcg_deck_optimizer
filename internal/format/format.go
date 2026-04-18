@@ -10,14 +10,12 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 )
 
-// Format identifies a deck-construction format. The zero value (Unrestricted) skips all
-// legality filtering — every implemented card is deckable.
+// Format identifies a deck-construction format. Every fabsim run is scoped to exactly one
+// format — there's no "no format" mode, so Parse rejects the empty string and callers should
+// always pass one of the named constants.
 type Format string
 
 const (
-	// Unrestricted allows every implemented card. Intended for tests and for callers that want to
-	// explore the full card pool regardless of any format's banlist.
-	Unrestricted Format = ""
 	// SilverAge is the current live format as of 2026; see data_sources/silver_age_banlist.txt for
 	// the authoritative banned card list.
 	SilverAge Format = "silver_age"
@@ -27,20 +25,20 @@ const (
 // supported formats so the failure message is self-describing.
 func Parse(s string) (Format, error) {
 	switch Format(s) {
-	case Unrestricted, SilverAge:
+	case SilverAge:
 		return Format(s), nil
 	}
-	return "", fmt.Errorf("unknown format %q (supported: %q, %q)", s, Unrestricted, SilverAge)
+	return "", fmt.Errorf("unknown format %q (supported: %q)", s, SilverAge)
 }
 
-// IsLegal reports whether c may appear in a deck built for this format. Unrestricted always
-// returns true; Silver Age rejects cards tagged with the card.NotSilverAgeLegal marker.
+// IsLegal reports whether c may appear in a deck built for this format. Silver Age rejects
+// cards tagged with the card.NotSilverAgeLegal marker; other formats (when added) plug in here.
 func (f Format) IsLegal(c card.Card) bool {
 	switch f {
 	case SilverAge:
 		_, banned := c.(card.NotSilverAgeLegal)
 		return !banned
 	default:
-		return true
+		panic(fmt.Sprintf("format: IsLegal called on unknown Format %q", f))
 	}
 }

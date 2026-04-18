@@ -48,9 +48,8 @@ catalogue.
 
 All subcommands read and write `mydecks/<deck>.json` where `<deck>` comes from `-deck` (default
 `<hero>_<format>_<incoming>_incoming`, e.g. `viserai_silver_age_0_incoming`, so different (hero,
-format, `-incoming`) regimes keep separate deck files). With `-format=""` (unrestricted) the
-format segment is dropped and the name collapses to the legacy `<hero>_<incoming>_incoming`. The
-`.json` suffix on `-deck` is optional.
+format, `-incoming`) regimes keep separate deck files). The `.json` suffix on `-deck` is
+optional.
 
 - **`random`** — two-phase search. Generates `-decks` random decks and evaluates each shallowly
   (`-shallow-shuffles` shuffles); takes the top `-top-n` and re-evaluates them with more shuffles
@@ -102,8 +101,8 @@ you like — each run only overwrites the deck file if it finds something better
   `<hero>_<format>_<incoming>_incoming`, e.g. `viserai_silver_age_0_incoming`, keyed off the
   hero, format, and `-incoming`). The `mydecks/` directory is created automatically.
 - `-format` — constructed format whose banlist restricts the card pool during search. Defaults
-  to `silver_age`; pass `""` for unrestricted (every implemented card is eligible). The
-  authoritative Silver Age banlist lives at `data_sources/silver_age_banlist.txt`.
+  to `silver_age`, which is currently the only supported format. The authoritative Silver Age
+  banlist lives at `data_sources/silver_age_banlist.txt`.
 
 Helper tool for exploring the upstream card database:
 
