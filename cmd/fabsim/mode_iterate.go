@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"math/rand"
 	"os"
+	"sync/atomic"
 	"time"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/deck"
@@ -66,14 +67,29 @@ func runIterate(cfg config) {
 		// shallow workers, publishes each result on a per-mutation ready channel, and
 		// short-circuits as soon as the main-goroutine deep confirmation lands an improvement —
 		// so on a round where an early mutation wins we don't burn cycles screening the tail.
-		onShallowRejected := func(idx int, mut deck.Mutation, shallowAvg, deepAvg float64) {
-			fmt.Fprintf(os.Stderr, "\r[round %d] shallow %.3f at %d/%d (%s) not confirmed by deep %.3f        \n",
-				round, shallowAvg, idx+1, len(mutations), mut.Description, deepAvg)
-		}
+		// A ticker goroutine prints live "tested N/total" progress off the shared atomic so the
+		// user sees the worker pool moving even during long rounds; the ticker exits cleanly once
+		// IterateParallel returns.
+		var tested atomic.Int64
+		tickerDone := make(chan struct{})
+		go func() {
+			t := time.NewTicker(500 * time.Millisecond)
+			defer t.Stop()
+			for {
+				select {
+				case <-tickerDone:
+					return
+				case <-t.C:
+					fmt.Fprintf(os.Stderr, "\r[round %d] tested %d/%d (%s elapsed)        ",
+						round, tested.Load(), len(mutations), time.Since(start).Truncate(time.Second))
+				}
+			}
+		}()
 		d, avg, idx, found := deck.IterateParallel(
 			mutations, bestAvg, cfg.shallowShuffles, cfg.deepShuffles, cfg.incoming, 0,
-			rng.Int63(), rng, onShallowRejected,
+			rng.Int63(), rng, &tested,
 		)
+		close(tickerDone)
 
 		improved := false
 		select {

@@ -522,8 +522,9 @@ func (d *Deck) EvaluateWith(runs int, incomingDamage int, rng *rand.Rand, ev *ha
 // numWorkers: goroutines in the pool; 0 uses runtime.GOMAXPROCS(0).
 // seed: base seed for worker RNGs; worker w uses (seed + w) so runs are reproducible.
 // deepRng: rng used for the serial deep-confirm runs on the main goroutine.
-// onShallowPassFailedDeep: optional hook invoked when a shallow pass fails at deep depth (for
-// logging in iterate mode).
+// shallowCompleted: optional atomic counter incremented once per shallow eval the worker pool
+// finishes, so callers can render live "tested N/total" progress from a separate goroutine.
+// Nil to opt out of accounting.
 //
 // Returns (improvedDeck, improvedAvg, improvedIndex, true) on first confirmed improvement, or
 // (nil, bestAvg, -1, false) if no mutation's deep-confirmed improvement was found.
@@ -533,7 +534,7 @@ func IterateParallel(
 	shallowShuffles, deepShuffles, incoming, numWorkers int,
 	seed int64,
 	deepRng *rand.Rand,
-	onShallowPassFailedDeep func(idx int, mut Mutation, shallowAvg, deepAvg float64),
+	shallowCompleted *atomic.Int64,
 ) (*Deck, float64, int, bool) {
 	if numWorkers <= 0 {
 		numWorkers = runtime.GOMAXPROCS(0)
@@ -578,6 +579,9 @@ func IterateParallel(
 				d := New(mut.Deck.Hero, mut.Deck.Weapons, mut.Deck.Cards)
 				results[i] = d.EvaluateWith(shallowShuffles, incoming, rng, ev).Avg()
 				close(ready[i])
+				if shallowCompleted != nil {
+					shallowCompleted.Add(1)
+				}
 			}
 		}(w)
 	}
@@ -594,9 +598,6 @@ func IterateParallel(
 			cancelled.Store(true)
 			wg.Wait()
 			return d, deepAvg, i, true
-		}
-		if onShallowPassFailedDeep != nil {
-			onShallowPassFailedDeep(i, mut, results[i], deepAvg)
 		}
 	}
 	wg.Wait()
