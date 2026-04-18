@@ -74,18 +74,28 @@ func runIterate(cfg config) {
 			default:
 			}
 
-			d := deck.New(mut.Deck.Hero, mut.Deck.Weapons, mut.Deck.Cards)
-			stats := d.Evaluate(cfg.deepShuffles, cfg.incoming, rng)
-			avg := stats.Avg()
-			if avg > bestAvg {
-				improvements++
-				fmt.Fprintf(os.Stderr, "\r[round %d] improvement at %d/%d: %.3f → %.3f (%s), restarting        \n",
-					round, i+1, len(mutations), bestAvg, avg, mut.Description)
-				bestAvg = avg
-				best = d
-				_ = writeDeck(best, cfg.outPath)
-				improved = true
-				break
+			// Two-stage evaluation: most mutations are neutral or worse, so a cheap shallow screen
+			// filters them out. Only mutations that clear bestAvg on the shallow sample graduate to
+			// a fresh -deep-shuffles evaluation that decides adoption. bestAvg always reflects
+			// deep-shuffles depth (that's what we wrote to disk), so the apples-to-apples check
+			// happens against the deep re-eval, not the shallow screen.
+			screen := deck.New(mut.Deck.Hero, mut.Deck.Weapons, mut.Deck.Cards)
+			shallowAvg := screen.Evaluate(cfg.shallowShuffles, cfg.incoming, rng).Avg()
+			if shallowAvg > bestAvg {
+				d := deck.New(mut.Deck.Hero, mut.Deck.Weapons, mut.Deck.Cards)
+				avg := d.Evaluate(cfg.deepShuffles, cfg.incoming, rng).Avg()
+				if avg > bestAvg {
+					improvements++
+					fmt.Fprintf(os.Stderr, "\r[round %d] improvement at %d/%d: shallow %.3f → deep %.3f beats %.3f (%s), restarting        \n",
+						round, i+1, len(mutations), shallowAvg, avg, bestAvg, mut.Description)
+					bestAvg = avg
+					best = d
+					_ = writeDeck(best, cfg.outPath)
+					improved = true
+					break
+				}
+				fmt.Fprintf(os.Stderr, "\r[round %d] shallow %.3f at %d/%d (%s) not confirmed by deep %.3f        \n",
+					round, shallowAvg, i+1, len(mutations), mut.Description, avg)
 			}
 			if (i+1)%50 == 0 {
 				fmt.Fprintf(os.Stderr, "\r[round %d] %d/%d evaluated, best still %.3f (%s elapsed)        ",

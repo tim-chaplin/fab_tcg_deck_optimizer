@@ -55,9 +55,11 @@ All subcommands read and write `mydecks/<deck>.json` where `<deck>` comes from `
 - **`iterate`** — hill-climbs deterministically on the deck at `-deck`, or on a fresh random
   deck if the file doesn't exist yet (so you don't need to run `random` first). Each round
   enumerates every single-slot mutation (every alternative weapon loadout + every (card-in-deck,
-  card-out-of-deck) swap), adopts the first one that scores higher, and restarts. When a full
-  round finishes without finding an improvement, the deck is at a local maximum and `iterate`
-  exits. Press Enter to abort mid-round.
+  card-out-of-deck) swap). Mutations are screened at `-shallow-shuffles`; only those that beat
+  the current best on the shallow sample are re-evaluated at `-deep-shuffles` to confirm. The
+  first mutation that beats the baseline at deep depth is adopted and the round restarts. When a
+  full round finishes without finding a confirmed improvement, the deck is at a local maximum and
+  `iterate` exits. Press Enter to abort mid-round.
 - **`eval`** — loads the deck file, simulates it for `-deep-shuffles` hands against `-incoming`
   damage, and prints the resulting stats. Does **not** overwrite the file — use this to re-score a
   saved deck at a new shuffle depth or opponent pressure without clobbering whatever's on disk.
@@ -73,8 +75,8 @@ All subcommands read and write `mydecks/<deck>.json` where `<deck>` comes from `
 Start with a wide random search to seed `mydecks/best_deck.json`, then hill-climb from there:
 
 ```
-go run ./cmd/fabsim random  -decks=10000 -shallow-shuffles=10 -top-n=100 -deep-shuffles=1000
-go run ./cmd/fabsim iterate -deep-shuffles=1000
+go run ./cmd/fabsim random
+go run ./cmd/fabsim iterate
 ```
 
 `random` explores the space; `iterate` refines the best find. Re-run either stage as often as you
@@ -82,12 +84,13 @@ like — each run only overwrites `mydecks/best_deck.json` if it finds something
 
 ### Flags
 
-- `-decks` — number of random decks to generate in phase 1 of `random` (default 10000)
-- `-shallow-shuffles` — shuffles per deck in phase 1 wide search (default 10)
+- `-decks` — number of random decks to generate in phase 1 of `random` (default 1000)
+- `-shallow-shuffles` — shuffles per deck in `random` phase 1 and for screening `iterate`
+  mutations (default 100)
 - `-top-n` — number of phase-1 decks to advance to phase 2 (default 100)
-- `-deep-shuffles` — shuffles per deck in phase 2 deep eval (also used per mutation in `iterate`)
-  (default 1000)
-- `-incoming` — opponent damage per turn (default 4)
+- `-deep-shuffles` — shuffles per deck in `random` phase 2 and for confirming `iterate`
+  improvements (default 10000)
+- `-incoming` — opponent damage per turn (default 0)
 - `-deck-size` — cards per deck (default 40)
 - `-max-copies` — max copies of any single card printing (default 2)
 - `-seed` — RNG seed (default: time-based)

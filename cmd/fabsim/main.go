@@ -33,9 +33,9 @@ func main() {
 	}
 
 	numDecks := flag.Int("decks", 1000, "number of random decks to generate (phase 1)")
-	shallowShuffles := flag.Int("shallow-shuffles", 10, "shuffles per deck in phase 1 (wide search)")
+	shallowShuffles := flag.Int("shallow-shuffles", 100, "shuffles per deck in phase 1 (wide search); also used to screen iterate mutations before deep confirmation")
 	topN := flag.Int("top-n", 100, "number of top decks to advance to phase 2")
-	deepShuffles := flag.Int("deep-shuffles", 1000, "shuffles per deck in phase 2 (deep evaluation)")
+	deepShuffles := flag.Int("deep-shuffles", 10000, "shuffles per deck in phase 2 (deep evaluation); also used to confirm iterate improvements")
 	incoming := flag.Int("incoming", 0, "opponent damage per turn")
 	deckSize := flag.Int("deck-size", 40, "number of cards per deck")
 	maxCopies := flag.Int("max-copies", 2, "maximum copies of any single card printing per deck")
