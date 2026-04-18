@@ -178,7 +178,7 @@ func FormatBestTurn(t TurnSummary) string {
 	}
 
 	for _, a := range defensePitches {
-		appendCard(a, "PITCH (defense)")
+		appendCard(a, "PITCH (opponent's turn)")
 	}
 	for _, a := range plainBlocks {
 		appendCard(a, "BLOCK")
@@ -187,7 +187,7 @@ func FormatBestTurn(t TurnSummary) string {
 		appendCard(a, "DEFENSE REACTION")
 	}
 	for _, a := range attackPitches {
-		appendCard(a, "PITCH (attack)")
+		appendCard(a, "PITCH (my turn)")
 	}
 	// Attack chain: iterate AttackChain for real play order, cross-referencing BestLine by ID to
 	// mark arsenal-played cards. Weapons have no BestLine entry, so they render as plain names.
