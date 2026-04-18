@@ -1,11 +1,10 @@
-package sim
+package deck
 
 import (
 	"context"
 	"math/rand"
 	"testing"
 
-	fabdeck "github.com/tim-chaplin/fab-deck-optimizer/internal/deck"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/hero"
 )
 
@@ -26,8 +25,7 @@ func BenchmarkIterateImprovements(b *testing.B) {
 		shallowShuffles = 100
 		// deepShuffles is closer to the production default (10000) than a cheap smoke value — the
 		// parallel-deep design only shows its real advantage when deep is meaningfully more
-		// expensive than shallow, which is where iterate actually lives. Keeping it at 1000 hid
-		// the regression the user hit in real iterate runs.
+		// expensive than shallow, which is where iterate actually lives.
 		deepShuffles       = 5000
 		incoming           = 0
 		targetImprovements = 2
@@ -35,16 +33,16 @@ func BenchmarkIterateImprovements(b *testing.B) {
 	for n := 0; n < b.N; n++ {
 		b.StopTimer()
 		rng := rand.New(rand.NewSource(42))
-		best := fabdeck.Random(hero.Viserai{}, deckSize, maxCopies, rng)
+		best := Random(hero.Viserai{}, deckSize, maxCopies, rng)
 		bestAvg := best.Evaluate(shallowShuffles, incoming, rng).Avg()
 		b.StartTimer()
 
 		improvements := 0
 		for improvements < targetImprovements {
-			mutations := fabdeck.AllMutations(best, maxCopies)
-			d, avg, _, found := fabdeck.IterateParallel(
+			mutations := AllMutations(best, maxCopies)
+			d, avg, _, found := IterateParallel(
 				context.Background(), mutations, bestAvg, shallowShuffles, deepShuffles, incoming, 0,
-				rng.Int63(), rng, nil, nil,
+				rng.Int63(), nil, nil,
 			)
 			if !found {
 				b.Fatalf("local maximum reached before hitting %d improvements", targetImprovements)
@@ -55,4 +53,3 @@ func BenchmarkIterateImprovements(b *testing.B) {
 		}
 	}
 }
-
