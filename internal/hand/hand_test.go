@@ -332,3 +332,58 @@ func TestBest_RespectsResourceConstraint(t *testing.T) {
 		t.Fatalf("invalid play: resources %d < costs %d", res, cost)
 	}
 }
+
+// TestBest_AllHeldWhenNoLegalPlay covers the "hand does nothing this turn" case. A single
+// Toughen Up Blue DR (cost 2) with no pitched cards to pay it has Value = 0. Under the new
+// phase-pitch rules the card can't be labeled Pitch either (pitching requires something unpaid
+// on the stack), so its role is Held and its Contribution is 0 — the card just carries into
+// next turn.
+func TestBest_AllHeldWhenNoLegalPlay(t *testing.T) {
+	h := []card.Card{generic.ToughenUpBlue{}}
+	got := Best(stubHero{}, nil, h, 4, nil, 0)
+	if got.Value != 0 {
+		t.Fatalf("Value = %d, want 0", got.Value)
+	}
+	if got.Roles[0] != Held {
+		t.Errorf("role = %s, want HELD (nothing to pitch for, nothing affordable to play)", got.Roles[0])
+	}
+	if got.Contributions[0] != 0 {
+		t.Errorf("Contribution = %.1f, want 0 (card sits in hand)", got.Contributions[0])
+	}
+}
+
+// TestBest_AttackPitchCantCoverDefense enforces that attack-phase and defense-phase pitches
+// draw from disjoint pools (resources don't cross turns). Hand: Malefic Blue (cost 0, pitch 3,
+// defense 2), Toughen Up Blue (DR, cost 2, pitch 3, defense 4), Red Attack (cost 1, pitch 1,
+// attack 3). Against incoming 4: only one pitched card (pitch 3) can be paired with Toughen Up
+// as DR, and that single pitch can cover either the 1-cost Red OR the 2-cost Toughen Up — not
+// both. The solver takes the better single-phase line: pitch Toughen Up to pay Red's cost,
+// plain-block with Malefic. Value = 3 (Red attack) + 2 (Malefic block) = 5. The OLD single-pool
+// model would have let one pitch fund both phases and scored 7 (Red attack + 4 Toughen Up
+// prevention) — an illegal split this test locks out.
+func TestBest_AttackPitchCantCoverDefense(t *testing.T) {
+	h := []card.Card{runeblade.MaleficIncantationBlue{}, generic.ToughenUpBlue{}, fake.RedAttack{}}
+	got := Best(stubHero{}, nil, h, 4, nil, 0)
+	if got.Value != 5 {
+		t.Fatalf("Value = %d, want 5 (attack and defense pitches are separate pools; Roles=[%s])",
+			got.Value, FormatRoles(h, got.Roles))
+	}
+}
+
+// TestBest_DRPitchNeedsSecondPitchedCard confirms that adding a second pitched card unlocks the
+// split: Malefic Blue (pitch 3) + second Malefic Blue (pitch 3) is enough to fund Red's 1-cost
+// attack from one Malefic and Toughen Up's 2-cost defense from the other. Value = 3 (attack) +
+// 4 (full prevent) = 7.
+func TestBest_DRPitchNeedsSecondPitchedCard(t *testing.T) {
+	h := []card.Card{
+		runeblade.MaleficIncantationBlue{},
+		runeblade.MaleficIncantationBlue{},
+		generic.ToughenUpBlue{},
+		fake.RedAttack{},
+	}
+	got := Best(stubHero{}, nil, h, 4, nil, 0)
+	if got.Value != 7 {
+		t.Fatalf("Value = %d, want 7 (two pitched cards let attack + defense phases both pay; Roles=[%s])",
+			got.Value, FormatRoles(h, got.Roles))
+	}
+}
