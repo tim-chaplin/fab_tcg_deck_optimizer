@@ -469,6 +469,7 @@ type attackerMeta struct {
 	printedCost      int // PrintedCost for DiscountPerRunechant cards; 0 otherwise
 	isDiscount       bool
 	baseGoAgain      bool // Card.GoAgain() — combined with PlayedCard.GrantedGoAgain at read time
+	canGrantGoAgain  bool // card.GoAgainGranter marker — card's Play may set GrantedGoAgain
 	isAttackOrWeapon bool
 }
 
@@ -515,6 +516,9 @@ func cardMetaSlowPath(c card.Card, id card.ID) attackerMeta {
 	if d, ok := c.(card.DiscountPerRunechant); ok {
 		m.isDiscount = true
 		m.printedCost = d.PrintedCost()
+	}
+	if g, ok := c.(card.GoAgainGranter); ok && g.GrantsGoAgain() {
+		m.canGrantGoAgain = true
 	}
 	cardMetaCache[id] = m
 	atomic.StoreUint32(&cardMetaReady[id], 1)
@@ -1188,6 +1192,21 @@ type sequenceContext struct {
 	runechantCarryover int
 }
 
+// anyGoAgainSupport reports whether any attacker in the sequence can produce a legal chain of
+// length > 1. A card supports chaining if its printed GoAgain() is true (baseGoAgain) or its
+// Play function can set GrantedGoAgain on Self / CardsRemaining (canGrantGoAgain, detected via
+// the card.GoAgainGranter optional interface at cardMetaSlowPath build time). When neither is
+// true for any attacker in the sequence, Heap's N! permutation enumeration only produces legal
+// length-1 plays — bestSequence's caller can take a faster equivalent path.
+func anyGoAgainSupport(meta []attackerMeta) bool {
+	for i := range meta {
+		if meta[i].baseGoAgain || meta[i].canGrantGoAgain {
+			return true
+		}
+	}
+	return false
+}
+
 // bestSequence tries every ordering of attackers and returns the max total damage after Play
 // is called on each in turn plus the runechant count at the end of that winning permutation.
 // Between each card's Play() and its append to CardsPlayed, the hero's OnCardPlayed hook fires
@@ -1255,6 +1274,23 @@ func (ctx *sequenceContext) bestSequence(attackers, winnerOrderOut []card.Card, 
 		}
 	}
 	eval()
+	// No-go-again fast path: if no attacker has baseGoAgain AND none can grant go-again via Play,
+	// any sequence of length > 1 fails playSequenceWithMeta's legality check at the first
+	// non-terminal card. Only single-card plays can be legal, so instead of enumerating N!
+	// permutations (of which all but N are rejected) we rotate each attacker into the front slot
+	// and evaluate those N single-play sequences. Huge win on partitions of cards without go-again
+	// support (common for non-combo decks); semantically equivalent to Heap's for this case.
+	if !anyGoAgainSupport(permMeta) {
+		for k := 1; k < n; k++ {
+			perm[0], perm[k] = perm[k], perm[0]
+			permMeta[0], permMeta[k] = permMeta[k], permMeta[0]
+			eval()
+			// Swap back so the next rotation starts from the original layout.
+			perm[0], perm[k] = perm[k], perm[0]
+			permMeta[0], permMeta[k] = permMeta[k], permMeta[0]
+		}
+		return best, bestLeftoverRunechants, bestResidualBudget
+	}
 	// Heap's algorithm, non-recursive: c[] counts how many times each stack frame has iterated.
 	// perm and permMeta are swapped together so playSequence always sees meta aligned with the
 	// current permutation.

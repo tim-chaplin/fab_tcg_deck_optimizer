@@ -24,6 +24,7 @@ func (RuneragerSwarmRed) Attack() int              { return 3 }
 func (RuneragerSwarmRed) Defense() int             { return 3 }
 func (RuneragerSwarmRed) Types() card.TypeSet      { return runeragerSwarmTypes }
 func (RuneragerSwarmRed) GoAgain() bool            { return false }
+func (RuneragerSwarmRed) GrantsGoAgain() bool      { return true }
 func (c RuneragerSwarmRed) Play(s *card.TurnState) int {
 	return runeragerSwarmPlay(c.Attack(), s)
 }
@@ -38,6 +39,7 @@ func (RuneragerSwarmYellow) Attack() int              { return 2 }
 func (RuneragerSwarmYellow) Defense() int             { return 3 }
 func (RuneragerSwarmYellow) Types() card.TypeSet      { return runeragerSwarmTypes }
 func (RuneragerSwarmYellow) GoAgain() bool            { return false }
+func (RuneragerSwarmYellow) GrantsGoAgain() bool      { return true }
 func (c RuneragerSwarmYellow) Play(s *card.TurnState) int {
 	return runeragerSwarmPlay(c.Attack(), s)
 }
@@ -52,6 +54,7 @@ func (RuneragerSwarmBlue) Attack() int              { return 1 }
 func (RuneragerSwarmBlue) Defense() int             { return 3 }
 func (RuneragerSwarmBlue) Types() card.TypeSet      { return runeragerSwarmTypes }
 func (RuneragerSwarmBlue) GoAgain() bool            { return false }
+func (RuneragerSwarmBlue) GrantsGoAgain() bool      { return true }
 func (c RuneragerSwarmBlue) Play(s *card.TurnState) int {
 	return runeragerSwarmPlay(c.Attack(), s)
 }

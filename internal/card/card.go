@@ -206,3 +206,18 @@ type DiscountPerRunechant interface {
 	PrintedCost() int
 }
 
+// GoAgainGranter is optionally implemented by cards whose Play might set GrantedGoAgain on the
+// card itself (Self) or on a later CardsRemaining entry — i.e. cards that can turn a "no go
+// again" sequence into a legal multi-card chain at runtime (Mauvrion Skies, Trot Along, Meat
+// and Greet, Vigor Rush, etc.). The solver reads this to decide whether it can skip its full
+// permutation search: if no attacker has baseGoAgain AND no attacker grants, the chain is
+// guaranteed to cap at length 1 and the enumerator can try each card as the sole attacker
+// instead of iterating N! permutations.
+//
+// Implementations return true unconditionally — the interface's mere presence is the flag, the
+// boolean is there to make unimplementing (e.g. because a card's grant-rider isn't modelled yet)
+// a one-line change without deleting the method.
+type GoAgainGranter interface {
+	GrantsGoAgain() bool
+}
+

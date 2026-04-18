@@ -41,6 +41,7 @@ func (VigorRushRed) Attack() int                 { return 4 }
 func (VigorRushRed) Defense() int                { return 2 }
 func (VigorRushRed) Types() card.TypeSet         { return vigorRushTypes }
 func (VigorRushRed) GoAgain() bool               { return false }
+func (VigorRushRed) GrantsGoAgain() bool         { return true }
 func (c VigorRushRed) Play(s *card.TurnState) int { return vigorRushPlay(c.Attack(), s) }
 
 type VigorRushYellow struct{}
@@ -53,6 +54,7 @@ func (VigorRushYellow) Attack() int                 { return 3 }
 func (VigorRushYellow) Defense() int                { return 2 }
 func (VigorRushYellow) Types() card.TypeSet         { return vigorRushTypes }
 func (VigorRushYellow) GoAgain() bool               { return false }
+func (VigorRushYellow) GrantsGoAgain() bool         { return true }
 func (c VigorRushYellow) Play(s *card.TurnState) int { return vigorRushPlay(c.Attack(), s) }
 
 type VigorRushBlue struct{}
@@ -65,4 +67,5 @@ func (VigorRushBlue) Attack() int                 { return 2 }
 func (VigorRushBlue) Defense() int                { return 2 }
 func (VigorRushBlue) Types() card.TypeSet         { return vigorRushTypes }
 func (VigorRushBlue) GoAgain() bool               { return false }
+func (VigorRushBlue) GrantsGoAgain() bool         { return true }
 func (c VigorRushBlue) Play(s *card.TurnState) int { return vigorRushPlay(c.Attack(), s) }

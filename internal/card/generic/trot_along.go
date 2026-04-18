@@ -35,4 +35,5 @@ func (TrotAlongBlue) Attack() int                 { return 0 }
 func (TrotAlongBlue) Defense() int                { return 3 }
 func (TrotAlongBlue) Types() card.TypeSet         { return trotAlongTypes }
 func (TrotAlongBlue) GoAgain() bool               { return true }
+func (TrotAlongBlue) GrantsGoAgain() bool         { return true }
 func (TrotAlongBlue) Play(s *card.TurnState) int { return trotAlongPlay(s) }

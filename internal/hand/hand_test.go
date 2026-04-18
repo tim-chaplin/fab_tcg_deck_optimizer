@@ -650,6 +650,23 @@ func TestPromoteRandomHeldToArsenal_NoHeldIsNoop(t *testing.T) {
 	}
 }
 
+// TestBest_NoGoAgainFastPathMatchesHeap pins the no-go-again fast path's correctness. With four
+// Wounding Blow Reds (cost 0, attack 4, no go-again, doesn't grant) in hand, any attack sequence
+// of length > 1 is illegal, so Heap's enumeration and the fast-path rotation must both produce
+// the same best Value — a single card attack dealing 4. A regression that picks a wrong card (or
+// no card) would surface as a Value mismatch.
+func TestBest_NoGoAgainFastPathMatchesHeap(t *testing.T) {
+	h := []card.Card{
+		generic.WoundingBlowRed{}, generic.WoundingBlowRed{},
+		generic.WoundingBlowRed{}, generic.WoundingBlowRed{},
+	}
+	got := Best(stubHero{}, nil, h, 0, nil, 0, nil)
+	if got.Value != 4 {
+		t.Errorf("Value = %d, want 4 (one Wounding Blow Red lands; rest can't chain without GoAgain). Roles=[%s]",
+			got.Value, FormatBestLine(got.BestLine))
+	}
+}
+
 // TestBest_AllAttackHandPlusArsenalNoWeapons regresses a slice-bounds panic: attackBufs sized its
 // scratch by handSize+weaponCount only, so a full 4-card hand of 0-cost attackers + an arsenal-in
 // attacker (5 entries) overflowed the 4-wide attackerBuf inside bestAttackWithWeapons when no

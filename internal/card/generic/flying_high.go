@@ -41,6 +41,7 @@ func (FlyingHighRed) Attack() int                 { return 0 }
 func (FlyingHighRed) Defense() int                { return 2 }
 func (FlyingHighRed) Types() card.TypeSet         { return flyingHighTypes }
 func (FlyingHighRed) GoAgain() bool               { return true }
+func (FlyingHighRed) GrantsGoAgain() bool         { return true }
 func (FlyingHighRed) Play(s *card.TurnState) int { return flyingHighPlay(s) }
 
 type FlyingHighYellow struct{}
@@ -53,6 +54,7 @@ func (FlyingHighYellow) Attack() int                 { return 0 }
 func (FlyingHighYellow) Defense() int                { return 2 }
 func (FlyingHighYellow) Types() card.TypeSet         { return flyingHighTypes }
 func (FlyingHighYellow) GoAgain() bool               { return true }
+func (FlyingHighYellow) GrantsGoAgain() bool         { return true }
 func (FlyingHighYellow) Play(s *card.TurnState) int { return flyingHighPlay(s) }
 
 type FlyingHighBlue struct{}
@@ -65,4 +67,5 @@ func (FlyingHighBlue) Attack() int                 { return 0 }
 func (FlyingHighBlue) Defense() int                { return 2 }
 func (FlyingHighBlue) Types() card.TypeSet         { return flyingHighTypes }
 func (FlyingHighBlue) GoAgain() bool               { return true }
+func (FlyingHighBlue) GrantsGoAgain() bool         { return true }
 func (FlyingHighBlue) Play(s *card.TurnState) int { return flyingHighPlay(s) }
