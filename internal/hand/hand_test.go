@@ -24,7 +24,7 @@ func (stubHero) OnCardPlayed(card.Card, *card.TurnState) int { return 0 }
 func TestBest_AllRedHand(t *testing.T) {
 	// Best: pitch 2 reds (2 res) to attack with the other 2 (cost 2, dealt 6). Value = 6.
 	h := []card.Card{fake.RedAttack{}, fake.RedAttack{}, fake.RedAttack{}, fake.RedAttack{}}
-	got := Best(stubHero{}, nil, h, 4, nil, 0)
+	got := Best(stubHero{}, nil, h, 4, nil, 0, nil)
 	if got.Value != 6 {
 		t.Fatalf("want value 6, got %d", got.Value)
 	}
@@ -34,7 +34,7 @@ func TestBest_AllBlueHand(t *testing.T) {
 	// Best: pitch 1 blue (3 res), attack with 2 blues (cost 2, dealt 2), defend with 1 blue (prevented
 	// 3). Value = 5.
 	h := []card.Card{fake.BlueAttack{}, fake.BlueAttack{}, fake.BlueAttack{}, fake.BlueAttack{}}
-	got := Best(stubHero{}, nil, h, 4, nil, 0)
+	got := Best(stubHero{}, nil, h, 4, nil, 0, nil)
 	if got.Value != 5 {
 		t.Fatalf("want value 5, got %d", got.Value)
 	}
@@ -44,7 +44,7 @@ func TestBest_MixedHand(t *testing.T) {
 	// Best: pitch 1 blue (3 res), attack with 2 reds (cost 2, dealt 6), defend with 1 blue (prevented
 	// 3). Value = 9.
 	h := []card.Card{fake.BlueAttack{}, fake.BlueAttack{}, fake.RedAttack{}, fake.RedAttack{}}
-	got := Best(stubHero{}, nil, h, 4, nil, 0)
+	got := Best(stubHero{}, nil, h, 4, nil, 0, nil)
 	if got.Value != 9 {
 		t.Fatalf("want value 9, got %d", got.Value)
 	}
@@ -54,7 +54,7 @@ func TestBest_DefenseCappedAtIncoming(t *testing.T) {
 	// Best: pitch 1 blue, attack with 2 blues (dealt 2), defend with 1 blue (prevented capped at
 	// incoming=2). Value = 4.
 	h := []card.Card{fake.BlueAttack{}, fake.BlueAttack{}, fake.BlueAttack{}, fake.BlueAttack{}}
-	got := Best(stubHero{}, nil, h, 2, nil, 0)
+	got := Best(stubHero{}, nil, h, 2, nil, 0, nil)
 	if got.Value != 4 {
 		t.Fatalf("want value 4, got %d", got.Value)
 	}
@@ -65,7 +65,7 @@ func TestBest_DefenseReactionRequiresCostPaid(t *testing.T) {
 	// 2-resource cost to play as a Defense Reaction (there's nothing else to pitch). The only
 	// legal lines are to pitch it (0 damage prevented) or do nothing — Value must be 0.
 	h := []card.Card{generic.ToughenUpBlue{}}
-	got := Best(stubHero{}, nil, h, 4, nil, 0)
+	got := Best(stubHero{}, nil, h, 4, nil, 0, nil)
 	if got.Value != 0 {
 		t.Fatalf("want value 0 (cost unpaid), got %d", got.Value)
 	}
@@ -75,7 +75,7 @@ func TestBest_DefenseReactionAffordableResolves(t *testing.T) {
 	// Pitch 1 Blue Malefic (3 res), pay Toughen Up (Blue)'s cost 2, prevent 4 damage (capped at
 	// incoming=4). Value = 4.
 	h := []card.Card{runeblade.MaleficIncantationBlue{}, generic.ToughenUpBlue{}}
-	got := Best(stubHero{}, nil, h, 4, nil, 0)
+	got := Best(stubHero{}, nil, h, 4, nil, 0, nil)
 	if got.Value != 4 {
 		t.Fatalf("want value 4 (cost paid, full block), got %d", got.Value)
 	}
@@ -85,7 +85,7 @@ func TestBest_PlainBlockStillFree(t *testing.T) {
 	// Attack cards have no Defense-Reaction type, so using them as blockers costs nothing. One
 	// Red attacker (Defense 1) alone, used as a blocker against 1 incoming, prevents 1. Value = 1.
 	h := []card.Card{fake.RedAttack{}}
-	got := Best(stubHero{}, nil, h, 1, nil, 0)
+	got := Best(stubHero{}, nil, h, 1, nil, 0, nil)
 	if got.Value != 1 {
 		t.Fatalf("want value 1 (free plain block), got %d", got.Value)
 	}
@@ -100,7 +100,7 @@ func TestBest_ViseraiMaleficShrillCombo(t *testing.T) {
 		runeblade.MaleficIncantationRed{},
 		runeblade.ShrillOfSkullformRed{},
 	}
-	got := Best(hero.Viserai{}, nil, h, 4, nil, 0)
+	got := Best(hero.Viserai{}, nil, h, 4, nil, 0, nil)
 	if got.Value != 15 {
 		t.Fatalf("want value 15, got %d (roles=[%s])",
 			got.Value, FormatRoles(h, got.Roles))
@@ -117,7 +117,7 @@ func TestBest_ViseraiReapingBladeBlueMalefics(t *testing.T) {
 		runeblade.MaleficIncantationBlue{},
 	}
 	weapons := []weapon.Weapon{weapon.ReapingBlade{}}
-	got := Best(hero.Viserai{}, weapons, h, 0, nil, 0)
+	got := Best(hero.Viserai{}, weapons, h, 0, nil, 0, nil)
 	if got.Value != 8 {
 		t.Fatalf("want value 8, got %d (roles=[%s])",
 			got.Value, FormatRoles(h, got.Roles))
@@ -135,7 +135,7 @@ func TestBest_ViseraiReapingBladeMaleficsPlusShrill(t *testing.T) {
 		runeblade.ShrillOfSkullformRed{},
 	}
 	weapons := []weapon.Weapon{weapon.ReapingBlade{}}
-	got := Best(hero.Viserai{}, weapons, h, 0, nil, 0)
+	got := Best(hero.Viserai{}, weapons, h, 0, nil, 0, nil)
 	if got.Value != 11 {
 		t.Fatalf("want value 11, got %d (roles=[%s])",
 			got.Value, FormatRoles(h, got.Roles))
@@ -152,7 +152,7 @@ func TestBest_ViseraiOathBlueHocusRedMalefic(t *testing.T) {
 		runeblade.MaleficIncantationRed{},
 	}
 	weapons := []weapon.Weapon{weapon.ReapingBlade{}}
-	got := Best(hero.Viserai{}, weapons, h, 0, nil, 0)
+	got := Best(hero.Viserai{}, weapons, h, 0, nil, 0, nil)
 	if got.Value != 11 {
 		t.Fatalf("want value 11, got %d (roles=[%s])",
 			got.Value, FormatRoles(h, got.Roles))
@@ -171,7 +171,7 @@ func TestBest_RunicReapingPrefersAttackPitch(t *testing.T) {
 		runeblade.RunicReapingRed{},
 		runeblade.ShrillOfSkullformRed{},
 	}
-	got := Best(hero.Viserai{}, nil, h, 0, nil, 0)
+	got := Best(hero.Viserai{}, nil, h, 0, nil, 0, nil)
 	if got.Value != 14 {
 		t.Fatalf("want value 14, got %d (roles=[%s])",
 			got.Value, FormatRoles(h, got.Roles))
@@ -192,7 +192,7 @@ func TestBest_ViseraiMauvrionGrantsGoAgainToShrill(t *testing.T) {
 		runeblade.ShrillOfSkullformRed{},
 	}
 	weapons := []weapon.Weapon{weapon.ReapingBlade{}}
-	got := Best(hero.Viserai{}, weapons, h, 0, nil, 0)
+	got := Best(hero.Viserai{}, weapons, h, 0, nil, 0, nil)
 	if got.Value != 16 {
 		t.Fatalf("want value 16, got %d (roles=[%s])",
 			got.Value, FormatRoles(h, got.Roles))
@@ -239,7 +239,7 @@ func TestBest_ViseraiMauvrionChainsShrillIntoRuneragerIntoWeapon(t *testing.T) {
 		runeblade.ShrillOfSkullformRed{},
 	}
 	weapons := []weapon.Weapon{weapon.ReapingBlade{}}
-	got := Best(hero.Viserai{}, weapons, h, 0, nil, 0)
+	got := Best(hero.Viserai{}, weapons, h, 0, nil, 0, nil)
 	if got.Value != 18 {
 		t.Fatalf("want value 18, got %d (roles=[%s])",
 			got.Value, FormatRoles(h, got.Roles))
@@ -315,7 +315,7 @@ func TestBest_RespectsResourceConstraint(t *testing.T) {
 	// Best: pitch 2 reds (2 res) to attack with 2 reds (cost 2, dealt 6). Value = 6. Resources must
 	// cover costs.
 	h := []card.Card{fake.RedAttack{}, fake.RedAttack{}, fake.RedAttack{}, fake.RedAttack{}}
-	got := Best(stubHero{}, nil, h, 0, nil, 0)
+	got := Best(stubHero{}, nil, h, 0, nil, 0, nil)
 	if got.Value != 6 {
 		t.Fatalf("want value 6, got %d", got.Value)
 	}
@@ -334,21 +334,23 @@ func TestBest_RespectsResourceConstraint(t *testing.T) {
 }
 
 // TestBest_AllHeldWhenNoLegalPlay covers the "hand does nothing this turn" case. A single
-// Toughen Up Blue DR (cost 2) with no pitched cards to pay it has Value = 0. Under the new
-// phase-pitch rules the card can't be labeled Pitch either (pitching requires something unpaid
-// on the stack), so its role is Held and its Contribution is 0 — the card just carries into
-// next turn.
+// Toughen Up Blue DR (cost 2) with no pitched cards to pay it has Value = 0. The partition
+// leaves the card Held; post-hoc the empty arsenal slot claims it, so Role becomes Arsenal
+// and Play.ArsenalCard records the card for next turn's carryover.
 func TestBest_AllHeldWhenNoLegalPlay(t *testing.T) {
 	h := []card.Card{generic.ToughenUpBlue{}}
-	got := Best(stubHero{}, nil, h, 4, nil, 0)
+	got := Best(stubHero{}, nil, h, 4, nil, 0, nil)
 	if got.Value != 0 {
 		t.Fatalf("Value = %d, want 0", got.Value)
 	}
-	if got.Roles[0] != Held {
-		t.Errorf("role = %s, want HELD (nothing to pitch for, nothing affordable to play)", got.Roles[0])
+	if got.Roles[0] != Arsenal {
+		t.Errorf("role = %s, want ARSENAL (empty slot + Held card → promoted)", got.Roles[0])
+	}
+	if got.ArsenalCard == nil || got.ArsenalCard.ID() != card.ToughenUpBlue {
+		t.Errorf("ArsenalCard = %v, want Toughen Up Blue", got.ArsenalCard)
 	}
 	if got.Contributions[0] != 0 {
-		t.Errorf("Contribution = %.1f, want 0 (card sits in hand)", got.Contributions[0])
+		t.Errorf("Contribution = %.1f, want 0 (card sits in arsenal, real value accrues on a later turn)", got.Contributions[0])
 	}
 }
 
@@ -363,7 +365,7 @@ func TestBest_AllHeldWhenNoLegalPlay(t *testing.T) {
 // prevention) — an illegal split this test locks out.
 func TestBest_AttackPitchCantCoverDefense(t *testing.T) {
 	h := []card.Card{runeblade.MaleficIncantationBlue{}, generic.ToughenUpBlue{}, fake.RedAttack{}}
-	got := Best(stubHero{}, nil, h, 4, nil, 0)
+	got := Best(stubHero{}, nil, h, 4, nil, 0, nil)
 	if got.Value != 5 {
 		t.Fatalf("Value = %d, want 5 (attack and defense pitches are separate pools; Roles=[%s])",
 			got.Value, FormatRoles(h, got.Roles))
@@ -381,9 +383,105 @@ func TestBest_DRPitchNeedsSecondPitchedCard(t *testing.T) {
 		generic.ToughenUpBlue{},
 		fake.RedAttack{},
 	}
-	got := Best(stubHero{}, nil, h, 4, nil, 0)
+	got := Best(stubHero{}, nil, h, 4, nil, 0, nil)
 	if got.Value != 7 {
 		t.Fatalf("Value = %d, want 7 (two pitched cards let attack + defense phases both pay; Roles=[%s])",
 			got.Value, FormatRoles(h, got.Roles))
+	}
+}
+
+// TestBest_EmptyArsenalClaimsHeldCard confirms the post-hoc Arsenal promotion fires when the
+// slot is empty and the winning partition has Held cards. A hand that can't play Toughen Up as
+// DR (no other card to pitch for the 2-cost) leaves the DR Held; with arsenalCardIn=nil the
+// slot is empty so the DR becomes Arsenal and rides into next turn as Play.ArsenalCard.
+func TestBest_EmptyArsenalClaimsHeldCard(t *testing.T) {
+	h := []card.Card{generic.ToughenUpBlue{}}
+	got := Best(stubHero{}, nil, h, 4, nil, 0, nil)
+	if got.Roles[0] != Arsenal {
+		t.Errorf("Roles[0] = %s, want ARSENAL", got.Roles[0])
+	}
+	if got.ArsenalCard == nil || got.ArsenalCard.ID() != card.ToughenUpBlue {
+		t.Errorf("ArsenalCard = %v, want Toughen Up Blue", got.ArsenalCard)
+	}
+}
+
+// TestBest_ArsenalInPlayDR covers the "arsenal card played as DR" branch. Previous turn left a
+// Toughen Up Blue in arsenal; this turn we draw a Blue Malefic (pitch 3, cost 0). The pitched
+// Malefic funds Toughen Up's 2-cost defense out of the arsenal, preventing 4 damage. Value = 4.
+// Play.ArsenalCard is nil because the slot was vacated and no hand card ends up Held.
+func TestBest_ArsenalInPlayDR(t *testing.T) {
+	h := []card.Card{runeblade.MaleficIncantationBlue{}}
+	got := Best(stubHero{}, nil, h, 4, nil, 0, generic.ToughenUpBlue{})
+	if got.Value != 4 {
+		t.Fatalf("Value = %d, want 4 (Malefic pitches to pay arsenal DR, prevents 4). Roles=[%s]",
+			got.Value, FormatRoles(h, got.Roles))
+	}
+	if got.ArsenalCard != nil {
+		t.Errorf("ArsenalCard = %v, want nil (slot was vacated, no Held card to promote)", got.ArsenalCard)
+	}
+	// PlayedFromArsenal surfaces the arsenal-in card so callers (the best-hand printout) can
+	// flag that this card wasn't in hand this turn.
+	if got.PlayedFromArsenal == nil || got.PlayedFromArsenal.ID() != card.ToughenUpBlue {
+		t.Errorf("PlayedFromArsenal = %v, want Toughen Up Blue", got.PlayedFromArsenal)
+	}
+	if got.PlayedFromArsenalRole != Defend {
+		t.Errorf("PlayedFromArsenalRole = %s, want DEFEND", got.PlayedFromArsenalRole)
+	}
+}
+
+// TestBest_ArsenalInStayBlocksNewArsenal locks in that while the arsenal slot is occupied, a
+// hand card that would otherwise be promoted to Arsenal (because it's Held) stays Held instead —
+// one arsenal slot, no replacement until the old card is played. A lone DR in hand is Held;
+// the arsenal-in Toughen Up Blue stays (incoming=0 makes defending pointless, and the hand
+// can't fund a DR anyway); post-hoc the slot is occupied so no promotion happens.
+func TestBest_ArsenalInStayBlocksNewArsenal(t *testing.T) {
+	h := []card.Card{generic.ToughenUpBlue{}}
+	got := Best(stubHero{}, nil, h, 0, nil, 0, generic.ToughenUpBlue{})
+	if got.Roles[0] != Held {
+		t.Errorf("Roles[0] = %s, want HELD (slot occupied by arsenal-in, can't promote)", got.Roles[0])
+	}
+	if got.ArsenalCard == nil || got.ArsenalCard.ID() != card.ToughenUpBlue {
+		t.Errorf("ArsenalCard = %v, want Toughen Up Blue (the staying arsenal-in card)", got.ArsenalCard)
+	}
+}
+
+// TestBest_ArsenalInPlayAttack covers the "arsenal card played as attack" branch. A Red attack
+// sits in arsenal from a previous turn; this turn we draw a single Red Attack which pitches
+// (pitch 1) to fund both the hand Red's 1-cost and the arsenal Red's 1-cost... wait, one pitch
+// can't pay two costs. Instead, the winning line plays the arsenal Red (funded by pitching the
+// hand Red) and leaves the hand slot consumed. Value = 3 (arsenal Red's attack). With the
+// arsenal slot now empty and no Held cards, ArsenalCard is nil.
+func TestBest_ArsenalInPlayAttack(t *testing.T) {
+	h := []card.Card{fake.RedAttack{}}
+	got := Best(stubHero{}, nil, h, 0, nil, 0, fake.RedAttack{})
+	if got.Value != 3 {
+		t.Fatalf("Value = %d, want 3 (arsenal Red played, hand Red pitched to fund it). Roles=[%s]",
+			got.Value, FormatRoles(h, got.Roles))
+	}
+	if got.ArsenalCard != nil {
+		t.Errorf("ArsenalCard = %v, want nil (slot vacated, no Held to promote)", got.ArsenalCard)
+	}
+}
+
+// TestBest_ArsenalInNonAttackActionPlays covers the "arsenal card isn't tagged Attack but can
+// still be played on your turn" rule — non-attack actions (auras, item cards, etc.) are playable
+// from arsenal. Hand: Malefic Incantation Red (cost 0, pitch 1). Arsenal: Blessing of Occult Red
+// (cost 1, pitch 1, attack 0, Play returns 3 via DelayRunechants). The winning line pitches the
+// Malefic to fund Blessing's 1-cost, plays Blessing from arsenal, and accrues 3 delayed
+// runechants for next turn. Value = 3 (Blessing's Play return is counted as damage credit for
+// the chain); LeftoverRunechants reflects the 3 tokens carrying over.
+func TestBest_ArsenalInNonAttackActionPlays(t *testing.T) {
+	h := []card.Card{runeblade.MaleficIncantationRed{}}
+	got := Best(stubHero{}, nil, h, 0, nil, 0, runeblade.BlessingOfOccultRed{})
+	if got.Value != 3 {
+		t.Fatalf("Value = %d, want 3 (Malefic pitched, arsenal Blessing played for 3 runechants). Roles=[%s]",
+			got.Value, FormatRoles(h, got.Roles))
+	}
+	if got.LeftoverRunechants != 3 {
+		t.Errorf("LeftoverRunechants = %d, want 3 (Blessing's Play delayed 3 tokens to next turn)",
+			got.LeftoverRunechants)
+	}
+	if got.ArsenalCard != nil {
+		t.Errorf("ArsenalCard = %v, want nil (Blessing played out of arsenal)", got.ArsenalCard)
 	}
 }

@@ -17,6 +17,12 @@ const (
 	Attack
 	Defend
 	Held
+	// Arsenal is assigned to exactly one hand card at most, representing "placed into the
+	// arsenal at end of turn". The card contributes nothing to this turn's Value (true value
+	// accrues when it's played from arsenal on a future turn), and it carries across the turn
+	// boundary as Play.ArsenalCard. Never produced by the recurse itself — Best upgrades one
+	// Held card to Arsenal post-hoc when the arsenal slot is empty.
+	Arsenal
 )
 
 // Play is the chosen partition for a hand: one role per card plus a total value score. Best sorts
@@ -40,9 +46,21 @@ type Play struct {
 	// chain, which carry into the next turn's Best call. For partitions with no attacks, this
 	// equals the carryover the caller passed in.
 	LeftoverRunechants int
+	// ArsenalCard is the card occupying the arsenal slot at the end of this turn — either a new
+	// hand card just arsenaled (role=Arsenal) or a previous-turn arsenal card that stayed. Nil
+	// when the slot is empty. The caller feeds this back as the next turn's arsenalCardIn.
+	ArsenalCard card.Card
+	// PlayedFromArsenal is the previous-turn arsenal card if this turn chose to play it rather
+	// than let it stay. Used for display — the card isn't in the hand slice so FormatRoles
+	// doesn't see it otherwise. PlayedFromArsenalRole tells whether it was played as Attack or
+	// Defend (the only two legal from-arsenal plays). Nil / zero when the arsenal slot was
+	// empty or the card stayed.
+	PlayedFromArsenal     card.Card
+	PlayedFromArsenalRole Role
 }
 
-// String returns a human-readable role name ("PITCH", "ATTACK", "DEFEND", "HELD").
+
+// String returns a human-readable role name ("PITCH", "ATTACK", "DEFEND", "HELD", "ARSENAL").
 func (r Role) String() string {
 	switch r {
 	case Pitch:
@@ -53,6 +71,8 @@ func (r Role) String() string {
 		return "DEFEND"
 	case Held:
 		return "HELD"
+	case Arsenal:
+		return "ARSENAL"
 	}
 	return "UNKNOWN"
 }
@@ -102,7 +122,14 @@ func FormatRoles(hand []card.Card, roles []Role) string {
 // runechantCarryover is the number of Runechant tokens carrying in from the previous turn. The
 // returned Play.Leftover is the count remaining at end of the chosen chain, which the caller
 // should feed back as the next turn's carryover.
-func Best(hero hero.Hero, weapons []weapon.Weapon, hand []card.Card, incomingDamage int, deck []card.Card, runechantCarryover int) Play {
+//
+// arsenalCardIn is the card sitting in the arsenal slot at the start of this turn (nil if the
+// slot is empty). The partition enumerator pulls it into the hand as an extra card with
+// restricted role options — Arsenal (stay in the slot), Attack (if it's an attack card), or
+// Defend (if it's a Defense Reaction). Never Pitch or Held. A hand card may also take the
+// Arsenal role so long as at most one card ends up there across the whole partition. Play.
+// ArsenalCard is the card to feed back as next turn's arsenalCardIn.
+func Best(hero hero.Hero, weapons []weapon.Weapon, hand []card.Card, incomingDamage int, deck []card.Card, runechantCarryover int, arsenalCardIn card.Card) Play {
 	// Fetch IDs into a fixed-size stack array to avoid a per-call slice allocation. Hand size is
 	// capped at 8 (matches memoKey.cardIDs); larger hands panic out of the inner loops elsewhere.
 	n := len(hand)
@@ -114,19 +141,21 @@ func Best(hero hero.Hero, weapons []weapon.Weapon, hand []card.Card, incomingDam
 			memoable = false
 		}
 	}
+	if arsenalCardIn != nil {
+		if _, ok := arsenalCardIn.(card.NoMemo); ok {
+			memoable = false
+		}
+	}
 
 	sortHandByID(hand, ids[:], n)
 
-	// Unmemoable hands skip the cache read but still write — the stale entry is harmless since
-	// future unmemoable lookups will skip the read too.
-	key := makeMemoKey(hero, weapons, &ids, n, incomingDamage, runechantCarryover)
+	key := makeMemoKey(hero, weapons, &ids, n, incomingDamage, runechantCarryover, arsenalCardIn)
 	if memoable {
 		if cached, hit := memo[key]; hit {
-			// Returned Play aliases the cached slices — callers must not mutate Roles or Weapons.
 			return cached
 		}
 	}
-	result := bestUncached(hero, weapons, hand, incomingDamage, deck, runechantCarryover)
+	result := bestUncached(hero, weapons, hand, incomingDamage, deck, runechantCarryover, arsenalCardIn)
 	memo[key] = result
 	return result
 }
@@ -154,6 +183,9 @@ type memoKey struct {
 	cardCount          uint8
 	incoming           int
 	runechantCarryover int
+	// arsenalInID is card.Invalid when the slot is empty, otherwise the ID of the card in the
+	// arsenal at the start of the turn — different arsenal-ins give distinct cache entries.
+	arsenalInID card.ID
 }
 
 // memo caches canonical-order results keyed by memoKey. Not goroutine-safe — the simulator is
@@ -163,8 +195,11 @@ var memo = map[memoKey]Play{}
 // makeMemoKey builds a comparable memo key. The hand must already be sorted by card ID; weapon
 // IDs are sorted numerically into the two fixed slots. sortedIDs is passed as a pointer to the
 // caller's [8]card.ID stack array to avoid a slice-header escape.
-func makeMemoKey(hero hero.Hero, weapons []weapon.Weapon, sortedIDs *[8]card.ID, n int, incoming int, runechantCarryover int) memoKey {
+func makeMemoKey(hero hero.Hero, weapons []weapon.Weapon, sortedIDs *[8]card.ID, n int, incoming int, runechantCarryover int, arsenalCardIn card.Card) memoKey {
 	k := memoKey{hero: hero.Name(), incoming: incoming, runechantCarryover: runechantCarryover, cardCount: uint8(n), cardIDs: *sortedIDs}
+	if arsenalCardIn != nil {
+		k.arsenalInID = arsenalCardIn.ID()
+	}
 	switch len(weapons) {
 	case 1:
 		k.weaponIDs[0] = weapons[0].ID()
@@ -297,8 +332,17 @@ func getAttackBufs(handSize int, weapons []weapon.Weapon) *attackBufs {
 	return cachedBufs
 }
 
-func bestUncached(hero hero.Hero, weapons []weapon.Weapon, hand []card.Card, incomingDamage int, deck []card.Card, runechantCarryover int) Play {
+func bestUncached(hero hero.Hero, weapons []weapon.Weapon, hand []card.Card, incomingDamage int, deck []card.Card, runechantCarryover int, arsenalCardIn card.Card) Play {
 	n := len(hand)
+	// The partition recurse treats the arsenal-in card as an extra slot at index n with a
+	// restricted role menu (Arsenal / Attack / Defend), so everything about it — its cost,
+	// its damage, whether it stays or plays — is decided inside the enumeration rather than
+	// by a wrapping enumerator. totalN is the effective hand length the recurse walks.
+	totalN := n
+	if arsenalCardIn != nil {
+		totalN = n + 1
+	}
+
 	// Seed best.LeftoverRunechants with the carryover — partitions with no attacks don't reduce
 	// the count, so carryover is the natural baseline to beat. Roles default to Held so that a
 	// hand with no Value-adding partition (everything pruned by cost/pitch-feasibility) still
@@ -308,41 +352,46 @@ func bestUncached(hero hero.Hero, weapons []weapon.Weapon, hand []card.Card, inc
 		best.Roles[i] = Held
 	}
 
-	// bufs is the pooled scratch space for this deck evaluation (see getAttackBufs).
+	// bufs is the pooled scratch space for this deck evaluation (see getAttackBufs). Arrays are
+	// sized handSize (n) and we extend by local scratch for the optional arsenal slot at index
+	// n — small enough that per-call allocation is cheap and keeps attackBufs untouched.
 	bufs := getAttackBufs(n, weapons)
-	roles := bufs.rolesBuf[:n]
-	pitchVals := bufs.pitchVals[:n]
-	costVals := bufs.costVals[:n]
-	defendCostVals := bufs.defendCostVals[:n]
-	defendPrintedVals := bufs.defendPrintedVals[:n]
-	defenseVals := bufs.defenseVals[:n]
+	pitchVals := append(bufs.pitchVals[:0:n], bufs.pitchVals[:n]...)[:0]
+	_ = pitchVals
+	// Use local scratch with capacity totalN for the per-card computed values. Small (≤ 9).
+	rolesBuf := make([]Role, totalN)
+	pvals := make([]int, totalN)
+	cvals := make([]int, totalN)
+	dvals := make([]int, totalN)
+	dCostVals := make([]int, totalN)
+	dPrintedVals := make([]int, totalN)
+	isDR := make([]bool, totalN)
 
-	// Pre-compute per-card pitch, cost, and defense values so the recursion can track sums
-	// incrementally without interface dispatch at each partition leaf. defendCostVals carries
-	// Cost only for Defense-Reaction-typed cards; non-reactions defend for free (plain blocking).
-	// hasReactions lets the leaf skip groupByRoleInto's defenders bucket and the reaction-Play
-	// dispatch when no card in the hand can fire a reaction — the common case.
-	// defendPrintedVals[i] carries PrintedCost for defense reactions that implement
-	// DiscountPerRunechant (e.g. Reduce to Runechant); hasDiscountReactions flags that any such
-	// card is present, so the leaf re-checks affordability using leftoverRunechants. Slot is 0
-	// for every other card, including non-discount reactions (their cost is already in
-	// defendCostVals and doesn't change post-attack).
+	// Pre-compute per-card pitch / cost / defense values so the recurse doesn't re-invoke
+	// card-method interface calls on each partition leaf. defendCostVals holds Cost only for
+	// Defense Reactions; non-reactions block for free. defendPrintedVals holds PrintedCost for
+	// DiscountPerRunechant defenders and zero otherwise — used by the post-attack discount
+	// re-pricing check at the leaf.
 	hasReactions := false
 	hasDiscountReactions := false
-	for i, c := range hand {
-		pitchVals[i] = c.Pitch()
-		costVals[i] = c.Cost()
-		defenseVals[i] = c.Defense()
-		defendPrintedVals[i] = 0
-		if c.Types().Has(card.TypeDefenseReaction) {
-			defendCostVals[i] = costVals[i]
+	for i := 0; i < totalN; i++ {
+		var c card.Card
+		if i < n {
+			c = hand[i]
+		} else {
+			c = arsenalCardIn
+		}
+		pvals[i] = c.Pitch()
+		cvals[i] = c.Cost()
+		dvals[i] = c.Defense()
+		isDR[i] = c.Types().Has(card.TypeDefenseReaction)
+		if isDR[i] {
+			dCostVals[i] = cvals[i]
 			hasReactions = true
-			if d, ok := c.(card.DiscountPerRunechant); ok {
-				defendPrintedVals[i] = d.PrintedCost()
+			if dp, ok := c.(card.DiscountPerRunechant); ok {
+				dPrintedVals[i] = dp.PrintedCost()
 				hasDiscountReactions = true
 			}
-		} else {
-			defendCostVals[i] = 0
 		}
 	}
 	pitched := bufs.pitchedBuf
@@ -351,24 +400,20 @@ func bestUncached(hero hero.Hero, weapons []weapon.Weapon, hand []card.Card, inc
 
 	// recurse tracks defenderCostSum separately so the leaf can hand the attack pipeline a
 	// resource budget of (pitchSum - defenderCostSum) to deduct chain-card effective costs from.
-	// pitchedVals is a scratch slice reused across leaves to carry the Pitch-role cards' pitch
-	// values into the phase-feasibility check.
-	pitchedValsScratch := make([]int, 0, n)
-	var recurse func(i, pitchSum, costSum, defenseSum, defenderCostSum int)
-	recurse = func(i, pitchSum, costSum, defenseSum, defenderCostSum int) {
-		if i == n {
+	// arsenalCount is at most 1 across the whole partition; any branch that would push it past
+	// one is pruned at the role-selection step. pitchedVals is scratch reused across leaves.
+	pitchedValsScratch := make([]int, 0, totalN)
+	var recurse func(i, pitchSum, costSum, defenseSum, defenderCostSum, arsenalCount int)
+	recurse = func(i, pitchSum, costSum, defenseSum, defenderCostSum, arsenalCount int) {
+		if i == totalN {
 			attackCardCost := costSum - defenderCostSum
 			drCost := defenderCostSum
 			pitchedVals := pitchedValsScratch[:0]
-			for j := 0; j < n; j++ {
-				if roles[j] == Pitch {
-					pitchedVals = append(pitchedVals, pitchVals[j])
+			for j := 0; j < totalN; j++ {
+				if rolesBuf[j] == Pitch {
+					pitchedVals = append(pitchedVals, pvals[j])
 				}
 			}
-			// Weapon swings are an attack-phase cost too — the leaf admits the partition iff at
-			// least one weapon mask yields a legal Pitch split. The per-mask refinement happens
-			// inside bestAttackWithWeapons so we can pick the best damage while respecting each
-			// mask's specific cost.
 			feasible := false
 			for mask := 0; mask < 1<<len(weapons); mask++ {
 				if canCoverPhasesAllUsed(pitchedVals, attackCardCost+bufs.weaponCosts[mask], drCost) {
@@ -383,30 +428,48 @@ func bestUncached(hero hero.Hero, weapons []weapon.Weapon, hand []card.Card, inc
 			if prevented > incomingDamage {
 				prevented = incomingDamage
 			}
+			// Group roles into played / pitched / defending buckets. The grouping iterates the
+			// hand (size n) for the usual buckets, then layers in the arsenal slot (index n)
+			// based on its assigned role. Arsenal-role cards — whether from hand or from the
+			// slot — contribute nothing this turn.
 			var p, a []card.Card
 			var defenseDealt int
-			if hasReactions {
+			hasAnyDefender := hasReactions
+			if !hasAnyDefender && arsenalCardIn != nil && rolesBuf[n] == Defend {
+				hasAnyDefender = true
+			}
+			if hasAnyDefender {
 				var d []card.Card
-				p, a, d = groupByRoleInto(hand, roles, pitched[:0], attackers[:0], defenders[:0])
+				p, a, d = groupByRoleInto(hand, rolesBuf[:n], pitched[:0], attackers[:0], defenders[:0])
+				if arsenalCardIn != nil {
+					switch rolesBuf[n] {
+					case Attack:
+						a = append(a, arsenalCardIn)
+					case Defend:
+						d = append(d, arsenalCardIn)
+					}
+				}
 				defenseDealt = defenseReactionDamage(d, p, deck, bufs.state)
 			} else {
-				p, a = groupPitchAttack(hand, roles, pitched[:0], attackers[:0])
+				p, a = groupPitchAttack(hand, rolesBuf[:n], pitched[:0], attackers[:0])
+				if arsenalCardIn != nil && rolesBuf[n] == Attack {
+					a = append(a, arsenalCardIn)
+				}
 			}
 			attackDealt, leftoverRunechants, residualBudget, swung := bestAttackWithWeapons(hero, weapons, a, p, deck, bufs, pitchSum, costSum, defenderCostSum, runechantCarryover)
 
-			// DiscountPerRunechant defense reactions reserved 0 in defenderCostSum (their Cost() is
-			// the fully-discounted minimum). Now that the attack chain has resolved and left
-			// `leftoverRunechants` runechants available for defense, re-price each discounted
-			// defender at its actual effective cost and reject this partition if the chain didn't
-			// leave enough residual budget to cover the delta. Runechants aren't consumed by the
-			// discount check — multiple discount defenders can all read the same leftover pool.
+			// DiscountPerRunechant defense reactions reserved 0 in defenderCostSum (their Cost()
+			// is the fully-discounted minimum). Re-price them now that the attack chain has
+			// resolved and left `leftoverRunechants` runechants available. Arsenal-in defenders
+			// aren't checked here; the roster has no DiscountPerRunechant cards that would also
+			// want to live in the arsenal slot, so the cheap hand-only scan suffices.
 			if hasDiscountReactions {
 				extraCost := 0
 				for j := 0; j < n; j++ {
-					if roles[j] != Defend || defendPrintedVals[j] == 0 {
+					if rolesBuf[j] != Defend || dPrintedVals[j] == 0 {
 						continue
 					}
-					actualCost := defendPrintedVals[j] - leftoverRunechants
+					actualCost := dPrintedVals[j] - leftoverRunechants
 					if actualCost < 0 {
 						actualCost = 0
 					}
@@ -418,44 +481,107 @@ func bestUncached(hero hero.Hero, weapons []weapon.Weapon, hand []card.Card, inc
 			}
 
 			v := attackDealt + defenseDealt + prevented
-			// Prefer higher Value; on ties prefer more leftover runechants — they're future
-			// damage on the next turn, so they're strictly additional value over the carryover
-			// baseline even when this turn's Value doesn't differentiate.
-			if v > best.Value || (v == best.Value && leftoverRunechants > best.LeftoverRunechants) {
+			// Identify the arsenal-role card (if any) up front — we use its presence as a
+			// tiebreaker: on equal Value and equal leftover runechants, a partition that puts
+			// something in the arsenal beats one that doesn't, since the arsenal card carries
+			// to next turn without eating a hand slot in the refill.
+			var arsenalCard card.Card
+			for j := 0; j < totalN; j++ {
+				if rolesBuf[j] == Arsenal {
+					if j < n {
+						arsenalCard = hand[j]
+					} else {
+						arsenalCard = arsenalCardIn
+					}
+					break
+				}
+			}
+			bestHasArsenal := best.ArsenalCard != nil
+			hasArsenal := arsenalCard != nil
+			// Tiebreak order: higher Value first, then more leftover runechants (they convert
+			// to future arcane damage), then preferring a partition that uses the arsenal slot
+			// (arsenal saves a hand slot in the next refill, smaller but real upside).
+			better := v > best.Value
+			if !better && v == best.Value {
+				if leftoverRunechants > best.LeftoverRunechants {
+					better = true
+				} else if leftoverRunechants == best.LeftoverRunechants && hasArsenal && !bestHasArsenal {
+					better = true
+				}
+			}
+			if better {
 				best.Value = v
-				copy(best.Roles, roles)
+				copy(best.Roles, rolesBuf[:n])
 				best.Weapons = swung
 				best.LeftoverRunechants = leftoverRunechants
+				best.ArsenalCard = arsenalCard
+				// Any hand card in the Arsenal slot replaces its Held default with the Arsenal
+				// role in the returned Play. Arsenal-in stays at slot n (not reflected in
+				// Roles, which only covers hand positions).
+				if arsenalCard != nil {
+					for j := 0; j < n; j++ {
+						if rolesBuf[j] == Arsenal {
+							best.Roles[j] = Arsenal
+							break
+						}
+					}
+				}
+				// Record whether the previous-turn arsenal card was played this turn so callers
+				// can report it in the best-hand printout — it's not in the hand slice and
+				// wouldn't otherwise surface alongside the role listing.
+				best.PlayedFromArsenal = nil
+				best.PlayedFromArsenalRole = 0
+				if arsenalCardIn != nil && (rolesBuf[n] == Attack || rolesBuf[n] == Defend) {
+					best.PlayedFromArsenal = arsenalCardIn
+					best.PlayedFromArsenalRole = rolesBuf[n]
+				}
 			}
 			return
 		}
-		// Defense Reactions have strict timing in FaB — they can only be played in response to an
-		// opponent's attack, not chained during our own attack phase. Pruning the Attack role here
-		// keeps the solver from picking partitions that use a reaction's Play effect for its
-		// damage/runechant credit in offense.
-		isDefenseReaction := hand[i].Types().Has(card.TypeDefenseReaction)
-		for r := Role(0); r <= Held; r++ {
-			roles[i] = r
-			switch r {
-			case Pitch:
-				recurse(i+1, pitchSum+pitchVals[i], costSum, defenseSum, defenderCostSum)
-			case Attack:
-				if isDefenseReaction {
+		isArsenalSlot := i == n && arsenalCardIn != nil
+		for r := Role(0); r <= Arsenal; r++ {
+			// Role restrictions: the arsenal slot may only take Arsenal (stay), Attack (any
+			// non-DR card — auras and non-attack actions can also be played from arsenal on
+			// your turn), or Defend (only if DR — plain-blocking from arsenal isn't allowed).
+			// Hand cards can take any role, with Attack forbidden for DRs (strict FaB timing —
+			// DRs only fire on the opponent's turn).
+			if isArsenalSlot {
+				switch r {
+				case Pitch, Held:
+					continue
+				case Attack:
+					if isDR[i] {
+						continue
+					}
+				case Defend:
+					if !isDR[i] {
+						continue
+					}
+				}
+			} else {
+				if r == Attack && isDR[i] {
 					continue
 				}
-				recurse(i+1, pitchSum, costSum+costVals[i], defenseSum, defenderCostSum)
+			}
+			if r == Arsenal && arsenalCount >= 1 {
+				continue
+			}
+			rolesBuf[i] = r
+			switch r {
+			case Pitch:
+				recurse(i+1, pitchSum+pvals[i], costSum, defenseSum, defenderCostSum, arsenalCount)
+			case Attack:
+				recurse(i+1, pitchSum, costSum+cvals[i], defenseSum, defenderCostSum, arsenalCount)
 			case Defend:
-				// Plain blocking (any card's Defense used to absorb damage) costs nothing.
-				// Defense Reactions must have their Cost paid to resolve — defendCostVals carries
-				// that cost for reaction cards and is zero otherwise.
-				recurse(i+1, pitchSum, costSum+defendCostVals[i], defenseSum+defenseVals[i], defenderCostSum+defendCostVals[i])
+				recurse(i+1, pitchSum, costSum+dCostVals[i], defenseSum+dvals[i], defenderCostSum+dCostVals[i], arsenalCount)
 			case Held:
-				// Card stays in hand; contributes nothing to any pool this turn.
-				recurse(i+1, pitchSum, costSum, defenseSum, defenderCostSum)
+				recurse(i+1, pitchSum, costSum, defenseSum, defenderCostSum, arsenalCount)
+			case Arsenal:
+				recurse(i+1, pitchSum, costSum, defenseSum, defenderCostSum, arsenalCount+1)
 			}
 		}
 	}
-	recurse(0, 0, 0, 0, 0)
+	recurse(0, 0, 0, 0, 0, 0)
 	// Once per Best call, on the winning line only, attribute per-card contribution. We skip
 	// when nothing has been played (best.Roles empty — a pathological degenerate path Best never
 	// actually returns from, but guard anyway).
