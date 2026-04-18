@@ -3,6 +3,11 @@
 //
 // Text: "If you have played a 'non-attack' action card this turn, Vigor Rush gains **go again**."
 //
+// Go again is CONDITIONAL on a prior non-attack action, so GoAgain() returns false; vigorRushPlay
+// flips Self.GrantedGoAgain when the condition fires and the solver's EffectiveGoAgain check
+// picks up the grant. Returning true from GoAgain() would make the chain-legality check always
+// pass, over-crediting sequences where no non-attack action was played.
+//
 // Source: github.com/the-fab-cube/flesh-and-blood-cards (card.csv).
 
 package generic
@@ -35,7 +40,7 @@ func (VigorRushRed) Pitch() int                  { return 1 }
 func (VigorRushRed) Attack() int                 { return 4 }
 func (VigorRushRed) Defense() int                { return 2 }
 func (VigorRushRed) Types() card.TypeSet         { return vigorRushTypes }
-func (VigorRushRed) GoAgain() bool               { return true }
+func (VigorRushRed) GoAgain() bool               { return false }
 func (c VigorRushRed) Play(s *card.TurnState) int { return vigorRushPlay(c.Attack(), s) }
 
 type VigorRushYellow struct{}
@@ -47,7 +52,7 @@ func (VigorRushYellow) Pitch() int                  { return 2 }
 func (VigorRushYellow) Attack() int                 { return 3 }
 func (VigorRushYellow) Defense() int                { return 2 }
 func (VigorRushYellow) Types() card.TypeSet         { return vigorRushTypes }
-func (VigorRushYellow) GoAgain() bool               { return true }
+func (VigorRushYellow) GoAgain() bool               { return false }
 func (c VigorRushYellow) Play(s *card.TurnState) int { return vigorRushPlay(c.Attack(), s) }
 
 type VigorRushBlue struct{}
@@ -59,5 +64,5 @@ func (VigorRushBlue) Pitch() int                  { return 3 }
 func (VigorRushBlue) Attack() int                 { return 2 }
 func (VigorRushBlue) Defense() int                { return 2 }
 func (VigorRushBlue) Types() card.TypeSet         { return vigorRushTypes }
-func (VigorRushBlue) GoAgain() bool               { return true }
+func (VigorRushBlue) GoAgain() bool               { return false }
 func (c VigorRushBlue) Play(s *card.TurnState) int { return vigorRushPlay(c.Attack(), s) }

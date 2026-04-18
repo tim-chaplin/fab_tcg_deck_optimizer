@@ -4,7 +4,10 @@
 // Text: "If Fervent Forerunner hits, **opt 2**. If Fervent Forerunner is played from arsenal, it
 // gains **go again**."
 //
-// Simplification: On-hit Opt 2 and arsenal-only go-again aren't modelled.
+// Simplification: on-hit Opt 2 and the played-from-arsenal go-again aren't modelled. The latter
+// means GoAgain() returns false unconditionally (matching how the rest of the unmodelled riders
+// here default off) — a true return would let Fervent Forerunner always chain, over-crediting
+// the vast majority of sequences where it wasn't played from arsenal.
 //
 // Source: github.com/the-fab-cube/flesh-and-blood-cards (card.csv).
 
@@ -23,7 +26,7 @@ func (FerventForerunnerRed) Pitch() int                  { return 1 }
 func (FerventForerunnerRed) Attack() int                 { return 3 }
 func (FerventForerunnerRed) Defense() int                { return 2 }
 func (FerventForerunnerRed) Types() card.TypeSet         { return ferventForerunnerTypes }
-func (FerventForerunnerRed) GoAgain() bool               { return true }
+func (FerventForerunnerRed) GoAgain() bool               { return false }
 func (c FerventForerunnerRed) Play(s *card.TurnState) int { return c.Attack() }
 
 type FerventForerunnerYellow struct{}
@@ -35,7 +38,7 @@ func (FerventForerunnerYellow) Pitch() int                  { return 2 }
 func (FerventForerunnerYellow) Attack() int                 { return 2 }
 func (FerventForerunnerYellow) Defense() int                { return 2 }
 func (FerventForerunnerYellow) Types() card.TypeSet         { return ferventForerunnerTypes }
-func (FerventForerunnerYellow) GoAgain() bool               { return true }
+func (FerventForerunnerYellow) GoAgain() bool               { return false }
 func (c FerventForerunnerYellow) Play(s *card.TurnState) int { return c.Attack() }
 
 type FerventForerunnerBlue struct{}
@@ -47,5 +50,5 @@ func (FerventForerunnerBlue) Pitch() int                  { return 3 }
 func (FerventForerunnerBlue) Attack() int                 { return 1 }
 func (FerventForerunnerBlue) Defense() int                { return 2 }
 func (FerventForerunnerBlue) Types() card.TypeSet         { return ferventForerunnerTypes }
-func (FerventForerunnerBlue) GoAgain() bool               { return true }
+func (FerventForerunnerBlue) GoAgain() bool               { return false }
 func (c FerventForerunnerBlue) Play(s *card.TurnState) int { return c.Attack() }

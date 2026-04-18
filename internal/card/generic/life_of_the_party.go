@@ -5,7 +5,10 @@
 // Party's {r} cost. If you do, choose all modes, otherwise choose 1 at random; - This gets "When
 // this hits, gain life 2{h}." - This gets +2{p}. - This gets **go again**."
 //
-// Simplification: Crazy Brew substitute cost and random-mode selection aren't modelled.
+// Simplification: Crazy Brew substitute and random-mode selection aren't modelled, so all three
+// modes (+2{p}, on-hit life, go again) default off — including go again. Returning true from
+// GoAgain() would make the chain-legality check always pass, over-crediting sequences against
+// the baseline where the random mode rolled a different option.
 //
 // Source: github.com/the-fab-cube/flesh-and-blood-cards (card.csv).
 
@@ -24,7 +27,7 @@ func (LifeOfThePartyRed) Pitch() int                  { return 1 }
 func (LifeOfThePartyRed) Attack() int                 { return 4 }
 func (LifeOfThePartyRed) Defense() int                { return 2 }
 func (LifeOfThePartyRed) Types() card.TypeSet         { return lifeOfThePartyTypes }
-func (LifeOfThePartyRed) GoAgain() bool               { return true }
+func (LifeOfThePartyRed) GoAgain() bool               { return false }
 func (c LifeOfThePartyRed) Play(s *card.TurnState) int { return c.Attack() }
 
 type LifeOfThePartyYellow struct{}
@@ -36,7 +39,7 @@ func (LifeOfThePartyYellow) Pitch() int                  { return 2 }
 func (LifeOfThePartyYellow) Attack() int                 { return 3 }
 func (LifeOfThePartyYellow) Defense() int                { return 2 }
 func (LifeOfThePartyYellow) Types() card.TypeSet         { return lifeOfThePartyTypes }
-func (LifeOfThePartyYellow) GoAgain() bool               { return true }
+func (LifeOfThePartyYellow) GoAgain() bool               { return false }
 func (c LifeOfThePartyYellow) Play(s *card.TurnState) int { return c.Attack() }
 
 type LifeOfThePartyBlue struct{}
@@ -48,5 +51,5 @@ func (LifeOfThePartyBlue) Pitch() int                  { return 3 }
 func (LifeOfThePartyBlue) Attack() int                 { return 2 }
 func (LifeOfThePartyBlue) Defense() int                { return 2 }
 func (LifeOfThePartyBlue) Types() card.TypeSet         { return lifeOfThePartyTypes }
-func (LifeOfThePartyBlue) GoAgain() bool               { return true }
+func (LifeOfThePartyBlue) GoAgain() bool               { return false }
 func (c LifeOfThePartyBlue) Play(s *card.TurnState) int { return c.Attack() }
