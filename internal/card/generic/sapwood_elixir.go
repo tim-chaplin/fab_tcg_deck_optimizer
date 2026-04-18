@@ -1,0 +1,40 @@
+// Sapwood Elixir — Generic Action. Cost 1, Pitch 1, Defense 3. Only printed in Red.
+//
+// Text: "Your next attack this turn gets +3{p}. You may destroy a Frailty token you control. If you
+// do, gain 1{h}. **Go again**"
+//
+// Simplification: Frailty health-gain rider dropped. Scans TurnState.CardsRemaining for the first
+// matching attack action card and credits the bonus assuming it will be played; if none is
+// scheduled after this card, the bonus fizzles.
+//
+// Source: github.com/the-fab-cube/flesh-and-blood-cards (card.csv).
+
+package generic
+
+import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+
+var sapwoodElixirTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction)
+
+// sapwoodElixirPlay returns 3 when a matching attack action card is scheduled later this turn.
+func sapwoodElixirPlay(s *card.TurnState) int {
+	for _, pc := range s.CardsRemaining {
+		t := pc.Card.Types()
+		if !t.Has(card.TypeAttack) || !t.Has(card.TypeAction) {
+			continue
+		}
+		return 3
+	}
+	return 0
+}
+
+type SapwoodElixirRed struct{}
+
+func (SapwoodElixirRed) ID() card.ID                 { return card.SapwoodElixirRed }
+func (SapwoodElixirRed) Name() string                { return "Sapwood Elixir (Red)" }
+func (SapwoodElixirRed) Cost() int                   { return 1 }
+func (SapwoodElixirRed) Pitch() int                  { return 1 }
+func (SapwoodElixirRed) Attack() int                 { return 0 }
+func (SapwoodElixirRed) Defense() int                { return 3 }
+func (SapwoodElixirRed) Types() card.TypeSet         { return sapwoodElixirTypes }
+func (SapwoodElixirRed) GoAgain() bool               { return true }
+func (SapwoodElixirRed) Play(s *card.TurnState) int { return sapwoodElixirPlay(s) }

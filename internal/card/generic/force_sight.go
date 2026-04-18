@@ -1,0 +1,64 @@
+// Force Sight — Generic Action. Cost 1. Printed pitch variants: Red 1, Yellow 2, Blue 3. Defense 2.
+//
+// Text: "The next attack action card you play this turn gains +3{p}. If Force Sight is played from
+// arsenal, **opt 2**. **Go again**"
+//
+// Simplification: The arsenal-gated Opt 2 is skipped. Scans TurnState.CardsRemaining for the first
+// matching attack action card and credits the bonus assuming it will be played; if none is
+// scheduled after this card, the bonus fizzles.
+//
+// Source: github.com/the-fab-cube/flesh-and-blood-cards (card.csv).
+
+package generic
+
+import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+
+var forceSightTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction)
+
+// forceSightPlay returns 3 when a matching attack action card is scheduled later this turn.
+func forceSightPlay(s *card.TurnState) int {
+	for _, pc := range s.CardsRemaining {
+		t := pc.Card.Types()
+		if !t.Has(card.TypeAttack) || !t.Has(card.TypeAction) {
+			continue
+		}
+		return 3
+	}
+	return 0
+}
+
+type ForceSightRed struct{}
+
+func (ForceSightRed) ID() card.ID                 { return card.ForceSightRed }
+func (ForceSightRed) Name() string                { return "Force Sight (Red)" }
+func (ForceSightRed) Cost() int                   { return 1 }
+func (ForceSightRed) Pitch() int                  { return 1 }
+func (ForceSightRed) Attack() int                 { return 0 }
+func (ForceSightRed) Defense() int                { return 2 }
+func (ForceSightRed) Types() card.TypeSet         { return forceSightTypes }
+func (ForceSightRed) GoAgain() bool               { return true }
+func (ForceSightRed) Play(s *card.TurnState) int { return forceSightPlay(s) }
+
+type ForceSightYellow struct{}
+
+func (ForceSightYellow) ID() card.ID                 { return card.ForceSightYellow }
+func (ForceSightYellow) Name() string                { return "Force Sight (Yellow)" }
+func (ForceSightYellow) Cost() int                   { return 1 }
+func (ForceSightYellow) Pitch() int                  { return 2 }
+func (ForceSightYellow) Attack() int                 { return 0 }
+func (ForceSightYellow) Defense() int                { return 2 }
+func (ForceSightYellow) Types() card.TypeSet         { return forceSightTypes }
+func (ForceSightYellow) GoAgain() bool               { return true }
+func (ForceSightYellow) Play(s *card.TurnState) int { return forceSightPlay(s) }
+
+type ForceSightBlue struct{}
+
+func (ForceSightBlue) ID() card.ID                 { return card.ForceSightBlue }
+func (ForceSightBlue) Name() string                { return "Force Sight (Blue)" }
+func (ForceSightBlue) Cost() int                   { return 1 }
+func (ForceSightBlue) Pitch() int                  { return 3 }
+func (ForceSightBlue) Attack() int                 { return 0 }
+func (ForceSightBlue) Defense() int                { return 2 }
+func (ForceSightBlue) Types() card.TypeSet         { return forceSightTypes }
+func (ForceSightBlue) GoAgain() bool               { return true }
+func (ForceSightBlue) Play(s *card.TurnState) int { return forceSightPlay(s) }
