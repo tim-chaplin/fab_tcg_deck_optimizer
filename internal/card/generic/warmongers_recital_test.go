@@ -24,12 +24,21 @@ func TestWarmongersRecital_NonAttackInRemainingFizzles(t *testing.T) {
 	}
 }
 
-// TestWarmongersRecital_NextAttackReturnsBonus: first attack-action in CardsRemaining triggers +3.
+// TestWarmongersRecital_NextAttackReturnsBonus: first attack-action in CardsRemaining triggers
+// the per-variant bonus (Red +3, Yellow +2, Blue +1).
 func TestWarmongersRecital_NextAttackReturnsBonus(t *testing.T) {
 	s := card.TurnState{CardsRemaining: []*card.PlayedCard{{Card: stubGenericAttack(0, 0)}}}
-	for _, c := range []card.Card{WarmongersRecitalRed{}, WarmongersRecitalYellow{}, WarmongersRecitalBlue{}} {
-		if got := c.Play(&s); got != 3 {
-			t.Errorf("%s: Play() = %d, want 3", c.Name(), got)
+	cases := []struct {
+		c    card.Card
+		want int
+	}{
+		{WarmongersRecitalRed{}, 3},
+		{WarmongersRecitalYellow{}, 2},
+		{WarmongersRecitalBlue{}, 1},
+	}
+	for _, tc := range cases {
+		if got := tc.c.Play(&s); got != tc.want {
+			t.Errorf("%s: Play() = %d, want %d", tc.c.Name(), got, tc.want)
 		}
 	}
 }

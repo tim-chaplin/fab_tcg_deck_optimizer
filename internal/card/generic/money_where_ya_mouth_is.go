@@ -1,8 +1,8 @@
 // Money Where Ya Mouth Is — Generic Action. Cost 1. Printed pitch variants: Red 1, Yellow 2, Blue
 // 3. Defense 2.
 //
-// Text: "Your next attack this turn gets +3{p} and "When this attacks a hero, you may **wager** a
-// Gold token with them.""
+// Text: "Your next attack this turn gets +N{p} and "When this attacks a hero, you may **wager** a
+// Gold token with them."" (Red N=3, Yellow N=2, Blue N=1.)
 //
 // Simplification: Wager Gold token rider is dropped. Scans TurnState.CardsRemaining for the first
 // matching attack action card and credits the bonus assuming it will be played; if none is
@@ -16,14 +16,14 @@ import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 
 var moneyWhereYaMouthIsTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction)
 
-// moneyWhereYaMouthIsPlay returns 3 when a matching attack action card is scheduled later this turn.
-func moneyWhereYaMouthIsPlay(s *card.TurnState) int {
+// moneyWhereYaMouthIsPlay returns n when a matching attack action card is scheduled later this turn.
+func moneyWhereYaMouthIsPlay(s *card.TurnState, n int) int {
 	for _, pc := range s.CardsRemaining {
 		t := pc.Card.Types()
 		if !t.Has(card.TypeAttack) || !t.Has(card.TypeAction) {
 			continue
 		}
-		return 3
+		return n
 	}
 	return 0
 }
@@ -38,7 +38,7 @@ func (MoneyWhereYaMouthIsRed) Attack() int                 { return 0 }
 func (MoneyWhereYaMouthIsRed) Defense() int                { return 2 }
 func (MoneyWhereYaMouthIsRed) Types() card.TypeSet         { return moneyWhereYaMouthIsTypes }
 func (MoneyWhereYaMouthIsRed) GoAgain() bool               { return true }
-func (MoneyWhereYaMouthIsRed) Play(s *card.TurnState) int { return moneyWhereYaMouthIsPlay(s) }
+func (MoneyWhereYaMouthIsRed) Play(s *card.TurnState) int { return moneyWhereYaMouthIsPlay(s, 3) }
 
 type MoneyWhereYaMouthIsYellow struct{}
 
@@ -50,7 +50,7 @@ func (MoneyWhereYaMouthIsYellow) Attack() int                 { return 0 }
 func (MoneyWhereYaMouthIsYellow) Defense() int                { return 2 }
 func (MoneyWhereYaMouthIsYellow) Types() card.TypeSet         { return moneyWhereYaMouthIsTypes }
 func (MoneyWhereYaMouthIsYellow) GoAgain() bool               { return true }
-func (MoneyWhereYaMouthIsYellow) Play(s *card.TurnState) int { return moneyWhereYaMouthIsPlay(s) }
+func (MoneyWhereYaMouthIsYellow) Play(s *card.TurnState) int { return moneyWhereYaMouthIsPlay(s, 2) }
 
 type MoneyWhereYaMouthIsBlue struct{}
 
@@ -62,4 +62,4 @@ func (MoneyWhereYaMouthIsBlue) Attack() int                 { return 0 }
 func (MoneyWhereYaMouthIsBlue) Defense() int                { return 2 }
 func (MoneyWhereYaMouthIsBlue) Types() card.TypeSet         { return moneyWhereYaMouthIsTypes }
 func (MoneyWhereYaMouthIsBlue) GoAgain() bool               { return true }
-func (MoneyWhereYaMouthIsBlue) Play(s *card.TurnState) int { return moneyWhereYaMouthIsPlay(s) }
+func (MoneyWhereYaMouthIsBlue) Play(s *card.TurnState) int { return moneyWhereYaMouthIsPlay(s, 1) }

@@ -24,12 +24,21 @@ func TestSloggism_LowCostFilteredOut(t *testing.T) {
 	}
 }
 
-// TestSloggism_HighCostReturnsBonus: first cost>=2 attack triggers +6.
+// TestSloggism_HighCostReturnsBonus: first cost>=2 attack triggers the per-variant bonus
+// (Red +6, Yellow +5, Blue +4).
 func TestSloggism_HighCostReturnsBonus(t *testing.T) {
 	s := card.TurnState{CardsRemaining: []*card.PlayedCard{{Card: stubGenericAttack(2, 0)}}}
-	for _, c := range []card.Card{SloggismRed{}, SloggismYellow{}, SloggismBlue{}} {
-		if got := c.Play(&s); got != 6 {
-			t.Errorf("%s: Play() = %d, want 6", c.Name(), got)
+	cases := []struct {
+		c    card.Card
+		want int
+	}{
+		{SloggismRed{}, 6},
+		{SloggismYellow{}, 5},
+		{SloggismBlue{}, 4},
+	}
+	for _, tc := range cases {
+		if got := tc.c.Play(&s); got != tc.want {
+			t.Errorf("%s: Play() = %d, want %d", tc.c.Name(), got, tc.want)
 		}
 	}
 }

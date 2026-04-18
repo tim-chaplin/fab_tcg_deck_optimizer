@@ -24,12 +24,21 @@ func TestPrimeTheCrowd_NonAttackInRemainingFizzles(t *testing.T) {
 	}
 }
 
-// TestPrimeTheCrowd_NextAttackReturnsBonus: first attack-action triggers +4.
+// TestPrimeTheCrowd_NextAttackReturnsBonus: first attack-action triggers the per-variant bonus
+// (Red +4, Yellow +3, Blue +2).
 func TestPrimeTheCrowd_NextAttackReturnsBonus(t *testing.T) {
 	s := card.TurnState{CardsRemaining: []*card.PlayedCard{{Card: stubGenericAttack(0, 0)}}}
-	for _, c := range []card.Card{PrimeTheCrowdRed{}, PrimeTheCrowdYellow{}, PrimeTheCrowdBlue{}} {
-		if got := c.Play(&s); got != 4 {
-			t.Errorf("%s: Play() = %d, want 4", c.Name(), got)
+	cases := []struct {
+		c    card.Card
+		want int
+	}{
+		{PrimeTheCrowdRed{}, 4},
+		{PrimeTheCrowdYellow{}, 3},
+		{PrimeTheCrowdBlue{}, 2},
+	}
+	for _, tc := range cases {
+		if got := tc.c.Play(&s); got != tc.want {
+			t.Errorf("%s: Play() = %d, want %d", tc.c.Name(), got, tc.want)
 		}
 	}
 }

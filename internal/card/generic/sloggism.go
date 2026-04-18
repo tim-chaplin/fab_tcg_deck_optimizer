@@ -1,7 +1,7 @@
 // Sloggism — Generic Action. Cost 3. Printed pitch variants: Red 1, Yellow 2, Blue 3. Defense 2.
 //
-// Text: "The next attack action card with cost 2 or greater you play this turn gains +6{p}. **Go
-// again**"
+// Text: "The next attack action card with cost 2 or greater you play this turn gains +N{p}. **Go
+// again**" (Red N=6, Yellow N=5, Blue N=4.)
 //
 // Simplification: Scans TurnState.CardsRemaining for the first matching attack action card and
 // credits the bonus assuming it will be played; if none is scheduled after this card, the bonus
@@ -15,15 +15,15 @@ import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 
 var sloggismTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction)
 
-// sloggismPlay returns 6 when a matching attack action card is scheduled later this turn.
-func sloggismPlay(s *card.TurnState) int {
+// sloggismPlay returns n when a matching attack action card is scheduled later this turn.
+func sloggismPlay(s *card.TurnState, n int) int {
 	for _, pc := range s.CardsRemaining {
 		t := pc.Card.Types()
 		if !t.Has(card.TypeAttack) || !t.Has(card.TypeAction) {
 			continue
 		}
 		if pc.Card.Cost() >= 2 {
-			return 6
+			return n
 		}
 		continue
 	}
@@ -40,7 +40,7 @@ func (SloggismRed) Attack() int                 { return 0 }
 func (SloggismRed) Defense() int                { return 2 }
 func (SloggismRed) Types() card.TypeSet         { return sloggismTypes }
 func (SloggismRed) GoAgain() bool               { return true }
-func (SloggismRed) Play(s *card.TurnState) int { return sloggismPlay(s) }
+func (SloggismRed) Play(s *card.TurnState) int { return sloggismPlay(s, 6) }
 
 type SloggismYellow struct{}
 
@@ -52,7 +52,7 @@ func (SloggismYellow) Attack() int                 { return 0 }
 func (SloggismYellow) Defense() int                { return 2 }
 func (SloggismYellow) Types() card.TypeSet         { return sloggismTypes }
 func (SloggismYellow) GoAgain() bool               { return true }
-func (SloggismYellow) Play(s *card.TurnState) int { return sloggismPlay(s) }
+func (SloggismYellow) Play(s *card.TurnState) int { return sloggismPlay(s, 5) }
 
 type SloggismBlue struct{}
 
@@ -64,4 +64,4 @@ func (SloggismBlue) Attack() int                 { return 0 }
 func (SloggismBlue) Defense() int                { return 2 }
 func (SloggismBlue) Types() card.TypeSet         { return sloggismTypes }
 func (SloggismBlue) GoAgain() bool               { return true }
-func (SloggismBlue) Play(s *card.TurnState) int { return sloggismPlay(s) }
+func (SloggismBlue) Play(s *card.TurnState) int { return sloggismPlay(s, 4) }
