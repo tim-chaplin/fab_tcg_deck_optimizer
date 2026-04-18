@@ -9,6 +9,7 @@ import (
 	"sort"
 	"strings"
 	"sync"
+	"sync/atomic"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/cards"
@@ -502,22 +503,30 @@ func (d *Deck) EvaluateWith(runs int, incomingDamage int, rng *rand.Rand, ev *ha
 	return d.Stats
 }
 
-// IterateParallel runs one iterate-mode round: shallow-screen mutations in chunks of numWorkers
-// using parallel goroutines, deep-confirm shallow passers in deterministic mutation order, and
-// return the first mutation that confirms as an improvement. Chunking (rather than evaluating
-// every mutation eagerly) lets the loop short-circuit as soon as an improvement is confirmed —
-// matching the first-improvement-wins semantics of the serial iterate.
+// IterateParallel runs one iterate-mode round: shallow-screens mutations on a pool of workers
+// while the main goroutine walks the results in mutation order and deep-confirms shallow passers.
+// As soon as a mutation deep-confirms, a cancellation flag stops the workers so no further
+// shallow evaluations run.
+//
+// Workers fill results out-of-order on a pool of numWorkers goroutines, signalling completion of
+// each slot via a per-mutation channel. The main goroutine reads those channels in strict
+// mutation-index order: the first shallow pass it encounters is the first by-position candidate,
+// preserving the "earliest mutation wins" heuristic of the serial iterate even under full
+// parallelism. Slower workers that were still computing when cancellation fires get their
+// ready-signal closed immediately (with zero as the result), so the main-goroutine walk never
+// blocks on abandoned work.
 //
 // mutations: ordered list of candidates; the first to deep-confirm wins.
 // bestAvg: the current baseline (at deep-shuffles depth).
 // shallowShuffles / deepShuffles / incoming: eval settings.
-// numWorkers: goroutines to spawn per shallow chunk; 0 uses runtime.GOMAXPROCS(0).
-// seed: base seed for worker RNGs; workers use (seed + offset) so runs are reproducible.
-// deepRng: rng used for deep-confirm runs, threaded across chunks; nil disables determinism.
-// onShallowRejected / onShallowPassFailedDeep: optional hooks for logging.
+// numWorkers: goroutines in the pool; 0 uses runtime.GOMAXPROCS(0).
+// seed: base seed for worker RNGs; worker w uses (seed + w) so runs are reproducible.
+// deepRng: rng used for the serial deep-confirm runs on the main goroutine.
+// onShallowPassFailedDeep: optional hook invoked when a shallow pass fails at deep depth (for
+// logging in iterate mode).
 //
 // Returns (improvedDeck, improvedAvg, improvedIndex, true) on first confirmed improvement, or
-// (nil, bestAvg, -1, false) if the whole mutation list produces no confirmed improvement.
+// (nil, bestAvg, -1, false) if no mutation's deep-confirmed improvement was found.
 func IterateParallel(
 	mutations []Mutation,
 	bestAvg float64,
@@ -529,50 +538,24 @@ func IterateParallel(
 	if numWorkers <= 0 {
 		numWorkers = runtime.GOMAXPROCS(0)
 	}
+	if len(mutations) == 0 {
+		return nil, bestAvg, -1, false
+	}
 	if deepRng == nil {
 		deepRng = rand.New(rand.NewSource(seed))
 	}
-	for start := 0; start < len(mutations); start += numWorkers {
-		end := start + numWorkers
-		if end > len(mutations) {
-			end = len(mutations)
-		}
-		shallowAvgs := shallowScreenChunk(mutations[start:end], shallowShuffles, incoming, numWorkers, seed+int64(start))
-		// Walk chunk results in mutation order so the FIRST shallow pass (by index) gets tried
-		// first at deep depth — matches the serial "first improvement wins" ordering.
-		for i, shallowAvg := range shallowAvgs {
-			if shallowAvg <= bestAvg {
-				continue
-			}
-			idx := start + i
-			mut := mutations[idx]
-			d := New(mut.Deck.Hero, mut.Deck.Weapons, mut.Deck.Cards)
-			deepAvg := d.Evaluate(deepShuffles, incoming, deepRng).Avg()
-			if deepAvg > bestAvg {
-				return d, deepAvg, idx, true
-			}
-			if onShallowPassFailedDeep != nil {
-				onShallowPassFailedDeep(idx, mut, shallowAvg, deepAvg)
-			}
-		}
-	}
-	return nil, bestAvg, -1, false
-}
 
-// shallowScreenChunk evaluates a chunk of mutations in parallel, one goroutine per chunk slot,
-// and returns the per-mutation averages. Each worker holds its own hand.Evaluator (buffers only;
-// the memo is shared across all goroutines) so the shallow screen scales near-linearly with
-// numWorkers up to the chunk size.
-func shallowScreenChunk(chunk []Mutation, shallowShuffles, incoming, numWorkers int, seed int64) []float64 {
-	if numWorkers > len(chunk) {
-		numWorkers = len(chunk)
+	// results[i] = shallow avg for mutation i. ready[i] closes once results[i] is set (or once
+	// the worker skipped that slot because cancellation fired). Main waits on ready[i] in order.
+	results := make([]float64, len(mutations))
+	ready := make([]chan struct{}, len(mutations))
+	for i := range ready {
+		ready[i] = make(chan struct{})
 	}
-	results := make([]float64, len(chunk))
-	if numWorkers == 0 {
-		return results
-	}
-	jobs := make(chan int, len(chunk))
-	for i := range chunk {
+	var cancelled atomic.Bool
+
+	jobs := make(chan int, len(mutations))
+	for i := range mutations {
 		jobs <- i
 	}
 	close(jobs)
@@ -585,12 +568,37 @@ func shallowScreenChunk(chunk []Mutation, shallowShuffles, incoming, numWorkers 
 			ev := hand.NewEvaluator()
 			rng := rand.New(rand.NewSource(seed + int64(workerIdx)))
 			for i := range jobs {
-				mut := chunk[i]
+				if cancelled.Load() {
+					// Main has already adopted an improvement. Skip compute but still close the
+					// ready channel so any main-goroutine read on ready[i] unblocks instantly.
+					close(ready[i])
+					continue
+				}
+				mut := mutations[i]
 				d := New(mut.Deck.Hero, mut.Deck.Weapons, mut.Deck.Cards)
 				results[i] = d.EvaluateWith(shallowShuffles, incoming, rng, ev).Avg()
+				close(ready[i])
 			}
 		}(w)
 	}
+
+	for i := 0; i < len(mutations); i++ {
+		<-ready[i]
+		if results[i] <= bestAvg {
+			continue
+		}
+		mut := mutations[i]
+		d := New(mut.Deck.Hero, mut.Deck.Weapons, mut.Deck.Cards)
+		deepAvg := d.Evaluate(deepShuffles, incoming, deepRng).Avg()
+		if deepAvg > bestAvg {
+			cancelled.Store(true)
+			wg.Wait()
+			return d, deepAvg, i, true
+		}
+		if onShallowPassFailedDeep != nil {
+			onShallowPassFailedDeep(i, mut, results[i], deepAvg)
+		}
+	}
 	wg.Wait()
-	return results
+	return nil, bestAvg, -1, false
 }
