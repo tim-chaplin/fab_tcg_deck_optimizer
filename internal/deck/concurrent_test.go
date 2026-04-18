@@ -26,7 +26,7 @@ func TestEvaluateWith_ConcurrentNoMapPanic(t *testing.T) {
 	}
 	const iterations = 25
 
-	baseline := Random(hero.Viserai{}, 40, 2, rand.New(rand.NewSource(42)))
+	baseline := Random(hero.Viserai{}, 40, 2, rand.New(rand.NewSource(42)), nil)
 
 	var wg sync.WaitGroup
 	for w := 0; w < numWorkers; w++ {
@@ -58,9 +58,9 @@ func TestEvaluateWith_ConcurrentNoMapPanic(t *testing.T) {
 // search succeeded.
 func TestIterateParallel_RunsWithoutPanic(t *testing.T) {
 	rng := rand.New(rand.NewSource(42))
-	baseline := Random(hero.Viserai{}, 40, 2, rng)
+	baseline := Random(hero.Viserai{}, 40, 2, rng, nil)
 	baseAvg := baseline.Evaluate(10, 0, rng).Avg()
-	mutations := AllMutations(baseline, 2)
+	mutations := AllMutations(baseline, 2, nil)
 	// Cap mutations so the test stays under a second; full list is thousands of entries.
 	if len(mutations) > 40 {
 		mutations = mutations[:40]
@@ -105,9 +105,9 @@ func TestIterateParallel_RunsWithoutPanic(t *testing.T) {
 // not "cancel races vs shallow completion."
 func TestIterateParallel_AbortsOnContextCancel(t *testing.T) {
 	rng := rand.New(rand.NewSource(42))
-	baseline := Random(hero.Viserai{}, 40, 2, rng)
+	baseline := Random(hero.Viserai{}, 40, 2, rng, nil)
 	baseAvg := baseline.Evaluate(10, 0, rng).Avg()
-	mutations := AllMutations(baseline, 2)
+	mutations := AllMutations(baseline, 2, nil)
 
 	ctx, cancel := context.WithCancel(context.Background())
 	cancel() // pre-cancel so no mutation ever completes its shallow eval
@@ -151,8 +151,8 @@ func TestIterateParallel_AbortsOnContextCancel(t *testing.T) {
 // "drain-queue-no-improvement-found" path.
 func TestIterateParallel_TerminatesWithNoImprovement(t *testing.T) {
 	rng := rand.New(rand.NewSource(42))
-	baseline := Random(hero.Viserai{}, 40, 2, rng)
-	mutations := AllMutations(baseline, 2)
+	baseline := Random(hero.Viserai{}, 40, 2, rng, nil)
+	mutations := AllMutations(baseline, 2, nil)
 	// Cap so the test runs in a second even serially. Full mutation list is thousands of entries.
 	if len(mutations) > 80 {
 		mutations = mutations[:80]

@@ -23,7 +23,7 @@ func filterHand(line []hand.CardAssignment) []hand.CardAssignment {
 
 func TestMarshalUnmarshalRoundTrip(t *testing.T) {
 	rng := rand.New(rand.NewSource(1))
-	d := deck.Random(hero.Viserai{}, 40, 2, rng)
+	d := deck.Random(hero.Viserai{}, 40, 2, rng, nil)
 	d.Evaluate(50, 4, rng)
 
 	data, err := Marshal(d)
@@ -68,7 +68,7 @@ func TestMarshalUnmarshalRoundTrip(t *testing.T) {
 // FormatBestTurn the same per-card numbers the live sim produced.
 func TestRoundTrip_PreservesBestTurnContributions(t *testing.T) {
 	rng := rand.New(rand.NewSource(7))
-	d := deck.Random(hero.Viserai{}, 40, 2, rng)
+	d := deck.Random(hero.Viserai{}, 40, 2, rng, nil)
 	d.Evaluate(100, 0, rng)
 
 	if len(d.Stats.Best.Summary.BestLine) == 0 {

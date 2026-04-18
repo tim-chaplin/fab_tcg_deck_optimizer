@@ -41,7 +41,12 @@ func New(h hero.Hero, weapons []weapon.Weapon, cards []card.Card) *Deck {
 // from cards.Deckable() in pairs — every included printing appears exactly twice (or more, up
 // to `maxCopies`, if the same printing is rolled on multiple picks). `size` must be even and
 // `maxCopies` must be at least 2.
-func Random(h hero.Hero, size, maxCopies int, rng *rand.Rand) *Deck {
+//
+// `legal` filters the card pool: only IDs for which `legal(cards.Get(id))` returns true are
+// candidates. Pass nil to skip filtering (every Deckable card is eligible). Typically the
+// caller wires format.Format.IsLegal through here to restrict generation to a specific
+// constructed format's banlist.
+func Random(h hero.Hero, size, maxCopies int, rng *rand.Rand, legal func(card.Card) bool) *Deck {
 	if size%2 != 0 {
 		panic(fmt.Sprintf("deck: Random requires even size (got %d) — cards are added in pairs", size))
 	}
@@ -51,7 +56,10 @@ func Random(h hero.Hero, size, maxCopies int, rng *rand.Rand) *Deck {
 	loadouts := weaponLoadouts(cards.AllWeapons)
 	weapons := loadouts[rng.Intn(len(loadouts))]
 
-	pool := cards.Deckable()
+	pool := legalPool(legal)
+	if len(pool) == 0 {
+		panic("deck: Random's legal filter rejected every card — cannot build a deck")
+	}
 	counts := map[cards.ID]int{}
 	picks := make([]card.Card, 0, size)
 	for len(picks) < size {
@@ -64,6 +72,22 @@ func Random(h hero.Hero, size, maxCopies int, rng *rand.Rand) *Deck {
 		picks = append(picks, c, c)
 	}
 	return New(h, weapons, picks)
+}
+
+// legalPool returns cards.Deckable() filtered by `legal`, or the full Deckable list if legal is
+// nil. Factored out so Random and AllMutations apply the same filter.
+func legalPool(legal func(card.Card) bool) []cards.ID {
+	pool := cards.Deckable()
+	if legal == nil {
+		return pool
+	}
+	filtered := pool[:0]
+	for _, id := range pool {
+		if legal(cards.Get(id)) {
+			filtered = append(filtered, id)
+		}
+	}
+	return filtered
 }
 
 // Mutation is one candidate single-slot change to a deck: the mutated Deck plus a human-readable
@@ -95,8 +119,13 @@ type Mutation struct {
 // for a whole pair" rule enforced 2-per-card artificially — with the sim fast enough, we let
 // composition fall out of which configurations actually score higher.
 //
+// `legal` filters the *addition* pool: only IDs accepted by the predicate become swap-in
+// candidates, so format-banned cards can't be introduced mid-climb. Removal targets are
+// whatever's currently in the deck — a deck that entered the climb holding a banned card can
+// still have it swapped out. Pass nil to skip filtering.
+//
 // The returned decks have fresh (zero) stats and share no backing slices with d or each other.
-func AllMutations(d *Deck, maxCopies int) []Mutation {
+func AllMutations(d *Deck, maxCopies int, legal func(card.Card) bool) []Mutation {
 	var out []Mutation
 
 	// Weapon mutations: every loadout different from the current one.
@@ -146,7 +175,7 @@ func AllMutations(d *Deck, maxCopies int) []Mutation {
 		return uniqueIDs[i] < uniqueIDs[j]
 	})
 
-	pool := cards.Deckable()
+	pool := legalPool(legal)
 	sort.Slice(pool, func(i, j int) bool { return pool[i] < pool[j] })
 
 	for _, removeID := range uniqueIDs {

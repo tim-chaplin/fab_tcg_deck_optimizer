@@ -16,6 +16,7 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/deck"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/deckio"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/fabrary"
+	fmtpkg "github.com/tim-chaplin/fab-deck-optimizer/internal/format"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/hand"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/hero"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/mydecks"
@@ -23,11 +24,12 @@ import (
 )
 
 // defaultDeckNameFor returns the deck name used when -deck isn't supplied, parametrised by the
-// hero and the -incoming value. Different opponent-pressure settings produce meaningfully
-// different optimal decks, so keying the filename off both keeps regimes in separate files
-// and avoids accidentally hill-climbing one regime's best deck under another regime's objective.
-func defaultDeckNameFor(h hero.Hero, incoming int) string {
-	return fmt.Sprintf("%s_%d_incoming", strings.ToLower(h.Name()), incoming)
+// hero, format, and the -incoming value. Different opponent-pressure settings produce meaningfully
+// different optimal decks, and different formats open up different card pools — keying the
+// filename off all three keeps regimes in separate files and avoids accidentally hill-climbing
+// one regime's best deck under another regime's objective.
+func defaultDeckNameFor(h hero.Hero, f fmtpkg.Format, incoming int) string {
+	return fmt.Sprintf("%s_%s_%d_incoming", strings.ToLower(h.Name()), f, incoming)
 }
 
 func main() {
@@ -45,15 +47,20 @@ func main() {
 	deckSize := flag.Int("deck-size", 40, "number of cards per deck")
 	maxCopies := flag.Int("max-copies", 2, "maximum copies of any single card printing per deck")
 	seed := flag.Int64("seed", time.Now().UnixNano(), "RNG seed")
-	deckName := flag.String("deck", "", "deck name; resolved to mydecks/<name>.json (\".json\" suffix optional). Defaults to <hero>_<incoming>_incoming so different (hero, -incoming) regimes keep separate deck files. Ignored by the import subcommand, which always prompts interactively.")
+	deckName := flag.String("deck", "", "deck name; resolved to mydecks/<name>.json (\".json\" suffix optional). Defaults to <hero>_<format>_<incoming>_incoming so different (hero, format, -incoming) regimes keep separate deck files. Ignored by the import subcommand, which always prompts interactively.")
+	formatFlag := flag.String("format", string(fmtpkg.SilverAge), "constructed format whose banlist restricts the card pool during search (only \"silver_age\" is supported today)")
 	flag.Parse()
 	// Positional args after the subcommand are rejected — `fabsim eval mydeck` silently ignoring
 	// the deck name (rather than treating it as -deck mydeck) wasted a long run during testing.
 	if flag.NArg() > 0 {
 		die("unexpected positional argument(s): %v (did you mean -deck %s?)", flag.Args(), flag.Args()[0])
 	}
+	fmtValue, err := fmtpkg.Parse(*formatFlag)
+	if err != nil {
+		die("%v", err)
+	}
 	if *deckName == "" {
-		*deckName = defaultDeckNameFor(hero.Viserai{}, *incoming)
+		*deckName = defaultDeckNameFor(hero.Viserai{}, fmtValue, *incoming)
 	}
 
 	// Create mydecks/ up front so downstream WriteFile calls in the search loops can't fail on
@@ -86,6 +93,7 @@ func main() {
 		maxCopies:       *maxCopies,
 		seed:            *seed,
 		outPath:         outPath,
+		format:          fmtValue,
 	}
 
 	switch subcommand {
@@ -152,6 +160,14 @@ type config struct {
 	maxCopies       int
 	seed            int64
 	outPath         string
+	format          fmtpkg.Format
+}
+
+// legalFilter returns the card-pool predicate for this run's format. Passed to deck.Random and
+// deck.AllMutations, which accept nil for "no filtering" — but fabsim always runs under a
+// format, so this always returns a non-nil predicate.
+func (c config) legalFilter() func(card.Card) bool {
+	return c.format.IsLegal
 }
 
 // loadExisting reads and deserializes the deck at path. Returns (nil, 0) if the file doesn't

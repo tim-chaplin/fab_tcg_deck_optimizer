@@ -41,7 +41,7 @@ func BenchmarkIterateImprovements(b *testing.B) {
 	)
 
 	setupRNG := rand.New(rand.NewSource(42))
-	baseline := Random(hero.Viserai{}, deckSize, maxCopies, setupRNG)
+	baseline := Random(hero.Viserai{}, deckSize, maxCopies, setupRNG, nil)
 	baselineAvg := baseline.Evaluate(shallowShuffles, incoming, setupRNG).Avg()
 
 	for n := 0; n < b.N; n++ {
@@ -53,7 +53,7 @@ func BenchmarkIterateImprovements(b *testing.B) {
 		b.StartTimer()
 
 		for improvements := 0; improvements < targetImprovements; improvements++ {
-			mutations := AllMutations(best, maxCopies)
+			mutations := AllMutations(best, maxCopies, nil)
 			d, avg, _, found := IterateParallel(
 				context.Background(), mutations, bestAvg, shallowShuffles, deepShuffles, incoming, 0,
 				iterRNG.Int63(), nil, nil,

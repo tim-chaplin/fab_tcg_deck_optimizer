@@ -30,7 +30,7 @@ func runIterate(cfg config) {
 	start := time.Now()
 	for {
 		round++
-		mutations := deck.AllMutations(best, cfg.maxCopies)
+		mutations := deck.AllMutations(best, cfg.maxCopies, cfg.legalFilter())
 		fmt.Fprintf(os.Stderr, "\n[round %d] evaluating %d mutations of avg %.3f\n",
 			round, len(mutations), bestAvg)
 
@@ -75,7 +75,7 @@ func prepareBaseline(cfg config, rng *rand.Rand) (*deck.Deck, float64) {
 	best, bestAvg := loadExisting(cfg.outPath)
 	if best == nil {
 		fmt.Fprintf(os.Stderr, "no deck at %s; generating a random starting deck\n", cfg.outPath)
-		best = deck.Random(hero.Viserai{}, cfg.deckSize, cfg.maxCopies, rng)
+		best = deck.Random(hero.Viserai{}, cfg.deckSize, cfg.maxCopies, rng, cfg.legalFilter())
 		bestAvg = best.Evaluate(cfg.deepShuffles, cfg.incoming, rng).Avg()
 		_ = writeDeck(best, cfg.outPath)
 		fmt.Printf("Starting deck avg %.3f, saved to %s\n", bestAvg, cfg.outPath)

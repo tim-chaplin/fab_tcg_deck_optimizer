@@ -47,8 +47,9 @@ This is a work in progress. The current model is deliberately narrow:
 catalogue.
 
 All subcommands read and write `mydecks/<deck>.json` where `<deck>` comes from `-deck` (default
-`<hero>_<incoming>_incoming`, e.g. `viserai_0_incoming`, so different (hero, `-incoming`)
-regimes keep separate deck files). The `.json` suffix on `-deck` is optional.
+`<hero>_<format>_<incoming>_incoming`, e.g. `viserai_silver_age_0_incoming`, so different (hero,
+format, `-incoming`) regimes keep separate deck files). The `.json` suffix on `-deck` is
+optional.
 
 - **`random`** — two-phase search. Generates `-decks` random decks and evaluates each shallowly
   (`-shallow-shuffles` shuffles); takes the top `-top-n` and re-evaluates them with more shuffles
@@ -96,9 +97,12 @@ you like — each run only overwrites the deck file if it finds something better
 - `-deck-size` — cards per deck (default 40)
 - `-max-copies` — max copies of any single card printing (default 2)
 - `-seed` — RNG seed (default: time-based)
-- `-deck` — deck name; resolved to `mydecks/<name>.json` (default `<hero>_<incoming>_incoming`,
-  e.g. `viserai_0_incoming`, keyed off the hero and `-incoming`). The `mydecks/` directory is
-  created automatically.
+- `-deck` — deck name; resolved to `mydecks/<name>.json` (default
+  `<hero>_<format>_<incoming>_incoming`, e.g. `viserai_silver_age_0_incoming`, keyed off the
+  hero, format, and `-incoming`). The `mydecks/` directory is created automatically.
+- `-format` — constructed format whose banlist restricts the card pool during search. Defaults
+  to `silver_age`, which is currently the only supported format. The authoritative Silver Age
+  banlist lives at `data_sources/silver_age_banlist.txt`.
 
 Helper tool for exploring the upstream card database:
 

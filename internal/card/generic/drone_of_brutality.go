@@ -24,6 +24,7 @@ func (DroneOfBrutalityRed) Attack() int                 { return 6 }
 func (DroneOfBrutalityRed) Defense() int                { return 2 }
 func (DroneOfBrutalityRed) Types() card.TypeSet         { return droneOfBrutalityTypes }
 func (DroneOfBrutalityRed) GoAgain() bool               { return false }
+func (DroneOfBrutalityRed) NotSilverAgeLegal()           {}
 func (c DroneOfBrutalityRed) Play(s *card.TurnState) int { return c.Attack() }
 
 type DroneOfBrutalityYellow struct{}
@@ -36,6 +37,7 @@ func (DroneOfBrutalityYellow) Attack() int                 { return 5 }
 func (DroneOfBrutalityYellow) Defense() int                { return 2 }
 func (DroneOfBrutalityYellow) Types() card.TypeSet         { return droneOfBrutalityTypes }
 func (DroneOfBrutalityYellow) GoAgain() bool               { return false }
+func (DroneOfBrutalityYellow) NotSilverAgeLegal()           {}
 func (c DroneOfBrutalityYellow) Play(s *card.TurnState) int { return c.Attack() }
 
 type DroneOfBrutalityBlue struct{}
@@ -48,4 +50,5 @@ func (DroneOfBrutalityBlue) Attack() int                 { return 4 }
 func (DroneOfBrutalityBlue) Defense() int                { return 2 }
 func (DroneOfBrutalityBlue) Types() card.TypeSet         { return droneOfBrutalityTypes }
 func (DroneOfBrutalityBlue) GoAgain() bool               { return false }
+func (DroneOfBrutalityBlue) NotSilverAgeLegal()           {}
 func (c DroneOfBrutalityBlue) Play(s *card.TurnState) int { return c.Attack() }
