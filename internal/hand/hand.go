@@ -738,12 +738,11 @@ func (e *Evaluator) bestUncached(hero hero.Hero, weapons []weapon.Weapon, hand [
 
 	// recurse tracks defenderCostSum separately so the leaf can hand the attack pipeline a
 	// resource budget of (pitchSum - defenderCostSum) to deduct chain-card effective costs from.
-	// arsenalCount is at most 1 across the whole partition; any branch that would push it past
-	// one is pruned at the role-selection step. pitchedVals is scratch reused across leaves;
-	// lifted to bufs.pitchedValsScratch so it doesn't allocate on every bestUncached call.
+	// pitchedVals is scratch reused across leaves; lifted to bufs.pitchedValsScratch so it
+	// doesn't allocate on every bestUncached call.
 	pitchedValsScratch := bufs.pitchedValsScratch[:0]
-	var recurse func(i, pitchSum, costSum, defenseSum, defenderCostSum, arsenalCount int)
-	recurse = func(i, pitchSum, costSum, defenseSum, defenderCostSum, arsenalCount int) {
+	var recurse func(i, pitchSum, costSum, defenseSum, defenderCostSum int)
+	recurse = func(i, pitchSum, costSum, defenseSum, defenderCostSum int) {
 		if i == totalN {
 			attackCardCost := costSum - defenderCostSum
 			drCost := defenderCostSum
@@ -813,7 +812,7 @@ func (e *Evaluator) bestUncached(hero hero.Hero, weapons []weapon.Weapon, hand [
 			}
 
 			v := attackDealt + defenseDealt + prevented
-			arsenalCard := findArsenalCard(rolesBuf, hand, arsenalCardIn, n, totalN)
+			arsenalCard := findArsenalCard(rolesBuf, arsenalCardIn, n)
 			// Hand cards never take Arsenal role (see roleAllowed). So arsenalCard here is only
 			// set when arsenal-in stayed; "arsenal will occupy post-hoc" is tracked via hasHeld.
 			hasHeld := false
@@ -851,25 +850,23 @@ func (e *Evaluator) bestUncached(hero hero.Hero, weapons []weapon.Weapon, hand [
 			maxRole = Arsenal
 		}
 		for r := Role(0); r <= maxRole; r++ {
-			if !roleAllowed(r, isArsenalSlot, isDR[i], arsenalCount) {
+			if !roleAllowed(r, isArsenalSlot, isDR[i]) {
 				continue
 			}
 			rolesBuf[i] = r
 			switch r {
 			case Pitch:
-				recurse(i+1, pitchSum+pvals[i], costSum, defenseSum, defenderCostSum, arsenalCount)
+				recurse(i+1, pitchSum+pvals[i], costSum, defenseSum, defenderCostSum)
 			case Attack:
-				recurse(i+1, pitchSum, costSum+cvals[i], defenseSum, defenderCostSum, arsenalCount)
+				recurse(i+1, pitchSum, costSum+cvals[i], defenseSum, defenderCostSum)
 			case Defend:
-				recurse(i+1, pitchSum, costSum+dCostVals[i], defenseSum+dvals[i], defenderCostSum+dCostVals[i], arsenalCount)
-			case Held:
-				recurse(i+1, pitchSum, costSum, defenseSum, defenderCostSum, arsenalCount)
-			case Arsenal:
-				recurse(i+1, pitchSum, costSum, defenseSum, defenderCostSum, arsenalCount+1)
+				recurse(i+1, pitchSum, costSum+dCostVals[i], defenseSum+dvals[i], defenderCostSum+dCostVals[i])
+			case Held, Arsenal:
+				recurse(i+1, pitchSum, costSum, defenseSum, defenderCostSum)
 			}
 		}
 	}
-	recurse(0, 0, 0, 0, 0, 0)
+	recurse(0, 0, 0, 0, 0)
 	// Once per Best call, on the winning line only, attribute per-card contribution.
 	if len(best.BestLine) > 0 {
 		fillContributions(&best, hero, weapons, bestSwung, deck, bufs, incomingDamage, runechantCarryover)
@@ -1035,17 +1032,11 @@ func anyMaskFeasible(pitchedVals []int, attackCardCost, drCost int, weaponCosts 
 	return false
 }
 
-// findArsenalCard picks out the card assigned the Arsenal role in the current partition, if any.
-// Index j < n points into the hand; j == n points at the arsenal-in card. Returns nil when no
-// slot in the partition is Arsenal.
-func findArsenalCard(rolesBuf []Role, hand []card.Card, arsenalCardIn card.Card, n, totalN int) card.Card {
-	for j := 0; j < totalN; j++ {
-		if rolesBuf[j] != Arsenal {
-			continue
-		}
-		if j < n {
-			return hand[j]
-		}
+// findArsenalCard returns the arsenal-in card when it stays in the arsenal slot, nil otherwise.
+// Under the post-hoc-promotion scheme (PR #76) hand cards never take Arsenal role during
+// enumeration, so the only slot that can be Arsenal is the arsenal-in slot at index n.
+func findArsenalCard(rolesBuf []Role, arsenalCardIn card.Card, n int) card.Card {
+	if arsenalCardIn != nil && rolesBuf[n] == Arsenal {
 		return arsenalCardIn
 	}
 	return nil
@@ -1073,19 +1064,15 @@ func beatsBest(v, leftoverRunechants int, willOccupyArsenal bool, best TurnSumma
 	return willOccupyArsenal && !bestWillOccupyArsenal
 }
 
-// roleAllowed decides whether the partition enumerator may assign role r to the current card. The
-// arsenal slot (i == n, arsenal-in card present) may only take Arsenal (stay), Attack (any
-// non-DR card — auras and non-attack actions play fine from arsenal on your turn), or Defend
-// (Defense Reactions only — plain-blocking from arsenal isn't allowed). Hand cards take any role
-// except Attack for Defense Reactions (strict FaB timing — DRs only fire on the opponent's turn)
-// and except Arsenal — the "which Held card gets arsenaled" choice is made post-hoc (randomly,
-// over all Held cards) so the enumerator's deterministic slot order doesn't bias arsenaling
-// toward low-ID cards. arsenalCount tracks how many Arsenal assignments the partition already
-// has; the cap is 1.
-func roleAllowed(r Role, isArsenalSlot, isDefenseReaction bool, arsenalCount int) bool {
-	if r == Arsenal && arsenalCount >= 1 {
-		return false
-	}
+// roleAllowed decides whether the partition enumerator may assign role r to the current card.
+// The arsenal-in slot (i == n, arsenal-in card present) may only take Arsenal (stay), Attack
+// (any non-DR card — auras and non-attack actions play fine from arsenal on your turn), or
+// Defend (Defense Reactions only — plain-blocking from arsenal isn't allowed). Hand cards take
+// any role except Attack for Defense Reactions (strict FaB timing — DRs only fire on the
+// opponent's turn); their role loop caps at Held because the "which Held card gets arsenaled"
+// choice is made post-hoc (randomly, over all Held cards) so the enumerator's deterministic
+// slot order doesn't bias arsenaling toward low-ID cards.
+func roleAllowed(r Role, isArsenalSlot, isDefenseReaction bool) bool {
 	if isArsenalSlot {
 		switch r {
 		case Pitch, Held:
@@ -1095,11 +1082,7 @@ func roleAllowed(r Role, isArsenalSlot, isDefenseReaction bool, arsenalCount int
 		case Defend:
 			return isDefenseReaction
 		}
-		return true
-	}
-	// Hand cards never take Arsenal — post-hoc Held→Arsenal promotion handles that.
-	if r == Arsenal {
-		return false
+		return true // Arsenal always allowed on the arsenal-in slot.
 	}
 	return !(r == Attack && isDefenseReaction)
 }
