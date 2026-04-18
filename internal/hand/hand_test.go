@@ -454,3 +454,26 @@ func TestBest_ArsenalInPlayAttack(t *testing.T) {
 		t.Errorf("ArsenalCard = %v, want nil (slot vacated, no Held to promote)", got.ArsenalCard)
 	}
 }
+
+// TestBest_ArsenalInNonAttackActionPlays covers the "arsenal card isn't tagged Attack but can
+// still be played on your turn" rule — non-attack actions (auras, item cards, etc.) are playable
+// from arsenal. Hand: Malefic Incantation Red (cost 0, pitch 1). Arsenal: Blessing of Occult Red
+// (cost 1, pitch 1, attack 0, Play returns 3 via DelayRunechants). The winning line pitches the
+// Malefic to fund Blessing's 1-cost, plays Blessing from arsenal, and accrues 3 delayed
+// runechants for next turn. Value = 3 (Blessing's Play return is counted as damage credit for
+// the chain); LeftoverRunechants reflects the 3 tokens carrying over.
+func TestBest_ArsenalInNonAttackActionPlays(t *testing.T) {
+	h := []card.Card{runeblade.MaleficIncantationRed{}}
+	got := Best(stubHero{}, nil, h, 0, nil, 0, runeblade.BlessingOfOccultRed{})
+	if got.Value != 3 {
+		t.Fatalf("Value = %d, want 3 (Malefic pitched, arsenal Blessing played for 3 runechants). Roles=[%s]",
+			got.Value, FormatRoles(h, got.Roles))
+	}
+	if got.LeftoverRunechants != 3 {
+		t.Errorf("LeftoverRunechants = %d, want 3 (Blessing's Play delayed 3 tokens to next turn)",
+			got.LeftoverRunechants)
+	}
+	if got.ArsenalCard != nil {
+		t.Errorf("ArsenalCard = %v, want nil (Blessing played out of arsenal)", got.ArsenalCard)
+	}
+}

@@ -359,7 +359,6 @@ func bestUncached(hero hero.Hero, weapons []weapon.Weapon, hand []card.Card, inc
 	dCostVals := make([]int, totalN)
 	dPrintedVals := make([]int, totalN)
 	isDR := make([]bool, totalN)
-	isAttackType := make([]bool, totalN)
 
 	// Pre-compute per-card pitch / cost / defense values so the recurse doesn't re-invoke
 	// card-method interface calls on each partition leaf. defendCostVals holds Cost only for
@@ -378,9 +377,7 @@ func bestUncached(hero hero.Hero, weapons []weapon.Weapon, hand []card.Card, inc
 		pvals[i] = c.Pitch()
 		cvals[i] = c.Cost()
 		dvals[i] = c.Defense()
-		t := c.Types()
-		isDR[i] = t.Has(card.TypeDefenseReaction)
-		isAttackType[i] = t.Has(card.TypeAttack)
+		isDR[i] = c.Types().Has(card.TypeDefenseReaction)
 		if isDR[i] {
 			dCostVals[i] = cvals[i]
 			hasReactions = true
@@ -527,16 +524,17 @@ func bestUncached(hero hero.Hero, weapons []weapon.Weapon, hand []card.Card, inc
 		}
 		isArsenalSlot := i == n && arsenalCardIn != nil
 		for r := Role(0); r <= Arsenal; r++ {
-			// Role restrictions: the arsenal slot may only be Arsenal (stay), Attack (if the
-			// card is an attack and not a DR), or Defend (only if DR — plain-blocking from the
-			// arsenal isn't allowed). Hand cards can take any role, with Attack forbidden for
-			// DRs (strict FaB timing — DRs only fire on the opponent's turn).
+			// Role restrictions: the arsenal slot may only take Arsenal (stay), Attack (any
+			// non-DR card — auras and non-attack actions can also be played from arsenal on
+			// your turn), or Defend (only if DR — plain-blocking from arsenal isn't allowed).
+			// Hand cards can take any role, with Attack forbidden for DRs (strict FaB timing —
+			// DRs only fire on the opponent's turn).
 			if isArsenalSlot {
 				switch r {
 				case Pitch, Held:
 					continue
 				case Attack:
-					if !isAttackType[i] || isDR[i] {
+					if isDR[i] {
 						continue
 					}
 				case Defend:
