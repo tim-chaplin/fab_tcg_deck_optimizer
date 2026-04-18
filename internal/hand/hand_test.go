@@ -215,7 +215,7 @@ func TestIsLegalOrder_MauvrionCantSaveShrillWhenRuneragerIsAhead(t *testing.T) {
 	ptrBuf := make([]*card.PlayedCard, n)
 	cpBuf := make([]card.Card, 0, n)
 	state := &card.TurnState{}
-	if _, _, _, legal := playSequence(hero.Viserai{}, nil, nil, order, pcBuf, ptrBuf, cpBuf, state, 1_000_000, 0, nil); legal {
+	if _, _, _, legal := playSequence(hero.Viserai{}, nil, nil, order, pcBuf, ptrBuf, cpBuf, state, 1_000_000, 0, nil, nil); legal {
 		t.Fatalf("ordering %v should be illegal (Shrill has no go-again and Mauvrion granted Runerager instead)",
 			cardNames(order))
 	}
@@ -305,7 +305,7 @@ func TestBestAttackDamage_PlayedCardGrantsDontLeakAcrossPermutations(t *testing.
 	// If the wrappers were reused across permutations the spy would see leaked grants and trip.
 	var sawLeak bool
 	attackers := []card.Card{grantAll{}, grantSpy{saw: &sawLeak}, grantAll{}}
-	_, _, _ = bestAttackDamage(stubHero{}, attackers, nil, nil, newAttackBufs(0, len(attackers), nil), 1_000_000, 0, nil, nil)
+	_, _, _ = bestAttackDamage(stubHero{}, attackers, nil, nil, newAttackBufs(0, len(attackers), nil), 1_000_000, 0, nil, nil, nil)
 	if sawLeak {
 		t.Fatalf("PlayedCard wrapper state leaked across permutations: grantSpy saw a pre-existing GrantedGoAgain when playing first")
 	}

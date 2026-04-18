@@ -2,6 +2,8 @@
 package hand
 
 import (
+	"fmt"
+	"sort"
 	"strings"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
@@ -44,10 +46,13 @@ type TurnSummary struct {
 	// first in canonical (post-sort) order; the previous-turn arsenal card, if any, follows as
 	// the last entry with FromArsenal=true. Never mutate — memoized results alias this slice.
 	BestLine []CardAssignment
-	// Weapons holds the names of equipped weapons that were swung in the optimal attack
-	// sequence, in the order they appear in the input weapons slice. Empty if no weapon was
-	// swung. Weapons aren't cards in BestLine so they don't carry their own CardAssignment.
-	Weapons []string
+	// AttackChain is the winning chain in play order — attack-role cards from BestLine mixed
+	// with any swung weapons at the positions the solver chose to swing them. Each entry
+	// carries its Play-time damage (including hero-trigger damage for cards) so callers can
+	// attribute contribution even to weapons (which have no BestLine entry). Swung weapons can
+	// be recovered by filtering AttackChain for AttackChainEntry.Card of type weapon.Weapon.
+	// Empty when no attacks were played.
+	AttackChain []AttackChainEntry
 	// Value is the turn's total score (damage dealt + damage prevented). Equals the sum of
 	// BestLine[].Contribution plus any weapon-swing damage (weapons aren't in BestLine).
 	Value int
@@ -59,6 +64,18 @@ type TurnSummary struct {
 	// hand card just arsenaled (role=Arsenal) or a previous-turn arsenal card that stayed. Nil
 	// when the slot is empty. The caller feeds this back as the next turn's arsenalCardIn.
 	ArsenalCard card.Card
+}
+
+// AttackChainEntry is a single played attack — either a card with role=Attack or a swung
+// weapon — carrying the damage it contributed at the moment it resolved in the winning chain.
+// Damage is the Play() return; TriggerDamage is the hero's OnCardPlayed contribution (e.g.
+// Viserai creating a Runechant) so callers can surface hero attribution on its own line.
+// For BestLine Attack entries Damage + TriggerDamage mirrors CardAssignment.Contribution;
+// weapons live only here.
+type AttackChainEntry struct {
+	Card          card.Card
+	Damage        float64
+	TriggerDamage float64
 }
 
 // ArsenalIn returns the assignment for the card that started the turn in the arsenal, if any.
@@ -91,10 +108,22 @@ func (r Role) String() string {
 	return "UNKNOWN"
 }
 
+// formatContribution renders a contribution/damage value for the best-turn printout. Integer
+// values (the common case: pitch amounts, attack power, hero-trigger damage) render without a
+// decimal; fractional values (proportional defense share when multiple blockers split an
+// incoming attack) show one decimal place.
+func formatContribution(v float64) string {
+	if v == float64(int(v)) {
+		return fmt.Sprintf("%d", int(v))
+	}
+	return fmt.Sprintf("%.1f", v)
+}
+
 // FormatBestLine pairs each card in BestLine with its assigned role for debug output, e.g.
 // "Hocus Pocus (Blue): PITCH, Runic Reaping (Red): ATTACK". Cards that came in from arsenal
 // get a " (from arsenal)" tag on their name so the reader can see why that card isn't in the
-// hand list the optimiser reports alongside.
+// hand list the optimiser reports alongside. This is the compact one-line form — use
+// FormatBestTurn for the chronological play-order presentation.
 func FormatBestLine(line []CardAssignment) string {
 	parts := make([]string, len(line))
 	for i, a := range line {
@@ -105,6 +134,148 @@ func FormatBestLine(line []CardAssignment) string {
 		parts[i] = name + ": " + a.Role.String()
 	}
 	return strings.Join(parts, ", ")
+}
+
+// FormatBestTurn renders a TurnSummary as a numbered play-order list, one card per line. The
+// order mirrors the actual sequence of a FaB turn:
+//
+//  1. Defense-phase pitches (paying for Defense Reactions)
+//  2. Plain blocks
+//  3. Defense Reactions
+//  4. Attack-phase pitches (paying for this turn's played cards)
+//  5. Attack chain — played cards and swung weapons in the order the solver picked
+//
+// Cards that ended up Held or Arsenal-bound (didn't get played or pitched this turn) are
+// summarized on trailing lines so the reader can see what's carrying over.
+//
+// Pitch-phase assignment is computed here by a simple greedy: smallest pitches first fund the
+// defense pool until drCost is covered, the rest fund attack. The solver validated that some
+// legal split exists; this chooses one deterministically for display.
+func FormatBestTurn(t TurnSummary) string {
+	// Partition BestLine entries into role buckets; pitch cards come out as a single pool which
+	// then gets split by phase below.
+	var pitched, plainBlocks, defenseReactions, held, arsenal []CardAssignment
+	var attackCost, drCost int
+	for _, a := range t.BestLine {
+		switch a.Role {
+		case Pitch:
+			pitched = append(pitched, a)
+		case Attack:
+			attackCost += a.Card.Cost()
+		case Defend:
+			if a.Card.Types().Has(card.TypeDefenseReaction) {
+				drCost += a.Card.Cost()
+				defenseReactions = append(defenseReactions, a)
+			} else {
+				plainBlocks = append(plainBlocks, a)
+			}
+		case Held:
+			held = append(held, a)
+		case Arsenal:
+			arsenal = append(arsenal, a)
+		}
+	}
+
+	// Greedy split: sort pitches ascending and pour into the defense bucket until drCost is
+	// covered; the rest is attack-phase. Stable w.r.t. input order for ties (sort.SliceStable).
+	sorted := append([]CardAssignment(nil), pitched...)
+	sort.SliceStable(sorted, func(i, j int) bool { return sorted[i].Card.Pitch() < sorted[j].Card.Pitch() })
+	var defensePitches, attackPitches []CardAssignment
+	covered := 0
+	for _, a := range sorted {
+		if covered < drCost {
+			defensePitches = append(defensePitches, a)
+			covered += a.Card.Pitch()
+		} else {
+			attackPitches = append(attackPitches, a)
+		}
+	}
+
+	var lines []string
+	step := 0
+	nextStep := func() int { step++; return step }
+	// Pitch lines don't show a damage contribution — pitches generate resource (already factored
+	// into the turn's affordability) rather than damage or prevention. Showing "+3" next to a
+	// pitch would double-count against the turn's Value.
+	appendPitch := func(a CardAssignment, roleLabel string) {
+		name := a.Card.Name()
+		if a.FromArsenal {
+			name += " (from arsenal)"
+		}
+		lines = append(lines, fmt.Sprintf("  %d. %s: %s", nextStep(), name, roleLabel))
+	}
+	// Defense lines DO contribute damage-prevention (block share + DR Play return) so their
+	// tag is shown.
+	appendDefense := func(a CardAssignment, roleLabel string) {
+		name := a.Card.Name()
+		if a.FromArsenal {
+			name += " (from arsenal)"
+		}
+		lines = append(lines, fmt.Sprintf("  %d. %s: %s (+%s prevented)", nextStep(), name, roleLabel, formatContribution(a.Contribution)))
+	}
+
+	for _, a := range defensePitches {
+		appendPitch(a, "PITCH (opponent's turn)")
+	}
+	for _, a := range plainBlocks {
+		appendDefense(a, "BLOCK")
+	}
+	for _, a := range defenseReactions {
+		appendDefense(a, "DEFENSE REACTION")
+	}
+	for _, a := range attackPitches {
+		appendPitch(a, "PITCH (my turn)")
+	}
+	// Attack chain: iterate AttackChain for real play order, cross-referencing BestLine by ID to
+	// mark arsenal-played cards. Weapons have no BestLine entry, so they render as plain names.
+	// Each entry prints its Play damage; if the hero's OnCardPlayed fired on this entry (e.g.
+	// Viserai creating a Runechant on a 2nd+ chain link), append " +M hero trigger" so the
+	// attribution is visible rather than silently folded into the card's number.
+	used := make([]bool, len(t.BestLine))
+	appendAttack := func(label, cardName string, e AttackChainEntry) {
+		line := fmt.Sprintf("  %d. %s: %s (+%s)", nextStep(), cardName, label, formatContribution(e.Damage))
+		if e.TriggerDamage > 0 {
+			line += fmt.Sprintf(" (+%s hero trigger)", formatContribution(e.TriggerDamage))
+		}
+		lines = append(lines, line)
+	}
+	for _, e := range t.AttackChain {
+		if _, isWeapon := e.Card.(weapon.Weapon); isWeapon {
+			appendAttack("WEAPON ATTACK", e.Card.Name(), e)
+			continue
+		}
+		// Find first unused BestLine entry with matching ID so we can detect FromArsenal.
+		tag := ""
+		for i := range t.BestLine {
+			if used[i] || t.BestLine[i].Role != Attack || t.BestLine[i].Card.ID() != e.Card.ID() {
+				continue
+			}
+			if t.BestLine[i].FromArsenal {
+				tag = " (from arsenal)"
+			}
+			used[i] = true
+			break
+		}
+		appendAttack("ATTACK", e.Card.Name()+tag, e)
+	}
+
+	// Held / Arsenal footer. These didn't get "played", so they're outside the numbered
+	// sequence. Keep them visible so the reader knows the whole turn disposition.
+	var footers []string
+	for _, a := range held {
+		footers = append(footers, fmt.Sprintf("  (held: %s)", a.Card.Name()))
+	}
+	for _, a := range arsenal {
+		label := a.Card.Name()
+		if a.FromArsenal {
+			label += " (stayed)"
+		} else {
+			label += " (new)"
+		}
+		footers = append(footers, fmt.Sprintf("  (arsenal: %s)", label))
+	}
+	lines = append(lines, footers...)
+	return strings.Join(lines, "\n")
 }
 
 // Best returns the optimal TurnSummary for the given hand against an opponent that will attack
@@ -264,11 +435,15 @@ type attackBufs struct {
 	// winning permutation's per-card damage into the caller's output buffer. Untracked callers
 	// (the partition-loop hot path) pass nil and never touch this slice.
 	perCardScratch []float64
+	// perCardTriggerScratch parallels perCardScratch for hero-trigger damage (OnCardPlayed
+	// return). Same sizing / same "only written when tracking" discipline.
+	perCardTriggerScratch []float64
 	// fillContribWinnerOrder / fillContribPerCard are output buffers for bestAttackDamage when
 	// fillContributions runs the tracked replay after the partition loop. Kept on attackBufs so
 	// each Best call reuses the same underlying slab instead of allocating a fresh pair.
 	fillContribWinnerOrder []card.Card
 	fillContribPerCard     []float64
+	fillContribTriggerDmg  []float64
 	// fillContribUsed marks hand indices already assigned during chain→hand mapping. Sized
 	// handSize; the caller resets it with clear before each fillContributions pass.
 	fillContribUsed []bool
@@ -310,8 +485,10 @@ func newAttackBufs(handSize, weaponCount int, weapons []weapon.Weapon) *attackBu
 		attackersBuf:           make([]card.Card, 0, handSize),
 		defendersBuf:           make([]card.Card, 0, handSize),
 		perCardScratch:         make([]float64, maxAttackers),
+		perCardTriggerScratch:  make([]float64, maxAttackers),
 		fillContribWinnerOrder: make([]card.Card, maxAttackers),
 		fillContribPerCard:     make([]float64, maxAttackers),
+		fillContribTriggerDmg:  make([]float64, maxAttackers),
 		fillContribUsed:        make([]bool, handSize),
 	}
 }
@@ -366,6 +543,10 @@ func bestUncached(hero hero.Hero, weapons []weapon.Weapon, hand []card.Card, inc
 	// no Value-adding partition (everything pruned by cost/pitch-feasibility) still reports
 	// sensible assignments — nothing got played or pitched.
 	best := TurnSummary{BestLine: make([]CardAssignment, totalN), LeftoverRunechants: runechantCarryover}
+	// bestSwung holds the winning partition's swung weapon names so fillContributions can
+	// rebuild the chain it runs bestAttackDamage over. It lives outside TurnSummary because
+	// weapons are recoverable from AttackChain once fillContributions finishes.
+	var bestSwung []string
 	for i := 0; i < n; i++ {
 		best.BestLine[i] = CardAssignment{Card: hand[i], Role: Held}
 	}
@@ -531,7 +712,7 @@ func bestUncached(hero hero.Hero, weapons []weapon.Weapon, hand []card.Card, inc
 			}
 			if better {
 				best.Value = v
-				best.Weapons = swung
+				bestSwung = swung
 				best.LeftoverRunechants = leftoverRunechants
 				best.ArsenalCard = arsenalCard
 				// Write the winning roles into BestLine. Cards and FromArsenal flags were
@@ -590,7 +771,7 @@ func bestUncached(hero hero.Hero, weapons []weapon.Weapon, hand []card.Card, inc
 	recurse(0, 0, 0, 0, 0, 0)
 	// Once per Best call, on the winning line only, attribute per-card contribution.
 	if len(best.BestLine) > 0 {
-		fillContributions(&best, hero, weapons, deck, bufs, incomingDamage, runechantCarryover)
+		fillContributions(&best, hero, weapons, bestSwung, deck, bufs, incomingDamage, runechantCarryover)
 	}
 	return best
 }
@@ -775,7 +956,7 @@ func bestAttackWithWeapons(hero hero.Hero, weapons []weapon.Weapon, attackers, p
 		}
 		// Every chain card (attackers AND the swung weapons) deducts its own effective cost
 		// from chainBudget inside playSequence, so we don't pre-deduct weapon cost here.
-		dealt, leftoverRunechants, residualBudget := bestAttackDamage(hero, allAttackers, pitched, deck, bufs, chainBudget, runechantCarryover, nil, nil)
+		dealt, leftoverRunechants, residualBudget := bestAttackDamage(hero, allAttackers, pitched, deck, bufs, chainBudget, runechantCarryover, nil, nil, nil)
 		// Prefer higher damage; on ties prefer more leftover runechants; then more residual
 		// budget — both are extra slack that can enable discount defense reactions.
 		if dealt > best ||
@@ -805,7 +986,7 @@ func bestAttackWithWeapons(hero hero.Hero, weapons []weapon.Weapon, attackers, p
 // filled with the winning permutation and its per-card damage respectively. Used once per Best
 // call by fillContributions to attribute per-card damage; the hot partition-loop caller
 // (bestAttackWithWeapons) passes nil for both so the permutation search stays allocation-free.
-func bestAttackDamage(hero hero.Hero, attackers, pitched, deck []card.Card, bufs *attackBufs, chainBudget, runechantCarryover int, winnerOrderOut []card.Card, perCardOut []float64) (int, int, int) {
+func bestAttackDamage(hero hero.Hero, attackers, pitched, deck []card.Card, bufs *attackBufs, chainBudget, runechantCarryover int, winnerOrderOut []card.Card, perCardOut, perCardTriggerOut []float64) (int, int, int) {
 	n := len(attackers)
 	if n == 0 {
 		return 0, runechantCarryover, chainBudget
@@ -813,18 +994,25 @@ func bestAttackDamage(hero hero.Hero, attackers, pitched, deck []card.Card, bufs
 	perm := bufs.perm[:n]
 	copy(perm, attackers)
 
-	// Scratch is the playSequence per-card output buffer, overwritten on every permutation; on a
-	// new winner we copy it into the caller's perCardOut. Only used when the caller asked to track.
-	var scratch []float64
+	// Scratch buffers are playSequence's per-card outputs, overwritten on every permutation; on
+	// a new winner we copy them into the caller's perCardOut / perCardTriggerOut. Only used
+	// when the caller asked to track.
+	var scratch, triggerScratch []float64
 	if perCardOut != nil {
 		scratch = bufs.perCardScratch[:n]
+	}
+	if perCardTriggerOut != nil {
+		if cap(bufs.perCardTriggerScratch) < n {
+			bufs.perCardTriggerScratch = make([]float64, n)
+		}
+		triggerScratch = bufs.perCardTriggerScratch[:n]
 	}
 
 	best := 0
 	bestLeftoverRunechants := runechantCarryover
 	bestResidualBudget := chainBudget
 	eval := func() {
-		dmg, leftoverRunechants, residualBudget, legal := playSequence(hero, pitched, deck, perm, bufs.pcBuf, bufs.ptrBuf, bufs.cardsPlayedBuf, bufs.state, chainBudget, runechantCarryover, scratch)
+		dmg, leftoverRunechants, residualBudget, legal := playSequence(hero, pitched, deck, perm, bufs.pcBuf, bufs.ptrBuf, bufs.cardsPlayedBuf, bufs.state, chainBudget, runechantCarryover, scratch, triggerScratch)
 		if !legal {
 			return
 		}
@@ -841,6 +1029,9 @@ func bestAttackDamage(hero hero.Hero, attackers, pitched, deck []card.Card, bufs
 			}
 			if perCardOut != nil {
 				copy(perCardOut[:n], scratch)
+			}
+			if perCardTriggerOut != nil {
+				copy(perCardTriggerOut[:n], triggerScratch)
 			}
 		}
 	}
@@ -890,13 +1081,16 @@ func bestAttackDamage(hero hero.Hero, attackers, pitched, deck []card.Card, bufs
 //     DiscountPerRunechant, effective cost is max(0, PrintedCost() - state.Runechants) at the
 //     moment it's played; for everyone else it's Cost(). A negative remaining budget returns
 //     legal=false (the caller treats this ordering as zero damage).
-func playSequence(hero hero.Hero, pitched, deck, order []card.Card, pcBuf []card.PlayedCard, ptrBuf []*card.PlayedCard, cardsPlayedBuf []card.Card, state *card.TurnState, chainBudget, runechantCarryover int, perCardOut []float64) (damage int, leftoverRunechants int, residualBudget int, legal bool) {
+func playSequence(hero hero.Hero, pitched, deck, order []card.Card, pcBuf []card.PlayedCard, ptrBuf []*card.PlayedCard, cardsPlayedBuf []card.Card, state *card.TurnState, chainBudget, runechantCarryover int, perCardOut, perCardTriggerOut []float64) (damage int, leftoverRunechants int, residualBudget int, legal bool) {
 	n := len(order)
 	for i, c := range order {
 		pcBuf[i] = card.PlayedCard{Card: c}
 		ptrBuf[i] = &pcBuf[i]
 		if perCardOut != nil {
 			perCardOut[i] = 0
+		}
+		if perCardTriggerOut != nil {
+			perCardTriggerOut[i] = 0
 		}
 	}
 	played := ptrBuf[:n]
@@ -936,7 +1130,10 @@ func playSequence(hero hero.Hero, pitched, deck, order []card.Card, pcBuf []card
 		triggerDmg := hero.OnCardPlayed(pc.Card, state)
 		damage += playDmg + triggerDmg
 		if perCardOut != nil {
-			perCardOut[i] = float64(playDmg + triggerDmg)
+			perCardOut[i] = float64(playDmg)
+		}
+		if perCardTriggerOut != nil {
+			perCardTriggerOut[i] = float64(triggerDmg)
 		}
 		state.CardsPlayed = append(state.CardsPlayed, pc.Card)
 
@@ -966,7 +1163,7 @@ func playSequence(hero hero.Hero, pitched, deck, order []card.Card, pcBuf []card
 // Called once per Best call from bestUncached after the partition loop picks the winner. All
 // transient slices (pitched/attackers/chain/winnerOrder/perCard/used) borrow attackBufs slots
 // so nothing allocates here.
-func fillContributions(summary *TurnSummary, hero hero.Hero, weapons []weapon.Weapon, deck []card.Card, bufs *attackBufs, incomingDamage, runechantCarryover int) {
+func fillContributions(summary *TurnSummary, hero hero.Hero, weapons []weapon.Weapon, swungNames []string, deck []card.Card, bufs *attackBufs, incomingDamage, runechantCarryover int) {
 	line := summary.BestLine
 	total := len(line)
 
@@ -1029,7 +1226,7 @@ func fillContributions(summary *TurnSummary, hero hero.Hero, weapons []weapon.We
 	// not credited per-card here.
 	chain := bufs.attackerBuf[:0]
 	chain = append(chain, attackers...)
-	for _, name := range summary.Weapons {
+	for _, name := range swungNames {
 		for _, w := range weapons {
 			if w.Name() == name {
 				chain = append(chain, w)
@@ -1040,10 +1237,26 @@ func fillContributions(summary *TurnSummary, hero hero.Hero, weapons []weapon.We
 	if len(chain) > 0 {
 		winnerOrder := bufs.fillContribWinnerOrder[:len(chain)]
 		perCardDmg := bufs.fillContribPerCard[:len(chain)]
-		bestAttackDamage(hero, chain, pitched, deck, bufs, chainBudget, runechantCarryover, winnerOrder, perCardDmg)
+		if cap(bufs.fillContribTriggerDmg) < len(chain) {
+			bufs.fillContribTriggerDmg = make([]float64, len(chain))
+		}
+		perCardTrigger := bufs.fillContribTriggerDmg[:len(chain)]
+		bestAttackDamage(hero, chain, pitched, deck, bufs, chainBudget, runechantCarryover, winnerOrder, perCardDmg, perCardTrigger)
+		// Snapshot the winning chain order into TurnSummary so display callers can show cards
+		// and weapons in the actual play order (matters for Go-again / trigger chains). Fresh
+		// slice — winnerOrder aliases attackBuf storage that the next partition would clobber.
+		summary.AttackChain = make([]AttackChainEntry, len(winnerOrder))
+		for i := range winnerOrder {
+			summary.AttackChain[i] = AttackChainEntry{
+				Card:          winnerOrder[i],
+				Damage:        perCardDmg[i],
+				TriggerDamage: perCardTrigger[i],
+			}
+		}
 		// Map chain-position damage back to BestLine indices by scanning for the first unused
 		// Attack-role entry with a matching ID. Duplicate printings played as twin attacks
-		// are disambiguated by scan order.
+		// are disambiguated by scan order. Hand-card Contribution bundles Play return plus hero
+		// trigger so the per-card stats aggregate the card's total this-turn impact.
 		if cap(bufs.fillContribUsed) < total {
 			bufs.fillContribUsed = make([]bool, total)
 		}
@@ -1059,7 +1272,7 @@ func fillContributions(summary *TurnSummary, hero hero.Hero, weapons []weapon.We
 				if used[i] || line[i].Role != Attack || line[i].Card.ID() != c.ID() {
 					continue
 				}
-				line[i].Contribution = perCardDmg[k]
+				line[i].Contribution = perCardDmg[k] + perCardTrigger[k]
 				used[i] = true
 				break
 			}

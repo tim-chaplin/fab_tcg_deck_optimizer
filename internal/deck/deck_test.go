@@ -215,15 +215,15 @@ func TestEvaluate_PerCardStatsPopulated(t *testing.T) {
 	}
 }
 
-// TestEvaluate_BestHandStartingRunechantsIsPreHandCarryover pins down a subtle bug: Evaluate
-// used to write the post-hand LeftoverRunechants into BestHand.StartingRunechants, so the field
+// TestEvaluate_BestTurnStartingRunechantsIsPreHandCarryover pins down a subtle bug: Evaluate
+// used to write the post-hand LeftoverRunechants into BestTurn.StartingRunechants, so the field
 // surfaced the wrong turn's count. The field is documented as "the Runechant count carried in
 // from the previous turn when this hand was played", which for the first hand of a run is
 // always 0 — even if the hand itself creates runechants that leftover into the next turn.
 //
 // Without the snapshot fix this test fails: StartingRunechants equals LeftoverRunechants (nonzero)
 // instead of 0.
-func TestEvaluate_BestHandStartingRunechantsIsPreHandCarryover(t *testing.T) {
+func TestEvaluate_BestTurnStartingRunechantsIsPreHandCarryover(t *testing.T) {
 	// Viserai has Intelligence 4. A 4-card deck gives exactly one hand per run, so the Best
 	// record always reflects that first hand — no previous turn ever existed.
 	read := cards.Get(card.ReadTheRunesRed)

@@ -245,17 +245,17 @@ type Stats struct {
 	// Best is the single highest-value hand seen across all runs (ties broken by first
 	// occurrence). Summary.BestLine is in canonical (post-sort) order. Zero-valued if no hands
 	// have been evaluated.
-	Best BestHand
+	Best BestTurn
 	// PerCard attributes hand-level outcomes back to the cards that appeared in those hands. The
 	// map is populated once per hand (after hand.Best picks the winning play), not per permutation
 	// — attribution cost is negligible compared to the underlying search.
 	PerCard map[card.ID]CardPlayStats
 }
 
-// BestHand records a single hand and its optimal turn — used to surface the peak draw a deck
+// BestTurn records a single hand and its optimal turn — used to surface the peak draw a deck
 // saw during simulation. Summary.BestLine carries the cards and their assigned roles in
 // canonical order; no parallel Hand slice is needed.
-type BestHand struct {
+type BestTurn struct {
 	Summary hand.TurnSummary
 	// StartingRunechants is the Runechant count carried in from the previous turn when this hand
 	// was played. Only meaningful for Runeblade heroes.
@@ -397,19 +397,19 @@ func (d *Deck) Evaluate(runs int, incomingDamage int, rng *rand.Rand) Stats {
 			d.Stats.TotalValue += v
 			d.Stats.Hands++
 			if play.Value > d.Stats.Best.Summary.Value || len(d.Stats.Best.Summary.BestLine) == 0 {
-				// Clone the BestLine and Weapons slices — both are aliased to memo-owned storage
-				// that a later Best call may reuse.
+				// Clone BestLine and AttackChain — both alias memo-owned storage that a later
+				// Best call may reuse.
 				lineCopy := make([]hand.CardAssignment, len(play.BestLine))
 				copy(lineCopy, play.BestLine)
-				var weaponsCopy []string
-				if len(play.Weapons) > 0 {
-					weaponsCopy = make([]string, len(play.Weapons))
-					copy(weaponsCopy, play.Weapons)
+				var chainCopy []hand.AttackChainEntry
+				if len(play.AttackChain) > 0 {
+					chainCopy = make([]hand.AttackChainEntry, len(play.AttackChain))
+					copy(chainCopy, play.AttackChain)
 				}
-				d.Stats.Best = BestHand{
+				d.Stats.Best = BestTurn{
 					Summary: hand.TurnSummary{
 						BestLine:    lineCopy,
-						Weapons:     weaponsCopy,
+						AttackChain: chainCopy,
 						Value:       play.Value,
 						ArsenalCard: play.ArsenalCard,
 					},
