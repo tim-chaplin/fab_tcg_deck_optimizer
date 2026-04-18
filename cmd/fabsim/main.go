@@ -42,6 +42,11 @@ func main() {
 	seed := flag.Int64("seed", time.Now().UnixNano(), "RNG seed")
 	deckName := flag.String("deck", defaultDeckName, "deck name; resolved to mydecks/<name>.json (\".json\" suffix optional). Ignored by the import subcommand, which always prompts interactively.")
 	flag.Parse()
+	// Positional args after the subcommand are rejected — `fabsim eval mydeck` silently ignoring
+	// the deck name (rather than treating it as -deck mydeck) wasted a long run during testing.
+	if flag.NArg() > 0 {
+		die("unexpected positional argument(s): %v (did you mean -deck %s?)", flag.Args(), flag.Args()[0])
+	}
 
 	// Create mydecks/ up front so downstream WriteFile calls in the search loops can't fail on
 	// a missing dir after a long run. Harmless if it already exists.
