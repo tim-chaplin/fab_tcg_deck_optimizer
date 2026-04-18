@@ -32,11 +32,11 @@ func main() {
 		return
 	}
 
-	numDecks := flag.Int("decks", 10000, "number of random decks to generate (phase 1)")
+	numDecks := flag.Int("decks", 1000, "number of random decks to generate (phase 1)")
 	shallowShuffles := flag.Int("shallow-shuffles", 10, "shuffles per deck in phase 1 (wide search)")
 	topN := flag.Int("top-n", 100, "number of top decks to advance to phase 2")
 	deepShuffles := flag.Int("deep-shuffles", 1000, "shuffles per deck in phase 2 (deep evaluation)")
-	incoming := flag.Int("incoming", 4, "opponent damage per turn")
+	incoming := flag.Int("incoming", 0, "opponent damage per turn")
 	deckSize := flag.Int("deck-size", 40, "number of cards per deck")
 	maxCopies := flag.Int("max-copies", 2, "maximum copies of any single card printing per deck")
 	seed := flag.Int64("seed", time.Now().UnixNano(), "RNG seed")
