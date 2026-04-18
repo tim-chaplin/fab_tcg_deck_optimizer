@@ -47,7 +47,8 @@ This is a work in progress. The current model is deliberately narrow:
 catalogue.
 
 All subcommands read and write `mydecks/<deck>.json` where `<deck>` comes from `-deck` (default
-`best_deck`). The `.json` suffix on `-deck` is optional.
+`<hero>_<incoming>_incoming`, e.g. `viserai_0_incoming`, so different (hero, `-incoming`)
+regimes keep separate deck files). The `.json` suffix on `-deck` is optional.
 
 - **`random`** — two-phase search. Generates `-decks` random decks and evaluates each shallowly
   (`-shallow-shuffles` shuffles); takes the top `-top-n` and re-evaluates them with more shuffles
@@ -72,15 +73,16 @@ All subcommands read and write `mydecks/<deck>.json` where `<deck>` comes from `
 
 ### Suggested workflow
 
-Start with a wide random search to seed `mydecks/best_deck.json`, then hill-climb from there:
+Start with a wide random search to seed the deck file for the current `-incoming` setting, then
+hill-climb from there:
 
 ```
 go run ./cmd/fabsim random
 go run ./cmd/fabsim iterate
 ```
 
-`random` explores the space; `iterate` refines the best find. Re-run either stage as often as you
-like — each run only overwrites `mydecks/best_deck.json` if it finds something better.
+`random` explores the space; `iterate` refines the best find. Re-run either stage as often as
+you like — each run only overwrites the deck file if it finds something better.
 
 ### Flags
 
@@ -94,8 +96,9 @@ like — each run only overwrites `mydecks/best_deck.json` if it finds something
 - `-deck-size` — cards per deck (default 40)
 - `-max-copies` — max copies of any single card printing (default 2)
 - `-seed` — RNG seed (default: time-based)
-- `-deck` — deck name; resolved to `mydecks/<name>.json` (default `best_deck`). The `mydecks/`
-  directory is created automatically.
+- `-deck` — deck name; resolved to `mydecks/<name>.json` (default `<hero>_<incoming>_incoming`,
+  e.g. `viserai_0_incoming`, keyed off the hero and `-incoming`). The `mydecks/` directory is
+  created automatically.
 
 Helper tool for exploring the upstream card database:
 
