@@ -13,6 +13,7 @@ var viseraiTypes = card.NewTypeSet(card.TypeRuneblade, card.TypeHero, card.TypeY
 // Viserai is Young Viserai.
 type Viserai struct{}
 
+func (Viserai) ID() ID                 { return ViseraiID }
 func (Viserai) Name() string           { return "Viserai" }
 func (Viserai) Health() int            { return 20 }
 func (Viserai) Intelligence() int      { return 4 }

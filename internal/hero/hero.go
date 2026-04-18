@@ -7,8 +7,10 @@ import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 
 // Hero is a FaB hero card. Intelligence is the hand size drawn per turn (currently always 4 for
 // heroes we simulate); Health is starting life total; Types is the hero's class/talent/age set
-// (e.g. Runeblade, Hero, Young) for O(1) lookup.
+// (e.g. Runeblade, Hero, Young) for O(1) lookup. ID is the stable uint16 identifier used as an
+// in-memory key (e.g. by the hand-evaluation memo); mirrors the card.ID pattern.
 type Hero interface {
+	ID() ID
 	Name() string
 	Health() int
 	Intelligence() int

@@ -377,12 +377,12 @@ func sortHandByID(hand []card.Card, ids []card.ID, n int) {
 }
 
 // memoKey is a comparable struct used as the map key for the shared memo. Hand size is capped at
-// 8 cards. Hero name + weapon IDs are in the key so concurrent Evaluators with different (hero,
+// 8 cards. Hero ID + weapon IDs are in the key so concurrent Evaluators with different (hero,
 // weapons) tuples share the memo safely without a scope-wipe step: distinct scopes just produce
-// distinct keys. The heroName string adds one memhash per lookup but stays cheaper than the
-// alternative of goroutine-local memos that can't share across workers.
+// distinct keys. Using hero.ID (uint16) instead of the display name keeps the entire key a fixed-
+// size integer struct — no string hashing per lookup.
 type memoKey struct {
-	heroName           string
+	heroID             hero.ID
 	weaponIDs          [2]card.ID
 	cardIDs            [8]card.ID
 	cardCount          uint8
@@ -437,7 +437,7 @@ var (
 // different orders still hash to the same key.
 func makeMemoKey(hero hero.Hero, weapons []weapon.Weapon, sortedIDs *[8]card.ID, n int, incoming int, runechantCarryover int, arsenalCardIn card.Card) memoKey {
 	k := memoKey{
-		heroName:           hero.Name(),
+		heroID:             hero.ID(),
 		incoming:           incoming,
 		runechantCarryover: runechantCarryover,
 		cardCount:          uint8(n),
