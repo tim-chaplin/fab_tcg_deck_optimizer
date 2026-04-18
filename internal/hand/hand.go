@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"sort"
 	"strings"
+	"sync"
+	"sync/atomic"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/hero"
@@ -318,6 +320,12 @@ func FormatBestTurn(t TurnSummary) string {
 // Defend (only Defense Reactions). Never Pitch or Held. A hand card may also take the Arsenal
 // role so long as at most one card in BestLine ends up there.
 func Best(hero hero.Hero, weapons []weapon.Weapon, hand []card.Card, incomingDamage int, deck []card.Card, runechantCarryover int, arsenalCardIn card.Card) TurnSummary {
+	return sharedEvaluator.Best(hero, weapons, hand, incomingDamage, deck, runechantCarryover, arsenalCardIn)
+}
+
+// Best is the method form of the package-level Best: same semantics, but uses this Evaluator's
+// memo and bufs so concurrent goroutines can each hold their own state.
+func (e *Evaluator) Best(hero hero.Hero, weapons []weapon.Weapon, hand []card.Card, incomingDamage int, deck []card.Card, runechantCarryover int, arsenalCardIn card.Card) TurnSummary {
 	// Fetch IDs into a fixed-size stack array to avoid a per-call slice allocation. Hand size is
 	// capped at 8 (matches memoKey.cardIDs); larger hands panic out of the inner loops elsewhere.
 	n := len(hand)
@@ -337,15 +345,21 @@ func Best(hero hero.Hero, weapons []weapon.Weapon, hand []card.Card, incomingDam
 
 	sortHandByID(hand, ids[:], n)
 
-	ensureMemoScope(hero, weapons)
-	key := makeMemoKey(&ids, n, incomingDamage, runechantCarryover, arsenalCardIn)
+	key := makeMemoKey(hero, weapons, &ids, n, incomingDamage, runechantCarryover, arsenalCardIn)
 	if memoable {
-		if cached, hit := memo[key]; hit {
+		memoMu.RLock()
+		cached, hit := memo[key]
+		memoMu.RUnlock()
+		if hit {
 			return cached
 		}
 	}
-	result := bestUncached(hero, weapons, hand, incomingDamage, deck, runechantCarryover, arsenalCardIn)
-	memo[key] = result
+	result := e.bestUncached(hero, weapons, hand, incomingDamage, deck, runechantCarryover, arsenalCardIn)
+	if memoable {
+		memoMu.Lock()
+		memo[key] = result
+		memoMu.Unlock()
+	}
 	return result
 }
 
@@ -362,11 +376,14 @@ func sortHandByID(hand []card.Card, ids []card.ID, n int) {
 	}
 }
 
-// memoKey is a comparable struct used as the map key for memo. Hand size is capped at 8 cards.
-// Hero and weapons are not in the key — memoScope invalidates the memo map whenever they change,
-// so every live entry is implicitly scoped to one (hero, weapons) tuple. Dropping those fields
-// keeps the key purely fixed-size integers, which shrinks the hot hash / equality path.
+// memoKey is a comparable struct used as the map key for the shared memo. Hand size is capped at
+// 8 cards. Hero name + weapon IDs are in the key so concurrent Evaluators with different (hero,
+// weapons) tuples share the memo safely without a scope-wipe step: distinct scopes just produce
+// distinct keys. The heroName string adds one memhash per lookup but stays cheaper than the
+// alternative of goroutine-local memos that can't share across workers.
 type memoKey struct {
+	heroName           string
+	weaponIDs          [2]card.ID
 	cardIDs            [8]card.ID
 	cardCount          uint8
 	incoming           int
@@ -376,53 +393,68 @@ type memoKey struct {
 	arsenalInID card.ID
 }
 
-// memo caches canonical-order TurnSummary results keyed by memoKey. Not goroutine-safe — the
-// simulator is single-threaded so no lock is needed.
-var memo = map[memoKey]TurnSummary{}
+// Evaluator owns the per-goroutine mutable state hand.Best threads through a single evaluation:
+// a scratch-buffer cache keyed by (handSize, weapons). The memo cache is shared across all
+// Evaluators (see `memo` below) so every worker benefits from previously-cached hands — only the
+// scratch buffers (which are mutated during a call) must be per-goroutine.
+//
+// Long-lived Evaluators avoid reallocating ~20 scratch slices on every call. Iterate mode keeps
+// one Evaluator per worker goroutine and reuses it across every mutation that worker screens.
+type Evaluator struct {
+	// bufs holds the pre-allocated scratch slices used by bestUncached / bestAttackWithWeapons /
+	// bestSequence. Keyed by (handSize, weaponCount, weaponIDs); recreated when any differ so the
+	// scratch sizing stays correct.
+	bufs            *attackBufs
+	bufsHandSize    int
+	bufsWeaponIDs   [2]card.ID
+	bufsWeaponCount int
+	bufsValid       bool
+}
 
-// memoScope tracks the (hero, weapons) tuple the current memo entries are valid under. When Best
-// is called with a different scope, memo is wiped. The simulator runs tens of thousands of hands
-// under one scope before changing, so the occasional wipe is cheap compared to the per-lookup
-// savings of not hashing a hero name string in every key.
+// NewEvaluator returns a fresh Evaluator with empty scratch buffers. Reusing one Evaluator across
+// many Best calls amortises the scratch allocation; holding separate Evaluators per goroutine
+// keeps them safe for concurrent use while still sharing the global memo.
+func NewEvaluator() *Evaluator {
+	return &Evaluator{}
+}
+
+// sharedEvaluator backs the package-level Best function — single-threaded callers don't need to
+// construct their own Evaluator. Parallel callers (iterate's worker pool) create one per
+// goroutine for bufs but all of them share the global memo below.
+var sharedEvaluator = NewEvaluator()
+
+// memo caches canonical-order TurnSummary results keyed by memoKey. Shared across all Evaluators
+// and goroutines; protected by memoMu. Hero name + weapon IDs live in memoKey so distinct (hero,
+// weapons) scopes coexist in the same map without a wipe step.
 var (
-	memoHeroName       string
-	memoWeaponIDs      [2]card.ID
-	memoWeaponCount    int
-	memoScopeInit      bool
+	memo   = map[memoKey]TurnSummary{}
+	memoMu sync.RWMutex
 )
 
-// ensureMemoScope resets the memo when the (hero, weapons) tuple changes so memoKey can omit both
-// without risk of cross-scope hits.
-func ensureMemoScope(hero hero.Hero, weapons []weapon.Weapon) {
-	var wids [2]card.ID
+// makeMemoKey builds a comparable memo key. The hand must already be sorted by card ID.
+// sortedIDs is passed as a pointer to the caller's [8]card.ID stack array to avoid a slice-header
+// escape. weapon IDs are sorted numerically into the two fixed slots so loadouts passed in
+// different orders still hash to the same key.
+func makeMemoKey(hero hero.Hero, weapons []weapon.Weapon, sortedIDs *[8]card.ID, n int, incoming int, runechantCarryover int, arsenalCardIn card.Card) memoKey {
+	k := memoKey{
+		heroName:           hero.Name(),
+		incoming:           incoming,
+		runechantCarryover: runechantCarryover,
+		cardCount:          uint8(n),
+		cardIDs:            *sortedIDs,
+	}
+	if arsenalCardIn != nil {
+		k.arsenalInID = arsenalCardIn.ID()
+	}
 	switch len(weapons) {
 	case 1:
-		wids[0] = weapons[0].ID()
+		k.weaponIDs[0] = weapons[0].ID()
 	case 2:
 		a, b := weapons[0].ID(), weapons[1].ID()
 		if a > b {
 			a, b = b, a
 		}
-		wids[0], wids[1] = a, b
-	}
-	name := hero.Name()
-	if memoScopeInit && name == memoHeroName && len(weapons) == memoWeaponCount && wids == memoWeaponIDs {
-		return
-	}
-	clear(memo)
-	memoHeroName = name
-	memoWeaponIDs = wids
-	memoWeaponCount = len(weapons)
-	memoScopeInit = true
-}
-
-// makeMemoKey builds a comparable memo key. The hand must already be sorted by card ID.
-// sortedIDs is passed as a pointer to the caller's [8]card.ID stack array to avoid a slice-header
-// escape.
-func makeMemoKey(sortedIDs *[8]card.ID, n int, incoming int, runechantCarryover int, arsenalCardIn card.Card) memoKey {
-	k := memoKey{incoming: incoming, runechantCarryover: runechantCarryover, cardCount: uint8(n), cardIDs: *sortedIDs}
-	if arsenalCardIn != nil {
-		k.arsenalInID = arsenalCardIn.ID()
+		k.weaponIDs[0], k.weaponIDs[1] = a, b
 	}
 	return k
 }
@@ -440,22 +472,37 @@ type attackerMeta struct {
 	isAttackOrWeapon bool
 }
 
-// cardMetaCache caches attackerMeta keyed by card.ID so repeated lookups across partitions,
-// weapon masks, and bestSequence calls hit an array read instead of re-dispatching the card's
-// scalar interface methods. card.ID is uint16, so we size the cache for the entire ID space and
-// trade ~100 KB of memory for per-call constant-time lookups. Single-threaded — the solver never
-// calls hand.Best concurrently.
+// cardMetaCache and cardMetaReady are the shared, read-only-after-init card metadata tables.
+// Populated lazily via cardMetaSlowPath on first encounter and then read freely from multiple
+// goroutines without synchronisation. Sized for the entire uint16 ID space so lookups are plain
+// bounds-checked reads — ~2 MB of immutable memory, trivially cheap given the target machine.
 const cardMetaCacheSize = 1 << 16
 
 var (
-	cardMetaCache      [cardMetaCacheSize]attackerMeta
-	cardMetaCacheReady [cardMetaCacheSize]bool
+	cardMetaCache [cardMetaCacheSize]attackerMeta
+	cardMetaReady [cardMetaCacheSize]uint32 // written once (atomically) per ID; 0 = unready, 1 = ready
+	cardMetaMu    sync.Mutex
 )
 
-// attackerMetaFor returns the cached metadata for c, populating the cache on first encounter.
+// attackerMetaFor returns cached metadata for c, populating the cache on first encounter. Safe to
+// call from multiple goroutines: the first writer per ID takes the mutex, subsequent readers see
+// the ready flag set with a release barrier and read the (now immutable) meta entry directly.
 func attackerMetaFor(c card.Card) attackerMeta {
 	id := c.ID()
-	if cardMetaCacheReady[id] {
+	if atomic.LoadUint32(&cardMetaReady[id]) == 1 {
+		return cardMetaCache[id]
+	}
+	return cardMetaSlowPath(c, id)
+}
+
+// cardMetaSlowPath populates the cache entry for the given card under cardMetaMu. Returns the
+// computed meta — no need for a second load of the cache since this goroutine just wrote it.
+func cardMetaSlowPath(c card.Card, id card.ID) attackerMeta {
+	cardMetaMu.Lock()
+	defer cardMetaMu.Unlock()
+	// Re-check under lock; another goroutine may have populated between the atomic load above and
+	// our Lock below.
+	if atomic.LoadUint32(&cardMetaReady[id]) == 1 {
 		return cardMetaCache[id]
 	}
 	t := c.Types()
@@ -470,7 +517,7 @@ func attackerMetaFor(c card.Card) attackerMeta {
 		m.printedCost = d.PrintedCost()
 	}
 	cardMetaCache[id] = m
-	cardMetaCacheReady[id] = true
+	atomic.StoreUint32(&cardMetaReady[id], 1)
 	return m
 }
 
@@ -577,18 +624,10 @@ func newAttackBufs(handSize, weaponCount int, weapons []weapon.Weapon) *attackBu
 	}
 }
 
-// attackBufsCache is a single-slot cache: the simulator is single-threaded and calls bestUncached
-// many times per deck with the same handSize / weapon set, so a global slot avoids rebuilding the
-// ~7-slice attackBufs on every unique hand. Keyed by (handSize, weaponCount, weapon IDs).
-var (
-	cachedBufs       *attackBufs
-	cachedHandSize   int
-	cachedWeaponIDs  [2]card.ID
-	cachedWeaponCt   int
-	cachedBufsValid  bool
-)
-
-func getAttackBufs(handSize int, weapons []weapon.Weapon) *attackBufs {
+// getAttackBufs returns this Evaluator's scratch-buffer set, rebuilding it when (handSize,
+// weapons) changes. The cache is single-slot per Evaluator — iterate runs tens of thousands of
+// hands with the same shape, so a slot outperforms a keyed pool for our workload.
+func (e *Evaluator) getAttackBufs(handSize int, weapons []weapon.Weapon) *attackBufs {
 	var wids [2]card.ID
 	for i, w := range weapons {
 		if i >= len(wids) {
@@ -596,21 +635,21 @@ func getAttackBufs(handSize int, weapons []weapon.Weapon) *attackBufs {
 		}
 		wids[i] = w.ID()
 	}
-	if cachedBufsValid &&
-		cachedHandSize == handSize &&
-		cachedWeaponCt == len(weapons) &&
-		cachedWeaponIDs == wids {
-		return cachedBufs
+	if e.bufsValid &&
+		e.bufsHandSize == handSize &&
+		e.bufsWeaponCount == len(weapons) &&
+		e.bufsWeaponIDs == wids {
+		return e.bufs
 	}
-	cachedBufs = newAttackBufs(handSize, len(weapons), weapons)
-	cachedHandSize = handSize
-	cachedWeaponCt = len(weapons)
-	cachedWeaponIDs = wids
-	cachedBufsValid = true
-	return cachedBufs
+	e.bufs = newAttackBufs(handSize, len(weapons), weapons)
+	e.bufsHandSize = handSize
+	e.bufsWeaponCount = len(weapons)
+	e.bufsWeaponIDs = wids
+	e.bufsValid = true
+	return e.bufs
 }
 
-func bestUncached(hero hero.Hero, weapons []weapon.Weapon, hand []card.Card, incomingDamage int, deck []card.Card, runechantCarryover int, arsenalCardIn card.Card) TurnSummary {
+func (e *Evaluator) bestUncached(hero hero.Hero, weapons []weapon.Weapon, hand []card.Card, incomingDamage int, deck []card.Card, runechantCarryover int, arsenalCardIn card.Card) TurnSummary {
 	n := len(hand)
 	// The partition recurse treats the arsenal-in card as an extra entry at index n with a
 	// restricted role menu (Arsenal / Attack / Defend), so everything about it — its cost,
@@ -643,7 +682,7 @@ func bestUncached(hero hero.Hero, weapons []weapon.Weapon, hand []card.Card, inc
 	// scratch is sized handSize+1, big enough for totalN when an arsenal-in card inflates the
 	// effective hand. Each field is reset via the totalN-slice init loop below, so carry-over
 	// bytes from prior calls never leak into this partition's values.
-	bufs := getAttackBufs(n, weapons)
+	bufs := e.getAttackBufs(n, weapons)
 	rolesBuf := bufs.rolesBuf[:totalN]
 	pvals := bufs.pitchVals[:totalN]
 	cvals := bufs.costVals[:totalN]
