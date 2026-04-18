@@ -401,9 +401,9 @@ func (d *Deck) Evaluate(runs int, incomingDamage int, rng *rand.Rand) Stats {
 				// Best call may reuse.
 				lineCopy := make([]hand.CardAssignment, len(play.BestLine))
 				copy(lineCopy, play.BestLine)
-				var chainCopy []card.Card
+				var chainCopy []hand.AttackChainEntry
 				if len(play.AttackChain) > 0 {
-					chainCopy = make([]card.Card, len(play.AttackChain))
+					chainCopy = make([]hand.AttackChainEntry, len(play.AttackChain))
 					copy(chainCopy, play.AttackChain)
 				}
 				d.Stats.Best = BestTurn{

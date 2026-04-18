@@ -174,8 +174,8 @@ func bestTurnToJSON(b deck.BestTurn) BestTurnJSON {
 		roles = append(roles, a.Role.String())
 	}
 	var weaponNames []string
-	for _, c := range b.Summary.AttackChain {
-		if w, ok := c.(weapon.Weapon); ok {
+	for _, e := range b.Summary.AttackChain {
+		if w, ok := e.Card.(weapon.Weapon); ok {
 			weaponNames = append(weaponNames, w.Name())
 		}
 	}
@@ -272,16 +272,17 @@ func bestTurnFromJSON(bj BestTurnJSON) (deck.BestTurn, error) {
 	// JSON doesn't preserve the attack chain permutation, so rebuild a plausible AttackChain
 	// by concatenating hand-order Attack-role cards with the named weapons. Display callers
 	// get sensible output even if the order isn't what the solver originally picked.
-	var chain []card.Card
+	var chain []hand.AttackChainEntry
 	for _, a := range line {
 		if a.Role == hand.Attack {
-			chain = append(chain, a.Card)
+			chain = append(chain, hand.AttackChainEntry{Card: a.Card, Damage: a.Contribution})
 		}
 	}
 	weaponReg := weaponsByName()
 	for _, name := range bj.Weapons {
 		if w, ok := weaponReg[name]; ok {
-			chain = append(chain, w)
+			// JSON didn't preserve per-weapon damage, so we leave Damage at 0 here.
+			chain = append(chain, hand.AttackChainEntry{Card: w})
 		}
 	}
 	return deck.BestTurn{
