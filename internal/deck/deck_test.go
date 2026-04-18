@@ -19,6 +19,7 @@ import (
 // no on-play triggers, never flags as Runeblade.
 type int1StubHero struct{}
 
+func (int1StubHero) ID() hero.ID                                { return hero.Invalid }
 func (int1StubHero) Name() string                               { return "int1Stub" }
 func (int1StubHero) Health() int                                { return 20 }
 func (int1StubHero) Intelligence() int                          { return 1 }

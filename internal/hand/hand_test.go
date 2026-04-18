@@ -15,6 +15,7 @@ import (
 // value without any hero-ability contribution.
 type stubHero struct{}
 
+func (stubHero) ID() hero.ID                           { return hero.Invalid }
 func (stubHero) Name() string                          { return "stubHero" }
 func (stubHero) Health() int                           { return 20 }
 func (stubHero) Intelligence() int                     { return 4 }
