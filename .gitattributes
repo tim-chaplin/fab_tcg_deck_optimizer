@@ -1,2 +1,9 @@
 # Auto detect text files and perform LF normalization
 * text=auto
+
+# Shell scripts must be LF — CRLF breaks the shebang on Unix / bash.
+fabsim text eol=lf
+*.sh text eol=lf
+
+# Windows batch files stay CRLF.
+*.bat text eol=crlf

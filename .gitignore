@@ -1,7 +1,6 @@
 # Binaries
 *.exe
 *.out
-/fabsim
 /bin/
 
 # Test/coverage
