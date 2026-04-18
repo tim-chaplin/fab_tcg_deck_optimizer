@@ -67,14 +67,13 @@ func runIterate(cfg config) {
 		fmt.Fprintf(os.Stderr, "\n[round %d] evaluating %d mutations of avg %.3f\n",
 			round, len(mutations), bestAvg)
 
-		// Streaming parallel shallow screen. deck.IterateParallel runs a persistent pool of
-		// shallow workers, publishes each result on a per-mutation ready channel, and
-		// short-circuits as soon as the main-goroutine deep confirmation lands an improvement —
-		// so on a round where an early mutation wins we don't burn cycles screening the tail.
-		// A ticker goroutine prints live "tested N/total" progress off the shared atomic so the
-		// user sees the worker pool moving even during long rounds; the ticker exits cleanly once
-		// IterateParallel returns.
-		var tested atomic.Int64
+		// deck.IterateParallel runs a persistent worker pool where each worker does both the
+		// shallow screen AND the deep confirmation for any mutation it flags — so the expensive
+		// deep pass parallelises across workers instead of bottlenecking on the main goroutine.
+		// First worker to land a confirmed improvement short-circuits the rest. The ticker off
+		// the two atomics renders "tested X/total (Y deep confirms)" so the user sees BOTH the
+		// shallow sweep and the deep-confirm churn advancing.
+		var tested, deepsDone atomic.Int64
 		tickerDone := make(chan struct{})
 		go func() {
 			t := time.NewTicker(500 * time.Millisecond)
@@ -84,14 +83,14 @@ func runIterate(cfg config) {
 				case <-tickerDone:
 					return
 				case <-t.C:
-					fmt.Fprintf(os.Stderr, "\r[round %d] tested %d/%d (%s elapsed)        ",
-						round, tested.Load(), len(mutations), time.Since(start).Truncate(time.Second))
+					fmt.Fprintf(os.Stderr, "\r[round %d] tested %d/%d (%d deep confirms, %s elapsed)        ",
+						round, tested.Load(), len(mutations), deepsDone.Load(), time.Since(start).Truncate(time.Second))
 				}
 			}
 		}()
 		d, avg, idx, found := deck.IterateParallel(
 			ctx, mutations, bestAvg, cfg.shallowShuffles, cfg.deepShuffles, cfg.incoming, 0,
-			rng.Int63(), rng, &tested,
+			rng.Int63(), rng, &tested, &deepsDone,
 		)
 		close(tickerDone)
 

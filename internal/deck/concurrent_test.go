@@ -68,7 +68,7 @@ func TestIterateParallel_RunsWithoutPanic(t *testing.T) {
 
 	d, avg, idx, found := IterateParallel(
 		context.Background(), mutations, baseAvg, 10, 30, 0, 0,
-		rng.Int63(), rng, nil,
+		rng.Int63(), rng, nil, nil,
 	)
 
 	if found {
@@ -116,7 +116,7 @@ func TestIterateParallel_AbortsOnContextCancel(t *testing.T) {
 	start := time.Now()
 	d, avg, idx, found := IterateParallel(
 		ctx, mutations, baseAvg, 100, 1000, 0, 0,
-		rng.Int63(), rng, &tested,
+		rng.Int63(), rng, &tested, nil,
 	)
 	elapsed := time.Since(start)
 
@@ -137,5 +137,48 @@ func TestIterateParallel_AbortsOnContextCancel(t *testing.T) {
 	// cancellation runtime indicates we're not actually aborting.
 	if elapsed > 3*time.Second {
 		t.Errorf("IterateParallel returned after %s; abort should be near-instant", elapsed)
+	}
+}
+
+// TestIterateParallel_TerminatesWithNoImprovement is the regression guard for a bug where, with
+// a noisy shallow screen and a near-optimal baseline, iterate would spend minutes serially deep-
+// confirming shallow passes on the main goroutine — looking hung to the user. With the deep
+// pass parallelised across workers, a round with no confirmed improvement returns promptly:
+// workers drain the shared queue and there's no serial deep-confirm bottleneck.
+//
+// Uses an artificially high bestAvg so every mutation fails the shallow screen cleanly AND any
+// noise-driven shallow passer would fail deep confirmation too — the test reliably hits the
+// "drain-queue-no-improvement-found" path.
+func TestIterateParallel_TerminatesWithNoImprovement(t *testing.T) {
+	rng := rand.New(rand.NewSource(42))
+	baseline := Random(hero.Viserai{}, 40, 2, rng)
+	mutations := AllMutations(baseline, 2)
+	// Cap so the test runs in a second even serially. Full mutation list is thousands of entries.
+	if len(mutations) > 80 {
+		mutations = mutations[:80]
+	}
+
+	start := time.Now()
+	d, avg, idx, found := IterateParallel(
+		context.Background(), mutations, 1_000_000.0, // unreachable baseline
+		20, 100, 0, 0,
+		rng.Int63(), rng, nil, nil,
+	)
+	elapsed := time.Since(start)
+
+	if found {
+		t.Errorf("found=true with unreachable bestAvg; want false")
+	}
+	if d != nil {
+		t.Error("deck non-nil with found=false; want nil")
+	}
+	if avg != 1_000_000.0 {
+		t.Errorf("avg=%f; want unchanged bestAvg 1_000_000", avg)
+	}
+	if idx != -1 {
+		t.Errorf("idx=%d; want -1", idx)
+	}
+	if elapsed > 10*time.Second {
+		t.Errorf("IterateParallel returned after %s for 80 mutations; should complete under a second", elapsed)
 	}
 }
