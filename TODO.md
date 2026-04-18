@@ -44,15 +44,6 @@ them as fully active.
 - **Yinti Yanti's defending-side +1{d} is ignored.** Defence is consumed by partition scoring
   before `Play()` runs (same shape as the Sigil of Suffering hook needed below).
 
-### "If you've dealt arcane damage this turn"
-
-Consuming Volition, Arcanic Spike, and Meat and Greet now gate their arcane-damage riders on
-`TurnState.ArcaneDamageDealt`, which playSequence flips on when a Runechant fires on an
-attack/weapon and which direct-arcane cards set themselves in Play. The same clause still fires
-unconditionally for:
-
-- **Sigil of Suffering** — +1{d} on defense reactions treated as always active.
-
 ### Hero health and life-total riders
 
 Hero health isn't tracked, so every life-gain and life-comparison rider collapses to one side.
