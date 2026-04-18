@@ -4,7 +4,8 @@
 // Text: "When this attacks, your next attack this combat chain with 1 or less base {p} gets +1{p}.
 // **Go again**"
 //
-// Simplification: Chain-bonus rider for next low-power attack isn't modelled.
+// Scans TurnState.CardsRemaining for the first attack action card with base power 1 or less and
+// credits the +1 assuming it will be played; if no matching attack follows, the rider fizzles.
 //
 // Source: github.com/the-fab-cube/flesh-and-blood-cards (card.csv).
 
@@ -13,6 +14,21 @@ package generic
 import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 
 var waterTheSeedsTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeAttack)
+
+// waterTheSeedsPlay returns basePower plus 1 if the next attack action card with base {p} <= 1 is
+// scheduled later this turn, otherwise just basePower.
+func waterTheSeedsPlay(basePower int, s *card.TurnState) int {
+	for _, pc := range s.CardsRemaining {
+		t := pc.Card.Types()
+		if !t.Has(card.TypeAttack) || !t.Has(card.TypeAction) {
+			continue
+		}
+		if pc.Card.Attack() <= 1 {
+			return basePower + 1
+		}
+	}
+	return basePower
+}
 
 type WaterTheSeedsRed struct{}
 
@@ -24,7 +40,7 @@ func (WaterTheSeedsRed) Attack() int                 { return 3 }
 func (WaterTheSeedsRed) Defense() int                { return 2 }
 func (WaterTheSeedsRed) Types() card.TypeSet         { return waterTheSeedsTypes }
 func (WaterTheSeedsRed) GoAgain() bool               { return true }
-func (c WaterTheSeedsRed) Play(s *card.TurnState) int { return c.Attack() }
+func (c WaterTheSeedsRed) Play(s *card.TurnState) int { return waterTheSeedsPlay(c.Attack(), s) }
 
 type WaterTheSeedsYellow struct{}
 
@@ -36,7 +52,7 @@ func (WaterTheSeedsYellow) Attack() int                 { return 2 }
 func (WaterTheSeedsYellow) Defense() int                { return 2 }
 func (WaterTheSeedsYellow) Types() card.TypeSet         { return waterTheSeedsTypes }
 func (WaterTheSeedsYellow) GoAgain() bool               { return true }
-func (c WaterTheSeedsYellow) Play(s *card.TurnState) int { return c.Attack() }
+func (c WaterTheSeedsYellow) Play(s *card.TurnState) int { return waterTheSeedsPlay(c.Attack(), s) }
 
 type WaterTheSeedsBlue struct{}
 
@@ -48,4 +64,4 @@ func (WaterTheSeedsBlue) Attack() int                 { return 1 }
 func (WaterTheSeedsBlue) Defense() int                { return 2 }
 func (WaterTheSeedsBlue) Types() card.TypeSet         { return waterTheSeedsTypes }
 func (WaterTheSeedsBlue) GoAgain() bool               { return true }
-func (c WaterTheSeedsBlue) Play(s *card.TurnState) int { return c.Attack() }
+func (c WaterTheSeedsBlue) Play(s *card.TurnState) int { return waterTheSeedsPlay(c.Attack(), s) }
