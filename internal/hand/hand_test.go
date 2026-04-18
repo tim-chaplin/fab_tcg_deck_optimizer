@@ -210,12 +210,8 @@ func TestIsLegalOrder_MauvrionCantSaveShrillWhenRuneragerIsAhead(t *testing.T) {
 		runeblade.ShrillOfSkullformRed{},
 		weapon.ReapingBlade{},
 	}
-	n := len(order)
-	pcBuf := make([]card.PlayedCard, n)
-	ptrBuf := make([]*card.PlayedCard, n)
-	cpBuf := make([]card.Card, 0, n)
-	state := &card.TurnState{}
-	if _, _, _, legal := playSequence(hero.Viserai{}, nil, nil, order, pcBuf, ptrBuf, cpBuf, state, 1_000_000, 0, nil, nil); legal {
+	ctx := newSequenceContextForTest(hero.Viserai{}, nil, nil, 1_000_000, 0, len(order))
+	if _, _, _, legal := ctx.playSequence(order, nil, nil); legal {
 		t.Fatalf("ordering %v should be illegal (Shrill has no go-again and Mauvrion granted Runerager instead)",
 			cardNames(order))
 	}
@@ -292,8 +288,8 @@ func (g grantSpy) Play(s *card.TurnState) int {
 	return 0
 }
 
-func TestBestAttackDamage_PlayedCardGrantsDontLeakAcrossPermutations(t *testing.T) {
-	// The permutation loop in bestAttackDamage must allocate fresh *PlayedCard wrappers per
+func TestBestSequence_PlayedCardGrantsDontLeakAcrossPermutations(t *testing.T) {
+	// The permutation loop in bestSequence must allocate fresh *PlayedCard wrappers per
 	// permutation so a grant applied by one permutation's Play() can't bleed into a later
 	// permutation's legality/effect checks.
 	//
@@ -305,7 +301,8 @@ func TestBestAttackDamage_PlayedCardGrantsDontLeakAcrossPermutations(t *testing.
 	// If the wrappers were reused across permutations the spy would see leaked grants and trip.
 	var sawLeak bool
 	attackers := []card.Card{grantAll{}, grantSpy{saw: &sawLeak}, grantAll{}}
-	_, _, _ = bestAttackDamage(stubHero{}, attackers, nil, nil, newAttackBufs(0, len(attackers), nil), 1_000_000, 0, nil, nil, nil)
+	ctx := newSequenceContextForTest(stubHero{}, nil, nil, 1_000_000, 0, len(attackers))
+	_, _, _ = ctx.bestSequence(attackers, nil, nil, nil)
 	if sawLeak {
 		t.Fatalf("PlayedCard wrapper state leaked across permutations: grantSpy saw a pre-existing GrantedGoAgain when playing first")
 	}
