@@ -46,7 +46,7 @@ type StatsJSON struct {
 	TotalValue  float64                `json:"total_value"`
 	FirstCycle  deck.CycleStats        `json:"first_cycle"`
 	SecondCycle deck.CycleStats        `json:"second_cycle"`
-	Best        BestHandJSON           `json:"best"`
+	Best        BestTurnJSON           `json:"best"`
 	PerCard     []CardPlayStatsJSON    `json:"per_card,omitempty"`
 }
 
@@ -61,9 +61,9 @@ type CardPlayStatsJSON struct {
 	Avg               float64 `json:"avg"`
 }
 
-// BestHandJSON is the JSON form of deck.BestHand: card names and role names instead of interface
+// BestTurnJSON is the JSON form of deck.BestTurn: card names and role names instead of interface
 // values.
-type BestHandJSON struct {
+type BestTurnJSON struct {
 	Hand               []string `json:"hand"`
 	Roles              []string `json:"roles"`
 	Weapons            []string `json:"weapons"`
@@ -122,7 +122,7 @@ func statsToJSON(s deck.Stats) StatsJSON {
 		TotalValue:  s.TotalValue,
 		FirstCycle:  s.FirstCycle,
 		SecondCycle: s.SecondCycle,
-		Best:        bestHandToJSON(s.Best),
+		Best:        bestTurnToJSON(s.Best),
 		PerCard:     perCardToJSON(s.PerCard),
 	}
 }
@@ -157,13 +157,14 @@ func perCardToJSON(m map[card.ID]deck.CardPlayStats) []CardPlayStatsJSON {
 	return out
 }
 
-func bestHandToJSON(b deck.BestHand) BestHandJSON {
+func bestTurnToJSON(b deck.BestTurn) BestTurnJSON {
 	if len(b.Summary.BestLine) == 0 {
-		return BestHandJSON{}
+		return BestTurnJSON{}
 	}
 	// Serialise hand cards only (arsenal-in entries belong to a previous turn's hand). JSON
 	// stays with parallel name + role arrays for human readability / backward compatibility;
-	// the in-memory BestLine is still the single source of truth.
+	// the in-memory BestLine is still the single source of truth. Weapon names get extracted
+	// from the AttackChain since TurnSummary no longer carries them separately.
 	var handNames, roles []string
 	for _, a := range b.Summary.BestLine {
 		if a.FromArsenal {
@@ -172,10 +173,16 @@ func bestHandToJSON(b deck.BestHand) BestHandJSON {
 		handNames = append(handNames, a.Card.Name())
 		roles = append(roles, a.Role.String())
 	}
-	return BestHandJSON{
+	var weaponNames []string
+	for _, c := range b.Summary.AttackChain {
+		if w, ok := c.(weapon.Weapon); ok {
+			weaponNames = append(weaponNames, w.Name())
+		}
+	}
+	return BestTurnJSON{
 		Hand:               handNames,
 		Roles:              roles,
-		Weapons:            append([]string(nil), b.Summary.Weapons...),
+		Weapons:            weaponNames,
 		Value:              b.Summary.Value,
 		StartingRunechants: b.StartingRunechants,
 	}
@@ -203,7 +210,7 @@ func fromJSON(dj *DeckJSON) (*deck.Deck, error) {
 		}
 		cs[i] = cards.Get(id)
 	}
-	best, err := bestHandFromJSON(dj.Stats.Best)
+	best, err := bestTurnFromJSON(dj.Stats.Best)
 	if err != nil {
 		return nil, err
 	}
@@ -243,30 +250,45 @@ func perCardFromJSON(entries []CardPlayStatsJSON) (map[card.ID]deck.CardPlayStat
 	return out, nil
 }
 
-func bestHandFromJSON(bj BestHandJSON) (deck.BestHand, error) {
+func bestTurnFromJSON(bj BestTurnJSON) (deck.BestTurn, error) {
 	if len(bj.Hand) == 0 {
-		return deck.BestHand{}, nil
+		return deck.BestTurn{}, nil
 	}
 	if len(bj.Roles) != len(bj.Hand) {
-		return deck.BestHand{}, fmt.Errorf("deckio: best hand has %d cards but %d roles", len(bj.Hand), len(bj.Roles))
+		return deck.BestTurn{}, fmt.Errorf("deckio: best turn has %d cards but %d roles", len(bj.Hand), len(bj.Roles))
 	}
 	line := make([]hand.CardAssignment, len(bj.Hand))
 	for i, name := range bj.Hand {
 		id, ok := cards.ByName(name)
 		if !ok {
-			return deck.BestHand{}, fmt.Errorf("deckio: unknown card %q in best hand", name)
+			return deck.BestTurn{}, fmt.Errorf("deckio: unknown card %q in best turn", name)
 		}
 		r, err := roleFromString(bj.Roles[i])
 		if err != nil {
-			return deck.BestHand{}, err
+			return deck.BestTurn{}, err
 		}
 		line[i] = hand.CardAssignment{Card: cards.Get(id), Role: r}
 	}
-	return deck.BestHand{
+	// JSON doesn't preserve the attack chain permutation, so rebuild a plausible AttackChain
+	// by concatenating hand-order Attack-role cards with the named weapons. Display callers
+	// get sensible output even if the order isn't what the solver originally picked.
+	var chain []card.Card
+	for _, a := range line {
+		if a.Role == hand.Attack {
+			chain = append(chain, a.Card)
+		}
+	}
+	weaponReg := weaponsByName()
+	for _, name := range bj.Weapons {
+		if w, ok := weaponReg[name]; ok {
+			chain = append(chain, w)
+		}
+	}
+	return deck.BestTurn{
 		Summary: hand.TurnSummary{
-			BestLine: line,
-			Weapons:  append([]string(nil), bj.Weapons...),
-			Value:    bj.Value,
+			BestLine:    line,
+			AttackChain: chain,
+			Value:       bj.Value,
 		},
 		StartingRunechants: bj.StartingRunechants,
 	}, nil
