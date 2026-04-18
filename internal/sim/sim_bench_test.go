@@ -37,27 +37,16 @@ func BenchmarkIterateImprovements(b *testing.B) {
 		improvements := 0
 		for improvements < targetImprovements {
 			mutations := fabdeck.AllMutations(best, maxCopies)
-			improved := false
-			for _, mut := range mutations {
-				screen := fabdeck.New(mut.Deck.Hero, mut.Deck.Weapons, mut.Deck.Cards)
-				shallowAvg := screen.Evaluate(shallowShuffles, incoming, rng).Avg()
-				if shallowAvg <= bestAvg {
-					continue
-				}
-				d := fabdeck.New(mut.Deck.Hero, mut.Deck.Weapons, mut.Deck.Cards)
-				avg := d.Evaluate(deepShuffles, incoming, rng).Avg()
-				if avg <= bestAvg {
-					continue
-				}
-				bestAvg = avg
-				best = d
-				improvements++
-				improved = true
-				break
-			}
-			if !improved {
+			d, avg, _, found := fabdeck.IterateParallel(
+				mutations, bestAvg, shallowShuffles, deepShuffles, incoming, 0,
+				rng.Int63(), rng, nil,
+			)
+			if !found {
 				b.Fatalf("local maximum reached before hitting %d improvements", targetImprovements)
 			}
+			bestAvg = avg
+			best = d
+			improvements++
 		}
 	}
 }

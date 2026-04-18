@@ -5,8 +5,10 @@ package deck
 import (
 	"fmt"
 	"math/rand"
+	"runtime"
 	"sort"
 	"strings"
+	"sync"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/cards"
@@ -328,7 +330,19 @@ func (s Stats) Avg() float64 {
 // are cycle 1, the next deckSize/handSize hands are cycle 2.
 //
 // Results accumulate into d.Stats and are also returned for convenience.
+//
+// Uses the package-level shared hand.Evaluator, which means repeated Evaluate calls on the same
+// (hero, weapons) share their memo cache. Callers that evaluate multiple decks concurrently must
+// use EvaluateWith with a goroutine-local Evaluator instead — the shared one has no internal
+// synchronisation.
 func (d *Deck) Evaluate(runs int, incomingDamage int, rng *rand.Rand) Stats {
+	return d.EvaluateWith(runs, incomingDamage, rng, nil)
+}
+
+// EvaluateWith is Evaluate using the given hand.Evaluator. Pass a dedicated Evaluator per
+// goroutine when running Evaluate calls in parallel; pass nil to reuse the package-level shared
+// Evaluator (equivalent to calling Evaluate directly).
+func (d *Deck) EvaluateWith(runs int, incomingDamage int, rng *rand.Rand, ev *hand.Evaluator) Stats {
 	d.Stats.Runs += runs
 	simstate.CurrentHero = d.Hero
 	handSize := d.Hero.Intelligence()
@@ -396,7 +410,12 @@ func (d *Deck) Evaluate(runs int, incomingDamage int, rng *rand.Rand) Stats {
 			// Snapshot the starting carryover before Best overwrites it — the best-hand record
 			// wants the count in play *when the hand was dealt*, not what remained after.
 			startingRunechants := runechantCarryover
-			play := hand.Best(d.Hero, d.Weapons, h, incomingDamage, buf[head+drawCount:tail], runechantCarryover, arsenalCard)
+			var play hand.TurnSummary
+			if ev != nil {
+				play = ev.Best(d.Hero, d.Weapons, h, incomingDamage, buf[head+drawCount:tail], runechantCarryover, arsenalCard)
+			} else {
+				play = hand.Best(d.Hero, d.Weapons, h, incomingDamage, buf[head+drawCount:tail], runechantCarryover, arsenalCard)
+			}
 			runechantCarryover = play.LeftoverRunechants
 			arsenalCard = play.ArsenalCard
 			v := float64(play.Value)
@@ -481,4 +500,97 @@ func (d *Deck) Evaluate(runs int, incomingDamage int, rng *rand.Rand) Stats {
 		}
 	}
 	return d.Stats
+}
+
+// IterateParallel runs one iterate-mode round: shallow-screen mutations in chunks of numWorkers
+// using parallel goroutines, deep-confirm shallow passers in deterministic mutation order, and
+// return the first mutation that confirms as an improvement. Chunking (rather than evaluating
+// every mutation eagerly) lets the loop short-circuit as soon as an improvement is confirmed —
+// matching the first-improvement-wins semantics of the serial iterate.
+//
+// mutations: ordered list of candidates; the first to deep-confirm wins.
+// bestAvg: the current baseline (at deep-shuffles depth).
+// shallowShuffles / deepShuffles / incoming: eval settings.
+// numWorkers: goroutines to spawn per shallow chunk; 0 uses runtime.GOMAXPROCS(0).
+// seed: base seed for worker RNGs; workers use (seed + offset) so runs are reproducible.
+// deepRng: rng used for deep-confirm runs, threaded across chunks; nil disables determinism.
+// onShallowRejected / onShallowPassFailedDeep: optional hooks for logging.
+//
+// Returns (improvedDeck, improvedAvg, improvedIndex, true) on first confirmed improvement, or
+// (nil, bestAvg, -1, false) if the whole mutation list produces no confirmed improvement.
+func IterateParallel(
+	mutations []Mutation,
+	bestAvg float64,
+	shallowShuffles, deepShuffles, incoming, numWorkers int,
+	seed int64,
+	deepRng *rand.Rand,
+	onShallowPassFailedDeep func(idx int, mut Mutation, shallowAvg, deepAvg float64),
+) (*Deck, float64, int, bool) {
+	if numWorkers <= 0 {
+		numWorkers = runtime.GOMAXPROCS(0)
+	}
+	if deepRng == nil {
+		deepRng = rand.New(rand.NewSource(seed))
+	}
+	for start := 0; start < len(mutations); start += numWorkers {
+		end := start + numWorkers
+		if end > len(mutations) {
+			end = len(mutations)
+		}
+		shallowAvgs := shallowScreenChunk(mutations[start:end], shallowShuffles, incoming, numWorkers, seed+int64(start))
+		// Walk chunk results in mutation order so the FIRST shallow pass (by index) gets tried
+		// first at deep depth — matches the serial "first improvement wins" ordering.
+		for i, shallowAvg := range shallowAvgs {
+			if shallowAvg <= bestAvg {
+				continue
+			}
+			idx := start + i
+			mut := mutations[idx]
+			d := New(mut.Deck.Hero, mut.Deck.Weapons, mut.Deck.Cards)
+			deepAvg := d.Evaluate(deepShuffles, incoming, deepRng).Avg()
+			if deepAvg > bestAvg {
+				return d, deepAvg, idx, true
+			}
+			if onShallowPassFailedDeep != nil {
+				onShallowPassFailedDeep(idx, mut, shallowAvg, deepAvg)
+			}
+		}
+	}
+	return nil, bestAvg, -1, false
+}
+
+// shallowScreenChunk evaluates a chunk of mutations in parallel, one goroutine per chunk slot,
+// and returns the per-mutation averages. Each worker holds its own hand.Evaluator (buffers only;
+// the memo is shared across all goroutines) so the shallow screen scales near-linearly with
+// numWorkers up to the chunk size.
+func shallowScreenChunk(chunk []Mutation, shallowShuffles, incoming, numWorkers int, seed int64) []float64 {
+	if numWorkers > len(chunk) {
+		numWorkers = len(chunk)
+	}
+	results := make([]float64, len(chunk))
+	if numWorkers == 0 {
+		return results
+	}
+	jobs := make(chan int, len(chunk))
+	for i := range chunk {
+		jobs <- i
+	}
+	close(jobs)
+
+	var wg sync.WaitGroup
+	for w := 0; w < numWorkers; w++ {
+		wg.Add(1)
+		go func(workerIdx int) {
+			defer wg.Done()
+			ev := hand.NewEvaluator()
+			rng := rand.New(rand.NewSource(seed + int64(workerIdx)))
+			for i := range jobs {
+				mut := chunk[i]
+				d := New(mut.Deck.Hero, mut.Deck.Weapons, mut.Deck.Cards)
+				results[i] = d.EvaluateWith(shallowShuffles, incoming, rng, ev).Avg()
+			}
+		}(w)
+	}
+	wg.Wait()
+	return results
 }

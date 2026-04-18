@@ -62,45 +62,37 @@ func runIterate(cfg config) {
 		fmt.Fprintf(os.Stderr, "\n[round %d] evaluating %d mutations of avg %.3f\n",
 			round, len(mutations), bestAvg)
 
-		improved := false
-		for i, mut := range mutations {
-			select {
-			case <-stop:
-				fmt.Fprintf(os.Stderr, "\nAborted mid-round after %d rounds / %d improvements in %s\n",
-					round, improvements, time.Since(start).Truncate(time.Second))
-				fmt.Println()
-				printBestDeck(best)
-				return
-			default:
-			}
+		// Chunked parallel shallow screen. deck.IterateParallel processes mutations in chunks of
+		// numWorkers goroutines and short-circuits as soon as one confirms at deep depth, so on a
+		// round where an early mutation wins we don't burn cycles screening the tail of the list.
+		onShallowRejected := func(idx int, mut deck.Mutation, shallowAvg, deepAvg float64) {
+			fmt.Fprintf(os.Stderr, "\r[round %d] shallow %.3f at %d/%d (%s) not confirmed by deep %.3f        \n",
+				round, shallowAvg, idx+1, len(mutations), mut.Description, deepAvg)
+		}
+		d, avg, idx, found := deck.IterateParallel(
+			mutations, bestAvg, cfg.shallowShuffles, cfg.deepShuffles, cfg.incoming, 0,
+			rng.Int63(), rng, onShallowRejected,
+		)
 
-			// Two-stage evaluation: most mutations are neutral or worse, so a cheap shallow screen
-			// filters them out. Only mutations that clear bestAvg on the shallow sample graduate to
-			// a fresh -deep-shuffles evaluation that decides adoption. bestAvg always reflects
-			// deep-shuffles depth (that's what we wrote to disk), so the apples-to-apples check
-			// happens against the deep re-eval, not the shallow screen.
-			screen := deck.New(mut.Deck.Hero, mut.Deck.Weapons, mut.Deck.Cards)
-			shallowAvg := screen.Evaluate(cfg.shallowShuffles, cfg.incoming, rng).Avg()
-			if shallowAvg > bestAvg {
-				d := deck.New(mut.Deck.Hero, mut.Deck.Weapons, mut.Deck.Cards)
-				avg := d.Evaluate(cfg.deepShuffles, cfg.incoming, rng).Avg()
-				if avg > bestAvg {
-					improvements++
-					fmt.Fprintf(os.Stderr, "\r[round %d] improvement at %d/%d: shallow %.3f → deep %.3f beats %.3f (%s), restarting        \n",
-						round, i+1, len(mutations), shallowAvg, avg, bestAvg, mut.Description)
-					bestAvg = avg
-					best = d
-					_ = writeDeck(best, cfg.outPath)
-					improved = true
-					break
-				}
-				fmt.Fprintf(os.Stderr, "\r[round %d] shallow %.3f at %d/%d (%s) not confirmed by deep %.3f        \n",
-					round, shallowAvg, i+1, len(mutations), mut.Description, avg)
-			}
-			if (i+1)%50 == 0 {
-				fmt.Fprintf(os.Stderr, "\r[round %d] %d/%d evaluated, best still %.3f (%s elapsed)        ",
-					round, i+1, len(mutations), bestAvg, time.Since(start).Truncate(time.Second))
-			}
+		improved := false
+		select {
+		case <-stop:
+			fmt.Fprintf(os.Stderr, "\nAborted mid-round after %d rounds / %d improvements in %s\n",
+				round, improvements, time.Since(start).Truncate(time.Second))
+			fmt.Println()
+			printBestDeck(best)
+			return
+		default:
+		}
+		if found {
+			improvements++
+			mut := mutations[idx]
+			fmt.Fprintf(os.Stderr, "\r[round %d] improvement at %d/%d: deep %.3f beats %.3f (%s), restarting        \n",
+				round, idx+1, len(mutations), avg, bestAvg, mut.Description)
+			bestAvg = avg
+			best = d
+			_ = writeDeck(best, cfg.outPath)
+			improved = true
 		}
 
 		if !improved {
