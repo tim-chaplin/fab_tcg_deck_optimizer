@@ -572,6 +572,84 @@ func TestPromoteRandomHeldToArsenal_DeterministicPerHand(t *testing.T) {
 	}
 }
 
+// TestBeatsBest_ArsenalOccupancyTiebreaker pins the tiebreaker contract used by the partition
+// enumerator: when two candidates tie on Value and LeftoverRunechants, the one that will end
+// the turn with the arsenal slot occupied (either via arsenal-in staying OR a post-hoc Held→
+// Arsenal promotion) beats the one that won't. Without this direct test, the logic was only
+// exercised indirectly through Best() scenarios where the enumeration order happens to explore
+// occupied partitions first, so a regression could accidentally invert the comparison without
+// any Best-level test catching it.
+func TestBeatsBest_ArsenalOccupancyTiebreaker(t *testing.T) {
+	// Seed best: Value=10, Leftover=0, arsenal NOT occupied.
+	best := TurnSummary{Value: 10, LeftoverRunechants: 0}
+	// Candidate with equal V/L but arsenal WILL be occupied — should beat.
+	if !beatsBest(10, 0, true, best, false) {
+		t.Error("willOccupy=true should beat a tied best with willOccupy=false")
+	}
+	// Candidate with equal V/L and arsenal NOT occupied — same as best, should NOT beat.
+	if beatsBest(10, 0, false, best, false) {
+		t.Error("willOccupy=false should not beat a tied best with willOccupy=false")
+	}
+	// Best already occupies; candidate also occupies — no advantage, should NOT beat.
+	if beatsBest(10, 0, true, best, true) {
+		t.Error("willOccupy=true should not beat a tied best that also has willOccupy=true")
+	}
+	// Strict-wins on Value still takes precedence over the occupancy tiebreaker.
+	if !beatsBest(11, 0, false, best, true) {
+		t.Error("higher Value should beat even when the candidate has no occupancy advantage")
+	}
+	// Strict-loses on Value — can't be rescued by occupancy.
+	if beatsBest(9, 0, true, best, false) {
+		t.Error("lower Value should lose regardless of occupancy advantage")
+	}
+	// Strict-wins on leftover takes precedence over occupancy.
+	if !beatsBest(10, 1, false, best, true) {
+		t.Error("higher LeftoverRunechants should beat even without occupancy advantage")
+	}
+}
+
+// TestPromoteRandomHeldToArsenal_SingleHeldAlwaysPicked covers the n=1 edge of the hash-modulo
+// selection: with exactly one Held index the modulo is deterministic (always 0), so the only
+// candidate gets promoted regardless of the hash value.
+func TestPromoteRandomHeldToArsenal_SingleHeldAlwaysPicked(t *testing.T) {
+	// Hand of two cards where one is Attack-role and one is Held-role — exactly one candidate
+	// for post-hoc promotion.
+	hand := []card.Card{generic.WoundingBlowRed{}, generic.WoundingBlowBlue{}}
+	line := []CardAssignment{
+		{Card: hand[0], Role: Attack},
+		{Card: hand[1], Role: Held},
+	}
+	best := TurnSummary{BestLine: line}
+	promoteRandomHeldToArsenal(&best, hand, len(hand), nil)
+	if best.BestLine[1].Role != Arsenal {
+		t.Errorf("Role[1] = %s, want Arsenal (only Held candidate)", best.BestLine[1].Role)
+	}
+	if best.ArsenalCard == nil || best.ArsenalCard.ID() != hand[1].ID() {
+		t.Errorf("ArsenalCard = %v, want %s", best.ArsenalCard, hand[1].Name())
+	}
+}
+
+// TestPromoteRandomHeldToArsenal_NoHeldIsNoop covers the other end: a partition where every
+// hand card plays/pitches/defends leaves zero Held candidates, so the promotion is a no-op and
+// the arsenal slot stays empty.
+func TestPromoteRandomHeldToArsenal_NoHeldIsNoop(t *testing.T) {
+	hand := []card.Card{generic.WoundingBlowRed{}, generic.WoundingBlowBlue{}}
+	line := []CardAssignment{
+		{Card: hand[0], Role: Attack},
+		{Card: hand[1], Role: Pitch},
+	}
+	best := TurnSummary{BestLine: line}
+	promoteRandomHeldToArsenal(&best, hand, len(hand), nil)
+	for i, a := range best.BestLine {
+		if a.Role == Arsenal {
+			t.Errorf("BestLine[%d].Role = Arsenal, want unchanged (no Held candidates)", i)
+		}
+	}
+	if best.ArsenalCard != nil {
+		t.Errorf("ArsenalCard = %v, want nil (no promotion possible)", best.ArsenalCard)
+	}
+}
+
 // TestBest_AllAttackHandPlusArsenalNoWeapons regresses a slice-bounds panic: attackBufs sized its
 // scratch by handSize+weaponCount only, so a full 4-card hand of 0-cost attackers + an arsenal-in
 // attacker (5 entries) overflowed the 4-wide attackerBuf inside bestAttackWithWeapons when no
