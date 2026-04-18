@@ -1,6 +1,7 @@
 package sim
 
 import (
+	"context"
 	"math/rand"
 	"testing"
 
@@ -38,7 +39,7 @@ func BenchmarkIterateImprovements(b *testing.B) {
 		for improvements < targetImprovements {
 			mutations := fabdeck.AllMutations(best, maxCopies)
 			d, avg, _, found := fabdeck.IterateParallel(
-				mutations, bestAvg, shallowShuffles, deepShuffles, incoming, 0,
+				context.Background(), mutations, bestAvg, shallowShuffles, deepShuffles, incoming, 0,
 				rng.Int63(), rng, nil,
 			)
 			if !found {

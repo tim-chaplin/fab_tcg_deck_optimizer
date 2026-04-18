@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"math/rand"
 	"os"
@@ -40,14 +41,17 @@ func runIterate(cfg config) {
 	}
 	fmt.Println("Press Enter to abort.")
 
-	// Signal channel: background goroutine reads stdin and sends on stop. EOF / closed stdin
-	// isn't an abort signal (otherwise iterate would exit immediately when stdin isn't a TTY) —
-	// only an actual read of at least one byte counts.
-	stop := make(chan struct{}, 1)
+	// Abort signal: background goroutine reads stdin and cancels ctx on the first keypress. EOF
+	// / closed stdin isn't an abort signal (otherwise iterate would exit immediately when stdin
+	// isn't a TTY) — only an actual read of at least one byte counts. Cancelling ctx propagates
+	// into IterateParallel so an abort takes effect mid-round rather than waiting for the current
+	// round to finish.
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
 	go func() {
 		buf := make([]byte, 1)
 		if n, err := os.Stdin.Read(buf); err == nil && n > 0 {
-			stop <- struct{}{}
+			cancel()
 		}
 	}()
 
@@ -86,21 +90,19 @@ func runIterate(cfg config) {
 			}
 		}()
 		d, avg, idx, found := deck.IterateParallel(
-			mutations, bestAvg, cfg.shallowShuffles, cfg.deepShuffles, cfg.incoming, 0,
+			ctx, mutations, bestAvg, cfg.shallowShuffles, cfg.deepShuffles, cfg.incoming, 0,
 			rng.Int63(), rng, &tested,
 		)
 		close(tickerDone)
 
-		improved := false
-		select {
-		case <-stop:
+		if ctx.Err() != nil {
 			fmt.Fprintf(os.Stderr, "\nAborted mid-round after %d rounds / %d improvements in %s\n",
 				round, improvements, time.Since(start).Truncate(time.Second))
 			fmt.Println()
 			printBestDeck(best)
 			return
-		default:
 		}
+		improved := false
 		if found {
 			improvements++
 			mut := mutations[idx]

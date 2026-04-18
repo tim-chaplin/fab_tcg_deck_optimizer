@@ -3,6 +3,7 @@
 package deck
 
 import (
+	"context"
 	"fmt"
 	"math/rand"
 	"runtime"
@@ -505,8 +506,10 @@ func (d *Deck) EvaluateWith(runs int, incomingDamage int, rng *rand.Rand, ev *ha
 
 // IterateParallel runs one iterate-mode round: shallow-screens mutations on a pool of workers
 // while the main goroutine walks the results in mutation order and deep-confirms shallow passers.
-// As soon as a mutation deep-confirms, a cancellation flag stops the workers so no further
-// shallow evaluations run.
+// As soon as a mutation deep-confirms, the shared internal context cancels so workers stop
+// picking up further jobs. An external caller can cancel the passed-in ctx to abort mid-round
+// (e.g. the user hits Enter in iterate mode); workers drop their queued jobs on the next
+// iteration and the main loop unblocks from its ready-channel wait via a select.
 //
 // Workers fill results out-of-order on a pool of numWorkers goroutines, signalling completion of
 // each slot via a per-mutation channel. The main goroutine reads those channels in strict
@@ -516,6 +519,8 @@ func (d *Deck) EvaluateWith(runs int, incomingDamage int, rng *rand.Rand, ev *ha
 // ready-signal closed immediately (with zero as the result), so the main-goroutine walk never
 // blocks on abandoned work.
 //
+// ctx: aborts the round when Done — workers exit early and IterateParallel returns with
+// found=false; caller distinguishes "aborted" from "local max" via ctx.Err().
 // mutations: ordered list of candidates; the first to deep-confirm wins.
 // bestAvg: the current baseline (at deep-shuffles depth).
 // shallowShuffles / deepShuffles / incoming: eval settings.
@@ -527,8 +532,9 @@ func (d *Deck) EvaluateWith(runs int, incomingDamage int, rng *rand.Rand, ev *ha
 // Nil to opt out of accounting.
 //
 // Returns (improvedDeck, improvedAvg, improvedIndex, true) on first confirmed improvement, or
-// (nil, bestAvg, -1, false) if no mutation's deep-confirmed improvement was found.
+// (nil, bestAvg, -1, false) if no improvement was found OR ctx was cancelled.
 func IterateParallel(
+	ctx context.Context,
 	mutations []Mutation,
 	bestAvg float64,
 	shallowShuffles, deepShuffles, incoming, numWorkers int,
@@ -546,6 +552,11 @@ func IterateParallel(
 		deepRng = rand.New(rand.NewSource(seed))
 	}
 
+	// innerCtx folds the caller's ctx with an internal cancel that fires when the main goroutine
+	// adopts an improvement — workers only need to watch one channel.
+	innerCtx, cancel := context.WithCancel(ctx)
+	defer cancel()
+
 	// results[i] = shallow avg for mutation i. ready[i] closes once results[i] is set (or once
 	// the worker skipped that slot because cancellation fired). Main waits on ready[i] in order.
 	results := make([]float64, len(mutations))
@@ -553,7 +564,6 @@ func IterateParallel(
 	for i := range ready {
 		ready[i] = make(chan struct{})
 	}
-	var cancelled atomic.Bool
 
 	jobs := make(chan int, len(mutations))
 	for i := range mutations {
@@ -569,9 +579,10 @@ func IterateParallel(
 			ev := hand.NewEvaluator()
 			rng := rand.New(rand.NewSource(seed + int64(workerIdx)))
 			for i := range jobs {
-				if cancelled.Load() {
-					// Main has already adopted an improvement. Skip compute but still close the
-					// ready channel so any main-goroutine read on ready[i] unblocks instantly.
+				if innerCtx.Err() != nil {
+					// Either main has adopted an improvement or the caller aborted; skip compute
+					// but close the ready channel so any main-goroutine read on ready[i] unblocks
+					// instantly.
 					close(ready[i])
 					continue
 				}
@@ -587,7 +598,12 @@ func IterateParallel(
 	}
 
 	for i := 0; i < len(mutations); i++ {
-		<-ready[i]
+		select {
+		case <-ready[i]:
+		case <-innerCtx.Done():
+			wg.Wait()
+			return nil, bestAvg, -1, false
+		}
 		if results[i] <= bestAvg {
 			continue
 		}
@@ -595,7 +611,7 @@ func IterateParallel(
 		d := New(mut.Deck.Hero, mut.Deck.Weapons, mut.Deck.Cards)
 		deepAvg := d.Evaluate(deepShuffles, incoming, deepRng).Avg()
 		if deepAvg > bestAvg {
-			cancelled.Store(true)
+			cancel()
 			wg.Wait()
 			return d, deepAvg, i, true
 		}

@@ -1,10 +1,13 @@
 package deck
 
 import (
+	"context"
 	"math/rand"
 	"runtime"
 	"sync"
+	"sync/atomic"
 	"testing"
+	"time"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/hand"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/hero"
@@ -64,7 +67,7 @@ func TestIterateParallel_RunsWithoutPanic(t *testing.T) {
 	}
 
 	d, avg, idx, found := IterateParallel(
-		mutations, baseAvg, 10, 30, 0, 0,
+		context.Background(), mutations, baseAvg, 10, 30, 0, 0,
 		rng.Int63(), rng, nil,
 	)
 
@@ -88,5 +91,51 @@ func TestIterateParallel_RunsWithoutPanic(t *testing.T) {
 		if idx != -1 {
 			t.Errorf("found=false but idx %d != -1", idx)
 		}
+	}
+}
+
+// TestIterateParallel_AbortsOnContextCancel pins the abort path that iterate's stdin-listener
+// depends on: a context cancellation must unblock both the worker pool and the main-goroutine
+// select on ready[i], and IterateParallel must return promptly with found=false and ctx.Err()
+// set. Regression guard for the parallelism refactor originally blocking Enter abort until the
+// round's very last mutation had been shallow-screened.
+//
+// Pre-cancels the context so the outcome is deterministic regardless of which worker happens to
+// deep-confirm first — the interesting assertion is "returns promptly with abort semantics,"
+// not "cancel races vs shallow completion."
+func TestIterateParallel_AbortsOnContextCancel(t *testing.T) {
+	rng := rand.New(rand.NewSource(42))
+	baseline := Random(hero.Viserai{}, 40, 2, rng)
+	baseAvg := baseline.Evaluate(10, 0, rng).Avg()
+	mutations := AllMutations(baseline, 2)
+
+	ctx, cancel := context.WithCancel(context.Background())
+	cancel() // pre-cancel so no mutation ever completes its shallow eval
+
+	var tested atomic.Int64
+	start := time.Now()
+	d, avg, idx, found := IterateParallel(
+		ctx, mutations, baseAvg, 100, 1000, 0, 0,
+		rng.Int63(), rng, &tested,
+	)
+	elapsed := time.Since(start)
+
+	if found {
+		t.Errorf("found=true after cancel; want false (aborted)")
+	}
+	if d != nil {
+		t.Error("deck is non-nil after cancel; want nil")
+	}
+	if avg != baseAvg {
+		t.Errorf("avg=%.3f after cancel; want baseAvg=%.3f", avg, baseAvg)
+	}
+	if idx != -1 {
+		t.Errorf("idx=%d after cancel; want -1", idx)
+	}
+	// A full-list shallow screen would take multiple seconds. Abort should land in well under a
+	// second — the exact bound is loose to tolerate scheduler noise, but anything near the no-
+	// cancellation runtime indicates we're not actually aborting.
+	if elapsed > 3*time.Second {
+		t.Errorf("IterateParallel returned after %s; abort should be near-instant", elapsed)
 	}
 }
