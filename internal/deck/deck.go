@@ -504,32 +504,33 @@ func (d *Deck) EvaluateWith(runs int, incomingDamage int, rng *rand.Rand, ev *ha
 	return d.Stats
 }
 
-// IterateParallel runs one iterate-mode round: shallow-screens mutations on a pool of workers
-// while the main goroutine walks the results in mutation order and deep-confirms shallow passers.
-// As soon as a mutation deep-confirms, the shared internal context cancels so workers stop
-// picking up further jobs. An external caller can cancel the passed-in ctx to abort mid-round
-// (e.g. the user hits Enter in iterate mode); workers drop their queued jobs on the next
-// iteration and the main loop unblocks from its ready-channel wait via a select.
+// IterateParallel runs one iterate-mode round. Workers share a single pool and each goroutine
+// does BOTH the shallow screen for its pulled mutation AND — if the shallow result beats bestAvg
+// — the deep-shuffles confirmation for that same mutation. The first worker to land a confirmed
+// improvement publishes it; a cancellation atomic stops everyone else. Because deep confirms
+// parallelise instead of serialising on the main goroutine, iterate rounds on noisy shallow
+// screens (many false-positive passes) finish in max(shallow wall, deeps/workers × deep wall)
+// rather than shallow wall + passes × deep wall.
 //
-// Workers fill results out-of-order on a pool of numWorkers goroutines, signalling completion of
-// each slot via a per-mutation channel. The main goroutine reads those channels in strict
-// mutation-index order: the first shallow pass it encounters is the first by-position candidate,
-// preserving the "earliest mutation wins" heuristic of the serial iterate even under full
-// parallelism. Slower workers that were still computing when cancellation fires get their
-// ready-signal closed immediately (with zero as the result), so the main-goroutine walk never
-// blocks on abandoned work.
+// Mutations are pulled FIFO from the shared queue and workers start at the front, so the
+// earliest-position-wins heuristic of serial iterate generally holds — but a worker locked on a
+// deep confirm at position 20 doesn't block others from picking up position 25, so a later-
+// position mutation can occasionally win if its deep confirm finishes first. The hill-climb
+// trajectory stays comparable.
 //
 // ctx: aborts the round when Done — workers exit early and IterateParallel returns with
 // found=false; caller distinguishes "aborted" from "local max" via ctx.Err().
-// mutations: ordered list of candidates; the first to deep-confirm wins.
-// bestAvg: the current baseline (at deep-shuffles depth).
+// mutations: ordered list of candidates.
+// bestAvg: current baseline (at deep-shuffles depth).
 // shallowShuffles / deepShuffles / incoming: eval settings.
 // numWorkers: goroutines in the pool; 0 uses runtime.GOMAXPROCS(0).
-// seed: base seed for worker RNGs; worker w uses (seed + w) so runs are reproducible.
-// deepRng: rng used for the serial deep-confirm runs on the main goroutine.
+// seed: base seed for worker RNGs; worker w uses (seed + w) for shallow and a derived stream for
+// deep so the two phases don't alias.
+// deepRng: legacy param, retained for callers; deep rng is now per-worker and this is ignored.
 // shallowCompleted: optional atomic counter incremented once per shallow eval the worker pool
 // finishes, so callers can render live "tested N/total" progress from a separate goroutine.
-// Nil to opt out of accounting.
+// deepsCompleted: optional counter incremented once per attempted deep confirm (regardless of
+// outcome) so callers can also show deep-phase progress. Nil to opt out.
 //
 // Returns (improvedDeck, improvedAvg, improvedIndex, true) on first confirmed improvement, or
 // (nil, bestAvg, -1, false) if no improvement was found OR ctx was cancelled.
@@ -539,8 +540,9 @@ func IterateParallel(
 	bestAvg float64,
 	shallowShuffles, deepShuffles, incoming, numWorkers int,
 	seed int64,
-	deepRng *rand.Rand,
+	_ *rand.Rand,
 	shallowCompleted *atomic.Int64,
+	deepsCompleted *atomic.Int64,
 ) (*Deck, float64, int, bool) {
 	if numWorkers <= 0 {
 		numWorkers = runtime.GOMAXPROCS(0)
@@ -548,22 +550,18 @@ func IterateParallel(
 	if len(mutations) == 0 {
 		return nil, bestAvg, -1, false
 	}
-	if deepRng == nil {
-		deepRng = rand.New(rand.NewSource(seed))
-	}
 
-	// innerCtx folds the caller's ctx with an internal cancel that fires when the main goroutine
-	// adopts an improvement — workers only need to watch one channel.
 	innerCtx, cancel := context.WithCancel(ctx)
 	defer cancel()
 
-	// results[i] = shallow avg for mutation i. ready[i] closes once results[i] is set (or once
-	// the worker skipped that slot because cancellation fired). Main waits on ready[i] in order.
-	results := make([]float64, len(mutations))
-	ready := make([]chan struct{}, len(mutations))
-	for i := range ready {
-		ready[i] = make(chan struct{})
+	type improvement struct {
+		idx  int
+		avg  float64
+		deck *Deck
 	}
+	// Buffered to numWorkers so the first-to-finish sender never blocks; later senders can also
+	// drop their improvement without waiting once the main goroutine has taken one.
+	improvementCh := make(chan improvement, numWorkers)
 
 	jobs := make(chan int, len(mutations))
 	for i := range mutations {
@@ -577,45 +575,63 @@ func IterateParallel(
 		go func(workerIdx int) {
 			defer wg.Done()
 			ev := hand.NewEvaluator()
-			rng := rand.New(rand.NewSource(seed + int64(workerIdx)))
+			shallowRng := rand.New(rand.NewSource(seed + int64(workerIdx)))
+			// Derive an independent deep stream so the two phases don't share rng state across
+			// a single worker.
+			deepRng := rand.New(rand.NewSource(seed ^ (int64(workerIdx)+1)*int64(0x9e3779b9)))
 			for i := range jobs {
 				if innerCtx.Err() != nil {
-					// Either main has adopted an improvement or the caller aborted; skip compute
-					// but close the ready channel so any main-goroutine read on ready[i] unblocks
-					// instantly.
-					close(ready[i])
-					continue
+					return
 				}
 				mut := mutations[i]
 				d := New(mut.Deck.Hero, mut.Deck.Weapons, mut.Deck.Cards)
-				results[i] = d.EvaluateWith(shallowShuffles, incoming, rng, ev).Avg()
-				close(ready[i])
+				shallowAvg := d.EvaluateWith(shallowShuffles, incoming, shallowRng, ev).Avg()
 				if shallowCompleted != nil {
 					shallowCompleted.Add(1)
 				}
+				if shallowAvg <= bestAvg {
+					continue
+				}
+				if innerCtx.Err() != nil {
+					return
+				}
+				// Fresh Deck for the deep pass so d.Stats from the shallow run doesn't bleed in.
+				dd := New(mut.Deck.Hero, mut.Deck.Weapons, mut.Deck.Cards)
+				deepAvg := dd.EvaluateWith(deepShuffles, incoming, deepRng, ev).Avg()
+				if deepsCompleted != nil {
+					deepsCompleted.Add(1)
+				}
+				if deepAvg > bestAvg {
+					select {
+					case improvementCh <- improvement{idx: i, avg: deepAvg, deck: dd}:
+					default:
+						// Another worker already filled the buffer; drop silently.
+					}
+					cancel()
+					return
+				}
+				// Deep rejected; keep pulling more shallow jobs.
 			}
 		}(w)
 	}
 
-	for i := 0; i < len(mutations); i++ {
+	workersDone := make(chan struct{})
+	go func() {
+		wg.Wait()
+		close(workersDone)
+	}()
+
+	select {
+	case imp := <-improvementCh:
+		<-workersDone
+		return imp.deck, imp.avg, imp.idx, true
+	case <-workersDone:
+		// A last-moment improvement may have landed just before the senders all returned.
 		select {
-		case <-ready[i]:
-		case <-innerCtx.Done():
-			wg.Wait()
-			return nil, bestAvg, -1, false
+		case imp := <-improvementCh:
+			return imp.deck, imp.avg, imp.idx, true
+		default:
 		}
-		if results[i] <= bestAvg {
-			continue
-		}
-		mut := mutations[i]
-		d := New(mut.Deck.Hero, mut.Deck.Weapons, mut.Deck.Cards)
-		deepAvg := d.Evaluate(deepShuffles, incoming, deepRng).Avg()
-		if deepAvg > bestAvg {
-			cancel()
-			wg.Wait()
-			return d, deepAvg, i, true
-		}
+		return nil, bestAvg, -1, false
 	}
-	wg.Wait()
-	return nil, bestAvg, -1, false
 }

@@ -21,10 +21,14 @@ import (
 // later mutations see different shuffle sequences than earlier ones, matching live iterate.
 func BenchmarkIterateImprovements(b *testing.B) {
 	const (
-		deckSize           = 40
-		maxCopies          = 2
-		shallowShuffles    = 100
-		deepShuffles       = 1000
+		deckSize        = 40
+		maxCopies       = 2
+		shallowShuffles = 100
+		// deepShuffles is closer to the production default (10000) than a cheap smoke value — the
+		// parallel-deep design only shows its real advantage when deep is meaningfully more
+		// expensive than shallow, which is where iterate actually lives. Keeping it at 1000 hid
+		// the regression the user hit in real iterate runs.
+		deepShuffles       = 5000
 		incoming           = 0
 		targetImprovements = 2
 	)
@@ -40,7 +44,7 @@ func BenchmarkIterateImprovements(b *testing.B) {
 			mutations := fabdeck.AllMutations(best, maxCopies)
 			d, avg, _, found := fabdeck.IterateParallel(
 				context.Background(), mutations, bestAvg, shallowShuffles, deepShuffles, incoming, 0,
-				rng.Int63(), rng, nil,
+				rng.Int63(), rng, nil, nil,
 			)
 			if !found {
 				b.Fatalf("local maximum reached before hitting %d improvements", targetImprovements)
