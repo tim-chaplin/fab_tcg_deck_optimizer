@@ -1,0 +1,59 @@
+// Yinti Yanti — Generic Action - Attack. Cost 0. Printed power: Red 3, Yellow 2, Blue 1. Printed
+// pitch variants: Red 1, Yellow 2, Blue 3. Defense 2.
+//
+// Text: "While Yinti Yanti is attacking and you control an aura, it has +1{p}. While Yinti Yanti is
+// defending and you control an aura, it has +1{d}."
+//
+// Simplification: The defending-side +1{d} buff is ignored (defence is consumed before Play).
+//
+// Source: github.com/the-fab-cube/flesh-and-blood-cards (card.csv).
+
+package generic
+
+import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+
+var yintiYantiTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeAttack)
+
+// yintiYantiPlay adds +1 when any aura is in play: either created this turn or played earlier.
+func yintiYantiPlay(base int, s *card.TurnState) int {
+	if s != nil && (s.AuraCreated || s.HasPlayedType(card.TypeAura)) {
+		return base + 1
+	}
+	return base
+}
+
+type YintiYantiRed struct{}
+
+func (YintiYantiRed) ID() card.ID                 { return card.YintiYantiRed }
+func (YintiYantiRed) Name() string                { return "Yinti Yanti (Red)" }
+func (YintiYantiRed) Cost() int                   { return 0 }
+func (YintiYantiRed) Pitch() int                  { return 1 }
+func (YintiYantiRed) Attack() int                 { return 3 }
+func (YintiYantiRed) Defense() int                { return 2 }
+func (YintiYantiRed) Types() card.TypeSet         { return yintiYantiTypes }
+func (YintiYantiRed) GoAgain() bool               { return false }
+func (c YintiYantiRed) Play(s *card.TurnState) int { return yintiYantiPlay(c.Attack(), s) }
+
+type YintiYantiYellow struct{}
+
+func (YintiYantiYellow) ID() card.ID                 { return card.YintiYantiYellow }
+func (YintiYantiYellow) Name() string                { return "Yinti Yanti (Yellow)" }
+func (YintiYantiYellow) Cost() int                   { return 0 }
+func (YintiYantiYellow) Pitch() int                  { return 2 }
+func (YintiYantiYellow) Attack() int                 { return 2 }
+func (YintiYantiYellow) Defense() int                { return 2 }
+func (YintiYantiYellow) Types() card.TypeSet         { return yintiYantiTypes }
+func (YintiYantiYellow) GoAgain() bool               { return false }
+func (c YintiYantiYellow) Play(s *card.TurnState) int { return yintiYantiPlay(c.Attack(), s) }
+
+type YintiYantiBlue struct{}
+
+func (YintiYantiBlue) ID() card.ID                 { return card.YintiYantiBlue }
+func (YintiYantiBlue) Name() string                { return "Yinti Yanti (Blue)" }
+func (YintiYantiBlue) Cost() int                   { return 0 }
+func (YintiYantiBlue) Pitch() int                  { return 3 }
+func (YintiYantiBlue) Attack() int                 { return 1 }
+func (YintiYantiBlue) Defense() int                { return 2 }
+func (YintiYantiBlue) Types() card.TypeSet         { return yintiYantiTypes }
+func (YintiYantiBlue) GoAgain() bool               { return false }
+func (c YintiYantiBlue) Play(s *card.TurnState) int { return yintiYantiPlay(c.Attack(), s) }

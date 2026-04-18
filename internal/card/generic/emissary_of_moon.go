@@ -1,0 +1,27 @@
+// Emissary of Moon — Generic Action - Attack. Cost 0, Pitch 1, Power 4, Defense 2. Only printed in
+// Red.
+//
+// Text: "When this attacks, you may put a card from your hand on the bottom of your deck. If you
+// do, draw a card."
+//
+// Simplification: Hand-cycle draw rider isn't modelled.
+//
+// Source: github.com/the-fab-cube/flesh-and-blood-cards (card.csv).
+
+package generic
+
+import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+
+var emissaryOfMoonTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeAttack)
+
+type EmissaryOfMoonRed struct{}
+
+func (EmissaryOfMoonRed) ID() card.ID                 { return card.EmissaryOfMoonRed }
+func (EmissaryOfMoonRed) Name() string                { return "Emissary of Moon (Red)" }
+func (EmissaryOfMoonRed) Cost() int                   { return 0 }
+func (EmissaryOfMoonRed) Pitch() int                  { return 1 }
+func (EmissaryOfMoonRed) Attack() int                 { return 4 }
+func (EmissaryOfMoonRed) Defense() int                { return 2 }
+func (EmissaryOfMoonRed) Types() card.TypeSet         { return emissaryOfMoonTypes }
+func (EmissaryOfMoonRed) GoAgain() bool               { return false }
+func (c EmissaryOfMoonRed) Play(s *card.TurnState) int { return c.Attack() }
