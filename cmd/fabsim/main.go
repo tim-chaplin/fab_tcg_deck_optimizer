@@ -17,13 +17,18 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/deckio"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/fabrary"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/hand"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/hero"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/mydecks"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/weapon"
 )
 
-// defaultDeckName is the deck fabsim reads from / writes to when -deck isn't supplied. Matches the
-// historical "best_deck" muscle memory.
-const defaultDeckName = "best_deck"
+// defaultDeckNameFor returns the deck name used when -deck isn't supplied, parametrised by the
+// hero and the -incoming value. Different opponent-pressure settings produce meaningfully
+// different optimal decks, so keying the filename off both keeps regimes in separate files
+// and avoids accidentally hill-climbing one regime's best deck under another regime's objective.
+func defaultDeckNameFor(h hero.Hero, incoming int) string {
+	return fmt.Sprintf("%s_%d_incoming", strings.ToLower(h.Name()), incoming)
+}
 
 func main() {
 	subcommand, ok := extractSubcommand()
@@ -40,12 +45,15 @@ func main() {
 	deckSize := flag.Int("deck-size", 40, "number of cards per deck")
 	maxCopies := flag.Int("max-copies", 2, "maximum copies of any single card printing per deck")
 	seed := flag.Int64("seed", time.Now().UnixNano(), "RNG seed")
-	deckName := flag.String("deck", defaultDeckName, "deck name; resolved to mydecks/<name>.json (\".json\" suffix optional). Ignored by the import subcommand, which always prompts interactively.")
+	deckName := flag.String("deck", "", "deck name; resolved to mydecks/<name>.json (\".json\" suffix optional). Defaults to <hero>_<incoming>_incoming so different (hero, -incoming) regimes keep separate deck files. Ignored by the import subcommand, which always prompts interactively.")
 	flag.Parse()
 	// Positional args after the subcommand are rejected — `fabsim eval mydeck` silently ignoring
 	// the deck name (rather than treating it as -deck mydeck) wasted a long run during testing.
 	if flag.NArg() > 0 {
 		die("unexpected positional argument(s): %v (did you mean -deck %s?)", flag.Args(), flag.Args()[0])
+	}
+	if *deckName == "" {
+		*deckName = defaultDeckNameFor(hero.Viserai{}, *incoming)
 	}
 
 	// Create mydecks/ up front so downstream WriteFile calls in the search loops can't fail on
