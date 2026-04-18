@@ -62,9 +62,10 @@ func runIterate(cfg config) {
 		fmt.Fprintf(os.Stderr, "\n[round %d] evaluating %d mutations of avg %.3f\n",
 			round, len(mutations), bestAvg)
 
-		// Chunked parallel shallow screen. deck.IterateParallel processes mutations in chunks of
-		// numWorkers goroutines and short-circuits as soon as one confirms at deep depth, so on a
-		// round where an early mutation wins we don't burn cycles screening the tail of the list.
+		// Streaming parallel shallow screen. deck.IterateParallel runs a persistent pool of
+		// shallow workers, publishes each result on a per-mutation ready channel, and
+		// short-circuits as soon as the main-goroutine deep confirmation lands an improvement —
+		// so on a round where an early mutation wins we don't burn cycles screening the tail.
 		onShallowRejected := func(idx int, mut deck.Mutation, shallowAvg, deepAvg float64) {
 			fmt.Fprintf(os.Stderr, "\r[round %d] shallow %.3f at %d/%d (%s) not confirmed by deep %.3f        \n",
 				round, shallowAvg, idx+1, len(mutations), mut.Description, deepAvg)
