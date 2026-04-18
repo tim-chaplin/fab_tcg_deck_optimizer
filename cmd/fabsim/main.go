@@ -206,13 +206,6 @@ func printBestDeck(d *deck.Deck) {
 		}
 	}
 	fmt.Printf("  Pitch:   %d red / %d yellow / %d blue\n", red, yellow, blue)
-	if b := s.Best; len(b.Summary.BestLine) > 0 {
-		prefix := fmt.Sprintf("  Best turn seen (value %d", b.Summary.Value)
-		if d.Hero.Types().Has(card.TypeRuneblade) {
-			prefix += fmt.Sprintf(", %d carryover runechants", b.StartingRunechants)
-		}
-		fmt.Printf("%s):\n%s\n", prefix, hand.FormatBestTurn(b.Summary))
-	}
 	fmt.Println()
 	fmt.Println("Card list:")
 	counts := map[string]int{}
@@ -226,6 +219,17 @@ func printBestDeck(d *deck.Deck) {
 	sort.Strings(names)
 	for _, n := range names {
 		fmt.Printf("  %dx %s\n", counts[n], n)
+	}
+
+	if b := s.Best; len(b.Summary.BestLine) > 0 {
+		fmt.Println()
+		header := fmt.Sprintf("Best turn played (value %d", b.Summary.Value)
+		if d.Hero.Types().Has(card.TypeRuneblade) {
+			header += fmt.Sprintf(", %d carryover runechants", b.StartingRunechants)
+		}
+		header += "):"
+		fmt.Println(header)
+		fmt.Println(hand.FormatBestTurn(b.Summary))
 	}
 
 	if len(s.PerCard) > 0 {
