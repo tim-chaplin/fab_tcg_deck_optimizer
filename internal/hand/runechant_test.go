@@ -10,6 +10,20 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/weapon"
 )
 
+// newSequenceContextForTest builds a sequenceContext wired to a fresh attackBufs sized for the
+// given chain length. Tests use this instead of hand-rolling the context fields so the common
+// shape is centralised.
+func newSequenceContextForTest(h hero.Hero, pitched, deck []card.Card, resourceBudget, runechantCarryover, chainLen int) *sequenceContext {
+	return &sequenceContext{
+		hero:               h,
+		pitched:            pitched,
+		deck:               deck,
+		bufs:               newAttackBufs(chainLen, 0, nil),
+		resourceBudget:     resourceBudget,
+		runechantCarryover: runechantCarryover,
+	}
+}
+
 // TestPlaySequence_SetsArcaneDamageDealtWhenRunechantsFire pins the sim-wide contract: when an
 // attack or weapon plays with Runechants live, playSequence flips ArcaneDamageDealt on before
 // calling the card's Play (so same-hand triggers reading the flag see it). A chain with no
@@ -17,37 +31,32 @@ import (
 // observes the playSequence pre-Play hook, not a card's own flag-setting inside its Play.
 func TestPlaySequence_SetsArcaneDamageDealtWhenRunechantsFire(t *testing.T) {
 	order := []card.Card{fake.RedAttack{}}
-	pcBuf := make([]card.PlayedCard, len(order))
-	ptrBuf := make([]*card.PlayedCard, len(order))
-	cpBuf := make([]card.Card, 0, len(order))
 
 	// No runechants → flag stays false.
-	state := &card.TurnState{}
-	_, _, _, _ = playSequence(hero.Viserai{}, nil, nil, order, pcBuf, ptrBuf, cpBuf, state, 10, 0, nil, nil)
-	if state.ArcaneDamageDealt {
+	ctx := newSequenceContextForTest(hero.Viserai{}, nil, nil, 10, 0, len(order))
+	_, _, _, _ = ctx.playSequence(order, nil, nil)
+	if ctx.bufs.state.ArcaneDamageDealt {
 		t.Errorf("no runechants carried over; expected ArcaneDamageDealt=false, got true")
 	}
 
 	// Carryover runechant → fires on the attack → flag set.
-	state = &card.TurnState{}
-	_, _, _, _ = playSequence(hero.Viserai{}, nil, nil, order, pcBuf, ptrBuf, cpBuf, state, 10, 1, nil, nil)
-	if !state.ArcaneDamageDealt {
+	ctx = newSequenceContextForTest(hero.Viserai{}, nil, nil, 10, 1, len(order))
+	_, _, _, _ = ctx.playSequence(order, nil, nil)
+	if !ctx.bufs.state.ArcaneDamageDealt {
 		t.Errorf("runechant carryover fired on attack; expected ArcaneDamageDealt=true, got false")
 	}
 }
 
 // TestPlaySequence_DiscountRejectsInsufficientBudget verifies that a DiscountPerRunechant card
-// fails its per-play cost check when the chain budget can't cover the effective cost.
+// fails its per-play cost check when the sequence's resource budget can't cover the effective
+// cost.
 func TestPlaySequence_DiscountRejectsInsufficientBudget(t *testing.T) {
 	order := []card.Card{runeblade.AmplifyTheArknightRed{}} // PrintedCost 3, Cost() 0
-	pcBuf := make([]card.PlayedCard, len(order))
-	ptrBuf := make([]*card.PlayedCard, len(order))
-	cpBuf := make([]card.Card, 0, len(order))
-	state := &card.TurnState{}
-	// Chain budget 0, carryover 0 → effective cost = 3 - 0 = 3 > 0, chain illegal.
-	dmg, leftover, _, legal := playSequence(hero.Viserai{}, nil, nil, order, pcBuf, ptrBuf, cpBuf, state, 0, 0, nil, nil)
+	ctx := newSequenceContextForTest(hero.Viserai{}, nil, nil, 0, 0, len(order))
+	// Resource budget 0, carryover 0 → effective cost = 3 - 0 = 3 > 0, sequence illegal.
+	dmg, leftover, _, legal := ctx.playSequence(order, nil, nil)
 	if legal {
-		t.Fatalf("expected illegal chain, got legal (dmg=%d, leftover=%d)", dmg, leftover)
+		t.Fatalf("expected illegal sequence, got legal (dmg=%d, leftover=%d)", dmg, leftover)
 	}
 }
 
@@ -55,15 +64,12 @@ func TestPlaySequence_DiscountRejectsInsufficientBudget(t *testing.T) {
 // budget covers its printed cost.
 func TestPlaySequence_DiscountAffordableWithBudget(t *testing.T) {
 	order := []card.Card{runeblade.AmplifyTheArknightRed{}}
-	pcBuf := make([]card.PlayedCard, len(order))
-	ptrBuf := make([]*card.PlayedCard, len(order))
-	cpBuf := make([]card.Card, 0, len(order))
-	state := &card.TurnState{}
-	// Chain budget 3, carryover 0 → effective cost 3, budget just covers it. Amplify's Attack(6)
-	// is the only damage; no runechants to consume.
-	dmg, leftover, _, legal := playSequence(hero.Viserai{}, nil, nil, order, pcBuf, ptrBuf, cpBuf, state, 3, 0, nil, nil)
+	ctx := newSequenceContextForTest(hero.Viserai{}, nil, nil, 3, 0, len(order))
+	// Resource budget 3, carryover 0 → effective cost 3, budget just covers it. Amplify's
+	// Attack(6) is the only damage; no runechants to consume.
+	dmg, leftover, _, legal := ctx.playSequence(order, nil, nil)
 	if !legal {
-		t.Fatalf("expected legal chain")
+		t.Fatalf("expected legal sequence")
 	}
 	if dmg != 6 {
 		t.Errorf("dmg = %d, want 6", dmg)
@@ -74,19 +80,16 @@ func TestPlaySequence_DiscountAffordableWithBudget(t *testing.T) {
 }
 
 // TestPlaySequence_DiscountUsesCarryoverRunechants shows the discount applies from carryover
-// tokens — no chain budget needed when there are enough runechants already in play.
+// tokens — no resource budget needed when there are enough runechants already in play.
 func TestPlaySequence_DiscountUsesCarryoverRunechants(t *testing.T) {
 	order := []card.Card{runeblade.AmplifyTheArknightRed{}}
-	pcBuf := make([]card.PlayedCard, len(order))
-	ptrBuf := make([]*card.PlayedCard, len(order))
-	cpBuf := make([]card.Card, 0, len(order))
-	state := &card.TurnState{}
-	// Chain budget 0, carryover 3 → effective cost 3-3 = 0, legal. Damage is just Amplify's
+	ctx := newSequenceContextForTest(hero.Viserai{}, nil, nil, 0, 3, len(order))
+	// Resource budget 0, carryover 3 → effective cost 3-3 = 0, legal. Damage is just Amplify's
 	// Attack(); the consumed carryover tokens aren't re-credited (they were credited on the
 	// previous turn when they were created).
-	dmg, leftover, _, legal := playSequence(hero.Viserai{}, nil, nil, order, pcBuf, ptrBuf, cpBuf, state, 0, 3, nil, nil)
+	dmg, leftover, _, legal := ctx.playSequence(order, nil, nil)
 	if !legal {
-		t.Fatalf("expected legal chain")
+		t.Fatalf("expected legal sequence")
 	}
 	if dmg != 6 {
 		t.Errorf("dmg = %d, want 6 (Attack only; consumed carryover isn't re-credited)", dmg)
@@ -100,13 +103,10 @@ func TestPlaySequence_DiscountUsesCarryoverRunechants(t *testing.T) {
 // action with no following attack persist as leftover, and that their creation credits damage.
 func TestPlaySequence_LeftoverFromNonAttackAction(t *testing.T) {
 	order := []card.Card{runeblade.ReadTheRunesRed{}} // creates 3 runechants, not an attack
-	pcBuf := make([]card.PlayedCard, len(order))
-	ptrBuf := make([]*card.PlayedCard, len(order))
-	cpBuf := make([]card.Card, 0, len(order))
-	state := &card.TurnState{}
-	dmg, leftover, _, legal := playSequence(hero.Viserai{}, nil, nil, order, pcBuf, ptrBuf, cpBuf, state, 0, 0, nil, nil)
+	ctx := newSequenceContextForTest(hero.Viserai{}, nil, nil, 0, 0, len(order))
+	dmg, leftover, _, legal := ctx.playSequence(order, nil, nil)
 	if !legal {
-		t.Fatalf("expected legal chain")
+		t.Fatalf("expected legal sequence")
 	}
 	if dmg != 3 {
 		t.Errorf("dmg = %d, want 3 (3 tokens created, each credited +1)", dmg)
@@ -129,7 +129,8 @@ func TestBest_MauvrionReadNoCarryover(t *testing.T) {
 		t.Errorf("Value = %d, want 4 (3 Read tokens + 1 Viserai token)", got.Value)
 	}
 	if got.LeftoverRunechants != 4 {
-		t.Errorf("LeftoverRunechants = %d, want 4", got.LeftoverRunechants)
+		t.Errorf("LeftoverRunechants = %d, want 4 (non-attack action; no consumption)",
+			got.LeftoverRunechants)
 	}
 }
 
@@ -209,7 +210,7 @@ func TestBest_ReduceToRunechantUnaffordableWithoutCarryover(t *testing.T) {
 // playable when the previous turn left enough runechants behind.
 func TestBest_CarryoverFeedsDiscount(t *testing.T) {
 	// Single Amplify the Arknight (Red): Cost()=0, PrintedCost=3, Attack()=6. With no pitch,
-	// chain budget is 0. Without any runechants, effective cost 3 exceeds the budget — so
+	// resource budget is 0. Without any runechants, effective cost 3 exceeds the budget — so
 	// attacking is illegal and Value should be 0.
 	h := []card.Card{runeblade.AmplifyTheArknightRed{}}
 	got := Best(stubHero{}, nil, h, 0, nil, 0, nil)
@@ -226,4 +227,3 @@ func TestBest_CarryoverFeedsDiscount(t *testing.T) {
 		t.Errorf("carryover=3: LeftoverRunechants = %d, want 0 (attack consumes tokens)", got.LeftoverRunechants)
 	}
 }
-

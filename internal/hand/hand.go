@@ -401,7 +401,7 @@ func makeMemoKey(hero hero.Hero, weapons []weapon.Weapon, sortedIDs *[8]card.ID,
 	return k
 }
 
-// attackBufs holds pre-allocated buffers for the attack-evaluation pipeline (bestAttackDamage →
+// attackBufs holds pre-allocated buffers for the attack-evaluation pipeline (bestSequence →
 // playSequence) and the partition loop in bestUncached. Allocated once and cached globally so a
 // whole deck evaluation reuses the same buffers across every partition, mask, and permutation.
 type attackBufs struct {
@@ -431,14 +431,14 @@ type attackBufs struct {
 	attackersBuf      []card.Card
 	defendersBuf      []card.Card
 	// perCardScratch is sized maxAttackers (handSize + weaponCount). Only written by playSequence
-	// when the caller passes a non-nil perCardOut, and read by bestAttackDamage to snapshot the
+	// when the caller passes a non-nil perCardOut, and read by bestSequence to snapshot the
 	// winning permutation's per-card damage into the caller's output buffer. Untracked callers
 	// (the partition-loop hot path) pass nil and never touch this slice.
 	perCardScratch []float64
 	// perCardTriggerScratch parallels perCardScratch for hero-trigger damage (OnCardPlayed
 	// return). Same sizing / same "only written when tracking" discipline.
 	perCardTriggerScratch []float64
-	// fillContribWinnerOrder / fillContribPerCard are output buffers for bestAttackDamage when
+	// fillContribWinnerOrder / fillContribPerCard are output buffers for bestSequence when
 	// fillContributions runs the tracked replay after the partition loop. Kept on attackBufs so
 	// each Best call reuses the same underlying slab instead of allocating a fresh pair.
 	fillContribWinnerOrder []card.Card
@@ -544,7 +544,7 @@ func bestUncached(hero hero.Hero, weapons []weapon.Weapon, hand []card.Card, inc
 	// sensible assignments — nothing got played or pitched.
 	best := TurnSummary{BestLine: make([]CardAssignment, totalN), LeftoverRunechants: runechantCarryover}
 	// bestSwung holds the winning partition's swung weapon names so fillContributions can
-	// rebuild the chain it runs bestAttackDamage over. It lives outside TurnSummary because
+	// rebuild the chain it runs bestSequence over. It lives outside TurnSummary because
 	// weapons are recoverable from AttackChain once fillContributions finishes.
 	var bestSwung []string
 	for i := 0; i < n; i++ {
@@ -922,12 +922,20 @@ func defenseReactionDamage(defenders, pitched, deck []card.Card, state *card.Tur
 // DiscountPerRunechant cards is max(0, PrintedCost() - runechantCount at play-time)) and rejects
 // orderings that run negative.
 func bestAttackWithWeapons(hero hero.Hero, weapons []weapon.Weapon, attackers, pitched, deck []card.Card, bufs *attackBufs, pitchSum, costSum, defenderCostSum, runechantCarryover int) (int, int, int, []string) {
-	// Baseline: no attacks played — carryover runechants stay, and the whole chainBudget is
-	// available for defense affordability checks.
-	chainBudget := pitchSum - defenderCostSum
+	// Build the sequence-eval context once per partition leaf. All three values (resourceBudget,
+	// runechantCarryover, and the stable pitched/deck refs) are constant across the weapon-mask
+	// loop, so sharing one context keeps the inner calls narrow.
+	ctx := &sequenceContext{
+		hero:               hero,
+		pitched:            pitched,
+		deck:               deck,
+		bufs:               bufs,
+		resourceBudget:     pitchSum - defenderCostSum,
+		runechantCarryover: runechantCarryover,
+	}
 	best := 0
 	bestLeftoverRunechants := runechantCarryover
-	bestResidualBudget := chainBudget
+	bestResidualBudget := ctx.resourceBudget
 	var bestSwung []string
 	// Reuse the shared attacker buffer across mask iterations.
 	copy(bufs.attackerBuf, attackers)
@@ -954,9 +962,9 @@ func bestAttackWithWeapons(hero hero.Hero, weapons []weapon.Weapon, attackers, p
 				allAttackers = append(allAttackers, w)
 			}
 		}
-		// Every chain card (attackers AND the swung weapons) deducts its own effective cost
-		// from chainBudget inside playSequence, so we don't pre-deduct weapon cost here.
-		dealt, leftoverRunechants, residualBudget := bestAttackDamage(hero, allAttackers, pitched, deck, bufs, chainBudget, runechantCarryover, nil, nil, nil)
+		// Every sequence card (attackers AND the swung weapons) deducts its own effective cost
+		// from resourceBudget inside playSequence, so we don't pre-deduct weapon cost here.
+		dealt, leftoverRunechants, residualBudget := ctx.bestSequence(allAttackers, nil, nil, nil)
 		// Prefer higher damage; on ties prefer more leftover runechants; then more residual
 		// budget — both are extra slack that can enable discount defense reactions.
 		if dealt > best ||
@@ -971,27 +979,39 @@ func bestAttackWithWeapons(hero hero.Hero, weapons []weapon.Weapon, attackers, p
 	return best, bestLeftoverRunechants, bestResidualBudget, bestSwung
 }
 
-// bestAttackDamage tries every ordering of attackers and returns the max total damage after Play
-// is called on each in sequence plus the runechant count at end of that winning permutation.
-// Between each attacker's Play() and its append to CardsPlayed, the hero's OnCardPlayed hook
-// fires so triggered abilities (e.g. Viserai's Runechants) contribute.
+// sequenceContext carries the stable per-partition-leaf environment for evaluating played-card
+// sequences: the hero (for OnCardPlayed triggers), the pitched / deck reference slices read by
+// Card.Play, the shared scratch buffers, and the numeric budgets that persist across permutation
+// and mask iterations. One context is built once per leaf and used for every permutation the
+// solver evaluates below it, so the hot inner calls (playSequence, bestSequence) shrink to just
+// their varying inputs and tracking outputs.
+type sequenceContext struct {
+	hero               hero.Hero
+	pitched, deck      []card.Card
+	bufs               *attackBufs
+	resourceBudget     int
+	runechantCarryover int
+}
+
+// bestSequence tries every ordering of attackers and returns the max total damage after Play
+// is called on each in turn plus the runechant count at the end of that winning permutation.
+// Between each card's Play() and its append to CardsPlayed, the hero's OnCardPlayed hook fires
+// so triggered abilities (e.g. Viserai's Runechants) contribute.
 //
 // Uses Heap's algorithm (iterative) for permutation generation. That saves a closure/callback
 // allocation and a recursive call per permutation vs. a callback-style permuter.
 //
-// chainBudget is the resource pool available to cover chain-card effective costs. For orderings
-// that run out of resources partway through, playSequence returns legal=false and contributes 0.
-//
-// When winnerOrderOut and perCardOut are non-nil (both must have len >= len(attackers)), they're
-// filled with the winning permutation and its per-card damage respectively. Used once per Best
-// call by fillContributions to attribute per-card damage; the hot partition-loop caller
-// (bestAttackWithWeapons) passes nil for both so the permutation search stays allocation-free.
-func bestAttackDamage(hero hero.Hero, attackers, pitched, deck []card.Card, bufs *attackBufs, chainBudget, runechantCarryover int, winnerOrderOut []card.Card, perCardOut, perCardTriggerOut []float64) (int, int, int) {
+// When winnerOrderOut is non-nil (len >= len(attackers)) the winning permutation is copied into
+// it. perCardOut / perCardTriggerOut (same size rule) receive the winning line's per-card Play
+// damage and per-card hero-trigger damage respectively. Used once per Best call by
+// fillContributions; the hot partition-loop caller (bestAttackWithWeapons) passes nil for all
+// three so the permutation search stays allocation-free.
+func (ctx *sequenceContext) bestSequence(attackers, winnerOrderOut []card.Card, perCardOut, perCardTriggerOut []float64) (int, int, int) {
 	n := len(attackers)
 	if n == 0 {
-		return 0, runechantCarryover, chainBudget
+		return 0, ctx.runechantCarryover, ctx.resourceBudget
 	}
-	perm := bufs.perm[:n]
+	perm := ctx.bufs.perm[:n]
 	copy(perm, attackers)
 
 	// Scratch buffers are playSequence's per-card outputs, overwritten on every permutation; on
@@ -999,20 +1019,20 @@ func bestAttackDamage(hero hero.Hero, attackers, pitched, deck []card.Card, bufs
 	// when the caller asked to track.
 	var scratch, triggerScratch []float64
 	if perCardOut != nil {
-		scratch = bufs.perCardScratch[:n]
+		scratch = ctx.bufs.perCardScratch[:n]
 	}
 	if perCardTriggerOut != nil {
-		if cap(bufs.perCardTriggerScratch) < n {
-			bufs.perCardTriggerScratch = make([]float64, n)
+		if cap(ctx.bufs.perCardTriggerScratch) < n {
+			ctx.bufs.perCardTriggerScratch = make([]float64, n)
 		}
-		triggerScratch = bufs.perCardTriggerScratch[:n]
+		triggerScratch = ctx.bufs.perCardTriggerScratch[:n]
 	}
 
 	best := 0
-	bestLeftoverRunechants := runechantCarryover
-	bestResidualBudget := chainBudget
+	bestLeftoverRunechants := ctx.runechantCarryover
+	bestResidualBudget := ctx.resourceBudget
 	eval := func() {
-		dmg, leftoverRunechants, residualBudget, legal := playSequence(hero, pitched, deck, perm, bufs.pcBuf, bufs.ptrBuf, bufs.cardsPlayedBuf, bufs.state, chainBudget, runechantCarryover, scratch, triggerScratch)
+		dmg, leftoverRunechants, residualBudget, legal := ctx.playSequence(perm, scratch, triggerScratch)
 		if !legal {
 			return
 		}
@@ -1057,32 +1077,34 @@ func bestAttackDamage(hero hero.Hero, attackers, pitched, deck []card.Card, bufs
 	return best, bestLeftoverRunechants, bestResidualBudget
 }
 
-// playSequence plays `order` as an attack chain, reusing caller-provided buffers to avoid
-// per-permutation heap allocation. pcBuf and ptrBuf must be at least len(order); cardsPlayedBuf
-// is reset to length 0 each call. state is reset and reused each call. The buffers are mutated
-// in place; the caller must not read them concurrently.
+// playSequence plays `order` as a sequence of cards, reusing ctx.bufs' pooled buffers to avoid
+// per-permutation heap allocation. The buffers are mutated in place; the caller must not read
+// them concurrently.
 //
-// When perCardOut is non-nil (len >= n) each entry is set to the damage attributed to the
-// corresponding position in `order` — the card's Play return plus the hero OnCardPlayed trigger
-// it chained. The hot partition-loop callers pass nil to skip this write; the winning-line
-// replay from fillContributions passes a real slice.
+// When perCardOut is non-nil (len >= n) each entry is set to the card's Play return for that
+// position; perCardTriggerOut (same size rule) receives the hero OnCardPlayed return for that
+// same position. The hot partition-loop callers pass nil for both to skip these writes; the
+// winning-line replay from fillContributions passes real slices.
 //
 // Runechant flow:
-//   - state.Runechants starts at runechantCarryover (tokens from the previous turn).
+//   - state.Runechants starts at ctx.runechantCarryover (tokens from the previous turn).
 //   - Each card's Play / hero OnCardPlayed may call CreateRunechants, incrementing the count AND
 //     returning n damage — tokens are credited exactly once, at creation.
 //   - After each Attack- or Weapon-typed card's Play+OnCardPlayed resolve, all current tokens
 //     fire and are destroyed: state.Runechants is zeroed but damage is NOT re-added (that would
 //     double-count tokens whose value was already credited on creation).
-//   - At end of chain, state.Runechants is the leftover count that carries into the next turn.
+//   - At end of the sequence, state.Runechants is the leftover count that carries into the next
+//     turn.
 //
 // Resource flow:
-//   - chainBudget starts the chain; each card deducts its effective cost. For cards implementing
-//     DiscountPerRunechant, effective cost is max(0, PrintedCost() - state.Runechants) at the
-//     moment it's played; for everyone else it's Cost(). A negative remaining budget returns
-//     legal=false (the caller treats this ordering as zero damage).
-func playSequence(hero hero.Hero, pitched, deck, order []card.Card, pcBuf []card.PlayedCard, ptrBuf []*card.PlayedCard, cardsPlayedBuf []card.Card, state *card.TurnState, chainBudget, runechantCarryover int, perCardOut, perCardTriggerOut []float64) (damage int, leftoverRunechants int, residualBudget int, legal bool) {
+//   - ctx.resourceBudget is the starting pool; each card deducts its effective cost. For cards
+//     implementing DiscountPerRunechant, effective cost is max(0, PrintedCost() - state.
+//     Runechants) at the moment it's played; for everyone else it's Cost(). A negative
+//     remaining budget returns legal=false (the caller treats this ordering as zero damage).
+func (ctx *sequenceContext) playSequence(order []card.Card, perCardOut, perCardTriggerOut []float64) (damage int, leftoverRunechants int, residualBudget int, legal bool) {
 	n := len(order)
+	pcBuf := ctx.bufs.pcBuf
+	ptrBuf := ctx.bufs.ptrBuf
 	for i, c := range order {
 		pcBuf[i] = card.PlayedCard{Card: c}
 		ptrBuf[i] = &pcBuf[i]
@@ -1094,8 +1116,9 @@ func playSequence(hero hero.Hero, pitched, deck, order []card.Card, pcBuf []card
 		}
 	}
 	played := ptrBuf[:n]
-	*state = card.TurnState{Pitched: pitched, Deck: deck, CardsPlayed: cardsPlayedBuf[:0], Runechants: runechantCarryover}
-	resources := chainBudget
+	state := ctx.bufs.state
+	*state = card.TurnState{Pitched: ctx.pitched, Deck: ctx.deck, CardsPlayed: ctx.bufs.cardsPlayedBuf[:0], Runechants: ctx.runechantCarryover}
+	resources := ctx.resourceBudget
 	for i, pc := range played {
 		// Effective cost: discount cards drop by runechant count (floored at 0); others pay printed.
 		var effCost int
@@ -1127,7 +1150,7 @@ func playSequence(hero hero.Hero, pitched, deck, order []card.Card, pcBuf []card
 		}
 
 		playDmg := pc.Card.Play(state)
-		triggerDmg := hero.OnCardPlayed(pc.Card, state)
+		triggerDmg := ctx.hero.OnCardPlayed(pc.Card, state)
 		damage += playDmg + triggerDmg
 		if perCardOut != nil {
 			perCardOut[i] = float64(playDmg)
@@ -1167,9 +1190,9 @@ func fillContributions(summary *TurnSummary, hero hero.Hero, weapons []weapon.We
 	line := summary.BestLine
 	total := len(line)
 
-	// Reconstruct pitched, attackers, swung weapons, and chainBudget from the winning line. The
-	// arsenal-in entry (FromArsenal=true, last slot) participates in attackers / defenders when
-	// its role is Attack / Defend, identically to hand entries.
+	// Reconstruct pitched, attackers, swung weapons, and the sequence's resourceBudget from the
+	// winning line. The arsenal-in entry (FromArsenal=true, last slot) participates in
+	// attackers / defenders when its role is Attack / Defend, identically to hand entries.
 	pitched := bufs.pitchedBuf[:0]
 	attackers := bufs.attackersBuf[:0]
 	var sumDef int
@@ -1191,7 +1214,7 @@ func fillContributions(summary *TurnSummary, hero hero.Hero, weapons []weapon.We
 			}
 		}
 	}
-	chainBudget := pitchSum - defenderCostSum
+	resourceBudget := pitchSum - defenderCostSum
 
 	// Pitch contributions.
 	for i := range line {
@@ -1220,10 +1243,10 @@ func fillContributions(summary *TurnSummary, hero hero.Hero, weapons []weapon.We
 		}
 	}
 
-	// Attack chain: re-run bestAttackDamage with tracking turned on so we recover the winning
-	// permutation and each chain position's contribution. Weapons in the chain don't map back
-	// to BestLine (they aren't cards in hand or arsenal) — their damage is counted in Value but
-	// not credited per-card here.
+	// Attack chain: re-run the sequence search with tracking turned on so we recover the
+	// winning permutation and each chain position's contribution. Weapons in the chain don't
+	// map back to BestLine (they aren't cards in hand or arsenal) — their damage is counted in
+	// Value but not credited per-card here.
 	chain := bufs.attackerBuf[:0]
 	chain = append(chain, attackers...)
 	for _, name := range swungNames {
@@ -1241,7 +1264,15 @@ func fillContributions(summary *TurnSummary, hero hero.Hero, weapons []weapon.We
 			bufs.fillContribTriggerDmg = make([]float64, len(chain))
 		}
 		perCardTrigger := bufs.fillContribTriggerDmg[:len(chain)]
-		bestAttackDamage(hero, chain, pitched, deck, bufs, chainBudget, runechantCarryover, winnerOrder, perCardDmg, perCardTrigger)
+		ctx := &sequenceContext{
+			hero:               hero,
+			pitched:            pitched,
+			deck:               deck,
+			bufs:               bufs,
+			resourceBudget:     resourceBudget,
+			runechantCarryover: runechantCarryover,
+		}
+		ctx.bestSequence(chain, winnerOrder, perCardDmg, perCardTrigger)
 		// Snapshot the winning chain order into TurnSummary so display callers can show cards
 		// and weapons in the actual play order (matters for Go-again / trigger chains). Fresh
 		// slice — winnerOrder aliases attackBuf storage that the next partition would clobber.
