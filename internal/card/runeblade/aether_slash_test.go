@@ -7,14 +7,16 @@ import (
 )
 
 func TestAetherSlash_BaseDamage(t *testing.T) {
-	// Nothing pitched → just printed power + printed 1 arcane.
+	// Nothing pitched → just printed power. The CSV "Arcane: 1" is the text rider's damage (not
+	// a separate baseline), so with the non-attack-action condition unmet the card deals no
+	// arcane.
 	cases := []struct {
 		c    card.Card
 		want int
 	}{
-		{AetherSlashRed{}, 5},
-		{AetherSlashYellow{}, 4},
-		{AetherSlashBlue{}, 3},
+		{AetherSlashRed{}, 4},
+		{AetherSlashYellow{}, 3},
+		{AetherSlashBlue{}, 2},
 	}
 	for _, tc := range cases {
 		var s card.TurnState
@@ -25,14 +27,14 @@ func TestAetherSlash_BaseDamage(t *testing.T) {
 }
 
 func TestAetherSlash_NonAttackActionPitchedAddsArcane(t *testing.T) {
-	// A non-attack action in Pitched triggers the +1 arcane rider.
+	// A non-attack action in Pitched fires the text rider for +1 arcane.
 	cases := []struct {
 		c    card.Card
 		want int
 	}{
-		{AetherSlashRed{}, 6},
-		{AetherSlashYellow{}, 5},
-		{AetherSlashBlue{}, 4},
+		{AetherSlashRed{}, 5},
+		{AetherSlashYellow{}, 4},
+		{AetherSlashBlue{}, 3},
 	}
 	for _, tc := range cases {
 		s := card.TurnState{Pitched: []card.Card{stubNonAttack{}}}
@@ -45,7 +47,22 @@ func TestAetherSlash_NonAttackActionPitchedAddsArcane(t *testing.T) {
 func TestAetherSlash_AttackPitchedDoesNotTrigger(t *testing.T) {
 	// Pitching an attack card does NOT satisfy the "non-attack action pitched" rider.
 	s := card.TurnState{Pitched: []card.Card{stubRunebladeAttack{}}}
-	if got := (AetherSlashRed{}).Play(&s); got != 5 {
-		t.Errorf("Aether Slash Red: Play() = %d, want 5 (no rider)", got)
+	if got := (AetherSlashRed{}).Play(&s); got != 4 {
+		t.Errorf("Aether Slash Red: Play() = %d, want 4 (no rider)", got)
+	}
+}
+
+func TestAetherSlash_FlagsArcaneDamageDealtOnlyWhenTriggered(t *testing.T) {
+	// The ArcaneDamageDealt flag should only be set when the rider actually fires — otherwise
+	// same-turn triggers like Meat and Greet's go-again would spuriously enable themselves.
+	var s card.TurnState
+	(AetherSlashRed{}).Play(&s)
+	if s.ArcaneDamageDealt {
+		t.Error("ArcaneDamageDealt = true with no qualifying pitch; want false")
+	}
+	s = card.TurnState{Pitched: []card.Card{stubNonAttack{}}}
+	(AetherSlashRed{}).Play(&s)
+	if !s.ArcaneDamageDealt {
+		t.Error("ArcaneDamageDealt = false with non-attack action pitched; want true")
 	}
 }
