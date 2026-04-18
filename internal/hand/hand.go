@@ -450,7 +450,10 @@ type attackBufs struct {
 }
 
 func newAttackBufs(handSize, weaponCount int, weapons []weapon.Weapon) *attackBufs {
-	maxAttackers := handSize + weaponCount
+	// +1 reserves a slot for the arsenal-in card, which joins `attackers` or `defenders` when
+	// the partition enumerator plays it out of arsenal. Without it, all-attack hands + arsenal
+	// overflow attackerBuf (slice bounds panic in bestAttackWithWeapons).
+	maxAttackers := handSize + weaponCount + 1
 	numMasks := 1 << weaponCount
 	weaponCosts := make([]int, numMasks)
 	weaponNames := make([][]string, numMasks)

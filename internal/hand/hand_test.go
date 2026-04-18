@@ -483,3 +483,22 @@ func TestBest_ArsenalInNonAttackActionPlays(t *testing.T) {
 		t.Errorf("ArsenalCard = %v, want nil (Blessing played out of arsenal)", got.ArsenalCard)
 	}
 }
+
+// TestBest_AllAttackHandPlusArsenalNoWeapons regresses a slice-bounds panic: attackBufs sized its
+// scratch by handSize+weaponCount only, so a full 4-card hand of 0-cost attackers + an arsenal-in
+// attacker (5 entries) overflowed the 4-wide attackerBuf inside bestAttackWithWeapons when no
+// weapons were present. Wounding Blow Red is 0-cost attack 4, so the all-Attack partition is
+// phase-feasible with zero pitches and enumerates through the previously-crashing code path. The
+// winning line only chains one (no GoAgain), but the enumerator still evaluates the 5-attacker
+// partition, which is what the buffer sizing has to survive.
+func TestBest_AllAttackHandPlusArsenalNoWeapons(t *testing.T) {
+	h := []card.Card{
+		generic.WoundingBlowRed{}, generic.WoundingBlowRed{},
+		generic.WoundingBlowRed{}, generic.WoundingBlowRed{},
+	}
+	got := Best(stubHero{}, nil, h, 0, nil, 0, generic.WoundingBlowRed{})
+	if got.Value != 4 {
+		t.Fatalf("Value = %d, want 4 (one Wounding Blow Red lands; rest can't chain without GoAgain). Roles=[%s]",
+			got.Value, FormatBestLine(got.BestLine))
+	}
+}
