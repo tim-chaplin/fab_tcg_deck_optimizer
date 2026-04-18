@@ -419,6 +419,14 @@ func TestBest_ArsenalInPlayDR(t *testing.T) {
 	if got.ArsenalCard != nil {
 		t.Errorf("ArsenalCard = %v, want nil (slot was vacated, no Held card to promote)", got.ArsenalCard)
 	}
+	// PlayedFromArsenal surfaces the arsenal-in card so callers (the best-hand printout) can
+	// flag that this card wasn't in hand this turn.
+	if got.PlayedFromArsenal == nil || got.PlayedFromArsenal.ID() != card.ToughenUpBlue {
+		t.Errorf("PlayedFromArsenal = %v, want Toughen Up Blue", got.PlayedFromArsenal)
+	}
+	if got.PlayedFromArsenalRole != Defend {
+		t.Errorf("PlayedFromArsenalRole = %s, want DEFEND", got.PlayedFromArsenalRole)
+	}
 }
 
 // TestBest_ArsenalInStayBlocksNewArsenal locks in that while the arsenal slot is occupied, a

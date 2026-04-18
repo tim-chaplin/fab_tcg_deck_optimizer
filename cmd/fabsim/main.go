@@ -211,6 +211,10 @@ func printBestDeck(d *deck.Deck) {
 		for _, w := range b.Play.Weapons {
 			line += ", " + w + ": ATTACK"
 		}
+		if b.Play.PlayedFromArsenal != nil {
+			line += fmt.Sprintf(", %s (from arsenal): %s",
+				b.Play.PlayedFromArsenal.Name(), b.Play.PlayedFromArsenalRole)
+		}
 		prefix := fmt.Sprintf("  Best hand seen (value %d", b.Play.Value)
 		if d.Hero.Types().Has(card.TypeRuneblade) {
 			prefix += fmt.Sprintf(", %d carryover runechants", b.StartingRunechants)

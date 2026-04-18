@@ -50,6 +50,13 @@ type Play struct {
 	// hand card just arsenaled (role=Arsenal) or a previous-turn arsenal card that stayed. Nil
 	// when the slot is empty. The caller feeds this back as the next turn's arsenalCardIn.
 	ArsenalCard card.Card
+	// PlayedFromArsenal is the previous-turn arsenal card if this turn chose to play it rather
+	// than let it stay. Used for display — the card isn't in the hand slice so FormatRoles
+	// doesn't see it otherwise. PlayedFromArsenalRole tells whether it was played as Attack or
+	// Defend (the only two legal from-arsenal plays). Nil / zero when the arsenal slot was
+	// empty or the card stayed.
+	PlayedFromArsenal     card.Card
+	PlayedFromArsenalRole Role
 }
 
 
@@ -518,6 +525,15 @@ func bestUncached(hero hero.Hero, weapons []weapon.Weapon, hand []card.Card, inc
 							break
 						}
 					}
+				}
+				// Record whether the previous-turn arsenal card was played this turn so callers
+				// can report it in the best-hand printout — it's not in the hand slice and
+				// wouldn't otherwise surface alongside the role listing.
+				best.PlayedFromArsenal = nil
+				best.PlayedFromArsenalRole = 0
+				if arsenalCardIn != nil && (rolesBuf[n] == Attack || rolesBuf[n] == Defend) {
+					best.PlayedFromArsenal = arsenalCardIn
+					best.PlayedFromArsenalRole = rolesBuf[n]
 				}
 			}
 			return

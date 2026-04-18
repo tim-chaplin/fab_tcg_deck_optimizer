@@ -409,8 +409,14 @@ func (d *Deck) Evaluate(runs int, incomingDamage int, rng *rand.Rand) Stats {
 					copy(weaponsCopy, play.Weapons)
 				}
 				d.Stats.Best = BestHand{
-					Hand:               handCopy,
-					Play:               hand.Play{Roles: rolesCopy, Weapons: weaponsCopy, Value: play.Value},
+					Hand: handCopy,
+					Play: hand.Play{
+						Roles:                 rolesCopy,
+						Weapons:               weaponsCopy,
+						Value:                 play.Value,
+						PlayedFromArsenal:     play.PlayedFromArsenal,
+						PlayedFromArsenalRole: play.PlayedFromArsenalRole,
+					},
 					StartingRunechants: startingRunechants,
 				}
 			}
