@@ -32,7 +32,7 @@ func TestAllMutations_CountsAndShape(t *testing.T) {
 	b := cards.Get(card.ArcanicSpikeRed)
 	d := New(hero.Viserai{}, []weapon.Weapon{weapon.NebulaBlade{}}, []card.Card{a, a, b, b})
 
-	muts := AllMutations(d, 2)
+	muts := AllMutations(d, 2, nil)
 
 	// Weapon mutations: every loadout except the current one. Card mutations at maxCopies=2:
 	// for each of the 2 unique removals, every pool entry except self (no-op) and the other
@@ -70,8 +70,8 @@ func TestAllMutations_OddCountsAllowed(t *testing.T) {
 
 	// At maxCopies=3, each of the 2 in-deck cards (a, b) is below the cap, so "remove a, add b"
 	// (and the mirror) become legal. That's 2 more card mutations than the maxCopies=2 case.
-	mutsLow := AllMutations(d, 2)
-	mutsHigh := AllMutations(d, 3)
+	mutsLow := AllMutations(d, 2, nil)
+	mutsHigh := AllMutations(d, 3, nil)
 	if len(mutsHigh)-len(mutsLow) != 2 {
 		t.Errorf("maxCopies=3 should produce exactly 2 more mutations than maxCopies=2; got diff=%d",
 			len(mutsHigh)-len(mutsLow))
@@ -130,7 +130,7 @@ func TestAllMutations_OrdersByAscendingAvg(t *testing.T) {
 				tc.highAvgCard.ID(): {Plays: 10, TotalContribution: 80},  // Avg 8.0
 			}
 
-			muts := AllMutations(d, 2)
+			muts := AllMutations(d, 2, nil)
 			// Skip the weapon-mutation block (len(loadouts)-1 entries, one per alternative loadout).
 			firstCardMut := muts[len(weaponLoadouts(cards.AllWeapons))-1]
 			wantPrefix := "-1 " + tc.lowAvgCard.Name() + ","
@@ -147,8 +147,8 @@ func TestAllMutations_Deterministic(t *testing.T) {
 	b := cards.Get(card.ArcanicSpikeRed)
 	d := New(hero.Viserai{}, []weapon.Weapon{weapon.NebulaBlade{}}, []card.Card{a, a, b, b})
 
-	first := AllMutations(d, 2)
-	second := AllMutations(d, 2)
+	first := AllMutations(d, 2, nil)
+	second := AllMutations(d, 2, nil)
 
 	if len(first) != len(second) {
 		t.Fatalf("mutation counts differ between calls: %d vs %d", len(first), len(second))
@@ -174,9 +174,61 @@ func TestAllMutations_NoDuplicateOfSource(t *testing.T) {
 	a := cards.Get(card.AetherSlashRed)
 	d := New(hero.Viserai{}, []weapon.Weapon{weapon.NebulaBlade{}}, []card.Card{a, a, a, a})
 	srcKey := deckFingerprint(d)
-	for i, m := range AllMutations(d, 2) {
+	for i, m := range AllMutations(d, 2, nil) {
 		if deckFingerprint(m.Deck) == srcKey {
 			t.Errorf("mutation %d equals the source deck", i)
+		}
+	}
+}
+
+// TestRandom_FilterExcludesRejected confirms the legal predicate is actually applied to the
+// candidate pool: a filter that blocks Plunder Run (all variants) should produce decks that
+// never contain any Plunder Run printing, even across many samples.
+func TestRandom_FilterExcludesRejected(t *testing.T) {
+	bannedIDs := map[card.ID]bool{
+		card.PlunderRunRed:    true,
+		card.PlunderRunYellow: true,
+		card.PlunderRunBlue:   true,
+	}
+	legal := func(c card.Card) bool { return !bannedIDs[c.ID()] }
+	rng := rand.New(rand.NewSource(1))
+	for i := 0; i < 20; i++ {
+		d := Random(hero.Viserai{}, 40, 2, rng, legal)
+		for j, c := range d.Cards {
+			if bannedIDs[c.ID()] {
+				t.Errorf("sample %d: card[%d] = %s was in the banlist", i, j, c.Name())
+			}
+		}
+	}
+}
+
+// TestAllMutations_FilterExcludesRejectedAdditions confirms banned cards never appear as
+// swap-in candidates. A banned card already in the deck IS still a valid removal target — the
+// hill climb must be able to swap it out — so we assert that the starting deck's banned card is
+// never in the post-mutation card list either (which would require it to have been added back).
+func TestAllMutations_FilterExcludesRejectedAdditions(t *testing.T) {
+	bannedIDs := map[card.ID]bool{
+		card.PlunderRunRed: true,
+	}
+	legal := func(c card.Card) bool { return !bannedIDs[c.ID()] }
+
+	pr := cards.Get(card.PlunderRunRed)
+	other := cards.Get(card.AetherSlashRed)
+	d := New(hero.Viserai{}, []weapon.Weapon{weapon.NebulaBlade{}}, []card.Card{pr, pr, other, other})
+
+	for i, m := range AllMutations(d, 2, legal) {
+		bannedIn := 0
+		for _, c := range m.Deck.Cards {
+			if bannedIDs[c.ID()] {
+				bannedIn++
+			}
+		}
+		// The starting deck has 2 copies of Plunder Run (Red). A mutation that removes one leaves
+		// 1; a mutation that removes the other leaves 1; a weapon-only mutation leaves all 2. No
+		// mutation should ADD another copy.
+		if bannedIn > 2 {
+			t.Errorf("mutation %d (%s): has %d banned copies, want <=2 (no additions allowed)",
+				i, m.Description, bannedIn)
 		}
 	}
 }

@@ -38,6 +38,7 @@ func (PlunderRunRed) Attack() int                 { return 0 }
 func (PlunderRunRed) Defense() int                { return 2 }
 func (PlunderRunRed) Types() card.TypeSet         { return plunderRunTypes }
 func (PlunderRunRed) GoAgain() bool               { return true }
+func (PlunderRunRed) NotSilverAgeLegal()           {}
 func (PlunderRunRed) Play(s *card.TurnState) int { return plunderRunPlay(s, 3) }
 
 type PlunderRunYellow struct{}
@@ -50,6 +51,7 @@ func (PlunderRunYellow) Attack() int                 { return 0 }
 func (PlunderRunYellow) Defense() int                { return 2 }
 func (PlunderRunYellow) Types() card.TypeSet         { return plunderRunTypes }
 func (PlunderRunYellow) GoAgain() bool               { return true }
+func (PlunderRunYellow) NotSilverAgeLegal()           {}
 func (PlunderRunYellow) Play(s *card.TurnState) int { return plunderRunPlay(s, 2) }
 
 type PlunderRunBlue struct{}
@@ -62,4 +64,5 @@ func (PlunderRunBlue) Attack() int                 { return 0 }
 func (PlunderRunBlue) Defense() int                { return 2 }
 func (PlunderRunBlue) Types() card.TypeSet         { return plunderRunTypes }
 func (PlunderRunBlue) GoAgain() bool               { return true }
+func (PlunderRunBlue) NotSilverAgeLegal()           {}
 func (PlunderRunBlue) Play(s *card.TurnState) int { return plunderRunPlay(s, 1) }

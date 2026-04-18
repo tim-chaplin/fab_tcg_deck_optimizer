@@ -25,7 +25,7 @@ func runRandom(cfg config) {
 	fmt.Fprintf(os.Stderr, "Phase 1: evaluating %d decks (%d shuffles each)\n", cfg.numDecks, cfg.shallowShuffles)
 	start := time.Now()
 	for i := 0; i < cfg.numDecks; i++ {
-		d := deck.Random(hero.Viserai{}, cfg.deckSize, cfg.maxCopies, rng)
+		d := deck.Random(hero.Viserai{}, cfg.deckSize, cfg.maxCopies, rng, cfg.legalFilter())
 		stats := d.Evaluate(cfg.shallowShuffles, cfg.incoming, rng)
 		candidates = append(candidates, candidate{deck: d, avg: stats.Avg()})
 		printProgress(i+1, cfg.numDecks, time.Since(start))

@@ -14,7 +14,7 @@ import (
 // weapons, cards, and hero all come back intact (stats are intentionally not round-tripped).
 func TestMarshalUnmarshalRoundTrip(t *testing.T) {
 	rng := rand.New(rand.NewSource(1))
-	d := deck.Random(hero.Viserai{}, 40, 2, rng)
+	d := deck.Random(hero.Viserai{}, 40, 2, rng, nil)
 
 	text := Marshal(d)
 	got, skipped, err := Unmarshal(text)
@@ -44,7 +44,7 @@ func TestMarshalUnmarshalRoundTrip(t *testing.T) {
 // update consciously.
 func TestMarshalFormat(t *testing.T) {
 	rng := rand.New(rand.NewSource(1))
-	d := deck.Random(hero.Viserai{}, 40, 2, rng)
+	d := deck.Random(hero.Viserai{}, 40, 2, rng, nil)
 	text := Marshal(d)
 
 	wantPrefix := "Name: Viserai\nHero: Viserai\nFormat: Silver Age\n\nArena cards\n"

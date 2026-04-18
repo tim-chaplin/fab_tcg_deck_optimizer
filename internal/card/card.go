@@ -206,3 +206,10 @@ type DiscountPerRunechant interface {
 	PrintedCost() int
 }
 
+// NotSilverAgeLegal is an optional marker. Cards that implement it signal they're banned in the
+// Silver Age format and must be excluded from format-restricted deck pools. Source of truth is
+// data_sources/silver_age_banlist.txt — keep the two in sync.
+type NotSilverAgeLegal interface {
+	NotSilverAgeLegal()
+}
+

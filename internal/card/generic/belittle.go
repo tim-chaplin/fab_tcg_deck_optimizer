@@ -25,6 +25,7 @@ func (BelittleRed) Attack() int                 { return 3 }
 func (BelittleRed) Defense() int                { return 2 }
 func (BelittleRed) Types() card.TypeSet         { return belittleTypes }
 func (BelittleRed) GoAgain() bool               { return true }
+func (BelittleRed) NotSilverAgeLegal()           {}
 func (c BelittleRed) Play(s *card.TurnState) int { return c.Attack() }
 
 type BelittleYellow struct{}
@@ -37,6 +38,7 @@ func (BelittleYellow) Attack() int                 { return 2 }
 func (BelittleYellow) Defense() int                { return 2 }
 func (BelittleYellow) Types() card.TypeSet         { return belittleTypes }
 func (BelittleYellow) GoAgain() bool               { return true }
+func (BelittleYellow) NotSilverAgeLegal()           {}
 func (c BelittleYellow) Play(s *card.TurnState) int { return c.Attack() }
 
 type BelittleBlue struct{}
@@ -49,4 +51,5 @@ func (BelittleBlue) Attack() int                 { return 1 }
 func (BelittleBlue) Defense() int                { return 2 }
 func (BelittleBlue) Types() card.TypeSet         { return belittleTypes }
 func (BelittleBlue) GoAgain() bool               { return true }
+func (BelittleBlue) NotSilverAgeLegal()           {}
 func (c BelittleBlue) Play(s *card.TurnState) int { return c.Attack() }
