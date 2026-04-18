@@ -553,9 +553,13 @@ type attackBufs struct {
 	defendPrintedVals []int
 	defenseVals       []int
 	isDRBuf           []bool
-	pitchedBuf        []card.Card
-	attackersBuf      []card.Card
-	defendersBuf      []card.Card
+	// pitchedValsScratch backs the per-leaf "pitched values" slice the feasibility check
+	// inspects. Re-sliced to [:0] at the start of every leaf and appended to inside it, so
+	// lifting the alloc to bufs eliminates one make([]int, …, totalN) per bestUncached call.
+	pitchedValsScratch []int
+	pitchedBuf         []card.Card
+	attackersBuf       []card.Card
+	defendersBuf       []card.Card
 	// perCardScratch is sized maxAttackers (handSize + weaponCount). Only written by playSequence
 	// when the caller passes a non-nil perCardOut, and read by bestSequence to snapshot the
 	// winning permutation's per-card damage into the caller's output buffer. Untracked callers
@@ -611,7 +615,8 @@ func newAttackBufs(handSize, weaponCount int, weapons []weapon.Weapon) *attackBu
 		defendCostVals:    make([]int, handSize+1),
 		defendPrintedVals: make([]int, handSize+1),
 		defenseVals:       make([]int, handSize+1),
-		isDRBuf:           make([]bool, handSize+1),
+		isDRBuf:            make([]bool, handSize+1),
+		pitchedValsScratch: make([]int, 0, handSize+1),
 		pitchedBuf:             make([]card.Card, 0, handSize+1),
 		attackersBuf:           make([]card.Card, 0, handSize+1),
 		defendersBuf:           make([]card.Card, 0, handSize+1),
@@ -728,8 +733,9 @@ func (e *Evaluator) bestUncached(hero hero.Hero, weapons []weapon.Weapon, hand [
 	// recurse tracks defenderCostSum separately so the leaf can hand the attack pipeline a
 	// resource budget of (pitchSum - defenderCostSum) to deduct chain-card effective costs from.
 	// arsenalCount is at most 1 across the whole partition; any branch that would push it past
-	// one is pruned at the role-selection step. pitchedVals is scratch reused across leaves.
-	pitchedValsScratch := make([]int, 0, totalN)
+	// one is pruned at the role-selection step. pitchedVals is scratch reused across leaves;
+	// lifted to bufs.pitchedValsScratch so it doesn't allocate on every bestUncached call.
+	pitchedValsScratch := bufs.pitchedValsScratch[:0]
 	var recurse func(i, pitchSum, costSum, defenseSum, defenderCostSum, arsenalCount int)
 	recurse = func(i, pitchSum, costSum, defenseSum, defenderCostSum, arsenalCount int) {
 		if i == totalN {
