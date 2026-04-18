@@ -485,6 +485,93 @@ func TestBest_ArsenalInNonAttackActionPlays(t *testing.T) {
 	}
 }
 
+// TestPromoteRandomHeldToArsenal_SpreadsAcrossHands pins the post-hoc Held→Arsenal promotion's
+// anti-bias property: the selection hashes the sorted hand IDs so different hands land on
+// different Held positions rather than always picking slot 0 (which, because the hand is sorted
+// by ID, would systematically prefer low-ID cards for arsenaling). Drives the helper directly
+// with synthesised BestLine entries — all slots Held, all equivalent in value — so the only
+// thing under test is the hash-based index selection.
+func TestPromoteRandomHeldToArsenal_SpreadsAcrossHands(t *testing.T) {
+	// 20 different 4-card hands using Wounding Blow Red/Yellow/Blue as "arbitrary cards with
+	// distinct IDs". Varying which card sits in which slot is enough to exercise the hash across
+	// different inputs.
+	wbR := generic.WoundingBlowRed{}
+	wbY := generic.WoundingBlowYellow{}
+	wbB := generic.WoundingBlowBlue{}
+	hands := [][]card.Card{
+		{wbR, wbR, wbR, wbY}, {wbR, wbR, wbY, wbY}, {wbR, wbR, wbY, wbB}, {wbR, wbY, wbY, wbB},
+		{wbR, wbY, wbB, wbB}, {wbR, wbR, wbR, wbB}, {wbR, wbR, wbB, wbB}, {wbY, wbY, wbY, wbB},
+		{wbY, wbY, wbB, wbB}, {wbY, wbB, wbB, wbB}, {wbR, wbR, wbR, wbR}, {wbY, wbY, wbY, wbY},
+		{wbB, wbB, wbB, wbB}, {wbR, wbY, wbY, wbY}, {wbR, wbR, wbY, wbR}, {wbB, wbR, wbY, wbR},
+		{wbB, wbY, wbR, wbR}, {wbR, wbB, wbB, wbY}, {wbR, wbR, wbB, wbY}, {wbY, wbR, wbB, wbB},
+	}
+	slots := map[int]int{}
+	for _, h := range hands {
+		// Sort to match bestUncached's canonical order. Build a BestLine where every slot is Held.
+		handCopy := append([]card.Card(nil), h...)
+		ids := make([]card.ID, len(handCopy))
+		for i, c := range handCopy {
+			ids[i] = c.ID()
+		}
+		sortHandByID(handCopy, ids, len(handCopy))
+		line := make([]CardAssignment, len(handCopy))
+		for i, c := range handCopy {
+			line[i] = CardAssignment{Card: c, Role: Held}
+		}
+		best := TurnSummary{BestLine: line}
+		promoteRandomHeldToArsenal(&best, handCopy, len(handCopy), nil)
+		idx := -1
+		for i, a := range best.BestLine {
+			if a.Role == Arsenal {
+				idx = i
+				break
+			}
+		}
+		if idx < 0 {
+			t.Fatalf("hand %v: no Arsenal-role slot found in BestLine=%s", h, FormatBestLine(best.BestLine))
+		}
+		slots[idx]++
+	}
+	if len(slots) < 2 {
+		t.Errorf("arsenal promotion only ever landed on slot %v across %d hands; expected spread across multiple slots", slots, len(hands))
+	}
+}
+
+// TestPromoteRandomHeldToArsenal_DeterministicPerHand pins the other half of the contract: a
+// given hand produces the SAME picked slot every call, so the memo cache doesn't drift between
+// hits and repeated simulations of the same deck stay reproducible.
+func TestPromoteRandomHeldToArsenal_DeterministicPerHand(t *testing.T) {
+	hand := []card.Card{
+		generic.WoundingBlowRed{}, generic.WoundingBlowYellow{},
+		generic.WoundingBlowBlue{}, generic.WoundingBlowBlue{},
+	}
+	var firstIdx int
+	for run := 0; run < 5; run++ {
+		line := []CardAssignment{
+			{Card: hand[0], Role: Held},
+			{Card: hand[1], Role: Held},
+			{Card: hand[2], Role: Held},
+			{Card: hand[3], Role: Held},
+		}
+		best := TurnSummary{BestLine: line}
+		promoteRandomHeldToArsenal(&best, hand, len(hand), nil)
+		idx := -1
+		for i, a := range best.BestLine {
+			if a.Role == Arsenal {
+				idx = i
+				break
+			}
+		}
+		if run == 0 {
+			firstIdx = idx
+			continue
+		}
+		if idx != firstIdx {
+			t.Errorf("run %d: Arsenal at slot %d, want %d (deterministic per-hand)", run, idx, firstIdx)
+		}
+	}
+}
+
 // TestBest_AllAttackHandPlusArsenalNoWeapons regresses a slice-bounds panic: attackBufs sized its
 // scratch by handSize+weaponCount only, so a full 4-card hand of 0-cost attackers + an arsenal-in
 // attacker (5 entries) overflowed the 4-wide attackerBuf inside bestAttackWithWeapons when no
