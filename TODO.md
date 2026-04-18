@@ -4,14 +4,6 @@ Running list of work we want to do on this project. Sectioned by theme.
 
 ## Rules modelling
 
-- **Pitch-cost partition.** The solver currently treats any card not played as pitchable, but the
-  real rules only let you pitch a card to pay for a cost being incurred. Needs a "not played"
-  partition in the hand evaluator that isn't automatically counted as pitched — only the cards
-  actually paying for a played card's cost should be in the pitch pool.
-- **Hand refill is "up to", not "exactly".** At end of turn we draw up to `hero.Intelligence()`
-  cards, meaning cards still in hand carry over and reduce the draw. The sim currently assumes a
-  full refill every turn; should model retained hand cards and their downstream effect on the
-  next turn's options.
 - **Arsenal.** Model putting a card into the arsenal at end of turn and playing from it on a
   later turn. Unlocks the arsenal riders on Unmovable, Springboard Somersault, Scout the
   Periphery, Plunder Run, Smashing Good Time, Force Sight, Fervent Forerunner, Frontline Scout,

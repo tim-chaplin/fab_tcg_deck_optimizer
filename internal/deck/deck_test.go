@@ -6,10 +6,23 @@ import (
 	"testing"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/card/generic"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/cards"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/hand"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/hero"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/weapon"
 )
+
+// int1StubHero is a test-only Hero with Intelligence=1 so we can isolate per-hand behavior
+// without interaction between multiple drawn cards. Otherwise identical to a no-op hero —
+// no on-play triggers, never flags as Runeblade.
+type int1StubHero struct{}
+
+func (int1StubHero) Name() string                               { return "int1Stub" }
+func (int1StubHero) Health() int                                { return 20 }
+func (int1StubHero) Intelligence() int                          { return 1 }
+func (int1StubHero) Types() card.TypeSet                        { return 0 }
+func (int1StubHero) OnCardPlayed(card.Card, *card.TurnState) int { return 0 }
 
 func TestAllMutations_CountsAndShape(t *testing.T) {
 	// Build a tiny deck: 2 unique cards × 2 copies = 4 cards, plus one weapon.
@@ -225,6 +238,40 @@ func TestEvaluate_BestHandStartingRunechantsIsPreHandCarryover(t *testing.T) {
 	if d.Stats.Best.StartingRunechants != 0 {
 		t.Errorf("StartingRunechants = %d, want 0 (first hand of the run has no previous-turn carryover)",
 			d.Stats.Best.StartingRunechants)
+	}
+}
+
+// TestEvaluate_HeldCardDefersDrawToNextTurn pins down the "up to Intelligence" draw rule. An
+// Intelligence-1 hero with a deck of Toughen Up Blue (DR, cost 2, defense 4) has no legal play:
+// the lone card can't pay its own 2-cost to fire as a DR, can't be pitched (nothing unpaid on
+// the stack), and can't Attack (DRs can't). Best returns the Held role. On the next iteration
+// the held card still occupies the hand slot and drawCount = Intelligence - 1 = 0, so the loop
+// terminates after a single hand. Under the old "always draw a full handSize" code the same
+// card would have been relabeled Pitch, recycled to the deck bottom, and re-drawn forever.
+func TestEvaluate_HeldCardDefersDrawToNextTurn(t *testing.T) {
+	// 40 copies of the DR so we have enough deck to fill many hands if held carryover weren't
+	// wired up — the assertion would fail catastrophically (loop or much larger Hands count).
+	deckCards := make([]card.Card, 40)
+	for i := range deckCards {
+		deckCards[i] = generic.ToughenUpBlue{}
+	}
+	d := New(int1StubHero{}, nil, deckCards)
+	d.Evaluate(1, 0, rand.New(rand.NewSource(1)))
+
+	if d.Stats.Hands != 1 {
+		t.Errorf("Stats.Hands = %d, want 1 (card Held → drawCount=0 on turn 2, loop terminates)", d.Stats.Hands)
+	}
+	tuStat := d.Stats.PerCard[card.ToughenUpBlue]
+	if tuStat.Plays != 0 || tuStat.Pitches != 0 {
+		t.Errorf("PerCard[ToughenUpBlue] Plays=%d Pitches=%d, want 0/0 (card was Held, not played or pitched)",
+			tuStat.Plays, tuStat.Pitches)
+	}
+	// Sanity: the one hand we did evaluate had the single card labeled Held.
+	if d.Stats.Best.Hand == nil || len(d.Stats.Best.Play.Roles) == 0 {
+		t.Fatalf("expected Best to be populated after one hand")
+	}
+	if d.Stats.Best.Play.Roles[0] != hand.Held {
+		t.Errorf("Best.Play.Roles[0] = %s, want HELD", d.Stats.Best.Play.Roles[0])
 	}
 }
 

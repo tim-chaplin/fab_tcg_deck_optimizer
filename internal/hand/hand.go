@@ -16,6 +16,7 @@ const (
 	Pitch Role = iota
 	Attack
 	Defend
+	Held
 )
 
 // Play is the chosen partition for a hand: one role per card plus a total value score. Best sorts
@@ -41,7 +42,7 @@ type Play struct {
 	LeftoverRunechants int
 }
 
-// String returns a human-readable role name ("PITCH", "ATTACK", "DEFEND").
+// String returns a human-readable role name ("PITCH", "ATTACK", "DEFEND", "HELD").
 func (r Role) String() string {
 	switch r {
 	case Pitch:
@@ -50,6 +51,8 @@ func (r Role) String() string {
 		return "ATTACK"
 	case Defend:
 		return "DEFEND"
+	case Held:
+		return "HELD"
 	}
 	return "UNKNOWN"
 }
@@ -68,20 +71,25 @@ func FormatRoles(hand []card.Card, roles []Role) string {
 // incomingDamage on their next turn. Any equipped weapons may also be swung for their Cost if
 // resources allow.
 //
-// Cards are partitioned into three roles:
-//   - Pitch: contributes its Pitch value as resources.
-//   - Attack: consumes Cost resources; the attack is resolved by calling Card.Play in some order
-//     the optimizer chooses. Effects on TurnState carry forward to later attacks in the same
-//     sequence.
+// Cards are partitioned into four roles:
+//   - Pitch: contributes its Pitch value as resources paying for a played card on this turn or a
+//     Defense Reaction on the opponent's turn.
+//   - Attack: consumes Cost resources on our turn; the attack is resolved by calling Card.Play in
+//     some order the optimizer chooses. Effects on TurnState carry forward to later attacks in
+//     the same sequence.
 //   - Defend: contributes Defense to damage prevented (capped at incomingDamage; excess block is
 //     wasted). Plain blocking is free; Defense-Reaction-typed cards must have their Cost paid to
 //     resolve and also contribute any Play() damage.
+//   - Held: the card stays in hand to next turn. Contributes nothing this turn.
 //
-// Pitch resources are a shared pool — attackers and Defense Reactions draw from the same
-// pitchSum, so partitions whose combined cost exceeds pitchSum are illegal and pruned at the
-// leaf.
+// Pitch resources are split across two phases because resources don't carry between turns:
+// attack-phase pitches pay for our played attack actions and non-attack actions, defence-phase
+// pitches pay for our Defense Reactions on the opponent's turn. A card cannot be pitched unless
+// at that moment there's an unpaid card on the stack in the matching phase — so a hand with no
+// plays in a phase must have no Pitch-role cards tagged to that phase. Any remaining cards that
+// can't be legally pitched become Held.
 //
-// The optimizer brute-forces all 3^N partitions, then for each legal partition enumerates every
+// The optimizer brute-forces all 4^N partitions, then for each legal partition enumerates every
 // subset of weapons to swing and every ordering of the combined attacker list. For N=4 with 0–2
 // weapons that remains well under 10k evaluations.
 //
@@ -292,8 +300,13 @@ func getAttackBufs(handSize int, weapons []weapon.Weapon) *attackBufs {
 func bestUncached(hero hero.Hero, weapons []weapon.Weapon, hand []card.Card, incomingDamage int, deck []card.Card, runechantCarryover int) Play {
 	n := len(hand)
 	// Seed best.LeftoverRunechants with the carryover — partitions with no attacks don't reduce
-	// the count, so carryover is the natural baseline to beat.
+	// the count, so carryover is the natural baseline to beat. Roles default to Held so that a
+	// hand with no Value-adding partition (everything pruned by cost/pitch-feasibility) still
+	// reports sensible per-card roles — nothing got played or pitched.
 	best := Play{Roles: make([]Role, n), LeftoverRunechants: runechantCarryover}
+	for i := range best.Roles {
+		best.Roles[i] = Held
+	}
 
 	// bufs is the pooled scratch space for this deck evaluation (see getAttackBufs).
 	bufs := getAttackBufs(n, weapons)
@@ -338,10 +351,32 @@ func bestUncached(hero hero.Hero, weapons []weapon.Weapon, hand []card.Card, inc
 
 	// recurse tracks defenderCostSum separately so the leaf can hand the attack pipeline a
 	// resource budget of (pitchSum - defenderCostSum) to deduct chain-card effective costs from.
+	// pitchedVals is a scratch slice reused across leaves to carry the Pitch-role cards' pitch
+	// values into the phase-feasibility check.
+	pitchedValsScratch := make([]int, 0, n)
 	var recurse func(i, pitchSum, costSum, defenseSum, defenderCostSum int)
 	recurse = func(i, pitchSum, costSum, defenseSum, defenderCostSum int) {
 		if i == n {
-			if pitchSum < costSum {
+			attackCardCost := costSum - defenderCostSum
+			drCost := defenderCostSum
+			pitchedVals := pitchedValsScratch[:0]
+			for j := 0; j < n; j++ {
+				if roles[j] == Pitch {
+					pitchedVals = append(pitchedVals, pitchVals[j])
+				}
+			}
+			// Weapon swings are an attack-phase cost too — the leaf admits the partition iff at
+			// least one weapon mask yields a legal Pitch split. The per-mask refinement happens
+			// inside bestAttackWithWeapons so we can pick the best damage while respecting each
+			// mask's specific cost.
+			feasible := false
+			for mask := 0; mask < 1<<len(weapons); mask++ {
+				if canCoverPhasesAllUsed(pitchedVals, attackCardCost+bufs.weaponCosts[mask], drCost) {
+					feasible = true
+					break
+				}
+			}
+			if !feasible {
 				return
 			}
 			prevented := defenseSum
@@ -399,7 +434,7 @@ func bestUncached(hero hero.Hero, weapons []weapon.Weapon, hand []card.Card, inc
 		// keeps the solver from picking partitions that use a reaction's Play effect for its
 		// damage/runechant credit in offense.
 		isDefenseReaction := hand[i].Types().Has(card.TypeDefenseReaction)
-		for r := Role(0); r <= Defend; r++ {
+		for r := Role(0); r <= Held; r++ {
 			roles[i] = r
 			switch r {
 			case Pitch:
@@ -414,6 +449,9 @@ func bestUncached(hero hero.Hero, weapons []weapon.Weapon, hand []card.Card, inc
 				// Defense Reactions must have their Cost paid to resolve — defendCostVals carries
 				// that cost for reaction cards and is zero otherwise.
 				recurse(i+1, pitchSum, costSum+defendCostVals[i], defenseSum+defenseVals[i], defenderCostSum+defendCostVals[i])
+			case Held:
+				// Card stays in hand; contributes nothing to any pool this turn.
+				recurse(i+1, pitchSum, costSum, defenseSum, defenderCostSum)
 			}
 		}
 	}
@@ -425,6 +463,79 @@ func bestUncached(hero hero.Hero, weapons []weapon.Weapon, hand []card.Card, inc
 		fillContributions(&best, hero, hand, weapons, deck, bufs, incomingDamage, runechantCarryover)
 	}
 	return best
+}
+
+// canCoverPhasesAllUsed decides whether every pitched value can be split between the attack
+// phase (covering attackCost) and the defence phase (covering drCost) while respecting FaB's
+// pitch-timing rule: a card can only be pitched while some played card on the stack is still
+// unpaid. That means the Pitch-role cards the partition has committed to must all pay for
+// something — any "extra" card would have to be Held instead.
+//
+// Per-phase legality uses a sufficient condition: if sum(pool) == phaseCost the pool exactly
+// covers its costs (assumed legal); if sum(pool) > phaseCost the excess has to be absorbable in
+// a single over-paying pitch, so max(pool) must strictly exceed the excess. Partitions that
+// would require multiple pitches to each push a cost above full are rejected.
+//
+// With both phases having positive cost we enumerate every non-empty, non-full attack-pool mask
+// (2^k - 2 for k pitched cards) and accept the first that satisfies both phase checks. k is
+// bounded by the hand size so this stays cheap relative to the outer 4^n partition search.
+func canCoverPhasesAllUsed(pitchedVals []int, attackCost, drCost int) bool {
+	k := len(pitchedVals)
+	if k == 0 {
+		// No pitches. Legal only if both phases cost nothing.
+		return attackCost == 0 && drCost == 0
+	}
+	if attackCost == 0 && drCost == 0 {
+		// Nothing to pitch for — any Pitch-role card would have been Held instead.
+		return false
+	}
+	total := 0
+	for _, v := range pitchedVals {
+		total += v
+	}
+	if total < attackCost+drCost {
+		return false
+	}
+	full := uint32(1<<uint(k)) - 1
+	if attackCost == 0 {
+		return phaseLegal(pitchedVals, full, drCost)
+	}
+	if drCost == 0 {
+		return phaseLegal(pitchedVals, full, attackCost)
+	}
+	// Both phases have cost, so each pool must be non-empty.
+	for aMask := uint32(1); aMask < full; aMask++ {
+		if !phaseLegal(pitchedVals, aMask, attackCost) {
+			continue
+		}
+		if phaseLegal(pitchedVals, full^aMask, drCost) {
+			return true
+		}
+	}
+	return false
+}
+
+// phaseLegal returns true iff the pitch values selected by subsetMask can legally cover phaseCost
+// for a single phase. sum < phaseCost means the pool can't pay; sum == phaseCost is trivially
+// legal (exact coverage); sum > phaseCost needs one pitch large enough to absorb the whole
+// over-pay in a single final pitch for some card in the phase.
+func phaseLegal(pitchedVals []int, subsetMask uint32, phaseCost int) bool {
+	sum, maxP := 0, 0
+	for i, v := range pitchedVals {
+		if subsetMask&(1<<uint(i)) != 0 {
+			sum += v
+			if v > maxP {
+				maxP = v
+			}
+		}
+	}
+	if sum < phaseCost {
+		return false
+	}
+	if sum == phaseCost {
+		return true
+	}
+	return maxP > sum-phaseCost
 }
 
 // groupByRoleInto is like groupByRole but appends into caller-provided slices (which should be
@@ -509,10 +620,21 @@ func bestAttackWithWeapons(hero hero.Hero, weapons []weapon.Weapon, attackers, p
 	var bestSwung []string
 	// Reuse the shared attacker buffer across mask iterations.
 	copy(bufs.attackerBuf, attackers)
+	// pitchedVals is derived from the pitched cards' Pitch() so the per-mask phase-feasibility
+	// check can include each mask's weapon cost in the attack-phase total. A locally-allocated
+	// slice keeps this call re-entrant (Best can be invoked concurrently through memoCache once
+	// that's exposed).
+	attackCardCost := costSum - defenderCostSum
+	drCost := defenderCostSum
+	pitchedVals := make([]int, len(pitched))
+	for i, c := range pitched {
+		pitchedVals[i] = c.Pitch()
+	}
 	for mask := 0; mask < 1<<len(weapons); mask++ {
 		// bufs.weaponCosts[mask] is the pre-summed Cost of the selected weapons — avoids an
-		// interface dispatch per weapon on every mask.
-		if pitchSum < costSum+bufs.weaponCosts[mask] {
+		// interface dispatch per weapon on every mask. The phase-feasibility check ensures every
+		// Pitch-role card can legally pay for something (attack cost + weapon cost + DR cost).
+		if !canCoverPhasesAllUsed(pitchedVals, attackCardCost+bufs.weaponCosts[mask], drCost) {
 			continue
 		}
 		allAttackers := bufs.attackerBuf[:len(attackers)]
