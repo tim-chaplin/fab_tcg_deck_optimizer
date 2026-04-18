@@ -365,7 +365,14 @@ func (d *Deck) Evaluate(runs int, incomingDamage int, rng *rand.Rand) Stats {
 		runechantCarryover := 0
 		var arsenalCard card.Card
 		heldBuf = heldBuf[:0]
-		for {
+		// maxHands caps the run at two full cycles through the deck. Without this a partition
+		// that pitches everything and swings a weapon every turn recycles the same cards back
+		// into the deck forever — hand.Best returns an identical TurnSummary each iteration so
+		// head and tail advance in lockstep and the run never terminates. Two cycles is enough
+		// to observe the shuffle's early and late game and matches the FirstCycle / SecondCycle
+		// stats the caller already tracks.
+		maxHands := 2 * handsPerCycle
+		for handIdx < maxHands {
 			// Fresh draws fill whatever held cards didn't take. If every slot is already held —
 			// pathological but possible for tiny hands — the hand doesn't progress, so stop the
 			// run rather than spin.

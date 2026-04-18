@@ -4,6 +4,7 @@ import (
 	"math/rand"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card/generic"
@@ -303,6 +304,39 @@ func TestEvaluate_ArsenalPersistsAcrossTurns(t *testing.T) {
 	// Turn 3: draw the recycled pitched card, arsenal it (deck is then empty). Loop ends.
 	if d.Stats.Hands != 3 {
 		t.Errorf("Stats.Hands = %d, want 3", d.Stats.Hands)
+	}
+}
+
+// TestEvaluate_TerminatesAfterTwoCycles pins the infinite-loop guard on Evaluate's per-run
+// loop. A deck of 40 Toughen Up Blue DRs with Reaping Blade equipped, incoming=0, reaches a
+// steady state after turn 1: the optimal partition of 4 TUs is to pitch one (sum 3 covers the
+// 1-cost weapon swing), swing Reaping Blade for +3, and hold the other 3. After turn 1 the
+// held buffer stays at 3 and every subsequent turn draws 1 fresh card that gets pitched back
+// — net deck change zero. Without the 2-cycle cap hand.Best would return the same TurnSummary
+// every iteration and the run would spin forever. With the cap Stats.Hands halts at 2 *
+// handsPerCycle = 20.
+func TestEvaluate_TerminatesAfterTwoCycles(t *testing.T) {
+	deckCards := make([]card.Card, 40)
+	for i := range deckCards {
+		deckCards[i] = generic.ToughenUpBlue{}
+	}
+	d := New(hero.Viserai{}, []weapon.Weapon{weapon.ReapingBlade{}}, deckCards)
+	done := make(chan struct{})
+	go func() {
+		d.Evaluate(1, 0, rand.New(rand.NewSource(1)))
+		close(done)
+	}()
+	select {
+	case <-done:
+	case <-time.After(2 * time.Second):
+		t.Fatalf("Evaluate did not terminate within 2 seconds — infinite loop regression")
+	}
+	// Two cycles of a 40-card / 4-hand-size deck is exactly 20 hands.
+	handsPerCycle := len(deckCards) / hero.Viserai{}.Intelligence()
+	maxHands := 2 * handsPerCycle
+	if d.Stats.Hands != maxHands {
+		t.Errorf("Stats.Hands = %d, want exactly %d (steady-state pitched-pitch loop hits the cap)",
+			d.Stats.Hands, maxHands)
 	}
 }
 
