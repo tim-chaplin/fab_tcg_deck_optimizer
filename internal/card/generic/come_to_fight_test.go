@@ -25,12 +25,21 @@ func TestComeToFight_NonAttackInRemainingFizzles(t *testing.T) {
 	}
 }
 
-// TestComeToFight_NextAttackReturnsBonus: first attack-action in CardsRemaining triggers +3.
+// TestComeToFight_NextAttackReturnsBonus: first attack-action in CardsRemaining triggers the
+// per-variant bonus (Red +3, Yellow +2, Blue +1).
 func TestComeToFight_NextAttackReturnsBonus(t *testing.T) {
 	s := card.TurnState{CardsRemaining: []*card.PlayedCard{{Card: stubGenericAttack(0, 0)}}}
-	for _, c := range []card.Card{ComeToFightRed{}, ComeToFightYellow{}, ComeToFightBlue{}} {
-		if got := c.Play(&s); got != 3 {
-			t.Errorf("%s: Play() = %d, want 3", c.Name(), got)
+	cases := []struct {
+		c    card.Card
+		want int
+	}{
+		{ComeToFightRed{}, 3},
+		{ComeToFightYellow{}, 2},
+		{ComeToFightBlue{}, 1},
+	}
+	for _, tc := range cases {
+		if got := tc.c.Play(&s); got != tc.want {
+			t.Errorf("%s: Play() = %d, want %d", tc.c.Name(), got, tc.want)
 		}
 	}
 }

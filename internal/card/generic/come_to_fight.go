@@ -1,7 +1,8 @@
 // Come to Fight — Generic Action. Cost 1. Printed pitch variants: Red 1, Yellow 2, Blue 3. Defense
 // 3.
 //
-// Text: "The next attack action card you play this turn gains +3{p}. **Go again**"
+// Text: "The next attack action card you play this turn gains +N{p}. **Go again**" (Red N=3,
+// Yellow N=2, Blue N=1.)
 //
 // Simplification: Scans TurnState.CardsRemaining for the first matching attack action card and
 // credits the bonus assuming it will be played; if none is scheduled after this card, the bonus
@@ -15,14 +16,14 @@ import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 
 var comeToFightTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction)
 
-// comeToFightPlay returns 3 when a matching attack action card is scheduled later this turn.
-func comeToFightPlay(s *card.TurnState) int {
+// comeToFightPlay returns n when a matching attack action card is scheduled later this turn.
+func comeToFightPlay(s *card.TurnState, n int) int {
 	for _, pc := range s.CardsRemaining {
 		t := pc.Card.Types()
 		if !t.Has(card.TypeAttack) || !t.Has(card.TypeAction) {
 			continue
 		}
-		return 3
+		return n
 	}
 	return 0
 }
@@ -37,7 +38,7 @@ func (ComeToFightRed) Attack() int                 { return 0 }
 func (ComeToFightRed) Defense() int                { return 3 }
 func (ComeToFightRed) Types() card.TypeSet         { return comeToFightTypes }
 func (ComeToFightRed) GoAgain() bool               { return true }
-func (ComeToFightRed) Play(s *card.TurnState) int { return comeToFightPlay(s) }
+func (ComeToFightRed) Play(s *card.TurnState) int { return comeToFightPlay(s, 3) }
 
 type ComeToFightYellow struct{}
 
@@ -49,7 +50,7 @@ func (ComeToFightYellow) Attack() int                 { return 0 }
 func (ComeToFightYellow) Defense() int                { return 3 }
 func (ComeToFightYellow) Types() card.TypeSet         { return comeToFightTypes }
 func (ComeToFightYellow) GoAgain() bool               { return true }
-func (ComeToFightYellow) Play(s *card.TurnState) int { return comeToFightPlay(s) }
+func (ComeToFightYellow) Play(s *card.TurnState) int { return comeToFightPlay(s, 2) }
 
 type ComeToFightBlue struct{}
 
@@ -61,4 +62,4 @@ func (ComeToFightBlue) Attack() int                 { return 0 }
 func (ComeToFightBlue) Defense() int                { return 3 }
 func (ComeToFightBlue) Types() card.TypeSet         { return comeToFightTypes }
 func (ComeToFightBlue) GoAgain() bool               { return true }
-func (ComeToFightBlue) Play(s *card.TurnState) int { return comeToFightPlay(s) }
+func (ComeToFightBlue) Play(s *card.TurnState) int { return comeToFightPlay(s, 1) }

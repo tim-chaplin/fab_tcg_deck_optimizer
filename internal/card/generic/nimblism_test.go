@@ -24,12 +24,21 @@ func TestNimblism_HighCostFilteredOut(t *testing.T) {
 	}
 }
 
-// TestNimblism_LowCostReturnsBonus: first cost<=1 attack triggers +3.
+// TestNimblism_LowCostReturnsBonus: first cost<=1 attack triggers the per-variant bonus
+// (Red +3, Yellow +2, Blue +1).
 func TestNimblism_LowCostReturnsBonus(t *testing.T) {
 	s := card.TurnState{CardsRemaining: []*card.PlayedCard{{Card: stubGenericAttack(1, 0)}}}
-	for _, c := range []card.Card{NimblismRed{}, NimblismYellow{}, NimblismBlue{}} {
-		if got := c.Play(&s); got != 3 {
-			t.Errorf("%s: Play() = %d, want 3", c.Name(), got)
+	cases := []struct {
+		c    card.Card
+		want int
+	}{
+		{NimblismRed{}, 3},
+		{NimblismYellow{}, 2},
+		{NimblismBlue{}, 1},
+	}
+	for _, tc := range cases {
+		if got := tc.c.Play(&s); got != tc.want {
+			t.Errorf("%s: Play() = %d, want %d", tc.c.Name(), got, tc.want)
 		}
 	}
 }

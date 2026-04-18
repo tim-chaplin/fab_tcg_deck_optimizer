@@ -28,30 +28,36 @@ func TestFlyingHigh_NonAttackInRemainingFizzles(t *testing.T) {
 	}
 }
 
-// TestFlyingHigh_NextAttackRedGrantsGoAgainAndBonus exercises the "target is red" branch: pitch 1
-// target gets go again granted and Play returns the +1{p} bonus.
-func TestFlyingHigh_NextAttackRedGrantsGoAgainAndBonus(t *testing.T) {
-	target := &card.PlayedCard{Card: stubGenericAttackPitch(0, 0, 1)}
-	s := card.TurnState{CardsRemaining: []*card.PlayedCard{target}}
-	if got := (FlyingHighRed{}).Play(&s); got != 1 {
-		t.Errorf("Play() = %d, want 1 (red target → +1{p})", got)
+// TestFlyingHigh_ColorMatchGrantsBonus: each variant's '+1{p} if matching color' rider only fires
+// when the granted target's pitch matches this card's own pitch. Every variant grants go again to
+// any attack target regardless.
+func TestFlyingHigh_ColorMatchGrantsBonus(t *testing.T) {
+	cases := []struct {
+		name       string
+		c          card.Card
+		wantRed    int
+		wantYellow int
+		wantBlue   int
+	}{
+		{"FlyingHighRed", FlyingHighRed{}, 1, 0, 0},
+		{"FlyingHighYellow", FlyingHighYellow{}, 0, 1, 0},
+		{"FlyingHighBlue", FlyingHighBlue{}, 0, 0, 1},
 	}
-	if !target.GrantedGoAgain {
-		t.Error("target GrantedGoAgain = false, want true")
-	}
-}
-
-// TestFlyingHigh_NextAttackNonRedGrantsGoAgainOnly: yellow (pitch 2) and blue (pitch 3) targets
-// still get go again, but the +1{p} rider doesn't fire.
-func TestFlyingHigh_NextAttackNonRedGrantsGoAgainOnly(t *testing.T) {
-	for _, pitch := range []int{2, 3} {
-		target := &card.PlayedCard{Card: stubGenericAttackPitch(0, 0, pitch)}
-		s := card.TurnState{CardsRemaining: []*card.PlayedCard{target}}
-		if got := (FlyingHighRed{}).Play(&s); got != 0 {
-			t.Errorf("pitch %d: Play() = %d, want 0", pitch, got)
-		}
-		if !target.GrantedGoAgain {
-			t.Errorf("pitch %d: target GrantedGoAgain = false, want true", pitch)
+	for _, tc := range cases {
+		for _, target := range []struct {
+			pitch int
+			want  int
+		}{{1, tc.wantRed}, {2, tc.wantYellow}, {3, tc.wantBlue}} {
+			pc := &card.PlayedCard{Card: stubGenericAttackPitch(0, 0, target.pitch)}
+			s := card.TurnState{CardsRemaining: []*card.PlayedCard{pc}}
+			if got := tc.c.Play(&s); got != target.want {
+				t.Errorf("%s vs pitch-%d target: Play() = %d, want %d",
+					tc.name, target.pitch, got, target.want)
+			}
+			if !pc.GrantedGoAgain {
+				t.Errorf("%s vs pitch-%d target: GrantedGoAgain = false, want true (go again is unconditional)",
+					tc.name, target.pitch)
+			}
 		}
 	}
 }

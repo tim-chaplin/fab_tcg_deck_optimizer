@@ -1,9 +1,9 @@
 // Captain's Call — Generic Action. Cost 0. Printed pitch variants: Red 1, Yellow 2, Blue 3. Defense
 // 2.
 //
-// Text: "Choose 1; The next attack action card with cost 2 or less you play this turn gains +2{p}.
-// The next attack action card with cost 2 or less you play this turn gains **go again**. **Go
-// again**"
+// Text: "Choose 1; The next attack action card with cost N or less you play this turn gains +2{p}.
+// The next attack action card with cost N or less you play this turn gains **go again**. **Go
+// again**" (Red N=2, Yellow N=1, Blue N=0.)
 //
 // Simplification: Modal: we pick the +2 power mode; the alternative 'go again' mode is dropped.
 // Scans TurnState.CardsRemaining for the first matching attack action card and credits the bonus
@@ -17,14 +17,15 @@ import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 
 var captainsCallTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction)
 
-// captainsCallPlay returns 2 when a matching attack action card is scheduled later this turn.
-func captainsCallPlay(s *card.TurnState) int {
+// captainsCallPlay returns 2 when a matching attack action card with cost <= maxCost is scheduled
+// later this turn.
+func captainsCallPlay(s *card.TurnState, maxCost int) int {
 	for _, pc := range s.CardsRemaining {
 		t := pc.Card.Types()
 		if !t.Has(card.TypeAttack) || !t.Has(card.TypeAction) {
 			continue
 		}
-		if pc.Card.Cost() <= 2 {
+		if pc.Card.Cost() <= maxCost {
 			return 2
 		}
 		continue
@@ -42,7 +43,7 @@ func (CaptainsCallRed) Attack() int                 { return 0 }
 func (CaptainsCallRed) Defense() int                { return 2 }
 func (CaptainsCallRed) Types() card.TypeSet         { return captainsCallTypes }
 func (CaptainsCallRed) GoAgain() bool               { return true }
-func (CaptainsCallRed) Play(s *card.TurnState) int { return captainsCallPlay(s) }
+func (CaptainsCallRed) Play(s *card.TurnState) int { return captainsCallPlay(s, 2) }
 
 type CaptainsCallYellow struct{}
 
@@ -54,7 +55,7 @@ func (CaptainsCallYellow) Attack() int                 { return 0 }
 func (CaptainsCallYellow) Defense() int                { return 2 }
 func (CaptainsCallYellow) Types() card.TypeSet         { return captainsCallTypes }
 func (CaptainsCallYellow) GoAgain() bool               { return true }
-func (CaptainsCallYellow) Play(s *card.TurnState) int { return captainsCallPlay(s) }
+func (CaptainsCallYellow) Play(s *card.TurnState) int { return captainsCallPlay(s, 1) }
 
 type CaptainsCallBlue struct{}
 
@@ -66,4 +67,4 @@ func (CaptainsCallBlue) Attack() int                 { return 0 }
 func (CaptainsCallBlue) Defense() int                { return 2 }
 func (CaptainsCallBlue) Types() card.TypeSet         { return captainsCallTypes }
 func (CaptainsCallBlue) GoAgain() bool               { return true }
-func (CaptainsCallBlue) Play(s *card.TurnState) int { return captainsCallPlay(s) }
+func (CaptainsCallBlue) Play(s *card.TurnState) int { return captainsCallPlay(s, 0) }

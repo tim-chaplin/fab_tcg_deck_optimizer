@@ -2,9 +2,9 @@
 // 2.
 //
 // Text: "**Mark** target opposing hero. The next time you attack a **marked** hero this turn, the
-// attack gets +3{p}. **Go again**"
+// attack gets +N{p}. **Go again**" (Red N=3, Yellow N=2, Blue N=1.)
 //
-// Simplification: Mark isn't modelled; the +3 rider is credited unconditionally. Scans
+// Simplification: Mark isn't modelled; the +N rider is credited unconditionally. Scans
 // TurnState.CardsRemaining for the first matching attack action card and credits the bonus assuming
 // it will be played; if none is scheduled after this card, the bonus fizzles.
 //
@@ -16,14 +16,14 @@ import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 
 var publicBountyTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction)
 
-// publicBountyPlay returns 3 when a matching attack action card is scheduled later this turn.
-func publicBountyPlay(s *card.TurnState) int {
+// publicBountyPlay returns n when a matching attack action card is scheduled later this turn.
+func publicBountyPlay(s *card.TurnState, n int) int {
 	for _, pc := range s.CardsRemaining {
 		t := pc.Card.Types()
 		if !t.Has(card.TypeAttack) || !t.Has(card.TypeAction) {
 			continue
 		}
-		return 3
+		return n
 	}
 	return 0
 }
@@ -38,7 +38,7 @@ func (PublicBountyRed) Attack() int                 { return 0 }
 func (PublicBountyRed) Defense() int                { return 2 }
 func (PublicBountyRed) Types() card.TypeSet         { return publicBountyTypes }
 func (PublicBountyRed) GoAgain() bool               { return true }
-func (PublicBountyRed) Play(s *card.TurnState) int { return publicBountyPlay(s) }
+func (PublicBountyRed) Play(s *card.TurnState) int { return publicBountyPlay(s, 3) }
 
 type PublicBountyYellow struct{}
 
@@ -50,7 +50,7 @@ func (PublicBountyYellow) Attack() int                 { return 0 }
 func (PublicBountyYellow) Defense() int                { return 2 }
 func (PublicBountyYellow) Types() card.TypeSet         { return publicBountyTypes }
 func (PublicBountyYellow) GoAgain() bool               { return true }
-func (PublicBountyYellow) Play(s *card.TurnState) int { return publicBountyPlay(s) }
+func (PublicBountyYellow) Play(s *card.TurnState) int { return publicBountyPlay(s, 2) }
 
 type PublicBountyBlue struct{}
 
@@ -62,4 +62,4 @@ func (PublicBountyBlue) Attack() int                 { return 0 }
 func (PublicBountyBlue) Defense() int                { return 2 }
 func (PublicBountyBlue) Types() card.TypeSet         { return publicBountyTypes }
 func (PublicBountyBlue) GoAgain() bool               { return true }
-func (PublicBountyBlue) Play(s *card.TurnState) int { return publicBountyPlay(s) }
+func (PublicBountyBlue) Play(s *card.TurnState) int { return publicBountyPlay(s, 1) }

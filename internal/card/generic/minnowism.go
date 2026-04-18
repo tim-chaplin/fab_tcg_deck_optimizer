@@ -1,7 +1,7 @@
 // Minnowism — Generic Action. Cost 0. Printed pitch variants: Red 1, Yellow 2, Blue 3. Defense 2.
 //
-// Text: "The next attack action card with 3 or less base {p} you play this turn gains +3{p}. **Go
-// again**"
+// Text: "The next attack action card with 3 or less base {p} you play this turn gains +N{p}. **Go
+// again**" (Red N=3, Yellow N=2, Blue N=1.)
 //
 // Simplification: Scans TurnState.CardsRemaining for the first matching attack action card and
 // credits the bonus assuming it will be played; if none is scheduled after this card, the bonus
@@ -15,15 +15,15 @@ import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 
 var minnowismTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction)
 
-// minnowismPlay returns 3 when a matching attack action card is scheduled later this turn.
-func minnowismPlay(s *card.TurnState) int {
+// minnowismPlay returns n when a matching attack action card is scheduled later this turn.
+func minnowismPlay(s *card.TurnState, n int) int {
 	for _, pc := range s.CardsRemaining {
 		t := pc.Card.Types()
 		if !t.Has(card.TypeAttack) || !t.Has(card.TypeAction) {
 			continue
 		}
 		if pc.Card.Attack() <= 3 {
-			return 3
+			return n
 		}
 		continue
 	}
@@ -40,7 +40,7 @@ func (MinnowismRed) Attack() int                 { return 0 }
 func (MinnowismRed) Defense() int                { return 2 }
 func (MinnowismRed) Types() card.TypeSet         { return minnowismTypes }
 func (MinnowismRed) GoAgain() bool               { return true }
-func (MinnowismRed) Play(s *card.TurnState) int { return minnowismPlay(s) }
+func (MinnowismRed) Play(s *card.TurnState) int { return minnowismPlay(s, 3) }
 
 type MinnowismYellow struct{}
 
@@ -52,7 +52,7 @@ func (MinnowismYellow) Attack() int                 { return 0 }
 func (MinnowismYellow) Defense() int                { return 2 }
 func (MinnowismYellow) Types() card.TypeSet         { return minnowismTypes }
 func (MinnowismYellow) GoAgain() bool               { return true }
-func (MinnowismYellow) Play(s *card.TurnState) int { return minnowismPlay(s) }
+func (MinnowismYellow) Play(s *card.TurnState) int { return minnowismPlay(s, 2) }
 
 type MinnowismBlue struct{}
 
@@ -64,4 +64,4 @@ func (MinnowismBlue) Attack() int                 { return 0 }
 func (MinnowismBlue) Defense() int                { return 2 }
 func (MinnowismBlue) Types() card.TypeSet         { return minnowismTypes }
 func (MinnowismBlue) GoAgain() bool               { return true }
-func (MinnowismBlue) Play(s *card.TurnState) int { return minnowismPlay(s) }
+func (MinnowismBlue) Play(s *card.TurnState) int { return minnowismPlay(s, 1) }

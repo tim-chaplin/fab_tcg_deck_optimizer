@@ -2,7 +2,7 @@
 // Defense 2.
 //
 // Text: "Look at the top card of target hero's deck. The next attack action card you play from
-// arsenal this turn gains +3{p}. **Go again**"
+// arsenal this turn gains +N{p}. **Go again**" (Red N=3, Yellow N=2, Blue N=1.)
 //
 // Simplification: The 'play from arsenal' gate is ignored (arsenal not modelled). Scans
 // TurnState.CardsRemaining for the first matching attack action card and credits the bonus assuming
@@ -16,14 +16,14 @@ import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 
 var scoutThePeripheryTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction)
 
-// scoutThePeripheryPlay returns 3 when a matching attack action card is scheduled later this turn.
-func scoutThePeripheryPlay(s *card.TurnState) int {
+// scoutThePeripheryPlay returns n when a matching attack action card is scheduled later this turn.
+func scoutThePeripheryPlay(s *card.TurnState, n int) int {
 	for _, pc := range s.CardsRemaining {
 		t := pc.Card.Types()
 		if !t.Has(card.TypeAttack) || !t.Has(card.TypeAction) {
 			continue
 		}
-		return 3
+		return n
 	}
 	return 0
 }
@@ -38,7 +38,7 @@ func (ScoutThePeripheryRed) Attack() int                 { return 0 }
 func (ScoutThePeripheryRed) Defense() int                { return 2 }
 func (ScoutThePeripheryRed) Types() card.TypeSet         { return scoutThePeripheryTypes }
 func (ScoutThePeripheryRed) GoAgain() bool               { return true }
-func (ScoutThePeripheryRed) Play(s *card.TurnState) int { return scoutThePeripheryPlay(s) }
+func (ScoutThePeripheryRed) Play(s *card.TurnState) int { return scoutThePeripheryPlay(s, 3) }
 
 type ScoutThePeripheryYellow struct{}
 
@@ -50,7 +50,7 @@ func (ScoutThePeripheryYellow) Attack() int                 { return 0 }
 func (ScoutThePeripheryYellow) Defense() int                { return 2 }
 func (ScoutThePeripheryYellow) Types() card.TypeSet         { return scoutThePeripheryTypes }
 func (ScoutThePeripheryYellow) GoAgain() bool               { return true }
-func (ScoutThePeripheryYellow) Play(s *card.TurnState) int { return scoutThePeripheryPlay(s) }
+func (ScoutThePeripheryYellow) Play(s *card.TurnState) int { return scoutThePeripheryPlay(s, 2) }
 
 type ScoutThePeripheryBlue struct{}
 
@@ -62,4 +62,4 @@ func (ScoutThePeripheryBlue) Attack() int                 { return 0 }
 func (ScoutThePeripheryBlue) Defense() int                { return 2 }
 func (ScoutThePeripheryBlue) Types() card.TypeSet         { return scoutThePeripheryTypes }
 func (ScoutThePeripheryBlue) GoAgain() bool               { return true }
-func (ScoutThePeripheryBlue) Play(s *card.TurnState) int { return scoutThePeripheryPlay(s) }
+func (ScoutThePeripheryBlue) Play(s *card.TurnState) int { return scoutThePeripheryPlay(s, 1) }
