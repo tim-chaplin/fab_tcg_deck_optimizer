@@ -23,7 +23,7 @@ func (PerformanceBonusRed) Pitch() int                  { return 1 }
 func (PerformanceBonusRed) Attack() int                 { return 3 }
 func (PerformanceBonusRed) Defense() int                { return 2 }
 func (PerformanceBonusRed) Types() card.TypeSet         { return performanceBonusTypes }
-func (PerformanceBonusRed) GoAgain() bool               { return true }
+func (PerformanceBonusRed) GoAgain() bool               { return false }
 func (c PerformanceBonusRed) Play(s *card.TurnState) int { return c.Attack() }
 
 type PerformanceBonusYellow struct{}
@@ -35,7 +35,7 @@ func (PerformanceBonusYellow) Pitch() int                  { return 2 }
 func (PerformanceBonusYellow) Attack() int                 { return 2 }
 func (PerformanceBonusYellow) Defense() int                { return 2 }
 func (PerformanceBonusYellow) Types() card.TypeSet         { return performanceBonusTypes }
-func (PerformanceBonusYellow) GoAgain() bool               { return true }
+func (PerformanceBonusYellow) GoAgain() bool               { return false }
 func (c PerformanceBonusYellow) Play(s *card.TurnState) int { return c.Attack() }
 
 type PerformanceBonusBlue struct{}
@@ -47,5 +47,5 @@ func (PerformanceBonusBlue) Pitch() int                  { return 3 }
 func (PerformanceBonusBlue) Attack() int                 { return 1 }
 func (PerformanceBonusBlue) Defense() int                { return 2 }
 func (PerformanceBonusBlue) Types() card.TypeSet         { return performanceBonusTypes }
-func (PerformanceBonusBlue) GoAgain() bool               { return true }
+func (PerformanceBonusBlue) GoAgain() bool               { return false }
 func (c PerformanceBonusBlue) Play(s *card.TurnState) int { return c.Attack() }

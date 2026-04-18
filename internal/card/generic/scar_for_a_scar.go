@@ -22,7 +22,7 @@ func (ScarForAScarRed) Pitch() int                  { return 1 }
 func (ScarForAScarRed) Attack() int                 { return 4 }
 func (ScarForAScarRed) Defense() int                { return 2 }
 func (ScarForAScarRed) Types() card.TypeSet         { return scarForAScarTypes }
-func (ScarForAScarRed) GoAgain() bool               { return true }
+func (ScarForAScarRed) GoAgain() bool               { return false }
 func (c ScarForAScarRed) Play(s *card.TurnState) int { return c.Attack() }
 
 type ScarForAScarYellow struct{}
@@ -34,7 +34,7 @@ func (ScarForAScarYellow) Pitch() int                  { return 2 }
 func (ScarForAScarYellow) Attack() int                 { return 3 }
 func (ScarForAScarYellow) Defense() int                { return 2 }
 func (ScarForAScarYellow) Types() card.TypeSet         { return scarForAScarTypes }
-func (ScarForAScarYellow) GoAgain() bool               { return true }
+func (ScarForAScarYellow) GoAgain() bool               { return false }
 func (c ScarForAScarYellow) Play(s *card.TurnState) int { return c.Attack() }
 
 type ScarForAScarBlue struct{}
@@ -46,5 +46,5 @@ func (ScarForAScarBlue) Pitch() int                  { return 3 }
 func (ScarForAScarBlue) Attack() int                 { return 2 }
 func (ScarForAScarBlue) Defense() int                { return 2 }
 func (ScarForAScarBlue) Types() card.TypeSet         { return scarForAScarTypes }
-func (ScarForAScarBlue) GoAgain() bool               { return true }
+func (ScarForAScarBlue) GoAgain() bool               { return false }
 func (c ScarForAScarBlue) Play(s *card.TurnState) int { return c.Attack() }
