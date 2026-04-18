@@ -103,7 +103,7 @@ func TestBest_ViseraiMaleficShrillCombo(t *testing.T) {
 	got := Best(hero.Viserai{}, nil, h, 4, nil, 0, nil)
 	if got.Value != 15 {
 		t.Fatalf("want value 15, got %d (roles=[%s])",
-			got.Value, FormatRoles(h, got.Roles))
+			got.Value, FormatBestLine(got.BestLine))
 	}
 }
 
@@ -120,7 +120,7 @@ func TestBest_ViseraiReapingBladeBlueMalefics(t *testing.T) {
 	got := Best(hero.Viserai{}, weapons, h, 0, nil, 0, nil)
 	if got.Value != 8 {
 		t.Fatalf("want value 8, got %d (roles=[%s])",
-			got.Value, FormatRoles(h, got.Roles))
+			got.Value, FormatBestLine(got.BestLine))
 	}
 }
 
@@ -138,7 +138,7 @@ func TestBest_ViseraiReapingBladeMaleficsPlusShrill(t *testing.T) {
 	got := Best(hero.Viserai{}, weapons, h, 0, nil, 0, nil)
 	if got.Value != 11 {
 		t.Fatalf("want value 11, got %d (roles=[%s])",
-			got.Value, FormatRoles(h, got.Roles))
+			got.Value, FormatBestLine(got.BestLine))
 	}
 }
 
@@ -155,7 +155,7 @@ func TestBest_ViseraiOathBlueHocusRedMalefic(t *testing.T) {
 	got := Best(hero.Viserai{}, weapons, h, 0, nil, 0, nil)
 	if got.Value != 11 {
 		t.Fatalf("want value 11, got %d (roles=[%s])",
-			got.Value, FormatRoles(h, got.Roles))
+			got.Value, FormatBestLine(got.BestLine))
 	}
 }
 
@@ -174,7 +174,7 @@ func TestBest_RunicReapingPrefersAttackPitch(t *testing.T) {
 	got := Best(hero.Viserai{}, nil, h, 0, nil, 0, nil)
 	if got.Value != 14 {
 		t.Fatalf("want value 14, got %d (roles=[%s])",
-			got.Value, FormatRoles(h, got.Roles))
+			got.Value, FormatBestLine(got.BestLine))
 	}
 }
 
@@ -195,7 +195,7 @@ func TestBest_ViseraiMauvrionGrantsGoAgainToShrill(t *testing.T) {
 	got := Best(hero.Viserai{}, weapons, h, 0, nil, 0, nil)
 	if got.Value != 16 {
 		t.Fatalf("want value 16, got %d (roles=[%s])",
-			got.Value, FormatRoles(h, got.Roles))
+			got.Value, FormatBestLine(got.BestLine))
 	}
 }
 
@@ -242,7 +242,7 @@ func TestBest_ViseraiMauvrionChainsShrillIntoRuneragerIntoWeapon(t *testing.T) {
 	got := Best(hero.Viserai{}, weapons, h, 0, nil, 0, nil)
 	if got.Value != 18 {
 		t.Fatalf("want value 18, got %d (roles=[%s])",
-			got.Value, FormatRoles(h, got.Roles))
+			got.Value, FormatBestLine(got.BestLine))
 	}
 }
 
@@ -321,7 +321,7 @@ func TestBest_RespectsResourceConstraint(t *testing.T) {
 	}
 	var res, cost int
 	for i, c := range h {
-		switch got.Roles[i] {
+		switch got.BestLine[i].Role {
 		case Pitch:
 			res += c.Pitch()
 		case Attack:
@@ -343,14 +343,14 @@ func TestBest_AllHeldWhenNoLegalPlay(t *testing.T) {
 	if got.Value != 0 {
 		t.Fatalf("Value = %d, want 0", got.Value)
 	}
-	if got.Roles[0] != Arsenal {
-		t.Errorf("role = %s, want ARSENAL (empty slot + Held card → promoted)", got.Roles[0])
+	if got.BestLine[0].Role != Arsenal {
+		t.Errorf("role = %s, want ARSENAL (empty slot + Held card → promoted)", got.BestLine[0].Role)
 	}
 	if got.ArsenalCard == nil || got.ArsenalCard.ID() != card.ToughenUpBlue {
 		t.Errorf("ArsenalCard = %v, want Toughen Up Blue", got.ArsenalCard)
 	}
-	if got.Contributions[0] != 0 {
-		t.Errorf("Contribution = %.1f, want 0 (card sits in arsenal, real value accrues on a later turn)", got.Contributions[0])
+	if got.BestLine[0].Contribution != 0 {
+		t.Errorf("Contribution = %.1f, want 0 (card sits in arsenal, real value accrues on a later turn)", got.BestLine[0].Contribution)
 	}
 }
 
@@ -368,7 +368,7 @@ func TestBest_AttackPitchCantCoverDefense(t *testing.T) {
 	got := Best(stubHero{}, nil, h, 4, nil, 0, nil)
 	if got.Value != 5 {
 		t.Fatalf("Value = %d, want 5 (attack and defense pitches are separate pools; Roles=[%s])",
-			got.Value, FormatRoles(h, got.Roles))
+			got.Value, FormatBestLine(got.BestLine))
 	}
 }
 
@@ -386,7 +386,7 @@ func TestBest_DRPitchNeedsSecondPitchedCard(t *testing.T) {
 	got := Best(stubHero{}, nil, h, 4, nil, 0, nil)
 	if got.Value != 7 {
 		t.Fatalf("Value = %d, want 7 (two pitched cards let attack + defense phases both pay; Roles=[%s])",
-			got.Value, FormatRoles(h, got.Roles))
+			got.Value, FormatBestLine(got.BestLine))
 	}
 }
 
@@ -397,8 +397,8 @@ func TestBest_DRPitchNeedsSecondPitchedCard(t *testing.T) {
 func TestBest_EmptyArsenalClaimsHeldCard(t *testing.T) {
 	h := []card.Card{generic.ToughenUpBlue{}}
 	got := Best(stubHero{}, nil, h, 4, nil, 0, nil)
-	if got.Roles[0] != Arsenal {
-		t.Errorf("Roles[0] = %s, want ARSENAL", got.Roles[0])
+	if got.BestLine[0].Role != Arsenal {
+		t.Errorf("Roles[0] = %s, want ARSENAL", got.BestLine[0].Role)
 	}
 	if got.ArsenalCard == nil || got.ArsenalCard.ID() != card.ToughenUpBlue {
 		t.Errorf("ArsenalCard = %v, want Toughen Up Blue", got.ArsenalCard)
@@ -414,18 +414,19 @@ func TestBest_ArsenalInPlayDR(t *testing.T) {
 	got := Best(stubHero{}, nil, h, 4, nil, 0, generic.ToughenUpBlue{})
 	if got.Value != 4 {
 		t.Fatalf("Value = %d, want 4 (Malefic pitches to pay arsenal DR, prevents 4). Roles=[%s]",
-			got.Value, FormatRoles(h, got.Roles))
+			got.Value, FormatBestLine(got.BestLine))
 	}
 	if got.ArsenalCard != nil {
 		t.Errorf("ArsenalCard = %v, want nil (slot was vacated, no Held card to promote)", got.ArsenalCard)
 	}
-	// PlayedFromArsenal surfaces the arsenal-in card so callers (the best-hand printout) can
-	// flag that this card wasn't in hand this turn.
-	if got.PlayedFromArsenal == nil || got.PlayedFromArsenal.ID() != card.ToughenUpBlue {
-		t.Errorf("PlayedFromArsenal = %v, want Toughen Up Blue", got.PlayedFromArsenal)
+	// ArsenalIn surfaces the arsenal-in assignment so callers (the best-hand printout) can flag
+	// that this card wasn't in hand this turn.
+	ai, hasArsenal := got.ArsenalIn()
+	if !hasArsenal || ai.Card.ID() != card.ToughenUpBlue {
+		t.Errorf("ArsenalIn = %v, want Toughen Up Blue", ai)
 	}
-	if got.PlayedFromArsenalRole != Defend {
-		t.Errorf("PlayedFromArsenalRole = %s, want DEFEND", got.PlayedFromArsenalRole)
+	if ai.Role != Defend {
+		t.Errorf("ArsenalIn role = %s, want DEFEND", ai.Role)
 	}
 }
 
@@ -437,8 +438,8 @@ func TestBest_ArsenalInPlayDR(t *testing.T) {
 func TestBest_ArsenalInStayBlocksNewArsenal(t *testing.T) {
 	h := []card.Card{generic.ToughenUpBlue{}}
 	got := Best(stubHero{}, nil, h, 0, nil, 0, generic.ToughenUpBlue{})
-	if got.Roles[0] != Held {
-		t.Errorf("Roles[0] = %s, want HELD (slot occupied by arsenal-in, can't promote)", got.Roles[0])
+	if got.BestLine[0].Role != Held {
+		t.Errorf("Roles[0] = %s, want HELD (slot occupied by arsenal-in, can't promote)", got.BestLine[0].Role)
 	}
 	if got.ArsenalCard == nil || got.ArsenalCard.ID() != card.ToughenUpBlue {
 		t.Errorf("ArsenalCard = %v, want Toughen Up Blue (the staying arsenal-in card)", got.ArsenalCard)
@@ -456,7 +457,7 @@ func TestBest_ArsenalInPlayAttack(t *testing.T) {
 	got := Best(stubHero{}, nil, h, 0, nil, 0, fake.RedAttack{})
 	if got.Value != 3 {
 		t.Fatalf("Value = %d, want 3 (arsenal Red played, hand Red pitched to fund it). Roles=[%s]",
-			got.Value, FormatRoles(h, got.Roles))
+			got.Value, FormatBestLine(got.BestLine))
 	}
 	if got.ArsenalCard != nil {
 		t.Errorf("ArsenalCard = %v, want nil (slot vacated, no Held to promote)", got.ArsenalCard)
@@ -475,7 +476,7 @@ func TestBest_ArsenalInNonAttackActionPlays(t *testing.T) {
 	got := Best(stubHero{}, nil, h, 0, nil, 0, runeblade.BlessingOfOccultRed{})
 	if got.Value != 3 {
 		t.Fatalf("Value = %d, want 3 (Malefic pitched, arsenal Blessing played for 3 runechants). Roles=[%s]",
-			got.Value, FormatRoles(h, got.Roles))
+			got.Value, FormatBestLine(got.BestLine))
 	}
 	if got.LeftoverRunechants != 3 {
 		t.Errorf("LeftoverRunechants = %d, want 3 (Blessing's Play delayed 3 tokens to next turn)",
