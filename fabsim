@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+# Convenience wrapper: run the fabsim CLI from the repo root without typing
+# `go run ./cmd/fabsim …`. Resolves to the repo root so it also works when
+# invoked from a subdirectory (e.g. ./fabsim from anywhere below the root).
+set -e
+repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+exec go run "$repo_root/cmd/fabsim" "$@"
