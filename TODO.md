@@ -165,17 +165,3 @@ Hero health isn't tracked, so every life-gain and life-comparison rider collapse
 - **Uncommon keyword text is dropped.** Prime the Crowd's Crowd cheers/boos keywords, Wage Gold's
   Universal keyword, Test of Strength's Clash with the attacking hero, and Smashing Good Time's
   item-destruction rider all collapse to base stats plus whatever bonus we credit unconditionally.
-
-### Assumptions that could now be dropped
-
-Each of these predates the sim's current TurnState plumbing. The accurate check is already
-available as a one-line condition; the fix is a single Play function plus a mirrored test. The
-pattern to follow is the Consuming Volition fix (PR #41) for the arcane-damage items, and the
-Hit the High Notes / Shrill of Skullform pattern for the aura one.
-
-- **Sigil of Suffering** (`internal/card/runeblade/sigil_of_suffering.go`) — +1{d} buff on
-  defense reactions is assumed always-true. Unlike the +{p} / on-hit riders, this one gates on
-  `Defense()` which is consumed by the solver's partition scoring before `Play()` runs. Dropping
-  the assumption needs a new `ConditionalDefense(state)` hook (or equivalent) so the block
-  capacity can react to `state.Runechants > 0`. Yinti Yanti's defending-side +1{d} would ride
-  on the same hook.
