@@ -317,10 +317,12 @@ func (s Stats) Avg() float64 {
 	return s.TotalValue / float64(s.Hands)
 }
 
-// Evaluate simulates `runs` shuffles of the deck. For each run it draws successive hands of
-// d.Hero.Intelligence() cards from the top, computes the optimal play against an opponent attacking
-// for incomingDamage, and returns Pitched cards to the bottom of the deck (in hand order). Played
-// and defended cards are spent. Each run ends when fewer than a full hand's worth of cards remain.
+// Evaluate simulates `runs` shuffles of the deck. For each run it assembles successive hands of
+// d.Hero.Intelligence() cards — Held cards from the previous turn plus fresh draws from the top
+// of the deck — computes the optimal play against an opponent attacking for incomingDamage, and
+// returns Pitched cards to the bottom of the deck (in hand order). Played and defended cards are
+// spent; Held cards carry into the next hand so only (handSize - heldCount) fresh cards are
+// drawn. Each run ends when the deck no longer has enough cards left to fill out the next hand.
 //
 // A "cycle" is one pass through the original deck size: cumulative hands 0..(deckSize/handSize - 1)
 // are cycle 1, the next deckSize/handSize hands are cycle 2.
@@ -343,6 +345,12 @@ func (d *Deck) Evaluate(runs int, incomingDamage int, rng *rand.Rand) Stats {
 	// (which shifts [head:tail] down) happens at most once every deckSize/handSize iterations.
 	// The head/tail pointers and one-shot allocation keep the per-hand path allocation-free.
 	buf := make([]card.Card, deckSize*2)
+	// handBuf is the per-turn working hand: Held cards from last turn (prefix) + fresh draws.
+	// heldBuf holds the Held cards between turns; next iteration copies them into handBuf. Both
+	// are sized once per Evaluate so the inner loop stays allocation-free.
+	handBuf := make([]card.Card, handSize)
+	heldBuf := make([]card.Card, 0, handSize)
+	nextHeld := make([]card.Card, 0, handSize)
 	for r := 0; r < runs; r++ {
 		copy(buf, d.Cards)
 		// Inline Fisher-Yates: the closure-based rng.Shuffle would heap-allocate a func value
@@ -355,7 +363,15 @@ func (d *Deck) Evaluate(runs int, incomingDamage int, rng *rand.Rand) Stats {
 		head, tail := 0, deckSize
 		handIdx := 0
 		runechantCarryover := 0
-		for tail-head >= handSize {
+		heldBuf = heldBuf[:0]
+		for {
+			// Fresh draws fill whatever held cards didn't take. If every slot is already held —
+			// pathological but possible for tiny hands — the hand doesn't progress, so stop the
+			// run rather than spin.
+			drawCount := handSize - len(heldBuf)
+			if drawCount == 0 || tail-head < drawCount {
+				break
+			}
 			// Compact when there isn't room at the bottom to append a full hand's worth of
 			// pitched cards without overrunning buf.
 			if tail+handSize > len(buf) {
@@ -363,11 +379,16 @@ func (d *Deck) Evaluate(runs int, incomingDamage int, rng *rand.Rand) Stats {
 				tail -= head
 				head = 0
 			}
-			h := buf[head : head+handSize]
+			// Assemble the hand: held prefix first, then fresh draws. Best() sorts the hand in
+			// canonical order and Roles align to that post-sort order, so which slot each card
+			// ends up in doesn't affect the held-vs-drawn distinction for anything downstream.
+			h := handBuf[:handSize]
+			copy(h, heldBuf)
+			copy(h[len(heldBuf):], buf[head:head+drawCount])
 			// Snapshot the starting carryover before Best overwrites it — the best-hand record
 			// wants the count in play *when the hand was dealt*, not what remained after.
 			startingRunechants := runechantCarryover
-			play := hand.Best(d.Hero, d.Weapons, h, incomingDamage, buf[head+handSize:tail], runechantCarryover)
+			play := hand.Best(d.Hero, d.Weapons, h, incomingDamage, buf[head+drawCount:tail], runechantCarryover)
 			runechantCarryover = play.LeftoverRunechants
 			v := float64(play.Value)
 
@@ -402,15 +423,18 @@ func (d *Deck) Evaluate(runs int, incomingDamage int, rng *rand.Rand) Stats {
 
 			// Attribute per-card contribution using play.Contributions, which hand.Best fills in
 			// from the winning attack-chain replay (accurate per-card damage including riders and
-			// hero triggers) plus role-based shares for pitch and defense.
+			// hero triggers) plus role-based shares for pitch and defense. Held cards sit in the
+			// hand without being played or pitched, so they don't increment Plays or Pitches —
+			// their Contribution is 0 and they don't count toward the per-card average.
 			if d.Stats.PerCard == nil {
 				d.Stats.PerCard = map[card.ID]CardPlayStats{}
 			}
 			for i, c := range h {
 				stat := d.Stats.PerCard[c.ID()]
-				if play.Roles[i] == hand.Pitch {
+				switch play.Roles[i] {
+				case hand.Pitch:
 					stat.Pitches++
-				} else {
+				case hand.Attack, hand.Defend:
 					stat.Plays++
 				}
 				if i < len(play.Contributions) {
@@ -421,15 +445,21 @@ func (d *Deck) Evaluate(runs int, incomingDamage int, rng *rand.Rand) Stats {
 
 			// Recycle: pitched cards go to the bottom of the remaining deck (buf[tail:]) in hand
 			// order; attacked and defended cards are spent. The backing array has room since the
-			// cards being "moved" are a subset of those we just consumed.
+			// cards being "moved" are a subset of those we just consumed. Held cards stay in the
+			// player's hand and get copied into nextHeld for the next turn.
+			nextHeld = nextHeld[:0]
 			for i, c := range h {
-				if play.Roles[i] == hand.Pitch {
+				switch play.Roles[i] {
+				case hand.Pitch:
 					buf[tail] = c
 					tail++
+				case hand.Held:
+					nextHeld = append(nextHeld, c)
 				}
 			}
-			head += handSize
+			head += drawCount
 			handIdx++
+			heldBuf, nextHeld = nextHeld, heldBuf
 		}
 	}
 	return d.Stats
