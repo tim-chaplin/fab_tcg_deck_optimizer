@@ -2,11 +2,6 @@
 
 Running list of work we want to do on this project. Sectioned by theme.
 
-## Rules modelling
-
-*(All three Rules-modelling items — pitch-cost partition, "up to Intelligence" refill, and
-arsenal — are now implemented. Future rules work will go here.)*
-
 ## Simplifying Assumptions
 
 Many card implementations assume optimistic outcomes for conditional effects so the simulator
