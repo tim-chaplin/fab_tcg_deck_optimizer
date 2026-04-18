@@ -431,6 +431,15 @@ var (
 	memoMu sync.RWMutex
 )
 
+// ClearMemo drops every cached TurnSummary. Intended for benchmarks that want each sample to
+// start from a cold cache so they measure the same work regardless of what ran before. Not part
+// of the production path — the sim never benefits from discarding memoised work mid-run.
+func ClearMemo() {
+	memoMu.Lock()
+	clear(memo)
+	memoMu.Unlock()
+}
+
 // makeMemoKey builds a comparable memo key. The hand must already be sorted by card ID.
 // sortedIDs is passed as a pointer to the caller's [8]card.ID stack array to avoid a slice-header
 // escape. weapon IDs are sorted numerically into the two fixed slots so loadouts passed in
