@@ -843,7 +843,14 @@ func (e *Evaluator) bestUncached(hero hero.Hero, weapons []weapon.Weapon, hand [
 			return
 		}
 		isArsenalSlot := i == n && arsenalCardIn != nil
-		for r := Role(0); r <= Arsenal; r++ {
+		// Hand cards can't take Arsenal role (post-hoc promotion handles that). Iterating up to
+		// Arsenal for every hand slot was paying the roleAllowed-rejection cost on ~20% of role
+		// tries — cap the range tighter when we're not on the arsenal-in slot.
+		maxRole := Held
+		if isArsenalSlot {
+			maxRole = Arsenal
+		}
+		for r := Role(0); r <= maxRole; r++ {
 			if !roleAllowed(r, isArsenalSlot, isDR[i], arsenalCount) {
 				continue
 			}
