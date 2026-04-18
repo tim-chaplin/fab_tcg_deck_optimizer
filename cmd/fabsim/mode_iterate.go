@@ -38,7 +38,7 @@ func runIterate(cfg config) {
 		stopTicker := startRoundTicker(round, len(mutations), start, &tested, &deepsDone)
 		d, avg, idx, found := deck.IterateParallel(
 			ctx, mutations, bestAvg, cfg.shallowShuffles, cfg.deepShuffles, cfg.incoming, 0,
-			rng.Int63(), rng, &tested, &deepsDone,
+			rng.Int63(), &tested, &deepsDone,
 		)
 		stopTicker()
 

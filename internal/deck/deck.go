@@ -526,7 +526,6 @@ func (d *Deck) EvaluateWith(runs int, incomingDamage int, rng *rand.Rand, ev *ha
 // numWorkers: goroutines in the pool; 0 uses runtime.GOMAXPROCS(0).
 // seed: base seed for worker RNGs; worker w uses (seed + w) for shallow and a derived stream for
 // deep so the two phases don't alias.
-// deepRng: legacy param, retained for callers; deep rng is now per-worker and this is ignored.
 // shallowCompleted: optional atomic counter incremented once per shallow eval the worker pool
 // finishes, so callers can render live "tested N/total" progress from a separate goroutine.
 // deepsCompleted: optional counter incremented once per attempted deep confirm (regardless of
@@ -540,7 +539,6 @@ func IterateParallel(
 	bestAvg float64,
 	shallowShuffles, deepShuffles, incoming, numWorkers int,
 	seed int64,
-	_ *rand.Rand,
 	shallowCompleted *atomic.Int64,
 	deepsCompleted *atomic.Int64,
 ) (*Deck, float64, int, bool) {
