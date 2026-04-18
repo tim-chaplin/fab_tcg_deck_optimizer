@@ -649,14 +649,7 @@ func bestUncached(hero hero.Hero, weapons []weapon.Weapon, hand []card.Card, inc
 					pitchedVals = append(pitchedVals, pvals[j])
 				}
 			}
-			feasible := false
-			for mask := 0; mask < 1<<len(weapons); mask++ {
-				if canCoverPhasesAllUsed(pitchedVals, attackCardCost+bufs.weaponCosts[mask], drCost) {
-					feasible = true
-					break
-				}
-			}
-			if !feasible {
+			if !anyMaskFeasible(pitchedVals, attackCardCost, drCost, bufs.weaponCosts, len(weapons)) {
 				return
 			}
 			prevented := defenseSum
@@ -716,75 +709,26 @@ func bestUncached(hero hero.Hero, weapons []weapon.Weapon, hand []card.Card, inc
 			}
 
 			v := attackDealt + defenseDealt + prevented
-			// Identify the arsenal-role card (if any) up front — we use its presence as a
-			// tiebreaker: on equal Value and equal leftover runechants, a partition that puts
-			// something in the arsenal beats one that doesn't, since the arsenal card carries
-			// to next turn without eating a hand slot in the refill.
-			var arsenalCard card.Card
+			arsenalCard := findArsenalCard(rolesBuf, hand, arsenalCardIn, n, totalN)
+			if !beatsBest(v, leftoverRunechants, arsenalCard != nil, best) {
+				return
+			}
+			best.Value = v
+			bestSwung = swung
+			best.LeftoverRunechants = leftoverRunechants
+			best.ArsenalCard = arsenalCard
+			// Write the winning roles into BestLine. Cards and FromArsenal flags were populated
+			// at construction; only Role varies per partition. Contribution is cleared here and
+			// written by fillContributions below for the winning line.
 			for j := 0; j < totalN; j++ {
-				if rolesBuf[j] == Arsenal {
-					if j < n {
-						arsenalCard = hand[j]
-					} else {
-						arsenalCard = arsenalCardIn
-					}
-					break
-				}
-			}
-			bestHasArsenal := best.ArsenalCard != nil
-			hasArsenal := arsenalCard != nil
-			// Tiebreak order: higher Value first, then more leftover runechants (they convert
-			// to future arcane damage), then preferring a partition that uses the arsenal slot
-			// (arsenal saves a hand slot in the next refill, smaller but real upside).
-			better := v > best.Value
-			if !better && v == best.Value {
-				if leftoverRunechants > best.LeftoverRunechants {
-					better = true
-				} else if leftoverRunechants == best.LeftoverRunechants && hasArsenal && !bestHasArsenal {
-					better = true
-				}
-			}
-			if better {
-				best.Value = v
-				bestSwung = swung
-				best.LeftoverRunechants = leftoverRunechants
-				best.ArsenalCard = arsenalCard
-				// Write the winning roles into BestLine. Cards and FromArsenal flags were
-				// populated at construction; only Role varies per partition. Contribution is
-				// cleared here and written by fillContributions below for the winning line.
-				for j := 0; j < totalN; j++ {
-					best.BestLine[j].Role = rolesBuf[j]
-					best.BestLine[j].Contribution = 0
-				}
+				best.BestLine[j].Role = rolesBuf[j]
+				best.BestLine[j].Contribution = 0
 			}
 			return
 		}
 		isArsenalSlot := i == n && arsenalCardIn != nil
 		for r := Role(0); r <= Arsenal; r++ {
-			// Role restrictions: the arsenal slot may only take Arsenal (stay), Attack (any
-			// non-DR card — auras and non-attack actions can also be played from arsenal on
-			// your turn), or Defend (only if DR — plain-blocking from arsenal isn't allowed).
-			// Hand cards can take any role, with Attack forbidden for DRs (strict FaB timing —
-			// DRs only fire on the opponent's turn).
-			if isArsenalSlot {
-				switch r {
-				case Pitch, Held:
-					continue
-				case Attack:
-					if isDR[i] {
-						continue
-					}
-				case Defend:
-					if !isDR[i] {
-						continue
-					}
-				}
-			} else {
-				if r == Attack && isDR[i] {
-					continue
-				}
-			}
-			if r == Arsenal && arsenalCount >= 1 {
+			if !roleAllowed(r, isArsenalSlot, isDR[i], arsenalCount) {
 				continue
 			}
 			rolesBuf[i] = r
@@ -913,17 +857,78 @@ func groupPitchAttack(hand []card.Card, roles []Role, pitched, attackers []card.
 	return pitched, attackers
 }
 
-// preventedDamage is the damage a wall of `defenders` blocks against `incoming`: the sum of
-// printed Defense, capped at incoming (excess block is wasted).
-func preventedDamage(defenders []card.Card, incoming int) int {
-	total := 0
-	for _, d := range defenders {
-		total += d.Defense()
+// anyMaskFeasible returns true if at least one weapon-swing subset can be paid for by some split
+// of the pitched values between the attack phase and the defense phase. Called at every
+// partition leaf — phase-legality is the cheap-to-check screen that lets the expensive
+// bestAttackWithWeapons work run only on partitions that could legally pay for something.
+func anyMaskFeasible(pitchedVals []int, attackCardCost, drCost int, weaponCosts []int, weaponCount int) bool {
+	masks := 1 << weaponCount
+	for mask := 0; mask < masks; mask++ {
+		if canCoverPhasesAllUsed(pitchedVals, attackCardCost+weaponCosts[mask], drCost) {
+			return true
+		}
 	}
-	if total > incoming {
-		return incoming
+	return false
+}
+
+// findArsenalCard picks out the card assigned the Arsenal role in the current partition, if any.
+// Index j < n points into the hand; j == n points at the arsenal-in card. Returns nil when no
+// slot in the partition is Arsenal.
+func findArsenalCard(rolesBuf []Role, hand []card.Card, arsenalCardIn card.Card, n, totalN int) card.Card {
+	for j := 0; j < totalN; j++ {
+		if rolesBuf[j] != Arsenal {
+			continue
+		}
+		if j < n {
+			return hand[j]
+		}
+		return arsenalCardIn
 	}
-	return total
+	return nil
+}
+
+// beatsBest decides whether a candidate partition displaces the current best under the solver's
+// tiebreak rules: higher Value first, then more leftover runechants (they convert to future
+// arcane damage), then preferring a partition that fills the arsenal slot (arsenal saves a hand
+// slot in the next refill — smaller but real upside).
+func beatsBest(v, leftoverRunechants int, hasArsenal bool, best TurnSummary) bool {
+	if v > best.Value {
+		return true
+	}
+	if v < best.Value {
+		return false
+	}
+	if leftoverRunechants > best.LeftoverRunechants {
+		return true
+	}
+	if leftoverRunechants < best.LeftoverRunechants {
+		return false
+	}
+	return hasArsenal && best.ArsenalCard == nil
+}
+
+// roleAllowed decides whether the partition enumerator may assign role r to the current card. The
+// arsenal slot (i == n, arsenal-in card present) may only take Arsenal (stay), Attack (any
+// non-DR card — auras and non-attack actions play fine from arsenal on your turn), or Defend
+// (Defense Reactions only — plain-blocking from arsenal isn't allowed). Hand cards take any role
+// except Attack for Defense Reactions (strict FaB timing — DRs only fire on the opponent's turn).
+// arsenalCount tracks how many Arsenal assignments the partition already has; the cap is 1.
+func roleAllowed(r Role, isArsenalSlot, isDefenseReaction bool, arsenalCount int) bool {
+	if r == Arsenal && arsenalCount >= 1 {
+		return false
+	}
+	if isArsenalSlot {
+		switch r {
+		case Pitch, Held:
+			return false
+		case Attack:
+			return !isDefenseReaction
+		case Defend:
+			return isDefenseReaction
+		}
+		return true
+	}
+	return !(r == Attack && isDefenseReaction)
 }
 
 // defenseReactionDamage runs the Play() hook of every Defense Reaction in `defenders` and sums
