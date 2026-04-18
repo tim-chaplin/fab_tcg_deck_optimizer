@@ -427,6 +427,53 @@ func makeMemoKey(sortedIDs *[8]card.ID, n int, incoming int, runechantCarryover 
 	return k
 }
 
+// attackerMeta caches the scalar card attributes playSequence reads on every permutation. With
+// this hoisted to a per-attacker lookup, the hot inner loop doesn't dispatch Types / Cost /
+// GoAgain through the Card interface on every iteration — the permutation enumerator evaluates
+// up to N! orderings of the same N cards, so one meta build amortises across all of them.
+type attackerMeta struct {
+	types            card.TypeSet
+	cost             int
+	printedCost      int // PrintedCost for DiscountPerRunechant cards; 0 otherwise
+	isDiscount       bool
+	baseGoAgain      bool // Card.GoAgain() — combined with PlayedCard.GrantedGoAgain at read time
+	isAttackOrWeapon bool
+}
+
+// cardMetaCache caches attackerMeta keyed by card.ID so repeated lookups across partitions,
+// weapon masks, and bestSequence calls hit an array read instead of re-dispatching the card's
+// scalar interface methods. card.ID is uint16, so we size the cache for the entire ID space and
+// trade ~100 KB of memory for per-call constant-time lookups. Single-threaded — the solver never
+// calls hand.Best concurrently.
+const cardMetaCacheSize = 1 << 16
+
+var (
+	cardMetaCache      [cardMetaCacheSize]attackerMeta
+	cardMetaCacheReady [cardMetaCacheSize]bool
+)
+
+// attackerMetaFor returns the cached metadata for c, populating the cache on first encounter.
+func attackerMetaFor(c card.Card) attackerMeta {
+	id := c.ID()
+	if cardMetaCacheReady[id] {
+		return cardMetaCache[id]
+	}
+	t := c.Types()
+	m := attackerMeta{
+		types:            t,
+		cost:             c.Cost(),
+		baseGoAgain:      c.GoAgain(),
+		isAttackOrWeapon: t.Has(card.TypeAttack) || t.Has(card.TypeWeapon),
+	}
+	if d, ok := c.(card.DiscountPerRunechant); ok {
+		m.isDiscount = true
+		m.printedCost = d.PrintedCost()
+	}
+	cardMetaCache[id] = m
+	cardMetaCacheReady[id] = true
+	return m
+}
+
 // attackBufs holds pre-allocated buffers for the attack-evaluation pipeline (bestSequence →
 // playSequence) and the partition loop in bestUncached. Allocated once and cached globally so a
 // whole deck evaluation reuses the same buffers across every partition, mask, and permutation.
@@ -442,6 +489,11 @@ type attackBufs struct {
 	// (0 to 2^len(weapons)-1).
 	weaponCosts []int
 	weaponNames [][]string
+	// permMeta is parallel to perm: it carries precomputed scalar metadata for each attacker so
+	// playSequence's inner loop can skip interface dispatch on Types / Cost / GoAgain / the
+	// DiscountPerRunechant type-assertion. Populated and permuted in lockstep with perm by
+	// bestSequence; read in order by playSequence.
+	permMeta []attackerMeta
 	// Partition-loop buffers, consumed by bestUncached. Sized handSize+1 to cover the optional
 	// arsenal-in slot the enumerator treats as index n. defendPrintedVals holds the PrintedCost of
 	// DiscountPerRunechant defense reactions for the leaf's post-attack discount re-pricing;
@@ -498,6 +550,7 @@ func newAttackBufs(handSize, weaponCount int, weapons []weapon.Weapon) *attackBu
 	}
 	return &attackBufs{
 		perm:           make([]card.Card, maxAttackers),
+		permMeta:       make([]attackerMeta, maxAttackers),
 		pcBuf:          make([]card.PlayedCard, maxAttackers),
 		ptrBuf:         make([]*card.PlayedCard, maxAttackers),
 		cardsPlayedBuf: make([]card.Card, 0, maxAttackers),
@@ -1051,7 +1104,11 @@ func (ctx *sequenceContext) bestSequence(attackers, winnerOrderOut []card.Card, 
 		return 0, ctx.runechantCarryover, ctx.resourceBudget
 	}
 	perm := ctx.bufs.perm[:n]
+	permMeta := ctx.bufs.permMeta[:n]
 	copy(perm, attackers)
+	for idx, c := range attackers {
+		permMeta[idx] = attackerMetaFor(c)
+	}
 
 	// Scratch buffers are playSequence's per-card outputs, overwritten on every permutation; on
 	// a new winner we copy them into the caller's perCardOut / perCardTriggerOut. Only used
@@ -1071,7 +1128,7 @@ func (ctx *sequenceContext) bestSequence(attackers, winnerOrderOut []card.Card, 
 	bestLeftoverRunechants := ctx.runechantCarryover
 	bestResidualBudget := ctx.resourceBudget
 	eval := func() {
-		dmg, leftoverRunechants, residualBudget, legal := ctx.playSequence(perm, scratch, triggerScratch)
+		dmg, leftoverRunechants, residualBudget, legal := ctx.playSequenceWithMeta(perm, scratch, triggerScratch)
 		if !legal {
 			return
 		}
@@ -1096,14 +1153,18 @@ func (ctx *sequenceContext) bestSequence(attackers, winnerOrderOut []card.Card, 
 	}
 	eval()
 	// Heap's algorithm, non-recursive: c[] counts how many times each stack frame has iterated.
+	// perm and permMeta are swapped together so playSequence always sees meta aligned with the
+	// current permutation.
 	var c [8]int
 	i := 0
 	for i < n {
 		if c[i] < i {
 			if i&1 == 0 {
 				perm[0], perm[i] = perm[i], perm[0]
+				permMeta[0], permMeta[i] = permMeta[i], permMeta[0]
 			} else {
 				perm[c[i]], perm[i] = perm[i], perm[c[i]]
+				permMeta[c[i]], permMeta[i] = permMeta[i], permMeta[c[i]]
 			}
 			eval()
 			c[i]++
@@ -1140,10 +1201,26 @@ func (ctx *sequenceContext) bestSequence(attackers, winnerOrderOut []card.Card, 
 //     implementing DiscountPerRunechant, effective cost is max(0, PrintedCost() - state.
 //     Runechants) at the moment it's played; for everyone else it's Cost(). A negative
 //     remaining budget returns legal=false (the caller treats this ordering as zero damage).
+// playSequence populates permMeta from order and then calls playSequenceWithMeta. Test-only
+// callers and fillContributions use this when they don't go through bestSequence's permutation
+// loop. The hot path (bestSequence) builds meta once and calls playSequenceWithMeta directly so
+// the interface dispatch for scalar attributes amortises across the N! permutations it evaluates.
 func (ctx *sequenceContext) playSequence(order []card.Card, perCardOut, perCardTriggerOut []float64) (damage int, leftoverRunechants int, residualBudget int, legal bool) {
+	meta := ctx.bufs.permMeta[:len(order)]
+	for i, c := range order {
+		meta[i] = attackerMetaFor(c)
+	}
+	return ctx.playSequenceWithMeta(order, perCardOut, perCardTriggerOut)
+}
+
+// playSequenceWithMeta runs a specific attacker ordering and returns damage + leftover runechants.
+// Assumes ctx.bufs.permMeta[:len(order)] holds metadata aligned with order; the caller is
+// responsible for keeping them in lockstep (bestSequence swaps meta whenever it swaps perm).
+func (ctx *sequenceContext) playSequenceWithMeta(order []card.Card, perCardOut, perCardTriggerOut []float64) (damage int, leftoverRunechants int, residualBudget int, legal bool) {
 	n := len(order)
 	pcBuf := ctx.bufs.pcBuf
 	ptrBuf := ctx.bufs.ptrBuf
+	meta := ctx.bufs.permMeta[:n]
 	for i, c := range order {
 		pcBuf[i] = card.PlayedCard{Card: c}
 		ptrBuf[i] = &pcBuf[i]
@@ -1156,18 +1233,31 @@ func (ctx *sequenceContext) playSequence(order []card.Card, perCardOut, perCardT
 	}
 	played := ptrBuf[:n]
 	state := ctx.bufs.state
-	*state = card.TurnState{Pitched: ctx.pitched, Deck: ctx.deck, CardsPlayed: ctx.bufs.cardsPlayedBuf[:0], Runechants: ctx.runechantCarryover}
+	// Reset only the fields playSequence is allowed to mutate. Pitched and Deck are stable across
+	// permutations within a partition leaf; CardsRemaining and Self are rewritten per-card in the
+	// loop below. A full-struct replace ran in the profile at ~850ms / call because every field
+	// (including the big slice headers) got memcpy'd from a zero template; skipping the fields
+	// the caller doesn't read afterward shaves most of that.
+	state.Pitched = ctx.pitched
+	state.Deck = ctx.deck
+	state.CardsPlayed = ctx.bufs.cardsPlayedBuf[:0]
+	state.Runechants = ctx.runechantCarryover
+	state.DelayedRunechants = 0
+	state.ArcaneDamageDealt = false
+	state.AuraCreated = false
+	state.Overpower = false
 	resources := ctx.resourceBudget
 	for i, pc := range played {
+		m := meta[i]
 		// Effective cost: discount cards drop by runechant count (floored at 0); others pay printed.
 		var effCost int
-		if d, ok := pc.Card.(card.DiscountPerRunechant); ok {
-			effCost = d.PrintedCost() - state.Runechants
+		if m.isDiscount {
+			effCost = m.printedCost - state.Runechants
 			if effCost < 0 {
 				effCost = 0
 			}
 		} else {
-			effCost = pc.Card.Cost()
+			effCost = m.cost
 		}
 		resources -= effCost
 		if resources < 0 {
@@ -1182,8 +1272,7 @@ func (ctx *sequenceContext) playSequence(order []card.Card, perCardOut, perCardT
 		// OnCardPlayed trigger — so Play effects that read "if you've dealt arcane damage this
 		// turn" see the flag for same-hand triggers. Cards that deal arcane damage directly via
 		// their Play text flip the flag themselves inside Play.
-		t := pc.Card.Types()
-		isAttackOrWeapon := t.Has(card.TypeAttack) || t.Has(card.TypeWeapon)
+		isAttackOrWeapon := m.isAttackOrWeapon
 		if isAttackOrWeapon && state.Runechants > 0 {
 			state.ArcaneDamageDealt = true
 		}
@@ -1206,7 +1295,7 @@ func (ctx *sequenceContext) playSequence(order []card.Card, perCardOut, perCardT
 			state.Runechants = 0
 		}
 
-		if i < n-1 && !pc.EffectiveGoAgain() {
+		if i < n-1 && !(m.baseGoAgain || pc.GrantedGoAgain) {
 			return 0, 0, 0, false
 		}
 	}

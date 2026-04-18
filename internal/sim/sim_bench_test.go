@@ -8,6 +8,60 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/hero"
 )
 
+// BenchmarkIterateImprovements mimics iterate mode's inner loop: starting from a random Viserai
+// deck, screen each mutation at shallow-shuffles, deep-confirm shallow passers, adopt the first
+// confirmed improvement and restart. Stops once targetImprovements have been adopted, so the
+// benchmark covers both the high-volume shallow screen path and the rare deep-confirm path in
+// realistic proportions.
+//
+// Shallow/deep shuffle counts are smaller than production defaults to keep the benchmark runnable
+// in single-digit seconds per iteration — the cost profile is the same, just compressed. Start
+// seed is fixed so b.N iterations are comparable; rng threads through the whole hill climb so
+// later mutations see different shuffle sequences than earlier ones, matching live iterate.
+func BenchmarkIterateImprovements(b *testing.B) {
+	const (
+		deckSize           = 40
+		maxCopies          = 2
+		shallowShuffles    = 100
+		deepShuffles       = 1000
+		incoming           = 0
+		targetImprovements = 2
+	)
+	for n := 0; n < b.N; n++ {
+		b.StopTimer()
+		rng := rand.New(rand.NewSource(42))
+		best := fabdeck.Random(hero.Viserai{}, deckSize, maxCopies, rng)
+		bestAvg := best.Evaluate(shallowShuffles, incoming, rng).Avg()
+		b.StartTimer()
+
+		improvements := 0
+		for improvements < targetImprovements {
+			mutations := fabdeck.AllMutations(best, maxCopies)
+			improved := false
+			for _, mut := range mutations {
+				screen := fabdeck.New(mut.Deck.Hero, mut.Deck.Weapons, mut.Deck.Cards)
+				shallowAvg := screen.Evaluate(shallowShuffles, incoming, rng).Avg()
+				if shallowAvg <= bestAvg {
+					continue
+				}
+				d := fabdeck.New(mut.Deck.Hero, mut.Deck.Weapons, mut.Deck.Cards)
+				avg := d.Evaluate(deepShuffles, incoming, rng).Avg()
+				if avg <= bestAvg {
+					continue
+				}
+				bestAvg = avg
+				best = d
+				improvements++
+				improved = true
+				break
+			}
+			if !improved {
+				b.Fatalf("local maximum reached before hitting %d improvements", targetImprovements)
+			}
+		}
+	}
+}
+
 func BenchmarkRun(b *testing.B) {
 	deck := mixedDeck()
 	b.ResetTimer()
