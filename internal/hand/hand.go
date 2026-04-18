@@ -675,6 +675,12 @@ func (e *Evaluator) bestUncached(hero hero.Hero, weapons []weapon.Weapon, hand [
 	// rebuild the chain it runs bestSequence over. It lives outside TurnSummary because
 	// weapons are recoverable from AttackChain once fillContributions finishes.
 	var bestSwung []string
+	// bestHasHeld tracks whether the current best partition has at least one Held hand card, so
+	// beatsBest can tell "arsenal will be occupied post-hoc" apart from "arsenal will be empty."
+	// Seeded true when the hand is non-empty: the initial best puts every hand card into Held, so
+	// a post-hoc promotion would fill arsenal. Candidate partitions have to tie on Value +
+	// leftover AND also provide some way to end with arsenal occupied to displace it.
+	bestHasHeld := n > 0
 	for i := 0; i < n; i++ {
 		best.BestLine[i] = CardAssignment{Card: hand[i], Role: Held}
 	}
@@ -808,13 +814,25 @@ func (e *Evaluator) bestUncached(hero hero.Hero, weapons []weapon.Weapon, hand [
 
 			v := attackDealt + defenseDealt + prevented
 			arsenalCard := findArsenalCard(rolesBuf, hand, arsenalCardIn, n, totalN)
-			if !beatsBest(v, leftoverRunechants, arsenalCard != nil, best) {
+			// Hand cards never take Arsenal role (see roleAllowed). So arsenalCard here is only
+			// set when arsenal-in stayed; "arsenal will occupy post-hoc" is tracked via hasHeld.
+			hasHeld := false
+			for j := 0; j < n; j++ {
+				if rolesBuf[j] == Held {
+					hasHeld = true
+					break
+				}
+			}
+			willOccupy := arsenalCard != nil || hasHeld
+			bestWillOccupy := best.ArsenalCard != nil || bestHasHeld
+			if !beatsBest(v, leftoverRunechants, willOccupy, best, bestWillOccupy) {
 				return
 			}
 			best.Value = v
 			bestSwung = swung
 			best.LeftoverRunechants = leftoverRunechants
 			best.ArsenalCard = arsenalCard
+			bestHasHeld = hasHeld
 			// Write the winning roles into BestLine. Cards and FromArsenal flags were populated
 			// at construction; only Role varies per partition. Contribution is cleared here and
 			// written by fillContributions below for the winning line.
@@ -849,7 +867,48 @@ func (e *Evaluator) bestUncached(hero hero.Hero, weapons []weapon.Weapon, hand [
 	if len(best.BestLine) > 0 {
 		fillContributions(&best, hero, weapons, bestSwung, deck, bufs, incomingDamage, runechantCarryover)
 	}
+	// If the arsenal slot is still empty after enumeration, promote a random Held card. The
+	// choice is deterministic per-hand (hashed from the sorted card IDs) so the memo stays
+	// consistent — but spreads across Held positions across different hands, avoiding the
+	// lowest-ID-always-wins bias that a straight BestLine[0] pick would introduce given the
+	// sort-by-ID hand canonicalisation.
+	if best.ArsenalCard == nil {
+		promoteRandomHeldToArsenal(&best, hand, n, arsenalCardIn)
+	}
 	return best
+}
+
+// promoteRandomHeldToArsenal picks one Held hand card in best.BestLine and flips its role to
+// Arsenal. Selection is a deterministic hash of the sorted hand IDs (plus arsenal-in ID if any)
+// modulo the count of Held candidates, so:
+//   - Calling Best twice with the same hand gives the same promotion — memo-safe.
+//   - Different hands hash to different indices, so the "first Held" is not systematically
+//     preferred across the whole simulation.
+func promoteRandomHeldToArsenal(best *TurnSummary, hand []card.Card, n int, arsenalCardIn card.Card) {
+	// Collect Held indices (hand slots only; arsenal-in can't be Held by construction).
+	heldIndices := make([]int, 0, n)
+	for i := 0; i < n; i++ {
+		if best.BestLine[i].Role == Held {
+			heldIndices = append(heldIndices, i)
+		}
+	}
+	if len(heldIndices) == 0 {
+		return
+	}
+	// FNV-1a-flavoured hash over the sorted hand IDs + arsenal-in ID. Doesn't need to be
+	// cryptographic — just spread enough across bucket counts 1..n that we don't bias.
+	var h uint64 = 1469598103934665603 // FNV offset basis
+	for _, c := range hand {
+		h ^= uint64(c.ID())
+		h *= 1099511628211 // FNV prime
+	}
+	if arsenalCardIn != nil {
+		h ^= uint64(arsenalCardIn.ID())
+		h *= 1099511628211
+	}
+	pick := heldIndices[h%uint64(len(heldIndices))]
+	best.BestLine[pick].Role = Arsenal
+	best.ArsenalCard = best.BestLine[pick].Card
 }
 
 // canCoverPhasesAllUsed decides whether every pitched value can be split between the attack
@@ -987,9 +1046,11 @@ func findArsenalCard(rolesBuf []Role, hand []card.Card, arsenalCardIn card.Card,
 
 // beatsBest decides whether a candidate partition displaces the current best under the solver's
 // tiebreak rules: higher Value first, then more leftover runechants (they convert to future
-// arcane damage), then preferring a partition that fills the arsenal slot (arsenal saves a hand
-// slot in the next refill — smaller but real upside).
-func beatsBest(v, leftoverRunechants int, hasArsenal bool, best TurnSummary) bool {
+// arcane damage), then preferring a partition that ends the turn with the arsenal slot occupied
+// (arsenal saves a hand slot in the next refill — smaller but real upside). "Occupied" covers
+// both cases: an arsenal-in card that stayed (partition's ArsenalCard is non-nil) OR a Held hand
+// card that will be promoted to Arsenal post-hoc.
+func beatsBest(v, leftoverRunechants int, willOccupyArsenal bool, best TurnSummary, bestWillOccupyArsenal bool) bool {
 	if v > best.Value {
 		return true
 	}
@@ -1002,15 +1063,18 @@ func beatsBest(v, leftoverRunechants int, hasArsenal bool, best TurnSummary) boo
 	if leftoverRunechants < best.LeftoverRunechants {
 		return false
 	}
-	return hasArsenal && best.ArsenalCard == nil
+	return willOccupyArsenal && !bestWillOccupyArsenal
 }
 
 // roleAllowed decides whether the partition enumerator may assign role r to the current card. The
 // arsenal slot (i == n, arsenal-in card present) may only take Arsenal (stay), Attack (any
 // non-DR card — auras and non-attack actions play fine from arsenal on your turn), or Defend
 // (Defense Reactions only — plain-blocking from arsenal isn't allowed). Hand cards take any role
-// except Attack for Defense Reactions (strict FaB timing — DRs only fire on the opponent's turn).
-// arsenalCount tracks how many Arsenal assignments the partition already has; the cap is 1.
+// except Attack for Defense Reactions (strict FaB timing — DRs only fire on the opponent's turn)
+// and except Arsenal — the "which Held card gets arsenaled" choice is made post-hoc (randomly,
+// over all Held cards) so the enumerator's deterministic slot order doesn't bias arsenaling
+// toward low-ID cards. arsenalCount tracks how many Arsenal assignments the partition already
+// has; the cap is 1.
 func roleAllowed(r Role, isArsenalSlot, isDefenseReaction bool, arsenalCount int) bool {
 	if r == Arsenal && arsenalCount >= 1 {
 		return false
@@ -1025,6 +1089,10 @@ func roleAllowed(r Role, isArsenalSlot, isDefenseReaction bool, arsenalCount int
 			return isDefenseReaction
 		}
 		return true
+	}
+	// Hand cards never take Arsenal — post-hoc Held→Arsenal promotion handles that.
+	if r == Arsenal {
+		return false
 	}
 	return !(r == Attack && isDefenseReaction)
 }
