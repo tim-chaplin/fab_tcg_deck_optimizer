@@ -23,5 +23,5 @@ func (BlowForABlowRed) Pitch() int                  { return 1 }
 func (BlowForABlowRed) Attack() int                 { return 4 }
 func (BlowForABlowRed) Defense() int                { return 2 }
 func (BlowForABlowRed) Types() card.TypeSet         { return blowForABlowTypes }
-func (BlowForABlowRed) GoAgain() bool               { return true }
+func (BlowForABlowRed) GoAgain() bool               { return false }
 func (c BlowForABlowRed) Play(s *card.TurnState) int { return c.Attack() }

@@ -24,7 +24,7 @@ func (PromiseOfPlentyRed) Pitch() int                  { return 1 }
 func (PromiseOfPlentyRed) Attack() int                 { return 3 }
 func (PromiseOfPlentyRed) Defense() int                { return 2 }
 func (PromiseOfPlentyRed) Types() card.TypeSet         { return promiseOfPlentyTypes }
-func (PromiseOfPlentyRed) GoAgain() bool               { return true }
+func (PromiseOfPlentyRed) GoAgain() bool               { return false }
 func (c PromiseOfPlentyRed) Play(s *card.TurnState) int { return c.Attack() }
 
 type PromiseOfPlentyYellow struct{}
@@ -36,7 +36,7 @@ func (PromiseOfPlentyYellow) Pitch() int                  { return 2 }
 func (PromiseOfPlentyYellow) Attack() int                 { return 2 }
 func (PromiseOfPlentyYellow) Defense() int                { return 2 }
 func (PromiseOfPlentyYellow) Types() card.TypeSet         { return promiseOfPlentyTypes }
-func (PromiseOfPlentyYellow) GoAgain() bool               { return true }
+func (PromiseOfPlentyYellow) GoAgain() bool               { return false }
 func (c PromiseOfPlentyYellow) Play(s *card.TurnState) int { return c.Attack() }
 
 type PromiseOfPlentyBlue struct{}
@@ -48,5 +48,5 @@ func (PromiseOfPlentyBlue) Pitch() int                  { return 3 }
 func (PromiseOfPlentyBlue) Attack() int                 { return 1 }
 func (PromiseOfPlentyBlue) Defense() int                { return 2 }
 func (PromiseOfPlentyBlue) Types() card.TypeSet         { return promiseOfPlentyTypes }
-func (PromiseOfPlentyBlue) GoAgain() bool               { return true }
+func (PromiseOfPlentyBlue) GoAgain() bool               { return false }
 func (c PromiseOfPlentyBlue) Play(s *card.TurnState) int { return c.Attack() }

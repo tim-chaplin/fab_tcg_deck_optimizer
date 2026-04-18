@@ -24,5 +24,5 @@ func (JackBeNimbleRed) Pitch() int                  { return 1 }
 func (JackBeNimbleRed) Attack() int                 { return 3 }
 func (JackBeNimbleRed) Defense() int                { return 3 }
 func (JackBeNimbleRed) Types() card.TypeSet         { return jackBeNimbleTypes }
-func (JackBeNimbleRed) GoAgain() bool               { return true }
+func (JackBeNimbleRed) GoAgain() bool               { return false }
 func (c JackBeNimbleRed) Play(s *card.TurnState) int { return c.Attack() }

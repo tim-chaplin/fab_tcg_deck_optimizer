@@ -23,7 +23,7 @@ func (FrontlineScoutRed) Pitch() int                  { return 1 }
 func (FrontlineScoutRed) Attack() int                 { return 3 }
 func (FrontlineScoutRed) Defense() int                { return 2 }
 func (FrontlineScoutRed) Types() card.TypeSet         { return frontlineScoutTypes }
-func (FrontlineScoutRed) GoAgain() bool               { return true }
+func (FrontlineScoutRed) GoAgain() bool               { return false }
 func (c FrontlineScoutRed) Play(s *card.TurnState) int { return c.Attack() }
 
 type FrontlineScoutYellow struct{}
@@ -35,7 +35,7 @@ func (FrontlineScoutYellow) Pitch() int                  { return 2 }
 func (FrontlineScoutYellow) Attack() int                 { return 2 }
 func (FrontlineScoutYellow) Defense() int                { return 2 }
 func (FrontlineScoutYellow) Types() card.TypeSet         { return frontlineScoutTypes }
-func (FrontlineScoutYellow) GoAgain() bool               { return true }
+func (FrontlineScoutYellow) GoAgain() bool               { return false }
 func (c FrontlineScoutYellow) Play(s *card.TurnState) int { return c.Attack() }
 
 type FrontlineScoutBlue struct{}
@@ -47,5 +47,5 @@ func (FrontlineScoutBlue) Pitch() int                  { return 3 }
 func (FrontlineScoutBlue) Attack() int                 { return 1 }
 func (FrontlineScoutBlue) Defense() int                { return 2 }
 func (FrontlineScoutBlue) Types() card.TypeSet         { return frontlineScoutTypes }
-func (FrontlineScoutBlue) GoAgain() bool               { return true }
+func (FrontlineScoutBlue) GoAgain() bool               { return false }
 func (c FrontlineScoutBlue) Play(s *card.TurnState) int { return c.Attack() }
