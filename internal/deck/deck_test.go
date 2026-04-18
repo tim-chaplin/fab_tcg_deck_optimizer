@@ -179,9 +179,10 @@ func TestAllMutations_NoDuplicateOfSource(t *testing.T) {
 	}
 }
 
-// TestEvaluate_PerCardStatsPopulated pins per-card attribution: every card appearance (played or
-// pitched) contributes to Plays+Pitches, and TotalContribution sums role-based per-card credit:
-// Attack → Card.Attack(), Defend → proportional share of block, Pitch → Card.Pitch(). A
+// TestEvaluate_PerCardStatsPopulated pins per-card attribution: every card that's played or
+// pitched increments Plays+Pitches, and TotalContribution sums role-based per-card credit:
+// Attack → Card.Attack(), Defend → proportional share of block, Pitch → Card.Pitch(). Held and
+// Arsenal cards don't tick the counters (they didn't contribute to this turn's Value). A
 // single-printing deck makes the totals easy to assert against the card's printed stats.
 func TestEvaluate_PerCardStatsPopulated(t *testing.T) {
 	read := cards.Get(card.ReadTheRunesRed)
@@ -195,8 +196,12 @@ func TestEvaluate_PerCardStatsPopulated(t *testing.T) {
 	if !ok {
 		t.Fatalf("PerCard missing entry for Read the Runes (Red)")
 	}
-	if got := stat.Plays + stat.Pitches; got != 4 {
-		t.Errorf("Plays+Pitches = %d, want 4 (one 4-card hand of the same card)", got)
+	// Read the Runes Red has no Go again, so the chain plays at most one per turn. With 4 in a
+	// 4-card hand, the solver plays one and the rest fall into Held/Arsenal roles which don't
+	// tick Plays or Pitches. Counter should be non-zero (at least one Play) but need not sum
+	// to 4.
+	if got := stat.Plays + stat.Pitches; got == 0 {
+		t.Errorf("Plays+Pitches = 0, want at least 1 (the chosen attacker plays once)")
 	}
 	// Contributions come from the winning chain replay (Play returns + hero triggers) plus
 	// role-based shares for pitch/defend. The exact total depends on rider/trigger damage, so
@@ -241,13 +246,16 @@ func TestEvaluate_BestHandStartingRunechantsIsPreHandCarryover(t *testing.T) {
 	}
 }
 
-// TestEvaluate_HeldCardDefersDrawToNextTurn pins down the "up to Intelligence" draw rule. An
-// Intelligence-1 hero with a deck of Toughen Up Blue (DR, cost 2, defense 4) has no legal play:
-// the lone card can't pay its own 2-cost to fire as a DR, can't be pitched (nothing unpaid on
-// the stack), and can't Attack (DRs can't). Best returns the Held role. On the next iteration
-// the held card still occupies the hand slot and drawCount = Intelligence - 1 = 0, so the loop
-// terminates after a single hand. Under the old "always draw a full handSize" code the same
-// card would have been relabeled Pitch, recycled to the deck bottom, and re-drawn forever.
+// TestEvaluate_HeldCardDefersDrawToNextTurn pins down the "up to Intelligence" draw rule and
+// the arsenal carryover that sits on top of it. An Intelligence-1 hero with a deck of Toughen
+// Up Blue (DR, cost 2, defense 4) has no legal play: the lone card can't pay its own 2-cost to
+// fire as a DR, can't be pitched (nothing unpaid on the stack), and can't Attack (DRs can't).
+//
+// Turn 1: the drawn card is Held by the partition; the arsenal slot is empty so the post-hoc
+// upgrade promotes it to Arsenal. Turn 2: a fresh DR is drawn; the arsenal card (from turn 1)
+// can stay or play as DR, and staying ties on Value, so it sits. The newly-drawn card goes
+// Held and next turn's drawCount is handSize - held = 0, halting the loop. Stats.Hands = 2.
+// Neither turn plays or pitches the card, so PerCard counters stay at 0.
 func TestEvaluate_HeldCardDefersDrawToNextTurn(t *testing.T) {
 	// 40 copies of the DR so we have enough deck to fill many hands if held carryover weren't
 	// wired up — the assertion would fail catastrophically (loop or much larger Hands count).
@@ -258,20 +266,43 @@ func TestEvaluate_HeldCardDefersDrawToNextTurn(t *testing.T) {
 	d := New(int1StubHero{}, nil, deckCards)
 	d.Evaluate(1, 0, rand.New(rand.NewSource(1)))
 
-	if d.Stats.Hands != 1 {
-		t.Errorf("Stats.Hands = %d, want 1 (card Held → drawCount=0 on turn 2, loop terminates)", d.Stats.Hands)
+	if d.Stats.Hands != 2 {
+		t.Errorf("Stats.Hands = %d, want 2 (turn 1 arsenals the card, turn 2 holds its successor, turn 3 can't draw)", d.Stats.Hands)
 	}
 	tuStat := d.Stats.PerCard[card.ToughenUpBlue]
 	if tuStat.Plays != 0 || tuStat.Pitches != 0 {
-		t.Errorf("PerCard[ToughenUpBlue] Plays=%d Pitches=%d, want 0/0 (card was Held, not played or pitched)",
+		t.Errorf("PerCard[ToughenUpBlue] Plays=%d Pitches=%d, want 0/0 (card was Held/Arsenaled, never played or pitched)",
 			tuStat.Plays, tuStat.Pitches)
 	}
-	// Sanity: the one hand we did evaluate had the single card labeled Held.
+	// Best captures turn 1 (first hand with a recorded play). That hand's single card got
+	// promoted from Held to Arsenal by the post-hoc upgrade.
 	if d.Stats.Best.Hand == nil || len(d.Stats.Best.Play.Roles) == 0 {
-		t.Fatalf("expected Best to be populated after one hand")
+		t.Fatalf("expected Best to be populated after at least one hand")
 	}
-	if d.Stats.Best.Play.Roles[0] != hand.Held {
-		t.Errorf("Best.Play.Roles[0] = %s, want HELD", d.Stats.Best.Play.Roles[0])
+	if d.Stats.Best.Play.Roles[0] != hand.Arsenal {
+		t.Errorf("Best.Play.Roles[0] = %s, want ARSENAL (empty slot on turn 1 → Held promoted)", d.Stats.Best.Play.Roles[0])
+	}
+}
+
+// TestEvaluate_ArsenalPersistsAcrossTurns confirms the arsenal slot threads through Evaluate's
+// per-turn loop: a card promoted to Arsenal on one turn becomes arsenalCardIn on the next.
+// Intelligence-1 hero, 2-card deck of two Toughen Up Blue. Turn 1 arsenals the drawn TU.
+// Turn 2 draws the second TU and against incoming 4 plays the arsenal-in DR, pitching the
+// drawn card to fund its 2-cost — Value = 4 (prevents the full attack). Turn 3 re-draws the
+// pitched card (returned to deck bottom) and arsenals it again. Loop stops when the deck's
+// empty and nothing new can be drawn.
+func TestEvaluate_ArsenalPersistsAcrossTurns(t *testing.T) {
+	d := New(int1StubHero{}, nil, []card.Card{generic.ToughenUpBlue{}, generic.ToughenUpBlue{}})
+	d.Evaluate(1, 4, rand.New(rand.NewSource(1)))
+
+	// Best captures turn 2 — only turn with Value > 0 (arsenal DR fires).
+	if d.Stats.Best.Play.Value != 4 {
+		t.Errorf("Best.Play.Value = %d, want 4 (turn 2 plays arsenal DR, pitches hand DR to pay; prevents 4)", d.Stats.Best.Play.Value)
+	}
+	// Turn 1: arsenal the drawn card. Turn 2: play arsenal DR (paid by pitching drawn card).
+	// Turn 3: draw the recycled pitched card, arsenal it (deck is then empty). Loop ends.
+	if d.Stats.Hands != 3 {
+		t.Errorf("Stats.Hands = %d, want 3", d.Stats.Hands)
 	}
 }
 

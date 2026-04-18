@@ -4,12 +4,8 @@ Running list of work we want to do on this project. Sectioned by theme.
 
 ## Rules modelling
 
-- **Arsenal.** Model putting a card into the arsenal at end of turn and playing from it on a
-  later turn. Unlocks the arsenal riders on Unmovable, Springboard Somersault, Scout the
-  Periphery, Plunder Run, Smashing Good Time, Force Sight, Fervent Forerunner, Frontline Scout,
-  Performance Bonus, Promise of Plenty, Scour the Battlescape, Trade In, Hand Behind the Pen,
-  Smash Up, Tongue Tied, Seek Horizon, Wreck Havoc — plus the hand-state piece above, since
-  arsenal and hand retention interact.
+*(All three Rules-modelling items — pitch-cost partition, "up to Intelligence" refill, and
+arsenal — are now implemented. Future rules work will go here.)*
 
 ## Simplifying Assumptions
 

@@ -363,6 +363,7 @@ func (d *Deck) Evaluate(runs int, incomingDamage int, rng *rand.Rand) Stats {
 		head, tail := 0, deckSize
 		handIdx := 0
 		runechantCarryover := 0
+		var arsenalCard card.Card
 		heldBuf = heldBuf[:0]
 		for {
 			// Fresh draws fill whatever held cards didn't take. If every slot is already held —
@@ -388,8 +389,9 @@ func (d *Deck) Evaluate(runs int, incomingDamage int, rng *rand.Rand) Stats {
 			// Snapshot the starting carryover before Best overwrites it — the best-hand record
 			// wants the count in play *when the hand was dealt*, not what remained after.
 			startingRunechants := runechantCarryover
-			play := hand.Best(d.Hero, d.Weapons, h, incomingDamage, buf[head+drawCount:tail], runechantCarryover)
+			play := hand.Best(d.Hero, d.Weapons, h, incomingDamage, buf[head+drawCount:tail], runechantCarryover, arsenalCard)
 			runechantCarryover = play.LeftoverRunechants
+			arsenalCard = play.ArsenalCard
 			v := float64(play.Value)
 
 			d.Stats.TotalValue += v
@@ -437,6 +439,9 @@ func (d *Deck) Evaluate(runs int, incomingDamage int, rng *rand.Rand) Stats {
 				case hand.Attack, hand.Defend:
 					stat.Plays++
 				}
+				// hand.Held and hand.Arsenal are both "not played, not pitched" this turn — the
+				// Arsenal card's real contribution accrues on a later turn when it's played out
+				// of the slot, so neither counter ticks here.
 				if i < len(play.Contributions) {
 					stat.TotalContribution += play.Contributions[i]
 				}
