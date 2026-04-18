@@ -62,13 +62,29 @@ type CardPlayStatsJSON struct {
 }
 
 // BestTurnJSON is the JSON form of deck.BestTurn: card names and role names instead of interface
-// values.
+// values. Contributions parallels Hand/Roles and carries CardAssignment.Contribution for each
+// hand slot so loaded decks render per-card damage/block/pitch credit instead of "+0". Chain is
+// the ordered attack sequence — cards and weapons in play order with their per-step damage —
+// so FormatBestTurn can reconstruct the same layout the live sim produced. Both fields are
+// omitempty so files produced before this change still load (missing contributions default to
+// 0, missing chain falls back to a plausible hand-order reconstruction).
 type BestTurnJSON struct {
-	Hand               []string `json:"hand"`
-	Roles              []string `json:"roles"`
-	Weapons            []string `json:"weapons"`
-	Value              int      `json:"value"`
-	StartingRunechants int      `json:"starting_runechants"`
+	Hand               []string               `json:"hand"`
+	Roles              []string               `json:"roles"`
+	Contributions      []float64              `json:"contributions,omitempty"`
+	Weapons            []string               `json:"weapons"`
+	Chain              []AttackChainEntryJSON `json:"chain,omitempty"`
+	Value              int                    `json:"value"`
+	StartingRunechants int                    `json:"starting_runechants"`
+}
+
+// AttackChainEntryJSON serialises one attack step (card or weapon) along with the damage it
+// dealt in the sim's winning chain. TriggerDamage is the hero's OnCardPlayed contribution for
+// that step (e.g. a Runechant Viserai fires as the card resolves) — omitted when zero.
+type AttackChainEntryJSON struct {
+	Card          string  `json:"card"`
+	Damage        float64 `json:"damage"`
+	TriggerDamage float64 `json:"trigger_damage,omitempty"`
 }
 
 // Marshal returns the JSON encoding of `d` (indented) with card/weapon/hero names in place of
@@ -166,23 +182,33 @@ func bestTurnToJSON(b deck.BestTurn) BestTurnJSON {
 	// the in-memory BestLine is still the single source of truth. Weapon names get extracted
 	// from the AttackChain since TurnSummary no longer carries them separately.
 	var handNames, roles []string
+	var contribs []float64
 	for _, a := range b.Summary.BestLine {
 		if a.FromArsenal {
 			continue
 		}
 		handNames = append(handNames, a.Card.Name())
 		roles = append(roles, a.Role.String())
+		contribs = append(contribs, a.Contribution)
 	}
 	var weaponNames []string
+	var chain []AttackChainEntryJSON
 	for _, e := range b.Summary.AttackChain {
 		if w, ok := e.Card.(weapon.Weapon); ok {
 			weaponNames = append(weaponNames, w.Name())
 		}
+		chain = append(chain, AttackChainEntryJSON{
+			Card:          e.Card.Name(),
+			Damage:        e.Damage,
+			TriggerDamage: e.TriggerDamage,
+		})
 	}
 	return BestTurnJSON{
 		Hand:               handNames,
 		Roles:              roles,
+		Contributions:      contribs,
 		Weapons:            weaponNames,
+		Chain:              chain,
 		Value:              b.Summary.Value,
 		StartingRunechants: b.StartingRunechants,
 	}
@@ -257,6 +283,9 @@ func bestTurnFromJSON(bj BestTurnJSON) (deck.BestTurn, error) {
 	if len(bj.Roles) != len(bj.Hand) {
 		return deck.BestTurn{}, fmt.Errorf("deckio: best turn has %d cards but %d roles", len(bj.Hand), len(bj.Roles))
 	}
+	if len(bj.Contributions) != 0 && len(bj.Contributions) != len(bj.Hand) {
+		return deck.BestTurn{}, fmt.Errorf("deckio: best turn has %d cards but %d contributions", len(bj.Hand), len(bj.Contributions))
+	}
 	line := make([]hand.CardAssignment, len(bj.Hand))
 	for i, name := range bj.Hand {
 		id, ok := cards.ByName(name)
@@ -267,23 +296,15 @@ func bestTurnFromJSON(bj BestTurnJSON) (deck.BestTurn, error) {
 		if err != nil {
 			return deck.BestTurn{}, err
 		}
-		line[i] = hand.CardAssignment{Card: cards.Get(id), Role: r}
-	}
-	// JSON doesn't preserve the attack chain permutation, so rebuild a plausible AttackChain
-	// by concatenating hand-order Attack-role cards with the named weapons. Display callers
-	// get sensible output even if the order isn't what the solver originally picked.
-	var chain []hand.AttackChainEntry
-	for _, a := range line {
-		if a.Role == hand.Attack {
-			chain = append(chain, hand.AttackChainEntry{Card: a.Card, Damage: a.Contribution})
+		ca := hand.CardAssignment{Card: cards.Get(id), Role: r}
+		if len(bj.Contributions) > 0 {
+			ca.Contribution = bj.Contributions[i]
 		}
+		line[i] = ca
 	}
-	weaponReg := weaponsByName()
-	for _, name := range bj.Weapons {
-		if w, ok := weaponReg[name]; ok {
-			// JSON didn't preserve per-weapon damage, so we leave Damage at 0 here.
-			chain = append(chain, hand.AttackChainEntry{Card: w})
-		}
+	chain, err := rebuildAttackChain(bj, line)
+	if err != nil {
+		return deck.BestTurn{}, err
 	}
 	return deck.BestTurn{
 		Summary: hand.TurnSummary{
@@ -293,6 +314,57 @@ func bestTurnFromJSON(bj BestTurnJSON) (deck.BestTurn, error) {
 		},
 		StartingRunechants: bj.StartingRunechants,
 	}, nil
+}
+
+// rebuildAttackChain reconstructs TurnSummary.AttackChain from the JSON form. When the file has
+// an explicit Chain array (written by bestTurnToJSON after this change), we use it — it carries
+// the real play order plus per-step damage and hero-trigger damage, which FormatBestTurn needs
+// to render "+N" contribution labels correctly. Files written before this change have no Chain;
+// we fall back to the legacy rebuild (hand-order Attack-role cards then weapons) so old decks
+// still load, just with "+0" labels for damage (same as they always had).
+func rebuildAttackChain(bj BestTurnJSON, line []hand.CardAssignment) ([]hand.AttackChainEntry, error) {
+	weaponReg := weaponsByName()
+	if len(bj.Chain) > 0 {
+		chain := make([]hand.AttackChainEntry, len(bj.Chain))
+		for i, e := range bj.Chain {
+			c, err := lookupChainCard(e.Card, weaponReg)
+			if err != nil {
+				return nil, err
+			}
+			chain[i] = hand.AttackChainEntry{
+				Card:          c,
+				Damage:        e.Damage,
+				TriggerDamage: e.TriggerDamage,
+			}
+		}
+		return chain, nil
+	}
+	var chain []hand.AttackChainEntry
+	for _, a := range line {
+		if a.Role == hand.Attack {
+			chain = append(chain, hand.AttackChainEntry{Card: a.Card, Damage: a.Contribution})
+		}
+	}
+	for _, name := range bj.Weapons {
+		if w, ok := weaponReg[name]; ok {
+			chain = append(chain, hand.AttackChainEntry{Card: w})
+		}
+	}
+	return chain, nil
+}
+
+// lookupChainCard resolves an attack-chain entry's name to either a registered card or a known
+// weapon. Returns an error on unknown names so a corrupted file doesn't silently produce nil
+// entries that'd crash FormatBestTurn.
+func lookupChainCard(name string, weaponReg map[string]weapon.Weapon) (card.Card, error) {
+	if w, ok := weaponReg[name]; ok {
+		return w, nil
+	}
+	id, ok := cards.ByName(name)
+	if !ok {
+		return nil, fmt.Errorf("deckio: unknown card/weapon %q in attack chain", name)
+	}
+	return cards.Get(id), nil
 }
 
 func roleFromString(s string) (hand.Role, error) {
