@@ -45,7 +45,7 @@ func TestMarshalUnmarshalRoundTrip(t *testing.T) {
 	if !reflect.DeepEqual(got.Stats.FirstCycle, d.Stats.FirstCycle) {
 		t.Errorf("first cycle: got %+v want %+v", got.Stats.FirstCycle, d.Stats.FirstCycle)
 	}
-	if got.Stats.Best.Play.Value != d.Stats.Best.Play.Value {
-		t.Errorf("best value: got %d want %d", got.Stats.Best.Play.Value, d.Stats.Best.Play.Value)
+	if got.Stats.Best.Summary.Value != d.Stats.Best.Summary.Value {
+		t.Errorf("best value: got %d want %d", got.Stats.Best.Summary.Value, d.Stats.Best.Summary.Value)
 	}
 }

@@ -232,12 +232,12 @@ func TestEvaluate_BestHandStartingRunechantsIsPreHandCarryover(t *testing.T) {
 	// Seed doesn't matter (all cards identical), but fix it for determinism.
 	d.Evaluate(1, 0, rand.New(rand.NewSource(1)))
 
-	if d.Stats.Best.Hand == nil {
+	if len(d.Stats.Best.Summary.BestLine) == 0 {
 		t.Fatalf("expected Best to be populated after Evaluate")
 	}
 	// Sanity: the hand should have left runechants on the table (otherwise the bug couldn't
 	// manifest — pre-hand and post-hand counts would both be 0).
-	if d.Stats.Best.Play.Value == 0 {
+	if d.Stats.Best.Summary.Value == 0 {
 		t.Fatalf("expected nonzero Value from a hand of Read the Runes; got 0")
 	}
 	if d.Stats.Best.StartingRunechants != 0 {
@@ -276,11 +276,11 @@ func TestEvaluate_HeldCardDefersDrawToNextTurn(t *testing.T) {
 	}
 	// Best captures turn 1 (first hand with a recorded play). That hand's single card got
 	// promoted from Held to Arsenal by the post-hoc upgrade.
-	if d.Stats.Best.Hand == nil || len(d.Stats.Best.Play.Roles) == 0 {
+	if len(d.Stats.Best.Summary.BestLine) == 0 {
 		t.Fatalf("expected Best to be populated after at least one hand")
 	}
-	if d.Stats.Best.Play.Roles[0] != hand.Arsenal {
-		t.Errorf("Best.Play.Roles[0] = %s, want ARSENAL (empty slot on turn 1 → Held promoted)", d.Stats.Best.Play.Roles[0])
+	if d.Stats.Best.Summary.BestLine[0].Role != hand.Arsenal {
+		t.Errorf("Best.Play.Roles[0] = %s, want ARSENAL (empty slot on turn 1 → Held promoted)", d.Stats.Best.Summary.BestLine[0].Role)
 	}
 }
 
@@ -296,8 +296,8 @@ func TestEvaluate_ArsenalPersistsAcrossTurns(t *testing.T) {
 	d.Evaluate(1, 4, rand.New(rand.NewSource(1)))
 
 	// Best captures turn 2 — only turn with Value > 0 (arsenal DR fires).
-	if d.Stats.Best.Play.Value != 4 {
-		t.Errorf("Best.Play.Value = %d, want 4 (turn 2 plays arsenal DR, pitches hand DR to pay; prevents 4)", d.Stats.Best.Play.Value)
+	if d.Stats.Best.Summary.Value != 4 {
+		t.Errorf("Best.Play.Value = %d, want 4 (turn 2 plays arsenal DR, pitches hand DR to pay; prevents 4)", d.Stats.Best.Summary.Value)
 	}
 	// Turn 1: arsenal the drawn card. Turn 2: play arsenal DR (paid by pitching drawn card).
 	// Turn 3: draw the recycled pitched card, arsenal it (deck is then empty). Loop ends.

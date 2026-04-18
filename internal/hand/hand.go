@@ -25,23 +25,32 @@ const (
 	Arsenal
 )
 
-// Play is the chosen partition for a hand: one role per card plus a total value score. Best sorts
-// the caller's hand into canonical order in place, and Roles are aligned to that post-sort order.
-type Play struct {
-	Roles []Role
-	// Weapons holds the names of equipped weapons that were swung in the optimal attack sequence,
-	// in the order they appear in the input weapons slice. Empty if no weapon was swung.
+// CardAssignment is a single card + the role it took this turn. Hand cards produce one per
+// card; the previous-turn arsenal card also contributes one CardAssignment with FromArsenal set,
+// so the whole turn fits in one slice rather than separate hand + role + arsenal structures.
+// Contribution is the per-card credit toward TurnSummary.Value (damage dealt, block share, or
+// pitch resource depending on Role), populated by fillContributions once the winner is picked.
+type CardAssignment struct {
+	Card         card.Card
+	Role         Role
+	FromArsenal  bool
+	Contribution float64
+}
+
+// TurnSummary is the result of running Best on a hand: the winning "best line" of card-role
+// assignments plus aggregate metadata about the turn.
+type TurnSummary struct {
+	// BestLine is the winning partition as a sequence of CardAssignment values. Hand cards come
+	// first in canonical (post-sort) order; the previous-turn arsenal card, if any, follows as
+	// the last entry with FromArsenal=true. Never mutate — memoized results alias this slice.
+	BestLine []CardAssignment
+	// Weapons holds the names of equipped weapons that were swung in the optimal attack
+	// sequence, in the order they appear in the input weapons slice. Empty if no weapon was
+	// swung. Weapons aren't cards in BestLine so they don't carry their own CardAssignment.
 	Weapons []string
-	// Value is the play's total score (damage dealt + damage prevented). Equals the sum of
-	// Contributions plus any weapon-swing damage (weapons aren't in the hand so they aren't in
-	// Contributions).
+	// Value is the turn's total score (damage dealt + damage prevented). Equals the sum of
+	// BestLine[].Contribution plus any weapon-swing damage (weapons aren't in BestLine).
 	Value int
-	// Contributions is per-hand-card credit toward Value, aligned with Roles. Attack role cards
-	// carry their Play() return (including any hero OnCardPlayed triggers chained off them) at
-	// the moment they resolved in the winning chain; Defend role cards carry their own Play
-	// return for defense reactions plus their share of the Prevented block; Pitch role cards
-	// carry their Pitch() resource value. Populated once per Best call on the winning line.
-	Contributions []float64
 	// LeftoverRunechants is the number of Runechant tokens in play at the end of the chosen
 	// chain, which carry into the next turn's Best call. For partitions with no attacks, this
 	// equals the carryover the caller passed in.
@@ -50,13 +59,18 @@ type Play struct {
 	// hand card just arsenaled (role=Arsenal) or a previous-turn arsenal card that stayed. Nil
 	// when the slot is empty. The caller feeds this back as the next turn's arsenalCardIn.
 	ArsenalCard card.Card
-	// PlayedFromArsenal is the previous-turn arsenal card if this turn chose to play it rather
-	// than let it stay. Used for display — the card isn't in the hand slice so FormatRoles
-	// doesn't see it otherwise. PlayedFromArsenalRole tells whether it was played as Attack or
-	// Defend (the only two legal from-arsenal plays). Nil / zero when the arsenal slot was
-	// empty or the card stayed.
-	PlayedFromArsenal     card.Card
-	PlayedFromArsenalRole Role
+}
+
+// ArsenalIn returns the assignment for the card that started the turn in the arsenal, if any.
+// Handy for callers (display, per-card stats) that want to treat the arsenal-in card differently
+// from hand cards without scanning BestLine themselves.
+func (t TurnSummary) ArsenalIn() (CardAssignment, bool) {
+	for _, a := range t.BestLine {
+		if a.FromArsenal {
+			return a, true
+		}
+	}
+	return CardAssignment{}, false
 }
 
 
@@ -77,21 +91,27 @@ func (r Role) String() string {
 	return "UNKNOWN"
 }
 
-// FormatRoles pairs each card in hand with its assigned role for debug output, e.g.
-// "Hocus Pocus (Blue): PITCH, Runic Reaping (Red): ATTACK".
-func FormatRoles(hand []card.Card, roles []Role) string {
-	parts := make([]string, len(hand))
-	for i, c := range hand {
-		parts[i] = c.Name() + ": " + roles[i].String()
+// FormatBestLine pairs each card in BestLine with its assigned role for debug output, e.g.
+// "Hocus Pocus (Blue): PITCH, Runic Reaping (Red): ATTACK". Cards that came in from arsenal
+// get a " (from arsenal)" tag on their name so the reader can see why that card isn't in the
+// hand list the optimiser reports alongside.
+func FormatBestLine(line []CardAssignment) string {
+	parts := make([]string, len(line))
+	for i, a := range line {
+		name := a.Card.Name()
+		if a.FromArsenal {
+			name += " (from arsenal)"
+		}
+		parts[i] = name + ": " + a.Role.String()
 	}
 	return strings.Join(parts, ", ")
 }
 
-// Best returns the optimal Play for the given hand against an opponent that will attack for
-// incomingDamage on their next turn. Any equipped weapons may also be swung for their Cost if
-// resources allow.
+// Best returns the optimal TurnSummary for the given hand against an opponent that will attack
+// for incomingDamage on their next turn. Any equipped weapons may also be swung for their Cost
+// if resources allow.
 //
-// Cards are partitioned into four roles:
+// Cards are partitioned into five roles:
 //   - Pitch: contributes its Pitch value as resources paying for a played card on this turn or a
 //     Defense Reaction on the opponent's turn.
 //   - Attack: consumes Cost resources on our turn; the attack is resolved by calling Card.Play in
@@ -101,6 +121,8 @@ func FormatRoles(hand []card.Card, roles []Role) string {
 //     wasted). Plain blocking is free; Defense-Reaction-typed cards must have their Cost paid to
 //     resolve and also contribute any Play() damage.
 //   - Held: the card stays in hand to next turn. Contributes nothing this turn.
+//   - Arsenal: the card moves into the arsenal slot at end of turn (or, for an arsenal-in card,
+//     stays there). Contributes nothing this turn.
 //
 // Pitch resources are split across two phases because resources don't carry between turns:
 // attack-phase pitches pay for our played attack actions and non-attack actions, defence-phase
@@ -109,27 +131,22 @@ func FormatRoles(hand []card.Card, roles []Role) string {
 // plays in a phase must have no Pitch-role cards tagged to that phase. Any remaining cards that
 // can't be legally pitched become Held.
 //
-// The optimizer brute-forces all 4^N partitions, then for each legal partition enumerates every
-// subset of weapons to swing and every ordering of the combined attacker list. For N=4 with 0–2
-// weapons that remains well under 10k evaluations.
-//
 // Results are memoized on (hero name, sorted weapon names, sorted card IDs, incomingDamage,
-// runechantCarryover) so that repeated evaluations of the same hand across shuffles
-// short-circuit. The hand is sorted in place into canonical order first — Roles in the returned
-// Play align with that post-sort order. Every card in the hand must be registered in package
+// runechantCarryover, arsenal-in ID) so repeated evaluations of the same hand across shuffles
+// short-circuit. The hand is sorted in place into canonical order first — BestLine's hand
+// entries align with that post-sort order. Every card in the hand must be registered in package
 // cards; Best panics otherwise.
 //
 // runechantCarryover is the number of Runechant tokens carrying in from the previous turn. The
-// returned Play.Leftover is the count remaining at end of the chosen chain, which the caller
-// should feed back as the next turn's carryover.
+// returned TurnSummary.LeftoverRunechants is the count remaining at end of the chosen chain,
+// which the caller should feed back as the next turn's carryover.
 //
 // arsenalCardIn is the card sitting in the arsenal slot at the start of this turn (nil if the
-// slot is empty). The partition enumerator pulls it into the hand as an extra card with
-// restricted role options — Arsenal (stay in the slot), Attack (if it's an attack card), or
-// Defend (if it's a Defense Reaction). Never Pitch or Held. A hand card may also take the
-// Arsenal role so long as at most one card ends up there across the whole partition. Play.
-// ArsenalCard is the card to feed back as next turn's arsenalCardIn.
-func Best(hero hero.Hero, weapons []weapon.Weapon, hand []card.Card, incomingDamage int, deck []card.Card, runechantCarryover int, arsenalCardIn card.Card) Play {
+// slot is empty). The partition enumerator pulls it into the turn as an extra CardAssignment
+// with restricted role options — Arsenal (stay in the slot), Attack (any non-DR card), or
+// Defend (only Defense Reactions). Never Pitch or Held. A hand card may also take the Arsenal
+// role so long as at most one card in BestLine ends up there.
+func Best(hero hero.Hero, weapons []weapon.Weapon, hand []card.Card, incomingDamage int, deck []card.Card, runechantCarryover int, arsenalCardIn card.Card) TurnSummary {
 	// Fetch IDs into a fixed-size stack array to avoid a per-call slice allocation. Hand size is
 	// capped at 8 (matches memoKey.cardIDs); larger hands panic out of the inner loops elsewhere.
 	n := len(hand)
@@ -188,9 +205,9 @@ type memoKey struct {
 	arsenalInID card.ID
 }
 
-// memo caches canonical-order results keyed by memoKey. Not goroutine-safe — the simulator is
-// single-threaded so no lock is needed.
-var memo = map[memoKey]Play{}
+// memo caches canonical-order TurnSummary results keyed by memoKey. Not goroutine-safe — the
+// simulator is single-threaded so no lock is needed.
+var memo = map[memoKey]TurnSummary{}
 
 // makeMemoKey builds a comparable memo key. The hand must already be sorted by card ID; weapon
 // IDs are sorted numerically into the two fixed slots. sortedIDs is passed as a pointer to the
@@ -332,32 +349,35 @@ func getAttackBufs(handSize int, weapons []weapon.Weapon) *attackBufs {
 	return cachedBufs
 }
 
-func bestUncached(hero hero.Hero, weapons []weapon.Weapon, hand []card.Card, incomingDamage int, deck []card.Card, runechantCarryover int, arsenalCardIn card.Card) Play {
+func bestUncached(hero hero.Hero, weapons []weapon.Weapon, hand []card.Card, incomingDamage int, deck []card.Card, runechantCarryover int, arsenalCardIn card.Card) TurnSummary {
 	n := len(hand)
-	// The partition recurse treats the arsenal-in card as an extra slot at index n with a
+	// The partition recurse treats the arsenal-in card as an extra entry at index n with a
 	// restricted role menu (Arsenal / Attack / Defend), so everything about it — its cost,
 	// its damage, whether it stays or plays — is decided inside the enumeration rather than
-	// by a wrapping enumerator. totalN is the effective hand length the recurse walks.
+	// by a wrapping enumerator. totalN is the effective size of BestLine.
 	totalN := n
 	if arsenalCardIn != nil {
 		totalN = n + 1
 	}
 
 	// Seed best.LeftoverRunechants with the carryover — partitions with no attacks don't reduce
-	// the count, so carryover is the natural baseline to beat. Roles default to Held so that a
-	// hand with no Value-adding partition (everything pruned by cost/pitch-feasibility) still
-	// reports sensible per-card roles — nothing got played or pitched.
-	best := Play{Roles: make([]Role, n), LeftoverRunechants: runechantCarryover}
-	for i := range best.Roles {
-		best.Roles[i] = Held
+	// the count, so carryover is the natural baseline to beat. BestLine is initialised with
+	// every hand card Held and the arsenal-in card (if any) staying in the slot, so a hand with
+	// no Value-adding partition (everything pruned by cost/pitch-feasibility) still reports
+	// sensible assignments — nothing got played or pitched.
+	best := TurnSummary{BestLine: make([]CardAssignment, totalN), LeftoverRunechants: runechantCarryover}
+	for i := 0; i < n; i++ {
+		best.BestLine[i] = CardAssignment{Card: hand[i], Role: Held}
+	}
+	if arsenalCardIn != nil {
+		best.BestLine[n] = CardAssignment{Card: arsenalCardIn, Role: Arsenal, FromArsenal: true}
+		best.ArsenalCard = arsenalCardIn
 	}
 
 	// bufs is the pooled scratch space for this deck evaluation (see getAttackBufs). Arrays are
-	// sized handSize (n) and we extend by local scratch for the optional arsenal slot at index
-	// n — small enough that per-call allocation is cheap and keeps attackBufs untouched.
+	// sized handSize (n); the optional arsenal slot at index n uses local scratch below — small
+	// enough that per-call allocation is cheap and keeps attackBufs untouched.
 	bufs := getAttackBufs(n, weapons)
-	pitchVals := append(bufs.pitchVals[:0:n], bufs.pitchVals[:n]...)[:0]
-	_ = pitchVals
 	// Use local scratch with capacity totalN for the per-card computed values. Small (≤ 9).
 	rolesBuf := make([]Role, totalN)
 	pvals := make([]int, totalN)
@@ -511,29 +531,15 @@ func bestUncached(hero hero.Hero, weapons []weapon.Weapon, hand []card.Card, inc
 			}
 			if better {
 				best.Value = v
-				copy(best.Roles, rolesBuf[:n])
 				best.Weapons = swung
 				best.LeftoverRunechants = leftoverRunechants
 				best.ArsenalCard = arsenalCard
-				// Any hand card in the Arsenal slot replaces its Held default with the Arsenal
-				// role in the returned Play. Arsenal-in stays at slot n (not reflected in
-				// Roles, which only covers hand positions).
-				if arsenalCard != nil {
-					for j := 0; j < n; j++ {
-						if rolesBuf[j] == Arsenal {
-							best.Roles[j] = Arsenal
-							break
-						}
-					}
-				}
-				// Record whether the previous-turn arsenal card was played this turn so callers
-				// can report it in the best-hand printout — it's not in the hand slice and
-				// wouldn't otherwise surface alongside the role listing.
-				best.PlayedFromArsenal = nil
-				best.PlayedFromArsenalRole = 0
-				if arsenalCardIn != nil && (rolesBuf[n] == Attack || rolesBuf[n] == Defend) {
-					best.PlayedFromArsenal = arsenalCardIn
-					best.PlayedFromArsenalRole = rolesBuf[n]
+				// Write the winning roles into BestLine. Cards and FromArsenal flags were
+				// populated at construction; only Role varies per partition. Contribution is
+				// cleared here and written by fillContributions below for the winning line.
+				for j := 0; j < totalN; j++ {
+					best.BestLine[j].Role = rolesBuf[j]
+					best.BestLine[j].Contribution = 0
 				}
 			}
 			return
@@ -582,11 +588,9 @@ func bestUncached(hero hero.Hero, weapons []weapon.Weapon, hand []card.Card, inc
 		}
 	}
 	recurse(0, 0, 0, 0, 0, 0)
-	// Once per Best call, on the winning line only, attribute per-card contribution. We skip
-	// when nothing has been played (best.Roles empty — a pathological degenerate path Best never
-	// actually returns from, but guard anyway).
-	if len(best.Roles) > 0 {
-		fillContributions(&best, hero, hand, weapons, deck, bufs, incomingDamage, runechantCarryover)
+	// Once per Best call, on the winning line only, attribute per-card contribution.
+	if len(best.BestLine) > 0 {
+		fillContributions(&best, hero, weapons, deck, bufs, incomingDamage, runechantCarryover)
 	}
 	return best
 }
@@ -952,78 +956,80 @@ func playSequence(hero hero.Hero, pitched, deck, order []card.Card, pcBuf []card
 	return damage, state.Runechants + state.DelayedRunechants, resources, true
 }
 
-// fillContributions populates play.Contributions from the winning line. Pitch role cards credit
-// Card.Pitch() (resource value); Defend role cards credit their proportional share of Prevented
-// blocking plus their own Play return if they're a defense reaction; Attack role cards credit
-// the per-card damage tracked during the winning attack-chain replay.
+// fillContributions populates each BestLine entry's Contribution from the winning line. Pitch
+// role cards credit Card.Pitch() (resource value); Defend role cards credit their proportional
+// share of Prevented blocking plus their own Play return if they're a defense reaction; Attack
+// role cards credit the per-card damage tracked during the winning attack-chain replay.
+// Contributions on Held / Arsenal entries stay at zero — those cards contributed nothing this
+// turn.
 //
 // Called once per Best call from bestUncached after the partition loop picks the winner. All
 // transient slices (pitched/attackers/chain/winnerOrder/perCard/used) borrow attackBufs slots
-// so only the returned Contributions slice allocates.
-func fillContributions(play *Play, hero hero.Hero, hand []card.Card, weapons []weapon.Weapon, deck []card.Card, bufs *attackBufs, incomingDamage, runechantCarryover int) {
-	n := len(hand)
-	contribs := make([]float64, n)
+// so nothing allocates here.
+func fillContributions(summary *TurnSummary, hero hero.Hero, weapons []weapon.Weapon, deck []card.Card, bufs *attackBufs, incomingDamage, runechantCarryover int) {
+	line := summary.BestLine
+	total := len(line)
 
-	// Reconstruct pitched, attackers, swung weapons, and chainBudget from best.Roles plus the
-	// original hand/weapons arguments. Reuses pitchedBuf/attackersBuf/attackerBuf from bufs —
-	// the partition-loop writes to them are no longer needed.
+	// Reconstruct pitched, attackers, swung weapons, and chainBudget from the winning line. The
+	// arsenal-in entry (FromArsenal=true, last slot) participates in attackers / defenders when
+	// its role is Attack / Defend, identically to hand entries.
 	pitched := bufs.pitchedBuf[:0]
 	attackers := bufs.attackersBuf[:0]
 	var sumDef int
 	pitchSum := 0
 	defenderCostSum := 0
-	for i, c := range hand {
-		switch play.Roles[i] {
+	for _, a := range line {
+		switch a.Role {
 		case Pitch:
-			pitched = append(pitched, c)
-			pitchSum += c.Pitch()
+			pitched = append(pitched, a.Card)
+			pitchSum += a.Card.Pitch()
 		case Attack:
-			attackers = append(attackers, c)
+			attackers = append(attackers, a.Card)
 		case Defend:
-			sumDef += c.Defense()
-			if c.Types().Has(card.TypeDefenseReaction) {
-				if _, disc := c.(card.DiscountPerRunechant); !disc {
-					defenderCostSum += c.Cost()
+			sumDef += a.Card.Defense()
+			if a.Card.Types().Has(card.TypeDefenseReaction) {
+				if _, disc := a.Card.(card.DiscountPerRunechant); !disc {
+					defenderCostSum += a.Card.Cost()
 				}
 			}
 		}
 	}
 	chainBudget := pitchSum - defenderCostSum
 
-	// Pitch cards: Card.Pitch() as resource-value contribution.
-	for i, c := range hand {
-		if play.Roles[i] == Pitch {
-			contribs[i] = float64(c.Pitch())
+	// Pitch contributions.
+	for i := range line {
+		if line[i].Role == Pitch {
+			line[i].Contribution = float64(line[i].Card.Pitch())
 		}
 	}
 
 	// Defense: prevented share (proportional to each defender's Defense()) plus defense-reaction
-	// Play return when applicable. defense-reaction Play is called with a freshly-minted state —
-	// the same pattern defenseReactionDamage uses during normal scoring.
+	// Play return when applicable.
 	prevented := sumDef
 	if prevented > incomingDamage {
 		prevented = incomingDamage
 	}
-	for i, c := range hand {
-		if play.Roles[i] != Defend {
+	for i := range line {
+		if line[i].Role != Defend {
 			continue
 		}
+		c := line[i].Card
 		if sumDef > 0 {
-			contribs[i] = float64(c.Defense()) * float64(prevented) / float64(sumDef)
+			line[i].Contribution = float64(c.Defense()) * float64(prevented) / float64(sumDef)
 		}
 		if c.Types().Has(card.TypeDefenseReaction) {
 			*bufs.state = card.TurnState{Pitched: pitched, Deck: deck}
-			contribs[i] += float64(c.Play(bufs.state))
+			line[i].Contribution += float64(c.Play(bufs.state))
 		}
 	}
 
-	// Attack chain: re-run bestAttackDamage with tracking turned on — it rediscovers the winning
-	// permutation (same scoring as the partition loop's untracked call) and fills winnerOrder
-	// and perCardDmg for the line that wins. Chain is the hand's attack-role cards followed by
-	// the swung weapons, assembled into attackerBuf (a bufs slot, no allocation).
+	// Attack chain: re-run bestAttackDamage with tracking turned on so we recover the winning
+	// permutation and each chain position's contribution. Weapons in the chain don't map back
+	// to BestLine (they aren't cards in hand or arsenal) — their damage is counted in Value but
+	// not credited per-card here.
 	chain := bufs.attackerBuf[:0]
 	chain = append(chain, attackers...)
-	for _, name := range play.Weapons {
+	for _, name := range summary.Weapons {
 		for _, w := range weapons {
 			if w.Name() == name {
 				chain = append(chain, w)
@@ -1035,11 +1041,13 @@ func fillContributions(play *Play, hero hero.Hero, hand []card.Card, weapons []w
 		winnerOrder := bufs.fillContribWinnerOrder[:len(chain)]
 		perCardDmg := bufs.fillContribPerCard[:len(chain)]
 		bestAttackDamage(hero, chain, pitched, deck, bufs, chainBudget, runechantCarryover, winnerOrder, perCardDmg)
-		// Map chain-position damage back to hand indices. Weapons aren't in the hand so their
-		// damage is dropped here (it's already in play.Value). For hand cards, find the first
-		// unassigned Attack-role index with matching card.ID — duplicate printings played as
-		// twin attacks are disambiguated by scan order.
-		used := bufs.fillContribUsed[:n]
+		// Map chain-position damage back to BestLine indices by scanning for the first unused
+		// Attack-role entry with a matching ID. Duplicate printings played as twin attacks
+		// are disambiguated by scan order.
+		if cap(bufs.fillContribUsed) < total {
+			bufs.fillContribUsed = make([]bool, total)
+		}
+		used := bufs.fillContribUsed[:total]
 		for i := range used {
 			used[i] = false
 		}
@@ -1047,18 +1055,16 @@ func fillContributions(play *Play, hero hero.Hero, hand []card.Card, weapons []w
 			if _, isWeapon := c.(weapon.Weapon); isWeapon {
 				continue
 			}
-			for i, h := range hand {
-				if used[i] || play.Roles[i] != Attack || h.ID() != c.ID() {
+			for i := range line {
+				if used[i] || line[i].Role != Attack || line[i].Card.ID() != c.ID() {
 					continue
 				}
-				contribs[i] = perCardDmg[k]
+				line[i].Contribution = perCardDmg[k]
 				used[i] = true
 				break
 			}
 		}
 	}
-
-	play.Contributions = contribs
 }
 
 

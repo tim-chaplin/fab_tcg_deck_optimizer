@@ -158,22 +158,25 @@ func perCardToJSON(m map[card.ID]deck.CardPlayStats) []CardPlayStatsJSON {
 }
 
 func bestHandToJSON(b deck.BestHand) BestHandJSON {
-	if b.Hand == nil {
+	if len(b.Summary.BestLine) == 0 {
 		return BestHandJSON{}
 	}
-	handNames := make([]string, len(b.Hand))
-	for i, c := range b.Hand {
-		handNames[i] = c.Name()
-	}
-	roles := make([]string, len(b.Play.Roles))
-	for i, r := range b.Play.Roles {
-		roles[i] = r.String()
+	// Serialise hand cards only (arsenal-in entries belong to a previous turn's hand). JSON
+	// stays with parallel name + role arrays for human readability / backward compatibility;
+	// the in-memory BestLine is still the single source of truth.
+	var handNames, roles []string
+	for _, a := range b.Summary.BestLine {
+		if a.FromArsenal {
+			continue
+		}
+		handNames = append(handNames, a.Card.Name())
+		roles = append(roles, a.Role.String())
 	}
 	return BestHandJSON{
 		Hand:               handNames,
 		Roles:              roles,
-		Weapons:            append([]string(nil), b.Play.Weapons...),
-		Value:              b.Play.Value,
+		Weapons:            append([]string(nil), b.Summary.Weapons...),
+		Value:              b.Summary.Value,
 		StartingRunechants: b.StartingRunechants,
 	}
 }
@@ -247,28 +250,23 @@ func bestHandFromJSON(bj BestHandJSON) (deck.BestHand, error) {
 	if len(bj.Roles) != len(bj.Hand) {
 		return deck.BestHand{}, fmt.Errorf("deckio: best hand has %d cards but %d roles", len(bj.Hand), len(bj.Roles))
 	}
-	cs := make([]card.Card, len(bj.Hand))
+	line := make([]hand.CardAssignment, len(bj.Hand))
 	for i, name := range bj.Hand {
 		id, ok := cards.ByName(name)
 		if !ok {
 			return deck.BestHand{}, fmt.Errorf("deckio: unknown card %q in best hand", name)
 		}
-		cs[i] = cards.Get(id)
-	}
-	roles := make([]hand.Role, len(bj.Roles))
-	for i, name := range bj.Roles {
-		r, err := roleFromString(name)
+		r, err := roleFromString(bj.Roles[i])
 		if err != nil {
 			return deck.BestHand{}, err
 		}
-		roles[i] = r
+		line[i] = hand.CardAssignment{Card: cards.Get(id), Role: r}
 	}
 	return deck.BestHand{
-		Hand: cs,
-		Play: hand.Play{
-			Roles:   roles,
-			Weapons: append([]string(nil), bj.Weapons...),
-			Value:   bj.Value,
+		Summary: hand.TurnSummary{
+			BestLine: line,
+			Weapons:  append([]string(nil), bj.Weapons...),
+			Value:    bj.Value,
 		},
 		StartingRunechants: bj.StartingRunechants,
 	}, nil
@@ -282,6 +280,10 @@ func roleFromString(s string) (hand.Role, error) {
 		return hand.Attack, nil
 	case "DEFEND":
 		return hand.Defend, nil
+	case "HELD":
+		return hand.Held, nil
+	case "ARSENAL":
+		return hand.Arsenal, nil
 	}
 	return 0, fmt.Errorf("deckio: unknown role %q", s)
 }

@@ -242,9 +242,9 @@ type Stats struct {
 	TotalValue  float64
 	FirstCycle  CycleStats
 	SecondCycle CycleStats
-	// Best is the single highest-value hand seen across all runs (ties broken by first occurrence).
-	// Hand is in canonical (post-sort) order aligned with Play.Roles. Zero-valued if no hands have
-	// been evaluated.
+	// Best is the single highest-value hand seen across all runs (ties broken by first
+	// occurrence). Summary.BestLine is in canonical (post-sort) order. Zero-valued if no hands
+	// have been evaluated.
 	Best BestHand
 	// PerCard attributes hand-level outcomes back to the cards that appeared in those hands. The
 	// map is populated once per hand (after hand.Best picks the winning play), not per permutation
@@ -252,11 +252,11 @@ type Stats struct {
 	PerCard map[card.ID]CardPlayStats
 }
 
-// BestHand records a single hand and its optimal play — used to surface the peak draw a deck saw
-// during simulation.
+// BestHand records a single hand and its optimal turn — used to surface the peak draw a deck
+// saw during simulation. Summary.BestLine carries the cards and their assigned roles in
+// canonical order; no parallel Hand slice is needed.
 type BestHand struct {
-	Hand []card.Card
-	Play hand.Play
+	Summary hand.TurnSummary
 	// StartingRunechants is the Runechant count carried in from the previous turn when this hand
 	// was played. Only meaningful for Runeblade heroes.
 	StartingRunechants int
@@ -396,26 +396,22 @@ func (d *Deck) Evaluate(runs int, incomingDamage int, rng *rand.Rand) Stats {
 
 			d.Stats.TotalValue += v
 			d.Stats.Hands++
-			if play.Value > d.Stats.Best.Play.Value || d.Stats.Best.Hand == nil {
-				// Clone both slices — h aliases the working deck and play.Roles is owned by the
-				// returned Play, which a later Best() call could reuse.
-				handCopy := make([]card.Card, len(h))
-				copy(handCopy, h)
-				rolesCopy := make([]hand.Role, len(play.Roles))
-				copy(rolesCopy, play.Roles)
+			if play.Value > d.Stats.Best.Summary.Value || len(d.Stats.Best.Summary.BestLine) == 0 {
+				// Clone the BestLine and Weapons slices — both are aliased to memo-owned storage
+				// that a later Best call may reuse.
+				lineCopy := make([]hand.CardAssignment, len(play.BestLine))
+				copy(lineCopy, play.BestLine)
 				var weaponsCopy []string
 				if len(play.Weapons) > 0 {
 					weaponsCopy = make([]string, len(play.Weapons))
 					copy(weaponsCopy, play.Weapons)
 				}
 				d.Stats.Best = BestHand{
-					Hand: handCopy,
-					Play: hand.Play{
-						Roles:                 rolesCopy,
-						Weapons:               weaponsCopy,
-						Value:                 play.Value,
-						PlayedFromArsenal:     play.PlayedFromArsenal,
-						PlayedFromArsenalRole: play.PlayedFromArsenalRole,
+					Summary: hand.TurnSummary{
+						BestLine:    lineCopy,
+						Weapons:     weaponsCopy,
+						Value:       play.Value,
+						ArsenalCard: play.ArsenalCard,
 					},
 					StartingRunechants: startingRunechants,
 				}
@@ -429,43 +425,47 @@ func (d *Deck) Evaluate(runs int, incomingDamage int, rng *rand.Rand) Stats {
 				d.Stats.SecondCycle.Total += v
 			}
 
-			// Attribute per-card contribution using play.Contributions, which hand.Best fills in
-			// from the winning attack-chain replay (accurate per-card damage including riders and
-			// hero triggers) plus role-based shares for pitch and defense. Held cards sit in the
-			// hand without being played or pitched, so they don't increment Plays or Pitches —
-			// their Contribution is 0 and they don't count toward the per-card average.
+			// Attribute per-card contribution from the winning BestLine. hand.Best has already
+			// filled Contribution on each assignment. Held and Arsenal entries are "not played,
+			// not pitched" so neither counter ticks; the Arsenal card's real contribution will
+			// accrue on the later turn when it's played out of the slot. Arsenal-in assignments
+			// (FromArsenal=true) belong to a previous turn's hand, so they don't contribute to
+			// THIS hand's per-card stats either.
 			if d.Stats.PerCard == nil {
 				d.Stats.PerCard = map[card.ID]CardPlayStats{}
 			}
-			for i, c := range h {
-				stat := d.Stats.PerCard[c.ID()]
-				switch play.Roles[i] {
+			for _, a := range play.BestLine {
+				if a.FromArsenal {
+					continue
+				}
+				stat := d.Stats.PerCard[a.Card.ID()]
+				switch a.Role {
 				case hand.Pitch:
 					stat.Pitches++
 				case hand.Attack, hand.Defend:
 					stat.Plays++
 				}
-				// hand.Held and hand.Arsenal are both "not played, not pitched" this turn — the
-				// Arsenal card's real contribution accrues on a later turn when it's played out
-				// of the slot, so neither counter ticks here.
-				if i < len(play.Contributions) {
-					stat.TotalContribution += play.Contributions[i]
-				}
-				d.Stats.PerCard[c.ID()] = stat
+				stat.TotalContribution += a.Contribution
+				d.Stats.PerCard[a.Card.ID()] = stat
 			}
 
-			// Recycle: pitched cards go to the bottom of the remaining deck (buf[tail:]) in hand
-			// order; attacked and defended cards are spent. The backing array has room since the
-			// cards being "moved" are a subset of those we just consumed. Held cards stay in the
-			// player's hand and get copied into nextHeld for the next turn.
+			// Recycle: pitched hand cards go to the bottom of the remaining deck (buf[tail:]) in
+			// hand order; attacked and defended cards are spent. The backing array has room
+			// since the cards being "moved" are a subset of those we just consumed. Held cards
+			// stay in the player's hand and get copied into nextHeld for the next turn. Arsenal
+			// and arsenal-in entries are handled via arsenalCard / the loop's top-level arsenal
+			// threading, not here.
 			nextHeld = nextHeld[:0]
-			for i, c := range h {
-				switch play.Roles[i] {
+			for _, a := range play.BestLine {
+				if a.FromArsenal {
+					continue
+				}
+				switch a.Role {
 				case hand.Pitch:
-					buf[tail] = c
+					buf[tail] = a.Card
 					tail++
 				case hand.Held:
-					nextHeld = append(nextHeld, c)
+					nextHeld = append(nextHeld, a.Card)
 				}
 			}
 			head += drawCount
