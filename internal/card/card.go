@@ -53,6 +53,14 @@ func (s TypeSet) IsRunebladeAttack() bool {
 	return s&TypeSet(TypeRuneblade) != 0 && s&(TypeSet(TypeAttack)|TypeSet(TypeWeapon)) != 0
 }
 
+// IsDefenseReaction reports whether s has the Defense Reaction subtype. Named because five
+// sites in the solver (partition-scratch isDR precompute, per-turn summary grouping,
+// defenseReactionDamage filter, fillContributions per-card Play re-play) all reach for the same
+// bit.
+func (s TypeSet) IsDefenseReaction() bool {
+	return s&TypeSet(TypeDefenseReaction) != 0
+}
+
 // PlayedCard wraps a Card with per-turn mutable flags that other cards' effects can toggle.
 // Instances are created by the solver at the start of each attack chain and live only for that
 // chain. Effects that grant keywords to "the next X" scan TurnState.CardsRemaining and flip

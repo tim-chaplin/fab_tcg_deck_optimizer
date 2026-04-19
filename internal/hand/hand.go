@@ -216,7 +216,7 @@ func FormatBestTurn(t TurnSummary) string {
 		case Attack:
 			attackCost += a.Card.Cost()
 		case Defend:
-			if a.Card.Types().Has(card.TypeDefenseReaction) {
+			if a.Card.Types().IsDefenseReaction() {
 				drCost += a.Card.Cost()
 				defenseReactions = append(defenseReactions, a)
 			} else {
@@ -729,7 +729,7 @@ func (e *Evaluator) bestUncached(hero hero.Hero, weapons []weapon.Weapon, hand [
 		pvals[i] = c.Pitch()
 		cvals[i] = c.Cost()
 		dvals[i] = c.Defense()
-		isDR[i] = c.Types().Has(card.TypeDefenseReaction)
+		isDR[i] = c.Types().IsDefenseReaction()
 		if isDR[i] {
 			dCostVals[i] = cvals[i]
 			hasReactions = true
@@ -1096,7 +1096,7 @@ func roleAllowed(r Role, isArsenalSlot, isDefenseReaction bool) bool {
 func defenseReactionDamage(defenders, pitched, deck []card.Card, state *card.TurnState) int {
 	total := 0
 	for _, d := range defenders {
-		if !d.Types().Has(card.TypeDefenseReaction) {
+		if !d.Types().IsDefenseReaction() {
 			continue
 		}
 		*state = card.TurnState{Pitched: pitched, Deck: deck}
@@ -1426,7 +1426,7 @@ func fillDefenseContributions(line []CardAssignment, pitched []card.Card, deck [
 		if sumDef > 0 {
 			line[i].Contribution = float64(c.Defense()) * float64(prevented) / float64(sumDef)
 		}
-		if c.Types().Has(card.TypeDefenseReaction) {
+		if c.Types().IsDefenseReaction() {
 			*bufs.state = card.TurnState{Pitched: pitched, Deck: deck}
 			line[i].Contribution += float64(c.Play(bufs.state))
 		}
@@ -1462,7 +1462,7 @@ func fillContributions(summary *TurnSummary, hero hero.Hero, weapons []weapon.We
 			attackers = append(attackers, a.Card)
 		case Defend:
 			sumDef += a.Card.Defense()
-			if a.Card.Types().Has(card.TypeDefenseReaction) {
+			if a.Card.Types().IsDefenseReaction() {
 				if _, disc := a.Card.(card.DiscountPerRunechant); !disc {
 					defenderCostSum += a.Card.Cost()
 				}
