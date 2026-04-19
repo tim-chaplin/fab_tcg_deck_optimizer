@@ -1,11 +1,10 @@
-// Package fabrary converts a deck.Deck to and from the plain-text deck format used by fabrary.net
+// Package fabrary converts a deck.Deck to and from fabrary.net's plain-text deck format
 // (https://fabrary.net/decks?tab=import). The format has a `Name:` / `Hero:` / `Format:` header,
-// an "Arena cards" section listing equipment and weapons, and a "Deck cards" section listing
-// pitch cards with lowercase color suffix (e.g. "2x Aether Slash (red)").
+// an "Arena cards" section for equipment and weapons, and a "Deck cards" section with pitch
+// cards carrying a lowercase color suffix (e.g. "2x Aether Slash (red)").
 //
-// The optimizer only models weapons, not non-weapon equipment (helms, chests, etc.). On import,
-// Arena lines that don't name a known weapon are ignored. On export, only weapons appear in the
-// Arena section — users will typically re-add equipment in fabrary after pasting.
+// The optimizer models only weapons, not other equipment. Unknown Arena lines are ignored on
+// import; only weapons appear on export, so users typically re-add equipment after pasting.
 package fabrary
 
 import (
@@ -52,12 +51,10 @@ func Marshal(d *deck.Deck) string {
 
 // Unmarshal parses fabrary-style deck text and returns a *deck.Deck plus a count-keyed map of
 // deck cards whose names aren't in the optimizer's registry. Callers should surface the skipped
-// map so users aren't surprised by a silently-reduced deck. Stats aren't round-tripped — they're
-// a simulation artifact.
+// map so users aren't surprised by a silently-reduced deck. Stats aren't round-tripped.
 //
-// Unknown Arena-section lines (non-weapon equipment) are silently skipped and NOT reported, since
-// the optimizer doesn't model non-weapon equipment. A missing hero aborts: the deck can't be
-// constructed without one.
+// Unknown Arena-section lines (non-weapon equipment) are silently skipped and NOT reported — the
+// optimizer doesn't model them. A missing hero aborts: the deck can't be constructed without one.
 func Unmarshal(text string) (*deck.Deck, map[string]int, error) {
 	var (
 		heroName string

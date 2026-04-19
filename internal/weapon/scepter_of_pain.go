@@ -2,10 +2,9 @@
 // Text: "Once per Turn Action - {r}{r}: Deal 1 arcane damage to any opposing target. Create a
 // Runechant token for each damage dealt this way."
 //
-// Simplification: modelled as dealing 1 arcane directly (Attack()=1) plus creating 1 Runechant,
-// whose future damage is contributed via TurnState.CreateRunechant(). Total Play value = 2. The
-// ability is not strictly an attack in FaB terms (the card has no "Attack" type), but the
-// simulator treats any weapon swing as the turn's damage-dealing action.
+// Simplification: 1 arcane direct (Attack()=1) + 1 Runechant via CreateRunechant() = Play value 2.
+// The ability isn't an Attack-typed action in FaB, but the simulator treats any weapon swing as
+// the turn's damage step.
 //
 // Source: github.com/the-fab-cube/flesh-and-blood-cards (card.csv).
 
