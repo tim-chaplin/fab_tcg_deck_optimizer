@@ -135,6 +135,24 @@ func FormatBestLine(line []CardAssignment) string {
 	return strings.Join(parts, ", ")
 }
 
+// splitPitchesByPhase assigns each pitch card to the defense or attack phase, simulating the
+// order FaB prompts them in. Smallest pitches fund the defense bucket until drCost is covered;
+// the rest pay for this turn's attacks. Stable on ties so display order is deterministic.
+func splitPitchesByPhase(pitched []CardAssignment, drCost int) (defensePitches, attackPitches []CardAssignment) {
+	sorted := append([]CardAssignment(nil), pitched...)
+	sort.SliceStable(sorted, func(i, j int) bool { return sorted[i].Card.Pitch() < sorted[j].Card.Pitch() })
+	covered := 0
+	for _, a := range sorted {
+		if covered < drCost {
+			defensePitches = append(defensePitches, a)
+			covered += a.Card.Pitch()
+		} else {
+			attackPitches = append(attackPitches, a)
+		}
+	}
+	return defensePitches, attackPitches
+}
+
 // FormatBestTurn renders a TurnSummary as a numbered play-order list, one card per line,
 // matching the actual FaB turn sequence:
 //
@@ -173,20 +191,7 @@ func FormatBestTurn(t TurnSummary) string {
 		}
 	}
 
-	// Greedy split: sort pitches ascending and pour into the defense bucket until drCost is
-	// covered; the rest is attack-phase. Stable on ties.
-	sorted := append([]CardAssignment(nil), pitched...)
-	sort.SliceStable(sorted, func(i, j int) bool { return sorted[i].Card.Pitch() < sorted[j].Card.Pitch() })
-	var defensePitches, attackPitches []CardAssignment
-	covered := 0
-	for _, a := range sorted {
-		if covered < drCost {
-			defensePitches = append(defensePitches, a)
-			covered += a.Card.Pitch()
-		} else {
-			attackPitches = append(attackPitches, a)
-		}
-	}
+	defensePitches, attackPitches := splitPitchesByPhase(pitched, drCost)
 
 	var lines []string
 	step := 0
