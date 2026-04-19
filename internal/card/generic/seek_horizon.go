@@ -18,7 +18,7 @@ type SeekHorizonRed struct{}
 
 func (SeekHorizonRed) ID() card.ID                 { return card.SeekHorizonRed }
 func (SeekHorizonRed) Name() string                { return "Seek Horizon (Red)" }
-func (SeekHorizonRed) Cost() int                   { return 0 }
+func (SeekHorizonRed) Cost(*card.TurnState) int                   { return 0 }
 func (SeekHorizonRed) Pitch() int                  { return 1 }
 func (SeekHorizonRed) Attack() int                 { return 4 }
 func (SeekHorizonRed) Defense() int                { return 2 }
@@ -30,7 +30,7 @@ type SeekHorizonYellow struct{}
 
 func (SeekHorizonYellow) ID() card.ID                 { return card.SeekHorizonYellow }
 func (SeekHorizonYellow) Name() string                { return "Seek Horizon (Yellow)" }
-func (SeekHorizonYellow) Cost() int                   { return 0 }
+func (SeekHorizonYellow) Cost(*card.TurnState) int                   { return 0 }
 func (SeekHorizonYellow) Pitch() int                  { return 2 }
 func (SeekHorizonYellow) Attack() int                 { return 3 }
 func (SeekHorizonYellow) Defense() int                { return 2 }
@@ -42,7 +42,7 @@ type SeekHorizonBlue struct{}
 
 func (SeekHorizonBlue) ID() card.ID                 { return card.SeekHorizonBlue }
 func (SeekHorizonBlue) Name() string                { return "Seek Horizon (Blue)" }
-func (SeekHorizonBlue) Cost() int                   { return 0 }
+func (SeekHorizonBlue) Cost(*card.TurnState) int                   { return 0 }
 func (SeekHorizonBlue) Pitch() int                  { return 3 }
 func (SeekHorizonBlue) Attack() int                 { return 2 }
 func (SeekHorizonBlue) Defense() int                { return 2 }

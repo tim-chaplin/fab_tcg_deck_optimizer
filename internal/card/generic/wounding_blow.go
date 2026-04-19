@@ -13,7 +13,7 @@ type WoundingBlowRed struct{}
 
 func (WoundingBlowRed) ID() card.ID                 { return card.WoundingBlowRed }
 func (WoundingBlowRed) Name() string                { return "Wounding Blow (Red)" }
-func (WoundingBlowRed) Cost() int                   { return 0 }
+func (WoundingBlowRed) Cost(*card.TurnState) int                   { return 0 }
 func (WoundingBlowRed) Pitch() int                  { return 1 }
 func (WoundingBlowRed) Attack() int                 { return 4 }
 func (WoundingBlowRed) Defense() int                { return 3 }
@@ -25,7 +25,7 @@ type WoundingBlowYellow struct{}
 
 func (WoundingBlowYellow) ID() card.ID                 { return card.WoundingBlowYellow }
 func (WoundingBlowYellow) Name() string                { return "Wounding Blow (Yellow)" }
-func (WoundingBlowYellow) Cost() int                   { return 0 }
+func (WoundingBlowYellow) Cost(*card.TurnState) int                   { return 0 }
 func (WoundingBlowYellow) Pitch() int                  { return 2 }
 func (WoundingBlowYellow) Attack() int                 { return 3 }
 func (WoundingBlowYellow) Defense() int                { return 3 }
@@ -37,7 +37,7 @@ type WoundingBlowBlue struct{}
 
 func (WoundingBlowBlue) ID() card.ID                 { return card.WoundingBlowBlue }
 func (WoundingBlowBlue) Name() string                { return "Wounding Blow (Blue)" }
-func (WoundingBlowBlue) Cost() int                   { return 0 }
+func (WoundingBlowBlue) Cost(*card.TurnState) int                   { return 0 }
 func (WoundingBlowBlue) Pitch() int                  { return 3 }
 func (WoundingBlowBlue) Attack() int                 { return 2 }
 func (WoundingBlowBlue) Defense() int                { return 3 }

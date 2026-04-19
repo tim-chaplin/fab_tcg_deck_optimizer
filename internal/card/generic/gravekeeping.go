@@ -17,7 +17,7 @@ type GravekeepingRed struct{}
 
 func (GravekeepingRed) ID() card.ID                 { return card.GravekeepingRed }
 func (GravekeepingRed) Name() string                { return "Gravekeeping (Red)" }
-func (GravekeepingRed) Cost() int                   { return 1 }
+func (GravekeepingRed) Cost(*card.TurnState) int                   { return 1 }
 func (GravekeepingRed) Pitch() int                  { return 1 }
 func (GravekeepingRed) Attack() int                 { return 5 }
 func (GravekeepingRed) Defense() int                { return 2 }
@@ -29,7 +29,7 @@ type GravekeepingYellow struct{}
 
 func (GravekeepingYellow) ID() card.ID                 { return card.GravekeepingYellow }
 func (GravekeepingYellow) Name() string                { return "Gravekeeping (Yellow)" }
-func (GravekeepingYellow) Cost() int                   { return 1 }
+func (GravekeepingYellow) Cost(*card.TurnState) int                   { return 1 }
 func (GravekeepingYellow) Pitch() int                  { return 2 }
 func (GravekeepingYellow) Attack() int                 { return 4 }
 func (GravekeepingYellow) Defense() int                { return 2 }
@@ -41,7 +41,7 @@ type GravekeepingBlue struct{}
 
 func (GravekeepingBlue) ID() card.ID                 { return card.GravekeepingBlue }
 func (GravekeepingBlue) Name() string                { return "Gravekeeping (Blue)" }
-func (GravekeepingBlue) Cost() int                   { return 1 }
+func (GravekeepingBlue) Cost(*card.TurnState) int                   { return 1 }
 func (GravekeepingBlue) Pitch() int                  { return 3 }
 func (GravekeepingBlue) Attack() int                 { return 3 }
 func (GravekeepingBlue) Defense() int                { return 2 }

@@ -18,7 +18,7 @@ type ScepterOfPain struct{}
 
 func (ScepterOfPain) ID() card.ID                  { return card.ScepterOfPainID }
 func (ScepterOfPain) Name() string                 { return "Scepter of Pain" }
-func (ScepterOfPain) Cost() int                    { return 2 }
+func (ScepterOfPain) Cost(*card.TurnState) int                    { return 2 }
 func (ScepterOfPain) Pitch() int                   { return 0 }
 func (ScepterOfPain) Attack() int                  { return 1 }
 func (ScepterOfPain) Defense() int                 { return 0 }

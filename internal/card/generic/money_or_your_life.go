@@ -18,7 +18,7 @@ type MoneyOrYourLifeRed struct{}
 
 func (MoneyOrYourLifeRed) ID() card.ID                 { return card.MoneyOrYourLifeRed }
 func (MoneyOrYourLifeRed) Name() string                { return "Money or Your Life? (Red)" }
-func (MoneyOrYourLifeRed) Cost() int                   { return 3 }
+func (MoneyOrYourLifeRed) Cost(*card.TurnState) int                   { return 3 }
 func (MoneyOrYourLifeRed) Pitch() int                  { return 1 }
 func (MoneyOrYourLifeRed) Attack() int                 { return 6 }
 func (MoneyOrYourLifeRed) Defense() int                { return 2 }
@@ -30,7 +30,7 @@ type MoneyOrYourLifeYellow struct{}
 
 func (MoneyOrYourLifeYellow) ID() card.ID                 { return card.MoneyOrYourLifeYellow }
 func (MoneyOrYourLifeYellow) Name() string                { return "Money or Your Life? (Yellow)" }
-func (MoneyOrYourLifeYellow) Cost() int                   { return 3 }
+func (MoneyOrYourLifeYellow) Cost(*card.TurnState) int                   { return 3 }
 func (MoneyOrYourLifeYellow) Pitch() int                  { return 2 }
 func (MoneyOrYourLifeYellow) Attack() int                 { return 5 }
 func (MoneyOrYourLifeYellow) Defense() int                { return 2 }
@@ -42,7 +42,7 @@ type MoneyOrYourLifeBlue struct{}
 
 func (MoneyOrYourLifeBlue) ID() card.ID                 { return card.MoneyOrYourLifeBlue }
 func (MoneyOrYourLifeBlue) Name() string                { return "Money or Your Life? (Blue)" }
-func (MoneyOrYourLifeBlue) Cost() int                   { return 3 }
+func (MoneyOrYourLifeBlue) Cost(*card.TurnState) int                   { return 3 }
 func (MoneyOrYourLifeBlue) Pitch() int                  { return 3 }
 func (MoneyOrYourLifeBlue) Attack() int                 { return 4 }
 func (MoneyOrYourLifeBlue) Defense() int                { return 2 }

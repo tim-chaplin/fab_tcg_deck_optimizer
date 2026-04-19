@@ -17,7 +17,7 @@ type BlusterBuffRed struct{}
 
 func (BlusterBuffRed) ID() card.ID                 { return card.BlusterBuffRed }
 func (BlusterBuffRed) Name() string                { return "Bluster Buff (Red)" }
-func (BlusterBuffRed) Cost() int                   { return 1 }
+func (BlusterBuffRed) Cost(*card.TurnState) int                   { return 1 }
 func (BlusterBuffRed) Pitch() int                  { return 1 }
 func (BlusterBuffRed) Attack() int                 { return 6 }
 func (BlusterBuffRed) Defense() int                { return 3 }

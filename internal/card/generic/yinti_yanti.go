@@ -26,7 +26,7 @@ type YintiYantiRed struct{}
 
 func (YintiYantiRed) ID() card.ID                 { return card.YintiYantiRed }
 func (YintiYantiRed) Name() string                { return "Yinti Yanti (Red)" }
-func (YintiYantiRed) Cost() int                   { return 0 }
+func (YintiYantiRed) Cost(*card.TurnState) int                   { return 0 }
 func (YintiYantiRed) Pitch() int                  { return 1 }
 func (YintiYantiRed) Attack() int                 { return 3 }
 func (YintiYantiRed) Defense() int                { return 2 }
@@ -38,7 +38,7 @@ type YintiYantiYellow struct{}
 
 func (YintiYantiYellow) ID() card.ID                 { return card.YintiYantiYellow }
 func (YintiYantiYellow) Name() string                { return "Yinti Yanti (Yellow)" }
-func (YintiYantiYellow) Cost() int                   { return 0 }
+func (YintiYantiYellow) Cost(*card.TurnState) int                   { return 0 }
 func (YintiYantiYellow) Pitch() int                  { return 2 }
 func (YintiYantiYellow) Attack() int                 { return 2 }
 func (YintiYantiYellow) Defense() int                { return 2 }
@@ -50,7 +50,7 @@ type YintiYantiBlue struct{}
 
 func (YintiYantiBlue) ID() card.ID                 { return card.YintiYantiBlue }
 func (YintiYantiBlue) Name() string                { return "Yinti Yanti (Blue)" }
-func (YintiYantiBlue) Cost() int                   { return 0 }
+func (YintiYantiBlue) Cost(*card.TurnState) int                   { return 0 }
 func (YintiYantiBlue) Pitch() int                  { return 3 }
 func (YintiYantiBlue) Attack() int                 { return 1 }
 func (YintiYantiBlue) Defense() int                { return 2 }

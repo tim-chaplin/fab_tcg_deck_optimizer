@@ -20,7 +20,7 @@ type FerventForerunnerRed struct{}
 
 func (FerventForerunnerRed) ID() card.ID                 { return card.FerventForerunnerRed }
 func (FerventForerunnerRed) Name() string                { return "Fervent Forerunner (Red)" }
-func (FerventForerunnerRed) Cost() int                   { return 0 }
+func (FerventForerunnerRed) Cost(*card.TurnState) int                   { return 0 }
 func (FerventForerunnerRed) Pitch() int                  { return 1 }
 func (FerventForerunnerRed) Attack() int                 { return 3 }
 func (FerventForerunnerRed) Defense() int                { return 2 }
@@ -32,7 +32,7 @@ type FerventForerunnerYellow struct{}
 
 func (FerventForerunnerYellow) ID() card.ID                 { return card.FerventForerunnerYellow }
 func (FerventForerunnerYellow) Name() string                { return "Fervent Forerunner (Yellow)" }
-func (FerventForerunnerYellow) Cost() int                   { return 0 }
+func (FerventForerunnerYellow) Cost(*card.TurnState) int                   { return 0 }
 func (FerventForerunnerYellow) Pitch() int                  { return 2 }
 func (FerventForerunnerYellow) Attack() int                 { return 2 }
 func (FerventForerunnerYellow) Defense() int                { return 2 }
@@ -44,7 +44,7 @@ type FerventForerunnerBlue struct{}
 
 func (FerventForerunnerBlue) ID() card.ID                 { return card.FerventForerunnerBlue }
 func (FerventForerunnerBlue) Name() string                { return "Fervent Forerunner (Blue)" }
-func (FerventForerunnerBlue) Cost() int                   { return 0 }
+func (FerventForerunnerBlue) Cost(*card.TurnState) int                   { return 0 }
 func (FerventForerunnerBlue) Pitch() int                  { return 3 }
 func (FerventForerunnerBlue) Attack() int                 { return 1 }
 func (FerventForerunnerBlue) Defense() int                { return 2 }

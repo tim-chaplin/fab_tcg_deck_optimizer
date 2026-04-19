@@ -14,7 +14,7 @@ type UnmovableRed struct{}
 
 func (UnmovableRed) ID() card.ID                 { return card.UnmovableRed }
 func (UnmovableRed) Name() string             { return "Unmovable (Red)" }
-func (UnmovableRed) Cost() int                { return 3 }
+func (UnmovableRed) Cost(*card.TurnState) int                { return 3 }
 func (UnmovableRed) Pitch() int               { return 1 }
 func (UnmovableRed) Attack() int              { return 0 }
 func (UnmovableRed) Defense() int             { return 7 }
@@ -26,7 +26,7 @@ type UnmovableYellow struct{}
 
 func (UnmovableYellow) ID() card.ID                 { return card.UnmovableYellow }
 func (UnmovableYellow) Name() string             { return "Unmovable (Yellow)" }
-func (UnmovableYellow) Cost() int                { return 3 }
+func (UnmovableYellow) Cost(*card.TurnState) int                { return 3 }
 func (UnmovableYellow) Pitch() int               { return 2 }
 func (UnmovableYellow) Attack() int              { return 0 }
 func (UnmovableYellow) Defense() int             { return 6 }
@@ -38,7 +38,7 @@ type UnmovableBlue struct{}
 
 func (UnmovableBlue) ID() card.ID                 { return card.UnmovableBlue }
 func (UnmovableBlue) Name() string             { return "Unmovable (Blue)" }
-func (UnmovableBlue) Cost() int                { return 3 }
+func (UnmovableBlue) Cost(*card.TurnState) int                { return 3 }
 func (UnmovableBlue) Pitch() int               { return 3 }
 func (UnmovableBlue) Attack() int              { return 0 }
 func (UnmovableBlue) Defense() int             { return 5 }

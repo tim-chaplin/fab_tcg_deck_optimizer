@@ -15,7 +15,7 @@ type TestOfStrengthRed struct{}
 
 func (TestOfStrengthRed) ID() card.ID                { return card.TestOfStrengthRed }
 func (TestOfStrengthRed) Name() string               { return "Test of Strength (Red)" }
-func (TestOfStrengthRed) Cost() int                  { return 0 }
+func (TestOfStrengthRed) Cost(*card.TurnState) int   { return 0 }
 func (TestOfStrengthRed) Pitch() int                 { return 1 }
 func (TestOfStrengthRed) Attack() int                { return 0 }
 func (TestOfStrengthRed) Defense() int               { return 4 }

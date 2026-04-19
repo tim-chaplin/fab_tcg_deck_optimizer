@@ -18,7 +18,7 @@ type RightBehindYouRed struct{}
 
 func (RightBehindYouRed) ID() card.ID                 { return card.RightBehindYouRed }
 func (RightBehindYouRed) Name() string                { return "Right Behind You (Red)" }
-func (RightBehindYouRed) Cost() int                   { return 3 }
+func (RightBehindYouRed) Cost(*card.TurnState) int                   { return 3 }
 func (RightBehindYouRed) Pitch() int                  { return 1 }
 func (RightBehindYouRed) Attack() int                 { return 7 }
 func (RightBehindYouRed) Defense() int                { return 2 }
@@ -30,7 +30,7 @@ type RightBehindYouYellow struct{}
 
 func (RightBehindYouYellow) ID() card.ID                 { return card.RightBehindYouYellow }
 func (RightBehindYouYellow) Name() string                { return "Right Behind You (Yellow)" }
-func (RightBehindYouYellow) Cost() int                   { return 3 }
+func (RightBehindYouYellow) Cost(*card.TurnState) int                   { return 3 }
 func (RightBehindYouYellow) Pitch() int                  { return 2 }
 func (RightBehindYouYellow) Attack() int                 { return 6 }
 func (RightBehindYouYellow) Defense() int                { return 2 }
@@ -42,7 +42,7 @@ type RightBehindYouBlue struct{}
 
 func (RightBehindYouBlue) ID() card.ID                 { return card.RightBehindYouBlue }
 func (RightBehindYouBlue) Name() string                { return "Right Behind You (Blue)" }
-func (RightBehindYouBlue) Cost() int                   { return 3 }
+func (RightBehindYouBlue) Cost(*card.TurnState) int                   { return 3 }
 func (RightBehindYouBlue) Pitch() int                  { return 3 }
 func (RightBehindYouBlue) Attack() int                 { return 5 }
 func (RightBehindYouBlue) Defense() int                { return 2 }

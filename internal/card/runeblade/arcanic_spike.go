@@ -29,7 +29,7 @@ type ArcanicSpikeRed struct{}
 
 func (ArcanicSpikeRed) ID() card.ID                    { return card.ArcanicSpikeRed }
 func (ArcanicSpikeRed) Name() string                   { return "Arcanic Spike (Red)" }
-func (ArcanicSpikeRed) Cost() int                      { return 2 }
+func (ArcanicSpikeRed) Cost(*card.TurnState) int                      { return 2 }
 func (ArcanicSpikeRed) Pitch() int                     { return 1 }
 func (ArcanicSpikeRed) Attack() int                    { return 5 }
 func (ArcanicSpikeRed) Defense() int                   { return 3 }
@@ -41,7 +41,7 @@ type ArcanicSpikeYellow struct{}
 
 func (ArcanicSpikeYellow) ID() card.ID                    { return card.ArcanicSpikeYellow }
 func (ArcanicSpikeYellow) Name() string                   { return "Arcanic Spike (Yellow)" }
-func (ArcanicSpikeYellow) Cost() int                      { return 2 }
+func (ArcanicSpikeYellow) Cost(*card.TurnState) int                      { return 2 }
 func (ArcanicSpikeYellow) Pitch() int                     { return 2 }
 func (ArcanicSpikeYellow) Attack() int                    { return 4 }
 func (ArcanicSpikeYellow) Defense() int                   { return 3 }
@@ -53,7 +53,7 @@ type ArcanicSpikeBlue struct{}
 
 func (ArcanicSpikeBlue) ID() card.ID                    { return card.ArcanicSpikeBlue }
 func (ArcanicSpikeBlue) Name() string                   { return "Arcanic Spike (Blue)" }
-func (ArcanicSpikeBlue) Cost() int                      { return 2 }
+func (ArcanicSpikeBlue) Cost(*card.TurnState) int                      { return 2 }
 func (ArcanicSpikeBlue) Pitch() int                     { return 3 }
 func (ArcanicSpikeBlue) Attack() int                    { return 3 }
 func (ArcanicSpikeBlue) Defense() int                   { return 3 }

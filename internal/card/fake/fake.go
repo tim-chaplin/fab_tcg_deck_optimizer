@@ -12,7 +12,7 @@ type BlueAttack struct{}
 
 func (BlueAttack) ID() card.ID                { return card.FakeBlueAttack }
 func (BlueAttack) Name() string               { return "cardtest.BlueAttack" }
-func (BlueAttack) Cost() int                  { return 1 }
+func (BlueAttack) Cost(*card.TurnState) int                  { return 1 }
 func (BlueAttack) Pitch() int                 { return 3 }
 func (BlueAttack) Attack() int                { return 1 }
 func (BlueAttack) Defense() int               { return 3 }
@@ -25,7 +25,7 @@ type RedAttack struct{}
 
 func (RedAttack) ID() card.ID                { return card.FakeRedAttack }
 func (RedAttack) Name() string               { return "cardtest.RedAttack" }
-func (RedAttack) Cost() int                  { return 1 }
+func (RedAttack) Cost(*card.TurnState) int                  { return 1 }
 func (RedAttack) Pitch() int                 { return 1 }
 func (RedAttack) Attack() int                { return 3 }
 func (RedAttack) Defense() int               { return 1 }

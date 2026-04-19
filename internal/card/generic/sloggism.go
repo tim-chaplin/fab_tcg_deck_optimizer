@@ -22,7 +22,7 @@ func sloggismPlay(s *card.TurnState, n int) int {
 		if !t.Has(card.TypeAttack) || !t.Has(card.TypeAction) {
 			continue
 		}
-		if pc.Card.Cost() >= 2 {
+		if pc.Card.Cost(s) >= 2 {
 			return n
 		}
 		continue
@@ -34,7 +34,7 @@ type SloggismRed struct{}
 
 func (SloggismRed) ID() card.ID                 { return card.SloggismRed }
 func (SloggismRed) Name() string                { return "Sloggism (Red)" }
-func (SloggismRed) Cost() int                   { return 3 }
+func (SloggismRed) Cost(*card.TurnState) int                   { return 3 }
 func (SloggismRed) Pitch() int                  { return 1 }
 func (SloggismRed) Attack() int                 { return 0 }
 func (SloggismRed) Defense() int                { return 2 }
@@ -46,7 +46,7 @@ type SloggismYellow struct{}
 
 func (SloggismYellow) ID() card.ID                 { return card.SloggismYellow }
 func (SloggismYellow) Name() string                { return "Sloggism (Yellow)" }
-func (SloggismYellow) Cost() int                   { return 3 }
+func (SloggismYellow) Cost(*card.TurnState) int                   { return 3 }
 func (SloggismYellow) Pitch() int                  { return 2 }
 func (SloggismYellow) Attack() int                 { return 0 }
 func (SloggismYellow) Defense() int                { return 2 }
@@ -58,7 +58,7 @@ type SloggismBlue struct{}
 
 func (SloggismBlue) ID() card.ID                 { return card.SloggismBlue }
 func (SloggismBlue) Name() string                { return "Sloggism (Blue)" }
-func (SloggismBlue) Cost() int                   { return 3 }
+func (SloggismBlue) Cost(*card.TurnState) int                   { return 3 }
 func (SloggismBlue) Pitch() int                  { return 3 }
 func (SloggismBlue) Attack() int                 { return 0 }
 func (SloggismBlue) Defense() int                { return 2 }

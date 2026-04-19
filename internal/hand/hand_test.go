@@ -248,7 +248,7 @@ type grantAll struct{}
 
 func (grantAll) ID() card.ID            { return card.Invalid }
 func (grantAll) Name() string           { return "grantAll" }
-func (grantAll) Cost() int              { return 0 }
+func (grantAll) Cost(*card.TurnState) int              { return 0 }
 func (grantAll) Pitch() int              { return 0 }
 func (grantAll) Attack() int            { return 0 }
 func (grantAll) Defense() int           { return 0 }
@@ -270,7 +270,7 @@ type grantSpy struct{ saw *bool }
 
 func (grantSpy) ID() card.ID              { return card.Invalid }
 func (grantSpy) Name() string             { return "grantSpy" }
-func (grantSpy) Cost() int                { return 0 }
+func (grantSpy) Cost(*card.TurnState) int                { return 0 }
 func (grantSpy) Pitch() int               { return 0 }
 func (grantSpy) Attack() int              { return 0 }
 func (grantSpy) Defense() int             { return 0 }
@@ -322,7 +322,7 @@ func TestBest_RespectsResourceConstraint(t *testing.T) {
 		case Pitch:
 			res += c.Pitch()
 		case Attack:
-			cost += c.Cost()
+			cost += c.Cost(&card.TurnState{})
 		}
 	}
 	if res < cost {

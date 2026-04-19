@@ -19,7 +19,7 @@ type JackBeNimbleRed struct{}
 
 func (JackBeNimbleRed) ID() card.ID                 { return card.JackBeNimbleRed }
 func (JackBeNimbleRed) Name() string                { return "Jack Be Nimble (Red)" }
-func (JackBeNimbleRed) Cost() int                   { return 0 }
+func (JackBeNimbleRed) Cost(*card.TurnState) int                   { return 0 }
 func (JackBeNimbleRed) Pitch() int                  { return 1 }
 func (JackBeNimbleRed) Attack() int                 { return 3 }
 func (JackBeNimbleRed) Defense() int                { return 3 }

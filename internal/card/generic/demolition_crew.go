@@ -18,7 +18,7 @@ type DemolitionCrewRed struct{}
 
 func (DemolitionCrewRed) ID() card.ID                 { return card.DemolitionCrewRed }
 func (DemolitionCrewRed) Name() string                { return "Demolition Crew (Red)" }
-func (DemolitionCrewRed) Cost() int                   { return 2 }
+func (DemolitionCrewRed) Cost(*card.TurnState) int                   { return 2 }
 func (DemolitionCrewRed) Pitch() int                  { return 1 }
 func (DemolitionCrewRed) Attack() int                 { return 6 }
 func (DemolitionCrewRed) Defense() int                { return 2 }
@@ -30,7 +30,7 @@ type DemolitionCrewYellow struct{}
 
 func (DemolitionCrewYellow) ID() card.ID                 { return card.DemolitionCrewYellow }
 func (DemolitionCrewYellow) Name() string                { return "Demolition Crew (Yellow)" }
-func (DemolitionCrewYellow) Cost() int                   { return 2 }
+func (DemolitionCrewYellow) Cost(*card.TurnState) int                   { return 2 }
 func (DemolitionCrewYellow) Pitch() int                  { return 2 }
 func (DemolitionCrewYellow) Attack() int                 { return 5 }
 func (DemolitionCrewYellow) Defense() int                { return 2 }
@@ -42,7 +42,7 @@ type DemolitionCrewBlue struct{}
 
 func (DemolitionCrewBlue) ID() card.ID                 { return card.DemolitionCrewBlue }
 func (DemolitionCrewBlue) Name() string                { return "Demolition Crew (Blue)" }
-func (DemolitionCrewBlue) Cost() int                   { return 2 }
+func (DemolitionCrewBlue) Cost(*card.TurnState) int                   { return 2 }
 func (DemolitionCrewBlue) Pitch() int                  { return 3 }
 func (DemolitionCrewBlue) Attack() int                 { return 4 }
 func (DemolitionCrewBlue) Defense() int                { return 2 }

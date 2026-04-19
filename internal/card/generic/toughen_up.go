@@ -10,7 +10,7 @@ type ToughenUpBlue struct{}
 
 func (ToughenUpBlue) ID() card.ID                 { return card.ToughenUpBlue }
 func (ToughenUpBlue) Name() string             { return "Toughen Up (Blue)" }
-func (ToughenUpBlue) Cost() int                { return 2 }
+func (ToughenUpBlue) Cost(*card.TurnState) int                { return 2 }
 func (ToughenUpBlue) Pitch() int               { return 3 }
 func (ToughenUpBlue) Attack() int              { return 0 }
 func (ToughenUpBlue) Defense() int             { return 4 }

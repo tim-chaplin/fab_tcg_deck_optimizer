@@ -18,7 +18,7 @@ type RegainComposureBlue struct{}
 
 func (RegainComposureBlue) ID() card.ID                 { return card.RegainComposureBlue }
 func (RegainComposureBlue) Name() string                { return "Regain Composure (Blue)" }
-func (RegainComposureBlue) Cost() int                   { return 0 }
+func (RegainComposureBlue) Cost(*card.TurnState) int                   { return 0 }
 func (RegainComposureBlue) Pitch() int                  { return 3 }
 func (RegainComposureBlue) Attack() int                 { return 0 }
 func (RegainComposureBlue) Defense() int                { return 2 }

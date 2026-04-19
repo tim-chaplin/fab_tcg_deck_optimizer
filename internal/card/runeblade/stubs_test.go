@@ -11,7 +11,7 @@ type stubRunebladeAttack struct{}
 
 func (stubRunebladeAttack) ID() card.ID  { return card.Invalid }
 func (stubRunebladeAttack) Name() string { return "StubRunebladeAttack" }
-func (stubRunebladeAttack) Cost() int    { return 0 }
+func (stubRunebladeAttack) Cost(*card.TurnState) int    { return 0 }
 func (stubRunebladeAttack) Pitch() int   { return 0 }
 func (stubRunebladeAttack) Attack() int  { return 0 }
 func (stubRunebladeAttack) Defense() int { return 0 }
@@ -28,7 +28,7 @@ type stubRunebladeWeapon struct{}
 
 func (stubRunebladeWeapon) ID() card.ID  { return card.Invalid }
 func (stubRunebladeWeapon) Name() string { return "StubRunebladeWeapon" }
-func (stubRunebladeWeapon) Cost() int    { return 0 }
+func (stubRunebladeWeapon) Cost(*card.TurnState) int    { return 0 }
 func (stubRunebladeWeapon) Pitch() int   { return 0 }
 func (stubRunebladeWeapon) Attack() int  { return 0 }
 func (stubRunebladeWeapon) Defense() int { return 0 }
@@ -44,7 +44,7 @@ type stubNonAttack struct{}
 
 func (stubNonAttack) ID() card.ID              { return card.Invalid }
 func (stubNonAttack) Name() string             { return "StubNonAttack" }
-func (stubNonAttack) Cost() int                { return 0 }
+func (stubNonAttack) Cost(*card.TurnState) int                { return 0 }
 func (stubNonAttack) Pitch() int               { return 0 }
 func (stubNonAttack) Attack() int              { return 0 }
 func (stubNonAttack) Defense() int             { return 0 }
@@ -58,7 +58,7 @@ type stubNonRunebladeAttack struct{}
 
 func (stubNonRunebladeAttack) ID() card.ID  { return card.Invalid }
 func (stubNonRunebladeAttack) Name() string { return "StubNonRunebladeAttack" }
-func (stubNonRunebladeAttack) Cost() int    { return 0 }
+func (stubNonRunebladeAttack) Cost(*card.TurnState) int    { return 0 }
 func (stubNonRunebladeAttack) Pitch() int   { return 0 }
 func (stubNonRunebladeAttack) Attack() int  { return 0 }
 func (stubNonRunebladeAttack) Defense() int { return 0 }
@@ -77,7 +77,7 @@ type stubAttackWithPower struct {
 
 func (stubAttackWithPower) ID() card.ID          { return card.Invalid }
 func (stubAttackWithPower) Name() string         { return "StubAttackWithPower" }
-func (stubAttackWithPower) Cost() int            { return 0 }
+func (stubAttackWithPower) Cost(*card.TurnState) int            { return 0 }
 func (stubAttackWithPower) Pitch() int           { return 0 }
 func (s stubAttackWithPower) Attack() int        { return s.power }
 func (stubAttackWithPower) Defense() int         { return 0 }
@@ -93,7 +93,7 @@ type stubAura struct{}
 
 func (stubAura) ID() card.ID              { return card.Invalid }
 func (stubAura) Name() string             { return "StubAura" }
-func (stubAura) Cost() int                { return 0 }
+func (stubAura) Cost(*card.TurnState) int                { return 0 }
 func (stubAura) Pitch() int               { return 0 }
 func (stubAura) Attack() int              { return 0 }
 func (stubAura) Defense() int             { return 0 }

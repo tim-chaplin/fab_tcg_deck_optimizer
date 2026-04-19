@@ -31,7 +31,7 @@ type LifeForALifeRed struct{}
 
 func (LifeForALifeRed) ID() card.ID                  { return card.LifeForALifeRed }
 func (LifeForALifeRed) Name() string                 { return "Life for a Life (Red)" }
-func (LifeForALifeRed) Cost() int                    { return 1 }
+func (LifeForALifeRed) Cost(*card.TurnState) int                    { return 1 }
 func (LifeForALifeRed) Pitch() int                   { return 1 }
 func (LifeForALifeRed) Attack() int                  { return 4 }
 func (LifeForALifeRed) Defense() int                 { return 2 }
@@ -43,7 +43,7 @@ type LifeForALifeYellow struct{}
 
 func (LifeForALifeYellow) ID() card.ID                  { return card.LifeForALifeYellow }
 func (LifeForALifeYellow) Name() string                 { return "Life for a Life (Yellow)" }
-func (LifeForALifeYellow) Cost() int                    { return 1 }
+func (LifeForALifeYellow) Cost(*card.TurnState) int                    { return 1 }
 func (LifeForALifeYellow) Pitch() int                   { return 2 }
 func (LifeForALifeYellow) Attack() int                  { return 3 }
 func (LifeForALifeYellow) Defense() int                 { return 2 }
@@ -55,7 +55,7 @@ type LifeForALifeBlue struct{}
 
 func (LifeForALifeBlue) ID() card.ID                  { return card.LifeForALifeBlue }
 func (LifeForALifeBlue) Name() string                 { return "Life for a Life (Blue)" }
-func (LifeForALifeBlue) Cost() int                    { return 1 }
+func (LifeForALifeBlue) Cost(*card.TurnState) int                    { return 1 }
 func (LifeForALifeBlue) Pitch() int                   { return 3 }
 func (LifeForALifeBlue) Attack() int                  { return 2 }
 func (LifeForALifeBlue) Defense() int                 { return 2 }

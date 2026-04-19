@@ -31,7 +31,7 @@ type RavenousRabbleRed struct{}
 
 func (RavenousRabbleRed) ID() card.ID                 { return card.RavenousRabbleRed }
 func (RavenousRabbleRed) Name() string                { return "Ravenous Rabble (Red)" }
-func (RavenousRabbleRed) Cost() int                   { return 0 }
+func (RavenousRabbleRed) Cost(*card.TurnState) int                   { return 0 }
 func (RavenousRabbleRed) Pitch() int                  { return 1 }
 func (RavenousRabbleRed) Attack() int                 { return 5 }
 func (RavenousRabbleRed) Defense() int                { return 2 }
@@ -44,7 +44,7 @@ type RavenousRabbleYellow struct{}
 
 func (RavenousRabbleYellow) ID() card.ID                 { return card.RavenousRabbleYellow }
 func (RavenousRabbleYellow) Name() string                { return "Ravenous Rabble (Yellow)" }
-func (RavenousRabbleYellow) Cost() int                   { return 0 }
+func (RavenousRabbleYellow) Cost(*card.TurnState) int                   { return 0 }
 func (RavenousRabbleYellow) Pitch() int                  { return 2 }
 func (RavenousRabbleYellow) Attack() int                 { return 4 }
 func (RavenousRabbleYellow) Defense() int                { return 2 }
@@ -57,7 +57,7 @@ type RavenousRabbleBlue struct{}
 
 func (RavenousRabbleBlue) ID() card.ID                 { return card.RavenousRabbleBlue }
 func (RavenousRabbleBlue) Name() string                { return "Ravenous Rabble (Blue)" }
-func (RavenousRabbleBlue) Cost() int                   { return 0 }
+func (RavenousRabbleBlue) Cost(*card.TurnState) int                   { return 0 }
 func (RavenousRabbleBlue) Pitch() int                  { return 3 }
 func (RavenousRabbleBlue) Attack() int                 { return 3 }
 func (RavenousRabbleBlue) Defense() int                { return 2 }

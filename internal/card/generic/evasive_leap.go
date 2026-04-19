@@ -12,7 +12,7 @@ type EvasiveLeapRed struct{}
 
 func (EvasiveLeapRed) ID() card.ID                 { return card.EvasiveLeapRed }
 func (EvasiveLeapRed) Name() string             { return "Evasive Leap (Red)" }
-func (EvasiveLeapRed) Cost() int                { return 0 }
+func (EvasiveLeapRed) Cost(*card.TurnState) int                { return 0 }
 func (EvasiveLeapRed) Pitch() int               { return 1 }
 func (EvasiveLeapRed) Attack() int              { return 0 }
 func (EvasiveLeapRed) Defense() int             { return 3 }
@@ -24,7 +24,7 @@ type EvasiveLeapYellow struct{}
 
 func (EvasiveLeapYellow) ID() card.ID                 { return card.EvasiveLeapYellow }
 func (EvasiveLeapYellow) Name() string             { return "Evasive Leap (Yellow)" }
-func (EvasiveLeapYellow) Cost() int                { return 0 }
+func (EvasiveLeapYellow) Cost(*card.TurnState) int                { return 0 }
 func (EvasiveLeapYellow) Pitch() int               { return 2 }
 func (EvasiveLeapYellow) Attack() int              { return 0 }
 func (EvasiveLeapYellow) Defense() int             { return 2 }
@@ -36,7 +36,7 @@ type EvasiveLeapBlue struct{}
 
 func (EvasiveLeapBlue) ID() card.ID                 { return card.EvasiveLeapBlue }
 func (EvasiveLeapBlue) Name() string             { return "Evasive Leap (Blue)" }
-func (EvasiveLeapBlue) Cost() int                { return 0 }
+func (EvasiveLeapBlue) Cost(*card.TurnState) int                { return 0 }
 func (EvasiveLeapBlue) Pitch() int               { return 3 }
 func (EvasiveLeapBlue) Attack() int              { return 0 }
 func (EvasiveLeapBlue) Defense() int             { return 1 }

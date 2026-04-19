@@ -28,7 +28,7 @@ type PerformanceBonusRed struct{}
 
 func (PerformanceBonusRed) ID() card.ID                  { return card.PerformanceBonusRed }
 func (PerformanceBonusRed) Name() string                 { return "Performance Bonus (Red)" }
-func (PerformanceBonusRed) Cost() int                    { return 0 }
+func (PerformanceBonusRed) Cost(*card.TurnState) int                    { return 0 }
 func (PerformanceBonusRed) Pitch() int                   { return 1 }
 func (PerformanceBonusRed) Attack() int                  { return 3 }
 func (PerformanceBonusRed) Defense() int                 { return 2 }
@@ -40,7 +40,7 @@ type PerformanceBonusYellow struct{}
 
 func (PerformanceBonusYellow) ID() card.ID                  { return card.PerformanceBonusYellow }
 func (PerformanceBonusYellow) Name() string                 { return "Performance Bonus (Yellow)" }
-func (PerformanceBonusYellow) Cost() int                    { return 0 }
+func (PerformanceBonusYellow) Cost(*card.TurnState) int                    { return 0 }
 func (PerformanceBonusYellow) Pitch() int                   { return 2 }
 func (PerformanceBonusYellow) Attack() int                  { return 2 }
 func (PerformanceBonusYellow) Defense() int                 { return 2 }
@@ -52,7 +52,7 @@ type PerformanceBonusBlue struct{}
 
 func (PerformanceBonusBlue) ID() card.ID                  { return card.PerformanceBonusBlue }
 func (PerformanceBonusBlue) Name() string                 { return "Performance Bonus (Blue)" }
-func (PerformanceBonusBlue) Cost() int                    { return 0 }
+func (PerformanceBonusBlue) Cost(*card.TurnState) int                    { return 0 }
 func (PerformanceBonusBlue) Pitch() int                   { return 3 }
 func (PerformanceBonusBlue) Attack() int                  { return 1 }
 func (PerformanceBonusBlue) Defense() int                 { return 2 }

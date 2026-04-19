@@ -13,7 +13,7 @@ type BrutalAssaultRed struct{}
 
 func (BrutalAssaultRed) ID() card.ID                 { return card.BrutalAssaultRed }
 func (BrutalAssaultRed) Name() string                { return "Brutal Assault (Red)" }
-func (BrutalAssaultRed) Cost() int                   { return 2 }
+func (BrutalAssaultRed) Cost(*card.TurnState) int                   { return 2 }
 func (BrutalAssaultRed) Pitch() int                  { return 1 }
 func (BrutalAssaultRed) Attack() int                 { return 6 }
 func (BrutalAssaultRed) Defense() int                { return 3 }
@@ -25,7 +25,7 @@ type BrutalAssaultYellow struct{}
 
 func (BrutalAssaultYellow) ID() card.ID                 { return card.BrutalAssaultYellow }
 func (BrutalAssaultYellow) Name() string                { return "Brutal Assault (Yellow)" }
-func (BrutalAssaultYellow) Cost() int                   { return 2 }
+func (BrutalAssaultYellow) Cost(*card.TurnState) int                   { return 2 }
 func (BrutalAssaultYellow) Pitch() int                  { return 2 }
 func (BrutalAssaultYellow) Attack() int                 { return 5 }
 func (BrutalAssaultYellow) Defense() int                { return 3 }
@@ -37,7 +37,7 @@ type BrutalAssaultBlue struct{}
 
 func (BrutalAssaultBlue) ID() card.ID                 { return card.BrutalAssaultBlue }
 func (BrutalAssaultBlue) Name() string                { return "Brutal Assault (Blue)" }
-func (BrutalAssaultBlue) Cost() int                   { return 2 }
+func (BrutalAssaultBlue) Cost(*card.TurnState) int                   { return 2 }
 func (BrutalAssaultBlue) Pitch() int                  { return 3 }
 func (BrutalAssaultBlue) Attack() int                 { return 4 }
 func (BrutalAssaultBlue) Defense() int                { return 3 }

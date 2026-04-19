@@ -18,7 +18,7 @@ type NebulaBlade struct{}
 
 func (NebulaBlade) ID() card.ID               { return card.NebulaBladeID }
 func (NebulaBlade) Name() string              { return "Nebula Blade" }
-func (NebulaBlade) Cost() int                 { return 2 }
+func (NebulaBlade) Cost(*card.TurnState) int                 { return 2 }
 func (NebulaBlade) Pitch() int                { return 0 }
 func (NebulaBlade) Attack() int               { return 1 }
 func (NebulaBlade) Defense() int              { return 0 }

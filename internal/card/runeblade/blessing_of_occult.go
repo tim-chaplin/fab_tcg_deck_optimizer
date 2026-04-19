@@ -18,7 +18,7 @@ type BlessingOfOccultRed struct{}
 
 func (BlessingOfOccultRed) ID() card.ID                 { return card.BlessingOfOccultRed }
 func (BlessingOfOccultRed) Name() string              { return "Blessing of Occult (Red)" }
-func (BlessingOfOccultRed) Cost() int                 { return 1 }
+func (BlessingOfOccultRed) Cost(*card.TurnState) int                 { return 1 }
 func (BlessingOfOccultRed) Pitch() int                { return 1 }
 func (BlessingOfOccultRed) Attack() int               { return 0 }
 func (BlessingOfOccultRed) Defense() int              { return 2 }
@@ -30,7 +30,7 @@ type BlessingOfOccultYellow struct{}
 
 func (BlessingOfOccultYellow) ID() card.ID                 { return card.BlessingOfOccultYellow }
 func (BlessingOfOccultYellow) Name() string             { return "Blessing of Occult (Yellow)" }
-func (BlessingOfOccultYellow) Cost() int                { return 1 }
+func (BlessingOfOccultYellow) Cost(*card.TurnState) int                { return 1 }
 func (BlessingOfOccultYellow) Pitch() int               { return 2 }
 func (BlessingOfOccultYellow) Attack() int              { return 0 }
 func (BlessingOfOccultYellow) Defense() int             { return 2 }
@@ -42,7 +42,7 @@ type BlessingOfOccultBlue struct{}
 
 func (BlessingOfOccultBlue) ID() card.ID                 { return card.BlessingOfOccultBlue }
 func (BlessingOfOccultBlue) Name() string             { return "Blessing of Occult (Blue)" }
-func (BlessingOfOccultBlue) Cost() int                { return 1 }
+func (BlessingOfOccultBlue) Cost(*card.TurnState) int                { return 1 }
 func (BlessingOfOccultBlue) Pitch() int               { return 3 }
 func (BlessingOfOccultBlue) Attack() int              { return 0 }
 func (BlessingOfOccultBlue) Defense() int             { return 2 }

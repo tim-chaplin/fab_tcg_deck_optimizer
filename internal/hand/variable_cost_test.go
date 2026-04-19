@@ -47,11 +47,11 @@ func TestPlaySequence_SetsArcaneDamageDealtWhenRunechantsFire(t *testing.T) {
 	}
 }
 
-// TestPlaySequence_DiscountRejectsInsufficientBudget verifies that a DiscountPerRunechant card
+// TestPlaySequence_DiscountRejectsInsufficientBudget verifies that a variable-cost card
 // fails its per-play cost check when the sequence's resource budget can't cover the effective
 // cost.
 func TestPlaySequence_DiscountRejectsInsufficientBudget(t *testing.T) {
-	order := []card.Card{runeblade.AmplifyTheArknightRed{}} // PrintedCost 3, Cost() 0
+	order := []card.Card{runeblade.AmplifyTheArknightRed{}} // printed cost 3, MinCost 0
 	ctx := newSequenceContextForTest(hero.Viserai{}, nil, nil, 0, 0, len(order))
 	// Resource budget 0, carryover 0 → effective cost = 3 - 0 = 3 > 0, sequence illegal.
 	dmg, leftover, _, legal := ctx.playSequence(order, nil, nil)
@@ -206,10 +206,44 @@ func TestBest_ReduceToRunechantUnaffordableWithoutCarryover(t *testing.T) {
 	}
 }
 
+// TestBest_DiscountAttackerPaysByPitchWithoutCarryover: a variable-cost attack can be
+// played by pitching for the full printed cost when no Runechants are available. Amplify
+// (PrintedCost 3, Attack 6) + a pitch-3 card with zero carryover should land for 6.
+func TestBest_DiscountAttackerPaysByPitchWithoutCarryover(t *testing.T) {
+	h := []card.Card{runeblade.AmplifyTheArknightRed{}, fake.BlueAttack{}}
+	got := Best(stubHero{}, nil, h, 0, nil, 0 /* carryover */, nil)
+	if got.Value != 6 {
+		t.Errorf("Value = %d, want 6", got.Value)
+	}
+}
+
+// TestBest_DiscountAttackerPaysByPartialCarryoverAndTightPitch: Runechants cover part of the
+// printed cost, and a tight pitch covers the remainder. Amplify (PrintedCost 3, Attack 6) with
+// 2 carryover Runechants (effective cost 1) and a fake pitch-1 card should land for 6.
+func TestBest_DiscountAttackerPaysByPartialCarryoverAndTightPitch(t *testing.T) {
+	h := []card.Card{runeblade.AmplifyTheArknightRed{}, fake.RedAttack{}}
+	got := Best(stubHero{}, nil, h, 0, nil, 2 /* carryover */, nil)
+	if got.Value != 6 {
+		t.Errorf("Value = %d, want 6", got.Value)
+	}
+}
+
+// TestBest_DiscountDefenderPaysByPitchWithoutCarryover: a variable-cost defense
+// reaction can be played by pitching for the full printed cost when no Runechants are
+// available. Reduce (PrintedCost 1, Defense 4, creates one Runechant) + a fake pitch-1 card,
+// zero carryover, against 4 incoming should land for 5 (4 prevented + 1 for the created token).
+func TestBest_DiscountDefenderPaysByPitchWithoutCarryover(t *testing.T) {
+	h := []card.Card{runeblade.ReduceToRunechantRed{}, fake.RedAttack{}}
+	got := Best(stubHero{}, nil, h, 4, nil, 0 /* carryover */, nil)
+	if got.Value != 5 {
+		t.Errorf("Value = %d, want 5", got.Value)
+	}
+}
+
 // TestBest_CarryoverFeedsDiscount verifies end-to-end: a hand containing a discount attacker is
 // playable when the previous turn left enough runechants behind.
 func TestBest_CarryoverFeedsDiscount(t *testing.T) {
-	// Single Amplify the Arknight (Red): Cost()=0, PrintedCost=3, Attack()=6. With no pitch,
+	// Single Amplify the Arknight (Red): printed cost 3, MinCost 0, Attack 6. With no pitch,
 	// resource budget is 0. Without any runechants, effective cost 3 exceeds the budget — so
 	// attacking is illegal and Value should be 0.
 	h := []card.Card{runeblade.AmplifyTheArknightRed{}}

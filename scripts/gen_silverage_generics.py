@@ -553,7 +553,7 @@ def build_file(name, kind, printings, text):
             "",
             f"func ({sname}) ID() card.ID                 {{ return card.{id_name} }}",
             f"func ({sname}) Name() string                {{ return {json_str(name, color)} }}",
-            f"func ({sname}) Cost() int                   {{ return {pcost} }}",
+            f"func ({sname}) Cost(*card.TurnState) int    {{ return {pcost} }}",
             f"func ({sname}) Pitch() int                  {{ return {pitch} }}",
             f"func ({sname}) Attack() int                 {{ return {power} }}",
             f"func ({sname}) Defense() int                {{ return {defense} }}",
@@ -589,9 +589,9 @@ def next_attack_bonus_helper(ident_root, bonus, filt):
     var = f"{ident_root[0].lower()}{ident_root[1:]}"
     fn = f"{var}Play"
     pred_map = {
-        "cost<=2":  "pc.Card.Cost() <= 2",
-        "cost<=1":  "pc.Card.Cost() <= 1",
-        "cost>=2":  "pc.Card.Cost() >= 2",
+        "cost<=2":  "pc.Card.Cost(s) <= 2",
+        "cost<=1":  "pc.Card.Cost(s) <= 1",
+        "cost>=2":  "pc.Card.Cost(s) >= 2",
         "power<=3": "pc.Card.Attack() <= 3",
     }
     if filt == "any":
@@ -618,8 +618,8 @@ def next_attack_grant_ga_helper(name, ident_root, filt):
     var = f"{ident_root[0].lower()}{ident_root[1:]}"
     fn = f"{var}Play"
     pred_map = {
-        "cost<=2":  "pc.Card.Cost() <= 2",
-        "cost<=1":  "pc.Card.Cost() <= 1",
+        "cost<=2":  "pc.Card.Cost(s) <= 2",
+        "cost<=1":  "pc.Card.Cost(s) <= 1",
         "power<=3": "pc.Card.Attack() <= 3",
     }
     if name == "Flying High":

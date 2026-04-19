@@ -13,7 +13,7 @@ type MuscleMuttYellow struct{}
 
 func (MuscleMuttYellow) ID() card.ID                 { return card.MuscleMuttYellow }
 func (MuscleMuttYellow) Name() string                { return "Muscle Mutt (Yellow)" }
-func (MuscleMuttYellow) Cost() int                   { return 3 }
+func (MuscleMuttYellow) Cost(*card.TurnState) int                   { return 3 }
 func (MuscleMuttYellow) Pitch() int                  { return 2 }
 func (MuscleMuttYellow) Attack() int                 { return 6 }
 func (MuscleMuttYellow) Defense() int                { return 2 }
