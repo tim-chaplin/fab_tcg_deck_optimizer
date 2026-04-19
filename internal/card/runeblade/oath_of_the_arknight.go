@@ -54,11 +54,7 @@ func (OathOfTheArknightBlue) Play(s *card.TurnState) int { return oathPlay(s, 1)
 func oathPlay(s *card.TurnState, n int) int {
 	bonus := 0
 	for _, pc := range s.CardsRemaining {
-		t := pc.Card.Types()
-		if !t.Has(card.TypeRuneblade) {
-			continue
-		}
-		if t.Has(card.TypeAttack) || t.Has(card.TypeWeapon) {
+		if pc.Card.Types().IsRunebladeAttack() {
 			bonus = n
 			break
 		}
