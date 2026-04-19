@@ -57,7 +57,7 @@ func (c RuneragerSwarmBlue) Play(s *card.TurnState) int {
 }
 
 func runeragerSwarmPlay(base int, s *card.TurnState) int {
-	if s.AuraCreated || s.HasPlayedType(card.TypeAura) {
+	if s.HasAuraInPlay() {
 		s.Self.GrantedGoAgain = true
 	}
 	return base
