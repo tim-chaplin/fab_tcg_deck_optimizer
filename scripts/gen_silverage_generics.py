@@ -263,7 +263,7 @@ MODELED_BLOCKS = {
     "Test of Strength": dict(
         helper="",
         call="card.ClashValue(s, card.GoldTokenValue)",
-        simp="Clash is modelled via card.ClashValue with a fixed-opponent heuristic: we win (+GoldTokenValue) when our deck's top-card attack is 6-7, tie at 5, lose (-GoldTokenValue) below. Block is typed as a Defense Reaction so the solver invokes Play during the defensive chain, making state.Deck available for the peek.",
+        simp="Rider modelled: Gold token to the Clash winner, staked at card.GoldTokenValue via card.ClashValue.",
     ),
 }
 

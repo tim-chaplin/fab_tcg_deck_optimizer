@@ -2,10 +2,8 @@
 //
 // Text: "When this defends, **clash** with the attacking hero. The winner creates a Gold token."
 //
-// Clash is modelled via card.ClashValue with a fixed-opponent heuristic: we win (+GoldTokenValue)
-// when our deck's top-card attack is 6 or 7, tie (0) at 5, lose (-GoldTokenValue — the Gold
-// token accrues to the opponent instead) at 4 or below. Block is typed as a Defense Reaction so
-// the solver invokes Play during the defensive chain, making state.Deck available for the peek.
+// Rider modelled: Gold token to the Clash winner, staked at card.GoldTokenValue via
+// card.ClashValue.
 //
 // Source: github.com/the-fab-cube/flesh-and-blood-cards (card.csv).
 
