@@ -49,6 +49,7 @@ func main() {
 	seed := flag.Int64("seed", time.Now().UnixNano(), "RNG seed")
 	deckName := flag.String("deck", "", "deck name; resolved to mydecks/<name>.json (\".json\" suffix optional). Defaults to <hero>_<format>_<incoming>_incoming so different (hero, format, -incoming) regimes keep separate deck files. Ignored by the import subcommand, which always prompts interactively.")
 	formatFlag := flag.String("format", string(fmtpkg.SilverAge), "constructed format whose banlist restricts the card pool during search (only \"silver_age\" is supported today)")
+	debug := flag.Bool("debug", false, "emit extra diagnostic output (e.g. memo cache size between iterate rounds)")
 	flag.Parse()
 	// Positional args after the subcommand are rejected — `fabsim eval mydeck` silently ignoring
 	// the deck name (rather than treating it as -deck mydeck) wasted a long run during testing.
@@ -94,6 +95,7 @@ func main() {
 		seed:            *seed,
 		outPath:         outPath,
 		format:          fmtValue,
+		debug:           *debug,
 	}
 
 	switch subcommand {
@@ -161,6 +163,7 @@ type config struct {
 	seed            int64
 	outPath         string
 	format          fmtpkg.Format
+	debug           bool
 }
 
 // legalFilter returns the card-pool predicate for this run's format. Passed to deck.Random and

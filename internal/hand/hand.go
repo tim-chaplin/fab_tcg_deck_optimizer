@@ -356,8 +356,15 @@ func (e *Evaluator) Best(hero hero.Hero, weapons []weapon.Weapon, hand []card.Ca
 	}
 	result := e.bestUncached(hero, weapons, hand, incomingDamage, deck, runechantCarryover, arsenalCardIn)
 	if memoable {
+		// Store a trimmed copy: drop AttackChain to shrink per-entry memory. The chain is only
+		// consumed when the caller clones `play` into Stats.Best on a new-best hand (see
+		// deck.go:461-464), and a cache hit can never be a new best — same memoKey produces the
+		// same Value, so the first encounter already claimed (or lost) that race. Every other
+		// read path (per-card stats, recycle) uses BestLine, which we keep.
+		thin := result
+		thin.AttackChain = nil
 		memoMu.Lock()
-		memo[key] = result
+		memo[key] = thin
 		memoMu.Unlock()
 	}
 	return result
@@ -431,13 +438,23 @@ var (
 	memoMu sync.RWMutex
 )
 
-// ClearMemo drops every cached TurnSummary. Intended for benchmarks that want each sample to
-// start from a cold cache so they measure the same work regardless of what ran before. Not part
-// of the production path — the sim never benefits from discarding memoised work mid-run.
+// ClearMemo drops every cached TurnSummary. Called between iterate rounds (mode_iterate.go) so
+// the map doesn't grow unboundedly across a long hill-climb run — cross-round hit rate is near
+// zero anyway since each round's deck has a different card composition. Also used by benchmarks
+// that want each sample to start from a cold cache.
 func ClearMemo() {
 	memoMu.Lock()
 	clear(memo)
 	memoMu.Unlock()
+}
+
+// MemoLen returns the current number of cached entries. Used by iterate to log memo pressure
+// between rounds.
+func MemoLen() int {
+	memoMu.RLock()
+	n := len(memo)
+	memoMu.RUnlock()
+	return n
 }
 
 // makeMemoKey builds a comparable memo key. The hand must already be sorted by card ID.

@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/deck"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/hand"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/hero"
 )
 
@@ -30,6 +31,15 @@ func runIterate(cfg config) {
 	start := time.Now()
 	for {
 		round++
+		// Drop the shared hand memo between rounds. Within a round the memo is load-bearing
+		// (same hand shapes recur across thousands of shuffles), but cross-round hit rate is
+		// near zero — every round tests mutations of a different `best`, so past entries rarely
+		// match. Without this the map grew ~1M+ entries over a long hill-climb and eventually
+		// OOM'd the machine.
+		if cfg.debug {
+			fmt.Fprintf(os.Stderr, "[memo] clearing %d entries before round %d\n", hand.MemoLen(), round)
+		}
+		hand.ClearMemo()
 		mutations := deck.AllMutations(best, cfg.maxCopies, cfg.legalFilter())
 		fmt.Fprintf(os.Stderr, "\n[round %d] evaluating %d mutations of avg %.3f\n",
 			round, len(mutations), bestAvg)
