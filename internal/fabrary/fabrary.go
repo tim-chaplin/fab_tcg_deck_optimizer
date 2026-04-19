@@ -61,7 +61,6 @@ func Unmarshal(text string) (*deck.Deck, map[string]int, error) {
 		cardList []card.Card
 		skipped  = map[string]int{}
 	)
-	wReg := weaponsByName()
 
 	sc := bufio.NewScanner(strings.NewReader(text))
 	for sc.Scan() {
@@ -96,7 +95,7 @@ func Unmarshal(text string) (*deck.Deck, map[string]int, error) {
 		}
 		switch section {
 		case "arena":
-			if w, ok := wReg[name]; ok {
+			if w, ok := cards.WeaponByName(name); ok {
 				for i := 0; i < qty; i++ {
 					weapons = append(weapons, w)
 				}
@@ -205,10 +204,3 @@ func fromFabraryCardName(s string) string {
 	return s
 }
 
-func weaponsByName() map[string]weapon.Weapon {
-	m := make(map[string]weapon.Weapon, len(cards.AllWeapons))
-	for _, w := range cards.AllWeapons {
-		m[w.Name()] = w
-	}
-	return m
-}
