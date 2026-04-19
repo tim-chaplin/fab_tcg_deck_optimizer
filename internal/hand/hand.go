@@ -482,6 +482,18 @@ func attackerMetaFor(c card.Card) attackerMeta {
 	return cardMetaSlowPath(c, id)
 }
 
+// attackerMetaPtrFor is the pointer-returning counterpart of attackerMetaFor: it hands back a
+// direct pointer into the global cache so permutation swaps move 8 bytes instead of a full
+// attackerMeta struct. The target is read-only after initialisation.
+func attackerMetaPtrFor(c card.Card) *attackerMeta {
+	id := c.ID()
+	if atomic.LoadUint32(&cardMetaReady[id]) == 1 {
+		return &cardMetaCache[id]
+	}
+	cardMetaSlowPath(c, id)
+	return &cardMetaCache[id]
+}
+
 // cardMetaSlowPath populates the cache entry under cardMetaMu and returns the computed meta.
 func cardMetaSlowPath(c card.Card, id card.ID) attackerMeta {
 	cardMetaMu.Lock()
@@ -520,10 +532,10 @@ type attackBufs struct {
 	// weaponCosts[mask] is total Cost; weaponNames[mask] is the pre-built []string of names.
 	weaponCosts []int
 	weaponNames [][]string
-	// permMeta is parallel to perm: precomputed scalar metadata per attacker so playSequence's
-	// inner loop skips interface dispatch on Types / Cost / GoAgain / the DiscountPerRunechant
-	// assertion. Populated and permuted in lockstep with perm by bestSequence.
-	permMeta []attackerMeta
+	// permMeta is parallel to perm: each entry points into the global cardMetaCache so per-card
+	// metadata lookup skips interface dispatch. Pointer-valued so permutation swaps move 8 bytes
+	// rather than a full attackerMeta struct.
+	permMeta []*attackerMeta
 	// Partition-loop buffers, consumed by bestUncached. Sized handSize+1 to cover the optional
 	// arsenal-in slot the enumerator treats as index n. defendPrintedVals holds PrintedCost for
 	// DiscountPerRunechant defense reactions (post-attack discount re-pricing); non-discount
@@ -579,11 +591,18 @@ func newAttackBufs(handSize, weaponCount int, weapons []weapon.Weapon) *attackBu
 		weaponCosts[mask] = cost
 		weaponNames[mask] = names
 	}
+	pcBuf := make([]card.PlayedCard, maxAttackers)
+	ptrBuf := make([]*card.PlayedCard, maxAttackers)
+	// Wire the ptrBuf entries to their pcBuf slots once — the mapping is stable across every
+	// permutation so playSequenceWithMeta doesn't need to rewrite it per call.
+	for i := range pcBuf {
+		ptrBuf[i] = &pcBuf[i]
+	}
 	return &attackBufs{
 		perm:                   make([]card.Card, maxAttackers),
-		permMeta:               make([]attackerMeta, maxAttackers),
-		pcBuf:                  make([]card.PlayedCard, maxAttackers),
-		ptrBuf:                 make([]*card.PlayedCard, maxAttackers),
+		permMeta:               make([]*attackerMeta, maxAttackers),
+		pcBuf:                  pcBuf,
+		ptrBuf:                 ptrBuf,
 		cardsPlayedBuf:         make([]card.Card, 0, maxAttackers),
 		state:                  &card.TurnState{},
 		attackerBuf:            make([]card.Card, maxAttackers),
@@ -1165,7 +1184,7 @@ func (ctx *sequenceContext) bestSequence(attackers, winnerOrderOut []card.Card, 
 	permMeta := ctx.bufs.permMeta[:n]
 	copy(perm, attackers)
 	for idx, c := range attackers {
-		permMeta[idx] = attackerMetaFor(c)
+		permMeta[idx] = attackerMetaPtrFor(c)
 	}
 
 	// Scratch buffers are playSequence's per-card outputs, overwritten every permutation. On a
@@ -1262,7 +1281,7 @@ func (ctx *sequenceContext) bestSequence(attackers, winnerOrderOut []card.Card, 
 func (ctx *sequenceContext) playSequence(order []card.Card, perCardOut, perCardTriggerOut []float64) (damage int, leftoverRunechants int, residualBudget int, legal bool) {
 	meta := ctx.bufs.permMeta[:len(order)]
 	for i, c := range order {
-		meta[i] = attackerMetaFor(c)
+		meta[i] = attackerMetaPtrFor(c)
 	}
 	return ctx.playSequenceWithMeta(order, perCardOut, perCardTriggerOut)
 }
@@ -1275,9 +1294,10 @@ func (ctx *sequenceContext) playSequenceWithMeta(order []card.Card, perCardOut, 
 	pcBuf := ctx.bufs.pcBuf
 	ptrBuf := ctx.bufs.ptrBuf
 	meta := ctx.bufs.permMeta[:n]
+	// ptrBuf entries point at the matching pcBuf slots permanently (wired once in newAttackBufs),
+	// so only the per-permutation Card and the zeroed GrantedGoAgain need refreshing here.
 	for i, c := range order {
 		pcBuf[i] = card.PlayedCard{Card: c}
-		ptrBuf[i] = &pcBuf[i]
 		if perCardOut != nil {
 			perCardOut[i] = 0
 		}
