@@ -1,13 +1,13 @@
 package card
 
-// ID uniquely identifies a printed card. The zero value (Invalid) is reserved so that a zero-
-// valued ID in other data structures can be detected as "unset".
+// ID uniquely identifies a printed card. The zero value (Invalid) is reserved so zero-valued
+// IDs in other data structures can be detected as "unset".
 //
-// IDs are stable within a single build but are NOT a persistence format: adding or removing cards
-// may renumber existing entries. Treat IDs as opaque in-process handles.
+// IDs are stable within a build but NOT a persistence format: adding or removing cards may
+// renumber existing entries. Treat IDs as opaque in-process handles.
 //
-// Each pitch variant (Red / Yellow / Blue) of a printed card is a distinct card and gets its own
-// ID. Weapons get IDs too so that every Card implementation has a unique, non-zero identifier.
+// Each pitch variant (Red / Yellow / Blue) is a distinct card and gets its own ID. Weapons get
+// IDs too so every Card implementation has a unique, non-zero identifier.
 type ID uint16
 
 // Invalid is the sentinel zero value. Valid IDs start at 1.
@@ -482,8 +482,8 @@ const (
 	ReapingBladeID
 	ScepterOfPainID
 
-	// Test-only synthetic card IDs. Registered so that hand.Best's cache key lookup doesn't panic
-	// on them. Not real FaB cards and should not be used in production decks.
+	// Test-only synthetic card IDs. Registered so hand.Best's cache key lookup doesn't panic on
+	// them. Not real FaB cards and must not appear in production decks.
 	FakeRedAttack
 	FakeBlueAttack
 )

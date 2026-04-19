@@ -16,8 +16,7 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/weapon"
 )
 
-// heroesByName is the fixed registry used to resolve Hero names during deserialization. Add new
-// heroes here as they're implemented.
+// heroesByName resolves Hero names during deserialization. Add new heroes here as implemented.
 var heroesByName = map[string]hero.Hero{
 	(hero.Viserai{}).Name(): hero.Viserai{},
 }
@@ -317,11 +316,10 @@ func bestTurnFromJSON(bj BestTurnJSON) (deck.BestTurn, error) {
 }
 
 // rebuildAttackChain reconstructs TurnSummary.AttackChain from the JSON form. When the file has
-// an explicit Chain array (written by bestTurnToJSON after this change), we use it — it carries
-// the real play order plus per-step damage and hero-trigger damage, which FormatBestTurn needs
-// to render "+N" contribution labels correctly. Files written before this change have no Chain;
-// we fall back to the legacy rebuild (hand-order Attack-role cards then weapons) so old decks
-// still load, just with "+0" labels for damage (same as they always had).
+// an explicit Chain array we use it: it carries true play order plus per-step damage and
+// hero-trigger damage, which FormatBestTurn needs to render "+N" contribution labels. Files
+// without a Chain field fall back to a best-effort rebuild (hand-order Attack-role cards then
+// weapons) so they still load, though damage labels will all read "+0".
 func rebuildAttackChain(bj BestTurnJSON, line []hand.CardAssignment) ([]hand.AttackChainEntry, error) {
 	weaponReg := weaponsByName()
 	if len(bj.Chain) > 0 {

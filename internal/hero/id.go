@@ -1,13 +1,13 @@
 package hero
 
-// ID uniquely identifies a hero printing. The zero value (Invalid) is reserved so that a
-// zero-valued ID in other data structures can be detected as "unset".
+// ID uniquely identifies a hero printing. The zero value (Invalid) is reserved so zero-valued
+// IDs in other data structures can be detected as "unset".
 //
-// IDs are stable within a single build but are NOT a persistence format: adding or removing
-// heroes may renumber existing entries. Treat IDs as opaque in-process handles.
+// IDs are stable within a build but NOT a persistence format: adding or removing heroes may
+// renumber existing entries. Treat IDs as opaque in-process handles.
 //
-// Mirrors the shape of card.ID so code that keys on (hero, …) tuples can use a fixed-size integer
-// instead of the hero's display name.
+// Mirrors card.ID so code keying on (hero, …) tuples can use a fixed-size integer struct
+// instead of the display name.
 type ID uint16
 
 // Invalid is the sentinel zero value. Valid IDs start at 1.
