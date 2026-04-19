@@ -36,10 +36,10 @@ func runIterate(cfg config) {
 		// near zero — every round tests mutations of a different `best`, so past entries rarely
 		// match. Without this the map grew ~1M+ entries over a long hill-climb and eventually
 		// OOM'd the machine.
-		if memoSize := hand.MemoLen(); memoSize > 0 {
-			fmt.Fprintf(os.Stderr, "[memo] clearing %d entries before round %d\n", memoSize, round)
-			hand.ClearMemo()
+		if cfg.debug {
+			fmt.Fprintf(os.Stderr, "[memo] clearing %d entries before round %d\n", hand.MemoLen(), round)
 		}
+		hand.ClearMemo()
 		mutations := deck.AllMutations(best, cfg.maxCopies, cfg.legalFilter())
 		fmt.Fprintf(os.Stderr, "\n[round %d] evaluating %d mutations of avg %.3f\n",
 			round, len(mutations), bestAvg)
