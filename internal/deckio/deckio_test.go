@@ -62,10 +62,9 @@ func TestMarshalUnmarshalRoundTrip(t *testing.T) {
 	}
 }
 
-// TestRoundTrip_PreservesBestTurnContributions pins the fix for "loaded deck's best-turn display
-// shows +0 everywhere": the JSON form now serialises per-card Contribution alongside Hand/Roles
-// and an ordered AttackChain with per-step Damage / TriggerDamage, so re-loading a deck gives
-// FormatBestTurn the same per-card numbers the live sim produced.
+// TestRoundTrip_PreservesBestTurnContributions locks in that per-card Contribution and the
+// AttackChain's per-step Damage / TriggerDamage round-trip through Marshal/Unmarshal, so a
+// reloaded deck renders with the same per-card numbers the live sim produced.
 func TestRoundTrip_PreservesBestTurnContributions(t *testing.T) {
 	rng := rand.New(rand.NewSource(7))
 	d := deck.Random(hero.Viserai{}, 40, 2, rng, nil)
