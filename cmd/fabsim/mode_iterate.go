@@ -23,9 +23,9 @@ func runIterate(cfg config) {
 	defer cancel()
 	watchStdinForAbort(cancel)
 
-	// Deterministic hill-climb: enumerate every single-slot mutation of the current best. On the
-	// first mutation that scores higher, adopt it and restart enumeration from the new best. If
-	// we exhaust every mutation with no improvement, we're at a local maximum.
+	// Deterministic hill-climb: enumerate every single-slot mutation of the current best, adopt
+	// the first mutation that scores higher, and restart enumeration. Exhausting every mutation
+	// with no improvement means we're at a local maximum.
 	round := 0
 	improvements := 0
 	start := time.Now()
@@ -33,9 +33,8 @@ func runIterate(cfg config) {
 		round++
 		// Drop the shared hand memo between rounds. Within a round the memo is load-bearing
 		// (same hand shapes recur across thousands of shuffles), but cross-round hit rate is
-		// near zero — every round tests mutations of a different `best`, so past entries rarely
-		// match. Without this the map grew ~1M+ entries over a long hill-climb and eventually
-		// OOM'd the machine.
+		// near zero — every round tests mutations of a different best, so old entries rarely
+		// match and unbounded growth would OOM long hill-climbs.
 		if cfg.debug {
 			fmt.Fprintf(os.Stderr, "[memo] clearing %d entries before round %d\n", hand.MemoLen(), round)
 		}
@@ -77,10 +76,10 @@ func runIterate(cfg config) {
 	}
 }
 
-// prepareBaseline returns the starting deck for the hill climb along with its deep-shuffles avg.
-// Three cases: no deck on disk (generate random + evaluate), loaded deck evaluated at fewer than
-// deepShuffles (re-evaluate at current depth for apples-to-apples), or loaded deck already deep-
-// evaluated (use as-is).
+// prepareBaseline returns the starting deck for the hill climb with its deep-shuffles avg. Three
+// cases: no deck on disk (generate random + evaluate), loaded deck evaluated at fewer than
+// deepShuffles (re-evaluate for apples-to-apples baseline), or loaded deck already deep-evaluated
+// (use as-is).
 func prepareBaseline(cfg config, rng *rand.Rand) (*deck.Deck, float64) {
 	best, bestAvg := loadExisting(cfg.outPath)
 	if best == nil {
@@ -104,11 +103,10 @@ func prepareBaseline(cfg config, rng *rand.Rand) (*deck.Deck, float64) {
 	return best, bestAvg
 }
 
-// watchStdinForAbort spawns a background goroutine that reads stdin and calls cancel() on the
-// first keypress. EOF / closed stdin isn't an abort signal (otherwise iterate would exit
-// immediately when stdin isn't a TTY) — only an actual read of at least one byte counts.
-// Cancelling the context propagates into IterateParallel so an abort takes effect mid-round
-// rather than waiting for the current round to finish.
+// watchStdinForAbort spawns a background goroutine that calls cancel() on the first keypress.
+// EOF / closed stdin isn't an abort (so iterate doesn't exit immediately on non-TTY stdin); only
+// a successful read of at least one byte counts. Cancellation propagates into IterateParallel so
+// an abort takes effect mid-round.
 func watchStdinForAbort(cancel context.CancelFunc) {
 	go func() {
 		buf := make([]byte, 1)
@@ -118,10 +116,9 @@ func watchStdinForAbort(cancel context.CancelFunc) {
 	}()
 }
 
-// startRoundTicker launches a 500ms ticker that renders the current round's progress — both the
-// shallow-screen count and the deep-confirm count — to stderr on a CR-terminated line, so the
-// user sees the worker pool moving even during long rounds. Returns a stop function the caller
-// must call once the round finishes.
+// startRoundTicker launches a 500ms ticker that renders the round's shallow-screen and
+// deep-confirm counts to stderr on a \r-terminated line so the user sees the worker pool moving
+// during long rounds. Returns a stop function the caller must call when the round finishes.
 func startRoundTicker(round, total int, start time.Time, tested, deepsDone *atomic.Int64) func() {
 	done := make(chan struct{})
 	go func() {

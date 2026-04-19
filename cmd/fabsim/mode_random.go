@@ -78,8 +78,8 @@ func runRandom(cfg config) {
 	}
 }
 
-// summarize returns (min, median, max) of vs. Panics if vs is empty. Median of an even-length
-// slice is the mean of the two middle elements.
+// summarize returns (min, median, max) of vs. Panics if vs is empty. For even-length vs, median
+// is the mean of the two middle elements.
 func summarize(vs []float64) (min, median, max float64) {
 	sorted := make([]float64, len(vs))
 	copy(sorted, vs)
@@ -95,8 +95,8 @@ func summarize(vs []float64) (min, median, max float64) {
 	return
 }
 
-// printProgress renders a single-line progress bar to stderr, overwriting itself with \r.
-// Shows deck count, percent, elapsed time, and ETA based on the average per-deck time so far.
+// printProgress renders a single-line \r-overwriting progress bar to stderr. Shows deck count,
+// percent, elapsed time, and ETA from average per-deck time so far.
 func printProgress(done, total int, elapsed time.Duration) {
 	const width = 30
 	frac := float64(done) / float64(total)
@@ -110,7 +110,7 @@ func printProgress(done, total int, elapsed time.Duration) {
 		bar, done, total, frac*100, elapsed.Truncate(time.Second), eta.Truncate(time.Second))
 }
 
-// saveIfBetter writes d to outPath if its average exceeds the previously saved deck (or if no
+// saveIfBetter writes d to outPath if its average exceeds the previously saved deck (or no
 // previous deck exists). Prints a status line either way.
 func saveIfBetter(d *deck.Deck, outPath string) {
 	prev, prevAvg := loadExisting(outPath)
