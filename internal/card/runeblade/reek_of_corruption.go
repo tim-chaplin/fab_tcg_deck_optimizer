@@ -17,14 +17,11 @@ import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 
 var reekOfCorruptionTypes = card.NewTypeSet(card.TypeRuneblade, card.TypeAction, card.TypeAttack)
 
-// reekDiscardBonus is the damage-equivalent credited when the on-hit discard rider fires.
-const reekDiscardBonus = 3
-
 // reekOfCorruptionDamage returns the base attack plus the discard rider when the aura condition
 // is satisfied AND this card's printed attack is likely to land on its own.
 func reekOfCorruptionDamage(attack int, s *card.TurnState) int {
 	if s != nil && s.HasAuraInPlay() && card.LikelyToHit(attack) {
-		return attack + reekDiscardBonus
+		return attack + card.DiscardValue
 	}
 	return attack
 }

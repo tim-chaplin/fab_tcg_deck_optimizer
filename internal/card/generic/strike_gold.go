@@ -14,15 +14,11 @@ import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 
 var strikeGoldTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeAttack)
 
-// strikeGoldTokenValue is the damage-equivalent credited when a Gold token is created (one free
-// resource ≈ 1 point of value).
-const strikeGoldTokenValue = 1
-
 // strikeGoldDamage returns the base attack plus the Gold-token rider when the attack is likely
 // to land.
 func strikeGoldDamage(attack int) int {
 	if card.LikelyToHit(attack) {
-		return attack + strikeGoldTokenValue
+		return attack + card.GoldTokenValue
 	}
 	return attack
 }

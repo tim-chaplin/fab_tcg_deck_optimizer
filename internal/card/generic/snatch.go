@@ -15,14 +15,11 @@ import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 
 var snatchTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeAttack)
 
-// snatchDrawValue is the damage-equivalent credited when the "draw a card" rider fires.
-const snatchDrawValue = 3
-
 // snatchDamage returns the base attack plus the draw-on-hit rider when the attack is likely to
 // land.
 func snatchDamage(attack int) int {
 	if card.LikelyToHit(attack) {
-		return attack + snatchDrawValue
+		return attack + card.DrawValue
 	}
 	return attack
 }

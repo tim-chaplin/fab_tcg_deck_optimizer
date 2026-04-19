@@ -7,11 +7,11 @@ import (
 )
 
 // TestStrikeGold_LikelyHitCreditsToken: Red (4) is the only variant whose printed attack lands
-// in the likely-to-hit set; the Gold-token rider credits +1.
+// in the likely-to-hit set; the Gold-token rider credits card.GoldTokenValue.
 func TestStrikeGold_LikelyHitCreditsToken(t *testing.T) {
 	var s card.TurnState
-	if got := (StrikeGoldRed{}).Play(&s); got != 4+1 {
-		t.Errorf("Red: Play() = %d, want 5 (4 likely to hit + 1 Gold)", got)
+	if got := (StrikeGoldRed{}).Play(&s); got != 4+card.GoldTokenValue {
+		t.Errorf("Red: Play() = %d, want %d (4 likely to hit + GoldTokenValue)", got, 4+card.GoldTokenValue)
 	}
 }
 

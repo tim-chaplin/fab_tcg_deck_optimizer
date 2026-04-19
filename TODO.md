@@ -10,6 +10,15 @@ favour cards whose printed stats are backed up by conditional riders. In the fut
 to apply a discount (e.g. 50%) to the value contributed by these conditions rather than treating
 them as fully active.
 
+### Fully model effects where we currently just credit an integer value
+
+`internal/card/effect_values.go` centralises the damage-equivalents we use as stand-ins for
+"draw a card" (3), "force opponent discard" (3), and "create a Gold token" (1). These are
+simplifications — the sim never actually draws a card, forces a discard, or tracks Gold. When
+we model the real state (hand, graveyard, Gold-token pool, opposing hand size), the rider
+implementations can cash out into actual future-turn tempo instead of a flat integer, and the
+`effect_values.go` constants should disappear.
+
 ### LikelyToHit breadcrumbs — on-hit riders awaiting modelling
 
 Each of the generic attacks below has a `func <card>Damage(attack int) int` helper with an

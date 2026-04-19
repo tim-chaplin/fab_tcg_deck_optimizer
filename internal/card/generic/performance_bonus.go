@@ -15,14 +15,11 @@ import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 
 var performanceBonusTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeAttack)
 
-// performanceBonusTokenValue is the damage-equivalent credited when the on-hit Gold token fires.
-const performanceBonusTokenValue = 1
-
 // performanceBonusDamage returns the base attack plus the Gold-token rider when the attack is
 // likely to land.
 func performanceBonusDamage(attack int) int {
 	if card.LikelyToHit(attack) {
-		return attack + performanceBonusTokenValue
+		return attack + card.GoldTokenValue
 	}
 	return attack
 }

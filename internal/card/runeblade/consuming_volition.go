@@ -17,14 +17,11 @@ import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 
 var consumingVolitionTypes = card.NewTypeSet(card.TypeRuneblade, card.TypeAction, card.TypeAttack)
 
-// discardRiderValue is the damage-equivalent credited when the "discard a card" rider fires.
-const discardRiderValue = 3
-
 // consumingVolitionDamage returns the base attack plus the discard rider when ArcaneDamageDealt
 // is set AND this card's printed attack is likely to land on its own.
 func consumingVolitionDamage(attack int, s *card.TurnState) int {
 	if s != nil && s.ArcaneDamageDealt && card.LikelyToHit(attack) {
-		return attack + discardRiderValue
+		return attack + card.DiscardValue
 	}
 	return attack
 }
