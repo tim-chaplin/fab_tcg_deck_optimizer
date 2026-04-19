@@ -4,10 +4,10 @@
 // Text: "If you have played or created an aura this turn, Reek of Corruption gains 'When this
 // hits a hero, they discard a card.'"
 //
-// Simplifications:
-//   - Aura condition checked at Play time via s.AuraCreated || s.HasPlayedType(TypeAura). When
-//     true, on-hit discard is valued at +3; otherwise printed attack alone.
-//   - Assumes the attack hits when the rider fires.
+// Aura condition checked via s.HasAuraInPlay(). The "when this hits a hero" discard rider fires
+// only when the aura clause is satisfied AND this card's printed attack is likely to land
+// (1/4/7 per card.LikelyToHit). Runechants alongside don't count — "this hits" is strictly
+// about this card's damage reaching the hero. On-hit discard credits +3.
 //
 // Source: github.com/the-fab-cube/flesh-and-blood-cards (card.csv).
 
@@ -21,9 +21,9 @@ var reekOfCorruptionTypes = card.NewTypeSet(card.TypeRuneblade, card.TypeAction,
 const reekDiscardBonus = 3
 
 // reekOfCorruptionDamage returns the base attack plus the discard rider when the aura condition
-// is satisfied.
+// is satisfied AND this card's printed attack is likely to land on its own.
 func reekOfCorruptionDamage(attack int, s *card.TurnState) int {
-	if s != nil && s.HasAuraInPlay() {
+	if s != nil && s.HasAuraInPlay() && card.LikelyToHit(attack) {
 		return attack + reekDiscardBonus
 	}
 	return attack
