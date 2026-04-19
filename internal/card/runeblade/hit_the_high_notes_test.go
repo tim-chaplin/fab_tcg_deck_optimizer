@@ -63,11 +63,11 @@ func TestHitTheHighNotes_AuraCreatedTriggersBonus(t *testing.T) {
 	}
 }
 
-// TestHitTheHighNotes_RunechantRescuesBlockableBuff: a lone Runechant firing alongside is
-// likely to slip through, which counts the attack as connecting and credits the buff.
-func TestHitTheHighNotes_RunechantRescuesBlockableBuff(t *testing.T) {
+// TestHitTheHighNotes_RunechantsDontRescueBuff: the +2{p} is a physical buff; runechants firing
+// alongside are a separate arcane stream and don't change whether the physical attack hits.
+func TestHitTheHighNotes_RunechantsDontRescueBuff(t *testing.T) {
 	s := card.TurnState{CardsPlayed: []card.Card{stubAura{}}, Runechants: 1}
-	if got := (HitTheHighNotesRed{}).Play(&s); got != 4+2 {
-		t.Errorf("Red with aura + 1 Runechant: Play() = %d, want 6", got)
+	if got := (HitTheHighNotesRed{}).Play(&s); got != 4 {
+		t.Errorf("Red with aura + 1 Runechant: Play() = %d, want 4 (buff physical, arcane separate)", got)
 	}
 }

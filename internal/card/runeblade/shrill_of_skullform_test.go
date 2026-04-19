@@ -54,11 +54,12 @@ func TestShrillOfSkullform_BlockableBuffedTotalSuppressesBonus(t *testing.T) {
 	}
 }
 
-// TestShrillOfSkullform_RunechantRescuesBlockableBuff: a lone Runechant firing alongside is
-// likely to slip through, qualifying the buff even on an otherwise-blockable variant.
-func TestShrillOfSkullform_RunechantRescuesBlockableBuff(t *testing.T) {
+// TestShrillOfSkullform_RunechantsDontRescueBuff: the +3{p} is a physical buff; runechants
+// firing alongside are a separate arcane stream and don't change whether the physical attack
+// hits.
+func TestShrillOfSkullform_RunechantsDontRescueBuff(t *testing.T) {
 	s := card.TurnState{CardsPlayed: []card.Card{stubAura{}}, Runechants: 1}
-	if got := (ShrillOfSkullformYellow{}).Play(&s); got != 3+3 {
-		t.Errorf("Yellow with aura + 1 Runechant: Play() = %d, want 6", got)
+	if got := (ShrillOfSkullformYellow{}).Play(&s); got != 3 {
+		t.Errorf("Yellow with aura + 1 Runechant: Play() = %d, want 3 (buff physical, arcane separate)", got)
 	}
 }

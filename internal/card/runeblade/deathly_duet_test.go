@@ -45,12 +45,13 @@ func TestDeathlyDuet_AttackPitchedBuffGated(t *testing.T) {
 	}
 }
 
-// TestDeathlyDuet_AttackPitchedRunechantRescuesBuff: a lone Runechant firing alongside counts
-// as the attack connecting, credits the +2 buff even for otherwise-blockable Red.
-func TestDeathlyDuet_AttackPitchedRunechantRescuesBuff(t *testing.T) {
+// TestDeathlyDuet_AttackPitchedRunechantsDontRescueBuff: the +2{p} is a physical buff;
+// runechants firing alongside are separate arcane damage, so they can't rescue a blockable
+// buffed total.
+func TestDeathlyDuet_AttackPitchedRunechantsDontRescueBuff(t *testing.T) {
 	s := card.TurnState{Pitched: []card.Card{stubRunebladeAttack{}}, Runechants: 1}
-	if got := (DeathlyDuetRed{}).Play(&s); got != 4+2 {
-		t.Errorf("Red with attack pitched + 1 Runechant: Play() = %d, want 6", got)
+	if got := (DeathlyDuetRed{}).Play(&s); got != 4 {
+		t.Errorf("Red with attack pitched + 1 Runechant: Play() = %d, want 4 (buff physical, arcane separate)", got)
 	}
 }
 

@@ -54,12 +54,12 @@ func TestConsumingVolition_BlockableBaseSuppressesDiscard(t *testing.T) {
 	}
 }
 
-// TestConsumingVolition_RunechantRescuesBlockableVariants: a single Runechant firing alongside
-// is likely to slip through (opponent won't pitch a card to block 1 arcane), so the discard
-// rider fires even when the printed attack is blockable.
-func TestConsumingVolition_RunechantRescuesBlockableVariants(t *testing.T) {
+// TestConsumingVolition_RunechantsDontRescue: "When this hits" refers to Consuming Volition's
+// own damage reaching the hero. Runechants firing alongside are separate arcane damage and
+// don't count toward "this" card hitting, so they can't rescue a blockable variant.
+func TestConsumingVolition_RunechantsDontRescue(t *testing.T) {
 	s := card.TurnState{ArcaneDamageDealt: true, Runechants: 1}
-	if got := (ConsumingVolitionYellow{}).Play(&s); got != 3+3 {
-		t.Errorf("Yellow with 1 Runechant: Play() = %d, want 6 (runechant slips → rider fires)", got)
+	if got := (ConsumingVolitionYellow{}).Play(&s); got != 3 {
+		t.Errorf("Yellow with 1 Runechant: Play() = %d, want 3 (runechant isn't 'this' damage)", got)
 	}
 }

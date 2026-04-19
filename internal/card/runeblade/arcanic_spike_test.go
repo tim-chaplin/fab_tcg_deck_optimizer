@@ -54,11 +54,12 @@ func TestArcanicSpike_BlockableBuffedTotalSuppressesBonus(t *testing.T) {
 	}
 }
 
-// TestArcanicSpike_RunechantRescuesBlockableBuff: a lone Runechant firing alongside is likely to
-// slip through, which counts as the attack connecting and credits the buff.
-func TestArcanicSpike_RunechantRescuesBlockableBuff(t *testing.T) {
+// TestArcanicSpike_RunechantsDontRescueBuff: the +2{p} is a physical buff; the opponent blocks
+// the physical attack based on physical damage. Runechants firing alongside are a separate
+// arcane stream and don't change the block decision, so they can't rescue a blockable buff.
+func TestArcanicSpike_RunechantsDontRescueBuff(t *testing.T) {
 	s := card.TurnState{ArcaneDamageDealt: true, Runechants: 1}
-	if got := (ArcanicSpikeYellow{}).Play(&s); got != 4+2 {
-		t.Errorf("Yellow with 1 Runechant: Play() = %d, want 6 (runechant slips → buff credited)", got)
+	if got := (ArcanicSpikeYellow{}).Play(&s); got != 4 {
+		t.Errorf("Yellow with 1 Runechant: Play() = %d, want 4 (buff is physical, arcane separate)", got)
 	}
 }

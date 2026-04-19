@@ -46,11 +46,12 @@ func (HitTheHighNotesBlue) Types() card.TypeSet       { return hitTheHighNotesTy
 func (HitTheHighNotesBlue) GoAgain() bool                { return false }
 func (c HitTheHighNotesBlue) Play(s *card.TurnState) int { return hitTheHighNotesPlay(c.Attack(), s) }
 
-// hitTheHighNotesPlay credits the +2{p} aura buff only when the buffed total is likely to land
-// — otherwise the opponent comfortably blocks it and the buff delivers nothing. Runechants
-// firing alongside (a lone arcane is likely to slip through) also qualify the buff as deliverable.
+// hitTheHighNotesPlay credits the +2{p} aura buff only when the buffed physical total is likely
+// to land — the opponent blocks based on physical damage, and a blockable buffed attack
+// delivers nothing. Runechants firing alongside are a separate arcane stream and don't rescue
+// a blockable buff.
 func hitTheHighNotesPlay(base int, s *card.TurnState) int {
-	if s.HasAuraInPlay() && (card.LikelyToHit(base+2) || card.LikelyToHit(s.Runechants)) {
+	if s.HasAuraInPlay() && card.LikelyToHit(base+2) {
 		return base + 2
 	}
 	return base

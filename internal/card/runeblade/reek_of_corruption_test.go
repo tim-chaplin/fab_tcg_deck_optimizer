@@ -61,11 +61,12 @@ func TestReekOfCorruption_BlockableBaseSuppressesDiscard(t *testing.T) {
 	}
 }
 
-// TestReekOfCorruption_RunechantRescuesBlockableVariants: a lone Runechant slipping through
-// counts as the attack connecting, firing the rider.
-func TestReekOfCorruption_RunechantRescuesBlockableVariants(t *testing.T) {
+// TestReekOfCorruption_RunechantsDontRescue: "When this hits" is strictly about this card's own
+// damage reaching the hero. Runechants firing alongside are separate arcane damage and don't
+// count toward "this" card hitting.
+func TestReekOfCorruption_RunechantsDontRescue(t *testing.T) {
 	s := card.TurnState{AuraCreated: true, Runechants: 1}
-	if got := (ReekOfCorruptionYellow{}).Play(&s); got != 3+3 {
-		t.Errorf("Yellow with 1 Runechant: Play() = %d, want 6 (runechant slips → rider fires)", got)
+	if got := (ReekOfCorruptionYellow{}).Play(&s); got != 3 {
+		t.Errorf("Yellow with 1 Runechant: Play() = %d, want 3 (runechant isn't 'this' damage)", got)
 	}
 }
