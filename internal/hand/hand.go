@@ -798,21 +798,8 @@ func (e *Evaluator) bestUncached(hero hero.Hero, weapons []weapon.Weapon, hand [
 			// is the fully-discounted minimum). Re-price them now that the attack chain has
 			// resolved with `leftoverRunechants` tokens available. Arsenal-in defenders aren't
 			// checked: no DiscountPerRunechant cards currently want to live in arsenal.
-			if hasDiscountReactions {
-				extraCost := 0
-				for j := 0; j < n; j++ {
-					if rolesBuf[j] != Defend || dPrintedVals[j] == 0 {
-						continue
-					}
-					actualCost := dPrintedVals[j] - leftoverRunechants
-					if actualCost < 0 {
-						actualCost = 0
-					}
-					extraCost += actualCost
-				}
-				if extraCost > residualBudget {
-					return
-				}
+			if hasDiscountReactions && !discountReactionsAffordable(rolesBuf, dPrintedVals, n, leftoverRunechants, residualBudget) {
+				return
 			}
 
 			v := attackDealt + defenseDealt + prevented
@@ -882,6 +869,25 @@ func (e *Evaluator) bestUncached(hero hero.Hero, weapons []weapon.Weapon, hand [
 		promoteRandomHeldToArsenal(&best, hand, n, arsenalCardIn)
 	}
 	return best
+}
+
+// discountReactionsAffordable re-prices DiscountPerRunechant defense reactions against the
+// `leftoverRunechants` tokens the attack chain left behind, and reports whether the extra cost
+// fits inside `residualBudget`. The partition's defenderCostSum reserved 0 for these cards;
+// this check catches partitions where the actual discount didn't cover the printed cost.
+func discountReactionsAffordable(rolesBuf []Role, dPrintedVals []int, n, leftoverRunechants, residualBudget int) bool {
+	extraCost := 0
+	for j := 0; j < n; j++ {
+		if rolesBuf[j] != Defend || dPrintedVals[j] == 0 {
+			continue
+		}
+		actualCost := dPrintedVals[j] - leftoverRunechants
+		if actualCost < 0 {
+			actualCost = 0
+		}
+		extraCost += actualCost
+	}
+	return extraCost <= residualBudget
 }
 
 // promoteRandomHeldToArsenal picks one Held hand card in best.BestLine and flips its role to
