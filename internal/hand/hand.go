@@ -801,7 +801,7 @@ func (e *Evaluator) bestUncached(hero hero.Hero, weapons []weapon.Weapon, hand [
 					a = append(a, arsenalCardIn)
 				}
 			}
-			attackDealt, leftoverRunechants, residualBudget, swung := bestAttackWithWeapons(hero, weapons, a, p, deck, bufs, pitchSum, costSum, defenderCostSum, runechantCarryover)
+			attackDealt, leftoverRunechants, residualBudget, swung := bestAttackWithWeapons(hero, weapons, a, p, deck, bufs, pitchSum, costSum, defenderCostSum, runechantCarryover, incomingDamage, defenseSum)
 
 			// DiscountPerRunechant defense reactions reserved 0 in defenderCostSum (their Cost()
 			// is the fully-discounted minimum). Re-price them now that the attack chain has
@@ -1130,7 +1130,7 @@ func defenseReactionDamage(defenders, pitched, deck []card.Card, state *card.Tur
 // for this mask; the chain then deducts each attacker's effective cost (which for
 // DiscountPerRunechant cards is max(0, PrintedCost() - runechantCount at play-time)) and rejects
 // orderings that run negative.
-func bestAttackWithWeapons(hero hero.Hero, weapons []weapon.Weapon, attackers, pitched, deck []card.Card, bufs *attackBufs, pitchSum, costSum, defenderCostSum, runechantCarryover int) (int, int, int, []string) {
+func bestAttackWithWeapons(hero hero.Hero, weapons []weapon.Weapon, attackers, pitched, deck []card.Card, bufs *attackBufs, pitchSum, costSum, defenderCostSum, runechantCarryover, incomingDamage, blockTotal int) (int, int, int, []string) {
 	// Build the sequence-eval context once per partition leaf. All three values (resourceBudget,
 	// runechantCarryover, and the stable pitched/deck refs) are constant across the weapon-mask
 	// loop, so sharing one context keeps the inner calls narrow.
@@ -1141,6 +1141,8 @@ func bestAttackWithWeapons(hero hero.Hero, weapons []weapon.Weapon, attackers, p
 		bufs:               bufs,
 		resourceBudget:     pitchSum - defenderCostSum,
 		runechantCarryover: runechantCarryover,
+		incomingDamage:     incomingDamage,
+		blockTotal:         blockTotal,
 	}
 	best := 0
 	bestLeftoverRunechants := runechantCarryover
@@ -1200,6 +1202,8 @@ type sequenceContext struct {
 	bufs               *attackBufs
 	resourceBudget     int
 	runechantCarryover int
+	incomingDamage     int
+	blockTotal         int
 }
 
 // bestSequence tries every ordering of attackers and returns the max total damage after Play
@@ -1363,6 +1367,8 @@ func (ctx *sequenceContext) playSequenceWithMeta(order []card.Card, perCardOut, 
 	state.ArcaneDamageDealt = false
 	state.AuraCreated = false
 	state.Overpower = false
+	state.IncomingDamage = ctx.incomingDamage
+	state.BlockTotal = ctx.blockTotal
 	resources := ctx.resourceBudget
 	for i, pc := range played {
 		m := meta[i]
@@ -1516,6 +1522,8 @@ func fillContributions(summary *TurnSummary, hero hero.Hero, weapons []weapon.We
 			bufs:               bufs,
 			resourceBudget:     resourceBudget,
 			runechantCarryover: runechantCarryover,
+			incomingDamage:     incomingDamage,
+			blockTotal:         sumDef,
 		}
 		ctx.bestSequence(chain, winnerOrder, perCardDmg, perCardTrigger)
 		// Snapshot the winning chain order into TurnSummary so display callers can show cards

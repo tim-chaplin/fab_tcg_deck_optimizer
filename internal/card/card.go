@@ -110,6 +110,14 @@ type TurnState struct {
 	// the flag in the current hand. Cards that deal arcane via their Play text are responsible
 	// for flipping the flag themselves.
 	ArcaneDamageDealt bool
+	// IncomingDamage is the opponent damage this turn (the value passed to hand.Best). Constant
+	// across every partition the solver enumerates for this hand.
+	IncomingDamage int
+	// BlockTotal is the sum of Defense() across every Defend-role card in the current partition.
+	// Uncapped: if the partition over-blocks, BlockTotal is the full sum, not clamped to
+	// IncomingDamage. Cards that key on "will we block all incoming this turn?" read
+	// BlockTotal >= IncomingDamage.
+	BlockTotal int
 }
 
 // Hero is the minimal hero profile card effects need. It's intentionally narrower than
