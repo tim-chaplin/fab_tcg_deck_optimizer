@@ -150,6 +150,35 @@ func loadCards(path string) ([]Card, error) {
 	return cards, nil
 }
 
+// cardMatchesFilter returns true when c should appear in the output. Applies, in order: the
+// optional user substring filters on Name and Types; the Silver Age legality gate (blank is
+// treated as legal since some rows are missing the column); the class gate (only Runeblade /
+// Generic cards — the tool targets this optimiser's current hero pool); and an exclusion list
+// for types the optimiser doesn't model (specialized elemental talents, tokens, equipment).
+func cardMatchesFilter(c Card, nameNeedle, typeNeedle string) bool {
+	if nameNeedle != "" && !strings.Contains(strings.ToLower(c.Name), nameNeedle) {
+		return false
+	}
+	if typeNeedle != "" && !strings.Contains(strings.ToLower(c.Types), typeNeedle) {
+		return false
+	}
+	if c.SilverAgeLegal != "Yes" && c.SilverAgeLegal != "" {
+		return false
+	}
+	if !strings.Contains(c.Types, "Runeblade") && !strings.Contains(c.Types, "Generic") {
+		return false
+	}
+	if strings.Contains(c.Types, "Shadow") ||
+		strings.Contains(c.Types, "Elemental") ||
+		strings.Contains(c.Types, "Lightning") ||
+		strings.Contains(c.Types, "Earth") ||
+		strings.Contains(c.Types, "Token") ||
+		strings.Contains(c.Types, "Equipment") {
+		return false
+	}
+	return true
+}
+
 func main() {
 	in := flag.String("in", "data_sources/card.csv", "path to card.csv")
 	nameFilter := flag.String("name", "", "only print cards whose name contains this substring (case insensitive)")
@@ -173,27 +202,9 @@ func main() {
 
 	var matched []Card
 	for _, c := range cards {
-		if nameNeedle != "" && !strings.Contains(strings.ToLower(c.Name), nameNeedle) {
-			continue
+		if cardMatchesFilter(c, nameNeedle, typeNeedle) {
+			matched = append(matched, c)
 		}
-		if typeNeedle != "" && !strings.Contains(strings.ToLower(c.Types), typeNeedle) {
-			continue
-		}
-		if c.SilverAgeLegal != "Yes" && c.SilverAgeLegal != "" {
-			continue
-		}
-		if !strings.Contains(c.Types, "Runeblade") && !strings.Contains(c.Types, "Generic") {
-			continue
-		}
-		if strings.Contains(c.Types, "Shadow") ||
-			strings.Contains(c.Types, "Elemental") ||
-			strings.Contains(c.Types, "Lightning") ||
-			strings.Contains(c.Types, "Earth") ||
-			strings.Contains(c.Types, "Token") ||
-			strings.Contains(c.Types, "Equipment") {
-			continue
-		}
-		matched = append(matched, c)
 	}
 
 	if *namesOnly {
