@@ -256,7 +256,15 @@ AURAS = {
 BLOCKS_NO_RIDER = {
     "Fiddler's Green":  "The 'gain 3{h} on entering graveyard' trigger isn't modelled.",
     "On the Horizon":   "The deck-peek trigger isn't modelled.",
-    "Test of Strength": "Clash with the attacking hero and the Gold-token winner rider aren't modelled.",
+}
+
+# Block cards with a modelled rider: Play returns the rider value (helper or direct call).
+MODELED_BLOCKS = {
+    "Test of Strength": dict(
+        helper="",
+        call="card.ClashValue(s, card.GoldTokenValue)",
+        simp="Clash is modelled via card.ClashValue with a fixed-opponent heuristic: we win (+GoldTokenValue) when our deck's top-card attack is 6-7, tie at 5, lose (-GoldTokenValue) below. Block is typed as a Defense Reaction so the solver invokes Play during the defensive chain, making state.Deck available for the peek.",
+    ),
 }
 
 # Plain Defense Reactions (no riders we model).
@@ -479,8 +487,14 @@ def build_file(name, kind, printings, text):
         helper_code = """"""
         play_call = "setAuraCreated(s)"
     elif block:
-        simp_note = BLOCKS_NO_RIDER.get(name, "Rider isn't modelled.")
-        play_call = "0"
+        if name in MODELED_BLOCKS:
+            m = MODELED_BLOCKS[name]
+            helper_code = m["helper"]
+            play_call = m["call"]
+            simp_note = m["simp"]
+        else:
+            simp_note = BLOCKS_NO_RIDER.get(name, "Rider isn't modelled.")
+            play_call = "0"
     elif is_dr:
         simp_note = DR_SKIPPED.get(name, "Rider isn't modelled.")
         play_call = "0"
