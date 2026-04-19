@@ -60,8 +60,8 @@ type CardPlayStatsJSON struct {
 // hand slot so loaded decks render per-card damage/block/pitch credit instead of "+0". Chain is
 // the ordered attack sequence — cards and weapons in play order with their per-step damage —
 // so FormatBestTurn can reconstruct the same layout the live sim produced. Both fields are
-// omitempty so files produced before this change still load (missing contributions default to
-// 0, missing chain falls back to a plausible hand-order reconstruction).
+// omitempty; files missing them fall back to defaults (contributions = 0, chain rebuilt in
+// hand order).
 type BestTurnJSON struct {
 	Hand               []string               `json:"hand"`
 	Roles              []string               `json:"roles"`
@@ -172,9 +172,8 @@ func bestTurnToJSON(b deck.BestTurn) BestTurnJSON {
 		return BestTurnJSON{}
 	}
 	// Serialise hand cards only (arsenal-in entries belong to a previous turn's hand). JSON
-	// stays with parallel name + role arrays for human readability / backward compatibility;
-	// the in-memory BestLine is still the single source of truth. Weapon names get extracted
-	// from the AttackChain since TurnSummary no longer carries them separately.
+	// uses parallel name + role arrays for human readability; the in-memory BestLine is the
+	// single source of truth. Weapon names are extracted from AttackChain.
 	var handNames, roles []string
 	var contribs []float64
 	for _, a := range b.Summary.BestLine {

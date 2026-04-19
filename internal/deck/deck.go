@@ -104,8 +104,8 @@ type Mutation struct {
 // Card-mutation ordering: the outer loop iterates uniqueIDs by ascending per-card average
 // contribution (d.Stats.PerCard[id].Avg()), so low-value cards get swap candidates tried first.
 // Cards without stats tie at 0 and fall back to card.ID. The inner loop iterates the addID pool
-// by card.ID. This pairs well with iterate-mode's first-improvement hill climb: low-value slots
-// are most likely to improve, so candidates there surface quickly.
+// by card.ID. Favouring low-value removal slots surfaces useful swaps early for a
+// first-improvement hill climb.
 //
 // Single-card swaps (not paired swaps) let the hill climber reach decks with odd per-card counts
 // (e.g. 1× X + 3× Y at maxCopies=3).
@@ -355,9 +355,8 @@ func (s Stats) Avg() float64 {
 //
 // Results accumulate into d.Stats and are returned for convenience.
 //
-// Uses the package-level shared hand.Evaluator so repeated Evaluate calls on the same (hero,
-// weapons) share the memo. Concurrent callers must use EvaluateWith with a goroutine-local
-// Evaluator — the shared buffers have no internal synchronisation.
+// Uses the package-level shared hand.Evaluator. Concurrent callers must use EvaluateWith with a
+// goroutine-local Evaluator — the shared buffers have no internal synchronisation.
 func (d *Deck) Evaluate(runs int, incomingDamage int, rng *rand.Rand) Stats {
 	return d.EvaluateWith(runs, incomingDamage, rng, nil)
 }
@@ -398,11 +397,9 @@ func (d *Deck) EvaluateWith(runs int, incomingDamage int, rng *rand.Rand, ev *ha
 		runechantCarryover := 0
 		var arsenalCard card.Card
 		heldBuf = heldBuf[:0]
-		// maxHands caps the run at two full cycles. Without it, a partition that pitches
-		// everything and swings a weapon every turn recycles the same cards forever: hand.Best
-		// returns identical summaries each iteration so head and tail advance in lockstep and
-		// the run never terminates. Two cycles is enough to observe early and late game and
-		// matches the FirstCycle / SecondCycle stats.
+		// Cap the run at two full cycles. A pitch-everything-swing-a-weapon loop recycles the
+		// same cards forever (hand.Best returns identical summaries each iteration, so head and
+		// tail advance in lockstep); two cycles also match FirstCycle / SecondCycle stats.
 		maxHands := 2 * handsPerCycle
 		for handIdx < maxHands {
 			// Fresh draws fill whatever Held cards didn't take. If every slot is already held

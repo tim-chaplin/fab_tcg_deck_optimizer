@@ -11,8 +11,7 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/weapon"
 )
 
-// stubHero is a no-op Hero used by tests that want to measure raw hand
-// value without any hero-ability contribution.
+// stubHero is a no-op Hero for tests measuring raw hand value with no hero-ability contribution.
 type stubHero struct{}
 
 func (stubHero) ID() hero.ID                           { return hero.Invalid }
@@ -358,9 +357,8 @@ func TestBest_AllHeldWhenNoLegalPlay(t *testing.T) {
 // attack 3). Against incoming 4: only one pitched card (pitch 3) can be paired with Toughen Up
 // as DR, and that single pitch can cover either the 1-cost Red OR the 2-cost Toughen Up — not
 // both. The solver takes the better single-phase line: pitch Toughen Up to pay Red's cost,
-// plain-block with Malefic. Value = 3 (Red attack) + 2 (Malefic block) = 5. The OLD single-pool
-// model would have let one pitch fund both phases and scored 7 (Red attack + 4 Toughen Up
-// prevention) — an illegal split this test locks out.
+// plain-block with Malefic. Value = 3 (Red attack) + 2 (Malefic block) = 5. A single-pool
+// fallback would score 7 by funding both phases from one pitch — illegal, locked out here.
 func TestBest_AttackPitchCantCoverDefense(t *testing.T) {
 	h := []card.Card{runeblade.MaleficIncantationBlue{}, generic.ToughenUpBlue{}, fake.RedAttack{}}
 	got := Best(stubHero{}, nil, h, 4, nil, 0, nil)
@@ -487,10 +485,10 @@ func TestBest_ArsenalInNonAttackActionPlays(t *testing.T) {
 
 // TestPromoteRandomHeldToArsenal_SpreadsAcrossHands pins the post-hoc Held→Arsenal promotion's
 // anti-bias property: the selection hashes the sorted hand IDs so different hands land on
-// different Held positions rather than always picking slot 0 (which, because the hand is sorted
-// by ID, would systematically prefer low-ID cards for arsenaling). Drives the helper directly
-// with synthesised BestLine entries — all slots Held, all equivalent in value — so the only
-// thing under test is the hash-based index selection.
+// different Held positions rather than always picking slot 0 (which, with IDs sorted, would
+// systematically prefer low-ID cards). Drives the helper directly with synthesised BestLine
+// entries — all slots Held, all equivalent in value — so only the hash-based index selection
+// is under test.
 func TestPromoteRandomHeldToArsenal_SpreadsAcrossHands(t *testing.T) {
 	// 20 different 4-card hands using Wounding Blow Red/Yellow/Blue as "arbitrary cards with
 	// distinct IDs". Varying which card sits in which slot is enough to exercise the hash across
@@ -574,11 +572,9 @@ func TestPromoteRandomHeldToArsenal_DeterministicPerHand(t *testing.T) {
 
 // TestBeatsBest_ArsenalOccupancyTiebreaker pins the tiebreaker contract used by the partition
 // enumerator: when two candidates tie on Value and LeftoverRunechants, the one that will end
-// the turn with the arsenal slot occupied (either via arsenal-in staying OR a post-hoc Held→
-// Arsenal promotion) beats the one that won't. Without this direct test, the logic was only
-// exercised indirectly through Best() scenarios where the enumeration order happens to explore
-// occupied partitions first, so a regression could accidentally invert the comparison without
-// any Best-level test catching it.
+// the turn with the arsenal slot occupied (either via arsenal-in staying OR a post-hoc Held →
+// Arsenal promotion) beats the one that won't. Exercised directly so a comparison-inversion
+// regression can't hide behind enumeration order at the Best() level.
 func TestBeatsBest_ArsenalOccupancyTiebreaker(t *testing.T) {
 	// Seed best: Value=10, Leftover=0, arsenal NOT occupied.
 	best := TurnSummary{Value: 10, LeftoverRunechants: 0}

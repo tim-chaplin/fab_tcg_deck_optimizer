@@ -1,7 +1,6 @@
 // Package mydecks resolves user-supplied deck names to paths under the local mydecks/ directory,
-// where both fabsim's outputs and fabrary imports live. Centralising this keeps name-validation
-// rules (path-traversal, Windows-reserved characters) consistent across every command that
-// takes a deck name.
+// where fabsim outputs and fabrary imports both live. Centralises name validation
+// (path-traversal, Windows-reserved characters) so every command gets the same rules.
 package mydecks
 
 import (

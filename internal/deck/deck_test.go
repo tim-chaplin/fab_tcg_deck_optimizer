@@ -78,7 +78,7 @@ func TestAllMutations_OddCountsAllowed(t *testing.T) {
 	}
 
 	// Every mutation at maxCopies=3 still has exactly 4 cards; some should have an odd count of
-	// one card (that's the whole point — no longer forced to keep pairs).
+	// one card — single-card swaps can leave odd-count slots when maxCopies allows it.
 	sawOdd := false
 	for _, m := range mutsHigh {
 		if len(m.Deck.Cards) != 4 {
@@ -296,16 +296,12 @@ func TestEvaluate_BestTurnStartingRunechantsIsPreHandCarryover(t *testing.T) {
 	}
 }
 
-// TestEvaluate_HeldCardDefersDrawToNextTurn pins down the "up to Intelligence" draw rule and
-// the arsenal carryover that sits on top of it. An Intelligence-1 hero with a deck of Toughen
-// Up Blue (DR, cost 2, defense 4) has no legal play: the lone card can't pay its own 2-cost to
-// fire as a DR, can't be pitched (nothing unpaid on the stack), and can't Attack (DRs can't).
-//
-// Turn 1: the drawn card is Held by the partition; the arsenal slot is empty so the post-hoc
-// upgrade promotes it to Arsenal. Turn 2: a fresh DR is drawn; the arsenal card (from turn 1)
-// can stay or play as DR, and staying ties on Value, so it sits. The newly-drawn card goes
-// Held and next turn's drawCount is handSize - held = 0, halting the loop. Stats.Hands = 2.
-// Neither turn plays or pitches the card, so PerCard counters stay at 0.
+// TestEvaluate_HeldCardDefersDrawToNextTurn pins the "up to Intelligence" draw rule plus arsenal
+// carryover. Intelligence-1 hero, deck of Toughen Up Blue (DR, cost 2, defense 4): the lone
+// card has no legal play (can't pay its 2-cost, can't pitch with nothing on the stack, DRs
+// can't Attack). Turn 1 holds then promotes it to Arsenal (empty slot). Turn 2 draws a new DR;
+// the arsenal card stays on tie, the new card goes Held, so drawCount = 0 next turn and the
+// loop halts at Stats.Hands = 2. Neither turn plays or pitches, so PerCard stays at 0.
 func TestEvaluate_HeldCardDefersDrawToNextTurn(t *testing.T) {
 	// 40 copies of the DR so we have enough deck to fill many hands if held carryover weren't
 	// wired up — the assertion would fail catastrophically (loop or much larger Hands count).
@@ -356,14 +352,11 @@ func TestEvaluate_ArsenalPersistsAcrossTurns(t *testing.T) {
 	}
 }
 
-// TestEvaluate_TerminatesAfterTwoCycles pins the infinite-loop guard on Evaluate's per-run
-// loop. A deck of 40 Toughen Up Blue DRs with Reaping Blade equipped, incoming=0, reaches a
-// steady state after turn 1: the optimal partition of 4 TUs is to pitch one (sum 3 covers the
-// 1-cost weapon swing), swing Reaping Blade for +3, and hold the other 3. After turn 1 the
-// held buffer stays at 3 and every subsequent turn draws 1 fresh card that gets pitched back
-// — net deck change zero. Without the 2-cycle cap hand.Best would return the same TurnSummary
-// every iteration and the run would spin forever. With the cap Stats.Hands halts at 2 *
-// handsPerCycle = 20.
+// TestEvaluate_TerminatesAfterTwoCycles pins the infinite-loop guard on Evaluate's per-run loop.
+// 40 Toughen Up Blue DRs with Reaping Blade equipped, incoming=0, reaches a steady state after
+// turn 1 (pitch one TU, swing Reaping Blade for +3, hold the other 3). From then on every turn
+// draws and pitches one card — net deck change zero, hand.Best returns the same TurnSummary.
+// Without the cap the loop would spin forever; with it, Stats.Hands halts at 2 × handsPerCycle.
 func TestEvaluate_TerminatesAfterTwoCycles(t *testing.T) {
 	deckCards := make([]card.Card, 40)
 	for i := range deckCards {

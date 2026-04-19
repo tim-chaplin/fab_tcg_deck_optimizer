@@ -121,8 +121,8 @@ func printProgress(done, total int, elapsed time.Duration) {
 		bar, done, total, frac*100, elapsed.Truncate(time.Second), eta.Truncate(time.Second))
 }
 
-// saveIfBetter writes d to outPath if its average exceeds the previously saved deck (or no
-// previous deck exists). Prints a status line either way.
+// saveIfBetter writes d to outPath if its average exceeds the deck already on disk (or none
+// exists). Prints a status line either way.
 func saveIfBetter(d *deck.Deck, outPath string) {
 	prev, prevAvg := loadExisting(outPath)
 	if prev != nil && d.Stats.Avg() <= prevAvg {
