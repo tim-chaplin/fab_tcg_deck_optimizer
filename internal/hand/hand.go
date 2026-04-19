@@ -1043,6 +1043,21 @@ func bestAttackWithWeapons(hero hero.Hero, weapons []weapon.Weapon, attackers, d
 		phaseCount = 1 << len(pitched)
 	}
 
+	// Pre-screen precomputation: printed-cost sums let us reject doomed (pmask, wmask) pairs in
+	// O(1) before spinning up bestSequence's N! permutation loop. attackersMinCost sums the
+	// floor-cost of each attacker (non-discount: printed Cost; discount: 0), a safe under-estimate
+	// of chain cost. attackersPrinted is the no-discount upper bound, used for the pitch-waste
+	// upper bound check.
+	attackersMinCost := 0
+	attackersPrinted := 0
+	for _, a := range attackers {
+		m := attackerMetaPtrFor(a)
+		attackersPrinted += m.cost
+		if !m.isDiscount {
+			attackersMinCost += m.cost
+		}
+	}
+
 	copy(bufs.attackerBuf, attackers)
 
 	bestDealt := 0
@@ -1078,6 +1093,18 @@ func bestAttackWithWeapons(hero hero.Hero, weapons []weapon.Weapon, attackers, d
 		ctx.maxAttackPitch = maxAttackPitch
 
 		for wmask := 0; wmask < 1<<len(weapons); wmask++ {
+			weaponPrinted := bufs.weaponCosts[wmask]
+			// Lower bound on total chain cost (non-discount attackers + weapons always pay printed).
+			// If the attack budget can't cover even this floor, no permutation is feasible.
+			if attackersMinCost+weaponPrinted > attackBudget {
+				continue
+			}
+			// Upper bound on pitch-waste residual: attackBudget - chainPrinted is the residual if
+			// no discount applies at all. If that lower bound already trips pitch-timing, every
+			// permutation wastes; no point enumerating.
+			if hasAttackPitches && attackBudget-(attackersPrinted+weaponPrinted) >= maxAttackPitch {
+				continue
+			}
 			allAttackers := bufs.attackerBuf[:len(attackers)]
 			for i, w := range weapons {
 				if wmask&(1<<i) != 0 {
