@@ -15,18 +15,6 @@ import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 
 var clearwaterElixirTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction)
 
-// clearwaterElixirPlay returns 3 when a matching attack action card is scheduled later this turn.
-func clearwaterElixirPlay(s *card.TurnState) int {
-	for _, pc := range s.CardsRemaining {
-		t := pc.Card.Types()
-		if !t.Has(card.TypeAttack) || !t.Has(card.TypeAction) {
-			continue
-		}
-		return 3
-	}
-	return 0
-}
-
 type ClearwaterElixirRed struct{}
 
 func (ClearwaterElixirRed) ID() card.ID                 { return card.ClearwaterElixirRed }
@@ -37,4 +25,4 @@ func (ClearwaterElixirRed) Attack() int                 { return 0 }
 func (ClearwaterElixirRed) Defense() int                { return 3 }
 func (ClearwaterElixirRed) Types() card.TypeSet         { return clearwaterElixirTypes }
 func (ClearwaterElixirRed) GoAgain() bool               { return true }
-func (ClearwaterElixirRed) Play(s *card.TurnState) int { return clearwaterElixirPlay(s) }
+func (ClearwaterElixirRed) Play(s *card.TurnState) int { return nextAttackActionBonus(s, 3) }

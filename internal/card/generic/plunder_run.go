@@ -16,18 +16,6 @@ import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 
 var plunderRunTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction)
 
-// plunderRunPlay returns n when a matching attack action card is scheduled later this turn.
-func plunderRunPlay(s *card.TurnState, n int) int {
-	for _, pc := range s.CardsRemaining {
-		t := pc.Card.Types()
-		if !t.Has(card.TypeAttack) || !t.Has(card.TypeAction) {
-			continue
-		}
-		return n
-	}
-	return 0
-}
-
 type PlunderRunRed struct{}
 
 func (PlunderRunRed) ID() card.ID                 { return card.PlunderRunRed }
@@ -39,7 +27,7 @@ func (PlunderRunRed) Defense() int                { return 2 }
 func (PlunderRunRed) Types() card.TypeSet         { return plunderRunTypes }
 func (PlunderRunRed) GoAgain() bool               { return true }
 func (PlunderRunRed) NotSilverAgeLegal()           {}
-func (PlunderRunRed) Play(s *card.TurnState) int { return plunderRunPlay(s, 3) }
+func (PlunderRunRed) Play(s *card.TurnState) int { return nextAttackActionBonus(s, 3) }
 
 type PlunderRunYellow struct{}
 
@@ -52,7 +40,7 @@ func (PlunderRunYellow) Defense() int                { return 2 }
 func (PlunderRunYellow) Types() card.TypeSet         { return plunderRunTypes }
 func (PlunderRunYellow) GoAgain() bool               { return true }
 func (PlunderRunYellow) NotSilverAgeLegal()           {}
-func (PlunderRunYellow) Play(s *card.TurnState) int { return plunderRunPlay(s, 2) }
+func (PlunderRunYellow) Play(s *card.TurnState) int { return nextAttackActionBonus(s, 2) }
 
 type PlunderRunBlue struct{}
 
@@ -65,4 +53,4 @@ func (PlunderRunBlue) Defense() int                { return 2 }
 func (PlunderRunBlue) Types() card.TypeSet         { return plunderRunTypes }
 func (PlunderRunBlue) GoAgain() bool               { return true }
 func (PlunderRunBlue) NotSilverAgeLegal()           {}
-func (PlunderRunBlue) Play(s *card.TurnState) int { return plunderRunPlay(s, 1) }
+func (PlunderRunBlue) Play(s *card.TurnState) int { return nextAttackActionBonus(s, 1) }
