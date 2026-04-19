@@ -175,8 +175,8 @@ func AllMutations(d *Deck, maxCopies int, legal func(card.Card) bool) []Mutation
 		return uniqueIDs[i] < uniqueIDs[j]
 	})
 
+	// legalPool returns IDs in ascending order (cards.Deckable() iterates byID).
 	pool := legalPool(legal)
-	sort.Slice(pool, func(i, j int) bool { return pool[i] < pool[j] })
 
 	for _, removeID := range uniqueIDs {
 		removed := cards.Get(removeID)
