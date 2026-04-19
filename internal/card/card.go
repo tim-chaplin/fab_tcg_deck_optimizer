@@ -146,8 +146,7 @@ func LikelyToHit(n int) bool {
 // key on "aura created this turn" see it, and returns n — each token is credited as +1 damage
 // at creation time (it'll fire on some future attack, possibly via carryover). The attack
 // pipeline consumes state.Runechants without re-crediting damage so every token counts once.
-// Tokens that neither fire nor carry over (end-of-sim leftovers) are slightly over-credited —
-// an accepted approximation.
+// Tokens that never fire (end-of-sim leftovers) are slightly over-credited — accepted.
 func (s *TurnState) CreateRunechants(n int) int {
 	if n > 0 {
 		s.AuraCreated = true
@@ -164,8 +163,8 @@ func (s *TurnState) CreateRunechant() int {
 // DelayRunechants adds n Runechant tokens that skip this turn entirely — they go to next turn's
 // carryover without being available to same-turn attacks or DiscountPerRunechant checks. Used
 // by cards whose text fires at the start of a future turn (e.g. Blessing of Occult's "at start
-// of your turn, create N Runechant tokens"). Returns n — each token credited as +1 damage at
-// creation, same as CreateRunechants.
+// of your turn, create N Runechant tokens"). Returns n; each token is credited as +1 damage at
+// creation.
 func (s *TurnState) DelayRunechants(n int) int {
 	if n > 0 {
 		s.AuraCreated = true

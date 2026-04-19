@@ -23,10 +23,9 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/weapon"
 )
 
-// defaultDeckNameFor returns the deck name when -deck isn't supplied, parametrised by hero,
-// format, and -incoming. Different opponent-pressure settings and card pools produce different
-// optimal decks, so keying the filename off all three keeps regimes in separate files and avoids
-// accidentally hill-climbing one regime's best under another regime's objective.
+// defaultDeckNameFor returns the deck name when -deck isn't supplied, keyed by hero, format, and
+// -incoming. Different regimes produce different optimal decks, so each gets its own file to
+// avoid hill-climbing one regime's best under another regime's objective.
 func defaultDeckNameFor(h hero.Hero, f fmtpkg.Format, incoming int) string {
 	return fmt.Sprintf("%s_%s_%d_incoming", strings.ToLower(h.Name()), f, incoming)
 }
@@ -201,9 +200,8 @@ func writeDeck(d *deck.Deck, path string) error {
 	return nil
 }
 
-// fabraryPathFor derives the sibling .txt path. A ".json" extension is replaced; anything else
-// gets ".txt" appended, so an unusual "-out deck.data" yields "deck.data.txt" rather than
-// overwriting the original.
+// fabraryPathFor derives the sibling .txt path. A ".json" extension is swapped for ".txt";
+// anything else gets ".txt" appended so non-JSON paths can't be overwritten.
 func fabraryPathFor(jsonPath string) string {
 	if ext := filepath.Ext(jsonPath); ext == ".json" {
 		return strings.TrimSuffix(jsonPath, ext) + ".txt"
@@ -263,8 +261,8 @@ func printBestDeck(d *deck.Deck) {
 
 // printPerCardStats renders per-card averages collected by deck.Evaluate: mean per-card
 // contribution across hands the card appeared in. Contribution is role-based (attack power on
-// attacks, proportional prevented-damage share on defends, Pitch on pitches) so the ranking is
-// about what each card typically does in its hand, not the hand's total value.
+// attacks, proportional prevented-damage share on defends, Pitch on pitches), so the ranking
+// reflects what each card typically does in its hand rather than the hand's total value.
 func printPerCardStats(d *deck.Deck) {
 	type row struct {
 		name           string
