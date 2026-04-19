@@ -4,7 +4,8 @@
 // cards carrying a lowercase color suffix (e.g. "2x Aether Slash (red)").
 //
 // The optimizer models only weapons, not other equipment. Unknown Arena lines are ignored on
-// import; only weapons appear on export, so users typically re-add equipment after pasting.
+// import; on export, modelled weapons are joined by the fixed equipment loadout in
+// defaultArenaPackage so the emitted .txt can be pasted into fabrary without hand-editing.
 package fabrary
 
 import (
@@ -25,6 +26,22 @@ import (
 // defaultFormat is emitted in the Format: header. Update when a new format comes online.
 const defaultFormat = "Silver Age"
 
+// defaultArenaPackage is the fixed equipment loadout the user runs on every exported deck. The
+// optimizer doesn't model these slots (only weapons are modelled and varied), so Marshal emits
+// them verbatim into the Arena cards section — pasting the .txt into fabrary.net picks them up
+// without hand-editing. Nebula Blade is deliberately excluded: it's a modelled weapon that
+// reaches the Arena section via d.Weapons when the deck actually uses it.
+var defaultArenaPackage = []string{
+	"Beckoning Haunt",
+	"Blade Beckoner Boots",
+	"Blade Beckoner Helm",
+	"Blossom of Spring",
+	"Crown of Dichotomy",
+	"Nullrune Boots",
+	"Nullrune Gloves",
+	"Nullrune Robe",
+}
+
 // Marshal returns fabrary-style deck text for d, suitable for pasting into fabrary.net's
 // "Import deck" tab. Weapons go in the Arena section; deck cards in the Deck section with pitch
 // color suffix lowercased to match fabrary's own exports.
@@ -36,7 +53,11 @@ func Marshal(d *deck.Deck) string {
 	fmt.Fprintf(&b, "Format: %s\n\n", defaultFormat)
 
 	b.WriteString("Arena cards\n")
-	writeCounts(&b, weaponCounts(d.Weapons))
+	arena := weaponCounts(d.Weapons)
+	for _, name := range defaultArenaPackage {
+		arena[name]++
+	}
+	writeCounts(&b, arena)
 	b.WriteString("\n")
 
 	b.WriteString("Deck cards\n")
