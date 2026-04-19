@@ -14,23 +14,7 @@ import (
 
 func runRandom(cfg config) {
 	rng := rand.New(rand.NewSource(cfg.seed))
-
-	// Phase 1: wide shallow search.
-	type candidate struct {
-		deck *deck.Deck
-		avg  float64
-	}
-	candidates := make([]candidate, 0, cfg.numDecks)
-
-	fmt.Fprintf(os.Stderr, "Phase 1: evaluating %d decks (%d shuffles each)\n", cfg.numDecks, cfg.shallowShuffles)
-	start := time.Now()
-	for i := 0; i < cfg.numDecks; i++ {
-		d := deck.Random(hero.Viserai{}, cfg.deckSize, cfg.maxCopies, rng, cfg.legalFilter())
-		stats := d.Evaluate(cfg.shallowShuffles, cfg.incoming, rng)
-		candidates = append(candidates, candidate{deck: d, avg: stats.Avg()})
-		printProgress(i+1, cfg.numDecks, time.Since(start))
-	}
-	fmt.Fprintln(os.Stderr)
+	candidates := sampleShallowCandidates(cfg, rng)
 
 	avgs := make([]float64, len(candidates))
 	for i, c := range candidates {
@@ -42,7 +26,7 @@ func runRandom(cfg config) {
 	fmt.Printf("Deck value distribution: min %.3f  median %.3f  max %.3f\n", min, median, max)
 	fmt.Println()
 
-	// Select top N by shallow average.
+	// Select top N by shallow average for phase 2.
 	sort.Slice(candidates, func(i, j int) bool {
 		return candidates[i].avg > candidates[j].avg
 	})
@@ -50,24 +34,7 @@ func runRandom(cfg config) {
 	if topN > len(candidates) {
 		topN = len(candidates)
 	}
-	finalists := candidates[:topN]
-
-	// Phase 2: deep evaluation of finalists with fresh stats.
-	fmt.Fprintf(os.Stderr, "Phase 2: re-evaluating top %d decks (%d shuffles each)\n", topN, cfg.deepShuffles)
-	var bestDeck *deck.Deck
-	bestAvg := -1.0
-	start = time.Now()
-	for i, c := range finalists {
-		d := deck.New(c.deck.Hero, c.deck.Weapons, c.deck.Cards)
-		stats := d.Evaluate(cfg.deepShuffles, cfg.incoming, rng)
-		avg := stats.Avg()
-		if avg > bestAvg {
-			bestAvg = avg
-			bestDeck = d
-		}
-		printProgress(i+1, topN, time.Since(start))
-	}
-	fmt.Fprintln(os.Stderr)
+	bestDeck := evaluateFinalistsDeep(cfg, rng, candidates[:topN])
 
 	fmt.Printf("Phase 2: re-evaluated top %d decks with %d shuffles\n", topN, cfg.deepShuffles)
 	fmt.Println()
@@ -76,6 +43,50 @@ func runRandom(cfg config) {
 	if cfg.outPath != "" {
 		saveIfBetter(bestDeck, cfg.outPath)
 	}
+}
+
+// shallowCandidate pairs a generated deck with its phase-1 (shallow) average so phase 2 can
+// re-evaluate the top finalists without re-sampling.
+type shallowCandidate struct {
+	deck *deck.Deck
+	avg  float64
+}
+
+// sampleShallowCandidates is phase 1: generate cfg.numDecks random decks and score each at
+// cfg.shallowShuffles. The progress bar renders to stderr so piping stdout yields clean output.
+func sampleShallowCandidates(cfg config, rng *rand.Rand) []shallowCandidate {
+	candidates := make([]shallowCandidate, 0, cfg.numDecks)
+	fmt.Fprintf(os.Stderr, "Phase 1: evaluating %d decks (%d shuffles each)\n", cfg.numDecks, cfg.shallowShuffles)
+	start := time.Now()
+	for i := 0; i < cfg.numDecks; i++ {
+		d := deck.Random(hero.Viserai{}, cfg.deckSize, cfg.maxCopies, rng, cfg.legalFilter())
+		stats := d.Evaluate(cfg.shallowShuffles, cfg.incoming, rng)
+		candidates = append(candidates, shallowCandidate{deck: d, avg: stats.Avg()})
+		printProgress(i+1, cfg.numDecks, time.Since(start))
+	}
+	fmt.Fprintln(os.Stderr)
+	return candidates
+}
+
+// evaluateFinalistsDeep is phase 2: re-evaluate each finalist at cfg.deepShuffles against a
+// fresh Deck (zeroed Stats) so phase-1 noise doesn't leak in, and return whichever scores highest.
+func evaluateFinalistsDeep(cfg config, rng *rand.Rand, finalists []shallowCandidate) *deck.Deck {
+	fmt.Fprintf(os.Stderr, "Phase 2: re-evaluating top %d decks (%d shuffles each)\n", len(finalists), cfg.deepShuffles)
+	var bestDeck *deck.Deck
+	bestAvg := -1.0
+	start := time.Now()
+	for i, c := range finalists {
+		d := deck.New(c.deck.Hero, c.deck.Weapons, c.deck.Cards)
+		stats := d.Evaluate(cfg.deepShuffles, cfg.incoming, rng)
+		avg := stats.Avg()
+		if avg > bestAvg {
+			bestAvg = avg
+			bestDeck = d
+		}
+		printProgress(i+1, len(finalists), time.Since(start))
+	}
+	fmt.Fprintln(os.Stderr)
+	return bestDeck
 }
 
 // summarize returns (min, median, max) of vs. Panics if vs is empty. For even-length vs, median
