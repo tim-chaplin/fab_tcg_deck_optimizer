@@ -202,5 +202,6 @@ Hero health isn't tracked, so every life-gain and life-comparison rider collapse
 - **Regurgitating Slog's riders are fully dropped** — Play returns base power with no modelling
   attempted.
 - **Uncommon keyword text is dropped.** Prime the Crowd's Crowd cheers/boos keywords, Wage Gold's
-  Universal keyword, Test of Strength's Clash with the attacking hero, and Smashing Good Time's
-  item-destruction rider all collapse to base stats plus whatever bonus we credit unconditionally.
+  Universal keyword, and Smashing Good Time's item-destruction rider all collapse to base stats
+  plus whatever bonus we credit unconditionally. (Clash is now modelled via `card.ClashValue` —
+  Test of Strength is the only card that uses it today.)
