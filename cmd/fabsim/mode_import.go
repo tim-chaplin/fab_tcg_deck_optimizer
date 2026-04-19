@@ -18,10 +18,10 @@ import (
 
 // runImport interactively pastes a fabrary.net plain-text deck from stdin, asks for a deck
 // name, and writes the resulting JSON to mydecks/<name>.json. The name is prompted BEFORE the
-// paste because the fabrary footer ends stdin — there's no opportunity to ask afterward.
+// paste: the fabrary footer ends stdin, so there's no opportunity afterward.
 //
 // Piping works incidentally (prompts go to stderr) but there's no dedicated -in flag. Export is
-// automatic: every random / iterate run writes a sibling fabrary .txt next to the JSON.
+// automatic — every random / iterate run writes a sibling fabrary .txt next to the JSON.
 func runImport() {
 	reader := bufio.NewReader(os.Stdin)
 
