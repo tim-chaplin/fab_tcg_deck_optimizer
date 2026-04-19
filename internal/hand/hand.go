@@ -1405,7 +1405,6 @@ func fillDefenseContributions(line []CardAssignment, pitched []card.Card, deck [
 // allocates here.
 func fillContributions(summary *TurnSummary, hero hero.Hero, weapons []weapon.Weapon, swungNames []string, deck []card.Card, bufs *attackBufs, incomingDamage, runechantCarryover int) {
 	line := summary.BestLine
-	total := len(line)
 
 	// Reconstruct pitched, attackers, swung weapons, and resourceBudget from the winning line.
 	// The arsenal-in entry (FromArsenal=true, last slot) participates in attackers / defenders
@@ -1442,26 +1441,8 @@ func fillContributions(summary *TurnSummary, hero hero.Hero, weapons []weapon.We
 
 	fillDefenseContributions(line, pitched, deck, bufs, sumDef, incomingDamage)
 
-	// Attack chain: re-run the sequence search with tracking on to recover the winning
-	// permutation and each chain position's contribution. Weapons don't map back to BestLine —
-	// their damage is counted in Value but not credited per-card here.
-	chain := bufs.attackerBuf[:0]
-	chain = append(chain, attackers...)
-	for _, name := range swungNames {
-		for _, w := range weapons {
-			if w.Name() == name {
-				chain = append(chain, w)
-				break
-			}
-		}
-	}
+	chain := buildAttackChain(bufs.attackerBuf[:0], attackers, weapons, swungNames)
 	if len(chain) > 0 {
-		winnerOrder := bufs.fillContribWinnerOrder[:len(chain)]
-		perCardDmg := bufs.fillContribPerCard[:len(chain)]
-		if cap(bufs.fillContribTriggerDmg) < len(chain) {
-			bufs.fillContribTriggerDmg = make([]float64, len(chain))
-		}
-		perCardTrigger := bufs.fillContribTriggerDmg[:len(chain)]
 		ctx := &sequenceContext{
 			hero:               hero,
 			pitched:            pitched,
@@ -1472,41 +1453,70 @@ func fillContributions(summary *TurnSummary, hero hero.Hero, weapons []weapon.We
 			incomingDamage:     incomingDamage,
 			blockTotal:         sumDef,
 		}
-		ctx.bestSequence(chain, winnerOrder, perCardDmg, perCardTrigger)
-		// Snapshot the winning chain into TurnSummary so display callers see true play order
-		// (matters for Go-again / trigger chains). Fresh slice — winnerOrder aliases attackBuf
-		// storage the next partition would clobber.
-		summary.AttackChain = make([]AttackChainEntry, len(winnerOrder))
-		for i := range winnerOrder {
-			summary.AttackChain[i] = AttackChainEntry{
-				Card:          winnerOrder[i],
-				Damage:        perCardDmg[i],
-				TriggerDamage: perCardTrigger[i],
-			}
-		}
-		// Map chain-position damage back to BestLine by scanning for the first unused Attack-role
-		// entry with a matching ID. Duplicate printings played as twin attacks disambiguate by
-		// scan order. Contribution bundles Play return + hero trigger so per-card stats reflect
-		// the card's total this-turn impact.
-		if cap(bufs.fillContribUsed) < total {
-			bufs.fillContribUsed = make([]bool, total)
-		}
-		used := bufs.fillContribUsed[:total]
-		for i := range used {
-			used[i] = false
-		}
-		for k, c := range winnerOrder {
-			if _, isWeapon := c.(weapon.Weapon); isWeapon {
-				continue
-			}
-			for i := range line {
-				if used[i] || line[i].Role != Attack || line[i].Card.ID() != c.ID() {
-					continue
-				}
-				line[i].Contribution = perCardDmg[k] + perCardTrigger[k]
-				used[i] = true
+		fillAttackChainContributions(summary, chain, ctx)
+	}
+}
+
+// buildAttackChain appends attackers first, then the weapons named in swungNames in that order,
+// so the sequence search sees the same chain composition the partition loop priced. Uses the
+// passed-in slice's backing array (typically bufs.attackerBuf) to stay allocation-free.
+func buildAttackChain(dst []card.Card, attackers []card.Card, weapons []weapon.Weapon, swungNames []string) []card.Card {
+	dst = append(dst, attackers...)
+	for _, name := range swungNames {
+		for _, w := range weapons {
+			if w.Name() == name {
+				dst = append(dst, w)
 				break
 			}
+		}
+	}
+	return dst
+}
+
+// fillAttackChainContributions re-runs the sequence search with tracking enabled to recover the
+// winning permutation, snapshots it into summary.AttackChain (fresh slice — the buf-backed
+// winnerOrder is reused on later calls), and maps each position's damage back to BestLine's
+// Attack-role entries. Weapons don't map back since they have no BestLine entry; their damage
+// is already in summary.Value. Duplicate printings played as twin attacks disambiguate by
+// scan order. Contribution bundles Play return + hero-trigger so per-card stats reflect the
+// card's total this-turn impact.
+func fillAttackChainContributions(summary *TurnSummary, chain []card.Card, ctx *sequenceContext) {
+	line := summary.BestLine
+	total := len(line)
+	bufs := ctx.bufs
+	winnerOrder := bufs.fillContribWinnerOrder[:len(chain)]
+	perCardDmg := bufs.fillContribPerCard[:len(chain)]
+	if cap(bufs.fillContribTriggerDmg) < len(chain) {
+		bufs.fillContribTriggerDmg = make([]float64, len(chain))
+	}
+	perCardTrigger := bufs.fillContribTriggerDmg[:len(chain)]
+	ctx.bestSequence(chain, winnerOrder, perCardDmg, perCardTrigger)
+	summary.AttackChain = make([]AttackChainEntry, len(winnerOrder))
+	for i := range winnerOrder {
+		summary.AttackChain[i] = AttackChainEntry{
+			Card:          winnerOrder[i],
+			Damage:        perCardDmg[i],
+			TriggerDamage: perCardTrigger[i],
+		}
+	}
+	if cap(bufs.fillContribUsed) < total {
+		bufs.fillContribUsed = make([]bool, total)
+	}
+	used := bufs.fillContribUsed[:total]
+	for i := range used {
+		used[i] = false
+	}
+	for k, c := range winnerOrder {
+		if _, isWeapon := c.(weapon.Weapon); isWeapon {
+			continue
+		}
+		for i := range line {
+			if used[i] || line[i].Role != Attack || line[i].Card.ID() != c.ID() {
+				continue
+			}
+			line[i].Contribution = perCardDmg[k] + perCardTrigger[k]
+			used[i] = true
+			break
 		}
 	}
 }
