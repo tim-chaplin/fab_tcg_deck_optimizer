@@ -60,6 +60,22 @@ func TestMarshalFormat(t *testing.T) {
 	}
 }
 
+// TestMarshalIncludesDefaultArenaPackage pins the convenience behaviour: Marshal emits the
+// user's fixed equipment loadout (defaultArenaPackage) alongside the deck's weapons, so the
+// exported .txt can be pasted into fabrary without hand-editing equipment slots.
+func TestMarshalIncludesDefaultArenaPackage(t *testing.T) {
+	rng := rand.New(rand.NewSource(1))
+	d := deck.Random(hero.Viserai{}, 40, 2, rng, nil)
+	text := Marshal(d)
+
+	for _, name := range defaultArenaPackage {
+		want := "1x " + name + "\n"
+		if !strings.Contains(text, want) {
+			t.Errorf("expected %q in Arena section; output:\n%s", strings.TrimSuffix(want, "\n"), text)
+		}
+	}
+}
+
 // TestUnmarshalSample parses the exact sample the user supplied (verbatim from fabrary.net's
 // plain-text export) to prove the parser tolerates the real output, including the footer and the
 // mix of weapons + non-weapon equipment in the Arena section.
