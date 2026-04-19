@@ -18,7 +18,7 @@ type WreckHavocRed struct{}
 
 func (WreckHavocRed) ID() card.ID                 { return card.WreckHavocRed }
 func (WreckHavocRed) Name() string                { return "Wreck Havoc (Red)" }
-func (WreckHavocRed) Cost() int                   { return 2 }
+func (WreckHavocRed) Cost(*card.TurnState) int                   { return 2 }
 func (WreckHavocRed) Pitch() int                  { return 1 }
 func (WreckHavocRed) Attack() int                 { return 6 }
 func (WreckHavocRed) Defense() int                { return 2 }
@@ -30,7 +30,7 @@ type WreckHavocYellow struct{}
 
 func (WreckHavocYellow) ID() card.ID                 { return card.WreckHavocYellow }
 func (WreckHavocYellow) Name() string                { return "Wreck Havoc (Yellow)" }
-func (WreckHavocYellow) Cost() int                   { return 2 }
+func (WreckHavocYellow) Cost(*card.TurnState) int                   { return 2 }
 func (WreckHavocYellow) Pitch() int                  { return 2 }
 func (WreckHavocYellow) Attack() int                 { return 5 }
 func (WreckHavocYellow) Defense() int                { return 2 }
@@ -42,7 +42,7 @@ type WreckHavocBlue struct{}
 
 func (WreckHavocBlue) ID() card.ID                 { return card.WreckHavocBlue }
 func (WreckHavocBlue) Name() string                { return "Wreck Havoc (Blue)" }
-func (WreckHavocBlue) Cost() int                   { return 2 }
+func (WreckHavocBlue) Cost(*card.TurnState) int                   { return 2 }
 func (WreckHavocBlue) Pitch() int                  { return 3 }
 func (WreckHavocBlue) Attack() int                 { return 4 }
 func (WreckHavocBlue) Defense() int                { return 2 }

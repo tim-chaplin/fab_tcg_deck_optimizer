@@ -209,15 +209,16 @@ func FormatBestTurn(t TurnSummary) string {
 	// Partition BestLine into role buckets; pitch cards pool and are split by phase below.
 	var pitched, plainBlocks, defenseReactions, held, arsenal []CardAssignment
 	var attackCost, drCost int
+	zeroState := &card.TurnState{}
 	for _, a := range t.BestLine {
 		switch a.Role {
 		case Pitch:
 			pitched = append(pitched, a)
 		case Attack:
-			attackCost += a.Card.Cost()
+			attackCost += a.Card.Cost(zeroState)
 		case Defend:
 			if a.Card.Types().IsDefenseReaction() {
-				drCost += a.Card.Cost()
+				drCost += a.Card.Cost(zeroState)
 				defenseReactions = append(defenseReactions, a)
 			} else {
 				plainBlocks = append(plainBlocks, a)
@@ -461,28 +462,31 @@ func makeMemoKey(hero hero.Hero, weapons []weapon.Weapon, sortedIDs *[8]card.ID,
 }
 
 // attackerMeta caches the scalar card attributes playSequence reads on every permutation. With
-// this hoisted to a per-attacker lookup, the hot inner loop skips Types / Cost / GoAgain
-// interface dispatch; the one meta build amortises across all N! permutations.
+// this hoisted to a per-attacker lookup, the hot inner loop skips Types / GoAgain interface
+// dispatch; the one meta build amortises across all N! permutations.
+//
+// minCost / maxCost are static bounds on Card.Cost(s). For cards implementing card.VariableCost
+// the solver uses them for O(1) partition pre-screens and falls through to card.Cost(state) in
+// the chain inner loop. For non-VariableCost cards, minCost == maxCost == Cost(&TurnState{})
+// and the cached value is used directly (no interface call per play).
 type attackerMeta struct {
 	types            card.TypeSet
-	cost             int  // Card.Cost() — for DiscountPerRunechant cards this is the printed cost
-	isDiscount       bool // Card implements DiscountPerRunechant; costAt applies the Runechant discount
-	baseGoAgain      bool // Card.GoAgain() — combined with PlayedCard.GrantedGoAgain at read time
+	card             card.Card // held for variable-cost chain-time Cost(state) calls
+	minCost          int
+	maxCost          int
+	isVariable       bool
+	baseGoAgain      bool
 	isAttackOrWeapon bool
 }
 
-// costAt returns the card's effective cost given the current Runechant count. Non-discount
-// cards pay Cost() flat; DiscountPerRunechant cards pay max(0, Cost() - runechants). This is
-// the only path the solver takes to compute a card's cost at play time.
-func (m *attackerMeta) costAt(runechants int) int {
-	if m.isDiscount {
-		eff := m.cost - runechants
-		if eff < 0 {
-			return 0
-		}
-		return eff
+// costAt returns the card's effective cost given the current TurnState. Static cards return the
+// cached value directly; variable-cost cards defer to card.Cost(s) so every game-state-dependent
+// costing rule lives inside the card, not the solver.
+func (m *attackerMeta) costAt(s *card.TurnState) int {
+	if m.isVariable {
+		return m.card.Cost(s)
 	}
-	return m.cost
+	return m.maxCost
 }
 
 // cardMetaCache / cardMetaReady are shared, read-only-after-init card metadata tables. Populated
@@ -530,12 +534,19 @@ func cardMetaSlowPath(c card.Card, id card.ID) attackerMeta {
 	t := c.Types()
 	m := attackerMeta{
 		types:            t,
-		cost:             c.Cost(),
+		card:             c,
 		baseGoAgain:      c.GoAgain(),
 		isAttackOrWeapon: t.Has(card.TypeAttack) || t.Has(card.TypeWeapon),
 	}
-	if _, ok := c.(card.DiscountPerRunechant); ok {
-		m.isDiscount = true
+	if vc, ok := c.(card.VariableCost); ok {
+		m.minCost = vc.MinCost()
+		m.maxCost = vc.MaxCost()
+		m.isVariable = m.minCost != m.maxCost
+	} else {
+		// Static cost: any TurnState probe returns the same value. Cache once.
+		fixed := c.Cost(&card.TurnState{})
+		m.minCost = fixed
+		m.maxCost = fixed
 	}
 	cardMetaCache[id] = m
 	atomic.StoreUint32(&cardMetaReady[id], 1)
@@ -551,13 +562,17 @@ type attackBufs struct {
 	ptrBuf         []*card.PlayedCard
 	cardsPlayedBuf []card.Card
 	state          *card.TurnState
+	// drScratch is a pooled TurnState for defense-reaction cost probing inside the
+	// (pmask × wmask) loop; reusing its heap slot avoids a per-iteration alloc caused by
+	// interface-call escape.
+	drScratch card.TurnState
 	attackerBuf    []card.Card // for bestAttackWithWeapons mask iteration
 	// Pre-computed per-mask weapon data. Indexed by bitmask (0 to 2^len(weapons)-1):
 	// weaponCosts[mask] is total Cost; weaponNames[mask] is the pre-built []string of names.
 	weaponCosts []int
 	weaponNames [][]string
 	// permMeta parallels perm: each entry points into the global cardMetaCache so playSequence's
-	// inner loop skips interface dispatch on Types / Cost / GoAgain / DiscountPerRunechant.
+	// inner loop skips interface dispatch on Types / GoAgain and reads cached cost bounds.
 	// Pointer-valued so bestSequence's permutation swaps move 8 bytes instead of a full struct.
 	permMeta []*attackerMeta
 	// Partition-loop buffers, consumed by bestUncached. Sized handSize+1 to cover the optional
@@ -604,7 +619,7 @@ func newAttackBufs(handSize, weaponCount int, weapons []weapon.Weapon) *attackBu
 		var names []string
 		for i, w := range weapons {
 			if mask&(1<<i) != 0 {
-				cost += w.Cost()
+				cost += w.Cost(&card.TurnState{})
 				names = append(names, w.Name())
 			}
 		}
@@ -1049,13 +1064,11 @@ func bestAttackWithWeapons(hero hero.Hero, weapons []weapon.Weapon, attackers, d
 	// of chain cost. attackersPrinted is the no-discount upper bound, used for the pitch-waste
 	// upper bound check.
 	attackersMinCost := 0
-	attackersPrinted := 0
+	attackersMaxCost := 0
 	for _, a := range attackers {
 		m := attackerMetaPtrFor(a)
-		attackersPrinted += m.cost
-		if !m.isDiscount {
-			attackersMinCost += m.cost
-		}
+		attackersMinCost += m.minCost
+		attackersMaxCost += m.maxCost
 	}
 
 	copy(bufs.attackerBuf, attackers)
@@ -1093,16 +1106,15 @@ func bestAttackWithWeapons(hero hero.Hero, weapons []weapon.Weapon, attackers, d
 		ctx.maxAttackPitch = maxAttackPitch
 
 		for wmask := 0; wmask < 1<<len(weapons); wmask++ {
-			weaponPrinted := bufs.weaponCosts[wmask]
-			// Lower bound on total chain cost (non-discount attackers + weapons always pay printed).
-			// If the attack budget can't cover even this floor, no permutation is feasible.
-			if attackersMinCost+weaponPrinted > attackBudget {
+			weaponCost := bufs.weaponCosts[wmask] // weapons are static-cost
+			// Lower bound on total chain cost (sum of MinCost across attackers + weapons). If the
+			// attack budget can't cover even this floor, no permutation is feasible.
+			if attackersMinCost+weaponCost > attackBudget {
 				continue
 			}
-			// Upper bound on pitch-waste residual: attackBudget - chainPrinted is the residual if
-			// no discount applies at all. If that lower bound already trips pitch-timing, every
-			// permutation wastes; no point enumerating.
-			if hasAttackPitches && attackBudget-(attackersPrinted+weaponPrinted) >= maxAttackPitch {
+			// Upper bound on pitch-waste residual: attackBudget - (sum of MaxCost) is the minimum
+			// possible residual. If even that trips pitch-timing, every permutation wastes.
+			if hasAttackPitches && attackBudget-(attackersMaxCost+weaponCost) >= maxAttackPitch {
 				continue
 			}
 			allAttackers := bufs.attackerBuf[:len(attackers)]
@@ -1115,14 +1127,18 @@ func bestAttackWithWeapons(hero hero.Hero, weapons []weapon.Weapon, attackers, d
 			if !legal {
 				continue
 			}
-			// Cost the DRs against the chain's final runechant count (DiscountPerRunechant DRs see
-			// the discount from whatever tokens survived the chain).
+			// Cost the DRs against the chain's final runechant count. DRs with variable cost
+			// read state.Runechants inside their Cost; static DRs return a constant. Reuse
+			// bufs.drScratch instead of allocating a fresh TurnState per mask iteration — the
+			// interface call boxes the pointer, so a stack allocation would escape and heap-alloc
+			// every loop.
+			bufs.drScratch = card.TurnState{Runechants: leftoverRunechants}
 			drCost := 0
 			for _, d := range defenders {
 				if !d.Types().IsDefenseReaction() {
 					continue
 				}
-				drCost += attackerMetaPtrFor(d).costAt(leftoverRunechants)
+				drCost += d.Cost(&bufs.drScratch)
 			}
 			if drCost > defendBudget {
 				continue
@@ -1289,9 +1305,9 @@ func (ctx *sequenceContext) bestSequence(attackers, winnerOrderOut []card.Card, 
 //   - At end of the sequence, state.Runechants is the leftover count carrying into next turn.
 //
 // Resource flow:
-//   - ctx.resourceBudget is the starting pool; each card deducts its effective cost. For cards
-//     implementing DiscountPerRunechant, effective cost is max(0, PrintedCost -
-//     state.Runechants) at play time; otherwise Cost(). Negative remaining budget returns
+//   - ctx.resourceBudget is the starting pool; each card deducts its effective cost, as returned
+//     by attackerMeta.costAt(state) — which defers to Card.Cost(state) for VariableCost cards
+//     and returns the cached static value otherwise. Negative remaining budget returns
 //     legal=false (the caller treats that ordering as zero damage).
 //
 // Populates permMeta from order and then calls playSequenceWithMeta. The hot path (bestSequence)
@@ -1342,7 +1358,7 @@ func (ctx *sequenceContext) playSequenceWithMeta(order []card.Card, perCardOut, 
 	resources := ctx.resourceBudget
 	for i, pc := range played {
 		m := meta[i]
-		resources -= m.costAt(state.Runechants)
+		resources -= m.costAt(state)
 		if resources < 0 {
 			return 0, 0, 0, false
 		}

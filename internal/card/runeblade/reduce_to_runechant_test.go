@@ -6,12 +6,12 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 )
 
-// Compile-time: all three Reduce variants must implement DiscountPerRunechant so the solver
-// uses the per-runechant discount path instead of treating their Cost() as authoritative.
+// Compile-time: all three Reduce variants must implement card.VariableCost so the solver can
+// pre-screen with MinCost / MaxCost bounds before running chain permutations.
 var (
-	_ card.DiscountPerRunechant = ReduceToRunechantRed{}
-	_ card.DiscountPerRunechant = ReduceToRunechantYellow{}
-	_ card.DiscountPerRunechant = ReduceToRunechantBlue{}
+	_ card.VariableCost = ReduceToRunechantRed{}
+	_ card.VariableCost = ReduceToRunechantYellow{}
+	_ card.VariableCost = ReduceToRunechantBlue{}
 )
 
 func TestReduceToRunechant_PlayCreditsCreatedToken(t *testing.T) {
@@ -32,15 +32,22 @@ func TestReduceToRunechant_PlayCreditsCreatedToken(t *testing.T) {
 	}
 }
 
-func TestReduceToRunechant_PrintedCost(t *testing.T) {
-	cases := []card.DiscountPerRunechant{
+func TestReduceToRunechant_CostBounds(t *testing.T) {
+	cases := []card.Card{
 		ReduceToRunechantRed{},
 		ReduceToRunechantYellow{},
 		ReduceToRunechantBlue{},
 	}
 	for _, c := range cases {
-		if got := c.PrintedCost(); got != 1 {
-			t.Errorf("%s: PrintedCost() = %d, want 1", c.(card.Card).Name(), got)
+		vc, ok := c.(card.VariableCost)
+		if !ok {
+			t.Fatalf("%s: does not implement card.VariableCost", c.Name())
+		}
+		if vc.MaxCost() != 1 {
+			t.Errorf("%s: MaxCost() = %d, want 1", c.Name(), vc.MaxCost())
+		}
+		if vc.MinCost() != 0 {
+			t.Errorf("%s: MinCost() = %d, want 0", c.Name(), vc.MinCost())
 		}
 	}
 }

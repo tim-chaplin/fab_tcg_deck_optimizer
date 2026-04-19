@@ -18,7 +18,7 @@ type FlockOfTheFeatherWalkersRed struct{}
 
 func (FlockOfTheFeatherWalkersRed) ID() card.ID                 { return card.FlockOfTheFeatherWalkersRed }
 func (FlockOfTheFeatherWalkersRed) Name() string                { return "Flock of the Feather Walkers (Red)" }
-func (FlockOfTheFeatherWalkersRed) Cost() int                   { return 1 }
+func (FlockOfTheFeatherWalkersRed) Cost(*card.TurnState) int                   { return 1 }
 func (FlockOfTheFeatherWalkersRed) Pitch() int                  { return 1 }
 func (FlockOfTheFeatherWalkersRed) Attack() int                 { return 5 }
 func (FlockOfTheFeatherWalkersRed) Defense() int                { return 2 }
@@ -30,7 +30,7 @@ type FlockOfTheFeatherWalkersYellow struct{}
 
 func (FlockOfTheFeatherWalkersYellow) ID() card.ID                 { return card.FlockOfTheFeatherWalkersYellow }
 func (FlockOfTheFeatherWalkersYellow) Name() string                { return "Flock of the Feather Walkers (Yellow)" }
-func (FlockOfTheFeatherWalkersYellow) Cost() int                   { return 1 }
+func (FlockOfTheFeatherWalkersYellow) Cost(*card.TurnState) int                   { return 1 }
 func (FlockOfTheFeatherWalkersYellow) Pitch() int                  { return 2 }
 func (FlockOfTheFeatherWalkersYellow) Attack() int                 { return 4 }
 func (FlockOfTheFeatherWalkersYellow) Defense() int                { return 2 }
@@ -42,7 +42,7 @@ type FlockOfTheFeatherWalkersBlue struct{}
 
 func (FlockOfTheFeatherWalkersBlue) ID() card.ID                 { return card.FlockOfTheFeatherWalkersBlue }
 func (FlockOfTheFeatherWalkersBlue) Name() string                { return "Flock of the Feather Walkers (Blue)" }
-func (FlockOfTheFeatherWalkersBlue) Cost() int                   { return 1 }
+func (FlockOfTheFeatherWalkersBlue) Cost(*card.TurnState) int                   { return 1 }
 func (FlockOfTheFeatherWalkersBlue) Pitch() int                  { return 3 }
 func (FlockOfTheFeatherWalkersBlue) Attack() int                 { return 3 }
 func (FlockOfTheFeatherWalkersBlue) Defense() int                { return 2 }

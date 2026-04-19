@@ -18,7 +18,7 @@ type OverloadRed struct{}
 
 func (OverloadRed) ID() card.ID                 { return card.OverloadRed }
 func (OverloadRed) Name() string                { return "Overload (Red)" }
-func (OverloadRed) Cost() int                   { return 0 }
+func (OverloadRed) Cost(*card.TurnState) int                   { return 0 }
 func (OverloadRed) Pitch() int                  { return 1 }
 func (OverloadRed) Attack() int                 { return 3 }
 func (OverloadRed) Defense() int                { return 2 }
@@ -30,7 +30,7 @@ type OverloadYellow struct{}
 
 func (OverloadYellow) ID() card.ID                 { return card.OverloadYellow }
 func (OverloadYellow) Name() string                { return "Overload (Yellow)" }
-func (OverloadYellow) Cost() int                   { return 0 }
+func (OverloadYellow) Cost(*card.TurnState) int                   { return 0 }
 func (OverloadYellow) Pitch() int                  { return 2 }
 func (OverloadYellow) Attack() int                 { return 2 }
 func (OverloadYellow) Defense() int                { return 2 }
@@ -42,7 +42,7 @@ type OverloadBlue struct{}
 
 func (OverloadBlue) ID() card.ID                 { return card.OverloadBlue }
 func (OverloadBlue) Name() string                { return "Overload (Blue)" }
-func (OverloadBlue) Cost() int                   { return 0 }
+func (OverloadBlue) Cost(*card.TurnState) int                   { return 0 }
 func (OverloadBlue) Pitch() int                  { return 3 }
 func (OverloadBlue) Attack() int                 { return 1 }
 func (OverloadBlue) Defense() int                { return 2 }

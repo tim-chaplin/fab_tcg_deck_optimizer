@@ -18,7 +18,7 @@ type InfectiousHostRed struct{}
 
 func (InfectiousHostRed) ID() card.ID                 { return card.InfectiousHostRed }
 func (InfectiousHostRed) Name() string                { return "Infectious Host (Red)" }
-func (InfectiousHostRed) Cost() int                   { return 0 }
+func (InfectiousHostRed) Cost(*card.TurnState) int                   { return 0 }
 func (InfectiousHostRed) Pitch() int                  { return 1 }
 func (InfectiousHostRed) Attack() int                 { return 4 }
 func (InfectiousHostRed) Defense() int                { return 2 }
@@ -30,7 +30,7 @@ type InfectiousHostYellow struct{}
 
 func (InfectiousHostYellow) ID() card.ID                 { return card.InfectiousHostYellow }
 func (InfectiousHostYellow) Name() string                { return "Infectious Host (Yellow)" }
-func (InfectiousHostYellow) Cost() int                   { return 0 }
+func (InfectiousHostYellow) Cost(*card.TurnState) int                   { return 0 }
 func (InfectiousHostYellow) Pitch() int                  { return 2 }
 func (InfectiousHostYellow) Attack() int                 { return 3 }
 func (InfectiousHostYellow) Defense() int                { return 2 }
@@ -42,7 +42,7 @@ type InfectiousHostBlue struct{}
 
 func (InfectiousHostBlue) ID() card.ID                 { return card.InfectiousHostBlue }
 func (InfectiousHostBlue) Name() string                { return "Infectious Host (Blue)" }
-func (InfectiousHostBlue) Cost() int                   { return 0 }
+func (InfectiousHostBlue) Cost(*card.TurnState) int                   { return 0 }
 func (InfectiousHostBlue) Pitch() int                  { return 3 }
 func (InfectiousHostBlue) Attack() int                 { return 2 }
 func (InfectiousHostBlue) Defense() int                { return 2 }

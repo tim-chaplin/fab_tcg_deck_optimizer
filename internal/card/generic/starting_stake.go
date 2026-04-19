@@ -16,7 +16,7 @@ type StartingStakeYellow struct{}
 
 func (StartingStakeYellow) ID() card.ID                 { return card.StartingStakeYellow }
 func (StartingStakeYellow) Name() string                { return "Starting Stake (Yellow)" }
-func (StartingStakeYellow) Cost() int                   { return 0 }
+func (StartingStakeYellow) Cost(*card.TurnState) int                   { return 0 }
 func (StartingStakeYellow) Pitch() int                  { return 2 }
 func (StartingStakeYellow) Attack() int                 { return 0 }
 func (StartingStakeYellow) Defense() int                { return 3 }

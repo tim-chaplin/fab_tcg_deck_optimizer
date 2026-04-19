@@ -22,7 +22,7 @@ type BlowForABlowRed struct{}
 
 func (BlowForABlowRed) ID() card.ID         { return card.BlowForABlowRed }
 func (BlowForABlowRed) Name() string        { return "Blow for a Blow (Red)" }
-func (BlowForABlowRed) Cost() int           { return 2 }
+func (BlowForABlowRed) Cost(*card.TurnState) int           { return 2 }
 func (BlowForABlowRed) Pitch() int          { return 1 }
 func (BlowForABlowRed) Attack() int         { return 4 }
 func (BlowForABlowRed) Defense() int        { return 2 }

@@ -17,7 +17,7 @@ type SurgingMilitiaRed struct{}
 
 func (SurgingMilitiaRed) ID() card.ID                 { return card.SurgingMilitiaRed }
 func (SurgingMilitiaRed) Name() string                { return "Surging Militia (Red)" }
-func (SurgingMilitiaRed) Cost() int                   { return 2 }
+func (SurgingMilitiaRed) Cost(*card.TurnState) int                   { return 2 }
 func (SurgingMilitiaRed) Pitch() int                  { return 1 }
 func (SurgingMilitiaRed) Attack() int                 { return 5 }
 func (SurgingMilitiaRed) Defense() int                { return 2 }
@@ -29,7 +29,7 @@ type SurgingMilitiaYellow struct{}
 
 func (SurgingMilitiaYellow) ID() card.ID                 { return card.SurgingMilitiaYellow }
 func (SurgingMilitiaYellow) Name() string                { return "Surging Militia (Yellow)" }
-func (SurgingMilitiaYellow) Cost() int                   { return 2 }
+func (SurgingMilitiaYellow) Cost(*card.TurnState) int                   { return 2 }
 func (SurgingMilitiaYellow) Pitch() int                  { return 2 }
 func (SurgingMilitiaYellow) Attack() int                 { return 4 }
 func (SurgingMilitiaYellow) Defense() int                { return 2 }
@@ -41,7 +41,7 @@ type SurgingMilitiaBlue struct{}
 
 func (SurgingMilitiaBlue) ID() card.ID                 { return card.SurgingMilitiaBlue }
 func (SurgingMilitiaBlue) Name() string                { return "Surging Militia (Blue)" }
-func (SurgingMilitiaBlue) Cost() int                   { return 2 }
+func (SurgingMilitiaBlue) Cost(*card.TurnState) int                   { return 2 }
 func (SurgingMilitiaBlue) Pitch() int                  { return 3 }
 func (SurgingMilitiaBlue) Attack() int                 { return 3 }
 func (SurgingMilitiaBlue) Defense() int                { return 2 }

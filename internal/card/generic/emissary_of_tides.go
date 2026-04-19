@@ -18,7 +18,7 @@ type EmissaryOfTidesRed struct{}
 
 func (EmissaryOfTidesRed) ID() card.ID                 { return card.EmissaryOfTidesRed }
 func (EmissaryOfTidesRed) Name() string                { return "Emissary of Tides (Red)" }
-func (EmissaryOfTidesRed) Cost() int                   { return 0 }
+func (EmissaryOfTidesRed) Cost(*card.TurnState) int                   { return 0 }
 func (EmissaryOfTidesRed) Pitch() int                  { return 1 }
 func (EmissaryOfTidesRed) Attack() int                 { return 4 }
 func (EmissaryOfTidesRed) Defense() int                { return 2 }

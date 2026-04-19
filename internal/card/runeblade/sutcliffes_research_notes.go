@@ -36,7 +36,7 @@ type SutcliffesResearchNotesRed struct{}
 
 func (SutcliffesResearchNotesRed) ID() card.ID                 { return card.SutcliffesResearchNotesRed }
 func (SutcliffesResearchNotesRed) Name() string                 { return "Sutcliffe's Research Notes (Red)" }
-func (SutcliffesResearchNotesRed) Cost() int                    { return 1 }
+func (SutcliffesResearchNotesRed) Cost(*card.TurnState) int                    { return 1 }
 func (SutcliffesResearchNotesRed) Pitch() int                   { return 1 }
 func (SutcliffesResearchNotesRed) Attack() int                  { return 0 }
 func (SutcliffesResearchNotesRed) Defense() int                 { return 2 }
@@ -49,7 +49,7 @@ type SutcliffesResearchNotesYellow struct{}
 
 func (SutcliffesResearchNotesYellow) ID() card.ID                 { return card.SutcliffesResearchNotesYellow }
 func (SutcliffesResearchNotesYellow) Name() string                 { return "Sutcliffe's Research Notes (Yellow)" }
-func (SutcliffesResearchNotesYellow) Cost() int                    { return 1 }
+func (SutcliffesResearchNotesYellow) Cost(*card.TurnState) int                    { return 1 }
 func (SutcliffesResearchNotesYellow) Pitch() int                   { return 2 }
 func (SutcliffesResearchNotesYellow) Attack() int                  { return 0 }
 func (SutcliffesResearchNotesYellow) Defense() int                 { return 2 }
@@ -62,7 +62,7 @@ type SutcliffesResearchNotesBlue struct{}
 
 func (SutcliffesResearchNotesBlue) ID() card.ID                 { return card.SutcliffesResearchNotesBlue }
 func (SutcliffesResearchNotesBlue) Name() string                 { return "Sutcliffe's Research Notes (Blue)" }
-func (SutcliffesResearchNotesBlue) Cost() int                    { return 1 }
+func (SutcliffesResearchNotesBlue) Cost(*card.TurnState) int                    { return 1 }
 func (SutcliffesResearchNotesBlue) Pitch() int                   { return 3 }
 func (SutcliffesResearchNotesBlue) Attack() int                  { return 0 }
 func (SutcliffesResearchNotesBlue) Defense() int                 { return 2 }

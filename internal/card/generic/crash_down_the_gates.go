@@ -19,7 +19,7 @@ type CrashDownTheGatesRed struct{}
 
 func (CrashDownTheGatesRed) ID() card.ID                 { return card.CrashDownTheGatesRed }
 func (CrashDownTheGatesRed) Name() string                { return "Crash Down the Gates (Red)" }
-func (CrashDownTheGatesRed) Cost() int                   { return 3 }
+func (CrashDownTheGatesRed) Cost(*card.TurnState) int                   { return 3 }
 func (CrashDownTheGatesRed) Pitch() int                  { return 1 }
 func (CrashDownTheGatesRed) Attack() int                 { return 6 }
 func (CrashDownTheGatesRed) Defense() int                { return 2 }
@@ -31,7 +31,7 @@ type CrashDownTheGatesYellow struct{}
 
 func (CrashDownTheGatesYellow) ID() card.ID                 { return card.CrashDownTheGatesYellow }
 func (CrashDownTheGatesYellow) Name() string                { return "Crash Down the Gates (Yellow)" }
-func (CrashDownTheGatesYellow) Cost() int                   { return 3 }
+func (CrashDownTheGatesYellow) Cost(*card.TurnState) int                   { return 3 }
 func (CrashDownTheGatesYellow) Pitch() int                  { return 2 }
 func (CrashDownTheGatesYellow) Attack() int                 { return 5 }
 func (CrashDownTheGatesYellow) Defense() int                { return 2 }
@@ -43,7 +43,7 @@ type CrashDownTheGatesBlue struct{}
 
 func (CrashDownTheGatesBlue) ID() card.ID                 { return card.CrashDownTheGatesBlue }
 func (CrashDownTheGatesBlue) Name() string                { return "Crash Down the Gates (Blue)" }
-func (CrashDownTheGatesBlue) Cost() int                   { return 3 }
+func (CrashDownTheGatesBlue) Cost(*card.TurnState) int                   { return 3 }
 func (CrashDownTheGatesBlue) Pitch() int                  { return 3 }
 func (CrashDownTheGatesBlue) Attack() int                 { return 4 }
 func (CrashDownTheGatesBlue) Defense() int                { return 2 }

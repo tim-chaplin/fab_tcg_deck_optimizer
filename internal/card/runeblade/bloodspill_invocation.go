@@ -21,7 +21,7 @@ type BloodspillInvocationRed struct{}
 
 func (BloodspillInvocationRed) ID() card.ID                { return card.BloodspillInvocationRed }
 func (BloodspillInvocationRed) Name() string               { return "Bloodspill Invocation (Red)" }
-func (BloodspillInvocationRed) Cost() int                  { return 1 }
+func (BloodspillInvocationRed) Cost(*card.TurnState) int                  { return 1 }
 func (BloodspillInvocationRed) Pitch() int                 { return 1 }
 func (BloodspillInvocationRed) Attack() int                { return 0 }
 func (BloodspillInvocationRed) Defense() int               { return 2 }
@@ -33,7 +33,7 @@ type BloodspillInvocationYellow struct{}
 
 func (BloodspillInvocationYellow) ID() card.ID                { return card.BloodspillInvocationYellow }
 func (BloodspillInvocationYellow) Name() string               { return "Bloodspill Invocation (Yellow)" }
-func (BloodspillInvocationYellow) Cost() int                  { return 1 }
+func (BloodspillInvocationYellow) Cost(*card.TurnState) int                  { return 1 }
 func (BloodspillInvocationYellow) Pitch() int                 { return 2 }
 func (BloodspillInvocationYellow) Attack() int                { return 0 }
 func (BloodspillInvocationYellow) Defense() int               { return 2 }
@@ -45,7 +45,7 @@ type BloodspillInvocationBlue struct{}
 
 func (BloodspillInvocationBlue) ID() card.ID                { return card.BloodspillInvocationBlue }
 func (BloodspillInvocationBlue) Name() string               { return "Bloodspill Invocation (Blue)" }
-func (BloodspillInvocationBlue) Cost() int                  { return 1 }
+func (BloodspillInvocationBlue) Cost(*card.TurnState) int                  { return 1 }
 func (BloodspillInvocationBlue) Pitch() int                 { return 3 }
 func (BloodspillInvocationBlue) Attack() int                { return 0 }
 func (BloodspillInvocationBlue) Defense() int               { return 2 }

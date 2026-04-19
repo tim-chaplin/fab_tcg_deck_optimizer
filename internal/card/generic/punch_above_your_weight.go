@@ -17,7 +17,7 @@ type PunchAboveYourWeightRed struct{}
 
 func (PunchAboveYourWeightRed) ID() card.ID                 { return card.PunchAboveYourWeightRed }
 func (PunchAboveYourWeightRed) Name() string                { return "Punch Above Your Weight (Red)" }
-func (PunchAboveYourWeightRed) Cost() int                   { return 0 }
+func (PunchAboveYourWeightRed) Cost(*card.TurnState) int                   { return 0 }
 func (PunchAboveYourWeightRed) Pitch() int                  { return 1 }
 func (PunchAboveYourWeightRed) Attack() int                 { return 2 }
 func (PunchAboveYourWeightRed) Defense() int                { return 2 }
@@ -29,7 +29,7 @@ type PunchAboveYourWeightYellow struct{}
 
 func (PunchAboveYourWeightYellow) ID() card.ID                 { return card.PunchAboveYourWeightYellow }
 func (PunchAboveYourWeightYellow) Name() string                { return "Punch Above Your Weight (Yellow)" }
-func (PunchAboveYourWeightYellow) Cost() int                   { return 0 }
+func (PunchAboveYourWeightYellow) Cost(*card.TurnState) int                   { return 0 }
 func (PunchAboveYourWeightYellow) Pitch() int                  { return 2 }
 func (PunchAboveYourWeightYellow) Attack() int                 { return 2 }
 func (PunchAboveYourWeightYellow) Defense() int                { return 2 }
@@ -41,7 +41,7 @@ type PunchAboveYourWeightBlue struct{}
 
 func (PunchAboveYourWeightBlue) ID() card.ID                 { return card.PunchAboveYourWeightBlue }
 func (PunchAboveYourWeightBlue) Name() string                { return "Punch Above Your Weight (Blue)" }
-func (PunchAboveYourWeightBlue) Cost() int                   { return 0 }
+func (PunchAboveYourWeightBlue) Cost(*card.TurnState) int                   { return 0 }
 func (PunchAboveYourWeightBlue) Pitch() int                  { return 3 }
 func (PunchAboveYourWeightBlue) Attack() int                 { return 2 }
 func (PunchAboveYourWeightBlue) Defense() int                { return 2 }

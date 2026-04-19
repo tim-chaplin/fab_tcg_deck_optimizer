@@ -16,7 +16,7 @@ type VisitTheBlacksmithBlue struct{}
 
 func (VisitTheBlacksmithBlue) ID() card.ID                 { return card.VisitTheBlacksmithBlue }
 func (VisitTheBlacksmithBlue) Name() string                { return "Visit the Blacksmith (Blue)" }
-func (VisitTheBlacksmithBlue) Cost() int                   { return 0 }
+func (VisitTheBlacksmithBlue) Cost(*card.TurnState) int                   { return 0 }
 func (VisitTheBlacksmithBlue) Pitch() int                  { return 3 }
 func (VisitTheBlacksmithBlue) Attack() int                 { return 0 }
 func (VisitTheBlacksmithBlue) Defense() int                { return 2 }

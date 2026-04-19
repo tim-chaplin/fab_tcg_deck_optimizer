@@ -20,7 +20,7 @@ type RunicFellingsongRed struct{}
 
 func (RunicFellingsongRed) ID() card.ID                 { return card.RunicFellingsongRed }
 func (RunicFellingsongRed) Name() string               { return "Runic Fellingsong (Red)" }
-func (RunicFellingsongRed) Cost() int                  { return 3 }
+func (RunicFellingsongRed) Cost(*card.TurnState) int                  { return 3 }
 func (RunicFellingsongRed) Pitch() int                 { return 1 }
 func (RunicFellingsongRed) Attack() int                { return 7 }
 func (RunicFellingsongRed) Defense() int               { return 3 }
@@ -32,7 +32,7 @@ type RunicFellingsongYellow struct{}
 
 func (RunicFellingsongYellow) ID() card.ID                 { return card.RunicFellingsongYellow }
 func (RunicFellingsongYellow) Name() string               { return "Runic Fellingsong (Yellow)" }
-func (RunicFellingsongYellow) Cost() int                  { return 3 }
+func (RunicFellingsongYellow) Cost(*card.TurnState) int                  { return 3 }
 func (RunicFellingsongYellow) Pitch() int                 { return 2 }
 func (RunicFellingsongYellow) Attack() int                { return 6 }
 func (RunicFellingsongYellow) Defense() int               { return 3 }
@@ -44,7 +44,7 @@ type RunicFellingsongBlue struct{}
 
 func (RunicFellingsongBlue) ID() card.ID                 { return card.RunicFellingsongBlue }
 func (RunicFellingsongBlue) Name() string               { return "Runic Fellingsong (Blue)" }
-func (RunicFellingsongBlue) Cost() int                  { return 3 }
+func (RunicFellingsongBlue) Cost(*card.TurnState) int                  { return 3 }
 func (RunicFellingsongBlue) Pitch() int                 { return 3 }
 func (RunicFellingsongBlue) Attack() int                { return 5 }
 func (RunicFellingsongBlue) Defense() int               { return 3 }

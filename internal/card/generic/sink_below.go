@@ -14,7 +14,7 @@ type SinkBelowRed struct{}
 
 func (SinkBelowRed) ID() card.ID                 { return card.SinkBelowRed }
 func (SinkBelowRed) Name() string             { return "Sink Below (Red)" }
-func (SinkBelowRed) Cost() int                { return 0 }
+func (SinkBelowRed) Cost(*card.TurnState) int                { return 0 }
 func (SinkBelowRed) Pitch() int               { return 1 }
 func (SinkBelowRed) Attack() int              { return 0 }
 func (SinkBelowRed) Defense() int             { return 4 }
@@ -27,7 +27,7 @@ type SinkBelowYellow struct{}
 
 func (SinkBelowYellow) ID() card.ID                 { return card.SinkBelowYellow }
 func (SinkBelowYellow) Name() string             { return "Sink Below (Yellow)" }
-func (SinkBelowYellow) Cost() int                { return 0 }
+func (SinkBelowYellow) Cost(*card.TurnState) int                { return 0 }
 func (SinkBelowYellow) Pitch() int               { return 2 }
 func (SinkBelowYellow) Attack() int              { return 0 }
 func (SinkBelowYellow) Defense() int             { return 3 }
@@ -40,7 +40,7 @@ type SinkBelowBlue struct{}
 
 func (SinkBelowBlue) ID() card.ID                 { return card.SinkBelowBlue }
 func (SinkBelowBlue) Name() string             { return "Sink Below (Blue)" }
-func (SinkBelowBlue) Cost() int                { return 0 }
+func (SinkBelowBlue) Cost(*card.TurnState) int                { return 0 }
 func (SinkBelowBlue) Pitch() int               { return 3 }
 func (SinkBelowBlue) Attack() int              { return 0 }
 func (SinkBelowBlue) Defense() int             { return 2 }

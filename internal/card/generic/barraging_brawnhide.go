@@ -18,7 +18,7 @@ type BarragingBrawnhideRed struct{}
 
 func (BarragingBrawnhideRed) ID() card.ID                 { return card.BarragingBrawnhideRed }
 func (BarragingBrawnhideRed) Name() string                { return "Barraging Brawnhide (Red)" }
-func (BarragingBrawnhideRed) Cost() int                   { return 3 }
+func (BarragingBrawnhideRed) Cost(*card.TurnState) int                   { return 3 }
 func (BarragingBrawnhideRed) Pitch() int                  { return 1 }
 func (BarragingBrawnhideRed) Attack() int                 { return 7 }
 func (BarragingBrawnhideRed) Defense() int                { return 2 }
@@ -30,7 +30,7 @@ type BarragingBrawnhideYellow struct{}
 
 func (BarragingBrawnhideYellow) ID() card.ID                 { return card.BarragingBrawnhideYellow }
 func (BarragingBrawnhideYellow) Name() string                { return "Barraging Brawnhide (Yellow)" }
-func (BarragingBrawnhideYellow) Cost() int                   { return 3 }
+func (BarragingBrawnhideYellow) Cost(*card.TurnState) int                   { return 3 }
 func (BarragingBrawnhideYellow) Pitch() int                  { return 2 }
 func (BarragingBrawnhideYellow) Attack() int                 { return 6 }
 func (BarragingBrawnhideYellow) Defense() int                { return 2 }
@@ -42,7 +42,7 @@ type BarragingBrawnhideBlue struct{}
 
 func (BarragingBrawnhideBlue) ID() card.ID                 { return card.BarragingBrawnhideBlue }
 func (BarragingBrawnhideBlue) Name() string                { return "Barraging Brawnhide (Blue)" }
-func (BarragingBrawnhideBlue) Cost() int                   { return 3 }
+func (BarragingBrawnhideBlue) Cost(*card.TurnState) int                   { return 3 }
 func (BarragingBrawnhideBlue) Pitch() int                  { return 3 }
 func (BarragingBrawnhideBlue) Attack() int                 { return 5 }
 func (BarragingBrawnhideBlue) Defense() int                { return 2 }

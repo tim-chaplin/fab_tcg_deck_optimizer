@@ -17,7 +17,7 @@ type RelentlessPursuitBlue struct{}
 
 func (RelentlessPursuitBlue) ID() card.ID                 { return card.RelentlessPursuitBlue }
 func (RelentlessPursuitBlue) Name() string                { return "Relentless Pursuit (Blue)" }
-func (RelentlessPursuitBlue) Cost() int                   { return 0 }
+func (RelentlessPursuitBlue) Cost(*card.TurnState) int                   { return 0 }
 func (RelentlessPursuitBlue) Pitch() int                  { return 3 }
 func (RelentlessPursuitBlue) Attack() int                 { return 0 }
 func (RelentlessPursuitBlue) Defense() int                { return 3 }

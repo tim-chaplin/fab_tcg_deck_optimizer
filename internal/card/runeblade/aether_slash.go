@@ -19,7 +19,7 @@ type AetherSlashRed struct{}
 
 func (AetherSlashRed) ID() card.ID                 { return card.AetherSlashRed }
 func (AetherSlashRed) Name() string                 { return "Aether Slash (Red)" }
-func (AetherSlashRed) Cost() int                    { return 1 }
+func (AetherSlashRed) Cost(*card.TurnState) int                    { return 1 }
 func (AetherSlashRed) Pitch() int                   { return 1 }
 func (AetherSlashRed) Attack() int                  { return 4 }
 func (AetherSlashRed) Defense() int                 { return 3 }
@@ -31,7 +31,7 @@ type AetherSlashYellow struct{}
 
 func (AetherSlashYellow) ID() card.ID                 { return card.AetherSlashYellow }
 func (AetherSlashYellow) Name() string                 { return "Aether Slash (Yellow)" }
-func (AetherSlashYellow) Cost() int                    { return 1 }
+func (AetherSlashYellow) Cost(*card.TurnState) int                    { return 1 }
 func (AetherSlashYellow) Pitch() int                   { return 2 }
 func (AetherSlashYellow) Attack() int                  { return 3 }
 func (AetherSlashYellow) Defense() int                 { return 3 }
@@ -43,7 +43,7 @@ type AetherSlashBlue struct{}
 
 func (AetherSlashBlue) ID() card.ID                 { return card.AetherSlashBlue }
 func (AetherSlashBlue) Name() string                 { return "Aether Slash (Blue)" }
-func (AetherSlashBlue) Cost() int                    { return 1 }
+func (AetherSlashBlue) Cost(*card.TurnState) int                    { return 1 }
 func (AetherSlashBlue) Pitch() int                   { return 3 }
 func (AetherSlashBlue) Attack() int                  { return 2 }
 func (AetherSlashBlue) Defense() int                 { return 3 }

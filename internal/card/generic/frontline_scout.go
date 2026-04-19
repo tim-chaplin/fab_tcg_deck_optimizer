@@ -18,7 +18,7 @@ type FrontlineScoutRed struct{}
 
 func (FrontlineScoutRed) ID() card.ID                 { return card.FrontlineScoutRed }
 func (FrontlineScoutRed) Name() string                { return "Frontline Scout (Red)" }
-func (FrontlineScoutRed) Cost() int                   { return 0 }
+func (FrontlineScoutRed) Cost(*card.TurnState) int                   { return 0 }
 func (FrontlineScoutRed) Pitch() int                  { return 1 }
 func (FrontlineScoutRed) Attack() int                 { return 3 }
 func (FrontlineScoutRed) Defense() int                { return 2 }
@@ -30,7 +30,7 @@ type FrontlineScoutYellow struct{}
 
 func (FrontlineScoutYellow) ID() card.ID                 { return card.FrontlineScoutYellow }
 func (FrontlineScoutYellow) Name() string                { return "Frontline Scout (Yellow)" }
-func (FrontlineScoutYellow) Cost() int                   { return 0 }
+func (FrontlineScoutYellow) Cost(*card.TurnState) int                   { return 0 }
 func (FrontlineScoutYellow) Pitch() int                  { return 2 }
 func (FrontlineScoutYellow) Attack() int                 { return 2 }
 func (FrontlineScoutYellow) Defense() int                { return 2 }
@@ -42,7 +42,7 @@ type FrontlineScoutBlue struct{}
 
 func (FrontlineScoutBlue) ID() card.ID                 { return card.FrontlineScoutBlue }
 func (FrontlineScoutBlue) Name() string                { return "Frontline Scout (Blue)" }
-func (FrontlineScoutBlue) Cost() int                   { return 0 }
+func (FrontlineScoutBlue) Cost(*card.TurnState) int                   { return 0 }
 func (FrontlineScoutBlue) Pitch() int                  { return 3 }
 func (FrontlineScoutBlue) Attack() int                 { return 1 }
 func (FrontlineScoutBlue) Defense() int                { return 2 }

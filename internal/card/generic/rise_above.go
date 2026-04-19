@@ -15,7 +15,7 @@ type RiseAboveRed struct{}
 
 func (RiseAboveRed) ID() card.ID                 { return card.RiseAboveRed }
 func (RiseAboveRed) Name() string             { return "Rise Above (Red)" }
-func (RiseAboveRed) Cost() int                { return 2 }
+func (RiseAboveRed) Cost(*card.TurnState) int                { return 2 }
 func (RiseAboveRed) Pitch() int               { return 1 }
 func (RiseAboveRed) Attack() int              { return 0 }
 func (RiseAboveRed) Defense() int             { return 4 }
@@ -27,7 +27,7 @@ type RiseAboveYellow struct{}
 
 func (RiseAboveYellow) ID() card.ID                 { return card.RiseAboveYellow }
 func (RiseAboveYellow) Name() string             { return "Rise Above (Yellow)" }
-func (RiseAboveYellow) Cost() int                { return 2 }
+func (RiseAboveYellow) Cost(*card.TurnState) int                { return 2 }
 func (RiseAboveYellow) Pitch() int               { return 2 }
 func (RiseAboveYellow) Attack() int              { return 0 }
 func (RiseAboveYellow) Defense() int             { return 3 }
@@ -39,7 +39,7 @@ type RiseAboveBlue struct{}
 
 func (RiseAboveBlue) ID() card.ID                 { return card.RiseAboveBlue }
 func (RiseAboveBlue) Name() string             { return "Rise Above (Blue)" }
-func (RiseAboveBlue) Cost() int                { return 2 }
+func (RiseAboveBlue) Cost(*card.TurnState) int                { return 2 }
 func (RiseAboveBlue) Pitch() int               { return 3 }
 func (RiseAboveBlue) Attack() int              { return 0 }
 func (RiseAboveBlue) Defense() int             { return 2 }

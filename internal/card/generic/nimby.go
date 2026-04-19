@@ -18,7 +18,7 @@ type NimbyRed struct{}
 
 func (NimbyRed) ID() card.ID                 { return card.NimbyRed }
 func (NimbyRed) Name() string                { return "Nimby (Red)" }
-func (NimbyRed) Cost() int                   { return 0 }
+func (NimbyRed) Cost(*card.TurnState) int                   { return 0 }
 func (NimbyRed) Pitch() int                  { return 1 }
 func (NimbyRed) Attack() int                 { return 3 }
 func (NimbyRed) Defense() int                { return 2 }
@@ -31,7 +31,7 @@ type NimbyYellow struct{}
 
 func (NimbyYellow) ID() card.ID                 { return card.NimbyYellow }
 func (NimbyYellow) Name() string                { return "Nimby (Yellow)" }
-func (NimbyYellow) Cost() int                   { return 0 }
+func (NimbyYellow) Cost(*card.TurnState) int                   { return 0 }
 func (NimbyYellow) Pitch() int                  { return 2 }
 func (NimbyYellow) Attack() int                 { return 2 }
 func (NimbyYellow) Defense() int                { return 2 }
@@ -44,7 +44,7 @@ type NimbyBlue struct{}
 
 func (NimbyBlue) ID() card.ID                 { return card.NimbyBlue }
 func (NimbyBlue) Name() string                { return "Nimby (Blue)" }
-func (NimbyBlue) Cost() int                   { return 0 }
+func (NimbyBlue) Cost(*card.TurnState) int                   { return 0 }
 func (NimbyBlue) Pitch() int                  { return 3 }
 func (NimbyBlue) Attack() int                 { return 1 }
 func (NimbyBlue) Defense() int                { return 2 }

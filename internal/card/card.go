@@ -114,7 +114,7 @@ type TurnState struct {
 	// Runechants is the live count of Runechant aura tokens in play. The solver seeds it with
 	// the previous turn's carryover, CreateRunechants increments it, and the attack pipeline
 	// consumes the running total on each attack / weapon swing (each token fires for 1 arcane
-	// and is destroyed). DiscountPerRunechant cards read this to compute effective cost.
+	// and is destroyed). Variable-cost cards (e.g. cost reduced per Runechant) read this in Cost.
 	Runechants int
 	// DelayedRunechants are tokens that skip this turn entirely and go to next turn's carryover.
 	// DelayRunechants adds here; same-turn attacks don't consume them and discount checks don't
@@ -194,7 +194,7 @@ func (s *TurnState) CreateRunechant() int {
 }
 
 // DelayRunechants adds n Runechant tokens that skip this turn entirely — they go to next turn's
-// carryover without being available to same-turn attacks or DiscountPerRunechant checks. Used
+// carryover without being available to same-turn attacks or variable-cost discount checks. Used
 // by cards whose text fires at the start of a future turn (e.g. Blessing of Occult's "at start
 // of your turn, create N Runechant tokens"). Returns n; each token is credited as +1 damage at
 // creation.
@@ -213,7 +213,11 @@ type Card interface {
 	// key maps / slices on cards without string-hashing Name().
 	ID() ID
 	Name() string
-	Cost() int
+	// Cost returns the card's current resource cost given the turn state. Cards with a static
+	// printed cost ignore s and return a constant; cards that read s (e.g. discount-per-token
+	// effects) additionally implement VariableCost so the solver can pre-screen with cheap
+	// MinCost / MaxCost bounds before enumerating chain permutations.
+	Cost(s *TurnState) int
 	Pitch() int
 	// Attack is the printed attack value. Conditional bonuses belong in Play, not here.
 	Attack() int
@@ -239,12 +243,13 @@ type NoMemo interface {
 	NoMemo()
 }
 
-// DiscountPerRunechant is optionally implemented by cards whose printed cost is reduced by 1
-// per Runechant in play (e.g. Amplify the Arknight, Reduce to Runechant, Rune Flash). Cost()
-// and PrintedCost() return the same (undiscounted) value; the solver applies the discount as
-// max(0, PrintedCost() - Runechants) at play time.
-type DiscountPerRunechant interface {
-	PrintedCost() int
+// VariableCost is optionally implemented by cards whose Cost(s) varies with TurnState (e.g.
+// discount-per-token effects). MinCost and MaxCost are static bounds on the Cost output across
+// any state; the solver uses them for cheap O(1) pre-screens before enumerating chain
+// permutations. Non-implementers must return the same value for Cost(s) regardless of s.
+type VariableCost interface {
+	MinCost() int
+	MaxCost() int
 }
 
 // NotSilverAgeLegal is an optional marker. Cards that implement it signal they're banned in the

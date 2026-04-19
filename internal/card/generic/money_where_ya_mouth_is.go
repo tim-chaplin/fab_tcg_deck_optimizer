@@ -20,7 +20,7 @@ type MoneyWhereYaMouthIsRed struct{}
 
 func (MoneyWhereYaMouthIsRed) ID() card.ID                 { return card.MoneyWhereYaMouthIsRed }
 func (MoneyWhereYaMouthIsRed) Name() string                { return "Money Where Ya Mouth Is (Red)" }
-func (MoneyWhereYaMouthIsRed) Cost() int                   { return 1 }
+func (MoneyWhereYaMouthIsRed) Cost(*card.TurnState) int                   { return 1 }
 func (MoneyWhereYaMouthIsRed) Pitch() int                  { return 1 }
 func (MoneyWhereYaMouthIsRed) Attack() int                 { return 0 }
 func (MoneyWhereYaMouthIsRed) Defense() int                { return 2 }
@@ -32,7 +32,7 @@ type MoneyWhereYaMouthIsYellow struct{}
 
 func (MoneyWhereYaMouthIsYellow) ID() card.ID                 { return card.MoneyWhereYaMouthIsYellow }
 func (MoneyWhereYaMouthIsYellow) Name() string                { return "Money Where Ya Mouth Is (Yellow)" }
-func (MoneyWhereYaMouthIsYellow) Cost() int                   { return 1 }
+func (MoneyWhereYaMouthIsYellow) Cost(*card.TurnState) int                   { return 1 }
 func (MoneyWhereYaMouthIsYellow) Pitch() int                  { return 2 }
 func (MoneyWhereYaMouthIsYellow) Attack() int                 { return 0 }
 func (MoneyWhereYaMouthIsYellow) Defense() int                { return 2 }
@@ -44,7 +44,7 @@ type MoneyWhereYaMouthIsBlue struct{}
 
 func (MoneyWhereYaMouthIsBlue) ID() card.ID                 { return card.MoneyWhereYaMouthIsBlue }
 func (MoneyWhereYaMouthIsBlue) Name() string                { return "Money Where Ya Mouth Is (Blue)" }
-func (MoneyWhereYaMouthIsBlue) Cost() int                   { return 1 }
+func (MoneyWhereYaMouthIsBlue) Cost(*card.TurnState) int                   { return 1 }
 func (MoneyWhereYaMouthIsBlue) Pitch() int                  { return 3 }
 func (MoneyWhereYaMouthIsBlue) Attack() int                 { return 0 }
 func (MoneyWhereYaMouthIsBlue) Defense() int                { return 2 }

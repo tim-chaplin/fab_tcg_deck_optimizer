@@ -6,30 +6,36 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 )
 
-// Compile-time: the Drawn to the Dark Dimension variants must implement DiscountPerRunechant,
-// otherwise the solver will not apply the Runechant discount at chain time.
+// Compile-time: the Drawn to the Dark Dimension variants must implement card.VariableCost,
+// otherwise the solver can't pre-screen with MinCost / MaxCost bounds.
 var (
-	_ card.DiscountPerRunechant = DrawnToTheDarkDimensionRed{}
-	_ card.DiscountPerRunechant = DrawnToTheDarkDimensionYellow{}
-	_ card.DiscountPerRunechant = DrawnToTheDarkDimensionBlue{}
+	_ card.VariableCost = DrawnToTheDarkDimensionRed{}
+	_ card.VariableCost = DrawnToTheDarkDimensionYellow{}
+	_ card.VariableCost = DrawnToTheDarkDimensionBlue{}
 )
 
-func TestDrawnToTheDarkDimension_PrintedCost(t *testing.T) {
+func TestDrawnToTheDarkDimension_CostBounds(t *testing.T) {
 	cases := []card.Card{
 		DrawnToTheDarkDimensionRed{},
 		DrawnToTheDarkDimensionYellow{},
 		DrawnToTheDarkDimensionBlue{},
 	}
 	for _, c := range cases {
-		d, ok := c.(card.DiscountPerRunechant)
+		vc, ok := c.(card.VariableCost)
 		if !ok {
-			t.Fatalf("%s: does not implement DiscountPerRunechant", c.Name())
+			t.Fatalf("%s: does not implement card.VariableCost", c.Name())
 		}
-		if d.PrintedCost() != 2 {
-			t.Errorf("%s: PrintedCost() = %d, want 2", c.Name(), d.PrintedCost())
+		if vc.MaxCost() != 2 {
+			t.Errorf("%s: MaxCost() = %d, want 2", c.Name(), vc.MaxCost())
 		}
-		if c.Cost() != 2 {
-			t.Errorf("%s: Cost() = %d, want 2", c.Name(), c.Cost())
+		if vc.MinCost() != 0 {
+			t.Errorf("%s: MinCost() = %d, want 0", c.Name(), vc.MinCost())
+		}
+		if c.Cost(&card.TurnState{}) != 2 {
+			t.Errorf("%s: Cost(zeroState) = %d, want 2", c.Name(), c.Cost(&card.TurnState{}))
+		}
+		if c.Cost(&card.TurnState{Runechants: 5}) != 0 {
+			t.Errorf("%s: Cost(Runechants=5) = %d, want 0", c.Name(), c.Cost(&card.TurnState{Runechants: 5}))
 		}
 	}
 }

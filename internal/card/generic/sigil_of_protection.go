@@ -18,7 +18,7 @@ type SigilOfProtectionRed struct{}
 
 func (SigilOfProtectionRed) ID() card.ID                 { return card.SigilOfProtectionRed }
 func (SigilOfProtectionRed) Name() string                { return "Sigil of Protection (Red)" }
-func (SigilOfProtectionRed) Cost() int                   { return 1 }
+func (SigilOfProtectionRed) Cost(*card.TurnState) int                   { return 1 }
 func (SigilOfProtectionRed) Pitch() int                  { return 1 }
 func (SigilOfProtectionRed) Attack() int                 { return 0 }
 func (SigilOfProtectionRed) Defense() int                { return 2 }
@@ -30,7 +30,7 @@ type SigilOfProtectionYellow struct{}
 
 func (SigilOfProtectionYellow) ID() card.ID                 { return card.SigilOfProtectionYellow }
 func (SigilOfProtectionYellow) Name() string                { return "Sigil of Protection (Yellow)" }
-func (SigilOfProtectionYellow) Cost() int                   { return 1 }
+func (SigilOfProtectionYellow) Cost(*card.TurnState) int                   { return 1 }
 func (SigilOfProtectionYellow) Pitch() int                  { return 2 }
 func (SigilOfProtectionYellow) Attack() int                 { return 0 }
 func (SigilOfProtectionYellow) Defense() int                { return 2 }
@@ -42,7 +42,7 @@ type SigilOfProtectionBlue struct{}
 
 func (SigilOfProtectionBlue) ID() card.ID                 { return card.SigilOfProtectionBlue }
 func (SigilOfProtectionBlue) Name() string                { return "Sigil of Protection (Blue)" }
-func (SigilOfProtectionBlue) Cost() int                   { return 1 }
+func (SigilOfProtectionBlue) Cost(*card.TurnState) int                   { return 1 }
 func (SigilOfProtectionBlue) Pitch() int                  { return 3 }
 func (SigilOfProtectionBlue) Attack() int                 { return 0 }
 func (SigilOfProtectionBlue) Defense() int                { return 2 }

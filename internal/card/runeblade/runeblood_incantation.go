@@ -6,7 +6,7 @@
 //
 // Simplification: 1 Runechant is delayed into next turn's carryover (the counter that'll tick
 // at next turn's action phase start); the remaining N-1 are credited as flat future-turn damage
-// without tracking the tokens. Avoids over-crediting same-turn state so DiscountPerRunechant
+// without tracking the tokens. Avoids over-crediting same-turn state so variable-cost
 // cards can't use all N runes for a full discount in the turn Runeblood was played.
 //
 // Source: github.com/the-fab-cube/flesh-and-blood-cards (card.csv).
@@ -21,7 +21,7 @@ type RunebloodIncantationRed struct{}
 
 func (RunebloodIncantationRed) ID() card.ID                 { return card.RunebloodIncantationRed }
 func (RunebloodIncantationRed) Name() string              { return "Runeblood Incantation (Red)" }
-func (RunebloodIncantationRed) Cost() int                 { return 1 }
+func (RunebloodIncantationRed) Cost(*card.TurnState) int                 { return 1 }
 func (RunebloodIncantationRed) Pitch() int                { return 1 }
 func (RunebloodIncantationRed) Attack() int               { return 0 }
 func (RunebloodIncantationRed) Defense() int              { return 2 }
@@ -33,7 +33,7 @@ type RunebloodIncantationYellow struct{}
 
 func (RunebloodIncantationYellow) ID() card.ID                 { return card.RunebloodIncantationYellow }
 func (RunebloodIncantationYellow) Name() string             { return "Runeblood Incantation (Yellow)" }
-func (RunebloodIncantationYellow) Cost() int                { return 1 }
+func (RunebloodIncantationYellow) Cost(*card.TurnState) int                { return 1 }
 func (RunebloodIncantationYellow) Pitch() int               { return 2 }
 func (RunebloodIncantationYellow) Attack() int              { return 0 }
 func (RunebloodIncantationYellow) Defense() int             { return 2 }
@@ -45,7 +45,7 @@ type RunebloodIncantationBlue struct{}
 
 func (RunebloodIncantationBlue) ID() card.ID                 { return card.RunebloodIncantationBlue }
 func (RunebloodIncantationBlue) Name() string             { return "Runeblood Incantation (Blue)" }
-func (RunebloodIncantationBlue) Cost() int                { return 1 }
+func (RunebloodIncantationBlue) Cost(*card.TurnState) int                { return 1 }
 func (RunebloodIncantationBlue) Pitch() int               { return 3 }
 func (RunebloodIncantationBlue) Attack() int              { return 0 }
 func (RunebloodIncantationBlue) Defense() int             { return 2 }

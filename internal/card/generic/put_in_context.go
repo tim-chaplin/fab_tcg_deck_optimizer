@@ -13,7 +13,7 @@ type PutInContextBlue struct{}
 
 func (PutInContextBlue) ID() card.ID                 { return card.PutInContextBlue }
 func (PutInContextBlue) Name() string             { return "Put in Context (Blue)" }
-func (PutInContextBlue) Cost() int                { return 0 }
+func (PutInContextBlue) Cost(*card.TurnState) int                { return 0 }
 func (PutInContextBlue) Pitch() int               { return 3 }
 func (PutInContextBlue) Attack() int              { return 0 }
 func (PutInContextBlue) Defense() int             { return 3 }

@@ -15,7 +15,7 @@ type stubCard struct {
 
 func (s stubCard) ID() card.ID                  { return card.Invalid }
 func (s stubCard) Name() string                 { return s.name }
-func (s stubCard) Cost() int                    { return s.cost }
+func (s stubCard) Cost(*card.TurnState) int                    { return s.cost }
 func (s stubCard) Pitch() int                   { return s.pitch }
 func (s stubCard) Attack() int                  { return s.power }
 func (s stubCard) Defense() int                 { return 0 }

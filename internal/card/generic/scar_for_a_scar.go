@@ -17,7 +17,7 @@ type ScarForAScarRed struct{}
 
 func (ScarForAScarRed) ID() card.ID                 { return card.ScarForAScarRed }
 func (ScarForAScarRed) Name() string                { return "Scar for a Scar (Red)" }
-func (ScarForAScarRed) Cost() int                   { return 0 }
+func (ScarForAScarRed) Cost(*card.TurnState) int                   { return 0 }
 func (ScarForAScarRed) Pitch() int                  { return 1 }
 func (ScarForAScarRed) Attack() int                 { return 4 }
 func (ScarForAScarRed) Defense() int                { return 2 }
@@ -29,7 +29,7 @@ type ScarForAScarYellow struct{}
 
 func (ScarForAScarYellow) ID() card.ID                 { return card.ScarForAScarYellow }
 func (ScarForAScarYellow) Name() string                { return "Scar for a Scar (Yellow)" }
-func (ScarForAScarYellow) Cost() int                   { return 0 }
+func (ScarForAScarYellow) Cost(*card.TurnState) int                   { return 0 }
 func (ScarForAScarYellow) Pitch() int                  { return 2 }
 func (ScarForAScarYellow) Attack() int                 { return 3 }
 func (ScarForAScarYellow) Defense() int                { return 2 }
@@ -41,7 +41,7 @@ type ScarForAScarBlue struct{}
 
 func (ScarForAScarBlue) ID() card.ID                 { return card.ScarForAScarBlue }
 func (ScarForAScarBlue) Name() string                { return "Scar for a Scar (Blue)" }
-func (ScarForAScarBlue) Cost() int                   { return 0 }
+func (ScarForAScarBlue) Cost(*card.TurnState) int                   { return 0 }
 func (ScarForAScarBlue) Pitch() int                  { return 3 }
 func (ScarForAScarBlue) Attack() int                 { return 2 }
 func (ScarForAScarBlue) Defense() int                { return 2 }

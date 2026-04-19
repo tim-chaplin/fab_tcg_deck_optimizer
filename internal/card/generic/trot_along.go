@@ -29,7 +29,7 @@ type TrotAlongBlue struct{}
 
 func (TrotAlongBlue) ID() card.ID                 { return card.TrotAlongBlue }
 func (TrotAlongBlue) Name() string                { return "Trot Along (Blue)" }
-func (TrotAlongBlue) Cost() int                   { return 0 }
+func (TrotAlongBlue) Cost(*card.TurnState) int                   { return 0 }
 func (TrotAlongBlue) Pitch() int                  { return 3 }
 func (TrotAlongBlue) Attack() int                 { return 0 }
 func (TrotAlongBlue) Defense() int                { return 3 }

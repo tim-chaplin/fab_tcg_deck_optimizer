@@ -18,7 +18,7 @@ type CadaverousContrabandRed struct{}
 
 func (CadaverousContrabandRed) ID() card.ID                 { return card.CadaverousContrabandRed }
 func (CadaverousContrabandRed) Name() string                { return "Cadaverous Contraband (Red)" }
-func (CadaverousContrabandRed) Cost() int                   { return 2 }
+func (CadaverousContrabandRed) Cost(*card.TurnState) int                   { return 2 }
 func (CadaverousContrabandRed) Pitch() int                  { return 1 }
 func (CadaverousContrabandRed) Attack() int                 { return 6 }
 func (CadaverousContrabandRed) Defense() int                { return 2 }
@@ -30,7 +30,7 @@ type CadaverousContrabandYellow struct{}
 
 func (CadaverousContrabandYellow) ID() card.ID                 { return card.CadaverousContrabandYellow }
 func (CadaverousContrabandYellow) Name() string                { return "Cadaverous Contraband (Yellow)" }
-func (CadaverousContrabandYellow) Cost() int                   { return 2 }
+func (CadaverousContrabandYellow) Cost(*card.TurnState) int                   { return 2 }
 func (CadaverousContrabandYellow) Pitch() int                  { return 2 }
 func (CadaverousContrabandYellow) Attack() int                 { return 5 }
 func (CadaverousContrabandYellow) Defense() int                { return 2 }
@@ -42,7 +42,7 @@ type CadaverousContrabandBlue struct{}
 
 func (CadaverousContrabandBlue) ID() card.ID                 { return card.CadaverousContrabandBlue }
 func (CadaverousContrabandBlue) Name() string                { return "Cadaverous Contraband (Blue)" }
-func (CadaverousContrabandBlue) Cost() int                   { return 2 }
+func (CadaverousContrabandBlue) Cost(*card.TurnState) int                   { return 2 }
 func (CadaverousContrabandBlue) Pitch() int                  { return 3 }
 func (CadaverousContrabandBlue) Attack() int                 { return 4 }
 func (CadaverousContrabandBlue) Defense() int                { return 2 }
