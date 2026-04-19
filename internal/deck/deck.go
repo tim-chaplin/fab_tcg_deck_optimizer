@@ -464,52 +464,60 @@ func (d *Deck) EvaluateWith(runs int, incomingDamage int, rng *rand.Rand, ev *ha
 				d.Stats.SecondCycle.Total += v
 			}
 
-			// Attribute per-card contribution from the winning BestLine. hand.Best already
-			// filled Contribution on each assignment. Held and Arsenal entries don't tick either
-			// counter (an Arsenal card's real contribution accrues when it's played out of the
-			// slot on a later turn). FromArsenal entries belong to a previous turn's hand and
-			// don't contribute to this hand's per-card stats.
-			if d.Stats.PerCard == nil {
-				d.Stats.PerCard = map[card.ID]CardPlayStats{}
-			}
-			for _, a := range play.BestLine {
-				if a.FromArsenal {
-					continue
-				}
-				stat := d.Stats.PerCard[a.Card.ID()]
-				switch a.Role {
-				case hand.Pitch:
-					stat.Pitches++
-				case hand.Attack, hand.Defend:
-					stat.Plays++
-				}
-				stat.TotalContribution += a.Contribution
-				d.Stats.PerCard[a.Card.ID()] = stat
-			}
-
-			// Recycle: pitched cards go to the bottom of buf[tail:] in hand order; attacked and
-			// defended cards are spent. The backing array has room since moved cards are a
-			// subset of those just consumed. Held cards go into nextHeld for the next turn.
-			// Arsenal / arsenal-in entries thread through arsenalCard, not here.
-			nextHeld = nextHeld[:0]
-			for _, a := range play.BestLine {
-				if a.FromArsenal {
-					continue
-				}
-				switch a.Role {
-				case hand.Pitch:
-					buf[tail] = a.Card
-					tail++
-				case hand.Held:
-					nextHeld = append(nextHeld, a.Card)
-				}
-			}
+			attributePlayStats(&d.Stats, play.BestLine)
+			nextHeld = recyclePlayedCards(play.BestLine, buf, &tail, nextHeld[:0])
 			head += drawCount
 			handIdx++
 			heldBuf, nextHeld = nextHeld, heldBuf
 		}
 	}
 	return d.Stats
+}
+
+// attributePlayStats folds the winning BestLine into per-card aggregates. hand.Best already
+// filled Contribution on each assignment. Held / Arsenal entries don't tick either counter
+// (Arsenal's real contribution accrues when it's played out of the slot on a later turn);
+// FromArsenal entries belong to a previous turn's hand and don't contribute to this hand.
+func attributePlayStats(stats *Stats, line []hand.CardAssignment) {
+	if stats.PerCard == nil {
+		stats.PerCard = map[card.ID]CardPlayStats{}
+	}
+	for _, a := range line {
+		if a.FromArsenal {
+			continue
+		}
+		stat := stats.PerCard[a.Card.ID()]
+		switch a.Role {
+		case hand.Pitch:
+			stat.Pitches++
+		case hand.Attack, hand.Defend:
+			stat.Plays++
+		}
+		stat.TotalContribution += a.Contribution
+		stats.PerCard[a.Card.ID()] = stat
+	}
+}
+
+// recyclePlayedCards prepares next turn's draw queue from this turn's assignments: pitched
+// cards go to the bottom of buf[*tail:] (the backing array has room since moved cards are a
+// subset of those just consumed); Held cards go into nextHeld for the next turn; attacked and
+// defended cards are spent. Arsenal / arsenal-in entries thread through arsenalCard separately,
+// not here. Returns the updated nextHeld slice (pass a nil/empty slice or nextHeld[:0] to
+// start).
+func recyclePlayedCards(line []hand.CardAssignment, buf []card.Card, tail *int, nextHeld []card.Card) []card.Card {
+	for _, a := range line {
+		if a.FromArsenal {
+			continue
+		}
+		switch a.Role {
+		case hand.Pitch:
+			buf[*tail] = a.Card
+			*tail++
+		case hand.Held:
+			nextHeld = append(nextHeld, a.Card)
+		}
+	}
+	return nextHeld
 }
 
 // IterateParallel runs one iterate-mode round. Workers share a queue and each goroutine does

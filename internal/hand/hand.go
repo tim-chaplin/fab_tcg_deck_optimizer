@@ -216,7 +216,7 @@ func FormatBestTurn(t TurnSummary) string {
 		case Attack:
 			attackCost += a.Card.Cost()
 		case Defend:
-			if a.Card.Types().Has(card.TypeDefenseReaction) {
+			if a.Card.Types().IsDefenseReaction() {
 				drCost += a.Card.Cost()
 				defenseReactions = append(defenseReactions, a)
 			} else {
@@ -729,7 +729,7 @@ func (e *Evaluator) bestUncached(hero hero.Hero, weapons []weapon.Weapon, hand [
 		pvals[i] = c.Pitch()
 		cvals[i] = c.Cost()
 		dvals[i] = c.Defense()
-		isDR[i] = c.Types().Has(card.TypeDefenseReaction)
+		isDR[i] = c.Types().IsDefenseReaction()
 		if isDR[i] {
 			dCostVals[i] = cvals[i]
 			hasReactions = true
@@ -798,21 +798,8 @@ func (e *Evaluator) bestUncached(hero hero.Hero, weapons []weapon.Weapon, hand [
 			// is the fully-discounted minimum). Re-price them now that the attack chain has
 			// resolved with `leftoverRunechants` tokens available. Arsenal-in defenders aren't
 			// checked: no DiscountPerRunechant cards currently want to live in arsenal.
-			if hasDiscountReactions {
-				extraCost := 0
-				for j := 0; j < n; j++ {
-					if rolesBuf[j] != Defend || dPrintedVals[j] == 0 {
-						continue
-					}
-					actualCost := dPrintedVals[j] - leftoverRunechants
-					if actualCost < 0 {
-						actualCost = 0
-					}
-					extraCost += actualCost
-				}
-				if extraCost > residualBudget {
-					return
-				}
+			if hasDiscountReactions && !discountReactionsAffordable(rolesBuf, dPrintedVals, n, leftoverRunechants, residualBudget) {
+				return
 			}
 
 			v := attackDealt + defenseDealt + prevented
@@ -882,6 +869,25 @@ func (e *Evaluator) bestUncached(hero hero.Hero, weapons []weapon.Weapon, hand [
 		promoteRandomHeldToArsenal(&best, hand, n, arsenalCardIn)
 	}
 	return best
+}
+
+// discountReactionsAffordable re-prices DiscountPerRunechant defense reactions against the
+// `leftoverRunechants` tokens the attack chain left behind, and reports whether the extra cost
+// fits inside `residualBudget`. The partition's defenderCostSum reserved 0 for these cards;
+// this check catches partitions where the actual discount didn't cover the printed cost.
+func discountReactionsAffordable(rolesBuf []Role, dPrintedVals []int, n, leftoverRunechants, residualBudget int) bool {
+	extraCost := 0
+	for j := 0; j < n; j++ {
+		if rolesBuf[j] != Defend || dPrintedVals[j] == 0 {
+			continue
+		}
+		actualCost := dPrintedVals[j] - leftoverRunechants
+		if actualCost < 0 {
+			actualCost = 0
+		}
+		extraCost += actualCost
+	}
+	return extraCost <= residualBudget
 }
 
 // promoteRandomHeldToArsenal picks one Held hand card in best.BestLine and flips its role to
@@ -1090,7 +1096,7 @@ func roleAllowed(r Role, isArsenalSlot, isDefenseReaction bool) bool {
 func defenseReactionDamage(defenders, pitched, deck []card.Card, state *card.TurnState) int {
 	total := 0
 	for _, d := range defenders {
-		if !d.Types().Has(card.TypeDefenseReaction) {
+		if !d.Types().IsDefenseReaction() {
 			continue
 		}
 		*state = card.TurnState{Pitched: pitched, Deck: deck}
@@ -1120,6 +1126,10 @@ func bestAttackWithWeapons(hero hero.Hero, weapons []weapon.Weapon, attackers, p
 		incomingDamage:     incomingDamage,
 		blockTotal:         blockTotal,
 	}
+	// Hoist the leaf-constant TurnState fields out of the per-permutation reset in
+	// playSequenceWithMeta. Pitched, Deck, IncomingDamage, BlockTotal don't change across a
+	// partition's permutations; setting them once per ctx saves four stores per playSequence call.
+	ctx.seedState()
 	best := 0
 	bestLeftoverRunechants := runechantCarryover
 	bestResidualBudget := ctx.resourceBudget
@@ -1175,6 +1185,17 @@ type sequenceContext struct {
 	runechantCarryover int
 	incomingDamage     int
 	blockTotal         int
+}
+
+// seedState writes the TurnState fields that are constant across a partition's permutations
+// (pitched / deck references, incoming damage, block total). Called once per ctx so
+// playSequenceWithMeta's hot per-permutation reset can skip them.
+func (ctx *sequenceContext) seedState() {
+	s := ctx.bufs.state
+	s.Pitched = ctx.pitched
+	s.Deck = ctx.deck
+	s.IncomingDamage = ctx.incomingDamage
+	s.BlockTotal = ctx.blockTotal
 }
 
 // bestSequence tries every ordering of attackers and returns the max total damage plus the
@@ -1291,6 +1312,7 @@ func (ctx *sequenceContext) bestSequence(attackers, winnerOrderOut []card.Card, 
 // builds meta once and calls playSequenceWithMeta directly so interface dispatch for scalar
 // attributes amortises across the N! permutations it evaluates.
 func (ctx *sequenceContext) playSequence(order []card.Card, perCardOut, perCardTriggerOut []float64) (damage int, leftoverRunechants int, residualBudget int, legal bool) {
+	ctx.seedState()
 	meta := ctx.bufs.permMeta[:len(order)]
 	for i, c := range order {
 		meta[i] = attackerMetaPtrFor(c)
@@ -1323,16 +1345,14 @@ func (ctx *sequenceContext) playSequenceWithMeta(order []card.Card, perCardOut, 
 	// in a partition leaf; CardsRemaining and Self are rewritten per-card in the loop. A
 	// full-struct replace would memcpy every field (including big slice headers) and profiled at
 	// ~850ms/call; skipping caller-unread fields cuts most of that.
-	state.Pitched = ctx.pitched
-	state.Deck = ctx.deck
+	// Pitched / Deck / IncomingDamage / BlockTotal are seeded once per ctx (see seedState); cards
+	// don't mutate them, so we skip the per-permutation reset.
 	state.CardsPlayed = ctx.bufs.cardsPlayedBuf[:0]
 	state.Runechants = ctx.runechantCarryover
 	state.DelayedRunechants = 0
 	state.ArcaneDamageDealt = false
 	state.AuraCreated = false
 	state.Overpower = false
-	state.IncomingDamage = ctx.incomingDamage
-	state.BlockTotal = ctx.blockTotal
 	resources := ctx.resourceBudget
 	for i, pc := range played {
 		m := meta[i]
@@ -1406,7 +1426,7 @@ func fillDefenseContributions(line []CardAssignment, pitched []card.Card, deck [
 		if sumDef > 0 {
 			line[i].Contribution = float64(c.Defense()) * float64(prevented) / float64(sumDef)
 		}
-		if c.Types().Has(card.TypeDefenseReaction) {
+		if c.Types().IsDefenseReaction() {
 			*bufs.state = card.TurnState{Pitched: pitched, Deck: deck}
 			line[i].Contribution += float64(c.Play(bufs.state))
 		}
@@ -1442,7 +1462,7 @@ func fillContributions(summary *TurnSummary, hero hero.Hero, weapons []weapon.We
 			attackers = append(attackers, a.Card)
 		case Defend:
 			sumDef += a.Card.Defense()
-			if a.Card.Types().Has(card.TypeDefenseReaction) {
+			if a.Card.Types().IsDefenseReaction() {
 				if _, disc := a.Card.(card.DiscountPerRunechant); !disc {
 					defenderCostSum += a.Card.Cost()
 				}
@@ -1472,6 +1492,7 @@ func fillContributions(summary *TurnSummary, hero hero.Hero, weapons []weapon.We
 			incomingDamage:     incomingDamage,
 			blockTotal:         sumDef,
 		}
+		ctx.seedState()
 		fillAttackChainContributions(summary, chain, ctx)
 	}
 }
