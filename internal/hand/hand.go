@@ -92,7 +92,6 @@ func (t TurnSummary) ArsenalIn() (CardAssignment, bool) {
 	return CardAssignment{}, false
 }
 
-
 // String returns a human-readable role name ("PITCH", "ATTACK", "DEFEND", "HELD", "ARSENAL").
 func (r Role) String() string {
 	switch r {
@@ -121,19 +120,23 @@ func formatContribution(v float64) string {
 	return fmt.Sprintf("%.1f", v)
 }
 
+// assignmentName returns the card name, suffixed with " (from arsenal)" when the assignment came
+// from the arsenal slot — that tag tells readers why the card isn't in the dealt-hand list the
+// optimiser reports alongside.
+func assignmentName(a CardAssignment) string {
+	if a.FromArsenal {
+		return a.Card.Name() + " (from arsenal)"
+	}
+	return a.Card.Name()
+}
+
 // FormatBestLine pairs each card in BestLine with its assigned role for debug output, e.g.
-// "Hocus Pocus (Blue): PITCH, Runic Reaping (Red): ATTACK". Cards that came in from arsenal
-// get a " (from arsenal)" tag on their name so the reader can see why that card isn't in the
-// hand list the optimiser reports alongside. This is the compact one-line form — use
-// FormatBestTurn for the chronological play-order presentation.
+// "Hocus Pocus (Blue): PITCH, Runic Reaping (Red): ATTACK". This is the compact one-line form —
+// use FormatBestTurn for the chronological play-order presentation.
 func FormatBestLine(line []CardAssignment) string {
 	parts := make([]string, len(line))
 	for i, a := range line {
-		name := a.Card.Name()
-		if a.FromArsenal {
-			name += " (from arsenal)"
-		}
-		parts[i] = name + ": " + a.Role.String()
+		parts[i] = assignmentName(a) + ": " + a.Role.String()
 	}
 	return strings.Join(parts, ", ")
 }
@@ -200,20 +203,12 @@ func FormatBestTurn(t TurnSummary) string {
 	// into the turn's affordability) rather than damage or prevention. Showing "+3" next to a
 	// pitch would double-count against the turn's Value.
 	appendPitch := func(a CardAssignment, roleLabel string) {
-		name := a.Card.Name()
-		if a.FromArsenal {
-			name += " (from arsenal)"
-		}
-		lines = append(lines, fmt.Sprintf("  %d. %s: %s", nextStep(), name, roleLabel))
+		lines = append(lines, fmt.Sprintf("  %d. %s: %s", nextStep(), assignmentName(a), roleLabel))
 	}
 	// Defense lines DO contribute damage-prevention (block share + DR Play return) so their
 	// tag is shown.
 	appendDefense := func(a CardAssignment, roleLabel string) {
-		name := a.Card.Name()
-		if a.FromArsenal {
-			name += " (from arsenal)"
-		}
-		lines = append(lines, fmt.Sprintf("  %d. %s: %s (+%s prevented)", nextStep(), name, roleLabel, formatContribution(a.Contribution)))
+		lines = append(lines, fmt.Sprintf("  %d. %s: %s (+%s prevented)", nextStep(), assignmentName(a), roleLabel, formatContribution(a.Contribution)))
 	}
 
 	for _, a := range defensePitches {
@@ -619,23 +614,23 @@ func newAttackBufs(handSize, weaponCount int, weapons []weapon.Weapon) *attackBu
 		weaponNames[mask] = names
 	}
 	return &attackBufs{
-		perm:           make([]card.Card, maxAttackers),
-		permMeta:       make([]attackerMeta, maxAttackers),
-		pcBuf:          make([]card.PlayedCard, maxAttackers),
-		ptrBuf:         make([]*card.PlayedCard, maxAttackers),
-		cardsPlayedBuf: make([]card.Card, 0, maxAttackers),
-		state:          &card.TurnState{},
-		attackerBuf:    make([]card.Card, maxAttackers),
-		weaponCosts:    weaponCosts,
-		weaponNames:    weaponNames,
-		rolesBuf:          make([]Role, handSize+1),
-		pitchVals:         make([]int, handSize+1),
-		costVals:          make([]int, handSize+1),
-		defendCostVals:    make([]int, handSize+1),
-		defendPrintedVals: make([]int, handSize+1),
-		defenseVals:       make([]int, handSize+1),
-		isDRBuf:            make([]bool, handSize+1),
-		pitchedValsScratch: make([]int, 0, handSize+1),
+		perm:                   make([]card.Card, maxAttackers),
+		permMeta:               make([]attackerMeta, maxAttackers),
+		pcBuf:                  make([]card.PlayedCard, maxAttackers),
+		ptrBuf:                 make([]*card.PlayedCard, maxAttackers),
+		cardsPlayedBuf:         make([]card.Card, 0, maxAttackers),
+		state:                  &card.TurnState{},
+		attackerBuf:            make([]card.Card, maxAttackers),
+		weaponCosts:            weaponCosts,
+		weaponNames:            weaponNames,
+		rolesBuf:               make([]Role, handSize+1),
+		pitchVals:              make([]int, handSize+1),
+		costVals:               make([]int, handSize+1),
+		defendCostVals:         make([]int, handSize+1),
+		defendPrintedVals:      make([]int, handSize+1),
+		defenseVals:            make([]int, handSize+1),
+		isDRBuf:                make([]bool, handSize+1),
+		pitchedValsScratch:     make([]int, 0, handSize+1),
 		pitchedBuf:             make([]card.Card, 0, handSize+1),
 		attackersBuf:           make([]card.Card, 0, handSize+1),
 		defendersBuf:           make([]card.Card, 0, handSize+1),
@@ -1560,5 +1555,3 @@ func fillContributions(summary *TurnSummary, hero hero.Hero, weapons []weapon.We
 		}
 	}
 }
-
-

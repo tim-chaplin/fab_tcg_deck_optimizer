@@ -712,17 +712,6 @@ func All() []ID {
 	return out
 }
 
-// Count is the number of registered cards (excluding Invalid).
-func Count() int {
-	n := 0
-	for id := 1; id < len(byID); id++ {
-		if byID[id] != nil {
-			n++
-		}
-	}
-	return n
-}
-
 // Deckable returns every registered card ID that's legal to put in a real deck — i.e. every
 // registered card except the test-only fakes. Freshly allocated; safe to mutate.
 func Deckable() []ID {

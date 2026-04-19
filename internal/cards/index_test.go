@@ -40,9 +40,3 @@ func TestByNameUnknown(t *testing.T) {
 		t.Error("ByName of unknown card should return ok=false")
 	}
 }
-
-func TestCountMatchesAll(t *testing.T) {
-	if Count() != len(All()) {
-		t.Errorf("Count()=%d, len(All())=%d", Count(), len(All()))
-	}
-}

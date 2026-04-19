@@ -175,8 +175,8 @@ func AllMutations(d *Deck, maxCopies int, legal func(card.Card) bool) []Mutation
 		return uniqueIDs[i] < uniqueIDs[j]
 	})
 
+	// legalPool returns IDs in ascending order (cards.Deckable() iterates byID).
 	pool := legalPool(legal)
-	sort.Slice(pool, func(i, j int) bool { return pool[i] < pool[j] })
 
 	for _, removeID := range uniqueIDs {
 		removed := cards.Get(removeID)
@@ -208,28 +208,30 @@ func AllMutations(d *Deck, maxCopies int, legal func(card.Card) bool) []Mutation
 	return out
 }
 
+// sortedWeaponNames returns the weapon names in ascending order. The canonical form both
+// loadoutLabel and weaponKey build on so two loadouts with the same weapons in different orders
+// compare equal.
+func sortedWeaponNames(ws []weapon.Weapon) []string {
+	names := make([]string, len(ws))
+	for i, w := range ws {
+		names[i] = w.Name()
+	}
+	sort.Strings(names)
+	return names
+}
+
 // loadoutLabel formats a weapon loadout for mutation descriptions, e.g. "[Nebula Blade]" or
 // "[Reaping Blade, Scepter of Pain]".
 func loadoutLabel(ws []weapon.Weapon) string {
 	if len(ws) == 0 {
 		return "[]"
 	}
-	names := make([]string, len(ws))
-	for i, w := range ws {
-		names[i] = w.Name()
-	}
-	sort.Strings(names)
-	return "[" + strings.Join(names, ", ") + "]"
+	return "[" + strings.Join(sortedWeaponNames(ws), ", ") + "]"
 }
 
 // weaponKey returns a comparable string for a weapon loadout so we can check equality.
 func weaponKey(ws []weapon.Weapon) string {
-	names := make([]string, len(ws))
-	for i, w := range ws {
-		names[i] = w.Name()
-	}
-	sort.Strings(names)
-	return strings.Join(names, ",")
+	return strings.Join(sortedWeaponNames(ws), ",")
 }
 
 // weaponLoadouts enumerates every legal equip combination from `ws`: each 2H weapon as a solo
