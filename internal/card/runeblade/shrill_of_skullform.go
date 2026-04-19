@@ -52,12 +52,8 @@ func (c ShrillOfSkullformBlue) Play(s *card.TurnState) int {
 	return shrillPlay(c.Attack(), s)
 }
 
-// shrillPlay credits the +3{p} aura buff only when the buffed physical total is likely to land
-// — the opponent blocks based on physical damage, so a blockable buffed attack delivers
-// nothing. Runechants firing alongside are a separate arcane stream and don't rescue a blockable
-// buff.
 func shrillPlay(base int, s *card.TurnState) int {
-	if s.HasAuraInPlay() && card.LikelyToHit(base+3) {
+	if s.HasAuraInPlay() {
 		return base + 3
 	}
 	return base
