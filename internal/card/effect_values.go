@@ -16,7 +16,7 @@ const DrawValue = 3
 // card. Symmetric to DrawValue — a discarded card is one the opponent won't get to play.
 const DiscardValue = 3
 
-// GoldTokenValue is the damage-equivalent credited when a card creates a Gold token. Gold is a
-// free-pitchable resource the controller deploys on a future turn; a full card's worth of
-// resources extracts ~3 damage elsewhere, so we value the token the same as a draw.
-const GoldTokenValue = 3
+// GoldTokenValue is the damage-equivalent credited when a card creates a Gold token. A Gold
+// token is one free resource (one {r}) worth of future tempo — about 1 damage's worth once
+// spent.
+const GoldTokenValue = 1
