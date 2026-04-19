@@ -28,13 +28,12 @@ var heroesByName = map[string]hero.Hero{
 	(hero.Viserai{}).Name(): hero.Viserai{},
 }
 
-// defaultFormat is emitted in the Format: header. Silver Age is the current Viserai format;
-// update when a new format comes online.
+// defaultFormat is emitted in the Format: header. Update when a new format comes online.
 const defaultFormat = "Silver Age"
 
-// Marshal returns fabrary-style deck text for `d`, suitable for pasting into fabrary.net's
-// "Import deck" tab. Weapons are listed in the Arena section; deck cards in the Deck section with
-// pitch color suffix lowercased to match fabrary's own exports.
+// Marshal returns fabrary-style deck text for d, suitable for pasting into fabrary.net's
+// "Import deck" tab. Weapons go in the Arena section; deck cards in the Deck section with pitch
+// color suffix lowercased to match fabrary's own exports.
 func Marshal(d *deck.Deck) string {
 	var b strings.Builder
 	name := d.Hero.Name()
@@ -52,14 +51,13 @@ func Marshal(d *deck.Deck) string {
 }
 
 // Unmarshal parses fabrary-style deck text and returns a *deck.Deck plus a count-keyed map of
-// deck cards whose names aren't in the optimizer's registry (typically cards implemented in
-// fabrary but not yet in this project). Callers should surface the skipped map so users aren't
-// surprised by silently-reduced deck size. Stats aren't round-tripped (they're a simulation
-// artifact).
+// deck cards whose names aren't in the optimizer's registry. Callers should surface the skipped
+// map so users aren't surprised by a silently-reduced deck. Stats aren't round-tripped — they're
+// a simulation artifact.
 //
 // Unknown Arena-section lines (non-weapon equipment) are silently skipped and NOT reported, since
-// the optimizer doesn't model non-weapon equipment at all and reporting would be noise.
-// Hero/format parse errors still abort — a missing hero means we can't build a deck.
+// the optimizer doesn't model non-weapon equipment. A missing hero aborts: the deck can't be
+// constructed without one.
 func Unmarshal(text string) (*deck.Deck, map[string]int, error) {
 	var (
 		heroName string
