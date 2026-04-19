@@ -33,8 +33,7 @@ func runIterate(cfg config) {
 		round++
 		// Drop the shared hand memo between rounds. Within a round the memo is load-bearing
 		// (same hand shapes recur across thousands of shuffles), but cross-round hit rate is
-		// near zero — every round tests mutations of a different best, so old entries rarely
-		// match and unbounded growth would OOM long hill-climbs.
+		// near zero and unbounded growth would OOM long hill-climbs.
 		if cfg.debug {
 			fmt.Fprintf(os.Stderr, "[memo] clearing %d entries before round %d\n", hand.MemoLen(), round)
 		}
@@ -77,9 +76,8 @@ func runIterate(cfg config) {
 }
 
 // prepareBaseline returns the starting deck for the hill climb with its deep-shuffles avg. Three
-// cases: no deck on disk (generate random + evaluate), loaded deck evaluated at fewer than
-// deepShuffles (re-evaluate for apples-to-apples baseline), or loaded deck already deep-evaluated
-// (use as-is).
+// cases: no deck on disk (generate random + evaluate), loaded deck under deepShuffles
+// (re-evaluate for an apples-to-apples baseline), or deck already deep-evaluated (use as-is).
 func prepareBaseline(cfg config, rng *rand.Rand) (*deck.Deck, float64) {
 	best, bestAvg := loadExisting(cfg.outPath)
 	if best == nil {

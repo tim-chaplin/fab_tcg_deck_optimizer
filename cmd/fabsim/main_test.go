@@ -7,8 +7,8 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/hero"
 )
 
-// TestFabraryPathFor pins the sibling-path derivation. A .json extension is replaced; anything
-// else gets .txt appended instead of clobbered so the JSON can't accidentally be overwritten.
+// TestFabraryPathFor pins the sibling-path derivation: .json is swapped for .txt; anything else
+// gets .txt appended so the original isn't clobbered.
 func TestFabraryPathFor(t *testing.T) {
 	cases := []struct {
 		in, want string
