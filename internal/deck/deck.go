@@ -116,9 +116,15 @@ type Mutation struct {
 //
 // Returned decks have zero Stats and share no backing slices with d or each other.
 func AllMutations(d *Deck, maxCopies int, legal func(card.Card) bool) []Mutation {
-	var out []Mutation
+	out := weaponLoadoutMutations(d)
+	out = append(out, cardSwapMutations(d, maxCopies, legal)...)
+	return out
+}
 
-	// Weapon mutations: every loadout different from the current one.
+// weaponLoadoutMutations emits one Mutation per distinct weapon loadout that isn't the current
+// one. Loadouts are canonicalised by weaponKey (names sorted) and processed in key order so
+// the output is deterministic regardless of map-iteration randomness.
+func weaponLoadoutMutations(d *Deck) []Mutation {
 	loadouts := weaponLoadouts(cards.AllWeapons)
 	currentKey := weaponKey(d.Weapons)
 	type keyedLoadout struct {
@@ -130,6 +136,7 @@ func AllMutations(d *Deck, maxCopies int, legal func(card.Card) bool) []Mutation
 		sortedLoadouts = append(sortedLoadouts, keyedLoadout{key: weaponKey(l), weapons: l})
 	}
 	sort.Slice(sortedLoadouts, func(i, j int) bool { return sortedLoadouts[i].key < sortedLoadouts[j].key })
+	var out []Mutation
 	for _, l := range sortedLoadouts {
 		if l.key == currentKey {
 			continue
@@ -141,9 +148,14 @@ func AllMutations(d *Deck, maxCopies int, legal func(card.Card) bool) []Mutation
 			Description: fmt.Sprintf("swapped weapons from %s to %s", loadoutLabel(d.Weapons), loadoutLabel(l.weapons)),
 		})
 	}
+	return out
+}
 
-	// Card mutations: for each unique card in the deck, try adding any Deckable card whose
-	// post-mutation count stays within maxCopies.
+// cardSwapMutations emits every single-card remove+add mutation the deck admits. Remove targets
+// iterate in ascending per-card avg contribution so the hill climb spends its budget on the
+// currently-worst cards first; with no Stats yet the tiebreak falls through to stable card.ID
+// order. Add candidates skip no-ops (same ID) and entries already at maxCopies.
+func cardSwapMutations(d *Deck, maxCopies int, legal func(card.Card) bool) []Mutation {
 	counts := map[card.ID]int{}
 	for _, c := range d.Cards {
 		counts[c.ID()]++
@@ -152,9 +164,6 @@ func AllMutations(d *Deck, maxCopies int, legal func(card.Card) bool) []Mutation
 	for id := range counts {
 		uniqueIDs = append(uniqueIDs, id)
 	}
-	// Order removeID by ascending per-card avg contribution, tiebreaker on card.ID. When the
-	// deck has no stats yet, Avg() returns 0 for every card and the tiebreak falls through to
-	// stable card.ID order.
 	sort.Slice(uniqueIDs, func(i, j int) bool {
 		ai := d.Stats.PerCard[uniqueIDs[i]].Avg()
 		aj := d.Stats.PerCard[uniqueIDs[j]].Avg()
@@ -167,6 +176,7 @@ func AllMutations(d *Deck, maxCopies int, legal func(card.Card) bool) []Mutation
 	// legalPool returns IDs in ascending order (cards.Deckable() iterates byID).
 	pool := legalPool(legal)
 
+	var out []Mutation
 	for _, removeID := range uniqueIDs {
 		removed := cards.Get(removeID)
 		for _, addID := range pool {
@@ -193,7 +203,6 @@ func AllMutations(d *Deck, maxCopies int, legal func(card.Card) bool) []Mutation
 			})
 		}
 	}
-
 	return out
 }
 
