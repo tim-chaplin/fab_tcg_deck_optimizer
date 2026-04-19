@@ -23,11 +23,6 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/weapon"
 )
 
-// heroesByName resolves hero names during Unmarshal. Add new heroes here as they're implemented.
-var heroesByName = map[string]hero.Hero{
-	(hero.Viserai{}).Name(): hero.Viserai{},
-}
-
 // defaultFormat is emitted in the Format: header. Update when a new format comes online.
 const defaultFormat = "Silver Age"
 
@@ -66,7 +61,6 @@ func Unmarshal(text string) (*deck.Deck, map[string]int, error) {
 		cardList []card.Card
 		skipped  = map[string]int{}
 	)
-	wReg := weaponsByName()
 
 	sc := bufio.NewScanner(strings.NewReader(text))
 	for sc.Scan() {
@@ -101,7 +95,7 @@ func Unmarshal(text string) (*deck.Deck, map[string]int, error) {
 		}
 		switch section {
 		case "arena":
-			if w, ok := wReg[name]; ok {
+			if w, ok := cards.WeaponByName(name); ok {
 				for i := 0; i < qty; i++ {
 					weapons = append(weapons, w)
 				}
@@ -122,7 +116,7 @@ func Unmarshal(text string) (*deck.Deck, map[string]int, error) {
 	if err := sc.Err(); err != nil {
 		return nil, nil, err
 	}
-	h, ok := heroesByName[heroName]
+	h, ok := hero.ByName(heroName)
 	if !ok {
 		return nil, nil, fmt.Errorf("fabrary: unknown hero %q", heroName)
 	}
@@ -210,10 +204,3 @@ func fromFabraryCardName(s string) string {
 	return s
 }
 
-func weaponsByName() map[string]weapon.Weapon {
-	m := make(map[string]weapon.Weapon, len(cards.AllWeapons))
-	for _, w := range cards.AllWeapons {
-		m[w.Name()] = w
-	}
-	return m
-}

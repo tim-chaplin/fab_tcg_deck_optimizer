@@ -15,18 +15,6 @@ import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 
 var sapwoodElixirTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction)
 
-// sapwoodElixirPlay returns 3 when a matching attack action card is scheduled later this turn.
-func sapwoodElixirPlay(s *card.TurnState) int {
-	for _, pc := range s.CardsRemaining {
-		t := pc.Card.Types()
-		if !t.Has(card.TypeAttack) || !t.Has(card.TypeAction) {
-			continue
-		}
-		return 3
-	}
-	return 0
-}
-
 type SapwoodElixirRed struct{}
 
 func (SapwoodElixirRed) ID() card.ID                 { return card.SapwoodElixirRed }
@@ -37,4 +25,4 @@ func (SapwoodElixirRed) Attack() int                 { return 0 }
 func (SapwoodElixirRed) Defense() int                { return 3 }
 func (SapwoodElixirRed) Types() card.TypeSet         { return sapwoodElixirTypes }
 func (SapwoodElixirRed) GoAgain() bool               { return true }
-func (SapwoodElixirRed) Play(s *card.TurnState) int { return sapwoodElixirPlay(s) }
+func (SapwoodElixirRed) Play(s *card.TurnState) int { return nextAttackActionBonus(s, 3) }

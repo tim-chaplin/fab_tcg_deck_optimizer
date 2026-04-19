@@ -14,18 +14,6 @@ import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 
 var regainComposureTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction)
 
-// regainComposurePlay returns 1 when a matching attack action card is scheduled later this turn.
-func regainComposurePlay(s *card.TurnState) int {
-	for _, pc := range s.CardsRemaining {
-		t := pc.Card.Types()
-		if !t.Has(card.TypeAttack) || !t.Has(card.TypeAction) {
-			continue
-		}
-		return 1
-	}
-	return 0
-}
-
 type RegainComposureBlue struct{}
 
 func (RegainComposureBlue) ID() card.ID                 { return card.RegainComposureBlue }
@@ -36,4 +24,4 @@ func (RegainComposureBlue) Attack() int                 { return 0 }
 func (RegainComposureBlue) Defense() int                { return 2 }
 func (RegainComposureBlue) Types() card.TypeSet         { return regainComposureTypes }
 func (RegainComposureBlue) GoAgain() bool               { return true }
-func (RegainComposureBlue) Play(s *card.TurnState) int { return regainComposurePlay(s) }
+func (RegainComposureBlue) Play(s *card.TurnState) int { return nextAttackActionBonus(s, 1) }

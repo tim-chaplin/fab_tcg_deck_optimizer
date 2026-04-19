@@ -16,11 +16,6 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/weapon"
 )
 
-// heroesByName resolves Hero names during deserialization. Add new heroes here as implemented.
-var heroesByName = map[string]hero.Hero{
-	(hero.Viserai{}).Name(): hero.Viserai{},
-}
-
 // DeckJSON is the on-disk shape of a Deck with its Stats.
 type DeckJSON struct {
 	Hero    string           `json:"hero"`
@@ -214,14 +209,13 @@ func bestTurnToJSON(b deck.BestTurn) BestTurnJSON {
 }
 
 func fromJSON(dj *DeckJSON) (*deck.Deck, error) {
-	h, ok := heroesByName[dj.Hero]
+	h, ok := hero.ByName(dj.Hero)
 	if !ok {
 		return nil, fmt.Errorf("deckio: unknown hero %q", dj.Hero)
 	}
-	weaponReg := weaponsByName()
 	weapons := make([]weapon.Weapon, len(dj.Weapons))
 	for i, name := range dj.Weapons {
-		w, ok := weaponReg[name]
+		w, ok := cards.WeaponByName(name)
 		if !ok {
 			return nil, fmt.Errorf("deckio: unknown weapon %q", name)
 		}
@@ -321,11 +315,10 @@ func bestTurnFromJSON(bj BestTurnJSON) (deck.BestTurn, error) {
 // without a Chain field fall back to a best-effort rebuild (hand-order Attack-role cards then
 // weapons) so they still load, though damage labels will all read "+0".
 func rebuildAttackChain(bj BestTurnJSON, line []hand.CardAssignment) ([]hand.AttackChainEntry, error) {
-	weaponReg := weaponsByName()
 	if len(bj.Chain) > 0 {
 		chain := make([]hand.AttackChainEntry, len(bj.Chain))
 		for i, e := range bj.Chain {
-			c, err := lookupChainCard(e.Card, weaponReg)
+			c, err := lookupChainCard(e.Card)
 			if err != nil {
 				return nil, err
 			}
@@ -344,7 +337,7 @@ func rebuildAttackChain(bj BestTurnJSON, line []hand.CardAssignment) ([]hand.Att
 		}
 	}
 	for _, name := range bj.Weapons {
-		if w, ok := weaponReg[name]; ok {
+		if w, ok := cards.WeaponByName(name); ok {
 			chain = append(chain, hand.AttackChainEntry{Card: w})
 		}
 	}
@@ -354,8 +347,8 @@ func rebuildAttackChain(bj BestTurnJSON, line []hand.CardAssignment) ([]hand.Att
 // lookupChainCard resolves an attack-chain entry's name to either a registered card or a known
 // weapon. Returns an error on unknown names so a corrupted file doesn't silently produce nil
 // entries that'd crash FormatBestTurn.
-func lookupChainCard(name string, weaponReg map[string]weapon.Weapon) (card.Card, error) {
-	if w, ok := weaponReg[name]; ok {
+func lookupChainCard(name string) (card.Card, error) {
+	if w, ok := cards.WeaponByName(name); ok {
 		return w, nil
 	}
 	id, ok := cards.ByName(name)
@@ -381,10 +374,3 @@ func roleFromString(s string) (hand.Role, error) {
 	return 0, fmt.Errorf("deckio: unknown role %q", s)
 }
 
-func weaponsByName() map[string]weapon.Weapon {
-	m := make(map[string]weapon.Weapon, len(cards.AllWeapons))
-	for _, w := range cards.AllWeapons {
-		m[w.Name()] = w
-	}
-	return m
-}
