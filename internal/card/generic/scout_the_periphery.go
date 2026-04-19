@@ -16,18 +16,6 @@ import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 
 var scoutThePeripheryTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction)
 
-// scoutThePeripheryPlay returns n when a matching attack action card is scheduled later this turn.
-func scoutThePeripheryPlay(s *card.TurnState, n int) int {
-	for _, pc := range s.CardsRemaining {
-		t := pc.Card.Types()
-		if !t.Has(card.TypeAttack) || !t.Has(card.TypeAction) {
-			continue
-		}
-		return n
-	}
-	return 0
-}
-
 type ScoutThePeripheryRed struct{}
 
 func (ScoutThePeripheryRed) ID() card.ID                 { return card.ScoutThePeripheryRed }
@@ -38,7 +26,7 @@ func (ScoutThePeripheryRed) Attack() int                 { return 0 }
 func (ScoutThePeripheryRed) Defense() int                { return 2 }
 func (ScoutThePeripheryRed) Types() card.TypeSet         { return scoutThePeripheryTypes }
 func (ScoutThePeripheryRed) GoAgain() bool               { return true }
-func (ScoutThePeripheryRed) Play(s *card.TurnState) int { return scoutThePeripheryPlay(s, 3) }
+func (ScoutThePeripheryRed) Play(s *card.TurnState) int { return nextAttackActionBonus(s, 3) }
 
 type ScoutThePeripheryYellow struct{}
 
@@ -50,7 +38,7 @@ func (ScoutThePeripheryYellow) Attack() int                 { return 0 }
 func (ScoutThePeripheryYellow) Defense() int                { return 2 }
 func (ScoutThePeripheryYellow) Types() card.TypeSet         { return scoutThePeripheryTypes }
 func (ScoutThePeripheryYellow) GoAgain() bool               { return true }
-func (ScoutThePeripheryYellow) Play(s *card.TurnState) int { return scoutThePeripheryPlay(s, 2) }
+func (ScoutThePeripheryYellow) Play(s *card.TurnState) int { return nextAttackActionBonus(s, 2) }
 
 type ScoutThePeripheryBlue struct{}
 
@@ -62,4 +50,4 @@ func (ScoutThePeripheryBlue) Attack() int                 { return 0 }
 func (ScoutThePeripheryBlue) Defense() int                { return 2 }
 func (ScoutThePeripheryBlue) Types() card.TypeSet         { return scoutThePeripheryTypes }
 func (ScoutThePeripheryBlue) GoAgain() bool               { return true }
-func (ScoutThePeripheryBlue) Play(s *card.TurnState) int { return scoutThePeripheryPlay(s, 1) }
+func (ScoutThePeripheryBlue) Play(s *card.TurnState) int { return nextAttackActionBonus(s, 1) }

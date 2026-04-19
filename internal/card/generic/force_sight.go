@@ -15,18 +15,6 @@ import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 
 var forceSightTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction)
 
-// forceSightPlay returns n when a matching attack action card is scheduled later this turn.
-func forceSightPlay(s *card.TurnState, n int) int {
-	for _, pc := range s.CardsRemaining {
-		t := pc.Card.Types()
-		if !t.Has(card.TypeAttack) || !t.Has(card.TypeAction) {
-			continue
-		}
-		return n
-	}
-	return 0
-}
-
 type ForceSightRed struct{}
 
 func (ForceSightRed) ID() card.ID                 { return card.ForceSightRed }
@@ -37,7 +25,7 @@ func (ForceSightRed) Attack() int                 { return 0 }
 func (ForceSightRed) Defense() int                { return 2 }
 func (ForceSightRed) Types() card.TypeSet         { return forceSightTypes }
 func (ForceSightRed) GoAgain() bool               { return true }
-func (ForceSightRed) Play(s *card.TurnState) int { return forceSightPlay(s, 3) }
+func (ForceSightRed) Play(s *card.TurnState) int { return nextAttackActionBonus(s, 3) }
 
 type ForceSightYellow struct{}
 
@@ -49,7 +37,7 @@ func (ForceSightYellow) Attack() int                 { return 0 }
 func (ForceSightYellow) Defense() int                { return 2 }
 func (ForceSightYellow) Types() card.TypeSet         { return forceSightTypes }
 func (ForceSightYellow) GoAgain() bool               { return true }
-func (ForceSightYellow) Play(s *card.TurnState) int { return forceSightPlay(s, 2) }
+func (ForceSightYellow) Play(s *card.TurnState) int { return nextAttackActionBonus(s, 2) }
 
 type ForceSightBlue struct{}
 
@@ -61,4 +49,4 @@ func (ForceSightBlue) Attack() int                 { return 0 }
 func (ForceSightBlue) Defense() int                { return 2 }
 func (ForceSightBlue) Types() card.TypeSet         { return forceSightTypes }
 func (ForceSightBlue) GoAgain() bool               { return true }
-func (ForceSightBlue) Play(s *card.TurnState) int { return forceSightPlay(s, 1) }
+func (ForceSightBlue) Play(s *card.TurnState) int { return nextAttackActionBonus(s, 1) }

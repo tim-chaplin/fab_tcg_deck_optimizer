@@ -17,18 +17,6 @@ import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 
 var primeTheCrowdTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction)
 
-// primeTheCrowdPlay returns n when a matching attack action card is scheduled later this turn.
-func primeTheCrowdPlay(s *card.TurnState, n int) int {
-	for _, pc := range s.CardsRemaining {
-		t := pc.Card.Types()
-		if !t.Has(card.TypeAttack) || !t.Has(card.TypeAction) {
-			continue
-		}
-		return n
-	}
-	return 0
-}
-
 type PrimeTheCrowdRed struct{}
 
 func (PrimeTheCrowdRed) ID() card.ID                 { return card.PrimeTheCrowdRed }
@@ -39,7 +27,7 @@ func (PrimeTheCrowdRed) Attack() int                 { return 0 }
 func (PrimeTheCrowdRed) Defense() int                { return 2 }
 func (PrimeTheCrowdRed) Types() card.TypeSet         { return primeTheCrowdTypes }
 func (PrimeTheCrowdRed) GoAgain() bool               { return true }
-func (PrimeTheCrowdRed) Play(s *card.TurnState) int { return primeTheCrowdPlay(s, 4) }
+func (PrimeTheCrowdRed) Play(s *card.TurnState) int { return nextAttackActionBonus(s, 4) }
 
 type PrimeTheCrowdYellow struct{}
 
@@ -51,7 +39,7 @@ func (PrimeTheCrowdYellow) Attack() int                 { return 0 }
 func (PrimeTheCrowdYellow) Defense() int                { return 2 }
 func (PrimeTheCrowdYellow) Types() card.TypeSet         { return primeTheCrowdTypes }
 func (PrimeTheCrowdYellow) GoAgain() bool               { return true }
-func (PrimeTheCrowdYellow) Play(s *card.TurnState) int { return primeTheCrowdPlay(s, 3) }
+func (PrimeTheCrowdYellow) Play(s *card.TurnState) int { return nextAttackActionBonus(s, 3) }
 
 type PrimeTheCrowdBlue struct{}
 
@@ -63,4 +51,4 @@ func (PrimeTheCrowdBlue) Attack() int                 { return 0 }
 func (PrimeTheCrowdBlue) Defense() int                { return 2 }
 func (PrimeTheCrowdBlue) Types() card.TypeSet         { return primeTheCrowdTypes }
 func (PrimeTheCrowdBlue) GoAgain() bool               { return true }
-func (PrimeTheCrowdBlue) Play(s *card.TurnState) int { return primeTheCrowdPlay(s, 2) }
+func (PrimeTheCrowdBlue) Play(s *card.TurnState) int { return nextAttackActionBonus(s, 2) }
