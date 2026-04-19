@@ -3,7 +3,8 @@
 //
 // Text: "When this hits, create a Gold token."
 //
-// Simplification: Gold-token creation isn't modelled.
+// The on-hit Gold token is modelled as +1 damage-equivalent (one resource worth), gated on
+// card.LikelyToHit — blockable multiples of 3 suppress the rider.
 //
 // Source: github.com/the-fab-cube/flesh-and-blood-cards (card.csv).
 
@@ -13,38 +14,51 @@ import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 
 var strikeGoldTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeAttack)
 
+// strikeGoldTokenValue is the damage-equivalent credited when a Gold token is created (one free
+// resource ≈ 1 point of value).
+const strikeGoldTokenValue = 1
+
+// strikeGoldDamage returns the base attack plus the Gold-token rider when the attack is likely
+// to land.
+func strikeGoldDamage(attack int) int {
+	if card.LikelyToHit(attack) {
+		return attack + strikeGoldTokenValue
+	}
+	return attack
+}
+
 type StrikeGoldRed struct{}
 
-func (StrikeGoldRed) ID() card.ID                 { return card.StrikeGoldRed }
-func (StrikeGoldRed) Name() string                { return "Strike Gold (Red)" }
-func (StrikeGoldRed) Cost() int                   { return 0 }
-func (StrikeGoldRed) Pitch() int                  { return 1 }
-func (StrikeGoldRed) Attack() int                 { return 4 }
-func (StrikeGoldRed) Defense() int                { return 2 }
-func (StrikeGoldRed) Types() card.TypeSet         { return strikeGoldTypes }
-func (StrikeGoldRed) GoAgain() bool               { return false }
-func (c StrikeGoldRed) Play(s *card.TurnState) int { return c.Attack() }
+func (StrikeGoldRed) ID() card.ID                  { return card.StrikeGoldRed }
+func (StrikeGoldRed) Name() string                 { return "Strike Gold (Red)" }
+func (StrikeGoldRed) Cost() int                    { return 0 }
+func (StrikeGoldRed) Pitch() int                   { return 1 }
+func (StrikeGoldRed) Attack() int                  { return 4 }
+func (StrikeGoldRed) Defense() int                 { return 2 }
+func (StrikeGoldRed) Types() card.TypeSet          { return strikeGoldTypes }
+func (StrikeGoldRed) GoAgain() bool                { return false }
+func (c StrikeGoldRed) Play(s *card.TurnState) int { return strikeGoldDamage(c.Attack()) }
 
 type StrikeGoldYellow struct{}
 
-func (StrikeGoldYellow) ID() card.ID                 { return card.StrikeGoldYellow }
-func (StrikeGoldYellow) Name() string                { return "Strike Gold (Yellow)" }
-func (StrikeGoldYellow) Cost() int                   { return 0 }
-func (StrikeGoldYellow) Pitch() int                  { return 2 }
-func (StrikeGoldYellow) Attack() int                 { return 3 }
-func (StrikeGoldYellow) Defense() int                { return 2 }
-func (StrikeGoldYellow) Types() card.TypeSet         { return strikeGoldTypes }
-func (StrikeGoldYellow) GoAgain() bool               { return false }
-func (c StrikeGoldYellow) Play(s *card.TurnState) int { return c.Attack() }
+func (StrikeGoldYellow) ID() card.ID                  { return card.StrikeGoldYellow }
+func (StrikeGoldYellow) Name() string                 { return "Strike Gold (Yellow)" }
+func (StrikeGoldYellow) Cost() int                    { return 0 }
+func (StrikeGoldYellow) Pitch() int                   { return 2 }
+func (StrikeGoldYellow) Attack() int                  { return 3 }
+func (StrikeGoldYellow) Defense() int                 { return 2 }
+func (StrikeGoldYellow) Types() card.TypeSet          { return strikeGoldTypes }
+func (StrikeGoldYellow) GoAgain() bool                { return false }
+func (c StrikeGoldYellow) Play(s *card.TurnState) int { return strikeGoldDamage(c.Attack()) }
 
 type StrikeGoldBlue struct{}
 
-func (StrikeGoldBlue) ID() card.ID                 { return card.StrikeGoldBlue }
-func (StrikeGoldBlue) Name() string                { return "Strike Gold (Blue)" }
-func (StrikeGoldBlue) Cost() int                   { return 0 }
-func (StrikeGoldBlue) Pitch() int                  { return 3 }
-func (StrikeGoldBlue) Attack() int                 { return 2 }
-func (StrikeGoldBlue) Defense() int                { return 2 }
-func (StrikeGoldBlue) Types() card.TypeSet         { return strikeGoldTypes }
-func (StrikeGoldBlue) GoAgain() bool               { return false }
-func (c StrikeGoldBlue) Play(s *card.TurnState) int { return c.Attack() }
+func (StrikeGoldBlue) ID() card.ID                  { return card.StrikeGoldBlue }
+func (StrikeGoldBlue) Name() string                 { return "Strike Gold (Blue)" }
+func (StrikeGoldBlue) Cost() int                    { return 0 }
+func (StrikeGoldBlue) Pitch() int                   { return 3 }
+func (StrikeGoldBlue) Attack() int                  { return 2 }
+func (StrikeGoldBlue) Defense() int                 { return 2 }
+func (StrikeGoldBlue) Types() card.TypeSet          { return strikeGoldTypes }
+func (StrikeGoldBlue) GoAgain() bool                { return false }
+func (c StrikeGoldBlue) Play(s *card.TurnState) int { return strikeGoldDamage(c.Attack()) }
