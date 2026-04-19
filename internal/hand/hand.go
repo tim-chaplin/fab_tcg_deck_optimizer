@@ -153,6 +153,44 @@ func splitPitchesByPhase(pitched []CardAssignment, drCost int) (defensePitches, 
 	return defensePitches, attackPitches
 }
 
+// appendAttackChainLines renders the Attack phase: one numbered line per AttackChain entry in
+// solver-chosen play order, with the shared step counter advanced via stepPtr so later sections
+// keep numbering contiguous. Non-weapon entries cross-reference BestLine by ID so arsenal-played
+// cards get a "(from arsenal)" tag; weapons skip the match since they have no BestLine entry. A
+// non-zero TriggerDamage adds a trailing " (+M hero trigger)" so the attribution is visible
+// instead of silently folded into the card's own damage number.
+func appendAttackChainLines(lines []string, t TurnSummary, stepPtr *int) []string {
+	used := make([]bool, len(t.BestLine))
+	appendAttack := func(label, cardName string, e AttackChainEntry) {
+		*stepPtr++
+		line := fmt.Sprintf("  %d. %s: %s (+%s)", *stepPtr, cardName, label, formatContribution(e.Damage))
+		if e.TriggerDamage > 0 {
+			line += fmt.Sprintf(" (+%s hero trigger)", formatContribution(e.TriggerDamage))
+		}
+		lines = append(lines, line)
+	}
+	for _, e := range t.AttackChain {
+		if _, isWeapon := e.Card.(weapon.Weapon); isWeapon {
+			appendAttack("WEAPON ATTACK", e.Card.Name(), e)
+			continue
+		}
+		// Match the first unused Attack-role BestLine entry by ID so we can detect FromArsenal.
+		tag := ""
+		for i := range t.BestLine {
+			if used[i] || t.BestLine[i].Role != Attack || t.BestLine[i].Card.ID() != e.Card.ID() {
+				continue
+			}
+			if t.BestLine[i].FromArsenal {
+				tag = " (from arsenal)"
+			}
+			used[i] = true
+			break
+		}
+		appendAttack("ATTACK", e.Card.Name()+tag, e)
+	}
+	return lines
+}
+
 // FormatBestTurn renders a TurnSummary as a numbered play-order list, one card per line,
 // matching the actual FaB turn sequence:
 //
@@ -219,37 +257,7 @@ func FormatBestTurn(t TurnSummary) string {
 	for _, a := range attackPitches {
 		appendPitch(a, "PITCH (my turn)")
 	}
-	// Attack chain: iterate AttackChain for true play order, cross-referencing BestLine by ID to
-	// tag arsenal-played cards. Weapons have no BestLine entry and render as plain names. If the
-	// hero's OnCardPlayed fired on this entry, append " +M hero trigger" so the attribution is
-	// visible rather than silently folded into the card's number.
-	used := make([]bool, len(t.BestLine))
-	appendAttack := func(label, cardName string, e AttackChainEntry) {
-		line := fmt.Sprintf("  %d. %s: %s (+%s)", nextStep(), cardName, label, formatContribution(e.Damage))
-		if e.TriggerDamage > 0 {
-			line += fmt.Sprintf(" (+%s hero trigger)", formatContribution(e.TriggerDamage))
-		}
-		lines = append(lines, line)
-	}
-	for _, e := range t.AttackChain {
-		if _, isWeapon := e.Card.(weapon.Weapon); isWeapon {
-			appendAttack("WEAPON ATTACK", e.Card.Name(), e)
-			continue
-		}
-		// Match the first unused Attack-role BestLine entry by ID so we can detect FromArsenal.
-		tag := ""
-		for i := range t.BestLine {
-			if used[i] || t.BestLine[i].Role != Attack || t.BestLine[i].Card.ID() != e.Card.ID() {
-				continue
-			}
-			if t.BestLine[i].FromArsenal {
-				tag = " (from arsenal)"
-			}
-			used[i] = true
-			break
-		}
-		appendAttack("ATTACK", e.Card.Name()+tag, e)
-	}
+	lines = appendAttackChainLines(lines, t, &step)
 
 	// Held / Arsenal footer: unplayed cards, outside the numbered sequence, shown so the reader
 	// sees the whole turn disposition.
