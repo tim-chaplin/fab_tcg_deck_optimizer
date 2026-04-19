@@ -29,7 +29,7 @@ const (
 )
 
 // CardAssignment is a single card + the role it took this turn. Hand cards produce one per card;
-// a previous-turn arsenal card contributes one with FromArsenal set so a turn fits in one slice.
+// an arsenal-in card contributes one with FromArsenal set so a turn fits in one slice.
 // Contribution is the per-card credit toward TurnSummary.Value (damage dealt, block share, or
 // pitch resource depending on Role), filled by fillContributions once the winner is picked.
 type CardAssignment struct {
@@ -69,7 +69,7 @@ type TurnSummary struct {
 // carrying the damage it contributed when it resolved in the winning chain. Damage is the Play()
 // return; TriggerDamage is the hero's OnCardPlayed contribution (e.g. Viserai creating a
 // Runechant) so callers can surface hero attribution on its own line. For BestLine Attack entries
-// Damage + TriggerDamage mirrors CardAssignment.Contribution; weapons live only here.
+// Damage + TriggerDamage equals CardAssignment.Contribution; weapons live only here.
 type AttackChainEntry struct {
 	Card          card.Card
 	Damage        float64
@@ -373,9 +373,8 @@ type memoKey struct {
 
 // Evaluator owns the per-goroutine mutable state hand.Best threads through an evaluation: a
 // scratch-buffer cache keyed by (handSize, weapons). The memo cache is shared across all
-// Evaluators so every worker benefits from previously-cached hands — only the mutated scratch
-// buffers must be per-goroutine. A long-lived Evaluator avoids reallocating ~20 scratch slices
-// on every call.
+// Evaluators so every worker benefits from cached hands — only the mutated scratch buffers
+// must be per-goroutine. A long-lived Evaluator avoids reallocating ~20 scratch slices per call.
 type Evaluator struct {
 	// bufs holds the pre-allocated scratch slices for bestUncached / bestAttackWithWeapons /
 	// bestSequence. Keyed by (handSize, weaponCount, weaponIDs); recreated when any differ so the
@@ -532,9 +531,9 @@ type attackBufs struct {
 	// weaponCosts[mask] is total Cost; weaponNames[mask] is the pre-built []string of names.
 	weaponCosts []int
 	weaponNames [][]string
-	// permMeta is parallel to perm: each entry points into the global cardMetaCache so per-card
-	// metadata lookup skips interface dispatch. Pointer-valued so permutation swaps move 8 bytes
-	// rather than a full attackerMeta struct.
+	// permMeta parallels perm: each entry points into the global cardMetaCache so playSequence's
+	// inner loop skips interface dispatch on Types / Cost / GoAgain / DiscountPerRunechant.
+	// Pointer-valued so bestSequence's permutation swaps move 8 bytes instead of a full struct.
 	permMeta []*attackerMeta
 	// Partition-loop buffers, consumed by bestUncached. Sized handSize+1 to cover the optional
 	// arsenal-in slot the enumerator treats as index n. defendPrintedVals holds PrintedCost for
@@ -1089,8 +1088,8 @@ func defenseReactionDamage(defenders, pitched, deck []card.Card, state *card.Tur
 
 // bestAttackWithWeapons enumerates every subset of weapons to swing alongside attackers and
 // returns the max damage over all affordable masks, the runechant leftover, the residual chain
-// budget (pitch not consumed by the winning line — used to re-check DiscountPerRunechant defense
-// affordability), and the swung weapons in input order.
+// budget (pitch not consumed by the winning line — the caller re-checks DiscountPerRunechant
+// defense affordability against it), and the swung weapons in input order.
 //
 // resourceBudget is pitchSum - defenderCostSum; the chain further deducts each attacker's
 // effective cost (DiscountPerRunechant: max(0, PrintedCost - runechants at play-time); others:
