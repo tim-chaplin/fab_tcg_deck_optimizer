@@ -16,11 +16,6 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/weapon"
 )
 
-// heroesByName resolves Hero names during deserialization. Add new heroes here as implemented.
-var heroesByName = map[string]hero.Hero{
-	(hero.Viserai{}).Name(): hero.Viserai{},
-}
-
 // DeckJSON is the on-disk shape of a Deck with its Stats.
 type DeckJSON struct {
 	Hero    string           `json:"hero"`
@@ -214,7 +209,7 @@ func bestTurnToJSON(b deck.BestTurn) BestTurnJSON {
 }
 
 func fromJSON(dj *DeckJSON) (*deck.Deck, error) {
-	h, ok := heroesByName[dj.Hero]
+	h, ok := hero.ByName(dj.Hero)
 	if !ok {
 		return nil, fmt.Errorf("deckio: unknown hero %q", dj.Hero)
 	}

@@ -23,11 +23,6 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/weapon"
 )
 
-// heroesByName resolves hero names during Unmarshal. Add new heroes here as they're implemented.
-var heroesByName = map[string]hero.Hero{
-	(hero.Viserai{}).Name(): hero.Viserai{},
-}
-
 // defaultFormat is emitted in the Format: header. Update when a new format comes online.
 const defaultFormat = "Silver Age"
 
@@ -122,7 +117,7 @@ func Unmarshal(text string) (*deck.Deck, map[string]int, error) {
 	if err := sc.Err(); err != nil {
 		return nil, nil, err
 	}
-	h, ok := heroesByName[heroName]
+	h, ok := hero.ByName(heroName)
 	if !ok {
 		return nil, nil, fmt.Errorf("fabrary: unknown hero %q", heroName)
 	}
