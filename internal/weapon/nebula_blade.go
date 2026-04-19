@@ -28,8 +28,7 @@ func (NebulaBlade) Hands() int                { return 2 }
 func (c NebulaBlade) Play(s *card.TurnState) int {
 	dmg := c.Attack() + s.CreateRunechant() // hit creates 1 Runechant (+1 future damage)
 	for _, pc := range s.CardsPlayed {
-		pt := pc.Types()
-		if pt.Has(card.TypeAction) && !pt.Has(card.TypeAttack) {
+		if pc.Types().IsNonAttackAction() {
 			dmg += 3
 			break
 		}

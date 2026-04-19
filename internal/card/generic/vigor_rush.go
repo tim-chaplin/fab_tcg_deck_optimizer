@@ -21,8 +21,7 @@ func vigorRushPlay(base int, s *card.TurnState) int {
 		return base
 	}
 	for _, pl := range s.CardsPlayed {
-		t := pl.Types()
-		if t.Has(card.TypeAction) && !t.Has(card.TypeAttack) {
+		if pl.Types().IsNonAttackAction() {
 			s.Self.GrantedGoAgain = true
 			break
 		}
