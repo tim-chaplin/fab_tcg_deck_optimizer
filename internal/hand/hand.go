@@ -1120,6 +1120,10 @@ func bestAttackWithWeapons(hero hero.Hero, weapons []weapon.Weapon, attackers, p
 		incomingDamage:     incomingDamage,
 		blockTotal:         blockTotal,
 	}
+	// Hoist the leaf-constant TurnState fields out of the per-permutation reset in
+	// playSequenceWithMeta. Pitched, Deck, IncomingDamage, BlockTotal don't change across a
+	// partition's permutations; setting them once per ctx saves four stores per playSequence call.
+	ctx.seedState()
 	best := 0
 	bestLeftoverRunechants := runechantCarryover
 	bestResidualBudget := ctx.resourceBudget
@@ -1175,6 +1179,17 @@ type sequenceContext struct {
 	runechantCarryover int
 	incomingDamage     int
 	blockTotal         int
+}
+
+// seedState writes the TurnState fields that are constant across a partition's permutations
+// (pitched / deck references, incoming damage, block total). Called once per ctx so
+// playSequenceWithMeta's hot per-permutation reset can skip them.
+func (ctx *sequenceContext) seedState() {
+	s := ctx.bufs.state
+	s.Pitched = ctx.pitched
+	s.Deck = ctx.deck
+	s.IncomingDamage = ctx.incomingDamage
+	s.BlockTotal = ctx.blockTotal
 }
 
 // bestSequence tries every ordering of attackers and returns the max total damage plus the
@@ -1291,6 +1306,7 @@ func (ctx *sequenceContext) bestSequence(attackers, winnerOrderOut []card.Card, 
 // builds meta once and calls playSequenceWithMeta directly so interface dispatch for scalar
 // attributes amortises across the N! permutations it evaluates.
 func (ctx *sequenceContext) playSequence(order []card.Card, perCardOut, perCardTriggerOut []float64) (damage int, leftoverRunechants int, residualBudget int, legal bool) {
+	ctx.seedState()
 	meta := ctx.bufs.permMeta[:len(order)]
 	for i, c := range order {
 		meta[i] = attackerMetaPtrFor(c)
@@ -1323,16 +1339,14 @@ func (ctx *sequenceContext) playSequenceWithMeta(order []card.Card, perCardOut, 
 	// in a partition leaf; CardsRemaining and Self are rewritten per-card in the loop. A
 	// full-struct replace would memcpy every field (including big slice headers) and profiled at
 	// ~850ms/call; skipping caller-unread fields cuts most of that.
-	state.Pitched = ctx.pitched
-	state.Deck = ctx.deck
+	// Pitched / Deck / IncomingDamage / BlockTotal are seeded once per ctx (see seedState); cards
+	// don't mutate them, so we skip the per-permutation reset.
 	state.CardsPlayed = ctx.bufs.cardsPlayedBuf[:0]
 	state.Runechants = ctx.runechantCarryover
 	state.DelayedRunechants = 0
 	state.ArcaneDamageDealt = false
 	state.AuraCreated = false
 	state.Overpower = false
-	state.IncomingDamage = ctx.incomingDamage
-	state.BlockTotal = ctx.blockTotal
 	resources := ctx.resourceBudget
 	for i, pc := range played {
 		m := meta[i]
@@ -1472,6 +1486,7 @@ func fillContributions(summary *TurnSummary, hero hero.Hero, weapons []weapon.We
 			incomingDamage:     incomingDamage,
 			blockTotal:         sumDef,
 		}
+		ctx.seedState()
 		fillAttackChainContributions(summary, chain, ctx)
 	}
 }
