@@ -10,19 +10,18 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 )
 
-// Format identifies a deck-construction format. Every fabsim run is scoped to exactly one
-// format — there's no "no format" mode, so Parse rejects the empty string and callers should
-// always pass one of the named constants.
+// Format identifies a deck-construction format. Every fabsim run is scoped to one format —
+// there's no "no format" mode, so Parse rejects the empty string.
 type Format string
 
 const (
-	// SilverAge is the current live format as of 2026; see data_sources/silver_age_banlist.txt for
-	// the authoritative banned card list.
+	// SilverAge is the current live format; see data_sources/silver_age_banlist.txt for the
+	// authoritative banned card list.
 	SilverAge Format = "silver_age"
 )
 
 // Parse converts a CLI flag value to a Format. Unknown values return an error listing the
-// supported formats so the failure message is self-describing.
+// supported formats so the message is self-describing.
 func Parse(s string) (Format, error) {
 	switch Format(s) {
 	case SilverAge:

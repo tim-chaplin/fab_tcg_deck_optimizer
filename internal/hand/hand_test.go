@@ -650,13 +650,12 @@ func TestPromoteRandomHeldToArsenal_NoHeldIsNoop(t *testing.T) {
 	}
 }
 
-// TestBest_AllAttackHandPlusArsenalNoWeapons regresses a slice-bounds panic: attackBufs sized its
-// scratch by handSize+weaponCount only, so a full 4-card hand of 0-cost attackers + an arsenal-in
-// attacker (5 entries) overflowed the 4-wide attackerBuf inside bestAttackWithWeapons when no
-// weapons were present. Wounding Blow Red is 0-cost attack 4, so the all-Attack partition is
-// phase-feasible with zero pitches and enumerates through the previously-crashing code path. The
-// winning line only chains one (no GoAgain), but the enumerator still evaluates the 5-attacker
-// partition, which is what the buffer sizing has to survive.
+// TestBest_AllAttackHandPlusArsenalNoWeapons guards attackBufs scratch sizing against slice-
+// bounds panics when a full 4-card hand of 0-cost attackers plus an arsenal-in attacker (5
+// entries) goes through bestAttackWithWeapons with no weapons. Wounding Blow Red is 0-cost
+// attack 4, so the all-Attack partition is phase-feasible with zero pitches and enumerates the
+// 5-attacker path. The winning line only chains one (no GoAgain), but the enumerator still
+// evaluates the 5-attacker partition — the buffer must survive that.
 func TestBest_AllAttackHandPlusArsenalNoWeapons(t *testing.T) {
 	h := []card.Card{
 		generic.WoundingBlowRed{}, generic.WoundingBlowRed{},

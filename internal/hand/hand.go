@@ -21,19 +21,17 @@ const (
 	Attack
 	Defend
 	Held
-	// Arsenal is assigned to exactly one hand card at most, representing "placed into the
-	// arsenal at end of turn". The card contributes nothing to this turn's Value (true value
-	// accrues when it's played from arsenal on a future turn), and it carries across the turn
-	// boundary as Play.ArsenalCard. Never produced by the recurse itself — Best upgrades one
-	// Held card to Arsenal post-hoc when the arsenal slot is empty.
+	// Arsenal marks the card placed into the arsenal at end of turn. Contributes nothing to this
+	// turn's Value (it scores on the future turn it's played) and carries across the turn boundary
+	// as Play.ArsenalCard. At most one card in BestLine takes this role; when the partition
+	// enumerator leaves arsenal empty, Best post-hoc promotes one Held card.
 	Arsenal
 )
 
-// CardAssignment is a single card + the role it took this turn. Hand cards produce one per
-// card; the previous-turn arsenal card also contributes one CardAssignment with FromArsenal set,
-// so the whole turn fits in one slice rather than separate hand + role + arsenal structures.
+// CardAssignment is a single card + the role it took this turn. Hand cards produce one per card;
+// a previous-turn arsenal card contributes one with FromArsenal set so a turn fits in one slice.
 // Contribution is the per-card credit toward TurnSummary.Value (damage dealt, block share, or
-// pitch resource depending on Role), populated by fillContributions once the winner is picked.
+// pitch resource depending on Role), filled by fillContributions once the winner is picked.
 type CardAssignment struct {
 	Card         card.Card
 	Role         Role
@@ -41,39 +39,37 @@ type CardAssignment struct {
 	Contribution float64
 }
 
-// TurnSummary is the result of running Best on a hand: the winning "best line" of card-role
-// assignments plus aggregate metadata about the turn.
+// TurnSummary is the result of running Best on a hand: the winning card-role assignments plus
+// aggregate metadata about the turn.
 type TurnSummary struct {
-	// BestLine is the winning partition as a sequence of CardAssignment values. Hand cards come
-	// first in canonical (post-sort) order; the previous-turn arsenal card, if any, follows as
-	// the last entry with FromArsenal=true. Never mutate — memoized results alias this slice.
+	// BestLine is the winning partition. Hand cards come first in canonical (post-sort) order;
+	// the previous-turn arsenal card, if any, is the last entry with FromArsenal=true. Never
+	// mutate — memoized results alias this slice.
 	BestLine []CardAssignment
-	// AttackChain is the winning chain in play order — attack-role cards from BestLine mixed
-	// with any swung weapons at the positions the solver chose to swing them. Each entry
-	// carries its Play-time damage (including hero-trigger damage for cards) so callers can
-	// attribute contribution even to weapons (which have no BestLine entry). Swung weapons can
-	// be recovered by filtering AttackChain for AttackChainEntry.Card of type weapon.Weapon.
-	// Empty when no attacks were played.
+	// AttackChain is the winning chain in play order: attack-role cards from BestLine interleaved
+	// with any swung weapons at the positions the solver picked. Each entry carries its Play-time
+	// damage (plus hero-trigger damage for cards) so callers can attribute contribution for
+	// weapons, which have no BestLine entry. Swung weapons are recoverable by type-asserting
+	// AttackChainEntry.Card to weapon.Weapon. Empty when no attacks were played.
 	AttackChain []AttackChainEntry
 	// Value is the turn's total score (damage dealt + damage prevented). Equals the sum of
 	// BestLine[].Contribution plus any weapon-swing damage (weapons aren't in BestLine).
 	Value int
-	// LeftoverRunechants is the number of Runechant tokens in play at the end of the chosen
-	// chain, which carry into the next turn's Best call. For partitions with no attacks, this
-	// equals the carryover the caller passed in.
+	// LeftoverRunechants is the Runechant token count at end of the chosen chain; the caller
+	// feeds it back as the next turn's carryover. For partitions with no attacks, equals the
+	// carryover the caller passed in.
 	LeftoverRunechants int
-	// ArsenalCard is the card occupying the arsenal slot at the end of this turn — either a new
-	// hand card just arsenaled (role=Arsenal) or a previous-turn arsenal card that stayed. Nil
-	// when the slot is empty. The caller feeds this back as the next turn's arsenalCardIn.
+	// ArsenalCard is the card occupying the arsenal slot at end of turn — either a hand card
+	// just arsenaled (role=Arsenal) or a previous-turn arsenal card that stayed. Nil when empty.
+	// The caller feeds this back as the next turn's arsenalCardIn.
 	ArsenalCard card.Card
 }
 
-// AttackChainEntry is a single played attack — either a card with role=Attack or a swung
-// weapon — carrying the damage it contributed at the moment it resolved in the winning chain.
-// Damage is the Play() return; TriggerDamage is the hero's OnCardPlayed contribution (e.g.
-// Viserai creating a Runechant) so callers can surface hero attribution on its own line.
-// For BestLine Attack entries Damage + TriggerDamage mirrors CardAssignment.Contribution;
-// weapons live only here.
+// AttackChainEntry is a single played attack — a card with role=Attack or a swung weapon —
+// carrying the damage it contributed when it resolved in the winning chain. Damage is the Play()
+// return; TriggerDamage is the hero's OnCardPlayed contribution (e.g. Viserai creating a
+// Runechant) so callers can surface hero attribution on its own line. For BestLine Attack entries
+// Damage + TriggerDamage mirrors CardAssignment.Contribution; weapons live only here.
 type AttackChainEntry struct {
 	Card          card.Card
 	Damage        float64
@@ -81,8 +77,7 @@ type AttackChainEntry struct {
 }
 
 // ArsenalIn returns the assignment for the card that started the turn in the arsenal, if any.
-// Handy for callers (display, per-card stats) that want to treat the arsenal-in card differently
-// from hand cards without scanning BestLine themselves.
+// Lets callers treat the arsenal-in card differently from hand cards without scanning BestLine.
 func (t TurnSummary) ArsenalIn() (CardAssignment, bool) {
 	for _, a := range t.BestLine {
 		if a.FromArsenal {
@@ -109,9 +104,8 @@ func (r Role) String() string {
 	return "UNKNOWN"
 }
 
-// formatContribution renders a contribution/damage value for the best-turn printout. Integer
-// values (the common case: pitch amounts, attack power, hero-trigger damage) render without a
-// decimal; fractional values (proportional defense share when multiple blockers split an
+// formatContribution renders a contribution/damage value for the best-turn printout. Integers
+// render bare; fractional values (proportional defense share when multiple blockers split an
 // incoming attack) show one decimal place.
 func formatContribution(v float64) string {
 	if v == float64(int(v)) {
@@ -131,8 +125,8 @@ func assignmentName(a CardAssignment) string {
 }
 
 // FormatBestLine pairs each card in BestLine with its assigned role for debug output, e.g.
-// "Hocus Pocus (Blue): PITCH, Runic Reaping (Red): ATTACK". This is the compact one-line form —
-// use FormatBestTurn for the chronological play-order presentation.
+// "Hocus Pocus (Blue): PITCH, Runic Reaping (Red): ATTACK". Compact one-line form; use
+// FormatBestTurn for chronological play order.
 func FormatBestLine(line []CardAssignment) string {
 	parts := make([]string, len(line))
 	for i, a := range line {
@@ -141,8 +135,8 @@ func FormatBestLine(line []CardAssignment) string {
 	return strings.Join(parts, ", ")
 }
 
-// FormatBestTurn renders a TurnSummary as a numbered play-order list, one card per line. The
-// order mirrors the actual sequence of a FaB turn:
+// FormatBestTurn renders a TurnSummary as a numbered play-order list, one card per line,
+// matching the actual FaB turn sequence:
 //
 //  1. Defense-phase pitches (paying for Defense Reactions)
 //  2. Plain blocks
@@ -150,15 +144,13 @@ func FormatBestLine(line []CardAssignment) string {
 //  4. Attack-phase pitches (paying for this turn's played cards)
 //  5. Attack chain — played cards and swung weapons in the order the solver picked
 //
-// Cards that ended up Held or Arsenal-bound (didn't get played or pitched this turn) are
-// summarized on trailing lines so the reader can see what's carrying over.
+// Held / Arsenal cards are summarized on trailing lines so the reader sees what's carrying over.
 //
-// Pitch-phase assignment is computed here by a simple greedy: smallest pitches first fund the
-// defense pool until drCost is covered, the rest fund attack. The solver validated that some
-// legal split exists; this chooses one deterministically for display.
+// Pitch-phase assignment uses a greedy split for display: smallest pitches first fund the defense
+// pool until drCost is covered, the rest fund attack. The solver already validated some legal
+// split exists; this picks one deterministically.
 func FormatBestTurn(t TurnSummary) string {
-	// Partition BestLine entries into role buckets; pitch cards come out as a single pool which
-	// then gets split by phase below.
+	// Partition BestLine into role buckets; pitch cards pool and are split by phase below.
 	var pitched, plainBlocks, defenseReactions, held, arsenal []CardAssignment
 	var attackCost, drCost int
 	for _, a := range t.BestLine {
@@ -182,7 +174,7 @@ func FormatBestTurn(t TurnSummary) string {
 	}
 
 	// Greedy split: sort pitches ascending and pour into the defense bucket until drCost is
-	// covered; the rest is attack-phase. Stable w.r.t. input order for ties (sort.SliceStable).
+	// covered; the rest is attack-phase. Stable on ties.
 	sorted := append([]CardAssignment(nil), pitched...)
 	sort.SliceStable(sorted, func(i, j int) bool { return sorted[i].Card.Pitch() < sorted[j].Card.Pitch() })
 	var defensePitches, attackPitches []CardAssignment
@@ -199,14 +191,13 @@ func FormatBestTurn(t TurnSummary) string {
 	var lines []string
 	step := 0
 	nextStep := func() int { step++; return step }
-	// Pitch lines don't show a damage contribution — pitches generate resource (already factored
-	// into the turn's affordability) rather than damage or prevention. Showing "+3" next to a
-	// pitch would double-count against the turn's Value.
+	// Pitch lines don't show a damage contribution: pitches generate resource, not damage —
+	// showing "+3" next to a pitch would double-count against the turn's Value.
 	appendPitch := func(a CardAssignment, roleLabel string) {
 		lines = append(lines, fmt.Sprintf("  %d. %s: %s", nextStep(), assignmentName(a), roleLabel))
 	}
-	// Defense lines DO contribute damage-prevention (block share + DR Play return) so their
-	// tag is shown.
+	// Defense lines contribute damage-prevention (block share + DR Play return), so the tag is
+	// shown.
 	appendDefense := func(a CardAssignment, roleLabel string) {
 		lines = append(lines, fmt.Sprintf("  %d. %s: %s (+%s prevented)", nextStep(), assignmentName(a), roleLabel, formatContribution(a.Contribution)))
 	}
@@ -223,11 +214,10 @@ func FormatBestTurn(t TurnSummary) string {
 	for _, a := range attackPitches {
 		appendPitch(a, "PITCH (my turn)")
 	}
-	// Attack chain: iterate AttackChain for real play order, cross-referencing BestLine by ID to
-	// mark arsenal-played cards. Weapons have no BestLine entry, so they render as plain names.
-	// Each entry prints its Play damage; if the hero's OnCardPlayed fired on this entry (e.g.
-	// Viserai creating a Runechant on a 2nd+ chain link), append " +M hero trigger" so the
-	// attribution is visible rather than silently folded into the card's number.
+	// Attack chain: iterate AttackChain for true play order, cross-referencing BestLine by ID to
+	// tag arsenal-played cards. Weapons have no BestLine entry and render as plain names. If the
+	// hero's OnCardPlayed fired on this entry, append " +M hero trigger" so the attribution is
+	// visible rather than silently folded into the card's number.
 	used := make([]bool, len(t.BestLine))
 	appendAttack := func(label, cardName string, e AttackChainEntry) {
 		line := fmt.Sprintf("  %d. %s: %s (+%s)", nextStep(), cardName, label, formatContribution(e.Damage))
@@ -241,7 +231,7 @@ func FormatBestTurn(t TurnSummary) string {
 			appendAttack("WEAPON ATTACK", e.Card.Name(), e)
 			continue
 		}
-		// Find first unused BestLine entry with matching ID so we can detect FromArsenal.
+		// Match the first unused Attack-role BestLine entry by ID so we can detect FromArsenal.
 		tag := ""
 		for i := range t.BestLine {
 			if used[i] || t.BestLine[i].Role != Attack || t.BestLine[i].Card.ID() != e.Card.ID() {
@@ -256,8 +246,8 @@ func FormatBestTurn(t TurnSummary) string {
 		appendAttack("ATTACK", e.Card.Name()+tag, e)
 	}
 
-	// Held / Arsenal footer. These didn't get "played", so they're outside the numbered
-	// sequence. Keep them visible so the reader knows the whole turn disposition.
+	// Held / Arsenal footer: unplayed cards, outside the numbered sequence, shown so the reader
+	// sees the whole turn disposition.
 	var footers []string
 	for _, a := range held {
 		footers = append(footers, fmt.Sprintf("  (held: %s)", a.Card.Name()))
@@ -276,53 +266,48 @@ func FormatBestTurn(t TurnSummary) string {
 }
 
 // Best returns the optimal TurnSummary for the given hand against an opponent that will attack
-// for incomingDamage on their next turn. Any equipped weapons may also be swung for their Cost
-// if resources allow.
+// for incomingDamage on their next turn. Equipped weapons may be swung for their Cost if
+// resources allow.
 //
-// Cards are partitioned into five roles:
-//   - Pitch: contributes its Pitch value as resources paying for a played card on this turn or a
+// Cards partition into five roles:
+//   - Pitch: contributes its Pitch value as resource paying for a played card this turn or a
 //     Defense Reaction on the opponent's turn.
-//   - Attack: consumes Cost resources on our turn; the attack is resolved by calling Card.Play in
-//     some order the optimizer chooses. Effects on TurnState carry forward to later attacks in
-//     the same sequence.
-//   - Defend: contributes Defense to damage prevented (capped at incomingDamage; excess block is
-//     wasted). Plain blocking is free; Defense-Reaction-typed cards must have their Cost paid to
-//     resolve and also contribute any Play() damage.
-//   - Held: the card stays in hand to next turn. Contributes nothing this turn.
-//   - Arsenal: the card moves into the arsenal slot at end of turn (or, for an arsenal-in card,
-//     stays there). Contributes nothing this turn.
+//   - Attack: consumes Cost on our turn; resolved by calling Card.Play in an order the optimizer
+//     chooses. TurnState effects carry forward to later attacks in the same sequence.
+//   - Defend: contributes Defense to damage prevented (capped at incomingDamage; excess wasted).
+//     Plain blocking is free; Defense Reactions must pay Cost and contribute any Play() damage.
+//   - Held: stays in hand for next turn. Contributes nothing this turn.
+//   - Arsenal: moves into the arsenal slot at end of turn, or for an arsenal-in card, stays.
+//     Contributes nothing this turn.
 //
-// Pitch resources are split across two phases because resources don't carry between turns:
-// attack-phase pitches pay for our played attack actions and non-attack actions, defence-phase
-// pitches pay for our Defense Reactions on the opponent's turn. A card cannot be pitched unless
-// at that moment there's an unpaid card on the stack in the matching phase — so a hand with no
-// plays in a phase must have no Pitch-role cards tagged to that phase. Any remaining cards that
-// can't be legally pitched become Held.
+// Pitch resources split across two phases because resources don't carry between turns: attack
+// pitches pay for this turn's played cards, defense pitches pay for Defense Reactions on the
+// opponent's turn. A card can only be pitched while some unpaid card is on the stack in the
+// matching phase, so a hand with no plays in a phase has no Pitch-role cards in that phase; any
+// card that can't be legally pitched becomes Held.
 //
-// Results are memoized on (hero name, sorted weapon names, sorted card IDs, incomingDamage,
-// runechantCarryover, arsenal-in ID) so repeated evaluations of the same hand across shuffles
-// short-circuit. The hand is sorted in place into canonical order first — BestLine's hand
-// entries align with that post-sort order. Every card in the hand must be registered in package
-// cards; Best panics otherwise.
+// Results are memoized on (heroID, sorted weapon IDs, sorted card IDs, incomingDamage,
+// runechantCarryover, arsenal-in ID) so repeat evaluations short-circuit. The hand is sorted in
+// place into canonical order first; BestLine's hand entries align with that post-sort order.
+// Every card in the hand must be registered in package cards or Best panics.
 //
-// runechantCarryover is the number of Runechant tokens carrying in from the previous turn. The
-// returned TurnSummary.LeftoverRunechants is the count remaining at end of the chosen chain,
-// which the caller should feed back as the next turn's carryover.
+// runechantCarryover is the Runechant token count carrying in from the previous turn.
+// TurnSummary.LeftoverRunechants is the count at end of the chosen chain; feed it back as the
+// next turn's carryover.
 //
-// arsenalCardIn is the card sitting in the arsenal slot at the start of this turn (nil if the
-// slot is empty). The partition enumerator pulls it into the turn as an extra CardAssignment
-// with restricted role options — Arsenal (stay in the slot), Attack (any non-DR card), or
-// Defend (only Defense Reactions). Never Pitch or Held. A hand card may also take the Arsenal
-// role so long as at most one card in BestLine ends up there.
+// arsenalCardIn is the card sitting in the arsenal slot at start of turn (nil if empty). The
+// enumerator pulls it in as an extra CardAssignment with restricted role options — Arsenal
+// (stay), Attack (any non-DR card), or Defend (Defense Reactions only). Never Pitch or Held. A
+// hand card may also take the Arsenal role so long as at most one BestLine entry ends up there.
 func Best(hero hero.Hero, weapons []weapon.Weapon, hand []card.Card, incomingDamage int, deck []card.Card, runechantCarryover int, arsenalCardIn card.Card) TurnSummary {
 	return sharedEvaluator.Best(hero, weapons, hand, incomingDamage, deck, runechantCarryover, arsenalCardIn)
 }
 
-// Best is the method form of the package-level Best: same semantics, but uses this Evaluator's
-// memo and bufs so concurrent goroutines can each hold their own state.
+// Best is the method form of the package-level Best: same semantics, uses this Evaluator's
+// scratch buffers so concurrent goroutines can each hold their own.
 func (e *Evaluator) Best(hero hero.Hero, weapons []weapon.Weapon, hand []card.Card, incomingDamage int, deck []card.Card, runechantCarryover int, arsenalCardIn card.Card) TurnSummary {
-	// Fetch IDs into a fixed-size stack array to avoid a per-call slice allocation. Hand size is
-	// capped at 8 (matches memoKey.cardIDs); larger hands panic out of the inner loops elsewhere.
+	// IDs go into a fixed-size stack array to avoid a per-call slice alloc. Hand size is capped
+	// at 8 (matches memoKey.cardIDs); larger hands panic out of the inner loops.
 	n := len(hand)
 	var ids [8]card.ID
 	memoable := true
@@ -358,10 +343,9 @@ func (e *Evaluator) Best(hero hero.Hero, weapons []weapon.Weapon, hand []card.Ca
 	return result
 }
 
-// sortHandByID sorts the first n entries of `hand` and `ids` in parallel by ascending id, in
-// place. Insertion sort — for n ≤ 8 this is faster than sort.Sort and avoids boxing the slices
-// through sort.Interface on every call. Canonicalizing the hand order is what lets the memo key
-// collapse permutations of the same cards onto a single entry.
+// sortHandByID sorts the first n entries of hand and ids in parallel by ascending id, in place.
+// Insertion sort — for n ≤ 8 this beats sort.Sort and avoids boxing slices through sort.Interface.
+// Canonicalizing the hand order is what lets the memo key collapse permutations onto one entry.
 func sortHandByID(hand []card.Card, ids []card.ID, n int) {
 	for i := 1; i < n; i++ {
 		for j := i; j > 0 && ids[j-1] > ids[j]; j-- {
@@ -371,11 +355,10 @@ func sortHandByID(hand []card.Card, ids []card.ID, n int) {
 	}
 }
 
-// memoKey is a comparable struct used as the map key for the shared memo. Hand size is capped at
-// 8 cards. Hero ID + weapon IDs are in the key so concurrent Evaluators with different (hero,
-// weapons) tuples share the memo safely without a scope-wipe step: distinct scopes just produce
-// distinct keys. Using hero.ID (uint16) instead of the display name keeps the entire key a fixed-
-// size integer struct — no string hashing per lookup.
+// memoKey is the comparable map key for the shared memo. Hand size is capped at 8 cards. Hero
+// ID + weapon IDs live in the key so Evaluators with different (hero, weapons) tuples coexist in
+// the memo without a scope wipe — distinct scopes just produce distinct keys. The uint16 hero.ID
+// keeps the whole key a fixed-size integer struct; no string hashing per lookup.
 type memoKey struct {
 	heroID             hero.ID
 	weaponIDs          [2]card.ID
@@ -383,20 +366,18 @@ type memoKey struct {
 	cardCount          uint8
 	incoming           int
 	runechantCarryover int
-	// arsenalInID is card.Invalid when the slot is empty, otherwise the ID of the card in the
-	// arsenal at the start of the turn — different arsenal-ins give distinct cache entries.
+	// arsenalInID is card.Invalid when the slot is empty, otherwise the ID of the starting
+	// arsenal card — different arsenal-ins give distinct cache entries.
 	arsenalInID card.ID
 }
 
-// Evaluator owns the per-goroutine mutable state hand.Best threads through a single evaluation:
-// a scratch-buffer cache keyed by (handSize, weapons). The memo cache is shared across all
-// Evaluators (see `memo` below) so every worker benefits from previously-cached hands — only the
-// scratch buffers (which are mutated during a call) must be per-goroutine.
-//
-// Long-lived Evaluators avoid reallocating ~20 scratch slices on every call. Iterate mode keeps
-// one Evaluator per worker goroutine and reuses it across every mutation that worker screens.
+// Evaluator owns the per-goroutine mutable state hand.Best threads through an evaluation: a
+// scratch-buffer cache keyed by (handSize, weapons). The memo cache is shared across all
+// Evaluators so every worker benefits from previously-cached hands — only the mutated scratch
+// buffers must be per-goroutine. A long-lived Evaluator avoids reallocating ~20 scratch slices
+// on every call.
 type Evaluator struct {
-	// bufs holds the pre-allocated scratch slices used by bestUncached / bestAttackWithWeapons /
+	// bufs holds the pre-allocated scratch slices for bestUncached / bestAttackWithWeapons /
 	// bestSequence. Keyed by (handSize, weaponCount, weaponIDs); recreated when any differ so the
 	// scratch sizing stays correct.
 	bufs            *attackBufs
@@ -406,38 +387,33 @@ type Evaluator struct {
 	bufsValid       bool
 }
 
-// NewEvaluator returns a fresh Evaluator with empty scratch buffers. Reusing one Evaluator across
-// many Best calls amortises the scratch allocation; holding separate Evaluators per goroutine
-// keeps them safe for concurrent use while still sharing the global memo.
+// NewEvaluator returns a fresh Evaluator with empty scratch buffers. One Evaluator per goroutine
+// is safe for concurrent use and still shares the global memo.
 func NewEvaluator() *Evaluator {
 	return &Evaluator{}
 }
 
-// sharedEvaluator backs the package-level Best function — single-threaded callers don't need to
-// construct their own Evaluator. Parallel callers (iterate's worker pool) create one per
-// goroutine for bufs but all of them share the global memo below.
+// sharedEvaluator backs the package-level Best — single-threaded callers don't need to construct
+// their own. Parallel callers create one per goroutine for bufs but all share the global memo.
 var sharedEvaluator = NewEvaluator()
 
 // memo caches canonical-order TurnSummary results keyed by memoKey. Shared across all Evaluators
-// and goroutines; protected by memoMu. Hero name + weapon IDs live in memoKey so distinct (hero,
-// weapons) scopes coexist in the same map without a wipe step.
+// and goroutines; protected by memoMu. Hero + weapon IDs live in memoKey so distinct (hero,
+// weapons) scopes coexist without a wipe step.
 var (
 	memo   = map[memoKey]TurnSummary{}
 	memoMu sync.RWMutex
 )
 
-// ClearMemo drops every cached TurnSummary. Called between iterate rounds (mode_iterate.go) so
-// the map doesn't grow unboundedly across a long hill-climb run — cross-round hit rate is near
-// zero anyway since each round's deck has a different card composition. Also used by benchmarks
-// that want each sample to start from a cold cache.
+// ClearMemo drops every cached TurnSummary. Callers (iterate-mode, benchmarks) use this to cap
+// memo growth across unrelated runs; cross-run hit rate is near zero so nothing of value is lost.
 func ClearMemo() {
 	memoMu.Lock()
 	clear(memo)
 	memoMu.Unlock()
 }
 
-// MemoLen returns the current number of cached entries. Used by iterate to log memo pressure
-// between rounds.
+// MemoLen returns the current number of cached entries, for diagnostic logging.
 func MemoLen() int {
 	memoMu.RLock()
 	n := len(memo)
@@ -446,9 +422,8 @@ func MemoLen() int {
 }
 
 // makeMemoKey builds a comparable memo key. The hand must already be sorted by card ID.
-// sortedIDs is passed as a pointer to the caller's [8]card.ID stack array to avoid a slice-header
-// escape. weapon IDs are sorted numerically into the two fixed slots so loadouts passed in
-// different orders still hash to the same key.
+// sortedIDs is a pointer to the caller's stack [8]card.ID to avoid a slice-header escape. Weapon
+// IDs are sorted into the two fixed slots so loadouts in any order hash to the same key.
 func makeMemoKey(hero hero.Hero, weapons []weapon.Weapon, sortedIDs *[8]card.ID, n int, incoming int, runechantCarryover int, arsenalCardIn card.Card) memoKey {
 	k := memoKey{
 		heroID:             hero.ID(),
@@ -474,9 +449,8 @@ func makeMemoKey(hero hero.Hero, weapons []weapon.Weapon, sortedIDs *[8]card.ID,
 }
 
 // attackerMeta caches the scalar card attributes playSequence reads on every permutation. With
-// this hoisted to a per-attacker lookup, the hot inner loop doesn't dispatch Types / Cost /
-// GoAgain through the Card interface on every iteration — the permutation enumerator evaluates
-// up to N! orderings of the same N cards, so one meta build amortises across all of them.
+// this hoisted to a per-attacker lookup, the hot inner loop skips Types / Cost / GoAgain
+// interface dispatch; the one meta build amortises across all N! permutations.
 type attackerMeta struct {
 	types            card.TypeSet
 	cost             int
@@ -486,10 +460,9 @@ type attackerMeta struct {
 	isAttackOrWeapon bool
 }
 
-// cardMetaCache and cardMetaReady are the shared, read-only-after-init card metadata tables.
-// Populated lazily via cardMetaSlowPath on first encounter and then read freely from multiple
-// goroutines without synchronisation. Sized for the entire uint16 ID space so lookups are plain
-// bounds-checked reads — ~2 MB of immutable memory, trivially cheap given the target machine.
+// cardMetaCache / cardMetaReady are shared, read-only-after-init card metadata tables. Populated
+// lazily via cardMetaSlowPath on first encounter, then read from all goroutines without sync.
+// Sized for the full uint16 ID space so lookups are plain bounds-checked reads (~2 MB total).
 const cardMetaCacheSize = 1 << 16
 
 var (
@@ -498,9 +471,9 @@ var (
 	cardMetaMu    sync.Mutex
 )
 
-// attackerMetaFor returns cached metadata for c, populating the cache on first encounter. Safe to
-// call from multiple goroutines: the first writer per ID takes the mutex, subsequent readers see
-// the ready flag set with a release barrier and read the (now immutable) meta entry directly.
+// attackerMetaFor returns cached metadata for c, populating on first encounter. Safe from
+// multiple goroutines: the first writer per ID holds the mutex, later readers see the ready flag
+// set with a release barrier and read the immutable meta entry directly.
 func attackerMetaFor(c card.Card) attackerMeta {
 	id := c.ID()
 	if atomic.LoadUint32(&cardMetaReady[id]) == 1 {
@@ -509,13 +482,11 @@ func attackerMetaFor(c card.Card) attackerMeta {
 	return cardMetaSlowPath(c, id)
 }
 
-// cardMetaSlowPath populates the cache entry for the given card under cardMetaMu. Returns the
-// computed meta — no need for a second load of the cache since this goroutine just wrote it.
+// cardMetaSlowPath populates the cache entry under cardMetaMu and returns the computed meta.
 func cardMetaSlowPath(c card.Card, id card.ID) attackerMeta {
 	cardMetaMu.Lock()
 	defer cardMetaMu.Unlock()
-	// Re-check under lock; another goroutine may have populated between the atomic load above and
-	// our Lock below.
+	// Re-check under lock: another goroutine may have populated between the atomic load and here.
 	if atomic.LoadUint32(&cardMetaReady[id]) == 1 {
 		return cardMetaCache[id]
 	}
@@ -536,8 +507,8 @@ func cardMetaSlowPath(c card.Card, id card.ID) attackerMeta {
 }
 
 // attackBufs holds pre-allocated buffers for the attack-evaluation pipeline (bestSequence →
-// playSequence) and the partition loop in bestUncached. Allocated once and cached globally so a
-// whole deck evaluation reuses the same buffers across every partition, mask, and permutation.
+// playSequence) and the partition loop in bestUncached. Allocated once and cached on the
+// Evaluator so a deck eval reuses them across every partition, mask, and permutation.
 type attackBufs struct {
 	perm           []card.Card
 	pcBuf          []card.PlayedCard
@@ -545,21 +516,18 @@ type attackBufs struct {
 	cardsPlayedBuf []card.Card
 	state          *card.TurnState
 	attackerBuf    []card.Card // for bestAttackWithWeapons mask iteration
-	// Pre-computed weapon data: weaponCosts[mask] is the total Cost of weapons in that mask;
-	// weaponNames[mask] is the pre-built []string of weapon names for the mask. Indexed by bitmask
-	// (0 to 2^len(weapons)-1).
+	// Pre-computed per-mask weapon data. Indexed by bitmask (0 to 2^len(weapons)-1):
+	// weaponCosts[mask] is total Cost; weaponNames[mask] is the pre-built []string of names.
 	weaponCosts []int
 	weaponNames [][]string
-	// permMeta is parallel to perm: it carries precomputed scalar metadata for each attacker so
-	// playSequence's inner loop can skip interface dispatch on Types / Cost / GoAgain / the
-	// DiscountPerRunechant type-assertion. Populated and permuted in lockstep with perm by
-	// bestSequence; read in order by playSequence.
+	// permMeta is parallel to perm: precomputed scalar metadata per attacker so playSequence's
+	// inner loop skips interface dispatch on Types / Cost / GoAgain / the DiscountPerRunechant
+	// assertion. Populated and permuted in lockstep with perm by bestSequence.
 	permMeta []attackerMeta
 	// Partition-loop buffers, consumed by bestUncached. Sized handSize+1 to cover the optional
-	// arsenal-in slot the enumerator treats as index n. defendPrintedVals holds the PrintedCost of
-	// DiscountPerRunechant defense reactions for the leaf's post-attack discount re-pricing;
-	// non-discount cards get 0. isDRBuf caches TypeDefenseReaction membership so the leaf skips
-	// Types().Has calls.
+	// arsenal-in slot the enumerator treats as index n. defendPrintedVals holds PrintedCost for
+	// DiscountPerRunechant defense reactions (post-attack discount re-pricing); non-discount
+	// cards get 0. isDRBuf caches TypeDefenseReaction membership to skip Types().Has calls.
 	rolesBuf          []Role
 	pitchVals         []int
 	costVals          []int
@@ -567,36 +535,34 @@ type attackBufs struct {
 	defendPrintedVals []int
 	defenseVals       []int
 	isDRBuf           []bool
-	// pitchedValsScratch backs the per-leaf "pitched values" slice the feasibility check
-	// inspects. Re-sliced to [:0] at the start of every leaf and appended to inside it, so
-	// lifting the alloc to bufs eliminates one make([]int, …, totalN) per bestUncached call.
+	// pitchedValsScratch backs the per-leaf "pitched values" slice the feasibility check reads.
+	// Re-sliced to [:0] at the start of every leaf to eliminate a make([]int, …) per leaf.
 	pitchedValsScratch []int
 	pitchedBuf         []card.Card
 	attackersBuf       []card.Card
 	defendersBuf       []card.Card
-	// perCardScratch is sized maxAttackers (handSize + weaponCount). Only written by playSequence
-	// when the caller passes a non-nil perCardOut, and read by bestSequence to snapshot the
-	// winning permutation's per-card damage into the caller's output buffer. Untracked callers
-	// (the partition-loop hot path) pass nil and never touch this slice.
+	// perCardScratch is sized maxAttackers (handSize + weaponCount). Written by playSequence only
+	// when the caller passes a non-nil perCardOut; bestSequence snapshots the winning
+	// permutation's per-card damage from here into the caller's output buffer. The partition-loop
+	// hot path passes nil and never touches this slice.
 	perCardScratch []float64
 	// perCardTriggerScratch parallels perCardScratch for hero-trigger damage (OnCardPlayed
-	// return). Same sizing / same "only written when tracking" discipline.
+	// return). Only written when the caller tracks.
 	perCardTriggerScratch []float64
-	// fillContribWinnerOrder / fillContribPerCard are output buffers for bestSequence when
-	// fillContributions runs the tracked replay after the partition loop. Kept on attackBufs so
-	// each Best call reuses the same underlying slab instead of allocating a fresh pair.
+	// fillContribWinnerOrder / fillContribPerCard are output buffers for bestSequence during
+	// fillContributions's tracked replay. Kept on attackBufs so each Best call reuses the slab.
 	fillContribWinnerOrder []card.Card
 	fillContribPerCard     []float64
 	fillContribTriggerDmg  []float64
 	// fillContribUsed marks hand indices already assigned during chain→hand mapping. Sized
-	// handSize; the caller resets it with clear before each fillContributions pass.
+	// handSize; reset with clear before each fillContributions pass.
 	fillContribUsed []bool
 }
 
 func newAttackBufs(handSize, weaponCount int, weapons []weapon.Weapon) *attackBufs {
-	// +1 reserves a slot for the arsenal-in card, which joins `attackers` or `defenders` when
-	// the partition enumerator plays it out of arsenal. Without it, all-attack hands + arsenal
-	// overflow attackerBuf (slice bounds panic in bestAttackWithWeapons).
+	// +1 reserves a slot for the arsenal-in card, which joins attackers or defenders when the
+	// enumerator plays it from arsenal. Without it, all-attack hands + arsenal would overflow
+	// attackerBuf in bestAttackWithWeapons.
 	maxAttackers := handSize + weaponCount + 1
 	numMasks := 1 << weaponCount
 	weaponCosts := make([]int, numMasks)
@@ -643,9 +609,9 @@ func newAttackBufs(handSize, weaponCount int, weapons []weapon.Weapon) *attackBu
 	}
 }
 
-// getAttackBufs returns this Evaluator's scratch-buffer set, rebuilding it when (handSize,
-// weapons) changes. The cache is single-slot per Evaluator — iterate runs tens of thousands of
-// hands with the same shape, so a slot outperforms a keyed pool for our workload.
+// getAttackBufs returns this Evaluator's scratch-buffer set, rebuilding when (handSize, weapons)
+// changes. Single-slot per Evaluator: iterate runs tens of thousands of same-shape hands, so a
+// slot outperforms a keyed pool for this workload.
 func (e *Evaluator) getAttackBufs(handSize int, weapons []weapon.Weapon) *attackBufs {
 	var wids [2]card.ID
 	for i, w := range weapons {
@@ -671,29 +637,27 @@ func (e *Evaluator) getAttackBufs(handSize int, weapons []weapon.Weapon) *attack
 func (e *Evaluator) bestUncached(hero hero.Hero, weapons []weapon.Weapon, hand []card.Card, incomingDamage int, deck []card.Card, runechantCarryover int, arsenalCardIn card.Card) TurnSummary {
 	n := len(hand)
 	// The partition recurse treats the arsenal-in card as an extra entry at index n with a
-	// restricted role menu (Arsenal / Attack / Defend), so everything about it — its cost,
-	// its damage, whether it stays or plays — is decided inside the enumeration rather than
-	// by a wrapping enumerator. totalN is the effective size of BestLine.
+	// restricted role menu (Arsenal / Attack / Defend), so everything about it is decided inside
+	// the enumeration. totalN is the effective size of BestLine.
 	totalN := n
 	if arsenalCardIn != nil {
 		totalN = n + 1
 	}
 
-	// Seed best.LeftoverRunechants with the carryover — partitions with no attacks don't reduce
-	// the count, so carryover is the natural baseline to beat. BestLine is initialised with
-	// every hand card Held and the arsenal-in card (if any) staying in the slot, so a hand with
-	// no Value-adding partition (everything pruned by cost/pitch-feasibility) still reports
-	// sensible assignments — nothing got played or pitched.
+	// Seed best.LeftoverRunechants with the carryover: partitions with no attacks don't reduce
+	// it, so carryover is the baseline to beat. BestLine starts with every hand card Held and
+	// the arsenal-in card (if any) staying in the slot, so a hand with no Value-adding partition
+	// still reports sensible "nothing played, nothing pitched" assignments.
 	best := TurnSummary{BestLine: make([]CardAssignment, totalN), LeftoverRunechants: runechantCarryover}
-	// bestSwung holds the winning partition's swung weapon names so fillContributions can
-	// rebuild the chain it runs bestSequence over. It lives outside TurnSummary because
-	// weapons are recoverable from AttackChain once fillContributions finishes.
+	// bestSwung holds the winning partition's swung weapon names so fillContributions can rebuild
+	// the chain it runs bestSequence over. Lives outside TurnSummary since weapons are
+	// recoverable from AttackChain once fillContributions finishes.
 	var bestSwung []string
-	// bestHasHeld tracks whether the current best partition has at least one Held hand card, so
-	// beatsBest can tell "arsenal will be occupied post-hoc" apart from "arsenal will be empty."
-	// Seeded true when the hand is non-empty: the initial best puts every hand card into Held, so
-	// a post-hoc promotion would fill arsenal. Candidate partitions have to tie on Value +
-	// leftover AND also provide some way to end with arsenal occupied to displace it.
+	// bestHasHeld tracks whether the current best has at least one Held hand card — lets
+	// beatsBest distinguish "arsenal will be occupied post-hoc" from "arsenal will be empty."
+	// Seeded true when the hand is non-empty: the initial best puts every hand card into Held,
+	// so a post-hoc promotion would fill arsenal. Candidates need both a Value/leftover tie and
+	// some way to end with arsenal occupied to displace it.
 	bestHasHeld := n > 0
 	for i := 0; i < n; i++ {
 		best.BestLine[i] = CardAssignment{Card: hand[i], Role: Held}
@@ -703,10 +667,9 @@ func (e *Evaluator) bestUncached(hero hero.Hero, weapons []weapon.Weapon, hand [
 		best.ArsenalCard = arsenalCardIn
 	}
 
-	// bufs is the pooled scratch space for this deck evaluation (see getAttackBufs). Partition
-	// scratch is sized handSize+1, big enough for totalN when an arsenal-in card inflates the
-	// effective hand. Each field is reset via the totalN-slice init loop below, so carry-over
-	// bytes from prior calls never leak into this partition's values.
+	// bufs is the pooled scratch space for this deck evaluation. Partition scratch is sized
+	// handSize+1, big enough for totalN when an arsenal-in card inflates the effective hand.
+	// Each field is re-sliced and rewritten below, so carry-over from prior calls can't leak.
 	bufs := e.getAttackBufs(n, weapons)
 	rolesBuf := bufs.rolesBuf[:totalN]
 	pvals := bufs.pitchVals[:totalN]
@@ -716,12 +679,11 @@ func (e *Evaluator) bestUncached(hero hero.Hero, weapons []weapon.Weapon, hand [
 	dPrintedVals := bufs.defendPrintedVals[:totalN]
 	isDR := bufs.isDRBuf[:totalN]
 
-	// Pre-compute per-card pitch / cost / defense values so the recurse doesn't re-invoke
-	// card-method interface calls on each partition leaf. defendCostVals holds Cost only for
-	// Defense Reactions; non-reactions block for free. defendPrintedVals holds PrintedCost for
-	// DiscountPerRunechant defenders and zero otherwise — used by the post-attack discount
-	// re-pricing check at the leaf. Both are populated conditionally below, so clear prior-call
-	// residue from the pooled scratch before the loop.
+	// Pre-compute per-card pitch / cost / defense values so the recurse doesn't re-invoke the
+	// card-method interface calls per leaf. defendCostVals holds Cost only for Defense Reactions
+	// (non-reactions block free). defendPrintedVals holds PrintedCost for DiscountPerRunechant
+	// defenders (used by the post-attack discount re-pricing check) and zero otherwise. Both are
+	// populated conditionally, so clear prior-call residue from the pooled scratch first.
 	clear(dCostVals)
 	clear(dPrintedVals)
 	hasReactions := false
@@ -752,8 +714,7 @@ func (e *Evaluator) bestUncached(hero hero.Hero, weapons []weapon.Weapon, hand [
 
 	// recurse tracks defenderCostSum separately so the leaf can hand the attack pipeline a
 	// resource budget of (pitchSum - defenderCostSum) to deduct chain-card effective costs from.
-	// pitchedVals is scratch reused across leaves; lifted to bufs.pitchedValsScratch so it
-	// doesn't allocate on every bestUncached call.
+	// pitchedValsScratch is reused across leaves to avoid per-leaf allocation.
 	pitchedValsScratch := bufs.pitchedValsScratch[:0]
 	var recurse func(i, pitchSum, costSum, defenseSum, defenderCostSum int)
 	recurse = func(i, pitchSum, costSum, defenseSum, defenderCostSum int) {
@@ -773,10 +734,9 @@ func (e *Evaluator) bestUncached(hero hero.Hero, weapons []weapon.Weapon, hand [
 			if prevented > incomingDamage {
 				prevented = incomingDamage
 			}
-			// Group roles into played / pitched / defending buckets. The grouping iterates the
-			// hand (size n) for the usual buckets, then layers in the arsenal slot (index n)
-			// based on its assigned role. Arsenal-role cards — whether from hand or from the
-			// slot — contribute nothing this turn.
+			// Group roles into played / pitched / defending buckets. Iterates the hand (size n),
+			// then layers in the arsenal slot (index n) based on its assigned role. Arsenal-role
+			// cards contribute nothing this turn whether they came from hand or the slot.
 			var p, a []card.Card
 			var defenseDealt int
 			hasAnyDefender := hasReactions
@@ -805,9 +765,8 @@ func (e *Evaluator) bestUncached(hero hero.Hero, weapons []weapon.Weapon, hand [
 
 			// DiscountPerRunechant defense reactions reserved 0 in defenderCostSum (their Cost()
 			// is the fully-discounted minimum). Re-price them now that the attack chain has
-			// resolved and left `leftoverRunechants` runechants available. Arsenal-in defenders
-			// aren't checked here; the roster has no DiscountPerRunechant cards that would also
-			// want to live in the arsenal slot, so the cheap hand-only scan suffices.
+			// resolved with `leftoverRunechants` tokens available. Arsenal-in defenders aren't
+			// checked: no DiscountPerRunechant cards currently want to live in arsenal.
 			if hasDiscountReactions {
 				extraCost := 0
 				for j := 0; j < n; j++ {
@@ -827,8 +786,8 @@ func (e *Evaluator) bestUncached(hero hero.Hero, weapons []weapon.Weapon, hand [
 
 			v := attackDealt + defenseDealt + prevented
 			arsenalCard := findArsenalCard(rolesBuf, arsenalCardIn, n)
-			// Hand cards never take Arsenal role (see roleAllowed). So arsenalCard here is only
-			// set when arsenal-in stayed; "arsenal will occupy post-hoc" is tracked via hasHeld.
+			// Hand cards never take Arsenal role during enumeration, so arsenalCard is only set
+			// when arsenal-in stayed; post-hoc promotion potential is tracked via hasHeld.
 			hasHeld := false
 			for j := 0; j < n; j++ {
 				if rolesBuf[j] == Held {
@@ -847,8 +806,8 @@ func (e *Evaluator) bestUncached(hero hero.Hero, weapons []weapon.Weapon, hand [
 			best.ArsenalCard = arsenalCard
 			bestHasHeld = hasHeld
 			// Write the winning roles into BestLine. Cards and FromArsenal flags were populated
-			// at construction; only Role varies per partition. Contribution is cleared here and
-			// written by fillContributions below for the winning line.
+			// at construction; only Role varies. Contribution is cleared here and filled by
+			// fillContributions below for the winning line.
 			for j := 0; j < totalN; j++ {
 				best.BestLine[j].Role = rolesBuf[j]
 				best.BestLine[j].Contribution = 0
@@ -856,9 +815,8 @@ func (e *Evaluator) bestUncached(hero hero.Hero, weapons []weapon.Weapon, hand [
 			return
 		}
 		isArsenalSlot := i == n && arsenalCardIn != nil
-		// Hand cards can't take Arsenal role (post-hoc promotion handles that). Iterating up to
-		// Arsenal for every hand slot was paying the roleAllowed-rejection cost on ~20% of role
-		// tries — cap the range tighter when we're not on the arsenal-in slot.
+		// Hand cards can't take Arsenal role (post-hoc promotion handles that). Cap the range at
+		// Held for hand slots to skip the roleAllowed-rejection work for Arsenal.
 		maxRole := Held
 		if isArsenalSlot {
 			maxRole = Arsenal
@@ -885,11 +843,10 @@ func (e *Evaluator) bestUncached(hero hero.Hero, weapons []weapon.Weapon, hand [
 	if len(best.BestLine) > 0 {
 		fillContributions(&best, hero, weapons, bestSwung, deck, bufs, incomingDamage, runechantCarryover)
 	}
-	// If the arsenal slot is still empty after enumeration, promote a random Held card. The
-	// choice is deterministic per-hand (hashed from the sorted card IDs) so the memo stays
-	// consistent — but spreads across Held positions across different hands, avoiding the
-	// lowest-ID-always-wins bias that a straight BestLine[0] pick would introduce given the
-	// sort-by-ID hand canonicalisation.
+	// If the arsenal slot is empty after enumeration, promote a Held card. The pick is
+	// deterministic per-hand (hashed from sorted card IDs) so the memo stays consistent, but
+	// spreads across Held positions across different hands — avoiding the lowest-ID bias that
+	// picking BestLine[0] would introduce under sort-by-ID canonicalisation.
 	if best.ArsenalCard == nil {
 		promoteRandomHeldToArsenal(&best, hand, n, arsenalCardIn)
 	}
@@ -897,11 +854,9 @@ func (e *Evaluator) bestUncached(hero hero.Hero, weapons []weapon.Weapon, hand [
 }
 
 // promoteRandomHeldToArsenal picks one Held hand card in best.BestLine and flips its role to
-// Arsenal. Selection is a deterministic hash of the sorted hand IDs (plus arsenal-in ID if any)
-// modulo the count of Held candidates, so:
-//   - Calling Best twice with the same hand gives the same promotion — memo-safe.
-//   - Different hands hash to different indices, so the "first Held" is not systematically
-//     preferred across the whole simulation.
+// Arsenal. Selection hashes the sorted hand IDs (plus arsenal-in ID) modulo the Held count:
+//   - Same hand → same promotion (memo-safe).
+//   - Different hands spread across Held positions (no systematic lowest-ID preference).
 func promoteRandomHeldToArsenal(best *TurnSummary, hand []card.Card, n int, arsenalCardIn card.Card) {
 	// Collect Held indices (hand slots only; arsenal-in can't be Held by construction).
 	heldIndices := make([]int, 0, n)
@@ -913,8 +868,8 @@ func promoteRandomHeldToArsenal(best *TurnSummary, hand []card.Card, n int, arse
 	if len(heldIndices) == 0 {
 		return
 	}
-	// FNV-1a-flavoured hash over the sorted hand IDs + arsenal-in ID. Doesn't need to be
-	// cryptographic — just spread enough across bucket counts 1..n that we don't bias.
+	// FNV-1a-flavoured hash over the sorted hand IDs + arsenal-in ID. Just needs to spread
+	// across bucket counts 1..n.
 	var h uint64 = 1469598103934665603 // FNV offset basis
 	for _, c := range hand {
 		h ^= uint64(c.ID())
@@ -930,19 +885,17 @@ func promoteRandomHeldToArsenal(best *TurnSummary, hand []card.Card, n int, arse
 }
 
 // canCoverPhasesAllUsed decides whether every pitched value can be split between the attack
-// phase (covering attackCost) and the defence phase (covering drCost) while respecting FaB's
-// pitch-timing rule: a card can only be pitched while some played card on the stack is still
-// unpaid. That means the Pitch-role cards the partition has committed to must all pay for
-// something — any "extra" card would have to be Held instead.
+// phase (covering attackCost) and the defense phase (covering drCost) while respecting FaB's
+// pitch-timing rule: a card can only be pitched while some unpaid card is on the stack. So every
+// Pitch-role card must pay for something — any "extra" card would have to be Held instead.
 //
-// Per-phase legality uses a sufficient condition: if sum(pool) == phaseCost the pool exactly
-// covers its costs (assumed legal); if sum(pool) > phaseCost the excess has to be absorbable in
-// a single over-paying pitch, so max(pool) must strictly exceed the excess. Partitions that
-// would require multiple pitches to each push a cost above full are rejected.
+// Per-phase legality uses a sufficient condition: sum == phaseCost is trivially legal; sum >
+// phaseCost needs the excess absorbable by one over-paying pitch, i.e. max(pool) > excess.
+// Partitions needing multiple pitches each pushing past a cost's ceiling are rejected.
 //
-// With both phases having positive cost we enumerate every non-empty, non-full attack-pool mask
-// (2^k - 2 for k pitched cards) and accept the first that satisfies both phase checks. k is
-// bounded by the hand size so this stays cheap relative to the outer 4^n partition search.
+// With both phases positive we enumerate every non-empty, non-full attack-pool mask (2^k - 2 for
+// k pitched cards) and take the first that satisfies both phase checks. k is bounded by hand
+// size so this stays cheap relative to the outer 4^n partition search.
 func canCoverPhasesAllUsed(pitchedVals []int, attackCost, drCost int) bool {
 	k := len(pitchedVals)
 	if k == 0 {
@@ -979,10 +932,9 @@ func canCoverPhasesAllUsed(pitchedVals []int, attackCost, drCost int) bool {
 	return false
 }
 
-// phaseLegal returns true iff the pitch values selected by subsetMask can legally cover phaseCost
-// for a single phase. sum < phaseCost means the pool can't pay; sum == phaseCost is trivially
-// legal (exact coverage); sum > phaseCost needs one pitch large enough to absorb the whole
-// over-pay in a single final pitch for some card in the phase.
+// phaseLegal returns true iff the pitch values selected by subsetMask can legally cover
+// phaseCost. sum < phaseCost can't pay; sum == phaseCost is exact (legal); sum > phaseCost needs
+// one pitch large enough to absorb the excess as a single over-paying final pitch.
 func phaseLegal(pitchedVals []int, subsetMask uint32, phaseCost int) bool {
 	sum, maxP := 0, 0
 	for i, v := range pitchedVals {
@@ -1002,8 +954,8 @@ func phaseLegal(pitchedVals []int, subsetMask uint32, phaseCost int) bool {
 	return maxP > sum-phaseCost
 }
 
-// groupByRoleInto is like groupByRole but appends into caller-provided slices (which should be
-// passed pre-reset to length 0) to avoid per-partition heap allocation.
+// groupByRoleInto appends hand cards into caller-provided pitched/attackers/defenders slices
+// (passed pre-reset to length 0) to avoid per-partition heap allocation.
 func groupByRoleInto(hand []card.Card, roles []Role, pitched, attackers, defenders []card.Card) ([]card.Card, []card.Card, []card.Card) {
 	for i, c := range hand {
 		switch roles[i] {
@@ -1018,8 +970,8 @@ func groupByRoleInto(hand []card.Card, roles []Role, pitched, attackers, defende
 	return pitched, attackers, defenders
 }
 
-// groupPitchAttack is the reaction-free leaf's grouping step: skips the defenders bucket since
-// we only need it for Defense-Reaction-Play dispatch, which this path doesn't run.
+// groupPitchAttack is the reaction-free leaf's grouping step: skips the defenders bucket (only
+// needed for Defense-Reaction-Play dispatch, which this path doesn't run).
 func groupPitchAttack(hand []card.Card, roles []Role, pitched, attackers []card.Card) ([]card.Card, []card.Card) {
 	for i, c := range hand {
 		switch roles[i] {
@@ -1033,9 +985,8 @@ func groupPitchAttack(hand []card.Card, roles []Role, pitched, attackers []card.
 }
 
 // anyMaskFeasible returns true if at least one weapon-swing subset can be paid for by some split
-// of the pitched values between the attack phase and the defense phase. Called at every
-// partition leaf — phase-legality is the cheap-to-check screen that lets the expensive
-// bestAttackWithWeapons work run only on partitions that could legally pay for something.
+// of the pitched values between attack and defense phases. Called at every partition leaf —
+// phase-legality is the cheap screen that keeps bestAttackWithWeapons off infeasible partitions.
 func anyMaskFeasible(pitchedVals []int, attackCardCost, drCost int, weaponCosts []int, weaponCount int) bool {
 	masks := 1 << weaponCount
 	for mask := 0; mask < masks; mask++ {
@@ -1047,8 +998,8 @@ func anyMaskFeasible(pitchedVals []int, attackCardCost, drCost int, weaponCosts 
 }
 
 // findArsenalCard returns the arsenal-in card when it stays in the arsenal slot, nil otherwise.
-// Under the post-hoc-promotion scheme (PR #76) hand cards never take Arsenal role during
-// enumeration, so the only slot that can be Arsenal is the arsenal-in slot at index n.
+// Hand cards never take Arsenal role during enumeration (post-hoc promotion handles that), so
+// the only slot that can be Arsenal is the arsenal-in slot at index n.
 func findArsenalCard(rolesBuf []Role, arsenalCardIn card.Card, n int) card.Card {
 	if arsenalCardIn != nil && rolesBuf[n] == Arsenal {
 		return arsenalCardIn
@@ -1056,12 +1007,11 @@ func findArsenalCard(rolesBuf []Role, arsenalCardIn card.Card, n int) card.Card 
 	return nil
 }
 
-// beatsBest decides whether a candidate partition displaces the current best under the solver's
-// tiebreak rules: higher Value first, then more leftover runechants (they convert to future
-// arcane damage), then preferring a partition that ends the turn with the arsenal slot occupied
-// (arsenal saves a hand slot in the next refill — smaller but real upside). "Occupied" covers
-// both cases: an arsenal-in card that stayed (partition's ArsenalCard is non-nil) OR a Held hand
-// card that will be promoted to Arsenal post-hoc.
+// beatsBest decides whether a candidate partition displaces the current best. Tiebreak order:
+// higher Value, then more leftover runechants (they convert to future arcane damage), then
+// preferring a partition that ends with the arsenal slot occupied (saves a hand slot next
+// refill). "Occupied" covers both an arsenal-in card that stayed and a Held hand card slated
+// for post-hoc promotion.
 func beatsBest(v, leftoverRunechants int, willOccupyArsenal bool, best TurnSummary, bestWillOccupyArsenal bool) bool {
 	if v > best.Value {
 		return true
@@ -1079,13 +1029,11 @@ func beatsBest(v, leftoverRunechants int, willOccupyArsenal bool, best TurnSumma
 }
 
 // roleAllowed decides whether the partition enumerator may assign role r to the current card.
-// The arsenal-in slot (i == n, arsenal-in card present) may only take Arsenal (stay), Attack
-// (any non-DR card — auras and non-attack actions play fine from arsenal on your turn), or
-// Defend (Defense Reactions only — plain-blocking from arsenal isn't allowed). Hand cards take
-// any role except Attack for Defense Reactions (strict FaB timing — DRs only fire on the
-// opponent's turn); their role loop caps at Held because the "which Held card gets arsenaled"
-// choice is made post-hoc (randomly, over all Held cards) so the enumerator's deterministic
-// slot order doesn't bias arsenaling toward low-ID cards.
+// The arsenal-in slot may only take Arsenal (stay), Attack (any non-DR card — non-attack actions
+// play fine from arsenal on your turn), or Defend (Defense Reactions only — plain-blocking from
+// arsenal isn't legal). Hand cards take any role except Attack for Defense Reactions (DRs only
+// fire on the opponent's turn); their role loop caps at Held, so the "which Held card gets
+// arsenaled" choice happens post-hoc and doesn't bias toward low-ID slots.
 func roleAllowed(r Role, isArsenalSlot, isDefenseReaction bool) bool {
 	if isArsenalSlot {
 		switch r {
@@ -1096,19 +1044,18 @@ func roleAllowed(r Role, isArsenalSlot, isDefenseReaction bool) bool {
 		case Defend:
 			return isDefenseReaction
 		}
-		return true // Arsenal always allowed on the arsenal-in slot.
+		return true // Arsenal is always allowed on the arsenal-in slot.
 	}
 	return !(r == Attack && isDefenseReaction)
 }
 
-// defenseReactionDamage runs the Play() hook of every Defense Reaction in `defenders` and sums
-// the damage they deal back to the attacker (e.g. Weeping Battleground's 1 arcane on banish).
-// Played in isolation — no attack ordering; TurnState only carries Pitched/Deck so effects that
-// check "what was pitched" work. Uncapped: this damage is dealt, not prevented.
+// defenseReactionDamage runs Play() for every Defense Reaction in defenders and sums the damage
+// they deal back to the attacker (e.g. Weeping Battleground's 1 arcane on banish). Played in
+// isolation — no attack ordering; TurnState carries only Pitched/Deck so effects that read
+// "what was pitched" work. Uncapped: this damage is dealt, not prevented.
 //
-// state is caller-provided (from attackBufs) and reset per call. Passing a reused pointer lets
-// the state stay on the heap-allocated buffer rather than escaping a fresh stack value through
-// the interface method on every partition leaf.
+// state is caller-provided (from attackBufs) and reset per call. Reusing the pointer keeps the
+// state on the heap buffer rather than escaping a fresh stack value per partition leaf.
 func defenseReactionDamage(defenders, pitched, deck []card.Card, state *card.TurnState) int {
 	total := 0
 	for _, d := range defenders {
@@ -1121,19 +1068,17 @@ func defenseReactionDamage(defenders, pitched, deck []card.Card, state *card.Tur
 	return total
 }
 
-// bestAttackWithWeapons enumerates every subset of `weapons` to swing alongside `attackers` and
-// returns the max damage over all (affordable) weapon masks, plus the runechant leftover, the
-// residual chain budget (pitch not consumed by the winning line — used by bestUncached to re-check
-// DiscountPerRunechant defense affordability), and the swung weapons (in input order).
+// bestAttackWithWeapons enumerates every subset of weapons to swing alongside attackers and
+// returns the max damage over all affordable masks, the runechant leftover, the residual chain
+// budget (pitch not consumed by the winning line — used to re-check DiscountPerRunechant defense
+// affordability), and the swung weapons in input order.
 //
-// resourceBudget passed down to the chain pipeline is pitchSum - defenderCostSum - weaponCosts
-// for this mask; the chain then deducts each attacker's effective cost (which for
-// DiscountPerRunechant cards is max(0, PrintedCost() - runechantCount at play-time)) and rejects
-// orderings that run negative.
+// resourceBudget is pitchSum - defenderCostSum; the chain further deducts each attacker's
+// effective cost (DiscountPerRunechant: max(0, PrintedCost - runechants at play-time); others:
+// Cost()) and rejects orderings that run negative.
 func bestAttackWithWeapons(hero hero.Hero, weapons []weapon.Weapon, attackers, pitched, deck []card.Card, bufs *attackBufs, pitchSum, costSum, defenderCostSum, runechantCarryover, incomingDamage, blockTotal int) (int, int, int, []string) {
-	// Build the sequence-eval context once per partition leaf. All three values (resourceBudget,
-	// runechantCarryover, and the stable pitched/deck refs) are constant across the weapon-mask
-	// loop, so sharing one context keeps the inner calls narrow.
+	// Build the sequence-eval context once per partition leaf: resourceBudget, runechantCarryover,
+	// and pitched/deck refs are constant across the weapon-mask loop.
 	ctx := &sequenceContext{
 		hero:               hero,
 		pitched:            pitched,
@@ -1150,10 +1095,8 @@ func bestAttackWithWeapons(hero hero.Hero, weapons []weapon.Weapon, attackers, p
 	var bestSwung []string
 	// Reuse the shared attacker buffer across mask iterations.
 	copy(bufs.attackerBuf, attackers)
-	// pitchedVals is derived from the pitched cards' Pitch() so the per-mask phase-feasibility
-	// check can include each mask's weapon cost in the attack-phase total. A locally-allocated
-	// slice keeps this call re-entrant (Best can be invoked concurrently through memoCache once
-	// that's exposed).
+	// pitchedVals feeds the per-mask phase-feasibility check so each mask's weapon cost folds
+	// into the attack-phase total. Locally allocated to keep this call re-entrant.
 	attackCardCost := costSum - defenderCostSum
 	drCost := defenderCostSum
 	pitchedVals := make([]int, len(pitched))
@@ -1161,9 +1104,8 @@ func bestAttackWithWeapons(hero hero.Hero, weapons []weapon.Weapon, attackers, p
 		pitchedVals[i] = c.Pitch()
 	}
 	for mask := 0; mask < 1<<len(weapons); mask++ {
-		// bufs.weaponCosts[mask] is the pre-summed Cost of the selected weapons — avoids an
-		// interface dispatch per weapon on every mask. The phase-feasibility check ensures every
-		// Pitch-role card can legally pay for something (attack cost + weapon cost + DR cost).
+		// bufs.weaponCosts[mask] is the pre-summed Cost, avoiding per-weapon interface dispatch.
+		// The feasibility check ensures every Pitch-role card can legally pay for something.
 		if !canCoverPhasesAllUsed(pitchedVals, attackCardCost+bufs.weaponCosts[mask], drCost) {
 			continue
 		}
@@ -1173,11 +1115,11 @@ func bestAttackWithWeapons(hero hero.Hero, weapons []weapon.Weapon, attackers, p
 				allAttackers = append(allAttackers, w)
 			}
 		}
-		// Every sequence card (attackers AND the swung weapons) deducts its own effective cost
-		// from resourceBudget inside playSequence, so we don't pre-deduct weapon cost here.
+		// Every sequence card (attackers AND swung weapons) deducts its own effective cost inside
+		// playSequence, so don't pre-deduct weapon cost here.
 		dealt, leftoverRunechants, residualBudget := ctx.bestSequence(allAttackers, nil, nil, nil)
-		// Prefer higher damage; on ties prefer more leftover runechants; then more residual
-		// budget — both are extra slack that can enable discount defense reactions.
+		// Tiebreaks: prefer more leftover runechants, then more residual budget — both are extra
+		// slack that can enable discount defense reactions.
 		if dealt > best ||
 			(dealt == best && leftoverRunechants > bestLeftoverRunechants) ||
 			(dealt == best && leftoverRunechants == bestLeftoverRunechants && residualBudget > bestResidualBudget) {
@@ -1190,12 +1132,10 @@ func bestAttackWithWeapons(hero hero.Hero, weapons []weapon.Weapon, attackers, p
 	return best, bestLeftoverRunechants, bestResidualBudget, bestSwung
 }
 
-// sequenceContext carries the stable per-partition-leaf environment for evaluating played-card
-// sequences: the hero (for OnCardPlayed triggers), the pitched / deck reference slices read by
-// Card.Play, the shared scratch buffers, and the numeric budgets that persist across permutation
-// and mask iterations. One context is built once per leaf and used for every permutation the
-// solver evaluates below it, so the hot inner calls (playSequence, bestSequence) shrink to just
-// their varying inputs and tracking outputs.
+// sequenceContext carries the stable per-partition-leaf environment: hero (for OnCardPlayed
+// triggers), pitched / deck refs for Card.Play, shared scratch buffers, and the numeric budgets
+// that persist across permutation and mask iterations. Built once per leaf so the hot inner
+// calls (playSequence, bestSequence) shrink to their varying inputs and tracking outputs.
 type sequenceContext struct {
 	hero               hero.Hero
 	pitched, deck      []card.Card
@@ -1206,19 +1146,16 @@ type sequenceContext struct {
 	blockTotal         int
 }
 
-// bestSequence tries every ordering of attackers and returns the max total damage after Play
-// is called on each in turn plus the runechant count at the end of that winning permutation.
-// Between each card's Play() and its append to CardsPlayed, the hero's OnCardPlayed hook fires
-// so triggered abilities (e.g. Viserai's Runechants) contribute.
+// bestSequence tries every ordering of attackers and returns the max total damage plus the
+// runechant count at the end of the winning permutation. Between each card's Play() and its
+// append to CardsPlayed, the hero's OnCardPlayed hook fires so triggered abilities contribute.
 //
-// Uses Heap's algorithm (iterative) for permutation generation. That saves a closure/callback
-// allocation and a recursive call per permutation vs. a callback-style permuter.
+// Uses Heap's algorithm (iterative) — no closure/callback alloc, no recursive call per perm.
 //
 // When winnerOrderOut is non-nil (len >= len(attackers)) the winning permutation is copied into
 // it. perCardOut / perCardTriggerOut (same size rule) receive the winning line's per-card Play
-// damage and per-card hero-trigger damage respectively. Used once per Best call by
-// fillContributions; the hot partition-loop caller (bestAttackWithWeapons) passes nil for all
-// three so the permutation search stays allocation-free.
+// damage and hero-trigger damage. fillContributions uses these; the partition-loop caller
+// passes nil for all three so the permutation search stays allocation-free.
 func (ctx *sequenceContext) bestSequence(attackers, winnerOrderOut []card.Card, perCardOut, perCardTriggerOut []float64) (int, int, int) {
 	n := len(attackers)
 	if n == 0 {
@@ -1231,8 +1168,8 @@ func (ctx *sequenceContext) bestSequence(attackers, winnerOrderOut []card.Card, 
 		permMeta[idx] = attackerMetaFor(c)
 	}
 
-	// Scratch buffers are playSequence's per-card outputs, overwritten on every permutation; on
-	// a new winner we copy them into the caller's perCardOut / perCardTriggerOut. Only used
+	// Scratch buffers are playSequence's per-card outputs, overwritten every permutation. On a
+	// new winner we copy them into the caller's perCardOut / perCardTriggerOut. Only populated
 	// when the caller asked to track.
 	var scratch, triggerScratch []float64
 	if perCardOut != nil {
@@ -1253,8 +1190,8 @@ func (ctx *sequenceContext) bestSequence(attackers, winnerOrderOut []card.Card, 
 		if !legal {
 			return
 		}
-		// Prefer higher damage; on ties prefer more leftover runechants; then more residual
-		// budget — both are extra slack that can enable discount defense reactions.
+		// Tiebreaks: more leftover runechants, then more residual budget — both are slack that
+		// can enable discount defense reactions.
 		if dmg > best ||
 			(dmg == best && leftoverRunechants > bestLeftoverRunechants) ||
 			(dmg == best && leftoverRunechants == bestLeftoverRunechants && residualBudget > bestResidualBudget) {
@@ -1273,9 +1210,8 @@ func (ctx *sequenceContext) bestSequence(attackers, winnerOrderOut []card.Card, 
 		}
 	}
 	eval()
-	// Heap's algorithm, non-recursive: c[] counts how many times each stack frame has iterated.
-	// perm and permMeta are swapped together so playSequence always sees meta aligned with the
-	// current permutation.
+	// Heap's algorithm, iterative: c[] counts how many times each stack frame has iterated.
+	// perm and permMeta swap together so playSequence sees meta aligned with the permutation.
 	var c [8]int
 	i := 0
 	for i < n {
@@ -1298,14 +1234,12 @@ func (ctx *sequenceContext) bestSequence(attackers, winnerOrderOut []card.Card, 
 	return best, bestLeftoverRunechants, bestResidualBudget
 }
 
-// playSequence plays `order` as a sequence of cards, reusing ctx.bufs' pooled buffers to avoid
-// per-permutation heap allocation. The buffers are mutated in place; the caller must not read
-// them concurrently.
+// playSequence plays `order` as a sequence of cards, reusing ctx.bufs' pooled buffers. Buffers
+// are mutated in place; the caller must not read them concurrently.
 //
-// When perCardOut is non-nil (len >= n) each entry is set to the card's Play return for that
-// position; perCardTriggerOut (same size rule) receives the hero OnCardPlayed return for that
-// same position. The hot partition-loop callers pass nil for both to skip these writes; the
-// winning-line replay from fillContributions passes real slices.
+// When perCardOut is non-nil (len >= n) each entry is the card's Play return for that position;
+// perCardTriggerOut (same size rule) receives the hero's OnCardPlayed return for that position.
+// The hot partition-loop callers pass nil for both; fillContributions's replay passes real slices.
 //
 // Runechant flow:
 //   - state.Runechants starts at ctx.runechantCarryover (tokens from the previous turn).
@@ -1313,19 +1247,18 @@ func (ctx *sequenceContext) bestSequence(attackers, winnerOrderOut []card.Card, 
 //     returning n damage — tokens are credited exactly once, at creation.
 //   - After each Attack- or Weapon-typed card's Play+OnCardPlayed resolve, all current tokens
 //     fire and are destroyed: state.Runechants is zeroed but damage is NOT re-added (that would
-//     double-count tokens whose value was already credited on creation).
-//   - At end of the sequence, state.Runechants is the leftover count that carries into the next
-//     turn.
+//     double-count tokens credited at creation).
+//   - At end of the sequence, state.Runechants is the leftover count carrying into next turn.
 //
 // Resource flow:
 //   - ctx.resourceBudget is the starting pool; each card deducts its effective cost. For cards
-//     implementing DiscountPerRunechant, effective cost is max(0, PrintedCost() - state.
-//     Runechants) at the moment it's played; for everyone else it's Cost(). A negative
-//     remaining budget returns legal=false (the caller treats this ordering as zero damage).
-// playSequence populates permMeta from order and then calls playSequenceWithMeta. Test-only
-// callers and fillContributions use this when they don't go through bestSequence's permutation
-// loop. The hot path (bestSequence) builds meta once and calls playSequenceWithMeta directly so
-// the interface dispatch for scalar attributes amortises across the N! permutations it evaluates.
+//     implementing DiscountPerRunechant, effective cost is max(0, PrintedCost -
+//     state.Runechants) at play time; otherwise Cost(). Negative remaining budget returns
+//     legal=false (the caller treats that ordering as zero damage).
+//
+// Populates permMeta from order and then calls playSequenceWithMeta. The hot path (bestSequence)
+// builds meta once and calls playSequenceWithMeta directly so interface dispatch for scalar
+// attributes amortises across the N! permutations it evaluates.
 func (ctx *sequenceContext) playSequence(order []card.Card, perCardOut, perCardTriggerOut []float64) (damage int, leftoverRunechants int, residualBudget int, legal bool) {
 	meta := ctx.bufs.permMeta[:len(order)]
 	for i, c := range order {
@@ -1334,9 +1267,9 @@ func (ctx *sequenceContext) playSequence(order []card.Card, perCardOut, perCardT
 	return ctx.playSequenceWithMeta(order, perCardOut, perCardTriggerOut)
 }
 
-// playSequenceWithMeta runs a specific attacker ordering and returns damage + leftover runechants.
-// Assumes ctx.bufs.permMeta[:len(order)] holds metadata aligned with order; the caller is
-// responsible for keeping them in lockstep (bestSequence swaps meta whenever it swaps perm).
+// playSequenceWithMeta runs a specific attacker ordering. Assumes ctx.bufs.permMeta[:len(order)]
+// holds metadata aligned with order; the caller keeps them in lockstep (bestSequence swaps meta
+// whenever it swaps perm).
 func (ctx *sequenceContext) playSequenceWithMeta(order []card.Card, perCardOut, perCardTriggerOut []float64) (damage int, leftoverRunechants int, residualBudget int, legal bool) {
 	n := len(order)
 	pcBuf := ctx.bufs.pcBuf
@@ -1354,11 +1287,10 @@ func (ctx *sequenceContext) playSequenceWithMeta(order []card.Card, perCardOut, 
 	}
 	played := ptrBuf[:n]
 	state := ctx.bufs.state
-	// Reset only the fields playSequence is allowed to mutate. Pitched and Deck are stable across
-	// permutations within a partition leaf; CardsRemaining and Self are rewritten per-card in the
-	// loop below. A full-struct replace ran in the profile at ~850ms / call because every field
-	// (including the big slice headers) got memcpy'd from a zero template; skipping the fields
-	// the caller doesn't read afterward shaves most of that.
+	// Reset only the fields playSequence mutates. Pitched and Deck are stable across permutations
+	// in a partition leaf; CardsRemaining and Self are rewritten per-card in the loop. A
+	// full-struct replace would memcpy every field (including big slice headers) and profiled at
+	// ~850ms/call; skipping caller-unread fields cuts most of that.
 	state.Pitched = ctx.pitched
 	state.Deck = ctx.deck
 	state.CardsPlayed = ctx.bufs.cardsPlayedBuf[:0]
@@ -1372,7 +1304,7 @@ func (ctx *sequenceContext) playSequenceWithMeta(order []card.Card, perCardOut, 
 	resources := ctx.resourceBudget
 	for i, pc := range played {
 		m := meta[i]
-		// Effective cost: discount cards drop by runechant count (floored at 0); others pay printed.
+		// Effective cost: discount cards drop by runechant count (floored at 0); others pay Cost.
 		var effCost int
 		if m.isDiscount {
 			effCost = m.printedCost - state.Runechants
@@ -1390,11 +1322,10 @@ func (ctx *sequenceContext) playSequenceWithMeta(order []card.Card, perCardOut, 
 		state.CardsRemaining = played[i+1:]
 		state.Self = pc
 
-		// If this card is an attack or weapon and any Runechant is currently live, those tokens
-		// will fire on its damage step. Set ArcaneDamageDealt now — *before* Play and the hero's
-		// OnCardPlayed trigger — so Play effects that read "if you've dealt arcane damage this
-		// turn" see the flag for same-hand triggers. Cards that deal arcane damage directly via
-		// their Play text flip the flag themselves inside Play.
+		// If this card is an attack or weapon and any Runechant is live, those tokens fire on
+		// its damage step. Set ArcaneDamageDealt now — before Play and OnCardPlayed — so Play
+		// effects that read "if you've dealt arcane damage this turn" see the flag for same-hand
+		// triggers. Cards that deal arcane damage via their Play text flip the flag themselves.
 		isAttackOrWeapon := m.isAttackOrWeapon
 		if isAttackOrWeapon && state.Runechants > 0 {
 			state.ArcaneDamageDealt = true
@@ -1411,9 +1342,8 @@ func (ctx *sequenceContext) playSequenceWithMeta(order []card.Card, perCardOut, 
 		}
 		state.CardsPlayed = append(state.CardsPlayed, pc.Card)
 
-		// Attacks and weapon swings consume all runechants in play. Damage isn't re-added here:
-		// each token was already credited as +1 at creation time (see CreateRunechants), so
-		// consuming them is purely state cleanup.
+		// Attacks and weapon swings consume all runechants in play. Damage isn't re-added: each
+		// token was credited +1 at creation time, so this is pure state cleanup.
 		if isAttackOrWeapon {
 			state.Runechants = 0
 		}
@@ -1422,28 +1352,26 @@ func (ctx *sequenceContext) playSequenceWithMeta(order []card.Card, perCardOut, 
 			return 0, 0, 0, false
 		}
 	}
-	// Delayed tokens (e.g. from Blessing of Occult) skip this turn and go straight to next
-	// turn's carryover.
+	// Delayed tokens skip this turn and go straight to next turn's carryover.
 	return damage, state.Runechants + state.DelayedRunechants, resources, true
 }
 
-// fillContributions populates each BestLine entry's Contribution from the winning line. Pitch
-// role cards credit Card.Pitch() (resource value); Defend role cards credit their proportional
-// share of Prevented blocking plus their own Play return if they're a defense reaction; Attack
-// role cards credit the per-card damage tracked during the winning attack-chain replay.
-// Contributions on Held / Arsenal entries stay at zero — those cards contributed nothing this
-// turn.
+// fillContributions populates each BestLine entry's Contribution from the winning line:
+//   - Pitch:  Card.Pitch() as resource value.
+//   - Defend: proportional share of Prevented plus own Play return if a Defense Reaction.
+//   - Attack: per-card damage from the winning attack-chain replay.
+//   - Held / Arsenal: zero (contributed nothing this turn).
 //
-// Called once per Best call from bestUncached after the partition loop picks the winner. All
-// transient slices (pitched/attackers/chain/winnerOrder/perCard/used) borrow attackBufs slots
-// so nothing allocates here.
+// Called once per Best call after the partition loop picks the winner. All transient slices
+// (pitched/attackers/chain/winnerOrder/perCard/used) borrow attackBufs slots so nothing
+// allocates here.
 func fillContributions(summary *TurnSummary, hero hero.Hero, weapons []weapon.Weapon, swungNames []string, deck []card.Card, bufs *attackBufs, incomingDamage, runechantCarryover int) {
 	line := summary.BestLine
 	total := len(line)
 
-	// Reconstruct pitched, attackers, swung weapons, and the sequence's resourceBudget from the
-	// winning line. The arsenal-in entry (FromArsenal=true, last slot) participates in
-	// attackers / defenders when its role is Attack / Defend, identically to hand entries.
+	// Reconstruct pitched, attackers, swung weapons, and resourceBudget from the winning line.
+	// The arsenal-in entry (FromArsenal=true, last slot) participates in attackers / defenders
+	// identically to hand entries when its role is Attack / Defend.
 	pitched := bufs.pitchedBuf[:0]
 	attackers := bufs.attackersBuf[:0]
 	var sumDef int
@@ -1474,8 +1402,8 @@ func fillContributions(summary *TurnSummary, hero hero.Hero, weapons []weapon.We
 		}
 	}
 
-	// Defense: prevented share (proportional to each defender's Defense()) plus defense-reaction
-	// Play return when applicable.
+	// Defense: share of Prevented (proportional to each defender's Defense()) plus the card's
+	// own Play return if it's a Defense Reaction.
 	prevented := sumDef
 	if prevented > incomingDamage {
 		prevented = incomingDamage
@@ -1494,10 +1422,9 @@ func fillContributions(summary *TurnSummary, hero hero.Hero, weapons []weapon.We
 		}
 	}
 
-	// Attack chain: re-run the sequence search with tracking turned on so we recover the
-	// winning permutation and each chain position's contribution. Weapons in the chain don't
-	// map back to BestLine (they aren't cards in hand or arsenal) — their damage is counted in
-	// Value but not credited per-card here.
+	// Attack chain: re-run the sequence search with tracking on to recover the winning
+	// permutation and each chain position's contribution. Weapons don't map back to BestLine —
+	// their damage is counted in Value but not credited per-card here.
 	chain := bufs.attackerBuf[:0]
 	chain = append(chain, attackers...)
 	for _, name := range swungNames {
@@ -1526,9 +1453,9 @@ func fillContributions(summary *TurnSummary, hero hero.Hero, weapons []weapon.We
 			blockTotal:         sumDef,
 		}
 		ctx.bestSequence(chain, winnerOrder, perCardDmg, perCardTrigger)
-		// Snapshot the winning chain order into TurnSummary so display callers can show cards
-		// and weapons in the actual play order (matters for Go-again / trigger chains). Fresh
-		// slice — winnerOrder aliases attackBuf storage that the next partition would clobber.
+		// Snapshot the winning chain into TurnSummary so display callers see true play order
+		// (matters for Go-again / trigger chains). Fresh slice — winnerOrder aliases attackBuf
+		// storage the next partition would clobber.
 		summary.AttackChain = make([]AttackChainEntry, len(winnerOrder))
 		for i := range winnerOrder {
 			summary.AttackChain[i] = AttackChainEntry{
@@ -1537,10 +1464,10 @@ func fillContributions(summary *TurnSummary, hero hero.Hero, weapons []weapon.We
 				TriggerDamage: perCardTrigger[i],
 			}
 		}
-		// Map chain-position damage back to BestLine indices by scanning for the first unused
-		// Attack-role entry with a matching ID. Duplicate printings played as twin attacks
-		// are disambiguated by scan order. Hand-card Contribution bundles Play return plus hero
-		// trigger so the per-card stats aggregate the card's total this-turn impact.
+		// Map chain-position damage back to BestLine by scanning for the first unused Attack-role
+		// entry with a matching ID. Duplicate printings played as twin attacks disambiguate by
+		// scan order. Contribution bundles Play return + hero trigger so per-card stats reflect
+		// the card's total this-turn impact.
 		if cap(bufs.fillContribUsed) < total {
 			bufs.fillContribUsed = make([]bool, total)
 		}

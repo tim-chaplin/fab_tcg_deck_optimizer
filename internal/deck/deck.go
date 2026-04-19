@@ -1,5 +1,5 @@
-// Package deck represents a candidate FaB deck and the hand-value stats accumulated from simulating
-// it. Future deck-search code will create many Decks, evaluate each, and compare their Stats.
+// Package deck represents a candidate FaB deck and the hand-value stats accumulated from
+// simulating it. Search code creates many Decks, evaluates each, and compares their Stats.
 package deck
 
 import (
@@ -20,8 +20,7 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/weapon"
 )
 
-// Deck is a hero plus equipped weapons and a deck of cards, along with the hand-value stats
-// accumulated from simulating it.
+// Deck is a hero, equipped weapons, a deck of cards, and the simulated hand-value stats.
 type Deck struct {
 	Hero    hero.Hero
 	Weapons []weapon.Weapon
@@ -29,23 +28,21 @@ type Deck struct {
 	Stats   Stats
 }
 
-// New constructs a Deck with the given hero, weapons, and cards. Panics if the weapon loadout
-// violates the "0–2 weapons; if 2, both must be 1H" equipment rule.
+// New constructs a Deck. Panics if the weapon loadout violates the "0–2 weapons; if 2, both 1H"
+// equipment rule.
 func New(h hero.Hero, weapons []weapon.Weapon, cards []card.Card) *Deck {
 	validateWeapons(weapons)
 	return &Deck{Hero: h, Weapons: weapons, Cards: cards}
 }
 
-// Random generates a random legal deck for `h`: a random weapon loadout from cards.AllWeapons
-// (one 2H or two 1H, dual-wielding the same weapon allowed) and `size` cards drawn uniformly
-// from cards.Deckable() in pairs — every included printing appears exactly twice (or more, up
-// to `maxCopies`, if the same printing is rolled on multiple picks). `size` must be even and
-// `maxCopies` must be at least 2.
+// Random generates a random legal deck for h: a random weapon loadout from cards.AllWeapons
+// (one 2H or two 1H; dual-wielding the same weapon allowed) and size cards drawn uniformly from
+// cards.Deckable() in pairs — every included printing appears exactly twice, or more up to
+// maxCopies if the same printing is rolled multiple times. size must be even and maxCopies ≥ 2.
 //
-// `legal` filters the card pool: only IDs for which `legal(cards.Get(id))` returns true are
-// candidates. Pass nil to skip filtering (every Deckable card is eligible). Typically the
-// caller wires format.Format.IsLegal through here to restrict generation to a specific
-// constructed format's banlist.
+// legal filters the card pool: only IDs for which legal(cards.Get(id)) returns true are
+// candidates. Pass nil for no filtering. Callers typically wire format.Format.IsLegal through
+// here to restrict generation to a constructed format's banlist.
 func Random(h hero.Hero, size, maxCopies int, rng *rand.Rand, legal func(card.Card) bool) *Deck {
 	if size%2 != 0 {
 		panic(fmt.Sprintf("deck: Random requires even size (got %d) — cards are added in pairs", size))
@@ -74,8 +71,8 @@ func Random(h hero.Hero, size, maxCopies int, rng *rand.Rand, legal func(card.Ca
 	return New(h, weapons, picks)
 }
 
-// legalPool returns cards.Deckable() filtered by `legal`, or the full Deckable list if legal is
-// nil. Factored out so Random and AllMutations apply the same filter.
+// legalPool returns cards.Deckable() filtered by legal, or the full list if legal is nil.
+// Shared by Random and AllMutations so both apply the same filter.
 func legalPool(legal func(card.Card) bool) []cards.ID {
 	pool := cards.Deckable()
 	if legal == nil {
@@ -90,9 +87,9 @@ func legalPool(legal func(card.Card) bool) []cards.ID {
 	return filtered
 }
 
-// Mutation is one candidate single-slot change to a deck: the mutated Deck plus a human-readable
-// summary of what changed (e.g. "swapped Aether Slash (Red) for Arcanic Spike (Red)"). Consumers
-// use Deck to evaluate and Description for logging.
+// Mutation is one candidate single-slot change: the mutated Deck plus a human-readable summary
+// (e.g. "swapped Aether Slash (Red) for Arcanic Spike (Red)"). Consumers use Deck to evaluate
+// and Description for logging.
 type Mutation struct {
 	Deck        *Deck
 	Description string
@@ -100,31 +97,24 @@ type Mutation struct {
 
 // AllMutations returns every single-card mutation of d in a deterministic order: first every
 // alternative weapon loadout (sorted by loadout key), then every (removeID, addID) pair where
-// one copy of removeID is dropped from the deck and one copy of addID is added. removeID must
-// currently be in the deck; addID's post-mutation count must not exceed maxCopies. Pairs that
-// would leave the deck unchanged (removeID == addID) are skipped.
+// one copy of removeID is dropped and one copy of addID is added. removeID must be in the deck;
+// addID's post-mutation count must not exceed maxCopies. Pairs with removeID == addID are
+// skipped.
 //
-// Ordering of card mutations: the outer loop iterates uniqueIDs by ascending per-card average
-// contribution (d.Stats.PerCard[id].Avg()), so the cards carrying the least value in the current
-// deck get swap candidates tried first. Cards without stats (the deck hasn't been evaluated
-// yet) all tie at 0 and fall back to the card.ID tiebreak. The inner loop iterates the addID
-// pool by card.ID.
+// Card-mutation ordering: the outer loop iterates uniqueIDs by ascending per-card average
+// contribution (d.Stats.PerCard[id].Avg()), so low-value cards get swap candidates tried first.
+// Cards without stats tie at 0 and fall back to card.ID. The inner loop iterates the addID pool
+// by card.ID. This pairs well with iterate-mode's first-improvement hill climb: low-value slots
+// are most likely to improve, so candidates there surface quickly.
 //
-// Iterate mode's hill climb adopts the FIRST mutation that beats the current best, so putting
-// cheap-to-replace cards up front makes the early-improvement rounds meaningful rather than
-// churn through high-value cards that are unlikely to lose their slot.
+// Single-card swaps (not paired swaps) let the hill climber reach decks with odd per-card counts
+// (e.g. 1× X + 3× Y at maxCopies=3).
 //
-// Single-card swaps let the hill climber reach decks with odd per-card counts (e.g. 1× X +
-// 3× Y at maxCopies=3, or 1× X with a hole filled elsewhere). The earlier "swap a whole pair
-// for a whole pair" rule enforced 2-per-card artificially — with the sim fast enough, we let
-// composition fall out of which configurations actually score higher.
+// legal filters the addition pool: only accepted IDs become swap-in candidates, so format-banned
+// cards can't be introduced. Removal targets aren't filtered — a deck that entered the climb
+// holding a banned card can still have it swapped out. Pass nil to skip filtering.
 //
-// `legal` filters the *addition* pool: only IDs accepted by the predicate become swap-in
-// candidates, so format-banned cards can't be introduced mid-climb. Removal targets are
-// whatever's currently in the deck — a deck that entered the climb holding a banned card can
-// still have it swapped out. Pass nil to skip filtering.
-//
-// The returned decks have fresh (zero) stats and share no backing slices with d or each other.
+// Returned decks have zero Stats and share no backing slices with d or each other.
 func AllMutations(d *Deck, maxCopies int, legal func(card.Card) bool) []Mutation {
 	var out []Mutation
 
@@ -153,8 +143,7 @@ func AllMutations(d *Deck, maxCopies int, legal func(card.Card) bool) []Mutation
 	}
 
 	// Card mutations: for each unique card in the deck, try adding any Deckable card whose
-	// post-mutation count is still within maxCopies (including cards already in the deck below
-	// the cap).
+	// post-mutation count stays within maxCopies.
 	counts := map[card.ID]int{}
 	for _, c := range d.Cards {
 		counts[c.ID()]++
@@ -164,8 +153,8 @@ func AllMutations(d *Deck, maxCopies int, legal func(card.Card) bool) []Mutation
 		uniqueIDs = append(uniqueIDs, id)
 	}
 	// Order removeID by ascending per-card avg contribution, tiebreaker on card.ID. When the
-	// current deck has no stats (PerCard is nil / unseen id), Avg() returns 0 so every card ties
-	// and the tiebreak falls through to stable card.ID order — same behaviour as before.
+	// deck has no stats yet, Avg() returns 0 for every card and the tiebreak falls through to
+	// stable card.ID order.
 	sort.Slice(uniqueIDs, func(i, j int) bool {
 		ai := d.Stats.PerCard[uniqueIDs[i]].Avg()
 		aj := d.Stats.PerCard[uniqueIDs[j]].Avg()
@@ -182,10 +171,10 @@ func AllMutations(d *Deck, maxCopies int, legal func(card.Card) bool) []Mutation
 		removed := cards.Get(removeID)
 		for _, addID := range pool {
 			if addID == removeID {
-				continue // no-op: remove one, add one of the same card.
+				continue // no-op: remove one and add one of the same card.
 			}
 			if counts[addID] >= maxCopies {
-				continue // already at max copies; can't add another.
+				continue // at max copies.
 			}
 			replacement := cards.Get(addID)
 			newCards := make([]card.Card, 0, len(d.Cards))
@@ -234,7 +223,7 @@ func weaponKey(ws []weapon.Weapon) string {
 	return strings.Join(sortedWeaponNames(ws), ",")
 }
 
-// weaponLoadouts enumerates every legal equip combination from `ws`: each 2H weapon as a solo
+// weaponLoadouts enumerates every legal equip combination from ws: each 2H weapon as a solo
 // loadout, plus every unordered pair of 1H weapons (including dual-wielding the same weapon).
 func weaponLoadouts(ws []weapon.Weapon) [][]weapon.Weapon {
 	var oneHand, twoHand []weapon.Weapon
@@ -281,15 +270,14 @@ type Stats struct {
 	// occurrence). Summary.BestLine is in canonical (post-sort) order. Zero-valued if no hands
 	// have been evaluated.
 	Best BestTurn
-	// PerCard attributes hand-level outcomes back to the cards that appeared in those hands. The
-	// map is populated once per hand (after hand.Best picks the winning play), not per permutation
-	// — attribution cost is negligible compared to the underlying search.
+	// PerCard attributes hand-level outcomes back to the cards that appeared in those hands.
+	// Populated once per hand after hand.Best picks the winner — attribution cost is negligible
+	// next to the underlying search.
 	PerCard map[card.ID]CardPlayStats
 }
 
-// BestTurn records a single hand and its optimal turn — used to surface the peak draw a deck
-// saw during simulation. Summary.BestLine carries the cards and their assigned roles in
-// canonical order; no parallel Hand slice is needed.
+// BestTurn records a single hand and its optimal turn — the peak draw a deck saw during
+// simulation. Summary.BestLine carries the cards and roles in canonical order.
 type BestTurn struct {
 	Summary hand.TurnSummary
 	// StartingRunechants is the Runechant count carried in from the previous turn when this hand
@@ -297,23 +285,18 @@ type BestTurn struct {
 	StartingRunechants int
 }
 
-// CardPlayStats captures how a single card contributed to the decks it appeared in. Plays counts
-// hands where it was played as an attack or defense; Pitches counts hands where it was spent for
-// resources. TotalContribution sums a per-role accounting of what the card did on each
-// appearance, filled in by hand.Best's tracked replay of the winning line:
+// CardPlayStats captures how a single card contributed across hands it appeared in. Plays counts
+// hands where it attacked or defended; Pitches counts hands where it was spent for resources.
+// TotalContribution sums role-specific credit from the winning-line replay:
 //
-//   - Pitch   → Card.Pitch() (1/2/3 resource value, treated as damage-equivalent per convention).
-//   - Attack  → Card.Play() return plus the hero's OnCardPlayed trigger chained off it, captured
-//     at the moment the card resolved in the winning attacker permutation — so conditional
-//     riders, Runechant creations, and all other Play-time damage are attributed to the card
-//     that actually did them.
-//   - Defend  → the card's proportional share of min(sum_defense, incomingDamage), plus the
-//     card's own Play return if it's a defense reaction.
+//   - Pitch   → Card.Pitch() (1/2/3 resource value, damage-equivalent by convention).
+//   - Attack  → Card.Play() return plus the hero's OnCardPlayed trigger chained off it, at the
+//     moment the card resolved in the winning permutation.
+//   - Defend  → proportional share of min(sumDefense, incomingDamage), plus the card's own
+//     Play return if it's a defense reaction.
 //
-// So the metric is "how much value does this card usually contribute, itself, to its hand" — as
-// opposed to the hand's total value lumping every card together. Useful as a directional
-// per-card signal; the Defense share is proportional rather than causal, so a defender that
-// soaks all the block will look equal to a weaker one padding the same partition.
+// Useful as a directional per-card signal. The Defense share is proportional not causal: a
+// defender soaking the whole block looks equal to a weaker one padding the same partition.
 type CardPlayStats struct {
 	Plays             int
 	Pitches           int
@@ -352,29 +335,26 @@ func (s Stats) Avg() float64 {
 	return s.TotalValue / float64(s.Hands)
 }
 
-// Evaluate simulates `runs` shuffles of the deck. For each run it assembles successive hands of
-// d.Hero.Intelligence() cards — Held cards from the previous turn plus fresh draws from the top
-// of the deck — computes the optimal play against an opponent attacking for incomingDamage, and
-// returns Pitched cards to the bottom of the deck (in hand order). Played and defended cards are
-// spent; Held cards carry into the next hand so only (handSize - heldCount) fresh cards are
-// drawn. Each run ends when the deck no longer has enough cards left to fill out the next hand.
+// Evaluate simulates runs shuffles of the deck. For each run it assembles successive hands of
+// d.Hero.Intelligence() cards (Held cards from last turn plus fresh top-of-deck draws), computes
+// the optimal play against an opponent attacking for incomingDamage, and recycles Pitched cards
+// to the bottom of the deck in hand order. Played and defended cards are spent; Held cards carry
+// into the next hand. A run ends when the deck can't fill the next hand.
 //
-// A "cycle" is one pass through the original deck size: cumulative hands 0..(deckSize/handSize - 1)
-// are cycle 1, the next deckSize/handSize hands are cycle 2.
+// A "cycle" is one pass through the original deck size: hands 0..(deckSize/handSize - 1) are
+// cycle 1, the next deckSize/handSize are cycle 2.
 //
-// Results accumulate into d.Stats and are also returned for convenience.
+// Results accumulate into d.Stats and are returned for convenience.
 //
-// Uses the package-level shared hand.Evaluator, which means repeated Evaluate calls on the same
-// (hero, weapons) share their memo cache. Callers that evaluate multiple decks concurrently must
-// use EvaluateWith with a goroutine-local Evaluator instead — the shared one has no internal
-// synchronisation.
+// Uses the package-level shared hand.Evaluator so repeated Evaluate calls on the same (hero,
+// weapons) share the memo. Concurrent callers must use EvaluateWith with a goroutine-local
+// Evaluator — the shared buffers have no internal synchronisation.
 func (d *Deck) Evaluate(runs int, incomingDamage int, rng *rand.Rand) Stats {
 	return d.EvaluateWith(runs, incomingDamage, rng, nil)
 }
 
 // EvaluateWith is Evaluate using the given hand.Evaluator. Pass a dedicated Evaluator per
-// goroutine when running Evaluate calls in parallel; pass nil to reuse the package-level shared
-// Evaluator (equivalent to calling Evaluate directly).
+// goroutine for parallel runs; nil reuses the package-level shared Evaluator.
 func (d *Deck) EvaluateWith(runs int, incomingDamage int, rng *rand.Rand, ev *hand.Evaluator) Stats {
 	d.Stats.Runs += runs
 	simstate.CurrentHero = d.Hero
@@ -385,23 +365,20 @@ func (d *Deck) EvaluateWith(runs int, incomingDamage int, rng *rand.Rand, ev *ha
 	}
 	handsPerCycle := deckSize / handSize
 
-	// `buf` is a single-allocation reusable slab holding the current "deck state" for the run.
-	// [head:tail] is the remaining deck in top-to-bottom order. Each iteration dealt cards are
-	// consumed by advancing head; pitched cards are re-appended at tail. Sized 2×deckSize so there
-	// is always room to append pitched cards before we need to compact head back to 0; compaction
-	// (which shifts [head:tail] down) happens at most once every deckSize/handSize iterations.
-	// The head/tail pointers and one-shot allocation keep the per-hand path allocation-free.
+	// buf is a single-allocation slab holding deck state for the run. [head:tail] is the
+	// remaining deck in top-to-bottom order. Dealt cards advance head; pitched cards are
+	// re-appended at tail. Sized 2×deckSize so there's always room to append before compacting;
+	// compaction (shifting [head:tail] down) happens at most once per deckSize/handSize
+	// iterations. The head/tail pointers keep the per-hand path allocation-free.
 	buf := make([]card.Card, deckSize*2)
-	// handBuf is the per-turn working hand: Held cards from last turn (prefix) + fresh draws.
-	// heldBuf holds the Held cards between turns; next iteration copies them into handBuf. Both
-	// are sized once per Evaluate so the inner loop stays allocation-free.
+	// handBuf is the per-turn working hand: Held prefix + fresh draws. heldBuf holds Held cards
+	// between turns. Sized once per Evaluate so the inner loop stays allocation-free.
 	handBuf := make([]card.Card, handSize)
 	heldBuf := make([]card.Card, 0, handSize)
 	nextHeld := make([]card.Card, 0, handSize)
 	for r := 0; r < runs; r++ {
 		copy(buf, d.Cards)
-		// Inline Fisher-Yates: the closure-based rng.Shuffle would heap-allocate a func value
-		// capturing buf on every run.
+		// Inline Fisher-Yates: rng.Shuffle would heap-allocate a closure over buf every run.
 		for i := deckSize - 1; i > 0; i-- {
 			j := rng.Intn(i + 1)
 			buf[i], buf[j] = buf[j], buf[i]
@@ -412,36 +389,33 @@ func (d *Deck) EvaluateWith(runs int, incomingDamage int, rng *rand.Rand, ev *ha
 		runechantCarryover := 0
 		var arsenalCard card.Card
 		heldBuf = heldBuf[:0]
-		// maxHands caps the run at two full cycles through the deck. Without this a partition
-		// that pitches everything and swings a weapon every turn recycles the same cards back
-		// into the deck forever — hand.Best returns an identical TurnSummary each iteration so
-		// head and tail advance in lockstep and the run never terminates. Two cycles is enough
-		// to observe the shuffle's early and late game and matches the FirstCycle / SecondCycle
-		// stats the caller already tracks.
+		// maxHands caps the run at two full cycles. Without it, a partition that pitches
+		// everything and swings a weapon every turn recycles the same cards forever: hand.Best
+		// returns identical summaries each iteration so head and tail advance in lockstep and
+		// the run never terminates. Two cycles is enough to observe early and late game and
+		// matches the FirstCycle / SecondCycle stats.
 		maxHands := 2 * handsPerCycle
 		for handIdx < maxHands {
-			// Fresh draws fill whatever held cards didn't take. If every slot is already held —
-			// pathological but possible for tiny hands — the hand doesn't progress, so stop the
-			// run rather than spin.
+			// Fresh draws fill whatever Held cards didn't take. If every slot is already held
+			// (pathological for tiny hands), the hand doesn't progress — stop the run.
 			drawCount := handSize - len(heldBuf)
 			if drawCount == 0 || tail-head < drawCount {
 				break
 			}
-			// Compact when there isn't room at the bottom to append a full hand's worth of
-			// pitched cards without overrunning buf.
+			// Compact when the tail has no room for a full hand's pitched cards.
 			if tail+handSize > len(buf) {
 				copy(buf, buf[head:tail])
 				tail -= head
 				head = 0
 			}
-			// Assemble the hand: held prefix first, then fresh draws. Best() sorts the hand in
-			// canonical order and Roles align to that post-sort order, so which slot each card
-			// ends up in doesn't affect the held-vs-drawn distinction for anything downstream.
+			// Assemble the hand: held prefix, then fresh draws. Best() sorts the hand into
+			// canonical order and Roles align to that order, so slot position here is irrelevant
+			// for anything downstream.
 			h := handBuf[:handSize]
 			copy(h, heldBuf)
 			copy(h[len(heldBuf):], buf[head:head+drawCount])
 			// Snapshot the starting carryover before Best overwrites it — the best-hand record
-			// wants the count in play *when the hand was dealt*, not what remained after.
+			// wants the count in play when the hand was dealt, not what remained after.
 			startingRunechants := runechantCarryover
 			var play hand.TurnSummary
 			if ev != nil {
@@ -456,8 +430,8 @@ func (d *Deck) EvaluateWith(runs int, incomingDamage int, rng *rand.Rand, ev *ha
 			d.Stats.TotalValue += v
 			d.Stats.Hands++
 			if play.Value > d.Stats.Best.Summary.Value || len(d.Stats.Best.Summary.BestLine) == 0 {
-				// Clone BestLine and AttackChain — both alias memo-owned storage that a later
-				// Best call may reuse.
+				// Clone BestLine and AttackChain — both alias memo-owned storage a later Best
+				// call may reuse.
 				lineCopy := make([]hand.CardAssignment, len(play.BestLine))
 				copy(lineCopy, play.BestLine)
 				var chainCopy []hand.AttackChainEntry
@@ -484,12 +458,11 @@ func (d *Deck) EvaluateWith(runs int, incomingDamage int, rng *rand.Rand, ev *ha
 				d.Stats.SecondCycle.Total += v
 			}
 
-			// Attribute per-card contribution from the winning BestLine. hand.Best has already
-			// filled Contribution on each assignment. Held and Arsenal entries are "not played,
-			// not pitched" so neither counter ticks; the Arsenal card's real contribution will
-			// accrue on the later turn when it's played out of the slot. Arsenal-in assignments
-			// (FromArsenal=true) belong to a previous turn's hand, so they don't contribute to
-			// THIS hand's per-card stats either.
+			// Attribute per-card contribution from the winning BestLine. hand.Best already
+			// filled Contribution on each assignment. Held and Arsenal entries don't tick either
+			// counter (an Arsenal card's real contribution accrues when it's played out of the
+			// slot on a later turn). FromArsenal entries belong to a previous turn's hand and
+			// don't contribute to this hand's per-card stats.
 			if d.Stats.PerCard == nil {
 				d.Stats.PerCard = map[card.ID]CardPlayStats{}
 			}
@@ -508,12 +481,10 @@ func (d *Deck) EvaluateWith(runs int, incomingDamage int, rng *rand.Rand, ev *ha
 				d.Stats.PerCard[a.Card.ID()] = stat
 			}
 
-			// Recycle: pitched hand cards go to the bottom of the remaining deck (buf[tail:]) in
-			// hand order; attacked and defended cards are spent. The backing array has room
-			// since the cards being "moved" are a subset of those we just consumed. Held cards
-			// stay in the player's hand and get copied into nextHeld for the next turn. Arsenal
-			// and arsenal-in entries are handled via arsenalCard / the loop's top-level arsenal
-			// threading, not here.
+			// Recycle: pitched cards go to the bottom of buf[tail:] in hand order; attacked and
+			// defended cards are spent. The backing array has room since moved cards are a
+			// subset of those just consumed. Held cards go into nextHeld for the next turn.
+			// Arsenal / arsenal-in entries thread through arsenalCard, not here.
 			nextHeld = nextHeld[:0]
 			for _, a := range play.BestLine {
 				if a.FromArsenal {
@@ -535,35 +506,28 @@ func (d *Deck) EvaluateWith(runs int, incomingDamage int, rng *rand.Rand, ev *ha
 	return d.Stats
 }
 
-// IterateParallel runs one iterate-mode round. Workers share a single pool and each goroutine
-// does BOTH the shallow screen for its pulled mutation AND — if the shallow result beats bestAvg
-// — the deep-shuffles confirmation for that same mutation. The first worker to land a confirmed
-// improvement publishes it; a cancellation atomic stops everyone else. Because deep confirms
-// parallelise instead of serialising on the main goroutine, iterate rounds on noisy shallow
-// screens (many false-positive passes) finish in max(shallow wall, deeps/workers × deep wall)
-// rather than shallow wall + passes × deep wall.
+// IterateParallel runs one iterate-mode round. Workers share a queue and each goroutine does
+// both the shallow screen and — if shallow beats bestAvg — the deep-shuffles confirmation for
+// the same mutation. The first worker to land a confirmed improvement wins; a cancellation
+// atomic stops the others. Parallelising deep confirms makes rounds with noisy shallow screens
+// finish in max(shallow wall, deeps/workers × deep wall) instead of shallow wall + passes × deep.
 //
-// Mutations are pulled FIFO from the shared queue and workers start at the front, so the
-// earliest-position-wins heuristic of serial iterate generally holds — but a worker locked on a
-// deep confirm at position 20 doesn't block others from picking up position 25, so a later-
-// position mutation can occasionally win if its deep confirm finishes first. The hill-climb
-// trajectory stays comparable.
+// Mutations are pulled FIFO so the earliest-position-wins heuristic of serial iterate generally
+// holds, but a worker locked on a deep confirm at position 20 doesn't block position 25 — a
+// later-position mutation can occasionally win if its deep confirm finishes first.
 //
-// ctx: aborts the round when Done — workers exit early and IterateParallel returns with
-// found=false; caller distinguishes "aborted" from "local max" via ctx.Err().
-// mutations: ordered list of candidates.
+// ctx: aborts the round when Done; workers exit and IterateParallel returns found=false. The
+// caller distinguishes "aborted" from "local max" via ctx.Err().
+// mutations: ordered candidate list.
 // bestAvg: current baseline (at deep-shuffles depth).
 // shallowShuffles / deepShuffles / incoming: eval settings.
-// numWorkers: goroutines in the pool; 0 uses runtime.GOMAXPROCS(0).
-// seed: base seed for worker RNGs; worker w uses (seed + w) for shallow and a derived stream for
-// deep so the two phases don't alias.
-// shallowCompleted: optional atomic counter incremented once per shallow eval the worker pool
-// finishes, so callers can render live "tested N/total" progress from a separate goroutine.
-// deepsCompleted: optional counter incremented once per attempted deep confirm (regardless of
-// outcome) so callers can also show deep-phase progress. Nil to opt out.
+// numWorkers: goroutines; 0 uses runtime.GOMAXPROCS(0).
+// seed: base seed; worker w uses (seed + w) for shallow and a derived stream for deep.
+// shallowCompleted / deepsCompleted: optional atomic counters incremented per shallow eval and
+// per attempted deep confirm, so callers can render live progress. Nil to opt out.
 //
 // Returns (improvedDeck, improvedAvg, improvedIndex, true) on first confirmed improvement, or
-// (nil, bestAvg, -1, false) if no improvement was found OR ctx was cancelled.
+// (nil, bestAvg, -1, false) if none was found or ctx was cancelled.
 func IterateParallel(
 	ctx context.Context,
 	mutations []Mutation,
@@ -588,8 +552,8 @@ func IterateParallel(
 		avg  float64
 		deck *Deck
 	}
-	// Buffered to numWorkers so the first-to-finish sender never blocks; later senders can also
-	// drop their improvement without waiting once the main goroutine has taken one.
+	// Buffered to numWorkers so the first sender never blocks and later senders can drop their
+	// improvement without waiting once the main goroutine has taken one.
 	improvementCh := make(chan improvement, numWorkers)
 
 	jobs := make(chan int, len(mutations))
@@ -605,8 +569,7 @@ func IterateParallel(
 			defer wg.Done()
 			ev := hand.NewEvaluator()
 			shallowRng := rand.New(rand.NewSource(seed + int64(workerIdx)))
-			// Derive an independent deep stream so the two phases don't share rng state across
-			// a single worker.
+			// Derive an independent deep stream so the two phases don't share rng state.
 			deepRng := rand.New(rand.NewSource(seed ^ (int64(workerIdx)+1)*int64(0x9e3779b9)))
 			for i := range jobs {
 				if innerCtx.Err() != nil {
@@ -624,7 +587,7 @@ func IterateParallel(
 				if innerCtx.Err() != nil {
 					return
 				}
-				// Fresh Deck for the deep pass so d.Stats from the shallow run doesn't bleed in.
+				// Fresh Deck for the deep pass so d.Stats from the shallow run doesn't leak in.
 				dd := New(mut.Deck.Hero, mut.Deck.Weapons, mut.Deck.Cards)
 				deepAvg := dd.EvaluateWith(deepShuffles, incoming, deepRng, ev).Avg()
 				if deepsCompleted != nil {
@@ -655,7 +618,7 @@ func IterateParallel(
 		<-workersDone
 		return imp.deck, imp.avg, imp.idx, true
 	case <-workersDone:
-		// A last-moment improvement may have landed just before the senders all returned.
+		// A last-moment improvement may have landed just before all senders returned.
 		select {
 		case imp := <-improvementCh:
 			return imp.deck, imp.avg, imp.idx, true

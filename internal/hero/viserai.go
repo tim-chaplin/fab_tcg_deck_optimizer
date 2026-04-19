@@ -19,12 +19,12 @@ func (Viserai) Health() int            { return 20 }
 func (Viserai) Intelligence() int      { return 4 }
 func (Viserai) Types() card.TypeSet    { return viseraiTypes }
 
-// OnCardPlayed implements Viserai's hero ability: whenever a Runeblade card is played, if another
-// "non-attack action" (an Action that is not also an Attack) has already been played this turn,
-// create a Runechant token (modelled as +1 damage).
+// OnCardPlayed implements Viserai's hero ability: whenever a Runeblade card is played, if
+// another "non-attack action" (an Action that is not also an Attack) has already been played
+// this turn, create a Runechant token (modelled as +1 damage).
 func (Viserai) OnCardPlayed(played card.Card, s *card.TurnState) int {
 	t := played.Types()
-	// Weapon swings are not "playing a card" and don't trigger Viserai.
+	// Weapon swings aren't "playing a card" and don't trigger Viserai.
 	if !t.Has(card.TypeRuneblade) || t.Has(card.TypeWeapon) {
 		return 0
 	}

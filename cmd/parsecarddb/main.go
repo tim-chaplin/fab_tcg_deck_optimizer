@@ -12,8 +12,8 @@ import (
 	"strings"
 )
 
-// Card mirrors the columns of card.csv (csvs/english/card.csv in
-// the-fab-cube/flesh-and-blood-cards). One row = one Card.
+// Card mirrors the columns of card.csv (csvs/english/card.csv in the-fab-cube source repo).
+// One CSV row = one Card.
 type Card struct {
 	UniqueID                string
 	Name                    string
@@ -43,8 +43,7 @@ type Card struct {
 	LLLegal                 string
 }
 
-// String pretty-prints a Card, omitting blank fields. Implements fmt.Stringer so fmt.Printf("%v",
-// c) uses this format automatically.
+// String pretty-prints a Card, omitting blank fields. Implements fmt.Stringer.
 func (c Card) String() string {
 	var b strings.Builder
 	add := func(label, value string) {
@@ -70,17 +69,11 @@ func (c Card) String() string {
 	add("Keywords", c.CardKeywords)
 	add("Text", c.FunctionalText)
 	add("Type Text", c.TypeText)
-	// add("Blitz", c.BlitzLegal)
-	// add("CC", c.CCLegal)
-	// add("Silver Age", c.SilverAgeLegal)
-	// add("Commoner", c.CommonerLegal)
-	// add("LL", c.LLLegal)
 	return b.String()
 }
 
-// cardCSVColumns maps CSV header names to the Card field they populate. Keeping this adjacent to
-// Card makes it obvious when a new column is added upstream — the compiler will complain if the
-// field is missing.
+// cardCSVColumns maps CSV header names to the Card field they populate. When a new column
+// appears upstream, add the mapping here.
 var cardCSVColumns = []struct {
 	Header string
 	Assign func(*Card, string)

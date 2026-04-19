@@ -4,11 +4,10 @@
 // the top card of your deck. If it's an attack action card, put it into your hand."
 //
 // Simplification: assume the Sigil enters then leaves at the start of next turn. By then the
-// hero has drawn Intelligence cards into their next hand, so the revealed card is the one at
-// index Intelligence (0-indexed) in the remaining deck — the (Intelligence+1)th from the top.
-// If it's an attack action, credit +3 value (matching Drawn to the Dark Dimension's draw-a-card
-// valuation); otherwise 0. Cross-turn aura-persistence isn't modelled; the value is collapsed to
-// an immediate return on play. If the deck is too short to reach that index, the bonus is 0.
+// hero has drawn Intelligence cards into their next hand, so the revealed card is at index
+// Intelligence in the remaining deck. If it's an attack action, credit +3 value (the draw-a-card
+// damage-equivalent); otherwise 0. Cross-turn aura-persistence isn't modelled — the value is
+// collapsed into the immediate Play return. Deck too short to reach that index → 0.
 //
 // Source: github.com/the-fab-cube/flesh-and-blood-cards (card.csv).
 

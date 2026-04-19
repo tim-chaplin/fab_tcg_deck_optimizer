@@ -16,17 +16,13 @@ import (
 // realistic proportions.
 //
 // Variance-control:
-//   - Every b.N iteration starts from a cold memo via hand.ClearMemo(). Without this, iteration
-//     0 pays the full memo-population cost while iteration 1+ inherit a warm cache; that gap
-//     was the dominant source of the 2–3× run-to-run spread the benchmark used to show.
-//     Resetting (rather than pre-warming) makes each sample measure the same work and matches
-//     what a fresh iterate run on a different deck would actually experience in production.
-//   - targetImprovements is sized so each iteration does enough work (~5 full rounds) that the
-//     cold-cache startup is a small fraction of total time and per-round scheduling / GC blips
-//     average out.
-//   - Shuffle counts (shallow=100, deep=5000) are a compressed-but-realistic version of the
-//     production defaults (100 / 10000). Same cost profile, iteration runs in single-digit
-//     seconds so `-benchtime=5x -count=5` gives a usable sample in about a minute.
+//   - Every b.N iteration starts from a cold memo via hand.ClearMemo() so each sample measures
+//     the same work; iteration 1+ otherwise inherit a warm cache and skew the distribution.
+//   - targetImprovements is sized so each iteration does ~5 full rounds, making cold-cache
+//     startup a small fraction of total time and averaging out per-round scheduling / GC blips.
+//   - Shuffle counts (shallow=100, deep=5000) are a compressed-but-realistic version of
+//     production defaults (100 / 10000). Each iteration runs in single-digit seconds so
+//     `-benchtime=5x -count=5` gives a usable sample in about a minute.
 //   - Seed is fixed so every b.N iteration walks the same mutation-pick sequence.
 //
 // Recommended invocation: `go test -bench=BenchmarkIterateImprovements -benchtime=5x -count=5`.

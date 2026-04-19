@@ -15,7 +15,7 @@ import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 var weepingBattlegroundTypes = card.NewTypeSet(card.TypeRuneblade, card.TypeDefenseReaction)
 
 // weepingBattlegroundPlay deals the 1 arcane from the always-banished aura and marks
-// ArcaneDamageDealt so later-this-turn triggers see the flag. Shared across all three printings.
+// ArcaneDamageDealt so later-this-turn triggers see the flag.
 func weepingBattlegroundPlay(s *card.TurnState) int {
 	s.ArcaneDamageDealt = true
 	return 1

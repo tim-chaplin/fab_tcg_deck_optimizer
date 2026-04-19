@@ -4,11 +4,10 @@
 // hits, create N Runechant tokens.'"
 // (Red N=3, Yellow N=2, Blue N=1.)
 //
-// Simplification: "if hits" is assumed, so the N Runechants are counted as N damage attributed to
-// Mauvrion Skies (contingent on a qualifying next attack existing in the turn's ordering). The
-// go-again grant is published by flipping GrantedGoAgain on the first matching PlayedCard in
-// TurnState.CardsRemaining; the solver's chain-legality check ORs that with the card's printed
-// Go again. Like Runic Reaping, "attack action card" excludes weapons.
+// Simplification: "if hits" is assumed, so the N Runechants are counted as N damage credited to
+// Mauvrion Skies (contingent on a qualifying next attack existing in turn order). The go-again
+// grant is published via GrantedGoAgain on the first matching PlayedCard in CardsRemaining.
+// "Attack action card" excludes weapons.
 //
 // Source: github.com/the-fab-cube/flesh-and-blood-cards (card.csv).
 

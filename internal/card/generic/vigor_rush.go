@@ -3,10 +3,9 @@
 //
 // Text: "If you have played a 'non-attack' action card this turn, Vigor Rush gains **go again**."
 //
-// Go again is CONDITIONAL on a prior non-attack action, so GoAgain() returns false; vigorRushPlay
-// flips Self.GrantedGoAgain when the condition fires and the solver's EffectiveGoAgain check
-// picks up the grant. Returning true from GoAgain() would make the chain-legality check always
-// pass, over-crediting sequences where no non-attack action was played.
+// Go again is conditional on a prior non-attack action, so GoAgain() returns false and
+// vigorRushPlay flips Self.GrantedGoAgain when the condition fires. Returning true from
+// GoAgain() unconditionally would over-credit sequences with no non-attack action played.
 //
 // Source: github.com/the-fab-cube/flesh-and-blood-cards (card.csv).
 

@@ -4,10 +4,9 @@
 // Text: "If Fervent Forerunner hits, **opt 2**. If Fervent Forerunner is played from arsenal, it
 // gains **go again**."
 //
-// Simplification: on-hit Opt 2 and the played-from-arsenal go-again aren't modelled. The latter
-// means GoAgain() returns false unconditionally (matching how the rest of the unmodelled riders
-// here default off) — a true return would let Fervent Forerunner always chain, over-crediting
-// the vast majority of sequences where it wasn't played from arsenal.
+// Simplification: on-hit Opt 2 and the played-from-arsenal go-again aren't modelled. GoAgain()
+// returns false unconditionally — returning true would let Fervent Forerunner always chain,
+// over-crediting sequences where it wasn't actually played from arsenal.
 //
 // Source: github.com/the-fab-cube/flesh-and-blood-cards (card.csv).
 

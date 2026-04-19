@@ -5,11 +5,10 @@
 // attack action card you play this turn gains +1{p}. Go again."
 // (Red N=3, Yellow N=2, Blue N=1.)
 //
-// Simplification: "if hits" is assumed, so the N Runechants are counted as N damage attributed to
+// Simplification: "if hits" is assumed, so the N Runechants are counted as N damage credited to
 // Runic Reaping. The +1{p} pitched-attack rider fires if any attack-typed card was pitched this
-// turn (we don't track which pitched card paid for which play, so any attack in Pitched qualifies).
-// Unlike Condemn/Oath, this rider targets only Runeblade attack action cards — weapon swings don't
-// qualify.
+// turn; pitch-to-play attribution isn't tracked. The rider targets only Runeblade attack action
+// cards — weapon swings don't qualify.
 //
 // Source: github.com/the-fab-cube/flesh-and-blood-cards (card.csv).
 

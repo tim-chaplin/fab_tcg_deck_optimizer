@@ -1,4 +1,4 @@
-// Command fabsim generates N random Viserai decks, evaluates each, and reports the best one.
+// Command fabsim searches for, evaluates, and iterates on Flesh and Blood decks.
 package main
 
 import (
@@ -23,11 +23,10 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/weapon"
 )
 
-// defaultDeckNameFor returns the deck name used when -deck isn't supplied, parametrised by the
-// hero, format, and the -incoming value. Different opponent-pressure settings produce meaningfully
-// different optimal decks, and different formats open up different card pools — keying the
-// filename off all three keeps regimes in separate files and avoids accidentally hill-climbing
-// one regime's best deck under another regime's objective.
+// defaultDeckNameFor returns the deck name when -deck isn't supplied, parametrised by hero,
+// format, and -incoming. Different opponent-pressure settings and card pools produce different
+// optimal decks, so keying the filename off all three keeps regimes in separate files and avoids
+// accidentally hill-climbing one regime's best under another regime's objective.
 func defaultDeckNameFor(h hero.Hero, f fmtpkg.Format, incoming int) string {
 	return fmt.Sprintf("%s_%s_%d_incoming", strings.ToLower(h.Name()), f, incoming)
 }
@@ -51,8 +50,8 @@ func main() {
 	formatFlag := flag.String("format", string(fmtpkg.SilverAge), "constructed format whose banlist restricts the card pool during search (only \"silver_age\" is supported today)")
 	debug := flag.Bool("debug", false, "emit extra diagnostic output (e.g. memo cache size between iterate rounds)")
 	flag.Parse()
-	// Positional args after the subcommand are rejected — `fabsim eval mydeck` silently ignoring
-	// the deck name (rather than treating it as -deck mydeck) wasted a long run during testing.
+	// Reject positional args after the subcommand so `fabsim eval mydeck` errors instead of
+	// silently ignoring the deck name.
 	if flag.NArg() > 0 {
 		die("unexpected positional argument(s): %v (did you mean -deck %s?)", flag.Args(), flag.Args()[0])
 	}
@@ -64,8 +63,8 @@ func main() {
 		*deckName = defaultDeckNameFor(hero.Viserai{}, fmtValue, *incoming)
 	}
 
-	// Create mydecks/ up front so downstream WriteFile calls in the search loops can't fail on
-	// a missing dir after a long run. Harmless if it already exists.
+	// Create mydecks/ up front so downstream WriteFile calls can't fail on a missing dir after
+	// a long run.
 	if err := os.MkdirAll(mydecks.Dir, 0o755); err != nil {
 		die("mkdir %s: %v", mydecks.Dir, err)
 	}
@@ -115,8 +114,8 @@ func main() {
 }
 
 // extractSubcommand pulls os.Args[1] as the subcommand name and rewrites os.Args so flag.Parse
-// only sees flags. Returns (_, false) when no subcommand is given or the first arg looks like a
-// flag (e.g. bare `fabsim`, `fabsim -help`) — the caller prints the subcommand list in that case.
+// only sees flags. Returns (_, false) when no subcommand is given or the first arg looks like
+// a flag (bare `fabsim`, `fabsim -help`); the caller prints the subcommand list.
 func extractSubcommand() (string, bool) {
 	if len(os.Args) < 2 {
 		return "", false
@@ -129,9 +128,8 @@ func extractSubcommand() (string, bool) {
 	return first, true
 }
 
-// printSubcommands writes the one-liner catalogue we show when no subcommand is given. Flag
-// details live behind `fabsim <subcommand> -help`, which invokes the standard flag package's
-// usage printer.
+// printSubcommands writes the one-liner catalogue shown when no subcommand is given. Flag
+// details live behind `fabsim <subcommand> -help`.
 func printSubcommands(w io.Writer) {
 	fmt.Fprintln(w, "fabsim: Flesh and Blood goldfishing deck optimizer")
 	fmt.Fprintln(w)
@@ -166,15 +164,14 @@ type config struct {
 	debug           bool
 }
 
-// legalFilter returns the card-pool predicate for this run's format. Passed to deck.Random and
-// deck.AllMutations, which accept nil for "no filtering" — but fabsim always runs under a
-// format, so this always returns a non-nil predicate.
+// legalFilter returns the card-pool predicate for this run's format. fabsim always runs under
+// a format, so this is non-nil; the deck package accepts nil for "no filtering" generally.
 func (c config) legalFilter() func(card.Card) bool {
 	return c.format.IsLegal
 }
 
-// loadExisting reads and deserializes the deck at path. Returns (nil, 0) if the file doesn't
-// exist or can't be parsed — the caller treats that as "no previous best".
+// loadExisting reads and deserializes the deck at path. Returns (nil, 0) on missing or
+// unparsable file — the caller treats that as "no previous best".
 func loadExisting(path string) (*deck.Deck, float64) {
 	data, err := os.ReadFile(path)
 	if err != nil {
@@ -187,8 +184,8 @@ func loadExisting(path string) (*deck.Deck, float64) {
 	return d, d.Stats.Avg()
 }
 
-// writeDeck persists d as JSON at path plus a sibling fabrary-format .txt ("x.json" → "x.txt"),
-// so the saved best deck is ready to paste into fabrary.net without a second export step.
+// writeDeck persists d as JSON at path plus a sibling fabrary-format .txt ("x.json" → "x.txt")
+// so the saved deck is ready to paste into fabrary.net without a second export step.
 func writeDeck(d *deck.Deck, path string) error {
 	data, err := deckio.Marshal(d)
 	if err != nil {
@@ -205,8 +202,8 @@ func writeDeck(d *deck.Deck, path string) error {
 }
 
 // fabraryPathFor derives the sibling .txt path. A ".json" extension is replaced; anything else
-// gets ".txt" appended rather than clobbered, so an unusual "-out deck.data" still yields a
-// "deck.data.txt" sibling instead of overwriting the JSON.
+// gets ".txt" appended, so an unusual "-out deck.data" yields "deck.data.txt" rather than
+// overwriting the original.
 func fabraryPathFor(jsonPath string) string {
 	if ext := filepath.Ext(jsonPath); ext == ".json" {
 		return strings.TrimSuffix(jsonPath, ext) + ".txt"
@@ -264,10 +261,10 @@ func printBestDeck(d *deck.Deck) {
 	}
 }
 
-// printPerCardStats renders the per-card averages collected by deck.Evaluate: mean per-card
-// contribution across every hand the card appeared in. Contribution is role-based — Attack() on
-// attacks, proportional share of prevented damage on defends, Pitch() on pitches — so the
-// ranking is about what each card typically does in its hand, not the hand's total value.
+// printPerCardStats renders per-card averages collected by deck.Evaluate: mean per-card
+// contribution across hands the card appeared in. Contribution is role-based (attack power on
+// attacks, proportional prevented-damage share on defends, Pitch on pitches) so the ranking is
+// about what each card typically does in its hand, not the hand's total value.
 func printPerCardStats(d *deck.Deck) {
 	type row struct {
 		name           string

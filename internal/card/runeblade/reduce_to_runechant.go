@@ -4,14 +4,12 @@
 // Text: "Reduce to Runechant costs {r} less to play for each Runechant you control. Create a
 // Runechant token."
 //
-// Cost() returns 0 for the partition-level minimum (fully-discounted case); PrintedCost() is 1
-// so the solver re-prices the reaction at max(0, 1 - leftoverRunechants) after the optimal
-// attack line is chosen — partitions that can't afford the actual cost get rejected.
+// Cost() returns 0 (fully-discounted minimum); PrintedCost() is 1 so the solver re-prices the
+// reaction at max(0, 1 - leftoverRunechants) after the attack line is chosen.
 //
-// Play() calls CreateRunechant, which credits +1 damage at creation (matching every other
-// Runechant-creating card). Simplification: defense-reaction state is reset between reactions in
-// defenseReactionDamage, so the token itself doesn't carry forward into the next turn's
-// carryover — only its damage credit lands.
+// Play() calls CreateRunechant, crediting +1 damage at creation. Defense-reaction state is reset
+// between reactions so the token itself doesn't carry into the next turn's carryover — only its
+// damage credit lands.
 //
 // Source: github.com/the-fab-cube/flesh-and-blood-cards (card.csv).
 
