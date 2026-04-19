@@ -357,9 +357,8 @@ func TestBest_AllHeldWhenNoLegalPlay(t *testing.T) {
 // attack 3). Against incoming 4: only one pitched card (pitch 3) can be paired with Toughen Up
 // as DR, and that single pitch can cover either the 1-cost Red OR the 2-cost Toughen Up — not
 // both. The solver takes the better single-phase line: pitch Toughen Up to pay Red's cost,
-// plain-block with Malefic. Value = 3 (Red attack) + 2 (Malefic block) = 5. The OLD single-pool
-// model would have let one pitch fund both phases and scored 7 (Red attack + 4 Toughen Up
-// prevention) — an illegal split this test locks out.
+// plain-block with Malefic. Value = 3 (Red attack) + 2 (Malefic block) = 5. A single-pool
+// fallback would score 7 by funding both phases from one pitch — illegal, locked out here.
 func TestBest_AttackPitchCantCoverDefense(t *testing.T) {
 	h := []card.Card{runeblade.MaleficIncantationBlue{}, generic.ToughenUpBlue{}, fake.RedAttack{}}
 	got := Best(stubHero{}, nil, h, 4, nil, 0, nil)
@@ -486,10 +485,10 @@ func TestBest_ArsenalInNonAttackActionPlays(t *testing.T) {
 
 // TestPromoteRandomHeldToArsenal_SpreadsAcrossHands pins the post-hoc Held→Arsenal promotion's
 // anti-bias property: the selection hashes the sorted hand IDs so different hands land on
-// different Held positions rather than always picking slot 0 (which, because the hand is sorted
-// by ID, would systematically prefer low-ID cards for arsenaling). Drives the helper directly
-// with synthesised BestLine entries — all slots Held, all equivalent in value — so the only
-// thing under test is the hash-based index selection.
+// different Held positions rather than always picking slot 0 (which, with IDs sorted, would
+// systematically prefer low-ID cards). Drives the helper directly with synthesised BestLine
+// entries — all slots Held, all equivalent in value — so only the hash-based index selection
+// is under test.
 func TestPromoteRandomHeldToArsenal_SpreadsAcrossHands(t *testing.T) {
 	// 20 different 4-card hands using Wounding Blow Red/Yellow/Blue as "arbitrary cards with
 	// distinct IDs". Varying which card sits in which slot is enough to exercise the hash across
