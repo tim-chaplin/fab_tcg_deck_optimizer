@@ -23,7 +23,7 @@ func (CutDownToSizeRed) Attack() int                 { return 6 }
 func (CutDownToSizeRed) Defense() int                { return 2 }
 func (CutDownToSizeRed) Types() card.TypeSet         { return cutDownToSizeTypes }
 func (CutDownToSizeRed) GoAgain() bool               { return false }
-func (c CutDownToSizeRed) Play(s *card.TurnState) int { return c.Attack() }
+func (c CutDownToSizeRed) Play(s *card.TurnState) int { return cutDownToSizeDamage(c.Attack()) }
 
 type CutDownToSizeYellow struct{}
 
@@ -35,7 +35,7 @@ func (CutDownToSizeYellow) Attack() int                 { return 5 }
 func (CutDownToSizeYellow) Defense() int                { return 2 }
 func (CutDownToSizeYellow) Types() card.TypeSet         { return cutDownToSizeTypes }
 func (CutDownToSizeYellow) GoAgain() bool               { return false }
-func (c CutDownToSizeYellow) Play(s *card.TurnState) int { return c.Attack() }
+func (c CutDownToSizeYellow) Play(s *card.TurnState) int { return cutDownToSizeDamage(c.Attack()) }
 
 type CutDownToSizeBlue struct{}
 
@@ -47,4 +47,13 @@ func (CutDownToSizeBlue) Attack() int                 { return 4 }
 func (CutDownToSizeBlue) Defense() int                { return 2 }
 func (CutDownToSizeBlue) Types() card.TypeSet         { return cutDownToSizeTypes }
 func (CutDownToSizeBlue) GoAgain() bool               { return false }
-func (c CutDownToSizeBlue) Play(s *card.TurnState) int { return c.Attack() }
+func (c CutDownToSizeBlue) Play(s *card.TurnState) int { return cutDownToSizeDamage(c.Attack()) }
+
+// cutDownToSizeDamage is a breadcrumb for the on-hit "discard a card if opponent has 4+ cards
+// in hand" rider — opponent hand size isn't tracked (see TODO.md).
+func cutDownToSizeDamage(attack int) int {
+	if card.LikelyToHit(attack) {
+		// TODO: model on-hit conditional discard rider.
+	}
+	return attack
+}

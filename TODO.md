@@ -10,6 +10,36 @@ favour cards whose printed stats are backed up by conditional riders. In the fut
 to apply a discount (e.g. 50%) to the value contributed by these conditions rather than treating
 them as fully active.
 
+### LikelyToHit breadcrumbs — on-hit riders awaiting modelling
+
+Each of the generic attacks below has a `func <card>Damage(attack int) int` helper with an
+`if card.LikelyToHit(attack) { /* TODO */ }` block. The body is a placeholder so grep for
+`LikelyToHit` turns these up when we come back to wire the riders. Plug the rider's
+damage-equivalent into the body and remove the TODO.
+
+- **Jack Be Quick** — on-hit steal ally (hero-specific).
+- **Jack Be Nimble** — on-hit steal item (hero-specific).
+- **Wreck Havoc** — on-hit DR lockout + arsenal manipulation (hero-specific).
+- **Walk the Plank** — on-hit freeze target (Pirate hero-specific).
+- **Tongue Tied** — on-hit arsenal face-up + banish instant (hero-specific).
+- **Smash Up** — on-hit arsenal face-up + banish attack action (hero-specific).
+- **Pursue to the Edge of Oblivion** — on-hit mark (hero-specific).
+- **Pursue to the Pits of Despair** — on-hit mark (hero-specific).
+- **Money or Your Life?** — on-hit deal 2 unless Gold given (hero-specific, Thief-repeat).
+- **Humble** — on-hit hero-ability suppression.
+- **Hand Behind the Pen** — on-hit arsenal face-up + banish non-attack action.
+- **Fact-Finding Mission** — on-hit peek arsenal / equipment.
+- **Destructive Deliberation** — on-hit create Ponder token.
+- **Down But Not Out** — on-hit create Agility/Might/Vigor tokens (gated on life/equipment/token
+  comparison).
+- **Cut Down to Size** — on-hit conditional discard (4+ cards in hand).
+- **Crash Down the Gates** — on-hit destroy top of their deck.
+- **Blanch** — on-hit opponent's cards lose all colors.
+
+Most of these require state the sim doesn't currently track (arsenal, marks, Gold / Ponder /
+status tokens, opponent hand size, life totals, deck top). The relevant state-tracking gaps are
+called out in the sections below — landing any of them unlocks a subset of the breadcrumbs.
+
 ### On-hit / combat interactions
 
 - **Attacks always hit.** Any "when this hits a hero…" rider is assumed to fire — the sim doesn't

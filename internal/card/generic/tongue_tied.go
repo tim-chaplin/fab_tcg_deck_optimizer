@@ -23,4 +23,13 @@ func (TongueTiedRed) Attack() int                 { return 7 }
 func (TongueTiedRed) Defense() int                { return 2 }
 func (TongueTiedRed) Types() card.TypeSet         { return tongueTiedTypes }
 func (TongueTiedRed) GoAgain() bool               { return false }
-func (c TongueTiedRed) Play(s *card.TurnState) int { return c.Attack() }
+func (c TongueTiedRed) Play(s *card.TurnState) int { return tongueTiedDamage(c.Attack()) }
+
+// tongueTiedDamage is a breadcrumb for the on-hit "arsenal face-up + banish instant" rider —
+// not modelled yet (see TODO.md).
+func tongueTiedDamage(attack int) int {
+	if card.LikelyToHit(attack) {
+		// TODO: model on-hit arsenal manipulation rider.
+	}
+	return attack
+}

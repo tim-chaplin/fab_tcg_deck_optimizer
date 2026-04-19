@@ -23,4 +23,13 @@ func (PursueToThePitsOfDespairRed) Attack() int                 { return 5 }
 func (PursueToThePitsOfDespairRed) Defense() int                { return 3 }
 func (PursueToThePitsOfDespairRed) Types() card.TypeSet         { return pursueToThePitsOfDespairTypes }
 func (PursueToThePitsOfDespairRed) GoAgain() bool               { return false }
-func (c PursueToThePitsOfDespairRed) Play(s *card.TurnState) int { return c.Attack() }
+func (c PursueToThePitsOfDespairRed) Play(s *card.TurnState) int { return pursueToThePitsOfDespairDamage(c.Attack()) }
+
+// pursueToThePitsOfDespairDamage is a breadcrumb for the on-hit "mark the hero" rider — marks
+// aren't tracked (see TODO.md).
+func pursueToThePitsOfDespairDamage(attack int) int {
+	if card.LikelyToHit(attack) {
+		// TODO: model on-hit mark rider.
+	}
+	return attack
+}

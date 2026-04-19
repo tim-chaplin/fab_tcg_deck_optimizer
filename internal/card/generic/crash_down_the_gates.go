@@ -25,7 +25,7 @@ func (CrashDownTheGatesRed) Attack() int                 { return 6 }
 func (CrashDownTheGatesRed) Defense() int                { return 2 }
 func (CrashDownTheGatesRed) Types() card.TypeSet         { return crashDownTheGatesTypes }
 func (CrashDownTheGatesRed) GoAgain() bool               { return false }
-func (c CrashDownTheGatesRed) Play(s *card.TurnState) int { return c.Attack() }
+func (c CrashDownTheGatesRed) Play(s *card.TurnState) int { return crashDownTheGatesDamage(c.Attack()) }
 
 type CrashDownTheGatesYellow struct{}
 
@@ -37,7 +37,7 @@ func (CrashDownTheGatesYellow) Attack() int                 { return 5 }
 func (CrashDownTheGatesYellow) Defense() int                { return 2 }
 func (CrashDownTheGatesYellow) Types() card.TypeSet         { return crashDownTheGatesTypes }
 func (CrashDownTheGatesYellow) GoAgain() bool               { return false }
-func (c CrashDownTheGatesYellow) Play(s *card.TurnState) int { return c.Attack() }
+func (c CrashDownTheGatesYellow) Play(s *card.TurnState) int { return crashDownTheGatesDamage(c.Attack()) }
 
 type CrashDownTheGatesBlue struct{}
 
@@ -49,4 +49,13 @@ func (CrashDownTheGatesBlue) Attack() int                 { return 4 }
 func (CrashDownTheGatesBlue) Defense() int                { return 2 }
 func (CrashDownTheGatesBlue) Types() card.TypeSet         { return crashDownTheGatesTypes }
 func (CrashDownTheGatesBlue) GoAgain() bool               { return false }
-func (c CrashDownTheGatesBlue) Play(s *card.TurnState) int { return c.Attack() }
+func (c CrashDownTheGatesBlue) Play(s *card.TurnState) int { return crashDownTheGatesDamage(c.Attack()) }
+
+// crashDownTheGatesDamage is a breadcrumb for the on-hit "destroy top of their deck" rider —
+// not modelled yet (see TODO.md).
+func crashDownTheGatesDamage(attack int) int {
+	if card.LikelyToHit(attack) {
+		// TODO: model on-hit deck-top destruction rider.
+	}
+	return attack
+}
