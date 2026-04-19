@@ -356,15 +356,8 @@ func (e *Evaluator) Best(hero hero.Hero, weapons []weapon.Weapon, hand []card.Ca
 	}
 	result := e.bestUncached(hero, weapons, hand, incomingDamage, deck, runechantCarryover, arsenalCardIn)
 	if memoable {
-		// Store a trimmed copy: drop AttackChain to shrink per-entry memory. The chain is only
-		// consumed when the caller clones `play` into Stats.Best on a new-best hand (see
-		// deck.go:461-464), and a cache hit can never be a new best — same memoKey produces the
-		// same Value, so the first encounter already claimed (or lost) that race. Every other
-		// read path (per-card stats, recycle) uses BestLine, which we keep.
-		thin := result
-		thin.AttackChain = nil
 		memoMu.Lock()
-		memo[key] = thin
+		memo[key] = result
 		memoMu.Unlock()
 	}
 	return result
