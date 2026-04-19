@@ -53,7 +53,7 @@ func (c ShrillOfSkullformBlue) Play(s *card.TurnState) int {
 }
 
 func shrillPlay(base int, s *card.TurnState) int {
-	if s.AuraCreated || s.HasPlayedType(card.TypeAura) {
+	if s.HasAuraInPlay() {
 		return base + 3
 	}
 	return base

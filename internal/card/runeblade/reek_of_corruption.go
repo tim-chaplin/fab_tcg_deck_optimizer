@@ -23,7 +23,7 @@ const reekDiscardBonus = 3
 // reekOfCorruptionDamage returns the base attack plus the discard rider when the aura condition
 // is satisfied.
 func reekOfCorruptionDamage(attack int, s *card.TurnState) int {
-	if s != nil && (s.AuraCreated || s.HasPlayedType(card.TypeAura)) {
+	if s != nil && s.HasAuraInPlay() {
 		return attack + reekDiscardBonus
 	}
 	return attack
