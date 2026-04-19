@@ -23,4 +23,13 @@ func (PursueToTheEdgeOfOblivionRed) Attack() int                 { return 4 }
 func (PursueToTheEdgeOfOblivionRed) Defense() int                { return 3 }
 func (PursueToTheEdgeOfOblivionRed) Types() card.TypeSet         { return pursueToTheEdgeOfOblivionTypes }
 func (PursueToTheEdgeOfOblivionRed) GoAgain() bool               { return false }
-func (c PursueToTheEdgeOfOblivionRed) Play(s *card.TurnState) int { return c.Attack() }
+func (c PursueToTheEdgeOfOblivionRed) Play(s *card.TurnState) int { return pursueToTheEdgeOfOblivionDamage(c.Attack()) }
+
+// pursueToTheEdgeOfOblivionDamage is a breadcrumb for the on-hit "mark the hero" rider — marks
+// aren't tracked (see TODO.md).
+func pursueToTheEdgeOfOblivionDamage(attack int) int {
+	if card.LikelyToHit(attack) {
+		// TODO: model on-hit mark rider.
+	}
+	return attack
+}
