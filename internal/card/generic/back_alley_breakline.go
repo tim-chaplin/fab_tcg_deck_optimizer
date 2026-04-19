@@ -18,7 +18,7 @@ type BackAlleyBreaklineRed struct{}
 
 func (BackAlleyBreaklineRed) ID() card.ID                 { return card.BackAlleyBreaklineRed }
 func (BackAlleyBreaklineRed) Name() string                { return "Back Alley Breakline (Red)" }
-func (BackAlleyBreaklineRed) Cost() int                   { return 1 }
+func (BackAlleyBreaklineRed) Cost(*card.TurnState) int                   { return 1 }
 func (BackAlleyBreaklineRed) Pitch() int                  { return 1 }
 func (BackAlleyBreaklineRed) Attack() int                 { return 5 }
 func (BackAlleyBreaklineRed) Defense() int                { return 2 }
@@ -30,7 +30,7 @@ type BackAlleyBreaklineYellow struct{}
 
 func (BackAlleyBreaklineYellow) ID() card.ID                 { return card.BackAlleyBreaklineYellow }
 func (BackAlleyBreaklineYellow) Name() string                { return "Back Alley Breakline (Yellow)" }
-func (BackAlleyBreaklineYellow) Cost() int                   { return 1 }
+func (BackAlleyBreaklineYellow) Cost(*card.TurnState) int                   { return 1 }
 func (BackAlleyBreaklineYellow) Pitch() int                  { return 2 }
 func (BackAlleyBreaklineYellow) Attack() int                 { return 4 }
 func (BackAlleyBreaklineYellow) Defense() int                { return 2 }
@@ -42,7 +42,7 @@ type BackAlleyBreaklineBlue struct{}
 
 func (BackAlleyBreaklineBlue) ID() card.ID                 { return card.BackAlleyBreaklineBlue }
 func (BackAlleyBreaklineBlue) Name() string                { return "Back Alley Breakline (Blue)" }
-func (BackAlleyBreaklineBlue) Cost() int                   { return 1 }
+func (BackAlleyBreaklineBlue) Cost(*card.TurnState) int                   { return 1 }
 func (BackAlleyBreaklineBlue) Pitch() int                  { return 3 }
 func (BackAlleyBreaklineBlue) Attack() int                 { return 3 }
 func (BackAlleyBreaklineBlue) Defense() int                { return 2 }

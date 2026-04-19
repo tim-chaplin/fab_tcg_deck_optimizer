@@ -16,7 +16,7 @@ type TitForTatBlue struct{}
 
 func (TitForTatBlue) ID() card.ID                 { return card.TitForTatBlue }
 func (TitForTatBlue) Name() string                { return "Tit for Tat (Blue)" }
-func (TitForTatBlue) Cost() int                   { return 0 }
+func (TitForTatBlue) Cost(*card.TurnState) int                   { return 0 }
 func (TitForTatBlue) Pitch() int                  { return 3 }
 func (TitForTatBlue) Attack() int                 { return 0 }
 func (TitForTatBlue) Defense() int                { return 2 }

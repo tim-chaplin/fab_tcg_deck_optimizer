@@ -18,7 +18,7 @@ type BrandishRed struct{}
 
 func (BrandishRed) ID() card.ID                 { return card.BrandishRed }
 func (BrandishRed) Name() string                { return "Brandish (Red)" }
-func (BrandishRed) Cost() int                   { return 1 }
+func (BrandishRed) Cost(*card.TurnState) int                   { return 1 }
 func (BrandishRed) Pitch() int                  { return 1 }
 func (BrandishRed) Attack() int                 { return 3 }
 func (BrandishRed) Defense() int                { return 2 }
@@ -30,7 +30,7 @@ type BrandishYellow struct{}
 
 func (BrandishYellow) ID() card.ID                 { return card.BrandishYellow }
 func (BrandishYellow) Name() string                { return "Brandish (Yellow)" }
-func (BrandishYellow) Cost() int                   { return 1 }
+func (BrandishYellow) Cost(*card.TurnState) int                   { return 1 }
 func (BrandishYellow) Pitch() int                  { return 2 }
 func (BrandishYellow) Attack() int                 { return 2 }
 func (BrandishYellow) Defense() int                { return 2 }
@@ -42,7 +42,7 @@ type BrandishBlue struct{}
 
 func (BrandishBlue) ID() card.ID                 { return card.BrandishBlue }
 func (BrandishBlue) Name() string                { return "Brandish (Blue)" }
-func (BrandishBlue) Cost() int                   { return 1 }
+func (BrandishBlue) Cost(*card.TurnState) int                   { return 1 }
 func (BrandishBlue) Pitch() int                  { return 3 }
 func (BrandishBlue) Attack() int                 { return 1 }
 func (BrandishBlue) Defense() int                { return 2 }

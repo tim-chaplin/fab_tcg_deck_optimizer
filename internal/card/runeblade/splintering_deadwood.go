@@ -18,7 +18,7 @@ type SplinteringDeadwoodRed struct{}
 
 func (SplinteringDeadwoodRed) ID() card.ID                 { return card.SplinteringDeadwoodRed }
 func (SplinteringDeadwoodRed) Name() string               { return "Splintering Deadwood (Red)" }
-func (SplinteringDeadwoodRed) Cost() int                  { return 3 }
+func (SplinteringDeadwoodRed) Cost(*card.TurnState) int                  { return 3 }
 func (SplinteringDeadwoodRed) Pitch() int                 { return 1 }
 func (SplinteringDeadwoodRed) Attack() int                { return 7 }
 func (SplinteringDeadwoodRed) Defense() int               { return 3 }
@@ -30,7 +30,7 @@ type SplinteringDeadwoodYellow struct{}
 
 func (SplinteringDeadwoodYellow) ID() card.ID                 { return card.SplinteringDeadwoodYellow }
 func (SplinteringDeadwoodYellow) Name() string               { return "Splintering Deadwood (Yellow)" }
-func (SplinteringDeadwoodYellow) Cost() int                  { return 3 }
+func (SplinteringDeadwoodYellow) Cost(*card.TurnState) int                  { return 3 }
 func (SplinteringDeadwoodYellow) Pitch() int                 { return 2 }
 func (SplinteringDeadwoodYellow) Attack() int                { return 6 }
 func (SplinteringDeadwoodYellow) Defense() int               { return 3 }
@@ -42,7 +42,7 @@ type SplinteringDeadwoodBlue struct{}
 
 func (SplinteringDeadwoodBlue) ID() card.ID                 { return card.SplinteringDeadwoodBlue }
 func (SplinteringDeadwoodBlue) Name() string               { return "Splintering Deadwood (Blue)" }
-func (SplinteringDeadwoodBlue) Cost() int                  { return 3 }
+func (SplinteringDeadwoodBlue) Cost(*card.TurnState) int                  { return 3 }
 func (SplinteringDeadwoodBlue) Pitch() int                 { return 3 }
 func (SplinteringDeadwoodBlue) Attack() int                { return 5 }
 func (SplinteringDeadwoodBlue) Defense() int               { return 3 }

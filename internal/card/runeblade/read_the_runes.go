@@ -16,7 +16,7 @@ type ReadTheRunesRed struct{}
 
 func (ReadTheRunesRed) ID() card.ID                 { return card.ReadTheRunesRed }
 func (ReadTheRunesRed) Name() string               { return "Read the Runes (Red)" }
-func (ReadTheRunesRed) Cost() int                  { return 0 }
+func (ReadTheRunesRed) Cost(*card.TurnState) int                  { return 0 }
 func (ReadTheRunesRed) Pitch() int                 { return 1 }
 func (ReadTheRunesRed) Attack() int                { return 0 }
 func (ReadTheRunesRed) Defense() int               { return 2 }
@@ -28,7 +28,7 @@ type ReadTheRunesYellow struct{}
 
 func (ReadTheRunesYellow) ID() card.ID                 { return card.ReadTheRunesYellow }
 func (ReadTheRunesYellow) Name() string               { return "Read the Runes (Yellow)" }
-func (ReadTheRunesYellow) Cost() int                  { return 0 }
+func (ReadTheRunesYellow) Cost(*card.TurnState) int                  { return 0 }
 func (ReadTheRunesYellow) Pitch() int                 { return 2 }
 func (ReadTheRunesYellow) Attack() int                { return 0 }
 func (ReadTheRunesYellow) Defense() int               { return 2 }
@@ -40,7 +40,7 @@ type ReadTheRunesBlue struct{}
 
 func (ReadTheRunesBlue) ID() card.ID                 { return card.ReadTheRunesBlue }
 func (ReadTheRunesBlue) Name() string               { return "Read the Runes (Blue)" }
-func (ReadTheRunesBlue) Cost() int                  { return 0 }
+func (ReadTheRunesBlue) Cost(*card.TurnState) int                  { return 0 }
 func (ReadTheRunesBlue) Pitch() int                 { return 3 }
 func (ReadTheRunesBlue) Attack() int                { return 0 }
 func (ReadTheRunesBlue) Defense() int               { return 2 }

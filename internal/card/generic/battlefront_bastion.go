@@ -17,7 +17,7 @@ type BattlefrontBastionRed struct{}
 
 func (BattlefrontBastionRed) ID() card.ID                 { return card.BattlefrontBastionRed }
 func (BattlefrontBastionRed) Name() string                { return "Battlefront Bastion (Red)" }
-func (BattlefrontBastionRed) Cost() int                   { return 3 }
+func (BattlefrontBastionRed) Cost(*card.TurnState) int                   { return 3 }
 func (BattlefrontBastionRed) Pitch() int                  { return 1 }
 func (BattlefrontBastionRed) Attack() int                 { return 7 }
 func (BattlefrontBastionRed) Defense() int                { return 2 }
@@ -29,7 +29,7 @@ type BattlefrontBastionYellow struct{}
 
 func (BattlefrontBastionYellow) ID() card.ID                 { return card.BattlefrontBastionYellow }
 func (BattlefrontBastionYellow) Name() string                { return "Battlefront Bastion (Yellow)" }
-func (BattlefrontBastionYellow) Cost() int                   { return 3 }
+func (BattlefrontBastionYellow) Cost(*card.TurnState) int                   { return 3 }
 func (BattlefrontBastionYellow) Pitch() int                  { return 2 }
 func (BattlefrontBastionYellow) Attack() int                 { return 6 }
 func (BattlefrontBastionYellow) Defense() int                { return 2 }
@@ -41,7 +41,7 @@ type BattlefrontBastionBlue struct{}
 
 func (BattlefrontBastionBlue) ID() card.ID                 { return card.BattlefrontBastionBlue }
 func (BattlefrontBastionBlue) Name() string                { return "Battlefront Bastion (Blue)" }
-func (BattlefrontBastionBlue) Cost() int                   { return 3 }
+func (BattlefrontBastionBlue) Cost(*card.TurnState) int                   { return 3 }
 func (BattlefrontBastionBlue) Pitch() int                  { return 3 }
 func (BattlefrontBastionBlue) Attack() int                 { return 5 }
 func (BattlefrontBastionBlue) Defense() int                { return 2 }

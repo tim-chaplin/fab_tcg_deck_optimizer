@@ -17,7 +17,7 @@ type DestructiveDeliberationRed struct{}
 
 func (DestructiveDeliberationRed) ID() card.ID                 { return card.DestructiveDeliberationRed }
 func (DestructiveDeliberationRed) Name() string                { return "Destructive Deliberation (Red)" }
-func (DestructiveDeliberationRed) Cost() int                   { return 2 }
+func (DestructiveDeliberationRed) Cost(*card.TurnState) int                   { return 2 }
 func (DestructiveDeliberationRed) Pitch() int                  { return 1 }
 func (DestructiveDeliberationRed) Attack() int                 { return 5 }
 func (DestructiveDeliberationRed) Defense() int                { return 2 }
@@ -29,7 +29,7 @@ type DestructiveDeliberationYellow struct{}
 
 func (DestructiveDeliberationYellow) ID() card.ID                 { return card.DestructiveDeliberationYellow }
 func (DestructiveDeliberationYellow) Name() string                { return "Destructive Deliberation (Yellow)" }
-func (DestructiveDeliberationYellow) Cost() int                   { return 2 }
+func (DestructiveDeliberationYellow) Cost(*card.TurnState) int                   { return 2 }
 func (DestructiveDeliberationYellow) Pitch() int                  { return 2 }
 func (DestructiveDeliberationYellow) Attack() int                 { return 4 }
 func (DestructiveDeliberationYellow) Defense() int                { return 2 }
@@ -41,7 +41,7 @@ type DestructiveDeliberationBlue struct{}
 
 func (DestructiveDeliberationBlue) ID() card.ID                 { return card.DestructiveDeliberationBlue }
 func (DestructiveDeliberationBlue) Name() string                { return "Destructive Deliberation (Blue)" }
-func (DestructiveDeliberationBlue) Cost() int                   { return 2 }
+func (DestructiveDeliberationBlue) Cost(*card.TurnState) int                   { return 2 }
 func (DestructiveDeliberationBlue) Pitch() int                  { return 3 }
 func (DestructiveDeliberationBlue) Attack() int                 { return 3 }
 func (DestructiveDeliberationBlue) Defense() int                { return 2 }

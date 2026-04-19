@@ -30,7 +30,7 @@ type ConsumingVolitionRed struct{}
 
 func (ConsumingVolitionRed) ID() card.ID                  { return card.ConsumingVolitionRed }
 func (ConsumingVolitionRed) Name() string                 { return "Consuming Volition (Red)" }
-func (ConsumingVolitionRed) Cost() int                    { return 1 }
+func (ConsumingVolitionRed) Cost(*card.TurnState) int                    { return 1 }
 func (ConsumingVolitionRed) Pitch() int                   { return 1 }
 func (ConsumingVolitionRed) Attack() int                  { return 4 }
 func (ConsumingVolitionRed) Defense() int                 { return 3 }
@@ -42,7 +42,7 @@ type ConsumingVolitionYellow struct{}
 
 func (ConsumingVolitionYellow) ID() card.ID                  { return card.ConsumingVolitionYellow }
 func (ConsumingVolitionYellow) Name() string                 { return "Consuming Volition (Yellow)" }
-func (ConsumingVolitionYellow) Cost() int                    { return 1 }
+func (ConsumingVolitionYellow) Cost(*card.TurnState) int                    { return 1 }
 func (ConsumingVolitionYellow) Pitch() int                   { return 2 }
 func (ConsumingVolitionYellow) Attack() int                  { return 3 }
 func (ConsumingVolitionYellow) Defense() int                 { return 3 }
@@ -54,7 +54,7 @@ type ConsumingVolitionBlue struct{}
 
 func (ConsumingVolitionBlue) ID() card.ID                  { return card.ConsumingVolitionBlue }
 func (ConsumingVolitionBlue) Name() string                 { return "Consuming Volition (Blue)" }
-func (ConsumingVolitionBlue) Cost() int                    { return 1 }
+func (ConsumingVolitionBlue) Cost(*card.TurnState) int                    { return 1 }
 func (ConsumingVolitionBlue) Pitch() int                   { return 3 }
 func (ConsumingVolitionBlue) Attack() int                  { return 2 }
 func (ConsumingVolitionBlue) Defense() int                 { return 3 }

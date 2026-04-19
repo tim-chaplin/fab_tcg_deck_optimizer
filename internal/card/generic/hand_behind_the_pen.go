@@ -18,7 +18,7 @@ type HandBehindThePenRed struct{}
 
 func (HandBehindThePenRed) ID() card.ID                 { return card.HandBehindThePenRed }
 func (HandBehindThePenRed) Name() string                { return "Hand Behind the Pen (Red)" }
-func (HandBehindThePenRed) Cost() int                   { return 2 }
+func (HandBehindThePenRed) Cost(*card.TurnState) int                   { return 2 }
 func (HandBehindThePenRed) Pitch() int                  { return 1 }
 func (HandBehindThePenRed) Attack() int                 { return 6 }
 func (HandBehindThePenRed) Defense() int                { return 2 }

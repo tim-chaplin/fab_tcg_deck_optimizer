@@ -17,7 +17,7 @@ type SpringLoadRed struct{}
 
 func (SpringLoadRed) ID() card.ID                 { return card.SpringLoadRed }
 func (SpringLoadRed) Name() string                { return "Spring Load (Red)" }
-func (SpringLoadRed) Cost() int                   { return 1 }
+func (SpringLoadRed) Cost(*card.TurnState) int                   { return 1 }
 func (SpringLoadRed) Pitch() int                  { return 1 }
 func (SpringLoadRed) Attack() int                 { return 2 }
 func (SpringLoadRed) Defense() int                { return 2 }
@@ -29,7 +29,7 @@ type SpringLoadYellow struct{}
 
 func (SpringLoadYellow) ID() card.ID                 { return card.SpringLoadYellow }
 func (SpringLoadYellow) Name() string                { return "Spring Load (Yellow)" }
-func (SpringLoadYellow) Cost() int                   { return 1 }
+func (SpringLoadYellow) Cost(*card.TurnState) int                   { return 1 }
 func (SpringLoadYellow) Pitch() int                  { return 2 }
 func (SpringLoadYellow) Attack() int                 { return 2 }
 func (SpringLoadYellow) Defense() int                { return 2 }
@@ -41,7 +41,7 @@ type SpringLoadBlue struct{}
 
 func (SpringLoadBlue) ID() card.ID                 { return card.SpringLoadBlue }
 func (SpringLoadBlue) Name() string                { return "Spring Load (Blue)" }
-func (SpringLoadBlue) Cost() int                   { return 1 }
+func (SpringLoadBlue) Cost(*card.TurnState) int                   { return 1 }
 func (SpringLoadBlue) Pitch() int                  { return 3 }
 func (SpringLoadBlue) Attack() int                 { return 2 }
 func (SpringLoadBlue) Defense() int                { return 2 }

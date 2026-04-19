@@ -18,7 +18,7 @@ type NimbleStrikeRed struct{}
 
 func (NimbleStrikeRed) ID() card.ID                 { return card.NimbleStrikeRed }
 func (NimbleStrikeRed) Name() string                { return "Nimble Strike (Red)" }
-func (NimbleStrikeRed) Cost() int                   { return 1 }
+func (NimbleStrikeRed) Cost(*card.TurnState) int                   { return 1 }
 func (NimbleStrikeRed) Pitch() int                  { return 1 }
 func (NimbleStrikeRed) Attack() int                 { return 4 }
 func (NimbleStrikeRed) Defense() int                { return 2 }
@@ -30,7 +30,7 @@ type NimbleStrikeYellow struct{}
 
 func (NimbleStrikeYellow) ID() card.ID                 { return card.NimbleStrikeYellow }
 func (NimbleStrikeYellow) Name() string                { return "Nimble Strike (Yellow)" }
-func (NimbleStrikeYellow) Cost() int                   { return 1 }
+func (NimbleStrikeYellow) Cost(*card.TurnState) int                   { return 1 }
 func (NimbleStrikeYellow) Pitch() int                  { return 2 }
 func (NimbleStrikeYellow) Attack() int                 { return 3 }
 func (NimbleStrikeYellow) Defense() int                { return 2 }
@@ -42,7 +42,7 @@ type NimbleStrikeBlue struct{}
 
 func (NimbleStrikeBlue) ID() card.ID                 { return card.NimbleStrikeBlue }
 func (NimbleStrikeBlue) Name() string                { return "Nimble Strike (Blue)" }
-func (NimbleStrikeBlue) Cost() int                   { return 1 }
+func (NimbleStrikeBlue) Cost(*card.TurnState) int                   { return 1 }
 func (NimbleStrikeBlue) Pitch() int                  { return 3 }
 func (NimbleStrikeBlue) Attack() int                 { return 2 }
 func (NimbleStrikeBlue) Defense() int                { return 2 }

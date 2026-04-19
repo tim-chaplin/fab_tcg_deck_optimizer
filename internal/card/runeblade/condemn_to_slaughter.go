@@ -21,7 +21,7 @@ type CondemnToSlaughterRed struct{}
 
 func (CondemnToSlaughterRed) ID() card.ID                 { return card.CondemnToSlaughterRed }
 func (CondemnToSlaughterRed) Name() string               { return "Condemn to Slaughter (Red)" }
-func (CondemnToSlaughterRed) Cost() int                  { return 1 }
+func (CondemnToSlaughterRed) Cost(*card.TurnState) int                  { return 1 }
 func (CondemnToSlaughterRed) Pitch() int                 { return 1 }
 func (CondemnToSlaughterRed) Attack() int                { return 0 }
 func (CondemnToSlaughterRed) Defense() int               { return 3 }
@@ -33,7 +33,7 @@ type CondemnToSlaughterYellow struct{}
 
 func (CondemnToSlaughterYellow) ID() card.ID                 { return card.CondemnToSlaughterYellow }
 func (CondemnToSlaughterYellow) Name() string               { return "Condemn to Slaughter (Yellow)" }
-func (CondemnToSlaughterYellow) Cost() int                  { return 1 }
+func (CondemnToSlaughterYellow) Cost(*card.TurnState) int                  { return 1 }
 func (CondemnToSlaughterYellow) Pitch() int                 { return 2 }
 func (CondemnToSlaughterYellow) Attack() int                { return 0 }
 func (CondemnToSlaughterYellow) Defense() int               { return 3 }
@@ -45,7 +45,7 @@ type CondemnToSlaughterBlue struct{}
 
 func (CondemnToSlaughterBlue) ID() card.ID                 { return card.CondemnToSlaughterBlue }
 func (CondemnToSlaughterBlue) Name() string               { return "Condemn to Slaughter (Blue)" }
-func (CondemnToSlaughterBlue) Cost() int                  { return 1 }
+func (CondemnToSlaughterBlue) Cost(*card.TurnState) int                  { return 1 }
 func (CondemnToSlaughterBlue) Pitch() int                 { return 3 }
 func (CondemnToSlaughterBlue) Attack() int                { return 0 }
 func (CondemnToSlaughterBlue) Defense() int               { return 3 }

@@ -13,7 +13,7 @@ type RagingOnslaughtRed struct{}
 
 func (RagingOnslaughtRed) ID() card.ID                 { return card.RagingOnslaughtRed }
 func (RagingOnslaughtRed) Name() string                { return "Raging Onslaught (Red)" }
-func (RagingOnslaughtRed) Cost() int                   { return 3 }
+func (RagingOnslaughtRed) Cost(*card.TurnState) int                   { return 3 }
 func (RagingOnslaughtRed) Pitch() int                  { return 1 }
 func (RagingOnslaughtRed) Attack() int                 { return 7 }
 func (RagingOnslaughtRed) Defense() int                { return 3 }
@@ -25,7 +25,7 @@ type RagingOnslaughtYellow struct{}
 
 func (RagingOnslaughtYellow) ID() card.ID                 { return card.RagingOnslaughtYellow }
 func (RagingOnslaughtYellow) Name() string                { return "Raging Onslaught (Yellow)" }
-func (RagingOnslaughtYellow) Cost() int                   { return 3 }
+func (RagingOnslaughtYellow) Cost(*card.TurnState) int                   { return 3 }
 func (RagingOnslaughtYellow) Pitch() int                  { return 2 }
 func (RagingOnslaughtYellow) Attack() int                 { return 6 }
 func (RagingOnslaughtYellow) Defense() int                { return 3 }
@@ -37,7 +37,7 @@ type RagingOnslaughtBlue struct{}
 
 func (RagingOnslaughtBlue) ID() card.ID                 { return card.RagingOnslaughtBlue }
 func (RagingOnslaughtBlue) Name() string                { return "Raging Onslaught (Blue)" }
-func (RagingOnslaughtBlue) Cost() int                   { return 3 }
+func (RagingOnslaughtBlue) Cost(*card.TurnState) int                   { return 3 }
 func (RagingOnslaughtBlue) Pitch() int                  { return 3 }
 func (RagingOnslaughtBlue) Attack() int                 { return 5 }
 func (RagingOnslaughtBlue) Defense() int                { return 3 }

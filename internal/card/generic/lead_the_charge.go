@@ -18,7 +18,7 @@ type LeadTheChargeRed struct{}
 
 func (LeadTheChargeRed) ID() card.ID                 { return card.LeadTheChargeRed }
 func (LeadTheChargeRed) Name() string                { return "Lead the Charge (Red)" }
-func (LeadTheChargeRed) Cost() int                   { return 0 }
+func (LeadTheChargeRed) Cost(*card.TurnState) int                   { return 0 }
 func (LeadTheChargeRed) Pitch() int                  { return 1 }
 func (LeadTheChargeRed) Attack() int                 { return 0 }
 func (LeadTheChargeRed) Defense() int                { return 2 }
@@ -30,7 +30,7 @@ type LeadTheChargeYellow struct{}
 
 func (LeadTheChargeYellow) ID() card.ID                 { return card.LeadTheChargeYellow }
 func (LeadTheChargeYellow) Name() string                { return "Lead the Charge (Yellow)" }
-func (LeadTheChargeYellow) Cost() int                   { return 0 }
+func (LeadTheChargeYellow) Cost(*card.TurnState) int                   { return 0 }
 func (LeadTheChargeYellow) Pitch() int                  { return 2 }
 func (LeadTheChargeYellow) Attack() int                 { return 0 }
 func (LeadTheChargeYellow) Defense() int                { return 2 }
@@ -42,7 +42,7 @@ type LeadTheChargeBlue struct{}
 
 func (LeadTheChargeBlue) ID() card.ID                 { return card.LeadTheChargeBlue }
 func (LeadTheChargeBlue) Name() string                { return "Lead the Charge (Blue)" }
-func (LeadTheChargeBlue) Cost() int                   { return 0 }
+func (LeadTheChargeBlue) Cost(*card.TurnState) int                   { return 0 }
 func (LeadTheChargeBlue) Pitch() int                  { return 3 }
 func (LeadTheChargeBlue) Attack() int                 { return 0 }
 func (LeadTheChargeBlue) Defense() int                { return 2 }

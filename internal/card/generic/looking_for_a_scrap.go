@@ -18,7 +18,7 @@ type LookingForAScrapRed struct{}
 
 func (LookingForAScrapRed) ID() card.ID                 { return card.LookingForAScrapRed }
 func (LookingForAScrapRed) Name() string                { return "Looking for a Scrap (Red)" }
-func (LookingForAScrapRed) Cost() int                   { return 1 }
+func (LookingForAScrapRed) Cost(*card.TurnState) int                   { return 1 }
 func (LookingForAScrapRed) Pitch() int                  { return 1 }
 func (LookingForAScrapRed) Attack() int                 { return 4 }
 func (LookingForAScrapRed) Defense() int                { return 2 }
@@ -30,7 +30,7 @@ type LookingForAScrapYellow struct{}
 
 func (LookingForAScrapYellow) ID() card.ID                 { return card.LookingForAScrapYellow }
 func (LookingForAScrapYellow) Name() string                { return "Looking for a Scrap (Yellow)" }
-func (LookingForAScrapYellow) Cost() int                   { return 1 }
+func (LookingForAScrapYellow) Cost(*card.TurnState) int                   { return 1 }
 func (LookingForAScrapYellow) Pitch() int                  { return 2 }
 func (LookingForAScrapYellow) Attack() int                 { return 3 }
 func (LookingForAScrapYellow) Defense() int                { return 2 }
@@ -42,7 +42,7 @@ type LookingForAScrapBlue struct{}
 
 func (LookingForAScrapBlue) ID() card.ID                 { return card.LookingForAScrapBlue }
 func (LookingForAScrapBlue) Name() string                { return "Looking for a Scrap (Blue)" }
-func (LookingForAScrapBlue) Cost() int                   { return 1 }
+func (LookingForAScrapBlue) Cost(*card.TurnState) int                   { return 1 }
 func (LookingForAScrapBlue) Pitch() int                  { return 3 }
 func (LookingForAScrapBlue) Attack() int                 { return 2 }
 func (LookingForAScrapBlue) Defense() int                { return 2 }

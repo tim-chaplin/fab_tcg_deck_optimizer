@@ -13,7 +13,7 @@ type CriticalStrikeRed struct{}
 
 func (CriticalStrikeRed) ID() card.ID                 { return card.CriticalStrikeRed }
 func (CriticalStrikeRed) Name() string                { return "Critical Strike (Red)" }
-func (CriticalStrikeRed) Cost() int                   { return 1 }
+func (CriticalStrikeRed) Cost(*card.TurnState) int                   { return 1 }
 func (CriticalStrikeRed) Pitch() int                  { return 1 }
 func (CriticalStrikeRed) Attack() int                 { return 5 }
 func (CriticalStrikeRed) Defense() int                { return 3 }
@@ -25,7 +25,7 @@ type CriticalStrikeYellow struct{}
 
 func (CriticalStrikeYellow) ID() card.ID                 { return card.CriticalStrikeYellow }
 func (CriticalStrikeYellow) Name() string                { return "Critical Strike (Yellow)" }
-func (CriticalStrikeYellow) Cost() int                   { return 1 }
+func (CriticalStrikeYellow) Cost(*card.TurnState) int                   { return 1 }
 func (CriticalStrikeYellow) Pitch() int                  { return 2 }
 func (CriticalStrikeYellow) Attack() int                 { return 4 }
 func (CriticalStrikeYellow) Defense() int                { return 3 }
@@ -37,7 +37,7 @@ type CriticalStrikeBlue struct{}
 
 func (CriticalStrikeBlue) ID() card.ID                 { return card.CriticalStrikeBlue }
 func (CriticalStrikeBlue) Name() string                { return "Critical Strike (Blue)" }
-func (CriticalStrikeBlue) Cost() int                   { return 1 }
+func (CriticalStrikeBlue) Cost(*card.TurnState) int                   { return 1 }
 func (CriticalStrikeBlue) Pitch() int                  { return 3 }
 func (CriticalStrikeBlue) Attack() int                 { return 3 }
 func (CriticalStrikeBlue) Defense() int                { return 3 }

@@ -27,7 +27,7 @@ type StrikeGoldRed struct{}
 
 func (StrikeGoldRed) ID() card.ID                  { return card.StrikeGoldRed }
 func (StrikeGoldRed) Name() string                 { return "Strike Gold (Red)" }
-func (StrikeGoldRed) Cost() int                    { return 0 }
+func (StrikeGoldRed) Cost(*card.TurnState) int                    { return 0 }
 func (StrikeGoldRed) Pitch() int                   { return 1 }
 func (StrikeGoldRed) Attack() int                  { return 4 }
 func (StrikeGoldRed) Defense() int                 { return 2 }
@@ -39,7 +39,7 @@ type StrikeGoldYellow struct{}
 
 func (StrikeGoldYellow) ID() card.ID                  { return card.StrikeGoldYellow }
 func (StrikeGoldYellow) Name() string                 { return "Strike Gold (Yellow)" }
-func (StrikeGoldYellow) Cost() int                    { return 0 }
+func (StrikeGoldYellow) Cost(*card.TurnState) int                    { return 0 }
 func (StrikeGoldYellow) Pitch() int                   { return 2 }
 func (StrikeGoldYellow) Attack() int                  { return 3 }
 func (StrikeGoldYellow) Defense() int                 { return 2 }
@@ -51,7 +51,7 @@ type StrikeGoldBlue struct{}
 
 func (StrikeGoldBlue) ID() card.ID                  { return card.StrikeGoldBlue }
 func (StrikeGoldBlue) Name() string                 { return "Strike Gold (Blue)" }
-func (StrikeGoldBlue) Cost() int                    { return 0 }
+func (StrikeGoldBlue) Cost(*card.TurnState) int                    { return 0 }
 func (StrikeGoldBlue) Pitch() int                   { return 3 }
 func (StrikeGoldBlue) Attack() int                  { return 2 }
 func (StrikeGoldBlue) Defense() int                 { return 2 }

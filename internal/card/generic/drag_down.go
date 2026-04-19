@@ -16,7 +16,7 @@ type DragDownRed struct{}
 
 func (DragDownRed) ID() card.ID                 { return card.DragDownRed }
 func (DragDownRed) Name() string                { return "Drag Down (Red)" }
-func (DragDownRed) Cost() int                   { return 0 }
+func (DragDownRed) Cost(*card.TurnState) int                   { return 0 }
 func (DragDownRed) Pitch() int                  { return 1 }
 func (DragDownRed) Attack() int                 { return 0 }
 func (DragDownRed) Defense() int                { return 0 }
@@ -28,7 +28,7 @@ type DragDownYellow struct{}
 
 func (DragDownYellow) ID() card.ID                 { return card.DragDownYellow }
 func (DragDownYellow) Name() string                { return "Drag Down (Yellow)" }
-func (DragDownYellow) Cost() int                   { return 0 }
+func (DragDownYellow) Cost(*card.TurnState) int                   { return 0 }
 func (DragDownYellow) Pitch() int                  { return 2 }
 func (DragDownYellow) Attack() int                 { return 0 }
 func (DragDownYellow) Defense() int                { return 0 }
@@ -40,7 +40,7 @@ type DragDownBlue struct{}
 
 func (DragDownBlue) ID() card.ID                 { return card.DragDownBlue }
 func (DragDownBlue) Name() string                { return "Drag Down (Blue)" }
-func (DragDownBlue) Cost() int                   { return 0 }
+func (DragDownBlue) Cost(*card.TurnState) int                   { return 0 }
 func (DragDownBlue) Pitch() int                  { return 3 }
 func (DragDownBlue) Attack() int                 { return 0 }
 func (DragDownBlue) Defense() int                { return 0 }

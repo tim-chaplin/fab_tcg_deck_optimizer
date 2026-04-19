@@ -17,7 +17,7 @@ type BlanchRed struct{}
 
 func (BlanchRed) ID() card.ID                 { return card.BlanchRed }
 func (BlanchRed) Name() string                { return "Blanch (Red)" }
-func (BlanchRed) Cost() int                   { return 3 }
+func (BlanchRed) Cost(*card.TurnState) int                   { return 3 }
 func (BlanchRed) Pitch() int                  { return 1 }
 func (BlanchRed) Attack() int                 { return 7 }
 func (BlanchRed) Defense() int                { return 2 }
@@ -29,7 +29,7 @@ type BlanchYellow struct{}
 
 func (BlanchYellow) ID() card.ID                 { return card.BlanchYellow }
 func (BlanchYellow) Name() string                { return "Blanch (Yellow)" }
-func (BlanchYellow) Cost() int                   { return 3 }
+func (BlanchYellow) Cost(*card.TurnState) int                   { return 3 }
 func (BlanchYellow) Pitch() int                  { return 2 }
 func (BlanchYellow) Attack() int                 { return 6 }
 func (BlanchYellow) Defense() int                { return 2 }
@@ -41,7 +41,7 @@ type BlanchBlue struct{}
 
 func (BlanchBlue) ID() card.ID                 { return card.BlanchBlue }
 func (BlanchBlue) Name() string                { return "Blanch (Blue)" }
-func (BlanchBlue) Cost() int                   { return 3 }
+func (BlanchBlue) Cost(*card.TurnState) int                   { return 3 }
 func (BlanchBlue) Pitch() int                  { return 3 }
 func (BlanchBlue) Attack() int                 { return 5 }
 func (BlanchBlue) Defense() int                { return 2 }

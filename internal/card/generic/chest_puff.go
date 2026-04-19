@@ -16,7 +16,7 @@ type ChestPuffRed struct{}
 
 func (ChestPuffRed) ID() card.ID                 { return card.ChestPuffRed }
 func (ChestPuffRed) Name() string                { return "Chest Puff (Red)" }
-func (ChestPuffRed) Cost() int                   { return 2 }
+func (ChestPuffRed) Cost(*card.TurnState) int                   { return 2 }
 func (ChestPuffRed) Pitch() int                  { return 1 }
 func (ChestPuffRed) Attack() int                 { return 7 }
 func (ChestPuffRed) Defense() int                { return 3 }

@@ -11,7 +11,7 @@ type stubRuneAttack struct{}
 
 func (stubRuneAttack) ID() card.ID             { return card.Invalid }
 func (stubRuneAttack) Name() string                { return "StubRuneAttack" }
-func (stubRuneAttack) Cost() int                   { return 0 }
+func (stubRuneAttack) Cost(*card.TurnState) int                   { return 0 }
 func (stubRuneAttack) Pitch() int                  { return 0 }
 func (stubRuneAttack) Attack() int                 { return 0 }
 func (stubRuneAttack) Defense() int                { return 0 }
@@ -26,7 +26,7 @@ type stubRuneAura struct{}
 
 func (stubRuneAura) ID() card.ID             { return card.Invalid }
 func (stubRuneAura) Name() string                { return "StubRuneAura" }
-func (stubRuneAura) Cost() int                   { return 0 }
+func (stubRuneAura) Cost(*card.TurnState) int                   { return 0 }
 func (stubRuneAura) Pitch() int                  { return 0 }
 func (stubRuneAura) Attack() int                 { return 0 }
 func (stubRuneAura) Defense() int                { return 0 }
@@ -41,7 +41,7 @@ type stubNonRuneblade struct{}
 
 func (stubNonRuneblade) ID() card.ID             { return card.Invalid }
 func (stubNonRuneblade) Name() string             { return "StubGeneric" }
-func (stubNonRuneblade) Cost() int                { return 0 }
+func (stubNonRuneblade) Cost(*card.TurnState) int                { return 0 }
 func (stubNonRuneblade) Pitch() int               { return 0 }
 func (stubNonRuneblade) Attack() int              { return 0 }
 func (stubNonRuneblade) Defense() int             { return 0 }
@@ -87,7 +87,7 @@ type stubRuneWeapon struct{}
 
 func (stubRuneWeapon) ID() card.ID             { return card.Invalid }
 func (stubRuneWeapon) Name() string             { return "StubRuneWeapon" }
-func (stubRuneWeapon) Cost() int                { return 0 }
+func (stubRuneWeapon) Cost(*card.TurnState) int                { return 0 }
 func (stubRuneWeapon) Pitch() int               { return 0 }
 func (stubRuneWeapon) Attack() int              { return 0 }
 func (stubRuneWeapon) Defense() int             { return 0 }

@@ -18,7 +18,7 @@ type OutMuscleRed struct{}
 
 func (OutMuscleRed) ID() card.ID                 { return card.OutMuscleRed }
 func (OutMuscleRed) Name() string                { return "Out Muscle (Red)" }
-func (OutMuscleRed) Cost() int                   { return 3 }
+func (OutMuscleRed) Cost(*card.TurnState) int                   { return 3 }
 func (OutMuscleRed) Pitch() int                  { return 1 }
 func (OutMuscleRed) Attack() int                 { return 6 }
 func (OutMuscleRed) Defense() int                { return 2 }
@@ -30,7 +30,7 @@ type OutMuscleYellow struct{}
 
 func (OutMuscleYellow) ID() card.ID                 { return card.OutMuscleYellow }
 func (OutMuscleYellow) Name() string                { return "Out Muscle (Yellow)" }
-func (OutMuscleYellow) Cost() int                   { return 3 }
+func (OutMuscleYellow) Cost(*card.TurnState) int                   { return 3 }
 func (OutMuscleYellow) Pitch() int                  { return 2 }
 func (OutMuscleYellow) Attack() int                 { return 5 }
 func (OutMuscleYellow) Defense() int                { return 2 }
@@ -42,7 +42,7 @@ type OutMuscleBlue struct{}
 
 func (OutMuscleBlue) ID() card.ID                 { return card.OutMuscleBlue }
 func (OutMuscleBlue) Name() string                { return "Out Muscle (Blue)" }
-func (OutMuscleBlue) Cost() int                   { return 3 }
+func (OutMuscleBlue) Cost(*card.TurnState) int                   { return 3 }
 func (OutMuscleBlue) Pitch() int                  { return 3 }
 func (OutMuscleBlue) Attack() int                 { return 4 }
 func (OutMuscleBlue) Defense() int                { return 2 }

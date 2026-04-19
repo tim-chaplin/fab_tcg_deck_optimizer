@@ -16,7 +16,7 @@ type SpellbladeAssaultRed struct{}
 
 func (SpellbladeAssaultRed) ID() card.ID                 { return card.SpellbladeAssaultRed }
 func (SpellbladeAssaultRed) Name() string               { return "Spellblade Assault (Red)" }
-func (SpellbladeAssaultRed) Cost() int                  { return 2 }
+func (SpellbladeAssaultRed) Cost(*card.TurnState) int                  { return 2 }
 func (SpellbladeAssaultRed) Pitch() int                 { return 1 }
 func (SpellbladeAssaultRed) Attack() int                { return 4 }
 func (SpellbladeAssaultRed) Defense() int               { return 3 }
@@ -28,7 +28,7 @@ type SpellbladeAssaultYellow struct{}
 
 func (SpellbladeAssaultYellow) ID() card.ID                 { return card.SpellbladeAssaultYellow }
 func (SpellbladeAssaultYellow) Name() string               { return "Spellblade Assault (Yellow)" }
-func (SpellbladeAssaultYellow) Cost() int                  { return 2 }
+func (SpellbladeAssaultYellow) Cost(*card.TurnState) int                  { return 2 }
 func (SpellbladeAssaultYellow) Pitch() int                 { return 2 }
 func (SpellbladeAssaultYellow) Attack() int                { return 3 }
 func (SpellbladeAssaultYellow) Defense() int               { return 3 }
@@ -40,7 +40,7 @@ type SpellbladeAssaultBlue struct{}
 
 func (SpellbladeAssaultBlue) ID() card.ID                 { return card.SpellbladeAssaultBlue }
 func (SpellbladeAssaultBlue) Name() string               { return "Spellblade Assault (Blue)" }
-func (SpellbladeAssaultBlue) Cost() int                  { return 2 }
+func (SpellbladeAssaultBlue) Cost(*card.TurnState) int                  { return 2 }
 func (SpellbladeAssaultBlue) Pitch() int                 { return 3 }
 func (SpellbladeAssaultBlue) Attack() int                { return 2 }
 func (SpellbladeAssaultBlue) Defense() int               { return 3 }

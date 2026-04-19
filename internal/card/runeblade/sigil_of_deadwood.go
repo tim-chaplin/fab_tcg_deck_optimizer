@@ -18,7 +18,7 @@ type SigilOfDeadwoodBlue struct{}
 
 func (SigilOfDeadwoodBlue) ID() card.ID                 { return card.SigilOfDeadwoodBlue }
 func (SigilOfDeadwoodBlue) Name() string             { return "Sigil of Deadwood (Blue)" }
-func (SigilOfDeadwoodBlue) Cost() int                { return 0 }
+func (SigilOfDeadwoodBlue) Cost(*card.TurnState) int                { return 0 }
 func (SigilOfDeadwoodBlue) Pitch() int               { return 3 }
 func (SigilOfDeadwoodBlue) Attack() int              { return 0 }
 func (SigilOfDeadwoodBlue) Defense() int             { return 2 }

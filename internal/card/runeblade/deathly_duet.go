@@ -20,7 +20,7 @@ type DeathlyDuetRed struct{}
 
 func (DeathlyDuetRed) ID() card.ID                 { return card.DeathlyDuetRed }
 func (DeathlyDuetRed) Name() string                 { return "Deathly Duet (Red)" }
-func (DeathlyDuetRed) Cost() int                    { return 2 }
+func (DeathlyDuetRed) Cost(*card.TurnState) int                    { return 2 }
 func (DeathlyDuetRed) Pitch() int                   { return 1 }
 func (DeathlyDuetRed) Attack() int                  { return 4 }
 func (DeathlyDuetRed) Defense() int                 { return 3 }
@@ -32,7 +32,7 @@ type DeathlyDuetYellow struct{}
 
 func (DeathlyDuetYellow) ID() card.ID                 { return card.DeathlyDuetYellow }
 func (DeathlyDuetYellow) Name() string                 { return "Deathly Duet (Yellow)" }
-func (DeathlyDuetYellow) Cost() int                    { return 2 }
+func (DeathlyDuetYellow) Cost(*card.TurnState) int                    { return 2 }
 func (DeathlyDuetYellow) Pitch() int                   { return 2 }
 func (DeathlyDuetYellow) Attack() int                  { return 3 }
 func (DeathlyDuetYellow) Defense() int                 { return 3 }
@@ -44,7 +44,7 @@ type DeathlyDuetBlue struct{}
 
 func (DeathlyDuetBlue) ID() card.ID                 { return card.DeathlyDuetBlue }
 func (DeathlyDuetBlue) Name() string                 { return "Deathly Duet (Blue)" }
-func (DeathlyDuetBlue) Cost() int                    { return 2 }
+func (DeathlyDuetBlue) Cost(*card.TurnState) int                    { return 2 }
 func (DeathlyDuetBlue) Pitch() int                   { return 3 }
 func (DeathlyDuetBlue) Attack() int                  { return 2 }
 func (DeathlyDuetBlue) Defense() int                 { return 3 }

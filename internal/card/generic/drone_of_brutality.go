@@ -18,7 +18,7 @@ type DroneOfBrutalityRed struct{}
 
 func (DroneOfBrutalityRed) ID() card.ID                 { return card.DroneOfBrutalityRed }
 func (DroneOfBrutalityRed) Name() string                { return "Drone of Brutality (Red)" }
-func (DroneOfBrutalityRed) Cost() int                   { return 2 }
+func (DroneOfBrutalityRed) Cost(*card.TurnState) int                   { return 2 }
 func (DroneOfBrutalityRed) Pitch() int                  { return 1 }
 func (DroneOfBrutalityRed) Attack() int                 { return 6 }
 func (DroneOfBrutalityRed) Defense() int                { return 2 }
@@ -31,7 +31,7 @@ type DroneOfBrutalityYellow struct{}
 
 func (DroneOfBrutalityYellow) ID() card.ID                 { return card.DroneOfBrutalityYellow }
 func (DroneOfBrutalityYellow) Name() string                { return "Drone of Brutality (Yellow)" }
-func (DroneOfBrutalityYellow) Cost() int                   { return 2 }
+func (DroneOfBrutalityYellow) Cost(*card.TurnState) int                   { return 2 }
 func (DroneOfBrutalityYellow) Pitch() int                  { return 2 }
 func (DroneOfBrutalityYellow) Attack() int                 { return 5 }
 func (DroneOfBrutalityYellow) Defense() int                { return 2 }
@@ -44,7 +44,7 @@ type DroneOfBrutalityBlue struct{}
 
 func (DroneOfBrutalityBlue) ID() card.ID                 { return card.DroneOfBrutalityBlue }
 func (DroneOfBrutalityBlue) Name() string                { return "Drone of Brutality (Blue)" }
-func (DroneOfBrutalityBlue) Cost() int                   { return 2 }
+func (DroneOfBrutalityBlue) Cost(*card.TurnState) int                   { return 2 }
 func (DroneOfBrutalityBlue) Pitch() int                  { return 3 }
 func (DroneOfBrutalityBlue) Attack() int                 { return 4 }
 func (DroneOfBrutalityBlue) Defense() int                { return 2 }

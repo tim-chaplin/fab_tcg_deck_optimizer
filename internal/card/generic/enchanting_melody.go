@@ -20,7 +20,7 @@ type EnchantingMelodyRed struct{}
 
 func (EnchantingMelodyRed) ID() card.ID                 { return card.EnchantingMelodyRed }
 func (EnchantingMelodyRed) Name() string                { return "Enchanting Melody (Red)" }
-func (EnchantingMelodyRed) Cost() int                   { return 2 }
+func (EnchantingMelodyRed) Cost(*card.TurnState) int                   { return 2 }
 func (EnchantingMelodyRed) Pitch() int                  { return 1 }
 func (EnchantingMelodyRed) Attack() int                 { return 0 }
 func (EnchantingMelodyRed) Defense() int                { return 2 }
@@ -32,7 +32,7 @@ type EnchantingMelodyYellow struct{}
 
 func (EnchantingMelodyYellow) ID() card.ID                 { return card.EnchantingMelodyYellow }
 func (EnchantingMelodyYellow) Name() string                { return "Enchanting Melody (Yellow)" }
-func (EnchantingMelodyYellow) Cost() int                   { return 2 }
+func (EnchantingMelodyYellow) Cost(*card.TurnState) int                   { return 2 }
 func (EnchantingMelodyYellow) Pitch() int                  { return 2 }
 func (EnchantingMelodyYellow) Attack() int                 { return 0 }
 func (EnchantingMelodyYellow) Defense() int                { return 2 }
@@ -44,7 +44,7 @@ type EnchantingMelodyBlue struct{}
 
 func (EnchantingMelodyBlue) ID() card.ID                 { return card.EnchantingMelodyBlue }
 func (EnchantingMelodyBlue) Name() string                { return "Enchanting Melody (Blue)" }
-func (EnchantingMelodyBlue) Cost() int                   { return 2 }
+func (EnchantingMelodyBlue) Cost(*card.TurnState) int                   { return 2 }
 func (EnchantingMelodyBlue) Pitch() int                  { return 3 }
 func (EnchantingMelodyBlue) Attack() int                 { return 0 }
 func (EnchantingMelodyBlue) Defense() int                { return 2 }

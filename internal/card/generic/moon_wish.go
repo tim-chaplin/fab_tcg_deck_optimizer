@@ -19,7 +19,7 @@ type MoonWishRed struct{}
 
 func (MoonWishRed) ID() card.ID                 { return card.MoonWishRed }
 func (MoonWishRed) Name() string                { return "Moon Wish (Red)" }
-func (MoonWishRed) Cost() int                   { return 2 }
+func (MoonWishRed) Cost(*card.TurnState) int                   { return 2 }
 func (MoonWishRed) Pitch() int                  { return 1 }
 func (MoonWishRed) Attack() int                 { return 5 }
 func (MoonWishRed) Defense() int                { return 2 }
@@ -31,7 +31,7 @@ type MoonWishYellow struct{}
 
 func (MoonWishYellow) ID() card.ID                 { return card.MoonWishYellow }
 func (MoonWishYellow) Name() string                { return "Moon Wish (Yellow)" }
-func (MoonWishYellow) Cost() int                   { return 2 }
+func (MoonWishYellow) Cost(*card.TurnState) int                   { return 2 }
 func (MoonWishYellow) Pitch() int                  { return 2 }
 func (MoonWishYellow) Attack() int                 { return 4 }
 func (MoonWishYellow) Defense() int                { return 2 }
@@ -43,7 +43,7 @@ type MoonWishBlue struct{}
 
 func (MoonWishBlue) ID() card.ID                 { return card.MoonWishBlue }
 func (MoonWishBlue) Name() string                { return "Moon Wish (Blue)" }
-func (MoonWishBlue) Cost() int                   { return 2 }
+func (MoonWishBlue) Cost(*card.TurnState) int                   { return 2 }
 func (MoonWishBlue) Pitch() int                  { return 3 }
 func (MoonWishBlue) Attack() int                 { return 3 }
 func (MoonWishBlue) Defense() int                { return 2 }

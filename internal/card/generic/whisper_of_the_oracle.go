@@ -17,7 +17,7 @@ type WhisperOfTheOracleRed struct{}
 
 func (WhisperOfTheOracleRed) ID() card.ID                 { return card.WhisperOfTheOracleRed }
 func (WhisperOfTheOracleRed) Name() string                { return "Whisper of the Oracle (Red)" }
-func (WhisperOfTheOracleRed) Cost() int                   { return 0 }
+func (WhisperOfTheOracleRed) Cost(*card.TurnState) int                   { return 0 }
 func (WhisperOfTheOracleRed) Pitch() int                  { return 1 }
 func (WhisperOfTheOracleRed) Attack() int                 { return 0 }
 func (WhisperOfTheOracleRed) Defense() int                { return 3 }
@@ -29,7 +29,7 @@ type WhisperOfTheOracleYellow struct{}
 
 func (WhisperOfTheOracleYellow) ID() card.ID                 { return card.WhisperOfTheOracleYellow }
 func (WhisperOfTheOracleYellow) Name() string                { return "Whisper of the Oracle (Yellow)" }
-func (WhisperOfTheOracleYellow) Cost() int                   { return 0 }
+func (WhisperOfTheOracleYellow) Cost(*card.TurnState) int                   { return 0 }
 func (WhisperOfTheOracleYellow) Pitch() int                  { return 2 }
 func (WhisperOfTheOracleYellow) Attack() int                 { return 0 }
 func (WhisperOfTheOracleYellow) Defense() int                { return 3 }
@@ -41,7 +41,7 @@ type WhisperOfTheOracleBlue struct{}
 
 func (WhisperOfTheOracleBlue) ID() card.ID                 { return card.WhisperOfTheOracleBlue }
 func (WhisperOfTheOracleBlue) Name() string                { return "Whisper of the Oracle (Blue)" }
-func (WhisperOfTheOracleBlue) Cost() int                   { return 0 }
+func (WhisperOfTheOracleBlue) Cost(*card.TurnState) int                   { return 0 }
 func (WhisperOfTheOracleBlue) Pitch() int                  { return 3 }
 func (WhisperOfTheOracleBlue) Attack() int                 { return 0 }
 func (WhisperOfTheOracleBlue) Defense() int                { return 3 }

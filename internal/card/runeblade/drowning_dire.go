@@ -19,7 +19,7 @@ type DrowningDireRed struct{}
 
 func (DrowningDireRed) ID() card.ID                 { return card.DrowningDireRed }
 func (DrowningDireRed) Name() string                 { return "Drowning Dire (Red)" }
-func (DrowningDireRed) Cost() int                    { return 2 }
+func (DrowningDireRed) Cost(*card.TurnState) int                    { return 2 }
 func (DrowningDireRed) Pitch() int                   { return 1 }
 func (DrowningDireRed) Attack() int                  { return 5 }
 func (DrowningDireRed) Defense() int                 { return 3 }
@@ -31,7 +31,7 @@ type DrowningDireYellow struct{}
 
 func (DrowningDireYellow) ID() card.ID                 { return card.DrowningDireYellow }
 func (DrowningDireYellow) Name() string                 { return "Drowning Dire (Yellow)" }
-func (DrowningDireYellow) Cost() int                    { return 2 }
+func (DrowningDireYellow) Cost(*card.TurnState) int                    { return 2 }
 func (DrowningDireYellow) Pitch() int                   { return 2 }
 func (DrowningDireYellow) Attack() int                  { return 4 }
 func (DrowningDireYellow) Defense() int                 { return 3 }
@@ -43,7 +43,7 @@ type DrowningDireBlue struct{}
 
 func (DrowningDireBlue) ID() card.ID                 { return card.DrowningDireBlue }
 func (DrowningDireBlue) Name() string                 { return "Drowning Dire (Blue)" }
-func (DrowningDireBlue) Cost() int                    { return 2 }
+func (DrowningDireBlue) Cost(*card.TurnState) int                    { return 2 }
 func (DrowningDireBlue) Pitch() int                   { return 3 }
 func (DrowningDireBlue) Attack() int                  { return 3 }
 func (DrowningDireBlue) Defense() int                 { return 3 }

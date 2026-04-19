@@ -17,7 +17,7 @@ type CutDownToSizeRed struct{}
 
 func (CutDownToSizeRed) ID() card.ID                 { return card.CutDownToSizeRed }
 func (CutDownToSizeRed) Name() string                { return "Cut Down to Size (Red)" }
-func (CutDownToSizeRed) Cost() int                   { return 2 }
+func (CutDownToSizeRed) Cost(*card.TurnState) int                   { return 2 }
 func (CutDownToSizeRed) Pitch() int                  { return 1 }
 func (CutDownToSizeRed) Attack() int                 { return 6 }
 func (CutDownToSizeRed) Defense() int                { return 2 }
@@ -29,7 +29,7 @@ type CutDownToSizeYellow struct{}
 
 func (CutDownToSizeYellow) ID() card.ID                 { return card.CutDownToSizeYellow }
 func (CutDownToSizeYellow) Name() string                { return "Cut Down to Size (Yellow)" }
-func (CutDownToSizeYellow) Cost() int                   { return 2 }
+func (CutDownToSizeYellow) Cost(*card.TurnState) int                   { return 2 }
 func (CutDownToSizeYellow) Pitch() int                  { return 2 }
 func (CutDownToSizeYellow) Attack() int                 { return 5 }
 func (CutDownToSizeYellow) Defense() int                { return 2 }
@@ -41,7 +41,7 @@ type CutDownToSizeBlue struct{}
 
 func (CutDownToSizeBlue) ID() card.ID                 { return card.CutDownToSizeBlue }
 func (CutDownToSizeBlue) Name() string                { return "Cut Down to Size (Blue)" }
-func (CutDownToSizeBlue) Cost() int                   { return 2 }
+func (CutDownToSizeBlue) Cost(*card.TurnState) int                   { return 2 }
 func (CutDownToSizeBlue) Pitch() int                  { return 3 }
 func (CutDownToSizeBlue) Attack() int                 { return 4 }
 func (CutDownToSizeBlue) Defense() int                { return 2 }

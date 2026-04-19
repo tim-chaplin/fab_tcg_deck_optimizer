@@ -26,7 +26,7 @@ type SigilOfTheArknightBlue struct{}
 
 func (SigilOfTheArknightBlue) ID() card.ID                 { return card.SigilOfTheArknightBlue }
 func (SigilOfTheArknightBlue) Name() string           { return "Sigil of the Arknight (Blue)" }
-func (SigilOfTheArknightBlue) Cost() int              { return 0 }
+func (SigilOfTheArknightBlue) Cost(*card.TurnState) int              { return 0 }
 func (SigilOfTheArknightBlue) Pitch() int             { return 3 }
 func (SigilOfTheArknightBlue) Attack() int            { return 0 }
 func (SigilOfTheArknightBlue) Defense() int           { return 2 }
