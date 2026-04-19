@@ -37,6 +37,22 @@ func NewTypeSet(types ...CardType) TypeSet {
 // Has reports whether s contains the given type.
 func (s TypeSet) Has(t CardType) bool { return s&TypeSet(t) != 0 }
 
+// IsNonAttackAction reports whether s represents an Action that is not also an Attack. Used by
+// effects keyed on "if a non-attack action card was played/pitched" (Viserai's trigger, Vigor
+// Rush's go-again rider, Aether Slash's arcane rider, Deathly Duet's runechant rider, Nebula
+// Blade's +3 power rider). A single bitmask check avoids duplicating Has(Action) && !Has(Attack)
+// in every caller.
+func (s TypeSet) IsNonAttackAction() bool {
+	return s&TypeSet(TypeAction) != 0 && s&TypeSet(TypeAttack) == 0
+}
+
+// IsRunebladeAttack reports whether s is a Runeblade attack — an attack action card OR a weapon
+// swing. Used by "next Runeblade attack this turn" riders (Mauvrion Skies, Runic Reaping, Oath of
+// the Arknight, Condemn to Slaughter) that peek CardsRemaining.
+func (s TypeSet) IsRunebladeAttack() bool {
+	return s&TypeSet(TypeRuneblade) != 0 && s&(TypeSet(TypeAttack)|TypeSet(TypeWeapon)) != 0
+}
+
 // PlayedCard wraps a Card with per-turn mutable flags that other cards' effects can toggle.
 // Instances are created by the solver at the start of each attack chain and live only for that
 // chain. Effects that grant keywords to "the next X" scan TurnState.CardsRemaining and flip
