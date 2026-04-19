@@ -17,18 +17,6 @@ import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 
 var smashingGoodTimeTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction)
 
-// smashingGoodTimePlay returns n when a matching attack action card is scheduled later this turn.
-func smashingGoodTimePlay(s *card.TurnState, n int) int {
-	for _, pc := range s.CardsRemaining {
-		t := pc.Card.Types()
-		if !t.Has(card.TypeAttack) || !t.Has(card.TypeAction) {
-			continue
-		}
-		return n
-	}
-	return 0
-}
-
 type SmashingGoodTimeRed struct{}
 
 func (SmashingGoodTimeRed) ID() card.ID                 { return card.SmashingGoodTimeRed }
@@ -39,7 +27,7 @@ func (SmashingGoodTimeRed) Attack() int                 { return 0 }
 func (SmashingGoodTimeRed) Defense() int                { return 2 }
 func (SmashingGoodTimeRed) Types() card.TypeSet         { return smashingGoodTimeTypes }
 func (SmashingGoodTimeRed) GoAgain() bool               { return true }
-func (SmashingGoodTimeRed) Play(s *card.TurnState) int { return smashingGoodTimePlay(s, 3) }
+func (SmashingGoodTimeRed) Play(s *card.TurnState) int { return nextAttackActionBonus(s, 3) }
 
 type SmashingGoodTimeYellow struct{}
 
@@ -51,7 +39,7 @@ func (SmashingGoodTimeYellow) Attack() int                 { return 0 }
 func (SmashingGoodTimeYellow) Defense() int                { return 2 }
 func (SmashingGoodTimeYellow) Types() card.TypeSet         { return smashingGoodTimeTypes }
 func (SmashingGoodTimeYellow) GoAgain() bool               { return true }
-func (SmashingGoodTimeYellow) Play(s *card.TurnState) int { return smashingGoodTimePlay(s, 2) }
+func (SmashingGoodTimeYellow) Play(s *card.TurnState) int { return nextAttackActionBonus(s, 2) }
 
 type SmashingGoodTimeBlue struct{}
 
@@ -63,4 +51,4 @@ func (SmashingGoodTimeBlue) Attack() int                 { return 0 }
 func (SmashingGoodTimeBlue) Defense() int                { return 2 }
 func (SmashingGoodTimeBlue) Types() card.TypeSet         { return smashingGoodTimeTypes }
 func (SmashingGoodTimeBlue) GoAgain() bool               { return true }
-func (SmashingGoodTimeBlue) Play(s *card.TurnState) int { return smashingGoodTimePlay(s, 1) }
+func (SmashingGoodTimeBlue) Play(s *card.TurnState) int { return nextAttackActionBonus(s, 1) }
