@@ -3,8 +3,10 @@
 // Printed power: Red 5, Yellow 4, Blue 3.
 // Text: "If you've dealt arcane damage this turn, this gets +2{p}."
 //
-// Rider reads TurnState.ArcaneDamageDealt: when set at Play time, +2{p}; otherwise printed
-// attack alone.
+// Rider reads TurnState.ArcaneDamageDealt. When set, the +2{p} buff applies — but only if the
+// buffed attack is likely to land (total damage in the likely set, or a runechant firing
+// alongside likely to slip through). If the opponent can comfortably block the buffed total the
+// buff delivers nothing, so we don't credit it.
 //
 // Source: github.com/the-fab-cube/flesh-and-blood-cards (card.csv).
 
@@ -17,9 +19,10 @@ var arcanicSpikeTypes = card.NewTypeSet(card.TypeRuneblade, card.TypeAction, car
 // arcaneDamageBonus is the +2{p} gained when the "dealt arcane damage this turn" clause is live.
 const arcaneDamageBonus = 2
 
-// arcanicSpikeDamage returns the base attack plus the +2{p} rider when ArcaneDamageDealt is set.
+// arcanicSpikeDamage returns the base attack plus the +2{p} rider when ArcaneDamageDealt is set
+// AND the buffed total is likely to hit.
 func arcanicSpikeDamage(attack int, s *card.TurnState) int {
-	if s != nil && s.ArcaneDamageDealt {
+	if s != nil && s.ArcaneDamageDealt && (card.LikelyToHit(attack+arcaneDamageBonus) || card.LikelyToHit(s.Runechants)) {
 		return attack + arcaneDamageBonus
 	}
 	return attack

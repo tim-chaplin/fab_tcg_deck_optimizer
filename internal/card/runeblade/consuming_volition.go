@@ -4,9 +4,10 @@
 // Text: "If you've dealt arcane damage this turn, this gets 'When this hits a hero, they discard
 // a card.'"
 //
-// Rider reads TurnState.ArcaneDamageDealt. When set at Play time, the discard rider fires
-// (valued at +3, matching the draw-a-card rider elsewhere); otherwise printed attack alone.
-// Assumes the attack hits and the opponent discards when the rider is active.
+// Rider reads TurnState.ArcaneDamageDealt. When set, the discard rider fires — but only if the
+// attack is likely to actually land and trigger the on-hit clause: a printed-attack amount of
+// 1/4/7 (non-multiple of 3, per card.LikelyToHit) or runechants firing alongside that look
+// likely to slip through. The rider credits +3 (matching the draw-a-card rider elsewhere).
 //
 // Source: github.com/the-fab-cube/flesh-and-blood-cards (card.csv).
 
@@ -19,10 +20,11 @@ var consumingVolitionTypes = card.NewTypeSet(card.TypeRuneblade, card.TypeAction
 // discardRiderValue is the damage-equivalent credited when the "discard a card" rider fires.
 const discardRiderValue = 3
 
-// consumingVolitionDamage returns the base attack plus the discard rider when
-// ArcaneDamageDealt is set.
+// consumingVolitionDamage returns the base attack plus the discard rider when ArcaneDamageDealt
+// is set AND the attack is likely to hit (printed attack in the likely set, or a runechant
+// firing alongside is likely to slip through).
 func consumingVolitionDamage(attack int, s *card.TurnState) int {
-	if s != nil && s.ArcaneDamageDealt {
+	if s != nil && s.ArcaneDamageDealt && (card.LikelyToHit(attack) || card.LikelyToHit(s.Runechants)) {
 		return attack + discardRiderValue
 	}
 	return attack

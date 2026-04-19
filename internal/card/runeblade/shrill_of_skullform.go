@@ -52,8 +52,11 @@ func (c ShrillOfSkullformBlue) Play(s *card.TurnState) int {
 	return shrillPlay(c.Attack(), s)
 }
 
+// shrillPlay credits the +3{p} aura buff only when the buffed total is likely to land —
+// otherwise the opponent blocks the buffed attack and the buff delivers nothing. Runechants
+// firing alongside (a lone arcane is likely to slip through) also qualify the buff.
 func shrillPlay(base int, s *card.TurnState) int {
-	if s.HasAuraInPlay() {
+	if s.HasAuraInPlay() && (card.LikelyToHit(base+3) || card.LikelyToHit(s.Runechants)) {
 		return base + 3
 	}
 	return base

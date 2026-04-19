@@ -6,8 +6,8 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 )
 
+// TestDeathlyDuet_BaseDamage: nothing pitched → neither rider fires, printed power stands.
 func TestDeathlyDuet_BaseDamage(t *testing.T) {
-	// Nothing pitched → just printed power.
 	cases := []struct {
 		c    card.Card
 		want int
@@ -24,21 +24,42 @@ func TestDeathlyDuet_BaseDamage(t *testing.T) {
 	}
 }
 
-func TestDeathlyDuet_AttackPitchedAddsPower(t *testing.T) {
-	// Attack pitched → +2{p}.
-	s := card.TurnState{Pitched: []card.Card{stubRunebladeAttack{}}}
-	if got := (DeathlyDuetRed{}).Play(&s); got != 6 {
-		t.Errorf("Deathly Duet Red with attack pitched: Play() = %d, want 6", got)
+// TestDeathlyDuet_AttackPitchedBuffGated: the +2{p} buff is credited only when the buffed
+// total lands in the likely-to-hit set. Blue (2+2=4) qualifies; Red (4+2=6) and Yellow (3+2=5)
+// don't — the opponent comfortably blocks their buffed totals.
+func TestDeathlyDuet_AttackPitchedBuffGated(t *testing.T) {
+	cases := []struct {
+		c    card.Card
+		want int
+		note string
+	}{
+		{DeathlyDuetRed{}, 4, "buffed total 6 blockable"},
+		{DeathlyDuetYellow{}, 3, "buffed total 5 blockable"},
+		{DeathlyDuetBlue{}, 2 + 2, "buffed total 4 likely to hit"},
+	}
+	for _, tc := range cases {
+		s := card.TurnState{Pitched: []card.Card{stubRunebladeAttack{}}}
+		if got := tc.c.Play(&s); got != tc.want {
+			t.Errorf("%s with attack pitched: Play() = %d, want %d (%s)", tc.c.Name(), got, tc.want, tc.note)
+		}
 	}
 }
 
+// TestDeathlyDuet_AttackPitchedRunechantRescuesBuff: a lone Runechant firing alongside counts
+// as the attack connecting, credits the +2 buff even for otherwise-blockable Red.
+func TestDeathlyDuet_AttackPitchedRunechantRescuesBuff(t *testing.T) {
+	s := card.TurnState{Pitched: []card.Card{stubRunebladeAttack{}}, Runechants: 1}
+	if got := (DeathlyDuetRed{}).Play(&s); got != 4+2 {
+		t.Errorf("Red with attack pitched + 1 Runechant: Play() = %d, want 6", got)
+	}
+}
+
+// TestDeathlyDuet_NonAttackActionPitchedCreatesRunechants: Runechants are arcane damage, not
+// gated by physical hit likelihood. The 2 tokens credit regardless of blockability.
 func TestDeathlyDuet_NonAttackActionPitchedCreatesRunechants(t *testing.T) {
-	// Non-attack action pitched → 2 Runechant tokens enter play, credited +1 each at creation.
-	// Play returns base + 2 (Deathly Duet Red base 4 + 2 token credits = 6). state.Runechants=2
-	// for downstream consume bookkeeping.
 	s := card.TurnState{Pitched: []card.Card{stubNonAttack{}}}
-	if got := (DeathlyDuetRed{}).Play(&s); got != 6 {
-		t.Errorf("Deathly Duet Red with non-attack pitched: Play() = %d, want 6 (base 4 + 2 token credits)", got)
+	if got := (DeathlyDuetRed{}).Play(&s); got != 4+2 {
+		t.Errorf("Red with non-attack pitched: Play() = %d, want 6 (base 4 + 2 runechant credits)", got)
 	}
 	if s.Runechants != 2 {
 		t.Errorf("Runechants = %d, want 2", s.Runechants)
@@ -48,12 +69,13 @@ func TestDeathlyDuet_NonAttackActionPitchedCreatesRunechants(t *testing.T) {
 	}
 }
 
+// TestDeathlyDuet_BothBranchesFire: both riders' conditions met. Red base 4 with attack pitched
+// has buffed total 6 (blockable → don't credit +2); runechant creation credits +2 independently.
+// Total = 4 + 2 = 6.
 func TestDeathlyDuet_BothBranchesFire(t *testing.T) {
-	// Both an attack AND a non-attack action in Pitched → both riders fire: +2 power bonus, plus
-	// 2 Runechants credited +1 each at creation. Play returns base 4 + 2 power + 2 tokens = 8.
 	s := card.TurnState{Pitched: []card.Card{stubRunebladeAttack{}, stubNonAttack{}}}
-	if got := (DeathlyDuetRed{}).Play(&s); got != 8 {
-		t.Errorf("Deathly Duet Red with both pitched: Play() = %d, want 8 (base 4 + 2 power + 2 token credits)", got)
+	if got := (DeathlyDuetRed{}).Play(&s); got != 4+2 {
+		t.Errorf("Red with both pitched: Play() = %d, want 6 (base 4 + 2 runechant credits; buff blocked)", got)
 	}
 	if s.Runechants != 2 {
 		t.Errorf("Runechants = %d, want 2", s.Runechants)

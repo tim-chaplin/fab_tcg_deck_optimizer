@@ -52,6 +52,11 @@ func (DeathlyDuetBlue) Types() card.TypeSet       { return deathlyDuetTypes }
 func (DeathlyDuetBlue) GoAgain() bool                { return false }
 func (c DeathlyDuetBlue) Play(s *card.TurnState) int { return deathlyDuetPlay(c.Attack(), s) }
 
+// deathlyDuetPlay applies two independent pitched-card riders:
+//   - Attack pitched: +2{p} static buff. Credited only when the buffed total is likely to land
+//     — a blockable buffed attack delivers nothing, so we don't count it.
+//   - Non-attack action pitched: 2 Runechant tokens. These are arcane damage, not blocked by
+//     physical blocks, so we always credit them regardless of LikelyToHit.
 func deathlyDuetPlay(base int, s *card.TurnState) int {
 	var attackPitched, nonAttackActionPitched bool
 	for _, p := range s.Pitched {
@@ -65,12 +70,12 @@ func deathlyDuetPlay(base int, s *card.TurnState) int {
 	}
 
 	dmg := base
-	if attackPitched {
+	if attackPitched && (card.LikelyToHit(base+2) || card.LikelyToHit(s.Runechants)) {
 		dmg += 2
 	}
 	if nonAttackActionPitched {
-		// Two Runechants enter during Deathly Duet's own attack resolution. No guard on a
-		// following attack existing — Deathly Duet itself is the attack.
+		// Two Runechants enter during Deathly Duet's own attack resolution. Deathly Duet IS
+		// the attack, so no lookahead for a following attack is needed.
 		dmg += s.CreateRunechants(2)
 	}
 	return dmg
