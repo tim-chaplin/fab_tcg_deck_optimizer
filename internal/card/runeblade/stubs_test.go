@@ -68,6 +68,25 @@ func (stubNonRunebladeAttack) Types() card.TypeSet {
 func (stubNonRunebladeAttack) GoAgain() bool            { return true }
 func (stubNonRunebladeAttack) Play(*card.TurnState) int { return 0 }
 
+// stubAttackWithPower is a Runeblade attack-action card with a configurable printed Attack()
+// value. Used by fragile-aura tests that need specific attack numbers to exercise the
+// LikelyToHit heuristic (e.g. Attack=4 lands, Attack=3 is blockable).
+type stubAttackWithPower struct {
+	power int
+}
+
+func (stubAttackWithPower) ID() card.ID          { return card.Invalid }
+func (stubAttackWithPower) Name() string         { return "StubAttackWithPower" }
+func (stubAttackWithPower) Cost() int            { return 0 }
+func (stubAttackWithPower) Pitch() int           { return 0 }
+func (s stubAttackWithPower) Attack() int        { return s.power }
+func (stubAttackWithPower) Defense() int         { return 0 }
+func (stubAttackWithPower) Types() card.TypeSet {
+	return card.NewTypeSet(card.TypeRuneblade, card.TypeAction, card.TypeAttack)
+}
+func (stubAttackWithPower) GoAgain() bool            { return true }
+func (stubAttackWithPower) Play(*card.TurnState) int { return 0 }
+
 // stubAura is a minimal Aura-typed card — used to test "aura played this turn" checks (Shrill of
 // Skullform's +3 bonus).
 type stubAura struct{}

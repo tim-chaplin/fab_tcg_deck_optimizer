@@ -110,6 +110,14 @@ type TurnState struct {
 	// the flag in the current hand. Cards that deal arcane via their Play text are responsible
 	// for flipping the flag themselves.
 	ArcaneDamageDealt bool
+	// IncomingDamage is the opponent damage this turn (the value passed to hand.Best). Constant
+	// across every partition the solver enumerates for this hand.
+	IncomingDamage int
+	// BlockTotal is the sum of Defense() across every Defend-role card in the current partition.
+	// Uncapped: if the partition over-blocks, BlockTotal is the full sum, not clamped to
+	// IncomingDamage. Cards that key on "will we block all incoming this turn?" read
+	// BlockTotal >= IncomingDamage.
+	BlockTotal int
 }
 
 // Hero is the minimal hero profile card effects need. It's intentionally narrower than
@@ -127,6 +135,15 @@ func (s *TurnState) HasPlayedType(t CardType) bool {
 		}
 	}
 	return false
+}
+
+// LikelyToHit reports whether dealing n damage is likely to get through an opponent's blocks.
+// A typical FaB card is worth ~3 points, so blocking 1/4/7 with a pitch or block card over-pays;
+// the opponent would rather eat the damage. Multiples of 3 are the easy-to-block amounts.
+// Used by fragile-aura cards (Arcane Cussing, Bloodspill Invocation) to decide whether a
+// same-turn attack will actually land and pop the aura for its pay-off.
+func LikelyToHit(n int) bool {
+	return n == 1 || n == 4 || n == 7
 }
 
 // CreateRunechants adds n Runechant token auras to the current count, sets AuraCreated so
