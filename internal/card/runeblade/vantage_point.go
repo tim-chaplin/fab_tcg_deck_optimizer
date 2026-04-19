@@ -49,7 +49,7 @@ func (VantagePointBlue) GoAgain() bool                { return false }
 func (c VantagePointBlue) Play(s *card.TurnState) int { return vantagePointPlay(c.Attack(), s) }
 
 func vantagePointPlay(base int, s *card.TurnState) int {
-	if s.AuraCreated || s.HasPlayedType(card.TypeAura) {
+	if s.HasAuraInPlay() {
 		s.Overpower = true
 	}
 	return base

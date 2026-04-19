@@ -59,7 +59,7 @@ func deathlyDuetPlay(base int, s *card.TurnState) int {
 		if t.Has(card.TypeAttack) {
 			attackPitched = true
 		}
-		if t.Has(card.TypeAction) && !t.Has(card.TypeAttack) {
+		if t.IsNonAttackAction() {
 			nonAttackActionPitched = true
 		}
 	}

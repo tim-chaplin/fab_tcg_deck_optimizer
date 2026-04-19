@@ -47,7 +47,7 @@ func (HitTheHighNotesBlue) GoAgain() bool                { return false }
 func (c HitTheHighNotesBlue) Play(s *card.TurnState) int { return hitTheHighNotesPlay(c.Attack(), s) }
 
 func hitTheHighNotesPlay(base int, s *card.TurnState) int {
-	if s.AuraCreated || s.HasPlayedType(card.TypeAura) {
+	if s.HasAuraInPlay() {
 		return base + 2
 	}
 	return base

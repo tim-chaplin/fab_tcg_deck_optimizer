@@ -57,11 +57,7 @@ func (CondemnToSlaughterBlue) Play(s *card.TurnState) int { return condemnToSlau
 // is scheduled later this turn, otherwise 0.
 func condemnToSlaughterBonus(s *card.TurnState, n int) int {
 	for _, pc := range s.CardsRemaining {
-		t := pc.Card.Types()
-		if !t.Has(card.TypeRuneblade) {
-			continue
-		}
-		if t.Has(card.TypeAttack) || t.Has(card.TypeWeapon) {
+		if pc.Card.Types().IsRunebladeAttack() {
 			return n
 		}
 	}

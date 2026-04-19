@@ -53,8 +53,7 @@ func (c AetherSlashBlue) Play(s *card.TurnState) int { return aetherSlashPlay(c.
 
 func aetherSlashPlay(base int, s *card.TurnState) int {
 	for _, p := range s.Pitched {
-		t := p.Types()
-		if t.Has(card.TypeAction) && !t.Has(card.TypeAttack) {
+		if p.Types().IsNonAttackAction() {
 			s.ArcaneDamageDealt = true
 			return base + 1
 		}
