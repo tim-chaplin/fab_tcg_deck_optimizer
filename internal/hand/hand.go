@@ -579,11 +579,18 @@ func newAttackBufs(handSize, weaponCount int, weapons []weapon.Weapon) *attackBu
 		weaponCosts[mask] = cost
 		weaponNames[mask] = names
 	}
+	pcBuf := make([]card.PlayedCard, maxAttackers)
+	ptrBuf := make([]*card.PlayedCard, maxAttackers)
+	// Wire the ptrBuf entries to their pcBuf slots once — the mapping is stable across every
+	// permutation so playSequenceWithMeta doesn't need to rewrite it per call.
+	for i := range pcBuf {
+		ptrBuf[i] = &pcBuf[i]
+	}
 	return &attackBufs{
 		perm:                   make([]card.Card, maxAttackers),
 		permMeta:               make([]attackerMeta, maxAttackers),
-		pcBuf:                  make([]card.PlayedCard, maxAttackers),
-		ptrBuf:                 make([]*card.PlayedCard, maxAttackers),
+		pcBuf:                  pcBuf,
+		ptrBuf:                 ptrBuf,
 		cardsPlayedBuf:         make([]card.Card, 0, maxAttackers),
 		state:                  &card.TurnState{},
 		attackerBuf:            make([]card.Card, maxAttackers),
@@ -1275,9 +1282,10 @@ func (ctx *sequenceContext) playSequenceWithMeta(order []card.Card, perCardOut, 
 	pcBuf := ctx.bufs.pcBuf
 	ptrBuf := ctx.bufs.ptrBuf
 	meta := ctx.bufs.permMeta[:n]
+	// ptrBuf entries point at the matching pcBuf slots permanently (wired once in newAttackBufs),
+	// so only the per-permutation Card and the zeroed GrantedGoAgain need refreshing here.
 	for i, c := range order {
 		pcBuf[i] = card.PlayedCard{Card: c}
-		ptrBuf[i] = &pcBuf[i]
 		if perCardOut != nil {
 			perCardOut[i] = 0
 		}
