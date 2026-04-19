@@ -78,7 +78,7 @@ func TestAllMutations_OddCountsAllowed(t *testing.T) {
 	}
 
 	// Every mutation at maxCopies=3 still has exactly 4 cards; some should have an odd count of
-	// one card (that's the whole point — no longer forced to keep pairs).
+	// one card — single-card swaps can leave odd-count slots when maxCopies allows it.
 	sawOdd := false
 	for _, m := range mutsHigh {
 		if len(m.Deck.Cards) != 4 {

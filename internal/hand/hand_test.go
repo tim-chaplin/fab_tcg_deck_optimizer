@@ -11,8 +11,7 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/weapon"
 )
 
-// stubHero is a no-op Hero used by tests that want to measure raw hand
-// value without any hero-ability contribution.
+// stubHero is a no-op Hero for tests measuring raw hand value with no hero-ability contribution.
 type stubHero struct{}
 
 func (stubHero) ID() hero.ID                           { return hero.Invalid }
@@ -574,11 +573,9 @@ func TestPromoteRandomHeldToArsenal_DeterministicPerHand(t *testing.T) {
 
 // TestBeatsBest_ArsenalOccupancyTiebreaker pins the tiebreaker contract used by the partition
 // enumerator: when two candidates tie on Value and LeftoverRunechants, the one that will end
-// the turn with the arsenal slot occupied (either via arsenal-in staying OR a post-hoc Held→
-// Arsenal promotion) beats the one that won't. Without this direct test, the logic was only
-// exercised indirectly through Best() scenarios where the enumeration order happens to explore
-// occupied partitions first, so a regression could accidentally invert the comparison without
-// any Best-level test catching it.
+// the turn with the arsenal slot occupied (either via arsenal-in staying OR a post-hoc Held →
+// Arsenal promotion) beats the one that won't. Exercised directly so a comparison-inversion
+// regression can't hide behind enumeration order at the Best() level.
 func TestBeatsBest_ArsenalOccupancyTiebreaker(t *testing.T) {
 	// Seed best: Value=10, Leftover=0, arsenal NOT occupied.
 	best := TurnSummary{Value: 10, LeftoverRunechants: 0}

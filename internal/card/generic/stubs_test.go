@@ -43,8 +43,8 @@ func stubGenericAttackPitch(cost, power, pitch int) stubCard {
 	return s
 }
 
-// stubGenericAction returns a Generic Action (non-attack) stub. Used to confirm attack-typed
-// lookaheads reject it.
+// stubGenericAction returns a Generic Action (non-attack) stub for attack-typed-lookahead
+// rejection cases.
 func stubGenericAction() stubCard {
 	return stubCard{
 		name:  "stubGenericAction",
@@ -52,7 +52,7 @@ func stubGenericAction() stubCard {
 	}
 }
 
-// stubGenericAura returns a Generic Aura stub. Used by Yinti Yanti's HasPlayedType(TypeAura) check.
+// stubGenericAura returns a Generic Aura stub — covers Yinti Yanti's HasPlayedType(TypeAura) check.
 func stubGenericAura() stubCard {
 	return stubCard{
 		name:  "stubGenericAura",
