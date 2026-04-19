@@ -240,13 +240,9 @@ type NoMemo interface {
 }
 
 // DiscountPerRunechant is optionally implemented by cards whose printed cost is reduced by 1
-// per Runechant in play (e.g. Amplify the Arknight, Reduce to Runechant, Rune Flash).
-// PrintedCost returns the undiscounted cost; the solver computes the effective per-play cost as
-// max(0, PrintedCost() - TurnState.Runechants) at play time.
-//
-// Cost() on these cards returns 0 so the partition-level affordability check treats them as
-// their fully-discounted minimum. The permutation pipeline enforces the actual per-play cost
-// against the running resource pool.
+// per Runechant in play (e.g. Amplify the Arknight, Reduce to Runechant, Rune Flash). Cost()
+// and PrintedCost() return the same (undiscounted) value; the solver applies the discount as
+// max(0, PrintedCost() - Runechants) at play time.
 type DiscountPerRunechant interface {
 	PrintedCost() int
 }

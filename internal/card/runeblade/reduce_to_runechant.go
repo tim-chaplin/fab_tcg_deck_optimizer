@@ -4,8 +4,8 @@
 // Text: "Reduce to Runechant costs {r} less to play for each Runechant you control. Create a
 // Runechant token."
 //
-// Cost() returns 0 (fully-discounted minimum); PrintedCost() is 1 so the solver re-prices the
-// reaction at max(0, 1 - leftoverRunechants) after the attack line is chosen.
+// Cost() returns the printed cost; DiscountPerRunechant lets the defense-reaction re-pricing
+// apply max(0, Cost() - leftoverRunechants) after the attack line resolves.
 //
 // Play() calls CreateRunechant, crediting +1 damage at creation. Defense-reaction state is reset
 // between reactions so the token itself doesn't carry into the next turn's carryover — only its
@@ -25,7 +25,7 @@ type ReduceToRunechantRed struct{}
 
 func (ReduceToRunechantRed) ID() card.ID                 { return card.ReduceToRunechantRed }
 func (ReduceToRunechantRed) Name() string             { return "Reduce to Runechant (Red)" }
-func (ReduceToRunechantRed) Cost() int                { return 0 }
+func (ReduceToRunechantRed) Cost() int                { return reduceToRunechantPrintedCost }
 func (ReduceToRunechantRed) PrintedCost() int         { return reduceToRunechantPrintedCost }
 func (ReduceToRunechantRed) Pitch() int               { return 1 }
 func (ReduceToRunechantRed) Attack() int              { return 0 }
@@ -38,7 +38,7 @@ type ReduceToRunechantYellow struct{}
 
 func (ReduceToRunechantYellow) ID() card.ID                 { return card.ReduceToRunechantYellow }
 func (ReduceToRunechantYellow) Name() string             { return "Reduce to Runechant (Yellow)" }
-func (ReduceToRunechantYellow) Cost() int                { return 0 }
+func (ReduceToRunechantYellow) Cost() int                { return reduceToRunechantPrintedCost }
 func (ReduceToRunechantYellow) PrintedCost() int         { return reduceToRunechantPrintedCost }
 func (ReduceToRunechantYellow) Pitch() int               { return 2 }
 func (ReduceToRunechantYellow) Attack() int              { return 0 }
@@ -51,7 +51,7 @@ type ReduceToRunechantBlue struct{}
 
 func (ReduceToRunechantBlue) ID() card.ID                 { return card.ReduceToRunechantBlue }
 func (ReduceToRunechantBlue) Name() string             { return "Reduce to Runechant (Blue)" }
-func (ReduceToRunechantBlue) Cost() int                { return 0 }
+func (ReduceToRunechantBlue) Cost() int                { return reduceToRunechantPrintedCost }
 func (ReduceToRunechantBlue) PrintedCost() int         { return reduceToRunechantPrintedCost }
 func (ReduceToRunechantBlue) Pitch() int               { return 3 }
 func (ReduceToRunechantBlue) Attack() int              { return 0 }

@@ -21,7 +21,7 @@ type DrawnToTheDarkDimensionRed struct{}
 
 func (DrawnToTheDarkDimensionRed) ID() card.ID                 { return card.DrawnToTheDarkDimensionRed }
 func (DrawnToTheDarkDimensionRed) Name() string               { return "Drawn to the Dark Dimension (Red)" }
-func (DrawnToTheDarkDimensionRed) Cost() int                  { return 0 }
+func (DrawnToTheDarkDimensionRed) Cost() int                  { return drawnToTheDarkDimensionPrintedCost }
 func (DrawnToTheDarkDimensionRed) PrintedCost() int           { return drawnToTheDarkDimensionPrintedCost }
 func (DrawnToTheDarkDimensionRed) Pitch() int                 { return 1 }
 func (DrawnToTheDarkDimensionRed) Attack() int                { return 3 }
@@ -34,7 +34,7 @@ type DrawnToTheDarkDimensionYellow struct{}
 
 func (DrawnToTheDarkDimensionYellow) ID() card.ID                 { return card.DrawnToTheDarkDimensionYellow }
 func (DrawnToTheDarkDimensionYellow) Name() string               { return "Drawn to the Dark Dimension (Yellow)" }
-func (DrawnToTheDarkDimensionYellow) Cost() int                  { return 0 }
+func (DrawnToTheDarkDimensionYellow) Cost() int                  { return drawnToTheDarkDimensionPrintedCost }
 func (DrawnToTheDarkDimensionYellow) PrintedCost() int           { return drawnToTheDarkDimensionPrintedCost }
 func (DrawnToTheDarkDimensionYellow) Pitch() int                 { return 2 }
 func (DrawnToTheDarkDimensionYellow) Attack() int                { return 2 }
@@ -47,7 +47,7 @@ type DrawnToTheDarkDimensionBlue struct{}
 
 func (DrawnToTheDarkDimensionBlue) ID() card.ID                 { return card.DrawnToTheDarkDimensionBlue }
 func (DrawnToTheDarkDimensionBlue) Name() string               { return "Drawn to the Dark Dimension (Blue)" }
-func (DrawnToTheDarkDimensionBlue) Cost() int                  { return 0 }
+func (DrawnToTheDarkDimensionBlue) Cost() int                  { return drawnToTheDarkDimensionPrintedCost }
 func (DrawnToTheDarkDimensionBlue) PrintedCost() int           { return drawnToTheDarkDimensionPrintedCost }
 func (DrawnToTheDarkDimensionBlue) Pitch() int                 { return 3 }
 func (DrawnToTheDarkDimensionBlue) Attack() int                { return 1 }
