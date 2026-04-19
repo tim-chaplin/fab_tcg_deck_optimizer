@@ -48,6 +48,7 @@ func main() {
 	deckName := flag.String("deck", "", "deck name; resolved to mydecks/<name>.json (\".json\" suffix optional). Defaults to <hero>_<format>_<incoming>_incoming so different (hero, format, -incoming) regimes keep separate deck files. Ignored by the import subcommand, which always prompts interactively.")
 	formatFlag := flag.String("format", string(fmtpkg.SilverAge), "constructed format whose banlist restricts the card pool during search (only \"silver_age\" is supported today)")
 	debug := flag.Bool("debug", false, "emit extra diagnostic output (e.g. memo cache size between iterate rounds)")
+	reevaluate := flag.Bool("reevaluate", false, "iterate: force re-evaluation of the loaded deck's baseline avg, even if its prior run count already matches -deep-shuffles. Use after adjusting modelling assumptions or fixing bugs that may have shifted the deck's true score.")
 	flag.Parse()
 	// Reject positional args after the subcommand so `fabsim eval mydeck` errors instead of
 	// silently ignoring the deck name.
@@ -94,6 +95,7 @@ func main() {
 		outPath:         outPath,
 		format:          fmtValue,
 		debug:           *debug,
+		reevaluate:      *reevaluate,
 	}
 
 	switch subcommand {
@@ -161,6 +163,7 @@ type config struct {
 	outPath         string
 	format          fmtpkg.Format
 	debug           bool
+	reevaluate      bool
 }
 
 // legalFilter returns the card-pool predicate for this run's format. fabsim always runs under
