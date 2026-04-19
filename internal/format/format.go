@@ -1,7 +1,6 @@
 // Package format enumerates the deck-construction formats fabsim supports and provides the
-// per-format legality filter used by deck generation and mutation. Cards opt out of a format via
-// marker interfaces on card.Card (e.g. card.NotSilverAgeLegal); this package translates a
-// Format value into the equivalent predicate.
+// per-format legality filter used by deck generation and mutation. Cards opt out via marker
+// interfaces on card.Card (e.g. card.NotSilverAgeLegal); Format translates to the predicate.
 package format
 
 import (
