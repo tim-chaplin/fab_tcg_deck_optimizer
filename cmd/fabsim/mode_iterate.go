@@ -75,9 +75,11 @@ func runIterate(cfg config) {
 	}
 }
 
-// prepareBaseline returns the starting deck for the hill climb with its deep-shuffles avg. Three
+// prepareBaseline returns the starting deck for the hill climb with its deep-shuffles avg. Four
 // cases: no deck on disk (generate random + evaluate), loaded deck under deepShuffles
-// (re-evaluate for an apples-to-apples baseline), or deck already deep-evaluated (use as-is).
+// (re-evaluate for an apples-to-apples baseline), -reevaluate set (force re-evaluation even if
+// the run count already matches — for when modelling assumptions changed), or deck already
+// deep-evaluated (use as-is).
 func prepareBaseline(cfg config, rng *rand.Rand) (*deck.Deck, float64) {
 	best, bestAvg := loadExisting(cfg.outPath)
 	if best == nil {
@@ -88,9 +90,13 @@ func prepareBaseline(cfg config, rng *rand.Rand) (*deck.Deck, float64) {
 		fmt.Printf("Starting deck avg %.3f, saved to %s\n", bestAvg, cfg.outPath)
 		return best, bestAvg
 	}
-	if best.Stats.Runs < cfg.deepShuffles {
-		fmt.Printf("Loaded best deck (avg %.3f from %d shuffles); re-evaluating at %d shuffles for an apples-to-apples baseline\n",
-			bestAvg, best.Stats.Runs, cfg.deepShuffles)
+	if cfg.reevaluate || best.Stats.Runs < cfg.deepShuffles {
+		reason := fmt.Sprintf("from %d shuffles", best.Stats.Runs)
+		if cfg.reevaluate && best.Stats.Runs >= cfg.deepShuffles {
+			reason = "-reevaluate forced"
+		}
+		fmt.Printf("Loaded best deck (avg %.3f %s); re-evaluating at %d shuffles for an apples-to-apples baseline\n",
+			bestAvg, reason, cfg.deepShuffles)
 		best = deck.New(best.Hero, best.Weapons, best.Cards)
 		bestAvg = best.Evaluate(cfg.deepShuffles, cfg.incoming, rng).Avg()
 		_ = writeDeck(best, cfg.outPath)
