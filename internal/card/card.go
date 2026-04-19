@@ -149,6 +149,15 @@ func (s *TurnState) HasPlayedType(t CardType) bool {
 	return false
 }
 
+// HasAuraInPlay reports whether an aura was played or created this turn — the condition six
+// "if you've played or created an aura this turn" riders check (Reek of Corruption, Hit the High
+// Notes, Shrill of Skullform, Vantage Point, Runerager Swarm, Yinti Yanti). Checks the
+// AuraCreated flag (set by CreateRunechants, Sigil plays, etc.) OR scans CardsPlayed for an
+// Aura-typed card — the flag covers token creation, the scan covers explicit Aura cards.
+func (s *TurnState) HasAuraInPlay() bool {
+	return s.AuraCreated || s.HasPlayedType(TypeAura)
+}
+
 // LikelyToHit reports whether dealing n damage is likely to get through an opponent's blocks.
 // A typical FaB card is worth ~3 points, so blocking 1/4/7 with a pitch or block card over-pays;
 // the opponent would rather eat the damage. Multiples of 3 are the easy-to-block amounts.

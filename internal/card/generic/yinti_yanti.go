@@ -16,7 +16,7 @@ var yintiYantiTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.Ty
 
 // yintiYantiPlay adds +1 when any aura is in play: either created this turn or played earlier.
 func yintiYantiPlay(base int, s *card.TurnState) int {
-	if s != nil && (s.AuraCreated || s.HasPlayedType(card.TypeAura)) {
+	if s != nil && s.HasAuraInPlay() {
 		return base + 1
 	}
 	return base
