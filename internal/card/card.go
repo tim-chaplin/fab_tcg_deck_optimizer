@@ -175,6 +175,29 @@ func LikelyToHit(n int) bool {
 	return n == 1 || n == 4 || n == 7
 }
 
+// ClashValue returns the net damage-equivalent of a clash (see comprehensive rules 8.5.45): we
+// and the opponent reveal the top card of our decks and the higher {p} wins. We model from our
+// side only — our deck's top card is read from s.Deck; the opponent's top is approximated as
+// 5-power (the median of an aggressive FaB deck). So our {p} of 6-7 wins (credit +bonus), 5
+// ties (credit 0), and anything below 5 loses (credit -bonus: the bonus accrues to the
+// opponent in those cases).
+//
+// bonus is the damage-equivalent of whatever the clash winner receives. Returns 0 when
+// s.Deck is empty: no card to reveal means the clash effect fails per rule 8.5.45d.
+func ClashValue(s *TurnState, bonus int) int {
+	if len(s.Deck) == 0 {
+		return 0
+	}
+	switch top := s.Deck[0].Attack(); {
+	case top >= 6:
+		return bonus
+	case top == 5:
+		return 0
+	default:
+		return -bonus
+	}
+}
+
 // CreateRunechants adds n Runechant token auras to the count, sets AuraCreated so effects that
 // key on "aura created this turn" see it, and returns n — each token is credited as +1 damage
 // at creation time (it'll fire on some future attack, possibly via carryover). The attack
