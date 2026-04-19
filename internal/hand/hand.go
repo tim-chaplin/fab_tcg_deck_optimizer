@@ -1369,6 +1369,31 @@ func (ctx *sequenceContext) playSequenceWithMeta(order []card.Card, perCardOut, 
 	return damage, state.Runechants + state.DelayedRunechants, resources, true
 }
 
+// fillDefenseContributions writes Contribution on each Defend-role entry. The block-prevention
+// share is proportional to the card's Defense() out of sumDef, capped by incomingDamage so
+// over-blocking doesn't inflate attribution past what actually stopped. Defense Reactions add
+// their own Play return on top, evaluated against a fresh TurnState seeded with the turn's
+// pitched pool and remaining deck so card effects see the same context the solver scored them in.
+func fillDefenseContributions(line []CardAssignment, pitched []card.Card, deck []card.Card, bufs *attackBufs, sumDef, incomingDamage int) {
+	prevented := sumDef
+	if prevented > incomingDamage {
+		prevented = incomingDamage
+	}
+	for i := range line {
+		if line[i].Role != Defend {
+			continue
+		}
+		c := line[i].Card
+		if sumDef > 0 {
+			line[i].Contribution = float64(c.Defense()) * float64(prevented) / float64(sumDef)
+		}
+		if c.Types().Has(card.TypeDefenseReaction) {
+			*bufs.state = card.TurnState{Pitched: pitched, Deck: deck}
+			line[i].Contribution += float64(c.Play(bufs.state))
+		}
+	}
+}
+
 // fillContributions populates each BestLine entry's Contribution from the winning line:
 //   - Pitch:  Card.Pitch() as resource value.
 //   - Defend: proportional share of Prevented plus own Play return if a Defense Reaction.
@@ -1415,25 +1440,7 @@ func fillContributions(summary *TurnSummary, hero hero.Hero, weapons []weapon.We
 		}
 	}
 
-	// Defense: share of Prevented (proportional to each defender's Defense()) plus the card's
-	// own Play return if it's a Defense Reaction.
-	prevented := sumDef
-	if prevented > incomingDamage {
-		prevented = incomingDamage
-	}
-	for i := range line {
-		if line[i].Role != Defend {
-			continue
-		}
-		c := line[i].Card
-		if sumDef > 0 {
-			line[i].Contribution = float64(c.Defense()) * float64(prevented) / float64(sumDef)
-		}
-		if c.Types().Has(card.TypeDefenseReaction) {
-			*bufs.state = card.TurnState{Pitched: pitched, Deck: deck}
-			line[i].Contribution += float64(c.Play(bufs.state))
-		}
-	}
+	fillDefenseContributions(line, pitched, deck, bufs, sumDef, incomingDamage)
 
 	// Attack chain: re-run the sequence search with tracking on to recover the winning
 	// permutation and each chain position's contribution. Weapons don't map back to BestLine —
