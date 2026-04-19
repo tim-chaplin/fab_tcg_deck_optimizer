@@ -4,13 +4,9 @@
 // Text: "If you've dealt arcane damage this turn, this gets 'When this hits a hero, they discard
 // a card.'"
 //
-// The "dealt arcane damage this turn" clause reads TurnState.ArcaneDamageDealt. playSequence
-// flips it on when a Runechant fires on an earlier attack/weapon in the chain, and direct-arcane
-// cards set it themselves when they resolve. When the flag is live at Play time the discard
-// rider fires (valued at +3, matching Drawn to the Dark Dimension's draw); otherwise Play
-// returns the printed attack alone.
-//
-// Assume the attack hits and the opponent discards when the rider is active.
+// Rider reads TurnState.ArcaneDamageDealt. When set at Play time, the discard rider fires
+// (valued at +3, matching the draw-a-card rider elsewhere); otherwise printed attack alone.
+// Assumes the attack hits and the opponent discards when the rider is active.
 //
 // Source: github.com/the-fab-cube/flesh-and-blood-cards (card.csv).
 
@@ -20,12 +16,11 @@ import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 
 var consumingVolitionTypes = card.NewTypeSet(card.TypeRuneblade, card.TypeAction, card.TypeAttack)
 
-// discardRiderValue is the damage-equivalent we credit when the "discard a card" rider fires.
-// Matches the "draw a card" value used by Drawn to the Dark Dimension.
+// discardRiderValue is the damage-equivalent credited when the "discard a card" rider fires.
 const discardRiderValue = 3
 
 // consumingVolitionDamage returns the base attack plus the discard rider when
-// ArcaneDamageDealt is set. Extracted so all three printings share one implementation.
+// ArcaneDamageDealt is set.
 func consumingVolitionDamage(attack int, s *card.TurnState) int {
 	if s != nil && s.ArcaneDamageDealt {
 		return attack + discardRiderValue

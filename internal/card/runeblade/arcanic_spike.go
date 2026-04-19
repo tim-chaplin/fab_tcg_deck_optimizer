@@ -3,10 +3,8 @@
 // Printed power: Red 5, Yellow 4, Blue 3.
 // Text: "If you've dealt arcane damage this turn, this gets +2{p}."
 //
-// The "dealt arcane damage this turn" clause reads TurnState.ArcaneDamageDealt, which
-// playSequence flips on whenever a Runechant fires on an attack/weapon earlier in the chain and
-// which direct-arcane cards set themselves when they resolve. When the flag is live at Play
-// time, the +2{p} bonus applies; otherwise Play returns the printed attack alone.
+// Rider reads TurnState.ArcaneDamageDealt: when set at Play time, +2{p}; otherwise printed
+// attack alone.
 //
 // Source: github.com/the-fab-cube/flesh-and-blood-cards (card.csv).
 
@@ -20,7 +18,6 @@ var arcanicSpikeTypes = card.NewTypeSet(card.TypeRuneblade, card.TypeAction, car
 const arcaneDamageBonus = 2
 
 // arcanicSpikeDamage returns the base attack plus the +2{p} rider when ArcaneDamageDealt is set.
-// Extracted so all three printings share one implementation.
 func arcanicSpikeDamage(attack int, s *card.TurnState) int {
 	if s != nil && s.ArcaneDamageDealt {
 		return attack + arcaneDamageBonus

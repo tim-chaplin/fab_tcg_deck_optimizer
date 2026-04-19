@@ -5,11 +5,9 @@
 // hits a hero, they discard a card.'"
 //
 // Simplifications:
-//   - The aura condition is checked via `s.AuraCreated || s.HasPlayedType(card.TypeAura)` at
-//     Play time — same pattern used by Hit the High Notes and Shrill of Skullform. When the
-//     condition passes, the on-hit discard is valued at +3 (matching Consuming Volition's
-//     discard valuation); otherwise Play returns only the printed attack.
-//   - Assume the attack hits when the rider is active.
+//   - Aura condition checked at Play time via s.AuraCreated || s.HasPlayedType(TypeAura). When
+//     true, on-hit discard is valued at +3; otherwise printed attack alone.
+//   - Assumes the attack hits when the rider fires.
 //
 // Source: github.com/the-fab-cube/flesh-and-blood-cards (card.csv).
 
@@ -19,12 +17,11 @@ import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 
 var reekOfCorruptionTypes = card.NewTypeSet(card.TypeRuneblade, card.TypeAction, card.TypeAttack)
 
-// reekDiscardBonus mirrors the discard-a-card rider's damage-equivalent used by Consuming Volition
-// and other on-hit discard riders.
+// reekDiscardBonus is the damage-equivalent credited when the on-hit discard rider fires.
 const reekDiscardBonus = 3
 
 // reekOfCorruptionDamage returns the base attack plus the discard rider when the aura condition
-// is satisfied. Extracted so all three printings share one implementation.
+// is satisfied.
 func reekOfCorruptionDamage(attack int, s *card.TurnState) int {
 	if s != nil && (s.AuraCreated || s.HasPlayedType(card.TypeAura)) {
 		return attack + reekDiscardBonus

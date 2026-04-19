@@ -3,11 +3,9 @@
 // Text: "When Aether Slash attacks, if a 'non-attack' action card was pitched to play it, deal 1
 // arcane damage to any target."
 //
-// The CSV's printed "Arcane: 1" stat is the SAME damage as the text's "deal 1 arcane damage" —
-// the convention elsewhere in this codebase (Arcanic Crackle, Vexing Malice, etc.) is to add the
-// printed arcane to base damage exactly once, matching the text rider. Aether Slash's arcane is
-// conditional on a non-attack action being pitched; with no qualifying pitch the card deals only
-// its printed power, no arcane bonus.
+// The printed "Arcane: 1" stat is the same damage as the text rider — added once when the
+// "non-attack action was pitched" condition is met, not double-counted. With no qualifying
+// pitch, the card deals only its printed power.
 //
 // Source: github.com/the-fab-cube/flesh-and-blood-cards (card.csv).
 
