@@ -137,6 +137,15 @@ func (s *TurnState) HasPlayedType(t CardType) bool {
 	return false
 }
 
+// LikelyToHit reports whether dealing n damage is likely to get through an opponent's blocks.
+// A typical FaB card is worth ~3 points, so blocking 1/4/7 with a pitch or block card over-pays;
+// the opponent would rather eat the damage. Multiples of 3 are the easy-to-block amounts.
+// Used by fragile-aura cards (Arcane Cussing, Bloodspill Invocation) to decide whether a
+// same-turn attack will actually land and pop the aura for its pay-off.
+func LikelyToHit(n int) bool {
+	return n == 1 || n == 4 || n == 7
+}
+
 // CreateRunechants adds n Runechant token auras to the current count, sets AuraCreated so
 // effects that key on "aura created this turn" see it, and returns n — each token is credited
 // as +1 damage at creation time (it'll fire on some future attack, possibly next turn via
