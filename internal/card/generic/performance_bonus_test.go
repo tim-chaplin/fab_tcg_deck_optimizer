@@ -7,12 +7,12 @@ import (
 )
 
 // TestPerformanceBonus_LikelyHitCreditsToken: Blue (1) is the only variant whose printed attack
-// lands in the likely-to-hit set; the Gold-token rider credits +1. (Red 3 and Yellow 2 are
-// both blockable.)
+// lands in the likely-to-hit set; the Gold-token rider credits card.GoldTokenValue. (Red 3 and
+// Yellow 2 are both blockable.)
 func TestPerformanceBonus_LikelyHitCreditsToken(t *testing.T) {
 	var s card.TurnState
-	if got := (PerformanceBonusBlue{}).Play(&s); got != 1+1 {
-		t.Errorf("Blue: Play() = %d, want 2 (1 likely to hit + 1 Gold)", got)
+	if got := (PerformanceBonusBlue{}).Play(&s); got != 1+card.GoldTokenValue {
+		t.Errorf("Blue: Play() = %d, want %d (1 likely to hit + GoldTokenValue)", got, 1+card.GoldTokenValue)
 	}
 }
 

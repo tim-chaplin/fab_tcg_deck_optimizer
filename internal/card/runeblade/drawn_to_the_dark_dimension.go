@@ -28,7 +28,7 @@ func (DrawnToTheDarkDimensionRed) Attack() int                { return 3 }
 func (DrawnToTheDarkDimensionRed) Defense() int               { return 3 }
 func (DrawnToTheDarkDimensionRed) Types() card.TypeSet        { return drawnToTheDarkDimensionTypes }
 func (DrawnToTheDarkDimensionRed) GoAgain() bool              { return false }
-func (c DrawnToTheDarkDimensionRed) Play(*card.TurnState) int { return c.Attack() + 3 }
+func (c DrawnToTheDarkDimensionRed) Play(*card.TurnState) int { return c.Attack() + card.DrawValue }
 
 type DrawnToTheDarkDimensionYellow struct{}
 
@@ -41,7 +41,7 @@ func (DrawnToTheDarkDimensionYellow) Attack() int                { return 2 }
 func (DrawnToTheDarkDimensionYellow) Defense() int               { return 3 }
 func (DrawnToTheDarkDimensionYellow) Types() card.TypeSet        { return drawnToTheDarkDimensionTypes }
 func (DrawnToTheDarkDimensionYellow) GoAgain() bool              { return false }
-func (c DrawnToTheDarkDimensionYellow) Play(*card.TurnState) int { return c.Attack() + 3 }
+func (c DrawnToTheDarkDimensionYellow) Play(*card.TurnState) int { return c.Attack() + card.DrawValue }
 
 type DrawnToTheDarkDimensionBlue struct{}
 
@@ -54,4 +54,4 @@ func (DrawnToTheDarkDimensionBlue) Attack() int                { return 1 }
 func (DrawnToTheDarkDimensionBlue) Defense() int               { return 3 }
 func (DrawnToTheDarkDimensionBlue) Types() card.TypeSet        { return drawnToTheDarkDimensionTypes }
 func (DrawnToTheDarkDimensionBlue) GoAgain() bool              { return false }
-func (c DrawnToTheDarkDimensionBlue) Play(*card.TurnState) int { return c.Attack() + 3 }
+func (c DrawnToTheDarkDimensionBlue) Play(*card.TurnState) int { return c.Attack() + card.DrawValue }

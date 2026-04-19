@@ -45,7 +45,7 @@ func (SigilOfTheArknightBlue) Play(s *card.TurnState) int {
 	}
 	t := s.Deck[idx].Types()
 	if t.Has(card.TypeAttack) && t.Has(card.TypeAction) {
-		return 3
+		return card.DrawValue
 	}
 	return 0
 }
