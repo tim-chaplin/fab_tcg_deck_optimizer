@@ -296,6 +296,28 @@ func TestEvaluate_BestTurnStartingRunechantsIsPreHandCarryover(t *testing.T) {
 	}
 }
 
+// TestEvaluate_BestTurnSnapshotsDrawnAndLeftoverRunechants pins the BestTurn snapshot's
+// completeness: Drawn (mid-turn-drawn cards with their dispositions) and LeftoverRunechants
+// must propagate from play.* into Stats.Best.Summary.* so FormatBestTurn's per-card breakdown
+// reconciles with the displayed Value and the header's "carryover runechants" count is real.
+// Without the snapshot, drawn-attack extension damage and pitch-from-drawn resource land in
+// Value but never show up in the printout, and runechants always read 0.
+func TestEvaluate_BestTurnSnapshotsDrawnAndLeftoverRunechants(t *testing.T) {
+	// Snatch (cost 0, attack 4) fires on-hit DrawOne — its drawn card lands in summary.Drawn.
+	// 4 Snatches keeps Viserai's Intelligence-4 hand full of draw-rider cards on the first
+	// turn so at least one Snatch attacks and DrawOne fires.
+	snatch := cards.Get(card.SnatchRed)
+	d := New(hero.Viserai{}, nil, []card.Card{snatch, snatch, snatch, snatch, snatch, snatch, snatch, snatch})
+	d.Evaluate(1, 0, rand.New(rand.NewSource(1)))
+
+	if len(d.Stats.Best.Summary.BestLine) == 0 {
+		t.Fatalf("expected Best to be populated after Evaluate")
+	}
+	if len(d.Stats.Best.Summary.Drawn) == 0 {
+		t.Errorf("Stats.Best.Summary.Drawn is empty; want >=1 entry from Snatch's on-hit DrawOne (the snapshot in Evaluate isn't copying play.Drawn)")
+	}
+}
+
 // TestEvaluate_HeldCardDefersDrawToNextTurn pins the "up to Intelligence" draw rule plus arsenal
 // carryover. Intelligence-1 hero, deck of Toughen Up Blue (DR, cost 2, defense 4): the lone
 // card has no legal play (can't pay its 2-cost, can't pitch with nothing on the stack, DRs
