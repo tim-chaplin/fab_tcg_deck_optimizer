@@ -853,45 +853,84 @@ func (e *Evaluator) bestUncached(hero hero.Hero, weapons []weapon.Weapon, hand [
 	if len(best.BestLine) > 0 {
 		fillContributions(&best, hero, weapons, bestSwung, bestBudget, deck, bufs, incomingDamage, runechantCarryover)
 	}
-	// If the arsenal slot is empty after enumeration, promote a Held card. The pick is
-	// deterministic per-hand (hashed from sorted card IDs) so the memo stays consistent, but
-	// spreads across Held positions across different hands — avoiding the lowest-ID bias that
-	// picking BestLine[0] would introduce under sort-by-ID canonicalisation.
+	// If the arsenal slot is empty after enumeration, promote one Held card into it. Held hand
+	// cards and Held mid-turn-drawn cards are treated as one pool — neither source is preferred,
+	// because both end the turn as a single card of equivalent future-turn value. The pick is
+	// deterministic per-hand (hashed from sorted card IDs + drawn card IDs + arsenal-in ID) so
+	// the memo stays consistent, but spreads across candidates to avoid a lowest-ID bias.
 	if best.ArsenalCard == nil {
 		promoteRandomHeldToArsenal(&best, hand, n, arsenalCardIn)
 	}
 	return best
 }
 
-// promoteRandomHeldToArsenal picks one Held hand card in best.BestLine and flips its role to
-// Arsenal. Selection hashes the sorted hand IDs (plus arsenal-in ID) modulo the Held count:
-//   - Same hand → same promotion (memo-safe).
-//   - Different hands spread across Held positions (no systematic lowest-ID preference).
+// promoteRandomHeldToArsenal picks one Held card — a hand card in best.BestLine or a mid-turn-
+// drawn card in best.Drawn — and flips its role to Arsenal. Both sources share a single
+// candidate pool so the draw isn't preferred over hand Helds (nor the other way around). No-op
+// when nothing is Held.
 func promoteRandomHeldToArsenal(best *TurnSummary, hand []card.Card, n int, arsenalCardIn card.Card) {
-	// Collect Held indices (hand slots only; arsenal-in can't be Held by construction).
-	heldIndices := make([]int, 0, n)
+	handHeldCount := 0
 	for i := 0; i < n; i++ {
 		if best.BestLine[i].Role == Held {
-			heldIndices = append(heldIndices, i)
+			handHeldCount++
 		}
 	}
-	if len(heldIndices) == 0 {
+	drawnHeldCount := 0
+	for i := range best.Drawn {
+		if best.Drawn[i].Role == Held {
+			drawnHeldCount++
+		}
+	}
+	total := handHeldCount + drawnHeldCount
+	if total == 0 {
 		return
 	}
-	// FNV-1a-flavoured hash over the sorted hand IDs + arsenal-in ID. Just needs to spread
-	// across bucket counts 1..n.
+	// FNV-1a-flavoured hash over the sorted hand IDs + drawn card IDs + arsenal-in ID. Just
+	// needs to spread across bucket counts 1..total.
 	var h uint64 = 1469598103934665603 // FNV offset basis
 	for _, c := range hand {
 		h ^= uint64(c.ID())
 		h *= 1099511628211 // FNV prime
 	}
+	for _, d := range best.Drawn {
+		h ^= uint64(d.Card.ID())
+		h *= 1099511628211
+	}
 	if arsenalCardIn != nil {
 		h ^= uint64(arsenalCardIn.ID())
 		h *= 1099511628211
 	}
-	pick := heldIndices[h%uint64(len(heldIndices))]
-	best.BestLine[pick].Role = Arsenal
-	best.ArsenalCard = best.BestLine[pick].Card
+	pick := int(h % uint64(total))
+	// Walk hand Helds first (in BestLine order), then drawn Helds (in draw order), mapping pick
+	// to the matching slot.
+	if pick < handHeldCount {
+		idx := 0
+		for i := 0; i < n; i++ {
+			if best.BestLine[i].Role != Held {
+				continue
+			}
+			if idx == pick {
+				best.BestLine[i].Role = Arsenal
+				best.ArsenalCard = best.BestLine[i].Card
+				return
+			}
+			idx++
+		}
+		return
+	}
+	pick -= handHeldCount
+	idx := 0
+	for i := range best.Drawn {
+		if best.Drawn[i].Role != Held {
+			continue
+		}
+		if idx == pick {
+			best.Drawn[i].Role = Arsenal
+			best.ArsenalCard = best.Drawn[i].Card
+			return
+		}
+		idx++
+	}
 }
 
 // groupByRoleInto appends hand cards into caller-provided pitched/attackers/defenders slices

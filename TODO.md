@@ -165,8 +165,9 @@ Hero health isn't tracked, so every life-gain and life-comparison rider collapse
   there) default off or fire unconditionally where noted.
 - **"No cards in hand" riders never fire.** Spring Load's +3{p} rider defaults off.
 - **Draw / hand cycling is flattened.** Mid-turn draws (Snatch, Drawn to the Dark Dimension)
-  route through `TurnState.DrawOne`; future phases will let the drawn card be played, pitched,
-  defended with, or arsenaled during the turn. Sutcliffe's Research Notes ignores its
+  route through `TurnState.DrawOne`; the drawn card competes with Held hand cards for the
+  end-of-turn arsenal slot and otherwise carries HELD into the next hand. The sim doesn't yet
+  let a drawn card be played, pitched, or defended with during the turn it's drawn. Sutcliffe's Research Notes ignores its
   re-ordering clause; Sink Below drops its cycling rider; Rise Above's alternative hand-as-cost
   option isn't simulated. The Emissary of Moon / Tides / Wind trio, Sift, Scour the
   Battlescape, Whisper of the Oracle (Opt), and Strategic Planning all similarly drop their

@@ -452,7 +452,15 @@ func (d *Deck) EvaluateWith(runs int, incomingDamage int, rng *rand.Rand, ev *ha
 
 			attributePlayStats(&d.Stats, play.BestLine)
 			nextHeld = recyclePlayedCards(play.BestLine, buf, &tail, nextHeld[:0])
-			head += drawCount
+			// Advance past mid-turn-drawn cards (already consumed from the deck slice by
+			// DrawOne) and fold each drawn card into next turn's holding pool. Held drawn
+			// cards ride forward in heldBuf; Arsenal drawn cards flow through arsenalCard.
+			head += drawCount + len(play.Drawn)
+			for _, drawn := range play.Drawn {
+				if drawn.Role == hand.Held {
+					nextHeld = append(nextHeld, drawn.Card)
+				}
+			}
 			handIdx++
 			heldBuf, nextHeld = nextHeld, heldBuf
 		}
@@ -495,11 +503,12 @@ type TurnStartState struct {
 
 // EvalOneTurnForTesting runs one turn against d.Cards in source order (no shuffle) and returns
 // the state at the start of what would be turn 2: the hand just dealt, the arsenal slot, the
-// cards remaining in the deck, and the runechant carryover. Test-only — pins cross-turn sim
+// cards remaining in the deck, and the runechant carryover. arsenalIn seeds the arsenal slot
+// at the start of turn 1 (pass nil for an empty slot). Test-only — pins cross-turn sim
 // behaviour (held cards carrying, mid-turn draws populating the next hand, arsenal carryover,
 // pitched cards recycling to the deck bottom) against a known deck layout. Production callers
 // should use Evaluate, which shuffles and loops.
-func (d *Deck) EvalOneTurnForTesting(incomingDamage int) TurnStartState {
+func (d *Deck) EvalOneTurnForTesting(incomingDamage int, arsenalIn card.Card) TurnStartState {
 	simstate.CurrentHero = d.Hero
 	handSize := d.Hero.Intelligence()
 	deckSize := len(d.Cards)
@@ -518,9 +527,18 @@ func (d *Deck) EvalOneTurnForTesting(incomingDamage int) TurnStartState {
 	if !ok {
 		return TurnStartState{}
 	}
-	play := hand.Best(d.Hero, d.Weapons, h, incomingDamage, buf[head+drawCount:tail], 0, nil)
+	play := hand.Best(d.Hero, d.Weapons, h, incomingDamage, buf[head+drawCount:tail], 0, arsenalIn)
 	nextHeld := recyclePlayedCards(play.BestLine, buf, &tail, nil)
-	head += drawCount
+	// Mid-turn draws consume from the top of the deck slice passed to Best. Advance past them
+	// so turn 2's refill starts beyond the drawn cards, then fold each drawn card into the
+	// next-turn holding pool: Held drawn cards carry into the hand, Arsenal drawn cards are
+	// already threaded through play.ArsenalCard.
+	head += drawCount + len(play.Drawn)
+	for _, drawn := range play.Drawn {
+		if drawn.Role == hand.Held {
+			nextHeld = append(nextHeld, drawn.Card)
+		}
+	}
 
 	// Deal turn 2's hand but stop short of running Best — the caller wants the pre-Best state.
 	turn2Hand, drawCount2, ok := dealNextHand(buf, handBuf, nextHeld, &head, &tail, handSize)
