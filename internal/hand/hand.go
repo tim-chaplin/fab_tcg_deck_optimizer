@@ -70,6 +70,19 @@ type TurnSummary struct {
 	// (promoted into an empty slot post-enumeration, Contribution 0), or Held (carries into
 	// the next hand, Contribution 0). Nil when no draw rider fired.
 	Drawn []CardAssignment
+	// DelayedFromLastTurn records cards queued from the previous turn whose PlayNextTurn ran at
+	// the start of this turn, each with the damage-equivalent it credited. Populated by the deck
+	// loop before FormatBestTurn is called; Value already includes the sum. Empty when no cards
+	// implementing card.DelayedPlay were played the previous turn.
+	DelayedFromLastTurn []DelayedContribution
+}
+
+// DelayedContribution is one card's PlayNextTurn outcome: the card itself plus the
+// damage-equivalent its start-of-turn effect produced. Surfaced in
+// TurnSummary.DelayedFromLastTurn so FormatBestTurn can print a "(from previous turn)" line.
+type DelayedContribution struct {
+	Card   card.Card
+	Damage int
 }
 
 // AttackChainEntry is a single played attack — a card with role=Attack or a swung weapon —
@@ -261,6 +274,11 @@ func FormatBestTurn(t TurnSummary) string {
 	}
 	for _, a := range defenseReactions {
 		appendDefense(a, "DEFENSE REACTION")
+	}
+	for _, d := range t.DelayedFromLastTurn {
+		step++
+		lines = append(lines, fmt.Sprintf("  %d. %s (from previous turn): START OF ACTION PHASE (+%d)",
+			step, d.Card.Name(), d.Damage))
 	}
 	for _, a := range attackPitches {
 		appendPitch(a, "PITCH (my turn)")

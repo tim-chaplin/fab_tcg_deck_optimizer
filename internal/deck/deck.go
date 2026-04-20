@@ -384,6 +384,11 @@ func (d *Deck) EvaluateWith(runs int, incomingDamage int, rng *rand.Rand, ev *ha
 	handBuf := make([]card.Card, handSize)
 	heldBuf := make([]card.Card, 0, handSize)
 	nextHeld := make([]card.Card, 0, handSize)
+	// delayedBuf queues cards played last turn that implement card.DelayedPlay; their
+	// PlayNextTurn fires at the start of this turn. Double-buffered with nextDelayed like the
+	// held slices so the swap is allocation-free.
+	delayedBuf := make([]card.Card, 0, handSize)
+	nextDelayed := make([]card.Card, 0, handSize)
 	for r := 0; r < runs; r++ {
 		copy(buf, d.Cards)
 		// Inline Fisher-Yates: rng.Shuffle would heap-allocate a closure over buf every run.
@@ -397,6 +402,7 @@ func (d *Deck) EvaluateWith(runs int, incomingDamage int, rng *rand.Rand, ev *ha
 		runechantCarryover := 0
 		var arsenalCard card.Card
 		heldBuf = heldBuf[:0]
+		delayedBuf = delayedBuf[:0]
 		// Cap the run at two full cycles. A pitch-everything-swing-a-weapon loop recycles the
 		// same cards forever (hand.Best returns identical summaries each iteration, so head and
 		// tail advance in lockstep); two cycles also match FirstCycle / SecondCycle stats.
@@ -409,6 +415,10 @@ func (d *Deck) EvaluateWith(runs int, incomingDamage int, rng *rand.Rand, ev *ha
 			// Snapshot the starting carryover before Best overwrites it — the best-hand record
 			// wants the count in play when the hand was dealt, not what remained after.
 			startingRunechants := runechantCarryover
+			// Fire any PlayNextTurn callbacks queued from last turn before the best-line search.
+			// The TurnState sees the post-draw deck so top-of-deck peeks (Sigil of the Arknight)
+			// read the actual card about to be revealed.
+			delayedContribs, delayedDamage := runDelayedPlays(delayedBuf, buf[head+drawCount:tail])
 			var play hand.TurnSummary
 			if ev != nil {
 				play = ev.Best(d.Hero, d.Weapons, h, incomingDamage, buf[head+drawCount:tail], runechantCarryover, arsenalCard)
@@ -417,6 +427,11 @@ func (d *Deck) EvaluateWith(runs int, incomingDamage int, rng *rand.Rand, ev *ha
 			}
 			runechantCarryover = play.LeftoverRunechants
 			arsenalCard = play.ArsenalCard
+			// Delayed credit is a flat additive on Value; every partition benefits equally so
+			// Best's ranking is unaffected, but the resulting Value must include it so the
+			// best-hand pick and cycle averages reflect the real total.
+			play.Value += delayedDamage
+			play.DelayedFromLastTurn = delayedContribs
 			v := float64(play.Value)
 
 			d.Stats.TotalValue += v
@@ -439,14 +454,20 @@ func (d *Deck) EvaluateWith(runs int, incomingDamage int, rng *rand.Rand, ev *ha
 					drawnCopy = make([]hand.CardAssignment, len(play.Drawn))
 					copy(drawnCopy, play.Drawn)
 				}
+				var delayedCopy []hand.DelayedContribution
+				if len(play.DelayedFromLastTurn) > 0 {
+					delayedCopy = make([]hand.DelayedContribution, len(play.DelayedFromLastTurn))
+					copy(delayedCopy, play.DelayedFromLastTurn)
+				}
 				d.Stats.Best = BestTurn{
 					Summary: hand.TurnSummary{
-						BestLine:           lineCopy,
-						AttackChain:        chainCopy,
-						Drawn:              drawnCopy,
-						Value:              play.Value,
-						LeftoverRunechants: play.LeftoverRunechants,
-						ArsenalCard:        play.ArsenalCard,
+						BestLine:            lineCopy,
+						AttackChain:         chainCopy,
+						Drawn:               drawnCopy,
+						Value:               play.Value,
+						LeftoverRunechants:  play.LeftoverRunechants,
+						ArsenalCard:         play.ArsenalCard,
+						DelayedFromLastTurn: delayedCopy,
 					},
 					StartingRunechants: startingRunechants,
 				}
@@ -462,11 +483,49 @@ func (d *Deck) EvaluateWith(runs int, incomingDamage int, rng *rand.Rand, ev *ha
 
 			attributePlayStats(&d.Stats, play.BestLine)
 			nextHeld = applyTurnResult(play, buf, &head, &tail, drawCount, nextHeld[:0])
+			nextDelayed = collectDelayedPlays(play.BestLine, nextDelayed[:0])
 			handIdx++
 			heldBuf, nextHeld = nextHeld, heldBuf
+			delayedBuf, nextDelayed = nextDelayed, delayedBuf
 		}
 	}
 	return d.Stats
+}
+
+// runDelayedPlays fires a PlayNextTurn callback on each queued card, passing a TurnState whose
+// Deck is the post-draw deck so top-of-deck peeks read the actual card about to be revealed.
+// Returns the per-card contributions for FormatBestTurn plus the summed damage to fold into
+// Value. Nil/zero when no cards are queued.
+func runDelayedPlays(queued []card.Card, postDrawDeck []card.Card) ([]hand.DelayedContribution, int) {
+	if len(queued) == 0 {
+		return nil, 0
+	}
+	contribs := make([]hand.DelayedContribution, 0, len(queued))
+	total := 0
+	ts := card.TurnState{Deck: postDrawDeck}
+	for _, c := range queued {
+		dp := c.(card.DelayedPlay)
+		d := dp.PlayNextTurn(&ts)
+		total += d
+		contribs = append(contribs, hand.DelayedContribution{Card: c, Damage: d})
+	}
+	return contribs, total
+}
+
+// collectDelayedPlays scans a turn's BestLine for cards whose Play ran (Role == Attack) and that
+// implement card.DelayedPlay. Those are queued so their PlayNextTurn fires at the top of the
+// next turn. Pitched / arsenaled / held copies are skipped — only the played instance has its
+// aura in the arena.
+func collectDelayedPlays(line []hand.CardAssignment, dst []card.Card) []card.Card {
+	for _, a := range line {
+		if a.Role != hand.Attack {
+			continue
+		}
+		if _, ok := a.Card.(card.DelayedPlay); ok {
+			dst = append(dst, a.Card)
+		}
+	}
+	return dst
 }
 
 // applyTurnResult folds a completed turn's outcome into cross-turn state: pitched hand cards

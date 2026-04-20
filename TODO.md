@@ -152,10 +152,14 @@ Hero health isn't tracked, so every life-gain and life-comparison rider collapse
   live `AuraCreated` / `HasPlayedType(TypeAura)` check. Reek of Corruption, Hit the High Notes,
   and Shrill of Skullform all gate this correctly; Yinti Yanti does as well. Nothing else on the
   roster currently reads the clause.
-- **Cross-turn aura lifecycles are collapsed.** Blessing of Occult, Sigil of Deadwood, and Sigil
-  of the Arknight credit their benefits immediately (via DelayRunechants or flat damage) rather
-  than modelling the full enter/leave sequence across turns. End-phase destruction clauses on
-  Enchanting Melody, Sigil of Cycles, and Sigil of Fyendal are similarly dropped.
+- **Cross-turn aura lifecycles are partially modelled.** `card.DelayedPlay` threads a
+  PlayNextTurn callback through the deck loop for cards whose effect fires at the start of the
+  owner's next action phase — Sigil of the Arknight peeks the actual post-draw top card next
+  turn, and Sigil of Fyendal credits its 1{h} gain on leave the turn the aura resolves. Other
+  cross-turn auras still collapse their effects into the immediate Play: Blessing of Occult
+  (DelayRunechants), Sigil of Deadwood, Sigil of Silphidae (enter + leave both credited at
+  play), Enchanting Melody (end-phase destruction clause dropped), Sigil of Cycles (on-leave
+  discard/draw dropped).
 - **Graveyard-banish additional costs are ignored.** Gravekeeping, Jack Be Nimble, Jack Be Quick,
   Looking for a Scrap, and Nimble Strike treat the banish step as free and either drop the
   rider or credit it unconditionally where noted in the card.
@@ -319,8 +323,8 @@ listed here so the direction tag is co-located with the name.
   destruction dropped (only same-turn Runeblade-attack +N is modelled).
 - **Runeblade Runic Fellingsong (all colours)** — cannot credit BOTH the printed 1 arcane AND
   the graveyard-banish rider; only one fires.
-- **Runeblade Sigil of the Arknight (all colours)** — cross-turn aura persistence collapsed to a
-  one-turn peek; if the correct card isn't at the Intelligence-index slot, 0 credited.
+- **Runeblade Sigil of the Arknight (all colours)** — reveal fires at the correct start-of-next-
+  turn timing via `card.DelayedPlay`; if the post-draw top card isn't an attack action, 0 credited.
 - **Runeblade Splintering Deadwood (all colours)** — aura-swap modelled as net-zero (no credit
   for the tempo of trading a weak aura for a Runechant).
 - **Runeblade Sutcliffe's Research Notes (all colours)** — top-of-deck re-ordering clause
