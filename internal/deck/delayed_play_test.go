@@ -29,9 +29,9 @@ func (s stubDelayed) Types() card.TypeSet {
 }
 func (s stubDelayed) GoAgain() bool            { return true }
 func (s stubDelayed) Play(*card.TurnState) int { return 0 }
-func (s stubDelayed) PlayNextTurn(*card.TurnState) int {
+func (s stubDelayed) PlayNextTurn(*card.TurnState) card.DelayedPlayResult {
 	*s.calls++
-	return s.damage
+	return card.DelayedPlayResult{Damage: s.damage}
 }
 
 // TestCollectDelayedPlays_OnlyAttackRole verifies only Role==Attack entries are queued:
@@ -63,7 +63,7 @@ func TestRunDelayedPlays_FiresEachQueuedCardOnce(t *testing.T) {
 	var callsA, callsB int
 	a := stubDelayed{damage: 2, calls: &callsA}
 	b := stubDelayed{damage: 3, calls: &callsB}
-	contribs, total := runDelayedPlays([]card.Card{a, b}, nil)
+	contribs, total, revealed := runDelayedPlays([]card.Card{a, b}, nil)
 	if total != 5 {
 		t.Errorf("total = %d, want 5 (2+3)", total)
 	}
@@ -76,6 +76,9 @@ func TestRunDelayedPlays_FiresEachQueuedCardOnce(t *testing.T) {
 	if contribs[1].Damage != 3 {
 		t.Errorf("contribs[1].Damage = %d, want 3", contribs[1].Damage)
 	}
+	if len(revealed) != 0 {
+		t.Errorf("revealed = %v, want nil (damage-only stubs don't reveal)", revealed)
+	}
 	if callsA != 1 || callsB != 1 {
 		t.Errorf("PlayNextTurn call counts = (%d, %d), want (1, 1)", callsA, callsB)
 	}
@@ -83,28 +86,121 @@ func TestRunDelayedPlays_FiresEachQueuedCardOnce(t *testing.T) {
 
 // TestRunDelayedPlays_EmptyQueue short-circuits: no contribs, no allocation, zero total.
 func TestRunDelayedPlays_EmptyQueue(t *testing.T) {
-	contribs, total := runDelayedPlays(nil, nil)
+	contribs, total, revealed := runDelayedPlays(nil, nil)
 	if total != 0 {
 		t.Errorf("total = %d, want 0", total)
 	}
 	if contribs != nil {
 		t.Errorf("contribs = %v, want nil", contribs)
 	}
+	if revealed != nil {
+		t.Errorf("revealed = %v, want nil", revealed)
+	}
 }
 
-// TestRunDelayedPlays_PassesPostDrawDeck verifies the callback sees the deck slice it was
-// given — important for Sigil of the Arknight, which peeks Deck[0] as the next-turn reveal.
-func TestRunDelayedPlays_PassesPostDrawDeck(t *testing.T) {
+// TestRunDelayedPlays_RevealsAttackActionIntoHand verifies Sigil of the Arknight's reveal:
+// the top card (an attack action) comes back in the revealed slice, and the contribution has
+// ToHand set for the formatter.
+func TestRunDelayedPlays_RevealsAttackActionIntoHand(t *testing.T) {
 	sigil := runeblade.SigilOfTheArknightBlue{}
-	attackTop := []card.Card{runeblade.AetherSlashRed{}}
-	_, total := runDelayedPlays([]card.Card{sigil}, attackTop)
-	if total != card.DrawValue {
-		t.Errorf("total = %d, want %d (top card is an attack action → DrawValue credited)", total, card.DrawValue)
-	}
-	// Sigil itself is an Aura, not an action-attack — reveal fails.
-	_, total = runDelayedPlays([]card.Card{sigil}, []card.Card{sigil})
+	slash := runeblade.AetherSlashRed{}
+	contribs, total, revealed := runDelayedPlays([]card.Card{sigil}, []card.Card{slash})
 	if total != 0 {
-		t.Errorf("total = %d, want 0 (top card is aura, not an attack action)", total)
+		t.Errorf("total = %d, want 0 (reveal contributes via hand, not damage)", total)
+	}
+	if len(revealed) != 1 || revealed[0] != slash {
+		t.Errorf("revealed = %v, want [%v]", revealed, slash)
+	}
+	if len(contribs) != 1 || contribs[0].ToHand != slash {
+		t.Errorf("contribs[0].ToHand = %v, want %v", contribs[0].ToHand, slash)
+	}
+}
+
+// TestRunDelayedPlays_CascadingReveals: two sigils in a row each reveal the current top, so the
+// second one sees the NEW top after the first pops its card off the front of the deck view.
+func TestRunDelayedPlays_CascadingReveals(t *testing.T) {
+	sigil := runeblade.SigilOfTheArknightBlue{}
+	first := runeblade.AetherSlashRed{}
+	second := runeblade.ConsumingVolitionRed{}
+	_, _, revealed := runDelayedPlays([]card.Card{sigil, sigil}, []card.Card{first, second})
+	if len(revealed) != 2 {
+		t.Fatalf("len(revealed) = %d, want 2 (two cascading reveals)", len(revealed))
+	}
+	if revealed[0] != first || revealed[1] != second {
+		t.Errorf("revealed = %v, want [%v, %v]", revealed, first, second)
+	}
+}
+
+// TestRunDelayedPlays_NonAttackTopSkipsReveal: sigil peeks a non-attack top → no reveal, no
+// damage. The top card stays on the deck in the real game.
+func TestRunDelayedPlays_NonAttackTopSkipsReveal(t *testing.T) {
+	sigil := runeblade.SigilOfTheArknightBlue{}
+	// Sigil itself is an Aura (non-attack) — use it as a convenient non-attack top.
+	_, total, revealed := runDelayedPlays([]card.Card{sigil}, []card.Card{sigil})
+	if total != 0 {
+		t.Errorf("total = %d, want 0 (non-attack top, no credit)", total)
+	}
+	if revealed != nil {
+		t.Errorf("revealed = %v, want nil (non-attack tops aren't moved)", revealed)
+	}
+}
+
+// TestEvalOneTurn_SigilOfTheArknightRevealsIntoHand is the end-to-end 2-turn check: turn 1
+// plays a Sigil of the Arknight, queueing its PlayNextTurn callback for turn 2. Turn 2 draws 4
+// cards (Viserai Intelligence=4) and the callback peeks the top of the post-draw deck — an
+// attack action — and moves it into the hand. The returned turn-2 hand has 5 cards: 4 normal
+// refills plus the revealed Aether Slash appended at the tail.
+//
+// Turn 1's hand is [sigil, Blue] with Shrill of Skullform (Yellow) in arsenal. Blue pitches to
+// fund Shrill's cost 2; sigil plays first (go-again + AuraCreated) so Shrill's aura-rider fires
+// for +3 power. A lone-sigil hand would otherwise be sent to arsenal by the solver's tiebreak
+// (sigil's Play contributes 0 current-turn Value, and Held → arsenal promotion beats Role=
+// Attack at equal Value), so the chain-partner is needed to force the intended Role=Attack.
+func TestEvalOneTurn_SigilOfTheArknightRevealsIntoHand(t *testing.T) {
+	sigil := runeblade.SigilOfTheArknightBlue{}
+	reveal := runeblade.AetherSlashRed{}
+	// Deck layout: positions 0..3 are turn 2's normal refill (Blues), position 4 is the reveal
+	// target at the post-draw top, positions 5+ are unused filler.
+	deckCards := []card.Card{
+		fake.BlueAttack{},
+		fake.BlueAttack{},
+		fake.BlueAttack{},
+		fake.BlueAttack{},
+		reveal,
+		fake.BlueAttack{},
+	}
+	d := New(hero.Viserai{}, nil, deckCards)
+	state := d.EvalOneTurnForTesting(0, runeblade.ShrillOfSkullformYellow{}, []card.Card{sigil, fake.BlueAttack{}})
+
+	// Assert sigil played: find it as Role=Attack in turn 1's BestLine.
+	sigilPlayed := false
+	for _, a := range state.PrevTurnBestLine {
+		if a.Card.ID() == card.SigilOfTheArknightBlue && a.Role == hand.Attack {
+			sigilPlayed = true
+			break
+		}
+	}
+	if !sigilPlayed {
+		t.Errorf("turn 1 BestLine didn't play the sigil as Role=Attack: %+v", state.PrevTurnBestLine)
+	}
+
+	// Turn 2: 4 normal draws + 1 revealed = 5 cards. The pitched Blue from turn 1 sits at the
+	// tail of the deck, so positions 0..3 of the post-turn-1 deck are the original Blues at
+	// deckCards[0..3]. Position 4 is the reveal target.
+	wantHand := []card.Card{
+		fake.BlueAttack{},
+		fake.BlueAttack{},
+		fake.BlueAttack{},
+		fake.BlueAttack{},
+		reveal,
+	}
+	if len(state.Hand) != len(wantHand) {
+		t.Fatalf("turn 2 hand size = %d, want %d (4 normal draws + 1 revealed)", len(state.Hand), len(wantHand))
+	}
+	for i, want := range wantHand {
+		if state.Hand[i] != want {
+			t.Errorf("turn 2 hand[%d] = %v, want %v", i, state.Hand[i], want)
+		}
 	}
 }
 
@@ -113,9 +209,6 @@ func TestRunDelayedPlays_PassesPostDrawDeck(t *testing.T) {
 // entry on at least some hand's TurnSummary. Uses enough copies + runs that the shuffle
 // reliably plays Sigil before the best turn is recorded.
 func TestEvaluate_DelayedFromLastTurnSurfacesInBest(t *testing.T) {
-	// Pack the deck: lots of Sigils so every hand plays one; Aether Slash as the reveal target
-	// so PlayNextTurn credits DrawValue; filler Blue attacks to round out hand value. Minimum
-	// deck size for Viserai (Int 4): 20.
 	sigil := runeblade.SigilOfTheArknightBlue{}
 	slash := runeblade.AetherSlashRed{}
 	deckCards := make([]card.Card, 0, 20)

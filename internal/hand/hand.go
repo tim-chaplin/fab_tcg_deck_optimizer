@@ -77,12 +77,15 @@ type TurnSummary struct {
 	DelayedFromLastTurn []DelayedContribution
 }
 
-// DelayedContribution is one card's PlayNextTurn outcome: the card itself plus the
-// damage-equivalent its start-of-turn effect produced. Surfaced in
-// TurnSummary.DelayedFromLastTurn so FormatBestTurn can print a "(from previous turn)" line.
+// DelayedContribution is one card's PlayNextTurn outcome: the card itself plus whichever
+// effects fired — Damage credited 1-to-1 toward Value, ToHand a card revealed off the top of
+// the deck and moved into the dealt hand (the hand already reflects it by the time the turn
+// is evaluated). Surfaced in TurnSummary.DelayedFromLastTurn so FormatBestTurn can print a
+// "(from previous turn)" line naming the outcome.
 type DelayedContribution struct {
 	Card   card.Card
 	Damage int
+	ToHand card.Card
 }
 
 // AttackChainEntry is a single played attack — a card with role=Attack or a swung weapon —
@@ -277,8 +280,14 @@ func FormatBestTurn(t TurnSummary) string {
 	}
 	for _, d := range t.DelayedFromLastTurn {
 		step++
-		lines = append(lines, fmt.Sprintf("  %d. %s (from previous turn): START OF ACTION PHASE (+%d)",
-			step, d.Card.Name(), d.Damage))
+		switch {
+		case d.ToHand != nil:
+			lines = append(lines, fmt.Sprintf("  %d. %s (from previous turn): REVEALED %s INTO HAND",
+				step, d.Card.Name(), d.ToHand.Name()))
+		default:
+			lines = append(lines, fmt.Sprintf("  %d. %s (from previous turn): START OF ACTION PHASE (+%d)",
+				step, d.Card.Name(), d.Damage))
+		}
 	}
 	for _, a := range attackPitches {
 		appendPitch(a, "PITCH (my turn)")

@@ -155,16 +155,30 @@ func TestFormatBestTurn_EmptyBestLine(t *testing.T) {
 // their own "(from previous turn)" line so the reader sees where the damage-equivalent came
 // from (the Value would otherwise not reconcile with the on-turn per-card breakdown).
 func TestFormatBestTurn_DelayedFromLastTurnLine(t *testing.T) {
-	summary := TurnSummary{
-		DelayedFromLastTurn: []DelayedContribution{
-			{Card: fake.RedAttack{}, Damage: 3},
-		},
-	}
-	out := FormatBestTurn(summary)
-	want := "1. cardtest.RedAttack (from previous turn): START OF ACTION PHASE (+3)"
-	if !strings.Contains(out, want) {
-		t.Errorf("missing %q in:\n%s", want, out)
-	}
+	t.Run("damage credit", func(t *testing.T) {
+		summary := TurnSummary{
+			DelayedFromLastTurn: []DelayedContribution{
+				{Card: fake.RedAttack{}, Damage: 3},
+			},
+		}
+		out := FormatBestTurn(summary)
+		want := "1. cardtest.RedAttack (from previous turn): START OF ACTION PHASE (+3)"
+		if !strings.Contains(out, want) {
+			t.Errorf("missing %q in:\n%s", want, out)
+		}
+	})
+	t.Run("reveal into hand", func(t *testing.T) {
+		summary := TurnSummary{
+			DelayedFromLastTurn: []DelayedContribution{
+				{Card: fake.RedAttack{}, ToHand: fake.BlueAttack{}},
+			},
+		}
+		out := FormatBestTurn(summary)
+		want := "1. cardtest.RedAttack (from previous turn): REVEALED cardtest.BlueAttack INTO HAND"
+		if !strings.Contains(out, want) {
+			t.Errorf("missing %q in:\n%s", want, out)
+		}
+	})
 }
 
 // TestFormatBestTurn_DrawnCardsRendered pins each role a drawn card can take to a tagged line
