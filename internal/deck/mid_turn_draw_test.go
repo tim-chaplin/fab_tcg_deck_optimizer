@@ -515,3 +515,96 @@ func TestEvalOneTurn_MidTurnDrawSansGoAgainStaysHeld(t *testing.T) {
 		t.Errorf("turn 2 runechant carryover = %d, want 0", state.RunechantCarryover)
 	}
 }
+
+// TestEvalOneTurn_TwoDrawRidersInOneChain pins a chain with two DrawOne calls — Snatch's
+// on-hit plus Drawn to the Dark Dimension's on-play — so `state.Drawn` accumulates twice and
+// both ends of the pipeline (the solver's draw-tracking, the sim's per-role routing, the
+// fillContributions snapshot) exercise multi-entry behaviour. Flying High grants Go again to
+// Snatch; Drawn to the Dark Dimension follows as the last attacker (doesn't need Go again).
+//
+// The winning partition leaves Toughen Up Blue HELD rather than pitching it: Drawn's cost 2
+// is covered by the drawn Blue Snatch pulled (Phase 2 pitch-from-drawn, which adds 3 to
+// resources), and leaving Toughen Up in hand lets the arsenal tiebreak land on an occupied
+// slot. One drawn Blue is consumed as pitch; the second drawn Blue (pulled by Drawn's
+// DrawOne) stays Held. Post-enumeration promotion then picks Toughen Up out of the combined
+// {Toughen Up, Blue} Held pool for the arsenal.
+//
+// Damage: 0 (Flying High Yellow, no pitch-match) + 4 (Snatch) + 3 (Drawn to the Dark
+// Dimension) + 1 (Viserai's Runechant trigger on Drawn's resolve — Flying High is a
+// non-attack action played earlier) = 8.
+func TestEvalOneTurn_TwoDrawRidersInOneChain(t *testing.T) {
+	initialHand := []card.Card{
+		generic.FlyingHighYellow{},
+		generic.SnatchRed{},
+		runeblade.DrawnToTheDarkDimensionRed{},
+		generic.ToughenUpBlue{},
+	}
+	deckCards := []card.Card{
+		fake.BlueAttack{},
+		fake.BlueAttack{},
+		fake.BlueAttack{},
+		fake.BlueAttack{},
+		fake.BlueAttack{},
+	}
+	d := New(hero.Viserai{}, nil, deckCards)
+	state := d.EvalOneTurnForTesting(0, nil, initialHand)
+
+	if state.PrevTurnValue != 8 {
+		t.Errorf("turn 1 Value = %d, want 8 (FH 0 + Snatch 4 + DrawnToDark 3 + Viserai Runechant 1)", state.PrevTurnValue)
+	}
+
+	// Toughen Up Blue stays Held in hand and is promoted to arsenal; the pitched drawn Blue
+	// recycles to the deck bottom, the second drawn Blue carries as Held into turn 2's hand.
+	if _, ok := state.ArsenalCard.(generic.ToughenUpBlue); !ok {
+		t.Errorf("turn 2 arsenal = %v, want Toughen Up Blue (Held hand card promoted over the held drawn Blue)", state.ArsenalCard)
+	}
+
+	// Turn 2 hand: the second drawn Blue (Held) plus three fresh Blues from the deck.
+	wantHand := []card.Card{
+		fake.BlueAttack{},
+		fake.BlueAttack{},
+		fake.BlueAttack{},
+		fake.BlueAttack{},
+	}
+	if !reflect.DeepEqual(state.Hand, wantHand) {
+		t.Errorf("turn 2 hand = %v, want %v", state.Hand, wantHand)
+	}
+
+	// Deck bottom: the drawn Blue that was pitched mid-chain to fund Drawn to the Dark
+	// Dimension, recycled to the tail of the deck like any other pitched card.
+	wantDeck := []card.Card{fake.BlueAttack{}}
+	if !reflect.DeepEqual(state.Deck, wantDeck) {
+		t.Errorf("turn 2 deck = %v, want %v", state.Deck, wantDeck)
+	}
+
+	if state.RunechantCarryover != 0 {
+		t.Errorf("turn 2 runechant carryover = %d, want 0 (Drawn to the Dark Dimension consumed its own Runechant on resolve)", state.RunechantCarryover)
+	}
+}
+
+// TestEvalOneTurn_DrawOneOnEmptyDeckIsNoop pins the degenerate case: Snatch fires DrawOne
+// against an empty deck and nothing happens — no panic, no spurious entry in state.Drawn, no
+// index math goes sideways downstream. Hand is just Snatch; d.Cards is empty. Turn 2 can't
+// deal (deck stays empty through the turn), so the sim returns a TurnStartState with just
+// the previous-turn value and the arsenal/runechant carryover.
+func TestEvalOneTurn_DrawOneOnEmptyDeckIsNoop(t *testing.T) {
+	initialHand := []card.Card{generic.SnatchRed{}}
+	d := New(hero.Viserai{}, nil, nil)
+	state := d.EvalOneTurnForTesting(0, nil, initialHand)
+
+	if state.PrevTurnValue != 4 {
+		t.Errorf("turn 1 Value = %d, want 4 (Snatch damage; DrawOne is a no-op on empty deck)", state.PrevTurnValue)
+	}
+	if len(state.Hand) != 0 {
+		t.Errorf("turn 2 hand = %v, want empty (deck was empty, can't refill)", state.Hand)
+	}
+	if len(state.Deck) != 0 {
+		t.Errorf("turn 2 deck = %v, want empty", state.Deck)
+	}
+	if state.ArsenalCard != nil {
+		t.Errorf("turn 2 arsenal = %v, want nil (nothing Held to promote)", state.ArsenalCard)
+	}
+	if state.RunechantCarryover != 0 {
+		t.Errorf("turn 2 runechant carryover = %d, want 0", state.RunechantCarryover)
+	}
+}
