@@ -21,14 +21,30 @@ func TestMauvrionSkies_NoNextAttackReturnsZero(t *testing.T) {
 }
 
 func TestMauvrionSkies_WeaponNextDoesNotQualify(t *testing.T) {
-	// A Runeblade weapon swing later in the turn is not an attack action card — rider fizzles.
+	// A Runeblade weapon swing later in the turn is not an attack action card — rider fizzles,
+	// and the go-again grant is skipped too (weapons already get go-again implicitly via the
+	// weapon swing slot; Mauvrion's grant targets attack action CARDS only).
 	target := &card.PlayedCard{Card: stubRunebladeWeapon{}}
 	s := card.TurnState{CardsRemaining: []*card.PlayedCard{target}}
 	if got := (MauvrionSkiesRed{}).Play(&s); got != 0 {
 		t.Fatalf("want 0 with weapon-only next, got %d", got)
 	}
 	if target.GrantedGoAgain {
-		t.Fatalf("grant should stay false when target isn't an attack action card")
+		t.Fatalf("grant should stay false when target is a weapon")
+	}
+}
+
+func TestMauvrionSkies_NonRunebladeAttackDoesNotQualify(t *testing.T) {
+	// A Generic attack action card later in the turn is not a Runeblade attack — Mauvrion's
+	// rider is gated on the "next Runeblade attack action card", so the grant must skip it
+	// (and no Runechants fire).
+	target := &card.PlayedCard{Card: stubNonRunebladeAttack{}}
+	s := card.TurnState{CardsRemaining: []*card.PlayedCard{target}}
+	if got := (MauvrionSkiesRed{}).Play(&s); got != 0 {
+		t.Fatalf("want 0 with non-Runeblade attack next, got %d", got)
+	}
+	if target.GrantedGoAgain {
+		t.Fatalf("grant should stay false when target isn't a Runeblade card")
 	}
 }
 
