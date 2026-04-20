@@ -214,3 +214,237 @@ Hero health isn't tracked, so every life-gain and life-comparison rider collapse
   Universal keyword, and Smashing Good Time's item-destruction rider all collapse to base stats
   plus whatever bonus we credit unconditionally. (Clash is now modelled via `card.ClashValue` —
   Test of Strength is the only card that uses it today.)
+
+### Direction tags: undervalued vs overvalued
+
+Bullets tag every card whose implementation drops or bends a rider, based on whether that
+simplification tilts the sim's score above or below what the real card delivers. Undervalued is
+the priority bucket — those cards get rejected by the optimizer before they ever get a shot at
+playtesting. Cards whose assumption already appears verbatim earlier in the section are still
+listed here so the direction tag is co-located with the name.
+
+#### Undervalued (sim discounts a real card's effect)
+
+- **Adrenaline Rush (all colours)** — drops the +3{p} for less-life gate; a board-state snapshot
+  where that fires is never scored.
+- **Back Alley Breakline (all colours)** — face-up-from-deck action-point grant dropped; action
+  points not tracked, so the tempo payoff is never scored.
+- **Barraging Brawnhide (all colours)** — defended-by-<2-non-equipment +1{p} never fires; the
+  card's own rider is dropped while printed power is left alone.
+- **Belittle (all colours)** — dropped Minnowism tutor step; the card prints go-again and searches
+  a specific follow-up, and only the go-again lands.
+- **Blanch (all colours)** — dropped on-hit "cards lose all colors" debuff; effectively vanilla
+  power.
+- **Blow for a Blow** — go-again on less-life is dropped (the +1 on-hit ping is modelled).
+- **Brandish (all colours)** — dropped next-weapon-attack +1{p}; with go-again printed the rider
+  would typically cash out.
+- **Brothers in Arms (all colours)** — dropped pay-to-buff-defence rider; card never gets credit
+  for its +2{d} swing.
+- **Cadaverous Contraband** — dropped graveyard-top-of-deck fix-up; the card's whole point is
+  unavailable.
+- **Captain's Call (all colours)** — modal pick is hard-coded to +2{p}; the alternative go-again
+  mode that could chain a bigger attack is never chosen.
+- **Cash In (all colours)** — Gold / Silver / Copper economy plus draw riders dropped; card
+  returns only base stats.
+- **Clearwater / Restvine / Sapwood Elixir (all colours)** — health-gain rider dropped (still
+  credits the +{p} scan, so the loss is only the life side).
+- **Crash Down the Gates (all colours)** — on-hit deck destruction + reveal comparison dropped.
+- **Cut Down to Size (all colours)** — on-hit opponent discard dropped.
+- **Destructive Deliberation (all colours)** — Ponder-token creation dropped entirely.
+- **Down But Not Out (all colours)** — none of Agility / Might / Vigor token branches fire.
+- **Drone of Brutality (all colours)** — graveyard-replacement-to-deck rider dropped.
+- **Emissary of Moon (all colours)** — hand-cycle draw dropped.
+- **Emissary of Tides (all colours)** — hand-cycle-for-+2{p} dropped.
+- **Emissary of Wind (all colours)** — hand-cycle-for-go-again dropped.
+- **Enchanting Melody (all colours)** — damage-prevention trigger dropped (aura-created flag is
+  the only value credited).
+- **Fact-Finding Mission (all colours)** — opponent arsenal/equipment peek dropped.
+- **Fate Foreseen (all colours)** — Opt 1 dropped; block value is printed defence only.
+- **Feisty Locals (all colours)** — defended-by-action +2{p} rider never fires.
+- **Fervent Forerunner (all colours)** — on-hit Opt 2 and the from-arsenal go-again both dropped.
+- **Fiddler's Green (all colours)** — graveyard-entry 3{h} dropped.
+- **Flex (all colours)** — pay-{r}{r}-for-+2{p} mode dropped; only printed power.
+- **Flock of the Feather Walkers (all colours)** — Quicken token creation dropped (and the
+  reveal cost too).
+- **Frontline Scout (all colours)** — hand-peek plus arsenal-only go-again dropped.
+- **Fyendal's Fighting Spirit (all colours)** — conditional 1{h} gain dropped.
+- **Gravekeeping (all colours)** — graveyard-banish additional value dropped.
+- **Hand Behind the Pen (all colours)** — on-hit arsenal / banish-instant dropped.
+- **Healing Balm (all colours)** — flat 3{h} dropped.
+- **High Striker (all colours)** — Copper-token economy dropped.
+- **Humble (all colours)** — hero-ability suppression debuff dropped.
+- **Infectious Host (all colours)** — Frailty / Inertia / Bloodrot Pox token emission dropped
+  (and the Elixir cycle that would consume them).
+- **Jack Be Nimble (all colours)** — graveyard-banish +1{p} / go-again and on-hit item steal
+  dropped.
+- **Jack Be Quick (all colours)** — graveyard-banish +1{p} / go-again and on-hit ally steal
+  dropped.
+- **Lead the Charge (all colours)** — face-up-from-deck action-point grant dropped.
+- **Life for a Life** — go-again on less-life dropped (on-hit heal is modelled).
+- **Life of the Party (all colours)** — all three modes default off including go-again; Crazy
+  Brew substitute never fires.
+- **Looking for a Scrap (all colours)** — graveyard-banish bonus dropped.
+- **Money or Your Life (all colours)** — Gold-exchange rider dropped; repeatable mode never
+  fires.
+- **Money Where Ya Mouth Is (all colours)** — Wager Gold payout dropped (scan bonus is still
+  credited).
+- **Moon Wish (all colours)** — hand-on-top alt cost plus Sun Kiss tutor dropped.
+- **Nimble Strike (all colours)** — graveyard-banish bonus dropped.
+- **Nimby (all colours)** — Nimblism tutor dropped.
+- **On a Knife Edge (all colours)** — next-sword-attack go-again dropped (weapon chain not
+  scanned).
+- **On the Horizon (all colours)** — deck-peek trigger dropped.
+- **Outed (all colours)** — +1{p} vs marked hero never fires.
+- **Performance Bonus (all colours)** — arsenal-conditional go-again dropped (on-hit Gold is
+  credited).
+- **Pick a Card, Any Card (all colours)** — opponent hand inspection and Silver-token rider
+  dropped.
+- **Promise of Plenty (all colours)** — arsenal-placement rider plus arsenal go-again dropped.
+- **Pursue to the Edge of Oblivion (all colours)** — on-hit mark dropped.
+- **Pursue to the Pits of Despair (all colours)** — on-hit mark dropped.
+- **Push the Point (all colours)** — chain-history +2{p} dropped (chain history unreadable from
+  Play).
+- **Punch Above Your Weight (all colours)** — pay-{r}{r}{r}-for-+5{p} dropped.
+- **Rally the Coast Guard (all colours)** — defence-time instant activation dropped.
+- **Rally the Rearguard (all colours)** — defence-time instant activation dropped.
+- **Ransack and Raze (all colours)** — Gold / Landmarks X-cost treated as 0 so the ramp pay-off
+  never lands.
+- **Regain Composure (all colours)** — on-hit unfreeze dropped (scan-bonus itself is credited).
+- **Regurgitating Slog (all colours)** — Sloggism graveyard-banish Dominate rider fully dropped.
+- **Relentless Pursuit** — marked-target + attacked-them-this-turn chain rider dropped.
+- **Rifting (all colours)** — on-hit instant cast dropped.
+- **Right Behind You (all colours)** — defend-together +1{d} and deck-bottom rider dropped.
+- **Rise Above (all colours)** — hand-as-cost alt dropped (card fails cost check unless printed
+  cost is met).
+- **Runeblade Condemn to Slaughter (all colours)** — aura-trade rider and opponent-aura
+  destruction dropped (only same-turn Runeblade-attack +N is modelled).
+- **Runeblade Runic Fellingsong (all colours)** — cannot credit BOTH the printed 1 arcane AND
+  the graveyard-banish rider; only one fires.
+- **Runeblade Sigil of the Arknight (all colours)** — cross-turn aura persistence collapsed to a
+  one-turn peek; if the correct card isn't at the Intelligence-index slot, 0 credited.
+- **Runeblade Splintering Deadwood (all colours)** — aura-swap modelled as net-zero (no credit
+  for the tempo of trading a weak aura for a Runechant).
+- **Runeblade Sutcliffe's Research Notes (all colours)** — top-of-deck re-ordering clause
+  dropped.
+- **Scar for a Scar** — go-again on less-life dropped.
+- **Scour the Battlescape (all colours)** — hand-cycle plus arsenal go-again dropped.
+- **Seek Horizon (all colours)** — hand-on-top alt cost plus conditional go-again dropped.
+- **Sift (all colours)** — hand cycling dropped.
+- **Sigil of Cycles (all colours)** — end-phase discard-and-draw dropped.
+- **Sigil of Fyendal (all colours)** — 1{h} on leave dropped.
+- **Sigil of Protection (all colours)** — Ward N dropped.
+- **Sirens of Safe Harbor (all colours)** — graveyard-trigger 1{h} dropped.
+- **Smash Up (all colours)** — on-hit arsenal face-up + banish attack action dropped.
+- **Snatch (all colours)** — currently fires the on-hit draw via TurnState.DrawOne, but a drawn
+  card only recovers part of a real draw's value in the sim (no cross-turn shuffle benefit).
+- **Sound the Alarm (all colours)** — deck-search rider dropped.
+- **Spring Load (all colours)** — +3{p} empty-hand rider never fires.
+- **Springboard Somersault (all colours)** — arsenal-only +2{d} never fires.
+- **Starting Stake (all colours)** — Gold-token economy dropped.
+- **Strategic Planning (all colours)** — graveyard recovery plus end-phase draw dropped.
+- **Stony Woottonhog (all colours)** — defended-by-<2-non-equipment rider dropped (same shape as
+  Barraging Brawnhide below).
+- **Sun Kiss (all colours)** — health gain plus Moon Wish synergy dropped.
+- **Surging Militia (all colours)** — defended-by +N{p} rider dropped.
+- **Tip-Off (all colours)** — instant discard activation dropped.
+- **Tongue Tied (all colours)** — on-hit arsenal face-up + banish instant dropped.
+- **Trade In (all colours)** — discard-to-draw plus arsenal-only go-again dropped.
+- **Tremor of íArathael (all colours)** — banished-zone +2{p} never fires.
+- **Unmovable (all colours)** — arsenal +1{d} never fires.
+- **Visit the Blacksmith (all colours)** — next-sword-attack bonuses dropped.
+- **Wage Gold (all colours)** — Universal keyword plus Gold wager dropped.
+- **Walk the Plank (all colours)** — Pirate-specific target-freeze dropped.
+- **Warmonger's Recital (all colours)** — bottom-of-deck rider dropped (scan bonus credited).
+- **Whisper of the Oracle (all colours)** — Opt dropped.
+- **Wounded Bull (all colours)** — less-life +1{p} never fires.
+- **Wreck Havoc (all colours)** — defence-reaction lockout plus arsenal-banish dropped.
+- **Yinti Yanti (all colours)** — defending-side +1{d} dropped (aura-created clause is modelled).
+
+#### Overvalued (sim credits more than the real card delivers)
+
+- **Bluster Buff** — pay {r}-or-lose-1{p} resolved as "always pay"; player short on pitch would
+  lose the point, so base power is over-credited.
+- **Chest Puff** — pay {r}-or-lose-1{p} resolved as "always pay"; same shape as Bluster Buff.
+- **Lay Low (all colours)** — treated as always legal even without a marked defender; real card
+  is uncastable when no hero is marked.
+- **Look Tuff** — pay {r}-or-lose-1{p} resolved as "always pay"; same shape as Bluster Buff.
+- **Out Muscle (all colours)** — printed Go again is kept unconditionally even though the real
+  card's go-again is gated on defender-power; when the gate would fail, chain legality is still
+  satisfied.
+- **Plunder Run (all colours)** — scan-target +N is credited unconditionally instead of only
+  when the played-from-arsenal gate is met.
+- **Public Bounty (all colours)** — mark rider fires unconditionally; real card requires the
+  opponent be marked and the rider is tied to the mark.
+- **Put in Context** — base-power cap on what it can block is ignored; every attack is assumed
+  to qualify so the defence is always live.
+- **Runeblade Arcanic Crackle** — printed 1 arcane added unconditionally; Ward on the opponent
+  would prevent part of it.
+- **Runeblade Bloodspill Invocation (all colours)** — all N Runechants credited up front;
+  incoming damage this turn would destroy the aura before the payoff fires.
+- **Runeblade Consuming Volition (all colours)** — on-hit discard credited whenever arcane was
+  already dealt this turn and LikelyToHit approves the attack; real trigger also needs the
+  attack to actually hit a hero, which a real opponent will block when possible.
+- **Runeblade Drowning Dire (all colours)** — Dominate keyword + AuraCreated flag both dropped
+  while the printed power is left alone — partial under-count, but in contexts where a
+  follow-up aura-reading card is present, Drowning Dire is materially overstated because the
+  Dominate protection of that damage is not modelled.
+- **Runeblade Mauvrion Skies (all colours)** — "if hits" on the N Runechants is assumed live so
+  N damage is credited regardless of blocks.
+- **Runeblade Meat and Greet (all colours)** — on-hit Runechant is credited flat +1; real card
+  only fires when the attack lands.
+- **Runeblade Oath of the Arknight (all colours)** — Runechant always credited +1 damage; real
+  card requires a hit, and the follow-up Runeblade-attack rider is credited whenever a future
+  attack exists in turn order, not gated on the aura state resolving correctly.
+- **Runeblade Runic Reaping (all colours)** — "if hits" on the N Runechants is assumed live.
+- **Runeblade Sigil of Silphidae** — assumed we always have an aura to banish on both enter and
+  leave, crediting 2 damage; real card fizzles both triggers when the graveyard is dry.
+- **Runeblade Sigil of Suffering (all colours)** — +1{d} is baked into printed Defense assuming
+  arcane has already been dealt; when that condition fails, the printed defence is overstated.
+- **Runeblade Singeing Steelblade (all colours)** — printed 1 arcane added unconditionally; Ward
+  would prevent it.
+- **Runeblade Vexing Malice (all colours)** — printed 2 arcane added unconditionally; Ward would
+  prevent part of it.
+- **Runeblade Weeping Battleground (all colours)** — assumes the graveyard always has a
+  banishable aura; fizzles when empty.
+- **Scout the Periphery (all colours)** — scan bonus credited whenever a target exists, even
+  though the real rider requires the card to be played from arsenal.
+- **Smashing Good Time (all colours)** — scan bonus credited unconditionally (same shape as
+  Scout the Periphery) rather than requiring the arsenal gate.
+
+#### Likely neutral
+
+- **Aether Slash (all colours)** — printed 1 arcane doubles as the text-rider damage; the code
+  adds it once when the non-attack pitch condition is met, which mirrors the card's actual
+  outcome on average.
+- **Blessing of Occult (all colours)** — tokens routed to next-turn carryover; tempo value is
+  preserved, just shifted a turn.
+- **Come to Fight / Minnowism / Nimblism / Sloggism (all colours)** — scan next attack and
+  credit +N only when a target actually exists; matches how the card plays in practice when the
+  chain is well-ordered.
+- **Deathly Duet (all colours)** — Pitched scan may let both riders fire even without the
+  specific attribution; on average this approximates the real outcome when the hero pitches one
+  of each type.
+- **Drawn to the Dark Dimension (all colours)** — draw rider routed through TurnState.DrawOne
+  and variable cost respected; accurate modelling rather than a simplification.
+- **Flying High (all colours)** — +1{p} matching-colour rider is modelled via CardsRemaining
+  scan plus GrantedGoAgain; both clauses fire only when a qualifying future attack exists.
+- **Hit the High Notes / Shrill of Skullform / Vantage Point / Runerager Swarm (all colours)** —
+  aura-created check is modelled directly via HasAuraInPlay; result matches the printed gate.
+- **Hocus Pocus / Spellblade Strike / Spellblade Assault / Reduce to Runechant / Read the
+  Runes** — Runechant = +1 future damage identity; faithful modelling of token creation.
+- **Malefic Incantation (all colours) / Runeblood Incantation (all colours)** — split between
+  carryover and in-turn credit avoids double-counting the same rune as both current-turn
+  discount and future-turn damage.
+- **Sigil of Deadwood (all colours)** — Runechant deliberately delayed to next-turn carryover
+  rather than this turn's discount pool.
+- **Sky Fire Lanterns (all colours)** — peeks actual deck top and matches on pitch; neither
+  over- nor under-credits.
+- **Sutcliffe's Research Notes (all colours)** — also listed under Undervalued for the dropped
+  re-order clause; the reveal-and-count core is accurate.
+- **Trot Along / Water the Seeds (all colours)** — scan CardsRemaining for a qualifying target
+  and fizzle when none exists; mirrors real card's interaction with chain order.
+
+Cards not listed in any bucket (Critical Strike, Brutal Assault, Raging Onslaught, Muscle Mutt,
+Wounding Blow, Dodge, Evasive Leap, Toughen Up, Rune Flash, Amplify the Arknight, Fragile Aura
+helper, Aura Helper, Next-Attack-Action helper) have no printed rider beyond the base stat
+line, so there's nothing to tag — they score exactly what they print.
