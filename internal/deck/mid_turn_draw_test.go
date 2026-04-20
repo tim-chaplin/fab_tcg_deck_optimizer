@@ -523,8 +523,8 @@ func TestEvalOneTurn_MidTurnDrawSansGoAgainStaysHeld(t *testing.T) {
 // Snatch; Drawn to the Dark Dimension follows as the last attacker (doesn't need Go again).
 //
 // The winning partition leaves Toughen Up Blue HELD rather than pitching it: Drawn's cost 2
-// is covered by the drawn Blue Snatch pulled (Phase 2 pitch-from-drawn, which adds 3 to
-// resources), and leaving Toughen Up in hand lets the arsenal tiebreak land on an occupied
+// is covered by the drawn Blue Snatch pulled (pitch-from-drawn adds 3 to resources), and
+// leaving Toughen Up in hand lets the arsenal tiebreak land on an occupied
 // slot. One drawn Blue is consumed as pitch; the second drawn Blue (pulled by Drawn's
 // DrawOne) stays Held. Post-enumeration promotion then picks Toughen Up out of the combined
 // {Toughen Up, Blue} Held pool for the arsenal.

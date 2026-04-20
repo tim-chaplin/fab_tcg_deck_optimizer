@@ -1156,15 +1156,12 @@ func bestAttackWithWeapons(hero hero.Hero, weapons []weapon.Weapon, attackers, d
 			weaponCost := bufs.weaponCosts[wmask] // weapons are static-cost
 			// Lower bound on total chain cost (sum of MinCost across attackers + weapons). If the
 			// attack budget can't cover even this floor, no permutation is feasible. Mid-turn
-			// draws can pitch on top of the committed hand pitch (Phase 2 "hopeful" partitions)
-			// but can't reduce the base cost, so this MinCost check is still a safe prune.
-			//
-			// We used to also pre-screen pitch-timing via attackBudget - MaxCost >= maxAttackPitch
-			// but that prune is unsafe now that drawn cards can play as chain extensions (Phase 3)
-			// and consume from the attack budget — a partition that looks wasteful pre-chain can
-			// end up legal once an extension absorbs the residual. playSequenceWithMeta still
-			// enforces pitch-timing post-extension, so correctness holds; the loss is a small
-			// amount of extra sim work on partitions that would have been pruned here.
+			// draws can pitch on top of the committed hand pitch ("hopeful" partitions) but
+			// can't reduce the base cost, so this MinCost check is still a safe prune. The
+			// matching pitch-timing pre-screen (attackBudget - MaxCost >= maxAttackPitch) is
+			// unsafe and has been removed: drawn cards can play as chain extensions and
+			// consume the residual, so a partition that looks wasteful pre-chain can end up
+			// legal. playSequenceWithMeta enforces pitch-timing post-extension instead.
 			if attackersMinCost+weaponCost > attackBudget {
 				continue
 			}
@@ -1235,10 +1232,10 @@ type sequenceContext struct {
 	maxAttackPitch     int
 	// Mid-turn-drawn-card tracking for the most recent playSequenceWithMeta call. state.Drawn
 	// is partitioned as [Pitch * drawnPitched | Attack * drawnAttacked | Held ...]: the first
-	// drawnPitched cards were consumed to plug a cost shortfall (Phase 2 "hopeful" partitions);
-	// the next drawnAttacked were played as free-cost chain extensions (Phase 3). The rest stay
-	// Held. drawnAttackDmg / drawnAttackTriggerDmg are aligned with the attacked slice — one
-	// entry per extension — capturing its Play return and hero-trigger damage so fillContributions
+	// drawnPitched cards were consumed to plug a cost shortfall ("hopeful" partitions); the
+	// next drawnAttacked were played as free-cost chain extensions. The rest stay Held.
+	// drawnAttackDmg / drawnAttackTriggerDmg are aligned with the attacked slice — one entry
+	// per extension — capturing its Play return and hero-trigger damage so fillContributions
 	// can write per-card contributions on summary.Drawn.
 	drawnPitched          int
 	drawnAttacked         int
