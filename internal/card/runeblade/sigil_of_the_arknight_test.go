@@ -4,73 +4,62 @@ import (
 	"testing"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/simstate"
 )
 
-// stubHero4 is a minimal card.Hero with Intelligence 4 for tests.
-type stubHero4 struct{}
-
-func (stubHero4) Name() string       { return "stubHero4" }
-func (stubHero4) Intelligence() int  { return 4 }
-
-func TestSigilOfTheArknight_EmptyDeckReturnsZero(t *testing.T) {
-	// No deck → can't reach the reveal index, so 0. AuraCreated still flips.
-	simstate.CurrentHero = stubHero4{}
-	defer func() { simstate.CurrentHero = nil }()
-	var s card.TurnState
+// TestSigilOfTheArknight_PlayOnlySetsAuraCreated verifies Play defers the reveal effect — it
+// only flips AuraCreated and returns 0. The deck peek happens in PlayNextTurn now.
+func TestSigilOfTheArknight_PlayOnlySetsAuraCreated(t *testing.T) {
+	s := card.TurnState{Deck: []card.Card{stubRunebladeAttack{}}}
 	if got := (SigilOfTheArknightBlue{}).Play(&s); got != 0 {
-		t.Errorf("Play() with empty deck = %d, want 0", got)
+		t.Errorf("Play() = %d, want 0 (reveal deferred to PlayNextTurn)", got)
 	}
 	if !s.AuraCreated {
-		t.Errorf("Play() did not set AuraCreated")
+		t.Error("AuraCreated = false, want true")
 	}
 }
 
-func TestSigilOfTheArknight_RevealsAttackActionAtIntelligenceIndex(t *testing.T) {
-	// Intelligence=4: first 4 cards go to next hand; the card at index 4 is revealed. Here that's
-	// an attack action → +3.
-	simstate.CurrentHero = stubHero4{}
-	defer func() { simstate.CurrentHero = nil }()
-	deck := []card.Card{
-		stubNonAttack{}, stubNonAttack{}, stubNonAttack{}, stubNonAttack{},
-		stubRunebladeAttack{},
+// TestSigilOfTheArknight_PlayNextTurnRevealsAttackActionIntoHand: the post-draw deck's top card
+// is an attack action → the card is returned in ToHand so the deck loop moves it into the hand.
+// Damage stays 0 because the tempo is captured by having the extra card, not by a flat credit.
+func TestSigilOfTheArknight_PlayNextTurnRevealsAttackActionIntoHand(t *testing.T) {
+	top := stubRunebladeAttack{}
+	s := card.TurnState{Deck: []card.Card{top, stubNonAttack{}}}
+	got := (SigilOfTheArknightBlue{}).PlayNextTurn(&s)
+	if got.Damage != 0 {
+		t.Errorf("Damage = %d, want 0 (tempo credited via ToHand, not Damage)", got.Damage)
 	}
-	s := card.TurnState{Deck: deck}
-	if got := (SigilOfTheArknightBlue{}).Play(&s); got != 3 {
-		t.Errorf("Play() = %d, want 3 (attack action at deck[Intelligence])", got)
-	}
-}
-
-func TestSigilOfTheArknight_RevealsNonAttackAtIntelligenceIndex(t *testing.T) {
-	// Deck[Intelligence] is a non-attack card → 0, even though attack actions sit elsewhere in
-	// the deck.
-	simstate.CurrentHero = stubHero4{}
-	defer func() { simstate.CurrentHero = nil }()
-	deck := []card.Card{
-		stubRunebladeAttack{}, stubRunebladeAttack{}, stubRunebladeAttack{}, stubRunebladeAttack{},
-		stubAura{},
-	}
-	s := card.TurnState{Deck: deck}
-	if got := (SigilOfTheArknightBlue{}).Play(&s); got != 0 {
-		t.Errorf("Play() = %d, want 0 (revealed card at index 4 is non-attack)", got)
+	if got.ToHand != top {
+		t.Errorf("ToHand = %v, want %v (top of post-draw deck)", got.ToHand, top)
 	}
 }
 
-func TestSigilOfTheArknight_DeckTooShortReturnsZero(t *testing.T) {
-	// Intelligence=4 but only 3 cards remain — can't reach the reveal index → 0.
-	simstate.CurrentHero = stubHero4{}
-	defer func() { simstate.CurrentHero = nil }()
-	deck := []card.Card{stubRunebladeAttack{}, stubRunebladeAttack{}, stubRunebladeAttack{}}
-	s := card.TurnState{Deck: deck}
-	if got := (SigilOfTheArknightBlue{}).Play(&s); got != 0 {
-		t.Errorf("Play() = %d, want 0 (deck too short)", got)
+// TestSigilOfTheArknight_PlayNextTurnRevealsNonAttack: top card is non-attack → ToHand stays
+// nil (the card stays on top of the deck in the real game).
+func TestSigilOfTheArknight_PlayNextTurnRevealsNonAttack(t *testing.T) {
+	s := card.TurnState{Deck: []card.Card{stubAura{}, stubRunebladeAttack{}}}
+	got := (SigilOfTheArknightBlue{}).PlayNextTurn(&s)
+	if got.ToHand != nil {
+		t.Errorf("ToHand = %v, want nil (top is non-attack, no reveal)", got.ToHand)
+	}
+	if got.Damage != 0 {
+		t.Errorf("Damage = %d, want 0", got.Damage)
 	}
 }
 
-func TestSigilOfTheArknight_NoMemoMarker(t *testing.T) {
-	// Sigil's Play depends on deck composition, so it must opt out of the hand-evaluation memo.
+// TestSigilOfTheArknight_PlayNextTurnEmptyDeck: nothing to reveal → zero result.
+func TestSigilOfTheArknight_PlayNextTurnEmptyDeck(t *testing.T) {
+	s := card.TurnState{}
+	got := (SigilOfTheArknightBlue{}).PlayNextTurn(&s)
+	if got.ToHand != nil || got.Damage != 0 {
+		t.Errorf("PlayNextTurn() = %+v, want zero (empty deck)", got)
+	}
+}
+
+// TestSigilOfTheArknight_ImplementsDelayedPlay pins the marker so the deck loop queues this
+// card for a next-turn callback.
+func TestSigilOfTheArknight_ImplementsDelayedPlay(t *testing.T) {
 	var c card.Card = SigilOfTheArknightBlue{}
-	if _, ok := c.(card.NoMemo); !ok {
-		t.Errorf("SigilOfTheArknightBlue should implement card.NoMemo")
+	if _, ok := c.(card.DelayedPlay); !ok {
+		t.Error("SigilOfTheArknightBlue should implement card.DelayedPlay")
 	}
 }

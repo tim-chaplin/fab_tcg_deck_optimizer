@@ -296,3 +296,30 @@ type LowerHealthWanter interface {
 	WantsLowerHealth()
 }
 
+// DelayedPlay is an optional marker for cards whose effect fires at the START of the owner's
+// NEXT action phase rather than the turn they're played. A card that implements this is still
+// played normally — Play runs this turn, typically to flip AuraCreated so same-turn aura-readers
+// see it — and is then queued for a PlayNextTurn callback that fires at the top of the next
+// turn, after the hand is drawn but before the best-line search.
+//
+// Cross-turn auras whose printed text reads "At the beginning of your action phase, destroy
+// this. When this leaves the arena, <effect>" belong here — Sigil of the Arknight's next-turn
+// reveal, Sigil of Fyendal's next-turn 1{h} gain.
+//
+// The TurnState passed to PlayNextTurn has Deck populated with the remaining deck after the
+// next hand has been drawn (so Deck[0] is the card about to be revealed by a top-of-deck
+// effect); every other field is zero.
+type DelayedPlay interface {
+	PlayNextTurn(s *TurnState) DelayedPlayResult
+}
+
+// DelayedPlayResult is what a DelayedPlay callback returns. Damage is credited 1-to-1 toward
+// the next turn's Value. ToHand, when non-nil, is popped off the top of the post-draw deck
+// and appended to that turn's hand — modelling "reveal top of deck; if <condition>, put it
+// into your hand" without collapsing the effect into a flat damage-equivalent. Callbacks that
+// don't reveal leave ToHand nil; callbacks that don't credit damage leave Damage 0.
+type DelayedPlayResult struct {
+	Damage int
+	ToHand Card
+}
+
