@@ -40,6 +40,7 @@ func (DrawnToTheDarkDimensionRed) Defense() int                { return 3 }
 func (DrawnToTheDarkDimensionRed) Types() card.TypeSet         { return drawnToTheDarkDimensionTypes }
 func (DrawnToTheDarkDimensionRed) GoAgain() bool               { return false }
 func (DrawnToTheDarkDimensionRed) NoMemo()                      {} // Play's DrawOne depends on top of deck
+func (DrawnToTheDarkDimensionRed) DrawRider()                   {}
 func (c DrawnToTheDarkDimensionRed) Play(s *card.TurnState) int {
 	s.DrawOne()
 	return c.Attack()
@@ -58,6 +59,7 @@ func (DrawnToTheDarkDimensionYellow) Defense() int               { return 3 }
 func (DrawnToTheDarkDimensionYellow) Types() card.TypeSet        { return drawnToTheDarkDimensionTypes }
 func (DrawnToTheDarkDimensionYellow) GoAgain() bool              { return false }
 func (DrawnToTheDarkDimensionYellow) NoMemo()                     {}
+func (DrawnToTheDarkDimensionYellow) DrawRider()                  {}
 func (c DrawnToTheDarkDimensionYellow) Play(s *card.TurnState) int {
 	s.DrawOne()
 	return c.Attack()
@@ -76,6 +78,7 @@ func (DrawnToTheDarkDimensionBlue) Defense() int               { return 3 }
 func (DrawnToTheDarkDimensionBlue) Types() card.TypeSet        { return drawnToTheDarkDimensionTypes }
 func (DrawnToTheDarkDimensionBlue) GoAgain() bool              { return false }
 func (DrawnToTheDarkDimensionBlue) NoMemo()                     {}
+func (DrawnToTheDarkDimensionBlue) DrawRider()                   {}
 func (c DrawnToTheDarkDimensionBlue) Play(s *card.TurnState) int {
 	s.DrawOne()
 	return c.Attack()

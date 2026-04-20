@@ -743,6 +743,10 @@ func (e *Evaluator) bestUncached(hero hero.Hero, weapons []weapon.Weapon, hand [
 	// attackerMeta at leaf time (variable-cost cards self-report their current game-accurate cost
 	// via Cost()); no partition-time cost sums needed.
 	hasReactions := false
+	// Hand-level flag consumed by bestAttackWithWeapons's pitch-timing pre-screen: when no card
+	// in the partition's source hand / arsenal can fire DrawOne, no chain extension or drawn
+	// pitch can appear, so the attack-phase residual can be bounded pre-sim.
+	handHasDrawRider := false
 	for i := 0; i < totalN; i++ {
 		var c card.Card
 		if i < n {
@@ -755,6 +759,9 @@ func (e *Evaluator) bestUncached(hero hero.Hero, weapons []weapon.Weapon, hand [
 		isDR[i] = c.Types().IsDefenseReaction()
 		if isDR[i] {
 			hasReactions = true
+		}
+		if _, ok := c.(card.DrawRider); ok {
+			handHasDrawRider = true
 		}
 	}
 	pitched := bufs.pitchedBuf
@@ -792,7 +799,7 @@ func (e *Evaluator) bestUncached(hero hero.Hero, weapons []weapon.Weapon, hand [
 					a = append(a, arsenalCardIn)
 				}
 			}
-			attackDealt, defenseDealt, leftoverRunechants, budget, swung, ok := bestAttackWithWeapons(hero, weapons, a, d, p, deck, bufs, runechantCarryover, incomingDamage, defenseSum)
+			attackDealt, defenseDealt, leftoverRunechants, budget, swung, ok := bestAttackWithWeapons(hero, weapons, a, d, p, deck, bufs, runechantCarryover, incomingDamage, defenseSum, handHasDrawRider)
 			if !ok {
 				return
 			}
@@ -1062,7 +1069,7 @@ type chainBudget struct {
 //
 // Phase masks: when no Defense Reactions are present (or no pitches exist), all pitches go to
 // the attack phase, so we visit one configuration. Otherwise we enumerate 2^|pitched| splits.
-func bestAttackWithWeapons(hero hero.Hero, weapons []weapon.Weapon, attackers, defenders, pitched, deck []card.Card, bufs *attackBufs, runechantCarryover, incomingDamage, blockTotal int) (int, int, int, chainBudget, []string, bool) {
+func bestAttackWithWeapons(hero hero.Hero, weapons []weapon.Weapon, attackers, defenders, pitched, deck []card.Card, bufs *attackBufs, runechantCarryover, incomingDamage, blockTotal int, handHasDrawRider bool) (int, int, int, chainBudget, []string, bool) {
 	ctx := &sequenceContext{
 		hero:               hero,
 		pitched:            pitched,
@@ -1158,14 +1165,18 @@ func bestAttackWithWeapons(hero hero.Hero, weapons []weapon.Weapon, attackers, d
 			// attack budget can't cover even this floor, no permutation is feasible. Mid-turn
 			// draws can pitch on top of the committed hand pitch (Phase 2 "hopeful" partitions)
 			// but can't reduce the base cost, so this MinCost check is still a safe prune.
-			//
-			// We used to also pre-screen pitch-timing via attackBudget - MaxCost >= maxAttackPitch
-			// but that prune is unsafe now that drawn cards can play as chain extensions (Phase 3)
-			// and consume from the attack budget — a partition that looks wasteful pre-chain can
-			// end up legal once an extension absorbs the residual. playSequenceWithMeta still
-			// enforces pitch-timing post-extension, so correctness holds; the loss is a small
-			// amount of extra sim work on partitions that would have been pruned here.
 			if attackersMinCost+weaponCost > attackBudget {
+				continue
+			}
+			// Pitch-timing pre-screen: when no card in the original hand fires DrawOne, no chain
+			// extension can ever appear and no Drawn card can pitch into the budget, so the
+			// attack-phase budget is frozen at enumeration time. If the residual budget after the
+			// max possible chain cost would still be ≥ maxAttackPitch, every legal permutation
+			// violates pitch-timing (one pitch could have been Held); skip the whole bestSequence
+			// call. Conservative: keeps the slower path for DrawRider hands where extensions can
+			// consume the residual.
+			if !handHasDrawRider && hasAttackPitches &&
+				attackBudget-(attackersMaxCost+weaponCost) >= maxAttackPitch {
 				continue
 			}
 			allAttackers := bufs.attackerBuf[:len(attackers)]

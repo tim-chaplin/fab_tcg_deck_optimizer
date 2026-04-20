@@ -272,6 +272,16 @@ type NoMemo interface {
 	NoMemo()
 }
 
+// DrawRider is an optional marker for cards whose Play or on-hit effect fires TurnState.DrawOne,
+// causing a mid-turn draw that can pitch into the attack chain (funding otherwise-unaffordable
+// cards) or play as a chain extension. The solver uses this marker to gate optimizations that
+// assume the attack-phase pitch budget is frozen at enumeration time — when no hand card is a
+// DrawRider, a partition's pitch-timing fate is decidable pre-sim, so several prunes become safe
+// again. Implementers must return the zero struct literal; the method exists only as a discriminator.
+type DrawRider interface {
+	DrawRider()
+}
+
 // VariableCost is optionally implemented by cards whose Cost(s) varies with TurnState (e.g.
 // discount-per-token effects). MinCost and MaxCost are static bounds on the Cost output across
 // any state; the solver uses them for cheap O(1) pre-screens before enumerating chain

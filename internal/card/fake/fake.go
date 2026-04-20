@@ -59,6 +59,7 @@ func (DrawCantrip) Attack() int                { return 1 }
 func (DrawCantrip) Defense() int               { return 0 }
 func (DrawCantrip) Types() card.TypeSet        { return genericAttackTypes }
 func (DrawCantrip) GoAgain() bool              { return true }
+func (DrawCantrip) DrawRider()                 {}
 func (c DrawCantrip) Play(s *card.TurnState) int {
 	s.DrawOne()
 	return c.Attack()
