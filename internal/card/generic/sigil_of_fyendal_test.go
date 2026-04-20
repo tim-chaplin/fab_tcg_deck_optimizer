@@ -22,7 +22,11 @@ func TestSigilOfFyendal_PlaySetsAuraCreated(t *testing.T) {
 // TestSigilOfFyendal_PlayNextTurnGainsHealth verifies the deferred 1{h} credit.
 func TestSigilOfFyendal_PlayNextTurnGainsHealth(t *testing.T) {
 	s := card.TurnState{}
-	if got := (SigilOfFyendalBlue{}).PlayNextTurn(&s); got != 1 {
-		t.Errorf("PlayNextTurn() = %d, want 1 (1{h} gain on leave)", got)
+	got := (SigilOfFyendalBlue{}).PlayNextTurn(&s)
+	if got.Damage != 1 {
+		t.Errorf("Damage = %d, want 1 (1{h} gain on leave)", got.Damage)
+	}
+	if got.ToHand != nil {
+		t.Errorf("ToHand = %v, want nil (Fyendal doesn't reveal)", got.ToHand)
 	}
 }

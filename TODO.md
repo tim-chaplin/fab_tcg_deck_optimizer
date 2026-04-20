@@ -13,13 +13,14 @@ them as fully active.
 ### Fully model effects where we currently just credit an integer value
 
 `internal/card/effect_values.go` centralises the damage-equivalents we use as stand-ins for
-"force opponent discard" (3), "create a Gold token" (1), and cross-turn additive draw via
-Sigil of the Arknight (still 3 via `DrawValue`). These are simplifications — the sim never
-actually forces a discard, tracks Gold, or cross-turn shuffles around arsenal state. When we
-model the real state (graveyard, Gold-token pool, opposing hand size) the rider implementations
-can cash out into actual future-turn tempo instead of a flat integer, and the `effect_values.go`
-constants should disappear. Mid-turn `"draw a card"` riders route through `TurnState.DrawOne`
-instead — see `internal/card/card.go`.
+"force opponent discard" (3) and "create a Gold token" (1). These are simplifications — the
+sim never actually forces a discard or tracks Gold. When we model the real state (graveyard,
+Gold-token pool, opposing hand size) the rider implementations can cash out into actual
+future-turn tempo instead of a flat integer, and the `effect_values.go` constants should
+disappear. Mid-turn `"draw a card"` riders route through `TurnState.DrawOne` instead — see
+`internal/card/card.go`. Start-of-next-turn reveal-and-put-into-hand effects (Sigil of the
+Arknight) route through `card.DelayedPlay`'s `ToHand` return and land in the actual turn-2
+hand rather than as a flat credit.
 
 ### LikelyToHit breadcrumbs — on-hit riders awaiting modelling
 
@@ -323,8 +324,6 @@ listed here so the direction tag is co-located with the name.
   destruction dropped (only same-turn Runeblade-attack +N is modelled).
 - **Runeblade Runic Fellingsong (all colours)** — cannot credit BOTH the printed 1 arcane AND
   the graveyard-banish rider; only one fires.
-- **Runeblade Sigil of the Arknight (all colours)** — reveal fires at the correct start-of-next-
-  turn timing via `card.DelayedPlay`; if the post-draw top card isn't an attack action, 0 credited.
 - **Runeblade Splintering Deadwood (all colours)** — aura-swap modelled as net-zero (no credit
   for the tempo of trading a weak aura for a Runechant).
 - **Runeblade Sutcliffe's Research Notes (all colours)** — top-of-deck re-ordering clause

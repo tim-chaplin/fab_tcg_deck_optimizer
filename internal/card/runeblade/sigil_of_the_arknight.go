@@ -6,8 +6,10 @@
 //
 // Modelling: Play only flips the aura-created flag — the aura enters the arena at end of the
 // turn it's played and its destroy/reveal triggers fire at the start of the NEXT action phase.
-// card.DelayedPlay routes PlayNextTurn through the deck loop so the reveal reads the actual
-// top of next turn's post-draw deck (s.Deck[0]); an attack action credits +card.DrawValue.
+// card.DelayedPlay routes PlayNextTurn through the deck loop; the callback peeks s.Deck[0]
+// (the actual card about to be revealed) and, when it's an attack action, returns the card in
+// ToHand so the deck loop pops it off the deck and appends it to that turn's hand. Non-attack
+// reveals leave the top card untouched.
 //
 // Source: github.com/the-fab-cube/flesh-and-blood-cards (card.csv).
 
@@ -34,14 +36,17 @@ func (SigilOfTheArknightBlue) Play(s *card.TurnState) int {
 
 // PlayNextTurn fires at the start of the action phase after this was played: destroy the aura
 // and reveal the top card of the deck (Deck[0] — the deck slice passed in is already post-draw).
-// If it's an attack action, credit the draw-a-card damage-equivalent.
-func (SigilOfTheArknightBlue) PlayNextTurn(s *card.TurnState) int {
+// If it's an attack action, return it in ToHand so the deck loop actually moves the card into
+// the hand for this turn's best-line search rather than collapsing the tempo into a flat
+// damage-equivalent.
+func (SigilOfTheArknightBlue) PlayNextTurn(s *card.TurnState) card.DelayedPlayResult {
 	if len(s.Deck) == 0 {
-		return 0
+		return card.DelayedPlayResult{}
 	}
-	t := s.Deck[0].Types()
+	top := s.Deck[0]
+	t := top.Types()
 	if t.Has(card.TypeAttack) && t.Has(card.TypeAction) {
-		return card.DrawValue
+		return card.DelayedPlayResult{ToHand: top}
 	}
-	return 0
+	return card.DelayedPlayResult{}
 }
