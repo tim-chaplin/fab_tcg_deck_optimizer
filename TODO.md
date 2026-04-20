@@ -55,11 +55,12 @@ called out in the sections below — landing any of them unlocks a subset of the
 
 - **Attacks always hit.** Any "when this hits a hero…" rider is assumed to fire — the sim doesn't
   model blocks. Affects Consuming Volition, Meat and Greet (on-hit Runechant), Weeping
-  Battleground, Reek of Corruption, Mauvrion Skies, Runic Reaping, Oath of the Arknight. Also
-  lets on-hit riders on Jack Be Nimble / Jack Be Quick (steal), Snatch (draw), Rifting (instant
-  cast), Life for a Life (1{h}), Blow for a Blow (1 damage), Fervent Forerunner (Opt 2),
-  Regain Composure (unfreeze) count as always firing (but the riders themselves aren't wired
-  in yet — see below).
+  Battleground, Reek of Corruption, Runic Reaping, Oath of the Arknight. Also lets on-hit riders
+  on Jack Be Nimble / Jack Be Quick (steal), Snatch (draw), Rifting (instant cast), Life for a
+  Life (1{h}), Blow for a Blow (1 damage), Fervent Forerunner (Opt 2), Regain Composure
+  (unfreeze) count as always firing (but the riders themselves aren't wired in yet — see
+  below). Mauvrion Skies's "if hits" clause is modelled via `card.LikelyToHit` on the target
+  attack's printed power.
 - **Dominate isn't modelled.** Drowning Dire, Overload, Pound for Pound, and Demolition Crew
   carry the keyword but the solver doesn't route around block partitioning.
 - **On-hit go-again isn't granted.** Overload's on-hit clause never fires.
@@ -384,8 +385,6 @@ listed here so the direction tag is co-located with the name.
   while the printed power is left alone — partial under-count, but in contexts where a
   follow-up aura-reading card is present, Drowning Dire is materially overstated because the
   Dominate protection of that damage is not modelled.
-- **Runeblade Mauvrion Skies (all colours)** — "if hits" on the N Runechants is assumed live so
-  N damage is credited regardless of blocks.
 - **Runeblade Meat and Greet (all colours)** — on-hit Runechant is credited flat +1; real card
   only fires when the attack lands.
 - **Runeblade Oath of the Arknight (all colours)** — Runechant always credited +1 damage; real

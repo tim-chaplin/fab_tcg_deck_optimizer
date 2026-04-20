@@ -4,10 +4,12 @@
 // hits, create N Runechant tokens.'"
 // (Red N=3, Yellow N=2, Blue N=1.)
 //
-// Simplification: "if hits" is assumed, so the N Runechants are counted as N damage credited to
-// Mauvrion Skies (contingent on a qualifying next attack existing in turn order). The go-again
-// grant is published via GrantedGoAgain on the first matching PlayedCard in CardsRemaining.
-// "Attack action card" excludes weapons.
+// Modelling: the go-again grant is published via GrantedGoAgain on the first matching
+// PlayedCard in CardsRemaining. The N Runechants are credited only when that target's printed
+// Attack() satisfies card.LikelyToHit — i.e. the "if this hits" clause is treated as firing
+// when the opponent would rather eat the damage than over-block. Targets whose printed power
+// lands in the blockable range drop the Runechants but still keep go-again. "Attack action
+// card" excludes weapons.
 //
 // Source: github.com/the-fab-cube/flesh-and-blood-cards (card.csv).
 
@@ -58,7 +60,11 @@ func mauvrionSkiesPlay(s *card.TurnState, n int) int {
 		t := pc.Card.Types()
 		if t.Has(card.TypeRuneblade) && t.Has(card.TypeAction) && t.Has(card.TypeAttack) {
 			pc.GrantedGoAgain = true
-			return s.CreateRunechants(n)
+			if card.LikelyToHit(pc.Card.Attack()) {
+				return s.CreateRunechants(n)
+			}
+			// Target is blockable — the "if hits" clause doesn't fire, so no Runechants.
+			return 0
 		}
 	}
 	// No qualifying target — both the go-again grant and the runechant rider fizzle.
