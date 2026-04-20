@@ -266,12 +266,19 @@ func FormatBestTurn(t TurnSummary) string {
 		appendPitch(a, "PITCH (my turn)")
 	}
 	lines = appendAttackChainLines(lines, t, &step)
+	lines = appendDrawnPlayLines(lines, t.Drawn, &step)
 
 	// Held / Arsenal footer: unplayed cards, outside the numbered sequence, shown so the reader
-	// sees the whole turn disposition.
+	// sees the whole turn disposition. Mid-turn-drawn Held / Arsenal cards land here too, tagged
+	// "(drawn)" so it's obvious they came from a DrawOne rather than the starting hand.
 	var footers []string
 	for _, a := range held {
 		footers = append(footers, fmt.Sprintf("  (held: %s)", a.Card.Name()))
+	}
+	for _, d := range t.Drawn {
+		if d.Role == Held {
+			footers = append(footers, fmt.Sprintf("  (held: %s (drawn))", d.Card.Name()))
+		}
 	}
 	for _, a := range arsenal {
 		label := a.Card.Name()
@@ -282,8 +289,34 @@ func FormatBestTurn(t TurnSummary) string {
 		}
 		footers = append(footers, fmt.Sprintf("  (arsenal: %s)", label))
 	}
+	for _, d := range t.Drawn {
+		if d.Role == Arsenal {
+			footers = append(footers, fmt.Sprintf("  (arsenal: %s (drawn))", d.Card.Name()))
+		}
+	}
 	lines = append(lines, footers...)
 	return strings.Join(lines, "\n")
+}
+
+// appendDrawnPlayLines renders the Pitch and Attack roles among mid-turn-drawn cards: the
+// solver's per-extension Play returns and per-pitch resource contributions are otherwise
+// invisible in the printout (they're held on TurnSummary.Drawn rather than BestLine /
+// AttackChain), so the per-card breakdown wouldn't reconcile with the turn's Value. Each entry
+// extends the numbered timeline, tagged "(drawn)" so the origin is clear.
+func appendDrawnPlayLines(lines []string, drawn []CardAssignment, stepPtr *int) []string {
+	for _, d := range drawn {
+		switch d.Role {
+		case Attack:
+			*stepPtr++
+			lines = append(lines, fmt.Sprintf("  %d. %s (drawn): ATTACK (+%s)",
+				*stepPtr, d.Card.Name(), formatContribution(d.Contribution)))
+		case Pitch:
+			*stepPtr++
+			lines = append(lines, fmt.Sprintf("  %d. %s (drawn): PITCH (my turn)",
+				*stepPtr, d.Card.Name()))
+		}
+	}
+	return lines
 }
 
 // Best returns the optimal TurnSummary for the given hand against an opponent that will attack
