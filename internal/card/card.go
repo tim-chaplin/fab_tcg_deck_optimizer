@@ -288,3 +288,11 @@ type NotSilverAgeLegal interface {
 	NotSilverAgeLegal()
 }
 
+// LowerHealthWanter is an optional Hero marker. Heroes whose strategy revolves around staying at
+// lower {h} than their opponent (deck building, sandbagging, self-damage) opt in. Cards with a
+// "less {h} than an opposing hero" rider assume the clause always fires for these heroes and never
+// fires for anyone else — a coarse proxy that skips per-turn life tracking.
+type LowerHealthWanter interface {
+	WantsLowerHealth()
+}
+

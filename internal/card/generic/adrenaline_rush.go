@@ -3,16 +3,28 @@
 //
 // Text: "When you play this, if you have less {h} than an opposing hero, this gets +3{p}."
 //
-// Simplification: 'Less life than opposing hero' health comparison isn't modelled; the +3{p} rider
-// never fires.
+// Simplification: The "less {h} than an opposing hero" clause is modelled as a hero attribute —
+// the +3{p} rider fires for heroes that implement card.LowerHealthWanter and never fires
+// otherwise.
 //
 // Source: github.com/the-fab-cube/flesh-and-blood-cards (card.csv).
 
 package generic
 
-import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+import (
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/simstate"
+)
 
 var adrenalineRushTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeAttack)
+
+// adrenalineRushDamage returns attack plus +3 when the current hero opts into LowerHealthWanter.
+func adrenalineRushDamage(attack int) int {
+	if simstate.HeroWantsLowerHealth() {
+		return attack + 3
+	}
+	return attack
+}
 
 type AdrenalineRushRed struct{}
 
@@ -24,7 +36,7 @@ func (AdrenalineRushRed) Attack() int                 { return 4 }
 func (AdrenalineRushRed) Defense() int                { return 2 }
 func (AdrenalineRushRed) Types() card.TypeSet         { return adrenalineRushTypes }
 func (AdrenalineRushRed) GoAgain() bool               { return false }
-func (c AdrenalineRushRed) Play(s *card.TurnState) int { return c.Attack() }
+func (c AdrenalineRushRed) Play(s *card.TurnState) int { return adrenalineRushDamage(c.Attack()) }
 
 type AdrenalineRushYellow struct{}
 
@@ -36,7 +48,7 @@ func (AdrenalineRushYellow) Attack() int                 { return 3 }
 func (AdrenalineRushYellow) Defense() int                { return 2 }
 func (AdrenalineRushYellow) Types() card.TypeSet         { return adrenalineRushTypes }
 func (AdrenalineRushYellow) GoAgain() bool               { return false }
-func (c AdrenalineRushYellow) Play(s *card.TurnState) int { return c.Attack() }
+func (c AdrenalineRushYellow) Play(s *card.TurnState) int { return adrenalineRushDamage(c.Attack()) }
 
 type AdrenalineRushBlue struct{}
 
@@ -48,4 +60,4 @@ func (AdrenalineRushBlue) Attack() int                 { return 2 }
 func (AdrenalineRushBlue) Defense() int                { return 2 }
 func (AdrenalineRushBlue) Types() card.TypeSet         { return adrenalineRushTypes }
 func (AdrenalineRushBlue) GoAgain() bool               { return false }
-func (c AdrenalineRushBlue) Play(s *card.TurnState) int { return c.Attack() }
+func (c AdrenalineRushBlue) Play(s *card.TurnState) int { return adrenalineRushDamage(c.Attack()) }

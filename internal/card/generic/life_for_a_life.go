@@ -5,13 +5,18 @@
 // When this hits, gain 1{h}."
 //
 // The on-hit 1{h} gain is modelled as +1 damage-equivalent (1 health saved ≈ 1 damage), gated
-// on card.LikelyToHit. The health-compare go-again isn't modelled.
+// on card.LikelyToHit. The "less {h} than an opposing hero" clause is modelled as a hero
+// attribute — go again fires for heroes that implement card.LowerHealthWanter and never fires
+// otherwise.
 //
 // Source: github.com/the-fab-cube/flesh-and-blood-cards (card.csv).
 
 package generic
 
-import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+import (
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/simstate"
+)
 
 var lifeForALifeTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeAttack)
 
@@ -36,7 +41,7 @@ func (LifeForALifeRed) Pitch() int                   { return 1 }
 func (LifeForALifeRed) Attack() int                  { return 4 }
 func (LifeForALifeRed) Defense() int                 { return 2 }
 func (LifeForALifeRed) Types() card.TypeSet          { return lifeForALifeTypes }
-func (LifeForALifeRed) GoAgain() bool                { return false }
+func (LifeForALifeRed) GoAgain() bool                { return simstate.HeroWantsLowerHealth() }
 func (c LifeForALifeRed) Play(s *card.TurnState) int { return lifeForALifeDamage(c.Attack()) }
 
 type LifeForALifeYellow struct{}
@@ -48,7 +53,7 @@ func (LifeForALifeYellow) Pitch() int                   { return 2 }
 func (LifeForALifeYellow) Attack() int                  { return 3 }
 func (LifeForALifeYellow) Defense() int                 { return 2 }
 func (LifeForALifeYellow) Types() card.TypeSet          { return lifeForALifeTypes }
-func (LifeForALifeYellow) GoAgain() bool                { return false }
+func (LifeForALifeYellow) GoAgain() bool                { return simstate.HeroWantsLowerHealth() }
 func (c LifeForALifeYellow) Play(s *card.TurnState) int { return lifeForALifeDamage(c.Attack()) }
 
 type LifeForALifeBlue struct{}
@@ -60,5 +65,5 @@ func (LifeForALifeBlue) Pitch() int                   { return 3 }
 func (LifeForALifeBlue) Attack() int                  { return 2 }
 func (LifeForALifeBlue) Defense() int                 { return 2 }
 func (LifeForALifeBlue) Types() card.TypeSet          { return lifeForALifeTypes }
-func (LifeForALifeBlue) GoAgain() bool                { return false }
+func (LifeForALifeBlue) GoAgain() bool                { return simstate.HeroWantsLowerHealth() }
 func (c LifeForALifeBlue) Play(s *card.TurnState) int { return lifeForALifeDamage(c.Attack()) }

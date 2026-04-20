@@ -3,15 +3,28 @@
 //
 // Text: "When you play this, if you have less {h} than an opposing hero, this gains +1{p}."
 //
-// Simplification: Health comparison isn't modelled; +1{p} rider never fires.
+// Simplification: The "less {h} than an opposing hero" clause is modelled as a hero attribute —
+// the +1{p} rider fires for heroes that implement card.LowerHealthWanter and never fires
+// otherwise.
 //
 // Source: github.com/the-fab-cube/flesh-and-blood-cards (card.csv).
 
 package generic
 
-import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+import (
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/simstate"
+)
 
 var woundedBullTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeAttack)
+
+// woundedBullDamage returns attack plus +1 when the current hero opts into LowerHealthWanter.
+func woundedBullDamage(attack int) int {
+	if simstate.HeroWantsLowerHealth() {
+		return attack + 1
+	}
+	return attack
+}
 
 type WoundedBullRed struct{}
 
@@ -23,7 +36,7 @@ func (WoundedBullRed) Attack() int                 { return 7 }
 func (WoundedBullRed) Defense() int                { return 2 }
 func (WoundedBullRed) Types() card.TypeSet         { return woundedBullTypes }
 func (WoundedBullRed) GoAgain() bool               { return false }
-func (c WoundedBullRed) Play(s *card.TurnState) int { return c.Attack() }
+func (c WoundedBullRed) Play(s *card.TurnState) int { return woundedBullDamage(c.Attack()) }
 
 type WoundedBullYellow struct{}
 
@@ -35,7 +48,7 @@ func (WoundedBullYellow) Attack() int                 { return 6 }
 func (WoundedBullYellow) Defense() int                { return 2 }
 func (WoundedBullYellow) Types() card.TypeSet         { return woundedBullTypes }
 func (WoundedBullYellow) GoAgain() bool               { return false }
-func (c WoundedBullYellow) Play(s *card.TurnState) int { return c.Attack() }
+func (c WoundedBullYellow) Play(s *card.TurnState) int { return woundedBullDamage(c.Attack()) }
 
 type WoundedBullBlue struct{}
 
@@ -47,4 +60,4 @@ func (WoundedBullBlue) Attack() int                 { return 5 }
 func (WoundedBullBlue) Defense() int                { return 2 }
 func (WoundedBullBlue) Types() card.TypeSet         { return woundedBullTypes }
 func (WoundedBullBlue) GoAgain() bool               { return false }
-func (c WoundedBullBlue) Play(s *card.TurnState) int { return c.Attack() }
+func (c WoundedBullBlue) Play(s *card.TurnState) int { return woundedBullDamage(c.Attack()) }

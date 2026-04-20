@@ -3,13 +3,17 @@
 //
 // Text: "When this is played, if you have less {h} than an opposing hero, it gets **go again**."
 //
-// Simplification: Health comparison for go-again isn't modelled.
+// Simplification: The "less {h} than an opposing hero" clause is modelled as a hero attribute —
+// go again fires for heroes that implement card.LowerHealthWanter and never fires otherwise.
 //
 // Source: github.com/the-fab-cube/flesh-and-blood-cards (card.csv).
 
 package generic
 
-import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+import (
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/simstate"
+)
 
 var scarForAScarTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeAttack)
 
@@ -22,7 +26,7 @@ func (ScarForAScarRed) Pitch() int                  { return 1 }
 func (ScarForAScarRed) Attack() int                 { return 4 }
 func (ScarForAScarRed) Defense() int                { return 2 }
 func (ScarForAScarRed) Types() card.TypeSet         { return scarForAScarTypes }
-func (ScarForAScarRed) GoAgain() bool               { return false }
+func (ScarForAScarRed) GoAgain() bool               { return simstate.HeroWantsLowerHealth() }
 func (c ScarForAScarRed) Play(s *card.TurnState) int { return c.Attack() }
 
 type ScarForAScarYellow struct{}
@@ -34,7 +38,7 @@ func (ScarForAScarYellow) Pitch() int                  { return 2 }
 func (ScarForAScarYellow) Attack() int                 { return 3 }
 func (ScarForAScarYellow) Defense() int                { return 2 }
 func (ScarForAScarYellow) Types() card.TypeSet         { return scarForAScarTypes }
-func (ScarForAScarYellow) GoAgain() bool               { return false }
+func (ScarForAScarYellow) GoAgain() bool               { return simstate.HeroWantsLowerHealth() }
 func (c ScarForAScarYellow) Play(s *card.TurnState) int { return c.Attack() }
 
 type ScarForAScarBlue struct{}
@@ -46,5 +50,5 @@ func (ScarForAScarBlue) Pitch() int                  { return 3 }
 func (ScarForAScarBlue) Attack() int                 { return 2 }
 func (ScarForAScarBlue) Defense() int                { return 2 }
 func (ScarForAScarBlue) Types() card.TypeSet         { return scarForAScarTypes }
-func (ScarForAScarBlue) GoAgain() bool               { return false }
+func (ScarForAScarBlue) GoAgain() bool               { return simstate.HeroWantsLowerHealth() }
 func (c ScarForAScarBlue) Play(s *card.TurnState) int { return c.Attack() }

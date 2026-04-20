@@ -89,9 +89,12 @@ called out in the sections below — landing any of them unlocks a subset of the
 
 Hero health isn't tracked, so every life-gain and life-comparison rider collapses to one side.
 
-- **Life-total comparisons never fire.** Adrenaline Rush +3{p} (less life), Down But Not Out
-  (health / equipment / tokens gating), Life for a Life go-again, Blow for a Blow go-again,
-  Scar for a Scar go-again, and Wounded Bull +1{p} all default to off.
+- **Life-total comparisons are modelled per-hero.** Adrenaline Rush (+3{p}), Fyendal's Fighting
+  Spirit (1{h} gain on attack), Life for a Life go-again, Blow for a Blow go-again, Scar for a
+  Scar go-again, and Wounded Bull (+1{p}) fire when the current hero implements
+  `card.LowerHealthWanter` (see `internal/card/card.go`) and stay off otherwise — a coarse proxy
+  that skips per-turn life tracking. No hero opts in yet. Down But Not Out's health / equipment /
+  tokens gate is not yet covered and still defaults off.
 - **Life-gain effects are dropped.** Healing Balm (gain 3{h}), Fyendal's Fighting Spirit,
   Sun Kiss, Sirens of Safe Harbor (graveyard 1{h}), Sigil of Fyendal (1{h} on leave),
   Fiddler's Green (3{h} entering graveyard), and the Clearwater / Restvine / Sapwood Elixir
@@ -225,8 +228,6 @@ listed here so the direction tag is co-located with the name.
 
 #### Undervalued (sim discounts a real card's effect)
 
-- **Adrenaline Rush (all colours)** — drops the +3{p} for less-life gate; a board-state snapshot
-  where that fires is never scored.
 - **Back Alley Breakline (all colours)** — face-up-from-deck action-point grant dropped; action
   points not tracked, so the tempo payoff is never scored.
 - **Barraging Brawnhide (all colours)** — defended-by-<2-non-equipment +1{p} never fires; the
@@ -235,7 +236,6 @@ listed here so the direction tag is co-located with the name.
   a specific follow-up, and only the go-again lands.
 - **Blanch (all colours)** — dropped on-hit "cards lose all colors" debuff; effectively vanilla
   power.
-- **Blow for a Blow** — go-again on less-life is dropped (the +1 on-hit ping is modelled).
 - **Brandish (all colours)** — dropped next-weapon-attack +1{p}; with go-again printed the rider
   would typically cash out.
 - **Brothers in Arms (all colours)** — dropped pay-to-buff-defence rider; card never gets credit
@@ -267,7 +267,8 @@ listed here so the direction tag is co-located with the name.
 - **Flock of the Feather Walkers (all colours)** — Quicken token creation dropped (and the
   reveal cost too).
 - **Frontline Scout (all colours)** — hand-peek plus arsenal-only go-again dropped.
-- **Fyendal's Fighting Spirit (all colours)** — conditional 1{h} gain dropped.
+- **Fyendal's Fighting Spirit (all colours)** — on-defend 1{h} gain dropped; on-attack gain is
+  modelled for `card.LowerHealthWanter` heroes only.
 - **Gravekeeping (all colours)** — graveyard-banish additional value dropped.
 - **Hand Behind the Pen (all colours)** — on-hit arsenal / banish-instant dropped.
 - **Healing Balm (all colours)** — flat 3{h} dropped.
@@ -280,7 +281,6 @@ listed here so the direction tag is co-located with the name.
 - **Jack Be Quick (all colours)** — graveyard-banish +1{p} / go-again and on-hit ally steal
   dropped.
 - **Lead the Charge (all colours)** — face-up-from-deck action-point grant dropped.
-- **Life for a Life** — go-again on less-life dropped (on-hit heal is modelled).
 - **Life of the Party (all colours)** — all three modes default off including go-again; Crazy
   Brew substitute never fires.
 - **Looking for a Scrap (all colours)** — graveyard-banish bonus dropped.
@@ -326,7 +326,6 @@ listed here so the direction tag is co-located with the name.
   for the tempo of trading a weak aura for a Runechant).
 - **Runeblade Sutcliffe's Research Notes (all colours)** — top-of-deck re-ordering clause
   dropped.
-- **Scar for a Scar** — go-again on less-life dropped.
 - **Scour the Battlescape (all colours)** — hand-cycle plus arsenal go-again dropped.
 - **Seek Horizon (all colours)** — hand-on-top alt cost plus conditional go-again dropped.
 - **Sift (all colours)** — hand cycling dropped.
@@ -356,7 +355,6 @@ listed here so the direction tag is co-located with the name.
 - **Walk the Plank (all colours)** — Pirate-specific target-freeze dropped.
 - **Warmonger's Recital (all colours)** — bottom-of-deck rider dropped (scan bonus credited).
 - **Whisper of the Oracle (all colours)** — Opt dropped.
-- **Wounded Bull (all colours)** — less-life +1{p} never fires.
 - **Wreck Havoc (all colours)** — defence-reaction lockout plus arsenal-banish dropped.
 - **Yinti Yanti (all colours)** — defending-side +1{d} dropped (aura-created clause is modelled).
 
