@@ -41,3 +41,23 @@ func TestPlaySequence_DrawDoesNotPoisonSubsequentPermutations(t *testing.T) {
 			len(ctx.bufs.state.Deck), len(deck))
 	}
 }
+
+// TestBest_DrawRiderBypassesMemo pins the NoMemo discipline on mid-turn-draw cards: the
+// evaluated result must depend on the deck contents, not just the hand, so `memoKey` (which
+// doesn't include the deck) can't cache one deck's outcome into another's. Two Best calls
+// with identical hands but different decks must report distinct Drawn cards.
+func TestBest_DrawRiderBypassesMemo(t *testing.T) {
+	h := []card.Card{generic.SnatchRed{}}
+	deckA := []card.Card{fake.RedAttack{}}
+	deckB := []card.Card{fake.BlueAttack{}}
+
+	resA := Best(hero.Viserai{}, nil, h, 0, deckA, 0, nil)
+	resB := Best(hero.Viserai{}, nil, h, 0, deckB, 0, nil)
+
+	if len(resA.Drawn) != 1 || resA.Drawn[0].Card != (fake.RedAttack{}) {
+		t.Errorf("deck A: Drawn = %v, want [RedAttack]", resA.Drawn)
+	}
+	if len(resB.Drawn) != 1 || resB.Drawn[0].Card != (fake.BlueAttack{}) {
+		t.Errorf("deck B: Drawn = %v, want [BlueAttack] (memo collision bleeding deck A's result here)", resB.Drawn)
+	}
+}
