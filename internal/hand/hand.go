@@ -1227,6 +1227,12 @@ type sequenceContext struct {
 	blockTotal         int
 	hasAttackPitches   bool
 	maxAttackPitch     int
+	// drawnPitched counts mid-turn-drawn cards consumed as pitch during the most recent
+	// playSequenceWithMeta call (their pitch plugged a "hopeful" partition's cost shortfall).
+	// drawnPitchedWinner snapshots that count whenever bestSequence picks a new winning
+	// permutation, so fillContributions can mark Role=Pitch on the right subset of Drawn.
+	drawnPitched       int
+	drawnPitchedWinner int
 }
 
 // seedState writes the TurnState fields that are constant across a partition's permutations
@@ -1287,6 +1293,7 @@ func (ctx *sequenceContext) bestSequence(attackers, winnerOrderOut []card.Card, 
 	best := 0
 	bestLeftoverRunechants := ctx.runechantCarryover
 	foundLegal := false
+	ctx.drawnPitchedWinner = 0
 	eval := func() {
 		dmg, leftoverRunechants, _, legal := ctx.playSequenceWithMeta(perm, scratch, triggerScratch)
 		if !legal {
@@ -1297,6 +1304,7 @@ func (ctx *sequenceContext) bestSequence(attackers, winnerOrderOut []card.Card, 
 			best = dmg
 			bestLeftoverRunechants = leftoverRunechants
 			foundLegal = true
+			ctx.drawnPitchedWinner = ctx.drawnPitched
 			if winnerOrderOut != nil {
 				copy(winnerOrderOut[:n], perm)
 			}
@@ -1405,10 +1413,20 @@ func (ctx *sequenceContext) playSequenceWithMeta(order []card.Card, perCardOut, 
 	// seedState — cards don't mutate them.
 	state.Deck = ctx.deck
 	state.Drawn = nil
+	ctx.drawnPitched = 0
+	drawnPitchedIdx := 0
 	resources := ctx.resourceBudget
 	for i, pc := range played {
 		m := meta[i]
-		resources -= m.costAt(state)
+		cost := m.costAt(state)
+		// When the hand's committed pitch can't cover this card's cost, consume mid-turn-drawn
+		// cards in draw order: their pitch plugs the gap and the "hopeful" partition becomes
+		// legal. Drawn cards are only available after an earlier chain step fired DrawOne.
+		for resources < cost && drawnPitchedIdx < len(state.Drawn) {
+			resources += state.Drawn[drawnPitchedIdx].Pitch()
+			drawnPitchedIdx++
+		}
+		resources -= cost
 		if resources < 0 {
 			return 0, 0, 0, false
 		}
@@ -1452,6 +1470,7 @@ func (ctx *sequenceContext) playSequenceWithMeta(order []card.Card, perCardOut, 
 	if ctx.hasAttackPitches && resources >= ctx.maxAttackPitch {
 		return 0, 0, 0, false
 	}
+	ctx.drawnPitched = drawnPitchedIdx
 	// Delayed tokens skip this turn and go straight to next turn's carryover.
 	return damage, state.Runechants + state.DelayedRunechants, resources, true
 }
@@ -1538,12 +1557,20 @@ func fillContributions(summary *TurnSummary, hero hero.Hero, weapons []weapon.We
 		}
 		ctx.seedState()
 		fillAttackChainContributions(summary, chain, ctx)
-		// state.Drawn accumulated across the tracked replay's winning permutation — copy it out
-		// as Held assignments, the cross-turn-carry disposition for mid-turn-drawn cards.
+		// state.Drawn accumulated across the tracked replay's winning permutation — copy it
+		// out as CardAssignments. Drawn cards consumed by the winning permutation to plug a
+		// cost shortfall take Role=Pitch (and their Pitch() as Contribution); the rest stay
+		// Held, the default cross-turn-carry disposition.
 		if drawn := bufs.state.Drawn; len(drawn) > 0 {
 			summary.Drawn = make([]CardAssignment, len(drawn))
 			for i, c := range drawn {
-				summary.Drawn[i] = CardAssignment{Card: c, Role: Held}
+				role := Held
+				var contribution float64
+				if i < ctx.drawnPitchedWinner {
+					role = Pitch
+					contribution = float64(c.Pitch())
+				}
+				summary.Drawn[i] = CardAssignment{Card: c, Role: role, Contribution: contribution}
 			}
 		}
 	}

@@ -7,6 +7,7 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card/fake"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card/generic"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/card/runeblade"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/hero"
 )
 
@@ -38,7 +39,7 @@ func TestEvalOneTurn_MidTurnDrawArsenalsWhenSlotEmpty(t *testing.T) {
 		fake.YellowAttack{},
 	}
 	d := New(hero.Viserai{}, nil, deckCards)
-	state := d.EvalOneTurnForTesting(0, nil)
+	state := d.EvalOneTurnForTesting(0, nil, nil)
 
 	wantHand := []card.Card{
 		fake.BlueAttack{},
@@ -100,7 +101,7 @@ func TestEvalOneTurn_TwoMidTurnDraws_OneArsenalsOneHeld(t *testing.T) {
 		fake.YellowAttack{},
 	}
 	d := New(hero.Viserai{}, nil, deckCards)
-	state := d.EvalOneTurnForTesting(0, nil)
+	state := d.EvalOneTurnForTesting(0, nil, nil)
 
 	// One beacon arsenaled, the other held at slot 0; the remaining three slots are the fresh
 	// refill from deck positions 6..8.
@@ -162,7 +163,7 @@ func TestEvalOneTurn_ThreeMidTurnDraws_ArsenalFromDrawnPool(t *testing.T) {
 		fake.YellowAttack{},
 	}
 	d := New(hero.Viserai{}, nil, deckCards)
-	state := d.EvalOneTurnForTesting(0, arsenalIn)
+	state := d.EvalOneTurnForTesting(0, arsenalIn, nil)
 
 	// Two held beacons plus two fresh Blues from deck positions 7..8.
 	wantHand := []card.Card{
@@ -220,7 +221,7 @@ func TestEvalOneTurn_MidTurnDrawHeldWhenArsenalFull(t *testing.T) {
 		fake.YellowAttack{},
 	}
 	d := New(hero.Viserai{}, nil, deckCards)
-	state := d.EvalOneTurnForTesting(0, arsenalIn)
+	state := d.EvalOneTurnForTesting(0, arsenalIn, nil)
 
 	wantHand := []card.Card{
 		beacon,
@@ -249,5 +250,81 @@ func TestEvalOneTurn_MidTurnDrawHeldWhenArsenalFull(t *testing.T) {
 
 	if state.RunechantCarryover != 0 {
 		t.Errorf("turn 2 runechant carryover = %d, want 0 (nothing on turn 1 creates runechants)", state.RunechantCarryover)
+	}
+}
+
+// TestEvalOneTurn_MidTurnDrawPitchesToFundHopefulAttacker pins the PITCH disposition: a
+// partition that leaves an attacker under-funded from hand pitch is still legal when a
+// mid-turn-drawn card's pitch plugs the gap. The winning line plays Flying High (go again
+// grant to the next attack), Snatch (fires on-hit DrawOne consuming the Blue on top of deck),
+// then Amplify the Arknight — Amplify's cost 3 is paid by the drawn Blue's pitch 3. Flying
+// High Yellow avoids the +1{p} matching-colour bonus against Snatch Red (pitch 2 ≠ pitch 1),
+// so the attack chain totals 0 + 4 + 6 damage, with Viserai's Runechant trigger adding +1
+// when Amplify (a Runeblade attack) resolves after a non-attack action (Flying High) — turn
+// Value lands at 11.
+//
+// Starts with an explicit 3-card hand so nothing extraneous competes for the arsenal slot:
+// all three cards play out, the drawn Blue is pitched (not Held), and the arsenal stays
+// empty at the start of turn 2.
+//
+// Deck layout (consumed in source order):
+//   - position 0 = the Blue beacon consumed by Snatch's DrawOne and pitched for Amplify.
+//   - positions 1..3 = Blues that make up turn 2's refill.
+//   - position 4 = Yellow in turn 2's last hand slot.
+//   - position 5 = Yellow tripwire that should stay in the deck.
+func TestEvalOneTurn_MidTurnDrawPitchesToFundHopefulAttacker(t *testing.T) {
+	initialHand := []card.Card{
+		generic.FlyingHighYellow{},
+		generic.SnatchRed{},
+		runeblade.AmplifyTheArknightRed{},
+	}
+	deckCards := []card.Card{
+		fake.BlueAttack{}, // beacon — drawn by Snatch, pitched for Amplify
+		fake.BlueAttack{},
+		fake.BlueAttack{},
+		fake.BlueAttack{},
+		fake.YellowAttack{},
+		fake.YellowAttack{},
+	}
+	d := New(hero.Viserai{}, nil, deckCards)
+	state := d.EvalOneTurnForTesting(0, nil, initialHand)
+
+	// Turn 2 hand: plain refill of three Blues plus a Yellow. All three starting cards played,
+	// the drawn Blue was pitched mid-chain, so nothing carries over as Held.
+	wantHand := []card.Card{
+		fake.BlueAttack{},
+		fake.BlueAttack{},
+		fake.BlueAttack{},
+		fake.YellowAttack{},
+	}
+	if !reflect.DeepEqual(state.Hand, wantHand) {
+		t.Errorf("turn 2 hand = %v, want %v", state.Hand, wantHand)
+	}
+
+	// Arsenal stays empty: no Held candidates (all hand cards played, drawn Blue was pitched).
+	if state.ArsenalCard != nil {
+		t.Errorf("turn 2 arsenal = %v, want nil (no Held card to promote)", state.ArsenalCard)
+	}
+
+	// Remaining deck: the untouched Yellow tripwire, then the drawn Blue recycled to the
+	// bottom after it was pitched to fund Amplify's cost.
+	wantDeck := []card.Card{
+		fake.YellowAttack{},
+		fake.BlueAttack{},
+	}
+	if !reflect.DeepEqual(state.Deck, wantDeck) {
+		t.Errorf("turn 2 deck = %v, want %v", state.Deck, wantDeck)
+	}
+
+	// Amplify's attack step consumes the Runechant Viserai created on its resolution (Amplify
+	// is Runeblade + Flying High is a non-attack action played earlier), so no tokens carry.
+	if state.RunechantCarryover != 0 {
+		t.Errorf("turn 2 runechant carryover = %d, want 0 (Amplify consumed Viserai's token on resolve)", state.RunechantCarryover)
+	}
+
+	// Turn 1 damage: 0 (Flying High Yellow — no pitch-match with Snatch Red) + 4 (Snatch) + 6
+	// (Amplify) + 1 (Runechant Viserai creates on Amplify's resolve, credited at creation).
+	if state.PrevTurnValue != 11 {
+		t.Errorf("turn 1 Value = %d, want 11 (Flying High 0 + Snatch 4 + Amplify 6 + Viserai Runechant 1)", state.PrevTurnValue)
 	}
 }
