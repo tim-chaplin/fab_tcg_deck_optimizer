@@ -3,7 +3,10 @@
 //
 // Text: "When this is put into your graveyard from anywhere, gain 1{h}."
 //
-// Simplification: Graveyard-trigger 1{h} gain isn't modelled.
+// Modelling: the card goes to graveyard after it resolves as an attack, so the 1{h} gain
+// fires on every Play — credited as +1 damage equivalent (health is valued 1-to-1 with
+// damage). Pitched copies go to the bottom of the deck, not the graveyard, so they don't
+// trigger the rider; pitched contributions stay at the printed pitch value only.
 //
 // Source: github.com/the-fab-cube/flesh-and-blood-cards (card.csv).
 
@@ -24,7 +27,7 @@ func (SirensOfSafeHarborRed) Defense() int                { return 2 }
 func (SirensOfSafeHarborRed) Types() card.TypeSet         { return sirensOfSafeHarborTypes }
 func (SirensOfSafeHarborRed) GoAgain() bool               { return false }
 func (SirensOfSafeHarborRed) NotSilverAgeLegal()           {}
-func (c SirensOfSafeHarborRed) Play(s *card.TurnState) int { return c.Attack() }
+func (c SirensOfSafeHarborRed) Play(s *card.TurnState) int { return c.Attack() + 1 }
 
 type SirensOfSafeHarborYellow struct{}
 
@@ -37,7 +40,7 @@ func (SirensOfSafeHarborYellow) Defense() int                { return 2 }
 func (SirensOfSafeHarborYellow) Types() card.TypeSet         { return sirensOfSafeHarborTypes }
 func (SirensOfSafeHarborYellow) GoAgain() bool               { return false }
 func (SirensOfSafeHarborYellow) NotSilverAgeLegal()           {}
-func (c SirensOfSafeHarborYellow) Play(s *card.TurnState) int { return c.Attack() }
+func (c SirensOfSafeHarborYellow) Play(s *card.TurnState) int { return c.Attack() + 1 }
 
 type SirensOfSafeHarborBlue struct{}
 
@@ -50,4 +53,4 @@ func (SirensOfSafeHarborBlue) Defense() int                { return 2 }
 func (SirensOfSafeHarborBlue) Types() card.TypeSet         { return sirensOfSafeHarborTypes }
 func (SirensOfSafeHarborBlue) GoAgain() bool               { return false }
 func (SirensOfSafeHarborBlue) NotSilverAgeLegal()           {}
-func (c SirensOfSafeHarborBlue) Play(s *card.TurnState) int { return c.Attack() }
+func (c SirensOfSafeHarborBlue) Play(s *card.TurnState) int { return c.Attack() + 1 }
