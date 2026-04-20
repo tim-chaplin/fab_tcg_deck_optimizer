@@ -5,13 +5,17 @@
 // When this hits, deal 1 damage to any target."
 //
 // The on-hit 1 damage is modelled as +1 damage-equivalent, gated on card.LikelyToHit. The
-// health-compare go-again isn't modelled.
+// "less {h} than an opposing hero" clause is modelled as a hero attribute — go again fires for
+// heroes that implement card.LowerHealthWanter and never fires otherwise.
 //
 // Source: github.com/the-fab-cube/flesh-and-blood-cards (card.csv).
 
 package generic
 
-import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+import (
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/simstate"
+)
 
 var blowForABlowTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeAttack)
 
@@ -27,7 +31,7 @@ func (BlowForABlowRed) Pitch() int          { return 1 }
 func (BlowForABlowRed) Attack() int         { return 4 }
 func (BlowForABlowRed) Defense() int        { return 2 }
 func (BlowForABlowRed) Types() card.TypeSet { return blowForABlowTypes }
-func (BlowForABlowRed) GoAgain() bool       { return false }
+func (BlowForABlowRed) GoAgain() bool       { return simstate.HeroWantsLowerHealth() }
 func (c BlowForABlowRed) Play(s *card.TurnState) int {
 	if card.LikelyToHit(c.Attack()) {
 		return c.Attack() + blowForABlowPingValue

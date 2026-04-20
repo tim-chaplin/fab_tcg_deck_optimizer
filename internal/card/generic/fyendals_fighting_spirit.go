@@ -3,15 +3,29 @@
 //
 // Text: "When this attacks or defends, if you have less {h} than an opposing hero, gain 1{h}."
 //
-// Simplification: Conditional health-gain rider isn't modelled.
+// Simplification: The "less {h}" clause is modelled as a hero attribute — the 1{h} gain is credited
+// 1-to-1 with damage when this attacks and the current hero implements card.LowerHealthWanter. The
+// on-defend half isn't modelled (Play isn't called during a plain block).
 //
 // Source: github.com/the-fab-cube/flesh-and-blood-cards (card.csv).
 
 package generic
 
-import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+import (
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/simstate"
+)
 
 var fyendalsFightingSpiritTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeAttack)
+
+// fyendalsFightingSpiritDamage returns attack plus the 1{h} gain credit when the current hero opts
+// into LowerHealthWanter.
+func fyendalsFightingSpiritDamage(attack int) int {
+	if simstate.HeroWantsLowerHealth() {
+		return attack + 1
+	}
+	return attack
+}
 
 type FyendalsFightingSpiritRed struct{}
 
@@ -23,7 +37,7 @@ func (FyendalsFightingSpiritRed) Attack() int                 { return 7 }
 func (FyendalsFightingSpiritRed) Defense() int                { return 2 }
 func (FyendalsFightingSpiritRed) Types() card.TypeSet         { return fyendalsFightingSpiritTypes }
 func (FyendalsFightingSpiritRed) GoAgain() bool               { return false }
-func (c FyendalsFightingSpiritRed) Play(s *card.TurnState) int { return c.Attack() }
+func (c FyendalsFightingSpiritRed) Play(s *card.TurnState) int { return fyendalsFightingSpiritDamage(c.Attack()) }
 
 type FyendalsFightingSpiritYellow struct{}
 
@@ -35,7 +49,7 @@ func (FyendalsFightingSpiritYellow) Attack() int                 { return 6 }
 func (FyendalsFightingSpiritYellow) Defense() int                { return 2 }
 func (FyendalsFightingSpiritYellow) Types() card.TypeSet         { return fyendalsFightingSpiritTypes }
 func (FyendalsFightingSpiritYellow) GoAgain() bool               { return false }
-func (c FyendalsFightingSpiritYellow) Play(s *card.TurnState) int { return c.Attack() }
+func (c FyendalsFightingSpiritYellow) Play(s *card.TurnState) int { return fyendalsFightingSpiritDamage(c.Attack()) }
 
 type FyendalsFightingSpiritBlue struct{}
 
@@ -47,4 +61,4 @@ func (FyendalsFightingSpiritBlue) Attack() int                 { return 5 }
 func (FyendalsFightingSpiritBlue) Defense() int                { return 2 }
 func (FyendalsFightingSpiritBlue) Types() card.TypeSet         { return fyendalsFightingSpiritTypes }
 func (FyendalsFightingSpiritBlue) GoAgain() bool               { return false }
-func (c FyendalsFightingSpiritBlue) Play(s *card.TurnState) int { return c.Attack() }
+func (c FyendalsFightingSpiritBlue) Play(s *card.TurnState) int { return fyendalsFightingSpiritDamage(c.Attack()) }
