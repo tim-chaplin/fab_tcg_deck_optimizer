@@ -644,11 +644,13 @@ type attackBufs struct {
 	permMeta []*attackerMeta
 	// Partition-loop buffers, consumed by bestUncached. Sized handSize+1 to cover the optional
 	// arsenal-in slot the enumerator treats as index n. isDRBuf caches TypeDefenseReaction
-	// membership to skip Types().Has calls.
-	rolesBuf    []Role
-	pitchVals   []int
-	defenseVals []int
-	isDRBuf     []bool
+	// membership to skip Types().Has calls; isDelayedBuf caches card.DelayedPlay implementation
+	// so the beatsBest tiebreaker can count how many delayed-play cards a partition queues.
+	rolesBuf     []Role
+	pitchVals    []int
+	defenseVals  []int
+	isDRBuf      []bool
+	isDelayedBuf []bool
 	// pitchedValsScratch backs the per-leaf "pitched values" slice consumed by phase-mask
 	// enumeration. Re-sliced to [:0] at the start of every leaf to eliminate a per-leaf alloc.
 	pitchedValsScratch []int
@@ -716,6 +718,7 @@ func newAttackBufs(handSize, weaponCount int, weapons []weapon.Weapon) *attackBu
 		pitchVals:              make([]int, handSize+1),
 		defenseVals:            make([]int, handSize+1),
 		isDRBuf:                make([]bool, handSize+1),
+		isDelayedBuf:           make([]bool, handSize+1),
 		pitchedValsScratch:     make([]int, 0, handSize+1),
 		pitchedBuf:             make([]card.Card, 0, handSize+1),
 		attackersBuf:           make([]card.Card, 0, handSize+1),
@@ -782,6 +785,12 @@ func (e *Evaluator) bestUncached(hero hero.Hero, weapons []weapon.Weapon, hand [
 	// so a post-hoc promotion would fill arsenal. Candidates need both a Value/leftover tie and
 	// some way to end with arsenal occupied to displace it.
 	bestHasHeld := n > 0
+	// bestDelayedPlayed tracks how many card.DelayedPlay cards the current best is playing
+	// (Role=Attack). Seeded 0 because the initial best assigns every card Held. The beatsBest
+	// tiebreaker prefers partitions that play MORE delayed-play cards at equal Value/leftover —
+	// their start-of-next-turn payoff is hidden from the current-turn score, so without this
+	// bias a lone sigil loses to Held → arsenal promotion on the arsenal-occupancy tiebreak.
+	bestDelayedPlayed := 0
 	for i := 0; i < n; i++ {
 		best.BestLine[i] = CardAssignment{Card: hand[i], Role: Held}
 	}
@@ -798,11 +807,12 @@ func (e *Evaluator) bestUncached(hero hero.Hero, weapons []weapon.Weapon, hand [
 	pvals := bufs.pitchVals[:totalN]
 	dvals := bufs.defenseVals[:totalN]
 	isDR := bufs.isDRBuf[:totalN]
+	isDelayed := bufs.isDelayedBuf[:totalN]
 
-	// Pre-compute per-card pitch / defense values and Defense-Reaction membership so the recurse
-	// doesn't re-invoke the card-method interface calls per leaf. Cost is pulled from
-	// attackerMeta at leaf time (variable-cost cards self-report their current game-accurate cost
-	// via Cost()); no partition-time cost sums needed.
+	// Pre-compute per-card pitch / defense values, Defense-Reaction membership, and DelayedPlay
+	// membership so the recurse doesn't re-invoke the card-method / type-assert calls per leaf.
+	// Cost is pulled from attackerMeta at leaf time (variable-cost cards self-report their
+	// current game-accurate cost via Cost()); no partition-time cost sums needed.
 	hasReactions := false
 	for i := 0; i < totalN; i++ {
 		var c card.Card
@@ -817,6 +827,7 @@ func (e *Evaluator) bestUncached(hero hero.Hero, weapons []weapon.Weapon, hand [
 		if isDR[i] {
 			hasReactions = true
 		}
+		_, isDelayed[i] = c.(card.DelayedPlay)
 	}
 	pitched := bufs.pitchedBuf
 	attackers := bufs.attackersBuf
@@ -863,15 +874,21 @@ func (e *Evaluator) bestUncached(hero hero.Hero, weapons []weapon.Weapon, hand [
 			// Hand cards never take Arsenal role during enumeration, so arsenalCard is only set
 			// when arsenal-in stayed; post-hoc promotion potential is tracked via hasHeld.
 			hasHeld := false
+			delayedPlayed := 0
 			for j := 0; j < n; j++ {
 				if rolesBuf[j] == Held {
 					hasHeld = true
-					break
 				}
+				if rolesBuf[j] == Attack && isDelayed[j] {
+					delayedPlayed++
+				}
+			}
+			if arsenalCardIn != nil && rolesBuf[n] == Attack && isDelayed[n] {
+				delayedPlayed++
 			}
 			willOccupy := arsenalCard != nil || hasHeld
 			bestWillOccupy := best.ArsenalCard != nil || bestHasHeld
-			if !beatsBest(v, leftoverRunechants, willOccupy, best, bestWillOccupy) {
+			if !beatsBest(v, leftoverRunechants, delayedPlayed, willOccupy, best, bestDelayedPlayed, bestWillOccupy) {
 				return
 			}
 			best.Value = v
@@ -880,6 +897,7 @@ func (e *Evaluator) bestUncached(hero hero.Hero, weapons []weapon.Weapon, hand [
 			best.LeftoverRunechants = leftoverRunechants
 			best.ArsenalCard = arsenalCard
 			bestHasHeld = hasHeld
+			bestDelayedPlayed = delayedPlayed
 			// Write the winning roles into BestLine. Cards and FromArsenal flags were populated
 			// at construction; only Role varies. Contribution is cleared here and filled by
 			// fillContributions below for the winning line.
@@ -1038,10 +1056,11 @@ func findArsenalCard(rolesBuf []Role, arsenalCardIn card.Card, n int) card.Card 
 
 // beatsBest decides whether a candidate partition displaces the current best. Tiebreak order:
 // higher Value, then more leftover runechants (they convert to future arcane damage), then
-// preferring a partition that ends with the arsenal slot occupied (saves a hand slot next
-// refill). "Occupied" covers both an arsenal-in card that stayed and a Held hand card slated
-// for post-hoc promotion.
-func beatsBest(v, leftoverRunechants int, willOccupyArsenal bool, best TurnSummary, bestWillOccupyArsenal bool) bool {
+// more card.DelayedPlay cards played (their start-of-next-turn payoff is hidden from the
+// current-turn Value — the bias corrects for that), then preferring a partition that ends
+// with the arsenal slot occupied (saves a hand slot next refill). "Occupied" covers both an
+// arsenal-in card that stayed and a Held hand card slated for post-hoc promotion.
+func beatsBest(v, leftoverRunechants, delayedPlayed int, willOccupyArsenal bool, best TurnSummary, bestDelayedPlayed int, bestWillOccupyArsenal bool) bool {
 	if v > best.Value {
 		return true
 	}
@@ -1052,6 +1071,12 @@ func beatsBest(v, leftoverRunechants int, willOccupyArsenal bool, best TurnSumma
 		return true
 	}
 	if leftoverRunechants < best.LeftoverRunechants {
+		return false
+	}
+	if delayedPlayed > bestDelayedPlayed {
+		return true
+	}
+	if delayedPlayed < bestDelayedPlayed {
 		return false
 	}
 	return willOccupyArsenal && !bestWillOccupyArsenal

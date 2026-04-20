@@ -576,31 +576,58 @@ func TestPromoteRandomHeldToArsenal_DeterministicPerHand(t *testing.T) {
 // Arsenal promotion) beats the one that won't. Exercised directly so a comparison-inversion
 // regression can't hide behind enumeration order at the Best() level.
 func TestBeatsBest_ArsenalOccupancyTiebreaker(t *testing.T) {
-	// Seed best: Value=10, Leftover=0, arsenal NOT occupied.
+	// Seed best: Value=10, Leftover=0, arsenal NOT occupied, no delayed plays.
 	best := TurnSummary{Value: 10, LeftoverRunechants: 0}
-	// Candidate with equal V/L but arsenal WILL be occupied — should beat.
-	if !beatsBest(10, 0, true, best, false) {
+	// Candidate with equal V/L/delayed but arsenal WILL be occupied — should beat.
+	if !beatsBest(10, 0, 0, true, best, 0, false) {
 		t.Error("willOccupy=true should beat a tied best with willOccupy=false")
 	}
 	// Candidate with equal V/L and arsenal NOT occupied — same as best, should NOT beat.
-	if beatsBest(10, 0, false, best, false) {
+	if beatsBest(10, 0, 0, false, best, 0, false) {
 		t.Error("willOccupy=false should not beat a tied best with willOccupy=false")
 	}
 	// Best already occupies; candidate also occupies — no advantage, should NOT beat.
-	if beatsBest(10, 0, true, best, true) {
+	if beatsBest(10, 0, 0, true, best, 0, true) {
 		t.Error("willOccupy=true should not beat a tied best that also has willOccupy=true")
 	}
 	// Strict-wins on Value still takes precedence over the occupancy tiebreaker.
-	if !beatsBest(11, 0, false, best, true) {
+	if !beatsBest(11, 0, 0, false, best, 0, true) {
 		t.Error("higher Value should beat even when the candidate has no occupancy advantage")
 	}
 	// Strict-loses on Value — can't be rescued by occupancy.
-	if beatsBest(9, 0, true, best, false) {
+	if beatsBest(9, 0, 0, true, best, 0, false) {
 		t.Error("lower Value should lose regardless of occupancy advantage")
 	}
 	// Strict-wins on leftover takes precedence over occupancy.
-	if !beatsBest(10, 1, false, best, true) {
+	if !beatsBest(10, 1, 0, false, best, 0, true) {
 		t.Error("higher LeftoverRunechants should beat even without occupancy advantage")
+	}
+}
+
+// TestBeatsBest_DelayedPlayTiebreaker pins the delayed-play bias: at equal Value and
+// LeftoverRunechants, a partition that plays more card.DelayedPlay cards wins over one that
+// plays fewer, regardless of arsenal occupancy. This corrects for the hidden next-turn value
+// those cards carry — without the bias, a lone sigil ends up Held → promoted to arsenal
+// because same-turn Value is 0 and arsenal occupancy wins the fallback tiebreak.
+func TestBeatsBest_DelayedPlayTiebreaker(t *testing.T) {
+	best := TurnSummary{Value: 5, LeftoverRunechants: 0}
+	// Candidate plays 1 delayed-play card, best plays 0 — candidate wins even though arsenal
+	// occupancy favours the best.
+	if !beatsBest(5, 0, 1, false, best, 0, true) {
+		t.Error("more delayed-play cards should beat a tied best with occupancy advantage")
+	}
+	// Reverse: best plays 1 delayed, candidate plays 0 — candidate loses even when candidate
+	// has the occupancy advantage.
+	if beatsBest(5, 0, 0, true, best, 1, false) {
+		t.Error("fewer delayed-play cards should lose even with occupancy advantage")
+	}
+	// Strict-wins on Value still takes precedence over the delayed tiebreaker.
+	if !beatsBest(6, 0, 0, false, best, 5, false) {
+		t.Error("higher Value should beat even when the candidate plays fewer delayed cards")
+	}
+	// Strict-wins on LeftoverRunechants still takes precedence over delayed.
+	if !beatsBest(5, 1, 0, false, best, 5, false) {
+		t.Error("higher LeftoverRunechants should beat even when the candidate plays fewer delayed cards")
 	}
 }
 

@@ -146,16 +146,12 @@ func TestRunDelayedPlays_NonAttackTopSkipsReveal(t *testing.T) {
 }
 
 // TestEvalOneTurn_SigilOfTheArknightRevealsIntoHand is the end-to-end 2-turn check: turn 1
-// plays a Sigil of the Arknight, queueing its PlayNextTurn callback for turn 2. Turn 2 draws 4
-// cards (Viserai Intelligence=4) and the callback peeks the top of the post-draw deck — an
-// attack action — and moves it into the hand. The returned turn-2 hand has 5 cards: 4 normal
-// refills plus the revealed Aether Slash appended at the tail.
-//
-// Turn 1's hand is [sigil, Blue] with Shrill of Skullform (Yellow) in arsenal. Blue pitches to
-// fund Shrill's cost 2; sigil plays first (go-again + AuraCreated) so Shrill's aura-rider fires
-// for +3 power. A lone-sigil hand would otherwise be sent to arsenal by the solver's tiebreak
-// (sigil's Play contributes 0 current-turn Value, and Held → arsenal promotion beats Role=
-// Attack at equal Value), so the chain-partner is needed to force the intended Role=Attack.
+// starts with a Sigil of the Arknight as the ONLY card in hand. The solver plays it (the
+// beatsBest tiebreaker prefers playing DelayedPlay cards at equal Value over Held → arsenal
+// promotion, crediting their hidden next-turn payoff). The sigil queues its PlayNextTurn
+// callback; on turn 2 the callback peeks the top of the post-draw deck — an attack action —
+// and moves it into the hand. The returned turn-2 hand should have 5 cards: 4 normal refills
+// plus the revealed Aether Slash appended at the tail.
 func TestEvalOneTurn_SigilOfTheArknightRevealsIntoHand(t *testing.T) {
 	sigil := runeblade.SigilOfTheArknightBlue{}
 	reveal := runeblade.AetherSlashRed{}
@@ -170,7 +166,7 @@ func TestEvalOneTurn_SigilOfTheArknightRevealsIntoHand(t *testing.T) {
 		fake.BlueAttack{},
 	}
 	d := New(hero.Viserai{}, nil, deckCards)
-	state := d.EvalOneTurnForTesting(0, runeblade.ShrillOfSkullformYellow{}, []card.Card{sigil, fake.BlueAttack{}})
+	state := d.EvalOneTurnForTesting(0, nil, []card.Card{sigil})
 
 	// Assert sigil played: find it as Role=Attack in turn 1's BestLine.
 	sigilPlayed := false
@@ -184,9 +180,8 @@ func TestEvalOneTurn_SigilOfTheArknightRevealsIntoHand(t *testing.T) {
 		t.Errorf("turn 1 BestLine didn't play the sigil as Role=Attack: %+v", state.PrevTurnBestLine)
 	}
 
-	// Turn 2: 4 normal draws + 1 revealed = 5 cards. The pitched Blue from turn 1 sits at the
-	// tail of the deck, so positions 0..3 of the post-turn-1 deck are the original Blues at
-	// deckCards[0..3]. Position 4 is the reveal target.
+	// Turn 2: 4 normal draws + 1 revealed = 5 cards. deckCards[0..3] refill turn 2's hand;
+	// deckCards[4] is the reveal target appended at the tail.
 	wantHand := []card.Card{
 		fake.BlueAttack{},
 		fake.BlueAttack{},
