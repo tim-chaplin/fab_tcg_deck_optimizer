@@ -3,8 +3,10 @@
 // Text: "**Go again** At the beginning of your action phase, destroy this. When this leaves the
 // arena, gain 1{h}."
 //
-// Simplification: At-action-phase self-destroy and the 1{h} gain on leave are dropped; only the
-// aura-created flag is credited.
+// Modelling: the sigil self-destroys at the start of your next action phase, which always
+// fires on the cadence the card prints, so the 1{h} "on leave" gain is credited as +1 damage
+// equivalent on Play (health is valued 1-to-1 with damage). The aura-created flag is also
+// set so same-turn "if you've created an aura" riders see it.
 //
 // Source: github.com/the-fab-cube/flesh-and-blood-cards (card.csv).
 
@@ -24,4 +26,4 @@ func (SigilOfFyendalBlue) Attack() int                 { return 0 }
 func (SigilOfFyendalBlue) Defense() int                { return 2 }
 func (SigilOfFyendalBlue) Types() card.TypeSet         { return sigilOfFyendalTypes }
 func (SigilOfFyendalBlue) GoAgain() bool               { return true }
-func (SigilOfFyendalBlue) Play(s *card.TurnState) int { return setAuraCreated(s) }
+func (SigilOfFyendalBlue) Play(s *card.TurnState) int { return setAuraCreated(s) + 1 }
