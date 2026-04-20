@@ -166,15 +166,6 @@ func (s *TurnState) HasAuraInPlay() bool {
 	return s.AuraCreated || s.HasPlayedType(TypeAura)
 }
 
-// LikelyToHit reports whether dealing n damage is likely to get through an opponent's blocks.
-// A typical FaB card is worth ~3 points, so blocking 1/4/7 with a pitch or block card over-pays;
-// the opponent would rather eat the damage. Multiples of 3 are the easy-to-block amounts.
-// Used by fragile-aura cards (Arcane Cussing, Bloodspill Invocation) to decide whether a
-// same-turn attack will actually land and pop the aura for its pay-off.
-func LikelyToHit(n int) bool {
-	return n == 1 || n == 4 || n == 7
-}
-
 // ClashValue returns the net damage-equivalent of a clash (see comprehensive rules 8.5.45): we
 // and the opponent reveal the top card of our decks and the higher {p} wins. We model from our
 // side only — our deck's top card is read from s.Deck; the opponent's top is approximated as
