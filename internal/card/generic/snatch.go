@@ -3,8 +3,7 @@
 //
 // Text: "When this hits, draw a card."
 //
-// The on-hit draw fires via state.DrawOne when the printed attack is likely to land (1/4/7 per
-// card.LikelyToHit).
+// The on-hit draw fires when card.LikelyToHit approves the printed attack.
 //
 // Source: github.com/the-fab-cube/flesh-and-blood-cards (card.csv).
 
@@ -14,8 +13,7 @@ import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 
 var snatchTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeAttack)
 
-// snatchPlay fires the on-hit draw via state.DrawOne when the attack is likely to land, and
-// returns the attack's damage.
+// snatchPlay fires the on-hit draw when the attack is likely to land and returns its damage.
 func snatchPlay(attack int, s *card.TurnState) int {
 	if card.LikelyToHit(attack) {
 		s.DrawOne()
