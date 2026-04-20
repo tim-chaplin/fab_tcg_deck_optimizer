@@ -145,9 +145,8 @@ type TurnState struct {
 	Drawn []Card
 }
 
-// DrawOne models a mid-turn draw: advance the deck by one card and record it in Drawn. No-op
-// on an empty deck. Provided as a method on TurnState so every draw-rider card funnels through
-// one helper.
+// DrawOne models a mid-turn draw: advance the deck by one card and append it to Drawn. No-op
+// on an empty deck. Every draw-rider card routes through this helper.
 func (s *TurnState) DrawOne() {
 	if len(s.Deck) == 0 {
 		return
