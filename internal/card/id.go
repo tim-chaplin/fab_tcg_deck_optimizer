@@ -487,4 +487,5 @@ const (
 	FakeRedAttack
 	FakeBlueAttack
 	FakeYellowAttack
+	FakeDrawCantrip
 )

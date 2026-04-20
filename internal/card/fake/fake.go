@@ -45,3 +45,21 @@ func (YellowAttack) Defense() int               { return 2 }
 func (YellowAttack) Types() card.TypeSet        { return genericAttackTypes }
 func (YellowAttack) GoAgain() bool              { return true }
 func (c YellowAttack) Play(*card.TurnState) int { return c.Attack() }
+
+// DrawCantrip is a generic free-cycling attack: cost 0, pitches 1, attacks 1, go again, and
+// fires DrawOne on play. Used by tests to exercise mid-turn-draw chains that extend themselves
+// (each cantrip plays, draws the next one, which plays, etc.).
+type DrawCantrip struct{}
+
+func (DrawCantrip) ID() card.ID                { return card.FakeDrawCantrip }
+func (DrawCantrip) Name() string               { return "cardtest.DrawCantrip" }
+func (DrawCantrip) Cost(*card.TurnState) int   { return 0 }
+func (DrawCantrip) Pitch() int                 { return 1 }
+func (DrawCantrip) Attack() int                { return 1 }
+func (DrawCantrip) Defense() int               { return 0 }
+func (DrawCantrip) Types() card.TypeSet        { return genericAttackTypes }
+func (DrawCantrip) GoAgain() bool              { return true }
+func (c DrawCantrip) Play(s *card.TurnState) int {
+	s.DrawOne()
+	return c.Attack()
+}
