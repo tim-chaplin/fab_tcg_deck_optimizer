@@ -1078,7 +1078,12 @@ func bestAttackWithWeapons(hero hero.Hero, weapons []weapon.Weapon, attackers, d
 		runechantCarryover: runechantCarryover,
 		incomingDamage:     incomingDamage,
 		blockTotal:         blockTotal,
+		hasDrawRider:       handHasDrawRider,
 	}
+	// Capture the optional hero.PlayTypeFilter once so playSequenceWithMeta's per-card loop skips
+	// the type assertion every iteration. hero is an interface value — storing a typed filter
+	// pointer gives the compiler a concrete method-table lookup.
+	ctx.heroPlayFilter = heroPlayFilterFor(hero)
 	// Hoist leaf-constant TurnState fields out of the per-permutation reset in
 	// playSequenceWithMeta.
 	ctx.seedState()
@@ -1236,6 +1241,11 @@ func bestAttackWithWeapons(hero hero.Hero, weapons []weapon.Weapon, attackers, d
 // one pitch could have been Held instead).
 type sequenceContext struct {
 	hero               hero.Hero
+	// heroPlayFilter caches the hero's optional TypeSet pre-filter if it implements
+	// hero.PlayTypeFilter. Setting it once at ctx-creation lets the per-play loop skip the
+	// interface-type assertion cost that would otherwise happen for every card in every
+	// permutation. Nil when the hero doesn't opt in — the loop always calls OnCardPlayed then.
+	heroPlayFilter     hero.PlayTypeFilter
 	pitched, deck      []card.Card
 	bufs               *attackBufs
 	resourceBudget     int
@@ -1244,6 +1254,14 @@ type sequenceContext struct {
 	blockTotal         int
 	hasAttackPitches   bool
 	maxAttackPitch     int
+	// hasDrawRider mirrors bestUncached's handHasDrawRider through the context so
+	// playSequenceWithMeta / bestSequence can skip drawn-card bookkeeping (state.Drawn reset,
+	// drawn-pitch probe, chain-extension loop, winner-snapshot copies) on hands with no card
+	// able to fire DrawOne. False default keeps pre-existing test entry points correct: the
+	// invariant is "false ⇒ no DrawOne can fire in this chain", which the bestUncased path sets
+	// from the hand's original card types. Callers entering via playSequence / bestSequence
+	// directly must set this true when their chain can touch state.Drawn.
+	hasDrawRider bool
 	// Mid-turn-drawn-card tracking for the most recent playSequenceWithMeta call. state.Drawn
 	// is partitioned as [Pitch * drawnPitched | Attack * drawnAttacked | Held ...]: the first
 	// drawnPitched cards were consumed to plug a cost shortfall (Phase 2 "hopeful" partitions);
@@ -1265,6 +1283,17 @@ type sequenceContext struct {
 	drawnAttackedWinner         int
 	drawnAttackDmgWinner        []float64
 	drawnAttackTriggerDmgWinner []float64
+}
+
+// heroPlayFilterFor returns the hero's optional hero.PlayTypeFilter — nil when the hero
+// doesn't opt in. Stored on sequenceContext so the per-card trigger dispatch in
+// playSequenceWithMeta skips OnCardPlayed entirely when the cached TypeSet can't possibly
+// trigger the hero (e.g. a non-Runeblade card against Viserai).
+func heroPlayFilterFor(h hero.Hero) hero.PlayTypeFilter {
+	if f, ok := h.(hero.PlayTypeFilter); ok {
+		return f
+	}
+	return nil
 }
 
 // seedState writes the TurnState fields that are constant across a partition's permutations
@@ -1303,9 +1332,15 @@ func (ctx *sequenceContext) bestSequence(attackers, winnerOrderOut []card.Card, 
 	}
 	perm := ctx.bufs.perm[:n]
 	permMeta := ctx.bufs.permMeta[:n]
+	pcBuf := ctx.bufs.pcBuf
 	copy(perm, attackers)
+	// pcBuf[i].Card is kept in lockstep with perm[i]: seeded here and swapped alongside perm /
+	// permMeta during Heap's-algorithm permutation below. playSequenceWithMeta then only clears
+	// GrantedGoAgain per permutation — it never rewrites the Card pointer, saving an n-element
+	// struct write across the N! search.
 	for idx, c := range attackers {
 		permMeta[idx] = attackerMetaPtrFor(c)
+		pcBuf[idx].Card = c
 	}
 
 	// Scratch buffers are playSequence's per-card outputs, overwritten every permutation. On a
@@ -1325,11 +1360,17 @@ func (ctx *sequenceContext) bestSequence(attackers, winnerOrderOut []card.Card, 
 	best := 0
 	bestLeftoverRunechants := ctx.runechantCarryover
 	foundLegal := false
-	ctx.drawnWinner = ctx.drawnWinner[:0]
-	ctx.drawnPitchedWinner = 0
-	ctx.drawnAttackedWinner = 0
-	ctx.drawnAttackDmgWinner = ctx.drawnAttackDmgWinner[:0]
-	ctx.drawnAttackTriggerDmgWinner = ctx.drawnAttackTriggerDmgWinner[:0]
+	// Winner-drawn bookkeeping only needs resetting and copying when a DrawRider exists. Without
+	// one, state.Drawn / ctx.drawn* stay at their zero values, so the resets + the per-winner
+	// snapshot are pure overhead on the non-cycling hand path.
+	hasDrawRider := ctx.hasDrawRider
+	if hasDrawRider {
+		ctx.drawnWinner = ctx.drawnWinner[:0]
+		ctx.drawnPitchedWinner = 0
+		ctx.drawnAttackedWinner = 0
+		ctx.drawnAttackDmgWinner = ctx.drawnAttackDmgWinner[:0]
+		ctx.drawnAttackTriggerDmgWinner = ctx.drawnAttackTriggerDmgWinner[:0]
+	}
 	eval := func() {
 		dmg, leftoverRunechants, _, legal := ctx.playSequenceWithMeta(perm, scratch, triggerScratch)
 		if !legal {
@@ -1340,11 +1381,13 @@ func (ctx *sequenceContext) bestSequence(attackers, winnerOrderOut []card.Card, 
 			best = dmg
 			bestLeftoverRunechants = leftoverRunechants
 			foundLegal = true
-			ctx.drawnWinner = append(ctx.drawnWinner[:0], ctx.bufs.state.Drawn...)
-			ctx.drawnPitchedWinner = ctx.drawnPitched
-			ctx.drawnAttackedWinner = ctx.drawnAttacked
-			ctx.drawnAttackDmgWinner = append(ctx.drawnAttackDmgWinner[:0], ctx.drawnAttackDmg...)
-			ctx.drawnAttackTriggerDmgWinner = append(ctx.drawnAttackTriggerDmgWinner[:0], ctx.drawnAttackTriggerDmg...)
+			if hasDrawRider {
+				ctx.drawnWinner = append(ctx.drawnWinner[:0], ctx.bufs.state.Drawn...)
+				ctx.drawnPitchedWinner = ctx.drawnPitched
+				ctx.drawnAttackedWinner = ctx.drawnAttacked
+				ctx.drawnAttackDmgWinner = append(ctx.drawnAttackDmgWinner[:0], ctx.drawnAttackDmg...)
+				ctx.drawnAttackTriggerDmgWinner = append(ctx.drawnAttackTriggerDmgWinner[:0], ctx.drawnAttackTriggerDmg...)
+			}
 			if winnerOrderOut != nil {
 				copy(winnerOrderOut[:n], perm)
 			}
@@ -1366,9 +1409,11 @@ func (ctx *sequenceContext) bestSequence(attackers, winnerOrderOut []card.Card, 
 			if i&1 == 0 {
 				perm[0], perm[i] = perm[i], perm[0]
 				permMeta[0], permMeta[i] = permMeta[i], permMeta[0]
+				pcBuf[0].Card, pcBuf[i].Card = pcBuf[i].Card, pcBuf[0].Card
 			} else {
 				perm[c[i]], perm[i] = perm[i], perm[c[i]]
 				permMeta[c[i]], permMeta[i] = permMeta[i], permMeta[c[i]]
+				pcBuf[c[i]].Card, pcBuf[i].Card = pcBuf[i].Card, pcBuf[c[i]].Card
 			}
 			eval()
 			c[i]++
@@ -1409,8 +1454,17 @@ func (ctx *sequenceContext) bestSequence(attackers, winnerOrderOut []card.Card, 
 func (ctx *sequenceContext) playSequence(order []card.Card, perCardOut, perCardTriggerOut []float64) (damage int, leftoverRunechants int, residualBudget int, legal bool) {
 	ctx.seedState()
 	meta := ctx.bufs.permMeta[:len(order)]
+	pcBuf := ctx.bufs.pcBuf
+	// Pre-sync pcBuf[i].Card to order[i] to satisfy playSequenceWithMeta's contract (Card set,
+	// only GrantedGoAgain cleared per call). Tests and other callers enter via this function
+	// without having set ctx.hasDrawRider; flip it on if any card in order opts into the
+	// DrawRider marker so drawn bookkeeping stays correct for them.
 	for i, c := range order {
 		meta[i] = attackerMetaPtrFor(c)
+		pcBuf[i].Card = c
+		if _, ok := c.(card.DrawRider); ok {
+			ctx.hasDrawRider = true
+		}
 	}
 	return ctx.playSequenceWithMeta(order, perCardOut, perCardTriggerOut)
 }
@@ -1423,10 +1477,13 @@ func (ctx *sequenceContext) playSequenceWithMeta(order []card.Card, perCardOut, 
 	pcBuf := ctx.bufs.pcBuf
 	ptrBuf := ctx.bufs.ptrBuf
 	meta := ctx.bufs.permMeta[:n]
-	// ptrBuf entries point at the matching pcBuf slots permanently (wired once in newAttackBufs),
-	// so only the per-permutation Card and the zeroed GrantedGoAgain need refreshing here.
-	for i, c := range order {
-		pcBuf[i] = card.PlayedCard{Card: c}
+	// ptrBuf entries point at the matching pcBuf slots permanently (wired once in newAttackBufs).
+	// Contract: callers (bestSequence / playSequence) pre-sync pcBuf[i].Card with order[i] and
+	// keep them in sync through any swaps, so only GrantedGoAgain needs clearing here — a prior
+	// permutation's grant mustn't leak forward. Skipping the full PlayedCard struct rewrite
+	// saves an interface+bool write per card per permutation across the N! search.
+	for i := 0; i < n; i++ {
+		pcBuf[i].GrantedGoAgain = false
 		if perCardOut != nil {
 			perCardOut[i] = 0
 		}
@@ -1448,26 +1505,33 @@ func (ctx *sequenceContext) playSequenceWithMeta(order []card.Card, perCardOut, 
 	state.ArcaneDamageDealt = false
 	state.AuraCreated = false
 	state.Overpower = false
-	// Deck and Drawn must reset per permutation: DrawOne mutates them and a prior permutation's
-	// consumption would poison the next. Pitched / IncomingDamage / BlockTotal remain in
-	// seedState — cards don't mutate them.
+	// Deck always resets per permutation (DrawOne mutates it). Drawn / drawn-tracking fields
+	// only need resetting when some card in this chain can fire DrawOne; on DrawRider-free
+	// hands they stay at their zero values, so skip the writes and the per-card drawn-pitch
+	// probe below.
+	hasDrawRider := ctx.hasDrawRider
 	state.Deck = ctx.deck
-	state.Drawn = nil
-	ctx.drawnPitched = 0
-	ctx.drawnAttacked = 0
-	ctx.drawnAttackDmg = ctx.drawnAttackDmg[:0]
-	ctx.drawnAttackTriggerDmg = ctx.drawnAttackTriggerDmg[:0]
 	drawnPitchedIdx := 0
+	if hasDrawRider {
+		state.Drawn = nil
+		ctx.drawnPitched = 0
+		ctx.drawnAttacked = 0
+		ctx.drawnAttackDmg = ctx.drawnAttackDmg[:0]
+		ctx.drawnAttackTriggerDmg = ctx.drawnAttackTriggerDmg[:0]
+	}
 	resources := ctx.resourceBudget
 	for i, pc := range played {
 		m := meta[i]
 		cost := m.costAt(state)
 		// When the hand's committed pitch can't cover this card's cost, consume mid-turn-drawn
 		// cards in draw order: their pitch plugs the gap and the "hopeful" partition becomes
-		// legal. Drawn cards are only available after an earlier chain step fired DrawOne.
-		for resources < cost && drawnPitchedIdx < len(state.Drawn) {
-			resources += state.Drawn[drawnPitchedIdx].Pitch()
-			drawnPitchedIdx++
+		// legal. Drawn cards are only available after an earlier chain step fired DrawOne,
+		// which can't happen on DrawRider-free hands — skip the probe entirely there.
+		if hasDrawRider {
+			for resources < cost && drawnPitchedIdx < len(state.Drawn) {
+				resources += state.Drawn[drawnPitchedIdx].Pitch()
+				drawnPitchedIdx++
+			}
 		}
 		resources -= cost
 		if resources < 0 {
@@ -1487,7 +1551,15 @@ func (ctx *sequenceContext) playSequenceWithMeta(order []card.Card, perCardOut, 
 		}
 
 		playDmg := pc.Card.Play(state)
-		triggerDmg := ctx.hero.OnCardPlayed(pc.Card, state)
+		// Skip the hero-trigger interface dispatch when the cached TypeSet already tells us the
+		// hero's ability can't fire (e.g. Viserai ignores non-Runeblade cards and weapon
+		// swings). The solver has m.types cached; routing through the hero's PlayTypeFilter
+		// avoids the played.Types() call inside the hero's own OnCardPlayed for irrelevant
+		// entries.
+		var triggerDmg int
+		if ctx.heroPlayFilter == nil || ctx.heroPlayFilter.CardTypeCanTrigger(m.types) {
+			triggerDmg = ctx.hero.OnCardPlayed(pc.Card, state)
+		}
 		damage += playDmg + triggerDmg
 		if perCardOut != nil {
 			perCardOut[i] = float64(playDmg)
@@ -1512,9 +1584,11 @@ func (ctx *sequenceContext) playSequenceWithMeta(order []card.Card, perCardOut, 
 	// extensions for as long as the previous card grants Go again, the next drawn card isn't
 	// a Defense Reaction, and leftover resources cover its cost. Each extension fires its own
 	// Play (possibly drawing more cards), which can unlock the next extension. pcBuf capacity
-	// caps the extension count so an accidentally-infinite cycle can't run away.
-	chainGoAgain := true
-	if n > 0 {
+	// caps the extension count so an accidentally-infinite cycle can't run away. DrawRider-free
+	// hands can't reach this block with any Drawn entries (state.Drawn stays empty), so skip
+	// the whole loop setup there.
+	chainGoAgain := hasDrawRider
+	if chainGoAgain && n > 0 {
 		lastM := meta[n-1]
 		lastPC := played[n-1]
 		chainGoAgain = lastM.baseGoAgain || lastPC.GrantedGoAgain
@@ -1560,7 +1634,10 @@ func (ctx *sequenceContext) playSequenceWithMeta(order []card.Card, perCardOut, 
 		}
 
 		playDmg := candidate.Play(state)
-		triggerDmg := ctx.hero.OnCardPlayed(candidate, state)
+		var triggerDmg int
+		if ctx.heroPlayFilter == nil || ctx.heroPlayFilter.CardTypeCanTrigger(extMeta.types) {
+			triggerDmg = ctx.hero.OnCardPlayed(candidate, state)
+		}
 		damage += playDmg + triggerDmg
 		ctx.drawnAttackDmg = append(ctx.drawnAttackDmg, float64(playDmg))
 		ctx.drawnAttackTriggerDmg = append(ctx.drawnAttackTriggerDmg, float64(triggerDmg))
@@ -1576,7 +1653,9 @@ func (ctx *sequenceContext) playSequenceWithMeta(order []card.Card, perCardOut, 
 		// itself has Go again.
 		chainGoAgain = extMeta.baseGoAgain
 	}
-	ctx.drawnAttacked = drawnAttackedIdx
+	if hasDrawRider {
+		ctx.drawnAttacked = drawnAttackedIdx
+	}
 
 	// Pitch-timing rule: every Pitch-role card must have paid for something on the stack. If the
 	// chain's leftover budget is at least the max attack-phase pitch, one pitch could have been
@@ -1584,7 +1663,9 @@ func (ctx *sequenceContext) playSequenceWithMeta(order []card.Card, perCardOut, 
 	if ctx.hasAttackPitches && resources >= ctx.maxAttackPitch {
 		return 0, 0, 0, false
 	}
-	ctx.drawnPitched = drawnPitchedIdx
+	if hasDrawRider {
+		ctx.drawnPitched = drawnPitchedIdx
+	}
 	// Delayed tokens skip this turn and go straight to next turn's carryover.
 	return damage, state.Runechants + state.DelayedRunechants, resources, true
 }
@@ -1656,7 +1737,11 @@ func fillContributions(summary *TurnSummary, hero hero.Hero, weapons []weapon.We
 	if len(chain) > 0 {
 		// Re-seed ctx with the winning phase split's chain-resource state so bestSequence
 		// reproduces the exact permutation that won during enumeration; per-card damage
-		// depends on order.
+		// depends on order. Conservatively set hasDrawRider=true so the drawn-bookkeeping
+		// branches in playSequenceWithMeta stay live for the replay — this fn runs once per
+		// Best call (not in the permutation-hot loop) so the tiny extra work is well-amortised
+		// and always correct, including for hands containing Snatch / Drawn to the Dark
+		// Dimension / cycling cantrips.
 		ctx := &sequenceContext{
 			hero:               hero,
 			pitched:            pitched,
@@ -1668,7 +1753,9 @@ func fillContributions(summary *TurnSummary, hero hero.Hero, weapons []weapon.We
 			blockTotal:         sumDef,
 			hasAttackPitches:   budget.hasAttackPitches,
 			maxAttackPitch:     budget.maxPitch,
+			hasDrawRider:       true,
 		}
+		ctx.heroPlayFilter = heroPlayFilterFor(hero)
 		ctx.seedState()
 		fillAttackChainContributions(summary, chain, ctx)
 		// Copy the winning permutation's drawn cards out as CardAssignments. The snapshot is

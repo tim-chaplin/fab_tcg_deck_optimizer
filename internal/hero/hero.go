@@ -20,3 +20,19 @@ type Hero interface {
 	// contributes (e.g. Runechant tokens). Heroes without a triggered ability return 0.
 	OnCardPlayed(played card.Card, s *card.TurnState) int
 }
+
+// PlayTypeFilter is an optional narrow contract: heroes whose OnCardPlayed trigger gates on the
+// played card's TypeSet can implement it to let the solver short-circuit the interface call on
+// clearly-irrelevant cards. The solver has each card's cached TypeSet available on attackerMeta,
+// so routing the pre-check through this method avoids a per-play played.Types() interface
+// dispatch inside OnCardPlayed for cards that would return 0 anyway. Heroes whose ability
+// doesn't key on the played card's type alone (e.g. triggers reading deck contents or other
+// state) should leave this unimplemented — the solver will simply call OnCardPlayed
+// unconditionally.
+type PlayTypeFilter interface {
+	// CardTypeCanTrigger reports whether a card with the given TypeSet might cause this hero's
+	// OnCardPlayed to return a non-zero bonus. False lets the solver skip OnCardPlayed entirely.
+	// Must be conservative: returning true when the hero ends up returning 0 is a missed
+	// optimization but correct; returning false when the hero would have returned >0 is a bug.
+	CardTypeCanTrigger(card.TypeSet) bool
+}

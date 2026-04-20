@@ -34,3 +34,10 @@ func (Viserai) OnCardPlayed(played card.Card, s *card.TurnState) int {
 	}
 	return 0
 }
+
+// CardTypeCanTrigger implements hero.PlayTypeFilter: Viserai's ability requires the played
+// card to carry Runeblade AND not Weapon. Returning false lets the hand evaluator skip the
+// OnCardPlayed interface dispatch on every non-Runeblade / weapon-swing entry in the chain.
+func (Viserai) CardTypeCanTrigger(t card.TypeSet) bool {
+	return t.Has(card.TypeRuneblade) && !t.Has(card.TypeWeapon)
+}
