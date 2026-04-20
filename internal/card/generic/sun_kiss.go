@@ -1,10 +1,12 @@
 // Sun Kiss — Generic Action. Cost 0. Printed pitch variants: Red 1, Yellow 2, Blue 3. Defense 2.
+// Printed health-gain: Red 3{h}, Yellow 2{h}, Blue 1{h}.
 //
-// Text: "Gain 3{h}. If you have played a card named Moon Wish this turn, draw a card and Sun Kiss
-// gains **go again**."
+// Text: "Gain N{h}. If you have played a card named Moon Wish this turn, draw a card and Sun Kiss
+// gains **go again**." (N is the printed variant value above.)
 //
-// Modelling: health gain is valued 1-to-1 with damage, so Play returns 3. The Moon Wish
-// synergy (draw a card + go again on playing Moon Wish earlier this turn) isn't modelled.
+// Modelling: health is valued 1-to-1 with damage, so Play returns +N damage-equivalent per
+// variant. The Moon Wish synergy (draw a card + go again on playing Moon Wish earlier this turn)
+// isn't modelled.
 //
 // Source: github.com/the-fab-cube/flesh-and-blood-cards (card.csv).
 
@@ -36,7 +38,7 @@ func (SunKissYellow) Attack() int                 { return 0 }
 func (SunKissYellow) Defense() int                { return 2 }
 func (SunKissYellow) Types() card.TypeSet         { return sunKissTypes }
 func (SunKissYellow) GoAgain() bool               { return true }
-func (SunKissYellow) Play(s *card.TurnState) int { return 3 }
+func (SunKissYellow) Play(s *card.TurnState) int { return 2 }
 
 type SunKissBlue struct{}
 
@@ -48,4 +50,4 @@ func (SunKissBlue) Attack() int                 { return 0 }
 func (SunKissBlue) Defense() int                { return 2 }
 func (SunKissBlue) Types() card.TypeSet         { return sunKissTypes }
 func (SunKissBlue) GoAgain() bool               { return true }
-func (SunKissBlue) Play(s *card.TurnState) int { return 3 }
+func (SunKissBlue) Play(s *card.TurnState) int { return 1 }

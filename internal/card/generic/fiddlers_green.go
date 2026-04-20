@@ -1,10 +1,11 @@
 // Fiddler's Green — Generic Block. Cost 0. Printed pitch variants: Red 1, Yellow 2, Blue 3. Defense
-// 1.
+// 1. Printed on-graveyard gain: Red 3{h}, Yellow 2{h}, Blue 1{h}.
 //
-// Text: "When this is put into your graveyard from anywhere, gain 3{h}."
+// Text: "When this is put into your graveyard from anywhere, gain N{h}." (N is the printed
+// variant value above.)
 //
-// Modelling: using this card to defend sends it to the graveyard, so the 3{h} gain fires on
-// the DR Play path — credited as +3 damage equivalent (health is valued 1-to-1 with damage).
+// Modelling: using this card to defend sends it to the graveyard, so the N{h} gain fires on
+// the DR Play path — credited as +N damage equivalent (health is valued 1-to-1 with damage).
 // Pitched copies go to the bottom of the deck, not the graveyard, so they don't trigger the
 // rider; the pitch-role contribution stays at the printed pitch value only.
 //
@@ -38,7 +39,7 @@ func (FiddlersGreenYellow) Defense() int                { return 1 }
 func (FiddlersGreenYellow) Types() card.TypeSet         { return defenseReactionTypes }
 func (FiddlersGreenYellow) GoAgain() bool               { return false }
 func (FiddlersGreenYellow) NotSilverAgeLegal()           {}
-func (FiddlersGreenYellow) Play(s *card.TurnState) int { return 3 }
+func (FiddlersGreenYellow) Play(s *card.TurnState) int { return 2 }
 
 type FiddlersGreenBlue struct{}
 
@@ -51,4 +52,4 @@ func (FiddlersGreenBlue) Defense() int                { return 1 }
 func (FiddlersGreenBlue) Types() card.TypeSet         { return defenseReactionTypes }
 func (FiddlersGreenBlue) GoAgain() bool               { return false }
 func (FiddlersGreenBlue) NotSilverAgeLegal()           {}
-func (FiddlersGreenBlue) Play(s *card.TurnState) int { return 3 }
+func (FiddlersGreenBlue) Play(s *card.TurnState) int { return 1 }
