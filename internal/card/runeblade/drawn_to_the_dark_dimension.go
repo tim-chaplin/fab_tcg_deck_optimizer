@@ -4,10 +4,10 @@
 // Text: "Drawn to the Dark Dimension costs {r} less to play for each Runechant you control.
 // Draw a card."
 //
-// Variable cost: Cost reads s.Runechants to return max(0, printed - Runechants) at play time.
-// Implements card.VariableCost so the solver can pre-screen with MinCost / MaxCost bounds.
+// Cost reads s.Runechants to return max(0, printed - Runechants) at play time; implements
+// card.VariableCost with bounds [0, printed].
 //
-// The "Draw a card" rider fires unconditionally on play via state.DrawOne.
+// The "Draw a card" rider fires unconditionally on play.
 //
 // Source: github.com/the-fab-cube/flesh-and-blood-cards (card.csv).
 

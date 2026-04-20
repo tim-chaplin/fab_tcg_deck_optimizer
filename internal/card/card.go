@@ -138,15 +138,15 @@ type TurnState struct {
 	// IncomingDamage. Cards that key on "will we block all incoming this turn?" read
 	// BlockTotal >= IncomingDamage.
 	BlockTotal int
-	// Drawn records cards this turn has drawn mid-chain via DrawOne, in draw order. Future
-	// phases will read this slice to let the drawn cards be played, pitched, defended with, or
-	// arsenaled during the remainder of the turn.
+	// Drawn records cards this turn has drawn mid-chain via DrawOne, in draw order. The solver
+	// consumes it after the initial chain: leading entries may pitch to fund an under-budgeted
+	// attack, next entries may play as free-cost chain extensions, and the rest carry as Held
+	// (or compete for the empty arsenal slot) into the next hand.
 	Drawn []Card
 }
 
-// DrawOne models a mid-turn draw: advance the deck by one card and record it in Drawn. No-op
-// on an empty deck. Provided as a method on TurnState so every draw-rider card funnels through
-// one helper.
+// DrawOne models a mid-turn draw: advance the deck by one card and append it to Drawn. No-op
+// on an empty deck. Every draw-rider card routes through this helper.
 func (s *TurnState) DrawOne() {
 	if len(s.Deck) == 0 {
 		return

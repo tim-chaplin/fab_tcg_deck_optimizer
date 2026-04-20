@@ -65,9 +65,10 @@ type TurnSummary struct {
 	ArsenalCard card.Card
 	// Drawn is the cards the winning chain drew mid-turn, in draw order, each paired with the
 	// disposition the solver picked for it. Populated from state.Drawn during fillContributions's
-	// tracked replay. Every drawn card's Role is Held (Contribution 0) — the drawn card displaces
-	// an end-of-turn refill draw so it carries into the next hand rather than contributing this
-	// turn. Nil when no draw rider fired.
+	// tracked replay. Role is one of Pitch (consumed to fund the chain, Contribution = Pitch()),
+	// Attack (played as a free-cost chain extension, Contribution = damage dealt), Arsenal
+	// (promoted into an empty slot post-enumeration, Contribution 0), or Held (carries into
+	// the next hand, Contribution 0). Nil when no draw rider fired.
 	Drawn []CardAssignment
 }
 
@@ -1156,15 +1157,12 @@ func bestAttackWithWeapons(hero hero.Hero, weapons []weapon.Weapon, attackers, d
 			weaponCost := bufs.weaponCosts[wmask] // weapons are static-cost
 			// Lower bound on total chain cost (sum of MinCost across attackers + weapons). If the
 			// attack budget can't cover even this floor, no permutation is feasible. Mid-turn
-			// draws can pitch on top of the committed hand pitch (Phase 2 "hopeful" partitions)
-			// but can't reduce the base cost, so this MinCost check is still a safe prune.
-			//
-			// We used to also pre-screen pitch-timing via attackBudget - MaxCost >= maxAttackPitch
-			// but that prune is unsafe now that drawn cards can play as chain extensions (Phase 3)
-			// and consume from the attack budget — a partition that looks wasteful pre-chain can
-			// end up legal once an extension absorbs the residual. playSequenceWithMeta still
-			// enforces pitch-timing post-extension, so correctness holds; the loss is a small
-			// amount of extra sim work on partitions that would have been pruned here.
+			// draws can pitch on top of the committed hand pitch ("hopeful" partitions) but
+			// can't reduce the base cost, so this MinCost check is still a safe prune. The
+			// matching pitch-timing pre-screen (attackBudget - MaxCost >= maxAttackPitch) is
+			// unsafe and has been removed: drawn cards can play as chain extensions and
+			// consume the residual, so a partition that looks wasteful pre-chain can end up
+			// legal. playSequenceWithMeta enforces pitch-timing post-extension instead.
 			if attackersMinCost+weaponCost > attackBudget {
 				continue
 			}
@@ -1235,10 +1233,10 @@ type sequenceContext struct {
 	maxAttackPitch     int
 	// Mid-turn-drawn-card tracking for the most recent playSequenceWithMeta call. state.Drawn
 	// is partitioned as [Pitch * drawnPitched | Attack * drawnAttacked | Held ...]: the first
-	// drawnPitched cards were consumed to plug a cost shortfall (Phase 2 "hopeful" partitions);
-	// the next drawnAttacked were played as free-cost chain extensions (Phase 3). The rest stay
-	// Held. drawnAttackDmg / drawnAttackTriggerDmg are aligned with the attacked slice — one
-	// entry per extension — capturing its Play return and hero-trigger damage so fillContributions
+	// drawnPitched cards were consumed to plug a cost shortfall ("hopeful" partitions); the
+	// next drawnAttacked were played as free-cost chain extensions. The rest stay Held.
+	// drawnAttackDmg / drawnAttackTriggerDmg are aligned with the attacked slice — one entry
+	// per extension — capturing its Play return and hero-trigger damage so fillContributions
 	// can write per-card contributions on summary.Drawn.
 	drawnPitched          int
 	drawnAttacked         int
@@ -1497,11 +1495,10 @@ func (ctx *sequenceContext) playSequenceWithMeta(order []card.Card, perCardOut, 
 		}
 	}
 
-	// Once the initial chain resolves, greedily play drawn cards at the tail of the chain as
-	// extensions for as long as the previous card grants Go again, the next drawn card isn't
-	// a Defense Reaction, and leftover resources cover its cost. Each extension fires its own
-	// Play (possibly drawing more cards), which can unlock the next extension. pcBuf capacity
-	// caps the extension count so an accidentally-infinite cycle can't run away.
+	// After the initial chain, greedily play drawn cards as tail extensions while the prior
+	// card grants Go again, the next drawn card isn't a Defense Reaction, and leftover
+	// resources cover its cost. Each extension's Play may draw more cards, unlocking the next
+	// extension; pcBuf capacity caps the count so an infinite cycle can't run away.
 	chainGoAgain := true
 	if n > 0 {
 		lastM := meta[n-1]
@@ -1533,13 +1530,11 @@ func (ctx *sequenceContext) playSequenceWithMeta(order []card.Card, perCardOut, 
 		played = append(played, extPC)
 		meta = append(meta, extMeta)
 
-		// The extension is the tail of the chain — nothing after it (yet); grants that scan
-		// CardsRemaining (e.g. Flying High, Mauvrion Skies, Oath of the Arknight, Runic
-		// Reaping, Condemn to Slaughter, Captain's Call) can't see drawn-later attacks and
-		// silently fizzle against them. FaB's "your next attack this turn" actually covers
-		// drawn-later targets, so this is a known under-count we tolerate to avoid a retroactive
-		// re-resolution pass. A more accurate fix is an option for a later phase; tracked in
-		// TODO.md under "Draw / hand cycling".
+		// The extension is the tail of the chain — nothing after it (yet); "next attack"-style
+		// grants that scan CardsRemaining can't see drawn-later attacks and silently fizzle
+		// against them. FaB's "your next attack this turn" actually covers drawn-later targets,
+		// so this is a known under-count tolerated to avoid a retroactive re-resolution pass.
+		// Tracked in TODO.md under "Draw / hand cycling".
 		state.CardsRemaining = played[len(played):]
 		state.Self = extPC
 
@@ -1660,15 +1655,14 @@ func fillContributions(summary *TurnSummary, hero hero.Hero, weapons []weapon.We
 		}
 		ctx.seedState()
 		fillAttackChainContributions(summary, chain, ctx)
-		// Copy the winning permutation's drawn cards out as CardAssignments. The snapshot is
-		// taken from ctx.drawnWinner (populated by bestSequence when it picks the winner) —
-		// not from bufs.state.Drawn, which reflects whichever permutation Heap's algorithm
-		// iterated last and can diverge from the winner once different permutations trigger
-		// different draws. The winning permutation partitions Drawn into three contiguous
-		// segments: the first drawnPitchedWinner were consumed to plug a cost shortfall
-		// (Role=Pitch, Contribution = Pitch()); the next drawnAttackedWinner were played as
+		// Copy the winning permutation's drawn cards out as CardAssignments. Read from
+		// ctx.drawnWinner (bestSequence's winner snapshot), not bufs.state.Drawn — state.Drawn
+		// reflects whichever permutation Heap's algorithm iterated last, which can diverge
+		// from the winner when different permutations trigger different draws. ctx.drawnWinner
+		// is three contiguous segments: first drawnPitchedWinner entries were consumed as
+		// pitch (Role=Pitch, Contribution = Pitch()); next drawnAttackedWinner were played as
 		// free-cost chain extensions (Role=Attack, Contribution = per-extension damage); the
-		// rest stay Held (Contribution 0), the default cross-turn-carry disposition.
+		// rest stay Held (Contribution 0).
 		if drawn := ctx.drawnWinner; len(drawn) > 0 {
 			summary.Drawn = make([]CardAssignment, len(drawn))
 			pitchedEnd := ctx.drawnPitchedWinner

@@ -459,13 +459,11 @@ func (d *Deck) EvaluateWith(runs int, incomingDamage int, rng *rand.Rand, ev *ha
 	return d.Stats
 }
 
-// applyTurnResult folds a completed turn's outcome into the simulator's cross-turn state:
-// pitched hand cards recycle to the bottom of the deck (via recyclePlayedCards), head advances
-// past the turn's initial draws and every mid-turn-drawn card, and each drawn card is routed
-// by disposition — Held appends to nextHeld, Pitch recycles to the deck bottom (same as hand
-// pitches), Arsenal flows through play.ArsenalCard and needs no bookkeeping here. Returns the
-// updated nextHeld slice. Shared by Evaluate's per-turn loop and EvalOneTurnForTesting so both
-// honour the same carryover contract.
+// applyTurnResult folds a completed turn's outcome into cross-turn state: pitched hand cards
+// recycle to the deck bottom (via recyclePlayedCards), head advances past initial draws and
+// every mid-turn-drawn card, and each drawn card is routed by disposition — Held appends to
+// nextHeld, Pitch recycles to the deck bottom, Arsenal flows through play.ArsenalCard and
+// needs no bookkeeping here. Returns the updated nextHeld slice.
 func applyTurnResult(play hand.TurnSummary, buf []card.Card, head, tail *int, drawCount int, nextHeld []card.Card) []card.Card {
 	nextHeld = recyclePlayedCards(play.BestLine, buf, tail, nextHeld)
 	*head += drawCount + len(play.Drawn)
@@ -486,8 +484,7 @@ func applyTurnResult(play hand.TurnSummary, buf []card.Card, head, tail *int, dr
 // when the tail doesn't have room for a full hand of pitched cards on the upcoming recycle.
 // Returns the dealt hand (aliasing handBuf — successive calls overwrite it), the number of
 // fresh draws consumed, and ok=false when the run can't progress (deck exhausted, or the whole
-// hand is already held with no room to draw). Shared by Evaluate's per-turn loop and
-// EvalOneTurnForTesting so they agree on the refill contract.
+// hand is already held with no room to draw).
 func dealNextHand(buf, handBuf, heldBuf []card.Card, head, tail *int, handSize int) ([]card.Card, int, bool) {
 	drawCount := handSize - len(heldBuf)
 	if drawCount == 0 || *tail-*head < drawCount {
@@ -519,16 +516,12 @@ type TurnStartState struct {
 }
 
 // EvalOneTurnForTesting runs one turn against d.Cards in source order (no shuffle) and returns
-// the state at the start of what would be turn 2: the hand just dealt, the arsenal slot, the
-// cards remaining in the deck, and the runechant carryover. arsenalIn seeds the arsenal slot
-// at the start of turn 1 (pass nil for an empty slot). initialHand sets turn 1's starting
-// hand; nil takes a full Intelligence()-sized hand from d.Cards[:handSize] and treats the
-// rest as the deck (the default start-of-turn layout), non-nil uses the slice directly (may
-// be shorter than handSize for tests that want to strip out extraneous cards) and treats
-// d.Cards as the deck entirely. Test-only — pins cross-turn sim behaviour (held cards
-// carrying, mid-turn draws populating the next hand, arsenal carryover, pitched cards
-// recycling to the deck bottom) against a known deck layout. Production callers should use
-// Evaluate, which shuffles and loops.
+// the turn-2 start state: the hand just dealt, the arsenal slot, the remaining deck, and the
+// runechant carryover. arsenalIn seeds turn 1's arsenal slot (nil for empty). initialHand
+// sets turn 1's starting hand; nil takes d.Cards[:handSize] as the hand and treats the rest
+// as the deck, non-nil uses the slice directly (may be shorter than handSize) and treats
+// d.Cards as the deck entirely. Test-only — pins cross-turn sim behaviour against a known
+// deck layout. Production callers should use Evaluate, which shuffles and loops.
 func (d *Deck) EvalOneTurnForTesting(incomingDamage int, arsenalIn card.Card, initialHand []card.Card) TurnStartState {
 	simstate.CurrentHero = d.Hero
 	handSize := d.Hero.Intelligence()
@@ -536,9 +529,9 @@ func (d *Deck) EvalOneTurnForTesting(incomingDamage int, arsenalIn card.Card, in
 		return TurnStartState{}
 	}
 
-	// Resolve turn 1's hand and the head offset into d.Cards. With no caller-supplied hand,
-	// the first handSize cards of d.Cards become the hand (default layout); otherwise d.Cards
-	// is the deck entirely and the hand is exactly what the caller handed in.
+	// Resolve turn 1's hand and the head offset. No caller-supplied hand: d.Cards[:handSize]
+	// is the hand (default layout). Caller-supplied: d.Cards is the deck entirely, and the
+	// hand is exactly what the caller handed in.
 	var turn1Hand []card.Card
 	var head int
 	if initialHand == nil {
@@ -566,8 +559,7 @@ func (d *Deck) EvalOneTurnForTesting(incomingDamage int, arsenalIn card.Card, in
 	h := handBuf[:len(turn1Hand)]
 	copy(h, turn1Hand)
 	play := hand.Best(d.Hero, d.Weapons, h, incomingDamage, buf[head:tail], 0, arsenalIn)
-	// drawCount=0: head already points past the starting hand (whether the hand came from
-	// d.Cards[:handSize] or the caller-supplied initialHand), so applyTurnResult only needs
+	// drawCount=0: head already points past the starting hand, so applyTurnResult only needs
 	// to advance past mid-turn draws.
 	nextHeld := applyTurnResult(play, buf, &head, &tail, 0, nil)
 
