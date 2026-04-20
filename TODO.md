@@ -95,10 +95,11 @@ Hero health isn't tracked, so every life-gain and life-comparison rider collapse
   `card.LowerHealthWanter` (see `internal/card/card.go`) and stay off otherwise — a coarse proxy
   that skips per-turn life tracking. No hero opts in yet. Down But Not Out's health / equipment /
   tokens gate is not yet covered and still defaults off.
-- **Life-gain effects are dropped.** Healing Balm (gain 3{h}), Fyendal's Fighting Spirit,
-  Sun Kiss, Sirens of Safe Harbor (graveyard 1{h}), Sigil of Fyendal (1{h} on leave),
-  Fiddler's Green (3{h} entering graveyard), and the Clearwater / Restvine / Sapwood Elixir
-  trio (Bloodrot Pox / Inertia / Frailty health-gain riders) all ignore the gain step.
+- **Life-gain effects are credited 1-to-1 with damage** when the trigger fires unconditionally
+  (Healing Balm, Sun Kiss, Sirens of Safe Harbor's graveyard gain on attack, Sigil of Fyendal's
+  gain on leave, Fiddler's Green's gain on defense). The Clearwater / Restvine / Sapwood Elixir
+  trio (Bloodrot Pox / Inertia / Frailty riders, gated on status tokens we don't track) still
+  defaults off.
 
 ### Token economies and resource trackers
 
@@ -262,7 +263,6 @@ listed here so the direction tag is co-located with the name.
 - **Fate Foreseen (all colours)** — Opt 1 dropped; block value is printed defence only.
 - **Feisty Locals (all colours)** — defended-by-action +2{p} rider never fires.
 - **Fervent Forerunner (all colours)** — on-hit Opt 2 and the from-arsenal go-again both dropped.
-- **Fiddler's Green (all colours)** — graveyard-entry 3{h} dropped.
 - **Flex (all colours)** — pay-{r}{r}-for-+2{p} mode dropped; only printed power.
 - **Flock of the Feather Walkers (all colours)** — Quicken token creation dropped (and the
   reveal cost too).
@@ -271,7 +271,6 @@ listed here so the direction tag is co-located with the name.
   modelled for `card.LowerHealthWanter` heroes only.
 - **Gravekeeping (all colours)** — graveyard-banish additional value dropped.
 - **Hand Behind the Pen (all colours)** — on-hit arsenal / banish-instant dropped.
-- **Healing Balm (all colours)** — flat 3{h} dropped.
 - **High Striker (all colours)** — Copper-token economy dropped.
 - **Humble (all colours)** — hero-ability suppression debuff dropped.
 - **Infectious Host (all colours)** — Frailty / Inertia / Bloodrot Pox token emission dropped
@@ -330,9 +329,7 @@ listed here so the direction tag is co-located with the name.
 - **Seek Horizon (all colours)** — hand-on-top alt cost plus conditional go-again dropped.
 - **Sift (all colours)** — hand cycling dropped.
 - **Sigil of Cycles (all colours)** — end-phase discard-and-draw dropped.
-- **Sigil of Fyendal (all colours)** — 1{h} on leave dropped.
 - **Sigil of Protection (all colours)** — Ward N dropped.
-- **Sirens of Safe Harbor (all colours)** — graveyard-trigger 1{h} dropped.
 - **Smash Up (all colours)** — on-hit arsenal face-up + banish attack action dropped.
 - **Snatch (all colours)** — currently fires the on-hit draw via TurnState.DrawOne, but a drawn
   card only recovers part of a real draw's value in the sim (no cross-turn shuffle benefit).
@@ -343,7 +340,8 @@ listed here so the direction tag is co-located with the name.
 - **Strategic Planning (all colours)** — graveyard recovery plus end-phase draw dropped.
 - **Stony Woottonhog (all colours)** — defended-by-<2-non-equipment rider dropped (same shape as
   Barraging Brawnhide below).
-- **Sun Kiss (all colours)** — health gain plus Moon Wish synergy dropped.
+- **Sun Kiss (all colours)** — Moon Wish synergy (draw + go again) dropped; the 3{h} gain is
+  modelled.
 - **Surging Militia (all colours)** — defended-by +N{p} rider dropped.
 - **Tip-Off (all colours)** — instant discard activation dropped.
 - **Tongue Tied (all colours)** — on-hit arsenal face-up + banish instant dropped.
