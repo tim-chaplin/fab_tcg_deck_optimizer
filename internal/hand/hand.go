@@ -1244,9 +1244,12 @@ type sequenceContext struct {
 	drawnAttacked         int
 	drawnAttackDmg        []float64
 	drawnAttackTriggerDmg []float64
-	// drawnPitchedWinner / drawnAttackedWinner / drawnAttackDmgWinner /
+	// drawnWinner / drawnPitchedWinner / drawnAttackedWinner / drawnAttackDmgWinner /
 	// drawnAttackTriggerDmgWinner snapshot the winning permutation's drawn-card outcome so
-	// fillContributions reads it back after bestSequence returns.
+	// fillContributions reads it back after bestSequence returns. drawnWinner is the cards
+	// themselves — can't just read bufs.state.Drawn because Heap's algorithm keeps iterating
+	// after the winner is chosen and state.Drawn reflects the last permutation's draws.
+	drawnWinner                 []card.Card
 	drawnPitchedWinner          int
 	drawnAttackedWinner         int
 	drawnAttackDmgWinner        []float64
@@ -1311,6 +1314,7 @@ func (ctx *sequenceContext) bestSequence(attackers, winnerOrderOut []card.Card, 
 	best := 0
 	bestLeftoverRunechants := ctx.runechantCarryover
 	foundLegal := false
+	ctx.drawnWinner = ctx.drawnWinner[:0]
 	ctx.drawnPitchedWinner = 0
 	ctx.drawnAttackedWinner = 0
 	ctx.drawnAttackDmgWinner = ctx.drawnAttackDmgWinner[:0]
@@ -1325,6 +1329,7 @@ func (ctx *sequenceContext) bestSequence(attackers, winnerOrderOut []card.Card, 
 			best = dmg
 			bestLeftoverRunechants = leftoverRunechants
 			foundLegal = true
+			ctx.drawnWinner = append(ctx.drawnWinner[:0], ctx.bufs.state.Drawn...)
 			ctx.drawnPitchedWinner = ctx.drawnPitched
 			ctx.drawnAttackedWinner = ctx.drawnAttacked
 			ctx.drawnAttackDmgWinner = append(ctx.drawnAttackDmgWinner[:0], ctx.drawnAttackDmg...)
@@ -1529,8 +1534,12 @@ func (ctx *sequenceContext) playSequenceWithMeta(order []card.Card, perCardOut, 
 		meta = append(meta, extMeta)
 
 		// The extension is the tail of the chain — nothing after it (yet); grants that scan
-		// CardsRemaining (e.g. Flying High) won't find a target, which matches FaB timing:
-		// the extension wasn't visible when prior cards resolved.
+		// CardsRemaining (e.g. Flying High, Mauvrion Skies, Oath of the Arknight, Runic
+		// Reaping, Condemn to Slaughter, Captain's Call) can't see drawn-later attacks and
+		// silently fizzle against them. FaB's "your next attack this turn" actually covers
+		// drawn-later targets, so this is a known under-count we tolerate to avoid a retroactive
+		// re-resolution pass. A more accurate fix is an option for a later phase; tracked in
+		// TODO.md under "Draw / hand cycling".
 		state.CardsRemaining = played[len(played):]
 		state.Self = extPC
 
@@ -1651,14 +1660,16 @@ func fillContributions(summary *TurnSummary, hero hero.Hero, weapons []weapon.We
 		}
 		ctx.seedState()
 		fillAttackChainContributions(summary, chain, ctx)
-		// state.Drawn accumulated across the tracked replay's winning permutation — copy it
-		// out as CardAssignments. The winning permutation partitions Drawn into three
-		// contiguous segments: the first drawnPitchedWinner were consumed to plug a cost
-		// shortfall (Role=Pitch, Contribution = Pitch()); the next drawnAttackedWinner were
-		// played as free-cost chain extensions (Role=Attack, Contribution = per-extension
-		// damage); the rest stay Held (Contribution 0), the default cross-turn-carry
-		// disposition.
-		if drawn := bufs.state.Drawn; len(drawn) > 0 {
+		// Copy the winning permutation's drawn cards out as CardAssignments. The snapshot is
+		// taken from ctx.drawnWinner (populated by bestSequence when it picks the winner) —
+		// not from bufs.state.Drawn, which reflects whichever permutation Heap's algorithm
+		// iterated last and can diverge from the winner once different permutations trigger
+		// different draws. The winning permutation partitions Drawn into three contiguous
+		// segments: the first drawnPitchedWinner were consumed to plug a cost shortfall
+		// (Role=Pitch, Contribution = Pitch()); the next drawnAttackedWinner were played as
+		// free-cost chain extensions (Role=Attack, Contribution = per-extension damage); the
+		// rest stay Held (Contribution 0), the default cross-turn-carry disposition.
+		if drawn := ctx.drawnWinner; len(drawn) > 0 {
 			summary.Drawn = make([]CardAssignment, len(drawn))
 			pitchedEnd := ctx.drawnPitchedWinner
 			attackedEnd := pitchedEnd + ctx.drawnAttackedWinner
