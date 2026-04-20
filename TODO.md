@@ -324,10 +324,6 @@ listed here so the direction tag is co-located with the name.
   destruction dropped (only same-turn Runeblade-attack +N is modelled).
 - **Runeblade Runic Fellingsong (all colours)** — cannot credit BOTH the printed 1 arcane AND
   the graveyard-banish rider; only one fires.
-- **Runeblade Sigil of the Arknight (all colours)** — reveal fires at the correct start-of-
-  next-turn timing via `card.DelayedPlay` and actually moves the revealed attack action into
-  the hand for the best-line search; if the post-draw top card isn't an attack action, nothing
-  happens (matches the real card).
 - **Runeblade Splintering Deadwood (all colours)** — aura-swap modelled as net-zero (no credit
   for the tempo of trading a weak aura for a Runechant).
 - **Runeblade Sutcliffe's Research Notes (all colours)** — top-of-deck re-ordering clause
