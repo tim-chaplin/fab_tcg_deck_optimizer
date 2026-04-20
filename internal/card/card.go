@@ -138,6 +138,21 @@ type TurnState struct {
 	// IncomingDamage. Cards that key on "will we block all incoming this turn?" read
 	// BlockTotal >= IncomingDamage.
 	BlockTotal int
+	// Drawn records cards this turn has drawn mid-chain via DrawOne, in draw order. Future
+	// phases will read this slice to let the drawn cards be played, pitched, defended with, or
+	// arsenaled during the remainder of the turn.
+	Drawn []Card
+}
+
+// DrawOne models a mid-turn draw: advance the deck by one card and record it in Drawn. No-op
+// on an empty deck. Provided as a method on TurnState so every draw-rider card funnels through
+// one helper.
+func (s *TurnState) DrawOne() {
+	if len(s.Deck) == 0 {
+		return
+	}
+	s.Drawn = append(s.Drawn, s.Deck[0])
+	s.Deck = s.Deck[1:]
 }
 
 // Hero is the minimal hero profile card effects need. Narrower than hero.Hero to avoid an

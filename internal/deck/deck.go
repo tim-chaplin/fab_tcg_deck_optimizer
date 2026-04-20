@@ -402,24 +402,10 @@ func (d *Deck) EvaluateWith(runs int, incomingDamage int, rng *rand.Rand, ev *ha
 		// tail advance in lockstep); two cycles also match FirstCycle / SecondCycle stats.
 		maxHands := 2 * handsPerCycle
 		for handIdx < maxHands {
-			// Fresh draws fill whatever Held cards didn't take. If every slot is already held
-			// (pathological for tiny hands), the hand doesn't progress — stop the run.
-			drawCount := handSize - len(heldBuf)
-			if drawCount == 0 || tail-head < drawCount {
+			h, drawCount, ok := dealNextHand(buf, handBuf, heldBuf, &head, &tail, handSize)
+			if !ok {
 				break
 			}
-			// Compact when the tail has no room for a full hand's pitched cards.
-			if tail+handSize > len(buf) {
-				copy(buf, buf[head:tail])
-				tail -= head
-				head = 0
-			}
-			// Assemble the hand: held prefix, then fresh draws. Best() sorts the hand into
-			// canonical order and Roles align to that order, so slot position here is irrelevant
-			// for anything downstream.
-			h := handBuf[:handSize]
-			copy(h, heldBuf)
-			copy(h[len(heldBuf):], buf[head:head+drawCount])
 			// Snapshot the starting carryover before Best overwrites it — the best-hand record
 			// wants the count in play when the hand was dealt, not what remained after.
 			startingRunechants := runechantCarryover
@@ -472,6 +458,87 @@ func (d *Deck) EvaluateWith(runs int, incomingDamage int, rng *rand.Rand, ev *ha
 		}
 	}
 	return d.Stats
+}
+
+// dealNextHand fills handBuf with this turn's dealt hand: the held prefix from heldBuf followed
+// by fresh top-of-deck draws, totaling handSize cards. Compacts buf[head:tail] down to buf[0:]
+// when the tail doesn't have room for a full hand of pitched cards on the upcoming recycle.
+// Returns the dealt hand (aliasing handBuf — successive calls overwrite it), the number of
+// fresh draws consumed, and ok=false when the run can't progress (deck exhausted, or the whole
+// hand is already held with no room to draw). Shared by Evaluate's per-turn loop and
+// EvalOneTurnForTesting so they agree on the refill contract.
+func dealNextHand(buf, handBuf, heldBuf []card.Card, head, tail *int, handSize int) ([]card.Card, int, bool) {
+	drawCount := handSize - len(heldBuf)
+	if drawCount == 0 || *tail-*head < drawCount {
+		return nil, 0, false
+	}
+	if *tail+handSize > len(buf) {
+		copy(buf, buf[*head:*tail])
+		*tail -= *head
+		*head = 0
+	}
+	h := handBuf[:handSize]
+	copy(h, heldBuf)
+	copy(h[len(heldBuf):], buf[*head:*head+drawCount])
+	return h, drawCount, true
+}
+
+// TurnStartState captures the game state at the start of a turn: the hand just dealt, the card
+// in the arsenal slot, the deck cards still to be drawn (top-to-bottom), and the runechant
+// carryover. Returned by EvalOneTurnForTesting.
+type TurnStartState struct {
+	Hand               []card.Card
+	ArsenalCard        card.Card
+	Deck               []card.Card
+	RunechantCarryover int
+}
+
+// EvalOneTurnForTesting runs one turn against d.Cards in source order (no shuffle) and returns
+// the state at the start of what would be turn 2: the hand just dealt, the arsenal slot, the
+// cards remaining in the deck, and the runechant carryover. Test-only — pins cross-turn sim
+// behaviour (held cards carrying, mid-turn draws populating the next hand, arsenal carryover,
+// pitched cards recycling to the deck bottom) against a known deck layout. Production callers
+// should use Evaluate, which shuffles and loops.
+func (d *Deck) EvalOneTurnForTesting(incomingDamage int) TurnStartState {
+	simstate.CurrentHero = d.Hero
+	handSize := d.Hero.Intelligence()
+	deckSize := len(d.Cards)
+	if handSize <= 0 || deckSize < handSize {
+		return TurnStartState{}
+	}
+
+	// Same buf layout as Evaluate: 2×deckSize so pitched cards recycle to tail without
+	// compaction during the single turn we simulate.
+	buf := make([]card.Card, deckSize*2)
+	copy(buf, d.Cards)
+	handBuf := make([]card.Card, handSize)
+	head, tail := 0, deckSize
+
+	h, drawCount, ok := dealNextHand(buf, handBuf, nil, &head, &tail, handSize)
+	if !ok {
+		return TurnStartState{}
+	}
+	play := hand.Best(d.Hero, d.Weapons, h, incomingDamage, buf[head+drawCount:tail], 0, nil)
+	nextHeld := recyclePlayedCards(play.BestLine, buf, &tail, nil)
+	head += drawCount
+
+	// Deal turn 2's hand but stop short of running Best — the caller wants the pre-Best state.
+	turn2Hand, drawCount2, ok := dealNextHand(buf, handBuf, nextHeld, &head, &tail, handSize)
+	if !ok {
+		return TurnStartState{
+			ArsenalCard:        play.ArsenalCard,
+			RunechantCarryover: play.LeftoverRunechants,
+		}
+	}
+	handCopy := append([]card.Card(nil), turn2Hand...)
+	deckLeft := append([]card.Card(nil), buf[head+drawCount2:tail]...)
+
+	return TurnStartState{
+		Hand:               handCopy,
+		ArsenalCard:        play.ArsenalCard,
+		Deck:               deckLeft,
+		RunechantCarryover: play.LeftoverRunechants,
+	}
 }
 
 // attributePlayStats folds the winning BestLine into per-card aggregates. hand.Best already

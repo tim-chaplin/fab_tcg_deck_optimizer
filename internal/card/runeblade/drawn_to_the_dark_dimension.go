@@ -7,8 +7,7 @@
 // Variable cost: Cost reads s.Runechants to return max(0, printed - Runechants) at play time.
 // Implements card.VariableCost so the solver can pre-screen with MinCost / MaxCost bounds.
 //
-// Simplification: the "Draw a card" rider is modelled as a flat +3 damage — assume the drawn
-// card goes to arsenal and is played on a future turn for roughly one card's worth of value.
+// The "Draw a card" rider fires unconditionally on play via state.DrawOne.
 //
 // Source: github.com/the-fab-cube/flesh-and-blood-cards (card.csv).
 
@@ -40,7 +39,10 @@ func (DrawnToTheDarkDimensionRed) Attack() int                 { return 3 }
 func (DrawnToTheDarkDimensionRed) Defense() int                { return 3 }
 func (DrawnToTheDarkDimensionRed) Types() card.TypeSet         { return drawnToTheDarkDimensionTypes }
 func (DrawnToTheDarkDimensionRed) GoAgain() bool               { return false }
-func (c DrawnToTheDarkDimensionRed) Play(*card.TurnState) int  { return c.Attack() + card.DrawValue }
+func (c DrawnToTheDarkDimensionRed) Play(s *card.TurnState) int {
+	s.DrawOne()
+	return c.Attack()
+}
 
 type DrawnToTheDarkDimensionYellow struct{}
 
@@ -54,7 +56,10 @@ func (DrawnToTheDarkDimensionYellow) Attack() int                { return 2 }
 func (DrawnToTheDarkDimensionYellow) Defense() int               { return 3 }
 func (DrawnToTheDarkDimensionYellow) Types() card.TypeSet        { return drawnToTheDarkDimensionTypes }
 func (DrawnToTheDarkDimensionYellow) GoAgain() bool              { return false }
-func (c DrawnToTheDarkDimensionYellow) Play(*card.TurnState) int { return c.Attack() + card.DrawValue }
+func (c DrawnToTheDarkDimensionYellow) Play(s *card.TurnState) int {
+	s.DrawOne()
+	return c.Attack()
+}
 
 type DrawnToTheDarkDimensionBlue struct{}
 
@@ -68,4 +73,7 @@ func (DrawnToTheDarkDimensionBlue) Attack() int                { return 1 }
 func (DrawnToTheDarkDimensionBlue) Defense() int               { return 3 }
 func (DrawnToTheDarkDimensionBlue) Types() card.TypeSet        { return drawnToTheDarkDimensionTypes }
 func (DrawnToTheDarkDimensionBlue) GoAgain() bool              { return false }
-func (c DrawnToTheDarkDimensionBlue) Play(*card.TurnState) int { return c.Attack() + card.DrawValue }
+func (c DrawnToTheDarkDimensionBlue) Play(s *card.TurnState) int {
+	s.DrawOne()
+	return c.Attack()
+}

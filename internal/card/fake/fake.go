@@ -32,3 +32,16 @@ func (RedAttack) Defense() int               { return 1 }
 func (RedAttack) Types() card.TypeSet        { return genericAttackTypes }
 func (RedAttack) GoAgain() bool              { return true }
 func (c RedAttack) Play(*card.TurnState) int { return c.Attack() }
+
+// YellowAttack is a generic yellow attack action: pitches 2, defends 2, attacks 2, costs 1.
+type YellowAttack struct{}
+
+func (YellowAttack) ID() card.ID                { return card.FakeYellowAttack }
+func (YellowAttack) Name() string               { return "cardtest.YellowAttack" }
+func (YellowAttack) Cost(*card.TurnState) int                  { return 1 }
+func (YellowAttack) Pitch() int                 { return 2 }
+func (YellowAttack) Attack() int                { return 2 }
+func (YellowAttack) Defense() int               { return 2 }
+func (YellowAttack) Types() card.TypeSet        { return genericAttackTypes }
+func (YellowAttack) GoAgain() bool              { return true }
+func (c YellowAttack) Play(*card.TurnState) int { return c.Attack() }

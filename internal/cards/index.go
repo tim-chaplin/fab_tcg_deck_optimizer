@@ -684,8 +684,9 @@ var byID = []card.Card{
 	card.ZealousBeltingYellow: generic.ZealousBeltingYellow{},
 	card.ZealousBeltingBlue: generic.ZealousBeltingBlue{},
 
-	card.FakeRedAttack:  fake.RedAttack{},
-	card.FakeBlueAttack: fake.BlueAttack{},
+	card.FakeRedAttack:    fake.RedAttack{},
+	card.FakeBlueAttack:   fake.BlueAttack{},
+	card.FakeYellowAttack: fake.YellowAttack{},
 }
 
 // byName maps Card.Name() → ID for reverse lookup. Built once at init.
@@ -737,7 +738,7 @@ func Deckable() []ID {
 			continue
 		}
 		switch ID(id) {
-		case card.FakeRedAttack, card.FakeBlueAttack:
+		case card.FakeRedAttack, card.FakeBlueAttack, card.FakeYellowAttack:
 			continue
 		}
 		out = append(out, ID(id))

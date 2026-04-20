@@ -63,6 +63,12 @@ type TurnSummary struct {
 	// just arsenaled (role=Arsenal) or a previous-turn arsenal card that stayed. Nil when empty.
 	// The caller feeds this back as the next turn's arsenalCardIn.
 	ArsenalCard card.Card
+	// Drawn is the cards the winning chain drew mid-turn, in draw order, each paired with the
+	// disposition the solver picked for it. Populated from state.Drawn during fillContributions's
+	// tracked replay. Every drawn card's Role is Held (Contribution 0) — the drawn card displaces
+	// an end-of-turn refill draw so it carries into the next hand rather than contributing this
+	// turn. Nil when no draw rider fired.
+	Drawn []CardAssignment
 }
 
 // AttackChainEntry is a single played attack — a card with role=Attack or a swung weapon —
@@ -1355,6 +1361,11 @@ func (ctx *sequenceContext) playSequenceWithMeta(order []card.Card, perCardOut, 
 	state.ArcaneDamageDealt = false
 	state.AuraCreated = false
 	state.Overpower = false
+	// Deck and Drawn must reset per permutation: DrawOne mutates them and a prior permutation's
+	// consumption would poison the next. Pitched / IncomingDamage / BlockTotal remain in
+	// seedState — cards don't mutate them.
+	state.Deck = ctx.deck
+	state.Drawn = nil
 	resources := ctx.resourceBudget
 	for i, pc := range played {
 		m := meta[i]
@@ -1488,6 +1499,14 @@ func fillContributions(summary *TurnSummary, hero hero.Hero, weapons []weapon.We
 		}
 		ctx.seedState()
 		fillAttackChainContributions(summary, chain, ctx)
+		// state.Drawn accumulated across the tracked replay's winning permutation — copy it out
+		// as Held assignments, the cross-turn-carry disposition for mid-turn-drawn cards.
+		if drawn := bufs.state.Drawn; len(drawn) > 0 {
+			summary.Drawn = make([]CardAssignment, len(drawn))
+			for i, c := range drawn {
+				summary.Drawn[i] = CardAssignment{Card: c, Role: Held}
+			}
+		}
 	}
 }
 
