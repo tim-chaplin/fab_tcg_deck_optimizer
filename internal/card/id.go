@@ -486,4 +486,6 @@ const (
 	// them. Not real FaB cards and must not appear in production decks.
 	FakeRedAttack
 	FakeBlueAttack
+	FakeYellowAttack
+	FakeDrawCantrip
 )

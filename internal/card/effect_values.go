@@ -9,8 +9,10 @@
 
 package card
 
-// DrawValue is the damage-equivalent credited for drawing one extra card. A typical FaB card
-// is worth ~3 points of tempo when played on a future turn.
+// DrawValue is the damage-equivalent credited for a cross-turn additive card draw — one the
+// sim doesn't currently route through TurnState.DrawOne because the card enters hand outside
+// the normal refill step (e.g. Sigil of the Arknight's start-of-action-phase reveal). A typical
+// FaB card is worth ~3 points of tempo when played on a future turn.
 const DrawValue = 3
 
 // DiscardValue is the damage-equivalent credited when the opponent is forced to discard one

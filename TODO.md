@@ -13,11 +13,13 @@ them as fully active.
 ### Fully model effects where we currently just credit an integer value
 
 `internal/card/effect_values.go` centralises the damage-equivalents we use as stand-ins for
-"draw a card" (3), "force opponent discard" (3), and "create a Gold token" (1). These are
-simplifications — the sim never actually draws a card, forces a discard, or tracks Gold. When
-we model the real state (hand, graveyard, Gold-token pool, opposing hand size), the rider
-implementations can cash out into actual future-turn tempo instead of a flat integer, and the
-`effect_values.go` constants should disappear.
+"force opponent discard" (3), "create a Gold token" (1), and cross-turn additive draw via
+Sigil of the Arknight (still 3 via `DrawValue`). These are simplifications — the sim never
+actually forces a discard, tracks Gold, or cross-turn shuffles around arsenal state. When we
+model the real state (graveyard, Gold-token pool, opposing hand size) the rider implementations
+can cash out into actual future-turn tempo instead of a flat integer, and the `effect_values.go`
+constants should disappear. Mid-turn `"draw a card"` riders route through `TurnState.DrawOne`
+instead — see `internal/card/card.go`.
 
 ### LikelyToHit breadcrumbs — on-hit riders awaiting modelling
 
@@ -162,11 +164,14 @@ Hero health isn't tracked, so every life-gain and life-comparison rider collapse
   riders (Unmovable +1{d}, Springboard Somersault +2{d}, and the ~14 Silver Age generics listed
   there) default off or fire unconditionally where noted.
 - **"No cards in hand" riders never fire.** Spring Load's +3{p} rider defaults off.
-- **Draw / hand cycling is flattened.** Drawn to the Dark Dimension credits +3 for its draw;
-  Sutcliffe's Research Notes ignores its re-ordering clause; Sink Below drops its cycling rider;
-  Rise Above's alternative hand-as-cost option isn't simulated. The Emissary of Moon / Tides /
-  Wind trio, Sift, Scour the Battlescape, Whisper of the Oracle (Opt), and Strategic Planning
-  all similarly drop their draw / cycle steps. Trade In's discard-to-draw is dropped.
+- **Draw / hand cycling is flattened.** Mid-turn draws (Snatch, Drawn to the Dark Dimension)
+  route through `TurnState.DrawOne`; the drawn card competes with Held hand cards for the
+  end-of-turn arsenal slot and otherwise carries HELD into the next hand. The sim doesn't yet
+  let a drawn card be played, pitched, or defended with during the turn it's drawn. Sutcliffe's Research Notes ignores its
+  re-ordering clause; Sink Below drops its cycling rider; Rise Above's alternative hand-as-cost
+  option isn't simulated. The Emissary of Moon / Tides / Wind trio, Sift, Scour the
+  Battlescape, Whisper of the Oracle (Opt), and Strategic Planning all similarly drop their
+  draw / cycle steps. Trade In's discard-to-draw is dropped.
 - **Hand-on-top / hand-as-cost alternative costs aren't modelled.** Moon Wish (hand-on-top + Sun
   Kiss search) and Seek Horizon (hand-on-top + conditional go-again) pick the base mode only.
 - **Fate Foreseen's "opt 1" is dropped** — block value is the printed defence only.

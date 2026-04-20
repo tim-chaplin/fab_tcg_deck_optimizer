@@ -63,6 +63,12 @@ type TurnSummary struct {
 	// just arsenaled (role=Arsenal) or a previous-turn arsenal card that stayed. Nil when empty.
 	// The caller feeds this back as the next turn's arsenalCardIn.
 	ArsenalCard card.Card
+	// Drawn is the cards the winning chain drew mid-turn, in draw order, each paired with the
+	// disposition the solver picked for it. Populated from state.Drawn during fillContributions's
+	// tracked replay. Every drawn card's Role is Held (Contribution 0) — the drawn card displaces
+	// an end-of-turn refill draw so it carries into the next hand rather than contributing this
+	// turn. Nil when no draw rider fired.
+	Drawn []CardAssignment
 }
 
 // AttackChainEntry is a single played attack — a card with role=Attack or a swung weapon —
@@ -608,9 +614,11 @@ type attackBufs struct {
 
 func newAttackBufs(handSize, weaponCount int, weapons []weapon.Weapon) *attackBufs {
 	// +1 reserves a slot for the arsenal-in card, which joins attackers or defenders when the
-	// enumerator plays it from arsenal. Without it, all-attack hands + arsenal would overflow
-	// attackerBuf in bestAttackWithWeapons.
-	maxAttackers := handSize + weaponCount + 1
+	// enumerator plays it from arsenal. +maxDrawnExtensions leaves headroom for mid-turn-drawn
+	// cards that play as chain extensions — cheap cycling cards (cost 0, Go again, draws a
+	// card) can extend a chain well past the starting hand size.
+	const maxDrawnExtensions = 32
+	maxAttackers := handSize + weaponCount + 1 + maxDrawnExtensions
 	numMasks := 1 << weaponCount
 	weaponCosts := make([]int, numMasks)
 	weaponNames := make([][]string, numMasks)
@@ -847,45 +855,84 @@ func (e *Evaluator) bestUncached(hero hero.Hero, weapons []weapon.Weapon, hand [
 	if len(best.BestLine) > 0 {
 		fillContributions(&best, hero, weapons, bestSwung, bestBudget, deck, bufs, incomingDamage, runechantCarryover)
 	}
-	// If the arsenal slot is empty after enumeration, promote a Held card. The pick is
-	// deterministic per-hand (hashed from sorted card IDs) so the memo stays consistent, but
-	// spreads across Held positions across different hands — avoiding the lowest-ID bias that
-	// picking BestLine[0] would introduce under sort-by-ID canonicalisation.
+	// If the arsenal slot is empty after enumeration, promote one Held card into it. Held hand
+	// cards and Held mid-turn-drawn cards are treated as one pool — neither source is preferred,
+	// because both end the turn as a single card of equivalent future-turn value. The pick is
+	// deterministic per-hand (hashed from sorted card IDs + drawn card IDs + arsenal-in ID) so
+	// the memo stays consistent, but spreads across candidates to avoid a lowest-ID bias.
 	if best.ArsenalCard == nil {
 		promoteRandomHeldToArsenal(&best, hand, n, arsenalCardIn)
 	}
 	return best
 }
 
-// promoteRandomHeldToArsenal picks one Held hand card in best.BestLine and flips its role to
-// Arsenal. Selection hashes the sorted hand IDs (plus arsenal-in ID) modulo the Held count:
-//   - Same hand → same promotion (memo-safe).
-//   - Different hands spread across Held positions (no systematic lowest-ID preference).
+// promoteRandomHeldToArsenal picks one Held card — a hand card in best.BestLine or a mid-turn-
+// drawn card in best.Drawn — and flips its role to Arsenal. Both sources share a single
+// candidate pool so the draw isn't preferred over hand Helds (nor the other way around). No-op
+// when nothing is Held.
 func promoteRandomHeldToArsenal(best *TurnSummary, hand []card.Card, n int, arsenalCardIn card.Card) {
-	// Collect Held indices (hand slots only; arsenal-in can't be Held by construction).
-	heldIndices := make([]int, 0, n)
+	handHeldCount := 0
 	for i := 0; i < n; i++ {
 		if best.BestLine[i].Role == Held {
-			heldIndices = append(heldIndices, i)
+			handHeldCount++
 		}
 	}
-	if len(heldIndices) == 0 {
+	drawnHeldCount := 0
+	for i := range best.Drawn {
+		if best.Drawn[i].Role == Held {
+			drawnHeldCount++
+		}
+	}
+	total := handHeldCount + drawnHeldCount
+	if total == 0 {
 		return
 	}
-	// FNV-1a-flavoured hash over the sorted hand IDs + arsenal-in ID. Just needs to spread
-	// across bucket counts 1..n.
+	// FNV-1a-flavoured hash over the sorted hand IDs + drawn card IDs + arsenal-in ID. Just
+	// needs to spread across bucket counts 1..total.
 	var h uint64 = 1469598103934665603 // FNV offset basis
 	for _, c := range hand {
 		h ^= uint64(c.ID())
 		h *= 1099511628211 // FNV prime
 	}
+	for _, d := range best.Drawn {
+		h ^= uint64(d.Card.ID())
+		h *= 1099511628211
+	}
 	if arsenalCardIn != nil {
 		h ^= uint64(arsenalCardIn.ID())
 		h *= 1099511628211
 	}
-	pick := heldIndices[h%uint64(len(heldIndices))]
-	best.BestLine[pick].Role = Arsenal
-	best.ArsenalCard = best.BestLine[pick].Card
+	pick := int(h % uint64(total))
+	// Walk hand Helds first (in BestLine order), then drawn Helds (in draw order), mapping pick
+	// to the matching slot.
+	if pick < handHeldCount {
+		idx := 0
+		for i := 0; i < n; i++ {
+			if best.BestLine[i].Role != Held {
+				continue
+			}
+			if idx == pick {
+				best.BestLine[i].Role = Arsenal
+				best.ArsenalCard = best.BestLine[i].Card
+				return
+			}
+			idx++
+		}
+		return
+	}
+	pick -= handHeldCount
+	idx := 0
+	for i := range best.Drawn {
+		if best.Drawn[i].Role != Held {
+			continue
+		}
+		if idx == pick {
+			best.Drawn[i].Role = Arsenal
+			best.ArsenalCard = best.Drawn[i].Card
+			return
+		}
+		idx++
+	}
 }
 
 // groupByRoleInto appends hand cards into caller-provided pitched/attackers/defenders slices
@@ -1108,13 +1155,17 @@ func bestAttackWithWeapons(hero hero.Hero, weapons []weapon.Weapon, attackers, d
 		for wmask := 0; wmask < 1<<len(weapons); wmask++ {
 			weaponCost := bufs.weaponCosts[wmask] // weapons are static-cost
 			// Lower bound on total chain cost (sum of MinCost across attackers + weapons). If the
-			// attack budget can't cover even this floor, no permutation is feasible.
+			// attack budget can't cover even this floor, no permutation is feasible. Mid-turn
+			// draws can pitch on top of the committed hand pitch (Phase 2 "hopeful" partitions)
+			// but can't reduce the base cost, so this MinCost check is still a safe prune.
+			//
+			// We used to also pre-screen pitch-timing via attackBudget - MaxCost >= maxAttackPitch
+			// but that prune is unsafe now that drawn cards can play as chain extensions (Phase 3)
+			// and consume from the attack budget — a partition that looks wasteful pre-chain can
+			// end up legal once an extension absorbs the residual. playSequenceWithMeta still
+			// enforces pitch-timing post-extension, so correctness holds; the loss is a small
+			// amount of extra sim work on partitions that would have been pruned here.
 			if attackersMinCost+weaponCost > attackBudget {
-				continue
-			}
-			// Upper bound on pitch-waste residual: attackBudget - (sum of MaxCost) is the minimum
-			// possible residual. If even that trips pitch-timing, every permutation wastes.
-			if hasAttackPitches && attackBudget-(attackersMaxCost+weaponCost) >= maxAttackPitch {
 				continue
 			}
 			allAttackers := bufs.attackerBuf[:len(attackers)]
@@ -1182,6 +1233,24 @@ type sequenceContext struct {
 	blockTotal         int
 	hasAttackPitches   bool
 	maxAttackPitch     int
+	// Mid-turn-drawn-card tracking for the most recent playSequenceWithMeta call. state.Drawn
+	// is partitioned as [Pitch * drawnPitched | Attack * drawnAttacked | Held ...]: the first
+	// drawnPitched cards were consumed to plug a cost shortfall (Phase 2 "hopeful" partitions);
+	// the next drawnAttacked were played as free-cost chain extensions (Phase 3). The rest stay
+	// Held. drawnAttackDmg / drawnAttackTriggerDmg are aligned with the attacked slice — one
+	// entry per extension — capturing its Play return and hero-trigger damage so fillContributions
+	// can write per-card contributions on summary.Drawn.
+	drawnPitched          int
+	drawnAttacked         int
+	drawnAttackDmg        []float64
+	drawnAttackTriggerDmg []float64
+	// drawnPitchedWinner / drawnAttackedWinner / drawnAttackDmgWinner /
+	// drawnAttackTriggerDmgWinner snapshot the winning permutation's drawn-card outcome so
+	// fillContributions reads it back after bestSequence returns.
+	drawnPitchedWinner          int
+	drawnAttackedWinner         int
+	drawnAttackDmgWinner        []float64
+	drawnAttackTriggerDmgWinner []float64
 }
 
 // seedState writes the TurnState fields that are constant across a partition's permutations
@@ -1242,6 +1311,10 @@ func (ctx *sequenceContext) bestSequence(attackers, winnerOrderOut []card.Card, 
 	best := 0
 	bestLeftoverRunechants := ctx.runechantCarryover
 	foundLegal := false
+	ctx.drawnPitchedWinner = 0
+	ctx.drawnAttackedWinner = 0
+	ctx.drawnAttackDmgWinner = ctx.drawnAttackDmgWinner[:0]
+	ctx.drawnAttackTriggerDmgWinner = ctx.drawnAttackTriggerDmgWinner[:0]
 	eval := func() {
 		dmg, leftoverRunechants, _, legal := ctx.playSequenceWithMeta(perm, scratch, triggerScratch)
 		if !legal {
@@ -1252,6 +1325,10 @@ func (ctx *sequenceContext) bestSequence(attackers, winnerOrderOut []card.Card, 
 			best = dmg
 			bestLeftoverRunechants = leftoverRunechants
 			foundLegal = true
+			ctx.drawnPitchedWinner = ctx.drawnPitched
+			ctx.drawnAttackedWinner = ctx.drawnAttacked
+			ctx.drawnAttackDmgWinner = append(ctx.drawnAttackDmgWinner[:0], ctx.drawnAttackDmg...)
+			ctx.drawnAttackTriggerDmgWinner = append(ctx.drawnAttackTriggerDmgWinner[:0], ctx.drawnAttackTriggerDmg...)
 			if winnerOrderOut != nil {
 				copy(winnerOrderOut[:n], perm)
 			}
@@ -1355,10 +1432,28 @@ func (ctx *sequenceContext) playSequenceWithMeta(order []card.Card, perCardOut, 
 	state.ArcaneDamageDealt = false
 	state.AuraCreated = false
 	state.Overpower = false
+	// Deck and Drawn must reset per permutation: DrawOne mutates them and a prior permutation's
+	// consumption would poison the next. Pitched / IncomingDamage / BlockTotal remain in
+	// seedState — cards don't mutate them.
+	state.Deck = ctx.deck
+	state.Drawn = nil
+	ctx.drawnPitched = 0
+	ctx.drawnAttacked = 0
+	ctx.drawnAttackDmg = ctx.drawnAttackDmg[:0]
+	ctx.drawnAttackTriggerDmg = ctx.drawnAttackTriggerDmg[:0]
+	drawnPitchedIdx := 0
 	resources := ctx.resourceBudget
 	for i, pc := range played {
 		m := meta[i]
-		resources -= m.costAt(state)
+		cost := m.costAt(state)
+		// When the hand's committed pitch can't cover this card's cost, consume mid-turn-drawn
+		// cards in draw order: their pitch plugs the gap and the "hopeful" partition becomes
+		// legal. Drawn cards are only available after an earlier chain step fired DrawOne.
+		for resources < cost && drawnPitchedIdx < len(state.Drawn) {
+			resources += state.Drawn[drawnPitchedIdx].Pitch()
+			drawnPitchedIdx++
+		}
+		resources -= cost
 		if resources < 0 {
 			return 0, 0, 0, false
 		}
@@ -1396,12 +1491,80 @@ func (ctx *sequenceContext) playSequenceWithMeta(order []card.Card, perCardOut, 
 			return 0, 0, 0, false
 		}
 	}
+
+	// Once the initial chain resolves, greedily play drawn cards at the tail of the chain as
+	// extensions for as long as the previous card grants Go again, the next drawn card isn't
+	// a Defense Reaction, and leftover resources cover its cost. Each extension fires its own
+	// Play (possibly drawing more cards), which can unlock the next extension. pcBuf capacity
+	// caps the extension count so an accidentally-infinite cycle can't run away.
+	chainGoAgain := true
+	if n > 0 {
+		lastM := meta[n-1]
+		lastPC := played[n-1]
+		chainGoAgain = lastM.baseGoAgain || lastPC.GrantedGoAgain
+	}
+	drawnAttackedIdx := 0
+	for chainGoAgain {
+		candidateIdx := drawnPitchedIdx + drawnAttackedIdx
+		if candidateIdx >= len(state.Drawn) {
+			break
+		}
+		candidate := state.Drawn[candidateIdx]
+		if candidate.Types().IsDefenseReaction() {
+			break
+		}
+		extCost := candidate.Cost(state)
+		if extCost > resources {
+			break
+		}
+		extIdx := n + drawnAttackedIdx
+		if extIdx >= len(pcBuf) {
+			break
+		}
+		resources -= extCost
+		pcBuf[extIdx] = card.PlayedCard{Card: candidate}
+		extPC := &pcBuf[extIdx]
+		extMeta := attackerMetaPtrFor(candidate)
+		played = append(played, extPC)
+		meta = append(meta, extMeta)
+
+		// The extension is the tail of the chain — nothing after it (yet); grants that scan
+		// CardsRemaining (e.g. Flying High) won't find a target, which matches FaB timing:
+		// the extension wasn't visible when prior cards resolved.
+		state.CardsRemaining = played[len(played):]
+		state.Self = extPC
+
+		isAttackOrWeapon := extMeta.isAttackOrWeapon
+		if isAttackOrWeapon && state.Runechants > 0 {
+			state.ArcaneDamageDealt = true
+		}
+
+		playDmg := candidate.Play(state)
+		triggerDmg := ctx.hero.OnCardPlayed(candidate, state)
+		damage += playDmg + triggerDmg
+		ctx.drawnAttackDmg = append(ctx.drawnAttackDmg, float64(playDmg))
+		ctx.drawnAttackTriggerDmg = append(ctx.drawnAttackTriggerDmg, float64(triggerDmg))
+		state.CardsPlayed = append(state.CardsPlayed, candidate)
+
+		if isAttackOrWeapon {
+			state.Runechants = 0
+		}
+
+		drawnAttackedIdx++
+		// Extensions inherit no granted Go again from prior cards (by the time a grant fired,
+		// the extension hadn't yet been drawn), so the chain only continues if the extension
+		// itself has Go again.
+		chainGoAgain = extMeta.baseGoAgain
+	}
+	ctx.drawnAttacked = drawnAttackedIdx
+
 	// Pitch-timing rule: every Pitch-role card must have paid for something on the stack. If the
 	// chain's leftover budget is at least the max attack-phase pitch, one pitch could have been
 	// Held instead — this permutation violates FaB's rules.
 	if ctx.hasAttackPitches && resources >= ctx.maxAttackPitch {
 		return 0, 0, 0, false
 	}
+	ctx.drawnPitched = drawnPitchedIdx
 	// Delayed tokens skip this turn and go straight to next turn's carryover.
 	return damage, state.Runechants + state.DelayedRunechants, resources, true
 }
@@ -1488,6 +1651,32 @@ func fillContributions(summary *TurnSummary, hero hero.Hero, weapons []weapon.We
 		}
 		ctx.seedState()
 		fillAttackChainContributions(summary, chain, ctx)
+		// state.Drawn accumulated across the tracked replay's winning permutation — copy it
+		// out as CardAssignments. The winning permutation partitions Drawn into three
+		// contiguous segments: the first drawnPitchedWinner were consumed to plug a cost
+		// shortfall (Role=Pitch, Contribution = Pitch()); the next drawnAttackedWinner were
+		// played as free-cost chain extensions (Role=Attack, Contribution = per-extension
+		// damage); the rest stay Held (Contribution 0), the default cross-turn-carry
+		// disposition.
+		if drawn := bufs.state.Drawn; len(drawn) > 0 {
+			summary.Drawn = make([]CardAssignment, len(drawn))
+			pitchedEnd := ctx.drawnPitchedWinner
+			attackedEnd := pitchedEnd + ctx.drawnAttackedWinner
+			for i, c := range drawn {
+				role := Held
+				var contribution float64
+				switch {
+				case i < pitchedEnd:
+					role = Pitch
+					contribution = float64(c.Pitch())
+				case i < attackedEnd:
+					role = Attack
+					attackIdx := i - pitchedEnd
+					contribution = ctx.drawnAttackDmgWinner[attackIdx] + ctx.drawnAttackTriggerDmgWinner[attackIdx]
+				}
+				summary.Drawn[i] = CardAssignment{Card: c, Role: role, Contribution: contribution}
+			}
+		}
 	}
 }
 

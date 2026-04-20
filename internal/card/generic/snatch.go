@@ -3,9 +3,8 @@
 //
 // Text: "When this hits, draw a card."
 //
-// The on-hit draw is modelled as +3 damage-equivalent (one card ≈ 3 points of value, matching
-// the draw-a-card rider credited elsewhere) — but only when the printed attack is likely to
-// land (1/4/7 per card.LikelyToHit). Blockable multiples of 3 suppress the rider.
+// The on-hit draw fires via state.DrawOne when the printed attack is likely to land (1/4/7 per
+// card.LikelyToHit).
 //
 // Source: github.com/the-fab-cube/flesh-and-blood-cards (card.csv).
 
@@ -15,11 +14,11 @@ import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 
 var snatchTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeAttack)
 
-// snatchDamage returns the base attack plus the draw-on-hit rider when the attack is likely to
-// land.
-func snatchDamage(attack int) int {
+// snatchPlay fires the on-hit draw via state.DrawOne when the attack is likely to land, and
+// returns the attack's damage.
+func snatchPlay(attack int, s *card.TurnState) int {
 	if card.LikelyToHit(attack) {
-		return attack + card.DrawValue
+		s.DrawOne()
 	}
 	return attack
 }
@@ -34,7 +33,7 @@ func (SnatchRed) Attack() int                  { return 4 }
 func (SnatchRed) Defense() int                 { return 2 }
 func (SnatchRed) Types() card.TypeSet          { return snatchTypes }
 func (SnatchRed) GoAgain() bool                { return false }
-func (c SnatchRed) Play(s *card.TurnState) int { return snatchDamage(c.Attack()) }
+func (c SnatchRed) Play(s *card.TurnState) int { return snatchPlay(c.Attack(), s) }
 
 type SnatchYellow struct{}
 
@@ -46,7 +45,7 @@ func (SnatchYellow) Attack() int                  { return 3 }
 func (SnatchYellow) Defense() int                 { return 2 }
 func (SnatchYellow) Types() card.TypeSet          { return snatchTypes }
 func (SnatchYellow) GoAgain() bool                { return false }
-func (c SnatchYellow) Play(s *card.TurnState) int { return snatchDamage(c.Attack()) }
+func (c SnatchYellow) Play(s *card.TurnState) int { return snatchPlay(c.Attack(), s) }
 
 type SnatchBlue struct{}
 
@@ -58,4 +57,4 @@ func (SnatchBlue) Attack() int                  { return 2 }
 func (SnatchBlue) Defense() int                 { return 2 }
 func (SnatchBlue) Types() card.TypeSet          { return snatchTypes }
 func (SnatchBlue) GoAgain() bool                { return false }
-func (c SnatchBlue) Play(s *card.TurnState) int { return snatchDamage(c.Attack()) }
+func (c SnatchBlue) Play(s *card.TurnState) int { return snatchPlay(c.Attack(), s) }
