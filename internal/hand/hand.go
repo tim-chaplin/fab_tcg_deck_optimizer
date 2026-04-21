@@ -1517,7 +1517,6 @@ func (ctx *sequenceContext) playSequenceWithMeta(order []card.Card, perCardOut, 
 	// don't mutate them, so we skip the per-permutation reset.
 	state.CardsPlayed = ctx.bufs.cardsPlayedBuf[:0]
 	state.Runechants = ctx.runechantCarryover
-	state.DelayedRunechants = 0
 	state.ArcaneDamageDealt = false
 	state.AuraCreated = false
 	state.Overpower = false
@@ -1590,8 +1589,7 @@ func (ctx *sequenceContext) playSequenceWithMeta(order []card.Card, perCardOut, 
 	if ctx.hasAttackPitches && resources >= ctx.maxAttackPitch {
 		return 0, 0, 0, false
 	}
-	// Delayed tokens skip this turn and go straight to next turn's carryover.
-	return damage, state.Runechants + state.DelayedRunechants, resources, true
+	return damage, state.Runechants, resources, true
 }
 
 // fillDefenseContributions writes Contribution on each Defend-role entry. The block-prevention

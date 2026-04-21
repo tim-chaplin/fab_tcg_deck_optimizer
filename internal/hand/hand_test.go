@@ -93,7 +93,8 @@ func TestBest_PlainBlockStillFree(t *testing.T) {
 
 func TestBest_ViseraiMaleficShrillCombo(t *testing.T) {
 	// Hero = Viserai. Best line: pitch the Blue Malefic, then play both Red Maleficas and the Red
-	// Shrill. Value = 15.
+	// Shrill. Value = 13 (each Red Malefic's Play returns n-1 = 2; the first tick's Runechant
+	// fires at next turn's upkeep via PlayNextTurn and isn't credited to this turn's Value).
 	h := []card.Card{
 		runeblade.MaleficIncantationBlue{},
 		runeblade.MaleficIncantationRed{},
@@ -101,15 +102,16 @@ func TestBest_ViseraiMaleficShrillCombo(t *testing.T) {
 		runeblade.ShrillOfSkullformRed{},
 	}
 	got := Best(hero.Viserai{}, nil, h, 4, nil, 0, nil)
-	if got.Value != 15 {
-		t.Fatalf("want value 15, got %d (roles=[%s])",
+	if got.Value != 13 {
+		t.Fatalf("want value 13, got %d (roles=[%s])",
 			got.Value, FormatBestLine(got.BestLine))
 	}
 }
 
 func TestBest_ViseraiReapingBladeBlueMalefics(t *testing.T) {
-	// Pitch 1 Blue Malefic (3 res), play the other 3 Blue Malefics (Runechants from Viserai on #2
-	// and #3), then swing Reaping Blade (cost 1, 3 dmg). Value = 3 + 2 + 3 = 8.
+	// Pitch 1 Blue Malefic (3 res), play the other 3 Blue Malefics (Play returns n-1 = 0 each;
+	// Runechants from Viserai on #2 and #3), then swing Reaping Blade (cost 1, 3 dmg).
+	// Value = 0 + 2 + 3 = 5 (each Blue Malefic's own rune fires next turn via PlayNextTurn).
 	h := []card.Card{
 		runeblade.MaleficIncantationBlue{},
 		runeblade.MaleficIncantationBlue{},
@@ -118,16 +120,17 @@ func TestBest_ViseraiReapingBladeBlueMalefics(t *testing.T) {
 	}
 	weapons := []weapon.Weapon{weapon.ReapingBlade{}}
 	got := Best(hero.Viserai{}, weapons, h, 0, nil, 0, nil)
-	if got.Value != 8 {
-		t.Fatalf("want value 8, got %d (roles=[%s])",
+	if got.Value != 5 {
+		t.Fatalf("want value 5, got %d (roles=[%s])",
 			got.Value, FormatBestLine(got.BestLine))
 	}
 }
 
 func TestBest_ViseraiReapingBladeMaleficsPlusShrill(t *testing.T) {
-	// Pitch 1 Blue Malefic (3 res), play 2 Blue Malefics (2 dmg + 1 Runechant), then Red Shrill
-	// (cost 2, 4+3 aura bonus + 1 Runechant = 8). Reaping Blade stays holstered — Shrill has no
-	// Go again, so nothing can follow it. Value = 2 + 1 + 8 = 11.
+	// Pitch 1 Blue Malefic (3 res), play 2 Blue Malefics (Play returns 0 each, +1 Viserai
+	// Runechant on the second), then Red Shrill (cost 2, 4+3 aura bonus + 1 Runechant = 8).
+	// Reaping Blade stays holstered — Shrill has no Go again, so nothing can follow it.
+	// Value = 0 + 1 + 8 = 9 (each Blue Malefic's own rune fires next turn via PlayNextTurn).
 	h := []card.Card{
 		runeblade.MaleficIncantationBlue{},
 		runeblade.MaleficIncantationBlue{},
@@ -136,16 +139,17 @@ func TestBest_ViseraiReapingBladeMaleficsPlusShrill(t *testing.T) {
 	}
 	weapons := []weapon.Weapon{weapon.ReapingBlade{}}
 	got := Best(hero.Viserai{}, weapons, h, 0, nil, 0, nil)
-	if got.Value != 11 {
-		t.Fatalf("want value 11, got %d (roles=[%s])",
+	if got.Value != 9 {
+		t.Fatalf("want value 9, got %d (roles=[%s])",
 			got.Value, FormatBestLine(got.BestLine))
 	}
 }
 
 func TestBest_ViseraiOathBlueHocusRedMalefic(t *testing.T) {
-	// Pitch Blue Hocus Pocus (3 res). Play Red Malefic (3 dmg, go again). Play Red Oath (+1
-	// Runechant, peeks ahead and sees the Blade swing = +3 bonus, +1 Viserai Runechant from prior
-	// non-attack action = 5). Swing Reaping Blade (cost 1, 3 dmg). Value = 3 + 5 + 3 = 11.
+	// Pitch Blue Hocus Pocus (3 res). Play Red Malefic (Play returns n-1 = 2, go again). Play
+	// Red Oath (+1 Runechant, peeks ahead and sees the Blade swing = +3 bonus, +1 Viserai
+	// Runechant from prior non-attack action = 5). Swing Reaping Blade (cost 1, 3 dmg).
+	// Value = 2 + 5 + 3 = 10 (Malefic's first-tick rune fires next turn via PlayNextTurn).
 	h := []card.Card{
 		runeblade.HocusPocusBlue{},
 		runeblade.OathOfTheArknightRed{},
@@ -153,8 +157,8 @@ func TestBest_ViseraiOathBlueHocusRedMalefic(t *testing.T) {
 	}
 	weapons := []weapon.Weapon{weapon.ReapingBlade{}}
 	got := Best(hero.Viserai{}, weapons, h, 0, nil, 0, nil)
-	if got.Value != 11 {
-		t.Fatalf("want value 11, got %d (roles=[%s])",
+	if got.Value != 10 {
+		t.Fatalf("want value 10, got %d (roles=[%s])",
 			got.Value, FormatBestLine(got.BestLine))
 	}
 }
@@ -162,9 +166,9 @@ func TestBest_ViseraiOathBlueHocusRedMalefic(t *testing.T) {
 func TestBest_RunicReapingPrefersAttackPitch(t *testing.T) {
 	// Pitching the Blue Hocus Pocus (attack-typed, pitch 3) pays for Runic Reaping + Shrill AND
 	// satisfies Runic Reaping's pitched-attack rider. Pitching the Blue Malefic Aura instead would
-	// lose the rider. Blue Malefic (1 arcane + 1 Viserai runechant = 2) → Runic Reaping (3 + 1
-	// rider + 1 Viserai runechant = 5) → Shrill (4 base + 3 aura-created bonus = 7). Value = 2 + 5
-	// + 7 = 14.
+	// lose the rider. Blue Malefic (Play returns 0, +1 Viserai runechant = 1) → Runic Reaping
+	// (3 + 1 rider + 1 Viserai runechant = 5) → Shrill (4 base + 3 aura-created bonus = 7).
+	// Value = 1 + 5 + 7 = 13 (Malefic's first-tick rune fires next turn via PlayNextTurn).
 	h := []card.Card{
 		runeblade.HocusPocusBlue{},
 		runeblade.MaleficIncantationBlue{},
@@ -172,19 +176,19 @@ func TestBest_RunicReapingPrefersAttackPitch(t *testing.T) {
 		runeblade.ShrillOfSkullformRed{},
 	}
 	got := Best(hero.Viserai{}, nil, h, 0, nil, 0, nil)
-	if got.Value != 14 {
-		t.Fatalf("want value 14, got %d (roles=[%s])",
+	if got.Value != 13 {
+		t.Fatalf("want value 13, got %d (roles=[%s])",
 			got.Value, FormatBestLine(got.BestLine))
 	}
 }
 
 func TestBest_ViseraiMauvrionGrantsGoAgainToShrill(t *testing.T) {
-	// Pitch Blue Hocus Pocus (3 res). Play Blue Malefic (1 arcane, go again). Play Red Mauvrion
-	// Skies (0 cost, go again; grants go-again to the next Runeblade attack action card = Shrill,
-	// and emits 3 runechants). Play Red Shrill (cost 2, 4 base + 3 aura-created bonus = 7; chains
-	// thanks to Mauvrion's grant). Swing Reaping Blade (cost 1, 3 dmg). Viserai fires +1 on
-	// Mauvrion (prior Malefic is a non-attack action) and +1 on Shrill (priors include non-attack
-	// actions). Value = 1 + 3 + 7 + 3 + 2 = 16.
+	// Pitch Blue Hocus Pocus (3 res). Play Blue Malefic (Play returns 0, go again). Play Red
+	// Mauvrion Skies (0 cost, go again; grants go-again to the next Runeblade attack action
+	// card = Shrill, and emits 3 runechants). Play Red Shrill (cost 2, 4 base + 3 aura-created
+	// bonus = 7; chains thanks to Mauvrion's grant). Swing Reaping Blade (cost 1, 3 dmg).
+	// Viserai fires +1 on Mauvrion (prior Malefic is a non-attack action) and +1 on Shrill.
+	// Value = 0 + 3 + 7 + 3 + 2 = 15 (Malefic's first-tick rune fires next turn via PlayNextTurn).
 	h := []card.Card{
 		runeblade.HocusPocusBlue{},
 		runeblade.MaleficIncantationBlue{},
@@ -193,8 +197,8 @@ func TestBest_ViseraiMauvrionGrantsGoAgainToShrill(t *testing.T) {
 	}
 	weapons := []weapon.Weapon{weapon.ReapingBlade{}}
 	got := Best(hero.Viserai{}, weapons, h, 0, nil, 0, nil)
-	if got.Value != 16 {
-		t.Fatalf("want value 16, got %d (roles=[%s])",
+	if got.Value != 15 {
+		t.Fatalf("want value 15, got %d (roles=[%s])",
 			got.Value, FormatBestLine(got.BestLine))
 	}
 }
@@ -462,24 +466,18 @@ func TestBest_ArsenalInPlayAttack(t *testing.T) {
 
 // TestBest_ArsenalInNonAttackActionPlays covers the "arsenal card isn't tagged Attack but can
 // still be played on your turn" rule — non-attack actions (auras, item cards, etc.) are playable
-// from arsenal. Hand: Malefic Incantation Red (cost 0, pitch 1). Arsenal: Blessing of Occult Red
-// (cost 1, pitch 1, attack 0, Play returns 3 via DelayRunechants). The winning line pitches the
-// Malefic to fund Blessing's 1-cost, plays Blessing from arsenal, and accrues 3 delayed
-// runechants for next turn. Value = 3 (Blessing's Play return is counted as damage credit for
-// the chain); LeftoverRunechants reflects the 3 tokens carrying over.
+// from arsenal. Hand: Malefic Incantation Red (cost 0, pitch 1). Arsenal: Arcane Cussing Red
+// (cost 1, pitch 1, attack 0, Play returns 3 when we block all incoming). The winning line
+// pitches Malefic to fund Cussing's 1-cost and plays Cussing from arsenal for a flat 3.
 func TestBest_ArsenalInNonAttackActionPlays(t *testing.T) {
 	h := []card.Card{runeblade.MaleficIncantationRed{}}
-	got := Best(stubHero{}, nil, h, 0, nil, 0, runeblade.BlessingOfOccultRed{})
+	got := Best(stubHero{}, nil, h, 0, nil, 0, runeblade.ArcaneCussingRed{})
 	if got.Value != 3 {
-		t.Fatalf("Value = %d, want 3 (Malefic pitched, arsenal Blessing played for 3 runechants). Roles=[%s]",
+		t.Fatalf("Value = %d, want 3 (Malefic pitched, arsenal Cussing played for 3). Roles=[%s]",
 			got.Value, FormatBestLine(got.BestLine))
 	}
-	if got.LeftoverRunechants != 3 {
-		t.Errorf("LeftoverRunechants = %d, want 3 (Blessing's Play delayed 3 tokens to next turn)",
-			got.LeftoverRunechants)
-	}
 	if got.ArsenalCard != nil {
-		t.Errorf("ArsenalCard = %v, want nil (Blessing played out of arsenal)", got.ArsenalCard)
+		t.Errorf("ArsenalCard = %v, want nil (Cussing played out of arsenal)", got.ArsenalCard)
 	}
 }
 

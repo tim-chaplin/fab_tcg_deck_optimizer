@@ -63,7 +63,7 @@ func TestRunDelayedPlays_FiresEachQueuedCardOnce(t *testing.T) {
 	var callsA, callsB int
 	a := stubDelayed{damage: 2, calls: &callsA}
 	b := stubDelayed{damage: 3, calls: &callsB}
-	contribs, total, revealed := runDelayedPlays([]card.Card{a, b}, nil)
+	contribs, total, _, revealed := runDelayedPlays([]card.Card{a, b}, nil)
 	if total != 5 {
 		t.Errorf("total = %d, want 5 (2+3)", total)
 	}
@@ -86,7 +86,7 @@ func TestRunDelayedPlays_FiresEachQueuedCardOnce(t *testing.T) {
 
 // TestRunDelayedPlays_EmptyQueue short-circuits: no contribs, no allocation, zero total.
 func TestRunDelayedPlays_EmptyQueue(t *testing.T) {
-	contribs, total, revealed := runDelayedPlays(nil, nil)
+	contribs, total, _, revealed := runDelayedPlays(nil, nil)
 	if total != 0 {
 		t.Errorf("total = %d, want 0", total)
 	}
@@ -104,7 +104,7 @@ func TestRunDelayedPlays_EmptyQueue(t *testing.T) {
 func TestRunDelayedPlays_RevealsAttackActionIntoHand(t *testing.T) {
 	sigil := runeblade.SigilOfTheArknightBlue{}
 	slash := runeblade.AetherSlashRed{}
-	contribs, total, revealed := runDelayedPlays([]card.Card{sigil}, []card.Card{slash})
+	contribs, total, _, revealed := runDelayedPlays([]card.Card{sigil}, []card.Card{slash})
 	if total != 0 {
 		t.Errorf("total = %d, want 0 (reveal contributes via hand, not damage)", total)
 	}
@@ -122,7 +122,7 @@ func TestRunDelayedPlays_CascadingReveals(t *testing.T) {
 	sigil := runeblade.SigilOfTheArknightBlue{}
 	first := runeblade.AetherSlashRed{}
 	second := runeblade.ConsumingVolitionRed{}
-	_, _, revealed := runDelayedPlays([]card.Card{sigil, sigil}, []card.Card{first, second})
+	_, _, _, revealed := runDelayedPlays([]card.Card{sigil, sigil}, []card.Card{first, second})
 	if len(revealed) != 2 {
 		t.Fatalf("len(revealed) = %d, want 2 (two cascading reveals)", len(revealed))
 	}
@@ -136,7 +136,7 @@ func TestRunDelayedPlays_CascadingReveals(t *testing.T) {
 func TestRunDelayedPlays_NonAttackTopSkipsReveal(t *testing.T) {
 	sigil := runeblade.SigilOfTheArknightBlue{}
 	// Sigil itself is an Aura (non-attack) — use it as a convenient non-attack top.
-	_, total, revealed := runDelayedPlays([]card.Card{sigil}, []card.Card{sigil})
+	_, total, _, revealed := runDelayedPlays([]card.Card{sigil}, []card.Card{sigil})
 	if total != 0 {
 		t.Errorf("total = %d, want 0 (non-attack top, no credit)", total)
 	}
