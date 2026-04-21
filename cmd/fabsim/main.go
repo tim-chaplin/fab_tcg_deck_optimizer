@@ -51,8 +51,9 @@ func main() {
 	reevaluate := flag.Bool("reevaluate", false, "iterate: force re-evaluation of the loaded deck's baseline avg, even if its prior run count already matches -deep-shuffles. Use after adjusting modelling assumptions or fixing bugs that may have shifted the deck's true score.")
 	flag.Parse()
 	// Reject positional args after the subcommand so `fabsim eval mydeck` errors instead of
-	// silently ignoring the deck name.
-	if flag.NArg() > 0 {
+	// silently ignoring the deck name. The diff subcommand consumes exactly two positional
+	// deck names and is handled below, so skip the rejection for it.
+	if subcommand != "diff" && flag.NArg() > 0 {
 		die("unexpected positional argument(s): %v (did you mean -deck %s?)", flag.Args(), flag.Args()[0])
 	}
 	fmtValue, err := fmtpkg.Parse(*formatFlag)
@@ -75,6 +76,13 @@ func main() {
 		return
 	case "import":
 		runImport()
+		return
+	case "diff":
+		args := flag.Args()
+		if len(args) != 2 {
+			die("diff: need exactly 2 positional deck names (got %d)", len(args))
+		}
+		runDiff(args[0], args[1])
 		return
 	}
 
@@ -142,6 +150,7 @@ func printSubcommands(w io.Writer) {
 	fmt.Fprintln(w, "  eval      Re-score the saved deck at -deep-shuffles without overwriting it")
 	fmt.Fprintln(w, "  print     Print the saved deck without simulating")
 	fmt.Fprintln(w, "  import    Paste a fabrary.net deck into mydecks/<name>.json")
+	fmt.Fprintln(w, "  diff      Print the card-count delta between two saved decks (usage: fabsim diff <deck1> <deck2>)")
 	fmt.Fprintln(w)
 	fmt.Fprintln(w, "Run 'fabsim <subcommand> -help' for flag details.")
 }
