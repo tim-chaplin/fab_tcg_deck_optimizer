@@ -148,19 +148,19 @@ Hero health isn't tracked, so every life-gain and life-comparison rider collapse
 
 ### Aura / graveyard state
 
-- **Aura presence in graveyard is now checked.** Weeping Battleground, Sigil of Silphidae
-  (both enter and leave triggers), and Runic Fellingsong all scan `s.Graveyard` for a
-  banishable aura before crediting their arcane damage.
 - **"Played or created an aura this turn" is assumed true** for cards that don't yet use the
   live `AuraCreated` / `HasPlayedType(TypeAura)` check. Reek of Corruption, Hit the High Notes,
   and Shrill of Skullform all gate this correctly; Yinti Yanti does as well. Nothing else on the
   roster currently reads the clause.
+- **Malefic Incantation and Runeblood Incantation collapse multi-turn ticks.** Both auras
+  really tick once per turn over N turns; the sim credits the non-next-turn ticks as flat
+  damage on Play and only the first rune materialises as a live token (Malefic this turn when
+  an attack action follows, Runeblood next turn via PlayNextTurn).
 - **Cross-turn aura lifecycles are partially modelled.** `card.DelayedPlay` threads a
   PlayNextTurn callback through the deck loop for cards whose effect fires at the start of the
   owner's next action phase — Sigil of the Arknight peeks the actual post-draw top card next
   turn, Sigil of Fyendal credits its 1{h} gain on leave, Blessing of Occult / Sigil of Deadwood
-  / Runeblood Incantation create their Runechants on next turn's starting state, Malefic
-  Incantation routes to next turn's graveyard after ticking, and Sigil of Silphidae fires its
+  create their Runechants on next turn's starting state, and Sigil of Silphidae fires its
   leave-trigger banish on next turn's upkeep. Other cross-turn auras still collapse their
   effects into the immediate Play: Enchanting Melody (end-phase destruction clause dropped),
   Sigil of Cycles (on-leave discard/draw dropped).
