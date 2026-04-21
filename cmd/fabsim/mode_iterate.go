@@ -85,7 +85,7 @@ func prepareBaseline(cfg config, rng *rand.Rand) (*deck.Deck, float64) {
 	if best == nil {
 		fmt.Fprintf(os.Stderr, "no deck at %s; generating a random starting deck\n", cfg.outPath)
 		best = deck.Random(hero.Viserai{}, cfg.deckSize, cfg.maxCopies, rng, cfg.legalFilter())
-		bestAvg = best.Evaluate(cfg.deepShuffles, cfg.incoming, rng).Avg()
+		bestAvg = best.Evaluate(cfg.deepShuffles, cfg.incoming, rng).Mean()
 		_ = writeDeck(best, cfg.outPath)
 		fmt.Printf("Starting deck avg %.3f, saved to %s\n", bestAvg, cfg.outPath)
 		fmt.Println()
@@ -100,7 +100,7 @@ func prepareBaseline(cfg config, rng *rand.Rand) (*deck.Deck, float64) {
 		fmt.Printf("Loaded best deck (avg %.3f %s); re-evaluating at %d shuffles for an apples-to-apples baseline\n",
 			bestAvg, reason, cfg.deepShuffles)
 		best = deck.New(best.Hero, best.Weapons, best.Cards)
-		bestAvg = best.Evaluate(cfg.deepShuffles, cfg.incoming, rng).Avg()
+		bestAvg = best.Evaluate(cfg.deepShuffles, cfg.incoming, rng).Mean()
 		_ = writeDeck(best, cfg.outPath)
 		fmt.Printf("Re-evaluated baseline avg %.3f, saved to %s\n", bestAvg, cfg.outPath)
 		fmt.Println()

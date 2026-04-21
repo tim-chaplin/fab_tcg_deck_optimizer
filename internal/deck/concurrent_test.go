@@ -59,7 +59,7 @@ func TestEvaluateWith_ConcurrentNoMapPanic(t *testing.T) {
 func TestIterateParallel_RunsWithoutPanic(t *testing.T) {
 	rng := rand.New(rand.NewSource(42))
 	baseline := Random(hero.Viserai{}, 40, 2, rng, nil)
-	baseAvg := baseline.Evaluate(10, 0, rng).Avg()
+	baseAvg := baseline.Evaluate(10, 0, rng).Mean()
 	mutations := AllMutations(baseline, 2, nil)
 	// Cap mutations so the test stays under a second; full list is thousands of entries.
 	if len(mutations) > 40 {
@@ -106,7 +106,7 @@ func TestIterateParallel_RunsWithoutPanic(t *testing.T) {
 func TestIterateParallel_AbortsOnContextCancel(t *testing.T) {
 	rng := rand.New(rand.NewSource(42))
 	baseline := Random(hero.Viserai{}, 40, 2, rng, nil)
-	baseAvg := baseline.Evaluate(10, 0, rng).Avg()
+	baseAvg := baseline.Evaluate(10, 0, rng).Mean()
 	mutations := AllMutations(baseline, 2, nil)
 
 	ctx, cancel := context.WithCancel(context.Background())

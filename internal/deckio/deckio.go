@@ -35,13 +35,17 @@ type PitchCountsJSON struct {
 
 // StatsJSON mirrors deck.Stats with card references flattened to names.
 type StatsJSON struct {
-	Runs        int                    `json:"runs"`
-	Hands       int                    `json:"hands"`
-	TotalValue  float64                `json:"total_value"`
-	FirstCycle  deck.CycleStats        `json:"first_cycle"`
-	SecondCycle deck.CycleStats        `json:"second_cycle"`
-	Best        BestTurnJSON           `json:"best"`
-	PerCard     []CardPlayStatsJSON    `json:"per_card,omitempty"`
+	Runs        int                 `json:"runs"`
+	Hands       int                 `json:"hands"`
+	TotalValue  float64             `json:"total_value"`
+	FirstCycle  deck.CycleStats     `json:"first_cycle"`
+	SecondCycle deck.CycleStats     `json:"second_cycle"`
+	Best        BestTurnJSON        `json:"best"`
+	PerCard     []CardPlayStatsJSON `json:"per_card,omitempty"`
+	// Histogram counts hands seen at each Value. encoding/json writes int-keyed maps with the
+	// int formatted as a string ("7": 42), which round-trips fine since we declare the field
+	// as map[int]int. Omitted when empty so old files stay valid.
+	Histogram map[int]int `json:"histogram,omitempty"`
 }
 
 // CardPlayStatsJSON is the JSON form of deck.CardPlayStats keyed by card name. Avg is included
@@ -134,6 +138,7 @@ func statsToJSON(s deck.Stats) StatsJSON {
 		SecondCycle: s.SecondCycle,
 		Best:        bestTurnToJSON(s.Best),
 		PerCard:     perCardToJSON(s.PerCard),
+		Histogram:   s.Histogram,
 	}
 }
 
@@ -245,6 +250,7 @@ func fromJSON(dj *DeckJSON) (*deck.Deck, error) {
 		SecondCycle: dj.Stats.SecondCycle,
 		Best:        best,
 		PerCard:     perCard,
+		Histogram:   dj.Stats.Histogram,
 	}
 	return d, nil
 }
