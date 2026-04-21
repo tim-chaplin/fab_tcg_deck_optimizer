@@ -19,13 +19,12 @@ func TestMeatAndGreet_OnHitRunechantGatedByLikelyToHit(t *testing.T) {
 		{MeatAndGreetBlue{}, 2},
 	}
 	for _, tc := range cases {
-		pc := &card.PlayedCard{Card: tc.c}
-		s := card.TurnState{Self: pc}
+		s := card.TurnState{}
 		if got := tc.c.Play(&s); got != tc.wantDmg {
 			t.Errorf("%s: Play() = %d, want %d", tc.c.Name(), got, tc.wantDmg)
 		}
-		if pc.GrantedGoAgain {
-			t.Errorf("%s: GrantedGoAgain = true, want false (no prior arcane damage → no go again)", tc.c.Name())
+		if s.SelfGoAgain {
+			t.Errorf("%s: SelfGoAgain = true, want false (no prior arcane damage → no go again)", tc.c.Name())
 		}
 		// Card's printed GoAgain must also be false — the rider is the only source.
 		if tc.c.GoAgain() {
@@ -36,7 +35,7 @@ func TestMeatAndGreet_OnHitRunechantGatedByLikelyToHit(t *testing.T) {
 
 // TestMeatAndGreet_ArcaneDamageDealtGrantsGoAgain exercises the satisfied branch: when
 // ArcaneDamageDealt is set at the start of Play, arcane damage has already been (or is about to
-// be) dealt this turn, so the conditional go again fires via Self.GrantedGoAgain.
+// be) dealt this turn, so the conditional go again fires via SelfGoAgain.
 func TestMeatAndGreet_ArcaneDamageDealtGrantsGoAgain(t *testing.T) {
 	cases := []card.Card{
 		MeatAndGreetRed{},
@@ -44,11 +43,10 @@ func TestMeatAndGreet_ArcaneDamageDealtGrantsGoAgain(t *testing.T) {
 		MeatAndGreetBlue{},
 	}
 	for _, c := range cases {
-		pc := &card.PlayedCard{Card: c}
-		s := card.TurnState{Self: pc, ArcaneDamageDealt: true}
+		s := card.TurnState{ArcaneDamageDealt: true}
 		_ = c.Play(&s)
-		if !pc.GrantedGoAgain {
-			t.Errorf("%s: GrantedGoAgain = false, want true (ArcaneDamageDealt → go again)", c.Name())
+		if !s.SelfGoAgain {
+			t.Errorf("%s: SelfGoAgain = false, want true (ArcaneDamageDealt → go again)", c.Name())
 		}
 	}
 }

@@ -5,7 +5,7 @@
 // again**."
 //
 // The on-hit Gold token is modelled as +1 damage-equivalent (one resource worth), gated on
-// card.LikelyToHit. The arsenal-conditional Go again fires via Self.GrantedGoAgain when
+// card.LikelyToHit. The arsenal-conditional Go again fires via SelfGoAgain when
 // card.PlayedFromArsenal reports this copy came from the arsenal slot.
 //
 // Source: github.com/the-fab-cube/flesh-and-blood-cards (card.csv).
@@ -25,11 +25,11 @@ func performanceBonusDamage(attack int) int {
 	return attack
 }
 
-// performanceBonusPlay credits the on-hit Gold token and grants Self.GrantedGoAgain when this
+// performanceBonusPlay credits the on-hit Gold token and grants SelfGoAgain when this
 // copy was played from arsenal.
 func performanceBonusPlay(c card.Card, s *card.TurnState) int {
 	if card.PlayedFromArsenal(s) {
-		s.Self.GrantedGoAgain = true
+		s.SelfGoAgain = true
 	}
 	return performanceBonusDamage(c.Attack())
 }

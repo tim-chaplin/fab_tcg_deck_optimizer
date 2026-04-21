@@ -2,9 +2,9 @@
 // Printed power: Red 3, Yellow 2, Blue 1.
 // Text: "If you've played or created an aura this turn, this gets go again."
 //
-// Go again is CONDITIONAL — it's not a printed keyword but a text-granted effect. Play flips
-// TurnState.Self.GrantedGoAgain when the aura condition is met so the chain-legality check sees
-// the grant.
+// Go again is CONDITIONAL — it's not a printed keyword but a text-granted effect. Play sets
+// TurnState.SelfGoAgain when the aura condition is met so the chain-legality check sees the
+// grant.
 //
 // Source: github.com/the-fab-cube/flesh-and-blood-cards (card.csv).
 
@@ -58,7 +58,7 @@ func (c RuneragerSwarmBlue) Play(s *card.TurnState) int {
 
 func runeragerSwarmPlay(base int, s *card.TurnState) int {
 	if s.HasAuraInPlay() {
-		s.Self.GrantedGoAgain = true
+		s.SelfGoAgain = true
 	}
 	return base
 }

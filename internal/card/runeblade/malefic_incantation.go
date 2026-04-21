@@ -23,14 +23,12 @@ import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 var maleficTypes = card.NewTypeSet(card.TypeRuneblade, card.TypeAction, card.TypeAura)
 
 // maleficPlay fires a Runechant when a future attack will pop a counter this turn, and moves
-// the aura to the graveyard in that case. Remaining n-1 counters are credited as flat damage.
+// self to the graveyard in that case. Remaining n-1 counters are credited as flat damage.
 // Without a follow-up attack, the aura lingers for PlayNextTurn to destroy.
-func maleficPlay(s *card.TurnState, n int) int {
+func maleficPlay(s *card.TurnState, self card.Card, n int) int {
 	s.AuraCreated = true
 	if hasFutureAttack(s) {
-		if s.Self != nil {
-			s.AddToGraveyard(s.Self.Card)
-		}
+		s.AddToGraveyard(self)
 		return s.CreateRunechant() + (n - 1)
 	}
 	return n - 1
@@ -66,7 +64,7 @@ func (MaleficIncantationRed) Attack() int                 { return 0 }
 func (MaleficIncantationRed) Defense() int                { return 2 }
 func (MaleficIncantationRed) Types() card.TypeSet         { return maleficTypes }
 func (MaleficIncantationRed) GoAgain() bool               { return true }
-func (MaleficIncantationRed) Play(s *card.TurnState) int  { return maleficPlay(s, 3) }
+func (c MaleficIncantationRed) Play(s *card.TurnState) int  { return maleficPlay(s, c, 3) }
 func (c MaleficIncantationRed) PlayNextTurn(s *card.TurnState) card.DelayedPlayResult {
 	return maleficNextTurn(s, c)
 }
@@ -81,7 +79,7 @@ func (MaleficIncantationYellow) Attack() int                 { return 0 }
 func (MaleficIncantationYellow) Defense() int                { return 2 }
 func (MaleficIncantationYellow) Types() card.TypeSet         { return maleficTypes }
 func (MaleficIncantationYellow) GoAgain() bool               { return true }
-func (MaleficIncantationYellow) Play(s *card.TurnState) int  { return maleficPlay(s, 2) }
+func (c MaleficIncantationYellow) Play(s *card.TurnState) int  { return maleficPlay(s, c, 2) }
 func (c MaleficIncantationYellow) PlayNextTurn(s *card.TurnState) card.DelayedPlayResult {
 	return maleficNextTurn(s, c)
 }
@@ -96,7 +94,7 @@ func (MaleficIncantationBlue) Attack() int                 { return 0 }
 func (MaleficIncantationBlue) Defense() int                { return 2 }
 func (MaleficIncantationBlue) Types() card.TypeSet         { return maleficTypes }
 func (MaleficIncantationBlue) GoAgain() bool               { return true }
-func (MaleficIncantationBlue) Play(s *card.TurnState) int  { return maleficPlay(s, 1) }
+func (c MaleficIncantationBlue) Play(s *card.TurnState) int  { return maleficPlay(s, c, 1) }
 func (c MaleficIncantationBlue) PlayNextTurn(s *card.TurnState) card.DelayedPlayResult {
 	return maleficNextTurn(s, c)
 }

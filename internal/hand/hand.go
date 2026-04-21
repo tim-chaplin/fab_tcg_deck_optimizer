@@ -1540,7 +1540,8 @@ func (ctx *sequenceContext) playSequenceWithMeta(order []card.Card, perCardOut, 
 		}
 
 		state.CardsRemaining = played[i+1:]
-		state.Self = pc
+		state.SelfFromArsenal = pc.FromArsenal
+		state.SelfGoAgain = false
 
 		// If this card is an attack or weapon and any Runechant is live, those tokens fire on
 		// its damage step. Set ArcaneDamageDealt now — before Play and OnCardPlayed — so Play
@@ -1559,6 +1560,9 @@ func (ctx *sequenceContext) playSequenceWithMeta(order []card.Card, perCardOut, 
 		}
 		if perCardTriggerOut != nil {
 			perCardTriggerOut[i] = float64(triggerDmg)
+		}
+		if state.SelfGoAgain {
+			pc.GrantedGoAgain = true
 		}
 		state.CardsPlayed = append(state.CardsPlayed, pc.Card)
 		// Only Actions, Attack Reactions, Defense Reactions, and Instants head to the graveyard

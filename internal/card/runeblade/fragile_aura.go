@@ -15,18 +15,16 @@ import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 // hits" trigger ignores weapon swings, so it passes true. Cussing's looser "deal damage"
 // trigger fires off any attacker, so it passes false.
 //
-// In the 0-bonus branch the aura was destroyed this turn by opponent damage, so the card moves
+// In the 0-bonus branch the aura was destroyed this turn by opponent damage, so self moves
 // to the graveyard immediately (otherwise auras stay in play until a destroy condition fires).
-func fragileAuraValue(s *card.TurnState, n int, attackActionOnly bool) int {
+func fragileAuraValue(s *card.TurnState, self card.Card, n int, attackActionOnly bool) int {
 	if popsThisTurn(s, attackActionOnly) {
 		return n
 	}
 	if s.BlockTotal >= s.IncomingDamage {
 		return n
 	}
-	if s.Self != nil {
-		s.AddToGraveyard(s.Self.Card)
-	}
+	s.AddToGraveyard(self)
 	return 0
 }
 

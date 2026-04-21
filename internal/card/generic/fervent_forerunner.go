@@ -5,7 +5,7 @@
 // gains **go again**."
 //
 // Modelling: on-hit Opt 2 isn't modelled. The played-from-arsenal go-again fires via
-// Self.GrantedGoAgain when card.PlayedFromArsenal reports this copy came from the arsenal
+// SelfGoAgain when card.PlayedFromArsenal reports this copy came from the arsenal
 // slot. GoAgain() stays false so hand-played copies don't get the grant.
 //
 // Source: github.com/the-fab-cube/flesh-and-blood-cards (card.csv).
@@ -16,10 +16,10 @@ import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 
 var ferventForerunnerTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeAttack)
 
-// ferventForerunnerPlay grants Self.GrantedGoAgain when this copy was played from arsenal.
+// ferventForerunnerPlay grants SelfGoAgain when this copy was played from arsenal.
 func ferventForerunnerPlay(c card.Card, s *card.TurnState) int {
 	if card.PlayedFromArsenal(s) {
-		s.Self.GrantedGoAgain = true
+		s.SelfGoAgain = true
 	}
 	return c.Attack()
 }

@@ -15,12 +15,9 @@ var zealousBeltingTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, car
 // zealousBeltingPlay grants go again when any pitched card this turn has base power greater
 // than the card's own base power.
 func zealousBeltingPlay(base int, s *card.TurnState) int {
-	if s == nil || s.Self == nil {
-		return base
-	}
 	for _, p := range s.Pitched {
 		if p.Attack() > base {
-			s.Self.GrantedGoAgain = true
+			s.SelfGoAgain = true
 			break
 		}
 	}

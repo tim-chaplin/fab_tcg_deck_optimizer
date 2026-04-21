@@ -27,8 +27,6 @@ func TestSmashingGoodTime_NonAttackInRemainingFizzles(t *testing.T) {
 // TestSmashingGoodTime_NextAttackReturnsBonus: arsenal-played copy with a queued attack action
 // triggers the per-variant bonus (Red +3, Yellow +2, Blue +1).
 func TestSmashingGoodTime_NextAttackReturnsBonus(t *testing.T) {
-	self := &card.PlayedCard{FromArsenal: true}
-	s := card.TurnState{Self: self, CardsRemaining: []*card.PlayedCard{{Card: stubGenericAttack(0, 0)}}}
 	cases := []struct {
 		c    card.Card
 		want int
@@ -38,7 +36,10 @@ func TestSmashingGoodTime_NextAttackReturnsBonus(t *testing.T) {
 		{SmashingGoodTimeBlue{}, 1},
 	}
 	for _, tc := range cases {
-		self.Card = tc.c
+		s := card.TurnState{
+			SelfFromArsenal: true,
+			CardsRemaining:  []*card.PlayedCard{{Card: stubGenericAttack(0, 0)}},
+		}
 		if got := tc.c.Play(&s); got != tc.want {
 			t.Errorf("%s: Play() = %d, want %d", tc.c.Name(), got, tc.want)
 		}
@@ -47,12 +48,8 @@ func TestSmashingGoodTime_NextAttackReturnsBonus(t *testing.T) {
 
 // TestSmashingGoodTime_HandPlayedFizzles: hand-played copy fails the from-arsenal gate.
 func TestSmashingGoodTime_HandPlayedFizzles(t *testing.T) {
-	s := card.TurnState{
-		Self:           &card.PlayedCard{Card: SmashingGoodTimeRed{}},
-		CardsRemaining: []*card.PlayedCard{{Card: stubGenericAttack(0, 0)}},
-	}
 	for _, c := range []card.Card{SmashingGoodTimeRed{}, SmashingGoodTimeYellow{}, SmashingGoodTimeBlue{}} {
-		s.Self.Card = c
+		s := card.TurnState{CardsRemaining: []*card.PlayedCard{{Card: stubGenericAttack(0, 0)}}}
 		if got := c.Play(&s); got != 0 {
 			t.Errorf("%s: Play() = %d, want 0 (hand-played)", c.Name(), got)
 		}

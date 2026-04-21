@@ -100,8 +100,7 @@ type PlayedCard struct {
 	GrantedGoAgain bool
 	// FromArsenal flags the single PlayedCard whose Card came from the arsenal slot at start of
 	// turn. The solver sets it before the chain runs; PlayedCards for hand cards and mid-turn
-	// extensions stay false. Effects gated on "if this is played from arsenal" read the
-	// helper card.PlayedFromArsenal(s) which checks s.Self.FromArsenal.
+	// extensions stay false.
 	FromArsenal bool
 }
 
@@ -130,11 +129,15 @@ type TurnState struct {
 	// Pitched is the cards pitched this turn for resources. Populated by the solver before any
 	// Play. Effects that check "if an attack card was pitched" scan this list.
 	Pitched []Card
-	// Self is the PlayedCard wrapper for the card currently being played. Effects that
-	// conditionally grant the played card itself Go again (e.g. Runerager Swarm) flip
-	// Self.GrantedGoAgain. The solver populates Self before each Play and consults
-	// EffectiveGoAgain after.
-	Self *PlayedCard
+	// SelfFromArsenal is true for the single Play call whose card came from the arsenal slot at
+	// start of turn. The solver flips it on before calling Play and clears it afterwards.
+	// Effects gated on "if this is played from arsenal" read PlayedFromArsenal(s), which checks
+	// this flag.
+	SelfFromArsenal bool
+	// SelfGoAgain is set by a card's Play to grant itself Go again for this chain (e.g. when
+	// Runerager Swarm's aura-played-this-turn rider fires). The solver reads it after Play
+	// returns and, if true, marks the card's PlayedCard.GrantedGoAgain.
+	SelfGoAgain bool
 	// Overpower is set when an attack with the Overpower keyword is being played. Not yet
 	// consumed by the solver — blocked damage should eventually be forwarded to the hero when
 	// Overpower is true.
@@ -186,10 +189,10 @@ type TurnState struct {
 }
 
 // PlayedFromArsenal reports whether the card currently being played came from the arsenal
-// slot. Reads Self.FromArsenal — the solver flips that flag on the PlayedCard wrapper for the
-// arsenal-in attacker before the chain runs. Returns false when there is no Self.
+// slot. Reads s.SelfFromArsenal — the solver flips that flag on before calling Play for the
+// arsenal-in attacker.
 func PlayedFromArsenal(s *TurnState) bool {
-	return s != nil && s.Self != nil && s.Self.FromArsenal
+	return s != nil && s.SelfFromArsenal
 }
 
 // AddToGraveyard moves c into the graveyard — the single entry point every card implementation

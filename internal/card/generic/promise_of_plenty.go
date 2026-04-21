@@ -6,7 +6,7 @@
 // gains **go again**."
 //
 // Modelling: The arsenal-placement rider isn't modelled (arsenal/deck content tracking would
-// be required). The played-from-arsenal go-again fires via Self.GrantedGoAgain when
+// be required). The played-from-arsenal go-again fires via SelfGoAgain when
 // card.PlayedFromArsenal reports this copy came from the arsenal slot.
 //
 // Source: github.com/the-fab-cube/flesh-and-blood-cards (card.csv).
@@ -17,10 +17,10 @@ import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 
 var promiseOfPlentyTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeAttack)
 
-// promiseOfPlentyPlay grants Self.GrantedGoAgain when this copy was played from arsenal.
+// promiseOfPlentyPlay grants SelfGoAgain when this copy was played from arsenal.
 func promiseOfPlentyPlay(c card.Card, s *card.TurnState) int {
 	if card.PlayedFromArsenal(s) {
-		s.Self.GrantedGoAgain = true
+		s.SelfGoAgain = true
 	}
 	return c.Attack()
 }

@@ -45,9 +45,7 @@ func TestMaleficIncantation_FollowingAttackPopsCounter(t *testing.T) {
 		{MaleficIncantationBlue{}, 1},
 	}
 	for _, tc := range cases {
-		self := &card.PlayedCard{Card: tc.c}
 		s := card.TurnState{
-			Self:           self,
 			CardsRemaining: []*card.PlayedCard{{Card: stubRunebladeAttack{}}},
 		}
 		if got := tc.c.Play(&s); got != tc.want {

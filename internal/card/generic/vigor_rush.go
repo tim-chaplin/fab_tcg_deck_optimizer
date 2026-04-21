@@ -4,8 +4,8 @@
 // Text: "If you have played a 'non-attack' action card this turn, Vigor Rush gains **go again**."
 //
 // Go again is conditional on a prior non-attack action, so GoAgain() returns false and
-// vigorRushPlay flips Self.GrantedGoAgain when the condition fires. Returning true from
-// GoAgain() unconditionally would over-credit sequences with no non-attack action played.
+// vigorRushPlay sets SelfGoAgain when the condition fires. Returning true from GoAgain()
+// unconditionally would over-credit sequences with no non-attack action played.
 //
 // Source: github.com/the-fab-cube/flesh-and-blood-cards (card.csv).
 
@@ -17,12 +17,9 @@ var vigorRushTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.Typ
 
 // vigorRushPlay grants go again when any non-attack Action has been played earlier this turn.
 func vigorRushPlay(base int, s *card.TurnState) int {
-	if s == nil || s.Self == nil {
-		return base
-	}
 	for _, pl := range s.CardsPlayed {
 		if pl.Types().IsNonAttackAction() {
-			s.Self.GrantedGoAgain = true
+			s.SelfGoAgain = true
 			break
 		}
 	}

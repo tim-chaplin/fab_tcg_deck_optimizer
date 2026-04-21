@@ -154,13 +154,10 @@ func yintiYantiPlay(base int, s *card.TurnState) int {
     "Vigor Rush": dict(
         helper="""// vigorRushPlay grants go again when any non-attack Action has been played earlier this turn.
 func vigorRushPlay(base int, s *card.TurnState) int {
-\tif s == nil || s.Self == nil {
-\t\treturn base
-\t}
 \tfor _, pl := range s.CardsPlayed {
 \t\tt := pl.Types()
 \t\tif t.Has(card.TypeAction) && !t.Has(card.TypeAttack) {
-\t\t\ts.Self.GrantedGoAgain = true
+\t\t\ts.SelfGoAgain = true
 \t\t\tbreak
 \t\t}
 \t}
@@ -176,12 +173,9 @@ func vigorRushPlay(base int, s *card.TurnState) int {
         helper="""// zealousBeltingPlay grants go again when any pitched card this turn has base power greater
 // than the card's own base power.
 func zealousBeltingPlay(base int, s *card.TurnState) int {
-\tif s == nil || s.Self == nil {
-\t\treturn base
-\t}
 \tfor _, p := range s.Pitched {
 \t\tif p.Attack() > base {
-\t\t\ts.Self.GrantedGoAgain = true
+\t\t\ts.SelfGoAgain = true
 \t\t\tbreak
 \t\t}
 \t}

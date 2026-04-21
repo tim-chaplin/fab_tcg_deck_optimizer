@@ -8,8 +8,8 @@
 //   - The on-hit Runechant fires only when the attack's printed power satisfies
 //     card.LikelyToHit; when it does, the token is credited as +1 damage via CreateRunechant
 //     (which also sets AuraCreated). Blockable-power variants drop the rider.
-//   - The go-again rider reads TurnState.ArcaneDamageDealt; when live, grants Self.GrantedGoAgain
-//     so the solver's chain legality reflects the conditional. The card's own Runechant fires
+//   - The go-again rider reads TurnState.ArcaneDamageDealt; when live, sets SelfGoAgain so
+//     the solver's chain-legality check sees the conditional. The card's own Runechant fires
 //     on a future turn, so it can't satisfy its own rider.
 //
 // Source: github.com/the-fab-cube/flesh-and-blood-cards (card.csv).
@@ -20,13 +20,13 @@ import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 
 var meatAndGreetTypes = card.NewTypeSet(card.TypeRuneblade, card.TypeAction, card.TypeAttack)
 
-// meatAndGreetPlay is the shared Play implementation. Go again goes on Self.GrantedGoAgain
-// (not the printed GoAgain) so the rider stays conditional on ArcaneDamageDealt. The on-hit
-// Runechant rider is gated on card.LikelyToHit, mirroring how other on-hit rider cards treat
-// blockable attacks.
+// meatAndGreetPlay is the shared Play implementation. Go again goes on SelfGoAgain (not the
+// printed GoAgain) so the rider stays conditional on ArcaneDamageDealt. The on-hit Runechant
+// rider is gated on card.LikelyToHit, mirroring how other on-hit rider cards treat blockable
+// attacks.
 func meatAndGreetPlay(c card.Card, s *card.TurnState) int {
-	if s.ArcaneDamageDealt && s.Self != nil {
-		s.Self.GrantedGoAgain = true
+	if s.ArcaneDamageDealt {
+		s.SelfGoAgain = true
 	}
 	if card.LikelyToHit(c.Attack()) {
 		return c.Attack() + s.CreateRunechant()
