@@ -55,12 +55,13 @@ called out in the sections below — landing any of them unlocks a subset of the
 ### On-hit / combat interactions
 
 - **Attacks always hit.** Any "when this hits a hero…" rider is assumed to fire — the sim doesn't
-  model blocks. Affects Consuming Volition, Weeping Battleground, Reek of Corruption, Runic
-  Reaping, Oath of the Arknight. Also lets on-hit riders on Jack Be Nimble / Jack Be Quick
-  (steal), Snatch (draw), Rifting (instant cast), Life for a Life (1{h}), Blow for a Blow
-  (1 damage), Fervent Forerunner (Opt 2), Regain Composure (unfreeze) count as always firing
-  (but the riders themselves aren't wired in yet — see below). Mauvrion Skies's and Meat and
-  Greet's "if hits" clauses are modelled via `card.LikelyToHit` on the attack's printed power.
+  model blocks. Affects Weeping Battleground, Reek of Corruption, Runic Reaping. Also lets
+  on-hit riders on Jack Be Nimble / Jack Be Quick (steal), Snatch (draw), Rifting (instant
+  cast), Life for a Life (1{h}), Blow for a Blow (1 damage), Fervent Forerunner (Opt 2),
+  Regain Composure (unfreeze) count as always firing (but the riders themselves aren't wired
+  in yet — see below). Mauvrion Skies, Meat and Greet, Consuming Volition, and Oath of the
+  Arknight all gate their "if hits" clauses via `card.LikelyToHit` on the attack's printed
+  power.
 - **Dominate isn't modelled.** Drowning Dire, Overload, Pound for Pound, and Demolition Crew
   carry the keyword but the solver doesn't route around block partitioning.
 - **On-hit go-again isn't granted.** Overload's on-hit clause never fires.
@@ -379,16 +380,10 @@ listed here so the direction tag is co-located with the name.
   would prevent part of it.
 - **Runeblade Bloodspill Invocation (all colours)** — all N Runechants credited up front;
   incoming damage this turn would destroy the aura before the payoff fires.
-- **Runeblade Consuming Volition (all colours)** — on-hit discard credited whenever arcane was
-  already dealt this turn and LikelyToHit approves the attack; real trigger also needs the
-  attack to actually hit a hero, which a real opponent will block when possible.
 - **Runeblade Drowning Dire (all colours)** — Dominate keyword + AuraCreated flag both dropped
   while the printed power is left alone — partial under-count, but in contexts where a
   follow-up aura-reading card is present, Drowning Dire is materially overstated because the
   Dominate protection of that damage is not modelled.
-- **Runeblade Oath of the Arknight (all colours)** — Runechant always credited +1 damage; real
-  card requires a hit, and the follow-up Runeblade-attack rider is credited whenever a future
-  attack exists in turn order, not gated on the aura state resolving correctly.
 - **Runeblade Runic Reaping (all colours)** — "if hits" on the N Runechants is assumed live.
 - **Runeblade Sigil of Silphidae** — assumed we always have an aura to banish on both enter and
   leave, crediting 2 damage; real card fizzles both triggers when the graveyard is dry.
