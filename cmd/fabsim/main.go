@@ -212,6 +212,25 @@ func fabraryPathFor(jsonPath string) string {
 	return jsonPath + ".txt"
 }
 
+// printCardList writes the deck's card list in canonical "Card list:" form: one grouped-and-
+// sorted count-and-name line per unique card. Shared between printBestDeck and iterate's
+// starting-deck banner so both callers render decks the same way.
+func printCardList(d *deck.Deck) {
+	fmt.Println("Card list:")
+	counts := map[string]int{}
+	for _, c := range d.Cards {
+		counts[c.Name()]++
+	}
+	names := make([]string, 0, len(counts))
+	for n := range counts {
+		names = append(names, n)
+	}
+	sort.Strings(names)
+	for _, n := range names {
+		fmt.Printf("  %dx %s\n", counts[n], n)
+	}
+}
+
 func printBestDeck(d *deck.Deck) {
 	s := d.Stats
 	fmt.Printf("Best deck (avg %.3f over %d hands)\n", s.Avg(), s.Hands)
@@ -232,19 +251,7 @@ func printBestDeck(d *deck.Deck) {
 	}
 	fmt.Printf("  Pitch:   %d red / %d yellow / %d blue\n", red, yellow, blue)
 	fmt.Println()
-	fmt.Println("Card list:")
-	counts := map[string]int{}
-	for _, c := range d.Cards {
-		counts[c.Name()]++
-	}
-	names := make([]string, 0, len(counts))
-	for n := range counts {
-		names = append(names, n)
-	}
-	sort.Strings(names)
-	for _, n := range names {
-		fmt.Printf("  %dx %s\n", counts[n], n)
-	}
+	printCardList(d)
 
 	if b := s.Best; len(b.Summary.BestLine) > 0 {
 		fmt.Println()
@@ -301,9 +308,21 @@ func printPerCardStats(d *deck.Deck) {
 	fmt.Println()
 	fmt.Println("Card value (avg contribution per appearance: attack=power, defend=share of block, pitch=resource):")
 	for _, r := range rows {
-		fmt.Printf("  %-35s avg %6.3f over %4d hands (%4d plays, %4d pitches, %dx in deck)\n",
-			r.name, r.avg, r.plays+r.pitches, r.plays, r.pitches, r.deckCount)
+		fmt.Printf("  %-*s avg %6.3f over %4d hands (%4d plays, %4d pitches, %dx in deck)\n",
+			maxNameLen(d.Cards), r.name, r.avg, r.plays+r.pitches, r.plays, r.pitches, r.deckCount)
 	}
+}
+
+// maxNameLen returns the length of the longest Name() across the given cards, or 0 when empty.
+// Used to width fixed-width card-name columns in printed tables.
+func maxNameLen(cs []card.Card) int {
+	m := 0
+	for _, c := range cs {
+		if n := len(c.Name()); n > m {
+			m = n
+		}
+	}
+	return m
 }
 
 func weaponNames(ws []weapon.Weapon) string {

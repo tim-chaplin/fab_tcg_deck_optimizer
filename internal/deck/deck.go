@@ -37,18 +37,16 @@ func New(h hero.Hero, weapons []weapon.Weapon, cards []card.Card) *Deck {
 
 // Random generates a random legal deck for h: a random weapon loadout from cards.AllWeapons
 // (one 2H or two 1H; dual-wielding the same weapon allowed) and size cards drawn uniformly from
-// cards.Deckable() in pairs — every included printing appears exactly twice, or more up to
-// maxCopies if the same printing is rolled multiple times. size must be even and maxCopies ≥ 2.
+// cards.Deckable() one at a time, skipping any roll that would exceed maxCopies for the picked
+// ID. Matches the single-slot granularity of deck.AllMutations so the hill-climb can explore
+// the space the generator actually produces.
 //
 // legal filters the card pool: only IDs for which legal(cards.Get(id)) returns true are
 // candidates. Pass nil for no filtering. Callers typically wire format.Format.IsLegal through
 // here to restrict generation to a constructed format's banlist.
 func Random(h hero.Hero, size, maxCopies int, rng *rand.Rand, legal func(card.Card) bool) *Deck {
-	if size%2 != 0 {
-		panic(fmt.Sprintf("deck: Random requires even size (got %d) — cards are added in pairs", size))
-	}
-	if maxCopies < 2 {
-		panic(fmt.Sprintf("deck: Random requires maxCopies >= 2 (got %d) — cards are added in pairs", maxCopies))
+	if maxCopies < 1 {
+		panic(fmt.Sprintf("deck: Random requires maxCopies >= 1 (got %d)", maxCopies))
 	}
 	loadouts := weaponLoadouts(cards.AllWeapons)
 	weapons := loadouts[rng.Intn(len(loadouts))]
@@ -61,12 +59,11 @@ func Random(h hero.Hero, size, maxCopies int, rng *rand.Rand, legal func(card.Ca
 	picks := make([]card.Card, 0, size)
 	for len(picks) < size {
 		id := pool[rng.Intn(len(pool))]
-		if counts[id]+2 > maxCopies {
+		if counts[id]+1 > maxCopies {
 			continue
 		}
-		counts[id] += 2
-		c := cards.Get(id)
-		picks = append(picks, c, c)
+		counts[id]++
+		picks = append(picks, cards.Get(id))
 	}
 	return New(h, weapons, picks)
 }

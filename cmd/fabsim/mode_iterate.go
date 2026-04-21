@@ -88,6 +88,8 @@ func prepareBaseline(cfg config, rng *rand.Rand) (*deck.Deck, float64) {
 		bestAvg = best.Evaluate(cfg.deepShuffles, cfg.incoming, rng).Avg()
 		_ = writeDeck(best, cfg.outPath)
 		fmt.Printf("Starting deck avg %.3f, saved to %s\n", bestAvg, cfg.outPath)
+		fmt.Println()
+		printCardList(best)
 		return best, bestAvg
 	}
 	if cfg.reevaluate || best.Stats.Runs < cfg.deepShuffles {
@@ -101,9 +103,13 @@ func prepareBaseline(cfg config, rng *rand.Rand) (*deck.Deck, float64) {
 		bestAvg = best.Evaluate(cfg.deepShuffles, cfg.incoming, rng).Avg()
 		_ = writeDeck(best, cfg.outPath)
 		fmt.Printf("Re-evaluated baseline avg %.3f, saved to %s\n", bestAvg, cfg.outPath)
+		fmt.Println()
+		printCardList(best)
 		return best, bestAvg
 	}
 	fmt.Printf("Loaded best deck (avg %.3f) from %s\n", bestAvg, cfg.outPath)
+	fmt.Println()
+	printCardList(best)
 	return best, bestAvg
 }
 
