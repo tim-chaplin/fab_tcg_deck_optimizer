@@ -299,6 +299,8 @@ listed here so the direction tag is co-located with the name.
 - **On a Knife Edge (all colours)** — next-sword-attack go-again dropped (weapon chain not
   scanned).
 - **On the Horizon (all colours)** — deck-peek trigger dropped.
+- **Out Muscle (all colours)** — defender-power go-again gate dropped; the printed rider never
+  fires in the sim.
 - **Outed (all colours)** — +1{p} vs marked hero never fires.
 - **Performance Bonus (all colours)** — arsenal-conditional go-again dropped (on-hit Gold is
   credited).
@@ -368,9 +370,6 @@ listed here so the direction tag is co-located with the name.
 - **Lay Low (all colours)** — treated as always legal even without a marked defender; real card
   is uncastable when no hero is marked.
 - **Look Tuff** — pay {r}-or-lose-1{p} resolved as "always pay"; same shape as Bluster Buff.
-- **Out Muscle (all colours)** — printed Go again is kept unconditionally even though the real
-  card's go-again is gated on defender-power; when the gate would fail, chain legality is still
-  satisfied.
 - **Plunder Run (all colours)** — scan-target +N is credited unconditionally instead of only
   when the played-from-arsenal gate is met.
 - **Public Bounty (all colours)** — mark rider fires unconditionally; real card requires the

@@ -3,8 +3,9 @@
 //
 // Text: "While Out Muscle isn't defended by a card with equal or greater {p}, it has **go again**."
 //
-// Simplification: Defended-by-equal-or-greater-power gate isn't modelled; the printed Go again
-// keyword is kept.
+// Simplification: The defended-by-equal-or-greater-power gate isn't modelled, and go-again
+// stays off — the printed keyword is conditional on the opponent's block choice, not
+// unconditional.
 //
 // Source: github.com/the-fab-cube/flesh-and-blood-cards (card.csv).
 
@@ -23,7 +24,7 @@ func (OutMuscleRed) Pitch() int                  { return 1 }
 func (OutMuscleRed) Attack() int                 { return 6 }
 func (OutMuscleRed) Defense() int                { return 2 }
 func (OutMuscleRed) Types() card.TypeSet         { return outMuscleTypes }
-func (OutMuscleRed) GoAgain() bool               { return true }
+func (OutMuscleRed) GoAgain() bool               { return false }
 func (c OutMuscleRed) Play(s *card.TurnState) int { return c.Attack() }
 
 type OutMuscleYellow struct{}
@@ -35,7 +36,7 @@ func (OutMuscleYellow) Pitch() int                  { return 2 }
 func (OutMuscleYellow) Attack() int                 { return 5 }
 func (OutMuscleYellow) Defense() int                { return 2 }
 func (OutMuscleYellow) Types() card.TypeSet         { return outMuscleTypes }
-func (OutMuscleYellow) GoAgain() bool               { return true }
+func (OutMuscleYellow) GoAgain() bool               { return false }
 func (c OutMuscleYellow) Play(s *card.TurnState) int { return c.Attack() }
 
 type OutMuscleBlue struct{}
@@ -47,5 +48,5 @@ func (OutMuscleBlue) Pitch() int                  { return 3 }
 func (OutMuscleBlue) Attack() int                 { return 4 }
 func (OutMuscleBlue) Defense() int                { return 2 }
 func (OutMuscleBlue) Types() card.TypeSet         { return outMuscleTypes }
-func (OutMuscleBlue) GoAgain() bool               { return true }
+func (OutMuscleBlue) GoAgain() bool               { return false }
 func (c OutMuscleBlue) Play(s *card.TurnState) int { return c.Attack() }
