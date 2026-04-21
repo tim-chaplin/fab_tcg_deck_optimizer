@@ -1,12 +1,11 @@
-// Runic Fellingsong — Runeblade Action - Attack. Cost 3, Defense 3, printed 1 arcane.
+// Runic Fellingsong — Runeblade Action - Attack. Cost 3, Defense 3.
 // Printed pitch variants: Red 1, Yellow 2, Blue 3.
 // Printed power: Red 7, Yellow 6, Blue 5.
 // Text: "When this attacks, you may banish an aura from your graveyard. If you do, deal 1 arcane
 // damage to target hero."
 //
-// Play credits Attack() + printed 1 arcane + 1 more arcane when banishAuraFromGraveyard lands
-// an aura in s.Banish. No aura in the graveyard → the banish rider fizzles and Play returns
-// just Attack() + 1 (the printed arcane stays).
+// Play credits Attack() plus 1 arcane when banishAuraFromGraveyard lands an aura in s.Banish.
+// No aura in the graveyard → the banish rider fizzles and Play returns just Attack().
 //
 // Source: github.com/the-fab-cube/flesh-and-blood-cards (card.csv).
 
@@ -16,9 +15,9 @@ import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 
 var runicFellingsongTypes = card.NewTypeSet(card.TypeRuneblade, card.TypeAction, card.TypeAttack)
 
-// runicFellingsongPlay returns printed power + 1 arcane + (1 if the banish rider succeeds).
+// runicFellingsongPlay returns printed power + (1 if the banish rider succeeds).
 func runicFellingsongPlay(c card.Card, s *card.TurnState) int {
-	return c.Attack() + 1 + banishAuraFromGraveyard(s)
+	return c.Attack() + banishAuraFromGraveyard(s)
 }
 
 type RunicFellingsongRed struct{}
