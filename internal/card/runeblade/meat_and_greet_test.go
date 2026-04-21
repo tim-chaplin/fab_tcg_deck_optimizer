@@ -6,24 +6,23 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 )
 
-// TestMeatAndGreet_ArcaneDamageNotDealtNoGoAgain covers the unsatisfied branch: when
-// ArcaneDamageDealt is false the conditional "this gets go again" rider doesn't trigger.
-// GoAgain() returns false and Self.GrantedGoAgain stays unset. The attack damage still includes
-// the on-hit Runechant creation.
-func TestMeatAndGreet_ArcaneDamageNotDealtNoGoAgain(t *testing.T) {
+// TestMeatAndGreet_OnHitRunechantGatedByLikelyToHit: the Runechant rider fires only when the
+// variant's printed power satisfies card.LikelyToHit. Red (4) qualifies and gets +1 for the
+// token; Yellow (3) and Blue (2) are blockable and drop the rider.
+func TestMeatAndGreet_OnHitRunechantGatedByLikelyToHit(t *testing.T) {
 	cases := []struct {
 		c       card.Card
 		wantDmg int
 	}{
 		{MeatAndGreetRed{}, 4 + 1},
-		{MeatAndGreetYellow{}, 3 + 1},
-		{MeatAndGreetBlue{}, 2 + 1},
+		{MeatAndGreetYellow{}, 3},
+		{MeatAndGreetBlue{}, 2},
 	}
 	for _, tc := range cases {
 		pc := &card.PlayedCard{Card: tc.c}
 		s := card.TurnState{Self: pc}
 		if got := tc.c.Play(&s); got != tc.wantDmg {
-			t.Errorf("%s: Play() = %d, want %d (attack + created Runechant)", tc.c.Name(), got, tc.wantDmg)
+			t.Errorf("%s: Play() = %d, want %d", tc.c.Name(), got, tc.wantDmg)
 		}
 		if pc.GrantedGoAgain {
 			t.Errorf("%s: GrantedGoAgain = true, want false (no prior arcane damage → no go again)", tc.c.Name())
