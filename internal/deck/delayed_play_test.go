@@ -199,6 +199,42 @@ func TestEvalOneTurn_SigilOfTheArknightRevealsIntoHand(t *testing.T) {
 	}
 }
 
+// TestEvalOneTurn_BlessingOfOccultCreatesRunesAtStartOfNextTurn: turn 1's hand has a Red
+// Blessing of Occult plus a pitch filler to fund Blessing's 1-cost. Play contributes 0 this
+// turn (the 3 Runechants fire at next turn's upkeep via PlayNextTurn), but the solver still
+// plays Blessing so the DelayedPlay queue picks it up. Turn 2's starting state should have 3
+// Runechants in the carryover.
+func TestEvalOneTurn_BlessingOfOccultCreatesRunesAtStartOfNextTurn(t *testing.T) {
+	blessing := runeblade.BlessingOfOccultRed{}
+	pitch := fake.PitchOneDR{}
+	deckCards := []card.Card{
+		fake.BlueAttack{},
+		fake.BlueAttack{},
+		fake.BlueAttack{},
+		fake.BlueAttack{},
+	}
+	d := New(hero.Viserai{}, nil, deckCards)
+	state := d.EvalOneTurnForTesting(0, nil, []card.Card{blessing, pitch})
+
+	if state.PrevTurnValue != 0 {
+		t.Errorf("PrevTurnValue = %d, want 0 (Blessing's rune credit is deferred)", state.PrevTurnValue)
+	}
+	blessingPlayed := false
+	for _, a := range state.PrevTurnBestLine {
+		if a.Card.ID() == card.BlessingOfOccultRed && a.Role == hand.Attack {
+			blessingPlayed = true
+			break
+		}
+	}
+	if !blessingPlayed {
+		t.Errorf("turn 1 BestLine didn't play Blessing as Role=Attack: %+v", state.PrevTurnBestLine)
+	}
+	if state.RunechantCarryover != 3 {
+		t.Errorf("RunechantCarryover = %d, want 3 (Blessing's PlayNextTurn creates 3 tokens)",
+			state.RunechantCarryover)
+	}
+}
+
 // TestEvaluate_DelayedFromLastTurnSurfacesInBest runs a full Evaluate with Sigil of the
 // Arknight in the deck and asserts the PlayNextTurn callback lands a DelayedFromLastTurn
 // entry on at least some hand's TurnSummary. Uses enough copies + runs that the shuffle

@@ -734,8 +734,8 @@ func (d *Deck) EvalOneTurnForTesting(incomingDamage int, arsenalIn card.Card, in
 	}
 	// Fire turn-1 DelayedPlay callbacks now so top-of-deck reveals (Sigil of the Arknight) show
 	// up in the returned turn-2 hand, matching production behaviour where Best sees the
-	// augmented hand.
-	_, _, _, revealed := runDelayedPlays(delayedQueue, buf[head+drawCount2:tail])
+	// augmented hand. Runes created by the callbacks fold into the turn-2 starting carryover.
+	_, _, delayedRunes, revealed := runDelayedPlays(delayedQueue, buf[head+drawCount2:tail])
 	for range revealed {
 		turn2Hand = append(turn2Hand, buf[head+drawCount2])
 		drawCount2++
@@ -748,7 +748,7 @@ func (d *Deck) EvalOneTurnForTesting(incomingDamage int, arsenalIn card.Card, in
 		Hand:               handCopy,
 		ArsenalCard:        play.ArsenalCard,
 		Deck:               deckLeft,
-		RunechantCarryover: play.LeftoverRunechants,
+		RunechantCarryover: play.LeftoverRunechants + delayedRunes,
 		PrevTurnValue:      play.Value,
 		PrevTurnBestLine:   lineCopy,
 	}
