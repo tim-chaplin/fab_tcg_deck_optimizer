@@ -4,9 +4,9 @@
 // If you do, deal 1 arcane damage to target hero. At the beginning of your action phase, destroy
 // this."
 //
-// Simplifications: assume we always have an aura in the graveyard to banish on both the enter
-// and leave triggers, so Sigil of Silphidae is worth 2 damage when played. Cross-turn
-// aura-persistence isn't modelled; we collapse the effect to an immediate 2 value on play.
+// Play credits the enter trigger; PlayNextTurn fires when the aura leaves at the start of the
+// next action phase and credits the leave trigger. Both triggers currently still assume an aura
+// is available to banish — TODO: scan the graveyard so the clauses fizzle correctly.
 //
 // Source: github.com/the-fab-cube/flesh-and-blood-cards (card.csv).
 
@@ -18,16 +18,23 @@ var sigilOfSilphidaeTypes = card.NewTypeSet(card.TypeRuneblade, card.TypeAction,
 
 type SigilOfSilphidaeBlue struct{}
 
-func (SigilOfSilphidaeBlue) ID() card.ID                 { return card.SigilOfSilphidaeBlue }
-func (SigilOfSilphidaeBlue) Name() string           { return "Sigil of Silphidae (Blue)" }
-func (SigilOfSilphidaeBlue) Cost(*card.TurnState) int              { return 0 }
-func (SigilOfSilphidaeBlue) Pitch() int             { return 3 }
-func (SigilOfSilphidaeBlue) Attack() int            { return 0 }
-func (SigilOfSilphidaeBlue) Defense() int           { return 3 }
-func (SigilOfSilphidaeBlue) Types() card.TypeSet    { return sigilOfSilphidaeTypes }
-func (SigilOfSilphidaeBlue) GoAgain() bool          { return true }
+func (SigilOfSilphidaeBlue) ID() card.ID               { return card.SigilOfSilphidaeBlue }
+func (SigilOfSilphidaeBlue) Name() string              { return "Sigil of Silphidae (Blue)" }
+func (SigilOfSilphidaeBlue) Cost(*card.TurnState) int  { return 0 }
+func (SigilOfSilphidaeBlue) Pitch() int                { return 3 }
+func (SigilOfSilphidaeBlue) Attack() int               { return 0 }
+func (SigilOfSilphidaeBlue) Defense() int              { return 3 }
+func (SigilOfSilphidaeBlue) Types() card.TypeSet       { return sigilOfSilphidaeTypes }
+func (SigilOfSilphidaeBlue) GoAgain() bool             { return true }
 func (SigilOfSilphidaeBlue) Play(s *card.TurnState) int {
 	s.AuraCreated = true
-	s.ArcaneDamageDealt = true // the aura-banish riders deal 1 arcane each (enter + leave)
-	return 2
+	s.ArcaneDamageDealt = true // enter-trigger's banish-an-aura-for-1-arcane
+	return 1
+}
+
+// PlayNextTurn destroys the aura at the start of the next action phase and credits the leave
+// trigger's 1 arcane. TODO: gate the 1 arcane on an actual aura being present in the graveyard.
+func (SigilOfSilphidaeBlue) PlayNextTurn(s *card.TurnState) card.DelayedPlayResult {
+	s.DestroyThis()
+	return card.DelayedPlayResult{Damage: 1}
 }

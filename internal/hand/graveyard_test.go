@@ -89,3 +89,81 @@ func TestBest_WeepingBattlegroundIsolatedAcrossCalls(t *testing.T) {
 		t.Fatalf("Best repeatability broken: first=%d second=%d", first.Value, second.Value)
 	}
 }
+
+// TestBest_WeepingBattlegroundDoesNotRetroactivelyBanishAttackedAura: Weeping Battleground as a
+// DR runs before the attack chain, so a Malefic Incantation that ends up in the graveyard via
+// the attack chain can't retroactively credit WB's banish. The DR sees an empty graveyard
+// (there are no aura defenders) and returns 0. WB's defense Contribution is its proportional
+// share of the 3 prevented damage, with no banish bonus on top.
+func TestBest_WeepingBattlegroundDoesNotRetroactivelyBanishAttackedAura(t *testing.T) {
+	h := []card.Card{
+		runeblade.WeepingBattlegroundRed{},
+		runeblade.MaleficIncantationBlue{},
+		runeblade.HocusPocusRed{},
+	}
+	got := Best(stubHero{}, nil, h, 3, nil, 0, nil)
+	var wbDefend float64
+	foundWB := false
+	for _, a := range got.BestLine {
+		if a.Card.ID() != card.WeepingBattlegroundRed {
+			continue
+		}
+		foundWB = true
+		if a.Role != Defend {
+			t.Fatalf("Weeping Battleground role = %s, want DEFEND", a.Role)
+		}
+		wbDefend = a.Contribution
+	}
+	if !foundWB {
+		t.Fatalf("Weeping Battleground missing from BestLine: %s", FormatBestLine(got.BestLine))
+	}
+	// With WB as the sole defender (3 defense), it prevents 3 out of 3 incoming; its
+	// contribution equals the 3 prevented. A +1 banish-bonus would push this to 4.
+	if wbDefend != 3 {
+		t.Errorf("Weeping Battleground contribution = %v, want 3 (no retroactive aura banish). Roles=[%s]",
+			wbDefend, FormatBestLine(got.BestLine))
+	}
+}
+
+// TestPlaySequence_AuraWithFollowupIsDestroyedSameTurn: Malefic followed by Hocus pops a counter
+// on Malefic, which destroys it — the aura lands in state.Graveyard for the rest of the turn.
+// Confirms the attack-chain graveyard bookkeeping puts destroyed-this-turn auras into the
+// graveyard while leaving lingering auras (no follow-up) out of it.
+func TestPlaySequence_AuraWithFollowupIsDestroyedSameTurn(t *testing.T) {
+	malefic := runeblade.MaleficIncantationBlue{}
+	hocus := runeblade.HocusPocusRed{}
+	order := []card.Card{malefic, hocus}
+	ctx := newSequenceContextForTest(stubHero{}, nil, nil, 1_000_000, 0, len(order))
+	if _, _, _, legal := ctx.playSequence(order, nil, nil); !legal {
+		t.Fatalf("playSequence rejected Malefic → Hocus")
+	}
+	// Hocus is Action+Attack so it appears in the graveyard; Malefic is added by its own Play
+	// when it detects a future attack. The aura-with-no-followup case is covered by
+	// TestPlaySequence_AuraWithoutFollowupLingers.
+	foundMalefic := false
+	for _, c := range ctx.bufs.state.Graveyard {
+		if c.ID() == malefic.ID() {
+			foundMalefic = true
+		}
+	}
+	if !foundMalefic {
+		t.Errorf("Malefic missing from graveyard after a follow-up attack; got %v", ctx.bufs.state.Graveyard)
+	}
+}
+
+// TestPlaySequence_AuraWithoutFollowupLingers: playing an aura (Malefic) with nothing following
+// in the chain leaves it out of the graveyard — the aura stays in the arena and waits for
+// PlayNextTurn (next-turn) to destroy it.
+func TestPlaySequence_AuraWithoutFollowupLingers(t *testing.T) {
+	malefic := runeblade.MaleficIncantationBlue{}
+	order := []card.Card{malefic}
+	ctx := newSequenceContextForTest(stubHero{}, nil, nil, 1_000_000, 0, len(order))
+	if _, _, _, legal := ctx.playSequence(order, nil, nil); !legal {
+		t.Fatalf("playSequence rejected lone Malefic")
+	}
+	for _, c := range ctx.bufs.state.Graveyard {
+		if c.ID() == malefic.ID() {
+			t.Errorf("Malefic unexpectedly in graveyard without a follow-up attack: %v", ctx.bufs.state.Graveyard)
+		}
+	}
+}

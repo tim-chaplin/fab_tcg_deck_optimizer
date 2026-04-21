@@ -157,13 +157,20 @@ Hero health isn't tracked, so every life-gain and life-comparison rider collapse
   and Shrill of Skullform all gate this correctly; Yinti Yanti does as well. Nothing else on the
   roster currently reads the clause.
 - **Cross-turn aura lifecycles are partially modelled.** `card.DelayedPlay` threads a
-  PlayNextTurn callback through the deck loop for cards whose effect fires at the start of the
-  owner's next action phase — Sigil of the Arknight peeks the actual post-draw top card next
-  turn, and Sigil of Fyendal credits its 1{h} gain on leave the turn the aura resolves. Other
-  cross-turn auras still collapse their effects into the immediate Play: Blessing of Occult
-  (DelayRunechants), Sigil of Deadwood, Sigil of Silphidae (enter + leave both credited at
-  play), Enchanting Melody (end-phase destruction clause dropped), Sigil of Cycles (on-leave
-  discard/draw dropped).
+  PlayNextTurn callback through the deck loop for cards whose destroy condition fires at the
+  start of the owner's next action phase. Callbacks opt into destruction by calling
+  `s.DestroyThis()`; without it the aura persists and the callback fires again the following
+  turn. Sigil of the Arknight reveals into hand, Sigil of Fyendal credits 1{h}, Sigil of
+  Silphidae credits its leave-trigger arcane, Sigil of Deadwood creates its Runechant, Blessing
+  of Occult creates its N Runechants, and Sigil of Cycles / Sigil of Protection destroy
+  themselves without modelling their riders. Malefic Incantation assumes the aura dies same-
+  turn when any attack follows in CardsRemaining and otherwise lingers for one turn before
+  PlayNextTurn sweeps it. Other cross-turn auras still collapse their effects into the
+  immediate Play: Runeblood Incantation (DelayRunechants), Enchanting Melody (end-phase
+  destruction clause dropped), Sigil of Cycles (on-leave discard/draw dropped).
+- **Enchanting Melody's end-phase destruction condition isn't modelled.** The real card is
+  destroyed at end of turn unless a non-attack action card was played this turn; the sim keeps
+  the aura forever and collapses the damage-prevention trigger into just an AuraCreated flip.
 - **Graveyard-banish additional costs are ignored.** Gravekeeping, Jack Be Nimble, Jack Be Quick,
   Looking for a Scrap, and Nimble Strike treat the banish step as free and either drop the
   rider or credit it unconditionally where noted in the card.

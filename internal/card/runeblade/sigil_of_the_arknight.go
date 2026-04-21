@@ -40,6 +40,7 @@ func (SigilOfTheArknightBlue) Play(s *card.TurnState) int {
 // the hand for this turn's best-line search rather than collapsing the tempo into a flat
 // damage-equivalent.
 func (SigilOfTheArknightBlue) PlayNextTurn(s *card.TurnState) card.DelayedPlayResult {
+	s.DestroyThis()
 	if len(s.Deck) == 0 {
 		return card.DelayedPlayResult{}
 	}

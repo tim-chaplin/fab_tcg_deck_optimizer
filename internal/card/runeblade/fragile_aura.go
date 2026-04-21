@@ -14,12 +14,18 @@ import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 // attackActionOnly gates the same-turn-pop check. Bloodspill's "attack action card you control
 // hits" trigger ignores weapon swings, so it passes true. Cussing's looser "deal damage"
 // trigger fires off any attacker, so it passes false.
+//
+// In the 0-bonus branch the aura was destroyed this turn by opponent damage, so the card moves
+// to the graveyard immediately (otherwise auras stay in play until a destroy condition fires).
 func fragileAuraValue(s *card.TurnState, n int, attackActionOnly bool) int {
 	if popsThisTurn(s, attackActionOnly) {
 		return n
 	}
 	if s.BlockTotal >= s.IncomingDamage {
 		return n
+	}
+	if s.Self != nil {
+		s.Graveyard = append(s.Graveyard, s.Self.Card)
 	}
 	return 0
 }

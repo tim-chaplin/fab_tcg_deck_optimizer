@@ -162,24 +162,22 @@ func TestBest_AetherSlashAloneConsumesCarryover(t *testing.T) {
 	}
 }
 
-// TestBest_BlessingOfOccultTokensOnlyAppearNextTurn shows Blessing of Occult's tokens sit in
-// DelayedRunechants and don't interact with same-turn attacks or discount checks: they only
-// surface as LeftoverRunechants into the next turn.
+// TestBest_BlessingOfOccultTokensOnlyAppearNextTurn shows Blessing of Occult's Runechant payoff
+// fires on the turn the aura leaves the arena via PlayNextTurn — this turn's Play returns 0 and
+// the tokens stay out of LeftoverRunechants too. Red Malefic (pitch 1) funds Blessing's 1-cost;
+// Malefic's 3 counters are not modelled same-turn since nothing follows in CardsRemaining, so
+// Malefic's Play returns 2 (n-1) and the aura lingers for PlayNextTurn to sweep.
 func TestBest_BlessingOfOccultTokensOnlyAppearNextTurn(t *testing.T) {
-	// Red Malefic (cost 0, pitch 1, flat N=3 with no follow-up) + Red Blessing (cost 1, pitch 1,
-	// Play returns 3 via DelayRunechants(3)). Two Value=3 partitions tie (pitch Malefic / attack
-	// Blessing, or vice versa); the solver's leftover tie-break picks the Blessing chain because
-	// its 3 delayed tokens carry over.
 	h := []card.Card{
 		runeblade.MaleficIncantationRed{},
 		runeblade.BlessingOfOccultRed{},
 	}
 	got := Best(stubHero{}, nil, h, 0, nil, 0, nil)
-	if got.Value != 3 {
-		t.Errorf("Value = %d, want 3", got.Value)
+	if got.Value != 2 {
+		t.Errorf("Value = %d, want 2 (Malefic-only: n-1 flat; Blessing deferred)", got.Value)
 	}
-	if got.LeftoverRunechants != 3 {
-		t.Errorf("LeftoverRunechants = %d, want 3 (0 live + 3 delayed from Blessing)",
+	if got.LeftoverRunechants != 0 {
+		t.Errorf("LeftoverRunechants = %d, want 0 (Blessing's payoff is in PlayNextTurn, not this turn)",
 			got.LeftoverRunechants)
 	}
 }

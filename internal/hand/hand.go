@@ -1619,7 +1619,12 @@ func (ctx *sequenceContext) playSequenceWithMeta(order []card.Card, perCardOut, 
 			perCardTriggerOut[i] = float64(triggerDmg)
 		}
 		state.CardsPlayed = append(state.CardsPlayed, pc.Card)
-		state.Graveyard = append(state.Graveyard, pc.Card)
+		// Only Actions, Attack Reactions, Defense Reactions, and Instants head to the graveyard
+		// the moment they resolve. Persistent types (Auras, Items, Weapons, …) stay in their
+		// zone until a destroy condition fires — typically on a later turn via DelayedPlay.
+		if m.types.GraveyardOnResolve() {
+			state.Graveyard = append(state.Graveyard, pc.Card)
+		}
 
 		// Attacks and weapon swings consume all runechants in play. Damage isn't re-added: each
 		// token was credited +1 at creation time, so this is pure state cleanup.
@@ -1686,7 +1691,9 @@ func (ctx *sequenceContext) playSequenceWithMeta(order []card.Card, perCardOut, 
 		ctx.drawnAttackDmg = append(ctx.drawnAttackDmg, float64(playDmg))
 		ctx.drawnAttackTriggerDmg = append(ctx.drawnAttackTriggerDmg, float64(triggerDmg))
 		state.CardsPlayed = append(state.CardsPlayed, candidate)
-		state.Graveyard = append(state.Graveyard, candidate)
+		if extMeta.types.GraveyardOnResolve() {
+			state.Graveyard = append(state.Graveyard, candidate)
+		}
 
 		if isAttackOrWeapon {
 			state.Runechants = 0

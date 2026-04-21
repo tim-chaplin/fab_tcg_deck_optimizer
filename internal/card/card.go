@@ -8,10 +8,12 @@ type CardType uint64
 const (
 	TypeAction          CardType = 1 << iota // "Action"
 	TypeAttack                               // "Attack"
+	TypeAttackReaction                       // "Attack Reaction"
 	TypeAura                                 // "Aura"
 	TypeDefenseReaction                      // "Defense Reaction"
 	TypeGeneric                              // "Generic"
 	TypeHero                                 // "Hero"
+	TypeInstant                              // "Instant"
 	TypeOneHand                              // "1H"
 	TypeRuneblade                            // "Runeblade"
 	TypeScepter                              // "Scepter"
@@ -20,6 +22,31 @@ const (
 	TypeWeapon                               // "Weapon"
 	TypeYoung                                // "Young"
 )
+
+// graveyardOnResolveMask is the set of types that hit the graveyard the moment they resolve:
+// Action, Attack Reaction, Defense Reaction, Instant. Persistent types (Aura today; Item,
+// Weapon, Hero, etc. for future card roll-outs) stay in their zone until a card-specific
+// destroy condition fires even when they also carry one of the four resolve-bound subtypes.
+const graveyardOnResolveMask TypeSet = TypeSet(TypeAction) | TypeSet(TypeAttackReaction) |
+	TypeSet(TypeDefenseReaction) | TypeSet(TypeInstant)
+
+// persistsInPlayMask is the set of types that keep a card in the arena (or a dedicated zone)
+// after resolving. When present the card doesn't hit the graveyard on resolve even if the
+// card's type line also includes Action / Attack / etc. — aura-actions like Sigil of the
+// Arknight are the canonical case: typed Runeblade/Action/Aura yet they linger until PlayNextTurn
+// destroys them. Keep this mask in sync with the set of implemented persistent types.
+const persistsInPlayMask TypeSet = TypeSet(TypeAura)
+
+// GraveyardOnResolve reports whether a card with this type set goes to the graveyard the moment
+// it resolves. Used by the solver to decide whether to append a just-played card to
+// state.Graveyard (true) or leave it on the battlefield (false — a separate destroy event will
+// move it, typically via card.DelayedPlay).
+func (s TypeSet) GraveyardOnResolve() bool {
+	if s&persistsInPlayMask != 0 {
+		return false
+	}
+	return s&graveyardOnResolveMask != 0
+}
 
 // TypeSet is a bitfield of CardType values — type checks become a single-word bitmask AND, no
 // string hashing or map lookup on the hot path.
@@ -160,6 +187,11 @@ type TurnState struct {
 	// the graveyard (e.g. Weeping Battleground banishing an aura). Cards that key on "was a
 	// card banished this turn" read this list.
 	Banish []Card
+	// SelfDestroyed is flipped by DestroyThis() inside a DelayedPlay.PlayNextTurn callback to
+	// signal the deck loop that the card wants to leave the arena and enter the graveyard. When
+	// it stays false, the callback will fire again at the start of the subsequent turn —
+	// matching auras like Malefic Incantation that linger until a counter runs out.
+	SelfDestroyed bool
 }
 
 // PlayedFromArsenal reports whether the card currently being played came from the arsenal
@@ -167,6 +199,14 @@ type TurnState struct {
 // arsenal-in attacker before the chain runs. Returns false when there is no Self.
 func PlayedFromArsenal(s *TurnState) bool {
 	return s != nil && s.Self != nil && s.Self.FromArsenal
+}
+
+// DestroyThis is called inside a DelayedPlay.PlayNextTurn callback to indicate the card leaves
+// the arena this turn (entering the graveyard); without this call the card persists and its
+// callback fires again next turn. The zero value means "stay" so one-shot destruction is
+// opt-in, matching printed text like "at the beginning of your action phase, destroy this".
+func (s *TurnState) DestroyThis() {
+	s.SelfDestroyed = true
 }
 
 // DrawOne models a mid-turn draw: advance the deck by one card and append it to Drawn. No-op
@@ -333,6 +373,11 @@ type LowerHealthWanter interface {
 // The TurnState passed to PlayNextTurn has Deck populated with the remaining deck after the
 // next hand has been drawn (so Deck[0] is the card about to be revealed by a top-of-deck
 // effect); every other field is zero.
+//
+// The callback decides whether the card leaves the arena this turn by calling s.DestroyThis().
+// Without that call, the card stays in the arena and its PlayNextTurn fires again at the top of
+// the subsequent turn — modelling auras that linger across multiple turns (verse-counter auras
+// like Malefic Incantation).
 type DelayedPlay interface {
 	PlayNextTurn(s *TurnState) DelayedPlayResult
 }
