@@ -148,8 +148,9 @@ Hero health isn't tracked, so every life-gain and life-comparison rider collapse
 
 ### Aura / graveyard state
 
-- **Aura presence in graveyard is assumed.** Sigil of Silphidae, Weeping Battleground, and Runic
-  Fellingsong (partly) assume there's always an aura available to banish.
+- **Aura presence in graveyard is assumed.** Sigil of Silphidae and Runic Fellingsong (partly)
+  assume there's always an aura available to banish. Weeping Battleground now scans
+  `s.Graveyard` for a real aura before crediting its arcane damage.
 - **"Played or created an aura this turn" is assumed true** for cards that don't yet use the
   live `AuraCreated` / `HasPlayedType(TypeAura)` check. Reek of Corruption, Hit the High Notes,
   and Shrill of Skullform all gate this correctly; Yinti Yanti does as well. Nothing else on the
@@ -389,8 +390,6 @@ listed here so the direction tag is co-located with the name.
   leave, crediting 2 damage; real card fizzles both triggers when the graveyard is dry.
 - **Runeblade Singeing Steelblade (all colours)** — printed 1 arcane added unconditionally; Ward
   would prevent it.
-- **Runeblade Weeping Battleground (all colours)** — assumes the graveyard always has a
-  banishable aura; fizzles when empty.
 #### Likely neutral
 
 - **Aether Slash (all colours)** — printed 1 arcane doubles as the text-rider damage; the code
