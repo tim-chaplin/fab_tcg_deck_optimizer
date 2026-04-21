@@ -61,7 +61,7 @@ func sampleShallowCandidates(cfg config, rng *rand.Rand) []shallowCandidate {
 	for i := 0; i < cfg.numDecks; i++ {
 		d := deck.Random(hero.Viserai{}, cfg.deckSize, cfg.maxCopies, rng, cfg.legalFilter())
 		stats := d.Evaluate(cfg.shallowShuffles, cfg.incoming, rng)
-		candidates = append(candidates, shallowCandidate{deck: d, avg: stats.Avg()})
+		candidates = append(candidates, shallowCandidate{deck: d, avg: stats.Mean()})
 		printProgress(i+1, cfg.numDecks, time.Since(start))
 	}
 	fmt.Fprintln(os.Stderr)
@@ -78,7 +78,7 @@ func evaluateFinalistsDeep(cfg config, rng *rand.Rand, finalists []shallowCandid
 	for i, c := range finalists {
 		d := deck.New(c.deck.Hero, c.deck.Weapons, c.deck.Cards)
 		stats := d.Evaluate(cfg.deepShuffles, cfg.incoming, rng)
-		avg := stats.Avg()
+		avg := stats.Mean()
 		if avg > bestAvg {
 			bestAvg = avg
 			bestDeck = d
@@ -125,8 +125,8 @@ func printProgress(done, total int, elapsed time.Duration) {
 // exists). Prints a status line either way.
 func saveIfBetter(d *deck.Deck, outPath string) {
 	prev, prevAvg := loadExisting(outPath)
-	if prev != nil && d.Stats.Avg() <= prevAvg {
-		fmt.Printf("\nPrevious best (%.3f) >= current (%.3f), %s unchanged\n", prevAvg, d.Stats.Avg(), outPath)
+	if prev != nil && d.Stats.Mean() <= prevAvg {
+		fmt.Printf("\nPrevious best (%.3f) >= current (%.3f), %s unchanged\n", prevAvg, d.Stats.Mean(), outPath)
 		return
 	}
 	if err := writeDeck(d, outPath); err != nil {
@@ -134,7 +134,7 @@ func saveIfBetter(d *deck.Deck, outPath string) {
 		os.Exit(1)
 	}
 	if prev != nil {
-		fmt.Printf("\nNew best (%.3f) beats previous (%.3f), wrote %s\n", d.Stats.Avg(), prevAvg, outPath)
+		fmt.Printf("\nNew best (%.3f) beats previous (%.3f), wrote %s\n", d.Stats.Mean(), prevAvg, outPath)
 	} else {
 		fmt.Printf("\nWrote best deck to %s\n", outPath)
 	}

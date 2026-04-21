@@ -192,7 +192,7 @@ func loadExisting(path string) (*deck.Deck, float64) {
 	if err != nil {
 		return nil, 0
 	}
-	return d, d.Stats.Avg()
+	return d, d.Stats.Mean()
 }
 
 // writeDeck persists d as JSON at path plus a sibling fabrary-format .txt ("x.json" → "x.txt")
@@ -242,11 +242,12 @@ func printCardList(d *deck.Deck) {
 
 func printBestDeck(d *deck.Deck) {
 	s := d.Stats
-	fmt.Printf("Best deck (avg %.3f over %d hands)\n", s.Avg(), s.Hands)
+	fmt.Printf("Best deck (min %d, median %.1f, mean %.3f, max %d over %d hands)\n",
+		s.Min(), s.Median(), s.Mean(), s.Max(), s.Hands)
 	fmt.Printf("  Hero:    %s\n", d.Hero.Name())
 	fmt.Printf("  Weapons: %s\n", weaponNames(d.Weapons))
-	fmt.Printf("  Cycle 1 avg: %.3f  (%d hands)\n", s.FirstCycle.Avg(), s.FirstCycle.Hands)
-	fmt.Printf("  Cycle 2 avg: %.3f  (%d hands)\n", s.SecondCycle.Avg(), s.SecondCycle.Hands)
+	fmt.Printf("  Cycle 1 mean: %.3f  (%d hands)\n", s.FirstCycle.Mean(), s.FirstCycle.Hands)
+	fmt.Printf("  Cycle 2 mean: %.3f  (%d hands)\n", s.SecondCycle.Mean(), s.SecondCycle.Hands)
 	var red, yellow, blue int
 	for _, c := range d.Cards {
 		switch c.Pitch() {
