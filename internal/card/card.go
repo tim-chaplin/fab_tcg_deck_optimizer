@@ -183,11 +183,6 @@ type TurnState struct {
 	// the graveyard (e.g. Weeping Battleground banishing an aura). Cards that key on "was a
 	// card banished this turn" read this list.
 	Banish []Card
-	// SelfDestroyed is flipped by DestroyThis inside a DelayedPlay.PlayNextTurn callback to
-	// signal the deck loop that the card just moved to the graveyard. When it stays false,
-	// the callback will fire again at the start of the subsequent turn — matching auras like
-	// Malefic Incantation that linger until a counter runs out.
-	SelfDestroyed bool
 }
 
 // PlayedFromArsenal reports whether the card currently being played came from the arsenal
@@ -197,15 +192,12 @@ func PlayedFromArsenal(s *TurnState) bool {
 	return s != nil && s.Self != nil && s.Self.FromArsenal
 }
 
-// DestroyThis moves c into the graveyard and, inside a DelayedPlay.PlayNextTurn callback,
-// signals the deck loop that the card leaves the arena this turn. Without this call the card
-// persists and the callback fires again next turn. The zero value means "stay", so one-shot
-// destruction is opt-in — matching printed text like "at the beginning of your action phase,
-// destroy this". Cards that destroy themselves mid-turn (e.g. a fragile aura taking unblocked
-// damage) also route through here so the graveyard bookkeeping is uniform.
+// DestroyThis moves c into the graveyard — the single entry point every card implementation
+// uses when an aura / item / other persistent card leaves the arena, whether that's during a
+// mid-turn self-destroy (e.g. a fragile aura taking unblocked damage) or from a
+// DelayedPlay.PlayNextTurn callback.
 func (s *TurnState) DestroyThis(c Card) {
 	s.Graveyard = append(s.Graveyard, c)
-	s.SelfDestroyed = true
 }
 
 // DrawOne models a mid-turn draw: advance the deck by one card and append it to Drawn. No-op
@@ -360,10 +352,11 @@ type LowerHealthWanter interface {
 // next hand has been drawn (so Deck[0] is the card about to be revealed by a top-of-deck
 // effect); every other field is zero.
 //
-// The callback decides whether the card leaves the arena this turn by calling s.DestroyThis().
-// Without that call, the card stays in the arena and its PlayNextTurn fires again at the top of
-// the subsequent turn — modelling auras that linger across multiple turns (verse-counter auras
-// like Malefic Incantation).
+// PlayNextTurn fires exactly once, at the top of the turn after the card was played. Cards
+// that leave the arena at that point call s.DestroyThis(self) to move themselves to the
+// graveyard; cards that return something to the hand set ToHand on the result. Effects that
+// should carry across additional turns have to be modelled separately — there's no automatic
+// re-queue.
 type DelayedPlay interface {
 	PlayNextTurn(s *TurnState) DelayedPlayResult
 }

@@ -45,8 +45,9 @@ func TestBlessingOfOccult_PlayNextTurnCreatesRunechants(t *testing.T) {
 		if s.Runechants != tc.n {
 			t.Errorf("%s: Runechants = %d, want %d", tc.c.(card.Card).Name(), s.Runechants, tc.n)
 		}
-		if !s.SelfDestroyed {
-			t.Errorf("%s: SelfDestroyed should be true (aura destroyed on leave)", tc.c.(card.Card).Name())
+		if len(s.Graveyard) != 1 || s.Graveyard[0].ID() != tc.c.(card.Card).ID() {
+			t.Errorf("%s: Graveyard = %v, want [%s] (DestroyThis puts self in graveyard)",
+				tc.c.(card.Card).Name(), s.Graveyard, tc.c.(card.Card).Name())
 		}
 	}
 }

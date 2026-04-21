@@ -481,12 +481,8 @@ func (d *Deck) EvaluateWith(runs int, incomingDamage int, rng *rand.Rand, ev *ha
 			// The TurnState sees the post-draw deck so top-of-deck peeks (Sigil of the Arknight)
 			// read the actual card about to be revealed. A ToHand result pops the revealed card
 			// off the deck and appends it to the hand — the reveal cascades across queued cards
-			// because runDelayedPlays advances its own Deck view between callbacks. Cards whose
-			// callbacks didn't call DestroyThis persist into the next turn's queue.
-			var delayedContribs []hand.DelayedContribution
-			var delayedDamage int
-			var revealed []card.Card
-			delayedContribs, delayedDamage, revealed, nextDelayed = runDelayedPlays(delayedBuf, buf[head+drawCount:tail], nextDelayed[:0])
+			// because runDelayedPlays advances its own Deck view between callbacks.
+			delayedContribs, delayedDamage, revealed := runDelayedPlays(delayedBuf, buf[head+drawCount:tail])
 			for range revealed {
 				h = append(h, buf[head+drawCount])
 				drawCount++
@@ -559,10 +555,7 @@ func (d *Deck) EvaluateWith(runs int, incomingDamage int, rng *rand.Rand, ev *ha
 
 			attributePlayStats(&d.Stats, play.BestLine)
 			nextHeld = applyTurnResult(play, buf, &head, &tail, drawCount, nextHeld[:0])
-			// nextDelayed already holds survivors from runDelayedPlays above (cards that didn't
-			// self-destroy). Append this turn's newly played DelayedPlay cards to build the full
-			// queue for next turn.
-			nextDelayed = collectDelayedPlays(play.BestLine, nextDelayed)
+			nextDelayed = collectDelayedPlays(play.BestLine, nextDelayed[:0])
 			handIdx++
 			heldBuf, nextHeld = nextHeld, heldBuf
 			delayedBuf, nextDelayed = nextDelayed, delayedBuf
@@ -578,24 +571,22 @@ const delayedHandRoom = 8
 
 // runDelayedPlays fires a PlayNextTurn callback on each queued card, passing a TurnState whose
 // Deck is the post-draw deck so top-of-deck peeks read the actual card about to be revealed.
-// Returns the per-card contributions for FormatBestTurn, the summed damage to fold into Value,
-// the list of cards the callbacks want appended to the hand (ToHand results) in the order they
-// were consumed from the deck top, and the subset of cards that should remain queued for the
-// next turn (callbacks that didn't call s.DestroyThis).
+// Each card fires exactly once. Returns the per-card contributions for FormatBestTurn, the
+// summed damage to fold into Value, and the list of cards the callbacks want appended to the
+// hand (ToHand results) in the order they were consumed from the deck top.
 //
 // Cascading reveals: each ToHand result shrinks the view of Deck by one entry so the next
 // callback peeks at the new top. Matches the real sequencing where sigils destroy one after
 // another at the start of the action phase.
-func runDelayedPlays(queued []card.Card, postDrawDeck []card.Card, survivors []card.Card) ([]hand.DelayedContribution, int, []card.Card, []card.Card) {
+func runDelayedPlays(queued []card.Card, postDrawDeck []card.Card) ([]hand.DelayedContribution, int, []card.Card) {
 	if len(queued) == 0 {
-		return nil, 0, nil, survivors
+		return nil, 0, nil
 	}
 	contribs := make([]hand.DelayedContribution, 0, len(queued))
 	var revealed []card.Card
 	total := 0
 	ts := card.TurnState{Deck: postDrawDeck}
 	for _, c := range queued {
-		ts.SelfDestroyed = false
 		dp := c.(card.DelayedPlay)
 		r := dp.PlayNextTurn(&ts)
 		total += r.Damage
@@ -604,11 +595,8 @@ func runDelayedPlays(queued []card.Card, postDrawDeck []card.Card, survivors []c
 			revealed = append(revealed, r.ToHand)
 			ts.Deck = ts.Deck[1:]
 		}
-		if !ts.SelfDestroyed {
-			survivors = append(survivors, c)
-		}
 	}
-	return contribs, total, revealed, survivors
+	return contribs, total, revealed
 }
 
 // collectDelayedPlays scans a turn's BestLine for cards whose Play ran (Role == Attack) and that
@@ -744,7 +732,7 @@ func (d *Deck) EvalOneTurnForTesting(incomingDamage int, arsenalIn card.Card, in
 	// Fire turn-1 DelayedPlay callbacks now so top-of-deck reveals (Sigil of the Arknight) show
 	// up in the returned turn-2 hand, matching production behaviour where Best sees the
 	// augmented hand.
-	_, _, revealed, _ := runDelayedPlays(delayedQueue, buf[head+drawCount2:tail], nil)
+	_, _, revealed := runDelayedPlays(delayedQueue, buf[head+drawCount2:tail])
 	for range revealed {
 		turn2Hand = append(turn2Hand, buf[head+drawCount2])
 		drawCount2++

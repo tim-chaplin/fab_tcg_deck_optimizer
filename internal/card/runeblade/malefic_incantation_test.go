@@ -76,8 +76,8 @@ func TestMaleficIncantation_PlayNextTurnDestroys(t *testing.T) {
 		if got.Damage != 0 {
 			t.Errorf("%s: Damage = %d, want 0 (leave rider not modelled)", c.(card.Card).Name(), got.Damage)
 		}
-		if !s.SelfDestroyed {
-			t.Errorf("%s: SelfDestroyed should be true", c.(card.Card).Name())
+		if len(s.Graveyard) != 1 || s.Graveyard[0].ID() != c.(card.Card).ID() {
+			t.Errorf("%s: Graveyard = %v, want [%s]", c.(card.Card).Name(), s.Graveyard, c.(card.Card).Name())
 		}
 	}
 }
