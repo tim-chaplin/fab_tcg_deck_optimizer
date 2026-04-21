@@ -5,10 +5,11 @@
 // attack action card you play this turn gains +1{p}. Go again."
 // (Red N=3, Yellow N=2, Blue N=1.)
 //
-// Simplification: "if hits" is assumed, so the N Runechants are counted as N damage credited to
-// Runic Reaping. The +1{p} pitched-attack rider fires if any attack-typed card was pitched this
-// turn; pitch-to-play attribution isn't tracked. The rider targets only Runeblade attack action
-// cards — weapon swings don't qualify.
+// Modelling: The N Runechants are credited only when the target's printed Attack() satisfies
+// card.LikelyToHit — mirrors Mauvrion Skies' gate, since both riders are on-hit clauses that
+// fizzle when the target gets blocked. The +1{p} pitched-attack rider isn't gated on hitting
+// and fires if any attack-typed card was pitched this turn; pitch-to-play attribution isn't
+// tracked. Both riders target only Runeblade attack action cards — weapon swings don't qualify.
 //
 // Source: github.com/the-fab-cube/flesh-and-blood-cards (card.csv).
 
@@ -55,15 +56,15 @@ func (RunicReapingBlue) GoAgain() bool              { return true }
 func (RunicReapingBlue) Play(s *card.TurnState) int { return runicReapingPlay(s, 1) }
 
 func runicReapingPlay(s *card.TurnState, n int) int {
-	hasNextAttack := false
+	var target card.Card
 	for _, pc := range s.CardsRemaining {
 		t := pc.Card.Types()
 		if t.Has(card.TypeRuneblade) && t.Has(card.TypeAction) && t.Has(card.TypeAttack) {
-			hasNextAttack = true
+			target = pc.Card
 			break
 		}
 	}
-	if !hasNextAttack {
+	if target == nil {
 		return 0
 	}
 	bonus := 0
@@ -73,5 +74,8 @@ func runicReapingPlay(s *card.TurnState, n int) int {
 			break
 		}
 	}
-	return s.CreateRunechants(n) + bonus
+	if card.LikelyToHit(target.Attack()) {
+		return s.CreateRunechants(n) + bonus
+	}
+	return bonus
 }
