@@ -61,3 +61,48 @@ func TestBest_DrawRiderBypassesMemo(t *testing.T) {
 		t.Errorf("deck B: Drawn = %v, want [BlueAttack] (memo collision bleeding deck A's result here)", resB.Drawn)
 	}
 }
+
+// TestBest_DeckOrderDoesNotAffectHandRoles pins an information-leak invariant in the solver.
+//
+// Problem: when a hand contains a "draw a card" action, the evaluator doesn't know which card
+// the player will see on top of the deck until the draw actually fires. In the real game the
+// player has to commit to a line first — play the draw hoping for something useful, or don't —
+// then live with whatever comes off the top. The current solver, though, evaluates every
+// permutation with full visibility into Deck[0] and lets mid-turn-drawn cards be pitched or
+// played as chain extensions (bestSequence's extension loop in playSequenceWithMeta). That
+// means the best line it picks can genuinely depend on the identity of the top card: with a
+// fantastic attack on top it'll play the draw, with a defense reaction on top it'll skip the
+// draw and play something else instead. The player, reordering what's in the same deck, would
+// see the same choice offered up — the evaluator has effectively cheated by peeking.
+//
+// The test: fix the hand and flip two deck orderings. The hand roles have to match. The draw
+// card is allowed to be played or not; the invariant is that the choice can't flip as a
+// function of deck order alone.
+func TestBest_DeckOrderDoesNotAffectHandRoles(t *testing.T) {
+	h := []card.Card{fake.CostlyDraw{}, fake.CostlyAttack{}, fake.PitchOneDR{}}
+	deckA := []card.Card{fake.HugeAttack{}, fake.PitchOneDR{}}
+	deckB := []card.Card{fake.PitchOneDR{}, fake.HugeAttack{}}
+
+	rolesFor := func(summary TurnSummary) map[card.ID]Role {
+		m := make(map[card.ID]Role, len(summary.BestLine))
+		for _, a := range summary.BestLine {
+			m[a.Card.ID()] = a.Role
+		}
+		return m
+	}
+
+	resA := Best(stubHero{}, nil, h, 0, deckA, 0, nil)
+	resB := Best(stubHero{}, nil, h, 0, deckB, 0, nil)
+
+	rolesA := rolesFor(resA)
+	rolesB := rolesFor(resB)
+	for id, rA := range rolesA {
+		if rB, ok := rolesB[id]; !ok || rA != rB {
+			t.Errorf("role differs by deck order for one of the hand cards: deckA role=%s "+
+				"deckB role=%s. The solver chose its hand roles based on what it peeked at the "+
+				"top of the deck — information the player doesn't have. Lines: A=[%s] B=[%s]",
+				rA, rB, FormatBestLine(resA.BestLine), FormatBestLine(resB.BestLine))
+			_ = id
+		}
+	}
+}
