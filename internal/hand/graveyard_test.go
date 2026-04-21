@@ -64,10 +64,10 @@ func (g gravSpyDR) Play(s *card.TurnState, _ *card.CardState) int {
 	return 0
 }
 
-// auraDefender is a test-only card whose type line is Aura — a type that normally wouldn't hit
-// the graveyard on resolve (it persists in the arena until a destroy condition fires). The
-// test uses it as a plain blocker to verify that cards used for raw block value land in the
-// graveyard via the defense-phase seeding regardless of their type mask.
+// auraDefender is a test-only card whose type line is Aura — a persistent type that normally
+// stays in the arena until a destroy condition fires. The test uses it as a plain blocker to
+// verify that cards used for raw block value land in the graveyard via the defense-phase
+// seeding regardless of their type mask.
 type auraDefender struct{}
 
 func (auraDefender) ID() card.ID                               { return card.Invalid }
@@ -80,15 +80,15 @@ func (auraDefender) Types() card.TypeSet                       { return card.New
 func (auraDefender) GoAgain() bool                             { return false }
 func (auraDefender) Play(*card.TurnState, *card.CardState) int { return 0 }
 
-// TestGraveyard_PlainBlockEntersGraveyardRegardlessOfType: a defender whose type mask doesn't
-// match GraveyardOnResolve still lands in the graveyard the instant it's used to block. The
-// test pairs an aura-typed plain blocker with a DR whose Play snapshots state.Graveyard —
-// confirming the DR sees the plain blocker in the graveyard alongside itself.
+// TestGraveyard_PlainBlockEntersGraveyardRegardlessOfType: a defender whose type mask
+// normally keeps it in play still lands in the graveyard the instant it's used to block.
+// The test pairs an aura-typed plain blocker with a DR whose Play snapshots state.Graveyard
+// — confirming the DR sees the plain blocker in the graveyard alongside itself.
 func TestGraveyard_PlainBlockEntersGraveyardRegardlessOfType(t *testing.T) {
 	blocker := auraDefender{}
-	if blocker.Types().GraveyardOnResolve() {
-		t.Fatal("auraDefender's type mask should NOT match GraveyardOnResolve; otherwise the " +
-			"test isn't isolating the plain-block path")
+	if !blocker.Types().PersistsInPlay() {
+		t.Fatal("auraDefender's type mask should set PersistsInPlay; otherwise the test " +
+			"isn't isolating the plain-block path")
 	}
 	var saw []card.Card
 	dr := gravSpyDR{saw: &saw}

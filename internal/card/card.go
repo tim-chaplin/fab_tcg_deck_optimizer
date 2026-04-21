@@ -15,6 +15,7 @@ const (
 	TypeGeneric                              // "Generic"
 	TypeHero                                 // "Hero"
 	TypeInstant                              // "Instant"
+	TypeItem                                 // "Item"
 	TypeOneHand                              // "1H"
 	TypeRuneblade                            // "Runeblade"
 	TypeScepter                              // "Scepter"
@@ -24,18 +25,16 @@ const (
 	TypeYoung                                // "Young"
 )
 
-// graveyardOnResolveMask is the set of types that hit the graveyard the moment they resolve:
-// Action, Attack Reaction, Block, Defense Reaction, Instant. Cards outside this mask (weapons,
-// heroes, equipment slots, plus persistent card types to be modelled later) aren't swept into
-// the graveyard automatically when they resolve in the attack chain.
-const graveyardOnResolveMask TypeSet = TypeSet(TypeAction) | TypeSet(TypeAttackReaction) |
-	TypeSet(TypeBlock) | TypeSet(TypeDefenseReaction) | TypeSet(TypeInstant)
+// persistsInPlayMask is the set of types that keep a card in its zone after resolving rather
+// than heading to the graveyard. Auras (e.g. Sigil of the Arknight: Runeblade, Action, Aura)
+// and Items linger in the arena until a destroy condition fires; weapons stay equipped.
+const persistsInPlayMask TypeSet = TypeSet(TypeAura) | TypeSet(TypeItem) | TypeSet(TypeWeapon)
 
-// GraveyardOnResolve reports whether a card with this type set goes to the graveyard the
-// moment it resolves. Used by the solver to decide whether to append a just-played card to
-// state.Graveyard.
-func (s TypeSet) GraveyardOnResolve() bool {
-	return s&graveyardOnResolveMask != 0
+// PersistsInPlay reports whether a card with this type set stays in its zone when it resolves
+// instead of heading to the graveyard. Used by the solver to decide whether to append a
+// just-played card to state.Graveyard.
+func (s TypeSet) PersistsInPlay() bool {
+	return s&persistsInPlayMask != 0
 }
 
 // TypeSet is a bitfield of CardType values — type checks become a single-word bitmask AND, no

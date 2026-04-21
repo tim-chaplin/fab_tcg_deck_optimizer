@@ -1561,11 +1561,11 @@ func (ctx *sequenceContext) playSequenceWithMeta(order []card.Card, perCardOut, 
 			perCardTriggerOut[i] = float64(triggerDmg)
 		}
 		state.CardsPlayed = append(state.CardsPlayed, pc.Card)
-		// Only Actions, Attack Reactions, Defense Reactions, Blocks, and Instants head to the
-		// graveyard the moment they resolve. Weapons and other persistent card types stay in
-		// their zone; any destroy event that should send them to the graveyard is a separate
-		// trigger.
-		if m.types.GraveyardOnResolve() {
+		// Weapons and persistent card types (Auras, Items) stay in their zone when they
+		// resolve; any destroy event that should send them to the graveyard is a separate
+		// trigger. Everything else — Actions, Attack Reactions, Defense Reactions, Blocks,
+		// Instants — heads to the graveyard immediately.
+		if !m.types.PersistsInPlay() {
 			state.Graveyard = append(state.Graveyard, pc.Card)
 		}
 
