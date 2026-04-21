@@ -293,7 +293,6 @@ func FormatBestTurn(t TurnSummary) string {
 		appendPitch(a, "PITCH (my turn)")
 	}
 	lines = appendAttackChainLines(lines, t, &step)
-	lines = appendDrawnPlayLines(lines, t.Drawn, &step)
 
 	// Held / Arsenal footer: unplayed cards, outside the numbered sequence, shown so the reader
 	// sees the whole turn disposition. Mid-turn-drawn Held / Arsenal cards land here too, tagged
@@ -323,27 +322,6 @@ func FormatBestTurn(t TurnSummary) string {
 	}
 	lines = append(lines, footers...)
 	return strings.Join(lines, "\n")
-}
-
-// appendDrawnPlayLines renders the Pitch and Attack roles among mid-turn-drawn cards: the
-// solver's per-extension Play returns and per-pitch resource contributions are otherwise
-// invisible in the printout (they're held on TurnSummary.Drawn rather than BestLine /
-// AttackChain), so the per-card breakdown wouldn't reconcile with the turn's Value. Each entry
-// extends the numbered timeline, tagged "(drawn)" so the origin is clear.
-func appendDrawnPlayLines(lines []string, drawn []CardAssignment, stepPtr *int) []string {
-	for _, d := range drawn {
-		switch d.Role {
-		case Attack:
-			*stepPtr++
-			lines = append(lines, fmt.Sprintf("  %d. %s (drawn): ATTACK (+%s)",
-				*stepPtr, d.Card.Name(), formatContribution(d.Contribution)))
-		case Pitch:
-			*stepPtr++
-			lines = append(lines, fmt.Sprintf("  %d. %s (drawn): PITCH (my turn)",
-				*stepPtr, d.Card.Name()))
-		}
-	}
-	return lines
 }
 
 // Best returns the optimal TurnSummary for the given hand against an opponent that will attack
@@ -1353,27 +1331,12 @@ type sequenceContext struct {
 	// is in the chain. Lets bestSequence flag the matching pcBuf entry's FromArsenal as the
 	// permutation moves it around.
 	arsenalInIdx int
-	// Mid-turn-drawn-card tracking for the most recent playSequenceWithMeta call. state.Drawn
-	// is partitioned as [Pitch * drawnPitched | Attack * drawnAttacked | Held ...]: the first
-	// drawnPitched cards were consumed to plug a cost shortfall ("hopeful" partitions); the
-	// next drawnAttacked were played as free-cost chain extensions. The rest stay Held.
-	// drawnAttackDmg / drawnAttackTriggerDmg are aligned with the attacked slice — one entry
-	// per extension — capturing its Play return and hero-trigger damage so fillContributions
-	// can write per-card contributions on summary.Drawn.
-	drawnPitched          int
-	drawnAttacked         int
-	drawnAttackDmg        []float64
-	drawnAttackTriggerDmg []float64
-	// drawnWinner / drawnPitchedWinner / drawnAttackedWinner / drawnAttackDmgWinner /
-	// drawnAttackTriggerDmgWinner snapshot the winning permutation's drawn-card outcome so
-	// fillContributions reads it back after bestSequence returns. drawnWinner is the cards
-	// themselves — can't just read bufs.state.Drawn because Heap's algorithm keeps iterating
-	// after the winner is chosen and state.Drawn reflects the last permutation's draws.
-	drawnWinner                 []card.Card
-	drawnPitchedWinner          int
-	drawnAttackedWinner         int
-	drawnAttackDmgWinner        []float64
-	drawnAttackTriggerDmgWinner []float64
+	// drawnWinner snapshots the winning permutation's drawn cards so fillContributions can
+	// surface them on summary.Drawn. Populated from state.Drawn during the winner path because
+	// Heap's algorithm keeps iterating after the winner is chosen and state.Drawn reflects the
+	// last permutation's draws. Every entry in drawnWinner is assigned Role=Held by the
+	// caller (post-Best, promoteRandomHeldToArsenal may flip one to Arsenal).
+	drawnWinner []card.Card
 }
 
 // seedState writes the TurnState fields that are constant across a partition's permutations
@@ -1437,10 +1400,6 @@ func (ctx *sequenceContext) bestSequence(attackers, winnerOrderOut []card.Card, 
 	bestLeftoverRunechants := ctx.runechantCarryover
 	foundLegal := false
 	ctx.drawnWinner = ctx.drawnWinner[:0]
-	ctx.drawnPitchedWinner = 0
-	ctx.drawnAttackedWinner = 0
-	ctx.drawnAttackDmgWinner = ctx.drawnAttackDmgWinner[:0]
-	ctx.drawnAttackTriggerDmgWinner = ctx.drawnAttackTriggerDmgWinner[:0]
 	eval := func() {
 		dmg, leftoverRunechants, _, legal := ctx.playSequenceWithMeta(perm, scratch, triggerScratch)
 		if !legal {
@@ -1452,10 +1411,6 @@ func (ctx *sequenceContext) bestSequence(attackers, winnerOrderOut []card.Card, 
 			bestLeftoverRunechants = leftoverRunechants
 			foundLegal = true
 			ctx.drawnWinner = append(ctx.drawnWinner[:0], ctx.bufs.state.Drawn...)
-			ctx.drawnPitchedWinner = ctx.drawnPitched
-			ctx.drawnAttackedWinner = ctx.drawnAttacked
-			ctx.drawnAttackDmgWinner = append(ctx.drawnAttackDmgWinner[:0], ctx.drawnAttackDmg...)
-			ctx.drawnAttackTriggerDmgWinner = append(ctx.drawnAttackTriggerDmgWinner[:0], ctx.drawnAttackTriggerDmg...)
 			if winnerOrderOut != nil {
 				copy(winnerOrderOut[:n], perm)
 			}
@@ -1575,22 +1530,10 @@ func (ctx *sequenceContext) playSequenceWithMeta(order []card.Card, perCardOut, 
 	// backing array keeps the reset allocation-free.
 	state.Graveyard = ctx.bufs.attackGravScratch[:0]
 	state.Banish = nil
-	ctx.drawnPitched = 0
-	ctx.drawnAttacked = 0
-	ctx.drawnAttackDmg = ctx.drawnAttackDmg[:0]
-	ctx.drawnAttackTriggerDmg = ctx.drawnAttackTriggerDmg[:0]
-	drawnPitchedIdx := 0
 	resources := ctx.resourceBudget
 	for i, pc := range played {
 		m := meta[i]
 		cost := m.costAt(state)
-		// When the hand's committed pitch can't cover this card's cost, consume mid-turn-drawn
-		// cards in draw order: their pitch plugs the gap and the "hopeful" partition becomes
-		// legal. Drawn cards are only available after an earlier chain step fired DrawOne.
-		for resources < cost && drawnPitchedIdx < len(state.Drawn) {
-			resources += state.Drawn[drawnPitchedIdx].Pitch()
-			drawnPitchedIdx++
-		}
 		resources -= cost
 		if resources < 0 {
 			return 0, 0, 0, false
@@ -1636,75 +1579,9 @@ func (ctx *sequenceContext) playSequenceWithMeta(order []card.Card, perCardOut, 
 		}
 	}
 
-	// After the initial chain, greedily play drawn cards as tail extensions while the prior
-	// card grants Go again, the next drawn card isn't a Defense Reaction, and leftover
-	// resources cover its cost. Each extension's Play may draw more cards, unlocking the next
-	// extension; pcBuf capacity caps the count so an infinite cycle can't run away.
-	chainGoAgain := true
-	if n > 0 {
-		lastM := meta[n-1]
-		lastPC := played[n-1]
-		chainGoAgain = lastM.baseGoAgain || lastPC.GrantedGoAgain
-	}
-	drawnAttackedIdx := 0
-	for chainGoAgain {
-		candidateIdx := drawnPitchedIdx + drawnAttackedIdx
-		if candidateIdx >= len(state.Drawn) {
-			break
-		}
-		candidate := state.Drawn[candidateIdx]
-		if candidate.Types().IsDefenseReaction() {
-			break
-		}
-		extCost := candidate.Cost(state)
-		if extCost > resources {
-			break
-		}
-		extIdx := n + drawnAttackedIdx
-		if extIdx >= len(pcBuf) {
-			break
-		}
-		resources -= extCost
-		pcBuf[extIdx] = card.PlayedCard{Card: candidate}
-		extPC := &pcBuf[extIdx]
-		extMeta := attackerMetaPtrFor(candidate)
-		played = append(played, extPC)
-		meta = append(meta, extMeta)
-
-		// The extension is the tail of the chain — nothing after it (yet); "next attack"-style
-		// grants that scan CardsRemaining can't see drawn-later attacks and silently fizzle
-		// against them. FaB's "your next attack this turn" actually covers drawn-later targets,
-		// so this is a known under-count tolerated to avoid a retroactive re-resolution pass.
-		// Tracked in TODO.md under "Draw / hand cycling".
-		state.CardsRemaining = played[len(played):]
-		state.Self = extPC
-
-		isAttackOrWeapon := extMeta.isAttackOrWeapon
-		if isAttackOrWeapon && state.Runechants > 0 {
-			state.ArcaneDamageDealt = true
-		}
-
-		playDmg := candidate.Play(state)
-		triggerDmg := ctx.hero.OnCardPlayed(candidate, state)
-		damage += playDmg + triggerDmg
-		ctx.drawnAttackDmg = append(ctx.drawnAttackDmg, float64(playDmg))
-		ctx.drawnAttackTriggerDmg = append(ctx.drawnAttackTriggerDmg, float64(triggerDmg))
-		state.CardsPlayed = append(state.CardsPlayed, candidate)
-		if extMeta.types.GraveyardOnResolve() {
-			state.Graveyard = append(state.Graveyard, candidate)
-		}
-
-		if isAttackOrWeapon {
-			state.Runechants = 0
-		}
-
-		drawnAttackedIdx++
-		// Extensions inherit no granted Go again from prior cards (by the time a grant fired,
-		// the extension hadn't yet been drawn), so the chain only continues if the extension
-		// itself has Go again.
-		chainGoAgain = extMeta.baseGoAgain
-	}
-	ctx.drawnAttacked = drawnAttackedIdx
+	// Mid-turn-drawn cards always carry to the next hand as Held or compete for the empty
+	// arsenal slot; they never pitch or extend the chain. If they could, the solver's best line
+	// would depend on Deck[0], which the player commits before the draw reveals.
 
 	// Pitch-timing rule: every Pitch-role card must have paid for something on the stack. If the
 	// chain's leftover budget is at least the max attack-phase pitch, one pitch could have been
@@ -1712,7 +1589,6 @@ func (ctx *sequenceContext) playSequenceWithMeta(order []card.Card, perCardOut, 
 	if ctx.hasAttackPitches && resources >= ctx.maxAttackPitch {
 		return 0, 0, 0, false
 	}
-	ctx.drawnPitched = drawnPitchedIdx
 	return damage, state.Runechants, resources, true
 }
 
@@ -1829,28 +1705,13 @@ func fillContributions(summary *TurnSummary, hero hero.Hero, weapons []weapon.We
 		// Copy the winning permutation's drawn cards out as CardAssignments. Read from
 		// ctx.drawnWinner (bestSequence's winner snapshot), not bufs.state.Drawn — state.Drawn
 		// reflects whichever permutation Heap's algorithm iterated last, which can diverge
-		// from the winner when different permutations trigger different draws. ctx.drawnWinner
-		// is three contiguous segments: first drawnPitchedWinner entries were consumed as
-		// pitch (Role=Pitch, Contribution = Pitch()); next drawnAttackedWinner were played as
-		// free-cost chain extensions (Role=Attack, Contribution = per-extension damage); the
-		// rest stay Held (Contribution 0).
+		// from the winner when different permutations trigger different draws. Drawn cards
+		// start Held with zero contribution; promoteRandomHeldToArsenal may flip one to
+		// Arsenal post-enumeration.
 		if drawn := ctx.drawnWinner; len(drawn) > 0 {
 			summary.Drawn = make([]CardAssignment, len(drawn))
-			pitchedEnd := ctx.drawnPitchedWinner
-			attackedEnd := pitchedEnd + ctx.drawnAttackedWinner
 			for i, c := range drawn {
-				role := Held
-				var contribution float64
-				switch {
-				case i < pitchedEnd:
-					role = Pitch
-					contribution = float64(c.Pitch())
-				case i < attackedEnd:
-					role = Attack
-					attackIdx := i - pitchedEnd
-					contribution = ctx.drawnAttackDmgWinner[attackIdx] + ctx.drawnAttackTriggerDmgWinner[attackIdx]
-				}
-				summary.Drawn[i] = CardAssignment{Card: c, Role: role, Contribution: contribution}
+				summary.Drawn[i] = CardAssignment{Card: c, Role: Held}
 			}
 		}
 	}

@@ -63,3 +63,72 @@ func (c DrawCantrip) Play(s *card.TurnState) int {
 	s.DrawOne()
 	return c.Attack()
 }
+
+// genericActionTypes is a plain non-attack action (no Attack subtype). Used by CostlyDraw — a
+// draw-a-card action card. It isn't a Defense Reaction so it can't be played on the opponent's
+// turn; it carries Go again so a drawn-card-as-extension can chain.
+var genericActionTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction)
+
+// CostlyDraw is a 1-cost, pitch-1, no-damage "draw a card, go again" action. Used by the
+// mid-turn-draw determinism tests: plays for 0 damage but a chain can continue off its Go again
+// onto a drawn-later attack. Implements NoMemo because Play reads the deck via DrawOne.
+type CostlyDraw struct{}
+
+func (CostlyDraw) ID() card.ID                { return card.FakeCostlyDraw }
+func (CostlyDraw) Name() string               { return "cardtest.CostlyDraw" }
+func (CostlyDraw) Cost(*card.TurnState) int   { return 1 }
+func (CostlyDraw) Pitch() int                 { return 1 }
+func (CostlyDraw) Attack() int                { return 0 }
+func (CostlyDraw) Defense() int               { return 0 }
+func (CostlyDraw) Types() card.TypeSet        { return genericActionTypes }
+func (CostlyDraw) GoAgain() bool              { return true }
+func (CostlyDraw) NoMemo()                    {}
+func (CostlyDraw) Play(s *card.TurnState) int { s.DrawOne(); return 0 }
+
+// CostlyAttack is a 1-cost, pitch-1, 3-damage attack action — the "deal 3 damage" alternative
+// the mid-turn-draw determinism test weighs against CostlyDraw.
+type CostlyAttack struct{}
+
+func (CostlyAttack) ID() card.ID                 { return card.FakeCostlyAttack }
+func (CostlyAttack) Name() string                { return "cardtest.CostlyAttack" }
+func (CostlyAttack) Cost(*card.TurnState) int    { return 1 }
+func (CostlyAttack) Pitch() int                  { return 1 }
+func (CostlyAttack) Attack() int                 { return 3 }
+func (CostlyAttack) Defense() int                { return 0 }
+func (CostlyAttack) Types() card.TypeSet         { return genericAttackTypes }
+func (CostlyAttack) GoAgain() bool               { return false }
+func (c CostlyAttack) Play(*card.TurnState) int  { return c.Attack() }
+
+var genericDefenseReactionTypes = card.NewTypeSet(card.TypeGeneric, card.TypeDefenseReaction)
+
+// PitchOneDR is a 1-pitch-value defense reaction: cost 0, defense 3. It exists solely so tests
+// can pitch it (contributing 1 resource) to fund another 1-cost card without also playing it.
+type PitchOneDR struct{}
+
+func (PitchOneDR) ID() card.ID                { return card.FakePitchOneDR }
+func (PitchOneDR) Name() string               { return "cardtest.PitchOneDR" }
+func (PitchOneDR) Cost(*card.TurnState) int   { return 0 }
+func (PitchOneDR) Pitch() int                 { return 1 }
+func (PitchOneDR) Attack() int                { return 0 }
+func (PitchOneDR) Defense() int               { return 3 }
+func (PitchOneDR) Types() card.TypeSet        { return genericDefenseReactionTypes }
+func (PitchOneDR) GoAgain() bool              { return false }
+func (PitchOneDR) Play(*card.TurnState) int   { return 0 }
+
+// HugeAttack is a 0-cost "do one million damage" attack. Outrageous on purpose: as the top of
+// the deck it makes the CostlyDraw → HugeAttack chain blatantly better than the CostlyAttack
+// line, so an evaluator that peeks at the deck will pick a different role for the hand's draw
+// card depending on deck order — the determinism test catches that.
+type HugeAttack struct{}
+
+const hugeAttackDamage = 1_000_000
+
+func (HugeAttack) ID() card.ID                { return card.FakeHugeAttack }
+func (HugeAttack) Name() string               { return "cardtest.HugeAttack" }
+func (HugeAttack) Cost(*card.TurnState) int   { return 0 }
+func (HugeAttack) Pitch() int                 { return 1 }
+func (HugeAttack) Attack() int                { return hugeAttackDamage }
+func (HugeAttack) Defense() int               { return 0 }
+func (HugeAttack) Types() card.TypeSet        { return genericAttackTypes }
+func (HugeAttack) GoAgain() bool              { return false }
+func (c HugeAttack) Play(*card.TurnState) int { return c.Attack() }

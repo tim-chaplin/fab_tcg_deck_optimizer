@@ -188,17 +188,19 @@ Hero health isn't tracked, so every life-gain and life-comparison rider collapse
   fire only when their copy actually came from the arsenal slot.
 - **"No cards in hand" riders never fire.** Spring Load's +3{p} rider defaults off.
 - **Draw / hand cycling is flattened.** Mid-turn draws (Snatch, Drawn to the Dark Dimension)
-  route through `TurnState.DrawOne`; the drawn card competes with Held hand cards for the
-  end-of-turn arsenal slot, can fund a cost shortfall via PITCH, and attaches to the chain
-  tail as a free/affordable PLAY when Go again is available. Lookahead grants that scan
-  `CardsRemaining` at play time (Flying High's next-attack grant, Mauvrion Skies,
+  route through `TurnState.DrawOne`; the drawn card either carries as Held into the next hand
+  or competes for an empty end-of-turn arsenal slot. It cannot pitch or extend the attack
+  chain — letting it do either would leak top-of-deck identity into the solver's line choice
+  (the best line would shift depending on what card was waiting on top of the deck), and the
+  player doesn't actually know that until they commit to playing the draw. Lookahead grants
+  that scan `CardsRemaining` at play time (Flying High's next-attack grant, Mauvrion Skies,
   Oath of the Arknight, Runic Reaping, Condemn to Slaughter, Captain's Call) silently fizzle
   when their intended target is only drawn later in the chain — a conservative under-count
-  we tolerate to avoid a retroactive re-resolution pass. Sutcliffe's Research Notes ignores its
-  re-ordering clause; Sink Below drops its cycling rider; Rise Above's alternative hand-as-cost
-  option isn't simulated. The Emissary of Moon / Tides / Wind trio, Sift, Scour the
-  Battlescape, Whisper of the Oracle (Opt), and Strategic Planning all similarly drop their
-  draw / cycle steps. Trade In's discard-to-draw is dropped.
+  we tolerate to avoid a retroactive re-resolution pass. Sutcliffe's Research Notes ignores
+  its re-ordering clause; Sink Below drops its cycling rider; Rise Above's alternative
+  hand-as-cost option isn't simulated. The Emissary of Moon / Tides / Wind trio, Sift, Scour
+  the Battlescape, Whisper of the Oracle (Opt), and Strategic Planning all similarly drop
+  their draw / cycle steps. Trade In's discard-to-draw is dropped.
 - **Hand-on-top / hand-as-cost alternative costs aren't modelled.** Moon Wish (hand-on-top + Sun
   Kiss search) and Seek Horizon (hand-on-top + conditional go-again) pick the base mode only.
 - **Fate Foreseen's "opt 1" is dropped** — block value is the printed defence only.

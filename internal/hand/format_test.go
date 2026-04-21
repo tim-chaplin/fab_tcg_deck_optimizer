@@ -181,37 +181,10 @@ func TestFormatBestTurn_DelayedFromLastTurnLine(t *testing.T) {
 	})
 }
 
-// TestFormatBestTurn_DrawnCardsRendered pins each role a drawn card can take to a tagged line
-// in the printout, so per-card attribution reconciles with the turn's Value rather than
-// silently folding extension damage / pitch-from-drawn into the total. The summary is
-// hand-built (rather than going through Best) so the test exercises only the formatter.
+// TestFormatBestTurn_DrawnCardsRendered pins each role a drawn card can take — Held in the
+// footer, Arsenal in the footer — to a tagged line in the printout. The summary is hand-built
+// so the test exercises only the formatter.
 func TestFormatBestTurn_DrawnCardsRendered(t *testing.T) {
-	t.Run("attack extension shows on numbered timeline", func(t *testing.T) {
-		summary := TurnSummary{
-			Drawn: []CardAssignment{
-				{Card: fake.RedAttack{}, Role: Attack, Contribution: 3},
-			},
-		}
-		out := FormatBestTurn(summary)
-		want := "1. cardtest.RedAttack (drawn): ATTACK (+3)"
-		if !strings.Contains(out, want) {
-			t.Errorf("missing %q in:\n%s", want, out)
-		}
-	})
-
-	t.Run("pitch shows on numbered timeline", func(t *testing.T) {
-		summary := TurnSummary{
-			Drawn: []CardAssignment{
-				{Card: fake.BlueAttack{}, Role: Pitch, Contribution: 3},
-			},
-		}
-		out := FormatBestTurn(summary)
-		want := "1. cardtest.BlueAttack (drawn): PITCH (my turn)"
-		if !strings.Contains(out, want) {
-			t.Errorf("missing %q in:\n%s", want, out)
-		}
-	})
-
 	t.Run("held lands in the footer", func(t *testing.T) {
 		summary := TurnSummary{
 			Drawn: []CardAssignment{

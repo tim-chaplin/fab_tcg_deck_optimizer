@@ -488,4 +488,8 @@ const (
 	FakeBlueAttack
 	FakeYellowAttack
 	FakeDrawCantrip
+	FakeCostlyDraw
+	FakeCostlyAttack
+	FakePitchOneDR
+	FakeHugeAttack
 )
