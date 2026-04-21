@@ -8,10 +8,13 @@ type CardType uint64
 const (
 	TypeAction          CardType = 1 << iota // "Action"
 	TypeAttack                               // "Attack"
+	TypeAttackReaction                       // "Attack Reaction"
 	TypeAura                                 // "Aura"
+	TypeBlock                                // "Block"
 	TypeDefenseReaction                      // "Defense Reaction"
 	TypeGeneric                              // "Generic"
 	TypeHero                                 // "Hero"
+	TypeInstant                              // "Instant"
 	TypeOneHand                              // "1H"
 	TypeRuneblade                            // "Runeblade"
 	TypeScepter                              // "Scepter"
@@ -20,6 +23,20 @@ const (
 	TypeWeapon                               // "Weapon"
 	TypeYoung                                // "Young"
 )
+
+// graveyardOnResolveMask is the set of types that hit the graveyard the moment they resolve:
+// Action, Attack Reaction, Block, Defense Reaction, Instant. Cards outside this mask (weapons,
+// heroes, equipment slots, plus persistent card types to be modelled later) aren't swept into
+// the graveyard automatically when they resolve in the attack chain.
+const graveyardOnResolveMask TypeSet = TypeSet(TypeAction) | TypeSet(TypeAttackReaction) |
+	TypeSet(TypeBlock) | TypeSet(TypeDefenseReaction) | TypeSet(TypeInstant)
+
+// GraveyardOnResolve reports whether a card with this type set goes to the graveyard the
+// moment it resolves. Used by the solver to decide whether to append a just-played card to
+// state.Graveyard.
+func (s TypeSet) GraveyardOnResolve() bool {
+	return s&graveyardOnResolveMask != 0
+}
 
 // TypeSet is a bitfield of CardType values — type checks become a single-word bitmask AND, no
 // string hashing or map lookup on the hot path.
@@ -146,6 +163,18 @@ type TurnState struct {
 	// attack, next entries may play as free-cost chain extensions, and the rest carry as Held
 	// (or compete for the empty arsenal slot) into the next hand.
 	Drawn []Card
+	// Graveyard is the cards that have entered the graveyard this turn — every card played or
+	// blocked lands here after resolving. Pitched cards do not (they go back to the deck). In
+	// the defense phase, the solver seeds Graveyard with every Defend-role card so effects
+	// that scan the graveyard see plain blocks and other defenders. In the attack chain, each
+	// card is appended after its Play returns so later attacks see what resolved before them.
+	// Cards that read Graveyard must implement NoMemo since its contents aren't captured in
+	// the hand's memo key.
+	Graveyard []Card
+	// Banish holds cards banished this turn — moved here by effects that pull a card out of
+	// the graveyard (e.g. an aura-banish-for-arcane rider). Cards that key on "was a card
+	// banished this turn" read this list.
+	Banish []Card
 }
 
 // DrawOne models a mid-turn draw: advance the deck by one card and append it to Drawn. No-op
