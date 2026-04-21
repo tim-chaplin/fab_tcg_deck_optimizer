@@ -229,9 +229,9 @@ func TestEvalOneTurn_BlessingOfOccultCreatesRunesAtStartOfNextTurn(t *testing.T)
 	if !blessingPlayed {
 		t.Errorf("turn 1 BestLine didn't play Blessing as Role=Attack: %+v", state.PrevTurnBestLine)
 	}
-	if state.RunechantCarryover != 3 {
-		t.Errorf("RunechantCarryover = %d, want 3 (Blessing's PlayNextTurn creates 3 tokens)",
-			state.RunechantCarryover)
+	if state.Runechants != 3 {
+		t.Errorf("Runechants = %d, want 3 (Blessing's PlayNextTurn creates 3 tokens at start of turn 2)",
+			state.Runechants)
 	}
 }
 

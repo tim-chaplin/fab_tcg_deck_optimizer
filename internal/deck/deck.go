@@ -657,14 +657,17 @@ func dealNextHand(buf, handBuf, heldBuf []card.Card, head, tail *int, handSize i
 }
 
 // TurnStartState captures the game state at the start of a turn: the hand just dealt, the card
-// in the arsenal slot, the deck cards still to be drawn (top-to-bottom), the runechant
-// carryover, and the Value dealt by the previous turn (damage + prevention). Returned by
-// EvalOneTurnForTesting.
+// in the arsenal slot, the deck cards still to be drawn (top-to-bottom), the live Runechant
+// count at the start of this turn, and the Value dealt by the previous turn (damage +
+// prevention). Returned by EvalOneTurnForTesting.
 type TurnStartState struct {
-	Hand               []card.Card
-	ArsenalCard        card.Card
-	Deck               []card.Card
-	RunechantCarryover int
+	Hand        []card.Card
+	ArsenalCard card.Card
+	Deck        []card.Card
+	// Runechants is the live Runechant count at the start of this turn — leftover from the
+	// previous turn's attack chain plus any tokens freshly created by PlayNextTurn callbacks
+	// (e.g. Blessing of Occult's start-of-turn rune creation).
+	Runechants int
 	// PrevTurnValue is the total Value (damage dealt + damage prevented) the previous turn
 	// produced — the same number hand.Best reports as TurnSummary.Value for that turn.
 	PrevTurnValue int
@@ -727,9 +730,9 @@ func (d *Deck) EvalOneTurnForTesting(incomingDamage int, arsenalIn card.Card, in
 	turn2Hand, drawCount2, ok := dealNextHand(buf, handBuf, nextHeld, &head, &tail, handSize)
 	if !ok {
 		return TurnStartState{
-			ArsenalCard:        play.ArsenalCard,
-			RunechantCarryover: play.LeftoverRunechants,
-			PrevTurnValue:      play.Value,
+			ArsenalCard:   play.ArsenalCard,
+			Runechants:    play.LeftoverRunechants,
+			PrevTurnValue: play.Value,
 		}
 	}
 	// Fire turn-1 DelayedPlay callbacks now so top-of-deck reveals (Sigil of the Arknight) show
@@ -745,12 +748,12 @@ func (d *Deck) EvalOneTurnForTesting(incomingDamage int, arsenalIn card.Card, in
 	lineCopy := append([]hand.CardAssignment(nil), play.BestLine...)
 
 	return TurnStartState{
-		Hand:               handCopy,
-		ArsenalCard:        play.ArsenalCard,
-		Deck:               deckLeft,
-		RunechantCarryover: play.LeftoverRunechants + delayedRunes,
-		PrevTurnValue:      play.Value,
-		PrevTurnBestLine:   lineCopy,
+		Hand:             handCopy,
+		ArsenalCard:      play.ArsenalCard,
+		Deck:             deckLeft,
+		Runechants:       play.LeftoverRunechants + delayedRunes,
+		PrevTurnValue:    play.Value,
+		PrevTurnBestLine: lineCopy,
 	}
 }
 
