@@ -386,12 +386,8 @@ listed here so the direction tag is co-located with the name.
   Dominate protection of that damage is not modelled.
 - **Runeblade Sigil of Silphidae** — assumed we always have an aura to banish on both enter and
   leave, crediting 2 damage; real card fizzles both triggers when the graveyard is dry.
-- **Runeblade Sigil of Suffering (all colours)** — +1{d} is baked into printed Defense assuming
-  arcane has already been dealt; when that condition fails, the printed defence is overstated.
 - **Runeblade Singeing Steelblade (all colours)** — printed 1 arcane added unconditionally; Ward
   would prevent it.
-- **Runeblade Vexing Malice (all colours)** — printed 2 arcane added unconditionally; Ward would
-  prevent part of it.
 - **Runeblade Weeping Battleground (all colours)** — assumes the graveyard always has a
   banishable aura; fizzles when empty.
 - **Scout the Periphery (all colours)** — scan bonus credited whenever a target exists, even
