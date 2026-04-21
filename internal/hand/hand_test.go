@@ -462,24 +462,19 @@ func TestBest_ArsenalInPlayAttack(t *testing.T) {
 
 // TestBest_ArsenalInNonAttackActionPlays covers the "arsenal card isn't tagged Attack but can
 // still be played on your turn" rule — non-attack actions (auras, item cards, etc.) are playable
-// from arsenal. Hand: Malefic Incantation Red (cost 0, pitch 1). Arsenal: Blessing of Occult Red
-// (cost 1, pitch 1, attack 0, Play returns 3 via DelayRunechants). The winning line pitches the
-// Malefic to fund Blessing's 1-cost, plays Blessing from arsenal, and accrues 3 delayed
-// runechants for next turn. Value = 3 (Blessing's Play return is counted as damage credit for
-// the chain); LeftoverRunechants reflects the 3 tokens carrying over.
+// from arsenal. Hand: Malefic Incantation Blue (cost 0, pitch 3, Play returns 1 flat with no
+// follow-up attack). Arsenal: Arcane Cussing Red (cost 1, pitch 1, Play returns 3 when we
+// block all incoming). The winning line pitches Malefic to fund Cussing's 1-cost and plays
+// Cussing from arsenal for a flat 3.
 func TestBest_ArsenalInNonAttackActionPlays(t *testing.T) {
-	h := []card.Card{runeblade.MaleficIncantationRed{}}
-	got := Best(stubHero{}, nil, h, 0, nil, 0, runeblade.BlessingOfOccultRed{})
+	h := []card.Card{runeblade.MaleficIncantationBlue{}}
+	got := Best(stubHero{}, nil, h, 0, nil, 0, runeblade.ArcaneCussingRed{})
 	if got.Value != 3 {
-		t.Fatalf("Value = %d, want 3 (Malefic pitched, arsenal Blessing played for 3 runechants). Roles=[%s]",
+		t.Fatalf("Value = %d, want 3 (Malefic pitched, arsenal Cussing played for 3). Roles=[%s]",
 			got.Value, FormatBestLine(got.BestLine))
 	}
-	if got.LeftoverRunechants != 3 {
-		t.Errorf("LeftoverRunechants = %d, want 3 (Blessing's Play delayed 3 tokens to next turn)",
-			got.LeftoverRunechants)
-	}
 	if got.ArsenalCard != nil {
-		t.Errorf("ArsenalCard = %v, want nil (Blessing played out of arsenal)", got.ArsenalCard)
+		t.Errorf("ArsenalCard = %v, want nil (Cussing played out of arsenal)", got.ArsenalCard)
 	}
 }
 

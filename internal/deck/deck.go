@@ -482,11 +482,12 @@ func (d *Deck) EvaluateWith(runs int, incomingDamage int, rng *rand.Rand, ev *ha
 			// read the actual card about to be revealed. A ToHand result pops the revealed card
 			// off the deck and appends it to the hand — the reveal cascades across queued cards
 			// because runDelayedPlays advances its own Deck view between callbacks.
-			delayedContribs, delayedDamage, revealed := runDelayedPlays(delayedBuf, buf[head+drawCount:tail])
+			delayedContribs, delayedDamage, delayedRunes, revealed := runDelayedPlays(delayedBuf, buf[head+drawCount:tail])
 			for range revealed {
 				h = append(h, buf[head+drawCount])
 				drawCount++
 			}
+			runechantCarryover += delayedRunes
 			var play hand.TurnSummary
 			if ev != nil {
 				play = ev.Best(d.Hero, d.Weapons, h, incomingDamage, buf[head+drawCount:tail], runechantCarryover, arsenalCard)
@@ -572,15 +573,17 @@ const delayedHandRoom = 8
 // runDelayedPlays fires a PlayNextTurn callback on each queued card, passing a TurnState whose
 // Deck is the post-draw deck so top-of-deck peeks read the actual card about to be revealed.
 // Returns the per-card contributions for FormatBestTurn, the summed damage to fold into Value,
-// and the list of cards the callbacks want appended to the hand (ToHand results) in the order
-// they were consumed from the deck top. Nil/zero/nil when no cards are queued.
+// the Runechant tokens created during the callbacks (folded into the next turn's carryover so
+// same-hand variable-cost checks and ArcaneDamageDealt triggers see them), and the list of
+// cards the callbacks want appended to the hand (ToHand results) in the order they were
+// consumed from the deck top. All zero/nil when no cards are queued.
 //
 // Cascading reveals: each ToHand result shrinks the view of Deck by one entry so the next
 // callback peeks at the new top. Matches the real sequencing where sigils destroy one after
 // another at the start of the action phase.
-func runDelayedPlays(queued []card.Card, postDrawDeck []card.Card) ([]hand.DelayedContribution, int, []card.Card) {
+func runDelayedPlays(queued []card.Card, postDrawDeck []card.Card) ([]hand.DelayedContribution, int, int, []card.Card) {
 	if len(queued) == 0 {
-		return nil, 0, nil
+		return nil, 0, 0, nil
 	}
 	contribs := make([]hand.DelayedContribution, 0, len(queued))
 	var revealed []card.Card
@@ -596,7 +599,7 @@ func runDelayedPlays(queued []card.Card, postDrawDeck []card.Card) ([]hand.Delay
 			ts.Deck = ts.Deck[1:]
 		}
 	}
-	return contribs, total, revealed
+	return contribs, total, ts.Runechants, revealed
 }
 
 // collectDelayedPlays scans a turn's BestLine for cards whose Play ran (Role == Attack) and that
@@ -654,14 +657,17 @@ func dealNextHand(buf, handBuf, heldBuf []card.Card, head, tail *int, handSize i
 }
 
 // TurnStartState captures the game state at the start of a turn: the hand just dealt, the card
-// in the arsenal slot, the deck cards still to be drawn (top-to-bottom), the runechant
-// carryover, and the Value dealt by the previous turn (damage + prevention). Returned by
-// EvalOneTurnForTesting.
+// in the arsenal slot, the deck cards still to be drawn (top-to-bottom), the live Runechant
+// count at the start of this turn, and the Value dealt by the previous turn (damage +
+// prevention). Returned by EvalOneTurnForTesting.
 type TurnStartState struct {
-	Hand               []card.Card
-	ArsenalCard        card.Card
-	Deck               []card.Card
-	RunechantCarryover int
+	Hand        []card.Card
+	ArsenalCard card.Card
+	Deck        []card.Card
+	// Runechants is the live Runechant count at the start of this turn — leftover from the
+	// previous turn's attack chain plus any tokens freshly created by PlayNextTurn callbacks
+	// (e.g. Blessing of Occult's start-of-turn rune creation).
+	Runechants int
 	// PrevTurnValue is the total Value (damage dealt + damage prevented) the previous turn
 	// produced — the same number hand.Best reports as TurnSummary.Value for that turn.
 	PrevTurnValue int
@@ -724,15 +730,15 @@ func (d *Deck) EvalOneTurnForTesting(incomingDamage int, arsenalIn card.Card, in
 	turn2Hand, drawCount2, ok := dealNextHand(buf, handBuf, nextHeld, &head, &tail, handSize)
 	if !ok {
 		return TurnStartState{
-			ArsenalCard:        play.ArsenalCard,
-			RunechantCarryover: play.LeftoverRunechants,
-			PrevTurnValue:      play.Value,
+			ArsenalCard:   play.ArsenalCard,
+			Runechants:    play.LeftoverRunechants,
+			PrevTurnValue: play.Value,
 		}
 	}
 	// Fire turn-1 DelayedPlay callbacks now so top-of-deck reveals (Sigil of the Arknight) show
 	// up in the returned turn-2 hand, matching production behaviour where Best sees the
-	// augmented hand.
-	_, _, revealed := runDelayedPlays(delayedQueue, buf[head+drawCount2:tail])
+	// augmented hand. Runes created by the callbacks fold into the turn-2 starting carryover.
+	_, _, delayedRunes, revealed := runDelayedPlays(delayedQueue, buf[head+drawCount2:tail])
 	for range revealed {
 		turn2Hand = append(turn2Hand, buf[head+drawCount2])
 		drawCount2++
@@ -742,12 +748,12 @@ func (d *Deck) EvalOneTurnForTesting(incomingDamage int, arsenalIn card.Card, in
 	lineCopy := append([]hand.CardAssignment(nil), play.BestLine...)
 
 	return TurnStartState{
-		Hand:               handCopy,
-		ArsenalCard:        play.ArsenalCard,
-		Deck:               deckLeft,
-		RunechantCarryover: play.LeftoverRunechants,
-		PrevTurnValue:      play.Value,
-		PrevTurnBestLine:   lineCopy,
+		Hand:             handCopy,
+		ArsenalCard:      play.ArsenalCard,
+		Deck:             deckLeft,
+		Runechants:       play.LeftoverRunechants + delayedRunes,
+		PrevTurnValue:    play.Value,
+		PrevTurnBestLine: lineCopy,
 	}
 }
 

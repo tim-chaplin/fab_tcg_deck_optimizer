@@ -65,8 +65,8 @@ func TestEvalOneTurn_MidTurnDrawArsenalsWhenSlotEmpty(t *testing.T) {
 		t.Errorf("turn 2 deck = %v, want %v", state.Deck, wantDeck)
 	}
 
-	if state.RunechantCarryover != 0 {
-		t.Errorf("turn 2 runechant carryover = %d, want 0 (nothing on turn 1 creates runechants)", state.RunechantCarryover)
+	if state.Runechants != 0 {
+		t.Errorf("turn 2 runechants = %d, want 0 (nothing on turn 1 creates runechants)", state.Runechants)
 	}
 }
 
@@ -128,8 +128,8 @@ func TestEvalOneTurn_TwoMidTurnDraws_OneArsenalsOneHeld(t *testing.T) {
 		t.Errorf("turn 2 deck = %v, want %v", state.Deck, wantDeck)
 	}
 
-	if state.RunechantCarryover != 0 {
-		t.Errorf("turn 2 runechant carryover = %d, want 0 (nothing on turn 1 creates runechants)", state.RunechantCarryover)
+	if state.Runechants != 0 {
+		t.Errorf("turn 2 runechants = %d, want 0 (nothing on turn 1 creates runechants)", state.Runechants)
 	}
 }
 
@@ -188,8 +188,8 @@ func TestEvalOneTurn_ThreeMidTurnDraws_ArsenalFromDrawnPool(t *testing.T) {
 		t.Errorf("turn 2 deck = %v, want %v", state.Deck, wantDeck)
 	}
 
-	if state.RunechantCarryover != 0 {
-		t.Errorf("turn 2 runechant carryover = %d, want 0 (nothing on turn 1 creates runechants)", state.RunechantCarryover)
+	if state.Runechants != 0 {
+		t.Errorf("turn 2 runechants = %d, want 0 (nothing on turn 1 creates runechants)", state.Runechants)
 	}
 }
 
@@ -248,8 +248,8 @@ func TestEvalOneTurn_MidTurnDrawHeldWhenArsenalFull(t *testing.T) {
 		t.Errorf("turn 2 deck = %v, want %v", state.Deck, wantDeck)
 	}
 
-	if state.RunechantCarryover != 0 {
-		t.Errorf("turn 2 runechant carryover = %d, want 0 (nothing on turn 1 creates runechants)", state.RunechantCarryover)
+	if state.Runechants != 0 {
+		t.Errorf("turn 2 runechants = %d, want 0 (nothing on turn 1 creates runechants)", state.Runechants)
 	}
 }
 
@@ -302,8 +302,8 @@ func TestEvalOneTurn_MidTurnDrawSansGoAgainStaysHeld(t *testing.T) {
 		t.Errorf("turn 2 deck = %v, want empty", state.Deck)
 	}
 
-	if state.RunechantCarryover != 0 {
-		t.Errorf("turn 2 runechant carryover = %d, want 0", state.RunechantCarryover)
+	if state.Runechants != 0 {
+		t.Errorf("turn 2 runechants = %d, want 0", state.Runechants)
 	}
 }
 
@@ -311,7 +311,7 @@ func TestEvalOneTurn_MidTurnDrawSansGoAgainStaysHeld(t *testing.T) {
 // against an empty deck and nothing happens — no panic, no spurious entry in state.Drawn, no
 // index math goes sideways downstream. Hand is just Snatch; d.Cards is empty. Turn 2 can't
 // deal (deck stays empty through the turn), so the sim returns a TurnStartState with just
-// the previous-turn value and the arsenal/runechant carryover.
+// the previous-turn value and the arsenal/live runechants.
 func TestEvalOneTurn_DrawOneOnEmptyDeckIsNoop(t *testing.T) {
 	initialHand := []card.Card{generic.SnatchRed{}}
 	d := New(hero.Viserai{}, nil, nil)
@@ -329,7 +329,7 @@ func TestEvalOneTurn_DrawOneOnEmptyDeckIsNoop(t *testing.T) {
 	if state.ArsenalCard != nil {
 		t.Errorf("turn 2 arsenal = %v, want nil (nothing Held to promote)", state.ArsenalCard)
 	}
-	if state.RunechantCarryover != 0 {
-		t.Errorf("turn 2 runechant carryover = %d, want 0", state.RunechantCarryover)
+	if state.Runechants != 0 {
+		t.Errorf("turn 2 runechants = %d, want 0", state.Runechants)
 	}
 }

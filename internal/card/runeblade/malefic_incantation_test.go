@@ -6,11 +6,13 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 )
 
-func TestMaleficIncantation_NoFollowingAttackIsFlatDamage(t *testing.T) {
-	// No attack in CardsRemaining → fall back to flat N damage; no tokens on state.
+// TestMaleficIncantation_NoFollowUpAttackIsFlatN: no attack action follows Malefic in the
+// chain, so no verse counter ticks this turn — credit flat n for the future-turn ticks and
+// leave the aura in play (it heads to next turn's graveyard via PlayNextTurn).
+func TestMaleficIncantation_NoFollowUpAttackIsFlatN(t *testing.T) {
 	cases := []struct {
-		c card.Card
-		n int
+		c    card.Card
+		want int
 	}{
 		{MaleficIncantationRed{}, 3},
 		{MaleficIncantationYellow{}, 2},
@@ -18,22 +20,29 @@ func TestMaleficIncantation_NoFollowingAttackIsFlatDamage(t *testing.T) {
 	}
 	for _, tc := range cases {
 		var s card.TurnState
-		if got := tc.c.Play(&s, &card.CardState{}); got != tc.n {
-			t.Errorf("%s: Play() = %d, want %d", tc.c.Name(), got, tc.n)
+		if got := tc.c.Play(&s, &card.CardState{}); got != tc.want {
+			t.Errorf("%s: Play() = %d, want %d", tc.c.Name(), got, tc.want)
 		}
-		if s.Runechants != 0 || s.DelayedRunechants != 0 {
-			t.Errorf("%s: Runechants=%d DelayedRunechants=%d, want both 0 (flat fallback)",
-				tc.c.Name(), s.Runechants, s.DelayedRunechants)
+		if !s.AuraCreated {
+			t.Errorf("%s: AuraCreated should be set", tc.c.Name())
+		}
+		if s.Runechants != 0 {
+			t.Errorf("%s: Runechants = %d, want 0 (no same-turn tick)", tc.c.Name(), s.Runechants)
+		}
+		if len(s.Graveyard) != 0 {
+			t.Errorf("%s: Graveyard = %v, want empty (aura persists until next turn)",
+				tc.c.Name(), s.Graveyard)
 		}
 	}
 }
 
-func TestMaleficIncantation_ExactlyOneFollowingAttackDelaysOne(t *testing.T) {
-	// Exactly one future attack in CardsRemaining → 1 token routed through DelayRunechants,
-	// remaining N-1 are flat. Play still returns N total damage.
+// TestMaleficIncantation_FollowUpAttackActionTicksOnce: an attack action card in the chain
+// after Malefic triggers the "once per turn" clause — a live Runechant appears this turn
+// and the total damage credited is n (1 rune + n-1 flat for the remaining ticks).
+func TestMaleficIncantation_FollowUpAttackActionTicksOnce(t *testing.T) {
 	cases := []struct {
-		c card.Card
-		n int
+		c    card.Card
+		want int
 	}{
 		{MaleficIncantationRed{}, 3},
 		{MaleficIncantationYellow{}, 2},
@@ -41,30 +50,57 @@ func TestMaleficIncantation_ExactlyOneFollowingAttackDelaysOne(t *testing.T) {
 	}
 	for _, tc := range cases {
 		s := card.TurnState{CardsRemaining: []*card.CardState{{Card: stubRunebladeAttack{}}}}
-		if got := tc.c.Play(&s, &card.CardState{}); got != tc.n {
-			t.Errorf("%s: Play() = %d, want %d", tc.c.Name(), got, tc.n)
+		if got := tc.c.Play(&s, &card.CardState{}); got != tc.want {
+			t.Errorf("%s: Play() = %d, want %d", tc.c.Name(), got, tc.want)
 		}
-		if s.DelayedRunechants != 1 {
-			t.Errorf("%s: DelayedRunechants = %d, want 1", tc.c.Name(), s.DelayedRunechants)
-		}
-		if s.Runechants != 0 {
-			t.Errorf("%s: Runechants = %d, want 0 (delayed, not live)", tc.c.Name(), s.Runechants)
+		if s.Runechants != 1 {
+			t.Errorf("%s: Runechants = %d, want 1 (same-turn tick fired)", tc.c.Name(), s.Runechants)
 		}
 	}
 }
 
-func TestMaleficIncantation_MultipleFollowingAttacksIsFlatDamage(t *testing.T) {
-	// Two future attacks → flat N (the "exactly one" branch doesn't trigger).
-	s := card.TurnState{
-		CardsRemaining: []*card.CardState{
-			{Card: stubRunebladeAttack{}},
-			{Card: stubRunebladeAttack{}},
-		},
+// TestMaleficIncantationBlue_FollowUpAttackGraveyardsImmediately: Blue starts with a single
+// verse counter, so the same-turn tick takes it to zero and the aura lands in this turn's
+// graveyard right away. Red/Yellow still have counters left, so they stay in play.
+func TestMaleficIncantationBlue_FollowUpAttackGraveyardsImmediately(t *testing.T) {
+	cases := []struct {
+		c             card.Card
+		wantGraveyard bool
+	}{
+		{MaleficIncantationRed{}, false},
+		{MaleficIncantationYellow{}, false},
+		{MaleficIncantationBlue{}, true},
 	}
-	if got := (MaleficIncantationRed{}).Play(&s, &card.CardState{}); got != 3 {
-		t.Errorf("Play() = %d, want 3", got)
+	for _, tc := range cases {
+		s := card.TurnState{CardsRemaining: []*card.CardState{{Card: stubRunebladeAttack{}}}}
+		tc.c.Play(&s, &card.CardState{})
+		inGrav := len(s.Graveyard) == 1 && s.Graveyard[0].ID() == tc.c.ID()
+		if inGrav != tc.wantGraveyard {
+			t.Errorf("%s: in graveyard = %v, want %v (Graveyard=%v)",
+				tc.c.Name(), inGrav, tc.wantGraveyard, s.Graveyard)
+		}
 	}
-	if s.Runechants != 0 || s.DelayedRunechants != 0 {
-		t.Errorf("Runechants=%d DelayedRunechants=%d, want both 0", s.Runechants, s.DelayedRunechants)
+}
+
+// TestMaleficIncantation_PlayNextTurnGraveyardsSelf: the aura heads to next turn's graveyard
+// when it still had counters left at end of this turn (any variant without a same-turn tick,
+// or Red/Yellow even with one). The callback only graveyards; damage credit is already on
+// the previous turn's Play return.
+func TestMaleficIncantation_PlayNextTurnGraveyardsSelf(t *testing.T) {
+	cases := []card.Card{
+		MaleficIncantationRed{},
+		MaleficIncantationYellow{},
+		MaleficIncantationBlue{},
+	}
+	for _, c := range cases {
+		var s card.TurnState
+		dp := c.(card.DelayedPlay)
+		r := dp.PlayNextTurn(&s)
+		if r.Damage != 0 {
+			t.Errorf("%s: Damage = %d, want 0 (damage was credited on Play)", c.Name(), r.Damage)
+		}
+		if len(s.Graveyard) != 1 || s.Graveyard[0].ID() != c.ID() {
+			t.Errorf("%s: Graveyard = %v, want [self]", c.Name(), s.Graveyard)
+		}
 	}
 }

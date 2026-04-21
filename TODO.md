@@ -157,11 +157,12 @@ Hero health isn't tracked, so every life-gain and life-comparison rider collapse
 - **Cross-turn aura lifecycles are partially modelled.** `card.DelayedPlay` threads a
   PlayNextTurn callback through the deck loop for cards whose effect fires at the start of the
   owner's next action phase — Sigil of the Arknight peeks the actual post-draw top card next
-  turn, and Sigil of Fyendal credits its 1{h} gain on leave the turn the aura resolves. Other
-  cross-turn auras still collapse their effects into the immediate Play: Blessing of Occult
-  (DelayRunechants), Sigil of Deadwood, Sigil of Silphidae (enter + leave both credited at
-  play), Enchanting Melody (end-phase destruction clause dropped), Sigil of Cycles (on-leave
-  discard/draw dropped).
+  turn, Sigil of Fyendal credits its 1{h} gain on leave, Blessing of Occult / Sigil of Deadwood
+  / Runeblood Incantation create their Runechants on next turn's starting state, and Malefic
+  Incantation routes to next turn's graveyard after ticking. Other cross-turn auras still
+  collapse their effects into the immediate Play: Sigil of Silphidae (enter + leave both
+  credited at play), Enchanting Melody (end-phase destruction clause dropped), Sigil of Cycles
+  (on-leave discard/draw dropped).
 - **Graveyard-banish additional costs are ignored.** Gravekeeping, Jack Be Nimble, Jack Be Quick,
   Looking for a Scrap, and Nimble Strike treat the banish step as free and either drop the
   rider or credit it unconditionally where noted in the card.

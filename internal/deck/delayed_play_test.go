@@ -63,7 +63,7 @@ func TestRunDelayedPlays_FiresEachQueuedCardOnce(t *testing.T) {
 	var callsA, callsB int
 	a := stubDelayed{damage: 2, calls: &callsA}
 	b := stubDelayed{damage: 3, calls: &callsB}
-	contribs, total, revealed := runDelayedPlays([]card.Card{a, b}, nil)
+	contribs, total, _, revealed := runDelayedPlays([]card.Card{a, b}, nil)
 	if total != 5 {
 		t.Errorf("total = %d, want 5 (2+3)", total)
 	}
@@ -86,7 +86,7 @@ func TestRunDelayedPlays_FiresEachQueuedCardOnce(t *testing.T) {
 
 // TestRunDelayedPlays_EmptyQueue short-circuits: no contribs, no allocation, zero total.
 func TestRunDelayedPlays_EmptyQueue(t *testing.T) {
-	contribs, total, revealed := runDelayedPlays(nil, nil)
+	contribs, total, _, revealed := runDelayedPlays(nil, nil)
 	if total != 0 {
 		t.Errorf("total = %d, want 0", total)
 	}
@@ -104,7 +104,7 @@ func TestRunDelayedPlays_EmptyQueue(t *testing.T) {
 func TestRunDelayedPlays_RevealsAttackActionIntoHand(t *testing.T) {
 	sigil := runeblade.SigilOfTheArknightBlue{}
 	slash := runeblade.AetherSlashRed{}
-	contribs, total, revealed := runDelayedPlays([]card.Card{sigil}, []card.Card{slash})
+	contribs, total, _, revealed := runDelayedPlays([]card.Card{sigil}, []card.Card{slash})
 	if total != 0 {
 		t.Errorf("total = %d, want 0 (reveal contributes via hand, not damage)", total)
 	}
@@ -122,7 +122,7 @@ func TestRunDelayedPlays_CascadingReveals(t *testing.T) {
 	sigil := runeblade.SigilOfTheArknightBlue{}
 	first := runeblade.AetherSlashRed{}
 	second := runeblade.ConsumingVolitionRed{}
-	_, _, revealed := runDelayedPlays([]card.Card{sigil, sigil}, []card.Card{first, second})
+	_, _, _, revealed := runDelayedPlays([]card.Card{sigil, sigil}, []card.Card{first, second})
 	if len(revealed) != 2 {
 		t.Fatalf("len(revealed) = %d, want 2 (two cascading reveals)", len(revealed))
 	}
@@ -136,7 +136,7 @@ func TestRunDelayedPlays_CascadingReveals(t *testing.T) {
 func TestRunDelayedPlays_NonAttackTopSkipsReveal(t *testing.T) {
 	sigil := runeblade.SigilOfTheArknightBlue{}
 	// Sigil itself is an Aura (non-attack) — use it as a convenient non-attack top.
-	_, total, revealed := runDelayedPlays([]card.Card{sigil}, []card.Card{sigil})
+	_, total, _, revealed := runDelayedPlays([]card.Card{sigil}, []card.Card{sigil})
 	if total != 0 {
 		t.Errorf("total = %d, want 0 (non-attack top, no credit)", total)
 	}
@@ -196,6 +196,42 @@ func TestEvalOneTurn_SigilOfTheArknightRevealsIntoHand(t *testing.T) {
 		if state.Hand[i] != want {
 			t.Errorf("turn 2 hand[%d] = %v, want %v", i, state.Hand[i], want)
 		}
+	}
+}
+
+// TestEvalOneTurn_BlessingOfOccultCreatesRunesAtStartOfNextTurn: turn 1's hand has a Red
+// Blessing of Occult plus a pitch filler to fund Blessing's 1-cost. Play contributes 0 this
+// turn (the 3 Runechants fire at next turn's upkeep via PlayNextTurn), but the solver still
+// plays Blessing so the DelayedPlay queue picks it up. Turn 2's starting state should have 3
+// Runechants in the carryover.
+func TestEvalOneTurn_BlessingOfOccultCreatesRunesAtStartOfNextTurn(t *testing.T) {
+	blessing := runeblade.BlessingOfOccultRed{}
+	pitch := fake.PitchOneDR{}
+	deckCards := []card.Card{
+		fake.BlueAttack{},
+		fake.BlueAttack{},
+		fake.BlueAttack{},
+		fake.BlueAttack{},
+	}
+	d := New(hero.Viserai{}, nil, deckCards)
+	state := d.EvalOneTurnForTesting(0, nil, []card.Card{blessing, pitch})
+
+	if state.PrevTurnValue != 0 {
+		t.Errorf("PrevTurnValue = %d, want 0 (Blessing's rune credit is deferred)", state.PrevTurnValue)
+	}
+	blessingPlayed := false
+	for _, a := range state.PrevTurnBestLine {
+		if a.Card.ID() == card.BlessingOfOccultRed && a.Role == hand.Attack {
+			blessingPlayed = true
+			break
+		}
+	}
+	if !blessingPlayed {
+		t.Errorf("turn 1 BestLine didn't play Blessing as Role=Attack: %+v", state.PrevTurnBestLine)
+	}
+	if state.Runechants != 3 {
+		t.Errorf("Runechants = %d, want 3 (Blessing's PlayNextTurn creates 3 tokens at start of turn 2)",
+			state.Runechants)
 	}
 }
 
