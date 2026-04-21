@@ -30,6 +30,6 @@ func (SigilOfCyclesBlue) Play(s *card.TurnState) int  { return setAuraCreated(s)
 // PlayNextTurn destroys the aura so it moves to the graveyard next turn. The discard/draw rider
 // is not modelled.
 func (c SigilOfCyclesBlue) PlayNextTurn(s *card.TurnState) card.DelayedPlayResult {
-	s.DestroyThis(c)
+	s.AddToGraveyard(c)
 	return card.DelayedPlayResult{}
 }

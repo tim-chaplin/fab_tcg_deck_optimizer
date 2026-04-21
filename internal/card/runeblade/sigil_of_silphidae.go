@@ -35,6 +35,6 @@ func (SigilOfSilphidaeBlue) Play(s *card.TurnState) int {
 // PlayNextTurn destroys the aura at the start of the next action phase and credits the leave
 // trigger's 1 arcane. TODO: gate the 1 arcane on an actual aura being present in the graveyard.
 func (c SigilOfSilphidaeBlue) PlayNextTurn(s *card.TurnState) card.DelayedPlayResult {
-	s.DestroyThis(c)
+	s.AddToGraveyard(c)
 	return card.DelayedPlayResult{Damage: 1}
 }

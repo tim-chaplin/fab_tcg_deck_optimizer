@@ -29,7 +29,7 @@ func maleficPlay(s *card.TurnState, n int) int {
 	s.AuraCreated = true
 	if hasFutureAttack(s) {
 		if s.Self != nil {
-			s.DestroyThis(s.Self.Card)
+			s.AddToGraveyard(s.Self.Card)
 		}
 		return s.CreateRunechant() + (n - 1)
 	}
@@ -40,7 +40,7 @@ func maleficPlay(s *card.TurnState, n int) int {
 // simplification treats any aura that survived the play-turn as destroyed here so it doesn't
 // stick around forever (the real card keeps ticking one counter per turn).
 func maleficNextTurn(s *card.TurnState, self card.Card) card.DelayedPlayResult {
-	s.DestroyThis(self)
+	s.AddToGraveyard(self)
 	return card.DelayedPlayResult{}
 }
 

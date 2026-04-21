@@ -46,7 +46,7 @@ func TestBlessingOfOccult_PlayNextTurnCreatesRunechants(t *testing.T) {
 			t.Errorf("%s: Runechants = %d, want %d", tc.c.(card.Card).Name(), s.Runechants, tc.n)
 		}
 		if len(s.Graveyard) != 1 || s.Graveyard[0].ID() != tc.c.(card.Card).ID() {
-			t.Errorf("%s: Graveyard = %v, want [%s] (DestroyThis puts self in graveyard)",
+			t.Errorf("%s: Graveyard = %v, want [%s] (AddToGraveyard puts self in graveyard)",
 				tc.c.(card.Card).Name(), s.Graveyard, tc.c.(card.Card).Name())
 		}
 	}

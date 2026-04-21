@@ -192,11 +192,11 @@ func PlayedFromArsenal(s *TurnState) bool {
 	return s != nil && s.Self != nil && s.Self.FromArsenal
 }
 
-// DestroyThis moves c into the graveyard — the single entry point every card implementation
+// AddToGraveyard moves c into the graveyard — the single entry point every card implementation
 // uses when an aura / item / other persistent card leaves the arena, whether that's during a
 // mid-turn self-destroy (e.g. a fragile aura taking unblocked damage) or from a
 // DelayedPlay.PlayNextTurn callback.
-func (s *TurnState) DestroyThis(c Card) {
+func (s *TurnState) AddToGraveyard(c Card) {
 	s.Graveyard = append(s.Graveyard, c)
 }
 
@@ -353,7 +353,7 @@ type LowerHealthWanter interface {
 // effect); every other field is zero.
 //
 // PlayNextTurn fires exactly once, at the top of the turn after the card was played. Cards
-// that leave the arena at that point call s.DestroyThis(self) to move themselves to the
+// that leave the arena at that point call s.AddToGraveyard(self) to move themselves to the
 // graveyard; cards that return something to the hand set ToHand on the result. Effects that
 // should carry across additional turns have to be modelled separately — there's no automatic
 // re-queue.

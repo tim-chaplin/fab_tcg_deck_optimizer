@@ -159,7 +159,7 @@ Hero health isn't tracked, so every life-gain and life-comparison rider collapse
 - **Cross-turn aura lifecycles are partially modelled.** `card.DelayedPlay` threads a
   PlayNextTurn callback through the deck loop for cards whose destroy condition fires at the
   start of the owner's next action phase. Callbacks opt into destruction by calling
-  `s.DestroyThis()`; without it the aura persists and the callback fires again the following
+  `s.AddToGraveyard()`; without it the aura persists and the callback fires again the following
   turn. Sigil of the Arknight reveals into hand, Sigil of Fyendal credits 1{h}, Sigil of
   Silphidae credits its leave-trigger arcane, Sigil of Deadwood creates its Runechant, Blessing
   of Occult creates its N Runechants, and Sigil of Cycles / Sigil of Protection destroy

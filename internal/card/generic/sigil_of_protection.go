@@ -28,7 +28,7 @@ func (SigilOfProtectionRed) Types() card.TypeSet         { return sigilOfProtect
 func (SigilOfProtectionRed) GoAgain() bool               { return false }
 func (SigilOfProtectionRed) Play(s *card.TurnState) int  { return setAuraCreated(s) }
 func (c SigilOfProtectionRed) PlayNextTurn(s *card.TurnState) card.DelayedPlayResult {
-	s.DestroyThis(c)
+	s.AddToGraveyard(c)
 	return card.DelayedPlayResult{}
 }
 
@@ -44,7 +44,7 @@ func (SigilOfProtectionYellow) Types() card.TypeSet        { return sigilOfProte
 func (SigilOfProtectionYellow) GoAgain() bool              { return false }
 func (SigilOfProtectionYellow) Play(s *card.TurnState) int { return setAuraCreated(s) }
 func (c SigilOfProtectionYellow) PlayNextTurn(s *card.TurnState) card.DelayedPlayResult {
-	s.DestroyThis(c)
+	s.AddToGraveyard(c)
 	return card.DelayedPlayResult{}
 }
 
@@ -60,6 +60,6 @@ func (SigilOfProtectionBlue) Types() card.TypeSet        { return sigilOfProtect
 func (SigilOfProtectionBlue) GoAgain() bool              { return false }
 func (SigilOfProtectionBlue) Play(s *card.TurnState) int { return setAuraCreated(s) }
 func (c SigilOfProtectionBlue) PlayNextTurn(s *card.TurnState) card.DelayedPlayResult {
-	s.DestroyThis(c)
+	s.AddToGraveyard(c)
 	return card.DelayedPlayResult{}
 }

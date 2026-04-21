@@ -27,7 +27,7 @@ func runebloodPlay(s *card.TurnState, n int) int {
 // runebloodNextTurn destroys self at the start of the next turn and creates one Runechant
 // token as its leave-arena payoff.
 func runebloodNextTurn(s *card.TurnState, self card.Card) card.DelayedPlayResult {
-	s.DestroyThis(self)
+	s.AddToGraveyard(self)
 	return card.DelayedPlayResult{Damage: s.CreateRunechant()}
 }
 

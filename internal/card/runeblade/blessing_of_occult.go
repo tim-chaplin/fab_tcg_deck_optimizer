@@ -24,7 +24,7 @@ func blessingOfOccultPlay(s *card.TurnState) int {
 // blessingOfOccultNextTurn destroys self and creates n Runechant tokens as its leaves-arena
 // payoff. CreateRunechants both credits the damage and increments the running token count.
 func blessingOfOccultNextTurn(s *card.TurnState, self card.Card, n int) card.DelayedPlayResult {
-	s.DestroyThis(self)
+	s.AddToGraveyard(self)
 	return card.DelayedPlayResult{Damage: s.CreateRunechants(n)}
 }
 

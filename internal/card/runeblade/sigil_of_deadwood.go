@@ -32,6 +32,6 @@ func (SigilOfDeadwoodBlue) Play(s *card.TurnState) int {
 // PlayNextTurn creates the Runechant token that fires when the aura leaves the arena at the
 // start of the next action phase.
 func (c SigilOfDeadwoodBlue) PlayNextTurn(s *card.TurnState) card.DelayedPlayResult {
-	s.DestroyThis(c)
+	s.AddToGraveyard(c)
 	return card.DelayedPlayResult{Damage: s.CreateRunechant()}
 }

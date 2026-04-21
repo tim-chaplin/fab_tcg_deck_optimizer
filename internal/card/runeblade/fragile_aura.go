@@ -25,7 +25,7 @@ func fragileAuraValue(s *card.TurnState, n int, attackActionOnly bool) int {
 		return n
 	}
 	if s.Self != nil {
-		s.DestroyThis(s.Self.Card)
+		s.AddToGraveyard(s.Self.Card)
 	}
 	return 0
 }
