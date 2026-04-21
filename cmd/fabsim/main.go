@@ -242,8 +242,8 @@ func printCardList(d *deck.Deck) {
 
 func printBestDeck(d *deck.Deck) {
 	s := d.Stats
-	fmt.Printf("Best deck (mean %.3f, min %d, median %.1f over %d hands)\n",
-		s.Mean(), s.Min(), s.Median(), s.Hands)
+	fmt.Printf("Best deck (min %d, median %.1f, mean %.3f, max %d over %d hands)\n",
+		s.Min(), s.Median(), s.Mean(), s.Max(), s.Hands)
 	fmt.Printf("  Hero:    %s\n", d.Hero.Name())
 	fmt.Printf("  Weapons: %s\n", weaponNames(d.Weapons))
 	fmt.Printf("  Cycle 1 mean: %.3f  (%d hands)\n", s.FirstCycle.Mean(), s.FirstCycle.Hands)

@@ -361,6 +361,17 @@ func (s Stats) Min() int {
 	return m
 }
 
+// Max returns the highest Value any simulated hand produced. Zero when no hands have been seen.
+func (s Stats) Max() int {
+	m := 0
+	for v := range s.Histogram {
+		if v > m {
+			m = v
+		}
+	}
+	return m
+}
+
 // Median returns the median hand value. With an even number of hands it's the mean of the two
 // middle values (so it can be fractional). Zero when no hands have been seen.
 func (s Stats) Median() float64 {
