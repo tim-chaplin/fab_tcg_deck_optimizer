@@ -38,7 +38,7 @@ func (RavenousRabbleRed) Defense() int                { return 2 }
 func (RavenousRabbleRed) Types() card.TypeSet         { return ravenousRabbleTypes }
 func (RavenousRabbleRed) GoAgain() bool               { return true }
 func (RavenousRabbleRed) NoMemo()                     {}
-func (c RavenousRabbleRed) Play(s *card.TurnState) int { return ravenousRabblePlay(c.Attack(), s) }
+func (c RavenousRabbleRed) Play(s *card.TurnState, _ *card.CardState) int { return ravenousRabblePlay(c.Attack(), s) }
 
 type RavenousRabbleYellow struct{}
 
@@ -51,7 +51,7 @@ func (RavenousRabbleYellow) Defense() int                { return 2 }
 func (RavenousRabbleYellow) Types() card.TypeSet         { return ravenousRabbleTypes }
 func (RavenousRabbleYellow) GoAgain() bool               { return true }
 func (RavenousRabbleYellow) NoMemo()                     {}
-func (c RavenousRabbleYellow) Play(s *card.TurnState) int { return ravenousRabblePlay(c.Attack(), s) }
+func (c RavenousRabbleYellow) Play(s *card.TurnState, _ *card.CardState) int { return ravenousRabblePlay(c.Attack(), s) }
 
 type RavenousRabbleBlue struct{}
 
@@ -64,4 +64,4 @@ func (RavenousRabbleBlue) Defense() int                { return 2 }
 func (RavenousRabbleBlue) Types() card.TypeSet         { return ravenousRabbleTypes }
 func (RavenousRabbleBlue) GoAgain() bool               { return true }
 func (RavenousRabbleBlue) NoMemo()                     {}
-func (c RavenousRabbleBlue) Play(s *card.TurnState) int { return ravenousRabblePlay(c.Attack(), s) }
+func (c RavenousRabbleBlue) Play(s *card.TurnState, _ *card.CardState) int { return ravenousRabblePlay(c.Attack(), s) }

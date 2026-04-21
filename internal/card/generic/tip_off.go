@@ -23,7 +23,7 @@ func (TipOffRed) Attack() int                 { return 5 }
 func (TipOffRed) Defense() int                { return 2 }
 func (TipOffRed) Types() card.TypeSet         { return tipOffTypes }
 func (TipOffRed) GoAgain() bool               { return false }
-func (c TipOffRed) Play(s *card.TurnState) int { return c.Attack() }
+func (c TipOffRed) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }
 
 type TipOffYellow struct{}
 
@@ -35,7 +35,7 @@ func (TipOffYellow) Attack() int                 { return 4 }
 func (TipOffYellow) Defense() int                { return 2 }
 func (TipOffYellow) Types() card.TypeSet         { return tipOffTypes }
 func (TipOffYellow) GoAgain() bool               { return false }
-func (c TipOffYellow) Play(s *card.TurnState) int { return c.Attack() }
+func (c TipOffYellow) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }
 
 type TipOffBlue struct{}
 
@@ -47,4 +47,4 @@ func (TipOffBlue) Attack() int                 { return 3 }
 func (TipOffBlue) Defense() int                { return 2 }
 func (TipOffBlue) Types() card.TypeSet         { return tipOffTypes }
 func (TipOffBlue) GoAgain() bool               { return false }
-func (c TipOffBlue) Play(s *card.TurnState) int { return c.Attack() }
+func (c TipOffBlue) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }

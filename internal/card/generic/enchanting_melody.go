@@ -26,7 +26,7 @@ func (EnchantingMelodyRed) Attack() int                 { return 0 }
 func (EnchantingMelodyRed) Defense() int                { return 2 }
 func (EnchantingMelodyRed) Types() card.TypeSet         { return enchantingMelodyTypes }
 func (EnchantingMelodyRed) GoAgain() bool               { return true }
-func (EnchantingMelodyRed) Play(s *card.TurnState) int { return setAuraCreated(s) }
+func (EnchantingMelodyRed) Play(s *card.TurnState, _ *card.CardState) int { return setAuraCreated(s) }
 
 type EnchantingMelodyYellow struct{}
 
@@ -38,7 +38,7 @@ func (EnchantingMelodyYellow) Attack() int                 { return 0 }
 func (EnchantingMelodyYellow) Defense() int                { return 2 }
 func (EnchantingMelodyYellow) Types() card.TypeSet         { return enchantingMelodyTypes }
 func (EnchantingMelodyYellow) GoAgain() bool               { return true }
-func (EnchantingMelodyYellow) Play(s *card.TurnState) int { return setAuraCreated(s) }
+func (EnchantingMelodyYellow) Play(s *card.TurnState, _ *card.CardState) int { return setAuraCreated(s) }
 
 type EnchantingMelodyBlue struct{}
 
@@ -50,4 +50,4 @@ func (EnchantingMelodyBlue) Attack() int                 { return 0 }
 func (EnchantingMelodyBlue) Defense() int                { return 2 }
 func (EnchantingMelodyBlue) Types() card.TypeSet         { return enchantingMelodyTypes }
 func (EnchantingMelodyBlue) GoAgain() bool               { return true }
-func (EnchantingMelodyBlue) Play(s *card.TurnState) int { return setAuraCreated(s) }
+func (EnchantingMelodyBlue) Play(s *card.TurnState, _ *card.CardState) int { return setAuraCreated(s) }

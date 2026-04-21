@@ -37,7 +37,7 @@ func (FyendalsFightingSpiritRed) Attack() int                 { return 7 }
 func (FyendalsFightingSpiritRed) Defense() int                { return 2 }
 func (FyendalsFightingSpiritRed) Types() card.TypeSet         { return fyendalsFightingSpiritTypes }
 func (FyendalsFightingSpiritRed) GoAgain() bool               { return false }
-func (c FyendalsFightingSpiritRed) Play(s *card.TurnState) int { return fyendalsFightingSpiritDamage(c.Attack()) }
+func (c FyendalsFightingSpiritRed) Play(s *card.TurnState, _ *card.CardState) int { return fyendalsFightingSpiritDamage(c.Attack()) }
 
 type FyendalsFightingSpiritYellow struct{}
 
@@ -49,7 +49,7 @@ func (FyendalsFightingSpiritYellow) Attack() int                 { return 6 }
 func (FyendalsFightingSpiritYellow) Defense() int                { return 2 }
 func (FyendalsFightingSpiritYellow) Types() card.TypeSet         { return fyendalsFightingSpiritTypes }
 func (FyendalsFightingSpiritYellow) GoAgain() bool               { return false }
-func (c FyendalsFightingSpiritYellow) Play(s *card.TurnState) int { return fyendalsFightingSpiritDamage(c.Attack()) }
+func (c FyendalsFightingSpiritYellow) Play(s *card.TurnState, _ *card.CardState) int { return fyendalsFightingSpiritDamage(c.Attack()) }
 
 type FyendalsFightingSpiritBlue struct{}
 
@@ -61,4 +61,4 @@ func (FyendalsFightingSpiritBlue) Attack() int                 { return 5 }
 func (FyendalsFightingSpiritBlue) Defense() int                { return 2 }
 func (FyendalsFightingSpiritBlue) Types() card.TypeSet         { return fyendalsFightingSpiritTypes }
 func (FyendalsFightingSpiritBlue) GoAgain() bool               { return false }
-func (c FyendalsFightingSpiritBlue) Play(s *card.TurnState) int { return fyendalsFightingSpiritDamage(c.Attack()) }
+func (c FyendalsFightingSpiritBlue) Play(s *card.TurnState, _ *card.CardState) int { return fyendalsFightingSpiritDamage(c.Attack()) }

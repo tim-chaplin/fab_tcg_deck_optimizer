@@ -27,7 +27,7 @@ func (CondemnToSlaughterRed) Attack() int                { return 0 }
 func (CondemnToSlaughterRed) Defense() int               { return 3 }
 func (CondemnToSlaughterRed) Types() card.TypeSet     { return condemnToSlaughterTypes }
 func (CondemnToSlaughterRed) GoAgain() bool              { return true }
-func (CondemnToSlaughterRed) Play(s *card.TurnState) int { return condemnToSlaughterBonus(s, 3) }
+func (CondemnToSlaughterRed) Play(s *card.TurnState, _ *card.CardState) int { return condemnToSlaughterBonus(s, 3) }
 
 type CondemnToSlaughterYellow struct{}
 
@@ -39,7 +39,7 @@ func (CondemnToSlaughterYellow) Attack() int                { return 0 }
 func (CondemnToSlaughterYellow) Defense() int               { return 3 }
 func (CondemnToSlaughterYellow) Types() card.TypeSet     { return condemnToSlaughterTypes }
 func (CondemnToSlaughterYellow) GoAgain() bool              { return true }
-func (CondemnToSlaughterYellow) Play(s *card.TurnState) int { return condemnToSlaughterBonus(s, 2) }
+func (CondemnToSlaughterYellow) Play(s *card.TurnState, _ *card.CardState) int { return condemnToSlaughterBonus(s, 2) }
 
 type CondemnToSlaughterBlue struct{}
 
@@ -51,7 +51,7 @@ func (CondemnToSlaughterBlue) Attack() int                { return 0 }
 func (CondemnToSlaughterBlue) Defense() int               { return 3 }
 func (CondemnToSlaughterBlue) Types() card.TypeSet     { return condemnToSlaughterTypes }
 func (CondemnToSlaughterBlue) GoAgain() bool              { return true }
-func (CondemnToSlaughterBlue) Play(s *card.TurnState) int { return condemnToSlaughterBonus(s, 1) }
+func (CondemnToSlaughterBlue) Play(s *card.TurnState, _ *card.CardState) int { return condemnToSlaughterBonus(s, 1) }
 
 // condemnToSlaughterBonus returns n if some Runeblade attack (attack action card or weapon swing)
 // is scheduled later this turn, otherwise 0.

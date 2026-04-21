@@ -42,7 +42,7 @@ func (LifeForALifeRed) Attack() int                  { return 4 }
 func (LifeForALifeRed) Defense() int                 { return 2 }
 func (LifeForALifeRed) Types() card.TypeSet          { return lifeForALifeTypes }
 func (LifeForALifeRed) GoAgain() bool                { return simstate.HeroWantsLowerHealth() }
-func (c LifeForALifeRed) Play(s *card.TurnState) int { return lifeForALifeDamage(c.Attack()) }
+func (c LifeForALifeRed) Play(s *card.TurnState, _ *card.CardState) int { return lifeForALifeDamage(c.Attack()) }
 
 type LifeForALifeYellow struct{}
 
@@ -54,7 +54,7 @@ func (LifeForALifeYellow) Attack() int                  { return 3 }
 func (LifeForALifeYellow) Defense() int                 { return 2 }
 func (LifeForALifeYellow) Types() card.TypeSet          { return lifeForALifeTypes }
 func (LifeForALifeYellow) GoAgain() bool                { return simstate.HeroWantsLowerHealth() }
-func (c LifeForALifeYellow) Play(s *card.TurnState) int { return lifeForALifeDamage(c.Attack()) }
+func (c LifeForALifeYellow) Play(s *card.TurnState, _ *card.CardState) int { return lifeForALifeDamage(c.Attack()) }
 
 type LifeForALifeBlue struct{}
 
@@ -66,4 +66,4 @@ func (LifeForALifeBlue) Attack() int                  { return 2 }
 func (LifeForALifeBlue) Defense() int                 { return 2 }
 func (LifeForALifeBlue) Types() card.TypeSet          { return lifeForALifeTypes }
 func (LifeForALifeBlue) GoAgain() bool                { return simstate.HeroWantsLowerHealth() }
-func (c LifeForALifeBlue) Play(s *card.TurnState) int { return lifeForALifeDamage(c.Attack()) }
+func (c LifeForALifeBlue) Play(s *card.TurnState, _ *card.CardState) int { return lifeForALifeDamage(c.Attack()) }

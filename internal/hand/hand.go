@@ -603,8 +603,8 @@ func cardMetaSlowPath(c card.Card, id card.ID) attackerMeta {
 // Evaluator so a deck eval reuses them across every partition, mask, and permutation.
 type attackBufs struct {
 	perm           []card.Card
-	pcBuf          []card.PlayedCard
-	ptrBuf         []*card.PlayedCard
+	pcBuf          []card.CardState
+	ptrBuf         []*card.CardState
 	cardsPlayedBuf []card.Card
 	state          *card.TurnState
 	// drScratch is a pooled TurnState for defense-reaction cost probing inside the
@@ -622,7 +622,7 @@ type attackBufs struct {
 	permMeta []*attackerMeta
 	// permFromArsenal carries arsenal-provenance per slot in lockstep with perm / permMeta. Set
 	// to true on the slot whose card came from the arsenal slot at start of turn so
-	// playSequenceWithMeta can flip pcBuf[i].FromArsenal for that PlayedCard.
+	// playSequenceWithMeta can flip pcBuf[i].FromArsenal for that CardState.
 	permFromArsenal []bool
 	// Partition-loop buffers, consumed by bestUncached. Sized handSize+1 to cover the optional
 	// arsenal-in slot the enumerator treats as index n. isDRBuf caches TypeDefenseReaction
@@ -679,8 +679,8 @@ func newAttackBufs(handSize, weaponCount int, weapons []weapon.Weapon) *attackBu
 		weaponCosts[mask] = cost
 		weaponNames[mask] = names
 	}
-	pcBuf := make([]card.PlayedCard, maxAttackers)
-	ptrBuf := make([]*card.PlayedCard, maxAttackers)
+	pcBuf := make([]card.CardState, maxAttackers)
+	ptrBuf := make([]*card.CardState, maxAttackers)
 	// Wire the ptrBuf entries to their pcBuf slots once — the mapping is stable across every
 	// permutation so playSequenceWithMeta doesn't need to rewrite it per call.
 	for i := range pcBuf {
@@ -1116,7 +1116,7 @@ func defenseReactionDamage(defenders, pitched, deck []card.Card, state *card.Tur
 			continue
 		}
 		*state = card.TurnState{Pitched: pitched, Deck: deck}
-		total += d.Play(state)
+		total += d.Play(state, &card.CardState{Card: d})
 	}
 	return total
 }
@@ -1489,7 +1489,7 @@ func (ctx *sequenceContext) playSequenceWithMeta(order []card.Card, perCardOut, 
 	// so only the per-permutation Card and the zeroed GrantedGoAgain / FromArsenal need
 	// refreshing here.
 	for i, c := range order {
-		pcBuf[i] = card.PlayedCard{Card: c, FromArsenal: permFromArsenal[i]}
+		pcBuf[i] = card.CardState{Card: c, FromArsenal: permFromArsenal[i]}
 		if perCardOut != nil {
 			perCardOut[i] = 0
 		}
@@ -1526,7 +1526,6 @@ func (ctx *sequenceContext) playSequenceWithMeta(order []card.Card, perCardOut, 
 		}
 
 		state.CardsRemaining = played[i+1:]
-		state.Self = pc
 
 		// If this card is an attack or weapon and any Runechant is live, those tokens fire on
 		// its damage step. Set ArcaneDamageDealt now — before Play and OnCardPlayed — so Play
@@ -1537,7 +1536,7 @@ func (ctx *sequenceContext) playSequenceWithMeta(order []card.Card, perCardOut, 
 			state.ArcaneDamageDealt = true
 		}
 
-		playDmg := pc.Card.Play(state)
+		playDmg := pc.Card.Play(state, pc)
 		triggerDmg := ctx.hero.OnCardPlayed(pc.Card, state)
 		damage += playDmg + triggerDmg
 		if perCardOut != nil {
@@ -1601,7 +1600,7 @@ func fillDefenseContributions(line []CardAssignment, pitched []card.Card, deck [
 		}
 		if c.Types().IsDefenseReaction() {
 			*bufs.state = card.TurnState{Pitched: pitched, Deck: deck}
-			line[i].Contribution += float64(c.Play(bufs.state))
+			line[i].Contribution += float64(c.Play(bufs.state, &card.CardState{Card: c, FromArsenal: line[i].FromArsenal}))
 		}
 	}
 }

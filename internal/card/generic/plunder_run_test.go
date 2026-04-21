@@ -10,7 +10,7 @@ import (
 func TestPlunderRun_NoAttackReturnsZero(t *testing.T) {
 	s := card.TurnState{}
 	for _, c := range []card.Card{PlunderRunRed{}, PlunderRunYellow{}, PlunderRunBlue{}} {
-		if got := c.Play(&s); got != 0 {
+		if got := c.Play(&s, &card.CardState{}); got != 0 {
 			t.Errorf("%s: Play() = %d, want 0", c.Name(), got)
 		}
 	}
@@ -18,8 +18,8 @@ func TestPlunderRun_NoAttackReturnsZero(t *testing.T) {
 
 // TestPlunderRun_NonAttackInRemainingFizzles: non-attack action fails the predicate.
 func TestPlunderRun_NonAttackInRemainingFizzles(t *testing.T) {
-	s := card.TurnState{CardsRemaining: []*card.PlayedCard{{Card: stubGenericAction()}}}
-	if got := (PlunderRunRed{}).Play(&s); got != 0 {
+	s := card.TurnState{CardsRemaining: []*card.CardState{{Card: stubGenericAction()}}}
+	if got := (PlunderRunRed{}).Play(&s, &card.CardState{}); got != 0 {
 		t.Errorf("Play() = %d, want 0 (non-attack skipped)", got)
 	}
 }
@@ -27,8 +27,6 @@ func TestPlunderRun_NonAttackInRemainingFizzles(t *testing.T) {
 // TestPlunderRun_NextAttackReturnsBonus: arsenal-played copy with a queued attack action
 // triggers the per-variant bonus (Red +3, Yellow +2, Blue +1).
 func TestPlunderRun_NextAttackReturnsBonus(t *testing.T) {
-	self := &card.PlayedCard{FromArsenal: true}
-	s := card.TurnState{Self: self, CardsRemaining: []*card.PlayedCard{{Card: stubGenericAttack(0, 0)}}}
 	cases := []struct {
 		c    card.Card
 		want int
@@ -38,8 +36,9 @@ func TestPlunderRun_NextAttackReturnsBonus(t *testing.T) {
 		{PlunderRunBlue{}, 1},
 	}
 	for _, tc := range cases {
-		self.Card = tc.c
-		if got := tc.c.Play(&s); got != tc.want {
+		s := card.TurnState{CardsRemaining: []*card.CardState{{Card: stubGenericAttack(0, 0)}}}
+		self := &card.CardState{Card: tc.c, FromArsenal: true}
+		if got := tc.c.Play(&s, self); got != tc.want {
 			t.Errorf("%s: Play() = %d, want %d", tc.c.Name(), got, tc.want)
 		}
 	}
@@ -48,11 +47,9 @@ func TestPlunderRun_NextAttackReturnsBonus(t *testing.T) {
 // TestPlunderRun_HandPlayedFizzles: hand-played copy fails the from-arsenal gate even when a
 // queued attack action would otherwise satisfy the rider.
 func TestPlunderRun_HandPlayedFizzles(t *testing.T) {
-	s := card.TurnState{
-		Self:           &card.PlayedCard{Card: PlunderRunRed{}},
-		CardsRemaining: []*card.PlayedCard{{Card: stubGenericAttack(0, 0)}},
-	}
-	if got := (PlunderRunRed{}).Play(&s); got != 0 {
+	s := card.TurnState{CardsRemaining: []*card.CardState{{Card: stubGenericAttack(0, 0)}}}
+	self := &card.CardState{Card: PlunderRunRed{}}
+	if got := (PlunderRunRed{}).Play(&s, self); got != 0 {
 		t.Errorf("Play() = %d, want 0 (hand-played, not from arsenal)", got)
 	}
 }

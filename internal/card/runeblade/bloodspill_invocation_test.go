@@ -19,7 +19,7 @@ func TestBloodspillInvocation_BlockCoversIncomingReturnsN(t *testing.T) {
 	}
 	for _, tc := range cases {
 		s := card.TurnState{IncomingDamage: 3, BlockTotal: 3}
-		if got := tc.c.Play(&s); got != tc.n {
+		if got := tc.c.Play(&s, &card.CardState{}); got != tc.n {
 			t.Errorf("%s: Play() = %d, want %d (block == incoming)", tc.c.Name(), got, tc.n)
 		}
 	}
@@ -35,7 +35,7 @@ func TestBloodspillInvocation_BlockShortReturnsZero(t *testing.T) {
 	}
 	for _, c := range cases {
 		s := card.TurnState{IncomingDamage: 3, BlockTotal: 2}
-		if got := c.Play(&s); got != 0 {
+		if got := c.Play(&s, &card.CardState{}); got != 0 {
 			t.Errorf("%s: Play() = %d, want 0 (block < incoming, no same-turn pop)", c.Name(), got)
 		}
 	}
@@ -47,9 +47,9 @@ func TestBloodspillInvocation_SameTurnPopBySalientAttackAction(t *testing.T) {
 	s := card.TurnState{
 		IncomingDamage: 3,
 		BlockTotal:     0,
-		CardsRemaining: []*card.PlayedCard{{Card: stubAttackWithPower{power: 4}}},
+		CardsRemaining: []*card.CardState{{Card: stubAttackWithPower{power: 4}}},
 	}
-	if got := (BloodspillInvocationRed{}).Play(&s); got != 3 {
+	if got := (BloodspillInvocationRed{}).Play(&s, &card.CardState{}); got != 3 {
 		t.Errorf("Play() = %d, want 3 (Attack=4 attack action pops Bloodspill same turn)", got)
 	}
 }
@@ -62,9 +62,9 @@ func TestBloodspillInvocation_WeaponDoesNotPop(t *testing.T) {
 		IncomingDamage: 3,
 		BlockTotal:     0,
 		Runechants:     1,
-		CardsRemaining: []*card.PlayedCard{{Card: stubRunebladeWeapon{}}},
+		CardsRemaining: []*card.CardState{{Card: stubRunebladeWeapon{}}},
 	}
-	if got := (BloodspillInvocationRed{}).Play(&s); got != 0 {
+	if got := (BloodspillInvocationRed{}).Play(&s, &card.CardState{}); got != 0 {
 		t.Errorf("Play() = %d, want 0 (weapon hits don't trigger Bloodspill; under-block collapses value)", got)
 	}
 }
@@ -76,9 +76,9 @@ func TestBloodspillInvocation_SameTurnPopByRunechant(t *testing.T) {
 		IncomingDamage: 3,
 		BlockTotal:     0,
 		Runechants:     1,
-		CardsRemaining: []*card.PlayedCard{{Card: stubAttackWithPower{power: 6}}},
+		CardsRemaining: []*card.CardState{{Card: stubAttackWithPower{power: 6}}},
 	}
-	if got := (BloodspillInvocationRed{}).Play(&s); got != 3 {
+	if got := (BloodspillInvocationRed{}).Play(&s, &card.CardState{}); got != 3 {
 		t.Errorf("Play() = %d, want 3 (Attack=6 blockable, 1 Runechant likely to hit)", got)
 	}
 }

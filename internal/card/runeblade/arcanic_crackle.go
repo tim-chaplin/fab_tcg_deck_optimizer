@@ -30,7 +30,7 @@ func (ArcanicCrackleRed) Attack() int                   { return 3 }
 func (ArcanicCrackleRed) Defense() int                  { return 3 }
 func (ArcanicCrackleRed) Types() card.TypeSet           { return arcanicCrackleTypes }
 func (ArcanicCrackleRed) GoAgain() bool                 { return false }
-func (c ArcanicCrackleRed) Play(s *card.TurnState) int  { return arcanicCracklePlay(c.Attack(), s) }
+func (c ArcanicCrackleRed) Play(s *card.TurnState, _ *card.CardState) int  { return arcanicCracklePlay(c.Attack(), s) }
 
 type ArcanicCrackleYellow struct{}
 
@@ -42,7 +42,7 @@ func (ArcanicCrackleYellow) Attack() int                   { return 2 }
 func (ArcanicCrackleYellow) Defense() int                  { return 3 }
 func (ArcanicCrackleYellow) Types() card.TypeSet           { return arcanicCrackleTypes }
 func (ArcanicCrackleYellow) GoAgain() bool                 { return false }
-func (c ArcanicCrackleYellow) Play(s *card.TurnState) int  { return arcanicCracklePlay(c.Attack(), s) }
+func (c ArcanicCrackleYellow) Play(s *card.TurnState, _ *card.CardState) int  { return arcanicCracklePlay(c.Attack(), s) }
 
 type ArcanicCrackleBlue struct{}
 
@@ -54,4 +54,4 @@ func (ArcanicCrackleBlue) Attack() int                    { return 1 }
 func (ArcanicCrackleBlue) Defense() int                   { return 3 }
 func (ArcanicCrackleBlue) Types() card.TypeSet            { return arcanicCrackleTypes }
 func (ArcanicCrackleBlue) GoAgain() bool                  { return false }
-func (c ArcanicCrackleBlue) Play(s *card.TurnState) int   { return arcanicCracklePlay(c.Attack(), s) }
+func (c ArcanicCrackleBlue) Play(s *card.TurnState, _ *card.CardState) int   { return arcanicCracklePlay(c.Attack(), s) }

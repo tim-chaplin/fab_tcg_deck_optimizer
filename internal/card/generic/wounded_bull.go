@@ -36,7 +36,7 @@ func (WoundedBullRed) Attack() int                 { return 7 }
 func (WoundedBullRed) Defense() int                { return 2 }
 func (WoundedBullRed) Types() card.TypeSet         { return woundedBullTypes }
 func (WoundedBullRed) GoAgain() bool               { return false }
-func (c WoundedBullRed) Play(s *card.TurnState) int { return woundedBullDamage(c.Attack()) }
+func (c WoundedBullRed) Play(s *card.TurnState, _ *card.CardState) int { return woundedBullDamage(c.Attack()) }
 
 type WoundedBullYellow struct{}
 
@@ -48,7 +48,7 @@ func (WoundedBullYellow) Attack() int                 { return 6 }
 func (WoundedBullYellow) Defense() int                { return 2 }
 func (WoundedBullYellow) Types() card.TypeSet         { return woundedBullTypes }
 func (WoundedBullYellow) GoAgain() bool               { return false }
-func (c WoundedBullYellow) Play(s *card.TurnState) int { return woundedBullDamage(c.Attack()) }
+func (c WoundedBullYellow) Play(s *card.TurnState, _ *card.CardState) int { return woundedBullDamage(c.Attack()) }
 
 type WoundedBullBlue struct{}
 
@@ -60,4 +60,4 @@ func (WoundedBullBlue) Attack() int                 { return 5 }
 func (WoundedBullBlue) Defense() int                { return 2 }
 func (WoundedBullBlue) Types() card.TypeSet         { return woundedBullTypes }
 func (WoundedBullBlue) GoAgain() bool               { return false }
-func (c WoundedBullBlue) Play(s *card.TurnState) int { return woundedBullDamage(c.Attack()) }
+func (c WoundedBullBlue) Play(s *card.TurnState, _ *card.CardState) int { return woundedBullDamage(c.Attack()) }

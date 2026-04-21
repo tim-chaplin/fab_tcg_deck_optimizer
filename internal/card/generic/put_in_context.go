@@ -19,4 +19,4 @@ func (PutInContextBlue) Attack() int              { return 0 }
 func (PutInContextBlue) Defense() int             { return 3 }
 func (PutInContextBlue) Types() card.TypeSet      { return defenseReactionTypes }
 func (PutInContextBlue) GoAgain() bool            { return false }
-func (PutInContextBlue) Play(*card.TurnState) int { return 0 }
+func (PutInContextBlue) Play(*card.TurnState, *card.CardState) int { return 0 }

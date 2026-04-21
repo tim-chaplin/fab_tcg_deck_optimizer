@@ -22,4 +22,4 @@ func (RansackAndRazeBlue) Attack() int                 { return 0 }
 func (RansackAndRazeBlue) Defense() int                { return 3 }
 func (RansackAndRazeBlue) Types() card.TypeSet         { return ransackAndRazeTypes }
 func (RansackAndRazeBlue) GoAgain() bool               { return true }
-func (RansackAndRazeBlue) Play(s *card.TurnState) int { return 0 }
+func (RansackAndRazeBlue) Play(s *card.TurnState, _ *card.CardState) int { return 0 }

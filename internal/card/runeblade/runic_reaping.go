@@ -29,7 +29,7 @@ func (RunicReapingRed) Attack() int                { return 0 }
 func (RunicReapingRed) Defense() int               { return 2 }
 func (RunicReapingRed) Types() card.TypeSet        { return runicReapingTypes }
 func (RunicReapingRed) GoAgain() bool              { return true }
-func (RunicReapingRed) Play(s *card.TurnState) int { return runicReapingPlay(s, 3) }
+func (RunicReapingRed) Play(s *card.TurnState, _ *card.CardState) int { return runicReapingPlay(s, 3) }
 
 type RunicReapingYellow struct{}
 
@@ -41,7 +41,7 @@ func (RunicReapingYellow) Attack() int                { return 0 }
 func (RunicReapingYellow) Defense() int               { return 2 }
 func (RunicReapingYellow) Types() card.TypeSet        { return runicReapingTypes }
 func (RunicReapingYellow) GoAgain() bool              { return true }
-func (RunicReapingYellow) Play(s *card.TurnState) int { return runicReapingPlay(s, 2) }
+func (RunicReapingYellow) Play(s *card.TurnState, _ *card.CardState) int { return runicReapingPlay(s, 2) }
 
 type RunicReapingBlue struct{}
 
@@ -53,7 +53,7 @@ func (RunicReapingBlue) Attack() int                { return 0 }
 func (RunicReapingBlue) Defense() int               { return 2 }
 func (RunicReapingBlue) Types() card.TypeSet        { return runicReapingTypes }
 func (RunicReapingBlue) GoAgain() bool              { return true }
-func (RunicReapingBlue) Play(s *card.TurnState) int { return runicReapingPlay(s, 1) }
+func (RunicReapingBlue) Play(s *card.TurnState, _ *card.CardState) int { return runicReapingPlay(s, 1) }
 
 func runicReapingPlay(s *card.TurnState, n int) int {
 	var target card.Card

@@ -153,21 +153,18 @@ func yintiYantiPlay(base int, s *card.TurnState) int {
     # Vigor Rush: if played a non-attack action this turn → go again.
     "Vigor Rush": dict(
         helper="""// vigorRushPlay grants go again when any non-attack Action has been played earlier this turn.
-func vigorRushPlay(base int, s *card.TurnState) int {
-\tif s == nil || s.Self == nil {
-\t\treturn base
-\t}
+func vigorRushPlay(base int, s *card.TurnState, self *card.CardState) int {
 \tfor _, pl := range s.CardsPlayed {
 \t\tt := pl.Types()
 \t\tif t.Has(card.TypeAction) && !t.Has(card.TypeAttack) {
-\t\t\ts.Self.GrantedGoAgain = true
+\t\t\tself.GrantedGoAgain = true
 \t\t\tbreak
 \t\t}
 \t}
 \treturn base
 }
 """,
-        call="vigorRushPlay(c.Attack(), s)",
+        call="vigorRushPlay(c.Attack(), s, self)",
         simp="",
     ),
     # Zealous Belting: any pitched card with power > base power → go again (printed says "in pitch
@@ -175,20 +172,17 @@ func vigorRushPlay(base int, s *card.TurnState) int {
     "Zealous Belting": dict(
         helper="""// zealousBeltingPlay grants go again when any pitched card this turn has base power greater
 // than the card's own base power.
-func zealousBeltingPlay(base int, s *card.TurnState) int {
-\tif s == nil || s.Self == nil {
-\t\treturn base
-\t}
+func zealousBeltingPlay(base int, s *card.TurnState, self *card.CardState) int {
 \tfor _, p := range s.Pitched {
 \t\tif p.Attack() > base {
-\t\t\ts.Self.GrantedGoAgain = true
+\t\t\tself.GrantedGoAgain = true
 \t\t\tbreak
 \t\t}
 \t}
 \treturn base
 }
 """,
-        call="zealousBeltingPlay(c.Attack(), s)",
+        call="zealousBeltingPlay(c.Attack(), s, self)",
         simp="",
     ),
     # Come to Fight, Minnowism, Nimblism, Sloggism, Captain's Call, Warmonger's Recital,
@@ -537,13 +531,16 @@ def build_file(name, kind, printings, text):
         kw = p.get("CardKeywords", "")
         go_again = "true" if "Go again" in kw else "false"
 
-        # Need to decide whether Play gets a receiver (c) or not.
+        # Need to decide whether Play gets a receiver (c) or not, and whether the helper call
+        # references `self` so we name the second parameter accordingly.
         use_receiver = play_call and ("c." in play_call)
+        uses_self = play_call and ("self" in play_call)
         recv = "c" if use_receiver else ""
+        self_name = "self" if uses_self else "_"
         if recv:
-            play_sig = f"func ({recv} {sname}) Play(s *card.TurnState) int"
+            play_sig = f"func ({recv} {sname}) Play(s *card.TurnState, {self_name} *card.CardState) int"
         else:
-            play_sig = f"func ({sname}) Play(s *card.TurnState) int"
+            play_sig = f"func ({sname}) Play(s *card.TurnState, {self_name} *card.CardState) int"
 
         # If play doesn't use s, avoid "unused var"?
         # Actually in Go s is just a param; unused params are OK.

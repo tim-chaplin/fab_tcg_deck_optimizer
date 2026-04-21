@@ -27,7 +27,7 @@ func (BloodspillInvocationRed) Attack() int                { return 0 }
 func (BloodspillInvocationRed) Defense() int               { return 2 }
 func (BloodspillInvocationRed) Types() card.TypeSet        { return bloodspillInvocationTypes }
 func (BloodspillInvocationRed) GoAgain() bool              { return true }
-func (BloodspillInvocationRed) Play(s *card.TurnState) int { return fragileAuraValue(s, 3, true) }
+func (BloodspillInvocationRed) Play(s *card.TurnState, _ *card.CardState) int { return fragileAuraValue(s, 3, true) }
 
 type BloodspillInvocationYellow struct{}
 
@@ -39,7 +39,7 @@ func (BloodspillInvocationYellow) Attack() int                { return 0 }
 func (BloodspillInvocationYellow) Defense() int               { return 2 }
 func (BloodspillInvocationYellow) Types() card.TypeSet        { return bloodspillInvocationTypes }
 func (BloodspillInvocationYellow) GoAgain() bool              { return true }
-func (BloodspillInvocationYellow) Play(s *card.TurnState) int { return fragileAuraValue(s, 2, true) }
+func (BloodspillInvocationYellow) Play(s *card.TurnState, _ *card.CardState) int { return fragileAuraValue(s, 2, true) }
 
 type BloodspillInvocationBlue struct{}
 
@@ -51,4 +51,4 @@ func (BloodspillInvocationBlue) Attack() int                { return 0 }
 func (BloodspillInvocationBlue) Defense() int               { return 2 }
 func (BloodspillInvocationBlue) Types() card.TypeSet        { return bloodspillInvocationTypes }
 func (BloodspillInvocationBlue) GoAgain() bool              { return true }
-func (BloodspillInvocationBlue) Play(s *card.TurnState) int { return fragileAuraValue(s, 1, true) }
+func (BloodspillInvocationBlue) Play(s *card.TurnState, _ *card.CardState) int { return fragileAuraValue(s, 1, true) }

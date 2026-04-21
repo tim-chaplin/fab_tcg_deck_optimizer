@@ -16,4 +16,4 @@ func (ToughenUpBlue) Attack() int              { return 0 }
 func (ToughenUpBlue) Defense() int             { return 4 }
 func (ToughenUpBlue) Types() card.TypeSet      { return defenseReactionTypes }
 func (ToughenUpBlue) GoAgain() bool            { return false }
-func (ToughenUpBlue) Play(*card.TurnState) int { return 0 }
+func (ToughenUpBlue) Play(*card.TurnState, *card.CardState) int { return 0 }

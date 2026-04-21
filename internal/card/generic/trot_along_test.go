@@ -10,7 +10,7 @@ import (
 // fizzles.
 func TestTrotAlong_NoAttackReturnsZero(t *testing.T) {
 	s := card.TurnState{}
-	if got := (TrotAlongBlue{}).Play(&s); got != 0 {
+	if got := (TrotAlongBlue{}).Play(&s, &card.CardState{}); got != 0 {
 		t.Errorf("Play() = %d, want 0", got)
 	}
 }
@@ -18,9 +18,9 @@ func TestTrotAlong_NoAttackReturnsZero(t *testing.T) {
 // TestTrotAlong_HighPowerAttackDoesNotFire exercises the power<=3 filter: a power-4 attack in
 // CardsRemaining is seen but doesn't pass the predicate, so the grant doesn't fire.
 func TestTrotAlong_HighPowerAttackDoesNotFire(t *testing.T) {
-	target := &card.PlayedCard{Card: stubGenericAttack(0, 4)}
-	s := card.TurnState{CardsRemaining: []*card.PlayedCard{target}}
-	if got := (TrotAlongBlue{}).Play(&s); got != 0 {
+	target := &card.CardState{Card: stubGenericAttack(0, 4)}
+	s := card.TurnState{CardsRemaining: []*card.CardState{target}}
+	if got := (TrotAlongBlue{}).Play(&s, &card.CardState{}); got != 0 {
 		t.Errorf("Play() = %d, want 0 (power 4 > 3)", got)
 	}
 	if target.GrantedGoAgain {
@@ -30,9 +30,9 @@ func TestTrotAlong_HighPowerAttackDoesNotFire(t *testing.T) {
 
 // TestTrotAlong_LowPowerAttackGrantsGoAgain exercises the hit branch: a power-3 attack qualifies.
 func TestTrotAlong_LowPowerAttackGrantsGoAgain(t *testing.T) {
-	target := &card.PlayedCard{Card: stubGenericAttack(0, 3)}
-	s := card.TurnState{CardsRemaining: []*card.PlayedCard{target}}
-	if got := (TrotAlongBlue{}).Play(&s); got != 0 {
+	target := &card.CardState{Card: stubGenericAttack(0, 3)}
+	s := card.TurnState{CardsRemaining: []*card.CardState{target}}
+	if got := (TrotAlongBlue{}).Play(&s, &card.CardState{}); got != 0 {
 		t.Errorf("Play() = %d, want 0 (Trot Along grants go again, not damage)", got)
 	}
 	if !target.GrantedGoAgain {

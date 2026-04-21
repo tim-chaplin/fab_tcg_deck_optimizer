@@ -24,4 +24,4 @@ func (EmissaryOfTidesRed) Attack() int                 { return 4 }
 func (EmissaryOfTidesRed) Defense() int                { return 2 }
 func (EmissaryOfTidesRed) Types() card.TypeSet         { return emissaryOfTidesTypes }
 func (EmissaryOfTidesRed) GoAgain() bool               { return false }
-func (c EmissaryOfTidesRed) Play(s *card.TurnState) int { return c.Attack() }
+func (c EmissaryOfTidesRed) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }

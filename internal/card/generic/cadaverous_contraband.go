@@ -24,7 +24,7 @@ func (CadaverousContrabandRed) Attack() int                 { return 6 }
 func (CadaverousContrabandRed) Defense() int                { return 2 }
 func (CadaverousContrabandRed) Types() card.TypeSet         { return cadaverousContrabandTypes }
 func (CadaverousContrabandRed) GoAgain() bool               { return false }
-func (c CadaverousContrabandRed) Play(s *card.TurnState) int { return c.Attack() }
+func (c CadaverousContrabandRed) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }
 
 type CadaverousContrabandYellow struct{}
 
@@ -36,7 +36,7 @@ func (CadaverousContrabandYellow) Attack() int                 { return 5 }
 func (CadaverousContrabandYellow) Defense() int                { return 2 }
 func (CadaverousContrabandYellow) Types() card.TypeSet         { return cadaverousContrabandTypes }
 func (CadaverousContrabandYellow) GoAgain() bool               { return false }
-func (c CadaverousContrabandYellow) Play(s *card.TurnState) int { return c.Attack() }
+func (c CadaverousContrabandYellow) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }
 
 type CadaverousContrabandBlue struct{}
 
@@ -48,4 +48,4 @@ func (CadaverousContrabandBlue) Attack() int                 { return 4 }
 func (CadaverousContrabandBlue) Defense() int                { return 2 }
 func (CadaverousContrabandBlue) Types() card.TypeSet         { return cadaverousContrabandTypes }
 func (CadaverousContrabandBlue) GoAgain() bool               { return false }
-func (c CadaverousContrabandBlue) Play(s *card.TurnState) int { return c.Attack() }
+func (c CadaverousContrabandBlue) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }

@@ -61,32 +61,35 @@ func (s TypeSet) IsDefenseReaction() bool {
 	return s&TypeSet(TypeDefenseReaction) != 0
 }
 
-// PlayedCard wraps a Card with per-turn mutable flags that other cards' effects can toggle.
+// CardState wraps a Card with per-turn mutable flags that other cards' effects can toggle.
 // Instances are created by the solver at the start of each attack chain and live only for that
 // chain. Effects that grant keywords to "the next X" scan TurnState.CardsRemaining and flip
-// flags on the matching entry.
-type PlayedCard struct {
+// flags on the matching entry; the card currently resolving receives its own CardState as
+// the `self` parameter to Play.
+type CardState struct {
 	Card Card
-	// GrantedGoAgain is set by a prior card's effect to give this specific card Go again even if
-	// its printed text doesn't (e.g. Mauvrion Skies targeting the next Runeblade attack). The
-	// solver's chain-legality check ORs this with Card.GoAgain().
+	// GrantedGoAgain is set by a prior card's grant (e.g. Mauvrion Skies targeting the next
+	// Runeblade attack) or by the card's own Play flipping self.GrantedGoAgain = true (e.g.
+	// Runerager Swarm, Vigor Rush). The solver's chain-legality check ORs this with
+	// Card.GoAgain().
 	GrantedGoAgain bool
-	// FromArsenal flags the single PlayedCard whose Card came from the arsenal slot at start of
-	// turn. The solver sets it before the chain runs; PlayedCards for hand cards and mid-turn
-	// extensions stay false. Effects gated on "if this is played from arsenal" read the
-	// helper card.PlayedFromArsenal(s) which checks s.Self.FromArsenal.
+	// FromArsenal flags the single CardState whose Card came from the arsenal slot at start of
+	// turn. The solver sets it before the chain runs; CardStates for hand cards and mid-turn
+	// extensions stay false. Cards gate "if this is played from arsenal" riders on
+	// self.FromArsenal.
 	FromArsenal bool
 }
 
 // EffectiveGoAgain reports whether this card has Go again this turn — from printed text or a
 // grant by a prior card's effect.
-func (p *PlayedCard) EffectiveGoAgain() bool {
+func (p *CardState) EffectiveGoAgain() bool {
 	return p.Card.GoAgain() || p.GrantedGoAgain
 }
 
-// TurnState is the context passed to Card.Play. Cards read it to decide what effects to apply;
-// the solver appends each played card to CardsPlayed after its Play returns so later cards this
-// turn see what was played before them.
+// TurnState is the shared turn-level context passed to Card.Play alongside the per-card
+// CardState wrapper. Cards read it to decide what effects to apply; the solver appends each
+// played card to CardsPlayed after its Play returns so later cards this turn see what was
+// played before them.
 type TurnState struct {
 	// CardsPlayed is the sequence of cards played (as attacks) this turn, in order. Populated by
 	// the solver, not by Play itself.
@@ -98,16 +101,11 @@ type TurnState struct {
 	// CardsRemaining is the cards that will be played after the current one in turn order.
 	// Populated by the solver before each Play so an effect can peek forward (e.g. Condemn to
 	// Slaughter buffing the "next Runeblade attack") or grant keywords to a later card by
-	// flipping flags on its PlayedCard entry (e.g. Mauvrion Skies granting Go again).
-	CardsRemaining []*PlayedCard
+	// flipping flags on its CardState entry (e.g. Mauvrion Skies granting Go again).
+	CardsRemaining []*CardState
 	// Pitched is the cards pitched this turn for resources. Populated by the solver before any
 	// Play. Effects that check "if an attack card was pitched" scan this list.
 	Pitched []Card
-	// Self is the PlayedCard wrapper for the card currently being played. Effects that
-	// conditionally grant the played card itself Go again (e.g. Runerager Swarm) flip
-	// Self.GrantedGoAgain. The solver populates Self before each Play and consults
-	// EffectiveGoAgain after.
-	Self *PlayedCard
 	// Overpower is set when an attack with the Overpower keyword is being played. Not yet
 	// consumed by the solver — blocked damage should eventually be forwarded to the hero when
 	// Overpower is true.
@@ -148,13 +146,6 @@ type TurnState struct {
 	// attack, next entries may play as free-cost chain extensions, and the rest carry as Held
 	// (or compete for the empty arsenal slot) into the next hand.
 	Drawn []Card
-}
-
-// PlayedFromArsenal reports whether the card currently being played came from the arsenal
-// slot. Reads Self.FromArsenal — the solver flips that flag on the PlayedCard wrapper for the
-// arsenal-in attacker before the chain runs. Returns false when there is no Self.
-func PlayedFromArsenal(s *TurnState) bool {
-	return s != nil && s.Self != nil && s.Self.FromArsenal
 }
 
 // DrawOne models a mid-turn draw: advance the deck by one card and append it to Drawn. No-op
@@ -271,10 +262,12 @@ type Card interface {
 	GoAgain() bool
 	// Play is called when the card resolves — as an attack or as a defense reaction. Returns
 	// damage dealt to the opposing hero (may differ from Attack() after conditional bonuses) and
-	// may read state to decide effects. When called on a defense reaction, the returned damage
-	// is added uncapped to the turn's dealt total (the incoming-damage cap applies only to
+	// may read state to decide effects. self is the CardState wrapper for this resolution:
+	// cards read self.FromArsenal for arsenal-gated riders and write self.GrantedGoAgain = true
+	// to grant themselves Go again. When called on a defense reaction, the returned damage is
+	// added uncapped to the turn's dealt total (the incoming-damage cap applies only to
 	// Defense()).
-	Play(s *TurnState) int
+	Play(s *TurnState, self *CardState) int
 }
 
 // NoMemo is an optional marker. Cards that implement it opt out of the hand-evaluation memo —

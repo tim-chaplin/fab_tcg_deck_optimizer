@@ -10,7 +10,7 @@ import (
 func TestMinnowism_NoAttackReturnsZero(t *testing.T) {
 	s := card.TurnState{}
 	for _, c := range []card.Card{MinnowismRed{}, MinnowismYellow{}, MinnowismBlue{}} {
-		if got := c.Play(&s); got != 0 {
+		if got := c.Play(&s, &card.CardState{}); got != 0 {
 			t.Errorf("%s: Play() = %d, want 0", c.Name(), got)
 		}
 	}
@@ -19,8 +19,8 @@ func TestMinnowism_NoAttackReturnsZero(t *testing.T) {
 // TestMinnowism_HighPowerFilteredOut: a power-4 attack is seen but the power<=3 filter rejects it,
 // so the rider fizzles without falling through to a later match.
 func TestMinnowism_HighPowerFilteredOut(t *testing.T) {
-	s := card.TurnState{CardsRemaining: []*card.PlayedCard{{Card: stubGenericAttack(0, 4)}}}
-	if got := (MinnowismRed{}).Play(&s); got != 0 {
+	s := card.TurnState{CardsRemaining: []*card.CardState{{Card: stubGenericAttack(0, 4)}}}
+	if got := (MinnowismRed{}).Play(&s, &card.CardState{}); got != 0 {
 		t.Errorf("Play() = %d, want 0 (power 4 > 3)", got)
 	}
 }
@@ -28,7 +28,7 @@ func TestMinnowism_HighPowerFilteredOut(t *testing.T) {
 // TestMinnowism_LowPowerReturnsBonus: first power<=3 attack triggers the per-variant bonus
 // (Red +3, Yellow +2, Blue +1).
 func TestMinnowism_LowPowerReturnsBonus(t *testing.T) {
-	s := card.TurnState{CardsRemaining: []*card.PlayedCard{{Card: stubGenericAttack(0, 3)}}}
+	s := card.TurnState{CardsRemaining: []*card.CardState{{Card: stubGenericAttack(0, 3)}}}
 	cases := []struct {
 		c    card.Card
 		want int
@@ -38,7 +38,7 @@ func TestMinnowism_LowPowerReturnsBonus(t *testing.T) {
 		{MinnowismBlue{}, 1},
 	}
 	for _, tc := range cases {
-		if got := tc.c.Play(&s); got != tc.want {
+		if got := tc.c.Play(&s, &card.CardState{}); got != tc.want {
 			t.Errorf("%s: Play() = %d, want %d", tc.c.Name(), got, tc.want)
 		}
 	}

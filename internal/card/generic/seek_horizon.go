@@ -24,7 +24,7 @@ func (SeekHorizonRed) Attack() int                 { return 4 }
 func (SeekHorizonRed) Defense() int                { return 2 }
 func (SeekHorizonRed) Types() card.TypeSet         { return seekHorizonTypes }
 func (SeekHorizonRed) GoAgain() bool               { return false }
-func (c SeekHorizonRed) Play(s *card.TurnState) int { return c.Attack() }
+func (c SeekHorizonRed) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }
 
 type SeekHorizonYellow struct{}
 
@@ -36,7 +36,7 @@ func (SeekHorizonYellow) Attack() int                 { return 3 }
 func (SeekHorizonYellow) Defense() int                { return 2 }
 func (SeekHorizonYellow) Types() card.TypeSet         { return seekHorizonTypes }
 func (SeekHorizonYellow) GoAgain() bool               { return false }
-func (c SeekHorizonYellow) Play(s *card.TurnState) int { return c.Attack() }
+func (c SeekHorizonYellow) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }
 
 type SeekHorizonBlue struct{}
 
@@ -48,4 +48,4 @@ func (SeekHorizonBlue) Attack() int                 { return 2 }
 func (SeekHorizonBlue) Defense() int                { return 2 }
 func (SeekHorizonBlue) Types() card.TypeSet         { return seekHorizonTypes }
 func (SeekHorizonBlue) GoAgain() bool               { return false }
-func (c SeekHorizonBlue) Play(s *card.TurnState) int { return c.Attack() }
+func (c SeekHorizonBlue) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }

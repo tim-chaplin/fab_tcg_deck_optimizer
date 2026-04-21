@@ -26,7 +26,7 @@ func (DeathlyDuetRed) Attack() int                  { return 4 }
 func (DeathlyDuetRed) Defense() int                 { return 3 }
 func (DeathlyDuetRed) Types() card.TypeSet       { return deathlyDuetTypes }
 func (DeathlyDuetRed) GoAgain() bool                { return false }
-func (c DeathlyDuetRed) Play(s *card.TurnState) int { return deathlyDuetPlay(c.Attack(), s) }
+func (c DeathlyDuetRed) Play(s *card.TurnState, _ *card.CardState) int { return deathlyDuetPlay(c.Attack(), s) }
 
 type DeathlyDuetYellow struct{}
 
@@ -38,7 +38,7 @@ func (DeathlyDuetYellow) Attack() int                  { return 3 }
 func (DeathlyDuetYellow) Defense() int                 { return 3 }
 func (DeathlyDuetYellow) Types() card.TypeSet       { return deathlyDuetTypes }
 func (DeathlyDuetYellow) GoAgain() bool                { return false }
-func (c DeathlyDuetYellow) Play(s *card.TurnState) int { return deathlyDuetPlay(c.Attack(), s) }
+func (c DeathlyDuetYellow) Play(s *card.TurnState, _ *card.CardState) int { return deathlyDuetPlay(c.Attack(), s) }
 
 type DeathlyDuetBlue struct{}
 
@@ -50,7 +50,7 @@ func (DeathlyDuetBlue) Attack() int                  { return 2 }
 func (DeathlyDuetBlue) Defense() int                 { return 3 }
 func (DeathlyDuetBlue) Types() card.TypeSet       { return deathlyDuetTypes }
 func (DeathlyDuetBlue) GoAgain() bool                { return false }
-func (c DeathlyDuetBlue) Play(s *card.TurnState) int { return deathlyDuetPlay(c.Attack(), s) }
+func (c DeathlyDuetBlue) Play(s *card.TurnState, _ *card.CardState) int { return deathlyDuetPlay(c.Attack(), s) }
 
 func deathlyDuetPlay(base int, s *card.TurnState) int {
 	var attackPitched, nonAttackActionPitched bool

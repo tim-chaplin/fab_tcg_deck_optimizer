@@ -24,7 +24,7 @@ func (TremorOfIArathaelRed) Attack() int                 { return 4 }
 func (TremorOfIArathaelRed) Defense() int                { return 2 }
 func (TremorOfIArathaelRed) Types() card.TypeSet         { return tremorOfIArathaelTypes }
 func (TremorOfIArathaelRed) GoAgain() bool               { return false }
-func (c TremorOfIArathaelRed) Play(s *card.TurnState) int { return c.Attack() }
+func (c TremorOfIArathaelRed) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }
 
 type TremorOfIArathaelYellow struct{}
 
@@ -36,7 +36,7 @@ func (TremorOfIArathaelYellow) Attack() int                 { return 3 }
 func (TremorOfIArathaelYellow) Defense() int                { return 2 }
 func (TremorOfIArathaelYellow) Types() card.TypeSet         { return tremorOfIArathaelTypes }
 func (TremorOfIArathaelYellow) GoAgain() bool               { return false }
-func (c TremorOfIArathaelYellow) Play(s *card.TurnState) int { return c.Attack() }
+func (c TremorOfIArathaelYellow) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }
 
 type TremorOfIArathaelBlue struct{}
 
@@ -48,4 +48,4 @@ func (TremorOfIArathaelBlue) Attack() int                 { return 2 }
 func (TremorOfIArathaelBlue) Defense() int                { return 2 }
 func (TremorOfIArathaelBlue) Types() card.TypeSet         { return tremorOfIArathaelTypes }
 func (TremorOfIArathaelBlue) GoAgain() bool               { return false }
-func (c TremorOfIArathaelBlue) Play(s *card.TurnState) int { return c.Attack() }
+func (c TremorOfIArathaelBlue) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }

@@ -18,7 +18,7 @@ func TestShrillOfSkullform_BaseDamage(t *testing.T) {
 	}
 	for _, tc := range cases {
 		var s card.TurnState
-		got := tc.c.Play(&s)
+		got := tc.c.Play(&s, &card.CardState{})
 		if got != tc.want {
 			t.Errorf("%s: Play() = %d, want %d", tc.c.Name(), got, tc.want)
 		}
@@ -37,7 +37,7 @@ func TestShrillOfSkullform_AuraBonus(t *testing.T) {
 	}
 	for _, tc := range cases {
 		s := card.TurnState{CardsPlayed: []card.Card{stubAura{}}}
-		got := tc.c.Play(&s)
+		got := tc.c.Play(&s, &card.CardState{})
 		if got != tc.want {
 			t.Errorf("%s with aura: Play() = %d, want %d", tc.c.Name(), got, tc.want)
 		}

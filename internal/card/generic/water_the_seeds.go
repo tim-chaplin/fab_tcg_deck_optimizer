@@ -40,7 +40,7 @@ func (WaterTheSeedsRed) Attack() int                 { return 3 }
 func (WaterTheSeedsRed) Defense() int                { return 2 }
 func (WaterTheSeedsRed) Types() card.TypeSet         { return waterTheSeedsTypes }
 func (WaterTheSeedsRed) GoAgain() bool               { return true }
-func (c WaterTheSeedsRed) Play(s *card.TurnState) int { return waterTheSeedsPlay(c.Attack(), s) }
+func (c WaterTheSeedsRed) Play(s *card.TurnState, _ *card.CardState) int { return waterTheSeedsPlay(c.Attack(), s) }
 
 type WaterTheSeedsYellow struct{}
 
@@ -52,7 +52,7 @@ func (WaterTheSeedsYellow) Attack() int                 { return 2 }
 func (WaterTheSeedsYellow) Defense() int                { return 2 }
 func (WaterTheSeedsYellow) Types() card.TypeSet         { return waterTheSeedsTypes }
 func (WaterTheSeedsYellow) GoAgain() bool               { return true }
-func (c WaterTheSeedsYellow) Play(s *card.TurnState) int { return waterTheSeedsPlay(c.Attack(), s) }
+func (c WaterTheSeedsYellow) Play(s *card.TurnState, _ *card.CardState) int { return waterTheSeedsPlay(c.Attack(), s) }
 
 type WaterTheSeedsBlue struct{}
 
@@ -64,4 +64,4 @@ func (WaterTheSeedsBlue) Attack() int                 { return 1 }
 func (WaterTheSeedsBlue) Defense() int                { return 2 }
 func (WaterTheSeedsBlue) Types() card.TypeSet         { return waterTheSeedsTypes }
 func (WaterTheSeedsBlue) GoAgain() bool               { return true }
-func (c WaterTheSeedsBlue) Play(s *card.TurnState) int { return waterTheSeedsPlay(c.Attack(), s) }
+func (c WaterTheSeedsBlue) Play(s *card.TurnState, _ *card.CardState) int { return waterTheSeedsPlay(c.Attack(), s) }

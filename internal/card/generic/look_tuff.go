@@ -22,4 +22,4 @@ func (LookTuffRed) Attack() int                 { return 8 }
 func (LookTuffRed) Defense() int                { return 3 }
 func (LookTuffRed) Types() card.TypeSet         { return lookTuffTypes }
 func (LookTuffRed) GoAgain() bool               { return false }
-func (c LookTuffRed) Play(s *card.TurnState) int { return c.Attack() }
+func (c LookTuffRed) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }

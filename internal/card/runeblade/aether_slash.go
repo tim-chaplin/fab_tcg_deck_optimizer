@@ -25,7 +25,7 @@ func (AetherSlashRed) Attack() int                  { return 4 }
 func (AetherSlashRed) Defense() int                 { return 3 }
 func (AetherSlashRed) Types() card.TypeSet       { return aetherSlashTypes }
 func (AetherSlashRed) GoAgain() bool                { return false }
-func (c AetherSlashRed) Play(s *card.TurnState) int { return aetherSlashPlay(c.Attack(), s) }
+func (c AetherSlashRed) Play(s *card.TurnState, _ *card.CardState) int { return aetherSlashPlay(c.Attack(), s) }
 
 type AetherSlashYellow struct{}
 
@@ -37,7 +37,7 @@ func (AetherSlashYellow) Attack() int                  { return 3 }
 func (AetherSlashYellow) Defense() int                 { return 3 }
 func (AetherSlashYellow) Types() card.TypeSet       { return aetherSlashTypes }
 func (AetherSlashYellow) GoAgain() bool                { return false }
-func (c AetherSlashYellow) Play(s *card.TurnState) int { return aetherSlashPlay(c.Attack(), s) }
+func (c AetherSlashYellow) Play(s *card.TurnState, _ *card.CardState) int { return aetherSlashPlay(c.Attack(), s) }
 
 type AetherSlashBlue struct{}
 
@@ -49,7 +49,7 @@ func (AetherSlashBlue) Attack() int                  { return 2 }
 func (AetherSlashBlue) Defense() int                 { return 3 }
 func (AetherSlashBlue) Types() card.TypeSet       { return aetherSlashTypes }
 func (AetherSlashBlue) GoAgain() bool                { return false }
-func (c AetherSlashBlue) Play(s *card.TurnState) int { return aetherSlashPlay(c.Attack(), s) }
+func (c AetherSlashBlue) Play(s *card.TurnState, _ *card.CardState) int { return aetherSlashPlay(c.Attack(), s) }
 
 func aetherSlashPlay(base int, s *card.TurnState) int {
 	for _, p := range s.Pitched {

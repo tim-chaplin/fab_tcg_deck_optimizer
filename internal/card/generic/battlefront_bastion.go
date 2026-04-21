@@ -23,7 +23,7 @@ func (BattlefrontBastionRed) Attack() int                 { return 7 }
 func (BattlefrontBastionRed) Defense() int                { return 2 }
 func (BattlefrontBastionRed) Types() card.TypeSet         { return battlefrontBastionTypes }
 func (BattlefrontBastionRed) GoAgain() bool               { return false }
-func (c BattlefrontBastionRed) Play(s *card.TurnState) int { return c.Attack() }
+func (c BattlefrontBastionRed) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }
 
 type BattlefrontBastionYellow struct{}
 
@@ -35,7 +35,7 @@ func (BattlefrontBastionYellow) Attack() int                 { return 6 }
 func (BattlefrontBastionYellow) Defense() int                { return 2 }
 func (BattlefrontBastionYellow) Types() card.TypeSet         { return battlefrontBastionTypes }
 func (BattlefrontBastionYellow) GoAgain() bool               { return false }
-func (c BattlefrontBastionYellow) Play(s *card.TurnState) int { return c.Attack() }
+func (c BattlefrontBastionYellow) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }
 
 type BattlefrontBastionBlue struct{}
 
@@ -47,4 +47,4 @@ func (BattlefrontBastionBlue) Attack() int                 { return 5 }
 func (BattlefrontBastionBlue) Defense() int                { return 2 }
 func (BattlefrontBastionBlue) Types() card.TypeSet         { return battlefrontBastionTypes }
 func (BattlefrontBastionBlue) GoAgain() bool               { return false }
-func (c BattlefrontBastionBlue) Play(s *card.TurnState) int { return c.Attack() }
+func (c BattlefrontBastionBlue) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }

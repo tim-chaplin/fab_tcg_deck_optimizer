@@ -19,7 +19,7 @@ func (BrutalAssaultRed) Attack() int                 { return 6 }
 func (BrutalAssaultRed) Defense() int                { return 3 }
 func (BrutalAssaultRed) Types() card.TypeSet         { return brutalAssaultTypes }
 func (BrutalAssaultRed) GoAgain() bool               { return false }
-func (c BrutalAssaultRed) Play(s *card.TurnState) int { return c.Attack() }
+func (c BrutalAssaultRed) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }
 
 type BrutalAssaultYellow struct{}
 
@@ -31,7 +31,7 @@ func (BrutalAssaultYellow) Attack() int                 { return 5 }
 func (BrutalAssaultYellow) Defense() int                { return 3 }
 func (BrutalAssaultYellow) Types() card.TypeSet         { return brutalAssaultTypes }
 func (BrutalAssaultYellow) GoAgain() bool               { return false }
-func (c BrutalAssaultYellow) Play(s *card.TurnState) int { return c.Attack() }
+func (c BrutalAssaultYellow) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }
 
 type BrutalAssaultBlue struct{}
 
@@ -43,4 +43,4 @@ func (BrutalAssaultBlue) Attack() int                 { return 4 }
 func (BrutalAssaultBlue) Defense() int                { return 3 }
 func (BrutalAssaultBlue) Types() card.TypeSet         { return brutalAssaultTypes }
 func (BrutalAssaultBlue) GoAgain() bool               { return false }
-func (c BrutalAssaultBlue) Play(s *card.TurnState) int { return c.Attack() }
+func (c BrutalAssaultBlue) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }

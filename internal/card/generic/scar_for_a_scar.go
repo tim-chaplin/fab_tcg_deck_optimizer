@@ -27,7 +27,7 @@ func (ScarForAScarRed) Attack() int                 { return 4 }
 func (ScarForAScarRed) Defense() int                { return 2 }
 func (ScarForAScarRed) Types() card.TypeSet         { return scarForAScarTypes }
 func (ScarForAScarRed) GoAgain() bool               { return simstate.HeroWantsLowerHealth() }
-func (c ScarForAScarRed) Play(s *card.TurnState) int { return c.Attack() }
+func (c ScarForAScarRed) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }
 
 type ScarForAScarYellow struct{}
 
@@ -39,7 +39,7 @@ func (ScarForAScarYellow) Attack() int                 { return 3 }
 func (ScarForAScarYellow) Defense() int                { return 2 }
 func (ScarForAScarYellow) Types() card.TypeSet         { return scarForAScarTypes }
 func (ScarForAScarYellow) GoAgain() bool               { return simstate.HeroWantsLowerHealth() }
-func (c ScarForAScarYellow) Play(s *card.TurnState) int { return c.Attack() }
+func (c ScarForAScarYellow) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }
 
 type ScarForAScarBlue struct{}
 
@@ -51,4 +51,4 @@ func (ScarForAScarBlue) Attack() int                 { return 2 }
 func (ScarForAScarBlue) Defense() int                { return 2 }
 func (ScarForAScarBlue) Types() card.TypeSet         { return scarForAScarTypes }
 func (ScarForAScarBlue) GoAgain() bool               { return simstate.HeroWantsLowerHealth() }
-func (c ScarForAScarBlue) Play(s *card.TurnState) int { return c.Attack() }
+func (c ScarForAScarBlue) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }

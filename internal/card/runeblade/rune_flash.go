@@ -36,7 +36,7 @@ func (RuneFlashRed) Attack() int                 { return 4 }
 func (RuneFlashRed) Defense() int                { return 3 }
 func (RuneFlashRed) Types() card.TypeSet         { return runeFlashTypes }
 func (RuneFlashRed) GoAgain() bool               { return true }
-func (c RuneFlashRed) Play(*card.TurnState) int  { return c.Attack() }
+func (c RuneFlashRed) Play(*card.TurnState, *card.CardState) int  { return c.Attack() }
 
 type RuneFlashYellow struct{}
 
@@ -50,7 +50,7 @@ func (RuneFlashYellow) Attack() int                 { return 3 }
 func (RuneFlashYellow) Defense() int                { return 3 }
 func (RuneFlashYellow) Types() card.TypeSet         { return runeFlashTypes }
 func (RuneFlashYellow) GoAgain() bool               { return true }
-func (c RuneFlashYellow) Play(*card.TurnState) int  { return c.Attack() }
+func (c RuneFlashYellow) Play(*card.TurnState, *card.CardState) int  { return c.Attack() }
 
 type RuneFlashBlue struct{}
 
@@ -64,4 +64,4 @@ func (RuneFlashBlue) Attack() int                 { return 2 }
 func (RuneFlashBlue) Defense() int                { return 3 }
 func (RuneFlashBlue) Types() card.TypeSet         { return runeFlashTypes }
 func (RuneFlashBlue) GoAgain() bool               { return true }
-func (c RuneFlashBlue) Play(*card.TurnState) int  { return c.Attack() }
+func (c RuneFlashBlue) Play(*card.TurnState, *card.CardState) int  { return c.Attack() }

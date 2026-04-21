@@ -23,4 +23,4 @@ func (RelentlessPursuitBlue) Attack() int                 { return 0 }
 func (RelentlessPursuitBlue) Defense() int                { return 3 }
 func (RelentlessPursuitBlue) Types() card.TypeSet         { return relentlessPursuitTypes }
 func (RelentlessPursuitBlue) GoAgain() bool               { return true }
-func (RelentlessPursuitBlue) Play(s *card.TurnState) int { return 0 }
+func (RelentlessPursuitBlue) Play(s *card.TurnState, _ *card.CardState) int { return 0 }

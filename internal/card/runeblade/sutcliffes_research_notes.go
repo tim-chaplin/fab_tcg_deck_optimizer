@@ -43,7 +43,7 @@ func (SutcliffesResearchNotesRed) Defense() int                 { return 2 }
 func (SutcliffesResearchNotesRed) Types() card.TypeSet          { return sutcliffesResearchNotesTypes }
 func (SutcliffesResearchNotesRed) GoAgain() bool                { return true }
 func (SutcliffesResearchNotesRed) NoMemo()                      {}
-func (SutcliffesResearchNotesRed) Play(s *card.TurnState) int   { return sutcliffesResearchNotesPlay(3, s) }
+func (SutcliffesResearchNotesRed) Play(s *card.TurnState, _ *card.CardState) int   { return sutcliffesResearchNotesPlay(3, s) }
 
 type SutcliffesResearchNotesYellow struct{}
 
@@ -56,7 +56,7 @@ func (SutcliffesResearchNotesYellow) Defense() int                 { return 2 }
 func (SutcliffesResearchNotesYellow) Types() card.TypeSet          { return sutcliffesResearchNotesTypes }
 func (SutcliffesResearchNotesYellow) GoAgain() bool                { return true }
 func (SutcliffesResearchNotesYellow) NoMemo()                      {}
-func (SutcliffesResearchNotesYellow) Play(s *card.TurnState) int   { return sutcliffesResearchNotesPlay(2, s) }
+func (SutcliffesResearchNotesYellow) Play(s *card.TurnState, _ *card.CardState) int   { return sutcliffesResearchNotesPlay(2, s) }
 
 type SutcliffesResearchNotesBlue struct{}
 
@@ -69,4 +69,4 @@ func (SutcliffesResearchNotesBlue) Defense() int                 { return 2 }
 func (SutcliffesResearchNotesBlue) Types() card.TypeSet          { return sutcliffesResearchNotesTypes }
 func (SutcliffesResearchNotesBlue) GoAgain() bool                { return true }
 func (SutcliffesResearchNotesBlue) NoMemo()                      {}
-func (SutcliffesResearchNotesBlue) Play(s *card.TurnState) int   { return sutcliffesResearchNotesPlay(1, s) }
+func (SutcliffesResearchNotesBlue) Play(s *card.TurnState, _ *card.CardState) int   { return sutcliffesResearchNotesPlay(1, s) }

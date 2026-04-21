@@ -23,7 +23,7 @@ func (SiftRed) Attack() int                 { return 0 }
 func (SiftRed) Defense() int                { return 3 }
 func (SiftRed) Types() card.TypeSet         { return siftTypes }
 func (SiftRed) GoAgain() bool               { return true }
-func (SiftRed) Play(s *card.TurnState) int { return 0 }
+func (SiftRed) Play(s *card.TurnState, _ *card.CardState) int { return 0 }
 
 type SiftYellow struct{}
 
@@ -35,7 +35,7 @@ func (SiftYellow) Attack() int                 { return 0 }
 func (SiftYellow) Defense() int                { return 3 }
 func (SiftYellow) Types() card.TypeSet         { return siftTypes }
 func (SiftYellow) GoAgain() bool               { return true }
-func (SiftYellow) Play(s *card.TurnState) int { return 0 }
+func (SiftYellow) Play(s *card.TurnState, _ *card.CardState) int { return 0 }
 
 type SiftBlue struct{}
 
@@ -47,4 +47,4 @@ func (SiftBlue) Attack() int                 { return 0 }
 func (SiftBlue) Defense() int                { return 3 }
 func (SiftBlue) Types() card.TypeSet         { return siftTypes }
 func (SiftBlue) GoAgain() bool               { return true }
-func (SiftBlue) Play(s *card.TurnState) int { return 0 }
+func (SiftBlue) Play(s *card.TurnState, _ *card.CardState) int { return 0 }

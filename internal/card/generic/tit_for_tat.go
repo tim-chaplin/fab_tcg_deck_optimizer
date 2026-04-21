@@ -22,4 +22,4 @@ func (TitForTatBlue) Attack() int                 { return 0 }
 func (TitForTatBlue) Defense() int                { return 2 }
 func (TitForTatBlue) Types() card.TypeSet         { return titForTatTypes }
 func (TitForTatBlue) GoAgain() bool               { return true }
-func (TitForTatBlue) Play(s *card.TurnState) int { return 0 }
+func (TitForTatBlue) Play(s *card.TurnState, _ *card.CardState) int { return 0 }

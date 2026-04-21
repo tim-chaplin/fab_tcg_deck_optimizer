@@ -23,7 +23,7 @@ func (FreewheelingRenegadesRed) Attack() int                 { return 6 }
 func (FreewheelingRenegadesRed) Defense() int                { return 2 }
 func (FreewheelingRenegadesRed) Types() card.TypeSet         { return freewheelingRenegadesTypes }
 func (FreewheelingRenegadesRed) GoAgain() bool               { return false }
-func (c FreewheelingRenegadesRed) Play(s *card.TurnState) int { return c.Attack() }
+func (c FreewheelingRenegadesRed) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }
 
 type FreewheelingRenegadesYellow struct{}
 
@@ -35,7 +35,7 @@ func (FreewheelingRenegadesYellow) Attack() int                 { return 5 }
 func (FreewheelingRenegadesYellow) Defense() int                { return 2 }
 func (FreewheelingRenegadesYellow) Types() card.TypeSet         { return freewheelingRenegadesTypes }
 func (FreewheelingRenegadesYellow) GoAgain() bool               { return false }
-func (c FreewheelingRenegadesYellow) Play(s *card.TurnState) int { return c.Attack() }
+func (c FreewheelingRenegadesYellow) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }
 
 type FreewheelingRenegadesBlue struct{}
 
@@ -47,4 +47,4 @@ func (FreewheelingRenegadesBlue) Attack() int                 { return 4 }
 func (FreewheelingRenegadesBlue) Defense() int                { return 2 }
 func (FreewheelingRenegadesBlue) Types() card.TypeSet         { return freewheelingRenegadesTypes }
 func (FreewheelingRenegadesBlue) GoAgain() bool               { return false }
-func (c FreewheelingRenegadesBlue) Play(s *card.TurnState) int { return c.Attack() }
+func (c FreewheelingRenegadesBlue) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }

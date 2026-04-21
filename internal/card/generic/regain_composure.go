@@ -24,4 +24,4 @@ func (RegainComposureBlue) Attack() int                 { return 0 }
 func (RegainComposureBlue) Defense() int                { return 2 }
 func (RegainComposureBlue) Types() card.TypeSet         { return regainComposureTypes }
 func (RegainComposureBlue) GoAgain() bool               { return true }
-func (RegainComposureBlue) Play(s *card.TurnState) int { return nextAttackActionBonus(s, 1) }
+func (RegainComposureBlue) Play(s *card.TurnState, _ *card.CardState) int { return nextAttackActionBonus(s, 1) }

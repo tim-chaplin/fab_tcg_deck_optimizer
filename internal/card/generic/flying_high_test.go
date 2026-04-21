@@ -10,7 +10,7 @@ import (
 // CardsRemaining the grant fizzles and Play returns 0.
 func TestFlyingHigh_NoAttackReturnsZero(t *testing.T) {
 	s := card.TurnState{}
-	if got := (FlyingHighRed{}).Play(&s); got != 0 {
+	if got := (FlyingHighRed{}).Play(&s, &card.CardState{}); got != 0 {
 		t.Errorf("Play() = %d, want 0", got)
 	}
 }
@@ -18,9 +18,9 @@ func TestFlyingHigh_NoAttackReturnsZero(t *testing.T) {
 // TestFlyingHigh_NonAttackInRemainingFizzles confirms a non-attack action in CardsRemaining is
 // skipped by the attack-action predicate.
 func TestFlyingHigh_NonAttackInRemainingFizzles(t *testing.T) {
-	skipped := &card.PlayedCard{Card: stubGenericAction()}
-	s := card.TurnState{CardsRemaining: []*card.PlayedCard{skipped}}
-	if got := (FlyingHighRed{}).Play(&s); got != 0 {
+	skipped := &card.CardState{Card: stubGenericAction()}
+	s := card.TurnState{CardsRemaining: []*card.CardState{skipped}}
+	if got := (FlyingHighRed{}).Play(&s, &card.CardState{}); got != 0 {
 		t.Errorf("Play() = %d, want 0 (non-attack skipped)", got)
 	}
 	if skipped.GrantedGoAgain {
@@ -48,9 +48,9 @@ func TestFlyingHigh_ColorMatchGrantsBonus(t *testing.T) {
 			pitch int
 			want  int
 		}{{1, tc.wantRed}, {2, tc.wantYellow}, {3, tc.wantBlue}} {
-			pc := &card.PlayedCard{Card: stubGenericAttackPitch(0, 0, target.pitch)}
-			s := card.TurnState{CardsRemaining: []*card.PlayedCard{pc}}
-			if got := tc.c.Play(&s); got != target.want {
+			pc := &card.CardState{Card: stubGenericAttackPitch(0, 0, target.pitch)}
+			s := card.TurnState{CardsRemaining: []*card.CardState{pc}}
+			if got := tc.c.Play(&s, &card.CardState{}); got != target.want {
 				t.Errorf("%s vs pitch-%d target: Play() = %d, want %d",
 					tc.name, target.pitch, got, target.want)
 			}

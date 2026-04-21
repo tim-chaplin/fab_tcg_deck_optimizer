@@ -21,4 +21,4 @@ func (TestOfStrengthRed) Attack() int                { return 0 }
 func (TestOfStrengthRed) Defense() int               { return 4 }
 func (TestOfStrengthRed) Types() card.TypeSet        { return defenseReactionTypes }
 func (TestOfStrengthRed) GoAgain() bool              { return false }
-func (TestOfStrengthRed) Play(s *card.TurnState) int { return card.ClashValue(s, card.GoldTokenValue) }
+func (TestOfStrengthRed) Play(s *card.TurnState, _ *card.CardState) int { return card.ClashValue(s, card.GoldTokenValue) }

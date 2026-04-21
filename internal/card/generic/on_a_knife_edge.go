@@ -22,4 +22,4 @@ func (OnAKnifeEdgeYellow) Attack() int                 { return 0 }
 func (OnAKnifeEdgeYellow) Defense() int                { return 2 }
 func (OnAKnifeEdgeYellow) Types() card.TypeSet         { return onAKnifeEdgeTypes }
 func (OnAKnifeEdgeYellow) GoAgain() bool               { return true }
-func (OnAKnifeEdgeYellow) Play(s *card.TurnState) int { return 0 }
+func (OnAKnifeEdgeYellow) Play(s *card.TurnState, _ *card.CardState) int { return 0 }

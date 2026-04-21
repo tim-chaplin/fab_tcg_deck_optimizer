@@ -20,7 +20,7 @@ func TestBlessingOfOccult_PushesTokensToNextTurn(t *testing.T) {
 	}
 	for _, tc := range cases {
 		var s card.TurnState
-		if got := tc.c.Play(&s); got != tc.n {
+		if got := tc.c.Play(&s, &card.CardState{}); got != tc.n {
 			t.Errorf("%s: Play() = %d, want %d", tc.c.Name(), got, tc.n)
 		}
 		if s.Runechants != 0 {

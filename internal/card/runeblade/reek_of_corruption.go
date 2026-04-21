@@ -36,7 +36,7 @@ func (ReekOfCorruptionRed) Attack() int                  { return 4 }
 func (ReekOfCorruptionRed) Defense() int                 { return 3 }
 func (ReekOfCorruptionRed) Types() card.TypeSet          { return reekOfCorruptionTypes }
 func (ReekOfCorruptionRed) GoAgain() bool                { return false }
-func (c ReekOfCorruptionRed) Play(s *card.TurnState) int { return reekOfCorruptionDamage(c.Attack(), s) }
+func (c ReekOfCorruptionRed) Play(s *card.TurnState, _ *card.CardState) int { return reekOfCorruptionDamage(c.Attack(), s) }
 
 type ReekOfCorruptionYellow struct{}
 
@@ -48,7 +48,7 @@ func (ReekOfCorruptionYellow) Attack() int                  { return 3 }
 func (ReekOfCorruptionYellow) Defense() int                 { return 3 }
 func (ReekOfCorruptionYellow) Types() card.TypeSet          { return reekOfCorruptionTypes }
 func (ReekOfCorruptionYellow) GoAgain() bool                { return false }
-func (c ReekOfCorruptionYellow) Play(s *card.TurnState) int { return reekOfCorruptionDamage(c.Attack(), s) }
+func (c ReekOfCorruptionYellow) Play(s *card.TurnState, _ *card.CardState) int { return reekOfCorruptionDamage(c.Attack(), s) }
 
 type ReekOfCorruptionBlue struct{}
 
@@ -60,4 +60,4 @@ func (ReekOfCorruptionBlue) Attack() int                  { return 2 }
 func (ReekOfCorruptionBlue) Defense() int                 { return 3 }
 func (ReekOfCorruptionBlue) Types() card.TypeSet          { return reekOfCorruptionTypes }
 func (ReekOfCorruptionBlue) GoAgain() bool                { return false }
-func (c ReekOfCorruptionBlue) Play(s *card.TurnState) int { return reekOfCorruptionDamage(c.Attack(), s) }
+func (c ReekOfCorruptionBlue) Play(s *card.TurnState, _ *card.CardState) int { return reekOfCorruptionDamage(c.Attack(), s) }

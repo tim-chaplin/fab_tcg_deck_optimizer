@@ -25,7 +25,7 @@ func (OutMuscleRed) Attack() int                 { return 6 }
 func (OutMuscleRed) Defense() int                { return 2 }
 func (OutMuscleRed) Types() card.TypeSet         { return outMuscleTypes }
 func (OutMuscleRed) GoAgain() bool               { return false }
-func (c OutMuscleRed) Play(s *card.TurnState) int { return c.Attack() }
+func (c OutMuscleRed) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }
 
 type OutMuscleYellow struct{}
 
@@ -37,7 +37,7 @@ func (OutMuscleYellow) Attack() int                 { return 5 }
 func (OutMuscleYellow) Defense() int                { return 2 }
 func (OutMuscleYellow) Types() card.TypeSet         { return outMuscleTypes }
 func (OutMuscleYellow) GoAgain() bool               { return false }
-func (c OutMuscleYellow) Play(s *card.TurnState) int { return c.Attack() }
+func (c OutMuscleYellow) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }
 
 type OutMuscleBlue struct{}
 
@@ -49,4 +49,4 @@ func (OutMuscleBlue) Attack() int                 { return 4 }
 func (OutMuscleBlue) Defense() int                { return 2 }
 func (OutMuscleBlue) Types() card.TypeSet         { return outMuscleTypes }
 func (OutMuscleBlue) GoAgain() bool               { return false }
-func (c OutMuscleBlue) Play(s *card.TurnState) int { return c.Attack() }
+func (c OutMuscleBlue) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }

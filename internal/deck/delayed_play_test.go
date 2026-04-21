@@ -28,7 +28,7 @@ func (s stubDelayed) Types() card.TypeSet {
 	return card.NewTypeSet(card.TypeGeneric, card.TypeAction)
 }
 func (s stubDelayed) GoAgain() bool            { return true }
-func (s stubDelayed) Play(*card.TurnState) int { return 0 }
+func (s stubDelayed) Play(*card.TurnState, *card.CardState) int { return 0 }
 func (s stubDelayed) PlayNextTurn(*card.TurnState) card.DelayedPlayResult {
 	*s.calls++
 	return card.DelayedPlayResult{Damage: s.damage}

@@ -5,8 +5,7 @@
 // gains **go again**."
 //
 // Modelling: Hand-peek isn't modelled. The played-from-arsenal go-again fires via
-// Self.GrantedGoAgain when card.PlayedFromArsenal reports this copy came from the arsenal
-// slot.
+// self.GrantedGoAgain when self.FromArsenal reports this copy came from the arsenal slot.
 //
 // Source: github.com/the-fab-cube/flesh-and-blood-cards (card.csv).
 
@@ -16,10 +15,10 @@ import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 
 var frontlineScoutTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeAttack)
 
-// frontlineScoutPlay grants Self.GrantedGoAgain when this copy was played from arsenal.
-func frontlineScoutPlay(c card.Card, s *card.TurnState) int {
-	if card.PlayedFromArsenal(s) {
-		s.Self.GrantedGoAgain = true
+// frontlineScoutPlay grants self Go again when this copy was played from arsenal.
+func frontlineScoutPlay(c card.Card, self *card.CardState) int {
+	if self.FromArsenal {
+		self.GrantedGoAgain = true
 	}
 	return c.Attack()
 }
@@ -34,7 +33,7 @@ func (FrontlineScoutRed) Attack() int                 { return 3 }
 func (FrontlineScoutRed) Defense() int                { return 2 }
 func (FrontlineScoutRed) Types() card.TypeSet         { return frontlineScoutTypes }
 func (FrontlineScoutRed) GoAgain() bool               { return false }
-func (c FrontlineScoutRed) Play(s *card.TurnState) int { return frontlineScoutPlay(c, s) }
+func (c FrontlineScoutRed) Play(_ *card.TurnState, self *card.CardState) int { return frontlineScoutPlay(c, self) }
 
 type FrontlineScoutYellow struct{}
 
@@ -46,7 +45,7 @@ func (FrontlineScoutYellow) Attack() int                 { return 2 }
 func (FrontlineScoutYellow) Defense() int                { return 2 }
 func (FrontlineScoutYellow) Types() card.TypeSet         { return frontlineScoutTypes }
 func (FrontlineScoutYellow) GoAgain() bool               { return false }
-func (c FrontlineScoutYellow) Play(s *card.TurnState) int { return frontlineScoutPlay(c, s) }
+func (c FrontlineScoutYellow) Play(_ *card.TurnState, self *card.CardState) int { return frontlineScoutPlay(c, self) }
 
 type FrontlineScoutBlue struct{}
 
@@ -58,4 +57,4 @@ func (FrontlineScoutBlue) Attack() int                 { return 1 }
 func (FrontlineScoutBlue) Defense() int                { return 2 }
 func (FrontlineScoutBlue) Types() card.TypeSet         { return frontlineScoutTypes }
 func (FrontlineScoutBlue) GoAgain() bool               { return false }
-func (c FrontlineScoutBlue) Play(s *card.TurnState) int { return frontlineScoutPlay(c, s) }
+func (c FrontlineScoutBlue) Play(_ *card.TurnState, self *card.CardState) int { return frontlineScoutPlay(c, self) }

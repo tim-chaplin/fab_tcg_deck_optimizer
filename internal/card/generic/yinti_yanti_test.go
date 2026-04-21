@@ -19,7 +19,7 @@ func TestYintiYanti_NoAuraReturnsBase(t *testing.T) {
 	}
 	for _, tc := range cases {
 		s := card.TurnState{}
-		if got := tc.c.Play(&s); got != tc.want {
+		if got := tc.c.Play(&s, &card.CardState{}); got != tc.want {
 			t.Errorf("%s: Play() = %d, want %d (no aura → base power)", tc.c.Name(), got, tc.want)
 		}
 	}
@@ -38,7 +38,7 @@ func TestYintiYanti_AuraCreatedAddsOne(t *testing.T) {
 	}
 	for _, tc := range cases {
 		s := card.TurnState{AuraCreated: true}
-		if got := tc.c.Play(&s); got != tc.want {
+		if got := tc.c.Play(&s, &card.CardState{}); got != tc.want {
 			t.Errorf("%s: Play() = %d, want %d (AuraCreated → +1)", tc.c.Name(), got, tc.want)
 		}
 	}
@@ -49,7 +49,7 @@ func TestYintiYanti_AuraCreatedAddsOne(t *testing.T) {
 // that entered via a non-creation path).
 func TestYintiYanti_AuraPlayedAddsOne(t *testing.T) {
 	s := card.TurnState{CardsPlayed: []card.Card{stubGenericAura()}}
-	if got := (YintiYantiRed{}).Play(&s); got != 4 {
+	if got := (YintiYantiRed{}).Play(&s, &card.CardState{}); got != 4 {
 		t.Errorf("Play() = %d, want 4 (aura in CardsPlayed → +1)", got)
 	}
 }

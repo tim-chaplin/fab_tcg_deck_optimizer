@@ -26,7 +26,7 @@ func (SunKissRed) Attack() int                 { return 0 }
 func (SunKissRed) Defense() int                { return 2 }
 func (SunKissRed) Types() card.TypeSet         { return sunKissTypes }
 func (SunKissRed) GoAgain() bool               { return false }
-func (SunKissRed) Play(s *card.TurnState) int { return 3 }
+func (SunKissRed) Play(s *card.TurnState, _ *card.CardState) int { return 3 }
 
 type SunKissYellow struct{}
 
@@ -38,7 +38,7 @@ func (SunKissYellow) Attack() int                 { return 0 }
 func (SunKissYellow) Defense() int                { return 2 }
 func (SunKissYellow) Types() card.TypeSet         { return sunKissTypes }
 func (SunKissYellow) GoAgain() bool               { return false }
-func (SunKissYellow) Play(s *card.TurnState) int { return 2 }
+func (SunKissYellow) Play(s *card.TurnState, _ *card.CardState) int { return 2 }
 
 type SunKissBlue struct{}
 
@@ -50,4 +50,4 @@ func (SunKissBlue) Attack() int                 { return 0 }
 func (SunKissBlue) Defense() int                { return 2 }
 func (SunKissBlue) Types() card.TypeSet         { return sunKissTypes }
 func (SunKissBlue) GoAgain() bool               { return false }
-func (SunKissBlue) Play(s *card.TurnState) int { return 1 }
+func (SunKissBlue) Play(s *card.TurnState, _ *card.CardState) int { return 1 }
