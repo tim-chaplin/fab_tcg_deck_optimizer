@@ -71,6 +71,11 @@ type PlayedCard struct {
 	// its printed text doesn't (e.g. Mauvrion Skies targeting the next Runeblade attack). The
 	// solver's chain-legality check ORs this with Card.GoAgain().
 	GrantedGoAgain bool
+	// FromArsenal flags the single PlayedCard whose Card came from the arsenal slot at start of
+	// turn. The solver sets it before the chain runs; PlayedCards for hand cards and mid-turn
+	// extensions stay false. Effects gated on "if this is played from arsenal" read the
+	// helper card.PlayedFromArsenal(s) which checks s.Self.FromArsenal.
+	FromArsenal bool
 }
 
 // EffectiveGoAgain reports whether this card has Go again this turn — from printed text or a
@@ -143,6 +148,13 @@ type TurnState struct {
 	// attack, next entries may play as free-cost chain extensions, and the rest carry as Held
 	// (or compete for the empty arsenal slot) into the next hand.
 	Drawn []Card
+}
+
+// PlayedFromArsenal reports whether the card currently being played came from the arsenal
+// slot. Reads Self.FromArsenal — the solver flips that flag on the PlayedCard wrapper for the
+// arsenal-in attacker before the chain runs. Returns false when there is no Self.
+func PlayedFromArsenal(s *TurnState) bool {
+	return s != nil && s.Self != nil && s.Self.FromArsenal
 }
 
 // DrawOne models a mid-turn draw: advance the deck by one card and append it to Drawn. No-op
@@ -321,5 +333,14 @@ type DelayedPlay interface {
 type DelayedPlayResult struct {
 	Damage int
 	ToHand Card
+}
+
+// ArsenalDefenseBonus is an optional marker for Defense Reactions whose printed text grants
+// extra defense only when the card is played from arsenal (e.g. Unmovable, Springboard
+// Somersault). Implementers return the additional defense added to Defense() when this copy
+// came from the arsenal slot at start of turn. Defense() itself stays the printed value so the
+// hand-played path is unaffected.
+type ArsenalDefenseBonus interface {
+	ArsenalDefenseBonus() int
 }
 

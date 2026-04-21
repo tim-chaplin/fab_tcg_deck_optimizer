@@ -483,6 +483,54 @@ func TestBest_ArsenalInNonAttackActionPlays(t *testing.T) {
 	}
 }
 
+// TestBest_ArsenalInUnmovableGrantsDefenseBonus pins the DR-from-arsenal +N{d} rider:
+// Unmovable Red printed Defense() is 7 and grants +1{d} when played from arsenal. Hand: Blue
+// Malefic (pitch 3, cost 0). Arsenal: Unmovable Red. Pitched Malefic funds Unmovable's 3-cost
+// defense; effective defense is 7 + 1 (from-arsenal) = 8, fully blocking 8 incoming. Value = 8.
+// If the rider didn't fire, prevented would cap at 7.
+func TestBest_ArsenalInUnmovableGrantsDefenseBonus(t *testing.T) {
+	h := []card.Card{runeblade.MaleficIncantationBlue{}}
+	got := Best(stubHero{}, nil, h, 8, nil, 0, generic.UnmovableRed{})
+	if got.Value != 8 {
+		t.Fatalf("Value = %d, want 8 (Unmovable from arsenal blocks 7+1). Roles=[%s]",
+			got.Value, FormatBestLine(got.BestLine))
+	}
+}
+
+// TestBest_HandUnmovableNoDefenseBonus confirms the +1{d} rider does NOT fire when Unmovable
+// is played from hand. Hand: Blue Malefic + Unmovable Red, no arsenal. Pitched Malefic funds
+// Unmovable's 3-cost; effective defense stays at printed 7, so 8 incoming caps prevented at 7.
+// If the rider mistakenly fired from hand, prevented would be 8.
+func TestBest_HandUnmovableNoDefenseBonus(t *testing.T) {
+	h := []card.Card{runeblade.MaleficIncantationBlue{}, generic.UnmovableRed{}}
+	got := Best(stubHero{}, nil, h, 8, nil, 0, nil)
+	if got.Value != 7 {
+		t.Fatalf("Value = %d, want 7 (hand-played Unmovable: no rider). Roles=[%s]",
+			got.Value, FormatBestLine(got.BestLine))
+	}
+}
+
+// TestBest_ArsenalInSmashingGoodTimeGatesOnlyArsenalCopy pins the from-arsenal gate: only the
+// SGT that came from the arsenal grants its +3 rider; the hand copy returns 0. Hero = Viserai.
+// Arsenal: SGT Red. Hand: SGT Red + Hocus Pocus Red. Best line plays both SGTs (non-attack
+// actions, go again) ahead of Hocus Pocus. Arsenal SGT's Play scans CardsRemaining, finds Hocus
+// (attack action) and credits +3; hand SGT's Play fails the FromArsenal check and returns 0.
+// Hocus Pocus contributes 3 base + 1 from its own Runechant + 1 from Viserai's hero ability
+// (fires because two non-attack actions were already played). Value = 3 + 0 + 3 + 1 + 1 = 8.
+// If the from-arsenal gate weren't enforced, both SGTs would grant their rider and value would
+// be 11.
+func TestBest_ArsenalInSmashingGoodTimeGatesOnlyArsenalCopy(t *testing.T) {
+	h := []card.Card{
+		generic.SmashingGoodTimeRed{},
+		runeblade.HocusPocusRed{},
+	}
+	got := Best(hero.Viserai{}, nil, h, 0, nil, 0, generic.SmashingGoodTimeRed{})
+	if got.Value != 8 {
+		t.Fatalf("Value = %d, want 8 (only arsenal SGT grants +3). Roles=[%s]",
+			got.Value, FormatBestLine(got.BestLine))
+	}
+}
+
 // TestPromoteRandomHeldToArsenal_SpreadsAcrossHands pins the post-hoc Held→Arsenal promotion's
 // anti-bias property: the selection hashes the sorted hand IDs so different hands land on
 // different Held positions rather than always picking slot 0 (which, with IDs sorted, would

@@ -5,7 +5,9 @@
 // card of their deck face down into their arsenal. If Promise of Plenty is played from arsenal, it
 // gains **go again**."
 //
-// Simplification: Arsenal-placement rider and arsenal-only go-again aren't modelled.
+// Modelling: The arsenal-placement rider isn't modelled (arsenal/deck content tracking would
+// be required). The played-from-arsenal go-again fires via Self.GrantedGoAgain when
+// card.PlayedFromArsenal reports this copy came from the arsenal slot.
 //
 // Source: github.com/the-fab-cube/flesh-and-blood-cards (card.csv).
 
@@ -14,6 +16,14 @@ package generic
 import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 
 var promiseOfPlentyTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeAttack)
+
+// promiseOfPlentyPlay grants Self.GrantedGoAgain when this copy was played from arsenal.
+func promiseOfPlentyPlay(c card.Card, s *card.TurnState) int {
+	if card.PlayedFromArsenal(s) {
+		s.Self.GrantedGoAgain = true
+	}
+	return c.Attack()
+}
 
 type PromiseOfPlentyRed struct{}
 
@@ -25,7 +35,7 @@ func (PromiseOfPlentyRed) Attack() int                 { return 3 }
 func (PromiseOfPlentyRed) Defense() int                { return 2 }
 func (PromiseOfPlentyRed) Types() card.TypeSet         { return promiseOfPlentyTypes }
 func (PromiseOfPlentyRed) GoAgain() bool               { return false }
-func (c PromiseOfPlentyRed) Play(s *card.TurnState) int { return c.Attack() }
+func (c PromiseOfPlentyRed) Play(s *card.TurnState) int { return promiseOfPlentyPlay(c, s) }
 
 type PromiseOfPlentyYellow struct{}
 
@@ -37,7 +47,7 @@ func (PromiseOfPlentyYellow) Attack() int                 { return 2 }
 func (PromiseOfPlentyYellow) Defense() int                { return 2 }
 func (PromiseOfPlentyYellow) Types() card.TypeSet         { return promiseOfPlentyTypes }
 func (PromiseOfPlentyYellow) GoAgain() bool               { return false }
-func (c PromiseOfPlentyYellow) Play(s *card.TurnState) int { return c.Attack() }
+func (c PromiseOfPlentyYellow) Play(s *card.TurnState) int { return promiseOfPlentyPlay(c, s) }
 
 type PromiseOfPlentyBlue struct{}
 
@@ -49,4 +59,4 @@ func (PromiseOfPlentyBlue) Attack() int                 { return 1 }
 func (PromiseOfPlentyBlue) Defense() int                { return 2 }
 func (PromiseOfPlentyBlue) Types() card.TypeSet         { return promiseOfPlentyTypes }
 func (PromiseOfPlentyBlue) GoAgain() bool               { return false }
-func (c PromiseOfPlentyBlue) Play(s *card.TurnState) int { return c.Attack() }
+func (c PromiseOfPlentyBlue) Play(s *card.TurnState) int { return promiseOfPlentyPlay(c, s) }

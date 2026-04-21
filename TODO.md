@@ -170,9 +170,11 @@ Hero health isn't tracked, so every life-gain and life-comparison rider collapse
 
 ### Arsenal and hand-state effects
 
-- **Arsenal isn't modelled.** See the dedicated Rules modelling item above — all arsenal-gated
-  riders (Unmovable +1{d}, Springboard Somersault +2{d}, and the ~14 Silver Age generics listed
-  there) default off or fire unconditionally where noted.
+- **Arsenal provenance is modelled.** The arsenal-in card carries `PlayedCard.FromArsenal` so
+  riders gated on "if X is played from arsenal" (Unmovable +1{d}, Springboard Somersault +2{d},
+  Smashing Good Time / Plunder Run / Scout the Periphery scan bonuses, Fervent Forerunner /
+  Frontline Scout / Performance Bonus / Promise of Plenty / Scour the Battlescape go-agains)
+  fire only when their copy actually came from the arsenal slot.
 - **"No cards in hand" riders never fire.** Spring Load's +3{p} rider defaults off.
 - **Draw / hand cycling is flattened.** Mid-turn draws (Snatch, Drawn to the Dark Dimension)
   route through `TurnState.DrawOne`; the drawn card competes with Held hand cards for the
@@ -268,11 +270,11 @@ listed here so the direction tag is co-located with the name.
 - **Fact-Finding Mission (all colours)** — opponent arsenal/equipment peek dropped.
 - **Fate Foreseen (all colours)** — Opt 1 dropped; block value is printed defence only.
 - **Feisty Locals (all colours)** — defended-by-action +2{p} rider never fires.
-- **Fervent Forerunner (all colours)** — on-hit Opt 2 and the from-arsenal go-again both dropped.
+- **Fervent Forerunner (all colours)** — on-hit Opt 2 dropped.
 - **Flex (all colours)** — pay-{r}{r}-for-+2{p} mode dropped; only printed power.
 - **Flock of the Feather Walkers (all colours)** — Quicken token creation dropped (and the
   reveal cost too).
-- **Frontline Scout (all colours)** — hand-peek plus arsenal-only go-again dropped.
+- **Frontline Scout (all colours)** — hand-peek dropped.
 - **Fyendal's Fighting Spirit (all colours)** — on-defend 1{h} gain dropped; on-attack gain is
   modelled for `card.LowerHealthWanter` heroes only.
 - **Gravekeeping (all colours)** — graveyard-banish additional value dropped.
@@ -302,11 +304,11 @@ listed here so the direction tag is co-located with the name.
 - **Out Muscle (all colours)** — defender-power go-again gate dropped; the printed rider never
   fires in the sim.
 - **Outed (all colours)** — +1{p} vs marked hero never fires.
-- **Performance Bonus (all colours)** — arsenal-conditional go-again dropped (on-hit Gold is
-  credited).
+- **Performance Bonus (all colours)** — on-hit Gold credit retained; no other riders.
 - **Pick a Card, Any Card (all colours)** — opponent hand inspection and Silver-token rider
   dropped.
-- **Promise of Plenty (all colours)** — arsenal-placement rider plus arsenal go-again dropped.
+- **Promise of Plenty (all colours)** — arsenal-placement rider dropped (arsenal/deck content
+  tracking would be required).
 - **Pursue to the Edge of Oblivion (all colours)** — on-hit mark dropped.
 - **Pursue to the Pits of Despair (all colours)** — on-hit mark dropped.
 - **Push the Point (all colours)** — chain-history +2{p} dropped (chain history unreadable from
@@ -331,7 +333,7 @@ listed here so the direction tag is co-located with the name.
   for the tempo of trading a weak aura for a Runechant).
 - **Runeblade Sutcliffe's Research Notes (all colours)** — top-of-deck re-ordering clause
   dropped.
-- **Scour the Battlescape (all colours)** — hand-cycle plus arsenal go-again dropped.
+- **Scour the Battlescape (all colours)** — hand-cycle dropped.
 - **Seek Horizon (all colours)** — hand-on-top alt cost plus conditional go-again dropped.
 - **Sift (all colours)** — hand cycling dropped.
 - **Sigil of Cycles (all colours)** — end-phase discard-and-draw dropped.
@@ -341,7 +343,6 @@ listed here so the direction tag is co-located with the name.
   card only recovers part of a real draw's value in the sim (no cross-turn shuffle benefit).
 - **Sound the Alarm (all colours)** — deck-search rider dropped.
 - **Spring Load (all colours)** — +3{p} empty-hand rider never fires.
-- **Springboard Somersault (all colours)** — arsenal-only +2{d} never fires.
 - **Starting Stake (all colours)** — Gold-token economy dropped.
 - **Strategic Planning (all colours)** — graveyard recovery plus end-phase draw dropped.
 - **Stony Woottonhog (all colours)** — defended-by-<2-non-equipment rider dropped (same shape as
@@ -353,7 +354,6 @@ listed here so the direction tag is co-located with the name.
 - **Tongue Tied (all colours)** — on-hit arsenal face-up + banish instant dropped.
 - **Trade In (all colours)** — discard-to-draw plus arsenal-only go-again dropped.
 - **Tremor of íArathael (all colours)** — banished-zone +2{p} never fires.
-- **Unmovable (all colours)** — arsenal +1{d} never fires.
 - **Visit the Blacksmith (all colours)** — next-sword-attack bonuses dropped.
 - **Wage Gold (all colours)** — Universal keyword plus Gold wager dropped.
 - **Walk the Plank (all colours)** — Pirate-specific target-freeze dropped.
@@ -370,8 +370,6 @@ listed here so the direction tag is co-located with the name.
 - **Lay Low (all colours)** — treated as always legal even without a marked defender; real card
   is uncastable when no hero is marked.
 - **Look Tuff** — pay {r}-or-lose-1{p} resolved as "always pay"; same shape as Bluster Buff.
-- **Plunder Run (all colours)** — scan-target +N is credited unconditionally instead of only
-  when the played-from-arsenal gate is met.
 - **Public Bounty (all colours)** — mark rider fires unconditionally; real card requires the
   opponent be marked and the rider is tied to the mark.
 - **Put in Context** — base-power cap on what it can block is ignored; every attack is assumed
@@ -390,11 +388,6 @@ listed here so the direction tag is co-located with the name.
   would prevent it.
 - **Runeblade Weeping Battleground (all colours)** — assumes the graveyard always has a
   banishable aura; fizzles when empty.
-- **Scout the Periphery (all colours)** — scan bonus credited whenever a target exists, even
-  though the real rider requires the card to be played from arsenal.
-- **Smashing Good Time (all colours)** — scan bonus credited unconditionally (same shape as
-  Scout the Periphery) rather than requiring the arsenal gate.
-
 #### Likely neutral
 
 - **Aether Slash (all colours)** — printed 1 arcane doubles as the text-rider damage; the code

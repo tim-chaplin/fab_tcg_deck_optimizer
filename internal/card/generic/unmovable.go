@@ -2,7 +2,10 @@
 // Printed pitch variants: Red 1, Yellow 2, Blue 3.
 // Printed defense: Red 7, Yellow 6, Blue 5.
 // Text: "If Unmovable is played from arsenal, it gains +1{d}."
-// Simplification: arsenal isn't modelled; the +1{d} rider never applies.
+//
+// Modelling: The +1{d} rider opts in via card.ArsenalDefenseBonus; the solver bumps the
+// arsenal slot's effective defense by 1 only when this copy was the start-of-turn arsenal-in
+// card.
 //
 // Source: github.com/the-fab-cube/flesh-and-blood-cards (card.csv).
 
@@ -21,6 +24,7 @@ func (UnmovableRed) Defense() int             { return 7 }
 func (UnmovableRed) Types() card.TypeSet      { return defenseReactionTypes }
 func (UnmovableRed) GoAgain() bool            { return false }
 func (UnmovableRed) Play(*card.TurnState) int { return 0 }
+func (UnmovableRed) ArsenalDefenseBonus() int { return 1 }
 
 type UnmovableYellow struct{}
 
@@ -33,6 +37,7 @@ func (UnmovableYellow) Defense() int             { return 6 }
 func (UnmovableYellow) Types() card.TypeSet      { return defenseReactionTypes }
 func (UnmovableYellow) GoAgain() bool            { return false }
 func (UnmovableYellow) Play(*card.TurnState) int { return 0 }
+func (UnmovableYellow) ArsenalDefenseBonus() int { return 1 }
 
 type UnmovableBlue struct{}
 
@@ -45,3 +50,4 @@ func (UnmovableBlue) Defense() int             { return 5 }
 func (UnmovableBlue) Types() card.TypeSet      { return defenseReactionTypes }
 func (UnmovableBlue) GoAgain() bool            { return false }
 func (UnmovableBlue) Play(*card.TurnState) int { return 0 }
+func (UnmovableBlue) ArsenalDefenseBonus() int { return 1 }

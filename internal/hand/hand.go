@@ -642,6 +642,10 @@ type attackBufs struct {
 	// inner loop skips interface dispatch on Types / GoAgain and reads cached cost bounds.
 	// Pointer-valued so bestSequence's permutation swaps move 8 bytes instead of a full struct.
 	permMeta []*attackerMeta
+	// permFromArsenal carries arsenal-provenance per slot in lockstep with perm / permMeta. Set
+	// to true on the slot whose card came from the arsenal slot at start of turn so
+	// playSequenceWithMeta can flip pcBuf[i].FromArsenal for that PlayedCard.
+	permFromArsenal []bool
 	// Partition-loop buffers, consumed by bestUncached. Sized handSize+1 to cover the optional
 	// arsenal-in slot the enumerator treats as index n. isDRBuf caches TypeDefenseReaction
 	// membership to skip Types().Has calls; isDelayedBuf caches card.DelayedPlay implementation
@@ -707,6 +711,7 @@ func newAttackBufs(handSize, weaponCount int, weapons []weapon.Weapon) *attackBu
 	return &attackBufs{
 		perm:                   make([]card.Card, maxAttackers),
 		permMeta:               make([]*attackerMeta, maxAttackers),
+		permFromArsenal:        make([]bool, maxAttackers),
 		pcBuf:                  pcBuf,
 		ptrBuf:                 ptrBuf,
 		cardsPlayedBuf:         make([]card.Card, 0, maxAttackers),
@@ -823,6 +828,15 @@ func (e *Evaluator) bestUncached(hero hero.Hero, weapons []weapon.Weapon, hand [
 		}
 		pvals[i] = c.Pitch()
 		dvals[i] = c.Defense()
+		// Arsenal slot (i == n) lives at the end. Defense Reactions whose +N{d} rider only fires
+		// when played from arsenal (Unmovable, Springboard Somersault) opt in via
+		// card.ArsenalDefenseBonus; bump the static Defense() up here so the partition / capping
+		// pipeline sees the effective value.
+		if i == n {
+			if ab, ok := c.(card.ArsenalDefenseBonus); ok {
+				dvals[i] += ab.ArsenalDefenseBonus()
+			}
+		}
 		isDR[i] = c.Types().IsDefenseReaction()
 		if isDR[i] {
 			hasReactions = true
@@ -864,7 +878,14 @@ func (e *Evaluator) bestUncached(hero hero.Hero, weapons []weapon.Weapon, hand [
 					a = append(a, arsenalCardIn)
 				}
 			}
-			attackDealt, defenseDealt, leftoverRunechants, budget, swung, ok := bestAttackWithWeapons(hero, weapons, a, d, p, deck, bufs, runechantCarryover, incomingDamage, defenseSum)
+			// Arsenal-in is appended last to a / d above, so its index in the attackers slice is
+			// len(a)-1 when present in the chain. -1 means no arsenal-in card in the attackers
+			// (either no arsenal-in card at all, or it took a different role).
+			arsenalInIdx := -1
+			if arsenalCardIn != nil && rolesBuf[n] == Attack {
+				arsenalInIdx = len(a) - 1
+			}
+			attackDealt, defenseDealt, leftoverRunechants, budget, swung, ok := bestAttackWithWeapons(hero, weapons, a, d, p, deck, bufs, runechantCarryover, incomingDamage, defenseSum, arsenalInIdx)
 			if !ok {
 				return
 			}
@@ -1148,7 +1169,7 @@ type chainBudget struct {
 //
 // Phase masks: when no Defense Reactions are present (or no pitches exist), all pitches go to
 // the attack phase, so we visit one configuration. Otherwise we enumerate 2^|pitched| splits.
-func bestAttackWithWeapons(hero hero.Hero, weapons []weapon.Weapon, attackers, defenders, pitched, deck []card.Card, bufs *attackBufs, runechantCarryover, incomingDamage, blockTotal int) (int, int, int, chainBudget, []string, bool) {
+func bestAttackWithWeapons(hero hero.Hero, weapons []weapon.Weapon, attackers, defenders, pitched, deck []card.Card, bufs *attackBufs, runechantCarryover, incomingDamage, blockTotal, arsenalInIdx int) (int, int, int, chainBudget, []string, bool) {
 	ctx := &sequenceContext{
 		hero:               hero,
 		pitched:            pitched,
@@ -1157,6 +1178,7 @@ func bestAttackWithWeapons(hero hero.Hero, weapons []weapon.Weapon, attackers, d
 		runechantCarryover: runechantCarryover,
 		incomingDamage:     incomingDamage,
 		blockTotal:         blockTotal,
+		arsenalInIdx:       arsenalInIdx,
 	}
 	// Hoist leaf-constant TurnState fields out of the per-permutation reset in
 	// playSequenceWithMeta.
@@ -1316,6 +1338,11 @@ type sequenceContext struct {
 	blockTotal         int
 	hasAttackPitches   bool
 	maxAttackPitch     int
+	// arsenalInIdx is the index in the attackers slice (the slice passed to bestSequence) of
+	// the card that came from the arsenal slot at start of turn, or -1 when no arsenal-in card
+	// is in the chain. Lets bestSequence flag the matching pcBuf entry's FromArsenal as the
+	// permutation moves it around.
+	arsenalInIdx int
 	// Mid-turn-drawn-card tracking for the most recent playSequenceWithMeta call. state.Drawn
 	// is partitioned as [Pitch * drawnPitched | Attack * drawnAttacked | Held ...]: the first
 	// drawnPitched cards were consumed to plug a cost shortfall ("hopeful" partitions); the
@@ -1375,9 +1402,11 @@ func (ctx *sequenceContext) bestSequence(attackers, winnerOrderOut []card.Card, 
 	}
 	perm := ctx.bufs.perm[:n]
 	permMeta := ctx.bufs.permMeta[:n]
+	permFromArsenal := ctx.bufs.permFromArsenal[:n]
 	copy(perm, attackers)
 	for idx, c := range attackers {
 		permMeta[idx] = attackerMetaPtrFor(c)
+		permFromArsenal[idx] = idx == ctx.arsenalInIdx
 	}
 
 	// Scratch buffers are playSequence's per-card outputs, overwritten every permutation. On a
@@ -1430,7 +1459,8 @@ func (ctx *sequenceContext) bestSequence(attackers, winnerOrderOut []card.Card, 
 	}
 	eval()
 	// Heap's algorithm, iterative: c[] counts how many times each stack frame has iterated.
-	// perm and permMeta swap together so playSequence sees meta aligned with the permutation.
+	// perm, permMeta, and permFromArsenal swap together so playSequence sees meta and arsenal
+	// provenance aligned with the permutation.
 	var c [8]int
 	i := 0
 	for i < n {
@@ -1438,9 +1468,11 @@ func (ctx *sequenceContext) bestSequence(attackers, winnerOrderOut []card.Card, 
 			if i&1 == 0 {
 				perm[0], perm[i] = perm[i], perm[0]
 				permMeta[0], permMeta[i] = permMeta[i], permMeta[0]
+				permFromArsenal[0], permFromArsenal[i] = permFromArsenal[i], permFromArsenal[0]
 			} else {
 				perm[c[i]], perm[i] = perm[i], perm[c[i]]
 				permMeta[c[i]], permMeta[i] = permMeta[i], permMeta[c[i]]
+				permFromArsenal[c[i]], permFromArsenal[i] = permFromArsenal[i], permFromArsenal[c[i]]
 			}
 			eval()
 			c[i]++
@@ -1481,8 +1513,10 @@ func (ctx *sequenceContext) bestSequence(attackers, winnerOrderOut []card.Card, 
 func (ctx *sequenceContext) playSequence(order []card.Card, perCardOut, perCardTriggerOut []float64) (damage int, leftoverRunechants int, residualBudget int, legal bool) {
 	ctx.seedState()
 	meta := ctx.bufs.permMeta[:len(order)]
+	permFromArsenal := ctx.bufs.permFromArsenal[:len(order)]
 	for i, c := range order {
 		meta[i] = attackerMetaPtrFor(c)
+		permFromArsenal[i] = i == ctx.arsenalInIdx
 	}
 	return ctx.playSequenceWithMeta(order, perCardOut, perCardTriggerOut)
 }
@@ -1495,10 +1529,12 @@ func (ctx *sequenceContext) playSequenceWithMeta(order []card.Card, perCardOut, 
 	pcBuf := ctx.bufs.pcBuf
 	ptrBuf := ctx.bufs.ptrBuf
 	meta := ctx.bufs.permMeta[:n]
+	permFromArsenal := ctx.bufs.permFromArsenal[:n]
 	// ptrBuf entries point at the matching pcBuf slots permanently (wired once in newAttackBufs),
-	// so only the per-permutation Card and the zeroed GrantedGoAgain need refreshing here.
+	// so only the per-permutation Card and the zeroed GrantedGoAgain / FromArsenal need
+	// refreshing here.
 	for i, c := range order {
-		pcBuf[i] = card.PlayedCard{Card: c}
+		pcBuf[i] = card.PlayedCard{Card: c, FromArsenal: permFromArsenal[i]}
 		if perCardOut != nil {
 			perCardOut[i] = 0
 		}
@@ -1659,10 +1695,12 @@ func (ctx *sequenceContext) playSequenceWithMeta(order []card.Card, perCardOut, 
 }
 
 // fillDefenseContributions writes Contribution on each Defend-role entry. The block-prevention
-// share is proportional to the card's Defense() out of sumDef, capped by incomingDamage so
-// over-blocking doesn't inflate attribution past what actually stopped. Defense Reactions add
-// their own Play return on top, evaluated against a fresh TurnState seeded with the turn's
-// pitched pool and remaining deck so card effects see the same context the solver scored them in.
+// share is proportional to the card's effective defense out of sumDef, capped by incomingDamage
+// so over-blocking doesn't inflate attribution past what actually stopped. Effective defense is
+// Defense() plus the arsenal bonus when FromArsenal is set on a card.ArsenalDefenseBonus
+// implementer. Defense Reactions add their own Play return on top, evaluated against a fresh
+// TurnState seeded with the turn's pitched pool and remaining deck so card effects see the same
+// context the solver scored them in.
 func fillDefenseContributions(line []CardAssignment, pitched []card.Card, deck []card.Card, bufs *attackBufs, sumDef, incomingDamage int) {
 	prevented := sumDef
 	if prevented > incomingDamage {
@@ -1673,8 +1711,14 @@ func fillDefenseContributions(line []CardAssignment, pitched []card.Card, deck [
 			continue
 		}
 		c := line[i].Card
+		def := c.Defense()
+		if line[i].FromArsenal {
+			if ab, ok := c.(card.ArsenalDefenseBonus); ok {
+				def += ab.ArsenalDefenseBonus()
+			}
+		}
 		if sumDef > 0 {
-			line[i].Contribution = float64(c.Defense()) * float64(prevented) / float64(sumDef)
+			line[i].Contribution = float64(def) * float64(prevented) / float64(sumDef)
 		}
 		if c.Types().IsDefenseReaction() {
 			*bufs.state = card.TurnState{Pitched: pitched, Deck: deck}
@@ -1700,15 +1744,25 @@ func fillContributions(summary *TurnSummary, hero hero.Hero, weapons []weapon.We
 	// entries when its role is Attack / Defend.
 	pitched := bufs.pitchedBuf[:0]
 	attackers := bufs.attackersBuf[:0]
+	arsenalInIdx := -1
 	var sumDef int
 	for _, a := range line {
 		switch a.Role {
 		case Pitch:
 			pitched = append(pitched, a.Card)
 		case Attack:
+			if a.FromArsenal {
+				arsenalInIdx = len(attackers)
+			}
 			attackers = append(attackers, a.Card)
 		case Defend:
-			sumDef += a.Card.Defense()
+			def := a.Card.Defense()
+			if a.FromArsenal {
+				if ab, ok := a.Card.(card.ArsenalDefenseBonus); ok {
+					def += ab.ArsenalDefenseBonus()
+				}
+			}
+			sumDef += def
 		}
 	}
 
@@ -1737,6 +1791,7 @@ func fillContributions(summary *TurnSummary, hero hero.Hero, weapons []weapon.We
 			blockTotal:         sumDef,
 			hasAttackPitches:   budget.hasAttackPitches,
 			maxAttackPitch:     budget.maxPitch,
+			arsenalInIdx:       arsenalInIdx,
 		}
 		ctx.seedState()
 		fillAttackChainContributions(summary, chain, ctx)

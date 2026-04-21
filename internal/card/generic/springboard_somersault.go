@@ -1,8 +1,10 @@
 // Springboard Somersault — Generic Defense Reaction. Cost 0, Pitch 2, Defense 2. Only printed in
 // Yellow.
 // Text: "If Springboard Somersault is played from arsenal, it gains +2{d}."
-// Simplification: arsenal isn't modelled; we assume the card is always played from hand, so the
-// +2{d} rider never applies.
+//
+// Modelling: The +2{d} rider opts in via card.ArsenalDefenseBonus; the solver bumps the
+// arsenal slot's effective defense by 2 only when this copy was the start-of-turn arsenal-in
+// card.
 //
 // Source: github.com/the-fab-cube/flesh-and-blood-cards (card.csv).
 
@@ -21,3 +23,4 @@ func (SpringboardSomersaultYellow) Defense() int             { return 2 }
 func (SpringboardSomersaultYellow) Types() card.TypeSet      { return defenseReactionTypes }
 func (SpringboardSomersaultYellow) GoAgain() bool            { return false }
 func (SpringboardSomersaultYellow) Play(*card.TurnState) int { return 0 }
+func (SpringboardSomersaultYellow) ArsenalDefenseBonus() int { return 2 }
