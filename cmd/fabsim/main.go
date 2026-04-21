@@ -49,7 +49,15 @@ func main() {
 	formatFlag := flag.String("format", string(fmtpkg.SilverAge), "constructed format whose banlist restricts the card pool during search (only \"silver_age\" is supported today)")
 	debug := flag.Bool("debug", false, "emit extra diagnostic output (e.g. memo cache size between iterate rounds)")
 	reevaluate := flag.Bool("reevaluate", false, "iterate: force re-evaluation of the loaded deck's baseline avg, even if its prior run count already matches -deep-shuffles. Use after adjusting modelling assumptions or fixing bugs that may have shifted the deck's true score.")
+	finalize := flag.Bool("finalize", false, "iterate: high-precision pass — overrides -shallow-shuffles to 10000 and -deep-shuffles to 100000. Use on a deck that's already converged to squeeze out the remaining sub-percent improvements.")
 	flag.Parse()
+	if *finalize {
+		if subcommand != "iterate" {
+			die("-finalize is only valid with the iterate subcommand")
+		}
+		*shallowShuffles = 10000
+		*deepShuffles = 100000
+	}
 	// Reject positional args after the subcommand so `fabsim eval mydeck` errors instead of
 	// silently ignoring the deck name. The diff subcommand consumes exactly two positional
 	// deck names and is handled below, so skip the rejection for it.
