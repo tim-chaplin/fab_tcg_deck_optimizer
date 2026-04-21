@@ -305,11 +305,20 @@ func printPerCardStats(d *deck.Deck) {
 		return rows[i].name < rows[j].name
 	})
 
+	// Width the name column to the longest card name so the "avg" column stays aligned even
+	// with Drawn to the Dark Dimension (Yellow) and the like.
+	nameWidth := 0
+	for _, r := range rows {
+		if len(r.name) > nameWidth {
+			nameWidth = len(r.name)
+		}
+	}
+
 	fmt.Println()
 	fmt.Println("Card value (avg contribution per appearance: attack=power, defend=share of block, pitch=resource):")
 	for _, r := range rows {
-		fmt.Printf("  %-35s avg %6.3f over %4d hands (%4d plays, %4d pitches, %dx in deck)\n",
-			r.name, r.avg, r.plays+r.pitches, r.plays, r.pitches, r.deckCount)
+		fmt.Printf("  %-*s avg %6.3f over %4d hands (%4d plays, %4d pitches, %dx in deck)\n",
+			nameWidth, r.name, r.avg, r.plays+r.pitches, r.plays, r.pitches, r.deckCount)
 	}
 }
 
