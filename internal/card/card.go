@@ -148,6 +148,18 @@ type TurnState struct {
 	// attack, next entries may play as free-cost chain extensions, and the rest carry as Held
 	// (or compete for the empty arsenal slot) into the next hand.
 	Drawn []Card
+	// Graveyard is the cards that have entered the graveyard this turn — every card played or
+	// blocked lands here after resolving. Pitched cards do not (they go back to the deck). In
+	// the defense phase, the solver seeds Graveyard with every Defend-role card so effects like
+	// Weeping Battleground's aura banish see plain-blocked auras. In the attack chain, each
+	// card is appended after its Play returns so later attacks see what resolved before them.
+	// Cards that read Graveyard must implement NoMemo since its contents aren't captured in
+	// the hand's memo key.
+	Graveyard []Card
+	// Banish holds cards banished this turn — moved here by effects that pull a card out of
+	// the graveyard (e.g. Weeping Battleground banishing an aura). Cards that key on "was a
+	// card banished this turn" read this list.
+	Banish []Card
 }
 
 // PlayedFromArsenal reports whether the card currently being played came from the arsenal

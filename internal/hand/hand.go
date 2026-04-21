@@ -661,6 +661,12 @@ type attackBufs struct {
 	pitchedBuf         []card.Card
 	attackersBuf       []card.Card
 	defendersBuf       []card.Card
+	// defenseGravScratch / attackGravScratch back state.Graveyard during DR Plays and attack-chain
+	// permutations respectively. Reset via [:0]+append per iteration so card effects can freely
+	// mutate their view (e.g. Weeping Battleground shrinks the slice when it banishes an aura)
+	// without leaking into the next one. Split so the two phases never alias each other.
+	defenseGravScratch []card.Card
+	attackGravScratch  []card.Card
 	// perCardScratch is sized maxAttackers (handSize + weaponCount). Written by playSequence only
 	// when the caller passes a non-nil perCardOut; bestSequence snapshots the winning
 	// permutation's per-card damage from here into the caller's output buffer. The partition-loop
@@ -728,6 +734,8 @@ func newAttackBufs(handSize, weaponCount int, weapons []weapon.Weapon) *attackBu
 		pitchedBuf:             make([]card.Card, 0, handSize+1),
 		attackersBuf:           make([]card.Card, 0, handSize+1),
 		defendersBuf:           make([]card.Card, 0, handSize+1),
+		defenseGravScratch:     make([]card.Card, 0, handSize+1),
+		attackGravScratch:      make([]card.Card, 0, maxAttackers),
 		perCardScratch:         make([]float64, maxAttackers),
 		perCardTriggerScratch:  make([]float64, maxAttackers),
 		fillContribWinnerOrder: make([]card.Card, maxAttackers),
@@ -1126,21 +1134,23 @@ func roleAllowed(r Role, isArsenalSlot, isDefenseReaction bool) bool {
 
 // defenseReactionDamage runs Play() for every Defense Reaction in defenders and sums the damage
 // they deal back to the attacker (e.g. Weeping Battleground's 1 arcane on banish). Played in
-// isolation — no attack ordering; TurnState carries only Pitched/Deck so effects that read
-// "what was pitched" work. Uncapped: this damage is dealt, not prevented.
+// isolation — no attack ordering; TurnState carries Pitched/Deck plus a per-DR fresh copy of the
+// defenders list in Graveyard so effects like Weeping Battleground's aura banish can scan what
+// went to graveyard this defense window. Uncapped: this damage is dealt, not prevented.
 //
-// state is caller-provided (from attackBufs) and reset per call. Reusing the pointer keeps the
-// state on the heap buffer rather than escaping a fresh stack value per partition leaf.
-func defenseReactionDamage(defenders, pitched, deck []card.Card, state *card.TurnState) int {
+// state is caller-provided (from attackBufs) and reset per call. gravBuf is the caller-owned
+// scratch backing state.Graveyard; the returned slice is the (possibly grown) buffer for reuse.
+func defenseReactionDamage(defenders, pitched, deck []card.Card, state *card.TurnState, gravBuf []card.Card) (int, []card.Card) {
 	total := 0
 	for _, d := range defenders {
 		if !d.Types().IsDefenseReaction() {
 			continue
 		}
-		*state = card.TurnState{Pitched: pitched, Deck: deck}
+		gravBuf = append(gravBuf[:0], defenders...)
+		*state = card.TurnState{Pitched: pitched, Deck: deck, Graveyard: gravBuf}
 		total += d.Play(state)
 	}
-	return total
+	return total, gravBuf
 }
 
 // chainBudget captures the winning phase-split's attack-chain resource state. Reusing it to seed
@@ -1196,7 +1206,7 @@ func bestAttackWithWeapons(hero hero.Hero, weapons []weapon.Weapon, attackers, d
 	}
 	var defenseDealt int
 	if hasDRs {
-		defenseDealt = defenseReactionDamage(defenders, pitched, deck, bufs.state)
+		defenseDealt, bufs.defenseGravScratch = defenseReactionDamage(defenders, pitched, deck, bufs.state, bufs.defenseGravScratch)
 		ctx.seedState()
 	}
 
@@ -1561,6 +1571,11 @@ func (ctx *sequenceContext) playSequenceWithMeta(order []card.Card, perCardOut, 
 	// seedState — cards don't mutate them.
 	state.Deck = ctx.deck
 	state.Drawn = nil
+	// Graveyard and Banish reset per permutation too: cards append themselves to Graveyard as
+	// they resolve, and graveyard-banish effects shift cards into Banish. Reusing the scratch
+	// backing array keeps the reset allocation-free.
+	state.Graveyard = ctx.bufs.attackGravScratch[:0]
+	state.Banish = nil
 	ctx.drawnPitched = 0
 	ctx.drawnAttacked = 0
 	ctx.drawnAttackDmg = ctx.drawnAttackDmg[:0]
@@ -1604,6 +1619,7 @@ func (ctx *sequenceContext) playSequenceWithMeta(order []card.Card, perCardOut, 
 			perCardTriggerOut[i] = float64(triggerDmg)
 		}
 		state.CardsPlayed = append(state.CardsPlayed, pc.Card)
+		state.Graveyard = append(state.Graveyard, pc.Card)
 
 		// Attacks and weapon swings consume all runechants in play. Damage isn't re-added: each
 		// token was credited +1 at creation time, so this is pure state cleanup.
@@ -1670,6 +1686,7 @@ func (ctx *sequenceContext) playSequenceWithMeta(order []card.Card, perCardOut, 
 		ctx.drawnAttackDmg = append(ctx.drawnAttackDmg, float64(playDmg))
 		ctx.drawnAttackTriggerDmg = append(ctx.drawnAttackTriggerDmg, float64(triggerDmg))
 		state.CardsPlayed = append(state.CardsPlayed, candidate)
+		state.Graveyard = append(state.Graveyard, candidate)
 
 		if isAttackOrWeapon {
 			state.Runechants = 0
@@ -1706,6 +1723,14 @@ func fillDefenseContributions(line []CardAssignment, pitched []card.Card, deck [
 	if prevented > incomingDamage {
 		prevented = incomingDamage
 	}
+	// Collect defenders first so each DR's Play sees the full set in state.Graveyard — mirroring
+	// the seeding that defenseReactionDamage does during partition enumeration.
+	defenders := bufs.defendersBuf[:0]
+	for i := range line {
+		if line[i].Role == Defend {
+			defenders = append(defenders, line[i].Card)
+		}
+	}
 	for i := range line {
 		if line[i].Role != Defend {
 			continue
@@ -1721,7 +1746,8 @@ func fillDefenseContributions(line []CardAssignment, pitched []card.Card, deck [
 			line[i].Contribution = float64(def) * float64(prevented) / float64(sumDef)
 		}
 		if c.Types().IsDefenseReaction() {
-			*bufs.state = card.TurnState{Pitched: pitched, Deck: deck}
+			bufs.defenseGravScratch = append(bufs.defenseGravScratch[:0], defenders...)
+			*bufs.state = card.TurnState{Pitched: pitched, Deck: deck, Graveyard: bufs.defenseGravScratch}
 			line[i].Contribution += float64(c.Play(bufs.state))
 		}
 	}
