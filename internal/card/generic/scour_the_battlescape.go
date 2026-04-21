@@ -4,7 +4,9 @@
 // Text: "You may put a card from your hand on the bottom of your deck. If you do, draw a card. If
 // Scour the Battlescape is played from arsenal, it gains **go again**."
 //
-// Simplification: Hand-cycle and arsenal-only go-again aren't modelled.
+// Modelling: The hand-cycle isn't modelled. The played-from-arsenal go-again fires via
+// Self.GrantedGoAgain when card.PlayedFromArsenal reports this copy came from the arsenal
+// slot.
 //
 // Source: github.com/the-fab-cube/flesh-and-blood-cards (card.csv).
 
@@ -13,6 +15,14 @@ package generic
 import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 
 var scourTheBattlescapeTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeAttack)
+
+// scourTheBattlescapePlay grants Self.GrantedGoAgain when this copy was played from arsenal.
+func scourTheBattlescapePlay(c card.Card, s *card.TurnState) int {
+	if card.PlayedFromArsenal(s) {
+		s.Self.GrantedGoAgain = true
+	}
+	return c.Attack()
+}
 
 type ScourTheBattlescapeRed struct{}
 
@@ -24,7 +34,7 @@ func (ScourTheBattlescapeRed) Attack() int                 { return 3 }
 func (ScourTheBattlescapeRed) Defense() int                { return 2 }
 func (ScourTheBattlescapeRed) Types() card.TypeSet         { return scourTheBattlescapeTypes }
 func (ScourTheBattlescapeRed) GoAgain() bool               { return false }
-func (c ScourTheBattlescapeRed) Play(s *card.TurnState) int { return c.Attack() }
+func (c ScourTheBattlescapeRed) Play(s *card.TurnState) int { return scourTheBattlescapePlay(c, s) }
 
 type ScourTheBattlescapeYellow struct{}
 
@@ -36,7 +46,7 @@ func (ScourTheBattlescapeYellow) Attack() int                 { return 2 }
 func (ScourTheBattlescapeYellow) Defense() int                { return 2 }
 func (ScourTheBattlescapeYellow) Types() card.TypeSet         { return scourTheBattlescapeTypes }
 func (ScourTheBattlescapeYellow) GoAgain() bool               { return false }
-func (c ScourTheBattlescapeYellow) Play(s *card.TurnState) int { return c.Attack() }
+func (c ScourTheBattlescapeYellow) Play(s *card.TurnState) int { return scourTheBattlescapePlay(c, s) }
 
 type ScourTheBattlescapeBlue struct{}
 
@@ -48,4 +58,4 @@ func (ScourTheBattlescapeBlue) Attack() int                 { return 1 }
 func (ScourTheBattlescapeBlue) Defense() int                { return 2 }
 func (ScourTheBattlescapeBlue) Types() card.TypeSet         { return scourTheBattlescapeTypes }
 func (ScourTheBattlescapeBlue) GoAgain() bool               { return false }
-func (c ScourTheBattlescapeBlue) Play(s *card.TurnState) int { return c.Attack() }
+func (c ScourTheBattlescapeBlue) Play(s *card.TurnState) int { return scourTheBattlescapePlay(c, s) }

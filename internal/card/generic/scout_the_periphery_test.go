@@ -16,18 +16,28 @@ func TestScoutThePeriphery_NoAttackReturnsZero(t *testing.T) {
 	}
 }
 
-// TestScoutThePeriphery_NonAttackInRemainingFizzles: non-attack action fails the predicate.
+// TestScoutThePeriphery_NonAttackInRemainingFizzles: non-attack action (even from arsenal)
+// fails the predicate — only attack actions count as the rider's target.
 func TestScoutThePeriphery_NonAttackInRemainingFizzles(t *testing.T) {
-	s := card.TurnState{CardsRemaining: []*card.PlayedCard{{Card: stubGenericAction()}}}
+	s := card.TurnState{CardsRemaining: []*card.PlayedCard{{Card: stubGenericAction(), FromArsenal: true}}}
 	if got := (ScoutThePeripheryRed{}).Play(&s); got != 0 {
 		t.Errorf("Play() = %d, want 0 (non-attack skipped)", got)
 	}
 }
 
-// TestScoutThePeriphery_NextAttackReturnsBonus: first attack-action triggers the per-variant
-// bonus (Red +3, Yellow +2, Blue +1).
-func TestScoutThePeriphery_NextAttackReturnsBonus(t *testing.T) {
+// TestScoutThePeriphery_HandPlayedAttackFizzles: queued attack action that wasn't played from
+// arsenal fails the rider's "next attack action card you play from arsenal" target gate.
+func TestScoutThePeriphery_HandPlayedAttackFizzles(t *testing.T) {
 	s := card.TurnState{CardsRemaining: []*card.PlayedCard{{Card: stubGenericAttack(0, 0)}}}
+	if got := (ScoutThePeripheryRed{}).Play(&s); got != 0 {
+		t.Errorf("Play() = %d, want 0 (target attack not from arsenal)", got)
+	}
+}
+
+// TestScoutThePeriphery_NextArsenalAttackReturnsBonus: when the queued attack action is itself
+// played from arsenal the per-variant bonus fires (Red +3, Yellow +2, Blue +1).
+func TestScoutThePeriphery_NextArsenalAttackReturnsBonus(t *testing.T) {
+	s := card.TurnState{CardsRemaining: []*card.PlayedCard{{Card: stubGenericAttack(0, 0), FromArsenal: true}}}
 	cases := []struct {
 		c    card.Card
 		want int
