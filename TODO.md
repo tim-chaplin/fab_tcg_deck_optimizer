@@ -148,9 +148,9 @@ Hero health isn't tracked, so every life-gain and life-comparison rider collapse
 
 ### Aura / graveyard state
 
-- **Aura presence in graveyard is assumed.** Sigil of Silphidae and Runic Fellingsong (partly)
-  assume there's always an aura available to banish. Weeping Battleground now scans
-  `s.Graveyard` for a real aura before crediting its arcane damage.
+- **Aura presence in graveyard is now checked.** Weeping Battleground, Sigil of Silphidae
+  (both enter and leave triggers), and Runic Fellingsong all scan `s.Graveyard` for a
+  banishable aura before crediting their arcane damage.
 - **"Played or created an aura this turn" is assumed true** for cards that don't yet use the
   live `AuraCreated` / `HasPlayedType(TypeAura)` check. Reek of Corruption, Hit the High Notes,
   and Shrill of Skullform all gate this correctly; Yinti Yanti does as well. Nothing else on the
@@ -159,11 +159,11 @@ Hero health isn't tracked, so every life-gain and life-comparison rider collapse
   PlayNextTurn callback through the deck loop for cards whose effect fires at the start of the
   owner's next action phase — Sigil of the Arknight peeks the actual post-draw top card next
   turn, Sigil of Fyendal credits its 1{h} gain on leave, Blessing of Occult / Sigil of Deadwood
-  / Runeblood Incantation create their Runechants on next turn's starting state, and Malefic
-  Incantation routes to next turn's graveyard after ticking. Other cross-turn auras still
-  collapse their effects into the immediate Play: Sigil of Silphidae (enter + leave both
-  credited at play), Enchanting Melody (end-phase destruction clause dropped), Sigil of Cycles
-  (on-leave discard/draw dropped).
+  / Runeblood Incantation create their Runechants on next turn's starting state, Malefic
+  Incantation routes to next turn's graveyard after ticking, and Sigil of Silphidae fires its
+  leave-trigger banish on next turn's upkeep. Other cross-turn auras still collapse their
+  effects into the immediate Play: Enchanting Melody (end-phase destruction clause dropped),
+  Sigil of Cycles (on-leave discard/draw dropped).
 - **Graveyard-banish additional costs are ignored.** Gravekeeping, Jack Be Nimble, Jack Be Quick,
   Looking for a Scrap, and Nimble Strike treat the banish step as free and either drop the
   rider or credit it unconditionally where noted in the card.
@@ -331,8 +331,6 @@ listed here so the direction tag is co-located with the name.
   cost is met).
 - **Runeblade Condemn to Slaughter (all colours)** — aura-trade rider and opponent-aura
   destruction dropped (only same-turn Runeblade-attack +N is modelled).
-- **Runeblade Runic Fellingsong (all colours)** — cannot credit BOTH the printed 1 arcane AND
-  the graveyard-banish rider; only one fires.
 - **Runeblade Splintering Deadwood (all colours)** — aura-swap modelled as net-zero (no credit
   for the tempo of trading a weak aura for a Runechant).
 - **Runeblade Sutcliffe's Research Notes (all colours)** — top-of-deck re-ordering clause
@@ -386,8 +384,6 @@ listed here so the direction tag is co-located with the name.
   while the printed power is left alone — partial under-count, but in contexts where a
   follow-up aura-reading card is present, Drowning Dire is materially overstated because the
   Dominate protection of that damage is not modelled.
-- **Runeblade Sigil of Silphidae** — assumed we always have an aura to banish on both enter and
-  leave, crediting 2 damage; real card fizzles both triggers when the graveyard is dry.
 - **Runeblade Singeing Steelblade (all colours)** — printed 1 arcane added unconditionally; Ward
   would prevent it.
 #### Likely neutral

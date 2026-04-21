@@ -3,9 +3,9 @@
 // Text: "You may banish an aura from your graveyard. If you do, deal 1 arcane damage to target
 // hero."
 //
-// Play scans s.Graveyard for an aura. The first one found is removed and appended to s.Banish;
-// Play returns 1 arcane and flips ArcaneDamageDealt. No aura means the banish clause fails and
-// Play returns 0 — the printed 3 block still applies via Defense().
+// Play routes through banishAuraFromGraveyard: if s.Graveyard has an aura, banish it for 1
+// arcane and flip ArcaneDamageDealt. No aura means the banish clause fails and Play returns
+// 0 — the printed 3 block still applies via Defense().
 //
 // Source: github.com/the-fab-cube/flesh-and-blood-cards (card.csv).
 
@@ -14,21 +14,6 @@ package runeblade
 import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 
 var weepingBattlegroundTypes = card.NewTypeSet(card.TypeRuneblade, card.TypeDefenseReaction)
-
-// weepingBattlegroundPlay banishes the first aura in s.Graveyard and deals 1 arcane; fizzles
-// (returns 0) when no aura is there.
-func weepingBattlegroundPlay(s *card.TurnState) int {
-	for i, c := range s.Graveyard {
-		if !c.Types().Has(card.TypeAura) {
-			continue
-		}
-		s.Banish = append(s.Banish, c)
-		s.Graveyard = append(s.Graveyard[:i], s.Graveyard[i+1:]...)
-		s.ArcaneDamageDealt = true
-		return 1
-	}
-	return 0
-}
 
 type WeepingBattlegroundRed struct{}
 
@@ -42,7 +27,7 @@ func (WeepingBattlegroundRed) Types() card.TypeSet      { return weepingBattlegr
 func (WeepingBattlegroundRed) GoAgain() bool            { return false }
 func (WeepingBattlegroundRed) NoMemo()                  {}
 func (WeepingBattlegroundRed) Play(s *card.TurnState, _ *card.CardState) int {
-	return weepingBattlegroundPlay(s)
+	return banishAuraFromGraveyard(s, nil)
 }
 
 type WeepingBattlegroundYellow struct{}
@@ -57,7 +42,7 @@ func (WeepingBattlegroundYellow) Types() card.TypeSet      { return weepingBattl
 func (WeepingBattlegroundYellow) GoAgain() bool            { return false }
 func (WeepingBattlegroundYellow) NoMemo()                  {}
 func (WeepingBattlegroundYellow) Play(s *card.TurnState, _ *card.CardState) int {
-	return weepingBattlegroundPlay(s)
+	return banishAuraFromGraveyard(s, nil)
 }
 
 type WeepingBattlegroundBlue struct{}
@@ -72,5 +57,5 @@ func (WeepingBattlegroundBlue) Types() card.TypeSet      { return weepingBattleg
 func (WeepingBattlegroundBlue) GoAgain() bool            { return false }
 func (WeepingBattlegroundBlue) NoMemo()                  {}
 func (WeepingBattlegroundBlue) Play(s *card.TurnState, _ *card.CardState) int {
-	return weepingBattlegroundPlay(s)
+	return banishAuraFromGraveyard(s, nil)
 }
