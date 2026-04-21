@@ -33,7 +33,7 @@ func (StrikeGoldRed) Attack() int                  { return 4 }
 func (StrikeGoldRed) Defense() int                 { return 2 }
 func (StrikeGoldRed) Types() card.TypeSet          { return strikeGoldTypes }
 func (StrikeGoldRed) GoAgain() bool                { return false }
-func (c StrikeGoldRed) Play(s *card.TurnState) int { return strikeGoldDamage(c.Attack()) }
+func (c StrikeGoldRed) Play(s *card.TurnState, _ *card.CardState) int { return strikeGoldDamage(c.Attack()) }
 
 type StrikeGoldYellow struct{}
 
@@ -45,7 +45,7 @@ func (StrikeGoldYellow) Attack() int                  { return 3 }
 func (StrikeGoldYellow) Defense() int                 { return 2 }
 func (StrikeGoldYellow) Types() card.TypeSet          { return strikeGoldTypes }
 func (StrikeGoldYellow) GoAgain() bool                { return false }
-func (c StrikeGoldYellow) Play(s *card.TurnState) int { return strikeGoldDamage(c.Attack()) }
+func (c StrikeGoldYellow) Play(s *card.TurnState, _ *card.CardState) int { return strikeGoldDamage(c.Attack()) }
 
 type StrikeGoldBlue struct{}
 
@@ -57,4 +57,4 @@ func (StrikeGoldBlue) Attack() int                  { return 2 }
 func (StrikeGoldBlue) Defense() int                 { return 2 }
 func (StrikeGoldBlue) Types() card.TypeSet          { return strikeGoldTypes }
 func (StrikeGoldBlue) GoAgain() bool                { return false }
-func (c StrikeGoldBlue) Play(s *card.TurnState) int { return strikeGoldDamage(c.Attack()) }
+func (c StrikeGoldBlue) Play(s *card.TurnState, _ *card.CardState) int { return strikeGoldDamage(c.Attack()) }

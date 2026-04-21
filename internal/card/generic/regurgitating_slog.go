@@ -24,7 +24,7 @@ func (RegurgitatingSlogRed) Attack() int                 { return 6 }
 func (RegurgitatingSlogRed) Defense() int                { return 2 }
 func (RegurgitatingSlogRed) Types() card.TypeSet         { return regurgitatingSlogTypes }
 func (RegurgitatingSlogRed) GoAgain() bool               { return false }
-func (c RegurgitatingSlogRed) Play(s *card.TurnState) int { return c.Attack() }
+func (c RegurgitatingSlogRed) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }
 
 type RegurgitatingSlogYellow struct{}
 
@@ -36,7 +36,7 @@ func (RegurgitatingSlogYellow) Attack() int                 { return 5 }
 func (RegurgitatingSlogYellow) Defense() int                { return 2 }
 func (RegurgitatingSlogYellow) Types() card.TypeSet         { return regurgitatingSlogTypes }
 func (RegurgitatingSlogYellow) GoAgain() bool               { return false }
-func (c RegurgitatingSlogYellow) Play(s *card.TurnState) int { return c.Attack() }
+func (c RegurgitatingSlogYellow) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }
 
 type RegurgitatingSlogBlue struct{}
 
@@ -48,4 +48,4 @@ func (RegurgitatingSlogBlue) Attack() int                 { return 4 }
 func (RegurgitatingSlogBlue) Defense() int                { return 2 }
 func (RegurgitatingSlogBlue) Types() card.TypeSet         { return regurgitatingSlogTypes }
 func (RegurgitatingSlogBlue) GoAgain() bool               { return false }
-func (c RegurgitatingSlogBlue) Play(s *card.TurnState) int { return c.Attack() }
+func (c RegurgitatingSlogBlue) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }

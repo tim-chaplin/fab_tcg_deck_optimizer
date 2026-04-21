@@ -24,4 +24,4 @@ func (ReapingBlade) Defense() int                 { return 0 }
 func (ReapingBlade) Types() card.TypeSet           { return reapingBladeTypes }
 func (ReapingBlade) GoAgain() bool                { return false }
 func (ReapingBlade) Hands() int                   { return 2 }
-func (c ReapingBlade) Play(*card.TurnState) int   { return c.Attack() }
+func (c ReapingBlade) Play(*card.TurnState, *card.CardState) int   { return c.Attack() }

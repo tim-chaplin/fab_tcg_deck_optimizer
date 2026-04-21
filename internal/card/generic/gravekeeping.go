@@ -23,7 +23,7 @@ func (GravekeepingRed) Attack() int                 { return 5 }
 func (GravekeepingRed) Defense() int                { return 2 }
 func (GravekeepingRed) Types() card.TypeSet         { return gravekeepingTypes }
 func (GravekeepingRed) GoAgain() bool               { return false }
-func (c GravekeepingRed) Play(s *card.TurnState) int { return c.Attack() }
+func (c GravekeepingRed) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }
 
 type GravekeepingYellow struct{}
 
@@ -35,7 +35,7 @@ func (GravekeepingYellow) Attack() int                 { return 4 }
 func (GravekeepingYellow) Defense() int                { return 2 }
 func (GravekeepingYellow) Types() card.TypeSet         { return gravekeepingTypes }
 func (GravekeepingYellow) GoAgain() bool               { return false }
-func (c GravekeepingYellow) Play(s *card.TurnState) int { return c.Attack() }
+func (c GravekeepingYellow) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }
 
 type GravekeepingBlue struct{}
 
@@ -47,4 +47,4 @@ func (GravekeepingBlue) Attack() int                 { return 3 }
 func (GravekeepingBlue) Defense() int                { return 2 }
 func (GravekeepingBlue) Types() card.TypeSet         { return gravekeepingTypes }
 func (GravekeepingBlue) GoAgain() bool               { return false }
-func (c GravekeepingBlue) Play(s *card.TurnState) int { return c.Attack() }
+func (c GravekeepingBlue) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }

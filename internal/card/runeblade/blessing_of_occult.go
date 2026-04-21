@@ -24,7 +24,7 @@ func (BlessingOfOccultRed) Attack() int               { return 0 }
 func (BlessingOfOccultRed) Defense() int              { return 2 }
 func (BlessingOfOccultRed) Types() card.TypeSet    { return blessingOfOccultTypes }
 func (BlessingOfOccultRed) GoAgain() bool             { return false }
-func (BlessingOfOccultRed) Play(s *card.TurnState) int  { return s.DelayRunechants(3) }
+func (BlessingOfOccultRed) Play(s *card.TurnState, _ *card.CardState) int  { return s.DelayRunechants(3) }
 
 type BlessingOfOccultYellow struct{}
 
@@ -36,7 +36,7 @@ func (BlessingOfOccultYellow) Attack() int              { return 0 }
 func (BlessingOfOccultYellow) Defense() int             { return 2 }
 func (BlessingOfOccultYellow) Types() card.TypeSet   { return blessingOfOccultTypes }
 func (BlessingOfOccultYellow) GoAgain() bool            { return false }
-func (BlessingOfOccultYellow) Play(s *card.TurnState) int { return s.DelayRunechants(2) }
+func (BlessingOfOccultYellow) Play(s *card.TurnState, _ *card.CardState) int { return s.DelayRunechants(2) }
 
 type BlessingOfOccultBlue struct{}
 
@@ -48,4 +48,4 @@ func (BlessingOfOccultBlue) Attack() int              { return 0 }
 func (BlessingOfOccultBlue) Defense() int             { return 2 }
 func (BlessingOfOccultBlue) Types() card.TypeSet   { return blessingOfOccultTypes }
 func (BlessingOfOccultBlue) GoAgain() bool            { return false }
-func (BlessingOfOccultBlue) Play(s *card.TurnState) int { return s.DelayRunechants(1) }
+func (BlessingOfOccultBlue) Play(s *card.TurnState, _ *card.CardState) int { return s.DelayRunechants(1) }

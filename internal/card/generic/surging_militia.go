@@ -23,7 +23,7 @@ func (SurgingMilitiaRed) Attack() int                 { return 5 }
 func (SurgingMilitiaRed) Defense() int                { return 2 }
 func (SurgingMilitiaRed) Types() card.TypeSet         { return surgingMilitiaTypes }
 func (SurgingMilitiaRed) GoAgain() bool               { return false }
-func (c SurgingMilitiaRed) Play(s *card.TurnState) int { return c.Attack() }
+func (c SurgingMilitiaRed) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }
 
 type SurgingMilitiaYellow struct{}
 
@@ -35,7 +35,7 @@ func (SurgingMilitiaYellow) Attack() int                 { return 4 }
 func (SurgingMilitiaYellow) Defense() int                { return 2 }
 func (SurgingMilitiaYellow) Types() card.TypeSet         { return surgingMilitiaTypes }
 func (SurgingMilitiaYellow) GoAgain() bool               { return false }
-func (c SurgingMilitiaYellow) Play(s *card.TurnState) int { return c.Attack() }
+func (c SurgingMilitiaYellow) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }
 
 type SurgingMilitiaBlue struct{}
 
@@ -47,4 +47,4 @@ func (SurgingMilitiaBlue) Attack() int                 { return 3 }
 func (SurgingMilitiaBlue) Defense() int                { return 2 }
 func (SurgingMilitiaBlue) Types() card.TypeSet         { return surgingMilitiaTypes }
 func (SurgingMilitiaBlue) GoAgain() bool               { return false }
-func (c SurgingMilitiaBlue) Play(s *card.TurnState) int { return c.Attack() }
+func (c SurgingMilitiaBlue) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }

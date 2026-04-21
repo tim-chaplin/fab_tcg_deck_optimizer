@@ -23,7 +23,7 @@ func (PursueToThePitsOfDespairRed) Attack() int                 { return 5 }
 func (PursueToThePitsOfDespairRed) Defense() int                { return 3 }
 func (PursueToThePitsOfDespairRed) Types() card.TypeSet         { return pursueToThePitsOfDespairTypes }
 func (PursueToThePitsOfDespairRed) GoAgain() bool               { return false }
-func (c PursueToThePitsOfDespairRed) Play(s *card.TurnState) int { return pursueToThePitsOfDespairDamage(c.Attack()) }
+func (c PursueToThePitsOfDespairRed) Play(s *card.TurnState, _ *card.CardState) int { return pursueToThePitsOfDespairDamage(c.Attack()) }
 
 // pursueToThePitsOfDespairDamage is a breadcrumb for the on-hit "mark the hero" rider — marks
 // aren't tracked (see TODO.md).

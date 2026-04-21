@@ -242,8 +242,8 @@ func TestBest_ViseraiMauvrionChainsShrillIntoRuneragerIntoWeapon(t *testing.T) {
 	}
 }
 
-// grantAll is a test-only attacker that sets GrantedGoAgain=true on every PlayedCard remaining in
-// CardsRemaining. Used with grantSpy to detect cross-permutation PlayedCard wrapper leakage.
+// grantAll is a test-only attacker that sets GrantedGoAgain=true on every CardState remaining in
+// CardsRemaining. Used with grantSpy to detect cross-permutation CardState wrapper leakage.
 type grantAll struct{}
 
 func (grantAll) ID() card.ID            { return card.Invalid }
@@ -254,7 +254,7 @@ func (grantAll) Attack() int            { return 0 }
 func (grantAll) Defense() int           { return 0 }
 func (grantAll) Types() card.TypeSet    { return card.NewTypeSet(card.TypeRuneblade, card.TypeAction, card.TypeAttack) }
 func (grantAll) GoAgain() bool          { return true }
-func (grantAll) Play(s *card.TurnState) int {
+func (grantAll) Play(s *card.TurnState, _ *card.CardState) int {
 	for _, pc := range s.CardsRemaining {
 		pc.GrantedGoAgain = true
 	}
@@ -262,7 +262,7 @@ func (grantAll) Play(s *card.TurnState) int {
 }
 
 // grantSpy is a test-only attacker that, when it plays FIRST in a permutation, records whether
-// any PlayedCard in CardsRemaining already has GrantedGoAgain=true. With per-permutation fresh
+// any CardState in CardsRemaining already has GrantedGoAgain=true. With per-permutation fresh
 // wrappers, that should never happen (no prior card in this permutation has run yet). If wrappers
 // leak across permutations, a grant applied by a previous permutation's grantAll will still be
 // visible here — tripping the spy.
@@ -276,7 +276,7 @@ func (grantSpy) Attack() int              { return 0 }
 func (grantSpy) Defense() int             { return 0 }
 func (grantSpy) Types() card.TypeSet      { return card.NewTypeSet(card.TypeRuneblade, card.TypeAction, card.TypeAttack) }
 func (grantSpy) GoAgain() bool            { return true }
-func (g grantSpy) Play(s *card.TurnState) int {
+func (g grantSpy) Play(s *card.TurnState, _ *card.CardState) int {
 	if len(s.CardsPlayed) != 0 {
 		return 0
 	}
@@ -288,8 +288,8 @@ func (g grantSpy) Play(s *card.TurnState) int {
 	return 0
 }
 
-func TestBestSequence_PlayedCardGrantsDontLeakAcrossPermutations(t *testing.T) {
-	// The permutation loop in bestSequence must allocate fresh *PlayedCard wrappers per
+func TestBestSequence_CardStateGrantsDontLeakAcrossPermutations(t *testing.T) {
+	// The permutation loop in bestSequence must allocate fresh *CardState wrappers per
 	// permutation so a grant applied by one permutation's Play() can't bleed into a later
 	// permutation's legality/effect checks.
 	//
@@ -304,7 +304,7 @@ func TestBestSequence_PlayedCardGrantsDontLeakAcrossPermutations(t *testing.T) {
 	ctx := newSequenceContextForTest(stubHero{}, nil, nil, 1_000_000, 0, len(attackers))
 	_, _, _ = ctx.bestSequence(attackers, nil, nil, nil)
 	if sawLeak {
-		t.Fatalf("PlayedCard wrapper state leaked across permutations: grantSpy saw a pre-existing GrantedGoAgain when playing first")
+		t.Fatalf("CardState wrapper state leaked across permutations: grantSpy saw a pre-existing GrantedGoAgain when playing first")
 	}
 }
 

@@ -22,4 +22,4 @@ func (StartingStakeYellow) Attack() int                 { return 0 }
 func (StartingStakeYellow) Defense() int                { return 3 }
 func (StartingStakeYellow) Types() card.TypeSet         { return startingStakeTypes }
 func (StartingStakeYellow) GoAgain() bool               { return false }
-func (StartingStakeYellow) Play(s *card.TurnState) int { return 0 }
+func (StartingStakeYellow) Play(s *card.TurnState, _ *card.CardState) int { return 0 }

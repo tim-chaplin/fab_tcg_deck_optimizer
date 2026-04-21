@@ -24,7 +24,7 @@ func (LeadTheChargeRed) Attack() int                 { return 0 }
 func (LeadTheChargeRed) Defense() int                { return 2 }
 func (LeadTheChargeRed) Types() card.TypeSet         { return leadTheChargeTypes }
 func (LeadTheChargeRed) GoAgain() bool               { return true }
-func (LeadTheChargeRed) Play(s *card.TurnState) int { return 0 }
+func (LeadTheChargeRed) Play(s *card.TurnState, _ *card.CardState) int { return 0 }
 
 type LeadTheChargeYellow struct{}
 
@@ -36,7 +36,7 @@ func (LeadTheChargeYellow) Attack() int                 { return 0 }
 func (LeadTheChargeYellow) Defense() int                { return 2 }
 func (LeadTheChargeYellow) Types() card.TypeSet         { return leadTheChargeTypes }
 func (LeadTheChargeYellow) GoAgain() bool               { return true }
-func (LeadTheChargeYellow) Play(s *card.TurnState) int { return 0 }
+func (LeadTheChargeYellow) Play(s *card.TurnState, _ *card.CardState) int { return 0 }
 
 type LeadTheChargeBlue struct{}
 
@@ -48,4 +48,4 @@ func (LeadTheChargeBlue) Attack() int                 { return 0 }
 func (LeadTheChargeBlue) Defense() int                { return 2 }
 func (LeadTheChargeBlue) Types() card.TypeSet         { return leadTheChargeTypes }
 func (LeadTheChargeBlue) GoAgain() bool               { return true }
-func (LeadTheChargeBlue) Play(s *card.TurnState) int { return 0 }
+func (LeadTheChargeBlue) Play(s *card.TurnState, _ *card.CardState) int { return 0 }

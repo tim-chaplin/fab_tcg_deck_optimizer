@@ -23,7 +23,7 @@ func (WalkThePlankRed) Attack() int                 { return 7 }
 func (WalkThePlankRed) Defense() int                { return 2 }
 func (WalkThePlankRed) Types() card.TypeSet         { return walkThePlankTypes }
 func (WalkThePlankRed) GoAgain() bool               { return false }
-func (c WalkThePlankRed) Play(s *card.TurnState) int { return walkThePlankDamage(c.Attack()) }
+func (c WalkThePlankRed) Play(s *card.TurnState, _ *card.CardState) int { return walkThePlankDamage(c.Attack()) }
 
 type WalkThePlankYellow struct{}
 
@@ -35,7 +35,7 @@ func (WalkThePlankYellow) Attack() int                 { return 6 }
 func (WalkThePlankYellow) Defense() int                { return 2 }
 func (WalkThePlankYellow) Types() card.TypeSet         { return walkThePlankTypes }
 func (WalkThePlankYellow) GoAgain() bool               { return false }
-func (c WalkThePlankYellow) Play(s *card.TurnState) int { return walkThePlankDamage(c.Attack()) }
+func (c WalkThePlankYellow) Play(s *card.TurnState, _ *card.CardState) int { return walkThePlankDamage(c.Attack()) }
 
 type WalkThePlankBlue struct{}
 
@@ -47,7 +47,7 @@ func (WalkThePlankBlue) Attack() int                 { return 5 }
 func (WalkThePlankBlue) Defense() int                { return 2 }
 func (WalkThePlankBlue) Types() card.TypeSet         { return walkThePlankTypes }
 func (WalkThePlankBlue) GoAgain() bool               { return false }
-func (c WalkThePlankBlue) Play(s *card.TurnState) int { return walkThePlankDamage(c.Attack()) }
+func (c WalkThePlankBlue) Play(s *card.TurnState, _ *card.CardState) int { return walkThePlankDamage(c.Attack()) }
 
 // walkThePlankDamage is a breadcrumb for the on-hit "freeze target" rider — Pirate-specific,
 // not modelled yet (see TODO.md).

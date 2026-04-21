@@ -19,7 +19,7 @@ func TestWaterTheSeeds_NoAttackReturnsBase(t *testing.T) {
 		{WaterTheSeedsBlue{}, 1},
 	}
 	for _, tc := range cases {
-		if got := tc.c.Play(s); got != tc.want {
+		if got := tc.c.Play(s, &card.CardState{}); got != tc.want {
 			t.Errorf("%s: Play() = %d, want %d (no lookahead target)", tc.c.Name(), got, tc.want)
 		}
 	}
@@ -28,8 +28,8 @@ func TestWaterTheSeeds_NoAttackReturnsBase(t *testing.T) {
 // TestWaterTheSeeds_HighPowerFizzles: a power-2 attack is past the base-{p}-<=1 gate, so the
 // rider keeps searching. With no matching attack below it, the bonus fizzles.
 func TestWaterTheSeeds_HighPowerFizzles(t *testing.T) {
-	s := &card.TurnState{CardsRemaining: []*card.PlayedCard{{Card: stubGenericAttack(0, 2)}}}
-	if got := (WaterTheSeedsRed{}).Play(s); got != 3 {
+	s := &card.TurnState{CardsRemaining: []*card.CardState{{Card: stubGenericAttack(0, 2)}}}
+	if got := (WaterTheSeedsRed{}).Play(s, &card.CardState{}); got != 3 {
 		t.Errorf("Play() = %d, want 3 (power 2 > 1 → no bonus)", got)
 	}
 }
@@ -37,7 +37,7 @@ func TestWaterTheSeeds_HighPowerFizzles(t *testing.T) {
 // TestWaterTheSeeds_LowPowerTriggersBonus: a power-1 attack matches the gate and fires the
 // +1 rider, so each variant returns base + 1.
 func TestWaterTheSeeds_LowPowerTriggersBonus(t *testing.T) {
-	s := &card.TurnState{CardsRemaining: []*card.PlayedCard{{Card: stubGenericAttack(0, 1)}}}
+	s := &card.TurnState{CardsRemaining: []*card.CardState{{Card: stubGenericAttack(0, 1)}}}
 	cases := []struct {
 		c    card.Card
 		want int
@@ -47,7 +47,7 @@ func TestWaterTheSeeds_LowPowerTriggersBonus(t *testing.T) {
 		{WaterTheSeedsBlue{}, 2},
 	}
 	for _, tc := range cases {
-		if got := tc.c.Play(s); got != tc.want {
+		if got := tc.c.Play(s, &card.CardState{}); got != tc.want {
 			t.Errorf("%s: Play() = %d, want %d (power-1 target triggers +1)", tc.c.Name(), got, tc.want)
 		}
 	}
@@ -57,11 +57,11 @@ func TestWaterTheSeeds_LowPowerTriggersBonus(t *testing.T) {
 // until a matching attack resolves, so a power-3 attack scheduled before a power-0 attack shouldn't
 // consume the rider.
 func TestWaterTheSeeds_SkipsPastNonMatchingAttacks(t *testing.T) {
-	s := &card.TurnState{CardsRemaining: []*card.PlayedCard{
+	s := &card.TurnState{CardsRemaining: []*card.CardState{
 		{Card: stubGenericAttack(0, 3)},
 		{Card: stubGenericAttack(0, 0)},
 	}}
-	if got := (WaterTheSeedsRed{}).Play(s); got != 4 {
+	if got := (WaterTheSeedsRed{}).Play(s, &card.CardState{}); got != 4 {
 		t.Errorf("Play() = %d, want 4 (rider waits for the power-0 attack)", got)
 	}
 }
@@ -69,8 +69,8 @@ func TestWaterTheSeeds_SkipsPastNonMatchingAttacks(t *testing.T) {
 // TestWaterTheSeeds_NonAttackInRemainingIgnored: only attack-action cards in CardsRemaining count
 // as potential triggers.
 func TestWaterTheSeeds_NonAttackInRemainingIgnored(t *testing.T) {
-	s := &card.TurnState{CardsRemaining: []*card.PlayedCard{{Card: stubGenericAction()}}}
-	if got := (WaterTheSeedsRed{}).Play(s); got != 3 {
+	s := &card.TurnState{CardsRemaining: []*card.CardState{{Card: stubGenericAction()}}}
+	if got := (WaterTheSeedsRed{}).Play(s, &card.CardState{}); got != 3 {
 		t.Errorf("Play() = %d, want 3 (non-attack ignored)", got)
 	}
 }

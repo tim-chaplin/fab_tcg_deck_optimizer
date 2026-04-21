@@ -24,7 +24,7 @@ func (StrategicPlanningRed) Attack() int                 { return 0 }
 func (StrategicPlanningRed) Defense() int                { return 2 }
 func (StrategicPlanningRed) Types() card.TypeSet         { return strategicPlanningTypes }
 func (StrategicPlanningRed) GoAgain() bool               { return true }
-func (StrategicPlanningRed) Play(s *card.TurnState) int { return 0 }
+func (StrategicPlanningRed) Play(s *card.TurnState, _ *card.CardState) int { return 0 }
 
 type StrategicPlanningYellow struct{}
 
@@ -36,7 +36,7 @@ func (StrategicPlanningYellow) Attack() int                 { return 0 }
 func (StrategicPlanningYellow) Defense() int                { return 2 }
 func (StrategicPlanningYellow) Types() card.TypeSet         { return strategicPlanningTypes }
 func (StrategicPlanningYellow) GoAgain() bool               { return true }
-func (StrategicPlanningYellow) Play(s *card.TurnState) int { return 0 }
+func (StrategicPlanningYellow) Play(s *card.TurnState, _ *card.CardState) int { return 0 }
 
 type StrategicPlanningBlue struct{}
 
@@ -48,4 +48,4 @@ func (StrategicPlanningBlue) Attack() int                 { return 0 }
 func (StrategicPlanningBlue) Defense() int                { return 2 }
 func (StrategicPlanningBlue) Types() card.TypeSet         { return strategicPlanningTypes }
 func (StrategicPlanningBlue) GoAgain() bool               { return true }
-func (StrategicPlanningBlue) Play(s *card.TurnState) int { return 0 }
+func (StrategicPlanningBlue) Play(s *card.TurnState, _ *card.CardState) int { return 0 }

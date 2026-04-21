@@ -20,7 +20,7 @@ func (ShrillOfSkullformRed) Attack() int               { return 4 }
 func (ShrillOfSkullformRed) Defense() int              { return 3 }
 func (ShrillOfSkullformRed) Types() card.TypeSet       { return shrillTypes }
 func (ShrillOfSkullformRed) GoAgain() bool             { return false }
-func (c ShrillOfSkullformRed) Play(s *card.TurnState) int {
+func (c ShrillOfSkullformRed) Play(s *card.TurnState, _ *card.CardState) int {
 	return shrillPlay(c.Attack(), s)
 }
 
@@ -34,7 +34,7 @@ func (ShrillOfSkullformYellow) Attack() int            { return 3 }
 func (ShrillOfSkullformYellow) Defense() int           { return 3 }
 func (ShrillOfSkullformYellow) Types() card.TypeSet    { return shrillTypes }
 func (ShrillOfSkullformYellow) GoAgain() bool          { return false }
-func (c ShrillOfSkullformYellow) Play(s *card.TurnState) int {
+func (c ShrillOfSkullformYellow) Play(s *card.TurnState, _ *card.CardState) int {
 	return shrillPlay(c.Attack(), s)
 }
 
@@ -48,7 +48,7 @@ func (ShrillOfSkullformBlue) Attack() int              { return 2 }
 func (ShrillOfSkullformBlue) Defense() int             { return 3 }
 func (ShrillOfSkullformBlue) Types() card.TypeSet      { return shrillTypes }
 func (ShrillOfSkullformBlue) GoAgain() bool            { return false }
-func (c ShrillOfSkullformBlue) Play(s *card.TurnState) int {
+func (c ShrillOfSkullformBlue) Play(s *card.TurnState, _ *card.CardState) int {
 	return shrillPlay(c.Attack(), s)
 }
 

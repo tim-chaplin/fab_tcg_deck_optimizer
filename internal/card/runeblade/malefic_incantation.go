@@ -28,7 +28,7 @@ func (MaleficIncantationRed) Attack() int               { return 0 }
 func (MaleficIncantationRed) Defense() int              { return 2 }
 func (MaleficIncantationRed) Types() card.TypeSet        { return maleficTypes }
 func (MaleficIncantationRed) GoAgain() bool             { return true }
-func (MaleficIncantationRed) Play(s *card.TurnState) int { return maleficPlay(s, 3) }
+func (MaleficIncantationRed) Play(s *card.TurnState, _ *card.CardState) int { return maleficPlay(s, 3) }
 
 type MaleficIncantationYellow struct{}
 
@@ -40,7 +40,7 @@ func (MaleficIncantationYellow) Attack() int               { return 0 }
 func (MaleficIncantationYellow) Defense() int              { return 2 }
 func (MaleficIncantationYellow) Types() card.TypeSet        { return maleficTypes }
 func (MaleficIncantationYellow) GoAgain() bool             { return true }
-func (MaleficIncantationYellow) Play(s *card.TurnState) int { return maleficPlay(s, 2) }
+func (MaleficIncantationYellow) Play(s *card.TurnState, _ *card.CardState) int { return maleficPlay(s, 2) }
 
 type MaleficIncantationBlue struct{}
 
@@ -52,7 +52,7 @@ func (MaleficIncantationBlue) Attack() int               { return 0 }
 func (MaleficIncantationBlue) Defense() int              { return 2 }
 func (MaleficIncantationBlue) Types() card.TypeSet        { return maleficTypes }
 func (MaleficIncantationBlue) GoAgain() bool             { return true }
-func (MaleficIncantationBlue) Play(s *card.TurnState) int { return maleficPlay(s, 1) }
+func (MaleficIncantationBlue) Play(s *card.TurnState, _ *card.CardState) int { return maleficPlay(s, 1) }
 
 // maleficPlay routes 1 Runechant through DelayRunechants (first rune, to next turn's carryover)
 // iff exactly one future attack (card or weapon) follows this turn; remaining n-1 are flat

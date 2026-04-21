@@ -23,7 +23,7 @@ func (FlexRed) Attack() int                 { return 4 }
 func (FlexRed) Defense() int                { return 2 }
 func (FlexRed) Types() card.TypeSet         { return flexTypes }
 func (FlexRed) GoAgain() bool               { return false }
-func (c FlexRed) Play(s *card.TurnState) int { return c.Attack() }
+func (c FlexRed) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }
 
 type FlexYellow struct{}
 
@@ -35,7 +35,7 @@ func (FlexYellow) Attack() int                 { return 3 }
 func (FlexYellow) Defense() int                { return 2 }
 func (FlexYellow) Types() card.TypeSet         { return flexTypes }
 func (FlexYellow) GoAgain() bool               { return false }
-func (c FlexYellow) Play(s *card.TurnState) int { return c.Attack() }
+func (c FlexYellow) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }
 
 type FlexBlue struct{}
 
@@ -47,4 +47,4 @@ func (FlexBlue) Attack() int                 { return 2 }
 func (FlexBlue) Defense() int                { return 2 }
 func (FlexBlue) Types() card.TypeSet         { return flexTypes }
 func (FlexBlue) GoAgain() bool               { return false }
-func (c FlexBlue) Play(s *card.TurnState) int { return c.Attack() }
+func (c FlexBlue) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }

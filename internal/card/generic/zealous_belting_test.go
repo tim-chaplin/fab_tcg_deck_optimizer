@@ -11,15 +11,12 @@ import (
 // Red's base power is 5 — a pitched power-5 card fails the strict ">" check.
 func TestZealousBelting_NoQualifyingPitchNoGoAgain(t *testing.T) {
 	c := ZealousBeltingRed{}
-	pc := &card.PlayedCard{Card: c}
-	s := card.TurnState{
-		Self:    pc,
-		Pitched: []card.Card{stubGenericAttack(0, 5)},
-	}
-	if got := c.Play(&s); got != c.Attack() {
+	s := card.TurnState{Pitched: []card.Card{stubGenericAttack(0, 5)}}
+	self := &card.CardState{Card: c}
+	if got := c.Play(&s, self); got != c.Attack() {
 		t.Errorf("Play() = %d, want %d (no qualifying pitch)", got, c.Attack())
 	}
-	if pc.GrantedGoAgain {
+	if self.GrantedGoAgain {
 		t.Errorf("GrantedGoAgain = true, want false (no pitched card with power > %d)", c.Attack())
 	}
 }
@@ -37,13 +34,10 @@ func TestZealousBelting_HigherPowerPitchGrantsGoAgain(t *testing.T) {
 		{ZealousBeltingBlue{}, 4},   // base 3, pitched power 4
 	}
 	for _, tc := range cases {
-		pc := &card.PlayedCard{Card: tc.c}
-		s := card.TurnState{
-			Self:    pc,
-			Pitched: []card.Card{stubGenericAttack(0, tc.pitchPow)},
-		}
-		_ = tc.c.Play(&s)
-		if !pc.GrantedGoAgain {
+		s := card.TurnState{Pitched: []card.Card{stubGenericAttack(0, tc.pitchPow)}}
+		self := &card.CardState{Card: tc.c}
+		_ = tc.c.Play(&s, self)
+		if !self.GrantedGoAgain {
 			t.Errorf("%s: GrantedGoAgain = false, want true (pitched power %d > base)", tc.c.Name(), tc.pitchPow)
 		}
 	}

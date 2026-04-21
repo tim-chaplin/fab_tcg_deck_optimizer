@@ -10,7 +10,7 @@ import (
 func TestCaptainsCall_NoAttackReturnsZero(t *testing.T) {
 	s := card.TurnState{}
 	for _, c := range []card.Card{CaptainsCallRed{}, CaptainsCallYellow{}, CaptainsCallBlue{}} {
-		if got := c.Play(&s); got != 0 {
+		if got := c.Play(&s, &card.CardState{}); got != 0 {
 			t.Errorf("%s: Play() = %d, want 0", c.Name(), got)
 		}
 	}
@@ -18,8 +18,8 @@ func TestCaptainsCall_NoAttackReturnsZero(t *testing.T) {
 
 // TestCaptainsCall_HighCostFilteredOut: a cost-3 attack is past Red's cost<=2 gate.
 func TestCaptainsCall_HighCostFilteredOut(t *testing.T) {
-	s := card.TurnState{CardsRemaining: []*card.PlayedCard{{Card: stubGenericAttack(3, 0)}}}
-	if got := (CaptainsCallRed{}).Play(&s); got != 0 {
+	s := card.TurnState{CardsRemaining: []*card.CardState{{Card: stubGenericAttack(3, 0)}}}
+	if got := (CaptainsCallRed{}).Play(&s, &card.CardState{}); got != 0 {
 		t.Errorf("Play() = %d, want 0 (cost 3 > 2)", got)
 	}
 }
@@ -40,14 +40,14 @@ func TestCaptainsCall_CostThresholdPerVariant(t *testing.T) {
 		{"cost 0", 0, 2, 2, 2},
 	}
 	for _, tc := range cases {
-		s := card.TurnState{CardsRemaining: []*card.PlayedCard{{Card: stubGenericAttack(tc.cost, 0)}}}
-		if got := (CaptainsCallRed{}).Play(&s); got != tc.red {
+		s := card.TurnState{CardsRemaining: []*card.CardState{{Card: stubGenericAttack(tc.cost, 0)}}}
+		if got := (CaptainsCallRed{}).Play(&s, &card.CardState{}); got != tc.red {
 			t.Errorf("%s Red: Play() = %d, want %d", tc.name, got, tc.red)
 		}
-		if got := (CaptainsCallYellow{}).Play(&s); got != tc.yellow {
+		if got := (CaptainsCallYellow{}).Play(&s, &card.CardState{}); got != tc.yellow {
 			t.Errorf("%s Yellow: Play() = %d, want %d", tc.name, got, tc.yellow)
 		}
-		if got := (CaptainsCallBlue{}).Play(&s); got != tc.blue {
+		if got := (CaptainsCallBlue{}).Play(&s, &card.CardState{}); got != tc.blue {
 			t.Errorf("%s Blue: Play() = %d, want %d", tc.name, got, tc.blue)
 		}
 	}

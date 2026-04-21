@@ -25,7 +25,7 @@ func (SigilOfFyendalBlue) Attack() int         { return 0 }
 func (SigilOfFyendalBlue) Defense() int        { return 2 }
 func (SigilOfFyendalBlue) Types() card.TypeSet { return sigilOfFyendalTypes }
 func (SigilOfFyendalBlue) GoAgain() bool       { return true }
-func (SigilOfFyendalBlue) Play(s *card.TurnState) int { return setAuraCreated(s) }
+func (SigilOfFyendalBlue) Play(s *card.TurnState, _ *card.CardState) int { return setAuraCreated(s) }
 
 // PlayNextTurn credits the 1{h} gain that fires when the aura leaves the arena at the start of
 // the next action phase.

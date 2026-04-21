@@ -24,7 +24,7 @@ func (BackAlleyBreaklineRed) Attack() int                 { return 5 }
 func (BackAlleyBreaklineRed) Defense() int                { return 2 }
 func (BackAlleyBreaklineRed) Types() card.TypeSet         { return backAlleyBreaklineTypes }
 func (BackAlleyBreaklineRed) GoAgain() bool               { return false }
-func (c BackAlleyBreaklineRed) Play(s *card.TurnState) int { return c.Attack() }
+func (c BackAlleyBreaklineRed) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }
 
 type BackAlleyBreaklineYellow struct{}
 
@@ -36,7 +36,7 @@ func (BackAlleyBreaklineYellow) Attack() int                 { return 4 }
 func (BackAlleyBreaklineYellow) Defense() int                { return 2 }
 func (BackAlleyBreaklineYellow) Types() card.TypeSet         { return backAlleyBreaklineTypes }
 func (BackAlleyBreaklineYellow) GoAgain() bool               { return false }
-func (c BackAlleyBreaklineYellow) Play(s *card.TurnState) int { return c.Attack() }
+func (c BackAlleyBreaklineYellow) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }
 
 type BackAlleyBreaklineBlue struct{}
 
@@ -48,4 +48,4 @@ func (BackAlleyBreaklineBlue) Attack() int                 { return 3 }
 func (BackAlleyBreaklineBlue) Defense() int                { return 2 }
 func (BackAlleyBreaklineBlue) Types() card.TypeSet         { return backAlleyBreaklineTypes }
 func (BackAlleyBreaklineBlue) GoAgain() bool               { return false }
-func (c BackAlleyBreaklineBlue) Play(s *card.TurnState) int { return c.Attack() }
+func (c BackAlleyBreaklineBlue) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }

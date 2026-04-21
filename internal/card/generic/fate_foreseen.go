@@ -20,7 +20,7 @@ func (FateForeseenRed) Defense() int             { return 4 }
 func (FateForeseenRed) Types() card.TypeSet      { return defenseReactionTypes }
 func (FateForeseenRed) GoAgain() bool            { return false }
 func (FateForeseenRed) NotSilverAgeLegal()       {}
-func (FateForeseenRed) Play(*card.TurnState) int { return 0 }
+func (FateForeseenRed) Play(*card.TurnState, *card.CardState) int { return 0 }
 
 type FateForeseenYellow struct{}
 
@@ -33,7 +33,7 @@ func (FateForeseenYellow) Defense() int             { return 3 }
 func (FateForeseenYellow) Types() card.TypeSet      { return defenseReactionTypes }
 func (FateForeseenYellow) GoAgain() bool            { return false }
 func (FateForeseenYellow) NotSilverAgeLegal()       {}
-func (FateForeseenYellow) Play(*card.TurnState) int { return 0 }
+func (FateForeseenYellow) Play(*card.TurnState, *card.CardState) int { return 0 }
 
 type FateForeseenBlue struct{}
 
@@ -46,4 +46,4 @@ func (FateForeseenBlue) Defense() int             { return 2 }
 func (FateForeseenBlue) Types() card.TypeSet      { return defenseReactionTypes }
 func (FateForeseenBlue) GoAgain() bool            { return false }
 func (FateForeseenBlue) NotSilverAgeLegal()       {}
-func (FateForeseenBlue) Play(*card.TurnState) int { return 0 }
+func (FateForeseenBlue) Play(*card.TurnState, *card.CardState) int { return 0 }

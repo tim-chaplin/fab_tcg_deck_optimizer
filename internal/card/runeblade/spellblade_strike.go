@@ -22,7 +22,7 @@ func (SpellbladeStrikeRed) Attack() int                { return 4 }
 func (SpellbladeStrikeRed) Defense() int               { return 3 }
 func (SpellbladeStrikeRed) Types() card.TypeSet        { return spellbladeStrikeTypes }
 func (SpellbladeStrikeRed) GoAgain() bool              { return false }
-func (c SpellbladeStrikeRed) Play(s *card.TurnState) int { return c.Attack() + s.CreateRunechant() }
+func (c SpellbladeStrikeRed) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() + s.CreateRunechant() }
 
 type SpellbladeStrikeYellow struct{}
 
@@ -34,7 +34,7 @@ func (SpellbladeStrikeYellow) Attack() int                { return 3 }
 func (SpellbladeStrikeYellow) Defense() int               { return 3 }
 func (SpellbladeStrikeYellow) Types() card.TypeSet        { return spellbladeStrikeTypes }
 func (SpellbladeStrikeYellow) GoAgain() bool              { return false }
-func (c SpellbladeStrikeYellow) Play(s *card.TurnState) int { return c.Attack() + s.CreateRunechant() }
+func (c SpellbladeStrikeYellow) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() + s.CreateRunechant() }
 
 type SpellbladeStrikeBlue struct{}
 
@@ -46,4 +46,4 @@ func (SpellbladeStrikeBlue) Attack() int                { return 2 }
 func (SpellbladeStrikeBlue) Defense() int               { return 3 }
 func (SpellbladeStrikeBlue) Types() card.TypeSet        { return spellbladeStrikeTypes }
 func (SpellbladeStrikeBlue) GoAgain() bool              { return false }
-func (c SpellbladeStrikeBlue) Play(s *card.TurnState) int { return c.Attack() + s.CreateRunechant() }
+func (c SpellbladeStrikeBlue) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() + s.CreateRunechant() }

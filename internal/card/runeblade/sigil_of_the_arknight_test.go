@@ -10,7 +10,7 @@ import (
 // only flips AuraCreated and returns 0. The deck peek happens in PlayNextTurn now.
 func TestSigilOfTheArknight_PlayOnlySetsAuraCreated(t *testing.T) {
 	s := card.TurnState{Deck: []card.Card{stubRunebladeAttack{}}}
-	if got := (SigilOfTheArknightBlue{}).Play(&s); got != 0 {
+	if got := (SigilOfTheArknightBlue{}).Play(&s, &card.CardState{}); got != 0 {
 		t.Errorf("Play() = %d, want 0 (reveal deferred to PlayNextTurn)", got)
 	}
 	if !s.AuraCreated {

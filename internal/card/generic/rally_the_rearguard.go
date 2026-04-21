@@ -24,7 +24,7 @@ func (RallyTheRearguardRed) Attack() int                 { return 6 }
 func (RallyTheRearguardRed) Defense() int                { return 2 }
 func (RallyTheRearguardRed) Types() card.TypeSet         { return rallyTheRearguardTypes }
 func (RallyTheRearguardRed) GoAgain() bool               { return false }
-func (c RallyTheRearguardRed) Play(s *card.TurnState) int { return c.Attack() }
+func (c RallyTheRearguardRed) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }
 
 type RallyTheRearguardYellow struct{}
 
@@ -36,7 +36,7 @@ func (RallyTheRearguardYellow) Attack() int                 { return 5 }
 func (RallyTheRearguardYellow) Defense() int                { return 2 }
 func (RallyTheRearguardYellow) Types() card.TypeSet         { return rallyTheRearguardTypes }
 func (RallyTheRearguardYellow) GoAgain() bool               { return false }
-func (c RallyTheRearguardYellow) Play(s *card.TurnState) int { return c.Attack() }
+func (c RallyTheRearguardYellow) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }
 
 type RallyTheRearguardBlue struct{}
 
@@ -48,4 +48,4 @@ func (RallyTheRearguardBlue) Attack() int                 { return 4 }
 func (RallyTheRearguardBlue) Defense() int                { return 2 }
 func (RallyTheRearguardBlue) Types() card.TypeSet         { return rallyTheRearguardTypes }
 func (RallyTheRearguardBlue) GoAgain() bool               { return false }
-func (c RallyTheRearguardBlue) Play(s *card.TurnState) int { return c.Attack() }
+func (c RallyTheRearguardBlue) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }

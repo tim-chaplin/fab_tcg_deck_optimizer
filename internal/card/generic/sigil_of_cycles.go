@@ -24,4 +24,4 @@ func (SigilOfCyclesBlue) Attack() int                 { return 0 }
 func (SigilOfCyclesBlue) Defense() int                { return 2 }
 func (SigilOfCyclesBlue) Types() card.TypeSet         { return sigilOfCyclesTypes }
 func (SigilOfCyclesBlue) GoAgain() bool               { return true }
-func (SigilOfCyclesBlue) Play(s *card.TurnState) int { return setAuraCreated(s) }
+func (SigilOfCyclesBlue) Play(s *card.TurnState, _ *card.CardState) int { return setAuraCreated(s) }

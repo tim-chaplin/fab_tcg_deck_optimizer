@@ -8,7 +8,7 @@ import (
 
 func TestSkyFireLanterns_EmptyDeck(t *testing.T) {
 	s := &card.TurnState{}
-	if got := (SkyFireLanternsRed{}).Play(s); got != 0 {
+	if got := (SkyFireLanternsRed{}).Play(s, &card.CardState{}); got != 0 {
 		t.Errorf("Play() = %d, want 0 (empty deck)", got)
 	}
 }
@@ -16,7 +16,7 @@ func TestSkyFireLanterns_EmptyDeck(t *testing.T) {
 func TestSkyFireLanterns_MatchingTopCard(t *testing.T) {
 	// Red variant (pitch 1) matches a top card with pitch 1.
 	s := &card.TurnState{Deck: []card.Card{HocusPocusRed{}}}
-	if got := (SkyFireLanternsRed{}).Play(s); got != 1 {
+	if got := (SkyFireLanternsRed{}).Play(s, &card.CardState{}); got != 1 {
 		t.Errorf("Red with Red top: Play() = %d, want 1 (pitch match → create Runechant)", got)
 	}
 	if s.Runechants != 1 {
@@ -27,7 +27,7 @@ func TestSkyFireLanterns_MatchingTopCard(t *testing.T) {
 func TestSkyFireLanterns_MismatchingTopCard(t *testing.T) {
 	// Red variant (pitch 1) doesn't match a Blue top card (pitch 3).
 	s := &card.TurnState{Deck: []card.Card{HocusPocusBlue{}}}
-	if got := (SkyFireLanternsRed{}).Play(s); got != 0 {
+	if got := (SkyFireLanternsRed{}).Play(s, &card.CardState{}); got != 0 {
 		t.Errorf("Red with Blue top: Play() = %d, want 0 (pitch mismatch)", got)
 	}
 }
@@ -43,7 +43,7 @@ func TestSkyFireLanterns_AllVariantsMatchOwnColor(t *testing.T) {
 	}
 	for _, tc := range cases {
 		s := &card.TurnState{Deck: []card.Card{tc.top}}
-		if got := tc.lantern.Play(s); got != 1 {
+		if got := tc.lantern.Play(s, &card.CardState{}); got != 1 {
 			t.Errorf("%s: Play() = %d, want 1 (same-color top card)", tc.lantern.Name(), got)
 		}
 	}

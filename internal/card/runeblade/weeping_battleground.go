@@ -31,7 +31,7 @@ func (WeepingBattlegroundRed) Attack() int                  { return 0 }
 func (WeepingBattlegroundRed) Defense() int                 { return 3 }
 func (WeepingBattlegroundRed) Types() card.TypeSet          { return weepingBattlegroundTypes }
 func (WeepingBattlegroundRed) GoAgain() bool                { return false }
-func (WeepingBattlegroundRed) Play(s *card.TurnState) int   { return weepingBattlegroundPlay(s) }
+func (WeepingBattlegroundRed) Play(s *card.TurnState, _ *card.CardState) int   { return weepingBattlegroundPlay(s) }
 
 type WeepingBattlegroundYellow struct{}
 
@@ -43,7 +43,7 @@ func (WeepingBattlegroundYellow) Attack() int                  { return 0 }
 func (WeepingBattlegroundYellow) Defense() int                 { return 3 }
 func (WeepingBattlegroundYellow) Types() card.TypeSet          { return weepingBattlegroundTypes }
 func (WeepingBattlegroundYellow) GoAgain() bool                { return false }
-func (WeepingBattlegroundYellow) Play(s *card.TurnState) int   { return weepingBattlegroundPlay(s) }
+func (WeepingBattlegroundYellow) Play(s *card.TurnState, _ *card.CardState) int   { return weepingBattlegroundPlay(s) }
 
 type WeepingBattlegroundBlue struct{}
 
@@ -55,4 +55,4 @@ func (WeepingBattlegroundBlue) Attack() int                  { return 0 }
 func (WeepingBattlegroundBlue) Defense() int                 { return 3 }
 func (WeepingBattlegroundBlue) Types() card.TypeSet          { return weepingBattlegroundTypes }
 func (WeepingBattlegroundBlue) GoAgain() bool                { return false }
-func (WeepingBattlegroundBlue) Play(s *card.TurnState) int   { return weepingBattlegroundPlay(s) }
+func (WeepingBattlegroundBlue) Play(s *card.TurnState, _ *card.CardState) int   { return weepingBattlegroundPlay(s) }

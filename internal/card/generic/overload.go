@@ -24,7 +24,7 @@ func (OverloadRed) Attack() int                 { return 3 }
 func (OverloadRed) Defense() int                { return 2 }
 func (OverloadRed) Types() card.TypeSet         { return overloadTypes }
 func (OverloadRed) GoAgain() bool               { return false }
-func (c OverloadRed) Play(s *card.TurnState) int { return c.Attack() }
+func (c OverloadRed) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }
 
 type OverloadYellow struct{}
 
@@ -36,7 +36,7 @@ func (OverloadYellow) Attack() int                 { return 2 }
 func (OverloadYellow) Defense() int                { return 2 }
 func (OverloadYellow) Types() card.TypeSet         { return overloadTypes }
 func (OverloadYellow) GoAgain() bool               { return false }
-func (c OverloadYellow) Play(s *card.TurnState) int { return c.Attack() }
+func (c OverloadYellow) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }
 
 type OverloadBlue struct{}
 
@@ -48,4 +48,4 @@ func (OverloadBlue) Attack() int                 { return 1 }
 func (OverloadBlue) Defense() int                { return 2 }
 func (OverloadBlue) Types() card.TypeSet         { return overloadTypes }
 func (OverloadBlue) GoAgain() bool               { return false }
-func (c OverloadBlue) Play(s *card.TurnState) int { return c.Attack() }
+func (c OverloadBlue) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }

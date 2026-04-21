@@ -21,7 +21,7 @@ func (s stubCard) Attack() int                  { return s.power }
 func (s stubCard) Defense() int                 { return 0 }
 func (s stubCard) Types() card.TypeSet          { return s.types }
 func (s stubCard) GoAgain() bool                { return false }
-func (s stubCard) Play(*card.TurnState) int     { return 0 }
+func (s stubCard) Play(*card.TurnState, *card.CardState) int     { return 0 }
 
 // stubGenericAttack returns a Generic Action - Attack stub with the given cost and base power.
 // Pitch defaults to 1; override via the pitch field if a test cares.

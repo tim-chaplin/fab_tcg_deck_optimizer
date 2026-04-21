@@ -23,7 +23,7 @@ func (FeistyLocalsRed) Attack() int                 { return 3 }
 func (FeistyLocalsRed) Defense() int                { return 2 }
 func (FeistyLocalsRed) Types() card.TypeSet         { return feistyLocalsTypes }
 func (FeistyLocalsRed) GoAgain() bool               { return false }
-func (c FeistyLocalsRed) Play(s *card.TurnState) int { return c.Attack() }
+func (c FeistyLocalsRed) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }
 
 type FeistyLocalsYellow struct{}
 
@@ -35,7 +35,7 @@ func (FeistyLocalsYellow) Attack() int                 { return 2 }
 func (FeistyLocalsYellow) Defense() int                { return 2 }
 func (FeistyLocalsYellow) Types() card.TypeSet         { return feistyLocalsTypes }
 func (FeistyLocalsYellow) GoAgain() bool               { return false }
-func (c FeistyLocalsYellow) Play(s *card.TurnState) int { return c.Attack() }
+func (c FeistyLocalsYellow) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }
 
 type FeistyLocalsBlue struct{}
 
@@ -47,4 +47,4 @@ func (FeistyLocalsBlue) Attack() int                 { return 1 }
 func (FeistyLocalsBlue) Defense() int                { return 2 }
 func (FeistyLocalsBlue) Types() card.TypeSet         { return feistyLocalsTypes }
 func (FeistyLocalsBlue) GoAgain() bool               { return false }
-func (c FeistyLocalsBlue) Play(s *card.TurnState) int { return c.Attack() }
+func (c FeistyLocalsBlue) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }

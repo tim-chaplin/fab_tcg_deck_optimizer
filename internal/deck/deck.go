@@ -616,12 +616,12 @@ func collectDelayedPlays(line []hand.CardAssignment, dst []card.Card) []card.Car
 }
 
 // applyTurnResult folds a completed turn's outcome into cross-turn state: pitched hand cards
-// recycle to the deck bottom (via recyclePlayedCards), head advances past initial draws and
+// recycle to the deck bottom (via recycleCardStates), head advances past initial draws and
 // every mid-turn-drawn card, and each drawn card is routed by disposition. Drawn-card Held
 // entries append into nextHeld; Arsenal flows through play.ArsenalCard and needs no
 // bookkeeping here.
 func applyTurnResult(play hand.TurnSummary, buf []card.Card, head, tail *int, drawCount int, nextHeld []card.Card) []card.Card {
-	nextHeld = recyclePlayedCards(play.BestLine, buf, tail, nextHeld)
+	nextHeld = recycleCardStates(play.BestLine, buf, tail, nextHeld)
 	*head += drawCount + len(play.Drawn)
 	for _, d := range play.Drawn {
 		if d.Role == hand.Held {
@@ -775,13 +775,13 @@ func attributePlayStats(stats *Stats, line []hand.CardAssignment) {
 	}
 }
 
-// recyclePlayedCards prepares next turn's draw queue from this turn's assignments: pitched
+// recycleCardStates prepares next turn's draw queue from this turn's assignments: pitched
 // cards go to the bottom of buf[*tail:] (the backing array has room since moved cards are a
 // subset of those just consumed); Held cards go into nextHeld for the next turn; attacked and
 // defended cards are spent. Arsenal / arsenal-in entries thread through arsenalCard separately,
 // not here. Returns the updated nextHeld slice (pass a nil/empty slice or nextHeld[:0] to
 // start).
-func recyclePlayedCards(line []hand.CardAssignment, buf []card.Card, tail *int, nextHeld []card.Card) []card.Card {
+func recycleCardStates(line []hand.CardAssignment, buf []card.Card, tail *int, nextHeld []card.Card) []card.Card {
 	for _, a := range line {
 		if a.FromArsenal {
 			continue

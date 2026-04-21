@@ -6,7 +6,7 @@
 //
 // Modelling: The deck-peek rider isn't modelled. The +N{p} grant requires the target attack
 // action card to itself have been played from arsenal — scan TurnState.CardsRemaining for the
-// first attack action with PlayedCard.FromArsenal set, and credit the bonus assuming it will
+// first attack action with CardState.FromArsenal set, and credit the bonus assuming it will
 // resolve. The arsenal can hold at most one card, so this only fires when the arsenal-in card
 // is itself an attack action queued later in the chain.
 //
@@ -44,7 +44,7 @@ func (ScoutThePeripheryRed) Attack() int                 { return 0 }
 func (ScoutThePeripheryRed) Defense() int                { return 2 }
 func (ScoutThePeripheryRed) Types() card.TypeSet         { return scoutThePeripheryTypes }
 func (ScoutThePeripheryRed) GoAgain() bool               { return true }
-func (ScoutThePeripheryRed) Play(s *card.TurnState) int { return nextArsenalAttackActionBonus(s, 3) }
+func (ScoutThePeripheryRed) Play(s *card.TurnState, _ *card.CardState) int { return nextArsenalAttackActionBonus(s, 3) }
 
 type ScoutThePeripheryYellow struct{}
 
@@ -56,7 +56,7 @@ func (ScoutThePeripheryYellow) Attack() int                 { return 0 }
 func (ScoutThePeripheryYellow) Defense() int                { return 2 }
 func (ScoutThePeripheryYellow) Types() card.TypeSet         { return scoutThePeripheryTypes }
 func (ScoutThePeripheryYellow) GoAgain() bool               { return true }
-func (ScoutThePeripheryYellow) Play(s *card.TurnState) int { return nextArsenalAttackActionBonus(s, 2) }
+func (ScoutThePeripheryYellow) Play(s *card.TurnState, _ *card.CardState) int { return nextArsenalAttackActionBonus(s, 2) }
 
 type ScoutThePeripheryBlue struct{}
 
@@ -68,4 +68,4 @@ func (ScoutThePeripheryBlue) Attack() int                 { return 0 }
 func (ScoutThePeripheryBlue) Defense() int                { return 2 }
 func (ScoutThePeripheryBlue) Types() card.TypeSet         { return scoutThePeripheryTypes }
 func (ScoutThePeripheryBlue) GoAgain() bool               { return true }
-func (ScoutThePeripheryBlue) Play(s *card.TurnState) int { return nextArsenalAttackActionBonus(s, 1) }
+func (ScoutThePeripheryBlue) Play(s *card.TurnState, _ *card.CardState) int { return nextArsenalAttackActionBonus(s, 1) }

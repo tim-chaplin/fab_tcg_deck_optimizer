@@ -33,7 +33,7 @@ func (SigilOfSufferingRed) Attack() int                   { return 0 }
 func (SigilOfSufferingRed) Defense() int                  { return 4 }
 func (SigilOfSufferingRed) Types() card.TypeSet           { return sigilOfSufferingTypes }
 func (SigilOfSufferingRed) GoAgain() bool                 { return false }
-func (SigilOfSufferingRed) Play(s *card.TurnState) int    { return sigilOfSufferingPlay(s) }
+func (SigilOfSufferingRed) Play(s *card.TurnState, _ *card.CardState) int    { return sigilOfSufferingPlay(s) }
 
 type SigilOfSufferingYellow struct{}
 
@@ -45,7 +45,7 @@ func (SigilOfSufferingYellow) Attack() int                   { return 0 }
 func (SigilOfSufferingYellow) Defense() int                  { return 3 }
 func (SigilOfSufferingYellow) Types() card.TypeSet           { return sigilOfSufferingTypes }
 func (SigilOfSufferingYellow) GoAgain() bool                 { return false }
-func (SigilOfSufferingYellow) Play(s *card.TurnState) int    { return sigilOfSufferingPlay(s) }
+func (SigilOfSufferingYellow) Play(s *card.TurnState, _ *card.CardState) int    { return sigilOfSufferingPlay(s) }
 
 type SigilOfSufferingBlue struct{}
 
@@ -57,4 +57,4 @@ func (SigilOfSufferingBlue) Attack() int                   { return 0 }
 func (SigilOfSufferingBlue) Defense() int                  { return 2 }
 func (SigilOfSufferingBlue) Types() card.TypeSet           { return sigilOfSufferingTypes }
 func (SigilOfSufferingBlue) GoAgain() bool                 { return false }
-func (SigilOfSufferingBlue) Play(s *card.TurnState) int    { return sigilOfSufferingPlay(s) }
+func (SigilOfSufferingBlue) Play(s *card.TurnState, _ *card.CardState) int    { return sigilOfSufferingPlay(s) }
