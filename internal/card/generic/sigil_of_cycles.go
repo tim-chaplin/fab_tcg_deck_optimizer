@@ -25,7 +25,7 @@ func (SigilOfCyclesBlue) Attack() int                 { return 0 }
 func (SigilOfCyclesBlue) Defense() int                { return 2 }
 func (SigilOfCyclesBlue) Types() card.TypeSet         { return sigilOfCyclesTypes }
 func (SigilOfCyclesBlue) GoAgain() bool               { return true }
-func (SigilOfCyclesBlue) Play(s *card.TurnState) int  { return setAuraCreated(s) }
+func (SigilOfCyclesBlue) Play(s *card.TurnState, _ *card.PlayedCard) int  { return setAuraCreated(s) }
 
 // PlayNextTurn destroys the aura so it moves to the graveyard next turn. The discard/draw rider
 // is not modelled.

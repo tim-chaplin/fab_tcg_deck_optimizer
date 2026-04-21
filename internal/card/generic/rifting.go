@@ -24,7 +24,7 @@ func (RiftingRed) Attack() int                 { return 6 }
 func (RiftingRed) Defense() int                { return 2 }
 func (RiftingRed) Types() card.TypeSet         { return riftingTypes }
 func (RiftingRed) GoAgain() bool               { return false }
-func (c RiftingRed) Play(s *card.TurnState) int { return c.Attack() }
+func (c RiftingRed) Play(s *card.TurnState, _ *card.PlayedCard) int { return c.Attack() }
 
 type RiftingYellow struct{}
 
@@ -36,7 +36,7 @@ func (RiftingYellow) Attack() int                 { return 5 }
 func (RiftingYellow) Defense() int                { return 2 }
 func (RiftingYellow) Types() card.TypeSet         { return riftingTypes }
 func (RiftingYellow) GoAgain() bool               { return false }
-func (c RiftingYellow) Play(s *card.TurnState) int { return c.Attack() }
+func (c RiftingYellow) Play(s *card.TurnState, _ *card.PlayedCard) int { return c.Attack() }
 
 type RiftingBlue struct{}
 
@@ -48,4 +48,4 @@ func (RiftingBlue) Attack() int                 { return 4 }
 func (RiftingBlue) Defense() int                { return 2 }
 func (RiftingBlue) Types() card.TypeSet         { return riftingTypes }
 func (RiftingBlue) GoAgain() bool               { return false }
-func (c RiftingBlue) Play(s *card.TurnState) int { return c.Attack() }
+func (c RiftingBlue) Play(s *card.TurnState, _ *card.PlayedCard) int { return c.Attack() }

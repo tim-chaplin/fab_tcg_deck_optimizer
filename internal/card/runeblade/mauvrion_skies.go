@@ -29,7 +29,7 @@ func (MauvrionSkiesRed) Attack() int                { return 0 }
 func (MauvrionSkiesRed) Defense() int               { return 2 }
 func (MauvrionSkiesRed) Types() card.TypeSet        { return mauvrionSkiesTypes }
 func (MauvrionSkiesRed) GoAgain() bool              { return true }
-func (MauvrionSkiesRed) Play(s *card.TurnState) int { return mauvrionSkiesPlay(s, 3) }
+func (MauvrionSkiesRed) Play(s *card.TurnState, _ *card.PlayedCard) int { return mauvrionSkiesPlay(s, 3) }
 
 type MauvrionSkiesYellow struct{}
 
@@ -41,7 +41,7 @@ func (MauvrionSkiesYellow) Attack() int                { return 0 }
 func (MauvrionSkiesYellow) Defense() int               { return 2 }
 func (MauvrionSkiesYellow) Types() card.TypeSet        { return mauvrionSkiesTypes }
 func (MauvrionSkiesYellow) GoAgain() bool              { return true }
-func (MauvrionSkiesYellow) Play(s *card.TurnState) int { return mauvrionSkiesPlay(s, 2) }
+func (MauvrionSkiesYellow) Play(s *card.TurnState, _ *card.PlayedCard) int { return mauvrionSkiesPlay(s, 2) }
 
 type MauvrionSkiesBlue struct{}
 
@@ -53,7 +53,7 @@ func (MauvrionSkiesBlue) Attack() int                { return 0 }
 func (MauvrionSkiesBlue) Defense() int               { return 2 }
 func (MauvrionSkiesBlue) Types() card.TypeSet        { return mauvrionSkiesTypes }
 func (MauvrionSkiesBlue) GoAgain() bool              { return true }
-func (MauvrionSkiesBlue) Play(s *card.TurnState) int { return mauvrionSkiesPlay(s, 1) }
+func (MauvrionSkiesBlue) Play(s *card.TurnState, _ *card.PlayedCard) int { return mauvrionSkiesPlay(s, 1) }
 
 func mauvrionSkiesPlay(s *card.TurnState, n int) int {
 	for _, pc := range s.CardsRemaining {

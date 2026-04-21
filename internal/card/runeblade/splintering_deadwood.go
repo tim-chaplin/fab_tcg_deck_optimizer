@@ -24,7 +24,7 @@ func (SplinteringDeadwoodRed) Attack() int                { return 7 }
 func (SplinteringDeadwoodRed) Defense() int               { return 3 }
 func (SplinteringDeadwoodRed) Types() card.TypeSet        { return splinteringDeadwoodTypes }
 func (SplinteringDeadwoodRed) GoAgain() bool              { return false }
-func (c SplinteringDeadwoodRed) Play(*card.TurnState) int { return c.Attack() }
+func (c SplinteringDeadwoodRed) Play(*card.TurnState, *card.PlayedCard) int { return c.Attack() }
 
 type SplinteringDeadwoodYellow struct{}
 
@@ -36,7 +36,7 @@ func (SplinteringDeadwoodYellow) Attack() int                { return 6 }
 func (SplinteringDeadwoodYellow) Defense() int               { return 3 }
 func (SplinteringDeadwoodYellow) Types() card.TypeSet        { return splinteringDeadwoodTypes }
 func (SplinteringDeadwoodYellow) GoAgain() bool              { return false }
-func (c SplinteringDeadwoodYellow) Play(*card.TurnState) int { return c.Attack() }
+func (c SplinteringDeadwoodYellow) Play(*card.TurnState, *card.PlayedCard) int { return c.Attack() }
 
 type SplinteringDeadwoodBlue struct{}
 
@@ -48,4 +48,4 @@ func (SplinteringDeadwoodBlue) Attack() int                { return 5 }
 func (SplinteringDeadwoodBlue) Defense() int               { return 3 }
 func (SplinteringDeadwoodBlue) Types() card.TypeSet        { return splinteringDeadwoodTypes }
 func (SplinteringDeadwoodBlue) GoAgain() bool              { return false }
-func (c SplinteringDeadwoodBlue) Play(*card.TurnState) int { return c.Attack() }
+func (c SplinteringDeadwoodBlue) Play(*card.TurnState, *card.PlayedCard) int { return c.Attack() }

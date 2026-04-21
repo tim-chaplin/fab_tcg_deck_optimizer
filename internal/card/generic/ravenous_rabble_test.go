@@ -18,7 +18,7 @@ func TestRavenousRabble_EmptyDeckReturnsBasePower(t *testing.T) {
 		{RavenousRabbleBlue{}, 3},
 	}
 	for _, tc := range cases {
-		if got := tc.c.Play(s); got != tc.want {
+		if got := tc.c.Play(s, nil); got != tc.want {
 			t.Errorf("%s: Play() = %d, want %d (empty deck → base power)", tc.c.Name(), got, tc.want)
 		}
 	}
@@ -39,13 +39,13 @@ func TestRavenousRabble_TopPitchSubtracted(t *testing.T) {
 	}
 	for _, tc := range cases {
 		s := &card.TurnState{Deck: []card.Card{stubGenericAttackPitch(0, 0, tc.topPitch)}}
-		if got := (RavenousRabbleRed{}).Play(s); got != tc.red {
+		if got := (RavenousRabbleRed{}).Play(s, nil); got != tc.red {
 			t.Errorf("%s Red: Play() = %d, want %d", tc.name, got, tc.red)
 		}
-		if got := (RavenousRabbleYellow{}).Play(s); got != tc.yellow {
+		if got := (RavenousRabbleYellow{}).Play(s, nil); got != tc.yellow {
 			t.Errorf("%s Yellow: Play() = %d, want %d", tc.name, got, tc.yellow)
 		}
-		if got := (RavenousRabbleBlue{}).Play(s); got != tc.blue {
+		if got := (RavenousRabbleBlue{}).Play(s, nil); got != tc.blue {
 			t.Errorf("%s Blue: Play() = %d, want %d", tc.name, got, tc.blue)
 		}
 	}
@@ -56,7 +56,7 @@ func TestRavenousRabble_TopPitchSubtracted(t *testing.T) {
 // should still return 0, not a negative number that'd turn into negative damage downstream.
 func TestRavenousRabble_FloorsAtZero(t *testing.T) {
 	s := &card.TurnState{Deck: []card.Card{stubGenericAttackPitch(0, 0, 5)}}
-	if got := (RavenousRabbleBlue{}).Play(s); got != 0 {
+	if got := (RavenousRabbleBlue{}).Play(s, nil); got != 0 {
 		t.Errorf("Blue vs pitch-5 top: Play() = %d, want 0 (floor)", got)
 	}
 }
@@ -69,7 +69,7 @@ func TestRavenousRabble_OnlyFirstDeckCardMatters(t *testing.T) {
 		stubGenericAttackPitch(0, 0, 3),
 		stubGenericAttackPitch(0, 0, 3),
 	}}
-	if got := (RavenousRabbleRed{}).Play(s); got != 4 {
+	if got := (RavenousRabbleRed{}).Play(s, nil); got != 4 {
 		t.Errorf("Play() = %d, want 4 (5 − top pitch 1, ignoring deeper cards)", got)
 	}
 }

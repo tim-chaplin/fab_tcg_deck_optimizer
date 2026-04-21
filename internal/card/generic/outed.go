@@ -23,4 +23,4 @@ func (OutedRed) Attack() int                 { return 3 }
 func (OutedRed) Defense() int                { return 0 }
 func (OutedRed) Types() card.TypeSet         { return outedTypes }
 func (OutedRed) GoAgain() bool               { return true }
-func (c OutedRed) Play(s *card.TurnState) int { return c.Attack() }
+func (c OutedRed) Play(s *card.TurnState, _ *card.PlayedCard) int { return c.Attack() }

@@ -23,7 +23,7 @@ func (BlanchRed) Attack() int                 { return 7 }
 func (BlanchRed) Defense() int                { return 2 }
 func (BlanchRed) Types() card.TypeSet         { return blanchTypes }
 func (BlanchRed) GoAgain() bool               { return false }
-func (c BlanchRed) Play(s *card.TurnState) int { return blanchDamage(c.Attack()) }
+func (c BlanchRed) Play(s *card.TurnState, _ *card.PlayedCard) int { return blanchDamage(c.Attack()) }
 
 type BlanchYellow struct{}
 
@@ -35,7 +35,7 @@ func (BlanchYellow) Attack() int                 { return 6 }
 func (BlanchYellow) Defense() int                { return 2 }
 func (BlanchYellow) Types() card.TypeSet         { return blanchTypes }
 func (BlanchYellow) GoAgain() bool               { return false }
-func (c BlanchYellow) Play(s *card.TurnState) int { return blanchDamage(c.Attack()) }
+func (c BlanchYellow) Play(s *card.TurnState, _ *card.PlayedCard) int { return blanchDamage(c.Attack()) }
 
 type BlanchBlue struct{}
 
@@ -47,7 +47,7 @@ func (BlanchBlue) Attack() int                 { return 5 }
 func (BlanchBlue) Defense() int                { return 2 }
 func (BlanchBlue) Types() card.TypeSet         { return blanchTypes }
 func (BlanchBlue) GoAgain() bool               { return false }
-func (c BlanchBlue) Play(s *card.TurnState) int { return blanchDamage(c.Attack()) }
+func (c BlanchBlue) Play(s *card.TurnState, _ *card.PlayedCard) int { return blanchDamage(c.Attack()) }
 
 // blanchDamage is a breadcrumb for the on-hit "cards they own lose all colors" rider — not
 // modelled yet (see TODO.md).

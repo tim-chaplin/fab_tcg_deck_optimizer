@@ -25,7 +25,7 @@ func (DownButNotOutRed) Attack() int                 { return 5 }
 func (DownButNotOutRed) Defense() int                { return 3 }
 func (DownButNotOutRed) Types() card.TypeSet         { return downButNotOutTypes }
 func (DownButNotOutRed) GoAgain() bool               { return false }
-func (c DownButNotOutRed) Play(s *card.TurnState) int { return downButNotOutDamage(c.Attack()) }
+func (c DownButNotOutRed) Play(s *card.TurnState, _ *card.PlayedCard) int { return downButNotOutDamage(c.Attack()) }
 
 type DownButNotOutYellow struct{}
 
@@ -37,7 +37,7 @@ func (DownButNotOutYellow) Attack() int                 { return 4 }
 func (DownButNotOutYellow) Defense() int                { return 3 }
 func (DownButNotOutYellow) Types() card.TypeSet         { return downButNotOutTypes }
 func (DownButNotOutYellow) GoAgain() bool               { return false }
-func (c DownButNotOutYellow) Play(s *card.TurnState) int { return downButNotOutDamage(c.Attack()) }
+func (c DownButNotOutYellow) Play(s *card.TurnState, _ *card.PlayedCard) int { return downButNotOutDamage(c.Attack()) }
 
 type DownButNotOutBlue struct{}
 
@@ -49,7 +49,7 @@ func (DownButNotOutBlue) Attack() int                 { return 3 }
 func (DownButNotOutBlue) Defense() int                { return 3 }
 func (DownButNotOutBlue) Types() card.TypeSet         { return downButNotOutTypes }
 func (DownButNotOutBlue) GoAgain() bool               { return false }
-func (c DownButNotOutBlue) Play(s *card.TurnState) int { return downButNotOutDamage(c.Attack()) }
+func (c DownButNotOutBlue) Play(s *card.TurnState, _ *card.PlayedCard) int { return downButNotOutDamage(c.Attack()) }
 
 // downButNotOutDamage is a breadcrumb for the conditional "when this hits, create Agility +
 // Might + Vigor tokens" rider — gated on a health/equipment/token comparison we don't track

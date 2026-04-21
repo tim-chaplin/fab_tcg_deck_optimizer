@@ -1126,7 +1126,7 @@ func defenseReactionDamage(defenders, pitched, deck []card.Card, state *card.Tur
 		}
 		gravBuf = append(gravBuf[:0], defenders...)
 		*state = card.TurnState{Pitched: pitched, Deck: deck, Graveyard: gravBuf}
-		total += d.Play(state)
+		total += d.Play(state, &card.PlayedCard{Card: d})
 	}
 	return total, gravBuf
 }
@@ -1540,8 +1540,6 @@ func (ctx *sequenceContext) playSequenceWithMeta(order []card.Card, perCardOut, 
 		}
 
 		state.CardsRemaining = played[i+1:]
-		state.SelfFromArsenal = pc.FromArsenal
-		state.SelfGoAgain = false
 
 		// If this card is an attack or weapon and any Runechant is live, those tokens fire on
 		// its damage step. Set ArcaneDamageDealt now — before Play and OnCardPlayed — so Play
@@ -1552,7 +1550,7 @@ func (ctx *sequenceContext) playSequenceWithMeta(order []card.Card, perCardOut, 
 			state.ArcaneDamageDealt = true
 		}
 
-		playDmg := pc.Card.Play(state)
+		playDmg := pc.Card.Play(state, pc)
 		triggerDmg := ctx.hero.OnCardPlayed(pc.Card, state)
 		damage += playDmg + triggerDmg
 		if perCardOut != nil {
@@ -1560,9 +1558,6 @@ func (ctx *sequenceContext) playSequenceWithMeta(order []card.Card, perCardOut, 
 		}
 		if perCardTriggerOut != nil {
 			perCardTriggerOut[i] = float64(triggerDmg)
-		}
-		if state.SelfGoAgain {
-			pc.GrantedGoAgain = true
 		}
 		state.CardsPlayed = append(state.CardsPlayed, pc.Card)
 		// Only Actions, Attack Reactions, Defense Reactions, and Instants head to the graveyard
@@ -1633,7 +1628,7 @@ func fillDefenseContributions(line []CardAssignment, pitched []card.Card, deck [
 		if c.Types().IsDefenseReaction() {
 			bufs.defenseGravScratch = append(bufs.defenseGravScratch[:0], defenders...)
 			*bufs.state = card.TurnState{Pitched: pitched, Deck: deck, Graveyard: bufs.defenseGravScratch}
-			line[i].Contribution += float64(c.Play(bufs.state))
+			line[i].Contribution += float64(c.Play(bufs.state, &card.PlayedCard{Card: c, FromArsenal: line[i].FromArsenal}))
 		}
 	}
 }

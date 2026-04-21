@@ -12,7 +12,7 @@ import (
 func TestMauvrionSkies_NoNextAttackReturnsZero(t *testing.T) {
 	// No qualifying next attack → both the runechant rider and the go-again grant fizzle.
 	s := card.TurnState{} // no CardsRemaining
-	if got := (MauvrionSkiesRed{}).Play(&s); got != 0 {
+	if got := (MauvrionSkiesRed{}).Play(&s, nil); got != 0 {
 		t.Fatalf("want 0 when no next attack, got %d", got)
 	}
 	if s.AuraCreated {
@@ -26,7 +26,7 @@ func TestMauvrionSkies_WeaponNextDoesNotQualify(t *testing.T) {
 	// weapon swing slot; Mauvrion's grant targets attack action CARDS only).
 	target := &card.PlayedCard{Card: stubRunebladeWeapon{}}
 	s := card.TurnState{CardsRemaining: []*card.PlayedCard{target}}
-	if got := (MauvrionSkiesRed{}).Play(&s); got != 0 {
+	if got := (MauvrionSkiesRed{}).Play(&s, nil); got != 0 {
 		t.Fatalf("want 0 with weapon-only next, got %d", got)
 	}
 	if target.GrantedGoAgain {
@@ -40,7 +40,7 @@ func TestMauvrionSkies_NonRunebladeAttackDoesNotQualify(t *testing.T) {
 	// (and no Runechants fire).
 	target := &card.PlayedCard{Card: stubNonRunebladeAttack{}}
 	s := card.TurnState{CardsRemaining: []*card.PlayedCard{target}}
-	if got := (MauvrionSkiesRed{}).Play(&s); got != 0 {
+	if got := (MauvrionSkiesRed{}).Play(&s, nil); got != 0 {
 		t.Fatalf("want 0 with non-Runeblade attack next, got %d", got)
 	}
 	if target.GrantedGoAgain {
@@ -64,7 +64,7 @@ func TestMauvrionSkies_LikelyHitTargetGrantsGoAgainAndRunechants(t *testing.T) {
 	for _, tc := range cases {
 		target := &card.PlayedCard{Card: stubAttackWithPower{power: 4}}
 		s := card.TurnState{CardsRemaining: []*card.PlayedCard{target}}
-		if got := tc.c.Play(&s); got != tc.n {
+		if got := tc.c.Play(&s, nil); got != tc.n {
 			t.Errorf("%s: Play() = %d, want %d", tc.c.Name(), got, tc.n)
 		}
 		if s.Runechants != tc.n {
@@ -85,7 +85,7 @@ func TestMauvrionSkies_BlockableTargetGrantsGoAgainButNoRunechants(t *testing.T)
 	// isn't gated on the attack hitting.
 	target := &card.PlayedCard{Card: stubAttackWithPower{power: 3}}
 	s := card.TurnState{CardsRemaining: []*card.PlayedCard{target}}
-	if got := (MauvrionSkiesRed{}).Play(&s); got != 0 {
+	if got := (MauvrionSkiesRed{}).Play(&s, nil); got != 0 {
 		t.Errorf("Play() = %d, want 0 (blockable target drops the Runechants)", got)
 	}
 	if s.Runechants != 0 {

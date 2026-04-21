@@ -24,9 +24,9 @@ var meatAndGreetTypes = card.NewTypeSet(card.TypeRuneblade, card.TypeAction, car
 // printed GoAgain) so the rider stays conditional on ArcaneDamageDealt. The on-hit Runechant
 // rider is gated on card.LikelyToHit, mirroring how other on-hit rider cards treat blockable
 // attacks.
-func meatAndGreetPlay(c card.Card, s *card.TurnState) int {
+func meatAndGreetPlay(c card.Card, s *card.TurnState, self *card.PlayedCard) int {
 	if s.ArcaneDamageDealt {
-		s.SelfGoAgain = true
+		self.GrantedGoAgain = true
 	}
 	if card.LikelyToHit(c.Attack()) {
 		return c.Attack() + s.CreateRunechant()
@@ -44,7 +44,7 @@ func (MeatAndGreetRed) Attack() int                   { return 4 }
 func (MeatAndGreetRed) Defense() int                  { return 3 }
 func (MeatAndGreetRed) Types() card.TypeSet           { return meatAndGreetTypes }
 func (MeatAndGreetRed) GoAgain() bool                 { return false }
-func (c MeatAndGreetRed) Play(s *card.TurnState) int  { return meatAndGreetPlay(c, s) }
+func (c MeatAndGreetRed) Play(s *card.TurnState, self *card.PlayedCard) int  { return meatAndGreetPlay(c, s, self) }
 
 type MeatAndGreetYellow struct{}
 
@@ -56,7 +56,7 @@ func (MeatAndGreetYellow) Attack() int                   { return 3 }
 func (MeatAndGreetYellow) Defense() int                  { return 3 }
 func (MeatAndGreetYellow) Types() card.TypeSet           { return meatAndGreetTypes }
 func (MeatAndGreetYellow) GoAgain() bool                 { return false }
-func (c MeatAndGreetYellow) Play(s *card.TurnState) int  { return meatAndGreetPlay(c, s) }
+func (c MeatAndGreetYellow) Play(s *card.TurnState, self *card.PlayedCard) int  { return meatAndGreetPlay(c, s, self) }
 
 type MeatAndGreetBlue struct{}
 
@@ -68,4 +68,4 @@ func (MeatAndGreetBlue) Attack() int                   { return 2 }
 func (MeatAndGreetBlue) Defense() int                  { return 3 }
 func (MeatAndGreetBlue) Types() card.TypeSet           { return meatAndGreetTypes }
 func (MeatAndGreetBlue) GoAgain() bool                 { return false }
-func (c MeatAndGreetBlue) Play(s *card.TurnState) int  { return meatAndGreetPlay(c, s) }
+func (c MeatAndGreetBlue) Play(s *card.TurnState, self *card.PlayedCard) int  { return meatAndGreetPlay(c, s, self) }

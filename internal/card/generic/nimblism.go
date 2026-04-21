@@ -40,7 +40,7 @@ func (NimblismRed) Attack() int                 { return 0 }
 func (NimblismRed) Defense() int                { return 2 }
 func (NimblismRed) Types() card.TypeSet         { return nimblismTypes }
 func (NimblismRed) GoAgain() bool               { return true }
-func (NimblismRed) Play(s *card.TurnState) int { return nimblismPlay(s, 3) }
+func (NimblismRed) Play(s *card.TurnState, _ *card.PlayedCard) int { return nimblismPlay(s, 3) }
 
 type NimblismYellow struct{}
 
@@ -52,7 +52,7 @@ func (NimblismYellow) Attack() int                 { return 0 }
 func (NimblismYellow) Defense() int                { return 2 }
 func (NimblismYellow) Types() card.TypeSet         { return nimblismTypes }
 func (NimblismYellow) GoAgain() bool               { return true }
-func (NimblismYellow) Play(s *card.TurnState) int { return nimblismPlay(s, 2) }
+func (NimblismYellow) Play(s *card.TurnState, _ *card.PlayedCard) int { return nimblismPlay(s, 2) }
 
 type NimblismBlue struct{}
 
@@ -64,4 +64,4 @@ func (NimblismBlue) Attack() int                 { return 0 }
 func (NimblismBlue) Defense() int                { return 2 }
 func (NimblismBlue) Types() card.TypeSet         { return nimblismTypes }
 func (NimblismBlue) GoAgain() bool               { return true }
-func (NimblismBlue) Play(s *card.TurnState) int { return nimblismPlay(s, 1) }
+func (NimblismBlue) Play(s *card.TurnState, _ *card.PlayedCard) int { return nimblismPlay(s, 1) }

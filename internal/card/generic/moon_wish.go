@@ -25,7 +25,7 @@ func (MoonWishRed) Attack() int                 { return 5 }
 func (MoonWishRed) Defense() int                { return 2 }
 func (MoonWishRed) Types() card.TypeSet         { return moonWishTypes }
 func (MoonWishRed) GoAgain() bool               { return false }
-func (c MoonWishRed) Play(s *card.TurnState) int { return c.Attack() }
+func (c MoonWishRed) Play(s *card.TurnState, _ *card.PlayedCard) int { return c.Attack() }
 
 type MoonWishYellow struct{}
 
@@ -37,7 +37,7 @@ func (MoonWishYellow) Attack() int                 { return 4 }
 func (MoonWishYellow) Defense() int                { return 2 }
 func (MoonWishYellow) Types() card.TypeSet         { return moonWishTypes }
 func (MoonWishYellow) GoAgain() bool               { return false }
-func (c MoonWishYellow) Play(s *card.TurnState) int { return c.Attack() }
+func (c MoonWishYellow) Play(s *card.TurnState, _ *card.PlayedCard) int { return c.Attack() }
 
 type MoonWishBlue struct{}
 
@@ -49,4 +49,4 @@ func (MoonWishBlue) Attack() int                 { return 3 }
 func (MoonWishBlue) Defense() int                { return 2 }
 func (MoonWishBlue) Types() card.TypeSet         { return moonWishTypes }
 func (MoonWishBlue) GoAgain() bool               { return false }
-func (c MoonWishBlue) Play(s *card.TurnState) int { return c.Attack() }
+func (c MoonWishBlue) Play(s *card.TurnState, _ *card.PlayedCard) int { return c.Attack() }

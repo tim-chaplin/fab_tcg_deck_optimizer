@@ -25,4 +25,4 @@ func (RestvineElixirRed) Attack() int                 { return 0 }
 func (RestvineElixirRed) Defense() int                { return 3 }
 func (RestvineElixirRed) Types() card.TypeSet         { return restvineElixirTypes }
 func (RestvineElixirRed) GoAgain() bool               { return true }
-func (RestvineElixirRed) Play(s *card.TurnState) int { return nextAttackActionBonus(s, 3) }
+func (RestvineElixirRed) Play(s *card.TurnState, _ *card.PlayedCard) int { return nextAttackActionBonus(s, 3) }

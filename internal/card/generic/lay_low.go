@@ -20,4 +20,4 @@ func (LayLowYellow) Attack() int              { return 0 }
 func (LayLowYellow) Defense() int             { return 3 }
 func (LayLowYellow) Types() card.TypeSet      { return defenseReactionTypes }
 func (LayLowYellow) GoAgain() bool            { return false }
-func (LayLowYellow) Play(*card.TurnState) int { return 0 }
+func (LayLowYellow) Play(*card.TurnState, *card.PlayedCard) int { return 0 }

@@ -24,7 +24,7 @@ func (InfectiousHostRed) Attack() int                 { return 4 }
 func (InfectiousHostRed) Defense() int                { return 2 }
 func (InfectiousHostRed) Types() card.TypeSet         { return infectiousHostTypes }
 func (InfectiousHostRed) GoAgain() bool               { return false }
-func (c InfectiousHostRed) Play(s *card.TurnState) int { return c.Attack() }
+func (c InfectiousHostRed) Play(s *card.TurnState, _ *card.PlayedCard) int { return c.Attack() }
 
 type InfectiousHostYellow struct{}
 
@@ -36,7 +36,7 @@ func (InfectiousHostYellow) Attack() int                 { return 3 }
 func (InfectiousHostYellow) Defense() int                { return 2 }
 func (InfectiousHostYellow) Types() card.TypeSet         { return infectiousHostTypes }
 func (InfectiousHostYellow) GoAgain() bool               { return false }
-func (c InfectiousHostYellow) Play(s *card.TurnState) int { return c.Attack() }
+func (c InfectiousHostYellow) Play(s *card.TurnState, _ *card.PlayedCard) int { return c.Attack() }
 
 type InfectiousHostBlue struct{}
 
@@ -48,4 +48,4 @@ func (InfectiousHostBlue) Attack() int                 { return 2 }
 func (InfectiousHostBlue) Defense() int                { return 2 }
 func (InfectiousHostBlue) Types() card.TypeSet         { return infectiousHostTypes }
 func (InfectiousHostBlue) GoAgain() bool               { return false }
-func (c InfectiousHostBlue) Play(s *card.TurnState) int { return c.Attack() }
+func (c InfectiousHostBlue) Play(s *card.TurnState, _ *card.PlayedCard) int { return c.Attack() }

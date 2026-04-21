@@ -5,9 +5,8 @@
 // again**" (Red N=3, Yellow N=2, Blue N=1.)
 //
 // Modelling: The on-hit draw rider isn't modelled. The +N{p} grant fires only when this copy
-// was played from arsenal (card.PlayedFromArsenal); when it does, scan
-// TurnState.CardsRemaining for the next attack action card and credit the bonus assuming it
-// will be played.
+// was played from arsenal (self.FromArsenal); when it does, scan TurnState.CardsRemaining for
+// the next attack action card and credit the bonus assuming it will be played.
 //
 // Source: github.com/the-fab-cube/flesh-and-blood-cards (card.csv).
 
@@ -28,8 +27,8 @@ func (PlunderRunRed) Defense() int                { return 2 }
 func (PlunderRunRed) Types() card.TypeSet         { return plunderRunTypes }
 func (PlunderRunRed) GoAgain() bool               { return true }
 func (PlunderRunRed) NotSilverAgeLegal()           {}
-func (PlunderRunRed) Play(s *card.TurnState) int {
-	if !card.PlayedFromArsenal(s) {
+func (PlunderRunRed) Play(s *card.TurnState, self *card.PlayedCard) int {
+	if !self.FromArsenal {
 		return 0
 	}
 	return nextAttackActionBonus(s, 3)
@@ -46,8 +45,8 @@ func (PlunderRunYellow) Defense() int                { return 2 }
 func (PlunderRunYellow) Types() card.TypeSet         { return plunderRunTypes }
 func (PlunderRunYellow) GoAgain() bool               { return true }
 func (PlunderRunYellow) NotSilverAgeLegal()           {}
-func (PlunderRunYellow) Play(s *card.TurnState) int {
-	if !card.PlayedFromArsenal(s) {
+func (PlunderRunYellow) Play(s *card.TurnState, self *card.PlayedCard) int {
+	if !self.FromArsenal {
 		return 0
 	}
 	return nextAttackActionBonus(s, 2)
@@ -64,8 +63,8 @@ func (PlunderRunBlue) Defense() int                { return 2 }
 func (PlunderRunBlue) Types() card.TypeSet         { return plunderRunTypes }
 func (PlunderRunBlue) GoAgain() bool               { return true }
 func (PlunderRunBlue) NotSilverAgeLegal()           {}
-func (PlunderRunBlue) Play(s *card.TurnState) int {
-	if !card.PlayedFromArsenal(s) {
+func (PlunderRunBlue) Play(s *card.TurnState, self *card.PlayedCard) int {
+	if !self.FromArsenal {
 		return 0
 	}
 	return nextAttackActionBonus(s, 1)

@@ -22,5 +22,5 @@ func (SpringboardSomersaultYellow) Attack() int              { return 0 }
 func (SpringboardSomersaultYellow) Defense() int             { return 2 }
 func (SpringboardSomersaultYellow) Types() card.TypeSet      { return defenseReactionTypes }
 func (SpringboardSomersaultYellow) GoAgain() bool            { return false }
-func (SpringboardSomersaultYellow) Play(*card.TurnState) int { return 0 }
+func (SpringboardSomersaultYellow) Play(*card.TurnState, *card.PlayedCard) int { return 0 }
 func (SpringboardSomersaultYellow) ArsenalDefenseBonus() int { return 2 }

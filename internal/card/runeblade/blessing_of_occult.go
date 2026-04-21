@@ -38,7 +38,7 @@ func (BlessingOfOccultRed) Attack() int                 { return 0 }
 func (BlessingOfOccultRed) Defense() int                { return 2 }
 func (BlessingOfOccultRed) Types() card.TypeSet         { return blessingOfOccultTypes }
 func (BlessingOfOccultRed) GoAgain() bool               { return false }
-func (BlessingOfOccultRed) Play(s *card.TurnState) int  { return blessingOfOccultPlay(s) }
+func (BlessingOfOccultRed) Play(s *card.TurnState, _ *card.PlayedCard) int  { return blessingOfOccultPlay(s) }
 func (c BlessingOfOccultRed) PlayNextTurn(s *card.TurnState) card.DelayedPlayResult {
 	return blessingOfOccultNextTurn(s, c, 3)
 }
@@ -53,7 +53,7 @@ func (BlessingOfOccultYellow) Attack() int                { return 0 }
 func (BlessingOfOccultYellow) Defense() int               { return 2 }
 func (BlessingOfOccultYellow) Types() card.TypeSet        { return blessingOfOccultTypes }
 func (BlessingOfOccultYellow) GoAgain() bool              { return false }
-func (BlessingOfOccultYellow) Play(s *card.TurnState) int { return blessingOfOccultPlay(s) }
+func (BlessingOfOccultYellow) Play(s *card.TurnState, _ *card.PlayedCard) int { return blessingOfOccultPlay(s) }
 func (c BlessingOfOccultYellow) PlayNextTurn(s *card.TurnState) card.DelayedPlayResult {
 	return blessingOfOccultNextTurn(s, c, 2)
 }
@@ -68,7 +68,7 @@ func (BlessingOfOccultBlue) Attack() int                { return 0 }
 func (BlessingOfOccultBlue) Defense() int               { return 2 }
 func (BlessingOfOccultBlue) Types() card.TypeSet        { return blessingOfOccultTypes }
 func (BlessingOfOccultBlue) GoAgain() bool              { return false }
-func (BlessingOfOccultBlue) Play(s *card.TurnState) int { return blessingOfOccultPlay(s) }
+func (BlessingOfOccultBlue) Play(s *card.TurnState, _ *card.PlayedCard) int { return blessingOfOccultPlay(s) }
 func (c BlessingOfOccultBlue) PlayNextTurn(s *card.TurnState) card.DelayedPlayResult {
 	return blessingOfOccultNextTurn(s, c, 1)
 }

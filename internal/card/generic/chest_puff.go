@@ -22,4 +22,4 @@ func (ChestPuffRed) Attack() int                 { return 7 }
 func (ChestPuffRed) Defense() int                { return 3 }
 func (ChestPuffRed) Types() card.TypeSet         { return chestPuffTypes }
 func (ChestPuffRed) GoAgain() bool               { return false }
-func (c ChestPuffRed) Play(s *card.TurnState) int { return c.Attack() }
+func (c ChestPuffRed) Play(s *card.TurnState, _ *card.PlayedCard) int { return c.Attack() }

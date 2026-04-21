@@ -23,7 +23,7 @@ func (UnmovableRed) Attack() int              { return 0 }
 func (UnmovableRed) Defense() int             { return 7 }
 func (UnmovableRed) Types() card.TypeSet      { return defenseReactionTypes }
 func (UnmovableRed) GoAgain() bool            { return false }
-func (UnmovableRed) Play(*card.TurnState) int { return 0 }
+func (UnmovableRed) Play(*card.TurnState, *card.PlayedCard) int { return 0 }
 func (UnmovableRed) ArsenalDefenseBonus() int { return 1 }
 
 type UnmovableYellow struct{}
@@ -36,7 +36,7 @@ func (UnmovableYellow) Attack() int              { return 0 }
 func (UnmovableYellow) Defense() int             { return 6 }
 func (UnmovableYellow) Types() card.TypeSet      { return defenseReactionTypes }
 func (UnmovableYellow) GoAgain() bool            { return false }
-func (UnmovableYellow) Play(*card.TurnState) int { return 0 }
+func (UnmovableYellow) Play(*card.TurnState, *card.PlayedCard) int { return 0 }
 func (UnmovableYellow) ArsenalDefenseBonus() int { return 1 }
 
 type UnmovableBlue struct{}
@@ -49,5 +49,5 @@ func (UnmovableBlue) Attack() int              { return 0 }
 func (UnmovableBlue) Defense() int             { return 5 }
 func (UnmovableBlue) Types() card.TypeSet      { return defenseReactionTypes }
 func (UnmovableBlue) GoAgain() bool            { return false }
-func (UnmovableBlue) Play(*card.TurnState) int { return 0 }
+func (UnmovableBlue) Play(*card.TurnState, *card.PlayedCard) int { return 0 }
 func (UnmovableBlue) ArsenalDefenseBonus() int { return 1 }

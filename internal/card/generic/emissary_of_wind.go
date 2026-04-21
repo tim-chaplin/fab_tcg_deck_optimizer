@@ -24,4 +24,4 @@ func (EmissaryOfWindRed) Attack() int                 { return 4 }
 func (EmissaryOfWindRed) Defense() int                { return 2 }
 func (EmissaryOfWindRed) Types() card.TypeSet         { return emissaryOfWindTypes }
 func (EmissaryOfWindRed) GoAgain() bool               { return false }
-func (c EmissaryOfWindRed) Play(s *card.TurnState) int { return c.Attack() }
+func (c EmissaryOfWindRed) Play(s *card.TurnState, _ *card.PlayedCard) int { return c.Attack() }

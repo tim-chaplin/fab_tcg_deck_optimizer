@@ -29,7 +29,7 @@ func (SigilOfTheArknightBlue) Attack() int         { return 0 }
 func (SigilOfTheArknightBlue) Defense() int        { return 2 }
 func (SigilOfTheArknightBlue) Types() card.TypeSet { return sigilOfTheArknightTypes }
 func (SigilOfTheArknightBlue) GoAgain() bool       { return true }
-func (SigilOfTheArknightBlue) Play(s *card.TurnState) int {
+func (SigilOfTheArknightBlue) Play(s *card.TurnState, _ *card.PlayedCard) int {
 	s.AuraCreated = true
 	return 0
 }

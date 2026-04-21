@@ -29,7 +29,7 @@ func (VexingMaliceRed) Attack() int                   { return 3 }
 func (VexingMaliceRed) Defense() int                  { return 3 }
 func (VexingMaliceRed) Types() card.TypeSet           { return vexingMaliceTypes }
 func (VexingMaliceRed) GoAgain() bool                 { return false }
-func (c VexingMaliceRed) Play(s *card.TurnState) int  { return vexingMalicePlay(c.Attack(), s) }
+func (c VexingMaliceRed) Play(s *card.TurnState, _ *card.PlayedCard) int  { return vexingMalicePlay(c.Attack(), s) }
 
 type VexingMaliceYellow struct{}
 
@@ -41,7 +41,7 @@ func (VexingMaliceYellow) Attack() int                   { return 2 }
 func (VexingMaliceYellow) Defense() int                  { return 3 }
 func (VexingMaliceYellow) Types() card.TypeSet           { return vexingMaliceTypes }
 func (VexingMaliceYellow) GoAgain() bool                 { return false }
-func (c VexingMaliceYellow) Play(s *card.TurnState) int  { return vexingMalicePlay(c.Attack(), s) }
+func (c VexingMaliceYellow) Play(s *card.TurnState, _ *card.PlayedCard) int  { return vexingMalicePlay(c.Attack(), s) }
 
 type VexingMaliceBlue struct{}
 
@@ -53,4 +53,4 @@ func (VexingMaliceBlue) Attack() int                   { return 1 }
 func (VexingMaliceBlue) Defense() int                  { return 3 }
 func (VexingMaliceBlue) Types() card.TypeSet           { return vexingMaliceTypes }
 func (VexingMaliceBlue) GoAgain() bool                 { return false }
-func (c VexingMaliceBlue) Play(s *card.TurnState) int  { return vexingMalicePlay(c.Attack(), s) }
+func (c VexingMaliceBlue) Play(s *card.TurnState, _ *card.PlayedCard) int  { return vexingMalicePlay(c.Attack(), s) }

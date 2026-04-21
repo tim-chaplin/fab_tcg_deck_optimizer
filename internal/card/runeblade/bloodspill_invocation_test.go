@@ -19,7 +19,7 @@ func TestBloodspillInvocation_BlockCoversIncomingReturnsN(t *testing.T) {
 	}
 	for _, tc := range cases {
 		s := card.TurnState{IncomingDamage: 3, BlockTotal: 3}
-		if got := tc.c.Play(&s); got != tc.n {
+		if got := tc.c.Play(&s, nil); got != tc.n {
 			t.Errorf("%s: Play() = %d, want %d (block == incoming)", tc.c.Name(), got, tc.n)
 		}
 	}
@@ -35,7 +35,7 @@ func TestBloodspillInvocation_BlockShortReturnsZero(t *testing.T) {
 	}
 	for _, c := range cases {
 		s := card.TurnState{IncomingDamage: 3, BlockTotal: 2}
-		if got := c.Play(&s); got != 0 {
+		if got := c.Play(&s, nil); got != 0 {
 			t.Errorf("%s: Play() = %d, want 0 (block < incoming, no same-turn pop)", c.Name(), got)
 		}
 	}
@@ -49,7 +49,7 @@ func TestBloodspillInvocation_SameTurnPopBySalientAttackAction(t *testing.T) {
 		BlockTotal:     0,
 		CardsRemaining: []*card.PlayedCard{{Card: stubAttackWithPower{power: 4}}},
 	}
-	if got := (BloodspillInvocationRed{}).Play(&s); got != 3 {
+	if got := (BloodspillInvocationRed{}).Play(&s, nil); got != 3 {
 		t.Errorf("Play() = %d, want 3 (Attack=4 attack action pops Bloodspill same turn)", got)
 	}
 }
@@ -64,7 +64,7 @@ func TestBloodspillInvocation_WeaponDoesNotPop(t *testing.T) {
 		Runechants:     1,
 		CardsRemaining: []*card.PlayedCard{{Card: stubRunebladeWeapon{}}},
 	}
-	if got := (BloodspillInvocationRed{}).Play(&s); got != 0 {
+	if got := (BloodspillInvocationRed{}).Play(&s, nil); got != 0 {
 		t.Errorf("Play() = %d, want 0 (weapon hits don't trigger Bloodspill; under-block collapses value)", got)
 	}
 }
@@ -78,7 +78,7 @@ func TestBloodspillInvocation_SameTurnPopByRunechant(t *testing.T) {
 		Runechants:     1,
 		CardsRemaining: []*card.PlayedCard{{Card: stubAttackWithPower{power: 6}}},
 	}
-	if got := (BloodspillInvocationRed{}).Play(&s); got != 3 {
+	if got := (BloodspillInvocationRed{}).Play(&s, nil); got != 3 {
 		t.Errorf("Play() = %d, want 3 (Attack=6 blockable, 1 Runechant likely to hit)", got)
 	}
 }

@@ -24,8 +24,8 @@ func (RuneragerSwarmRed) Attack() int              { return 3 }
 func (RuneragerSwarmRed) Defense() int             { return 3 }
 func (RuneragerSwarmRed) Types() card.TypeSet      { return runeragerSwarmTypes }
 func (RuneragerSwarmRed) GoAgain() bool            { return false }
-func (c RuneragerSwarmRed) Play(s *card.TurnState) int {
-	return runeragerSwarmPlay(c.Attack(), s)
+func (c RuneragerSwarmRed) Play(s *card.TurnState, self *card.PlayedCard) int {
+	return runeragerSwarmPlay(c.Attack(), s, self)
 }
 
 type RuneragerSwarmYellow struct{}
@@ -38,8 +38,8 @@ func (RuneragerSwarmYellow) Attack() int              { return 2 }
 func (RuneragerSwarmYellow) Defense() int             { return 3 }
 func (RuneragerSwarmYellow) Types() card.TypeSet      { return runeragerSwarmTypes }
 func (RuneragerSwarmYellow) GoAgain() bool            { return false }
-func (c RuneragerSwarmYellow) Play(s *card.TurnState) int {
-	return runeragerSwarmPlay(c.Attack(), s)
+func (c RuneragerSwarmYellow) Play(s *card.TurnState, self *card.PlayedCard) int {
+	return runeragerSwarmPlay(c.Attack(), s, self)
 }
 
 type RuneragerSwarmBlue struct{}
@@ -52,13 +52,13 @@ func (RuneragerSwarmBlue) Attack() int              { return 1 }
 func (RuneragerSwarmBlue) Defense() int             { return 3 }
 func (RuneragerSwarmBlue) Types() card.TypeSet      { return runeragerSwarmTypes }
 func (RuneragerSwarmBlue) GoAgain() bool            { return false }
-func (c RuneragerSwarmBlue) Play(s *card.TurnState) int {
-	return runeragerSwarmPlay(c.Attack(), s)
+func (c RuneragerSwarmBlue) Play(s *card.TurnState, self *card.PlayedCard) int {
+	return runeragerSwarmPlay(c.Attack(), s, self)
 }
 
-func runeragerSwarmPlay(base int, s *card.TurnState) int {
+func runeragerSwarmPlay(base int, s *card.TurnState, self *card.PlayedCard) int {
 	if s.HasAuraInPlay() {
-		s.SelfGoAgain = true
+		self.GrantedGoAgain = true
 	}
 	return base
 }

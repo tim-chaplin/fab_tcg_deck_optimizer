@@ -23,7 +23,7 @@ func (HighStrikerRed) Attack() int                 { return 0 }
 func (HighStrikerRed) Defense() int                { return 2 }
 func (HighStrikerRed) Types() card.TypeSet         { return highStrikerTypes }
 func (HighStrikerRed) GoAgain() bool               { return true }
-func (HighStrikerRed) Play(s *card.TurnState) int { return 0 }
+func (HighStrikerRed) Play(s *card.TurnState, _ *card.PlayedCard) int { return 0 }
 
 type HighStrikerYellow struct{}
 
@@ -35,7 +35,7 @@ func (HighStrikerYellow) Attack() int                 { return 0 }
 func (HighStrikerYellow) Defense() int                { return 2 }
 func (HighStrikerYellow) Types() card.TypeSet         { return highStrikerTypes }
 func (HighStrikerYellow) GoAgain() bool               { return true }
-func (HighStrikerYellow) Play(s *card.TurnState) int { return 0 }
+func (HighStrikerYellow) Play(s *card.TurnState, _ *card.PlayedCard) int { return 0 }
 
 type HighStrikerBlue struct{}
 
@@ -47,4 +47,4 @@ func (HighStrikerBlue) Attack() int                 { return 0 }
 func (HighStrikerBlue) Defense() int                { return 2 }
 func (HighStrikerBlue) Types() card.TypeSet         { return highStrikerTypes }
 func (HighStrikerBlue) GoAgain() bool               { return true }
-func (HighStrikerBlue) Play(s *card.TurnState) int { return 0 }
+func (HighStrikerBlue) Play(s *card.TurnState, _ *card.PlayedCard) int { return 0 }

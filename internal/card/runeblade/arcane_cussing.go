@@ -26,7 +26,7 @@ func (ArcaneCussingRed) Attack() int                { return 0 }
 func (ArcaneCussingRed) Defense() int               { return 2 }
 func (ArcaneCussingRed) Types() card.TypeSet        { return arcaneCussingTypes }
 func (ArcaneCussingRed) GoAgain() bool              { return true }
-func (c ArcaneCussingRed) Play(s *card.TurnState) int { return fragileAuraValue(s, c, 3, false) }
+func (c ArcaneCussingRed) Play(s *card.TurnState, _ *card.PlayedCard) int { return fragileAuraValue(s, c, 3, false) }
 
 type ArcaneCussingYellow struct{}
 
@@ -38,7 +38,7 @@ func (ArcaneCussingYellow) Attack() int                { return 0 }
 func (ArcaneCussingYellow) Defense() int               { return 2 }
 func (ArcaneCussingYellow) Types() card.TypeSet        { return arcaneCussingTypes }
 func (ArcaneCussingYellow) GoAgain() bool              { return true }
-func (c ArcaneCussingYellow) Play(s *card.TurnState) int { return fragileAuraValue(s, c, 2, false) }
+func (c ArcaneCussingYellow) Play(s *card.TurnState, _ *card.PlayedCard) int { return fragileAuraValue(s, c, 2, false) }
 
 type ArcaneCussingBlue struct{}
 
@@ -50,4 +50,4 @@ func (ArcaneCussingBlue) Attack() int                { return 0 }
 func (ArcaneCussingBlue) Defense() int               { return 2 }
 func (ArcaneCussingBlue) Types() card.TypeSet        { return arcaneCussingTypes }
 func (ArcaneCussingBlue) GoAgain() bool              { return true }
-func (c ArcaneCussingBlue) Play(s *card.TurnState) int { return fragileAuraValue(s, c, 1, false) }
+func (c ArcaneCussingBlue) Play(s *card.TurnState, _ *card.PlayedCard) int { return fragileAuraValue(s, c, 1, false) }

@@ -26,7 +26,7 @@ func (RunicFellingsongRed) Attack() int                { return 7 }
 func (RunicFellingsongRed) Defense() int               { return 3 }
 func (RunicFellingsongRed) Types() card.TypeSet        { return runicFellingsongTypes }
 func (RunicFellingsongRed) GoAgain() bool              { return false }
-func (c RunicFellingsongRed) Play(*card.TurnState) int { return c.Attack() + 1 }
+func (c RunicFellingsongRed) Play(*card.TurnState, *card.PlayedCard) int { return c.Attack() + 1 }
 
 type RunicFellingsongYellow struct{}
 
@@ -38,7 +38,7 @@ func (RunicFellingsongYellow) Attack() int                { return 6 }
 func (RunicFellingsongYellow) Defense() int               { return 3 }
 func (RunicFellingsongYellow) Types() card.TypeSet        { return runicFellingsongTypes }
 func (RunicFellingsongYellow) GoAgain() bool              { return false }
-func (c RunicFellingsongYellow) Play(*card.TurnState) int { return c.Attack() + 1 }
+func (c RunicFellingsongYellow) Play(*card.TurnState, *card.PlayedCard) int { return c.Attack() + 1 }
 
 type RunicFellingsongBlue struct{}
 
@@ -50,4 +50,4 @@ func (RunicFellingsongBlue) Attack() int                { return 5 }
 func (RunicFellingsongBlue) Defense() int               { return 3 }
 func (RunicFellingsongBlue) Types() card.TypeSet        { return runicFellingsongTypes }
 func (RunicFellingsongBlue) GoAgain() bool              { return false }
-func (c RunicFellingsongBlue) Play(*card.TurnState) int { return c.Attack() + 1 }
+func (c RunicFellingsongBlue) Play(*card.TurnState, *card.PlayedCard) int { return c.Attack() + 1 }

@@ -10,7 +10,7 @@ import (
 func TestForceSight_NoAttackReturnsZero(t *testing.T) {
 	s := card.TurnState{}
 	for _, c := range []card.Card{ForceSightRed{}, ForceSightYellow{}, ForceSightBlue{}} {
-		if got := c.Play(&s); got != 0 {
+		if got := c.Play(&s, nil); got != 0 {
 			t.Errorf("%s: Play() = %d, want 0", c.Name(), got)
 		}
 	}
@@ -19,7 +19,7 @@ func TestForceSight_NoAttackReturnsZero(t *testing.T) {
 // TestForceSight_NonAttackInRemainingFizzles: non-attack action fails the predicate.
 func TestForceSight_NonAttackInRemainingFizzles(t *testing.T) {
 	s := card.TurnState{CardsRemaining: []*card.PlayedCard{{Card: stubGenericAction()}}}
-	if got := (ForceSightRed{}).Play(&s); got != 0 {
+	if got := (ForceSightRed{}).Play(&s, nil); got != 0 {
 		t.Errorf("Play() = %d, want 0 (non-attack skipped)", got)
 	}
 }
@@ -37,7 +37,7 @@ func TestForceSight_NextAttackReturnsBonus(t *testing.T) {
 		{ForceSightBlue{}, 1},
 	}
 	for _, tc := range cases {
-		if got := tc.c.Play(&s); got != tc.want {
+		if got := tc.c.Play(&s, nil); got != tc.want {
 			t.Errorf("%s: Play() = %d, want %d", tc.c.Name(), got, tc.want)
 		}
 	}

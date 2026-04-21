@@ -20,7 +20,7 @@ func TestMaleficIncantation_NoFollowingAttackLingers(t *testing.T) {
 	}
 	for _, tc := range cases {
 		var s card.TurnState
-		if got := tc.c.Play(&s); got != tc.want {
+		if got := tc.c.Play(&s, nil); got != tc.want {
 			t.Errorf("%s: Play() = %d, want %d", tc.c.Name(), got, tc.want)
 		}
 		if s.Runechants != 0 {
@@ -48,7 +48,7 @@ func TestMaleficIncantation_FollowingAttackPopsCounter(t *testing.T) {
 		s := card.TurnState{
 			CardsRemaining: []*card.PlayedCard{{Card: stubRunebladeAttack{}}},
 		}
-		if got := tc.c.Play(&s); got != tc.want {
+		if got := tc.c.Play(&s, nil); got != tc.want {
 			t.Errorf("%s: Play() = %d, want %d", tc.c.Name(), got, tc.want)
 		}
 		if s.Runechants != 1 {

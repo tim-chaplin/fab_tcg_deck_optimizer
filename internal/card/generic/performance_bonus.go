@@ -5,8 +5,8 @@
 // again**."
 //
 // The on-hit Gold token is modelled as +1 damage-equivalent (one resource worth), gated on
-// card.LikelyToHit. The arsenal-conditional Go again fires via SelfGoAgain when
-// card.PlayedFromArsenal reports this copy came from the arsenal slot.
+// card.LikelyToHit. The arsenal-conditional Go again fires via self.GrantedGoAgain when
+// self.FromArsenal reports this copy came from the arsenal slot.
 //
 // Source: github.com/the-fab-cube/flesh-and-blood-cards (card.csv).
 
@@ -25,11 +25,11 @@ func performanceBonusDamage(attack int) int {
 	return attack
 }
 
-// performanceBonusPlay credits the on-hit Gold token and grants SelfGoAgain when this
+// performanceBonusPlay credits the on-hit Gold token and grants self Go again when this
 // copy was played from arsenal.
-func performanceBonusPlay(c card.Card, s *card.TurnState) int {
-	if card.PlayedFromArsenal(s) {
-		s.SelfGoAgain = true
+func performanceBonusPlay(c card.Card, self *card.PlayedCard) int {
+	if self.FromArsenal {
+		self.GrantedGoAgain = true
 	}
 	return performanceBonusDamage(c.Attack())
 }
@@ -44,7 +44,7 @@ func (PerformanceBonusRed) Attack() int                  { return 3 }
 func (PerformanceBonusRed) Defense() int                 { return 2 }
 func (PerformanceBonusRed) Types() card.TypeSet          { return performanceBonusTypes }
 func (PerformanceBonusRed) GoAgain() bool                { return false }
-func (c PerformanceBonusRed) Play(s *card.TurnState) int { return performanceBonusDamage(c.Attack()) }
+func (c PerformanceBonusRed) Play(_ *card.TurnState, self *card.PlayedCard) int { return performanceBonusPlay(c, self) }
 
 type PerformanceBonusYellow struct{}
 
@@ -56,7 +56,7 @@ func (PerformanceBonusYellow) Attack() int                  { return 2 }
 func (PerformanceBonusYellow) Defense() int                 { return 2 }
 func (PerformanceBonusYellow) Types() card.TypeSet          { return performanceBonusTypes }
 func (PerformanceBonusYellow) GoAgain() bool                { return false }
-func (c PerformanceBonusYellow) Play(s *card.TurnState) int { return performanceBonusDamage(c.Attack()) }
+func (c PerformanceBonusYellow) Play(_ *card.TurnState, self *card.PlayedCard) int { return performanceBonusPlay(c, self) }
 
 type PerformanceBonusBlue struct{}
 
@@ -68,4 +68,4 @@ func (PerformanceBonusBlue) Attack() int                  { return 1 }
 func (PerformanceBonusBlue) Defense() int                 { return 2 }
 func (PerformanceBonusBlue) Types() card.TypeSet          { return performanceBonusTypes }
 func (PerformanceBonusBlue) GoAgain() bool                { return false }
-func (c PerformanceBonusBlue) Play(s *card.TurnState) int { return performanceBonusDamage(c.Attack()) }
+func (c PerformanceBonusBlue) Play(_ *card.TurnState, self *card.PlayedCard) int { return performanceBonusPlay(c, self) }

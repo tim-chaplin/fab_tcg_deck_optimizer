@@ -24,7 +24,7 @@ func (FlockOfTheFeatherWalkersRed) Attack() int                 { return 5 }
 func (FlockOfTheFeatherWalkersRed) Defense() int                { return 2 }
 func (FlockOfTheFeatherWalkersRed) Types() card.TypeSet         { return flockOfTheFeatherWalkersTypes }
 func (FlockOfTheFeatherWalkersRed) GoAgain() bool               { return false }
-func (c FlockOfTheFeatherWalkersRed) Play(s *card.TurnState) int { return c.Attack() }
+func (c FlockOfTheFeatherWalkersRed) Play(s *card.TurnState, _ *card.PlayedCard) int { return c.Attack() }
 
 type FlockOfTheFeatherWalkersYellow struct{}
 
@@ -36,7 +36,7 @@ func (FlockOfTheFeatherWalkersYellow) Attack() int                 { return 4 }
 func (FlockOfTheFeatherWalkersYellow) Defense() int                { return 2 }
 func (FlockOfTheFeatherWalkersYellow) Types() card.TypeSet         { return flockOfTheFeatherWalkersTypes }
 func (FlockOfTheFeatherWalkersYellow) GoAgain() bool               { return false }
-func (c FlockOfTheFeatherWalkersYellow) Play(s *card.TurnState) int { return c.Attack() }
+func (c FlockOfTheFeatherWalkersYellow) Play(s *card.TurnState, _ *card.PlayedCard) int { return c.Attack() }
 
 type FlockOfTheFeatherWalkersBlue struct{}
 
@@ -48,4 +48,4 @@ func (FlockOfTheFeatherWalkersBlue) Attack() int                 { return 3 }
 func (FlockOfTheFeatherWalkersBlue) Defense() int                { return 2 }
 func (FlockOfTheFeatherWalkersBlue) Types() card.TypeSet         { return flockOfTheFeatherWalkersTypes }
 func (FlockOfTheFeatherWalkersBlue) GoAgain() bool               { return false }
-func (c FlockOfTheFeatherWalkersBlue) Play(s *card.TurnState) int { return c.Attack() }
+func (c FlockOfTheFeatherWalkersBlue) Play(s *card.TurnState, _ *card.PlayedCard) int { return c.Attack() }

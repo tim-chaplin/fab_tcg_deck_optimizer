@@ -21,7 +21,7 @@ func (SinkBelowRed) Defense() int             { return 4 }
 func (SinkBelowRed) Types() card.TypeSet      { return defenseReactionTypes }
 func (SinkBelowRed) GoAgain() bool            { return false }
 func (SinkBelowRed) NotSilverAgeLegal()       {}
-func (SinkBelowRed) Play(*card.TurnState) int { return 0 }
+func (SinkBelowRed) Play(*card.TurnState, *card.PlayedCard) int { return 0 }
 
 type SinkBelowYellow struct{}
 
@@ -34,7 +34,7 @@ func (SinkBelowYellow) Defense() int             { return 3 }
 func (SinkBelowYellow) Types() card.TypeSet      { return defenseReactionTypes }
 func (SinkBelowYellow) GoAgain() bool            { return false }
 func (SinkBelowYellow) NotSilverAgeLegal()       {}
-func (SinkBelowYellow) Play(*card.TurnState) int { return 0 }
+func (SinkBelowYellow) Play(*card.TurnState, *card.PlayedCard) int { return 0 }
 
 type SinkBelowBlue struct{}
 
@@ -47,4 +47,4 @@ func (SinkBelowBlue) Defense() int             { return 2 }
 func (SinkBelowBlue) Types() card.TypeSet      { return defenseReactionTypes }
 func (SinkBelowBlue) GoAgain() bool            { return false }
 func (SinkBelowBlue) NotSilverAgeLegal()       {}
-func (SinkBelowBlue) Play(*card.TurnState) int { return 0 }
+func (SinkBelowBlue) Play(*card.TurnState, *card.PlayedCard) int { return 0 }

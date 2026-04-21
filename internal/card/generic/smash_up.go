@@ -23,7 +23,7 @@ func (SmashUpRed) Attack() int                 { return 5 }
 func (SmashUpRed) Defense() int                { return 2 }
 func (SmashUpRed) Types() card.TypeSet         { return smashUpTypes }
 func (SmashUpRed) GoAgain() bool               { return false }
-func (c SmashUpRed) Play(s *card.TurnState) int { return smashUpDamage(c.Attack()) }
+func (c SmashUpRed) Play(s *card.TurnState, _ *card.PlayedCard) int { return smashUpDamage(c.Attack()) }
 
 // smashUpDamage is a breadcrumb for the on-hit "arsenal face-up + banish attack action" rider —
 // not modelled yet (see TODO.md).

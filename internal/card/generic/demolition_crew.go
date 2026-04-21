@@ -24,7 +24,7 @@ func (DemolitionCrewRed) Attack() int                 { return 6 }
 func (DemolitionCrewRed) Defense() int                { return 2 }
 func (DemolitionCrewRed) Types() card.TypeSet         { return demolitionCrewTypes }
 func (DemolitionCrewRed) GoAgain() bool               { return false }
-func (c DemolitionCrewRed) Play(s *card.TurnState) int { return c.Attack() }
+func (c DemolitionCrewRed) Play(s *card.TurnState, _ *card.PlayedCard) int { return c.Attack() }
 
 type DemolitionCrewYellow struct{}
 
@@ -36,7 +36,7 @@ func (DemolitionCrewYellow) Attack() int                 { return 5 }
 func (DemolitionCrewYellow) Defense() int                { return 2 }
 func (DemolitionCrewYellow) Types() card.TypeSet         { return demolitionCrewTypes }
 func (DemolitionCrewYellow) GoAgain() bool               { return false }
-func (c DemolitionCrewYellow) Play(s *card.TurnState) int { return c.Attack() }
+func (c DemolitionCrewYellow) Play(s *card.TurnState, _ *card.PlayedCard) int { return c.Attack() }
 
 type DemolitionCrewBlue struct{}
 
@@ -48,4 +48,4 @@ func (DemolitionCrewBlue) Attack() int                 { return 4 }
 func (DemolitionCrewBlue) Defense() int                { return 2 }
 func (DemolitionCrewBlue) Types() card.TypeSet         { return demolitionCrewTypes }
 func (DemolitionCrewBlue) GoAgain() bool               { return false }
-func (c DemolitionCrewBlue) Play(s *card.TurnState) int { return c.Attack() }
+func (c DemolitionCrewBlue) Play(s *card.TurnState, _ *card.PlayedCard) int { return c.Attack() }

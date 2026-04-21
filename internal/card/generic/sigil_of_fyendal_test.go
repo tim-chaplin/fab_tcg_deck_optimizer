@@ -11,7 +11,7 @@ import (
 // phase.
 func TestSigilOfFyendal_PlaySetsAuraCreated(t *testing.T) {
 	s := card.TurnState{}
-	if got := (SigilOfFyendalBlue{}).Play(&s); got != 0 {
+	if got := (SigilOfFyendalBlue{}).Play(&s, nil); got != 0 {
 		t.Errorf("Play() = %d, want 0 (health gain deferred to PlayNextTurn)", got)
 	}
 	if !s.AuraCreated {

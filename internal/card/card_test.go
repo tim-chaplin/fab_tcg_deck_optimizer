@@ -14,7 +14,7 @@ func (stubCard) Attack() int                  { return 0 }
 func (stubCard) Defense() int                 { return 0 }
 func (stubCard) Types() TypeSet               { return 0 }
 func (stubCard) GoAgain() bool                { return false }
-func (stubCard) Play(*TurnState) int          { return 0 }
+func (stubCard) Play(*TurnState, *PlayedCard) int { return 0 }
 
 // TestDrawOne_AppendsTopAndAdvancesDeck: DrawOne moves the top card from Deck into Drawn and
 // preserves draw order for the caller.

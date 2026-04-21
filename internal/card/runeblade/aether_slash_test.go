@@ -20,7 +20,7 @@ func TestAetherSlash_BaseDamage(t *testing.T) {
 	}
 	for _, tc := range cases {
 		var s card.TurnState
-		if got := tc.c.Play(&s); got != tc.want {
+		if got := tc.c.Play(&s, nil); got != tc.want {
 			t.Errorf("%s: Play() = %d, want %d", tc.c.Name(), got, tc.want)
 		}
 	}
@@ -38,7 +38,7 @@ func TestAetherSlash_NonAttackActionPitchedAddsArcane(t *testing.T) {
 	}
 	for _, tc := range cases {
 		s := card.TurnState{Pitched: []card.Card{stubNonAttack{}}}
-		if got := tc.c.Play(&s); got != tc.want {
+		if got := tc.c.Play(&s, nil); got != tc.want {
 			t.Errorf("%s: Play() = %d, want %d", tc.c.Name(), got, tc.want)
 		}
 	}
@@ -47,7 +47,7 @@ func TestAetherSlash_NonAttackActionPitchedAddsArcane(t *testing.T) {
 func TestAetherSlash_AttackPitchedDoesNotTrigger(t *testing.T) {
 	// Pitching an attack card does NOT satisfy the "non-attack action pitched" rider.
 	s := card.TurnState{Pitched: []card.Card{stubRunebladeAttack{}}}
-	if got := (AetherSlashRed{}).Play(&s); got != 4 {
+	if got := (AetherSlashRed{}).Play(&s, nil); got != 4 {
 		t.Errorf("Aether Slash Red: Play() = %d, want 4 (no rider)", got)
 	}
 }
@@ -56,12 +56,12 @@ func TestAetherSlash_FlagsArcaneDamageDealtOnlyWhenTriggered(t *testing.T) {
 	// The ArcaneDamageDealt flag should only be set when the rider actually fires — otherwise
 	// same-turn triggers like Meat and Greet's go-again would spuriously enable themselves.
 	var s card.TurnState
-	(AetherSlashRed{}).Play(&s)
+	(AetherSlashRed{}).Play(&s, nil)
 	if s.ArcaneDamageDealt {
 		t.Error("ArcaneDamageDealt = true with no qualifying pitch; want false")
 	}
 	s = card.TurnState{Pitched: []card.Card{stubNonAttack{}}}
-	(AetherSlashRed{}).Play(&s)
+	(AetherSlashRed{}).Play(&s, nil)
 	if !s.ArcaneDamageDealt {
 		t.Error("ArcaneDamageDealt = false with non-attack action pitched; want true")
 	}

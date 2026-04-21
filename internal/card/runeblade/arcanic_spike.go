@@ -35,7 +35,7 @@ func (ArcanicSpikeRed) Attack() int                    { return 5 }
 func (ArcanicSpikeRed) Defense() int                   { return 3 }
 func (ArcanicSpikeRed) Types() card.TypeSet            { return arcanicSpikeTypes }
 func (ArcanicSpikeRed) GoAgain() bool                  { return false }
-func (c ArcanicSpikeRed) Play(s *card.TurnState) int   { return arcanicSpikeDamage(c.Attack(), s) }
+func (c ArcanicSpikeRed) Play(s *card.TurnState, _ *card.PlayedCard) int   { return arcanicSpikeDamage(c.Attack(), s) }
 
 type ArcanicSpikeYellow struct{}
 
@@ -47,7 +47,7 @@ func (ArcanicSpikeYellow) Attack() int                    { return 4 }
 func (ArcanicSpikeYellow) Defense() int                   { return 3 }
 func (ArcanicSpikeYellow) Types() card.TypeSet            { return arcanicSpikeTypes }
 func (ArcanicSpikeYellow) GoAgain() bool                  { return false }
-func (c ArcanicSpikeYellow) Play(s *card.TurnState) int   { return arcanicSpikeDamage(c.Attack(), s) }
+func (c ArcanicSpikeYellow) Play(s *card.TurnState, _ *card.PlayedCard) int   { return arcanicSpikeDamage(c.Attack(), s) }
 
 type ArcanicSpikeBlue struct{}
 
@@ -59,4 +59,4 @@ func (ArcanicSpikeBlue) Attack() int                    { return 3 }
 func (ArcanicSpikeBlue) Defense() int                   { return 3 }
 func (ArcanicSpikeBlue) Types() card.TypeSet            { return arcanicSpikeTypes }
 func (ArcanicSpikeBlue) GoAgain() bool                  { return false }
-func (c ArcanicSpikeBlue) Play(s *card.TurnState) int   { return arcanicSpikeDamage(c.Attack(), s) }
+func (c ArcanicSpikeBlue) Play(s *card.TurnState, _ *card.PlayedCard) int   { return arcanicSpikeDamage(c.Attack(), s) }

@@ -13,7 +13,7 @@ func TestBlessingOfOccult_PlayIsAuraOnly(t *testing.T) {
 	cases := []card.Card{BlessingOfOccultRed{}, BlessingOfOccultYellow{}, BlessingOfOccultBlue{}}
 	for _, c := range cases {
 		var s card.TurnState
-		if got := c.Play(&s); got != 0 {
+		if got := c.Play(&s, nil); got != 0 {
 			t.Errorf("%s: Play() = %d, want 0 (Runechants deferred to PlayNextTurn)", c.Name(), got)
 		}
 		if s.Runechants != 0 {

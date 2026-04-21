@@ -254,7 +254,7 @@ func (grantAll) Attack() int            { return 0 }
 func (grantAll) Defense() int           { return 0 }
 func (grantAll) Types() card.TypeSet    { return card.NewTypeSet(card.TypeRuneblade, card.TypeAction, card.TypeAttack) }
 func (grantAll) GoAgain() bool          { return true }
-func (grantAll) Play(s *card.TurnState) int {
+func (grantAll) Play(s *card.TurnState, _ *card.PlayedCard) int {
 	for _, pc := range s.CardsRemaining {
 		pc.GrantedGoAgain = true
 	}
@@ -276,7 +276,7 @@ func (grantSpy) Attack() int              { return 0 }
 func (grantSpy) Defense() int             { return 0 }
 func (grantSpy) Types() card.TypeSet      { return card.NewTypeSet(card.TypeRuneblade, card.TypeAction, card.TypeAttack) }
 func (grantSpy) GoAgain() bool            { return true }
-func (g grantSpy) Play(s *card.TurnState) int {
+func (g grantSpy) Play(s *card.TurnState, _ *card.PlayedCard) int {
 	if len(s.CardsPlayed) != 0 {
 		return 0
 	}

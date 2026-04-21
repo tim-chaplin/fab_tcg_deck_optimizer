@@ -24,7 +24,7 @@ func (FactFindingMissionRed) Attack() int                 { return 6 }
 func (FactFindingMissionRed) Defense() int                { return 2 }
 func (FactFindingMissionRed) Types() card.TypeSet         { return factFindingMissionTypes }
 func (FactFindingMissionRed) GoAgain() bool               { return false }
-func (c FactFindingMissionRed) Play(s *card.TurnState) int { return factFindingMissionDamage(c.Attack()) }
+func (c FactFindingMissionRed) Play(s *card.TurnState, _ *card.PlayedCard) int { return factFindingMissionDamage(c.Attack()) }
 
 type FactFindingMissionYellow struct{}
 
@@ -36,7 +36,7 @@ func (FactFindingMissionYellow) Attack() int                 { return 5 }
 func (FactFindingMissionYellow) Defense() int                { return 2 }
 func (FactFindingMissionYellow) Types() card.TypeSet         { return factFindingMissionTypes }
 func (FactFindingMissionYellow) GoAgain() bool               { return false }
-func (c FactFindingMissionYellow) Play(s *card.TurnState) int { return factFindingMissionDamage(c.Attack()) }
+func (c FactFindingMissionYellow) Play(s *card.TurnState, _ *card.PlayedCard) int { return factFindingMissionDamage(c.Attack()) }
 
 type FactFindingMissionBlue struct{}
 
@@ -48,7 +48,7 @@ func (FactFindingMissionBlue) Attack() int                 { return 4 }
 func (FactFindingMissionBlue) Defense() int                { return 2 }
 func (FactFindingMissionBlue) Types() card.TypeSet         { return factFindingMissionTypes }
 func (FactFindingMissionBlue) GoAgain() bool               { return false }
-func (c FactFindingMissionBlue) Play(s *card.TurnState) int { return factFindingMissionDamage(c.Attack()) }
+func (c FactFindingMissionBlue) Play(s *card.TurnState, _ *card.PlayedCard) int { return factFindingMissionDamage(c.Attack()) }
 
 // factFindingMissionDamage is a breadcrumb for the on-hit "peek a face-down card in arsenal /
 // equipment" rider — opponent-side inspection isn't modelled (see TODO.md).

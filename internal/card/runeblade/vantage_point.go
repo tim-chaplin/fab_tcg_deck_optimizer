@@ -22,7 +22,7 @@ func (VantagePointRed) Attack() int                { return 7 }
 func (VantagePointRed) Defense() int               { return 3 }
 func (VantagePointRed) Types() card.TypeSet        { return vantagePointTypes }
 func (VantagePointRed) GoAgain() bool              { return false }
-func (c VantagePointRed) Play(s *card.TurnState) int { return vantagePointPlay(c.Attack(), s) }
+func (c VantagePointRed) Play(s *card.TurnState, _ *card.PlayedCard) int { return vantagePointPlay(c.Attack(), s) }
 
 type VantagePointYellow struct{}
 
@@ -34,7 +34,7 @@ func (VantagePointYellow) Attack() int                  { return 6 }
 func (VantagePointYellow) Defense() int                 { return 3 }
 func (VantagePointYellow) Types() card.TypeSet          { return vantagePointTypes }
 func (VantagePointYellow) GoAgain() bool                { return false }
-func (c VantagePointYellow) Play(s *card.TurnState) int { return vantagePointPlay(c.Attack(), s) }
+func (c VantagePointYellow) Play(s *card.TurnState, _ *card.PlayedCard) int { return vantagePointPlay(c.Attack(), s) }
 
 type VantagePointBlue struct{}
 
@@ -46,7 +46,7 @@ func (VantagePointBlue) Attack() int                  { return 5 }
 func (VantagePointBlue) Defense() int                 { return 3 }
 func (VantagePointBlue) Types() card.TypeSet          { return vantagePointTypes }
 func (VantagePointBlue) GoAgain() bool                { return false }
-func (c VantagePointBlue) Play(s *card.TurnState) int { return vantagePointPlay(c.Attack(), s) }
+func (c VantagePointBlue) Play(s *card.TurnState, _ *card.PlayedCard) int { return vantagePointPlay(c.Attack(), s) }
 
 func vantagePointPlay(base int, s *card.TurnState) int {
 	if s.HasAuraInPlay() {

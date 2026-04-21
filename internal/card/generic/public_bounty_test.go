@@ -10,7 +10,7 @@ import (
 func TestPublicBounty_NoAttackReturnsZero(t *testing.T) {
 	s := card.TurnState{}
 	for _, c := range []card.Card{PublicBountyRed{}, PublicBountyYellow{}, PublicBountyBlue{}} {
-		if got := c.Play(&s); got != 0 {
+		if got := c.Play(&s, nil); got != 0 {
 			t.Errorf("%s: Play() = %d, want 0", c.Name(), got)
 		}
 	}
@@ -19,7 +19,7 @@ func TestPublicBounty_NoAttackReturnsZero(t *testing.T) {
 // TestPublicBounty_NonAttackInRemainingFizzles: non-attack action fails the predicate.
 func TestPublicBounty_NonAttackInRemainingFizzles(t *testing.T) {
 	s := card.TurnState{CardsRemaining: []*card.PlayedCard{{Card: stubGenericAction()}}}
-	if got := (PublicBountyRed{}).Play(&s); got != 0 {
+	if got := (PublicBountyRed{}).Play(&s, nil); got != 0 {
 		t.Errorf("Play() = %d, want 0 (non-attack skipped)", got)
 	}
 }
@@ -37,7 +37,7 @@ func TestPublicBounty_NextAttackReturnsBonus(t *testing.T) {
 		{PublicBountyBlue{}, 1},
 	}
 	for _, tc := range cases {
-		if got := tc.c.Play(&s); got != tc.want {
+		if got := tc.c.Play(&s, nil); got != tc.want {
 			t.Errorf("%s: Play() = %d, want %d", tc.c.Name(), got, tc.want)
 		}
 	}

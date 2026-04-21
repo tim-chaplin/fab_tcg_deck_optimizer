@@ -11,7 +11,7 @@ import (
 // Yellow 2 are both blockable.)
 func TestPerformanceBonus_LikelyHitCreditsToken(t *testing.T) {
 	var s card.TurnState
-	if got := (PerformanceBonusBlue{}).Play(&s); got != 1+card.GoldTokenValue {
+	if got := (PerformanceBonusBlue{}).Play(&s, &card.PlayedCard{}); got != 1+card.GoldTokenValue {
 		t.Errorf("Blue: Play() = %d, want %d (1 likely to hit + GoldTokenValue)", got, 1+card.GoldTokenValue)
 	}
 }
@@ -28,7 +28,7 @@ func TestPerformanceBonus_BlockableSuppressesToken(t *testing.T) {
 	}
 	for _, tc := range cases {
 		var s card.TurnState
-		if got := tc.c.Play(&s); got != tc.want {
+		if got := tc.c.Play(&s, &card.PlayedCard{}); got != tc.want {
 			t.Errorf("%s: Play() = %d, want %d (blockable, no token)", tc.c.Name(), got, tc.want)
 		}
 	}

@@ -64,7 +64,7 @@ func (MaleficIncantationRed) Attack() int                 { return 0 }
 func (MaleficIncantationRed) Defense() int                { return 2 }
 func (MaleficIncantationRed) Types() card.TypeSet         { return maleficTypes }
 func (MaleficIncantationRed) GoAgain() bool               { return true }
-func (c MaleficIncantationRed) Play(s *card.TurnState) int  { return maleficPlay(s, c, 3) }
+func (c MaleficIncantationRed) Play(s *card.TurnState, _ *card.PlayedCard) int  { return maleficPlay(s, c, 3) }
 func (c MaleficIncantationRed) PlayNextTurn(s *card.TurnState) card.DelayedPlayResult {
 	return maleficNextTurn(s, c)
 }
@@ -79,7 +79,7 @@ func (MaleficIncantationYellow) Attack() int                 { return 0 }
 func (MaleficIncantationYellow) Defense() int                { return 2 }
 func (MaleficIncantationYellow) Types() card.TypeSet         { return maleficTypes }
 func (MaleficIncantationYellow) GoAgain() bool               { return true }
-func (c MaleficIncantationYellow) Play(s *card.TurnState) int  { return maleficPlay(s, c, 2) }
+func (c MaleficIncantationYellow) Play(s *card.TurnState, _ *card.PlayedCard) int  { return maleficPlay(s, c, 2) }
 func (c MaleficIncantationYellow) PlayNextTurn(s *card.TurnState) card.DelayedPlayResult {
 	return maleficNextTurn(s, c)
 }
@@ -94,7 +94,7 @@ func (MaleficIncantationBlue) Attack() int                 { return 0 }
 func (MaleficIncantationBlue) Defense() int                { return 2 }
 func (MaleficIncantationBlue) Types() card.TypeSet         { return maleficTypes }
 func (MaleficIncantationBlue) GoAgain() bool               { return true }
-func (c MaleficIncantationBlue) Play(s *card.TurnState) int  { return maleficPlay(s, c, 1) }
+func (c MaleficIncantationBlue) Play(s *card.TurnState, _ *card.PlayedCard) int  { return maleficPlay(s, c, 1) }
 func (c MaleficIncantationBlue) PlayNextTurn(s *card.TurnState) card.DelayedPlayResult {
 	return maleficNextTurn(s, c)
 }

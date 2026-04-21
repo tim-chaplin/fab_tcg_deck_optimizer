@@ -18,7 +18,7 @@ func (EvasiveLeapRed) Attack() int              { return 0 }
 func (EvasiveLeapRed) Defense() int             { return 3 }
 func (EvasiveLeapRed) Types() card.TypeSet      { return defenseReactionTypes }
 func (EvasiveLeapRed) GoAgain() bool            { return false }
-func (EvasiveLeapRed) Play(*card.TurnState) int { return 0 }
+func (EvasiveLeapRed) Play(*card.TurnState, *card.PlayedCard) int { return 0 }
 
 type EvasiveLeapYellow struct{}
 
@@ -30,7 +30,7 @@ func (EvasiveLeapYellow) Attack() int              { return 0 }
 func (EvasiveLeapYellow) Defense() int             { return 2 }
 func (EvasiveLeapYellow) Types() card.TypeSet      { return defenseReactionTypes }
 func (EvasiveLeapYellow) GoAgain() bool            { return false }
-func (EvasiveLeapYellow) Play(*card.TurnState) int { return 0 }
+func (EvasiveLeapYellow) Play(*card.TurnState, *card.PlayedCard) int { return 0 }
 
 type EvasiveLeapBlue struct{}
 
@@ -42,4 +42,4 @@ func (EvasiveLeapBlue) Attack() int              { return 0 }
 func (EvasiveLeapBlue) Defense() int             { return 1 }
 func (EvasiveLeapBlue) Types() card.TypeSet      { return defenseReactionTypes }
 func (EvasiveLeapBlue) GoAgain() bool            { return false }
-func (EvasiveLeapBlue) Play(*card.TurnState) int { return 0 }
+func (EvasiveLeapBlue) Play(*card.TurnState, *card.PlayedCard) int { return 0 }

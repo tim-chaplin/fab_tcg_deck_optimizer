@@ -24,4 +24,4 @@ func (CashInYellow) Defense() int                { return 2 }
 func (CashInYellow) Types() card.TypeSet         { return cashInTypes }
 func (CashInYellow) GoAgain() bool               { return true }
 func (CashInYellow) NotSilverAgeLegal()           {}
-func (CashInYellow) Play(s *card.TurnState) int { return 0 }
+func (CashInYellow) Play(s *card.TurnState, _ *card.PlayedCard) int { return 0 }

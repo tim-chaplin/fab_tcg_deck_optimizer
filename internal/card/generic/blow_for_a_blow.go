@@ -32,7 +32,7 @@ func (BlowForABlowRed) Attack() int         { return 4 }
 func (BlowForABlowRed) Defense() int        { return 2 }
 func (BlowForABlowRed) Types() card.TypeSet { return blowForABlowTypes }
 func (BlowForABlowRed) GoAgain() bool       { return simstate.HeroWantsLowerHealth() }
-func (c BlowForABlowRed) Play(s *card.TurnState) int {
+func (c BlowForABlowRed) Play(s *card.TurnState, _ *card.PlayedCard) int {
 	if card.LikelyToHit(c.Attack()) {
 		return c.Attack() + blowForABlowPingValue
 	}

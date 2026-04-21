@@ -40,7 +40,7 @@ func (MinnowismRed) Attack() int                 { return 0 }
 func (MinnowismRed) Defense() int                { return 2 }
 func (MinnowismRed) Types() card.TypeSet         { return minnowismTypes }
 func (MinnowismRed) GoAgain() bool               { return true }
-func (MinnowismRed) Play(s *card.TurnState) int { return minnowismPlay(s, 3) }
+func (MinnowismRed) Play(s *card.TurnState, _ *card.PlayedCard) int { return minnowismPlay(s, 3) }
 
 type MinnowismYellow struct{}
 
@@ -52,7 +52,7 @@ func (MinnowismYellow) Attack() int                 { return 0 }
 func (MinnowismYellow) Defense() int                { return 2 }
 func (MinnowismYellow) Types() card.TypeSet         { return minnowismTypes }
 func (MinnowismYellow) GoAgain() bool               { return true }
-func (MinnowismYellow) Play(s *card.TurnState) int { return minnowismPlay(s, 2) }
+func (MinnowismYellow) Play(s *card.TurnState, _ *card.PlayedCard) int { return minnowismPlay(s, 2) }
 
 type MinnowismBlue struct{}
 
@@ -64,4 +64,4 @@ func (MinnowismBlue) Attack() int                 { return 0 }
 func (MinnowismBlue) Defense() int                { return 2 }
 func (MinnowismBlue) Types() card.TypeSet         { return minnowismTypes }
 func (MinnowismBlue) GoAgain() bool               { return true }
-func (MinnowismBlue) Play(s *card.TurnState) int { return minnowismPlay(s, 1) }
+func (MinnowismBlue) Play(s *card.TurnState, _ *card.PlayedCard) int { return minnowismPlay(s, 1) }

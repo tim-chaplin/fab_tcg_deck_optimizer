@@ -24,4 +24,4 @@ func (EmissaryOfMoonRed) Attack() int                 { return 4 }
 func (EmissaryOfMoonRed) Defense() int                { return 2 }
 func (EmissaryOfMoonRed) Types() card.TypeSet         { return emissaryOfMoonTypes }
 func (EmissaryOfMoonRed) GoAgain() bool               { return false }
-func (c EmissaryOfMoonRed) Play(s *card.TurnState) int { return c.Attack() }
+func (c EmissaryOfMoonRed) Play(s *card.TurnState, _ *card.PlayedCard) int { return c.Attack() }

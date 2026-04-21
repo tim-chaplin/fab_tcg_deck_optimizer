@@ -24,7 +24,7 @@ func (SigilOfDeadwoodBlue) Attack() int                { return 0 }
 func (SigilOfDeadwoodBlue) Defense() int               { return 2 }
 func (SigilOfDeadwoodBlue) Types() card.TypeSet        { return sigilOfDeadwoodTypes }
 func (SigilOfDeadwoodBlue) GoAgain() bool              { return true }
-func (SigilOfDeadwoodBlue) Play(s *card.TurnState) int {
+func (SigilOfDeadwoodBlue) Play(s *card.TurnState, _ *card.PlayedCard) int {
 	s.AuraCreated = true
 	return 0
 }

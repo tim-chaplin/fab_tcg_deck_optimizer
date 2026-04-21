@@ -19,7 +19,7 @@ func (CriticalStrikeRed) Attack() int                 { return 5 }
 func (CriticalStrikeRed) Defense() int                { return 3 }
 func (CriticalStrikeRed) Types() card.TypeSet         { return criticalStrikeTypes }
 func (CriticalStrikeRed) GoAgain() bool               { return false }
-func (c CriticalStrikeRed) Play(s *card.TurnState) int { return c.Attack() }
+func (c CriticalStrikeRed) Play(s *card.TurnState, _ *card.PlayedCard) int { return c.Attack() }
 
 type CriticalStrikeYellow struct{}
 
@@ -31,7 +31,7 @@ func (CriticalStrikeYellow) Attack() int                 { return 4 }
 func (CriticalStrikeYellow) Defense() int                { return 3 }
 func (CriticalStrikeYellow) Types() card.TypeSet         { return criticalStrikeTypes }
 func (CriticalStrikeYellow) GoAgain() bool               { return false }
-func (c CriticalStrikeYellow) Play(s *card.TurnState) int { return c.Attack() }
+func (c CriticalStrikeYellow) Play(s *card.TurnState, _ *card.PlayedCard) int { return c.Attack() }
 
 type CriticalStrikeBlue struct{}
 
@@ -43,4 +43,4 @@ func (CriticalStrikeBlue) Attack() int                 { return 3 }
 func (CriticalStrikeBlue) Defense() int                { return 3 }
 func (CriticalStrikeBlue) Types() card.TypeSet         { return criticalStrikeTypes }
 func (CriticalStrikeBlue) GoAgain() bool               { return false }
-func (c CriticalStrikeBlue) Play(s *card.TurnState) int { return c.Attack() }
+func (c CriticalStrikeBlue) Play(s *card.TurnState, _ *card.PlayedCard) int { return c.Attack() }

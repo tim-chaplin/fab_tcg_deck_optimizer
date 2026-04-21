@@ -24,7 +24,7 @@ func (PoundForPoundRed) Attack() int                 { return 6 }
 func (PoundForPoundRed) Defense() int                { return 2 }
 func (PoundForPoundRed) Types() card.TypeSet         { return poundForPoundTypes }
 func (PoundForPoundRed) GoAgain() bool               { return false }
-func (c PoundForPoundRed) Play(s *card.TurnState) int { return c.Attack() }
+func (c PoundForPoundRed) Play(s *card.TurnState, _ *card.PlayedCard) int { return c.Attack() }
 
 type PoundForPoundYellow struct{}
 
@@ -36,7 +36,7 @@ func (PoundForPoundYellow) Attack() int                 { return 5 }
 func (PoundForPoundYellow) Defense() int                { return 2 }
 func (PoundForPoundYellow) Types() card.TypeSet         { return poundForPoundTypes }
 func (PoundForPoundYellow) GoAgain() bool               { return false }
-func (c PoundForPoundYellow) Play(s *card.TurnState) int { return c.Attack() }
+func (c PoundForPoundYellow) Play(s *card.TurnState, _ *card.PlayedCard) int { return c.Attack() }
 
 type PoundForPoundBlue struct{}
 
@@ -48,4 +48,4 @@ func (PoundForPoundBlue) Attack() int                 { return 4 }
 func (PoundForPoundBlue) Defense() int                { return 2 }
 func (PoundForPoundBlue) Types() card.TypeSet         { return poundForPoundTypes }
 func (PoundForPoundBlue) GoAgain() bool               { return false }
-func (c PoundForPoundBlue) Play(s *card.TurnState) int { return c.Attack() }
+func (c PoundForPoundBlue) Play(s *card.TurnState, _ *card.PlayedCard) int { return c.Attack() }

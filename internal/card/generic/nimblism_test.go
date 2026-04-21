@@ -10,7 +10,7 @@ import (
 func TestNimblism_NoAttackReturnsZero(t *testing.T) {
 	s := card.TurnState{}
 	for _, c := range []card.Card{NimblismRed{}, NimblismYellow{}, NimblismBlue{}} {
-		if got := c.Play(&s); got != 0 {
+		if got := c.Play(&s, nil); got != 0 {
 			t.Errorf("%s: Play() = %d, want 0", c.Name(), got)
 		}
 	}
@@ -19,7 +19,7 @@ func TestNimblism_NoAttackReturnsZero(t *testing.T) {
 // TestNimblism_HighCostFilteredOut: a cost-2 attack is seen but the cost<=1 filter rejects it.
 func TestNimblism_HighCostFilteredOut(t *testing.T) {
 	s := card.TurnState{CardsRemaining: []*card.PlayedCard{{Card: stubGenericAttack(2, 0)}}}
-	if got := (NimblismRed{}).Play(&s); got != 0 {
+	if got := (NimblismRed{}).Play(&s, nil); got != 0 {
 		t.Errorf("Play() = %d, want 0 (cost 2 > 1)", got)
 	}
 }
@@ -37,7 +37,7 @@ func TestNimblism_LowCostReturnsBonus(t *testing.T) {
 		{NimblismBlue{}, 1},
 	}
 	for _, tc := range cases {
-		if got := tc.c.Play(&s); got != tc.want {
+		if got := tc.c.Play(&s, nil); got != tc.want {
 			t.Errorf("%s: Play() = %d, want %d", tc.c.Name(), got, tc.want)
 		}
 	}

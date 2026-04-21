@@ -23,7 +23,7 @@ func (StonyWoottonhogRed) Attack() int                 { return 6 }
 func (StonyWoottonhogRed) Defense() int                { return 2 }
 func (StonyWoottonhogRed) Types() card.TypeSet         { return stonyWoottonhogTypes }
 func (StonyWoottonhogRed) GoAgain() bool               { return false }
-func (c StonyWoottonhogRed) Play(s *card.TurnState) int { return c.Attack() }
+func (c StonyWoottonhogRed) Play(s *card.TurnState, _ *card.PlayedCard) int { return c.Attack() }
 
 type StonyWoottonhogYellow struct{}
 
@@ -35,7 +35,7 @@ func (StonyWoottonhogYellow) Attack() int                 { return 5 }
 func (StonyWoottonhogYellow) Defense() int                { return 2 }
 func (StonyWoottonhogYellow) Types() card.TypeSet         { return stonyWoottonhogTypes }
 func (StonyWoottonhogYellow) GoAgain() bool               { return false }
-func (c StonyWoottonhogYellow) Play(s *card.TurnState) int { return c.Attack() }
+func (c StonyWoottonhogYellow) Play(s *card.TurnState, _ *card.PlayedCard) int { return c.Attack() }
 
 type StonyWoottonhogBlue struct{}
 
@@ -47,4 +47,4 @@ func (StonyWoottonhogBlue) Attack() int                 { return 4 }
 func (StonyWoottonhogBlue) Defense() int                { return 2 }
 func (StonyWoottonhogBlue) Types() card.TypeSet         { return stonyWoottonhogTypes }
 func (StonyWoottonhogBlue) GoAgain() bool               { return false }
-func (c StonyWoottonhogBlue) Play(s *card.TurnState) int { return c.Attack() }
+func (c StonyWoottonhogBlue) Play(s *card.TurnState, _ *card.PlayedCard) int { return c.Attack() }

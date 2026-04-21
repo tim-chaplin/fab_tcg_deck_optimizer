@@ -23,7 +23,7 @@ func (WhisperOfTheOracleRed) Attack() int                 { return 0 }
 func (WhisperOfTheOracleRed) Defense() int                { return 3 }
 func (WhisperOfTheOracleRed) Types() card.TypeSet         { return whisperOfTheOracleTypes }
 func (WhisperOfTheOracleRed) GoAgain() bool               { return true }
-func (WhisperOfTheOracleRed) Play(s *card.TurnState) int { return 0 }
+func (WhisperOfTheOracleRed) Play(s *card.TurnState, _ *card.PlayedCard) int { return 0 }
 
 type WhisperOfTheOracleYellow struct{}
 
@@ -35,7 +35,7 @@ func (WhisperOfTheOracleYellow) Attack() int                 { return 0 }
 func (WhisperOfTheOracleYellow) Defense() int                { return 3 }
 func (WhisperOfTheOracleYellow) Types() card.TypeSet         { return whisperOfTheOracleTypes }
 func (WhisperOfTheOracleYellow) GoAgain() bool               { return true }
-func (WhisperOfTheOracleYellow) Play(s *card.TurnState) int { return 0 }
+func (WhisperOfTheOracleYellow) Play(s *card.TurnState, _ *card.PlayedCard) int { return 0 }
 
 type WhisperOfTheOracleBlue struct{}
 
@@ -47,4 +47,4 @@ func (WhisperOfTheOracleBlue) Attack() int                 { return 0 }
 func (WhisperOfTheOracleBlue) Defense() int                { return 3 }
 func (WhisperOfTheOracleBlue) Types() card.TypeSet         { return whisperOfTheOracleTypes }
 func (WhisperOfTheOracleBlue) GoAgain() bool               { return true }
-func (WhisperOfTheOracleBlue) Play(s *card.TurnState) int { return 0 }
+func (WhisperOfTheOracleBlue) Play(s *card.TurnState, _ *card.PlayedCard) int { return 0 }

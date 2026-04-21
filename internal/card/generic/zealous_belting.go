@@ -14,10 +14,10 @@ var zealousBeltingTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, car
 
 // zealousBeltingPlay grants go again when any pitched card this turn has base power greater
 // than the card's own base power.
-func zealousBeltingPlay(base int, s *card.TurnState) int {
+func zealousBeltingPlay(base int, s *card.TurnState, self *card.PlayedCard) int {
 	for _, p := range s.Pitched {
 		if p.Attack() > base {
-			s.SelfGoAgain = true
+			self.GrantedGoAgain = true
 			break
 		}
 	}
@@ -34,7 +34,7 @@ func (ZealousBeltingRed) Attack() int                 { return 5 }
 func (ZealousBeltingRed) Defense() int                { return 2 }
 func (ZealousBeltingRed) Types() card.TypeSet         { return zealousBeltingTypes }
 func (ZealousBeltingRed) GoAgain() bool               { return false }
-func (c ZealousBeltingRed) Play(s *card.TurnState) int { return zealousBeltingPlay(c.Attack(), s) }
+func (c ZealousBeltingRed) Play(s *card.TurnState, self *card.PlayedCard) int { return zealousBeltingPlay(c.Attack(), s, self) }
 
 type ZealousBeltingYellow struct{}
 
@@ -46,7 +46,7 @@ func (ZealousBeltingYellow) Attack() int                 { return 4 }
 func (ZealousBeltingYellow) Defense() int                { return 2 }
 func (ZealousBeltingYellow) Types() card.TypeSet         { return zealousBeltingTypes }
 func (ZealousBeltingYellow) GoAgain() bool               { return false }
-func (c ZealousBeltingYellow) Play(s *card.TurnState) int { return zealousBeltingPlay(c.Attack(), s) }
+func (c ZealousBeltingYellow) Play(s *card.TurnState, self *card.PlayedCard) int { return zealousBeltingPlay(c.Attack(), s, self) }
 
 type ZealousBeltingBlue struct{}
 
@@ -58,4 +58,4 @@ func (ZealousBeltingBlue) Attack() int                 { return 3 }
 func (ZealousBeltingBlue) Defense() int                { return 2 }
 func (ZealousBeltingBlue) Types() card.TypeSet         { return zealousBeltingTypes }
 func (ZealousBeltingBlue) GoAgain() bool               { return false }
-func (c ZealousBeltingBlue) Play(s *card.TurnState) int { return zealousBeltingPlay(c.Attack(), s) }
+func (c ZealousBeltingBlue) Play(s *card.TurnState, self *card.PlayedCard) int { return zealousBeltingPlay(c.Attack(), s, self) }

@@ -24,7 +24,7 @@ func (LookingForAScrapRed) Attack() int                 { return 4 }
 func (LookingForAScrapRed) Defense() int                { return 2 }
 func (LookingForAScrapRed) Types() card.TypeSet         { return lookingForAScrapTypes }
 func (LookingForAScrapRed) GoAgain() bool               { return false }
-func (c LookingForAScrapRed) Play(s *card.TurnState) int { return c.Attack() }
+func (c LookingForAScrapRed) Play(s *card.TurnState, _ *card.PlayedCard) int { return c.Attack() }
 
 type LookingForAScrapYellow struct{}
 
@@ -36,7 +36,7 @@ func (LookingForAScrapYellow) Attack() int                 { return 3 }
 func (LookingForAScrapYellow) Defense() int                { return 2 }
 func (LookingForAScrapYellow) Types() card.TypeSet         { return lookingForAScrapTypes }
 func (LookingForAScrapYellow) GoAgain() bool               { return false }
-func (c LookingForAScrapYellow) Play(s *card.TurnState) int { return c.Attack() }
+func (c LookingForAScrapYellow) Play(s *card.TurnState, _ *card.PlayedCard) int { return c.Attack() }
 
 type LookingForAScrapBlue struct{}
 
@@ -48,4 +48,4 @@ func (LookingForAScrapBlue) Attack() int                 { return 2 }
 func (LookingForAScrapBlue) Defense() int                { return 2 }
 func (LookingForAScrapBlue) Types() card.TypeSet         { return lookingForAScrapTypes }
 func (LookingForAScrapBlue) GoAgain() bool               { return false }
-func (c LookingForAScrapBlue) Play(s *card.TurnState) int { return c.Attack() }
+func (c LookingForAScrapBlue) Play(s *card.TurnState, _ *card.PlayedCard) int { return c.Attack() }

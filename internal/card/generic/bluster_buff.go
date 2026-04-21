@@ -23,4 +23,4 @@ func (BlusterBuffRed) Attack() int                 { return 6 }
 func (BlusterBuffRed) Defense() int                { return 3 }
 func (BlusterBuffRed) Types() card.TypeSet         { return blusterBuffTypes }
 func (BlusterBuffRed) GoAgain() bool               { return false }
-func (c BlusterBuffRed) Play(s *card.TurnState) int { return c.Attack() }
+func (c BlusterBuffRed) Play(s *card.TurnState, _ *card.PlayedCard) int { return c.Attack() }

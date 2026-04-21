@@ -19,7 +19,7 @@ func (stubRuneAttack) Types() card.TypeSet {
 	return card.NewTypeSet(card.TypeRuneblade, card.TypeAction, card.TypeAttack)
 }
 func (stubRuneAttack) GoAgain() bool            { return true }
-func (stubRuneAttack) Play(*card.TurnState) int { return 0 }
+func (stubRuneAttack) Play(*card.TurnState, *card.PlayedCard) int { return 0 }
 
 // stubRuneAura is a minimal Runeblade non-attack action (an Aura).
 type stubRuneAura struct{}
@@ -34,7 +34,7 @@ func (stubRuneAura) Types() card.TypeSet {
 	return card.NewTypeSet(card.TypeRuneblade, card.TypeAction, card.TypeAura)
 }
 func (stubRuneAura) GoAgain() bool            { return true }
-func (stubRuneAura) Play(*card.TurnState) int { return 0 }
+func (stubRuneAura) Play(*card.TurnState, *card.PlayedCard) int { return 0 }
 
 // stubNonRuneblade is an Action-Attack with no Runeblade type — should never trigger Viserai.
 type stubNonRuneblade struct{}
@@ -49,7 +49,7 @@ func (stubNonRuneblade) Types() card.TypeSet {
 	return card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeAttack)
 }
 func (stubNonRuneblade) GoAgain() bool            { return true }
-func (stubNonRuneblade) Play(*card.TurnState) int { return 0 }
+func (stubNonRuneblade) Play(*card.TurnState, *card.PlayedCard) int { return 0 }
 
 func TestViserai_RunebladeAfterNonAttackActionTriggers(t *testing.T) {
 	// Non-attack action played first, then a Runeblade attack. Viserai's OnCardPlayed creates a
@@ -95,7 +95,7 @@ func (stubRuneWeapon) Types() card.TypeSet {
 	return card.NewTypeSet(card.TypeRuneblade, card.TypeWeapon)
 }
 func (stubRuneWeapon) GoAgain() bool            { return true }
-func (stubRuneWeapon) Play(*card.TurnState) int { return 0 }
+func (stubRuneWeapon) Play(*card.TurnState, *card.PlayedCard) int { return 0 }
 
 func TestViserai_WeaponSwingDoesNotTrigger(t *testing.T) {
 	// Even with a prior non-attack action in CardsPlayed, swinging a Runeblade weapon isn't "playing a

@@ -10,7 +10,7 @@ import (
 func TestSloggism_NoAttackReturnsZero(t *testing.T) {
 	s := card.TurnState{}
 	for _, c := range []card.Card{SloggismRed{}, SloggismYellow{}, SloggismBlue{}} {
-		if got := c.Play(&s); got != 0 {
+		if got := c.Play(&s, nil); got != 0 {
 			t.Errorf("%s: Play() = %d, want 0", c.Name(), got)
 		}
 	}
@@ -19,7 +19,7 @@ func TestSloggism_NoAttackReturnsZero(t *testing.T) {
 // TestSloggism_LowCostFilteredOut: a cost-1 attack is seen but the cost>=2 filter rejects it.
 func TestSloggism_LowCostFilteredOut(t *testing.T) {
 	s := card.TurnState{CardsRemaining: []*card.PlayedCard{{Card: stubGenericAttack(1, 0)}}}
-	if got := (SloggismRed{}).Play(&s); got != 0 {
+	if got := (SloggismRed{}).Play(&s, nil); got != 0 {
 		t.Errorf("Play() = %d, want 0 (cost 1 < 2)", got)
 	}
 }
@@ -37,7 +37,7 @@ func TestSloggism_HighCostReturnsBonus(t *testing.T) {
 		{SloggismBlue{}, 4},
 	}
 	for _, tc := range cases {
-		if got := tc.c.Play(&s); got != tc.want {
+		if got := tc.c.Play(&s, nil); got != tc.want {
 			t.Errorf("%s: Play() = %d, want %d", tc.c.Name(), got, tc.want)
 		}
 	}

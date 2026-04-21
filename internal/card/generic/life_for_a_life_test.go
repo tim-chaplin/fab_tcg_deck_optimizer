@@ -10,7 +10,7 @@ import (
 // in the likely-to-hit set; the 1{h} gain credits +1.
 func TestLifeForALife_LikelyHitCreditsHeal(t *testing.T) {
 	var s card.TurnState
-	if got := (LifeForALifeRed{}).Play(&s); got != 4+1 {
+	if got := (LifeForALifeRed{}).Play(&s, nil); got != 4+1 {
 		t.Errorf("Red: Play() = %d, want 5 (4 likely to hit + 1 heal)", got)
 	}
 }
@@ -27,7 +27,7 @@ func TestLifeForALife_BlockableSuppressesHeal(t *testing.T) {
 	}
 	for _, tc := range cases {
 		var s card.TurnState
-		if got := tc.c.Play(&s); got != tc.want {
+		if got := tc.c.Play(&s, nil); got != tc.want {
 			t.Errorf("%s: Play() = %d, want %d (blockable, no heal)", tc.c.Name(), got, tc.want)
 		}
 	}

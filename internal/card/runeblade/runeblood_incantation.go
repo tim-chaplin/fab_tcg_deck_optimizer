@@ -41,7 +41,7 @@ func (RunebloodIncantationRed) Attack() int                { return 0 }
 func (RunebloodIncantationRed) Defense() int               { return 2 }
 func (RunebloodIncantationRed) Types() card.TypeSet        { return runebloodIncantationTypes }
 func (RunebloodIncantationRed) GoAgain() bool              { return true }
-func (RunebloodIncantationRed) Play(s *card.TurnState) int { return runebloodPlay(s, 3) }
+func (RunebloodIncantationRed) Play(s *card.TurnState, _ *card.PlayedCard) int { return runebloodPlay(s, 3) }
 func (c RunebloodIncantationRed) PlayNextTurn(s *card.TurnState) card.DelayedPlayResult {
 	return runebloodNextTurn(s, c)
 }
@@ -56,7 +56,7 @@ func (RunebloodIncantationYellow) Attack() int                { return 0 }
 func (RunebloodIncantationYellow) Defense() int               { return 2 }
 func (RunebloodIncantationYellow) Types() card.TypeSet        { return runebloodIncantationTypes }
 func (RunebloodIncantationYellow) GoAgain() bool              { return true }
-func (RunebloodIncantationYellow) Play(s *card.TurnState) int { return runebloodPlay(s, 2) }
+func (RunebloodIncantationYellow) Play(s *card.TurnState, _ *card.PlayedCard) int { return runebloodPlay(s, 2) }
 func (c RunebloodIncantationYellow) PlayNextTurn(s *card.TurnState) card.DelayedPlayResult {
 	return runebloodNextTurn(s, c)
 }
@@ -71,7 +71,7 @@ func (RunebloodIncantationBlue) Attack() int                { return 0 }
 func (RunebloodIncantationBlue) Defense() int               { return 2 }
 func (RunebloodIncantationBlue) Types() card.TypeSet        { return runebloodIncantationTypes }
 func (RunebloodIncantationBlue) GoAgain() bool              { return true }
-func (RunebloodIncantationBlue) Play(s *card.TurnState) int { return runebloodPlay(s, 1) }
+func (RunebloodIncantationBlue) Play(s *card.TurnState, _ *card.PlayedCard) int { return runebloodPlay(s, 1) }
 func (c RunebloodIncantationBlue) PlayNextTurn(s *card.TurnState) card.DelayedPlayResult {
 	return runebloodNextTurn(s, c)
 }

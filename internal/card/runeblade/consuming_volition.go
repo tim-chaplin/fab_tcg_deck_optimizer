@@ -36,7 +36,7 @@ func (ConsumingVolitionRed) Attack() int                  { return 4 }
 func (ConsumingVolitionRed) Defense() int                 { return 3 }
 func (ConsumingVolitionRed) Types() card.TypeSet          { return consumingVolitionTypes }
 func (ConsumingVolitionRed) GoAgain() bool                { return false }
-func (c ConsumingVolitionRed) Play(s *card.TurnState) int { return consumingVolitionDamage(c.Attack(), s) }
+func (c ConsumingVolitionRed) Play(s *card.TurnState, _ *card.PlayedCard) int { return consumingVolitionDamage(c.Attack(), s) }
 
 type ConsumingVolitionYellow struct{}
 
@@ -48,7 +48,7 @@ func (ConsumingVolitionYellow) Attack() int                  { return 3 }
 func (ConsumingVolitionYellow) Defense() int                 { return 3 }
 func (ConsumingVolitionYellow) Types() card.TypeSet          { return consumingVolitionTypes }
 func (ConsumingVolitionYellow) GoAgain() bool                { return false }
-func (c ConsumingVolitionYellow) Play(s *card.TurnState) int { return consumingVolitionDamage(c.Attack(), s) }
+func (c ConsumingVolitionYellow) Play(s *card.TurnState, _ *card.PlayedCard) int { return consumingVolitionDamage(c.Attack(), s) }
 
 type ConsumingVolitionBlue struct{}
 
@@ -60,4 +60,4 @@ func (ConsumingVolitionBlue) Attack() int                  { return 2 }
 func (ConsumingVolitionBlue) Defense() int                 { return 3 }
 func (ConsumingVolitionBlue) Types() card.TypeSet          { return consumingVolitionTypes }
 func (ConsumingVolitionBlue) GoAgain() bool                { return false }
-func (c ConsumingVolitionBlue) Play(s *card.TurnState) int { return consumingVolitionDamage(c.Attack(), s) }
+func (c ConsumingVolitionBlue) Play(s *card.TurnState, _ *card.PlayedCard) int { return consumingVolitionDamage(c.Attack(), s) }

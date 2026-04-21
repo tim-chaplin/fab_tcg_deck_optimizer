@@ -10,7 +10,7 @@ import (
 func TestWeepingBattleground_AuraInGraveyard(t *testing.T) {
 	aura := SigilOfSilphidaeBlue{}
 	s := card.TurnState{Graveyard: []card.Card{aura}}
-	if got := (WeepingBattlegroundRed{}).Play(&s); got != 1 {
+	if got := (WeepingBattlegroundRed{}).Play(&s, nil); got != 1 {
 		t.Fatalf("Play() = %d, want 1", got)
 	}
 	if !s.ArcaneDamageDealt {
@@ -24,7 +24,7 @@ func TestWeepingBattleground_NoAuraInGraveyard(t *testing.T) {
 	// Shrill of Skullform is an Action - Attack (no Aura type), so it fails the aura scan.
 	nonAura := ShrillOfSkullformRed{}
 	s := card.TurnState{Graveyard: []card.Card{nonAura}}
-	if got := (WeepingBattlegroundRed{}).Play(&s); got != 0 {
+	if got := (WeepingBattlegroundRed{}).Play(&s, nil); got != 0 {
 		t.Fatalf("Play() = %d, want 0 (no aura to banish)", got)
 	}
 	if s.ArcaneDamageDealt {
@@ -35,7 +35,7 @@ func TestWeepingBattleground_NoAuraInGraveyard(t *testing.T) {
 // TestWeepingBattleground_EmptyGraveyard: no graveyard at all means no banish, no damage.
 func TestWeepingBattleground_EmptyGraveyard(t *testing.T) {
 	var s card.TurnState
-	if got := (WeepingBattlegroundRed{}).Play(&s); got != 0 {
+	if got := (WeepingBattlegroundRed{}).Play(&s, nil); got != 0 {
 		t.Fatalf("Play() = %d, want 0", got)
 	}
 }
@@ -46,7 +46,7 @@ func TestWeepingBattleground_BanishesAura(t *testing.T) {
 	aura := SigilOfSilphidaeBlue{}
 	nonAura := ShrillOfSkullformRed{}
 	s := card.TurnState{Graveyard: []card.Card{nonAura, aura}}
-	(WeepingBattlegroundRed{}).Play(&s)
+	(WeepingBattlegroundRed{}).Play(&s, nil)
 	if len(s.Graveyard) != 1 || s.Graveyard[0].ID() != nonAura.ID() {
 		t.Errorf("want graveyard with only non-aura left, got %+v", s.Graveyard)
 	}
@@ -62,7 +62,7 @@ func TestWeepingBattleground_OnlyOneAuraBanished(t *testing.T) {
 	aura1 := SigilOfSilphidaeBlue{}
 	aura2 := SigilOfSilphidaeBlue{}
 	s := card.TurnState{Graveyard: []card.Card{aura1, aura2}}
-	(WeepingBattlegroundRed{}).Play(&s)
+	(WeepingBattlegroundRed{}).Play(&s, nil)
 	if len(s.Graveyard) != 1 {
 		t.Fatalf("want one aura left in graveyard, got %d", len(s.Graveyard))
 	}
@@ -77,10 +77,10 @@ func TestWeepingBattleground_SecondCopyAlsoFires(t *testing.T) {
 	aura1 := SigilOfSilphidaeBlue{}
 	aura2 := SigilOfSilphidaeBlue{}
 	s := card.TurnState{Graveyard: []card.Card{aura1, aura2}}
-	if got := (WeepingBattlegroundRed{}).Play(&s); got != 1 {
+	if got := (WeepingBattlegroundRed{}).Play(&s, nil); got != 1 {
 		t.Fatalf("first Play() = %d, want 1", got)
 	}
-	if got := (WeepingBattlegroundBlue{}).Play(&s); got != 1 {
+	if got := (WeepingBattlegroundBlue{}).Play(&s, nil); got != 1 {
 		t.Fatalf("second Play() = %d, want 1", got)
 	}
 	if len(s.Graveyard) != 0 {
@@ -96,10 +96,10 @@ func TestWeepingBattleground_SecondCopyAlsoFires(t *testing.T) {
 func TestWeepingBattleground_SecondCopyFizzlesWhenOutOfAuras(t *testing.T) {
 	aura := SigilOfSilphidaeBlue{}
 	s := card.TurnState{Graveyard: []card.Card{aura}}
-	if got := (WeepingBattlegroundRed{}).Play(&s); got != 1 {
+	if got := (WeepingBattlegroundRed{}).Play(&s, nil); got != 1 {
 		t.Fatalf("first Play() = %d, want 1", got)
 	}
-	if got := (WeepingBattlegroundBlue{}).Play(&s); got != 0 {
+	if got := (WeepingBattlegroundBlue{}).Play(&s, nil); got != 0 {
 		t.Fatalf("second Play() = %d, want 0 (no aura left)", got)
 	}
 }

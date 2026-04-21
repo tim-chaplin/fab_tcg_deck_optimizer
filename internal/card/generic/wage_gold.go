@@ -23,7 +23,7 @@ func (WageGoldRed) Attack() int                 { return 7 }
 func (WageGoldRed) Defense() int                { return 2 }
 func (WageGoldRed) Types() card.TypeSet         { return wageGoldTypes }
 func (WageGoldRed) GoAgain() bool               { return false }
-func (c WageGoldRed) Play(s *card.TurnState) int { return c.Attack() }
+func (c WageGoldRed) Play(s *card.TurnState, _ *card.PlayedCard) int { return c.Attack() }
 
 type WageGoldYellow struct{}
 
@@ -35,7 +35,7 @@ func (WageGoldYellow) Attack() int                 { return 6 }
 func (WageGoldYellow) Defense() int                { return 2 }
 func (WageGoldYellow) Types() card.TypeSet         { return wageGoldTypes }
 func (WageGoldYellow) GoAgain() bool               { return false }
-func (c WageGoldYellow) Play(s *card.TurnState) int { return c.Attack() }
+func (c WageGoldYellow) Play(s *card.TurnState, _ *card.PlayedCard) int { return c.Attack() }
 
 type WageGoldBlue struct{}
 
@@ -47,4 +47,4 @@ func (WageGoldBlue) Attack() int                 { return 5 }
 func (WageGoldBlue) Defense() int                { return 2 }
 func (WageGoldBlue) Types() card.TypeSet         { return wageGoldTypes }
 func (WageGoldBlue) GoAgain() bool               { return false }
-func (c WageGoldBlue) Play(s *card.TurnState) int { return c.Attack() }
+func (c WageGoldBlue) Play(s *card.TurnState, _ *card.PlayedCard) int { return c.Attack() }

@@ -25,4 +25,4 @@ func (SoundTheAlarmRed) Attack() int                 { return 5 }
 func (SoundTheAlarmRed) Defense() int                { return 3 }
 func (SoundTheAlarmRed) Types() card.TypeSet         { return soundTheAlarmTypes }
 func (SoundTheAlarmRed) GoAgain() bool               { return false }
-func (c SoundTheAlarmRed) Play(s *card.TurnState) int { return c.Attack() }
+func (c SoundTheAlarmRed) Play(s *card.TurnState, _ *card.PlayedCard) int { return c.Attack() }

@@ -26,26 +26,26 @@ func TestVigorRush_NoNonAttackActionNoGoAgain(t *testing.T) {
 		s := card.TurnState{
 			CardsPlayed: []card.Card{stubGenericAttack(0, 0)}, // attack action, not non-attack
 		}
-		if got := c.Play(&s); got != c.Attack() {
+		self := &card.PlayedCard{Card: c}
+		if got := c.Play(&s, self); got != c.Attack() {
 			t.Errorf("%s: Play() = %d, want %d (base power)", c.Name(), got, c.Attack())
 		}
-		if s.SelfGoAgain {
-			t.Errorf("%s: SelfGoAgain = true, want false (no non-attack action played)", c.Name())
+		if self.GrantedGoAgain {
+			t.Errorf("%s: GrantedGoAgain = true, want false (no non-attack action played)", c.Name())
 		}
 	}
 }
 
 // TestVigorRush_NonAttackActionGrantsGoAgain exercises the hit branch: a non-attack action played
-// earlier this turn flips SelfGoAgain.
+// earlier this turn flips self.GrantedGoAgain.
 func TestVigorRush_NonAttackActionGrantsGoAgain(t *testing.T) {
 	cases := []card.Card{VigorRushRed{}, VigorRushYellow{}, VigorRushBlue{}}
 	for _, c := range cases {
-		s := card.TurnState{
-			CardsPlayed: []card.Card{stubGenericAction()},
-		}
-		_ = c.Play(&s)
-		if !s.SelfGoAgain {
-			t.Errorf("%s: SelfGoAgain = false, want true (non-attack action → go again)", c.Name())
+		s := card.TurnState{CardsPlayed: []card.Card{stubGenericAction()}}
+		self := &card.PlayedCard{Card: c}
+		_ = c.Play(&s, self)
+		if !self.GrantedGoAgain {
+			t.Errorf("%s: GrantedGoAgain = false, want true (non-attack action → go again)", c.Name())
 		}
 	}
 }

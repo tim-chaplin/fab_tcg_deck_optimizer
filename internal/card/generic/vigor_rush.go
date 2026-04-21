@@ -16,10 +16,10 @@ import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 var vigorRushTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeAttack)
 
 // vigorRushPlay grants go again when any non-attack Action has been played earlier this turn.
-func vigorRushPlay(base int, s *card.TurnState) int {
+func vigorRushPlay(base int, s *card.TurnState, self *card.PlayedCard) int {
 	for _, pl := range s.CardsPlayed {
 		if pl.Types().IsNonAttackAction() {
-			s.SelfGoAgain = true
+			self.GrantedGoAgain = true
 			break
 		}
 	}
@@ -36,7 +36,7 @@ func (VigorRushRed) Attack() int                 { return 4 }
 func (VigorRushRed) Defense() int                { return 2 }
 func (VigorRushRed) Types() card.TypeSet         { return vigorRushTypes }
 func (VigorRushRed) GoAgain() bool               { return false }
-func (c VigorRushRed) Play(s *card.TurnState) int { return vigorRushPlay(c.Attack(), s) }
+func (c VigorRushRed) Play(s *card.TurnState, self *card.PlayedCard) int { return vigorRushPlay(c.Attack(), s, self) }
 
 type VigorRushYellow struct{}
 
@@ -48,7 +48,7 @@ func (VigorRushYellow) Attack() int                 { return 3 }
 func (VigorRushYellow) Defense() int                { return 2 }
 func (VigorRushYellow) Types() card.TypeSet         { return vigorRushTypes }
 func (VigorRushYellow) GoAgain() bool               { return false }
-func (c VigorRushYellow) Play(s *card.TurnState) int { return vigorRushPlay(c.Attack(), s) }
+func (c VigorRushYellow) Play(s *card.TurnState, self *card.PlayedCard) int { return vigorRushPlay(c.Attack(), s, self) }
 
 type VigorRushBlue struct{}
 
@@ -60,4 +60,4 @@ func (VigorRushBlue) Attack() int                 { return 2 }
 func (VigorRushBlue) Defense() int                { return 2 }
 func (VigorRushBlue) Types() card.TypeSet         { return vigorRushTypes }
 func (VigorRushBlue) GoAgain() bool               { return false }
-func (c VigorRushBlue) Play(s *card.TurnState) int { return vigorRushPlay(c.Attack(), s) }
+func (c VigorRushBlue) Play(s *card.TurnState, self *card.PlayedCard) int { return vigorRushPlay(c.Attack(), s, self) }

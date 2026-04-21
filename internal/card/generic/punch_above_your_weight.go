@@ -23,7 +23,7 @@ func (PunchAboveYourWeightRed) Attack() int                 { return 2 }
 func (PunchAboveYourWeightRed) Defense() int                { return 2 }
 func (PunchAboveYourWeightRed) Types() card.TypeSet         { return punchAboveYourWeightTypes }
 func (PunchAboveYourWeightRed) GoAgain() bool               { return false }
-func (c PunchAboveYourWeightRed) Play(s *card.TurnState) int { return c.Attack() }
+func (c PunchAboveYourWeightRed) Play(s *card.TurnState, _ *card.PlayedCard) int { return c.Attack() }
 
 type PunchAboveYourWeightYellow struct{}
 
@@ -35,7 +35,7 @@ func (PunchAboveYourWeightYellow) Attack() int                 { return 2 }
 func (PunchAboveYourWeightYellow) Defense() int                { return 2 }
 func (PunchAboveYourWeightYellow) Types() card.TypeSet         { return punchAboveYourWeightTypes }
 func (PunchAboveYourWeightYellow) GoAgain() bool               { return false }
-func (c PunchAboveYourWeightYellow) Play(s *card.TurnState) int { return c.Attack() }
+func (c PunchAboveYourWeightYellow) Play(s *card.TurnState, _ *card.PlayedCard) int { return c.Attack() }
 
 type PunchAboveYourWeightBlue struct{}
 
@@ -47,4 +47,4 @@ func (PunchAboveYourWeightBlue) Attack() int                 { return 2 }
 func (PunchAboveYourWeightBlue) Defense() int                { return 2 }
 func (PunchAboveYourWeightBlue) Types() card.TypeSet         { return punchAboveYourWeightTypes }
 func (PunchAboveYourWeightBlue) GoAgain() bool               { return false }
-func (c PunchAboveYourWeightBlue) Play(s *card.TurnState) int { return c.Attack() }
+func (c PunchAboveYourWeightBlue) Play(s *card.TurnState, _ *card.PlayedCard) int { return c.Attack() }

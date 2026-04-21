@@ -9,7 +9,7 @@ import (
 func TestRunicReaping_NoNextAttackReturnsZero(t *testing.T) {
 	// No attack action following → no bonus at all, and AuraCreated must remain false.
 	s := card.TurnState{Pitched: []card.Card{stubAttackWithPower{power: 4}}}
-	if got := (RunicReapingRed{}).Play(&s); got != 0 {
+	if got := (RunicReapingRed{}).Play(&s, nil); got != 0 {
 		t.Fatalf("want 0 when no next attack, got %d", got)
 	}
 	if s.AuraCreated {
@@ -21,7 +21,7 @@ func TestRunicReaping_WeaponNextDoesNotQualify(t *testing.T) {
 	// A Runeblade weapon swing later in the turn is not an attack action card, so the rider doesn't
 	// trigger.
 	s := card.TurnState{CardsRemaining: []*card.PlayedCard{{Card: stubRunebladeWeapon{}}}}
-	if got := (RunicReapingRed{}).Play(&s); got != 0 {
+	if got := (RunicReapingRed{}).Play(&s, nil); got != 0 {
 		t.Fatalf("want 0 with weapon-only next, got %d", got)
 	}
 }
@@ -43,7 +43,7 @@ func TestRunicReaping_LikelyHitTargetNoPitchedAttack(t *testing.T) {
 			CardsRemaining: []*card.PlayedCard{{Card: stubAttackWithPower{power: 4}}},
 			Pitched:        []card.Card{stubNonAttack{}},
 		}
-		if got := tc.c.Play(&s); got != tc.n {
+		if got := tc.c.Play(&s, nil); got != tc.n {
 			t.Errorf("%s: Play() = %d, want %d", tc.c.Name(), got, tc.n)
 		}
 		if s.Runechants != tc.n {
@@ -72,7 +72,7 @@ func TestRunicReaping_LikelyHitTargetWithPitchedAttack(t *testing.T) {
 			CardsRemaining: []*card.PlayedCard{{Card: stubAttackWithPower{power: 4}}},
 			Pitched:        []card.Card{stubRunebladeAttack{}},
 		}
-		if got := tc.c.Play(&s); got != tc.n+1 {
+		if got := tc.c.Play(&s, nil); got != tc.n+1 {
 			t.Errorf("%s: Play() = %d, want %d (N tokens + 1 pitched-attack bonus)", tc.c.Name(), got, tc.n+1)
 		}
 		if s.Runechants != tc.n {
@@ -89,7 +89,7 @@ func TestRunicReaping_BlockableTargetDropsRunechants(t *testing.T) {
 		CardsRemaining: []*card.PlayedCard{{Card: stubAttackWithPower{power: 3}}},
 		Pitched:        []card.Card{stubRunebladeAttack{}},
 	}
-	if got := (RunicReapingRed{}).Play(&s); got != 1 {
+	if got := (RunicReapingRed{}).Play(&s, nil); got != 1 {
 		t.Errorf("Play() = %d, want 1 (blockable target drops Runechants, pitched-attack +1 still fires)", got)
 	}
 	if s.Runechants != 0 {

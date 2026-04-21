@@ -24,7 +24,7 @@ func (BarragingBrawnhideRed) Attack() int                 { return 7 }
 func (BarragingBrawnhideRed) Defense() int                { return 2 }
 func (BarragingBrawnhideRed) Types() card.TypeSet         { return barragingBrawnhideTypes }
 func (BarragingBrawnhideRed) GoAgain() bool               { return false }
-func (c BarragingBrawnhideRed) Play(s *card.TurnState) int { return c.Attack() }
+func (c BarragingBrawnhideRed) Play(s *card.TurnState, _ *card.PlayedCard) int { return c.Attack() }
 
 type BarragingBrawnhideYellow struct{}
 
@@ -36,7 +36,7 @@ func (BarragingBrawnhideYellow) Attack() int                 { return 6 }
 func (BarragingBrawnhideYellow) Defense() int                { return 2 }
 func (BarragingBrawnhideYellow) Types() card.TypeSet         { return barragingBrawnhideTypes }
 func (BarragingBrawnhideYellow) GoAgain() bool               { return false }
-func (c BarragingBrawnhideYellow) Play(s *card.TurnState) int { return c.Attack() }
+func (c BarragingBrawnhideYellow) Play(s *card.TurnState, _ *card.PlayedCard) int { return c.Attack() }
 
 type BarragingBrawnhideBlue struct{}
 
@@ -48,4 +48,4 @@ func (BarragingBrawnhideBlue) Attack() int                 { return 5 }
 func (BarragingBrawnhideBlue) Defense() int                { return 2 }
 func (BarragingBrawnhideBlue) Types() card.TypeSet         { return barragingBrawnhideTypes }
 func (BarragingBrawnhideBlue) GoAgain() bool               { return false }
-func (c BarragingBrawnhideBlue) Play(s *card.TurnState) int { return c.Attack() }
+func (c BarragingBrawnhideBlue) Play(s *card.TurnState, _ *card.PlayedCard) int { return c.Attack() }

@@ -25,7 +25,7 @@ func (OathOfTheArknightRed) Attack() int                { return 0 }
 func (OathOfTheArknightRed) Defense() int               { return 3 }
 func (OathOfTheArknightRed) Types() card.TypeSet        { return oathOfTheArknightTypes }
 func (OathOfTheArknightRed) GoAgain() bool              { return true }
-func (OathOfTheArknightRed) Play(s *card.TurnState) int { return oathPlay(s, 3) }
+func (OathOfTheArknightRed) Play(s *card.TurnState, _ *card.PlayedCard) int { return oathPlay(s, 3) }
 
 type OathOfTheArknightYellow struct{}
 
@@ -37,7 +37,7 @@ func (OathOfTheArknightYellow) Attack() int                { return 0 }
 func (OathOfTheArknightYellow) Defense() int               { return 3 }
 func (OathOfTheArknightYellow) Types() card.TypeSet        { return oathOfTheArknightTypes }
 func (OathOfTheArknightYellow) GoAgain() bool              { return true }
-func (OathOfTheArknightYellow) Play(s *card.TurnState) int { return oathPlay(s, 2) }
+func (OathOfTheArknightYellow) Play(s *card.TurnState, _ *card.PlayedCard) int { return oathPlay(s, 2) }
 
 type OathOfTheArknightBlue struct{}
 
@@ -49,7 +49,7 @@ func (OathOfTheArknightBlue) Attack() int                { return 0 }
 func (OathOfTheArknightBlue) Defense() int               { return 3 }
 func (OathOfTheArknightBlue) Types() card.TypeSet        { return oathOfTheArknightTypes }
 func (OathOfTheArknightBlue) GoAgain() bool              { return true }
-func (OathOfTheArknightBlue) Play(s *card.TurnState) int { return oathPlay(s, 1) }
+func (OathOfTheArknightBlue) Play(s *card.TurnState, _ *card.PlayedCard) int { return oathPlay(s, 1) }
 
 func oathPlay(s *card.TurnState, n int) int {
 	bonus := 0

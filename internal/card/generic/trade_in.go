@@ -24,7 +24,7 @@ func (TradeInRed) Attack() int                 { return 3 }
 func (TradeInRed) Defense() int                { return 2 }
 func (TradeInRed) Types() card.TypeSet         { return tradeInTypes }
 func (TradeInRed) GoAgain() bool               { return false }
-func (c TradeInRed) Play(s *card.TurnState) int { return c.Attack() }
+func (c TradeInRed) Play(s *card.TurnState, _ *card.PlayedCard) int { return c.Attack() }
 
 type TradeInYellow struct{}
 
@@ -36,7 +36,7 @@ func (TradeInYellow) Attack() int                 { return 2 }
 func (TradeInYellow) Defense() int                { return 2 }
 func (TradeInYellow) Types() card.TypeSet         { return tradeInTypes }
 func (TradeInYellow) GoAgain() bool               { return false }
-func (c TradeInYellow) Play(s *card.TurnState) int { return c.Attack() }
+func (c TradeInYellow) Play(s *card.TurnState, _ *card.PlayedCard) int { return c.Attack() }
 
 type TradeInBlue struct{}
 
@@ -48,4 +48,4 @@ func (TradeInBlue) Attack() int                 { return 1 }
 func (TradeInBlue) Defense() int                { return 2 }
 func (TradeInBlue) Types() card.TypeSet         { return tradeInTypes }
 func (TradeInBlue) GoAgain() bool               { return false }
-func (c TradeInBlue) Play(s *card.TurnState) int { return c.Attack() }
+func (c TradeInBlue) Play(s *card.TurnState, _ *card.PlayedCard) int { return c.Attack() }

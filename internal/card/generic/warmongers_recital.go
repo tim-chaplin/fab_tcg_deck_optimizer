@@ -26,7 +26,7 @@ func (WarmongersRecitalRed) Attack() int                 { return 0 }
 func (WarmongersRecitalRed) Defense() int                { return 2 }
 func (WarmongersRecitalRed) Types() card.TypeSet         { return warmongersRecitalTypes }
 func (WarmongersRecitalRed) GoAgain() bool               { return true }
-func (WarmongersRecitalRed) Play(s *card.TurnState) int { return nextAttackActionBonus(s, 3) }
+func (WarmongersRecitalRed) Play(s *card.TurnState, _ *card.PlayedCard) int { return nextAttackActionBonus(s, 3) }
 
 type WarmongersRecitalYellow struct{}
 
@@ -38,7 +38,7 @@ func (WarmongersRecitalYellow) Attack() int                 { return 0 }
 func (WarmongersRecitalYellow) Defense() int                { return 2 }
 func (WarmongersRecitalYellow) Types() card.TypeSet         { return warmongersRecitalTypes }
 func (WarmongersRecitalYellow) GoAgain() bool               { return true }
-func (WarmongersRecitalYellow) Play(s *card.TurnState) int { return nextAttackActionBonus(s, 2) }
+func (WarmongersRecitalYellow) Play(s *card.TurnState, _ *card.PlayedCard) int { return nextAttackActionBonus(s, 2) }
 
 type WarmongersRecitalBlue struct{}
 
@@ -50,4 +50,4 @@ func (WarmongersRecitalBlue) Attack() int                 { return 0 }
 func (WarmongersRecitalBlue) Defense() int                { return 2 }
 func (WarmongersRecitalBlue) Types() card.TypeSet         { return warmongersRecitalTypes }
 func (WarmongersRecitalBlue) GoAgain() bool               { return true }
-func (WarmongersRecitalBlue) Play(s *card.TurnState) int { return nextAttackActionBonus(s, 1) }
+func (WarmongersRecitalBlue) Play(s *card.TurnState, _ *card.PlayedCard) int { return nextAttackActionBonus(s, 1) }

@@ -23,7 +23,7 @@ func (DestructiveDeliberationRed) Attack() int                 { return 5 }
 func (DestructiveDeliberationRed) Defense() int                { return 2 }
 func (DestructiveDeliberationRed) Types() card.TypeSet         { return destructiveDeliberationTypes }
 func (DestructiveDeliberationRed) GoAgain() bool               { return false }
-func (c DestructiveDeliberationRed) Play(s *card.TurnState) int { return destructiveDeliberationDamage(c.Attack()) }
+func (c DestructiveDeliberationRed) Play(s *card.TurnState, _ *card.PlayedCard) int { return destructiveDeliberationDamage(c.Attack()) }
 
 type DestructiveDeliberationYellow struct{}
 
@@ -35,7 +35,7 @@ func (DestructiveDeliberationYellow) Attack() int                 { return 4 }
 func (DestructiveDeliberationYellow) Defense() int                { return 2 }
 func (DestructiveDeliberationYellow) Types() card.TypeSet         { return destructiveDeliberationTypes }
 func (DestructiveDeliberationYellow) GoAgain() bool               { return false }
-func (c DestructiveDeliberationYellow) Play(s *card.TurnState) int { return destructiveDeliberationDamage(c.Attack()) }
+func (c DestructiveDeliberationYellow) Play(s *card.TurnState, _ *card.PlayedCard) int { return destructiveDeliberationDamage(c.Attack()) }
 
 type DestructiveDeliberationBlue struct{}
 
@@ -47,7 +47,7 @@ func (DestructiveDeliberationBlue) Attack() int                 { return 3 }
 func (DestructiveDeliberationBlue) Defense() int                { return 2 }
 func (DestructiveDeliberationBlue) Types() card.TypeSet         { return destructiveDeliberationTypes }
 func (DestructiveDeliberationBlue) GoAgain() bool               { return false }
-func (c DestructiveDeliberationBlue) Play(s *card.TurnState) int { return destructiveDeliberationDamage(c.Attack()) }
+func (c DestructiveDeliberationBlue) Play(s *card.TurnState, _ *card.PlayedCard) int { return destructiveDeliberationDamage(c.Attack()) }
 
 // destructiveDeliberationDamage is a breadcrumb for the on-hit "create a Ponder token" rider —
 // Ponder tokens aren't tracked (see TODO.md).

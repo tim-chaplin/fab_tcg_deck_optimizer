@@ -28,7 +28,7 @@ func (LifeOfThePartyRed) Attack() int                 { return 4 }
 func (LifeOfThePartyRed) Defense() int                { return 2 }
 func (LifeOfThePartyRed) Types() card.TypeSet         { return lifeOfThePartyTypes }
 func (LifeOfThePartyRed) GoAgain() bool               { return false }
-func (c LifeOfThePartyRed) Play(s *card.TurnState) int { return c.Attack() }
+func (c LifeOfThePartyRed) Play(s *card.TurnState, _ *card.PlayedCard) int { return c.Attack() }
 
 type LifeOfThePartyYellow struct{}
 
@@ -40,7 +40,7 @@ func (LifeOfThePartyYellow) Attack() int                 { return 3 }
 func (LifeOfThePartyYellow) Defense() int                { return 2 }
 func (LifeOfThePartyYellow) Types() card.TypeSet         { return lifeOfThePartyTypes }
 func (LifeOfThePartyYellow) GoAgain() bool               { return false }
-func (c LifeOfThePartyYellow) Play(s *card.TurnState) int { return c.Attack() }
+func (c LifeOfThePartyYellow) Play(s *card.TurnState, _ *card.PlayedCard) int { return c.Attack() }
 
 type LifeOfThePartyBlue struct{}
 
@@ -52,4 +52,4 @@ func (LifeOfThePartyBlue) Attack() int                 { return 2 }
 func (LifeOfThePartyBlue) Defense() int                { return 2 }
 func (LifeOfThePartyBlue) Types() card.TypeSet         { return lifeOfThePartyTypes }
 func (LifeOfThePartyBlue) GoAgain() bool               { return false }
-func (c LifeOfThePartyBlue) Play(s *card.TurnState) int { return c.Attack() }
+func (c LifeOfThePartyBlue) Play(s *card.TurnState, _ *card.PlayedCard) int { return c.Attack() }

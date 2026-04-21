@@ -25,7 +25,7 @@ func (PickACardAnyCardRed) Attack() int                 { return 0 }
 func (PickACardAnyCardRed) Defense() int                { return 2 }
 func (PickACardAnyCardRed) Types() card.TypeSet         { return pickACardAnyCardTypes }
 func (PickACardAnyCardRed) GoAgain() bool               { return true }
-func (PickACardAnyCardRed) Play(s *card.TurnState) int { return 0 }
+func (PickACardAnyCardRed) Play(s *card.TurnState, _ *card.PlayedCard) int { return 0 }
 
 type PickACardAnyCardYellow struct{}
 
@@ -37,7 +37,7 @@ func (PickACardAnyCardYellow) Attack() int                 { return 0 }
 func (PickACardAnyCardYellow) Defense() int                { return 2 }
 func (PickACardAnyCardYellow) Types() card.TypeSet         { return pickACardAnyCardTypes }
 func (PickACardAnyCardYellow) GoAgain() bool               { return true }
-func (PickACardAnyCardYellow) Play(s *card.TurnState) int { return 0 }
+func (PickACardAnyCardYellow) Play(s *card.TurnState, _ *card.PlayedCard) int { return 0 }
 
 type PickACardAnyCardBlue struct{}
 
@@ -49,4 +49,4 @@ func (PickACardAnyCardBlue) Attack() int                 { return 0 }
 func (PickACardAnyCardBlue) Defense() int                { return 2 }
 func (PickACardAnyCardBlue) Types() card.TypeSet         { return pickACardAnyCardTypes }
 func (PickACardAnyCardBlue) GoAgain() bool               { return true }
-func (PickACardAnyCardBlue) Play(s *card.TurnState) int { return 0 }
+func (PickACardAnyCardBlue) Play(s *card.TurnState, _ *card.PlayedCard) int { return 0 }

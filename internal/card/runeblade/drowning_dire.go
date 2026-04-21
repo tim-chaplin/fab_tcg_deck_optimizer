@@ -25,7 +25,7 @@ func (DrowningDireRed) Attack() int                  { return 5 }
 func (DrowningDireRed) Defense() int                 { return 3 }
 func (DrowningDireRed) Types() card.TypeSet       { return drowningDireTypes }
 func (DrowningDireRed) GoAgain() bool                { return false }
-func (c DrowningDireRed) Play(*card.TurnState) int   { return c.Attack() }
+func (c DrowningDireRed) Play(*card.TurnState, *card.PlayedCard) int   { return c.Attack() }
 
 type DrowningDireYellow struct{}
 
@@ -37,7 +37,7 @@ func (DrowningDireYellow) Attack() int                  { return 4 }
 func (DrowningDireYellow) Defense() int                 { return 3 }
 func (DrowningDireYellow) Types() card.TypeSet       { return drowningDireTypes }
 func (DrowningDireYellow) GoAgain() bool                { return false }
-func (c DrowningDireYellow) Play(*card.TurnState) int   { return c.Attack() }
+func (c DrowningDireYellow) Play(*card.TurnState, *card.PlayedCard) int   { return c.Attack() }
 
 type DrowningDireBlue struct{}
 
@@ -49,4 +49,4 @@ func (DrowningDireBlue) Attack() int                  { return 3 }
 func (DrowningDireBlue) Defense() int                 { return 3 }
 func (DrowningDireBlue) Types() card.TypeSet       { return drowningDireTypes }
 func (DrowningDireBlue) GoAgain() bool                { return false }
-func (c DrowningDireBlue) Play(*card.TurnState) int   { return c.Attack() }
+func (c DrowningDireBlue) Play(*card.TurnState, *card.PlayedCard) int   { return c.Attack() }

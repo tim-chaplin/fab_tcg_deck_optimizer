@@ -23,7 +23,7 @@ func (BrothersInArmsRed) Attack() int                 { return 6 }
 func (BrothersInArmsRed) Defense() int                { return 2 }
 func (BrothersInArmsRed) Types() card.TypeSet         { return brothersInArmsTypes }
 func (BrothersInArmsRed) GoAgain() bool               { return false }
-func (c BrothersInArmsRed) Play(s *card.TurnState) int { return c.Attack() }
+func (c BrothersInArmsRed) Play(s *card.TurnState, _ *card.PlayedCard) int { return c.Attack() }
 
 type BrothersInArmsYellow struct{}
 
@@ -35,7 +35,7 @@ func (BrothersInArmsYellow) Attack() int                 { return 5 }
 func (BrothersInArmsYellow) Defense() int                { return 2 }
 func (BrothersInArmsYellow) Types() card.TypeSet         { return brothersInArmsTypes }
 func (BrothersInArmsYellow) GoAgain() bool               { return false }
-func (c BrothersInArmsYellow) Play(s *card.TurnState) int { return c.Attack() }
+func (c BrothersInArmsYellow) Play(s *card.TurnState, _ *card.PlayedCard) int { return c.Attack() }
 
 type BrothersInArmsBlue struct{}
 
@@ -47,4 +47,4 @@ func (BrothersInArmsBlue) Attack() int                 { return 4 }
 func (BrothersInArmsBlue) Defense() int                { return 2 }
 func (BrothersInArmsBlue) Types() card.TypeSet         { return brothersInArmsTypes }
 func (BrothersInArmsBlue) GoAgain() bool               { return false }
-func (c BrothersInArmsBlue) Play(s *card.TurnState) int { return c.Attack() }
+func (c BrothersInArmsBlue) Play(s *card.TurnState, _ *card.PlayedCard) int { return c.Attack() }

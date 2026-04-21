@@ -10,7 +10,8 @@ import (
 func TestPlunderRun_NoAttackReturnsZero(t *testing.T) {
 	s := card.TurnState{}
 	for _, c := range []card.Card{PlunderRunRed{}, PlunderRunYellow{}, PlunderRunBlue{}} {
-		if got := c.Play(&s); got != 0 {
+		self := &card.PlayedCard{Card: c, FromArsenal: true}
+		if got := c.Play(&s, self); got != 0 {
 			t.Errorf("%s: Play() = %d, want 0", c.Name(), got)
 		}
 	}
@@ -19,7 +20,8 @@ func TestPlunderRun_NoAttackReturnsZero(t *testing.T) {
 // TestPlunderRun_NonAttackInRemainingFizzles: non-attack action fails the predicate.
 func TestPlunderRun_NonAttackInRemainingFizzles(t *testing.T) {
 	s := card.TurnState{CardsRemaining: []*card.PlayedCard{{Card: stubGenericAction()}}}
-	if got := (PlunderRunRed{}).Play(&s); got != 0 {
+	self := &card.PlayedCard{Card: PlunderRunRed{}, FromArsenal: true}
+	if got := (PlunderRunRed{}).Play(&s, self); got != 0 {
 		t.Errorf("Play() = %d, want 0 (non-attack skipped)", got)
 	}
 }
@@ -36,11 +38,9 @@ func TestPlunderRun_NextAttackReturnsBonus(t *testing.T) {
 		{PlunderRunBlue{}, 1},
 	}
 	for _, tc := range cases {
-		s := card.TurnState{
-			SelfFromArsenal: true,
-			CardsRemaining:  []*card.PlayedCard{{Card: stubGenericAttack(0, 0)}},
-		}
-		if got := tc.c.Play(&s); got != tc.want {
+		s := card.TurnState{CardsRemaining: []*card.PlayedCard{{Card: stubGenericAttack(0, 0)}}}
+		self := &card.PlayedCard{Card: tc.c, FromArsenal: true}
+		if got := tc.c.Play(&s, self); got != tc.want {
 			t.Errorf("%s: Play() = %d, want %d", tc.c.Name(), got, tc.want)
 		}
 	}
@@ -52,7 +52,8 @@ func TestPlunderRun_HandPlayedFizzles(t *testing.T) {
 	s := card.TurnState{
 		CardsRemaining: []*card.PlayedCard{{Card: stubGenericAttack(0, 0)}},
 	}
-	if got := (PlunderRunRed{}).Play(&s); got != 0 {
+	self := &card.PlayedCard{Card: PlunderRunRed{}}
+	if got := (PlunderRunRed{}).Play(&s, self); got != 0 {
 		t.Errorf("Play() = %d, want 0 (hand-played, not from arsenal)", got)
 	}
 }

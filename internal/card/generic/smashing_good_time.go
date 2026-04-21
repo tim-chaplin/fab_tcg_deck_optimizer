@@ -6,9 +6,8 @@
 // card you play this turn gains +N{p}. **Go again**" (Red N=3, Yellow N=2, Blue N=1.)
 //
 // Modelling: The item-destruction rider isn't modelled. The +N{p} grant fires only when this
-// copy was played from arsenal (card.PlayedFromArsenal); when it does, scan
-// TurnState.CardsRemaining for the next attack action card and credit the bonus assuming it
-// will be played.
+// copy was played from arsenal (self.FromArsenal); when it does, scan TurnState.CardsRemaining
+// for the next attack action card and credit the bonus assuming it will be played.
 //
 // Source: github.com/the-fab-cube/flesh-and-blood-cards (card.csv).
 
@@ -28,8 +27,8 @@ func (SmashingGoodTimeRed) Attack() int                 { return 0 }
 func (SmashingGoodTimeRed) Defense() int                { return 2 }
 func (SmashingGoodTimeRed) Types() card.TypeSet         { return smashingGoodTimeTypes }
 func (SmashingGoodTimeRed) GoAgain() bool               { return true }
-func (SmashingGoodTimeRed) Play(s *card.TurnState) int {
-	if !card.PlayedFromArsenal(s) {
+func (SmashingGoodTimeRed) Play(s *card.TurnState, self *card.PlayedCard) int {
+	if !self.FromArsenal {
 		return 0
 	}
 	return nextAttackActionBonus(s, 3)
@@ -45,8 +44,8 @@ func (SmashingGoodTimeYellow) Attack() int                 { return 0 }
 func (SmashingGoodTimeYellow) Defense() int                { return 2 }
 func (SmashingGoodTimeYellow) Types() card.TypeSet         { return smashingGoodTimeTypes }
 func (SmashingGoodTimeYellow) GoAgain() bool               { return true }
-func (SmashingGoodTimeYellow) Play(s *card.TurnState) int {
-	if !card.PlayedFromArsenal(s) {
+func (SmashingGoodTimeYellow) Play(s *card.TurnState, self *card.PlayedCard) int {
+	if !self.FromArsenal {
 		return 0
 	}
 	return nextAttackActionBonus(s, 2)
@@ -62,8 +61,8 @@ func (SmashingGoodTimeBlue) Attack() int                 { return 0 }
 func (SmashingGoodTimeBlue) Defense() int                { return 2 }
 func (SmashingGoodTimeBlue) Types() card.TypeSet         { return smashingGoodTimeTypes }
 func (SmashingGoodTimeBlue) GoAgain() bool               { return true }
-func (SmashingGoodTimeBlue) Play(s *card.TurnState) int {
-	if !card.PlayedFromArsenal(s) {
+func (SmashingGoodTimeBlue) Play(s *card.TurnState, self *card.PlayedCard) int {
+	if !self.FromArsenal {
 		return 0
 	}
 	return nextAttackActionBonus(s, 1)

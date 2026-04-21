@@ -23,7 +23,7 @@ func (PushThePointRed) Attack() int                 { return 4 }
 func (PushThePointRed) Defense() int                { return 2 }
 func (PushThePointRed) Types() card.TypeSet         { return pushThePointTypes }
 func (PushThePointRed) GoAgain() bool               { return false }
-func (c PushThePointRed) Play(s *card.TurnState) int { return c.Attack() }
+func (c PushThePointRed) Play(s *card.TurnState, _ *card.PlayedCard) int { return c.Attack() }
 
 type PushThePointYellow struct{}
 
@@ -35,7 +35,7 @@ func (PushThePointYellow) Attack() int                 { return 3 }
 func (PushThePointYellow) Defense() int                { return 2 }
 func (PushThePointYellow) Types() card.TypeSet         { return pushThePointTypes }
 func (PushThePointYellow) GoAgain() bool               { return false }
-func (c PushThePointYellow) Play(s *card.TurnState) int { return c.Attack() }
+func (c PushThePointYellow) Play(s *card.TurnState, _ *card.PlayedCard) int { return c.Attack() }
 
 type PushThePointBlue struct{}
 
@@ -47,4 +47,4 @@ func (PushThePointBlue) Attack() int                 { return 2 }
 func (PushThePointBlue) Defense() int                { return 2 }
 func (PushThePointBlue) Types() card.TypeSet         { return pushThePointTypes }
 func (PushThePointBlue) GoAgain() bool               { return false }
-func (c PushThePointBlue) Play(s *card.TurnState) int { return c.Attack() }
+func (c PushThePointBlue) Play(s *card.TurnState, _ *card.PlayedCard) int { return c.Attack() }

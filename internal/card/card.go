@@ -91,16 +91,19 @@ func (s TypeSet) IsDefenseReaction() bool {
 // PlayedCard wraps a Card with per-turn mutable flags that other cards' effects can toggle.
 // Instances are created by the solver at the start of each attack chain and live only for that
 // chain. Effects that grant keywords to "the next X" scan TurnState.CardsRemaining and flip
-// flags on the matching entry.
+// flags on the matching entry; the card currently resolving receives its own PlayedCard as
+// the `self` parameter to Play.
 type PlayedCard struct {
 	Card Card
-	// GrantedGoAgain is set by a prior card's effect to give this specific card Go again even if
-	// its printed text doesn't (e.g. Mauvrion Skies targeting the next Runeblade attack). The
-	// solver's chain-legality check ORs this with Card.GoAgain().
+	// GrantedGoAgain is set by a prior card's grant (e.g. Mauvrion Skies targeting the next
+	// Runeblade attack) or by the card's own Play flipping self.GrantedGoAgain = true (e.g.
+	// Runerager Swarm, Vigor Rush). The solver's chain-legality check ORs this with
+	// Card.GoAgain().
 	GrantedGoAgain bool
 	// FromArsenal flags the single PlayedCard whose Card came from the arsenal slot at start of
 	// turn. The solver sets it before the chain runs; PlayedCards for hand cards and mid-turn
-	// extensions stay false.
+	// extensions stay false. Cards gate "if this is played from arsenal" riders on
+	// self.FromArsenal.
 	FromArsenal bool
 }
 
@@ -110,9 +113,10 @@ func (p *PlayedCard) EffectiveGoAgain() bool {
 	return p.Card.GoAgain() || p.GrantedGoAgain
 }
 
-// TurnState is the context passed to Card.Play. Cards read it to decide what effects to apply;
-// the solver appends each played card to CardsPlayed after its Play returns so later cards this
-// turn see what was played before them.
+// TurnState is the shared turn-level context passed to Card.Play alongside the per-card
+// PlayedCard wrapper. Cards read it to decide what effects to apply; the solver appends each
+// played card to CardsPlayed after its Play returns so later cards this turn see what was
+// played before them.
 type TurnState struct {
 	// CardsPlayed is the sequence of cards played (as attacks) this turn, in order. Populated by
 	// the solver, not by Play itself.
@@ -129,15 +133,6 @@ type TurnState struct {
 	// Pitched is the cards pitched this turn for resources. Populated by the solver before any
 	// Play. Effects that check "if an attack card was pitched" scan this list.
 	Pitched []Card
-	// SelfFromArsenal is true for the single Play call whose card came from the arsenal slot at
-	// start of turn. The solver flips it on before calling Play and clears it afterwards.
-	// Effects gated on "if this is played from arsenal" read PlayedFromArsenal(s), which checks
-	// this flag.
-	SelfFromArsenal bool
-	// SelfGoAgain is set by a card's Play to grant itself Go again for this chain (e.g. when
-	// Runerager Swarm's aura-played-this-turn rider fires). The solver reads it after Play
-	// returns and, if true, marks the card's PlayedCard.GrantedGoAgain.
-	SelfGoAgain bool
 	// Overpower is set when an attack with the Overpower keyword is being played. Not yet
 	// consumed by the solver — blocked damage should eventually be forwarded to the hero when
 	// Overpower is true.
@@ -186,13 +181,6 @@ type TurnState struct {
 	// the graveyard (e.g. Weeping Battleground banishing an aura). Cards that key on "was a
 	// card banished this turn" read this list.
 	Banish []Card
-}
-
-// PlayedFromArsenal reports whether the card currently being played came from the arsenal
-// slot. Reads s.SelfFromArsenal — the solver flips that flag on before calling Play for the
-// arsenal-in attacker.
-func PlayedFromArsenal(s *TurnState) bool {
-	return s != nil && s.SelfFromArsenal
 }
 
 // AddToGraveyard moves c into the graveyard — the single entry point every card implementation
@@ -304,10 +292,12 @@ type Card interface {
 	GoAgain() bool
 	// Play is called when the card resolves — as an attack or as a defense reaction. Returns
 	// damage dealt to the opposing hero (may differ from Attack() after conditional bonuses) and
-	// may read state to decide effects. When called on a defense reaction, the returned damage
-	// is added uncapped to the turn's dealt total (the incoming-damage cap applies only to
+	// may read state to decide effects. self is the PlayedCard wrapper for this resolution:
+	// cards read self.FromArsenal for arsenal-gated riders and write self.GrantedGoAgain = true
+	// to grant themselves Go again. When called on a defense reaction, the returned damage is
+	// added uncapped to the turn's dealt total (the incoming-damage cap applies only to
 	// Defense()).
-	Play(s *TurnState) int
+	Play(s *TurnState, self *PlayedCard) int
 }
 
 // NoMemo is an optional marker. Cards that implement it opt out of the hand-evaluation memo —

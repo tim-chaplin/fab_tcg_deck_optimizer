@@ -18,11 +18,12 @@ func TestRuneragerSwarm_NoAuraNoGoAgain(t *testing.T) {
 	}
 	for _, tc := range cases {
 		s := card.TurnState{}
-		if got := tc.c.Play(&s); got != tc.want {
+		self := &card.PlayedCard{Card: tc.c}
+		if got := tc.c.Play(&s, self); got != tc.want {
 			t.Errorf("%s: Play() = %d, want %d", tc.c.Name(), got, tc.want)
 		}
-		if s.SelfGoAgain {
-			t.Errorf("%s: SelfGoAgain should stay false with no aura", tc.c.Name())
+		if self.GrantedGoAgain {
+			t.Errorf("%s: GrantedGoAgain should stay false with no aura", tc.c.Name())
 		}
 	}
 }
@@ -31,9 +32,10 @@ func TestRuneragerSwarm_AuraPlayedGrantsGoAgain(t *testing.T) {
 	// An aura in CardsPlayed satisfies the "played an aura this turn" condition.
 	for _, c := range []card.Card{RuneragerSwarmRed{}, RuneragerSwarmYellow{}, RuneragerSwarmBlue{}} {
 		s := card.TurnState{CardsPlayed: []card.Card{stubAura{}}}
-		c.Play(&s)
-		if !s.SelfGoAgain {
-			t.Errorf("%s: SelfGoAgain should be set when an aura has been played", c.Name())
+		self := &card.PlayedCard{Card: c}
+		c.Play(&s, self)
+		if !self.GrantedGoAgain {
+			t.Errorf("%s: GrantedGoAgain should be set when an aura has been played", c.Name())
 		}
 	}
 }
@@ -43,9 +45,10 @@ func TestRuneragerSwarm_AuraCreatedGrantsGoAgain(t *testing.T) {
 	// satisfies the condition.
 	for _, c := range []card.Card{RuneragerSwarmRed{}, RuneragerSwarmYellow{}, RuneragerSwarmBlue{}} {
 		s := card.TurnState{AuraCreated: true}
-		c.Play(&s)
-		if !s.SelfGoAgain {
-			t.Errorf("%s: SelfGoAgain should be set when AuraCreated is true", c.Name())
+		self := &card.PlayedCard{Card: c}
+		c.Play(&s, self)
+		if !self.GrantedGoAgain {
+			t.Errorf("%s: GrantedGoAgain should be set when AuraCreated is true", c.Name())
 		}
 	}
 }

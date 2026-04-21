@@ -19,7 +19,7 @@ func (stubRunebladeAttack) Types() card.TypeSet {
 	return card.NewTypeSet(card.TypeRuneblade, card.TypeAction, card.TypeAttack)
 }
 func (stubRunebladeAttack) GoAgain() bool            { return true }
-func (stubRunebladeAttack) Play(*card.TurnState) int { return 0 }
+func (stubRunebladeAttack) Play(*card.TurnState, *card.PlayedCard) int { return 0 }
 
 // stubRunebladeWeapon is a Runeblade weapon — satisfies "next Runeblade attack" lookaheads that
 // include weapons (Condemn, Oath) but NOT ones restricted to attack action cards (Runic Reaping,
@@ -36,7 +36,7 @@ func (stubRunebladeWeapon) Types() card.TypeSet {
 	return card.NewTypeSet(card.TypeRuneblade, card.TypeWeapon)
 }
 func (stubRunebladeWeapon) GoAgain() bool            { return false }
-func (stubRunebladeWeapon) Play(*card.TurnState) int { return 0 }
+func (stubRunebladeWeapon) Play(*card.TurnState, *card.PlayedCard) int { return 0 }
 
 // stubNonAttack is a non-attack card — covers "attack-typed predicate should reject non-attack"
 // cases (e.g. Runic Reaping's pitched-attack +1{p} rider).
@@ -50,7 +50,7 @@ func (stubNonAttack) Attack() int              { return 0 }
 func (stubNonAttack) Defense() int             { return 0 }
 func (stubNonAttack) Types() card.TypeSet       { return card.NewTypeSet(card.TypeAction) }
 func (stubNonAttack) GoAgain() bool            { return false }
-func (stubNonAttack) Play(*card.TurnState) int { return 0 }
+func (stubNonAttack) Play(*card.TurnState, *card.PlayedCard) int { return 0 }
 
 // stubNonRunebladeAttack is a Generic Action-Attack — covers Runeblade-gated lookaheads
 // (Condemn, Oath, Runic Reaping, Mauvrion) rejecting non-Runeblade attacks.
@@ -66,7 +66,7 @@ func (stubNonRunebladeAttack) Types() card.TypeSet {
 	return card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeAttack)
 }
 func (stubNonRunebladeAttack) GoAgain() bool            { return true }
-func (stubNonRunebladeAttack) Play(*card.TurnState) int { return 0 }
+func (stubNonRunebladeAttack) Play(*card.TurnState, *card.PlayedCard) int { return 0 }
 
 // stubAttackWithPower is a Runeblade attack-action card with a configurable printed Attack()
 // value. Fragile-aura tests set specific numbers to hit/miss the LikelyToHit heuristic (e.g.
@@ -85,7 +85,7 @@ func (stubAttackWithPower) Types() card.TypeSet {
 	return card.NewTypeSet(card.TypeRuneblade, card.TypeAction, card.TypeAttack)
 }
 func (stubAttackWithPower) GoAgain() bool            { return true }
-func (stubAttackWithPower) Play(*card.TurnState) int { return 0 }
+func (stubAttackWithPower) Play(*card.TurnState, *card.PlayedCard) int { return 0 }
 
 // stubAura is a minimal Aura-typed card — exercises "aura played this turn" checks (Shrill of
 // Skullform's +3 bonus).
@@ -99,4 +99,4 @@ func (stubAura) Attack() int              { return 0 }
 func (stubAura) Defense() int             { return 0 }
 func (stubAura) Types() card.TypeSet       { return card.NewTypeSet(card.TypeAura) }
 func (stubAura) GoAgain() bool            { return true }
-func (stubAura) Play(*card.TurnState) int { return 0 }
+func (stubAura) Play(*card.TurnState, *card.PlayedCard) int { return 0 }

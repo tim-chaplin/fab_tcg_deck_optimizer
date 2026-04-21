@@ -22,4 +22,4 @@ func (VisitTheBlacksmithBlue) Attack() int                 { return 0 }
 func (VisitTheBlacksmithBlue) Defense() int                { return 2 }
 func (VisitTheBlacksmithBlue) Types() card.TypeSet         { return visitTheBlacksmithTypes }
 func (VisitTheBlacksmithBlue) GoAgain() bool               { return true }
-func (VisitTheBlacksmithBlue) Play(s *card.TurnState) int { return 0 }
+func (VisitTheBlacksmithBlue) Play(s *card.TurnState, _ *card.PlayedCard) int { return 0 }
