@@ -181,11 +181,9 @@ func TestFormatBestTurn_DelayedFromLastTurnLine(t *testing.T) {
 	})
 }
 
-// TestFormatBestTurn_DrawnCardsRendered pins each role a drawn card can take to a tagged line
-// in the printout, so per-card attribution reconciles with the turn's Value rather than
-// silently folding in extra drawn-card contributions. Mid-turn-drawn cards can only be Held
-// or Arsenal (they can't pitch or chain — that would leak top-of-deck information into the
-// solver's line choice). The summary is hand-built so the test exercises only the formatter.
+// TestFormatBestTurn_DrawnCardsRendered pins each role a drawn card can take — Held in the
+// footer, Arsenal in the footer — to a tagged line in the printout. The summary is hand-built
+// so the test exercises only the formatter.
 func TestFormatBestTurn_DrawnCardsRendered(t *testing.T) {
 	t.Run("held lands in the footer", func(t *testing.T) {
 		summary := TurnSummary{

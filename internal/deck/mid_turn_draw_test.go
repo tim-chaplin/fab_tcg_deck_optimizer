@@ -253,28 +253,12 @@ func TestEvalOneTurn_MidTurnDrawHeldWhenArsenalFull(t *testing.T) {
 	}
 }
 
-// NOTE: three tests previously lived here — MidTurnDrawPitchesToFundHopefulAttacker,
-// MidTurnDrawExtendsChainUntilItCantContinue, MidTurnDrawExtensionPaysFromLeftoverPitch —
-// that pinned solver behaviour where mid-turn-drawn cards could be pitched to fund a cost
-// shortfall or attached to the end of the attack chain as free extensions. Both dispositions
-// leak top-of-deck information into the solver's line choice (the hand roles end up
-// depending on what comes off the top), so they were removed; mid-turn-drawn cards now
-// always land Held or Arsenal. See TestBest_DeckOrderDoesNotAffectHandRoles in the hand
-// package for the invariant that replaces those pins.
-
-// TestEvalOneTurn_MidTurnDrawSansGoAgainStaysHeld is the mirror of
-// MidTurnDrawExtensionPaysFromLeftoverPitch: same shape of hand (Snatch + Toughen Up Blue) and
-// deck (Aether Slash on top + refill) but without the Flying High that granted Go again to
-// Snatch. Snatch's baseline Go again is false, no other card grants it one, so the chain ends
-// after Snatch resolves — the Slash is drawn but sits out the rest of the turn.
-//
-// The partition enumerator can't pitch Toughen Up Blue here either: without an extension to
-// consume the residual, the committed 3 pitch against a 0-cost chain trips the pitch-timing
-// rule (leftover == maxAttackPitch). So the winning partition has Toughen Up Blue Held. Turn 1
-// Value = 4 (Snatch alone). Toughen Up and the drawn Slash both land in the unified Held pool
-// that feeds post-enumeration arsenal promotion; the deterministic hash picks Toughen Up for
-// the arsenal slot this hand, leaving Aether Slash to carry into turn 2's hand as the Held
-// prefix of the refill.
+// TestEvalOneTurn_MidTurnDrawSansGoAgainStaysHeld: hand is Snatch + Toughen Up Blue, top of
+// deck is Aether Slash. Snatch has no baseline Go again and nothing grants it, so the chain
+// ends right after Snatch — the Slash is drawn but not played. Turn 1 Value = 4 (Snatch
+// alone). Toughen Up and the drawn Slash share the Held pool that feeds post-enumeration
+// arsenal promotion; the deterministic hash picks Toughen Up for the arsenal slot this hand,
+// leaving Aether Slash to carry into turn 2's hand as the Held prefix of the refill.
 func TestEvalOneTurn_MidTurnDrawSansGoAgainStaysHeld(t *testing.T) {
 	initialHand := []card.Card{
 		generic.SnatchRed{},
@@ -322,13 +306,6 @@ func TestEvalOneTurn_MidTurnDrawSansGoAgainStaysHeld(t *testing.T) {
 		t.Errorf("turn 2 runechant carryover = %d, want 0", state.RunechantCarryover)
 	}
 }
-
-// NOTE: TestEvalOneTurn_TwoDrawRidersInOneChain previously pinned the outcome of a two-draw
-// chain (Snatch + Drawn to the Dark Dimension) where one drawn card was pitched to cover
-// Drawn's 2-cost. With mid-turn-drawn cards no longer eligible to pitch, that scenario's
-// winning partition collapses into an ordinary "play what hand has, hold what's drawn" shape
-// and the arsenal contents become an uninteresting hash pick — no unique behaviour left to
-// pin. Removed.
 
 // TestEvalOneTurn_DrawOneOnEmptyDeckIsNoop pins the degenerate case: Snatch fires DrawOne
 // against an empty deck and nothing happens — no panic, no spurious entry in state.Drawn, no

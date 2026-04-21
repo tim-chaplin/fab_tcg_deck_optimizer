@@ -1321,19 +1321,12 @@ type sequenceContext struct {
 	// is in the chain. Lets bestSequence flag the matching pcBuf entry's FromArsenal as the
 	// permutation moves it around.
 	arsenalInIdx int
-	// drawnAttackDmg / drawnAttackTriggerDmg are vestigial placeholders kept so older callers
-	// don't diverge: every mid-turn-drawn card is now Held or Arsenal (see the comment in
-	// playSequenceWithMeta), so these never get populated in practice.
-	drawnAttackDmg        []float64
-	drawnAttackTriggerDmg []float64
 	// drawnWinner snapshots the winning permutation's drawn cards so fillContributions can
 	// surface them on summary.Drawn. Populated from state.Drawn during the winner path because
 	// Heap's algorithm keeps iterating after the winner is chosen and state.Drawn reflects the
 	// last permutation's draws. Every entry in drawnWinner is assigned Role=Held by the
 	// caller (post-Best, promoteRandomHeldToArsenal may flip one to Arsenal).
-	drawnWinner                 []card.Card
-	drawnAttackDmgWinner        []float64
-	drawnAttackTriggerDmgWinner []float64
+	drawnWinner []card.Card
 }
 
 // seedState writes the TurnState fields that are constant across a partition's permutations
@@ -1397,8 +1390,6 @@ func (ctx *sequenceContext) bestSequence(attackers, winnerOrderOut []card.Card, 
 	bestLeftoverRunechants := ctx.runechantCarryover
 	foundLegal := false
 	ctx.drawnWinner = ctx.drawnWinner[:0]
-	ctx.drawnAttackDmgWinner = ctx.drawnAttackDmgWinner[:0]
-	ctx.drawnAttackTriggerDmgWinner = ctx.drawnAttackTriggerDmgWinner[:0]
 	eval := func() {
 		dmg, leftoverRunechants, _, legal := ctx.playSequenceWithMeta(perm, scratch, triggerScratch)
 		if !legal {
@@ -1525,8 +1516,6 @@ func (ctx *sequenceContext) playSequenceWithMeta(order []card.Card, perCardOut, 
 	// seedState — cards don't mutate them.
 	state.Deck = ctx.deck
 	state.Drawn = nil
-	ctx.drawnAttackDmg = ctx.drawnAttackDmg[:0]
-	ctx.drawnAttackTriggerDmg = ctx.drawnAttackTriggerDmg[:0]
 	resources := ctx.resourceBudget
 	for i, pc := range played {
 		m := meta[i]
@@ -1570,11 +1559,9 @@ func (ctx *sequenceContext) playSequenceWithMeta(order []card.Card, perCardOut, 
 		}
 	}
 
-	// Mid-turn-drawn cards are NOT eligible to pitch or extend the chain. The player commits
-	// to the attack line before DrawOne reveals the top card, so letting the solver spend or
-	// chain a drawn card here would be a visibility cheat: the best line would silently shift
-	// depending on what happened to be on top of the deck. Drawn cards carry to the next hand
-	// as Held (or compete for the empty arsenal slot) instead — see fillContributions.
+	// Mid-turn-drawn cards always carry to the next hand as Held or compete for the empty
+	// arsenal slot; they never pitch or extend the chain. If they could, the solver's best line
+	// would depend on Deck[0], which the player commits before the draw reveals.
 
 	// Pitch-timing rule: every Pitch-role card must have paid for something on the stack. If the
 	// chain's leftover budget is at least the max attack-phase pitch, one pitch could have been

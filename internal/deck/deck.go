@@ -617,10 +617,9 @@ func collectDelayedPlays(line []hand.CardAssignment, dst []card.Card) []card.Car
 
 // applyTurnResult folds a completed turn's outcome into cross-turn state: pitched hand cards
 // recycle to the deck bottom (via recyclePlayedCards), head advances past initial draws and
-// every mid-turn-drawn card, and each drawn card is routed by disposition. Mid-turn-drawn
-// cards are always Held or Arsenal — they can't pitch or extend the chain, because that would
-// leak the top-of-deck identity into the solver's line choice — so only the Held case has to
-// append into nextHeld; Arsenal flows through play.ArsenalCard and needs no bookkeeping here.
+// every mid-turn-drawn card, and each drawn card is routed by disposition. Drawn-card Held
+// entries append into nextHeld; Arsenal flows through play.ArsenalCard and needs no
+// bookkeeping here.
 func applyTurnResult(play hand.TurnSummary, buf []card.Card, head, tail *int, drawCount int, nextHeld []card.Card) []card.Card {
 	nextHeld = recyclePlayedCards(play.BestLine, buf, tail, nextHeld)
 	*head += drawCount + len(play.Drawn)
