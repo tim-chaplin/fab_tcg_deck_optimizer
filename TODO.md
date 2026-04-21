@@ -55,13 +55,13 @@ called out in the sections below — landing any of them unlocks a subset of the
 ### On-hit / combat interactions
 
 - **Attacks always hit.** Any "when this hits a hero…" rider is assumed to fire — the sim doesn't
-  model blocks. Affects Weeping Battleground, Reek of Corruption, Runic Reaping. Also lets
-  on-hit riders on Jack Be Nimble / Jack Be Quick (steal), Snatch (draw), Rifting (instant
-  cast), Life for a Life (1{h}), Blow for a Blow (1 damage), Fervent Forerunner (Opt 2),
-  Regain Composure (unfreeze) count as always firing (but the riders themselves aren't wired
-  in yet — see below). Mauvrion Skies, Meat and Greet, Consuming Volition, and Oath of the
-  Arknight all gate their "if hits" clauses via `card.LikelyToHit` on the attack's printed
-  power.
+  model blocks. Affects Weeping Battleground, Reek of Corruption. Also lets on-hit riders on
+  Jack Be Nimble / Jack Be Quick (steal), Snatch (draw), Rifting (instant cast), Life for a
+  Life (1{h}), Blow for a Blow (1 damage), Fervent Forerunner (Opt 2), Regain Composure
+  (unfreeze) count as always firing (but the riders themselves aren't wired in yet — see
+  below). Mauvrion Skies, Meat and Greet, Consuming Volition, Oath of the Arknight, and
+  Runic Reaping all gate their "if hits" clauses via `card.LikelyToHit` on the attack's
+  printed power.
 - **Dominate isn't modelled.** Drowning Dire, Overload, Pound for Pound, and Demolition Crew
   carry the keyword but the solver doesn't route around block partitioning.
 - **On-hit go-again isn't granted.** Overload's on-hit clause never fires.
@@ -384,7 +384,6 @@ listed here so the direction tag is co-located with the name.
   while the printed power is left alone — partial under-count, but in contexts where a
   follow-up aura-reading card is present, Drowning Dire is materially overstated because the
   Dominate protection of that damage is not modelled.
-- **Runeblade Runic Reaping (all colours)** — "if hits" on the N Runechants is assumed live.
 - **Runeblade Sigil of Silphidae** — assumed we always have an aura to banish on both enter and
   leave, crediting 2 damage; real card fizzles both triggers when the graveyard is dry.
 - **Runeblade Sigil of Suffering (all colours)** — +1{d} is baked into printed Defense assuming

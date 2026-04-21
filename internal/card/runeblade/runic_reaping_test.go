@@ -8,7 +8,7 @@ import (
 
 func TestRunicReaping_NoNextAttackReturnsZero(t *testing.T) {
 	// No attack action following → no bonus at all, and AuraCreated must remain false.
-	s := card.TurnState{Pitched: []card.Card{stubRunebladeAttack{}}}
+	s := card.TurnState{Pitched: []card.Card{stubAttackWithPower{power: 4}}}
 	if got := (RunicReapingRed{}).Play(&s); got != 0 {
 		t.Fatalf("want 0 when no next attack, got %d", got)
 	}
@@ -26,10 +26,10 @@ func TestRunicReaping_WeaponNextDoesNotQualify(t *testing.T) {
 	}
 }
 
-func TestRunicReaping_NextAttackNoPitchedAttack(t *testing.T) {
-	// Next attack exists, but nothing attack-typed was pitched → N Runechant tokens created.
-	// Play returns N (each token credited +1 at creation); the pitched-attack +1 rider doesn't
-	// fire. state.Runechants tracks the tokens for downstream consume.
+func TestRunicReaping_LikelyHitTargetNoPitchedAttack(t *testing.T) {
+	// Target's printed power (4) is in the likely-to-hit set and nothing attack-typed was
+	// pitched → N Runechant tokens created. Play returns N (each token credited +1 at creation);
+	// the pitched-attack +1 rider doesn't fire.
 	cases := []struct {
 		c card.Card
 		n int
@@ -40,7 +40,7 @@ func TestRunicReaping_NextAttackNoPitchedAttack(t *testing.T) {
 	}
 	for _, tc := range cases {
 		s := card.TurnState{
-			CardsRemaining: []*card.PlayedCard{{Card: stubRunebladeAttack{}}},
+			CardsRemaining: []*card.PlayedCard{{Card: stubAttackWithPower{power: 4}}},
 			Pitched:        []card.Card{stubNonAttack{}},
 		}
 		if got := tc.c.Play(&s); got != tc.n {
@@ -55,9 +55,9 @@ func TestRunicReaping_NextAttackNoPitchedAttack(t *testing.T) {
 	}
 }
 
-func TestRunicReaping_NextAttackWithPitchedAttack(t *testing.T) {
-	// Next attack exists AND an attack card was pitched → Play returns N (token credits) plus 1
-	// (the pitched-attack rider). state.Runechants holds only the N tokens — the rider damage is
+func TestRunicReaping_LikelyHitTargetWithPitchedAttack(t *testing.T) {
+	// Target is likely-to-hit AND an attack card was pitched → Play returns N (token credits) plus
+	// 1 (the pitched-attack rider). state.Runechants holds only the N tokens — the rider damage is
 	// direct, not a runechant.
 	cases := []struct {
 		c card.Card
@@ -69,7 +69,7 @@ func TestRunicReaping_NextAttackWithPitchedAttack(t *testing.T) {
 	}
 	for _, tc := range cases {
 		s := card.TurnState{
-			CardsRemaining: []*card.PlayedCard{{Card: stubRunebladeAttack{}}},
+			CardsRemaining: []*card.PlayedCard{{Card: stubAttackWithPower{power: 4}}},
 			Pitched:        []card.Card{stubRunebladeAttack{}},
 		}
 		if got := tc.c.Play(&s); got != tc.n+1 {
@@ -78,5 +78,24 @@ func TestRunicReaping_NextAttackWithPitchedAttack(t *testing.T) {
 		if s.Runechants != tc.n {
 			t.Errorf("%s: Runechants = %d, want %d", tc.c.Name(), s.Runechants, tc.n)
 		}
+	}
+}
+
+// TestRunicReaping_BlockableTargetDropsRunechants pins the LikelyToHit gate: when the target's
+// printed power (3) falls in the blockable range, the "if this hits" Runechant clause fizzles.
+// The pitched-attack +1{p} rider still fires because it isn't gated on hitting.
+func TestRunicReaping_BlockableTargetDropsRunechants(t *testing.T) {
+	s := card.TurnState{
+		CardsRemaining: []*card.PlayedCard{{Card: stubAttackWithPower{power: 3}}},
+		Pitched:        []card.Card{stubRunebladeAttack{}},
+	}
+	if got := (RunicReapingRed{}).Play(&s); got != 1 {
+		t.Errorf("Play() = %d, want 1 (blockable target drops Runechants, pitched-attack +1 still fires)", got)
+	}
+	if s.Runechants != 0 {
+		t.Errorf("Runechants = %d, want 0 (no tokens when target is blockable)", s.Runechants)
+	}
+	if s.AuraCreated {
+		t.Error("AuraCreated should stay false when no Runechant is created")
 	}
 }
