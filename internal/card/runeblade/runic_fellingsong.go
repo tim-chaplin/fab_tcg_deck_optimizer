@@ -18,7 +18,7 @@ var runicFellingsongTypes = card.NewTypeSet(card.TypeRuneblade, card.TypeAction,
 
 // runicFellingsongPlay returns printed power + 1 arcane + (1 if the banish rider succeeds).
 func runicFellingsongPlay(c card.Card, s *card.TurnState) int {
-	return c.Attack() + 1 + banishAuraFromGraveyard(s, nil)
+	return c.Attack() + 1 + banishAuraFromGraveyard(s)
 }
 
 type RunicFellingsongRed struct{}

@@ -54,7 +54,8 @@ func TestSigilOfSilphidae_PlayNextTurnGraveyardsSelfAndFizzles(t *testing.T) {
 
 // TestSigilOfSilphidae_PlayNextTurnBanishesAnotherAura: with another aura already in the
 // graveyard, the leave trigger banishes it for 1 arcane. The "another" restriction is
-// honoured — Silphidae lands in the graveyard first and the scan skips it.
+// honoured by scan order — PlayNextTurn scans the graveyard before adding Silphidae, so the
+// sigil itself can't be banished.
 func TestSigilOfSilphidae_PlayNextTurnBanishesAnotherAura(t *testing.T) {
 	c := SigilOfSilphidaeBlue{}
 	other := BlessingOfOccultRed{}

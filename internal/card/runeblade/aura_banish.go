@@ -5,16 +5,13 @@ package runeblade
 
 import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 
-// banishAuraFromGraveyard scans s.Graveyard for the first aura-typed card that isn't skip,
-// moves it to s.Banish, flips ArcaneDamageDealt, and returns 1. Returns 0 when no eligible
-// aura is found. skip is nil for the usual "banish an aura" phrasing; Sigil of Silphidae's
-// leave trigger passes itself so the "another aura" restriction from the printed text is
-// honoured once it joins the graveyard.
-func banishAuraFromGraveyard(s *card.TurnState, skip card.Card) int {
+// banishAuraFromGraveyard scans s.Graveyard for the first aura-typed card, moves it to
+// s.Banish, flips ArcaneDamageDealt, and returns 1. Returns 0 when no aura is found.
+// Callers that also destroy the source card (e.g. Sigil of Silphidae's leave trigger) should
+// run this scan BEFORE adding the source to s.Graveyard so the printed "another aura"
+// restriction is satisfied naturally.
+func banishAuraFromGraveyard(s *card.TurnState) int {
 	for i, c := range s.Graveyard {
-		if c == skip {
-			continue
-		}
 		if !c.Types().Has(card.TypeAura) {
 			continue
 		}

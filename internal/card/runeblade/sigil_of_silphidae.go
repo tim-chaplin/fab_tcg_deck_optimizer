@@ -5,9 +5,9 @@
 // this."
 //
 // Enter trigger fires on Play: banishAuraFromGraveyard scans s.Graveyard for an aura and
-// credits 1 arcane if one lands in s.Banish. At the start of next turn PlayNextTurn destroys
-// this (AddToGraveyard) and runs the leave trigger — another banishAuraFromGraveyard pass,
-// skipping the sigil itself so the "another aura" restriction holds.
+// credits 1 arcane if one lands in s.Banish. At the start of next turn PlayNextTurn scans
+// the graveyard for the leave trigger FIRST, then adds the sigil to the graveyard — the
+// ordering honours the printed "another aura" restriction without any explicit skip.
 //
 // Source: github.com/the-fab-cube/flesh-and-blood-cards (card.csv).
 
@@ -30,9 +30,12 @@ func (SigilOfSilphidaeBlue) GoAgain() bool            { return true }
 func (SigilOfSilphidaeBlue) NoMemo()                  {}
 func (c SigilOfSilphidaeBlue) Play(s *card.TurnState, _ *card.CardState) int {
 	s.AuraCreated = true
-	return banishAuraFromGraveyard(s, c)
+	return banishAuraFromGraveyard(s)
 }
 func (c SigilOfSilphidaeBlue) PlayNextTurn(s *card.TurnState) card.DelayedPlayResult {
+	// Scan BEFORE Silphidae lands in the graveyard so the printed "another aura" restriction
+	// is satisfied naturally — the scan can't pick up the sigil itself.
+	r := card.DelayedPlayResult{Damage: banishAuraFromGraveyard(s)}
 	s.AddToGraveyard(c)
-	return card.DelayedPlayResult{Damage: banishAuraFromGraveyard(s, c)}
+	return r
 }

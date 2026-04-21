@@ -27,7 +27,7 @@ func (WeepingBattlegroundRed) Types() card.TypeSet      { return weepingBattlegr
 func (WeepingBattlegroundRed) GoAgain() bool            { return false }
 func (WeepingBattlegroundRed) NoMemo()                  {}
 func (WeepingBattlegroundRed) Play(s *card.TurnState, _ *card.CardState) int {
-	return banishAuraFromGraveyard(s, nil)
+	return banishAuraFromGraveyard(s)
 }
 
 type WeepingBattlegroundYellow struct{}
@@ -42,7 +42,7 @@ func (WeepingBattlegroundYellow) Types() card.TypeSet      { return weepingBattl
 func (WeepingBattlegroundYellow) GoAgain() bool            { return false }
 func (WeepingBattlegroundYellow) NoMemo()                  {}
 func (WeepingBattlegroundYellow) Play(s *card.TurnState, _ *card.CardState) int {
-	return banishAuraFromGraveyard(s, nil)
+	return banishAuraFromGraveyard(s)
 }
 
 type WeepingBattlegroundBlue struct{}
@@ -57,5 +57,5 @@ func (WeepingBattlegroundBlue) Types() card.TypeSet      { return weepingBattleg
 func (WeepingBattlegroundBlue) GoAgain() bool            { return false }
 func (WeepingBattlegroundBlue) NoMemo()                  {}
 func (WeepingBattlegroundBlue) Play(s *card.TurnState, _ *card.CardState) int {
-	return banishAuraFromGraveyard(s, nil)
+	return banishAuraFromGraveyard(s)
 }
