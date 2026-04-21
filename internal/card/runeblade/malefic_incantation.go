@@ -4,10 +4,10 @@
 // when you play an attack action card, remove a verse counter from this. If you do, create a
 // Runechant token." (Red N=3, Yellow N=2, Blue N=1.)
 //
-// Simplification: credit n-1 flat damage on Play for the later-turn verse-counter ticks, and
-// model the first tick via card.DelayedPlay — PlayNextTurn creates 1 live Runechant on next
-// turn's starting state and destroys the aura. The "once per turn, when you play an attack"
-// condition is approximated by always firing once at next turn's upkeep.
+// Simplification: if at least one attack action card follows Malefic in this turn's chain, the
+// "once per turn" trigger fires — create a live Runechant now and credit n-1 flat damage for
+// the remaining verse counters that'll tick on future turns. Otherwise no same-turn tick;
+// credit flat n for the full set of future ticks without tracking the aura's persistence.
 //
 // Source: github.com/the-fab-cube/flesh-and-blood-cards (card.csv).
 
@@ -27,11 +27,8 @@ func (MaleficIncantationRed) Attack() int              { return 0 }
 func (MaleficIncantationRed) Defense() int             { return 2 }
 func (MaleficIncantationRed) Types() card.TypeSet      { return maleficTypes }
 func (MaleficIncantationRed) GoAgain() bool            { return true }
-func (c MaleficIncantationRed) Play(s *card.TurnState, _ *card.CardState) int {
+func (MaleficIncantationRed) Play(s *card.TurnState, _ *card.CardState) int {
 	return maleficPlay(s, 3)
-}
-func (c MaleficIncantationRed) PlayNextTurn(s *card.TurnState) card.DelayedPlayResult {
-	return maleficPlayNextTurn(s, c)
 }
 
 type MaleficIncantationYellow struct{}
@@ -44,11 +41,8 @@ func (MaleficIncantationYellow) Attack() int              { return 0 }
 func (MaleficIncantationYellow) Defense() int             { return 2 }
 func (MaleficIncantationYellow) Types() card.TypeSet      { return maleficTypes }
 func (MaleficIncantationYellow) GoAgain() bool            { return true }
-func (c MaleficIncantationYellow) Play(s *card.TurnState, _ *card.CardState) int {
+func (MaleficIncantationYellow) Play(s *card.TurnState, _ *card.CardState) int {
 	return maleficPlay(s, 2)
-}
-func (c MaleficIncantationYellow) PlayNextTurn(s *card.TurnState) card.DelayedPlayResult {
-	return maleficPlayNextTurn(s, c)
 }
 
 type MaleficIncantationBlue struct{}
@@ -61,24 +55,30 @@ func (MaleficIncantationBlue) Attack() int              { return 0 }
 func (MaleficIncantationBlue) Defense() int             { return 2 }
 func (MaleficIncantationBlue) Types() card.TypeSet      { return maleficTypes }
 func (MaleficIncantationBlue) GoAgain() bool            { return true }
-func (c MaleficIncantationBlue) Play(s *card.TurnState, _ *card.CardState) int {
+func (MaleficIncantationBlue) Play(s *card.TurnState, _ *card.CardState) int {
 	return maleficPlay(s, 1)
 }
-func (c MaleficIncantationBlue) PlayNextTurn(s *card.TurnState) card.DelayedPlayResult {
-	return maleficPlayNextTurn(s, c)
-}
 
-// maleficPlay flips AuraCreated for same-turn aura-readers and credits n-1 flat damage for
-// the future-turn verse-counter ticks that aren't separately modelled. The first tick's rune
-// is created in PlayNextTurn.
+// maleficPlay flips AuraCreated for same-turn aura-readers and ticks a verse counter if any
+// attack action card follows in this turn's chain — creating a live Runechant that can feed
+// later attacks, and crediting n-1 flat damage for the remaining future-turn ticks. Without a
+// follow-up attack action, the tick doesn't fire; credit flat n for the full run of future
+// ticks instead.
 func maleficPlay(s *card.TurnState, n int) int {
 	s.AuraCreated = true
-	return n - 1
+	if followUpAttackAction(s.CardsRemaining) {
+		return s.CreateRunechants(1) + (n - 1)
+	}
+	return n
 }
 
-// maleficPlayNextTurn fires the first verse-counter tick at the start of the next turn:
-// destroy the aura and create 1 live Runechant on the new turn's starting state.
-func maleficPlayNextTurn(s *card.TurnState, self card.Card) card.DelayedPlayResult {
-	s.AddToGraveyard(self)
-	return card.DelayedPlayResult{Damage: s.CreateRunechants(1)}
+// followUpAttackAction reports whether any CardState in remaining is an attack action card
+// (TypeAttack excludes weapons, which carry TypeWeapon on the type line instead).
+func followUpAttackAction(remaining []*card.CardState) bool {
+	for _, pc := range remaining {
+		if pc.Card.Types().Has(card.TypeAttack) {
+			return true
+		}
+	}
+	return false
 }
