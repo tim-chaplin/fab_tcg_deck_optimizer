@@ -183,10 +183,10 @@ type TurnState struct {
 	// the graveyard (e.g. Weeping Battleground banishing an aura). Cards that key on "was a
 	// card banished this turn" read this list.
 	Banish []Card
-	// SelfDestroyed is flipped by DestroyThis() inside a DelayedPlay.PlayNextTurn callback to
-	// signal the deck loop that the card wants to leave the arena and enter the graveyard. When
-	// it stays false, the callback will fire again at the start of the subsequent turn —
-	// matching auras like Malefic Incantation that linger until a counter runs out.
+	// SelfDestroyed is flipped by DestroyThis inside a DelayedPlay.PlayNextTurn callback to
+	// signal the deck loop that the card just moved to the graveyard. When it stays false,
+	// the callback will fire again at the start of the subsequent turn — matching auras like
+	// Malefic Incantation that linger until a counter runs out.
 	SelfDestroyed bool
 }
 
@@ -197,11 +197,14 @@ func PlayedFromArsenal(s *TurnState) bool {
 	return s != nil && s.Self != nil && s.Self.FromArsenal
 }
 
-// DestroyThis is called inside a DelayedPlay.PlayNextTurn callback to indicate the card leaves
-// the arena this turn (entering the graveyard); without this call the card persists and its
-// callback fires again next turn. The zero value means "stay" so one-shot destruction is
-// opt-in, matching printed text like "at the beginning of your action phase, destroy this".
-func (s *TurnState) DestroyThis() {
+// DestroyThis moves c into the graveyard and, inside a DelayedPlay.PlayNextTurn callback,
+// signals the deck loop that the card leaves the arena this turn. Without this call the card
+// persists and the callback fires again next turn. The zero value means "stay", so one-shot
+// destruction is opt-in — matching printed text like "at the beginning of your action phase,
+// destroy this". Cards that destroy themselves mid-turn (e.g. a fragile aura taking unblocked
+// damage) also route through here so the graveyard bookkeeping is uniform.
+func (s *TurnState) DestroyThis(c Card) {
+	s.Graveyard = append(s.Graveyard, c)
 	s.SelfDestroyed = true
 }
 

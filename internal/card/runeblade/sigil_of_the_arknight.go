@@ -39,8 +39,8 @@ func (SigilOfTheArknightBlue) Play(s *card.TurnState) int {
 // If it's an attack action, return it in ToHand so the deck loop actually moves the card into
 // the hand for this turn's best-line search rather than collapsing the tempo into a flat
 // damage-equivalent.
-func (SigilOfTheArknightBlue) PlayNextTurn(s *card.TurnState) card.DelayedPlayResult {
-	s.DestroyThis()
+func (c SigilOfTheArknightBlue) PlayNextTurn(s *card.TurnState) card.DelayedPlayResult {
+	s.DestroyThis(c)
 	if len(s.Deck) == 0 {
 		return card.DelayedPlayResult{}
 	}

@@ -29,7 +29,7 @@ func (SigilOfFyendalBlue) Play(s *card.TurnState) int { return setAuraCreated(s)
 
 // PlayNextTurn credits the 1{h} gain that fires when the aura leaves the arena at the start of
 // the next action phase.
-func (SigilOfFyendalBlue) PlayNextTurn(s *card.TurnState) card.DelayedPlayResult {
-	s.DestroyThis()
+func (c SigilOfFyendalBlue) PlayNextTurn(s *card.TurnState) card.DelayedPlayResult {
+	s.DestroyThis(c)
 	return card.DelayedPlayResult{Damage: 1}
 }

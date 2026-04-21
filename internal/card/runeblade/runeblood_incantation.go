@@ -24,10 +24,10 @@ func runebloodPlay(s *card.TurnState, n int) int {
 	return n - 1
 }
 
-// runebloodNextTurn destroys the aura at the start of the next turn and creates one Runechant
+// runebloodNextTurn destroys self at the start of the next turn and creates one Runechant
 // token as its leave-arena payoff.
-func runebloodNextTurn(s *card.TurnState) card.DelayedPlayResult {
-	s.DestroyThis()
+func runebloodNextTurn(s *card.TurnState, self card.Card) card.DelayedPlayResult {
+	s.DestroyThis(self)
 	return card.DelayedPlayResult{Damage: s.CreateRunechant()}
 }
 
@@ -42,8 +42,8 @@ func (RunebloodIncantationRed) Defense() int               { return 2 }
 func (RunebloodIncantationRed) Types() card.TypeSet        { return runebloodIncantationTypes }
 func (RunebloodIncantationRed) GoAgain() bool              { return true }
 func (RunebloodIncantationRed) Play(s *card.TurnState) int { return runebloodPlay(s, 3) }
-func (RunebloodIncantationRed) PlayNextTurn(s *card.TurnState) card.DelayedPlayResult {
-	return runebloodNextTurn(s)
+func (c RunebloodIncantationRed) PlayNextTurn(s *card.TurnState) card.DelayedPlayResult {
+	return runebloodNextTurn(s, c)
 }
 
 type RunebloodIncantationYellow struct{}
@@ -57,8 +57,8 @@ func (RunebloodIncantationYellow) Defense() int               { return 2 }
 func (RunebloodIncantationYellow) Types() card.TypeSet        { return runebloodIncantationTypes }
 func (RunebloodIncantationYellow) GoAgain() bool              { return true }
 func (RunebloodIncantationYellow) Play(s *card.TurnState) int { return runebloodPlay(s, 2) }
-func (RunebloodIncantationYellow) PlayNextTurn(s *card.TurnState) card.DelayedPlayResult {
-	return runebloodNextTurn(s)
+func (c RunebloodIncantationYellow) PlayNextTurn(s *card.TurnState) card.DelayedPlayResult {
+	return runebloodNextTurn(s, c)
 }
 
 type RunebloodIncantationBlue struct{}
@@ -72,6 +72,6 @@ func (RunebloodIncantationBlue) Defense() int               { return 2 }
 func (RunebloodIncantationBlue) Types() card.TypeSet        { return runebloodIncantationTypes }
 func (RunebloodIncantationBlue) GoAgain() bool              { return true }
 func (RunebloodIncantationBlue) Play(s *card.TurnState) int { return runebloodPlay(s, 1) }
-func (RunebloodIncantationBlue) PlayNextTurn(s *card.TurnState) card.DelayedPlayResult {
-	return runebloodNextTurn(s)
+func (c RunebloodIncantationBlue) PlayNextTurn(s *card.TurnState) card.DelayedPlayResult {
+	return runebloodNextTurn(s, c)
 }

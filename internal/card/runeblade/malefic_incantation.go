@@ -29,7 +29,7 @@ func maleficPlay(s *card.TurnState, n int) int {
 	s.AuraCreated = true
 	if hasFutureAttack(s) {
 		if s.Self != nil {
-			s.Graveyard = append(s.Graveyard, s.Self.Card)
+			s.DestroyThis(s.Self.Card)
 		}
 		return s.CreateRunechant() + (n - 1)
 	}
@@ -39,8 +39,8 @@ func maleficPlay(s *card.TurnState, n int) int {
 // maleficNextTurn destroys a lingering Malefic at the start of the next turn — the solver's
 // simplification treats any aura that survived the play-turn as destroyed here so it doesn't
 // stick around forever (the real card keeps ticking one counter per turn).
-func maleficNextTurn(s *card.TurnState) card.DelayedPlayResult {
-	s.DestroyThis()
+func maleficNextTurn(s *card.TurnState, self card.Card) card.DelayedPlayResult {
+	s.DestroyThis(self)
 	return card.DelayedPlayResult{}
 }
 
@@ -67,8 +67,8 @@ func (MaleficIncantationRed) Defense() int                { return 2 }
 func (MaleficIncantationRed) Types() card.TypeSet         { return maleficTypes }
 func (MaleficIncantationRed) GoAgain() bool               { return true }
 func (MaleficIncantationRed) Play(s *card.TurnState) int  { return maleficPlay(s, 3) }
-func (MaleficIncantationRed) PlayNextTurn(s *card.TurnState) card.DelayedPlayResult {
-	return maleficNextTurn(s)
+func (c MaleficIncantationRed) PlayNextTurn(s *card.TurnState) card.DelayedPlayResult {
+	return maleficNextTurn(s, c)
 }
 
 type MaleficIncantationYellow struct{}
@@ -82,8 +82,8 @@ func (MaleficIncantationYellow) Defense() int                { return 2 }
 func (MaleficIncantationYellow) Types() card.TypeSet         { return maleficTypes }
 func (MaleficIncantationYellow) GoAgain() bool               { return true }
 func (MaleficIncantationYellow) Play(s *card.TurnState) int  { return maleficPlay(s, 2) }
-func (MaleficIncantationYellow) PlayNextTurn(s *card.TurnState) card.DelayedPlayResult {
-	return maleficNextTurn(s)
+func (c MaleficIncantationYellow) PlayNextTurn(s *card.TurnState) card.DelayedPlayResult {
+	return maleficNextTurn(s, c)
 }
 
 type MaleficIncantationBlue struct{}
@@ -97,6 +97,6 @@ func (MaleficIncantationBlue) Defense() int                { return 2 }
 func (MaleficIncantationBlue) Types() card.TypeSet         { return maleficTypes }
 func (MaleficIncantationBlue) GoAgain() bool               { return true }
 func (MaleficIncantationBlue) Play(s *card.TurnState) int  { return maleficPlay(s, 1) }
-func (MaleficIncantationBlue) PlayNextTurn(s *card.TurnState) card.DelayedPlayResult {
-	return maleficNextTurn(s)
+func (c MaleficIncantationBlue) PlayNextTurn(s *card.TurnState) card.DelayedPlayResult {
+	return maleficNextTurn(s, c)
 }

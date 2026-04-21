@@ -21,26 +21,26 @@ func blessingOfOccultPlay(s *card.TurnState) int {
 	return 0
 }
 
-// blessingOfOccultNextTurn destroys the aura and creates n Runechant tokens as its leaves-arena
+// blessingOfOccultNextTurn destroys self and creates n Runechant tokens as its leaves-arena
 // payoff. CreateRunechants both credits the damage and increments the running token count.
-func blessingOfOccultNextTurn(s *card.TurnState, n int) card.DelayedPlayResult {
-	s.DestroyThis()
+func blessingOfOccultNextTurn(s *card.TurnState, self card.Card, n int) card.DelayedPlayResult {
+	s.DestroyThis(self)
 	return card.DelayedPlayResult{Damage: s.CreateRunechants(n)}
 }
 
 type BlessingOfOccultRed struct{}
 
-func (BlessingOfOccultRed) ID() card.ID                   { return card.BlessingOfOccultRed }
-func (BlessingOfOccultRed) Name() string                  { return "Blessing of Occult (Red)" }
-func (BlessingOfOccultRed) Cost(*card.TurnState) int      { return 1 }
-func (BlessingOfOccultRed) Pitch() int                    { return 1 }
-func (BlessingOfOccultRed) Attack() int                   { return 0 }
-func (BlessingOfOccultRed) Defense() int                  { return 2 }
-func (BlessingOfOccultRed) Types() card.TypeSet           { return blessingOfOccultTypes }
-func (BlessingOfOccultRed) GoAgain() bool                 { return false }
-func (BlessingOfOccultRed) Play(s *card.TurnState) int    { return blessingOfOccultPlay(s) }
-func (BlessingOfOccultRed) PlayNextTurn(s *card.TurnState) card.DelayedPlayResult {
-	return blessingOfOccultNextTurn(s, 3)
+func (BlessingOfOccultRed) ID() card.ID                 { return card.BlessingOfOccultRed }
+func (BlessingOfOccultRed) Name() string                { return "Blessing of Occult (Red)" }
+func (BlessingOfOccultRed) Cost(*card.TurnState) int    { return 1 }
+func (BlessingOfOccultRed) Pitch() int                  { return 1 }
+func (BlessingOfOccultRed) Attack() int                 { return 0 }
+func (BlessingOfOccultRed) Defense() int                { return 2 }
+func (BlessingOfOccultRed) Types() card.TypeSet         { return blessingOfOccultTypes }
+func (BlessingOfOccultRed) GoAgain() bool               { return false }
+func (BlessingOfOccultRed) Play(s *card.TurnState) int  { return blessingOfOccultPlay(s) }
+func (c BlessingOfOccultRed) PlayNextTurn(s *card.TurnState) card.DelayedPlayResult {
+	return blessingOfOccultNextTurn(s, c, 3)
 }
 
 type BlessingOfOccultYellow struct{}
@@ -54,21 +54,21 @@ func (BlessingOfOccultYellow) Defense() int               { return 2 }
 func (BlessingOfOccultYellow) Types() card.TypeSet        { return blessingOfOccultTypes }
 func (BlessingOfOccultYellow) GoAgain() bool              { return false }
 func (BlessingOfOccultYellow) Play(s *card.TurnState) int { return blessingOfOccultPlay(s) }
-func (BlessingOfOccultYellow) PlayNextTurn(s *card.TurnState) card.DelayedPlayResult {
-	return blessingOfOccultNextTurn(s, 2)
+func (c BlessingOfOccultYellow) PlayNextTurn(s *card.TurnState) card.DelayedPlayResult {
+	return blessingOfOccultNextTurn(s, c, 2)
 }
 
 type BlessingOfOccultBlue struct{}
 
-func (BlessingOfOccultBlue) ID() card.ID                  { return card.BlessingOfOccultBlue }
-func (BlessingOfOccultBlue) Name() string                 { return "Blessing of Occult (Blue)" }
-func (BlessingOfOccultBlue) Cost(*card.TurnState) int     { return 1 }
-func (BlessingOfOccultBlue) Pitch() int                   { return 3 }
-func (BlessingOfOccultBlue) Attack() int                  { return 0 }
-func (BlessingOfOccultBlue) Defense() int                 { return 2 }
-func (BlessingOfOccultBlue) Types() card.TypeSet          { return blessingOfOccultTypes }
-func (BlessingOfOccultBlue) GoAgain() bool                { return false }
-func (BlessingOfOccultBlue) Play(s *card.TurnState) int   { return blessingOfOccultPlay(s) }
-func (BlessingOfOccultBlue) PlayNextTurn(s *card.TurnState) card.DelayedPlayResult {
-	return blessingOfOccultNextTurn(s, 1)
+func (BlessingOfOccultBlue) ID() card.ID                { return card.BlessingOfOccultBlue }
+func (BlessingOfOccultBlue) Name() string               { return "Blessing of Occult (Blue)" }
+func (BlessingOfOccultBlue) Cost(*card.TurnState) int   { return 1 }
+func (BlessingOfOccultBlue) Pitch() int                 { return 3 }
+func (BlessingOfOccultBlue) Attack() int                { return 0 }
+func (BlessingOfOccultBlue) Defense() int               { return 2 }
+func (BlessingOfOccultBlue) Types() card.TypeSet        { return blessingOfOccultTypes }
+func (BlessingOfOccultBlue) GoAgain() bool              { return false }
+func (BlessingOfOccultBlue) Play(s *card.TurnState) int { return blessingOfOccultPlay(s) }
+func (c BlessingOfOccultBlue) PlayNextTurn(s *card.TurnState) card.DelayedPlayResult {
+	return blessingOfOccultNextTurn(s, c, 1)
 }
