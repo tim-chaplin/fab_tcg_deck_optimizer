@@ -165,9 +165,11 @@ Hero health isn't tracked, so every life-gain and life-comparison rider collapse
   of Occult creates its N Runechants, and Sigil of Cycles / Sigil of Protection destroy
   themselves without modelling their riders. Malefic Incantation assumes the aura dies same-
   turn when any attack follows in CardsRemaining and otherwise lingers for one turn before
-  PlayNextTurn sweeps it. Other cross-turn auras still collapse their effects into the
-  immediate Play: Runeblood Incantation (DelayRunechants), Enchanting Melody (end-phase
-  destruction clause dropped), Sigil of Cycles (on-leave discard/draw dropped).
+  PlayNextTurn sweeps it. Runeblood Incantation credits N-1 counters up front as flat damage
+  and fires the first counter (creating one Runechant) on PlayNextTurn, destroying the aura
+  there. Other cross-turn auras still collapse their effects into the immediate Play:
+  Enchanting Melody (end-phase destruction clause dropped), Sigil of Cycles (on-leave
+  discard/draw dropped).
 - **Enchanting Melody's end-phase destruction condition isn't modelled.** The real card is
   destroyed at end of turn unless a non-attack action card was played this turn; the sim keeps
   the aura forever and collapses the damage-prevention trigger into just an AuraCreated flip.

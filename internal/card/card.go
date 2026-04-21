@@ -148,10 +148,6 @@ type TurnState struct {
 	// consumes the running total on each attack / weapon swing (each token fires for 1 arcane
 	// and is destroyed). Variable-cost cards (e.g. cost reduced per Runechant) read this in Cost.
 	Runechants int
-	// DelayedRunechants are tokens that skip this turn entirely and go to next turn's carryover.
-	// DelayRunechants adds here; same-turn attacks don't consume them and discount checks don't
-	// see them. playSequence folds Runechants + DelayedRunechants into LeftoverRunechants.
-	DelayedRunechants int
 	// ArcaneDamageDealt sticks true once any source of arcane damage fires this turn: a
 	// Runechant token consuming itself on an attack / weapon swing, or a card whose Play deals
 	// arcane directly (e.g. Arcanic Crackle, Vexing Malice, Sigil of Suffering). Effects that
@@ -284,19 +280,6 @@ func (s *TurnState) CreateRunechants(n int) int {
 // CreateRunechant is shorthand for CreateRunechants(1) for the common single-token case.
 func (s *TurnState) CreateRunechant() int {
 	return s.CreateRunechants(1)
-}
-
-// DelayRunechants adds n Runechant tokens that skip this turn entirely — they go to next turn's
-// carryover without being available to same-turn attacks or variable-cost discount checks. Used
-// by cards whose text fires at the start of a future turn (e.g. Blessing of Occult's "at start
-// of your turn, create N Runechant tokens"). Returns n; each token is credited as +1 damage at
-// creation.
-func (s *TurnState) DelayRunechants(n int) int {
-	if n > 0 {
-		s.AuraCreated = true
-		s.DelayedRunechants += n
-	}
-	return n
 }
 
 // Card is any Flesh and Blood card that can be in a deck. Methods return the card's static
