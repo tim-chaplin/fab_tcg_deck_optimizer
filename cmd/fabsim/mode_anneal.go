@@ -97,7 +97,9 @@ func runAnneal(cfg config) annealResult {
 			fmt.Fprintf(os.Stderr, "\nAborted mid-round after %d rounds / %d acceptances in %s\n",
 				round, acceptances, time.Since(start).Truncate(time.Second))
 			fmt.Println()
-			printBestDeck(bestEver)
+			if shouldPrintFinalDeck(cfg.startTemp, bestEverAvg, startingAvg) {
+				printBestDeck(bestEver)
+			}
 			return annealResult{bestEverAvg: bestEverAvg, startingAvg: startingAvg, aborted: true}
 		}
 		if !found {
@@ -108,7 +110,9 @@ func runAnneal(cfg config) annealResult {
 			fmt.Fprintf(os.Stderr, "\nLocal maximum reached after %d rounds / %d acceptances in %s\n",
 				round, acceptances, time.Since(start).Truncate(time.Second))
 			fmt.Println()
-			printBestDeck(bestEver)
+			if shouldPrintFinalDeck(cfg.startTemp, bestEverAvg, startingAvg) {
+				printBestDeck(bestEver)
+			}
 			return annealResult{bestEverAvg: bestEverAvg, startingAvg: startingAvg}
 		}
 
@@ -139,6 +143,16 @@ func runAnneal(cfg config) annealResult {
 		}
 		temperature = coolDown(temperature, cfg.tempDecay, cfg.minTemp)
 	}
+}
+
+// shouldPrintFinalDeck decides whether to dump the full deck listing at the end of a run.
+// Annealing sessions that exit with no net improvement over the starting deck (a common
+// outcome for long reanneal loops that are just probing) would otherwise reprint the same
+// cards every session and bury the session-summary line in noise. Classical mode keeps
+// printing regardless — a no-improvement run there is a single round and the listing is the
+// user's confirmation of what was evaluated.
+func shouldPrintFinalDeck(startTemp, bestEverAvg, startingAvg float64) bool {
+	return startTemp == 0 || bestEverAvg > startingAvg
 }
 
 // coolDown applies one round of geometric cooling, clamped at minTemp so the classical-mode
