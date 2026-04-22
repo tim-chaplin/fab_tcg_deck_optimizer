@@ -1,51 +1,46 @@
 # fab-deck-optimizer
 
-A deck-building and simulation tool for the Flesh and Blood TCG, written in Go.
+A deck-finding tool for the Flesh and Blood TCG, written in Go.
 
-Built with Claude Opus 4.6.
+Built with Claude Code Opus.
 
 ## FAQ
 
 ### So are these AI-generated decks?
 
-No. This is just a computer program that implements an evaluation function and uses known
-optimization techniques to look for optimal decks according to the evaluation. You can compile
-and run the program to find decks on your own computer without having invoked AI at all.
+No. This is just a computer program that implements an evaluation function (the simulator) and
+uses known optimization techniques to look for decks that optimize the evaluation. You can
+compile and run the program on your own computer without having invoked AI at all. AI was used
+to write the program (much) faster than I could have by hand; but the program could have been
+written without AI.
 
 ### Is this the best possible deck in the format?
 
-No. A few caveats:
+No.
 
-- **The search space is too big to exhaust.** For any given set of modelling assumptions I
-  don't know that it'll ever be practical to find the true global optimum. This program finds
-  local maxima, and I don't have a way to prove how far any given local max is from the
-  global one.
-- **"Best" depends on your assumptions**, and especially on the specific matchup you end up in.
-  The tool outputs a deck that's strong for goldfishing under the simplifications listed in
-  "Scope & limitations"; there's no such thing as a single deck that's optimal across every
-  matchup and every assumption.
+1) The search space is too big to exhaust; for any given set of modelling assumptions I don't
+   know that it'll ever be practical to find the true global optimum. This program finds local
+   maxima, and I don't have a way to prove how far any given local max is from the global one.
 
-## Insights
+2) "Best" depends on your assumptions, and especially on the specific matchup; there's no such
+   thing as a single deck that's optimal across every matchup and every assumption (assuming
+   even a moderately well-balanced format). The tool outputs a deck that's strong for
+   goldfishing under the assumptions listed in "Scope & limitations".
 
-Observations that held up across many optimizer runs, and that a human deckbuilder can take as
-hypotheses for their own testing:
+## Observations
 
-- **Nebula Blade is the strongest weapon for Viserai in the format.** Even at very early stages
-  of development — when the card pool and card-effect modelling were much rougher than they are
-  today — the optimizer converged on Nebula Blade over every other weapon loadout almost
-  immediately. It picked Nebula again when rerun under different incoming-damage settings and
-  different partial card pools. That's a strong signal the pick isn't an artifact of some specific
-  deck composition.
-- **Mauvrion Skies wants all six copies.** Across seeds and starting decks the optimizer tends to
-  fill all six legal slots (two each of red / yellow / blue). Whatever the Go-again-plus-Runechant
-  rider is doing for total expected value, the simulator evidently likes it more than the
-  marginal alternative.
-- **Card draw is strong even when the drawn card can't be played this turn.** The current
-  simulator is deliberately conservative about mid-turn draws — drawn cards don't pitch or extend
-  the chain on the same turn; they only carry forward as Held / Arsenal. Even with that
-  effectively-zero same-turn value, converged decks still pack Hit the High Notes / Drawn to the
-  Dark Dimension / Snatch / etc. heavily. The implication is that simply cycling through your
-  deck faster — getting to the peak-value hands sooner on average — is worth a lot on its own.
+- Nebula Blade is probably the strongest weapon for Viserai in the format. Even at very early
+  stages of development (when the card pool and card-effect modelling were much rougher than
+  they are today) the optimizer converged on Nebula Blade over every other weapon loadout
+  almost immediately.
+- Mauvrion Skies wants all six copies. Across seeds and starting decks the optimizer tends to
+  fill all six legal slots (two each of red / yellow / blue).
+- Card draw is strong even when the drawn card can't be played this turn. The current simulator
+  is deliberately conservative about mid-turn draws — drawn cards don't pitch or extend the
+  chain on the same turn; they only carry forward as Held / Arsenal. Even with card draw being
+  undervalued in the simulation (because we never even consider lines where the card is played
+  the same turn it's drawn), the optimizer keeps converging on Drawn to the Dark Dimension and
+  Snatch.
 
 ## Goal
 
@@ -57,18 +52,18 @@ Attack / Defend split and reports aggregate value across many shuffles.
 
 This is a work in progress. The current model is deliberately narrow:
 
-- **Hero pool.** Only cards legal for **Viserai in the Silver Age** are in scope (plus Generic
-  cards). Other heroes / talents / formats aren't modeled yet.
-- **Turns are evaluated in isolation.** There is no between-turn state — no arsenal, no persistent
-  auras carrying over, no health totals, no deck thinning effects that span turns. Each hand is
-  solved as a standalone puzzle.
+- **Hero pool.** Only cards legal for **Viserai in the Silver Age** are in scope. Other heroes /
+  talents / formats aren't modeled yet.
+- **Turns are evaluated in isolation.** There is no between-turn state — no arsenal, no
+  persistent auras carrying over, no health totals, no deck thinning effects that span turns.
+  Each hand is solved as a standalone puzzle.
 - **No opponent counterplay.** The opponent is represented by a single configurable `-incoming`
-  value: a static amount of damage per turn that the hand can defend against. There are no blocks
-  from hand, no disruption, no reaction windows. This is the goldfishing assumption.
+  value: a static amount of damage per turn that the hand can defend against. There are no
+  blocks from hand, no disruption, no reaction windows. This is the goldfishing assumption.
 - **Simplified card effects.** Conditional bonuses are modeled where tractable (e.g. Runechant
-  tokens count as +1 damage, "if hits" is assumed, "next Runeblade attack" riders peek forward via
-  `CardsRemaining`). Effects that require deck / graveyard / multi-turn state are approximated as 0
-  or omitted.
+  tokens count as +1 damage, "if hits" is assumed, "next Runeblade attack" riders peek forward
+  via `CardsRemaining`). Effects that require deck / graveyard / multi-turn state are
+  approximated as 0 or omitted.
 - **Card coverage is incomplete.** Most of the Runeblade Silver-Age pool and some Generics are
   implemented; the rest are stubbed or missing.
 
@@ -76,23 +71,23 @@ This is a work in progress. The current model is deliberately narrow:
 
 - Loads a 40-card deck from `mydecks/<name>.json`.
 - Shuffles and repeatedly draws hands of 4 cards.
-- For each hand, brute-forces the optimal play: every partition of the hand into Pitch / Attack /
-  Defend, every weapon-swing subset, every legal attack ordering (respecting Go again). Hand value
-  = damage dealt + damage prevented (capped at `-incoming`).
-- Per FaB rules, pitched cards return to the bottom of the deck; attacked and defended cards are
-  spent. The simulation runs until fewer than 4 cards remain.
-- Reports the overall average hand value, plus the averages for the first and second cycle through
-  the deck.
+- For each hand, brute-forces the optimal play: every partition of the hand into Pitch / Attack
+  / Defend, every weapon-swing subset, every legal attack ordering (respecting Go again). Hand
+  value = damage dealt + damage prevented (capped at `-incoming`).
+- Per FaB rules, pitched cards return to the bottom of the deck; attacked and defended cards
+  are spent. The simulation runs until fewer than 4 cards remain.
+- Reports the overall average hand value, plus the averages for the first and second cycle
+  through the deck.
 
 ## Usage
 
-`fabsim` takes a subcommand as its first argument. Running `fabsim` with no subcommand prints the
-catalogue.
+`fabsim` takes a subcommand as its first argument. Running `fabsim` with no subcommand prints
+the catalogue.
 
 All subcommands read and write `mydecks/<deck>.json` where `<deck>` comes from `-deck` (default
-`<hero>_<format>_<incoming>_incoming`, e.g. `viserai_silver_age_0_incoming`, so different (hero,
-format, `-incoming`) regimes keep separate deck files). The `.json` suffix on `-deck` is
-optional.
+`<hero>_<format>_<incoming>_incoming`, e.g. `viserai_silver_age_0_incoming`, so different
+(hero, format, `-incoming`) regimes keep separate deck files). The `.json` suffix on `-deck`
+is optional.
 
 - **`anneal`** — simulated-annealing search on the deck at `-deck`, or on a fresh random deck
   if the file doesn't exist yet. Each round enumerates every single-slot mutation (every
@@ -103,19 +98,21 @@ optional.
   `exp((avg - baseline) / T)` when `-start-temp > 0`. Temperature decays geometrically per
   acceptance (`-temp-decay`, floored at `-min-temp`). At `-start-temp 0` the gate is strictly
   `> baseline` and anneal degenerates to a classical hill climb. A round with zero acceptances
-  is treated as a local maximum and anneal exits. Press Enter to abort mid-round (exits 130
-  so wrapper scripts can tell this apart from natural convergence). Only the best-ever deck is
+  is treated as a local maximum and anneal exits. Press Enter to abort mid-round (exits 130 so
+  wrapper scripts can tell this apart from natural convergence). Only the best-ever deck is
   persisted to disk — walks through worse states under annealing don't regress the JSON.
-- **`eval`** — loads the deck file, simulates it for `-deep-shuffles` hands against `-incoming`
-  damage, and prints the resulting stats. Does **not** overwrite the file — use this to re-score a
-  saved deck at a new shuffle depth or opponent pressure without clobbering whatever's on disk.
+- **`eval`** — loads the deck file, simulates it for `-deep-shuffles` hands against
+  `-incoming` damage, and prints the resulting stats. Does **not** overwrite the file — use
+  this to re-score a saved deck at a new shuffle depth or opponent pressure without clobbering
+  whatever's on disk.
 - **`print`** — prints the deck without running any simulation.
 - **`import`** — interactively imports a deck from fabrary.net. Prompts for a deck name, then
   asks you to paste the plain-text export; input ends automatically at fabrary's
-  `See the full deck @ …` footer. Saves the result as `mydecks/<name>.json`. The `-deck` flag is
-  ignored — the name always comes from the prompt. Cards the optimizer hasn't implemented yet are
-  skipped with a warning rather than blocking the import.
-- **`diff`** — prints the card-count delta between two saved decks. Usage: `fabsim diff <deck1> <deck2>`.
+  `See the full deck @ …` footer. Saves the result as `mydecks/<name>.json`. The `-deck` flag
+  is ignored — the name always comes from the prompt. Cards the optimizer hasn't implemented
+  yet are skipped with a warning rather than blocking the import.
+- **`diff`** — prints the card-count delta between two saved decks. Usage:
+  `fabsim diff <deck1> <deck2>`.
 
 ### Suggested workflow
 
@@ -139,7 +136,8 @@ re-run indefinitely.
 ### Flags
 
 - `-shallow-shuffles` — shuffles per deck when screening anneal mutations (default 100)
-- `-deep-shuffles` — shuffles per deck when confirming anneal improvements and for `eval` (default 10000)
+- `-deep-shuffles` — shuffles per deck when confirming anneal improvements and for `eval`
+  (default 10000)
 - `-incoming` — opponent damage per turn (default 0)
 - `-deck-size` — cards per deck (default 40)
 - `-max-copies` — max copies of any single card printing (default 2)
