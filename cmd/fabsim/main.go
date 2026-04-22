@@ -37,10 +37,8 @@ func main() {
 		return
 	}
 
-	numDecks := flag.Int("decks", 1000, "number of random decks to generate (phase 1)")
-	shallowShuffles := flag.Int("shallow-shuffles", 100, "shuffles per deck in phase 1 (wide search); also used to screen iterate mutations before deep confirmation")
-	topN := flag.Int("top-n", 100, "number of top decks to advance to phase 2")
-	deepShuffles := flag.Int("deep-shuffles", 10000, "shuffles per deck in phase 2 (deep evaluation); also used to confirm iterate improvements")
+	shallowShuffles := flag.Int("shallow-shuffles", 100, "shuffles per deck used to screen iterate mutations before deep confirmation")
+	deepShuffles := flag.Int("deep-shuffles", 10000, "shuffles per deck used to confirm iterate improvements and for the eval subcommand")
 	incoming := flag.Int("incoming", 0, "opponent damage per turn")
 	deckSize := flag.Int("deck-size", 40, "number of cards per deck")
 	maxCopies := flag.Int("max-copies", 2, "maximum copies of any single card printing per deck")
@@ -48,15 +46,15 @@ func main() {
 	deckName := flag.String("deck", "", "deck name; resolved to mydecks/<name>.json (\".json\" suffix optional). Defaults to <hero>_<format>_<incoming>_incoming so different (hero, format, -incoming) regimes keep separate deck files. Ignored by the import subcommand, which always prompts interactively.")
 	formatFlag := flag.String("format", string(fmtpkg.SilverAge), "constructed format whose banlist restricts the card pool during search (only \"silver_age\" is supported today)")
 	debug := flag.Bool("debug", false, "emit extra diagnostic output (e.g. memo cache size between iterate rounds)")
-	reevaluate := flag.Bool("reevaluate", false, "iterate: force re-evaluation of the loaded deck's baseline avg, even if its prior run count already matches -deep-shuffles. Use after adjusting modelling assumptions or fixing bugs that may have shifted the deck's true score.")
-	finalize := flag.Bool("finalize", false, "iterate: high-precision pass — overrides -shallow-shuffles to 10000 and -deep-shuffles to 100000. Use on a deck that's already converged to squeeze out the remaining sub-percent improvements.")
-	startTemp := flag.Float64("start-temp", 0, "iterate: simulated-annealing starting temperature. 0 (default) runs a pure hill climb. Higher values probabilistically accept worse mutations early; acceptance probability is exp((avg - baseline) / T). Good starting range is ~0.05–0.5 given typical Value units.")
-	tempDecay := flag.Float64("temp-decay", 0.95, "iterate: multiplicative cooling per acceptance — T ← T × decay, floored at -min-temp. Unused when -start-temp is 0.")
-	minTemp := flag.Float64("min-temp", 0, "iterate: minimum temperature. Once T reaches this floor the climb becomes greedy until a local maximum is found. 0 disables annealing in the converged tail.")
+	reevaluate := flag.Bool("reevaluate", false, "anneal: force re-evaluation of the loaded deck's baseline avg, even if its prior run count already matches -deep-shuffles. Use after adjusting modelling assumptions or fixing bugs that may have shifted the deck's true score.")
+	finalize := flag.Bool("finalize", false, "anneal: high-precision pass — overrides -shallow-shuffles to 10000 and -deep-shuffles to 100000. Use on a deck that's already converged to squeeze out the remaining sub-percent improvements.")
+	startTemp := flag.Float64("start-temp", 0, "anneal: simulated-annealing starting temperature. 0 (default) runs a pure hill climb. Higher values probabilistically accept worse mutations early; acceptance probability is exp((avg - baseline) / T). Good starting range is ~0.05–0.5 given typical Value units.")
+	tempDecay := flag.Float64("temp-decay", 0.95, "anneal: multiplicative cooling per acceptance — T ← T × decay, floored at -min-temp. Unused when -start-temp is 0.")
+	minTemp := flag.Float64("min-temp", 0, "anneal: minimum temperature. Once T reaches this floor the climb becomes greedy until a local maximum is found. 0 disables annealing in the converged tail.")
 	flag.Parse()
 	if *finalize {
-		if subcommand != "iterate" {
-			die("-finalize is only valid with the iterate subcommand")
+		if subcommand != "anneal" {
+			die("-finalize is only valid with the anneal subcommand")
 		}
 		*shallowShuffles = 10000
 		*deepShuffles = 100000
@@ -98,9 +96,7 @@ func main() {
 	}
 
 	cfg := config{
-		numDecks:        *numDecks,
 		shallowShuffles: *shallowShuffles,
-		topN:            *topN,
 		deepShuffles:    *deepShuffles,
 		incoming:        *incoming,
 		deckSize:        *deckSize,
@@ -121,13 +117,11 @@ func main() {
 	cfg.outPath = outPath
 
 	switch subcommand {
-	case "random":
-		runRandom(cfg)
-	case "iterate":
+	case "anneal":
 		// Print the session-level delta (starting best vs final best) on any exit path, then
-		// surface abort via a non-zero exit so wrapper scripts (iterate-reanneal.ps1 et al.)
+		// surface abort via a non-zero exit so wrapper scripts (anneal-reanneal.ps1 et al.)
 		// can tell Enter-initiated termination from natural convergence and stop looping.
-		res := runIterate(cfg)
+		res := runAnneal(cfg)
 		fmt.Fprintf(os.Stderr, "\nSession summary: avg %.3f → %.3f (%+.3f)\n",
 			res.startingAvg, res.bestEverAvg, res.bestEverAvg-res.startingAvg)
 		if res.aborted {
@@ -167,8 +161,7 @@ func printSubcommands(w io.Writer) {
 	fmt.Fprintln(w, "Usage: fabsim <subcommand> [flags]")
 	fmt.Fprintln(w)
 	fmt.Fprintln(w, "Subcommands:")
-	fmt.Fprintln(w, "  random    Search for a new best deck via two-phase random sampling")
-	fmt.Fprintln(w, "  iterate   Hill-climb on the saved deck until a local maximum")
+	fmt.Fprintln(w, "  iterate   Hill-climb (optionally simulated-annealing) on the saved deck until a local maximum")
 	fmt.Fprintln(w, "  eval      Re-score the saved deck at -deep-shuffles without overwriting it")
 	fmt.Fprintln(w, "  print     Print the saved deck without simulating")
 	fmt.Fprintln(w, "  import    Paste a fabrary.net deck into mydecks/<name>.json")
@@ -183,9 +176,7 @@ func die(format string, args ...any) {
 }
 
 type config struct {
-	numDecks        int
 	shallowShuffles int
-	topN            int
 	deepShuffles    int
 	incoming        int
 	deckSize        int

@@ -1,108 +1,150 @@
 # fab-deck-optimizer
 
-A deck-building and simulation tool for the Flesh and Blood TCG, written in Go.
+A deck-finding tool for the Flesh and Blood TCG, written in Go.
 
-Built with Claude Opus 4.6.
+Built with Claude Code Opus.
 
 ## Goal
 
-Find optimal deck lists for **goldfishing** — i.e. maximizing a deck's own output in a vacuum,
-without modeling a live opponent. The simulator partitions each drawn hand into its best Pitch /
-Attack / Defend split and reports aggregate value across many shuffles.
+Find optimal deck lists under a given set of assumptions. I model a deck's value as the average
+value produced by each hand over many plays through the deck. A hand's value is the sum of damage
+dealt, and damage prevented.
+
+## FAQ
+
+### So are these AI-generated decks?
+
+No. This is just a computer program that implements an evaluation function (the simulator) and
+uses known optimization techniques to look for decks that optimize the evaluation. You can
+compile and run the program on your own computer without having invoked AI at all. AI was used
+to write the program (much) faster than I could have by hand; but the program could have been
+written without AI.
+
+### Is this the best possible deck in the format?
+
+No.
+
+1) The search space is too big to exhaust; for any given set of modelling assumptions I don't
+   know that it'll ever be practical to find the true global optimum. This program finds local
+   maxima, and I don't have a way to prove how far any given local max is from the global one.
+
+2) "Best" depends on your assumptions, and especially on the specific matchup; there's no such
+   thing as a single deck that's optimal across every matchup and every assumption (assuming
+   even a moderately well-balanced format). The tool outputs a deck that's strong for
+   goldfishing under the assumptions listed in "Scope & limitations".
+
+## Observations
+
+- Nebula Blade is probably the strongest weapon for Viserai in the format. Even at very early
+  stages of development (when the card pool and card-effect modelling were much rougher than
+  they are today) the optimizer converged on Nebula Blade over every other weapon loadout
+  almost immediately.
+- Mauvrion Skies wants all six copies. Across seeds and starting decks the optimizer tends to
+  fill all six legal slots (two each of red / yellow / blue).
+- Even with card draw being undervalued in the simulation (because we never even consider lines
+  where the card is played the same turn it's drawn), the optimizer keeps converging on Drawn to
+  the Dark Dimension and Snatch.
 
 ## Scope & limitations
 
 This is a work in progress. The current model is deliberately narrow:
 
-- **Hero pool.** Only cards legal for **Viserai in the Silver Age** are in scope (plus Generic
-  cards). Other heroes / talents / formats aren't modeled yet.
-- **Turns are evaluated in isolation.** There is no between-turn state — no arsenal, no persistent
-  auras carrying over, no health totals, no deck thinning effects that span turns. Each hand is
-  solved as a standalone puzzle.
+- **Hero pool.** Only cards legal for Viserai in Silver Age are modeled.
 - **No opponent counterplay.** The opponent is represented by a single configurable `-incoming`
-  value: a static amount of damage per turn that the hand can defend against. There are no blocks
-  from hand, no disruption, no reaction windows. This is the goldfishing assumption.
-- **Simplified card effects.** Conditional bonuses are modeled where tractable (e.g. Runechant
-  tokens count as +1 damage, "if hits" is assumed, "next Runeblade attack" riders peek forward via
-  `CardsRemaining`). Effects that require deck / graveyard / multi-turn state are approximated as 0
-  or omitted.
-- **Card coverage is incomplete.** Most of the Runeblade Silver-Age pool and some Generics are
-  implemented; the rest are stubbed or missing.
+  value: a static amount of damage per turn that the hand can defend against. There are no
+  blocks from hand, no disruption, no reaction windows. This is the goldfishing assumption.
+- **Card coverage is incomplete.** Most Runeblade and Generic Silver Age cards are implemented, but
+    many are still stubs, or simplified.
 
-## What it does today
+## How it works
 
-- Loads a 40-card deck (currently hardcoded).
+- Loads a 40-card deck from `mydecks/<name>.json`.
 - Shuffles and repeatedly draws hands of 4 cards.
-- For each hand, brute-forces the optimal play: every partition of the hand into Pitch / Attack /
-  Defend, every weapon-swing subset, every legal attack ordering (respecting Go again). Hand value
-  = damage dealt + damage prevented (capped at `-incoming`).
-- Per FaB rules, pitched cards return to the bottom of the deck; attacked and defended cards are
-  spent. The simulation runs until fewer than 4 cards remain.
-- Reports the overall average hand value, plus the averages for the first and second cycle through
-  the deck.
+- For each hand, brute-forces the optimal play: every partition of the hand into Pitch / Attack
+  / Defend, every weapon-swing subset, every legal attack ordering (respecting Go again). Hand
+  value = damage dealt + damage prevented (capped at `-incoming`).
+- After shuffling and drawing through the deck a certain number of times, assigns it a score.
+- Generates new decks by randomly swapping out cards, and saving the deck with the higher score.
 
 ## Usage
 
-`fabsim` takes a subcommand as its first argument. Running `fabsim` with no subcommand prints the
-catalogue.
+`fabsim` takes a subcommand as its first argument. Running `fabsim` with no subcommand prints
+the catalogue.
 
 All subcommands read and write `mydecks/<deck>.json` where `<deck>` comes from `-deck` (default
-`<hero>_<format>_<incoming>_incoming`, e.g. `viserai_silver_age_0_incoming`, so different (hero,
-format, `-incoming`) regimes keep separate deck files). The `.json` suffix on `-deck` is
-optional.
+`<hero>_<format>_<incoming>_incoming`, e.g. `viserai_silver_age_0_incoming`, so different
+(hero, format, `-incoming`) regimes keep separate deck files). The `.json` suffix on `-deck`
+is optional.
 
-- **`random`** — two-phase search. Generates `-decks` random decks and evaluates each shallowly
-  (`-shallow-shuffles` shuffles); takes the top `-top-n` and re-evaluates them with more shuffles
-  (`-deep-shuffles`). Writes the winner to the deck file if it beats whatever's already there.
-- **`iterate`** — hill-climbs deterministically on the deck at `-deck`, or on a fresh random
-  deck if the file doesn't exist yet (so you don't need to run `random` first). Each round
-  enumerates every single-slot mutation (every alternative weapon loadout + every (card-in-deck,
-  card-out-of-deck) swap). Mutations are screened at `-shallow-shuffles`; only those that beat
-  the current best on the shallow sample are re-evaluated at `-deep-shuffles` to confirm. The
-  first mutation that beats the baseline at deep depth is adopted and the round restarts. When a
-  full round finishes without finding a confirmed improvement, the deck is at a local maximum and
-  `iterate` exits. Press Enter to abort mid-round.
-- **`eval`** — loads the deck file, simulates it for `-deep-shuffles` hands against `-incoming`
-  damage, and prints the resulting stats. Does **not** overwrite the file — use this to re-score a
-  saved deck at a new shuffle depth or opponent pressure without clobbering whatever's on disk.
+- **`anneal`** — simulated-annealing search on the deck at `-deck`, or on a fresh random deck
+  if the file doesn't exist yet. Each round enumerates every single-slot mutation (every
+  alternative weapon loadout + every (card-in-deck, card-out-of-deck) swap). Mutations are
+  screened at `-shallow-shuffles`; candidates that clear the acceptance gate are re-evaluated
+  at `-deep-shuffles` to confirm. The acceptance gate is the Metropolis rule: strict
+  improvements are always accepted, worse mutations are accepted with probability
+  `exp((avg - baseline) / T)` when `-start-temp > 0`. Temperature decays geometrically per
+  acceptance (`-temp-decay`, floored at `-min-temp`). At `-start-temp 0` the gate is strictly
+  `> baseline` and anneal degenerates to a classical hill climb. A round with zero acceptances
+  is treated as a local maximum and anneal exits. Press Enter to abort mid-round (exits 130 so
+  wrapper scripts can tell this apart from natural convergence). Only the best-ever deck is
+  persisted to disk — walks through worse states under annealing don't regress the JSON.
+- **`eval`** — loads the deck file, simulates it for `-deep-shuffles` hands against
+  `-incoming` damage, and prints the resulting stats. Does **not** overwrite the file — use
+  this to re-score a saved deck at a new shuffle depth or opponent pressure without clobbering
+  whatever's on disk.
 - **`print`** — prints the deck without running any simulation.
 - **`import`** — interactively imports a deck from fabrary.net. Prompts for a deck name, then
   asks you to paste the plain-text export; input ends automatically at fabrary's
-  `See the full deck @ …` footer. Saves the result as `mydecks/<name>.json`. The `-deck` flag is
-  ignored — the name always comes from the prompt. Cards the optimizer hasn't implemented yet are
-  skipped with a warning rather than blocking the import.
+  `See the full deck @ …` footer. Saves the result as `mydecks/<name>.json`. The `-deck` flag
+  is ignored — the name always comes from the prompt. Cards the optimizer hasn't implemented
+  yet are skipped with a warning rather than blocking the import.
+- **`diff`** — prints the card-count delta between two saved decks. Usage:
+  `fabsim diff <deck1> <deck2>`.
 
 ### Suggested workflow
 
-Start with a wide random search to seed the deck file for the current `-incoming` setting, then
-hill-climb from there:
+Choose an amount of incoming damage per turn (basically your tuning knob for how aggressive vs.
+defensive the deck will be). Run in continuous annealing mode to look for the best deck for the
+chosen assumption:
 
 ```
-go run ./cmd/fabsim random
-go run ./cmd/fabsim iterate
+./scripts/anneal-reanneal.ps1 -Deck viserai_silver_age_7_incoming -StartTemp 1 -Incoming 7
 ```
 
-`random` explores the space; `iterate` refines the best find. Re-run either stage as often as
-you like — each run only overwrites the deck file if it finds something better.
+Or fan out across several independent starts for potentially better coverage of the solution space,
+and rank the results:
+
+```
+./scripts/anneal-restarts.ps1 -N 10 -DeckTemplate 'viserai_*' -Incoming 7 -StartTemp 1
+```
+
+Each run only overwrites its deck file when a new best-ever avg is found, so it's safe to
+re-run indefinitely.
 
 ### Flags
 
-- `-decks` — number of random decks to generate in phase 1 of `random` (default 1000)
-- `-shallow-shuffles` — shuffles per deck in `random` phase 1 and for screening `iterate`
-  mutations (default 100)
-- `-top-n` — number of phase-1 decks to advance to phase 2 (default 100)
-- `-deep-shuffles` — shuffles per deck in `random` phase 2 and for confirming `iterate`
-  improvements (default 10000)
+- `-shallow-shuffles` — shuffles per deck when screening anneal mutations (default 100)
+- `-deep-shuffles` — shuffles per deck when confirming anneal improvements and for `eval`
+  (default 10000)
 - `-incoming` — opponent damage per turn (default 0)
 - `-deck-size` — cards per deck (default 40)
 - `-max-copies` — max copies of any single card printing (default 2)
 - `-seed` — RNG seed (default: time-based)
 - `-deck` — deck name; resolved to `mydecks/<name>.json` (default
-  `<hero>_<format>_<incoming>_incoming`, e.g. `viserai_silver_age_0_incoming`, keyed off the
-  hero, format, and `-incoming`). The `mydecks/` directory is created automatically.
+  `<hero>_<format>_<incoming>_incoming`, keyed off the hero, format, and `-incoming`). The
+  `mydecks/` directory is created automatically.
 - `-format` — constructed format whose banlist restricts the card pool during search. Defaults
   to `silver_age`, which is currently the only supported format. The authoritative Silver Age
   banlist lives at `data_sources/silver_age_banlist.txt`.
+- `-start-temp` — anneal: starting temperature. `0` (default) runs a pure hill climb. Higher
+  values probabilistically accept worse mutations early (Metropolis rule).
+- `-temp-decay` — anneal: multiplicative cooling per acceptance (default 0.95).
+- `-min-temp` — anneal: temperature floor (default 0).
+- `-finalize` — anneal: high-precision pass — overrides `-shallow-shuffles` to 10000 and
+  `-deep-shuffles` to 100000. Use on a deck that's already converged to squeeze out the
+  remaining sub-percent improvements.
+- `-reevaluate` — anneal: force re-evaluation of the loaded deck's baseline avg even if its
+  prior run count already matches `-deep-shuffles`. Use after adjusting modelling assumptions.
 
 Helper tool for exploring the upstream card database:
 
@@ -119,12 +161,14 @@ go test ./...
 ## Layout
 
 ```
-cmd/fabsim/         CLI entry point
-cmd/parsecarddb/    Card-database parser / filter
-internal/card/      Card interface, TurnState, and card implementations
-internal/deck/      Deck construction
-internal/hand/      Optimal-play solver for a single hand
-internal/hero/      Hero definitions and on-play triggers
-internal/sim/       Deck simulation and stat aggregation
-internal/weapon/    Weapon definitions
+.github/workflows/   GitHub Actions (anneal-sweep: parallel matrix run)
+cmd/fabsim/          CLI entry point
+cmd/parsecarddb/     Card-database parser / filter
+internal/card/       Card interface, TurnState, and card implementations
+internal/deck/       Deck construction and parallel anneal round driver
+internal/deckio/     JSON serialisation / deserialisation
+internal/hand/       Optimal-play solver for a single hand
+internal/hero/       Hero definitions and on-play triggers
+internal/weapon/     Weapon definitions
+scripts/             PowerShell wrappers for multi-restart and reanneal sweeps
 ```

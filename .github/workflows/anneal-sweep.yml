@@ -1,11 +1,11 @@
-name: Iterate sweep
+name: Anneal sweep
 
-# Parallel hill-climb sweep on GitHub-hosted runners. Spawns `N` iterate workers in a matrix —
+# Parallel anneal sweep on GitHub-hosted runners. Spawns `N` anneal workers in a matrix —
 # each with a distinct seed — lets them run for up to `runtime_minutes`, then uploads every
 # worker's final deck as an artifact. A final aggregation job downloads everything and ranks by
 # avg so the best runs surface without SSH'ing anywhere.
 #
-# Manual trigger only: `gh workflow run iterate-sweep.yml -f num_seeds=100 -f incoming=7` (or use
+# Manual trigger only: `gh workflow run anneal-sweep.yml -f num_seeds=100 -f incoming=7` (or use
 # the GitHub UI). Free-tier public-repo accounts cap concurrent runners at ~20, so
 # `num_seeds > 20` queues rather than fans out flat.
 
@@ -13,7 +13,7 @@ on:
   workflow_dispatch:
     inputs:
       num_seeds:
-        description: "Number of parallel iterate workers (each gets a distinct seed)."
+        description: "Number of parallel anneal workers (each gets a distinct seed)."
         required: true
         default: "10"
       incoming:
@@ -41,7 +41,7 @@ on:
         required: true
         default: "silver_age"
       runtime_minutes:
-        description: "Per-worker wall-clock cap (minutes). Iterate exits cleanly on natural convergence; this bounds runaway jobs so the matrix finishes within GitHub's 6h job limit with headroom for upload."
+        description: "Per-worker wall-clock cap (minutes). Anneal exits cleanly on natural convergence; this bounds runaway jobs so the matrix finishes within GitHub's 6h job limit with headroom for upload."
         required: true
         default: "300"
 
@@ -58,7 +58,7 @@ jobs:
         run: |
           echo "workers=[$(seq -s, 1 ${{ inputs.num_seeds }})]" >> "$GITHUB_OUTPUT"
 
-  iterate:
+  anneal:
     needs: plan
     runs-on: ubuntu-latest
     timeout-minutes: 350
@@ -85,15 +85,15 @@ jobs:
           echo "Chose seed=$SEED for worker ${{ matrix.worker }}"
           echo "seed=$SEED" >> "$GITHUB_OUTPUT"
 
-      - name: Run iterate
+      - name: Run anneal
         # `timeout` bounds the worker at runtime_minutes so every job finishes inside the GitHub
-        # 6h cap even without natural convergence. iterate saves to mydecks/<name>.json on every
+        # 6h cap even without natural convergence. anneal saves to mydecks/<name>.json on every
         # improvement, so a SIGTERM leaves the latest best deck on disk. `|| true` keeps the step
         # green on a timeout exit (124) so the upload step still runs.
         run: |
           set -x
           mkdir -p mydecks
-          timeout ${{ inputs.runtime_minutes }}m go run ./cmd/fabsim iterate \
+          timeout ${{ inputs.runtime_minutes }}m go run ./cmd/fabsim anneal \
             -seed ${{ steps.seed.outputs.seed }} \
             -deck seed-${{ steps.seed.outputs.seed }} \
             -incoming ${{ inputs.incoming }} \
@@ -118,7 +118,7 @@ jobs:
           retention-days: 30
 
   aggregate:
-    needs: iterate
+    needs: anneal
     if: always()
     runs-on: ubuntu-latest
     steps:
