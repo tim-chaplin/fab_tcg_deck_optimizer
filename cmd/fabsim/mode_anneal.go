@@ -178,8 +178,7 @@ func prepareBaseline(cfg config, rng *rand.Rand) (*deck.Deck, float64) {
 		bestAvg = best.Evaluate(cfg.deepShuffles, cfg.incoming, rng).Mean()
 		_ = writeDeck(best, cfg.outPath)
 		fmt.Printf("Starting deck avg %.3f, saved to %s\n", bestAvg, cfg.outPath)
-		fmt.Println()
-		printCardList(best)
+		maybePrintBaselineCards(cfg, best)
 		return best, bestAvg
 	}
 	if cfg.reevaluate || best.Stats.Runs < cfg.deepShuffles {
@@ -193,14 +192,23 @@ func prepareBaseline(cfg config, rng *rand.Rand) (*deck.Deck, float64) {
 		bestAvg = best.Evaluate(cfg.deepShuffles, cfg.incoming, rng).Mean()
 		_ = writeDeck(best, cfg.outPath)
 		fmt.Printf("Re-evaluated baseline avg %.3f, saved to %s\n", bestAvg, cfg.outPath)
-		fmt.Println()
-		printCardList(best)
+		maybePrintBaselineCards(cfg, best)
 		return best, bestAvg
 	}
 	fmt.Printf("Loaded best deck (avg %.3f) from %s\n", bestAvg, cfg.outPath)
-	fmt.Println()
-	printCardList(best)
+	maybePrintBaselineCards(cfg, best)
 	return best, bestAvg
+}
+
+// maybePrintBaselineCards emits the startup card-list dump unless -quiet-load suppressed it. The
+// leading blank line is part of the listing block, so it's also gated — otherwise -quiet-load
+// would leave a lone empty line hanging after the baseline avg summary.
+func maybePrintBaselineCards(cfg config, d *deck.Deck) {
+	if cfg.quietLoad {
+		return
+	}
+	fmt.Println()
+	printCardList(d)
 }
 
 // watchStdinForAbort spawns a background goroutine that calls cancel() on the first keypress.
