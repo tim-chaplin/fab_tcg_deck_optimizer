@@ -63,6 +63,14 @@ func runDiff(name1, name2 string) {
 			pluses = append(pluses, fmt.Sprintf("+%d %s", d, n))
 		}
 	}
+	if len(minuses) == 0 && len(pluses) == 0 {
+		// Silent-on-match left the user guessing whether diff ran at all when the two decks had
+		// matching card counts. Print an explicit confirmation so "no output" can't be confused
+		// with "diff failed silently". Scoped to the card list to match what diff actually
+		// compares — hero and weapon differences are not surfaced here.
+		fmt.Printf("%s and %s have identical card lists (%d cards)\n", name1, name2, len(d1.Cards))
+		return
+	}
 	for _, l := range minuses {
 		fmt.Println(l)
 	}
