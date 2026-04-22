@@ -1,4 +1,4 @@
-# iterate-restarts.ps1 — run `fabsim iterate` N times with different deck names and rank the
+# iterate-restarts.ps1 - run `fabsim iterate` N times with different deck names and rank the
 # results at the end. Replaces the former -N / -deck-template flags that lived inside fabsim's
 # Go code: a thin shell-level wrapper keeps iterate's surface narrow while still giving the
 # user multi-restart sweeps.
@@ -28,7 +28,7 @@ param(
 
 $ErrorActionPreference = 'Stop'
 
-# Validate template shape mirrors what fabsim's own validator used to reject — exactly one '*'.
+# Validate template shape mirrors what fabsim's own validator used to reject - exactly one '*'.
 $starCount = ($DeckTemplate.ToCharArray() | Where-Object { $_ -eq '*' } | Measure-Object).Count
 if ($starCount -ne 1) {
     throw "-DeckTemplate must contain exactly one '*' placeholder (got '$DeckTemplate')"
@@ -61,10 +61,14 @@ for ($i = 1; $i -le $N; $i++) {
     if ($IterateDebug) { $goArgs += '-debug' }
 
     & go @goArgs
+    if ($LASTEXITCODE -ne 0) {
+        Write-Host "iterate exited $LASTEXITCODE on restart ${i}; stopping the sweep."
+        break
+    }
 
     # iterate persists its final state to mydecks/<deckName>.json; the deck's Stats block carries
     # the avg directly, so we don't have to parse stdout to rank. Missing file means the run
-    # failed or was aborted before a single improvement saved — leave it out of the ranking.
+    # failed or was aborted before a single improvement saved - leave it out of the ranking.
     $deckPath = Join-Path 'mydecks' "$deckName.json"
     if (Test-Path $deckPath) {
         $deck = Get-Content $deckPath -Raw | ConvertFrom-Json

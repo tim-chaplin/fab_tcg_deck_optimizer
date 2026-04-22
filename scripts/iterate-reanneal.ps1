@@ -66,6 +66,13 @@ while ($true) {
     if ($IterateDebug) { $goArgs += '-debug' }
 
     & go @goArgs
+    # Exit 130 is iterate's "user pressed Enter" signal. Break the outer loop so the whole
+    # session stops instead of kicking off another pass; any other non-zero is also treated
+    # as a reason to stop.
+    if ($LASTEXITCODE -ne 0) {
+        Write-Host "iterate exited $LASTEXITCODE; ending reanneal session."
+        break
+    }
 
     if (Test-Path $deckPath) {
         $d = Get-Content $deckPath -Raw | ConvertFrom-Json

@@ -13,7 +13,17 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/hero"
 )
 
-func runIterate(cfg config) float64 {
+// iterateResult carries the outcome of a single runIterate pass. aborted is true when the
+// user hit Enter (stdin watcher fired) — callers propagate this up to main so the process
+// exits non-zero and wrapper scripts like iterate-reanneal.ps1 stop their outer loop instead
+// of immediately launching another pass.
+type iterateResult struct {
+	bestEverAvg  float64
+	startingAvg  float64
+	aborted      bool
+}
+
+func runIterate(cfg config) iterateResult {
 	rng := rand.New(rand.NewSource(cfg.seed))
 
 	current, currentAvg := prepareBaseline(cfg, rng)
@@ -22,6 +32,7 @@ func runIterate(cfg config) float64 {
 	// local maxima, but the on-disk artifact should always reflect the peak reached so far.
 	bestEver := current
 	bestEverAvg := currentAvg
+	startingAvg := currentAvg
 	fmt.Println("Press Enter to abort.")
 
 	ctx, cancel := context.WithCancel(context.Background())
@@ -29,6 +40,11 @@ func runIterate(cfg config) float64 {
 	watchStdinForAbort(cancel)
 
 	temperature := cfg.startTemp
+	// verbose gates the noisy per-round headers and per-mutation acceptance lines. Classical
+	// hill-climb (T==0) keeps them on because the log is the user's progress indicator; under
+	// annealing they flood the terminal with hundreds of near-identical lines, so they're
+	// suppressed unless -debug asked for them.
+	verbose := temperature == 0 || cfg.debug
 	if temperature > 0 {
 		fmt.Fprintf(os.Stderr, "Simulated annealing: startTemp=%.3f decay=%.3f minTemp=%.3f\n",
 			cfg.startTemp, cfg.tempDecay, cfg.minTemp)
@@ -62,24 +78,31 @@ func runIterate(cfg config) float64 {
 		if temperature > 0 {
 			tempLabel = fmt.Sprintf(" (T=%.4f)", temperature)
 		}
-		fmt.Fprintf(os.Stderr, "\n[round %d] evaluating %d mutations of avg %.3f%s (best ever %.3f)\n",
-			round, len(mutations), currentAvg, tempLabel, bestEverAvg)
+		if verbose {
+			fmt.Fprintf(os.Stderr, "\n[round %d] evaluating %d mutations of avg %.3f%s (best ever %.3f)\n",
+				round, len(mutations), currentAvg, tempLabel, bestEverAvg)
+		}
 
 		var tested, deepsDone atomic.Int64
-		stopTicker := startRoundTicker(round, len(mutations), start, &tested, &deepsDone)
+		var stopTicker func()
+		if verbose {
+			stopTicker = startRoundTicker(round, len(mutations), start, &tested, &deepsDone)
+		}
 		d, avg, idx, found := deck.IterateParallel(
 			ctx, mutations, currentAvg, temperature,
 			cfg.shallowShuffles, cfg.deepShuffles, cfg.incoming, 0,
 			rng.Int63(), &tested, &deepsDone,
 		)
-		stopTicker()
+		if stopTicker != nil {
+			stopTicker()
+		}
 
 		if ctx.Err() != nil {
 			fmt.Fprintf(os.Stderr, "\nAborted mid-round after %d rounds / %d acceptances in %s\n",
 				round, acceptances, time.Since(start).Truncate(time.Second))
 			fmt.Println()
 			printBestDeck(bestEver)
-			return bestEverAvg
+			return iterateResult{bestEverAvg: bestEverAvg, startingAvg: startingAvg, aborted: true}
 		}
 		if !found {
 			// A full round with zero acceptances means every mutation — including the
@@ -90,7 +113,7 @@ func runIterate(cfg config) float64 {
 				round, acceptances, time.Since(start).Truncate(time.Second))
 			fmt.Println()
 			printBestDeck(bestEver)
-			return bestEverAvg
+			return iterateResult{bestEverAvg: bestEverAvg, startingAvg: startingAvg}
 		}
 
 		acceptances++
@@ -99,11 +122,20 @@ func runIterate(cfg config) float64 {
 		if avg <= currentAvg {
 			verb = "annealing step"
 		}
-		fmt.Fprintf(os.Stderr, "\r[round %d] %s at %d/%d: deep %.3f vs %.3f (%s)%s       \n",
-			round, verb, idx+1, len(mutations), avg, currentAvg, mut.Description, tempLabel)
+		if verbose {
+			fmt.Fprintf(os.Stderr, "\r[round %d] %s at %d/%d: deep %.3f vs %.3f (%s)%s       \n",
+				round, verb, idx+1, len(mutations), avg, currentAvg, mut.Description, tempLabel)
+		}
 		current = d
 		currentAvg = avg
 		if avg > bestEverAvg {
+			if !verbose {
+				// Surface every new all-time best in non-verbose annealing mode so long
+				// reanneal sessions still show visible forward motion without the per-round
+				// spam. Classical mode already got this info via the "improvement" line above.
+				fmt.Fprintf(os.Stderr, "[round %d] new best %.3f (was %.3f, +%.3f)%s\n",
+					round, avg, bestEverAvg, avg-bestEverAvg, tempLabel)
+			}
 			bestEver = d
 			bestEverAvg = avg
 			_ = writeDeck(bestEver, cfg.outPath)

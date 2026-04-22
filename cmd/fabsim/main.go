@@ -124,7 +124,15 @@ func main() {
 	case "random":
 		runRandom(cfg)
 	case "iterate":
-		runIterate(cfg)
+		// Print the session-level delta (starting best vs final best) on any exit path, then
+		// surface abort via a non-zero exit so wrapper scripts (iterate-reanneal.ps1 et al.)
+		// can tell Enter-initiated termination from natural convergence and stop looping.
+		res := runIterate(cfg)
+		fmt.Fprintf(os.Stderr, "\nSession summary: avg %.3f → %.3f (%+.3f)\n",
+			res.startingAvg, res.bestEverAvg, res.bestEverAvg-res.startingAvg)
+		if res.aborted {
+			os.Exit(130)
+		}
 	case "eval":
 		runEval(cfg)
 	case "print":
