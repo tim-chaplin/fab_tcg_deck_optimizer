@@ -54,7 +54,8 @@ func BenchmarkIterateImprovements(b *testing.B) {
 		for improvements := 0; improvements < targetImprovements; improvements++ {
 			mutations := AllMutations(best, maxCopies, nil)
 			d, avg, _, found := IterateParallel(
-				context.Background(), mutations, bestAvg, shallowShuffles, deepShuffles, incoming, 0,
+				context.Background(), mutations, bestAvg, 0,
+				shallowShuffles, deepShuffles, incoming, 0,
 				iterRNG.Int63(), nil, nil,
 			)
 			if !found {

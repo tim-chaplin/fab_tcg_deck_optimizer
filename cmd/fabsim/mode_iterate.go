@@ -13,21 +13,45 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/hero"
 )
 
-func runIterate(cfg config) float64 {
+// iterateResult carries the outcome of a single runIterate pass. aborted is true when the
+// user hit Enter (stdin watcher fired) — callers propagate this up to main so the process
+// exits non-zero and wrapper scripts like iterate-reanneal.ps1 stop their outer loop instead
+// of immediately launching another pass.
+type iterateResult struct {
+	bestEverAvg  float64
+	startingAvg  float64
+	aborted      bool
+}
+
+func runIterate(cfg config) iterateResult {
 	rng := rand.New(rand.NewSource(cfg.seed))
 
-	best, bestAvg := prepareBaseline(cfg, rng)
+	current, currentAvg := prepareBaseline(cfg, rng)
+	// All-time best tracks the highest-avg deck seen since runIterate started. The saved JSON
+	// mirrors this — simulated annealing intentionally walks through worse states to escape
+	// local maxima, but the on-disk artifact should always reflect the peak reached so far.
+	bestEver := current
+	bestEverAvg := currentAvg
+	startingAvg := currentAvg
 	fmt.Println("Press Enter to abort.")
 
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 	watchStdinForAbort(cancel)
 
-	// Deterministic hill-climb: enumerate every single-slot mutation of the current best, adopt
-	// the first mutation that scores higher, and restart enumeration. Exhausting every mutation
-	// with no improvement means we're at a local maximum.
+	temperature := cfg.startTemp
+	// verbose gates the noisy per-round headers and per-mutation acceptance lines. Classical
+	// hill-climb (T==0) keeps them on because the log is the user's progress indicator; under
+	// annealing they flood the terminal with hundreds of near-identical lines, so they're
+	// suppressed unless -debug asked for them.
+	verbose := temperature == 0 || cfg.debug
+	if temperature > 0 {
+		fmt.Fprintf(os.Stderr, "Simulated annealing: startTemp=%.3f decay=%.3f minTemp=%.3f\n",
+			cfg.startTemp, cfg.tempDecay, cfg.minTemp)
+	}
+
 	round := 0
-	improvements := 0
+	acceptances := 0
 	start := time.Now()
 	for {
 		round++
@@ -38,41 +62,93 @@ func runIterate(cfg config) float64 {
 			fmt.Fprintf(os.Stderr, "[memo] clearing %d entries before round %d\n", hand.MemoLen(), round)
 		}
 		hand.ClearMemo()
-		mutations := deck.AllMutations(best, cfg.maxCopies, cfg.legalFilter())
-		fmt.Fprintf(os.Stderr, "\n[round %d] evaluating %d mutations of avg %.3f\n",
-			round, len(mutations), bestAvg)
+		mutations := deck.AllMutations(current, cfg.maxCopies, cfg.legalFilter())
+		if cfg.startTemp > 0 {
+			// AllMutations sorts weakest-card-first so a first-found classical climb tries the
+			// highest-expected-gain swaps early. Under annealing that same bias means the
+			// probabilistic acceptances disproportionately hit mutations against the weakest
+			// card in the deck — shrinking the slice of the solution space the walk actually
+			// explores. Shuffling each round gives every mutation an even shot at being the
+			// first one accepted at the current temperature.
+			rng.Shuffle(len(mutations), func(i, j int) {
+				mutations[i], mutations[j] = mutations[j], mutations[i]
+			})
+		}
+		tempLabel := ""
+		if temperature > 0 {
+			tempLabel = fmt.Sprintf(" (T=%.4f)", temperature)
+		}
+		if verbose {
+			fmt.Fprintf(os.Stderr, "\n[round %d] evaluating %d mutations of avg %.3f%s (best ever %.3f)\n",
+				round, len(mutations), currentAvg, tempLabel, bestEverAvg)
+		}
 
 		var tested, deepsDone atomic.Int64
-		stopTicker := startRoundTicker(round, len(mutations), start, &tested, &deepsDone)
+		stopTicker := startRoundTicker(round, len(mutations), start, &tested, &deepsDone,
+			temperature, currentAvg, bestEverAvg)
 		d, avg, idx, found := deck.IterateParallel(
-			ctx, mutations, bestAvg, cfg.shallowShuffles, cfg.deepShuffles, cfg.incoming, 0,
+			ctx, mutations, currentAvg, temperature,
+			cfg.shallowShuffles, cfg.deepShuffles, cfg.incoming, 0,
 			rng.Int63(), &tested, &deepsDone,
 		)
 		stopTicker()
 
 		if ctx.Err() != nil {
-			fmt.Fprintf(os.Stderr, "\nAborted mid-round after %d rounds / %d improvements in %s\n",
-				round, improvements, time.Since(start).Truncate(time.Second))
+			fmt.Fprintf(os.Stderr, "\nAborted mid-round after %d rounds / %d acceptances in %s\n",
+				round, acceptances, time.Since(start).Truncate(time.Second))
 			fmt.Println()
-			printBestDeck(best)
-			return bestAvg
+			printBestDeck(bestEver)
+			return iterateResult{bestEverAvg: bestEverAvg, startingAvg: startingAvg, aborted: true}
 		}
 		if !found {
-			fmt.Fprintf(os.Stderr, "\nLocal maximum reached after %d rounds / %d improvements in %s\n",
-				round, improvements, time.Since(start).Truncate(time.Second))
+			// A full round with zero acceptances means every mutation — including the
+			// probabilistically-accepted worse ones — failed the gate. At any T > 0 with
+			// thousands of mutations this is vanishingly unlikely unless we've genuinely
+			// converged, so treat it as a local maximum regardless of the current temperature.
+			fmt.Fprintf(os.Stderr, "\nLocal maximum reached after %d rounds / %d acceptances in %s\n",
+				round, acceptances, time.Since(start).Truncate(time.Second))
 			fmt.Println()
-			printBestDeck(best)
-			return bestAvg
+			printBestDeck(bestEver)
+			return iterateResult{bestEverAvg: bestEverAvg, startingAvg: startingAvg}
 		}
 
-		improvements++
+		acceptances++
 		mut := mutations[idx]
-		fmt.Fprintf(os.Stderr, "\r[round %d] improvement at %d/%d: deep %.3f beats %.3f (%s), restarting        \n",
-			round, idx+1, len(mutations), avg, bestAvg, mut.Description)
-		bestAvg = avg
-		best = d
-		_ = writeDeck(best, cfg.outPath)
+		verb := "improvement"
+		if avg <= currentAvg {
+			verb = "annealing step"
+		}
+		if verbose {
+			fmt.Fprintf(os.Stderr, "\r[round %d] %s at %d/%d: deep %.3f vs %.3f (%s)%s       \n",
+				round, verb, idx+1, len(mutations), avg, currentAvg, mut.Description, tempLabel)
+		}
+		current = d
+		currentAvg = avg
+		if avg > bestEverAvg {
+			if !verbose {
+				// Surface every new all-time best in non-verbose annealing mode so long
+				// reanneal sessions still show visible forward motion without the per-round
+				// spam. \r + trailing padding overwrites the ticker line cleanly; the \n at
+				// the end promotes this to a persistent entry above the next round's ticker.
+				fmt.Fprintf(os.Stderr, "\r[round %d] new best %.3f (was %.3f, +%.3f)%s                                \n",
+					round, avg, bestEverAvg, avg-bestEverAvg, tempLabel)
+			}
+			bestEver = d
+			bestEverAvg = avg
+			_ = writeDeck(bestEver, cfg.outPath)
+		}
+		temperature = coolDown(temperature, cfg.tempDecay, cfg.minTemp)
 	}
+}
+
+// coolDown applies one round of geometric cooling, clamped at minTemp so the classical-mode
+// hill climb is fully recovered once temperature reaches the floor.
+func coolDown(temperature, decay, minTemp float64) float64 {
+	next := temperature * decay
+	if next < minTemp {
+		return minTemp
+	}
+	return next
 }
 
 // prepareBaseline returns the starting deck for the hill climb with its deep-shuffles avg. Four
@@ -126,10 +202,13 @@ func watchStdinForAbort(cancel context.CancelFunc) {
 	}()
 }
 
-// startRoundTicker launches a 500ms ticker that renders the round's shallow-screen and
-// deep-confirm counts to stderr on a \r-terminated line so the user sees the worker pool moving
-// during long rounds. Returns a stop function the caller must call when the round finishes.
-func startRoundTicker(round, total int, start time.Time, tested, deepsDone *atomic.Int64) func() {
+// startRoundTicker launches a 500ms ticker that renders round progress plus the annealing
+// state (T, current avg, best-ever) to a \r-terminated stderr line. Runs in both classical
+// and annealing modes: in annealing mode it's effectively the only ongoing progress indicator
+// (the per-round / per-mutation logs are suppressed without -debug), so keeping the snapshot
+// rich enough to track the walk is what makes silent mode bearable. Returns a stop function
+// the caller must call when the round finishes.
+func startRoundTicker(round, total int, start time.Time, tested, deepsDone *atomic.Int64, temperature, currentAvg, bestEverAvg float64) func() {
 	done := make(chan struct{})
 	go func() {
 		t := time.NewTicker(500 * time.Millisecond)
@@ -139,8 +218,13 @@ func startRoundTicker(round, total int, start time.Time, tested, deepsDone *atom
 			case <-done:
 				return
 			case <-t.C:
-				fmt.Fprintf(os.Stderr, "\r[round %d] tested %d/%d (%d deep confirms, %s elapsed)        ",
-					round, tested.Load(), total, deepsDone.Load(), time.Since(start).Truncate(time.Second))
+				tempLabel := ""
+				if temperature > 0 {
+					tempLabel = fmt.Sprintf("  T=%.4f", temperature)
+				}
+				fmt.Fprintf(os.Stderr, "\r[round %d] tested %d/%d  cur %.3f  best %.3f%s  %s elapsed        ",
+					round, tested.Load(), total, currentAvg, bestEverAvg, tempLabel,
+					time.Since(start).Truncate(time.Second))
 			}
 		}
 	}()

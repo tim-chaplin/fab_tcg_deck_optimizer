@@ -35,6 +35,10 @@ type PitchCountsJSON struct {
 
 // StatsJSON mirrors deck.Stats with card references flattened to names.
 type StatsJSON struct {
+	// Avg is TotalValue/Hands, emitted for human readability when skimming the JSON. Loaders
+	// ignore it — Unmarshal rederives via Stats.Mean() so the canonical state is always
+	// (Runs, Hands, TotalValue). Kept first so it's the first number a human sees.
+	Avg         float64             `json:"avg"`
 	Runs        int                 `json:"runs"`
 	Hands       int                 `json:"hands"`
 	TotalValue  float64             `json:"total_value"`
@@ -134,6 +138,7 @@ func statsToJSON(s deck.Stats) StatsJSON {
 		Runs:        s.Runs,
 		Hands:       s.Hands,
 		TotalValue:  s.TotalValue,
+		Avg:         s.Mean(),
 		FirstCycle:  s.FirstCycle,
 		SecondCycle: s.SecondCycle,
 		Best:        bestTurnToJSON(s.Best),
