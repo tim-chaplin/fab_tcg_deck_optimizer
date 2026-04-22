@@ -75,6 +75,23 @@ type TurnSummary struct {
 	// loop before FormatBestTurn is called; Value already includes the sum. Empty when no cards
 	// implementing card.DelayedPlay were played the previous turn.
 	DelayedFromLastTurn []DelayedContribution
+	// AuraTriggers is the surviving AuraTrigger set at end of this turn — triggers added by
+	// this turn's winning Play chain. The deck loop feeds this into next turn's start-of-turn
+	// trigger pass, closing the cross-turn loop. Nil when the turn played no trigger-creating
+	// aura.
+	AuraTriggers []card.AuraTrigger
+	// TriggersFromLastTurn records the AuraTriggers whose start-of-turn handlers fired at the
+	// top of this turn. Parallels DelayedFromLastTurn for the AuraTrigger mechanism: populated
+	// by the deck loop before FormatBestTurn is called; Value already includes the sum.
+	TriggersFromLastTurn []TriggerContribution
+}
+
+// TriggerContribution is one start-of-turn AuraTrigger fire: the aura that fired plus the
+// Damage it credited (folded into Value). Mirrors DelayedContribution for the trigger
+// mechanism; will gain a ToHand field when a reveal-capable card migrates.
+type TriggerContribution struct {
+	Card   card.Card
+	Damage int
 }
 
 // DelayedContribution is one card's PlayNextTurn outcome: the card itself plus whichever
@@ -288,6 +305,11 @@ func FormatBestTurn(t TurnSummary) string {
 			lines = append(lines, fmt.Sprintf("  %d. %s (from previous turn): START OF ACTION PHASE (+%d)",
 				step, d.Card.Name(), d.Damage))
 		}
+	}
+	for _, d := range t.TriggersFromLastTurn {
+		step++
+		lines = append(lines, fmt.Sprintf("  %d. %s (from previous turn): START OF ACTION PHASE (+%d)",
+			step, d.Card.Name(), d.Damage))
 	}
 	for _, a := range attackPitches {
 		appendPitch(a, "PITCH (my turn)")
@@ -646,6 +668,9 @@ type attackBufs struct {
 	// never alias each other.
 	defenseGravScratch []card.Card
 	attackGravScratch  []card.Card
+	// auraTriggersScratch backs state.AuraTriggers during attack-chain permutations. Reset
+	// per permutation so AddAuraTrigger calls in one ordering don't leak into the next.
+	auraTriggersScratch []card.AuraTrigger
 	// perCardScratch is sized maxAttackers (handSize + weaponCount). Written by playSequence only
 	// when the caller passes a non-nil perCardOut; bestSequence snapshots the winning
 	// permutation's per-card damage from here into the caller's output buffer. The partition-loop
@@ -713,6 +738,7 @@ func newAttackBufs(handSize, weaponCount int, weapons []weapon.Weapon) *attackBu
 		defendersBuf:           make([]card.Card, 0, handSize+1),
 		defenseGravScratch:     make([]card.Card, 0, handSize+1),
 		attackGravScratch:      make([]card.Card, 0, maxAttackers),
+		auraTriggersScratch:    make([]card.AuraTrigger, 0, maxAttackers),
 		perCardScratch:         make([]float64, maxAttackers),
 		perCardTriggerScratch:  make([]float64, maxAttackers),
 		fillContribWinnerOrder: make([]card.Card, maxAttackers),
@@ -1349,6 +1375,10 @@ type sequenceContext struct {
 	// last permutation's draws. Every entry in drawnWinner is assigned Role=Held by the
 	// caller (post-Best, promoteRandomHeldToArsenal may flip one to Arsenal).
 	drawnWinner []card.Card
+	// auraTriggersWinner snapshots the winning permutation's final state.AuraTriggers so the
+	// deck loop can carry them into next turn. The triggers are whichever ones Play() added
+	// during the chain (Sigil of Fyendal's start-of-turn +1{h}, etc.).
+	auraTriggersWinner []card.AuraTrigger
 }
 
 // seedState writes the TurnState fields that are constant across a partition's permutations
@@ -1410,6 +1440,7 @@ func (ctx *sequenceContext) bestSequence(attackers, winnerOrderOut []card.Card, 
 	bestLeftoverRunechants := ctx.runechantCarryover
 	foundLegal := false
 	ctx.drawnWinner = ctx.drawnWinner[:0]
+	ctx.auraTriggersWinner = ctx.auraTriggersWinner[:0]
 	eval := func() {
 		dmg, leftoverRunechants, _, legal := ctx.playSequenceWithMeta(n, scratch, triggerScratch)
 		if !legal {
@@ -1421,6 +1452,7 @@ func (ctx *sequenceContext) bestSequence(attackers, winnerOrderOut []card.Card, 
 			bestLeftoverRunechants = leftoverRunechants
 			foundLegal = true
 			ctx.drawnWinner = append(ctx.drawnWinner[:0], ctx.bufs.state.Drawn...)
+			ctx.auraTriggersWinner = append(ctx.auraTriggersWinner[:0], ctx.bufs.state.AuraTriggers...)
 			if winnerOrderOut != nil {
 				for i := 0; i < n; i++ {
 					winnerOrderOut[i] = pcBuf[i].Card
@@ -1539,6 +1571,10 @@ func (ctx *sequenceContext) playSequenceWithMeta(n int, perCardOut, perCardTrigg
 	// backing array keeps the reset allocation-free.
 	state.Graveyard = ctx.bufs.attackGravScratch[:0]
 	state.Banish = nil
+	// AuraTriggers reset per permutation so triggers added by Play (via AddAuraTrigger) in one
+	// permutation don't leak into the next. Reuses auraTriggersScratch's backing array to keep
+	// the reset allocation-free.
+	state.AuraTriggers = ctx.bufs.auraTriggersScratch[:0]
 	resources := ctx.resourceBudget
 	for i, pc := range played {
 		m := meta[i]
@@ -1726,6 +1762,13 @@ func fillContributions(summary *TurnSummary, hero hero.Hero, weapons []weapon.We
 			for i, c := range drawn {
 				summary.Drawn[i] = CardAssignment{Card: c, Role: Held}
 			}
+		}
+		// Fresh slice so the returned TurnSummary doesn't alias ctx's buf-backed scratch — the
+		// memo keeps TurnSummaries around and a later Best call would otherwise overwrite the
+		// cached entry's triggers on its next permutation sweep.
+		if n := len(ctx.auraTriggersWinner); n > 0 {
+			summary.AuraTriggers = make([]card.AuraTrigger, n)
+			copy(summary.AuraTriggers, ctx.auraTriggersWinner)
 		}
 	}
 }

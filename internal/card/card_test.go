@@ -51,3 +51,23 @@ func TestDrawOne_EmptyDeckIsNoOp(t *testing.T) {
 		t.Errorf("Deck = %v, want nil", s.Deck)
 	}
 }
+
+// TestAddAuraTrigger_AppendsToList: AddAuraTrigger pushes each trigger onto s.AuraTriggers in
+// call order — the sim reads that list to decide which handlers to fire on each
+// trigger-Type condition.
+func TestAddAuraTrigger_AppendsToList(t *testing.T) {
+	self := stubCard{"self"}
+	s := &TurnState{}
+	s.AddAuraTrigger(AuraTrigger{Self: self, Type: TriggerStartOfTurn, Count: 2})
+	s.AddAuraTrigger(AuraTrigger{Self: self, Type: TriggerStartOfTurn, Count: 1})
+	if len(s.AuraTriggers) != 2 {
+		t.Fatalf("AuraTriggers len = %d, want 2", len(s.AuraTriggers))
+	}
+	if s.AuraTriggers[0].Count != 2 || s.AuraTriggers[1].Count != 1 {
+		t.Errorf("order broke: got Counts %d,%d want 2,1",
+			s.AuraTriggers[0].Count, s.AuraTriggers[1].Count)
+	}
+	if s.AuraTriggers[0].Self != self {
+		t.Errorf("Self = %v, want %v", s.AuraTriggers[0].Self, self)
+	}
+}

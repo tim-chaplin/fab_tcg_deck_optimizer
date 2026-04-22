@@ -175,6 +175,49 @@ type TurnState struct {
 	// the graveyard (e.g. an aura-banish-for-arcane rider). Cards that key on "was a card
 	// banished this turn" read this list.
 	Banish []Card
+	// AuraTriggers is the list of triggers from auras currently in play. Value-typed so the
+	// sim can copy-restore it cheaply between permutations of the best-line search. Cards add
+	// entries during Play via AddAuraTrigger; the sim fires matching entries on each
+	// trigger-Type condition (start of turn for now), decrements Count in place, and drops
+	// entries whose Count hits zero after sending Self to the graveyard.
+	AuraTriggers []AuraTrigger
+}
+
+// AuraTriggerType categorizes when an AuraTrigger's Handler fires. The sim walks the
+// TurnState's AuraTriggers list on each matching condition and invokes every applicable
+// handler.
+type AuraTriggerType int
+
+const (
+	// TriggerStartOfTurn fires at the start of the owning player's action phase, before the
+	// best-line search. The classic upkeep trigger for "at the beginning of your action phase
+	// …" auras.
+	TriggerStartOfTurn AuraTriggerType = iota
+)
+
+// OnAuraTrigger is the business-logic callback attached to an AuraTrigger. Called when the
+// trigger's Type condition fires — it's where the printed "create a runechant", "gain 1{h}",
+// "reveal top of deck" effect lives. Handlers mutate the passed TurnState directly
+// (e.g. s.CreateRunechants, s.AddToGraveyard) and return the damage-equivalent that folds
+// 1-to-1 into Value. The sim handles the counter bookkeeping (decrementing Count,
+// graveyarding the aura when Count hits zero); the handler does not.
+type OnAuraTrigger func(s *TurnState) int
+
+// AuraTrigger is a counter-tracked handler attached to an aura in play. Each time Type's
+// condition fires, the sim calls Handler and decrements Count. When Count reaches zero the
+// sim sends Self to the graveyard and drops the trigger from TurnState.AuraTriggers. Self
+// is the aura card itself so the sim can graveyard it without needing a back-reference.
+type AuraTrigger struct {
+	// Self is the aura card this trigger belongs to. Used by the sim to graveyard the aura
+	// when Count reaches zero; also surfaced in per-turn summaries (e.g. the "(from previous
+	// turn)" formatter line naming the aura that fired).
+	Self Card
+	// Type is the condition that fires this trigger.
+	Type AuraTriggerType
+	// Count is the number of times this trigger will still fire before the aura is destroyed.
+	Count int
+	// Handler runs when Type fires.
+	Handler OnAuraTrigger
 }
 
 // DrawOne models a mid-turn draw: advance the deck by one card and append it to Drawn. No-op
@@ -259,6 +302,15 @@ func (s *TurnState) CreateRunechant() int {
 // themselves mid-chain route through here to make the move visible to downstream readers.
 func (s *TurnState) AddToGraveyard(c Card) {
 	s.Graveyard = append(s.Graveyard, c)
+}
+
+// AddAuraTrigger appends t to s.AuraTriggers so the sim fires it on its matching Type
+// condition. Cards call this from Play to register the "at the beginning of your action
+// phase …" / "once per turn, when …" clauses printed on Action - Aura cards. The sim owns
+// the trigger's lifecycle from here on: ticking Count and graveyarding Self when Count
+// hits zero.
+func (s *TurnState) AddAuraTrigger(t AuraTrigger) {
+	s.AuraTriggers = append(s.AuraTriggers, t)
 }
 
 // Card is any Flesh and Blood card that can be in a deck. Methods return the card's static

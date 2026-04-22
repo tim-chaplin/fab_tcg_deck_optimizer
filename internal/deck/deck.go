@@ -453,6 +453,11 @@ func (d *Deck) EvaluateWith(runs int, incomingDamage int, rng *rand.Rand, ev *ha
 	// held slices so the swap is allocation-free.
 	delayedBuf := make([]card.Card, 0, handSize)
 	nextDelayed := make([]card.Card, 0, handSize)
+	// auraTriggerBuf carries AuraTriggers left alive at the end of last turn — the newer
+	// counter-tracked mechanism that will eventually replace DelayedPlay. Parallels
+	// delayedBuf in shape: double-buffered with nextAuraTrigger for allocation-free swaps.
+	auraTriggerBuf := make([]card.AuraTrigger, 0, handSize)
+	nextAuraTrigger := make([]card.AuraTrigger, 0, handSize)
 	for r := 0; r < runs; r++ {
 		copy(buf, d.Cards)
 		// Inline Fisher-Yates: rng.Shuffle would heap-allocate a closure over buf every run.
@@ -467,6 +472,7 @@ func (d *Deck) EvaluateWith(runs int, incomingDamage int, rng *rand.Rand, ev *ha
 		var arsenalCard card.Card
 		heldBuf = heldBuf[:0]
 		delayedBuf = delayedBuf[:0]
+		auraTriggerBuf = auraTriggerBuf[:0]
 		// Cap the run at two full cycles. A pitch-everything-swing-a-weapon loop recycles the
 		// same cards forever (hand.Best returns identical summaries each iteration, so head and
 		// tail advance in lockstep); two cycles also match FirstCycle / SecondCycle stats.
@@ -490,6 +496,14 @@ func (d *Deck) EvaluateWith(runs int, incomingDamage int, rng *rand.Rand, ev *ha
 				drawCount++
 			}
 			runechantCarryover += delayedRunes
+			// Fire start-of-turn AuraTriggers from last turn. Survivors (triggers whose Count
+			// didn't hit zero, and non-start-of-turn types) carry forward. Destroyed auras
+			// are surfaced for tests via EvalOneTurnForTesting; the production loop discards
+			// them here.
+			var trigContribs []hand.TriggerContribution
+			var trigDamage, trigRunes int
+			auraTriggerBuf, trigContribs, trigDamage, trigRunes, _ = fireStartOfTurnTriggers(auraTriggerBuf)
+			runechantCarryover += trigRunes
 			var play hand.TurnSummary
 			if ev != nil {
 				play = ev.Best(d.Hero, d.Weapons, h, incomingDamage, buf[head+drawCount:tail], runechantCarryover, arsenalCard)
@@ -503,6 +517,8 @@ func (d *Deck) EvaluateWith(runs int, incomingDamage int, rng *rand.Rand, ev *ha
 			// best-hand pick and cycle averages reflect the real total.
 			play.Value += delayedDamage
 			play.DelayedFromLastTurn = delayedContribs
+			play.Value += trigDamage
+			play.TriggersFromLastTurn = trigContribs
 			v := float64(play.Value)
 
 			d.Stats.TotalValue += v
@@ -534,15 +550,21 @@ func (d *Deck) EvaluateWith(runs int, incomingDamage int, rng *rand.Rand, ev *ha
 					delayedCopy = make([]hand.DelayedContribution, len(play.DelayedFromLastTurn))
 					copy(delayedCopy, play.DelayedFromLastTurn)
 				}
+				var trigCopy []hand.TriggerContribution
+				if len(play.TriggersFromLastTurn) > 0 {
+					trigCopy = make([]hand.TriggerContribution, len(play.TriggersFromLastTurn))
+					copy(trigCopy, play.TriggersFromLastTurn)
+				}
 				d.Stats.Best = BestTurn{
 					Summary: hand.TurnSummary{
-						BestLine:            lineCopy,
-						AttackChain:         chainCopy,
-						Drawn:               drawnCopy,
-						Value:               play.Value,
-						LeftoverRunechants:  play.LeftoverRunechants,
-						ArsenalCard:         play.ArsenalCard,
-						DelayedFromLastTurn: delayedCopy,
+						BestLine:             lineCopy,
+						AttackChain:          chainCopy,
+						Drawn:                drawnCopy,
+						Value:                play.Value,
+						LeftoverRunechants:   play.LeftoverRunechants,
+						ArsenalCard:          play.ArsenalCard,
+						DelayedFromLastTurn:  delayedCopy,
+						TriggersFromLastTurn: trigCopy,
 					},
 					StartingRunechants: startingRunechants,
 				}
@@ -559,9 +581,11 @@ func (d *Deck) EvaluateWith(runs int, incomingDamage int, rng *rand.Rand, ev *ha
 			attributePlayStats(&d.Stats, play.BestLine)
 			nextHeld = applyTurnResult(play, buf, &head, &tail, drawCount, nextHeld[:0])
 			nextDelayed = collectDelayedPlays(play.BestLine, nextDelayed[:0])
+			nextAuraTrigger = append(nextAuraTrigger[:0], play.AuraTriggers...)
 			handIdx++
 			heldBuf, nextHeld = nextHeld, heldBuf
 			delayedBuf, nextDelayed = nextDelayed, delayedBuf
+			auraTriggerBuf, nextAuraTrigger = nextAuraTrigger, auraTriggerBuf
 		}
 	}
 	return d.Stats
@@ -602,6 +626,49 @@ func runDelayedPlays(queued []card.Card, postDrawDeck []card.Card) ([]hand.Delay
 		}
 	}
 	return contribs, total, ts.Runechants, revealed
+}
+
+// fireStartOfTurnTriggers walks queued (the AuraTriggers alive at end of last turn) and
+// invokes every TriggerStartOfTurn handler. Non-start-of-turn triggers (future
+// TriggerAttackAction etc.) pass through unchanged, ready to fire mid-chain on their own
+// condition.
+//
+// Returns the survivor list (start-of-turn triggers whose Count didn't hit zero plus every
+// non-start-of-turn trigger), the per-aura contributions for FormatBestTurn, the summed
+// damage to fold into Value, the Runechant tokens created during the handlers (folded into
+// next turn's carryover), and the auras that left the arena this pass (Count hit zero) in
+// destroy order — so subsequent handlers can see them in state.Graveyard and tests can
+// assert the destroy.
+func fireStartOfTurnTriggers(queued []card.AuraTrigger) (
+	survivors []card.AuraTrigger,
+	contribs []hand.TriggerContribution,
+	damage int,
+	runes int,
+	graveyarded []card.Card,
+) {
+	if len(queued) == 0 {
+		return queued[:0], nil, 0, 0, nil
+	}
+	var ts card.TurnState
+	survivors = queued[:0]
+	for _, t := range queued {
+		if t.Type != card.TriggerStartOfTurn {
+			survivors = append(survivors, t)
+			continue
+		}
+		d := t.Handler(&ts)
+		damage += d
+		contribs = append(contribs, hand.TriggerContribution{Card: t.Self, Damage: d})
+		t.Count--
+		if t.Count > 0 {
+			survivors = append(survivors, t)
+			continue
+		}
+		// Aura destroyed — Self joins the start-of-turn graveyard so subsequent handlers see
+		// it in state.Graveyard (e.g. a second aura with a graveyard-banish rider).
+		ts.AddToGraveyard(t.Self)
+	}
+	return survivors, contribs, damage, ts.Runechants, ts.Graveyard
 }
 
 // collectDelayedPlays scans a turn's BestLine for cards whose Play ran (Role == Attack) and that
@@ -676,6 +743,16 @@ type TurnStartState struct {
 	// PrevTurnBestLine is the winning role assignment from turn 1, so tests can assert which
 	// card took which role (e.g. sigil played as Role=Attack vs. pitched vs. held).
 	PrevTurnBestLine []hand.CardAssignment
+	// StartOfTurnTriggerDamage is the damage-equivalent credited by turn-2's start-of-turn
+	// AuraTrigger handlers — i.e. by triggers that were registered during turn 1's winning
+	// Play chain and fired at the top of turn 2. Zero when turn 1 registered no trigger that
+	// survived into the start-of-turn pass. Production callers fold this into turn 2's Value;
+	// the testing helper exposes it so tests can assert the cross-turn credit without running
+	// turn 2 to completion.
+	StartOfTurnTriggerDamage int
+	// StartOfTurnGraveyard is the auras that left the arena during turn-2's start-of-turn
+	// AuraTrigger pass — every trigger whose Count hit zero after firing. In destroy order.
+	StartOfTurnGraveyard []card.Card
 }
 
 // EvalOneTurnForTesting runs one turn against d.Cards in source order (no shuffle) and returns
@@ -727,6 +804,7 @@ func (d *Deck) EvalOneTurnForTesting(incomingDamage int, arsenalIn card.Card, in
 	// to advance past mid-turn draws.
 	nextHeld := applyTurnResult(play, buf, &head, &tail, 0, nil)
 	delayedQueue := collectDelayedPlays(play.BestLine, nil)
+	triggerQueue := append([]card.AuraTrigger(nil), play.AuraTriggers...)
 
 	// Deal turn 2's hand but stop short of running Best — the caller wants the pre-Best state.
 	turn2Hand, drawCount2, ok := dealNextHand(buf, handBuf, nextHeld, &head, &tail, handSize)
@@ -745,17 +823,23 @@ func (d *Deck) EvalOneTurnForTesting(incomingDamage int, arsenalIn card.Card, in
 		turn2Hand = append(turn2Hand, buf[head+drawCount2])
 		drawCount2++
 	}
+	// Fire turn-1 start-of-turn AuraTriggers, parallelling the DelayedPlay pass above.
+	// Survivors would become priorAuraTriggers for turn 2 in production but the caller
+	// returns before running Best.
+	_, _, trigDamage, trigRunes, trigGraveyarded := fireStartOfTurnTriggers(triggerQueue)
 	handCopy := append([]card.Card(nil), turn2Hand...)
 	deckLeft := append([]card.Card(nil), buf[head+drawCount2:tail]...)
 	lineCopy := append([]hand.CardAssignment(nil), play.BestLine...)
 
 	return TurnStartState{
-		Hand:             handCopy,
-		ArsenalCard:      play.ArsenalCard,
-		Deck:             deckLeft,
-		Runechants:       play.LeftoverRunechants + delayedRunes,
-		PrevTurnValue:    play.Value,
-		PrevTurnBestLine: lineCopy,
+		Hand:                     handCopy,
+		ArsenalCard:              play.ArsenalCard,
+		Deck:                     deckLeft,
+		Runechants:               play.LeftoverRunechants + delayedRunes + trigRunes,
+		PrevTurnValue:            play.Value,
+		PrevTurnBestLine:         lineCopy,
+		StartOfTurnTriggerDamage: trigDamage,
+		StartOfTurnGraveyard:     trigGraveyarded,
 	}
 }
 
