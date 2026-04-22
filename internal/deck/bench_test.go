@@ -32,7 +32,10 @@ func BenchmarkIterateImprovements(b *testing.B) {
 		maxCopies          = 2
 		shallowShuffles    = 100
 		deepShuffles       = 5000
-		incoming           = 0
+		// Non-zero incoming so the benchmark exercises the Defend-role partition branches.
+		// incoming=0 is rare in production use; 7 tracks a mid-game opponent swing that's
+		// typical of iterate sessions against the classic archetype.
+		incoming           = 7
 		targetImprovements = 5
 	)
 
