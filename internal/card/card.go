@@ -145,6 +145,11 @@ type TurnState struct {
 	// Runechants > 0 before each attack/weapon's Play runs. Cards that deal arcane via their
 	// Play text are responsible for flipping the flag themselves.
 	ArcaneDamageDealt bool
+	// NonAttackActionPlayed is set true once any non-attack action card has been appended to
+	// CardsPlayed this turn. Maintained by playSequenceWithMeta when each card resolves so
+	// hero triggers that ask "was a non-attack action played earlier?" (Viserai's runechant
+	// rider) can answer in O(1) instead of rescanning CardsPlayed on every trigger.
+	NonAttackActionPlayed bool
 	// IncomingDamage is the opponent damage this turn (the value passed to hand.Best). Constant
 	// across every partition the solver enumerates for this hand.
 	IncomingDamage int

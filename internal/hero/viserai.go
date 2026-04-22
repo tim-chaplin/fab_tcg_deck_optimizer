@@ -27,10 +27,8 @@ func (Viserai) OnCardPlayed(played card.Card, s *card.TurnState) int {
 	if !t.Has(card.TypeRuneblade) || t.Has(card.TypeWeapon) {
 		return 0
 	}
-	for _, c := range s.CardsPlayed {
-		if c.Types().IsNonAttackAction() {
-			return s.CreateRunechant()
-		}
+	if s.NonAttackActionPlayed {
+		return s.CreateRunechant()
 	}
 	return 0
 }
