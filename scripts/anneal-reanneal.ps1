@@ -64,6 +64,10 @@ while ($true) {
     )
     if ($Reevaluate)   { $goArgs += '-reevaluate' }
     if ($IterateDebug) { $goArgs += '-debug' }
+    # The starting card list is identical every pass once we're iterating on the same deck file,
+    # so suppress it from pass 2 onward — the user already saw it in pass 1 and reprinting ~40
+    # lines each pass buries the progress signal.
+    if ($pass -gt 1)   { $goArgs += '-quiet-load' }
 
     & go @goArgs
     # Exit 130 is anneal's "user pressed Enter" signal. Break the outer loop so the whole

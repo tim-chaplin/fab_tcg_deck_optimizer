@@ -51,6 +51,7 @@ func main() {
 	startTemp := flag.Float64("start-temp", 0, "anneal: simulated-annealing starting temperature. 0 (default) runs a pure hill climb. Higher values probabilistically accept worse mutations early; acceptance probability is exp((avg - baseline) / T). Good starting range is ~0.05–0.5 given typical Value units.")
 	tempDecay := flag.Float64("temp-decay", 0.95, "anneal: multiplicative cooling per acceptance — T ← T × decay, floored at -min-temp. Unused when -start-temp is 0.")
 	minTemp := flag.Float64("min-temp", 0, "anneal: minimum temperature. Once T reaches this floor the climb becomes greedy until a local maximum is found. 0 disables annealing in the converged tail.")
+	quietLoad := flag.Bool("quiet-load", false, "anneal: skip the baseline card-list dump at startup. Intended for wrapper scripts (e.g. anneal-reanneal.ps1) that re-invoke anneal many times on the same deck — the listing never changes pass-to-pass and floods the log.")
 	flag.Parse()
 	if *finalize {
 		if subcommand != "anneal" {
@@ -108,6 +109,7 @@ func main() {
 		startTemp:       *startTemp,
 		tempDecay:       *tempDecay,
 		minTemp:         *minTemp,
+		quietLoad:       *quietLoad,
 	}
 
 	outPath, err := mydecks.Path(*deckName)
@@ -191,6 +193,10 @@ type config struct {
 	startTemp float64
 	tempDecay float64
 	minTemp   float64
+	// quietLoad suppresses the baseline card-list dump in prepareBaseline. Set by wrapper
+	// scripts that re-invoke anneal repeatedly on the same deck; the listing is unchanging
+	// noise after the first pass.
+	quietLoad bool
 }
 
 // legalFilter returns the card-pool predicate for this run's format. fabsim always runs under
