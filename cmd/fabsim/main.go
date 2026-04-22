@@ -50,6 +50,9 @@ func main() {
 	debug := flag.Bool("debug", false, "emit extra diagnostic output (e.g. memo cache size between iterate rounds)")
 	reevaluate := flag.Bool("reevaluate", false, "iterate: force re-evaluation of the loaded deck's baseline avg, even if its prior run count already matches -deep-shuffles. Use after adjusting modelling assumptions or fixing bugs that may have shifted the deck's true score.")
 	finalize := flag.Bool("finalize", false, "iterate: high-precision pass — overrides -shallow-shuffles to 10000 and -deep-shuffles to 100000. Use on a deck that's already converged to squeeze out the remaining sub-percent improvements.")
+	startTemp := flag.Float64("start-temp", 0, "iterate: simulated-annealing starting temperature. 0 (default) runs a pure hill climb. Higher values probabilistically accept worse mutations early; acceptance probability is exp((avg - baseline) / T). Good starting range is ~0.05–0.5 given typical Value units.")
+	tempDecay := flag.Float64("temp-decay", 0.95, "iterate: multiplicative cooling per acceptance — T ← T × decay, floored at -min-temp. Unused when -start-temp is 0.")
+	minTemp := flag.Float64("min-temp", 0, "iterate: minimum temperature. Once T reaches this floor the climb becomes greedy until a local maximum is found. 0 disables annealing in the converged tail.")
 	flag.Parse()
 	if *finalize {
 		if subcommand != "iterate" {
@@ -106,6 +109,9 @@ func main() {
 		format:          fmtValue,
 		debug:           *debug,
 		reevaluate:      *reevaluate,
+		startTemp:       *startTemp,
+		tempDecay:       *tempDecay,
+		minTemp:         *minTemp,
 	}
 
 	outPath, err := mydecks.Path(*deckName)
@@ -181,6 +187,11 @@ type config struct {
 	format          fmtpkg.Format
 	debug           bool
 	reevaluate      bool
+	// startTemp / tempDecay / minTemp are the simulated-annealing knobs for iterate. startTemp
+	// of 0 degenerates to the classical hill-climb (strict > baseline acceptance).
+	startTemp float64
+	tempDecay float64
+	minTemp   float64
 }
 
 // legalFilter returns the card-pool predicate for this run's format. fabsim always runs under

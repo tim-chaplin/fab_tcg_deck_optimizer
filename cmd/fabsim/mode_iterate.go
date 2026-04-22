@@ -16,18 +16,26 @@ import (
 func runIterate(cfg config) float64 {
 	rng := rand.New(rand.NewSource(cfg.seed))
 
-	best, bestAvg := prepareBaseline(cfg, rng)
+	current, currentAvg := prepareBaseline(cfg, rng)
+	// All-time best tracks the highest-avg deck seen since runIterate started. The saved JSON
+	// mirrors this — simulated annealing intentionally walks through worse states to escape
+	// local maxima, but the on-disk artifact should always reflect the peak reached so far.
+	bestEver := current
+	bestEverAvg := currentAvg
 	fmt.Println("Press Enter to abort.")
 
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 	watchStdinForAbort(cancel)
 
-	// Deterministic hill-climb: enumerate every single-slot mutation of the current best, adopt
-	// the first mutation that scores higher, and restart enumeration. Exhausting every mutation
-	// with no improvement means we're at a local maximum.
+	temperature := cfg.startTemp
+	if temperature > 0 {
+		fmt.Fprintf(os.Stderr, "Simulated annealing: startTemp=%.3f decay=%.3f minTemp=%.3f\n",
+			cfg.startTemp, cfg.tempDecay, cfg.minTemp)
+	}
+
 	round := 0
-	improvements := 0
+	acceptances := 0
 	start := time.Now()
 	for {
 		round++
@@ -38,41 +46,75 @@ func runIterate(cfg config) float64 {
 			fmt.Fprintf(os.Stderr, "[memo] clearing %d entries before round %d\n", hand.MemoLen(), round)
 		}
 		hand.ClearMemo()
-		mutations := deck.AllMutations(best, cfg.maxCopies, cfg.legalFilter())
-		fmt.Fprintf(os.Stderr, "\n[round %d] evaluating %d mutations of avg %.3f\n",
-			round, len(mutations), bestAvg)
+		mutations := deck.AllMutations(current, cfg.maxCopies, cfg.legalFilter())
+		tempLabel := ""
+		if temperature > 0 {
+			tempLabel = fmt.Sprintf(" (T=%.4f)", temperature)
+		}
+		fmt.Fprintf(os.Stderr, "\n[round %d] evaluating %d mutations of avg %.3f%s (best ever %.3f)\n",
+			round, len(mutations), currentAvg, tempLabel, bestEverAvg)
 
 		var tested, deepsDone atomic.Int64
 		stopTicker := startRoundTicker(round, len(mutations), start, &tested, &deepsDone)
 		d, avg, idx, found := deck.IterateParallel(
-			ctx, mutations, bestAvg, cfg.shallowShuffles, cfg.deepShuffles, cfg.incoming, 0,
+			ctx, mutations, currentAvg, temperature,
+			cfg.shallowShuffles, cfg.deepShuffles, cfg.incoming, 0,
 			rng.Int63(), &tested, &deepsDone,
 		)
 		stopTicker()
 
 		if ctx.Err() != nil {
-			fmt.Fprintf(os.Stderr, "\nAborted mid-round after %d rounds / %d improvements in %s\n",
-				round, improvements, time.Since(start).Truncate(time.Second))
+			fmt.Fprintf(os.Stderr, "\nAborted mid-round after %d rounds / %d acceptances in %s\n",
+				round, acceptances, time.Since(start).Truncate(time.Second))
 			fmt.Println()
-			printBestDeck(best)
-			return bestAvg
+			printBestDeck(bestEver)
+			return bestEverAvg
 		}
 		if !found {
-			fmt.Fprintf(os.Stderr, "\nLocal maximum reached after %d rounds / %d improvements in %s\n",
-				round, improvements, time.Since(start).Truncate(time.Second))
+			// No mutation cleared the acceptance gate. If the temperature is still above the
+			// minimum, the next round tries with a lower T (the cooling step below already ran
+			// for prior rounds; force another decay here so we keep making progress). Once T
+			// hits the min and we still find nothing, we're at a local maximum.
+			if temperature > cfg.minTemp {
+				temperature = coolDown(temperature, cfg.tempDecay, cfg.minTemp)
+				fmt.Fprintf(os.Stderr, "\r[round %d] no acceptance; cooling to T=%.4f                                    \n",
+					round, temperature)
+				continue
+			}
+			fmt.Fprintf(os.Stderr, "\nLocal maximum reached after %d rounds / %d acceptances in %s\n",
+				round, acceptances, time.Since(start).Truncate(time.Second))
 			fmt.Println()
-			printBestDeck(best)
-			return bestAvg
+			printBestDeck(bestEver)
+			return bestEverAvg
 		}
 
-		improvements++
+		acceptances++
 		mut := mutations[idx]
-		fmt.Fprintf(os.Stderr, "\r[round %d] improvement at %d/%d: deep %.3f beats %.3f (%s), restarting        \n",
-			round, idx+1, len(mutations), avg, bestAvg, mut.Description)
-		bestAvg = avg
-		best = d
-		_ = writeDeck(best, cfg.outPath)
+		verb := "improvement"
+		if avg <= currentAvg {
+			verb = "annealing step"
+		}
+		fmt.Fprintf(os.Stderr, "\r[round %d] %s at %d/%d: deep %.3f vs %.3f (%s)%s       \n",
+			round, verb, idx+1, len(mutations), avg, currentAvg, mut.Description, tempLabel)
+		current = d
+		currentAvg = avg
+		if avg > bestEverAvg {
+			bestEver = d
+			bestEverAvg = avg
+			_ = writeDeck(bestEver, cfg.outPath)
+		}
+		temperature = coolDown(temperature, cfg.tempDecay, cfg.minTemp)
 	}
+}
+
+// coolDown applies one round of geometric cooling, clamped at minTemp so the classical-mode
+// hill climb is fully recovered once temperature reaches the floor.
+func coolDown(temperature, decay, minTemp float64) float64 {
+	next := temperature * decay
+	if next < minTemp {
+		return minTemp
+	}
+	return next
 }
 
 // prepareBaseline returns the starting deck for the hill climb with its deep-shuffles avg. Four

@@ -5,6 +5,7 @@ package deck
 import (
 	"context"
 	"fmt"
+	"math"
 	"math/rand"
 	"runtime"
 	"sort"
@@ -804,31 +805,39 @@ func recycleCardStates(line []hand.CardAssignment, buf []card.Card, tail *int, n
 }
 
 // IterateParallel runs one iterate-mode round. Workers share a queue and each goroutine does
-// both the shallow screen and — if shallow beats bestAvg — the deep-shuffles confirmation for
-// the same mutation. The first worker to land a confirmed improvement wins; a cancellation
-// atomic stops the others. Parallelising deep confirms makes rounds with noisy shallow screens
-// finish in max(shallow wall, deeps/workers × deep wall) instead of shallow wall + passes × deep.
+// both the shallow screen and — if shallow beats the effective threshold — the deep-shuffles
+// confirmation for the same mutation. The first worker to land an acceptable mutation wins; a
+// cancellation atomic stops the others. Parallelising deep confirms makes rounds with noisy
+// shallow screens finish in max(shallow wall, deeps/workers × deep wall) instead of
+// shallow wall + passes × deep.
+//
+// Annealing: at temperature == 0 the function accepts only strict improvements (deepAvg >
+// baseline) — the classical hill climb. At temperature > 0 it also accepts worse mutations
+// with probability exp((deepAvg - baseline) / temperature), implementing a Metropolis-style
+// simulated-annealing acceptance gate. The shallow pre-screen is widened proportionally
+// (threshold = baseline - 3·T) so mutations likely to clear the probabilistic gate aren't cut
+// off before they get to deep confirm.
 //
 // Mutations are pulled FIFO so the earliest-position-wins heuristic of serial iterate generally
 // holds, but a worker locked on a deep confirm at position 20 doesn't block position 25 — a
 // later-position mutation can occasionally win if its deep confirm finishes first.
 //
-// ctx: aborts the round when Done; workers exit and IterateParallel returns found=false. The
-// caller distinguishes "aborted" from "local max" via ctx.Err().
+// ctx: aborts the round when Done; workers exit and IterateParallel returns found=false.
 // mutations: ordered candidate list.
-// bestAvg: current baseline (at deep-shuffles depth).
-// shallowShuffles / deepShuffles / incoming: eval settings.
-// numWorkers: goroutines; 0 uses runtime.GOMAXPROCS(0).
-// seed: base seed; worker w uses (seed + w) for shallow and a derived stream for deep.
-// shallowCompleted / deepsCompleted: optional atomic counters incremented per shallow eval and
-// per attempted deep confirm, so callers can render live progress. Nil to opt out.
+// bestAvg: the current deck's avg (the "current state" in SA terms, not the all-time best).
+// temperature: SA temperature for this round; 0 disables annealing.
+// shallowShuffles / deepShuffles / incoming / numWorkers: eval settings.
+// seed: base seed; worker w uses (seed + w) for shallow and a derived stream for deep and
+// acceptance rolls.
+// shallowCompleted / deepsCompleted: optional atomic counters for live progress.
 //
-// Returns (improvedDeck, improvedAvg, improvedIndex, true) on first confirmed improvement, or
-// (nil, bestAvg, -1, false) if none was found or ctx was cancelled.
+// Returns (acceptedDeck, acceptedAvg, acceptedIndex, true) on first acceptance, or
+// (nil, bestAvg, -1, false) if nothing cleared the gate or ctx was cancelled.
 func IterateParallel(
 	ctx context.Context,
 	mutations []Mutation,
 	bestAvg float64,
+	temperature float64,
 	shallowShuffles, deepShuffles, incoming, numWorkers int,
 	seed int64,
 	shallowCompleted *atomic.Int64,
@@ -841,6 +850,14 @@ func IterateParallel(
 		return nil, bestAvg, -1, false
 	}
 
+	// Shallow threshold mirrors the deep acceptance gate's reach: at T=0 it's strict (> bestAvg),
+	// at T>0 it's widened to let probabilistically-acceptable mutations through. 3·T covers
+	// ~95% of mutations that would be accepted (exp(-3) ≈ 0.05).
+	shallowThreshold := bestAvg
+	if temperature > 0 {
+		shallowThreshold = bestAvg - 3*temperature
+	}
+
 	innerCtx, cancel := context.WithCancel(ctx)
 	defer cancel()
 
@@ -849,8 +866,6 @@ func IterateParallel(
 		avg  float64
 		deck *Deck
 	}
-	// Buffered to numWorkers so the first sender never blocks and later senders can drop their
-	// improvement without waiting once the main goroutine has taken one.
 	improvementCh := make(chan improvement, numWorkers)
 
 	jobs := make(chan int, len(mutations))
@@ -866,7 +881,9 @@ func IterateParallel(
 			defer wg.Done()
 			ev := hand.NewEvaluator()
 			shallowRng := rand.New(rand.NewSource(seed + int64(workerIdx)))
-			// Derive an independent deep stream so the two phases don't share rng state.
+			// Derive an independent deep stream so the two phases don't share rng state. The
+			// acceptance-roll rng shares the deep stream — the deep eval has already happened
+			// by the time the roll runs, so no cross-influence on the deep result.
 			deepRng := rand.New(rand.NewSource(seed ^ (int64(workerIdx)+1)*int64(0x9e3779b9)))
 			for i := range jobs {
 				if innerCtx.Err() != nil {
@@ -878,7 +895,7 @@ func IterateParallel(
 				if shallowCompleted != nil {
 					shallowCompleted.Add(1)
 				}
-				if shallowAvg <= bestAvg {
+				if shallowAvg <= shallowThreshold {
 					continue
 				}
 				if innerCtx.Err() != nil {
@@ -890,16 +907,16 @@ func IterateParallel(
 				if deepsCompleted != nil {
 					deepsCompleted.Add(1)
 				}
-				if deepAvg > bestAvg {
-					select {
-					case improvementCh <- improvement{idx: i, avg: deepAvg, deck: dd}:
-					default:
-						// Another worker already filled the buffer; drop silently.
-					}
-					cancel()
-					return
+				if !acceptMutation(deepAvg, bestAvg, temperature, deepRng) {
+					continue
 				}
-				// Deep rejected; keep pulling more shallow jobs.
+				select {
+				case improvementCh <- improvement{idx: i, avg: deepAvg, deck: dd}:
+				default:
+					// Another worker already filled the buffer; drop silently.
+				}
+				cancel()
+				return
 			}
 		}(w)
 	}
@@ -915,7 +932,7 @@ func IterateParallel(
 		<-workersDone
 		return imp.deck, imp.avg, imp.idx, true
 	case <-workersDone:
-		// A last-moment improvement may have landed just before all senders returned.
+		// A last-moment acceptance may have landed just before all senders returned.
 		select {
 		case imp := <-improvementCh:
 			return imp.deck, imp.avg, imp.idx, true
@@ -923,4 +940,18 @@ func IterateParallel(
 		}
 		return nil, bestAvg, -1, false
 	}
+}
+
+// acceptMutation implements the Metropolis acceptance rule. Strict improvements (deepAvg >
+// bestAvg) always pass. Worse mutations pass with probability exp((deepAvg - bestAvg) / T)
+// when T > 0; at T == 0 they're rejected, recovering the classical hill-climb behaviour.
+func acceptMutation(deepAvg, bestAvg, temperature float64, rng *rand.Rand) bool {
+	if deepAvg > bestAvg {
+		return true
+	}
+	if temperature <= 0 {
+		return false
+	}
+	prob := math.Exp((deepAvg - bestAvg) / temperature)
+	return rng.Float64() < prob
 }
