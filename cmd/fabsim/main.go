@@ -2,80 +2,33 @@
 package main
 
 import (
-	"flag"
 	"fmt"
 	"io"
 	"os"
 	"path/filepath"
 	"sort"
 	"strings"
-	"time"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/cards"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/deck"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/deckio"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/fabrary"
-	fmtpkg "github.com/tim-chaplin/fab-deck-optimizer/internal/format"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/hand"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/hero"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/mydecks"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/weapon"
 )
 
-// defaultDeckNameFor returns the deck name when -deck isn't supplied, keyed by hero, format, and
-// -incoming. Different regimes produce different optimal decks, so each gets its own file to
-// avoid hill-climbing one regime's best under another regime's objective.
-func defaultDeckNameFor(h hero.Hero, f fmtpkg.Format, incoming int) string {
-	return fmt.Sprintf("%s_%s_%d_incoming", strings.ToLower(h.Name()), f, incoming)
-}
-
 func main() {
-	subcommand, ok := extractSubcommand()
+	subcommand, args, ok := extractSubcommand()
 	if !ok {
 		printSubcommands(os.Stdout)
 		return
 	}
 
-	shallowShuffles := flag.Int("shallow-shuffles", 100, "shuffles per deck used to screen iterate mutations before deep confirmation")
-	deepShuffles := flag.Int("deep-shuffles", 10000, "shuffles per deck used to confirm iterate improvements and for the eval subcommand")
-	incoming := flag.Int("incoming", 0, "opponent damage per turn")
-	deckSize := flag.Int("deck-size", 40, "number of cards per deck")
-	maxCopies := flag.Int("max-copies", 2, "maximum copies of any single card printing per deck")
-	seed := flag.Int64("seed", time.Now().UnixNano(), "RNG seed")
-	deckName := flag.String("deck", "", "deck name; resolved to mydecks/<name>.json (\".json\" suffix optional). Defaults to <hero>_<format>_<incoming>_incoming so different (hero, format, -incoming) regimes keep separate deck files. Ignored by the import subcommand, which always prompts interactively.")
-	formatFlag := flag.String("format", string(fmtpkg.SilverAge), "constructed format whose banlist restricts the card pool during search (only \"silver_age\" is supported today)")
-	debug := flag.Bool("debug", false, "emit extra diagnostic output (e.g. memo cache size between iterate rounds)")
-	reevaluate := flag.Bool("reevaluate", false, "anneal: force re-evaluation of the loaded deck's baseline avg, even if its prior run count already matches -deep-shuffles. Use after adjusting modelling assumptions or fixing bugs that may have shifted the deck's true score.")
-	finalize := flag.Bool("finalize", false, "anneal: high-precision pass — overrides -shallow-shuffles to 10000 and -deep-shuffles to 100000. Use on a deck that's already converged to squeeze out the remaining sub-percent improvements.")
-	startTemp := flag.Float64("start-temp", 0, "anneal: simulated-annealing starting temperature. 0 (default) runs a pure hill climb. Higher values probabilistically accept worse mutations early; acceptance probability is exp((avg - baseline) / T). Good starting range is ~0.05–0.5 given typical Value units.")
-	tempDecay := flag.Float64("temp-decay", 0.95, "anneal: multiplicative cooling per acceptance — T ← T × decay, floored at -min-temp. Unused when -start-temp is 0.")
-	minTemp := flag.Float64("min-temp", 0, "anneal: minimum temperature. Once T reaches this floor the climb becomes greedy until a local maximum is found. 0 disables annealing in the converged tail.")
-	quietLoad := flag.Bool("quiet-load", false, "anneal: skip the baseline card-list dump at startup. Intended for wrapper scripts (e.g. anneal-reanneal.ps1) that re-invoke anneal many times on the same deck — the listing never changes pass-to-pass and floods the log.")
-	flag.Parse()
-	if *finalize {
-		if subcommand != "anneal" {
-			die("-finalize is only valid with the anneal subcommand")
-		}
-		*shallowShuffles = 10000
-		*deepShuffles = 100000
-	}
-	// Reject positional args after the subcommand so `fabsim eval mydeck` errors instead of
-	// silently ignoring the deck name. The diff subcommand consumes exactly two positional
-	// deck names and is handled below, so skip the rejection for it.
-	if subcommand != "diff" && flag.NArg() > 0 {
-		die("unexpected positional argument(s): %v (did you mean -deck %s?)", flag.Args(), flag.Args()[0])
-	}
-	fmtValue, err := fmtpkg.Parse(*formatFlag)
-	if err != nil {
-		die("%v", err)
-	}
-	if *deckName == "" {
-		*deckName = defaultDeckNameFor(hero.Viserai{}, fmtValue, *incoming)
-	}
-
 	// Create mydecks/ up front so downstream WriteFile calls can't fail on a missing dir after
-	// a long run.
+	// a long run. Done once here rather than per-subcommand since every subcommand either reads
+	// or writes mydecks/.
 	if err := os.MkdirAll(mydecks.Dir, 0o755); err != nil {
 		die("mkdir %s: %v", mydecks.Dir, err)
 	}
@@ -83,56 +36,16 @@ func main() {
 	switch subcommand {
 	case "help":
 		printSubcommands(os.Stdout)
-		return
+	case "anneal":
+		runAnnealCmd(args)
+	case "eval":
+		runEvalCmd(args)
+	case "print":
+		runPrintCmd(args)
+	case "diff":
+		runDiffCmd(args)
 	case "import":
 		runImport()
-		return
-	case "diff":
-		args := flag.Args()
-		if len(args) != 2 {
-			die("diff: need exactly 2 positional deck names (got %d)", len(args))
-		}
-		runDiff(args[0], args[1])
-		return
-	}
-
-	cfg := config{
-		shallowShuffles: *shallowShuffles,
-		deepShuffles:    *deepShuffles,
-		incoming:        *incoming,
-		deckSize:        *deckSize,
-		maxCopies:       *maxCopies,
-		seed:            *seed,
-		format:          fmtValue,
-		debug:           *debug,
-		reevaluate:      *reevaluate,
-		startTemp:       *startTemp,
-		tempDecay:       *tempDecay,
-		minTemp:         *minTemp,
-		quietLoad:       *quietLoad,
-	}
-
-	outPath, err := mydecks.Path(*deckName)
-	if err != nil {
-		die("%v", err)
-	}
-	cfg.outPath = outPath
-
-	switch subcommand {
-	case "anneal":
-		// Print the session-level delta (starting best vs final best) on any exit path, then
-		// surface abort via a non-zero exit so wrapper scripts (anneal-reanneal.ps1 et al.)
-		// can tell Enter-initiated termination from natural convergence and stop looping.
-		res := runAnneal(cfg)
-		fmt.Fprintf(os.Stderr, "\nSession summary: avg %.3f → %.3f (%+.3f)\n",
-			res.startingAvg, res.bestEverAvg, res.bestEverAvg-res.startingAvg)
-		if res.aborted {
-			os.Exit(130)
-		}
-	case "eval":
-		runEval(cfg)
-	case "print":
-		runPrint(cfg.outPath)
 	default:
 		fmt.Fprintf(os.Stderr, "unknown subcommand %q\n\n", subcommand)
 		printSubcommands(os.Stderr)
@@ -140,32 +53,32 @@ func main() {
 	}
 }
 
-// extractSubcommand pulls os.Args[1] as the subcommand name and rewrites os.Args so flag.Parse
-// only sees flags. Returns (_, false) when no subcommand is given or the first arg looks like
-// a flag (bare `fabsim`, `fabsim -help`); the caller prints the subcommand list.
-func extractSubcommand() (string, bool) {
+// extractSubcommand pulls os.Args[1] as the subcommand name and returns the remaining args for
+// the subcommand's own flag.FlagSet to parse. Returns (_, _, false) when no subcommand is given
+// or the first arg looks like a flag (bare `fabsim`, `fabsim -help`); the caller prints the
+// subcommand list.
+func extractSubcommand() (string, []string, bool) {
 	if len(os.Args) < 2 {
-		return "", false
+		return "", nil, false
 	}
 	first := os.Args[1]
 	if strings.HasPrefix(first, "-") {
-		return "", false
+		return "", nil, false
 	}
-	os.Args = append([]string{os.Args[0]}, os.Args[2:]...)
-	return first, true
+	return first, os.Args[2:], true
 }
 
 // printSubcommands writes the one-liner catalogue shown when no subcommand is given. Flag
-// details live behind `fabsim <subcommand> -help`.
+// details live behind `fabsim <subcommand> -help`, which each subcommand's own FlagSet renders.
 func printSubcommands(w io.Writer) {
 	fmt.Fprintln(w, "fabsim: Flesh and Blood goldfishing deck optimizer")
 	fmt.Fprintln(w)
 	fmt.Fprintln(w, "Usage: fabsim <subcommand> [flags]")
 	fmt.Fprintln(w)
 	fmt.Fprintln(w, "Subcommands:")
-	fmt.Fprintln(w, "  iterate   Hill-climb (optionally simulated-annealing) on the saved deck until a local maximum")
-	fmt.Fprintln(w, "  eval      Re-score the saved deck at -deep-shuffles without overwriting it")
-	fmt.Fprintln(w, "  print     Print the saved deck without simulating")
+	fmt.Fprintln(w, "  anneal    Hill-climb (optionally simulated-annealing) on the saved deck until a local maximum")
+	fmt.Fprintln(w, "  eval      Re-score the saved deck at -deep-shuffles without overwriting it (usage: fabsim eval <deck>)")
+	fmt.Fprintln(w, "  print     Print the saved deck without simulating (usage: fabsim print <deck>)")
 	fmt.Fprintln(w, "  import    Paste a fabrary.net deck into mydecks/<name>.json")
 	fmt.Fprintln(w, "  diff      Print the card-count delta between two saved decks (usage: fabsim diff <deck1> <deck2>)")
 	fmt.Fprintln(w)
@@ -175,34 +88,6 @@ func printSubcommands(w io.Writer) {
 func die(format string, args ...any) {
 	fmt.Fprintf(os.Stderr, format+"\n", args...)
 	os.Exit(1)
-}
-
-type config struct {
-	shallowShuffles int
-	deepShuffles    int
-	incoming        int
-	deckSize        int
-	maxCopies       int
-	seed            int64
-	outPath         string
-	format          fmtpkg.Format
-	debug           bool
-	reevaluate      bool
-	// startTemp / tempDecay / minTemp are the simulated-annealing knobs for iterate. startTemp
-	// of 0 degenerates to the classical hill-climb (strict > baseline acceptance).
-	startTemp float64
-	tempDecay float64
-	minTemp   float64
-	// quietLoad suppresses the baseline card-list dump in prepareBaseline. Set by wrapper
-	// scripts that re-invoke anneal repeatedly on the same deck; the listing is unchanging
-	// noise after the first pass.
-	quietLoad bool
-}
-
-// legalFilter returns the card-pool predicate for this run's format. fabsim always runs under
-// a format, so this is non-nil; the deck package accepts nil for "no filtering" generally.
-func (c config) legalFilter() func(card.Card) bool {
-	return c.format.IsLegal
 }
 
 // loadExisting reads and deserializes the deck at path. Returns (nil, 0) on missing or
@@ -243,6 +128,17 @@ func fabraryPathFor(jsonPath string) string {
 		return strings.TrimSuffix(jsonPath, ext) + ".txt"
 	}
 	return jsonPath + ".txt"
+}
+
+// resolveDeckPath is the positional-arg counterpart to anneal's -deck flag. Subcommands that
+// always operate on an existing deck (eval, print, diff) accept the deck name as a positional
+// arg and resolve it to mydecks/<name>.json via mydecks.Path.
+func resolveDeckPath(name string) string {
+	p, err := mydecks.Path(name)
+	if err != nil {
+		die("%v", err)
+	}
+	return p
 }
 
 // printCardList writes the deck's card list in canonical "Card list:" form: one grouped-and-
