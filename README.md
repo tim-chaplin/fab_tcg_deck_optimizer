@@ -12,6 +12,28 @@ No. This is just a computer program that implements an evaluation function and u
 optimization techniques to look for optimal decks according to the evaluation. You can compile
 and run the program to find decks on your own computer without having invoked AI at all.
 
+## Insights
+
+Observations that held up across many optimizer runs, and that a human deckbuilder can take as
+hypotheses for their own testing:
+
+- **Nebula Blade is the strongest weapon for Viserai in the format.** Even at very early stages
+  of development — when the card pool and card-effect modelling were much rougher than they are
+  today — the optimizer converged on Nebula Blade over every other weapon loadout almost
+  immediately. It picked Nebula again when rerun under different incoming-damage settings and
+  different partial card pools. That's a strong signal the pick isn't an artifact of some specific
+  deck composition.
+- **Mauvrion Skies wants all six copies.** Across seeds and starting decks the optimizer tends to
+  fill all six legal slots (two each of red / yellow / blue). Whatever the Go-again-plus-Runechant
+  rider is doing for total expected value, the simulator evidently likes it more than the
+  marginal alternative.
+- **Card draw is strong even when the drawn card can't be played this turn.** The current
+  simulator is deliberately conservative about mid-turn draws — drawn cards don't pitch or extend
+  the chain on the same turn; they only carry forward as Held / Arsenal. Even with that
+  effectively-zero same-turn value, converged decks still pack Hit the High Notes / Drawn to the
+  Dark Dimension / Snatch / etc. heavily. The implication is that simply cycling through your
+  deck faster — getting to the peak-value hands sooner on average — is worth a lot on its own.
+
 ## Goal
 
 Find optimal deck lists for **goldfishing** — i.e. maximizing a deck's own output in a vacuum,
