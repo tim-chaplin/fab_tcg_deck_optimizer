@@ -54,8 +54,10 @@ func (stubNonRuneblade) Play(*card.TurnState, *card.CardState) int { return 0 }
 func TestViserai_RunebladeAfterNonAttackActionTriggers(t *testing.T) {
 	// Non-attack action played first, then a Runeblade attack. Viserai's OnCardPlayed creates a
 	// Runechant token: returns +1 damage (each token credited +1 at creation) and leaves a
-	// token on state.Runechants for downstream consume or carryover.
-	s := card.TurnState{CardsPlayed: []card.Card{stubRuneAura{}}}
+	// token on state.Runechants for downstream consume or carryover. NonAttackActionPlayed is
+	// maintained by the attack-chain driver as non-attack actions resolve; callers must set it
+	// when seeding a TurnState for trigger checks.
+	s := card.TurnState{CardsPlayed: []card.Card{stubRuneAura{}}, NonAttackActionPlayed: true}
 	if got := (Viserai{}).OnCardPlayed(stubRuneAttack{}, &s); got != 1 {
 		t.Fatalf("expected +1 damage from OnCardPlayed, got %d", got)
 	}
@@ -75,7 +77,7 @@ func TestViserai_NoPriorNonAttackAction(t *testing.T) {
 func TestViserai_CardStateNotRuneblade(t *testing.T) {
 	// Played card isn't Runeblade — Viserai's ability doesn't trigger even if a non-attack action was
 	// played earlier.
-	s := card.TurnState{CardsPlayed: []card.Card{stubRuneAura{}}}
+	s := card.TurnState{CardsPlayed: []card.Card{stubRuneAura{}}, NonAttackActionPlayed: true}
 	if got := (Viserai{}).OnCardPlayed(stubNonRuneblade{}, &s); got != 0 {
 		t.Fatalf("expected 0 (non-Runeblade played), got %d", got)
 	}
@@ -100,7 +102,7 @@ func (stubRuneWeapon) Play(*card.TurnState, *card.CardState) int { return 0 }
 func TestViserai_WeaponSwingDoesNotTrigger(t *testing.T) {
 	// Even with a prior non-attack action in CardsPlayed, swinging a Runeblade weapon isn't "playing a
 	// card" and must not trigger.
-	s := card.TurnState{CardsPlayed: []card.Card{stubRuneAura{}}}
+	s := card.TurnState{CardsPlayed: []card.Card{stubRuneAura{}}, NonAttackActionPlayed: true}
 	if got := (Viserai{}).OnCardPlayed(stubRuneWeapon{}, &s); got != 0 {
 		t.Fatalf("expected 0 for weapon swing, got %d", got)
 	}

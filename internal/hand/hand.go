@@ -1526,6 +1526,7 @@ func (ctx *sequenceContext) playSequenceWithMeta(order []card.Card, perCardOut, 
 	state.ArcaneDamageDealt = false
 	state.AuraCreated = false
 	state.Overpower = false
+	state.NonAttackActionPlayed = false
 	// Deck and Drawn must reset per permutation: DrawOne mutates them and a prior permutation's
 	// consumption would poison the next. Pitched / IncomingDamage / BlockTotal remain in
 	// seedState — cards don't mutate them.
@@ -1566,6 +1567,9 @@ func (ctx *sequenceContext) playSequenceWithMeta(order []card.Card, perCardOut, 
 			perCardTriggerOut[i] = float64(triggerDmg)
 		}
 		state.CardsPlayed = append(state.CardsPlayed, pc.Card)
+		if m.types.IsNonAttackAction() {
+			state.NonAttackActionPlayed = true
+		}
 		// Weapons and persistent card types (Auras, Items) stay in their zone when they
 		// resolve; any destroy event that should send them to the graveyard is a separate
 		// trigger. Everything else — Actions, Attack Reactions, Defense Reactions, Blocks,
