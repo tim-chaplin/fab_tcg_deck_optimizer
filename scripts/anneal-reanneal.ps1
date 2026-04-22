@@ -1,14 +1,14 @@
-# iterate-reanneal.ps1 - run simulated-annealing iterate on the same deck over and over, each
+# anneal-reanneal.ps1 - run simulated-annealing anneal on the same deck over and over, each
 # pass starting from the current on-disk best. Stops only when you Ctrl-C.
 #
-# Every pass invokes `go run ./cmd/fabsim iterate -deck <Deck> -start-temp <T> ...`. iterate
+# Every pass invokes `go run ./cmd/fabsim anneal -deck <Deck> -start-temp <T> ...`. anneal
 # converges to a local maximum and writes the best-ever deck to mydecks/<Deck>.json; the next
 # pass picks up from that deck (re-evaluates its baseline) and starts annealing again from the
 # full -StartTemp. Repeated high-T walks are the whole point: each escape attempts to dislodge
 # the deck from the basin of attraction the previous pass left it in.
 #
 # Usage:
-#   ./scripts/iterate-reanneal.ps1 -Deck viserai_annealed -StartTemp 1 -Incoming 7
+#   ./scripts/anneal-reanneal.ps1 -Deck viserai_annealed -StartTemp 1 -Incoming 7
 
 [CmdletBinding()]
 param(
@@ -41,7 +41,7 @@ if (Test-Path $deckPath) {
     }
 }
 
-Write-Host "=== iterate-reanneal: $Deck, startTemp=$StartTemp, incoming=$Incoming ==="
+Write-Host "=== anneal-reanneal: $Deck, startTemp=$StartTemp, incoming=$Incoming ==="
 Write-Host ("Starting from {0:F3} - Ctrl-C to stop.`n" -f $bestSeen)
 
 $pass = 0
@@ -50,7 +50,7 @@ while ($true) {
     Write-Host "--- Pass $pass ---"
 
     $goArgs = @(
-        'run', './cmd/fabsim', 'iterate',
+        'run', './cmd/fabsim', 'anneal',
         '-deck', $Deck,
         '-incoming', $Incoming,
         '-start-temp', $StartTemp,
@@ -66,11 +66,11 @@ while ($true) {
     if ($IterateDebug) { $goArgs += '-debug' }
 
     & go @goArgs
-    # Exit 130 is iterate's "user pressed Enter" signal. Break the outer loop so the whole
+    # Exit 130 is anneal's "user pressed Enter" signal. Break the outer loop so the whole
     # session stops instead of kicking off another pass; any other non-zero is also treated
     # as a reason to stop.
     if ($LASTEXITCODE -ne 0) {
-        Write-Host "iterate exited $LASTEXITCODE; ending reanneal session."
+        Write-Host "anneal exited $LASTEXITCODE; ending reanneal session."
         break
     }
 

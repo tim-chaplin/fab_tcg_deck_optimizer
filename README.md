@@ -31,7 +31,7 @@ This is a work in progress. The current model is deliberately narrow:
 
 ## What it does today
 
-- Loads a 40-card deck (currently hardcoded).
+- Loads a 40-card deck from `mydecks/<name>.json`.
 - Shuffles and repeatedly draws hands of 4 cards.
 - For each hand, brute-forces the optimal play: every partition of the hand into Pitch / Attack /
   Defend, every weapon-swing subset, every legal attack ordering (respecting Go again). Hand value
@@ -51,17 +51,18 @@ All subcommands read and write `mydecks/<deck>.json` where `<deck>` comes from `
 format, `-incoming`) regimes keep separate deck files). The `.json` suffix on `-deck` is
 optional.
 
-- **`random`** — two-phase search. Generates `-decks` random decks and evaluates each shallowly
-  (`-shallow-shuffles` shuffles); takes the top `-top-n` and re-evaluates them with more shuffles
-  (`-deep-shuffles`). Writes the winner to the deck file if it beats whatever's already there.
-- **`iterate`** — hill-climbs deterministically on the deck at `-deck`, or on a fresh random
-  deck if the file doesn't exist yet (so you don't need to run `random` first). Each round
-  enumerates every single-slot mutation (every alternative weapon loadout + every (card-in-deck,
-  card-out-of-deck) swap). Mutations are screened at `-shallow-shuffles`; only those that beat
-  the current best on the shallow sample are re-evaluated at `-deep-shuffles` to confirm. The
-  first mutation that beats the baseline at deep depth is adopted and the round restarts. When a
-  full round finishes without finding a confirmed improvement, the deck is at a local maximum and
-  `iterate` exits. Press Enter to abort mid-round.
+- **`anneal`** — simulated-annealing search on the deck at `-deck`, or on a fresh random deck
+  if the file doesn't exist yet. Each round enumerates every single-slot mutation (every
+  alternative weapon loadout + every (card-in-deck, card-out-of-deck) swap). Mutations are
+  screened at `-shallow-shuffles`; candidates that clear the acceptance gate are re-evaluated
+  at `-deep-shuffles` to confirm. The acceptance gate is the Metropolis rule: strict
+  improvements are always accepted, worse mutations are accepted with probability
+  `exp((avg - baseline) / T)` when `-start-temp > 0`. Temperature decays geometrically per
+  acceptance (`-temp-decay`, floored at `-min-temp`). At `-start-temp 0` the gate is strictly
+  `> baseline` and anneal degenerates to a classical hill climb. A round with zero acceptances
+  is treated as a local maximum and anneal exits. Press Enter to abort mid-round (exits 130
+  so wrapper scripts can tell this apart from natural convergence). Only the best-ever deck is
+  persisted to disk — walks through worse states under annealing don't regress the JSON.
 - **`eval`** — loads the deck file, simulates it for `-deep-shuffles` hands against `-incoming`
   damage, and prints the resulting stats. Does **not** overwrite the file — use this to re-score a
   saved deck at a new shuffle depth or opponent pressure without clobbering whatever's on disk.
@@ -71,38 +72,50 @@ optional.
   `See the full deck @ …` footer. Saves the result as `mydecks/<name>.json`. The `-deck` flag is
   ignored — the name always comes from the prompt. Cards the optimizer hasn't implemented yet are
   skipped with a warning rather than blocking the import.
+- **`diff`** — prints the card-count delta between two saved decks. Usage: `fabsim diff <deck1> <deck2>`.
 
 ### Suggested workflow
 
-Start with a wide random search to seed the deck file for the current `-incoming` setting, then
-hill-climb from there:
+Start with annealing to escape weak local maxima, then re-anneal repeatedly to probe the
+neighbourhood of each new best:
 
 ```
-go run ./cmd/fabsim random
-go run ./cmd/fabsim iterate
+go run ./cmd/fabsim anneal -start-temp 1 -incoming 7
+./scripts/anneal-reanneal.ps1 -Deck viserai_silver_age_7_incoming -StartTemp 1 -Incoming 7
 ```
 
-`random` explores the space; `iterate` refines the best find. Re-run either stage as often as
-you like — each run only overwrites the deck file if it finds something better.
+Or fan out across several independent starts and rank the results:
+
+```
+./scripts/anneal-restarts.ps1 -N 10 -DeckTemplate 'viserai_*' -Incoming 7 -StartTemp 1
+```
+
+Each run only overwrites its deck file when a new best-ever avg is found, so it's safe to
+re-run indefinitely.
 
 ### Flags
 
-- `-decks` — number of random decks to generate in phase 1 of `random` (default 1000)
-- `-shallow-shuffles` — shuffles per deck in `random` phase 1 and for screening `iterate`
-  mutations (default 100)
-- `-top-n` — number of phase-1 decks to advance to phase 2 (default 100)
-- `-deep-shuffles` — shuffles per deck in `random` phase 2 and for confirming `iterate`
-  improvements (default 10000)
+- `-shallow-shuffles` — shuffles per deck when screening anneal mutations (default 100)
+- `-deep-shuffles` — shuffles per deck when confirming anneal improvements and for `eval` (default 10000)
 - `-incoming` — opponent damage per turn (default 0)
 - `-deck-size` — cards per deck (default 40)
 - `-max-copies` — max copies of any single card printing (default 2)
 - `-seed` — RNG seed (default: time-based)
 - `-deck` — deck name; resolved to `mydecks/<name>.json` (default
-  `<hero>_<format>_<incoming>_incoming`, e.g. `viserai_silver_age_0_incoming`, keyed off the
-  hero, format, and `-incoming`). The `mydecks/` directory is created automatically.
+  `<hero>_<format>_<incoming>_incoming`, keyed off the hero, format, and `-incoming`). The
+  `mydecks/` directory is created automatically.
 - `-format` — constructed format whose banlist restricts the card pool during search. Defaults
   to `silver_age`, which is currently the only supported format. The authoritative Silver Age
   banlist lives at `data_sources/silver_age_banlist.txt`.
+- `-start-temp` — anneal: starting temperature. `0` (default) runs a pure hill climb. Higher
+  values probabilistically accept worse mutations early (Metropolis rule).
+- `-temp-decay` — anneal: multiplicative cooling per acceptance (default 0.95).
+- `-min-temp` — anneal: temperature floor (default 0).
+- `-finalize` — anneal: high-precision pass — overrides `-shallow-shuffles` to 10000 and
+  `-deep-shuffles` to 100000. Use on a deck that's already converged to squeeze out the
+  remaining sub-percent improvements.
+- `-reevaluate` — anneal: force re-evaluation of the loaded deck's baseline avg even if its
+  prior run count already matches `-deep-shuffles`. Use after adjusting modelling assumptions.
 
 Helper tool for exploring the upstream card database:
 
@@ -119,12 +132,14 @@ go test ./...
 ## Layout
 
 ```
-cmd/fabsim/         CLI entry point
-cmd/parsecarddb/    Card-database parser / filter
-internal/card/      Card interface, TurnState, and card implementations
-internal/deck/      Deck construction
-internal/hand/      Optimal-play solver for a single hand
-internal/hero/      Hero definitions and on-play triggers
-internal/sim/       Deck simulation and stat aggregation
-internal/weapon/    Weapon definitions
+.github/workflows/   GitHub Actions (anneal-sweep: parallel matrix run)
+cmd/fabsim/          CLI entry point
+cmd/parsecarddb/     Card-database parser / filter
+internal/card/       Card interface, TurnState, and card implementations
+internal/deck/       Deck construction and parallel anneal round driver
+internal/deckio/     JSON serialisation / deserialisation
+internal/hand/       Optimal-play solver for a single hand
+internal/hero/       Hero definitions and on-play triggers
+internal/weapon/     Weapon definitions
+scripts/             PowerShell wrappers for multi-restart and reanneal sweeps
 ```

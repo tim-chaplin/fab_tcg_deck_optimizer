@@ -13,21 +13,21 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/hero"
 )
 
-// iterateResult carries the outcome of a single runIterate pass. aborted is true when the
+// annealResult carries the outcome of a single runAnneal pass. aborted is true when the
 // user hit Enter (stdin watcher fired) — callers propagate this up to main so the process
-// exits non-zero and wrapper scripts like iterate-reanneal.ps1 stop their outer loop instead
+// exits non-zero and wrapper scripts like anneal-reanneal.ps1 stop their outer loop instead
 // of immediately launching another pass.
-type iterateResult struct {
-	bestEverAvg  float64
-	startingAvg  float64
-	aborted      bool
+type annealResult struct {
+	bestEverAvg float64
+	startingAvg float64
+	aborted     bool
 }
 
-func runIterate(cfg config) iterateResult {
+func runAnneal(cfg config) annealResult {
 	rng := rand.New(rand.NewSource(cfg.seed))
 
 	current, currentAvg := prepareBaseline(cfg, rng)
-	// All-time best tracks the highest-avg deck seen since runIterate started. The saved JSON
+	// All-time best tracks the highest-avg deck seen since runAnneal started. The saved JSON
 	// mirrors this — simulated annealing intentionally walks through worse states to escape
 	// local maxima, but the on-disk artifact should always reflect the peak reached so far.
 	bestEver := current
@@ -98,7 +98,7 @@ func runIterate(cfg config) iterateResult {
 				round, acceptances, time.Since(start).Truncate(time.Second))
 			fmt.Println()
 			printBestDeck(bestEver)
-			return iterateResult{bestEverAvg: bestEverAvg, startingAvg: startingAvg, aborted: true}
+			return annealResult{bestEverAvg: bestEverAvg, startingAvg: startingAvg, aborted: true}
 		}
 		if !found {
 			// A full round with zero acceptances means every mutation — including the
@@ -109,7 +109,7 @@ func runIterate(cfg config) iterateResult {
 				round, acceptances, time.Since(start).Truncate(time.Second))
 			fmt.Println()
 			printBestDeck(bestEver)
-			return iterateResult{bestEverAvg: bestEverAvg, startingAvg: startingAvg}
+			return annealResult{bestEverAvg: bestEverAvg, startingAvg: startingAvg}
 		}
 
 		acceptances++

@@ -1,12 +1,12 @@
-# iterate-restarts.ps1 - run `fabsim iterate` N times with different deck names and rank the
+# anneal-restarts.ps1 - run `fabsim anneal` N times with different deck names and rank the
 # results at the end. Replaces the former -N / -deck-template flags that lived inside fabsim's
-# Go code: a thin shell-level wrapper keeps iterate's surface narrow while still giving the
+# Go code: a thin shell-level wrapper keeps anneal's surface narrow while still giving the
 # user multi-restart sweeps.
 #
 # Usage:
-#   ./scripts/iterate-restarts.ps1 -N 10 -DeckTemplate 'viserai_*' -Incoming 7
+#   ./scripts/anneal-restarts.ps1 -N 10 -DeckTemplate 'viserai_*' -Incoming 7
 #
-# Each iteration resolves '*' to 1..N and invokes `go run ./cmd/fabsim iterate -deck <name> ...`.
+# Each pass resolves '*' to 1..N and invokes `go run ./cmd/fabsim anneal -deck <name> ...`.
 # Decks on disk at mydecks/<name>.json are preserved as resume state (already-converged runs
 # pass through one no-op round); pass the same -DeckTemplate to resume a partial sweep. Delete
 # the JSON files manually when you want fresh random starts.
@@ -47,7 +47,7 @@ for ($i = 1; $i -le $N; $i++) {
     # Build the flag list dynamically so optional switches only appear when set. PowerShell 5.1
     # flattens @-splatting across array boundaries for native exe calls.
     $goArgs = @(
-        'run', './cmd/fabsim', 'iterate',
+        'run', './cmd/fabsim', 'anneal',
         '-deck', $deckName,
         '-incoming', $Incoming,
         '-shallow-shuffles', $ShallowShuffles,
@@ -62,11 +62,11 @@ for ($i = 1; $i -le $N; $i++) {
 
     & go @goArgs
     if ($LASTEXITCODE -ne 0) {
-        Write-Host "iterate exited $LASTEXITCODE on restart ${i}; stopping the sweep."
+        Write-Host "anneal exited $LASTEXITCODE on restart ${i}; stopping the sweep."
         break
     }
 
-    # iterate persists its final state to mydecks/<deckName>.json; the deck's Stats block carries
+    # anneal persists its final state to mydecks/<deckName>.json; the deck's Stats block carries
     # the avg directly, so we don't have to parse stdout to rank. Missing file means the run
     # failed or was aborted before a single improvement saved - leave it out of the ranking.
     $deckPath = Join-Path 'mydecks' "$deckName.json"
