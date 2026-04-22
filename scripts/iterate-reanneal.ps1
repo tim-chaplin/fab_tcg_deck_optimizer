@@ -23,7 +23,7 @@ param(
     [int]$MaxCopies = 2,
     [string]$Format = "silver_age",
     [switch]$Reevaluate,
-    [switch]$Debug
+    [switch]$IterateDebug
 )
 
 $ErrorActionPreference = 'Stop'
@@ -62,8 +62,8 @@ while ($true) {
         '-max-copies', $MaxCopies,
         '-format', $Format
     )
-    if ($Reevaluate) { $goArgs += '-reevaluate' }
-    if ($Debug)      { $goArgs += '-debug' }
+    if ($Reevaluate)   { $goArgs += '-reevaluate' }
+    if ($IterateDebug) { $goArgs += '-debug' }
 
     & go @goArgs
 

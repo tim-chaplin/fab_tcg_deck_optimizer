@@ -23,7 +23,7 @@ param(
     [string]$Format = "silver_age",
     [switch]$Finalize,
     [switch]$Reevaluate,
-    [switch]$Debug
+    [switch]$IterateDebug
 )
 
 $ErrorActionPreference = 'Stop'
@@ -56,9 +56,9 @@ for ($i = 1; $i -le $N; $i++) {
         '-max-copies', $MaxCopies,
         '-format', $Format
     )
-    if ($Finalize)   { $goArgs += '-finalize' }
-    if ($Reevaluate) { $goArgs += '-reevaluate' }
-    if ($Debug)      { $goArgs += '-debug' }
+    if ($Finalize)     { $goArgs += '-finalize' }
+    if ($Reevaluate)   { $goArgs += '-reevaluate' }
+    if ($IterateDebug) { $goArgs += '-debug' }
 
     & go @goArgs
 
