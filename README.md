@@ -12,6 +12,19 @@ No. This is just a computer program that implements an evaluation function and u
 optimization techniques to look for optimal decks according to the evaluation. You can compile
 and run the program to find decks on your own computer without having invoked AI at all.
 
+### Is this the best possible deck in the format?
+
+No. A few caveats:
+
+- **The search space is too big to exhaust.** For any given set of modelling assumptions I
+  don't know that it'll ever be practical to find the true global optimum. This program finds
+  local maxima, and I don't have a way to prove how far any given local max is from the
+  global one.
+- **"Best" depends on your assumptions**, and especially on the specific matchup you end up in.
+  The tool outputs a deck that's strong for goldfishing under the simplifications listed in
+  "Scope & limitations"; there's no such thing as a single deck that's optimal across every
+  matchup and every assumption.
+
 ## Insights
 
 Observations that held up across many optimizer runs, and that a human deckbuilder can take as
