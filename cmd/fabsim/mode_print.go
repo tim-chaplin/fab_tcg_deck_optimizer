@@ -14,7 +14,7 @@ func runPrintCmd(args []string) {
 	fs.Usage = func() {
 		fmt.Fprintln(fs.Output(), "Usage: fabsim print <deck>")
 	}
-	_ = fs.Parse(args)
+	_ = parseFlagsAnywhere(fs, args)
 	if fs.NArg() != 1 {
 		die("print: need exactly one positional <deck> (got %d); try `fabsim print <deck>`", fs.NArg())
 	}

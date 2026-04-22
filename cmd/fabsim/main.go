@@ -2,6 +2,7 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"io"
 	"os"
@@ -88,6 +89,56 @@ func printSubcommands(w io.Writer) {
 func die(format string, args ...any) {
 	fmt.Fprintf(os.Stderr, format+"\n", args...)
 	os.Exit(1)
+}
+
+// parseFlagsAnywhere parses args on fs while tolerating flags that appear before, after, or
+// interleaved with positional arguments. Go's stdlib flag package stops at the first positional
+// token, so `fabsim eval <deck> --incoming=100` would otherwise leave --incoming unparsed and
+// treat it as a second positional. Every subcommand routes through this helper so flag order
+// never matters to the user.
+//
+// The reorder is aware of each flag's bool-ness (via the optional IsBoolFlag() interface that
+// the flag package uses): a non-bool `-name` token consumes the following arg as its value, a
+// bool flag doesn't. Unknown flags are passed through untouched so fs.Parse can emit its usual
+// "flag provided but not defined" error. A bare `--` is honored as the end-of-flags terminator,
+// with everything after it treated as positional.
+func parseFlagsAnywhere(fs *flag.FlagSet, args []string) error {
+	var flagTokens, positional []string
+	for i := 0; i < len(args); i++ {
+		a := args[i]
+		if a == "--" {
+			positional = append(positional, args[i+1:]...)
+			break
+		}
+		if len(a) < 2 || a[0] != '-' {
+			positional = append(positional, a)
+			continue
+		}
+		flagTokens = append(flagTokens, a)
+		// -name=value is self-contained; only -name (no =) can consume the next token.
+		if strings.Contains(a, "=") {
+			continue
+		}
+		name := strings.TrimLeft(a, "-")
+		f := fs.Lookup(name)
+		if f == nil {
+			// Unknown flag — let fs.Parse produce the canonical error with usage.
+			continue
+		}
+		bf, ok := f.Value.(interface{ IsBoolFlag() bool })
+		isBool := ok && bf.IsBoolFlag()
+		if !isBool && i+1 < len(args) {
+			i++
+			flagTokens = append(flagTokens, args[i])
+		}
+	}
+	// Insert `--` before the positional block so fs.Parse doesn't re-interpret positional
+	// tokens that happen to start with `-`. That's necessary when the caller supplied an
+	// explicit `--` terminator (whose tail ends up in positional) and also future-proofs
+	// against deck names that begin with a dash.
+	out := append(flagTokens, "--")
+	out = append(out, positional...)
+	return fs.Parse(out)
 }
 
 // loadExisting reads and deserializes the deck at path. Returns (nil, 0) on missing or

@@ -24,7 +24,7 @@ func runEvalCmd(args []string) {
 	deepShuffles := fs.Int("deep-shuffles", 10000, "shuffles per deck used to re-score the deck")
 	incoming := fs.Int("incoming", 0, "opponent damage per turn")
 	seed := fs.Int64("seed", time.Now().UnixNano(), "RNG seed")
-	_ = fs.Parse(args)
+	_ = parseFlagsAnywhere(fs, args)
 	if fs.NArg() != 1 {
 		die("eval: need exactly one positional <deck> (got %d); try `fabsim eval <deck>`", fs.NArg())
 	}

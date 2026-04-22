@@ -15,7 +15,7 @@ func runDiffCmd(args []string) {
 	fs.Usage = func() {
 		fmt.Fprintln(fs.Output(), "Usage: fabsim diff <deck1> <deck2>")
 	}
-	_ = fs.Parse(args)
+	_ = parseFlagsAnywhere(fs, args)
 	if fs.NArg() != 2 {
 		die("diff: need exactly 2 positional deck names (got %d); try `fabsim diff <deck1> <deck2>`", fs.NArg())
 	}
