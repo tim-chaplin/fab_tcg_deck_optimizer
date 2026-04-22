@@ -1,0 +1,171 @@
+name: Iterate sweep
+
+# Parallel hill-climb sweep on GitHub-hosted runners. Spawns `N` iterate workers in a matrix —
+# each with a distinct seed — lets them run for up to `runtime_minutes`, then uploads every
+# worker's final deck as an artifact. A final aggregation job downloads everything and ranks by
+# avg so the best runs surface without SSH'ing anywhere.
+#
+# Manual trigger only: `gh workflow run iterate-sweep.yml -f num_seeds=100 -f incoming=7` (or use
+# the GitHub UI). Free-tier public-repo accounts cap concurrent runners at ~20, so
+# `num_seeds > 20` queues rather than fans out flat.
+
+on:
+  workflow_dispatch:
+    inputs:
+      num_seeds:
+        description: "Number of parallel iterate workers (each gets a distinct seed)."
+        required: true
+        default: "10"
+      incoming:
+        description: "-incoming damage per turn"
+        required: true
+        default: "7"
+      deck_size:
+        description: "-deck-size"
+        required: true
+        default: "40"
+      max_copies:
+        description: "-max-copies"
+        required: true
+        default: "2"
+      shallow_shuffles:
+        description: "-shallow-shuffles"
+        required: true
+        default: "100"
+      deep_shuffles:
+        description: "-deep-shuffles"
+        required: true
+        default: "10000"
+      format:
+        description: "-format"
+        required: true
+        default: "silver_age"
+      runtime_minutes:
+        description: "Per-worker wall-clock cap (minutes). Iterate exits cleanly on natural convergence; this bounds runaway jobs so the matrix finishes within GitHub's 6h job limit with headroom for upload."
+        required: true
+        default: "300"
+
+jobs:
+  plan:
+    runs-on: ubuntu-latest
+    outputs:
+      workers: ${{ steps.gen.outputs.workers }}
+    steps:
+      - id: gen
+        # JSON array [1, 2, ..., num_seeds] fans out the matrix. The matrix index is just a
+        # worker counter — each worker picks its own random seed at runtime, so the 1..N here
+        # has no semantic meaning beyond "how many workers to spawn".
+        run: |
+          echo "workers=[$(seq -s, 1 ${{ inputs.num_seeds }})]" >> "$GITHUB_OUTPUT"
+
+  iterate:
+    needs: plan
+    runs-on: ubuntu-latest
+    timeout-minutes: 350
+    strategy:
+      fail-fast: false
+      matrix:
+        worker: ${{ fromJSON(needs.plan.outputs.workers) }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+          cache: true
+
+      - name: Pick random seed
+        id: seed
+        # /dev/urandom → unsigned 32-bit int. Each worker independently draws its own seed so
+        # parallel sweeps explore different corners of the search space even across repeated
+        # workflow runs. Seed is exposed as a step output and baked into the deck filename
+        # (see -deck below) so the resulting artifact is self-identifying.
+        run: |
+          SEED=$(od -An -N4 -tu4 /dev/urandom | tr -d ' ')
+          echo "Chose seed=$SEED for worker ${{ matrix.worker }}"
+          echo "seed=$SEED" >> "$GITHUB_OUTPUT"
+
+      - name: Run iterate
+        # `timeout` bounds the worker at runtime_minutes so every job finishes inside the GitHub
+        # 6h cap even without natural convergence. iterate saves to mydecks/<name>.json on every
+        # improvement, so a SIGTERM leaves the latest best deck on disk. `|| true` keeps the step
+        # green on a timeout exit (124) so the upload step still runs.
+        run: |
+          set -x
+          mkdir -p mydecks
+          timeout ${{ inputs.runtime_minutes }}m go run ./cmd/fabsim iterate \
+            -seed ${{ steps.seed.outputs.seed }} \
+            -deck seed-${{ steps.seed.outputs.seed }} \
+            -incoming ${{ inputs.incoming }} \
+            -deck-size ${{ inputs.deck_size }} \
+            -max-copies ${{ inputs.max_copies }} \
+            -shallow-shuffles ${{ inputs.shallow_shuffles }} \
+            -deep-shuffles ${{ inputs.deep_shuffles }} \
+            -format ${{ inputs.format }} \
+            < /dev/null \
+            || true
+
+      - name: Upload deck artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          # Artifact name is keyed on worker index (not seed) so two workers that happen to
+          # draw the same seed still produce distinct artifacts. The deck file itself is named
+          # after the seed, so collecting every artifact into one dir keeps them separate.
+          name: worker-${{ matrix.worker }}
+          path: mydecks/seed-${{ steps.seed.outputs.seed }}.json
+          if-no-files-found: warn
+          retention-days: 30
+
+  aggregate:
+    needs: iterate
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+          cache: true
+
+      - name: Download all deck artifacts
+        uses: actions/download-artifact@v4
+        with:
+          # Flattens every `worker-<N>` artifact into mydecks/ so ranking sees one flat dir of
+          # seed-<SEED>.json files.
+          pattern: worker-*
+          path: mydecks
+          merge-multiple: true
+
+      - name: List collected decks
+        run: ls -la mydecks/
+
+      - name: Rank decks by avg
+        # Scans every JSON, pulls the seed from the filename and the avg from Stats, emits a
+        # sorted table. Cheap and doesn't require rebuilding the program.
+        run: |
+          set -eu
+          python3 - <<'PY'
+          import json, os, glob
+          rows = []
+          for p in sorted(glob.glob("mydecks/seed-*.json")):
+              with open(p) as f:
+                  d = json.load(f)
+              stats = d.get("Stats", {}) or {}
+              total = stats.get("TotalValue", 0.0) or 0.0
+              hands = stats.get("Hands", 0) or 0
+              avg = (total / hands) if hands else 0.0
+              rows.append((os.path.basename(p), avg, hands, stats.get("Runs", 0)))
+          rows.sort(key=lambda r: r[1], reverse=True)
+          print(f"{'deck':<32} {'avg':>8} {'hands':>10} {'runs':>8}")
+          for name, avg, hands, runs in rows:
+              print(f"{name:<32} {avg:>8.3f} {hands:>10} {runs:>8}")
+          PY
+
+      - name: Upload ranked summary
+        uses: actions/upload-artifact@v4
+        with:
+          name: sweep-summary
+          path: mydecks/
+          retention-days: 30
