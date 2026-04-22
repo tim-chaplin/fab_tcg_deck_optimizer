@@ -84,18 +84,14 @@ func runIterate(cfg config) iterateResult {
 		}
 
 		var tested, deepsDone atomic.Int64
-		var stopTicker func()
-		if verbose {
-			stopTicker = startRoundTicker(round, len(mutations), start, &tested, &deepsDone)
-		}
+		stopTicker := startRoundTicker(round, len(mutations), start, &tested, &deepsDone,
+			temperature, currentAvg, bestEverAvg)
 		d, avg, idx, found := deck.IterateParallel(
 			ctx, mutations, currentAvg, temperature,
 			cfg.shallowShuffles, cfg.deepShuffles, cfg.incoming, 0,
 			rng.Int63(), &tested, &deepsDone,
 		)
-		if stopTicker != nil {
-			stopTicker()
-		}
+		stopTicker()
 
 		if ctx.Err() != nil {
 			fmt.Fprintf(os.Stderr, "\nAborted mid-round after %d rounds / %d acceptances in %s\n",
@@ -132,8 +128,9 @@ func runIterate(cfg config) iterateResult {
 			if !verbose {
 				// Surface every new all-time best in non-verbose annealing mode so long
 				// reanneal sessions still show visible forward motion without the per-round
-				// spam. Classical mode already got this info via the "improvement" line above.
-				fmt.Fprintf(os.Stderr, "[round %d] new best %.3f (was %.3f, +%.3f)%s\n",
+				// spam. \r + trailing padding overwrites the ticker line cleanly; the \n at
+				// the end promotes this to a persistent entry above the next round's ticker.
+				fmt.Fprintf(os.Stderr, "\r[round %d] new best %.3f (was %.3f, +%.3f)%s                                \n",
 					round, avg, bestEverAvg, avg-bestEverAvg, tempLabel)
 			}
 			bestEver = d
@@ -205,10 +202,13 @@ func watchStdinForAbort(cancel context.CancelFunc) {
 	}()
 }
 
-// startRoundTicker launches a 500ms ticker that renders the round's shallow-screen and
-// deep-confirm counts to stderr on a \r-terminated line so the user sees the worker pool moving
-// during long rounds. Returns a stop function the caller must call when the round finishes.
-func startRoundTicker(round, total int, start time.Time, tested, deepsDone *atomic.Int64) func() {
+// startRoundTicker launches a 500ms ticker that renders round progress plus the annealing
+// state (T, current avg, best-ever) to a \r-terminated stderr line. Runs in both classical
+// and annealing modes: in annealing mode it's effectively the only ongoing progress indicator
+// (the per-round / per-mutation logs are suppressed without -debug), so keeping the snapshot
+// rich enough to track the walk is what makes silent mode bearable. Returns a stop function
+// the caller must call when the round finishes.
+func startRoundTicker(round, total int, start time.Time, tested, deepsDone *atomic.Int64, temperature, currentAvg, bestEverAvg float64) func() {
 	done := make(chan struct{})
 	go func() {
 		t := time.NewTicker(500 * time.Millisecond)
@@ -218,8 +218,13 @@ func startRoundTicker(round, total int, start time.Time, tested, deepsDone *atom
 			case <-done:
 				return
 			case <-t.C:
-				fmt.Fprintf(os.Stderr, "\r[round %d] tested %d/%d (%d deep confirms, %s elapsed)        ",
-					round, tested.Load(), total, deepsDone.Load(), time.Since(start).Truncate(time.Second))
+				tempLabel := ""
+				if temperature > 0 {
+					tempLabel = fmt.Sprintf("  T=%.4f", temperature)
+				}
+				fmt.Fprintf(os.Stderr, "\r[round %d] tested %d/%d  cur %.3f  best %.3f%s  %s elapsed        ",
+					round, tested.Load(), total, currentAvg, bestEverAvg, tempLabel,
+					time.Since(start).Truncate(time.Second))
 			}
 		}
 	}()
