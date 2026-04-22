@@ -923,6 +923,13 @@ func (e *Evaluator) bestUncached(hero hero.Hero, weapons []weapon.Weapon, hand [
 			if !roleAllowed(r, isArsenalSlot, isDR[i]) {
 				continue
 			}
+			// When no damage is coming in, a non-DR card's Defend contributes 0 — same as Held.
+			// The two partitions produce identical Value / leftover / tiebreaker state, so skip
+			// the Defend branch and let the Held branch stand in. DR cards still need Defend
+			// because their Play damage is gated on the Defend role.
+			if r == Defend && incomingDamage == 0 && !isDR[i] {
+				continue
+			}
 			rolesBuf[i] = r
 			switch r {
 			case Pitch:
