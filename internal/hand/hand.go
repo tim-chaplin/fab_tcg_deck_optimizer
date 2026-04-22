@@ -602,7 +602,6 @@ func cardMetaSlowPath(c card.Card, id card.ID) attackerMeta {
 // playSequence) and the partition loop in bestUncached. Allocated once and cached on the
 // Evaluator so a deck eval reuses them across every partition, mask, and permutation.
 type attackBufs struct {
-	perm           []card.Card
 	pcBuf          []card.CardState
 	ptrBuf         []*card.CardState
 	cardsPlayedBuf []card.Card
@@ -621,14 +620,10 @@ type attackBufs struct {
 	// weaponCosts[mask] is total Cost; weaponNames[mask] is the pre-built []string of names.
 	weaponCosts []int
 	weaponNames [][]string
-	// permMeta parallels perm: each entry points into the global cardMetaCache so playSequence's
+	// permMeta parallels pcBuf: each entry points into the global cardMetaCache so playSequence's
 	// inner loop skips interface dispatch on Types / GoAgain and reads cached cost bounds.
 	// Pointer-valued so bestSequence's permutation swaps move 8 bytes instead of a full struct.
 	permMeta []*attackerMeta
-	// permFromArsenal carries arsenal-provenance per slot in lockstep with perm / permMeta. Set
-	// to true on the slot whose card came from the arsenal slot at start of turn so
-	// playSequenceWithMeta can flip pcBuf[i].FromArsenal for that CardState.
-	permFromArsenal []bool
 	// Partition-loop buffers, consumed by bestUncached. Sized handSize+1 to cover the optional
 	// arsenal-in slot the enumerator treats as index n. isDRBuf caches TypeDefenseReaction
 	// membership to skip Types().Has calls; isDelayedBuf caches card.DelayedPlay implementation
@@ -698,9 +693,7 @@ func newAttackBufs(handSize, weaponCount int, weapons []weapon.Weapon) *attackBu
 		ptrBuf[i] = &pcBuf[i]
 	}
 	return &attackBufs{
-		perm:                   make([]card.Card, maxAttackers),
 		permMeta:               make([]*attackerMeta, maxAttackers),
-		permFromArsenal:        make([]bool, maxAttackers),
 		pcBuf:                  pcBuf,
 		ptrBuf:                 ptrBuf,
 		cardsPlayedBuf:         make([]card.Card, 0, maxAttackers),
@@ -1379,13 +1372,11 @@ func (ctx *sequenceContext) bestSequence(attackers, winnerOrderOut []card.Card, 
 		}
 		return 0, ctx.runechantCarryover, true
 	}
-	perm := ctx.bufs.perm[:n]
+	pcBuf := ctx.bufs.pcBuf[:n]
 	permMeta := ctx.bufs.permMeta[:n]
-	permFromArsenal := ctx.bufs.permFromArsenal[:n]
-	copy(perm, attackers)
 	for idx, c := range attackers {
 		permMeta[idx] = attackerMetaPtrFor(c)
-		permFromArsenal[idx] = idx == ctx.arsenalInIdx
+		pcBuf[idx] = card.CardState{Card: c, FromArsenal: idx == ctx.arsenalInIdx}
 	}
 
 	// Scratch buffers are playSequence's per-card outputs, overwritten every permutation. On a
@@ -1407,7 +1398,7 @@ func (ctx *sequenceContext) bestSequence(attackers, winnerOrderOut []card.Card, 
 	foundLegal := false
 	ctx.drawnWinner = ctx.drawnWinner[:0]
 	eval := func() {
-		dmg, leftoverRunechants, _, legal := ctx.playSequenceWithMeta(perm, scratch, triggerScratch)
+		dmg, leftoverRunechants, _, legal := ctx.playSequenceWithMeta(n, scratch, triggerScratch)
 		if !legal {
 			return
 		}
@@ -1418,7 +1409,9 @@ func (ctx *sequenceContext) bestSequence(attackers, winnerOrderOut []card.Card, 
 			foundLegal = true
 			ctx.drawnWinner = append(ctx.drawnWinner[:0], ctx.bufs.state.Drawn...)
 			if winnerOrderOut != nil {
-				copy(winnerOrderOut[:n], perm)
+				for i := 0; i < n; i++ {
+					winnerOrderOut[i] = pcBuf[i].Card
+				}
 			}
 			if perCardOut != nil {
 				copy(perCardOut[:n], scratch)
@@ -1430,20 +1423,19 @@ func (ctx *sequenceContext) bestSequence(attackers, winnerOrderOut []card.Card, 
 	}
 	eval()
 	// Heap's algorithm, iterative: c[] counts how many times each stack frame has iterated.
-	// perm, permMeta, and permFromArsenal swap together so playSequence sees meta and arsenal
-	// provenance aligned with the permutation.
+	// pcBuf and permMeta swap together so playSequenceWithMeta sees meta aligned with the
+	// current permutation. FromArsenal rides inside pcBuf (one byte), so it permutes for free;
+	// no separate permFromArsenal slice to maintain.
 	var c [8]int
 	i := 0
 	for i < n {
 		if c[i] < i {
 			if i&1 == 0 {
-				perm[0], perm[i] = perm[i], perm[0]
+				pcBuf[0], pcBuf[i] = pcBuf[i], pcBuf[0]
 				permMeta[0], permMeta[i] = permMeta[i], permMeta[0]
-				permFromArsenal[0], permFromArsenal[i] = permFromArsenal[i], permFromArsenal[0]
 			} else {
-				perm[c[i]], perm[i] = perm[i], perm[c[i]]
+				pcBuf[c[i]], pcBuf[i] = pcBuf[i], pcBuf[c[i]]
 				permMeta[c[i]], permMeta[i] = permMeta[i], permMeta[c[i]]
-				permFromArsenal[c[i]], permFromArsenal[i] = permFromArsenal[i], permFromArsenal[c[i]]
 			}
 			eval()
 			c[i]++
@@ -1483,29 +1475,26 @@ func (ctx *sequenceContext) bestSequence(attackers, winnerOrderOut []card.Card, 
 // attributes amortises across the N! permutations it evaluates.
 func (ctx *sequenceContext) playSequence(order []card.Card, perCardOut, perCardTriggerOut []float64) (damage int, leftoverRunechants int, residualBudget int, legal bool) {
 	ctx.seedState()
-	meta := ctx.bufs.permMeta[:len(order)]
-	permFromArsenal := ctx.bufs.permFromArsenal[:len(order)]
+	n := len(order)
+	pcBuf := ctx.bufs.pcBuf
+	meta := ctx.bufs.permMeta[:n]
 	for i, c := range order {
 		meta[i] = attackerMetaPtrFor(c)
-		permFromArsenal[i] = i == ctx.arsenalInIdx
+		pcBuf[i] = card.CardState{Card: c, FromArsenal: i == ctx.arsenalInIdx}
 	}
-	return ctx.playSequenceWithMeta(order, perCardOut, perCardTriggerOut)
+	return ctx.playSequenceWithMeta(n, perCardOut, perCardTriggerOut)
 }
 
-// playSequenceWithMeta runs a specific attacker ordering. Assumes ctx.bufs.permMeta[:len(order)]
-// holds metadata aligned with order; the caller keeps them in lockstep (bestSequence swaps meta
-// whenever it swaps perm).
-func (ctx *sequenceContext) playSequenceWithMeta(order []card.Card, perCardOut, perCardTriggerOut []float64) (damage int, leftoverRunechants int, residualBudget int, legal bool) {
-	n := len(order)
+// playSequenceWithMeta runs the permutation currently held in ctx.bufs.pcBuf[:n] (with aligned
+// permMeta[:n]). bestSequence keeps the two in lockstep as it swaps perm entries — the full
+// CardState (Card + FromArsenal) persists across permutations, so only GrantedGoAgain needs a
+// per-permutation reset. Cards' Play is the only thing that flips it.
+func (ctx *sequenceContext) playSequenceWithMeta(n int, perCardOut, perCardTriggerOut []float64) (damage int, leftoverRunechants int, residualBudget int, legal bool) {
 	pcBuf := ctx.bufs.pcBuf
 	ptrBuf := ctx.bufs.ptrBuf
 	meta := ctx.bufs.permMeta[:n]
-	permFromArsenal := ctx.bufs.permFromArsenal[:n]
-	// ptrBuf entries point at the matching pcBuf slots permanently (wired once in newAttackBufs),
-	// so only the per-permutation Card and the zeroed GrantedGoAgain / FromArsenal need
-	// refreshing here.
-	for i, c := range order {
-		pcBuf[i] = card.CardState{Card: c, FromArsenal: permFromArsenal[i]}
+	for i := 0; i < n; i++ {
+		pcBuf[i].GrantedGoAgain = false
 		if perCardOut != nil {
 			perCardOut[i] = 0
 		}
