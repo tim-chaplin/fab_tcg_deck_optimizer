@@ -1,0 +1,155 @@
+name: Iterate sweep
+
+# Parallel hill-climb sweep on GitHub-hosted runners. Spawns `N` iterate workers in a matrix —
+# each with a distinct seed — lets them run for up to 5 hours, then uploads every worker's final
+# deck as an artifact. A final aggregation job downloads everything and ranks by avg so you can
+# spot the best runs without SSH'ing anywhere.
+#
+# Manual trigger only: `gh workflow run iterate-sweep.yml -f num_seeds=100 -f incoming=7` (or use
+# the GitHub UI). Defaults target a modest 10-worker sweep so a stray run doesn't park minutes.
+# Free-tier public-repo accounts cap concurrent runners at ~20, so `num_seeds > 20` will queue.
+
+on:
+  workflow_dispatch:
+    inputs:
+      num_seeds:
+        description: "Number of parallel iterate workers (each gets a distinct seed)."
+        required: true
+        default: "10"
+      incoming:
+        description: "-incoming damage per turn"
+        required: true
+        default: "7"
+      deck_size:
+        description: "-deck-size"
+        required: true
+        default: "40"
+      max_copies:
+        description: "-max-copies"
+        required: true
+        default: "2"
+      shallow_shuffles:
+        description: "-shallow-shuffles"
+        required: true
+        default: "100"
+      deep_shuffles:
+        description: "-deep-shuffles"
+        required: true
+        default: "10000"
+      format:
+        description: "-format"
+        required: true
+        default: "silver_age"
+      runtime_minutes:
+        description: "Per-worker wall-clock cap (minutes). Iterate exits cleanly on natural convergence; this bounds runaway jobs so the matrix still finishes within GitHub's 6h job limit with headroom for upload."
+        required: true
+        default: "300"
+
+jobs:
+  plan:
+    runs-on: ubuntu-latest
+    outputs:
+      seeds: ${{ steps.gen.outputs.seeds }}
+    steps:
+      - id: gen
+        # JSON array [1, 2, ..., num_seeds] consumed by the matrix below. Bash `seq` is the
+        # simplest way; wrap with brackets for valid JSON.
+        run: |
+          echo "seeds=[$(seq -s, 1 ${{ inputs.num_seeds }})]" >> "$GITHUB_OUTPUT"
+
+  iterate:
+    needs: plan
+    runs-on: ubuntu-latest
+    timeout-minutes: 350
+    strategy:
+      fail-fast: false
+      matrix:
+        seed: ${{ fromJSON(needs.plan.outputs.seeds) }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+          cache: true
+
+      - name: Run iterate
+        # `timeout` bounds the worker at runtime_minutes so every job finishes inside the GitHub
+        # 6h cap even without natural convergence. iterate saves to mydecks/<name>.json on every
+        # improvement, so a SIGTERM leaves the latest best deck on disk. `|| true` keeps the step
+        # green on a timeout exit (124) so the upload step still runs.
+        run: |
+          set -x
+          mkdir -p mydecks
+          timeout ${{ inputs.runtime_minutes }}m go run ./cmd/fabsim iterate \
+            -seed ${{ matrix.seed }} \
+            -deck seed-${{ matrix.seed }} \
+            -incoming ${{ inputs.incoming }} \
+            -deck-size ${{ inputs.deck_size }} \
+            -max-copies ${{ inputs.max_copies }} \
+            -shallow-shuffles ${{ inputs.shallow_shuffles }} \
+            -deep-shuffles ${{ inputs.deep_shuffles }} \
+            -format ${{ inputs.format }} \
+            < /dev/null \
+            || true
+
+      - name: Upload deck artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: deck-seed-${{ matrix.seed }}
+          path: mydecks/seed-${{ matrix.seed }}.json
+          if-no-files-found: warn
+          retention-days: 30
+
+  aggregate:
+    needs: iterate
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+          cache: true
+
+      - name: Download all deck artifacts
+        uses: actions/download-artifact@v4
+        with:
+          # Flattens every `deck-seed-<N>` artifact into mydecks/ so ranking sees one flat dir.
+          pattern: deck-seed-*
+          path: mydecks
+          merge-multiple: true
+
+      - name: List collected decks
+        run: ls -la mydecks/
+
+      - name: Rank decks by avg
+        # jq scans every JSON, pulls the seed from the filename and the avg from Stats, and
+        # emits a sorted table. Cheap and doesn't require rebuilding the program.
+        run: |
+          set -eu
+          python3 - <<'PY'
+          import json, os, glob
+          rows = []
+          for p in sorted(glob.glob("mydecks/seed-*.json")):
+              with open(p) as f:
+                  d = json.load(f)
+              stats = d.get("Stats", {}) or {}
+              total = stats.get("TotalValue", 0.0) or 0.0
+              hands = stats.get("Hands", 0) or 0
+              avg = (total / hands) if hands else 0.0
+              rows.append((os.path.basename(p), avg, hands, stats.get("Runs", 0)))
+          rows.sort(key=lambda r: r[1], reverse=True)
+          print(f"{'deck':<32} {'avg':>8} {'hands':>10} {'runs':>8}")
+          for name, avg, hands, runs in rows:
+              print(f"{name:<32} {avg:>8.3f} {hands:>10} {runs:>8}")
+          PY
+
+      - name: Upload ranked summary
+        uses: actions/upload-artifact@v4
+        with:
+          name: sweep-summary
+          path: mydecks/
+          retention-days: 30
