@@ -4,6 +4,12 @@ A deck-finding tool for the Flesh and Blood TCG, written in Go.
 
 Built with Claude Code Opus.
 
+## Goal
+
+Find optimal deck lists under a given set of assumptions. I model a deck's value as the average
+value produced by each hand over many plays through the deck. A hand's value is the sum of damage
+dealt, and damage prevented.
+
 ## FAQ
 
 ### So are these AI-generated decks?
@@ -35,49 +41,30 @@ No.
   almost immediately.
 - Mauvrion Skies wants all six copies. Across seeds and starting decks the optimizer tends to
   fill all six legal slots (two each of red / yellow / blue).
-- Card draw is strong even when the drawn card can't be played this turn. The current simulator
-  is deliberately conservative about mid-turn draws — drawn cards don't pitch or extend the
-  chain on the same turn; they only carry forward as Held / Arsenal. Even with card draw being
-  undervalued in the simulation (because we never even consider lines where the card is played
-  the same turn it's drawn), the optimizer keeps converging on Drawn to the Dark Dimension and
-  Snatch.
-
-## Goal
-
-Find optimal deck lists for **goldfishing** — i.e. maximizing a deck's own output in a vacuum,
-without modeling a live opponent. The simulator partitions each drawn hand into its best Pitch /
-Attack / Defend split and reports aggregate value across many shuffles.
+- Even with card draw being undervalued in the simulation (because we never even consider lines
+  where the card is played the same turn it's drawn), the optimizer keeps converging on Drawn to
+  the Dark Dimension and Snatch.
 
 ## Scope & limitations
 
 This is a work in progress. The current model is deliberately narrow:
 
-- **Hero pool.** Only cards legal for **Viserai in the Silver Age** are in scope. Other heroes /
-  talents / formats aren't modeled yet.
-- **Turns are evaluated in isolation.** There is no between-turn state — no arsenal, no
-  persistent auras carrying over, no health totals, no deck thinning effects that span turns.
-  Each hand is solved as a standalone puzzle.
+- **Hero pool.** Only cards legal for Viserai in Silver Age are modeled.
 - **No opponent counterplay.** The opponent is represented by a single configurable `-incoming`
   value: a static amount of damage per turn that the hand can defend against. There are no
   blocks from hand, no disruption, no reaction windows. This is the goldfishing assumption.
-- **Simplified card effects.** Conditional bonuses are modeled where tractable (e.g. Runechant
-  tokens count as +1 damage, "if hits" is assumed, "next Runeblade attack" riders peek forward
-  via `CardsRemaining`). Effects that require deck / graveyard / multi-turn state are
-  approximated as 0 or omitted.
-- **Card coverage is incomplete.** Most of the Runeblade Silver-Age pool and some Generics are
-  implemented; the rest are stubbed or missing.
+- **Card coverage is incomplete.** Most Runeblade and Generic Silver Age cards are implemented, but
+    many are still stubs, or simplified.
 
-## What it does today
+## How it works
 
 - Loads a 40-card deck from `mydecks/<name>.json`.
 - Shuffles and repeatedly draws hands of 4 cards.
 - For each hand, brute-forces the optimal play: every partition of the hand into Pitch / Attack
   / Defend, every weapon-swing subset, every legal attack ordering (respecting Go again). Hand
   value = damage dealt + damage prevented (capped at `-incoming`).
-- Per FaB rules, pitched cards return to the bottom of the deck; attacked and defended cards
-  are spent. The simulation runs until fewer than 4 cards remain.
-- Reports the overall average hand value, plus the averages for the first and second cycle
-  through the deck.
+- After shuffling and drawing through the deck a certain number of times, assigns it a score.
+- Generates new decks by randomly swapping out cards, and saving the deck with the higher score.
 
 ## Usage
 
@@ -116,15 +103,16 @@ is optional.
 
 ### Suggested workflow
 
-Start with annealing to escape weak local maxima, then re-anneal repeatedly to probe the
-neighbourhood of each new best:
+Choose an amount of incoming damage per turn (basically your tuning knob for how aggressive vs.
+defensive the deck will be). Run in continuous annealing mode to look for the best deck for the
+chosen assumption:
 
 ```
-go run ./cmd/fabsim anneal -start-temp 1 -incoming 7
 ./scripts/anneal-reanneal.ps1 -Deck viserai_silver_age_7_incoming -StartTemp 1 -Incoming 7
 ```
 
-Or fan out across several independent starts and rank the results:
+Or fan out across several independent starts for potentially better coverage of the solution space,
+and rank the results:
 
 ```
 ./scripts/anneal-restarts.ps1 -N 10 -DeckTemplate 'viserai_*' -Incoming 7 -StartTemp 1
