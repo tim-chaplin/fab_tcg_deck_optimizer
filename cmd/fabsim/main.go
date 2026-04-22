@@ -50,8 +50,6 @@ func main() {
 	debug := flag.Bool("debug", false, "emit extra diagnostic output (e.g. memo cache size between iterate rounds)")
 	reevaluate := flag.Bool("reevaluate", false, "iterate: force re-evaluation of the loaded deck's baseline avg, even if its prior run count already matches -deep-shuffles. Use after adjusting modelling assumptions or fixing bugs that may have shifted the deck's true score.")
 	finalize := flag.Bool("finalize", false, "iterate: high-precision pass — overrides -shallow-shuffles to 10000 and -deep-shuffles to 100000. Use on a deck that's already converged to squeeze out the remaining sub-percent improvements.")
-	nRestarts := flag.Int("N", 1, "iterate: number of independent hill-climb restarts. Each run resolves -deck-template's * to a number 1..N; already-converged decks on disk are loaded and pass through one no-op round. Restarts escape the local maxima single-start iterate gets stuck in.")
-	deckTemplate := flag.String("deck-template", "", "iterate: deck-name pattern with exactly one * placeholder, resolved to 1..N on each restart (e.g. \"viserai_*\" → viserai_1, viserai_2, …). Required when -N > 1 and mutually exclusive with -deck.")
 	flag.Parse()
 	if *finalize {
 		if subcommand != "iterate" {
@@ -59,23 +57,6 @@ func main() {
 		}
 		*shallowShuffles = 10000
 		*deepShuffles = 100000
-	}
-	if *nRestarts < 1 {
-		die("-N must be ≥ 1 (got %d)", *nRestarts)
-	}
-	if *nRestarts > 1 || *deckTemplate != "" {
-		if subcommand != "iterate" {
-			die("-N and -deck-template are only valid with the iterate subcommand")
-		}
-		if *deckTemplate == "" {
-			die("-N > 1 requires -deck-template")
-		}
-		if *deckName != "" {
-			die("-deck and -deck-template are mutually exclusive")
-		}
-		if strings.Count(*deckTemplate, "*") != 1 {
-			die("-deck-template must contain exactly one * placeholder (got %q)", *deckTemplate)
-		}
 	}
 	// Reject positional args after the subcommand so `fabsim eval mydeck` errors instead of
 	// silently ignoring the deck name. The diff subcommand consumes exactly two positional
@@ -127,22 +108,16 @@ func main() {
 		reevaluate:      *reevaluate,
 	}
 
-	if subcommand != "iterate" || *deckTemplate == "" {
-		outPath, err := mydecks.Path(*deckName)
-		if err != nil {
-			die("%v", err)
-		}
-		cfg.outPath = outPath
+	outPath, err := mydecks.Path(*deckName)
+	if err != nil {
+		die("%v", err)
 	}
+	cfg.outPath = outPath
 
 	switch subcommand {
 	case "random":
 		runRandom(cfg)
 	case "iterate":
-		if *deckTemplate != "" {
-			runIterateRestarts(cfg, *deckTemplate, *nRestarts)
-			return
-		}
 		runIterate(cfg)
 	case "eval":
 		runEval(cfg)
