@@ -1,4 +1,4 @@
-# iterate-reanneal.ps1 — run simulated-annealing iterate on the same deck over and over, each
+# iterate-reanneal.ps1 - run simulated-annealing iterate on the same deck over and over, each
 # pass starting from the current on-disk best. Stops only when you Ctrl-C.
 #
 # Every pass invokes `go run ./cmd/fabsim iterate -deck <Deck> -start-temp <T> ...`. iterate
@@ -42,7 +42,7 @@ if (Test-Path $deckPath) {
 }
 
 Write-Host "=== iterate-reanneal: $Deck, startTemp=$StartTemp, incoming=$Incoming ==="
-Write-Host ("Starting from {0:F3} — Ctrl-C to stop.`n" -f $bestSeen)
+Write-Host ("Starting from {0:F3} - Ctrl-C to stop.`n" -f $bestSeen)
 
 $pass = 0
 while ($true) {
