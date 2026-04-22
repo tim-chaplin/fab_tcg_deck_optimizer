@@ -5,52 +5,13 @@ import (
 	"fmt"
 	"math/rand"
 	"os"
-	"strconv"
-	"strings"
 	"sync/atomic"
 	"time"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/deck"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/hand"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/hero"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/mydecks"
 )
-
-// runIterateRestarts runs the hill climb N times from independent starts, resolving template's
-// single '*' to 1..N for each deck name. Each run loads the deck at mydecks/<name>.json if one
-// exists (so interrupted sessions resume without losing work — an already-converged deck
-// passes through one no-op round), or generates a fresh random starting deck when missing.
-// Prints a final ranking across all restarts.
-func runIterateRestarts(cfg config, template string, n int) {
-	type result struct {
-		deckName string
-		avg      float64
-	}
-	results := make([]result, 0, n)
-	for i := 1; i <= n; i++ {
-		deckName := strings.Replace(template, "*", strconv.Itoa(i), 1)
-		outPath, err := mydecks.Path(deckName)
-		if err != nil {
-			die("%v", err)
-		}
-		fmt.Fprintf(os.Stderr, "\n=== Restart %d/%d: %s ===\n", i, n, deckName)
-		cfg.outPath = outPath
-		avg := runIterate(cfg)
-		results = append(results, result{deckName: deckName, avg: avg})
-	}
-
-	fmt.Fprintln(os.Stderr, "\n=== Restart ranking ===")
-	for _, r := range results {
-		fmt.Fprintf(os.Stderr, "  %-40s avg %.3f\n", r.deckName, r.avg)
-	}
-	var best result
-	for i, r := range results {
-		if i == 0 || r.avg > best.avg {
-			best = r
-		}
-	}
-	fmt.Fprintf(os.Stderr, "\nBest: %s (avg %.3f)\n", best.deckName, best.avg)
-}
 
 func runIterate(cfg config) float64 {
 	rng := rand.New(rand.NewSource(cfg.seed))
