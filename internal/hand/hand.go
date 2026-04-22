@@ -923,11 +923,14 @@ func (e *Evaluator) bestUncached(hero hero.Hero, weapons []weapon.Weapon, hand [
 			if !roleAllowed(r, isArsenalSlot, isDR[i]) {
 				continue
 			}
-			// When no damage is coming in, a non-DR card's Defend contributes 0 — same as Held.
-			// The two partitions produce identical Value / leftover / tiebreaker state, so skip
-			// the Defend branch and let the Held branch stand in. DR cards still need Defend
-			// because their Play damage is gated on the Defend role.
-			if r == Defend && incomingDamage == 0 && !isDR[i] {
+			// With no damage coming in and no Defense Reactions in the hand, a non-DR card's
+			// Defend contribution is 0 — same as Held — and nothing scans the defender set,
+			// so the two partitions produce the same Value / leftover / delayedPlayed and
+			// Held wins the arsenal-occupancy tiebreaker. Skip the dominated Defend branch.
+			// DR-present hands keep Defend because DR Play effects scan defenders as a
+			// graveyard seed (e.g. Weeping Battleground banishing an aura a non-DR blocker
+			// put there).
+			if r == Defend && incomingDamage == 0 && !isDR[i] && !hasReactions {
 				continue
 			}
 			rolesBuf[i] = r
