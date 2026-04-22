@@ -924,3 +924,97 @@ func IterateParallel(
 		return nil, bestAvg, -1, false
 	}
 }
+
+// IterateParallelBest is the steepest-ascent variant of IterateParallel: instead of adopting
+// the first deep-confirmed improvement and cancelling, workers drain the full mutation queue
+// and the global best is returned at the end. Each worker's shallow screen compares against
+// the running global best (not the starting baseline) so mutations that can't beat an in-
+// progress improvement skip their deep confirm. Trade-off: longer per-round wall-time because
+// every mutation gets a shallow screen, versus potentially fewer rounds because each round
+// moves further and converges toward higher local maxima.
+//
+// Return contract matches IterateParallel: (*Deck, newAvg, mutationIndex, true) on success,
+// (nil, bestAvg, -1, false) when no mutation beat the baseline or ctx was cancelled.
+func IterateParallelBest(
+	ctx context.Context,
+	mutations []Mutation,
+	bestAvg float64,
+	shallowShuffles, deepShuffles, incoming, numWorkers int,
+	seed int64,
+	shallowCompleted *atomic.Int64,
+	deepsCompleted *atomic.Int64,
+) (*Deck, float64, int, bool) {
+	if numWorkers <= 0 {
+		numWorkers = runtime.GOMAXPROCS(0)
+	}
+	if len(mutations) == 0 {
+		return nil, bestAvg, -1, false
+	}
+
+	jobs := make(chan int, len(mutations))
+	for i := range mutations {
+		jobs <- i
+	}
+	close(jobs)
+
+	// Shared running-best state. A mutex is fine: updates are rare (only when deepAvg beats
+	// the current best) and shallow reads pay ~20ns of lock overhead per mutation — negligible
+	// next to the shuffle evaluation itself. Workers read currentBest inside the loop so the
+	// shallow screen's threshold climbs as improvements land.
+	var mu sync.Mutex
+	currentBest := bestAvg
+	var bestDeck *Deck
+	bestIdx := -1
+
+	var wg sync.WaitGroup
+	for w := 0; w < numWorkers; w++ {
+		wg.Add(1)
+		go func(workerIdx int) {
+			defer wg.Done()
+			ev := hand.NewEvaluator()
+			shallowRng := rand.New(rand.NewSource(seed + int64(workerIdx)))
+			deepRng := rand.New(rand.NewSource(seed ^ (int64(workerIdx)+1)*int64(0x9e3779b9)))
+			for i := range jobs {
+				if ctx.Err() != nil {
+					return
+				}
+				mut := mutations[i]
+				d := New(mut.Deck.Hero, mut.Deck.Weapons, mut.Deck.Cards)
+				shallowAvg := d.EvaluateWith(shallowShuffles, incoming, shallowRng, ev).Mean()
+				if shallowCompleted != nil {
+					shallowCompleted.Add(1)
+				}
+				mu.Lock()
+				threshold := currentBest
+				mu.Unlock()
+				if shallowAvg <= threshold {
+					continue
+				}
+				if ctx.Err() != nil {
+					return
+				}
+				dd := New(mut.Deck.Hero, mut.Deck.Weapons, mut.Deck.Cards)
+				deepAvg := dd.EvaluateWith(deepShuffles, incoming, deepRng, ev).Mean()
+				if deepsCompleted != nil {
+					deepsCompleted.Add(1)
+				}
+				mu.Lock()
+				if deepAvg > currentBest {
+					currentBest = deepAvg
+					bestDeck = dd
+					bestIdx = i
+				}
+				mu.Unlock()
+			}
+		}(w)
+	}
+	wg.Wait()
+
+	if ctx.Err() != nil {
+		return nil, bestAvg, -1, false
+	}
+	if bestDeck == nil {
+		return nil, bestAvg, -1, false
+	}
+	return bestDeck, currentBest, bestIdx, true
+}

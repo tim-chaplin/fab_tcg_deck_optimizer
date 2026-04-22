@@ -52,6 +52,7 @@ func main() {
 	finalize := flag.Bool("finalize", false, "iterate: high-precision pass — overrides -shallow-shuffles to 10000 and -deep-shuffles to 100000. Use on a deck that's already converged to squeeze out the remaining sub-percent improvements.")
 	nRestarts := flag.Int("N", 1, "iterate: number of independent hill-climb restarts. Each run resolves -deck-template's * to a number 1..N; already-converged decks on disk are loaded and pass through one no-op round. Restarts escape the local maxima single-start iterate gets stuck in.")
 	deckTemplate := flag.String("deck-template", "", "iterate: deck-name pattern with exactly one * placeholder, resolved to 1..N on each restart (e.g. \"viserai_*\" → viserai_1, viserai_2, …). Required when -N > 1 and mutually exclusive with -deck.")
+	bestOfRound := flag.Bool("best-of-round", false, "iterate: take the single highest-avg deep-confirmed improvement per round instead of the first one that passes. Trades longer per-round wall-time for a shorter overall climb and — potentially — a higher final local maximum.")
 	flag.Parse()
 	if *finalize {
 		if subcommand != "iterate" {
@@ -125,6 +126,7 @@ func main() {
 		format:          fmtValue,
 		debug:           *debug,
 		reevaluate:      *reevaluate,
+		bestOfRound:     *bestOfRound,
 	}
 
 	if subcommand != "iterate" || *deckTemplate == "" {
@@ -206,6 +208,9 @@ type config struct {
 	format          fmtpkg.Format
 	debug           bool
 	reevaluate      bool
+	// bestOfRound switches iterate to steepest-ascent (IterateParallelBest) per round. When
+	// false, iterate uses the first-found mode (IterateParallel).
+	bestOfRound bool
 }
 
 // legalFilter returns the card-pool predicate for this run's format. fabsim always runs under

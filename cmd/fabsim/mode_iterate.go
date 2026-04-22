@@ -83,7 +83,11 @@ func runIterate(cfg config) float64 {
 
 		var tested, deepsDone atomic.Int64
 		stopTicker := startRoundTicker(round, len(mutations), start, &tested, &deepsDone)
-		d, avg, idx, found := deck.IterateParallel(
+		iter := deck.IterateParallel
+		if cfg.bestOfRound {
+			iter = deck.IterateParallelBest
+		}
+		d, avg, idx, found := iter(
 			ctx, mutations, bestAvg, cfg.shallowShuffles, cfg.deepShuffles, cfg.incoming, 0,
 			rng.Int63(), &tested, &deepsDone,
 		)
