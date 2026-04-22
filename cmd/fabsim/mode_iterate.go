@@ -47,6 +47,17 @@ func runIterate(cfg config) float64 {
 		}
 		hand.ClearMemo()
 		mutations := deck.AllMutations(current, cfg.maxCopies, cfg.legalFilter())
+		if cfg.startTemp > 0 {
+			// AllMutations sorts weakest-card-first so a first-found classical climb tries the
+			// highest-expected-gain swaps early. Under annealing that same bias means the
+			// probabilistic acceptances disproportionately hit mutations against the weakest
+			// card in the deck — shrinking the slice of the solution space the walk actually
+			// explores. Shuffling each round gives every mutation an even shot at being the
+			// first one accepted at the current temperature.
+			rng.Shuffle(len(mutations), func(i, j int) {
+				mutations[i], mutations[j] = mutations[j], mutations[i]
+			})
+		}
 		tempLabel := ""
 		if temperature > 0 {
 			tempLabel = fmt.Sprintf(" (T=%.4f)", temperature)
