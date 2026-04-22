@@ -2,16 +2,134 @@ package main
 
 import (
 	"context"
+	"flag"
 	"fmt"
 	"math/rand"
 	"os"
+	"strings"
 	"sync/atomic"
 	"time"
 
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/deck"
+	fmtpkg "github.com/tim-chaplin/fab-deck-optimizer/internal/format"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/hand"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/hero"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/mydecks"
 )
+
+// annealConfig bundles the knobs runAnneal needs. Built by runAnnealCmd from its flag.FlagSet;
+// kept package-local to the anneal subcommand because no other command shares this surface.
+type annealConfig struct {
+	shallowShuffles int
+	deepShuffles    int
+	incoming        int
+	deckSize        int
+	maxCopies       int
+	seed            int64
+	outPath         string
+	format          fmtpkg.Format
+	debug           bool
+	reevaluate      bool
+	// startTemp / tempDecay / minTemp are the simulated-annealing knobs. startTemp of 0
+	// degenerates to the classical hill-climb (strict > baseline acceptance).
+	startTemp float64
+	tempDecay float64
+	minTemp   float64
+	// quietLoad suppresses the baseline card-list dump in prepareBaseline. Set by wrapper
+	// scripts that re-invoke anneal repeatedly on the same deck; the listing is unchanging
+	// noise after the first pass.
+	quietLoad bool
+}
+
+// legalFilter returns the card-pool predicate for this run's format. anneal always runs under a
+// format, so this is non-nil; the deck package accepts nil for "no filtering" generally.
+func (c annealConfig) legalFilter() func(card.Card) bool {
+	return c.format.IsLegal
+}
+
+// defaultDeckNameFor returns the deck name when -deck isn't supplied, keyed by hero, format, and
+// -incoming. Different regimes produce different optimal decks, so each gets its own file to
+// avoid hill-climbing one regime's best under another regime's objective.
+func defaultDeckNameFor(h hero.Hero, f fmtpkg.Format, incoming int) string {
+	return fmt.Sprintf("%s_%s_%d_incoming", strings.ToLower(h.Name()), f, incoming)
+}
+
+// runAnnealCmd parses anneal's flags from args and dispatches to runAnneal. Every anneal-only
+// knob (temperature schedule, shuffle counts, deck-generation constraints, the -deck checkpoint
+// flag) lives on this FlagSet so `fabsim anneal -help` shows exactly the flags that apply here
+// and other subcommands don't have to advertise them.
+func runAnnealCmd(args []string) {
+	fs := flag.NewFlagSet("anneal", flag.ExitOnError)
+	deckName := fs.String("deck", "", "deck name; resolved to mydecks/<name>.json (\".json\" suffix optional). Defaults to <hero>_<format>_<incoming>_incoming so different (hero, format, -incoming) regimes keep separate deck files. When the named deck exists, anneal resumes from it as a checkpoint.")
+	shallowShuffles := fs.Int("shallow-shuffles", 100, "shuffles per deck used to screen mutations before deep confirmation")
+	deepShuffles := fs.Int("deep-shuffles", 10000, "shuffles per deck used to confirm improvements and to baseline loaded decks")
+	incoming := fs.Int("incoming", 0, "opponent damage per turn")
+	deckSize := fs.Int("deck-size", 40, "number of cards per deck")
+	maxCopies := fs.Int("max-copies", 2, "maximum copies of any single card printing per deck")
+	seed := fs.Int64("seed", time.Now().UnixNano(), "RNG seed")
+	formatFlag := fs.String("format", string(fmtpkg.SilverAge), "constructed format whose banlist restricts the card pool during search (only \"silver_age\" is supported today)")
+	debug := fs.Bool("debug", false, "emit extra diagnostic output (e.g. memo cache size between rounds)")
+	reevaluate := fs.Bool("reevaluate", false, "force re-evaluation of the loaded deck's baseline avg, even if its prior run count already matches -deep-shuffles. Use after adjusting modelling assumptions or fixing bugs that may have shifted the deck's true score.")
+	finalize := fs.Bool("finalize", false, "high-precision pass — overrides -shallow-shuffles to 10000 and -deep-shuffles to 100000. Use on a deck that's already converged to squeeze out the remaining sub-percent improvements.")
+	startTemp := fs.Float64("start-temp", 0, "simulated-annealing starting temperature. 0 (default) runs a pure hill climb. Higher values probabilistically accept worse mutations early; acceptance probability is exp((avg - baseline) / T). Good starting range is ~0.05–0.5 given typical Value units.")
+	tempDecay := fs.Float64("temp-decay", 0.95, "multiplicative cooling per acceptance — T ← T × decay, floored at -min-temp. Unused when -start-temp is 0.")
+	minTemp := fs.Float64("min-temp", 0, "minimum temperature. Once T reaches this floor the climb becomes greedy until a local maximum is found. 0 disables annealing in the converged tail.")
+	quietLoad := fs.Bool("quiet-load", false, "skip the baseline card-list dump at startup. Intended for wrapper scripts (e.g. anneal-reanneal.ps1) that re-invoke anneal many times on the same deck — the listing never changes pass-to-pass and floods the log.")
+	_ = parseFlagsAnywhere(fs, args)
+	if fs.NArg() > 0 {
+		die("anneal: unexpected positional argument(s): %v (did you mean -deck %s?)", fs.Args(), fs.Args()[0])
+	}
+
+	fmtValue, err := fmtpkg.Parse(*formatFlag)
+	if err != nil {
+		die("%v", err)
+	}
+
+	// -finalize is a convenience shorthand: it ratchets the shuffle counts up to high-precision
+	// values rather than adding orthogonal behavior, so it's applied as a post-parse override
+	// rather than threaded into annealConfig.
+	if *finalize {
+		*shallowShuffles = 10000
+		*deepShuffles = 100000
+	}
+
+	name := *deckName
+	if name == "" {
+		name = defaultDeckNameFor(hero.Viserai{}, fmtValue, *incoming)
+	}
+	outPath, err := mydecks.Path(name)
+	if err != nil {
+		die("%v", err)
+	}
+
+	cfg := annealConfig{
+		shallowShuffles: *shallowShuffles,
+		deepShuffles:    *deepShuffles,
+		incoming:        *incoming,
+		deckSize:        *deckSize,
+		maxCopies:       *maxCopies,
+		seed:            *seed,
+		outPath:         outPath,
+		format:          fmtValue,
+		debug:           *debug,
+		reevaluate:      *reevaluate,
+		startTemp:       *startTemp,
+		tempDecay:       *tempDecay,
+		minTemp:         *minTemp,
+		quietLoad:       *quietLoad,
+	}
+
+	// Print the session-level delta (starting best vs final best) on any exit path, then
+	// surface abort via a non-zero exit so wrapper scripts (anneal-reanneal.ps1 et al.) can
+	// tell Enter-initiated termination from natural convergence and stop looping.
+	res := runAnneal(cfg)
+	fmt.Fprintf(os.Stderr, "\nSession summary: avg %.3f → %.3f (%+.3f)\n",
+		res.startingAvg, res.bestEverAvg, res.bestEverAvg-res.startingAvg)
+	if res.aborted {
+		os.Exit(130)
+	}
+}
 
 // annealResult carries the outcome of a single runAnneal pass. aborted is true when the
 // user hit Enter (stdin watcher fired) — callers propagate this up to main so the process
@@ -23,7 +141,7 @@ type annealResult struct {
 	aborted     bool
 }
 
-func runAnneal(cfg config) annealResult {
+func runAnneal(cfg annealConfig) annealResult {
 	rng := rand.New(rand.NewSource(cfg.seed))
 
 	current, currentAvg := prepareBaseline(cfg, rng)
@@ -170,7 +288,7 @@ func coolDown(temperature, decay, minTemp float64) float64 {
 // (re-evaluate for an apples-to-apples baseline), -reevaluate set (force re-evaluation even if
 // the run count already matches — for when modelling assumptions changed), or deck already
 // deep-evaluated (use as-is).
-func prepareBaseline(cfg config, rng *rand.Rand) (*deck.Deck, float64) {
+func prepareBaseline(cfg annealConfig, rng *rand.Rand) (*deck.Deck, float64) {
 	best, bestAvg := loadExisting(cfg.outPath)
 	if best == nil {
 		fmt.Fprintf(os.Stderr, "no deck at %s; generating a random starting deck\n", cfg.outPath)
@@ -203,7 +321,7 @@ func prepareBaseline(cfg config, rng *rand.Rand) (*deck.Deck, float64) {
 // maybePrintBaselineCards emits the startup card-list dump unless -quiet-load suppressed it. The
 // leading blank line is part of the listing block, so it's also gated — otherwise -quiet-load
 // would leave a lone empty line hanging after the baseline avg summary.
-func maybePrintBaselineCards(cfg config, d *deck.Deck) {
+func maybePrintBaselineCards(cfg annealConfig, d *deck.Deck) {
 	if cfg.quietLoad {
 		return
 	}

@@ -1,26 +1,34 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"os"
 	"sort"
-
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/mydecks"
 )
+
+// runDiffCmd parses diff's flags (none today) and dispatches to runDiff. Both decks are
+// positional args — diff never creates a deck, so there's no analogue of anneal's -deck
+// checkpoint flag.
+func runDiffCmd(args []string) {
+	fs := flag.NewFlagSet("diff", flag.ExitOnError)
+	fs.Usage = func() {
+		fmt.Fprintln(fs.Output(), "Usage: fabsim diff <deck1> <deck2>")
+	}
+	_ = parseFlagsAnywhere(fs, args)
+	if fs.NArg() != 2 {
+		die("diff: need exactly 2 positional deck names (got %d); try `fabsim diff <deck1> <deck2>`", fs.NArg())
+	}
+	runDiff(fs.Arg(0), fs.Arg(1))
+}
 
 // runDiff loads the two decks at mydecks/<name1>.json and mydecks/<name2>.json and prints the
 // per-card count delta from deck1 to deck2, one line per changed card. Negative rows first,
 // then positives; alphabetical within each group. Cards present in equal counts in both decks
 // are omitted.
 func runDiff(name1, name2 string) {
-	p1, err := mydecks.Path(name1)
-	if err != nil {
-		die("%v", err)
-	}
-	p2, err := mydecks.Path(name2)
-	if err != nil {
-		die("%v", err)
-	}
+	p1 := resolveDeckPath(name1)
+	p2 := resolveDeckPath(name2)
 	d1, _ := loadExisting(p1)
 	if d1 == nil {
 		fmt.Fprintf(os.Stderr, "could not load deck from %s\n", p1)

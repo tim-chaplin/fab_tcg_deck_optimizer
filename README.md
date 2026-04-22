@@ -71,10 +71,15 @@ This is a work in progress. The current model is deliberately narrow:
 `fabsim` takes a subcommand as its first argument. Running `fabsim` with no subcommand prints
 the catalogue.
 
-All subcommands read and write `mydecks/<deck>.json` where `<deck>` comes from `-deck` (default
-`<hero>_<format>_<incoming>_incoming`, e.g. `viserai_silver_age_0_incoming`, so different
-(hero, format, `-incoming`) regimes keep separate deck files). The `.json` suffix on `-deck`
-is optional.
+Deck names are resolved to `mydecks/<name>.json`; the `.json` suffix is optional. Subcommands
+that always operate on a specific deck (`eval`, `print`, `diff`) take the deck name(s) as
+positional arguments. `anneal` uses a `-deck` flag instead because the name can be omitted (the
+default is `<hero>_<format>_<incoming>_incoming`, e.g. `viserai_silver_age_0_incoming`, so
+different (hero, format, `-incoming`) regimes keep separate checkpoints) and the named file
+doubles as a resume point when it already exists.
+
+Each subcommand parses its own flag set, so `fabsim <subcommand> -help` lists exactly the flags
+that apply.
 
 - **`anneal`** — simulated-annealing search on the deck at `-deck`, or on a fresh random deck
   if the file doesn't exist yet. Each round enumerates every single-slot mutation (every
@@ -88,18 +93,17 @@ is optional.
   is treated as a local maximum and anneal exits. Press Enter to abort mid-round (exits 130 so
   wrapper scripts can tell this apart from natural convergence). Only the best-ever deck is
   persisted to disk — walks through worse states under annealing don't regress the JSON.
-- **`eval`** — loads the deck file, simulates it for `-deep-shuffles` hands against
-  `-incoming` damage, and prints the resulting stats. Does **not** overwrite the file — use
-  this to re-score a saved deck at a new shuffle depth or opponent pressure without clobbering
-  whatever's on disk.
-- **`print`** — prints the deck without running any simulation.
+- **`eval`** — `fabsim eval <deck>`. Loads the deck file, simulates it for `-deep-shuffles`
+  hands against `-incoming` damage, and prints the resulting stats. Does **not** overwrite the
+  file — use this to re-score a saved deck at a new shuffle depth or opponent pressure without
+  clobbering whatever's on disk.
+- **`print`** — `fabsim print <deck>`. Prints the deck without running any simulation.
 - **`import`** — interactively imports a deck from fabrary.net. Prompts for a deck name, then
   asks you to paste the plain-text export; input ends automatically at fabrary's
-  `See the full deck @ …` footer. Saves the result as `mydecks/<name>.json`. The `-deck` flag
-  is ignored — the name always comes from the prompt. Cards the optimizer hasn't implemented
-  yet are skipped with a warning rather than blocking the import.
-- **`diff`** — prints the card-count delta between two saved decks. Usage:
-  `fabsim diff <deck1> <deck2>`.
+  `See the full deck @ …` footer. Saves the result as `mydecks/<name>.json`. Cards the
+  optimizer hasn't implemented yet are skipped with a warning rather than blocking the import.
+- **`diff`** — `fabsim diff <deck1> <deck2>`. Prints the card-count delta between two saved
+  decks, or confirms when the card lists are identical.
 
 ### Suggested workflow
 
@@ -123,28 +127,45 @@ re-run indefinitely.
 
 ### Flags
 
-- `-shallow-shuffles` — shuffles per deck when screening anneal mutations (default 100)
-- `-deep-shuffles` — shuffles per deck when confirming anneal improvements and for `eval`
-  (default 10000)
+Each subcommand owns its own flag set; `fabsim <subcommand> -help` is the authoritative list.
+The summary below groups the flags by subcommand.
+
+**`anneal`** (search + resume + re-score the baseline on load):
+
+- `-deck` — checkpoint name; resolved to `mydecks/<name>.json` (default
+  `<hero>_<format>_<incoming>_incoming`, keyed off the hero, format, and `-incoming`). The
+  `mydecks/` directory is created automatically. If the file exists anneal resumes from it.
+- `-shallow-shuffles` — shuffles per deck when screening mutations (default 100)
+- `-deep-shuffles` — shuffles per deck when confirming improvements / baselining the loaded
+  deck (default 10000)
 - `-incoming` — opponent damage per turn (default 0)
-- `-deck-size` — cards per deck (default 40)
+- `-deck-size` — cards per deck, used only for random starting decks (default 40)
 - `-max-copies` — max copies of any single card printing (default 2)
 - `-seed` — RNG seed (default: time-based)
-- `-deck` — deck name; resolved to `mydecks/<name>.json` (default
-  `<hero>_<format>_<incoming>_incoming`, keyed off the hero, format, and `-incoming`). The
-  `mydecks/` directory is created automatically.
 - `-format` — constructed format whose banlist restricts the card pool during search. Defaults
-  to `silver_age`, which is currently the only supported format. The authoritative Silver Age
-  banlist lives at `data_sources/silver_age_banlist.txt`.
-- `-start-temp` — anneal: starting temperature. `0` (default) runs a pure hill climb. Higher
-  values probabilistically accept worse mutations early (Metropolis rule).
-- `-temp-decay` — anneal: multiplicative cooling per acceptance (default 0.95).
-- `-min-temp` — anneal: temperature floor (default 0).
-- `-finalize` — anneal: high-precision pass — overrides `-shallow-shuffles` to 10000 and
+  to `silver_age`, currently the only supported format. The authoritative Silver Age banlist
+  lives at `data_sources/silver_age_banlist.txt`.
+- `-start-temp` — starting temperature. `0` (default) runs a pure hill climb. Higher values
+  probabilistically accept worse mutations early (Metropolis rule).
+- `-temp-decay` — multiplicative cooling per acceptance (default 0.95).
+- `-min-temp` — temperature floor (default 0).
+- `-finalize` — high-precision pass — overrides `-shallow-shuffles` to 10000 and
   `-deep-shuffles` to 100000. Use on a deck that's already converged to squeeze out the
   remaining sub-percent improvements.
-- `-reevaluate` — anneal: force re-evaluation of the loaded deck's baseline avg even if its
-  prior run count already matches `-deep-shuffles`. Use after adjusting modelling assumptions.
+- `-reevaluate` — force re-evaluation of the loaded deck's baseline avg even if its prior run
+  count already matches `-deep-shuffles`. Use after adjusting modelling assumptions.
+- `-quiet-load` — skip the baseline card-list dump at startup. Used by
+  `scripts/anneal-reanneal.ps1` from pass 2 onward so the unchanging listing doesn't flood the
+  log.
+- `-debug` — emit extra diagnostic output (e.g. memo cache size between rounds).
+
+**`eval`** (re-score a deck without overwriting it):
+
+- `-deep-shuffles` — shuffles per deck used for the re-score (default 10000)
+- `-incoming` — opponent damage per turn (default 0)
+- `-seed` — RNG seed (default: time-based)
+
+**`print`**, **`diff`**, **`import`**: no flags; see the usage lines above.
 
 Helper tool for exploring the upstream card database:
 
