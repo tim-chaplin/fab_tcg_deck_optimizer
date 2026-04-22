@@ -13,6 +13,7 @@ import (
 	"sync"
 	"sync/atomic"
 
+	"github.com/klauspost/cpuid/v2"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/cards"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/hand"
@@ -844,7 +845,7 @@ func IterateParallel(
 	deepsCompleted *atomic.Int64,
 ) (*Deck, float64, int, bool) {
 	if numWorkers <= 0 {
-		numWorkers = runtime.GOMAXPROCS(0)
+		numWorkers = defaultWorkers()
 	}
 	if len(mutations) == 0 {
 		return nil, bestAvg, -1, false
@@ -940,6 +941,21 @@ func IterateParallel(
 		}
 		return nil, bestAvg, -1, false
 	}
+}
+
+// defaultWorkers returns the worker count to use when callers pass numWorkers<=0. The workload
+// is purely CPU-bound (shallow/deep sim, zero I/O), so SMT siblings end up fighting for the same
+// cache and execution units rather than adding throughput — benchmarks on an 8-core / 16-thread
+// Ryzen showed ~20% speedup capping at physical cores vs defaulting to GOMAXPROCS. cpuid exposes
+// the physical count portably; we still clamp by GOMAXPROCS so an explicit GOMAXPROCS<physical
+// (user override, container cgroup) wins.
+func defaultWorkers() int {
+	maxProcs := runtime.GOMAXPROCS(0)
+	physical := cpuid.CPU.PhysicalCores
+	if physical <= 0 || physical > maxProcs {
+		return maxProcs
+	}
+	return physical
 }
 
 // acceptMutation implements the Metropolis acceptance rule. Strict improvements (deepAvg >
