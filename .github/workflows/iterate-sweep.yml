@@ -49,13 +49,14 @@ jobs:
   plan:
     runs-on: ubuntu-latest
     outputs:
-      seeds: ${{ steps.gen.outputs.seeds }}
+      workers: ${{ steps.gen.outputs.workers }}
     steps:
       - id: gen
-        # JSON array [1, 2, ..., num_seeds] consumed by the matrix below. Bash `seq` is the
-        # simplest way; wrap with brackets for valid JSON.
+        # JSON array [1, 2, ..., num_seeds] fans out the matrix. The matrix index is just a
+        # worker counter — each worker picks its own random seed at runtime, so the 1..N here
+        # has no semantic meaning beyond "how many workers to spawn".
         run: |
-          echo "seeds=[$(seq -s, 1 ${{ inputs.num_seeds }})]" >> "$GITHUB_OUTPUT"
+          echo "workers=[$(seq -s, 1 ${{ inputs.num_seeds }})]" >> "$GITHUB_OUTPUT"
 
   iterate:
     needs: plan
@@ -64,7 +65,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        seed: ${{ fromJSON(needs.plan.outputs.seeds) }}
+        worker: ${{ fromJSON(needs.plan.outputs.workers) }}
     steps:
       - uses: actions/checkout@v4
 
@@ -72,6 +73,17 @@ jobs:
         with:
           go-version-file: go.mod
           cache: true
+
+      - name: Pick random seed
+        id: seed
+        # /dev/urandom → unsigned 32-bit int. Each worker independently draws its own seed so
+        # parallel sweeps explore different corners of the search space even across repeated
+        # workflow runs. Seed is exposed as a step output and baked into the deck filename
+        # (see -deck below) so the resulting artifact is self-identifying.
+        run: |
+          SEED=$(od -An -N4 -tu4 /dev/urandom | tr -d ' ')
+          echo "Chose seed=$SEED for worker ${{ matrix.worker }}"
+          echo "seed=$SEED" >> "$GITHUB_OUTPUT"
 
       - name: Run iterate
         # `timeout` bounds the worker at runtime_minutes so every job finishes inside the GitHub
@@ -82,8 +94,8 @@ jobs:
           set -x
           mkdir -p mydecks
           timeout ${{ inputs.runtime_minutes }}m go run ./cmd/fabsim iterate \
-            -seed ${{ matrix.seed }} \
-            -deck seed-${{ matrix.seed }} \
+            -seed ${{ steps.seed.outputs.seed }} \
+            -deck seed-${{ steps.seed.outputs.seed }} \
             -incoming ${{ inputs.incoming }} \
             -deck-size ${{ inputs.deck_size }} \
             -max-copies ${{ inputs.max_copies }} \
@@ -97,8 +109,11 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: deck-seed-${{ matrix.seed }}
-          path: mydecks/seed-${{ matrix.seed }}.json
+          # Artifact name is keyed on worker index (not seed) so two workers that happen to
+          # draw the same seed still produce distinct artifacts. The deck file itself is named
+          # after the seed, so collecting every artifact into one dir keeps them separate.
+          name: worker-${{ matrix.worker }}
+          path: mydecks/seed-${{ steps.seed.outputs.seed }}.json
           if-no-files-found: warn
           retention-days: 30
 
@@ -117,8 +132,9 @@ jobs:
       - name: Download all deck artifacts
         uses: actions/download-artifact@v4
         with:
-          # Flattens every `deck-seed-<N>` artifact into mydecks/ so ranking sees one flat dir.
-          pattern: deck-seed-*
+          # Flattens every `worker-<N>` artifact into mydecks/ so ranking sees one flat dir of
+          # seed-<SEED>.json files.
+          pattern: worker-*
           path: mydecks
           merge-multiple: true
 
