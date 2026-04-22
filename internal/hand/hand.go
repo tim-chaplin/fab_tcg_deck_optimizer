@@ -611,6 +611,11 @@ type attackBufs struct {
 	// (pmask × wmask) loop; reusing its heap slot avoids a per-iteration alloc caused by
 	// interface-call escape.
 	drScratch card.TurnState
+	// drCardStateScratch is a pooled *CardState handed to DR Card.Play calls. Each Play takes
+	// a *CardState through an interface boundary so a literal &card.CardState{} would escape
+	// and heap-alloc once per DR per partition — reusing this slot keeps the whole defense-phase
+	// replay allocation-free. Reset per call by the caller.
+	drCardStateScratch card.CardState
 	attackerBuf    []card.Card // for bestAttackWithWeapons mask iteration
 	// Pre-computed per-mask weapon data. Indexed by bitmask (0 to 2^len(weapons)-1):
 	// weaponCosts[mask] is total Cost; weaponNames[mask] is the pre-built []string of names.
@@ -1118,7 +1123,7 @@ func roleAllowed(r Role, isArsenalSlot, isDefenseReaction bool) bool {
 //
 // state is caller-provided (from attackBufs) and reset per call. gravBuf is the caller-owned
 // scratch backing state.Graveyard; the returned slice is the (possibly grown) buffer for reuse.
-func defenseReactionDamage(defenders, pitched, deck []card.Card, state *card.TurnState, gravBuf []card.Card) (int, []card.Card) {
+func defenseReactionDamage(defenders, pitched, deck []card.Card, state *card.TurnState, gravBuf []card.Card, cs *card.CardState) (int, []card.Card) {
 	total := 0
 	for _, d := range defenders {
 		if !d.Types().IsDefenseReaction() {
@@ -1126,7 +1131,8 @@ func defenseReactionDamage(defenders, pitched, deck []card.Card, state *card.Tur
 		}
 		gravBuf = append(gravBuf[:0], defenders...)
 		*state = card.TurnState{Pitched: pitched, Deck: deck, Graveyard: gravBuf}
-		total += d.Play(state, &card.CardState{Card: d})
+		*cs = card.CardState{Card: d}
+		total += d.Play(state, cs)
 	}
 	return total, gravBuf
 }
@@ -1184,7 +1190,7 @@ func bestAttackWithWeapons(hero hero.Hero, weapons []weapon.Weapon, attackers, d
 	}
 	var defenseDealt int
 	if hasDRs {
-		defenseDealt, bufs.defenseGravScratch = defenseReactionDamage(defenders, pitched, deck, bufs.state, bufs.defenseGravScratch)
+		defenseDealt, bufs.defenseGravScratch = defenseReactionDamage(defenders, pitched, deck, bufs.state, bufs.defenseGravScratch, &bufs.drCardStateScratch)
 		ctx.seedState()
 	}
 
@@ -1629,7 +1635,8 @@ func fillDefenseContributions(line []CardAssignment, pitched []card.Card, deck [
 		if c.Types().IsDefenseReaction() {
 			bufs.defenseGravScratch = append(bufs.defenseGravScratch[:0], defenders...)
 			*bufs.state = card.TurnState{Pitched: pitched, Deck: deck, Graveyard: bufs.defenseGravScratch}
-			line[i].Contribution += float64(c.Play(bufs.state, &card.CardState{Card: c, FromArsenal: line[i].FromArsenal}))
+			bufs.drCardStateScratch = card.CardState{Card: c, FromArsenal: line[i].FromArsenal}
+			line[i].Contribution += float64(c.Play(bufs.state, &bufs.drCardStateScratch))
 		}
 	}
 }

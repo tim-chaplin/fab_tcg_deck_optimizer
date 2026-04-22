@@ -98,6 +98,7 @@ func TestGraveyard_PlainBlockEntersGraveyardRegardlessOfType(t *testing.T) {
 		nil, nil,
 		bufs.state,
 		bufs.defenseGravScratch,
+		&bufs.drCardStateScratch,
 	)
 	foundBlocker := false
 	for _, c := range saw {
