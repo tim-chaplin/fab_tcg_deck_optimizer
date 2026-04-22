@@ -71,16 +71,10 @@ func runIterate(cfg config) float64 {
 			return bestEverAvg
 		}
 		if !found {
-			// No mutation cleared the acceptance gate. If the temperature is still above the
-			// minimum, the next round tries with a lower T (the cooling step below already ran
-			// for prior rounds; force another decay here so we keep making progress). Once T
-			// hits the min and we still find nothing, we're at a local maximum.
-			if temperature > cfg.minTemp {
-				temperature = coolDown(temperature, cfg.tempDecay, cfg.minTemp)
-				fmt.Fprintf(os.Stderr, "\r[round %d] no acceptance; cooling to T=%.4f                                    \n",
-					round, temperature)
-				continue
-			}
+			// A full round with zero acceptances means every mutation — including the
+			// probabilistically-accepted worse ones — failed the gate. At any T > 0 with
+			// thousands of mutations this is vanishingly unlikely unless we've genuinely
+			// converged, so treat it as a local maximum regardless of the current temperature.
 			fmt.Fprintf(os.Stderr, "\nLocal maximum reached after %d rounds / %d acceptances in %s\n",
 				round, acceptances, time.Since(start).Truncate(time.Second))
 			fmt.Println()
