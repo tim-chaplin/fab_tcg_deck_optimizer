@@ -4,6 +4,14 @@ A deck-building and simulation tool for the Flesh and Blood TCG, written in Go.
 
 Built with Claude Opus 4.6.
 
+## FAQ
+
+### So are these AI-generated decks?
+
+No. This is just a computer program that implements an evaluation function and uses known
+optimization techniques to look for optimal decks according to the evaluation. You can compile
+and run the program to find decks on your own computer without having invoked AI at all.
+
 ## Goal
 
 Find optimal deck lists for **goldfishing** — i.e. maximizing a deck's own output in a vacuum,
