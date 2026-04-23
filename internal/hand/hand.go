@@ -667,6 +667,17 @@ type attackBufs struct {
 	// auraTriggersScratch backs state.AuraTriggers during attack-chain permutations. Reset
 	// per permutation so AddAuraTrigger calls in one ordering don't leak into the next.
 	auraTriggersScratch []card.AuraTrigger
+	// drawnWinnerScratch / auraTriggersWinnerScratch back sequenceContext.drawnWinner and
+	// auraTriggersWinner. Each sequenceContext borrows them at construction so the eval
+	// closure's winner snapshot (append-into-[:0] on every improved permutation) reuses one
+	// backing array per Best call. Without this, each of the thousands of sequenceContexts a
+	// Best call builds would start with a nil slice and allocate a fresh backing array the
+	// first time a winner's AuraTriggers or Drawn is non-empty — the hottest alloc site in the
+	// attack-enumeration inner loop. fillContributions clones the winners into summary.Drawn
+	// / summary.AuraTriggers before returning so no downstream reader aliases this shared
+	// storage.
+	drawnWinnerScratch        []card.Card
+	auraTriggersWinnerScratch []card.AuraTrigger
 	// perCardScratch is sized maxAttackers (handSize + weaponCount). Written by playSequence only
 	// when the caller passes a non-nil perCardOut; bestSequence snapshots the winning
 	// permutation's per-card damage from here into the caller's output buffer. The partition-loop
@@ -715,32 +726,34 @@ func newAttackBufs(handSize, weaponCount int, weapons []weapon.Weapon) *attackBu
 		ptrBuf[i] = &pcBuf[i]
 	}
 	return &attackBufs{
-		permMeta:               make([]*attackerMeta, maxAttackers),
-		pcBuf:                  pcBuf,
-		ptrBuf:                 ptrBuf,
-		cardsPlayedBuf:         make([]card.Card, 0, maxAttackers),
-		state:                  &card.TurnState{},
-		attackerBuf:            make([]card.Card, maxAttackers),
-		weaponCosts:            weaponCosts,
-		weaponNames:            weaponNames,
-		rolesBuf:               make([]Role, handSize+1),
-		pitchVals:              make([]int, handSize+1),
-		defenseVals:            make([]int, handSize+1),
-		isDRBuf:                make([]bool, handSize+1),
-		addsFutureValueBuf:     make([]bool, handSize+1),
-		pitchedValsScratch:     make([]int, 0, handSize+1),
-		pitchedBuf:             make([]card.Card, 0, handSize+1),
-		attackersBuf:           make([]card.Card, 0, handSize+1),
-		defendersBuf:           make([]card.Card, 0, handSize+1),
-		defenseGravScratch:     make([]card.Card, 0, handSize+1),
-		attackGravScratch:      make([]card.Card, 0, maxAttackers),
-		auraTriggersScratch:    make([]card.AuraTrigger, 0, maxAttackers),
-		perCardScratch:         make([]float64, maxAttackers),
-		perCardTriggerScratch:  make([]float64, maxAttackers),
-		fillContribWinnerOrder: make([]card.Card, maxAttackers),
-		fillContribPerCard:     make([]float64, maxAttackers),
-		fillContribTriggerDmg:  make([]float64, maxAttackers),
-		fillContribUsed:        make([]bool, handSize),
+		permMeta:                  make([]*attackerMeta, maxAttackers),
+		pcBuf:                     pcBuf,
+		ptrBuf:                    ptrBuf,
+		cardsPlayedBuf:            make([]card.Card, 0, maxAttackers),
+		state:                     &card.TurnState{},
+		attackerBuf:               make([]card.Card, maxAttackers),
+		weaponCosts:               weaponCosts,
+		weaponNames:               weaponNames,
+		rolesBuf:                  make([]Role, handSize+1),
+		pitchVals:                 make([]int, handSize+1),
+		defenseVals:               make([]int, handSize+1),
+		isDRBuf:                   make([]bool, handSize+1),
+		addsFutureValueBuf:        make([]bool, handSize+1),
+		pitchedValsScratch:        make([]int, 0, handSize+1),
+		pitchedBuf:                make([]card.Card, 0, handSize+1),
+		attackersBuf:              make([]card.Card, 0, handSize+1),
+		defendersBuf:              make([]card.Card, 0, handSize+1),
+		defenseGravScratch:        make([]card.Card, 0, handSize+1),
+		attackGravScratch:         make([]card.Card, 0, maxAttackers),
+		auraTriggersScratch:       make([]card.AuraTrigger, 0, maxAttackers),
+		drawnWinnerScratch:        make([]card.Card, 0, maxAttackers),
+		auraTriggersWinnerScratch: make([]card.AuraTrigger, 0, maxAttackers),
+		perCardScratch:            make([]float64, maxAttackers),
+		perCardTriggerScratch:     make([]float64, maxAttackers),
+		fillContribWinnerOrder:    make([]card.Card, maxAttackers),
+		fillContribPerCard:        make([]float64, maxAttackers),
+		fillContribTriggerDmg:     make([]float64, maxAttackers),
+		fillContribUsed:           make([]bool, handSize),
 	}
 }
 
@@ -1202,6 +1215,10 @@ func bestAttackWithWeapons(hero hero.Hero, weapons []weapon.Weapon, attackers, d
 		blockTotal:         blockTotal,
 		arsenalInIdx:       arsenalInIdx,
 		priorAuraTriggers:  priorAuraTriggers,
+		// Borrow bufs' pre-sized winner scratch so the eval closure's append-winner step reuses
+		// one backing array per Best call instead of allocating per sequenceContext.
+		drawnWinner:        bufs.drawnWinnerScratch[:0],
+		auraTriggersWinner: bufs.auraTriggersWinnerScratch[:0],
 	}
 	// Hoist leaf-constant TurnState fields out of the per-permutation reset in
 	// playSequenceWithMeta.
@@ -1790,6 +1807,10 @@ func fillContributions(summary *TurnSummary, hero hero.Hero, weapons []weapon.We
 			maxAttackPitch:     budget.maxPitch,
 			arsenalInIdx:       arsenalInIdx,
 			priorAuraTriggers:  priorAuraTriggers,
+			// Same borrow as bestAttackWithWeapons above — fillContributions clones the
+			// winners into summary before returning, so sharing bufs-backed storage is safe.
+			drawnWinner:        bufs.drawnWinnerScratch[:0],
+			auraTriggersWinner: bufs.auraTriggersWinnerScratch[:0],
 		}
 		ctx.seedState()
 		fillAttackChainContributions(summary, chain, ctx)
