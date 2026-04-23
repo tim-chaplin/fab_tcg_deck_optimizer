@@ -6,6 +6,7 @@ import (
 	"flag"
 	"fmt"
 	"io"
+	"math/rand"
 	"os"
 	"path/filepath"
 	"sort"
@@ -232,6 +233,26 @@ func fabraryPathFor(jsonPath string) string {
 		return strings.TrimSuffix(jsonPath, ext) + ".txt"
 	}
 	return jsonPath + ".txt"
+}
+
+// sanitizeLoadedDeck swaps every card.NotImplemented copy in d for a random legal
+// replacement, prints a warning summary on stderr when any swap was made, and returns the
+// ordered list of swaps. maxCopies caps post-sanitize copies per printing; legal restricts
+// the replacement pool (typically the run's format predicate). Returns nil when the deck
+// was already clean — callers can use that to skip the forced-reevaluation branch.
+//
+// The sanitizer mutates d.Cards in place. Callers that care about the pre-sanitize score
+// for a delta warning should capture it before calling this.
+func sanitizeLoadedDeck(d *deck.Deck, maxCopies int, rng *rand.Rand, legal func(card.Card) bool) []deck.NotImplementedReplacement {
+	replaced := d.SanitizeNotImplemented(maxCopies, rng, legal)
+	if len(replaced) == 0 {
+		return nil
+	}
+	fmt.Fprintf(os.Stderr, "warning: loaded deck contained %d NotImplemented card(s); replacing with legal substitutes:\n", len(replaced))
+	for _, r := range replaced {
+		fmt.Fprintf(os.Stderr, "  -1 %s, +1 %s\n", r.From.Name(), r.To.Name())
+	}
+	return replaced
 }
 
 // mustLoadDeck loads the deck at path or dies. For subcommands that always operate on an

@@ -320,6 +320,11 @@ func coolDown(temperature, decay, minTemp float64) float64 {
 // (re-evaluate for an apples-to-apples baseline); -reevaluate set (force re-evaluation even
 // if the run count already matches); or deck already deep-evaluated (use as-is). File
 // exists but doesn't parse → die loudly rather than silently overwrite a corrupt checkpoint.
+//
+// A loaded deck that contains card.NotImplemented copies (e.g. a pre-tag deck recovered
+// from disk) is sanitized before any of the above branches: the tagged slots are replaced
+// with random legal picks and the run always takes the re-evaluate path so the baseline
+// reflects the new card list.
 func prepareBaseline(cfg annealConfig, rng *rand.Rand) (*deck.Deck, float64) {
 	best, bestAvg, err := loadExisting(cfg.outPath)
 	if err != nil {
@@ -336,10 +341,21 @@ func prepareBaseline(cfg annealConfig, rng *rand.Rand) (*deck.Deck, float64) {
 		maybePrintBaselineCards(cfg, best)
 		return best, bestAvg
 	}
+	// Sanitize in place before the evaluation-branch decision. Any swap forces the
+	// re-evaluate path below by zeroing Stats.Runs so the saved run count can't satisfy
+	// the "already deep-evaluated" check against a now-different card list. bestAvg stays
+	// at the loaded value for the "saved avg → current avg" delta display below.
+	sanitized := sanitizeLoadedDeck(best, cfg.maxCopies, rng, cfg.legalFilter())
+	if len(sanitized) > 0 {
+		best.Stats.Runs = 0
+	}
 	if cfg.reevaluate || best.Stats.Runs < cfg.deepShuffles {
 		reason := fmt.Sprintf("from %d shuffles", best.Stats.Runs)
 		if cfg.reevaluate && best.Stats.Runs >= cfg.deepShuffles {
 			reason = "-reevaluate forced"
+		}
+		if len(sanitized) > 0 {
+			reason = fmt.Sprintf("%d NotImplemented card(s) replaced", len(sanitized))
 		}
 		// Label the loaded number "saved avg" so it can't be mistaken for the re-evaluated
 		// score. Decks scored under older simulation logic can have saved avgs that diverge
