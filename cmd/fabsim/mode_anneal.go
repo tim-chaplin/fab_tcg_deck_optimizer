@@ -169,29 +169,8 @@ func runAnneal(cfg annealConfig) annealResult {
 	start := time.Now()
 	for {
 		round++
-		// Drop the shared hand memo between rounds. Within a round the memo is load-bearing
-		// (same hand shapes recur across thousands of shuffles), but cross-round hit rate is
-		// near zero and unbounded growth would OOM long hill-climbs.
-		if cfg.debug {
-			fmt.Fprintf(os.Stderr, "[memo] clearing %d entries before round %d\n", hand.MemoLen(), round)
-		}
-		hand.ClearMemo()
-		mutations := deck.AllMutations(current, cfg.maxCopies, cfg.legalFilter())
-		if cfg.startTemp > 0 {
-			// AllMutations sorts weakest-card-first so a first-found classical climb tries the
-			// highest-expected-gain swaps early. Under annealing that same bias means the
-			// probabilistic acceptances disproportionately hit mutations against the weakest
-			// card in the deck — shrinking the slice of the solution space the walk actually
-			// explores. Shuffling each round gives every mutation an even shot at being the
-			// first one accepted at the current temperature.
-			rng.Shuffle(len(mutations), func(i, j int) {
-				mutations[i], mutations[j] = mutations[j], mutations[i]
-			})
-		}
-		tempLabel := ""
-		if temperature > 0 {
-			tempLabel = fmt.Sprintf(" (T=%.4f)", temperature)
-		}
+		mutations := buildRoundMutations(cfg, rng, current, round)
+		tempLabel := formatTempLabel(temperature)
 		if verbose {
 			fmt.Fprintf(os.Stderr, "\n[round %d] evaluating %d mutations of avg %.3f%s (best ever %.3f)\n",
 				round, len(mutations), currentAvg, tempLabel, bestEverAvg)
@@ -208,57 +187,112 @@ func runAnneal(cfg annealConfig) annealResult {
 		stopTicker()
 
 		if ctx.Err() != nil {
-			fmt.Fprintf(os.Stderr, "\nAborted mid-round after %d rounds / %d acceptances in %s\n",
-				round, acceptances, time.Since(start).Truncate(time.Second))
-			fmt.Println()
-			if shouldPrintFinalDeck(cfg.startTemp, bestEverAvg, startingAvg) {
-				printBestDeck(bestEver)
-			}
-			return annealResult{bestEverAvg: bestEverAvg, startingAvg: startingAvg, aborted: true}
+			return finishAnnealRun(cfg, bestEver, bestEverAvg, startingAvg,
+				fmt.Sprintf("Aborted mid-round after %d rounds / %d acceptances in %s",
+					round, acceptances, time.Since(start).Truncate(time.Second)),
+				true)
 		}
 		if !found {
 			// A full round with zero acceptances means every mutation — including the
 			// probabilistically-accepted worse ones — failed the gate. At any T > 0 with
 			// thousands of mutations this is vanishingly unlikely unless we've genuinely
 			// converged, so treat it as a local maximum regardless of the current temperature.
-			fmt.Fprintf(os.Stderr, "\nLocal maximum reached after %d rounds / %d acceptances in %s\n",
-				round, acceptances, time.Since(start).Truncate(time.Second))
-			fmt.Println()
-			if shouldPrintFinalDeck(cfg.startTemp, bestEverAvg, startingAvg) {
-				printBestDeck(bestEver)
-			}
-			return annealResult{bestEverAvg: bestEverAvg, startingAvg: startingAvg}
+			return finishAnnealRun(cfg, bestEver, bestEverAvg, startingAvg,
+				fmt.Sprintf("Local maximum reached after %d rounds / %d acceptances in %s",
+					round, acceptances, time.Since(start).Truncate(time.Second)),
+				false)
 		}
 
 		acceptances++
-		mut := mutations[idx]
-		verb := "improvement"
-		if avg <= currentAvg {
-			verb = "annealing step"
-		}
-		if verbose {
-			fmt.Fprintf(os.Stderr, "\r[round %d] %s at %d/%d: deep %.3f vs %.3f (%s)%s       \n",
-				round, verb, idx+1, len(mutations), avg, currentAvg, mut.Description, tempLabel)
-		}
+		bestEver, bestEverAvg = applyAcceptedMutation(cfg, round, verbose, tempLabel,
+			idx, len(mutations), mutations[idx], d, avg, currentAvg, bestEver, bestEverAvg)
 		current = d
 		currentAvg = avg
-		if avg > bestEverAvg {
-			if !verbose {
-				// Surface every new all-time best in non-verbose annealing mode so long
-				// reanneal sessions still show visible forward motion without the per-round
-				// spam. \r + trailing padding overwrites the ticker line cleanly; the \n at
-				// the end promotes this to a persistent entry above the next round's ticker.
-				fmt.Fprintf(os.Stderr, "\r[round %d] new best %.3f (was %.3f, +%.3f)%s                                \n",
-					round, avg, bestEverAvg, avg-bestEverAvg, tempLabel)
-			}
-			bestEver = d
-			bestEverAvg = avg
-			if err := writeDeck(bestEver, cfg.outPath); err != nil {
-				die("%v", err)
-			}
-		}
 		temperature = coolDown(temperature, cfg.tempDecay, cfg.minTemp)
 	}
+}
+
+// buildRoundMutations produces the per-round mutation list: clears the shared hand memo (so the
+// next round starts with a bounded cache), enumerates every single-card/weapon mutation, and
+// under annealing shuffles the order so probabilistic acceptances aren't concentrated on the
+// weakest card. Also emits the debug memo-size line when -debug is set.
+func buildRoundMutations(cfg annealConfig, rng *rand.Rand, current *deck.Deck, round int) []deck.Mutation {
+	// Drop the shared hand memo between rounds. Within a round the memo is load-bearing
+	// (same hand shapes recur across thousands of shuffles), but cross-round hit rate is
+	// near zero and unbounded growth would OOM long hill-climbs.
+	if cfg.debug {
+		fmt.Fprintf(os.Stderr, "[memo] clearing %d entries before round %d\n", hand.MemoLen(), round)
+	}
+	hand.ClearMemo()
+	mutations := deck.AllMutations(current, cfg.maxCopies, cfg.legalFilter())
+	if cfg.startTemp > 0 {
+		// AllMutations sorts weakest-card-first so a first-found classical climb tries the
+		// highest-expected-gain swaps early. Under annealing that same bias means the
+		// probabilistic acceptances disproportionately hit mutations against the weakest
+		// card in the deck — shrinking the slice of the solution space the walk actually
+		// explores. Shuffling each round gives every mutation an even shot at being the
+		// first one accepted at the current temperature.
+		rng.Shuffle(len(mutations), func(i, j int) {
+			mutations[i], mutations[j] = mutations[j], mutations[i]
+		})
+	}
+	return mutations
+}
+
+// formatTempLabel is the " (T=…)" suffix the round header and acceptance lines share. Empty
+// string when temperature is 0 so classical hill-climb logs stay clean.
+func formatTempLabel(temperature float64) string {
+	if temperature <= 0 {
+		return ""
+	}
+	return fmt.Sprintf(" (T=%.4f)", temperature)
+}
+
+// applyAcceptedMutation runs the after-success branch of a round: logs the acceptance (against
+// the pre-mutation currentAvg so the "improvement" / "annealing step" label reflects whether
+// this specific step walked uphill), logs a new all-time best in non-verbose mode, persists
+// the deck to disk when avg exceeds bestEverAvg, and returns the possibly-updated bestEver /
+// bestEverAvg. The current deck and its avg stay owned by the caller.
+func applyAcceptedMutation(cfg annealConfig, round int, verbose bool, tempLabel string,
+	idx, total int, mut deck.Mutation, d *deck.Deck, avg, currentAvg float64,
+	bestEver *deck.Deck, bestEverAvg float64) (*deck.Deck, float64) {
+	verb := "improvement"
+	if avg <= currentAvg {
+		verb = "annealing step"
+	}
+	if verbose {
+		fmt.Fprintf(os.Stderr, "\r[round %d] %s at %d/%d: deep %.3f vs %.3f (%s)%s       \n",
+			round, verb, idx+1, total, avg, currentAvg, mut.Description, tempLabel)
+	}
+	if avg <= bestEverAvg {
+		return bestEver, bestEverAvg
+	}
+	if !verbose {
+		// Surface every new all-time best in non-verbose annealing mode so long
+		// reanneal sessions still show visible forward motion without the per-round
+		// spam. \r + trailing padding overwrites the ticker line cleanly; the \n at
+		// the end promotes this to a persistent entry above the next round's ticker.
+		fmt.Fprintf(os.Stderr, "\r[round %d] new best %.3f (was %.3f, +%.3f)%s                                \n",
+			round, avg, bestEverAvg, avg-bestEverAvg, tempLabel)
+	}
+	if err := writeDeck(d, cfg.outPath); err != nil {
+		die("%v", err)
+	}
+	return d, avg
+}
+
+// finishAnnealRun emits the terminal status line (abort / converged), optionally prints the
+// full best-ever deck listing, and builds the annealResult the top-level command surfaces as
+// exit code and session summary. aborted is threaded through as-is because runAnnealCmd keys
+// exit code 130 off it.
+func finishAnnealRun(cfg annealConfig, bestEver *deck.Deck, bestEverAvg, startingAvg float64,
+	statusLine string, aborted bool) annealResult {
+	fmt.Fprintln(os.Stderr, "\n"+statusLine)
+	fmt.Println()
+	if shouldPrintFinalDeck(cfg.startTemp, bestEverAvg, startingAvg) {
+		printBestDeck(bestEver)
+	}
+	return annealResult{bestEverAvg: bestEverAvg, startingAvg: startingAvg, aborted: aborted}
 }
 
 // shouldPrintFinalDeck decides whether to dump the full deck listing at the end of a run.
