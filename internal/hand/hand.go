@@ -1296,11 +1296,9 @@ func bestAttackWithWeapons(hero hero.Hero, weapons []weapon.Weapon, attackers, d
 			// Lower bound on total chain cost (sum of MinCost across attackers + weapons). If the
 			// attack budget can't cover even this floor, no permutation is feasible. Mid-turn
 			// draws can pitch on top of the committed hand pitch ("hopeful" partitions) but
-			// can't reduce the base cost, so this MinCost check is still a safe prune. The
-			// matching pitch-timing pre-screen (attackBudget - MaxCost >= maxAttackPitch) is
-			// unsafe and has been removed: drawn cards can play as chain extensions and
-			// consume the residual, so a partition that looks wasteful pre-chain can end up
-			// legal. playSequenceWithMeta enforces pitch-timing post-extension instead.
+			// can't reduce the base cost, so this MinCost prune is safe. No matching pitch-timing
+			// pre-screen here: drawn cards play as chain extensions and consume the residual, so
+			// playSequenceWithMeta enforces pitch-timing post-extension instead.
 			if attackersMinCost+weaponCost > attackBudget {
 				continue
 			}
