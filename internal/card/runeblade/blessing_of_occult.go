@@ -65,7 +65,6 @@ func (c BlessingOfOccultBlue) Play(s *card.TurnState, _ *card.CardState) int {
 // next turn, create n live Runechants. Same-turn Play contributes 0 — the rune credit is
 // deferred to the trigger.
 func blessingOfOccultPlay(s *card.TurnState, self card.Card, n int) int {
-	s.AuraCreated = true
 	s.AddAuraTrigger(card.AuraTrigger{
 		Self:    self,
 		Type:    card.TriggerStartOfTurn,

@@ -28,7 +28,6 @@ func (SigilOfFyendalBlue) Types() card.TypeSet      { return sigilOfFyendalTypes
 func (SigilOfFyendalBlue) GoAgain() bool            { return true }
 func (SigilOfFyendalBlue) AddsFutureValue()         {}
 func (c SigilOfFyendalBlue) Play(s *card.TurnState, _ *card.CardState) int {
-	s.AuraCreated = true
 	s.AddAuraTrigger(card.AuraTrigger{
 		Self:    c,
 		Type:    card.TriggerStartOfTurn,
