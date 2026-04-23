@@ -773,6 +773,43 @@ func (e *Evaluator) getAttackBufs(handSize int, weapons []weapon.Weapon) *attack
 	return e.bufs
 }
 
+// fillPartitionPerCardBufs writes the per-card values the partition recurse reads at each leaf:
+// Pitch / Defense magnitudes, Defense-Reaction membership, and AddsFutureValue interface
+// satisfaction. Computing them up front keeps the recurse's inner body free of card-method /
+// type-assert calls, which would otherwise repeat on every leaf. totalN covers the optional
+// arsenal-in slot at index n; when present, its Defense picks up ArsenalDefenseBonus so the
+// partition / capping pipeline sees the effective value. Returns whether any card is a
+// Defense Reaction so the leaf branch can pick between the full three-bucket grouper and the
+// faster reaction-free grouper.
+func fillPartitionPerCardBufs(hand []card.Card, n, totalN int, arsenalCardIn card.Card, pvals, dvals []int, isDR, addsFutureValue []bool) bool {
+	hasReactions := false
+	for i := 0; i < totalN; i++ {
+		var c card.Card
+		if i < n {
+			c = hand[i]
+		} else {
+			c = arsenalCardIn
+		}
+		pvals[i] = c.Pitch()
+		dvals[i] = c.Defense()
+		// Arsenal slot (i == n) lives at the end. Defense Reactions whose +N{d} rider only fires
+		// when played from arsenal (Unmovable, Springboard Somersault) opt in via
+		// card.ArsenalDefenseBonus; bump the static Defense() up here so the partition / capping
+		// pipeline sees the effective value.
+		if i == n {
+			if ab, ok := c.(card.ArsenalDefenseBonus); ok {
+				dvals[i] += ab.ArsenalDefenseBonus()
+			}
+		}
+		isDR[i] = c.Types().IsDefenseReaction()
+		if isDR[i] {
+			hasReactions = true
+		}
+		_, addsFutureValue[i] = c.(card.AddsFutureValue)
+	}
+	return hasReactions
+}
+
 func (e *Evaluator) bestUncached(hero hero.Hero, weapons []weapon.Weapon, hand []card.Card, incomingDamage int, deck []card.Card, runechantCarryover int, arsenalCardIn card.Card, priorAuraTriggers []card.AuraTrigger) TurnSummary {
 	n := len(hand)
 	// The partition recurse treats the arsenal-in card as an extra entry at index n with a
@@ -826,36 +863,7 @@ func (e *Evaluator) bestUncached(hero hero.Hero, weapons []weapon.Weapon, hand [
 	isDR := bufs.isDRBuf[:totalN]
 	addsFutureValue := bufs.addsFutureValueBuf[:totalN]
 
-	// Pre-compute per-card pitch / defense values, Defense-Reaction membership, and
-	// AddsFutureValue membership so the recurse doesn't re-invoke the card-method /
-	// type-assert calls per leaf.
-	// Cost is pulled from attackerMeta at leaf time (variable-cost cards self-report their
-	// current game-accurate cost via Cost()); no partition-time cost sums needed.
-	hasReactions := false
-	for i := 0; i < totalN; i++ {
-		var c card.Card
-		if i < n {
-			c = hand[i]
-		} else {
-			c = arsenalCardIn
-		}
-		pvals[i] = c.Pitch()
-		dvals[i] = c.Defense()
-		// Arsenal slot (i == n) lives at the end. Defense Reactions whose +N{d} rider only fires
-		// when played from arsenal (Unmovable, Springboard Somersault) opt in via
-		// card.ArsenalDefenseBonus; bump the static Defense() up here so the partition / capping
-		// pipeline sees the effective value.
-		if i == n {
-			if ab, ok := c.(card.ArsenalDefenseBonus); ok {
-				dvals[i] += ab.ArsenalDefenseBonus()
-			}
-		}
-		isDR[i] = c.Types().IsDefenseReaction()
-		if isDR[i] {
-			hasReactions = true
-		}
-		_, addsFutureValue[i] = c.(card.AddsFutureValue)
-	}
+	hasReactions := fillPartitionPerCardBufs(hand, n, totalN, arsenalCardIn, pvals, dvals, isDR, addsFutureValue)
 	pitched := bufs.pitchedBuf
 	attackers := bufs.attackersBuf
 	defenders := bufs.defendersBuf
