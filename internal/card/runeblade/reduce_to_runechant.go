@@ -4,11 +4,9 @@
 // Text: "Reduce to Runechant costs {r} less to play for each Runechant you control. Create a
 // Runechant token."
 //
-// Variable cost: Cost reads s.Runechants to return max(0, printed - Runechants) at play time.
-// Implements card.VariableCost so the solver can pre-screen with MinCost / MaxCost bounds.
-//
-// Play() calls CreateRunechant, crediting +1 damage at creation. Defense-reaction state is reset
-// between reactions so the token itself doesn't carry into the next turn's carryover — only its
+// Cost returns max(0, printed - s.Runechants) at play time (card.VariableCost bounds [0, 1]).
+// Play creates one Runechant, crediting +1 at creation. Defense-reaction state is reset
+// between reactions so the token itself doesn't carry into next turn's carryover — only its
 // damage credit lands.
 
 package runeblade

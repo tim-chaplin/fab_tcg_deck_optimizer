@@ -4,10 +4,8 @@
 // action card revealed this way, then put the cards on top of your deck in any order." (N = 3
 // Red / 2 Yellow / 1 Blue.)
 //
-// Simplification: scan the top N cards of the remaining deck; credit +1 per Runeblade attack
-// action card revealed and set AuraCreated if at least one Runechant is made. Opts out of the
-// hand-evaluation memo because the result depends on deck composition. The re-ordering clause is
-// ignored — we don't model future-turn draw order.
+// Scan the top N cards of s.Deck; credit +1 per Runeblade attack action card revealed. The
+// re-ordering clause isn't modelled.
 
 package runeblade
 
