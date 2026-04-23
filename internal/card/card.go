@@ -324,6 +324,20 @@ type LowerHealthWanter interface {
 	WantsLowerHealth()
 }
 
+// AddsFutureValue is an optional marker for cards whose printed effect delivers value on a
+// LATER turn rather than the one they're played — next-turn triggers, cross-turn counters,
+// and the like. The solver uses it as a beatsBest tiebreaker: at equal current-turn Value
+// and equal leftover-runechants, a partition that plays more AddsFutureValue cards wins,
+// because their hidden future payoff isn't reflected in this turn's score. Without the
+// bias, a lone Sigil of the Arknight loses to Held → arsenal promotion on the
+// arsenal-occupancy tiebreak.
+//
+// The marker is orthogonal to the mechanism — DelayedPlay next-turn callbacks, and any
+// future effects that hide value past this turn, all opt in here.
+type AddsFutureValue interface {
+	AddsFutureValue()
+}
+
 // DelayedPlay is an optional marker for cards whose effect fires at the START of the owner's
 // NEXT action phase rather than the turn they're played. A card that implements this is still
 // played normally — Play runs this turn, typically to flip AuraCreated so same-turn aura-readers
@@ -337,6 +351,9 @@ type LowerHealthWanter interface {
 // The TurnState passed to PlayNextTurn has Deck populated with the remaining deck after the
 // next hand has been drawn (so Deck[0] is the card about to be revealed by a top-of-deck
 // effect); every other field is zero.
+//
+// Every DelayedPlay card also implements AddsFutureValue so the solver's tiebreaker picks up
+// its hidden next-turn payoff.
 type DelayedPlay interface {
 	PlayNextTurn(s *TurnState) DelayedPlayResult
 }
