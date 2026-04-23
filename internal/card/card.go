@@ -181,6 +181,13 @@ type TurnState struct {
 	// trigger-Type condition (start of turn for now), decrements Count in place, and drops
 	// entries whose Count hits zero after sending Self to the graveyard.
 	AuraTriggers []AuraTrigger
+	// Revealed is the side channel start-of-turn AuraTrigger handlers use to move a card
+	// from the top of the post-draw deck into the hand (Sigil of the Arknight's reveal).
+	// Handlers peek s.Deck[0], append to s.Revealed, and advance s.Deck past the popped
+	// card; the deck loop consumes s.Revealed after firing every start-of-turn handler and
+	// appends each entry to the dealt hand in order. Cascading reveals work because each
+	// handler's pop shrinks the shared Deck view for the next handler.
+	Revealed []Card
 }
 
 // AuraTriggerType categorizes when an AuraTrigger's Handler fires. The sim walks the

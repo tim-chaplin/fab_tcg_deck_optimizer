@@ -4,11 +4,11 @@
 // beginning of your action phase, remove a verse counter. If you do, create a Runechant token.
 // Otherwise, destroy Runeblood Incantation." (Red N=3, Yellow N=2, Blue N=1.)
 //
-// Simplification: credit n-1 flat damage on Play for the later-turn rune ticks, and model the
-// first tick via card.DelayedPlay — PlayNextTurn creates 1 live Runechant on next turn's
-// starting state and destroys the aura. Avoids over-crediting same-turn state so
-// variable-cost cards can't use any of Runeblood's runes for a discount on the turn it was
-// played.
+// Simplification: credit n-1 flat damage on Play for the later-turn rune ticks, and model
+// the first tick via a start-of-turn AuraTrigger with Count=1. Next turn the handler creates
+// 1 live Runechant and the sim graveyards the aura as Count hits zero. Avoids over-crediting
+// same-turn state so variable-cost cards can't use any of Runeblood's runes for a discount
+// on the turn it was played.
 //
 // Source: github.com/the-fab-cube/flesh-and-blood-cards (card.csv).
 
@@ -30,10 +30,7 @@ func (RunebloodIncantationRed) Types() card.TypeSet      { return runebloodIncan
 func (RunebloodIncantationRed) GoAgain() bool            { return true }
 func (RunebloodIncantationRed) AddsFutureValue()         {}
 func (c RunebloodIncantationRed) Play(s *card.TurnState, _ *card.CardState) int {
-	return runebloodPlay(s, 3)
-}
-func (c RunebloodIncantationRed) PlayNextTurn(s *card.TurnState) card.DelayedPlayResult {
-	return runebloodPlayNextTurn(s, c)
+	return runebloodPlay(s, c, 3)
 }
 
 type RunebloodIncantationYellow struct{}
@@ -48,10 +45,7 @@ func (RunebloodIncantationYellow) Types() card.TypeSet      { return runebloodIn
 func (RunebloodIncantationYellow) GoAgain() bool            { return true }
 func (RunebloodIncantationYellow) AddsFutureValue()         {}
 func (c RunebloodIncantationYellow) Play(s *card.TurnState, _ *card.CardState) int {
-	return runebloodPlay(s, 2)
-}
-func (c RunebloodIncantationYellow) PlayNextTurn(s *card.TurnState) card.DelayedPlayResult {
-	return runebloodPlayNextTurn(s, c)
+	return runebloodPlay(s, c, 2)
 }
 
 type RunebloodIncantationBlue struct{}
@@ -66,23 +60,19 @@ func (RunebloodIncantationBlue) Types() card.TypeSet      { return runebloodInca
 func (RunebloodIncantationBlue) GoAgain() bool            { return true }
 func (RunebloodIncantationBlue) AddsFutureValue()         {}
 func (c RunebloodIncantationBlue) Play(s *card.TurnState, _ *card.CardState) int {
-	return runebloodPlay(s, 1)
-}
-func (c RunebloodIncantationBlue) PlayNextTurn(s *card.TurnState) card.DelayedPlayResult {
-	return runebloodPlayNextTurn(s, c)
+	return runebloodPlay(s, c, 1)
 }
 
-// runebloodPlay flips AuraCreated for same-turn aura-readers and credits n-1 flat damage for
-// the future-turn verse-counter ticks that aren't separately modelled. The first tick's rune
-// is created in PlayNextTurn.
-func runebloodPlay(s *card.TurnState, n int) int {
+// runebloodPlay flips AuraCreated, credits n-1 flat damage for the future-turn verse-counter
+// ticks that aren't separately modelled, and registers a start-of-turn trigger that fires
+// the first tick (1 live Runechant) at the top of the next turn.
+func runebloodPlay(s *card.TurnState, self card.Card, n int) int {
 	s.AuraCreated = true
+	s.AddAuraTrigger(card.AuraTrigger{
+		Self:    self,
+		Type:    card.TriggerStartOfTurn,
+		Count:   1,
+		Handler: func(s *card.TurnState) int { return s.CreateRunechants(1) },
+	})
 	return n - 1
-}
-
-// runebloodPlayNextTurn fires the first verse-counter tick at the start of the next turn:
-// destroy the aura and create 1 live Runechant on the new turn's starting state.
-func runebloodPlayNextTurn(s *card.TurnState, self card.Card) card.DelayedPlayResult {
-	s.AddToGraveyard(self)
-	return card.DelayedPlayResult{Damage: s.CreateRunechants(1)}
 }

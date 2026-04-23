@@ -6,14 +6,15 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 )
 
-// TestBlessingOfOccult_PlayCreatesAuraNoThisTurnRunes: Play just flips AuraCreated so
-// same-turn readers see an aura was created; no runes are made this turn.
+// TestBlessingOfOccult_PlayCreatesAuraNoThisTurnRunes: Play flips AuraCreated so same-turn
+// readers see an aura was created; no runes are made this turn (deferred to the trigger).
+// The registered trigger is TriggerStartOfTurn with Count=1.
 func TestBlessingOfOccult_PlayCreatesAuraNoThisTurnRunes(t *testing.T) {
 	cases := []card.Card{BlessingOfOccultRed{}, BlessingOfOccultYellow{}, BlessingOfOccultBlue{}}
 	for _, c := range cases {
 		var s card.TurnState
 		if got := c.Play(&s, &card.CardState{}); got != 0 {
-			t.Errorf("%s: Play() = %d, want 0 (rune creation deferred to PlayNextTurn)", c.Name(), got)
+			t.Errorf("%s: Play() = %d, want 0 (rune creation deferred to trigger)", c.Name(), got)
 		}
 		if !s.AuraCreated {
 			t.Errorf("%s: AuraCreated should be set", c.Name())
@@ -21,13 +22,21 @@ func TestBlessingOfOccult_PlayCreatesAuraNoThisTurnRunes(t *testing.T) {
 		if s.Runechants != 0 {
 			t.Errorf("%s: Runechants = %d, want 0 (tokens are next-turn)", c.Name(), s.Runechants)
 		}
+		if len(s.AuraTriggers) != 1 {
+			t.Fatalf("%s: AuraTriggers len = %d, want 1", c.Name(), len(s.AuraTriggers))
+		}
+		if s.AuraTriggers[0].Type != card.TriggerStartOfTurn {
+			t.Errorf("%s: trigger Type = %d, want TriggerStartOfTurn", c.Name(), s.AuraTriggers[0].Type)
+		}
+		if s.AuraTriggers[0].Count != 1 {
+			t.Errorf("%s: Count = %d, want 1", c.Name(), s.AuraTriggers[0].Count)
+		}
 	}
 }
 
-// TestBlessingOfOccult_PlayNextTurnCreatesRunesAndGraveyardsSelf: at next turn's upkeep,
-// Blessing creates N live Runechants on the new state and adds itself to the graveyard.
-// The returned Damage matches the token count so cumulative Value picks up the credit.
-func TestBlessingOfOccult_PlayNextTurnCreatesRunesAndGraveyardsSelf(t *testing.T) {
+// TestBlessingOfOccult_TriggerHandlerCreatesNRunes: invoking the trigger's handler on a
+// fresh TurnState creates N live Runechants and credits matching damage.
+func TestBlessingOfOccult_TriggerHandlerCreatesNRunes(t *testing.T) {
 	cases := []struct {
 		c card.Card
 		n int
@@ -37,17 +46,16 @@ func TestBlessingOfOccult_PlayNextTurnCreatesRunesAndGraveyardsSelf(t *testing.T
 		{BlessingOfOccultBlue{}, 1},
 	}
 	for _, tc := range cases {
-		var s card.TurnState
-		dp := tc.c.(card.DelayedPlay)
-		r := dp.PlayNextTurn(&s)
-		if r.Damage != tc.n {
-			t.Errorf("%s: Damage = %d, want %d", tc.c.Name(), r.Damage, tc.n)
+		var play card.TurnState
+		tc.c.Play(&play, &card.CardState{})
+		var next card.TurnState
+		got := play.AuraTriggers[0].Handler(&next)
+		if got != tc.n {
+			t.Errorf("%s: handler damage = %d, want %d", tc.c.Name(), got, tc.n)
 		}
-		if s.Runechants != tc.n {
-			t.Errorf("%s: Runechants = %d, want %d (live tokens on next turn)", tc.c.Name(), s.Runechants, tc.n)
-		}
-		if len(s.Graveyard) != 1 || s.Graveyard[0].ID() != tc.c.ID() {
-			t.Errorf("%s: Graveyard = %v, want [self]", tc.c.Name(), s.Graveyard)
+		if next.Runechants != tc.n {
+			t.Errorf("%s: Runechants = %d, want %d (live tokens on next turn)",
+				tc.c.Name(), next.Runechants, tc.n)
 		}
 	}
 }

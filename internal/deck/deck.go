@@ -497,12 +497,18 @@ func (d *Deck) EvaluateWith(runs int, incomingDamage int, rng *rand.Rand, ev *ha
 			}
 			runechantCarryover += delayedRunes
 			// Fire start-of-turn AuraTriggers from last turn. Survivors (triggers whose Count
-			// didn't hit zero, and non-start-of-turn types) carry forward. Destroyed auras
-			// are surfaced for tests via EvalOneTurnForTesting; the production loop discards
-			// them here.
+			// didn't hit zero, and non-start-of-turn types) carry forward. A ToHand-style
+			// reveal from a handler pops the deck top and appends it to the hand here so the
+			// best-line search sees the augmented hand. Destroyed auras are surfaced for
+			// tests via EvalOneTurnForTesting; the production loop discards them here.
 			var trigContribs []hand.TriggerContribution
 			var trigDamage, trigRunes int
-			auraTriggerBuf, trigContribs, trigDamage, trigRunes, _ = fireStartOfTurnTriggers(auraTriggerBuf)
+			var trigRevealed []card.Card
+			auraTriggerBuf, trigContribs, trigDamage, trigRunes, trigRevealed, _ = fireStartOfTurnTriggers(auraTriggerBuf, buf[head+drawCount:tail])
+			for range trigRevealed {
+				h = append(h, buf[head+drawCount])
+				drawCount++
+			}
 			runechantCarryover += trigRunes
 			var play hand.TurnSummary
 			if ev != nil {
@@ -629,27 +635,33 @@ func runDelayedPlays(queued []card.Card, postDrawDeck []card.Card) ([]hand.Delay
 }
 
 // fireStartOfTurnTriggers walks queued (the AuraTriggers alive at end of last turn) and
-// invokes every TriggerStartOfTurn handler. Non-start-of-turn triggers (future
-// TriggerAttackAction etc.) pass through unchanged, ready to fire mid-chain on their own
-// condition.
+// invokes every TriggerStartOfTurn handler against a shared TurnState seeded with the
+// post-draw deck — handlers that peek the top (Sigil of the Arknight's reveal) read the
+// actual card about to be revealed. Non-start-of-turn triggers (future TriggerAttackAction
+// etc.) pass through unchanged, ready to fire mid-chain on their own condition.
 //
 // Returns the survivor list (start-of-turn triggers whose Count didn't hit zero plus every
 // non-start-of-turn trigger), the per-aura contributions for FormatBestTurn, the summed
 // damage to fold into Value, the Runechant tokens created during the handlers (folded into
-// next turn's carryover), and the auras that left the arena this pass (Count hit zero) in
-// destroy order — so subsequent handlers can see them in state.Graveyard and tests can
-// assert the destroy.
-func fireStartOfTurnTriggers(queued []card.AuraTrigger) (
+// next turn's carryover), the cards the handlers moved from the deck top into the hand (via
+// ts.Revealed) in reveal order, and the auras that left the arena this pass (Count hit
+// zero) in destroy order — so subsequent handlers can see them in state.Graveyard and tests
+// can assert the destroy.
+//
+// Cascading reveals: a handler that pops s.Deck shrinks the view for the next handler, so
+// two reveal-capable auras see distinct tops.
+func fireStartOfTurnTriggers(queued []card.AuraTrigger, postDrawDeck []card.Card) (
 	survivors []card.AuraTrigger,
 	contribs []hand.TriggerContribution,
 	damage int,
 	runes int,
+	revealed []card.Card,
 	graveyarded []card.Card,
 ) {
 	if len(queued) == 0 {
-		return queued[:0], nil, 0, 0, nil
+		return queued[:0], nil, 0, 0, nil, nil
 	}
-	var ts card.TurnState
+	ts := card.TurnState{Deck: postDrawDeck}
 	survivors = queued[:0]
 	for _, t := range queued {
 		if t.Type != card.TriggerStartOfTurn {
@@ -668,7 +680,7 @@ func fireStartOfTurnTriggers(queued []card.AuraTrigger) (
 		// it in state.Graveyard (e.g. a second aura with a graveyard-banish rider).
 		ts.AddToGraveyard(t.Self)
 	}
-	return survivors, contribs, damage, ts.Runechants, ts.Graveyard
+	return survivors, contribs, damage, ts.Runechants, ts.Revealed, ts.Graveyard
 }
 
 // collectDelayedPlays scans a turn's BestLine for cards whose Play ran (Role == Attack) and that
@@ -825,8 +837,13 @@ func (d *Deck) EvalOneTurnForTesting(incomingDamage int, arsenalIn card.Card, in
 	}
 	// Fire turn-1 start-of-turn AuraTriggers, parallelling the DelayedPlay pass above.
 	// Survivors would become priorAuraTriggers for turn 2 in production but the caller
-	// returns before running Best.
-	_, _, trigDamage, trigRunes, trigGraveyarded := fireStartOfTurnTriggers(triggerQueue)
+	// returns before running Best. Reveals into the hand are consumed here so the returned
+	// turn-2 Hand matches what Best would see.
+	_, _, trigDamage, trigRunes, trigRevealed, trigGraveyarded := fireStartOfTurnTriggers(triggerQueue, buf[head+drawCount2:tail])
+	for range trigRevealed {
+		turn2Hand = append(turn2Hand, buf[head+drawCount2])
+		drawCount2++
+	}
 	handCopy := append([]card.Card(nil), turn2Hand...)
 	deckLeft := append([]card.Card(nil), buf[head+drawCount2:tail]...)
 	lineCopy := append([]hand.CardAssignment(nil), play.BestLine...)

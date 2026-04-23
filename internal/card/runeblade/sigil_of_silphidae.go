@@ -4,10 +4,11 @@
 // If you do, deal 1 arcane damage to target hero. At the beginning of your action phase, destroy
 // this."
 //
-// Enter trigger fires on Play: banishAuraFromGraveyard scans s.Graveyard for an aura and
-// credits 1 arcane if one lands in s.Banish. At the start of next turn PlayNextTurn scans
-// the graveyard for the leave trigger FIRST, then adds the sigil to the graveyard — the
-// ordering honours the printed "another aura" restriction without any explicit skip.
+// Modelling: Play resolves the enter trigger directly (banishAuraFromGraveyard scans
+// s.Graveyard and credits 1 arcane if an aura lands in s.Banish) and registers a
+// start-of-turn AuraTrigger with Count=1 for the "destroy this" clause. Next turn the
+// handler runs the LEAVE trigger FIRST — the sim graveyards Self only after Count hits
+// zero, so the "another aura" restriction is honoured naturally without an explicit skip.
 //
 // Source: github.com/the-fab-cube/flesh-and-blood-cards (card.csv).
 
@@ -31,12 +32,17 @@ func (SigilOfSilphidaeBlue) AddsFutureValue()         {}
 func (SigilOfSilphidaeBlue) NoMemo()                  {}
 func (c SigilOfSilphidaeBlue) Play(s *card.TurnState, _ *card.CardState) int {
 	s.AuraCreated = true
-	return banishAuraFromGraveyard(s)
-}
-func (c SigilOfSilphidaeBlue) PlayNextTurn(s *card.TurnState) card.DelayedPlayResult {
-	// Scan BEFORE Silphidae lands in the graveyard so the printed "another aura" restriction
-	// is satisfied naturally — the scan can't pick up the sigil itself.
-	r := card.DelayedPlayResult{Damage: banishAuraFromGraveyard(s)}
-	s.AddToGraveyard(c)
-	return r
+	enterDamage := banishAuraFromGraveyard(s)
+	s.AddAuraTrigger(card.AuraTrigger{
+		Self:  c,
+		Type:  card.TriggerStartOfTurn,
+		Count: 1,
+		Handler: func(s *card.TurnState) int {
+			// The sim graveyards Self only AFTER this handler returns (Count hits zero),
+			// so the scan here naturally can't pick up Silphidae itself — the printed
+			// "another aura" restriction is satisfied without an explicit skip.
+			return banishAuraFromGraveyard(s)
+		},
+	})
+	return enterDamage
 }

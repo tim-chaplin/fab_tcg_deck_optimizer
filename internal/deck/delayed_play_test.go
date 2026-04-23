@@ -1,18 +1,16 @@
 package deck
 
 import (
-	"math/rand"
 	"testing"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card/fake"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/card/runeblade"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/hand"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/hero"
 )
 
 // stubDelayed implements card.DelayedPlay and records each PlayNextTurn call so tests can
-// assert the queue was processed exactly once per turn boundary.
+// assert the queue was processed exactly once per turn boundary. Kept around until Phase 4
+// deletes the legacy DelayedPlay mechanism; real cards have all migrated to AuraTrigger.
 type stubDelayed struct {
 	damage int
 	calls  *int
@@ -27,8 +25,8 @@ func (s stubDelayed) Defense() int             { return 0 }
 func (s stubDelayed) Types() card.TypeSet {
 	return card.NewTypeSet(card.TypeGeneric, card.TypeAction)
 }
-func (s stubDelayed) GoAgain() bool            { return true }
-func (s stubDelayed) Play(*card.TurnState, *card.CardState) int { return 0 }
+func (s stubDelayed) GoAgain() bool                              { return true }
+func (s stubDelayed) Play(*card.TurnState, *card.CardState) int  { return 0 }
 func (s stubDelayed) PlayNextTurn(*card.TurnState) card.DelayedPlayResult {
 	*s.calls++
 	return card.DelayedPlayResult{Damage: s.damage}
@@ -95,175 +93,5 @@ func TestRunDelayedPlays_EmptyQueue(t *testing.T) {
 	}
 	if revealed != nil {
 		t.Errorf("revealed = %v, want nil", revealed)
-	}
-}
-
-// TestRunDelayedPlays_RevealsAttackActionIntoHand verifies Sigil of the Arknight's reveal:
-// the top card (an attack action) comes back in the revealed slice, and the contribution has
-// ToHand set for the formatter.
-func TestRunDelayedPlays_RevealsAttackActionIntoHand(t *testing.T) {
-	sigil := runeblade.SigilOfTheArknightBlue{}
-	slash := runeblade.AetherSlashRed{}
-	contribs, total, _, revealed := runDelayedPlays([]card.Card{sigil}, []card.Card{slash})
-	if total != 0 {
-		t.Errorf("total = %d, want 0 (reveal contributes via hand, not damage)", total)
-	}
-	if len(revealed) != 1 || revealed[0] != slash {
-		t.Errorf("revealed = %v, want [%v]", revealed, slash)
-	}
-	if len(contribs) != 1 || contribs[0].ToHand != slash {
-		t.Errorf("contribs[0].ToHand = %v, want %v", contribs[0].ToHand, slash)
-	}
-}
-
-// TestRunDelayedPlays_CascadingReveals: two sigils in a row each reveal the current top, so the
-// second one sees the NEW top after the first pops its card off the front of the deck view.
-func TestRunDelayedPlays_CascadingReveals(t *testing.T) {
-	sigil := runeblade.SigilOfTheArknightBlue{}
-	first := runeblade.AetherSlashRed{}
-	second := runeblade.ConsumingVolitionRed{}
-	_, _, _, revealed := runDelayedPlays([]card.Card{sigil, sigil}, []card.Card{first, second})
-	if len(revealed) != 2 {
-		t.Fatalf("len(revealed) = %d, want 2 (two cascading reveals)", len(revealed))
-	}
-	if revealed[0] != first || revealed[1] != second {
-		t.Errorf("revealed = %v, want [%v, %v]", revealed, first, second)
-	}
-}
-
-// TestRunDelayedPlays_NonAttackTopSkipsReveal: sigil peeks a non-attack top → no reveal, no
-// damage. The top card stays on the deck in the real game.
-func TestRunDelayedPlays_NonAttackTopSkipsReveal(t *testing.T) {
-	sigil := runeblade.SigilOfTheArknightBlue{}
-	// Sigil itself is an Aura (non-attack) — use it as a convenient non-attack top.
-	_, total, _, revealed := runDelayedPlays([]card.Card{sigil}, []card.Card{sigil})
-	if total != 0 {
-		t.Errorf("total = %d, want 0 (non-attack top, no credit)", total)
-	}
-	if revealed != nil {
-		t.Errorf("revealed = %v, want nil (non-attack tops aren't moved)", revealed)
-	}
-}
-
-// TestEvalOneTurn_SigilOfTheArknightRevealsIntoHand is the end-to-end 2-turn check: turn 1
-// starts with a Sigil of the Arknight as the ONLY card in hand. The solver plays it (the
-// beatsBest tiebreaker prefers playing DelayedPlay cards at equal Value over Held → arsenal
-// promotion, crediting their hidden next-turn payoff). The sigil queues its PlayNextTurn
-// callback; on turn 2 the callback peeks the top of the post-draw deck — an attack action —
-// and moves it into the hand. The returned turn-2 hand should have 5 cards: 4 normal refills
-// plus the revealed Aether Slash appended at the tail.
-func TestEvalOneTurn_SigilOfTheArknightRevealsIntoHand(t *testing.T) {
-	sigil := runeblade.SigilOfTheArknightBlue{}
-	reveal := runeblade.AetherSlashRed{}
-	// Deck layout: positions 0..3 are turn 2's normal refill (Blues), position 4 is the reveal
-	// target at the post-draw top, positions 5+ are unused filler.
-	deckCards := []card.Card{
-		fake.BlueAttack{},
-		fake.BlueAttack{},
-		fake.BlueAttack{},
-		fake.BlueAttack{},
-		reveal,
-		fake.BlueAttack{},
-	}
-	d := New(hero.Viserai{}, nil, deckCards)
-	state := d.EvalOneTurnForTesting(0, nil, []card.Card{sigil})
-
-	// Assert sigil played: find it as Role=Attack in turn 1's BestLine.
-	sigilPlayed := false
-	for _, a := range state.PrevTurnBestLine {
-		if a.Card.ID() == card.SigilOfTheArknightBlue && a.Role == hand.Attack {
-			sigilPlayed = true
-			break
-		}
-	}
-	if !sigilPlayed {
-		t.Errorf("turn 1 BestLine didn't play the sigil as Role=Attack: %+v", state.PrevTurnBestLine)
-	}
-
-	// Turn 2: 4 normal draws + 1 revealed = 5 cards. deckCards[0..3] refill turn 2's hand;
-	// deckCards[4] is the reveal target appended at the tail.
-	wantHand := []card.Card{
-		fake.BlueAttack{},
-		fake.BlueAttack{},
-		fake.BlueAttack{},
-		fake.BlueAttack{},
-		reveal,
-	}
-	if len(state.Hand) != len(wantHand) {
-		t.Fatalf("turn 2 hand size = %d, want %d (4 normal draws + 1 revealed)", len(state.Hand), len(wantHand))
-	}
-	for i, want := range wantHand {
-		if state.Hand[i] != want {
-			t.Errorf("turn 2 hand[%d] = %v, want %v", i, state.Hand[i], want)
-		}
-	}
-}
-
-// TestEvalOneTurn_BlessingOfOccultCreatesRunesAtStartOfNextTurn: turn 1's hand has a Red
-// Blessing of Occult plus a pitch filler to fund Blessing's 1-cost. Play contributes 0 this
-// turn (the 3 Runechants fire at next turn's upkeep via PlayNextTurn), but the solver still
-// plays Blessing so the DelayedPlay queue picks it up. Turn 2's starting state should have 3
-// Runechants in the carryover.
-func TestEvalOneTurn_BlessingOfOccultCreatesRunesAtStartOfNextTurn(t *testing.T) {
-	blessing := runeblade.BlessingOfOccultRed{}
-	pitch := fake.PitchOneDR{}
-	deckCards := []card.Card{
-		fake.BlueAttack{},
-		fake.BlueAttack{},
-		fake.BlueAttack{},
-		fake.BlueAttack{},
-	}
-	d := New(hero.Viserai{}, nil, deckCards)
-	state := d.EvalOneTurnForTesting(0, nil, []card.Card{blessing, pitch})
-
-	if state.PrevTurnValue != 0 {
-		t.Errorf("PrevTurnValue = %d, want 0 (Blessing's rune credit is deferred)", state.PrevTurnValue)
-	}
-	blessingPlayed := false
-	for _, a := range state.PrevTurnBestLine {
-		if a.Card.ID() == card.BlessingOfOccultRed && a.Role == hand.Attack {
-			blessingPlayed = true
-			break
-		}
-	}
-	if !blessingPlayed {
-		t.Errorf("turn 1 BestLine didn't play Blessing as Role=Attack: %+v", state.PrevTurnBestLine)
-	}
-	if state.Runechants != 3 {
-		t.Errorf("Runechants = %d, want 3 (Blessing's PlayNextTurn creates 3 tokens at start of turn 2)",
-			state.Runechants)
-	}
-}
-
-// TestEvaluate_DelayedFromLastTurnSurfacesInBest runs a full Evaluate with Sigil of the
-// Arknight in the deck and asserts the PlayNextTurn callback lands a DelayedFromLastTurn
-// entry on at least some hand's TurnSummary. Uses enough copies + runs that the shuffle
-// reliably plays Sigil before the best turn is recorded.
-func TestEvaluate_DelayedFromLastTurnSurfacesInBest(t *testing.T) {
-	sigil := runeblade.SigilOfTheArknightBlue{}
-	slash := runeblade.AetherSlashRed{}
-	deckCards := make([]card.Card, 0, 20)
-	for i := 0; i < 8; i++ {
-		deckCards = append(deckCards, sigil)
-	}
-	for i := 0; i < 6; i++ {
-		deckCards = append(deckCards, slash)
-	}
-	for i := 0; i < 6; i++ {
-		deckCards = append(deckCards, fake.BlueAttack{})
-	}
-	d := New(hero.Viserai{}, nil, deckCards)
-	rng := rand.New(rand.NewSource(42))
-	d.Evaluate(20, 0, rng)
-
-	if d.Stats.PerCard[card.SigilOfTheArknightBlue].Plays == 0 {
-		t.Fatal("Sigil was never played — test fixture not provoking the code path")
-	}
-	// Across 20 runs * multiple turns each, the best-value turn almost certainly had a Sigil
-	// queued from the prior turn. Failing here means the delayed bookkeeping never reached
-	// Stats.Best.
-	if len(d.Stats.Best.Summary.DelayedFromLastTurn) == 0 {
-		t.Errorf("Stats.Best.Summary.DelayedFromLastTurn is empty; Best.Value=%d; Sigils played=%d",
-			d.Stats.Best.Summary.Value, d.Stats.PerCard[card.SigilOfTheArknightBlue].Plays)
 	}
 }

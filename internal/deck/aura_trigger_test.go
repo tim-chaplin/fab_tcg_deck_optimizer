@@ -1,11 +1,13 @@
 package deck
 
 import (
+	"math/rand"
 	"testing"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card/fake"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card/generic"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/card/runeblade"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/hand"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/hero"
 )
@@ -32,7 +34,7 @@ func TestFireStartOfTurnTriggers_FiresEachQueuedTriggerOnce(t *testing.T) {
 	aura := fake.RedAttack{}
 	var callsA, callsB int
 	queue := []card.AuraTrigger{damageTrigger(aura, 2, &callsA), damageTrigger(aura, 3, &callsB)}
-	survivors, contribs, total, _, _ := fireStartOfTurnTriggers(queue)
+	survivors, contribs, total, _, _, _ := fireStartOfTurnTriggers(queue, nil)
 	if total != 5 {
 		t.Errorf("total = %d, want 5 (2+3)", total)
 	}
@@ -49,7 +51,7 @@ func TestFireStartOfTurnTriggers_FiresEachQueuedTriggerOnce(t *testing.T) {
 
 // TestFireStartOfTurnTriggers_EmptyQueue short-circuits: no contribs, no allocation, zero total.
 func TestFireStartOfTurnTriggers_EmptyQueue(t *testing.T) {
-	survivors, contribs, total, runes, _ := fireStartOfTurnTriggers(nil)
+	survivors, contribs, total, runes, _, _ := fireStartOfTurnTriggers(nil, nil)
 	if total != 0 || runes != 0 {
 		t.Errorf("total/runes = %d/%d, want 0/0", total, runes)
 	}
@@ -77,10 +79,10 @@ func TestFireStartOfTurnTriggers_GraveyardsExhaustedAura(t *testing.T) {
 			return 0
 		},
 	}
-	_, _, _, _, _ = fireStartOfTurnTriggers([]card.AuraTrigger{
+	_, _, _, _, _, _ = fireStartOfTurnTriggers([]card.AuraTrigger{
 		{Self: aura, Type: card.TriggerStartOfTurn, Count: 1, Handler: func(*card.TurnState) int { return 0 }},
 		watcher,
-	})
+	}, nil)
 	if len(seen) != 1 || seen[0] != aura {
 		t.Errorf("second handler saw Graveyard = %v, want [%v] (first trigger's Self graveyarded first)",
 			seen, aura)
@@ -120,5 +122,187 @@ func TestEvalOneTurn_SigilOfFyendalQueuesTrigger(t *testing.T) {
 	if len(state.StartOfTurnGraveyard) != 1 || state.StartOfTurnGraveyard[0].ID() != card.SigilOfFyendalBlue {
 		t.Errorf("StartOfTurnGraveyard = %v, want [Sigil of Fyendal] (Count hit zero after firing)",
 			state.StartOfTurnGraveyard)
+	}
+}
+
+// TestFireStartOfTurnTriggers_RevealsAttackActionIntoHand: Sigil of the Arknight's handler
+// peeks the post-draw deck top, pops it, and appends to ts.Revealed when it's an attack
+// action. The helper surfaces ts.Revealed so the deck loop can forward the revealed card
+// into the hand.
+func TestFireStartOfTurnTriggers_RevealsAttackActionIntoHand(t *testing.T) {
+	var play card.TurnState
+	(runeblade.SigilOfTheArknightBlue{}).Play(&play, &card.CardState{})
+	slash := runeblade.AetherSlashRed{}
+	_, contribs, total, _, revealed, _ := fireStartOfTurnTriggers(play.AuraTriggers, []card.Card{slash})
+	if total != 0 {
+		t.Errorf("total = %d, want 0 (reveal contributes via hand, not damage)", total)
+	}
+	if len(revealed) != 1 || revealed[0] != slash {
+		t.Errorf("revealed = %v, want [%v]", revealed, slash)
+	}
+	if len(contribs) != 1 || contribs[0].Card.ID() != card.SigilOfTheArknightBlue {
+		t.Errorf("contribs = %+v, want one entry for the sigil", contribs)
+	}
+}
+
+// TestFireStartOfTurnTriggers_CascadingReveals: two Arknight sigil triggers in a row each
+// reveal the current top, so the second sees the NEW top after the first pops its card.
+func TestFireStartOfTurnTriggers_CascadingReveals(t *testing.T) {
+	var play card.TurnState
+	(runeblade.SigilOfTheArknightBlue{}).Play(&play, &card.CardState{})
+	(runeblade.SigilOfTheArknightBlue{}).Play(&play, &card.CardState{})
+	first := runeblade.AetherSlashRed{}
+	second := runeblade.ConsumingVolitionRed{}
+	_, _, _, _, revealed, _ := fireStartOfTurnTriggers(play.AuraTriggers, []card.Card{first, second})
+	if len(revealed) != 2 {
+		t.Fatalf("len(revealed) = %d, want 2 (two cascading reveals)", len(revealed))
+	}
+	if revealed[0] != first || revealed[1] != second {
+		t.Errorf("revealed = %v, want [%v, %v]", revealed, first, second)
+	}
+}
+
+// TestFireStartOfTurnTriggers_NonAttackActionTopSkipsReveal: the sigil handler peeks a
+// non-attack top → no reveal. The top stays on the deck in the real game.
+func TestFireStartOfTurnTriggers_NonAttackActionTopSkipsReveal(t *testing.T) {
+	var play card.TurnState
+	sigil := runeblade.SigilOfTheArknightBlue{}
+	sigil.Play(&play, &card.CardState{})
+	// Sigil itself is an Aura (non-attack action) — use it as a convenient non-attack top.
+	_, _, total, _, revealed, _ := fireStartOfTurnTriggers(play.AuraTriggers, []card.Card{sigil})
+	if total != 0 {
+		t.Errorf("total = %d, want 0 (non-attack top, no credit)", total)
+	}
+	if revealed != nil {
+		t.Errorf("revealed = %v, want nil (non-attack tops aren't moved)", revealed)
+	}
+}
+
+// TestEvalOneTurn_SigilOfTheArknightRevealsIntoHand is the end-to-end 2-turn check: turn 1
+// starts with a Sigil of the Arknight as the ONLY card in hand. The solver plays it (the
+// beatsBest tiebreaker prefers playing trigger-creating auras at equal Value over Held →
+// arsenal promotion, crediting their hidden next-turn payoff). The sigil registers a
+// start-of-turn AuraTrigger; on turn 2 the handler peeks the post-draw top (an attack
+// action) and moves it into the hand. The returned turn-2 hand should have 5 cards:
+// 4 normal refills plus the revealed Aether Slash appended at the tail.
+func TestEvalOneTurn_SigilOfTheArknightRevealsIntoHand(t *testing.T) {
+	sigil := runeblade.SigilOfTheArknightBlue{}
+	reveal := runeblade.AetherSlashRed{}
+	// Deck layout: positions 0..3 are turn 2's normal refill (Blues), position 4 is the reveal
+	// target at the post-draw top, positions 5+ are unused filler.
+	deckCards := []card.Card{
+		fake.BlueAttack{},
+		fake.BlueAttack{},
+		fake.BlueAttack{},
+		fake.BlueAttack{},
+		reveal,
+		fake.BlueAttack{},
+	}
+	d := New(hero.Viserai{}, nil, deckCards)
+	state := d.EvalOneTurnForTesting(0, nil, []card.Card{sigil})
+
+	sigilPlayed := false
+	for _, a := range state.PrevTurnBestLine {
+		if a.Card.ID() == card.SigilOfTheArknightBlue && a.Role == hand.Attack {
+			sigilPlayed = true
+			break
+		}
+	}
+	if !sigilPlayed {
+		t.Errorf("turn 1 BestLine didn't play the sigil as Role=Attack: %+v", state.PrevTurnBestLine)
+	}
+
+	// Turn 2: 4 normal draws + 1 revealed = 5 cards. deckCards[0..3] refill turn 2's hand;
+	// deckCards[4] is the reveal target appended at the tail.
+	wantHand := []card.Card{
+		fake.BlueAttack{},
+		fake.BlueAttack{},
+		fake.BlueAttack{},
+		fake.BlueAttack{},
+		reveal,
+	}
+	if len(state.Hand) != len(wantHand) {
+		t.Fatalf("turn 2 hand size = %d, want %d (4 normal draws + 1 revealed)", len(state.Hand), len(wantHand))
+	}
+	for i, want := range wantHand {
+		if state.Hand[i] != want {
+			t.Errorf("turn 2 hand[%d] = %v, want %v", i, state.Hand[i], want)
+		}
+	}
+	if len(state.StartOfTurnGraveyard) != 1 || state.StartOfTurnGraveyard[0].ID() != card.SigilOfTheArknightBlue {
+		t.Errorf("StartOfTurnGraveyard = %v, want [Sigil of the Arknight]", state.StartOfTurnGraveyard)
+	}
+}
+
+// TestEvalOneTurn_BlessingOfOccultCreatesRunesAtStartOfNextTurn: turn 1's hand has a Red
+// Blessing of Occult plus a pitch filler to fund Blessing's 1-cost. Play contributes 0 this
+// turn (the 3 Runechants fire at next turn's upkeep via the start-of-turn AuraTrigger), but
+// the solver still plays Blessing so the trigger queue picks it up. Turn 2's starting state
+// should have 3 Runechants in the carryover.
+func TestEvalOneTurn_BlessingOfOccultCreatesRunesAtStartOfNextTurn(t *testing.T) {
+	blessing := runeblade.BlessingOfOccultRed{}
+	pitch := fake.PitchOneDR{}
+	deckCards := []card.Card{
+		fake.BlueAttack{},
+		fake.BlueAttack{},
+		fake.BlueAttack{},
+		fake.BlueAttack{},
+	}
+	d := New(hero.Viserai{}, nil, deckCards)
+	state := d.EvalOneTurnForTesting(0, nil, []card.Card{blessing, pitch})
+
+	if state.PrevTurnValue != 0 {
+		t.Errorf("PrevTurnValue = %d, want 0 (Blessing's rune credit is deferred)", state.PrevTurnValue)
+	}
+	blessingPlayed := false
+	for _, a := range state.PrevTurnBestLine {
+		if a.Card.ID() == card.BlessingOfOccultRed && a.Role == hand.Attack {
+			blessingPlayed = true
+			break
+		}
+	}
+	if !blessingPlayed {
+		t.Errorf("turn 1 BestLine didn't play Blessing as Role=Attack: %+v", state.PrevTurnBestLine)
+	}
+	if state.Runechants != 3 {
+		t.Errorf("Runechants = %d, want 3 (Blessing's start-of-turn trigger creates 3 tokens)",
+			state.Runechants)
+	}
+	if state.StartOfTurnTriggerDamage != 3 {
+		t.Errorf("StartOfTurnTriggerDamage = %d, want 3", state.StartOfTurnTriggerDamage)
+	}
+	if len(state.StartOfTurnGraveyard) != 1 || state.StartOfTurnGraveyard[0].ID() != card.BlessingOfOccultRed {
+		t.Errorf("StartOfTurnGraveyard = %v, want [Blessing (Red)]", state.StartOfTurnGraveyard)
+	}
+}
+
+// TestEvaluate_TriggersFromLastTurnSurfacesInBest runs a full Evaluate with Red Blessing of
+// Occult in the deck and asserts the start-of-turn trigger lands a TriggersFromLastTurn
+// entry on at least some hand's TurnSummary. Blessing's +3-rune trigger pads next turn's
+// Value directly, so a turn with Blessing queued from the prior turn reliably beats a turn
+// without — guaranteeing the best-turn picker selects a trigger-fired hand.
+func TestEvaluate_TriggersFromLastTurnSurfacesInBest(t *testing.T) {
+	blessing := runeblade.BlessingOfOccultRed{}
+	slash := runeblade.AetherSlashRed{}
+	deckCards := make([]card.Card, 0, 20)
+	for i := 0; i < 8; i++ {
+		deckCards = append(deckCards, blessing)
+	}
+	for i := 0; i < 6; i++ {
+		deckCards = append(deckCards, slash)
+	}
+	for i := 0; i < 6; i++ {
+		deckCards = append(deckCards, fake.BlueAttack{})
+	}
+	d := New(hero.Viserai{}, nil, deckCards)
+	rng := rand.New(rand.NewSource(42))
+	d.Evaluate(20, 0, rng)
+
+	if d.Stats.PerCard[card.BlessingOfOccultRed].Plays == 0 {
+		t.Fatal("Blessing was never played — test fixture not provoking the code path")
+	}
+	if len(d.Stats.Best.Summary.TriggersFromLastTurn) == 0 {
+		t.Errorf("Stats.Best.Summary.TriggersFromLastTurn is empty; Best.Value=%d; Blessings played=%d",
+			d.Stats.Best.Summary.Value, d.Stats.PerCard[card.BlessingOfOccultRed].Plays)
 	}
 }
