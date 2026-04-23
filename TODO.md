@@ -44,10 +44,11 @@ called out in the sections below — landing any of them unlocks a subset of the
 
 ### On-hit / combat interactions
 
-- **Conditional Dominate grants aren't wired.** Drowning Dire, Pound for Pound, and
-  Regurgitating Slog don't implement the `card.Dominator` marker and their `Play` never flips
-  `self.GrantedDominate`, so their "gains dominate" clauses never reach `LikelyToHit`.
-  (Overload and Demolition Crew's inherent Dominate is modelled via the marker.)
+- **Regurgitating Slog's Dominate grant isn't wired.** The "banish Sloggism" additional cost
+  the grant gates on isn't modelled, so flipping `self.GrantedDominate` unconditionally would
+  over-credit lines that don't actually have a Sloggism to banish. (Drowning Dire's
+  aura-gated grant and Pound for Pound's health-gated grant are both wired; Overload and
+  Demolition Crew's inherent Dominate runs through the `card.Dominator` marker.)
 - **On-hit go-again isn't granted.** Overload's on-hit clause never fires.
 - **Lay Low's marked-defender cost is ignored.** Card is treated as always legal and the attacker
   debuff is dropped.
@@ -343,4 +344,3 @@ listed here so the direction tag is co-located with the name.
   opponent be marked and the rider is tied to the mark.
 - **Put in Context** — base-power cap on what it can block is ignored; every attack is assumed
   to qualify so the defence is always live.
-- **Runeblade Drowning Dire (all colours)** — Dominate keyword dropped.

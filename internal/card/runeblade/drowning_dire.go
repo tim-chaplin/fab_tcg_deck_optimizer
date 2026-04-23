@@ -3,11 +3,12 @@
 // Printed power: Red 5, Yellow 4, Blue 3.
 // Text: "If you have played or created an aura this turn, Drowning Dire gains **dominate**."
 //
-// Modelling: the Dominate grant is conditional, so Drowning Dire does not implement the
-// card.Dominator marker and Play does not flip self.GrantedDominate. Wiring the grant would
-// fire when s.HasAuraInPlay() is true, but Drowning Dire has no on-hit rider keyed off
-// LikelyToHit — a flip here would only feed downstream scanners (none today) reading
-// EffectiveDominate on this CardState. Pending follow-up.
+// Modelling: the Dominate grant is conditional, gated on s.HasAuraInPlay(). Play flips
+// self.GrantedDominate when the aura clause is live so EffectiveDominate reports the card as
+// dominating this turn — downstream scanners (and any future on-hit rider) that read
+// pc.EffectiveDominate() see the grant. Printed power never clears the +5 Dominate bar
+// (R 5, Y 4, B 3), so today only Red flips from "blockable" to "hits" — but setting the
+// flag keeps the wiring honest in case a future card grants Drowning Dire an on-hit rider.
 
 package runeblade
 
@@ -15,38 +16,53 @@ import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 
 var drowningDireTypes = card.NewTypeSet(card.TypeRuneblade, card.TypeAction, card.TypeAttack)
 
+// drowningDirePlay grants self Dominate when an aura has been played or created this turn,
+// then returns the base attack.
+func drowningDirePlay(attack int, s *card.TurnState, self *card.CardState) int {
+	if s.HasAuraInPlay() {
+		self.GrantedDominate = true
+	}
+	return attack
+}
+
 type DrowningDireRed struct{}
 
 func (DrowningDireRed) ID() card.ID                 { return card.DrowningDireRed }
-func (DrowningDireRed) Name() string                 { return "Drowning Dire (Red)" }
-func (DrowningDireRed) Cost(*card.TurnState) int                    { return 2 }
-func (DrowningDireRed) Pitch() int                   { return 1 }
-func (DrowningDireRed) Attack() int                  { return 5 }
-func (DrowningDireRed) Defense() int                 { return 3 }
-func (DrowningDireRed) Types() card.TypeSet       { return drowningDireTypes }
-func (DrowningDireRed) GoAgain() bool                { return false }
-func (c DrowningDireRed) Play(*card.TurnState, *card.CardState) int   { return c.Attack() }
+func (DrowningDireRed) Name() string                { return "Drowning Dire (Red)" }
+func (DrowningDireRed) Cost(*card.TurnState) int    { return 2 }
+func (DrowningDireRed) Pitch() int                  { return 1 }
+func (DrowningDireRed) Attack() int                 { return 5 }
+func (DrowningDireRed) Defense() int                { return 3 }
+func (DrowningDireRed) Types() card.TypeSet         { return drowningDireTypes }
+func (DrowningDireRed) GoAgain() bool               { return false }
+func (c DrowningDireRed) Play(s *card.TurnState, self *card.CardState) int {
+	return drowningDirePlay(c.Attack(), s, self)
+}
 
 type DrowningDireYellow struct{}
 
 func (DrowningDireYellow) ID() card.ID                 { return card.DrowningDireYellow }
-func (DrowningDireYellow) Name() string                 { return "Drowning Dire (Yellow)" }
-func (DrowningDireYellow) Cost(*card.TurnState) int                    { return 2 }
-func (DrowningDireYellow) Pitch() int                   { return 2 }
-func (DrowningDireYellow) Attack() int                  { return 4 }
-func (DrowningDireYellow) Defense() int                 { return 3 }
-func (DrowningDireYellow) Types() card.TypeSet       { return drowningDireTypes }
-func (DrowningDireYellow) GoAgain() bool                { return false }
-func (c DrowningDireYellow) Play(*card.TurnState, *card.CardState) int   { return c.Attack() }
+func (DrowningDireYellow) Name() string                { return "Drowning Dire (Yellow)" }
+func (DrowningDireYellow) Cost(*card.TurnState) int    { return 2 }
+func (DrowningDireYellow) Pitch() int                  { return 2 }
+func (DrowningDireYellow) Attack() int                 { return 4 }
+func (DrowningDireYellow) Defense() int                { return 3 }
+func (DrowningDireYellow) Types() card.TypeSet         { return drowningDireTypes }
+func (DrowningDireYellow) GoAgain() bool               { return false }
+func (c DrowningDireYellow) Play(s *card.TurnState, self *card.CardState) int {
+	return drowningDirePlay(c.Attack(), s, self)
+}
 
 type DrowningDireBlue struct{}
 
 func (DrowningDireBlue) ID() card.ID                 { return card.DrowningDireBlue }
-func (DrowningDireBlue) Name() string                 { return "Drowning Dire (Blue)" }
-func (DrowningDireBlue) Cost(*card.TurnState) int                    { return 2 }
-func (DrowningDireBlue) Pitch() int                   { return 3 }
-func (DrowningDireBlue) Attack() int                  { return 3 }
-func (DrowningDireBlue) Defense() int                 { return 3 }
-func (DrowningDireBlue) Types() card.TypeSet       { return drowningDireTypes }
-func (DrowningDireBlue) GoAgain() bool                { return false }
-func (c DrowningDireBlue) Play(*card.TurnState, *card.CardState) int   { return c.Attack() }
+func (DrowningDireBlue) Name() string                { return "Drowning Dire (Blue)" }
+func (DrowningDireBlue) Cost(*card.TurnState) int    { return 2 }
+func (DrowningDireBlue) Pitch() int                  { return 3 }
+func (DrowningDireBlue) Attack() int                 { return 3 }
+func (DrowningDireBlue) Defense() int                { return 3 }
+func (DrowningDireBlue) Types() card.TypeSet         { return drowningDireTypes }
+func (DrowningDireBlue) GoAgain() bool               { return false }
+func (c DrowningDireBlue) Play(s *card.TurnState, self *card.CardState) int {
+	return drowningDirePlay(c.Attack(), s, self)
+}
