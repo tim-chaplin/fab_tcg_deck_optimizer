@@ -1,8 +1,6 @@
 // Hocus Pocus — Runeblade Action - Attack. Cost 0, Defense 3.
 // Printed power: Red 3, Yellow 2, Blue 1.
 // Text: "When this attacks, create a Runechant token."
-//
-// Simplification: each Runechant = +1 future damage. Play returns power + 1.
 
 package runeblade
 
