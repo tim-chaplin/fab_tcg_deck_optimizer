@@ -3,8 +3,10 @@
 // Text: "Go again. At the beginning of your action phase, destroy this. When this leaves the
 // arena, create a Runechant token."
 //
-// The rune fires at next turn's upkeep, so this card implements card.DelayedPlay —
-// PlayNextTurn destroys the aura and creates the Runechant on next turn's starting state.
+// Modelling: Play flips AuraCreated so same-turn aura-readers see it and registers a
+// start-of-turn AuraTrigger with Count=1. Next turn the sim fires the trigger — the handler
+// creates one live Runechant on the new turn's state — and graveyards Sigil of Deadwood as
+// Count hits zero.
 //
 // Source: github.com/the-fab-cube/flesh-and-blood-cards (card.csv).
 
@@ -27,9 +29,11 @@ func (SigilOfDeadwoodBlue) GoAgain() bool            { return true }
 func (SigilOfDeadwoodBlue) AddsFutureValue()         {}
 func (c SigilOfDeadwoodBlue) Play(s *card.TurnState, _ *card.CardState) int {
 	s.AuraCreated = true
+	s.AddAuraTrigger(card.AuraTrigger{
+		Self:    c,
+		Type:    card.TriggerStartOfTurn,
+		Count:   1,
+		Handler: func(s *card.TurnState) int { return s.CreateRunechants(1) },
+	})
 	return 0
-}
-func (c SigilOfDeadwoodBlue) PlayNextTurn(s *card.TurnState) card.DelayedPlayResult {
-	s.AddToGraveyard(c)
-	return card.DelayedPlayResult{Damage: s.CreateRunechants(1)}
 }

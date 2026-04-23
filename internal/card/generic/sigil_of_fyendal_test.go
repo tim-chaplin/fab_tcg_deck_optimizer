@@ -6,28 +6,32 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 )
 
-// TestSigilOfFyendal_PlaySetsAuraCreated verifies Play flips AuraCreated and credits 0 — the
-// 1{h} gain defers to PlayNextTurn since the aura only leaves at the start of the next action
-// phase.
-func TestSigilOfFyendal_PlaySetsAuraCreated(t *testing.T) {
-	s := card.TurnState{}
+// TestSigilOfFyendal_PlayRegistersStartOfTurnTrigger: Play flips AuraCreated and appends a
+// start-of-turn AuraTrigger with Count=1 — no same-turn damage, the 1{h} gain is credited
+// when the sim fires the trigger next turn.
+func TestSigilOfFyendal_PlayRegistersStartOfTurnTrigger(t *testing.T) {
+	var s card.TurnState
 	if got := (SigilOfFyendalBlue{}).Play(&s, &card.CardState{}); got != 0 {
-		t.Errorf("Play() = %d, want 0 (health gain deferred to PlayNextTurn)", got)
+		t.Errorf("Play() = %d, want 0 (1{h} gain deferred to trigger)", got)
 	}
 	if !s.AuraCreated {
 		t.Error("AuraCreated = false, want true")
 	}
+	if len(s.AuraTriggers) != 1 || s.AuraTriggers[0].Type != card.TriggerStartOfTurn {
+		t.Errorf("AuraTriggers = %+v, want one TriggerStartOfTurn entry", s.AuraTriggers)
+	}
+	if s.AuraTriggers[0].Count != 1 {
+		t.Errorf("Count = %d, want 1", s.AuraTriggers[0].Count)
+	}
 }
 
-// TestSigilOfFyendal_PlayNextTurnGainsHealth verifies the deferred 1{h} credit.
-func TestSigilOfFyendal_PlayNextTurnGainsHealth(t *testing.T) {
-	s := card.TurnState{}
-	got := (SigilOfFyendalBlue{}).PlayNextTurn(&s)
-	if got.Damage != 1 {
-		t.Errorf("Damage = %d, want 1 (1{h} gain on leave)", got.Damage)
-	}
-	if got.ToHand != nil {
-		t.Errorf("ToHand = %v, want nil (Fyendal doesn't reveal)", got.ToHand)
+// TestSigilOfFyendal_TriggerHandlerCredits1Damage: the registered handler credits +1 damage
+// (the 1{h} gain, valued 1-to-1 with damage).
+func TestSigilOfFyendal_TriggerHandlerCredits1Damage(t *testing.T) {
+	var s card.TurnState
+	(SigilOfFyendalBlue{}).Play(&s, &card.CardState{})
+	if got := s.AuraTriggers[0].Handler(&card.TurnState{}); got != 1 {
+		t.Errorf("Handler damage = %d, want 1", got)
 	}
 }
 

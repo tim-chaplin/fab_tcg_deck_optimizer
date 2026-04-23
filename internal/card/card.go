@@ -175,6 +175,68 @@ type TurnState struct {
 	// the graveyard (e.g. an aura-banish-for-arcane rider). Cards that key on "was a card
 	// banished this turn" read this list.
 	Banish []Card
+	// AuraTriggers is the list of triggers from auras currently in play. Value-typed so the
+	// sim can copy-restore it cheaply between permutations of the best-line search. Cards add
+	// entries during Play via AddAuraTrigger; the sim fires matching entries on each
+	// trigger-Type condition (start of turn for now), decrements Count in place, and drops
+	// entries whose Count hits zero after sending Self to the graveyard.
+	AuraTriggers []AuraTrigger
+	// Revealed is the side channel start-of-turn AuraTrigger handlers use to move a card
+	// from the top of the post-draw deck into the hand (Sigil of the Arknight's reveal).
+	// Handlers peek s.Deck[0], append to s.Revealed, and advance s.Deck past the popped
+	// card; the deck loop consumes s.Revealed after firing every start-of-turn handler and
+	// appends each entry to the dealt hand in order. Cascading reveals work because each
+	// handler's pop shrinks the shared Deck view for the next handler.
+	Revealed []Card
+}
+
+// AuraTriggerType categorizes when an AuraTrigger's Handler fires. The sim walks the
+// TurnState's AuraTriggers list on each matching condition and invokes every applicable
+// handler.
+type AuraTriggerType int
+
+const (
+	// TriggerStartOfTurn fires at the start of the owning player's action phase, before the
+	// best-line search. The classic upkeep trigger for "at the beginning of your action phase
+	// …" auras.
+	TriggerStartOfTurn AuraTriggerType = iota
+	// TriggerAttackAction fires each time an attack action card resolves during the attack
+	// chain. Triggers that set OncePerTurn cap themselves at one fire per turn regardless of
+	// how many attack actions resolve — Malefic Incantation's "once per turn, when you play
+	// an attack action card …" clause.
+	TriggerAttackAction
+)
+
+// OnAuraTrigger is the business-logic callback attached to an AuraTrigger. Called when the
+// trigger's Type condition fires — it's where the printed "create a runechant", "gain 1{h}",
+// "reveal top of deck" effect lives. Handlers mutate the passed TurnState directly
+// (e.g. s.CreateRunechants, s.AddToGraveyard) and return the damage-equivalent that folds
+// 1-to-1 into Value. The sim handles the counter bookkeeping (decrementing Count,
+// graveyarding the aura when Count hits zero); the handler does not.
+type OnAuraTrigger func(s *TurnState) int
+
+// AuraTrigger is a counter-tracked handler attached to an aura in play. Each time Type's
+// condition fires — and, when OncePerTurn is set, at most once per turn — the sim calls
+// Handler and decrements Count. When Count reaches zero the sim sends Self to the graveyard
+// and drops the trigger from TurnState.AuraTriggers. Self is the aura card itself so the
+// sim can graveyard it without needing a back-reference.
+type AuraTrigger struct {
+	// Self is the aura card this trigger belongs to. Used by the sim to graveyard the aura
+	// when Count reaches zero; also surfaced in per-turn summaries (e.g. the "(from previous
+	// turn)" formatter line naming the aura that fired).
+	Self Card
+	// Type is the condition that fires this trigger.
+	Type AuraTriggerType
+	// Count is the number of times this trigger will still fire before the aura is destroyed.
+	Count int
+	// Handler runs when Type fires.
+	Handler OnAuraTrigger
+	// OncePerTurn caps the trigger at a single fire per turn regardless of how many matching
+	// events occur. The sim sets FiredThisTurn the first time Handler runs each turn and
+	// clears it at the next turn boundary.
+	OncePerTurn bool
+	// FiredThisTurn is sim-managed bookkeeping for OncePerTurn. Cards must not set it.
+	FiredThisTurn bool
 }
 
 // DrawOne models a mid-turn draw: advance the deck by one card and append it to Drawn. No-op
@@ -261,6 +323,15 @@ func (s *TurnState) AddToGraveyard(c Card) {
 	s.Graveyard = append(s.Graveyard, c)
 }
 
+// AddAuraTrigger appends t to s.AuraTriggers so the sim fires it on its matching Type
+// condition. Cards call this from Play to register the "at the beginning of your action
+// phase …" / "once per turn, when …" clauses printed on Action - Aura cards. The sim owns
+// the trigger's lifecycle from here on: ticking Count and graveyarding Self when Count
+// hits zero.
+func (s *TurnState) AddAuraTrigger(t AuraTrigger) {
+	s.AuraTriggers = append(s.AuraTriggers, t)
+}
+
 // Card is any Flesh and Blood card that can be in a deck. Methods return the card's static
 // profile plus a Play hook for on-play logic.
 type Card interface {
@@ -332,40 +403,10 @@ type LowerHealthWanter interface {
 // bias, a lone Sigil of the Arknight loses to Held → arsenal promotion on the
 // arsenal-occupancy tiebreak.
 //
-// The marker is orthogonal to the mechanism — DelayedPlay next-turn callbacks, and any
-// future effects that hide value past this turn, all opt in here.
+// Today every implementer also registers an AuraTrigger on Play; the marker stays separate
+// so future hidden-value mechanisms can opt in without piggybacking on the trigger system.
 type AddsFutureValue interface {
 	AddsFutureValue()
-}
-
-// DelayedPlay is an optional marker for cards whose effect fires at the START of the owner's
-// NEXT action phase rather than the turn they're played. A card that implements this is still
-// played normally — Play runs this turn, typically to flip AuraCreated so same-turn aura-readers
-// see it — and is then queued for a PlayNextTurn callback that fires at the top of the next
-// turn, after the hand is drawn but before the best-line search.
-//
-// Cross-turn auras whose printed text reads "At the beginning of your action phase, destroy
-// this. When this leaves the arena, <effect>" belong here — Sigil of the Arknight's next-turn
-// reveal, Sigil of Fyendal's next-turn 1{h} gain.
-//
-// The TurnState passed to PlayNextTurn has Deck populated with the remaining deck after the
-// next hand has been drawn (so Deck[0] is the card about to be revealed by a top-of-deck
-// effect); every other field is zero.
-//
-// Every DelayedPlay card also implements AddsFutureValue so the solver's tiebreaker picks up
-// its hidden next-turn payoff.
-type DelayedPlay interface {
-	PlayNextTurn(s *TurnState) DelayedPlayResult
-}
-
-// DelayedPlayResult is what a DelayedPlay callback returns. Damage is credited 1-to-1 toward
-// the next turn's Value. ToHand, when non-nil, is popped off the top of the post-draw deck
-// and appended to that turn's hand — modelling "reveal top of deck; if <condition>, put it
-// into your hand" without collapsing the effect into a flat damage-equivalent. Callbacks that
-// don't reveal leave ToHand nil; callbacks that don't credit damage leave Damage 0.
-type DelayedPlayResult struct {
-	Damage int
-	ToHand Card
 }
 
 // ArsenalDefenseBonus is an optional marker for Defense Reactions whose printed text grants

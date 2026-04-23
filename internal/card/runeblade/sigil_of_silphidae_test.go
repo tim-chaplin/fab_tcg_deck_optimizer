@@ -7,7 +7,8 @@ import (
 )
 
 // TestSigilOfSilphidae_PlayFizzlesWithoutAura: no aura in s.Graveyard means the enter trigger
-// can't banish anything and Play returns 0. AuraCreated still fires (Silphidae IS an aura).
+// can't banish anything and Play returns 0. AuraCreated still fires (Silphidae IS an aura)
+// and a start-of-turn AuraTrigger is registered for the "destroy this" clause.
 func TestSigilOfSilphidae_PlayFizzlesWithoutAura(t *testing.T) {
 	var s card.TurnState
 	if got := (SigilOfSilphidaeBlue{}).Play(&s, nil); got != 0 {
@@ -18,6 +19,9 @@ func TestSigilOfSilphidae_PlayFizzlesWithoutAura(t *testing.T) {
 	}
 	if s.ArcaneDamageDealt {
 		t.Errorf("ArcaneDamageDealt should stay false when banish fizzles")
+	}
+	if len(s.AuraTriggers) != 1 || s.AuraTriggers[0].Type != card.TriggerStartOfTurn {
+		t.Errorf("AuraTriggers = %+v, want one TriggerStartOfTurn entry", s.AuraTriggers)
 	}
 }
 
@@ -37,38 +41,33 @@ func TestSigilOfSilphidae_PlayBanishesAuraForOneArcane(t *testing.T) {
 	}
 }
 
-// TestSigilOfSilphidae_PlayNextTurnGraveyardsSelfAndFizzles: with nothing else in the
-// graveyard, PlayNextTurn adds Silphidae to the graveyard and the leave trigger has no
-// OTHER aura to banish — returns 0 damage.
-func TestSigilOfSilphidae_PlayNextTurnGraveyardsSelfAndFizzles(t *testing.T) {
-	c := SigilOfSilphidaeBlue{}
-	var s card.TurnState
-	r := c.PlayNextTurn(&s)
-	if r.Damage != 0 {
-		t.Errorf("Damage = %d, want 0 (no other aura to banish)", r.Damage)
-	}
-	if len(s.Graveyard) != 1 || s.Graveyard[0].ID() != c.ID() {
-		t.Errorf("Graveyard = %v, want [Silphidae]", s.Graveyard)
+// TestSigilOfSilphidae_StartOfTurnHandlerFizzlesWithoutAnotherAura: with nothing else in the
+// start-of-turn graveyard, the leave trigger has no OTHER aura to banish — handler returns
+// 0 damage.
+func TestSigilOfSilphidae_StartOfTurnHandlerFizzlesWithoutAnotherAura(t *testing.T) {
+	var play card.TurnState
+	(SigilOfSilphidaeBlue{}).Play(&play, nil)
+	var next card.TurnState
+	got := play.AuraTriggers[0].Handler(&next)
+	if got != 0 {
+		t.Errorf("handler damage = %d, want 0 (no other aura to banish)", got)
 	}
 }
 
-// TestSigilOfSilphidae_PlayNextTurnBanishesAnotherAura: with another aura already in the
-// graveyard, the leave trigger banishes it for 1 arcane. The "another" restriction is
-// honoured by scan order — PlayNextTurn scans the graveyard before adding Silphidae, so the
-// sigil itself can't be banished.
-func TestSigilOfSilphidae_PlayNextTurnBanishesAnotherAura(t *testing.T) {
-	c := SigilOfSilphidaeBlue{}
+// TestSigilOfSilphidae_StartOfTurnHandlerBanishesAnotherAura: with another aura already in
+// the start-of-turn graveyard, the leave trigger banishes it for 1 arcane. The sim
+// graveyards Self only AFTER this handler returns, so the scan can't pick up Silphidae
+// itself — the printed "another aura" restriction is satisfied naturally.
+func TestSigilOfSilphidae_StartOfTurnHandlerBanishesAnotherAura(t *testing.T) {
+	var play card.TurnState
+	(SigilOfSilphidaeBlue{}).Play(&play, nil)
 	other := BlessingOfOccultRed{}
-	s := card.TurnState{Graveyard: []card.Card{other}}
-	r := c.PlayNextTurn(&s)
-	if r.Damage != 1 {
-		t.Errorf("Damage = %d, want 1 (banished another aura)", r.Damage)
+	next := card.TurnState{Graveyard: []card.Card{other}}
+	got := play.AuraTriggers[0].Handler(&next)
+	if got != 1 {
+		t.Errorf("handler damage = %d, want 1 (banished another aura)", got)
 	}
-	if len(s.Banish) != 1 || s.Banish[0].ID() != other.ID() {
-		t.Errorf("Banish = %v, want [Blessing]", s.Banish)
-	}
-	// Silphidae stays in the graveyard after the leave trigger (it's the thing that just died).
-	if len(s.Graveyard) != 1 || s.Graveyard[0].ID() != c.ID() {
-		t.Errorf("Graveyard = %v, want [Silphidae]", s.Graveyard)
+	if len(next.Banish) != 1 || next.Banish[0].ID() != other.ID() {
+		t.Errorf("Banish = %v, want [Blessing]", next.Banish)
 	}
 }

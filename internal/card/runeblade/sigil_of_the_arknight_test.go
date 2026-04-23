@@ -7,59 +7,76 @@ import (
 )
 
 // TestSigilOfTheArknight_PlayOnlySetsAuraCreated verifies Play defers the reveal effect — it
-// only flips AuraCreated and returns 0. The deck peek happens in PlayNextTurn now.
+// flips AuraCreated, registers a TriggerStartOfTurn entry, and returns 0. The deck peek
+// happens when the sim fires the trigger next turn.
 func TestSigilOfTheArknight_PlayOnlySetsAuraCreated(t *testing.T) {
 	s := card.TurnState{Deck: []card.Card{stubRunebladeAttack{}}}
 	if got := (SigilOfTheArknightBlue{}).Play(&s, &card.CardState{}); got != 0 {
-		t.Errorf("Play() = %d, want 0 (reveal deferred to PlayNextTurn)", got)
+		t.Errorf("Play() = %d, want 0 (reveal deferred to trigger)", got)
 	}
 	if !s.AuraCreated {
 		t.Error("AuraCreated = false, want true")
 	}
+	if len(s.AuraTriggers) != 1 || s.AuraTriggers[0].Type != card.TriggerStartOfTurn {
+		t.Errorf("AuraTriggers = %+v, want one TriggerStartOfTurn entry", s.AuraTriggers)
+	}
 }
 
-// TestSigilOfTheArknight_PlayNextTurnRevealsAttackActionIntoHand: the post-draw deck's top card
-// is an attack action → the card is returned in ToHand so the deck loop moves it into the hand.
-// Damage stays 0 because the tempo is captured by having the extra card, not by a flat credit.
-func TestSigilOfTheArknight_PlayNextTurnRevealsAttackActionIntoHand(t *testing.T) {
+// TestSigilOfTheArknight_TriggerRevealsAttackActionIntoHand: the post-draw deck's top card
+// is an attack action → the handler moves it to s.Revealed and pops s.Deck so the deck
+// loop appends the card to that turn's hand. Damage stays 0 (tempo is captured by the
+// extra card, not a flat credit).
+func TestSigilOfTheArknight_TriggerRevealsAttackActionIntoHand(t *testing.T) {
+	var play card.TurnState
+	(SigilOfTheArknightBlue{}).Play(&play, &card.CardState{})
 	top := stubRunebladeAttack{}
-	s := card.TurnState{Deck: []card.Card{top, stubNonAttack{}}}
-	got := (SigilOfTheArknightBlue{}).PlayNextTurn(&s)
-	if got.Damage != 0 {
-		t.Errorf("Damage = %d, want 0 (tempo credited via ToHand, not Damage)", got.Damage)
+	next := card.TurnState{Deck: []card.Card{top, stubNonAttack{}}}
+	if got := play.AuraTriggers[0].Handler(&next); got != 0 {
+		t.Errorf("handler damage = %d, want 0 (tempo credited via Revealed, not damage)", got)
 	}
-	if got.ToHand != top {
-		t.Errorf("ToHand = %v, want %v (top of post-draw deck)", got.ToHand, top)
+	if len(next.Revealed) != 1 || next.Revealed[0] != top {
+		t.Errorf("Revealed = %v, want [%v] (top of post-draw deck)", next.Revealed, top)
 	}
-}
-
-// TestSigilOfTheArknight_PlayNextTurnRevealsNonAttack: top card is non-attack → ToHand stays
-// nil (the card stays on top of the deck in the real game).
-func TestSigilOfTheArknight_PlayNextTurnRevealsNonAttack(t *testing.T) {
-	s := card.TurnState{Deck: []card.Card{stubAura{}, stubRunebladeAttack{}}}
-	got := (SigilOfTheArknightBlue{}).PlayNextTurn(&s)
-	if got.ToHand != nil {
-		t.Errorf("ToHand = %v, want nil (top is non-attack, no reveal)", got.ToHand)
-	}
-	if got.Damage != 0 {
-		t.Errorf("Damage = %d, want 0", got.Damage)
+	if len(next.Deck) != 1 || next.Deck[0] != (stubNonAttack{}) {
+		t.Errorf("Deck = %v, want top popped leaving [stubNonAttack]", next.Deck)
 	}
 }
 
-// TestSigilOfTheArknight_PlayNextTurnEmptyDeck: nothing to reveal → zero result.
-func TestSigilOfTheArknight_PlayNextTurnEmptyDeck(t *testing.T) {
-	s := card.TurnState{}
-	got := (SigilOfTheArknightBlue{}).PlayNextTurn(&s)
-	if got.ToHand != nil || got.Damage != 0 {
-		t.Errorf("PlayNextTurn() = %+v, want zero (empty deck)", got)
+// TestSigilOfTheArknight_TriggerRevealsNonAttack: top card is non-attack → Revealed stays
+// nil and Deck is untouched (the card stays on top of the deck in the real game).
+func TestSigilOfTheArknight_TriggerRevealsNonAttack(t *testing.T) {
+	var play card.TurnState
+	(SigilOfTheArknightBlue{}).Play(&play, &card.CardState{})
+	next := card.TurnState{Deck: []card.Card{stubAura{}, stubRunebladeAttack{}}}
+	if got := play.AuraTriggers[0].Handler(&next); got != 0 {
+		t.Errorf("handler damage = %d, want 0", got)
+	}
+	if next.Revealed != nil {
+		t.Errorf("Revealed = %v, want nil (non-attack top, no reveal)", next.Revealed)
+	}
+	if len(next.Deck) != 2 {
+		t.Errorf("Deck len = %d, want 2 (non-attack tops aren't moved)", len(next.Deck))
 	}
 }
 
-// TestSigilOfTheArknight_ImplementsDelayedPlay pins the marker so the deck loop queues this
-// card for a next-turn callback.
-func TestSigilOfTheArknight_ImplementsDelayedPlay(t *testing.T) {
+// TestSigilOfTheArknight_TriggerEmptyDeck: nothing to reveal → zero result, Revealed stays nil.
+func TestSigilOfTheArknight_TriggerEmptyDeck(t *testing.T) {
+	var play card.TurnState
+	(SigilOfTheArknightBlue{}).Play(&play, &card.CardState{})
+	var next card.TurnState
+	if got := play.AuraTriggers[0].Handler(&next); got != 0 {
+		t.Errorf("handler damage = %d, want 0", got)
+	}
+	if next.Revealed != nil {
+		t.Errorf("Revealed = %v, want nil (empty deck)", next.Revealed)
+	}
+}
+
+// TestSigilOfTheArknight_ImplementsAddsFutureValue pins the marker so the solver's
+// beatsBest tiebreaker counts this card as future-value-adding.
+func TestSigilOfTheArknight_ImplementsAddsFutureValue(t *testing.T) {
 	var c card.Card = SigilOfTheArknightBlue{}
-	if _, ok := c.(card.DelayedPlay); !ok {
-		t.Error("SigilOfTheArknightBlue should implement card.DelayedPlay")
+	if _, ok := c.(card.AddsFutureValue); !ok {
+		t.Error("SigilOfTheArknightBlue should implement card.AddsFutureValue")
 	}
 }
