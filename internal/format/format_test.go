@@ -39,14 +39,10 @@ func TestParse(t *testing.T) {
 	}
 }
 
-// TestSilverAgeBanlistParity pins the authoritative banlist file against the code tags: every
-// card name in data_sources/silver_age_banlist.txt that has an implementation must have every one
-// of its variants tagged with NotSilverAgeLegal. Catches drift when someone edits the banlist
-// without updating code, or implements an already-banned card without tagging it.
-//
-// Names are matched after stripping the " (Red)" / " (Yellow)" / " (Blue)" color suffix and
-// normalising Unicode curly apostrophes (U+2019) to ASCII — the banlist file uses curly quotes
-// in places where Name() returns straight ones.
+// TestSilverAgeBanlistParity pins the banlist file against the code tags: every card in
+// data_sources/silver_age_banlist.txt that has an implementation must tag every variant with
+// NotSilverAgeLegal. Names are matched after stripping the color suffix and normalising
+// curly apostrophes (U+2019) to ASCII.
 func TestSilverAgeBanlistParity(t *testing.T) {
 	// Banlist lives at the repo root; tests run from this package dir, so two levels up.
 	data, err := os.ReadFile("../../data_sources/silver_age_banlist.txt")
@@ -94,8 +90,8 @@ func normalizeName(s string) string {
 	return strings.ReplaceAll(s, "\u2019", "'")
 }
 
-// TestIsLegal uses two concrete cards: Plunder Run (Red) which implements NotSilverAgeLegal, and
-// Nimblism (Red) which doesn't. Silver Age rejects the banned one and accepts the other.
+// TestIsLegal uses one card with NotSilverAgeLegal and one without to confirm Silver Age
+// rejects the banned one and accepts the other.
 func TestIsLegal(t *testing.T) {
 	banned := generic.PlunderRunRed{}
 	legal := generic.NimblismRed{}
