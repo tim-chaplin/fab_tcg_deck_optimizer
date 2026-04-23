@@ -2,8 +2,8 @@
 // Printed power: Red 4, Yellow 3, Blue 2.
 // Text: "When you attack with Singeing Steelblade, deal 1 arcane damage to target hero."
 //
-// Simplification: the printed 1 arcane is added to base damage unconditionally. Play sets
-// ArcaneDamageDealt so later-this-turn triggers see the flag.
+// The printed 1 arcane is added to combat damage (both hit the same target). Play also sets
+// ArcaneDamageDealt so same-turn triggers keyed on that flag fire.
 
 package runeblade
 

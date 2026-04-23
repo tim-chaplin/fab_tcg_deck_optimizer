@@ -2,9 +2,9 @@
 // Printed power: Red 3, Yellow 2, Blue 1.
 // Text: "Deal 1 arcane damage to target hero."
 //
-// Simplification: the printed 1 arcane is added to base damage unconditionally. Play sets
-// ArcaneDamageDealt so later-this-turn triggers reading "if you've dealt arcane damage this
-// turn" see it.
+// The printed 1 arcane is added to combat damage (both hit the same target). Play also sets
+// ArcaneDamageDealt so same-turn triggers reading "if you've dealt arcane damage this turn"
+// fire.
 
 package runeblade
 

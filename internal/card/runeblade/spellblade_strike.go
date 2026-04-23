@@ -1,8 +1,6 @@
 // Spellblade Strike — Runeblade Action - Attack. Cost 1, Defense 3.
 // Printed power: Red 4, Yellow 3, Blue 2.
 // Text: "Create a Runechant token."
-//
-// Simplification: +1 damage per Runechant. Play returns power + 1.
 
 package runeblade
 

@@ -1,8 +1,6 @@
 // Spellblade Assault — Runeblade Action - Attack. Cost 2, Defense 3.
 // Printed power: Red 4, Yellow 3, Blue 2.
 // Text: "When you attack with Spellblade Assault, create 2 Runechant tokens."
-//
-// Simplification: +1 damage per Runechant. Play returns power + 2.
 
 package runeblade
 
