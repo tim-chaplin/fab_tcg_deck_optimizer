@@ -4,10 +4,9 @@
 // you do, each opponent destroys an aura permanent they control. Go again."
 // (Red N=3, Yellow N=2, Blue N=1.)
 //
-// Simplification: the aura-trade rider is ignored. The +N{p} fires only if a Runeblade attack
-// (an attack action card OR a weapon swing) follows later in this turn's ordering (peeking
-// TurnState.CardsRemaining); in that case Play returns N as the bonus damage it will eventually
-// confer. The opponent-aura-destruction clause is ignored.
+// Simplification: the aura-trade rider and the opponent-aura-destruction clause are ignored.
+// The +N{p} fires only if a Runeblade attack (attack action card OR weapon swing) follows
+// later in this turn's ordering; in that case Play returns N as the bonus damage.
 
 package runeblade
 

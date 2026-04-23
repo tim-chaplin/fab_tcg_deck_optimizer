@@ -9,9 +9,8 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/deck"
 )
 
-// runEvalCmd parses eval's flags and dispatches to runEval. eval always operates on a specific
-// existing deck, so the deck is a positional arg rather than a -deck flag; only knobs that
-// shape the re-simulation (-deep-shuffles, -incoming, -seed) get flags.
+// runEvalCmd parses eval's flags and dispatches to runEval. eval always operates on an
+// existing deck passed positionally; flags cover only re-simulation knobs.
 func runEvalCmd(args []string) {
 	fs := flag.NewFlagSet("eval", flag.ExitOnError)
 	fs.Usage = func() {
@@ -30,10 +29,10 @@ func runEvalCmd(args []string) {
 	runEval(resolveDeckPath(fs.Arg(0)), *deepShuffles, *incoming, *seed)
 }
 
-// runEval loads the deck at outPath, simulates it for deepShuffles hands, and prints the fresh
-// stats. The file on disk is NOT overwritten — eval is a read-only measurement so a deck can be
-// re-scored at a new shuffle depth (or a different -incoming) without clobbering the saved
-// stats.
+// runEval loads the deck at outPath, simulates it for deepShuffles hands, and prints the
+// fresh stats. The file on disk is NOT overwritten: eval is a read-only measurement so a
+// deck can be re-scored at a new shuffle depth or different -incoming without clobbering
+// the saved stats.
 func runEval(outPath string, deepShuffles, incoming int, seed int64) {
 	loaded := mustLoadDeck(outPath)
 	// Wrap the loaded hero/weapons/cards in a fresh Deck so Evaluate's stats start from zero

@@ -29,8 +29,7 @@ func main() {
 	}
 
 	// Create mydecks/ up front so downstream WriteFile calls can't fail on a missing dir after
-	// a long run. Done once here rather than per-subcommand since every subcommand either reads
-	// or writes mydecks/.
+	// a long run. Every subcommand reads or writes this directory.
 	if err := os.MkdirAll(mydecks.Dir, 0o755); err != nil {
 		die("mkdir %s: %v", mydecks.Dir, err)
 	}
@@ -55,10 +54,9 @@ func main() {
 	}
 }
 
-// extractSubcommand pulls os.Args[1] as the subcommand name and returns the remaining args for
-// the subcommand's own flag.FlagSet to parse. Returns (_, _, false) when no subcommand is given
-// or the first arg looks like a flag (bare `fabsim`, `fabsim -help`); the caller prints the
-// subcommand list.
+// extractSubcommand pulls os.Args[1] as the subcommand name and returns the remaining args
+// for the subcommand's own flag.FlagSet. Returns (_, _, false) when no subcommand is given
+// or the first arg looks like a flag; the caller prints the subcommand list.
 func extractSubcommand() (string, []string, bool) {
 	if len(os.Args) < 2 {
 		return "", nil, false
@@ -215,11 +213,10 @@ func fabraryPathFor(jsonPath string) string {
 	return jsonPath + ".txt"
 }
 
-// mustLoadDeck loads the deck at path or dies. Used by subcommands (eval, print, diff) that
-// always operate on an existing deck — for them, both "missing" and "corrupt" are fatal,
-// they should report the situation and exit. anneal handles the missing-vs-corrupt
-// distinction itself because "missing" is a valid input ("no deck yet, generate one")
-// while "corrupt" needs the loud refusal to overwrite.
+// mustLoadDeck loads the deck at path or dies. For subcommands that always operate on an
+// existing deck (eval, print, diff), both "missing" and "corrupt" are fatal. anneal handles
+// the distinction itself: "missing" is a valid input ("no deck yet, generate one") while
+// "corrupt" needs the loud refusal to overwrite.
 func mustLoadDeck(path string) *deck.Deck {
 	d, _, err := loadExisting(path)
 	if err != nil {
@@ -242,9 +239,8 @@ func resolveDeckPath(name string) string {
 	return p
 }
 
-// printCardList writes the deck's card list in canonical "Card list:" form: one grouped-and-
-// sorted count-and-name line per unique card. Shared between printBestDeck and iterate's
-// starting-deck banner so both callers render decks the same way.
+// printCardList writes the deck's card list in canonical "Card list:" form: one
+// grouped-and-sorted count-and-name line per unique card.
 func printCardList(d *deck.Deck) {
 	fmt.Println("Card list:")
 	counts := map[string]int{}
