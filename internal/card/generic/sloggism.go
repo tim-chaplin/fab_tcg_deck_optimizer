@@ -18,14 +18,12 @@ var sloggismTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction)
 // sloggismPlay returns n when a matching attack action card is scheduled later this turn.
 func sloggismPlay(s *card.TurnState, n int) int {
 	for _, pc := range s.CardsRemaining {
-		t := pc.Card.Types()
-		if !t.Has(card.TypeAttack) || !t.Has(card.TypeAction) {
+		if !pc.Card.Types().IsAttackAction() {
 			continue
 		}
 		if pc.Card.Cost(s) >= 2 {
 			return n
 		}
-		continue
 	}
 	return 0
 }

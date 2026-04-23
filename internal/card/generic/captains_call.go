@@ -21,14 +21,12 @@ var captainsCallTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction)
 // later this turn.
 func captainsCallPlay(s *card.TurnState, maxCost int) int {
 	for _, pc := range s.CardsRemaining {
-		t := pc.Card.Types()
-		if !t.Has(card.TypeAttack) || !t.Has(card.TypeAction) {
+		if !pc.Card.Types().IsAttackAction() {
 			continue
 		}
 		if pc.Card.Cost(s) <= maxCost {
 			return 2
 		}
-		continue
 	}
 	return 0
 }

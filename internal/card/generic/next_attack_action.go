@@ -11,8 +11,7 @@ import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 // CardsRemaining themselves rather than trying to parameterise this helper further.
 func nextAttackActionBonus(s *card.TurnState, n int) int {
 	for _, pc := range s.CardsRemaining {
-		t := pc.Card.Types()
-		if t.Has(card.TypeAttack) && t.Has(card.TypeAction) {
+		if pc.Card.Types().IsAttackAction() {
 			return n
 		}
 	}

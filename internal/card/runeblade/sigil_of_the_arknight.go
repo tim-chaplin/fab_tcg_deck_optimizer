@@ -48,8 +48,7 @@ func sigilOfTheArknightReveal(s *card.TurnState) int {
 		return 0
 	}
 	top := s.Deck[0]
-	t := top.Types()
-	if t.Has(card.TypeAttack) && t.Has(card.TypeAction) {
+	if top.Types().IsAttackAction() {
 		s.Revealed = append(s.Revealed, top)
 		s.Deck = s.Deck[1:]
 	}

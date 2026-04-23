@@ -59,7 +59,7 @@ func runicReapingPlay(s *card.TurnState, n int) int {
 	var target card.Card
 	for _, pc := range s.CardsRemaining {
 		t := pc.Card.Types()
-		if t.Has(card.TypeRuneblade) && t.Has(card.TypeAction) && t.Has(card.TypeAttack) {
+		if t.Has(card.TypeRuneblade) && t.IsAttackAction() {
 			target = pc.Card
 			break
 		}

@@ -19,8 +19,7 @@ var waterTheSeedsTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card
 // scheduled later this turn, otherwise just basePower.
 func waterTheSeedsPlay(basePower int, s *card.TurnState) int {
 	for _, pc := range s.CardsRemaining {
-		t := pc.Card.Types()
-		if !t.Has(card.TypeAttack) || !t.Has(card.TypeAction) {
+		if !pc.Card.Types().IsAttackAction() {
 			continue
 		}
 		if pc.Card.Attack() <= 1 {

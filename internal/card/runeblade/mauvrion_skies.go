@@ -58,7 +58,7 @@ func (MauvrionSkiesBlue) Play(s *card.TurnState, _ *card.CardState) int { return
 func mauvrionSkiesPlay(s *card.TurnState, n int) int {
 	for _, pc := range s.CardsRemaining {
 		t := pc.Card.Types()
-		if t.Has(card.TypeRuneblade) && t.Has(card.TypeAction) && t.Has(card.TypeAttack) {
+		if t.Has(card.TypeRuneblade) && t.IsAttackAction() {
 			pc.GrantedGoAgain = true
 			if card.LikelyToHit(pc.Card.Attack()) {
 				return s.CreateRunechants(n)

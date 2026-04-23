@@ -590,7 +590,7 @@ func cardMetaSlowPath(c card.Card, id card.ID) attackerMeta {
 		card:             c,
 		baseGoAgain:      c.GoAgain(),
 		isAttackOrWeapon: t.Has(card.TypeAttack) || t.Has(card.TypeWeapon),
-		isAttackAction:   t.Has(card.TypeAttack) && t.Has(card.TypeAction),
+		isAttackAction:   t.IsAttackAction(),
 	}
 	if vc, ok := c.(card.VariableCost); ok {
 		m.minCost = vc.MinCost()

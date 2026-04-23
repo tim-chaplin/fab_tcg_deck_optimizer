@@ -25,7 +25,7 @@ func sutcliffesResearchNotesPlay(revealCount int, s *card.TurnState) int {
 	count := 0
 	for i := 0; i < n; i++ {
 		t := s.Deck[i].Types()
-		if t.Has(card.TypeRuneblade) && t.Has(card.TypeAttack) && t.Has(card.TypeAction) {
+		if t.Has(card.TypeRuneblade) && t.IsAttackAction() {
 			count++
 		}
 	}

@@ -62,6 +62,15 @@ func (s TypeSet) IsNonAttackAction() bool {
 	return s&TypeSet(TypeAction) != 0 && s&TypeSet(TypeAttack) == 0
 }
 
+// IsAttackAction reports whether s is an attack action card — both Action and Attack. Used by
+// the ten-or-so "next attack action card you play this turn" riders (Come to Fight, Minnowism,
+// Nimblism, Sloggism, Water the Seeds, Captain's Call, Flying High, Trot Along, Scout the
+// Periphery, Next Attack Action helper) plus the solver's per-card attackerMeta precompute.
+// Single-expression bitmask keeps the peek loops lean.
+func (s TypeSet) IsAttackAction() bool {
+	return s&TypeSet(TypeAction) != 0 && s&TypeSet(TypeAttack) != 0
+}
+
 // IsRunebladeAttack reports whether s is a Runeblade attack — an attack action card OR a weapon
 // swing. Used by "next Runeblade attack this turn" riders (Mauvrion Skies, Runic Reaping, Oath of
 // the Arknight, Condemn to Slaughter) that peek CardsRemaining.
