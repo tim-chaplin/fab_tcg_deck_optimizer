@@ -14,9 +14,8 @@ package card
 const DiscardValue = 3
 
 // GoldTokenValue is the damage-equivalent credited when a card creates a Gold token. A Gold
-// token is one free resource (one {r}) worth of future tempo — about 1 damage's worth once
-// spent.
-const GoldTokenValue = 1
+// token is is one future card draw, at the expense of two resource.
+const GoldTokenValue = 0
 
 // LikelyToHit reports whether dealing n damage is likely to get through an opponent's blocks.
 // A typical FaB card is worth ~3 points, so blocking 1/4/7 with a pitch or block card
