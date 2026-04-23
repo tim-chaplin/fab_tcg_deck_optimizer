@@ -334,50 +334,54 @@ func TestFireStartOfTurnTriggers_ReArmsOncePerTurnGate(t *testing.T) {
 }
 
 // TestEvalOneTurn_MaleficIncantationOncePerTurnLimitsToOneRune: turn 1 plays Red Malefic
-// (Count=3) plus two attack-action attackers in the same chain. Both resolve, but with
-// OncePerTurn only the first fires the trigger — the verse-counter Count ticks from 3 to 2
-// just once. Turn 2's start-of-turn pass clears FiredThisTurn so a turn-2 attack action
-// could tick it again.
+// (Count=3, OncePerTurn) followed by Red Hocus Pocus (an attack action card). Hocus is the
+// only attack action this turn so the trigger fires exactly once — verifying the gate
+// doesn't *prevent* the first fire (a separate hand-package test exercises the gate
+// closing on a same-turn second attack action). Turn 1 Value breaks down as:
 //
-// fake.BlueAttack is Action+Attack with Go again, so two of them chain after Malefic. The
-// first BlueAttack triggers Malefic's verse counter (+1 rune); the second is gated.
+//	+3 Hocus Pocus attack (printed power)
+//	+1 Hocus Pocus's own Runechant-creation rider
+//	+1 Viserai trigger (Hocus is a Runeblade card; Malefic was a prior non-attack action)
+//	+1 Malefic AttackAction trigger (creates one Runechant)
+//	= 6
+//
+// Turn 2's start-of-turn pass clears FiredThisTurn so the trigger can fire again next
+// turn, but doesn't itself credit damage (Malefic is AttackAction-typed, not StartOfTurn).
+// Malefic survives with Count=2.
 func TestEvalOneTurn_MaleficIncantationOncePerTurnLimitsToOneRune(t *testing.T) {
 	malefic := runeblade.MaleficIncantationRed{}
+	hocus := runeblade.HocusPocusRed{}
+	// Filler deck so turn 2 can be dealt — content doesn't matter for what we assert.
 	deckCards := []card.Card{
 		fake.BlueAttack{},
 		fake.BlueAttack{},
 		fake.BlueAttack{},
 		fake.BlueAttack{},
 	}
-	// Hand: Malefic + 3× BlueAttack. Pitch 1 BlueAttack (3 res) covers the two costs of 1
-	// for the other two BlueAttacks; Malefic costs 0 and goes again.
 	d := New(hero.Viserai{}, nil, deckCards)
-	state := d.EvalOneTurnForTesting(0, nil, []card.Card{
-		malefic,
-		fake.BlueAttack{},
-		fake.BlueAttack{},
-		fake.BlueAttack{},
-	})
+	state := d.EvalOneTurnForTesting(0, nil, []card.Card{malefic, hocus})
 
-	maleficPlayed := false
-	blueAttacks := 0
+	maleficPlayed, hocusPlayed := false, false
 	for _, a := range state.PrevTurnBestLine {
 		if a.Card.ID() == card.MaleficIncantationRed && a.Role == hand.Attack {
 			maleficPlayed = true
 		}
-		if a.Card.ID() == card.FakeBlueAttack && a.Role == hand.Attack {
-			blueAttacks++
+		if a.Card.ID() == card.HocusPocusRed && a.Role == hand.Attack {
+			hocusPlayed = true
 		}
 	}
 	if !maleficPlayed {
-		t.Fatalf("turn 1 BestLine didn't play Malefic as Role=Attack: %+v", state.PrevTurnBestLine)
+		t.Errorf("turn 1 BestLine didn't play Malefic as Role=Attack: %+v", state.PrevTurnBestLine)
 	}
-	if blueAttacks < 2 {
-		t.Fatalf("turn 1 BestLine played %d attack actions, want >= 2 (need multiple to test the gate)",
-			blueAttacks)
+	if !hocusPlayed {
+		t.Errorf("turn 1 BestLine didn't play Hocus Pocus as Role=Attack: %+v", state.PrevTurnBestLine)
 	}
-	// Turn 2's start-of-turn pass: Malefic is AttackAction-typed, doesn't fire at start-of-
-	// turn — it just survives with FiredThisTurn cleared. No same-turn-credit, no graveyard.
+	if state.PrevTurnValue != 6 {
+		t.Errorf("PrevTurnValue = %d, want 6 (3 Hocus + 1 Hocus rune + 1 Viserai trigger + 1 Malefic trigger)",
+			state.PrevTurnValue)
+	}
+	// Malefic's AttackAction trigger doesn't fire at start of turn — it only ticks on
+	// attack actions during the chain. Carry-only at the turn boundary.
 	if state.StartOfTurnTriggerDamage != 0 {
 		t.Errorf("StartOfTurnTriggerDamage = %d, want 0 (Malefic only fires on attack actions)",
 			state.StartOfTurnTriggerDamage)
