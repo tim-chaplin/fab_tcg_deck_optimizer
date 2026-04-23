@@ -180,9 +180,11 @@ func splitPitchesByPhase(pitched []CardAssignment, drCost int) (defensePitches, 
 // appendAttackChainLines renders the Attack phase: one numbered line per AttackChain entry in
 // solver-chosen play order, with the shared step counter advanced via stepPtr so later sections
 // keep numbering contiguous. Non-weapon entries cross-reference BestLine by ID so arsenal-played
-// cards get a "(from arsenal)" tag; weapons skip the match since they have no BestLine entry. A
-// non-zero TriggerDamage adds a trailing " (+M hero trigger)" so the attribution is visible
-// instead of silently folded into the card's own damage number.
+// cards get a "(from arsenal)" tag; weapons skip the match since they have no BestLine entry.
+// Cards that aren't attacks (e.g. non-attack actions like Mauvrion Skies) use "PLAY" so the
+// label matches what the card actually does on the chain. A non-zero TriggerDamage adds a
+// trailing " (+M hero trigger)" so the attribution is visible instead of silently folded into
+// the card's own damage number.
 func appendAttackChainLines(lines []string, t TurnSummary, stepPtr *int) []string {
 	used := make([]bool, len(t.BestLine))
 	appendAttack := func(label, cardName string, e AttackChainEntry) {
@@ -210,7 +212,11 @@ func appendAttackChainLines(lines []string, t TurnSummary, stepPtr *int) []strin
 			used[i] = true
 			break
 		}
-		appendAttack("ATTACK", e.Card.Name()+tag, e)
+		label := "ATTACK"
+		if !e.Card.Types().Has(card.TypeAttack) {
+			label = "PLAY"
+		}
+		appendAttack(label, e.Card.Name()+tag, e)
 	}
 	return lines
 }
