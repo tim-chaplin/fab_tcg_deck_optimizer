@@ -92,8 +92,12 @@ func TestBest_PlainBlockStillFree(t *testing.T) {
 }
 
 func TestBest_ViseraiMaleficShrillCombo(t *testing.T) {
-	// Hero = Viserai. Best line: pitch the Blue Malefic, then play both Red Maleficas and the Red
-	// Shrill. Value = 15.
+	// Hero = Viserai. Best line: pitch the Blue Malefic, then play both Red Maleficas and the
+	// Red Shrill. Each Malefic Play credits 0; Shrill (an attack action) fires both Malefics'
+	// AttackAction triggers for +2 runes (OncePerTurn each, both at Count=3 so neither hits
+	// zero). Plus Viserai's runechant on Shrill, plus Shrill's 4+3 aura-bonus = 11. Future
+	// turns will keep ticking each Malefic for two more runes apiece, but those don't show
+	// up in this turn's Value.
 	h := []card.Card{
 		runeblade.MaleficIncantationBlue{},
 		runeblade.MaleficIncantationRed{},
@@ -101,15 +105,18 @@ func TestBest_ViseraiMaleficShrillCombo(t *testing.T) {
 		runeblade.ShrillOfSkullformRed{},
 	}
 	got := Best(hero.Viserai{}, nil, h, 4, nil, 0, nil)
-	if got.Value != 15 {
-		t.Fatalf("want value 15, got %d (roles=[%s])",
+	if got.Value != 11 {
+		t.Fatalf("want value 11, got %d (roles=[%s])",
 			got.Value, FormatBestLine(got.BestLine))
 	}
 }
 
 func TestBest_ViseraiReapingBladeBlueMalefics(t *testing.T) {
-	// Pitch 1 Blue Malefic (3 res), play the other 3 Blue Malefics (Runechants from Viserai on #2
-	// and #3), then swing Reaping Blade (cost 1, 3 dmg). Value = 3 + 2 + 3 = 8.
+	// Pitch 1 Blue Malefic (3 res), play the other 3 Blue Malefics (Viserai runechants on #2
+	// and #3), then swing Reaping Blade (cost 1, 3 dmg). Malefic's AttackAction triggers
+	// don't fire here — the only attack is the weapon swing, which isn't an attack ACTION
+	// card. Value = 0 + 1 + 1 + 3 = 5. The 3 Malefic verse counters carry forward and pay
+	// out one rune apiece on future turns when an attack action lands.
 	h := []card.Card{
 		runeblade.MaleficIncantationBlue{},
 		runeblade.MaleficIncantationBlue{},
@@ -118,8 +125,8 @@ func TestBest_ViseraiReapingBladeBlueMalefics(t *testing.T) {
 	}
 	weapons := []weapon.Weapon{weapon.ReapingBlade{}}
 	got := Best(hero.Viserai{}, weapons, h, 0, nil, 0, nil)
-	if got.Value != 8 {
-		t.Fatalf("want value 8, got %d (roles=[%s])",
+	if got.Value != 5 {
+		t.Fatalf("want value 5, got %d (roles=[%s])",
 			got.Value, FormatBestLine(got.BestLine))
 	}
 }
@@ -143,9 +150,11 @@ func TestBest_ViseraiReapingBladeMaleficsPlusShrill(t *testing.T) {
 }
 
 func TestBest_ViseraiOathBlueHocusRedMalefic(t *testing.T) {
-	// Pitch Blue Hocus Pocus (3 res). Play Red Malefic (3 dmg, go again). Play Red Oath (+1
-	// Runechant, peeks ahead and sees the Blade swing = +3 bonus, +1 Viserai Runechant from prior
-	// non-attack action = 5). Swing Reaping Blade (cost 1, 3 dmg). Value = 3 + 5 + 3 = 11.
+	// Pitch Blue Hocus Pocus (3 res). Play Red Malefic (0 dmg, registers AttackAction
+	// trigger). Play Red Oath (+1 Runechant, peeks ahead and sees the Blade swing = +3
+	// bonus, +1 Viserai Runechant from prior non-attack action = 5). Swing Reaping Blade
+	// (cost 1, 3 dmg) — Malefic's trigger doesn't fire (weapon swings aren't attack ACTION
+	// cards). Value = 5 + 3 = 8. Future turns will tick Malefic when an attack action lands.
 	h := []card.Card{
 		runeblade.HocusPocusBlue{},
 		runeblade.OathOfTheArknightRed{},
@@ -153,8 +162,8 @@ func TestBest_ViseraiOathBlueHocusRedMalefic(t *testing.T) {
 	}
 	weapons := []weapon.Weapon{weapon.ReapingBlade{}}
 	got := Best(hero.Viserai{}, weapons, h, 0, nil, 0, nil)
-	if got.Value != 11 {
-		t.Fatalf("want value 11, got %d (roles=[%s])",
+	if got.Value != 8 {
+		t.Fatalf("want value 8, got %d (roles=[%s])",
 			got.Value, FormatBestLine(got.BestLine))
 	}
 }

@@ -512,9 +512,9 @@ func (d *Deck) EvaluateWith(runs int, incomingDamage int, rng *rand.Rand, ev *ha
 			runechantCarryover += trigRunes
 			var play hand.TurnSummary
 			if ev != nil {
-				play = ev.Best(d.Hero, d.Weapons, h, incomingDamage, buf[head+drawCount:tail], runechantCarryover, arsenalCard)
+				play = ev.BestWithTriggers(d.Hero, d.Weapons, h, incomingDamage, buf[head+drawCount:tail], runechantCarryover, arsenalCard, auraTriggerBuf)
 			} else {
-				play = hand.Best(d.Hero, d.Weapons, h, incomingDamage, buf[head+drawCount:tail], runechantCarryover, arsenalCard)
+				play = hand.BestWithTriggers(d.Hero, d.Weapons, h, incomingDamage, buf[head+drawCount:tail], runechantCarryover, arsenalCard, auraTriggerBuf)
 			}
 			runechantCarryover = play.LeftoverRunechants
 			arsenalCard = play.ArsenalCard
@@ -664,6 +664,11 @@ func fireStartOfTurnTriggers(queued []card.AuraTrigger, postDrawDeck []card.Card
 	ts := card.TurnState{Deck: postDrawDeck}
 	survivors = queued[:0]
 	for _, t := range queued {
+		// Every trigger gets its OncePerTurn gate re-armed at every turn boundary regardless
+		// of Type — a fresh turn is a fresh once-per-turn window. Cleared before the
+		// start-of-turn fire so a TriggerStartOfTurn handler that itself reads FiredThisTurn
+		// (none today, but contract-safe) sees the cleared state.
+		t.FiredThisTurn = false
 		if t.Type != card.TriggerStartOfTurn {
 			survivors = append(survivors, t)
 			continue

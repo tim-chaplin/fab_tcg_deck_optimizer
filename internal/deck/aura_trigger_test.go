@@ -307,6 +307,87 @@ func TestEvaluate_TriggersFromLastTurnSurfacesInBest(t *testing.T) {
 	}
 }
 
+// TestFireStartOfTurnTriggers_ReArmsOncePerTurnGate: every trigger's FiredThisTurn is
+// cleared at every turn boundary regardless of Type, so an AttackAction trigger that
+// fired last turn can fire again this turn. Asserts the re-arm contract through the helper
+// rather than waiting for the end-to-end multi-turn path to surface a regression.
+func TestFireStartOfTurnTriggers_ReArmsOncePerTurnGate(t *testing.T) {
+	aura := fake.RedAttack{}
+	exhausted := card.AuraTrigger{
+		Self:          aura,
+		Type:          card.TriggerAttackAction,
+		Count:         2,
+		OncePerTurn:   true,
+		FiredThisTurn: true,
+		Handler:       func(*card.TurnState) int { return 1 },
+	}
+	survivors, _, _, _, _, _ := fireStartOfTurnTriggers([]card.AuraTrigger{exhausted}, nil)
+	if len(survivors) != 1 {
+		t.Fatalf("survivors len = %d, want 1 (AttackAction trigger passes through)", len(survivors))
+	}
+	if survivors[0].FiredThisTurn {
+		t.Errorf("FiredThisTurn = true, want false (turn-boundary reset)")
+	}
+	if survivors[0].Count != 2 {
+		t.Errorf("Count = %d, want 2 (only re-arm; don't tick)", survivors[0].Count)
+	}
+}
+
+// TestEvalOneTurn_MaleficIncantationOncePerTurnLimitsToOneRune: turn 1 plays Red Malefic
+// (Count=3) plus two attack-action attackers in the same chain. Both resolve, but with
+// OncePerTurn only the first fires the trigger — the verse-counter Count ticks from 3 to 2
+// just once. Turn 2's start-of-turn pass clears FiredThisTurn so a turn-2 attack action
+// could tick it again.
+//
+// fake.BlueAttack is Action+Attack with Go again, so two of them chain after Malefic. The
+// first BlueAttack triggers Malefic's verse counter (+1 rune); the second is gated.
+func TestEvalOneTurn_MaleficIncantationOncePerTurnLimitsToOneRune(t *testing.T) {
+	malefic := runeblade.MaleficIncantationRed{}
+	deckCards := []card.Card{
+		fake.BlueAttack{},
+		fake.BlueAttack{},
+		fake.BlueAttack{},
+		fake.BlueAttack{},
+	}
+	// Hand: Malefic + 3× BlueAttack. Pitch 1 BlueAttack (3 res) covers the two costs of 1
+	// for the other two BlueAttacks; Malefic costs 0 and goes again.
+	d := New(hero.Viserai{}, nil, deckCards)
+	state := d.EvalOneTurnForTesting(0, nil, []card.Card{
+		malefic,
+		fake.BlueAttack{},
+		fake.BlueAttack{},
+		fake.BlueAttack{},
+	})
+
+	maleficPlayed := false
+	blueAttacks := 0
+	for _, a := range state.PrevTurnBestLine {
+		if a.Card.ID() == card.MaleficIncantationRed && a.Role == hand.Attack {
+			maleficPlayed = true
+		}
+		if a.Card.ID() == card.FakeBlueAttack && a.Role == hand.Attack {
+			blueAttacks++
+		}
+	}
+	if !maleficPlayed {
+		t.Fatalf("turn 1 BestLine didn't play Malefic as Role=Attack: %+v", state.PrevTurnBestLine)
+	}
+	if blueAttacks < 2 {
+		t.Fatalf("turn 1 BestLine played %d attack actions, want >= 2 (need multiple to test the gate)",
+			blueAttacks)
+	}
+	// Turn 2's start-of-turn pass: Malefic is AttackAction-typed, doesn't fire at start-of-
+	// turn — it just survives with FiredThisTurn cleared. No same-turn-credit, no graveyard.
+	if state.StartOfTurnTriggerDamage != 0 {
+		t.Errorf("StartOfTurnTriggerDamage = %d, want 0 (Malefic only fires on attack actions)",
+			state.StartOfTurnTriggerDamage)
+	}
+	if len(state.StartOfTurnGraveyard) != 0 {
+		t.Errorf("StartOfTurnGraveyard = %v, want empty (Malefic still has Count>0)",
+			state.StartOfTurnGraveyard)
+	}
+}
+
 // TestEvalOneTurn_RunebloodIncantationTicksAcrossTurns: turn 1 plays Red Runeblood
 // Incantation (Count=3 verse counters). Turn 2's start-of-turn pass fires the trigger once
 // — credits 1 Runechant, decrements Count to 2, leaves the aura alive. The surviving

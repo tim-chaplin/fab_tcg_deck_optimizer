@@ -162,21 +162,22 @@ func TestBest_AetherSlashAloneConsumesCarryover(t *testing.T) {
 	}
 }
 
-// TestBest_BlessingOfOccultTokensDoNotAffectSameTurnChain: Blessing's runes materialise at
-// next turn's upkeep via PlayNextTurn, so Play returns 0 and nothing lands in this turn's
-// live Runechants. Hand: Red Malefic + Red Blessing. Pitching Blessing funds Malefic; with no
-// attack action to follow Malefic, it credits flat 3 and no same-turn rune is created.
+// TestBest_BlessingOfOccultTokensDoNotAffectSameTurnChain: Blessing's runes materialise on
+// next turn via its TriggerStartOfTurn AuraTrigger, so Play returns 0 and nothing lands in
+// this turn's live Runechants. Hand: Red Malefic + Red Blessing. With no attack action
+// played this turn, Malefic's AttackAction trigger never fires either — same-turn Value is
+// 0. Both auras carry forward as triggers for future turns to consume.
 func TestBest_BlessingOfOccultTokensDoNotAffectSameTurnChain(t *testing.T) {
 	h := []card.Card{
 		runeblade.MaleficIncantationRed{},
 		runeblade.BlessingOfOccultRed{},
 	}
 	got := Best(stubHero{}, nil, h, 0, nil, 0, nil)
-	if got.Value != 3 {
-		t.Errorf("Value = %d, want 3 (Malefic's flat n; Blessing's runes are next-turn)", got.Value)
+	if got.Value != 0 {
+		t.Errorf("Value = %d, want 0 (Malefic needs an attack action to fire; Blessing is deferred)", got.Value)
 	}
 	if got.LeftoverRunechants != 0 {
-		t.Errorf("LeftoverRunechants = %d, want 0 (Blessing's runes materialise via PlayNextTurn, not carryover)",
+		t.Errorf("LeftoverRunechants = %d, want 0 (Blessing's runes materialise via start-of-turn trigger, not carryover)",
 			got.LeftoverRunechants)
 	}
 }

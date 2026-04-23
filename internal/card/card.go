@@ -200,6 +200,11 @@ const (
 	// best-line search. The classic upkeep trigger for "at the beginning of your action phase
 	// …" auras.
 	TriggerStartOfTurn AuraTriggerType = iota
+	// TriggerAttackAction fires each time an attack action card resolves during the attack
+	// chain. Triggers that set OncePerTurn cap themselves at one fire per turn regardless of
+	// how many attack actions resolve — Malefic Incantation's "once per turn, when you play
+	// an attack action card …" clause.
+	TriggerAttackAction
 )
 
 // OnAuraTrigger is the business-logic callback attached to an AuraTrigger. Called when the
@@ -211,9 +216,10 @@ const (
 type OnAuraTrigger func(s *TurnState) int
 
 // AuraTrigger is a counter-tracked handler attached to an aura in play. Each time Type's
-// condition fires, the sim calls Handler and decrements Count. When Count reaches zero the
-// sim sends Self to the graveyard and drops the trigger from TurnState.AuraTriggers. Self
-// is the aura card itself so the sim can graveyard it without needing a back-reference.
+// condition fires — and, when OncePerTurn is set, at most once per turn — the sim calls
+// Handler and decrements Count. When Count reaches zero the sim sends Self to the graveyard
+// and drops the trigger from TurnState.AuraTriggers. Self is the aura card itself so the
+// sim can graveyard it without needing a back-reference.
 type AuraTrigger struct {
 	// Self is the aura card this trigger belongs to. Used by the sim to graveyard the aura
 	// when Count reaches zero; also surfaced in per-turn summaries (e.g. the "(from previous
@@ -225,6 +231,12 @@ type AuraTrigger struct {
 	Count int
 	// Handler runs when Type fires.
 	Handler OnAuraTrigger
+	// OncePerTurn caps the trigger at a single fire per turn regardless of how many matching
+	// events occur. The sim sets FiredThisTurn the first time Handler runs each turn and
+	// clears it at the next turn boundary.
+	OncePerTurn bool
+	// FiredThisTurn is sim-managed bookkeeping for OncePerTurn. Cards must not set it.
+	FiredThisTurn bool
 }
 
 // DrawOne models a mid-turn draw: advance the deck by one card and append it to Drawn. No-op
