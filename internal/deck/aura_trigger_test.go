@@ -305,6 +305,20 @@ func TestEvaluate_TriggersFromLastTurnSurfacesInBest(t *testing.T) {
 		t.Errorf("Stats.Best.Summary.TriggersFromLastTurn is empty; Best.Value=%d; Blessings played=%d",
 			d.Stats.Best.Summary.Value, d.Stats.PerCard[card.BlessingOfOccultRed].Plays)
 	}
+	// The best-turn snapshot must also list Blessing under StartOfTurnAuras — Blessing
+	// registers a carryover AuraTrigger on the turn it's played, and the best-scoring turn
+	// is the one where that trigger fires, so the aura has to be in play at the top.
+	foundBlessing := false
+	for _, a := range d.Stats.Best.Summary.StartOfTurnAuras {
+		if a.ID() == card.BlessingOfOccultRed {
+			foundBlessing = true
+			break
+		}
+	}
+	if !foundBlessing {
+		t.Errorf("Stats.Best.Summary.StartOfTurnAuras missing Blessing; got %+v",
+			d.Stats.Best.Summary.StartOfTurnAuras)
+	}
 }
 
 // TestProcessTriggersAtStartOfTurn_ReArmsOncePerTurnGate: every trigger's FiredThisTurn is

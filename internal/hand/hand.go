@@ -79,6 +79,12 @@ type TurnSummary struct {
 	// top of this turn, each with the damage-equivalent it credited. Populated by the deck
 	// loop before FormatBestTurn is called; Value already includes the sum.
 	TriggersFromLastTurn []TriggerContribution
+	// StartOfTurnAuras lists the aura cards that were in play at the top of this turn — one
+	// entry per AuraTrigger carried in from the previous turn (so an aura that registered
+	// multiple triggers appears multiple times, and two copies of the same aura show twice).
+	// Populated by the deck loop before the start-of-turn fires run; surfaced in FormatBestTurn
+	// so the reader can see which carryover auras fed mid-chain "(+M aura trigger)" damage.
+	StartOfTurnAuras []card.Card
 }
 
 // TriggerContribution is one start-of-turn AuraTrigger fire: the aura that fired plus the
@@ -238,6 +244,9 @@ func appendAttackChainLines(lines []string, t TurnSummary, stepPtr *int) []strin
 //  4. Attack-phase pitches (paying for this turn's played cards)
 //  5. Attack chain — played cards and swung weapons in the order the solver picked
 //
+// A non-numbered `  Auras in play at start of turn: …` header is emitted above the play order
+// when TurnSummary.StartOfTurnAuras is non-empty.
+//
 // Held / Arsenal cards are summarized on trailing lines so the reader sees what's carrying over.
 //
 // Pitch-phase assignment uses a greedy split for display: smallest pitches first fund the defense
@@ -248,6 +257,14 @@ func FormatBestTurn(t TurnSummary) string {
 	defensePitches, attackPitches := splitPitchesByPhase(parts.pitched, parts.drCost)
 
 	var lines []string
+	if len(t.StartOfTurnAuras) > 0 {
+		names := make([]string, len(t.StartOfTurnAuras))
+		for i, a := range t.StartOfTurnAuras {
+			names[i] = a.Name()
+		}
+		sort.Strings(names)
+		lines = append(lines, "  Auras in play at start of turn: "+strings.Join(names, ", "))
+	}
 	step := 0
 	nextStep := func() int { step++; return step }
 	// Pitch lines don't show a damage contribution: pitches generate resource, not damage —

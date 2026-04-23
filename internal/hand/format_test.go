@@ -214,6 +214,34 @@ func TestFormatBestTurn_TriggersFromLastTurnLine(t *testing.T) {
 	}
 }
 
+// TestFormatBestTurn_StartOfTurnAurasHeader pins the header line that lists the aura cards
+// in play at the top of the turn. Names sort alphabetically for determinism, and duplicates
+// are preserved (two copies of the same aura render twice).
+func TestFormatBestTurn_StartOfTurnAurasHeader(t *testing.T) {
+	summary := TurnSummary{
+		StartOfTurnAuras: []card.Card{
+			runeblade.MaleficIncantationRed{},
+			runeblade.MaleficIncantationRed{},
+			runeblade.SigilOfTheArknightBlue{},
+		},
+	}
+	out := FormatBestTurn(summary)
+	want := "Auras in play at start of turn: Malefic Incantation (Red), Malefic Incantation (Red), Sigil of the Arknight (Blue)"
+	if !strings.Contains(out, want) {
+		t.Errorf("missing %q in:\n%s", want, out)
+	}
+}
+
+// TestFormatBestTurn_StartOfTurnAurasHeaderSuppressedWhenEmpty pins the omission of the header
+// line when no auras were in play — the empty state shouldn't render a dangling label.
+func TestFormatBestTurn_StartOfTurnAurasHeaderSuppressedWhenEmpty(t *testing.T) {
+	summary := TurnSummary{BestLine: []CardAssignment{{Card: fake.RedAttack{}, Role: Attack}}}
+	out := FormatBestTurn(summary)
+	if strings.Contains(out, "Auras in play at start of turn") {
+		t.Errorf("unexpected header in output:\n%s", out)
+	}
+}
+
 // TestFormatBestTurn_DrawnCardsRendered pins each role a drawn card can take — Held in the
 // footer, Arsenal in the footer — to a tagged line in the printout. The summary is hand-built
 // so the test exercises only the formatter.

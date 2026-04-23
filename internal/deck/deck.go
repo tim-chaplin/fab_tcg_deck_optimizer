@@ -552,6 +552,17 @@ func (d *Deck) EvaluateWith(runs int, incomingDamage int, rng *rand.Rand, ev *ha
 			// Snapshot the starting carryover before Best overwrites it — the best-hand record
 			// wants the count in play when the hand was dealt, not what remained after.
 			startingRunechants := runechantCarryover
+			// Snapshot the aura cards in play at the top of this turn (one entry per queued
+			// AuraTrigger) before processTriggersAtStartOfTurn potentially destroys any. A
+			// fresh slice keeps the snapshot stable once auraTriggerBuf is rewritten with the
+			// survivors.
+			var startOfTurnAuras []card.Card
+			if len(auraTriggerBuf) > 0 {
+				startOfTurnAuras = make([]card.Card, len(auraTriggerBuf))
+				for i, t := range auraTriggerBuf {
+					startOfTurnAuras[i] = t.Self
+				}
+			}
 			// Process AuraTriggers carried in from last turn before the best-line search.
 			// Survivors become this turn's priorAuraTriggers. Reveal handlers pop the deck top
 			// and append it to the hand so the best-line search sees the augmented hand.
@@ -577,6 +588,7 @@ func (d *Deck) EvaluateWith(runs int, incomingDamage int, rng *rand.Rand, ev *ha
 			// the best-hand pick and cycle averages reflect the real total.
 			play.Value += trigDamage
 			play.TriggersFromLastTurn = trigContribs
+			play.StartOfTurnAuras = startOfTurnAuras
 			v := float64(play.Value)
 
 			d.Stats.TotalValue += v
@@ -822,9 +834,10 @@ func (d *Deck) EvalOneTurnForTesting(incomingDamage int, arsenalIn card.Card, in
 
 // recordBestTurn clones the winning turn's memo-owned slices into fresh storage and stamps
 // stats.Best with the resulting BestTurn. Every slice in play (BestLine, AttackChain, Drawn,
-// TriggersFromLastTurn) aliases storage hand.Best may rewrite on the next call, so retaining
-// them directly would let a later evaluation mutate the saved peak. Nil-length slices skip
-// the clone so the captured hand.TurnSummary holds nil rather than a zero-length allocation.
+// TriggersFromLastTurn, StartOfTurnAuras) aliases storage hand.Best may rewrite on the next
+// call, so retaining them directly would let a later evaluation mutate the saved peak.
+// Nil-length slices skip the clone so the captured hand.TurnSummary holds nil rather than a
+// zero-length allocation.
 func recordBestTurn(stats *Stats, play hand.TurnSummary, startingRunechants int) {
 	lineCopy := make([]hand.CardAssignment, len(play.BestLine))
 	copy(lineCopy, play.BestLine)
@@ -843,6 +856,11 @@ func recordBestTurn(stats *Stats, play hand.TurnSummary, startingRunechants int)
 		trigCopy = make([]hand.TriggerContribution, len(play.TriggersFromLastTurn))
 		copy(trigCopy, play.TriggersFromLastTurn)
 	}
+	var aurasCopy []card.Card
+	if len(play.StartOfTurnAuras) > 0 {
+		aurasCopy = make([]card.Card, len(play.StartOfTurnAuras))
+		copy(aurasCopy, play.StartOfTurnAuras)
+	}
 	stats.Best = BestTurn{
 		Summary: hand.TurnSummary{
 			BestLine:             lineCopy,
@@ -852,6 +870,7 @@ func recordBestTurn(stats *Stats, play hand.TurnSummary, startingRunechants int)
 			LeftoverRunechants:   play.LeftoverRunechants,
 			ArsenalCard:          play.ArsenalCard,
 			TriggersFromLastTurn: trigCopy,
+			StartOfTurnAuras:     aurasCopy,
 		},
 		StartingRunechants: startingRunechants,
 	}

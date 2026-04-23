@@ -139,6 +139,48 @@ func TestRoundTrip_PreservesBestTurnContributions(t *testing.T) {
 	}
 }
 
+// TestRoundTrip_PreservesStartOfTurnAuras locks in that the best turn's StartOfTurnAuras list
+// (the auras that were in play at the top of the captured turn) survives Marshal/Unmarshal by
+// card name, preserving duplicates and order. Without the round-trip, a reloaded deck's best
+// turn would lose its "Auras in play at start of turn" header line.
+func TestRoundTrip_PreservesStartOfTurnAuras(t *testing.T) {
+	rng := rand.New(rand.NewSource(7))
+	d := deck.Random(hero.Viserai{}, 40, 2, rng, nil)
+	// Seed a best turn by hand so the assertion doesn't depend on the sim organically
+	// producing carryover auras — synthetic input is enough to pin the round trip.
+	d.Stats.Best = deck.BestTurn{
+		Summary: hand.TurnSummary{
+			BestLine: []hand.CardAssignment{{Card: cards.Get(card.MaleficIncantationRed), Role: hand.Attack}},
+			StartOfTurnAuras: []card.Card{
+				cards.Get(card.MaleficIncantationRed),
+				cards.Get(card.MaleficIncantationRed),
+				cards.Get(card.SigilOfTheArknightBlue),
+			},
+			Value: 1,
+		},
+	}
+
+	data, err := Marshal(d)
+	if err != nil {
+		t.Fatalf("Marshal: %v", err)
+	}
+	got, err := Unmarshal(data)
+	if err != nil {
+		t.Fatalf("Unmarshal: %v", err)
+	}
+
+	wantNames := []string{"Malefic Incantation (Red)", "Malefic Incantation (Red)", "Sigil of the Arknight (Blue)"}
+	gotAuras := got.Stats.Best.Summary.StartOfTurnAuras
+	if len(gotAuras) != len(wantNames) {
+		t.Fatalf("StartOfTurnAuras len: got %d want %d", len(gotAuras), len(wantNames))
+	}
+	for i := range wantNames {
+		if gotAuras[i].Name() != wantNames[i] {
+			t.Errorf("StartOfTurnAuras[%d]: got %q want %q", i, gotAuras[i].Name(), wantNames[i])
+		}
+	}
+}
+
 // TestRoundTrip_PreservesSideboard verifies the user-managed Sideboard field survives a
 // Marshal/Unmarshal cycle as a multiset of card names. Sideboard contents don't affect the
 // sim — this test pins that the IO layer still round-trips them so `fabsim eval` / `anneal`
