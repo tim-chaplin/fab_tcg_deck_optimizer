@@ -177,6 +177,14 @@ type TurnState struct {
 	// trigger-Type condition (start of turn for now), decrements Count in place, and drops
 	// entries whose Count hits zero after sending Self to the graveyard.
 	AuraTriggers []AuraTrigger
+	// EphemeralAttackTriggers are same-turn, single-fire "next attack" triggers registered by
+	// a card's Play (e.g. Mauvrion Skies's "if this hits, create Runechants" rider). They
+	// differ from AuraTriggers on three axes: they fizzle at end of turn rather than carrying
+	// across (no cross-turn seeding), they fire at most once (no Count), and they don't send
+	// a source card to the graveyard on fire or fizzle — the registering card was already
+	// graveyarded when its Play resolved; only the trigger "stays in play" for the turn. The
+	// sim reset per permutation is an empty slice (no cross-turn carryover).
+	EphemeralAttackTriggers []EphemeralAttackTrigger
 	// Revealed is the side channel start-of-turn AuraTrigger handlers use to move a card
 	// from the top of the post-draw deck into the hand (Sigil of the Arknight's reveal).
 	// Handlers peek s.Deck[0], append to s.Revealed, and advance s.Deck past the popped
@@ -233,6 +241,46 @@ type AuraTrigger struct {
 	OncePerTurn bool
 	// FiredThisTurn is sim-managed bookkeeping for OncePerTurn. Cards must not set it.
 	FiredThisTurn bool
+}
+
+// OnEphemeralAttackTrigger is the business-logic callback attached to an
+// EphemeralAttackTrigger. target is the CardState of the attacker whose resolution triggered
+// the fire; the handler may read target.Card.Attack(), target.EffectiveDominate(), etc. to
+// decide whether a rider effect fires and what damage-equivalent to credit. Handlers mutate
+// the passed TurnState directly (e.g. s.CreateRunechants) and return the damage-equivalent;
+// the sim routes that damage back to the trigger's Source for per-card attribution.
+type OnEphemeralAttackTrigger func(s *TurnState, target *CardState) int
+
+// EphemeralAttackTrigger is a same-turn, fire-once "next attack" trigger registered by a
+// card's Play (via TurnState.AddEphemeralAttackTrigger). Fires on the next attack action
+// whose resolution matches its Matches predicate, AFTER the attacker's Play, hero
+// OnCardPlayed, and AuraTriggers have all settled — so the Handler sees the fully-resolved
+// attacker state (incl. any Dominate grants and hero-created auras).
+//
+// Distinct from AuraTrigger on three axes:
+//   - Fire-once. No Count / OncePerTurn bookkeeping; the trigger resolves and drops out.
+//   - Doesn't graveyard a source when it fires or fizzles — the registering card was
+//     already graveyarded on its own resolution; only the trigger effect "stays in play."
+//   - Doesn't persist across turns. Non-matching attack actions leave the trigger in place
+//     for a later match, but anything unresolved at end of turn fizzles silently.
+//
+// The Source card keeps damage attribution clean: Handler's return is credited to Source's
+// position in the chain (via SourceIndex), so a trigger fired by Mauvrion Skies during
+// Drowning Dire's attack surfaces as damage on Mauvrion's BestLine entry rather than DD's.
+type EphemeralAttackTrigger struct {
+	// Source is the card that registered the trigger. Damage the handler returns accrues to
+	// Source's per-card attribution; also surfaces in per-turn debug output.
+	Source Card
+	// Matches decides whether the trigger fires on a given attack action card's
+	// resolution. Nil matches any attack action — non-matching resolutions leave the
+	// trigger in place for a later attack.
+	Matches func(target *CardState) bool
+	// Handler runs when the trigger fires. Returns damage-equivalent credited to Source.
+	Handler OnEphemeralAttackTrigger
+	// SourceIndex is sim-managed bookkeeping: the position of Source in the played-chain
+	// permutation, used to route Handler's damage back to Source's perCardOut slot. Cards
+	// must not set it — the solver stamps it on registration.
+	SourceIndex int
 }
 
 // DrawOne models a mid-turn draw: advance the deck by one card and append it to Drawn. No-op
@@ -335,6 +383,14 @@ func (s *TurnState) AddToGraveyard(c Card) {
 func (s *TurnState) AddAuraTrigger(t AuraTrigger) {
 	s.AuraCreated = true
 	s.AuraTriggers = append(s.AuraTriggers, t)
+}
+
+// AddEphemeralAttackTrigger registers a same-turn, fire-once "next attack" trigger. The sim
+// stamps t.SourceIndex after the registering card's Play returns, so cards don't need to
+// (and must not) set it. Fires on the next matching attack action's resolution; fizzles
+// silently at end of turn if no match occurs.
+func (s *TurnState) AddEphemeralAttackTrigger(t EphemeralAttackTrigger) {
+	s.EphemeralAttackTriggers = append(s.EphemeralAttackTriggers, t)
 }
 
 // Card is any Flesh and Blood card that can be in a deck. Methods return the card's static
