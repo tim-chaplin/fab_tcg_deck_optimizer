@@ -70,18 +70,23 @@ func Random(h hero.Hero, size, maxCopies int, rng *rand.Rand, legal func(card.Ca
 	return New(h, weapons, picks)
 }
 
-// legalPool returns cards.Deckable() filtered by legal, or the full list if legal is nil.
-// Shared by Random and AllMutations so both apply the same filter.
+// legalPool returns cards.Deckable() filtered by legal, with any card carrying the
+// card.NotImplemented marker removed. The NotImplemented filter is always applied — a card
+// whose printed effect the sim can't faithfully reproduce shouldn't land in a random deck or
+// become a mutation candidate regardless of format legality. Pass nil for legal to apply only
+// the NotImplemented filter. Shared by Random and AllMutations so both agree on the pool.
 func legalPool(legal func(card.Card) bool) []cards.ID {
 	pool := cards.Deckable()
-	if legal == nil {
-		return pool
-	}
 	filtered := pool[:0]
 	for _, id := range pool {
-		if legal(cards.Get(id)) {
-			filtered = append(filtered, id)
+		c := cards.Get(id)
+		if _, unimplemented := c.(card.NotImplemented); unimplemented {
+			continue
 		}
+		if legal != nil && !legal(c) {
+			continue
+		}
+		filtered = append(filtered, id)
 	}
 	return filtered
 }

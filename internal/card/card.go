@@ -460,6 +460,17 @@ type NotSilverAgeLegal interface {
 	NotSilverAgeLegal()
 }
 
+// NotImplemented is an optional marker. Cards whose printed effect references mechanics the
+// simulator doesn't model (e.g. Gold / Silver / Copper token economies, Landmarks) opt in so
+// random deck generation and mutation pools skip them. A NotImplemented card is still a valid
+// Card — hands that already contain one still evaluate using its static Attack / Pitch /
+// Defense — but the optimizer won't introduce it into a new deck or swap one in via mutation.
+// Orthogonal to NotSilverAgeLegal: a card can be format-legal yet unimplemented, or banned yet
+// fully implemented, or both.
+type NotImplemented interface {
+	NotImplemented()
+}
+
 // Dominator is an optional marker. Attack action cards printed with the Dominate keyword
 // implement it; the defender is capped at one blocking card, so LikelyToHit credits the
 // "slips past one block" bump at 5+ power. Conditional grants ("if X, it gains dominate")
