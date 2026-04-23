@@ -1028,56 +1028,92 @@ func (e *Evaluator) bestUncached(hero hero.Hero, weapons []weapon.Weapon, hand [
 // candidate pool so the draw isn't preferred over hand Helds (nor the other way around). No-op
 // when nothing is Held.
 func promoteRandomHeldToArsenal(best *TurnSummary, hand []card.Card, n int, arsenalCardIn card.Card) {
-	handHeldCount := 0
-	for i := 0; i < n; i++ {
-		if best.BestLine[i].Role == Held {
-			handHeldCount++
-		}
-	}
-	drawnHeldCount := 0
-	for i := range best.Drawn {
-		if best.Drawn[i].Role == Held {
-			drawnHeldCount++
-		}
-	}
+	handHeldCount := countHeldInBestLine(best.BestLine, n)
+	drawnHeldCount := countHeldInDrawn(best.Drawn)
 	total := handHeldCount + drawnHeldCount
 	if total == 0 {
 		return
 	}
-	// FNV-1a-flavoured hash over the sorted hand IDs + drawn card IDs + arsenal-in ID. Just
-	// needs to spread across bucket counts 1..total.
-	var h uint64 = 1469598103934665603 // FNV offset basis
-	for _, c := range hand {
-		h ^= uint64(c.ID())
-		h *= 1099511628211 // FNV prime
-	}
-	for _, d := range best.Drawn {
-		h ^= uint64(d.Card.ID())
-		h *= 1099511628211
-	}
-	if arsenalCardIn != nil {
-		h ^= uint64(arsenalCardIn.ID())
-		h *= 1099511628211
-	}
-	pick := int(h % uint64(total))
+	pick := int(arsenalPromotionHash(hand, best.Drawn, arsenalCardIn) % uint64(total))
 	// Walk hand Helds first (in BestLine order), then drawn Helds (in draw order), mapping pick
 	// to the matching slot.
 	if pick < handHeldCount {
-		idx := 0
-		for i := 0; i < n; i++ {
-			if best.BestLine[i].Role != Held {
-				continue
-			}
-			if idx == pick {
-				best.BestLine[i].Role = Arsenal
-				best.ArsenalCard = best.BestLine[i].Card
-				return
-			}
-			idx++
-		}
+		promoteNthHeldInBestLine(best, n, pick)
 		return
 	}
-	pick -= handHeldCount
+	promoteNthHeldInDrawn(best, pick-handHeldCount)
+}
+
+// countHeldInBestLine returns how many of the first n BestLine entries are still Role=Held after
+// enumeration. The first-n restriction excludes any arsenal-in entry (which lives at index n and
+// is never Held).
+func countHeldInBestLine(line []CardAssignment, n int) int {
+	c := 0
+	for i := 0; i < n; i++ {
+		if line[i].Role == Held {
+			c++
+		}
+	}
+	return c
+}
+
+// countHeldInDrawn returns how many mid-turn-drawn cards are still Role=Held after the winning
+// chain resolved.
+func countHeldInDrawn(drawn []CardAssignment) int {
+	c := 0
+	for i := range drawn {
+		if drawn[i].Role == Held {
+			c++
+		}
+	}
+	return c
+}
+
+// arsenalPromotionHash computes the deterministic bucket seed that picks which Held card fills
+// an empty arsenal slot. Uses FNV-1a over the sorted hand IDs + drawn card IDs + arsenal-in ID —
+// the only requirement is a uniform spread across bucket counts 1..total so no lowest-ID bias
+// creeps in while the memo stays consistent per hand.
+func arsenalPromotionHash(hand []card.Card, drawn []CardAssignment, arsenalCardIn card.Card) uint64 {
+	const (
+		fnvOffsetBasis uint64 = 1469598103934665603
+		fnvPrime       uint64 = 1099511628211
+	)
+	h := fnvOffsetBasis
+	for _, c := range hand {
+		h ^= uint64(c.ID())
+		h *= fnvPrime
+	}
+	for _, d := range drawn {
+		h ^= uint64(d.Card.ID())
+		h *= fnvPrime
+	}
+	if arsenalCardIn != nil {
+		h ^= uint64(arsenalCardIn.ID())
+		h *= fnvPrime
+	}
+	return h
+}
+
+// promoteNthHeldInBestLine flips the pick-th Held hand card (in BestLine order) to Arsenal, and
+// records it on best.ArsenalCard. Caller guarantees pick < count of Held entries.
+func promoteNthHeldInBestLine(best *TurnSummary, n, pick int) {
+	idx := 0
+	for i := 0; i < n; i++ {
+		if best.BestLine[i].Role != Held {
+			continue
+		}
+		if idx == pick {
+			best.BestLine[i].Role = Arsenal
+			best.ArsenalCard = best.BestLine[i].Card
+			return
+		}
+		idx++
+	}
+}
+
+// promoteNthHeldInDrawn flips the pick-th Held mid-turn-drawn card (in draw order) to Arsenal,
+// and records it on best.ArsenalCard. Caller guarantees pick < count of Held drawn entries.
+func promoteNthHeldInDrawn(best *TurnSummary, pick int) {
 	idx := 0
 	for i := range best.Drawn {
 		if best.Drawn[i].Role != Held {
