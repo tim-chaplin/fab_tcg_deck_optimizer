@@ -257,7 +257,9 @@ func runAnneal(cfg annealConfig) annealResult {
 			}
 			bestEver = d
 			bestEverAvg = avg
-			_ = writeDeck(bestEver, cfg.outPath)
+			if err := writeDeck(bestEver, cfg.outPath); err != nil {
+				die("%v", err)
+			}
 		}
 		temperature = coolDown(temperature, cfg.tempDecay, cfg.minTemp)
 	}
@@ -283,18 +285,25 @@ func coolDown(temperature, decay, minTemp float64) float64 {
 	return next
 }
 
-// prepareBaseline returns the starting deck for the hill climb with its deep-shuffles avg. Four
-// cases: no deck on disk (generate random + evaluate), loaded deck under deepShuffles
-// (re-evaluate for an apples-to-apples baseline), -reevaluate set (force re-evaluation even if
-// the run count already matches — for when modelling assumptions changed), or deck already
-// deep-evaluated (use as-is).
+// prepareBaseline returns the starting deck for the hill climb with its deep-shuffles avg.
+// Four cases: no deck on disk (generate random + evaluate), loaded deck under deepShuffles
+// (re-evaluate for an apples-to-apples baseline), -reevaluate set (force re-evaluation even
+// if the run count already matches — for when modelling assumptions changed), or deck
+// already deep-evaluated (use as-is). A fifth case — file exists but doesn't parse —
+// dies loudly rather than overwriting; otherwise an interrupt during a previous writeDeck
+// would silently cost the user their converged deck.
 func prepareBaseline(cfg annealConfig, rng *rand.Rand) (*deck.Deck, float64) {
-	best, bestAvg := loadExisting(cfg.outPath)
+	best, bestAvg, err := loadExisting(cfg.outPath)
+	if err != nil {
+		die("%v", err)
+	}
 	if best == nil {
 		fmt.Fprintf(os.Stderr, "no deck at %s; generating a random starting deck\n", cfg.outPath)
 		best = deck.Random(hero.Viserai{}, cfg.deckSize, cfg.maxCopies, rng, cfg.legalFilter())
 		bestAvg = best.Evaluate(cfg.deepShuffles, cfg.incoming, rng).Mean()
-		_ = writeDeck(best, cfg.outPath)
+		if err := writeDeck(best, cfg.outPath); err != nil {
+			die("%v", err)
+		}
 		fmt.Printf("Starting deck avg %.3f, saved to %s\n", bestAvg, cfg.outPath)
 		maybePrintBaselineCards(cfg, best)
 		return best, bestAvg
@@ -308,7 +317,9 @@ func prepareBaseline(cfg annealConfig, rng *rand.Rand) (*deck.Deck, float64) {
 			bestAvg, reason, cfg.deepShuffles)
 		best = deck.New(best.Hero, best.Weapons, best.Cards)
 		bestAvg = best.Evaluate(cfg.deepShuffles, cfg.incoming, rng).Mean()
-		_ = writeDeck(best, cfg.outPath)
+		if err := writeDeck(best, cfg.outPath); err != nil {
+			die("%v", err)
+		}
 		fmt.Printf("Re-evaluated baseline avg %.3f, saved to %s\n", bestAvg, cfg.outPath)
 		maybePrintBaselineCards(cfg, best)
 		return best, bestAvg

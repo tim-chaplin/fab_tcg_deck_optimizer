@@ -2,6 +2,7 @@
 package main
 
 import (
+	"errors"
 	"flag"
 	"fmt"
 	"io"
@@ -141,35 +142,76 @@ func parseFlagsAnywhere(fs *flag.FlagSet, args []string) error {
 	return fs.Parse(out)
 }
 
-// loadExisting reads and deserializes the deck at path. Returns (nil, 0) on missing or
-// unparsable file — the caller treats that as "no previous best".
-func loadExisting(path string) (*deck.Deck, float64) {
+// loadExisting reads and deserializes the deck at path. Returns (nil, 0, nil) when the file
+// doesn't exist — the caller treats that as "no previous best, generate a fresh deck."
+// Returns (nil, 0, err) when the file exists but can't be read or parsed: callers must NOT
+// treat this as "missing" because that would silently overwrite a corrupt file with a
+// random deck. In particular, anneal's wrapper scripts (anneal-reanneal.ps1) re-invoke
+// anneal in a loop; a Ctrl-C during a writeDeck can leave the file truncated, and without
+// this distinction the next pass would clobber the user's converged deck with a random one.
+func loadExisting(path string) (*deck.Deck, float64, error) {
 	data, err := os.ReadFile(path)
 	if err != nil {
-		return nil, 0
+		if errors.Is(err, os.ErrNotExist) {
+			return nil, 0, nil
+		}
+		return nil, 0, fmt.Errorf("read %s: %w", path, err)
 	}
 	d, err := deckio.Unmarshal(data)
 	if err != nil {
-		return nil, 0
+		return nil, 0, fmt.Errorf("parse %s: %w (file exists but isn't a valid deck — "+
+			"refusing to silently overwrite; inspect the file and delete it manually if you "+
+			"want a fresh start)", path, err)
 	}
-	return d, d.Stats.Mean()
+	return d, d.Stats.Mean(), nil
 }
 
 // writeDeck persists d as JSON at path plus a sibling fabrary-format .txt ("x.json" → "x.txt")
 // so the saved deck is ready to paste into fabrary.net without a second export step.
+//
+// Both files are written atomically: data lands in <path>.tmp first, then os.Rename swaps
+// it into place. Rename is atomic on the same filesystem on POSIX and effectively atomic on
+// Windows (NTFS replace-existing on the same volume), so a Ctrl-C mid-write can never leave
+// the destination empty or partially written. The non-atomic variant — os.WriteFile with
+// O_TRUNC — would truncate the destination FIRST and then write, exposing a window in
+// which an interrupt produces an empty file that loadExisting can't parse.
 func writeDeck(d *deck.Deck, path string) error {
 	data, err := deckio.Marshal(d)
 	if err != nil {
 		return fmt.Errorf("marshal: %w", err)
 	}
-	if err := os.WriteFile(path, data, 0o644); err != nil {
+	if err := writeFileAtomic(path, data); err != nil {
 		return fmt.Errorf("write %s: %w", path, err)
 	}
 	txtPath := fabraryPathFor(path)
-	if err := os.WriteFile(txtPath, []byte(fabrary.Marshal(d)), 0o644); err != nil {
+	if err := writeFileAtomic(txtPath, []byte(fabrary.Marshal(d))); err != nil {
 		return fmt.Errorf("write %s: %w", txtPath, err)
 	}
 	return nil
+}
+
+// writeFileAtomic writes data to a temp file in the same directory as path and renames it
+// over path. The same-directory placement keeps the rename within one filesystem so it stays
+// atomic. Removes the temp file on any error so a failed write doesn't leave junk behind.
+func writeFileAtomic(path string, data []byte) error {
+	dir := filepath.Dir(path)
+	tmp, err := os.CreateTemp(dir, filepath.Base(path)+".tmp-*")
+	if err != nil {
+		return err
+	}
+	tmpName := tmp.Name()
+	// On any failure path below, clean up the temp file so a crashed write doesn't litter
+	// mydecks/ with .tmp-* turds. Best-effort; the rename success path makes this a no-op
+	// because tmpName no longer exists by then.
+	defer os.Remove(tmpName)
+	if _, err := tmp.Write(data); err != nil {
+		tmp.Close()
+		return err
+	}
+	if err := tmp.Close(); err != nil {
+		return err
+	}
+	return os.Rename(tmpName, path)
 }
 
 // fabraryPathFor derives the sibling .txt path. A ".json" extension is swapped for ".txt";
@@ -179,6 +221,22 @@ func fabraryPathFor(jsonPath string) string {
 		return strings.TrimSuffix(jsonPath, ext) + ".txt"
 	}
 	return jsonPath + ".txt"
+}
+
+// mustLoadDeck loads the deck at path or dies. Used by subcommands (eval, print, diff) that
+// always operate on an existing deck — for them, both "missing" and "corrupt" are fatal,
+// they should report the situation and exit. anneal handles the missing-vs-corrupt
+// distinction itself because "missing" is a valid input ("no deck yet, generate one")
+// while "corrupt" needs the loud refusal to overwrite.
+func mustLoadDeck(path string) *deck.Deck {
+	d, _, err := loadExisting(path)
+	if err != nil {
+		die("%v", err)
+	}
+	if d == nil {
+		die("could not load deck from %s (file not found)", path)
+	}
+	return d
 }
 
 // resolveDeckPath is the positional-arg counterpart to anneal's -deck flag. Subcommands that

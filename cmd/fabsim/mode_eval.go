@@ -4,7 +4,6 @@ import (
 	"flag"
 	"fmt"
 	"math/rand"
-	"os"
 	"time"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/deck"
@@ -36,11 +35,7 @@ func runEvalCmd(args []string) {
 // re-scored at a new shuffle depth (or a different -incoming) without clobbering the saved
 // stats.
 func runEval(outPath string, deepShuffles, incoming int, seed int64) {
-	loaded, _ := loadExisting(outPath)
-	if loaded == nil {
-		fmt.Fprintf(os.Stderr, "could not load deck from %s\n", outPath)
-		os.Exit(1)
-	}
+	loaded := mustLoadDeck(outPath)
 	// Wrap the loaded hero/weapons/cards in a fresh Deck so Evaluate's stats start from zero
 	// instead of accumulating on top of the persisted Stats.
 	d := deck.New(loaded.Hero, loaded.Weapons, loaded.Cards)

@@ -3,7 +3,6 @@ package main
 import (
 	"flag"
 	"fmt"
-	"os"
 	"sort"
 )
 
@@ -27,18 +26,8 @@ func runDiffCmd(args []string) {
 // then positives; alphabetical within each group. Cards present in equal counts in both decks
 // are omitted.
 func runDiff(name1, name2 string) {
-	p1 := resolveDeckPath(name1)
-	p2 := resolveDeckPath(name2)
-	d1, _ := loadExisting(p1)
-	if d1 == nil {
-		fmt.Fprintf(os.Stderr, "could not load deck from %s\n", p1)
-		os.Exit(1)
-	}
-	d2, _ := loadExisting(p2)
-	if d2 == nil {
-		fmt.Fprintf(os.Stderr, "could not load deck from %s\n", p2)
-		os.Exit(1)
-	}
+	d1 := mustLoadDeck(resolveDeckPath(name1))
+	d2 := mustLoadDeck(resolveDeckPath(name2))
 
 	counts1 := map[string]int{}
 	for _, c := range d1.Cards {
