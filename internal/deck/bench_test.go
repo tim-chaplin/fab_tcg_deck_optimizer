@@ -9,21 +9,19 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/hero"
 )
 
-// BenchmarkIterateImprovements mimics iterate mode's inner loop: starting from a random Viserai
-// deck, screen each mutation at shallow-shuffles, deep-confirm shallow passers, adopt the first
-// confirmed improvement and restart. Stops once targetImprovements have been adopted, so the
-// benchmark covers both the high-volume shallow screen path and the rare deep-confirm path in
-// realistic proportions.
+// BenchmarkIterateImprovements mimics iterate mode's inner loop: from a random Viserai deck,
+// screen each mutation at shallow-shuffles, deep-confirm passers, adopt the first improvement
+// and restart, until targetImprovements are adopted. Covers both the shallow screen path and
+// the rarer deep-confirm path in realistic proportions.
 //
 // Variance-control:
-//   - Every b.N iteration starts from a cold memo via hand.ClearMemo() so each sample measures
-//     the same work; iteration 1+ otherwise inherit a warm cache and skew the distribution.
-//   - targetImprovements is sized so each iteration does ~5 full rounds, making cold-cache
-//     startup a small fraction of total time and averaging out per-round scheduling / GC blips.
-//   - Shuffle counts (shallow=100, deep=5000) are a compressed-but-realistic version of
-//     production defaults (100 / 10000). Each iteration runs in single-digit seconds so
-//     `-benchtime=5x -count=5` gives a usable sample in about a minute.
-//   - Seed is fixed so every b.N iteration walks the same mutation-pick sequence.
+//   - Each b.N iteration starts from a cold memo via hand.ClearMemo() so every sample
+//     measures the same work.
+//   - targetImprovements is sized so each iteration does ~5 full rounds, amortising cold-cache
+//     startup and per-round scheduling/GC blips.
+//   - Shuffle counts (shallow=100, deep=5000) compress the production defaults (100 / 10000)
+//     to keep each iteration in single-digit seconds.
+//   - Seed is fixed so every iteration walks the same mutation-pick sequence.
 //
 // Recommended invocation: `go test -bench=BenchmarkIterateImprovements -benchtime=5x -count=5`.
 func BenchmarkIterateImprovements(b *testing.B) {

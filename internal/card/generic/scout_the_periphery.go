@@ -9,8 +9,6 @@
 // first attack action with CardState.FromArsenal set, and credit the bonus assuming it will
 // resolve. The arsenal can hold at most one card, so this only fires when the arsenal-in card
 // is itself an attack action queued later in the chain.
-//
-// Source: github.com/the-fab-cube/flesh-and-blood-cards (card.csv).
 
 package generic
 

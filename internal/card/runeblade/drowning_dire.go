@@ -6,8 +6,6 @@
 // Simplification: Dominate (opposing hero blocks with at most 1 card) isn't modelled — the
 // optimizer doesn't simulate defender blocks, so Dominate currently adds no value. Damage returned
 // is the printed attack. AuraCreated is not set.
-//
-// Source: github.com/the-fab-cube/flesh-and-blood-cards (card.csv).
 
 package runeblade
 

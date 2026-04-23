@@ -4,8 +4,6 @@
 // Text: "Surging Militia has +1{p} for each non-equipment card defending it."
 //
 // Simplification: Defended-by +N{p} rider isn't modelled.
-//
-// Source: github.com/the-fab-cube/flesh-and-blood-cards (card.csv).
 
 package generic
 

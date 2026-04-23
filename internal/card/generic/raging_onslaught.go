@@ -1,7 +1,5 @@
 // Raging Onslaught — Generic Action - Attack. Cost 3. Printed power: Red 7, Yellow 6, Blue 5.
 // Printed pitch variants: Red 1, Yellow 2, Blue 3. Defense 3.
-//
-// Source: github.com/the-fab-cube/flesh-and-blood-cards (card.csv).
 
 package generic
 

@@ -4,8 +4,6 @@
 //
 // Simulation: modelled as an attack source costing 1 resource, dealing 3 damage. The
 // health-symmetry rider is ignored (irrelevant to single-turn damage evaluation).
-//
-// Source: github.com/the-fab-cube/flesh-and-blood-cards (card.csv).
 
 package weapon
 

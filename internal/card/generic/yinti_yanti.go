@@ -5,8 +5,6 @@
 // defending and you control an aura, it has +1{d}."
 //
 // Simplification: The defending-side +1{d} buff is ignored (defence is consumed before Play).
-//
-// Source: github.com/the-fab-cube/flesh-and-blood-cards (card.csv).
 
 package generic
 

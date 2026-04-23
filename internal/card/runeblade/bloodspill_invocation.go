@@ -4,12 +4,8 @@
 // then create N Runechant tokens. When your hero is dealt damage, destroy Bloodspill
 // Invocation." (Red N=3, Yellow N=2, Blue N=1.)
 //
-// Modelled as a fragile aura (see fragile_aura.go): pays N if we land a same-turn attack
-// action (pops it now for the Runechants) or if we block all incoming damage (survives into a
-// future turn); pays 0 if we take damage. Only attack actions qualify for the same-turn pop —
-// weapons hitting don't trigger Bloodspill's rider.
-//
-// Source: github.com/the-fab-cube/flesh-and-blood-cards (card.csv).
+// Modelled as a fragile aura (fragile_aura.go). Only attack action cards qualify for the
+// same-turn pop (weapons don't trigger Bloodspill), so Play passes attackActionOnly=true.
 
 package runeblade
 

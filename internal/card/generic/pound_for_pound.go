@@ -5,8 +5,6 @@
 // **dominate**."
 //
 // Simplification: Health comparison for Dominate isn't modelled; Dominate keyword held but unused.
-//
-// Source: github.com/the-fab-cube/flesh-and-blood-cards (card.csv).
 
 package generic
 

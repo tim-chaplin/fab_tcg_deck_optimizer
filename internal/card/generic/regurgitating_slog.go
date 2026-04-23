@@ -5,8 +5,6 @@
 // from your graveyard. If you do, Regurgitating Slog gains **dominate**."
 //
 // Simplification: Riders described above aren't modelled; Play returns base power.
-//
-// Source: github.com/the-fab-cube/flesh-and-blood-cards (card.csv).
 
 package generic
 

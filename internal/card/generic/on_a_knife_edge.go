@@ -3,8 +3,6 @@
 // Text: "Your next sword attack this turn gains **go again**. **Go again**"
 //
 // Simplification: Next-sword-attack go-again isn't applied (weapon chain isn't peeked).
-//
-// Source: github.com/the-fab-cube/flesh-and-blood-cards (card.csv).
 
 package generic
 

@@ -4,14 +4,10 @@
 // hits, create N Runechant tokens.'"
 // (Red N=3, Yellow N=2, Blue N=1.)
 //
-// Modelling: the go-again grant is published via GrantedGoAgain on the first matching
-// CardState in CardsRemaining. The N Runechants are credited only when that target's printed
-// Attack() satisfies card.LikelyToHit — i.e. the "if this hits" clause is treated as firing
-// when the opponent would rather eat the damage than over-block. Targets whose printed power
-// lands in the blockable range drop the Runechants but still keep go-again. "Attack action
-// card" excludes weapons.
-//
-// Source: github.com/the-fab-cube/flesh-and-blood-cards (card.csv).
+// The go-again grant flips GrantedGoAgain on the first matching CardState in CardsRemaining.
+// The "if this hits" Runechants only fire when the target's printed Attack() satisfies
+// card.LikelyToHit; blockable-power targets keep go-again but drop the Runechants. "Attack
+// action card" excludes weapons.
 
 package runeblade
 

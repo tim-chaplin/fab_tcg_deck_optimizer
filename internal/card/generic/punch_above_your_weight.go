@@ -4,8 +4,6 @@
 // Text: "When this attacks, you may pay {r}{r}{r}. If you do, this gets +5{p}."
 //
 // Simplification: Pay-{r}{r}{r}-for-+5{p} rider isn't modelled.
-//
-// Source: github.com/the-fab-cube/flesh-and-blood-cards (card.csv).
 
 package generic
 

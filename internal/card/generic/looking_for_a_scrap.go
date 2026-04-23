@@ -5,8 +5,6 @@
 // your graveyard. When you do, this gains +1{p} and **go again**."
 //
 // Simplification: Graveyard-banish additional cost and bonus rider aren't modelled.
-//
-// Source: github.com/the-fab-cube/flesh-and-blood-cards (card.csv).
 
 package generic
 

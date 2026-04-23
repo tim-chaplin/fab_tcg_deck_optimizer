@@ -4,14 +4,8 @@
 // turn, when you play an attack action card, remove a verse counter from this. If you do,
 // create a Runechant token." (Red N=3, Yellow N=2, Blue N=1.)
 //
-// Modelling: Play flips AuraCreated and registers an AttackAction AuraTrigger with Count=N
-// and OncePerTurn=true. Each turn, the first attack action card to resolve while Malefic is
-// in play fires the trigger — the handler creates one Runechant and the sim decrements
-// Count. When Count hits zero the sim graveyards Self. The OncePerTurn gate ensures playing
-// multiple attack actions in the same turn only burns one verse counter, matching the
-// printed text.
-//
-// Source: github.com/the-fab-cube/flesh-and-blood-cards (card.csv).
+// AttackAction trigger with Count=N and OncePerTurn=true: each turn's first attack action
+// creates 1 Runechant and burns one verse counter.
 
 package runeblade
 
@@ -64,10 +58,7 @@ func (c MaleficIncantationBlue) Play(s *card.TurnState, _ *card.CardState) int {
 	return maleficPlay(s, c, 1)
 }
 
-// maleficPlay flips AuraCreated and registers the shared attack-action once-per-turn
-// trigger. Same-turn Play returns 0 — every rune comes from the trigger firing on each
-// turn's first attack action. The sim handles the OncePerTurn gate, the Count decrement,
-// and the Count=0 graveyard.
+// maleficPlay registers the attack-action once-per-turn trigger. Same-turn Play returns 0.
 func maleficPlay(s *card.TurnState, self card.Card, n int) int {
 	s.AddAuraTrigger(card.AuraTrigger{
 		Self:        self,

@@ -6,8 +6,6 @@
 // put it into your hand, then shuffle your deck. **Go again**"
 //
 // Simplification: Additional-cost reveal and deck search for Minnowism aren't modelled.
-//
-// Source: github.com/the-fab-cube/flesh-and-blood-cards (card.csv).
 
 package generic
 

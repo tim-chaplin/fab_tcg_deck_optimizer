@@ -5,8 +5,6 @@
 // zone from your deck, gain 1 action point."
 //
 // Simplification: Face-up-from-deck action-point grant isn't modelled.
-//
-// Source: github.com/the-fab-cube/flesh-and-blood-cards (card.csv).
 
 package generic
 

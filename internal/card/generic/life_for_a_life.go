@@ -8,8 +8,6 @@
 // on card.LikelyToHit. The "less {h} than an opposing hero" clause is modelled as a hero
 // attribute — go again fires for heroes that implement card.LowerHealthWanter and never fires
 // otherwise.
-//
-// Source: github.com/the-fab-cube/flesh-and-blood-cards (card.csv).
 
 package generic
 

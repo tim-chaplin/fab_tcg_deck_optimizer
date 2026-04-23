@@ -4,8 +4,6 @@
 // Text: "When this hits a hero, cards they own lose all colors until the end of their next turn."
 //
 // Simplification: Opponent 'lose all colors' debuff isn't modelled.
-//
-// Source: github.com/the-fab-cube/flesh-and-blood-cards (card.csv).
 
 package generic
 

@@ -5,8 +5,6 @@
 // +2{p}."
 //
 // Simplification: Banished-zone tracking isn't modelled; +2{p} rider never fires.
-//
-// Source: github.com/the-fab-cube/flesh-and-blood-cards (card.csv).
 
 package generic
 

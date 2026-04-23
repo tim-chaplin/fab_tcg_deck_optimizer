@@ -4,8 +4,6 @@
 // Text: "If this is defended by an action card, this gets +2{p}."
 //
 // Simplification: The 'defended by action card' +2{p} rider isn't modelled.
-//
-// Source: github.com/the-fab-cube/flesh-and-blood-cards (card.csv).
 
 package generic
 

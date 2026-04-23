@@ -3,8 +3,6 @@
 // this turn gets -1{p}."
 // Simplification: marked-hero state isn't tracked; we assume the defender is never marked (so the
 // card is always legal) and ignore the attacker debuff.
-//
-// Source: github.com/the-fab-cube/flesh-and-blood-cards (card.csv).
 
 package generic
 

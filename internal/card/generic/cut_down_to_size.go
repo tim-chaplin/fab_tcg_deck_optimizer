@@ -4,8 +4,6 @@
 // Text: "When this hits a hero, if they have 4 or more cards in hand, they discard a card."
 //
 // Simplification: Opponent discard rider isn't modelled.
-//
-// Source: github.com/the-fab-cube/flesh-and-blood-cards (card.csv).
 
 package generic
 

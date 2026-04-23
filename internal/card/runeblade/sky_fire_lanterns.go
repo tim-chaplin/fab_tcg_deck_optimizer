@@ -3,12 +3,8 @@
 // Text: "Reveal the top card of your deck. If it's <same color as this variant>, create a
 // Runechant token."
 //
-// Simplification: peek at the actual top card of the remaining deck (s.Deck[0]) and compare its
-// pitch value to this card's pitch (pitch = color: 1 Red / 2 Yellow / 3 Blue). On match, credit
-// +1 for the Runechant and set AuraCreated. Opts out of the hand-evaluation memo because the
-// result depends on deck composition not captured by the memo key.
-//
-// Source: github.com/the-fab-cube/flesh-and-blood-cards (card.csv).
+// Peek s.Deck[0] and compare its pitch to this variant's pitch (color). On match, create
+// one Runechant.
 
 package runeblade
 

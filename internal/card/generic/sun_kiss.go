@@ -7,8 +7,6 @@
 // Modelling: health is valued 1-to-1 with damage, so Play returns +N damage-equivalent per
 // variant. The Moon Wish synergy (draw a card + go again on playing Moon Wish earlier this turn)
 // isn't modelled, so go-again stays off — the printed keyword is conditional, not unconditional.
-//
-// Source: github.com/the-fab-cube/flesh-and-blood-cards (card.csv).
 
 package generic
 

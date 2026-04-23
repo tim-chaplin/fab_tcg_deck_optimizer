@@ -4,8 +4,6 @@
 // Text: "When this defends, look at the top card of your deck."
 //
 // Simplification: The deck-peek trigger isn't modelled.
-//
-// Source: github.com/the-fab-cube/flesh-and-blood-cards (card.csv).
 
 package generic
 

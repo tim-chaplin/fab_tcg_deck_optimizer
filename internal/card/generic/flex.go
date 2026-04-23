@@ -4,8 +4,6 @@
 // Text: "When you attack or defend with Flex, you may pay {r}{r}. If you do, it gains +2{p}."
 //
 // Simplification: Pay-{r}{r}-for-+2{p} rider isn't modelled.
-//
-// Source: github.com/the-fab-cube/flesh-and-blood-cards (card.csv).
 
 package generic
 

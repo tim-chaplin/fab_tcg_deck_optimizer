@@ -6,8 +6,6 @@
 // again**"
 //
 // Simplification: Opponent hand inspection and Silver-token economy aren't modelled.
-//
-// Source: github.com/the-fab-cube/flesh-and-blood-cards (card.csv).
 
 package generic
 

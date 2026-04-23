@@ -1,7 +1,5 @@
 // Muscle Mutt — Generic Action - Attack. Cost 3, Pitch 2, Power 6, Defense 2. Only printed in
 // Yellow.
-//
-// Source: github.com/the-fab-cube/flesh-and-blood-cards (card.csv).
 
 package generic
 

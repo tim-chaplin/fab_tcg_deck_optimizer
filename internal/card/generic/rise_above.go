@@ -4,8 +4,6 @@
 // Text: "You may put a card from your hand on top of your deck rather than pay Rise Above's {r}
 // cost." Simplification: the alternative hand-as-cost option isn't modelled — we pay the printed
 // 2{r} or the partition's affordability check rejects the play.
-//
-// Source: github.com/the-fab-cube/flesh-and-blood-cards (card.csv).
 
 package generic
 

@@ -4,8 +4,6 @@
 // Text: "While Stony Woottonhog is defended by less than 2 non-equipment cards, it has +1{p}."
 //
 // Simplification: Defended-by-<2-non-equipment condition isn't modelled.
-//
-// Source: github.com/the-fab-cube/flesh-and-blood-cards (card.csv).
 
 package generic
 

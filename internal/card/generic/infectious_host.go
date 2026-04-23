@@ -5,8 +5,6 @@
 // their control, then repeat for Inertia and Bloodrot Pox."
 //
 // Simplification: Frailty/Inertia/Bloodrot Pox token creation isn't modelled.
-//
-// Source: github.com/the-fab-cube/flesh-and-blood-cards (card.csv).
 
 package generic
 

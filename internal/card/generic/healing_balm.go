@@ -5,8 +5,6 @@
 //
 // Modelling: health is valued 1-to-1 with damage, so Play returns +N damage-equivalent per
 // variant.
-//
-// Source: github.com/the-fab-cube/flesh-and-blood-cards (card.csv).
 
 package generic
 

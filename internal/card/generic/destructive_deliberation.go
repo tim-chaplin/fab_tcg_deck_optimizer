@@ -4,8 +4,6 @@
 // Text: "When this hits a hero, create a Ponder token."
 //
 // Simplification: Ponder token creation isn't modelled.
-//
-// Source: github.com/the-fab-cube/flesh-and-blood-cards (card.csv).
 
 package generic
 

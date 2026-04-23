@@ -4,8 +4,6 @@
 // cost. Draw 2 cards. **Go again**"
 //
 // Simplification: Activated Gold/Silver/Copper economy and draws aren't modelled.
-//
-// Source: github.com/the-fab-cube/flesh-and-blood-cards (card.csv).
 
 package generic
 

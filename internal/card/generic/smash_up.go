@@ -4,8 +4,6 @@
 // card from their arsenal."
 //
 // Simplification: Arsenal-manipulation rider isn't modelled.
-//
-// Source: github.com/the-fab-cube/flesh-and-blood-cards (card.csv).
 
 package generic
 

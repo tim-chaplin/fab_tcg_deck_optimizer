@@ -7,8 +7,6 @@
 // Modelling: on-hit Opt 2 isn't modelled. The played-from-arsenal go-again fires via
 // self.GrantedGoAgain when self.FromArsenal reports this copy came from the arsenal slot.
 // GoAgain() stays false so hand-played copies don't get the grant.
-//
-// Source: github.com/the-fab-cube/flesh-and-blood-cards (card.csv).
 
 package generic
 

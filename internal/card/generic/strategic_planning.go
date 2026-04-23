@@ -5,8 +5,6 @@
 // At the beginning of the end phase, draw a card. **Go again**"
 //
 // Simplification: Graveyard recovery and end-phase draw aren't modelled.
-//
-// Source: github.com/the-fab-cube/flesh-and-blood-cards (card.csv).
 
 package generic
 

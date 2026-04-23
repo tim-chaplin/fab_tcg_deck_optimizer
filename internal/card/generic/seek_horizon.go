@@ -5,8 +5,6 @@
 // your deck. If you do, Seek Horizon gains **go again**."
 //
 // Simplification: Hand-on-top additional cost and conditional go-again aren't modelled.
-//
-// Source: github.com/the-fab-cube/flesh-and-blood-cards (card.csv).
 
 package generic
 

@@ -5,8 +5,6 @@
 // greater. **Dominate**"
 //
 // Simplification: Additional reveal cost isn't modelled; Dominate keyword is held but unused.
-//
-// Source: github.com/the-fab-cube/flesh-and-blood-cards (card.csv).
 
 package generic
 

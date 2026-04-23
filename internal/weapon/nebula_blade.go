@@ -5,8 +5,6 @@
 //
 // Simplification: assume the attack always hits (+1 damage for the Runechant, counted as future
 // damage). The +3 power rider fires iff a prior card in CardsPlayed has Action && !Attack types.
-//
-// Source: github.com/the-fab-cube/flesh-and-blood-cards (card.csv).
 
 package weapon
 

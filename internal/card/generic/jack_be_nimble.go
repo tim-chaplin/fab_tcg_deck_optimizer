@@ -6,8 +6,6 @@
 // action phase."
 //
 // Simplification: Graveyard banish for +1{p}/go-again and on-hit steal aren't modelled.
-//
-// Source: github.com/the-fab-cube/flesh-and-blood-cards (card.csv).
 
 package generic
 

@@ -6,8 +6,6 @@
 // Simplification: The defended-by-equal-or-greater-power gate isn't modelled, and go-again
 // stays off — the printed keyword is conditional on the opponent's block choice, not
 // unconditional.
-//
-// Source: github.com/the-fab-cube/flesh-and-blood-cards (card.csv).
 
 package generic
 

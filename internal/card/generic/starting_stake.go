@@ -3,8 +3,6 @@
 // Text: "If you control no Gold tokens, create a Gold token."
 //
 // Simplification: Gold-token economy isn't tracked.
-//
-// Source: github.com/the-fab-cube/flesh-and-blood-cards (card.csv).
 
 package generic
 

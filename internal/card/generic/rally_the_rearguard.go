@@ -5,8 +5,6 @@
 // while this is defending."
 //
 // Simplification: Defense-time instant activated ability isn't modelled.
-//
-// Source: github.com/the-fab-cube/flesh-and-blood-cards (card.csv).
 
 package generic
 

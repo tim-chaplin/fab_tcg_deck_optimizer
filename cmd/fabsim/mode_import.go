@@ -17,11 +17,8 @@ import (
 )
 
 // runImport interactively pastes a fabrary.net plain-text deck from stdin, asks for a deck
-// name, and writes the resulting JSON to mydecks/<name>.json. The name is prompted BEFORE the
-// paste: the fabrary footer ends stdin, so there's no opportunity afterward.
-//
-// Piping works incidentally (prompts go to stderr) but there's no dedicated -in flag. Export is
-// automatic — every random / iterate run writes a sibling fabrary .txt next to the JSON.
+// name, and writes the resulting JSON to mydecks/<name>.json. The name is prompted BEFORE
+// the paste because the fabrary footer ends stdin — no opportunity afterward.
 func runImport() {
 	reader := bufio.NewReader(os.Stdin)
 
@@ -64,9 +61,9 @@ func runImport() {
 	warnSkipped(skipped)
 }
 
-// fabraryFooterPrefix is the last line of every fabrary plain-text export. Seeing it means the
-// paste is done, so we stop reading and the user doesn't have to send EOF (Ctrl-Z on Windows).
-// EOF is still honored for pastes that have been edited to strip the footer.
+// fabraryFooterPrefix is the last line of every fabrary plain-text export. Seeing it ends
+// the read so the user doesn't have to send EOF (Ctrl-Z on Windows). EOF is still honored
+// for pastes edited to strip the footer.
 const fabraryFooterPrefix = "See the full deck"
 
 func readUntilFabraryFooter(r *bufio.Reader) ([]byte, error) {

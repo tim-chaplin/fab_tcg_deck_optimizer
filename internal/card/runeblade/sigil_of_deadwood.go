@@ -3,12 +3,7 @@
 // Text: "Go again. At the beginning of your action phase, destroy this. When this leaves the
 // arena, create a Runechant token."
 //
-// Modelling: Play flips AuraCreated so same-turn aura-readers see it and registers a
-// start-of-turn AuraTrigger with Count=1. Next turn the sim fires the trigger — the handler
-// creates one live Runechant on the new turn's state — and graveyards Sigil of Deadwood as
-// Count hits zero.
-//
-// Source: github.com/the-fab-cube/flesh-and-blood-cards (card.csv).
+// Handler creates 1 Runechant next turn.
 
 package runeblade
 

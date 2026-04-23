@@ -9,8 +9,6 @@
 // modes (+2{p}, on-hit life, go again) default off — including go again. Returning true from
 // GoAgain() would make the chain-legality check always pass, over-crediting sequences against
 // the baseline where the random mode rolled a different option.
-//
-// Source: github.com/the-fab-cube/flesh-and-blood-cards (card.csv).
 
 package generic
 

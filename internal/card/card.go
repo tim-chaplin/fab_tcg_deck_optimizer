@@ -53,35 +53,25 @@ func NewTypeSet(types ...CardType) TypeSet {
 // Has reports whether s contains the given type.
 func (s TypeSet) Has(t CardType) bool { return s&TypeSet(t) != 0 }
 
-// IsNonAttackAction reports whether s represents an Action that is not also an Attack. Used by
-// effects keyed on "if a non-attack action card was played/pitched" (Viserai's trigger, Vigor
-// Rush's go-again rider, Aether Slash's arcane rider, Deathly Duet's runechant rider, Nebula
-// Blade's +3 power rider). A single bitmask check avoids duplicating Has(Action) && !Has(Attack)
-// in every caller.
+// IsNonAttackAction reports whether s represents an Action that is not also an Attack —
+// the bitmask check behind every "if a non-attack action card was played/pitched" rider.
 func (s TypeSet) IsNonAttackAction() bool {
 	return s&TypeSet(TypeAction) != 0 && s&TypeSet(TypeAttack) == 0
 }
 
-// IsAttackAction reports whether s is an attack action card — both Action and Attack. Used by
-// the ten-or-so "next attack action card you play this turn" riders (Come to Fight, Minnowism,
-// Nimblism, Sloggism, Water the Seeds, Captain's Call, Flying High, Trot Along, Scout the
-// Periphery, Next Attack Action helper) plus the solver's per-card attackerMeta precompute.
-// Single-expression bitmask keeps the peek loops lean.
+// IsAttackAction reports whether s is an attack action card — both Action and Attack.
+// Single-expression bitmask keeps the "next attack action" peek loops lean.
 func (s TypeSet) IsAttackAction() bool {
 	return s&TypeSet(TypeAction) != 0 && s&TypeSet(TypeAttack) != 0
 }
 
-// IsRunebladeAttack reports whether s is a Runeblade attack — an attack action card OR a weapon
-// swing. Used by "next Runeblade attack this turn" riders (Mauvrion Skies, Runic Reaping, Oath of
-// the Arknight, Condemn to Slaughter) that peek CardsRemaining.
+// IsRunebladeAttack reports whether s is a Runeblade attack — an attack action card OR a
+// weapon swing. Used by "next Runeblade attack this turn" riders that peek CardsRemaining.
 func (s TypeSet) IsRunebladeAttack() bool {
 	return s&TypeSet(TypeRuneblade) != 0 && s&(TypeSet(TypeAttack)|TypeSet(TypeWeapon)) != 0
 }
 
-// IsDefenseReaction reports whether s has the Defense Reaction subtype. Named because five
-// sites in the solver (partition-scratch isDR precompute, per-turn summary grouping,
-// defenseReactionDamage filter, fillContributions per-card Play re-play) all reach for the same
-// bit.
+// IsDefenseReaction reports whether s has the Defense Reaction subtype.
 func (s TypeSet) IsDefenseReaction() bool {
 	return s&TypeSet(TypeDefenseReaction) != 0
 }
@@ -93,10 +83,9 @@ func (s TypeSet) IsDefenseReaction() bool {
 // the `self` parameter to Play.
 type CardState struct {
 	Card Card
-	// GrantedGoAgain is set by a prior card's grant (e.g. Mauvrion Skies targeting the next
-	// Runeblade attack) or by the card's own Play flipping self.GrantedGoAgain = true (e.g.
-	// Runerager Swarm, Vigor Rush). The solver's chain-legality check ORs this with
-	// Card.GoAgain().
+	// GrantedGoAgain is set by a prior card's grant ("next X attack" riders) or by the card's
+	// own Play flipping self.GrantedGoAgain = true. The solver's chain-legality check ORs
+	// this with Card.GoAgain().
 	GrantedGoAgain bool
 	// FromArsenal flags the single CardState whose Card came from the arsenal slot at start of
 	// turn. The solver sets it before the chain runs; CardStates for hand cards and mid-turn
@@ -124,9 +113,8 @@ type TurnState struct {
 	// turn" should OR this with CardsPlayed containing an Aura-typed card.
 	AuraCreated bool
 	// CardsRemaining is the cards that will be played after the current one in turn order.
-	// Populated by the solver before each Play so an effect can peek forward (e.g. Condemn to
-	// Slaughter buffing the "next Runeblade attack") or grant keywords to a later card by
-	// flipping flags on its CardState entry (e.g. Mauvrion Skies granting Go again).
+	// Populated by the solver before each Play so an effect can peek forward ("next X
+	// attack") or grant keywords to a later card by flipping flags on its CardState entry.
 	CardsRemaining []*CardState
 	// Pitched is the cards pitched this turn for resources. Populated by the solver before any
 	// Play. Effects that check "if an attack card was pitched" scan this list.
@@ -146,9 +134,8 @@ type TurnState struct {
 	Runechants int
 	// ArcaneDamageDealt sticks true once any source of arcane damage fires this turn: a
 	// Runechant token consuming itself on an attack / weapon swing, or a card whose Play deals
-	// arcane directly (e.g. Arcanic Crackle, Vexing Malice, Sigil of Suffering). Effects that
-	// read "if you've dealt arcane damage this turn" consult this flag rather than Runechants
-	// (which only shows currently-alive tokens).
+	// arcane directly. Effects that read "if you've dealt arcane damage this turn" consult
+	// this flag rather than Runechants (which only shows currently-alive tokens).
 	//
 	// playSequence sets the flag automatically for the Runechant-firing case by checking
 	// Runechants > 0 before each attack/weapon's Play runs. Cards that deal arcane via their
@@ -156,8 +143,8 @@ type TurnState struct {
 	ArcaneDamageDealt bool
 	// NonAttackActionPlayed is set true once any non-attack action card has been appended to
 	// CardsPlayed this turn. Maintained by playSequenceWithMeta when each card resolves so
-	// hero triggers that ask "was a non-attack action played earlier?" (Viserai's runechant
-	// rider) can answer in O(1) instead of rescanning CardsPlayed on every trigger.
+	// hero triggers that ask "was a non-attack action played earlier?" can answer in O(1)
+	// instead of rescanning CardsPlayed on every trigger.
 	NonAttackActionPlayed bool
 	// IncomingDamage is the opponent damage this turn (the value passed to hand.Best). Constant
 	// across every partition the solver enumerates for this hand.
@@ -211,8 +198,8 @@ const (
 	TriggerStartOfTurn AuraTriggerType = iota
 	// TriggerAttackAction fires each time an attack action card resolves during the attack
 	// chain. Triggers that set OncePerTurn cap themselves at one fire per turn regardless of
-	// how many attack actions resolve — Malefic Incantation's "once per turn, when you play
-	// an attack action card …" clause.
+	// how many attack actions resolve ("once per turn, when you play an attack action card
+	// …" clauses).
 	TriggerAttackAction
 )
 
@@ -275,11 +262,10 @@ func (s *TurnState) HasPlayedType(t CardType) bool {
 	return false
 }
 
-// HasAuraInPlay reports whether an aura was played or created this turn — the condition six
-// "if you've played or created an aura this turn" riders check (Reek of Corruption, Hit the High
-// Notes, Shrill of Skullform, Vantage Point, Runerager Swarm, Yinti Yanti). Checks the
-// AuraCreated flag (set by CreateRunechants, Sigil plays, etc.) OR scans CardsPlayed for an
-// Aura-typed card — the flag covers token creation, the scan covers explicit Aura cards.
+// HasAuraInPlay reports whether an aura was played or created this turn — the condition
+// behind "if you've played or created an aura this turn" riders. Checks AuraCreated (set by
+// CreateRunechants, Sigil plays, etc.) OR scans CardsPlayed for an Aura-typed card: the flag
+// covers token creation, the scan covers explicit Aura cards.
 func (s *TurnState) HasAuraInPlay() bool {
 	return s.AuraCreated || s.HasPlayedType(TypeAura)
 }
@@ -411,20 +397,19 @@ type LowerHealthWanter interface {
 // and the like. The solver uses it as a beatsBest tiebreaker: at equal current-turn Value
 // and equal leftover-runechants, a partition that plays more AddsFutureValue cards wins,
 // because their hidden future payoff isn't reflected in this turn's score. Without the
-// bias, a lone Sigil of the Arknight loses to Held → arsenal promotion on the
-// arsenal-occupancy tiebreak.
+// bias, a lone future-value aura loses to Held → arsenal promotion on the arsenal-occupancy
+// tiebreak.
 //
-// Today every implementer also registers an AuraTrigger on Play; the marker stays separate
-// so future hidden-value mechanisms can opt in without piggybacking on the trigger system.
+// The marker is intentionally decoupled from AuraTrigger so future hidden-value mechanisms
+// can opt in without piggybacking on the trigger system.
 type AddsFutureValue interface {
 	AddsFutureValue()
 }
 
 // ArsenalDefenseBonus is an optional marker for Defense Reactions whose printed text grants
-// extra defense only when the card is played from arsenal (e.g. Unmovable, Springboard
-// Somersault). Implementers return the additional defense added to Defense() when this copy
-// came from the arsenal slot at start of turn. Defense() itself stays the printed value so the
-// hand-played path is unaffected.
+// extra defense only when the card is played from arsenal. Implementers return the
+// additional defense added to Defense() when this copy came from the arsenal slot at start
+// of turn. Defense() itself stays the printed value so the hand-played path is unaffected.
 type ArsenalDefenseBonus interface {
 	ArsenalDefenseBonus() int
 }

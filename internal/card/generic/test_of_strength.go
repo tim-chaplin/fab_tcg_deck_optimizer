@@ -4,8 +4,6 @@
 //
 // Rider modelled: Gold token to the Clash winner, staked at card.GoldTokenValue via
 // card.ClashValue.
-//
-// Source: github.com/the-fab-cube/flesh-and-blood-cards (card.csv).
 
 package generic
 

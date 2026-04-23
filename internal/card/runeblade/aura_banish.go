@@ -1,5 +1,4 @@
-// Shared helper for cards that banish an aura from the graveyard for +1 arcane damage:
-// Weeping Battleground, Sigil of Silphidae (both enter and leave triggers), Runic Fellingsong.
+// Shared helper for cards that banish an aura from the graveyard for +1 arcane damage.
 
 package runeblade
 

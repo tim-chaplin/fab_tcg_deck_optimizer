@@ -7,8 +7,6 @@
 // play; any attack in Pitched satisfies the +2{p} branch, any non-attack action satisfies the
 // runechant branch, and both can fire if both kinds were pitched). The 2 Runechants enter state
 // via CreateRunechants — they fire on Deathly Duet's own attack resolution downstream.
-//
-// Source: github.com/the-fab-cube/flesh-and-blood-cards (card.csv).
 
 package runeblade
 

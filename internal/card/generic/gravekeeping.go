@@ -4,8 +4,6 @@
 // Text: "When this attacks a hero, you may banish a card from their graveyard."
 //
 // Simplification: Graveyard banish rider isn't modelled.
-//
-// Source: github.com/the-fab-cube/flesh-and-blood-cards (card.csv).
 
 package generic
 

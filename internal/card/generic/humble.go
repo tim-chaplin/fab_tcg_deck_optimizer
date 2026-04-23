@@ -5,8 +5,6 @@
 // turn."
 //
 // Simplification: Hero-ability suppression rider isn't modelled.
-//
-// Source: github.com/the-fab-cube/flesh-and-blood-cards (card.csv).
 
 package generic
 

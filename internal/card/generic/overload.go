@@ -5,8 +5,6 @@
 //
 // Simplification: On-hit go-again and Dominate aren't modelled (keyword held but solver ignores
 // hit-gated grants).
-//
-// Source: github.com/the-fab-cube/flesh-and-blood-cards (card.csv).
 
 package generic
 

@@ -4,8 +4,6 @@
 // of its owner's deck. **Go again**"
 //
 // Simplification: Marks and 'attacked them this turn' tracking aren't modelled.
-//
-// Source: github.com/the-fab-cube/flesh-and-blood-cards (card.csv).
 
 package generic
 

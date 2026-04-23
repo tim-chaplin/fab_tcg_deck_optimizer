@@ -5,8 +5,6 @@
 // were an instant."
 //
 // Simplification: On-hit instant-casting rider isn't modelled.
-//
-// Source: github.com/the-fab-cube/flesh-and-blood-cards (card.csv).
 
 package generic
 

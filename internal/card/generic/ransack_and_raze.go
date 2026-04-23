@@ -3,8 +3,6 @@
 // Text: "Destroy target landmark with cost X. Create X Gold tokens. **Go again**"
 //
 // Simplification: Landmarks and Gold tokens aren't modelled; X cost treated as 0.
-//
-// Source: github.com/the-fab-cube/flesh-and-blood-cards (card.csv).
 
 package generic
 

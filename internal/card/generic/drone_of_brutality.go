@@ -5,8 +5,6 @@
 // the bottom of your deck."
 //
 // Simplification: Graveyard-replacement-to-deck trigger isn't modelled.
-//
-// Source: github.com/the-fab-cube/flesh-and-blood-cards (card.csv).
 
 package generic
 

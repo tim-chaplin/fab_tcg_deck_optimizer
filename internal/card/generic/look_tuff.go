@@ -3,8 +3,6 @@
 // Text: "When this attacks, it gets -1{p} unless you pay {r}."
 //
 // Simplification: Pay {r} or lose 1{p} — base power is kept.
-//
-// Source: github.com/the-fab-cube/flesh-and-blood-cards (card.csv).
 
 package generic
 

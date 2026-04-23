@@ -5,8 +5,6 @@
 //
 // Simplification: The '+1{p} if matching color' rider is modelled: when the granted target's pitch
 // matches this card's, +1 is also credited.
-//
-// Source: github.com/the-fab-cube/flesh-and-blood-cards (card.csv).
 
 package generic
 

@@ -5,8 +5,6 @@
 //
 // Simplification: Next weapon attack +1{p} isn't modelled (weapons aren't scanned in
 // CardsRemaining).
-//
-// Source: github.com/the-fab-cube/flesh-and-blood-cards (card.csv).
 
 package generic
 

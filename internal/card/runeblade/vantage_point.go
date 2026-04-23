@@ -3,8 +3,6 @@
 // Text: "If you've played or created an aura this turn, this gets **overpower**."
 //
 // Sets TurnState.Overpower when the aura condition is met.
-//
-// Source: github.com/the-fab-cube/flesh-and-blood-cards (card.csv).
 
 package runeblade
 

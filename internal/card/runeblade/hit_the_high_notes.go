@@ -1,8 +1,6 @@
 // Hit the High Notes — Runeblade Action - Attack. Cost 1, Defense 3.
 // Printed power: Red 4, Yellow 3, Blue 2.
 // Text: "If you've played or created an aura this turn, this gets +2{p}."
-//
-// Source: github.com/the-fab-cube/flesh-and-blood-cards (card.csv).
 
 package runeblade
 

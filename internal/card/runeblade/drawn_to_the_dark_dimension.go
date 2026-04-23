@@ -8,8 +8,6 @@
 // card.VariableCost with bounds [0, printed].
 //
 // The "Draw a card" rider fires unconditionally on play.
-//
-// Source: github.com/the-fab-cube/flesh-and-blood-cards (card.csv).
 
 package runeblade
 

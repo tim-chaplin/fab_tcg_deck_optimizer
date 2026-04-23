@@ -3,8 +3,6 @@
 // Printed defense: Red 4, Yellow 3, Blue 2.
 // Text: "You may put a card from your hand on the bottom of your deck. If you do, draw a card."
 // Simplification: the hand-cycling rider is ignored (card quality/draw isn't modelled).
-//
-// Source: github.com/the-fab-cube/flesh-and-blood-cards (card.csv).
 
 package generic
 

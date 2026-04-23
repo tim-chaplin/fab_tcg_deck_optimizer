@@ -4,8 +4,6 @@
 // Text: "When this defends alone, prevent the next 1 damage that would be dealt to you this turn."
 //
 // Simplification: Defense-prevention rider isn't modelled.
-//
-// Source: github.com/the-fab-cube/flesh-and-blood-cards (card.csv).
 
 package generic
 

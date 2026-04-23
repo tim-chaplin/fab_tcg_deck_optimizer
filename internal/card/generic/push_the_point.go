@@ -4,8 +4,6 @@
 // Text: "If the last attack on this combat chain hit, Push the Point gains +2{p}."
 //
 // Simplification: Chain-history +2{p} rider isn't modelled.
-//
-// Source: github.com/the-fab-cube/flesh-and-blood-cards (card.csv).
 
 package generic
 

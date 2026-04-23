@@ -19,10 +19,9 @@ const DiscardValue = 3
 const GoldTokenValue = 1
 
 // LikelyToHit reports whether dealing n damage is likely to get through an opponent's blocks.
-// A typical FaB card is worth ~3 points, so blocking 1/4/7 with a pitch or block card over-pays;
-// the opponent would rather eat the damage. Multiples of 3 are the easy-to-block amounts.
-// Used by fragile-aura cards (Arcane Cussing, Bloodspill Invocation) to decide whether a
-// same-turn attack will actually land and pop the aura for its pay-off.
+// A typical FaB card is worth ~3 points, so blocking 1/4/7 with a pitch or block card
+// over-pays; the opponent would rather eat the damage. Multiples of 3 are the easy-to-block
+// amounts. Used by riders like "if this hits, …" to decide whether the clause fires.
 func LikelyToHit(n int) bool {
 	return n == 1 || n == 4 || n == 7
 }

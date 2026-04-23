@@ -32,10 +32,9 @@ func TestFabraryPathFor(t *testing.T) {
 	}
 }
 
-// TestParseFlagsAnywhere pins the reorder behavior: flags must parse regardless of position
-// relative to positional args, both `-name value` and `-name=value` forms work, bool flags
-// don't consume the next token, `--` terminates flag parsing, and unknown flags surface their
-// canonical fs.Parse error instead of silently swallowing a positional.
+// TestParseFlagsAnywhere pins the reorder behaviour: flags parse regardless of position,
+// `-name value` and `-name=value` both work, bool flags don't consume the next token, `--`
+// terminates flag parsing, and unknown flags surface fs.Parse's canonical error.
 func TestParseFlagsAnywhere(t *testing.T) {
 	t.Run("flag after positional", func(t *testing.T) {
 		fs := flag.NewFlagSet("test", flag.ContinueOnError)
@@ -147,9 +146,8 @@ func TestLoadExisting_TruncatedReturnsError(t *testing.T) {
 	}
 }
 
-// TestWriteFileAtomic_LeavesNoTempOnSuccess: the temp file used during the write must be
-// renamed away (not left behind) on success — anything else would litter mydecks/ with
-// .tmp-* files over thousands of anneal rounds.
+// TestWriteFileAtomic_LeavesNoTempOnSuccess: the temp file must be renamed away on
+// success, not left behind.
 func TestWriteFileAtomic_LeavesNoTempOnSuccess(t *testing.T) {
 	dir := t.TempDir()
 	path := filepath.Join(dir, "deck.json")
@@ -174,10 +172,9 @@ func TestWriteFileAtomic_LeavesNoTempOnSuccess(t *testing.T) {
 	}
 }
 
-// TestWriteFileAtomic_PreservesOldOnFailure: if the rename target already has content and
-// the write succeeds, the new content replaces the old atomically. (We can't easily simulate
-// a partial write failure without an injectable seam, but at minimum the success path must
-// fully replace, not append/corrupt.)
+// TestWriteFileAtomic_PreservesOldOnFailure: a successful write must fully replace prior
+// content, not append or corrupt it. (Simulating a partial-write failure would need an
+// injectable seam; the success path is the minimum guardrail.)
 func TestWriteFileAtomic_PreservesOldOnFailure(t *testing.T) {
 	dir := t.TempDir()
 	path := filepath.Join(dir, "deck.json")
@@ -196,8 +193,7 @@ func TestWriteFileAtomic_PreservesOldOnFailure(t *testing.T) {
 	}
 }
 
-// TestDefaultDeckNameFor pins the filename shape: hero_format_incoming. Every run is scoped to
-// exactly one format, so the format segment is always present.
+// TestDefaultDeckNameFor pins the filename shape: hero_format_incoming.
 func TestDefaultDeckNameFor(t *testing.T) {
 	cases := []struct {
 		f    fmtpkg.Format

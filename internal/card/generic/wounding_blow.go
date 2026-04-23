@@ -1,7 +1,5 @@
 // Wounding Blow — Generic Action - Attack. Cost 0. Printed power: Red 4, Yellow 3, Blue 2. Printed
 // pitch variants: Red 1, Yellow 2, Blue 3. Defense 3.
-//
-// Source: github.com/the-fab-cube/flesh-and-blood-cards (card.csv).
 
 package generic
 

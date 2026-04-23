@@ -63,13 +63,11 @@ type CardPlayStatsJSON struct {
 	Avg               float64 `json:"avg"`
 }
 
-// BestTurnJSON is the JSON form of deck.BestTurn: card names and role names instead of interface
-// values. Contributions parallels Hand/Roles and carries CardAssignment.Contribution for each
-// hand slot so loaded decks render per-card damage/block/pitch credit instead of "+0". Chain is
-// the ordered attack sequence — cards and weapons in play order with their per-step damage —
-// so FormatBestTurn can reconstruct the same layout the live sim produced. Both fields are
-// omitempty; files missing them fall back to defaults (contributions = 0, chain rebuilt in
-// hand order).
+// BestTurnJSON is the JSON form of deck.BestTurn: card names and role names instead of
+// interface values. Contributions parallels Hand/Roles and carries
+// CardAssignment.Contribution for each hand slot. Chain is the ordered attack sequence —
+// cards and weapons in play order with their per-step damage. Both are omitempty; files
+// missing them fall back to defaults (contributions = 0, chain rebuilt in hand order).
 type BestTurnJSON struct {
 	Hand               []string               `json:"hand"`
 	Roles              []string               `json:"roles"`
@@ -80,9 +78,9 @@ type BestTurnJSON struct {
 	StartingRunechants int                    `json:"starting_runechants"`
 }
 
-// AttackChainEntryJSON serialises one attack step (card or weapon) along with the damage it
-// dealt in the sim's winning chain. TriggerDamage is the hero's OnCardPlayed contribution for
-// that step (e.g. a Runechant Viserai fires as the card resolves) — omitted when zero.
+// AttackChainEntryJSON serialises one attack step (card or weapon) with the damage it dealt
+// in the sim's winning chain. TriggerDamage is the hero's OnCardPlayed contribution for that
+// step — omitted when zero.
 type AttackChainEntryJSON struct {
 	Card          string  `json:"card"`
 	Damage        float64 `json:"damage"`

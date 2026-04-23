@@ -1,8 +1,6 @@
 // Viserai — Runeblade Hero, Young. Health 20, Intelligence 4.
 // Text: "Whenever you play a Runeblade card, if you have played another 'non-attack' action card
 // this turn, create a Runechant token."
-//
-// Source: github.com/the-fab-cube/flesh-and-blood-cards (card.csv).
 
 package hero
 

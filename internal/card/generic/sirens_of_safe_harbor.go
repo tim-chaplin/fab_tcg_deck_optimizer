@@ -7,8 +7,6 @@
 // fires on every Play — credited as +1 damage equivalent (health is valued 1-to-1 with
 // damage). Pitched copies go to the bottom of the deck, not the graveyard, so they don't
 // trigger the rider; pitched contributions stay at the printed pitch value only.
-//
-// Source: github.com/the-fab-cube/flesh-and-blood-cards (card.csv).
 
 package generic
 

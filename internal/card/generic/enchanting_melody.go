@@ -7,8 +7,6 @@
 //
 // Simplification: Damage-prevention trigger and end-phase destruction clause aren't modelled; value
 // is just the aura-created flag (read by Yinti Yanti, Runerager Swarm, etc.).
-//
-// Source: github.com/the-fab-cube/flesh-and-blood-cards (card.csv).
 
 package generic
 

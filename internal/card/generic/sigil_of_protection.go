@@ -5,8 +5,6 @@
 //
 // Simplification: Ward N isn't modelled (opponent's damage prevention); only the aura-created flag
 // is credited.
-//
-// Source: github.com/the-fab-cube/flesh-and-blood-cards (card.csv).
 
 package generic
 

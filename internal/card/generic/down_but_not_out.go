@@ -6,8 +6,6 @@
 // token.""
 //
 // Simplification: Health/equipment/token comparison isn't modelled; none of the riders fire.
-//
-// Source: github.com/the-fab-cube/flesh-and-blood-cards (card.csv).
 
 package generic
 

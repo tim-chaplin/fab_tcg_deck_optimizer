@@ -441,10 +441,10 @@ func (d *Deck) EvaluateWith(runs int, incomingDamage int, rng *rand.Rand, ev *ha
 	// compaction (shifting [head:tail] down) happens at most once per deckSize/handSize
 	// iterations. The head/tail pointers keep the per-hand path allocation-free.
 	buf := make([]card.Card, deckSize*2)
-	// handBuf is the per-turn working hand: Held prefix + fresh draws. heldBuf holds Held cards
-	// between turns. Sized once per Evaluate so the inner loop stays allocation-free. handBuf's
-	// capacity exceeds handSize so a start-of-turn AuraTrigger reveal (Sigil of the Arknight)
-	// can append the revealed card to the dealt hand without reallocating.
+	// handBuf is the per-turn working hand: Held prefix + fresh draws. heldBuf holds Held
+	// cards between turns. Sized once per Evaluate so the inner loop stays allocation-free.
+	// handBuf's capacity exceeds handSize so a start-of-turn AuraTrigger reveal can append
+	// the revealed card to the dealt hand without reallocating.
 	handBuf := make([]card.Card, handSize, handSize+startOfTurnRevealRoom)
 	heldBuf := make([]card.Card, 0, handSize)
 	nextHeld := make([]card.Card, 0, handSize)
@@ -478,12 +478,9 @@ func (d *Deck) EvaluateWith(runs int, incomingDamage int, rng *rand.Rand, ev *ha
 			// Snapshot the starting carryover before Best overwrites it — the best-hand record
 			// wants the count in play when the hand was dealt, not what remained after.
 			startingRunechants := runechantCarryover
-			// Process AuraTriggers carried in from last turn before the best-line search:
-			// fire start-of-turn handlers, re-arm OncePerTurn gates, drop exhausted triggers.
-			// Survivors (everything still in play) become priorAuraTriggers for this turn's
-			// search. A reveal handler pops the deck top and appends it to the hand here so
-			// the best-line search sees the augmented hand. Destroyed auras are surfaced for
-			// tests via EvalOneTurnForTesting; the production loop discards them here.
+			// Process AuraTriggers carried in from last turn before the best-line search.
+			// Survivors become this turn's priorAuraTriggers. Reveal handlers pop the deck top
+			// and append it to the hand so the best-line search sees the augmented hand.
 			var trigContribs []hand.TriggerContribution
 			var trigDamage, trigRunes int
 			var trigRevealed []card.Card
@@ -501,9 +498,9 @@ func (d *Deck) EvaluateWith(runs int, incomingDamage int, rng *rand.Rand, ev *ha
 			}
 			runechantCarryover = play.LeftoverRunechants
 			arsenalCard = play.ArsenalCard
-			// Start-of-turn trigger credit is a flat additive on Value; every partition
-			// benefits equally so Best's ranking is unaffected, but the resulting Value must
-			// include it so the best-hand pick and cycle averages reflect the real total.
+			// Start-of-turn trigger credit is a flat additive on Value. Every partition
+			// benefits equally so Best's ranking is unaffected, but Value must include it so
+			// the best-hand pick and cycle averages reflect the real total.
 			play.Value += trigDamage
 			play.TriggersFromLastTurn = trigContribs
 			v := float64(play.Value)
@@ -578,24 +575,18 @@ const startOfTurnRevealRoom = 8
 // processTriggersAtStartOfTurn walks every AuraTrigger queued from last turn and does all
 // the bookkeeping a turn boundary requires:
 //
-//   - Clears FiredThisTurn on every trigger regardless of Type, re-arming OncePerTurn
-//     gates (Malefic Incantation's "once per turn" can fire again on the new turn's first
-//     attack action).
+//   - Clears FiredThisTurn on every trigger regardless of Type, re-arming OncePerTurn gates.
 //   - Fires every TriggerStartOfTurn handler against a shared TurnState seeded with the
-//     post-draw deck — handlers that peek the top (Sigil of the Arknight's reveal) read
-//     the actual card about to be revealed.
+//     post-draw deck, so handlers that peek the top read the card about to be revealed.
 //   - Decrements Count on each fired trigger, drops the entry when Count hits zero, and
-//     adds the destroyed aura to the start-of-turn graveyard so subsequent handlers (e.g.
-//     Sigil of Silphidae's leave-trigger banish) see it in state.Graveyard.
-//   - Passes non-start-of-turn triggers (TriggerAttackAction etc.) through unchanged so
-//     they can fire mid-chain on their own condition.
+//     adds the destroyed aura to the start-of-turn graveyard so subsequent handlers see
+//     it in state.Graveyard.
+//   - Passes non-start-of-turn triggers through unchanged so they can fire mid-chain.
 //
-// Returns the survivor list (anything still in play), the per-aura contributions for
-// FormatBestTurn, the summed damage to fold into Value, the Runechant tokens created
-// during the handlers (folded into next turn's carryover), the cards the handlers moved
-// from the deck top into the hand (via ts.Revealed) in reveal order, and the auras that
-// left the arena this pass (Count hit zero) in destroy order — so tests can assert the
-// destroy.
+// Returns the survivor list, per-aura contributions for FormatBestTurn, the summed damage
+// to fold into Value, Runechants created during the handlers (fed into next turn's
+// carryover), cards the handlers moved from the deck top into the hand (ts.Revealed) in
+// reveal order, and auras destroyed this pass in destroy order.
 //
 // Cascading reveals: a handler that pops s.Deck shrinks the view for the next handler, so
 // two reveal-capable auras see distinct tops.
@@ -613,10 +604,8 @@ func processTriggersAtStartOfTurn(queued []card.AuraTrigger, postDrawDeck []card
 	ts := card.TurnState{Deck: postDrawDeck}
 	survivors = queued[:0]
 	for _, t := range queued {
-		// Every trigger gets its OncePerTurn gate re-armed at every turn boundary regardless
-		// of Type — a fresh turn is a fresh once-per-turn window. Cleared before the
-		// start-of-turn fire so a TriggerStartOfTurn handler that itself reads FiredThisTurn
-		// (none today, but contract-safe) sees the cleared state.
+		// Re-arm the OncePerTurn gate before the start-of-turn fire so handlers that read
+		// FiredThisTurn see the cleared state.
 		t.FiredThisTurn = false
 		if t.Type != card.TriggerStartOfTurn {
 			survivors = append(survivors, t)
@@ -631,7 +620,7 @@ func processTriggersAtStartOfTurn(queued []card.AuraTrigger, postDrawDeck []card
 			continue
 		}
 		// Aura destroyed — Self joins the start-of-turn graveyard so subsequent handlers see
-		// it in state.Graveyard (e.g. a second aura with a graveyard-banish rider).
+		// it in state.Graveyard.
 		ts.AddToGraveyard(t.Self)
 	}
 	return survivors, contribs, damage, ts.Runechants, ts.Revealed, ts.Graveyard
@@ -685,33 +674,32 @@ type TurnStartState struct {
 	Deck        []card.Card
 	// Runechants is the live Runechant count at the start of this turn — leftover from the
 	// previous turn's attack chain plus any tokens freshly created by start-of-turn
-	// AuraTrigger handlers (e.g. Blessing of Occult's rune creation on its first tick).
+	// AuraTrigger handlers.
 	Runechants int
 	// PrevTurnValue is the total Value (damage dealt + damage prevented) the previous turn
 	// produced — the same number hand.Best reports as TurnSummary.Value for that turn.
 	PrevTurnValue int
 	// PrevTurnBestLine is the winning role assignment from turn 1, so tests can assert which
-	// card took which role (e.g. sigil played as Role=Attack vs. pitched vs. held).
+	// card took which role.
 	PrevTurnBestLine []hand.CardAssignment
 	// StartOfTurnTriggerDamage is the damage-equivalent credited by turn-2's start-of-turn
-	// AuraTrigger handlers — i.e. by triggers that were registered during turn 1's winning
-	// Play chain and fired at the top of turn 2. Zero when turn 1 registered no trigger that
-	// survived into the start-of-turn pass. Production callers fold this into turn 2's Value;
-	// the testing helper exposes it so tests can assert the cross-turn credit without running
-	// turn 2 to completion.
+	// AuraTrigger handlers — triggers registered during turn 1 that fired at the top of
+	// turn 2. Zero when no trigger survived into the pass. Production callers fold this
+	// into turn 2's Value; exposed here so tests can assert the cross-turn credit without
+	// running turn 2 to completion.
 	StartOfTurnTriggerDamage int
-	// StartOfTurnGraveyard is the auras that left the arena during turn-2's start-of-turn
-	// AuraTrigger pass — every trigger whose Count hit zero after firing. In destroy order.
+	// StartOfTurnGraveyard is the auras destroyed during turn-2's start-of-turn AuraTrigger
+	// pass, in destroy order.
 	StartOfTurnGraveyard []card.Card
 }
 
-// EvalOneTurnForTesting runs one turn against d.Cards in source order (no shuffle) and returns
-// the turn-2 start state: the hand just dealt, the arsenal slot, the remaining deck, and the
-// runechant carryover. arsenalIn seeds turn 1's arsenal slot (nil for empty). initialHand
-// sets turn 1's starting hand; nil takes d.Cards[:handSize] as the hand and treats the rest
-// as the deck, non-nil uses the slice directly (may be shorter than handSize) and treats
-// d.Cards as the deck entirely. Test-only — pins cross-turn sim behaviour against a known
-// deck layout. Production callers should use Evaluate, which shuffles and loops.
+// EvalOneTurnForTesting runs one turn against d.Cards in source order (no shuffle) and
+// returns the turn-2 start state: the hand just dealt, the arsenal slot, the remaining
+// deck, and the runechant carryover. arsenalIn seeds turn 1's arsenal slot (nil for empty).
+// initialHand sets turn 1's starting hand; nil takes d.Cards[:handSize] as the hand and
+// treats the rest as the deck, non-nil uses the slice directly (may be shorter than
+// handSize) and treats d.Cards as the deck entirely. Test-only — production callers use
+// Evaluate, which shuffles and loops.
 func (d *Deck) EvalOneTurnForTesting(incomingDamage int, arsenalIn card.Card, initialHand []card.Card) TurnStartState {
 	simstate.CurrentHero = d.Hero
 	handSize := d.Hero.Intelligence()
@@ -836,32 +824,27 @@ func recycleCardStates(line []hand.CardAssignment, buf []card.Card, tail *int, n
 	return nextHeld
 }
 
-// IterateParallel runs one iterate-mode round. Workers share a queue and each goroutine does
-// both the shallow screen and — if shallow beats the effective threshold — the deep-shuffles
-// confirmation for the same mutation. The first worker to land an acceptable mutation wins; a
-// cancellation atomic stops the others. Parallelising deep confirms makes rounds with noisy
-// shallow screens finish in max(shallow wall, deeps/workers × deep wall) instead of
-// shallow wall + passes × deep.
+// IterateParallel runs one iterate-mode round. Workers share a queue; each goroutine does
+// the shallow screen and, if shallow clears the effective threshold, the deep-shuffles
+// confirmation for the same mutation. The first worker to land an acceptable mutation wins
+// (cancellation stops the others). Parallelising deep confirms keeps rounds with noisy
+// shallow screens bounded by max(shallow wall, deeps/workers × deep wall).
 //
-// Annealing: at temperature == 0 the function accepts only strict improvements (deepAvg >
-// baseline) — the classical hill climb. At temperature > 0 it also accepts worse mutations
-// with probability exp((deepAvg - baseline) / temperature), implementing a Metropolis-style
-// simulated-annealing acceptance gate. The shallow pre-screen is widened proportionally
-// (threshold = baseline - 3·T) so mutations likely to clear the probabilistic gate aren't cut
-// off before they get to deep confirm.
+// Annealing: at temperature == 0 only strict improvements are accepted (classical hill
+// climb). At temperature > 0 worse mutations are also accepted with probability
+// exp((deepAvg - baseline) / temperature) — a Metropolis-style SA gate. The shallow
+// pre-screen widens proportionally (threshold = baseline - 3·T) so mutations likely to
+// clear the probabilistic gate aren't cut off early. 3·T covers ~95% of acceptable
+// mutations (exp(-3) ≈ 0.05).
 //
-// Mutations are pulled FIFO so the earliest-position-wins heuristic of serial iterate generally
-// holds, but a worker locked on a deep confirm at position 20 doesn't block position 25 — a
-// later-position mutation can occasionally win if its deep confirm finishes first.
+// Mutations are pulled FIFO so the earliest-position-wins heuristic of serial iterate
+// generally holds, but a worker locked on a deep confirm at position 20 doesn't block
+// position 25 — a later-position mutation can occasionally win if its deep confirm
+// finishes first.
 //
-// ctx: aborts the round when Done; workers exit and IterateParallel returns found=false.
-// mutations: ordered candidate list.
-// bestAvg: the current deck's avg (the "current state" in SA terms, not the all-time best).
-// temperature: SA temperature for this round; 0 disables annealing.
-// shallowShuffles / deepShuffles / incoming / numWorkers: eval settings.
-// seed: base seed; worker w uses (seed + w) for shallow and a derived stream for deep and
-// acceptance rolls.
-// shallowCompleted / deepsCompleted: optional atomic counters for live progress.
+// bestAvg is the current deck's avg (SA "current state", not the all-time best). seed is
+// a base; worker w uses (seed + w) for shallow and a derived stream for deep + acceptance
+// rolls. shallowCompleted / deepsCompleted are optional live-progress counters.
 //
 // Returns (acceptedDeck, acceptedAvg, acceptedIndex, true) on first acceptance, or
 // (nil, bestAvg, -1, false) if nothing cleared the gate or ctx was cancelled.
@@ -882,9 +865,8 @@ func IterateParallel(
 		return nil, bestAvg, -1, false
 	}
 
-	// Shallow threshold mirrors the deep acceptance gate's reach: at T=0 it's strict (> bestAvg),
-	// at T>0 it's widened to let probabilistically-acceptable mutations through. 3·T covers
-	// ~95% of mutations that would be accepted (exp(-3) ≈ 0.05).
+	// Shallow threshold mirrors the deep acceptance gate's reach: strict at T=0, widened by
+	// 3·T at T>0 so probabilistically-acceptable mutations still clear the pre-screen.
 	shallowThreshold := bestAvg
 	if temperature > 0 {
 		shallowThreshold = bestAvg - 3*temperature
@@ -974,12 +956,10 @@ func IterateParallel(
 	}
 }
 
-// defaultWorkers returns the worker count to use when callers pass numWorkers<=0. The workload
-// is purely CPU-bound (shallow/deep sim, zero I/O), so SMT siblings end up fighting for the same
-// cache and execution units rather than adding throughput — benchmarks on an 8-core / 16-thread
-// Ryzen showed ~20% speedup capping at physical cores vs defaulting to GOMAXPROCS. cpuid exposes
-// the physical count portably; we still clamp by GOMAXPROCS so an explicit GOMAXPROCS<physical
-// (user override, container cgroup) wins.
+// defaultWorkers returns the worker count when callers pass numWorkers<=0. The workload is
+// purely CPU-bound, so SMT siblings fight for cache and execution units rather than adding
+// throughput: capping at physical cores outperforms defaulting to GOMAXPROCS by ~20% on a
+// typical consumer CPU. Still clamped by GOMAXPROCS so a lower user/cgroup override wins.
 func defaultWorkers() int {
 	maxProcs := runtime.GOMAXPROCS(0)
 	physical := cpuid.CPU.PhysicalCores

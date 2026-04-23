@@ -6,8 +6,6 @@
 // Play routes through banishAuraFromGraveyard: if s.Graveyard has an aura, banish it for 1
 // arcane and flip ArcaneDamageDealt. No aura means the banish clause fails and Play returns
 // 0 — the printed 3 block still applies via Defense().
-//
-// Source: github.com/the-fab-cube/flesh-and-blood-cards (card.csv).
 
 package runeblade
 

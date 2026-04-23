@@ -1,6 +1,4 @@
 // Toughen Up — Generic Defense Reaction. Cost 2, Pitch 3, Defense 4. Only printed in Blue.
-//
-// Source: github.com/the-fab-cube/flesh-and-blood-cards (card.csv).
 
 package generic
 

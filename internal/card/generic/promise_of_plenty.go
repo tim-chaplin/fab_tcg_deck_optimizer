@@ -8,8 +8,6 @@
 // Modelling: The arsenal-placement rider isn't modelled (arsenal/deck content tracking would
 // be required). The played-from-arsenal go-again fires via self.GrantedGoAgain when
 // self.FromArsenal reports this copy came from the arsenal slot.
-//
-// Source: github.com/the-fab-cube/flesh-and-blood-cards (card.csv).
 
 package generic
 

@@ -29,8 +29,7 @@ func main() {
 	}
 
 	// Create mydecks/ up front so downstream WriteFile calls can't fail on a missing dir after
-	// a long run. Done once here rather than per-subcommand since every subcommand either reads
-	// or writes mydecks/.
+	// a long run. Every subcommand reads or writes this directory.
 	if err := os.MkdirAll(mydecks.Dir, 0o755); err != nil {
 		die("mkdir %s: %v", mydecks.Dir, err)
 	}
@@ -55,10 +54,9 @@ func main() {
 	}
 }
 
-// extractSubcommand pulls os.Args[1] as the subcommand name and returns the remaining args for
-// the subcommand's own flag.FlagSet to parse. Returns (_, _, false) when no subcommand is given
-// or the first arg looks like a flag (bare `fabsim`, `fabsim -help`); the caller prints the
-// subcommand list.
+// extractSubcommand pulls os.Args[1] as the subcommand name and returns the remaining args
+// for the subcommand's own flag.FlagSet. Returns (_, _, false) when no subcommand is given
+// or the first arg looks like a flag; the caller prints the subcommand list.
 func extractSubcommand() (string, []string, bool) {
 	if len(os.Args) < 2 {
 		return "", nil, false
@@ -93,16 +91,14 @@ func die(format string, args ...any) {
 }
 
 // parseFlagsAnywhere parses args on fs while tolerating flags that appear before, after, or
-// interleaved with positional arguments. Go's stdlib flag package stops at the first positional
-// token, so `fabsim eval <deck> --incoming=100` would otherwise leave --incoming unparsed and
-// treat it as a second positional. Every subcommand routes through this helper so flag order
-// never matters to the user.
+// interleaved with positional arguments. Go's stdlib flag package stops at the first
+// positional token; every subcommand routes through this helper so flag order never matters
+// to the user.
 //
-// The reorder is aware of each flag's bool-ness (via the optional IsBoolFlag() interface that
-// the flag package uses): a non-bool `-name` token consumes the following arg as its value, a
-// bool flag doesn't. Unknown flags are passed through untouched so fs.Parse can emit its usual
-// "flag provided but not defined" error. A bare `--` is honored as the end-of-flags terminator,
-// with everything after it treated as positional.
+// Bool-awareness matters: a non-bool `-name` token consumes the following arg as its value,
+// a bool flag (detected via IsBoolFlag) doesn't. Unknown flags pass through untouched so
+// fs.Parse emits the canonical "flag provided but not defined" error. A bare `--` acts as
+// the end-of-flags terminator, with everything after it treated as positional.
 func parseFlagsAnywhere(fs *flag.FlagSet, args []string) error {
 	var flagTokens, positional []string
 	for i := 0; i < len(args); i++ {
@@ -145,10 +141,8 @@ func parseFlagsAnywhere(fs *flag.FlagSet, args []string) error {
 // loadExisting reads and deserializes the deck at path. Returns (nil, 0, nil) when the file
 // doesn't exist — the caller treats that as "no previous best, generate a fresh deck."
 // Returns (nil, 0, err) when the file exists but can't be read or parsed: callers must NOT
-// treat this as "missing" because that would silently overwrite a corrupt file with a
-// random deck. In particular, anneal's wrapper scripts (anneal-reanneal.ps1) re-invoke
-// anneal in a loop; a Ctrl-C during a writeDeck can leave the file truncated, and without
-// this distinction the next pass would clobber the user's converged deck with a random one.
+// treat that as "missing" or they'd silently overwrite a corrupt file with a random deck
+// (looping wrapper scripts would clobber a converged deck after a Ctrl-C mid-write).
 func loadExisting(path string) (*deck.Deck, float64, error) {
 	data, err := os.ReadFile(path)
 	if err != nil {
@@ -166,15 +160,12 @@ func loadExisting(path string) (*deck.Deck, float64, error) {
 	return d, d.Stats.Mean(), nil
 }
 
-// writeDeck persists d as JSON at path plus a sibling fabrary-format .txt ("x.json" → "x.txt")
-// so the saved deck is ready to paste into fabrary.net without a second export step.
+// writeDeck persists d as JSON at path plus a sibling fabrary-format .txt ("x.json" →
+// "x.txt") so the saved deck is ready to paste into fabrary.net without a second export step.
 //
-// Both files are written atomically: data lands in <path>.tmp first, then os.Rename swaps
-// it into place. Rename is atomic on the same filesystem on POSIX and effectively atomic on
-// Windows (NTFS replace-existing on the same volume), so a Ctrl-C mid-write can never leave
-// the destination empty or partially written. The non-atomic variant — os.WriteFile with
-// O_TRUNC — would truncate the destination FIRST and then write, exposing a window in
-// which an interrupt produces an empty file that loadExisting can't parse.
+// Both files are written atomically via writeFileAtomic: data lands in <path>.tmp first,
+// then os.Rename swaps it into place, so a Ctrl-C mid-write can never leave the destination
+// empty or partially written.
 func writeDeck(d *deck.Deck, path string) error {
 	data, err := deckio.Marshal(d)
 	if err != nil {
@@ -200,9 +191,8 @@ func writeFileAtomic(path string, data []byte) error {
 		return err
 	}
 	tmpName := tmp.Name()
-	// On any failure path below, clean up the temp file so a crashed write doesn't litter
-	// mydecks/ with .tmp-* turds. Best-effort; the rename success path makes this a no-op
-	// because tmpName no longer exists by then.
+	// Clean up the temp file on any failure path so crashed writes don't litter mydecks/ with
+	// .tmp-* files. The rename success path makes this a no-op.
 	defer os.Remove(tmpName)
 	if _, err := tmp.Write(data); err != nil {
 		tmp.Close()
@@ -223,11 +213,10 @@ func fabraryPathFor(jsonPath string) string {
 	return jsonPath + ".txt"
 }
 
-// mustLoadDeck loads the deck at path or dies. Used by subcommands (eval, print, diff) that
-// always operate on an existing deck — for them, both "missing" and "corrupt" are fatal,
-// they should report the situation and exit. anneal handles the missing-vs-corrupt
-// distinction itself because "missing" is a valid input ("no deck yet, generate one")
-// while "corrupt" needs the loud refusal to overwrite.
+// mustLoadDeck loads the deck at path or dies. For subcommands that always operate on an
+// existing deck (eval, print, diff), both "missing" and "corrupt" are fatal. anneal handles
+// the distinction itself: "missing" is a valid input ("no deck yet, generate one") while
+// "corrupt" needs the loud refusal to overwrite.
 func mustLoadDeck(path string) *deck.Deck {
 	d, _, err := loadExisting(path)
 	if err != nil {
@@ -250,9 +239,8 @@ func resolveDeckPath(name string) string {
 	return p
 }
 
-// printCardList writes the deck's card list in canonical "Card list:" form: one grouped-and-
-// sorted count-and-name line per unique card. Shared between printBestDeck and iterate's
-// starting-deck banner so both callers render decks the same way.
+// printCardList writes the deck's card list in canonical "Card list:" form: one
+// grouped-and-sorted count-and-name line per unique card.
 func printCardList(d *deck.Deck) {
 	fmt.Println("Card list:")
 	counts := map[string]int{}
@@ -352,8 +340,8 @@ func printPerCardStats(d *deck.Deck) {
 	}
 }
 
-// maxNameLen returns the length of the longest Name() across the given cards, or 0 when empty.
-// Used to width fixed-width card-name columns in printed tables.
+// maxNameLen returns the length of the longest Name() across cs, or 0 when empty. Used to
+// size fixed-width card-name columns in printed tables.
 func maxNameLen(cs []card.Card) int {
 	m := 0
 	for _, c := range cs {

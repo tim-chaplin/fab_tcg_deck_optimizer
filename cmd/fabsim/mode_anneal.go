@@ -18,8 +18,7 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/mydecks"
 )
 
-// annealConfig bundles the knobs runAnneal needs. Built by runAnnealCmd from its flag.FlagSet;
-// kept package-local to the anneal subcommand because no other command shares this surface.
+// annealConfig bundles the knobs runAnneal needs. Built by runAnnealCmd from its flag.FlagSet.
 type annealConfig struct {
 	shallowShuffles int
 	deepShuffles    int
@@ -56,9 +55,7 @@ func defaultDeckNameFor(h hero.Hero, f fmtpkg.Format, incoming int) string {
 }
 
 // runAnnealCmd parses anneal's flags from args and dispatches to runAnneal. Every anneal-only
-// knob (temperature schedule, shuffle counts, deck-generation constraints, the -deck checkpoint
-// flag) lives on this FlagSet so `fabsim anneal -help` shows exactly the flags that apply here
-// and other subcommands don't have to advertise them.
+// knob lives on this FlagSet so `fabsim anneal -help` shows exactly the flags that apply here.
 func runAnnealCmd(args []string) {
 	fs := flag.NewFlagSet("anneal", flag.ExitOnError)
 	deckName := fs.String("deck", "", "deck name; resolved to mydecks/<name>.json (\".json\" suffix optional). Defaults to <hero>_<format>_<incoming>_incoming so different (hero, format, -incoming) regimes keep separate deck files. When the named deck exists, anneal resumes from it as a checkpoint.")
@@ -86,9 +83,8 @@ func runAnnealCmd(args []string) {
 		die("%v", err)
 	}
 
-	// -finalize is a convenience shorthand: it ratchets the shuffle counts up to high-precision
-	// values rather than adding orthogonal behavior, so it's applied as a post-parse override
-	// rather than threaded into annealConfig.
+	// -finalize is a shuffle-count shorthand, so apply it as a post-parse override rather than
+	// threading it into annealConfig.
 	if *finalize {
 		*shallowShuffles = 10000
 		*deepShuffles = 100000
@@ -266,11 +262,10 @@ func runAnneal(cfg annealConfig) annealResult {
 }
 
 // shouldPrintFinalDeck decides whether to dump the full deck listing at the end of a run.
-// Annealing sessions that exit with no net improvement over the starting deck (a common
-// outcome for long reanneal loops that are just probing) would otherwise reprint the same
-// cards every session and bury the session-summary line in noise. Classical mode keeps
-// printing regardless — a no-improvement run there is a single round and the listing is the
-// user's confirmation of what was evaluated.
+// Annealing sessions that exit with no net improvement (common in long reanneal loops that
+// are just probing) suppress the listing to keep the session-summary line visible. Classical
+// mode keeps printing regardless: a no-improvement run is a single round and the listing is
+// the user's confirmation of what was evaluated.
 func shouldPrintFinalDeck(startTemp, bestEverAvg, startingAvg float64) bool {
 	return startTemp == 0 || bestEverAvg > startingAvg
 }
@@ -286,12 +281,10 @@ func coolDown(temperature, decay, minTemp float64) float64 {
 }
 
 // prepareBaseline returns the starting deck for the hill climb with its deep-shuffles avg.
-// Four cases: no deck on disk (generate random + evaluate), loaded deck under deepShuffles
-// (re-evaluate for an apples-to-apples baseline), -reevaluate set (force re-evaluation even
-// if the run count already matches — for when modelling assumptions changed), or deck
-// already deep-evaluated (use as-is). A fifth case — file exists but doesn't parse —
-// dies loudly rather than overwriting; otherwise an interrupt during a previous writeDeck
-// would silently cost the user their converged deck.
+// Four cases: no deck on disk (generate random + evaluate); loaded deck under deepShuffles
+// (re-evaluate for an apples-to-apples baseline); -reevaluate set (force re-evaluation even
+// if the run count already matches); or deck already deep-evaluated (use as-is). File
+// exists but doesn't parse → die loudly rather than silently overwrite a corrupt checkpoint.
 func prepareBaseline(cfg annealConfig, rng *rand.Rand) (*deck.Deck, float64) {
 	best, bestAvg, err := loadExisting(cfg.outPath)
 	if err != nil {

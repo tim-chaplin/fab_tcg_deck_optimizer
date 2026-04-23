@@ -5,8 +5,6 @@
 //
 // Simplification: The -3{p} attacker debuff isn't modelled (solver doesn't expose defender-side
 // power reductions).
-//
-// Source: github.com/the-fab-cube/flesh-and-blood-cards (card.csv).
 
 package generic
 

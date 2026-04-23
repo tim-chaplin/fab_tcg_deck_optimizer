@@ -1,8 +1,6 @@
 // Trot Along — Generic Action. Cost 0, Pitch 3, Defense 3. Only printed in Blue.
 //
 // Text: "Your next attack with 3 or less base {p} this turn gets **go again**. **Go again**"
-//
-// Source: github.com/the-fab-cube/flesh-and-blood-cards (card.csv).
 
 package generic
 

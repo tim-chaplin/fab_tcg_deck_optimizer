@@ -3,12 +3,7 @@
 // Text: "At the start of your turn, destroy Blessing of Occult then create N Runechant tokens."
 // (Red N=3, Yellow N=2, Blue N=1.)
 //
-// Modelling: Play flips AuraCreated so same-turn aura-readers see the blessing and
-// registers a start-of-turn AuraTrigger with Count=1. Next turn the sim fires the trigger —
-// the handler creates N live Runechants on the new turn's state — and graveyards the aura
-// as Count hits zero.
-//
-// Source: github.com/the-fab-cube/flesh-and-blood-cards (card.csv).
+// Handler creates N Runechants next turn.
 
 package runeblade
 
@@ -61,9 +56,8 @@ func (c BlessingOfOccultBlue) Play(s *card.TurnState, _ *card.CardState) int {
 	return blessingOfOccultPlay(s, c, 1)
 }
 
-// blessingOfOccultPlay flips AuraCreated and registers the shared start-of-turn trigger:
-// next turn, create n live Runechants. Same-turn Play contributes 0 — the rune credit is
-// deferred to the trigger.
+// blessingOfOccultPlay registers the shared next-turn trigger that creates n Runechants.
+// Same-turn Play returns 0; all credit is deferred to the trigger.
 func blessingOfOccultPlay(s *card.TurnState, self card.Card, n int) int {
 	s.AddAuraTrigger(card.AuraTrigger{
 		Self:    self,

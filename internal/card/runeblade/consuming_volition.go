@@ -8,8 +8,6 @@
 // fires only if this card's own printed attack is likely to land (1/4/7 per card.LikelyToHit).
 // Runechants firing alongside don't count — "this hits" is strictly about this card's damage
 // reaching the hero, not separate arcane tokens.
-//
-// Source: github.com/the-fab-cube/flesh-and-blood-cards (card.csv).
 
 package runeblade
 
