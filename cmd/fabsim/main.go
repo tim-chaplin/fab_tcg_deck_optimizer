@@ -90,6 +90,27 @@ func die(format string, args ...any) {
 	os.Exit(1)
 }
 
+// requireFlag dies with a usage error when fs.Parse didn't encounter -name. The flag's own Usage
+// string is echoed so the per-flag guidance the caller wrote in the FlagSet (e.g. why the flag
+// can't default) shows up alongside the "required" message — no need to duplicate that wording
+// here.
+func requireFlag(fs *flag.FlagSet, subcommand, name string) {
+	seen := false
+	fs.Visit(func(f *flag.Flag) {
+		if f.Name == name {
+			seen = true
+		}
+	})
+	if seen {
+		return
+	}
+	f := fs.Lookup(name)
+	if f == nil {
+		die("%s: internal error — required flag -%s is not registered on the FlagSet", subcommand, name)
+	}
+	die("%s: -%s is required\n  usage: %s", subcommand, name, f.Usage)
+}
+
 // parseFlagsAnywhere parses args on fs while tolerating flags that appear before, after, or
 // interleaved with positional arguments. Go's stdlib flag package stops at the first
 // positional token; every subcommand routes through this helper so flag order never matters
@@ -257,7 +278,11 @@ func printCardList(d *deck.Deck) {
 	}
 }
 
-func printBestDeck(d *deck.Deck) {
+// printDeckSummary prints the compact score header: min/median/mean/max, hero, weapons, per-cycle
+// means, and pitch colour counts. printBestDeck wraps this with the full card list + best-turn +
+// per-card stats; eval calls it directly so the freshly-computed score stays visible on a small
+// terminal instead of being scrolled off by the card-list block.
+func printDeckSummary(d *deck.Deck) {
 	s := d.Stats
 	fmt.Printf("Best deck (min %d, median %.1f, mean %.3f, max %d over %d hands)\n",
 		s.Min(), s.Median(), s.Mean(), s.Max(), s.Hands)
@@ -277,9 +302,14 @@ func printBestDeck(d *deck.Deck) {
 		}
 	}
 	fmt.Printf("  Pitch:   %d red / %d yellow / %d blue\n", red, yellow, blue)
+}
+
+func printBestDeck(d *deck.Deck) {
+	printDeckSummary(d)
 	fmt.Println()
 	printCardList(d)
 
+	s := d.Stats
 	if b := s.Best; len(b.Summary.BestLine) > 0 {
 		fmt.Println()
 		header := fmt.Sprintf("Best turn played (value %d", b.Summary.Value)

@@ -14,7 +14,10 @@
 param(
     [Parameter(Mandatory)][string]$Deck,
     [Parameter(Mandatory)][double]$StartTemp,
-    [int]$Incoming = 0,
+    # Incoming is mandatory: different opponent-pressure regimes produce different optimal
+    # decks, and the value isn't persisted with the deck - defaulting to 0 silently rescores
+    # a deck at a different regime than it was annealed at.
+    [Parameter(Mandatory)][int]$Incoming,
     [double]$TempDecay = 0.95,
     [double]$MinTemp = 0,
     [int]$ShallowShuffles = 100,
