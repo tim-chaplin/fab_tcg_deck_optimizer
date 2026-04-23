@@ -13,8 +13,7 @@ var vexingMaliceTypes = card.NewTypeSet(card.TypeRuneblade, card.TypeAction, car
 
 // vexingMalicePlay adds the 2 arcane to base damage and marks ArcaneDamageDealt.
 func vexingMalicePlay(attack int, s *card.TurnState) int {
-	s.ArcaneDamageDealt = true
-	return attack + 2
+	return attack + s.DealArcaneDamage(2)
 }
 
 type VexingMaliceRed struct{}
