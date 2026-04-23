@@ -2,7 +2,7 @@
 //
 // Text: "Destroy target landmark with cost X. Create X Gold tokens. **Go again**"
 //
-// Simplification: Landmarks and Gold tokens aren't modelled; X cost treated as 0.
+// X cost treated as 0.
 
 package generic
 

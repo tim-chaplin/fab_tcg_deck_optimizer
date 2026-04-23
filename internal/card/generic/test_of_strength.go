@@ -1,9 +1,6 @@
 // Test of Strength — Generic Block. Cost 0, Pitch 1, Defense 4. Only printed in Red.
 //
 // Text: "When this defends, **clash** with the attacking hero. The winner creates a Gold token."
-//
-// Rider modelled: Gold token to the Clash winner, staked at card.GoldTokenValue via
-// card.ClashValue.
 
 package generic
 

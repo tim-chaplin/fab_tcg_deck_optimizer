@@ -1,8 +1,6 @@
 // Starting Stake — Generic Action. Cost 0, Pitch 2, Defense 3. Only printed in Yellow.
 //
 // Text: "If you control no Gold tokens, create a Gold token."
-//
-// Simplification: Gold-token economy isn't tracked.
 
 package generic
 

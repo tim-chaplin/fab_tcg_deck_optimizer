@@ -4,9 +4,9 @@
 // Text: "Your next attack this turn gets +N{p} and "When this attacks a hero, you may **wager** a
 // Gold token with them."" (Red N=3, Yellow N=2, Blue N=1.)
 //
-// Simplification: Wager Gold token rider is dropped. Scans TurnState.CardsRemaining for the first
-// matching attack action card and credits the bonus assuming it will be played; if none is
-// scheduled after this card, the bonus fizzles.
+// Scans TurnState.CardsRemaining for the first matching attack action card and credits the
+// +N{p} bonus assuming it will be played; if none is scheduled after this card, the bonus
+// fizzles.
 
 package generic
 

@@ -4,9 +4,8 @@
 // Text: "When this hits, create a Gold token. If this was played from arsenal, it gets **Go
 // again**."
 //
-// The on-hit Gold token is modelled as +1 damage-equivalent (one resource worth), gated on
-// card.LikelyToHit. The arsenal-conditional Go again fires via self.GrantedGoAgain when
-// self.FromArsenal reports this copy came from the arsenal slot.
+// The arsenal-conditional Go again fires via self.GrantedGoAgain when self.FromArsenal reports
+// this copy came from the arsenal slot.
 
 package generic
 

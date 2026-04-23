@@ -3,8 +3,6 @@
 //
 // Text: "When this hits a hero, deal 2 damage to them unless they give you a Gold token they
 // control. If you are a Thief, repeat this process once."
-//
-// Simplification: Gold-token exchange rider isn't modelled.
 
 package generic
 

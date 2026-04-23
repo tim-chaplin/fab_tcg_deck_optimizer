@@ -2,8 +2,6 @@
 // pitch variants: Red 1, Yellow 2, Blue 3. Defense 2.
 //
 // Text: "**Universal** When this attacks a hero, you may **wager** a Gold token with them."
-//
-// Simplification: Universal keyword and Gold-token wager aren't modelled.
 
 package generic
 

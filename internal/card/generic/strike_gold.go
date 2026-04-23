@@ -2,9 +2,6 @@
 // pitch variants: Red 1, Yellow 2, Blue 3. Defense 2.
 //
 // Text: "When this hits, create a Gold token."
-//
-// The on-hit Gold token is modelled as +1 damage-equivalent (one resource worth), gated on
-// card.LikelyToHit — blockable multiples of 3 suppress the rider.
 
 package generic
 

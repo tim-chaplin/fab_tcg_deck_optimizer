@@ -2,8 +2,6 @@
 //
 // Text: "You may destroy 4 Coppers, 2 Silvers, or 1 Gold you control rather than pay Cash In's {r}
 // cost. Draw 2 cards. **Go again**"
-//
-// Simplification: Activated Gold/Silver/Copper economy and draws aren't modelled.
 
 package generic
 
