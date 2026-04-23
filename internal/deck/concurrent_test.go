@@ -13,12 +13,11 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/hero"
 )
 
-// TestEvaluateWith_ConcurrentNoMapPanic hammers deck.EvaluateWith from many goroutines with each
-// holding its own hand.Evaluator. Shared state across goroutines includes the memo map and the
-// card-meta lookup table; without proper synchronisation the Go runtime would panic with
-// "concurrent map read and map write" or "concurrent map writes" and fail the test. This catches
-// the most common category of race regressions without depending on -race (which requires cgo,
-// and we don't ship a gcc toolchain on CI).
+// TestEvaluateWith_ConcurrentNoMapPanic hammers deck.EvaluateWith from many goroutines with
+// each holding its own hand.Evaluator. Shared state includes the memo map and card-meta
+// lookup table; unsynchronised access would panic with "concurrent map read and map write"
+// or "concurrent map writes" and fail the test. Catches common race regressions without
+// depending on -race (which requires cgo).
 func TestEvaluateWith_ConcurrentNoMapPanic(t *testing.T) {
 	numWorkers := runtime.GOMAXPROCS(0)
 	if numWorkers < 2 {
@@ -51,11 +50,10 @@ func TestEvaluateWith_ConcurrentNoMapPanic(t *testing.T) {
 	wg.Wait()
 }
 
-// TestIterateParallel_RunsWithoutPanic is a smoke test for the parallel iterate entry point. It
-// verifies the worker pool, cancellation signalling, and ready-channel coordination all complete
-// without deadlock or panic on a realistic mutation list. Whether an improvement is found for
-// this specific seed is not guaranteed, so the test only asserts invariants — not that the
-// search succeeded.
+// TestIterateParallel_RunsWithoutPanic is a smoke test for the parallel iterate entry
+// point: verifies the worker pool, cancellation signalling, and ready-channel coordination
+// complete without deadlock or panic on a realistic mutation list. Whether an improvement is
+// found is seed-dependent, so the test only asserts invariants.
 func TestIterateParallel_RunsWithoutPanic(t *testing.T) {
 	rng := rand.New(rand.NewSource(42))
 	baseline := Random(hero.Viserai{}, 40, 2, rng, nil)
