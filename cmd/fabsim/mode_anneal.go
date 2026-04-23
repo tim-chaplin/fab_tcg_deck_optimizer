@@ -63,7 +63,7 @@ func runAnnealCmd(args []string) {
 	deepShuffles := fs.Int("deep-shuffles", 10000, "shuffles per deck used to confirm improvements and to baseline loaded decks")
 	incoming := fs.Int("incoming", 0, "opponent damage per turn (required — different values produce different optimal decks, so this is explicit rather than defaulted)")
 	deckSize := fs.Int("deck-size", 40, "number of cards per deck")
-	maxCopies := fs.Int("max-copies", 2, "maximum copies of any single card printing per deck")
+	maxCopies := fs.Int("max-copies", defaultMaxCopies, "maximum copies of any single card printing per deck")
 	seed := fs.Int64("seed", time.Now().UnixNano(), "RNG seed")
 	formatFlag := fs.String("format", string(fmtpkg.SilverAge), "constructed format whose banlist restricts the card pool during search (only \"silver_age\" is supported today)")
 	debug := fs.Bool("debug", false, "emit extra diagnostic output (e.g. memo cache size between rounds)")
@@ -320,6 +320,11 @@ func coolDown(temperature, decay, minTemp float64) float64 {
 // (re-evaluate for an apples-to-apples baseline); -reevaluate set (force re-evaluation even
 // if the run count already matches); or deck already deep-evaluated (use as-is). File
 // exists but doesn't parse → die loudly rather than silently overwrite a corrupt checkpoint.
+//
+// A loaded deck that contains card.NotImplemented copies (e.g. a pre-tag deck recovered
+// from disk) is sanitized before any of the above branches: the tagged slots are replaced
+// with random legal picks and the run always takes the re-evaluate path so the baseline
+// reflects the new card list.
 func prepareBaseline(cfg annealConfig, rng *rand.Rand) (*deck.Deck, float64) {
 	best, bestAvg, err := loadExisting(cfg.outPath)
 	if err != nil {
@@ -336,10 +341,21 @@ func prepareBaseline(cfg annealConfig, rng *rand.Rand) (*deck.Deck, float64) {
 		maybePrintBaselineCards(cfg, best)
 		return best, bestAvg
 	}
+	// Sanitize in place before the evaluation-branch decision. Any swap forces the
+	// re-evaluate path below by zeroing Stats.Runs so the saved run count can't satisfy
+	// the "already deep-evaluated" check against a now-different card list. bestAvg stays
+	// at the loaded value for the "saved avg → current avg" delta display below.
+	sanitized := sanitizeLoadedDeck(best, cfg.maxCopies, rng, cfg.legalFilter())
+	if len(sanitized) > 0 {
+		best.Stats.Runs = 0
+	}
 	if cfg.reevaluate || best.Stats.Runs < cfg.deepShuffles {
 		reason := fmt.Sprintf("from %d shuffles", best.Stats.Runs)
 		if cfg.reevaluate && best.Stats.Runs >= cfg.deepShuffles {
 			reason = "-reevaluate forced"
+		}
+		if len(sanitized) > 0 {
+			reason = fmt.Sprintf("%d NotImplemented card(s) replaced", len(sanitized))
 		}
 		// Label the loaded number "saved avg" so it can't be mistaken for the re-evaluated
 		// score. Decks scored under older simulation logic can have saved avgs that diverge

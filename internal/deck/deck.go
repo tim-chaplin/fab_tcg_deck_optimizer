@@ -70,6 +70,68 @@ func Random(h hero.Hero, size, maxCopies int, rng *rand.Rand, legal func(card.Ca
 	return New(h, weapons, picks)
 }
 
+// NotImplementedReplacement records one swap made by Deck.SanitizeNotImplemented: the
+// card.NotImplemented-tagged card that was removed and the card.NotImplemented-free card
+// that took its slot.
+type NotImplementedReplacement struct {
+	From card.Card
+	To   card.Card
+}
+
+// SanitizeNotImplemented scans d.Cards in order and replaces every card carrying
+// card.NotImplemented with a random legal replacement drawn from legalPool(legal), rolling
+// again if the pick would exceed maxCopies for that printing. Weapons and hero are
+// untouched. The sanitized deck stays size-stable and copy-cap-legal so the caller can
+// re-evaluate directly.
+//
+// Returns the ordered list of swaps made (one entry per replaced slot; duplicates of the
+// same tagged ID produce one entry each since each slot is picked independently). Returns
+// an empty slice when nothing needed replacement.
+//
+// Panics when maxCopies < 1 or when the legal/NotImplemented pool is smaller than the
+// per-printing maxCopies budget d already uses — both indicate a config so degenerate that
+// there's no sensible recovery.
+func (d *Deck) SanitizeNotImplemented(maxCopies int, rng *rand.Rand, legal func(card.Card) bool) []NotImplementedReplacement {
+	if maxCopies < 1 {
+		panic(fmt.Sprintf("deck: SanitizeNotImplemented requires maxCopies >= 1 (got %d)", maxCopies))
+	}
+	pool := legalPool(legal)
+	if len(pool) == 0 {
+		panic("deck: SanitizeNotImplemented's legal filter rejected every implemented card — cannot build a replacement")
+	}
+	// Seed counts with the implemented-keeper cards already in the deck so replacements
+	// respect maxCopies against the surviving slots. The tagged slots we're about to
+	// overwrite don't count.
+	counts := map[card.ID]int{}
+	var slots []int
+	for i, c := range d.Cards {
+		if _, unimplemented := c.(card.NotImplemented); unimplemented {
+			slots = append(slots, i)
+			continue
+		}
+		counts[c.ID()]++
+	}
+	if len(slots) == 0 {
+		return nil
+	}
+	replacements := make([]NotImplementedReplacement, 0, len(slots))
+	for _, idx := range slots {
+		var pick card.ID
+		for {
+			pick = pool[rng.Intn(len(pool))]
+			if counts[pick]+1 <= maxCopies {
+				break
+			}
+		}
+		counts[pick]++
+		from := d.Cards[idx]
+		to := cards.Get(pick)
+		d.Cards[idx] = to
+		replacements = append(replacements, NotImplementedReplacement{From: from, To: to})
+	}
+	return replacements
+}
+
 // legalPool returns cards.Deckable() filtered by legal, with any card carrying the
 // card.NotImplemented marker removed. The NotImplemented filter is always applied — a card
 // whose printed effect the sim can't faithfully reproduce shouldn't land in a random deck or
