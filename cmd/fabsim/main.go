@@ -279,9 +279,9 @@ func printCardList(d *deck.Deck) {
 }
 
 // printDeckSummary prints the compact score header: min/median/mean/max, hero, weapons, per-cycle
-// means, and pitch colour counts. Separated from printBestDeck so eval can emit only this block —
-// eval's whole purpose is the freshly-computed score, and on a small terminal the full card list
-// scrolls that score off the top.
+// means, and pitch colour counts. printBestDeck wraps this with the full card list + best-turn +
+// per-card stats; eval calls it directly so the freshly-computed score stays visible on a small
+// terminal instead of being scrolled off by the card-list block.
 func printDeckSummary(d *deck.Deck) {
 	s := d.Stats
 	fmt.Printf("Best deck (min %d, median %.1f, mean %.3f, max %d over %d hands)\n",
