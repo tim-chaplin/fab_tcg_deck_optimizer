@@ -3,7 +3,8 @@
 //
 // Text: "**Universal** When this attacks a hero, you may **wager** a Gold token with them."
 //
-// Simplification: Universal keyword and Gold-token wager aren't modelled.
+// The Universal keyword and the Gold-token wager aren't modelled so the card carries
+// card.NotImplemented — the optimizer's random deck generator and mutation pool skip it.
 
 package generic
 
@@ -21,6 +22,8 @@ func (WageGoldRed) Attack() int                 { return 7 }
 func (WageGoldRed) Defense() int                { return 2 }
 func (WageGoldRed) Types() card.TypeSet         { return wageGoldTypes }
 func (WageGoldRed) GoAgain() bool               { return false }
+// not implemented: gold tokens, universal keyword
+func (WageGoldRed) NotImplemented()              {}
 func (c WageGoldRed) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }
 
 type WageGoldYellow struct{}
@@ -33,6 +36,8 @@ func (WageGoldYellow) Attack() int                 { return 6 }
 func (WageGoldYellow) Defense() int                { return 2 }
 func (WageGoldYellow) Types() card.TypeSet         { return wageGoldTypes }
 func (WageGoldYellow) GoAgain() bool               { return false }
+// not implemented: gold tokens, universal keyword
+func (WageGoldYellow) NotImplemented()              {}
 func (c WageGoldYellow) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }
 
 type WageGoldBlue struct{}
@@ -45,4 +50,6 @@ func (WageGoldBlue) Attack() int                 { return 5 }
 func (WageGoldBlue) Defense() int                { return 2 }
 func (WageGoldBlue) Types() card.TypeSet         { return wageGoldTypes }
 func (WageGoldBlue) GoAgain() bool               { return false }
+// not implemented: gold tokens, universal keyword
+func (WageGoldBlue) NotImplemented()              {}
 func (c WageGoldBlue) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }

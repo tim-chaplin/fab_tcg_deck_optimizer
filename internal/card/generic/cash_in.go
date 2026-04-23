@@ -3,7 +3,8 @@
 // Text: "You may destroy 4 Coppers, 2 Silvers, or 1 Gold you control rather than pay Cash In's {r}
 // cost. Draw 2 cards. **Go again**"
 //
-// Simplification: Activated Gold/Silver/Copper economy and draws aren't modelled.
+// The Gold / Silver / Copper token economy and the draw aren't modelled — the card carries
+// card.NotImplemented so the optimizer's random deck generator and mutation pool skip it.
 
 package generic
 
@@ -22,4 +23,6 @@ func (CashInYellow) Defense() int                { return 2 }
 func (CashInYellow) Types() card.TypeSet         { return cashInTypes }
 func (CashInYellow) GoAgain() bool               { return true }
 func (CashInYellow) NotSilverAgeLegal()           {}
+// not implemented: gold/silver/copper tokens, card draw
+func (CashInYellow) NotImplemented()              {}
 func (CashInYellow) Play(s *card.TurnState, _ *card.CardState) int { return 0 }

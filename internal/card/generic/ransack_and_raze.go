@@ -2,7 +2,8 @@
 //
 // Text: "Destroy target landmark with cost X. Create X Gold tokens. **Go again**"
 //
-// Simplification: Landmarks and Gold tokens aren't modelled; X cost treated as 0.
+// Landmarks and Gold tokens aren't modelled (X cost treated as 0) so the card carries
+// card.NotImplemented — the optimizer's random deck generator and mutation pool skip it.
 
 package generic
 
@@ -20,4 +21,6 @@ func (RansackAndRazeBlue) Attack() int                 { return 0 }
 func (RansackAndRazeBlue) Defense() int                { return 3 }
 func (RansackAndRazeBlue) Types() card.TypeSet         { return ransackAndRazeTypes }
 func (RansackAndRazeBlue) GoAgain() bool               { return true }
+// not implemented: gold tokens, landmarks
+func (RansackAndRazeBlue) NotImplemented()             {}
 func (RansackAndRazeBlue) Play(s *card.TurnState, _ *card.CardState) int { return 0 }

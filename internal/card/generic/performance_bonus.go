@@ -4,9 +4,11 @@
 // Text: "When this hits, create a Gold token. If this was played from arsenal, it gets **Go
 // again**."
 //
-// The on-hit Gold token is modelled as +1 damage-equivalent (one resource worth), gated on
-// card.LikelyToHit. The arsenal-conditional Go again fires via self.GrantedGoAgain when
-// self.FromArsenal reports this copy came from the arsenal slot.
+// The arsenal-conditional Go again fires via self.GrantedGoAgain when self.FromArsenal reports
+// this copy came from the arsenal slot. The on-hit Gold token is credited via
+// card.GoldTokenValue (currently 0) but the underlying token economy isn't modelled, so the
+// card carries card.NotImplemented — the optimizer's random deck generator and mutation pool
+// skip it.
 
 package generic
 
@@ -42,6 +44,8 @@ func (PerformanceBonusRed) Attack() int                  { return 3 }
 func (PerformanceBonusRed) Defense() int                 { return 2 }
 func (PerformanceBonusRed) Types() card.TypeSet          { return performanceBonusTypes }
 func (PerformanceBonusRed) GoAgain() bool                { return false }
+// not implemented: gold tokens
+func (PerformanceBonusRed) NotImplemented()              {}
 func (c PerformanceBonusRed) Play(_ *card.TurnState, self *card.CardState) int { return performanceBonusPlay(c, self) }
 
 type PerformanceBonusYellow struct{}
@@ -54,6 +58,8 @@ func (PerformanceBonusYellow) Attack() int                  { return 2 }
 func (PerformanceBonusYellow) Defense() int                 { return 2 }
 func (PerformanceBonusYellow) Types() card.TypeSet          { return performanceBonusTypes }
 func (PerformanceBonusYellow) GoAgain() bool                { return false }
+// not implemented: gold tokens
+func (PerformanceBonusYellow) NotImplemented()              {}
 func (c PerformanceBonusYellow) Play(_ *card.TurnState, self *card.CardState) int { return performanceBonusPlay(c, self) }
 
 type PerformanceBonusBlue struct{}
@@ -66,4 +72,6 @@ func (PerformanceBonusBlue) Attack() int                  { return 1 }
 func (PerformanceBonusBlue) Defense() int                 { return 2 }
 func (PerformanceBonusBlue) Types() card.TypeSet          { return performanceBonusTypes }
 func (PerformanceBonusBlue) GoAgain() bool                { return false }
+// not implemented: gold tokens
+func (PerformanceBonusBlue) NotImplemented()              {}
 func (c PerformanceBonusBlue) Play(_ *card.TurnState, self *card.CardState) int { return performanceBonusPlay(c, self) }

@@ -234,6 +234,23 @@ func TestRandom_ExcludesNotImplemented(t *testing.T) {
 	}
 }
 
+// TestLegalPool_ExcludesTaggedCardsByID gives TestLegalPool_SkipsNotImplemented teeth: it
+// picks a concrete registered card we know currently carries the NotImplemented marker
+// (Strike Gold (Red), gold-token rider) and asserts it's absent from legalPool's output.
+// Without at least one real tagged card the property test is vacuous, so this guards against
+// a regression where the marker interface itself silently breaks. Self-retires if Strike Gold
+// ever loses the tag (gold-token economy gets modelled) so maintenance is only a delete.
+func TestLegalPool_ExcludesTaggedCardsByID(t *testing.T) {
+	if _, ok := cards.Get(card.StrikeGoldRed).(card.NotImplemented); !ok {
+		t.Skip("Strike Gold (Red) is no longer NotImplemented — pick another tagged card or drop this test")
+	}
+	for _, id := range legalPool(nil) {
+		if id == card.StrikeGoldRed {
+			t.Fatalf("legalPool included Strike Gold (Red) despite its NotImplemented tag")
+		}
+	}
+}
+
 // TestAllMutations_ExcludesNotImplementedAdditions confirms no single-slot mutation can
 // introduce a NotImplemented card. Starting deck contains only implemented cards so any
 // NotImplemented copy in a mutation output must have come from the add pool.

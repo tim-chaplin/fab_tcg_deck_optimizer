@@ -4,9 +4,10 @@
 // Text: "Your next attack this turn gets +N{p} and "When this attacks a hero, you may **wager** a
 // Gold token with them."" (Red N=3, Yellow N=2, Blue N=1.)
 //
-// Simplification: Wager Gold token rider is dropped. Scans TurnState.CardsRemaining for the first
-// matching attack action card and credits the bonus assuming it will be played; if none is
-// scheduled after this card, the bonus fizzles.
+// The +N{p} rider is modelled (scans TurnState.CardsRemaining for the first matching attack
+// action card and credits the bonus). The Gold-token wager piggybacked onto that grant isn't
+// modelled so the card carries card.NotImplemented — the optimizer's random deck generator and
+// mutation pool skip it.
 
 package generic
 
@@ -24,6 +25,8 @@ func (MoneyWhereYaMouthIsRed) Attack() int                 { return 0 }
 func (MoneyWhereYaMouthIsRed) Defense() int                { return 2 }
 func (MoneyWhereYaMouthIsRed) Types() card.TypeSet         { return moneyWhereYaMouthIsTypes }
 func (MoneyWhereYaMouthIsRed) GoAgain() bool               { return true }
+// not implemented: gold tokens
+func (MoneyWhereYaMouthIsRed) NotImplemented()             {}
 func (MoneyWhereYaMouthIsRed) Play(s *card.TurnState, _ *card.CardState) int { return nextAttackActionBonus(s, 3) }
 
 type MoneyWhereYaMouthIsYellow struct{}
@@ -36,6 +39,8 @@ func (MoneyWhereYaMouthIsYellow) Attack() int                 { return 0 }
 func (MoneyWhereYaMouthIsYellow) Defense() int                { return 2 }
 func (MoneyWhereYaMouthIsYellow) Types() card.TypeSet         { return moneyWhereYaMouthIsTypes }
 func (MoneyWhereYaMouthIsYellow) GoAgain() bool               { return true }
+// not implemented: gold tokens
+func (MoneyWhereYaMouthIsYellow) NotImplemented()             {}
 func (MoneyWhereYaMouthIsYellow) Play(s *card.TurnState, _ *card.CardState) int { return nextAttackActionBonus(s, 2) }
 
 type MoneyWhereYaMouthIsBlue struct{}
@@ -48,4 +53,6 @@ func (MoneyWhereYaMouthIsBlue) Attack() int                 { return 0 }
 func (MoneyWhereYaMouthIsBlue) Defense() int                { return 2 }
 func (MoneyWhereYaMouthIsBlue) Types() card.TypeSet         { return moneyWhereYaMouthIsTypes }
 func (MoneyWhereYaMouthIsBlue) GoAgain() bool               { return true }
+// not implemented: gold tokens
+func (MoneyWhereYaMouthIsBlue) NotImplemented()             {}
 func (MoneyWhereYaMouthIsBlue) Play(s *card.TurnState, _ *card.CardState) int { return nextAttackActionBonus(s, 1) }

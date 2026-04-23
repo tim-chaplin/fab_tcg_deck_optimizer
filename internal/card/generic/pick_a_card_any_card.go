@@ -5,7 +5,8 @@
 // reveal it. If it's the named card, create a Silver token. Repeat this process thrice. **Go
 // again**"
 //
-// Simplification: Opponent hand inspection and Silver-token economy aren't modelled.
+// The opponent hand inspection and the Silver-token payoff aren't modelled so the card carries
+// card.NotImplemented — the optimizer's random deck generator and mutation pool skip it.
 
 package generic
 
@@ -23,6 +24,8 @@ func (PickACardAnyCardRed) Attack() int                 { return 0 }
 func (PickACardAnyCardRed) Defense() int                { return 2 }
 func (PickACardAnyCardRed) Types() card.TypeSet         { return pickACardAnyCardTypes }
 func (PickACardAnyCardRed) GoAgain() bool               { return true }
+// not implemented: silver tokens, opponent hand inspection
+func (PickACardAnyCardRed) NotImplemented()             {}
 func (PickACardAnyCardRed) Play(s *card.TurnState, _ *card.CardState) int { return 0 }
 
 type PickACardAnyCardYellow struct{}
@@ -35,6 +38,8 @@ func (PickACardAnyCardYellow) Attack() int                 { return 0 }
 func (PickACardAnyCardYellow) Defense() int                { return 2 }
 func (PickACardAnyCardYellow) Types() card.TypeSet         { return pickACardAnyCardTypes }
 func (PickACardAnyCardYellow) GoAgain() bool               { return true }
+// not implemented: silver tokens, opponent hand inspection
+func (PickACardAnyCardYellow) NotImplemented()             {}
 func (PickACardAnyCardYellow) Play(s *card.TurnState, _ *card.CardState) int { return 0 }
 
 type PickACardAnyCardBlue struct{}
@@ -47,4 +52,6 @@ func (PickACardAnyCardBlue) Attack() int                 { return 0 }
 func (PickACardAnyCardBlue) Defense() int                { return 2 }
 func (PickACardAnyCardBlue) Types() card.TypeSet         { return pickACardAnyCardTypes }
 func (PickACardAnyCardBlue) GoAgain() bool               { return true }
+// not implemented: silver tokens, opponent hand inspection
+func (PickACardAnyCardBlue) NotImplemented()             {}
 func (PickACardAnyCardBlue) Play(s *card.TurnState, _ *card.CardState) int { return 0 }
