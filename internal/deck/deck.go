@@ -504,7 +504,7 @@ func (d *Deck) EvaluateWith(runs int, incomingDamage int, rng *rand.Rand, ev *ha
 			var trigContribs []hand.TriggerContribution
 			var trigDamage, trigRunes int
 			var trigRevealed []card.Card
-			auraTriggerBuf, trigContribs, trigDamage, trigRunes, trigRevealed, _ = fireStartOfTurnTriggers(auraTriggerBuf, buf[head+drawCount:tail])
+			auraTriggerBuf, trigContribs, trigDamage, trigRunes, trigRevealed, _ = processTriggersAtStartOfTurn(auraTriggerBuf, buf[head+drawCount:tail])
 			for range trigRevealed {
 				h = append(h, buf[head+drawCount])
 				drawCount++
@@ -634,23 +634,31 @@ func runDelayedPlays(queued []card.Card, postDrawDeck []card.Card) ([]hand.Delay
 	return contribs, total, ts.Runechants, revealed
 }
 
-// fireStartOfTurnTriggers walks queued (the AuraTriggers alive at end of last turn) and
-// invokes every TriggerStartOfTurn handler against a shared TurnState seeded with the
-// post-draw deck — handlers that peek the top (Sigil of the Arknight's reveal) read the
-// actual card about to be revealed. Non-start-of-turn triggers (future TriggerAttackAction
-// etc.) pass through unchanged, ready to fire mid-chain on their own condition.
+// processTriggersAtStartOfTurn walks every AuraTrigger queued from last turn and does all
+// the bookkeeping a turn boundary requires:
 //
-// Returns the survivor list (start-of-turn triggers whose Count didn't hit zero plus every
-// non-start-of-turn trigger), the per-aura contributions for FormatBestTurn, the summed
-// damage to fold into Value, the Runechant tokens created during the handlers (folded into
-// next turn's carryover), the cards the handlers moved from the deck top into the hand (via
-// ts.Revealed) in reveal order, and the auras that left the arena this pass (Count hit
-// zero) in destroy order — so subsequent handlers can see them in state.Graveyard and tests
-// can assert the destroy.
+//   - Clears FiredThisTurn on every trigger regardless of Type, re-arming OncePerTurn
+//     gates (Malefic Incantation's "once per turn" can fire again on the new turn's first
+//     attack action).
+//   - Fires every TriggerStartOfTurn handler against a shared TurnState seeded with the
+//     post-draw deck — handlers that peek the top (Sigil of the Arknight's reveal) read
+//     the actual card about to be revealed.
+//   - Decrements Count on each fired trigger, drops the entry when Count hits zero, and
+//     adds the destroyed aura to the start-of-turn graveyard so subsequent handlers (e.g.
+//     Sigil of Silphidae's leave-trigger banish) see it in state.Graveyard.
+//   - Passes non-start-of-turn triggers (TriggerAttackAction etc.) through unchanged so
+//     they can fire mid-chain on their own condition.
+//
+// Returns the survivor list (anything still in play), the per-aura contributions for
+// FormatBestTurn, the summed damage to fold into Value, the Runechant tokens created
+// during the handlers (folded into next turn's carryover), the cards the handlers moved
+// from the deck top into the hand (via ts.Revealed) in reveal order, and the auras that
+// left the arena this pass (Count hit zero) in destroy order — so tests can assert the
+// destroy.
 //
 // Cascading reveals: a handler that pops s.Deck shrinks the view for the next handler, so
 // two reveal-capable auras see distinct tops.
-func fireStartOfTurnTriggers(queued []card.AuraTrigger, postDrawDeck []card.Card) (
+func processTriggersAtStartOfTurn(queued []card.AuraTrigger, postDrawDeck []card.Card) (
 	survivors []card.AuraTrigger,
 	contribs []hand.TriggerContribution,
 	damage int,
@@ -844,7 +852,7 @@ func (d *Deck) EvalOneTurnForTesting(incomingDamage int, arsenalIn card.Card, in
 	// Survivors would become priorAuraTriggers for turn 2 in production but the caller
 	// returns before running Best. Reveals into the hand are consumed here so the returned
 	// turn-2 Hand matches what Best would see.
-	_, _, trigDamage, trigRunes, trigRevealed, trigGraveyarded := fireStartOfTurnTriggers(triggerQueue, buf[head+drawCount2:tail])
+	_, _, trigDamage, trigRunes, trigRevealed, trigGraveyarded := processTriggersAtStartOfTurn(triggerQueue, buf[head+drawCount2:tail])
 	for range trigRevealed {
 		turn2Hand = append(turn2Hand, buf[head+drawCount2])
 		drawCount2++

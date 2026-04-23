@@ -27,14 +27,14 @@ func damageTrigger(self card.Card, damage int, calls *int) card.AuraTrigger {
 	}
 }
 
-// TestFireStartOfTurnTriggers_FiresEachQueuedTriggerOnce verifies every queued start-of-turn
+// TestProcessTriggersAtStartOfTurn_FiresEachQueuedTriggerOnce verifies every queued start-of-turn
 // trigger's handler is invoked exactly once per pass, contributions are reported, and a
 // trigger whose Count hits zero drops out of survivors.
-func TestFireStartOfTurnTriggers_FiresEachQueuedTriggerOnce(t *testing.T) {
+func TestProcessTriggersAtStartOfTurn_FiresEachQueuedTriggerOnce(t *testing.T) {
 	aura := fake.RedAttack{}
 	var callsA, callsB int
 	queue := []card.AuraTrigger{damageTrigger(aura, 2, &callsA), damageTrigger(aura, 3, &callsB)}
-	survivors, contribs, total, _, _, _ := fireStartOfTurnTriggers(queue, nil)
+	survivors, contribs, total, _, _, _ := processTriggersAtStartOfTurn(queue, nil)
 	if total != 5 {
 		t.Errorf("total = %d, want 5 (2+3)", total)
 	}
@@ -49,9 +49,9 @@ func TestFireStartOfTurnTriggers_FiresEachQueuedTriggerOnce(t *testing.T) {
 	}
 }
 
-// TestFireStartOfTurnTriggers_EmptyQueue short-circuits: no contribs, no allocation, zero total.
-func TestFireStartOfTurnTriggers_EmptyQueue(t *testing.T) {
-	survivors, contribs, total, runes, _, _ := fireStartOfTurnTriggers(nil, nil)
+// TestProcessTriggersAtStartOfTurn_EmptyQueue short-circuits: no contribs, no allocation, zero total.
+func TestProcessTriggersAtStartOfTurn_EmptyQueue(t *testing.T) {
+	survivors, contribs, total, runes, _, _ := processTriggersAtStartOfTurn(nil, nil)
 	if total != 0 || runes != 0 {
 		t.Errorf("total/runes = %d/%d, want 0/0", total, runes)
 	}
@@ -61,11 +61,11 @@ func TestFireStartOfTurnTriggers_EmptyQueue(t *testing.T) {
 	}
 }
 
-// TestFireStartOfTurnTriggers_GraveyardsExhaustedAura: when a trigger's Count hits zero after
+// TestProcessTriggersAtStartOfTurn_GraveyardsExhaustedAura: when a trigger's Count hits zero after
 // firing, the sim moves Self into the turn-state graveyard so subsequent handlers (e.g. an
 // aura with a graveyard-banish rider) see it. Asserts the contract without relying on any
 // specific card to model the "look at graveyard" side.
-func TestFireStartOfTurnTriggers_GraveyardsExhaustedAura(t *testing.T) {
+func TestProcessTriggersAtStartOfTurn_GraveyardsExhaustedAura(t *testing.T) {
 	aura := fake.RedAttack{}
 	var seen []card.Card
 	// Second trigger's handler records what's currently in the graveyard so we can check the
@@ -79,7 +79,7 @@ func TestFireStartOfTurnTriggers_GraveyardsExhaustedAura(t *testing.T) {
 			return 0
 		},
 	}
-	_, _, _, _, _, _ = fireStartOfTurnTriggers([]card.AuraTrigger{
+	_, _, _, _, _, _ = processTriggersAtStartOfTurn([]card.AuraTrigger{
 		{Self: aura, Type: card.TriggerStartOfTurn, Count: 1, Handler: func(*card.TurnState) int { return 0 }},
 		watcher,
 	}, nil)
@@ -125,15 +125,15 @@ func TestEvalOneTurn_SigilOfFyendalQueuesTrigger(t *testing.T) {
 	}
 }
 
-// TestFireStartOfTurnTriggers_RevealsAttackActionIntoHand: Sigil of the Arknight's handler
+// TestProcessTriggersAtStartOfTurn_RevealsAttackActionIntoHand: Sigil of the Arknight's handler
 // peeks the post-draw deck top, pops it, and appends to ts.Revealed when it's an attack
 // action. The helper surfaces ts.Revealed so the deck loop can forward the revealed card
 // into the hand.
-func TestFireStartOfTurnTriggers_RevealsAttackActionIntoHand(t *testing.T) {
+func TestProcessTriggersAtStartOfTurn_RevealsAttackActionIntoHand(t *testing.T) {
 	var play card.TurnState
 	(runeblade.SigilOfTheArknightBlue{}).Play(&play, &card.CardState{})
 	slash := runeblade.AetherSlashRed{}
-	_, contribs, total, _, revealed, _ := fireStartOfTurnTriggers(play.AuraTriggers, []card.Card{slash})
+	_, contribs, total, _, revealed, _ := processTriggersAtStartOfTurn(play.AuraTriggers, []card.Card{slash})
 	if total != 0 {
 		t.Errorf("total = %d, want 0 (reveal contributes via hand, not damage)", total)
 	}
@@ -145,15 +145,15 @@ func TestFireStartOfTurnTriggers_RevealsAttackActionIntoHand(t *testing.T) {
 	}
 }
 
-// TestFireStartOfTurnTriggers_CascadingReveals: two Arknight sigil triggers in a row each
+// TestProcessTriggersAtStartOfTurn_CascadingReveals: two Arknight sigil triggers in a row each
 // reveal the current top, so the second sees the NEW top after the first pops its card.
-func TestFireStartOfTurnTriggers_CascadingReveals(t *testing.T) {
+func TestProcessTriggersAtStartOfTurn_CascadingReveals(t *testing.T) {
 	var play card.TurnState
 	(runeblade.SigilOfTheArknightBlue{}).Play(&play, &card.CardState{})
 	(runeblade.SigilOfTheArknightBlue{}).Play(&play, &card.CardState{})
 	first := runeblade.AetherSlashRed{}
 	second := runeblade.ConsumingVolitionRed{}
-	_, _, _, _, revealed, _ := fireStartOfTurnTriggers(play.AuraTriggers, []card.Card{first, second})
+	_, _, _, _, revealed, _ := processTriggersAtStartOfTurn(play.AuraTriggers, []card.Card{first, second})
 	if len(revealed) != 2 {
 		t.Fatalf("len(revealed) = %d, want 2 (two cascading reveals)", len(revealed))
 	}
@@ -162,14 +162,14 @@ func TestFireStartOfTurnTriggers_CascadingReveals(t *testing.T) {
 	}
 }
 
-// TestFireStartOfTurnTriggers_NonAttackActionTopSkipsReveal: the sigil handler peeks a
+// TestProcessTriggersAtStartOfTurn_NonAttackActionTopSkipsReveal: the sigil handler peeks a
 // non-attack top → no reveal. The top stays on the deck in the real game.
-func TestFireStartOfTurnTriggers_NonAttackActionTopSkipsReveal(t *testing.T) {
+func TestProcessTriggersAtStartOfTurn_NonAttackActionTopSkipsReveal(t *testing.T) {
 	var play card.TurnState
 	sigil := runeblade.SigilOfTheArknightBlue{}
 	sigil.Play(&play, &card.CardState{})
 	// Sigil itself is an Aura (non-attack action) — use it as a convenient non-attack top.
-	_, _, total, _, revealed, _ := fireStartOfTurnTriggers(play.AuraTriggers, []card.Card{sigil})
+	_, _, total, _, revealed, _ := processTriggersAtStartOfTurn(play.AuraTriggers, []card.Card{sigil})
 	if total != 0 {
 		t.Errorf("total = %d, want 0 (non-attack top, no credit)", total)
 	}
@@ -307,11 +307,11 @@ func TestEvaluate_TriggersFromLastTurnSurfacesInBest(t *testing.T) {
 	}
 }
 
-// TestFireStartOfTurnTriggers_ReArmsOncePerTurnGate: every trigger's FiredThisTurn is
+// TestProcessTriggersAtStartOfTurn_ReArmsOncePerTurnGate: every trigger's FiredThisTurn is
 // cleared at every turn boundary regardless of Type, so an AttackAction trigger that
 // fired last turn can fire again this turn. Asserts the re-arm contract through the helper
 // rather than waiting for the end-to-end multi-turn path to surface a regression.
-func TestFireStartOfTurnTriggers_ReArmsOncePerTurnGate(t *testing.T) {
+func TestProcessTriggersAtStartOfTurn_ReArmsOncePerTurnGate(t *testing.T) {
 	aura := fake.RedAttack{}
 	exhausted := card.AuraTrigger{
 		Self:          aura,
@@ -321,7 +321,7 @@ func TestFireStartOfTurnTriggers_ReArmsOncePerTurnGate(t *testing.T) {
 		FiredThisTurn: true,
 		Handler:       func(*card.TurnState) int { return 1 },
 	}
-	survivors, _, _, _, _, _ := fireStartOfTurnTriggers([]card.AuraTrigger{exhausted}, nil)
+	survivors, _, _, _, _, _ := processTriggersAtStartOfTurn([]card.AuraTrigger{exhausted}, nil)
 	if len(survivors) != 1 {
 		t.Fatalf("survivors len = %d, want 1 (AttackAction trigger passes through)", len(survivors))
 	}
