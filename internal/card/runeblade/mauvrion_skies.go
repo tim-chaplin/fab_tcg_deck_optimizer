@@ -4,10 +4,19 @@
 // hits, create N Runechant tokens.'"
 // (Red N=3, Yellow N=2, Blue N=1.)
 //
-// The go-again grant flips GrantedGoAgain on the first matching CardState in CardsRemaining.
-// The "if this hits" Runechants only fire when the target's printed Attack() satisfies
-// card.LikelyToHit; blockable-power targets keep go-again but drop the Runechants. "Attack
-// action card" excludes weapons.
+// Modelling splits the two grants by when they need to resolve:
+//   - Go again is a static property of the target card (not gated on how the attack plays
+//     out), and must be visible before the target's chain-legality check. Play scans
+//     CardsRemaining for the first matching Runeblade attack action card and flips its
+//     GrantedGoAgain immediately.
+//   - The "if this hits" Runechant rider depends on the target's fully-resolved attack
+//     state — the target's own Play effects, hero triggers, and aura triggers can shift
+//     what LikelyToHit sees (e.g. a mid-chain aura that grants Dominate). Play registers
+//     an EphemeralAttackTrigger that fires after those settle; damage attributes back to
+//     Mauvrion via SourceIndex.
+//
+// "Attack action card" excludes weapons; the Matches predicate requires both
+// TypeRuneblade and the attack-action bit.
 
 package runeblade
 
@@ -15,54 +24,73 @@ import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 
 var mauvrionSkiesTypes = card.NewTypeSet(card.TypeRuneblade, card.TypeAction)
 
+// mauvrionTargetMatches is the shared predicate for Mauvrion's grants: the next Runeblade
+// attack action card (weapons don't qualify).
+func mauvrionTargetMatches(target *card.CardState) bool {
+	t := target.Card.Types()
+	return t.Has(card.TypeRuneblade) && t.IsAttackAction()
+}
+
+// mauvrionSkiesPlay applies the go-again grant via look-ahead and registers the ephemeral
+// "if hits, create n Runechants" trigger for the same target's fully-resolved attack.
+func mauvrionSkiesPlay(s *card.TurnState, source card.Card, n int) int {
+	// Go again is static — flip it on the first matching target so its chain-legality check
+	// sees the grant before the target's Play runs.
+	for _, pc := range s.CardsRemaining {
+		if mauvrionTargetMatches(pc) {
+			pc.GrantedGoAgain = true
+			break
+		}
+	}
+	// The Runechant rider depends on whether the attack actually hits, so defer until the
+	// target's full resolution. The trigger fires on the first matching attack action's
+	// post-resolution; non-matching attacks (e.g. a Generic attack played before the
+	// Runeblade one) leave it in place. Unconsumed triggers fizzle silently at end of turn.
+	s.AddEphemeralAttackTrigger(card.EphemeralAttackTrigger{
+		Source:  source,
+		Matches: mauvrionTargetMatches,
+		Handler: func(s *card.TurnState, target *card.CardState) int {
+			if card.LikelyToHit(target.Card.Attack()) {
+				return s.CreateRunechants(n)
+			}
+			return 0
+		},
+	})
+	return 0
+}
+
 type MauvrionSkiesRed struct{}
 
-func (MauvrionSkiesRed) ID() card.ID                 { return card.MauvrionSkiesRed }
-func (MauvrionSkiesRed) Name() string               { return "Mauvrion Skies (Red)" }
-func (MauvrionSkiesRed) Cost(*card.TurnState) int                  { return 0 }
-func (MauvrionSkiesRed) Pitch() int                 { return 1 }
-func (MauvrionSkiesRed) Attack() int                { return 0 }
-func (MauvrionSkiesRed) Defense() int               { return 2 }
-func (MauvrionSkiesRed) Types() card.TypeSet        { return mauvrionSkiesTypes }
-func (MauvrionSkiesRed) GoAgain() bool              { return true }
-func (MauvrionSkiesRed) Play(s *card.TurnState, _ *card.CardState) int { return mauvrionSkiesPlay(s, 3) }
+func (MauvrionSkiesRed) ID() card.ID                                     { return card.MauvrionSkiesRed }
+func (MauvrionSkiesRed) Name() string                                    { return "Mauvrion Skies (Red)" }
+func (MauvrionSkiesRed) Cost(*card.TurnState) int                        { return 0 }
+func (MauvrionSkiesRed) Pitch() int                                      { return 1 }
+func (MauvrionSkiesRed) Attack() int                                     { return 0 }
+func (MauvrionSkiesRed) Defense() int                                    { return 2 }
+func (MauvrionSkiesRed) Types() card.TypeSet                             { return mauvrionSkiesTypes }
+func (MauvrionSkiesRed) GoAgain() bool                                   { return true }
+func (c MauvrionSkiesRed) Play(s *card.TurnState, _ *card.CardState) int { return mauvrionSkiesPlay(s, c, 3) }
 
 type MauvrionSkiesYellow struct{}
 
-func (MauvrionSkiesYellow) ID() card.ID                 { return card.MauvrionSkiesYellow }
-func (MauvrionSkiesYellow) Name() string               { return "Mauvrion Skies (Yellow)" }
-func (MauvrionSkiesYellow) Cost(*card.TurnState) int                  { return 0 }
-func (MauvrionSkiesYellow) Pitch() int                 { return 2 }
-func (MauvrionSkiesYellow) Attack() int                { return 0 }
-func (MauvrionSkiesYellow) Defense() int               { return 2 }
-func (MauvrionSkiesYellow) Types() card.TypeSet        { return mauvrionSkiesTypes }
-func (MauvrionSkiesYellow) GoAgain() bool              { return true }
-func (MauvrionSkiesYellow) Play(s *card.TurnState, _ *card.CardState) int { return mauvrionSkiesPlay(s, 2) }
+func (MauvrionSkiesYellow) ID() card.ID                                     { return card.MauvrionSkiesYellow }
+func (MauvrionSkiesYellow) Name() string                                    { return "Mauvrion Skies (Yellow)" }
+func (MauvrionSkiesYellow) Cost(*card.TurnState) int                        { return 0 }
+func (MauvrionSkiesYellow) Pitch() int                                      { return 2 }
+func (MauvrionSkiesYellow) Attack() int                                     { return 0 }
+func (MauvrionSkiesYellow) Defense() int                                    { return 2 }
+func (MauvrionSkiesYellow) Types() card.TypeSet                             { return mauvrionSkiesTypes }
+func (MauvrionSkiesYellow) GoAgain() bool                                   { return true }
+func (c MauvrionSkiesYellow) Play(s *card.TurnState, _ *card.CardState) int { return mauvrionSkiesPlay(s, c, 2) }
 
 type MauvrionSkiesBlue struct{}
 
-func (MauvrionSkiesBlue) ID() card.ID                 { return card.MauvrionSkiesBlue }
-func (MauvrionSkiesBlue) Name() string               { return "Mauvrion Skies (Blue)" }
-func (MauvrionSkiesBlue) Cost(*card.TurnState) int                  { return 0 }
-func (MauvrionSkiesBlue) Pitch() int                 { return 3 }
-func (MauvrionSkiesBlue) Attack() int                { return 0 }
-func (MauvrionSkiesBlue) Defense() int               { return 2 }
-func (MauvrionSkiesBlue) Types() card.TypeSet        { return mauvrionSkiesTypes }
-func (MauvrionSkiesBlue) GoAgain() bool              { return true }
-func (MauvrionSkiesBlue) Play(s *card.TurnState, _ *card.CardState) int { return mauvrionSkiesPlay(s, 1) }
-
-func mauvrionSkiesPlay(s *card.TurnState, n int) int {
-	for _, pc := range s.CardsRemaining {
-		t := pc.Card.Types()
-		if t.Has(card.TypeRuneblade) && t.IsAttackAction() {
-			pc.GrantedGoAgain = true
-			if card.LikelyToHit(pc.Card.Attack()) {
-				return s.CreateRunechants(n)
-			}
-			// Target is blockable — the "if hits" clause doesn't fire, so no Runechants.
-			return 0
-		}
-	}
-	// No qualifying target — both the go-again grant and the runechant rider fizzle.
-	return 0
-}
+func (MauvrionSkiesBlue) ID() card.ID                                     { return card.MauvrionSkiesBlue }
+func (MauvrionSkiesBlue) Name() string                                    { return "Mauvrion Skies (Blue)" }
+func (MauvrionSkiesBlue) Cost(*card.TurnState) int                        { return 0 }
+func (MauvrionSkiesBlue) Pitch() int                                      { return 3 }
+func (MauvrionSkiesBlue) Attack() int                                     { return 0 }
+func (MauvrionSkiesBlue) Defense() int                                    { return 2 }
+func (MauvrionSkiesBlue) Types() card.TypeSet                             { return mauvrionSkiesTypes }
+func (MauvrionSkiesBlue) GoAgain() bool                                   { return true }
+func (c MauvrionSkiesBlue) Play(s *card.TurnState, _ *card.CardState) int { return mauvrionSkiesPlay(s, c, 1) }
