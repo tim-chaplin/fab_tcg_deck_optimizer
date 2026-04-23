@@ -13,12 +13,11 @@ disappear.
 
 ### LikelyToHit breadcrumbs — on-hit riders awaiting modelling
 
-Each of the generic attacks below has a `func <card>Damage(attack int) int` helper with an
-`if card.LikelyToHit(attack, false) { /* TODO */ }` block. The body is a placeholder so grep
-for `LikelyToHit` turns these up when we come back to wire the riders. Plug the rider's
-damage-equivalent into the body and remove the TODO. (None of these cards are printed with
-Dominate, so the second argument stays `false`; if a future card grows a Dominate-gated on-hit
-rider, thread `self.EffectiveDominate()` through to the helper instead.)
+Each of the generic attacks below has a
+`func <card>Damage(attack int, self *card.CardState) int` helper with an
+`if card.LikelyToHit(attack, self.EffectiveDominate()) { /* TODO */ }` block. The body is a
+placeholder so grep for `LikelyToHit` turns these up when we come back to wire the riders.
+Plug the rider's damage-equivalent into the body and remove the TODO.
 
 - **Jack Be Quick** — on-hit steal ally (hero-specific).
 - **Jack Be Nimble** — on-hit steal item (hero-specific).

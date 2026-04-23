@@ -22,12 +22,12 @@ func (HandBehindThePenRed) Attack() int                 { return 6 }
 func (HandBehindThePenRed) Defense() int                { return 2 }
 func (HandBehindThePenRed) Types() card.TypeSet         { return handBehindThePenTypes }
 func (HandBehindThePenRed) GoAgain() bool               { return false }
-func (c HandBehindThePenRed) Play(s *card.TurnState, _ *card.CardState) int { return handBehindThePenDamage(c.Attack()) }
+func (c HandBehindThePenRed) Play(s *card.TurnState, self *card.CardState) int { return handBehindThePenDamage(c.Attack(), self) }
 
 // handBehindThePenDamage is a breadcrumb for the on-hit "arsenal face-up + banish non-attack
 // action" rider — not modelled yet (see TODO.md).
-func handBehindThePenDamage(attack int) int {
-	if card.LikelyToHit(attack, false) {
+func handBehindThePenDamage(attack int, self *card.CardState) int {
+	if card.LikelyToHit(attack, self.EffectiveDominate()) {
 		// TODO: model on-hit arsenal manipulation rider.
 	}
 	return attack

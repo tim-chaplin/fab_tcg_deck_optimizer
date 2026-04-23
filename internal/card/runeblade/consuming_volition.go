@@ -17,8 +17,8 @@ var consumingVolitionTypes = card.NewTypeSet(card.TypeRuneblade, card.TypeAction
 
 // consumingVolitionDamage returns the base attack plus the discard rider when ArcaneDamageDealt
 // is set AND this card's printed attack is likely to land on its own.
-func consumingVolitionDamage(attack int, s *card.TurnState) int {
-	if s != nil && s.ArcaneDamageDealt && card.LikelyToHit(attack, false) {
+func consumingVolitionDamage(attack int, s *card.TurnState, self *card.CardState) int {
+	if s != nil && s.ArcaneDamageDealt && card.LikelyToHit(attack, self.EffectiveDominate()) {
 		return attack + card.DiscardValue
 	}
 	return attack
@@ -34,7 +34,7 @@ func (ConsumingVolitionRed) Attack() int                  { return 4 }
 func (ConsumingVolitionRed) Defense() int                 { return 3 }
 func (ConsumingVolitionRed) Types() card.TypeSet          { return consumingVolitionTypes }
 func (ConsumingVolitionRed) GoAgain() bool                { return false }
-func (c ConsumingVolitionRed) Play(s *card.TurnState, _ *card.CardState) int { return consumingVolitionDamage(c.Attack(), s) }
+func (c ConsumingVolitionRed) Play(s *card.TurnState, self *card.CardState) int { return consumingVolitionDamage(c.Attack(), s, self) }
 
 type ConsumingVolitionYellow struct{}
 
@@ -46,7 +46,7 @@ func (ConsumingVolitionYellow) Attack() int                  { return 3 }
 func (ConsumingVolitionYellow) Defense() int                 { return 3 }
 func (ConsumingVolitionYellow) Types() card.TypeSet          { return consumingVolitionTypes }
 func (ConsumingVolitionYellow) GoAgain() bool                { return false }
-func (c ConsumingVolitionYellow) Play(s *card.TurnState, _ *card.CardState) int { return consumingVolitionDamage(c.Attack(), s) }
+func (c ConsumingVolitionYellow) Play(s *card.TurnState, self *card.CardState) int { return consumingVolitionDamage(c.Attack(), s, self) }
 
 type ConsumingVolitionBlue struct{}
 
@@ -58,4 +58,4 @@ func (ConsumingVolitionBlue) Attack() int                  { return 2 }
 func (ConsumingVolitionBlue) Defense() int                 { return 3 }
 func (ConsumingVolitionBlue) Types() card.TypeSet          { return consumingVolitionTypes }
 func (ConsumingVolitionBlue) GoAgain() bool                { return false }
-func (c ConsumingVolitionBlue) Play(s *card.TurnState, _ *card.CardState) int { return consumingVolitionDamage(c.Attack(), s) }
+func (c ConsumingVolitionBlue) Play(s *card.TurnState, self *card.CardState) int { return consumingVolitionDamage(c.Attack(), s, self) }

@@ -22,7 +22,7 @@ func (MoneyOrYourLifeRed) Attack() int                 { return 6 }
 func (MoneyOrYourLifeRed) Defense() int                { return 2 }
 func (MoneyOrYourLifeRed) Types() card.TypeSet         { return moneyOrYourLifeTypes }
 func (MoneyOrYourLifeRed) GoAgain() bool               { return false }
-func (c MoneyOrYourLifeRed) Play(s *card.TurnState, _ *card.CardState) int { return moneyOrYourLifeDamage(c.Attack()) }
+func (c MoneyOrYourLifeRed) Play(s *card.TurnState, self *card.CardState) int { return moneyOrYourLifeDamage(c.Attack(), self) }
 
 type MoneyOrYourLifeYellow struct{}
 
@@ -34,7 +34,7 @@ func (MoneyOrYourLifeYellow) Attack() int                 { return 5 }
 func (MoneyOrYourLifeYellow) Defense() int                { return 2 }
 func (MoneyOrYourLifeYellow) Types() card.TypeSet         { return moneyOrYourLifeTypes }
 func (MoneyOrYourLifeYellow) GoAgain() bool               { return false }
-func (c MoneyOrYourLifeYellow) Play(s *card.TurnState, _ *card.CardState) int { return moneyOrYourLifeDamage(c.Attack()) }
+func (c MoneyOrYourLifeYellow) Play(s *card.TurnState, self *card.CardState) int { return moneyOrYourLifeDamage(c.Attack(), self) }
 
 type MoneyOrYourLifeBlue struct{}
 
@@ -46,12 +46,12 @@ func (MoneyOrYourLifeBlue) Attack() int                 { return 4 }
 func (MoneyOrYourLifeBlue) Defense() int                { return 2 }
 func (MoneyOrYourLifeBlue) Types() card.TypeSet         { return moneyOrYourLifeTypes }
 func (MoneyOrYourLifeBlue) GoAgain() bool               { return false }
-func (c MoneyOrYourLifeBlue) Play(s *card.TurnState, _ *card.CardState) int { return moneyOrYourLifeDamage(c.Attack()) }
+func (c MoneyOrYourLifeBlue) Play(s *card.TurnState, self *card.CardState) int { return moneyOrYourLifeDamage(c.Attack(), self) }
 
 // moneyOrYourLifeDamage is a breadcrumb for the on-hit "deal 2 damage unless they give Gold"
 // rider — Gold tokens aren't tracked, Thief-repeat isn't modelled (see TODO.md).
-func moneyOrYourLifeDamage(attack int) int {
-	if card.LikelyToHit(attack, false) {
+func moneyOrYourLifeDamage(attack int, self *card.CardState) int {
+	if card.LikelyToHit(attack, self.EffectiveDominate()) {
 		// TODO: model on-hit Gold-trade rider.
 	}
 	return attack

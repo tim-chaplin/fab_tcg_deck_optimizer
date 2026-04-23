@@ -22,7 +22,7 @@ func (HumbleRed) Attack() int                 { return 6 }
 func (HumbleRed) Defense() int                { return 2 }
 func (HumbleRed) Types() card.TypeSet         { return humbleTypes }
 func (HumbleRed) GoAgain() bool               { return false }
-func (c HumbleRed) Play(s *card.TurnState, _ *card.CardState) int { return humbleDamage(c.Attack()) }
+func (c HumbleRed) Play(s *card.TurnState, self *card.CardState) int { return humbleDamage(c.Attack(), self) }
 
 type HumbleYellow struct{}
 
@@ -34,7 +34,7 @@ func (HumbleYellow) Attack() int                 { return 5 }
 func (HumbleYellow) Defense() int                { return 2 }
 func (HumbleYellow) Types() card.TypeSet         { return humbleTypes }
 func (HumbleYellow) GoAgain() bool               { return false }
-func (c HumbleYellow) Play(s *card.TurnState, _ *card.CardState) int { return humbleDamage(c.Attack()) }
+func (c HumbleYellow) Play(s *card.TurnState, self *card.CardState) int { return humbleDamage(c.Attack(), self) }
 
 type HumbleBlue struct{}
 
@@ -46,12 +46,12 @@ func (HumbleBlue) Attack() int                 { return 4 }
 func (HumbleBlue) Defense() int                { return 2 }
 func (HumbleBlue) Types() card.TypeSet         { return humbleTypes }
 func (HumbleBlue) GoAgain() bool               { return false }
-func (c HumbleBlue) Play(s *card.TurnState, _ *card.CardState) int { return humbleDamage(c.Attack()) }
+func (c HumbleBlue) Play(s *card.TurnState, self *card.CardState) int { return humbleDamage(c.Attack(), self) }
 
 // humbleDamage is a breadcrumb for the on-hit "lose all hero card abilities" rider — not
 // modelled yet (see TODO.md).
-func humbleDamage(attack int) int {
-	if card.LikelyToHit(attack, false) {
+func humbleDamage(attack int, self *card.CardState) int {
+	if card.LikelyToHit(attack, self.EffectiveDominate()) {
 		// TODO: model on-hit hero-ability suppression rider.
 	}
 	return attack

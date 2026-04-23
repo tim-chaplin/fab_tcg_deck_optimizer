@@ -21,7 +21,7 @@ func (DestructiveDeliberationRed) Attack() int                 { return 5 }
 func (DestructiveDeliberationRed) Defense() int                { return 2 }
 func (DestructiveDeliberationRed) Types() card.TypeSet         { return destructiveDeliberationTypes }
 func (DestructiveDeliberationRed) GoAgain() bool               { return false }
-func (c DestructiveDeliberationRed) Play(s *card.TurnState, _ *card.CardState) int { return destructiveDeliberationDamage(c.Attack()) }
+func (c DestructiveDeliberationRed) Play(s *card.TurnState, self *card.CardState) int { return destructiveDeliberationDamage(c.Attack(), self) }
 
 type DestructiveDeliberationYellow struct{}
 
@@ -33,7 +33,7 @@ func (DestructiveDeliberationYellow) Attack() int                 { return 4 }
 func (DestructiveDeliberationYellow) Defense() int                { return 2 }
 func (DestructiveDeliberationYellow) Types() card.TypeSet         { return destructiveDeliberationTypes }
 func (DestructiveDeliberationYellow) GoAgain() bool               { return false }
-func (c DestructiveDeliberationYellow) Play(s *card.TurnState, _ *card.CardState) int { return destructiveDeliberationDamage(c.Attack()) }
+func (c DestructiveDeliberationYellow) Play(s *card.TurnState, self *card.CardState) int { return destructiveDeliberationDamage(c.Attack(), self) }
 
 type DestructiveDeliberationBlue struct{}
 
@@ -45,12 +45,12 @@ func (DestructiveDeliberationBlue) Attack() int                 { return 3 }
 func (DestructiveDeliberationBlue) Defense() int                { return 2 }
 func (DestructiveDeliberationBlue) Types() card.TypeSet         { return destructiveDeliberationTypes }
 func (DestructiveDeliberationBlue) GoAgain() bool               { return false }
-func (c DestructiveDeliberationBlue) Play(s *card.TurnState, _ *card.CardState) int { return destructiveDeliberationDamage(c.Attack()) }
+func (c DestructiveDeliberationBlue) Play(s *card.TurnState, self *card.CardState) int { return destructiveDeliberationDamage(c.Attack(), self) }
 
 // destructiveDeliberationDamage is a breadcrumb for the on-hit "create a Ponder token" rider —
 // Ponder tokens aren't tracked (see TODO.md).
-func destructiveDeliberationDamage(attack int) int {
-	if card.LikelyToHit(attack, false) {
+func destructiveDeliberationDamage(attack int, self *card.CardState) int {
+	if card.LikelyToHit(attack, self.EffectiveDominate()) {
 		// TODO: model on-hit Ponder token creation rider.
 	}
 	return attack

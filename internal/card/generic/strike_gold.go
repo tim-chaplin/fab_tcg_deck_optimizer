@@ -14,8 +14,8 @@ var strikeGoldTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.Ty
 
 // strikeGoldDamage returns the base attack plus the Gold-token rider when the attack is likely
 // to land.
-func strikeGoldDamage(attack int) int {
-	if card.LikelyToHit(attack, false) {
+func strikeGoldDamage(attack int, self *card.CardState) int {
+	if card.LikelyToHit(attack, self.EffectiveDominate()) {
 		return attack + card.GoldTokenValue
 	}
 	return attack
@@ -31,7 +31,7 @@ func (StrikeGoldRed) Attack() int                  { return 4 }
 func (StrikeGoldRed) Defense() int                 { return 2 }
 func (StrikeGoldRed) Types() card.TypeSet          { return strikeGoldTypes }
 func (StrikeGoldRed) GoAgain() bool                { return false }
-func (c StrikeGoldRed) Play(s *card.TurnState, _ *card.CardState) int { return strikeGoldDamage(c.Attack()) }
+func (c StrikeGoldRed) Play(s *card.TurnState, self *card.CardState) int { return strikeGoldDamage(c.Attack(), self) }
 
 type StrikeGoldYellow struct{}
 
@@ -43,7 +43,7 @@ func (StrikeGoldYellow) Attack() int                  { return 3 }
 func (StrikeGoldYellow) Defense() int                 { return 2 }
 func (StrikeGoldYellow) Types() card.TypeSet          { return strikeGoldTypes }
 func (StrikeGoldYellow) GoAgain() bool                { return false }
-func (c StrikeGoldYellow) Play(s *card.TurnState, _ *card.CardState) int { return strikeGoldDamage(c.Attack()) }
+func (c StrikeGoldYellow) Play(s *card.TurnState, self *card.CardState) int { return strikeGoldDamage(c.Attack(), self) }
 
 type StrikeGoldBlue struct{}
 
@@ -55,4 +55,4 @@ func (StrikeGoldBlue) Attack() int                  { return 2 }
 func (StrikeGoldBlue) Defense() int                 { return 2 }
 func (StrikeGoldBlue) Types() card.TypeSet          { return strikeGoldTypes }
 func (StrikeGoldBlue) GoAgain() bool                { return false }
-func (c StrikeGoldBlue) Play(s *card.TurnState, _ *card.CardState) int { return strikeGoldDamage(c.Attack()) }
+func (c StrikeGoldBlue) Play(s *card.TurnState, self *card.CardState) int { return strikeGoldDamage(c.Attack(), self) }

@@ -12,8 +12,8 @@ import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 var snatchTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeAttack)
 
 // snatchPlay fires the on-hit draw when the attack is likely to land and returns its damage.
-func snatchPlay(attack int, s *card.TurnState) int {
-	if card.LikelyToHit(attack, false) {
+func snatchPlay(attack int, s *card.TurnState, self *card.CardState) int {
+	if card.LikelyToHit(attack, self.EffectiveDominate()) {
 		s.DrawOne()
 	}
 	return attack
@@ -30,7 +30,7 @@ func (SnatchRed) Defense() int                 { return 2 }
 func (SnatchRed) Types() card.TypeSet          { return snatchTypes }
 func (SnatchRed) GoAgain() bool                { return false }
 func (SnatchRed) NoMemo()                      {} // on-hit DrawOne depends on top of deck
-func (c SnatchRed) Play(s *card.TurnState, _ *card.CardState) int { return snatchPlay(c.Attack(), s) }
+func (c SnatchRed) Play(s *card.TurnState, self *card.CardState) int { return snatchPlay(c.Attack(), s, self) }
 
 type SnatchYellow struct{}
 
@@ -43,7 +43,7 @@ func (SnatchYellow) Defense() int                 { return 2 }
 func (SnatchYellow) Types() card.TypeSet          { return snatchTypes }
 func (SnatchYellow) GoAgain() bool                { return false }
 func (SnatchYellow) NoMemo()                      {}
-func (c SnatchYellow) Play(s *card.TurnState, _ *card.CardState) int { return snatchPlay(c.Attack(), s) }
+func (c SnatchYellow) Play(s *card.TurnState, self *card.CardState) int { return snatchPlay(c.Attack(), s, self) }
 
 type SnatchBlue struct{}
 
@@ -56,4 +56,4 @@ func (SnatchBlue) Defense() int                 { return 2 }
 func (SnatchBlue) Types() card.TypeSet          { return snatchTypes }
 func (SnatchBlue) GoAgain() bool                { return false }
 func (SnatchBlue) NoMemo()                      {}
-func (c SnatchBlue) Play(s *card.TurnState, _ *card.CardState) int { return snatchPlay(c.Attack(), s) }
+func (c SnatchBlue) Play(s *card.TurnState, self *card.CardState) int { return snatchPlay(c.Attack(), s, self) }

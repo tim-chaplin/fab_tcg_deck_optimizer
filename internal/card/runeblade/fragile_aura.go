@@ -28,6 +28,11 @@ func fragileAuraValue(s *card.TurnState, n int, attackActionOnly bool) int {
 // first attack/weapon after our play consumes every live Runechant (playSequence zeroes them
 // after it fires), so we credit the current Runechant count only to that first slot; later
 // attackers see zero in this approximation.
+//
+// The runechants check passes dominate=false because Runechant damage is ambient arcane
+// damage from aura tokens, not a card attack — Dominate is an attack-keyword and doesn't
+// apply. The attacker-power check threads pc.EffectiveDominate() so a target with printed
+// (or granted) Dominate clears the 5+ bar.
 func popsThisTurn(s *card.TurnState, attackActionOnly bool) bool {
 	firstAttacker := true
 	for _, pc := range s.CardsRemaining {
