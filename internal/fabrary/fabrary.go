@@ -26,11 +26,10 @@ import (
 // defaultFormat is emitted in the Format: header. Update when a new format comes online.
 const defaultFormat = "Silver Age"
 
-// defaultArenaPackage is the fixed equipment loadout the user runs on every exported deck. The
-// optimizer doesn't model these slots (only weapons are modelled and varied), so Marshal emits
-// them verbatim into the Arena cards section — pasting the .txt into fabrary.net picks them up
-// without hand-editing. Nebula Blade is deliberately excluded: it's a modelled weapon that
-// reaches the Arena section via d.Weapons when the deck actually uses it.
+// defaultArenaPackage is the fixed equipment loadout the user runs on every exported deck.
+// The optimizer doesn't model these slots (only weapons are modelled and varied), so Marshal
+// emits them verbatim into the Arena cards section. Modelled weapons (e.g. Nebula Blade)
+// are NOT listed here — they reach the Arena section via d.Weapons when the deck uses them.
 var defaultArenaPackage = []string{
 	"Beckoning Haunt",
 	"Blade Beckoner Boots",

@@ -5,11 +5,11 @@
 // attack action card you play this turn gains +1{p}. Go again."
 // (Red N=3, Yellow N=2, Blue N=1.)
 //
-// Modelling: The N Runechants are credited only when the target's printed Attack() satisfies
-// card.LikelyToHit — mirrors Mauvrion Skies' gate, since both riders are on-hit clauses that
-// fizzle when the target gets blocked. The +1{p} pitched-attack rider isn't gated on hitting
-// and fires if any attack-typed card was pitched this turn; pitch-to-play attribution isn't
-// tracked. Both riders target only Runeblade attack action cards — weapon swings don't qualify.
+// The N Runechants are credited only when the target's printed Attack() satisfies
+// card.LikelyToHit (on-hit clause fizzles when blocked). The +1{p} pitched-attack rider
+// isn't gated on hitting and fires if any attack-typed card was pitched this turn;
+// pitch-to-play attribution isn't tracked. Both riders target Runeblade attack action cards
+// only — weapon swings don't qualify.
 
 package runeblade
 

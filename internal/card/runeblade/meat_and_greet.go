@@ -4,13 +4,10 @@
 // Text: "When this hits, create a Runechant token. If you've dealt arcane damage to an opposing
 // hero this turn, this gets go again."
 //
-// Modelling:
-//   - The on-hit Runechant fires only when the attack's printed power satisfies
-//     card.LikelyToHit; when it does, the token is credited as +1 damage via CreateRunechant
-//     (which also sets AuraCreated). Blockable-power variants drop the rider.
-//   - The go-again rider reads TurnState.ArcaneDamageDealt; when live, sets self.GrantedGoAgain
-//     so the solver's chain legality reflects the conditional. The card's own Runechant fires
-//     on a future turn, so it can't satisfy its own rider.
+// On-hit Runechant fires only when the attack's printed power satisfies card.LikelyToHit;
+// blockable variants drop the rider. Go-again rider flips self.GrantedGoAgain when
+// TurnState.ArcaneDamageDealt is live. The card's own Runechant fires on a future turn, so
+// it can't satisfy its own rider.
 
 package runeblade
 
@@ -18,10 +15,8 @@ import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 
 var meatAndGreetTypes = card.NewTypeSet(card.TypeRuneblade, card.TypeAction, card.TypeAttack)
 
-// meatAndGreetPlay is the shared Play implementation. Go again goes on self.GrantedGoAgain
-// (not the printed GoAgain) so the rider stays conditional on ArcaneDamageDealt. The on-hit
-// Runechant rider is gated on card.LikelyToHit, mirroring how other on-hit rider cards treat
-// blockable attacks.
+// meatAndGreetPlay is the shared Play implementation. See the file docstring for rider
+// modelling.
 func meatAndGreetPlay(c card.Card, s *card.TurnState, self *card.CardState) int {
 	if s.ArcaneDamageDealt {
 		self.GrantedGoAgain = true

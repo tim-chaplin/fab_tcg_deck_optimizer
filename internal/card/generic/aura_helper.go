@@ -4,9 +4,8 @@ package generic
 
 import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 
-// setAuraCreated marks the turn state so cards that read AuraCreated (e.g. Yinti Yanti,
-// Runerager Swarm) see the aura entering play. Returns 0 — the aura itself contributes
-// no direct damage; its value is in the flag it leaves behind.
+// setAuraCreated flips s.AuraCreated so cards that read it see the aura entering play.
+// Returns 0 — the aura's value is in the flag, not direct damage.
 func setAuraCreated(s *card.TurnState) int {
 	s.AuraCreated = true
 	return 0

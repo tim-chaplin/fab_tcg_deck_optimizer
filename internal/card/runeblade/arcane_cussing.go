@@ -3,10 +3,8 @@
 // Text: "Go again. When you deal or are dealt damage, destroy this. When this leaves the arena
 // during your turn, create N Runechants." (Red N=3, Yellow N=2, Blue N=1.)
 //
-// Modelled as a fragile aura (see fragile_aura.go): pays N if we land a same-turn attack (pops
-// it now for the Runechants) or if we block all incoming damage (survives into a future turn);
-// pays 0 if we take damage. Any attacker type qualifies for the same-turn pop since Cussing's
-// trigger is the looser "deal damage" phrasing.
+// Modelled as a fragile aura (fragile_aura.go). The "deal damage" trigger lets any attacker
+// type pop the aura, so Play passes attackActionOnly=false.
 
 package runeblade
 

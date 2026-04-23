@@ -1,19 +1,18 @@
-// Shared helpers for fragile-aura cards (Arcane Cussing, Bloodspill Invocation). Both pay out
-// N Runechants on destruction but die without value when we take damage, so their worth this
-// game collapses to 0 in partitions where we don't block all incoming damage — unless we pop
-// the aura ourselves the same turn by landing an attack.
+// Shared helpers for fragile-aura cards. A fragile aura pays N Runechants on destruction
+// but dies without value if we take damage, so its worth collapses to 0 in partitions where
+// we don't block all incoming damage — unless we pop the aura ourselves same turn by landing
+// an attack.
 
 package runeblade
 
 import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 
-// fragileAuraValue returns n when the aura is expected to pay out, 0 otherwise. Two paths to
-// payment: (1) we land a same-turn attack that pops the aura now, or (2) we block all incoming
-// so the aura survives opponent's turn into a future turn where it eventually pays.
+// fragileAuraValue returns n when the aura is expected to pay out, 0 otherwise. Two paths
+// to payment: (1) we land a same-turn attack that pops the aura now, or (2) we block all
+// incoming so the aura survives into a future turn.
 //
-// attackActionOnly gates the same-turn-pop check. Bloodspill's "attack action card you control
-// hits" trigger ignores weapon swings, so it passes true. Cussing's looser "deal damage"
-// trigger fires off any attacker, so it passes false.
+// attackActionOnly gates the same-turn-pop check. Triggers restricted to "attack action
+// card" pass true (weapon swings don't qualify); triggers off any damage source pass false.
 func fragileAuraValue(s *card.TurnState, n int, attackActionOnly bool) int {
 	if popsThisTurn(s, attackActionOnly) {
 		return n
