@@ -3,8 +3,11 @@ package deckio
 import (
 	"math/rand"
 	"reflect"
+	"strings"
 	"testing"
 
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/cards"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/deck"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/hand"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/hero"
@@ -129,5 +132,73 @@ func TestRoundTrip_PreservesBestTurnContributions(t *testing.T) {
 		if gotChain[i].TriggerDamage != wantChain[i].TriggerDamage {
 			t.Errorf("AttackChain[%d].TriggerDamage: got %.3f want %.3f", i, gotChain[i].TriggerDamage, wantChain[i].TriggerDamage)
 		}
+	}
+}
+
+// TestRoundTrip_PreservesSideboard verifies the user-managed Sideboard field survives a
+// Marshal/Unmarshal cycle as a multiset of card names. Sideboard contents don't affect the
+// sim — this test pins that the IO layer still round-trips them so `fabsim eval` / `anneal`
+// can preserve them across runs even when they'd otherwise drop the data.
+func TestRoundTrip_PreservesSideboard(t *testing.T) {
+	rng := rand.New(rand.NewSource(42))
+	d := deck.Random(hero.Viserai{}, 40, 2, rng, nil)
+	d.Sideboard = []card.Card{
+		cards.Get(card.AetherSlashRed),
+		cards.Get(card.AetherSlashRed),
+		cards.Get(card.ArcanicSpikeBlue),
+	}
+
+	data, err := Marshal(d)
+	if err != nil {
+		t.Fatalf("Marshal: %v", err)
+	}
+	got, err := Unmarshal(data)
+	if err != nil {
+		t.Fatalf("Unmarshal: %v", err)
+	}
+
+	want := map[string]int{"Aether Slash (Red)": 2, "Arcanic Spike (Blue)": 1}
+	gotCounts := map[string]int{}
+	for _, c := range got.Sideboard {
+		gotCounts[c.Name()]++
+	}
+	if !reflect.DeepEqual(gotCounts, want) {
+		t.Errorf("sideboard counts: got %v want %v", gotCounts, want)
+	}
+}
+
+// TestMarshal_OmitsEmptySideboard pins the omitempty behaviour: a deck with no sideboard
+// doesn't emit the field at all, so existing on-disk JSON files stay byte-identical after
+// a re-serialize.
+func TestMarshal_OmitsEmptySideboard(t *testing.T) {
+	rng := rand.New(rand.NewSource(1))
+	d := deck.Random(hero.Viserai{}, 40, 2, rng, nil)
+	data, err := Marshal(d)
+	if err != nil {
+		t.Fatalf("Marshal: %v", err)
+	}
+	if strings.Contains(string(data), `"sideboard"`) {
+		t.Errorf("empty sideboard should be omitted from JSON; got:\n%s", data)
+	}
+}
+
+// TestUnmarshal_UnknownSideboardCardErrors mirrors the strict behaviour of the main Cards
+// list: unknown names abort the parse rather than being silently dropped, so a typo in a
+// hand-edited sideboard surfaces immediately.
+func TestUnmarshal_UnknownSideboardCardErrors(t *testing.T) {
+	const bad = `{
+  "hero": "Viserai",
+  "weapons": [],
+  "cards": [],
+  "sideboard": ["Not A Real Card"],
+  "pitch": {"red": 0, "yellow": 0, "blue": 0},
+  "stats": {"avg": 0, "runs": 0, "hands": 0, "total_value": 0, "first_cycle": {"Hands": 0, "Total": 0}, "second_cycle": {"Hands": 0, "Total": 0}, "best": {"hand": [], "roles": [], "weapons": [], "value": 0, "starting_runechants": 0}}
+}`
+	_, err := Unmarshal([]byte(bad))
+	if err == nil {
+		t.Fatal("expected error for unknown sideboard card, got nil")
+	}
+	if !strings.Contains(err.Error(), "sideboard") {
+		t.Errorf("error should mention sideboard; got %v", err)
 	}
 }

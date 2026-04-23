@@ -287,11 +287,23 @@ func resolveDeckPath(name string) string {
 }
 
 // printCardList writes the deck's card list in canonical "Card list:" form: one
-// grouped-and-sorted count-and-name line per unique card.
+// grouped-and-sorted count-and-name line per unique card. When the deck carries a user-managed
+// sideboard a trailing "Sideboard:" block lists its contents in the same grouped form — an
+// empty sideboard is silently skipped so stock decks stay untouched.
 func printCardList(d *deck.Deck) {
 	fmt.Println("Card list:")
+	printGroupedCards(d.Cards)
+	if len(d.Sideboard) > 0 {
+		fmt.Println("Sideboard:")
+		printGroupedCards(d.Sideboard)
+	}
+}
+
+// printGroupedCards writes one count-and-name line per unique card in cs, sorted by name.
+// Factored out of printCardList so the main list and the sideboard section share formatting.
+func printGroupedCards(cs []card.Card) {
 	counts := map[string]int{}
-	for _, c := range d.Cards {
+	for _, c := range cs {
 		counts[c.Name()]++
 	}
 	names := make([]string, 0, len(counts))

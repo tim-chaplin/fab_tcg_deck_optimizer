@@ -6,6 +6,8 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/cards"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/deck"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/hero"
 )
@@ -174,6 +176,71 @@ Deck cards
 	}
 	if skipped["Not A Real Card (Red)"] != 2 {
 		t.Errorf("skipped should contain Not A Real Card (Red) x2; got %v", skipped)
+	}
+}
+
+// TestMarshalSideboardSection verifies that a deck with a non-empty Sideboard renders a
+// trailing "Sideboard" section with count-and-name lines in the same shape as the Deck section.
+// An empty sideboard should skip the section entirely so minimal decks stay minimal.
+func TestMarshalSideboardSection(t *testing.T) {
+	rng := rand.New(rand.NewSource(1))
+	d := deck.Random(hero.Viserai{}, 40, 2, rng, nil)
+
+	// Empty sideboard → no section at all.
+	if text := Marshal(d); strings.Contains(text, "Sideboard") {
+		t.Errorf("empty sideboard should not emit a Sideboard section; got:\n%s", text)
+	}
+
+	// Populated sideboard → the section appears after Deck cards with the same "Nx Name (color)"
+	// shape. Uses Mauvrion Skies Red since it's in the registry and carries a pitch color.
+	d.Sideboard = []card.Card{cards.Get(card.MauvrionSkiesRed), cards.Get(card.MauvrionSkiesRed)}
+	text := Marshal(d)
+	if !strings.Contains(text, "\nSideboard\n") {
+		t.Errorf("populated sideboard should emit a Sideboard section; got:\n%s", text)
+	}
+	if !strings.Contains(text, "2x Mauvrion Skies (red)") {
+		t.Errorf("expected '2x Mauvrion Skies (red)' in sideboard section; got:\n%s", text)
+	}
+	if strings.Index(text, "Sideboard") < strings.Index(text, "Deck cards") {
+		t.Errorf("Sideboard must come after Deck cards; got:\n%s", text)
+	}
+}
+
+// TestUnmarshalSideboardRoundTrip pins the import path: a fabrary-style text with a Sideboard
+// section parses into Deck.Sideboard as a multiset, separate from the main card list.
+func TestUnmarshalSideboardRoundTrip(t *testing.T) {
+	const sample = `Name: Viserai
+Hero: Viserai
+Format: Silver Age
+
+Arena cards
+1x Reaping Blade
+
+Deck cards
+2x Aether Slash (red)
+
+Sideboard
+2x Mauvrion Skies (red)
+1x Runic Reaping (blue)
+`
+	d, skipped, err := Unmarshal(sample)
+	if err != nil {
+		t.Fatalf("Unmarshal: %v", err)
+	}
+	if len(skipped) != 0 {
+		t.Errorf("unexpected skipped cards: %v", skipped)
+	}
+	wantMain := map[string]int{"Aether Slash (Red)": 2}
+	wantSide := map[string]int{"Mauvrion Skies (Red)": 2, "Runic Reaping (Blue)": 1}
+	if got := cardNameCounts(d); !reflect.DeepEqual(got, wantMain) {
+		t.Errorf("main cards: got %v want %v", got, wantMain)
+	}
+	gotSide := map[string]int{}
+	for _, c := range d.Sideboard {
+		gotSide[c.Name()]++
+	}
+	if !reflect.DeepEqual(gotSide, wantSide) {
+		t.Errorf("sideboard: got %v want %v", gotSide, wantSide)
 	}
 }
 

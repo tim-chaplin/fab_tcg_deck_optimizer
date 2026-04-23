@@ -1,7 +1,8 @@
 // Package fabrary converts a deck.Deck to and from fabrary.net's plain-text deck format
 // (https://fabrary.net/decks?tab=import). The format has a `Name:` / `Hero:` / `Format:` header,
-// an "Arena cards" section for equipment and weapons, and a "Deck cards" section with pitch
-// cards carrying a lowercase color suffix (e.g. "2x Aether Slash (red)").
+// an "Arena cards" section for equipment and weapons, a "Deck cards" section with pitch cards
+// carrying a lowercase color suffix (e.g. "2x Aether Slash (red)"), and an optional
+// "Sideboard" section mirroring the Deck section for the user-managed sideboard.
 //
 // The optimizer models only weapons, not other equipment. Unknown Arena lines are ignored on
 // import; on export, modelled weapons are joined by the fixed equipment loadout in
@@ -43,7 +44,9 @@ var defaultArenaPackage = []string{
 
 // Marshal returns fabrary-style deck text for d, suitable for pasting into fabrary.net's
 // "Import deck" tab. Weapons go in the Arena section; deck cards in the Deck section with pitch
-// color suffix lowercased to match fabrary's own exports.
+// color suffix lowercased to match fabrary's own exports. When the deck carries a sideboard a
+// trailing "Sideboard" section is appended with the same count-and-name formatting; an empty
+// sideboard skips the section entirely so the output stays minimal.
 func Marshal(d *deck.Deck) string {
 	var b strings.Builder
 	name := d.Hero.Name()
@@ -61,6 +64,11 @@ func Marshal(d *deck.Deck) string {
 
 	b.WriteString("Deck cards\n")
 	writeCounts(&b, cardCountsForExport(d.Cards))
+
+	if len(d.Sideboard) > 0 {
+		b.WriteString("\nSideboard\n")
+		writeCounts(&b, cardCountsForExport(d.Sideboard))
+	}
 	return b.String()
 }
 
@@ -72,11 +80,12 @@ func Marshal(d *deck.Deck) string {
 // optimizer doesn't model them. A missing hero aborts: the deck can't be constructed without one.
 func Unmarshal(text string) (*deck.Deck, map[string]int, error) {
 	var (
-		heroName string
-		section  string
-		weapons  []weapon.Weapon
-		cardList []card.Card
-		skipped  = map[string]int{}
+		heroName  string
+		section   string
+		weapons   []weapon.Weapon
+		cardList  []card.Card
+		sideboard []card.Card
+		skipped   = map[string]int{}
 	)
 
 	sc := bufio.NewScanner(strings.NewReader(text))
@@ -102,6 +111,9 @@ func Unmarshal(text string) (*deck.Deck, map[string]int, error) {
 		case "Deck cards":
 			section = "deck"
 			continue
+		case "Sideboard":
+			section = "sideboard"
+			continue
 		}
 		if isFooter(line) {
 			continue
@@ -117,7 +129,7 @@ func Unmarshal(text string) (*deck.Deck, map[string]int, error) {
 					weapons = append(weapons, w)
 				}
 			}
-		case "deck":
+		case "deck", "sideboard":
 			canon := fromFabraryCardName(name)
 			id, ok := cards.ByName(canon)
 			if !ok {
@@ -126,7 +138,11 @@ func Unmarshal(text string) (*deck.Deck, map[string]int, error) {
 			}
 			c := cards.Get(id)
 			for i := 0; i < qty; i++ {
-				cardList = append(cardList, c)
+				if section == "sideboard" {
+					sideboard = append(sideboard, c)
+				} else {
+					cardList = append(cardList, c)
+				}
 			}
 		}
 	}
@@ -137,7 +153,9 @@ func Unmarshal(text string) (*deck.Deck, map[string]int, error) {
 	if !ok {
 		return nil, nil, fmt.Errorf("fabrary: unknown hero %q", heroName)
 	}
-	return deck.New(h, weapons, cardList), skipped, nil
+	d := deck.New(h, weapons, cardList)
+	d.Sideboard = sideboard
+	return d, skipped, nil
 }
 
 // countedLine matches "<N>x <name>" — fabrary always uses a lowercase "x" with no spaces around it.

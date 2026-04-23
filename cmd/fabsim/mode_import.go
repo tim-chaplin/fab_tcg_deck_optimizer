@@ -83,14 +83,19 @@ func readUntilFabraryFooter(r *bufio.Reader) ([]byte, error) {
 	}
 }
 
-// summarizeImportedDeck prints a short stderr confirmation (hero, weapons, card count) so the
-// user can sanity-check the paste without opening the file.
+// summarizeImportedDeck prints a short stderr confirmation (hero, weapons, card count,
+// optional sideboard count) so the user can sanity-check the paste without opening the file.
+// The sideboard count only appears when non-empty so typical imports stay one-line.
 func summarizeImportedDeck(d *deck.Deck) {
 	weapons := make([]string, len(d.Weapons))
 	for i, w := range d.Weapons {
 		weapons[i] = w.Name()
 	}
-	fmt.Fprintf(os.Stderr, "  hero: %s, weapons: %v, cards: %d\n", d.Hero.Name(), weapons, len(d.Cards))
+	fmt.Fprintf(os.Stderr, "  hero: %s, weapons: %v, cards: %d", d.Hero.Name(), weapons, len(d.Cards))
+	if len(d.Sideboard) > 0 {
+		fmt.Fprintf(os.Stderr, ", sideboard: %d", len(d.Sideboard))
+	}
+	fmt.Fprintln(os.Stderr)
 }
 
 // warnSkipped prints a stderr notice for any fabrary cards the optimizer's registry doesn't

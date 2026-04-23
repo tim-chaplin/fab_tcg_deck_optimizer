@@ -16,13 +16,17 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/weapon"
 )
 
-// DeckJSON is the on-disk shape of a Deck with its Stats.
+// DeckJSON is the on-disk shape of a Deck with its Stats. Sideboard is a user-managed
+// parallel card list that the simulator never reads — it round-trips through Marshal /
+// Unmarshal but doesn't participate in scoring, mutations, or NotImplemented sanitization.
+// Omitted from the JSON when empty so existing files stay untouched.
 type DeckJSON struct {
-	Hero    string           `json:"hero"`
-	Weapons []string         `json:"weapons"`
-	Cards   []string         `json:"cards"`
-	Pitch   PitchCountsJSON  `json:"pitch"`
-	Stats   StatsJSON        `json:"stats"`
+	Hero      string          `json:"hero"`
+	Weapons   []string        `json:"weapons"`
+	Cards     []string        `json:"cards"`
+	Sideboard []string        `json:"sideboard,omitempty"`
+	Pitch     PitchCountsJSON `json:"pitch"`
+	Stats     StatsJSON       `json:"stats"`
 }
 
 // PitchCountsJSON reports how many cards of each pitch colour are in the deck. Derived from
@@ -122,12 +126,23 @@ func toJSON(d *deck.Deck) *DeckJSON {
 		}
 	}
 	sort.Strings(cardNames)
+	// Sideboard is sorted like Cards so files diff stably across writes. Stays nil when the
+	// source deck has no sideboard so `omitempty` keeps the field out of the JSON entirely.
+	var sideboardNames []string
+	if len(d.Sideboard) > 0 {
+		sideboardNames = make([]string, len(d.Sideboard))
+		for i, c := range d.Sideboard {
+			sideboardNames[i] = c.Name()
+		}
+		sort.Strings(sideboardNames)
+	}
 	return &DeckJSON{
-		Hero:    d.Hero.Name(),
-		Weapons: weapons,
-		Cards:   cardNames,
-		Pitch:   pitchCounts,
-		Stats:   statsToJSON(d.Stats),
+		Hero:      d.Hero.Name(),
+		Weapons:   weapons,
+		Cards:     cardNames,
+		Sideboard: sideboardNames,
+		Pitch:     pitchCounts,
+		Stats:     statsToJSON(d.Stats),
 	}
 }
 
@@ -236,6 +251,17 @@ func fromJSON(dj *DeckJSON) (*deck.Deck, error) {
 		}
 		cs[i] = cards.Get(id)
 	}
+	var sideboard []card.Card
+	if len(dj.Sideboard) > 0 {
+		sideboard = make([]card.Card, len(dj.Sideboard))
+		for i, name := range dj.Sideboard {
+			id, ok := cards.ByName(name)
+			if !ok {
+				return nil, fmt.Errorf("deckio: unknown sideboard card %q", name)
+			}
+			sideboard[i] = cards.Get(id)
+		}
+	}
 	best, err := bestTurnFromJSON(dj.Stats.Best)
 	if err != nil {
 		return nil, err
@@ -245,6 +271,7 @@ func fromJSON(dj *DeckJSON) (*deck.Deck, error) {
 		return nil, err
 	}
 	d := deck.New(h, weapons, cs)
+	d.Sideboard = sideboard
 	d.Stats = deck.Stats{
 		Runs:        dj.Stats.Runs,
 		Hands:       dj.Stats.Hands,
