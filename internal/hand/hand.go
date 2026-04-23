@@ -1261,6 +1261,53 @@ type chainBudget struct {
 // attack-phase check per permutation; this function applies the defense-phase check after
 // computing the DR cost at the chain's final runechant count.
 //
+// phaseBudgets is one (pmask) configuration's split of pitched-resource totals across the
+// attack and defense phases. Each side tracks both its running total and the largest single
+// pitch assigned to it — the "largest pitch" feeds the pitch-timing waste check (if the
+// residual budget after paying all costs is at least that value, one pitch could have been
+// Held, and the partition is illegal).
+type phaseBudgets struct {
+	attackBudget, defendBudget       int
+	maxAttackPitch, maxDefendPitch   int
+	hasAttackPitches, hasDefendPitches bool
+}
+
+// splitPitchesAcrossPhases assigns each pitch to the attack or defense phase based on the
+// bitmask and computes the per-phase resource summary. Bit i set → pitchedVals[i] funds
+// defense; bit i clear → it funds attack. phaseCount==1 forces every pitch to the attack
+// phase (no DRs present or no pitches to split) regardless of pmask.
+func splitPitchesAcrossPhases(pitchedVals []int, pmask, phaseCount int) phaseBudgets {
+	var p phaseBudgets
+	for i, v := range pitchedVals {
+		if phaseCount > 1 && pmask&(1<<i) != 0 {
+			p.defendBudget += v
+			if v > p.maxDefendPitch {
+				p.maxDefendPitch = v
+			}
+			p.hasDefendPitches = true
+		} else {
+			p.attackBudget += v
+			if v > p.maxAttackPitch {
+				p.maxAttackPitch = v
+			}
+			p.hasAttackPitches = true
+		}
+	}
+	return p
+}
+
+// containsDefenseReaction reports whether any card in cards is a Defense Reaction. The
+// partition-leaf precompute uses this to decide whether the defense-phase pitch enumeration
+// needs to split budgets at all (no DRs means every pitch funds the attack phase).
+func containsDefenseReaction(cards []card.Card) bool {
+	for _, c := range cards {
+		if c.Types().IsDefenseReaction() {
+			return true
+		}
+	}
+	return false
+}
+
 // Phase masks: when no Defense Reactions are present (or no pitches exist), all pitches go to
 // the attack phase, so we visit one configuration. Otherwise we enumerate 2^|pitched| splits.
 func bestAttackWithWeapons(hero hero.Hero, weapons []weapon.Weapon, attackers, defenders, pitched, deck []card.Card, bufs *attackBufs, runechantCarryover, incomingDamage, blockTotal, arsenalInIdx int, priorAuraTriggers []card.AuraTrigger) (int, int, int, chainBudget, []string, bool) {
@@ -1286,13 +1333,7 @@ func bestAttackWithWeapons(hero hero.Hero, weapons []weapon.Weapon, attackers, d
 	// Defense Reactions fire independently of ordering and attack chain (each sees a fresh
 	// TurnState with only Pitched + Deck), so their Play-return damage is constant across phase /
 	// weapon masks. Compute it once; reseed ctx state for the attack chain afterwards.
-	hasDRs := false
-	for _, d := range defenders {
-		if d.Types().IsDefenseReaction() {
-			hasDRs = true
-			break
-		}
-	}
+	hasDRs := containsDefenseReaction(defenders)
 	var defenseDealt int
 	if hasDRs {
 		defenseDealt, bufs.defenseGravScratch = defenseReactionDamage(defenders, pitched, deck, bufs.state, bufs.defenseGravScratch, &bufs.drCardStateScratch)
@@ -1334,30 +1375,11 @@ func bestAttackWithWeapons(hero hero.Hero, weapons []weapon.Weapon, attackers, d
 	foundFeasible := false
 
 	for pmask := 0; pmask < phaseCount; pmask++ {
-		attackBudget, defendBudget := 0, 0
-		maxAttackPitch, maxDefendPitch := 0, 0
-		hasAttackPitches, hasDefendPitches := false, false
-		for i, v := range pitchedVals {
-			// Bit i set → card i funds defense; else it funds attack. When phaseCount == 1 the
-			// bitmask is always zero, so every pitch goes to the attack phase.
-			if phaseCount > 1 && pmask&(1<<i) != 0 {
-				defendBudget += v
-				if v > maxDefendPitch {
-					maxDefendPitch = v
-				}
-				hasDefendPitches = true
-			} else {
-				attackBudget += v
-				if v > maxAttackPitch {
-					maxAttackPitch = v
-				}
-				hasAttackPitches = true
-			}
-		}
+		phase := splitPitchesAcrossPhases(pitchedVals, pmask, phaseCount)
 
-		ctx.resourceBudget = attackBudget
-		ctx.hasAttackPitches = hasAttackPitches
-		ctx.maxAttackPitch = maxAttackPitch
+		ctx.resourceBudget = phase.attackBudget
+		ctx.hasAttackPitches = phase.hasAttackPitches
+		ctx.maxAttackPitch = phase.maxAttackPitch
 
 		for wmask := 0; wmask < 1<<len(weapons); wmask++ {
 			weaponCost := bufs.weaponCosts[wmask] // weapons are static-cost
@@ -1367,7 +1389,7 @@ func bestAttackWithWeapons(hero hero.Hero, weapons []weapon.Weapon, attackers, d
 			// can't reduce the base cost, so this MinCost prune is safe. No matching pitch-timing
 			// pre-screen here: drawn cards play as chain extensions and consume the residual, so
 			// playSequenceWithMeta enforces pitch-timing post-extension instead.
-			if attackersMinCost+weaponCost > attackBudget {
+			if attackersMinCost+weaponCost > phase.attackBudget {
 				continue
 			}
 			allAttackers := bufs.attackerBuf[:len(attackers)]
@@ -1393,10 +1415,10 @@ func bestAttackWithWeapons(hero hero.Hero, weapons []weapon.Weapon, attackers, d
 				}
 				drCost += d.Cost(&bufs.drScratch)
 			}
-			if drCost > defendBudget {
+			if drCost > phase.defendBudget {
 				continue
 			}
-			if hasDefendPitches && defendBudget-drCost >= maxDefendPitch {
+			if phase.hasDefendPitches && phase.defendBudget-drCost >= phase.maxDefendPitch {
 				continue
 			}
 			if !foundFeasible || dealt > bestDealt ||
@@ -1404,7 +1426,7 @@ func bestAttackWithWeapons(hero hero.Hero, weapons []weapon.Weapon, attackers, d
 				bestDealt = dealt
 				bestLeftoverRunechants = leftoverRunechants
 				bestSwung = bufs.weaponNames[wmask]
-				bestBudget = chainBudget{resource: attackBudget, maxPitch: maxAttackPitch, hasAttackPitches: hasAttackPitches}
+				bestBudget = chainBudget{resource: phase.attackBudget, maxPitch: phase.maxAttackPitch, hasAttackPitches: phase.hasAttackPitches}
 				foundFeasible = true
 			}
 		}
