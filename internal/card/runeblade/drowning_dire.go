@@ -1,11 +1,13 @@
-// Drowning Dire — Runeblade Action - Attack. Cost 2, Defense 3. Has Dominate.
+// Drowning Dire — Runeblade Action - Attack. Cost 2, Defense 3.
 // Printed pitch variants: Red 1, Yellow 2, Blue 3.
 // Printed power: Red 5, Yellow 4, Blue 3.
 // Text: "If you have played or created an aura this turn, Drowning Dire gains **dominate**."
 //
-// Simplification: Dominate (opposing hero blocks with at most 1 card) isn't modelled — the
-// optimizer doesn't simulate defender blocks, so Dominate currently adds no value. Damage returned
-// is the printed attack.
+// Modelling: the Dominate grant is conditional, so Drowning Dire does not implement the
+// card.Dominator marker and Play does not flip self.GrantedDominate. Wiring the grant would
+// fire when s.HasAuraInPlay() is true, but Drowning Dire has no on-hit rider keyed off
+// LikelyToHit — a flip here would only feed downstream scanners (none today) reading
+// EffectiveDominate on this CardState. Pending follow-up.
 
 package runeblade
 

@@ -14,9 +14,11 @@ disappear.
 ### LikelyToHit breadcrumbs — on-hit riders awaiting modelling
 
 Each of the generic attacks below has a `func <card>Damage(attack int) int` helper with an
-`if card.LikelyToHit(attack) { /* TODO */ }` block. The body is a placeholder so grep for
-`LikelyToHit` turns these up when we come back to wire the riders. Plug the rider's
-damage-equivalent into the body and remove the TODO.
+`if card.LikelyToHit(attack, false) { /* TODO */ }` block. The body is a placeholder so grep
+for `LikelyToHit` turns these up when we come back to wire the riders. Plug the rider's
+damage-equivalent into the body and remove the TODO. (None of these cards are printed with
+Dominate, so the second argument stays `false`; if a future card grows a Dominate-gated on-hit
+rider, thread `self.EffectiveDominate()` through to the helper instead.)
 
 - **Jack Be Quick** — on-hit steal ally (hero-specific).
 - **Jack Be Nimble** — on-hit steal item (hero-specific).
@@ -43,8 +45,10 @@ called out in the sections below — landing any of them unlocks a subset of the
 
 ### On-hit / combat interactions
 
-- **Dominate isn't modelled.** Drowning Dire, Overload, Pound for Pound, and Demolition Crew
-  carry the keyword but the solver doesn't route around block partitioning.
+- **Conditional Dominate grants aren't wired.** Drowning Dire, Pound for Pound, and
+  Regurgitating Slog don't implement the `card.Dominator` marker and their `Play` never flips
+  `self.GrantedDominate`, so their "gains dominate" clauses never reach `LikelyToHit`.
+  (Overload and Demolition Crew's inherent Dominate is modelled via the marker.)
 - **On-hit go-again isn't granted.** Overload's on-hit clause never fires.
 - **Lay Low's marked-defender cost is ignored.** Card is treated as always legal and the attacker
   debuff is dropped.

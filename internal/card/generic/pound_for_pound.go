@@ -4,7 +4,10 @@
 // Text: "When you play Pound for Pound, if you have less {h} than an opposing hero, it gains
 // **dominate**."
 //
-// Simplification: Health comparison for Dominate isn't modelled; Dominate keyword held but unused.
+// Modelling: the Dominate grant is conditional on a health comparison the sim doesn't track
+// (no per-turn life totals). Pound for Pound does not implement card.Dominator and Play does
+// not flip self.GrantedDominate. Hero-strategy heuristics (like simstate.HeroWantsLowerHealth
+// for Blow for a Blow) could gate the grant in future if needed.
 
 package generic
 
