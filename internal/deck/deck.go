@@ -512,40 +512,7 @@ func (d *Deck) EvaluateWith(runs int, incomingDamage int, rng *rand.Rand, ev *ha
 			}
 			d.Stats.Histogram[play.Value]++
 			if play.Value > d.Stats.Best.Summary.Value || len(d.Stats.Best.Summary.BestLine) == 0 {
-				// Clone BestLine, AttackChain, and Drawn — all three alias memo-owned storage a
-				// later Best call may reuse. Drawn carries the turn's mid-turn-drawn cards
-				// (Pitch / Attack / Held / Arsenal dispositions) so FormatBestTurn's per-card
-				// breakdown reconciles with the displayed Value; LeftoverRunechants is captured
-				// so the header's "carryover runechants" count is real instead of always zero.
-				lineCopy := make([]hand.CardAssignment, len(play.BestLine))
-				copy(lineCopy, play.BestLine)
-				var chainCopy []hand.AttackChainEntry
-				if len(play.AttackChain) > 0 {
-					chainCopy = make([]hand.AttackChainEntry, len(play.AttackChain))
-					copy(chainCopy, play.AttackChain)
-				}
-				var drawnCopy []hand.CardAssignment
-				if len(play.Drawn) > 0 {
-					drawnCopy = make([]hand.CardAssignment, len(play.Drawn))
-					copy(drawnCopy, play.Drawn)
-				}
-				var trigCopy []hand.TriggerContribution
-				if len(play.TriggersFromLastTurn) > 0 {
-					trigCopy = make([]hand.TriggerContribution, len(play.TriggersFromLastTurn))
-					copy(trigCopy, play.TriggersFromLastTurn)
-				}
-				d.Stats.Best = BestTurn{
-					Summary: hand.TurnSummary{
-						BestLine:             lineCopy,
-						AttackChain:          chainCopy,
-						Drawn:                drawnCopy,
-						Value:                play.Value,
-						LeftoverRunechants:   play.LeftoverRunechants,
-						ArsenalCard:          play.ArsenalCard,
-						TriggersFromLastTurn: trigCopy,
-					},
-					StartingRunechants: startingRunechants,
-				}
+				recordBestTurn(&d.Stats, play, startingRunechants)
 			}
 			switch handIdx / handsPerCycle {
 			case 0:
@@ -775,6 +742,43 @@ func (d *Deck) EvalOneTurnForTesting(incomingDamage int, arsenalIn card.Card, in
 		PrevTurnBestLine:         lineCopy,
 		StartOfTurnTriggerDamage: trigDamage,
 		StartOfTurnGraveyard:     trigGraveyarded,
+	}
+}
+
+// recordBestTurn clones the winning turn's memo-owned slices into fresh storage and stamps
+// stats.Best with the resulting BestTurn. Every slice in play (BestLine, AttackChain, Drawn,
+// TriggersFromLastTurn) aliases storage hand.Best may rewrite on the next call, so retaining
+// them directly would let a later evaluation mutate the saved peak. Nil-length slices skip
+// the clone so the captured hand.TurnSummary holds nil rather than a zero-length allocation.
+func recordBestTurn(stats *Stats, play hand.TurnSummary, startingRunechants int) {
+	lineCopy := make([]hand.CardAssignment, len(play.BestLine))
+	copy(lineCopy, play.BestLine)
+	var chainCopy []hand.AttackChainEntry
+	if len(play.AttackChain) > 0 {
+		chainCopy = make([]hand.AttackChainEntry, len(play.AttackChain))
+		copy(chainCopy, play.AttackChain)
+	}
+	var drawnCopy []hand.CardAssignment
+	if len(play.Drawn) > 0 {
+		drawnCopy = make([]hand.CardAssignment, len(play.Drawn))
+		copy(drawnCopy, play.Drawn)
+	}
+	var trigCopy []hand.TriggerContribution
+	if len(play.TriggersFromLastTurn) > 0 {
+		trigCopy = make([]hand.TriggerContribution, len(play.TriggersFromLastTurn))
+		copy(trigCopy, play.TriggersFromLastTurn)
+	}
+	stats.Best = BestTurn{
+		Summary: hand.TurnSummary{
+			BestLine:             lineCopy,
+			AttackChain:          chainCopy,
+			Drawn:                drawnCopy,
+			Value:                play.Value,
+			LeftoverRunechants:   play.LeftoverRunechants,
+			ArsenalCard:          play.ArsenalCard,
+			TriggersFromLastTurn: trigCopy,
+		},
+		StartingRunechants: startingRunechants,
 	}
 }
 
