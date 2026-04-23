@@ -87,6 +87,11 @@ type CardState struct {
 	// own Play flipping self.GrantedGoAgain = true. The solver's chain-legality check ORs
 	// this with Card.GoAgain().
 	GrantedGoAgain bool
+	// GrantedDominate is the Dominate counterpart to GrantedGoAgain: set by a prior card's
+	// grant or by this card's own Play flipping self.GrantedDominate = true when a
+	// conditional "gains dominate" clause fires. LikelyToHit ORs this with the card's
+	// Dominator marker (HasDominate) to decide whether to credit the "can't over-block" bump.
+	GrantedDominate bool
 	// FromArsenal flags the single CardState whose Card came from the arsenal slot at start of
 	// turn. The solver sets it before the chain runs; CardStates for hand cards and mid-turn
 	// extensions stay false. Cards gate "if this is played from arsenal" riders on
@@ -98,6 +103,13 @@ type CardState struct {
 // grant by a prior card's effect.
 func (p *CardState) EffectiveGoAgain() bool {
 	return p.Card.GoAgain() || p.GrantedGoAgain
+}
+
+// EffectiveDominate reports whether this card attacks with Dominate this turn — from its
+// printed Dominator marker or a grant flipping GrantedDominate (either by a prior card or by
+// this card's own Play when a conditional "gains dominate" clause fires).
+func (p *CardState) EffectiveDominate() bool {
+	return p.GrantedDominate || HasDominate(p.Card)
 }
 
 // TurnState is the shared turn-level context passed to Card.Play alongside the per-card
