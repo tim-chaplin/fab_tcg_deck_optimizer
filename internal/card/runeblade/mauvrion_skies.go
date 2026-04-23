@@ -11,9 +11,10 @@
 //     GrantedGoAgain immediately.
 //   - The "if this hits" Runechant rider depends on the target's fully-resolved attack
 //     state — the target's own Play effects, hero triggers, and aura triggers can shift
-//     what LikelyToHit sees (e.g. a mid-chain aura that grants Dominate). Play registers
-//     an EphemeralAttackTrigger that fires after those settle; damage attributes back to
-//     Mauvrion via SourceIndex.
+//     what LikelyToHit sees (e.g. Drowning Dire gaining Dominate from an aura created
+//     mid-chain). Play registers an EphemeralAttackTrigger that fires after those settle;
+//     the Handler reads target.EffectiveDominate() to pick up printed + granted + conditional
+//     Dominate in one probe. Damage attributes back to Mauvrion via SourceIndex.
 //
 // "Attack action card" excludes weapons; the Matches predicate requires both
 // TypeRuneblade and the attack-action bit.
@@ -50,7 +51,7 @@ func mauvrionSkiesPlay(s *card.TurnState, source card.Card, n int) int {
 		Source:  source,
 		Matches: mauvrionTargetMatches,
 		Handler: func(s *card.TurnState, target *card.CardState) int {
-			if card.LikelyToHit(target.Card.Attack()) {
+			if card.LikelyToHit(target.Card.Attack(), target.EffectiveDominate()) {
 				return s.CreateRunechants(n)
 			}
 			return 0

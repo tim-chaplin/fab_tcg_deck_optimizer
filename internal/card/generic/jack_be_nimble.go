@@ -23,12 +23,12 @@ func (JackBeNimbleRed) Attack() int                 { return 3 }
 func (JackBeNimbleRed) Defense() int                { return 3 }
 func (JackBeNimbleRed) Types() card.TypeSet         { return jackBeNimbleTypes }
 func (JackBeNimbleRed) GoAgain() bool               { return false }
-func (c JackBeNimbleRed) Play(s *card.TurnState, _ *card.CardState) int { return jackBeNimbleDamage(c.Attack()) }
+func (c JackBeNimbleRed) Play(s *card.TurnState, self *card.CardState) int { return jackBeNimbleDamage(c.Attack(), self) }
 
 // jackBeNimbleDamage is a breadcrumb for the on-hit "steal an item" rider — not modelled yet
 // (see TODO.md). The LikelyToHit call marks where the rider value would plug in.
-func jackBeNimbleDamage(attack int) int {
-	if card.LikelyToHit(attack) {
+func jackBeNimbleDamage(attack int, self *card.CardState) int {
+	if card.LikelyToHit(attack, self.EffectiveDominate()) {
 		// TODO: model on-hit steal-item rider.
 	}
 	return attack

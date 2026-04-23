@@ -15,7 +15,10 @@ func TestAuraTriggerCreatorsOptInToAddsFutureValue(t *testing.T) {
 	for _, id := range All() {
 		c := Get(id)
 		var s card.TurnState
-		c.Play(&s, &card.CardState{})
+		// self carries the card so Plays that consult self.EffectiveGoAgain /
+		// self.EffectiveDominate (reading Card.GoAgain / the Dominator marker) don't
+		// nil-dereference.
+		c.Play(&s, &card.CardState{Card: c})
 		if len(s.AuraTriggers) == 0 {
 			continue
 		}

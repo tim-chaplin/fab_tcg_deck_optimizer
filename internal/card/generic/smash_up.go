@@ -21,12 +21,12 @@ func (SmashUpRed) Attack() int                 { return 5 }
 func (SmashUpRed) Defense() int                { return 2 }
 func (SmashUpRed) Types() card.TypeSet         { return smashUpTypes }
 func (SmashUpRed) GoAgain() bool               { return false }
-func (c SmashUpRed) Play(s *card.TurnState, _ *card.CardState) int { return smashUpDamage(c.Attack()) }
+func (c SmashUpRed) Play(s *card.TurnState, self *card.CardState) int { return smashUpDamage(c.Attack(), self) }
 
 // smashUpDamage is a breadcrumb for the on-hit "arsenal face-up + banish attack action" rider —
 // not modelled yet (see TODO.md).
-func smashUpDamage(attack int) int {
-	if card.LikelyToHit(attack) {
+func smashUpDamage(attack int, self *card.CardState) int {
+	if card.LikelyToHit(attack, self.EffectiveDominate()) {
 		// TODO: model on-hit arsenal manipulation rider.
 	}
 	return attack

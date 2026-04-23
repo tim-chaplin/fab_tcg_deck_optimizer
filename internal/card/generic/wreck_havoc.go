@@ -22,7 +22,7 @@ func (WreckHavocRed) Attack() int                 { return 6 }
 func (WreckHavocRed) Defense() int                { return 2 }
 func (WreckHavocRed) Types() card.TypeSet         { return wreckHavocTypes }
 func (WreckHavocRed) GoAgain() bool               { return false }
-func (c WreckHavocRed) Play(s *card.TurnState, _ *card.CardState) int { return wreckHavocDamage(c.Attack()) }
+func (c WreckHavocRed) Play(s *card.TurnState, self *card.CardState) int { return wreckHavocDamage(c.Attack(), self) }
 
 type WreckHavocYellow struct{}
 
@@ -34,7 +34,7 @@ func (WreckHavocYellow) Attack() int                 { return 5 }
 func (WreckHavocYellow) Defense() int                { return 2 }
 func (WreckHavocYellow) Types() card.TypeSet         { return wreckHavocTypes }
 func (WreckHavocYellow) GoAgain() bool               { return false }
-func (c WreckHavocYellow) Play(s *card.TurnState, _ *card.CardState) int { return wreckHavocDamage(c.Attack()) }
+func (c WreckHavocYellow) Play(s *card.TurnState, self *card.CardState) int { return wreckHavocDamage(c.Attack(), self) }
 
 type WreckHavocBlue struct{}
 
@@ -46,12 +46,12 @@ func (WreckHavocBlue) Attack() int                 { return 4 }
 func (WreckHavocBlue) Defense() int                { return 2 }
 func (WreckHavocBlue) Types() card.TypeSet         { return wreckHavocTypes }
 func (WreckHavocBlue) GoAgain() bool               { return false }
-func (c WreckHavocBlue) Play(s *card.TurnState, _ *card.CardState) int { return wreckHavocDamage(c.Attack()) }
+func (c WreckHavocBlue) Play(s *card.TurnState, self *card.CardState) int { return wreckHavocDamage(c.Attack(), self) }
 
 // wreckHavocDamage is a breadcrumb for the on-hit "DR lockout + arsenal-face-up / banish DR"
 // rider — not modelled yet (see TODO.md). LikelyToHit marks where the rider value would plug in.
-func wreckHavocDamage(attack int) int {
-	if card.LikelyToHit(attack) {
+func wreckHavocDamage(attack int, self *card.CardState) int {
+	if card.LikelyToHit(attack, self.EffectiveDominate()) {
 		// TODO: model on-hit arsenal manipulation rider.
 	}
 	return attack

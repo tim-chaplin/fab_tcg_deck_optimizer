@@ -4,7 +4,10 @@
 // Text: "As an additional cost to play Regurgitating Slog, you may banish a card named Sloggism
 // from your graveyard. If you do, Regurgitating Slog gains **dominate**."
 //
-// Simplification: Riders described above aren't modelled; Play returns base power.
+// Modelling: the Dominate grant is gated on banishing a Sloggism out of the graveyard — an
+// additional cost the sim doesn't evaluate. Regurgitating Slog does not implement
+// card.Dominator and Play does not flip self.GrantedDominate; wiring it would over-credit
+// lines that don't actually have a Sloggism to banish.
 
 package generic
 

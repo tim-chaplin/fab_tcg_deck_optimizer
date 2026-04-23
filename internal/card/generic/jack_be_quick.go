@@ -23,12 +23,12 @@ func (JackBeQuickRed) Attack() int                 { return 3 }
 func (JackBeQuickRed) Defense() int                { return 3 }
 func (JackBeQuickRed) Types() card.TypeSet         { return jackBeQuickTypes }
 func (JackBeQuickRed) GoAgain() bool               { return false }
-func (c JackBeQuickRed) Play(s *card.TurnState, _ *card.CardState) int { return jackBeQuickDamage(c.Attack()) }
+func (c JackBeQuickRed) Play(s *card.TurnState, self *card.CardState) int { return jackBeQuickDamage(c.Attack(), self) }
 
 // jackBeQuickDamage is a breadcrumb for the on-hit "unfreeze and steal an ally" rider — not
 // modelled yet (see TODO.md). The LikelyToHit call marks where the rider value would plug in.
-func jackBeQuickDamage(attack int) int {
-	if card.LikelyToHit(attack) {
+func jackBeQuickDamage(attack int, self *card.CardState) int {
+	if card.LikelyToHit(attack, self.EffectiveDominate()) {
 		// TODO: model on-hit steal-ally rider.
 	}
 	return attack

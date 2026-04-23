@@ -208,6 +208,34 @@ func TestBest_ViseraiMauvrionGrantsGoAgainToShrill(t *testing.T) {
 	}
 }
 
+// TestBest_ViseraiMauvrionPredictsDrowningDireDominate pins the full resolution stack each
+// card's grants need to settle in the right order:
+//   (1) target plays → hero ability fires (Viserai creates a Runechant → AuraCreated=true)
+//   (2) target's Dominate clause resolves (Drowning Dire sees the aura → gains Dominate)
+//   (3) Mauvrion's OnAttack trigger fires against the fully-resolved target state and
+//       credits its Runechant rider iff the attack is now likely to hit.
+// Requires hero.OnCardPlayed running before card.Play (so DD's aura check sees Viserai's
+// Runechant), DD's conditional Dominate grant, and Mauvrion's ephemeral trigger reading
+// target.EffectiveDominate() at fire time. If any of those regresses, this test drops to 6
+// (no Mauvrion rider) or less.
+//
+// Line: pitch YellowAttack (2 res), play Mauvrion Red (cost 0, grants go-again + "if hits,
+// create 3 Runechants" to the next Runeblade attack action), play Drowning Dire Red (cost 2,
+// attack 5). Viserai creates a Runechant → Drowning Dire has Dominate → 5+ dominating
+// attack lands → Mauvrion's rider fires for 3 Runechants. Value = 3 + 5 + 1 = 9.
+func TestBest_ViseraiMauvrionPredictsDrowningDireDominate(t *testing.T) {
+	h := []card.Card{
+		runeblade.MauvrionSkiesRed{},
+		runeblade.DrowningDireRed{},
+		fake.YellowAttack{},
+	}
+	got := Best(hero.Viserai{}, nil, h, 0, nil, 0, nil)
+	if got.Value != 9 {
+		t.Fatalf("want value 9, got %d (roles=[%s])",
+			got.Value, FormatBestLine(got.BestLine))
+	}
+}
+
 func TestIsLegalOrder_MauvrionCantSaveShrillWhenRuneragerIsAhead(t *testing.T) {
 	// Mauvrion's grant lands on the first matching Runeblade attack action card in CardsRemaining.
 	// In the ordering Mauvrion → Runerager → Shrill → weapon, Runerager is that first match, so

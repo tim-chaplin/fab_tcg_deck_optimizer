@@ -13,10 +13,11 @@ disappear.
 
 ### LikelyToHit breadcrumbs — on-hit riders awaiting modelling
 
-Each of the generic attacks below has a `func <card>Damage(attack int) int` helper with an
-`if card.LikelyToHit(attack) { /* TODO */ }` block. The body is a placeholder so grep for
-`LikelyToHit` turns these up when we come back to wire the riders. Plug the rider's
-damage-equivalent into the body and remove the TODO.
+Each of the generic attacks below has a
+`func <card>Damage(attack int, self *card.CardState) int` helper with an
+`if card.LikelyToHit(attack, self.EffectiveDominate()) { /* TODO */ }` block. The body is a
+placeholder so grep for `LikelyToHit` turns these up when we come back to wire the riders.
+Plug the rider's damage-equivalent into the body and remove the TODO.
 
 - **Jack Be Quick** — on-hit steal ally (hero-specific).
 - **Jack Be Nimble** — on-hit steal item (hero-specific).
@@ -43,8 +44,11 @@ called out in the sections below — landing any of them unlocks a subset of the
 
 ### On-hit / combat interactions
 
-- **Dominate isn't modelled.** Drowning Dire, Overload, Pound for Pound, and Demolition Crew
-  carry the keyword but the solver doesn't route around block partitioning.
+- **Regurgitating Slog's Dominate grant isn't wired.** The "banish Sloggism" additional cost
+  the grant gates on isn't modelled, so flipping `self.GrantedDominate` unconditionally would
+  over-credit lines that don't actually have a Sloggism to banish. (Drowning Dire's
+  aura-gated grant and Pound for Pound's health-gated grant are both wired; Overload and
+  Demolition Crew's inherent Dominate runs through the `card.Dominator` marker.)
 - **On-hit go-again isn't granted.** Overload's on-hit clause never fires.
 - **Lay Low's marked-defender cost is ignored.** Card is treated as always legal and the attacker
   debuff is dropped.
@@ -340,4 +344,3 @@ listed here so the direction tag is co-located with the name.
   opponent be marked and the rider is tied to the mark.
 - **Put in Context** — base-power cap on what it can block is ignored; every attack is assumed
   to qualify so the defence is always live.
-- **Runeblade Drowning Dire (all colours)** — Dominate keyword dropped.

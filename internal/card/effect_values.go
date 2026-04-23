@@ -21,6 +21,13 @@ const GoldTokenValue = 0
 // A typical FaB card is worth ~3 points, so blocking 1/4/7 with a pitch or block card
 // over-pays; the opponent would rather eat the damage. Multiples of 3 are the easy-to-block
 // amounts. Used by riders like "if this hits, …" to decide whether the clause fires.
-func LikelyToHit(n int) bool {
+//
+// dominate flips the math for cards printed (or granted) with the Dominate keyword: the
+// defender is capped at one blocking card, so any attack of 5+ power slips at least 2 damage
+// past that single block. The "if this hits" clause fires — we credit the rider.
+func LikelyToHit(n int, dominate bool) bool {
+	if dominate && n >= 5 {
+		return true
+	}
 	return n == 1 || n == 4 || n == 7
 }

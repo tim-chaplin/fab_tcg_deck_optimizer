@@ -23,7 +23,7 @@ func (DownButNotOutRed) Attack() int                 { return 5 }
 func (DownButNotOutRed) Defense() int                { return 3 }
 func (DownButNotOutRed) Types() card.TypeSet         { return downButNotOutTypes }
 func (DownButNotOutRed) GoAgain() bool               { return false }
-func (c DownButNotOutRed) Play(s *card.TurnState, _ *card.CardState) int { return downButNotOutDamage(c.Attack()) }
+func (c DownButNotOutRed) Play(s *card.TurnState, self *card.CardState) int { return downButNotOutDamage(c.Attack(), self) }
 
 type DownButNotOutYellow struct{}
 
@@ -35,7 +35,7 @@ func (DownButNotOutYellow) Attack() int                 { return 4 }
 func (DownButNotOutYellow) Defense() int                { return 3 }
 func (DownButNotOutYellow) Types() card.TypeSet         { return downButNotOutTypes }
 func (DownButNotOutYellow) GoAgain() bool               { return false }
-func (c DownButNotOutYellow) Play(s *card.TurnState, _ *card.CardState) int { return downButNotOutDamage(c.Attack()) }
+func (c DownButNotOutYellow) Play(s *card.TurnState, self *card.CardState) int { return downButNotOutDamage(c.Attack(), self) }
 
 type DownButNotOutBlue struct{}
 
@@ -47,13 +47,13 @@ func (DownButNotOutBlue) Attack() int                 { return 3 }
 func (DownButNotOutBlue) Defense() int                { return 3 }
 func (DownButNotOutBlue) Types() card.TypeSet         { return downButNotOutTypes }
 func (DownButNotOutBlue) GoAgain() bool               { return false }
-func (c DownButNotOutBlue) Play(s *card.TurnState, _ *card.CardState) int { return downButNotOutDamage(c.Attack()) }
+func (c DownButNotOutBlue) Play(s *card.TurnState, self *card.CardState) int { return downButNotOutDamage(c.Attack(), self) }
 
 // downButNotOutDamage is a breadcrumb for the conditional "when this hits, create Agility +
 // Might + Vigor tokens" rider — gated on a health/equipment/token comparison we don't track
 // (see TODO.md).
-func downButNotOutDamage(attack int) int {
-	if card.LikelyToHit(attack) {
+func downButNotOutDamage(attack int, self *card.CardState) int {
+	if card.LikelyToHit(attack, self.EffectiveDominate()) {
 		// TODO: model on-hit status-token creation rider (requires life-total + token tracking).
 	}
 	return attack

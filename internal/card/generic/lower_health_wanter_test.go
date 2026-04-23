@@ -86,3 +86,36 @@ func TestLowerHealthWanter_NilHeroIsOff(t *testing.T) {
 		t.Errorf("ScarForAScarRed nil-hero GoAgain() = true, want false")
 	}
 }
+
+// TestLowerHealthWanter_PoundForPoundDominateGrant: Pound for Pound's conditional Dominate
+// fires via self.GrantedDominate iff the current hero opts into LowerHealthWanter. Damage
+// itself is unchanged — the grant feeds EffectiveDominate for downstream scanners / future
+// on-hit riders.
+func TestLowerHealthWanter_PoundForPoundDominateGrant(t *testing.T) {
+	cards := []card.Card{PoundForPoundRed{}, PoundForPoundYellow{}, PoundForPoundBlue{}}
+
+	simstate.CurrentHero = stubLowHeroOff{}
+	for _, c := range cards {
+		self := &card.CardState{Card: c}
+		c.Play(&card.TurnState{}, self)
+		if self.GrantedDominate {
+			t.Errorf("%s: GrantedDominate = true with hero off, want false", c.Name())
+		}
+		if self.EffectiveDominate() {
+			t.Errorf("%s: EffectiveDominate = true with hero off, want false", c.Name())
+		}
+	}
+
+	simstate.CurrentHero = stubLowHeroOn{}
+	for _, c := range cards {
+		self := &card.CardState{Card: c}
+		c.Play(&card.TurnState{}, self)
+		if !self.GrantedDominate {
+			t.Errorf("%s: GrantedDominate = false with hero on, want true", c.Name())
+		}
+		if !self.EffectiveDominate() {
+			t.Errorf("%s: EffectiveDominate = false with hero on, want true", c.Name())
+		}
+	}
+	simstate.CurrentHero = nil
+}
