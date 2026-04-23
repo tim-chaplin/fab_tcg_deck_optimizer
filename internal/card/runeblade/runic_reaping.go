@@ -54,11 +54,11 @@ func (RunicReapingBlue) GoAgain() bool              { return true }
 func (RunicReapingBlue) Play(s *card.TurnState, _ *card.CardState) int { return runicReapingPlay(s, 1) }
 
 func runicReapingPlay(s *card.TurnState, n int) int {
-	var target card.Card
+	var target *card.CardState
 	for _, pc := range s.CardsRemaining {
 		t := pc.Card.Types()
 		if t.Has(card.TypeRuneblade) && t.IsAttackAction() {
-			target = pc.Card
+			target = pc
 			break
 		}
 	}
@@ -72,7 +72,7 @@ func runicReapingPlay(s *card.TurnState, n int) int {
 			break
 		}
 	}
-	if card.LikelyToHit(target.Attack()) {
+	if card.LikelyToHit(target.Card.Attack(), target.EffectiveDominate()) {
 		return s.CreateRunechants(n) + bonus
 	}
 	return bonus

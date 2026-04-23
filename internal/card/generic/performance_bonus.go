@@ -17,7 +17,7 @@ var performanceBonusTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, c
 // performanceBonusDamage returns the base attack plus the Gold-token rider when the attack is
 // likely to land.
 func performanceBonusDamage(attack int) int {
-	if card.LikelyToHit(attack) {
+	if card.LikelyToHit(attack, false) {
 		return attack + card.GoldTokenValue
 	}
 	return attack

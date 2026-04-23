@@ -21,7 +21,7 @@ func meatAndGreetPlay(c card.Card, s *card.TurnState, self *card.CardState) int 
 	if s.ArcaneDamageDealt {
 		self.GrantedGoAgain = true
 	}
-	if card.LikelyToHit(c.Attack()) {
+	if card.LikelyToHit(c.Attack(), false) {
 		return c.Attack() + s.CreateRunechant()
 	}
 	return c.Attack()

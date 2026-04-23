@@ -13,7 +13,7 @@ var snatchTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeAt
 
 // snatchPlay fires the on-hit draw when the attack is likely to land and returns its damage.
 func snatchPlay(attack int, s *card.TurnState) int {
-	if card.LikelyToHit(attack) {
+	if card.LikelyToHit(attack, false) {
 		s.DrawOne()
 	}
 	return attack

@@ -27,7 +27,7 @@ func (c HandBehindThePenRed) Play(s *card.TurnState, _ *card.CardState) int { re
 // handBehindThePenDamage is a breadcrumb for the on-hit "arsenal face-up + banish non-attack
 // action" rider — not modelled yet (see TODO.md).
 func handBehindThePenDamage(attack int) int {
-	if card.LikelyToHit(attack) {
+	if card.LikelyToHit(attack, false) {
 		// TODO: model on-hit arsenal manipulation rider.
 	}
 	return attack

@@ -53,7 +53,7 @@ func (c DownButNotOutBlue) Play(s *card.TurnState, _ *card.CardState) int { retu
 // Might + Vigor tokens" rider — gated on a health/equipment/token comparison we don't track
 // (see TODO.md).
 func downButNotOutDamage(attack int) int {
-	if card.LikelyToHit(attack) {
+	if card.LikelyToHit(attack, false) {
 		// TODO: model on-hit status-token creation rider (requires life-total + token tracking).
 	}
 	return attack

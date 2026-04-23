@@ -30,7 +30,7 @@ func (c NebulaBlade) Play(s *card.TurnState, _ *card.CardState) int {
 	if s.NonAttackActionPlayed {
 		dmg += 3
 	}
-	if card.LikelyToHit(dmg) {
+	if card.LikelyToHit(dmg, false) {
 		dmg += s.CreateRunechant()
 	}
 	return dmg

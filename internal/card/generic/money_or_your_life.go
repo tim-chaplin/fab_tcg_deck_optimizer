@@ -51,7 +51,7 @@ func (c MoneyOrYourLifeBlue) Play(s *card.TurnState, _ *card.CardState) int { re
 // moneyOrYourLifeDamage is a breadcrumb for the on-hit "deal 2 damage unless they give Gold"
 // rider — Gold tokens aren't tracked, Thief-repeat isn't modelled (see TODO.md).
 func moneyOrYourLifeDamage(attack int) int {
-	if card.LikelyToHit(attack) {
+	if card.LikelyToHit(attack, false) {
 		// TODO: model on-hit Gold-trade rider.
 	}
 	return attack

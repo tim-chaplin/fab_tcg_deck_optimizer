@@ -51,7 +51,7 @@ func (c HumbleBlue) Play(s *card.TurnState, _ *card.CardState) int { return humb
 // humbleDamage is a breadcrumb for the on-hit "lose all hero card abilities" rider — not
 // modelled yet (see TODO.md).
 func humbleDamage(attack int) int {
-	if card.LikelyToHit(attack) {
+	if card.LikelyToHit(attack, false) {
 		// TODO: model on-hit hero-ability suppression rider.
 	}
 	return attack

@@ -52,7 +52,7 @@ func (c CrashDownTheGatesBlue) Play(s *card.TurnState, _ *card.CardState) int { 
 // crashDownTheGatesDamage is a breadcrumb for the on-hit "destroy top of their deck" rider —
 // not modelled yet (see TODO.md).
 func crashDownTheGatesDamage(attack int) int {
-	if card.LikelyToHit(attack) {
+	if card.LikelyToHit(attack, false) {
 		// TODO: model on-hit deck-top destruction rider.
 	}
 	return attack

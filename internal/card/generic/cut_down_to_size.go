@@ -50,7 +50,7 @@ func (c CutDownToSizeBlue) Play(s *card.TurnState, _ *card.CardState) int { retu
 // cutDownToSizeDamage is a breadcrumb for the on-hit "discard a card if opponent has 4+ cards
 // in hand" rider — opponent hand size isn't tracked (see TODO.md).
 func cutDownToSizeDamage(attack int) int {
-	if card.LikelyToHit(attack) {
+	if card.LikelyToHit(attack, false) {
 		// TODO: model on-hit conditional discard rider.
 	}
 	return attack

@@ -18,7 +18,7 @@ var consumingVolitionTypes = card.NewTypeSet(card.TypeRuneblade, card.TypeAction
 // consumingVolitionDamage returns the base attack plus the discard rider when ArcaneDamageDealt
 // is set AND this card's printed attack is likely to land on its own.
 func consumingVolitionDamage(attack int, s *card.TurnState) int {
-	if s != nil && s.ArcaneDamageDealt && card.LikelyToHit(attack) {
+	if s != nil && s.ArcaneDamageDealt && card.LikelyToHit(attack, false) {
 		return attack + card.DiscardValue
 	}
 	return attack

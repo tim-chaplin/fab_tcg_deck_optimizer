@@ -26,7 +26,7 @@ func (c SmashUpRed) Play(s *card.TurnState, _ *card.CardState) int { return smas
 // smashUpDamage is a breadcrumb for the on-hit "arsenal face-up + banish attack action" rider —
 // not modelled yet (see TODO.md).
 func smashUpDamage(attack int) int {
-	if card.LikelyToHit(attack) {
+	if card.LikelyToHit(attack, false) {
 		// TODO: model on-hit arsenal manipulation rider.
 	}
 	return attack
