@@ -20,12 +20,13 @@ func runEvalCmd(args []string) {
 		fs.PrintDefaults()
 	}
 	deepShuffles := fs.Int("deep-shuffles", 10000, "shuffles per deck used to re-score the deck")
-	incoming := fs.Int("incoming", 0, "opponent damage per turn")
+	incoming := fs.Int("incoming", 0, "opponent damage per turn (required — must match the value the deck was annealed at for comparable numbers)")
 	seed := fs.Int64("seed", time.Now().UnixNano(), "RNG seed")
 	_ = parseFlagsAnywhere(fs, args)
 	if fs.NArg() != 1 {
 		die("eval: need exactly one positional <deck> (got %d); try `fabsim eval <deck>`", fs.NArg())
 	}
+	requireFlag(fs, "eval", "incoming")
 	runEval(resolveDeckPath(fs.Arg(0)), *deepShuffles, *incoming, *seed)
 }
 
@@ -33,6 +34,10 @@ func runEvalCmd(args []string) {
 // fresh stats. The file on disk is NOT overwritten: eval is a read-only measurement so a
 // deck can be re-scored at a new shuffle depth or different -incoming without clobbering
 // the saved stats.
+//
+// Prints only the score summary — not the card list — so the freshly-computed mean stays
+// visible on a small terminal. The deck's contents haven't changed, so repeating them here
+// just scrolls the score off the top; `fabsim print <deck>` is the command for the full dump.
 func runEval(outPath string, deepShuffles, incoming int, seed int64) {
 	loaded := mustLoadDeck(outPath)
 	// Wrap the loaded hero/weapons/cards in a fresh Deck so Evaluate's stats start from zero
@@ -40,5 +45,5 @@ func runEval(outPath string, deepShuffles, incoming int, seed int64) {
 	d := deck.New(loaded.Hero, loaded.Weapons, loaded.Cards)
 	rng := rand.New(rand.NewSource(seed))
 	d.Evaluate(deepShuffles, incoming, rng)
-	printBestDeck(d)
+	printDeckSummary(d)
 }

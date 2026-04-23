@@ -61,7 +61,7 @@ func runAnnealCmd(args []string) {
 	deckName := fs.String("deck", "", "deck name; resolved to mydecks/<name>.json (\".json\" suffix optional). Defaults to <hero>_<format>_<incoming>_incoming so different (hero, format, -incoming) regimes keep separate deck files. When the named deck exists, anneal resumes from it as a checkpoint.")
 	shallowShuffles := fs.Int("shallow-shuffles", 100, "shuffles per deck used to screen mutations before deep confirmation")
 	deepShuffles := fs.Int("deep-shuffles", 10000, "shuffles per deck used to confirm improvements and to baseline loaded decks")
-	incoming := fs.Int("incoming", 0, "opponent damage per turn")
+	incoming := fs.Int("incoming", 0, "opponent damage per turn (required — different values produce different optimal decks, so this is explicit rather than defaulted)")
 	deckSize := fs.Int("deck-size", 40, "number of cards per deck")
 	maxCopies := fs.Int("max-copies", 2, "maximum copies of any single card printing per deck")
 	seed := fs.Int64("seed", time.Now().UnixNano(), "RNG seed")
@@ -77,6 +77,7 @@ func runAnnealCmd(args []string) {
 	if fs.NArg() > 0 {
 		die("anneal: unexpected positional argument(s): %v (did you mean -deck %s?)", fs.Args(), fs.Args()[0])
 	}
+	requireFlag(fs, "anneal", "incoming")
 
 	fmtValue, err := fmtpkg.Parse(*formatFlag)
 	if err != nil {
@@ -340,14 +341,21 @@ func prepareBaseline(cfg annealConfig, rng *rand.Rand) (*deck.Deck, float64) {
 		if cfg.reevaluate && best.Stats.Runs >= cfg.deepShuffles {
 			reason = "-reevaluate forced"
 		}
-		fmt.Printf("Loaded best deck (avg %.3f %s); re-evaluating at %d shuffles for an apples-to-apples baseline\n",
+		// Label the loaded number "saved avg" so it can't be mistaken for the re-evaluated
+		// score. Decks scored under older simulation logic can have saved avgs that diverge
+		// substantially from what today's simulator produces.
+		fmt.Printf("Loaded best deck (saved avg %.3f, %s); re-evaluating at %d shuffles for an apples-to-apples baseline\n",
 			bestAvg, reason, cfg.deepShuffles)
+		savedAvg := bestAvg
 		best = deck.New(best.Hero, best.Weapons, best.Cards)
 		bestAvg = best.Evaluate(cfg.deepShuffles, cfg.incoming, rng).Mean()
 		if err := writeDeck(best, cfg.outPath); err != nil {
 			die("%v", err)
 		}
-		fmt.Printf("Re-evaluated baseline avg %.3f, saved to %s\n", bestAvg, cfg.outPath)
+		// Show saved→current so the delta from any simulation-logic drift is visible at a
+		// glance, instead of the user guessing which of the two printed numbers is the fresh
+		// one.
+		fmt.Printf("Re-evaluated baseline: %.3f → %.3f, saved to %s\n", savedAvg, bestAvg, cfg.outPath)
 		maybePrintBaselineCards(cfg, best)
 		return best, bestAvg
 	}

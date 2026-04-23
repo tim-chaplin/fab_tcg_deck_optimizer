@@ -613,11 +613,12 @@ func applyTurnResult(play hand.TurnSummary, buf []card.Card, head, tail *int, dr
 // by fresh top-of-deck draws, totaling handSize cards. Compacts buf[head:tail] down to buf[0:]
 // when the tail doesn't have room for a full hand of pitched cards on the upcoming recycle.
 // Returns the dealt hand (aliasing handBuf — successive calls overwrite it), the number of
-// fresh draws consumed, and ok=false when the run can't progress (deck exhausted, or the whole
-// hand is already held with no room to draw).
+// fresh draws consumed, and ok=false when the run can't progress: deck exhausted, the whole
+// hand is already held with no room to draw, or last turn's start-of-turn reveal padded the
+// hand past handSize and enough of those extras got Held to overflow handSize this turn.
 func dealNextHand(buf, handBuf, heldBuf []card.Card, head, tail *int, handSize int) ([]card.Card, int, bool) {
 	drawCount := handSize - len(heldBuf)
-	if drawCount == 0 || *tail-*head < drawCount {
+	if drawCount <= 0 || *tail-*head < drawCount {
 		return nil, 0, false
 	}
 	if *tail+handSize > len(buf) {
