@@ -363,7 +363,11 @@ func prepareBaseline(cfg annealConfig, rng *rand.Rand) (*deck.Deck, float64) {
 		fmt.Printf("Loaded best deck (saved avg %.3f, %s); re-evaluating at %d shuffles for an apples-to-apples baseline\n",
 			bestAvg, reason, cfg.deepShuffles)
 		savedAvg := bestAvg
+		// Sideboard is user-managed and doesn't feed the sim — preserve it across the
+		// stats reset so the re-evaluated deck writes back unchanged.
+		sideboard := best.Sideboard
 		best = deck.New(best.Hero, best.Weapons, best.Cards)
+		best.Sideboard = sideboard
 		bestAvg = best.Evaluate(cfg.deepShuffles, cfg.incoming, rng).Mean()
 		if err := writeDeck(best, cfg.outPath); err != nil {
 			die("%v", err)

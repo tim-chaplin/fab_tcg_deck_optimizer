@@ -144,6 +144,36 @@ func TestAllMutations_OrdersByAscendingAvg(t *testing.T) {
 	}
 }
 
+// TestAllMutations_PreservesSideboard pins that every derived Mutation inherits the source
+// deck's Sideboard verbatim. Without this guarantee an anneal round would silently drop the
+// user's hand-managed sideboard as soon as it accepted a mutation and wrote the deck back.
+func TestAllMutations_PreservesSideboard(t *testing.T) {
+	a := cards.Get(card.AetherSlashRed)
+	b := cards.Get(card.ArcanicSpikeRed)
+	d := New(hero.Viserai{}, []weapon.Weapon{weapon.NebulaBlade{}}, []card.Card{a, a, b, b})
+	d.Sideboard = []card.Card{a, b, b}
+
+	muts := AllMutations(d, 2, nil)
+	if len(muts) == 0 {
+		t.Fatal("expected at least one mutation")
+	}
+
+	wantCounts := map[card.ID]int{a.ID(): 1, b.ID(): 2}
+	for i, m := range muts {
+		got := map[card.ID]int{}
+		for _, c := range m.Deck.Sideboard {
+			got[c.ID()]++
+		}
+		for id, want := range wantCounts {
+			if got[id] != want {
+				t.Errorf("mutation %d (%s): sideboard count for %s = %d, want %d",
+					i, m.Description, cards.Get(id).Name(), got[id], want)
+				break
+			}
+		}
+	}
+}
+
 func TestAllMutations_Deterministic(t *testing.T) {
 	a := cards.Get(card.AetherSlashRed)
 	b := cards.Get(card.ArcanicSpikeRed)
