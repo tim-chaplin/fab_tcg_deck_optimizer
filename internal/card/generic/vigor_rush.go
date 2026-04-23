@@ -14,12 +14,11 @@ import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 var vigorRushTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeAttack)
 
 // vigorRushPlay grants go again when any non-attack Action has been played earlier this turn.
+// The solver maintains s.NonAttackActionPlayed as it walks the chain, so this is an O(1) flag
+// read rather than a scan of CardsPlayed.
 func vigorRushPlay(base int, s *card.TurnState, self *card.CardState) int {
-	for _, pl := range s.CardsPlayed {
-		if pl.Types().IsNonAttackAction() {
-			self.GrantedGoAgain = true
-			break
-		}
+	if s.NonAttackActionPlayed {
+		self.GrantedGoAgain = true
 	}
 	return base
 }
