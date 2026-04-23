@@ -230,31 +230,8 @@ func appendAttackChainLines(lines []string, t TurnSummary, stepPtr *int) []strin
 // pool until drCost is covered, the rest fund attack. The solver already validated some legal
 // split exists; this picks one deterministically.
 func FormatBestTurn(t TurnSummary) string {
-	// Partition BestLine into role buckets; pitch cards pool and are split by phase below.
-	var pitched, plainBlocks, defenseReactions, held, arsenal []CardAssignment
-	var attackCost, drCost int
-	zeroState := &card.TurnState{}
-	for _, a := range t.BestLine {
-		switch a.Role {
-		case Pitch:
-			pitched = append(pitched, a)
-		case Attack:
-			attackCost += a.Card.Cost(zeroState)
-		case Defend:
-			if a.Card.Types().IsDefenseReaction() {
-				drCost += a.Card.Cost(zeroState)
-				defenseReactions = append(defenseReactions, a)
-			} else {
-				plainBlocks = append(plainBlocks, a)
-			}
-		case Held:
-			held = append(held, a)
-		case Arsenal:
-			arsenal = append(arsenal, a)
-		}
-	}
-
-	defensePitches, attackPitches := splitPitchesByPhase(pitched, drCost)
+	parts := partitionBestLineForDisplay(t.BestLine)
+	defensePitches, attackPitches := splitPitchesByPhase(parts.pitched, parts.drCost)
 
 	var lines []string
 	step := 0
@@ -273,10 +250,10 @@ func FormatBestTurn(t TurnSummary) string {
 	for _, a := range defensePitches {
 		appendPitch(a, "PITCH (opponent's turn)")
 	}
-	for _, a := range plainBlocks {
+	for _, a := range parts.plainBlocks {
 		appendDefense(a, "BLOCK")
 	}
-	for _, a := range defenseReactions {
+	for _, a := range parts.defenseReactions {
 		appendDefense(a, "DEFENSE REACTION")
 	}
 	for _, d := range t.TriggersFromLastTurn {
@@ -288,15 +265,65 @@ func FormatBestTurn(t TurnSummary) string {
 		appendPitch(a, "PITCH (my turn)")
 	}
 	lines = appendAttackChainLines(lines, t, &step)
+	lines = appendHeldArsenalFooter(lines, parts.held, parts.arsenal, t.Drawn)
+	return strings.Join(lines, "\n")
+}
 
-	// Held / Arsenal footer: unplayed cards, outside the numbered sequence, shown so the reader
-	// sees the whole turn disposition. Mid-turn-drawn Held / Arsenal cards land here too, tagged
-	// "(drawn)" so it's obvious they came from a DrawOne rather than the starting hand.
+// bestLineDisplayParts groups BestLine entries by the display section each belongs to. Pitches
+// pool before being split into defense / attack phases; blocks split again by whether the card
+// is a Defense Reaction (which has its own "DEFENSE REACTION" tag). drCost sums Defense-Reaction
+// costs so splitPitchesByPhase can decide how much of the pitch pool funds the opponent's turn.
+type bestLineDisplayParts struct {
+	pitched          []CardAssignment
+	plainBlocks      []CardAssignment
+	defenseReactions []CardAssignment
+	held             []CardAssignment
+	arsenal          []CardAssignment
+	drCost           int
+}
+
+// partitionBestLineForDisplay sorts the winning line into the buckets FormatBestTurn renders
+// section-by-section. Defenders split on DR membership so DR-only lines get the right label
+// and their cost contributes to the defense-phase pitch target.
+func partitionBestLineForDisplay(line []CardAssignment) bestLineDisplayParts {
+	var parts bestLineDisplayParts
+	zeroState := &card.TurnState{}
+	for _, a := range line {
+		switch a.Role {
+		case Pitch:
+			parts.pitched = append(parts.pitched, a)
+		case Attack:
+			// Attack-phase cost sum is computed here to match the turn's modeling, but is not
+			// surfaced in the rendered output — the attack chain's per-card lines already show
+			// damage credit rather than cost.
+			_ = a.Card.Cost(zeroState)
+		case Defend:
+			if a.Card.Types().IsDefenseReaction() {
+				parts.drCost += a.Card.Cost(zeroState)
+				parts.defenseReactions = append(parts.defenseReactions, a)
+			} else {
+				parts.plainBlocks = append(parts.plainBlocks, a)
+			}
+		case Held:
+			parts.held = append(parts.held, a)
+		case Arsenal:
+			parts.arsenal = append(parts.arsenal, a)
+		}
+	}
+	return parts
+}
+
+// appendHeldArsenalFooter appends the trailing "(held: ...)" / "(arsenal: ...)" lines that show
+// unplayed cards outside the numbered sequence. Mid-turn-drawn Held / Arsenal cards render with
+// a "(drawn)" suffix so the reader can tell them from starting-hand entries; the arsenal card
+// itself shows "(stayed)" vs "(new)" so staying-in-place is distinguishable from being newly
+// placed this turn.
+func appendHeldArsenalFooter(lines []string, held, arsenal, drawn []CardAssignment) []string {
 	var footers []string
 	for _, a := range held {
 		footers = append(footers, fmt.Sprintf("  (held: %s)", a.Card.Name()))
 	}
-	for _, d := range t.Drawn {
+	for _, d := range drawn {
 		if d.Role == Held {
 			footers = append(footers, fmt.Sprintf("  (held: %s (drawn))", d.Card.Name()))
 		}
@@ -310,13 +337,12 @@ func FormatBestTurn(t TurnSummary) string {
 		}
 		footers = append(footers, fmt.Sprintf("  (arsenal: %s)", label))
 	}
-	for _, d := range t.Drawn {
+	for _, d := range drawn {
 		if d.Role == Arsenal {
 			footers = append(footers, fmt.Sprintf("  (arsenal: %s (drawn))", d.Card.Name()))
 		}
 	}
-	lines = append(lines, footers...)
-	return strings.Join(lines, "\n")
+	return append(lines, footers...)
 }
 
 // Best returns the optimal TurnSummary for the given hand against an opponent that will attack
