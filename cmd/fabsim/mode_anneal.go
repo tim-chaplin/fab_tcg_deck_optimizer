@@ -63,7 +63,7 @@ func runAnnealCmd(args []string) {
 	deepShuffles := fs.Int("deep-shuffles", 10000, "shuffles per deck used to confirm improvements and to baseline loaded decks")
 	incoming := fs.Int("incoming", 0, "opponent damage per turn (required — different values produce different optimal decks, so this is explicit rather than defaulted)")
 	deckSize := fs.Int("deck-size", 40, "number of cards per deck")
-	maxCopies := fs.Int("max-copies", 2, "maximum copies of any single card printing per deck")
+	maxCopies := fs.Int("max-copies", defaultMaxCopies, "maximum copies of any single card printing per deck")
 	seed := fs.Int64("seed", time.Now().UnixNano(), "RNG seed")
 	formatFlag := fs.String("format", string(fmtpkg.SilverAge), "constructed format whose banlist restricts the card pool during search (only \"silver_age\" is supported today)")
 	debug := fs.Bool("debug", false, "emit extra diagnostic output (e.g. memo cache size between rounds)")

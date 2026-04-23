@@ -7,7 +7,6 @@ import (
 	"os"
 	"time"
 
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/deck"
 	fmtpkg "github.com/tim-chaplin/fab-deck-optimizer/internal/format"
 )
@@ -26,6 +25,7 @@ func runEvalCmd(args []string) {
 	incoming := fs.Int("incoming", 0, "opponent damage per turn (required — must match the value the deck was annealed at for comparable numbers)")
 	seed := fs.Int64("seed", time.Now().UnixNano(), "RNG seed")
 	formatFlag := fs.String("format", string(fmtpkg.SilverAge), "constructed format predicate applied to replacement picks when the loaded deck contains NotImplemented cards")
+	maxCopies := fs.Int("max-copies", defaultMaxCopies, "maximum copies of any single card printing per deck, applied when replacing NotImplemented cards in the loaded deck")
 	_ = parseFlagsAnywhere(fs, args)
 	if fs.NArg() != 1 {
 		die("eval: need exactly one positional <deck> (got %d); try `fabsim eval <deck>`", fs.NArg())
@@ -35,7 +35,7 @@ func runEvalCmd(args []string) {
 	if err != nil {
 		die("%v", err)
 	}
-	runEval(resolveDeckPath(fs.Arg(0)), *deepShuffles, *incoming, *seed, fmtValue)
+	runEval(resolveDeckPath(fs.Arg(0)), *deepShuffles, *incoming, *maxCopies, *seed, fmtValue)
 }
 
 // runEval loads the deck at outPath, simulates it for deepShuffles hands, and prints the
@@ -49,14 +49,13 @@ func runEvalCmd(args []string) {
 // Prints only the score summary — not the card list — so the freshly-computed mean stays
 // visible on a small terminal. The deck's contents haven't changed, so repeating them here
 // just scrolls the score off the top; `fabsim print <deck>` is the command for the full dump.
-func runEval(outPath string, deepShuffles, incoming int, seed int64, fmtValue fmtpkg.Format) {
+func runEval(outPath string, deepShuffles, incoming, maxCopies int, seed int64, fmtValue fmtpkg.Format) {
 	loaded := mustLoadDeck(outPath)
 	// Wrap the loaded hero/weapons/cards in a fresh Deck so Evaluate's stats start from zero
 	// instead of accumulating on top of the persisted Stats.
 	d := deck.New(loaded.Hero, loaded.Weapons, loaded.Cards)
 	rng := rand.New(rand.NewSource(seed))
 	savedAvg := loaded.Stats.Mean()
-	maxCopies := inferMaxCopies(d.Cards)
 	replaced := sanitizeLoadedDeck(d, maxCopies, rng, fmtValue.IsLegal)
 	d.Evaluate(deepShuffles, incoming, rng)
 	if len(replaced) > 0 {
@@ -67,20 +66,4 @@ func runEval(outPath string, deepShuffles, incoming int, seed int64, fmtValue fm
 		}
 	}
 	printDeckSummary(d)
-}
-
-// inferMaxCopies returns the highest per-printing count present in cs. Used by eval to
-// derive a copies-cap for in-place sanitization when the caller didn't supply one: a deck
-// already at N copies of some card stays legal under a cap of N, so picking max(count)
-// keeps the existing distribution valid post-sanitize.
-func inferMaxCopies(cs []card.Card) int {
-	counts := map[card.ID]int{}
-	maxCount := 1
-	for _, c := range cs {
-		counts[c.ID()]++
-		if counts[c.ID()] > maxCount {
-			maxCount = counts[c.ID()]
-		}
-	}
-	return maxCount
 }
