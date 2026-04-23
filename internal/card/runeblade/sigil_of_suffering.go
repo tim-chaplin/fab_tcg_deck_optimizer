@@ -17,8 +17,7 @@ var sigilOfSufferingTypes = card.NewTypeSet(card.TypeRuneblade, card.TypeDefense
 // sigilOfSufferingPlay deals 1 arcane damage to the attacking hero and marks ArcaneDamageDealt
 // so same-turn triggers reading "if you've dealt arcane damage this turn" see it.
 func sigilOfSufferingPlay(s *card.TurnState) int {
-	s.ArcaneDamageDealt = true
-	return 1
+	return s.DealArcaneDamage(1)
 }
 
 type SigilOfSufferingRed struct{}

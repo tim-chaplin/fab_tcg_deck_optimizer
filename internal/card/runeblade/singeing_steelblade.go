@@ -13,8 +13,7 @@ var singeingSteelbladeTypes = card.NewTypeSet(card.TypeRuneblade, card.TypeActio
 
 // singeingSteelbladePlay adds the 1 arcane to base damage and marks ArcaneDamageDealt.
 func singeingSteelbladePlay(attack int, s *card.TurnState) int {
-	s.ArcaneDamageDealt = true
-	return attack + 1
+	return attack + s.DealArcaneDamage(1)
 }
 
 type SingeingSteelbladeRed struct{}

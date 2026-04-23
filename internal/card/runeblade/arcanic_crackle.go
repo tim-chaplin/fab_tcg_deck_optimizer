@@ -14,8 +14,7 @@ var arcanicCrackleTypes = card.NewTypeSet(card.TypeRuneblade, card.TypeAction, c
 
 // arcanicCracklePlay adds the printed +1 arcane to base damage and marks ArcaneDamageDealt.
 func arcanicCracklePlay(attack int, s *card.TurnState) int {
-	s.ArcaneDamageDealt = true
-	return attack + 1
+	return attack + s.DealArcaneDamage(1)
 }
 
 type ArcanicCrackleRed struct{}

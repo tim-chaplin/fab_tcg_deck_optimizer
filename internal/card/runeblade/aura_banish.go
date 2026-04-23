@@ -16,8 +16,7 @@ func banishAuraFromGraveyard(s *card.TurnState) int {
 		}
 		s.Banish = append(s.Banish, c)
 		s.Graveyard = append(s.Graveyard[:i], s.Graveyard[i+1:]...)
-		s.ArcaneDamageDealt = true
-		return 1
+		return s.DealArcaneDamage(1)
 	}
 	return 0
 }

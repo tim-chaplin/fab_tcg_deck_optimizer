@@ -311,6 +311,14 @@ func (s *TurnState) CreateRunechant() int {
 	return s.CreateRunechants(1)
 }
 
+// DealArcaneDamage flips ArcaneDamageDealt so same-turn triggers reading "if you've dealt
+// arcane damage this turn" fire, and returns n so callers can fold the arcane damage into
+// their Play return in one expression (e.g. `return attack + s.DealArcaneDamage(1)`).
+func (s *TurnState) DealArcaneDamage(n int) int {
+	s.ArcaneDamageDealt = true
+	return n
+}
+
 // AddToGraveyard appends c to s.Graveyard so later-resolving cards see it. Persistent-type
 // cards (Auras, Items) don't enter the graveyard on play, so effects that destroy or banish
 // themselves mid-chain route through here to make the move visible to downstream readers.
