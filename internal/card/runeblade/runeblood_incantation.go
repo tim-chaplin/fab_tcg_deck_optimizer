@@ -67,7 +67,6 @@ func (c RunebloodIncantationBlue) Play(s *card.TurnState, _ *card.CardState) int
 // the sim graveyards the aura when Count hits zero. Same-turn Play returns 0 — every rune
 // is credited at its real future-turn fire, no flat over-credit.
 func runebloodPlay(s *card.TurnState, self card.Card, n int) int {
-	s.AuraCreated = true
 	s.AddAuraTrigger(card.AuraTrigger{
 		Self:    self,
 		Type:    card.TriggerStartOfTurn,

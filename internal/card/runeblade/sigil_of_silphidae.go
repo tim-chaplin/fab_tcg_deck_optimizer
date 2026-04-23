@@ -31,7 +31,6 @@ func (SigilOfSilphidaeBlue) GoAgain() bool            { return true }
 func (SigilOfSilphidaeBlue) AddsFutureValue()         {}
 func (SigilOfSilphidaeBlue) NoMemo()                  {}
 func (c SigilOfSilphidaeBlue) Play(s *card.TurnState, _ *card.CardState) int {
-	s.AuraCreated = true
 	enterDamage := banishAuraFromGraveyard(s)
 	s.AddAuraTrigger(card.AuraTrigger{
 		Self:  c,

@@ -69,7 +69,6 @@ func (c MaleficIncantationBlue) Play(s *card.TurnState, _ *card.CardState) int {
 // turn's first attack action. The sim handles the OncePerTurn gate, the Count decrement,
 // and the Count=0 graveyard.
 func maleficPlay(s *card.TurnState, self card.Card, n int) int {
-	s.AuraCreated = true
 	s.AddAuraTrigger(card.AuraTrigger{
 		Self:        self,
 		Type:        card.TriggerAttackAction,

@@ -323,12 +323,14 @@ func (s *TurnState) AddToGraveyard(c Card) {
 	s.Graveyard = append(s.Graveyard, c)
 }
 
-// AddAuraTrigger appends t to s.AuraTriggers so the sim fires it on its matching Type
-// condition. Cards call this from Play to register the "at the beginning of your action
-// phase …" / "once per turn, when …" clauses printed on Action - Aura cards. The sim owns
-// the trigger's lifecycle from here on: ticking Count and graveyarding Self when Count
-// hits zero.
+// AddAuraTrigger is the Play-side combo every Action - Aura card reaches for: flip AuraCreated
+// so same-turn "if you've played or created an aura" riders see the entry, and append t to
+// s.AuraTriggers so the sim fires it on its matching Type condition. Pairing the two in one
+// method keeps a card from accidentally advertising the aura without the trigger or vice
+// versa. The sim owns the trigger's lifecycle from here on: ticking Count and graveyarding
+// Self when Count hits zero.
 func (s *TurnState) AddAuraTrigger(t AuraTrigger) {
+	s.AuraCreated = true
 	s.AuraTriggers = append(s.AuraTriggers, t)
 }
 

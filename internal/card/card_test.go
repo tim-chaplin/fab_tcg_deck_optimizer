@@ -58,14 +58,21 @@ func TestDrawOne_EmptyDeckIsNoOp(t *testing.T) {
 	}
 }
 
-// TestAddAuraTrigger_AppendsToList: AddAuraTrigger pushes each trigger onto s.AuraTriggers in
-// call order — the sim reads that list to decide which handlers to fire on each
-// trigger-Type condition.
-func TestAddAuraTrigger_AppendsToList(t *testing.T) {
+// TestAddAuraTrigger_FlipsAuraCreatedAndAppends: AddAuraTrigger MUST flip AuraCreated (so
+// same-turn "if you've played or created an aura" riders see the entry) AND push each
+// trigger onto s.AuraTriggers in call order. Pairing both in one method is what stops a
+// card from registering a trigger without advertising the aura (or vice versa).
+func TestAddAuraTrigger_FlipsAuraCreatedAndAppends(t *testing.T) {
 	self := stubCard{name: "self"}
 	s := &TurnState{}
+	if s.AuraCreated {
+		t.Fatal("pre: AuraCreated should be false")
+	}
 	s.AddAuraTrigger(AuraTrigger{Self: self, Type: TriggerStartOfTurn, Count: 2})
 	s.AddAuraTrigger(AuraTrigger{Self: self, Type: TriggerStartOfTurn, Count: 1})
+	if !s.AuraCreated {
+		t.Error("AuraCreated = false, want true")
+	}
 	if len(s.AuraTriggers) != 2 {
 		t.Fatalf("AuraTriggers len = %d, want 2", len(s.AuraTriggers))
 	}
