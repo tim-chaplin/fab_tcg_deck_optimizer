@@ -1758,6 +1758,11 @@ func (ctx *sequenceContext) playSequenceWithMeta(n int, perCardOut, perCardTrigg
 			state.ArcaneDamageDealt = true
 		}
 
+		// Hero ability fires BEFORE the card's own Play so "aura created this turn" checks
+		// inside the card's Play see the runechant (or other aura) the hero just made.
+		// Viserai's "another non-attack action" gate still excludes the current card because
+		// NonAttackActionPlayed isn't flipped until the end of the iteration.
+		triggerDmg := ctx.hero.OnCardPlayed(pc.Card, state)
 		ephemeralsBefore := len(state.EphemeralAttackTriggers)
 		playDmg := pc.Card.Play(state, pc)
 		// Stamp SourceIndex on any EphemeralAttackTriggers the card registered during Play
@@ -1766,7 +1771,6 @@ func (ctx *sequenceContext) playSequenceWithMeta(n int, perCardOut, perCardTrigg
 		for k := ephemeralsBefore; k < len(state.EphemeralAttackTriggers); k++ {
 			state.EphemeralAttackTriggers[k].SourceIndex = i
 		}
-		triggerDmg := ctx.hero.OnCardPlayed(pc.Card, state)
 		auraTriggerDmg := 0
 		ephemeralDmg := 0
 		if m.isAttackAction {
