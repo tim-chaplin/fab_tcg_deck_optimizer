@@ -5,8 +5,6 @@
 // Go again is CONDITIONAL — it's not a printed keyword but a text-granted effect. Play sets
 // self.GrantedGoAgain when the aura condition is met so the chain-legality check sees the
 // grant.
-//
-// Source: github.com/the-fab-cube/flesh-and-blood-cards (card.csv).
 
 package runeblade
 

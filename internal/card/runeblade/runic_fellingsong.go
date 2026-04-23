@@ -6,8 +6,6 @@
 //
 // Play credits Attack() plus 1 arcane when banishAuraFromGraveyard lands an aura in s.Banish.
 // No aura in the graveyard → the banish rider fizzles and Play returns just Attack().
-//
-// Source: github.com/the-fab-cube/flesh-and-blood-cards (card.csv).
 
 package runeblade
 

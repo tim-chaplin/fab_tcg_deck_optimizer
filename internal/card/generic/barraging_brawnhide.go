@@ -5,8 +5,6 @@
 //
 // Simplification: Defended-by-<2-non-equipment condition isn't modelled; the +1{p} rider never
 // applies.
-//
-// Source: github.com/the-fab-cube/flesh-and-blood-cards (card.csv).
 
 package generic
 

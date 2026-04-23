@@ -6,8 +6,6 @@
 // Simplification: The "less {h}" clause is modelled as a hero attribute — the 1{h} gain is credited
 // 1-to-1 with damage when this attacks and the current hero implements card.LowerHealthWanter. The
 // on-defend half isn't modelled (Play isn't called during a plain block).
-//
-// Source: github.com/the-fab-cube/flesh-and-blood-cards (card.csv).
 
 package generic
 

@@ -8,8 +8,6 @@
 // action (pops it now for the Runechants) or if we block all incoming damage (survives into a
 // future turn); pays 0 if we take damage. Only attack actions qualify for the same-turn pop —
 // weapons hitting don't trigger Bloodspill's rider.
-//
-// Source: github.com/the-fab-cube/flesh-and-blood-cards (card.csv).
 
 package runeblade
 

@@ -5,8 +5,6 @@
 // a card in their arsenal face up, then destroy a defense reaction in their arsenal."
 //
 // Simplification: Defense-reaction lockout and arsenal-banish aren't modelled.
-//
-// Source: github.com/the-fab-cube/flesh-and-blood-cards (card.csv).
 
 package generic
 

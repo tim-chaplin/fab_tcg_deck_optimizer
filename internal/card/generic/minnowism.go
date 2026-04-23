@@ -6,8 +6,6 @@
 // Simplification: Scans TurnState.CardsRemaining for the first matching attack action card and
 // credits the bonus assuming it will be played; if none is scheduled after this card, the bonus
 // fizzles.
-//
-// Source: github.com/the-fab-cube/flesh-and-blood-cards (card.csv).
 
 package generic
 

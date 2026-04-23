@@ -5,8 +5,6 @@
 // on top of your deck."
 //
 // Simplification: Graveyard → top-of-deck rider isn't modelled.
-//
-// Source: github.com/the-fab-cube/flesh-and-blood-cards (card.csv).
 
 package generic
 

@@ -5,8 +5,6 @@
 // do, this gets +2{p}."
 //
 // Simplification: Hand-cycle-for-+2{p} rider isn't modelled.
-//
-// Source: github.com/the-fab-cube/flesh-and-blood-cards (card.csv).
 
 package generic
 

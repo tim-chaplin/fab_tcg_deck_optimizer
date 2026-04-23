@@ -5,8 +5,6 @@
 //
 // Variable cost: Cost reads s.Runechants to return max(0, printed - Runechants) at play time.
 // Implements card.VariableCost so the solver can pre-screen with MinCost / MaxCost bounds.
-//
-// Source: github.com/the-fab-cube/flesh-and-blood-cards (card.csv).
 
 package runeblade
 

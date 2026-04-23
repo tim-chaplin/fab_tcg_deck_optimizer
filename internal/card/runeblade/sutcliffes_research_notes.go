@@ -8,8 +8,6 @@
 // action card revealed and set AuraCreated if at least one Runechant is made. Opts out of the
 // hand-evaluation memo because the result depends on deck composition. The re-ordering clause is
 // ignored — we don't model future-turn draw order.
-//
-// Source: github.com/the-fab-cube/flesh-and-blood-cards (card.csv).
 
 package runeblade
 

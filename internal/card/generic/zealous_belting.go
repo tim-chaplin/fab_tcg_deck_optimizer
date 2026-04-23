@@ -3,8 +3,6 @@
 //
 // Text: "While there is a card in your pitch zone with {p} greater than Zealous Belting's base {p},
 // Zealous Belting has **go again**."
-//
-// Source: github.com/the-fab-cube/flesh-and-blood-cards (card.csv).
 
 package generic
 

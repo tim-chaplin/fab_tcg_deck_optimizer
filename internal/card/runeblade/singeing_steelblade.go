@@ -4,8 +4,6 @@
 //
 // Simplification: the printed 1 arcane is added to base damage unconditionally. Play sets
 // ArcaneDamageDealt so later-this-turn triggers see the flag.
-//
-// Source: github.com/the-fab-cube/flesh-and-blood-cards (card.csv).
 
 package runeblade
 

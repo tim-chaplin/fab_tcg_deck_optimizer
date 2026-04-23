@@ -4,13 +4,10 @@
 // Text: "At the beginning of your action phase, destroy this. When this leaves the arena,
 // reveal the top card of your deck. If it's an attack action card, put it into your hand."
 //
-// Modelling: Play flips AuraCreated and registers a start-of-turn AuraTrigger with Count=1.
-// Next turn the sim fires the trigger on a TurnState whose Deck is the post-draw deck — the
-// handler peeks s.Deck[0] and, when it's an attack action, appends that card to s.Revealed
-// and shrinks s.Deck by one so the deck loop pops the top and adds it to this turn's hand.
-// Non-attack reveals leave the top untouched. Count hits zero, so the sim graveyards Self.
-//
-// Source: github.com/the-fab-cube/flesh-and-blood-cards (card.csv).
+// Handler fires next turn on the post-draw deck: if s.Deck[0] is an attack action, append it
+// to s.Revealed (the deck loop moves revealed cards into the hand) and pop it off s.Deck;
+// non-attack reveals leave the top untouched. Damage is 0 either way — the tempo is the
+// extra card, not a flat credit.
 
 package runeblade
 
@@ -39,10 +36,7 @@ func (c SigilOfTheArknightBlue) Play(s *card.TurnState, _ *card.CardState) int {
 	return 0
 }
 
-// sigilOfTheArknightReveal peeks the top of the post-draw deck. If it's an attack action,
-// append it to s.Revealed and pop it off s.Deck so the deck loop moves it into that turn's
-// hand; otherwise the top stays in place. Damage is 0 either way — the tempo is captured by
-// the extra card, not by a flat credit.
+// sigilOfTheArknightReveal implements the handler described in the file docstring.
 func sigilOfTheArknightReveal(s *card.TurnState) int {
 	if len(s.Deck) == 0 {
 		return 0

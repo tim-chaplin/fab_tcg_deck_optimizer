@@ -5,8 +5,6 @@
 // with cost 1 or less. When you attack with Flock of the Feather Walkers, create a Quicken token."
 //
 // Simplification: Additional reveal cost and Quicken token creation aren't modelled.
-//
-// Source: github.com/the-fab-cube/flesh-and-blood-cards (card.csv).
 
 package generic
 

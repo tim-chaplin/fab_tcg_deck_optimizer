@@ -6,8 +6,6 @@
 // The printed "Arcane: 1" stat is the same damage as the text rider — added once when the
 // "non-attack action was pitched" condition is met, not double-counted. With no qualifying
 // pitch, the card deals only its printed power.
-//
-// Source: github.com/the-fab-cube/flesh-and-blood-cards (card.csv).
 
 package runeblade
 

@@ -5,8 +5,6 @@
 // at the top card of your deck. You may put it on the bottom."
 //
 // Simplification: Defend-together +1{d} and deck-bottom rider aren't modelled.
-//
-// Source: github.com/the-fab-cube/flesh-and-blood-cards (card.csv).
 
 package generic
 

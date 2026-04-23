@@ -4,8 +4,6 @@
 // Text: "The next time an attack you control hits this turn, create 6 Copper tokens. **Go again**"
 //
 // Simplification: Copper-token economy isn't modelled.
-//
-// Source: github.com/the-fab-cube/flesh-and-blood-cards (card.csv).
 
 package generic
 

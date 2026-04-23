@@ -4,12 +4,7 @@
 // beginning of your action phase, remove a verse counter. If you do, create a Runechant token.
 // Otherwise, destroy Runeblood Incantation." (Red N=3, Yellow N=2, Blue N=1.)
 //
-// Modelling: Play flips AuraCreated and registers a start-of-turn AuraTrigger with Count=N.
-// Each subsequent turn the sim fires the trigger — the handler creates one live Runechant —
-// and decrements Count. After N turns Count hits zero and the sim graveyards the aura.
-// Same-turn Play credits 0; every rune comes from a real future-turn fire.
-//
-// Source: github.com/the-fab-cube/flesh-and-blood-cards (card.csv).
+// Handler creates 1 Runechant per fire; Count=N gives N total fires before the aura dies.
 
 package runeblade
 
@@ -62,10 +57,8 @@ func (c RunebloodIncantationBlue) Play(s *card.TurnState, _ *card.CardState) int
 	return runebloodPlay(s, c, 1)
 }
 
-// runebloodPlay flips AuraCreated and registers the shared start-of-turn trigger with
-// Count=n. Each future turn fires the handler (one Runechant per fire) and ticks Count down;
-// the sim graveyards the aura when Count hits zero. Same-turn Play returns 0 — every rune
-// is credited at its real future-turn fire, no flat over-credit.
+// runebloodPlay registers a start-of-turn trigger with Count=n. Same-turn Play returns 0;
+// every rune is credited at its future-turn fire.
 func runebloodPlay(s *card.TurnState, self card.Card, n int) int {
 	s.AddAuraTrigger(card.AuraTrigger{
 		Self:    self,

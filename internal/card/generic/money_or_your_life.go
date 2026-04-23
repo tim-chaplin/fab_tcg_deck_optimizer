@@ -5,8 +5,6 @@
 // control. If you are a Thief, repeat this process once."
 //
 // Simplification: Gold-token exchange rider isn't modelled.
-//
-// Source: github.com/the-fab-cube/flesh-and-blood-cards (card.csv).
 
 package generic
 

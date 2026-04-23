@@ -4,8 +4,6 @@
 // Text: "When this defends, you may pay {r}. If you do, it gets +2{d}."
 //
 // Simplification: Pay-to-buff-defence rider isn't modelled (defence-side costs aren't solved).
-//
-// Source: github.com/the-fab-cube/flesh-and-blood-cards (card.csv).
 
 package generic
 

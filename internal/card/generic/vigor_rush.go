@@ -6,8 +6,6 @@
 // Go again is conditional on a prior non-attack action, so GoAgain() returns false and
 // vigorRushPlay sets self.GrantedGoAgain when the condition fires. Returning true from
 // GoAgain() unconditionally would over-credit sequences with no non-attack action played.
-//
-// Source: github.com/the-fab-cube/flesh-and-blood-cards (card.csv).
 
 package generic
 

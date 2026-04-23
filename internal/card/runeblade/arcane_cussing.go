@@ -7,8 +7,6 @@
 // it now for the Runechants) or if we block all incoming damage (survives into a future turn);
 // pays 0 if we take damage. Any attacker type qualifies for the same-turn pop since Cussing's
 // trigger is the looser "deal damage" phrasing.
-//
-// Source: github.com/the-fab-cube/flesh-and-blood-cards (card.csv).
 
 package runeblade
 

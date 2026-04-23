@@ -5,8 +5,6 @@
 //
 // Rider reads TurnState.ArcaneDamageDealt: when set at Play time, +2{p}; otherwise printed
 // attack alone.
-//
-// Source: github.com/the-fab-cube/flesh-and-blood-cards (card.csv).
 
 package runeblade
 

@@ -1,6 +1,4 @@
 // Shared aura-creation helper for Generic Action - Aura cards.
-//
-// Source: github.com/the-fab-cube/flesh-and-blood-cards (card.csv).
 
 package generic
 

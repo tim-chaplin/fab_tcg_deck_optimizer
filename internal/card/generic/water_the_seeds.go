@@ -6,8 +6,6 @@
 //
 // Scans TurnState.CardsRemaining for the first attack action card with base power 1 or less and
 // credits the +1 assuming it will be played; if no matching attack follows, the rider fizzles.
-//
-// Source: github.com/the-fab-cube/flesh-and-blood-cards (card.csv).
 
 package generic
 

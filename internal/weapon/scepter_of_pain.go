@@ -5,8 +5,6 @@
 // Simplification: 1 arcane direct (Attack()=1) + 1 Runechant via CreateRunechant() = Play value 2.
 // The ability isn't an Attack-typed action in FaB, but the simulator treats any weapon swing as
 // the turn's damage step.
-//
-// Source: github.com/the-fab-cube/flesh-and-blood-cards (card.csv).
 
 package weapon
 

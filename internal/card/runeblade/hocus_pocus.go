@@ -3,8 +3,6 @@
 // Text: "When this attacks, create a Runechant token."
 //
 // Simplification: each Runechant = +1 future damage. Play returns power + 1.
-//
-// Source: github.com/the-fab-cube/flesh-and-blood-cards (card.csv).
 
 package runeblade
 

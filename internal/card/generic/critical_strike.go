@@ -1,7 +1,5 @@
 // Critical Strike — Generic Action - Attack. Cost 1. Printed power: Red 5, Yellow 4, Blue 3.
 // Printed pitch variants: Red 1, Yellow 2, Blue 3. Defense 3.
-//
-// Source: github.com/the-fab-cube/flesh-and-blood-cards (card.csv).
 
 package generic
 

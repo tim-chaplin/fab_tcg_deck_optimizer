@@ -5,8 +5,6 @@
 // point. **Go again**"
 //
 // Simplification: Action-point tracking isn't modelled.
-//
-// Source: github.com/the-fab-cube/flesh-and-blood-cards (card.csv).
 
 package generic
 

@@ -5,8 +5,6 @@
 //
 // Simplification: At-action-phase self-destroy and leaves-arena discard/draw aren't modelled; only
 // the aura-created flag is credited.
-//
-// Source: github.com/the-fab-cube/flesh-and-blood-cards (card.csv).
 
 package generic
 

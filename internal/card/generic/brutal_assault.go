@@ -1,7 +1,5 @@
 // Brutal Assault — Generic Action - Attack. Cost 2. Printed power: Red 6, Yellow 5, Blue 4. Printed
 // pitch variants: Red 1, Yellow 2, Blue 3. Defense 3.
-//
-// Source: github.com/the-fab-cube/flesh-and-blood-cards (card.csv).
 
 package generic
 

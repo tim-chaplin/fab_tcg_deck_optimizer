@@ -4,13 +4,10 @@
 // If you do, deal 1 arcane damage to target hero. At the beginning of your action phase, destroy
 // this."
 //
-// Modelling: Play resolves the enter trigger directly (banishAuraFromGraveyard scans
-// s.Graveyard and credits 1 arcane if an aura lands in s.Banish) and registers a
-// start-of-turn AuraTrigger with Count=1 for the "destroy this" clause. Next turn the
-// handler runs the LEAVE trigger FIRST — the sim graveyards Self only after Count hits
-// zero, so the "another aura" restriction is honoured naturally without an explicit skip.
-//
-// Source: github.com/the-fab-cube/flesh-and-blood-cards (card.csv).
+// Play resolves the enter trigger directly via banishAuraFromGraveyard. The start-of-turn
+// handler runs the leave trigger — because the sim graveyards Self only after Count hits zero,
+// the scan naturally can't pick up Silphidae itself, satisfying "another aura" without an
+// explicit skip.
 
 package runeblade
 
@@ -37,9 +34,6 @@ func (c SigilOfSilphidaeBlue) Play(s *card.TurnState, _ *card.CardState) int {
 		Type:  card.TriggerStartOfTurn,
 		Count: 1,
 		Handler: func(s *card.TurnState) int {
-			// The sim graveyards Self only AFTER this handler returns (Count hits zero),
-			// so the scan here naturally can't pick up Silphidae itself — the printed
-			// "another aura" restriction is satisfied without an explicit skip.
 			return banishAuraFromGraveyard(s)
 		},
 	})

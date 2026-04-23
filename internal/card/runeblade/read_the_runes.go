@@ -3,8 +3,6 @@
 // Text: "Create N Runechant tokens." (Red N=3, Yellow N=2, Blue N=1.)
 //
 // Play returns N and sets AuraCreated so later cards this turn see the Runechants.
-//
-// Source: github.com/the-fab-cube/flesh-and-blood-cards (card.csv).
 
 package runeblade
 

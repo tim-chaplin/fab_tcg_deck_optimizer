@@ -6,8 +6,6 @@
 //
 // Modelling: Hand-peek isn't modelled. The played-from-arsenal go-again fires via
 // self.GrantedGoAgain when self.FromArsenal reports this copy came from the arsenal slot.
-//
-// Source: github.com/the-fab-cube/flesh-and-blood-cards (card.csv).
 
 package generic
 

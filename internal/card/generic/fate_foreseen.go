@@ -2,8 +2,6 @@
 // Printed pitch variants: Red 1, Yellow 2, Blue 3.
 // Printed defense: Red 4, Yellow 3, Blue 2.
 // Text: "Opt 1" — simplified away; no effect on block value.
-//
-// Source: github.com/the-fab-cube/flesh-and-blood-cards (card.csv).
 
 package generic
 

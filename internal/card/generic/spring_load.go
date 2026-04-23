@@ -4,8 +4,6 @@
 // Text: "When this attacks, if you have no cards in hand, it gains +3{p}."
 //
 // Simplification: 'No cards in hand' +3{p} rider isn't modelled.
-//
-// Source: github.com/the-fab-cube/flesh-and-blood-cards (card.csv).
 
 package generic
 

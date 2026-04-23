@@ -5,8 +5,6 @@
 // Modelling: The +2{d} rider opts in via card.ArsenalDefenseBonus; the solver bumps the
 // arsenal slot's effective defense by 2 only when this copy was the start-of-turn arsenal-in
 // card.
-//
-// Source: github.com/the-fab-cube/flesh-and-blood-cards (card.csv).
 
 package generic
 

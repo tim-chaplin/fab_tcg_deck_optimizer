@@ -7,8 +7,6 @@
 // The on-hit Gold token is modelled as +1 damage-equivalent (one resource worth), gated on
 // card.LikelyToHit. The arsenal-conditional Go again fires via self.GrantedGoAgain when
 // self.FromArsenal reports this copy came from the arsenal slot.
-//
-// Source: github.com/the-fab-cube/flesh-and-blood-cards (card.csv).
 
 package generic
 

@@ -3,8 +3,6 @@
 // Text: "{t} target hero. {u} another target hero. **Go again**"
 //
 // Simplification: Freeze/unfreeze (tap/untap) isn't modelled.
-//
-// Source: github.com/the-fab-cube/flesh-and-blood-cards (card.csv).
 
 package generic
 

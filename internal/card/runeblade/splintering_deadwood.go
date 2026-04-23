@@ -5,8 +5,6 @@
 //
 // Simplification: the effect swaps an existing aura (worth a Runechant's value) for a new
 // Runechant — net zero. Play returns base power.
-//
-// Source: github.com/the-fab-cube/flesh-and-blood-cards (card.csv).
 
 package runeblade
 

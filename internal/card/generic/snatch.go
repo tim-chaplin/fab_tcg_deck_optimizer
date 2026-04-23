@@ -4,8 +4,6 @@
 // Text: "When this hits, draw a card."
 //
 // The on-hit draw fires when card.LikelyToHit approves the printed attack.
-//
-// Source: github.com/the-fab-cube/flesh-and-blood-cards (card.csv).
 
 package generic
 

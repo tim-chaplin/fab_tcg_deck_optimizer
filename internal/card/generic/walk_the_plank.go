@@ -4,8 +4,6 @@
 // Text: "When this hits a Pirate hero, {t} them or an ally they control."
 //
 // Simplification: Pirate-specific target-freezing rider isn't modelled.
-//
-// Source: github.com/the-fab-cube/flesh-and-blood-cards (card.csv).
 
 package generic
 

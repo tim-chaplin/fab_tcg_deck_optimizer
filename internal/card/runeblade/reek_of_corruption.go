@@ -8,8 +8,6 @@
 // only when the aura clause is satisfied AND this card's printed attack is likely to land
 // (1/4/7 per card.LikelyToHit). Runechants alongside don't count — "this hits" is strictly
 // about this card's damage reaching the hero. On-hit discard credits +3.
-//
-// Source: github.com/the-fab-cube/flesh-and-blood-cards (card.csv).
 
 package runeblade
 

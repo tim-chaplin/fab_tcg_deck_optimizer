@@ -3,8 +3,6 @@
 // Text: "When you attack with Spellblade Assault, create 2 Runechant tokens."
 //
 // Simplification: +1 damage per Runechant. Play returns power + 2.
-//
-// Source: github.com/the-fab-cube/flesh-and-blood-cards (card.csv).
 
 package runeblade
 

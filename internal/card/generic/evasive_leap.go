@@ -1,8 +1,6 @@
 // Evasive Leap — Generic Defense Reaction. Cost 0.
 // Printed pitch variants: Red 1, Yellow 2, Blue 3.
 // Printed defense: Red 3, Yellow 2, Blue 1.
-//
-// Source: github.com/the-fab-cube/flesh-and-blood-cards (card.csv).
 
 package generic
 

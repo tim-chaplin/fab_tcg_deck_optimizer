@@ -8,8 +8,6 @@
 // (an attack action card OR a weapon swing) follows later in this turn's ordering (peeking
 // TurnState.CardsRemaining); in that case Play returns N as the bonus damage it will eventually
 // confer. The opponent-aura-destruction clause is ignored.
-//
-// Source: github.com/the-fab-cube/flesh-and-blood-cards (card.csv).
 
 package runeblade
 

@@ -10,8 +10,6 @@
 // fizzle when the target gets blocked. The +1{p} pitched-attack rider isn't gated on hitting
 // and fires if any attack-typed card was pitched this turn; pitch-to-play attribution isn't
 // tracked. Both riders target only Runeblade attack action cards — weapon swings don't qualify.
-//
-// Source: github.com/the-fab-cube/flesh-and-blood-cards (card.csv).
 
 package runeblade
 

@@ -5,8 +5,6 @@
 //
 // The on-hit Gold token is modelled as +1 damage-equivalent (one resource worth), gated on
 // card.LikelyToHit — blockable multiples of 3 suppress the rider.
-//
-// Source: github.com/the-fab-cube/flesh-and-blood-cards (card.csv).
 
 package generic
 

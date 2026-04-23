@@ -3,12 +3,7 @@
 // Text: "**Go again** At the beginning of your action phase, destroy this. When this leaves the
 // arena, gain 1{h}."
 //
-// Modelling: Play flips AuraCreated so same-turn aura-readers see it and registers a
-// start-of-turn AuraTrigger with Count=1. Next turn the sim fires the trigger — the handler
-// credits +1 (the 1{h} gain, valued 1-to-1 with damage) — and graveyards Sigil of Fyendal
-// as Count hits zero.
-//
-// Source: github.com/the-fab-cube/flesh-and-blood-cards (card.csv).
+// Handler credits +1 next turn for the 1{h} gain (valued 1-to-1 with damage).
 
 package generic
 

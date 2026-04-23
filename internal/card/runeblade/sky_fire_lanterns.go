@@ -7,8 +7,6 @@
 // pitch value to this card's pitch (pitch = color: 1 Red / 2 Yellow / 3 Blue). On match, credit
 // +1 for the Runechant and set AuraCreated. Opts out of the hand-evaluation memo because the
 // result depends on deck composition not captured by the memo key.
-//
-// Source: github.com/the-fab-cube/flesh-and-blood-cards (card.csv).
 
 package runeblade
 

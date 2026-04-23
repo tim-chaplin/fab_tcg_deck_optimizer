@@ -8,8 +8,6 @@
 // Modelling: The item-destruction rider isn't modelled. The +N{p} grant fires only when this
 // copy was played from arsenal (self.FromArsenal); when it does, scan TurnState.CardsRemaining
 // for the next attack action card and credit the bonus assuming it will be played.
-//
-// Source: github.com/the-fab-cube/flesh-and-blood-cards (card.csv).
 
 package generic
 

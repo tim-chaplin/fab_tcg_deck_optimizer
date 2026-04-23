@@ -6,8 +6,6 @@
 // hand, then shuffle your deck."
 //
 // Simplification: Alternative hand-on-top cost and Sun Kiss search rider aren't modelled.
-//
-// Source: github.com/the-fab-cube/flesh-and-blood-cards (card.csv).
 
 package generic
 

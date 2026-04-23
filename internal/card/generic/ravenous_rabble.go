@@ -7,8 +7,6 @@
 // Peek s.Deck[0].Pitch() and subtract from base power, floored at 0. Opts out of the memo because
 // the return depends on deck composition. If the deck is empty, no card is revealed so there's no
 // penalty.
-//
-// Source: github.com/the-fab-cube/flesh-and-blood-cards (card.csv).
 
 package generic
 

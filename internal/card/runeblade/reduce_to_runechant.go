@@ -10,8 +10,6 @@
 // Play() calls CreateRunechant, crediting +1 damage at creation. Defense-reaction state is reset
 // between reactions so the token itself doesn't carry into the next turn's carryover — only its
 // damage credit lands.
-//
-// Source: github.com/the-fab-cube/flesh-and-blood-cards (card.csv).
 
 package runeblade
 

@@ -7,8 +7,6 @@
 // return so it counts toward dealt damage). The conditional +1{d} is always assumed to trigger
 // (i.e. assume arcane damage has already been dealt this turn) and is baked into the printed
 // Defense values below.
-//
-// Source: github.com/the-fab-cube/flesh-and-blood-cards (card.csv).
 
 package runeblade
 

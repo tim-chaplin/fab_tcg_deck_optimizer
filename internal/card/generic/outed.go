@@ -4,8 +4,6 @@
 // +1{p}. **Go again**"
 //
 // Simplification: Marked-hero checks aren't modelled; the +1{p} rider never applies.
-//
-// Source: github.com/the-fab-cube/flesh-and-blood-cards (card.csv).
 
 package generic
 

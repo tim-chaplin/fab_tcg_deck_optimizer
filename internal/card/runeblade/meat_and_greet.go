@@ -11,8 +11,6 @@
 //   - The go-again rider reads TurnState.ArcaneDamageDealt; when live, sets self.GrantedGoAgain
 //     so the solver's chain legality reflects the conditional. The card's own Runechant fires
 //     on a future turn, so it can't satisfy its own rider.
-//
-// Source: github.com/the-fab-cube/flesh-and-blood-cards (card.csv).
 
 package runeblade
 

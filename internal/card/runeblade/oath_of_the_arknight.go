@@ -6,8 +6,6 @@
 // Simplification: the +N{p} rider contributes N damage only if a Runeblade attack (an attack
 // action card OR a weapon swing) follows later in this turn's ordering (peeking
 // TurnState.CardsRemaining). The Runechant is always created (+1 damage) regardless.
-//
-// Source: github.com/the-fab-cube/flesh-and-blood-cards (card.csv).
 
 package runeblade
 

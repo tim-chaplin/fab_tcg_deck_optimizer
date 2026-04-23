@@ -2,8 +2,6 @@
 // Text: "This can only defend an attack with 3 or less base {p}."
 // Simplification: the base-power cap on which attack this can block is ignored — we assume every
 // attack qualifies and treat the defense as unconditional.
-//
-// Source: github.com/the-fab-cube/flesh-and-blood-cards (card.csv).
 
 package generic
 

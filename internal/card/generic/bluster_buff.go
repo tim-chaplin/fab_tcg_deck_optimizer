@@ -4,8 +4,6 @@
 //
 // Simplification: Pay {r} or lose 1{p} — we keep base power; players who can't afford should be
 // rare and the loss is 1.
-//
-// Source: github.com/the-fab-cube/flesh-and-blood-cards (card.csv).
 
 package generic
 
