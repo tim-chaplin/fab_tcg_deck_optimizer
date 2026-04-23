@@ -3,8 +3,10 @@
 //
 // Text: "**Dominate** If Overload hits, it gains **go again**."
 //
-// Simplification: On-hit go-again and Dominate aren't modelled (keyword held but solver ignores
-// hit-gated grants).
+// Modelling: Dominate is advertised via the card.Dominator marker so LikelyToHit credits the
+// "defender capped at one blocker" bump at 5+ power. The on-hit go-again rider isn't
+// modelled — Overload's printed power tops out at 3, so go-again-on-hit would only matter
+// once Dominate lets it land, and we don't chain that through today.
 
 package generic
 
@@ -22,6 +24,7 @@ func (OverloadRed) Attack() int                 { return 3 }
 func (OverloadRed) Defense() int                { return 2 }
 func (OverloadRed) Types() card.TypeSet         { return overloadTypes }
 func (OverloadRed) GoAgain() bool               { return false }
+func (OverloadRed) Dominate()                   {}
 func (c OverloadRed) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }
 
 type OverloadYellow struct{}
@@ -34,6 +37,7 @@ func (OverloadYellow) Attack() int                 { return 2 }
 func (OverloadYellow) Defense() int                { return 2 }
 func (OverloadYellow) Types() card.TypeSet         { return overloadTypes }
 func (OverloadYellow) GoAgain() bool               { return false }
+func (OverloadYellow) Dominate()                   {}
 func (c OverloadYellow) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }
 
 type OverloadBlue struct{}
@@ -46,4 +50,5 @@ func (OverloadBlue) Attack() int                 { return 1 }
 func (OverloadBlue) Defense() int                { return 2 }
 func (OverloadBlue) Types() card.TypeSet         { return overloadTypes }
 func (OverloadBlue) GoAgain() bool               { return false }
+func (OverloadBlue) Dominate()                   {}
 func (c OverloadBlue) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }

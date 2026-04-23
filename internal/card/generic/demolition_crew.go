@@ -4,7 +4,10 @@
 // Text: "As an additional cost to play Demolition Crew, reveal a card in your hand with cost 2 or
 // greater. **Dominate**"
 //
-// Simplification: Additional reveal cost isn't modelled; Dominate keyword is held but unused.
+// Modelling: Dominate is advertised via the card.Dominator marker so LikelyToHit credits the
+// "defender capped at one blocker" bump at 5+ power. The additional reveal cost isn't
+// modelled — the sim doesn't enumerate hand reveals as payment, and the card is effectively
+// always playable if its resource cost is met.
 
 package generic
 
@@ -22,6 +25,7 @@ func (DemolitionCrewRed) Attack() int                 { return 6 }
 func (DemolitionCrewRed) Defense() int                { return 2 }
 func (DemolitionCrewRed) Types() card.TypeSet         { return demolitionCrewTypes }
 func (DemolitionCrewRed) GoAgain() bool               { return false }
+func (DemolitionCrewRed) Dominate()                   {}
 func (c DemolitionCrewRed) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }
 
 type DemolitionCrewYellow struct{}
@@ -34,6 +38,7 @@ func (DemolitionCrewYellow) Attack() int                 { return 5 }
 func (DemolitionCrewYellow) Defense() int                { return 2 }
 func (DemolitionCrewYellow) Types() card.TypeSet         { return demolitionCrewTypes }
 func (DemolitionCrewYellow) GoAgain() bool               { return false }
+func (DemolitionCrewYellow) Dominate()                   {}
 func (c DemolitionCrewYellow) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }
 
 type DemolitionCrewBlue struct{}
@@ -46,4 +51,5 @@ func (DemolitionCrewBlue) Attack() int                 { return 4 }
 func (DemolitionCrewBlue) Defense() int                { return 2 }
 func (DemolitionCrewBlue) Types() card.TypeSet         { return demolitionCrewTypes }
 func (DemolitionCrewBlue) GoAgain() bool               { return false }
+func (DemolitionCrewBlue) Dominate()                   {}
 func (c DemolitionCrewBlue) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }

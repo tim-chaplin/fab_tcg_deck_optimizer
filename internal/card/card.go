@@ -448,6 +448,22 @@ type NotSilverAgeLegal interface {
 	NotSilverAgeLegal()
 }
 
+// Dominator is an optional marker. Attack action cards printed with the Dominate keyword
+// implement it; the defender is capped at one blocking card, so LikelyToHit credits the
+// "slips past one block" bump at 5+ power. Conditional grants ("if X, it gains dominate")
+// stay off this marker and flow through CardState.GrantedDominate instead.
+type Dominator interface {
+	Dominate()
+}
+
+// HasDominate reports whether c is printed with the Dominate keyword — a type assertion to
+// the Dominator marker. Used by CardState.EffectiveDominate and any future scanner that
+// needs the static printed-keyword check without going through a CardState.
+func HasDominate(c Card) bool {
+	_, ok := c.(Dominator)
+	return ok
+}
+
 // LowerHealthWanter is an optional Hero marker. Heroes whose strategy revolves around staying at
 // lower {h} than their opponent (deck building, sandbagging, self-damage) opt in. Cards with a
 // "less {h} than an opposing hero" rider assume the clause always fires for these heroes and never
