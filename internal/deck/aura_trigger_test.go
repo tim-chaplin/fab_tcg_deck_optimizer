@@ -306,3 +306,46 @@ func TestEvaluate_TriggersFromLastTurnSurfacesInBest(t *testing.T) {
 			d.Stats.Best.Summary.Value, d.Stats.PerCard[card.BlessingOfOccultRed].Plays)
 	}
 }
+
+// TestEvalOneTurn_RunebloodIncantationTicksAcrossTurns: turn 1 plays Red Runeblood
+// Incantation (Count=3 verse counters). Turn 2's start-of-turn pass fires the trigger once
+// — credits 1 Runechant, decrements Count to 2, leaves the aura alive. The surviving
+// trigger is what carries forward; this test pins the multi-turn fire shape end-to-end at
+// the deck-loop boundary.
+func TestEvalOneTurn_RunebloodIncantationTicksAcrossTurns(t *testing.T) {
+	runeblood := runeblade.RunebloodIncantationRed{}
+	pitch := fake.PitchOneDR{}
+	deckCards := []card.Card{
+		fake.BlueAttack{},
+		fake.BlueAttack{},
+		fake.BlueAttack{},
+		fake.BlueAttack{},
+	}
+	d := New(hero.Viserai{}, nil, deckCards)
+	state := d.EvalOneTurnForTesting(0, nil, []card.Card{runeblood, pitch})
+
+	runebloodPlayed := false
+	for _, a := range state.PrevTurnBestLine {
+		if a.Card.ID() == card.RunebloodIncantationRed && a.Role == hand.Attack {
+			runebloodPlayed = true
+			break
+		}
+	}
+	if !runebloodPlayed {
+		t.Errorf("turn 1 BestLine didn't play Runeblood as Role=Attack: %+v", state.PrevTurnBestLine)
+	}
+	if state.PrevTurnValue != 0 {
+		t.Errorf("PrevTurnValue = %d, want 0 (every Runeblood rune is deferred to a future fire)",
+			state.PrevTurnValue)
+	}
+	if state.StartOfTurnTriggerDamage != 1 {
+		t.Errorf("StartOfTurnTriggerDamage = %d, want 1 (one tick per turn)", state.StartOfTurnTriggerDamage)
+	}
+	if state.Runechants != 1 {
+		t.Errorf("Runechants = %d, want 1 (one rune per fire)", state.Runechants)
+	}
+	if len(state.StartOfTurnGraveyard) != 0 {
+		t.Errorf("StartOfTurnGraveyard = %v, want empty (Red has Count=3, only one tick fired)",
+			state.StartOfTurnGraveyard)
+	}
+}

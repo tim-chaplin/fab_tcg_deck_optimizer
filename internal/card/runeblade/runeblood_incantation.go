@@ -4,11 +4,10 @@
 // beginning of your action phase, remove a verse counter. If you do, create a Runechant token.
 // Otherwise, destroy Runeblood Incantation." (Red N=3, Yellow N=2, Blue N=1.)
 //
-// Simplification: credit n-1 flat damage on Play for the later-turn rune ticks, and model
-// the first tick via a start-of-turn AuraTrigger with Count=1. Next turn the handler creates
-// 1 live Runechant and the sim graveyards the aura as Count hits zero. Avoids over-crediting
-// same-turn state so variable-cost cards can't use any of Runeblood's runes for a discount
-// on the turn it was played.
+// Modelling: Play flips AuraCreated and registers a start-of-turn AuraTrigger with Count=N.
+// Each subsequent turn the sim fires the trigger — the handler creates one live Runechant —
+// and decrements Count. After N turns Count hits zero and the sim graveyards the aura.
+// Same-turn Play credits 0; every rune comes from a real future-turn fire.
 //
 // Source: github.com/the-fab-cube/flesh-and-blood-cards (card.csv).
 
@@ -63,16 +62,17 @@ func (c RunebloodIncantationBlue) Play(s *card.TurnState, _ *card.CardState) int
 	return runebloodPlay(s, c, 1)
 }
 
-// runebloodPlay flips AuraCreated, credits n-1 flat damage for the future-turn verse-counter
-// ticks that aren't separately modelled, and registers a start-of-turn trigger that fires
-// the first tick (1 live Runechant) at the top of the next turn.
+// runebloodPlay flips AuraCreated and registers the shared start-of-turn trigger with
+// Count=n. Each future turn fires the handler (one Runechant per fire) and ticks Count down;
+// the sim graveyards the aura when Count hits zero. Same-turn Play returns 0 — every rune
+// is credited at its real future-turn fire, no flat over-credit.
 func runebloodPlay(s *card.TurnState, self card.Card, n int) int {
 	s.AuraCreated = true
 	s.AddAuraTrigger(card.AuraTrigger{
 		Self:    self,
 		Type:    card.TriggerStartOfTurn,
-		Count:   1,
+		Count:   n,
 		Handler: func(s *card.TurnState) int { return s.CreateRunechants(1) },
 	})
-	return n - 1
+	return 0
 }
