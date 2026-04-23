@@ -443,19 +443,13 @@ func (d *Deck) EvaluateWith(runs int, incomingDamage int, rng *rand.Rand, ev *ha
 	buf := make([]card.Card, deckSize*2)
 	// handBuf is the per-turn working hand: Held prefix + fresh draws. heldBuf holds Held cards
 	// between turns. Sized once per Evaluate so the inner loop stays allocation-free. handBuf's
-	// capacity exceeds handSize so a DelayedPlay reveal (Sigil of the Arknight) can append the
-	// revealed card to the dealt hand without reallocating.
-	handBuf := make([]card.Card, handSize, handSize+delayedHandRoom)
+	// capacity exceeds handSize so a start-of-turn AuraTrigger reveal (Sigil of the Arknight)
+	// can append the revealed card to the dealt hand without reallocating.
+	handBuf := make([]card.Card, handSize, handSize+startOfTurnRevealRoom)
 	heldBuf := make([]card.Card, 0, handSize)
 	nextHeld := make([]card.Card, 0, handSize)
-	// delayedBuf queues cards played last turn that implement card.DelayedPlay; their
-	// PlayNextTurn fires at the start of this turn. Double-buffered with nextDelayed like the
-	// held slices so the swap is allocation-free.
-	delayedBuf := make([]card.Card, 0, handSize)
-	nextDelayed := make([]card.Card, 0, handSize)
-	// auraTriggerBuf carries AuraTriggers left alive at the end of last turn — the newer
-	// counter-tracked mechanism that will eventually replace DelayedPlay. Parallels
-	// delayedBuf in shape: double-buffered with nextAuraTrigger for allocation-free swaps.
+	// auraTriggerBuf carries AuraTriggers left alive at the end of last turn. Double-buffered
+	// with nextAuraTrigger like heldBuf so the swap is allocation-free.
 	auraTriggerBuf := make([]card.AuraTrigger, 0, handSize)
 	nextAuraTrigger := make([]card.AuraTrigger, 0, handSize)
 	for r := 0; r < runs; r++ {
@@ -471,7 +465,6 @@ func (d *Deck) EvaluateWith(runs int, incomingDamage int, rng *rand.Rand, ev *ha
 		runechantCarryover := 0
 		var arsenalCard card.Card
 		heldBuf = heldBuf[:0]
-		delayedBuf = delayedBuf[:0]
 		auraTriggerBuf = auraTriggerBuf[:0]
 		// Cap the run at two full cycles. A pitch-everything-swing-a-weapon loop recycles the
 		// same cards forever (hand.Best returns identical summaries each iteration, so head and
@@ -485,21 +478,11 @@ func (d *Deck) EvaluateWith(runs int, incomingDamage int, rng *rand.Rand, ev *ha
 			// Snapshot the starting carryover before Best overwrites it — the best-hand record
 			// wants the count in play when the hand was dealt, not what remained after.
 			startingRunechants := runechantCarryover
-			// Fire any PlayNextTurn callbacks queued from last turn before the best-line search.
-			// The TurnState sees the post-draw deck so top-of-deck peeks (Sigil of the Arknight)
-			// read the actual card about to be revealed. A ToHand result pops the revealed card
-			// off the deck and appends it to the hand — the reveal cascades across queued cards
-			// because runDelayedPlays advances its own Deck view between callbacks.
-			delayedContribs, delayedDamage, delayedRunes, revealed := runDelayedPlays(delayedBuf, buf[head+drawCount:tail])
-			for range revealed {
-				h = append(h, buf[head+drawCount])
-				drawCount++
-			}
-			runechantCarryover += delayedRunes
-			// Fire start-of-turn AuraTriggers from last turn. Survivors (triggers whose Count
-			// didn't hit zero, and non-start-of-turn types) carry forward. A ToHand-style
-			// reveal from a handler pops the deck top and appends it to the hand here so the
-			// best-line search sees the augmented hand. Destroyed auras are surfaced for
+			// Process AuraTriggers carried in from last turn before the best-line search:
+			// fire start-of-turn handlers, re-arm OncePerTurn gates, drop exhausted triggers.
+			// Survivors (everything still in play) become priorAuraTriggers for this turn's
+			// search. A reveal handler pops the deck top and appends it to the hand here so
+			// the best-line search sees the augmented hand. Destroyed auras are surfaced for
 			// tests via EvalOneTurnForTesting; the production loop discards them here.
 			var trigContribs []hand.TriggerContribution
 			var trigDamage, trigRunes int
@@ -518,11 +501,9 @@ func (d *Deck) EvaluateWith(runs int, incomingDamage int, rng *rand.Rand, ev *ha
 			}
 			runechantCarryover = play.LeftoverRunechants
 			arsenalCard = play.ArsenalCard
-			// Delayed credit is a flat additive on Value; every partition benefits equally so
-			// Best's ranking is unaffected, but the resulting Value must include it so the
-			// best-hand pick and cycle averages reflect the real total.
-			play.Value += delayedDamage
-			play.DelayedFromLastTurn = delayedContribs
+			// Start-of-turn trigger credit is a flat additive on Value; every partition
+			// benefits equally so Best's ranking is unaffected, but the resulting Value must
+			// include it so the best-hand pick and cycle averages reflect the real total.
 			play.Value += trigDamage
 			play.TriggersFromLastTurn = trigContribs
 			v := float64(play.Value)
@@ -551,11 +532,6 @@ func (d *Deck) EvaluateWith(runs int, incomingDamage int, rng *rand.Rand, ev *ha
 					drawnCopy = make([]hand.CardAssignment, len(play.Drawn))
 					copy(drawnCopy, play.Drawn)
 				}
-				var delayedCopy []hand.DelayedContribution
-				if len(play.DelayedFromLastTurn) > 0 {
-					delayedCopy = make([]hand.DelayedContribution, len(play.DelayedFromLastTurn))
-					copy(delayedCopy, play.DelayedFromLastTurn)
-				}
 				var trigCopy []hand.TriggerContribution
 				if len(play.TriggersFromLastTurn) > 0 {
 					trigCopy = make([]hand.TriggerContribution, len(play.TriggersFromLastTurn))
@@ -569,7 +545,6 @@ func (d *Deck) EvaluateWith(runs int, incomingDamage int, rng *rand.Rand, ev *ha
 						Value:                play.Value,
 						LeftoverRunechants:   play.LeftoverRunechants,
 						ArsenalCard:          play.ArsenalCard,
-						DelayedFromLastTurn:  delayedCopy,
 						TriggersFromLastTurn: trigCopy,
 					},
 					StartingRunechants: startingRunechants,
@@ -586,53 +561,19 @@ func (d *Deck) EvaluateWith(runs int, incomingDamage int, rng *rand.Rand, ev *ha
 
 			attributePlayStats(&d.Stats, play.BestLine)
 			nextHeld = applyTurnResult(play, buf, &head, &tail, drawCount, nextHeld[:0])
-			nextDelayed = collectDelayedPlays(play.BestLine, nextDelayed[:0])
 			nextAuraTrigger = append(nextAuraTrigger[:0], play.AuraTriggers...)
 			handIdx++
 			heldBuf, nextHeld = nextHeld, heldBuf
-			delayedBuf, nextDelayed = nextDelayed, delayedBuf
 			auraTriggerBuf, nextAuraTrigger = nextAuraTrigger, auraTriggerBuf
 		}
 	}
 	return d.Stats
 }
 
-// delayedHandRoom caps how many cards a DelayedPlay reveal can append to a turn's dealt hand.
-// Set larger than any plausible number of queued reveal-capable cards so the per-turn handBuf
-// never reallocates.
-const delayedHandRoom = 8
-
-// runDelayedPlays fires a PlayNextTurn callback on each queued card, passing a TurnState whose
-// Deck is the post-draw deck so top-of-deck peeks read the actual card about to be revealed.
-// Returns the per-card contributions for FormatBestTurn, the summed damage to fold into Value,
-// the Runechant tokens created during the callbacks (folded into the next turn's carryover so
-// same-hand variable-cost checks and ArcaneDamageDealt triggers see them), and the list of
-// cards the callbacks want appended to the hand (ToHand results) in the order they were
-// consumed from the deck top. All zero/nil when no cards are queued.
-//
-// Cascading reveals: each ToHand result shrinks the view of Deck by one entry so the next
-// callback peeks at the new top. Matches the real sequencing where sigils destroy one after
-// another at the start of the action phase.
-func runDelayedPlays(queued []card.Card, postDrawDeck []card.Card) ([]hand.DelayedContribution, int, int, []card.Card) {
-	if len(queued) == 0 {
-		return nil, 0, 0, nil
-	}
-	contribs := make([]hand.DelayedContribution, 0, len(queued))
-	var revealed []card.Card
-	total := 0
-	ts := card.TurnState{Deck: postDrawDeck}
-	for _, c := range queued {
-		dp := c.(card.DelayedPlay)
-		r := dp.PlayNextTurn(&ts)
-		total += r.Damage
-		contribs = append(contribs, hand.DelayedContribution{Card: c, Damage: r.Damage, ToHand: r.ToHand})
-		if r.ToHand != nil {
-			revealed = append(revealed, r.ToHand)
-			ts.Deck = ts.Deck[1:]
-		}
-	}
-	return contribs, total, ts.Runechants, revealed
-}
+// startOfTurnRevealRoom caps how many cards a start-of-turn AuraTrigger reveal can append
+// to a turn's dealt hand. Set larger than any plausible number of queued reveal-capable
+// triggers so the per-turn handBuf never reallocates.
+const startOfTurnRevealRoom = 8
 
 // processTriggersAtStartOfTurn walks every AuraTrigger queued from last turn and does all
 // the bookkeeping a turn boundary requires:
@@ -696,22 +637,6 @@ func processTriggersAtStartOfTurn(queued []card.AuraTrigger, postDrawDeck []card
 	return survivors, contribs, damage, ts.Runechants, ts.Revealed, ts.Graveyard
 }
 
-// collectDelayedPlays scans a turn's BestLine for cards whose Play ran (Role == Attack) and that
-// implement card.DelayedPlay. Those are queued so their PlayNextTurn fires at the top of the
-// next turn. Pitched / arsenaled / held copies are skipped — only the played instance has its
-// aura in the arena.
-func collectDelayedPlays(line []hand.CardAssignment, dst []card.Card) []card.Card {
-	for _, a := range line {
-		if a.Role != hand.Attack {
-			continue
-		}
-		if _, ok := a.Card.(card.DelayedPlay); ok {
-			dst = append(dst, a.Card)
-		}
-	}
-	return dst
-}
-
 // applyTurnResult folds a completed turn's outcome into cross-turn state: pitched hand cards
 // recycle to the deck bottom (via recycleCardStates), head advances past initial draws and
 // every mid-turn-drawn card, and each drawn card is routed by disposition. Drawn-card Held
@@ -759,8 +684,8 @@ type TurnStartState struct {
 	ArsenalCard card.Card
 	Deck        []card.Card
 	// Runechants is the live Runechant count at the start of this turn — leftover from the
-	// previous turn's attack chain plus any tokens freshly created by PlayNextTurn callbacks
-	// (e.g. Blessing of Occult's start-of-turn rune creation).
+	// previous turn's attack chain plus any tokens freshly created by start-of-turn
+	// AuraTrigger handlers (e.g. Blessing of Occult's rune creation on its first tick).
 	Runechants int
 	// PrevTurnValue is the total Value (damage dealt + damage prevented) the previous turn
 	// produced — the same number hand.Best reports as TurnSummary.Value for that turn.
@@ -818,8 +743,9 @@ func (d *Deck) EvalOneTurnForTesting(incomingDamage int, arsenalIn card.Card, in
 	// decks still have room for mid-turn pitches (hand + drawn) without overflowing tail.
 	buf := make([]card.Card, deckSize*2+handSize*2)
 	copy(buf, d.Cards)
-	// handBuf capacity matches Evaluate's so DelayedPlay reveals can append without realloc.
-	handBuf := make([]card.Card, handSize, handSize+delayedHandRoom)
+	// handBuf capacity matches Evaluate's so start-of-turn AuraTrigger reveals can append
+	// without realloc.
+	handBuf := make([]card.Card, handSize, handSize+startOfTurnRevealRoom)
 	tail := deckSize
 
 	h := handBuf[:len(turn1Hand)]
@@ -828,7 +754,6 @@ func (d *Deck) EvalOneTurnForTesting(incomingDamage int, arsenalIn card.Card, in
 	// drawCount=0: head already points past the starting hand, so applyTurnResult only needs
 	// to advance past mid-turn draws.
 	nextHeld := applyTurnResult(play, buf, &head, &tail, 0, nil)
-	delayedQueue := collectDelayedPlays(play.BestLine, nil)
 	triggerQueue := append([]card.AuraTrigger(nil), play.AuraTriggers...)
 
 	// Deal turn 2's hand but stop short of running Best — the caller wants the pre-Best state.
@@ -840,18 +765,10 @@ func (d *Deck) EvalOneTurnForTesting(incomingDamage int, arsenalIn card.Card, in
 			PrevTurnValue: play.Value,
 		}
 	}
-	// Fire turn-1 DelayedPlay callbacks now so top-of-deck reveals (Sigil of the Arknight) show
-	// up in the returned turn-2 hand, matching production behaviour where Best sees the
-	// augmented hand. Runes created by the callbacks fold into the turn-2 starting carryover.
-	_, _, delayedRunes, revealed := runDelayedPlays(delayedQueue, buf[head+drawCount2:tail])
-	for range revealed {
-		turn2Hand = append(turn2Hand, buf[head+drawCount2])
-		drawCount2++
-	}
-	// Fire turn-1 start-of-turn AuraTriggers, parallelling the DelayedPlay pass above.
-	// Survivors would become priorAuraTriggers for turn 2 in production but the caller
-	// returns before running Best. Reveals into the hand are consumed here so the returned
-	// turn-2 Hand matches what Best would see.
+	// Process turn-1 AuraTriggers at the turn-2 boundary the same way Evaluate does:
+	// fire start-of-turn handlers, re-arm OncePerTurn gates, drop exhausted entries.
+	// Reveals into the hand are consumed here so the returned turn-2 Hand matches what
+	// Best would see.
 	_, _, trigDamage, trigRunes, trigRevealed, trigGraveyarded := processTriggersAtStartOfTurn(triggerQueue, buf[head+drawCount2:tail])
 	for range trigRevealed {
 		turn2Hand = append(turn2Hand, buf[head+drawCount2])
@@ -865,7 +782,7 @@ func (d *Deck) EvalOneTurnForTesting(incomingDamage int, arsenalIn card.Card, in
 		Hand:                     handCopy,
 		ArsenalCard:              play.ArsenalCard,
 		Deck:                     deckLeft,
-		Runechants:               play.LeftoverRunechants + delayedRunes + trigRunes,
+		Runechants:               play.LeftoverRunechants + trigRunes,
 		PrevTurnValue:            play.Value,
 		PrevTurnBestLine:         lineCopy,
 		StartOfTurnTriggerDamage: trigDamage,

@@ -6,18 +6,21 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 )
 
-// TestDelayedPlayImpliesAddsFutureValue: every card with a next-turn callback should also opt
-// into the AddsFutureValue beatsBest tiebreaker — its damage / token / reveal payoff doesn't
-// land in this turn's Value, so without the marker the solver would pick a Held → arsenal
-// promotion at equal Value over actually playing the card.
-func TestDelayedPlayImpliesAddsFutureValue(t *testing.T) {
+// TestAuraTriggerCreatorsOptInToAddsFutureValue: a card whose Play registers an AuraTrigger
+// hides its real payoff on a future turn — without AddsFutureValue the beatsBest tiebreaker
+// would pick a Held → arsenal promotion at equal current-turn Value over actually playing
+// the card. Probes Play with a fresh TurnState and checks every registrant carries the
+// marker.
+func TestAuraTriggerCreatorsOptInToAddsFutureValue(t *testing.T) {
 	for _, id := range All() {
 		c := Get(id)
-		if _, isDelayed := c.(card.DelayedPlay); !isDelayed {
+		var s card.TurnState
+		c.Play(&s, &card.CardState{})
+		if len(s.AuraTriggers) == 0 {
 			continue
 		}
 		if _, addsFuture := c.(card.AddsFutureValue); !addsFuture {
-			t.Errorf("%s implements DelayedPlay but not AddsFutureValue — beatsBest tiebreaker won't favour playing it",
+			t.Errorf("%s registers an AuraTrigger but doesn't implement AddsFutureValue — beatsBest tiebreaker won't favour playing it",
 				c.Name())
 		}
 	}

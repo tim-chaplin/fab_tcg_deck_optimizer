@@ -70,39 +70,23 @@ type TurnSummary struct {
 	// (promoted into an empty slot post-enumeration, Contribution 0), or Held (carries into
 	// the next hand, Contribution 0). Nil when no draw rider fired.
 	Drawn []CardAssignment
-	// DelayedFromLastTurn records cards queued from the previous turn whose PlayNextTurn ran at
-	// the start of this turn, each with the damage-equivalent it credited. Populated by the deck
-	// loop before FormatBestTurn is called; Value already includes the sum. Empty when no cards
-	// implementing card.DelayedPlay were played the previous turn.
-	DelayedFromLastTurn []DelayedContribution
 	// AuraTriggers is the surviving AuraTrigger set at end of this turn — triggers added by
 	// this turn's winning Play chain. The deck loop feeds this into next turn's start-of-turn
 	// trigger pass, closing the cross-turn loop. Nil when the turn played no trigger-creating
 	// aura.
 	AuraTriggers []card.AuraTrigger
 	// TriggersFromLastTurn records the AuraTriggers whose start-of-turn handlers fired at the
-	// top of this turn. Parallels DelayedFromLastTurn for the AuraTrigger mechanism: populated
-	// by the deck loop before FormatBestTurn is called; Value already includes the sum.
+	// top of this turn, each with the damage-equivalent it credited. Populated by the deck
+	// loop before FormatBestTurn is called; Value already includes the sum.
 	TriggersFromLastTurn []TriggerContribution
 }
 
 // TriggerContribution is one start-of-turn AuraTrigger fire: the aura that fired plus the
-// Damage it credited (folded into Value). Mirrors DelayedContribution for the trigger
-// mechanism; will gain a ToHand field when a reveal-capable card migrates.
+// Damage it credited (folded into Value). Surfaced in TurnSummary.TriggersFromLastTurn so
+// FormatBestTurn can print a "(from previous turn)" line naming the outcome.
 type TriggerContribution struct {
 	Card   card.Card
 	Damage int
-}
-
-// DelayedContribution is one card's PlayNextTurn outcome: the card itself plus whichever
-// effects fired — Damage credited 1-to-1 toward Value, ToHand a card revealed off the top of
-// the deck and moved into the dealt hand (the hand already reflects it by the time the turn
-// is evaluated). Surfaced in TurnSummary.DelayedFromLastTurn so FormatBestTurn can print a
-// "(from previous turn)" line naming the outcome.
-type DelayedContribution struct {
-	Card   card.Card
-	Damage int
-	ToHand card.Card
 }
 
 // AttackChainEntry is a single played attack — a card with role=Attack or a swung weapon —
@@ -294,17 +278,6 @@ func FormatBestTurn(t TurnSummary) string {
 	}
 	for _, a := range defenseReactions {
 		appendDefense(a, "DEFENSE REACTION")
-	}
-	for _, d := range t.DelayedFromLastTurn {
-		step++
-		switch {
-		case d.ToHand != nil:
-			lines = append(lines, fmt.Sprintf("  %d. %s (from previous turn): REVEALED %s INTO HAND",
-				step, d.Card.Name(), d.ToHand.Name()))
-		default:
-			lines = append(lines, fmt.Sprintf("  %d. %s (from previous turn): START OF ACTION PHASE (+%d)",
-				step, d.Card.Name(), d.Damage))
-		}
 	}
 	for _, d := range t.TriggersFromLastTurn {
 		step++
