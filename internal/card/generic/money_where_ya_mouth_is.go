@@ -4,10 +4,9 @@
 // Text: "Your next attack this turn gets +N{p} and "When this attacks a hero, you may **wager** a
 // Gold token with them."" (Red N=3, Yellow N=2, Blue N=1.)
 //
-// The +N{p} rider is modelled (scans TurnState.CardsRemaining for the first matching attack
-// action card and credits the bonus). The Gold-token wager piggybacked onto that grant isn't
-// modelled so the card carries card.NotImplemented — the optimizer's random deck generator and
-// mutation pool skip it.
+// Simplification: Wager Gold token rider is dropped. Scans TurnState.CardsRemaining for the first
+// matching attack action card and credits the bonus assuming it will be played; if none is
+// scheduled after this card, the bonus fizzles.
 
 package generic
 

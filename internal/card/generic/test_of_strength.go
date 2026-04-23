@@ -2,9 +2,8 @@
 //
 // Text: "When this defends, **clash** with the attacking hero. The winner creates a Gold token."
 //
-// The Clash winner's Gold token is credited via card.ClashValue(s, card.GoldTokenValue) —
-// currently 0 — because the underlying token economy isn't modelled, so the card carries
-// card.NotImplemented and the optimizer's random deck generator and mutation pool skip it.
+// Rider modelled: Gold token to the Clash winner, staked at card.GoldTokenValue via
+// card.ClashValue.
 
 package generic
 

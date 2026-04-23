@@ -2,8 +2,7 @@
 //
 // Text: "Destroy target landmark with cost X. Create X Gold tokens. **Go again**"
 //
-// Landmarks and Gold tokens aren't modelled (X cost treated as 0) so the card carries
-// card.NotImplemented — the optimizer's random deck generator and mutation pool skip it.
+// Simplification: Landmarks and Gold tokens aren't modelled; X cost treated as 0.
 
 package generic
 

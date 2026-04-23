@@ -3,9 +3,8 @@
 //
 // Text: "When this hits, create a Gold token."
 //
-// The on-hit Gold token is credited via card.GoldTokenValue (currently 0) gated on
-// card.LikelyToHit, but the underlying token economy isn't modelled, so the card carries
-// card.NotImplemented — the optimizer's random deck generator and mutation pool skip it.
+// The on-hit Gold token is modelled as +1 damage-equivalent (one resource worth), gated on
+// card.LikelyToHit — blockable multiples of 3 suppress the rider.
 
 package generic
 

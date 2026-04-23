@@ -4,8 +4,7 @@
 // Text: "When this hits a hero, deal 2 damage to them unless they give you a Gold token they
 // control. If you are a Thief, repeat this process once."
 //
-// The on-hit Gold-token exchange isn't modelled so the card carries card.NotImplemented —
-// the optimizer's random deck generator and mutation pool skip it.
+// Simplification: Gold-token exchange rider isn't modelled.
 
 package generic
 

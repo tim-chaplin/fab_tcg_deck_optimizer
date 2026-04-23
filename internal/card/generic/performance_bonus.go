@@ -4,11 +4,9 @@
 // Text: "When this hits, create a Gold token. If this was played from arsenal, it gets **Go
 // again**."
 //
-// The arsenal-conditional Go again fires via self.GrantedGoAgain when self.FromArsenal reports
-// this copy came from the arsenal slot. The on-hit Gold token is credited via
-// card.GoldTokenValue (currently 0) but the underlying token economy isn't modelled, so the
-// card carries card.NotImplemented — the optimizer's random deck generator and mutation pool
-// skip it.
+// The on-hit Gold token is modelled as +1 damage-equivalent (one resource worth), gated on
+// card.LikelyToHit. The arsenal-conditional Go again fires via self.GrantedGoAgain when
+// self.FromArsenal reports this copy came from the arsenal slot.
 
 package generic
 

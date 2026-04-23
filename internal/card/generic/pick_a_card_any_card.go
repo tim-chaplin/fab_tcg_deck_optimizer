@@ -5,8 +5,7 @@
 // reveal it. If it's the named card, create a Silver token. Repeat this process thrice. **Go
 // again**"
 //
-// The opponent hand inspection and the Silver-token payoff aren't modelled so the card carries
-// card.NotImplemented — the optimizer's random deck generator and mutation pool skip it.
+// Simplification: Opponent hand inspection and Silver-token economy aren't modelled.
 
 package generic
 

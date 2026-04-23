@@ -3,8 +3,7 @@
 //
 // Text: "**Universal** When this attacks a hero, you may **wager** a Gold token with them."
 //
-// The Universal keyword and the Gold-token wager aren't modelled so the card carries
-// card.NotImplemented — the optimizer's random deck generator and mutation pool skip it.
+// Simplification: Universal keyword and Gold-token wager aren't modelled.
 
 package generic
 

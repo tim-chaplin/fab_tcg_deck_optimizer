@@ -2,8 +2,7 @@
 //
 // Text: "If you control no Gold tokens, create a Gold token."
 //
-// The Gold-token economy isn't tracked so the card carries card.NotImplemented — the
-// optimizer's random deck generator and mutation pool skip it.
+// Simplification: Gold-token economy isn't tracked.
 
 package generic
 
