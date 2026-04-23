@@ -66,8 +66,9 @@ func TestMarshalUnmarshalRoundTrip(t *testing.T) {
 }
 
 // TestRoundTrip_PreservesBestTurnContributions locks in that per-card Contribution and the
-// AttackChain's per-step Damage / TriggerDamage round-trip through Marshal/Unmarshal, so a
-// reloaded deck renders with the same per-card numbers the live sim produced.
+// AttackChain's per-step Damage / TriggerDamage / AuraTriggerDamage round-trip through
+// Marshal/Unmarshal, so a reloaded deck renders with the same per-card numbers the live sim
+// produced.
 func TestRoundTrip_PreservesBestTurnContributions(t *testing.T) {
 	rng := rand.New(rand.NewSource(7))
 	d := deck.Random(hero.Viserai{}, 40, 2, rng, nil)
@@ -131,6 +132,9 @@ func TestRoundTrip_PreservesBestTurnContributions(t *testing.T) {
 		}
 		if gotChain[i].TriggerDamage != wantChain[i].TriggerDamage {
 			t.Errorf("AttackChain[%d].TriggerDamage: got %.3f want %.3f", i, gotChain[i].TriggerDamage, wantChain[i].TriggerDamage)
+		}
+		if gotChain[i].AuraTriggerDamage != wantChain[i].AuraTriggerDamage {
+			t.Errorf("AttackChain[%d].AuraTriggerDamage: got %.3f want %.3f", i, gotChain[i].AuraTriggerDamage, wantChain[i].AuraTriggerDamage)
 		}
 	}
 }

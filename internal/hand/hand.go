@@ -92,12 +92,16 @@ type TriggerContribution struct {
 // AttackChainEntry is a single played attack — a card with role=Attack or a swung weapon —
 // carrying the damage it contributed when it resolved in the winning chain. Damage is the Play()
 // return; TriggerDamage is the hero's OnCardPlayed contribution (e.g. Viserai creating a
-// Runechant) so callers can surface hero attribution on its own line. For BestLine Attack entries
-// Damage + TriggerDamage equals CardAssignment.Contribution; weapons live only here.
+// Runechant); AuraTriggerDamage is the mid-chain AuraTrigger contribution (e.g. a Malefic
+// Incantation played on a prior turn whose TriggerAttackAction fires when this card resolves).
+// The two trigger buckets are split so the display can attribute hero OnCardPlayed damage and
+// mid-chain aura damage on their own lines. For BestLine Attack entries Damage + TriggerDamage
+// + AuraTriggerDamage equals CardAssignment.Contribution; weapons live only here.
 type AttackChainEntry struct {
-	Card          card.Card
-	Damage        float64
-	TriggerDamage float64
+	Card              card.Card
+	Damage            float64
+	TriggerDamage     float64
+	AuraTriggerDamage float64
 }
 
 // ArsenalIn returns the assignment for the card that started the turn in the arsenal, if any.
@@ -182,9 +186,10 @@ func splitPitchesByPhase(pitched []CardAssignment, drCost int) (defensePitches, 
 // keep numbering contiguous. Non-weapon entries cross-reference BestLine by ID so arsenal-played
 // cards get a "(from arsenal)" tag; weapons skip the match since they have no BestLine entry.
 // Cards that aren't attacks (e.g. non-attack actions like Mauvrion Skies) use "PLAY" so the
-// label matches what the card actually does on the chain. A non-zero TriggerDamage adds a
-// trailing " (+M hero trigger)" so the attribution is visible instead of silently folded into
-// the card's own damage number.
+// label matches what the card actually does on the chain. Non-zero TriggerDamage /
+// AuraTriggerDamage add trailing " (+M hero trigger)" / " (+M aura trigger)" tags so each
+// source is attributed on its own rather than silently folded into the card's damage number or
+// mis-labelled as coming from the hero.
 func appendAttackChainLines(lines []string, t TurnSummary, stepPtr *int) []string {
 	used := make([]bool, len(t.BestLine))
 	appendAttack := func(label, cardName string, e AttackChainEntry) {
@@ -192,6 +197,9 @@ func appendAttackChainLines(lines []string, t TurnSummary, stepPtr *int) []strin
 		line := fmt.Sprintf("  %d. %s: %s (+%s)", *stepPtr, cardName, label, formatContribution(e.Damage))
 		if e.TriggerDamage > 0 {
 			line += fmt.Sprintf(" (+%s hero trigger)", formatContribution(e.TriggerDamage))
+		}
+		if e.AuraTriggerDamage > 0 {
+			line += fmt.Sprintf(" (+%s aura trigger)", formatContribution(e.AuraTriggerDamage))
 		}
 		lines = append(lines, line)
 	}
@@ -713,11 +721,16 @@ type attackBufs struct {
 	// perCardTriggerScratch parallels perCardScratch for hero-trigger damage (OnCardPlayed
 	// return). Only written when the caller tracks.
 	perCardTriggerScratch []float64
+	// perCardAuraTriggerScratch parallels perCardScratch for mid-chain AuraTrigger damage
+	// (fireAttackActionTriggers return). Split out from perCardTriggerScratch so the display
+	// can separately attribute hero OnCardPlayed and mid-chain aura triggers.
+	perCardAuraTriggerScratch []float64
 	// fillContribWinnerOrder / fillContribPerCard are output buffers for bestSequence during
 	// fillContributions's tracked replay. Kept on attackBufs so each Best call reuses the slab.
-	fillContribWinnerOrder []card.Card
-	fillContribPerCard     []float64
-	fillContribTriggerDmg  []float64
+	fillContribWinnerOrder    []card.Card
+	fillContribPerCard        []float64
+	fillContribTriggerDmg     []float64
+	fillContribAuraTriggerDmg []float64
 	// fillContribUsed marks hand indices already assigned during chain→hand mapping. Sized
 	// handSize; reset with clear before each fillContributions pass.
 	fillContribUsed []bool
@@ -778,9 +791,11 @@ func newAttackBufs(handSize, weaponCount int, weapons []weapon.Weapon) *attackBu
 		auraTriggersWinnerScratch: make([]card.AuraTrigger, 0, maxAttackers),
 		perCardScratch:            make([]float64, maxAttackers),
 		perCardTriggerScratch:     make([]float64, maxAttackers),
+		perCardAuraTriggerScratch: make([]float64, maxAttackers),
 		fillContribWinnerOrder:    make([]card.Card, maxAttackers),
 		fillContribPerCard:        make([]float64, maxAttackers),
 		fillContribTriggerDmg:     make([]float64, maxAttackers),
+		fillContribAuraTriggerDmg: make([]float64, maxAttackers),
 		fillContribUsed:           make([]bool, handSize),
 	}
 }
@@ -1409,7 +1424,7 @@ func bestAttackWithWeapons(hero hero.Hero, weapons []weapon.Weapon, attackers, d
 					allAttackers = append(allAttackers, w)
 				}
 			}
-			dealt, leftoverRunechants, legal := ctx.bestSequence(allAttackers, nil, nil, nil)
+			dealt, leftoverRunechants, legal := ctx.bestSequence(allAttackers, nil, nil, nil, nil)
 			if !legal {
 				continue
 			}
@@ -1572,10 +1587,11 @@ func (ctx *sequenceContext) seedState() {
 // Uses Heap's algorithm (iterative) — no closure/callback alloc, no recursive call per perm.
 //
 // When winnerOrderOut is non-nil (len >= len(attackers)) the winning permutation is copied into
-// it. perCardOut / perCardTriggerOut (same size rule) receive the winning line's per-card Play
-// damage and hero-trigger damage. fillContributions uses these; the partition-loop caller
-// passes nil for all three so the permutation search stays allocation-free.
-func (ctx *sequenceContext) bestSequence(attackers, winnerOrderOut []card.Card, perCardOut, perCardTriggerOut []float64) (int, int, bool) {
+// it. perCardOut / perCardTriggerOut / perCardAuraTriggerOut (same size rule) receive the
+// winning line's per-card Play damage, hero-trigger damage, and mid-chain aura-trigger damage.
+// fillContributions uses these; the partition-loop caller passes nil for all four so the
+// permutation search stays allocation-free.
+func (ctx *sequenceContext) bestSequence(attackers, winnerOrderOut []card.Card, perCardOut, perCardTriggerOut, perCardAuraTriggerOut []float64) (int, int, bool) {
 	n := len(attackers)
 	if n == 0 {
 		// No attackers means no chain costs are deducted — the attack phase spends zero from the
@@ -1594,9 +1610,9 @@ func (ctx *sequenceContext) bestSequence(attackers, winnerOrderOut []card.Card, 
 	}
 
 	// Scratch buffers are playSequence's per-card outputs, overwritten every permutation. On a
-	// new winner we copy them into the caller's perCardOut / perCardTriggerOut. Only populated
-	// when the caller asked to track.
-	var scratch, triggerScratch []float64
+	// new winner we copy them into the caller's perCardOut / perCardTriggerOut /
+	// perCardAuraTriggerOut. Only populated when the caller asked to track.
+	var scratch, triggerScratch, auraTriggerScratch []float64
 	if perCardOut != nil {
 		scratch = ctx.bufs.perCardScratch[:n]
 	}
@@ -1606,6 +1622,12 @@ func (ctx *sequenceContext) bestSequence(attackers, winnerOrderOut []card.Card, 
 		}
 		triggerScratch = ctx.bufs.perCardTriggerScratch[:n]
 	}
+	if perCardAuraTriggerOut != nil {
+		if cap(ctx.bufs.perCardAuraTriggerScratch) < n {
+			ctx.bufs.perCardAuraTriggerScratch = make([]float64, n)
+		}
+		auraTriggerScratch = ctx.bufs.perCardAuraTriggerScratch[:n]
+	}
 
 	best := 0
 	bestLeftoverRunechants := ctx.runechantCarryover
@@ -1613,7 +1635,7 @@ func (ctx *sequenceContext) bestSequence(attackers, winnerOrderOut []card.Card, 
 	ctx.drawnWinner = ctx.drawnWinner[:0]
 	ctx.auraTriggersWinner = ctx.auraTriggersWinner[:0]
 	eval := func() {
-		dmg, leftoverRunechants, _, legal := ctx.playSequenceWithMeta(n, scratch, triggerScratch)
+		dmg, leftoverRunechants, _, legal := ctx.playSequenceWithMeta(n, scratch, triggerScratch, auraTriggerScratch)
 		if !legal {
 			return
 		}
@@ -1634,6 +1656,9 @@ func (ctx *sequenceContext) bestSequence(attackers, winnerOrderOut []card.Card, 
 			}
 			if perCardTriggerOut != nil {
 				copy(perCardTriggerOut[:n], triggerScratch)
+			}
+			if perCardAuraTriggerOut != nil {
+				copy(perCardAuraTriggerOut[:n], auraTriggerScratch)
 			}
 		}
 	}
@@ -1668,8 +1693,9 @@ func (ctx *sequenceContext) bestSequence(attackers, winnerOrderOut []card.Card, 
 // Buffers are mutated in place; the caller must not read them concurrently.
 //
 // When perCardOut is non-nil (len >= n) each entry is the card's Play return for that
-// position; perCardTriggerOut (same size rule) receives the hero's OnCardPlayed return.
-// The hot partition-loop callers pass nil for both.
+// position; perCardTriggerOut (same size rule) receives the hero's OnCardPlayed return;
+// perCardAuraTriggerOut (same size rule) receives the mid-chain AuraTrigger return (e.g.
+// Malefic Incantation's TriggerAttackAction). The hot partition-loop callers pass nil.
 //
 // Runechant flow:
 //   - state.Runechants starts at ctx.runechantCarryover.
@@ -1686,7 +1712,7 @@ func (ctx *sequenceContext) bestSequence(attackers, winnerOrderOut []card.Card, 
 // Populates permMeta from order and then calls playSequenceWithMeta. The hot path
 // (bestSequence) builds meta once and calls playSequenceWithMeta directly to amortise
 // interface dispatch across the N! permutations.
-func (ctx *sequenceContext) playSequence(order []card.Card, perCardOut, perCardTriggerOut []float64) (damage int, leftoverRunechants int, residualBudget int, legal bool) {
+func (ctx *sequenceContext) playSequence(order []card.Card, perCardOut, perCardTriggerOut, perCardAuraTriggerOut []float64) (damage int, leftoverRunechants int, residualBudget int, legal bool) {
 	ctx.seedState()
 	n := len(order)
 	pcBuf := ctx.bufs.pcBuf
@@ -1695,13 +1721,22 @@ func (ctx *sequenceContext) playSequence(order []card.Card, perCardOut, perCardT
 		meta[i] = attackerMetaPtrFor(c)
 		pcBuf[i] = card.CardState{Card: c, FromArsenal: i == ctx.arsenalInIdx}
 	}
-	return ctx.playSequenceWithMeta(n, perCardOut, perCardTriggerOut)
+	return ctx.playSequenceWithMeta(n, perCardOut, perCardTriggerOut, perCardAuraTriggerOut)
 }
 
 // playSequenceWithMeta runs the permutation currently held in ctx.bufs.pcBuf[:n] with
 // aligned permMeta[:n]. CardState (Card + FromArsenal) persists across permutations, so only
 // GrantedGoAgain needs a per-permutation reset — Play is the only thing that flips it.
-func (ctx *sequenceContext) playSequenceWithMeta(n int, perCardOut, perCardTriggerOut []float64) (damage int, leftoverRunechants int, residualBudget int, legal bool) {
+//
+// Per-card output attribution:
+//   - perCardOut[i] = card's own Play return (plus any EphemeralAttackTrigger damage routed
+//     back to this slot via SourceIndex — ephemeral triggers credit their source card, not
+//     the attacker that happened to consume them).
+//   - perCardTriggerOut[i] = hero.OnCardPlayed return for this card.
+//   - perCardAuraTriggerOut[i] = fireAttackActionTriggers return fired by this card. Credited
+//     to the attack action card that resolved because prior-turn auras have no BestLine entry
+//     this turn — attributing to the aura would drop the damage off the chain display.
+func (ctx *sequenceContext) playSequenceWithMeta(n int, perCardOut, perCardTriggerOut, perCardAuraTriggerOut []float64) (damage int, leftoverRunechants int, residualBudget int, legal bool) {
 	pcBuf := ctx.bufs.pcBuf
 	ptrBuf := ctx.bufs.ptrBuf
 	meta := ctx.bufs.permMeta[:n]
@@ -1712,6 +1747,9 @@ func (ctx *sequenceContext) playSequenceWithMeta(n int, perCardOut, perCardTrigg
 		}
 		if perCardTriggerOut != nil {
 			perCardTriggerOut[i] = 0
+		}
+		if perCardAuraTriggerOut != nil {
+			perCardAuraTriggerOut[i] = 0
 		}
 	}
 	played := ptrBuf[:n]
@@ -1792,14 +1830,10 @@ func (ctx *sequenceContext) playSequenceWithMeta(n int, perCardOut, perCardTrigg
 			perCardOut[i] = float64(playDmg)
 		}
 		if perCardTriggerOut != nil {
-			// Fold AuraTrigger damage into the hero-trigger slot for per-card attribution —
-			// the damage is driven by the attack action card that resolved, not by the aura
-			// (which has no BestLine entry by mid-chain). Ephemeral trigger damage is NOT
-			// folded in here — fireEphemeralAttackTriggers already credited it to the
-			// trigger's source via perCardOut[SourceIndex], which is the semantically
-			// correct attribution (the effect belongs to the card that registered the
-			// trigger, not the attacker that happened to consume it).
-			perCardTriggerOut[i] = float64(triggerDmg + auraTriggerDmg)
+			perCardTriggerOut[i] = float64(triggerDmg)
+		}
+		if perCardAuraTriggerOut != nil {
+			perCardAuraTriggerOut[i] = float64(auraTriggerDmg)
 		}
 		state.CardsPlayed = append(state.CardsPlayed, pc.Card)
 		if m.types.IsNonAttackAction() {
@@ -1996,7 +2030,7 @@ func buildAttackChain(dst []card.Card, attackers []card.Card, weapons []weapon.W
 // aliasing the buf-backed winnerOrder), and maps each position's damage back to BestLine's
 // Attack-role entries. Weapons have no BestLine entry; their damage is already in
 // summary.Value. Duplicate printings disambiguate by scan order. Contribution bundles Play
-// return + hero-trigger so per-card stats reflect total this-turn impact.
+// return + hero-trigger + aura-trigger so per-card stats reflect total this-turn impact.
 func fillAttackChainContributions(summary *TurnSummary, chain []card.Card, ctx *sequenceContext) {
 	line := summary.BestLine
 	total := len(line)
@@ -2007,13 +2041,18 @@ func fillAttackChainContributions(summary *TurnSummary, chain []card.Card, ctx *
 		bufs.fillContribTriggerDmg = make([]float64, len(chain))
 	}
 	perCardTrigger := bufs.fillContribTriggerDmg[:len(chain)]
-	ctx.bestSequence(chain, winnerOrder, perCardDmg, perCardTrigger)
+	if cap(bufs.fillContribAuraTriggerDmg) < len(chain) {
+		bufs.fillContribAuraTriggerDmg = make([]float64, len(chain))
+	}
+	perCardAuraTrigger := bufs.fillContribAuraTriggerDmg[:len(chain)]
+	ctx.bestSequence(chain, winnerOrder, perCardDmg, perCardTrigger, perCardAuraTrigger)
 	summary.AttackChain = make([]AttackChainEntry, len(winnerOrder))
 	for i := range winnerOrder {
 		summary.AttackChain[i] = AttackChainEntry{
-			Card:          winnerOrder[i],
-			Damage:        perCardDmg[i],
-			TriggerDamage: perCardTrigger[i],
+			Card:              winnerOrder[i],
+			Damage:            perCardDmg[i],
+			TriggerDamage:     perCardTrigger[i],
+			AuraTriggerDamage: perCardAuraTrigger[i],
 		}
 	}
 	if cap(bufs.fillContribUsed) < total {
@@ -2031,7 +2070,7 @@ func fillAttackChainContributions(summary *TurnSummary, chain []card.Card, ctx *
 			if used[i] || line[i].Role != Attack || line[i].Card.ID() != c.ID() {
 				continue
 			}
-			line[i].Contribution = perCardDmg[k] + perCardTrigger[k]
+			line[i].Contribution = perCardDmg[k] + perCardTrigger[k] + perCardAuraTrigger[k]
 			used[i] = true
 			break
 		}

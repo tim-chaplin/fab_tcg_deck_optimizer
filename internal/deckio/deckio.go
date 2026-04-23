@@ -84,11 +84,13 @@ type BestTurnJSON struct {
 
 // AttackChainEntryJSON serialises one attack step (card or weapon) with the damage it dealt
 // in the sim's winning chain. TriggerDamage is the hero's OnCardPlayed contribution for that
-// step — omitted when zero.
+// step; AuraTriggerDamage is the mid-chain AuraTrigger contribution (e.g. a prior-turn Malefic
+// Incantation firing on this attack). Both are omitted when zero.
 type AttackChainEntryJSON struct {
-	Card          string  `json:"card"`
-	Damage        float64 `json:"damage"`
-	TriggerDamage float64 `json:"trigger_damage,omitempty"`
+	Card              string  `json:"card"`
+	Damage            float64 `json:"damage"`
+	TriggerDamage     float64 `json:"trigger_damage,omitempty"`
+	AuraTriggerDamage float64 `json:"aura_trigger_damage,omitempty"`
 }
 
 // Marshal returns the JSON encoding of `d` (indented) with card/weapon/hero names in place of
@@ -214,9 +216,10 @@ func bestTurnToJSON(b deck.BestTurn) BestTurnJSON {
 			weaponNames = append(weaponNames, w.Name())
 		}
 		chain = append(chain, AttackChainEntryJSON{
-			Card:          e.Card.Name(),
-			Damage:        e.Damage,
-			TriggerDamage: e.TriggerDamage,
+			Card:              e.Card.Name(),
+			Damage:            e.Damage,
+			TriggerDamage:     e.TriggerDamage,
+			AuraTriggerDamage: e.AuraTriggerDamage,
 		})
 	}
 	return BestTurnJSON{
@@ -345,10 +348,11 @@ func bestTurnFromJSON(bj BestTurnJSON) (deck.BestTurn, error) {
 }
 
 // rebuildAttackChain reconstructs TurnSummary.AttackChain from the JSON form. When the file has
-// an explicit Chain array we use it: it carries true play order plus per-step damage and
-// hero-trigger damage, which FormatBestTurn needs to render "+N" contribution labels. Files
-// without a Chain field fall back to a best-effort rebuild (hand-order Attack-role cards then
-// weapons) so they still load, though damage labels will all read "+0".
+// an explicit Chain array we use it: it carries true play order plus per-step damage,
+// hero-trigger damage, and aura-trigger damage, which FormatBestTurn needs to render "+N"
+// contribution labels. Files without a Chain field fall back to a best-effort rebuild
+// (hand-order Attack-role cards then weapons) so they still load, though damage labels will
+// all read "+0".
 func rebuildAttackChain(bj BestTurnJSON, line []hand.CardAssignment) ([]hand.AttackChainEntry, error) {
 	if len(bj.Chain) > 0 {
 		chain := make([]hand.AttackChainEntry, len(bj.Chain))
@@ -358,9 +362,10 @@ func rebuildAttackChain(bj BestTurnJSON, line []hand.CardAssignment) ([]hand.Att
 				return nil, err
 			}
 			chain[i] = hand.AttackChainEntry{
-				Card:          c,
-				Damage:        e.Damage,
-				TriggerDamage: e.TriggerDamage,
+				Card:              c,
+				Damage:            e.Damage,
+				TriggerDamage:     e.TriggerDamage,
+				AuraTriggerDamage: e.AuraTriggerDamage,
 			}
 		}
 		return chain, nil
