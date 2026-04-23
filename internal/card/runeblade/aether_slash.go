@@ -2,10 +2,6 @@
 // Printed power: Red 4, Yellow 3, Blue 2.
 // Text: "When Aether Slash attacks, if a 'non-attack' action card was pitched to play it, deal 1
 // arcane damage to any target."
-//
-// The printed "Arcane: 1" stat is the same damage as the text rider — added once when the
-// "non-attack action was pitched" condition is met, not double-counted. With no qualifying
-// pitch, the card deals only its printed power.
 
 package runeblade
 

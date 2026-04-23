@@ -2,25 +2,14 @@
 
 Running list of work we want to do on this project. Sectioned by theme.
 
-## Simplifying Assumptions
-
-Many card implementations assume optimistic outcomes for conditional effects so the simulator
-doesn't have to model prior-turn state or opponent choices. These assumptions systematically
-favour cards whose printed stats are backed up by conditional riders. In the future we may want
-to apply a discount (e.g. 50%) to the value contributed by these conditions rather than treating
-them as fully active.
-
 ### Fully model effects where we currently just credit an integer value
 
 `internal/card/effect_values.go` centralises the damage-equivalents we use as stand-ins for
-"force opponent discard" (3) and "create a Gold token" (1). These are simplifications — the
+"force opponent discard" (3) and "create a Gold token" (0). These are simplifications — the
 sim never actually forces a discard or tracks Gold. When we model the real state (graveyard,
 Gold-token pool, opposing hand size) the rider implementations can cash out into actual
-future-turn tempo instead of a flat integer, and the `effect_values.go` constants should
-disappear. Mid-turn `"draw a card"` riders route through `TurnState.DrawOne` instead — see
-`internal/card/card.go`. Start-of-next-turn reveal-and-put-into-hand effects (Sigil of the
-Arknight) route through `card.DelayedPlay`'s `ToHand` return and land in the actual turn-2
-hand rather than as a flat credit.
+future-turn draw instead of a flat integer, and the `effect_values.go` constants should
+disappear.
 
 ### LikelyToHit breadcrumbs — on-hit riders awaiting modelling
 
@@ -54,19 +43,9 @@ called out in the sections below — landing any of them unlocks a subset of the
 
 ### On-hit / combat interactions
 
-- **Attacks always hit.** Any "when this hits a hero…" rider is assumed to fire — the sim doesn't
-  model blocks. Affects Weeping Battleground, Reek of Corruption. Also lets on-hit riders on
-  Jack Be Nimble / Jack Be Quick (steal), Snatch (draw), Rifting (instant cast), Life for a
-  Life (1{h}), Blow for a Blow (1 damage), Fervent Forerunner (Opt 2), Regain Composure
-  (unfreeze) count as always firing (but the riders themselves aren't wired in yet — see
-  below). Mauvrion Skies, Meat and Greet, Consuming Volition, Oath of the Arknight, and
-  Runic Reaping all gate their "if hits" clauses via `card.LikelyToHit` on the attack's
-  printed power.
 - **Dominate isn't modelled.** Drowning Dire, Overload, Pound for Pound, and Demolition Crew
   carry the keyword but the solver doesn't route around block partitioning.
 - **On-hit go-again isn't granted.** Overload's on-hit clause never fires.
-- **Incoming damage doesn't interrupt our auras.** Bloodspill Invocation assumes the attack lands
-  before its aura gets destroyed by incoming damage, so all N Runechants are created up front.
 - **Lay Low's marked-defender cost is ignored.** Card is treated as always legal and the attacker
   debuff is dropped.
 
@@ -152,18 +131,6 @@ Hero health isn't tracked, so every life-gain and life-comparison rider collapse
   live `AuraCreated` / `HasPlayedType(TypeAura)` check. Reek of Corruption, Hit the High Notes,
   and Shrill of Skullform all gate this correctly; Yinti Yanti does as well. Nothing else on the
   roster currently reads the clause.
-- **Malefic Incantation and Runeblood Incantation collapse multi-turn ticks.** Both auras
-  really tick once per turn over N turns; the sim credits the non-next-turn ticks as flat
-  damage on Play and only the first rune materialises as a live token (Malefic this turn when
-  an attack action follows, Runeblood next turn via PlayNextTurn).
-- **Cross-turn aura lifecycles are partially modelled.** `card.DelayedPlay` threads a
-  PlayNextTurn callback through the deck loop for cards whose effect fires at the start of the
-  owner's next action phase — Sigil of the Arknight peeks the actual post-draw top card next
-  turn, Sigil of Fyendal credits its 1{h} gain on leave, Blessing of Occult / Sigil of Deadwood
-  create their Runechants on next turn's starting state, and Sigil of Silphidae fires its
-  leave-trigger banish on next turn's upkeep. Other cross-turn auras still collapse their
-  effects into the immediate Play: Enchanting Melody (end-phase destruction clause dropped),
-  Sigil of Cycles (on-leave discard/draw dropped).
 - **Graveyard-banish additional costs are ignored.** Gravekeeping, Jack Be Nimble, Jack Be Quick,
   Looking for a Scrap, and Nimble Strike treat the banish step as free and either drop the
   rider or credit it unconditionally where noted in the card.
@@ -172,11 +139,6 @@ Hero health isn't tracked, so every life-gain and life-comparison rider collapse
 
 ### Arsenal and hand-state effects
 
-- **Arsenal provenance is modelled.** The arsenal-in card carries `PlayedCard.FromArsenal` so
-  riders gated on "if X is played from arsenal" (Unmovable +1{d}, Springboard Somersault +2{d},
-  Smashing Good Time / Plunder Run / Scout the Periphery scan bonuses, Fervent Forerunner /
-  Frontline Scout / Performance Bonus / Promise of Plenty / Scour the Battlescape go-agains)
-  fire only when their copy actually came from the arsenal slot.
 - **"No cards in hand" riders never fire.** Spring Load's +3{p} rider defaults off.
 - **Draw / hand cycling is flattened.** Mid-turn draws (Snatch, Drawn to the Dark Dimension)
   route through `TurnState.DrawOne`; the drawn card either carries as Held into the next hand
@@ -369,6 +331,8 @@ listed here so the direction tag is co-located with the name.
 - **Bluster Buff** — pay {r}-or-lose-1{p} resolved as "always pay"; player short on pitch would
   lose the point, so base power is over-credited.
 - **Chest Puff** — pay {r}-or-lose-1{p} resolved as "always pay"; same shape as Bluster Buff.
+- **Deathly Duet (all colours)** — Pitched scan may let both riders fire even without the
+  specific attribution.
 - **Lay Low (all colours)** — treated as always legal even without a marked defender; real card
   is uncastable when no hero is marked.
 - **Look Tuff** — pay {r}-or-lose-1{p} resolved as "always pay"; same shape as Bluster Buff.
@@ -376,50 +340,4 @@ listed here so the direction tag is co-located with the name.
   opponent be marked and the rider is tied to the mark.
 - **Put in Context** — base-power cap on what it can block is ignored; every attack is assumed
   to qualify so the defence is always live.
-- **Runeblade Arcanic Crackle** — printed 1 arcane added unconditionally; Ward on the opponent
-  would prevent part of it.
-- **Runeblade Bloodspill Invocation (all colours)** — all N Runechants credited up front;
-  incoming damage this turn would destroy the aura before the payoff fires.
-- **Runeblade Drowning Dire (all colours)** — Dominate keyword + AuraCreated flag both dropped
-  while the printed power is left alone — partial under-count, but in contexts where a
-  follow-up aura-reading card is present, Drowning Dire is materially overstated because the
-  Dominate protection of that damage is not modelled.
-- **Runeblade Singeing Steelblade (all colours)** — printed 1 arcane added unconditionally; Ward
-  would prevent it.
-#### Likely neutral
-
-- **Aether Slash (all colours)** — printed 1 arcane doubles as the text-rider damage; the code
-  adds it once when the non-attack pitch condition is met, which mirrors the card's actual
-  outcome on average.
-- **Blessing of Occult (all colours)** — tokens routed to next-turn carryover; tempo value is
-  preserved, just shifted a turn.
-- **Come to Fight / Minnowism / Nimblism / Sloggism (all colours)** — scan next attack and
-  credit +N only when a target actually exists; matches how the card plays in practice when the
-  chain is well-ordered.
-- **Deathly Duet (all colours)** — Pitched scan may let both riders fire even without the
-  specific attribution; on average this approximates the real outcome when the hero pitches one
-  of each type.
-- **Drawn to the Dark Dimension (all colours)** — draw rider routed through TurnState.DrawOne
-  and variable cost respected; accurate modelling rather than a simplification.
-- **Flying High (all colours)** — +1{p} matching-colour rider is modelled via CardsRemaining
-  scan plus GrantedGoAgain; both clauses fire only when a qualifying future attack exists.
-- **Hit the High Notes / Shrill of Skullform / Vantage Point / Runerager Swarm (all colours)** —
-  aura-created check is modelled directly via HasAuraInPlay; result matches the printed gate.
-- **Hocus Pocus / Spellblade Strike / Spellblade Assault / Reduce to Runechant / Read the
-  Runes** — Runechant = +1 future damage identity; faithful modelling of token creation.
-- **Malefic Incantation (all colours) / Runeblood Incantation (all colours)** — split between
-  carryover and in-turn credit avoids double-counting the same rune as both current-turn
-  discount and future-turn damage.
-- **Sigil of Deadwood (all colours)** — Runechant deliberately delayed to next-turn carryover
-  rather than this turn's discount pool.
-- **Sky Fire Lanterns (all colours)** — peeks actual deck top and matches on pitch; neither
-  over- nor under-credits.
-- **Sutcliffe's Research Notes (all colours)** — also listed under Undervalued for the dropped
-  re-order clause; the reveal-and-count core is accurate.
-- **Trot Along / Water the Seeds (all colours)** — scan CardsRemaining for a qualifying target
-  and fizzle when none exists; mirrors real card's interaction with chain order.
-
-Cards not listed in any bucket (Critical Strike, Brutal Assault, Raging Onslaught, Muscle Mutt,
-Wounding Blow, Dodge, Evasive Leap, Toughen Up, Rune Flash, Amplify the Arknight, Fragile Aura
-helper, Aura Helper, Next-Attack-Action helper) have no printed rider beyond the base stat
-line, so there's nothing to tag — they score exactly what they print.
+- **Runeblade Drowning Dire (all colours)** — Dominate keyword dropped.

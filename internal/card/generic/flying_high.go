@@ -2,9 +2,6 @@
 //
 // Text: "Your next attack this turn gets **go again**. If it's <matching color>, it gets +1{p}.
 // **Go again**" (Red checks for a red attack, Yellow for a yellow attack, Blue for a blue attack.)
-//
-// Simplification: The '+1{p} if matching color' rider is modelled: when the granted target's pitch
-// matches this card's, +1 is also credited.
 
 package generic
 
