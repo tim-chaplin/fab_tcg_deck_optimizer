@@ -562,20 +562,11 @@ var (
 	cardMetaMu    sync.Mutex
 )
 
-// attackerMetaFor returns cached metadata for c, populating on first encounter. Safe from
-// multiple goroutines: the first writer per ID holds the mutex, later readers see the ready flag
-// set with a release barrier and read the immutable meta entry directly.
-func attackerMetaFor(c card.Card) attackerMeta {
-	id := c.ID()
-	if atomic.LoadUint32(&cardMetaReady[id]) == 1 {
-		return cardMetaCache[id]
-	}
-	return cardMetaSlowPath(c, id)
-}
-
-// attackerMetaPtrFor is the pointer-returning counterpart of attackerMetaFor: it hands back a
-// direct pointer into the global cache so permutation swaps move 8 bytes instead of a full
-// attackerMeta struct. The target is read-only after initialisation.
+// attackerMetaPtrFor returns a pointer to cached metadata for c, populating on first encounter.
+// Hands back a direct pointer into the global cache so permutation swaps move 8 bytes instead of
+// a full attackerMeta struct. The target is read-only after initialisation. Safe from multiple
+// goroutines: the first writer per ID holds the mutex, later readers see the ready flag set with
+// a release barrier and read the immutable meta entry directly.
 func attackerMetaPtrFor(c card.Card) *attackerMeta {
 	id := c.ID()
 	if atomic.LoadUint32(&cardMetaReady[id]) == 1 {
