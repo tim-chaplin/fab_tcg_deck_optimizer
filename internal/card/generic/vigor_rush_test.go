@@ -20,12 +20,15 @@ func TestVigorRush_BaseGoAgainFalse(t *testing.T) {
 }
 
 // TestVigorRush_NoNonAttackActionNoGoAgain covers the miss branch: if only attack-action cards
-// (or nothing) have been played this turn, the conditional go-again rider doesn't fire.
+// (or nothing) have been played this turn, the conditional go-again rider doesn't fire. The sim
+// maintains NonAttackActionPlayed alongside CardsPlayed as it walks the chain, so Play reads the
+// flag rather than re-scanning.
 func TestVigorRush_NoNonAttackActionNoGoAgain(t *testing.T) {
 	cases := []card.Card{VigorRushRed{}, VigorRushYellow{}, VigorRushBlue{}}
 	for _, c := range cases {
 		s := card.TurnState{
-			CardsPlayed: []card.Card{stubGenericAttack(0, 0)}, // attack action, not non-attack
+			CardsPlayed:           []card.Card{stubGenericAttack(0, 0)}, // attack action, not non-attack
+			NonAttackActionPlayed: false,
 		}
 		self := &card.CardState{Card: c}
 		if got := c.Play(&s, self); got != c.Attack() {
@@ -42,7 +45,10 @@ func TestVigorRush_NoNonAttackActionNoGoAgain(t *testing.T) {
 func TestVigorRush_NonAttackActionGrantsGoAgain(t *testing.T) {
 	cases := []card.Card{VigorRushRed{}, VigorRushYellow{}, VigorRushBlue{}}
 	for _, c := range cases {
-		s := card.TurnState{CardsPlayed: []card.Card{stubGenericAction()}}
+		s := card.TurnState{
+			CardsPlayed:           []card.Card{stubGenericAction()},
+			NonAttackActionPlayed: true,
+		}
 		self := &card.CardState{Card: c}
 		_ = c.Play(&s, self)
 		if !self.GrantedGoAgain {

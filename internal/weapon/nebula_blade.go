@@ -3,8 +3,10 @@
 // you have played a 'non-attack' action card this turn, Nebula Blade gains +3{p} until end of
 // turn."
 //
-// Simplification: assume the attack always hits (+1 damage for the Runechant, counted as future
-// damage). The +3 power rider fires iff a prior card in CardsPlayed has Action && !Attack types.
+// Modelling: the +3 power rider fires when s.NonAttackActionPlayed is set. The runechant rider
+// gates on card.LikelyToHit of the effective attack — today's heuristic lets both the base-1 and
+// buffed-4 swings qualify, so behavior matches "always create a rune", but gating explicitly
+// tracks any future retune of LikelyToHit without a follow-up patch.
 
 package weapon
 
@@ -24,12 +26,12 @@ func (NebulaBlade) Types() card.TypeSet        { return nebulaBladeTypes }
 func (NebulaBlade) GoAgain() bool             { return false }
 func (NebulaBlade) Hands() int                { return 2 }
 func (c NebulaBlade) Play(s *card.TurnState, _ *card.CardState) int {
-	dmg := c.Attack() + s.CreateRunechant() // hit creates 1 Runechant (+1 future damage)
-	for _, pc := range s.CardsPlayed {
-		if pc.Types().IsNonAttackAction() {
-			dmg += 3
-			break
-		}
+	dmg := c.Attack()
+	if s.NonAttackActionPlayed {
+		dmg += 3
+	}
+	if card.LikelyToHit(dmg) {
+		dmg += s.CreateRunechant()
 	}
 	return dmg
 }
