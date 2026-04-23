@@ -90,11 +90,10 @@ func die(format string, args ...any) {
 	os.Exit(1)
 }
 
-// requireFlag dies with a usage error when fs.Parse didn't encounter -name. Used on knobs where a
-// silent default would score the deck under different assumptions than the caller intended —
-// most notably -incoming, where the opponent-pressure the deck was annealed at is not persisted
-// with the deck, so eval/anneal invocations that omit it would quietly rescore at a different
-// regime and the user would chase the resulting mismatch as a bug.
+// requireFlag dies with a usage error when fs.Parse didn't encounter -name. The flag's own Usage
+// string is echoed so the per-flag guidance the caller wrote in the FlagSet (e.g. why the flag
+// can't default) shows up alongside the "required" message — no need to duplicate that wording
+// here.
 func requireFlag(fs *flag.FlagSet, subcommand, name string) {
 	seen := false
 	fs.Visit(func(f *flag.Flag) {
@@ -102,11 +101,14 @@ func requireFlag(fs *flag.FlagSet, subcommand, name string) {
 			seen = true
 		}
 	})
-	if !seen {
-		die("%s: -%s is required; pass the opponent damage/turn the deck should be scored against "+
-			"(must match the -incoming the deck was annealed at to get comparable numbers)",
-			subcommand, name)
+	if seen {
+		return
 	}
+	f := fs.Lookup(name)
+	if f == nil {
+		die("%s: internal error — required flag -%s is not registered on the FlagSet", subcommand, name)
+	}
+	die("%s: -%s is required\n  usage: %s", subcommand, name, f.Usage)
 }
 
 // parseFlagsAnywhere parses args on fs while tolerating flags that appear before, after, or
