@@ -85,6 +85,21 @@ func TestFormatBestTurn_HeroTriggerAttribution(t *testing.T) {
 	}
 }
 
+// TestFormatBestTurn_NonAttackCardUsesPlayLabel pins the chain label to "PLAY" for cards that
+// aren't attacks (e.g. Mauvrion Skies, a non-attack action). Attack cards keep the "ATTACK"
+// label so the reader can distinguish damage-dealing chain steps from resource/setup plays.
+func TestFormatBestTurn_NonAttackCardUsesPlayLabel(t *testing.T) {
+	h := []card.Card{runeblade.MauvrionSkiesRed{}, runeblade.ShrillOfSkullformRed{}, runeblade.MaleficIncantationBlue{}}
+	got := Best(hero.Viserai{}, nil, h, 0, nil, 0, nil)
+	out := FormatBestTurn(got)
+	if !strings.Contains(out, "Mauvrion Skies (Red): PLAY") {
+		t.Errorf("want Mauvrion (non-attack action) labelled PLAY, got:\n%s", out)
+	}
+	if !strings.Contains(out, "Shrill of Skullform (Red): ATTACK") {
+		t.Errorf("want Shrill (attack action) labelled ATTACK, got:\n%s", out)
+	}
+}
+
 // TestFormatBestTurn_ArsenalInPlayedAsDR checks the combined "arsenal-in played from the slot"
 // + "defense reaction prevented" rendering. Hand: one Malefic Blue (pitch 3). Arsenal-in:
 // Toughen Up Blue (DR cost 2). Malefic pitches to fund the DR, Toughen Up blocks 4 of 4 incoming.
