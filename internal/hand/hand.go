@@ -1098,12 +1098,10 @@ func findArsenalCard(rolesBuf []Role, arsenalCardIn card.Card, n int) card.Card 
 	return nil
 }
 
-// beatsBest decides whether a candidate partition displaces the current best. Tiebreak order:
-// higher Value, then more leftover runechants (they convert to future arcane damage), then
-// more card.AddsFutureValue cards played (their hidden-later-turn payoff is invisible to the
-// current-turn Value — the bias corrects for that), then preferring a partition that ends
-// with the arsenal slot occupied (saves a hand slot next refill). "Occupied" covers both an
-// arsenal-in card that stayed and a Held hand card slated for post-hoc promotion.
+// beatsBest decides whether a candidate partition displaces the current best. Tiebreak
+// order: Value → leftover runechants (future arcane) → more AddsFutureValue cards played
+// (hidden later-turn payoff the current-turn Value misses) → arsenal slot ending occupied
+// (saves a hand slot next refill; covers both arsenal-in-stayed and Held-for-promotion).
 func beatsBest(v, leftoverRunechants, futureValuePlayed int, willOccupyArsenal bool, best TurnSummary, bestFutureValuePlayed int, bestWillOccupyArsenal bool) bool {
 	if v > best.Value {
 		return true
@@ -1421,8 +1419,8 @@ func fireAttackActionTriggers(state *card.TurnState) int {
 	return total
 }
 
-// (pitched / deck references, incoming damage, block total). Called once per ctx so
-// playSequenceWithMeta's hot per-permutation reset can skip them.
+// seedState writes the leaf-constant TurnState fields (pitched / deck refs, incoming damage,
+// block total) so the per-permutation reset in playSequenceWithMeta can skip them.
 func (ctx *sequenceContext) seedState() {
 	s := ctx.bufs.state
 	s.Pitched = ctx.pitched
@@ -1532,31 +1530,28 @@ func (ctx *sequenceContext) bestSequence(attackers, winnerOrderOut []card.Card, 
 	return best, bestLeftoverRunechants, foundLegal
 }
 
-// playSequence plays `order` as a sequence of cards, reusing ctx.bufs' pooled buffers. Buffers
-// are mutated in place; the caller must not read them concurrently.
+// playSequence plays `order` as a sequence of cards, reusing ctx.bufs' pooled buffers.
+// Buffers are mutated in place; the caller must not read them concurrently.
 //
-// When perCardOut is non-nil (len >= n) each entry is the card's Play return for that position;
-// perCardTriggerOut (same size rule) receives the hero's OnCardPlayed return for that position.
-// The hot partition-loop callers pass nil for both; fillContributions's replay passes real slices.
+// When perCardOut is non-nil (len >= n) each entry is the card's Play return for that
+// position; perCardTriggerOut (same size rule) receives the hero's OnCardPlayed return.
+// The hot partition-loop callers pass nil for both.
 //
 // Runechant flow:
-//   - state.Runechants starts at ctx.runechantCarryover (tokens from the previous turn).
-//   - Each card's Play / hero OnCardPlayed may call CreateRunechants, incrementing the count AND
-//     returning n damage — tokens are credited exactly once, at creation.
-//   - After each Attack- or Weapon-typed card's Play+OnCardPlayed resolve, all current tokens
-//     fire and are destroyed: state.Runechants is zeroed but damage is NOT re-added (that would
-//     double-count tokens credited at creation).
+//   - state.Runechants starts at ctx.runechantCarryover.
+//   - Play / OnCardPlayed calling CreateRunechants increments the count AND returns n damage
+//     — tokens are credited exactly once, at creation.
+//   - After each Attack / Weapon card resolves, all current tokens fire and are destroyed;
+//     state.Runechants is zeroed but damage is NOT re-added (tokens were credited at
+//     creation).
 //   - At end of the sequence, state.Runechants is the leftover count carrying into next turn.
 //
-// Resource flow:
-//   - ctx.resourceBudget is the starting pool; each card deducts its effective cost, as returned
-//     by attackerMeta.costAt(state) — which defers to Card.Cost(state) for VariableCost cards
-//     and returns the cached static value otherwise. Negative remaining budget returns
-//     legal=false (the caller treats that ordering as zero damage).
+// Resource flow: ctx.resourceBudget is the starting pool; each card deducts
+// attackerMeta.costAt(state). Negative remaining budget returns legal=false.
 //
-// Populates permMeta from order and then calls playSequenceWithMeta. The hot path (bestSequence)
-// builds meta once and calls playSequenceWithMeta directly so interface dispatch for scalar
-// attributes amortises across the N! permutations it evaluates.
+// Populates permMeta from order and then calls playSequenceWithMeta. The hot path
+// (bestSequence) builds meta once and calls playSequenceWithMeta directly to amortise
+// interface dispatch across the N! permutations.
 func (ctx *sequenceContext) playSequence(order []card.Card, perCardOut, perCardTriggerOut []float64) (damage int, leftoverRunechants int, residualBudget int, legal bool) {
 	ctx.seedState()
 	n := len(order)
@@ -1569,10 +1564,9 @@ func (ctx *sequenceContext) playSequence(order []card.Card, perCardOut, perCardT
 	return ctx.playSequenceWithMeta(n, perCardOut, perCardTriggerOut)
 }
 
-// playSequenceWithMeta runs the permutation currently held in ctx.bufs.pcBuf[:n] (with aligned
-// permMeta[:n]). bestSequence keeps the two in lockstep as it swaps perm entries — the full
-// CardState (Card + FromArsenal) persists across permutations, so only GrantedGoAgain needs a
-// per-permutation reset. Cards' Play is the only thing that flips it.
+// playSequenceWithMeta runs the permutation currently held in ctx.bufs.pcBuf[:n] with
+// aligned permMeta[:n]. CardState (Card + FromArsenal) persists across permutations, so only
+// GrantedGoAgain needs a per-permutation reset — Play is the only thing that flips it.
 func (ctx *sequenceContext) playSequenceWithMeta(n int, perCardOut, perCardTriggerOut []float64) (damage int, leftoverRunechants int, residualBudget int, legal bool) {
 	pcBuf := ctx.bufs.pcBuf
 	ptrBuf := ctx.bufs.ptrBuf
@@ -1590,30 +1584,28 @@ func (ctx *sequenceContext) playSequenceWithMeta(n int, perCardOut, perCardTrigg
 	state := ctx.bufs.state
 	// Reset only the fields playSequence mutates. Pitched and Deck are stable across permutations
 	// in a partition leaf; CardsRemaining and Self are rewritten per-card in the loop. A
-	// full-struct replace would memcpy every field (including big slice headers) and profiled at
-	// ~850ms/call; skipping caller-unread fields cuts most of that.
-	// Pitched / Deck / IncomingDamage / BlockTotal are seeded once per ctx (see seedState); cards
-	// don't mutate them, so we skip the per-permutation reset.
+	// Per-permutation reset. Only touch fields the cards mutate; leaf-stable fields (Pitched,
+	// Deck, IncomingDamage, BlockTotal) come from seedState. A full-struct replace here
+	// memcpies big slice headers on every permutation and profiles dramatically slower.
 	state.CardsPlayed = ctx.bufs.cardsPlayedBuf[:0]
 	state.Runechants = ctx.runechantCarryover
 	state.ArcaneDamageDealt = false
 	state.AuraCreated = false
 	state.Overpower = false
 	state.NonAttackActionPlayed = false
-	// Deck and Drawn must reset per permutation: DrawOne mutates them and a prior permutation's
-	// consumption would poison the next. Pitched / IncomingDamage / BlockTotal remain in
-	// seedState — cards don't mutate them.
+	// Deck and Drawn reset per permutation: DrawOne mutates them, so a prior permutation's
+	// consumption would poison the next.
 	state.Deck = ctx.deck
 	state.Drawn = nil
-	// Graveyard and Banish reset per permutation too: cards append themselves to Graveyard as
+	// Graveyard and Banish reset per permutation: cards append themselves to Graveyard as
 	// they resolve, and graveyard-banish effects shift cards into Banish. Reusing the scratch
 	// backing array keeps the reset allocation-free.
 	state.Graveyard = ctx.bufs.attackGravScratch[:0]
 	state.Banish = nil
 	// AuraTriggers reset per permutation: seeded with a copy of priorAuraTriggers so
-	// mid-chain attack-action triggers (Malefic Incantation) fire without their Count /
-	// FiredThisTurn mutations leaking across permutations. Cards adding new triggers via
-	// AddAuraTrigger extend the same scratch slice.
+	// mid-chain attack-action triggers can fire without their Count / FiredThisTurn
+	// mutations leaking across permutations. Cards adding triggers via AddAuraTrigger extend
+	// the same scratch slice.
 	state.AuraTriggers = append(ctx.bufs.auraTriggersScratch[:0], ctx.priorAuraTriggers...)
 	resources := ctx.resourceBudget
 	for i, pc := range played {
@@ -1841,13 +1833,12 @@ func buildAttackChain(dst []card.Card, attackers []card.Card, weapons []weapon.W
 	return dst
 }
 
-// fillAttackChainContributions re-runs the sequence search with tracking enabled to recover the
-// winning permutation, snapshots it into summary.AttackChain (fresh slice — the buf-backed
-// winnerOrder is reused on later calls), and maps each position's damage back to BestLine's
-// Attack-role entries. Weapons don't map back since they have no BestLine entry; their damage
-// is already in summary.Value. Duplicate printings played as twin attacks disambiguate by
-// scan order. Contribution bundles Play return + hero-trigger so per-card stats reflect the
-// card's total this-turn impact.
+// fillAttackChainContributions re-runs the sequence search with tracking enabled to recover
+// the winning permutation, snapshots it into summary.AttackChain (fresh slice to avoid
+// aliasing the buf-backed winnerOrder), and maps each position's damage back to BestLine's
+// Attack-role entries. Weapons have no BestLine entry; their damage is already in
+// summary.Value. Duplicate printings disambiguate by scan order. Contribution bundles Play
+// return + hero-trigger so per-card stats reflect total this-turn impact.
 func fillAttackChainContributions(summary *TurnSummary, chain []card.Card, ctx *sequenceContext) {
 	line := summary.BestLine
 	total := len(line)
