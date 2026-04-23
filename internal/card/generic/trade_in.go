@@ -3,8 +3,6 @@
 //
 // Text: "When this attacks, you may discard a card. If you do, draw a card. If this was played from
 // arsenal, it gains **go again**."
-//
-// Simplification: Discard-to-draw and arsenal-only go-again aren't modelled.
 
 package generic
 
@@ -22,6 +20,8 @@ func (TradeInRed) Attack() int                 { return 3 }
 func (TradeInRed) Defense() int                { return 2 }
 func (TradeInRed) Types() card.TypeSet         { return tradeInTypes }
 func (TradeInRed) GoAgain() bool               { return false }
+// not implemented: discard-to-draw rider, arsenal-conditional go again
+func (TradeInRed) NotImplemented()             {}
 func (c TradeInRed) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }
 
 type TradeInYellow struct{}
@@ -34,6 +34,8 @@ func (TradeInYellow) Attack() int                 { return 2 }
 func (TradeInYellow) Defense() int                { return 2 }
 func (TradeInYellow) Types() card.TypeSet         { return tradeInTypes }
 func (TradeInYellow) GoAgain() bool               { return false }
+// not implemented: discard-to-draw rider, arsenal-conditional go again
+func (TradeInYellow) NotImplemented()             {}
 func (c TradeInYellow) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }
 
 type TradeInBlue struct{}
@@ -46,4 +48,6 @@ func (TradeInBlue) Attack() int                 { return 1 }
 func (TradeInBlue) Defense() int                { return 2 }
 func (TradeInBlue) Types() card.TypeSet         { return tradeInTypes }
 func (TradeInBlue) GoAgain() bool               { return false }
+// not implemented: discard-to-draw rider, arsenal-conditional go again
+func (TradeInBlue) NotImplemented()             {}
 func (c TradeInBlue) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }

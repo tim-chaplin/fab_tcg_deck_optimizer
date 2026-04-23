@@ -3,8 +3,6 @@
 //
 // Text: "When this attacks, you may put a card from your hand on the bottom of your deck. If you
 // do, draw a card."
-//
-// Simplification: Hand-cycle draw rider isn't modelled.
 
 package generic
 
@@ -22,4 +20,6 @@ func (EmissaryOfMoonRed) Attack() int                 { return 4 }
 func (EmissaryOfMoonRed) Defense() int                { return 2 }
 func (EmissaryOfMoonRed) Types() card.TypeSet         { return emissaryOfMoonTypes }
 func (EmissaryOfMoonRed) GoAgain() bool               { return false }
+// not implemented: hand-cycle draw rider
+func (EmissaryOfMoonRed) NotImplemented()             {}
 func (c EmissaryOfMoonRed) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }

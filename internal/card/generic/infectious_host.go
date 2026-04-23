@@ -3,8 +3,6 @@
 //
 // Text: "When this attacks a hero, if you control a Frailty token, create a Frailty token under
 // their control, then repeat for Inertia and Bloodrot Pox."
-//
-// Simplification: Frailty/Inertia/Bloodrot Pox token creation isn't modelled.
 
 package generic
 
@@ -22,6 +20,8 @@ func (InfectiousHostRed) Attack() int                 { return 4 }
 func (InfectiousHostRed) Defense() int                { return 2 }
 func (InfectiousHostRed) Types() card.TypeSet         { return infectiousHostTypes }
 func (InfectiousHostRed) GoAgain() bool               { return false }
+// not implemented: frailty/inertia/bloodrot pox tokens
+func (InfectiousHostRed) NotImplemented()             {}
 func (c InfectiousHostRed) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }
 
 type InfectiousHostYellow struct{}
@@ -34,6 +34,8 @@ func (InfectiousHostYellow) Attack() int                 { return 3 }
 func (InfectiousHostYellow) Defense() int                { return 2 }
 func (InfectiousHostYellow) Types() card.TypeSet         { return infectiousHostTypes }
 func (InfectiousHostYellow) GoAgain() bool               { return false }
+// not implemented: frailty/inertia/bloodrot pox tokens
+func (InfectiousHostYellow) NotImplemented()             {}
 func (c InfectiousHostYellow) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }
 
 type InfectiousHostBlue struct{}
@@ -46,4 +48,6 @@ func (InfectiousHostBlue) Attack() int                 { return 2 }
 func (InfectiousHostBlue) Defense() int                { return 2 }
 func (InfectiousHostBlue) Types() card.TypeSet         { return infectiousHostTypes }
 func (InfectiousHostBlue) GoAgain() bool               { return false }
+// not implemented: frailty/inertia/bloodrot pox tokens
+func (InfectiousHostBlue) NotImplemented()             {}
 func (c InfectiousHostBlue) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }

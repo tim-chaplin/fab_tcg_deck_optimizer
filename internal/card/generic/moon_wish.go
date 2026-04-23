@@ -4,8 +4,6 @@
 // Text: "You may put a card from your hand on top of your deck rather than pay Moon Wish's {r}
 // cost. If Moon Wish hits, search your deck for a card named Sun Kiss, reveal it, put it into your
 // hand, then shuffle your deck."
-//
-// Simplification: Alternative hand-on-top cost and Sun Kiss search rider aren't modelled.
 
 package generic
 
@@ -23,6 +21,8 @@ func (MoonWishRed) Attack() int                 { return 5 }
 func (MoonWishRed) Defense() int                { return 2 }
 func (MoonWishRed) Types() card.TypeSet         { return moonWishTypes }
 func (MoonWishRed) GoAgain() bool               { return false }
+// not implemented: hand-on-top alternative cost, Sun Kiss deck search
+func (MoonWishRed) NotImplemented()             {}
 func (c MoonWishRed) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }
 
 type MoonWishYellow struct{}
@@ -35,6 +35,8 @@ func (MoonWishYellow) Attack() int                 { return 4 }
 func (MoonWishYellow) Defense() int                { return 2 }
 func (MoonWishYellow) Types() card.TypeSet         { return moonWishTypes }
 func (MoonWishYellow) GoAgain() bool               { return false }
+// not implemented: hand-on-top alternative cost, Sun Kiss deck search
+func (MoonWishYellow) NotImplemented()             {}
 func (c MoonWishYellow) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }
 
 type MoonWishBlue struct{}
@@ -47,4 +49,6 @@ func (MoonWishBlue) Attack() int                 { return 3 }
 func (MoonWishBlue) Defense() int                { return 2 }
 func (MoonWishBlue) Types() card.TypeSet         { return moonWishTypes }
 func (MoonWishBlue) GoAgain() bool               { return false }
+// not implemented: hand-on-top alternative cost, Sun Kiss deck search
+func (MoonWishBlue) NotImplemented()             {}
 func (c MoonWishBlue) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }

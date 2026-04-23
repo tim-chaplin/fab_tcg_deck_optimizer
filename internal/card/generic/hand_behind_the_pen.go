@@ -3,8 +3,6 @@
 //
 // Text: "When this hits a hero, turn a card in their arsenal face-up, then banish a non-attack
 // action card from their arsenal."
-//
-// Simplification: Arsenal-manipulation rider isn't modelled.
 
 package generic
 
@@ -22,6 +20,8 @@ func (HandBehindThePenRed) Attack() int                 { return 6 }
 func (HandBehindThePenRed) Defense() int                { return 2 }
 func (HandBehindThePenRed) Types() card.TypeSet         { return handBehindThePenTypes }
 func (HandBehindThePenRed) GoAgain() bool               { return false }
+// not implemented: on-hit opponent-arsenal manipulation rider
+func (HandBehindThePenRed) NotImplemented()             {}
 func (c HandBehindThePenRed) Play(s *card.TurnState, self *card.CardState) int { return handBehindThePenDamage(c.Attack(), self) }
 
 // handBehindThePenDamage is a breadcrumb for the on-hit "arsenal face-up + banish non-attack

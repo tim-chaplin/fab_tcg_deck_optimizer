@@ -3,8 +3,6 @@
 //
 // Text: "When this attacks, you may put a card from your hand on the bottom of your deck. If you
 // do, this gets +2{p}."
-//
-// Simplification: Hand-cycle-for-+2{p} rider isn't modelled.
 
 package generic
 
@@ -22,4 +20,6 @@ func (EmissaryOfTidesRed) Attack() int                 { return 4 }
 func (EmissaryOfTidesRed) Defense() int                { return 2 }
 func (EmissaryOfTidesRed) Types() card.TypeSet         { return emissaryOfTidesTypes }
 func (EmissaryOfTidesRed) GoAgain() bool               { return false }
+// not implemented: hand-cycle-for-+2{p} rider
+func (EmissaryOfTidesRed) NotImplemented()             {}
 func (c EmissaryOfTidesRed) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }

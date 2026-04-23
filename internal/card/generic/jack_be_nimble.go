@@ -4,8 +4,6 @@
 // Text: "When this attacks, you may banish a Nimblism from your graveyard. If you do, this gets
 // +1{p} and **go again**. When this hits a hero, steal an item they control until the end of this
 // action phase."
-//
-// Simplification: Graveyard banish for +1{p}/go-again and on-hit steal aren't modelled.
 
 package generic
 
@@ -23,6 +21,8 @@ func (JackBeNimbleRed) Attack() int                 { return 3 }
 func (JackBeNimbleRed) Defense() int                { return 3 }
 func (JackBeNimbleRed) Types() card.TypeSet         { return jackBeNimbleTypes }
 func (JackBeNimbleRed) GoAgain() bool               { return false }
+// not implemented: graveyard-banish cost + on-hit item steal
+func (JackBeNimbleRed) NotImplemented()             {}
 func (c JackBeNimbleRed) Play(s *card.TurnState, self *card.CardState) int { return jackBeNimbleDamage(c.Attack(), self) }
 
 // jackBeNimbleDamage is a breadcrumb for the on-hit "steal an item" rider — not modelled yet

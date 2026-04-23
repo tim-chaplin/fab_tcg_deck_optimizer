@@ -5,8 +5,8 @@
 // prevent 4 damage that source would deal. At the beginning of your end phase, destroy Enchanting
 // Melody unless you have played a 'non-attack' action card this turn."
 //
-// Simplification: Damage-prevention trigger and end-phase destruction clause aren't modelled; value
-// is just the aura-created flag (read by Yinti Yanti, Runerager Swarm, etc.).
+// The aura-created flag is set so same-turn aura-readers (Yinti Yanti, Runerager Swarm, etc.)
+// see the entry.
 
 package generic
 
@@ -24,6 +24,8 @@ func (EnchantingMelodyRed) Attack() int                 { return 0 }
 func (EnchantingMelodyRed) Defense() int                { return 2 }
 func (EnchantingMelodyRed) Types() card.TypeSet         { return enchantingMelodyTypes }
 func (EnchantingMelodyRed) GoAgain() bool               { return true }
+// not implemented: damage-prevention trigger, end-phase destruction clause
+func (EnchantingMelodyRed) NotImplemented()             {}
 func (EnchantingMelodyRed) Play(s *card.TurnState, _ *card.CardState) int { return setAuraCreated(s) }
 
 type EnchantingMelodyYellow struct{}
@@ -36,6 +38,8 @@ func (EnchantingMelodyYellow) Attack() int                 { return 0 }
 func (EnchantingMelodyYellow) Defense() int                { return 2 }
 func (EnchantingMelodyYellow) Types() card.TypeSet         { return enchantingMelodyTypes }
 func (EnchantingMelodyYellow) GoAgain() bool               { return true }
+// not implemented: damage-prevention trigger, end-phase destruction clause
+func (EnchantingMelodyYellow) NotImplemented()             {}
 func (EnchantingMelodyYellow) Play(s *card.TurnState, _ *card.CardState) int { return setAuraCreated(s) }
 
 type EnchantingMelodyBlue struct{}
@@ -48,4 +52,6 @@ func (EnchantingMelodyBlue) Attack() int                 { return 0 }
 func (EnchantingMelodyBlue) Defense() int                { return 2 }
 func (EnchantingMelodyBlue) Types() card.TypeSet         { return enchantingMelodyTypes }
 func (EnchantingMelodyBlue) GoAgain() bool               { return true }
+// not implemented: damage-prevention trigger, end-phase destruction clause
+func (EnchantingMelodyBlue) NotImplemented()             {}
 func (EnchantingMelodyBlue) Play(s *card.TurnState, _ *card.CardState) int { return setAuraCreated(s) }

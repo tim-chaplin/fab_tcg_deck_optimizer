@@ -3,8 +3,6 @@
 //
 // Text: "If Drone of Brutality would be put into your graveyard from anywhere, instead put it on
 // the bottom of your deck."
-//
-// Simplification: Graveyard-replacement-to-deck trigger isn't modelled.
 
 package generic
 
@@ -23,6 +21,8 @@ func (DroneOfBrutalityRed) Defense() int                { return 2 }
 func (DroneOfBrutalityRed) Types() card.TypeSet         { return droneOfBrutalityTypes }
 func (DroneOfBrutalityRed) GoAgain() bool               { return false }
 func (DroneOfBrutalityRed) NotSilverAgeLegal()           {}
+// not implemented: graveyard-replacement-to-deck trigger
+func (DroneOfBrutalityRed) NotImplemented()              {}
 func (c DroneOfBrutalityRed) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }
 
 type DroneOfBrutalityYellow struct{}
@@ -36,6 +36,8 @@ func (DroneOfBrutalityYellow) Defense() int                { return 2 }
 func (DroneOfBrutalityYellow) Types() card.TypeSet         { return droneOfBrutalityTypes }
 func (DroneOfBrutalityYellow) GoAgain() bool               { return false }
 func (DroneOfBrutalityYellow) NotSilverAgeLegal()           {}
+// not implemented: graveyard-replacement-to-deck trigger
+func (DroneOfBrutalityYellow) NotImplemented()              {}
 func (c DroneOfBrutalityYellow) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }
 
 type DroneOfBrutalityBlue struct{}
@@ -49,4 +51,6 @@ func (DroneOfBrutalityBlue) Defense() int                { return 2 }
 func (DroneOfBrutalityBlue) Types() card.TypeSet         { return droneOfBrutalityTypes }
 func (DroneOfBrutalityBlue) GoAgain() bool               { return false }
 func (DroneOfBrutalityBlue) NotSilverAgeLegal()           {}
+// not implemented: graveyard-replacement-to-deck trigger
+func (DroneOfBrutalityBlue) NotImplemented()              {}
 func (c DroneOfBrutalityBlue) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }

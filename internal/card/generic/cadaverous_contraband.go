@@ -3,8 +3,6 @@
 //
 // Text: "If Cadaverous Contraband hits, you may put a 'non-attack' action card from your graveyard
 // on top of your deck."
-//
-// Simplification: Graveyard → top-of-deck rider isn't modelled.
 
 package generic
 
@@ -22,6 +20,8 @@ func (CadaverousContrabandRed) Attack() int                 { return 6 }
 func (CadaverousContrabandRed) Defense() int                { return 2 }
 func (CadaverousContrabandRed) Types() card.TypeSet         { return cadaverousContrabandTypes }
 func (CadaverousContrabandRed) GoAgain() bool               { return false }
+// not implemented: on-hit graveyard → top-of-deck rider
+func (CadaverousContrabandRed) NotImplemented()             {}
 func (c CadaverousContrabandRed) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }
 
 type CadaverousContrabandYellow struct{}
@@ -34,6 +34,8 @@ func (CadaverousContrabandYellow) Attack() int                 { return 5 }
 func (CadaverousContrabandYellow) Defense() int                { return 2 }
 func (CadaverousContrabandYellow) Types() card.TypeSet         { return cadaverousContrabandTypes }
 func (CadaverousContrabandYellow) GoAgain() bool               { return false }
+// not implemented: on-hit graveyard → top-of-deck rider
+func (CadaverousContrabandYellow) NotImplemented()             {}
 func (c CadaverousContrabandYellow) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }
 
 type CadaverousContrabandBlue struct{}
@@ -46,4 +48,6 @@ func (CadaverousContrabandBlue) Attack() int                 { return 4 }
 func (CadaverousContrabandBlue) Defense() int                { return 2 }
 func (CadaverousContrabandBlue) Types() card.TypeSet         { return cadaverousContrabandTypes }
 func (CadaverousContrabandBlue) GoAgain() bool               { return false }
+// not implemented: on-hit graveyard → top-of-deck rider
+func (CadaverousContrabandBlue) NotImplemented()             {}
 func (c CadaverousContrabandBlue) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }

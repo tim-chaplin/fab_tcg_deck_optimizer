@@ -2,8 +2,6 @@
 // defense: Red 4, Yellow 3, Blue 2.
 //
 // Text: "When this defends, look at the top card of your deck."
-//
-// Simplification: The deck-peek trigger isn't modelled.
 
 package generic
 
@@ -19,6 +17,8 @@ func (OnTheHorizonRed) Attack() int                 { return 0 }
 func (OnTheHorizonRed) Defense() int                { return 4 }
 func (OnTheHorizonRed) Types() card.TypeSet         { return defenseReactionTypes }
 func (OnTheHorizonRed) GoAgain() bool               { return false }
+// not implemented: deck-peek defend trigger
+func (OnTheHorizonRed) NotImplemented()             {}
 func (OnTheHorizonRed) Play(s *card.TurnState, _ *card.CardState) int { return 0 }
 
 type OnTheHorizonYellow struct{}
@@ -31,6 +31,8 @@ func (OnTheHorizonYellow) Attack() int                 { return 0 }
 func (OnTheHorizonYellow) Defense() int                { return 3 }
 func (OnTheHorizonYellow) Types() card.TypeSet         { return defenseReactionTypes }
 func (OnTheHorizonYellow) GoAgain() bool               { return false }
+// not implemented: deck-peek defend trigger
+func (OnTheHorizonYellow) NotImplemented()             {}
 func (OnTheHorizonYellow) Play(s *card.TurnState, _ *card.CardState) int { return 0 }
 
 type OnTheHorizonBlue struct{}
@@ -43,4 +45,6 @@ func (OnTheHorizonBlue) Attack() int                 { return 0 }
 func (OnTheHorizonBlue) Defense() int                { return 2 }
 func (OnTheHorizonBlue) Types() card.TypeSet         { return defenseReactionTypes }
 func (OnTheHorizonBlue) GoAgain() bool               { return false }
+// not implemented: deck-peek defend trigger
+func (OnTheHorizonBlue) NotImplemented()             {}
 func (OnTheHorizonBlue) Play(s *card.TurnState, _ *card.CardState) int { return 0 }

@@ -2,8 +2,6 @@
 // Defense 3.
 //
 // Text: "**Opt 4** **Go again**"
-//
-// Simplification: Opt isn't modelled.
 
 package generic
 
@@ -21,6 +19,8 @@ func (WhisperOfTheOracleRed) Attack() int                 { return 0 }
 func (WhisperOfTheOracleRed) Defense() int                { return 3 }
 func (WhisperOfTheOracleRed) Types() card.TypeSet         { return whisperOfTheOracleTypes }
 func (WhisperOfTheOracleRed) GoAgain() bool               { return true }
+// not implemented: opt (deck-top reorder)
+func (WhisperOfTheOracleRed) NotImplemented()             {}
 func (WhisperOfTheOracleRed) Play(s *card.TurnState, _ *card.CardState) int { return 0 }
 
 type WhisperOfTheOracleYellow struct{}
@@ -33,6 +33,8 @@ func (WhisperOfTheOracleYellow) Attack() int                 { return 0 }
 func (WhisperOfTheOracleYellow) Defense() int                { return 3 }
 func (WhisperOfTheOracleYellow) Types() card.TypeSet         { return whisperOfTheOracleTypes }
 func (WhisperOfTheOracleYellow) GoAgain() bool               { return true }
+// not implemented: opt (deck-top reorder)
+func (WhisperOfTheOracleYellow) NotImplemented()             {}
 func (WhisperOfTheOracleYellow) Play(s *card.TurnState, _ *card.CardState) int { return 0 }
 
 type WhisperOfTheOracleBlue struct{}
@@ -45,4 +47,6 @@ func (WhisperOfTheOracleBlue) Attack() int                 { return 0 }
 func (WhisperOfTheOracleBlue) Defense() int                { return 3 }
 func (WhisperOfTheOracleBlue) Types() card.TypeSet         { return whisperOfTheOracleTypes }
 func (WhisperOfTheOracleBlue) GoAgain() bool               { return true }
+// not implemented: opt (deck-top reorder)
+func (WhisperOfTheOracleBlue) NotImplemented()             {}
 func (WhisperOfTheOracleBlue) Play(s *card.TurnState, _ *card.CardState) int { return 0 }

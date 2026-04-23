@@ -2,8 +2,6 @@
 // Printed pitch variants: Red 1, Yellow 2, Blue 3. Defense 2.
 //
 // Text: "When this hits a hero, if they have 4 or more cards in hand, they discard a card."
-//
-// Simplification: Opponent discard rider isn't modelled.
 
 package generic
 
@@ -21,6 +19,8 @@ func (CutDownToSizeRed) Attack() int                 { return 6 }
 func (CutDownToSizeRed) Defense() int                { return 2 }
 func (CutDownToSizeRed) Types() card.TypeSet         { return cutDownToSizeTypes }
 func (CutDownToSizeRed) GoAgain() bool               { return false }
+// not implemented: on-hit opponent discard (conditional on hand size)
+func (CutDownToSizeRed) NotImplemented()             {}
 func (c CutDownToSizeRed) Play(s *card.TurnState, self *card.CardState) int { return cutDownToSizeDamage(c.Attack(), self) }
 
 type CutDownToSizeYellow struct{}
@@ -33,6 +33,8 @@ func (CutDownToSizeYellow) Attack() int                 { return 5 }
 func (CutDownToSizeYellow) Defense() int                { return 2 }
 func (CutDownToSizeYellow) Types() card.TypeSet         { return cutDownToSizeTypes }
 func (CutDownToSizeYellow) GoAgain() bool               { return false }
+// not implemented: on-hit opponent discard (conditional on hand size)
+func (CutDownToSizeYellow) NotImplemented()             {}
 func (c CutDownToSizeYellow) Play(s *card.TurnState, self *card.CardState) int { return cutDownToSizeDamage(c.Attack(), self) }
 
 type CutDownToSizeBlue struct{}
@@ -45,6 +47,8 @@ func (CutDownToSizeBlue) Attack() int                 { return 4 }
 func (CutDownToSizeBlue) Defense() int                { return 2 }
 func (CutDownToSizeBlue) Types() card.TypeSet         { return cutDownToSizeTypes }
 func (CutDownToSizeBlue) GoAgain() bool               { return false }
+// not implemented: on-hit opponent discard (conditional on hand size)
+func (CutDownToSizeBlue) NotImplemented()             {}
 func (c CutDownToSizeBlue) Play(s *card.TurnState, self *card.CardState) int { return cutDownToSizeDamage(c.Attack(), self) }
 
 // cutDownToSizeDamage is a breadcrumb for the on-hit "discard a card if opponent has 4+ cards

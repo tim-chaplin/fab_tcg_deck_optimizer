@@ -3,8 +3,6 @@
 //
 // Text: "Put an action card with cost 2 or less from a graveyard on the bottom of its owner's deck.
 // At the beginning of the end phase, draw a card. **Go again**"
-//
-// Simplification: Graveyard recovery and end-phase draw aren't modelled.
 
 package generic
 
@@ -22,6 +20,8 @@ func (StrategicPlanningRed) Attack() int                 { return 0 }
 func (StrategicPlanningRed) Defense() int                { return 2 }
 func (StrategicPlanningRed) Types() card.TypeSet         { return strategicPlanningTypes }
 func (StrategicPlanningRed) GoAgain() bool               { return true }
+// not implemented: graveyard recovery, end-phase draw
+func (StrategicPlanningRed) NotImplemented()             {}
 func (StrategicPlanningRed) Play(s *card.TurnState, _ *card.CardState) int { return 0 }
 
 type StrategicPlanningYellow struct{}
@@ -34,6 +34,8 @@ func (StrategicPlanningYellow) Attack() int                 { return 0 }
 func (StrategicPlanningYellow) Defense() int                { return 2 }
 func (StrategicPlanningYellow) Types() card.TypeSet         { return strategicPlanningTypes }
 func (StrategicPlanningYellow) GoAgain() bool               { return true }
+// not implemented: graveyard recovery, end-phase draw
+func (StrategicPlanningYellow) NotImplemented()             {}
 func (StrategicPlanningYellow) Play(s *card.TurnState, _ *card.CardState) int { return 0 }
 
 type StrategicPlanningBlue struct{}
@@ -46,4 +48,6 @@ func (StrategicPlanningBlue) Attack() int                 { return 0 }
 func (StrategicPlanningBlue) Defense() int                { return 2 }
 func (StrategicPlanningBlue) Types() card.TypeSet         { return strategicPlanningTypes }
 func (StrategicPlanningBlue) GoAgain() bool               { return true }
+// not implemented: graveyard recovery, end-phase draw
+func (StrategicPlanningBlue) NotImplemented()             {}
 func (StrategicPlanningBlue) Play(s *card.TurnState, _ *card.CardState) int { return 0 }

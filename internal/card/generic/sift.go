@@ -2,8 +2,6 @@
 //
 // Text: "Put up to 4 cards from your hand on the bottom of your deck, then draw that many cards.
 // **Go again**"
-//
-// Simplification: Hand cycling isn't modelled.
 
 package generic
 
@@ -21,6 +19,8 @@ func (SiftRed) Attack() int                 { return 0 }
 func (SiftRed) Defense() int                { return 3 }
 func (SiftRed) Types() card.TypeSet         { return siftTypes }
 func (SiftRed) GoAgain() bool               { return true }
+// not implemented: hand cycling
+func (SiftRed) NotImplemented()             {}
 func (SiftRed) Play(s *card.TurnState, _ *card.CardState) int { return 0 }
 
 type SiftYellow struct{}
@@ -33,6 +33,8 @@ func (SiftYellow) Attack() int                 { return 0 }
 func (SiftYellow) Defense() int                { return 3 }
 func (SiftYellow) Types() card.TypeSet         { return siftTypes }
 func (SiftYellow) GoAgain() bool               { return true }
+// not implemented: hand cycling
+func (SiftYellow) NotImplemented()             {}
 func (SiftYellow) Play(s *card.TurnState, _ *card.CardState) int { return 0 }
 
 type SiftBlue struct{}
@@ -45,4 +47,6 @@ func (SiftBlue) Attack() int                 { return 0 }
 func (SiftBlue) Defense() int                { return 3 }
 func (SiftBlue) Types() card.TypeSet         { return siftTypes }
 func (SiftBlue) GoAgain() bool               { return true }
+// not implemented: hand cycling
+func (SiftBlue) NotImplemented()             {}
 func (SiftBlue) Play(s *card.TurnState, _ *card.CardState) int { return 0 }

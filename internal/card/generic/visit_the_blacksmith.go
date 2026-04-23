@@ -1,8 +1,6 @@
 // Visit the Blacksmith — Generic Action. Cost 0, Pitch 3, Defense 2. Only printed in Blue.
 //
 // Text: "Your next sword attack this turn gains +1{p}. **Go again**"
-//
-// Simplification: Next-sword-attack bonuses aren't applied (weapon chain isn't peeked).
 
 package generic
 
@@ -20,4 +18,6 @@ func (VisitTheBlacksmithBlue) Attack() int                 { return 0 }
 func (VisitTheBlacksmithBlue) Defense() int                { return 2 }
 func (VisitTheBlacksmithBlue) Types() card.TypeSet         { return visitTheBlacksmithTypes }
 func (VisitTheBlacksmithBlue) GoAgain() bool               { return true }
+// not implemented: next-sword-attack +1{p} grant (weapon chain not peeked)
+func (VisitTheBlacksmithBlue) NotImplemented()             {}
 func (VisitTheBlacksmithBlue) Play(s *card.TurnState, _ *card.CardState) int { return 0 }

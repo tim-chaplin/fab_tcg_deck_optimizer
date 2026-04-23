@@ -2,8 +2,6 @@
 // pitch variants: Red 1, Yellow 2, Blue 3. Defense 2.
 //
 // Text: "When this hits a Pirate hero, {t} them or an ally they control."
-//
-// Simplification: Pirate-specific target-freezing rider isn't modelled.
 
 package generic
 
@@ -21,6 +19,8 @@ func (WalkThePlankRed) Attack() int                 { return 7 }
 func (WalkThePlankRed) Defense() int                { return 2 }
 func (WalkThePlankRed) Types() card.TypeSet         { return walkThePlankTypes }
 func (WalkThePlankRed) GoAgain() bool               { return false }
+// not implemented: pirate-target freeze rider
+func (WalkThePlankRed) NotImplemented()             {}
 func (c WalkThePlankRed) Play(s *card.TurnState, self *card.CardState) int { return walkThePlankDamage(c.Attack(), self) }
 
 type WalkThePlankYellow struct{}
@@ -33,6 +33,8 @@ func (WalkThePlankYellow) Attack() int                 { return 6 }
 func (WalkThePlankYellow) Defense() int                { return 2 }
 func (WalkThePlankYellow) Types() card.TypeSet         { return walkThePlankTypes }
 func (WalkThePlankYellow) GoAgain() bool               { return false }
+// not implemented: pirate-target freeze rider
+func (WalkThePlankYellow) NotImplemented()             {}
 func (c WalkThePlankYellow) Play(s *card.TurnState, self *card.CardState) int { return walkThePlankDamage(c.Attack(), self) }
 
 type WalkThePlankBlue struct{}
@@ -45,6 +47,8 @@ func (WalkThePlankBlue) Attack() int                 { return 5 }
 func (WalkThePlankBlue) Defense() int                { return 2 }
 func (WalkThePlankBlue) Types() card.TypeSet         { return walkThePlankTypes }
 func (WalkThePlankBlue) GoAgain() bool               { return false }
+// not implemented: pirate-target freeze rider
+func (WalkThePlankBlue) NotImplemented()             {}
 func (c WalkThePlankBlue) Play(s *card.TurnState, self *card.CardState) int { return walkThePlankDamage(c.Attack(), self) }
 
 // walkThePlankDamage is a breadcrumb for the on-hit "freeze target" rider — Pirate-specific,

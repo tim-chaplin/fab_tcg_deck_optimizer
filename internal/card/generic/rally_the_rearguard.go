@@ -3,8 +3,6 @@
 //
 // Text: "**Once per Turn Instant** - Discard a card: This gets +3{d}. Activate this ability only
 // while this is defending."
-//
-// Simplification: Defense-time instant activated ability isn't modelled.
 
 package generic
 
@@ -22,6 +20,8 @@ func (RallyTheRearguardRed) Attack() int                 { return 6 }
 func (RallyTheRearguardRed) Defense() int                { return 2 }
 func (RallyTheRearguardRed) Types() card.TypeSet         { return rallyTheRearguardTypes }
 func (RallyTheRearguardRed) GoAgain() bool               { return false }
+// not implemented: defense-time instant activated ability
+func (RallyTheRearguardRed) NotImplemented()             {}
 func (c RallyTheRearguardRed) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }
 
 type RallyTheRearguardYellow struct{}
@@ -34,6 +34,8 @@ func (RallyTheRearguardYellow) Attack() int                 { return 5 }
 func (RallyTheRearguardYellow) Defense() int                { return 2 }
 func (RallyTheRearguardYellow) Types() card.TypeSet         { return rallyTheRearguardTypes }
 func (RallyTheRearguardYellow) GoAgain() bool               { return false }
+// not implemented: defense-time instant activated ability
+func (RallyTheRearguardYellow) NotImplemented()             {}
 func (c RallyTheRearguardYellow) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }
 
 type RallyTheRearguardBlue struct{}
@@ -46,4 +48,6 @@ func (RallyTheRearguardBlue) Attack() int                 { return 4 }
 func (RallyTheRearguardBlue) Defense() int                { return 2 }
 func (RallyTheRearguardBlue) Types() card.TypeSet         { return rallyTheRearguardTypes }
 func (RallyTheRearguardBlue) GoAgain() bool               { return false }
+// not implemented: defense-time instant activated ability
+func (RallyTheRearguardBlue) NotImplemented()             {}
 func (c RallyTheRearguardBlue) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }

@@ -2,8 +2,6 @@
 // Printed pitch variants: Red 1, Yellow 2, Blue 3. Defense 2.
 //
 // Text: "When this defends alone, prevent the next 1 damage that would be dealt to you this turn."
-//
-// Simplification: Defense-prevention rider isn't modelled.
 
 package generic
 
@@ -21,6 +19,8 @@ func (BattlefrontBastionRed) Attack() int                 { return 7 }
 func (BattlefrontBastionRed) Defense() int                { return 2 }
 func (BattlefrontBastionRed) Types() card.TypeSet         { return battlefrontBastionTypes }
 func (BattlefrontBastionRed) GoAgain() bool               { return false }
+// not implemented: defend-alone damage prevention rider
+func (BattlefrontBastionRed) NotImplemented()             {}
 func (c BattlefrontBastionRed) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }
 
 type BattlefrontBastionYellow struct{}
@@ -33,6 +33,8 @@ func (BattlefrontBastionYellow) Attack() int                 { return 6 }
 func (BattlefrontBastionYellow) Defense() int                { return 2 }
 func (BattlefrontBastionYellow) Types() card.TypeSet         { return battlefrontBastionTypes }
 func (BattlefrontBastionYellow) GoAgain() bool               { return false }
+// not implemented: defend-alone damage prevention rider
+func (BattlefrontBastionYellow) NotImplemented()             {}
 func (c BattlefrontBastionYellow) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }
 
 type BattlefrontBastionBlue struct{}
@@ -45,4 +47,6 @@ func (BattlefrontBastionBlue) Attack() int                 { return 5 }
 func (BattlefrontBastionBlue) Defense() int                { return 2 }
 func (BattlefrontBastionBlue) Types() card.TypeSet         { return battlefrontBastionTypes }
 func (BattlefrontBastionBlue) GoAgain() bool               { return false }
+// not implemented: defend-alone damage prevention rider
+func (BattlefrontBastionBlue) NotImplemented()             {}
 func (c BattlefrontBastionBlue) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }

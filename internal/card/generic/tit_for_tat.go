@@ -1,8 +1,6 @@
 // Tit for Tat — Generic Action. Cost 0, Pitch 3, Defense 2. Only printed in Blue.
 //
 // Text: "{t} target hero. {u} another target hero. **Go again**"
-//
-// Simplification: Freeze/unfreeze (tap/untap) isn't modelled.
 
 package generic
 
@@ -20,4 +18,6 @@ func (TitForTatBlue) Attack() int                 { return 0 }
 func (TitForTatBlue) Defense() int                { return 2 }
 func (TitForTatBlue) Types() card.TypeSet         { return titForTatTypes }
 func (TitForTatBlue) GoAgain() bool               { return true }
+// not implemented: freeze/unfreeze
+func (TitForTatBlue) NotImplemented()             {}
 func (TitForTatBlue) Play(s *card.TurnState, _ *card.CardState) int { return 0 }

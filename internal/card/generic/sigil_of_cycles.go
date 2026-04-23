@@ -3,8 +3,7 @@
 // Text: "**Go again** At the beginning of your action phase, destroy this. When this leaves the
 // arena, discard a card then draw a card."
 //
-// Simplification: At-action-phase self-destroy and leaves-arena discard/draw aren't modelled; only
-// the aura-created flag is credited.
+// The aura-created flag is set so same-turn aura-readers see the entry.
 
 package generic
 
@@ -22,4 +21,6 @@ func (SigilOfCyclesBlue) Attack() int                 { return 0 }
 func (SigilOfCyclesBlue) Defense() int                { return 2 }
 func (SigilOfCyclesBlue) Types() card.TypeSet         { return sigilOfCyclesTypes }
 func (SigilOfCyclesBlue) GoAgain() bool               { return true }
+// not implemented: start-of-action-phase self-destroy, leaves-arena discard/draw
+func (SigilOfCyclesBlue) NotImplemented()             {}
 func (SigilOfCyclesBlue) Play(s *card.TurnState, _ *card.CardState) int { return setAuraCreated(s) }
