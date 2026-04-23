@@ -3,8 +3,6 @@
 //
 // Text: "When this attacks, you may search your deck for a Nimblism, reveal it, put it into your
 // hand, then shuffle."
-//
-// Simplification: Deck search for Nimblism isn't modelled.
 
 package generic
 
@@ -23,6 +21,8 @@ func (NimbyRed) Defense() int                { return 2 }
 func (NimbyRed) Types() card.TypeSet         { return nimbyTypes }
 func (NimbyRed) GoAgain() bool               { return false }
 func (NimbyRed) NotSilverAgeLegal()           {}
+// not implemented: Nimblism deck-search tutor
+func (NimbyRed) NotImplemented()              {}
 func (c NimbyRed) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }
 
 type NimbyYellow struct{}
@@ -36,6 +36,8 @@ func (NimbyYellow) Defense() int                { return 2 }
 func (NimbyYellow) Types() card.TypeSet         { return nimbyTypes }
 func (NimbyYellow) GoAgain() bool               { return false }
 func (NimbyYellow) NotSilverAgeLegal()           {}
+// not implemented: Nimblism deck-search tutor
+func (NimbyYellow) NotImplemented()              {}
 func (c NimbyYellow) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }
 
 type NimbyBlue struct{}
@@ -49,4 +51,6 @@ func (NimbyBlue) Defense() int                { return 2 }
 func (NimbyBlue) Types() card.TypeSet         { return nimbyTypes }
 func (NimbyBlue) GoAgain() bool               { return false }
 func (NimbyBlue) NotSilverAgeLegal()           {}
+// not implemented: Nimblism deck-search tutor
+func (NimbyBlue) NotImplemented()              {}
 func (c NimbyBlue) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }

@@ -2,8 +2,6 @@
 // Only printed in Red.
 //
 // Text: "When this hits a hero, **mark** them."
-//
-// Simplification: Mark on hit isn't modelled.
 
 package generic
 
@@ -21,6 +19,8 @@ func (PursueToThePitsOfDespairRed) Attack() int                 { return 5 }
 func (PursueToThePitsOfDespairRed) Defense() int                { return 3 }
 func (PursueToThePitsOfDespairRed) Types() card.TypeSet         { return pursueToThePitsOfDespairTypes }
 func (PursueToThePitsOfDespairRed) GoAgain() bool               { return false }
+// not implemented: on-hit mark
+func (PursueToThePitsOfDespairRed) NotImplemented()             {}
 func (c PursueToThePitsOfDespairRed) Play(s *card.TurnState, self *card.CardState) int { return pursueToThePitsOfDespairDamage(c.Attack(), self) }
 
 // pursueToThePitsOfDespairDamage is a breadcrumb for the on-hit "mark the hero" rider — marks

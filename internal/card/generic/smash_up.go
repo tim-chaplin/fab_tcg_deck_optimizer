@@ -2,8 +2,6 @@
 //
 // Text: "When this hits a hero, turn a card in their arsenal face-up, then banish an attack action
 // card from their arsenal."
-//
-// Simplification: Arsenal-manipulation rider isn't modelled.
 
 package generic
 
@@ -21,6 +19,8 @@ func (SmashUpRed) Attack() int                 { return 5 }
 func (SmashUpRed) Defense() int                { return 2 }
 func (SmashUpRed) Types() card.TypeSet         { return smashUpTypes }
 func (SmashUpRed) GoAgain() bool               { return false }
+// not implemented: on-hit opponent-arsenal manipulation rider
+func (SmashUpRed) NotImplemented()             {}
 func (c SmashUpRed) Play(s *card.TurnState, self *card.CardState) int { return smashUpDamage(c.Attack(), self) }
 
 // smashUpDamage is a breadcrumb for the on-hit "arsenal face-up + banish attack action" rider —

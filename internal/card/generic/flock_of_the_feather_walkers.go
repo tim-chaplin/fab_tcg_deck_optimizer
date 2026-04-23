@@ -3,8 +3,6 @@
 //
 // Text: "As an additional cost to play Flock of the Feather Walkers, reveal a card in your hand
 // with cost 1 or less. When you attack with Flock of the Feather Walkers, create a Quicken token."
-//
-// Simplification: Additional reveal cost and Quicken token creation aren't modelled.
 
 package generic
 
@@ -22,6 +20,8 @@ func (FlockOfTheFeatherWalkersRed) Attack() int                 { return 5 }
 func (FlockOfTheFeatherWalkersRed) Defense() int                { return 2 }
 func (FlockOfTheFeatherWalkersRed) Types() card.TypeSet         { return flockOfTheFeatherWalkersTypes }
 func (FlockOfTheFeatherWalkersRed) GoAgain() bool               { return false }
+// not implemented: additional reveal cost, quicken tokens
+func (FlockOfTheFeatherWalkersRed) NotImplemented()             {}
 func (c FlockOfTheFeatherWalkersRed) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }
 
 type FlockOfTheFeatherWalkersYellow struct{}
@@ -34,6 +34,8 @@ func (FlockOfTheFeatherWalkersYellow) Attack() int                 { return 4 }
 func (FlockOfTheFeatherWalkersYellow) Defense() int                { return 2 }
 func (FlockOfTheFeatherWalkersYellow) Types() card.TypeSet         { return flockOfTheFeatherWalkersTypes }
 func (FlockOfTheFeatherWalkersYellow) GoAgain() bool               { return false }
+// not implemented: additional reveal cost, quicken tokens
+func (FlockOfTheFeatherWalkersYellow) NotImplemented()             {}
 func (c FlockOfTheFeatherWalkersYellow) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }
 
 type FlockOfTheFeatherWalkersBlue struct{}
@@ -46,4 +48,6 @@ func (FlockOfTheFeatherWalkersBlue) Attack() int                 { return 3 }
 func (FlockOfTheFeatherWalkersBlue) Defense() int                { return 2 }
 func (FlockOfTheFeatherWalkersBlue) Types() card.TypeSet         { return flockOfTheFeatherWalkersTypes }
 func (FlockOfTheFeatherWalkersBlue) GoAgain() bool               { return false }
+// not implemented: additional reveal cost, quicken tokens
+func (FlockOfTheFeatherWalkersBlue) NotImplemented()             {}
 func (c FlockOfTheFeatherWalkersBlue) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }

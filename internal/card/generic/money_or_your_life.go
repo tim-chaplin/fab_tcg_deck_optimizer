@@ -3,8 +3,6 @@
 //
 // Text: "When this hits a hero, deal 2 damage to them unless they give you a Gold token they
 // control. If you are a Thief, repeat this process once."
-//
-// Simplification: Gold-token exchange rider isn't modelled.
 
 package generic
 
@@ -22,6 +20,8 @@ func (MoneyOrYourLifeRed) Attack() int                 { return 6 }
 func (MoneyOrYourLifeRed) Defense() int                { return 2 }
 func (MoneyOrYourLifeRed) Types() card.TypeSet         { return moneyOrYourLifeTypes }
 func (MoneyOrYourLifeRed) GoAgain() bool               { return false }
+// not implemented: gold tokens
+func (MoneyOrYourLifeRed) NotImplemented()             {}
 func (c MoneyOrYourLifeRed) Play(s *card.TurnState, self *card.CardState) int { return moneyOrYourLifeDamage(c.Attack(), self) }
 
 type MoneyOrYourLifeYellow struct{}
@@ -34,6 +34,8 @@ func (MoneyOrYourLifeYellow) Attack() int                 { return 5 }
 func (MoneyOrYourLifeYellow) Defense() int                { return 2 }
 func (MoneyOrYourLifeYellow) Types() card.TypeSet         { return moneyOrYourLifeTypes }
 func (MoneyOrYourLifeYellow) GoAgain() bool               { return false }
+// not implemented: gold tokens
+func (MoneyOrYourLifeYellow) NotImplemented()             {}
 func (c MoneyOrYourLifeYellow) Play(s *card.TurnState, self *card.CardState) int { return moneyOrYourLifeDamage(c.Attack(), self) }
 
 type MoneyOrYourLifeBlue struct{}
@@ -46,6 +48,8 @@ func (MoneyOrYourLifeBlue) Attack() int                 { return 4 }
 func (MoneyOrYourLifeBlue) Defense() int                { return 2 }
 func (MoneyOrYourLifeBlue) Types() card.TypeSet         { return moneyOrYourLifeTypes }
 func (MoneyOrYourLifeBlue) GoAgain() bool               { return false }
+// not implemented: gold tokens
+func (MoneyOrYourLifeBlue) NotImplemented()             {}
 func (c MoneyOrYourLifeBlue) Play(s *card.TurnState, self *card.CardState) int { return moneyOrYourLifeDamage(c.Attack(), self) }
 
 // moneyOrYourLifeDamage is a breadcrumb for the on-hit "deal 2 damage unless they give Gold"

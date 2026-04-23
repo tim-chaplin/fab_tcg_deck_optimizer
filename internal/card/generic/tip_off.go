@@ -2,8 +2,6 @@
 // variants: Red 1, Yellow 2, Blue 3. Defense 2.
 //
 // Text: "**Instant** - Discard this: **Mark** target opposing hero."
-//
-// Simplification: Instant discard activation isn't modelled.
 
 package generic
 
@@ -21,6 +19,8 @@ func (TipOffRed) Attack() int                 { return 5 }
 func (TipOffRed) Defense() int                { return 2 }
 func (TipOffRed) Types() card.TypeSet         { return tipOffTypes }
 func (TipOffRed) GoAgain() bool               { return false }
+// not implemented: instant discard-to-mark activation
+func (TipOffRed) NotImplemented()             {}
 func (c TipOffRed) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }
 
 type TipOffYellow struct{}
@@ -33,6 +33,8 @@ func (TipOffYellow) Attack() int                 { return 4 }
 func (TipOffYellow) Defense() int                { return 2 }
 func (TipOffYellow) Types() card.TypeSet         { return tipOffTypes }
 func (TipOffYellow) GoAgain() bool               { return false }
+// not implemented: instant discard-to-mark activation
+func (TipOffYellow) NotImplemented()             {}
 func (c TipOffYellow) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }
 
 type TipOffBlue struct{}
@@ -45,4 +47,6 @@ func (TipOffBlue) Attack() int                 { return 3 }
 func (TipOffBlue) Defense() int                { return 2 }
 func (TipOffBlue) Types() card.TypeSet         { return tipOffTypes }
 func (TipOffBlue) GoAgain() bool               { return false }
+// not implemented: instant discard-to-mark activation
+func (TipOffBlue) NotImplemented()             {}
 func (c TipOffBlue) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }

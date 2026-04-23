@@ -3,8 +3,7 @@
 //
 // Text: "**Ward 4** At the beginning of your action phase, destroy Sigil of Protection."
 //
-// Simplification: Ward N isn't modelled (opponent's damage prevention); only the aura-created flag
-// is credited.
+// The aura-created flag is set so same-turn aura-readers see the entry.
 
 package generic
 
@@ -22,6 +21,8 @@ func (SigilOfProtectionRed) Attack() int                 { return 0 }
 func (SigilOfProtectionRed) Defense() int                { return 2 }
 func (SigilOfProtectionRed) Types() card.TypeSet         { return sigilOfProtectionTypes }
 func (SigilOfProtectionRed) GoAgain() bool               { return false }
+// not implemented: ward (opponent damage prevention)
+func (SigilOfProtectionRed) NotImplemented()             {}
 func (SigilOfProtectionRed) Play(s *card.TurnState, _ *card.CardState) int { return setAuraCreated(s) }
 
 type SigilOfProtectionYellow struct{}
@@ -34,6 +35,8 @@ func (SigilOfProtectionYellow) Attack() int                 { return 0 }
 func (SigilOfProtectionYellow) Defense() int                { return 2 }
 func (SigilOfProtectionYellow) Types() card.TypeSet         { return sigilOfProtectionTypes }
 func (SigilOfProtectionYellow) GoAgain() bool               { return false }
+// not implemented: ward (opponent damage prevention)
+func (SigilOfProtectionYellow) NotImplemented()             {}
 func (SigilOfProtectionYellow) Play(s *card.TurnState, _ *card.CardState) int { return setAuraCreated(s) }
 
 type SigilOfProtectionBlue struct{}
@@ -46,4 +49,6 @@ func (SigilOfProtectionBlue) Attack() int                 { return 0 }
 func (SigilOfProtectionBlue) Defense() int                { return 2 }
 func (SigilOfProtectionBlue) Types() card.TypeSet         { return sigilOfProtectionTypes }
 func (SigilOfProtectionBlue) GoAgain() bool               { return false }
+// not implemented: ward (opponent damage prevention)
+func (SigilOfProtectionBlue) NotImplemented()             {}
 func (SigilOfProtectionBlue) Play(s *card.TurnState, _ *card.CardState) int { return setAuraCreated(s) }

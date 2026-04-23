@@ -2,8 +2,6 @@
 //
 // Text: "When this hits a hero, turn a card in their arsenal face-up, then banish an instant card
 // from their arsenal."
-//
-// Simplification: Arsenal-manipulation rider isn't modelled.
 
 package generic
 
@@ -21,6 +19,8 @@ func (TongueTiedRed) Attack() int                 { return 7 }
 func (TongueTiedRed) Defense() int                { return 2 }
 func (TongueTiedRed) Types() card.TypeSet         { return tongueTiedTypes }
 func (TongueTiedRed) GoAgain() bool               { return false }
+// not implemented: on-hit opponent-arsenal manipulation rider
+func (TongueTiedRed) NotImplemented()             {}
 func (c TongueTiedRed) Play(s *card.TurnState, self *card.CardState) int { return tongueTiedDamage(c.Attack(), self) }
 
 // tongueTiedDamage is a breadcrumb for the on-hit "arsenal face-up + banish instant" rider —

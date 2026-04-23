@@ -2,9 +2,6 @@
 // pitch variants: Red 1, Yellow 2, Blue 3. Defense 2.
 //
 // Text: "When this hits, create a Gold token."
-//
-// The on-hit Gold token is modelled as +1 damage-equivalent (one resource worth), gated on
-// card.LikelyToHit — blockable multiples of 3 suppress the rider.
 
 package generic
 
@@ -31,6 +28,8 @@ func (StrikeGoldRed) Attack() int                  { return 4 }
 func (StrikeGoldRed) Defense() int                 { return 2 }
 func (StrikeGoldRed) Types() card.TypeSet          { return strikeGoldTypes }
 func (StrikeGoldRed) GoAgain() bool                { return false }
+// not implemented: gold tokens
+func (StrikeGoldRed) NotImplemented()               {}
 func (c StrikeGoldRed) Play(s *card.TurnState, self *card.CardState) int { return strikeGoldDamage(c.Attack(), self) }
 
 type StrikeGoldYellow struct{}
@@ -43,6 +42,8 @@ func (StrikeGoldYellow) Attack() int                  { return 3 }
 func (StrikeGoldYellow) Defense() int                 { return 2 }
 func (StrikeGoldYellow) Types() card.TypeSet          { return strikeGoldTypes }
 func (StrikeGoldYellow) GoAgain() bool                { return false }
+// not implemented: gold tokens
+func (StrikeGoldYellow) NotImplemented()               {}
 func (c StrikeGoldYellow) Play(s *card.TurnState, self *card.CardState) int { return strikeGoldDamage(c.Attack(), self) }
 
 type StrikeGoldBlue struct{}
@@ -55,4 +56,6 @@ func (StrikeGoldBlue) Attack() int                  { return 2 }
 func (StrikeGoldBlue) Defense() int                 { return 2 }
 func (StrikeGoldBlue) Types() card.TypeSet          { return strikeGoldTypes }
 func (StrikeGoldBlue) GoAgain() bool                { return false }
+// not implemented: gold tokens
+func (StrikeGoldBlue) NotImplemented()               {}
 func (c StrikeGoldBlue) Play(s *card.TurnState, self *card.CardState) int { return strikeGoldDamage(c.Attack(), self) }

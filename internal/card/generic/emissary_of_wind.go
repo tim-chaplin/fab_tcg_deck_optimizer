@@ -3,8 +3,6 @@
 //
 // Text: "When this attacks, you may put a card from your hand on the bottom of your deck. If you
 // do, this gets **go again**."
-//
-// Simplification: Hand-cycle-for-go-again rider isn't modelled.
 
 package generic
 
@@ -22,4 +20,6 @@ func (EmissaryOfWindRed) Attack() int                 { return 4 }
 func (EmissaryOfWindRed) Defense() int                { return 2 }
 func (EmissaryOfWindRed) Types() card.TypeSet         { return emissaryOfWindTypes }
 func (EmissaryOfWindRed) GoAgain() bool               { return false }
+// not implemented: hand-cycle-for-go-again rider
+func (EmissaryOfWindRed) NotImplemented()             {}
 func (c EmissaryOfWindRed) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }

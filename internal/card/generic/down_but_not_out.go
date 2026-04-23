@@ -4,8 +4,6 @@
 // Text: "When this attacks a hero, if you have less {h} and control fewer equipment and tokens than
 // them, this gets +3{p}, **overpower**, and "When this hits, create an Agility, Might, and Vigor
 // token.""
-//
-// Simplification: Health/equipment/token comparison isn't modelled; none of the riders fire.
 
 package generic
 
@@ -23,6 +21,8 @@ func (DownButNotOutRed) Attack() int                 { return 5 }
 func (DownButNotOutRed) Defense() int                { return 3 }
 func (DownButNotOutRed) Types() card.TypeSet         { return downButNotOutTypes }
 func (DownButNotOutRed) GoAgain() bool               { return false }
+// not implemented: health/equipment/token comparison, agility/might/vigor tokens, overpower
+func (DownButNotOutRed) NotImplemented()             {}
 func (c DownButNotOutRed) Play(s *card.TurnState, self *card.CardState) int { return downButNotOutDamage(c.Attack(), self) }
 
 type DownButNotOutYellow struct{}
@@ -35,6 +35,8 @@ func (DownButNotOutYellow) Attack() int                 { return 4 }
 func (DownButNotOutYellow) Defense() int                { return 3 }
 func (DownButNotOutYellow) Types() card.TypeSet         { return downButNotOutTypes }
 func (DownButNotOutYellow) GoAgain() bool               { return false }
+// not implemented: health/equipment/token comparison, agility/might/vigor tokens, overpower
+func (DownButNotOutYellow) NotImplemented()             {}
 func (c DownButNotOutYellow) Play(s *card.TurnState, self *card.CardState) int { return downButNotOutDamage(c.Attack(), self) }
 
 type DownButNotOutBlue struct{}
@@ -47,6 +49,8 @@ func (DownButNotOutBlue) Attack() int                 { return 3 }
 func (DownButNotOutBlue) Defense() int                { return 3 }
 func (DownButNotOutBlue) Types() card.TypeSet         { return downButNotOutTypes }
 func (DownButNotOutBlue) GoAgain() bool               { return false }
+// not implemented: health/equipment/token comparison, agility/might/vigor tokens, overpower
+func (DownButNotOutBlue) NotImplemented()             {}
 func (c DownButNotOutBlue) Play(s *card.TurnState, self *card.CardState) int { return downButNotOutDamage(c.Attack(), self) }
 
 // downButNotOutDamage is a breadcrumb for the conditional "when this hits, create Agility +

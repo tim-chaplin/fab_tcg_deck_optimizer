@@ -3,8 +3,6 @@
 //
 // Text: "When this hits a hero, they lose all hero card abilities until the end of their next
 // turn."
-//
-// Simplification: Hero-ability suppression rider isn't modelled.
 
 package generic
 
@@ -22,6 +20,8 @@ func (HumbleRed) Attack() int                 { return 6 }
 func (HumbleRed) Defense() int                { return 2 }
 func (HumbleRed) Types() card.TypeSet         { return humbleTypes }
 func (HumbleRed) GoAgain() bool               { return false }
+// not implemented: hero-ability suppression rider
+func (HumbleRed) NotImplemented()             {}
 func (c HumbleRed) Play(s *card.TurnState, self *card.CardState) int { return humbleDamage(c.Attack(), self) }
 
 type HumbleYellow struct{}
@@ -34,6 +34,8 @@ func (HumbleYellow) Attack() int                 { return 5 }
 func (HumbleYellow) Defense() int                { return 2 }
 func (HumbleYellow) Types() card.TypeSet         { return humbleTypes }
 func (HumbleYellow) GoAgain() bool               { return false }
+// not implemented: hero-ability suppression rider
+func (HumbleYellow) NotImplemented()             {}
 func (c HumbleYellow) Play(s *card.TurnState, self *card.CardState) int { return humbleDamage(c.Attack(), self) }
 
 type HumbleBlue struct{}
@@ -46,6 +48,8 @@ func (HumbleBlue) Attack() int                 { return 4 }
 func (HumbleBlue) Defense() int                { return 2 }
 func (HumbleBlue) Types() card.TypeSet         { return humbleTypes }
 func (HumbleBlue) GoAgain() bool               { return false }
+// not implemented: hero-ability suppression rider
+func (HumbleBlue) NotImplemented()             {}
 func (c HumbleBlue) Play(s *card.TurnState, self *card.CardState) int { return humbleDamage(c.Attack(), self) }
 
 // humbleDamage is a breadcrumb for the on-hit "lose all hero card abilities" rider — not

@@ -36,9 +36,11 @@ func TestAllMutations_CountsAndShape(t *testing.T) {
 
 	// Weapon mutations: every loadout except the current one. Card mutations at maxCopies=2:
 	// for each of the 2 unique removals, every pool entry except self (no-op) and the other
-	// in-deck card (already at cap) is a valid add — so 2 × (pool - 2).
+	// in-deck card (already at cap) is a valid add — so 2 × (pool - 2). Use legalPool(nil)
+	// instead of cards.Deckable() directly so the expected count tracks AllMutations's own
+	// filtering (NotImplemented cards are skipped).
 	loadouts := weaponLoadouts(cards.AllWeapons)
-	pool := cards.Deckable()
+	pool := legalPool(nil)
 	wantWeaponMuts := len(loadouts) - 1
 	wantCardMuts := 2 * (len(pool) - 2)
 	want := wantWeaponMuts + wantCardMuts
@@ -197,6 +199,68 @@ func TestRandom_FilterExcludesRejected(t *testing.T) {
 		for j, c := range d.Cards {
 			if bannedIDs[c.ID()] {
 				t.Errorf("sample %d: card[%d] = %s was in the banlist", i, j, c.Name())
+			}
+		}
+	}
+}
+
+// TestLegalPool_SkipsNotImplemented pins the contract that cards tagged with
+// card.NotImplemented never land in the search pool, with or without a legal predicate. The
+// property holds regardless of which registered cards carry the tag today, so it doubles as
+// a regression guard against accidental weakening of the filter.
+func TestLegalPool_SkipsNotImplemented(t *testing.T) {
+	for _, pred := range []func(card.Card) bool{nil, func(card.Card) bool { return true }} {
+		for _, id := range legalPool(pred) {
+			c := cards.Get(id)
+			if _, ok := c.(card.NotImplemented); ok {
+				t.Errorf("legalPool included NotImplemented card %s", c.Name())
+			}
+		}
+	}
+}
+
+// TestRandom_ExcludesNotImplemented confirms no sampled random deck contains a card tagged
+// with card.NotImplemented. Drives Random over many seeds so a leak into the pool would show
+// up as a failure even when the tagged set is small relative to the full pool.
+func TestRandom_ExcludesNotImplemented(t *testing.T) {
+	rng := rand.New(rand.NewSource(1))
+	for i := 0; i < 20; i++ {
+		d := Random(hero.Viserai{}, 40, 2, rng, nil)
+		for j, c := range d.Cards {
+			if _, ok := c.(card.NotImplemented); ok {
+				t.Errorf("sample %d card[%d] = %s implements NotImplemented", i, j, c.Name())
+			}
+		}
+	}
+}
+
+// TestLegalPool_ExcludesTaggedCardsByID gives TestLegalPool_SkipsNotImplemented teeth: it
+// picks a concrete registered card we know currently carries the NotImplemented marker
+// (Strike Gold (Red), gold-token rider) and asserts it's absent from legalPool's output.
+// Without at least one real tagged card the property test is vacuous, so this guards against
+// a regression where the marker interface itself silently breaks. Self-retires if Strike Gold
+// ever loses the tag (gold-token economy gets modelled) so maintenance is only a delete.
+func TestLegalPool_ExcludesTaggedCardsByID(t *testing.T) {
+	if _, ok := cards.Get(card.StrikeGoldRed).(card.NotImplemented); !ok {
+		t.Skip("Strike Gold (Red) is no longer NotImplemented — pick another tagged card or drop this test")
+	}
+	for _, id := range legalPool(nil) {
+		if id == card.StrikeGoldRed {
+			t.Fatalf("legalPool included Strike Gold (Red) despite its NotImplemented tag")
+		}
+	}
+}
+
+// TestAllMutations_ExcludesNotImplementedAdditions confirms no single-slot mutation can
+// introduce a NotImplemented card. Starting deck contains only implemented cards so any
+// NotImplemented copy in a mutation output must have come from the add pool.
+func TestAllMutations_ExcludesNotImplementedAdditions(t *testing.T) {
+	a := cards.Get(card.AetherSlashRed)
+	d := New(hero.Viserai{}, []weapon.Weapon{weapon.NebulaBlade{}}, []card.Card{a, a, a, a})
+	for _, m := range AllMutations(d, 2, nil) {
+		for _, c := range m.Deck.Cards {
+			if _, ok := c.(card.NotImplemented); ok {
+				t.Errorf("%s introduced NotImplemented card %s", m.Description, c.Name())
 			}
 		}
 	}

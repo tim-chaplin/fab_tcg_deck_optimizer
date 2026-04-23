@@ -3,8 +3,6 @@
 //
 // Text: "If Rifting hits, you may play your next 'non-attack' action card this turn as though it
 // were an instant."
-//
-// Simplification: On-hit instant-casting rider isn't modelled.
 
 package generic
 
@@ -22,6 +20,8 @@ func (RiftingRed) Attack() int                 { return 6 }
 func (RiftingRed) Defense() int                { return 2 }
 func (RiftingRed) Types() card.TypeSet         { return riftingTypes }
 func (RiftingRed) GoAgain() bool               { return false }
+// not implemented: on-hit instant-casting grant
+func (RiftingRed) NotImplemented()             {}
 func (c RiftingRed) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }
 
 type RiftingYellow struct{}
@@ -34,6 +34,8 @@ func (RiftingYellow) Attack() int                 { return 5 }
 func (RiftingYellow) Defense() int                { return 2 }
 func (RiftingYellow) Types() card.TypeSet         { return riftingTypes }
 func (RiftingYellow) GoAgain() bool               { return false }
+// not implemented: on-hit instant-casting grant
+func (RiftingYellow) NotImplemented()             {}
 func (c RiftingYellow) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }
 
 type RiftingBlue struct{}
@@ -46,4 +48,6 @@ func (RiftingBlue) Attack() int                 { return 4 }
 func (RiftingBlue) Defense() int                { return 2 }
 func (RiftingBlue) Types() card.TypeSet         { return riftingTypes }
 func (RiftingBlue) GoAgain() bool               { return false }
+// not implemented: on-hit instant-casting grant
+func (RiftingBlue) NotImplemented()             {}
 func (c RiftingBlue) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }

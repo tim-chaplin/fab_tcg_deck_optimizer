@@ -1,8 +1,6 @@
 // Starting Stake — Generic Action. Cost 0, Pitch 2, Defense 3. Only printed in Yellow.
 //
 // Text: "If you control no Gold tokens, create a Gold token."
-//
-// Simplification: Gold-token economy isn't tracked.
 
 package generic
 
@@ -20,4 +18,6 @@ func (StartingStakeYellow) Attack() int                 { return 0 }
 func (StartingStakeYellow) Defense() int                { return 3 }
 func (StartingStakeYellow) Types() card.TypeSet         { return startingStakeTypes }
 func (StartingStakeYellow) GoAgain() bool               { return false }
+// not implemented: gold tokens
+func (StartingStakeYellow) NotImplemented()             {}
 func (StartingStakeYellow) Play(s *card.TurnState, _ *card.CardState) int { return 0 }

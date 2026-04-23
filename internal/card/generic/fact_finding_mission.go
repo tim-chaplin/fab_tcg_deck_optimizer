@@ -3,8 +3,6 @@
 //
 // Text: "When this hits a hero, you may look at a face-down card in their arsenal or equipment
 // zones."
-//
-// Simplification: Peeking opponent arsenal/equipment isn't modelled.
 
 package generic
 
@@ -22,6 +20,8 @@ func (FactFindingMissionRed) Attack() int                 { return 6 }
 func (FactFindingMissionRed) Defense() int                { return 2 }
 func (FactFindingMissionRed) Types() card.TypeSet         { return factFindingMissionTypes }
 func (FactFindingMissionRed) GoAgain() bool               { return false }
+// not implemented: on-hit opponent-arsenal/equipment peek
+func (FactFindingMissionRed) NotImplemented()             {}
 func (c FactFindingMissionRed) Play(s *card.TurnState, self *card.CardState) int { return factFindingMissionDamage(c.Attack(), self) }
 
 type FactFindingMissionYellow struct{}
@@ -34,6 +34,8 @@ func (FactFindingMissionYellow) Attack() int                 { return 5 }
 func (FactFindingMissionYellow) Defense() int                { return 2 }
 func (FactFindingMissionYellow) Types() card.TypeSet         { return factFindingMissionTypes }
 func (FactFindingMissionYellow) GoAgain() bool               { return false }
+// not implemented: on-hit opponent-arsenal/equipment peek
+func (FactFindingMissionYellow) NotImplemented()             {}
 func (c FactFindingMissionYellow) Play(s *card.TurnState, self *card.CardState) int { return factFindingMissionDamage(c.Attack(), self) }
 
 type FactFindingMissionBlue struct{}
@@ -46,6 +48,8 @@ func (FactFindingMissionBlue) Attack() int                 { return 4 }
 func (FactFindingMissionBlue) Defense() int                { return 2 }
 func (FactFindingMissionBlue) Types() card.TypeSet         { return factFindingMissionTypes }
 func (FactFindingMissionBlue) GoAgain() bool               { return false }
+// not implemented: on-hit opponent-arsenal/equipment peek
+func (FactFindingMissionBlue) NotImplemented()             {}
 func (c FactFindingMissionBlue) Play(s *card.TurnState, self *card.CardState) int { return factFindingMissionDamage(c.Attack(), self) }
 
 // factFindingMissionDamage is a breadcrumb for the on-hit "peek a face-down card in arsenal /

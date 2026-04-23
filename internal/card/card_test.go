@@ -30,6 +30,29 @@ type dominatingStubCard struct {
 
 func (dominatingStubCard) Dominate() {}
 
+// notImplementedStubCard is a stubCard that implements the NotImplemented marker — exercises
+// the type assertion the deck legal-pool filter keys on.
+type notImplementedStubCard struct {
+	stubCard
+}
+
+func (notImplementedStubCard) NotImplemented() {}
+
+// TestNotImplementedMarker pins the type-assertion contract: a plain Card does NOT satisfy the
+// NotImplemented interface, and a Card whose type carries a NotImplemented() method does.
+// That's the exact check the deck legal-pool filter performs when deciding whether to skip a
+// card in random generation or mutation pools.
+func TestNotImplementedMarker(t *testing.T) {
+	var plain Card = stubCard{name: "plain"}
+	if _, ok := plain.(NotImplemented); ok {
+		t.Error("plain stub satisfied NotImplemented — the marker must be opt-in, not implicit")
+	}
+	var tagged Card = notImplementedStubCard{stubCard{name: "tagged"}}
+	if _, ok := tagged.(NotImplemented); !ok {
+		t.Error("tagged stub failed NotImplemented assertion — defining NotImplemented() must opt in")
+	}
+}
+
 // TestDrawOne_AppendsTopAndAdvancesDeck: DrawOne moves the top card from Deck into Drawn and
 // preserves draw order for the caller.
 func TestDrawOne_AppendsTopAndAdvancesDeck(t *testing.T) {
