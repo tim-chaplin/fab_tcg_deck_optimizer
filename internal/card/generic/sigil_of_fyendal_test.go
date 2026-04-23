@@ -30,3 +30,12 @@ func TestSigilOfFyendal_PlayNextTurnGainsHealth(t *testing.T) {
 		t.Errorf("ToHand = %v, want nil (Fyendal doesn't reveal)", got.ToHand)
 	}
 }
+
+// TestSigilOfFyendal_AddsFutureValue pins the marker so the solver's beatsBest tiebreaker
+// favours playing the sigil over Held → arsenal at equal Value.
+func TestSigilOfFyendal_AddsFutureValue(t *testing.T) {
+	var c card.Card = SigilOfFyendalBlue{}
+	if _, ok := c.(card.AddsFutureValue); !ok {
+		t.Error("SigilOfFyendalBlue should implement card.AddsFutureValue")
+	}
+}

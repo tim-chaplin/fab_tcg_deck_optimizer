@@ -1,6 +1,27 @@
 package cards
 
-import "testing"
+import (
+	"testing"
+
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+)
+
+// TestDelayedPlayImpliesAddsFutureValue: every card with a next-turn callback should also opt
+// into the AddsFutureValue beatsBest tiebreaker — its damage / token / reveal payoff doesn't
+// land in this turn's Value, so without the marker the solver would pick a Held → arsenal
+// promotion at equal Value over actually playing the card.
+func TestDelayedPlayImpliesAddsFutureValue(t *testing.T) {
+	for _, id := range All() {
+		c := Get(id)
+		if _, isDelayed := c.(card.DelayedPlay); !isDelayed {
+			continue
+		}
+		if _, addsFuture := c.(card.AddsFutureValue); !addsFuture {
+			t.Errorf("%s implements DelayedPlay but not AddsFutureValue — beatsBest tiebreaker won't favour playing it",
+				c.Name())
+		}
+	}
+}
 
 func TestAllIDsResolve(t *testing.T) {
 	// Every ID returned by All() must map to a non-nil card. Catches gaps in the byID slice (an

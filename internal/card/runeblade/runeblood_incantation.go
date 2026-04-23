@@ -28,6 +28,7 @@ func (RunebloodIncantationRed) Attack() int              { return 0 }
 func (RunebloodIncantationRed) Defense() int             { return 2 }
 func (RunebloodIncantationRed) Types() card.TypeSet      { return runebloodIncantationTypes }
 func (RunebloodIncantationRed) GoAgain() bool            { return true }
+func (RunebloodIncantationRed) AddsFutureValue()         {}
 func (c RunebloodIncantationRed) Play(s *card.TurnState, _ *card.CardState) int {
 	return runebloodPlay(s, 3)
 }
@@ -45,6 +46,7 @@ func (RunebloodIncantationYellow) Attack() int              { return 0 }
 func (RunebloodIncantationYellow) Defense() int             { return 2 }
 func (RunebloodIncantationYellow) Types() card.TypeSet      { return runebloodIncantationTypes }
 func (RunebloodIncantationYellow) GoAgain() bool            { return true }
+func (RunebloodIncantationYellow) AddsFutureValue()         {}
 func (c RunebloodIncantationYellow) Play(s *card.TurnState, _ *card.CardState) int {
 	return runebloodPlay(s, 2)
 }
@@ -62,6 +64,7 @@ func (RunebloodIncantationBlue) Attack() int              { return 0 }
 func (RunebloodIncantationBlue) Defense() int             { return 2 }
 func (RunebloodIncantationBlue) Types() card.TypeSet      { return runebloodIncantationTypes }
 func (RunebloodIncantationBlue) GoAgain() bool            { return true }
+func (RunebloodIncantationBlue) AddsFutureValue()         {}
 func (c RunebloodIncantationBlue) Play(s *card.TurnState, _ *card.CardState) int {
 	return runebloodPlay(s, 1)
 }

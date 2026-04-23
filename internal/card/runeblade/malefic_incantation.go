@@ -29,6 +29,7 @@ func (MaleficIncantationRed) Attack() int              { return 0 }
 func (MaleficIncantationRed) Defense() int             { return 2 }
 func (MaleficIncantationRed) Types() card.TypeSet      { return maleficTypes }
 func (MaleficIncantationRed) GoAgain() bool            { return true }
+func (MaleficIncantationRed) AddsFutureValue()         {}
 func (c MaleficIncantationRed) Play(s *card.TurnState, _ *card.CardState) int {
 	return maleficPlay(s, 3, c)
 }
@@ -47,6 +48,7 @@ func (MaleficIncantationYellow) Attack() int              { return 0 }
 func (MaleficIncantationYellow) Defense() int             { return 2 }
 func (MaleficIncantationYellow) Types() card.TypeSet      { return maleficTypes }
 func (MaleficIncantationYellow) GoAgain() bool            { return true }
+func (MaleficIncantationYellow) AddsFutureValue()         {}
 func (c MaleficIncantationYellow) Play(s *card.TurnState, _ *card.CardState) int {
 	return maleficPlay(s, 2, c)
 }
@@ -65,6 +67,7 @@ func (MaleficIncantationBlue) Attack() int              { return 0 }
 func (MaleficIncantationBlue) Defense() int             { return 2 }
 func (MaleficIncantationBlue) Types() card.TypeSet      { return maleficTypes }
 func (MaleficIncantationBlue) GoAgain() bool            { return true }
+func (MaleficIncantationBlue) AddsFutureValue()         {}
 func (c MaleficIncantationBlue) Play(s *card.TurnState, _ *card.CardState) int {
 	return maleficPlay(s, 1, c)
 }

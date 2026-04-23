@@ -25,6 +25,7 @@ func (BlessingOfOccultRed) Attack() int                        { return 0 }
 func (BlessingOfOccultRed) Defense() int                       { return 2 }
 func (BlessingOfOccultRed) Types() card.TypeSet                { return blessingOfOccultTypes }
 func (BlessingOfOccultRed) GoAgain() bool                      { return false }
+func (BlessingOfOccultRed) AddsFutureValue()                   {}
 func (c BlessingOfOccultRed) Play(s *card.TurnState, _ *card.CardState) int {
 	s.AuraCreated = true
 	return 0
@@ -44,6 +45,7 @@ func (BlessingOfOccultYellow) Attack() int                        { return 0 }
 func (BlessingOfOccultYellow) Defense() int                       { return 2 }
 func (BlessingOfOccultYellow) Types() card.TypeSet                { return blessingOfOccultTypes }
 func (BlessingOfOccultYellow) GoAgain() bool                      { return false }
+func (BlessingOfOccultYellow) AddsFutureValue()                   {}
 func (c BlessingOfOccultYellow) Play(s *card.TurnState, _ *card.CardState) int {
 	s.AuraCreated = true
 	return 0
@@ -63,6 +65,7 @@ func (BlessingOfOccultBlue) Attack() int                        { return 0 }
 func (BlessingOfOccultBlue) Defense() int                       { return 2 }
 func (BlessingOfOccultBlue) Types() card.TypeSet                { return blessingOfOccultTypes }
 func (BlessingOfOccultBlue) GoAgain() bool                      { return false }
+func (BlessingOfOccultBlue) AddsFutureValue()                   {}
 func (c BlessingOfOccultBlue) Play(s *card.TurnState, _ *card.CardState) int {
 	s.AuraCreated = true
 	return 0

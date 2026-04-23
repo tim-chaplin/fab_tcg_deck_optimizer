@@ -27,6 +27,7 @@ func (SigilOfSilphidaeBlue) Attack() int              { return 0 }
 func (SigilOfSilphidaeBlue) Defense() int             { return 3 }
 func (SigilOfSilphidaeBlue) Types() card.TypeSet      { return sigilOfSilphidaeTypes }
 func (SigilOfSilphidaeBlue) GoAgain() bool            { return true }
+func (SigilOfSilphidaeBlue) AddsFutureValue()         {}
 func (SigilOfSilphidaeBlue) NoMemo()                  {}
 func (c SigilOfSilphidaeBlue) Play(s *card.TurnState, _ *card.CardState) int {
 	s.AuraCreated = true
