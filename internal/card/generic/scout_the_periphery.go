@@ -26,8 +26,7 @@ func nextArsenalAttackActionBonus(s *card.TurnState, n int) int {
 		if !pc.FromArsenal {
 			continue
 		}
-		t := pc.Card.Types()
-		if t.Has(card.TypeAttack) && t.Has(card.TypeAction) {
+		if pc.Card.Types().IsAttackAction() {
 			return n
 		}
 	}

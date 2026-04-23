@@ -19,8 +19,7 @@ var flyingHighTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction)
 // bonus — the '+1{p} if it's <matching color>' rider.
 func flyingHighPlay(s *card.TurnState, matchPitch int) int {
 	for _, pc := range s.CardsRemaining {
-		t := pc.Card.Types()
-		if !t.Has(card.TypeAttack) || !t.Has(card.TypeAction) {
+		if !pc.Card.Types().IsAttackAction() {
 			continue
 		}
 		bonus := 0

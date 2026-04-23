@@ -13,8 +13,7 @@ var trotAlongTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction)
 // trotAlongPlay grants go again to the next qualifying attack action card scheduled later this turn.
 func trotAlongPlay(s *card.TurnState) int {
 	for _, pc := range s.CardsRemaining {
-		t := pc.Card.Types()
-		if !t.Has(card.TypeAttack) || !t.Has(card.TypeAction) {
+		if !pc.Card.Types().IsAttackAction() {
 			continue
 		}
 		if pc.Card.Attack() <= 3 {

@@ -146,6 +146,31 @@ func TestTypeSet_IsNonAttackAction(t *testing.T) {
 	}
 }
 
+// TestTypeSet_IsAttackAction pins the predicate every "next attack action card you play this
+// turn" rider walks CardsRemaining to find (Come to Fight, Minnowism, Nimblism, Sloggism, Water
+// the Seeds, Captain's Call, Flying High, Trot Along, Scout the Periphery). Requires both
+// Action and Attack; either alone doesn't qualify.
+func TestTypeSet_IsAttackAction(t *testing.T) {
+	cases := []struct {
+		name string
+		set  TypeSet
+		want bool
+	}{
+		{"attack action", NewTypeSet(TypeAction, TypeAttack), true},
+		{"runeblade attack action", NewTypeSet(TypeRuneblade, TypeAction, TypeAttack), true},
+		{"plain action", NewTypeSet(TypeAction), false},
+		{"pure attack", NewTypeSet(TypeAttack), false},
+		{"runeblade weapon", NewTypeSet(TypeRuneblade, TypeWeapon, TypeAttack), false},
+		{"aura only", NewTypeSet(TypeAura), false},
+		{"empty", 0, false},
+	}
+	for _, tc := range cases {
+		if got := tc.set.IsAttackAction(); got != tc.want {
+			t.Errorf("%s.IsAttackAction() = %v, want %v", tc.name, got, tc.want)
+		}
+	}
+}
+
 // TestTypeSet_IsRunebladeAttack: every "next Runeblade attack this turn" rider keys on this
 // helper. Requires both TypeRuneblade AND (TypeAttack | TypeWeapon). Plain Runeblade auras
 // (no attack / weapon) don't qualify.
