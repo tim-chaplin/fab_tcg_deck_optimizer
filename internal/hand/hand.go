@@ -684,6 +684,10 @@ type attackBufs struct {
 	// auraTriggersScratch backs state.AuraTriggers during attack-chain permutations. Reset
 	// per permutation so AddAuraTrigger calls in one ordering don't leak into the next.
 	auraTriggersScratch []card.AuraTrigger
+	// ephemeralTriggersScratch backs state.EphemeralAttackTriggers during attack-chain
+	// permutations. Reset per permutation (empty, no cross-turn carry) so one ordering's
+	// registrations don't leak into the next.
+	ephemeralTriggersScratch []card.EphemeralAttackTrigger
 	// drawnWinnerScratch / auraTriggersWinnerScratch back sequenceContext.drawnWinner and
 	// auraTriggersWinner. Each sequenceContext borrows them at construction so the eval
 	// closure's winner snapshot (append-into-[:0] on every improved permutation) reuses one
@@ -763,6 +767,7 @@ func newAttackBufs(handSize, weaponCount int, weapons []weapon.Weapon) *attackBu
 		defenseGravScratch:        make([]card.Card, 0, handSize+1),
 		attackGravScratch:         make([]card.Card, 0, maxAttackers),
 		auraTriggersScratch:       make([]card.AuraTrigger, 0, maxAttackers),
+		ephemeralTriggersScratch:  make([]card.EphemeralAttackTrigger, 0, maxAttackers),
 		drawnWinnerScratch:        make([]card.Card, 0, maxAttackers),
 		auraTriggersWinnerScratch: make([]card.AuraTrigger, 0, maxAttackers),
 		perCardScratch:            make([]float64, maxAttackers),
@@ -1511,6 +1516,37 @@ func fireAttackActionTriggers(state *card.TurnState) int {
 	return total
 }
 
+// fireEphemeralAttackTriggers walks state.EphemeralAttackTriggers after an attack action
+// card resolves and invokes every entry whose Matches predicate accepts the attacker. Each
+// fire consumes the trigger (fire-once semantics) and routes its damage to the source's
+// perCardOut slot via SourceIndex — Mauvrion Skies's "if hits" Runechants, for instance,
+// surface on Mauvrion's BestLine entry rather than the attacker's. Non-matching entries stay
+// in the slice for a later attack action; anything still in the list at end of chain
+// fizzles silently (no graveyard bookkeeping — the source was already graveyarded when its
+// own Play resolved).
+//
+// Slice mutation parallels fireAttackActionTriggers: a survivors prefix is built in place
+// over the existing slice, with fired entries skipped.
+func fireEphemeralAttackTriggers(state *card.TurnState, target *card.CardState, perCardOut []float64) int {
+	total := 0
+	triggers := state.EphemeralAttackTriggers
+	dst := triggers[:0]
+	for i := range triggers {
+		t := triggers[i]
+		if t.Matches != nil && !t.Matches(target) {
+			dst = append(dst, t)
+			continue
+		}
+		dmg := t.Handler(state, target)
+		total += dmg
+		if perCardOut != nil && t.SourceIndex >= 0 && t.SourceIndex < len(perCardOut) {
+			perCardOut[t.SourceIndex] += float64(dmg)
+		}
+	}
+	state.EphemeralAttackTriggers = dst
+	return total
+}
+
 // seedState writes the leaf-constant TurnState fields (pitched / deck refs, incoming damage,
 // block total) so the per-permutation reset in playSequenceWithMeta can skip them.
 func (ctx *sequenceContext) seedState() {
@@ -1699,6 +1735,9 @@ func (ctx *sequenceContext) playSequenceWithMeta(n int, perCardOut, perCardTrigg
 	// mutations leaking across permutations. Cards adding triggers via AddAuraTrigger extend
 	// the same scratch slice.
 	state.AuraTriggers = append(ctx.bufs.auraTriggersScratch[:0], ctx.priorAuraTriggers...)
+	// EphemeralAttackTriggers reset per permutation as empty — fire-once triggers never
+	// carry across turns, so there's nothing to seed from prior state.
+	state.EphemeralAttackTriggers = ctx.bufs.ephemeralTriggersScratch[:0]
 	resources := ctx.resourceBudget
 	for i, pc := range played {
 		m := meta[i]
@@ -1719,20 +1758,37 @@ func (ctx *sequenceContext) playSequenceWithMeta(n int, perCardOut, perCardTrigg
 			state.ArcaneDamageDealt = true
 		}
 
+		ephemeralsBefore := len(state.EphemeralAttackTriggers)
 		playDmg := pc.Card.Play(state, pc)
+		// Stamp SourceIndex on any EphemeralAttackTriggers the card registered during Play
+		// so fireEphemeralAttackTriggers can route their damage back to this card's
+		// perCardOut slot.
+		for k := ephemeralsBefore; k < len(state.EphemeralAttackTriggers); k++ {
+			state.EphemeralAttackTriggers[k].SourceIndex = i
+		}
 		triggerDmg := ctx.hero.OnCardPlayed(pc.Card, state)
 		auraTriggerDmg := 0
+		ephemeralDmg := 0
 		if m.isAttackAction {
 			auraTriggerDmg = fireAttackActionTriggers(state)
+			// Fire ephemeral triggers AFTER hero and aura triggers so the handler sees the
+			// fully-resolved attacker state (Dominate grants, hero-created auras, fresh
+			// Runechants from aura triggers). Damage is routed back to each trigger's
+			// source via SourceIndex, so perCardOut is updated in place inside the helper.
+			ephemeralDmg = fireEphemeralAttackTriggers(state, pc, perCardOut)
 		}
-		damage += playDmg + triggerDmg + auraTriggerDmg
+		damage += playDmg + triggerDmg + auraTriggerDmg + ephemeralDmg
 		if perCardOut != nil {
 			perCardOut[i] = float64(playDmg)
 		}
 		if perCardTriggerOut != nil {
 			// Fold AuraTrigger damage into the hero-trigger slot for per-card attribution —
 			// the damage is driven by the attack action card that resolved, not by the aura
-			// (which has no BestLine entry by mid-chain).
+			// (which has no BestLine entry by mid-chain). Ephemeral trigger damage is NOT
+			// folded in here — fireEphemeralAttackTriggers already credited it to the
+			// trigger's source via perCardOut[SourceIndex], which is the semantically
+			// correct attribution (the effect belongs to the card that registered the
+			// trigger, not the attacker that happened to consume it).
 			perCardTriggerOut[i] = float64(triggerDmg + auraTriggerDmg)
 		}
 		state.CardsPlayed = append(state.CardsPlayed, pc.Card)
