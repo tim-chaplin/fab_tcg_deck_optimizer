@@ -190,10 +190,16 @@ func loadExisting(path string) (*deck.Deck, float64, error) {
 // writeDeck persists d as JSON at path plus a sibling fabrary-format .txt ("x.json" →
 // "x.txt") so the saved deck is ready to paste into fabrary.net without a second export step.
 //
+// ApplyDefaults runs first so both files carry the hardcoded default equipment / sideboard
+// loadout the user runs on every deck. Persisting the defaults into the JSON (not just the
+// .txt) means a reloaded deck already has them in Equipment / Sideboard without another
+// round trip.
+//
 // Both files are written atomically via writeFileAtomic: data lands in <path>.tmp first,
 // then os.Rename swaps it into place, so a Ctrl-C mid-write can never leave the destination
 // empty or partially written.
 func writeDeck(d *deck.Deck, path string) error {
+	d.ApplyDefaults()
 	data, err := deckio.Marshal(d)
 	if err != nil {
 		return fmt.Errorf("marshal: %w", err)

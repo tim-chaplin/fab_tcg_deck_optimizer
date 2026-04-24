@@ -1,14 +1,11 @@
 package fabrary
 
 import (
-	"fmt"
 	"math/rand"
 	"reflect"
 	"strings"
 	"testing"
 
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/cards"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/deck"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/hero"
 )
@@ -63,89 +60,28 @@ func TestMarshalFormat(t *testing.T) {
 	}
 }
 
-// TestMarshalIncludesDefaultEquipment pins the Arena-section convenience: Marshal emits
-// each defaultEquipment entry exactly once alongside the deck's weapons, so the exported
-// .txt can be pasted into fabrary without hand-editing head/chest/arms/legs slots.
-func TestMarshalIncludesDefaultEquipment(t *testing.T) {
+// TestMarshalRendersAppliedDefaults pins that when a caller runs ApplyDefaults (as
+// writeDeck does), Marshal's output carries the default equipment in Arena and the default
+// sideboard entries in Sideboard. The default lists themselves are pinned in the deck
+// package's tests; this one only checks the fabrary text picks them up verbatim.
+func TestMarshalRendersAppliedDefaults(t *testing.T) {
 	rng := rand.New(rand.NewSource(1))
 	d := deck.Random(hero.Viserai{}, 40, 2, rng, nil)
+	d.ApplyDefaults()
 	text := Marshal(d)
 
-	for _, name := range defaultEquipment {
-		want := "1x " + name + "\n"
+	// Pick representative entries from each default list — full-list coverage belongs in
+	// deck.TestApplyDefaults_*.
+	for _, want := range []string{
+		"1x Beckoning Haunt\n",
+		"1x Blade Beckoner Helm\n",
+		"1x Crown of Dichotomy\n",
+		"2x Read the Runes (red)\n",
+	} {
 		if !strings.Contains(text, want) {
-			t.Errorf("expected %q in Arena section; output:\n%s", strings.TrimSuffix(want, "\n"), text)
+			t.Errorf("expected %q in output; got:\n%s", strings.TrimSuffix(want, "\n"), text)
 		}
 	}
-}
-
-// TestMarshalIncludesDefaultSideboard pins the Sideboard-section convenience: Marshal
-// emits each defaultSideboard entry up to its target count in the Sideboard section, even
-// when the deck's explicit Sideboard is empty.
-func TestMarshalIncludesDefaultSideboard(t *testing.T) {
-	rng := rand.New(rand.NewSource(1))
-	d := deck.Random(hero.Viserai{}, 40, 2, rng, nil)
-	// Start from empty Cards / Sideboard so main-deck counts don't clamp the defaults.
-	d.Cards = nil
-	d.Sideboard = nil
-	text := Marshal(d)
-
-	if !strings.Contains(text, "\nSideboard\n") {
-		t.Fatalf("defaults should produce a Sideboard section; got:\n%s", text)
-	}
-	for _, entry := range defaultSideboard {
-		want := fmt.Sprintf("%dx %s\n", entry.count, entry.name)
-		if !strings.Contains(text, want) {
-			t.Errorf("expected %q in Sideboard section; output:\n%s", strings.TrimSuffix(want, "\n"), text)
-		}
-	}
-}
-
-// TestMarshalDefaultSideboardRespectsMainDeckCopies pins the 2-copy cap: when the main
-// deck already holds copies of a default sideboard entry, Marshal tops the sideboard up
-// only as far as the combined total stays at sideboardCopyCap.
-func TestMarshalDefaultSideboardRespectsMainDeckCopies(t *testing.T) {
-	// Seed a deck with 2x Read the Runes (Red) in the main deck. The default merger should
-	// skip this entry entirely since main + sideboard already equals the cap.
-	readRunes := cards.Get(card.ReadTheRunesRed)
-	d := deck.New(hero.Viserai{}, nil, []card.Card{readRunes, readRunes})
-	text := Marshal(d)
-	// Line-prefix match: `<N>x Read the Runes (red)` at the start of a sideboard line, never
-	// a free substring match — a different default that happens to end in "Read the Runes"
-	// would otherwise false-positive.
-	if sideboardCountLine(t, text, "Read the Runes (red)") != 0 {
-		t.Errorf("Read the Runes already at 2x in main deck; merger must add 0 to sideboard. Text:\n%s", text)
-	}
-
-	// Now seed with 1x Read the Runes in main — merger should add exactly 1 copy to
-	// sideboard so the total is 2.
-	d = deck.New(hero.Viserai{}, nil, []card.Card{readRunes})
-	text = Marshal(d)
-	if got := sideboardCountLine(t, text, "Read the Runes (red)"); got != 1 {
-		t.Errorf("sideboard Read the Runes count = %d, want 1 (topping up to 2 total); text:\n%s", got, text)
-	}
-}
-
-// sideboardCountLine extracts the count for one card name from the Sideboard section of a
-// Marshal output. Returns 0 when the name doesn't appear; fails the test when the text has
-// no Sideboard section at all (callers asking about sideboard contents when there isn't one
-// is a test-fixture bug, not a behaviour the production code should tolerate silently).
-func sideboardCountLine(t *testing.T, text, name string) int {
-	t.Helper()
-	sideboardStart := strings.Index(text, "\nSideboard\n")
-	if sideboardStart < 0 {
-		t.Fatalf("no Sideboard section in output:\n%s", text)
-	}
-	for _, line := range strings.Split(text[sideboardStart:], "\n") {
-		qty, n, ok := parseCountedLine(strings.TrimSpace(line))
-		if !ok {
-			continue
-		}
-		if n == name {
-			return qty
-		}
-	}
-	return 0
 }
 
 // TestUnmarshalSample parses the exact sample the user supplied (verbatim from fabrary.net's

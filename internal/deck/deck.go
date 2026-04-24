@@ -48,6 +48,94 @@ func New(h hero.Hero, weapons []weapon.Weapon, cards []card.Card) *Deck {
 	return &Deck{Hero: h, Weapons: weapons, Cards: cards}
 }
 
+// defaultEquipment lists equipment names that every persisted deck should carry in its
+// Equipment section. ApplyDefaults tops Equipment up to include each of these at least once;
+// the user can add more copies but never drops below one.
+var defaultEquipment = []string{
+	"Beckoning Haunt",
+	"Blade Beckoner Boots",
+	"Blade Beckoner Helm",
+	"Blossom of Spring",
+}
+
+// defaultSideboardEntry is one "always include in the sideboard" default: a name plus the
+// target copy count ApplyDefaults tops the sideboard up toward. Invariant: count must be in
+// [1, sideboardCopyCap] — a larger target would silently clamp when the merge respects the
+// main-deck + sideboard copy cap.
+type defaultSideboardEntry struct {
+	name  string
+	count int
+}
+
+// defaultSideboard items are appended to Sideboard by ApplyDefaults. For each entry, the
+// merger tops the sideboard count up toward `count`, but never past sideboardCopyCap (2 per
+// card across main + sideboard). Equipment-slot items (Crown of Dichotomy, Nullrune
+// boots/gloves, Runebleed Robe) target 1 copy; deck cards target 2.
+//
+// Names must match card.Card.Name()'s canonical casing (e.g. "Read the Runes (Red)", not
+// "(red)"): ApplyDefaults dedupes by exact string and fabrary's lowercasing happens later
+// in sideboardCountsForExport, so a mixed-case entry here would leak duplicates into the
+// persisted Sideboard.
+var defaultSideboard = []defaultSideboardEntry{
+	{"Crown of Dichotomy", 1},
+	{"Nullrune Boots", 1},
+	{"Nullrune Gloves", 1},
+	{"Runebleed Robe", 1},
+	{"Read the Runes (Red)", 2},
+	{"Reduce to Runechant (Red)", 2},
+	{"Sigil of Suffering (Red)", 2},
+}
+
+// sideboardCopyCap is the per-card copy limit across main deck + sideboard combined. The
+// default-sideboard merger respects this so a default addition never pushes a card past the
+// normal deck-construction max.
+const sideboardCopyCap = 2
+
+// ApplyDefaults tops d.Equipment and d.Sideboard up toward the hardcoded default loadout so
+// persisted decks always carry the common "every Viserai deck runs these" slots. Idempotent:
+// running it twice is a no-op because each entry is only added when the current count falls
+// below its target. Equipment targets 1 copy per entry; sideboard targets each entry's
+// count, but is clamped by sideboardCopyCap against main-deck + sideboard copies so the
+// merge never pushes a card past the deck-construction limit.
+func (d *Deck) ApplyDefaults() {
+	equipCounts := map[string]int{}
+	for _, name := range d.Equipment {
+		equipCounts[name]++
+	}
+	for _, name := range defaultEquipment {
+		if equipCounts[name] < 1 {
+			d.Equipment = append(d.Equipment, name)
+			equipCounts[name]++
+		}
+	}
+
+	mainCounts := map[string]int{}
+	for _, c := range d.Cards {
+		mainCounts[c.Name()]++
+	}
+	sideCounts := map[string]int{}
+	for _, name := range d.Sideboard {
+		sideCounts[name]++
+	}
+	for _, entry := range defaultSideboard {
+		room := sideboardCopyCap - mainCounts[entry.name] - sideCounts[entry.name]
+		if room <= 0 {
+			continue
+		}
+		want := entry.count - sideCounts[entry.name]
+		if want <= 0 {
+			continue
+		}
+		if want > room {
+			want = room
+		}
+		for i := 0; i < want; i++ {
+			d.Sideboard = append(d.Sideboard, entry.name)
+			sideCounts[entry.name]++
+		}
+	}
+}
+
 // Random generates a random legal deck for h: a random weapon loadout from cards.AllWeapons
 // (one 2H or two 1H; dual-wielding the same weapon allowed) and size cards drawn uniformly from
 // cards.Deckable() one at a time, skipping any roll that would exceed maxCopies for the picked
