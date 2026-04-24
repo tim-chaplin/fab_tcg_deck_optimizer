@@ -10,6 +10,7 @@ import (
 	"os"
 	"path/filepath"
 	"sort"
+	"strconv"
 	"strings"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
@@ -47,8 +48,6 @@ func main() {
 		runAnnealCmd(args)
 	case "eval":
 		runEvalCmd(args)
-	case "print":
-		runPrintCmd(args)
 	case "diff":
 		runDiffCmd(args)
 	case "import":
@@ -83,8 +82,7 @@ func printSubcommands(w io.Writer) {
 	fmt.Fprintln(w)
 	fmt.Fprintln(w, "Subcommands:")
 	fmt.Fprintln(w, "  anneal    Hill-climb (optionally simulated-annealing) on the saved deck until a local maximum")
-	fmt.Fprintln(w, "  eval      Re-score the saved deck at -deep-shuffles without overwriting it (usage: fabsim eval <deck>)")
-	fmt.Fprintln(w, "  print     Print the saved deck without simulating (usage: fabsim print <deck>)")
+	fmt.Fprintln(w, "  eval      Re-score the saved deck at -deep-shuffles and rewrite it; -print-only skips the sim (usage: fabsim eval <deck>)")
 	fmt.Fprintln(w, "  import    Paste a fabrary.net deck into mydecks/<name>.json")
 	fmt.Fprintln(w, "  diff      Print the card-count delta between two saved decks (usage: fabsim diff <deck1> <deck2>)")
 	fmt.Fprintln(w)
@@ -267,8 +265,8 @@ func sanitizeLoadedDeck(d *deck.Deck, maxCopies int, rng *rand.Rand, legal func(
 }
 
 // mustLoadDeck loads the deck at path or dies. For subcommands that always operate on an
-// existing deck (eval, print, diff), both "missing" and "corrupt" are fatal. anneal handles
-// the distinction itself: "missing" is a valid input ("no deck yet, generate one") while
+// existing deck (eval, diff), both "missing" and "corrupt" are fatal. anneal handles the
+// distinction itself: "missing" is a valid input ("no deck yet, generate one") while
 // "corrupt" needs the loud refusal to overwrite.
 func mustLoadDeck(path string) *deck.Deck {
 	d, _, err := loadExisting(path)
@@ -282,8 +280,8 @@ func mustLoadDeck(path string) *deck.Deck {
 }
 
 // resolveDeckPath is the positional-arg counterpart to anneal's -deck flag. Subcommands that
-// always operate on an existing deck (eval, print, diff) accept the deck name as a positional
-// arg and resolve it to mydecks/<name>.json via mydecks.Path.
+// always operate on an existing deck (eval, diff) accept the deck name as a positional arg
+// and resolve it to mydecks/<name>.json via mydecks.Path.
 func resolveDeckPath(name string) string {
 	p, err := mydecks.Path(name)
 	if err != nil {
@@ -337,20 +335,27 @@ func printGroupedStrings(ss []string) {
 	}
 }
 
-// printDeckSummary prints the compact score header: min/median/mean/max, hero, weapons, per-cycle
-// means, and pitch colour counts. printBestDeck wraps this with the full card list + best-turn +
-// per-card stats; `fabsim eval -brief` calls printDeckSummary directly so a scripted re-score
-// gets just the numbers without the card-list scroll.
+// printDeckSummary prints the compact summary: a loadout block (hero, weapons, pitch colour
+// counts) followed by a blank line and a stats block (overall mean, per-cycle means).
+// printBestDeck wraps this with the card list, best-turn block, and per-card stats;
+// `fabsim eval -brief` calls printDeckSummary directly so a scripted re-score gets just the
+// numbers without the card-list scroll.
 func printDeckSummary(d *deck.Deck) {
 	s := d.Stats
-	fmt.Printf("Best deck (min %d, median %.1f, mean %.3f, max %d over %d hands)\n",
-		s.Min(), s.Median(), s.Mean(), s.Max(), s.Hands)
-	fmt.Printf("  Hero:    %s\n", d.Hero.Name())
-	fmt.Printf("  Weapons: %s\n", weaponNames(d.Weapons))
-	fmt.Printf("  Cycle 1 mean: %.3f  (%d hands)\n", s.FirstCycle.Mean(), s.FirstCycle.Hands)
-	fmt.Printf("  Cycle 2 mean: %.3f  (%d hands)\n", s.SecondCycle.Mean(), s.SecondCycle.Hands)
-	var red, yellow, blue int
-	for _, c := range d.Cards {
+	red, yellow, blue := pitchCounts(d.Cards)
+	fmt.Printf("Hero:    %s\n", d.Hero.Name())
+	fmt.Printf("Weapons: %s\n", weaponNames(d.Weapons))
+	fmt.Printf("Pitch:   %d red / %d yellow / %d blue\n", red, yellow, blue)
+	fmt.Println()
+	fmt.Printf("Mean value: %.3f  (%s shuffles)\n", s.Mean(), commaInt(s.Runs))
+	fmt.Printf("  Cycle 1 mean: %.3f\n", s.FirstCycle.Mean())
+	fmt.Printf("  Cycle 2 mean: %.3f\n", s.SecondCycle.Mean())
+}
+
+// pitchCounts tallies red/yellow/blue copies by Pitch() value so the summary's "Pitch:" line
+// stays a single expression. Cards with pitch outside 1-3 contribute to no bucket.
+func pitchCounts(cs []card.Card) (red, yellow, blue int) {
+	for _, c := range cs {
 		switch c.Pitch() {
 		case 1:
 			red++
@@ -360,7 +365,7 @@ func printDeckSummary(d *deck.Deck) {
 			blue++
 		}
 	}
-	fmt.Printf("  Pitch:   %d red / %d yellow / %d blue\n", red, yellow, blue)
+	return red, yellow, blue
 }
 
 func printBestDeck(d *deck.Deck) {
@@ -447,10 +452,41 @@ func maxNameLen(cs []card.Card) int {
 	return m
 }
 
+// weaponNames joins the deck's weapon names with ", " for the summary's "Weapons:" line.
+// A single-weapon loadout prints the name bare; an empty loadout prints "none" so the column
+// stays filled rather than rendering as a trailing blank.
 func weaponNames(ws []weapon.Weapon) string {
+	if len(ws) == 0 {
+		return "none"
+	}
 	names := make([]string, len(ws))
 	for i, w := range ws {
 		names[i] = w.Name()
 	}
-	return fmt.Sprintf("%v", names)
+	return strings.Join(names, ", ")
+}
+
+// commaInt renders n with ',' thousands separators (e.g. 10000 -> "10,000"). Used for the
+// summary's shuffle count so six- and seven-digit totals stay legible at a glance.
+func commaInt(n int) string {
+	s := strconv.Itoa(n)
+	sign := ""
+	if strings.HasPrefix(s, "-") {
+		sign, s = "-", s[1:]
+	}
+	if len(s) <= 3 {
+		return sign + s
+	}
+	var b strings.Builder
+	b.Grow(len(s) + (len(s)-1)/3)
+	head := len(s) % 3
+	if head == 0 {
+		head = 3
+	}
+	b.WriteString(s[:head])
+	for i := head; i < len(s); i += 3 {
+		b.WriteByte(',')
+		b.WriteString(s[i : i+3])
+	}
+	return sign + b.String()
 }
