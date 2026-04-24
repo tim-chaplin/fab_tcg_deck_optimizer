@@ -34,7 +34,7 @@ func fromJSON(dj *DeckJSON) (*deck.Deck, error) {
 	}
 	weapons := make([]weapon.Weapon, len(dj.Weapons))
 	for i, name := range dj.Weapons {
-		w, ok := cards.WeaponByName(name)
+		w, ok := weapon.ByName(name)
 		if !ok {
 			return nil, fmt.Errorf("deckio: unknown weapon %q", name)
 		}
@@ -223,7 +223,7 @@ func rebuildAttackChain(bj BestTurnJSON, line []hand.CardAssignment) ([]hand.Att
 		}
 	}
 	for _, name := range bj.Weapons {
-		if w, ok := cards.WeaponByName(name); ok {
+		if w, ok := weapon.ByName(name); ok {
 			chain = append(chain, hand.AttackChainEntry{Card: w})
 		}
 	}
@@ -235,7 +235,7 @@ func rebuildAttackChain(bj BestTurnJSON, line []hand.CardAssignment) ([]hand.Att
 // nil entries that'd crash FormatBestTurn. Callers wrap the bare error with the field
 // context (attack chain, start-of-turn aura, etc.) since those strings differ.
 func lookupCardByName(name string) (card.Card, error) {
-	if w, ok := cards.WeaponByName(name); ok {
+	if w, ok := weapon.ByName(name); ok {
 		return w, nil
 	}
 	id, ok := cards.ByName(name)
