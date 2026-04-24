@@ -195,6 +195,45 @@ func TestYAxisTickLabels_CollapsesTinyPeak(t *testing.T) {
 	}
 }
 
+// TestXAxisTicks_GuardsDegenerateInputs pins the two guard clauses: a zero-or-negative width
+// and an empty range (minV > maxV) both short-circuit to nil so upstream callers don't walk
+// a bogus tick slice. Neither case can occur today given histWidth=60 and the non-empty
+// Histogram check in printHistogram, but pinning it keeps future refactors honest.
+func TestXAxisTicks_GuardsDegenerateInputs(t *testing.T) {
+	if ticks := xAxisTicks(0, 10, 0); ticks != nil {
+		t.Errorf("width=0 returned %v, want nil", ticks)
+	}
+	if ticks := xAxisTicks(5, 3, 60); ticks != nil {
+		t.Errorf("min>max (rng<=0) returned %v, want nil", ticks)
+	}
+}
+
+// TestXAxisTickRow_CollisionDropsInteriorWinsMinMax pins the label-priority contract: when
+// a hand-crafted interior tick collides with min or max, the interior tick is dropped rather
+// than overwriting the anchor. min (col 0) and max (col width-1) are added to the buffer
+// first so their characters win any overlap.
+func TestXAxisTickRow_CollisionDropsInteriorWinsMinMax(t *testing.T) {
+	// Interior tick value deliberately placed at col 1 with a label wide enough to overlap
+	// the 4-character "1234" label anchored at col 0. width=10 leaves just enough room for
+	// the min and max labels to dominate.
+	ticks := []xAxisTick{
+		{col: 0, value: 1234},
+		{col: 9, value: 5678},
+		{col: 1, value: 9999}, // overlaps min ("1234" occupies cols 0-3)
+	}
+	got := xAxisTickRow(ticks, 10)
+	if got[:4] != "1234" {
+		t.Errorf("min label clobbered: first four chars = %q, want \"1234\"", got[:4])
+	}
+	if got[6:] != "5678" {
+		t.Errorf("max label clobbered: last four chars = %q, want \"5678\"", got[6:])
+	}
+	// Interior tick "9999" is dropped; the middle of the buffer stays blank.
+	if got[4:6] != "  " {
+		t.Errorf("interior label should be dropped on collision; got middle = %q", got[4:6])
+	}
+}
+
 // TestCenterLabel centres a label within the chart width so the title reads under the centre
 // of the bar area. Labels longer than the width pass through unchanged rather than overflow
 // left.

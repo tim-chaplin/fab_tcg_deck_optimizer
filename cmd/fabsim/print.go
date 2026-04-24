@@ -316,7 +316,8 @@ type xAxisTick struct {
 // last col, plus interior quartile ticks (lower quartile, midpoint, upper quartile) whose
 // values don't duplicate an already-placed tick. Value dedup keeps narrow ranges from
 // emitting the same label twice (e.g. a 3-integer spread never produces five distinct
-// tick values).
+// tick values). rng = maxV-minV+1 treats the span as an inclusive count of integer values,
+// matching how buildHistogramColumns derives its per-column value mapping.
 func xAxisTicks(minV, maxV, width int) []xAxisTick {
 	if width <= 0 {
 		return nil
