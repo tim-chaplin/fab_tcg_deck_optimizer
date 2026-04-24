@@ -169,11 +169,15 @@ func printPerCardStats(d *deck.Deck) {
 	}
 }
 
-// Fixed dimensions of the hand-value histogram chart body. Chosen to fit comfortably in an
-// 80-column terminal alongside the y-axis label column and a little left margin.
+// Dimensions of the hand-value histogram chart body. histWidth is the hard cap so the chart
+// always fits under an 80-column terminal; histHeight is the row count; histStretchSlot is
+// the target per-bar column budget (1 bar + 2 spaces) in the stretch regime — the chart
+// shrinks below histWidth when the range fits at this spacing, and falls back to evenly
+// distributing bars across histWidth when the range is too wide to honour the slot.
 const (
-	histWidth  = 60
-	histHeight = 12
+	histWidth        = 60
+	histHeight       = 12
+	histStretchSlot  = 3
 )
 
 // printHistogram renders Stats.Histogram as an ASCII bar chart. The chart body is always
@@ -184,7 +188,8 @@ const (
 func printHistogram(d *deck.Deck) {
 	minV := d.Stats.Min()
 	maxV := d.Stats.Max()
-	counts, peak := buildHistogramColumns(d.Stats.Histogram, minV, maxV, histWidth)
+	width := histChartWidth(maxV - minV + 1)
+	counts, peak := buildHistogramColumns(d.Stats.Histogram, minV, maxV, width)
 	if peak == 0 {
 		return
 	}
@@ -194,7 +199,7 @@ func printHistogram(d *deck.Deck) {
 	// axis baseline, tick labels, title) lines up: 1 lead + yLabelW label + " |" (2 chars).
 	bodyIndent := strings.Repeat(" ", 1+yLabelW+2)
 	yTicks := yAxisTickLabels(peak, histHeight)
-	xTicks := xAxisTicks(minV, maxV, histWidth)
+	xTicks := xAxisTicks(minV, maxV, width)
 
 	fmt.Println()
 	fmt.Printf("Hand-value distribution (%s hands):\n\n", commaInt(d.Stats.Hands))
@@ -209,7 +214,7 @@ func printHistogram(d *deck.Deck) {
 			label = strings.Repeat(" ", yLabelW+1)
 		}
 		fmt.Print(label + " |")
-		for col := 0; col < histWidth; col++ {
+		for col := 0; col < width; col++ {
 			if bars[col] >= rowFromBottom {
 				fmt.Print("#")
 			} else {
@@ -221,9 +226,28 @@ func printHistogram(d *deck.Deck) {
 	// Baseline: the "+" under the y-axis is the origin tick; additional "+" marks sit under
 	// each interior x-axis tick so the scale is readable at a glance. The tick-label and
 	// title rows both live under the chart body (bodyIndent).
-	fmt.Printf(" %*d %s\n", yLabelW, 0, xAxisBaseline(xTicks, histWidth))
-	fmt.Println(bodyIndent + xAxisTickRow(xTicks, histWidth))
-	fmt.Println(bodyIndent + centerLabel("hand value", histWidth))
+	fmt.Printf(" %*d %s\n", yLabelW, 0, xAxisBaseline(xTicks, width))
+	fmt.Println(bodyIndent + xAxisTickRow(xTicks, width))
+	fmt.Println(bodyIndent + centerLabel("hand value", width))
+}
+
+// histChartWidth picks the chart body width for a given integer range. Short ranges shrink
+// the chart to rng*histStretchSlot-1 cols so each bar gets a fixed (slot-1)-space gap
+// instead of the airy spread you'd get if all bars were forced to span histWidth. Longer
+// ranges that would exceed histWidth at this spacing clamp to histWidth; the compress
+// regime uses the full histWidth for maximum resolution.
+func histChartWidth(rng int) int {
+	if rng <= 1 {
+		return histWidth
+	}
+	if rng > histWidth {
+		return histWidth
+	}
+	desired := rng*histStretchSlot - (histStretchSlot - 1)
+	if desired > histWidth {
+		return histWidth
+	}
+	return desired
 }
 
 // buildHistogramColumns bins the raw histogram map into width fixed-width columns spanning

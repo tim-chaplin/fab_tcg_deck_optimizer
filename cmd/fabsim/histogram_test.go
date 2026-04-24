@@ -240,6 +240,33 @@ func TestYAxisTickLabels_CollapsesTinyPeak(t *testing.T) {
 	}
 }
 
+// TestHistChartWidth pins the width-picking contract: short ranges shrink the chart to
+// rng*slot - (slot-1) cols so bars get a fixed inter-bar gap, ranges that would exceed
+// histWidth at that spacing clamp to histWidth, and the compress regime (rng > histWidth)
+// and the single-value range (rng <= 1) both fall back to the full histWidth.
+func TestHistChartWidth(t *testing.T) {
+	// Short range (15 values): shrink to 15*3-2 = 43 cols.
+	if got := histChartWidth(15); got != 43 {
+		t.Errorf("histChartWidth(15) = %d, want 43 (15*slot - (slot-1))", got)
+	}
+	// Medium range (25 values) still under histWidth at slot=3: 25*3-2 = 73, clamps to 60.
+	if got := histChartWidth(25); got != histWidth {
+		t.Errorf("histChartWidth(25) = %d, want %d (clamped)", got, histWidth)
+	}
+	// Compress regime: rng > histWidth → full width.
+	if got := histChartWidth(histWidth + 10); got != histWidth {
+		t.Errorf("histChartWidth(%d) = %d, want %d (compress regime)", histWidth+10, got, histWidth)
+	}
+	// Single-value range keeps the full width (there's nothing to shrink to).
+	if got := histChartWidth(1); got != histWidth {
+		t.Errorf("histChartWidth(1) = %d, want %d", got, histWidth)
+	}
+	// Degenerate zero / negative range still returns a sensible value so the caller can proceed.
+	if got := histChartWidth(0); got != histWidth {
+		t.Errorf("histChartWidth(0) = %d, want %d", got, histWidth)
+	}
+}
+
 // TestXAxisTicks_GuardsDegenerateInputs pins the two guard clauses: a zero-or-negative width
 // and an empty range (minV > maxV) both short-circuit to nil so upstream callers don't walk
 // a bogus tick slice. Neither case can occur today given histWidth=60 and the non-empty
