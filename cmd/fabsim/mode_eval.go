@@ -27,6 +27,7 @@ func runEvalCmd(args []string) {
 	formatFlag := fs.String("format", string(fmtpkg.SilverAge), "constructed format predicate applied to replacement picks when the loaded deck contains NotImplemented cards")
 	maxCopies := fs.Int("max-copies", defaultMaxCopies, "maximum copies of any single card printing per deck, applied when replacing NotImplemented cards in the loaded deck")
 	reevaluate := fs.Bool("reevaluate", false, "overwrite the on-disk .json / .txt with this run's fresh stats")
+	brief := fs.Bool("brief", false, "print only the score summary (no card list, per-card stats, or best turn)")
 	_ = parseFlagsAnywhere(fs, args)
 	if fs.NArg() != 1 {
 		die("eval: need exactly one positional <deck> (got %d); try `fabsim eval <deck>`", fs.NArg())
@@ -36,7 +37,7 @@ func runEvalCmd(args []string) {
 	if err != nil {
 		die("%v", err)
 	}
-	runEval(resolveDeckPath(fs.Arg(0)), *deepShuffles, *incoming, *maxCopies, *seed, fmtValue, *reevaluate)
+	runEval(resolveDeckPath(fs.Arg(0)), *deepShuffles, *incoming, *maxCopies, *seed, fmtValue, *reevaluate, *brief)
 }
 
 // runEval loads the deck at outPath, simulates it for deepShuffles hands, and prints the
@@ -51,10 +52,12 @@ func runEvalCmd(args []string) {
 //   - The caller passed -reevaluate to explicitly refresh the persisted stats. Use this
 //     to bring a saved file in sync with the current binary's best-turn output.
 //
-// Prints only the score summary — not the card list — so the freshly-computed mean stays
-// visible on a small terminal. The deck's contents haven't changed, so repeating them here
-// just scrolls the score off the top; `fabsim print <deck>` is the command for the full dump.
-func runEval(outPath string, deepShuffles, incoming, maxCopies int, seed int64, fmtValue fmtpkg.Format, reevaluate bool) {
+// Output shape is controlled by brief:
+//   - brief=false (default): full printBestDeck dump — summary, card list, best-turn block,
+//     per-card stats. Same shape as `fabsim print`.
+//   - brief=true: score summary only. Good for scripted re-scoring where the card list and
+//     best turn are noise.
+func runEval(outPath string, deepShuffles, incoming, maxCopies int, seed int64, fmtValue fmtpkg.Format, reevaluate, brief bool) {
 	loaded := mustLoadDeck(outPath)
 	// Wrap the loaded hero/weapons/cards in a fresh Deck so Evaluate's stats start from zero
 	// instead of accumulating on top of the persisted Stats. Sideboard and Equipment carry
@@ -81,5 +84,9 @@ func runEval(outPath string, deepShuffles, incoming, maxCopies int, seed int64, 
 			die("%v", err)
 		}
 	}
-	printDeckSummary(d)
+	if brief {
+		printDeckSummary(d)
+		return
+	}
+	printBestDeck(d)
 }
