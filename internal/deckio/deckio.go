@@ -70,25 +70,29 @@ type CardPlayStatsJSON struct {
 // BestTurnJSON is the JSON form of deck.BestTurn: card names and role names instead of
 // interface values. Contributions parallels Hand/Roles and carries
 // CardAssignment.Contribution for each hand slot. Chain is the ordered attack sequence —
-// cards and weapons in play order with their per-step damage. Both are omitempty; files
-// missing them fall back to defaults (contributions = 0, chain rebuilt in hand order).
+// cards and weapons in play order with their per-step damage. StartOfTurnAuras mirrors
+// hand.TurnSummary.StartOfTurnAuras as a list of card names. Omitempty-omitted fields fall
+// back to defaults (contributions = 0, chain rebuilt in hand order, no prior auras).
 type BestTurnJSON struct {
 	Hand               []string               `json:"hand"`
 	Roles              []string               `json:"roles"`
 	Contributions      []float64              `json:"contributions,omitempty"`
 	Weapons            []string               `json:"weapons"`
 	Chain              []AttackChainEntryJSON `json:"chain,omitempty"`
+	StartOfTurnAuras   []string               `json:"start_of_turn_auras,omitempty"`
 	Value              int                    `json:"value"`
 	StartingRunechants int                    `json:"starting_runechants"`
 }
 
 // AttackChainEntryJSON serialises one attack step (card or weapon) with the damage it dealt
 // in the sim's winning chain. TriggerDamage is the hero's OnCardPlayed contribution for that
-// step — omitted when zero.
+// step; AuraTriggerDamage is the mid-chain AuraTrigger contribution (e.g. a prior-turn Malefic
+// Incantation firing on this attack). Both are omitted when zero.
 type AttackChainEntryJSON struct {
-	Card          string  `json:"card"`
-	Damage        float64 `json:"damage"`
-	TriggerDamage float64 `json:"trigger_damage,omitempty"`
+	Card              string  `json:"card"`
+	Damage            float64 `json:"damage"`
+	TriggerDamage     float64 `json:"trigger_damage,omitempty"`
+	AuraTriggerDamage float64 `json:"aura_trigger_damage,omitempty"`
 }
 
 // Marshal returns the JSON encoding of `d` (indented) with card/weapon/hero names in place of
@@ -214,10 +218,18 @@ func bestTurnToJSON(b deck.BestTurn) BestTurnJSON {
 			weaponNames = append(weaponNames, w.Name())
 		}
 		chain = append(chain, AttackChainEntryJSON{
-			Card:          e.Card.Name(),
-			Damage:        e.Damage,
-			TriggerDamage: e.TriggerDamage,
+			Card:              e.Card.Name(),
+			Damage:            e.Damage,
+			TriggerDamage:     e.TriggerDamage,
+			AuraTriggerDamage: e.AuraTriggerDamage,
 		})
+	}
+	var startOfTurnAuras []string
+	if len(b.Summary.StartOfTurnAuras) > 0 {
+		startOfTurnAuras = make([]string, len(b.Summary.StartOfTurnAuras))
+		for i, a := range b.Summary.StartOfTurnAuras {
+			startOfTurnAuras[i] = a.Name()
+		}
 	}
 	return BestTurnJSON{
 		Hand:               handNames,
@@ -225,6 +237,7 @@ func bestTurnToJSON(b deck.BestTurn) BestTurnJSON {
 		Contributions:      contribs,
 		Weapons:            weaponNames,
 		Chain:              chain,
+		StartOfTurnAuras:   startOfTurnAuras,
 		Value:              b.Summary.Value,
 		StartingRunechants: b.StartingRunechants,
 	}
@@ -334,33 +347,47 @@ func bestTurnFromJSON(bj BestTurnJSON) (deck.BestTurn, error) {
 	if err != nil {
 		return deck.BestTurn{}, err
 	}
+	var startOfTurnAuras []card.Card
+	if len(bj.StartOfTurnAuras) > 0 {
+		startOfTurnAuras = make([]card.Card, len(bj.StartOfTurnAuras))
+		for i, name := range bj.StartOfTurnAuras {
+			c, err := lookupCardByName(name)
+			if err != nil {
+				return deck.BestTurn{}, fmt.Errorf("deckio: unknown start_of_turn_aura %q", name)
+			}
+			startOfTurnAuras[i] = c
+		}
+	}
 	return deck.BestTurn{
 		Summary: hand.TurnSummary{
-			BestLine:    line,
-			AttackChain: chain,
-			Value:       bj.Value,
+			BestLine:         line,
+			AttackChain:      chain,
+			Value:            bj.Value,
+			StartOfTurnAuras: startOfTurnAuras,
 		},
 		StartingRunechants: bj.StartingRunechants,
 	}, nil
 }
 
 // rebuildAttackChain reconstructs TurnSummary.AttackChain from the JSON form. When the file has
-// an explicit Chain array we use it: it carries true play order plus per-step damage and
-// hero-trigger damage, which FormatBestTurn needs to render "+N" contribution labels. Files
-// without a Chain field fall back to a best-effort rebuild (hand-order Attack-role cards then
-// weapons) so they still load, though damage labels will all read "+0".
+// an explicit Chain array we use it: it carries true play order plus per-step damage,
+// hero-trigger damage, and aura-trigger damage, which FormatBestTurn needs to render "+N"
+// contribution labels. Files without a Chain field fall back to a best-effort rebuild
+// (hand-order Attack-role cards then weapons) so they still load, though damage labels will
+// all read "+0".
 func rebuildAttackChain(bj BestTurnJSON, line []hand.CardAssignment) ([]hand.AttackChainEntry, error) {
 	if len(bj.Chain) > 0 {
 		chain := make([]hand.AttackChainEntry, len(bj.Chain))
 		for i, e := range bj.Chain {
-			c, err := lookupChainCard(e.Card)
+			c, err := lookupCardByName(e.Card)
 			if err != nil {
-				return nil, err
+				return nil, fmt.Errorf("%v in attack chain", err)
 			}
 			chain[i] = hand.AttackChainEntry{
-				Card:          c,
-				Damage:        e.Damage,
-				TriggerDamage: e.TriggerDamage,
+				Card:              c,
+				Damage:            e.Damage,
+				TriggerDamage:     e.TriggerDamage,
+				AuraTriggerDamage: e.AuraTriggerDamage,
 			}
 		}
 		return chain, nil
@@ -379,16 +406,17 @@ func rebuildAttackChain(bj BestTurnJSON, line []hand.CardAssignment) ([]hand.Att
 	return chain, nil
 }
 
-// lookupChainCard resolves an attack-chain entry's name to either a registered card or a known
-// weapon. Returns an error on unknown names so a corrupted file doesn't silently produce nil
-// entries that'd crash FormatBestTurn.
-func lookupChainCard(name string) (card.Card, error) {
+// lookupCardByName resolves a card name from the JSON form to either a registered card or a
+// known weapon. Returns an error on unknown names so a corrupted file doesn't silently produce
+// nil entries that'd crash FormatBestTurn. Callers wrap the bare error with the field
+// context (attack chain, start-of-turn aura, etc.) since those strings differ.
+func lookupCardByName(name string) (card.Card, error) {
 	if w, ok := cards.WeaponByName(name); ok {
 		return w, nil
 	}
 	id, ok := cards.ByName(name)
 	if !ok {
-		return nil, fmt.Errorf("deckio: unknown card/weapon %q in attack chain", name)
+		return nil, fmt.Errorf("deckio: unknown card/weapon %q", name)
 	}
 	return cards.Get(id), nil
 }

@@ -21,7 +21,7 @@ func TestPlaySequence_DrawDoesNotPoisonSubsequentPermutations(t *testing.T) {
 	ctx := newSequenceContextForTest(hero.Viserai{}, nil, deck, 10, 0, 1)
 
 	// First permutation: Snatch fires, DrawOne consumes the top of the deck.
-	_, _, _, _ = ctx.playSequence([]card.Card{generic.SnatchRed{}}, nil, nil)
+	_, _, _, _ = ctx.playSequence([]card.Card{generic.SnatchRed{}}, nil, nil, nil)
 	if len(ctx.bufs.state.Drawn) != 1 || ctx.bufs.state.Drawn[0] != top {
 		t.Fatalf("after first permutation: Drawn = %v, want [top]", ctx.bufs.state.Drawn)
 	}
@@ -32,7 +32,7 @@ func TestPlaySequence_DrawDoesNotPoisonSubsequentPermutations(t *testing.T) {
 
 	// Second permutation: plain attack, no draw. The reset at the top of playSequenceWithMeta
 	// must restore state.Deck to the original and clear state.Drawn before this call runs.
-	_, _, _, _ = ctx.playSequence([]card.Card{fake.RedAttack{}}, nil, nil)
+	_, _, _, _ = ctx.playSequence([]card.Card{fake.RedAttack{}}, nil, nil, nil)
 	if len(ctx.bufs.state.Drawn) != 0 {
 		t.Errorf("after second permutation: Drawn = %v, want empty (reset lost)", ctx.bufs.state.Drawn)
 	}
