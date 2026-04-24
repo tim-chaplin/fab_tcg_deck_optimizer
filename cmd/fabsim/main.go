@@ -10,6 +10,7 @@ import (
 	"os"
 	"path/filepath"
 	"sort"
+	"strconv"
 	"strings"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
@@ -346,7 +347,7 @@ func printDeckSummary(d *deck.Deck) {
 	fmt.Printf("Weapons: %s\n", weaponNames(d.Weapons))
 	fmt.Printf("Pitch:   %d red / %d yellow / %d blue\n", red, yellow, blue)
 	fmt.Println()
-	fmt.Printf("Mean value: %.3f  (%d shuffles)\n", s.Mean(), s.Runs)
+	fmt.Printf("Mean value: %.3f  (%s shuffles)\n", s.Mean(), commaInt(s.Runs))
 	fmt.Printf("  Cycle 1 mean: %.3f\n", s.FirstCycle.Mean())
 	fmt.Printf("  Cycle 2 mean: %.3f\n", s.SecondCycle.Mean())
 }
@@ -463,4 +464,29 @@ func weaponNames(ws []weapon.Weapon) string {
 		names[i] = w.Name()
 	}
 	return strings.Join(names, ", ")
+}
+
+// commaInt renders n with ',' thousands separators (e.g. 10000 -> "10,000"). Used for the
+// summary's shuffle count so six- and seven-digit totals stay legible at a glance.
+func commaInt(n int) string {
+	s := strconv.Itoa(n)
+	sign := ""
+	if strings.HasPrefix(s, "-") {
+		sign, s = "-", s[1:]
+	}
+	if len(s) <= 3 {
+		return sign + s
+	}
+	var b strings.Builder
+	b.Grow(len(s) + (len(s)-1)/3)
+	head := len(s) % 3
+	if head == 0 {
+		head = 3
+	}
+	b.WriteString(s[:head])
+	for i := head; i < len(s); i += 3 {
+		b.WriteByte(',')
+		b.WriteString(s[i : i+3])
+	}
+	return sign + b.String()
 }

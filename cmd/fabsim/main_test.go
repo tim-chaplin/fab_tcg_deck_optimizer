@@ -209,3 +209,28 @@ func TestDefaultDeckNameFor(t *testing.T) {
 		}
 	}
 }
+
+// TestCommaInt covers each branch of the comma-insertion loop: sub-1000 passthrough, the
+// head length of 1/2/3, a round-thousand boundary, a longer six-digit count (the typical
+// fabsim shuffle total), and negative input so the sign isn't lost.
+func TestCommaInt(t *testing.T) {
+	cases := []struct {
+		in   int
+		want string
+	}{
+		{0, "0"},
+		{7, "7"},
+		{42, "42"},
+		{999, "999"},
+		{1000, "1,000"},
+		{12345, "12,345"},
+		{100000, "100,000"},
+		{1234567, "1,234,567"},
+		{-1234, "-1,234"},
+	}
+	for _, c := range cases {
+		if got := commaInt(c.in); got != c.want {
+			t.Errorf("commaInt(%d) = %q, want %q", c.in, got, c.want)
+		}
+	}
+}
