@@ -132,27 +132,27 @@ func (d *Deck) ApplyDefaults() {
 	}
 }
 
-// Random generates a random legal deck for h: a random weapon loadout from cards.AllWeapons
-// (one 2H or two 1H; dual-wielding the same weapon allowed) and size cards drawn uniformly from
+// Random generates a random legal deck for h: a random weapon loadout from weapon.All (one 2H
+// or two 1H; dual-wielding the same weapon allowed) and size cards drawn uniformly from
 // cards.Deckable() one at a time, skipping any roll that would exceed maxCopies for the picked
 // ID. Matches the single-slot granularity of deck.AllMutations so the hill-climb can explore
 // the space the generator actually produces.
 //
 // legal filters the card pool: only IDs for which legal(cards.Get(id)) returns true are
-// candidates. Pass nil for no filtering. Callers typically wire format.Format.IsLegal through
-// here to restrict generation to a constructed format's banlist.
+// candidates. Pass nil for no filtering. Callers typically wire deckformat.Format.IsLegal
+// through here to restrict generation to a constructed format's banlist.
 func Random(h hero.Hero, size, maxCopies int, rng *rand.Rand, legal func(card.Card) bool) *Deck {
 	if maxCopies < 1 {
 		panic(fmt.Sprintf("deck: Random requires maxCopies >= 1 (got %d)", maxCopies))
 	}
-	loadouts := weaponLoadouts(cards.AllWeapons)
+	loadouts := weaponLoadouts(weapon.All)
 	weapons := loadouts[rng.Intn(len(loadouts))]
 
 	pool := legalPool(legal)
 	if len(pool) == 0 {
 		panic("deck: Random's legal filter rejected every card — cannot build a deck")
 	}
-	counts := map[cards.ID]int{}
+	counts := map[card.ID]int{}
 	picks := make([]card.Card, 0, size)
 	for len(picks) < size {
 		id := pool[rng.Intn(len(pool))]
@@ -232,7 +232,7 @@ func (d *Deck) SanitizeNotImplemented(maxCopies int, rng *rand.Rand, legal func(
 // whose printed effect the sim can't faithfully reproduce shouldn't land in a random deck or
 // become a mutation candidate regardless of format legality. Pass nil for legal to apply only
 // the NotImplemented filter. Shared by Random and AllMutations so both agree on the pool.
-func legalPool(legal func(card.Card) bool) []cards.ID {
+func legalPool(legal func(card.Card) bool) []card.ID {
 	pool := cards.Deckable()
 	filtered := pool[:0]
 	for _, id := range pool {

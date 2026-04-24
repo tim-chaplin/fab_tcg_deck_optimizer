@@ -23,7 +23,7 @@ func TestAllMutations_CountsAndShape(t *testing.T) {
 	// in-deck card (already at cap) is a valid add — so 2 × (pool - 2). Use legalPool(nil)
 	// instead of cards.Deckable() directly so the expected count tracks AllMutations's own
 	// filtering (NotImplemented cards are skipped).
-	loadouts := weaponLoadouts(cards.AllWeapons)
+	loadouts := weaponLoadouts(weapon.All)
 	pool := legalPool(nil)
 	wantWeaponMuts := len(loadouts) - 1
 	wantCardMuts := 2 * (len(pool) - 2)
@@ -118,7 +118,7 @@ func TestAllMutations_OrdersByAscendingAvg(t *testing.T) {
 
 			muts := AllMutations(d, 2, nil)
 			// Skip the weapon-mutation block (len(loadouts)-1 entries, one per alternative loadout).
-			firstCardMut := muts[len(weaponLoadouts(cards.AllWeapons))-1]
+			firstCardMut := muts[len(weaponLoadouts(weapon.All))-1]
 			wantPrefix := "-1 " + tc.lowAvgCard.Name() + ","
 			if !strings.HasPrefix(firstCardMut.Description, wantPrefix) {
 				t.Errorf("first card mutation removed wrong card\n  got:  %q\n  want prefix: %q",

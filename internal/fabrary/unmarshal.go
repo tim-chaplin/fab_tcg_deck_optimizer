@@ -73,7 +73,7 @@ func Unmarshal(text string) (*deck.Deck, map[string]int, error) {
 		}
 		switch section {
 		case "arena":
-			if w, ok := cards.WeaponByName(name); ok {
+			if w, ok := weapon.ByName(name); ok {
 				for i := 0; i < qty; i++ {
 					weapons = append(weapons, w)
 				}

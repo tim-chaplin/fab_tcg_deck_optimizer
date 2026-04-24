@@ -3,8 +3,8 @@
 // lookup / iteration helpers useful for random deck generation, serialization, and compact
 // equality checks.
 //
-// Weapons aren't ID-indexed here (decks are built from cards; weapons are equipment) but the full
-// roster is exposed via AllWeapons for convenience.
+// Weapons aren't ID-indexed — they're equipment, not deck cards. The weapon roster lives in
+// package weapon alongside the Weapon implementations (weapon.All, weapon.ByName).
 package cards
 
 import (

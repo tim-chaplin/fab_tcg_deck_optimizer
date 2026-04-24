@@ -1,7 +1,10 @@
-// Package format enumerates the deck-construction formats fabsim supports and provides the
+// Package deckformat enumerates the deck-construction formats fabsim supports and provides the
 // per-format legality filter used by deck generation and mutation. Cards opt out via marker
 // interfaces on card.Card (e.g. card.NotSilverAgeLegal); Format translates to the predicate.
-package format
+//
+// Named deckformat rather than format so the import doesn't collide with the stdlib fmt /
+// package-local fmt aliases callers already lean on.
+package deckformat
 
 import (
 	"fmt"
@@ -37,6 +40,6 @@ func (f Format) IsLegal(c card.Card) bool {
 		_, banned := c.(card.NotSilverAgeLegal)
 		return !banned
 	default:
-		panic(fmt.Sprintf("format: IsLegal called on unknown Format %q", f))
+		panic(fmt.Sprintf("deckformat: IsLegal called on unknown Format %q", f))
 	}
 }
