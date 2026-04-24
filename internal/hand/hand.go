@@ -88,11 +88,16 @@ type TurnSummary struct {
 }
 
 // TriggerContribution is one start-of-turn AuraTrigger fire: the aura that fired plus the
-// Damage it credited (folded into Value). Surfaced in TurnSummary.TriggersFromLastTurn so
-// FormatBestTurn can print a "(from previous turn)" line naming the outcome.
+// Damage it credited (folded into Value) and the card (if any) the handler revealed onto the
+// hand. Surfaced in TurnSummary.TriggersFromLastTurn so FormatBestTurn can print a "(from
+// previous turn)" line naming the outcome.
+//
+// Revealed is the deck-top card the handler moved into the hand (e.g. Sigil of the Arknight
+// revealing an attack action). Nil when the handler didn't reveal anything.
 type TriggerContribution struct {
-	Card   card.Card
-	Damage int
+	Card     card.Card
+	Damage   int
+	Revealed card.Card
 }
 
 // AttackChainEntry is a single played attack — a card with role=Attack or a swung weapon —
@@ -165,6 +170,24 @@ func FormatBestLine(line []CardAssignment) string {
 	parts := make([]string, len(line))
 	for i, a := range line {
 		parts[i] = assignmentName(a) + ": " + a.Role.String()
+	}
+	return strings.Join(parts, ", ")
+}
+
+// formatTriggerEffect renders the effect suffix for a cross-turn AuraTrigger line — the
+// portion after "(from previous turn): ". Damage > 0 surfaces as "START OF ACTION PHASE
+// (+N)"; a non-nil Revealed card surfaces as "drew X into hand". Both compose with a comma
+// when a trigger both deals damage and reveals (no real card does both today, but the path
+// handles it generically). Returns "" when the trigger had no visible effect — caller drops
+// the line entirely so a zero-impact reveal-capable aura (e.g. Sigil of the Arknight when
+// the top card wasn't an attack action) doesn't clutter the output with a bare "(+0)".
+func formatTriggerEffect(d TriggerContribution) string {
+	var parts []string
+	if d.Damage > 0 {
+		parts = append(parts, fmt.Sprintf("START OF ACTION PHASE (+%d)", d.Damage))
+	}
+	if d.Revealed != nil {
+		parts = append(parts, fmt.Sprintf("drew %s into hand", d.Revealed.Name()))
 	}
 	return strings.Join(parts, ", ")
 }
@@ -288,9 +311,13 @@ func FormatBestTurn(t TurnSummary) string {
 		appendDefense(a, "DEFENSE REACTION")
 	}
 	for _, d := range t.TriggersFromLastTurn {
+		suffix := formatTriggerEffect(d)
+		if suffix == "" {
+			continue
+		}
 		step++
-		lines = append(lines, fmt.Sprintf("  %d. %s (from previous turn): START OF ACTION PHASE (+%d)",
-			step, d.Card.Name(), d.Damage))
+		lines = append(lines, fmt.Sprintf("  %d. %s (from previous turn): %s",
+			step, d.Card.Name(), suffix))
 	}
 	for _, a := range attackPitches {
 		appendPitch(a, "PITCH (my turn)")
@@ -681,7 +708,7 @@ type attackBufs struct {
 	// and heap-alloc once per DR per partition — reusing this slot keeps the whole defense-phase
 	// replay allocation-free. Reset per call by the caller.
 	drCardStateScratch card.CardState
-	attackerBuf    []card.Card // for bestAttackWithWeapons mask iteration
+	attackerBuf        []card.Card // for bestAttackWithWeapons mask iteration
 	// Pre-computed per-mask weapon data. Indexed by bitmask (0 to 2^len(weapons)-1):
 	// weaponCosts[mask] is total Cost; weaponNames[mask] is the pre-built []string of names.
 	weaponCosts []int
@@ -1310,8 +1337,8 @@ type chainBudget struct {
 // residual budget after paying all costs is at least that value, one pitch could have been
 // Held, and the partition is illegal).
 type phaseBudgets struct {
-	attackBudget, defendBudget       int
-	maxAttackPitch, maxDefendPitch   int
+	attackBudget, defendBudget         int
+	maxAttackPitch, maxDefendPitch     int
 	hasAttackPitches, hasDefendPitches bool
 }
 

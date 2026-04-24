@@ -214,6 +214,40 @@ func TestFormatBestTurn_TriggersFromLastTurnLine(t *testing.T) {
 	}
 }
 
+// TestFormatBestTurn_TriggersFromLastTurnRevealedLine surfaces the card a trigger handler
+// revealed into the hand. Sigil of the Arknight fires at start of action phase with
+// Damage=0 but reveals the deck top; the printout should name the card it drew, not show
+// "(+0)".
+func TestFormatBestTurn_TriggersFromLastTurnRevealedLine(t *testing.T) {
+	summary := TurnSummary{
+		TriggersFromLastTurn: []TriggerContribution{
+			{Card: runeblade.SigilOfTheArknightBlue{}, Revealed: runeblade.MauvrionSkiesRed{}},
+		},
+	}
+	out := FormatBestTurn(summary)
+	want := "1. Sigil of the Arknight (Blue) (from previous turn): drew Mauvrion Skies (Red) into hand"
+	if !strings.Contains(out, want) {
+		t.Errorf("missing %q in:\n%s", want, out)
+	}
+}
+
+// TestFormatBestTurn_TriggersFromLastTurnZeroEffectDropped suppresses lines for carryover
+// triggers that did nothing visible this turn (zero damage, no reveal). A reveal-capable
+// aura whose top card wasn't matched otherwise renders as a bare "(+0)" line that adds
+// noise without information; dropping it keeps the printout focused on effects the reader
+// actually cares about.
+func TestFormatBestTurn_TriggersFromLastTurnZeroEffectDropped(t *testing.T) {
+	summary := TurnSummary{
+		TriggersFromLastTurn: []TriggerContribution{
+			{Card: runeblade.SigilOfTheArknightBlue{}},
+		},
+	}
+	out := FormatBestTurn(summary)
+	if strings.Contains(out, "from previous turn") {
+		t.Errorf("zero-effect trigger should not render a line; got:\n%s", out)
+	}
+}
+
 // TestFormatBestTurn_StartOfTurnAurasHeader pins the header line that lists the aura cards
 // in play at the top of the turn. Names sort alphabetically for determinism, and duplicates
 // are preserved (two copies of the same aura render twice).
