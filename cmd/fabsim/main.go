@@ -318,8 +318,8 @@ func printGroupedCards(cs []card.Card) {
 
 // printDeckSummary prints the compact score header: min/median/mean/max, hero, weapons, per-cycle
 // means, and pitch colour counts. printBestDeck wraps this with the full card list + best-turn +
-// per-card stats; eval calls it directly so the freshly-computed score stays visible on a small
-// terminal instead of being scrolled off by the card-list block.
+// per-card stats; `fabsim eval -brief` calls printDeckSummary directly so a scripted re-score
+// gets just the numbers without the card-list scroll.
 func printDeckSummary(d *deck.Deck) {
 	s := d.Stats
 	fmt.Printf("Best deck (min %d, median %.1f, mean %.3f, max %d over %d hands)\n",
@@ -346,22 +346,28 @@ func printBestDeck(d *deck.Deck) {
 	printDeckSummary(d)
 	fmt.Println()
 	printCardList(d)
-
-	s := d.Stats
-	if b := s.Best; len(b.Summary.BestLine) > 0 {
-		fmt.Println()
-		header := fmt.Sprintf("Best turn played (value %d", b.Summary.Value)
-		if d.Hero.Types().Has(card.TypeRuneblade) {
-			header += fmt.Sprintf(", %d carryover runechants", b.StartingRunechants)
-		}
-		header += "):"
-		fmt.Println(header)
-		fmt.Println(hand.FormatBestTurn(b.Summary))
-	}
-
-	if len(s.PerCard) > 0 {
+	printBestTurn(d)
+	if len(d.Stats.PerCard) > 0 {
 		printPerCardStats(d)
 	}
+}
+
+// printBestTurn renders the persisted peak-Value turn — header plus FormatBestTurn's
+// numbered play order — when Stats.Best holds one. No-ops on an unscored deck so callers
+// don't have to guard. Shared by printBestDeck and runEval.
+func printBestTurn(d *deck.Deck) {
+	b := d.Stats.Best
+	if len(b.Summary.BestLine) == 0 {
+		return
+	}
+	fmt.Println()
+	header := fmt.Sprintf("Best turn played (value %d", b.Summary.Value)
+	if d.Hero.Types().Has(card.TypeRuneblade) {
+		header += fmt.Sprintf(", %d carryover runechants", b.StartingRunechants)
+	}
+	header += "):"
+	fmt.Println(header)
+	fmt.Println(hand.FormatBestTurn(b.Summary))
 }
 
 // printPerCardStats renders per-card averages collected by deck.Evaluate: mean per-card
