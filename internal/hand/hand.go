@@ -176,11 +176,11 @@ func FormatBestLine(line []CardAssignment) string {
 
 // formatTriggerEffect renders the effect suffix for a cross-turn AuraTrigger line — the
 // portion after "(from previous turn): ". Damage > 0 surfaces as "START OF ACTION PHASE
-// (+N)"; a non-nil Revealed card surfaces as "drew X into hand". Both compose with a comma
-// when a trigger both deals damage and reveals (no real card does both today, but the path
-// handles it generically). Returns "" when the trigger had no visible effect — caller drops
-// the line entirely so a zero-impact reveal-capable aura (e.g. Sigil of the Arknight when
-// the top card wasn't an attack action) doesn't clutter the output with a bare "(+0)".
+// (+N)"; a non-nil Revealed card surfaces as "drew X into hand". No current card both
+// damages and reveals; the comma-join handles it generically in case one is added.
+// Returns "" when the trigger had no visible effect — caller drops the line entirely so
+// a zero-impact reveal-capable aura (e.g. Sigil of the Arknight when the top card wasn't
+// an attack action) doesn't clutter the output with a bare "(+0)".
 func formatTriggerEffect(d TriggerContribution) string {
 	var parts []string
 	if d.Damage > 0 {

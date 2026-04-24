@@ -231,8 +231,8 @@ func bestTurnToJSON(b deck.BestTurn) BestTurnJSON {
 	}
 	// JSON uses parallel name + role arrays for human readability; the in-memory BestLine is
 	// the single source of truth. Weapon names are extracted from AttackChain. Arsenal-in
-	// entries peel off into ArsenalIn so a reload can re-append them with FromArsenal=true —
-	// without that, the "(from arsenal)" tag would be lost across a round-trip.
+	// entries are emitted separately in ArsenalIn so reload can re-append them with
+	// FromArsenal=true, which keeps the "(from arsenal)" tag on the printout.
 	var handNames, roles []string
 	var contribs []float64
 	var arsenalIn *ArsenalInJSON

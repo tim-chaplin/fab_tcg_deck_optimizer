@@ -182,9 +182,9 @@ func TestRoundTrip_PreservesStartOfTurnAuras(t *testing.T) {
 }
 
 // TestRoundTrip_PreservesArsenalIn pins the arsenal-in entry round-trip: a BestLine slot
-// with FromArsenal=true survives Marshal/Unmarshal so the reloaded deck can re-render the
-// "(from arsenal)" tag. Without this, `fabsim eval -print-only` would lose the tag on any
-// saved best turn whose winning play chain included the arsenal-in card.
+// with FromArsenal=true survives Marshal/Unmarshal so `fabsim eval -print-only` can
+// render the "(from arsenal)" tag on any saved best turn whose winning chain includes the
+// arsenal-in card.
 func TestRoundTrip_PreservesArsenalIn(t *testing.T) {
 	rng := rand.New(rand.NewSource(11))
 	d := deck.Random(hero.Viserai{}, 40, 2, rng, nil)
@@ -241,9 +241,8 @@ func TestRoundTrip_PreservesArsenalIn(t *testing.T) {
 
 // TestRoundTrip_PreservesTriggersFromLastTurn pins the carryover-AuraTrigger round-trip
 // including the Revealed-into-hand attribution. Sigil of the Arknight fires at start of
-// action phase with Damage=0 and reveals the deck top; a reloaded deck must still render
-// the "drew X into hand" line, which requires both the aura and its revealed card to
-// round-trip by name.
+// action phase with Damage=0 and reveals the deck top; for a reloaded deck to render the
+// "drew X into hand" line both the aura and its revealed card must round-trip by name.
 func TestRoundTrip_PreservesTriggersFromLastTurn(t *testing.T) {
 	rng := rand.New(rand.NewSource(13))
 	d := deck.Random(hero.Viserai{}, 40, 2, rng, nil)
