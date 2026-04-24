@@ -72,17 +72,44 @@ type CardPlayStatsJSON struct {
 // interface values. Contributions parallels Hand/Roles and carries
 // CardAssignment.Contribution for each hand slot. Chain is the ordered attack sequence —
 // cards and weapons in play order with their per-step damage. StartOfTurnAuras mirrors
-// hand.TurnSummary.StartOfTurnAuras as a list of card names. Omitempty-omitted fields fall
-// back to defaults (contributions = 0, chain rebuilt in hand order, no prior auras).
+// hand.TurnSummary.StartOfTurnAuras as a list of card names; ArsenalIn carries the card
+// that started the turn in the arsenal slot (distinct from Hand, which is the dealt hand
+// only). TriggersFromLastTurn records carryover AuraTrigger fires so the "from previous
+// turn" printout round-trips across a reload. Omitempty-omitted fields fall back to
+// defaults (contributions = 0, chain rebuilt in hand order, no prior auras, no arsenal-in,
+// no carryover trigger lines).
 type BestTurnJSON struct {
-	Hand               []string               `json:"hand"`
-	Roles              []string               `json:"roles"`
-	Contributions      []float64              `json:"contributions,omitempty"`
-	Weapons            []string               `json:"weapons"`
-	Chain              []AttackChainEntryJSON `json:"chain,omitempty"`
-	StartOfTurnAuras   []string               `json:"start_of_turn_auras,omitempty"`
-	Value              int                    `json:"value"`
-	StartingRunechants int                    `json:"starting_runechants"`
+	Hand                 []string                  `json:"hand"`
+	Roles                []string                  `json:"roles"`
+	Contributions        []float64                 `json:"contributions,omitempty"`
+	Weapons              []string                  `json:"weapons"`
+	Chain                []AttackChainEntryJSON    `json:"chain,omitempty"`
+	StartOfTurnAuras     []string                  `json:"start_of_turn_auras,omitempty"`
+	ArsenalIn            *ArsenalInJSON            `json:"arsenal_in,omitempty"`
+	TriggersFromLastTurn []TriggerContributionJSON `json:"triggers_from_last_turn,omitempty"`
+	Value                int                       `json:"value"`
+	StartingRunechants   int                       `json:"starting_runechants"`
+}
+
+// ArsenalInJSON carries the arsenal-in card's role-assigned entry for the best turn so a
+// reloaded deck can re-render the "(from arsenal)" tag in the play order. Hand serialises
+// only dealt-hand entries; the arsenal-in card lives here separately because it belongs to
+// a previous turn and isn't part of the dealt hand the reader sees in the Card list.
+type ArsenalInJSON struct {
+	Card         string  `json:"card"`
+	Role         string  `json:"role"`
+	Contribution float64 `json:"contribution,omitempty"`
+}
+
+// TriggerContributionJSON is the serialised form of hand.TriggerContribution — one
+// carryover AuraTrigger fire at the top of the saved turn. Damage / Revealed are both
+// omitempty so a zero-damage non-reveal entry would still round-trip as just the aura
+// name (shouldn't happen in practice since FormatBestTurn drops those lines, but the
+// shape stays lossless).
+type TriggerContributionJSON struct {
+	Card     string `json:"card"`
+	Damage   int    `json:"damage,omitempty"`
+	Revealed string `json:"revealed,omitempty"`
 }
 
 // AttackChainEntryJSON serialises one attack step (card or weapon) with the damage it dealt
@@ -202,13 +229,20 @@ func bestTurnToJSON(b deck.BestTurn) BestTurnJSON {
 	if len(b.Summary.BestLine) == 0 {
 		return BestTurnJSON{}
 	}
-	// Serialise hand cards only (arsenal-in entries belong to a previous turn's hand). JSON
-	// uses parallel name + role arrays for human readability; the in-memory BestLine is the
-	// single source of truth. Weapon names are extracted from AttackChain.
+	// JSON uses parallel name + role arrays for human readability; the in-memory BestLine is
+	// the single source of truth. Weapon names are extracted from AttackChain. Arsenal-in
+	// entries are emitted separately in ArsenalIn so reload can re-append them with
+	// FromArsenal=true, which keeps the "(from arsenal)" tag on the printout.
 	var handNames, roles []string
 	var contribs []float64
+	var arsenalIn *ArsenalInJSON
 	for _, a := range b.Summary.BestLine {
 		if a.FromArsenal {
+			arsenalIn = &ArsenalInJSON{
+				Card:         a.Card.Name(),
+				Role:         a.Role.String(),
+				Contribution: a.Contribution,
+			}
 			continue
 		}
 		handNames = append(handNames, a.Card.Name())
@@ -235,15 +269,25 @@ func bestTurnToJSON(b deck.BestTurn) BestTurnJSON {
 			startOfTurnAuras[i] = a.Name()
 		}
 	}
+	var triggers []TriggerContributionJSON
+	for _, t := range b.Summary.TriggersFromLastTurn {
+		entry := TriggerContributionJSON{Card: t.Card.Name(), Damage: t.Damage}
+		if t.Revealed != nil {
+			entry.Revealed = t.Revealed.Name()
+		}
+		triggers = append(triggers, entry)
+	}
 	return BestTurnJSON{
-		Hand:               handNames,
-		Roles:              roles,
-		Contributions:      contribs,
-		Weapons:            weaponNames,
-		Chain:              chain,
-		StartOfTurnAuras:   startOfTurnAuras,
-		Value:              b.Summary.Value,
-		StartingRunechants: b.StartingRunechants,
+		Hand:                 handNames,
+		Roles:                roles,
+		Contributions:        contribs,
+		Weapons:              weaponNames,
+		Chain:                chain,
+		StartOfTurnAuras:     startOfTurnAuras,
+		ArsenalIn:            arsenalIn,
+		TriggersFromLastTurn: triggers,
+		Value:                b.Summary.Value,
+		StartingRunechants:   b.StartingRunechants,
 	}
 }
 
@@ -328,7 +372,14 @@ func bestTurnFromJSON(bj BestTurnJSON) (deck.BestTurn, error) {
 	if len(bj.Contributions) != 0 && len(bj.Contributions) != len(bj.Hand) {
 		return deck.BestTurn{}, fmt.Errorf("deckio: best turn has %d cards but %d contributions", len(bj.Hand), len(bj.Contributions))
 	}
-	line := make([]hand.CardAssignment, len(bj.Hand))
+	// Size the rebuilt line to include the arsenal-in entry when present so the "(from
+	// arsenal)" tag survives the round-trip. The arsenal-in entry goes at the tail,
+	// matching bestUncached's convention (hand cards at indices [0,n); arsenal-in at n).
+	lineLen := len(bj.Hand)
+	if bj.ArsenalIn != nil {
+		lineLen++
+	}
+	line := make([]hand.CardAssignment, lineLen)
 	for i, name := range bj.Hand {
 		id, ok := cards.ByName(name)
 		if !ok {
@@ -343,6 +394,22 @@ func bestTurnFromJSON(bj BestTurnJSON) (deck.BestTurn, error) {
 			ca.Contribution = bj.Contributions[i]
 		}
 		line[i] = ca
+	}
+	if bj.ArsenalIn != nil {
+		ac, err := lookupCardByName(bj.ArsenalIn.Card)
+		if err != nil {
+			return deck.BestTurn{}, fmt.Errorf("deckio: unknown arsenal_in card %q", bj.ArsenalIn.Card)
+		}
+		r, err := roleFromString(bj.ArsenalIn.Role)
+		if err != nil {
+			return deck.BestTurn{}, err
+		}
+		line[len(bj.Hand)] = hand.CardAssignment{
+			Card:         ac,
+			Role:         r,
+			Contribution: bj.ArsenalIn.Contribution,
+			FromArsenal:  true,
+		}
 	}
 	chain, err := rebuildAttackChain(bj, line)
 	if err != nil {
@@ -359,12 +426,32 @@ func bestTurnFromJSON(bj BestTurnJSON) (deck.BestTurn, error) {
 			startOfTurnAuras[i] = c
 		}
 	}
+	var triggers []hand.TriggerContribution
+	if len(bj.TriggersFromLastTurn) > 0 {
+		triggers = make([]hand.TriggerContribution, len(bj.TriggersFromLastTurn))
+		for i, t := range bj.TriggersFromLastTurn {
+			c, err := lookupCardByName(t.Card)
+			if err != nil {
+				return deck.BestTurn{}, fmt.Errorf("deckio: unknown triggers_from_last_turn card %q", t.Card)
+			}
+			entry := hand.TriggerContribution{Card: c, Damage: t.Damage}
+			if t.Revealed != "" {
+				rc, err := lookupCardByName(t.Revealed)
+				if err != nil {
+					return deck.BestTurn{}, fmt.Errorf("deckio: unknown triggers_from_last_turn revealed %q", t.Revealed)
+				}
+				entry.Revealed = rc
+			}
+			triggers[i] = entry
+		}
+	}
 	return deck.BestTurn{
 		Summary: hand.TurnSummary{
-			BestLine:         line,
-			AttackChain:      chain,
-			Value:            bj.Value,
-			StartOfTurnAuras: startOfTurnAuras,
+			BestLine:             line,
+			AttackChain:          chain,
+			Value:                bj.Value,
+			StartOfTurnAuras:     startOfTurnAuras,
+			TriggersFromLastTurn: triggers,
 		},
 		StartingRunechants: bj.StartingRunechants,
 	}, nil
@@ -437,4 +524,3 @@ func roleFromString(s string) (hand.Role, error) {
 	}
 	return 0, fmt.Errorf("deckio: unknown role %q", s)
 }
-

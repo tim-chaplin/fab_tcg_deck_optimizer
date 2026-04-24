@@ -145,6 +145,23 @@ func TestProcessTriggersAtStartOfTurn_RevealsAttackActionIntoHand(t *testing.T) 
 	}
 }
 
+// TestProcessTriggersAtStartOfTurn_AttributesRevealedToContribution: the per-trigger
+// TriggerContribution carries the card the handler appended so FormatBestTurn can render a
+// "drew X into hand" line attributed to the specific aura. Without this attribution the
+// printout would know a reveal happened but not which aura caused it.
+func TestProcessTriggersAtStartOfTurn_AttributesRevealedToContribution(t *testing.T) {
+	var play card.TurnState
+	(runeblade.SigilOfTheArknightBlue{}).Play(&play, &card.CardState{})
+	slash := runeblade.AetherSlashRed{}
+	_, contribs, _, _, _, _ := processTriggersAtStartOfTurn(play.AuraTriggers, []card.Card{slash})
+	if len(contribs) != 1 {
+		t.Fatalf("contribs = %+v, want one entry", contribs)
+	}
+	if contribs[0].Revealed == nil || contribs[0].Revealed.ID() != card.AetherSlashRed {
+		t.Errorf("contribs[0].Revealed = %v, want Aether Slash (Red)", contribs[0].Revealed)
+	}
+}
+
 // TestProcessTriggersAtStartOfTurn_CascadingReveals: two Arknight sigil triggers in a row each
 // reveal the current top, so the second sees the NEW top after the first pops its card.
 func TestProcessTriggersAtStartOfTurn_CascadingReveals(t *testing.T) {

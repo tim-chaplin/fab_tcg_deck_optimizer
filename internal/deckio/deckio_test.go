@@ -181,6 +181,109 @@ func TestRoundTrip_PreservesStartOfTurnAuras(t *testing.T) {
 	}
 }
 
+// TestRoundTrip_PreservesArsenalIn pins the arsenal-in entry round-trip: a BestLine slot
+// with FromArsenal=true survives Marshal/Unmarshal so `fabsim eval -print-only` can
+// render the "(from arsenal)" tag on any saved best turn whose winning chain includes the
+// arsenal-in card.
+func TestRoundTrip_PreservesArsenalIn(t *testing.T) {
+	rng := rand.New(rand.NewSource(11))
+	d := deck.Random(hero.Viserai{}, 40, 2, rng, nil)
+	arsenalCard := cards.Get(card.MauvrionSkiesRed)
+	handCard := cards.Get(card.HitTheHighNotesRed)
+	// Seed a best turn by hand with an arsenal-in entry at the tail (bestUncached's
+	// convention: hand cards at indices [0,n); arsenal-in at n). The chain includes both
+	// so rebuildAttackChain reconstructs them on load.
+	d.Stats.Best = deck.BestTurn{
+		Summary: hand.TurnSummary{
+			BestLine: []hand.CardAssignment{
+				{Card: handCard, Role: hand.Attack, Contribution: 6},
+				{Card: arsenalCard, Role: hand.Attack, Contribution: 3, FromArsenal: true},
+			},
+			AttackChain: []hand.AttackChainEntry{
+				{Card: arsenalCard, Damage: 3},
+				{Card: handCard, Damage: 6},
+			},
+			Value: 9,
+		},
+	}
+
+	data, err := Marshal(d)
+	if err != nil {
+		t.Fatalf("Marshal: %v", err)
+	}
+	got, err := Unmarshal(data)
+	if err != nil {
+		t.Fatalf("Unmarshal: %v", err)
+	}
+
+	var arsenalEntry hand.CardAssignment
+	var found bool
+	for _, a := range got.Stats.Best.Summary.BestLine {
+		if a.FromArsenal {
+			arsenalEntry = a
+			found = true
+			break
+		}
+	}
+	if !found {
+		t.Fatalf("BestLine missing arsenal-in entry after round-trip; got %+v", got.Stats.Best.Summary.BestLine)
+	}
+	if arsenalEntry.Card.ID() != arsenalCard.ID() {
+		t.Errorf("arsenal-in card: got %q want %q", arsenalEntry.Card.Name(), arsenalCard.Name())
+	}
+	if arsenalEntry.Role != hand.Attack {
+		t.Errorf("arsenal-in role: got %v want Attack", arsenalEntry.Role)
+	}
+	if arsenalEntry.Contribution != 3 {
+		t.Errorf("arsenal-in contribution: got %v want 3", arsenalEntry.Contribution)
+	}
+}
+
+// TestRoundTrip_PreservesTriggersFromLastTurn pins the carryover-AuraTrigger round-trip
+// including the Revealed-into-hand attribution. Sigil of the Arknight fires at start of
+// action phase with Damage=0 and reveals the deck top; for a reloaded deck to render the
+// "drew X into hand" line both the aura and its revealed card must round-trip by name.
+func TestRoundTrip_PreservesTriggersFromLastTurn(t *testing.T) {
+	rng := rand.New(rand.NewSource(13))
+	d := deck.Random(hero.Viserai{}, 40, 2, rng, nil)
+	d.Stats.Best = deck.BestTurn{
+		Summary: hand.TurnSummary{
+			BestLine: []hand.CardAssignment{{Card: cards.Get(card.MaleficIncantationRed), Role: hand.Attack}},
+			TriggersFromLastTurn: []hand.TriggerContribution{
+				{Card: cards.Get(card.SigilOfTheArknightBlue), Revealed: cards.Get(card.HitTheHighNotesRed)},
+				{Card: cards.Get(card.MaleficIncantationRed), Damage: 2},
+			},
+			Value: 3,
+		},
+	}
+
+	data, err := Marshal(d)
+	if err != nil {
+		t.Fatalf("Marshal: %v", err)
+	}
+	got, err := Unmarshal(data)
+	if err != nil {
+		t.Fatalf("Unmarshal: %v", err)
+	}
+
+	trigs := got.Stats.Best.Summary.TriggersFromLastTurn
+	if len(trigs) != 2 {
+		t.Fatalf("TriggersFromLastTurn len: got %d want 2 (%+v)", len(trigs), trigs)
+	}
+	if trigs[0].Card.Name() != "Sigil of the Arknight (Blue)" {
+		t.Errorf("trigs[0].Card: got %q want Sigil of the Arknight (Blue)", trigs[0].Card.Name())
+	}
+	if trigs[0].Revealed == nil || trigs[0].Revealed.Name() != "Hit the High Notes (Red)" {
+		t.Errorf("trigs[0].Revealed: got %v want Hit the High Notes (Red)", trigs[0].Revealed)
+	}
+	if trigs[0].Damage != 0 {
+		t.Errorf("trigs[0].Damage: got %d want 0", trigs[0].Damage)
+	}
+	if trigs[1].Card.Name() != "Malefic Incantation (Red)" || trigs[1].Damage != 2 || trigs[1].Revealed != nil {
+		t.Errorf("trigs[1]: got %+v want {Malefic Incantation (Red), Damage:2, Revealed:nil}", trigs[1])
+	}
+}
+
 // TestRoundTrip_PreservesSideboard verifies the user-managed Sideboard field survives a
 // Marshal/Unmarshal cycle as a multiset of card names. Sideboard contents don't affect the
 // sim — this test pins that the IO layer still round-trips them so `fabsim eval` / `anneal`

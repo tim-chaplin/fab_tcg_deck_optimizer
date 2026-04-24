@@ -762,9 +762,18 @@ func processTriggersAtStartOfTurn(queued []card.AuraTrigger, postDrawDeck []card
 			survivors = append(survivors, t)
 			continue
 		}
+		preReveal := len(ts.Revealed)
 		d := t.Handler(&ts)
 		damage += d
-		contribs = append(contribs, hand.TriggerContribution{Card: t.Self, Damage: d})
+		// Attribute any newly-revealed card to this trigger so the best-turn printout can
+		// show what the handler drew (e.g. Sigil of the Arknight: "drew X into hand"). Taking
+		// ts.Revealed[preReveal] instead of counting from the end handles cascading reveals
+		// where a later handler also appends — each trigger sees its own first-appended card.
+		var revealed card.Card
+		if len(ts.Revealed) > preReveal {
+			revealed = ts.Revealed[preReveal]
+		}
+		contribs = append(contribs, hand.TriggerContribution{Card: t.Self, Damage: d, Revealed: revealed})
 		t.Count--
 		if t.Count > 0 {
 			survivors = append(survivors, t)
