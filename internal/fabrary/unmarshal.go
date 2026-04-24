@@ -121,7 +121,8 @@ func Unmarshal(text string) (*deck.Deck, map[string]int, error) {
 	return d, skipped, nil
 }
 
-// countedLine matches "<N>x <name>" — fabrary always uses a lowercase "x" with no spaces around it.
+// countedLine matches "<N>x <name>" — fabrary always uses a lowercase "x" with no surrounding
+// spaces.
 var countedLine = regexp.MustCompile(`^(\d+)x\s+(.+?)\s*$`)
 
 func parseCountedLine(line string) (int, string, bool) {
