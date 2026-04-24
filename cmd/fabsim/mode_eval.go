@@ -57,10 +57,12 @@ func runEvalCmd(args []string) {
 func runEval(outPath string, deepShuffles, incoming, maxCopies int, seed int64, fmtValue fmtpkg.Format, reevaluate bool) {
 	loaded := mustLoadDeck(outPath)
 	// Wrap the loaded hero/weapons/cards in a fresh Deck so Evaluate's stats start from zero
-	// instead of accumulating on top of the persisted Stats. Sideboard carries over verbatim
-	// — the sim ignores it but the post-eval writeDeck round-trips it back to disk.
+	// instead of accumulating on top of the persisted Stats. Sideboard and Equipment carry
+	// over verbatim — the sim ignores both, but the post-eval writeDeck round-trips them
+	// back to disk so the user's hand-managed lists aren't dropped by a re-score.
 	d := deck.New(loaded.Hero, loaded.Weapons, loaded.Cards)
 	d.Sideboard = loaded.Sideboard
+	d.Equipment = loaded.Equipment
 	rng := rand.New(rand.NewSource(seed))
 	savedAvg := loaded.Stats.Mean()
 	replaced := sanitizeLoadedDeck(d, maxCopies, rng, fmtValue.IsLegal)

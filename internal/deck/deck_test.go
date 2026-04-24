@@ -151,23 +151,23 @@ func TestAllMutations_PreservesSideboard(t *testing.T) {
 	a := cards.Get(card.AetherSlashRed)
 	b := cards.Get(card.ArcanicSpikeRed)
 	d := New(hero.Viserai{}, []weapon.Weapon{weapon.NebulaBlade{}}, []card.Card{a, a, b, b})
-	d.Sideboard = []card.Card{a, b, b}
+	d.Sideboard = []string{a.Name(), b.Name(), b.Name()}
 
 	muts := AllMutations(d, 2, nil)
 	if len(muts) == 0 {
 		t.Fatal("expected at least one mutation")
 	}
 
-	wantCounts := map[card.ID]int{a.ID(): 1, b.ID(): 2}
+	wantCounts := map[string]int{a.Name(): 1, b.Name(): 2}
 	for i, m := range muts {
-		got := map[card.ID]int{}
-		for _, c := range m.Deck.Sideboard {
-			got[c.ID()]++
+		got := map[string]int{}
+		for _, name := range m.Deck.Sideboard {
+			got[name]++
 		}
-		for id, want := range wantCounts {
-			if got[id] != want {
+		for name, want := range wantCounts {
+			if got[name] != want {
 				t.Errorf("mutation %d (%s): sideboard count for %s = %d, want %d",
-					i, m.Description, cards.Get(id).Name(), got[id], want)
+					i, m.Description, name, got[name], want)
 				break
 			}
 		}

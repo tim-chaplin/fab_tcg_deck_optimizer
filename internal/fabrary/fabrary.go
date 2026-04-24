@@ -27,26 +27,16 @@ import (
 // defaultFormat is emitted in the Format: header. Update when a new format comes online.
 const defaultFormat = "Silver Age"
 
-// defaultArenaPackage is the fixed equipment loadout the user runs on every exported deck.
-// The optimizer doesn't model these slots (only weapons are modelled and varied), so Marshal
-// emits them verbatim into the Arena cards section. Modelled weapons (e.g. Nebula Blade)
-// are NOT listed here — they reach the Arena section via d.Weapons when the deck uses them.
-var defaultArenaPackage = []string{
-	"Beckoning Haunt",
-	"Blade Beckoner Boots",
-	"Blade Beckoner Helm",
-	"Blossom of Spring",
-	"Crown of Dichotomy",
-	"Nullrune Boots",
-	"Nullrune Gloves",
-	"Nullrune Robe",
-}
-
 // Marshal returns fabrary-style deck text for d, suitable for pasting into fabrary.net's
-// "Import deck" tab. Weapons go in the Arena section; deck cards in the Deck section with pitch
-// color suffix lowercased to match fabrary's own exports. When the deck carries a sideboard a
-// trailing "Sideboard" section is appended with the same count-and-name formatting; an empty
-// sideboard skips the section entirely so the output stays minimal.
+// "Import deck" tab. The output sections are:
+//
+//   - Arena cards: weapons + d.Equipment.
+//   - Deck cards: d.Cards, pitch color suffix lowercased to match fabrary.
+//   - Sideboard: d.Sideboard, lowercased pitch suffix. Empty when d.Sideboard is empty.
+//
+// Callers that want the hardcoded default equipment / sideboard loadout baked in should run
+// d.ApplyDefaults() before Marshal. writeDeck does that automatically so the persisted .txt
+// always carries the full loadout.
 func Marshal(d *deck.Deck) string {
 	var b strings.Builder
 	name := d.Hero.Name()
@@ -56,7 +46,7 @@ func Marshal(d *deck.Deck) string {
 
 	b.WriteString("Arena cards\n")
 	arena := weaponCounts(d.Weapons)
-	for _, name := range defaultArenaPackage {
+	for _, name := range d.Equipment {
 		arena[name]++
 	}
 	writeCounts(&b, arena)
@@ -65,9 +55,10 @@ func Marshal(d *deck.Deck) string {
 	b.WriteString("Deck cards\n")
 	writeCounts(&b, cardCountsForExport(d.Cards))
 
-	if len(d.Sideboard) > 0 {
+	sideboardCounts := sideboardCountsForExport(d.Sideboard)
+	if len(sideboardCounts) > 0 {
 		b.WriteString("\nSideboard\n")
-		writeCounts(&b, cardCountsForExport(d.Sideboard))
+		writeCounts(&b, sideboardCounts)
 	}
 	return b.String()
 }
@@ -76,15 +67,17 @@ func Marshal(d *deck.Deck) string {
 // deck cards whose names aren't in the optimizer's registry. Callers should surface the skipped
 // map so users aren't surprised by a silently-reduced deck. Stats aren't round-tripped.
 //
-// Unknown Arena-section lines (non-weapon equipment) are silently skipped and NOT reported — the
-// optimizer doesn't model them. A missing hero aborts: the deck can't be constructed without one.
+// Arena-section entries split by lookup: weapon names land in d.Weapons, everything else lands
+// in d.Equipment (the user-managed arena list) so the round-trip preserves the full loadout.
+// A missing hero aborts: the deck can't be constructed without one.
 func Unmarshal(text string) (*deck.Deck, map[string]int, error) {
 	var (
 		heroName  string
 		section   string
 		weapons   []weapon.Weapon
 		cardList  []card.Card
-		sideboard []card.Card
+		sideboard []string
+		equipment []string
 		skipped   = map[string]int{}
 	)
 
@@ -128,8 +121,15 @@ func Unmarshal(text string) (*deck.Deck, map[string]int, error) {
 				for i := 0; i < qty; i++ {
 					weapons = append(weapons, w)
 				}
+				continue
 			}
-		case "deck", "sideboard":
+			// Non-weapon arena lines are equipment (head, chest, arms, legs) — stored as raw
+			// names since the optimizer doesn't model them. The fabrary-case suffix isn't
+			// stripped: equipment items don't carry pitch colors.
+			for i := 0; i < qty; i++ {
+				equipment = append(equipment, name)
+			}
+		case "deck":
 			canon := fromFabraryCardName(name)
 			id, ok := cards.ByName(canon)
 			if !ok {
@@ -138,11 +138,17 @@ func Unmarshal(text string) (*deck.Deck, map[string]int, error) {
 			}
 			c := cards.Get(id)
 			for i := 0; i < qty; i++ {
-				if section == "sideboard" {
-					sideboard = append(sideboard, c)
-				} else {
-					cardList = append(cardList, c)
-				}
+				cardList = append(cardList, c)
+			}
+		case "sideboard":
+			// Sideboard is a name-only list the sim doesn't touch, so there's no registry
+			// lookup — any card or equipment piece the user lists comes back verbatim.
+			// fromFabraryCardName maps the lowercase pitch suffix back to the canonical
+			// "(Red)" form; names without a recognized suffix (e.g. equipment pieces like
+			// "Crown of Dichotomy") pass through unchanged.
+			canon := fromFabraryCardName(name)
+			for i := 0; i < qty; i++ {
+				sideboard = append(sideboard, canon)
 			}
 		}
 	}
@@ -155,6 +161,7 @@ func Unmarshal(text string) (*deck.Deck, map[string]int, error) {
 	}
 	d := deck.New(h, weapons, cardList)
 	d.Sideboard = sideboard
+	d.Equipment = equipment
 	return d, skipped, nil
 }
 
@@ -198,6 +205,18 @@ func cardCountsForExport(cs []card.Card) map[string]int {
 	m := make(map[string]int, len(cs))
 	for _, c := range cs {
 		m[toFabraryCardName(c.Name())]++
+	}
+	return m
+}
+
+// sideboardCountsForExport mirrors cardCountsForExport for the Sideboard — a string slice
+// rather than []card.Card, since the optimizer doesn't resolve sideboard entries through
+// the card registry. Names are converted to fabrary's lowercase-pitch-color form if they
+// match a known canonical suffix.
+func sideboardCountsForExport(ss []string) map[string]int {
+	m := make(map[string]int, len(ss))
+	for _, s := range ss {
+		m[toFabraryCardName(s)]++
 	}
 	return m
 }

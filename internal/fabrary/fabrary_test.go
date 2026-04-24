@@ -6,8 +6,6 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/cards"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/deck"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/hero"
 )
@@ -62,25 +60,34 @@ func TestMarshalFormat(t *testing.T) {
 	}
 }
 
-// TestMarshalIncludesDefaultArenaPackage pins the convenience behaviour: Marshal emits the
-// user's fixed equipment loadout (defaultArenaPackage) alongside the deck's weapons, so the
-// exported .txt can be pasted into fabrary without hand-editing equipment slots.
-func TestMarshalIncludesDefaultArenaPackage(t *testing.T) {
+// TestMarshalRendersAppliedDefaults pins that when a caller runs ApplyDefaults (as
+// writeDeck does), Marshal's output carries the default equipment in Arena and the default
+// sideboard entries in Sideboard. The default lists themselves are pinned in the deck
+// package's tests; this one only checks the fabrary text picks them up verbatim.
+func TestMarshalRendersAppliedDefaults(t *testing.T) {
 	rng := rand.New(rand.NewSource(1))
 	d := deck.Random(hero.Viserai{}, 40, 2, rng, nil)
+	d.ApplyDefaults()
 	text := Marshal(d)
 
-	for _, name := range defaultArenaPackage {
-		want := "1x " + name + "\n"
+	// Pick representative entries from each default list — full-list coverage belongs in
+	// deck.TestApplyDefaults_*.
+	for _, want := range []string{
+		"1x Beckoning Haunt\n",
+		"1x Blade Beckoner Helm\n",
+		"1x Crown of Dichotomy\n",
+		"2x Read the Runes (red)\n",
+	} {
 		if !strings.Contains(text, want) {
-			t.Errorf("expected %q in Arena section; output:\n%s", strings.TrimSuffix(want, "\n"), text)
+			t.Errorf("expected %q in output; got:\n%s", strings.TrimSuffix(want, "\n"), text)
 		}
 	}
 }
 
 // TestUnmarshalSample parses the exact sample the user supplied (verbatim from fabrary.net's
 // plain-text export) to prove the parser tolerates the real output, including the footer and the
-// mix of weapons + non-weapon equipment in the Arena section.
+// mix of weapons + non-weapon equipment in the Arena section. Non-weapon arena entries land
+// in Deck.Equipment so they round-trip on re-export.
 func TestUnmarshalSample(t *testing.T) {
 	const sample = `Name: Viserai
 Hero: Viserai
@@ -132,14 +139,26 @@ See the full deck @ https://fabrary.net/decks/01KP1AZ5SAS425YN30WB779M41
 	if d.Hero.Name() != "Viserai" {
 		t.Errorf("hero: got %q want %q", d.Hero.Name(), "Viserai")
 	}
-	// Exactly one weapon in the sample maps to a registered weapon ("Reaping Blade"); the other
-	// Arena lines are equipment the optimizer doesn't model and should be silently skipped.
+	// Exactly one weapon in the sample maps to a registered weapon ("Reaping Blade"); the
+	// other non-weapon Arena lines are equipment the optimizer doesn't model — they land in
+	// Deck.Equipment as opaque strings.
 	if len(d.Weapons) != 1 || d.Weapons[0].Name() != "Reaping Blade" {
 		names := make([]string, len(d.Weapons))
 		for i, w := range d.Weapons {
 			names[i] = w.Name()
 		}
 		t.Errorf("weapons: got %v want [Reaping Blade]", names)
+	}
+	// Count how many of each equipment name landed in Deck.Equipment, and spot-check a
+	// couple of the ones in the sample.
+	gotEquipment := map[string]int{}
+	for _, e := range d.Equipment {
+		gotEquipment[e]++
+	}
+	for _, want := range []string{"Blade Beckoner Boots", "Crown of Dichotomy", "Nullrune Boots", "Runehold Release"} {
+		if gotEquipment[want] != 1 {
+			t.Errorf("equipment[%q] = %d, want 1", want, gotEquipment[want])
+		}
 	}
 	if len(d.Cards) == 0 {
 		t.Fatalf("expected deck cards, got none")
@@ -179,21 +198,16 @@ Deck cards
 	}
 }
 
-// TestMarshalSideboardSection verifies that a deck with a non-empty Sideboard renders a
-// trailing "Sideboard" section with count-and-name lines in the same shape as the Deck section.
-// An empty sideboard should skip the section entirely so minimal decks stay minimal.
+// TestMarshalSideboardSection verifies that a deck with an explicit Sideboard renders a
+// trailing "Sideboard" section with count-and-name lines in the same shape as the Deck section,
+// placed after Deck cards.
 func TestMarshalSideboardSection(t *testing.T) {
 	rng := rand.New(rand.NewSource(1))
 	d := deck.Random(hero.Viserai{}, 40, 2, rng, nil)
 
-	// Empty sideboard → no section at all.
-	if text := Marshal(d); strings.Contains(text, "Sideboard") {
-		t.Errorf("empty sideboard should not emit a Sideboard section; got:\n%s", text)
-	}
-
-	// Populated sideboard → the section appears after Deck cards with the same "Nx Name (color)"
-	// shape. Uses Mauvrion Skies Red since it's in the registry and carries a pitch color.
-	d.Sideboard = []card.Card{cards.Get(card.MauvrionSkiesRed), cards.Get(card.MauvrionSkiesRed)}
+	// Use Mauvrion Skies (Red) — its pitch-color suffix exercises the toFabraryCardName
+	// lowercase conversion. Sideboard is a string list; names are stored in canonical form.
+	d.Sideboard = []string{"Mauvrion Skies (Red)", "Mauvrion Skies (Red)"}
 	text := Marshal(d)
 	if !strings.Contains(text, "\nSideboard\n") {
 		t.Errorf("populated sideboard should emit a Sideboard section; got:\n%s", text)
@@ -236,8 +250,8 @@ Sideboard
 		t.Errorf("main cards: got %v want %v", got, wantMain)
 	}
 	gotSide := map[string]int{}
-	for _, c := range d.Sideboard {
-		gotSide[c.Name()]++
+	for _, name := range d.Sideboard {
+		gotSide[name]++
 	}
 	if !reflect.DeepEqual(gotSide, wantSide) {
 		t.Errorf("sideboard: got %v want %v", gotSide, wantSide)

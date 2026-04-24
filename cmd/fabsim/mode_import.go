@@ -95,6 +95,9 @@ func summarizeImportedDeck(d *deck.Deck) {
 	if len(d.Sideboard) > 0 {
 		fmt.Fprintf(os.Stderr, ", sideboard: %d", len(d.Sideboard))
 	}
+	if len(d.Equipment) > 0 {
+		fmt.Fprintf(os.Stderr, ", equipment: %d", len(d.Equipment))
+	}
 	fmt.Fprintln(os.Stderr)
 }
 

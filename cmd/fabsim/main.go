@@ -190,10 +190,16 @@ func loadExisting(path string) (*deck.Deck, float64, error) {
 // writeDeck persists d as JSON at path plus a sibling fabrary-format .txt ("x.json" →
 // "x.txt") so the saved deck is ready to paste into fabrary.net without a second export step.
 //
+// ApplyDefaults runs first so both files carry the hardcoded default equipment / sideboard
+// loadout the user runs on every deck. Persisting the defaults into the JSON (not just the
+// .txt) means a reloaded deck already has them in Equipment / Sideboard without another
+// round trip.
+//
 // Both files are written atomically via writeFileAtomic: data lands in <path>.tmp first,
 // then os.Rename swaps it into place, so a Ctrl-C mid-write can never leave the destination
 // empty or partially written.
 func writeDeck(d *deck.Deck, path string) error {
+	d.ApplyDefaults()
 	data, err := deckio.Marshal(d)
 	if err != nil {
 		return fmt.Errorf("marshal: %w", err)
@@ -287,24 +293,39 @@ func resolveDeckPath(name string) string {
 }
 
 // printCardList writes the deck's card list in canonical "Card list:" form: one
-// grouped-and-sorted count-and-name line per unique card. When the deck carries a user-managed
-// sideboard a trailing "Sideboard:" block lists its contents in the same grouped form — an
-// empty sideboard is silently skipped so stock decks stay untouched.
+// grouped-and-sorted count-and-name line per unique card. When the deck carries user-managed
+// Equipment or Sideboard sections, trailing "Equipment:" / "Sideboard:" blocks list their
+// contents in the same grouped form — empty sections are silently skipped so stock decks
+// stay untouched.
 func printCardList(d *deck.Deck) {
 	fmt.Println("Card list:")
 	printGroupedCards(d.Cards)
+	if len(d.Equipment) > 0 {
+		fmt.Println("Equipment:")
+		printGroupedStrings(d.Equipment)
+	}
 	if len(d.Sideboard) > 0 {
 		fmt.Println("Sideboard:")
-		printGroupedCards(d.Sideboard)
+		printGroupedStrings(d.Sideboard)
 	}
 }
 
 // printGroupedCards writes one count-and-name line per unique card in cs, sorted by name.
-// Factored out of printCardList so the main list and the sideboard section share formatting.
+// Shared between the main card list and the sideboard block so formatting stays consistent.
 func printGroupedCards(cs []card.Card) {
+	names := make([]string, len(cs))
+	for i, c := range cs {
+		names[i] = c.Name()
+	}
+	printGroupedStrings(names)
+}
+
+// printGroupedStrings is the string-slice counterpart of printGroupedCards — used by the
+// Equipment section where entries are opaque names rather than registry cards.
+func printGroupedStrings(ss []string) {
 	counts := map[string]int{}
-	for _, c := range cs {
-		counts[c.Name()]++
+	for _, s := range ss {
+		counts[s]++
 	}
 	names := make([]string, 0, len(counts))
 	for n := range counts {
