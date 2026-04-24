@@ -12,7 +12,7 @@ import (
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/deck"
-	fmtpkg "github.com/tim-chaplin/fab-deck-optimizer/internal/format"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/deckformat"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/hand"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/hero"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/mydecks"
@@ -27,7 +27,7 @@ type annealConfig struct {
 	maxCopies       int
 	seed            int64
 	outPath         string
-	format          fmtpkg.Format
+	format          deckformat.Format
 	debug           bool
 	reevaluate      bool
 	// startTemp / tempDecay / minTemp are the simulated-annealing knobs. startTemp of 0
@@ -50,7 +50,7 @@ func (c annealConfig) legalFilter() func(card.Card) bool {
 // defaultDeckNameFor returns the deck name when -deck isn't supplied, keyed by hero, format, and
 // -incoming. Different regimes produce different optimal decks, so each gets its own file to
 // avoid hill-climbing one regime's best under another regime's objective.
-func defaultDeckNameFor(h hero.Hero, f fmtpkg.Format, incoming int) string {
+func defaultDeckNameFor(h hero.Hero, f deckformat.Format, incoming int) string {
 	return fmt.Sprintf("%s_%s_%d_incoming", strings.ToLower(h.Name()), f, incoming)
 }
 
@@ -65,7 +65,7 @@ func runAnnealCmd(args []string) {
 	deckSize := fs.Int("deck-size", 40, "number of cards per deck")
 	maxCopies := fs.Int("max-copies", defaultMaxCopies, "maximum copies of any single card printing per deck")
 	seed := fs.Int64("seed", time.Now().UnixNano(), "RNG seed")
-	formatFlag := fs.String("format", string(fmtpkg.SilverAge), "constructed format whose banlist restricts the card pool during search (only \"silver_age\" is supported today)")
+	formatFlag := fs.String("format", string(deckformat.SilverAge), "constructed format whose banlist restricts the card pool during search (only \"silver_age\" is supported today)")
 	debug := fs.Bool("debug", false, "emit extra diagnostic output (e.g. memo cache size between rounds)")
 	reevaluate := fs.Bool("reevaluate", false, "force re-evaluation of the loaded deck's baseline avg, even if its prior run count already matches -deep-shuffles. Use after adjusting modelling assumptions or fixing bugs that may have shifted the deck's true score.")
 	finalize := fs.Bool("finalize", false, "high-precision pass — overrides -shallow-shuffles to 10000 and -deep-shuffles to 100000. Use on a deck that's already converged to squeeze out the remaining sub-percent improvements.")
@@ -79,7 +79,7 @@ func runAnnealCmd(args []string) {
 	}
 	requireFlag(fs, "anneal", "incoming")
 
-	fmtValue, err := fmtpkg.Parse(*formatFlag)
+	fmtValue, err := deckformat.Parse(*formatFlag)
 	if err != nil {
 		die("%v", err)
 	}

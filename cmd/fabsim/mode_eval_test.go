@@ -11,7 +11,7 @@ import (
 	"testing"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/deck"
-	fmtpkg "github.com/tim-chaplin/fab-deck-optimizer/internal/format"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/deckformat"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/hero"
 )
 
@@ -78,7 +78,7 @@ func TestRunEval_DefaultRewritesFile(t *testing.T) {
 	// where the seed had Hands=0. captureEvalOutput drains stdout/stderr so the test isn't
 	// cluttered with eval's prints and runEval doesn't block on a full pipe buffer.
 	_, _ = captureEvalOutput(t, func() {
-		runEval(path, 50, 0, 2, 1, fmtpkg.SilverAge, false, true)
+		runEval(path, 50, 0, 2, 1, deckformat.SilverAge, false, true)
 	})
 	afterDefault, err := os.ReadFile(path)
 	if err != nil {
@@ -118,7 +118,7 @@ func TestRunEval_PrintOnlyLeavesFileUnchanged(t *testing.T) {
 	}
 
 	_, stderr := captureEvalOutput(t, func() {
-		runEval(path, 50, 0, 2, 1, fmtpkg.SilverAge, true, true)
+		runEval(path, 50, 0, 2, 1, deckformat.SilverAge, true, true)
 	})
 	afterRead, err := os.ReadFile(path)
 	if err != nil {
@@ -152,7 +152,7 @@ func TestRunEval_DefaultPrintsFullDump(t *testing.T) {
 	}
 
 	stdout, stderr := captureEvalOutput(t, func() {
-		runEval(path, 100, 0, 2, 1, fmtpkg.SilverAge, false, false)
+		runEval(path, 100, 0, 2, 1, deckformat.SilverAge, false, false)
 	})
 	if !strings.Contains(stdout, "Best turn played") {
 		t.Errorf("eval output missing 'Best turn played' header:\n%s", stdout)
@@ -179,7 +179,7 @@ func TestRunEval_BriefSkipsBestTurnAndCardList(t *testing.T) {
 	}
 
 	stdout, _ := captureEvalOutput(t, func() {
-		runEval(path, 100, 0, 2, 1, fmtpkg.SilverAge, false, true)
+		runEval(path, 100, 0, 2, 1, deckformat.SilverAge, false, true)
 	})
 	if !strings.Contains(stdout, "Mean value:") {
 		t.Errorf("brief eval output missing the 'Mean value:' stats line:\n%s", stdout)

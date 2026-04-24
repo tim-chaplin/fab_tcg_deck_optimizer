@@ -8,7 +8,7 @@ import (
 	"time"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/deck"
-	fmtpkg "github.com/tim-chaplin/fab-deck-optimizer/internal/format"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/deckformat"
 )
 
 // runEvalCmd parses eval's flags and dispatches to runEval. eval always operates on an
@@ -24,7 +24,7 @@ func runEvalCmd(args []string) {
 	deepShuffles := fs.Int("deep-shuffles", 10000, "shuffles per deck used to re-score the deck")
 	incoming := fs.Int("incoming", 0, "opponent damage per turn (required unless -print-only is set — must match the value the deck was annealed at for comparable numbers)")
 	seed := fs.Int64("seed", time.Now().UnixNano(), "RNG seed")
-	formatFlag := fs.String("format", string(fmtpkg.SilverAge), "constructed format predicate applied to replacement picks when the loaded deck contains NotImplemented cards")
+	formatFlag := fs.String("format", string(deckformat.SilverAge), "constructed format predicate applied to replacement picks when the loaded deck contains NotImplemented cards")
 	maxCopies := fs.Int("max-copies", defaultMaxCopies, "maximum copies of any single card printing per deck, applied when replacing NotImplemented cards in the loaded deck")
 	printOnly := fs.Bool("print-only", false, "load the deck and print the stats from the last run without simulating or rewriting the on-disk .json / .txt")
 	brief := fs.Bool("brief", false, "print only the score summary (no card list, per-card stats, or best turn)")
@@ -35,7 +35,7 @@ func runEvalCmd(args []string) {
 	if !*printOnly {
 		requireFlag(fs, "eval", "incoming")
 	}
-	fmtValue, err := fmtpkg.Parse(*formatFlag)
+	fmtValue, err := deckformat.Parse(*formatFlag)
 	if err != nil {
 		die("%v", err)
 	}
@@ -59,7 +59,7 @@ func runEvalCmd(args []string) {
 //     per-card stats.
 //   - brief=true: score summary only. Good for scripted re-scoring where the card list and
 //     best turn are noise.
-func runEval(outPath string, deepShuffles, incoming, maxCopies int, seed int64, fmtValue fmtpkg.Format, printOnly, brief bool) {
+func runEval(outPath string, deepShuffles, incoming, maxCopies int, seed int64, fmtValue deckformat.Format, printOnly, brief bool) {
 	loaded := mustLoadDeck(outPath)
 	if printOnly {
 		printLoadedDeck(loaded, brief)

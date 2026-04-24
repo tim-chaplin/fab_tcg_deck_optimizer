@@ -139,8 +139,8 @@ func (d *Deck) ApplyDefaults() {
 // the space the generator actually produces.
 //
 // legal filters the card pool: only IDs for which legal(cards.Get(id)) returns true are
-// candidates. Pass nil for no filtering. Callers typically wire format.Format.IsLegal through
-// here to restrict generation to a constructed format's banlist.
+// candidates. Pass nil for no filtering. Callers typically wire deckformat.Format.IsLegal
+// through here to restrict generation to a constructed format's banlist.
 func Random(h hero.Hero, size, maxCopies int, rng *rand.Rand, legal func(card.Card) bool) *Deck {
 	if maxCopies < 1 {
 		panic(fmt.Sprintf("deck: Random requires maxCopies >= 1 (got %d)", maxCopies))
