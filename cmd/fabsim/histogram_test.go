@@ -80,28 +80,118 @@ func TestScaleBarHeights_ZeroStaysZero_NonZeroRoundsUp(t *testing.T) {
 	}
 }
 
-// TestXAxisTickRow_FitsWithinWidth pins the tick-row layout: minV is left-justified at col 0,
-// maxV is right-justified at the last column, spaces fill the middle.
-func TestXAxisTickRow_FitsWithinWidth(t *testing.T) {
-	got := xAxisTickRow(7, 21, 20)
-	if len(got) != 20 {
-		t.Errorf("len = %d, want 20 (chart width)", len(got))
+// TestXAxisTicks_FullFiveOnWideRange verifies the happy path: a large-enough range across
+// the full chart width produces five ticks (min, lower quartile, midpoint, upper quartile,
+// max) in left-to-right order. min and max always anchor the ends.
+func TestXAxisTicks_FullFiveOnWideRange(t *testing.T) {
+	ticks := xAxisTicks(0, 59, 60)
+	if len(ticks) != 5 {
+		t.Fatalf("len = %d, want 5 (min + 3 quartiles + max)", len(ticks))
 	}
-	if got[0] != '7' {
-		t.Errorf("first char = %q, want '7' (left tick aligned at col 0)", got[0])
+	wantCols := []int{0, 14, 29, 44, 59}
+	for i, tk := range ticks {
+		if tk.col != wantCols[i] {
+			t.Errorf("ticks[%d].col = %d, want %d", i, tk.col, wantCols[i])
+		}
 	}
-	if got[len(got)-2:] != "21" {
-		t.Errorf("last two chars = %q, want \"21\" (right tick aligned at last col)", got[len(got)-2:])
+	if ticks[0].value != 0 || ticks[len(ticks)-1].value != 59 {
+		t.Errorf("ends = (%d, %d), want (0, 59)", ticks[0].value, ticks[len(ticks)-1].value)
 	}
 }
 
-// TestXAxisTickRow_TooNarrowFallsBack covers the degenerate case: when the two labels plus
-// a separating space don't fit in width, the row collapses to a compact "min..max" form
-// rather than overlapping labels.
-func TestXAxisTickRow_TooNarrowFallsBack(t *testing.T) {
-	got := xAxisTickRow(1000, 2000, 5)
-	if got != "1000..2000" {
-		t.Errorf("got %q, want %q", got, "1000..2000")
+// TestXAxisTicks_DedupesNarrowRange pins the narrow-range contract: when the data spans only
+// a handful of distinct integers, interior quartile ticks whose value duplicates a neighbour
+// are dropped so the axis never prints the same label twice.
+func TestXAxisTicks_DedupesNarrowRange(t *testing.T) {
+	// min=7, max=9 across width 60: quartile cols 14/29/44 all map to values in {7, 8, 9}.
+	// min(7) and max(9) are reserved; the only novel quartile value is 8 at col 29.
+	ticks := xAxisTicks(7, 9, 60)
+	values := map[int]int{}
+	for _, tk := range ticks {
+		values[tk.value]++
+	}
+	for v, n := range values {
+		if n != 1 {
+			t.Errorf("value %d appears %d times, want 1 (dedup should drop repeats)", v, n)
+		}
+	}
+	if _, ok := values[7]; !ok {
+		t.Error("min=7 missing from ticks")
+	}
+	if _, ok := values[9]; !ok {
+		t.Error("max=9 missing from ticks")
+	}
+}
+
+// TestXAxisTickRow_LayoutCentresLabels pins the label placement: each tick label is centred on
+// its column (with edge ticks clipped inward to fit), and when labels would collide the
+// interior tick is dropped so min and max always render.
+func TestXAxisTickRow_LayoutCentresLabels(t *testing.T) {
+	ticks := xAxisTicks(0, 59, 60)
+	got := xAxisTickRow(ticks, 60)
+	if len(got) != 60 {
+		t.Fatalf("len = %d, want 60 (chart width)", len(got))
+	}
+	if got[0] != '0' {
+		t.Errorf("first char = %q, want '0' (min left-clipped to col 0)", got[0])
+	}
+	// "59" is right-clipped so the 9 lands at col 59 and the 5 at col 58.
+	if got[58:60] != "59" {
+		t.Errorf("last two chars = %q, want \"59\" (max right-clipped to last col)", got[58:60])
+	}
+}
+
+// TestXAxisBaseline_MarksTickPositions covers the bottom-axis rendering: the leading "+"
+// sits under the y-axis, the body is dashes, and each interior tick gets an additional "+"
+// anchor aligned under its label.
+func TestXAxisBaseline_MarksTickPositions(t *testing.T) {
+	ticks := xAxisTicks(0, 59, 60)
+	base := xAxisBaseline(ticks, 60)
+	if len(base) != 61 {
+		t.Fatalf("len = %d, want 61 (leading + plus 60 cols)", len(base))
+	}
+	if base[0] != '+' {
+		t.Errorf("base[0] = %q, want '+'", base[0])
+	}
+	// Interior ticks at cols 14, 29, 44 produce "+" one position to the right (buf[col+1]).
+	for _, col := range []int{14, 29, 44} {
+		if base[col+1] != '+' {
+			t.Errorf("base[%d] = %q, want '+' (tick anchor)", col+1, base[col+1])
+		}
+	}
+	// Rightmost tick at col 59 lands at buf[60].
+	if base[60] != '+' {
+		t.Errorf("base[60] = %q, want '+' (max-tick anchor)", base[60])
+	}
+}
+
+// TestYAxisTickLabels_FourRowsOnTallPeak verifies that a peak comfortably above the height
+// emits the expected four-row label set: row 0 at the peak plus three interior quartile
+// rows at 3/4, 1/2, 1/4 of the peak.
+func TestYAxisTickLabels_FourRowsOnTallPeak(t *testing.T) {
+	ticks := yAxisTickLabels(1200, 12)
+	want := map[int]int{0: 1200, 3: 900, 6: 600, 9: 300}
+	if len(ticks) != len(want) {
+		t.Fatalf("len = %d, want %d (peak + 3 quartiles)", len(ticks), len(want))
+	}
+	for row, v := range want {
+		if ticks[row] != v {
+			t.Errorf("ticks[%d] = %d, want %d", row, ticks[row], v)
+		}
+	}
+}
+
+// TestYAxisTickLabels_CollapsesTinyPeak pins the dedup contract: when the peak is small
+// enough that multiple quartile rows would report the same integer value, only the first
+// occurrence is kept so the axis never prints duplicates.
+func TestYAxisTickLabels_CollapsesTinyPeak(t *testing.T) {
+	// Peak=1 over height=12: all interior quartiles compute to 0, so only row 0 survives.
+	ticks := yAxisTickLabels(1, 12)
+	if len(ticks) != 1 {
+		t.Errorf("len = %d, want 1 (tiny peak should collapse interior ticks)", len(ticks))
+	}
+	if ticks[0] != 1 {
+		t.Errorf("ticks[0] = %d, want 1", ticks[0])
 	}
 }
 

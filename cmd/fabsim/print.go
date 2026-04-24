@@ -193,6 +193,8 @@ func printHistogram(d *deck.Deck) {
 	// bodyIndent is the number of spaces before the first bar column so every row (y-label,
 	// axis baseline, tick labels, title) lines up: 1 lead + yLabelW label + " |" (2 chars).
 	bodyIndent := strings.Repeat(" ", 1+yLabelW+2)
+	yTicks := yAxisTickLabels(peak, histHeight)
+	xTicks := xAxisTicks(minV, maxV, histWidth)
 
 	fmt.Println()
 	fmt.Printf("Hand-value distribution (%s hands):\n\n", commaInt(d.Stats.Hands))
@@ -201,8 +203,8 @@ func printHistogram(d *deck.Deck) {
 		// height h fills the bottom h rows, so this row is filled when histHeight-row <= h.
 		rowFromBottom := histHeight - row
 		var label string
-		if row == 0 {
-			label = fmt.Sprintf(" %*d", yLabelW, peak)
+		if v, ok := yTicks[row]; ok {
+			label = fmt.Sprintf(" %*d", yLabelW, v)
 		} else {
 			label = strings.Repeat(" ", yLabelW+1)
 		}
@@ -216,10 +218,11 @@ func printHistogram(d *deck.Deck) {
 		}
 		fmt.Println()
 	}
-	// X-axis baseline and endpoint ticks. The baseline's "+" sits directly under the y-axis
-	// bars, so the tick-label and title rows both live under the chart body (bodyIndent).
-	fmt.Printf(" %*d +%s\n", yLabelW, 0, strings.Repeat("-", histWidth))
-	fmt.Println(bodyIndent + xAxisTickRow(minV, maxV, histWidth))
+	// Baseline: the "+" under the y-axis is the origin tick; additional "+" marks sit under
+	// each interior x-axis tick so the scale is readable at a glance. The tick-label and
+	// title rows both live under the chart body (bodyIndent).
+	fmt.Printf(" %*d %s\n", yLabelW, 0, xAxisBaseline(xTicks, histWidth))
+	fmt.Println(bodyIndent + xAxisTickRow(xTicks, histWidth))
 	fmt.Println(bodyIndent + centerLabel("hand value", histWidth))
 }
 
@@ -278,15 +281,138 @@ func scaleBarHeights(counts []int, peak, height int) []int {
 	return bars
 }
 
-// xAxisTickRow returns a width-character string with minV left-justified and maxV
-// right-justified. Collapses to "minV..maxV" when the two labels can't both fit.
-func xAxisTickRow(minV, maxV, width int) string {
-	lo := strconv.Itoa(minV)
-	hi := strconv.Itoa(maxV)
-	if len(lo)+len(hi)+1 > width {
-		return lo + ".." + hi
+// yAxisTickLabels picks up to four rows on the y-axis to carry numeric labels: the peak (row
+// 0) plus up-to-three interior quartile rows. Quartile labels are skipped when their
+// integer-truncated value would duplicate a neighbour — e.g. a peak of 1 collapses all
+// interior ticks to 0, so only the peak label survives. The map is keyed by row index so the
+// render loop can look up per-row without re-computing.
+func yAxisTickLabels(peak, height int) map[int]int {
+	// Row 0 is the peak; rows height/4, height/2, 3*height/4 mark the interior quartiles. The
+	// value at row r represents the top of that row, so v = peak * (height - r) / height.
+	ticks := map[int]int{0: peak}
+	candidates := []int{height / 4, height / 2, 3 * height / 4}
+	seen := map[int]bool{peak: true, 0: true}
+	for _, r := range candidates {
+		if r == 0 {
+			continue
+		}
+		v := peak * (height - r) / height
+		if seen[v] {
+			continue
+		}
+		seen[v] = true
+		ticks[r] = v
 	}
-	return lo + strings.Repeat(" ", width-len(lo)-len(hi)) + hi
+	return ticks
+}
+
+// xAxisTick marks a single x-axis position and the hand value it represents.
+type xAxisTick struct {
+	col   int
+	value int
+}
+
+// xAxisTicks returns up to five evenly-distributed x-axis ticks: minV at col 0, maxV at the
+// last col, plus interior quartile ticks (lower quartile, midpoint, upper quartile) whose
+// values don't duplicate an already-placed tick. Value dedup keeps narrow ranges from
+// emitting the same label twice (e.g. a 3-integer spread never produces five distinct
+// tick values).
+func xAxisTicks(minV, maxV, width int) []xAxisTick {
+	if width <= 0 {
+		return nil
+	}
+	rng := maxV - minV + 1
+	if rng <= 0 {
+		return nil
+	}
+	// min and max are reserved first so their positions always render; interior quartile
+	// ticks are appended only when their value is novel.
+	placed := map[int]bool{minV: true, maxV: true}
+	ticks := []xAxisTick{{col: 0, value: minV}, {col: width - 1, value: maxV}}
+	interior := []int{(width - 1) / 4, (width - 1) / 2, 3 * (width - 1) / 4}
+	for _, c := range interior {
+		if c <= 0 || c >= width-1 {
+			continue
+		}
+		v := minV + c*rng/width
+		if placed[v] {
+			continue
+		}
+		placed[v] = true
+		ticks = append(ticks, xAxisTick{col: c, value: v})
+	}
+	sort.Slice(ticks, func(i, j int) bool { return ticks[i].col < ticks[j].col })
+	return ticks
+}
+
+// xAxisBaseline renders the chart's bottom axis: a leading "+" under the y-axis, then
+// "-" across the full chart width with an additional "+" at every interior tick position so
+// the tick labels below have visible anchors on the axis.
+func xAxisBaseline(ticks []xAxisTick, width int) string {
+	buf := make([]byte, width+1) // +1 for the leading "+"
+	buf[0] = '+'
+	for i := 1; i < len(buf); i++ {
+		buf[i] = '-'
+	}
+	for _, t := range ticks {
+		// Skip the leftmost tick; the leading "+" already marks it. Any tick at the last
+		// column lands at buf[width], which is still inside the buffer.
+		if t.col == 0 {
+			continue
+		}
+		buf[t.col+1] = '+'
+	}
+	return string(buf)
+}
+
+// xAxisTickRow renders the tick-label row below the baseline. Each tick label is centred on
+// its column; labels that would overflow the chart are clipped inward so no character lands
+// outside [0, width). When two labels would collide, the later one is dropped — min and max
+// are added first so interior labels are the ones that lose.
+func xAxisTickRow(ticks []xAxisTick, width int) string {
+	buf := make([]byte, width)
+	for i := range buf {
+		buf[i] = ' '
+	}
+	place := func(col int, label string) bool {
+		start := col - len(label)/2
+		if start < 0 {
+			start = 0
+		}
+		if start+len(label) > width {
+			start = width - len(label)
+		}
+		for i := 0; i < len(label); i++ {
+			if buf[start+i] != ' ' {
+				return false
+			}
+		}
+		copy(buf[start:], label)
+		return true
+	}
+	// min and max first (by extracting them from the sorted ticks list), then interior.
+	var mn, mx *xAxisTick
+	var interior []xAxisTick
+	for i := range ticks {
+		switch {
+		case ticks[i].col == 0:
+			mn = &ticks[i]
+		case ticks[i].col == width-1:
+			mx = &ticks[i]
+		default:
+			interior = append(interior, ticks[i])
+		}
+	}
+	if mn != nil {
+		place(mn.col, strconv.Itoa(mn.value))
+	}
+	if mx != nil {
+		place(mx.col, strconv.Itoa(mx.value))
+	}
+	for _, t := range interior {
+		place(t.col, strconv.Itoa(t.value))
+	}
+	return string(buf)
 }
 
 // centerLabel returns s padded with spaces so it is horizontally centered within width.
