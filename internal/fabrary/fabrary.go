@@ -39,7 +39,7 @@ var defaultArenaPackage = []string{
 	"Crown of Dichotomy",
 	"Nullrune Boots",
 	"Nullrune Gloves",
-	"Nullrune Robe",
+	"Runebleed Robe",
 }
 
 // Marshal returns fabrary-style deck text for d, suitable for pasting into fabrary.net's
