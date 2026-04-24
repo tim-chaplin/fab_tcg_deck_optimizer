@@ -228,8 +228,11 @@ func printHistogram(d *deck.Deck) {
 
 // buildHistogramColumns bins the raw histogram map into width fixed-width columns spanning
 // [minV, maxV] inclusive. Two regimes:
-//   - range <= width: each integer value gets one or more columns (the chart stretches).
-//   - range > width: each column covers a contiguous integer range (the chart compresses).
+//   - range <= width: each integer value gets its own one-character bar placed at an evenly
+//     distributed column; remaining columns stay zero, giving visual separation between bars
+//     so adjacent values don't fuse into a solid block.
+//   - range > width: each column aggregates a contiguous integer range (the chart compresses
+//     and bars are necessarily contiguous since every column carries data).
 //
 // Returns the per-column count and the peak value so callers can scale bar heights.
 func buildHistogramColumns(hist map[int]int, minV, maxV, width int) (counts []int, peak int) {
@@ -239,10 +242,16 @@ func buildHistogramColumns(hist map[int]int, minV, maxV, width int) (counts []in
 		return counts, 0
 	}
 	if rng <= width {
-		// Stretch: column col maps to a single integer value; adjacent columns may share one.
-		for col := 0; col < width; col++ {
-			v := minV + col*rng/width
-			counts[col] = hist[v]
+		// Stretch: one bar per integer value, evenly distributed so the leftmost value lands
+		// at col 0 and the rightmost at col width-1. A single-value range (rng=1) can't span
+		// anything, so centre it.
+		if rng == 1 {
+			counts[(width-1)/2] = hist[minV]
+		} else {
+			for v := minV; v <= maxV; v++ {
+				col := (v - minV) * (width - 1) / (rng - 1)
+				counts[col] = hist[v]
+			}
 		}
 	} else {
 		// Compress: column col aggregates every value in [binLo, binHi).
@@ -312,12 +321,12 @@ type xAxisTick struct {
 	value int
 }
 
-// xAxisTicks returns up to five evenly-distributed x-axis ticks: minV at col 0, maxV at the
-// last col, plus interior quartile ticks (lower quartile, midpoint, upper quartile) whose
-// values don't duplicate an already-placed tick. Value dedup keeps narrow ranges from
-// emitting the same label twice (e.g. a 3-integer spread never produces five distinct
-// tick values). rng = maxV-minV+1 treats the span as an inclusive count of integer values,
-// matching how buildHistogramColumns derives its per-column value mapping.
+// xAxisTicks returns up to five x-axis ticks at the quartile VALUES of [minV, maxV] (min,
+// lower quartile, midpoint, upper quartile, max), each mapped to its bar column via
+// colForValue so every tick lands directly under the bar it labels. Duplicate values are
+// deduped so a narrow range (e.g. a 3-integer spread) can't emit the same label twice.
+// rng = maxV-minV+1 treats the span as an inclusive count of integer values, matching how
+// buildHistogramColumns derives its per-column value mapping.
 func xAxisTicks(minV, maxV, width int) []xAxisTick {
 	if width <= 0 {
 		return nil
@@ -326,24 +335,42 @@ func xAxisTicks(minV, maxV, width int) []xAxisTick {
 	if rng <= 0 {
 		return nil
 	}
-	// min and max are reserved first so their positions always render; interior quartile
-	// ticks are appended only when their value is novel.
-	placed := map[int]bool{minV: true, maxV: true}
-	ticks := []xAxisTick{{col: 0, value: minV}, {col: width - 1, value: maxV}}
-	interior := []int{(width - 1) / 4, (width - 1) / 2, 3 * (width - 1) / 4}
-	for _, c := range interior {
-		if c <= 0 || c >= width-1 {
-			continue
-		}
-		v := minV + c*rng/width
+	// Target values: min and max anchor the ends; three interior quartile values fill the
+	// middle. Interior ticks are added only when their value is novel so narrow ranges
+	// collapse to just min+max rather than repeating labels.
+	placed := map[int]bool{}
+	ticks := make([]xAxisTick, 0, 5)
+	add := func(v int) {
 		if placed[v] {
-			continue
+			return
 		}
 		placed[v] = true
-		ticks = append(ticks, xAxisTick{col: c, value: v})
+		ticks = append(ticks, xAxisTick{col: colForValue(v, minV, maxV, width), value: v})
 	}
+	add(minV)
+	add(maxV)
+	add(minV + (rng-1)/4)
+	add(minV + (rng-1)/2)
+	add(minV + 3*(rng-1)/4)
 	sort.Slice(ticks, func(i, j int) bool { return ticks[i].col < ticks[j].col })
 	return ticks
+}
+
+// colForValue returns the chart column that renders the bar for integer value v. The formula
+// mirrors buildHistogramColumns so tick labels always land directly under their bar:
+//   - Stretch regime (rng <= width): bars are at evenly-distributed positions with minV at
+//     col 0 and maxV at col width-1.
+//   - Compress regime (rng > width): bars are contiguous; v maps to the start of its bin.
+//   - Degenerate rng<=1 (single value): the lone bar is centred, so the column is width/2.
+func colForValue(v, minV, maxV, width int) int {
+	rng := maxV - minV + 1
+	if rng <= 1 {
+		return (width - 1) / 2
+	}
+	if rng <= width {
+		return (v - minV) * (width - 1) / (rng - 1)
+	}
+	return (v - minV) * width / rng
 }
 
 // xAxisBaseline renders the chart's bottom axis: a leading "+" under the y-axis, then

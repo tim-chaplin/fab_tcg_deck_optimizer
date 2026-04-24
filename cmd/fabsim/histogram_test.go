@@ -2,15 +2,16 @@ package main
 
 import "testing"
 
-// TestBuildHistogramColumns_Stretch verifies the "range <= width" regime: when the histogram
-// spans fewer distinct integer values than the chart is wide, each value stretches across
-// multiple adjacent columns so the chart still fills the full width.
+// TestBuildHistogramColumns_Stretch verifies the "range <= width" regime: each integer
+// value places a single one-char bar at an evenly-distributed column (min at col 0, max at
+// col width-1) so adjacent values don't fuse into a solid block. Interior columns stay zero
+// to render as blank spacers.
 func TestBuildHistogramColumns_Stretch(t *testing.T) {
-	// Three distinct values (min=0, max=2, range=3) across a 6-wide chart → every value gets
-	// exactly two columns and all six cols pull real data.
+	// Three distinct values (min=0, max=2, range=3) across a 6-wide chart → bars at cols
+	// (v-0)*5/(3-1) for v = 0, 1, 2, i.e. cols 0, 2, 5.
 	hist := map[int]int{0: 5, 1: 10, 2: 3}
 	counts, peak := buildHistogramColumns(hist, 0, 2, 6)
-	want := []int{5, 5, 10, 10, 3, 3}
+	want := []int{5, 0, 10, 0, 0, 3}
 	for i, got := range counts {
 		if got != want[i] {
 			t.Errorf("counts[%d] = %d, want %d (full=%v)", i, got, want[i], counts)
@@ -18,6 +19,27 @@ func TestBuildHistogramColumns_Stretch(t *testing.T) {
 	}
 	if peak != 10 {
 		t.Errorf("peak = %d, want 10", peak)
+	}
+}
+
+// TestBuildHistogramColumns_StretchSingleValueCentred covers the rng=1 edge: a deck that
+// only ever produced one distinct hand value has no range to distribute across, so the
+// lone bar renders centred rather than at col 0.
+func TestBuildHistogramColumns_StretchSingleValueCentred(t *testing.T) {
+	hist := map[int]int{42: 7}
+	counts, peak := buildHistogramColumns(hist, 42, 42, 6)
+	if peak != 7 {
+		t.Errorf("peak = %d, want 7", peak)
+	}
+	// width=6, centre = (6-1)/2 = 2.
+	for i, c := range counts {
+		want := 0
+		if i == 2 {
+			want = 7
+		}
+		if c != want {
+			t.Errorf("counts[%d] = %d, want %d", i, c, want)
+		}
 	}
 }
 
@@ -178,6 +200,29 @@ func TestYAxisTickLabels_FourRowsOnTallPeak(t *testing.T) {
 		if ticks[row] != v {
 			t.Errorf("ticks[%d] = %d, want %d", row, ticks[row], v)
 		}
+	}
+}
+
+// TestColForValue_MatchesBarPositions pins the shared col-to-value mapping used by both
+// buildHistogramColumns (to place bars) and xAxisTicks (to place labels): identical math
+// in both callers is what keeps tick labels sitting directly under their bars rather than
+// drifting one or two columns off.
+func TestColForValue_MatchesBarPositions(t *testing.T) {
+	// Stretch regime: 15 distinct values across 60 cols. minV at col 0, maxV at col 59,
+	// interior values evenly distributed.
+	if got := colForValue(7, 7, 21, 60); got != 0 {
+		t.Errorf("colForValue(min) = %d, want 0", got)
+	}
+	if got := colForValue(21, 7, 21, 60); got != 59 {
+		t.Errorf("colForValue(max) = %d, want 59 (width-1)", got)
+	}
+	// Compress regime: col = (v-min)*width/rng. At v=50, min=0, max=119, width=60 → 50*60/120 = 25.
+	if got := colForValue(50, 0, 119, 60); got != 25 {
+		t.Errorf("colForValue(50, 0, 119, 60) = %d, want 25 (compress regime)", got)
+	}
+	// Degenerate rng<=1: single bar centred regardless of value.
+	if got := colForValue(42, 42, 42, 60); got != 29 {
+		t.Errorf("colForValue with min==max = %d, want 29 (centred at (width-1)/2)", got)
 	}
 }
 
