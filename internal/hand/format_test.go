@@ -100,6 +100,38 @@ func TestFormatBestTurn_NonAttackCardUsesPlayLabel(t *testing.T) {
 	}
 }
 
+// TestFormatBestTurn_AuraTriggerLabelledSeparately pins the chain display to attribute hero
+// OnCardPlayed damage and mid-chain AuraTrigger damage on separate tags. When a Runeblade
+// attack action triggers both Viserai (hero ability, +1 Runechant) and a carryover Malefic
+// Incantation (TriggerAttackAction aura from a prior turn, +1 Runechant), the card line must
+// read "(+1 hero trigger) (+1 aura trigger)", not combine them under one label.
+func TestFormatBestTurn_AuraTriggerLabelledSeparately(t *testing.T) {
+	// Hand: a Generic non-attack action (Nimblism — sets NonAttackActionPlayed without being
+	// Runeblade), a Runeblade non-attack action (Mauvrion — Viserai fires on it), and a
+	// Runeblade attack action (Consuming Volition — Viserai fires AND the carryover Malefic
+	// trigger fires). Viserai's contribution is +1; the carryover aura's is +1; the display
+	// must attribute them to separate tags.
+	h := []card.Card{generic.NimblismRed{}, runeblade.MauvrionSkiesRed{}, runeblade.ConsumingVolitionRed{}}
+	prior := []card.AuraTrigger{{
+		Self:        runeblade.MaleficIncantationRed{},
+		Type:        card.TriggerAttackAction,
+		Count:       2,
+		OncePerTurn: true,
+		Handler:     func(s *card.TurnState) int { return s.CreateRunechants(1) },
+	}}
+	got := BestWithTriggers(hero.Viserai{}, nil, h, 0, nil, 0, nil, prior)
+	out := FormatBestTurn(got)
+	if !strings.Contains(out, "(+1 hero trigger)") {
+		t.Errorf("want '(+1 hero trigger)' on the Runeblade attack from Viserai, got:\n%s", out)
+	}
+	if !strings.Contains(out, "(+1 aura trigger)") {
+		t.Errorf("want '(+1 aura trigger)' from the carryover Malefic, got:\n%s", out)
+	}
+	if strings.Contains(out, "(+2 hero trigger)") {
+		t.Errorf("the +1 aura damage must not appear under the hero tag; got:\n%s", out)
+	}
+}
+
 // TestFormatBestTurn_ArsenalInPlayedAsDR checks the combined "arsenal-in played from the slot"
 // + "defense reaction prevented" rendering. Hand: one Malefic Blue (pitch 3). Arsenal-in:
 // Toughen Up Blue (DR cost 2). Malefic pitches to fund the DR, Toughen Up blocks 4 of 4 incoming.
@@ -179,6 +211,34 @@ func TestFormatBestTurn_TriggersFromLastTurnLine(t *testing.T) {
 	want := "1. cardtest.RedAttack (from previous turn): START OF ACTION PHASE (+3)"
 	if !strings.Contains(out, want) {
 		t.Errorf("missing %q in:\n%s", want, out)
+	}
+}
+
+// TestFormatBestTurn_StartOfTurnAurasHeader pins the header line that lists the aura cards
+// in play at the top of the turn. Names sort alphabetically for determinism, and duplicates
+// are preserved (two copies of the same aura render twice).
+func TestFormatBestTurn_StartOfTurnAurasHeader(t *testing.T) {
+	summary := TurnSummary{
+		StartOfTurnAuras: []card.Card{
+			runeblade.MaleficIncantationRed{},
+			runeblade.MaleficIncantationRed{},
+			runeblade.SigilOfTheArknightBlue{},
+		},
+	}
+	out := FormatBestTurn(summary)
+	want := "Auras in play at start of turn: Malefic Incantation (Red), Malefic Incantation (Red), Sigil of the Arknight (Blue)"
+	if !strings.Contains(out, want) {
+		t.Errorf("missing %q in:\n%s", want, out)
+	}
+}
+
+// TestFormatBestTurn_StartOfTurnAurasHeaderSuppressedWhenEmpty pins the omission of the header
+// line when no auras were in play — the empty state shouldn't render a dangling label.
+func TestFormatBestTurn_StartOfTurnAurasHeaderSuppressedWhenEmpty(t *testing.T) {
+	summary := TurnSummary{BestLine: []CardAssignment{{Card: fake.RedAttack{}, Role: Attack}}}
+	out := FormatBestTurn(summary)
+	if strings.Contains(out, "Auras in play at start of turn") {
+		t.Errorf("unexpected header in output:\n%s", out)
 	}
 }
 

@@ -66,8 +66,9 @@ func TestMarshalUnmarshalRoundTrip(t *testing.T) {
 }
 
 // TestRoundTrip_PreservesBestTurnContributions locks in that per-card Contribution and the
-// AttackChain's per-step Damage / TriggerDamage round-trip through Marshal/Unmarshal, so a
-// reloaded deck renders with the same per-card numbers the live sim produced.
+// AttackChain's per-step Damage / TriggerDamage / AuraTriggerDamage round-trip through
+// Marshal/Unmarshal, so a reloaded deck renders with the same per-card numbers the live sim
+// produced.
 func TestRoundTrip_PreservesBestTurnContributions(t *testing.T) {
 	rng := rand.New(rand.NewSource(7))
 	d := deck.Random(hero.Viserai{}, 40, 2, rng, nil)
@@ -131,6 +132,51 @@ func TestRoundTrip_PreservesBestTurnContributions(t *testing.T) {
 		}
 		if gotChain[i].TriggerDamage != wantChain[i].TriggerDamage {
 			t.Errorf("AttackChain[%d].TriggerDamage: got %.3f want %.3f", i, gotChain[i].TriggerDamage, wantChain[i].TriggerDamage)
+		}
+		if gotChain[i].AuraTriggerDamage != wantChain[i].AuraTriggerDamage {
+			t.Errorf("AttackChain[%d].AuraTriggerDamage: got %.3f want %.3f", i, gotChain[i].AuraTriggerDamage, wantChain[i].AuraTriggerDamage)
+		}
+	}
+}
+
+// TestRoundTrip_PreservesStartOfTurnAuras locks in that the best turn's StartOfTurnAuras list
+// (the auras that were in play at the top of the captured turn) survives Marshal/Unmarshal by
+// card name, preserving duplicates and order. Without the round-trip, a reloaded deck's best
+// turn would lose its "Auras in play at start of turn" header line.
+func TestRoundTrip_PreservesStartOfTurnAuras(t *testing.T) {
+	rng := rand.New(rand.NewSource(7))
+	d := deck.Random(hero.Viserai{}, 40, 2, rng, nil)
+	// Seed a best turn by hand so the assertion doesn't depend on the sim organically
+	// producing carryover auras — synthetic input is enough to pin the round trip.
+	d.Stats.Best = deck.BestTurn{
+		Summary: hand.TurnSummary{
+			BestLine: []hand.CardAssignment{{Card: cards.Get(card.MaleficIncantationRed), Role: hand.Attack}},
+			StartOfTurnAuras: []card.Card{
+				cards.Get(card.MaleficIncantationRed),
+				cards.Get(card.MaleficIncantationRed),
+				cards.Get(card.SigilOfTheArknightBlue),
+			},
+			Value: 1,
+		},
+	}
+
+	data, err := Marshal(d)
+	if err != nil {
+		t.Fatalf("Marshal: %v", err)
+	}
+	got, err := Unmarshal(data)
+	if err != nil {
+		t.Fatalf("Unmarshal: %v", err)
+	}
+
+	wantNames := []string{"Malefic Incantation (Red)", "Malefic Incantation (Red)", "Sigil of the Arknight (Blue)"}
+	gotAuras := got.Stats.Best.Summary.StartOfTurnAuras
+	if len(gotAuras) != len(wantNames) {
+		t.Fatalf("StartOfTurnAuras len: got %d want %d", len(gotAuras), len(wantNames))
+	}
+	for i := range wantNames {
+		if gotAuras[i].Name() != wantNames[i] {
+			t.Errorf("StartOfTurnAuras[%d]: got %q want %q", i, gotAuras[i].Name(), wantNames[i])
 		}
 	}
 }
