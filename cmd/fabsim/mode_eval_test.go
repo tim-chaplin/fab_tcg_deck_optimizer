@@ -185,8 +185,8 @@ func TestRunEval_BriefSkipsBestTurnAndCardList(t *testing.T) {
 	stdout, _ := captureEvalOutput(t, func() {
 		runEval(path, 100, 0, 2, 1, fmtpkg.SilverAge, false, true)
 	})
-	if !strings.Contains(stdout, "Best deck (min") {
-		t.Errorf("brief eval output missing the score header:\n%s", stdout)
+	if !strings.Contains(stdout, "Mean value:") {
+		t.Errorf("brief eval output missing the 'Mean value:' stats line:\n%s", stdout)
 	}
 	if strings.Contains(stdout, "Best turn played") {
 		t.Errorf("brief eval should suppress the best-turn block; got:\n%s", stdout)

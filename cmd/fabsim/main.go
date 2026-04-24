@@ -334,20 +334,27 @@ func printGroupedStrings(ss []string) {
 	}
 }
 
-// printDeckSummary prints the compact score header: min/median/mean/max, hero, weapons, per-cycle
-// means, and pitch colour counts. printBestDeck wraps this with the full card list + best-turn +
-// per-card stats; `fabsim eval -brief` calls printDeckSummary so a scripted re-score gets just
-// the numbers without the card-list scroll.
+// printDeckSummary prints the compact summary: a loadout block (hero, weapons, pitch colour
+// counts) followed by a blank line and a stats block (overall mean, per-cycle means).
+// printBestDeck wraps this with the card list, best-turn block, and per-card stats;
+// `fabsim eval -brief` calls printDeckSummary directly so a scripted re-score gets just the
+// numbers without the card-list scroll.
 func printDeckSummary(d *deck.Deck) {
 	s := d.Stats
-	fmt.Printf("Best deck (min %d, median %.1f, mean %.3f, max %d over %d hands)\n",
-		s.Min(), s.Median(), s.Mean(), s.Max(), s.Hands)
-	fmt.Printf("  Hero:    %s\n", d.Hero.Name())
-	fmt.Printf("  Weapons: %s\n", weaponNames(d.Weapons))
-	fmt.Printf("  Cycle 1 mean: %.3f  (%d hands)\n", s.FirstCycle.Mean(), s.FirstCycle.Hands)
-	fmt.Printf("  Cycle 2 mean: %.3f  (%d hands)\n", s.SecondCycle.Mean(), s.SecondCycle.Hands)
-	var red, yellow, blue int
-	for _, c := range d.Cards {
+	red, yellow, blue := pitchCounts(d.Cards)
+	fmt.Printf("Hero:    %s\n", d.Hero.Name())
+	fmt.Printf("Weapons: %s\n", weaponNames(d.Weapons))
+	fmt.Printf("Pitch:   %d red / %d yellow / %d blue\n", red, yellow, blue)
+	fmt.Println()
+	fmt.Printf("Mean value: %.3f  (%d shuffles)\n", s.Mean(), s.Runs)
+	fmt.Printf("  Cycle 1 mean: %.3f\n", s.FirstCycle.Mean())
+	fmt.Printf("  Cycle 2 mean: %.3f\n", s.SecondCycle.Mean())
+}
+
+// pitchCounts tallies red/yellow/blue copies by Pitch() value so the summary's "Pitch:" line
+// stays a single expression. Cards with pitch outside 1-3 contribute to no bucket.
+func pitchCounts(cs []card.Card) (red, yellow, blue int) {
+	for _, c := range cs {
 		switch c.Pitch() {
 		case 1:
 			red++
@@ -357,7 +364,7 @@ func printDeckSummary(d *deck.Deck) {
 			blue++
 		}
 	}
-	fmt.Printf("  Pitch:   %d red / %d yellow / %d blue\n", red, yellow, blue)
+	return red, yellow, blue
 }
 
 func printBestDeck(d *deck.Deck) {
@@ -444,10 +451,16 @@ func maxNameLen(cs []card.Card) int {
 	return m
 }
 
+// weaponNames joins the deck's weapon names with ", " for the summary's "Weapons:" line.
+// A single-weapon loadout prints the name bare; an empty loadout prints "none" so the column
+// stays filled rather than rendering as a trailing blank.
 func weaponNames(ws []weapon.Weapon) string {
+	if len(ws) == 0 {
+		return "none"
+	}
 	names := make([]string, len(ws))
 	for i, w := range ws {
 		names[i] = w.Name()
 	}
-	return fmt.Sprintf("%v", names)
+	return strings.Join(names, ", ")
 }
