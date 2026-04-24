@@ -188,11 +188,7 @@ func TestRoundTrip_PreservesStartOfTurnAuras(t *testing.T) {
 func TestRoundTrip_PreservesSideboard(t *testing.T) {
 	rng := rand.New(rand.NewSource(42))
 	d := deck.Random(hero.Viserai{}, 40, 2, rng, nil)
-	d.Sideboard = []card.Card{
-		cards.Get(card.AetherSlashRed),
-		cards.Get(card.AetherSlashRed),
-		cards.Get(card.ArcanicSpikeBlue),
-	}
+	d.Sideboard = []string{"Aether Slash (Red)", "Aether Slash (Red)", "Arcanic Spike (Blue)"}
 
 	data, err := Marshal(d)
 	if err != nil {
@@ -205,8 +201,8 @@ func TestRoundTrip_PreservesSideboard(t *testing.T) {
 
 	want := map[string]int{"Aether Slash (Red)": 2, "Arcanic Spike (Blue)": 1}
 	gotCounts := map[string]int{}
-	for _, c := range got.Sideboard {
-		gotCounts[c.Name()]++
+	for _, name := range got.Sideboard {
+		gotCounts[name]++
 	}
 	if !reflect.DeepEqual(gotCounts, want) {
 		t.Errorf("sideboard counts: got %v want %v", gotCounts, want)
@@ -228,23 +224,62 @@ func TestMarshal_OmitsEmptySideboard(t *testing.T) {
 	}
 }
 
-// TestUnmarshal_UnknownSideboardCardErrors mirrors the strict behaviour of the main Cards
-// list: unknown names abort the parse rather than being silently dropped, so a typo in a
-// hand-edited sideboard surfaces immediately.
-func TestUnmarshal_UnknownSideboardCardErrors(t *testing.T) {
-	const bad = `{
+// TestUnmarshal_SideboardAcceptsAnyName pins the lenient behaviour of Sideboard: it's a
+// name-only list the sim never reads, so any string the user wrote — including equipment
+// pieces and yet-to-be-implemented cards — round-trips verbatim instead of aborting the
+// parse.
+func TestUnmarshal_SideboardAcceptsAnyName(t *testing.T) {
+	const raw = `{
   "hero": "Viserai",
   "weapons": [],
   "cards": [],
-  "sideboard": ["Not A Real Card"],
+  "sideboard": ["Not A Real Card", "Crown of Dichotomy"],
   "pitch": {"red": 0, "yellow": 0, "blue": 0},
   "stats": {"avg": 0, "runs": 0, "hands": 0, "total_value": 0, "first_cycle": {"Hands": 0, "Total": 0}, "second_cycle": {"Hands": 0, "Total": 0}, "best": {"hand": [], "roles": [], "weapons": [], "value": 0, "starting_runechants": 0}}
 }`
-	_, err := Unmarshal([]byte(bad))
-	if err == nil {
-		t.Fatal("expected error for unknown sideboard card, got nil")
+	d, err := Unmarshal([]byte(raw))
+	if err != nil {
+		t.Fatalf("Unmarshal: %v", err)
 	}
-	if !strings.Contains(err.Error(), "sideboard") {
-		t.Errorf("error should mention sideboard; got %v", err)
+	want := []string{"Not A Real Card", "Crown of Dichotomy"}
+	if !reflect.DeepEqual(d.Sideboard, want) {
+		t.Errorf("sideboard: got %v want %v", d.Sideboard, want)
+	}
+}
+
+// TestRoundTrip_PreservesEquipment pins the Equipment round-trip: the field survives
+// Marshal/Unmarshal and accepts names the card registry doesn't cover (the sim doesn't
+// model equipment pieces).
+func TestRoundTrip_PreservesEquipment(t *testing.T) {
+	rng := rand.New(rand.NewSource(1))
+	d := deck.Random(hero.Viserai{}, 40, 2, rng, nil)
+	d.Equipment = []string{"Beckoning Haunt", "Nullrune Boots", "Blade Beckoner Helm"}
+
+	data, err := Marshal(d)
+	if err != nil {
+		t.Fatalf("Marshal: %v", err)
+	}
+	got, err := Unmarshal(data)
+	if err != nil {
+		t.Fatalf("Unmarshal: %v", err)
+	}
+	// Sorted copy — Marshal sorts for stable on-disk diff.
+	want := []string{"Beckoning Haunt", "Blade Beckoner Helm", "Nullrune Boots"}
+	if !reflect.DeepEqual(got.Equipment, want) {
+		t.Errorf("equipment: got %v want %v", got.Equipment, want)
+	}
+}
+
+// TestMarshal_OmitsEmptyEquipment pins omitempty: a deck with no equipment doesn't emit
+// the field at all, keeping existing files byte-identical after a re-serialize.
+func TestMarshal_OmitsEmptyEquipment(t *testing.T) {
+	rng := rand.New(rand.NewSource(1))
+	d := deck.Random(hero.Viserai{}, 40, 2, rng, nil)
+	data, err := Marshal(d)
+	if err != nil {
+		t.Fatalf("Marshal: %v", err)
+	}
+	if strings.Contains(string(data), `"equipment"`) {
+		t.Errorf("empty equipment should be omitted from JSON; got:\n%s", data)
 	}
 }

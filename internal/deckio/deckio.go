@@ -16,15 +16,16 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/weapon"
 )
 
-// DeckJSON is the on-disk shape of a Deck with its Stats. Sideboard is a user-managed
-// parallel card list that the simulator never reads — it round-trips through Marshal /
-// Unmarshal but doesn't participate in scoring, mutations, or NotImplemented sanitization.
-// Omitted from the JSON when empty so existing files stay untouched.
+// DeckJSON is the on-disk shape of a Deck with its Stats. Sideboard and Equipment are
+// user-managed parallel card lists that the simulator never reads — both round-trip through
+// Marshal / Unmarshal but don't participate in scoring, mutations, or NotImplemented
+// sanitization. Each is omitted from the JSON when empty so existing files stay untouched.
 type DeckJSON struct {
 	Hero      string          `json:"hero"`
 	Weapons   []string        `json:"weapons"`
 	Cards     []string        `json:"cards"`
 	Sideboard []string        `json:"sideboard,omitempty"`
+	Equipment []string        `json:"equipment,omitempty"`
 	Pitch     PitchCountsJSON `json:"pitch"`
 	Stats     StatsJSON       `json:"stats"`
 }
@@ -130,24 +131,27 @@ func toJSON(d *deck.Deck) *DeckJSON {
 		}
 	}
 	sort.Strings(cardNames)
-	// Sideboard is sorted like Cards so files diff stably across writes. Stays nil when the
-	// source deck has no sideboard so `omitempty` keeps the field out of the JSON entirely.
-	var sideboardNames []string
-	if len(d.Sideboard) > 0 {
-		sideboardNames = make([]string, len(d.Sideboard))
-		for i, c := range d.Sideboard {
-			sideboardNames[i] = c.Name()
-		}
-		sort.Strings(sideboardNames)
-	}
 	return &DeckJSON{
 		Hero:      d.Hero.Name(),
 		Weapons:   weapons,
 		Cards:     cardNames,
-		Sideboard: sideboardNames,
+		Sideboard: sortedStrings(d.Sideboard),
+		Equipment: sortedStrings(d.Equipment),
 		Pitch:     pitchCounts,
 		Stats:     statsToJSON(d.Stats),
 	}
+}
+
+// sortedStrings returns a sorted copy of ss. Nil on empty input so omitempty can elide the
+// field entirely. Used for name-only parallel lists (Sideboard, Equipment) that don't
+// participate in simulation.
+func sortedStrings(ss []string) []string {
+	if len(ss) == 0 {
+		return nil
+	}
+	out := append([]string(nil), ss...)
+	sort.Strings(out)
+	return out
 }
 
 func statsToJSON(s deck.Stats) StatsJSON {
@@ -264,17 +268,6 @@ func fromJSON(dj *DeckJSON) (*deck.Deck, error) {
 		}
 		cs[i] = cards.Get(id)
 	}
-	var sideboard []card.Card
-	if len(dj.Sideboard) > 0 {
-		sideboard = make([]card.Card, len(dj.Sideboard))
-		for i, name := range dj.Sideboard {
-			id, ok := cards.ByName(name)
-			if !ok {
-				return nil, fmt.Errorf("deckio: unknown sideboard card %q", name)
-			}
-			sideboard[i] = cards.Get(id)
-		}
-	}
 	best, err := bestTurnFromJSON(dj.Stats.Best)
 	if err != nil {
 		return nil, err
@@ -284,7 +277,15 @@ func fromJSON(dj *DeckJSON) (*deck.Deck, error) {
 		return nil, err
 	}
 	d := deck.New(h, weapons, cs)
-	d.Sideboard = sideboard
+	// Sideboard and Equipment are name-only lists — the optimizer doesn't read them and the
+	// registry isn't consulted (so the user can list equipment pieces or any other items
+	// the sim doesn't model). Copy the names through verbatim.
+	if len(dj.Sideboard) > 0 {
+		d.Sideboard = append([]string(nil), dj.Sideboard...)
+	}
+	if len(dj.Equipment) > 0 {
+		d.Equipment = append([]string(nil), dj.Equipment...)
+	}
 	d.Stats = deck.Stats{
 		Runs:        dj.Stats.Runs,
 		Hands:       dj.Stats.Hands,

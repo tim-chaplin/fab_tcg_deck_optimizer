@@ -23,18 +23,26 @@ import (
 )
 
 // Deck is a hero, equipped weapons, a deck of cards, and the simulated hand-value stats.
-// Sideboard is an optional parallel card list the user manages by hand — round-tripped through
-// deckio and fabrary but never read by the simulator, so mutations and Evaluate leave it alone.
+// Sideboard is the reserve-card list the user manages for sideboarding between games;
+// Equipment is the non-weapon arena loadout (head, chest, arms, legs). Both round-trip
+// through deckio and fabrary; the simulator never reads either, so mutations and Evaluate
+// leave them alone.
+//
+// Both are []string rather than []card.Card: equipment pieces and other items the user
+// wants on their sideboard list (e.g. Nullrune cycle) aren't in the card registry, so a
+// registry-backed field would force the user's data through a lossy lookup.
 type Deck struct {
 	Hero      hero.Hero
 	Weapons   []weapon.Weapon
 	Cards     []card.Card
-	Sideboard []card.Card
+	Sideboard []string
+	Equipment []string
 	Stats     Stats
 }
 
 // New constructs a Deck. Panics if the weapon loadout violates the "0–2 weapons; if 2, both 1H"
-// equipment rule. Sideboard starts empty; callers assign it directly when carrying one over.
+// equipment rule. Sideboard and Equipment start empty; callers assign them directly when
+// carrying them over.
 func New(h hero.Hero, weapons []weapon.Weapon, cards []card.Card) *Deck {
 	validateWeapons(weapons)
 	return &Deck{Hero: h, Weapons: weapons, Cards: cards}
@@ -214,6 +222,7 @@ func weaponLoadoutMutations(d *Deck) []Mutation {
 		copy(newCards, d.Cards)
 		nd := New(d.Hero, l.weapons, newCards)
 		nd.Sideboard = d.Sideboard
+		nd.Equipment = d.Equipment
 		out = append(out, Mutation{
 			Deck:        nd,
 			Description: fmt.Sprintf("swapped weapons from %s to %s", loadoutLabel(d.Weapons), loadoutLabel(l.weapons)),
@@ -270,6 +279,7 @@ func cardSwapMutations(d *Deck, maxCopies int, legal func(card.Card) bool) []Mut
 			newCards = append(newCards, replacement)
 			nd := New(d.Hero, d.Weapons, newCards)
 			nd.Sideboard = d.Sideboard
+			nd.Equipment = d.Equipment
 			out = append(out, Mutation{
 				Deck:        nd,
 				Description: fmt.Sprintf("-1 %s, +1 %s", removed.Name(), replacement.Name()),
