@@ -26,6 +26,7 @@ func runEvalCmd(args []string) {
 	seed := fs.Int64("seed", time.Now().UnixNano(), "RNG seed")
 	formatFlag := fs.String("format", string(fmtpkg.SilverAge), "constructed format predicate applied to replacement picks when the loaded deck contains NotImplemented cards")
 	maxCopies := fs.Int("max-copies", defaultMaxCopies, "maximum copies of any single card printing per deck, applied when replacing NotImplemented cards in the loaded deck")
+	reevaluate := fs.Bool("reevaluate", false, "overwrite the on-disk .json / .txt with this run's fresh stats")
 	_ = parseFlagsAnywhere(fs, args)
 	if fs.NArg() != 1 {
 		die("eval: need exactly one positional <deck> (got %d); try `fabsim eval <deck>`", fs.NArg())
@@ -35,21 +36,25 @@ func runEvalCmd(args []string) {
 	if err != nil {
 		die("%v", err)
 	}
-	runEval(resolveDeckPath(fs.Arg(0)), *deepShuffles, *incoming, *maxCopies, *seed, fmtValue)
+	runEval(resolveDeckPath(fs.Arg(0)), *deepShuffles, *incoming, *maxCopies, *seed, fmtValue, *reevaluate)
 }
 
 // runEval loads the deck at outPath, simulates it for deepShuffles hands, and prints the
-// fresh stats. The file on disk is NOT overwritten: eval is a read-only measurement so a
-// deck can be re-scored at a new shuffle depth or different -incoming without clobbering
-// the saved stats. Exception: a deck that arrived with card.NotImplemented copies has
-// those slots replaced in memory before scoring and the sanitized result is written back,
-// because keeping the old file would leave the on-disk avg forever out of sync with the
-// cards we can actually simulate.
+// fresh stats. By default the file on disk is NOT overwritten — eval is a read-only
+// measurement so a deck can be re-scored at a new shuffle depth or different -incoming
+// without clobbering the saved stats. Two cases force a rewrite:
+//
+//   - A deck that arrived with card.NotImplemented copies has those slots replaced in
+//     memory before scoring and the sanitized result is written back, because keeping the
+//     old file would leave the on-disk avg forever out of sync with the cards we can
+//     actually simulate.
+//   - The caller passed -reevaluate to explicitly refresh the persisted stats. Use this
+//     to bring a saved file in sync with the current binary's best-turn output.
 //
 // Prints only the score summary — not the card list — so the freshly-computed mean stays
 // visible on a small terminal. The deck's contents haven't changed, so repeating them here
 // just scrolls the score off the top; `fabsim print <deck>` is the command for the full dump.
-func runEval(outPath string, deepShuffles, incoming, maxCopies int, seed int64, fmtValue fmtpkg.Format) {
+func runEval(outPath string, deepShuffles, incoming, maxCopies int, seed int64, fmtValue fmtpkg.Format, reevaluate bool) {
 	loaded := mustLoadDeck(outPath)
 	// Wrap the loaded hero/weapons/cards in a fresh Deck so Evaluate's stats start from zero
 	// instead of accumulating on top of the persisted Stats. Sideboard carries over verbatim
@@ -60,9 +65,16 @@ func runEval(outPath string, deepShuffles, incoming, maxCopies int, seed int64, 
 	savedAvg := loaded.Stats.Mean()
 	replaced := sanitizeLoadedDeck(d, maxCopies, rng, fmtValue.IsLegal)
 	d.Evaluate(deepShuffles, incoming, rng)
-	if len(replaced) > 0 {
-		fmt.Fprintf(os.Stderr, "warning: sanitized avg %.3f → %.3f (delta %+.3f); rewriting %s\n",
-			savedAvg, d.Stats.Mean(), d.Stats.Mean()-savedAvg, outPath)
+	var reason string
+	switch {
+	case len(replaced) > 0:
+		reason = "warning: sanitized"
+	case reevaluate:
+		reason = "reevaluate:"
+	}
+	if reason != "" {
+		fmt.Fprintf(os.Stderr, "%s avg %.3f → %.3f (delta %+.3f); rewriting %s\n",
+			reason, savedAvg, d.Stats.Mean(), d.Stats.Mean()-savedAvg, outPath)
 		if err := writeDeck(d, outPath); err != nil {
 			die("%v", err)
 		}
