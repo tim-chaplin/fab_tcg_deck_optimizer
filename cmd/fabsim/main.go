@@ -378,22 +378,20 @@ func printBestDeck(d *deck.Deck) {
 	}
 }
 
-// printBestTurn renders the persisted peak-Value turn — header plus FormatBestTurn's
-// numbered play order — when Stats.Best holds one. No-ops on an unscored deck so callers
-// don't have to guard. Shared by printBestDeck and runEval.
+// printBestTurn renders the persisted peak-Value turn — "Best turn played (value N):"
+// header plus FormatBestTurn's sectioned play order — when Stats.Best holds one. No-ops on
+// an unscored deck so callers don't have to guard. Shared by printBestDeck and runEval.
+// Starting Runechants (Runeblade carryover state) pipe through to FormatBestTurn, which
+// folds a non-zero count into its "Auras in play at start of turn:" line; zero is omitted
+// entirely so only turns that actually started with pending tokens surface the detail.
 func printBestTurn(d *deck.Deck) {
 	b := d.Stats.Best
 	if len(b.Summary.BestLine) == 0 {
 		return
 	}
 	fmt.Println()
-	header := fmt.Sprintf("Best turn played (value %d", b.Summary.Value)
-	if d.Hero.Types().Has(card.TypeRuneblade) {
-		header += fmt.Sprintf(", %d carryover runechants", b.StartingRunechants)
-	}
-	header += "):"
-	fmt.Println(header)
-	fmt.Println(hand.FormatBestTurn(b.Summary))
+	fmt.Printf("Best turn played (value %d):\n", b.Summary.Value)
+	fmt.Println(hand.FormatBestTurn(b.Summary, b.StartingRunechants))
 }
 
 // printPerCardStats renders per-card averages collected by deck.Evaluate: mean per-card

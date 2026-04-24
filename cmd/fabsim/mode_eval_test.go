@@ -145,7 +145,6 @@ func TestRunEval_DefaultPrintsFullDump(t *testing.T) {
 	dir := t.TempDir()
 	path := filepath.Join(dir, "deck.json")
 
-	// Viserai seed so the "carryover runechants" header tag is part of the expected output.
 	rng := rand.New(rand.NewSource(1))
 	d := deck.Random(hero.Viserai{}, 40, 2, rng, nil)
 	if err := writeDeck(d, path); err != nil {
@@ -157,9 +156,6 @@ func TestRunEval_DefaultPrintsFullDump(t *testing.T) {
 	})
 	if !strings.Contains(stdout, "Best turn played") {
 		t.Errorf("eval output missing 'Best turn played' header:\n%s", stdout)
-	}
-	if !strings.Contains(stdout, "carryover runechants") {
-		t.Errorf("Viserai eval output missing 'carryover runechants' tag:\n%s", stdout)
 	}
 	if !strings.Contains(stdout, "Card list:") {
 		t.Errorf("default eval output missing the card list:\n%s", stdout)

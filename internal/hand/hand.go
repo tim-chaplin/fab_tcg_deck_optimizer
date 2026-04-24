@@ -155,7 +155,9 @@ func formatContribution(v float64) string {
 
 // assignmentName returns the card name, suffixed with " (from arsenal)" when the assignment came
 // from the arsenal slot — that tag tells readers why the card isn't in the dealt-hand list the
-// optimiser reports alongside.
+// optimiser reports alongside. Used by FormatBestLine (debug one-liner) and the held/arsenal
+// footer; FormatBestTurn's numbered play order attaches the arsenal tag to the role label
+// instead ("PLAY from arsenal").
 func assignmentName(a CardAssignment) string {
 	if a.FromArsenal {
 		return a.Card.Name() + " (from arsenal)"
@@ -174,13 +176,23 @@ func FormatBestLine(line []CardAssignment) string {
 	return strings.Join(parts, ", ")
 }
 
+// roleLabelWithArsenal attaches " from arsenal" to the role label when a is arsenal-in, so the
+// numbered play order reads "Mauvrion Skies (Red): PLAY from arsenal" rather than tagging the
+// card name. Bare label otherwise.
+func roleLabelWithArsenal(a CardAssignment, label string) string {
+	if a.FromArsenal {
+		return label + " from arsenal"
+	}
+	return label
+}
+
 // formatTriggerEffect renders the effect suffix for a cross-turn AuraTrigger line — the
-// portion after "(from previous turn): ". Damage > 0 surfaces as "START OF ACTION PHASE
-// (+N)"; a non-nil Revealed card surfaces as "drew X into hand". No current card both
-// damages and reveals; the comma-join handles it generically in case one is added.
-// Returns "" when the trigger had no visible effect — caller drops the line entirely so
-// a zero-impact reveal-capable aura (e.g. Sigil of the Arknight when the top card wasn't
-// an attack action) doesn't clutter the output with a bare "(+0)".
+// portion after the aura name. Damage > 0 surfaces as "START OF ACTION PHASE (+N)"; a
+// non-nil Revealed card surfaces as "drew X into hand". No current card both damages and
+// reveals; the comma-join handles it generically in case one is added. Returns "" when the
+// trigger had no visible effect — caller drops the line entirely so a zero-impact
+// reveal-capable aura (e.g. Sigil of the Arknight when the top card wasn't an attack
+// action) doesn't clutter the output with a bare "(+0)".
 func formatTriggerEffect(d TriggerContribution) string {
 	var parts []string
 	if d.Damage > 0 {
@@ -210,42 +222,54 @@ func splitPitchesByPhase(pitched []CardAssignment, drCost int) (defensePitches, 
 	return defensePitches, attackPitches
 }
 
-// appendAttackChainLines renders the Attack phase: one numbered line per AttackChain entry in
-// solver-chosen play order, with the shared step counter advanced via stepPtr so later sections
-// keep numbering contiguous. Non-weapon entries cross-reference BestLine by ID so arsenal-played
-// cards get a "(from arsenal)" tag; weapons skip the match since they have no BestLine entry.
-// Cards that aren't attacks (e.g. non-attack actions like Mauvrion Skies) use "PLAY" so the
-// label matches what the card actually does on the chain. Non-zero TriggerDamage /
-// AuraTriggerDamage add trailing " (+M hero trigger)" / " (+M aura trigger)" tags so each
-// source is attributed on its own rather than silently folded into the card's damage number or
-// mis-labelled as coming from the hero.
-func appendAttackChainLines(lines []string, t TurnSummary, stepPtr *int) []string {
+// formatTriggerDamageTag joins non-zero hero and aura trigger damage into a single
+// parenthesised group like "(+1 hero trigger, +1 aura trigger)" so the chain line doesn't
+// stack two separate parens for what the reader sees as one composite effect block.
+// Returns "" when both are zero.
+func formatTriggerDamageTag(e AttackChainEntry) string {
+	var parts []string
+	if e.TriggerDamage > 0 {
+		parts = append(parts, fmt.Sprintf("+%s hero trigger", formatContribution(e.TriggerDamage)))
+	}
+	if e.AuraTriggerDamage > 0 {
+		parts = append(parts, fmt.Sprintf("+%s aura trigger", formatContribution(e.AuraTriggerDamage)))
+	}
+	if len(parts) == 0 {
+		return ""
+	}
+	return " (" + strings.Join(parts, ", ") + ")"
+}
+
+// appendAttackChainLines renders the Attack phase into playLines at 4-space indent (one level
+// deeper than section headers): one numbered entry per AttackChain step in solver-chosen play
+// order. nextStep advances the shared step counter so the chain's entries interleave with the
+// other my-turn entries built around it. Non-weapon entries cross-reference BestLine by ID so
+// arsenal-played cards get "PLAY from arsenal" / "ATTACK from arsenal" on the role label;
+// weapons skip the match since they have no BestLine entry. Cards that aren't attacks
+// (e.g. non-attack actions like Mauvrion Skies) use "PLAY" so the label matches what the card
+// actually does on the chain. Non-zero TriggerDamage / AuraTriggerDamage merge into a single
+// "(+M hero trigger, +M aura trigger)" tag so each source is attributed without fragmenting
+// the line into two parenthesised groups.
+func appendAttackChainLines(playLines []string, t TurnSummary, nextStep func() int) []string {
 	used := make([]bool, len(t.BestLine))
 	appendAttack := func(label, cardName string, e AttackChainEntry) {
-		*stepPtr++
-		line := fmt.Sprintf("  %d. %s: %s (+%s)", *stepPtr, cardName, label, formatContribution(e.Damage))
-		if e.TriggerDamage > 0 {
-			line += fmt.Sprintf(" (+%s hero trigger)", formatContribution(e.TriggerDamage))
-		}
-		if e.AuraTriggerDamage > 0 {
-			line += fmt.Sprintf(" (+%s aura trigger)", formatContribution(e.AuraTriggerDamage))
-		}
-		lines = append(lines, line)
+		line := fmt.Sprintf("    %d. %s: %s (+%s)", nextStep(), cardName, label, formatContribution(e.Damage))
+		line += formatTriggerDamageTag(e)
+		playLines = append(playLines, line)
 	}
 	for _, e := range t.AttackChain {
 		if _, isWeapon := e.Card.(weapon.Weapon); isWeapon {
 			appendAttack("WEAPON ATTACK", e.Card.Name(), e)
 			continue
 		}
-		// Match the first unused Attack-role BestLine entry by ID so we can detect FromArsenal.
-		tag := ""
+		// Match the first unused Attack-role BestLine entry by ID so we can detect FromArsenal
+		// and pick the right role label.
+		var matched CardAssignment
 		for i := range t.BestLine {
 			if used[i] || t.BestLine[i].Role != Attack || t.BestLine[i].Card.ID() != e.Card.ID() {
 				continue
 			}
-			if t.BestLine[i].FromArsenal {
-				tag = " (from arsenal)"
-			}
+			matched = t.BestLine[i]
 			used[i] = true
 			break
 		}
@@ -253,78 +277,137 @@ func appendAttackChainLines(lines []string, t TurnSummary, stepPtr *int) []strin
 		if !e.Card.Types().Has(card.TypeAttack) {
 			label = "PLAY"
 		}
-		appendAttack(label, e.Card.Name()+tag, e)
+		appendAttack(roleLabelWithArsenal(matched, label), e.Card.Name(), e)
 	}
-	return lines
+	return playLines
 }
 
-// FormatBestTurn renders a TurnSummary as a numbered play-order list, one card per line,
-// matching the actual FaB turn sequence:
+// FormatBestTurn renders a TurnSummary as a numbered play-order list grouped into two
+// sections, matching when the actions take place around the FaB turn boundary:
 //
-//  1. Defense-phase pitches (paying for Defense Reactions)
-//  2. Plain blocks
-//  3. Defense Reactions
-//  4. Attack-phase pitches (paying for this turn's played cards)
-//  5. Attack chain — played cards and swung weapons in the order the solver picked
+//	"My turn:"       — previous-turn AuraTrigger fires (start of action phase), then this
+//	                   turn's attack-phase pitches, then the attack chain (plays, attacks,
+//	                   weapon swings).
+//	"Opponent's turn:" — defense-phase pitches (paying for Defense Reactions), plain blocks,
+//	                   Defense Reactions. These resolve on the opponent's following turn.
 //
-// A non-numbered `  Auras in play at start of turn: …` header is emitted above the play order
-// when TurnSummary.StartOfTurnAuras is non-empty.
+// Section headers render at 2-space indent; numbered entries below them at 4-space indent.
+// The step counter is continuous across sections so the reader can reference "step 5"
+// without ambiguity. An empty section (no entries) is elided, header and all.
+//
+// A non-numbered `  Auras in play at start of turn: …` header precedes the sections when
+// StartOfTurnAuras is non-empty or startingRunechants > 0. Runechants append to the header
+// as "N Runechant(s)" since they're another piece of start-of-turn carryover state the
+// reader wants to see at a glance.
 //
 // Held / Arsenal cards are summarized on trailing lines so the reader sees what's carrying over.
 //
 // Pitch-phase assignment uses a greedy split for display: smallest pitches first fund the defense
 // pool until drCost is covered, the rest fund attack. The solver already validated some legal
 // split exists; this picks one deterministically.
-func FormatBestTurn(t TurnSummary) string {
+func FormatBestTurn(t TurnSummary, startingRunechants int) string {
 	parts := partitionBestLineForDisplay(t.BestLine)
 	defensePitches, attackPitches := splitPitchesByPhase(parts.pitched, parts.drCost)
 
 	var lines []string
-	if len(t.StartOfTurnAuras) > 0 {
-		names := make([]string, len(t.StartOfTurnAuras))
-		for i, a := range t.StartOfTurnAuras {
+	if hdr := formatStartOfTurnHeader(t.StartOfTurnAuras, startingRunechants); hdr != "" {
+		lines = append(lines, hdr)
+	}
+
+	step := 0
+	nextStep := func() int { step++; return step }
+	myTurn := buildMyTurnLines(t, attackPitches, nextStep)
+	opponent := buildOpponentTurnLines(defensePitches, parts.plainBlocks, parts.defenseReactions, nextStep)
+
+	if len(myTurn) > 0 {
+		lines = append(lines, "  My turn:")
+		lines = append(lines, myTurn...)
+	}
+	if len(opponent) > 0 {
+		lines = append(lines, "  Opponent's turn:")
+		lines = append(lines, opponent...)
+	}
+	lines = appendHeldArsenalFooter(lines, parts.held, parts.arsenal, t.Drawn)
+	return strings.Join(lines, "\n")
+}
+
+// formatStartOfTurnHeader builds the "  Auras in play at start of turn: ..." line. Auras
+// render by sorted name (duplicates preserved). Runechants append as "N Runechant" (singular
+// for 1, plural otherwise) when startingRunechants > 0 so the reader sees both carryover
+// inputs in one line. Returns "" when there's nothing to report so the caller skips the line
+// entirely instead of emitting a dangling label.
+func formatStartOfTurnHeader(auras []card.Card, startingRunechants int) string {
+	if len(auras) == 0 && startingRunechants == 0 {
+		return ""
+	}
+	var items []string
+	if len(auras) > 0 {
+		names := make([]string, len(auras))
+		for i, a := range auras {
 			names[i] = a.Name()
 		}
 		sort.Strings(names)
-		lines = append(lines, "  Auras in play at start of turn: "+strings.Join(names, ", "))
+		items = append(items, names...)
 	}
-	step := 0
-	nextStep := func() int { step++; return step }
-	// Pitch lines don't show a damage contribution: pitches generate resource, not damage —
-	// showing "+3" next to a pitch would double-count against the turn's Value.
-	appendPitch := func(a CardAssignment, roleLabel string) {
-		lines = append(lines, fmt.Sprintf("  %d. %s: %s", nextStep(), assignmentName(a), roleLabel))
+	if startingRunechants > 0 {
+		noun := "Runechants"
+		if startingRunechants == 1 {
+			noun = "Runechant"
+		}
+		items = append(items, fmt.Sprintf("%d %s", startingRunechants, noun))
 	}
-	// Defense lines contribute damage-prevention (block share + DR Play return), so the tag is
-	// shown.
-	appendDefense := func(a CardAssignment, roleLabel string) {
-		lines = append(lines, fmt.Sprintf("  %d. %s: %s (+%s prevented)", nextStep(), assignmentName(a), roleLabel, formatContribution(a.Contribution)))
-	}
+	return "  Auras in play at start of turn: " + strings.Join(items, ", ")
+}
 
-	for _, a := range defensePitches {
-		appendPitch(a, "PITCH (opponent's turn)")
-	}
-	for _, a := range parts.plainBlocks {
-		appendDefense(a, "BLOCK")
-	}
-	for _, a := range parts.defenseReactions {
-		appendDefense(a, "DEFENSE REACTION")
-	}
+// buildMyTurnLines returns the numbered entries for the "My turn:" section — previous-turn
+// AuraTrigger fires, attack-phase pitches, and the attack chain — at 4-space indent. Shares
+// the caller's step counter via nextStep so the returned lines carry globally unique step
+// numbers. Zero-effect triggers (no damage, no reveal) are dropped so the section isn't
+// padded with bare "(+0)" rows. Role labels route through roleLabelWithArsenal so an
+// arsenal-in entry's provenance surfaces on the role label ("ATTACK from arsenal", "PLAY
+// from arsenal", "PITCH from arsenal") via one rendering contract shared with the chain
+// and opponent's-turn helpers.
+func buildMyTurnLines(t TurnSummary, attackPitches []CardAssignment, nextStep func() int) []string {
+	var lines []string
 	for _, d := range t.TriggersFromLastTurn {
 		suffix := formatTriggerEffect(d)
 		if suffix == "" {
 			continue
 		}
-		step++
-		lines = append(lines, fmt.Sprintf("  %d. %s (from previous turn): %s",
-			step, d.Card.Name(), suffix))
+		lines = append(lines, fmt.Sprintf("    %d. %s: %s", nextStep(), d.Card.Name(), suffix))
 	}
 	for _, a := range attackPitches {
-		appendPitch(a, "PITCH (my turn)")
+		lines = append(lines, fmt.Sprintf("    %d. %s: %s",
+			nextStep(), a.Card.Name(), roleLabelWithArsenal(a, "PITCH")))
 	}
-	lines = appendAttackChainLines(lines, t, &step)
-	lines = appendHeldArsenalFooter(lines, parts.held, parts.arsenal, t.Drawn)
-	return strings.Join(lines, "\n")
+	return appendAttackChainLines(lines, t, nextStep)
+}
+
+// buildOpponentTurnLines returns the numbered entries for the "Opponent's turn:" section —
+// defense-phase pitches (paying for Defense Reactions), plain blocks, then Defense Reactions
+// — at 4-space indent. Every role label routes through roleLabelWithArsenal so arsenal
+// provenance surfaces consistently on whichever role the card takes. The solver currently
+// only lets arsenal-in cards reach Defense Reactions in this section (plain blocking and
+// pitching from arsenal aren't legal), but the helper keeps one rendering contract for any
+// future role-permission widening. Prevented damage renders as "(+N prevented)" on defense
+// lines.
+func buildOpponentTurnLines(defensePitches, plainBlocks, defenseReactions []CardAssignment, nextStep func() int) []string {
+	var lines []string
+	for _, a := range defensePitches {
+		lines = append(lines, fmt.Sprintf("    %d. %s: %s",
+			nextStep(), a.Card.Name(), roleLabelWithArsenal(a, "PITCH")))
+	}
+	for _, a := range plainBlocks {
+		lines = append(lines, fmt.Sprintf("    %d. %s: %s (+%s prevented)",
+			nextStep(), a.Card.Name(), roleLabelWithArsenal(a, "BLOCK"),
+			formatContribution(a.Contribution)))
+	}
+	for _, a := range defenseReactions {
+		lines = append(lines, fmt.Sprintf("    %d. %s: %s (+%s prevented)",
+			nextStep(), a.Card.Name(), roleLabelWithArsenal(a, "DEFENSE REACTION"),
+			formatContribution(a.Contribution)))
+	}
+	return lines
 }
 
 // bestLineDisplayParts groups BestLine entries by the display section each belongs to. Pitches
