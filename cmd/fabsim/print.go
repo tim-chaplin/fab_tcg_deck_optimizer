@@ -177,7 +177,7 @@ const (
 )
 
 // printHistogram renders Stats.Histogram as an ASCII bar chart. The chart body is always
-// histWidth × histHeight characters regardless of how many distinct hand values the deck
+// histWidth x histHeight characters regardless of how many distinct hand values the deck
 // produced — sparse data stretches across the width, dense data bins into it — so the
 // rendered output has predictable size and the axis labels alone carry the scale. No-ops on
 // an unscored deck. Called by printBestDeck after the per-card stats block.
@@ -225,7 +225,7 @@ func printHistogram(d *deck.Deck) {
 
 // buildHistogramColumns bins the raw histogram map into width fixed-width columns spanning
 // [minV, maxV] inclusive. Two regimes:
-//   - range ≤ width: each integer value gets one or more columns (the chart stretches).
+//   - range <= width: each integer value gets one or more columns (the chart stretches).
 //   - range > width: each column covers a contiguous integer range (the chart compresses).
 //
 // Returns the per-column count and the peak value so callers can scale bar heights.

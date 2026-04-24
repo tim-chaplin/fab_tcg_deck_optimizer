@@ -2,7 +2,7 @@ package main
 
 import "testing"
 
-// TestBuildHistogramColumns_Stretch verifies the "range ≤ width" regime: when the histogram
+// TestBuildHistogramColumns_Stretch verifies the "range <= width" regime: when the histogram
 // spans fewer distinct integer values than the chart is wide, each value stretches across
 // multiple adjacent columns so the chart still fills the full width.
 func TestBuildHistogramColumns_Stretch(t *testing.T) {
