@@ -104,6 +104,9 @@ func printBestDeck(d *deck.Deck) {
 	if len(d.Stats.PerCard) > 0 {
 		printPerCardStats(d)
 	}
+	if len(d.Stats.Histogram) > 0 {
+		printHistogram(d)
+	}
 }
 
 // printBestTurn renders the persisted peak-Value turn — "Best turn played (value N):"
@@ -164,6 +167,136 @@ func printPerCardStats(d *deck.Deck) {
 		fmt.Printf("  %-*s avg %6.3f over %4d hands (%4d plays, %4d pitches, %dx in deck)\n",
 			maxNameLen(d.Cards), r.name, r.avg, r.plays+r.pitches, r.plays, r.pitches, r.deckCount)
 	}
+}
+
+// Fixed dimensions of the hand-value histogram chart body. Chosen to fit comfortably in an
+// 80-column terminal alongside the y-axis label column and a little left margin.
+const (
+	histWidth  = 60
+	histHeight = 12
+)
+
+// printHistogram renders Stats.Histogram as an ASCII bar chart. The chart body is always
+// histWidth × histHeight characters regardless of how many distinct hand values the deck
+// produced — sparse data stretches across the width, dense data bins into it — so the
+// rendered output has predictable size and the axis labels alone carry the scale. No-ops on
+// an unscored deck. Called by printBestDeck after the per-card stats block.
+func printHistogram(d *deck.Deck) {
+	minV := d.Stats.Min()
+	maxV := d.Stats.Max()
+	counts, peak := buildHistogramColumns(d.Stats.Histogram, minV, maxV, histWidth)
+	if peak == 0 {
+		return
+	}
+	bars := scaleBarHeights(counts, peak, histHeight)
+	yLabelW := len(strconv.Itoa(peak))
+	// bodyIndent is the number of spaces before the first bar column so every row (y-label,
+	// axis baseline, tick labels, title) lines up: 1 lead + yLabelW label + " |" (2 chars).
+	bodyIndent := strings.Repeat(" ", 1+yLabelW+2)
+
+	fmt.Println()
+	fmt.Printf("Hand-value distribution (%s hands):\n\n", commaInt(d.Stats.Hands))
+	for row := 0; row < histHeight; row++ {
+		// Top-down: row 0 is the peak, row histHeight-1 is one slot above the axis. A bar of
+		// height h fills the bottom h rows, so this row is filled when histHeight-row <= h.
+		rowFromBottom := histHeight - row
+		var label string
+		if row == 0 {
+			label = fmt.Sprintf(" %*d", yLabelW, peak)
+		} else {
+			label = strings.Repeat(" ", yLabelW+1)
+		}
+		fmt.Print(label + " |")
+		for col := 0; col < histWidth; col++ {
+			if bars[col] >= rowFromBottom {
+				fmt.Print("#")
+			} else {
+				fmt.Print(" ")
+			}
+		}
+		fmt.Println()
+	}
+	// X-axis baseline and endpoint ticks. The baseline's "+" sits directly under the y-axis
+	// bars, so the tick-label and title rows both live under the chart body (bodyIndent).
+	fmt.Printf(" %*d +%s\n", yLabelW, 0, strings.Repeat("-", histWidth))
+	fmt.Println(bodyIndent + xAxisTickRow(minV, maxV, histWidth))
+	fmt.Println(bodyIndent + centerLabel("hand value", histWidth))
+}
+
+// buildHistogramColumns bins the raw histogram map into width fixed-width columns spanning
+// [minV, maxV] inclusive. Two regimes:
+//   - range ≤ width: each integer value gets one or more columns (the chart stretches).
+//   - range > width: each column covers a contiguous integer range (the chart compresses).
+//
+// Returns the per-column count and the peak value so callers can scale bar heights.
+func buildHistogramColumns(hist map[int]int, minV, maxV, width int) (counts []int, peak int) {
+	counts = make([]int, width)
+	rng := maxV - minV + 1
+	if rng <= 0 {
+		return counts, 0
+	}
+	if rng <= width {
+		// Stretch: column col maps to a single integer value; adjacent columns may share one.
+		for col := 0; col < width; col++ {
+			v := minV + col*rng/width
+			counts[col] = hist[v]
+		}
+	} else {
+		// Compress: column col aggregates every value in [binLo, binHi).
+		for col := 0; col < width; col++ {
+			binLo := minV + col*rng/width
+			binHi := minV + (col+1)*rng/width
+			n := 0
+			for v := binLo; v < binHi; v++ {
+				n += hist[v]
+			}
+			counts[col] = n
+		}
+	}
+	for _, c := range counts {
+		if c > peak {
+			peak = c
+		}
+	}
+	return counts, peak
+}
+
+// scaleBarHeights converts per-column counts into bar heights in rows. Non-zero counts always
+// round up to at least one row so tiny buckets stay visible next to a tall peak.
+func scaleBarHeights(counts []int, peak, height int) []int {
+	bars := make([]int, len(counts))
+	for i, c := range counts {
+		if c == 0 {
+			continue
+		}
+		h := c * height / peak
+		if h == 0 {
+			h = 1
+		}
+		bars[i] = h
+	}
+	return bars
+}
+
+// xAxisTickRow returns a width-character string with minV left-justified and maxV
+// right-justified. Collapses to "minV..maxV" when the two labels can't both fit.
+func xAxisTickRow(minV, maxV, width int) string {
+	lo := strconv.Itoa(minV)
+	hi := strconv.Itoa(maxV)
+	if len(lo)+len(hi)+1 > width {
+		return lo + ".." + hi
+	}
+	return lo + strings.Repeat(" ", width-len(lo)-len(hi)) + hi
+}
+
+// centerLabel returns s padded with spaces so it is horizontally centered within width.
+// Shorter-than-width strings are centred; equal-or-longer strings pass through unchanged.
+func centerLabel(s string, width int) string {
+	if len(s) >= width {
+		return s
+	}
+	left := (width - len(s)) / 2
+	return strings.Repeat(" ", left) + s
 }
 
 // maxNameLen returns the length of the longest Name() across cs, or 0 when empty. Used to
