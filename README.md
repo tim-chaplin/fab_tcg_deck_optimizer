@@ -72,11 +72,11 @@ This is a work in progress. The current model is deliberately narrow:
 the catalogue.
 
 Deck names are resolved to `mydecks/<name>.json`; the `.json` suffix is optional. Subcommands
-that always operate on a specific deck (`eval`, `print`, `diff`) take the deck name(s) as
-positional arguments. `anneal` uses a `-deck` flag instead because the name can be omitted (the
-default is `<hero>_<format>_<incoming>_incoming`, e.g. `viserai_silver_age_0_incoming`, so
-different (hero, format, `-incoming`) regimes keep separate checkpoints) and the named file
-doubles as a resume point when it already exists.
+that always operate on a specific deck (`eval`, `diff`) take the deck name(s) as positional
+arguments. `anneal` uses a `-deck` flag instead because the name can be omitted (the default
+is `<hero>_<format>_<incoming>_incoming`, e.g. `viserai_silver_age_0_incoming`, so different
+(hero, format, `-incoming`) regimes keep separate checkpoints) and the named file doubles as
+a resume point when it already exists.
 
 Each subcommand parses its own flag set, so `fabsim <subcommand> -help` lists exactly the flags
 that apply.
@@ -94,10 +94,10 @@ that apply.
   wrapper scripts can tell this apart from natural convergence). Only the best-ever deck is
   persisted to disk — walks through worse states under annealing don't regress the JSON.
 - **`eval`** — `fabsim eval <deck>`. Loads the deck file, simulates it for `-deep-shuffles`
-  hands against `-incoming` damage, and prints the resulting stats. Does **not** overwrite the
-  file — use this to re-score a saved deck at a new shuffle depth or opponent pressure without
-  clobbering whatever's on disk.
-- **`print`** — `fabsim print <deck>`. Prints the deck without running any simulation.
+  hands against `-incoming` damage, prints the resulting stats, and rewrites both the `.json`
+  and sibling fabrary `.txt` so the saved copy stays in sync with the current binary's
+  modelling. Pass `-print-only` to skip the sim and just print the last run's stats without
+  touching the file.
 - **`import`** — interactively imports a deck from fabrary.net. Prompts for a deck name, then
   asks you to paste the plain-text export; input ends automatically at fabrary's
   `See the full deck @ …` footer. Saves the result as `mydecks/<name>.json`. Cards the
@@ -159,13 +159,20 @@ The summary below groups the flags by subcommand.
   log.
 - `-debug` — emit extra diagnostic output (e.g. memo cache size between rounds).
 
-**`eval`** (re-score a deck without overwriting it):
+**`eval`** (re-score a deck and rewrite it; `-print-only` skips the sim and the rewrite):
 
 - `-deep-shuffles` — shuffles per deck used for the re-score (default 10000)
-- `-incoming` — opponent damage per turn (default 0)
+- `-incoming` — opponent damage per turn (required unless `-print-only` is set)
 - `-seed` — RNG seed (default: time-based)
+- `-format` — format predicate applied to replacement picks when the loaded deck contains
+  NotImplemented cards (default `silver_age`)
+- `-max-copies` — max copies per printing, applied when replacing NotImplemented cards
+  (default 2)
+- `-print-only` — skip the sim; load the deck and print the persisted stats without
+  rewriting the `.json` / `.txt`
+- `-brief` — print only the score summary (no card list, per-card stats, or best turn)
 
-**`print`**, **`diff`**, **`import`**: no flags; see the usage lines above.
+**`diff`**, **`import`**: no flags; see the usage lines above.
 
 Helper tool for exploring the upstream card database:
 

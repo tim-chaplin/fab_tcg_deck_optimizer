@@ -47,8 +47,6 @@ func main() {
 		runAnnealCmd(args)
 	case "eval":
 		runEvalCmd(args)
-	case "print":
-		runPrintCmd(args)
 	case "diff":
 		runDiffCmd(args)
 	case "import":
@@ -83,8 +81,7 @@ func printSubcommands(w io.Writer) {
 	fmt.Fprintln(w)
 	fmt.Fprintln(w, "Subcommands:")
 	fmt.Fprintln(w, "  anneal    Hill-climb (optionally simulated-annealing) on the saved deck until a local maximum")
-	fmt.Fprintln(w, "  eval      Re-score the saved deck at -deep-shuffles without overwriting it (usage: fabsim eval <deck>)")
-	fmt.Fprintln(w, "  print     Print the saved deck without simulating (usage: fabsim print <deck>)")
+	fmt.Fprintln(w, "  eval      Re-score the saved deck at -deep-shuffles and rewrite it; -print-only skips the sim (usage: fabsim eval <deck>)")
 	fmt.Fprintln(w, "  import    Paste a fabrary.net deck into mydecks/<name>.json")
 	fmt.Fprintln(w, "  diff      Print the card-count delta between two saved decks (usage: fabsim diff <deck1> <deck2>)")
 	fmt.Fprintln(w)
@@ -267,8 +264,8 @@ func sanitizeLoadedDeck(d *deck.Deck, maxCopies int, rng *rand.Rand, legal func(
 }
 
 // mustLoadDeck loads the deck at path or dies. For subcommands that always operate on an
-// existing deck (eval, print, diff), both "missing" and "corrupt" are fatal. anneal handles
-// the distinction itself: "missing" is a valid input ("no deck yet, generate one") while
+// existing deck (eval, diff), both "missing" and "corrupt" are fatal. anneal handles the
+// distinction itself: "missing" is a valid input ("no deck yet, generate one") while
 // "corrupt" needs the loud refusal to overwrite.
 func mustLoadDeck(path string) *deck.Deck {
 	d, _, err := loadExisting(path)
@@ -282,8 +279,8 @@ func mustLoadDeck(path string) *deck.Deck {
 }
 
 // resolveDeckPath is the positional-arg counterpart to anneal's -deck flag. Subcommands that
-// always operate on an existing deck (eval, print, diff) accept the deck name as a positional
-// arg and resolve it to mydecks/<name>.json via mydecks.Path.
+// always operate on an existing deck (eval, diff) accept the deck name as a positional arg
+// and resolve it to mydecks/<name>.json via mydecks.Path.
 func resolveDeckPath(name string) string {
 	p, err := mydecks.Path(name)
 	if err != nil {
@@ -339,8 +336,8 @@ func printGroupedStrings(ss []string) {
 
 // printDeckSummary prints the compact score header: min/median/mean/max, hero, weapons, per-cycle
 // means, and pitch colour counts. printBestDeck wraps this with the full card list + best-turn +
-// per-card stats; `fabsim eval -brief` calls printDeckSummary directly so a scripted re-score
-// gets just the numbers without the card-list scroll.
+// per-card stats; `fabsim eval -brief` calls printDeckSummary so a scripted re-score gets just
+// the numbers without the card-list scroll.
 func printDeckSummary(d *deck.Deck) {
 	s := d.Stats
 	fmt.Printf("Best deck (min %d, median %.1f, mean %.3f, max %d over %d hands)\n",
