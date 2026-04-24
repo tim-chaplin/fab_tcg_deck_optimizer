@@ -91,8 +91,8 @@ func TestBest_DeckOrderDoesNotAffectHandRoles(t *testing.T) {
 		return m
 	}
 
-	resA := Best(stubHero{}, nil, h, 0, deckA, 0, nil)
-	resB := Best(stubHero{}, nil, h, 0, deckB, 0, nil)
+	resA := Best(stubHero, nil, h, 0, deckA, 0, nil)
+	resB := Best(stubHero, nil, h, 0, deckB, 0, nil)
 
 	rolesA := rolesFor(resA)
 	rolesB := rolesFor(resB)

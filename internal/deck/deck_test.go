@@ -11,20 +11,13 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/cards"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/hand"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/hero"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/hero/stubs"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/weapon"
 )
 
-// int1StubHero is a test-only Hero with Intelligence=1 so we can isolate per-hand behavior
-// without interaction between multiple drawn cards. Otherwise identical to a no-op hero —
-// no on-play triggers, never flags as Runeblade.
-type int1StubHero struct{}
-
-func (int1StubHero) ID() hero.ID                                { return hero.Invalid }
-func (int1StubHero) Name() string                               { return "int1Stub" }
-func (int1StubHero) Health() int                                { return 20 }
-func (int1StubHero) Intelligence() int                          { return 1 }
-func (int1StubHero) Types() card.TypeSet                        { return 0 }
-func (int1StubHero) OnCardPlayed(card.Card, *card.TurnState) int { return 0 }
+// int1StubHero is a no-op hero with Intelligence=1 so tests can isolate per-hand behaviour
+// without interaction between multiple drawn cards.
+var int1StubHero = stubs.Hero{Intel: 1}
 
 func TestAllMutations_CountsAndShape(t *testing.T) {
 	// Build a tiny deck: 2 unique cards × 2 copies = 4 cards, plus one weapon.
@@ -491,7 +484,7 @@ func TestEvaluate_HeldCardDefersDrawToNextTurn(t *testing.T) {
 	for i := range deckCards {
 		deckCards[i] = generic.ToughenUpBlue{}
 	}
-	d := New(int1StubHero{}, nil, deckCards)
+	d := New(int1StubHero, nil, deckCards)
 	d.Evaluate(1, 0, rand.New(rand.NewSource(1)))
 
 	if d.Stats.Hands != 2 {
@@ -520,7 +513,7 @@ func TestEvaluate_HeldCardDefersDrawToNextTurn(t *testing.T) {
 // pitched card (returned to deck bottom) and arsenals it again. Loop stops when the deck's
 // empty and nothing new can be drawn.
 func TestEvaluate_ArsenalPersistsAcrossTurns(t *testing.T) {
-	d := New(int1StubHero{}, nil, []card.Card{generic.ToughenUpBlue{}, generic.ToughenUpBlue{}})
+	d := New(int1StubHero, nil, []card.Card{generic.ToughenUpBlue{}, generic.ToughenUpBlue{}})
 	d.Evaluate(1, 4, rand.New(rand.NewSource(1)))
 
 	// Best captures turn 2 — only turn with Value > 0 (arsenal DR fires).

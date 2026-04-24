@@ -55,7 +55,7 @@ func TestFormatBestLine_Compact(t *testing.T) {
 // pitched to pay, one Held).
 func TestFormatBestTurn_AttackAndPitch(t *testing.T) {
 	h := []card.Card{fake.BlueAttack{}, fake.BlueAttack{}, fake.RedAttack{}, fake.RedAttack{}}
-	got := Best(stubHero{}, nil, h, 0, nil, 0, nil)
+	got := Best(stubHero, nil, h, 0, nil, 0, nil)
 	out := FormatBestTurn(got, 0)
 	if !strings.Contains(out, "  My turn:") {
 		t.Errorf("want 'My turn:' section header, got:\n%s", out)
@@ -142,7 +142,7 @@ func TestFormatBestTurn_AuraTriggerLabelledSeparately(t *testing.T) {
 // reads "DEFENSE REACTION from arsenal" since Toughen Up came out of the arsenal slot.
 func TestFormatBestTurn_ArsenalInPlayedAsDR(t *testing.T) {
 	h := []card.Card{runeblade.MaleficIncantationBlue{}}
-	got := Best(stubHero{}, nil, h, 4, nil, 0, generic.ToughenUpBlue{})
+	got := Best(stubHero, nil, h, 4, nil, 0, generic.ToughenUpBlue{})
 	out := FormatBestTurn(got, 0)
 	if !strings.Contains(out, "  Opponent's turn:") {
 		t.Errorf("want 'Opponent's turn:' section header, got:\n%s", out)
@@ -165,7 +165,7 @@ func TestFormatBestTurn_ArsenalInPlayedAsDR(t *testing.T) {
 // from arsenal" — tag on the role, not on the card name.
 func TestFormatBestTurn_ArsenalInPlayedOnChain(t *testing.T) {
 	h := []card.Card{fake.BlueAttack{}}
-	got := Best(stubHero{}, nil, h, 0, nil, 0, fake.RedAttack{})
+	got := Best(stubHero, nil, h, 0, nil, 0, fake.RedAttack{})
 	out := FormatBestTurn(got, 0)
 	if !strings.Contains(out, "  My turn:") {
 		t.Errorf("want 'My turn:' section header, got:\n%s", out)
@@ -184,7 +184,7 @@ func TestFormatBestTurn_ArsenalInPlayedOnChain(t *testing.T) {
 func TestFormatBestTurn_WeaponSwingInChain(t *testing.T) {
 	h := []card.Card{fake.RedAttack{}}
 	weapons := []weapon.Weapon{weapon.ReapingBlade{}}
-	got := Best(stubHero{}, weapons, h, 0, nil, 0, nil)
+	got := Best(stubHero, weapons, h, 0, nil, 0, nil)
 	out := FormatBestTurn(got, 0)
 	// Reaping Blade attack is 3.
 	if !strings.Contains(out, "Reaping Blade: WEAPON ATTACK (+3)") {
@@ -197,7 +197,7 @@ func TestFormatBestTurn_WeaponSwingInChain(t *testing.T) {
 // then promoted to Arsenal post-hoc, so the output shows an arsenal footer (not a held footer).
 func TestFormatBestTurn_HeldAndArsenalFooter(t *testing.T) {
 	h := []card.Card{generic.ToughenUpBlue{}}
-	got := Best(stubHero{}, nil, h, 4, nil, 0, nil)
+	got := Best(stubHero, nil, h, 4, nil, 0, nil)
 	out := FormatBestTurn(got, 0)
 	if !strings.Contains(out, "(arsenal: Toughen Up (Blue) (new))") {
 		t.Errorf("want an arsenal footer tagged '(new)', got:\n%s", out)
@@ -210,7 +210,7 @@ func TestFormatBestTurn_StayingArsenalFooter(t *testing.T) {
 	// Hand with no attacks / no pitches to pay for the arsenal DR at incoming=0 (defense is
 	// wasted anyway). Arsenal-in Toughen Up sits.
 	h := []card.Card{generic.ToughenUpBlue{}}
-	got := Best(stubHero{}, nil, h, 0, nil, 0, generic.ToughenUpBlue{})
+	got := Best(stubHero, nil, h, 0, nil, 0, generic.ToughenUpBlue{})
 	out := FormatBestTurn(got, 0)
 	if !strings.Contains(out, "(stayed)") {
 		t.Errorf("want the arsenal-in card tagged '(stayed)', got:\n%s", out)

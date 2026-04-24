@@ -8,23 +8,19 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card/generic"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card/runeblade"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/hero"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/hero/stubs"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/weapon"
 )
 
-// stubHero is a no-op Hero for tests measuring raw hand value with no hero-ability contribution.
-type stubHero struct{}
-
-func (stubHero) ID() hero.ID                           { return hero.Invalid }
-func (stubHero) Name() string                          { return "stubHero" }
-func (stubHero) Health() int                           { return 20 }
-func (stubHero) Intelligence() int                     { return 4 }
-func (stubHero) Types() card.TypeSet                   { return 0 }
-func (stubHero) OnCardPlayed(card.Card, *card.TurnState) int { return 0 }
+// stubHero is the package-wide no-op hero for tests measuring raw hand value with no
+// hero-ability contribution. Intel=4 matches real adult hero hand size so solver tests see
+// the same draw-up depth as production.
+var stubHero = stubs.Hero{Intel: 4}
 
 func TestBest_AllRedHand(t *testing.T) {
 	// Best: pitch 2 reds (2 res) to attack with the other 2 (cost 2, dealt 6). Value = 6.
 	h := []card.Card{fake.RedAttack{}, fake.RedAttack{}, fake.RedAttack{}, fake.RedAttack{}}
-	got := Best(stubHero{}, nil, h, 4, nil, 0, nil)
+	got := Best(stubHero, nil, h, 4, nil, 0, nil)
 	if got.Value != 6 {
 		t.Fatalf("want value 6, got %d", got.Value)
 	}
@@ -34,7 +30,7 @@ func TestBest_AllBlueHand(t *testing.T) {
 	// Best: pitch 1 blue (3 res), attack with 2 blues (cost 2, dealt 2), defend with 1 blue (prevented
 	// 3). Value = 5.
 	h := []card.Card{fake.BlueAttack{}, fake.BlueAttack{}, fake.BlueAttack{}, fake.BlueAttack{}}
-	got := Best(stubHero{}, nil, h, 4, nil, 0, nil)
+	got := Best(stubHero, nil, h, 4, nil, 0, nil)
 	if got.Value != 5 {
 		t.Fatalf("want value 5, got %d", got.Value)
 	}
@@ -44,7 +40,7 @@ func TestBest_MixedHand(t *testing.T) {
 	// Best: pitch 1 blue (3 res), attack with 2 reds (cost 2, dealt 6), defend with 1 blue (prevented
 	// 3). Value = 9.
 	h := []card.Card{fake.BlueAttack{}, fake.BlueAttack{}, fake.RedAttack{}, fake.RedAttack{}}
-	got := Best(stubHero{}, nil, h, 4, nil, 0, nil)
+	got := Best(stubHero, nil, h, 4, nil, 0, nil)
 	if got.Value != 9 {
 		t.Fatalf("want value 9, got %d", got.Value)
 	}
@@ -54,7 +50,7 @@ func TestBest_DefenseCappedAtIncoming(t *testing.T) {
 	// Best: pitch 1 blue, attack with 2 blues (dealt 2), defend with 1 blue (prevented capped at
 	// incoming=2). Value = 4.
 	h := []card.Card{fake.BlueAttack{}, fake.BlueAttack{}, fake.BlueAttack{}, fake.BlueAttack{}}
-	got := Best(stubHero{}, nil, h, 2, nil, 0, nil)
+	got := Best(stubHero, nil, h, 2, nil, 0, nil)
 	if got.Value != 4 {
 		t.Fatalf("want value 4, got %d", got.Value)
 	}
@@ -65,7 +61,7 @@ func TestBest_DefenseReactionRequiresCostPaid(t *testing.T) {
 	// 2-resource cost to play as a Defense Reaction (there's nothing else to pitch). The only
 	// legal lines are to pitch it (0 damage prevented) or do nothing — Value must be 0.
 	h := []card.Card{generic.ToughenUpBlue{}}
-	got := Best(stubHero{}, nil, h, 4, nil, 0, nil)
+	got := Best(stubHero, nil, h, 4, nil, 0, nil)
 	if got.Value != 0 {
 		t.Fatalf("want value 0 (cost unpaid), got %d", got.Value)
 	}
@@ -75,7 +71,7 @@ func TestBest_DefenseReactionAffordableResolves(t *testing.T) {
 	// Pitch 1 Blue Malefic (3 res), pay Toughen Up (Blue)'s cost 2, prevent 4 damage (capped at
 	// incoming=4). Value = 4.
 	h := []card.Card{runeblade.MaleficIncantationBlue{}, generic.ToughenUpBlue{}}
-	got := Best(stubHero{}, nil, h, 4, nil, 0, nil)
+	got := Best(stubHero, nil, h, 4, nil, 0, nil)
 	if got.Value != 4 {
 		t.Fatalf("want value 4 (cost paid, full block), got %d", got.Value)
 	}
@@ -85,7 +81,7 @@ func TestBest_PlainBlockStillFree(t *testing.T) {
 	// Attack cards have no Defense-Reaction type, so using them as blockers costs nothing. One
 	// Red attacker (Defense 1) alone, used as a blocker against 1 incoming, prevents 1. Value = 1.
 	h := []card.Card{fake.RedAttack{}}
-	got := Best(stubHero{}, nil, h, 1, nil, 0, nil)
+	got := Best(stubHero, nil, h, 1, nil, 0, nil)
 	if got.Value != 1 {
 		t.Fatalf("want value 1 (free plain block), got %d", got.Value)
 	}
@@ -338,7 +334,7 @@ func TestBestSequence_CardStateGrantsDontLeakAcrossPermutations(t *testing.T) {
 	// If the wrappers were reused across permutations the spy would see leaked grants and trip.
 	var sawLeak bool
 	attackers := []card.Card{grantAll{}, grantSpy{saw: &sawLeak}, grantAll{}}
-	ctx := newSequenceContextForTest(stubHero{}, nil, nil, 1_000_000, 0, len(attackers))
+	ctx := newSequenceContextForTest(stubHero, nil, nil, 1_000_000, 0, len(attackers))
 	_, _, _ = ctx.bestSequence(attackers, nil, nil, nil, nil)
 	if sawLeak {
 		t.Fatalf("CardState wrapper state leaked across permutations: grantSpy saw a pre-existing GrantedGoAgain when playing first")
@@ -349,7 +345,7 @@ func TestBest_RespectsResourceConstraint(t *testing.T) {
 	// Best: pitch 2 reds (2 res) to attack with 2 reds (cost 2, dealt 6). Value = 6. Resources must
 	// cover costs.
 	h := []card.Card{fake.RedAttack{}, fake.RedAttack{}, fake.RedAttack{}, fake.RedAttack{}}
-	got := Best(stubHero{}, nil, h, 0, nil, 0, nil)
+	got := Best(stubHero, nil, h, 0, nil, 0, nil)
 	if got.Value != 6 {
 		t.Fatalf("want value 6, got %d", got.Value)
 	}
@@ -373,7 +369,7 @@ func TestBest_RespectsResourceConstraint(t *testing.T) {
 // and Play.ArsenalCard records the card for next turn's carryover.
 func TestBest_AllHeldWhenNoLegalPlay(t *testing.T) {
 	h := []card.Card{generic.ToughenUpBlue{}}
-	got := Best(stubHero{}, nil, h, 4, nil, 0, nil)
+	got := Best(stubHero, nil, h, 4, nil, 0, nil)
 	if got.Value != 0 {
 		t.Fatalf("Value = %d, want 0", got.Value)
 	}
@@ -398,7 +394,7 @@ func TestBest_AllHeldWhenNoLegalPlay(t *testing.T) {
 // fallback would score 7 by funding both phases from one pitch — illegal, locked out here.
 func TestBest_AttackPitchCantCoverDefense(t *testing.T) {
 	h := []card.Card{runeblade.MaleficIncantationBlue{}, generic.ToughenUpBlue{}, fake.RedAttack{}}
-	got := Best(stubHero{}, nil, h, 4, nil, 0, nil)
+	got := Best(stubHero, nil, h, 4, nil, 0, nil)
 	if got.Value != 5 {
 		t.Fatalf("Value = %d, want 5 (attack and defense pitches are separate pools; Roles=[%s])",
 			got.Value, FormatBestLine(got.BestLine))
@@ -416,7 +412,7 @@ func TestBest_DRPitchNeedsSecondPitchedCard(t *testing.T) {
 		generic.ToughenUpBlue{},
 		fake.RedAttack{},
 	}
-	got := Best(stubHero{}, nil, h, 4, nil, 0, nil)
+	got := Best(stubHero, nil, h, 4, nil, 0, nil)
 	if got.Value != 7 {
 		t.Fatalf("Value = %d, want 7 (two pitched cards let attack + defense phases both pay; Roles=[%s])",
 			got.Value, FormatBestLine(got.BestLine))
@@ -429,7 +425,7 @@ func TestBest_DRPitchNeedsSecondPitchedCard(t *testing.T) {
 // slot is empty so the DR becomes Arsenal and rides into next turn as Play.ArsenalCard.
 func TestBest_EmptyArsenalClaimsHeldCard(t *testing.T) {
 	h := []card.Card{generic.ToughenUpBlue{}}
-	got := Best(stubHero{}, nil, h, 4, nil, 0, nil)
+	got := Best(stubHero, nil, h, 4, nil, 0, nil)
 	if got.BestLine[0].Role != Arsenal {
 		t.Errorf("Roles[0] = %s, want ARSENAL", got.BestLine[0].Role)
 	}
@@ -444,7 +440,7 @@ func TestBest_EmptyArsenalClaimsHeldCard(t *testing.T) {
 // Play.ArsenalCard is nil because the slot was vacated and no hand card ends up Held.
 func TestBest_ArsenalInPlayDR(t *testing.T) {
 	h := []card.Card{runeblade.MaleficIncantationBlue{}}
-	got := Best(stubHero{}, nil, h, 4, nil, 0, generic.ToughenUpBlue{})
+	got := Best(stubHero, nil, h, 4, nil, 0, generic.ToughenUpBlue{})
 	if got.Value != 4 {
 		t.Fatalf("Value = %d, want 4 (Malefic pitches to pay arsenal DR, prevents 4). Roles=[%s]",
 			got.Value, FormatBestLine(got.BestLine))
@@ -470,7 +466,7 @@ func TestBest_ArsenalInPlayDR(t *testing.T) {
 // can't fund a DR anyway); post-hoc the slot is occupied so no promotion happens.
 func TestBest_ArsenalInStayBlocksNewArsenal(t *testing.T) {
 	h := []card.Card{generic.ToughenUpBlue{}}
-	got := Best(stubHero{}, nil, h, 0, nil, 0, generic.ToughenUpBlue{})
+	got := Best(stubHero, nil, h, 0, nil, 0, generic.ToughenUpBlue{})
 	if got.BestLine[0].Role != Held {
 		t.Errorf("Roles[0] = %s, want HELD (slot occupied by arsenal-in, can't promote)", got.BestLine[0].Role)
 	}
@@ -487,7 +483,7 @@ func TestBest_ArsenalInStayBlocksNewArsenal(t *testing.T) {
 // arsenal slot now empty and no Held cards, ArsenalCard is nil.
 func TestBest_ArsenalInPlayAttack(t *testing.T) {
 	h := []card.Card{fake.RedAttack{}}
-	got := Best(stubHero{}, nil, h, 0, nil, 0, fake.RedAttack{})
+	got := Best(stubHero, nil, h, 0, nil, 0, fake.RedAttack{})
 	if got.Value != 3 {
 		t.Fatalf("Value = %d, want 3 (arsenal Red played, hand Red pitched to fund it). Roles=[%s]",
 			got.Value, FormatBestLine(got.BestLine))
@@ -505,7 +501,7 @@ func TestBest_ArsenalInPlayAttack(t *testing.T) {
 // Cussing from arsenal for a flat 3.
 func TestBest_ArsenalInNonAttackActionPlays(t *testing.T) {
 	h := []card.Card{runeblade.MaleficIncantationBlue{}}
-	got := Best(stubHero{}, nil, h, 0, nil, 0, runeblade.ArcaneCussingRed{})
+	got := Best(stubHero, nil, h, 0, nil, 0, runeblade.ArcaneCussingRed{})
 	if got.Value != 3 {
 		t.Fatalf("Value = %d, want 3 (Malefic pitched, arsenal Cussing played for 3). Roles=[%s]",
 			got.Value, FormatBestLine(got.BestLine))
@@ -522,7 +518,7 @@ func TestBest_ArsenalInNonAttackActionPlays(t *testing.T) {
 // If the rider didn't fire, prevented would cap at 7.
 func TestBest_ArsenalInUnmovableGrantsDefenseBonus(t *testing.T) {
 	h := []card.Card{runeblade.MaleficIncantationBlue{}}
-	got := Best(stubHero{}, nil, h, 8, nil, 0, generic.UnmovableRed{})
+	got := Best(stubHero, nil, h, 8, nil, 0, generic.UnmovableRed{})
 	if got.Value != 8 {
 		t.Fatalf("Value = %d, want 8 (Unmovable from arsenal blocks 7+1). Roles=[%s]",
 			got.Value, FormatBestLine(got.BestLine))
@@ -535,7 +531,7 @@ func TestBest_ArsenalInUnmovableGrantsDefenseBonus(t *testing.T) {
 // If the rider mistakenly fired from hand, prevented would be 8.
 func TestBest_HandUnmovableNoDefenseBonus(t *testing.T) {
 	h := []card.Card{runeblade.MaleficIncantationBlue{}, generic.UnmovableRed{}}
-	got := Best(stubHero{}, nil, h, 8, nil, 0, nil)
+	got := Best(stubHero, nil, h, 8, nil, 0, nil)
 	if got.Value != 7 {
 		t.Fatalf("Value = %d, want 7 (hand-played Unmovable: no rider). Roles=[%s]",
 			got.Value, FormatBestLine(got.BestLine))
@@ -764,7 +760,7 @@ func TestBest_AllAttackHandPlusArsenalNoWeapons(t *testing.T) {
 		generic.WoundingBlowRed{}, generic.WoundingBlowRed{},
 		generic.WoundingBlowRed{}, generic.WoundingBlowRed{},
 	}
-	got := Best(stubHero{}, nil, h, 0, nil, 0, generic.WoundingBlowRed{})
+	got := Best(stubHero, nil, h, 0, nil, 0, generic.WoundingBlowRed{})
 	if got.Value != 4 {
 		t.Fatalf("Value = %d, want 4 (one Wounding Blow Red lands; rest can't chain without GoAgain). Roles=[%s]",
 			got.Value, FormatBestLine(got.BestLine))
