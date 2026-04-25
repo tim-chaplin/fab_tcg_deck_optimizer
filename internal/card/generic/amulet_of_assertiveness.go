@@ -1,0 +1,27 @@
+// Amulet of Assertiveness — Generic Action - Item. Cost 0. Printed pitch variants: Yellow 2.
+//
+// Text: "**Go again** **Attack Reaction** - Destroy Amulet of Assertiveness: Target attack gains
+// "When this hits, banish the top card of your deck. If it's an attack action card, you may play it
+// this turn." Activate this ability only if you have 4 or more cards in hand."
+//
+// Stub only — marked NotImplemented so the optimizer skips it. The printed effect isn't modelled;
+// Play returns 0.
+
+package generic
+
+import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+
+var amuletOfAssertivenessTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeItem)
+
+type AmuletOfAssertivenessYellow struct{}
+
+func (AmuletOfAssertivenessYellow) ID() card.ID                               { return card.AmuletOfAssertivenessYellow }
+func (AmuletOfAssertivenessYellow) Name() string                              { return "Amulet of Assertiveness (Yellow)" }
+func (AmuletOfAssertivenessYellow) Cost(*card.TurnState) int                  { return 0 }
+func (AmuletOfAssertivenessYellow) Pitch() int                                { return 2 }
+func (AmuletOfAssertivenessYellow) Attack() int                               { return 0 }
+func (AmuletOfAssertivenessYellow) Defense() int                              { return 0 }
+func (AmuletOfAssertivenessYellow) Types() card.TypeSet                       { return amuletOfAssertivenessTypes }
+func (AmuletOfAssertivenessYellow) GoAgain() bool                             { return true }
+func (AmuletOfAssertivenessYellow) NotImplemented()                           {}
+func (AmuletOfAssertivenessYellow) Play(*card.TurnState, *card.CardState) int { return 0 }

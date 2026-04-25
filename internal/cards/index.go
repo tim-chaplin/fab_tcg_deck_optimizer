@@ -182,6 +182,22 @@ var byID = []card.Card{
 	card.AdrenalineRushYellow: generic.AdrenalineRushYellow{},
 	card.AdrenalineRushBlue: generic.AdrenalineRushBlue{},
 
+	card.AmuletOfAssertivenessYellow: generic.AmuletOfAssertivenessYellow{},
+
+	card.AmuletOfEchoesBlue: generic.AmuletOfEchoesBlue{},
+
+	card.AmuletOfHavencallBlue: generic.AmuletOfHavencallBlue{},
+
+	card.AmuletOfIgnitionYellow: generic.AmuletOfIgnitionYellow{},
+
+	card.AmuletOfInterventionBlue: generic.AmuletOfInterventionBlue{},
+
+	card.AmuletOfOblationBlue: generic.AmuletOfOblationBlue{},
+
+	card.ArcanePolarityRed: generic.ArcanePolarityRed{},
+	card.ArcanePolarityYellow: generic.ArcanePolarityYellow{},
+	card.ArcanePolarityBlue: generic.ArcanePolarityBlue{},
+
 	card.BackAlleyBreaklineRed: generic.BackAlleyBreaklineRed{},
 	card.BackAlleyBreaklineYellow: generic.BackAlleyBreaklineYellow{},
 	card.BackAlleyBreaklineBlue: generic.BackAlleyBreaklineBlue{},
@@ -197,6 +213,8 @@ var byID = []card.Card{
 	card.BelittleRed: generic.BelittleRed{},
 	card.BelittleYellow: generic.BelittleYellow{},
 	card.BelittleBlue: generic.BelittleBlue{},
+
+	card.BladeFlashBlue: generic.BladeFlashBlue{},
 
 	card.BlanchRed: generic.BlanchRed{},
 	card.BlanchYellow: generic.BlanchYellow{},
@@ -214,6 +232,10 @@ var byID = []card.Card{
 	card.BrothersInArmsYellow: generic.BrothersInArmsYellow{},
 	card.BrothersInArmsBlue: generic.BrothersInArmsBlue{},
 
+	card.BrushOffRed: generic.BrushOffRed{},
+	card.BrushOffYellow: generic.BrushOffYellow{},
+	card.BrushOffBlue: generic.BrushOffBlue{},
+
 	card.BrutalAssaultRed: generic.BrutalAssaultRed{},
 	card.BrutalAssaultYellow: generic.BrutalAssaultYellow{},
 	card.BrutalAssaultBlue: generic.BrutalAssaultBlue{},
@@ -221,6 +243,8 @@ var byID = []card.Card{
 	card.CadaverousContrabandRed: generic.CadaverousContrabandRed{},
 	card.CadaverousContrabandYellow: generic.CadaverousContrabandYellow{},
 	card.CadaverousContrabandBlue: generic.CadaverousContrabandBlue{},
+
+	card.CalmingBreezeRed: generic.CalmingBreezeRed{},
 
 	card.CaptainsCallRed: generic.CaptainsCallRed{},
 	card.CaptainsCallYellow: generic.CaptainsCallYellow{},
@@ -230,11 +254,21 @@ var byID = []card.Card{
 
 	card.ChestPuffRed: generic.ChestPuffRed{},
 
+	card.ClapEmInIronsBlue: generic.ClapEmInIronsBlue{},
+
+	card.ClarityPotionBlue: generic.ClarityPotionBlue{},
+
 	card.ClearwaterElixirRed: generic.ClearwaterElixirRed{},
 
 	card.ComeToFightRed: generic.ComeToFightRed{},
 	card.ComeToFightYellow: generic.ComeToFightYellow{},
 	card.ComeToFightBlue: generic.ComeToFightBlue{},
+
+	card.CountYourBlessingsRed: generic.CountYourBlessingsRed{},
+	card.CountYourBlessingsYellow: generic.CountYourBlessingsYellow{},
+	card.CountYourBlessingsBlue: generic.CountYourBlessingsBlue{},
+
+	card.CrackedBaubleYellow: generic.CrackedBaubleYellow{},
 
 	card.CrashDownTheGatesRed: generic.CrashDownTheGatesRed{},
 	card.CrashDownTheGatesYellow: generic.CrashDownTheGatesYellow{},
@@ -256,6 +290,8 @@ var byID = []card.Card{
 	card.DestructiveDeliberationYellow: generic.DestructiveDeliberationYellow{},
 	card.DestructiveDeliberationBlue: generic.DestructiveDeliberationBlue{},
 
+	card.DestructiveTendenciesBlue: generic.DestructiveTendenciesBlue{},
+
 	card.DodgeBlue: generic.DodgeBlue{},
 
 	card.DownButNotOutRed: generic.DownButNotOutRed{},
@@ -270,6 +306,10 @@ var byID = []card.Card{
 	card.DroneOfBrutalityYellow: generic.DroneOfBrutalityYellow{},
 	card.DroneOfBrutalityBlue: generic.DroneOfBrutalityBlue{},
 
+	card.EirinasPrayerRed: generic.EirinasPrayerRed{},
+	card.EirinasPrayerYellow: generic.EirinasPrayerYellow{},
+	card.EirinasPrayerBlue: generic.EirinasPrayerBlue{},
+
 	card.EmissaryOfMoonRed: generic.EmissaryOfMoonRed{},
 
 	card.EmissaryOfTidesRed: generic.EmissaryOfTidesRed{},
@@ -280,9 +320,17 @@ var byID = []card.Card{
 	card.EnchantingMelodyYellow: generic.EnchantingMelodyYellow{},
 	card.EnchantingMelodyBlue: generic.EnchantingMelodyBlue{},
 
+	card.EnergyPotionBlue: generic.EnergyPotionBlue{},
+
 	card.EvasiveLeapRed: generic.EvasiveLeapRed{},
 	card.EvasiveLeapYellow: generic.EvasiveLeapYellow{},
 	card.EvasiveLeapBlue: generic.EvasiveLeapBlue{},
+
+	card.EvenBiggerThanThatRed: generic.EvenBiggerThanThatRed{},
+	card.EvenBiggerThanThatYellow: generic.EvenBiggerThanThatYellow{},
+	card.EvenBiggerThanThatBlue: generic.EvenBiggerThanThatBlue{},
+
+	card.ExposedBlue: generic.ExposedBlue{},
 
 	card.FactFindingMissionRed: generic.FactFindingMissionRed{},
 	card.FactFindingMissionYellow: generic.FactFindingMissionYellow{},
@@ -316,6 +364,8 @@ var byID = []card.Card{
 	card.FlyingHighYellow: generic.FlyingHighYellow{},
 	card.FlyingHighBlue: generic.FlyingHighBlue{},
 
+	card.FoolsGoldYellow: generic.FoolsGoldYellow{},
+
 	card.ForceSightRed: generic.ForceSightRed{},
 	card.ForceSightYellow: generic.ForceSightYellow{},
 	card.ForceSightBlue: generic.ForceSightBlue{},
@@ -342,6 +392,8 @@ var byID = []card.Card{
 	card.HealingBalmYellow: generic.HealingBalmYellow{},
 	card.HealingBalmBlue: generic.HealingBalmBlue{},
 
+	card.HealingPotionBlue: generic.HealingPotionBlue{},
+
 	card.HighStrikerRed: generic.HighStrikerRed{},
 	card.HighStrikerYellow: generic.HighStrikerYellow{},
 	card.HighStrikerBlue: generic.HighStrikerBlue{},
@@ -349,6 +401,8 @@ var byID = []card.Card{
 	card.HumbleRed: generic.HumbleRed{},
 	card.HumbleYellow: generic.HumbleYellow{},
 	card.HumbleBlue: generic.HumbleBlue{},
+
+	card.ImperialSealOfCommandRed: generic.ImperialSealOfCommandRed{},
 
 	card.InfectiousHostRed: generic.InfectiousHostRed{},
 	card.InfectiousHostYellow: generic.InfectiousHostYellow{},
@@ -372,11 +426,17 @@ var byID = []card.Card{
 	card.LifeOfThePartyYellow: generic.LifeOfThePartyYellow{},
 	card.LifeOfThePartyBlue: generic.LifeOfThePartyBlue{},
 
-	card.LookTuffRed: generic.LookTuffRed{},
-
 	card.LookingForAScrapRed: generic.LookingForAScrapRed{},
 	card.LookingForAScrapYellow: generic.LookingForAScrapYellow{},
 	card.LookingForAScrapBlue: generic.LookingForAScrapBlue{},
+
+	card.LookTuffRed: generic.LookTuffRed{},
+
+	card.LungingPressBlue: generic.LungingPressBlue{},
+
+	card.MemorialGroundRed: generic.MemorialGroundRed{},
+	card.MemorialGroundYellow: generic.MemorialGroundYellow{},
+	card.MemorialGroundBlue: generic.MemorialGroundBlue{},
 
 	card.MinnowismRed: generic.MinnowismRed{},
 	card.MinnowismYellow: generic.MinnowismYellow{},
@@ -408,21 +468,31 @@ var byID = []card.Card{
 	card.NimbyYellow: generic.NimbyYellow{},
 	card.NimbyBlue: generic.NimbyBlue{},
 
+	card.NipAtTheHeelsBlue: generic.NipAtTheHeelsBlue{},
+
+	card.OasisRespiteRed: generic.OasisRespiteRed{},
+	card.OasisRespiteYellow: generic.OasisRespiteYellow{},
+	card.OasisRespiteBlue: generic.OasisRespiteBlue{},
+
 	card.OnAKnifeEdgeYellow: generic.OnAKnifeEdgeYellow{},
 
 	card.OnTheHorizonRed: generic.OnTheHorizonRed{},
 	card.OnTheHorizonYellow: generic.OnTheHorizonYellow{},
 	card.OnTheHorizonBlue: generic.OnTheHorizonBlue{},
 
+	card.OutedRed: generic.OutedRed{},
+
 	card.OutMuscleRed: generic.OutMuscleRed{},
 	card.OutMuscleYellow: generic.OutMuscleYellow{},
 	card.OutMuscleBlue: generic.OutMuscleBlue{},
 
-	card.OutedRed: generic.OutedRed{},
-
 	card.OverloadRed: generic.OverloadRed{},
 	card.OverloadYellow: generic.OverloadYellow{},
 	card.OverloadBlue: generic.OverloadBlue{},
+
+	card.PeaceOfMindRed: generic.PeaceOfMindRed{},
+	card.PeaceOfMindYellow: generic.PeaceOfMindYellow{},
+	card.PeaceOfMindBlue: generic.PeaceOfMindBlue{},
 
 	card.PerformanceBonusRed: generic.PerformanceBonusRed{},
 	card.PerformanceBonusYellow: generic.PerformanceBonusYellow{},
@@ -432,9 +502,21 @@ var byID = []card.Card{
 	card.PickACardAnyCardYellow: generic.PickACardAnyCardYellow{},
 	card.PickACardAnyCardBlue: generic.PickACardAnyCardBlue{},
 
+	card.PilferTheTombBlue: generic.PilferTheTombBlue{},
+
 	card.PlunderRunRed: generic.PlunderRunRed{},
 	card.PlunderRunYellow: generic.PlunderRunYellow{},
 	card.PlunderRunBlue: generic.PlunderRunBlue{},
+
+	card.PotionOfDejaVuBlue: generic.PotionOfDejaVuBlue{},
+
+	card.PotionOfIronhideBlue: generic.PotionOfIronhideBlue{},
+
+	card.PotionOfLuckBlue: generic.PotionOfLuckBlue{},
+
+	card.PotionOfSeeingBlue: generic.PotionOfSeeingBlue{},
+
+	card.PotionOfStrengthBlue: generic.PotionOfStrengthBlue{},
 
 	card.PoundForPoundRed: generic.PoundForPoundRed{},
 	card.PoundForPoundYellow: generic.PoundForPoundYellow{},
@@ -451,6 +533,10 @@ var byID = []card.Card{
 	card.PublicBountyRed: generic.PublicBountyRed{},
 	card.PublicBountyYellow: generic.PublicBountyYellow{},
 	card.PublicBountyBlue: generic.PublicBountyBlue{},
+
+	card.PummelRed: generic.PummelRed{},
+	card.PummelYellow: generic.PummelYellow{},
+	card.PummelBlue: generic.PummelBlue{},
 
 	card.PunchAboveYourWeightRed: generic.PunchAboveYourWeightRed{},
 	card.PunchAboveYourWeightYellow: generic.PunchAboveYourWeightYellow{},
@@ -484,11 +570,19 @@ var byID = []card.Card{
 	card.RavenousRabbleYellow: generic.RavenousRabbleYellow{},
 	card.RavenousRabbleBlue: generic.RavenousRabbleBlue{},
 
+	card.RazorReflexRed: generic.RazorReflexRed{},
+	card.RazorReflexYellow: generic.RazorReflexYellow{},
+	card.RazorReflexBlue: generic.RazorReflexBlue{},
+
 	card.RegainComposureBlue: generic.RegainComposureBlue{},
 
 	card.RegurgitatingSlogRed: generic.RegurgitatingSlogRed{},
 	card.RegurgitatingSlogYellow: generic.RegurgitatingSlogYellow{},
 	card.RegurgitatingSlogBlue: generic.RegurgitatingSlogBlue{},
+
+	card.ReinforceTheLineRed: generic.ReinforceTheLineRed{},
+	card.ReinforceTheLineYellow: generic.ReinforceTheLineYellow{},
+	card.ReinforceTheLineBlue: generic.ReinforceTheLineBlue{},
 
 	card.RelentlessPursuitBlue: generic.RelentlessPursuitBlue{},
 
@@ -524,6 +618,8 @@ var byID = []card.Card{
 	card.SeekHorizonYellow: generic.SeekHorizonYellow{},
 	card.SeekHorizonBlue: generic.SeekHorizonBlue{},
 
+	card.ShatterSorceryBlue: generic.ShatterSorceryBlue{},
+
 	card.SiftRed: generic.SiftRed{},
 	card.SiftYellow: generic.SiftYellow{},
 	card.SiftBlue: generic.SiftBlue{},
@@ -535,6 +631,10 @@ var byID = []card.Card{
 	card.SigilOfProtectionRed: generic.SigilOfProtectionRed{},
 	card.SigilOfProtectionYellow: generic.SigilOfProtectionYellow{},
 	card.SigilOfProtectionBlue: generic.SigilOfProtectionBlue{},
+
+	card.SigilOfSolaceRed: generic.SigilOfSolaceRed{},
+	card.SigilOfSolaceYellow: generic.SigilOfSolaceYellow{},
+	card.SigilOfSolaceBlue: generic.SigilOfSolaceBlue{},
 
 	card.SinkBelowRed: generic.SinkBelowRed{},
 	card.SinkBelowYellow: generic.SinkBelowYellow{},
@@ -548,11 +648,11 @@ var byID = []card.Card{
 	card.SloggismYellow: generic.SloggismYellow{},
 	card.SloggismBlue: generic.SloggismBlue{},
 
-	card.SmashUpRed: generic.SmashUpRed{},
-
 	card.SmashingGoodTimeRed: generic.SmashingGoodTimeRed{},
 	card.SmashingGoodTimeYellow: generic.SmashingGoodTimeYellow{},
 	card.SmashingGoodTimeBlue: generic.SmashingGoodTimeBlue{},
+
+	card.SmashUpRed: generic.SmashUpRed{},
 
 	card.SnatchRed: generic.SnatchRed{},
 	card.SnatchYellow: generic.SnatchYellow{},
@@ -560,11 +660,11 @@ var byID = []card.Card{
 
 	card.SoundTheAlarmRed: generic.SoundTheAlarmRed{},
 
+	card.SpringboardSomersaultYellow: generic.SpringboardSomersaultYellow{},
+
 	card.SpringLoadRed: generic.SpringLoadRed{},
 	card.SpringLoadYellow: generic.SpringLoadYellow{},
 	card.SpringLoadBlue: generic.SpringLoadBlue{},
-
-	card.SpringboardSomersaultYellow: generic.SpringboardSomersaultYellow{},
 
 	card.StartingStakeYellow: generic.StartingStakeYellow{},
 
@@ -588,11 +688,31 @@ var byID = []card.Card{
 	card.SurgingMilitiaYellow: generic.SurgingMilitiaYellow{},
 	card.SurgingMilitiaBlue: generic.SurgingMilitiaBlue{},
 
+	card.TalismanOfBalanceBlue: generic.TalismanOfBalanceBlue{},
+
+	card.TalismanOfCremationBlue: generic.TalismanOfCremationBlue{},
+
+	card.TalismanOfDousingYellow: generic.TalismanOfDousingYellow{},
+
+	card.TalismanOfFeatherfootYellow: generic.TalismanOfFeatherfootYellow{},
+
+	card.TalismanOfRecompenseYellow: generic.TalismanOfRecompenseYellow{},
+
+	card.TalismanOfTithesBlue: generic.TalismanOfTithesBlue{},
+
+	card.TalismanOfWarfareYellow: generic.TalismanOfWarfareYellow{},
+
 	card.TestOfStrengthRed: generic.TestOfStrengthRed{},
+
+	card.ThrustRed: generic.ThrustRed{},
+
+	card.TimesnapPotionBlue: generic.TimesnapPotionBlue{},
 
 	card.TipOffRed: generic.TipOffRed{},
 	card.TipOffYellow: generic.TipOffYellow{},
 	card.TipOffBlue: generic.TipOffBlue{},
+
+	card.TitaniumBaubleBlue: generic.TitaniumBaubleBlue{},
 
 	card.TitForTatBlue: generic.TitForTatBlue{},
 

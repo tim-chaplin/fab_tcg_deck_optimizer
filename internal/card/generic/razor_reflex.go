@@ -1,0 +1,53 @@
+// Razor Reflex — Generic Attack Reaction. Cost 1. Printed pitch variants: Red 1, Yellow 2, Blue 3.
+// Defense 2.
+//
+// Text: "Choose 1; - Target dagger or sword weapon attack gets +3{p}. - Target attack action card
+// with cost 1 or less gets +3{p} and "When this hits, it gets **go again**.""
+//
+// Stub only — marked NotImplemented so the optimizer skips it. The printed effect isn't modelled;
+// Play returns 0.
+
+package generic
+
+import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+
+var razorReflexTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAttackReaction)
+
+type RazorReflexRed struct{}
+
+func (RazorReflexRed) ID() card.ID                               { return card.RazorReflexRed }
+func (RazorReflexRed) Name() string                              { return "Razor Reflex (Red)" }
+func (RazorReflexRed) Cost(*card.TurnState) int                  { return 1 }
+func (RazorReflexRed) Pitch() int                                { return 1 }
+func (RazorReflexRed) Attack() int                               { return 0 }
+func (RazorReflexRed) Defense() int                              { return 2 }
+func (RazorReflexRed) Types() card.TypeSet                       { return razorReflexTypes }
+func (RazorReflexRed) GoAgain() bool                             { return false }
+func (RazorReflexRed) NotImplemented()                           {}
+func (RazorReflexRed) Play(*card.TurnState, *card.CardState) int { return 0 }
+
+type RazorReflexYellow struct{}
+
+func (RazorReflexYellow) ID() card.ID                               { return card.RazorReflexYellow }
+func (RazorReflexYellow) Name() string                              { return "Razor Reflex (Yellow)" }
+func (RazorReflexYellow) Cost(*card.TurnState) int                  { return 1 }
+func (RazorReflexYellow) Pitch() int                                { return 2 }
+func (RazorReflexYellow) Attack() int                               { return 0 }
+func (RazorReflexYellow) Defense() int                              { return 2 }
+func (RazorReflexYellow) Types() card.TypeSet                       { return razorReflexTypes }
+func (RazorReflexYellow) GoAgain() bool                             { return false }
+func (RazorReflexYellow) NotImplemented()                           {}
+func (RazorReflexYellow) Play(*card.TurnState, *card.CardState) int { return 0 }
+
+type RazorReflexBlue struct{}
+
+func (RazorReflexBlue) ID() card.ID                               { return card.RazorReflexBlue }
+func (RazorReflexBlue) Name() string                              { return "Razor Reflex (Blue)" }
+func (RazorReflexBlue) Cost(*card.TurnState) int                  { return 1 }
+func (RazorReflexBlue) Pitch() int                                { return 3 }
+func (RazorReflexBlue) Attack() int                               { return 0 }
+func (RazorReflexBlue) Defense() int                              { return 2 }
+func (RazorReflexBlue) Types() card.TypeSet                       { return razorReflexTypes }
+func (RazorReflexBlue) GoAgain() bool                             { return false }
+func (RazorReflexBlue) NotImplemented()                           {}
+func (RazorReflexBlue) Play(*card.TurnState, *card.CardState) int { return 0 }

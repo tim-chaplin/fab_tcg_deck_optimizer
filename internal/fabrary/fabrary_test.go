@@ -163,11 +163,10 @@ See the full deck @ https://fabrary.net/decks/01KP1AZ5SAS425YN30WB779M41
 	if len(d.Cards) == 0 {
 		t.Fatalf("expected deck cards, got none")
 	}
-	// "Arcane Polarity" isn't in the registry yet; the sample has 2 red copies, so the skip map
-	// should report it. If/when it gets implemented this expectation needs to move to whichever
-	// card remains unimplemented in the sample.
-	if skipped["Arcane Polarity (Red)"] != 2 {
-		t.Errorf("skipped map should report Arcane Polarity (Red) x2; got %v", skipped)
+	// Every card in this sample is now in the registry (some as NotImplemented stubs); the
+	// unknown-card skip path is covered by TestUnmarshalUnknownCardSkipped instead.
+	if len(skipped) != 0 {
+		t.Errorf("expected no skipped cards on this sample; got %v", skipped)
 	}
 }
 

@@ -9,6 +9,7 @@ var All = []Weapon{
 	NebulaBlade{},
 	ReapingBlade{},
 	ScepterOfPain{},
+	Talishar{},
 }
 
 // byName maps Weapon.Name() → Weapon for reverse lookup. Built once at init.

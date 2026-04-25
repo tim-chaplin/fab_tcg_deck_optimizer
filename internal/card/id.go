@@ -135,6 +135,15 @@ const (
 	AdrenalineRushRed
 	AdrenalineRushYellow
 	AdrenalineRushBlue
+	AmuletOfAssertivenessYellow
+	AmuletOfEchoesBlue
+	AmuletOfHavencallBlue
+	AmuletOfIgnitionYellow
+	AmuletOfInterventionBlue
+	AmuletOfOblationBlue
+	ArcanePolarityRed
+	ArcanePolarityYellow
+	ArcanePolarityBlue
 	BackAlleyBreaklineRed
 	BackAlleyBreaklineYellow
 	BackAlleyBreaklineBlue
@@ -147,6 +156,7 @@ const (
 	BelittleRed
 	BelittleYellow
 	BelittleBlue
+	BladeFlashBlue
 	BlanchRed
 	BlanchYellow
 	BlanchBlue
@@ -158,21 +168,31 @@ const (
 	BrothersInArmsRed
 	BrothersInArmsYellow
 	BrothersInArmsBlue
+	BrushOffRed
+	BrushOffYellow
+	BrushOffBlue
 	BrutalAssaultRed
 	BrutalAssaultYellow
 	BrutalAssaultBlue
 	CadaverousContrabandRed
 	CadaverousContrabandYellow
 	CadaverousContrabandBlue
+	CalmingBreezeRed
 	CaptainsCallRed
 	CaptainsCallYellow
 	CaptainsCallBlue
 	CashInYellow
 	ChestPuffRed
+	ClapEmInIronsBlue
+	ClarityPotionBlue
 	ClearwaterElixirRed
 	ComeToFightRed
 	ComeToFightYellow
 	ComeToFightBlue
+	CountYourBlessingsRed
+	CountYourBlessingsYellow
+	CountYourBlessingsBlue
+	CrackedBaubleYellow
 	CrashDownTheGatesRed
 	CrashDownTheGatesYellow
 	CrashDownTheGatesBlue
@@ -188,6 +208,7 @@ const (
 	DestructiveDeliberationRed
 	DestructiveDeliberationYellow
 	DestructiveDeliberationBlue
+	DestructiveTendenciesBlue
 	DodgeBlue
 	DownButNotOutRed
 	DownButNotOutYellow
@@ -198,15 +219,23 @@ const (
 	DroneOfBrutalityRed
 	DroneOfBrutalityYellow
 	DroneOfBrutalityBlue
+	EirinasPrayerRed
+	EirinasPrayerYellow
+	EirinasPrayerBlue
 	EmissaryOfMoonRed
 	EmissaryOfTidesRed
 	EmissaryOfWindRed
 	EnchantingMelodyRed
 	EnchantingMelodyYellow
 	EnchantingMelodyBlue
+	EnergyPotionBlue
 	EvasiveLeapRed
 	EvasiveLeapYellow
 	EvasiveLeapBlue
+	EvenBiggerThanThatRed
+	EvenBiggerThanThatYellow
+	EvenBiggerThanThatBlue
+	ExposedBlue
 	FactFindingMissionRed
 	FactFindingMissionYellow
 	FactFindingMissionBlue
@@ -231,6 +260,7 @@ const (
 	FlyingHighRed
 	FlyingHighYellow
 	FlyingHighBlue
+	FoolsGoldYellow
 	ForceSightRed
 	ForceSightYellow
 	ForceSightBlue
@@ -250,12 +280,14 @@ const (
 	HealingBalmRed
 	HealingBalmYellow
 	HealingBalmBlue
+	HealingPotionBlue
 	HighStrikerRed
 	HighStrikerYellow
 	HighStrikerBlue
 	HumbleRed
 	HumbleYellow
 	HumbleBlue
+	ImperialSealOfCommandRed
 	InfectiousHostRed
 	InfectiousHostYellow
 	InfectiousHostBlue
@@ -271,10 +303,14 @@ const (
 	LifeOfThePartyRed
 	LifeOfThePartyYellow
 	LifeOfThePartyBlue
-	LookTuffRed
 	LookingForAScrapRed
 	LookingForAScrapYellow
 	LookingForAScrapBlue
+	LookTuffRed
+	LungingPressBlue
+	MemorialGroundRed
+	MemorialGroundYellow
+	MemorialGroundBlue
 	MinnowismRed
 	MinnowismYellow
 	MinnowismBlue
@@ -297,26 +333,39 @@ const (
 	NimbyRed
 	NimbyYellow
 	NimbyBlue
+	NipAtTheHeelsBlue
+	OasisRespiteRed
+	OasisRespiteYellow
+	OasisRespiteBlue
 	OnAKnifeEdgeYellow
 	OnTheHorizonRed
 	OnTheHorizonYellow
 	OnTheHorizonBlue
+	OutedRed
 	OutMuscleRed
 	OutMuscleYellow
 	OutMuscleBlue
-	OutedRed
 	OverloadRed
 	OverloadYellow
 	OverloadBlue
+	PeaceOfMindRed
+	PeaceOfMindYellow
+	PeaceOfMindBlue
 	PerformanceBonusRed
 	PerformanceBonusYellow
 	PerformanceBonusBlue
 	PickACardAnyCardRed
 	PickACardAnyCardYellow
 	PickACardAnyCardBlue
+	PilferTheTombBlue
 	PlunderRunRed
 	PlunderRunYellow
 	PlunderRunBlue
+	PotionOfDejaVuBlue
+	PotionOfIronhideBlue
+	PotionOfLuckBlue
+	PotionOfSeeingBlue
+	PotionOfStrengthBlue
 	PoundForPoundRed
 	PoundForPoundYellow
 	PoundForPoundBlue
@@ -329,6 +378,9 @@ const (
 	PublicBountyRed
 	PublicBountyYellow
 	PublicBountyBlue
+	PummelRed
+	PummelYellow
+	PummelBlue
 	PunchAboveYourWeightRed
 	PunchAboveYourWeightYellow
 	PunchAboveYourWeightBlue
@@ -351,10 +403,16 @@ const (
 	RavenousRabbleRed
 	RavenousRabbleYellow
 	RavenousRabbleBlue
+	RazorReflexRed
+	RazorReflexYellow
+	RazorReflexBlue
 	RegainComposureBlue
 	RegurgitatingSlogRed
 	RegurgitatingSlogYellow
 	RegurgitatingSlogBlue
+	ReinforceTheLineRed
+	ReinforceTheLineYellow
+	ReinforceTheLineBlue
 	RelentlessPursuitBlue
 	RestvineElixirRed
 	RiftingRed
@@ -379,6 +437,7 @@ const (
 	SeekHorizonRed
 	SeekHorizonYellow
 	SeekHorizonBlue
+	ShatterSorceryBlue
 	SiftRed
 	SiftYellow
 	SiftBlue
@@ -387,6 +446,9 @@ const (
 	SigilOfProtectionRed
 	SigilOfProtectionYellow
 	SigilOfProtectionBlue
+	SigilOfSolaceRed
+	SigilOfSolaceYellow
+	SigilOfSolaceBlue
 	SinkBelowRed
 	SinkBelowYellow
 	SinkBelowBlue
@@ -396,18 +458,18 @@ const (
 	SloggismRed
 	SloggismYellow
 	SloggismBlue
-	SmashUpRed
 	SmashingGoodTimeRed
 	SmashingGoodTimeYellow
 	SmashingGoodTimeBlue
+	SmashUpRed
 	SnatchRed
 	SnatchYellow
 	SnatchBlue
 	SoundTheAlarmRed
+	SpringboardSomersaultYellow
 	SpringLoadRed
 	SpringLoadYellow
 	SpringLoadBlue
-	SpringboardSomersaultYellow
 	StartingStakeYellow
 	StonyWoottonhogRed
 	StonyWoottonhogYellow
@@ -424,10 +486,20 @@ const (
 	SurgingMilitiaRed
 	SurgingMilitiaYellow
 	SurgingMilitiaBlue
+	TalismanOfBalanceBlue
+	TalismanOfCremationBlue
+	TalismanOfDousingYellow
+	TalismanOfFeatherfootYellow
+	TalismanOfRecompenseYellow
+	TalismanOfTithesBlue
+	TalismanOfWarfareYellow
 	TestOfStrengthRed
+	ThrustRed
+	TimesnapPotionBlue
 	TipOffRed
 	TipOffYellow
 	TipOffBlue
+	TitaniumBaubleBlue
 	TitForTatBlue
 	TongueTiedRed
 	ToughenUpBlue
@@ -481,6 +553,7 @@ const (
 	NebulaBladeID
 	ReapingBladeID
 	ScepterOfPainID
+	TalisharID
 
 	// Test-only synthetic card IDs. Registered so hand.Best's cache key lookup doesn't panic on
 	// them. Not real FaB cards and must not appear in production decks.
