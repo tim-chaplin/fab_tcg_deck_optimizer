@@ -1,7 +1,5 @@
 // Put in Context — Generic Defense Reaction. Cost 0, Pitch 3, Defense 3. Only printed in Blue.
 // Text: "This can only defend an attack with 3 or less base {p}."
-// Simplification: the base-power cap on which attack this can block is ignored — we assume every
-// attack qualifies and treat the defense as unconditional.
 
 package generic
 
@@ -17,4 +15,6 @@ func (PutInContextBlue) Attack() int              { return 0 }
 func (PutInContextBlue) Defense() int             { return 3 }
 func (PutInContextBlue) Types() card.TypeSet      { return defenseReactionTypes }
 func (PutInContextBlue) GoAgain() bool            { return false }
+// not implemented: base-power cap on what this can defend is ignored; treated as legal vs every attack
+func (PutInContextBlue) NotImplemented()             {}
 func (PutInContextBlue) Play(*card.TurnState, *card.CardState) int { return 0 }

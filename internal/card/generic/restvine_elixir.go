@@ -2,10 +2,6 @@
 //
 // Text: "Your next attack this turn gets +3{p}. You may destroy an Inertia token you control. If
 // you do, gain 1{h}. **Go again**"
-//
-// Simplification: Inertia health-gain rider dropped. Scans TurnState.CardsRemaining for the first
-// matching attack action card and credits the bonus assuming it will be played; if none is
-// scheduled after this card, the bonus fizzles.
 
 package generic
 
@@ -23,4 +19,6 @@ func (RestvineElixirRed) Attack() int                 { return 0 }
 func (RestvineElixirRed) Defense() int                { return 3 }
 func (RestvineElixirRed) Types() card.TypeSet         { return restvineElixirTypes }
 func (RestvineElixirRed) GoAgain() bool               { return true }
+// not implemented: Inertia health-gain rider dropped (status tokens not tracked)
+func (RestvineElixirRed) NotImplemented()             {}
 func (RestvineElixirRed) Play(s *card.TurnState, _ *card.CardState) int { return grantNextAttackActionBonus(s, 3) }
