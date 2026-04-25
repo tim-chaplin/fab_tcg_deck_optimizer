@@ -35,6 +35,29 @@ func (g grantBonusDamage) Play(s *card.TurnState, _ *card.CardState) int {
 	return 0
 }
 
+// grantBonusDamageUngated is grantBonusDamage's misbehaving cousin: it writes BonusDamage to
+// every entry in CardsRemaining, attack action or not. Used to exercise the solver-side
+// `isAttackAction` gate that protects against a buggy grantor leaking damage into a non-attack
+// target's slot.
+type grantBonusDamageUngated struct{ n int }
+
+func (grantBonusDamageUngated) ID() card.ID              { return card.Invalid }
+func (grantBonusDamageUngated) Name() string             { return "grantBonusDamageUngated" }
+func (grantBonusDamageUngated) Cost(*card.TurnState) int { return 0 }
+func (grantBonusDamageUngated) Pitch() int               { return 0 }
+func (grantBonusDamageUngated) Attack() int              { return 0 }
+func (grantBonusDamageUngated) Defense() int             { return 0 }
+func (grantBonusDamageUngated) Types() card.TypeSet {
+	return card.NewTypeSet(card.TypeGeneric, card.TypeAction)
+}
+func (grantBonusDamageUngated) GoAgain() bool { return true }
+func (g grantBonusDamageUngated) Play(s *card.TurnState, _ *card.CardState) int {
+	for _, pc := range s.CardsRemaining {
+		pc.BonusDamage += g.n
+	}
+	return 0
+}
+
 // TestPlaySequence_BonusDamageAppliedToTargetDamage pins the core wiring: a granter scheduled
 // before an attack action sets BonusDamage on the target's CardState; playSequence folds the
 // buff into damage at the target's Play step rather than the granter's, so the chain total
@@ -105,12 +128,44 @@ func TestPlaySequence_BonusDamageStacksAcrossGranters(t *testing.T) {
 	}
 }
 
-// TestPlaySequence_BonusDamageGrantOnNonAttackIgnored pins the gate: the grantor only writes
-// BonusDamage onto attack-action targets, and even if one were applied to a non-attack
-// CardState, the solver wouldn't fold it into damage (only attack actions get the +N
-// credit). Constructed with a non-attack-action target after the granter — granter scans,
-// finds nothing matching, and BonusDamage stays 0 on every entry.
-func TestPlaySequence_BonusDamageGrantOnNonAttackIgnored(t *testing.T) {
+// TestPlaySequence_BonusDamageSolverGateOnNonAttack pins the solver-side `isAttackAction`
+// gate in playSequenceWithMeta. Uses an ungated granter that writes BonusDamage onto every
+// CardsRemaining entry — including a non-attack action card scheduled after it. The solver
+// must NOT fold that bonus into the non-attack card's perCardOut, only the attack action's
+// slot. Without the gate, the non-attack would over-credit by 5 and the chain total would
+// rise from 8 to 13.
+func TestPlaySequence_BonusDamageSolverGateOnNonAttack(t *testing.T) {
+	order := []card.Card{
+		grantBonusDamageUngated{n: 5},
+		grantBonusDamage{n: 0}, // non-attack action target — solver must skip BonusDamage on it
+		fake.RedAttack{},
+	}
+	ctx := newSequenceContextForTest(stubHero, nil, nil, 10, 0, len(order))
+	perCard := make([]float64, len(order))
+	dmg, _, _, legal := ctx.playSequence(order, perCard, nil, nil)
+	if !legal {
+		t.Fatalf("playSequence returned legal=false")
+	}
+	// Ungated granter writes BonusDamage += 5 to BOTH the non-attack granter (index 1) and
+	// the RedAttack (index 2). Only the attack action has the bonus folded into damage:
+	//   index 0: 0 (granter's own Play return)
+	//   index 1: 0 (non-attack action — gate skips its BonusDamage)
+	//   index 2: 3 (printed) + 5 (bonus) = 8
+	// Total: 8.
+	if dmg != 8 {
+		t.Fatalf("dmg = %d, want 8 (only the attack action's BonusDamage applies); perCard=%v", dmg, perCard)
+	}
+	if perCard[1] != 0 {
+		t.Errorf("non-attack target perCardOut = %.1f, want 0 (solver-side isAttackAction gate skipped it)", perCard[1])
+	}
+	if perCard[2] != 8 {
+		t.Errorf("RedAttack perCardOut = %.1f, want 8 (printed 3 + bonus 5)", perCard[2])
+	}
+}
+
+// TestPlaySequence_BonusDamageNoAttackTargetFizzles pins the granter-side scan: if no attack
+// action follows the granter, the rider has nowhere to land and total damage stays 0.
+func TestPlaySequence_BonusDamageNoAttackTargetFizzles(t *testing.T) {
 	order := []card.Card{grantBonusDamage{n: 3}, grantBonusDamage{n: 2}}
 	ctx := newSequenceContextForTest(stubHero, nil, nil, 10, 0, len(order))
 	dmg, _, _, legal := ctx.playSequence(order, nil, nil, nil)

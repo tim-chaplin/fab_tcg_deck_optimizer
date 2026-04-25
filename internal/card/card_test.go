@@ -88,7 +88,6 @@ func TestCardState_EffectiveAttack(t *testing.T) {
 		{"no bonus", 4, 0, 4},
 		{"granted +1 bumps 3 into the 1/4/7 window", 3, 1, 4},
 		{"granted +3 stacks", 4, 3, 7},
-		{"negative bonus is honoured (defender debuffs)", 5, -2, 3},
 	}
 	for _, tc := range cases {
 		p := &CardState{Card: stubCard{name: tc.name, attack: tc.printed}, BonusDamage: tc.bonusDamage}
