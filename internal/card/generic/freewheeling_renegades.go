@@ -2,8 +2,6 @@
 // Printed pitch variants: Red 1, Yellow 2, Blue 3. Defense 2.
 //
 // Text: "If this is defended by an action card, this has -2{p}."
-//
-// Simplification: The 'defended by action card' -2{p} rider isn't modelled.
 
 package generic
 
@@ -21,6 +19,8 @@ func (FreewheelingRenegadesRed) Attack() int                 { return 6 }
 func (FreewheelingRenegadesRed) Defense() int                { return 2 }
 func (FreewheelingRenegadesRed) Types() card.TypeSet         { return freewheelingRenegadesTypes }
 func (FreewheelingRenegadesRed) GoAgain() bool               { return false }
+// not implemented: defended-by-action-card -2{p} rider
+func (FreewheelingRenegadesRed) NotImplemented()             {}
 func (c FreewheelingRenegadesRed) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }
 
 type FreewheelingRenegadesYellow struct{}
@@ -33,6 +33,8 @@ func (FreewheelingRenegadesYellow) Attack() int                 { return 5 }
 func (FreewheelingRenegadesYellow) Defense() int                { return 2 }
 func (FreewheelingRenegadesYellow) Types() card.TypeSet         { return freewheelingRenegadesTypes }
 func (FreewheelingRenegadesYellow) GoAgain() bool               { return false }
+// not implemented: defended-by-action-card -2{p} rider
+func (FreewheelingRenegadesYellow) NotImplemented()             {}
 func (c FreewheelingRenegadesYellow) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }
 
 type FreewheelingRenegadesBlue struct{}
@@ -45,4 +47,6 @@ func (FreewheelingRenegadesBlue) Attack() int                 { return 4 }
 func (FreewheelingRenegadesBlue) Defense() int                { return 2 }
 func (FreewheelingRenegadesBlue) Types() card.TypeSet         { return freewheelingRenegadesTypes }
 func (FreewheelingRenegadesBlue) GoAgain() bool               { return false }
+// not implemented: defended-by-action-card -2{p} rider
+func (FreewheelingRenegadesBlue) NotImplemented()             {}
 func (c FreewheelingRenegadesBlue) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }
