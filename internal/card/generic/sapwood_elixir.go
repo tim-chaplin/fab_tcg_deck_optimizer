@@ -2,10 +2,6 @@
 //
 // Text: "Your next attack this turn gets +3{p}. You may destroy a Frailty token you control. If you
 // do, gain 1{h}. **Go again**"
-//
-// Simplification: Frailty health-gain rider dropped. Scans TurnState.CardsRemaining for the first
-// matching attack action card and credits the bonus assuming it will be played; if none is
-// scheduled after this card, the bonus fizzles.
 
 package generic
 
@@ -23,4 +19,6 @@ func (SapwoodElixirRed) Attack() int                 { return 0 }
 func (SapwoodElixirRed) Defense() int                { return 3 }
 func (SapwoodElixirRed) Types() card.TypeSet         { return sapwoodElixirTypes }
 func (SapwoodElixirRed) GoAgain() bool               { return true }
+// not implemented: Frailty health-gain rider dropped (status tokens not tracked)
+func (SapwoodElixirRed) NotImplemented()             {}
 func (SapwoodElixirRed) Play(s *card.TurnState, _ *card.CardState) int { return grantNextAttackActionBonus(s, 3) }

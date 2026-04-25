@@ -2,10 +2,6 @@
 //
 // Text: "The next attack action card with cost 2 or greater you play this turn gains +N{p}. **Go
 // again**" (Red N=6, Yellow N=5, Blue N=4.)
-//
-// Simplification: Scans TurnState.CardsRemaining for the first matching attack action card and
-// credits the bonus assuming it will be played; if none is scheduled after this card, the bonus
-// fizzles.
 
 package generic
 

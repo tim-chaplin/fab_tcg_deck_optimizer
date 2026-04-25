@@ -3,8 +3,6 @@
 //
 // Text: "As an additional cost to play Seek Horizon, you may put a card from your hand on top of
 // your deck. If you do, Seek Horizon gains **go again**."
-//
-// Simplification: Hand-on-top additional cost and conditional go-again aren't modelled.
 
 package generic
 
@@ -22,6 +20,8 @@ func (SeekHorizonRed) Attack() int                 { return 4 }
 func (SeekHorizonRed) Defense() int                { return 2 }
 func (SeekHorizonRed) Types() card.TypeSet         { return seekHorizonTypes }
 func (SeekHorizonRed) GoAgain() bool               { return false }
+// not implemented: hand-on-top alt cost and conditional go-again rider
+func (SeekHorizonRed) NotImplemented()             {}
 func (c SeekHorizonRed) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }
 
 type SeekHorizonYellow struct{}
@@ -34,6 +34,8 @@ func (SeekHorizonYellow) Attack() int                 { return 3 }
 func (SeekHorizonYellow) Defense() int                { return 2 }
 func (SeekHorizonYellow) Types() card.TypeSet         { return seekHorizonTypes }
 func (SeekHorizonYellow) GoAgain() bool               { return false }
+// not implemented: hand-on-top alt cost and conditional go-again rider
+func (SeekHorizonYellow) NotImplemented()             {}
 func (c SeekHorizonYellow) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }
 
 type SeekHorizonBlue struct{}
@@ -46,4 +48,6 @@ func (SeekHorizonBlue) Attack() int                 { return 2 }
 func (SeekHorizonBlue) Defense() int                { return 2 }
 func (SeekHorizonBlue) Types() card.TypeSet         { return seekHorizonTypes }
 func (SeekHorizonBlue) GoAgain() bool               { return false }
+// not implemented: hand-on-top alt cost and conditional go-again rider
+func (SeekHorizonBlue) NotImplemented()             {}
 func (c SeekHorizonBlue) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }
