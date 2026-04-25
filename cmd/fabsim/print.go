@@ -220,15 +220,18 @@ func printPerCardStats(d *deck.Deck) {
 	}
 }
 
-// Dimensions of the hand-value histogram chart body. histWidth is the hard cap so the chart
-// always fits under an 80-column terminal; histHeight is the row count; histStretchSlot is
-// the target per-bar column budget (1 bar + 2 spaces) in the stretch regime — the chart
-// shrinks below histWidth when the range fits at this spacing, and falls back to evenly
-// distributing bars across histWidth when the range is too wide to honour the slot.
+// Dimensions of the hand-value histogram chart body. histWidth is the chart width in the
+// compress regime; histHeight is the row count; histStretchSlot is the per-bar column budget
+// (1 bar + slot-1 gap chars) in the stretch regime — every bar gets exactly slot cols of
+// horizontal space so the spacing reads uniformly. histMaxStretchWidth caps how wide a
+// stretched chart is allowed to grow before the chart compresses to histWidth and bins
+// instead, so absurd hand-value spreads can't balloon the chart past terminal-friendly
+// widths.
 const (
-	histWidth        = 60
-	histHeight       = 12
-	histStretchSlot  = 3
+	histWidth           = 60
+	histHeight          = 12
+	histStretchSlot     = 3
+	histMaxStretchWidth = 120
 )
 
 // histogramScale fixes the axis ranges a chart renders against: x-axis spans minV..maxV
@@ -311,32 +314,36 @@ func printHistogram(d *deck.Deck, title string, scale histogramScale) {
 	fmt.Println(bodyIndent + centerLabel("hand value", width))
 }
 
-// histChartWidth picks the chart body width for a given integer range. Short ranges shrink
-// the chart to rng*histStretchSlot-1 cols so each bar gets a fixed (slot-1)-space gap
-// instead of the airy spread you'd get if all bars were forced to span histWidth. Longer
-// ranges that would exceed histWidth at this spacing clamp to histWidth; the compress
-// regime uses the full histWidth for maximum resolution.
+// histChartWidth picks the chart body width for a given integer range. The chart stretches
+// to (rng-1)*histStretchSlot+1 cols whenever that fits histMaxStretchWidth so every bar gets
+// exactly histStretchSlot cols of horizontal space and the spacing stays uniform. Ranges
+// that would exceed histMaxStretchWidth at slot=3 fall back to histWidth and the compress
+// regime aggregates adjacent values into bins.
 func histChartWidth(rng int) int {
 	if rng <= 1 {
 		return histWidth
 	}
-	if rng > histWidth {
-		return histWidth
+	if w := stretchWidth(rng); w <= histMaxStretchWidth {
+		return w
 	}
-	desired := rng*histStretchSlot - (histStretchSlot - 1)
-	if desired > histWidth {
-		return histWidth
-	}
-	return desired
+	return histWidth
+}
+
+// stretchWidth returns the chart width that fits rng integer values at slot=3: each bar
+// occupies its leftmost col with histStretchSlot-1 spaces of gap, and the rightmost bar at
+// (rng-1)*slot lives at the final col. The +1 closes the right edge under the last bar.
+func stretchWidth(rng int) int {
+	return (rng-1)*histStretchSlot + 1
 }
 
 // buildHistogramColumns bins the raw histogram map into width fixed-width columns spanning
-// [minV, maxV] inclusive. Two regimes:
-//   - range <= width: each integer value gets its own one-character bar placed at an evenly
-//     distributed column; remaining columns stay zero, giving visual separation between bars
-//     so adjacent values don't fuse into a solid block.
-//   - range > width: each column aggregates a contiguous integer range (the chart compresses
-//     and bars are necessarily contiguous since every column carries data).
+// [minV, maxV] inclusive. Three regimes:
+//   - rng == 1: the lone bar is centred, so a single-value chart isn't pinned to col 0.
+//   - width fits stretchWidth(rng): each integer value gets its own one-character bar at
+//     col (v-minV)*histStretchSlot, with histStretchSlot-1 empty cols of gap between bars.
+//     Spacing is uniform regardless of rng.
+//   - otherwise: compress. Each column aggregates the contiguous integer range that maps to
+//     it; bars are necessarily adjacent since every column carries data.
 //
 // Returns the per-column count and the peak value so callers can scale bar heights.
 func buildHistogramColumns(hist map[int]int, minV, maxV, width int) (counts []int, peak int) {
@@ -345,19 +352,14 @@ func buildHistogramColumns(hist map[int]int, minV, maxV, width int) (counts []in
 	if rng <= 0 {
 		return counts, 0
 	}
-	if rng <= width {
-		// Stretch: one bar per integer value, evenly distributed so the leftmost value lands
-		// at col 0 and the rightmost at col width-1. A single-value range (rng=1) can't span
-		// anything, so centre it.
-		if rng == 1 {
-			counts[(width-1)/2] = hist[minV]
-		} else {
-			for v := minV; v <= maxV; v++ {
-				col := (v - minV) * (width - 1) / (rng - 1)
-				counts[col] = hist[v]
-			}
+	switch {
+	case rng == 1:
+		counts[(width-1)/2] = hist[minV]
+	case width >= stretchWidth(rng):
+		for v := minV; v <= maxV; v++ {
+			counts[(v-minV)*histStretchSlot] = hist[v]
 		}
-	} else {
+	default:
 		// Compress: column col aggregates every value in [binLo, binHi).
 		for col := 0; col < width; col++ {
 			binLo := minV + col*rng/width
@@ -462,17 +464,18 @@ func xAxisTicks(minV, maxV, width int) []xAxisTick {
 
 // colForValue returns the chart column that renders the bar for integer value v. The formula
 // mirrors buildHistogramColumns so tick labels always land directly under their bar:
-//   - Stretch regime (rng <= width): bars are at evenly-distributed positions with minV at
-//     col 0 and maxV at col width-1.
-//   - Compress regime (rng > width): bars are contiguous; v maps to the start of its bin.
 //   - Degenerate rng<=1 (single value): the lone bar is centred, so the column is width/2.
+//   - Stretch regime (width fits stretchWidth(rng)): col = (v-minV)*histStretchSlot, giving
+//     uniform slot-spaced positions independent of width.
+//   - Compress regime (width can't fit stretch): bars are contiguous; v maps to the start of
+//     its bin.
 func colForValue(v, minV, maxV, width int) int {
 	rng := maxV - minV + 1
 	if rng <= 1 {
 		return (width - 1) / 2
 	}
-	if rng <= width {
-		return (v - minV) * (width - 1) / (rng - 1)
+	if width >= stretchWidth(rng) {
+		return (v - minV) * histStretchSlot
 	}
 	return (v - minV) * width / rng
 }
