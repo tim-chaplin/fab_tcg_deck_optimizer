@@ -3,10 +3,6 @@
 //
 // Text: "The next attack action card you play this turn gains +N{p} and "When this hits, put it on
 // the bottom of its owner's deck." **Go again**" (Red N=3, Yellow N=2, Blue N=1.)
-//
-// Simplification: The 'bottom of deck' rider is dropped (just credit the +N). Scans
-// TurnState.CardsRemaining for the first matching attack action card and credits the bonus assuming
-// it will be played; if none is scheduled after this card, the bonus fizzles.
 
 package generic
 
@@ -24,6 +20,8 @@ func (WarmongersRecitalRed) Attack() int                 { return 0 }
 func (WarmongersRecitalRed) Defense() int                { return 2 }
 func (WarmongersRecitalRed) Types() card.TypeSet         { return warmongersRecitalTypes }
 func (WarmongersRecitalRed) GoAgain() bool               { return true }
+// not implemented: bottom-of-deck rider on next-attack-action target
+func (WarmongersRecitalRed) NotImplemented()             {}
 func (WarmongersRecitalRed) Play(s *card.TurnState, _ *card.CardState) int { return grantNextAttackActionBonus(s, 3) }
 
 type WarmongersRecitalYellow struct{}
@@ -36,6 +34,8 @@ func (WarmongersRecitalYellow) Attack() int                 { return 0 }
 func (WarmongersRecitalYellow) Defense() int                { return 2 }
 func (WarmongersRecitalYellow) Types() card.TypeSet         { return warmongersRecitalTypes }
 func (WarmongersRecitalYellow) GoAgain() bool               { return true }
+// not implemented: bottom-of-deck rider on next-attack-action target
+func (WarmongersRecitalYellow) NotImplemented()             {}
 func (WarmongersRecitalYellow) Play(s *card.TurnState, _ *card.CardState) int { return grantNextAttackActionBonus(s, 2) }
 
 type WarmongersRecitalBlue struct{}
@@ -48,4 +48,6 @@ func (WarmongersRecitalBlue) Attack() int                 { return 0 }
 func (WarmongersRecitalBlue) Defense() int                { return 2 }
 func (WarmongersRecitalBlue) Types() card.TypeSet         { return warmongersRecitalTypes }
 func (WarmongersRecitalBlue) GoAgain() bool               { return true }
+// not implemented: bottom-of-deck rider on next-attack-action target
+func (WarmongersRecitalBlue) NotImplemented()             {}
 func (WarmongersRecitalBlue) Play(s *card.TurnState, _ *card.CardState) int { return grantNextAttackActionBonus(s, 1) }
