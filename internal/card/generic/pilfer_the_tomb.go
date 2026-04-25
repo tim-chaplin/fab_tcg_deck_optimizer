@@ -2,9 +2,6 @@
 //
 // Text: "Choose 1 or both; - Banish target instant from an opposing hero's graveyard. - Banish
 // target yellow card from an opposing hero's graveyard."
-//
-// Stub only — marked NotImplemented so the optimizer skips it. The printed effect isn't modelled;
-// Play returns 0.
 
 package generic
 
@@ -22,5 +19,6 @@ func (PilferTheTombBlue) Attack() int                               { return 0 }
 func (PilferTheTombBlue) Defense() int                              { return 0 }
 func (PilferTheTombBlue) Types() card.TypeSet                       { return pilferTheTombTypes }
 func (PilferTheTombBlue) GoAgain() bool                             { return false }
+// not implemented: Instant 'banish from opposing graveyard'
 func (PilferTheTombBlue) NotImplemented()                           {}
 func (PilferTheTombBlue) Play(*card.TurnState, *card.CardState) int { return 0 }

@@ -1,9 +1,6 @@
 // Arcane Polarity — Generic Instant. Cost 0. Printed pitch variants: Red 1, Yellow 2, Blue 3.
 //
 // Text: "Gain 1{h} If you've been dealt arcane damage this turn, instead gain 4{h}."
-//
-// Stub only — marked NotImplemented so the optimizer skips it. The printed effect isn't modelled;
-// Play returns 0.
 
 package generic
 
@@ -21,6 +18,7 @@ func (ArcanePolarityRed) Attack() int                               { return 0 }
 func (ArcanePolarityRed) Defense() int                              { return 0 }
 func (ArcanePolarityRed) Types() card.TypeSet                       { return arcanePolarityTypes }
 func (ArcanePolarityRed) GoAgain() bool                             { return false }
+// not implemented: 1{h} or 4/3/2{h} on arcane-damage trigger
 func (ArcanePolarityRed) NotImplemented()                           {}
 func (ArcanePolarityRed) Play(*card.TurnState, *card.CardState) int { return 0 }
 
@@ -34,6 +32,7 @@ func (ArcanePolarityYellow) Attack() int                               { return 
 func (ArcanePolarityYellow) Defense() int                              { return 0 }
 func (ArcanePolarityYellow) Types() card.TypeSet                       { return arcanePolarityTypes }
 func (ArcanePolarityYellow) GoAgain() bool                             { return false }
+// not implemented: 1{h} or 4/3/2{h} on arcane-damage trigger
 func (ArcanePolarityYellow) NotImplemented()                           {}
 func (ArcanePolarityYellow) Play(*card.TurnState, *card.CardState) int { return 0 }
 
@@ -47,5 +46,6 @@ func (ArcanePolarityBlue) Attack() int                               { return 0 
 func (ArcanePolarityBlue) Defense() int                              { return 0 }
 func (ArcanePolarityBlue) Types() card.TypeSet                       { return arcanePolarityTypes }
 func (ArcanePolarityBlue) GoAgain() bool                             { return false }
+// not implemented: 1{h} or 4/3/2{h} on arcane-damage trigger
 func (ArcanePolarityBlue) NotImplemented()                           {}
 func (ArcanePolarityBlue) Play(*card.TurnState, *card.CardState) int { return 0 }

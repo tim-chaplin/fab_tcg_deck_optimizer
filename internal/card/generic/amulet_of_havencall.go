@@ -3,9 +3,6 @@
 // Text: "**Go again** **Defense Reaction** - Destroy Amulet of Havencall: Search your deck for a
 // card named Rally the Rearguard, add it to this chain link as a defending card, then shuffle.
 // Activate this ability only if you have no cards in hand."
-//
-// Stub only — marked NotImplemented so the optimizer skips it. The printed effect isn't modelled;
-// Play returns 0.
 
 package generic
 
@@ -23,5 +20,6 @@ func (AmuletOfHavencallBlue) Attack() int                               { return
 func (AmuletOfHavencallBlue) Defense() int                              { return 0 }
 func (AmuletOfHavencallBlue) Types() card.TypeSet                       { return amuletOfHavencallTypes }
 func (AmuletOfHavencallBlue) GoAgain() bool                             { return true }
+// not implemented: DR tutor for Rally the Rearguard; gated on empty hand
 func (AmuletOfHavencallBlue) NotImplemented()                           {}
 func (AmuletOfHavencallBlue) Play(*card.TurnState, *card.CardState) int { return 0 }

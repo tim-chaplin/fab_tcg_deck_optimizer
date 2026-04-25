@@ -1,9 +1,6 @@
 // Timesnap Potion — Generic Action - Item. Cost 0. Printed pitch variants: Blue 3.
 //
 // Text: "**Action** - Destroy this: Gain 2 action points."
-//
-// Stub only — marked NotImplemented so the optimizer skips it. The printed effect isn't modelled;
-// Play returns 0.
 
 package generic
 
@@ -21,5 +18,6 @@ func (TimesnapPotionBlue) Attack() int                               { return 0 
 func (TimesnapPotionBlue) Defense() int                              { return 0 }
 func (TimesnapPotionBlue) Types() card.TypeSet                       { return timesnapPotionTypes }
 func (TimesnapPotionBlue) GoAgain() bool                             { return false }
+// not implemented: activated 'play next attack action from graveyard'
 func (TimesnapPotionBlue) NotImplemented()                           {}
 func (TimesnapPotionBlue) Play(*card.TurnState, *card.CardState) int { return 0 }

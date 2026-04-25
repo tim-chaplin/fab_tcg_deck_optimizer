@@ -2,9 +2,6 @@
 //
 // Text: "**Go again** If an opponent would draw 1 or more cards during your action phase, instead
 // destroy Talisman of Tithes and they draw that many cards minus 1."
-//
-// Stub only — marked NotImplemented so the optimizer skips it. The printed effect isn't modelled;
-// Play returns 0.
 
 package generic
 
@@ -22,5 +19,6 @@ func (TalismanOfTithesBlue) Attack() int                               { return 
 func (TalismanOfTithesBlue) Defense() int                              { return 0 }
 func (TalismanOfTithesBlue) Types() card.TypeSet                       { return talismanOfTithesTypes }
 func (TalismanOfTithesBlue) GoAgain() bool                             { return true }
+// not implemented: passive Gold-token economy on opposing damage
 func (TalismanOfTithesBlue) NotImplemented()                           {}
 func (TalismanOfTithesBlue) Play(*card.TurnState, *card.CardState) int { return 0 }

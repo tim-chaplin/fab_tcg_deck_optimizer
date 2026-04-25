@@ -4,9 +4,6 @@
 // Text: "Play Even Bigger Than That! only if you've dealt {p} this turn. **Opt 3**, then reveal the
 // top card of your deck. If it has {p} greater than the amount of damage you've dealt this turn,
 // create a Quicken token and draw a card."
-//
-// Stub only — marked NotImplemented so the optimizer skips it. The printed effect isn't modelled;
-// Play returns 0.
 
 package generic
 
@@ -24,6 +21,7 @@ func (EvenBiggerThanThatRed) Attack() int                               { return
 func (EvenBiggerThanThatRed) Defense() int                              { return 0 }
 func (EvenBiggerThanThatRed) Types() card.TypeSet                       { return evenBiggerThanThatTypes }
 func (EvenBiggerThanThatRed) GoAgain() bool                             { return false }
+// not implemented: Opt + reveal-and-quicken trigger; gated on damage dealt
 func (EvenBiggerThanThatRed) NotImplemented()                           {}
 func (EvenBiggerThanThatRed) Play(*card.TurnState, *card.CardState) int { return 0 }
 
@@ -37,6 +35,7 @@ func (EvenBiggerThanThatYellow) Attack() int                               { ret
 func (EvenBiggerThanThatYellow) Defense() int                              { return 0 }
 func (EvenBiggerThanThatYellow) Types() card.TypeSet                       { return evenBiggerThanThatTypes }
 func (EvenBiggerThanThatYellow) GoAgain() bool                             { return false }
+// not implemented: Opt + reveal-and-quicken trigger; gated on damage dealt
 func (EvenBiggerThanThatYellow) NotImplemented()                           {}
 func (EvenBiggerThanThatYellow) Play(*card.TurnState, *card.CardState) int { return 0 }
 
@@ -50,5 +49,6 @@ func (EvenBiggerThanThatBlue) Attack() int                               { retur
 func (EvenBiggerThanThatBlue) Defense() int                              { return 0 }
 func (EvenBiggerThanThatBlue) Types() card.TypeSet                       { return evenBiggerThanThatTypes }
 func (EvenBiggerThanThatBlue) GoAgain() bool                             { return false }
+// not implemented: Opt + reveal-and-quicken trigger; gated on damage dealt
 func (EvenBiggerThanThatBlue) NotImplemented()                           {}
 func (EvenBiggerThanThatBlue) Play(*card.TurnState, *card.CardState) int { return 0 }

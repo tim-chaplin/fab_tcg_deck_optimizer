@@ -2,9 +2,6 @@
 //
 // Text: "**Go again** When this enters the arena, {t} target Pirate hero or ally. It can't {u}
 // while this is in the arena. At the start of your turn, destroy this."
-//
-// Stub only — marked NotImplemented so the optimizer skips it. The printed effect isn't modelled;
-// Play returns 0.
 
 package generic
 
@@ -22,5 +19,6 @@ func (ClapEmInIronsBlue) Attack() int                               { return 0 }
 func (ClapEmInIronsBlue) Defense() int                              { return 0 }
 func (ClapEmInIronsBlue) Types() card.TypeSet                       { return clapEmInIronsTypes }
 func (ClapEmInIronsBlue) GoAgain() bool                             { return true }
+// not implemented: passive Pirate-target tap rider; self-destroys at upkeep
 func (ClapEmInIronsBlue) NotImplemented()                           {}
 func (ClapEmInIronsBlue) Play(*card.TurnState, *card.CardState) int { return 0 }

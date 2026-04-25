@@ -2,9 +2,6 @@
 //
 // Text: "**Instant** - Destroy Potion of Déjà Vu: Put all cards from your pitch zone on top of your
 // deck in any order."
-//
-// Stub only — marked NotImplemented so the optimizer skips it. The printed effect isn't modelled;
-// Play returns 0.
 
 package generic
 
@@ -22,5 +19,6 @@ func (PotionOfDejaVuBlue) Attack() int                               { return 0 
 func (PotionOfDejaVuBlue) Defense() int                              { return 0 }
 func (PotionOfDejaVuBlue) Types() card.TypeSet                       { return potionOfDejaVuTypes }
 func (PotionOfDejaVuBlue) GoAgain() bool                             { return false }
+// not implemented: activated 'replay last instant from graveyard'
 func (PotionOfDejaVuBlue) NotImplemented()                           {}
 func (PotionOfDejaVuBlue) Play(*card.TurnState, *card.CardState) int { return 0 }

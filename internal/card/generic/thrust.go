@@ -1,9 +1,6 @@
 // Thrust — Generic Attack Reaction. Cost 1. Printed pitch variants: Red 1. Defense 2.
 //
 // Text: "Target sword attack gains +3{p}."
-//
-// Stub only — marked NotImplemented so the optimizer skips it. The printed effect isn't modelled;
-// Play returns 0.
 
 package generic
 
@@ -21,5 +18,6 @@ func (ThrustRed) Attack() int                               { return 0 }
 func (ThrustRed) Defense() int                              { return 2 }
 func (ThrustRed) Types() card.TypeSet                       { return thrustTypes }
 func (ThrustRed) GoAgain() bool                             { return false }
+// not implemented: AR +3{p} buff to a sword attack
 func (ThrustRed) NotImplemented()                           {}
 func (ThrustRed) Play(*card.TurnState, *card.CardState) int { return 0 }

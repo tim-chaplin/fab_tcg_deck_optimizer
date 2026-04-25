@@ -2,9 +2,6 @@
 //
 // Text: "*(A player may add any number of Cracked Baubles to their card-pool in sealed deck or
 // booster draft formats.)*"
-//
-// Stub only — marked NotImplemented so the optimizer skips it. The printed effect isn't modelled;
-// Play returns 0.
 
 package generic
 
@@ -22,5 +19,6 @@ func (CrackedBaubleYellow) Attack() int                               { return 0
 func (CrackedBaubleYellow) Defense() int                              { return 0 }
 func (CrackedBaubleYellow) Types() card.TypeSet                       { return crackedBaubleTypes }
 func (CrackedBaubleYellow) GoAgain() bool                             { return false }
+// not implemented: draft-format pitch resource; no other effect
 func (CrackedBaubleYellow) NotImplemented()                           {}
 func (CrackedBaubleYellow) Play(*card.TurnState, *card.CardState) int { return 0 }

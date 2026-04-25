@@ -1,9 +1,6 @@
 // Sigil of Solace — Generic Instant. Cost 0. Printed pitch variants: Red 1, Yellow 2, Blue 3.
 //
 // Text: "Gain 3{h}"
-//
-// Stub only — marked NotImplemented so the optimizer skips it. The printed effect isn't modelled;
-// Play returns 0.
 
 package generic
 
@@ -22,6 +19,7 @@ func (SigilOfSolaceRed) Defense() int                              { return 0 }
 func (SigilOfSolaceRed) Types() card.TypeSet                       { return sigilOfSolaceTypes }
 func (SigilOfSolaceRed) GoAgain() bool                             { return false }
 func (SigilOfSolaceRed) NotSilverAgeLegal()                        {}
+// not implemented: 1/2/3{h} gain (also banlisted)
 func (SigilOfSolaceRed) NotImplemented()                           {}
 func (SigilOfSolaceRed) Play(*card.TurnState, *card.CardState) int { return 0 }
 
@@ -36,6 +34,7 @@ func (SigilOfSolaceYellow) Defense() int                              { return 0
 func (SigilOfSolaceYellow) Types() card.TypeSet                       { return sigilOfSolaceTypes }
 func (SigilOfSolaceYellow) GoAgain() bool                             { return false }
 func (SigilOfSolaceYellow) NotSilverAgeLegal()                        {}
+// not implemented: 1/2/3{h} gain (also banlisted)
 func (SigilOfSolaceYellow) NotImplemented()                           {}
 func (SigilOfSolaceYellow) Play(*card.TurnState, *card.CardState) int { return 0 }
 
@@ -50,5 +49,6 @@ func (SigilOfSolaceBlue) Defense() int                              { return 0 }
 func (SigilOfSolaceBlue) Types() card.TypeSet                       { return sigilOfSolaceTypes }
 func (SigilOfSolaceBlue) GoAgain() bool                             { return false }
 func (SigilOfSolaceBlue) NotSilverAgeLegal()                        {}
+// not implemented: 1/2/3{h} gain (also banlisted)
 func (SigilOfSolaceBlue) NotImplemented()                           {}
 func (SigilOfSolaceBlue) Play(*card.TurnState, *card.CardState) int { return 0 }

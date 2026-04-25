@@ -2,9 +2,6 @@
 //
 // Text: "Choose 1 or both; - Destroy target aura permanent with Sigil in its name. - Prevent the
 // next 1 arcane damage that would be dealt to target hero this turn."
-//
-// Stub only — marked NotImplemented so the optimizer skips it. The printed effect isn't modelled;
-// Play returns 0.
 
 package generic
 
@@ -22,5 +19,6 @@ func (ShatterSorceryBlue) Attack() int                               { return 0 
 func (ShatterSorceryBlue) Defense() int                              { return 0 }
 func (ShatterSorceryBlue) Types() card.TypeSet                       { return shatterSorceryTypes }
 func (ShatterSorceryBlue) GoAgain() bool                             { return false }
+// not implemented: Instant destroy Sigil aura or prevent 1 arcane damage
 func (ShatterSorceryBlue) NotImplemented()                           {}
 func (ShatterSorceryBlue) Play(*card.TurnState, *card.CardState) int { return 0 }

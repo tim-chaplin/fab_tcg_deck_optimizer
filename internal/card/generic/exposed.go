@@ -2,9 +2,6 @@
 //
 // Text: "If you are **marked**, you can't play this. Target attack gets +1{p}. **Mark** the
 // defending hero."
-//
-// Stub only — marked NotImplemented so the optimizer skips it. The printed effect isn't modelled;
-// Play returns 0.
 
 package generic
 
@@ -22,5 +19,6 @@ func (ExposedBlue) Attack() int                               { return 0 }
 func (ExposedBlue) Defense() int                              { return 0 }
 func (ExposedBlue) Types() card.TypeSet                       { return exposedTypes }
 func (ExposedBlue) GoAgain() bool                             { return false }
+// not implemented: AR -2{p} attacker debuff; gated on hand size
 func (ExposedBlue) NotImplemented()                           {}
 func (ExposedBlue) Play(*card.TurnState, *card.CardState) int { return 0 }

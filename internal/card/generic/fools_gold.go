@@ -1,9 +1,6 @@
 // Fool's Gold — Generic Resource. Cost 0. Printed pitch variants: Yellow 2.
 //
 // Text: "When this is discarded, create a Gold token."
-//
-// Stub only — marked NotImplemented so the optimizer skips it. The printed effect isn't modelled;
-// Play returns 0.
 
 package generic
 
@@ -21,5 +18,6 @@ func (FoolsGoldYellow) Attack() int                               { return 0 }
 func (FoolsGoldYellow) Defense() int                              { return 0 }
 func (FoolsGoldYellow) Types() card.TypeSet                       { return foolsGoldTypes }
 func (FoolsGoldYellow) GoAgain() bool                             { return false }
+// not implemented: discard trigger creates Gold token
 func (FoolsGoldYellow) NotImplemented()                           {}
 func (FoolsGoldYellow) Play(*card.TurnState, *card.CardState) int { return 0 }

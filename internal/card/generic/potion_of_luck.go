@@ -2,9 +2,6 @@
 //
 // Text: "**Instant** - Destroy Potion of Luck: Shuffle your hand and arsenal into your deck then
 // draw that many cards."
-//
-// Stub only — marked NotImplemented so the optimizer skips it. The printed effect isn't modelled;
-// Play returns 0.
 
 package generic
 
@@ -22,5 +19,6 @@ func (PotionOfLuckBlue) Attack() int                               { return 0 }
 func (PotionOfLuckBlue) Defense() int                              { return 0 }
 func (PotionOfLuckBlue) Types() card.TypeSet                       { return potionOfLuckTypes }
 func (PotionOfLuckBlue) GoAgain() bool                             { return false }
+// not implemented: activated peek-and-rearrange top 3
 func (PotionOfLuckBlue) NotImplemented()                           {}
 func (PotionOfLuckBlue) Play(*card.TurnState, *card.CardState) int { return 0 }

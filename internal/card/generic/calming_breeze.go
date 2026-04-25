@@ -1,9 +1,6 @@
 // Calming Breeze — Generic Instant. Cost 0. Printed pitch variants: Red 1.
 //
 // Text: "The next 3 times you would be dealt damage this turn, prevent 1 of that damage."
-//
-// Stub only — marked NotImplemented so the optimizer skips it. The printed effect isn't modelled;
-// Play returns 0.
 
 package generic
 
@@ -21,5 +18,6 @@ func (CalmingBreezeRed) Attack() int                               { return 0 }
 func (CalmingBreezeRed) Defense() int                              { return 0 }
 func (CalmingBreezeRed) Types() card.TypeSet                       { return calmingBreezeTypes }
 func (CalmingBreezeRed) GoAgain() bool                             { return false }
+// not implemented: Instant 1{h} gain
 func (CalmingBreezeRed) NotImplemented()                           {}
 func (CalmingBreezeRed) Play(*card.TurnState, *card.CardState) int { return 0 }

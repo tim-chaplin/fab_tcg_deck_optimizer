@@ -2,9 +2,6 @@
 //
 // Text: "The next time you would be dealt {p} damage, prevent 4 of that damage. Create a Ponder
 // token."
-//
-// Stub only — marked NotImplemented so the optimizer skips it. The printed effect isn't modelled;
-// Play returns 0.
 
 package generic
 
@@ -22,6 +19,7 @@ func (PeaceOfMindRed) Attack() int                               { return 0 }
 func (PeaceOfMindRed) Defense() int                              { return 0 }
 func (PeaceOfMindRed) Types() card.TypeSet                       { return peaceOfMindTypes }
 func (PeaceOfMindRed) GoAgain() bool                             { return false }
+// not implemented: Instant prevent 2 damage; gated on no attacks this turn
 func (PeaceOfMindRed) NotImplemented()                           {}
 func (PeaceOfMindRed) Play(*card.TurnState, *card.CardState) int { return 0 }
 
@@ -35,6 +33,7 @@ func (PeaceOfMindYellow) Attack() int                               { return 0 }
 func (PeaceOfMindYellow) Defense() int                              { return 0 }
 func (PeaceOfMindYellow) Types() card.TypeSet                       { return peaceOfMindTypes }
 func (PeaceOfMindYellow) GoAgain() bool                             { return false }
+// not implemented: Instant prevent 2 damage; gated on no attacks this turn
 func (PeaceOfMindYellow) NotImplemented()                           {}
 func (PeaceOfMindYellow) Play(*card.TurnState, *card.CardState) int { return 0 }
 
@@ -48,5 +47,6 @@ func (PeaceOfMindBlue) Attack() int                               { return 0 }
 func (PeaceOfMindBlue) Defense() int                              { return 0 }
 func (PeaceOfMindBlue) Types() card.TypeSet                       { return peaceOfMindTypes }
 func (PeaceOfMindBlue) GoAgain() bool                             { return false }
+// not implemented: Instant prevent 2 damage; gated on no attacks this turn
 func (PeaceOfMindBlue) NotImplemented()                           {}
 func (PeaceOfMindBlue) Play(*card.TurnState, *card.CardState) int { return 0 }

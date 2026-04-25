@@ -2,9 +2,6 @@
 //
 // Text: "**Go again** Whenever you pitch a card, if you would gain exactly one {r}, instead destroy
 // Talisman of Recompense and gain {r}{r}{r}."
-//
-// Stub only — marked NotImplemented so the optimizer skips it. The printed effect isn't modelled;
-// Play returns 0.
 
 package generic
 
@@ -22,5 +19,6 @@ func (TalismanOfRecompenseYellow) Attack() int                               { r
 func (TalismanOfRecompenseYellow) Defense() int                              { return 0 }
 func (TalismanOfRecompenseYellow) Types() card.TypeSet                       { return talismanOfRecompenseTypes }
 func (TalismanOfRecompenseYellow) GoAgain() bool                             { return true }
+// not implemented: passive 1{h} on opponent damage
 func (TalismanOfRecompenseYellow) NotImplemented()                           {}
 func (TalismanOfRecompenseYellow) Play(*card.TurnState, *card.CardState) int { return 0 }

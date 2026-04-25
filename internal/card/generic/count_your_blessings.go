@@ -1,9 +1,6 @@
 // Count Your Blessings — Generic Instant. Cost 2. Printed pitch variants: Red 1, Yellow 2, Blue 3.
 //
 // Text: "Gain X{h}, where X is 3 plus the number of Count Your Blessings in your graveyard."
-//
-// Stub only — marked NotImplemented so the optimizer skips it. The printed effect isn't modelled;
-// Play returns 0.
 
 package generic
 
@@ -22,6 +19,7 @@ func (CountYourBlessingsRed) Defense() int                              { return
 func (CountYourBlessingsRed) Types() card.TypeSet                       { return countYourBlessingsTypes }
 func (CountYourBlessingsRed) GoAgain() bool                             { return false }
 func (CountYourBlessingsRed) NotSilverAgeLegal()                        {}
+// not implemented: graveyard-scaled X{h} gain (also banlisted)
 func (CountYourBlessingsRed) NotImplemented()                           {}
 func (CountYourBlessingsRed) Play(*card.TurnState, *card.CardState) int { return 0 }
 
@@ -36,6 +34,7 @@ func (CountYourBlessingsYellow) Defense() int                              { ret
 func (CountYourBlessingsYellow) Types() card.TypeSet                       { return countYourBlessingsTypes }
 func (CountYourBlessingsYellow) GoAgain() bool                             { return false }
 func (CountYourBlessingsYellow) NotSilverAgeLegal()                        {}
+// not implemented: graveyard-scaled X{h} gain (also banlisted)
 func (CountYourBlessingsYellow) NotImplemented()                           {}
 func (CountYourBlessingsYellow) Play(*card.TurnState, *card.CardState) int { return 0 }
 
@@ -50,5 +49,6 @@ func (CountYourBlessingsBlue) Defense() int                              { retur
 func (CountYourBlessingsBlue) Types() card.TypeSet                       { return countYourBlessingsTypes }
 func (CountYourBlessingsBlue) GoAgain() bool                             { return false }
 func (CountYourBlessingsBlue) NotSilverAgeLegal()                        {}
+// not implemented: graveyard-scaled X{h} gain (also banlisted)
 func (CountYourBlessingsBlue) NotImplemented()                           {}
 func (CountYourBlessingsBlue) Play(*card.TurnState, *card.CardState) int { return 0 }

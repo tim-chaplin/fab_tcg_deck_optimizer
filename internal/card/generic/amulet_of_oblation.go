@@ -3,9 +3,6 @@
 // Text: "**Go again** **Instant** - Destroy Amulet of Oblation: Until end of turn, target attack
 // action gains "If this would be put into a graveyard, instead put it on the bottom of its owner's
 // deck." Activate this ability only if a card has entered a graveyard this turn."
-//
-// Stub only — marked NotImplemented so the optimizer skips it. The printed effect isn't modelled;
-// Play returns 0.
 
 package generic
 
@@ -23,5 +20,6 @@ func (AmuletOfOblationBlue) Attack() int                               { return 
 func (AmuletOfOblationBlue) Defense() int                              { return 0 }
 func (AmuletOfOblationBlue) Types() card.TypeSet                       { return amuletOfOblationTypes }
 func (AmuletOfOblationBlue) GoAgain() bool                             { return true }
+// not implemented: Instant 'graveyard → bottom of deck' replacement effect
 func (AmuletOfOblationBlue) NotImplemented()                           {}
 func (AmuletOfOblationBlue) Play(*card.TurnState, *card.CardState) int { return 0 }

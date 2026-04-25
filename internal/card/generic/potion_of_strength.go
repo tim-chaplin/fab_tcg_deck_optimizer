@@ -1,9 +1,6 @@
 // Potion of Strength — Generic Action - Item. Cost 0. Printed pitch variants: Blue 3.
 //
 // Text: "**Action** - Destroy this: Your next attack this turn gains +2{p}. **Go again**"
-//
-// Stub only — marked NotImplemented so the optimizer skips it. The printed effect isn't modelled;
-// Play returns 0.
 
 package generic
 
@@ -21,5 +18,6 @@ func (PotionOfStrengthBlue) Attack() int                               { return 
 func (PotionOfStrengthBlue) Defense() int                              { return 0 }
 func (PotionOfStrengthBlue) Types() card.TypeSet                       { return potionOfStrengthTypes }
 func (PotionOfStrengthBlue) GoAgain() bool                             { return false }
+// not implemented: activated +2{p} on next attack
 func (PotionOfStrengthBlue) NotImplemented()                           {}
 func (PotionOfStrengthBlue) Play(*card.TurnState, *card.CardState) int { return 0 }

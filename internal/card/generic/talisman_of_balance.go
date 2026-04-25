@@ -3,9 +3,6 @@
 // Text: "**Go again** At the beginning of your end phase, if you have less cards in arsenal than an
 // opposing hero, destroy Talisman of Balance and put the top card of your deck into an empty
 // arsenal zone you control."
-//
-// Stub only — marked NotImplemented so the optimizer skips it. The printed effect isn't modelled;
-// Play returns 0.
 
 package generic
 
@@ -23,5 +20,6 @@ func (TalismanOfBalanceBlue) Attack() int                               { return
 func (TalismanOfBalanceBlue) Defense() int                              { return 0 }
 func (TalismanOfBalanceBlue) Types() card.TypeSet                       { return talismanOfBalanceTypes }
 func (TalismanOfBalanceBlue) GoAgain() bool                             { return true }
+// not implemented: passive 'gain 1{h} when you draw 4+'
 func (TalismanOfBalanceBlue) NotImplemented()                           {}
 func (TalismanOfBalanceBlue) Play(*card.TurnState, *card.CardState) int { return 0 }

@@ -2,9 +2,6 @@
 //
 // Text: "**Instant** - Destroy Potion of Ironhide: Attack action cards you own gain +1{d} this
 // turn."
-//
-// Stub only — marked NotImplemented so the optimizer skips it. The printed effect isn't modelled;
-// Play returns 0.
 
 package generic
 
@@ -22,5 +19,6 @@ func (PotionOfIronhideBlue) Attack() int                               { return 
 func (PotionOfIronhideBlue) Defense() int                              { return 0 }
 func (PotionOfIronhideBlue) Types() card.TypeSet                       { return potionOfIronhideTypes }
 func (PotionOfIronhideBlue) GoAgain() bool                             { return false }
+// not implemented: activated +2{d} on next defending card
 func (PotionOfIronhideBlue) NotImplemented()                           {}
 func (PotionOfIronhideBlue) Play(*card.TurnState, *card.CardState) int { return 0 }

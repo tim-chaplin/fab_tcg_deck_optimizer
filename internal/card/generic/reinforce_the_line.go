@@ -1,9 +1,6 @@
 // Reinforce the Line — Generic Instant. Cost 0. Printed pitch variants: Red 1, Yellow 2, Blue 3.
 //
 // Text: "Target defending attack action card gains +4{d}."
-//
-// Stub only — marked NotImplemented so the optimizer skips it. The printed effect isn't modelled;
-// Play returns 0.
 
 package generic
 
@@ -21,6 +18,7 @@ func (ReinforceTheLineRed) Attack() int                               { return 0
 func (ReinforceTheLineRed) Defense() int                              { return 0 }
 func (ReinforceTheLineRed) Types() card.TypeSet                       { return reinforceTheLineTypes }
 func (ReinforceTheLineRed) GoAgain() bool                             { return false }
+// not implemented: Instant +1{d} grant to a defending card
 func (ReinforceTheLineRed) NotImplemented()                           {}
 func (ReinforceTheLineRed) Play(*card.TurnState, *card.CardState) int { return 0 }
 
@@ -34,6 +32,7 @@ func (ReinforceTheLineYellow) Attack() int                               { retur
 func (ReinforceTheLineYellow) Defense() int                              { return 0 }
 func (ReinforceTheLineYellow) Types() card.TypeSet                       { return reinforceTheLineTypes }
 func (ReinforceTheLineYellow) GoAgain() bool                             { return false }
+// not implemented: Instant +1{d} grant to a defending card
 func (ReinforceTheLineYellow) NotImplemented()                           {}
 func (ReinforceTheLineYellow) Play(*card.TurnState, *card.CardState) int { return 0 }
 
@@ -47,5 +46,6 @@ func (ReinforceTheLineBlue) Attack() int                               { return 
 func (ReinforceTheLineBlue) Defense() int                              { return 0 }
 func (ReinforceTheLineBlue) Types() card.TypeSet                       { return reinforceTheLineTypes }
 func (ReinforceTheLineBlue) GoAgain() bool                             { return false }
+// not implemented: Instant +1{d} grant to a defending card
 func (ReinforceTheLineBlue) NotImplemented()                           {}
 func (ReinforceTheLineBlue) Play(*card.TurnState, *card.CardState) int { return 0 }

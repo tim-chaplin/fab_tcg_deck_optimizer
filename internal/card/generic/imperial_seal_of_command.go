@@ -3,9 +3,6 @@
 // Text: "**Legendary** **Action** - Destroy this: Defense reaction cards can't be played this turn.
 // If you are Royal, the next time you hit a hero this turn, destroy all cards in their arsenal.
 // **Go again**"
-//
-// Stub only — marked NotImplemented so the optimizer skips it. The printed effect isn't modelled;
-// Play returns 0.
 
 package generic
 
@@ -23,5 +20,6 @@ func (ImperialSealOfCommandRed) Attack() int                               { ret
 func (ImperialSealOfCommandRed) Defense() int                              { return 0 }
 func (ImperialSealOfCommandRed) Types() card.TypeSet                       { return imperialSealOfCommandTypes }
 func (ImperialSealOfCommandRed) GoAgain() bool                             { return false }
+// not implemented: activated 'no DR this turn' lockout + Royal-only arsenal-destroy on hit
 func (ImperialSealOfCommandRed) NotImplemented()                           {}
 func (ImperialSealOfCommandRed) Play(*card.TurnState, *card.CardState) int { return 0 }

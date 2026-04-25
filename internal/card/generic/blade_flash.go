@@ -1,9 +1,6 @@
 // Blade Flash — Generic Attack Reaction. Cost 1. Printed pitch variants: Blue 3. Defense 2.
 //
 // Text: "Target sword attack gains **go again**."
-//
-// Stub only — marked NotImplemented so the optimizer skips it. The printed effect isn't modelled;
-// Play returns 0.
 
 package generic
 
@@ -21,5 +18,6 @@ func (BladeFlashBlue) Attack() int                               { return 0 }
 func (BladeFlashBlue) Defense() int                              { return 2 }
 func (BladeFlashBlue) Types() card.TypeSet                       { return bladeFlashTypes }
 func (BladeFlashBlue) GoAgain() bool                             { return false }
+// not implemented: AR 'sword attack gains go again' grant
 func (BladeFlashBlue) NotImplemented()                           {}
 func (BladeFlashBlue) Play(*card.TurnState, *card.CardState) int { return 0 }

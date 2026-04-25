@@ -1,9 +1,6 @@
 // Nip at the Heels — Generic Attack Reaction. Cost 0. Printed pitch variants: Blue 3. Defense 3.
 //
 // Text: "Target attack with 3 or less base {p} gets +1{p}."
-//
-// Stub only — marked NotImplemented so the optimizer skips it. The printed effect isn't modelled;
-// Play returns 0.
 
 package generic
 
@@ -21,5 +18,6 @@ func (NipAtTheHeelsBlue) Attack() int                               { return 0 }
 func (NipAtTheHeelsBlue) Defense() int                              { return 3 }
 func (NipAtTheHeelsBlue) Types() card.TypeSet                       { return nipAtTheHeelsTypes }
 func (NipAtTheHeelsBlue) GoAgain() bool                             { return false }
+// not implemented: AR +1{p} buff and on-hit draw
 func (NipAtTheHeelsBlue) NotImplemented()                           {}
 func (NipAtTheHeelsBlue) Play(*card.TurnState, *card.CardState) int { return 0 }

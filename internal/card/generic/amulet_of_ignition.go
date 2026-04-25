@@ -3,9 +3,6 @@
 // Text: "**Go again** **Instant** - Destroy Amulet of Ignition: The next ability you activate this
 // turn costs {r} less. Activate this ability only if you haven't played a card or activated an
 // ability this turn."
-//
-// Stub only — marked NotImplemented so the optimizer skips it. The printed effect isn't modelled;
-// Play returns 0.
 
 package generic
 
@@ -23,5 +20,6 @@ func (AmuletOfIgnitionYellow) Attack() int                               { retur
 func (AmuletOfIgnitionYellow) Defense() int                              { return 0 }
 func (AmuletOfIgnitionYellow) Types() card.TypeSet                       { return amuletOfIgnitionTypes }
 func (AmuletOfIgnitionYellow) GoAgain() bool                             { return true }
+// not implemented: Instant 'next ability costs {r} less'
 func (AmuletOfIgnitionYellow) NotImplemented()                           {}
 func (AmuletOfIgnitionYellow) Play(*card.TurnState, *card.CardState) int { return 0 }

@@ -3,9 +3,6 @@
 // Text: "**Go again** **Attack Reaction** - Destroy Amulet of Assertiveness: Target attack gains
 // "When this hits, banish the top card of your deck. If it's an attack action card, you may play it
 // this turn." Activate this ability only if you have 4 or more cards in hand."
-//
-// Stub only — marked NotImplemented so the optimizer skips it. The printed effect isn't modelled;
-// Play returns 0.
 
 package generic
 
@@ -23,5 +20,6 @@ func (AmuletOfAssertivenessYellow) Attack() int                               { 
 func (AmuletOfAssertivenessYellow) Defense() int                              { return 0 }
 func (AmuletOfAssertivenessYellow) Types() card.TypeSet                       { return amuletOfAssertivenessTypes }
 func (AmuletOfAssertivenessYellow) GoAgain() bool                             { return true }
+// not implemented: AR 'banish-top-of-deck-on-hit' grant; gated on hand size
 func (AmuletOfAssertivenessYellow) NotImplemented()                           {}
 func (AmuletOfAssertivenessYellow) Play(*card.TurnState, *card.CardState) int { return 0 }

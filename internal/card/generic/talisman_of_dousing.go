@@ -1,9 +1,6 @@
 // Talisman of Dousing — Generic Action - Item. Cost 0. Printed pitch variants: Yellow 2.
 //
 // Text: "**Go again** **Spellvoid 1**"
-//
-// Stub only — marked NotImplemented so the optimizer skips it. The printed effect isn't modelled;
-// Play returns 0.
 
 package generic
 
@@ -21,5 +18,6 @@ func (TalismanOfDousingYellow) Attack() int                               { retu
 func (TalismanOfDousingYellow) Defense() int                              { return 0 }
 func (TalismanOfDousingYellow) Types() card.TypeSet                       { return talismanOfDousingTypes }
 func (TalismanOfDousingYellow) GoAgain() bool                             { return true }
+// not implemented: passive prevent 1 arcane damage per turn
 func (TalismanOfDousingYellow) NotImplemented()                           {}
 func (TalismanOfDousingYellow) Play(*card.TurnState, *card.CardState) int { return 0 }

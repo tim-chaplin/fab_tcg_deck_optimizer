@@ -2,9 +2,6 @@
 //
 // Text: "Reveal the top card of your deck. Prevent the next X arcane damage that would be dealt to
 // your hero this turn, where X is 6 minus the pitch value of the card revealed this way."
-//
-// Stub only — marked NotImplemented so the optimizer skips it. The printed effect isn't modelled;
-// Play returns 0.
 
 package generic
 
@@ -22,6 +19,7 @@ func (EirinasPrayerRed) Attack() int                               { return 0 }
 func (EirinasPrayerRed) Defense() int                              { return 0 }
 func (EirinasPrayerRed) Types() card.TypeSet                       { return eirinasPrayerTypes }
 func (EirinasPrayerRed) GoAgain() bool                             { return false }
+// not implemented: Instant prevent 2 damage to a non-hero target
 func (EirinasPrayerRed) NotImplemented()                           {}
 func (EirinasPrayerRed) Play(*card.TurnState, *card.CardState) int { return 0 }
 
@@ -35,6 +33,7 @@ func (EirinasPrayerYellow) Attack() int                               { return 0
 func (EirinasPrayerYellow) Defense() int                              { return 0 }
 func (EirinasPrayerYellow) Types() card.TypeSet                       { return eirinasPrayerTypes }
 func (EirinasPrayerYellow) GoAgain() bool                             { return false }
+// not implemented: Instant prevent 2 damage to a non-hero target
 func (EirinasPrayerYellow) NotImplemented()                           {}
 func (EirinasPrayerYellow) Play(*card.TurnState, *card.CardState) int { return 0 }
 
@@ -48,5 +47,6 @@ func (EirinasPrayerBlue) Attack() int                               { return 0 }
 func (EirinasPrayerBlue) Defense() int                              { return 0 }
 func (EirinasPrayerBlue) Types() card.TypeSet                       { return eirinasPrayerTypes }
 func (EirinasPrayerBlue) GoAgain() bool                             { return false }
+// not implemented: Instant prevent 2 damage to a non-hero target
 func (EirinasPrayerBlue) NotImplemented()                           {}
 func (EirinasPrayerBlue) Play(*card.TurnState, *card.CardState) int { return 0 }

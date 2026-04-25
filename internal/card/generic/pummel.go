@@ -3,9 +3,6 @@
 //
 // Text: "Choose 1; - Target club or hammer weapon attack gains +4{p}. - Target attack action card
 // with cost 2 or more gets +4{p} and "When this hits a hero, they discard a card.""
-//
-// Stub only — marked NotImplemented so the optimizer skips it. The printed effect isn't modelled;
-// Play returns 0.
 
 package generic
 
@@ -23,6 +20,7 @@ func (PummelRed) Attack() int                               { return 0 }
 func (PummelRed) Defense() int                              { return 2 }
 func (PummelRed) Types() card.TypeSet                       { return pummelTypes }
 func (PummelRed) GoAgain() bool                             { return false }
+// not implemented: AR 'destroy target item with ≤2 counters' rider
 func (PummelRed) NotImplemented()                           {}
 func (PummelRed) Play(*card.TurnState, *card.CardState) int { return 0 }
 
@@ -36,6 +34,7 @@ func (PummelYellow) Attack() int                               { return 0 }
 func (PummelYellow) Defense() int                              { return 2 }
 func (PummelYellow) Types() card.TypeSet                       { return pummelTypes }
 func (PummelYellow) GoAgain() bool                             { return false }
+// not implemented: AR 'destroy target item with ≤2 counters' rider
 func (PummelYellow) NotImplemented()                           {}
 func (PummelYellow) Play(*card.TurnState, *card.CardState) int { return 0 }
 
@@ -49,5 +48,6 @@ func (PummelBlue) Attack() int                               { return 0 }
 func (PummelBlue) Defense() int                              { return 2 }
 func (PummelBlue) Types() card.TypeSet                       { return pummelTypes }
 func (PummelBlue) GoAgain() bool                             { return false }
+// not implemented: AR 'destroy target item with ≤2 counters' rider
 func (PummelBlue) NotImplemented()                           {}
 func (PummelBlue) Play(*card.TurnState, *card.CardState) int { return 0 }

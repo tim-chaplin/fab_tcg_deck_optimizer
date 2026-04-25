@@ -2,9 +2,6 @@
 //
 // Text: "Choose 1 or both; - Remove all counters from target item token. - Remove all counters from
 // target aura token."
-//
-// Stub only — marked NotImplemented so the optimizer skips it. The printed effect isn't modelled;
-// Play returns 0.
 
 package generic
 
@@ -22,5 +19,6 @@ func (DestructiveTendenciesBlue) Attack() int                               { re
 func (DestructiveTendenciesBlue) Defense() int                              { return 0 }
 func (DestructiveTendenciesBlue) Types() card.TypeSet                       { return destructiveTendenciesTypes }
 func (DestructiveTendenciesBlue) GoAgain() bool                             { return false }
+// not implemented: Instant remove counters from item / aura tokens
 func (DestructiveTendenciesBlue) NotImplemented()                           {}
 func (DestructiveTendenciesBlue) Play(*card.TurnState, *card.CardState) int { return 0 }

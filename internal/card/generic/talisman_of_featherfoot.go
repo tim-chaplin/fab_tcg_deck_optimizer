@@ -2,9 +2,6 @@
 //
 // Text: "**Go again** When an attack you control gains exactly +1{p} from an effect during the
 // reaction step, destroy Talisman of Featherfoot and the attack gains **go again**."
-//
-// Stub only — marked NotImplemented so the optimizer skips it. The printed effect isn't modelled;
-// Play returns 0.
 
 package generic
 
@@ -22,5 +19,6 @@ func (TalismanOfFeatherfootYellow) Attack() int                               { 
 func (TalismanOfFeatherfootYellow) Defense() int                              { return 0 }
 func (TalismanOfFeatherfootYellow) Types() card.TypeSet                       { return talismanOfFeatherfootTypes }
 func (TalismanOfFeatherfootYellow) GoAgain() bool                             { return true }
+// not implemented: passive 'first attack each turn gains evade'
 func (TalismanOfFeatherfootYellow) NotImplemented()                           {}
 func (TalismanOfFeatherfootYellow) Play(*card.TurnState, *card.CardState) int { return 0 }

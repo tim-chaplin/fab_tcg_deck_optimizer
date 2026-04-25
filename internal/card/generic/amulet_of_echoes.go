@@ -2,9 +2,6 @@
 //
 // Text: "**Go again** **Instant** - Destroy Amulet of Echoes: Target hero discards 2 cards.
 // Activate this ability only if they have played 2 or more cards with the same name this turn."
-//
-// Stub only — marked NotImplemented so the optimizer skips it. The printed effect isn't modelled;
-// Play returns 0.
 
 package generic
 
@@ -22,5 +19,6 @@ func (AmuletOfEchoesBlue) Attack() int                               { return 0 
 func (AmuletOfEchoesBlue) Defense() int                              { return 0 }
 func (AmuletOfEchoesBlue) Types() card.TypeSet                       { return amuletOfEchoesTypes }
 func (AmuletOfEchoesBlue) GoAgain() bool                             { return true }
+// not implemented: Instant 'discard 2' against repeat-name plays
 func (AmuletOfEchoesBlue) NotImplemented()                           {}
 func (AmuletOfEchoesBlue) Play(*card.TurnState, *card.CardState) int { return 0 }

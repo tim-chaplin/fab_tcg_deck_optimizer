@@ -2,9 +2,6 @@
 //
 // Text: "**Go again** When you play a card from your banished zone, destroy Talisman of Cremation
 // and name a card. Banish all cards with the chosen name from each opposing hero's graveyard."
-//
-// Stub only — marked NotImplemented so the optimizer skips it. The printed effect isn't modelled;
-// Play returns 0.
 
 package generic
 
@@ -22,5 +19,6 @@ func (TalismanOfCremationBlue) Attack() int                               { retu
 func (TalismanOfCremationBlue) Defense() int                              { return 0 }
 func (TalismanOfCremationBlue) Types() card.TypeSet                       { return talismanOfCremationTypes }
 func (TalismanOfCremationBlue) GoAgain() bool                             { return true }
+// not implemented: passive 'banish on graveyard entry'
 func (TalismanOfCremationBlue) NotImplemented()                           {}
 func (TalismanOfCremationBlue) Play(*card.TurnState, *card.CardState) int { return 0 }
