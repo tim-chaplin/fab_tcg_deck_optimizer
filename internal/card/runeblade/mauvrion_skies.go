@@ -51,7 +51,7 @@ func mauvrionSkiesPlay(s *card.TurnState, source card.Card, n int) int {
 		Source:  source,
 		Matches: mauvrionTargetMatches,
 		Handler: func(s *card.TurnState, target *card.CardState) int {
-			if card.LikelyToHit(target.Card.Attack(), target.EffectiveDominate()) {
+			if card.LikelyToHit(target) {
 				return s.CreateRunechants(n)
 			}
 			return 0

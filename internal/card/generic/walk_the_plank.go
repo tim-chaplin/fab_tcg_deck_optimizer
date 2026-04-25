@@ -54,7 +54,7 @@ func (c WalkThePlankBlue) Play(s *card.TurnState, self *card.CardState) int { re
 // walkThePlankDamage is a breadcrumb for the on-hit "freeze target" rider — Pirate-specific,
 // not modelled yet (see TODO.md).
 func walkThePlankDamage(attack int, self *card.CardState) int {
-	if card.LikelyToHit(attack, self.EffectiveDominate()) {
+	if card.LikelyToHit(self) {
 		// TODO: model on-hit Pirate-target freeze rider.
 	}
 	return attack

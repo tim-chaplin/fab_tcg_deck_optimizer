@@ -27,7 +27,6 @@ func TestForceSight_NonAttackInRemainingFizzles(t *testing.T) {
 // TestForceSight_NextAttackReturnsBonus: first attack-action triggers the per-variant bonus
 // (Red +3, Yellow +2, Blue +1).
 func TestForceSight_NextAttackReturnsBonus(t *testing.T) {
-	s := card.TurnState{CardsRemaining: []*card.CardState{{Card: stubGenericAttack(0, 0)}}}
 	cases := []struct {
 		c    card.Card
 		want int
@@ -37,8 +36,13 @@ func TestForceSight_NextAttackReturnsBonus(t *testing.T) {
 		{ForceSightBlue{}, 1},
 	}
 	for _, tc := range cases {
-		if got := tc.c.Play(&s, &card.CardState{}); got != tc.want {
-			t.Errorf("%s: Play() = %d, want %d", tc.c.Name(), got, tc.want)
+		target := &card.CardState{Card: stubGenericAttack(0, 0)}
+		s := card.TurnState{CardsRemaining: []*card.CardState{target}}
+		if got := tc.c.Play(&s, &card.CardState{}); got != 0 {
+			t.Errorf("%s: Play() = %d, want 0 (granter returns 0; +N rides on target's BonusAttack)", tc.c.Name(), got)
+		}
+		if target.BonusAttack != tc.want {
+			t.Errorf("%s: target BonusAttack = %d, want %d", tc.c.Name(), target.BonusAttack, tc.want)
 		}
 	}
 }

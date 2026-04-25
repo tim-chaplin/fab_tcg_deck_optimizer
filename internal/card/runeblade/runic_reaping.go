@@ -72,7 +72,7 @@ func runicReapingPlay(s *card.TurnState, n int) int {
 			break
 		}
 	}
-	if card.LikelyToHit(target.Card.Attack(), target.EffectiveDominate()) {
+	if card.LikelyToHit(target) {
 		return s.CreateRunechants(n) + bonus
 	}
 	return bonus

@@ -28,6 +28,17 @@ type CardState struct {
 	// extensions stay false. Cards gate "if this is played from arsenal" riders on
 	// self.FromArsenal.
 	FromArsenal bool
+	// BonusAttack is the +{p} this card has accumulated from prior cards' "next attack +N{p}"
+	// riders. Granters set pc.BonusAttack += N on the matching CardState in CardsRemaining
+	// instead of returning the bonus from their own Play return — that way the damage is
+	// attributed to the attack receiving the buff, and EffectiveAttack folds it into
+	// hit-likelihood checks (LikelyToHit) so a +N buff bumps a 4-power attack into the 5+
+	// dominate window or a 6 into the unblockable 7. The solver applies BonusAttack to every
+	// CardState's contribution unconditionally; deciding which CardStates are legal targets
+	// (attack actions, weapons, future card types) is the grantor's job, not the solver's.
+	// Negative bonuses (defender-side -N{p} debuffs) clamp at 0 because FaB attack power
+	// can't go below 0.
+	BonusAttack int
 }
 
 // EffectiveGoAgain reports whether this card has Go again this turn — from printed text or a
@@ -41,6 +52,20 @@ func (p *CardState) EffectiveGoAgain() bool {
 // this card's own Play when a conditional "gains dominate" clause fires).
 func (p *CardState) EffectiveDominate() bool {
 	return p.GrantedDominate || HasDominate(p.Card)
+}
+
+// EffectiveAttack returns the card's printed Attack() plus any granted BonusAttack from prior
+// "next attack action card gains +N{p}" riders, clamped at 0. An attack's power can't be
+// reduced below 0 in FaB, so a -2 grant on a 1-power attack resolves as a 0-power attack
+// (not -1). Cards with "if this hits" clauses should pass this into LikelyToHit so the rider
+// fires off the post-clamp value — a +1 grant bumps a base-3 attack to 4 (the 1/4/7 likely-to-
+// hit window), and a -3 grant on a 3-power attack drops it to 0 (no rider fires).
+func (p *CardState) EffectiveAttack() int {
+	n := p.Card.Attack() + p.BonusAttack
+	if n < 0 {
+		return 0
+	}
+	return n
 }
 
 // Hero is the minimal hero profile card effects need. Narrower than hero.Hero to avoid an

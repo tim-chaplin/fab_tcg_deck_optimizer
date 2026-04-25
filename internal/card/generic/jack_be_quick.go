@@ -28,7 +28,7 @@ func (c JackBeQuickRed) Play(s *card.TurnState, self *card.CardState) int { retu
 // jackBeQuickDamage is a breadcrumb for the on-hit "unfreeze and steal an ally" rider — not
 // modelled yet (see TODO.md). The LikelyToHit call marks where the rider value would plug in.
 func jackBeQuickDamage(attack int, self *card.CardState) int {
-	if card.LikelyToHit(attack, self.EffectiveDominate()) {
+	if card.LikelyToHit(self) {
 		// TODO: model on-hit steal-ally rider.
 	}
 	return attack

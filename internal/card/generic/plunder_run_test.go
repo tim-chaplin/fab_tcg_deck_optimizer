@@ -24,9 +24,10 @@ func TestPlunderRun_NonAttackInRemainingFizzles(t *testing.T) {
 	}
 }
 
-// TestPlunderRun_NextAttackReturnsBonus: arsenal-played copy with a queued attack action
-// triggers the per-variant bonus (Red +3, Yellow +2, Blue +1).
-func TestPlunderRun_NextAttackReturnsBonus(t *testing.T) {
+// TestPlunderRun_NextAttackGrantsBonusAttack: arsenal-played copy with a queued attack
+// action grants the per-variant bonus (Red +3, Yellow +2, Blue +1) onto the target's
+// BonusAttack — granter returns 0; the +N attributes to the buffed attack.
+func TestPlunderRun_NextAttackGrantsBonusAttack(t *testing.T) {
 	cases := []struct {
 		c    card.Card
 		want int
@@ -36,10 +37,14 @@ func TestPlunderRun_NextAttackReturnsBonus(t *testing.T) {
 		{PlunderRunBlue{}, 1},
 	}
 	for _, tc := range cases {
-		s := card.TurnState{CardsRemaining: []*card.CardState{{Card: stubGenericAttack(0, 0)}}}
+		target := &card.CardState{Card: stubGenericAttack(0, 0)}
+		s := card.TurnState{CardsRemaining: []*card.CardState{target}}
 		self := &card.CardState{Card: tc.c, FromArsenal: true}
-		if got := tc.c.Play(&s, self); got != tc.want {
-			t.Errorf("%s: Play() = %d, want %d", tc.c.Name(), got, tc.want)
+		if got := tc.c.Play(&s, self); got != 0 {
+			t.Errorf("%s: Play() = %d, want 0 (granter returns 0; +N rides on target's BonusAttack)", tc.c.Name(), got)
+		}
+		if target.BonusAttack != tc.want {
+			t.Errorf("%s: target BonusAttack = %d, want %d", tc.c.Name(), target.BonusAttack, tc.want)
 		}
 	}
 }

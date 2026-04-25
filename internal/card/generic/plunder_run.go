@@ -29,7 +29,7 @@ func (PlunderRunRed) Play(s *card.TurnState, self *card.CardState) int {
 	if !self.FromArsenal {
 		return 0
 	}
-	return nextAttackActionBonus(s, 3)
+	return grantNextAttackActionBonus(s, 3)
 }
 
 type PlunderRunYellow struct{}
@@ -47,7 +47,7 @@ func (PlunderRunYellow) Play(s *card.TurnState, self *card.CardState) int {
 	if !self.FromArsenal {
 		return 0
 	}
-	return nextAttackActionBonus(s, 2)
+	return grantNextAttackActionBonus(s, 2)
 }
 
 type PlunderRunBlue struct{}
@@ -65,5 +65,5 @@ func (PlunderRunBlue) Play(s *card.TurnState, self *card.CardState) int {
 	if !self.FromArsenal {
 		return 0
 	}
-	return nextAttackActionBonus(s, 1)
+	return grantNextAttackActionBonus(s, 1)
 }

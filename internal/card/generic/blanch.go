@@ -54,7 +54,7 @@ func (c BlanchBlue) Play(s *card.TurnState, self *card.CardState) int { return b
 // blanchDamage is a breadcrumb for the on-hit "cards they own lose all colors" rider — not
 // modelled yet (see TODO.md).
 func blanchDamage(attack int, self *card.CardState) int {
-	if card.LikelyToHit(attack, self.EffectiveDominate()) {
+	if card.LikelyToHit(self) {
 		// TODO: model on-hit opponent-card color-strip rider.
 	}
 	return attack

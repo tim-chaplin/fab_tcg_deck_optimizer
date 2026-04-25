@@ -55,7 +55,7 @@ func (c WreckHavocBlue) Play(s *card.TurnState, self *card.CardState) int { retu
 // wreckHavocDamage is a breadcrumb for the on-hit "DR lockout + arsenal-face-up / banish DR"
 // rider — not modelled yet (see TODO.md). LikelyToHit marks where the rider value would plug in.
 func wreckHavocDamage(attack int, self *card.CardState) int {
-	if card.LikelyToHit(attack, self.EffectiveDominate()) {
+	if card.LikelyToHit(self) {
 		// TODO: model on-hit arsenal manipulation rider.
 	}
 	return attack

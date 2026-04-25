@@ -26,7 +26,7 @@ func (c PursueToThePitsOfDespairRed) Play(s *card.TurnState, self *card.CardStat
 // pursueToThePitsOfDespairDamage is a breadcrumb for the on-hit "mark the hero" rider — marks
 // aren't tracked (see TODO.md).
 func pursueToThePitsOfDespairDamage(attack int, self *card.CardState) int {
-	if card.LikelyToHit(attack, self.EffectiveDominate()) {
+	if card.LikelyToHit(self) {
 		// TODO: model on-hit mark rider.
 	}
 	return attack

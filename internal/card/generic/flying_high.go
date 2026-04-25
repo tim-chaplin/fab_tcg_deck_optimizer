@@ -9,20 +9,21 @@ import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 
 var flyingHighTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction)
 
-// flyingHighPlay grants go again to the next attack action card scheduled later this turn. If
-// that target's pitch matches matchPitch (this card's own pitch), we also credit +1 power as a
-// bonus — the '+1{p} if it's <matching color>' rider.
+// flyingHighPlay grants go again to the next attack action card scheduled later this turn.
+// If that target's pitch matches matchPitch (this card's own pitch), we also add +1 to its
+// BonusAttack — the "+1{p} if it's <matching color>" rider — so EffectiveAttack picks the
+// buff up in any LikelyToHit check on the buffed attack. Returns 0; the +1 attributes to
+// the target's slot, not Flying High's.
 func flyingHighPlay(s *card.TurnState, matchPitch int) int {
 	for _, pc := range s.CardsRemaining {
 		if !pc.Card.Types().IsAttackAction() {
 			continue
 		}
-		bonus := 0
-		if pc.Card.Pitch() == matchPitch {
-			bonus = 1
-		}
 		pc.GrantedGoAgain = true
-		return bonus
+		if pc.Card.Pitch() == matchPitch {
+			pc.BonusAttack++
+		}
+		return 0
 	}
 	return 0
 }

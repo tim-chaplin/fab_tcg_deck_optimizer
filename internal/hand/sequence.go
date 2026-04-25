@@ -401,8 +401,9 @@ func (ctx *sequenceContext) playSequence(order []card.Card, perCardOut, perCardT
 }
 
 // playSequenceWithMeta runs the permutation currently held in ctx.bufs.pcBuf[:n] with
-// aligned permMeta[:n]. CardState (Card + FromArsenal) persists across permutations, so only
-// GrantedGoAgain needs a per-permutation reset — Play is the only thing that flips it.
+// aligned permMeta[:n]. CardState (Card + FromArsenal) persists across permutations, so any
+// field a prior card's Play flips on a future card needs a per-permutation reset:
+// GrantedGoAgain (next-attack go-again grants) and BonusAttack (next-attack +N{p} grants).
 //
 // Per-card output attribution:
 //   - perCardOut[i] = card's own Play return (plus any EphemeralAttackTrigger damage routed
@@ -418,6 +419,7 @@ func (ctx *sequenceContext) playSequenceWithMeta(n int, perCardOut, perCardTrigg
 	meta := ctx.bufs.permMeta[:n]
 	for i := 0; i < n; i++ {
 		pcBuf[i].GrantedGoAgain = false
+		pcBuf[i].BonusAttack = 0
 		if perCardOut != nil {
 			perCardOut[i] = 0
 		}
@@ -499,9 +501,27 @@ func (ctx *sequenceContext) playSequenceWithMeta(n int, perCardOut, perCardTrigg
 			// source via SourceIndex, so perCardOut is updated in place inside the helper.
 			ephemeralDmg = fireEphemeralAttackTriggers(state, pc, perCardOut)
 		}
-		damage += playDmg + triggerDmg + auraTriggerDmg + ephemeralDmg
+		// BonusAttack is granted by a prior card's "next attack +N{p}" rider. The grant is
+		// folded in here (not by the target's Play) so the +N is attributed to the attack
+		// receiving the buff rather than the granter, and so any "if this hits" rider
+		// inside the target's Play can read self.EffectiveAttack() consistently. Applied
+		// unconditionally — picking who can legally receive a +N{p} grant is the grantor's
+		// responsibility (it scans CardsRemaining and matches the appropriate type, e.g.
+		// attack actions for Come to Fight, weapon swings for Brandish), and a future card
+		// that grants damage to a non-attack source shouldn't have to fight a solver-side
+		// type gate. Clamped at 0 because FaB attack-power buffs can't drive an attack
+		// below 0 power (a -3 grant on a 1-power attack resolves as a 0-power attack,
+		// not -2). We can't simply reuse pc.EffectiveAttack() here because playDmg is the
+		// card's full Play return — printed power plus any rider the card already folded
+		// in (e.g. Blow for a Blow's on-hit +1) — and EffectiveAttack only sees printed
+		// power, so substituting it would drop the rider component.
+		cardContrib := playDmg + pc.BonusAttack
+		if cardContrib < 0 {
+			cardContrib = 0
+		}
+		damage += cardContrib + triggerDmg + auraTriggerDmg + ephemeralDmg
 		if perCardOut != nil {
-			perCardOut[i] = float64(playDmg)
+			perCardOut[i] = float64(cardContrib)
 		}
 		if perCardTriggerOut != nil {
 			perCardTriggerOut[i] = float64(triggerDmg)

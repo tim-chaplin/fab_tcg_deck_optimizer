@@ -44,7 +44,7 @@ func popsThisTurn(s *card.TurnState, attackActionOnly bool) bool {
 			runechants = s.Runechants
 			firstAttacker = false
 		}
-		if card.LikelyToHit(pc.Card.Attack(), pc.EffectiveDominate()) || card.LikelyToHit(runechants, false) {
+		if card.LikelyToHit(pc) || card.LikelyDamageHits(runechants, false) {
 			return true
 		}
 	}

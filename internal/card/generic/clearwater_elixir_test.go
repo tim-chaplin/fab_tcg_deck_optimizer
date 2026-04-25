@@ -22,10 +22,16 @@ func TestClearwaterElixir_NonAttackInRemainingFizzles(t *testing.T) {
 	}
 }
 
-// TestClearwaterElixir_NextAttackReturnsBonus: first attack-action triggers +3.
-func TestClearwaterElixir_NextAttackReturnsBonus(t *testing.T) {
-	s := card.TurnState{CardsRemaining: []*card.CardState{{Card: stubGenericAttack(0, 0)}}}
-	if got := (ClearwaterElixirRed{}).Play(&s, &card.CardState{}); got != 3 {
-		t.Errorf("Play() = %d, want 3", got)
+// TestClearwaterElixir_NextAttackGrantsBonusAttack: first attack-action picks up +3 on its
+// BonusAttack so EffectiveAttack folds it into LikelyToHit and the solver routes the bonus
+// to the buffed attack's chain slot. Granter returns 0 — the +3 attributes to the target.
+func TestClearwaterElixir_NextAttackGrantsBonusAttack(t *testing.T) {
+	target := &card.CardState{Card: stubGenericAttack(0, 0)}
+	s := card.TurnState{CardsRemaining: []*card.CardState{target}}
+	if got := (ClearwaterElixirRed{}).Play(&s, &card.CardState{}); got != 0 {
+		t.Errorf("Play() = %d, want 0 (granter returns 0; +N rides on target's BonusAttack)", got)
+	}
+	if target.BonusAttack != 3 {
+		t.Errorf("target BonusAttack = %d, want 3", target.BonusAttack)
 	}
 }

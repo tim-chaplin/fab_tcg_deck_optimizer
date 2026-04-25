@@ -54,7 +54,7 @@ func (c DestructiveDeliberationBlue) Play(s *card.TurnState, self *card.CardStat
 // destructiveDeliberationDamage is a breadcrumb for the on-hit "create a Ponder token" rider —
 // Ponder tokens aren't tracked (see TODO.md).
 func destructiveDeliberationDamage(attack int, self *card.CardState) int {
-	if card.LikelyToHit(attack, self.EffectiveDominate()) {
+	if card.LikelyToHit(self) {
 		// TODO: model on-hit Ponder token creation rider.
 	}
 	return attack

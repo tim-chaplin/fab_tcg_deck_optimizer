@@ -26,7 +26,7 @@ func (c PursueToTheEdgeOfOblivionRed) Play(s *card.TurnState, self *card.CardSta
 // pursueToTheEdgeOfOblivionDamage is a breadcrumb for the on-hit "mark the hero" rider — marks
 // aren't tracked (see TODO.md).
 func pursueToTheEdgeOfOblivionDamage(attack int, self *card.CardState) int {
-	if card.LikelyToHit(attack, self.EffectiveDominate()) {
+	if card.LikelyToHit(self) {
 		// TODO: model on-hit mark rider.
 	}
 	return attack
