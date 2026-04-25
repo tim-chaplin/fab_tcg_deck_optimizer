@@ -117,8 +117,8 @@ func TestRunEval_PrintOnlyLeavesFileUnchanged(t *testing.T) {
 		t.Fatalf("read seeded json: %v", err)
 	}
 
-	_, stderr := captureEvalOutput(t, func() {
-		runEval(path, 50, 0, 2, 1, deckformat.SilverAge, true, true)
+	stdout, stderr := captureEvalOutput(t, func() {
+		runEval(path, 50, 0, 2, 1, deckformat.SilverAge, true, false)
 	})
 	afterRead, err := os.ReadFile(path)
 	if err != nil {
@@ -133,6 +133,14 @@ func TestRunEval_PrintOnlyLeavesFileUnchanged(t *testing.T) {
 	// the rewrite-line marker.
 	if strings.Contains(stderr, "rewriting") {
 		t.Errorf("-print-only should not log a rewrite; got stderr:\n%s", stderr)
+	}
+	// -print-only must render the same dump as a fresh sim — including the marginal-value
+	// table, which round-trips through PerCardMarginal in the JSON.
+	if !strings.Contains(stdout, "Card value") {
+		t.Errorf("-print-only output missing the per-card value table; PerCardMarginal isn't round-tripping through deckio:\n%s", stdout)
+	}
+	if !strings.Contains(stdout, "marginal") {
+		t.Errorf("-print-only output missing the marginal column header:\n%s", stdout)
 	}
 }
 

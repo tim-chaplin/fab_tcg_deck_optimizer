@@ -64,15 +64,16 @@ func sortedStrings(ss []string) []string {
 
 func statsToJSON(s deck.Stats) StatsJSON {
 	return StatsJSON{
-		Runs:        s.Runs,
-		Hands:       s.Hands,
-		TotalValue:  s.TotalValue,
-		Avg:         s.Mean(),
-		FirstCycle:  s.FirstCycle,
-		SecondCycle: s.SecondCycle,
-		Best:        bestTurnToJSON(s.Best),
-		PerCard:     perCardToJSON(s.PerCard),
-		Histogram:   s.Histogram,
+		Runs:            s.Runs,
+		Hands:           s.Hands,
+		TotalValue:      s.TotalValue,
+		Avg:             s.Mean(),
+		FirstCycle:      s.FirstCycle,
+		SecondCycle:     s.SecondCycle,
+		Best:            bestTurnToJSON(s.Best),
+		PerCard:         perCardToJSON(s.PerCard),
+		PerCardMarginal: perCardMarginalToJSON(s.PerCardMarginal),
+		Histogram:       s.Histogram,
 	}
 }
 
@@ -100,6 +101,33 @@ func perCardToJSON(m map[card.ID]deck.CardPlayStats) []CardPlayStatsJSON {
 		ni, nj := out[i].Plays+out[i].Pitches, out[j].Plays+out[j].Pitches
 		if ni != nj {
 			return ni > nj
+		}
+		return out[i].Card < out[j].Card
+	})
+	return out
+}
+
+// perCardMarginalToJSON flattens the card.ID-keyed marginal-stats map into a slice sorted
+// by Marginal descending, then by card name — matching the on-screen card-value table's
+// order so the JSON and the printout read in lockstep.
+func perCardMarginalToJSON(m map[card.ID]deck.CardMarginalStats) []CardMarginalStatsJSON {
+	if len(m) == 0 {
+		return nil
+	}
+	out := make([]CardMarginalStatsJSON, 0, len(m))
+	for id, s := range m {
+		out = append(out, CardMarginalStatsJSON{
+			Card:         cards.Get(id).Name(),
+			PresentTotal: s.PresentTotal,
+			PresentHands: s.PresentHands,
+			AbsentTotal:  s.AbsentTotal,
+			AbsentHands:  s.AbsentHands,
+			Marginal:     s.Marginal(),
+		})
+	}
+	sort.Slice(out, func(i, j int) bool {
+		if out[i].Marginal != out[j].Marginal {
+			return out[i].Marginal > out[j].Marginal
 		}
 		return out[i].Card < out[j].Card
 	})

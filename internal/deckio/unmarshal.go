@@ -56,6 +56,10 @@ func fromJSON(dj *DeckJSON) (*deck.Deck, error) {
 	if err != nil {
 		return nil, err
 	}
+	perCardMarginal, err := perCardMarginalFromJSON(dj.Stats.PerCardMarginal)
+	if err != nil {
+		return nil, err
+	}
 	d := deck.New(h, weapons, cs)
 	// Sideboard and Equipment are name-only lists — the optimizer doesn't read them and the
 	// registry isn't consulted (so the user can list equipment pieces or any other items
@@ -67,14 +71,15 @@ func fromJSON(dj *DeckJSON) (*deck.Deck, error) {
 		d.Equipment = append([]string(nil), dj.Equipment...)
 	}
 	d.Stats = deck.Stats{
-		Runs:        dj.Stats.Runs,
-		Hands:       dj.Stats.Hands,
-		TotalValue:  dj.Stats.TotalValue,
-		FirstCycle:  dj.Stats.FirstCycle,
-		SecondCycle: dj.Stats.SecondCycle,
-		Best:        best,
-		PerCard:     perCard,
-		Histogram:   dj.Stats.Histogram,
+		Runs:            dj.Stats.Runs,
+		Hands:           dj.Stats.Hands,
+		TotalValue:      dj.Stats.TotalValue,
+		FirstCycle:      dj.Stats.FirstCycle,
+		SecondCycle:     dj.Stats.SecondCycle,
+		Best:            best,
+		PerCard:         perCard,
+		PerCardMarginal: perCardMarginal,
+		Histogram:       dj.Stats.Histogram,
 	}
 	return d, nil
 }
@@ -93,6 +98,26 @@ func perCardFromJSON(entries []CardPlayStatsJSON) (map[card.ID]deck.CardPlayStat
 			Plays:             e.Plays,
 			Pitches:           e.Pitches,
 			TotalContribution: e.TotalContribution,
+		}
+	}
+	return out, nil
+}
+
+func perCardMarginalFromJSON(entries []CardMarginalStatsJSON) (map[card.ID]deck.CardMarginalStats, error) {
+	if len(entries) == 0 {
+		return nil, nil
+	}
+	out := make(map[card.ID]deck.CardMarginalStats, len(entries))
+	for _, e := range entries {
+		id, ok := cards.ByName(e.Card)
+		if !ok {
+			return nil, fmt.Errorf("deckio: unknown card %q in per_card_marginal stats", e.Card)
+		}
+		out[id] = deck.CardMarginalStats{
+			PresentTotal: e.PresentTotal,
+			PresentHands: e.PresentHands,
+			AbsentTotal:  e.AbsentTotal,
+			AbsentHands:  e.AbsentHands,
 		}
 	}
 	return out, nil

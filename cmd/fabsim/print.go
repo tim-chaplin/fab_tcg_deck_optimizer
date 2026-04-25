@@ -224,6 +224,7 @@ func printCardValues(d *deck.Deck) {
 
 	fmt.Println()
 	fmt.Println("Card value (marginal = mean turn value with vs without the card in hand or arsenal; avg = role-based contribution per appearance):")
+	fmt.Println()
 
 	// Column widths take the larger of header label and longest data string so the dividers
 	// line up regardless of deck. Card column also widens for the "Card" header on absurdly

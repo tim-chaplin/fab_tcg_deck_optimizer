@@ -65,6 +65,57 @@ func TestMarshalUnmarshalRoundTrip(t *testing.T) {
 	}
 }
 
+// TestRoundTrip_PreservesPerCardMarginal pins that the per-card marginal-stats accumulator
+// (PresentTotal/PresentHands and AbsentTotal/AbsentHands per unique card.ID) survives a
+// Marshal/Unmarshal so a re-loaded deck can render the marginal-value table without a
+// fresh sim. Compared via the public Marginal() so a regression in any of the four
+// underlying fields surfaces.
+func TestRoundTrip_PreservesPerCardMarginal(t *testing.T) {
+	rng := rand.New(rand.NewSource(13))
+	d := deck.Random(hero.Viserai{}, 40, 2, rng, nil)
+	d.Evaluate(50, 4, rng)
+	if len(d.Stats.PerCardMarginal) == 0 {
+		t.Fatalf("baseline deck produced no PerCardMarginal entries; test can't differentiate good from bad")
+	}
+
+	data, err := Marshal(d)
+	if err != nil {
+		t.Fatalf("Marshal: %v", err)
+	}
+	got, err := Unmarshal(data)
+	if err != nil {
+		t.Fatalf("Unmarshal: %v", err)
+	}
+
+	if len(got.Stats.PerCardMarginal) != len(d.Stats.PerCardMarginal) {
+		t.Fatalf("PerCardMarginal entry count: got %d want %d",
+			len(got.Stats.PerCardMarginal), len(d.Stats.PerCardMarginal))
+	}
+	for id, want := range d.Stats.PerCardMarginal {
+		gotEntry, ok := got.Stats.PerCardMarginal[id]
+		if !ok {
+			t.Errorf("PerCardMarginal missing entry for %s after round trip", cards.Get(id).Name())
+			continue
+		}
+		if gotEntry.PresentHands != want.PresentHands || gotEntry.AbsentHands != want.AbsentHands {
+			t.Errorf("%s bucket counts: got present=%d absent=%d, want present=%d absent=%d",
+				cards.Get(id).Name(),
+				gotEntry.PresentHands, gotEntry.AbsentHands,
+				want.PresentHands, want.AbsentHands)
+		}
+		if gotEntry.PresentTotal != want.PresentTotal || gotEntry.AbsentTotal != want.AbsentTotal {
+			t.Errorf("%s bucket totals: got present=%v absent=%v, want present=%v absent=%v",
+				cards.Get(id).Name(),
+				gotEntry.PresentTotal, gotEntry.AbsentTotal,
+				want.PresentTotal, want.AbsentTotal)
+		}
+		if gotEntry.Marginal() != want.Marginal() {
+			t.Errorf("%s Marginal(): got %v want %v", cards.Get(id).Name(),
+				gotEntry.Marginal(), want.Marginal())
+		}
+	}
+}
+
 // TestRoundTrip_PreservesBestTurnContributions locks in that per-card Contribution and the
 // AttackChain's per-step Damage / TriggerDamage / AuraTriggerDamage round-trip through
 // Marshal/Unmarshal, so a reloaded deck renders with the same per-card numbers the live sim

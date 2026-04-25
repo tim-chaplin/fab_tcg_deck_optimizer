@@ -42,8 +42,9 @@ type StatsJSON struct {
 	TotalValue  float64             `json:"total_value"`
 	FirstCycle  deck.CycleStats     `json:"first_cycle"`
 	SecondCycle deck.CycleStats     `json:"second_cycle"`
-	Best        BestTurnJSON        `json:"best"`
-	PerCard     []CardPlayStatsJSON `json:"per_card,omitempty"`
+	Best            BestTurnJSON            `json:"best"`
+	PerCard         []CardPlayStatsJSON     `json:"per_card,omitempty"`
+	PerCardMarginal []CardMarginalStatsJSON `json:"per_card_marginal,omitempty"`
 	// Histogram counts hands seen at each Value. encoding/json writes int-keyed maps with the
 	// int formatted as a string ("7": 42), which round-trips fine since we declare the field
 	// as map[int]int. Omitted when empty so old files stay valid.
@@ -59,6 +60,19 @@ type CardPlayStatsJSON struct {
 	Pitches           int     `json:"pitches"`
 	TotalContribution float64 `json:"total_contribution"`
 	Avg               float64 `json:"avg"`
+}
+
+// CardMarginalStatsJSON is the JSON form of deck.CardMarginalStats keyed by card name.
+// Marginal (PresentMean - AbsentMean) is the actionable smell-test signal a human reader
+// scans for, so it's included alongside the raw with/without sums even though it's
+// derivable.
+type CardMarginalStatsJSON struct {
+	Card         string  `json:"card"`
+	PresentTotal float64 `json:"present_total"`
+	PresentHands int     `json:"present_hands"`
+	AbsentTotal  float64 `json:"absent_total"`
+	AbsentHands  int     `json:"absent_hands"`
+	Marginal     float64 `json:"marginal"`
 }
 
 // BestTurnJSON is the JSON form of deck.BestTurn: card names and role names instead of
