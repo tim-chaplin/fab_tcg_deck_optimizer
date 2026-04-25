@@ -75,7 +75,7 @@ func printSubcommands(w io.Writer) {
 	fmt.Fprintln(w, "  anneal    Hill-climb (optionally simulated-annealing) on the saved deck until a local maximum")
 	fmt.Fprintln(w, "  eval      Re-score the saved deck at -deep-shuffles and rewrite it; -print-only skips the sim (usage: fabsim eval <deck>)")
 	fmt.Fprintln(w, "  import    Paste a fabrary.net deck into mydecks/<name>.json")
-	fmt.Fprintln(w, "  compare   Print the loadout/score summary, hand-value histogram, and card-count delta between two saved decks (usage: fabsim compare <deck1> <deck2>)")
+	fmt.Fprintln(w, "  compare   Re-score two saved decks under matched (-deep-shuffles, -incoming) settings, then print a side-by-side stat / histogram / card-delta comparison (usage: fabsim compare <deck1> <deck2> -incoming N)")
 	fmt.Fprintln(w)
 	fmt.Fprintln(w, "Run 'fabsim <subcommand> -help' for flag details.")
 }

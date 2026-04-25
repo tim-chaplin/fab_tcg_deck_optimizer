@@ -4,48 +4,71 @@ import (
 	"flag"
 	"fmt"
 	"sort"
+	"time"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/deck"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/deckformat"
 )
 
-// runCompareCmd parses compare's flags (none today) and dispatches to runCompare. Both decks
-// are positional args — compare never creates a deck, so there's no analogue of anneal's
-// -deck checkpoint flag.
+// runCompareCmd parses compare's flags and dispatches to runCompare. Both decks are positional
+// args; simulation knobs (-deep-shuffles, -incoming, -seed, -format, -max-copies) are accepted
+// so both decks can be re-scored under matched conditions before comparison. -incoming is
+// required because comparing decks scored against different incoming-damage assumptions would
+// be apples to oranges.
 func runCompareCmd(args []string) {
 	fs := flag.NewFlagSet("compare", flag.ExitOnError)
 	fs.Usage = func() {
-		fmt.Fprintln(fs.Output(), "Usage: fabsim compare <deck1> <deck2>")
+		fmt.Fprintln(fs.Output(), "Usage: fabsim compare <deck1> <deck2> [flags]")
+		fmt.Fprintln(fs.Output())
+		fmt.Fprintln(fs.Output(), "Flags:")
+		fs.PrintDefaults()
 	}
+	deepShuffles := fs.Int("deep-shuffles", 10000, "shuffles per deck used to re-score each deck before comparing")
+	incoming := fs.Int("incoming", 0, "opponent damage per turn (required — both decks are re-scored against this value)")
+	seed := fs.Int64("seed", time.Now().UnixNano(), "RNG seed (each deck builds an independent RNG from this seed)")
+	formatFlag := fs.String("format", string(deckformat.SilverAge), "constructed format predicate applied to replacement picks when a loaded deck contains NotImplemented cards")
+	maxCopies := fs.Int("max-copies", defaultMaxCopies, "maximum copies of any single card printing per deck, applied when replacing NotImplemented cards in a loaded deck")
 	_ = parseFlagsAnywhere(fs, args)
 	if fs.NArg() != 2 {
 		die("compare: need exactly 2 positional deck names (got %d); try `fabsim compare <deck1> <deck2>`", fs.NArg())
 	}
-	runCompare(fs.Arg(0), fs.Arg(1))
+	requireFlag(fs, "compare", "incoming")
+	fmtValue, err := deckformat.Parse(*formatFlag)
+	if err != nil {
+		die("%v", err)
+	}
+	runCompare(fs.Arg(0), fs.Arg(1), *deepShuffles, *incoming, *maxCopies, *seed, fmtValue)
 }
 
-// runCompare loads the two decks at mydecks/<name1>.json and mydecks/<name2>.json and prints
-// a stat-by-stat side-by-side comparison: pitch counts, mean hand value, per-cycle means, the
-// hand-value histograms, and finally the per-card count delta.
-func runCompare(name1, name2 string) {
-	d1 := mustLoadDeck(resolveDeckPath(name1))
-	d2 := mustLoadDeck(resolveDeckPath(name2))
+// runCompare re-evaluates both decks under identical (deepShuffles, incoming) settings so the
+// printed stats are apples to apples regardless of what conditions either deck happened to be
+// scored under last, then prints a stat-by-stat side-by-side comparison: pitch counts, mean
+// hand value, per-cycle means, the hand-value histograms, and finally the per-card count
+// delta. The header line at the top of the output records the (deepShuffles, incoming)
+// settings so the per-section rows don't have to repeat them.
+func runCompare(name1, name2 string, deepShuffles, incoming, maxCopies int, seed int64, fmtValue deckformat.Format) {
+	d1 := evaluateAndPersist(resolveDeckPath(name1), deepShuffles, incoming, maxCopies, seed, fmtValue)
+	d2 := evaluateAndPersist(resolveDeckPath(name2), deepShuffles, incoming, maxCopies, seed, fmtValue)
 	s1, s2 := d1.Stats, d2.Stats
+
+	fmt.Printf("compare: -deep-shuffles=%s -incoming=%d\n", commaInt(deepShuffles), incoming)
+	fmt.Println()
 
 	printSideBySideStats(name1, name2, []statSection{
 		{"Pitch values", pitchCountsLine(d1.Cards), pitchCountsLine(d2.Cards)},
-		{"Mean hand value", meanValueLine(s1), meanValueLine(s2)},
-		{"Cycle 1 mean", cycleMeanLine(s1.FirstCycle), cycleMeanLine(s2.FirstCycle)},
-		{"Cycle 2 mean", cycleMeanLine(s1.SecondCycle), cycleMeanLine(s2.SecondCycle)},
+		{"Mean hand value", formatMean(s1.Mean()), formatMean(s2.Mean())},
+		{"Cycle 1 mean", formatMean(s1.FirstCycle.Mean()), formatMean(s2.FirstCycle.Mean())},
+		{"Cycle 2 mean", formatMean(s1.SecondCycle.Mean()), formatMean(s2.SecondCycle.Mean())},
 	})
 
 	if len(s1.Histogram) > 0 || len(s2.Histogram) > 0 {
 		fmt.Println()
 		fmt.Println("Hand-value distributions:")
 		if len(s1.Histogram) > 0 {
-			printHistogram(d1, fmt.Sprintf("  %s (%s hands):", name1, commaInt(s1.Hands)))
+			printHistogram(d1, fmt.Sprintf("  %s:", name1))
 		}
 		if len(s2.Histogram) > 0 {
-			printHistogram(d2, fmt.Sprintf("  %s (%s hands):", name2, commaInt(s2.Hands)))
+			printHistogram(d2, fmt.Sprintf("  %s:", name2))
 		}
 	}
 

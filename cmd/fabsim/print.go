@@ -75,8 +75,8 @@ func printDeckSummary(d *deck.Deck) {
 	fmt.Printf("Pitch:   %s\n", pitchCountsLine(d.Cards))
 	fmt.Println()
 	fmt.Printf("Mean value: %s\n", meanValueLine(s))
-	fmt.Printf("  Cycle 1 mean: %s\n", cycleMeanLine(s.FirstCycle))
-	fmt.Printf("  Cycle 2 mean: %s\n", cycleMeanLine(s.SecondCycle))
+	fmt.Printf("  Cycle 1 mean: %s\n", formatMean(s.FirstCycle.Mean()))
+	fmt.Printf("  Cycle 2 mean: %s\n", formatMean(s.SecondCycle.Mean()))
 }
 
 // pitchCountsLine returns the "20 red / 8 yellow / 12 blue" rendering of the deck's pitch
@@ -92,9 +92,9 @@ func meanValueLine(s deck.Stats) string {
 	return fmt.Sprintf("%.3f (%s shuffles)", s.Mean(), commaInt(s.Runs))
 }
 
-// cycleMeanLine returns the per-cycle mean as a 3-decimal string.
-func cycleMeanLine(c deck.CycleStats) string {
-	return fmt.Sprintf("%.3f", c.Mean())
+// formatMean returns a 3-decimal rendering of a mean value.
+func formatMean(mean float64) string {
+	return fmt.Sprintf("%.3f", mean)
 }
 
 // statSection is one row of compare's side-by-side stat layout: a label header and the two

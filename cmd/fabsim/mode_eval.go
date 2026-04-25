@@ -49,22 +49,29 @@ func runEvalCmd(args []string) {
 // entirely: the loaded stats are printed as-is, which is what you want for a quick look at a
 // saved deck without spending shuffles or mutating the file.
 //
-// The sanitize pass (replacing any card.NotImplemented copies with legal substitutes) runs
-// only in the simulate path: a sanitized deck has to be rewritten anyway so the on-disk avg
-// stays in sync with the cards we can actually simulate, and skipping it in print-only
-// preserves the "don't touch the file" promise.
-//
 // Output shape is controlled by brief:
 //   - brief=false (default): full printBestDeck dump — summary, card list, best-turn block,
 //     per-card stats.
 //   - brief=true: score summary only. Good for scripted re-scoring where the card list and
 //     best turn are noise.
 func runEval(outPath string, deepShuffles, incoming, maxCopies int, seed int64, fmtValue deckformat.Format, printOnly, brief bool) {
-	loaded := mustLoadDeck(outPath)
 	if printOnly {
-		printLoadedDeck(loaded, brief)
+		printLoadedDeck(mustLoadDeck(outPath), brief)
 		return
 	}
+	d := evaluateAndPersist(outPath, deepShuffles, incoming, maxCopies, seed, fmtValue)
+	printLoadedDeck(d, brief)
+}
+
+// evaluateAndPersist loads the deck at outPath, re-simulates it for deepShuffles hands against
+// incoming, and writes the fresh stats back to disk (.json + sibling fabrary .txt). Returns
+// the simulated deck so callers can print its stats. The sanitize pass (replacing any
+// card.NotImplemented copies with legal substitutes drawn at maxCopies under fmtValue) runs
+// before Evaluate so the on-disk avg always reflects the cards the binary can actually
+// simulate. The stderr "avg X → Y; rewriting <path>" line lets the operator see the re-score
+// happening before the printed output appears.
+func evaluateAndPersist(outPath string, deepShuffles, incoming, maxCopies int, seed int64, fmtValue deckformat.Format) *deck.Deck {
+	loaded := mustLoadDeck(outPath)
 	// Wrap the loaded hero/weapons/cards in a fresh Deck so Evaluate's stats start from zero
 	// instead of accumulating on top of the persisted Stats. Sideboard and Equipment carry
 	// over verbatim — the sim ignores both, but the post-eval writeDeck round-trips them
@@ -81,7 +88,7 @@ func runEval(outPath string, deepShuffles, incoming, maxCopies int, seed int64, 
 	if err := writeDeck(d, outPath); err != nil {
 		die("%v", err)
 	}
-	printLoadedDeck(d, brief)
+	return d
 }
 
 // printLoadedDeck dispatches between the brief summary and the full printBestDeck dump;
