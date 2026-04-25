@@ -20,6 +20,6 @@ func (AmuletOfIgnitionYellow) Attack() int                               { retur
 func (AmuletOfIgnitionYellow) Defense() int                              { return 0 }
 func (AmuletOfIgnitionYellow) Types() card.TypeSet                       { return amuletOfIgnitionTypes }
 func (AmuletOfIgnitionYellow) GoAgain() bool                             { return true }
-// not implemented: Instant 'next ability costs {r} less'
+// not implemented: Instant 'next activated ability costs {r} less'
 func (AmuletOfIgnitionYellow) NotImplemented()                           {}
 func (AmuletOfIgnitionYellow) Play(*card.TurnState, *card.CardState) int { return 0 }

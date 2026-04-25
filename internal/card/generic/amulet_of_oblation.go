@@ -20,6 +20,6 @@ func (AmuletOfOblationBlue) Attack() int                               { return 
 func (AmuletOfOblationBlue) Defense() int                              { return 0 }
 func (AmuletOfOblationBlue) Types() card.TypeSet                       { return amuletOfOblationTypes }
 func (AmuletOfOblationBlue) GoAgain() bool                             { return true }
-// not implemented: Instant 'graveyard → bottom of deck' replacement effect
+// not implemented: Instant 'graveyard → bottom of deck' replacement; gated on graveyard entry
 func (AmuletOfOblationBlue) NotImplemented()                           {}
 func (AmuletOfOblationBlue) Play(*card.TurnState, *card.CardState) int { return 0 }

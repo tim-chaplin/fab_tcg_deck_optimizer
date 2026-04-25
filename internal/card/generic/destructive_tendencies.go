@@ -19,6 +19,6 @@ func (DestructiveTendenciesBlue) Attack() int                               { re
 func (DestructiveTendenciesBlue) Defense() int                              { return 0 }
 func (DestructiveTendenciesBlue) Types() card.TypeSet                       { return destructiveTendenciesTypes }
 func (DestructiveTendenciesBlue) GoAgain() bool                             { return false }
-// not implemented: Instant remove counters from item / aura tokens
+// not implemented: Instant 'remove counters from target item / aura token'
 func (DestructiveTendenciesBlue) NotImplemented()                           {}
 func (DestructiveTendenciesBlue) Play(*card.TurnState, *card.CardState) int { return 0 }

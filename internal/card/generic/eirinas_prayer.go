@@ -19,7 +19,7 @@ func (EirinasPrayerRed) Attack() int                               { return 0 }
 func (EirinasPrayerRed) Defense() int                              { return 0 }
 func (EirinasPrayerRed) Types() card.TypeSet                       { return eirinasPrayerTypes }
 func (EirinasPrayerRed) GoAgain() bool                             { return false }
-// not implemented: Instant prevent 2 damage to a non-hero target
+// not implemented: Instant prevent X arcane to your hero; X scaled by revealed top-card pitch
 func (EirinasPrayerRed) NotImplemented()                           {}
 func (EirinasPrayerRed) Play(*card.TurnState, *card.CardState) int { return 0 }
 
@@ -33,7 +33,7 @@ func (EirinasPrayerYellow) Attack() int                               { return 0
 func (EirinasPrayerYellow) Defense() int                              { return 0 }
 func (EirinasPrayerYellow) Types() card.TypeSet                       { return eirinasPrayerTypes }
 func (EirinasPrayerYellow) GoAgain() bool                             { return false }
-// not implemented: Instant prevent 2 damage to a non-hero target
+// not implemented: Instant prevent X arcane to your hero; X scaled by revealed top-card pitch
 func (EirinasPrayerYellow) NotImplemented()                           {}
 func (EirinasPrayerYellow) Play(*card.TurnState, *card.CardState) int { return 0 }
 
@@ -47,6 +47,6 @@ func (EirinasPrayerBlue) Attack() int                               { return 0 }
 func (EirinasPrayerBlue) Defense() int                              { return 0 }
 func (EirinasPrayerBlue) Types() card.TypeSet                       { return eirinasPrayerTypes }
 func (EirinasPrayerBlue) GoAgain() bool                             { return false }
-// not implemented: Instant prevent 2 damage to a non-hero target
+// not implemented: Instant prevent X arcane to your hero; X scaled by revealed top-card pitch
 func (EirinasPrayerBlue) NotImplemented()                           {}
 func (EirinasPrayerBlue) Play(*card.TurnState, *card.CardState) int { return 0 }

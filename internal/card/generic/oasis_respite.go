@@ -19,7 +19,7 @@ func (OasisRespiteRed) Attack() int                               { return 0 }
 func (OasisRespiteRed) Defense() int                              { return 0 }
 func (OasisRespiteRed) Types() card.TypeSet                       { return oasisRespiteTypes }
 func (OasisRespiteRed) GoAgain() bool                             { return false }
-// not implemented: Instant 1{h} gain to a non-hero target
+// not implemented: Instant 'prevent N damage from chosen source to target hero'; conditional 1{h}
 func (OasisRespiteRed) NotImplemented()                           {}
 func (OasisRespiteRed) Play(*card.TurnState, *card.CardState) int { return 0 }
 
@@ -33,7 +33,7 @@ func (OasisRespiteYellow) Attack() int                               { return 0 
 func (OasisRespiteYellow) Defense() int                              { return 0 }
 func (OasisRespiteYellow) Types() card.TypeSet                       { return oasisRespiteTypes }
 func (OasisRespiteYellow) GoAgain() bool                             { return false }
-// not implemented: Instant 1{h} gain to a non-hero target
+// not implemented: Instant 'prevent N damage from chosen source to target hero'; conditional 1{h}
 func (OasisRespiteYellow) NotImplemented()                           {}
 func (OasisRespiteYellow) Play(*card.TurnState, *card.CardState) int { return 0 }
 
@@ -47,6 +47,6 @@ func (OasisRespiteBlue) Attack() int                               { return 0 }
 func (OasisRespiteBlue) Defense() int                              { return 0 }
 func (OasisRespiteBlue) Types() card.TypeSet                       { return oasisRespiteTypes }
 func (OasisRespiteBlue) GoAgain() bool                             { return false }
-// not implemented: Instant 1{h} gain to a non-hero target
+// not implemented: Instant 'prevent N damage from chosen source to target hero'; conditional 1{h}
 func (OasisRespiteBlue) NotImplemented()                           {}
 func (OasisRespiteBlue) Play(*card.TurnState, *card.CardState) int { return 0 }

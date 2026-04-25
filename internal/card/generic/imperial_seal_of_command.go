@@ -20,6 +20,6 @@ func (ImperialSealOfCommandRed) Attack() int                               { ret
 func (ImperialSealOfCommandRed) Defense() int                              { return 0 }
 func (ImperialSealOfCommandRed) Types() card.TypeSet                       { return imperialSealOfCommandTypes }
 func (ImperialSealOfCommandRed) GoAgain() bool                             { return false }
-// not implemented: activated 'no DR this turn' lockout + Royal-only arsenal-destroy on hit
+// not implemented: activated 'no DR this turn' + Royal-only arsenal-wipe on hit
 func (ImperialSealOfCommandRed) NotImplemented()                           {}
 func (ImperialSealOfCommandRed) Play(*card.TurnState, *card.CardState) int { return 0 }

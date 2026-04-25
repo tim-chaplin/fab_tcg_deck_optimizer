@@ -19,6 +19,6 @@ func (PotionOfDejaVuBlue) Attack() int                               { return 0 
 func (PotionOfDejaVuBlue) Defense() int                              { return 0 }
 func (PotionOfDejaVuBlue) Types() card.TypeSet                       { return potionOfDejaVuTypes }
 func (PotionOfDejaVuBlue) GoAgain() bool                             { return false }
-// not implemented: activated 'replay last instant from graveyard'
+// not implemented: activated 'put pitch zone on top of deck in any order'
 func (PotionOfDejaVuBlue) NotImplemented()                           {}
 func (PotionOfDejaVuBlue) Play(*card.TurnState, *card.CardState) int { return 0 }

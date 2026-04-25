@@ -18,7 +18,7 @@ func (ArcanePolarityRed) Attack() int                               { return 0 }
 func (ArcanePolarityRed) Defense() int                              { return 0 }
 func (ArcanePolarityRed) Types() card.TypeSet                       { return arcanePolarityTypes }
 func (ArcanePolarityRed) GoAgain() bool                             { return false }
-// not implemented: 1{h} or 4/3/2{h} on arcane-damage trigger
+// not implemented: 1{h} gain (4/3/2{h} if dealt arcane damage this turn)
 func (ArcanePolarityRed) NotImplemented()                           {}
 func (ArcanePolarityRed) Play(*card.TurnState, *card.CardState) int { return 0 }
 
@@ -32,7 +32,7 @@ func (ArcanePolarityYellow) Attack() int                               { return 
 func (ArcanePolarityYellow) Defense() int                              { return 0 }
 func (ArcanePolarityYellow) Types() card.TypeSet                       { return arcanePolarityTypes }
 func (ArcanePolarityYellow) GoAgain() bool                             { return false }
-// not implemented: 1{h} or 4/3/2{h} on arcane-damage trigger
+// not implemented: 1{h} gain (4/3/2{h} if dealt arcane damage this turn)
 func (ArcanePolarityYellow) NotImplemented()                           {}
 func (ArcanePolarityYellow) Play(*card.TurnState, *card.CardState) int { return 0 }
 
@@ -46,6 +46,6 @@ func (ArcanePolarityBlue) Attack() int                               { return 0 
 func (ArcanePolarityBlue) Defense() int                              { return 0 }
 func (ArcanePolarityBlue) Types() card.TypeSet                       { return arcanePolarityTypes }
 func (ArcanePolarityBlue) GoAgain() bool                             { return false }
-// not implemented: 1{h} or 4/3/2{h} on arcane-damage trigger
+// not implemented: 1{h} gain (4/3/2{h} if dealt arcane damage this turn)
 func (ArcanePolarityBlue) NotImplemented()                           {}
 func (ArcanePolarityBlue) Play(*card.TurnState, *card.CardState) int { return 0 }

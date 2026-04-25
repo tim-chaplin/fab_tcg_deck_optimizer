@@ -18,7 +18,7 @@ func (BrushOffRed) Attack() int                               { return 0 }
 func (BrushOffRed) Defense() int                              { return 0 }
 func (BrushOffRed) Types() card.TypeSet                       { return brushOffTypes }
 func (BrushOffRed) GoAgain() bool                             { return false }
-// not implemented: Instant prevent 1 damage; gated on aura/item with counter
+// not implemented: Instant 'prevent next damage of N or less' (3 / 2 / 1 by colour)
 func (BrushOffRed) NotImplemented()                           {}
 func (BrushOffRed) Play(*card.TurnState, *card.CardState) int { return 0 }
 
@@ -32,7 +32,7 @@ func (BrushOffYellow) Attack() int                               { return 0 }
 func (BrushOffYellow) Defense() int                              { return 0 }
 func (BrushOffYellow) Types() card.TypeSet                       { return brushOffTypes }
 func (BrushOffYellow) GoAgain() bool                             { return false }
-// not implemented: Instant prevent 1 damage; gated on aura/item with counter
+// not implemented: Instant 'prevent next damage of N or less' (3 / 2 / 1 by colour)
 func (BrushOffYellow) NotImplemented()                           {}
 func (BrushOffYellow) Play(*card.TurnState, *card.CardState) int { return 0 }
 
@@ -46,6 +46,6 @@ func (BrushOffBlue) Attack() int                               { return 0 }
 func (BrushOffBlue) Defense() int                              { return 0 }
 func (BrushOffBlue) Types() card.TypeSet                       { return brushOffTypes }
 func (BrushOffBlue) GoAgain() bool                             { return false }
-// not implemented: Instant prevent 1 damage; gated on aura/item with counter
+// not implemented: Instant 'prevent next damage of N or less' (3 / 2 / 1 by colour)
 func (BrushOffBlue) NotImplemented()                           {}
 func (BrushOffBlue) Play(*card.TurnState, *card.CardState) int { return 0 }

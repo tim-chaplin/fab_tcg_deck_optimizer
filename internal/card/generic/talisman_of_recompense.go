@@ -19,6 +19,6 @@ func (TalismanOfRecompenseYellow) Attack() int                               { r
 func (TalismanOfRecompenseYellow) Defense() int                              { return 0 }
 func (TalismanOfRecompenseYellow) Types() card.TypeSet                       { return talismanOfRecompenseTypes }
 func (TalismanOfRecompenseYellow) GoAgain() bool                             { return true }
-// not implemented: passive 1{h} on opponent damage
+// not implemented: self-destroys on pitching a 1-resource card → gain {r}{r}{r} instead
 func (TalismanOfRecompenseYellow) NotImplemented()                           {}
 func (TalismanOfRecompenseYellow) Play(*card.TurnState, *card.CardState) int { return 0 }

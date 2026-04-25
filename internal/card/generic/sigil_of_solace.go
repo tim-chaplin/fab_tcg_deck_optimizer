@@ -19,7 +19,7 @@ func (SigilOfSolaceRed) Defense() int                              { return 0 }
 func (SigilOfSolaceRed) Types() card.TypeSet                       { return sigilOfSolaceTypes }
 func (SigilOfSolaceRed) GoAgain() bool                             { return false }
 func (SigilOfSolaceRed) NotSilverAgeLegal()                        {}
-// not implemented: 1/2/3{h} gain (also banlisted)
+// not implemented: 3/2/1{h} gain (also banlisted)
 func (SigilOfSolaceRed) NotImplemented()                           {}
 func (SigilOfSolaceRed) Play(*card.TurnState, *card.CardState) int { return 0 }
 
@@ -34,7 +34,7 @@ func (SigilOfSolaceYellow) Defense() int                              { return 0
 func (SigilOfSolaceYellow) Types() card.TypeSet                       { return sigilOfSolaceTypes }
 func (SigilOfSolaceYellow) GoAgain() bool                             { return false }
 func (SigilOfSolaceYellow) NotSilverAgeLegal()                        {}
-// not implemented: 1/2/3{h} gain (also banlisted)
+// not implemented: 3/2/1{h} gain (also banlisted)
 func (SigilOfSolaceYellow) NotImplemented()                           {}
 func (SigilOfSolaceYellow) Play(*card.TurnState, *card.CardState) int { return 0 }
 
@@ -49,6 +49,6 @@ func (SigilOfSolaceBlue) Defense() int                              { return 0 }
 func (SigilOfSolaceBlue) Types() card.TypeSet                       { return sigilOfSolaceTypes }
 func (SigilOfSolaceBlue) GoAgain() bool                             { return false }
 func (SigilOfSolaceBlue) NotSilverAgeLegal()                        {}
-// not implemented: 1/2/3{h} gain (also banlisted)
+// not implemented: 3/2/1{h} gain (also banlisted)
 func (SigilOfSolaceBlue) NotImplemented()                           {}
 func (SigilOfSolaceBlue) Play(*card.TurnState, *card.CardState) int { return 0 }

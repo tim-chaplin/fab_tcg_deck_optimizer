@@ -19,6 +19,6 @@ func (PotionOfLuckBlue) Attack() int                               { return 0 }
 func (PotionOfLuckBlue) Defense() int                              { return 0 }
 func (PotionOfLuckBlue) Types() card.TypeSet                       { return potionOfLuckTypes }
 func (PotionOfLuckBlue) GoAgain() bool                             { return false }
-// not implemented: activated peek-and-rearrange top 3
+// not implemented: activated 'shuffle hand+arsenal into deck, draw that many'
 func (PotionOfLuckBlue) NotImplemented()                           {}
 func (PotionOfLuckBlue) Play(*card.TurnState, *card.CardState) int { return 0 }

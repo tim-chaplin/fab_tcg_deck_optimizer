@@ -19,7 +19,7 @@ func (MemorialGroundRed) Attack() int                               { return 0 }
 func (MemorialGroundRed) Defense() int                              { return 0 }
 func (MemorialGroundRed) Types() card.TypeSet                       { return memorialGroundTypes }
 func (MemorialGroundRed) GoAgain() bool                             { return false }
-// not implemented: Instant 'graveyard → top of deck' for low-cost attack action
+// not implemented: Instant 'graveyard → top of deck' for low-cost attack action card
 func (MemorialGroundRed) NotImplemented()                           {}
 func (MemorialGroundRed) Play(*card.TurnState, *card.CardState) int { return 0 }
 
@@ -33,7 +33,7 @@ func (MemorialGroundYellow) Attack() int                               { return 
 func (MemorialGroundYellow) Defense() int                              { return 0 }
 func (MemorialGroundYellow) Types() card.TypeSet                       { return memorialGroundTypes }
 func (MemorialGroundYellow) GoAgain() bool                             { return false }
-// not implemented: Instant 'graveyard → top of deck' for low-cost attack action
+// not implemented: Instant 'graveyard → top of deck' for low-cost attack action card
 func (MemorialGroundYellow) NotImplemented()                           {}
 func (MemorialGroundYellow) Play(*card.TurnState, *card.CardState) int { return 0 }
 
@@ -47,6 +47,6 @@ func (MemorialGroundBlue) Attack() int                               { return 0 
 func (MemorialGroundBlue) Defense() int                              { return 0 }
 func (MemorialGroundBlue) Types() card.TypeSet                       { return memorialGroundTypes }
 func (MemorialGroundBlue) GoAgain() bool                             { return false }
-// not implemented: Instant 'graveyard → top of deck' for low-cost attack action
+// not implemented: Instant 'graveyard → top of deck' for low-cost attack action card
 func (MemorialGroundBlue) NotImplemented()                           {}
 func (MemorialGroundBlue) Play(*card.TurnState, *card.CardState) int { return 0 }

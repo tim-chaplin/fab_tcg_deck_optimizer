@@ -18,6 +18,6 @@ func (EnergyPotionBlue) Attack() int                               { return 0 }
 func (EnergyPotionBlue) Defense() int                              { return 0 }
 func (EnergyPotionBlue) Types() card.TypeSet                       { return energyPotionTypes }
 func (EnergyPotionBlue) GoAgain() bool                             { return false }
-// not implemented: activated 'put 2 cards from graveyard on bottom, gain action'
+// not implemented: activated 'gain {r}{r}'
 func (EnergyPotionBlue) NotImplemented()                           {}
 func (EnergyPotionBlue) Play(*card.TurnState, *card.CardState) int { return 0 }

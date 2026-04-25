@@ -18,6 +18,6 @@ func (BladeFlashBlue) Attack() int                               { return 0 }
 func (BladeFlashBlue) Defense() int                              { return 2 }
 func (BladeFlashBlue) Types() card.TypeSet                       { return bladeFlashTypes }
 func (BladeFlashBlue) GoAgain() bool                             { return false }
-// not implemented: AR 'sword attack gains go again' grant
+// not implemented: AR 'target sword attack gains go again'
 func (BladeFlashBlue) NotImplemented()                           {}
 func (BladeFlashBlue) Play(*card.TurnState, *card.CardState) int { return 0 }

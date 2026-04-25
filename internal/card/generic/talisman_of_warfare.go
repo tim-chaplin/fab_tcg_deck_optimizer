@@ -19,6 +19,6 @@ func (TalismanOfWarfareYellow) Attack() int                               { retu
 func (TalismanOfWarfareYellow) Defense() int                              { return 0 }
 func (TalismanOfWarfareYellow) Types() card.TypeSet                       { return talismanOfWarfareTypes }
 func (TalismanOfWarfareYellow) GoAgain() bool                             { return true }
-// not implemented: passive arsenal-wipe on a 2-damage hit
+// not implemented: self-destroys + wipes all arsenals on a 2-damage hit
 func (TalismanOfWarfareYellow) NotImplemented()                           {}
 func (TalismanOfWarfareYellow) Play(*card.TurnState, *card.CardState) int { return 0 }

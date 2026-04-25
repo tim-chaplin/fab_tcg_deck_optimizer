@@ -19,6 +19,6 @@ func (PotionOfIronhideBlue) Attack() int                               { return 
 func (PotionOfIronhideBlue) Defense() int                              { return 0 }
 func (PotionOfIronhideBlue) Types() card.TypeSet                       { return potionOfIronhideTypes }
 func (PotionOfIronhideBlue) GoAgain() bool                             { return false }
-// not implemented: activated +2{d} on next defending card
+// not implemented: activated +1{d} buff on all your attack actions this turn
 func (PotionOfIronhideBlue) NotImplemented()                           {}
 func (PotionOfIronhideBlue) Play(*card.TurnState, *card.CardState) int { return 0 }

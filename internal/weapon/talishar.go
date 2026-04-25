@@ -21,6 +21,6 @@ func (Talishar) Defense() int                                { return 0 }
 func (Talishar) Types() card.TypeSet                         { return talisharTypes }
 func (Talishar) GoAgain() bool                               { return false }
 func (Talishar) Hands() int                                  { return 2 }
-// not implemented: rust-counter activation cost and self-destruct trigger
+// not implemented: rust-counter activation cost and end-phase self-destruct at 3+ counters
 func (Talishar) NotImplemented()                             {}
 func (c Talishar) Play(*card.TurnState, *card.CardState) int { return c.Attack() }

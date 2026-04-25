@@ -19,6 +19,6 @@ func (AmuletOfEchoesBlue) Attack() int                               { return 0 
 func (AmuletOfEchoesBlue) Defense() int                              { return 0 }
 func (AmuletOfEchoesBlue) Types() card.TypeSet                       { return amuletOfEchoesTypes }
 func (AmuletOfEchoesBlue) GoAgain() bool                             { return true }
-// not implemented: Instant 'discard 2' against repeat-name plays
+// not implemented: Instant 'opposing hero discards 2'; gated on a repeat-name play this turn
 func (AmuletOfEchoesBlue) NotImplemented()                           {}
 func (AmuletOfEchoesBlue) Play(*card.TurnState, *card.CardState) int { return 0 }

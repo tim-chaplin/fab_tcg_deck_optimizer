@@ -16,6 +16,6 @@ func (TitaniumBaubleBlue) Attack() int                               { return 0 
 func (TitaniumBaubleBlue) Defense() int                              { return 3 }
 func (TitaniumBaubleBlue) Types() card.TypeSet                       { return titaniumBaubleTypes }
 func (TitaniumBaubleBlue) GoAgain() bool                             { return false }
-// not implemented: Defense Reaction with 3{d}; no other effect
+// not implemented: pitch-3 resource with 3{d}; no other effect
 func (TitaniumBaubleBlue) NotImplemented()                           {}
 func (TitaniumBaubleBlue) Play(*card.TurnState, *card.CardState) int { return 0 }

@@ -18,6 +18,6 @@ func (TalismanOfDousingYellow) Attack() int                               { retu
 func (TalismanOfDousingYellow) Defense() int                              { return 0 }
 func (TalismanOfDousingYellow) Types() card.TypeSet                       { return talismanOfDousingTypes }
 func (TalismanOfDousingYellow) GoAgain() bool                             { return true }
-// not implemented: passive prevent 1 arcane damage per turn
+// not implemented: passive Spellvoid 1
 func (TalismanOfDousingYellow) NotImplemented()                           {}
 func (TalismanOfDousingYellow) Play(*card.TurnState, *card.CardState) int { return 0 }

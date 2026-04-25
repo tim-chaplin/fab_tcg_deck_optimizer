@@ -19,7 +19,7 @@ func (PeaceOfMindRed) Attack() int                               { return 0 }
 func (PeaceOfMindRed) Defense() int                              { return 0 }
 func (PeaceOfMindRed) Types() card.TypeSet                       { return peaceOfMindTypes }
 func (PeaceOfMindRed) GoAgain() bool                             { return false }
-// not implemented: Instant prevent 2 damage; gated on no attacks this turn
+// not implemented: Instant 'prevent 4 of next {p}-damage hit'; creates a Ponder token
 func (PeaceOfMindRed) NotImplemented()                           {}
 func (PeaceOfMindRed) Play(*card.TurnState, *card.CardState) int { return 0 }
 
@@ -33,7 +33,7 @@ func (PeaceOfMindYellow) Attack() int                               { return 0 }
 func (PeaceOfMindYellow) Defense() int                              { return 0 }
 func (PeaceOfMindYellow) Types() card.TypeSet                       { return peaceOfMindTypes }
 func (PeaceOfMindYellow) GoAgain() bool                             { return false }
-// not implemented: Instant prevent 2 damage; gated on no attacks this turn
+// not implemented: Instant 'prevent 4 of next {p}-damage hit'; creates a Ponder token
 func (PeaceOfMindYellow) NotImplemented()                           {}
 func (PeaceOfMindYellow) Play(*card.TurnState, *card.CardState) int { return 0 }
 
@@ -47,6 +47,6 @@ func (PeaceOfMindBlue) Attack() int                               { return 0 }
 func (PeaceOfMindBlue) Defense() int                              { return 0 }
 func (PeaceOfMindBlue) Types() card.TypeSet                       { return peaceOfMindTypes }
 func (PeaceOfMindBlue) GoAgain() bool                             { return false }
-// not implemented: Instant prevent 2 damage; gated on no attacks this turn
+// not implemented: Instant 'prevent 4 of next {p}-damage hit'; creates a Ponder token
 func (PeaceOfMindBlue) NotImplemented()                           {}
 func (PeaceOfMindBlue) Play(*card.TurnState, *card.CardState) int { return 0 }

@@ -18,6 +18,6 @@ func (LungingPressBlue) Attack() int                               { return 0 }
 func (LungingPressBlue) Defense() int                              { return 2 }
 func (LungingPressBlue) Types() card.TypeSet                       { return lungingPressTypes }
 func (LungingPressBlue) GoAgain() bool                             { return false }
-// not implemented: AR +2{p} buff and freeze rider
+// not implemented: AR +1{p} buff to a target attack action card
 func (LungingPressBlue) NotImplemented()                           {}
 func (LungingPressBlue) Play(*card.TurnState, *card.CardState) int { return 0 }

@@ -18,6 +18,6 @@ func (FoolsGoldYellow) Attack() int                               { return 0 }
 func (FoolsGoldYellow) Defense() int                              { return 0 }
 func (FoolsGoldYellow) Types() card.TypeSet                       { return foolsGoldTypes }
 func (FoolsGoldYellow) GoAgain() bool                             { return false }
-// not implemented: discard trigger creates Gold token
+// not implemented: discard trigger creates a Gold token
 func (FoolsGoldYellow) NotImplemented()                           {}
 func (FoolsGoldYellow) Play(*card.TurnState, *card.CardState) int { return 0 }

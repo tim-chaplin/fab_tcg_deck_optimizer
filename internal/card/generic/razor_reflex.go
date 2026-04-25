@@ -20,7 +20,7 @@ func (RazorReflexRed) Attack() int                               { return 0 }
 func (RazorReflexRed) Defense() int                              { return 2 }
 func (RazorReflexRed) Types() card.TypeSet                       { return razorReflexTypes }
 func (RazorReflexRed) GoAgain() bool                             { return false }
-// not implemented: modal AR +N{p} for sword/dagger or low-cost attack action
+// not implemented: modal AR +N{p}: dagger/sword weapon attack OR cost ≤1 attack action (on-hit go again)
 func (RazorReflexRed) NotImplemented()                           {}
 func (RazorReflexRed) Play(*card.TurnState, *card.CardState) int { return 0 }
 
@@ -34,7 +34,7 @@ func (RazorReflexYellow) Attack() int                               { return 0 }
 func (RazorReflexYellow) Defense() int                              { return 2 }
 func (RazorReflexYellow) Types() card.TypeSet                       { return razorReflexTypes }
 func (RazorReflexYellow) GoAgain() bool                             { return false }
-// not implemented: modal AR +N{p} for sword/dagger or low-cost attack action
+// not implemented: modal AR +N{p}: dagger/sword weapon attack OR cost ≤1 attack action (on-hit go again)
 func (RazorReflexYellow) NotImplemented()                           {}
 func (RazorReflexYellow) Play(*card.TurnState, *card.CardState) int { return 0 }
 
@@ -48,6 +48,6 @@ func (RazorReflexBlue) Attack() int                               { return 0 }
 func (RazorReflexBlue) Defense() int                              { return 2 }
 func (RazorReflexBlue) Types() card.TypeSet                       { return razorReflexTypes }
 func (RazorReflexBlue) GoAgain() bool                             { return false }
-// not implemented: modal AR +N{p} for sword/dagger or low-cost attack action
+// not implemented: modal AR +N{p}: dagger/sword weapon attack OR cost ≤1 attack action (on-hit go again)
 func (RazorReflexBlue) NotImplemented()                           {}
 func (RazorReflexBlue) Play(*card.TurnState, *card.CardState) int { return 0 }

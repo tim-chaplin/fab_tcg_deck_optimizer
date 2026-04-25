@@ -18,6 +18,6 @@ func (TimesnapPotionBlue) Attack() int                               { return 0 
 func (TimesnapPotionBlue) Defense() int                              { return 0 }
 func (TimesnapPotionBlue) Types() card.TypeSet                       { return timesnapPotionTypes }
 func (TimesnapPotionBlue) GoAgain() bool                             { return false }
-// not implemented: activated 'play next attack action from graveyard'
+// not implemented: activated 'gain 2 action points'
 func (TimesnapPotionBlue) NotImplemented()                           {}
 func (TimesnapPotionBlue) Play(*card.TurnState, *card.CardState) int { return 0 }

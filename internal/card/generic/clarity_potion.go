@@ -18,6 +18,6 @@ func (ClarityPotionBlue) Attack() int                               { return 0 }
 func (ClarityPotionBlue) Defense() int                              { return 0 }
 func (ClarityPotionBlue) Types() card.TypeSet                       { return clarityPotionTypes }
 func (ClarityPotionBlue) GoAgain() bool                             { return false }
-// not implemented: activated 'next instant costs {r} less'
+// not implemented: activated Opt 2
 func (ClarityPotionBlue) NotImplemented()                           {}
 func (ClarityPotionBlue) Play(*card.TurnState, *card.CardState) int { return 0 }

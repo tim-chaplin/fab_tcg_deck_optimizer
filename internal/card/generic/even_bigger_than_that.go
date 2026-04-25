@@ -21,7 +21,7 @@ func (EvenBiggerThanThatRed) Attack() int                               { return
 func (EvenBiggerThanThatRed) Defense() int                              { return 0 }
 func (EvenBiggerThanThatRed) Types() card.TypeSet                       { return evenBiggerThanThatTypes }
 func (EvenBiggerThanThatRed) GoAgain() bool                             { return false }
-// not implemented: Opt + reveal-and-quicken trigger; gated on damage dealt
+// not implemented: Opt + reveal-and-Quicken trigger; gated on damage dealt this turn
 func (EvenBiggerThanThatRed) NotImplemented()                           {}
 func (EvenBiggerThanThatRed) Play(*card.TurnState, *card.CardState) int { return 0 }
 
@@ -35,7 +35,7 @@ func (EvenBiggerThanThatYellow) Attack() int                               { ret
 func (EvenBiggerThanThatYellow) Defense() int                              { return 0 }
 func (EvenBiggerThanThatYellow) Types() card.TypeSet                       { return evenBiggerThanThatTypes }
 func (EvenBiggerThanThatYellow) GoAgain() bool                             { return false }
-// not implemented: Opt + reveal-and-quicken trigger; gated on damage dealt
+// not implemented: Opt + reveal-and-Quicken trigger; gated on damage dealt this turn
 func (EvenBiggerThanThatYellow) NotImplemented()                           {}
 func (EvenBiggerThanThatYellow) Play(*card.TurnState, *card.CardState) int { return 0 }
 
@@ -49,6 +49,6 @@ func (EvenBiggerThanThatBlue) Attack() int                               { retur
 func (EvenBiggerThanThatBlue) Defense() int                              { return 0 }
 func (EvenBiggerThanThatBlue) Types() card.TypeSet                       { return evenBiggerThanThatTypes }
 func (EvenBiggerThanThatBlue) GoAgain() bool                             { return false }
-// not implemented: Opt + reveal-and-quicken trigger; gated on damage dealt
+// not implemented: Opt + reveal-and-Quicken trigger; gated on damage dealt this turn
 func (EvenBiggerThanThatBlue) NotImplemented()                           {}
 func (EvenBiggerThanThatBlue) Play(*card.TurnState, *card.CardState) int { return 0 }

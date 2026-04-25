@@ -18,6 +18,6 @@ func (PotionOfSeeingBlue) Attack() int                               { return 0 
 func (PotionOfSeeingBlue) Defense() int                              { return 0 }
 func (PotionOfSeeingBlue) Types() card.TypeSet                       { return potionOfSeeingTypes }
 func (PotionOfSeeingBlue) GoAgain() bool                             { return false }
-// not implemented: activated reveal opponent's hand
+// not implemented: activated reveal opposing hero's hand
 func (PotionOfSeeingBlue) NotImplemented()                           {}
 func (PotionOfSeeingBlue) Play(*card.TurnState, *card.CardState) int { return 0 }

@@ -19,6 +19,6 @@ func (PilferTheTombBlue) Attack() int                               { return 0 }
 func (PilferTheTombBlue) Defense() int                              { return 0 }
 func (PilferTheTombBlue) Types() card.TypeSet                       { return pilferTheTombTypes }
 func (PilferTheTombBlue) GoAgain() bool                             { return false }
-// not implemented: Instant 'banish from opposing graveyard'
+// not implemented: Instant banish from an opposing graveyard / aura
 func (PilferTheTombBlue) NotImplemented()                           {}
 func (PilferTheTombBlue) Play(*card.TurnState, *card.CardState) int { return 0 }

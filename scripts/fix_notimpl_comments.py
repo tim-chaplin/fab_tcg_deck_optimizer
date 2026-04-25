@@ -17,55 +17,55 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # One-line, card-specific summary of what's NOT modelled for each stub. Each maps card name →
 # short clause (≤100 chars) inserted as `// not implemented: <clause>` above NotImplemented().
 NOTES = {
-    "Amulet of Assertiveness": "AR 'banish-top-of-deck-on-hit' grant; gated on hand size",
-    "Amulet of Echoes": "Instant 'discard 2' against repeat-name plays",
+    "Amulet of Assertiveness": "AR grant: target attack 'banish top of deck on hit'; gated on 4+ cards in hand",
+    "Amulet of Echoes": "Instant 'opposing hero discards 2'; gated on a repeat-name play this turn",
     "Amulet of Havencall": "DR tutor for Rally the Rearguard; gated on empty hand",
-    "Amulet of Ignition": "Instant 'next ability costs {r} less'",
-    "Amulet of Intervention": "Instant 1 damage prevention; gated on lethal source",
-    "Amulet of Oblation": "Instant 'graveyard → bottom of deck' replacement effect",
-    "Arcane Polarity": "1{h} or 4/3/2{h} on arcane-damage trigger",
-    "Blade Flash": "AR 'sword attack gains go again' grant",
-    "Brush Off": "Instant prevent 1 damage; gated on aura/item with counter",
-    "Calming Breeze": "Instant 1{h} gain",
-    "Clap 'Em in Irons": "passive Pirate-target tap rider; self-destroys at upkeep",
-    "Clarity Potion": "activated 'next instant costs {r} less'",
+    "Amulet of Ignition": "Instant 'next activated ability costs {r} less'",
+    "Amulet of Intervention": "Instant 1 damage prevention; gated on a lethal incoming source",
+    "Amulet of Oblation": "Instant 'graveyard → bottom of deck' replacement; gated on graveyard entry",
+    "Arcane Polarity": "1{h} gain (4/3/2{h} if dealt arcane damage this turn)",
+    "Blade Flash": "AR 'target sword attack gains go again'",
+    "Brush Off": "Instant 'prevent next damage of N or less' (3 / 2 / 1 by colour)",
+    "Calming Breeze": "Instant 'prevent 1 of each of the next 3 damage events'",
+    "Clap 'Em in Irons": "passive tap-target Pirate; can't unfreeze; self-destroys at start of turn",
+    "Clarity Potion": "activated Opt 2",
     "Count Your Blessings": "graveyard-scaled X{h} gain (also banlisted)",
     "Cracked Bauble": "draft-format pitch resource; no other effect",
-    "Destructive Tendencies": "Instant remove counters from item / aura tokens",
-    "Eirina's Prayer": "Instant prevent 2 damage to a non-hero target",
-    "Energy Potion": "activated 'put 2 cards from graveyard on bottom, gain action'",
-    "Even Bigger Than That!": "Opt + reveal-and-quicken trigger; gated on damage dealt",
-    "Exposed": "AR -2{p} attacker debuff; gated on hand size",
-    "Fool's Gold": "discard trigger creates Gold token",
+    "Destructive Tendencies": "Instant 'remove counters from target item / aura token'",
+    "Eirina's Prayer": "Instant prevent X arcane to your hero; X scaled by revealed top-card pitch",
+    "Energy Potion": "activated 'gain {r}{r}'",
+    "Even Bigger Than That!": "Opt + reveal-and-Quicken trigger; gated on damage dealt this turn",
+    "Exposed": "AR +1{p}; gated on attacker not being marked",
+    "Fool's Gold": "discard trigger creates a Gold token",
     "Healing Potion": "activated 2{h} gain",
-    "Imperial Seal of Command": "activated 'no DR this turn' lockout + Royal-only arsenal-destroy on hit",
-    "Lunging Press": "AR +2{p} buff and freeze rider",
-    "Memorial Ground": "Instant 'graveyard → top of deck' for low-cost attack action",
-    "Nip at the Heels": "AR +1{p} buff and on-hit draw",
-    "Oasis Respite": "Instant 1{h} gain to a non-hero target",
-    "Peace of Mind": "Instant prevent 2 damage; gated on no attacks this turn",
-    "Pilfer the Tomb": "Instant 'banish from opposing graveyard'",
-    "Potion of Déjà Vu": "activated 'replay last instant from graveyard'",
-    "Potion of Ironhide": "activated +2{d} on next defending card",
-    "Potion of Luck": "activated peek-and-rearrange top 3",
-    "Potion of Seeing": "activated reveal opponent's hand",
+    "Imperial Seal of Command": "activated 'no DR this turn' + Royal-only arsenal-wipe on hit",
+    "Lunging Press": "AR +1{p} buff to a target attack action card",
+    "Memorial Ground": "Instant 'graveyard → top of deck' for low-cost attack action card",
+    "Nip at the Heels": "AR +1{p} buff to a target attack with ≤3 base {p}",
+    "Oasis Respite": "Instant 'prevent N damage from chosen source to target hero'; conditional 1{h}",
+    "Peace of Mind": "Instant 'prevent 4 of next {p}-damage hit'; creates a Ponder token",
+    "Pilfer the Tomb": "Instant banish from an opposing graveyard / aura",
+    "Potion of Déjà Vu": "activated 'put pitch zone on top of deck in any order'",
+    "Potion of Ironhide": "activated +1{d} buff on all your attack actions this turn",
+    "Potion of Luck": "activated 'shuffle hand+arsenal into deck, draw that many'",
+    "Potion of Seeing": "activated reveal opposing hero's hand",
     "Potion of Strength": "activated +2{p} on next attack",
-    "Pummel": "AR 'destroy target item with ≤2 counters' rider",
-    "Razor Reflex": "modal AR +N{p} for sword/dagger or low-cost attack action",
-    "Reinforce the Line": "Instant +1{d} grant to a defending card",
-    "Shatter Sorcery": "Instant destroy Sigil aura or prevent 1 arcane damage",
-    "Sigil of Solace": "1/2/3{h} gain (also banlisted)",
-    "Talisman of Balance": "passive 'gain 1{h} when you draw 4+'",
-    "Talisman of Cremation": "passive 'banish on graveyard entry'",
-    "Talisman of Dousing": "passive prevent 1 arcane damage per turn",
-    "Talisman of Featherfoot": "passive 'first attack each turn gains evade'",
-    "Talisman of Recompense": "passive 1{h} on opponent damage",
-    "Talisman of Tithes": "passive Gold-token economy on opposing damage",
-    "Talisman of Warfare": "passive arsenal-wipe on a 2-damage hit",
-    "Thrust": "AR +3{p} buff to a sword attack",
-    "Timesnap Potion": "activated 'play next attack action from graveyard'",
-    "Titanium Bauble": "Defense Reaction with 3{d}; no other effect",
-    "Talishar, the Lost Prince": "rust-counter activation cost and self-destruct trigger",
+    "Pummel": "modal AR +4{p}: club/hammer weapon attack OR cost-2+ attack action (on-hit discard)",
+    "Razor Reflex": "modal AR +N{p}: dagger/sword weapon attack OR cost ≤1 attack action (on-hit go again)",
+    "Reinforce the Line": "Instant +N{d} grant to a defending attack action card",
+    "Shatter Sorcery": "Instant: destroy a Sigil aura, and/or prevent 1 arcane damage",
+    "Sigil of Solace": "3/2/1{h} gain (also banlisted)",
+    "Talisman of Balance": "end-phase arsenal-fill from top of deck if behind on arsenal count",
+    "Talisman of Cremation": "self-destroys on play-from-banished → banish a named card from opposing graveyards",
+    "Talisman of Dousing": "passive Spellvoid 1",
+    "Talisman of Featherfoot": "self-destroys when an attack gains exactly +1{p} in the reaction step → grants go again",
+    "Talisman of Recompense": "self-destroys on pitching a 1-resource card → gain {r}{r}{r} instead",
+    "Talisman of Tithes": "self-destroys on an opposing draw during your action phase → opponent draws minus 1",
+    "Talisman of Warfare": "self-destroys + wipes all arsenals on a 2-damage hit",
+    "Thrust": "AR +3{p} buff to a target sword attack",
+    "Timesnap Potion": "activated 'gain 2 action points'",
+    "Titanium Bauble": "pitch-3 resource with 3{d}; no other effect",
+    "Talishar, the Lost Prince": "rust-counter activation cost and end-phase self-destruct at 3+ counters",
 }
 
 
@@ -86,25 +86,21 @@ def process_file(path, name):
         count=1,
     )
 
-    # 2. Insert a `// not implemented: <note>` line immediately above each NotImplemented()
-    #    method. Idempotent: skip if a "// not implemented:" line already sits directly above.
-    pattern = re.compile(
-        r"(^[ \t]*)func \(([A-Za-z0-9]+)\) NotImplemented\(\)",
-        re.MULTILINE,
+    # 2. Drop any existing `// not implemented: ...` line that sits directly above a
+    #    NotImplemented() method, then insert a fresh one with the current note. This makes the
+    #    rewrite idempotent and lets us correct previous notes by editing NOTES and re-running.
+    new_src = re.sub(
+        r"^[ \t]*// not implemented:[^\n]*\n(?=[ \t]*func \([A-Za-z0-9]+\) NotImplemented\(\))",
+        "",
+        new_src,
+        flags=re.MULTILINE,
     )
-
-    def repl(m):
-        indent = m.group(1)
-        # Look one line back: if the previous line is already a "not implemented:" comment, skip.
-        start = m.start()
-        # Find the previous newline.
-        prev_nl = new_src.rfind("\n", 0, start - 1)
-        prev_line = new_src[prev_nl + 1 : start - 1] if prev_nl != -1 else ""
-        if "not implemented:" in prev_line:
-            return m.group(0)
-        return f"{indent}// not implemented: {note}\n{m.group(0)}"
-
-    new_src = pattern.sub(repl, new_src)
+    new_src = re.sub(
+        r"(^[ \t]*)(func \([A-Za-z0-9]+\) NotImplemented\(\))",
+        rf"\1// not implemented: {note}\n\1\2",
+        new_src,
+        flags=re.MULTILINE,
+    )
 
     if new_src == src:
         return False

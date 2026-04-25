@@ -20,6 +20,6 @@ func (AmuletOfInterventionBlue) Attack() int                               { ret
 func (AmuletOfInterventionBlue) Defense() int                              { return 0 }
 func (AmuletOfInterventionBlue) Types() card.TypeSet                       { return amuletOfInterventionTypes }
 func (AmuletOfInterventionBlue) GoAgain() bool                             { return true }
-// not implemented: Instant 1 damage prevention; gated on lethal source
+// not implemented: Instant 1 damage prevention; gated on a lethal incoming source
 func (AmuletOfInterventionBlue) NotImplemented()                           {}
 func (AmuletOfInterventionBlue) Play(*card.TurnState, *card.CardState) int { return 0 }
