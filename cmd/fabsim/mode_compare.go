@@ -75,20 +75,15 @@ func runCompare(name1, name2 string, deepShuffles, incoming, maxCopies int, seed
 	printCardDelta(name1, name2, d1, d2)
 }
 
-// printCardDelta writes the per-card count delta between d1 and d2 — negative rows first,
-// then positives; alphabetical within each group; cards present in equal counts in both decks
-// are omitted. When the two card lists match exactly an explicit confirmation line replaces
-// the empty body so silence can't be mistaken for a failure. Scoped to the card list — hero
-// and weapon differences are not surfaced here.
+// printCardDelta writes the per-loadout count delta between d1 and d2 — negative rows first,
+// then positives; alphabetical within each group; entries present in equal counts in both
+// decks are omitted. Covers both the deck's Cards and its Weapons since both are sim-relevant
+// loadout choices a comparison reader needs to see. Hero, Equipment, and Sideboard are out
+// of scope. When the two loadouts match exactly an explicit confirmation line replaces the
+// empty body so silence can't be mistaken for a failure.
 func printCardDelta(name1, name2 string, d1, d2 *deck.Deck) {
-	counts1 := map[string]int{}
-	for _, c := range d1.Cards {
-		counts1[c.Name()]++
-	}
-	counts2 := map[string]int{}
-	for _, c := range d2.Cards {
-		counts2[c.Name()]++
-	}
+	counts1 := loadoutCounts(d1)
+	counts2 := loadoutCounts(d2)
 	names := make(map[string]struct{}, len(counts1)+len(counts2))
 	for n := range counts1 {
 		names[n] = struct{}{}
@@ -112,9 +107,10 @@ func printCardDelta(name1, name2 string, d1, d2 *deck.Deck) {
 			pluses = append(pluses, fmt.Sprintf("+%d %s", d, n))
 		}
 	}
-	fmt.Println("Card differences:")
+	fmt.Println("Card / weapon differences:")
 	if len(minuses) == 0 && len(pluses) == 0 {
-		fmt.Printf("  %s and %s have identical card lists (%d cards)\n", name1, name2, len(d1.Cards))
+		fmt.Printf("  %s and %s have identical card and weapon lists (%d cards, %d weapons)\n",
+			name1, name2, len(d1.Cards), len(d1.Weapons))
 		return
 	}
 	for _, l := range minuses {
@@ -123,4 +119,18 @@ func printCardDelta(name1, name2 string, d1, d2 *deck.Deck) {
 	for _, l := range pluses {
 		fmt.Println("  " + l)
 	}
+}
+
+// loadoutCounts tallies the deck's cards and weapons by display name in a single map.
+// Weapon names don't collide with card names in the current registry, so a flat
+// name-keyed map cleanly captures both lists for diffing.
+func loadoutCounts(d *deck.Deck) map[string]int {
+	out := make(map[string]int, len(d.Cards)+len(d.Weapons))
+	for _, c := range d.Cards {
+		out[c.Name()]++
+	}
+	for _, w := range d.Weapons {
+		out[w.Name()]++
+	}
+	return out
 }
