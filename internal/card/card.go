@@ -28,13 +28,16 @@ type CardState struct {
 	// extensions stay false. Cards gate "if this is played from arsenal" riders on
 	// self.FromArsenal.
 	FromArsenal bool
-	// BonusDamage is the +{p} this card has accumulated from prior cards' "next attack action
-	// card gains +N{p}" riders. Granters set pc.BonusDamage += N on the matching CardState in
-	// CardsRemaining instead of returning the bonus from their own Play return — that way the
-	// damage is attributed to the attack receiving the buff, and EffectiveAttack folds it into
+	// BonusDamage is the +{p} this card has accumulated from prior cards' "next attack +N{p}"
+	// riders. Granters set pc.BonusDamage += N on the matching CardState in CardsRemaining
+	// instead of returning the bonus from their own Play return — that way the damage is
+	// attributed to the attack receiving the buff, and EffectiveAttack folds it into
 	// hit-likelihood checks (LikelyToHit) so a +N buff bumps a 4-power attack into the 5+
-	// dominate window or a 6 into the unblockable 7. The solver adds BonusDamage to the
-	// per-card damage output when an attack action's Play resolves.
+	// dominate window or a 6 into the unblockable 7. Negative bonuses (defender-side -N{p}
+	// debuffs) clamp at 0 because FaB attack power can't go below 0. The solver adds
+	// BonusDamage to the per-card damage output for any attacking source — attack action
+	// cards or weapons — since several grantors target weapon swings (Brandish, Razor
+	// Reflex's sword/dagger branch, Thrust).
 	BonusDamage int
 }
 

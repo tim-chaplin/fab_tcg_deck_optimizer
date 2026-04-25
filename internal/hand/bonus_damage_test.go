@@ -5,6 +5,7 @@ import (
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card/fake"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/weapon"
 )
 
 // grantBonusDamage is a test-only non-attack action card that scans CardsRemaining and adds n
@@ -35,10 +36,35 @@ func (g grantBonusDamage) Play(s *card.TurnState, _ *card.CardState) int {
 	return 0
 }
 
+// grantBonusDamageWeapon scans CardsRemaining for the first weapon swing (TypeWeapon, no
+// TypeAction) and adds n to its BonusDamage. Mirrors the production shape of Brandish's
+// "next weapon attack +1{p}" rider — the target is a weapon, not an attack action.
+type grantBonusDamageWeapon struct{ n int }
+
+func (grantBonusDamageWeapon) ID() card.ID              { return card.Invalid }
+func (grantBonusDamageWeapon) Name() string             { return "grantBonusDamageWeapon" }
+func (grantBonusDamageWeapon) Cost(*card.TurnState) int { return 0 }
+func (grantBonusDamageWeapon) Pitch() int               { return 0 }
+func (grantBonusDamageWeapon) Attack() int              { return 0 }
+func (grantBonusDamageWeapon) Defense() int             { return 0 }
+func (grantBonusDamageWeapon) Types() card.TypeSet {
+	return card.NewTypeSet(card.TypeGeneric, card.TypeAction)
+}
+func (grantBonusDamageWeapon) GoAgain() bool { return true }
+func (g grantBonusDamageWeapon) Play(s *card.TurnState, _ *card.CardState) int {
+	for _, pc := range s.CardsRemaining {
+		if pc.Card.Types().Has(card.TypeWeapon) {
+			pc.BonusDamage += g.n
+			return 0
+		}
+	}
+	return 0
+}
+
 // grantBonusDamageUngated is grantBonusDamage's misbehaving cousin: it writes BonusDamage to
-// every entry in CardsRemaining, attack action or not. Used to exercise the solver-side
-// `isAttackAction` gate that protects against a buggy grantor leaking damage into a non-attack
-// target's slot.
+// every entry in CardsRemaining, attack-or-weapon or not. Used to exercise the solver-side
+// `isAttackOrWeapon` gate that protects against a buggy grantor leaking damage into a non-
+// attacking target's slot.
 type grantBonusDamageUngated struct{ n int }
 
 func (grantBonusDamageUngated) ID() card.ID              { return card.Invalid }
@@ -128,16 +154,37 @@ func TestPlaySequence_BonusDamageStacksAcrossGranters(t *testing.T) {
 	}
 }
 
-// TestPlaySequence_BonusDamageSolverGateOnNonAttack pins the solver-side `isAttackAction`
+// TestPlaySequence_BonusDamageAppliesToWeapon pins that BonusDamage works on weapon swings,
+// not just attack action cards. Brandish, Razor Reflex's sword/dagger branch, Thrust, and
+// Visit the Blacksmith all target weapon attacks — the solver-side gate must let those land.
+func TestPlaySequence_BonusDamageAppliesToWeapon(t *testing.T) {
+	order := []card.Card{grantBonusDamageWeapon{n: 2}, weapon.ReapingBlade{}}
+	ctx := newSequenceContextForTest(stubHero, nil, nil, 10, 0, len(order))
+	perCard := make([]float64, len(order))
+	dmg, _, _, legal := ctx.playSequence(order, perCard, nil, nil)
+	if !legal {
+		t.Fatalf("playSequence returned legal=false; expected granter→weapon swing to chain via go-again")
+	}
+	// Granter (cost 0, returns 0) → Reaping Blade (cost 1, printed power 3, bonus +2 = 5).
+	// Total: 0 + 5 = 5.
+	if dmg != 5 {
+		t.Fatalf("dmg = %d, want 5 (Reaping Blade 3 + granted bonus 2); perCard=%v", dmg, perCard)
+	}
+	if perCard[1] != 5 {
+		t.Errorf("Reaping Blade perCardOut = %.1f, want 5 (printed 3 + bonus 2)", perCard[1])
+	}
+}
+
+// TestPlaySequence_BonusDamageSolverGateOnNonSwinger pins the solver-side `isAttackOrWeapon`
 // gate in playSequenceWithMeta. Uses an ungated granter that writes BonusDamage onto every
 // CardsRemaining entry — including a non-attack action card scheduled after it. The solver
-// must NOT fold that bonus into the non-attack card's perCardOut, only the attack action's
-// slot. Without the gate, the non-attack would over-credit by 5 and the chain total would
-// rise from 8 to 13.
-func TestPlaySequence_BonusDamageSolverGateOnNonAttack(t *testing.T) {
+// must NOT fold that bonus into the non-swinger's perCardOut, only into entries that
+// actually swing (attack actions or weapons). Without the gate, the non-swinger would over-
+// credit by 5 and the chain total would rise from 8 to 13.
+func TestPlaySequence_BonusDamageSolverGateOnNonSwinger(t *testing.T) {
 	order := []card.Card{
 		grantBonusDamageUngated{n: 5},
-		grantBonusDamage{n: 0}, // non-attack action target — solver must skip BonusDamage on it
+		grantBonusDamage{n: 0}, // non-attack-non-weapon target — solver must skip BonusDamage on it
 		fake.RedAttack{},
 	}
 	ctx := newSequenceContextForTest(stubHero, nil, nil, 10, 0, len(order))
@@ -147,16 +194,16 @@ func TestPlaySequence_BonusDamageSolverGateOnNonAttack(t *testing.T) {
 		t.Fatalf("playSequence returned legal=false")
 	}
 	// Ungated granter writes BonusDamage += 5 to BOTH the non-attack granter (index 1) and
-	// the RedAttack (index 2). Only the attack action has the bonus folded into damage:
+	// the RedAttack (index 2). Only the attacking source has the bonus folded into damage:
 	//   index 0: 0 (granter's own Play return)
-	//   index 1: 0 (non-attack action — gate skips its BonusDamage)
+	//   index 1: 0 (non-attack non-weapon — gate skips its BonusDamage)
 	//   index 2: 3 (printed) + 5 (bonus) = 8
 	// Total: 8.
 	if dmg != 8 {
-		t.Fatalf("dmg = %d, want 8 (only the attack action's BonusDamage applies); perCard=%v", dmg, perCard)
+		t.Fatalf("dmg = %d, want 8 (only the attacking source's BonusDamage applies); perCard=%v", dmg, perCard)
 	}
 	if perCard[1] != 0 {
-		t.Errorf("non-attack target perCardOut = %.1f, want 0 (solver-side isAttackAction gate skipped it)", perCard[1])
+		t.Errorf("non-swinger perCardOut = %.1f, want 0 (solver-side isAttackOrWeapon gate skipped it)", perCard[1])
 	}
 	if perCard[2] != 8 {
 		t.Errorf("RedAttack perCardOut = %.1f, want 8 (printed 3 + bonus 5)", perCard[2])

@@ -501,15 +501,20 @@ func (ctx *sequenceContext) playSequenceWithMeta(n int, perCardOut, perCardTrigg
 			// source via SourceIndex, so perCardOut is updated in place inside the helper.
 			ephemeralDmg = fireEphemeralAttackTriggers(state, pc, perCardOut)
 		}
-		// BonusDamage is granted by a prior card's "next attack action +N{p}" rider; the
-		// grant is folded in here (not by the target's Play) so the +N is attributed to the
-		// attack receiving the buff rather than the granter, and so any "if this hits" rider
-		// inside the target's Play can read self.EffectiveAttack() consistently. Gated on
-		// isAttackAction because grants only target attack actions; clamped at 0 because
-		// FaB attack-power buffs can't drive an attack below 0 power (a -3 grant on a
-		// 1-power attack resolves as a 0-power attack, not -2).
+		// BonusDamage is granted by a prior card's "next attack +N{p}" rider; the grant is
+		// folded in here (not by the target's Play) so the +N is attributed to the attack
+		// receiving the buff rather than the granter, and so any "if this hits" rider inside
+		// the target's Play can read self.EffectiveAttack() consistently. Gated on
+		// isAttackOrWeapon because grants target attacking sources — most are "next attack
+		// action card +N{p}" (Come to Fight, Captain's Call, etc.) but several target weapon
+		// swings (Brandish's "next weapon attack", Razor Reflex's modal sword/dagger weapon
+		// branch, Thrust's "target sword attack"), and a few are agnostic ("target attack").
+		// The actual grantor card is responsible for picking which CardState in
+		// CardsRemaining to flip; the solver only needs to fold the bonus in for any swinger.
+		// Clamped at 0 because FaB attack-power buffs can't drive an attack below 0 power
+		// (a -3 grant on a 1-power attack resolves as a 0-power attack, not -2).
 		cardContrib := playDmg
-		if m.isAttackAction {
+		if m.isAttackOrWeapon {
 			cardContrib += pc.BonusDamage
 			if cardContrib < 0 {
 				cardContrib = 0
