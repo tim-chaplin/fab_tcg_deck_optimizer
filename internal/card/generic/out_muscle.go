@@ -2,10 +2,6 @@
 // pitch variants: Red 1, Yellow 2, Blue 3. Defense 2.
 //
 // Text: "While Out Muscle isn't defended by a card with equal or greater {p}, it has **go again**."
-//
-// Simplification: The defended-by-equal-or-greater-power gate isn't modelled, and go-again
-// stays off — the printed keyword is conditional on the opponent's block choice, not
-// unconditional.
 
 package generic
 
@@ -23,6 +19,8 @@ func (OutMuscleRed) Attack() int                 { return 6 }
 func (OutMuscleRed) Defense() int                { return 2 }
 func (OutMuscleRed) Types() card.TypeSet         { return outMuscleTypes }
 func (OutMuscleRed) GoAgain() bool               { return false }
+// not implemented: defended-by-equal-or-greater-power go-again gate
+func (OutMuscleRed) NotImplemented()             {}
 func (c OutMuscleRed) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }
 
 type OutMuscleYellow struct{}
@@ -35,6 +33,8 @@ func (OutMuscleYellow) Attack() int                 { return 5 }
 func (OutMuscleYellow) Defense() int                { return 2 }
 func (OutMuscleYellow) Types() card.TypeSet         { return outMuscleTypes }
 func (OutMuscleYellow) GoAgain() bool               { return false }
+// not implemented: defended-by-equal-or-greater-power go-again gate
+func (OutMuscleYellow) NotImplemented()             {}
 func (c OutMuscleYellow) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }
 
 type OutMuscleBlue struct{}
@@ -47,4 +47,6 @@ func (OutMuscleBlue) Attack() int                 { return 4 }
 func (OutMuscleBlue) Defense() int                { return 2 }
 func (OutMuscleBlue) Types() card.TypeSet         { return outMuscleTypes }
 func (OutMuscleBlue) GoAgain() bool               { return false }
+// not implemented: defended-by-equal-or-greater-power go-again gate
+func (OutMuscleBlue) NotImplemented()             {}
 func (c OutMuscleBlue) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }
