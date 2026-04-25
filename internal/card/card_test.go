@@ -75,15 +75,15 @@ func TestHasDominate_MatchesMarker(t *testing.T) {
 	}
 }
 
-// TestCardState_EffectiveAttack: printed Attack plus any granted BonusDamage from a prior
-// card's "next attack +N{p}" rider. Default BonusDamage of 0 leaves EffectiveAttack equal to
+// TestCardState_EffectiveAttack: printed Attack plus any granted BonusAttack from a prior
+// card's "next attack +N{p}" rider. Default BonusAttack of 0 leaves EffectiveAttack equal to
 // the printed power. Negative bonuses (defender-side -N{p} debuffs like Drag Down) clamp at
 // 0 — an attack's power can't be reduced below 0 in FaB.
 func TestCardState_EffectiveAttack(t *testing.T) {
 	cases := []struct {
 		name        string
 		printed     int
-		bonusDamage int
+		bonusAttack int
 		want        int
 	}{
 		{"no bonus", 4, 0, 4},
@@ -95,7 +95,7 @@ func TestCardState_EffectiveAttack(t *testing.T) {
 		{"large negative on a 4-power attack still clamps at 0", 4, -10, 0},
 	}
 	for _, tc := range cases {
-		p := &CardState{Card: stubCard{name: tc.name, attack: tc.printed}, BonusDamage: tc.bonusDamage}
+		p := &CardState{Card: stubCard{name: tc.name, attack: tc.printed}, BonusAttack: tc.bonusAttack}
 		if got := p.EffectiveAttack(); got != tc.want {
 			t.Errorf("%s: EffectiveAttack() = %d, want %d", tc.name, got, tc.want)
 		}

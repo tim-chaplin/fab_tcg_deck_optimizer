@@ -403,7 +403,7 @@ func (ctx *sequenceContext) playSequence(order []card.Card, perCardOut, perCardT
 // playSequenceWithMeta runs the permutation currently held in ctx.bufs.pcBuf[:n] with
 // aligned permMeta[:n]. CardState (Card + FromArsenal) persists across permutations, so any
 // field a prior card's Play flips on a future card needs a per-permutation reset:
-// GrantedGoAgain (next-attack go-again grants) and BonusDamage (next-attack +N{p} grants).
+// GrantedGoAgain (next-attack go-again grants) and BonusAttack (next-attack +N{p} grants).
 //
 // Per-card output attribution:
 //   - perCardOut[i] = card's own Play return (plus any EphemeralAttackTrigger damage routed
@@ -419,7 +419,7 @@ func (ctx *sequenceContext) playSequenceWithMeta(n int, perCardOut, perCardTrigg
 	meta := ctx.bufs.permMeta[:n]
 	for i := 0; i < n; i++ {
 		pcBuf[i].GrantedGoAgain = false
-		pcBuf[i].BonusDamage = 0
+		pcBuf[i].BonusAttack = 0
 		if perCardOut != nil {
 			perCardOut[i] = 0
 		}
@@ -501,7 +501,7 @@ func (ctx *sequenceContext) playSequenceWithMeta(n int, perCardOut, perCardTrigg
 			// source via SourceIndex, so perCardOut is updated in place inside the helper.
 			ephemeralDmg = fireEphemeralAttackTriggers(state, pc, perCardOut)
 		}
-		// BonusDamage is granted by a prior card's "next attack +N{p}" rider. The grant is
+		// BonusAttack is granted by a prior card's "next attack +N{p}" rider. The grant is
 		// folded in here (not by the target's Play) so the +N is attributed to the attack
 		// receiving the buff rather than the granter, and so any "if this hits" rider
 		// inside the target's Play can read self.EffectiveAttack() consistently. Applied
@@ -509,10 +509,14 @@ func (ctx *sequenceContext) playSequenceWithMeta(n int, perCardOut, perCardTrigg
 		// responsibility (it scans CardsRemaining and matches the appropriate type, e.g.
 		// attack actions for Come to Fight, weapon swings for Brandish), and a future card
 		// that grants damage to a non-attack source shouldn't have to fight a solver-side
-		// type gate. Clamped at 0 because FaB attack-power buffs can't drive an attack
-		// below 0 power (a -3 grant on a 1-power attack resolves as a 0-power attack,
-		// not -2).
-		cardContrib := playDmg + pc.BonusDamage
+		// type gate.
+		//
+		// Reuses pc.EffectiveAttack() for the printed-power-plus-bonus calculation
+		// (which already enforces the FaB attack-power floor: a -3 grant on a 1-power
+		// attack resolves as 0, not -2) and folds in any rider damage Play returned
+		// beyond Card.Attack — that "extra" component sits outside the attack-power
+		// floor so it's added on top of the clamped value.
+		cardContrib := pc.EffectiveAttack() + (playDmg - pc.Card.Attack())
 		if cardContrib < 0 {
 			cardContrib = 0
 		}
