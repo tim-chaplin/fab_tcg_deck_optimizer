@@ -2,10 +2,6 @@
 //
 // Text: "Your next attack this turn gets +3{p}. You may destroy a Bloodrot Pox token you control.
 // If you do, gain 1{h}. **Go again**"
-//
-// Simplification: Bloodrot Pox health-gain rider dropped. Scans TurnState.CardsRemaining for the
-// first matching attack action card and credits the bonus assuming it will be played; if none is
-// scheduled after this card, the bonus fizzles.
 
 package generic
 
@@ -23,4 +19,6 @@ func (ClearwaterElixirRed) Attack() int                 { return 0 }
 func (ClearwaterElixirRed) Defense() int                { return 3 }
 func (ClearwaterElixirRed) Types() card.TypeSet         { return clearwaterElixirTypes }
 func (ClearwaterElixirRed) GoAgain() bool               { return true }
+// not implemented: Bloodrot Pox health-gain rider dropped (status tokens not tracked)
+func (ClearwaterElixirRed) NotImplemented()             {}
 func (ClearwaterElixirRed) Play(s *card.TurnState, _ *card.CardState) int { return grantNextAttackActionBonus(s, 3) }

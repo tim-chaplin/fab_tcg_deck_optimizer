@@ -4,10 +4,6 @@
 // Text: "Choose 1; The next attack action card with cost N or less you play this turn gains +2{p}.
 // The next attack action card with cost N or less you play this turn gains **go again**. **Go
 // again**" (Red N=2, Yellow N=1, Blue N=0.)
-//
-// Simplification: Modal: we pick the +2 power mode; the alternative 'go again' mode is dropped.
-// Scans TurnState.CardsRemaining for the first matching attack action card and credits the bonus
-// assuming it will be played; if none is scheduled after this card, the bonus fizzles.
 
 package generic
 
@@ -42,6 +38,8 @@ func (CaptainsCallRed) Attack() int                 { return 0 }
 func (CaptainsCallRed) Defense() int                { return 2 }
 func (CaptainsCallRed) Types() card.TypeSet         { return captainsCallTypes }
 func (CaptainsCallRed) GoAgain() bool               { return true }
+// not implemented: modal pick hard-coded to +2{p}; 'go again' mode is dropped
+func (CaptainsCallRed) NotImplemented()             {}
 func (CaptainsCallRed) Play(s *card.TurnState, _ *card.CardState) int { return captainsCallPlay(s, 2) }
 
 type CaptainsCallYellow struct{}
@@ -54,6 +52,8 @@ func (CaptainsCallYellow) Attack() int                 { return 0 }
 func (CaptainsCallYellow) Defense() int                { return 2 }
 func (CaptainsCallYellow) Types() card.TypeSet         { return captainsCallTypes }
 func (CaptainsCallYellow) GoAgain() bool               { return true }
+// not implemented: modal pick hard-coded to +2{p}; 'go again' mode is dropped
+func (CaptainsCallYellow) NotImplemented()             {}
 func (CaptainsCallYellow) Play(s *card.TurnState, _ *card.CardState) int { return captainsCallPlay(s, 1) }
 
 type CaptainsCallBlue struct{}
@@ -66,4 +66,6 @@ func (CaptainsCallBlue) Attack() int                 { return 0 }
 func (CaptainsCallBlue) Defense() int                { return 2 }
 func (CaptainsCallBlue) Types() card.TypeSet         { return captainsCallTypes }
 func (CaptainsCallBlue) GoAgain() bool               { return true }
+// not implemented: modal pick hard-coded to +2{p}; 'go again' mode is dropped
+func (CaptainsCallBlue) NotImplemented()             {}
 func (CaptainsCallBlue) Play(s *card.TurnState, _ *card.CardState) int { return captainsCallPlay(s, 0) }
