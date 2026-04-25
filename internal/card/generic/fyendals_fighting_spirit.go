@@ -2,10 +2,6 @@
 // 5. Printed pitch variants: Red 1, Yellow 2, Blue 3. Defense 2.
 //
 // Text: "When this attacks or defends, if you have less {h} than an opposing hero, gain 1{h}."
-//
-// Simplification: The "less {h}" clause is modelled as a hero attribute — the 1{h} gain is credited
-// 1-to-1 with damage when this attacks and the current hero implements card.LowerHealthWanter. The
-// on-defend half isn't modelled (Play isn't called during a plain block).
 
 package generic
 
@@ -35,6 +31,8 @@ func (FyendalsFightingSpiritRed) Attack() int                 { return 7 }
 func (FyendalsFightingSpiritRed) Defense() int                { return 2 }
 func (FyendalsFightingSpiritRed) Types() card.TypeSet         { return fyendalsFightingSpiritTypes }
 func (FyendalsFightingSpiritRed) GoAgain() bool               { return false }
+// not implemented: 1{h} on-attack only fires for LowerHealthWanter heroes; on-defend half not modelled
+func (FyendalsFightingSpiritRed) NotImplemented()             {}
 func (c FyendalsFightingSpiritRed) Play(s *card.TurnState, _ *card.CardState) int { return fyendalsFightingSpiritDamage(c.Attack()) }
 
 type FyendalsFightingSpiritYellow struct{}
@@ -47,6 +45,8 @@ func (FyendalsFightingSpiritYellow) Attack() int                 { return 6 }
 func (FyendalsFightingSpiritYellow) Defense() int                { return 2 }
 func (FyendalsFightingSpiritYellow) Types() card.TypeSet         { return fyendalsFightingSpiritTypes }
 func (FyendalsFightingSpiritYellow) GoAgain() bool               { return false }
+// not implemented: 1{h} on-attack only fires for LowerHealthWanter heroes; on-defend half not modelled
+func (FyendalsFightingSpiritYellow) NotImplemented()             {}
 func (c FyendalsFightingSpiritYellow) Play(s *card.TurnState, _ *card.CardState) int { return fyendalsFightingSpiritDamage(c.Attack()) }
 
 type FyendalsFightingSpiritBlue struct{}
@@ -59,4 +59,6 @@ func (FyendalsFightingSpiritBlue) Attack() int                 { return 5 }
 func (FyendalsFightingSpiritBlue) Defense() int                { return 2 }
 func (FyendalsFightingSpiritBlue) Types() card.TypeSet         { return fyendalsFightingSpiritTypes }
 func (FyendalsFightingSpiritBlue) GoAgain() bool               { return false }
+// not implemented: 1{h} on-attack only fires for LowerHealthWanter heroes; on-defend half not modelled
+func (FyendalsFightingSpiritBlue) NotImplemented()             {}
 func (c FyendalsFightingSpiritBlue) Play(s *card.TurnState, _ *card.CardState) int { return fyendalsFightingSpiritDamage(c.Attack()) }

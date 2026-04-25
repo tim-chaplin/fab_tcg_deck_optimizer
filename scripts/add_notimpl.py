@@ -18,12 +18,14 @@ import sys
 def transform(src, note):
     # 1. Strip the leading-comment "Simplification:" paragraph from the doc block. The paragraph
     #    starts at a line beginning "// Simplification:" and includes any continuation `//` lines
-    #    that follow. The blank `//` separator immediately above is also removed.
+    #    that follow. A blank `//` separator immediately above is also removed if present (some
+    #    files run the Simplification line straight on from the Text: line).
     src = re.sub(
-        r"//\n// Simplification:[^\n]*(?:\n//[^\n]*)*\n",
+        r"(?:^//\n)?^// Simplification:[^\n]*(?:\n//[^\n]*)*\n",
         "",
         src,
         count=1,
+        flags=re.MULTILINE,
     )
 
     # 2. For each printing's struct, insert (or refresh) the `// not implemented:` line and the

@@ -64,9 +64,12 @@ func TestMarshalFormat(t *testing.T) {
 // writeDeck does), Marshal's output carries the default equipment in Arena and the default
 // sideboard entries in Sideboard. The default lists themselves are pinned in the deck
 // package's tests; this one only checks the fabrary text picks them up verbatim.
+//
+// Builds a Deck directly instead of going through deck.Random so the test is stable across
+// pool changes (e.g. cards getting tagged NotImplemented and dropping out of the random pool,
+// causing a seed-1 deck to roll different cards that collide with sideboard-default cap).
 func TestMarshalRendersAppliedDefaults(t *testing.T) {
-	rng := rand.New(rand.NewSource(1))
-	d := deck.Random(hero.Viserai{}, 40, 2, rng, nil)
+	d := &deck.Deck{Hero: hero.Viserai{}}
 	d.ApplyDefaults()
 	text := Marshal(d)
 
