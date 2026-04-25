@@ -223,11 +223,11 @@ func printCardValues(d *deck.Deck) {
 	})
 
 	fmt.Println()
-	fmt.Println("Card value (avg = role-based contribution per appearance; marginal = mean turn value with vs without the card in hand or arsenal):")
+	fmt.Println("Card value (marginal = mean turn value with vs without the card in hand or arsenal; avg = role-based contribution per appearance):")
 	nameW := maxNameLen(d.Cards)
 	for _, r := range rows {
-		fmt.Printf("  %-*s  avg %s  marginal %s\n",
-			nameW, r.name, formatCardValue(r.avg, r.hasAvg), formatCardMargin(r.margin, r.hasMargin))
+		fmt.Printf("  %-*s  marginal %s  avg %s\n",
+			nameW, r.name, formatCardMargin(r.margin, r.hasMargin), formatCardValue(r.avg, r.hasAvg))
 	}
 }
 
