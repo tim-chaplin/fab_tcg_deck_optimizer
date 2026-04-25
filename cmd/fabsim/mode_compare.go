@@ -75,52 +75,94 @@ func runCompare(name1, name2 string, deepShuffles, incoming, maxCopies int, seed
 	printCardDelta(name1, name2, d1, d2)
 }
 
-// printCardDelta writes the per-card count delta between d1 and d2 — negative rows first,
-// then positives; alphabetical within each group; cards present in equal counts in both decks
-// are omitted. When the two card lists match exactly an explicit confirmation line replaces
-// the empty body so silence can't be mistaken for a failure. Scoped to the card list — hero
-// and weapon differences are not surfaced here.
+// printCardDelta writes the per-loadout count delta between d1 and d2 — negative rows first,
+// then positives; weapons lead each block (alphabetical) followed by cards (alphabetical),
+// so the loadout-defining piece sits at the top of each list. Entries present in equal
+// counts in both decks are omitted. Covers both the deck's Cards and its Weapons since both
+// are sim-relevant loadout choices a comparison reader needs to see. Hero, Equipment, and
+// Sideboard are out of scope. When the two loadouts match exactly an explicit confirmation
+// line replaces the empty body so silence can't be mistaken for a failure.
 func printCardDelta(name1, name2 string, d1, d2 *deck.Deck) {
-	counts1 := map[string]int{}
-	for _, c := range d1.Cards {
-		counts1[c.Name()]++
+	counts1 := loadoutCounts(d1)
+	counts2 := loadoutCounts(d2)
+	weaponNames := loadoutWeaponNames(d1, d2)
+
+	type entry struct {
+		line     string
+		name     string
+		isWeapon bool
 	}
-	counts2 := map[string]int{}
-	for _, c := range d2.Cards {
-		counts2[c.Name()]++
-	}
-	names := make(map[string]struct{}, len(counts1)+len(counts2))
+	allNames := make(map[string]struct{}, len(counts1)+len(counts2))
 	for n := range counts1 {
-		names[n] = struct{}{}
+		allNames[n] = struct{}{}
 	}
 	for n := range counts2 {
-		names[n] = struct{}{}
+		allNames[n] = struct{}{}
 	}
-	sorted := make([]string, 0, len(names))
-	for n := range names {
-		sorted = append(sorted, n)
-	}
-	sort.Strings(sorted)
 
-	var minuses, pluses []string
-	for _, n := range sorted {
-		d := counts2[n] - counts1[n]
-		switch {
-		case d < 0:
-			minuses = append(minuses, fmt.Sprintf("%d %s", d, n))
-		case d > 0:
-			pluses = append(pluses, fmt.Sprintf("+%d %s", d, n))
+	var minuses, pluses []entry
+	for n := range allNames {
+		delta := counts2[n] - counts1[n]
+		if delta == 0 {
+			continue
+		}
+		_, isWeapon := weaponNames[n]
+		e := entry{name: n, isWeapon: isWeapon}
+		if delta < 0 {
+			e.line = fmt.Sprintf("%d %s", delta, n)
+			minuses = append(minuses, e)
+		} else {
+			e.line = fmt.Sprintf("+%d %s", delta, n)
+			pluses = append(pluses, e)
 		}
 	}
-	fmt.Println("Card differences:")
+	sortLoadoutEntries := func(es []entry) {
+		sort.Slice(es, func(i, j int) bool {
+			if es[i].isWeapon != es[j].isWeapon {
+				return es[i].isWeapon
+			}
+			return es[i].name < es[j].name
+		})
+	}
+	sortLoadoutEntries(minuses)
+	sortLoadoutEntries(pluses)
+
+	fmt.Println("Card / weapon differences:")
 	if len(minuses) == 0 && len(pluses) == 0 {
-		fmt.Printf("  %s and %s have identical card lists (%d cards)\n", name1, name2, len(d1.Cards))
+		fmt.Printf("  %s and %s have identical card and weapon lists (%d cards, %d weapons)\n",
+			name1, name2, len(d1.Cards), len(d1.Weapons))
 		return
 	}
-	for _, l := range minuses {
-		fmt.Println("  " + l)
+	for _, e := range minuses {
+		fmt.Println("  " + e.line)
 	}
-	for _, l := range pluses {
-		fmt.Println("  " + l)
+	for _, e := range pluses {
+		fmt.Println("  " + e.line)
 	}
+}
+
+// loadoutCounts tallies the deck's cards and weapons by display name in a single map.
+// Weapon names don't collide with card names in the current registry, so a flat
+// name-keyed map cleanly captures both lists for diffing.
+func loadoutCounts(d *deck.Deck) map[string]int {
+	out := make(map[string]int, len(d.Cards)+len(d.Weapons))
+	for _, c := range d.Cards {
+		out[c.Name()]++
+	}
+	for _, w := range d.Weapons {
+		out[w.Name()]++
+	}
+	return out
+}
+
+// loadoutWeaponNames returns the set of weapon display names appearing in either deck,
+// used to flag which diff entries should sort first within their +/- block.
+func loadoutWeaponNames(decks ...*deck.Deck) map[string]struct{} {
+	out := map[string]struct{}{}
+	for _, d := range decks {
+		for _, w := range d.Weapons {
+			out[w.Name()] = struct{}{}
+		}
+	}
+	return out
 }
