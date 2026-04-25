@@ -2,8 +2,6 @@
 // 2. Printed pitch variants: Red 1, Yellow 2, Blue 3. Defense 2.
 //
 // Text: "When this attacks, you may pay {r}{r}{r}. If you do, this gets +5{p}."
-//
-// Simplification: Pay-{r}{r}{r}-for-+5{p} rider isn't modelled.
 
 package generic
 
@@ -21,6 +19,8 @@ func (PunchAboveYourWeightRed) Attack() int                 { return 2 }
 func (PunchAboveYourWeightRed) Defense() int                { return 2 }
 func (PunchAboveYourWeightRed) Types() card.TypeSet         { return punchAboveYourWeightTypes }
 func (PunchAboveYourWeightRed) GoAgain() bool               { return false }
+// not implemented: pay-{r}{r}{r}-for-+5{p} mode
+func (PunchAboveYourWeightRed) NotImplemented()             {}
 func (c PunchAboveYourWeightRed) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }
 
 type PunchAboveYourWeightYellow struct{}
@@ -33,6 +33,8 @@ func (PunchAboveYourWeightYellow) Attack() int                 { return 2 }
 func (PunchAboveYourWeightYellow) Defense() int                { return 2 }
 func (PunchAboveYourWeightYellow) Types() card.TypeSet         { return punchAboveYourWeightTypes }
 func (PunchAboveYourWeightYellow) GoAgain() bool               { return false }
+// not implemented: pay-{r}{r}{r}-for-+5{p} mode
+func (PunchAboveYourWeightYellow) NotImplemented()             {}
 func (c PunchAboveYourWeightYellow) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }
 
 type PunchAboveYourWeightBlue struct{}
@@ -45,4 +47,6 @@ func (PunchAboveYourWeightBlue) Attack() int                 { return 2 }
 func (PunchAboveYourWeightBlue) Defense() int                { return 2 }
 func (PunchAboveYourWeightBlue) Types() card.TypeSet         { return punchAboveYourWeightTypes }
 func (PunchAboveYourWeightBlue) GoAgain() bool               { return false }
+// not implemented: pay-{r}{r}{r}-for-+5{p} mode
+func (PunchAboveYourWeightBlue) NotImplemented()             {}
 func (c PunchAboveYourWeightBlue) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }

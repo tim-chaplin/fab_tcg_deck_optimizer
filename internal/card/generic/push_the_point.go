@@ -2,8 +2,6 @@
 // pitch variants: Red 1, Yellow 2, Blue 3. Defense 2.
 //
 // Text: "If the last attack on this combat chain hit, Push the Point gains +2{p}."
-//
-// Simplification: Chain-history +2{p} rider isn't modelled.
 
 package generic
 
@@ -21,6 +19,8 @@ func (PushThePointRed) Attack() int                 { return 4 }
 func (PushThePointRed) Defense() int                { return 2 }
 func (PushThePointRed) Types() card.TypeSet         { return pushThePointTypes }
 func (PushThePointRed) GoAgain() bool               { return false }
+// not implemented: chain-history +2{p} rider (in-chain history not readable from Play)
+func (PushThePointRed) NotImplemented()             {}
 func (c PushThePointRed) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }
 
 type PushThePointYellow struct{}
@@ -33,6 +33,8 @@ func (PushThePointYellow) Attack() int                 { return 3 }
 func (PushThePointYellow) Defense() int                { return 2 }
 func (PushThePointYellow) Types() card.TypeSet         { return pushThePointTypes }
 func (PushThePointYellow) GoAgain() bool               { return false }
+// not implemented: chain-history +2{p} rider (in-chain history not readable from Play)
+func (PushThePointYellow) NotImplemented()             {}
 func (c PushThePointYellow) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }
 
 type PushThePointBlue struct{}
@@ -45,4 +47,6 @@ func (PushThePointBlue) Attack() int                 { return 2 }
 func (PushThePointBlue) Defense() int                { return 2 }
 func (PushThePointBlue) Types() card.TypeSet         { return pushThePointTypes }
 func (PushThePointBlue) GoAgain() bool               { return false }
+// not implemented: chain-history +2{p} rider (in-chain history not readable from Play)
+func (PushThePointBlue) NotImplemented()             {}
 func (c PushThePointBlue) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }

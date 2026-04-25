@@ -3,10 +3,6 @@
 //
 // Text: "**Mark** target opposing hero. The next time you attack a **marked** hero this turn, the
 // attack gets +N{p}. **Go again**" (Red N=3, Yellow N=2, Blue N=1.)
-//
-// Simplification: Mark isn't modelled; the +N rider is credited unconditionally. Scans
-// TurnState.CardsRemaining for the first matching attack action card and credits the bonus assuming
-// it will be played; if none is scheduled after this card, the bonus fizzles.
 
 package generic
 
@@ -24,6 +20,8 @@ func (PublicBountyRed) Attack() int                 { return 0 }
 func (PublicBountyRed) Defense() int                { return 2 }
 func (PublicBountyRed) Types() card.TypeSet         { return publicBountyTypes }
 func (PublicBountyRed) GoAgain() bool               { return true }
+// not implemented: mark not tracked; +3{p} 'marked defender' rider fires unconditionally
+func (PublicBountyRed) NotImplemented()             {}
 func (PublicBountyRed) Play(s *card.TurnState, _ *card.CardState) int { return grantNextAttackActionBonus(s, 3) }
 
 type PublicBountyYellow struct{}
@@ -36,6 +34,8 @@ func (PublicBountyYellow) Attack() int                 { return 0 }
 func (PublicBountyYellow) Defense() int                { return 2 }
 func (PublicBountyYellow) Types() card.TypeSet         { return publicBountyTypes }
 func (PublicBountyYellow) GoAgain() bool               { return true }
+// not implemented: mark not tracked; +3{p} 'marked defender' rider fires unconditionally
+func (PublicBountyYellow) NotImplemented()             {}
 func (PublicBountyYellow) Play(s *card.TurnState, _ *card.CardState) int { return grantNextAttackActionBonus(s, 2) }
 
 type PublicBountyBlue struct{}
@@ -48,4 +48,6 @@ func (PublicBountyBlue) Attack() int                 { return 0 }
 func (PublicBountyBlue) Defense() int                { return 2 }
 func (PublicBountyBlue) Types() card.TypeSet         { return publicBountyTypes }
 func (PublicBountyBlue) GoAgain() bool               { return true }
+// not implemented: mark not tracked; +3{p} 'marked defender' rider fires unconditionally
+func (PublicBountyBlue) NotImplemented()             {}
 func (PublicBountyBlue) Play(s *card.TurnState, _ *card.CardState) int { return grantNextAttackActionBonus(s, 1) }
