@@ -2,10 +2,6 @@
 // Printed pitch variants: Red 1, Yellow 2, Blue 3.
 // Text: "Your next Runeblade attack this turn gains +N{p}. Create a Runechant token. Go again."
 // (Red N=3, Yellow N=2, Blue N=1.)
-//
-// Simplification: the +N{p} rider contributes N damage only if a Runeblade attack (an attack
-// action card OR a weapon swing) follows later in this turn's ordering (peeking
-// TurnState.CardsRemaining). The Runechant is always created (+1 damage) regardless.
 
 package runeblade
 

@@ -2,11 +2,6 @@
 // Printed power: Red 4, Yellow 3, Blue 2.
 // Text: "When Deathly Duet attacks, if an attack action card was pitched to play it, it gains
 // +2{p}. If a 'non-attack' action card was pitched to play it, create 2 Runechant tokens."
-//
-// Simplification: both riders scan Pitched (we don't track which pitched card paid for which
-// play; any attack in Pitched satisfies the +2{p} branch, any non-attack action satisfies the
-// runechant branch, and both can fire if both kinds were pitched). The 2 Runechants enter state
-// via CreateRunechants — they fire on Deathly Duet's own attack resolution downstream.
 
 package runeblade
 
@@ -24,6 +19,8 @@ func (DeathlyDuetRed) Attack() int                  { return 4 }
 func (DeathlyDuetRed) Defense() int                 { return 3 }
 func (DeathlyDuetRed) Types() card.TypeSet       { return deathlyDuetTypes }
 func (DeathlyDuetRed) GoAgain() bool                { return false }
+// not implemented: Pitched scan can fire both riders independently of which pitched card paid for which play (over-credits when both an attack and a non-attack action are pitched)
+func (DeathlyDuetRed) NotImplemented()             {}
 func (c DeathlyDuetRed) Play(s *card.TurnState, _ *card.CardState) int { return deathlyDuetPlay(c.Attack(), s) }
 
 type DeathlyDuetYellow struct{}
@@ -36,6 +33,8 @@ func (DeathlyDuetYellow) Attack() int                  { return 3 }
 func (DeathlyDuetYellow) Defense() int                 { return 3 }
 func (DeathlyDuetYellow) Types() card.TypeSet       { return deathlyDuetTypes }
 func (DeathlyDuetYellow) GoAgain() bool                { return false }
+// not implemented: Pitched scan can fire both riders independently of which pitched card paid for which play (over-credits when both an attack and a non-attack action are pitched)
+func (DeathlyDuetYellow) NotImplemented()             {}
 func (c DeathlyDuetYellow) Play(s *card.TurnState, _ *card.CardState) int { return deathlyDuetPlay(c.Attack(), s) }
 
 type DeathlyDuetBlue struct{}
@@ -48,6 +47,8 @@ func (DeathlyDuetBlue) Attack() int                  { return 2 }
 func (DeathlyDuetBlue) Defense() int                 { return 3 }
 func (DeathlyDuetBlue) Types() card.TypeSet       { return deathlyDuetTypes }
 func (DeathlyDuetBlue) GoAgain() bool                { return false }
+// not implemented: Pitched scan can fire both riders independently of which pitched card paid for which play (over-credits when both an attack and a non-attack action are pitched)
+func (DeathlyDuetBlue) NotImplemented()             {}
 func (c DeathlyDuetBlue) Play(s *card.TurnState, _ *card.CardState) int { return deathlyDuetPlay(c.Attack(), s) }
 
 func deathlyDuetPlay(base int, s *card.TurnState) int {
