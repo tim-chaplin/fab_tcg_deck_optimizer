@@ -55,7 +55,7 @@ func (c FactFindingMissionBlue) Play(s *card.TurnState, self *card.CardState) in
 // factFindingMissionDamage is a breadcrumb for the on-hit "peek a face-down card in arsenal /
 // equipment" rider — opponent-side inspection isn't modelled (see TODO.md).
 func factFindingMissionDamage(attack int, self *card.CardState) int {
-	if card.LikelyToHit(attack, self.EffectiveDominate()) {
+	if card.LikelyToHit(self) {
 		// TODO: model on-hit opponent-arsenal peek rider.
 	}
 	return attack

@@ -31,7 +31,7 @@ func (BlowForABlowRed) Defense() int        { return 2 }
 func (BlowForABlowRed) Types() card.TypeSet { return blowForABlowTypes }
 func (BlowForABlowRed) GoAgain() bool       { return simstate.HeroWantsLowerHealth() }
 func (c BlowForABlowRed) Play(s *card.TurnState, self *card.CardState) int {
-	if card.LikelyToHit(c.Attack(), self.EffectiveDominate()) {
+	if card.LikelyToHit(self) {
 		return c.Attack() + blowForABlowPingValue
 	}
 	return c.Attack()

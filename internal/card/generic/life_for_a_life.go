@@ -24,7 +24,7 @@ const lifeForALifeHealValue = 1
 // lifeForALifeDamage returns the base attack plus the heal rider when the attack is likely to
 // land.
 func lifeForALifeDamage(attack int, self *card.CardState) int {
-	if card.LikelyToHit(attack, self.EffectiveDominate()) {
+	if card.LikelyToHit(self) {
 		return attack + lifeForALifeHealValue
 	}
 	return attack

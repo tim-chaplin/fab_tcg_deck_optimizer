@@ -18,7 +18,7 @@ var reekOfCorruptionTypes = card.NewTypeSet(card.TypeRuneblade, card.TypeAction,
 // reekOfCorruptionDamage returns the base attack plus the discard rider when the aura condition
 // is satisfied AND this card's printed attack is likely to land on its own.
 func reekOfCorruptionDamage(attack int, s *card.TurnState, self *card.CardState) int {
-	if s != nil && s.HasAuraInPlay() && card.LikelyToHit(attack, self.EffectiveDominate()) {
+	if s != nil && s.HasAuraInPlay() && card.LikelyToHit(self) {
 		return attack + card.DiscardValue
 	}
 	return attack
