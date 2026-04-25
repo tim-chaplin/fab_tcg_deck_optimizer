@@ -52,11 +52,17 @@ func (p *CardState) EffectiveDominate() bool {
 }
 
 // EffectiveAttack returns the card's printed Attack() plus any granted BonusDamage from prior
-// "next attack action card gains +N{p}" riders. Cards with "if this hits" clauses should pass
-// this into LikelyToHit so a buffed attack credits its rider correctly (e.g. a +1 grant bumps
-// a base-3 attack to 4, which lands in the 1/4/7 likely-to-hit window).
+// "next attack action card gains +N{p}" riders, clamped at 0. An attack's power can't be
+// reduced below 0 in FaB, so a -2 grant on a 1-power attack resolves as a 0-power attack
+// (not -1). Cards with "if this hits" clauses should pass this into LikelyToHit so the rider
+// fires off the post-clamp value — a +1 grant bumps a base-3 attack to 4 (the 1/4/7 likely-to-
+// hit window), and a -3 grant on a 3-power attack drops it to 0 (no rider fires).
 func (p *CardState) EffectiveAttack() int {
-	return p.Card.Attack() + p.BonusDamage
+	n := p.Card.Attack() + p.BonusDamage
+	if n < 0 {
+		return 0
+	}
+	return n
 }
 
 // Hero is the minimal hero profile card effects need. Narrower than hero.Hero to avoid an

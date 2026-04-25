@@ -505,14 +505,19 @@ func (ctx *sequenceContext) playSequenceWithMeta(n int, perCardOut, perCardTrigg
 		// grant is folded in here (not by the target's Play) so the +N is attributed to the
 		// attack receiving the buff rather than the granter, and so any "if this hits" rider
 		// inside the target's Play can read self.EffectiveAttack() consistently. Gated on
-		// isAttackAction because grants only target attack actions.
-		bonusDmg := 0
+		// isAttackAction because grants only target attack actions; clamped at 0 because
+		// FaB attack-power buffs can't drive an attack below 0 power (a -3 grant on a
+		// 1-power attack resolves as a 0-power attack, not -2).
+		cardContrib := playDmg
 		if m.isAttackAction {
-			bonusDmg = pc.BonusDamage
+			cardContrib += pc.BonusDamage
+			if cardContrib < 0 {
+				cardContrib = 0
+			}
 		}
-		damage += playDmg + triggerDmg + auraTriggerDmg + ephemeralDmg + bonusDmg
+		damage += cardContrib + triggerDmg + auraTriggerDmg + ephemeralDmg
 		if perCardOut != nil {
-			perCardOut[i] = float64(playDmg + bonusDmg)
+			perCardOut[i] = float64(cardContrib)
 		}
 		if perCardTriggerOut != nil {
 			perCardTriggerOut[i] = float64(triggerDmg)

@@ -163,6 +163,44 @@ func TestPlaySequence_BonusDamageSolverGateOnNonAttack(t *testing.T) {
 	}
 }
 
+// TestPlaySequence_BonusDamageNegativeClampsAtZero pins the FaB attack-power floor: a
+// negative grant (defender-side -N{p} debuff like Drag Down's printed text) reduces the
+// target attack's contribution but never drives it below 0. A 1-power attack with a -3
+// grant deals 0, not -2 — the chain total is unchanged below the floor.
+func TestPlaySequence_BonusDamageNegativeClampsAtZero(t *testing.T) {
+	order := []card.Card{grantBonusDamage{n: -3}, fake.BlueAttack{}}
+	ctx := newSequenceContextForTest(stubHero, nil, nil, 10, 0, len(order))
+	perCard := make([]float64, len(order))
+	dmg, _, _, legal := ctx.playSequence(order, perCard, nil, nil)
+	if !legal {
+		t.Fatalf("playSequence returned legal=false")
+	}
+	// Granter (returns 0, no own attack) → BlueAttack (printed power 1, bonus -3 →
+	// pre-clamp -2, post-clamp 0). Total 0+0 = 0.
+	if dmg != 0 {
+		t.Fatalf("dmg = %d, want 0 (1-power attack with -3 bonus floors at 0)", dmg)
+	}
+	if perCard[1] != 0 {
+		t.Errorf("BlueAttack perCardOut = %.1f, want 0 (clamped from -2)", perCard[1])
+	}
+}
+
+// TestPlaySequence_BonusDamageNegativePartialReduction pins the in-range case: a negative
+// grant that doesn't drive the target below 0 reduces the contribution by the full bonus,
+// no clamp.
+func TestPlaySequence_BonusDamageNegativePartialReduction(t *testing.T) {
+	order := []card.Card{grantBonusDamage{n: -2}, fake.RedAttack{}}
+	ctx := newSequenceContextForTest(stubHero, nil, nil, 10, 0, len(order))
+	dmg, _, _, legal := ctx.playSequence(order, nil, nil, nil)
+	if !legal {
+		t.Fatalf("playSequence returned legal=false")
+	}
+	// Granter → RedAttack (printed power 3, bonus -2 → 1). Total 1.
+	if dmg != 1 {
+		t.Fatalf("dmg = %d, want 1 (RedAttack 3 - debuff 2)", dmg)
+	}
+}
+
 // TestPlaySequence_BonusDamageNoAttackTargetFizzles pins the granter-side scan: if no attack
 // action follows the granter, the rider has nowhere to land and total damage stays 0.
 func TestPlaySequence_BonusDamageNoAttackTargetFizzles(t *testing.T) {
