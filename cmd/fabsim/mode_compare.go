@@ -61,15 +61,14 @@ func runCompare(name1, name2 string, deepShuffles, incoming, maxCopies int, seed
 		{"Cycle 2 mean", formatMean(s1.SecondCycle.Mean()), formatMean(s2.SecondCycle.Mean())},
 	})
 
-	if len(s1.Histogram) > 0 || len(s2.Histogram) > 0 {
+	if len(s1.Histogram) > 0 && len(s2.Histogram) > 0 {
+		// Both decks render against the same axis ranges so values, bar widths, and tick
+		// labels line up between the two charts and a side-by-side read is meaningful.
+		scale := unionHistogramScale(d1, d2)
 		fmt.Println()
 		fmt.Println("Hand-value distributions:")
-		if len(s1.Histogram) > 0 {
-			printHistogram(d1, fmt.Sprintf("  %s:", name1))
-		}
-		if len(s2.Histogram) > 0 {
-			printHistogram(d2, fmt.Sprintf("  %s:", name2))
-		}
+		printHistogram(d1, fmt.Sprintf("  %s:", name1), scale)
+		printHistogram(d2, fmt.Sprintf("  %s:", name2), scale)
 	}
 
 	fmt.Println()

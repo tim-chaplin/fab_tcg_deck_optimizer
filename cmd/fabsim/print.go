@@ -151,7 +151,7 @@ func printBestDeck(d *deck.Deck) {
 		printPerCardStats(d)
 	}
 	if len(d.Stats.Histogram) > 0 {
-		printHistogram(d, histogramTitle(d))
+		printHistogram(d, histogramTitle(d), naturalHistogramScale(d))
 	}
 }
 
@@ -231,27 +231,54 @@ const (
 	histStretchSlot  = 3
 )
 
+// histogramScale fixes the axis ranges a chart renders against: x-axis spans minV..maxV
+// inclusive and y-axis tops out at peak.
+type histogramScale struct {
+	minV, maxV, peak int
+}
+
+// naturalHistogramScale returns the histogramScale derived from d's own min/max/peak — what to
+// pass to printHistogram for a single-deck chart at its native resolution.
+func naturalHistogramScale(d *deck.Deck) histogramScale {
+	minV := d.Stats.Min()
+	maxV := d.Stats.Max()
+	_, peak := buildHistogramColumns(d.Stats.Histogram, minV, maxV, histChartWidth(maxV-minV+1))
+	return histogramScale{minV, maxV, peak}
+}
+
+// unionHistogramScale returns the smallest scale that fits both decks' data, so the two
+// charts can be rendered with matching x and y axes. The peak is computed under the union
+// range and width because binning shifts when the range widens.
+func unionHistogramScale(d1, d2 *deck.Deck) histogramScale {
+	minV := min(d1.Stats.Min(), d2.Stats.Min())
+	maxV := max(d1.Stats.Max(), d2.Stats.Max())
+	width := histChartWidth(maxV - minV + 1)
+	_, peak1 := buildHistogramColumns(d1.Stats.Histogram, minV, maxV, width)
+	_, peak2 := buildHistogramColumns(d2.Stats.Histogram, minV, maxV, width)
+	return histogramScale{minV, maxV, max(peak1, peak2)}
+}
+
 // printHistogram renders Stats.Histogram as an ASCII bar chart under the supplied title line.
 // The chart body is always histWidth x histHeight characters regardless of how many distinct
 // hand values the deck produced — sparse data stretches across the width, dense data bins into
 // it — so the rendered output has predictable size and the axis labels alone carry the scale.
 // title is printed verbatim above the chart so the caller can identify the deck the chart is
-// for. No-ops on an unscored deck.
-func printHistogram(d *deck.Deck, title string) {
-	minV := d.Stats.Min()
-	maxV := d.Stats.Max()
-	width := histChartWidth(maxV - minV + 1)
-	counts, peak := buildHistogramColumns(d.Stats.Histogram, minV, maxV, width)
-	if peak == 0 {
+// for. The scale fixes both axes; values outside scale.minV..scale.maxV contribute nothing,
+// and bars scale against scale.peak rather than this deck's natural peak. No-ops when
+// scale.peak == 0.
+func printHistogram(d *deck.Deck, title string, scale histogramScale) {
+	if scale.peak == 0 {
 		return
 	}
-	bars := scaleBarHeights(counts, peak, histHeight)
-	yLabelW := len(strconv.Itoa(peak))
+	width := histChartWidth(scale.maxV - scale.minV + 1)
+	counts, _ := buildHistogramColumns(d.Stats.Histogram, scale.minV, scale.maxV, width)
+	bars := scaleBarHeights(counts, scale.peak, histHeight)
+	yLabelW := len(strconv.Itoa(scale.peak))
 	// bodyIndent is the number of spaces before the first bar column so every row (y-label,
 	// axis baseline, tick labels, title) lines up: 1 lead + yLabelW label + " |" (2 chars).
 	bodyIndent := strings.Repeat(" ", 1+yLabelW+2)
-	yTicks := yAxisTickLabels(peak, histHeight)
-	xTicks := xAxisTicks(minV, maxV, width)
+	yTicks := yAxisTickLabels(scale.peak, histHeight)
+	xTicks := xAxisTicks(scale.minV, scale.maxV, width)
 
 	fmt.Println()
 	fmt.Println(title)

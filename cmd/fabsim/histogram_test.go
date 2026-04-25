@@ -1,6 +1,10 @@
 package main
 
-import "testing"
+import (
+	"testing"
+
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/deck"
+)
 
 // TestBuildHistogramColumns_Stretch verifies the "range <= width" regime: each integer
 // value places a single one-char bar at an evenly-distributed column (min at col 0, max at
@@ -303,6 +307,35 @@ func TestXAxisTickRow_CollisionDropsInteriorWinsMinMax(t *testing.T) {
 	// Interior tick "9999" is dropped; the middle of the buffer stays blank.
 	if got[4:6] != "  " {
 		t.Errorf("interior label should be dropped on collision; got middle = %q", got[4:6])
+	}
+}
+
+// TestUnionHistogramScale_StretchesAxesToCoverBoth pins the union math compare relies on for
+// matching axes: minV is the smaller of the two mins, maxV the larger, and peak the larger of
+// the two binned peaks under the union range. Each deck individually has a different range
+// and peak; the union spans both so the side-by-side charts can be read against identical
+// scales.
+func TestUnionHistogramScale_StretchesAxesToCoverBoth(t *testing.T) {
+	// d1: values 9..21, peak 32135 — narrower range, taller peak.
+	// d2: values 7..27, peak 19723 — wider range, shorter peak.
+	d1 := &deck.Deck{Stats: deck.Stats{
+		Hands:     100000,
+		Histogram: map[int]int{9: 1000, 12: 32135, 15: 24000, 18: 16000, 21: 8000},
+	}}
+	d2 := &deck.Deck{Stats: deck.Stats{
+		Hands:     100000,
+		Histogram: map[int]int{7: 1, 12: 14000, 17: 19723, 22: 9000, 27: 1},
+	}}
+
+	got := unionHistogramScale(d1, d2)
+	if got.minV != 7 {
+		t.Errorf("minV = %d, want 7 (smaller of the two mins)", got.minV)
+	}
+	if got.maxV != 27 {
+		t.Errorf("maxV = %d, want 27 (larger of the two maxes)", got.maxV)
+	}
+	if got.peak != 32135 {
+		t.Errorf("peak = %d, want 32135 (larger of the two peaks)", got.peak)
 	}
 }
 
