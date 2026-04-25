@@ -22,10 +22,15 @@ func TestRegainComposure_NonAttackInRemainingFizzles(t *testing.T) {
 	}
 }
 
-// TestRegainComposure_NextAttackReturnsBonus: first attack-action triggers +1.
-func TestRegainComposure_NextAttackReturnsBonus(t *testing.T) {
-	s := card.TurnState{CardsRemaining: []*card.CardState{{Card: stubGenericAttack(0, 0)}}}
-	if got := (RegainComposureBlue{}).Play(&s, &card.CardState{}); got != 1 {
-		t.Errorf("Play() = %d, want 1", got)
+// TestRegainComposure_NextAttackGrantsBonusAttack: first attack-action picks up +1 on its
+// BonusAttack so EffectiveAttack folds it into LikelyToHit. Granter returns 0.
+func TestRegainComposure_NextAttackGrantsBonusAttack(t *testing.T) {
+	target := &card.CardState{Card: stubGenericAttack(0, 0)}
+	s := card.TurnState{CardsRemaining: []*card.CardState{target}}
+	if got := (RegainComposureBlue{}).Play(&s, &card.CardState{}); got != 0 {
+		t.Errorf("Play() = %d, want 0 (granter returns 0; +N rides on target's BonusAttack)", got)
+	}
+	if target.BonusAttack != 1 {
+		t.Errorf("target BonusAttack = %d, want 1", target.BonusAttack)
 	}
 }

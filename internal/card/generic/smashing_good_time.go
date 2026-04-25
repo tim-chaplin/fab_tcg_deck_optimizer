@@ -29,7 +29,7 @@ func (SmashingGoodTimeRed) Play(s *card.TurnState, self *card.CardState) int {
 	if !self.FromArsenal {
 		return 0
 	}
-	return nextAttackActionBonus(s, 3)
+	return grantNextAttackActionBonus(s, 3)
 }
 
 type SmashingGoodTimeYellow struct{}
@@ -46,7 +46,7 @@ func (SmashingGoodTimeYellow) Play(s *card.TurnState, self *card.CardState) int 
 	if !self.FromArsenal {
 		return 0
 	}
-	return nextAttackActionBonus(s, 2)
+	return grantNextAttackActionBonus(s, 2)
 }
 
 type SmashingGoodTimeBlue struct{}
@@ -63,5 +63,5 @@ func (SmashingGoodTimeBlue) Play(s *card.TurnState, self *card.CardState) int {
 	if !self.FromArsenal {
 		return 0
 	}
-	return nextAttackActionBonus(s, 1)
+	return grantNextAttackActionBonus(s, 1)
 }

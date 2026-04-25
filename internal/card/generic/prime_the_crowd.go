@@ -25,7 +25,7 @@ func (PrimeTheCrowdRed) Attack() int                 { return 0 }
 func (PrimeTheCrowdRed) Defense() int                { return 2 }
 func (PrimeTheCrowdRed) Types() card.TypeSet         { return primeTheCrowdTypes }
 func (PrimeTheCrowdRed) GoAgain() bool               { return true }
-func (PrimeTheCrowdRed) Play(s *card.TurnState, _ *card.CardState) int { return nextAttackActionBonus(s, 4) }
+func (PrimeTheCrowdRed) Play(s *card.TurnState, _ *card.CardState) int { return grantNextAttackActionBonus(s, 4) }
 
 type PrimeTheCrowdYellow struct{}
 
@@ -37,7 +37,7 @@ func (PrimeTheCrowdYellow) Attack() int                 { return 0 }
 func (PrimeTheCrowdYellow) Defense() int                { return 2 }
 func (PrimeTheCrowdYellow) Types() card.TypeSet         { return primeTheCrowdTypes }
 func (PrimeTheCrowdYellow) GoAgain() bool               { return true }
-func (PrimeTheCrowdYellow) Play(s *card.TurnState, _ *card.CardState) int { return nextAttackActionBonus(s, 3) }
+func (PrimeTheCrowdYellow) Play(s *card.TurnState, _ *card.CardState) int { return grantNextAttackActionBonus(s, 3) }
 
 type PrimeTheCrowdBlue struct{}
 
@@ -49,4 +49,4 @@ func (PrimeTheCrowdBlue) Attack() int                 { return 0 }
 func (PrimeTheCrowdBlue) Defense() int                { return 2 }
 func (PrimeTheCrowdBlue) Types() card.TypeSet         { return primeTheCrowdTypes }
 func (PrimeTheCrowdBlue) GoAgain() bool               { return true }
-func (PrimeTheCrowdBlue) Play(s *card.TurnState, _ *card.CardState) int { return nextAttackActionBonus(s, 2) }
+func (PrimeTheCrowdBlue) Play(s *card.TurnState, _ *card.CardState) int { return grantNextAttackActionBonus(s, 2) }

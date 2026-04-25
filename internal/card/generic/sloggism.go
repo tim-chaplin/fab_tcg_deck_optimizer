@@ -13,14 +13,17 @@ import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 
 var sloggismTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction)
 
-// sloggismPlay returns n when a matching attack action card is scheduled later this turn.
+// sloggismPlay grants +n to the first scheduled attack action card whose cost is 2 or more,
+// by adding to its BonusAttack. Returns 0 — the +n attributes to the buffed attack (so
+// EffectiveAttack picks it up in LikelyToHit) rather than to Sloggism itself.
 func sloggismPlay(s *card.TurnState, n int) int {
 	for _, pc := range s.CardsRemaining {
 		if !pc.Card.Types().IsAttackAction() {
 			continue
 		}
 		if pc.Card.Cost(s) >= 2 {
-			return n
+			pc.BonusAttack += n
+			return 0
 		}
 	}
 	return 0

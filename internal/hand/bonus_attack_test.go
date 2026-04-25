@@ -5,8 +5,28 @@ import (
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card/fake"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/card/generic"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/card/runeblade"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/weapon"
 )
+
+// pitchOnlyRed is a 0-cost, pitch-1, 0-attack, 0-defense red action: pure resource fodder for
+// integration tests that need to fund a 1-cost card without leaving any defensive or
+// offensive option in the partition. Non-attack action so Nimblism / Come to Fight / etc.
+// don't see it as a candidate target for their "next attack action" grants.
+type pitchOnlyRed struct{}
+
+func (pitchOnlyRed) ID() card.ID              { return card.Invalid }
+func (pitchOnlyRed) Name() string             { return "pitchOnlyRed" }
+func (pitchOnlyRed) Cost(*card.TurnState) int { return 0 }
+func (pitchOnlyRed) Pitch() int               { return 1 }
+func (pitchOnlyRed) Attack() int              { return 0 }
+func (pitchOnlyRed) Defense() int             { return 0 }
+func (pitchOnlyRed) Types() card.TypeSet {
+	return card.NewTypeSet(card.TypeGeneric, card.TypeAction)
+}
+func (pitchOnlyRed) GoAgain() bool                                 { return false }
+func (pitchOnlyRed) Play(*card.TurnState, *card.CardState) int { return 0 }
 
 // grantBonusAttack is a test-only non-attack action card that scans CardsRemaining and adds n
 // to BonusAttack on the first attack action card it finds. Mirrors the production shape used
@@ -217,5 +237,43 @@ func TestPlaySequence_BonusAttackPerPermutationReset(t *testing.T) {
 	second, _, _, _ := ctx.playSequence(order, nil, nil, nil)
 	if first != 6 || second != 6 {
 		t.Fatalf("non-deterministic damage across reuses: first=%d, second=%d, want both=6", first, second)
+	}
+}
+
+// TestBest_NimblismGrantsConsumingVolitionDiscardRider exercises the full BonusAttack flow
+// end-to-end through Best(): a Nimblism grant pushes Consuming Volition past the
+// likely-to-hit threshold so its arcane-damage discard rider fires.
+//
+// Setup:
+//   - Hand: Consuming Volition (Yellow) + Nimblism (Blue) + a pitch-1 red.
+//   - 1 Runechant carrying over from the previous turn.
+//
+// Best chain:
+//   1. Pitch the red (1 resource) to fund Volition.
+//   2. Play Nimblism Blue (cost 0, go again) — scans CardsRemaining, finds Volition Yellow
+//      (cost 1, satisfies the cost-≤1 filter), and writes pc.BonusAttack += 1.
+//   3. Play Consuming Volition Yellow:
+//        - The runechant carryover fires when the attack starts, flipping
+//          state.ArcaneDamageDealt = true.
+//        - self.EffectiveAttack() = printed 3 + BonusAttack 1 = 4. LikelyToHit(self) is
+//          true (4 ∈ {1,4,7}), so the discard rider returns +DiscardValue (3).
+//        - Volition's Play returns 3 (printed) + 3 (discard rider) = 6.
+//        - Solver folds in BonusAttack: cardContrib = 6 + 1 = 7.
+//
+// Total Value = 7 = 3 (Volition base) + 1 (Nimblism's grant via BonusAttack) + 3 (discard
+// rider, gated on ArcaneDamageDealt + LikelyToHit firing on the buffed attack).
+//
+// The runechant fires for 1 arcane damage but it was already credited last turn at token
+// creation, so it doesn't appear in this turn's Value.
+func TestBest_NimblismGrantsConsumingVolitionDiscardRider(t *testing.T) {
+	h := []card.Card{
+		runeblade.ConsumingVolitionYellow{},
+		generic.NimblismBlue{},
+		pitchOnlyRed{},
+	}
+	got := Best(stubHero, nil, h, 0, nil, 1, nil)
+	if got.Value != 7 {
+		t.Fatalf("Value = %d, want 7 (Volition 3 base + Nimblism +1 BonusAttack + discard rider 3 from runechant-driven ArcaneDamageDealt × LikelyToHit on buffed 4-power attack); line=[%s]",
+			got.Value, FormatBestLine(got.BestLine))
 	}
 }

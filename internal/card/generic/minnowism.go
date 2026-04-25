@@ -13,14 +13,17 @@ import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 
 var minnowismTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction)
 
-// minnowismPlay returns n when a matching attack action card is scheduled later this turn.
+// minnowismPlay grants +n to the first scheduled attack action card whose printed power is
+// 3 or less, by adding to its BonusAttack. Returns 0 — the +n attributes to the buffed
+// attack (so EffectiveAttack picks it up in LikelyToHit) rather than to Minnowism itself.
 func minnowismPlay(s *card.TurnState, n int) int {
 	for _, pc := range s.CardsRemaining {
 		if !pc.Card.Types().IsAttackAction() {
 			continue
 		}
 		if pc.Card.Attack() <= 3 {
-			return n
+			pc.BonusAttack += n
+			return 0
 		}
 	}
 	return 0

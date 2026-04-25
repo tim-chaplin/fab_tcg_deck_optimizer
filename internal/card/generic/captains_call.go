@@ -15,15 +15,18 @@ import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 
 var captainsCallTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction)
 
-// captainsCallPlay returns 2 when a matching attack action card with cost <= maxCost is scheduled
-// later this turn.
+// captainsCallPlay grants +2 to the first scheduled attack action card whose cost is at most
+// maxCost, by adding to its BonusAttack. Returns 0 — the +2 attributes to the buffed attack
+// (so EffectiveAttack picks it up in LikelyToHit) rather than to Captain's Call itself. The
+// alternative "go again" mode is dropped (covered by NotImplemented in Phase 2).
 func captainsCallPlay(s *card.TurnState, maxCost int) int {
 	for _, pc := range s.CardsRemaining {
 		if !pc.Card.Types().IsAttackAction() {
 			continue
 		}
 		if pc.Card.Cost(s) <= maxCost {
-			return 2
+			pc.BonusAttack += 2
+			return 0
 		}
 	}
 	return 0

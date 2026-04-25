@@ -23,4 +23,4 @@ func (ClearwaterElixirRed) Attack() int                 { return 0 }
 func (ClearwaterElixirRed) Defense() int                { return 3 }
 func (ClearwaterElixirRed) Types() card.TypeSet         { return clearwaterElixirTypes }
 func (ClearwaterElixirRed) GoAgain() bool               { return true }
-func (ClearwaterElixirRed) Play(s *card.TurnState, _ *card.CardState) int { return nextAttackActionBonus(s, 3) }
+func (ClearwaterElixirRed) Play(s *card.TurnState, _ *card.CardState) int { return grantNextAttackActionBonus(s, 3) }

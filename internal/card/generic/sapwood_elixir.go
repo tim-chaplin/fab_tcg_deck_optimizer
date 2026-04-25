@@ -23,4 +23,4 @@ func (SapwoodElixirRed) Attack() int                 { return 0 }
 func (SapwoodElixirRed) Defense() int                { return 3 }
 func (SapwoodElixirRed) Types() card.TypeSet         { return sapwoodElixirTypes }
 func (SapwoodElixirRed) GoAgain() bool               { return true }
-func (SapwoodElixirRed) Play(s *card.TurnState, _ *card.CardState) int { return nextAttackActionBonus(s, 3) }
+func (SapwoodElixirRed) Play(s *card.TurnState, _ *card.CardState) int { return grantNextAttackActionBonus(s, 3) }

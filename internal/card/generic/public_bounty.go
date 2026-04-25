@@ -24,7 +24,7 @@ func (PublicBountyRed) Attack() int                 { return 0 }
 func (PublicBountyRed) Defense() int                { return 2 }
 func (PublicBountyRed) Types() card.TypeSet         { return publicBountyTypes }
 func (PublicBountyRed) GoAgain() bool               { return true }
-func (PublicBountyRed) Play(s *card.TurnState, _ *card.CardState) int { return nextAttackActionBonus(s, 3) }
+func (PublicBountyRed) Play(s *card.TurnState, _ *card.CardState) int { return grantNextAttackActionBonus(s, 3) }
 
 type PublicBountyYellow struct{}
 
@@ -36,7 +36,7 @@ func (PublicBountyYellow) Attack() int                 { return 0 }
 func (PublicBountyYellow) Defense() int                { return 2 }
 func (PublicBountyYellow) Types() card.TypeSet         { return publicBountyTypes }
 func (PublicBountyYellow) GoAgain() bool               { return true }
-func (PublicBountyYellow) Play(s *card.TurnState, _ *card.CardState) int { return nextAttackActionBonus(s, 2) }
+func (PublicBountyYellow) Play(s *card.TurnState, _ *card.CardState) int { return grantNextAttackActionBonus(s, 2) }
 
 type PublicBountyBlue struct{}
 
@@ -48,4 +48,4 @@ func (PublicBountyBlue) Attack() int                 { return 0 }
 func (PublicBountyBlue) Defense() int                { return 2 }
 func (PublicBountyBlue) Types() card.TypeSet         { return publicBountyTypes }
 func (PublicBountyBlue) GoAgain() bool               { return true }
-func (PublicBountyBlue) Play(s *card.TurnState, _ *card.CardState) int { return nextAttackActionBonus(s, 1) }
+func (PublicBountyBlue) Play(s *card.TurnState, _ *card.CardState) int { return grantNextAttackActionBonus(s, 1) }

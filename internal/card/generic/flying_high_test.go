@@ -28,9 +28,10 @@ func TestFlyingHigh_NonAttackInRemainingFizzles(t *testing.T) {
 	}
 }
 
-// TestFlyingHigh_ColorMatchGrantsBonus: each variant's '+1{p} if matching color' rider only fires
-// when the granted target's pitch matches this card's own pitch. Every variant grants go again to
-// any attack target regardless.
+// TestFlyingHigh_ColorMatchGrantsBonus: each variant's '+1{p} if matching color' rider only
+// fires when the granted target's pitch matches this card's own pitch. Every variant grants
+// go again to any attack target regardless. Granter returns 0; the +1 (when applicable)
+// rides on the target's BonusAttack.
 func TestFlyingHigh_ColorMatchGrantsBonus(t *testing.T) {
 	cases := []struct {
 		name       string
@@ -50,9 +51,13 @@ func TestFlyingHigh_ColorMatchGrantsBonus(t *testing.T) {
 		}{{1, tc.wantRed}, {2, tc.wantYellow}, {3, tc.wantBlue}} {
 			pc := &card.CardState{Card: stubGenericAttackPitch(0, 0, target.pitch)}
 			s := card.TurnState{CardsRemaining: []*card.CardState{pc}}
-			if got := tc.c.Play(&s, &card.CardState{}); got != target.want {
-				t.Errorf("%s vs pitch-%d target: Play() = %d, want %d",
-					tc.name, target.pitch, got, target.want)
+			if got := tc.c.Play(&s, &card.CardState{}); got != 0 {
+				t.Errorf("%s vs pitch-%d target: Play() = %d, want 0 (granter returns 0; +1 rides on target's BonusAttack when colour matches)",
+					tc.name, target.pitch, got)
+			}
+			if pc.BonusAttack != target.want {
+				t.Errorf("%s vs pitch-%d target: BonusAttack = %d, want %d",
+					tc.name, target.pitch, pc.BonusAttack, target.want)
 			}
 			if !pc.GrantedGoAgain {
 				t.Errorf("%s vs pitch-%d target: GrantedGoAgain = false, want true (go again is unconditional)",

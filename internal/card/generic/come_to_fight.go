@@ -24,7 +24,7 @@ func (ComeToFightRed) Attack() int                 { return 0 }
 func (ComeToFightRed) Defense() int                { return 3 }
 func (ComeToFightRed) Types() card.TypeSet         { return comeToFightTypes }
 func (ComeToFightRed) GoAgain() bool               { return true }
-func (ComeToFightRed) Play(s *card.TurnState, _ *card.CardState) int { return nextAttackActionBonus(s, 3) }
+func (ComeToFightRed) Play(s *card.TurnState, _ *card.CardState) int { return grantNextAttackActionBonus(s, 3) }
 
 type ComeToFightYellow struct{}
 
@@ -36,7 +36,7 @@ func (ComeToFightYellow) Attack() int                 { return 0 }
 func (ComeToFightYellow) Defense() int                { return 3 }
 func (ComeToFightYellow) Types() card.TypeSet         { return comeToFightTypes }
 func (ComeToFightYellow) GoAgain() bool               { return true }
-func (ComeToFightYellow) Play(s *card.TurnState, _ *card.CardState) int { return nextAttackActionBonus(s, 2) }
+func (ComeToFightYellow) Play(s *card.TurnState, _ *card.CardState) int { return grantNextAttackActionBonus(s, 2) }
 
 type ComeToFightBlue struct{}
 
@@ -48,4 +48,4 @@ func (ComeToFightBlue) Attack() int                 { return 0 }
 func (ComeToFightBlue) Defense() int                { return 3 }
 func (ComeToFightBlue) Types() card.TypeSet         { return comeToFightTypes }
 func (ComeToFightBlue) GoAgain() bool               { return true }
-func (ComeToFightBlue) Play(s *card.TurnState, _ *card.CardState) int { return nextAttackActionBonus(s, 1) }
+func (ComeToFightBlue) Play(s *card.TurnState, _ *card.CardState) int { return grantNextAttackActionBonus(s, 1) }
