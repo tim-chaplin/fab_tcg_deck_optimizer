@@ -160,6 +160,12 @@ func TestRunEval_DefaultPrintsFullDump(t *testing.T) {
 	if !strings.Contains(stdout, "Card list:") {
 		t.Errorf("default eval output missing the card list:\n%s", stdout)
 	}
+	if !strings.Contains(stdout, "Card value") {
+		t.Errorf("default eval output missing the per-card value table:\n%s", stdout)
+	}
+	if !strings.Contains(stdout, "marginal") {
+		t.Errorf("default eval output missing the marginal-value column:\n%s", stdout)
+	}
 	if !strings.Contains(stderr, "rewriting") {
 		t.Errorf("default eval should announce the rewrite on stderr; got:\n%s", stderr)
 	}
