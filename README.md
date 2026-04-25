@@ -72,7 +72,7 @@ This is a work in progress. The current model is deliberately narrow:
 the catalogue.
 
 Deck names are resolved to `mydecks/<name>.json`; the `.json` suffix is optional. Subcommands
-that always operate on a specific deck (`eval`, `diff`) take the deck name(s) as positional
+that always operate on a specific deck (`eval`, `compare`) take the deck name(s) as positional
 arguments. `anneal` uses a `-deck` flag instead because the name can be omitted (the default
 is `<hero>_<format>_<incoming>_incoming`, e.g. `viserai_silver_age_0_incoming`, so different
 (hero, format, `-incoming`) regimes keep separate checkpoints) and the named file doubles as
@@ -102,8 +102,9 @@ that apply.
   asks you to paste the plain-text export; input ends automatically at fabrary's
   `See the full deck @ …` footer. Saves the result as `mydecks/<name>.json`. Cards the
   optimizer hasn't implemented yet are skipped with a warning rather than blocking the import.
-- **`diff`** — `fabsim diff <deck1> <deck2>`. Prints the card-count delta between two saved
-  decks, or confirms when the card lists are identical.
+- **`compare`** — `fabsim compare <deck1> <deck2>`. For each deck prints the brief summary
+  (hero, weapons, pitch counts, mean and per-cycle scores) and the hand-value histogram, then
+  the card-count delta between the two — or confirms when the card lists are identical.
 
 ### Suggested workflow
 
@@ -172,7 +173,7 @@ The summary below groups the flags by subcommand.
   rewriting the `.json` / `.txt`
 - `-brief` — print only the score summary (no card list, per-card stats, or best turn)
 
-**`diff`**, **`import`**: no flags; see the usage lines above.
+**`compare`**, **`import`**: no flags; see the usage lines above.
 
 Helper tool for exploring the upstream card database:
 
