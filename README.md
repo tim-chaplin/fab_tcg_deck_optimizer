@@ -72,7 +72,7 @@ This is a work in progress. The current model is deliberately narrow:
 the catalogue.
 
 Deck names are resolved to `mydecks/<name>.json`; the `.json` suffix is optional. Subcommands
-that always operate on a specific deck (`eval`, `diff`) take the deck name(s) as positional
+that always operate on a specific deck (`eval`, `compare`) take the deck name(s) as positional
 arguments. `anneal` uses a `-deck` flag instead because the name can be omitted (the default
 is `<hero>_<format>_<incoming>_incoming`, e.g. `viserai_silver_age_0_incoming`, so different
 (hero, format, `-incoming`) regimes keep separate checkpoints) and the named file doubles as
@@ -102,8 +102,12 @@ that apply.
   asks you to paste the plain-text export; input ends automatically at fabrary's
   `See the full deck @ …` footer. Saves the result as `mydecks/<name>.json`. Cards the
   optimizer hasn't implemented yet are skipped with a warning rather than blocking the import.
-- **`diff`** — `fabsim diff <deck1> <deck2>`. Prints the card-count delta between two saved
-  decks, or confirms when the card lists are identical.
+- **`compare`** — `fabsim compare <deck1> <deck2> -incoming N`. Re-scores both decks under the
+  same `-deep-shuffles` / `-incoming` so the comparison is apples-to-apples (the .json files
+  are rewritten with the fresh stats — card lists are unchanged), then prints a stat-by-stat
+  side-by-side report: pitch counts, mean hand value, per-cycle means, the two hand-value
+  histograms, and the per-card count delta. The (deep-shuffles, incoming) settings ride at the
+  top so the per-section rows don't repeat them.
 
 ### Suggested workflow
 
@@ -172,7 +176,17 @@ The summary below groups the flags by subcommand.
   rewriting the `.json` / `.txt`
 - `-brief` — print only the score summary (no card list, per-card stats, or best turn)
 
-**`diff`**, **`import`**: no flags; see the usage lines above.
+**`compare`** (re-score both decks at matched settings before reporting):
+
+- `-deep-shuffles` — shuffles per deck used for the re-score (default 10000)
+- `-incoming` — opponent damage per turn (required; both decks are re-scored against this value)
+- `-seed` — RNG seed (default: time-based)
+- `-format` — format predicate applied to replacement picks when a loaded deck contains
+  NotImplemented cards (default `silver_age`)
+- `-max-copies` — max copies per printing, applied when replacing NotImplemented cards
+  (default 2)
+
+**`import`**: no flags; see the usage line above.
 
 Helper tool for exploring the upstream card database:
 
