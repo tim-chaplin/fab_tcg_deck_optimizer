@@ -1,17 +1,20 @@
 package main
 
-import "testing"
+import (
+	"testing"
 
-// TestBuildHistogramColumns_Stretch verifies the "range <= width" regime: each integer
-// value places a single one-char bar at an evenly-distributed column (min at col 0, max at
-// col width-1) so adjacent values don't fuse into a solid block. Interior columns stay zero
-// to render as blank spacers.
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/deck"
+)
+
+// TestBuildHistogramColumns_Stretch verifies the stretch regime: each integer value places a
+// single one-char bar at col (v-min)*slot, with slot-1 empty cols between bars so adjacent
+// values don't fuse into a solid block. Bar positions are uniform regardless of rng.
 func TestBuildHistogramColumns_Stretch(t *testing.T) {
-	// Three distinct values (min=0, max=2, range=3) across a 6-wide chart → bars at cols
-	// (v-0)*5/(3-1) for v = 0, 1, 2, i.e. cols 0, 2, 5.
+	// Three distinct values (min=0, max=2, range=3) at slot=3 → bars at cols 0, 3, 6 within
+	// the natural 7-wide stretch chart.
 	hist := map[int]int{0: 5, 1: 10, 2: 3}
-	counts, peak := buildHistogramColumns(hist, 0, 2, 6)
-	want := []int{5, 0, 10, 0, 0, 3}
+	counts, peak := buildHistogramColumns(hist, 0, 2, 7)
+	want := []int{5, 0, 0, 10, 0, 0, 3}
 	for i, got := range counts {
 		if got != want[i] {
 			t.Errorf("counts[%d] = %d, want %d (full=%v)", i, got, want[i], counts)
@@ -208,13 +211,13 @@ func TestYAxisTickLabels_FourRowsOnTallPeak(t *testing.T) {
 // in both callers is what keeps tick labels sitting directly under their bars rather than
 // drifting one or two columns off.
 func TestColForValue_MatchesBarPositions(t *testing.T) {
-	// Stretch regime: 15 distinct values across 60 cols. minV at col 0, maxV at col 59,
-	// interior values evenly distributed.
-	if got := colForValue(7, 7, 21, 60); got != 0 {
+	// Stretch regime: 15 distinct values at slot=3 → natural width 43, bars at (v-min)*3.
+	// minV lands at col 0 and maxV at col 42 = (rng-1)*slot.
+	if got := colForValue(7, 7, 21, 43); got != 0 {
 		t.Errorf("colForValue(min) = %d, want 0", got)
 	}
-	if got := colForValue(21, 7, 21, 60); got != 59 {
-		t.Errorf("colForValue(max) = %d, want 59 (width-1)", got)
+	if got := colForValue(21, 7, 21, 43); got != 42 {
+		t.Errorf("colForValue(max) = %d, want 42 ((rng-1)*slot)", got)
 	}
 	// Compress regime: col = (v-min)*width/rng. At v=50, min=0, max=119, width=60 → 50*60/120 = 25.
 	if got := colForValue(50, 0, 119, 60); got != 25 {
@@ -240,24 +243,24 @@ func TestYAxisTickLabels_CollapsesTinyPeak(t *testing.T) {
 	}
 }
 
-// TestHistChartWidth pins the width-picking contract: short ranges shrink the chart to
-// rng*slot - (slot-1) cols so bars get a fixed inter-bar gap, ranges that would exceed
-// histWidth at that spacing clamp to histWidth, and the compress regime (rng > histWidth)
-// and the single-value range (rng <= 1) both fall back to the full histWidth.
+// TestHistChartWidth pins the width-picking contract: stretch widens the chart to
+// (rng-1)*slot+1 cols so bars get a fixed slot-1 gap, ranges that would exceed
+// histMaxStretchWidth fall back to histWidth and the compress regime, and the single-value
+// range (rng <= 1) returns the full histWidth.
 func TestHistChartWidth(t *testing.T) {
-	// Short range (15 values): shrink to 15*3-2 = 43 cols.
+	// Short range (15 values): stretch to 14*3+1 = 43 cols.
 	if got := histChartWidth(15); got != 43 {
-		t.Errorf("histChartWidth(15) = %d, want 43 (15*slot - (slot-1))", got)
+		t.Errorf("histChartWidth(15) = %d, want 43 ((rng-1)*slot+1)", got)
 	}
-	// Medium range (25 values) still under histWidth at slot=3: 25*3-2 = 73, clamps to 60.
-	if got := histChartWidth(25); got != histWidth {
-		t.Errorf("histChartWidth(25) = %d, want %d (clamped)", got, histWidth)
+	// Medium range (25 values): stretch to 24*3+1 = 73 cols (no longer clamped).
+	if got := histChartWidth(25); got != 73 {
+		t.Errorf("histChartWidth(25) = %d, want 73 ((rng-1)*slot+1)", got)
 	}
-	// Compress regime: rng > histWidth → full width.
-	if got := histChartWidth(histWidth + 10); got != histWidth {
-		t.Errorf("histChartWidth(%d) = %d, want %d (compress regime)", histWidth+10, got, histWidth)
+	// Compress regime: rng large enough that stretch would exceed histMaxStretchWidth.
+	if got := histChartWidth(histMaxStretchWidth); got != histWidth {
+		t.Errorf("histChartWidth(%d) = %d, want %d (compress)", histMaxStretchWidth, got, histWidth)
 	}
-	// Single-value range keeps the full width (there's nothing to shrink to).
+	// Single-value range keeps the full width (there's nothing to spread).
 	if got := histChartWidth(1); got != histWidth {
 		t.Errorf("histChartWidth(1) = %d, want %d", got, histWidth)
 	}
@@ -303,6 +306,35 @@ func TestXAxisTickRow_CollisionDropsInteriorWinsMinMax(t *testing.T) {
 	// Interior tick "9999" is dropped; the middle of the buffer stays blank.
 	if got[4:6] != "  " {
 		t.Errorf("interior label should be dropped on collision; got middle = %q", got[4:6])
+	}
+}
+
+// TestUnionHistogramScale_StretchesAxesToCoverBoth pins the union math compare relies on for
+// matching axes: minV is the smaller of the two mins, maxV the larger, and peak the larger of
+// the two binned peaks under the union range. Each deck individually has a different range
+// and peak; the union spans both so the side-by-side charts can be read against identical
+// scales.
+func TestUnionHistogramScale_StretchesAxesToCoverBoth(t *testing.T) {
+	// d1: values 9..21, peak 32135 — narrower range, taller peak.
+	// d2: values 7..27, peak 19723 — wider range, shorter peak.
+	d1 := &deck.Deck{Stats: deck.Stats{
+		Hands:     100000,
+		Histogram: map[int]int{9: 1000, 12: 32135, 15: 24000, 18: 16000, 21: 8000},
+	}}
+	d2 := &deck.Deck{Stats: deck.Stats{
+		Hands:     100000,
+		Histogram: map[int]int{7: 1, 12: 14000, 17: 19723, 22: 9000, 27: 1},
+	}}
+
+	got := unionHistogramScale(d1, d2)
+	if got.minV != 7 {
+		t.Errorf("minV = %d, want 7 (smaller of the two mins)", got.minV)
+	}
+	if got.maxV != 27 {
+		t.Errorf("maxV = %d, want 27 (larger of the two maxes)", got.maxV)
+	}
+	if got.peak != 32135 {
+		t.Errorf("peak = %d, want 32135 (larger of the two peaks)", got.peak)
 	}
 }
 
