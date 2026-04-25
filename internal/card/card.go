@@ -28,6 +28,14 @@ type CardState struct {
 	// extensions stay false. Cards gate "if this is played from arsenal" riders on
 	// self.FromArsenal.
 	FromArsenal bool
+	// BonusDamage is the +{p} this card has accumulated from prior cards' "next attack action
+	// card gains +N{p}" riders. Granters set pc.BonusDamage += N on the matching CardState in
+	// CardsRemaining instead of returning the bonus from their own Play return — that way the
+	// damage is attributed to the attack receiving the buff, and EffectiveAttack folds it into
+	// hit-likelihood checks (LikelyToHit) so a +N buff bumps a 4-power attack into the 5+
+	// dominate window or a 6 into the unblockable 7. The solver adds BonusDamage to the
+	// per-card damage output when an attack action's Play resolves.
+	BonusDamage int
 }
 
 // EffectiveGoAgain reports whether this card has Go again this turn — from printed text or a
@@ -41,6 +49,14 @@ func (p *CardState) EffectiveGoAgain() bool {
 // this card's own Play when a conditional "gains dominate" clause fires).
 func (p *CardState) EffectiveDominate() bool {
 	return p.GrantedDominate || HasDominate(p.Card)
+}
+
+// EffectiveAttack returns the card's printed Attack() plus any granted BonusDamage from prior
+// "next attack action card gains +N{p}" riders. Cards with "if this hits" clauses should pass
+// this into LikelyToHit so a buffed attack credits its rider correctly (e.g. a +1 grant bumps
+// a base-3 attack to 4, which lands in the 1/4/7 likely-to-hit window).
+func (p *CardState) EffectiveAttack() int {
+	return p.Card.Attack() + p.BonusDamage
 }
 
 // Hero is the minimal hero profile card effects need. Narrower than hero.Hero to avoid an

@@ -74,3 +74,26 @@ func TestHasDominate_MatchesMarker(t *testing.T) {
 		t.Error("HasDominate(dominator) = false, want true")
 	}
 }
+
+// TestCardState_EffectiveAttack: printed Attack plus any granted BonusDamage from a prior
+// card's "next attack +N{p}" rider. Default BonusDamage of 0 leaves EffectiveAttack equal to
+// the printed power.
+func TestCardState_EffectiveAttack(t *testing.T) {
+	cases := []struct {
+		name        string
+		printed     int
+		bonusDamage int
+		want        int
+	}{
+		{"no bonus", 4, 0, 4},
+		{"granted +1 bumps 3 into the 1/4/7 window", 3, 1, 4},
+		{"granted +3 stacks", 4, 3, 7},
+		{"negative bonus is honoured (defender debuffs)", 5, -2, 3},
+	}
+	for _, tc := range cases {
+		p := &CardState{Card: stubCard{name: tc.name, attack: tc.printed}, BonusDamage: tc.bonusDamage}
+		if got := p.EffectiveAttack(); got != tc.want {
+			t.Errorf("%s: EffectiveAttack() = %d, want %d", tc.name, got, tc.want)
+		}
+	}
+}

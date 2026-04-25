@@ -1,0 +1,139 @@
+package hand
+
+import (
+	"testing"
+
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/card/fake"
+)
+
+// grantBonusDamage is a test-only non-attack action card that scans CardsRemaining and adds n
+// to BonusDamage on the first attack action card it finds. Mirrors the production shape used
+// by Come to Fight / Minnowism / Captain's Call once they migrate to the BonusDamage path:
+// the grant lives on the target's CardState rather than being returned from the granter's
+// own Play, so the buff is attributed to the attack being buffed and feeds EffectiveAttack
+// for any "if this hits" rider on that target.
+type grantBonusDamage struct{ n int }
+
+func (grantBonusDamage) ID() card.ID              { return card.Invalid }
+func (grantBonusDamage) Name() string             { return "grantBonusDamage" }
+func (grantBonusDamage) Cost(*card.TurnState) int { return 0 }
+func (grantBonusDamage) Pitch() int               { return 0 }
+func (grantBonusDamage) Attack() int              { return 0 }
+func (grantBonusDamage) Defense() int             { return 0 }
+func (grantBonusDamage) Types() card.TypeSet {
+	return card.NewTypeSet(card.TypeGeneric, card.TypeAction)
+}
+func (grantBonusDamage) GoAgain() bool { return true }
+func (g grantBonusDamage) Play(s *card.TurnState, _ *card.CardState) int {
+	for _, pc := range s.CardsRemaining {
+		if pc.Card.Types().IsAttackAction() {
+			pc.BonusDamage += g.n
+			return 0
+		}
+	}
+	return 0
+}
+
+// TestPlaySequence_BonusDamageAppliedToTargetDamage pins the core wiring: a granter scheduled
+// before an attack action sets BonusDamage on the target's CardState; playSequence folds the
+// buff into damage at the target's Play step rather than the granter's, so the chain total
+// reflects printed-attack + bonus.
+func TestPlaySequence_BonusDamageAppliedToTargetDamage(t *testing.T) {
+	order := []card.Card{grantBonusDamage{n: 3}, fake.RedAttack{}}
+	ctx := newSequenceContextForTest(stubHero, nil, nil, 10, 0, len(order))
+	dmg, _, _, legal := ctx.playSequence(order, nil, nil, nil)
+	if !legal {
+		t.Fatalf("playSequence returned legal=false; expected granter→RedAttack to chain via go-again")
+	}
+	// Granter (cost 0, attack 0, go again) → RedAttack (cost 1, printed power 3, bonus +3).
+	// Total: 0 + (3 + 3) = 6.
+	if dmg != 6 {
+		t.Fatalf("dmg = %d, want 6 (RedAttack 3 + granted bonus 3)", dmg)
+	}
+}
+
+// TestPlaySequence_BonusDamageCreditedToTargetSlot pins per-card attribution: the +N lands in
+// the target's perCardOut slot, not the granter's, so chain-display callers see the buff
+// credited to the attack receiving it.
+func TestPlaySequence_BonusDamageCreditedToTargetSlot(t *testing.T) {
+	order := []card.Card{grantBonusDamage{n: 3}, fake.RedAttack{}}
+	ctx := newSequenceContextForTest(stubHero, nil, nil, 10, 0, len(order))
+	perCard := make([]float64, len(order))
+	dmg, _, _, legal := ctx.playSequence(order, perCard, nil, nil)
+	if !legal {
+		t.Fatalf("playSequence returned legal=false")
+	}
+	if dmg != 6 {
+		t.Fatalf("dmg = %d, want 6", dmg)
+	}
+	if perCard[0] != 0 {
+		t.Errorf("granter perCardOut = %.1f, want 0 (granter returns 0; the +3 belongs to the target)", perCard[0])
+	}
+	if perCard[1] != 6 {
+		t.Errorf("RedAttack perCardOut = %.1f, want 6 (printed 3 + bonus 3)", perCard[1])
+	}
+}
+
+// TestPlaySequence_BonusDamageNoTargetFizzles pins the no-target case: a granter alone
+// scans CardsRemaining, finds no attack action, and contributes nothing — the BonusDamage
+// state simply stays 0.
+func TestPlaySequence_BonusDamageNoTargetFizzles(t *testing.T) {
+	order := []card.Card{grantBonusDamage{n: 3}}
+	ctx := newSequenceContextForTest(stubHero, nil, nil, 10, 0, len(order))
+	dmg, _, _, legal := ctx.playSequence(order, nil, nil, nil)
+	if !legal {
+		t.Fatalf("playSequence returned legal=false; expected granter alone to be a legal 1-card chain")
+	}
+	if dmg != 0 {
+		t.Fatalf("dmg = %d, want 0 (granter has no damage and no target to buff)", dmg)
+	}
+}
+
+// TestPlaySequence_BonusDamageStacksAcrossGranters pins that two granters in front of the
+// same target both write to BonusDamage; the field accumulates rather than overwriting.
+func TestPlaySequence_BonusDamageStacksAcrossGranters(t *testing.T) {
+	order := []card.Card{grantBonusDamage{n: 3}, grantBonusDamage{n: 2}, fake.RedAttack{}}
+	ctx := newSequenceContextForTest(stubHero, nil, nil, 10, 0, len(order))
+	dmg, _, _, legal := ctx.playSequence(order, nil, nil, nil)
+	if !legal {
+		t.Fatalf("playSequence returned legal=false; expected two granters→RedAttack to chain via go-again")
+	}
+	// Granter +3 → granter +2 → RedAttack (cost 1, printed power 3, bonus 3+2=5). Total 0+0+8 = 8.
+	if dmg != 8 {
+		t.Fatalf("dmg = %d, want 8 (RedAttack 3 + stacked grants 5)", dmg)
+	}
+}
+
+// TestPlaySequence_BonusDamageGrantOnNonAttackIgnored pins the gate: the grantor only writes
+// BonusDamage onto attack-action targets, and even if one were applied to a non-attack
+// CardState, the solver wouldn't fold it into damage (only attack actions get the +N
+// credit). Constructed with a non-attack-action target after the granter — granter scans,
+// finds nothing matching, and BonusDamage stays 0 on every entry.
+func TestPlaySequence_BonusDamageGrantOnNonAttackIgnored(t *testing.T) {
+	order := []card.Card{grantBonusDamage{n: 3}, grantBonusDamage{n: 2}}
+	ctx := newSequenceContextForTest(stubHero, nil, nil, 10, 0, len(order))
+	dmg, _, _, legal := ctx.playSequence(order, nil, nil, nil)
+	if !legal {
+		t.Fatalf("playSequence returned legal=false")
+	}
+	if dmg != 0 {
+		t.Fatalf("dmg = %d, want 0 (no attack actions present; both granters fizzle)", dmg)
+	}
+}
+
+// TestPlaySequence_BonusDamagePerPermutationReset pins the per-permutation reset contract.
+// playSequence rebuilds CardState wrappers fresh per call, but inside one call the
+// re-entrant playSequenceWithMeta must zero BonusDamage before reading the chain — otherwise
+// a wrapper carried in via pcBuf could leak from a previous run. We verify by running the
+// same hand twice through one playSequence (which re-enters playSequenceWithMeta): each run
+// must start with BonusDamage = 0 and the totals must match.
+func TestPlaySequence_BonusDamagePerPermutationReset(t *testing.T) {
+	order := []card.Card{grantBonusDamage{n: 3}, fake.RedAttack{}}
+	ctx := newSequenceContextForTest(stubHero, nil, nil, 10, 0, len(order))
+	first, _, _, _ := ctx.playSequence(order, nil, nil, nil)
+	second, _, _, _ := ctx.playSequence(order, nil, nil, nil)
+	if first != 6 || second != 6 {
+		t.Fatalf("non-deterministic damage across reuses: first=%d, second=%d, want both=6", first, second)
+	}
+}
