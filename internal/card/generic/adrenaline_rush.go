@@ -2,10 +2,6 @@
 // Printed pitch variants: Red 1, Yellow 2, Blue 3. Defense 2.
 //
 // Text: "When you play this, if you have less {h} than an opposing hero, this gets +3{p}."
-//
-// Simplification: The "less {h} than an opposing hero" clause is modelled as a hero attribute —
-// the +3{p} rider fires for heroes that implement card.LowerHealthWanter and never fires
-// otherwise.
 
 package generic
 
@@ -34,6 +30,8 @@ func (AdrenalineRushRed) Attack() int                 { return 4 }
 func (AdrenalineRushRed) Defense() int                { return 2 }
 func (AdrenalineRushRed) Types() card.TypeSet         { return adrenalineRushTypes }
 func (AdrenalineRushRed) GoAgain() bool               { return false }
+// not implemented: +3{p} 'less life than opposing hero' rider only fires for LowerHealthWanter heroes
+func (AdrenalineRushRed) NotImplemented()             {}
 func (c AdrenalineRushRed) Play(s *card.TurnState, _ *card.CardState) int { return adrenalineRushDamage(c.Attack()) }
 
 type AdrenalineRushYellow struct{}
@@ -46,6 +44,8 @@ func (AdrenalineRushYellow) Attack() int                 { return 3 }
 func (AdrenalineRushYellow) Defense() int                { return 2 }
 func (AdrenalineRushYellow) Types() card.TypeSet         { return adrenalineRushTypes }
 func (AdrenalineRushYellow) GoAgain() bool               { return false }
+// not implemented: +3{p} 'less life than opposing hero' rider only fires for LowerHealthWanter heroes
+func (AdrenalineRushYellow) NotImplemented()             {}
 func (c AdrenalineRushYellow) Play(s *card.TurnState, _ *card.CardState) int { return adrenalineRushDamage(c.Attack()) }
 
 type AdrenalineRushBlue struct{}
@@ -58,4 +58,6 @@ func (AdrenalineRushBlue) Attack() int                 { return 2 }
 func (AdrenalineRushBlue) Defense() int                { return 2 }
 func (AdrenalineRushBlue) Types() card.TypeSet         { return adrenalineRushTypes }
 func (AdrenalineRushBlue) GoAgain() bool               { return false }
+// not implemented: +3{p} 'less life than opposing hero' rider only fires for LowerHealthWanter heroes
+func (AdrenalineRushBlue) NotImplemented()             {}
 func (c AdrenalineRushBlue) Play(s *card.TurnState, _ *card.CardState) int { return adrenalineRushDamage(c.Attack()) }

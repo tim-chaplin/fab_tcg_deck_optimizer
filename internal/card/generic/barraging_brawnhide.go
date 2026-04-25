@@ -2,9 +2,6 @@
 // Printed pitch variants: Red 1, Yellow 2, Blue 3. Defense 2.
 //
 // Text: "While Barraging Brawnhide is defended by less than 2 non-equipment cards, it has +1{p}."
-//
-// Simplification: Defended-by-<2-non-equipment condition isn't modelled; the +1{p} rider never
-// applies.
 
 package generic
 
@@ -22,6 +19,8 @@ func (BarragingBrawnhideRed) Attack() int                 { return 7 }
 func (BarragingBrawnhideRed) Defense() int                { return 2 }
 func (BarragingBrawnhideRed) Types() card.TypeSet         { return barragingBrawnhideTypes }
 func (BarragingBrawnhideRed) GoAgain() bool               { return false }
+// not implemented: defended-by-<2-non-equipment +1{p} rider
+func (BarragingBrawnhideRed) NotImplemented()             {}
 func (c BarragingBrawnhideRed) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }
 
 type BarragingBrawnhideYellow struct{}
@@ -34,6 +33,8 @@ func (BarragingBrawnhideYellow) Attack() int                 { return 6 }
 func (BarragingBrawnhideYellow) Defense() int                { return 2 }
 func (BarragingBrawnhideYellow) Types() card.TypeSet         { return barragingBrawnhideTypes }
 func (BarragingBrawnhideYellow) GoAgain() bool               { return false }
+// not implemented: defended-by-<2-non-equipment +1{p} rider
+func (BarragingBrawnhideYellow) NotImplemented()             {}
 func (c BarragingBrawnhideYellow) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }
 
 type BarragingBrawnhideBlue struct{}
@@ -46,4 +47,6 @@ func (BarragingBrawnhideBlue) Attack() int                 { return 5 }
 func (BarragingBrawnhideBlue) Defense() int                { return 2 }
 func (BarragingBrawnhideBlue) Types() card.TypeSet         { return barragingBrawnhideTypes }
 func (BarragingBrawnhideBlue) GoAgain() bool               { return false }
+// not implemented: defended-by-<2-non-equipment +1{p} rider
+func (BarragingBrawnhideBlue) NotImplemented()             {}
 func (c BarragingBrawnhideBlue) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }

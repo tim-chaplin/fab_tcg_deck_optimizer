@@ -1,9 +1,6 @@
 // Bluster Buff — Generic Action - Attack. Cost 1, Pitch 1, Power 6, Defense 3. Only printed in Red.
 //
 // Text: "When this attacks, it gets -1{p} unless you pay {r}."
-//
-// Simplification: Pay {r} or lose 1{p} — we keep base power; players who can't afford should be
-// rare and the loss is 1.
 
 package generic
 
@@ -21,4 +18,6 @@ func (BlusterBuffRed) Attack() int                 { return 6 }
 func (BlusterBuffRed) Defense() int                { return 3 }
 func (BlusterBuffRed) Types() card.TypeSet         { return blusterBuffTypes }
 func (BlusterBuffRed) GoAgain() bool               { return false }
+// not implemented: pay {r} or lose 1{p} resolved as 'always pay'
+func (BlusterBuffRed) NotImplemented()             {}
 func (c BlusterBuffRed) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }
