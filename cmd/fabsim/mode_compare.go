@@ -23,29 +23,34 @@ func runCompareCmd(args []string) {
 	runCompare(fs.Arg(0), fs.Arg(1))
 }
 
-// runCompare loads the two decks at mydecks/<name1>.json and mydecks/<name2>.json and prints,
-// for each deck, the brief summary block (loadout + score) and the hand-value histogram, then
-// the per-card count delta from deck1 to deck2. The summary + histogram blocks let you eyeball
-// whether the two decks are in the same league before reading the card-list delta.
+// runCompare loads the two decks at mydecks/<name1>.json and mydecks/<name2>.json and prints
+// a stat-by-stat side-by-side comparison: pitch counts, mean hand value, per-cycle means, the
+// hand-value histograms, and finally the per-card count delta.
 func runCompare(name1, name2 string) {
 	d1 := mustLoadDeck(resolveDeckPath(name1))
 	d2 := mustLoadDeck(resolveDeckPath(name2))
+	s1, s2 := d1.Stats, d2.Stats
 
-	printDeckBlock(name1, d1)
-	fmt.Println()
-	printDeckBlock(name2, d2)
+	printSideBySideStats(name1, name2, []statSection{
+		{"Pitch values", pitchCountsLine(d1.Cards), pitchCountsLine(d2.Cards)},
+		{"Mean hand value", meanValueLine(s1), meanValueLine(s2)},
+		{"Cycle 1 mean", cycleMeanLine(s1.FirstCycle), cycleMeanLine(s2.FirstCycle)},
+		{"Cycle 2 mean", cycleMeanLine(s1.SecondCycle), cycleMeanLine(s2.SecondCycle)},
+	})
+
+	if len(s1.Histogram) > 0 || len(s2.Histogram) > 0 {
+		fmt.Println()
+		fmt.Println("Hand-value distributions:")
+		if len(s1.Histogram) > 0 {
+			printHistogram(d1, fmt.Sprintf("  %s (%s hands):", name1, commaInt(s1.Hands)))
+		}
+		if len(s2.Histogram) > 0 {
+			printHistogram(d2, fmt.Sprintf("  %s (%s hands):", name2, commaInt(s2.Hands)))
+		}
+	}
+
 	fmt.Println()
 	printCardDelta(name1, name2, d1, d2)
-}
-
-// printDeckBlock renders one deck's compare-mode block: a "<name>:" header followed by the
-// brief summary and histogram.
-func printDeckBlock(name string, d *deck.Deck) {
-	fmt.Printf("%s:\n", name)
-	printDeckSummary(d)
-	if len(d.Stats.Histogram) > 0 {
-		printHistogram(d)
-	}
 }
 
 // printCardDelta writes the per-card count delta between d1 and d2 — negative rows first,

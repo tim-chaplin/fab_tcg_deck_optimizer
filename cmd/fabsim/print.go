@@ -70,18 +70,64 @@ func printGroupedStrings(ss []string) {
 // numbers without the card-list scroll.
 func printDeckSummary(d *deck.Deck) {
 	s := d.Stats
-	red, yellow, blue := pitchCounts(d.Cards)
 	fmt.Printf("Hero:    %s\n", d.Hero.Name())
 	fmt.Printf("Weapons: %s\n", weaponNames(d.Weapons))
-	fmt.Printf("Pitch:   %d red / %d yellow / %d blue\n", red, yellow, blue)
+	fmt.Printf("Pitch:   %s\n", pitchCountsLine(d.Cards))
 	fmt.Println()
-	fmt.Printf("Mean value: %.3f  (%s shuffles)\n", s.Mean(), commaInt(s.Runs))
-	fmt.Printf("  Cycle 1 mean: %.3f\n", s.FirstCycle.Mean())
-	fmt.Printf("  Cycle 2 mean: %.3f\n", s.SecondCycle.Mean())
+	fmt.Printf("Mean value: %s\n", meanValueLine(s))
+	fmt.Printf("  Cycle 1 mean: %s\n", cycleMeanLine(s.FirstCycle))
+	fmt.Printf("  Cycle 2 mean: %s\n", cycleMeanLine(s.SecondCycle))
 }
 
-// pitchCounts tallies red/yellow/blue copies by Pitch() value so the summary's "Pitch:" line
-// stays a single expression. Cards with pitch outside 1-3 contribute to no bucket.
+// pitchCountsLine returns the "20 red / 8 yellow / 12 blue" rendering of the deck's pitch
+// distribution.
+func pitchCountsLine(cs []card.Card) string {
+	red, yellow, blue := pitchCounts(cs)
+	return fmt.Sprintf("%d red / %d yellow / %d blue", red, yellow, blue)
+}
+
+// meanValueLine returns "14.041 (10,000 shuffles)" — the deck's overall mean plus the run
+// count that produced it.
+func meanValueLine(s deck.Stats) string {
+	return fmt.Sprintf("%.3f (%s shuffles)", s.Mean(), commaInt(s.Runs))
+}
+
+// cycleMeanLine returns the per-cycle mean as a 3-decimal string.
+func cycleMeanLine(c deck.CycleStats) string {
+	return fmt.Sprintf("%.3f", c.Mean())
+}
+
+// statSection is one row of compare's side-by-side stat layout: a label header and the two
+// rendered values to slot under it (val1 sits next to name1, val2 next to name2).
+type statSection struct {
+	label, val1, val2 string
+}
+
+// printSideBySideStats stacks several labelled stat blocks, one per section:
+//
+//	<label>:
+//	  <name1>: <val1>
+//	  <name2>: <val2>
+//
+// Deck names are right-padded to the longer of the two so every section's value column lines
+// up vertically. Sections are separated by a blank line.
+func printSideBySideStats(name1, name2 string, sections []statSection) {
+	nameW := len(name1)
+	if len(name2) > nameW {
+		nameW = len(name2)
+	}
+	for i, sec := range sections {
+		if i > 0 {
+			fmt.Println()
+		}
+		fmt.Printf("%s:\n", sec.label)
+		fmt.Printf("  %-*s  %s\n", nameW+1, name1+":", sec.val1)
+		fmt.Printf("  %-*s  %s\n", nameW+1, name2+":", sec.val2)
+	}
+}
+
+// pitchCounts tallies red/yellow/blue copies by Pitch() value. Cards with pitch outside 1-3
+// contribute to no bucket.
 func pitchCounts(cs []card.Card) (red, yellow, blue int) {
 	for _, c := range cs {
 		switch c.Pitch() {
@@ -105,8 +151,13 @@ func printBestDeck(d *deck.Deck) {
 		printPerCardStats(d)
 	}
 	if len(d.Stats.Histogram) > 0 {
-		printHistogram(d)
+		printHistogram(d, histogramTitle(d))
 	}
+}
+
+// histogramTitle returns the standard "Hand-value distribution (N hands):" header.
+func histogramTitle(d *deck.Deck) string {
+	return fmt.Sprintf("Hand-value distribution (%s hands):", commaInt(d.Stats.Hands))
 }
 
 // printBestTurn renders the persisted peak-Value turn — "Best turn played (value N):"
@@ -180,12 +231,13 @@ const (
 	histStretchSlot  = 3
 )
 
-// printHistogram renders Stats.Histogram as an ASCII bar chart. The chart body is always
-// histWidth x histHeight characters regardless of how many distinct hand values the deck
-// produced — sparse data stretches across the width, dense data bins into it — so the
-// rendered output has predictable size and the axis labels alone carry the scale. No-ops on
-// an unscored deck. Called by printBestDeck after the per-card stats block.
-func printHistogram(d *deck.Deck) {
+// printHistogram renders Stats.Histogram as an ASCII bar chart under the supplied title line.
+// The chart body is always histWidth x histHeight characters regardless of how many distinct
+// hand values the deck produced — sparse data stretches across the width, dense data bins into
+// it — so the rendered output has predictable size and the axis labels alone carry the scale.
+// title is printed verbatim above the chart so the caller can identify the deck the chart is
+// for. No-ops on an unscored deck.
+func printHistogram(d *deck.Deck, title string) {
 	minV := d.Stats.Min()
 	maxV := d.Stats.Max()
 	width := histChartWidth(maxV - minV + 1)
@@ -202,7 +254,8 @@ func printHistogram(d *deck.Deck) {
 	xTicks := xAxisTicks(minV, maxV, width)
 
 	fmt.Println()
-	fmt.Printf("Hand-value distribution (%s hands):\n\n", commaInt(d.Stats.Hands))
+	fmt.Println(title)
+	fmt.Println()
 	for row := 0; row < histHeight; row++ {
 		// Top-down: row 0 is the peak, row histHeight-1 is one slot above the axis. A bar of
 		// height h fills the bottom h rows, so this row is filled when histHeight-row <= h.
