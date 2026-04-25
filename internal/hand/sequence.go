@@ -501,24 +501,20 @@ func (ctx *sequenceContext) playSequenceWithMeta(n int, perCardOut, perCardTrigg
 			// source via SourceIndex, so perCardOut is updated in place inside the helper.
 			ephemeralDmg = fireEphemeralAttackTriggers(state, pc, perCardOut)
 		}
-		// BonusDamage is granted by a prior card's "next attack +N{p}" rider; the grant is
+		// BonusDamage is granted by a prior card's "next attack +N{p}" rider. The grant is
 		// folded in here (not by the target's Play) so the +N is attributed to the attack
-		// receiving the buff rather than the granter, and so any "if this hits" rider inside
-		// the target's Play can read self.EffectiveAttack() consistently. Gated on
-		// isAttackOrWeapon because grants target attacking sources — most are "next attack
-		// action card +N{p}" (Come to Fight, Captain's Call, etc.) but several target weapon
-		// swings (Brandish's "next weapon attack", Razor Reflex's modal sword/dagger weapon
-		// branch, Thrust's "target sword attack"), and a few are agnostic ("target attack").
-		// The actual grantor card is responsible for picking which CardState in
-		// CardsRemaining to flip; the solver only needs to fold the bonus in for any swinger.
-		// Clamped at 0 because FaB attack-power buffs can't drive an attack below 0 power
-		// (a -3 grant on a 1-power attack resolves as a 0-power attack, not -2).
-		cardContrib := playDmg
-		if m.isAttackOrWeapon {
-			cardContrib += pc.BonusDamage
-			if cardContrib < 0 {
-				cardContrib = 0
-			}
+		// receiving the buff rather than the granter, and so any "if this hits" rider
+		// inside the target's Play can read self.EffectiveAttack() consistently. Applied
+		// unconditionally — picking who can legally receive a +N{p} grant is the grantor's
+		// responsibility (it scans CardsRemaining and matches the appropriate type, e.g.
+		// attack actions for Come to Fight, weapon swings for Brandish), and a future card
+		// that grants damage to a non-attack source shouldn't have to fight a solver-side
+		// type gate. Clamped at 0 because FaB attack-power buffs can't drive an attack
+		// below 0 power (a -3 grant on a 1-power attack resolves as a 0-power attack,
+		// not -2).
+		cardContrib := playDmg + pc.BonusDamage
+		if cardContrib < 0 {
+			cardContrib = 0
 		}
 		damage += cardContrib + triggerDmg + auraTriggerDmg + ephemeralDmg
 		if perCardOut != nil {
