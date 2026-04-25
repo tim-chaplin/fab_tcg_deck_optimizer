@@ -43,9 +43,8 @@ func captureStdout(t *testing.T, f func()) string {
 }
 
 // TestPrintCardDelta_IncludesWeaponDifferences pins that printCardDelta surfaces a weapon
-// swap as a -/+ pair the same way it does for a card swap. Identical card lists with
-// different weapon loadouts used to render as "identical card lists" — that hid a real
-// loadout difference from the reader.
+// swap as a -/+ pair so a loadout diff that lives only in the weapon list isn't silently
+// collapsed into the "identical card lists" branch.
 func TestPrintCardDelta_IncludesWeaponDifferences(t *testing.T) {
 	cs := []card.Card{cards.Get(card.ReadTheRunesRed)}
 	d1 := deck.New(hero.Viserai{}, []weapon.Weapon{weapon.NebulaBlade{}}, cs)
@@ -61,6 +60,42 @@ func TestPrintCardDelta_IncludesWeaponDifferences(t *testing.T) {
 	}
 	if strings.Contains(out, "identical card and weapon lists") {
 		t.Errorf("decks differ on weapons but printCardDelta declared them identical:\n%s", out)
+	}
+}
+
+// TestPrintCardDelta_WeaponsLeadEachBlock pins the within-block order: weapons sit at the
+// top of the minus block and at the top of the plus block, ahead of any card lines, so the
+// loadout-defining piece is the first thing the reader sees in each direction.
+func TestPrintCardDelta_WeaponsLeadEachBlock(t *testing.T) {
+	read := cards.Get(card.ReadTheRunesRed)
+	snatch := cards.Get(card.SnatchRed)
+	d1 := deck.New(hero.Viserai{}, []weapon.Weapon{weapon.NebulaBlade{}}, []card.Card{read, read})
+	d2 := deck.New(hero.Viserai{}, []weapon.Weapon{weapon.ReapingBlade{}}, []card.Card{snatch, snatch})
+
+	out := captureStdout(t, func() { printCardDelta("d1", "d2", d1, d2) })
+
+	// Walk the body lines in printed order and assert: weapon minus precedes card minus,
+	// then weapon plus precedes card plus.
+	lines := strings.Split(strings.TrimRight(out, "\n"), "\n")
+	wantOrder := []string{
+		"  -1 Nebula Blade",
+		"  -2 Read the Runes (Red)",
+		"  +1 Reaping Blade",
+		"  +2 Snatch (Red)",
+	}
+	got := make([]string, 0, len(wantOrder))
+	for _, l := range lines {
+		if strings.HasPrefix(l, "  -") || strings.HasPrefix(l, "  +") {
+			got = append(got, l)
+		}
+	}
+	if len(got) != len(wantOrder) {
+		t.Fatalf("delta line count: got %d want %d; full output:\n%s", len(got), len(wantOrder), out)
+	}
+	for i, want := range wantOrder {
+		if got[i] != want {
+			t.Errorf("line %d: got %q want %q; full output:\n%s", i, got[i], want, out)
+		}
 	}
 }
 
