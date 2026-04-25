@@ -224,31 +224,55 @@ func printCardValues(d *deck.Deck) {
 
 	fmt.Println()
 	fmt.Println("Card value (marginal = mean turn value with vs without the card in hand or arsenal; avg = role-based contribution per appearance):")
+
+	// Column widths take the larger of header label and longest data string so the dividers
+	// line up regardless of deck. Card column also widens for the "Card" header on absurdly
+	// short-named decks.
 	nameW := maxNameLen(d.Cards)
+	if nameW < len("Card") {
+		nameW = len("Card")
+	}
+	marginalW := len("Marginal")
+	avgW := len("Avg")
 	for _, r := range rows {
-		fmt.Printf("  %-*s  marginal %s  avg %s\n",
-			nameW, r.name, formatCardMargin(r.margin, r.hasMargin), formatCardValue(r.avg, r.hasAvg))
+		if w := len(formatCardMargin(r.margin, r.hasMargin)); w > marginalW {
+			marginalW = w
+		}
+		if w := len(formatCardValue(r.avg, r.hasAvg)); w > avgW {
+			avgW = w
+		}
+	}
+
+	fmt.Printf("  %-*s | %*s | %*s\n", nameW, "Card", marginalW, "Marginal", avgW, "Avg")
+	fmt.Printf("  %s-+-%s-+-%s\n",
+		strings.Repeat("-", nameW), strings.Repeat("-", marginalW), strings.Repeat("-", avgW))
+	for _, r := range rows {
+		fmt.Printf("  %-*s | %*s | %*s\n",
+			nameW, r.name,
+			marginalW, formatCardMargin(r.margin, r.hasMargin),
+			avgW, formatCardValue(r.avg, r.hasAvg))
 	}
 }
 
-// formatCardValue renders a non-negative role-based avg in fixed width, falling back to a
-// blank-aligned dash when the card never tallied a Play or Pitch (e.g. a card only ever
-// held / arsenaled). The dash keeps the column aligned without printing a misleading 0.000.
+// formatCardValue renders a card's role-based avg as the bare "%.2f" number, or "-" when
+// the card never tallied a Play or Pitch (held / arsenaled cards only). The caller's
+// printf width handles right-alignment so the column stays readable without printing a
+// misleading 0.00 for the no-data case.
 func formatCardValue(v float64, has bool) string {
 	if !has {
-		return "    -"
+		return "-"
 	}
-	return fmt.Sprintf("%5.2f", v)
+	return fmt.Sprintf("%.2f", v)
 }
 
-// formatCardMargin renders the signed marginal value with an explicit sign. Cards present
-// in every hand (or never present) have no comparison and render as a blank-aligned dash so
-// the column stays read-able without an artificial 0.000.
+// formatCardMargin renders the signed marginal value with an explicit sign, or "-" when
+// the card was present in every hand (or never present) so no with/without comparison is
+// possible. The caller's printf width handles right-alignment.
 func formatCardMargin(v float64, has bool) string {
 	if !has {
-		return "     -"
+		return "-"
 	}
-	return fmt.Sprintf("%+6.2f", v)
+	return fmt.Sprintf("%+.2f", v)
 }
 
 // Dimensions of the hand-value histogram chart body. histWidth is the chart width in the
