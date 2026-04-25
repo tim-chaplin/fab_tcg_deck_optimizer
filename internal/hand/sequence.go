@@ -509,14 +509,13 @@ func (ctx *sequenceContext) playSequenceWithMeta(n int, perCardOut, perCardTrigg
 		// responsibility (it scans CardsRemaining and matches the appropriate type, e.g.
 		// attack actions for Come to Fight, weapon swings for Brandish), and a future card
 		// that grants damage to a non-attack source shouldn't have to fight a solver-side
-		// type gate.
-		//
-		// Reuses pc.EffectiveAttack() for the printed-power-plus-bonus calculation
-		// (which already enforces the FaB attack-power floor: a -3 grant on a 1-power
-		// attack resolves as 0, not -2) and folds in any rider damage Play returned
-		// beyond Card.Attack — that "extra" component sits outside the attack-power
-		// floor so it's added on top of the clamped value.
-		cardContrib := pc.EffectiveAttack() + (playDmg - pc.Card.Attack())
+		// type gate. Clamped at 0 because FaB attack-power buffs can't drive an attack
+		// below 0 power (a -3 grant on a 1-power attack resolves as a 0-power attack,
+		// not -2). We can't simply reuse pc.EffectiveAttack() here because playDmg is the
+		// card's full Play return — printed power plus any rider the card already folded
+		// in (e.g. Blow for a Blow's on-hit +1) — and EffectiveAttack only sees printed
+		// power, so substituting it would drop the rider component.
+		cardContrib := playDmg + pc.BonusAttack
 		if cardContrib < 0 {
 			cardContrib = 0
 		}
