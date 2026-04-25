@@ -43,11 +43,12 @@ func runEvalCmd(args []string) {
 }
 
 // runEval loads the deck at outPath and prints its stats. Default behaviour (printOnly=false)
-// re-simulates the deck for deepShuffles hands against incoming and writes the fresh stats
-// back to disk — both the JSON and the sibling fabrary .txt — so the on-disk copy always
-// reflects the latest binary's modelling. printOnly=true skips the simulation and the rewrite
-// entirely: the loaded stats are printed as-is, which is what you want for a quick look at a
-// saved deck without spending shuffles or mutating the file.
+// first re-simulates the deck for deepShuffles hands against incoming and writes the fresh
+// stats back to disk — both the JSON and the sibling fabrary .txt — so the on-disk copy
+// always reflects the latest binary's modelling. printOnly=true skips that step and just
+// loads-and-prints, which is what you want for a quick look at a saved deck without spending
+// shuffles or mutating the file. Both branches share the same load-and-print path so the
+// output is identical regardless of whether a sim ran first.
 //
 // Output shape is controlled by brief:
 //   - brief=false (default): full printBestDeck dump — summary, card list, best-turn block,
@@ -55,12 +56,10 @@ func runEvalCmd(args []string) {
 //   - brief=true: score summary only. Good for scripted re-scoring where the card list and
 //     best turn are noise.
 func runEval(outPath string, deepShuffles, incoming, maxCopies int, seed int64, fmtValue deckformat.Format, printOnly, brief bool) {
-	if printOnly {
-		printLoadedDeck(mustLoadDeck(outPath), brief)
-		return
+	if !printOnly {
+		evaluateAndPersist(outPath, deepShuffles, incoming, maxCopies, seed, fmtValue)
 	}
-	d := evaluateAndPersist(outPath, deepShuffles, incoming, maxCopies, seed, fmtValue)
-	printLoadedDeck(d, brief)
+	printLoadedDeck(mustLoadDeck(outPath), brief)
 }
 
 // evaluateAndPersist loads the deck at outPath, re-simulates it for deepShuffles hands against

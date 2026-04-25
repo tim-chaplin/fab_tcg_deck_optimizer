@@ -142,16 +142,21 @@ func pitchCounts(cs []card.Card) (red, yellow, blue int) {
 	return red, yellow, blue
 }
 
+// printBestDeck dumps the full deck report: summary, card list, best turn played, the
+// hand-value histogram, and the per-card value table pairing each card's role-based avg
+// contribution with its correlational marginal hand-value lift. Sections silently skip
+// themselves when the underlying Stats slice/map is empty so unscored decks still render
+// the parts that do exist.
 func printBestDeck(d *deck.Deck) {
 	printDeckSummary(d)
 	fmt.Println()
 	printCardList(d)
 	printBestTurn(d)
-	if len(d.Stats.PerCard) > 0 {
-		printPerCardStats(d)
-	}
 	if len(d.Stats.Histogram) > 0 {
 		printHistogram(d, histogramTitle(d), naturalHistogramScale(d))
+	}
+	if len(d.Stats.PerCardMarginal) > 0 {
+		printCardValues(d)
 	}
 }
 
@@ -176,48 +181,99 @@ func printBestTurn(d *deck.Deck) {
 	fmt.Println(hand.FormatBestTurn(b.Summary, b.StartingRunechants))
 }
 
-// printPerCardStats renders per-card averages collected by deck.Evaluate: mean per-card
-// contribution across hands the card appeared in. Contribution is role-based (attack power on
-// attacks, proportional prevented-damage share on defends, Pitch on pitches), so the ranking
-// reflects what each card typically does in its hand rather than the hand's total value.
-func printPerCardStats(d *deck.Deck) {
+// printCardValues renders one row per unique card with two complementary signals:
+//
+//   - avg value: role-based contribution per appearance — attack power on attacks,
+//     proportional prevented-damage share on defends, Pitch value on pitches. Captures
+//     what the card typically does in the turn it's played.
+//   - marginal +/-: mean turn value when the card sits in the dealt hand or arsenal-in
+//     slot, minus the mean turn value when it's absent. Picks up within-turn indirect
+//     lift (card draw, runechant generation, mid-turn triggers) the role-based avg misses.
+//
+// Sorted by marginal descending so suspected above-curve cards surface at the top and the
+// drags sit at the bottom — the spread is a smell test for buggy implementations or
+// oversimplified mechanics. See deck.Stats.PerCardMarginal for the cross-turn caveat that
+// limits this view's reach for next-turn-payoff cards.
+func printCardValues(d *deck.Deck) {
 	type row struct {
-		name           string
-		deckCount      int
-		plays, pitches int
-		avg            float64
+		name      string
+		avg       float64
+		margin    float64
+		hasAvg    bool
+		hasMargin bool
 	}
-	deckCounts := map[card.ID]int{}
-	for _, c := range d.Cards {
-		deckCounts[c.ID()]++
-	}
-	rows := make([]row, 0, len(d.Stats.PerCard))
-	for id, s := range d.Stats.PerCard {
-		rows = append(rows, row{
-			name:      cards.Get(id).Name(),
-			deckCount: deckCounts[id],
-			plays:     s.Plays,
-			pitches:   s.Pitches,
-			avg:       s.Avg(),
-		})
+	rows := make([]row, 0, len(d.Stats.PerCardMarginal))
+	for id, m := range d.Stats.PerCardMarginal {
+		r := row{name: cards.Get(id).Name()}
+		if play, ok := d.Stats.PerCard[id]; ok && (play.Plays+play.Pitches) > 0 {
+			r.avg = play.Avg()
+			r.hasAvg = true
+		}
+		if m.PresentHands > 0 && m.AbsentHands > 0 {
+			r.margin = m.Marginal()
+			r.hasMargin = true
+		}
+		rows = append(rows, r)
 	}
 	sort.Slice(rows, func(i, j int) bool {
-		if rows[i].avg != rows[j].avg {
-			return rows[i].avg > rows[j].avg
-		}
-		ni, nj := rows[i].plays+rows[i].pitches, rows[j].plays+rows[j].pitches
-		if ni != nj {
-			return ni > nj
+		if rows[i].margin != rows[j].margin {
+			return rows[i].margin > rows[j].margin
 		}
 		return rows[i].name < rows[j].name
 	})
 
 	fmt.Println()
-	fmt.Println("Card value (avg contribution per appearance: attack=power, defend=share of block, pitch=resource):")
-	for _, r := range rows {
-		fmt.Printf("  %-*s avg %6.3f over %4d hands (%4d plays, %4d pitches, %dx in deck)\n",
-			maxNameLen(d.Cards), r.name, r.avg, r.plays+r.pitches, r.plays, r.pitches, r.deckCount)
+	fmt.Println("Card value (marginal = mean turn value with vs without the card in hand or arsenal; avg = role-based contribution per appearance):")
+	fmt.Println()
+
+	// Column widths take the larger of header label and longest data string so the dividers
+	// line up regardless of deck. Card column also widens for the "Card" header on absurdly
+	// short-named decks.
+	nameW := maxNameLen(d.Cards)
+	if nameW < len("Card") {
+		nameW = len("Card")
 	}
+	marginalW := len("Marginal")
+	avgW := len("Avg")
+	for _, r := range rows {
+		if w := len(formatCardMargin(r.margin, r.hasMargin)); w > marginalW {
+			marginalW = w
+		}
+		if w := len(formatCardValue(r.avg, r.hasAvg)); w > avgW {
+			avgW = w
+		}
+	}
+
+	fmt.Printf("  %-*s | %*s | %*s\n", nameW, "Card", marginalW, "Marginal", avgW, "Avg")
+	fmt.Printf("  %s-+-%s-+-%s\n",
+		strings.Repeat("-", nameW), strings.Repeat("-", marginalW), strings.Repeat("-", avgW))
+	for _, r := range rows {
+		fmt.Printf("  %-*s | %*s | %*s\n",
+			nameW, r.name,
+			marginalW, formatCardMargin(r.margin, r.hasMargin),
+			avgW, formatCardValue(r.avg, r.hasAvg))
+	}
+}
+
+// formatCardValue renders a card's role-based avg as the bare "%.2f" number, or "-" when
+// the card never tallied a Play or Pitch (held / arsenaled cards only). The caller's
+// printf width handles right-alignment so the column stays readable without printing a
+// misleading 0.00 for the no-data case.
+func formatCardValue(v float64, has bool) string {
+	if !has {
+		return "-"
+	}
+	return fmt.Sprintf("%.2f", v)
+}
+
+// formatCardMargin renders the signed marginal value with an explicit sign, or "-" when
+// the card was present in every hand (or never present) so no with/without comparison is
+// possible. The caller's printf width handles right-alignment.
+func formatCardMargin(v float64, has bool) string {
+	if !has {
+		return "-"
+	}
+	return fmt.Sprintf("%+.2f", v)
 }
 
 // Dimensions of the hand-value histogram chart body. histWidth is the chart width in the

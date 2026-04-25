@@ -26,6 +26,21 @@ type Stats struct {
 	// Populated once per hand after hand.Best picks the winner — attribution cost is negligible
 	// next to the underlying search.
 	PerCard map[card.ID]CardPlayStats
+	// PerCardMarginal carries a coarse correlational view of each card's hand-value impact:
+	// for every unique card ID in d.Cards, the mean turn Value across turns where that card
+	// was in the dealt hand (or arsenal-in slot) vs turns where it wasn't. The gap between
+	// the two means is a smell test — cards whose presence shifts hand value far more than
+	// their printed face value would suggest are candidates for buggy or oversimplified
+	// implementations. Captures within-turn indirect effects (card draw, runechant
+	// generation, mid-turn triggers) that the role-based PerCard attribution misses, but
+	// is purely correlational: co-occurring strong cards inflate each other's marginals.
+	//
+	// Future problem: cards whose printed effect pays off on a LATER turn (auras, drawn-card
+	// payoffs that resolve next turn) often won't surface here — the source card has rotated
+	// out of the hand by the time its value lands, so the correlation hits whichever cards
+	// happened to share the payoff turn instead. A regression-based estimator over per-hand
+	// presence vectors would credit such effects more cleanly.
+	PerCardMarginal map[card.ID]CardMarginalStats
 	// Histogram counts hands seen at each integer Value. Keyed by TurnSummary.Value so Min /
 	// Median can be derived without retaining every hand's value. Nil until the first hand is
 	// evaluated.
@@ -67,6 +82,47 @@ func (c CardPlayStats) Avg() float64 {
 		return 0
 	}
 	return c.TotalContribution / float64(n)
+}
+
+// CardMarginalStats accumulates the with/without sums needed to compute a card's correlational
+// marginal hand-value contribution. PresentTotal / PresentHands cover turns where at least one
+// copy of the card sat in the dealt hand or arsenal-in slot when hand.Best ran; AbsentTotal /
+// AbsentHands cover the rest. PresentHands + AbsentHands always equals the deck's total Hands.
+type CardMarginalStats struct {
+	PresentTotal float64
+	PresentHands int
+	AbsentTotal  float64
+	AbsentHands  int
+}
+
+// PresentMean returns the mean turn Value across turns where this card was present in the
+// dealt hand or arsenal-in slot. Zero when the card was never present.
+func (m CardMarginalStats) PresentMean() float64 {
+	if m.PresentHands == 0 {
+		return 0
+	}
+	return m.PresentTotal / float64(m.PresentHands)
+}
+
+// AbsentMean returns the mean turn Value across turns where this card was absent. Zero when
+// the card was always present.
+func (m CardMarginalStats) AbsentMean() float64 {
+	if m.AbsentHands == 0 {
+		return 0
+	}
+	return m.AbsentTotal / float64(m.AbsentHands)
+}
+
+// Marginal returns PresentMean - AbsentMean — the correlational hand-value lift associated
+// with this card being in the turn's hand. Positive means hands containing the card score
+// higher on average; negative means lower. Confounded by co-occurrence with other strong
+// cards, so use as a smell test, not a precise per-card valuation. Zero when either bucket
+// is empty.
+func (m CardMarginalStats) Marginal() float64 {
+	if m.PresentHands == 0 || m.AbsentHands == 0 {
+		return 0
+	}
+	return m.PresentMean() - m.AbsentMean()
 }
 
 // CycleStats tracks total value and hand count for a single deck cycle.

@@ -98,6 +98,61 @@ func TestEvaluate_BestTurnSnapshotsDrawnAndLeftoverRunechants(t *testing.T) {
 	}
 }
 
+// TestEvaluate_PerCardMarginalCoversEveryHand pins the marginal-stats invariant: for every
+// unique card.ID in the deck, PresentHands + AbsentHands equals Stats.Hands. The bucket sums
+// are also non-negative and reflect the per-turn hand-value tally so a regression that
+// double-counts (or skips) a hand surfaces immediately. A multi-card deck mixes "present
+// every turn" vs "present some turns" so both buckets are exercised.
+func TestEvaluate_PerCardMarginalCoversEveryHand(t *testing.T) {
+	read := cards.Get(card.ReadTheRunesRed)
+	snatch := cards.Get(card.SnatchRed)
+	// 4 of each so Snatch isn't pinned to a single hand and the absent bucket gets exercised.
+	deckCards := []card.Card{read, read, read, read, snatch, snatch, snatch, snatch}
+	d := New(hero.Viserai{}, nil, deckCards)
+	d.Evaluate(20, 0, rand.New(rand.NewSource(1)))
+
+	if d.Stats.PerCardMarginal == nil {
+		t.Fatalf("PerCardMarginal should be initialised after Evaluate")
+	}
+	for _, id := range []card.ID{card.ReadTheRunesRed, card.SnatchRed} {
+		m, ok := d.Stats.PerCardMarginal[id]
+		if !ok {
+			t.Errorf("PerCardMarginal missing entry for %s", cards.Get(id).Name())
+			continue
+		}
+		if got := m.PresentHands + m.AbsentHands; got != d.Stats.Hands {
+			t.Errorf("%s: PresentHands+AbsentHands = %d, want Stats.Hands = %d (every hand must end up in exactly one bucket)",
+				cards.Get(id).Name(), got, d.Stats.Hands)
+		}
+		if m.PresentHands == 0 {
+			t.Errorf("%s: PresentHands = 0 — this card should have been in at least one dealt hand across 20 shuffles",
+				cards.Get(id).Name())
+		}
+	}
+}
+
+// TestEvaluate_PerCardMarginalAlwaysPresent pins the singleton case: a deck containing only
+// one unique card never registers an absent bucket. PresentMean equals the deck's overall
+// Mean, and Marginal is 0 (no comparison possible). Single-card decks are a degenerate but
+// realistic test fixture.
+func TestEvaluate_PerCardMarginalAlwaysPresent(t *testing.T) {
+	read := cards.Get(card.ReadTheRunesRed)
+	d := New(hero.Viserai{}, nil, []card.Card{read, read, read, read, read, read, read, read})
+	d.Evaluate(5, 0, rand.New(rand.NewSource(1)))
+
+	m := d.Stats.PerCardMarginal[card.ReadTheRunesRed]
+	if m.AbsentHands != 0 {
+		t.Errorf("AbsentHands = %d, want 0 (single-card deck means card is always present)", m.AbsentHands)
+	}
+	if m.PresentHands != d.Stats.Hands {
+		t.Errorf("PresentHands = %d, want %d (every hand contains the only card in the deck)",
+			m.PresentHands, d.Stats.Hands)
+	}
+	if m.Marginal() != 0 {
+		t.Errorf("Marginal() = %v, want 0 (no absent comparison possible)", m.Marginal())
+	}
+}
+
 // TestEvaluate_HeldCardDefersDrawToNextTurn pins the "up to Intelligence" draw rule plus arsenal
 // carryover. Intelligence-1 hero, deck of Toughen Up Blue (DR, cost 2, defense 4): the lone
 // card has no legal play (can't pay its 2-cost, can't pitch with nothing on the stack, DRs

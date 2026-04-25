@@ -42,6 +42,20 @@ func (d *Deck) EvaluateWith(runs int, incomingDamage int, rng *rand.Rand, ev *ha
 	}
 	handsPerCycle := deckSize / handSize
 
+	// uniqueIDs / idIndex / presentBuf / marginalBuf back the per-turn marginal-stats
+	// accounting. uniqueIDs lists every distinct card.ID that appears in d.Cards (one entry
+	// per ID, in deck order of first appearance). idIndex maps an ID back to its position so
+	// the per-turn presence walk over the dealt hand is O(handSize) map lookups instead of
+	// an O(handSize × uniqueIDs) scan. presentBuf is reused each turn — zeroed via clear()
+	// — to mark which uniqueIDs sat in this turn's dealt hand or arsenal-in slot.
+	// marginalBuf accumulates the with/without sums in a flat slice so the inner loop avoids
+	// per-turn map churn (~30ns × 2 ops × 21 IDs/turn would dominate Evaluate's hot path on
+	// large anneal benchmarks); the slice is folded into Stats.PerCardMarginal once after
+	// every shuffle finishes.
+	uniqueIDs, idIndex := uniqueDeckIDs(d.Cards)
+	presentBuf := make([]bool, len(uniqueIDs))
+	marginalBuf := make([]CardMarginalStats, len(uniqueIDs))
+
 	// buf is a single-allocation slab holding deck state for the run. [head:tail] is the
 	// remaining deck in top-to-bottom order. Dealt cards advance head; pitched cards are
 	// re-appended at tail. Sized 2×deckSize so there's always room to append before compacting;
@@ -108,6 +122,10 @@ func (d *Deck) EvaluateWith(runs int, incomingDamage int, rng *rand.Rand, ev *ha
 				drawCount++
 			}
 			runechantCarryover += trigRunes
+			// arsenalIn snapshots the arsenal slot's contents at the top of this turn, before
+			// Best decides what to put in arsenal-out. Marginal stats key on arsenalIn so the
+			// "card present in this turn's hand" set covers everything the solver had access to.
+			arsenalIn := arsenalCard
 			var play hand.TurnSummary
 			if ev != nil {
 				play = ev.BestWithTriggers(d.Hero, d.Weapons, h, incomingDamage, buf[head+drawCount:tail], runechantCarryover, arsenalCard, auraTriggerBuf)
@@ -143,6 +161,7 @@ func (d *Deck) EvaluateWith(runs int, incomingDamage int, rng *rand.Rand, ev *ha
 			}
 
 			attributePlayStats(&d.Stats, play.BestLine)
+			tallyMarginalPresence(marginalBuf, idIndex, presentBuf, h, arsenalIn, v)
 			nextHeld = applyTurnResult(play, buf, &head, &tail, drawCount, nextHeld[:0])
 			nextAuraTrigger = append(nextAuraTrigger[:0], play.AuraTriggers...)
 			handIdx++
@@ -150,6 +169,7 @@ func (d *Deck) EvaluateWith(runs int, incomingDamage int, rng *rand.Rand, ev *ha
 			auraTriggerBuf, nextAuraTrigger = nextAuraTrigger, auraTriggerBuf
 		}
 	}
+	mergeMarginalBuf(&d.Stats, uniqueIDs, marginalBuf)
 	return d.Stats
 }
 
@@ -415,6 +435,75 @@ func recordBestTurn(stats *Stats, play hand.TurnSummary, startingRunechants int)
 			StartOfTurnAuras:     aurasCopy,
 		},
 		StartingRunechants: startingRunechants,
+	}
+}
+
+// uniqueDeckIDs returns the distinct card IDs in cs (in deck order of first appearance) and
+// a position-lookup map keyed by ID. The caller uses uniqueIDs to iterate every card the deck
+// could ever score against and idIndex to flip per-turn presence flags from the dealt hand.
+func uniqueDeckIDs(cs []card.Card) ([]card.ID, map[card.ID]int) {
+	ids := make([]card.ID, 0, len(cs))
+	idx := make(map[card.ID]int, len(cs))
+	for _, c := range cs {
+		id := c.ID()
+		if _, seen := idx[id]; seen {
+			continue
+		}
+		idx[id] = len(ids)
+		ids = append(ids, id)
+	}
+	return ids, idx
+}
+
+// tallyMarginalPresence credits this turn's value to each entry in marginalBuf, bucketed by
+// whether the card was present in the dealt hand or in the arsenal-in slot when hand.Best
+// ran. presentBuf is a scratch slice indexed parallel to marginalBuf; the caller owns both
+// across turns to keep this path allocation-free. Operates entirely on slices so the inner
+// loop avoids the per-turn map churn a direct Stats.PerCardMarginal[id] update would cost.
+func tallyMarginalPresence(marginalBuf []CardMarginalStats, idIndex map[card.ID]int, presentBuf []bool, dealt []card.Card, arsenalIn card.Card, value float64) {
+	if len(marginalBuf) == 0 {
+		return
+	}
+	clear(presentBuf)
+	for _, c := range dealt {
+		if i, ok := idIndex[c.ID()]; ok {
+			presentBuf[i] = true
+		}
+	}
+	if arsenalIn != nil {
+		if i, ok := idIndex[arsenalIn.ID()]; ok {
+			presentBuf[i] = true
+		}
+	}
+	for i := range marginalBuf {
+		if presentBuf[i] {
+			marginalBuf[i].PresentTotal += value
+			marginalBuf[i].PresentHands++
+		} else {
+			marginalBuf[i].AbsentTotal += value
+			marginalBuf[i].AbsentHands++
+		}
+	}
+}
+
+// mergeMarginalBuf folds the per-Evaluate slice accumulator into Stats.PerCardMarginal,
+// summing into existing entries so multiple Evaluate calls accumulate the same way PerCard
+// does. The map is lazily initialised so decks that never get evaluated don't pay for an
+// empty map.
+func mergeMarginalBuf(stats *Stats, uniqueIDs []card.ID, marginalBuf []CardMarginalStats) {
+	if len(uniqueIDs) == 0 {
+		return
+	}
+	if stats.PerCardMarginal == nil {
+		stats.PerCardMarginal = make(map[card.ID]CardMarginalStats, len(uniqueIDs))
+	}
+	for i, id := range uniqueIDs {
+		m := stats.PerCardMarginal[id]
+		m.PresentTotal += marginalBuf[i].PresentTotal
+		m.PresentHands += marginalBuf[i].PresentHands
+		m.AbsentTotal += marginalBuf[i].AbsentTotal
+		m.AbsentHands += marginalBuf[i].AbsentHands
+		stats.PerCardMarginal[id] = m
 	}
 }
 
