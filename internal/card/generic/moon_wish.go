@@ -6,8 +6,8 @@
 // your hand, then shuffle your deck."
 //
 // Card-specific quirks:
-//   - Tutor priority is lowest-pitch first (Red > Yellow > Blue): the Red printing is the
-//     most flexible draw next turn.
+//   - Tutor priority is Red > Yellow > Blue — the Red printing heals the most (3{h} vs 2 vs
+//     1), so the highest-power variant present wins.
 //   - When the alt cost fires, the consumed Held card is recorded on s.HeldConsumed so the
 //     deck loop knows not to also carry it as a BestLine[Held] entry — the card has already
 //     been re-routed onto the deck.
@@ -78,8 +78,8 @@ func moonWishPlay(c card.Card, attack int, s *card.TurnState, self *card.CardSta
 }
 
 // bestSunKissInDeck returns the highest-priority Sun Kiss printing present in deck, or nil
-// when no Sun Kiss is in the deck. Priority order is Red > Yellow > Blue: the lower the
-// pitch value, the more flexible the variant in any future hand.
+// when no Sun Kiss is in the deck. Priority order is Red > Yellow > Blue: Red heals the
+// most ({3,2,1}{h} by colour), so the highest-power variant present wins.
 func bestSunKissInDeck(deck []card.Card) card.Card {
 	var pickedRed, pickedYellow, pickedBlue card.Card
 	for _, c := range deck {

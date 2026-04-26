@@ -58,7 +58,7 @@ func TestMoonWish_AltCostMovesHeldToDeckTop(t *testing.T) {
 }
 
 // TestMoonWish_TutorPrefersRedSunKissThenYellowThenBlue: when multiple Sun Kiss variants are
-// in deck the tutor picks the lowest-pitch (most flexible) printing first.
+// in deck the tutor picks the highest-power printing first — Red heals 3, Yellow 2, Blue 1.
 func TestMoonWish_TutorPrefersRedSunKissThenYellowThenBlue(t *testing.T) {
 	cases := []struct {
 		name string
