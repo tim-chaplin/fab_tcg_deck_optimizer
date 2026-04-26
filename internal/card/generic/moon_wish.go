@@ -8,9 +8,6 @@
 // Card-specific quirks:
 //   - Tutor priority is Red > Yellow > Blue — the Red printing heals the most (3{h} vs 2 vs
 //     1), so the highest-power variant present wins.
-//   - When the alt cost fires, the consumed Held card is recorded on s.HeldConsumed so the
-//     deck loop knows not to also carry it as a BestLine[Held] entry — the card has already
-//     been re-routed onto the deck.
 //   - The on-hit Sun Kiss tutor wants the synergy ("if you've played Moon Wish") to fire
 //     when Sun Kiss resolves immediately (go-again branch), but Moon Wish hasn't been
 //     appended to CardsPlayed yet. Play does a transient pre-append + pop around the Sun
@@ -61,9 +58,8 @@ func moonWishPlay(c card.Card, attack int, s *card.TurnState, self *card.CardSta
 		return attack
 	}
 	s.Deck = removeFirstByID(s.Deck, sk.ID())
-	// Tell the deck loop to drop this card from the underlying buffer too — without it the
-	// tutored card would re-surface on a later turn (head only advances; the buf isn't
-	// patched by the local s.Deck slice rewrite above).
+	// Mirror the s.Deck slice rewrite into the underlying buf via applyTurnResult so the
+	// tutored card stays out of future turns.
 	s.DeckRemoved = append(s.DeckRemoved, sk)
 
 	if !self.EffectiveGoAgain() {

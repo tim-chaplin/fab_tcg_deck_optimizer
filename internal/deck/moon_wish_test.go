@@ -37,7 +37,8 @@ var moonWishHero = stubs.Hero{Intel: 4}
 func TestEvalOneTurn_MoonWishAltCostTutorsSunKissAndConsumesDeck(t *testing.T) {
 	deckCards := []card.Card{
 		generic.SunKissRed{},
-		fake.RedAttack{}, fake.RedAttack{}, fake.RedAttack{}, fake.RedAttack{}, fake.RedAttack{},
+		fake.RedAttack{}, fake.RedAttack{}, fake.RedAttack{},
+		fake.RedAttack{}, fake.RedAttack{},
 	}
 	d := New(moonWishHero, nil, deckCards)
 	state := d.EvalOneTurnForTesting(0, nil, []card.Card{
@@ -46,20 +47,19 @@ func TestEvalOneTurn_MoonWishAltCostTutorsSunKissAndConsumesDeck(t *testing.T) {
 	})
 
 	if state.PrevTurnValue != 4 {
-		t.Errorf("turn-1 Value = %d, want 4 (Moon Wish printed attack only — Sun Kiss tutored to hand, not played)",
+		t.Errorf("turn-1 Value = %d, want 4 (Moon Wish base attack; Sun Kiss tutored, not played)",
 			state.PrevTurnValue)
 	}
 	if state.ArsenalCard == nil || state.ArsenalCard.ID() != card.SunKissRed {
 		t.Errorf("ArsenalCard = %v, want Sun Kiss (Red)", state.ArsenalCard)
 	}
 	if len(state.Hand) == 0 || state.Hand[0].ID() != card.WeepingBattlegroundRed {
-		t.Errorf("turn-2 Hand[0] = %v, want Weeping Battleground (Red) (alt-cost'd card on top of deck)",
+		t.Errorf("turn-2 Hand[0] = %v, want Weeping Battleground (Red) (alt-cost'd card on deck top)",
 			state.Hand)
 	}
 	for i, c := range state.Deck {
 		if c.ID() == card.SunKissRed {
-			t.Errorf("turn-2 Deck[%d] is Sun Kiss (Red); deck should hold zero copies after tutor patched buf",
-				i)
+			t.Errorf("turn-2 Deck[%d] is Sun Kiss (Red); want 0 copies after tutor patched buf", i)
 		}
 	}
 }
@@ -72,7 +72,8 @@ func TestEvalOneTurn_MoonWishAltCostTutorsSunKissAndConsumesDeck(t *testing.T) {
 // Cross-turn assertion mirrors the prior test: turn-2 Hand[0] is the alt-cost'd card.
 func TestEvalOneTurn_MoonWishAltCostTutorFizzlesWithoutSunKiss(t *testing.T) {
 	deckCards := []card.Card{
-		fake.RedAttack{}, fake.RedAttack{}, fake.RedAttack{}, fake.RedAttack{}, fake.RedAttack{}, fake.RedAttack{},
+		fake.RedAttack{}, fake.RedAttack{}, fake.RedAttack{},
+		fake.RedAttack{}, fake.RedAttack{}, fake.RedAttack{},
 	}
 	d := New(moonWishHero, nil, deckCards)
 	state := d.EvalOneTurnForTesting(0, nil, []card.Card{
@@ -81,14 +82,15 @@ func TestEvalOneTurn_MoonWishAltCostTutorFizzlesWithoutSunKiss(t *testing.T) {
 	})
 
 	if state.PrevTurnValue != 4 {
-		t.Errorf("turn-1 Value = %d, want 4 (Moon Wish printed attack; tutor fizzles)", state.PrevTurnValue)
+		t.Errorf("turn-1 Value = %d, want 4 (Moon Wish base attack; tutor fizzles)",
+			state.PrevTurnValue)
 	}
 	if state.ArsenalCard != nil {
-		t.Errorf("ArsenalCard = %v, want nil (DR was the only hand-Held and got consumed by alt cost)",
+		t.Errorf("ArsenalCard = %v, want nil (DR was the only Held; alt cost consumed it)",
 			state.ArsenalCard)
 	}
 	if len(state.Hand) == 0 || state.Hand[0].ID() != card.WeepingBattlegroundRed {
-		t.Errorf("turn-2 Hand[0] = %v, want Weeping Battleground (Red) (alt-cost'd card on top even without tutor hit)",
+		t.Errorf("turn-2 Hand[0] = %v, want Weeping Battleground (Red) (alt-cost'd, no tutor)",
 			state.Hand)
 	}
 }
@@ -131,7 +133,8 @@ func TestEvalOneTurn_MoonWishWithFlyingHighPlaysTutoredSunKiss(t *testing.T) {
 			state.PrevTurnValue)
 	}
 	if state.ArsenalCard == nil || state.ArsenalCard.ID() != card.WeepingBattlegroundRed {
-		t.Errorf("ArsenalCard = %v, want Weeping Battleground (Red) (Sun Kiss's DrawOne pulled the alt-cost'd DR off deck top)",
+		t.Errorf("ArsenalCard = %v, want Weeping Battleground (Red) "+
+			"(Sun Kiss's DrawOne pulled the alt-cost'd DR off deck top)",
 			state.ArsenalCard)
 	}
 	// Sun Kiss was tutored and played — it should be in the graveyard, NOT in any of the

@@ -79,16 +79,12 @@ type TurnSummary struct {
 	// Populated by the deck loop before the start-of-turn fires run; surfaced in FormatBestTurn
 	// so the reader can see which carryover auras fed mid-chain "(+M aura trigger)" damage.
 	StartOfTurnAuras []card.Card
-	// HeldConsumed is the BestLine[Held] cards an alt-cost effect moved out of the
-	// partition's Held set during the chain. The deck loop suppresses these cards in
-	// BestLine[Held]→nextHeld carries and arsenal-promotion candidate counts; without that
-	// suppression the consumed card would double-count against the next turn (still Held in
-	// BestLine, also routed via the alt-cost effect). Each HeldConsumed entry is also
-	// inserted at the top of the next-turn deck buffer by applyTurnResult.
+	// HeldConsumed surfaces card.TurnState.HeldConsumed from the winning permutation; see
+	// that field for the alt-cost contract (deck loop skips Held → nextHeld carries for
+	// these cards, plus inserts each at the next-turn deck top).
 	HeldConsumed []card.Card
-	// DeckRemoved is the cards taken out of the deck this turn — DrawOne pulls plus tutor-
-	// style removals (Moon Wish's Sun Kiss search). applyTurnResult patches each out of the
-	// underlying deck buffer so the same card can't be drawn again on a later turn.
+	// DeckRemoved surfaces card.TurnState.DeckRemoved from the winning permutation; see
+	// that field for the buf-patch contract.
 	DeckRemoved []card.Card
 }
 
