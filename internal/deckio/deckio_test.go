@@ -6,23 +6,11 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/cards"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/deck"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/hand"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/hero"
 )
-
-func filterHand(line []hand.CardAssignment) []hand.CardAssignment {
-	out := make([]hand.CardAssignment, 0, len(line))
-	for _, a := range line {
-		if a.FromArsenal {
-			continue
-		}
-		out = append(out, a)
-	}
-	return out
-}
 
 func TestMarshalUnmarshalRoundTrip(t *testing.T) {
 	rng := rand.New(rand.NewSource(1))
@@ -117,24 +105,27 @@ func TestRoundTrip_PreservesPerCardMarginal(t *testing.T) {
 }
 
 // TestRoundTrip_PreservesStartOfTurnAuras locks in that the best turn's StartOfTurnAuras list
-// (the auras that were in play at the top of the captured turn) survives Marshal/Unmarshal by
-// card name, preserving duplicates and order. Without the round-trip, a reloaded deck's best
-// turn would lose its "Auras in play at start of turn" header line.
-func TestRoundTrip_PreservesStartOfTurnAuras(t *testing.T) {
+// TestRoundTrip_PreservesBestTurnLines pins the on-disk best-turn round-trip: deck.BestTurn.
+// Lines is the rendered printout (header + chain body), and Marshal/Unmarshal carry it
+// verbatim so a reloaded deck's printBestTurn output matches the original byte-for-byte. No
+// structured fields (StartOfTurnAuras, ArsenalIn, TriggersFromLastTurn) round-trip anymore —
+// they're already baked into the rendered Lines.
+func TestRoundTrip_PreservesBestTurnLines(t *testing.T) {
 	rng := rand.New(rand.NewSource(7))
 	d := deck.Random(hero.Viserai{}, 40, 2, rng, nil)
-	// Seed a best turn by hand so the assertion doesn't depend on the sim organically
-	// producing carryover auras — synthetic input is enough to pin the round trip.
+	want := []string{
+		"Best turn played (value 21):",
+		"  Auras in play at start of turn: Sigil of the Arknight (Blue)",
+		"  My turn:",
+		"    1. Sigil of the Arknight (Blue): drew Hit the High Notes (Red) into hand",
+		"    2. Hocus Pocus (Blue): PITCH",
+		"    3. Consuming Volition (Red): ATTACK (+4)",
+		"    4. Viserai: HERO TRIGGER (+1)",
+	}
 	d.Stats.Best = deck.BestTurn{
-		Summary: hand.TurnSummary{
-			BestLine: []hand.CardAssignment{{Card: cards.Get(card.MaleficIncantationRed), Role: hand.Attack}},
-			StartOfTurnAuras: []card.Card{
-				cards.Get(card.MaleficIncantationRed),
-				cards.Get(card.MaleficIncantationRed),
-				cards.Get(card.SigilOfTheArknightBlue),
-			},
-			Value: 1,
-		},
+		Summary:            hand.TurnSummary{Value: 21},
+		StartingRunechants: 0,
+		Lines:              want,
 	}
 
 	data, err := Marshal(d)
@@ -146,111 +137,17 @@ func TestRoundTrip_PreservesStartOfTurnAuras(t *testing.T) {
 		t.Fatalf("Unmarshal: %v", err)
 	}
 
-	wantNames := []string{"Malefic Incantation (Red)", "Malefic Incantation (Red)", "Sigil of the Arknight (Blue)"}
-	gotAuras := got.Stats.Best.Summary.StartOfTurnAuras
-	if len(gotAuras) != len(wantNames) {
-		t.Fatalf("StartOfTurnAuras len: got %d want %d", len(gotAuras), len(wantNames))
+	gotLines := got.Stats.Best.Lines
+	if len(gotLines) != len(want) {
+		t.Fatalf("Lines len: got %d want %d (got=%v)", len(gotLines), len(want), gotLines)
 	}
-	for i := range wantNames {
-		if gotAuras[i].Name() != wantNames[i] {
-			t.Errorf("StartOfTurnAuras[%d]: got %q want %q", i, gotAuras[i].Name(), wantNames[i])
+	for i := range want {
+		if gotLines[i] != want[i] {
+			t.Errorf("Lines[%d]: got %q want %q", i, gotLines[i], want[i])
 		}
 	}
-}
-
-// TestRoundTrip_PreservesArsenalIn pins the arsenal-in entry round-trip: a BestLine slot
-// with FromArsenal=true survives Marshal/Unmarshal so `fabsim eval -print-only` can
-// render the "(from arsenal)" tag on any saved best turn whose winning chain includes the
-// arsenal-in card.
-func TestRoundTrip_PreservesArsenalIn(t *testing.T) {
-	rng := rand.New(rand.NewSource(11))
-	d := deck.Random(hero.Viserai{}, 40, 2, rng, nil)
-	arsenalCard := cards.Get(card.MauvrionSkiesRed)
-	handCard := cards.Get(card.HitTheHighNotesRed)
-	// Seed a best turn by hand with an arsenal-in entry at the tail (bestUncached's
-	// convention: hand cards at indices [0,n); arsenal-in at n). The chain includes both
-	// so rebuildAttackChain reconstructs them on load.
-	d.Stats.Best = deck.BestTurn{
-		Summary: hand.TurnSummary{
-			BestLine: []hand.CardAssignment{
-				{Card: handCard, Role: hand.Attack},
-				{Card: arsenalCard, Role: hand.Attack, FromArsenal: true},
-			},
-			Value: 9,
-		},
-	}
-
-	data, err := Marshal(d)
-	if err != nil {
-		t.Fatalf("Marshal: %v", err)
-	}
-	got, err := Unmarshal(data)
-	if err != nil {
-		t.Fatalf("Unmarshal: %v", err)
-	}
-
-	var arsenalEntry hand.CardAssignment
-	var found bool
-	for _, a := range got.Stats.Best.Summary.BestLine {
-		if a.FromArsenal {
-			arsenalEntry = a
-			found = true
-			break
-		}
-	}
-	if !found {
-		t.Fatalf("BestLine missing arsenal-in entry after round-trip; got %+v", got.Stats.Best.Summary.BestLine)
-	}
-	if arsenalEntry.Card.ID() != arsenalCard.ID() {
-		t.Errorf("arsenal-in card: got %q want %q", arsenalEntry.Card.Name(), arsenalCard.Name())
-	}
-	if arsenalEntry.Role != hand.Attack {
-		t.Errorf("arsenal-in role: got %v want Attack", arsenalEntry.Role)
-	}
-}
-
-// TestRoundTrip_PreservesTriggersFromLastTurn pins the carryover-AuraTrigger round-trip
-// including the Revealed-into-hand attribution. Sigil of the Arknight fires at start of
-// action phase with Damage=0 and reveals the deck top; for a reloaded deck to render the
-// "drew X into hand" line both the aura and its revealed card must round-trip by name.
-func TestRoundTrip_PreservesTriggersFromLastTurn(t *testing.T) {
-	rng := rand.New(rand.NewSource(13))
-	d := deck.Random(hero.Viserai{}, 40, 2, rng, nil)
-	d.Stats.Best = deck.BestTurn{
-		Summary: hand.TurnSummary{
-			BestLine: []hand.CardAssignment{{Card: cards.Get(card.MaleficIncantationRed), Role: hand.Attack}},
-			TriggersFromLastTurn: []hand.TriggerContribution{
-				{Card: cards.Get(card.SigilOfTheArknightBlue), Revealed: cards.Get(card.HitTheHighNotesRed)},
-				{Card: cards.Get(card.MaleficIncantationRed), Damage: 2},
-			},
-			Value: 3,
-		},
-	}
-
-	data, err := Marshal(d)
-	if err != nil {
-		t.Fatalf("Marshal: %v", err)
-	}
-	got, err := Unmarshal(data)
-	if err != nil {
-		t.Fatalf("Unmarshal: %v", err)
-	}
-
-	trigs := got.Stats.Best.Summary.TriggersFromLastTurn
-	if len(trigs) != 2 {
-		t.Fatalf("TriggersFromLastTurn len: got %d want 2 (%+v)", len(trigs), trigs)
-	}
-	if trigs[0].Card.Name() != "Sigil of the Arknight (Blue)" {
-		t.Errorf("trigs[0].Card: got %q want Sigil of the Arknight (Blue)", trigs[0].Card.Name())
-	}
-	if trigs[0].Revealed == nil || trigs[0].Revealed.Name() != "Hit the High Notes (Red)" {
-		t.Errorf("trigs[0].Revealed: got %v want Hit the High Notes (Red)", trigs[0].Revealed)
-	}
-	if trigs[0].Damage != 0 {
-		t.Errorf("trigs[0].Damage: got %d want 0", trigs[0].Damage)
-	}
-	if trigs[1].Card.Name() != "Malefic Incantation (Red)" || trigs[1].Damage != 2 || trigs[1].Revealed != nil {
-		t.Errorf("trigs[1]: got %+v want {Malefic Incantation (Red), Damage:2, Revealed:nil}", trigs[1])
+	if got.Stats.Best.Summary.Value != 21 {
+		t.Errorf("Value: got %d want 21", got.Stats.Best.Summary.Value)
 	}
 }
 

@@ -63,40 +63,14 @@ type CardMarginalStatsJSON struct {
 	Marginal     float64 `json:"marginal"`
 }
 
-// BestTurnJSON is the JSON form of deck.BestTurn: card names and role names instead of
-// interface values. Weapons names the weapons swung this turn (mirrors
-// hand.TurnSummary.SwungWeapons). StartOfTurnAuras mirrors hand.TurnSummary.StartOfTurnAuras
-// as a list of card names; ArsenalIn carries the card that started the turn in the arsenal
-// slot (distinct from Hand, which is the dealt hand only). TriggersFromLastTurn records
-// carryover AuraTrigger fires so the "from previous turn" printout round-trips across a
-// reload.
+// BestTurnJSON is the on-disk shape of deck.BestTurn — just the rendered printout lines.
+// Marshal serialises deck.BestTurn.Lines verbatim; Unmarshal restores them into the loaded
+// deck so fabsim's print path can dump them directly without reconstructing a TurnSummary.
+// Value and StartingRunechants ride along for diff-friendly searchability of the file but
+// don't drive the printout — Lines already includes the "Best turn played (value N):"
+// header.
 type BestTurnJSON struct {
-	Hand                 []string                  `json:"hand"`
-	Roles                []string                  `json:"roles"`
-	Weapons              []string                  `json:"weapons"`
-	StartOfTurnAuras     []string                  `json:"start_of_turn_auras,omitempty"`
-	ArsenalIn            *ArsenalInJSON            `json:"arsenal_in,omitempty"`
-	TriggersFromLastTurn []TriggerContributionJSON `json:"triggers_from_last_turn,omitempty"`
-	Value                int                       `json:"value"`
-	StartingRunechants   int                       `json:"starting_runechants"`
-}
-
-// ArsenalInJSON carries the arsenal-in card's role-assigned entry for the best turn so a
-// reloaded deck can re-render the "(from arsenal)" tag in the play order. Hand serialises
-// only dealt-hand entries; the arsenal-in card lives here separately because it belongs to
-// a previous turn and isn't part of the dealt hand the reader sees in the Card list.
-type ArsenalInJSON struct {
-	Card string `json:"card"`
-	Role string `json:"role"`
-}
-
-// TriggerContributionJSON is the serialised form of hand.TriggerContribution — one
-// carryover AuraTrigger fire at the top of the saved turn. Damage / Revealed are both
-// omitempty so a zero-damage non-reveal entry would still round-trip as just the aura
-// name (shouldn't happen in practice since FormatBestTurn drops those lines, but the
-// shape stays lossless).
-type TriggerContributionJSON struct {
-	Card     string `json:"card"`
-	Damage   int    `json:"damage,omitempty"`
-	Revealed string `json:"revealed,omitempty"`
+	Value              int      `json:"value"`
+	StartingRunechants int      `json:"starting_runechants,omitempty"`
+	Lines              []string `json:"lines,omitempty"`
 }

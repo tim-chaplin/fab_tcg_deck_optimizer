@@ -14,7 +14,6 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/cards"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/deck"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/hand"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/weapon"
 )
 
@@ -165,20 +164,19 @@ func histogramTitle(d *deck.Deck) string {
 	return fmt.Sprintf("Hand-value distribution (%s hands):", commaInt(d.Stats.Hands))
 }
 
-// printBestTurn renders the persisted peak-Value turn — "Best turn played (value N):"
-// header plus FormatBestTurn's sectioned play order — when Stats.Best holds one. No-ops on
-// an unscored deck so callers don't have to guard. Shared by printBestDeck and runEval.
-// Starting Runechants (Runeblade carryover state) pipe through to FormatBestTurn, which
-// folds a non-zero count into its "Auras in play at start of turn:" line; zero is omitted
-// entirely so only turns that actually started with pending tokens surface the detail.
+// printBestTurn dumps the persisted peak-Value turn's pre-rendered lines — header plus
+// chain body, captured at end of Evaluate and round-tripped through JSON verbatim. No-ops on
+// an unscored deck (no Lines stored) so callers don't have to guard. Shared by printBestDeck
+// and runEval; live and reloaded decks render identically because the print path consumes
+// the same Lines slice in both cases.
 func printBestTurn(d *deck.Deck) {
-	b := d.Stats.Best
-	if len(b.Summary.BestLine) == 0 {
+	if len(d.Stats.Best.Lines) == 0 {
 		return
 	}
 	fmt.Println()
-	fmt.Printf("Best turn played (value %d):\n", b.Summary.Value)
-	fmt.Println(hand.FormatBestTurn(b.Summary, b.StartingRunechants))
+	for _, line := range d.Stats.Best.Lines {
+		fmt.Println(line)
+	}
 }
 
 // printCardValues renders one row per unique card with the marginal +/- signal: mean turn
