@@ -421,6 +421,44 @@ func (s *TurnState) AddAuraTrigger(t AuraTrigger) {
 	s.AuraTriggers = append(s.AuraTriggers, t)
 }
 
+// RegisterStartOfTurn registers a TriggerStartOfTurn AuraTrigger as the canonical shape
+// for "at the beginning of your action phase ..." aura clauses. self is the aura card
+// (used by the sim to graveyard the source after the final fire); count is how many
+// start-of-turn fires the aura survives before the sim destroys it (1 for one-shot
+// destroy-on-fire auras, N for verse-counter / charge-counter auras); text is the
+// per-fire effect description ("Gained 1 health", "Created a runechant", …) auto-logged
+// alongside the trigger so the printout names what happened — pass "" when the handler
+// authors its own log line (dynamic wording, e.g. Sigil of the Arknight's "drew X into
+// hand"); handler runs each fire and returns the damage-equivalent the trigger credits.
+//
+// When text is non-empty and the handler returns n > 0, the wrapper writes a post-trigger
+// log entry "<DisplayName>: text (+n)" attributed to self so the sim's per-trigger
+// contribution renders as a descriptive line instead of the generic "<DisplayName>:
+// START OF ACTION PHASE (+N)" fallback. n == 0 fires log nothing (matches the no-banish
+// edge case of Sigil of Silphidae's leave trigger). The damage accumulator in
+// processTriggersAtStartOfTurn still folds n into the turn's value via the handler's
+// return; the log entry's N is purely cosmetic for the rendered line.
+func (s *TurnState) RegisterStartOfTurn(self Card, count int, text string, handler OnAuraTrigger) {
+	finalHandler := handler
+	if text != "" {
+		source := DisplayName(self)
+		prefix := source + ": " + text
+		finalHandler = func(s *TurnState) int {
+			n := handler(s)
+			if n > 0 {
+				s.AddPostTriggerLogEntry(fmt.Sprintf("%s (+%d)", prefix, n), source, n)
+			}
+			return n
+		}
+	}
+	s.AddAuraTrigger(AuraTrigger{
+		Self:    self,
+		Type:    TriggerStartOfTurn,
+		Count:   count,
+		Handler: finalHandler,
+	})
+}
+
 // AddEphemeralAttackTrigger registers a same-turn, fire-once "next attack" trigger. The sim
 // stamps t.SourceIndex after the registering card's Play returns. Fires on the next
 // matching attack action's resolution; fizzles silently at end of turn if no match.

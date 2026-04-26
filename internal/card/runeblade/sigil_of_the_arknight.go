@@ -28,12 +28,7 @@ func (SigilOfTheArknightBlue) Types() card.TypeSet      { return sigilOfTheArkni
 func (SigilOfTheArknightBlue) GoAgain() bool            { return true }
 func (SigilOfTheArknightBlue) AddsFutureValue()         {}
 func (c SigilOfTheArknightBlue) Play(s *card.TurnState, self *card.CardState) {
-	s.AddAuraTrigger(card.AuraTrigger{
-		Self:    c,
-		Type:    card.TriggerStartOfTurn,
-		Count:   1,
-		Handler: sigilOfTheArknightReveal,
-	})
+	s.RegisterStartOfTurn(c, 1, "", sigilOfTheArknightReveal)
 	s.LogPlay(self)
 }
 
