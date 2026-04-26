@@ -79,11 +79,11 @@ type TurnSummary struct {
 	// Populated by the deck loop before the start-of-turn fires run; surfaced in FormatBestTurn
 	// so the reader can see which carryover auras fed mid-chain "(+M aura trigger)" damage.
 	StartOfTurnAuras []card.Card
-	// HeldConsumed is the BestLine[Held] cards an alt-cost effect (e.g. Moon Wish's "use a
-	// Held card") moved out of the partition's Held set during the chain. The deck loop
-	// suppresses these cards in BestLine[Held]→nextHeld carries and arsenal-promotion
-	// candidate counts; without that suppression the consumed card would double-count
-	// against the next turn (still Held in BestLine, also routed via the alt-cost effect).
+	// HeldConsumed is the BestLine[Held] cards an alt-cost effect moved out of the
+	// partition's Held set during the chain. The deck loop suppresses these cards in
+	// BestLine[Held]→nextHeld carries and arsenal-promotion candidate counts; without that
+	// suppression the consumed card would double-count against the next turn (still Held in
+	// BestLine, also routed via the alt-cost effect).
 	HeldConsumed []card.Card
 }
 

@@ -33,7 +33,7 @@ func TestBest_MoonWishAltCostTutorsSunKissToHand(t *testing.T) {
 			got.Value)
 	}
 	if len(got.HeldConsumed) != 1 || got.HeldConsumed[0].ID() != card.WeepingBattlegroundRed {
-		t.Errorf("HeldConsumed = %v, want [Weeping Battleground (Red)]", cardNames(consumedCards(got.HeldConsumed)))
+		t.Errorf("HeldConsumed = %v, want [Weeping Battleground (Red)]", cardNames(got.HeldConsumed))
 	}
 	if len(got.Drawn) != 1 || got.Drawn[0].Card.ID() != card.SunKissRed {
 		t.Errorf("Drawn = %v, want [Sun Kiss (Red)]", drawnNames(got.Drawn))
@@ -74,7 +74,7 @@ func TestBest_MoonWishAltCostTutorFizzlesWithoutSunKiss(t *testing.T) {
 		t.Errorf("Value = %d, want 4 (Moon Wish printed attack; tutor fizzles)", got.Value)
 	}
 	if len(got.HeldConsumed) != 1 || got.HeldConsumed[0].ID() != card.WeepingBattlegroundRed {
-		t.Errorf("HeldConsumed = %v, want [Weeping Battleground (Red)]", cardNames(consumedCards(got.HeldConsumed)))
+		t.Errorf("HeldConsumed = %v, want [Weeping Battleground (Red)]", cardNames(got.HeldConsumed))
 	}
 	if len(got.Drawn) != 0 {
 		t.Errorf("Drawn = %v, want [] (tutor found no Sun Kiss; no DrawOne fired)", drawnNames(got.Drawn))
@@ -109,7 +109,7 @@ func TestBest_MoonWishWithFlyingHighPlaysTutoredSunKiss(t *testing.T) {
 			got.Value)
 	}
 	if len(got.HeldConsumed) != 1 || got.HeldConsumed[0].ID() != card.WeepingBattlegroundRed {
-		t.Errorf("HeldConsumed = %v, want [Weeping Battleground (Red)]", cardNames(consumedCards(got.HeldConsumed)))
+		t.Errorf("HeldConsumed = %v, want [Weeping Battleground (Red)]", cardNames(got.HeldConsumed))
 	}
 	if len(got.Drawn) != 1 || got.Drawn[0].Card.ID() != card.WeepingBattlegroundRed {
 		t.Errorf("Drawn = %v, want [Weeping Battleground (Red)] (Sun Kiss's DrawOne pulled the alt-cost'd DR off deck top)",
@@ -132,9 +132,6 @@ func TestBest_MoonWishWithFlyingHighPlaysTutoredSunKiss(t *testing.T) {
 	}
 }
 
-// consumedCards bridges []card.Card → cardNames-friendly slice for failure-message rendering.
-func consumedCards(cs []card.Card) []card.Card { return cs }
-
 // drawnNames renders Drawn entries for failure-message rendering.
 func drawnNames(d []CardAssignment) []string {
 	out := make([]string, len(d))
@@ -153,8 +150,9 @@ func chainNames(ch []AttackChainEntry) []string {
 	return out
 }
 
-// bestLineRoles returns the BestLine roles assigned to the cards with mwID and drID. -1 sized
-// sentinel role on either when the card is missing.
+// bestLineRoles returns the BestLine roles assigned to the cards with mwID and drID. Defaults
+// to Held on either when the card isn't in line — a missing card surfaces as an unexpected
+// role mismatch in the calling assertion rather than a panic.
 func bestLineRoles(line []CardAssignment, mwID, drID card.ID) (Role, Role) {
 	var mw, dr Role = Held, Held
 	for _, a := range line {

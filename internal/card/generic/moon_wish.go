@@ -5,21 +5,17 @@
 // cost. If Moon Wish hits, search your deck for a card named Sun Kiss, reveal it, put it into
 // your hand, then shuffle your deck."
 //
-// Alt cost is implemented via card.VariableCost: Cost(s) returns 0 when the partition has any
-// Held card to spend (len(s.Held) > 0), else the printed 2. When the alt cost fires Play pops
-// the first Held card, prepends it to s.Deck (top-of-deck placement), and records it on
-// s.HeldConsumed so the deck loop suppresses the BestLine[Held] → nextHeld carry that would
-// otherwise double-count.
-//
-// On-hit Sun Kiss tutor: card.LikelyToHit gates the search. The deck is scanned for any Sun
-// Kiss printing and the lowest-pitch variant wins (Red over Yellow over Blue) since pitch 1
-// is the strongest deck slot. The chosen card is removed from s.Deck — the printed "shuffle
-// your deck" reorder is dropped because the simulator doesn't model deck order beyond
-// removal. If Moon Wish has go-again at this point (granted by a prior chain card such as
-// Flying High), Sun Kiss plays immediately: damage is added to Moon Wish's return, the
-// synergy fires (Sun Kiss reads Moon Wish in CardsPlayed via a transient pre-append), and
-// Sun Kiss heads to the graveyard. Without go-again Sun Kiss appends to s.Drawn so it
-// carries to the next hand as a tutored card.
+// Card-specific quirks:
+//   - Tutor priority is lowest-pitch first (Red > Yellow > Blue): the Red printing is the
+//     most flexible draw next turn.
+//   - When the alt cost fires, the consumed Held card is recorded on s.HeldConsumed so the
+//     deck loop knows not to also carry it as a BestLine[Held] entry — the card has already
+//     been re-routed onto the deck.
+//   - The on-hit Sun Kiss tutor wants the synergy ("if you've played Moon Wish") to fire
+//     when Sun Kiss resolves immediately (go-again branch), but Moon Wish hasn't been
+//     appended to CardsPlayed yet. Play does a transient pre-append + pop around the Sun
+//     Kiss invocation so Sun Kiss sees Moon Wish in CardsPlayed without double-adding.
+//   - The printed "shuffle your deck" is dropped: deck order isn't modelled beyond removal.
 
 package generic
 
@@ -49,8 +45,8 @@ func moonWishPlay(c card.Card, attack int, s *card.TurnState, self *card.CardSta
 		moved := s.Held[0]
 		s.Held = s.Held[1:]
 		s.HeldConsumed = append(s.HeldConsumed, moved)
-		// Prepend to deck — top-of-deck placement so any same-turn deck-top reader (e.g.
-		// the Sun Kiss tutor's post-shuffle DrawOne) sees it.
+		// Prepend to deck so any same-turn deck-top reader (e.g. the Sun Kiss tutor's
+		// post-resolution DrawOne) sees it.
 		newDeck := make([]card.Card, 0, len(s.Deck)+1)
 		newDeck = append(newDeck, moved)
 		newDeck = append(newDeck, s.Deck...)
@@ -137,7 +133,9 @@ func (MoonWishRed) Attack() int                 { return 5 }
 func (MoonWishRed) Defense() int                { return 2 }
 func (MoonWishRed) Types() card.TypeSet         { return moonWishTypes }
 func (MoonWishRed) GoAgain() bool               { return false }
-func (MoonWishRed) NoMemo()                     {} // alt-cost mutates Deck; tutor depends on deck contents.
+// NoMemo: alt-cost mutates Deck and the tutor reads deck contents — both leak through the
+// memo key, so all three variants opt out.
+func (MoonWishRed) NoMemo()                     {}
 func (c MoonWishRed) Play(s *card.TurnState, self *card.CardState) int {
 	return moonWishPlay(c, c.Attack(), s, self)
 }
