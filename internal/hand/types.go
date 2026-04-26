@@ -86,6 +86,12 @@ type TurnSummary struct {
 	// StartOfTurnAuras lists the aura cards that were in play at the top of this turn — one
 	// entry per AuraTrigger carried in from the previous turn.
 	StartOfTurnAuras []card.Card
+	// DealtHand is the hand the deck loop snapshotted right after the draw step, before
+	// processTriggersAtStartOfTurn appended any reveal-handler outputs (Sigil of the
+	// Arknight). Solver-internal call paths leave this nil; the deck loop populates it so
+	// the printout's "Start of turn → Hand:" line reflects the dealt cards only, with
+	// reveals showing up under MyTurn where they actually resolve.
+	DealtHand []card.Card
 }
 
 // TriggerContribution is one start-of-turn AuraTrigger fire: the aura that fired plus the

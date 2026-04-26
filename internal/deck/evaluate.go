@@ -111,6 +111,11 @@ func (d *Deck) EvaluateWith(runs int, incomingDamage int, rng *rand.Rand, ev *ha
 					startOfTurnAuras[i] = t.Self
 				}
 			}
+			// Snapshot the dealt hand BEFORE start-of-action-phase reveal handlers append
+			// their drawn cards — the printout's "Start of turn → Hand:" line wants the hand
+			// the player was actually dealt, not the post-reveal augmented version. Fresh
+			// slice so a later Best mutation of h (Hand mid-chain) doesn't bleed back.
+			dealtHand := append([]card.Card(nil), h...)
 			// Process AuraTriggers carried in from last turn before the best-line search.
 			// Survivors become this turn's priorAuraTriggers. Reveal handlers pop the deck top
 			// and append it to the hand so the best-line search sees the augmented hand.
@@ -141,6 +146,7 @@ func (d *Deck) EvaluateWith(runs int, incomingDamage int, rng *rand.Rand, ev *ha
 			play.Value += trigDamage
 			play.TriggersFromLastTurn = trigContribs
 			play.StartOfTurnAuras = startOfTurnAuras
+			play.DealtHand = dealtHand
 			v := float64(play.Value)
 
 			d.Stats.TotalValue += v
@@ -455,6 +461,10 @@ func recordBestTurn(stats *Stats, play hand.TurnSummary, startingRunechants int)
 		aurasCopy = make([]card.Card, len(play.StartOfTurnAuras))
 		copy(aurasCopy, play.StartOfTurnAuras)
 	}
+	var dealtCopy []card.Card
+	if len(play.DealtHand) > 0 {
+		dealtCopy = append([]card.Card(nil), play.DealtHand...)
+	}
 	stats.Best = BestTurn{
 		Summary: hand.TurnSummary{
 			BestLine:             lineCopy,
@@ -463,6 +473,7 @@ func recordBestTurn(stats *Stats, play hand.TurnSummary, startingRunechants int)
 			State:                cloneCarryState(play.State),
 			TriggersFromLastTurn: trigCopy,
 			StartOfTurnAuras:     aurasCopy,
+			DealtHand:            dealtCopy,
 		},
 		StartingRunechants: startingRunechants,
 	}
