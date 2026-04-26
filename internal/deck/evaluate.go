@@ -247,14 +247,57 @@ func processTriggersAtStartOfTurn(queued []card.AuraTrigger, postDrawDeck []card
 // entries append into nextHeld; Arsenal flows through play.ArsenalCard and needs no
 // bookkeeping here.
 func applyTurnResult(play hand.TurnSummary, buf []card.Card, head, tail *int, drawCount int, nextHeld []card.Card) []card.Card {
-	nextHeld = recycleCardStates(play.BestLine, buf, tail, nextHeld)
-	*head += drawCount + len(play.Drawn)
+	nextHeld = recycleCardStates(play.BestLine, play.ReturnedToTopOfDeck, buf, tail, nextHeld)
+	// Advance head past this turn's dealt cards; mid-turn removals and inserts are applied
+	// to the active deck slice buf[*head:*tail] below.
+	*head += drawCount
+	insertOnDeckTop(buf, head, tail, play.ReturnedToTopOfDeck)
+	removeFromDeck(buf, *head, tail, play.DeckRemoved)
 	for _, d := range play.Drawn {
 		if d.Role == hand.Held {
 			nextHeld = append(nextHeld, d.Card)
 		}
 	}
 	return nextHeld
+}
+
+// insertOnDeckTop shifts the active deck slice buf[*head:*tail] right by len(cards) and
+// writes cards at buf[*head:*head+len(cards)]. This makes each card the next-to-be-drawn
+// entry in registry order — the canonical "rather than pay" alt-cost placement. Tail grows
+// by len(cards). Caller guarantees buf has room (sized 2×deckSize plus a handSize cushion).
+func insertOnDeckTop(buf []card.Card, head, tail *int, cards []card.Card) {
+	n := len(cards)
+	if n == 0 {
+		return
+	}
+	copy(buf[*head+n:*tail+n], buf[*head:*tail])
+	for i, c := range cards {
+		buf[*head+i] = c
+	}
+	*tail += n
+}
+
+// removeFromDeck deletes the first occurrence of each card from the active deck slice
+// buf[head:*tail] (in the order cards lists them) and shifts later entries left. tail
+// shrinks by the count of cards actually found. Cards not present in the slice are
+// silently skipped — DrawOne plus alt-cost-prepend can produce a removal target that's no
+// longer in buf because a prior insertOnDeckTop wrote it back in then a later removal
+// already took it out.
+func removeFromDeck(buf []card.Card, head int, tail *int, cards []card.Card) {
+	for _, c := range cards {
+		idx := -1
+		for i := head; i < *tail; i++ {
+			if buf[i].ID() == c.ID() {
+				idx = i
+				break
+			}
+		}
+		if idx < 0 {
+			continue
+		}
+		copy(buf[idx:*tail-1], buf[idx+1:*tail])
+		*tail--
+	}
 }
 
 // dealNextHand fills handBuf with this turn's dealt hand: the held prefix from heldBuf followed
@@ -298,6 +341,11 @@ type TurnStartState struct {
 	// PrevTurnBestLine is the winning role assignment from turn 1, so tests can assert which
 	// card took which role.
 	PrevTurnBestLine []hand.CardAssignment
+	// PrevTurnGraveyard is the cards that ended up in the graveyard at the end of turn 1, in
+	// the order they landed there. Sourced from hand.TurnSummary.Graveyard so tests can
+	// distinguish "this card is in the graveyard" from "this card is just absent from the
+	// next-turn surfaces."
+	PrevTurnGraveyard []card.Card
 	// StartOfTurnTriggerDamage is the damage-equivalent credited by turn-2's start-of-turn
 	// AuraTrigger handlers — triggers registered during turn 1 that fired at the top of
 	// turn 2. Zero when no trigger survived into the pass. Production callers fold this
@@ -364,9 +412,10 @@ func (d *Deck) EvalOneTurnForTesting(incomingDamage int, arsenalIn card.Card, in
 	turn2Hand, drawCount2, ok := dealNextHand(buf, handBuf, nextHeld, &head, &tail, handSize)
 	if !ok {
 		return TurnStartState{
-			ArsenalCard:   play.ArsenalCard,
-			Runechants:    play.LeftoverRunechants,
-			PrevTurnValue: play.Value,
+			ArsenalCard:       play.ArsenalCard,
+			Runechants:        play.LeftoverRunechants,
+			PrevTurnValue:     play.Value,
+			PrevTurnGraveyard: append([]card.Card(nil), play.Graveyard...),
 		}
 	}
 	// Process turn-1 AuraTriggers at the turn-2 boundary the same way Evaluate does:
@@ -389,6 +438,7 @@ func (d *Deck) EvalOneTurnForTesting(incomingDamage int, arsenalIn card.Card, in
 		Runechants:               play.LeftoverRunechants + trigRunes,
 		PrevTurnValue:            play.Value,
 		PrevTurnBestLine:         lineCopy,
+		PrevTurnGraveyard:        append([]card.Card(nil), play.Graveyard...),
 		StartOfTurnTriggerDamage: trigDamage,
 		StartOfTurnGraveyard:     trigGraveyarded,
 	}
@@ -534,10 +584,12 @@ func attributePlayStats(stats *Stats, line []hand.CardAssignment) {
 // recycleCardStates prepares next turn's draw queue from this turn's assignments: pitched
 // cards go to the bottom of buf[*tail:] (the backing array has room since moved cards are a
 // subset of those just consumed); Held cards go into nextHeld for the next turn; attacked and
-// defended cards are spent. Arsenal / arsenal-in entries thread through arsenalCard separately,
-// not here. Returns the updated nextHeld slice (pass a nil/empty slice or nextHeld[:0] to
-// start).
-func recycleCardStates(line []hand.CardAssignment, buf []card.Card, tail *int, nextHeld []card.Card) []card.Card {
+// defended cards are spent. Cards listed in returnedToTopOfDeck are skipped on the Held
+// branch — applyTurnResult inserts those copies on top of the next-turn deck, so an
+// additional nextHeld carry would double-count them. Arsenal / arsenal-in entries thread
+// through arsenalCard separately, not here. Returns the updated nextHeld slice (pass a
+// nil/empty slice or nextHeld[:0] to start).
+func recycleCardStates(line []hand.CardAssignment, returnedToTopOfDeck []card.Card, buf []card.Card, tail *int, nextHeld []card.Card) []card.Card {
 	for _, a := range line {
 		if a.FromArsenal {
 			continue
@@ -547,8 +599,37 @@ func recycleCardStates(line []hand.CardAssignment, buf []card.Card, tail *int, n
 			buf[*tail] = a.Card
 			*tail++
 		case hand.Held:
+			if containsCardOnce(returnedToTopOfDeck, a.Card) {
+				returnedToTopOfDeck = removeCardOnce(returnedToTopOfDeck, a.Card)
+				continue
+			}
 			nextHeld = append(nextHeld, a.Card)
 		}
 	}
 	return nextHeld
+}
+
+// containsCardOnce reports whether cs holds at least one occurrence of c (by ID). Linear
+// scan; returnedToTopOfDeck lists are tiny (one entry per alt-cost-using card per chain) so a map
+// would just add overhead.
+func containsCardOnce(cs []card.Card, c card.Card) bool {
+	for _, x := range cs {
+		if x.ID() == c.ID() {
+			return true
+		}
+	}
+	return false
+}
+
+// removeCardOnce returns cs with the first occurrence of c (by ID) removed. Used by
+// recycleCardStates to consume a returnedToTopOfDeck entry exactly once per matching BestLine slot,
+// so a deck that holds two copies of a card and consumes only one via alt cost still carries
+// the other to nextHeld.
+func removeCardOnce(cs []card.Card, c card.Card) []card.Card {
+	for i, x := range cs {
+		if x.ID() == c.ID() {
+			return append(cs[:i:i], cs[i+1:]...)
+		}
+	}
+	return cs
 }

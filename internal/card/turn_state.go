@@ -97,15 +97,38 @@ type TurnState struct {
 	// appends each entry to the dealt hand in order. Cascading reveals work because each
 	// handler's pop shrinks the shared Deck view for the next handler.
 	Revealed []Card
+	// Held is the partition's Held-role cards at start of the chain — the hand cards the
+	// solver assigned no Pitch / Attack / Defend role. Read-only by Play unless the card
+	// implements an alt-cost "use a Held card" effect, in which case Play pops the chosen
+	// card off Held and appends it to ReturnedToTopOfDeck so the post-chain accounting
+	// (recycleCardStates, arsenal-promotion candidate counts) skips it.
+	Held []Card
+	// ReturnedToTopOfDeck records cards an alt-cost "rather than pay" effect moved from
+	// hand onto the deck top mid-chain (typically a Held card). The deck-loop accounting
+	// inserts each at the top of the next-turn deck buffer so the move actually persists,
+	// and the BestLine[Held] → nextHeld carry skips any matching card so the same copy
+	// doesn't double-count. The same card commonly reappears in the next turn's hand or
+	// feeds a same-turn DrawOne when a tutor fires.
+	ReturnedToTopOfDeck []Card
+	// DeckRemoved records cards taken out of the deck this turn by any means — DrawOne,
+	// tutor effects (Moon Wish's Sun Kiss search), or future deck-search riders. The
+	// deck-loop's applyTurnResult patches the underlying deck buffer to actually remove
+	// each listed card so it can't be drawn again on a later turn. Without this list the
+	// buf would still hold the tutored card at its original position, and a duplicate would
+	// surface once the head pointer reached that slot.
+	DeckRemoved []Card
 }
 
 // DrawOne models a mid-turn draw: advance the deck by one card and append it to Drawn. No-op
-// on an empty deck. Every draw-rider card routes through this helper.
+// on an empty deck. Every draw-rider card routes through this helper. Also appends to
+// DeckRemoved so applyTurnResult patches the same card out of the underlying deck buffer.
 func (s *TurnState) DrawOne() {
 	if len(s.Deck) == 0 {
 		return
 	}
-	s.Drawn = append(s.Drawn, s.Deck[0])
+	c := s.Deck[0]
+	s.Drawn = append(s.Drawn, c)
+	s.DeckRemoved = append(s.DeckRemoved, c)
 	s.Deck = s.Deck[1:]
 }
 

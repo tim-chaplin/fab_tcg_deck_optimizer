@@ -13,11 +13,12 @@ import (
 
 // Phase masks: when no Defense Reactions are present (or no pitches exist), all pitches go to
 // the attack phase, so we visit one configuration. Otherwise we enumerate 2^|pitched| splits.
-func bestAttackWithWeapons(hero hero.Hero, weapons []weapon.Weapon, attackers, defenders, pitched, deck []card.Card, bufs *attackBufs, runechantCarryover, incomingDamage, blockTotal, arsenalInIdx int, priorAuraTriggers []card.AuraTrigger) (int, int, int, chainBudget, []string, bool) {
+func bestAttackWithWeapons(hero hero.Hero, weapons []weapon.Weapon, attackers, defenders, pitched, held, deck []card.Card, bufs *attackBufs, runechantCarryover, incomingDamage, blockTotal, arsenalInIdx int, priorAuraTriggers []card.AuraTrigger) (int, int, int, chainBudget, []string, bool) {
 	ctx := &sequenceContext{
 		hero:               hero,
 		pitched:            pitched,
 		deck:               deck,
+		held:               held,
 		bufs:               bufs,
 		runechantCarryover: runechantCarryover,
 		incomingDamage:     incomingDamage,
@@ -26,8 +27,11 @@ func bestAttackWithWeapons(hero hero.Hero, weapons []weapon.Weapon, attackers, d
 		priorAuraTriggers:  priorAuraTriggers,
 		// Borrow bufs' pre-sized winner scratch so the eval closure's append-winner step reuses
 		// one backing array per Best call instead of allocating per sequenceContext.
-		drawnWinner:        bufs.drawnWinnerScratch[:0],
-		auraTriggersWinner: bufs.auraTriggersWinnerScratch[:0],
+		drawnWinner:               bufs.drawnWinnerScratch[:0],
+		auraTriggersWinner:        bufs.auraTriggersWinnerScratch[:0],
+		returnedToTopOfDeckWinner: bufs.returnedToTopOfDeckWinnerScratch[:0],
+		deckRemovedWinner:         bufs.deckRemovedWinnerScratch[:0],
+		graveyardWinner:           bufs.graveyardWinnerScratch[:0],
 	}
 	// Hoist leaf-constant TurnState fields out of the per-permutation reset in
 	// playSequenceWithMeta.
@@ -153,6 +157,9 @@ func bestAttackWithWeapons(hero hero.Hero, weapons []weapon.Weapon, attackers, d
 type sequenceContext struct {
 	hero               hero.Hero
 	pitched, deck      []card.Card
+	// held is the partition's Held-role hand cards. Threaded through to state.Held so
+	// alt-cost cards (e.g. Moon Wish's "use a Held card") can read len > 0 from Cost(s).
+	held               []card.Card
 	bufs               *attackBufs
 	resourceBudget     int
 	runechantCarryover int
@@ -176,10 +183,25 @@ type sequenceContext struct {
 	// last permutation's draws. Every entry in drawnWinner is assigned Role=Held by the
 	// caller (post-Best, promoteRandomHeldToArsenal may flip one to Arsenal).
 	drawnWinner []card.Card
+	// returnedToTopOfDeckWinner snapshots the winning permutation's ReturnedToTopOfDeck list (cards moved
+	// out of partition Held by alt-cost effects). Same Heap's-algorithm-keeps-iterating
+	// reason as drawnWinner: state.ReturnedToTopOfDeck reflects the last permutation, not the
+	// winner. The deck loop reads this off TurnSummary to skip BestLine[Held]→nextHeld
+	// carries and arsenal-promotion candidates that have already been re-routed elsewhere.
+	returnedToTopOfDeckWinner []card.Card
+	// deckRemovedWinner snapshots the winning permutation's DeckRemoved list (cards taken
+	// out of the deck this turn by DrawOne or tutor effects). The deck loop uses it to
+	// patch the underlying buf so the same card can't be drawn again on a later turn.
+	deckRemovedWinner []card.Card
 	// auraTriggersWinner snapshots the winning permutation's final state.AuraTriggers so the
 	// deck loop can carry them into next turn. Includes both inherited triggers from
 	// priorAuraTriggers (with mutated Count / FiredThisTurn) and ones added by Play.
 	auraTriggersWinner []card.AuraTrigger
+	// graveyardWinner snapshots the winning permutation's final state.Graveyard. Surfaces on
+	// TurnSummary so callers can see every card that ended up in the graveyard this turn —
+	// played hand cards (added by playSequenceWithMeta), tutored-and-played cards (added via
+	// AddToGraveyard from a card's Play), and any AuraTriggers that destroyed themselves.
+	graveyardWinner []card.Card
 }
 
 // fireAttackActionTriggers walks state.AuraTriggers after an attack action card resolves and
@@ -245,7 +267,8 @@ func fireEphemeralAttackTriggers(state *card.TurnState, target *card.CardState, 
 }
 
 // seedState writes the leaf-constant TurnState fields (pitched / deck refs, incoming damage,
-// block total) so the per-permutation reset in playSequenceWithMeta can skip them.
+// block total) so the per-permutation reset in playSequenceWithMeta can skip them. Held is
+// re-seeded per permutation in playSequenceWithMeta because alt-cost effects mutate it.
 func (ctx *sequenceContext) seedState() {
 	s := ctx.bufs.state
 	s.Pitched = ctx.pitched
@@ -310,6 +333,9 @@ func (ctx *sequenceContext) bestSequence(attackers, winnerOrderOut []card.Card, 
 	foundLegal := false
 	ctx.drawnWinner = ctx.drawnWinner[:0]
 	ctx.auraTriggersWinner = ctx.auraTriggersWinner[:0]
+	ctx.returnedToTopOfDeckWinner = ctx.returnedToTopOfDeckWinner[:0]
+	ctx.deckRemovedWinner = ctx.deckRemovedWinner[:0]
+	ctx.graveyardWinner = ctx.graveyardWinner[:0]
 	eval := func() {
 		dmg, leftoverRunechants, _, legal := ctx.playSequenceWithMeta(n, scratch, triggerScratch, auraTriggerScratch)
 		if !legal {
@@ -322,6 +348,9 @@ func (ctx *sequenceContext) bestSequence(attackers, winnerOrderOut []card.Card, 
 			foundLegal = true
 			ctx.drawnWinner = append(ctx.drawnWinner[:0], ctx.bufs.state.Drawn...)
 			ctx.auraTriggersWinner = append(ctx.auraTriggersWinner[:0], ctx.bufs.state.AuraTriggers...)
+			ctx.returnedToTopOfDeckWinner = append(ctx.returnedToTopOfDeckWinner[:0], ctx.bufs.state.ReturnedToTopOfDeck...)
+			ctx.deckRemovedWinner = append(ctx.deckRemovedWinner[:0], ctx.bufs.state.DeckRemoved...)
+			ctx.graveyardWinner = append(ctx.graveyardWinner[:0], ctx.bufs.state.Graveyard...)
 			if winnerOrderOut != nil {
 				for i := 0; i < n; i++ {
 					winnerOrderOut[i] = pcBuf[i].Card
@@ -445,6 +474,15 @@ func (ctx *sequenceContext) playSequenceWithMeta(n int, perCardOut, perCardTrigg
 	// consumption would poison the next.
 	state.Deck = ctx.deck
 	state.Drawn = nil
+	// Held and ReturnedToTopOfDeck reset per permutation: alt-cost effects (e.g. Moon Wish) pop
+	// from Held and append to ReturnedToTopOfDeck, so the next permutation needs the original
+	// partition view back.
+	state.Held = ctx.held
+	state.ReturnedToTopOfDeck = nil
+	// DeckRemoved reset per permutation: DrawOne and tutor effects mutate it during Play,
+	// and the next permutation needs an empty list so its own draws/tutors aren't tainted
+	// by the previous permutation's removals.
+	state.DeckRemoved = nil
 	// Graveyard and Banish reset per permutation: cards append themselves to Graveyard as
 	// they resolve, and graveyard-banish effects shift cards into Banish. Reusing the scratch
 	// backing array keeps the reset allocation-free.

@@ -52,6 +52,7 @@ type attackBufs struct {
 	pitchedBuf         []card.Card
 	attackersBuf       []card.Card
 	defendersBuf       []card.Card
+	heldBuf            []card.Card
 	// defenseGravScratch / attackGravScratch back state.Graveyard during DR Plays and attack-
 	// chain permutations respectively. Reset via [:0]+append per iteration so card effects can
 	// freely mutate their view without leaking into the next one. Split so the two phases
@@ -76,6 +77,17 @@ type attackBufs struct {
 	// storage.
 	drawnWinnerScratch        []card.Card
 	auraTriggersWinnerScratch []card.AuraTrigger
+	// returnedToTopOfDeckWinnerScratch backs sequenceContext.returnedToTopOfDeckWinner — the alt-cost-
+	// consumed Held cards from the winning permutation, surfaced on TurnSummary so the deck
+	// loop can suppress double-counting them in nextHeld.
+	returnedToTopOfDeckWinnerScratch []card.Card
+	// deckRemovedWinnerScratch backs sequenceContext.deckRemovedWinner — cards taken out of
+	// the deck this turn (DrawOne, tutor effects). The deck loop patches buf to remove each.
+	deckRemovedWinnerScratch []card.Card
+	// graveyardWinnerScratch backs sequenceContext.graveyardWinner — every card that landed
+	// in the graveyard during the winning permutation (played hand cards, tutored-and-played
+	// cards, AuraTriggers that destroyed themselves).
+	graveyardWinnerScratch []card.Card
 	// perCardScratch is sized maxAttackers (handSize + weaponCount). Written by playSequence only
 	// when the caller passes a non-nil perCardOut; bestSequence snapshots the winning
 	// permutation's per-card damage from here into the caller's output buffer. The partition-loop
@@ -146,12 +158,16 @@ func newAttackBufs(handSize, weaponCount int, weapons []weapon.Weapon) *attackBu
 		pitchedBuf:                make([]card.Card, 0, handSize+1),
 		attackersBuf:              make([]card.Card, 0, handSize+1),
 		defendersBuf:              make([]card.Card, 0, handSize+1),
+		heldBuf:                   make([]card.Card, 0, handSize+1),
 		defenseGravScratch:        make([]card.Card, 0, handSize+1),
 		attackGravScratch:         make([]card.Card, 0, maxAttackers),
 		auraTriggersScratch:       make([]card.AuraTrigger, 0, maxAttackers),
 		ephemeralTriggersScratch:  make([]card.EphemeralAttackTrigger, 0, maxAttackers),
 		drawnWinnerScratch:        make([]card.Card, 0, maxAttackers),
 		auraTriggersWinnerScratch: make([]card.AuraTrigger, 0, maxAttackers),
+		returnedToTopOfDeckWinnerScratch: make([]card.Card, 0, handSize+1),
+		deckRemovedWinnerScratch:         make([]card.Card, 0, maxAttackers),
+		graveyardWinnerScratch:           make([]card.Card, 0, maxAttackers),
 		perCardScratch:            make([]float64, maxAttackers),
 		perCardTriggerScratch:     make([]float64, maxAttackers),
 		perCardAuraTriggerScratch: make([]float64, maxAttackers),

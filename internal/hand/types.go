@@ -79,6 +79,19 @@ type TurnSummary struct {
 	// Populated by the deck loop before the start-of-turn fires run; surfaced in FormatBestTurn
 	// so the reader can see which carryover auras fed mid-chain "(+M aura trigger)" damage.
 	StartOfTurnAuras []card.Card
+	// ReturnedToTopOfDeck surfaces card.TurnState.ReturnedToTopOfDeck from the winning permutation; see
+	// that field for the alt-cost contract (deck loop skips Held → nextHeld carries for
+	// these cards, plus inserts each at the next-turn deck top).
+	ReturnedToTopOfDeck []card.Card
+	// DeckRemoved surfaces card.TurnState.DeckRemoved from the winning permutation; see
+	// that field for the buf-patch contract.
+	DeckRemoved []card.Card
+	// Graveyard surfaces card.TurnState.Graveyard from the winning permutation — every card
+	// that ended up in the graveyard this turn. Includes Action / Attack / Defense Reaction
+	// cards played from hand (added by playSequenceWithMeta), tutored-and-played cards
+	// (added via TurnState.AddToGraveyard from a card's Play), and AuraTriggers that
+	// destroyed themselves. Empty when no cards landed in the graveyard.
+	Graveyard []card.Card
 }
 
 // TriggerContribution is one start-of-turn AuraTrigger fire: the aura that fired plus the
