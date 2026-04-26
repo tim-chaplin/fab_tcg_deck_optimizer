@@ -32,8 +32,8 @@ import (
 //
 // minImprovement is the noise floor on strict improvements: a mutation must lift deepAvg by
 // more than this amount above bestAvg to be accepted at T==0. Prevents infinite loops where
-// repeated near-zero "wins" (within shuffle noise) keep accepting indefinitely. Pass 0 for
-// the original strict-greater behaviour.
+// repeated near-zero "wins" (within shuffle noise) keep accepting indefinitely. Pass 0 to
+// disable the floor (any strictly-greater deepAvg passes).
 //
 // Mutations are pulled FIFO so the earliest-position-wins heuristic of serial iterate
 // generally holds, but a worker locked on a deep confirm at position 20 doesn't block

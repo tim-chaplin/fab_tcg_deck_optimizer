@@ -57,10 +57,10 @@ func TestAcceptMutation_AnnealingBypassesMinImprovement(t *testing.T) {
 	}
 }
 
-// TestAcceptMutation_ZeroMinImprovementMatchesLegacy: passing minImprovement=0 must restore
-// the original strict-greater behaviour (any strict improvement passes). Regression guard for
-// existing call sites that aren't yet aware of the new parameter.
-func TestAcceptMutation_ZeroMinImprovementMatchesLegacy(t *testing.T) {
+// TestAcceptMutation_ZeroMinImprovementAllowsAnyStrictImprovement: with minImprovement=0
+// the floor is disabled and any strictly-greater deepAvg passes at T==0; equal deepAvg still
+// fails (strict >, not >=). Pins the documented "pass 0 to disable the floor" contract.
+func TestAcceptMutation_ZeroMinImprovementAllowsAnyStrictImprovement(t *testing.T) {
 	rng := rand.New(rand.NewSource(1))
 	if !acceptMutation(10.0001, 10.0, 0, 0, rng) {
 		t.Error("minImprovement=0: deepAvg = baseline + tiny epsilon should pass at T==0")

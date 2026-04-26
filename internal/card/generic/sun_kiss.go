@@ -4,9 +4,9 @@
 // Text: "Gain N{h}. If you have played a card named Moon Wish this turn, draw a card and Sun Kiss
 // gains **go again**." (N is the printed variant value above.)
 //
-// The Moon Wish gate scans s.CardsPlayed for a "Moon Wish " name prefix — covers all three pitch
-// variants in one check without keying on specific IDs (a new printing of Moon Wish would still
-// match). When the gate fires we pull the bonus draw via s.DrawOne and flip self.GrantedGoAgain.
+// The synergy is pitch-agnostic: it triggers off any Moon Wish printing in the same turn's
+// CardsPlayed. NoMemo on every variant because the bonus draw's value depends on the top of
+// the deck, which the memo key doesn't capture.
 
 package generic
 
@@ -50,7 +50,7 @@ func (SunKissRed) Attack() int                                       { return 0 
 func (SunKissRed) Defense() int                                      { return 2 }
 func (SunKissRed) Types() card.TypeSet                               { return sunKissTypes }
 func (SunKissRed) GoAgain() bool                                     { return false }
-func (SunKissRed) NoMemo()                                           {} // synergy DrawOne depends on top of deck
+func (SunKissRed) NoMemo()                                           {}
 func (SunKissRed) Play(s *card.TurnState, self *card.CardState) int  { return sunKissPlay(3, s, self) }
 
 type SunKissYellow struct{}

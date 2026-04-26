@@ -90,9 +90,9 @@ func runAnnealCmd(args []string) {
 		die("%v", err)
 	}
 
-	// -finalize is a shuffle-count shorthand, so apply it as a post-parse override rather than
-	// threading it into annealConfig. The -min-improvement floor also tightens here so the
-	// finalize pass can land sub-0.1 wins that the default 0.1 floor would otherwise reject.
+	// -finalize bundles the high-precision overrides — heavier shuffle counts plus a tighter
+	// noise floor so sub-0.1 wins land that the default 0.1 -min-improvement gate would reject.
+	// Applied as a post-parse override so it composes cleanly with explicit per-flag values.
 	if *finalize {
 		*shallowShuffles = 10000
 		*deepShuffles = 100000
