@@ -553,7 +553,6 @@ func (ctx *sequenceContext) playSequenceWithMeta(n int, perCardOut, perCardTrigg
 	return damage, state.Runechants, resources, true
 }
 
-
 // snapshotCarry copies every persistent TurnState field that survives the turn boundary into
 // a CarryState. The slice copies are intentional: mid-chain state.* slices alias attackBufs
 // scratch storage and the next permutation will overwrite them. The deck loop adopts these

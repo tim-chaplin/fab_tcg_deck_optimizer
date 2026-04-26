@@ -11,7 +11,7 @@ import (
 )
 
 // moonWishHero is the no-op hero used by the Moon Wish e2e tests so the assertions on Value
-// / Hand / Deck / ArsenalCard reflect Moon Wish's plumbing alone (no Viserai-style
+// / Hand / Deck / Arsenal reflect Moon Wish's plumbing alone (no Viserai-style
 // OnCardPlayed runechant credit perturbing the numbers). Intel matches a typical adult hero
 // hand size.
 var moonWishHero = stubs.Hero{Intel: 4}
@@ -29,8 +29,8 @@ var moonWishHero = stubs.Hero{Intel: 4}
 //   - Deck: Sun Kiss (Red) plus filler.
 //
 // Expected line: Moon Wish plays via its alt cost — Weeping Battleground is the consumed
-// Held card and gets returned to the deck. Moon Wish hits, tutors Sun Kiss out of the deck,
-// and (without go-again) appends Sun Kiss to s.Drawn for the post-hoc Arsenal promotion.
+// hand card and gets returned to the deck. Moon Wish hits, tutors Sun Kiss out of the deck,
+// and (without go-again) appends Sun Kiss to s.Hand for the post-hoc Arsenal promotion.
 //
 // Cross-turn assertions:
 //   - turn-1 Value = 4 (Moon Wish base only; Sun Kiss tutored, not played).
@@ -55,7 +55,7 @@ func TestEvalOneTurn_MoonWishAltCostTutorsSunKissAndConsumesDeck(t *testing.T) {
 			state.PrevTurnValue)
 	}
 	if state.ArsenalCard == nil || state.ArsenalCard.ID() != card.SunKissRed {
-		t.Errorf("ArsenalCard = %v, want Sun Kiss (Red) (post-hoc promoted from Drawn)",
+		t.Errorf("ArsenalCard = %v, want Sun Kiss (Red) (post-hoc promoted from State.Hand)",
 			state.ArsenalCard)
 	}
 	if got := countAcrossSurfaces(state, card.SunKissRed); got != 1 {
@@ -149,8 +149,8 @@ func TestEvalOneTurn_MoonWishWithFlyingHighPlaysTutoredSunKiss(t *testing.T) {
 			got)
 	}
 	if state.ArsenalCard == nil {
-		t.Error("ArsenalCard = nil; want any card (Sun Kiss's DrawOne pulled one and Drawn → " +
-			"Arsenal promotion is the only candidate)")
+		t.Error("ArsenalCard = nil; want any card (Sun Kiss's DrawOne pulled one card into " +
+			"State.Hand → Arsenal promotion is the only candidate)")
 	}
 }
 

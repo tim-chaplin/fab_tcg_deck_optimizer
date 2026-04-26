@@ -13,7 +13,7 @@ import (
 // TestBest_EmptyArsenalClaimsHeldCard confirms the post-hoc Arsenal promotion fires when the
 // slot is empty and the winning partition has Held cards. A hand that can't play Toughen Up as
 // DR (no other card to pitch for the 2-cost) leaves the DR Held; with arsenalCardIn=nil the
-// slot is empty so the DR becomes Arsenal and rides into next turn as Play.ArsenalCard.
+// slot is empty so the DR becomes Arsenal and rides into next turn as got.State.Arsenal.
 func TestBest_EmptyArsenalClaimsHeldCard(t *testing.T) {
 	h := []card.Card{generic.ToughenUpBlue{}}
 	got := Best(stubHero, nil, h, 4, nil, 0, nil)
@@ -28,7 +28,7 @@ func TestBest_EmptyArsenalClaimsHeldCard(t *testing.T) {
 // TestBest_ArsenalInPlayDR covers the "arsenal card played as DR" branch. Previous turn left a
 // Toughen Up Blue in arsenal; this turn we draw a Blue Malefic (pitch 3, cost 0). The pitched
 // Malefic funds Toughen Up's 2-cost defense out of the arsenal, preventing 4 damage. Value = 4.
-// Play.ArsenalCard is nil because the slot was vacated and no hand card ends up Held.
+// got.State.Arsenal is nil because the slot was vacated and no hand card ends up Held.
 func TestBest_ArsenalInPlayDR(t *testing.T) {
 	h := []card.Card{runeblade.MaleficIncantationBlue{}}
 	got := Best(stubHero, nil, h, 4, nil, 0, generic.ToughenUpBlue{})
@@ -270,7 +270,7 @@ func TestPromoteRandomHandCardToArsenal_EmptyHandIsNoop(t *testing.T) {
 }
 
 // TestBeatsBest_ArsenalOccupancyTiebreaker pins the tiebreaker contract used by the partition
-// enumerator: when two candidates tie on Value and LeftoverRunechants, the one that will end
+// enumerator: when two candidates tie on Value and leftover Runechants, the one that will end
 // the turn with the arsenal slot occupied (either via arsenal-in staying OR a post-hoc Held →
 // Arsenal promotion) beats the one that won't. Exercised directly so a comparison-inversion
 // regression can't hide behind enumeration order at the Best() level.
@@ -299,12 +299,12 @@ func TestBeatsBest_ArsenalOccupancyTiebreaker(t *testing.T) {
 	}
 	// Strict-wins on leftover takes precedence over occupancy.
 	if !beatsBest(10, 1, 0, false, best, 0, true) {
-		t.Error("higher LeftoverRunechants should beat even without occupancy advantage")
+		t.Error("higher leftover Runechants should beat even without occupancy advantage")
 	}
 }
 
 // TestBeatsBest_FutureValueTiebreaker pins the future-value bias: at equal Value and
-// LeftoverRunechants, a partition that plays more card.AddsFutureValue cards wins over one
+// leftover Runechants, a partition that plays more card.AddsFutureValue cards wins over one
 // that plays fewer, regardless of arsenal occupancy. This corrects for the hidden later-turn
 // value those cards carry — without the bias, a lone sigil ends up Held → promoted to
 // arsenal because same-turn Value is 0 and arsenal occupancy wins the fallback tiebreak.
@@ -324,8 +324,8 @@ func TestBeatsBest_FutureValueTiebreaker(t *testing.T) {
 	if !beatsBest(6, 0, 0, false, best, 5, false) {
 		t.Error("higher Value should beat even when the candidate plays fewer future-value cards")
 	}
-	// Strict-wins on LeftoverRunechants still takes precedence over future-value.
+	// Strict-wins on leftover Runechants still takes precedence over future-value.
 	if !beatsBest(5, 1, 0, false, best, 5, false) {
-		t.Error("higher LeftoverRunechants should beat even when the candidate plays fewer future-value cards")
+		t.Error("higher leftover Runechants should beat even when the candidate plays fewer future-value cards")
 	}
 }

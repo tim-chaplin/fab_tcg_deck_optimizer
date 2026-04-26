@@ -2,10 +2,8 @@ package hand
 
 // Entry points for hand evaluation. Best / BestWithTriggers compute the optimal turn line
 // for a given hand against an opponent attacking for incomingDamage. The Evaluator type is
-// kept as a no-op wrapper so existing call sites compile; no scratch caching, no memo —
-// every call allocates fresh state. The state-as-output refactor traded those optimisations
-// for a clean state-mutation interface; if profiling shows a need, caching can come back
-// behind the same surface.
+// a no-op wrapper kept so concurrent callers can construct per-goroutine instances; every
+// call allocates fresh scratch state.
 
 import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
@@ -24,7 +22,7 @@ import (
 //
 // arsenalCardIn is the card sitting in the arsenal slot at start of turn (nil if empty).
 // runechantCarryover is the Runechant token count carrying in from the previous turn.
-// TurnSummary.LeftoverRunechants is the count at end of the chosen chain; feed it back as
+// TurnSummary.State.Runechants is the count at end of the chosen chain; feed it back as
 // the next turn's carryover.
 func Best(hero hero.Hero, weapons []weapon.Weapon, hand []card.Card, incomingDamage int, deck []card.Card, runechantCarryover int, arsenalCardIn card.Card) TurnSummary {
 	return sharedEvaluator.BestWithTriggers(hero, weapons, hand, incomingDamage, deck, runechantCarryover, arsenalCardIn, nil)
@@ -48,8 +46,8 @@ func (e *Evaluator) BestWithTriggers(hero hero.Hero, weapons []weapon.Weapon, ha
 }
 
 // Evaluator is a placeholder for per-goroutine state. Currently empty — every call allocates
-// fresh scratch — but kept so concurrent callers can construct one without compile-time
-// breakage if scratch caching comes back later.
+// fresh scratch — but kept so concurrent callers can construct one if scratch caching needs
+// to be reintroduced behind the same surface.
 type Evaluator struct{}
 
 // NewEvaluator returns a fresh Evaluator. Safe for concurrent use across goroutines.
@@ -59,10 +57,8 @@ func NewEvaluator() *Evaluator { return &Evaluator{} }
 // construct their own.
 var sharedEvaluator = NewEvaluator()
 
-// ClearMemo is a no-op kept for call-site compatibility; the memo cache was removed in the
-// state-as-output refactor.
+// ClearMemo is a no-op kept for diagnostic call-site compatibility.
 func ClearMemo() {}
 
-// MemoLen returns 0; the memo cache was removed in the state-as-output refactor. Kept for
-// call-site compatibility (diagnostic loggers that print "[memo] N entries").
+// MemoLen returns 0. Kept for diagnostic loggers that print "[memo] N entries".
 func MemoLen() int { return 0 }

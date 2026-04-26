@@ -14,10 +14,9 @@ import (
 // playSequence) and the partition loop in bestUncached. Allocated once and cached on the
 // Evaluator so a deck eval reuses them across every partition, mask, and permutation.
 type attackBufs struct {
-	pcBuf          []card.CardState
-	ptrBuf         []*card.CardState
-	cardsPlayedBuf []card.Card
-	state          *card.TurnState
+	pcBuf  []card.CardState
+	ptrBuf []*card.CardState
+	state  *card.TurnState
 	// drScratch is a pooled TurnState for defense-reaction cost probing inside the
 	// (pmask × wmask) loop; reusing its heap slot avoids a per-iteration alloc caused by
 	// interface-call escape.
@@ -49,23 +48,13 @@ type attackBufs struct {
 	// pitchedValsScratch backs the per-leaf "pitched values" slice consumed by phase-mask
 	// enumeration. Re-sliced to [:0] at the start of every leaf to eliminate a per-leaf alloc.
 	pitchedValsScratch []int
-	pitchedBuf   []card.Card
-	attackersBuf []card.Card
-	defendersBuf []card.Card
-	heldBuf      []card.Card
-	// defenseGravScratch / attackGravScratch back state.Graveyard during DR Plays and attack-
-	// chain permutations respectively. Reset via [:0]+append per iteration so card effects can
-	// freely mutate their view without leaking into the next one. Split so the two phases
-	// never alias each other.
+	pitchedBuf         []card.Card
+	attackersBuf       []card.Card
+	defendersBuf       []card.Card
+	heldBuf            []card.Card
+	// defenseGravScratch backs state.Graveyard during DR Plays. Reset via [:0]+append per
+	// iteration so card effects can freely mutate their view without leaking into the next one.
 	defenseGravScratch []card.Card
-	attackGravScratch  []card.Card
-	// auraTriggersScratch backs state.AuraTriggers during attack-chain permutations. Reset
-	// per permutation so AddAuraTrigger calls in one ordering don't leak into the next.
-	auraTriggersScratch []card.AuraTrigger
-	// ephemeralTriggersScratch backs state.EphemeralAttackTriggers during attack-chain
-	// permutations. Reset per permutation (empty, no cross-turn carry) so one ordering's
-	// registrations don't leak into the next.
-	ephemeralTriggersScratch []card.EphemeralAttackTrigger
 	// perCardScratch is sized maxAttackers (handSize + weaponCount). Written by playSequence only
 	// when the caller passes a non-nil perCardOut; bestSequence snapshots the winning
 	// permutation's per-card damage from here into the caller's output buffer. The partition-loop
@@ -122,7 +111,6 @@ func newAttackBufs(handSize, weaponCount int, weapons []weapon.Weapon) *attackBu
 		permMeta:                  make([]*attackerMeta, maxAttackers),
 		pcBuf:                     pcBuf,
 		ptrBuf:                    ptrBuf,
-		cardsPlayedBuf:            make([]card.Card, 0, maxAttackers),
 		state:                     &card.TurnState{},
 		attackerBuf:               make([]card.Card, maxAttackers),
 		weaponCosts:               weaponCosts,
@@ -137,11 +125,8 @@ func newAttackBufs(handSize, weaponCount int, weapons []weapon.Weapon) *attackBu
 		attackersBuf:              make([]card.Card, 0, handSize+1),
 		defendersBuf:              make([]card.Card, 0, handSize+1),
 		heldBuf:                   make([]card.Card, 0, handSize+1),
-		defenseGravScratch:       make([]card.Card, 0, handSize+1),
-		attackGravScratch:        make([]card.Card, 0, maxAttackers),
-		auraTriggersScratch:      make([]card.AuraTrigger, 0, maxAttackers),
-		ephemeralTriggersScratch: make([]card.EphemeralAttackTrigger, 0, maxAttackers),
-		perCardScratch:           make([]float64, maxAttackers),
+		defenseGravScratch:        make([]card.Card, 0, handSize+1),
+		perCardScratch:            make([]float64, maxAttackers),
 		perCardTriggerScratch:     make([]float64, maxAttackers),
 		perCardAuraTriggerScratch: make([]float64, maxAttackers),
 		fillContribWinnerOrder:    make([]card.Card, maxAttackers),
@@ -152,9 +137,8 @@ func newAttackBufs(handSize, weaponCount int, weapons []weapon.Weapon) *attackBu
 	}
 }
 
-// getAttackBufs returns a fresh attackBufs sized for this hand. The state-as-output refactor
-// dropped the per-Evaluator scratch caching; callers allocate fresh each time. If profiling
-// shows pressure, the cache can come back behind the same surface.
+// getAttackBufs returns a fresh attackBufs sized for this hand. Callers allocate fresh per
+// Best call.
 func (e *Evaluator) getAttackBufs(handSize int, weapons []weapon.Weapon) *attackBufs {
 	return newAttackBufs(handSize, len(weapons), weapons)
 }

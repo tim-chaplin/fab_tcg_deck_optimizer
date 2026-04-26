@@ -6,6 +6,7 @@ package deck
 // arsenal, runechant carryover, start-of-turn AuraTrigger handling) lives here.
 
 import (
+	"fmt"
 	"math/rand"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
@@ -162,7 +163,7 @@ func (d *Deck) EvaluateWith(runs int, incomingDamage int, rng *rand.Rand, ev *ha
 
 			attributePlayStats(&d.Stats, play.BestLine)
 			tallyMarginalPresence(marginalBuf, idIndex, presentBuf, h, arsenalIn, v)
-			nextHeld = applyTurnResult(play, buf, &head, &tail, drawCount, nextHeld[:0])
+			nextHeld = applyTurnResult(play, buf, &head, &tail, nextHeld[:0])
 			nextAuraTrigger = append(nextAuraTrigger[:0], play.State.AuraTriggers...)
 			handIdx++
 			heldBuf, nextHeld = nextHeld, heldBuf
@@ -241,28 +242,20 @@ func processTriggersAtStartOfTurn(queued []card.AuraTrigger, postDrawDeck []card
 	return survivors, contribs, damage, ts.Runechants, ts.Revealed, ts.Graveyard
 }
 
-// applyTurnResult folds a completed turn's outcome into cross-turn state. With the state-as-
-// output model the deck loop just adopts play.State.Deck wholesale (cards mutated freely
-// during the chain — DrawOne pops, alt-cost prepends, tutor removals — and the snapshot
-// reflects every change), then recycles pitched-role cards to the bottom of buf per FaB
-// rules. nextHeld is replaced with play.State.Hand, which carries partition Held cards plus
-// anything tutored that didn't get played.
-//
-// drawCount is no longer consulted (head advance is implicit in the slice replacement).
-// Kept in the signature so call sites don't need updating; will be dropped in a follow-up.
-func applyTurnResult(play hand.TurnSummary, buf []card.Card, head, tail *int, drawCount int, nextHeld []card.Card) []card.Card {
-	_ = drawCount
+// applyTurnResult folds a completed turn's outcome into cross-turn state. The deck loop
+// adopts play.State.Deck wholesale (cards mutated freely during the chain — DrawOne pops,
+// alt-cost prepends, tutor removals — and the snapshot reflects every change), then
+// recycles pitched-role cards to the bottom of buf per FaB rules. nextHeld is replaced with
+// play.State.Hand, which carries partition Held cards plus anything tutored that didn't get
+// played. Panics if buf is undersized — the standard 2×deckSize sizing leaves enough room
+// for any plausible mid-chain growth, so a too-small buf signals a sizing bug at the caller.
+func applyTurnResult(play hand.TurnSummary, buf []card.Card, head, tail *int, nextHeld []card.Card) []card.Card {
 	newDeck := play.State.Deck
 	pitched := pitchedFromBestLine(play.BestLine)
 	totalLen := len(newDeck) + len(pitched)
 	if cap(buf) < totalLen {
-		// Shouldn't happen with the standard 2×deckSize sizing, but realloc defensively if
-		// mid-chain growth (alt-cost prepends + tutor adds) outran the cushion.
-		grown := make([]card.Card, totalLen, totalLen*2)
-		copy(grown, newDeck)
-		copy(grown[len(newDeck):], pitched)
-		copy(buf[:0:0], grown) // mark unused — caller's buf slice header doesn't change here
-		_ = grown
+		panic(fmt.Sprintf("applyTurnResult: buf cap %d < required %d (newDeck=%d + pitched=%d) — caller under-sized buf",
+			cap(buf), totalLen, len(newDeck), len(pitched)))
 	}
 	*head = 0
 	copy(buf[:len(newDeck)], newDeck)
@@ -394,7 +387,7 @@ func (d *Deck) EvalOneTurnForTesting(incomingDamage int, arsenalIn card.Card, in
 	play := hand.Best(d.Hero, d.Weapons, h, incomingDamage, buf[head:tail], 0, arsenalIn)
 	// drawCount=0: head already points past the starting hand, so applyTurnResult only needs
 	// to advance past mid-turn draws.
-	nextHeld := applyTurnResult(play, buf, &head, &tail, 0, nil)
+	nextHeld := applyTurnResult(play, buf, &head, &tail, nil)
 	triggerQueue := append([]card.AuraTrigger(nil), play.State.AuraTriggers...)
 
 	// Deal turn 2's hand but stop short of running Best — the caller wants the pre-Best state.

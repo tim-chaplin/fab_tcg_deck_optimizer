@@ -117,7 +117,7 @@ func (e *Evaluator) bestUncached(hero hero.Hero, weapons []weapon.Weapon, hand [
 				arsenalInIdx = len(a) - 1
 			}
 			// Held cards (hand cards left without a Pitch / Attack / Defend role) thread
-			// through to TurnState.Held so alt-cost effects (e.g. Moon Wish's "use a Held
+			// through to TurnState.Hand so alt-cost effects (e.g. Moon Wish's "use a hand
 			// card") can read len > 0. Arsenal-in can never be Held (roleAllowed bars it).
 			h := gatherHeldCards(hand, rolesBuf[:n], held[:0])
 			arsenalAtChainStart := findArsenalCard(rolesBuf, arsenalCardIn, n)
@@ -283,7 +283,7 @@ func groupByRoleInto(hand []card.Card, roles []Role, pitched, attackers, defende
 
 // gatherHeldCards appends every hand card with role Held into the caller-provided held slice
 // (passed pre-reset to length 0) and returns it. Threads the partition's Held set into
-// bestAttackWithWeapons so alt-cost effects can consult it via TurnState.Held.
+// bestAttackWithWeapons so alt-cost effects can consult it via TurnState.Hand.
 func gatherHeldCards(hand []card.Card, roles []Role, held []card.Card) []card.Card {
 	for i, c := range hand {
 		if roles[i] == Held {

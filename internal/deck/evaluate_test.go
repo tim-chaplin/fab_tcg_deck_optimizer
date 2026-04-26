@@ -78,9 +78,11 @@ func TestEvaluate_BestTurnStartingRunechantsIsPreHandCarryover(t *testing.T) {
 
 // TestEvaluate_BestTurnSnapshotsState pins the BestTurn snapshot's completeness: the winning
 // turn's CarryState (Hand, Deck, Graveyard, Arsenal, Runechants, etc.) must be deep-copied
-// into Stats.Best.Summary.State so FormatBestTurn's per-card breakdown reconciles with the
-// displayed Value and the per-zone counts are real. A Snatch-heavy hand pumps the chain with
-// on-hit DrawOne firings so State.Graveyard/State.Hand have non-trivial contents to verify.
+// into Stats.Best.Summary.State. A Snatch-heavy Viserai hand attacks with at least one Snatch
+// (its draw-rider fires DrawOne, pulling another Snatch off the deck), so at least one drawn
+// card surfaces in State.Hand or State.Arsenal alongside the played Snatch in State.Graveyard.
+// The total card count across the three surfaces must exceed handSize (4) — proof the snapshot
+// carried the mid-chain draw rather than just the partition's static slice.
 func TestEvaluate_BestTurnSnapshotsState(t *testing.T) {
 	snatch := cards.Get(card.SnatchRed)
 	d := New(hero.Viserai{}, nil, []card.Card{snatch, snatch, snatch, snatch, snatch, snatch, snatch, snatch})
@@ -90,8 +92,17 @@ func TestEvaluate_BestTurnSnapshotsState(t *testing.T) {
 		t.Fatalf("expected Best to be populated after Evaluate")
 	}
 	state := d.Stats.Best.Summary.State
-	if len(state.Graveyard) == 0 && len(state.Hand) == 0 {
-		t.Errorf("Stats.Best.Summary.State has empty Hand and Graveyard; want >=1 card surfaced from the chain")
+	if len(state.Graveyard) == 0 {
+		t.Errorf("State.Graveyard is empty; want the played Snatch in graveyard")
+	}
+	surfaceCount := len(state.Hand) + len(state.Graveyard)
+	if state.Arsenal != nil {
+		surfaceCount++
+	}
+	const handSize = 4 // Viserai's Intelligence
+	if surfaceCount <= handSize {
+		t.Errorf("surface count = %d, want >%d (Hand=%d Arsenal=%v Graveyard=%d). The mid-turn-drawn Snatch should have surfaced — without the State snapshot the carry would lose it.",
+			surfaceCount, handSize, len(state.Hand), state.Arsenal, len(state.Graveyard))
 	}
 }
 
