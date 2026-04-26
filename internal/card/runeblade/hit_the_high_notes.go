@@ -18,8 +18,8 @@ func (HitTheHighNotesRed) Attack() int              { return 4 }
 func (HitTheHighNotesRed) Defense() int             { return 3 }
 func (HitTheHighNotesRed) Types() card.TypeSet      { return hitTheHighNotesTypes }
 func (HitTheHighNotesRed) GoAgain() bool            { return false }
-func (c HitTheHighNotesRed) Play(s *card.TurnState, self *card.CardState) {
-	s.ApplyAndLogEffectiveAttackPlus(self, hitTheHighNotesPlay(c.Attack(), s)-self.Card.Attack())
+func (HitTheHighNotesRed) Play(s *card.TurnState, self *card.CardState) {
+	s.ApplyAndLogEffectiveAttackPlus(self, hitTheHighNotesBonus(s))
 }
 
 type HitTheHighNotesYellow struct{}
@@ -32,8 +32,8 @@ func (HitTheHighNotesYellow) Attack() int              { return 3 }
 func (HitTheHighNotesYellow) Defense() int             { return 3 }
 func (HitTheHighNotesYellow) Types() card.TypeSet      { return hitTheHighNotesTypes }
 func (HitTheHighNotesYellow) GoAgain() bool            { return false }
-func (c HitTheHighNotesYellow) Play(s *card.TurnState, self *card.CardState) {
-	s.ApplyAndLogEffectiveAttackPlus(self, hitTheHighNotesPlay(c.Attack(), s)-self.Card.Attack())
+func (HitTheHighNotesYellow) Play(s *card.TurnState, self *card.CardState) {
+	s.ApplyAndLogEffectiveAttackPlus(self, hitTheHighNotesBonus(s))
 }
 
 type HitTheHighNotesBlue struct{}
@@ -46,12 +46,12 @@ func (HitTheHighNotesBlue) Attack() int              { return 2 }
 func (HitTheHighNotesBlue) Defense() int             { return 3 }
 func (HitTheHighNotesBlue) Types() card.TypeSet      { return hitTheHighNotesTypes }
 func (HitTheHighNotesBlue) GoAgain() bool            { return false }
-func (c HitTheHighNotesBlue) Play(s *card.TurnState, self *card.CardState) {
-	s.ApplyAndLogEffectiveAttackPlus(self, hitTheHighNotesPlay(c.Attack(), s)-self.Card.Attack())
+func (HitTheHighNotesBlue) Play(s *card.TurnState, self *card.CardState) {
+	s.ApplyAndLogEffectiveAttackPlus(self, hitTheHighNotesBonus(s))
 }
-func hitTheHighNotesPlay(base int, s *card.TurnState) int {
+func hitTheHighNotesBonus(s *card.TurnState) int {
 	if s.HasAuraInPlay() {
-		return base + 2
+		return 2
 	}
-	return base
+	return 0
 }

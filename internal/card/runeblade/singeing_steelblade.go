@@ -12,8 +12,8 @@ import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 var singeingSteelbladeTypes = card.NewTypeSet(card.TypeRuneblade, card.TypeAction, card.TypeAttack)
 
 // singeingSteelbladePlay adds the 1 arcane to base damage and marks ArcaneDamageDealt.
-func singeingSteelbladePlay(attack int, s *card.TurnState) int {
-	return attack + s.DealArcaneDamage(1)
+func singeingSteelbladeBonus(s *card.TurnState) int {
+	return s.DealArcaneDamage(1)
 }
 
 type SingeingSteelbladeRed struct{}
@@ -26,8 +26,8 @@ func (SingeingSteelbladeRed) Attack() int              { return 4 }
 func (SingeingSteelbladeRed) Defense() int             { return 3 }
 func (SingeingSteelbladeRed) Types() card.TypeSet      { return singeingSteelbladeTypes }
 func (SingeingSteelbladeRed) GoAgain() bool            { return false }
-func (c SingeingSteelbladeRed) Play(s *card.TurnState, self *card.CardState) {
-	s.ApplyAndLogEffectiveAttackPlus(self, singeingSteelbladePlay(c.Attack(), s)-self.Card.Attack())
+func (SingeingSteelbladeRed) Play(s *card.TurnState, self *card.CardState) {
+	s.ApplyAndLogEffectiveAttackPlus(self, singeingSteelbladeBonus(s))
 }
 
 type SingeingSteelbladeYellow struct{}
@@ -40,8 +40,8 @@ func (SingeingSteelbladeYellow) Attack() int              { return 3 }
 func (SingeingSteelbladeYellow) Defense() int             { return 3 }
 func (SingeingSteelbladeYellow) Types() card.TypeSet      { return singeingSteelbladeTypes }
 func (SingeingSteelbladeYellow) GoAgain() bool            { return false }
-func (c SingeingSteelbladeYellow) Play(s *card.TurnState, self *card.CardState) {
-	s.ApplyAndLogEffectiveAttackPlus(self, singeingSteelbladePlay(c.Attack(), s)-self.Card.Attack())
+func (SingeingSteelbladeYellow) Play(s *card.TurnState, self *card.CardState) {
+	s.ApplyAndLogEffectiveAttackPlus(self, singeingSteelbladeBonus(s))
 }
 
 type SingeingSteelbladeBlue struct{}
@@ -54,6 +54,6 @@ func (SingeingSteelbladeBlue) Attack() int              { return 2 }
 func (SingeingSteelbladeBlue) Defense() int             { return 3 }
 func (SingeingSteelbladeBlue) Types() card.TypeSet      { return singeingSteelbladeTypes }
 func (SingeingSteelbladeBlue) GoAgain() bool            { return false }
-func (c SingeingSteelbladeBlue) Play(s *card.TurnState, self *card.CardState) {
-	s.ApplyAndLogEffectiveAttackPlus(self, singeingSteelbladePlay(c.Attack(), s)-self.Card.Attack())
+func (SingeingSteelbladeBlue) Play(s *card.TurnState, self *card.CardState) {
+	s.ApplyAndLogEffectiveAttackPlus(self, singeingSteelbladeBonus(s))
 }

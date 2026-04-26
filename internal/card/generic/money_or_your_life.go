@@ -23,8 +23,8 @@ func (MoneyOrYourLifeRed) GoAgain() bool            { return false }
 
 // not implemented: gold tokens
 func (MoneyOrYourLifeRed) NotImplemented() {}
-func (c MoneyOrYourLifeRed) Play(s *card.TurnState, self *card.CardState) {
-	s.ApplyAndLogEffectiveAttackPlus(self, moneyOrYourLifeDamage(c.Attack(), self)-self.Card.Attack())
+func (MoneyOrYourLifeRed) Play(s *card.TurnState, self *card.CardState) {
+	s.ApplyAndLogEffectiveAttackPlus(self, moneyOrYourLifeBonus(self))
 }
 
 type MoneyOrYourLifeYellow struct{}
@@ -40,8 +40,8 @@ func (MoneyOrYourLifeYellow) GoAgain() bool            { return false }
 
 // not implemented: gold tokens
 func (MoneyOrYourLifeYellow) NotImplemented() {}
-func (c MoneyOrYourLifeYellow) Play(s *card.TurnState, self *card.CardState) {
-	s.ApplyAndLogEffectiveAttackPlus(self, moneyOrYourLifeDamage(c.Attack(), self)-self.Card.Attack())
+func (MoneyOrYourLifeYellow) Play(s *card.TurnState, self *card.CardState) {
+	s.ApplyAndLogEffectiveAttackPlus(self, moneyOrYourLifeBonus(self))
 }
 
 type MoneyOrYourLifeBlue struct{}
@@ -57,15 +57,15 @@ func (MoneyOrYourLifeBlue) GoAgain() bool            { return false }
 
 // not implemented: gold tokens
 func (MoneyOrYourLifeBlue) NotImplemented() {}
-func (c MoneyOrYourLifeBlue) Play(s *card.TurnState, self *card.CardState) {
-	s.ApplyAndLogEffectiveAttackPlus(self, moneyOrYourLifeDamage(c.Attack(), self)-self.Card.Attack())
+func (MoneyOrYourLifeBlue) Play(s *card.TurnState, self *card.CardState) {
+	s.ApplyAndLogEffectiveAttackPlus(self, moneyOrYourLifeBonus(self))
 }
 
 // moneyOrYourLifeDamage is a breadcrumb for the on-hit "deal 2 damage unless they give Gold"
 // rider — Gold tokens aren't tracked, Thief-repeat isn't modelled (see TODO.md).
-func moneyOrYourLifeDamage(attack int, self *card.CardState) int {
+func moneyOrYourLifeBonus(self *card.CardState) int {
 	if card.LikelyToHit(self) {
 		// TODO: model on-hit Gold-trade rider.
 	}
-	return attack
+	return 0
 }

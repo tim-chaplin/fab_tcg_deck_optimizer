@@ -23,8 +23,8 @@ func (VantagePointRed) GoAgain() bool            { return false }
 
 // not implemented: Overpower flag is set on the aura condition but never consumed by the solver
 func (VantagePointRed) NotImplemented() {}
-func (c VantagePointRed) Play(s *card.TurnState, self *card.CardState) {
-	s.ApplyAndLogEffectiveAttackPlus(self, vantagePointPlay(c.Attack(), s)-self.Card.Attack())
+func (VantagePointRed) Play(s *card.TurnState, self *card.CardState) {
+	s.ApplyAndLogEffectiveAttackPlus(self, vantagePointBonus(s))
 }
 
 type VantagePointYellow struct{}
@@ -40,8 +40,8 @@ func (VantagePointYellow) GoAgain() bool            { return false }
 
 // not implemented: Overpower flag is set on the aura condition but never consumed by the solver
 func (VantagePointYellow) NotImplemented() {}
-func (c VantagePointYellow) Play(s *card.TurnState, self *card.CardState) {
-	s.ApplyAndLogEffectiveAttackPlus(self, vantagePointPlay(c.Attack(), s)-self.Card.Attack())
+func (VantagePointYellow) Play(s *card.TurnState, self *card.CardState) {
+	s.ApplyAndLogEffectiveAttackPlus(self, vantagePointBonus(s))
 }
 
 type VantagePointBlue struct{}
@@ -57,12 +57,12 @@ func (VantagePointBlue) GoAgain() bool            { return false }
 
 // not implemented: Overpower flag is set on the aura condition but never consumed by the solver
 func (VantagePointBlue) NotImplemented() {}
-func (c VantagePointBlue) Play(s *card.TurnState, self *card.CardState) {
-	s.ApplyAndLogEffectiveAttackPlus(self, vantagePointPlay(c.Attack(), s)-self.Card.Attack())
+func (VantagePointBlue) Play(s *card.TurnState, self *card.CardState) {
+	s.ApplyAndLogEffectiveAttackPlus(self, vantagePointBonus(s))
 }
-func vantagePointPlay(base int, s *card.TurnState) int {
+func vantagePointBonus(s *card.TurnState) int {
 	if s.HasAuraInPlay() {
 		s.Overpower = true
 	}
-	return base
+	return 0
 }

@@ -219,16 +219,16 @@ func TestPlaySequence_BonusAttackPerPermutationReset(t *testing.T) {
 //   - 1 Runechant carrying over from the previous turn.
 //
 // Best chain:
-//   1. Pitch the red (1 resource) to fund Volition.
-//   2. Play Nimblism Blue (cost 0, go again) — scans CardsRemaining, finds Volition Yellow
-//      (cost 1, satisfies the cost-≤1 filter), and writes pc.BonusAttack += 1.
-//   3. Play Consuming Volition Yellow:
-//        - The runechant carryover fires when the attack starts, flipping
-//          state.ArcaneDamageDealt = true.
-//        - self.EffectiveAttack() = printed 3 + BonusAttack 1 = 4. LikelyToHit(self) is
-//          true (4 ∈ {1,4,7}), so the discard rider returns +DiscardValue (3).
-//        - Volition's Play returns 3 (printed) + 3 (discard rider) = 6.
-//        - Solver folds in BonusAttack: cardContrib = 6 + 1 = 7.
+//  1. Pitch the red (1 resource) to fund Volition.
+//  2. Play Nimblism Blue (cost 0, go again) — scans CardsRemaining, finds Volition Yellow
+//     (cost 1, satisfies the cost-≤1 filter), and writes pc.BonusAttack += 1.
+//  3. Play Consuming Volition Yellow:
+//     - The runechant carryover fires when the attack starts, flipping
+//     state.ArcaneDamageDealt = true.
+//     - self.EffectiveAttack() = printed 3 + BonusAttack 1 = 4. LikelyToHit(self) is
+//     true (4 ∈ {1,4,7}), so the discard rider returns +DiscardValue (3).
+//     - Volition's Play returns 3 (printed) + 3 (discard rider) = 6.
+//     - Solver folds in BonusAttack: cardContrib = 6 + 1 = 7.
 //
 // Total Value = 7 = 3 (Volition base) + 1 (Nimblism's grant via BonusAttack) + 3 (discard
 // rider, gated on ArcaneDamageDealt + LikelyToHit firing on the buffed attack).

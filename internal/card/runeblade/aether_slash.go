@@ -24,8 +24,8 @@ func (AetherSlashRed) GoAgain() bool            { return false }
 // Pitched, regardless of which pitched card actually paid for Aether Slash (over-credits when both
 // an attack and a non-attack action are pitched)
 func (AetherSlashRed) NotImplemented() {}
-func (c AetherSlashRed) Play(s *card.TurnState, self *card.CardState) {
-	s.ApplyAndLogEffectiveAttackPlus(self, aetherSlashPlay(c.Attack(), s)-self.Card.Attack())
+func (AetherSlashRed) Play(s *card.TurnState, self *card.CardState) {
+	s.ApplyAndLogEffectiveAttackPlus(self, aetherSlashBonus(s))
 }
 
 type AetherSlashYellow struct{}
@@ -43,8 +43,8 @@ func (AetherSlashYellow) GoAgain() bool            { return false }
 // Pitched, regardless of which pitched card actually paid for Aether Slash (over-credits when both
 // an attack and a non-attack action are pitched)
 func (AetherSlashYellow) NotImplemented() {}
-func (c AetherSlashYellow) Play(s *card.TurnState, self *card.CardState) {
-	s.ApplyAndLogEffectiveAttackPlus(self, aetherSlashPlay(c.Attack(), s)-self.Card.Attack())
+func (AetherSlashYellow) Play(s *card.TurnState, self *card.CardState) {
+	s.ApplyAndLogEffectiveAttackPlus(self, aetherSlashBonus(s))
 }
 
 type AetherSlashBlue struct{}
@@ -62,14 +62,14 @@ func (AetherSlashBlue) GoAgain() bool            { return false }
 // Pitched, regardless of which pitched card actually paid for Aether Slash (over-credits when both
 // an attack and a non-attack action are pitched)
 func (AetherSlashBlue) NotImplemented() {}
-func (c AetherSlashBlue) Play(s *card.TurnState, self *card.CardState) {
-	s.ApplyAndLogEffectiveAttackPlus(self, aetherSlashPlay(c.Attack(), s)-self.Card.Attack())
+func (AetherSlashBlue) Play(s *card.TurnState, self *card.CardState) {
+	s.ApplyAndLogEffectiveAttackPlus(self, aetherSlashBonus(s))
 }
-func aetherSlashPlay(base int, s *card.TurnState) int {
+func aetherSlashBonus(s *card.TurnState) int {
 	for _, p := range s.Pitched {
 		if p.Types().IsNonAttackAction() {
-			return base + s.DealArcaneDamage(1)
+			return s.DealArcaneDamage(1)
 		}
 	}
-	return base
+	return 0
 }

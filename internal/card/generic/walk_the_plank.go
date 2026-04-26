@@ -22,8 +22,8 @@ func (WalkThePlankRed) GoAgain() bool            { return false }
 
 // not implemented: pirate-target freeze rider
 func (WalkThePlankRed) NotImplemented() {}
-func (c WalkThePlankRed) Play(s *card.TurnState, self *card.CardState) {
-	s.ApplyAndLogEffectiveAttackPlus(self, walkThePlankDamage(c.Attack(), self)-self.Card.Attack())
+func (WalkThePlankRed) Play(s *card.TurnState, self *card.CardState) {
+	s.ApplyAndLogEffectiveAttackPlus(self, walkThePlankBonus(self))
 }
 
 type WalkThePlankYellow struct{}
@@ -39,8 +39,8 @@ func (WalkThePlankYellow) GoAgain() bool            { return false }
 
 // not implemented: pirate-target freeze rider
 func (WalkThePlankYellow) NotImplemented() {}
-func (c WalkThePlankYellow) Play(s *card.TurnState, self *card.CardState) {
-	s.ApplyAndLogEffectiveAttackPlus(self, walkThePlankDamage(c.Attack(), self)-self.Card.Attack())
+func (WalkThePlankYellow) Play(s *card.TurnState, self *card.CardState) {
+	s.ApplyAndLogEffectiveAttackPlus(self, walkThePlankBonus(self))
 }
 
 type WalkThePlankBlue struct{}
@@ -56,15 +56,15 @@ func (WalkThePlankBlue) GoAgain() bool            { return false }
 
 // not implemented: pirate-target freeze rider
 func (WalkThePlankBlue) NotImplemented() {}
-func (c WalkThePlankBlue) Play(s *card.TurnState, self *card.CardState) {
-	s.ApplyAndLogEffectiveAttackPlus(self, walkThePlankDamage(c.Attack(), self)-self.Card.Attack())
+func (WalkThePlankBlue) Play(s *card.TurnState, self *card.CardState) {
+	s.ApplyAndLogEffectiveAttackPlus(self, walkThePlankBonus(self))
 }
 
 // walkThePlankDamage is a breadcrumb for the on-hit "freeze target" rider — Pirate-specific,
 // not modelled yet (see TODO.md).
-func walkThePlankDamage(attack int, self *card.CardState) int {
+func walkThePlankBonus(self *card.CardState) int {
 	if card.LikelyToHit(self) {
 		// TODO: model on-hit Pirate-target freeze rider.
 	}
-	return attack
+	return 0
 }

@@ -17,11 +17,11 @@ var reekOfCorruptionTypes = card.NewTypeSet(card.TypeRuneblade, card.TypeAction,
 
 // reekOfCorruptionDamage returns the base attack plus the discard rider when the aura condition
 // is satisfied AND this card's printed attack is likely to land on its own.
-func reekOfCorruptionDamage(attack int, s *card.TurnState, self *card.CardState) int {
+func reekOfCorruptionBonus(s *card.TurnState, self *card.CardState) int {
 	if s != nil && s.HasAuraInPlay() && card.LikelyToHit(self) {
-		return attack + card.DiscardValue
+		return card.DiscardValue
 	}
-	return attack
+	return 0
 }
 
 type ReekOfCorruptionRed struct{}
@@ -34,8 +34,8 @@ func (ReekOfCorruptionRed) Attack() int              { return 4 }
 func (ReekOfCorruptionRed) Defense() int             { return 3 }
 func (ReekOfCorruptionRed) Types() card.TypeSet      { return reekOfCorruptionTypes }
 func (ReekOfCorruptionRed) GoAgain() bool            { return false }
-func (c ReekOfCorruptionRed) Play(s *card.TurnState, self *card.CardState) {
-	s.ApplyAndLogEffectiveAttackPlus(self, reekOfCorruptionDamage(c.Attack(), s, self)-self.Card.Attack())
+func (ReekOfCorruptionRed) Play(s *card.TurnState, self *card.CardState) {
+	s.ApplyAndLogEffectiveAttackPlus(self, reekOfCorruptionBonus(s, self))
 }
 
 type ReekOfCorruptionYellow struct{}
@@ -48,8 +48,8 @@ func (ReekOfCorruptionYellow) Attack() int              { return 3 }
 func (ReekOfCorruptionYellow) Defense() int             { return 3 }
 func (ReekOfCorruptionYellow) Types() card.TypeSet      { return reekOfCorruptionTypes }
 func (ReekOfCorruptionYellow) GoAgain() bool            { return false }
-func (c ReekOfCorruptionYellow) Play(s *card.TurnState, self *card.CardState) {
-	s.ApplyAndLogEffectiveAttackPlus(self, reekOfCorruptionDamage(c.Attack(), s, self)-self.Card.Attack())
+func (ReekOfCorruptionYellow) Play(s *card.TurnState, self *card.CardState) {
+	s.ApplyAndLogEffectiveAttackPlus(self, reekOfCorruptionBonus(s, self))
 }
 
 type ReekOfCorruptionBlue struct{}
@@ -62,6 +62,6 @@ func (ReekOfCorruptionBlue) Attack() int              { return 2 }
 func (ReekOfCorruptionBlue) Defense() int             { return 3 }
 func (ReekOfCorruptionBlue) Types() card.TypeSet      { return reekOfCorruptionTypes }
 func (ReekOfCorruptionBlue) GoAgain() bool            { return false }
-func (c ReekOfCorruptionBlue) Play(s *card.TurnState, self *card.CardState) {
-	s.ApplyAndLogEffectiveAttackPlus(self, reekOfCorruptionDamage(c.Attack(), s, self)-self.Card.Attack())
+func (ReekOfCorruptionBlue) Play(s *card.TurnState, self *card.CardState) {
+	s.ApplyAndLogEffectiveAttackPlus(self, reekOfCorruptionBonus(s, self))
 }

@@ -13,8 +13,8 @@ import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 var arcanicCrackleTypes = card.NewTypeSet(card.TypeRuneblade, card.TypeAction, card.TypeAttack)
 
 // arcanicCracklePlay adds the printed +1 arcane to base damage and marks ArcaneDamageDealt.
-func arcanicCracklePlay(attack int, s *card.TurnState) int {
-	return attack + s.DealArcaneDamage(1)
+func arcanicCrackleBonus(s *card.TurnState) int {
+	return s.DealArcaneDamage(1)
 }
 
 type ArcanicCrackleRed struct{}
@@ -27,8 +27,8 @@ func (ArcanicCrackleRed) Attack() int              { return 3 }
 func (ArcanicCrackleRed) Defense() int             { return 3 }
 func (ArcanicCrackleRed) Types() card.TypeSet      { return arcanicCrackleTypes }
 func (ArcanicCrackleRed) GoAgain() bool            { return false }
-func (c ArcanicCrackleRed) Play(s *card.TurnState, self *card.CardState) {
-	s.ApplyAndLogEffectiveAttackPlus(self, arcanicCracklePlay(c.Attack(), s)-self.Card.Attack())
+func (ArcanicCrackleRed) Play(s *card.TurnState, self *card.CardState) {
+	s.ApplyAndLogEffectiveAttackPlus(self, arcanicCrackleBonus(s))
 }
 
 type ArcanicCrackleYellow struct{}
@@ -41,8 +41,8 @@ func (ArcanicCrackleYellow) Attack() int              { return 2 }
 func (ArcanicCrackleYellow) Defense() int             { return 3 }
 func (ArcanicCrackleYellow) Types() card.TypeSet      { return arcanicCrackleTypes }
 func (ArcanicCrackleYellow) GoAgain() bool            { return false }
-func (c ArcanicCrackleYellow) Play(s *card.TurnState, self *card.CardState) {
-	s.ApplyAndLogEffectiveAttackPlus(self, arcanicCracklePlay(c.Attack(), s)-self.Card.Attack())
+func (ArcanicCrackleYellow) Play(s *card.TurnState, self *card.CardState) {
+	s.ApplyAndLogEffectiveAttackPlus(self, arcanicCrackleBonus(s))
 }
 
 type ArcanicCrackleBlue struct{}
@@ -55,6 +55,6 @@ func (ArcanicCrackleBlue) Attack() int              { return 1 }
 func (ArcanicCrackleBlue) Defense() int             { return 3 }
 func (ArcanicCrackleBlue) Types() card.TypeSet      { return arcanicCrackleTypes }
 func (ArcanicCrackleBlue) GoAgain() bool            { return false }
-func (c ArcanicCrackleBlue) Play(s *card.TurnState, self *card.CardState) {
-	s.ApplyAndLogEffectiveAttackPlus(self, arcanicCracklePlay(c.Attack(), s)-self.Card.Attack())
+func (ArcanicCrackleBlue) Play(s *card.TurnState, self *card.CardState) {
+	s.ApplyAndLogEffectiveAttackPlus(self, arcanicCrackleBonus(s))
 }

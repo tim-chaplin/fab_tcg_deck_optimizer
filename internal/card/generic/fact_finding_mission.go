@@ -23,8 +23,8 @@ func (FactFindingMissionRed) GoAgain() bool            { return false }
 
 // not implemented: on-hit opponent-arsenal/equipment peek
 func (FactFindingMissionRed) NotImplemented() {}
-func (c FactFindingMissionRed) Play(s *card.TurnState, self *card.CardState) {
-	s.ApplyAndLogEffectiveAttackPlus(self, factFindingMissionDamage(c.Attack(), self)-self.Card.Attack())
+func (FactFindingMissionRed) Play(s *card.TurnState, self *card.CardState) {
+	s.ApplyAndLogEffectiveAttackPlus(self, factFindingMissionBonus(self))
 }
 
 type FactFindingMissionYellow struct{}
@@ -40,8 +40,8 @@ func (FactFindingMissionYellow) GoAgain() bool            { return false }
 
 // not implemented: on-hit opponent-arsenal/equipment peek
 func (FactFindingMissionYellow) NotImplemented() {}
-func (c FactFindingMissionYellow) Play(s *card.TurnState, self *card.CardState) {
-	s.ApplyAndLogEffectiveAttackPlus(self, factFindingMissionDamage(c.Attack(), self)-self.Card.Attack())
+func (FactFindingMissionYellow) Play(s *card.TurnState, self *card.CardState) {
+	s.ApplyAndLogEffectiveAttackPlus(self, factFindingMissionBonus(self))
 }
 
 type FactFindingMissionBlue struct{}
@@ -57,15 +57,15 @@ func (FactFindingMissionBlue) GoAgain() bool            { return false }
 
 // not implemented: on-hit opponent-arsenal/equipment peek
 func (FactFindingMissionBlue) NotImplemented() {}
-func (c FactFindingMissionBlue) Play(s *card.TurnState, self *card.CardState) {
-	s.ApplyAndLogEffectiveAttackPlus(self, factFindingMissionDamage(c.Attack(), self)-self.Card.Attack())
+func (FactFindingMissionBlue) Play(s *card.TurnState, self *card.CardState) {
+	s.ApplyAndLogEffectiveAttackPlus(self, factFindingMissionBonus(self))
 }
 
 // factFindingMissionDamage is a breadcrumb for the on-hit "peek a face-down card in arsenal /
 // equipment" rider — opponent-side inspection isn't modelled (see TODO.md).
-func factFindingMissionDamage(attack int, self *card.CardState) int {
+func factFindingMissionBonus(self *card.CardState) int {
 	if card.LikelyToHit(self) {
 		// TODO: model on-hit opponent-arsenal peek rider.
 	}
-	return attack
+	return 0
 }

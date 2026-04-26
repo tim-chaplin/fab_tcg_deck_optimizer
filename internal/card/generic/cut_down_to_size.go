@@ -22,8 +22,8 @@ func (CutDownToSizeRed) GoAgain() bool            { return false }
 
 // not implemented: on-hit opponent discard (conditional on hand size)
 func (CutDownToSizeRed) NotImplemented() {}
-func (c CutDownToSizeRed) Play(s *card.TurnState, self *card.CardState) {
-	s.ApplyAndLogEffectiveAttackPlus(self, cutDownToSizeDamage(c.Attack(), self)-self.Card.Attack())
+func (CutDownToSizeRed) Play(s *card.TurnState, self *card.CardState) {
+	s.ApplyAndLogEffectiveAttackPlus(self, cutDownToSizeBonus(self))
 }
 
 type CutDownToSizeYellow struct{}
@@ -39,8 +39,8 @@ func (CutDownToSizeYellow) GoAgain() bool            { return false }
 
 // not implemented: on-hit opponent discard (conditional on hand size)
 func (CutDownToSizeYellow) NotImplemented() {}
-func (c CutDownToSizeYellow) Play(s *card.TurnState, self *card.CardState) {
-	s.ApplyAndLogEffectiveAttackPlus(self, cutDownToSizeDamage(c.Attack(), self)-self.Card.Attack())
+func (CutDownToSizeYellow) Play(s *card.TurnState, self *card.CardState) {
+	s.ApplyAndLogEffectiveAttackPlus(self, cutDownToSizeBonus(self))
 }
 
 type CutDownToSizeBlue struct{}
@@ -56,15 +56,15 @@ func (CutDownToSizeBlue) GoAgain() bool            { return false }
 
 // not implemented: on-hit opponent discard (conditional on hand size)
 func (CutDownToSizeBlue) NotImplemented() {}
-func (c CutDownToSizeBlue) Play(s *card.TurnState, self *card.CardState) {
-	s.ApplyAndLogEffectiveAttackPlus(self, cutDownToSizeDamage(c.Attack(), self)-self.Card.Attack())
+func (CutDownToSizeBlue) Play(s *card.TurnState, self *card.CardState) {
+	s.ApplyAndLogEffectiveAttackPlus(self, cutDownToSizeBonus(self))
 }
 
 // cutDownToSizeDamage is a breadcrumb for the on-hit "discard a card if opponent has 4+ cards
 // in hand" rider — opponent hand size isn't tracked (see TODO.md).
-func cutDownToSizeDamage(attack int, self *card.CardState) int {
+func cutDownToSizeBonus(self *card.CardState) int {
 	if card.LikelyToHit(self) {
 		// TODO: model on-hit conditional discard rider.
 	}
-	return attack
+	return 0
 }

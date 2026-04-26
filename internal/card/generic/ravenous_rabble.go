@@ -14,15 +14,15 @@ import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 
 var ravenousRabbleTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeAttack)
 
-func ravenousRabblePlay(basePower int, s *card.TurnState) int {
-	p := basePower
-	if len(s.Deck) > 0 {
-		p -= s.Deck[0].Pitch()
+// ravenousRabbleBonus returns the negative rider applied to base attack: -topPitch when a
+// deck top exists, 0 otherwise. ApplyAndLogEffectiveAttackPlus clamps the chain step's
+// (+N) at 0, so a deeper-negative rider naturally floors the contribution at 0 — no
+// in-helper clamp needed.
+func ravenousRabbleBonus(s *card.TurnState) int {
+	if len(s.Deck) == 0 {
+		return 0
 	}
-	if p < 0 {
-		p = 0
-	}
-	return p
+	return -s.Deck[0].Pitch()
 }
 
 type RavenousRabbleRed struct{}
@@ -36,8 +36,8 @@ func (RavenousRabbleRed) Defense() int             { return 2 }
 func (RavenousRabbleRed) Types() card.TypeSet      { return ravenousRabbleTypes }
 func (RavenousRabbleRed) GoAgain() bool            { return true }
 func (RavenousRabbleRed) NoMemo()                  {}
-func (c RavenousRabbleRed) Play(s *card.TurnState, self *card.CardState) {
-	s.ApplyAndLogEffectiveAttackPlus(self, ravenousRabblePlay(c.Attack(), s)-self.Card.Attack())
+func (RavenousRabbleRed) Play(s *card.TurnState, self *card.CardState) {
+	s.ApplyAndLogEffectiveAttackPlus(self, ravenousRabbleBonus(s))
 }
 
 type RavenousRabbleYellow struct{}
@@ -51,8 +51,8 @@ func (RavenousRabbleYellow) Defense() int             { return 2 }
 func (RavenousRabbleYellow) Types() card.TypeSet      { return ravenousRabbleTypes }
 func (RavenousRabbleYellow) GoAgain() bool            { return true }
 func (RavenousRabbleYellow) NoMemo()                  {}
-func (c RavenousRabbleYellow) Play(s *card.TurnState, self *card.CardState) {
-	s.ApplyAndLogEffectiveAttackPlus(self, ravenousRabblePlay(c.Attack(), s)-self.Card.Attack())
+func (RavenousRabbleYellow) Play(s *card.TurnState, self *card.CardState) {
+	s.ApplyAndLogEffectiveAttackPlus(self, ravenousRabbleBonus(s))
 }
 
 type RavenousRabbleBlue struct{}
@@ -66,6 +66,6 @@ func (RavenousRabbleBlue) Defense() int             { return 2 }
 func (RavenousRabbleBlue) Types() card.TypeSet      { return ravenousRabbleTypes }
 func (RavenousRabbleBlue) GoAgain() bool            { return true }
 func (RavenousRabbleBlue) NoMemo()                  {}
-func (c RavenousRabbleBlue) Play(s *card.TurnState, self *card.CardState) {
-	s.ApplyAndLogEffectiveAttackPlus(self, ravenousRabblePlay(c.Attack(), s)-self.Card.Attack())
+func (RavenousRabbleBlue) Play(s *card.TurnState, self *card.CardState) {
+	s.ApplyAndLogEffectiveAttackPlus(self, ravenousRabbleBonus(s))
 }

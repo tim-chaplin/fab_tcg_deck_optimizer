@@ -24,8 +24,8 @@ func (DownButNotOutRed) GoAgain() bool            { return false }
 
 // not implemented: health/equipment/token comparison, agility/might/vigor tokens, overpower
 func (DownButNotOutRed) NotImplemented() {}
-func (c DownButNotOutRed) Play(s *card.TurnState, self *card.CardState) {
-	s.ApplyAndLogEffectiveAttackPlus(self, downButNotOutDamage(c.Attack(), self)-self.Card.Attack())
+func (DownButNotOutRed) Play(s *card.TurnState, self *card.CardState) {
+	s.ApplyAndLogEffectiveAttackPlus(self, downButNotOutBonus(self))
 }
 
 type DownButNotOutYellow struct{}
@@ -41,8 +41,8 @@ func (DownButNotOutYellow) GoAgain() bool            { return false }
 
 // not implemented: health/equipment/token comparison, agility/might/vigor tokens, overpower
 func (DownButNotOutYellow) NotImplemented() {}
-func (c DownButNotOutYellow) Play(s *card.TurnState, self *card.CardState) {
-	s.ApplyAndLogEffectiveAttackPlus(self, downButNotOutDamage(c.Attack(), self)-self.Card.Attack())
+func (DownButNotOutYellow) Play(s *card.TurnState, self *card.CardState) {
+	s.ApplyAndLogEffectiveAttackPlus(self, downButNotOutBonus(self))
 }
 
 type DownButNotOutBlue struct{}
@@ -58,16 +58,16 @@ func (DownButNotOutBlue) GoAgain() bool            { return false }
 
 // not implemented: health/equipment/token comparison, agility/might/vigor tokens, overpower
 func (DownButNotOutBlue) NotImplemented() {}
-func (c DownButNotOutBlue) Play(s *card.TurnState, self *card.CardState) {
-	s.ApplyAndLogEffectiveAttackPlus(self, downButNotOutDamage(c.Attack(), self)-self.Card.Attack())
+func (DownButNotOutBlue) Play(s *card.TurnState, self *card.CardState) {
+	s.ApplyAndLogEffectiveAttackPlus(self, downButNotOutBonus(self))
 }
 
 // downButNotOutDamage is a breadcrumb for the conditional "when this hits, create Agility +
 // Might + Vigor tokens" rider — gated on a health/equipment/token comparison we don't track
 // (see TODO.md).
-func downButNotOutDamage(attack int, self *card.CardState) int {
+func downButNotOutBonus(self *card.CardState) int {
 	if card.LikelyToHit(self) {
 		// TODO: model on-hit status-token creation rider (requires life-total + token tracking).
 	}
-	return attack
+	return 0
 }

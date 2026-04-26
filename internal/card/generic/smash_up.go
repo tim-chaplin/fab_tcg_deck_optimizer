@@ -22,15 +22,15 @@ func (SmashUpRed) GoAgain() bool            { return false }
 
 // not implemented: on-hit opponent-arsenal manipulation rider
 func (SmashUpRed) NotImplemented() {}
-func (c SmashUpRed) Play(s *card.TurnState, self *card.CardState) {
-	s.ApplyAndLogEffectiveAttackPlus(self, smashUpDamage(c.Attack(), self)-self.Card.Attack())
+func (SmashUpRed) Play(s *card.TurnState, self *card.CardState) {
+	s.ApplyAndLogEffectiveAttackPlus(self, smashUpBonus(self))
 }
 
 // smashUpDamage is a breadcrumb for the on-hit "arsenal face-up + banish attack action" rider —
 // not modelled yet (see TODO.md).
-func smashUpDamage(attack int, self *card.CardState) int {
+func smashUpBonus(self *card.CardState) int {
 	if card.LikelyToHit(self) {
 		// TODO: model on-hit arsenal manipulation rider.
 	}
-	return attack
+	return 0
 }

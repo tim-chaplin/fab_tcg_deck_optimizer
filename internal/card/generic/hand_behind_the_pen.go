@@ -23,15 +23,15 @@ func (HandBehindThePenRed) GoAgain() bool            { return false }
 
 // not implemented: on-hit opponent-arsenal manipulation rider
 func (HandBehindThePenRed) NotImplemented() {}
-func (c HandBehindThePenRed) Play(s *card.TurnState, self *card.CardState) {
-	s.ApplyAndLogEffectiveAttackPlus(self, handBehindThePenDamage(c.Attack(), self)-self.Card.Attack())
+func (HandBehindThePenRed) Play(s *card.TurnState, self *card.CardState) {
+	s.ApplyAndLogEffectiveAttackPlus(self, handBehindThePenBonus(self))
 }
 
 // handBehindThePenDamage is a breadcrumb for the on-hit "arsenal face-up + banish non-attack
 // action" rider — not modelled yet (see TODO.md).
-func handBehindThePenDamage(attack int, self *card.CardState) int {
+func handBehindThePenBonus(self *card.CardState) int {
 	if card.LikelyToHit(self) {
 		// TODO: model on-hit arsenal manipulation rider.
 	}
-	return attack
+	return 0
 }

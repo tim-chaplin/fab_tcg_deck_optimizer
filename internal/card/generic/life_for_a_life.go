@@ -23,11 +23,11 @@ const lifeForALifeHealValue = 1
 
 // lifeForALifeDamage returns the base attack plus the heal rider when the attack is likely to
 // land.
-func lifeForALifeDamage(attack int, self *card.CardState) int {
+func lifeForALifeBonus(self *card.CardState) int {
 	if card.LikelyToHit(self) {
-		return attack + lifeForALifeHealValue
+		return lifeForALifeHealValue
 	}
-	return attack
+	return 0
 }
 
 type LifeForALifeRed struct{}
@@ -40,8 +40,8 @@ func (LifeForALifeRed) Attack() int              { return 4 }
 func (LifeForALifeRed) Defense() int             { return 2 }
 func (LifeForALifeRed) Types() card.TypeSet      { return lifeForALifeTypes }
 func (LifeForALifeRed) GoAgain() bool            { return simstate.HeroWantsLowerHealth() }
-func (c LifeForALifeRed) Play(s *card.TurnState, self *card.CardState) {
-	s.ApplyAndLogEffectiveAttackPlus(self, lifeForALifeDamage(c.Attack(), self)-self.Card.Attack())
+func (LifeForALifeRed) Play(s *card.TurnState, self *card.CardState) {
+	s.ApplyAndLogEffectiveAttackPlus(self, lifeForALifeBonus(self))
 }
 
 type LifeForALifeYellow struct{}
@@ -54,8 +54,8 @@ func (LifeForALifeYellow) Attack() int              { return 3 }
 func (LifeForALifeYellow) Defense() int             { return 2 }
 func (LifeForALifeYellow) Types() card.TypeSet      { return lifeForALifeTypes }
 func (LifeForALifeYellow) GoAgain() bool            { return simstate.HeroWantsLowerHealth() }
-func (c LifeForALifeYellow) Play(s *card.TurnState, self *card.CardState) {
-	s.ApplyAndLogEffectiveAttackPlus(self, lifeForALifeDamage(c.Attack(), self)-self.Card.Attack())
+func (LifeForALifeYellow) Play(s *card.TurnState, self *card.CardState) {
+	s.ApplyAndLogEffectiveAttackPlus(self, lifeForALifeBonus(self))
 }
 
 type LifeForALifeBlue struct{}
@@ -68,6 +68,6 @@ func (LifeForALifeBlue) Attack() int              { return 2 }
 func (LifeForALifeBlue) Defense() int             { return 2 }
 func (LifeForALifeBlue) Types() card.TypeSet      { return lifeForALifeTypes }
 func (LifeForALifeBlue) GoAgain() bool            { return simstate.HeroWantsLowerHealth() }
-func (c LifeForALifeBlue) Play(s *card.TurnState, self *card.CardState) {
-	s.ApplyAndLogEffectiveAttackPlus(self, lifeForALifeDamage(c.Attack(), self)-self.Card.Attack())
+func (LifeForALifeBlue) Play(s *card.TurnState, self *card.CardState) {
+	s.ApplyAndLogEffectiveAttackPlus(self, lifeForALifeBonus(self))
 }

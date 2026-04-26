@@ -22,15 +22,15 @@ func (PursueToTheEdgeOfOblivionRed) GoAgain() bool            { return false }
 
 // not implemented: on-hit mark
 func (PursueToTheEdgeOfOblivionRed) NotImplemented() {}
-func (c PursueToTheEdgeOfOblivionRed) Play(s *card.TurnState, self *card.CardState) {
-	s.ApplyAndLogEffectiveAttackPlus(self, pursueToTheEdgeOfOblivionDamage(c.Attack(), self)-self.Card.Attack())
+func (PursueToTheEdgeOfOblivionRed) Play(s *card.TurnState, self *card.CardState) {
+	s.ApplyAndLogEffectiveAttackPlus(self, pursueToTheEdgeOfOblivionBonus(self))
 }
 
 // pursueToTheEdgeOfOblivionDamage is a breadcrumb for the on-hit "mark the hero" rider — marks
 // aren't tracked (see TODO.md).
-func pursueToTheEdgeOfOblivionDamage(attack int, self *card.CardState) int {
+func pursueToTheEdgeOfOblivionBonus(self *card.CardState) int {
 	if card.LikelyToHit(self) {
 		// TODO: model on-hit mark rider.
 	}
-	return attack
+	return 0
 }

@@ -16,11 +16,11 @@ var arcanicSpikeTypes = card.NewTypeSet(card.TypeRuneblade, card.TypeAction, car
 const arcaneDamageBonus = 2
 
 // arcanicSpikeDamage returns the base attack plus the +2{p} rider when ArcaneDamageDealt is set.
-func arcanicSpikeDamage(attack int, s *card.TurnState) int {
+func arcanicSpikeBonus(s *card.TurnState) int {
 	if s != nil && s.ArcaneDamageDealt {
-		return attack + arcaneDamageBonus
+		return arcaneDamageBonus
 	}
-	return attack
+	return 0
 }
 
 type ArcanicSpikeRed struct{}
@@ -33,8 +33,8 @@ func (ArcanicSpikeRed) Attack() int              { return 5 }
 func (ArcanicSpikeRed) Defense() int             { return 3 }
 func (ArcanicSpikeRed) Types() card.TypeSet      { return arcanicSpikeTypes }
 func (ArcanicSpikeRed) GoAgain() bool            { return false }
-func (c ArcanicSpikeRed) Play(s *card.TurnState, self *card.CardState) {
-	s.ApplyAndLogEffectiveAttackPlus(self, arcanicSpikeDamage(c.Attack(), s)-self.Card.Attack())
+func (ArcanicSpikeRed) Play(s *card.TurnState, self *card.CardState) {
+	s.ApplyAndLogEffectiveAttackPlus(self, arcanicSpikeBonus(s))
 }
 
 type ArcanicSpikeYellow struct{}
@@ -47,8 +47,8 @@ func (ArcanicSpikeYellow) Attack() int              { return 4 }
 func (ArcanicSpikeYellow) Defense() int             { return 3 }
 func (ArcanicSpikeYellow) Types() card.TypeSet      { return arcanicSpikeTypes }
 func (ArcanicSpikeYellow) GoAgain() bool            { return false }
-func (c ArcanicSpikeYellow) Play(s *card.TurnState, self *card.CardState) {
-	s.ApplyAndLogEffectiveAttackPlus(self, arcanicSpikeDamage(c.Attack(), s)-self.Card.Attack())
+func (ArcanicSpikeYellow) Play(s *card.TurnState, self *card.CardState) {
+	s.ApplyAndLogEffectiveAttackPlus(self, arcanicSpikeBonus(s))
 }
 
 type ArcanicSpikeBlue struct{}
@@ -61,6 +61,6 @@ func (ArcanicSpikeBlue) Attack() int              { return 3 }
 func (ArcanicSpikeBlue) Defense() int             { return 3 }
 func (ArcanicSpikeBlue) Types() card.TypeSet      { return arcanicSpikeTypes }
 func (ArcanicSpikeBlue) GoAgain() bool            { return false }
-func (c ArcanicSpikeBlue) Play(s *card.TurnState, self *card.CardState) {
-	s.ApplyAndLogEffectiveAttackPlus(self, arcanicSpikeDamage(c.Attack(), s)-self.Card.Attack())
+func (ArcanicSpikeBlue) Play(s *card.TurnState, self *card.CardState) {
+	s.ApplyAndLogEffectiveAttackPlus(self, arcanicSpikeBonus(s))
 }

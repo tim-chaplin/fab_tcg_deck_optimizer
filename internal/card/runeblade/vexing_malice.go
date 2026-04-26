@@ -12,8 +12,8 @@ import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 var vexingMaliceTypes = card.NewTypeSet(card.TypeRuneblade, card.TypeAction, card.TypeAttack)
 
 // vexingMalicePlay adds the 2 arcane to base damage and marks ArcaneDamageDealt.
-func vexingMalicePlay(attack int, s *card.TurnState) int {
-	return attack + s.DealArcaneDamage(2)
+func vexingMaliceBonus(s *card.TurnState) int {
+	return s.DealArcaneDamage(2)
 }
 
 type VexingMaliceRed struct{}
@@ -26,8 +26,8 @@ func (VexingMaliceRed) Attack() int              { return 3 }
 func (VexingMaliceRed) Defense() int             { return 3 }
 func (VexingMaliceRed) Types() card.TypeSet      { return vexingMaliceTypes }
 func (VexingMaliceRed) GoAgain() bool            { return false }
-func (c VexingMaliceRed) Play(s *card.TurnState, self *card.CardState) {
-	s.ApplyAndLogEffectiveAttackPlus(self, vexingMalicePlay(c.Attack(), s)-self.Card.Attack())
+func (VexingMaliceRed) Play(s *card.TurnState, self *card.CardState) {
+	s.ApplyAndLogEffectiveAttackPlus(self, vexingMaliceBonus(s))
 }
 
 type VexingMaliceYellow struct{}
@@ -40,8 +40,8 @@ func (VexingMaliceYellow) Attack() int              { return 2 }
 func (VexingMaliceYellow) Defense() int             { return 3 }
 func (VexingMaliceYellow) Types() card.TypeSet      { return vexingMaliceTypes }
 func (VexingMaliceYellow) GoAgain() bool            { return false }
-func (c VexingMaliceYellow) Play(s *card.TurnState, self *card.CardState) {
-	s.ApplyAndLogEffectiveAttackPlus(self, vexingMalicePlay(c.Attack(), s)-self.Card.Attack())
+func (VexingMaliceYellow) Play(s *card.TurnState, self *card.CardState) {
+	s.ApplyAndLogEffectiveAttackPlus(self, vexingMaliceBonus(s))
 }
 
 type VexingMaliceBlue struct{}
@@ -54,6 +54,6 @@ func (VexingMaliceBlue) Attack() int              { return 1 }
 func (VexingMaliceBlue) Defense() int             { return 3 }
 func (VexingMaliceBlue) Types() card.TypeSet      { return vexingMaliceTypes }
 func (VexingMaliceBlue) GoAgain() bool            { return false }
-func (c VexingMaliceBlue) Play(s *card.TurnState, self *card.CardState) {
-	s.ApplyAndLogEffectiveAttackPlus(self, vexingMalicePlay(c.Attack(), s)-self.Card.Attack())
+func (VexingMaliceBlue) Play(s *card.TurnState, self *card.CardState) {
+	s.ApplyAndLogEffectiveAttackPlus(self, vexingMaliceBonus(s))
 }

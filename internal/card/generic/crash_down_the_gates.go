@@ -24,8 +24,8 @@ func (CrashDownTheGatesRed) GoAgain() bool            { return false }
 
 // not implemented: deck-reveal comparison + on-hit deck-top destruction
 func (CrashDownTheGatesRed) NotImplemented() {}
-func (c CrashDownTheGatesRed) Play(s *card.TurnState, self *card.CardState) {
-	s.ApplyAndLogEffectiveAttackPlus(self, crashDownTheGatesDamage(c.Attack(), self)-self.Card.Attack())
+func (CrashDownTheGatesRed) Play(s *card.TurnState, self *card.CardState) {
+	s.ApplyAndLogEffectiveAttackPlus(self, crashDownTheGatesBonus(self))
 }
 
 type CrashDownTheGatesYellow struct{}
@@ -41,8 +41,8 @@ func (CrashDownTheGatesYellow) GoAgain() bool            { return false }
 
 // not implemented: deck-reveal comparison + on-hit deck-top destruction
 func (CrashDownTheGatesYellow) NotImplemented() {}
-func (c CrashDownTheGatesYellow) Play(s *card.TurnState, self *card.CardState) {
-	s.ApplyAndLogEffectiveAttackPlus(self, crashDownTheGatesDamage(c.Attack(), self)-self.Card.Attack())
+func (CrashDownTheGatesYellow) Play(s *card.TurnState, self *card.CardState) {
+	s.ApplyAndLogEffectiveAttackPlus(self, crashDownTheGatesBonus(self))
 }
 
 type CrashDownTheGatesBlue struct{}
@@ -58,15 +58,15 @@ func (CrashDownTheGatesBlue) GoAgain() bool            { return false }
 
 // not implemented: deck-reveal comparison + on-hit deck-top destruction
 func (CrashDownTheGatesBlue) NotImplemented() {}
-func (c CrashDownTheGatesBlue) Play(s *card.TurnState, self *card.CardState) {
-	s.ApplyAndLogEffectiveAttackPlus(self, crashDownTheGatesDamage(c.Attack(), self)-self.Card.Attack())
+func (CrashDownTheGatesBlue) Play(s *card.TurnState, self *card.CardState) {
+	s.ApplyAndLogEffectiveAttackPlus(self, crashDownTheGatesBonus(self))
 }
 
 // crashDownTheGatesDamage is a breadcrumb for the on-hit "destroy top of their deck" rider —
 // not modelled yet (see TODO.md).
-func crashDownTheGatesDamage(attack int, self *card.CardState) int {
+func crashDownTheGatesBonus(self *card.CardState) int {
 	if card.LikelyToHit(self) {
 		// TODO: model on-hit deck-top destruction rider.
 	}
-	return attack
+	return 0
 }

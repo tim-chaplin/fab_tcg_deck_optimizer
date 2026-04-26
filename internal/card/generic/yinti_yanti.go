@@ -11,11 +11,11 @@ import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 var yintiYantiTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeAttack)
 
 // yintiYantiPlay adds +1 when any aura is in play: either created this turn or played earlier.
-func yintiYantiPlay(base int, s *card.TurnState) int {
+func yintiYantiBonus(s *card.TurnState) int {
 	if s != nil && s.HasAuraInPlay() {
-		return base + 1
+		return 1
 	}
-	return base
+	return 0
 }
 
 type YintiYantiRed struct{}
@@ -32,8 +32,8 @@ func (YintiYantiRed) GoAgain() bool            { return false }
 // not implemented: defending-side +1{d} buff (defence consumed before Play); aura-attack
 // +1{p} is modelled
 func (YintiYantiRed) NotImplemented() {}
-func (c YintiYantiRed) Play(s *card.TurnState, self *card.CardState) {
-	s.ApplyAndLogEffectiveAttackPlus(self, yintiYantiPlay(c.Attack(), s)-self.Card.Attack())
+func (YintiYantiRed) Play(s *card.TurnState, self *card.CardState) {
+	s.ApplyAndLogEffectiveAttackPlus(self, yintiYantiBonus(s))
 }
 
 type YintiYantiYellow struct{}
@@ -50,8 +50,8 @@ func (YintiYantiYellow) GoAgain() bool            { return false }
 // not implemented: defending-side +1{d} buff (defence consumed before Play); aura-attack
 // +1{p} is modelled
 func (YintiYantiYellow) NotImplemented() {}
-func (c YintiYantiYellow) Play(s *card.TurnState, self *card.CardState) {
-	s.ApplyAndLogEffectiveAttackPlus(self, yintiYantiPlay(c.Attack(), s)-self.Card.Attack())
+func (YintiYantiYellow) Play(s *card.TurnState, self *card.CardState) {
+	s.ApplyAndLogEffectiveAttackPlus(self, yintiYantiBonus(s))
 }
 
 type YintiYantiBlue struct{}
@@ -68,6 +68,6 @@ func (YintiYantiBlue) GoAgain() bool            { return false }
 // not implemented: defending-side +1{d} buff (defence consumed before Play); aura-attack
 // +1{p} is modelled
 func (YintiYantiBlue) NotImplemented() {}
-func (c YintiYantiBlue) Play(s *card.TurnState, self *card.CardState) {
-	s.ApplyAndLogEffectiveAttackPlus(self, yintiYantiPlay(c.Attack(), s)-self.Card.Attack())
+func (YintiYantiBlue) Play(s *card.TurnState, self *card.CardState) {
+	s.ApplyAndLogEffectiveAttackPlus(self, yintiYantiBonus(s))
 }

@@ -13,11 +13,11 @@ import (
 var woundedBullTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeAttack)
 
 // woundedBullDamage returns attack plus +1 when the current hero opts into LowerHealthWanter.
-func woundedBullDamage(attack int) int {
+func woundedBullBonus() int {
 	if simstate.HeroWantsLowerHealth() {
-		return attack + 1
+		return 1
 	}
-	return attack
+	return 0
 }
 
 type WoundedBullRed struct{}
@@ -30,8 +30,8 @@ func (WoundedBullRed) Attack() int              { return 7 }
 func (WoundedBullRed) Defense() int             { return 2 }
 func (WoundedBullRed) Types() card.TypeSet      { return woundedBullTypes }
 func (WoundedBullRed) GoAgain() bool            { return false }
-func (c WoundedBullRed) Play(s *card.TurnState, self *card.CardState) {
-	s.ApplyAndLogEffectiveAttackPlus(self, woundedBullDamage(c.Attack())-self.Card.Attack())
+func (WoundedBullRed) Play(s *card.TurnState, self *card.CardState) {
+	s.ApplyAndLogEffectiveAttackPlus(self, woundedBullBonus())
 }
 
 type WoundedBullYellow struct{}
@@ -44,8 +44,8 @@ func (WoundedBullYellow) Attack() int              { return 6 }
 func (WoundedBullYellow) Defense() int             { return 2 }
 func (WoundedBullYellow) Types() card.TypeSet      { return woundedBullTypes }
 func (WoundedBullYellow) GoAgain() bool            { return false }
-func (c WoundedBullYellow) Play(s *card.TurnState, self *card.CardState) {
-	s.ApplyAndLogEffectiveAttackPlus(self, woundedBullDamage(c.Attack())-self.Card.Attack())
+func (WoundedBullYellow) Play(s *card.TurnState, self *card.CardState) {
+	s.ApplyAndLogEffectiveAttackPlus(self, woundedBullBonus())
 }
 
 type WoundedBullBlue struct{}
@@ -58,6 +58,6 @@ func (WoundedBullBlue) Attack() int              { return 5 }
 func (WoundedBullBlue) Defense() int             { return 2 }
 func (WoundedBullBlue) Types() card.TypeSet      { return woundedBullTypes }
 func (WoundedBullBlue) GoAgain() bool            { return false }
-func (c WoundedBullBlue) Play(s *card.TurnState, self *card.CardState) {
-	s.ApplyAndLogEffectiveAttackPlus(self, woundedBullDamage(c.Attack())-self.Card.Attack())
+func (WoundedBullBlue) Play(s *card.TurnState, self *card.CardState) {
+	s.ApplyAndLogEffectiveAttackPlus(self, woundedBullBonus())
 }

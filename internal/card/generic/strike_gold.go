@@ -11,11 +11,11 @@ var strikeGoldTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.Ty
 
 // strikeGoldDamage returns the base attack plus the Gold-token rider when the attack is likely
 // to land.
-func strikeGoldDamage(attack int, self *card.CardState) int {
+func strikeGoldBonus(self *card.CardState) int {
 	if card.LikelyToHit(self) {
-		return attack + card.GoldTokenValue
+		return card.GoldTokenValue
 	}
-	return attack
+	return 0
 }
 
 type StrikeGoldRed struct{}
@@ -31,8 +31,8 @@ func (StrikeGoldRed) GoAgain() bool            { return false }
 
 // not implemented: gold tokens
 func (StrikeGoldRed) NotImplemented() {}
-func (c StrikeGoldRed) Play(s *card.TurnState, self *card.CardState) {
-	s.ApplyAndLogEffectiveAttackPlus(self, strikeGoldDamage(c.Attack(), self)-self.Card.Attack())
+func (StrikeGoldRed) Play(s *card.TurnState, self *card.CardState) {
+	s.ApplyAndLogEffectiveAttackPlus(self, strikeGoldBonus(self))
 }
 
 type StrikeGoldYellow struct{}
@@ -48,8 +48,8 @@ func (StrikeGoldYellow) GoAgain() bool            { return false }
 
 // not implemented: gold tokens
 func (StrikeGoldYellow) NotImplemented() {}
-func (c StrikeGoldYellow) Play(s *card.TurnState, self *card.CardState) {
-	s.ApplyAndLogEffectiveAttackPlus(self, strikeGoldDamage(c.Attack(), self)-self.Card.Attack())
+func (StrikeGoldYellow) Play(s *card.TurnState, self *card.CardState) {
+	s.ApplyAndLogEffectiveAttackPlus(self, strikeGoldBonus(self))
 }
 
 type StrikeGoldBlue struct{}
@@ -65,6 +65,6 @@ func (StrikeGoldBlue) GoAgain() bool            { return false }
 
 // not implemented: gold tokens
 func (StrikeGoldBlue) NotImplemented() {}
-func (c StrikeGoldBlue) Play(s *card.TurnState, self *card.CardState) {
-	s.ApplyAndLogEffectiveAttackPlus(self, strikeGoldDamage(c.Attack(), self)-self.Card.Attack())
+func (StrikeGoldBlue) Play(s *card.TurnState, self *card.CardState) {
+	s.ApplyAndLogEffectiveAttackPlus(self, strikeGoldBonus(self))
 }

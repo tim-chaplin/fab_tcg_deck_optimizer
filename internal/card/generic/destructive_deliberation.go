@@ -22,8 +22,8 @@ func (DestructiveDeliberationRed) GoAgain() bool            { return false }
 
 // not implemented: ponder tokens
 func (DestructiveDeliberationRed) NotImplemented() {}
-func (c DestructiveDeliberationRed) Play(s *card.TurnState, self *card.CardState) {
-	s.ApplyAndLogEffectiveAttackPlus(self, destructiveDeliberationDamage(c.Attack(), self)-self.Card.Attack())
+func (DestructiveDeliberationRed) Play(s *card.TurnState, self *card.CardState) {
+	s.ApplyAndLogEffectiveAttackPlus(self, destructiveDeliberationBonus(self))
 }
 
 type DestructiveDeliberationYellow struct{}
@@ -39,8 +39,8 @@ func (DestructiveDeliberationYellow) GoAgain() bool            { return false }
 
 // not implemented: ponder tokens
 func (DestructiveDeliberationYellow) NotImplemented() {}
-func (c DestructiveDeliberationYellow) Play(s *card.TurnState, self *card.CardState) {
-	s.ApplyAndLogEffectiveAttackPlus(self, destructiveDeliberationDamage(c.Attack(), self)-self.Card.Attack())
+func (DestructiveDeliberationYellow) Play(s *card.TurnState, self *card.CardState) {
+	s.ApplyAndLogEffectiveAttackPlus(self, destructiveDeliberationBonus(self))
 }
 
 type DestructiveDeliberationBlue struct{}
@@ -56,15 +56,15 @@ func (DestructiveDeliberationBlue) GoAgain() bool            { return false }
 
 // not implemented: ponder tokens
 func (DestructiveDeliberationBlue) NotImplemented() {}
-func (c DestructiveDeliberationBlue) Play(s *card.TurnState, self *card.CardState) {
-	s.ApplyAndLogEffectiveAttackPlus(self, destructiveDeliberationDamage(c.Attack(), self)-self.Card.Attack())
+func (DestructiveDeliberationBlue) Play(s *card.TurnState, self *card.CardState) {
+	s.ApplyAndLogEffectiveAttackPlus(self, destructiveDeliberationBonus(self))
 }
 
 // destructiveDeliberationDamage is a breadcrumb for the on-hit "create a Ponder token" rider —
 // Ponder tokens aren't tracked (see TODO.md).
-func destructiveDeliberationDamage(attack int, self *card.CardState) int {
+func destructiveDeliberationBonus(self *card.CardState) int {
 	if card.LikelyToHit(self) {
 		// TODO: model on-hit Ponder token creation rider.
 	}
-	return attack
+	return 0
 }
