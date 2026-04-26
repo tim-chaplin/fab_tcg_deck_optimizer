@@ -1,6 +1,7 @@
 package hand
 
 import (
+	"reflect"
 	"strings"
 	"testing"
 
@@ -90,15 +91,16 @@ func TestFormatBestTurn_NonAttackCardUsesPlayLabel(t *testing.T) {
 
 // TestFormatBestTurn_LogAttributesEachTriggerSeparately pins phase-2 logging: each event in
 // the chain (card Play, hero trigger, mid-chain aura trigger, ephemeral attack trigger) gets
-// its own attributed line. Hand: Nimblism (Generic non-attack action, sets
-// NonAttackActionPlayed) + Mauvrion (Runeblade non-attack action, registers an ephemeral
-// "if hits, +3" trigger) + Consuming Volition (Runeblade attack action). Prior aura: a
-// Malefic Incantation TriggerAttackAction. The chain log should hit:
-//   - Mauvrion: PLAY (+0)            — non-attack action, no own damage
-//   - Consuming Volition: ATTACK (+N) — printed power
-//   - Viserai: HERO TRIGGER (+1)     — fires on Volition (attack action)
-//   - Malefic Incantation: AURA TRIGGER (+1) — carryover aura fires on Volition
-//   - Mauvrion: ATTACK TRIGGER (+3)  — ephemeral fires on Volition's hit
+// its own attributed line, grouped under the chain entry of the card that triggered it.
+// Hand: Nimblism (Generic non-attack action, sets NonAttackActionPlayed) + Mauvrion
+// (Runeblade non-attack action, registers an ephemeral "if hits, +3" trigger) + Consuming
+// Volition (Runeblade attack action). Prior aura: a Malefic Incantation TriggerAttackAction.
+// The chain log should hit:
+//   - Mauvrion: PLAY (+0)             — non-attack action, no own damage
+//   - Consuming Volition: ATTACK (+N) — printed power, with the three triggers it fires
+//     attached underneath as indented children (Viserai HERO, Malefic AURA, Mauvrion
+//     ATTACK TRIGGER). The "(from Consuming Volition)" suffix is dropped because the
+//     visual grouping makes the source obvious.
 func TestFormatBestTurn_LogAttributesEachTriggerSeparately(t *testing.T) {
 	h := []card.Card{generic.NimblismRed{}, runeblade.MauvrionSkiesRed{}, runeblade.ConsumingVolitionRed{}}
 	prior := []card.AuraTrigger{{
@@ -110,16 +112,23 @@ func TestFormatBestTurn_LogAttributesEachTriggerSeparately(t *testing.T) {
 	}}
 	got := BestWithTriggers(hero.Viserai{}, nil, h, 0, nil, 0, nil, prior)
 	out := FormatBestTurn(got, 0)
+	// Trigger lines render indented (9 spaces) with no "(from <source>)" suffix — the
+	// indentation under the parent chain entry conveys attribution.
 	wants := []string{
 		"Consuming Volition [R]: ATTACK",
-		"Viserai: HERO TRIGGER (+1)",
-		"Malefic Incantation [R]: AURA TRIGGER (+1)",
-		"Mauvrion Skies [R]: ATTACK TRIGGER (+3)",
+		"         Viserai: HERO TRIGGER (+1)",
+		"         Malefic Incantation [R]: AURA TRIGGER (+1)",
+		"         Mauvrion Skies [R]: ATTACK TRIGGER (+3)",
 	}
 	for _, want := range wants {
 		if !strings.Contains(out, want) {
 			t.Errorf("missing %q in:\n%s", want, out)
 		}
+	}
+	// "(from <source>)" attribution belongs only to orphan triggers; grouped triggers
+	// drop it.
+	if strings.Contains(out, "(from Consuming Volition") {
+		t.Errorf("grouped trigger should not carry '(from <source>)' suffix; got:\n%s", out)
 	}
 }
 
@@ -263,6 +272,38 @@ func TestFormatBestTurn_TriggersFromLastTurnLine(t *testing.T) {
 	}
 }
 
+// TestFormatBestTurn_StartOfTurnHandReadsDealtHand: the printout's "Start of turn → Hand:"
+// line must reflect the cards dealt at end of last turn — NOT the augmented hand a Sigil
+// reveal produces by appending its drawn card. The deck loop snapshots TurnSummary.DealtHand
+// before processTriggersAtStartOfTurn modifies the working hand, and the formatter reads
+// only that snapshot. The Sigil-revealed card appears under MyTurn (where it actually
+// resolves), never in the start-of-turn hand line.
+func TestFormatBestTurn_StartOfTurnHandReadsDealtHand(t *testing.T) {
+	summary := TurnSummary{
+		DealtHand: []card.Card{fake.RedAttack{}},
+		BestLine: []CardAssignment{
+			{Card: fake.RedAttack{}, Role: Attack},
+			// Mauvrion is in BestLine because the reveal augmented the hand the partition
+			// saw, but it never appeared in DealtHand — so it must not show up in the
+			// start-of-turn hand line.
+			{Card: runeblade.MauvrionSkiesRed{}, Role: Held},
+		},
+		TriggersFromLastTurn: []TriggerContribution{
+			{Card: runeblade.SigilOfTheArknightBlue{}, Revealed: runeblade.MauvrionSkiesRed{}},
+		},
+	}
+	out := FormatBestTurn(summary, 0)
+	if !strings.Contains(out, "Hand: cardtest.RedAttack [R]\n") {
+		t.Errorf("Hand line should list only DealtHand cards; got:\n%s", out)
+	}
+	if strings.Contains(out, "Hand: cardtest.RedAttack [R], Mauvrion Skies [R]") {
+		t.Errorf("revealed Mauvrion must not appear in start-of-turn hand; got:\n%s", out)
+	}
+	if !strings.Contains(out, "Sigil of the Arknight [B]: drew Mauvrion Skies [R] into hand") {
+		t.Errorf("MyTurn should still record the reveal; got:\n%s", out)
+	}
+}
+
 // TestFormatBestTurn_TriggersFromLastTurnRevealedLine surfaces the card a trigger handler
 // revealed into the hand. Sigil of the Arknight fires at start of action phase with
 // Damage=0 but reveals the deck top; the My turn section's first numbered entry names the
@@ -292,6 +333,58 @@ func TestFormatBestTurn_TriggersFromLastTurnZeroEffectDropped(t *testing.T) {
 	out := FormatBestTurn(summary, 0)
 	if out != "" {
 		t.Errorf("zero-effect trigger with no other content should render empty; got:\n%s", out)
+	}
+}
+
+// TestAppendGroupedChainEntries_ClustersTriggersUnderTheirParent drives the grouping
+// helper directly with a synthesised LogEntry slice — covers the three placement cases
+// (pre-trigger before its parent, post-trigger after, trigger from card B interleaved
+// before card B's chain entry) without needing a full Best invocation.
+func TestAppendGroupedChainEntries_ClustersTriggersUnderTheirParent(t *testing.T) {
+	log := []card.LogEntry{
+		// Card A's pre-trigger fires from a hero/aura before A's chain entry resolves.
+		{Label: "Viserai: HERO TRIGGER", Source: "Card A", N: 1},
+		// Card A resolves.
+		{Label: "Card A: ATTACK", N: 5},
+		// Card A's ephemeral attack trigger fires after the hit.
+		{Label: "Aura: ATTACK TRIGGER", Source: "Card A", N: 3},
+		// Card B's pre-trigger queues for B.
+		{Label: "Viserai: HERO TRIGGER", Source: "Card B", N: 1},
+		// Card B resolves; its post-trigger follows.
+		{Label: "Card B: PLAY", N: 0},
+		{Label: "Aura: ATTACK TRIGGER", Source: "Card B", N: 2},
+	}
+	got := appendGroupedChainEntries(nil, log)
+	want := []string{
+		"Card A: ATTACK (+5)",
+		"  Viserai: HERO TRIGGER (+1)",
+		"  Aura: ATTACK TRIGGER (+3)",
+		"Card B: PLAY",
+		"  Viserai: HERO TRIGGER (+1)",
+		"  Aura: ATTACK TRIGGER (+2)",
+	}
+	if !reflect.DeepEqual(got, want) {
+		t.Errorf("grouped output mismatch\n got: %#v\nwant: %#v", got, want)
+	}
+}
+
+// TestAppendGroupedChainEntries_OrphanTriggerSurfacesAtTopLevel guards the defensive
+// fallback: a trigger whose Source matches no chain entry shouldn't be silently dropped.
+// Currently impossible in practice (playSequenceWithMeta emits triggers immediately around
+// their parent) but the fallback keeps the data visible if that invariant ever loosens.
+func TestAppendGroupedChainEntries_OrphanTriggerSurfacesAtTopLevel(t *testing.T) {
+	log := []card.LogEntry{
+		{Label: "Card A: ATTACK", N: 5},
+		{Label: "Aura: ATTACK TRIGGER", Source: "Card Z", N: 2},
+	}
+	got := appendGroupedChainEntries(nil, log)
+	want := []string{
+		"Card A: ATTACK (+5)",
+		"Aura: ATTACK TRIGGER (+2) (from Card Z)",
+	}
+	if !reflect.DeepEqual(got, want) {
+		t.Errorf("orphan trigger should render as top-level line\n got: %#v\nwant: %#v",
+			got, want)
 	}
 }
 

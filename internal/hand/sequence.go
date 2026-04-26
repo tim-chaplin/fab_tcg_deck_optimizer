@@ -23,18 +23,23 @@ func recordValueAndLog(s *card.TurnState, label string, n int) {
 	s.Log = append(s.Log, card.LogEntry{Label: label, N: n})
 }
 
-// recordTrigger logs a trigger fire — same as recordValueAndLog but with a Source field so
-// FormatLogEntry can append "(from <source>)" naming the card that caused the trigger.
-// Hero, aura, and ephemeral triggers all route through here so the suffix is uniform.
+// recordTrigger logs a trigger fire — same as recordValueAndLog but with a Source field
+// naming the card that caused the trigger. The display layer
+// (appendGroupedChainEntries) clusters trigger entries underneath the chain entry whose
+// DisplayName matches Source; the orphan-fallback FormatLogEntry surfaces the Source as a
+// "(from <source>)" tail when grouping isn't possible. Hero, aura, and ephemeral triggers
+// all route through here so the source attribution is uniform.
 func recordTrigger(s *card.TurnState, label, sourceName string, n int) {
 	n = max(0, n)
 	s.Value += n
 	s.Log = append(s.Log, card.LogEntry{Label: label, Source: sourceName, N: n})
 }
 
-// FormatLogEntry renders a LogEntry into its display string. Chain entries with N=0 drop
-// the "(+0)" suffix; trigger entries always carry the "(from Source)" tag. Called at
-// snapshot time and from anywhere else that needs to convert a stored entry to text.
+// FormatLogEntry renders a LogEntry into its display string. Chain entries (Source=="")
+// with N=0 drop the "(+0)" suffix; trigger entries (Source!="") carry a "(from <source>)"
+// tail. The grouped MyTurn renderer prefers formatChildLogEntry / formatChainParent for
+// trigger entries that get clustered under their parent chain line; FormatLogEntry is the
+// fallback for orphan triggers and external callers that just need the verbose string.
 func FormatLogEntry(e card.LogEntry) string {
 	if e.Source == "" {
 		if e.N == 0 {
@@ -248,9 +253,9 @@ type sequenceContext struct {
 // invokes every TriggerAttackAction entry whose OncePerTurn gate is open. Each fire
 // decrements the trigger's Count; when Count hits zero the aura drops out of the list and
 // Self lands in the graveyard so downstream same-turn effects see the destroy. Each handler's
-// damage-equivalent is recorded via recordTrigger under the aura's Self.Name() with a
-// "(from <triggeringCard>)" suffix so the log attributes both the source aura and the card
-// that triggered it.
+// damage-equivalent is recorded via recordTrigger under the aura's DisplayName, with the
+// triggering card's DisplayName carried in LogEntry.Source so the display layer can group
+// the trigger underneath that card's chain entry.
 //
 // Slice mutation: a survivors prefix is built in place over the existing slice; entries
 // kept after firing are written back at increasing indices, exhausted ones are skipped.
@@ -281,11 +286,11 @@ func fireAttackActionTriggers(state *card.TurnState, triggeringCard string) {
 // fireEphemeralAttackTriggers walks state.EphemeralAttackTriggers after an attack action
 // card resolves and invokes every entry whose Matches predicate accepts the attacker. Each
 // fire consumes the trigger (fire-once semantics) and records the handler's damage-
-// equivalent via recordTrigger under the trigger's Source.Name() with a "(from <attacker>)"
-// suffix so the log credits the registering card and names the attack that triggered it.
-// Non-matching entries stay in the slice for a later attack action; anything still in the
-// list at end of chain fizzles silently (no graveyard bookkeeping — the source was already
-// graveyarded when its own Play resolved).
+// equivalent via recordTrigger under the registering card's DisplayName, with the attacker's
+// DisplayName carried in LogEntry.Source so the display layer can group the trigger
+// underneath the attacker's chain entry. Non-matching entries stay in the slice for a later
+// attack action; anything still in the list at end of chain fizzles silently (no graveyard
+// bookkeeping — the source was already graveyarded when its own Play resolved).
 //
 // Slice mutation parallels fireAttackActionTriggers: a survivors prefix is built in place
 // over the existing slice, with fired entries skipped.
@@ -481,10 +486,11 @@ func (ctx *sequenceContext) playSequenceWithMeta(n int) (damage int, leftoverRun
 		}
 		// Log order matches FaB's stack-resolution order, not the dispatcher's call order:
 		// hero / aura triggers fire when the card is played (LL1), go on top of the stack,
-		// and resolve before the card itself — so their lines appear above the card's chain
-		// line. Each trigger line gets a "(from <triggeringCard>)" suffix so the reader can
-		// trace which card caused the trigger. Ephemeral "if hits" triggers fire after the
-		// attack lands and log below.
+		// and resolve before the card itself — so their entries land above the card's chain
+		// entry in s.Log. Ephemeral "if hits" triggers fire after the attack lands and log
+		// below. Each trigger carries the triggering card's DisplayName in LogEntry.Source so
+		// appendGroupedChainEntries can cluster the trigger underneath the chain entry whose
+		// Label names that card.
 		triggeringCard := card.DisplayName(pc.Card)
 		if heroDmg > 0 {
 			recordTrigger(state, ctx.hero.Name()+": HERO TRIGGER", triggeringCard, heroDmg)

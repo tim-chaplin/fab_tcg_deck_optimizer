@@ -23,7 +23,7 @@ func BuildTurnLog(t TurnSummary, startingRunechants int) TurnLog {
 	// Start of turn: dealt hand, arsenal-in card, auras / runechants in play. Carryover
 	// AuraTrigger fires (Sigil reveals, +N damage credits) belong to MyTurn — they're
 	// actions resolving at the top of the action phase, not pre-existing state.
-	if line := startingHandLine(t.BestLine); line != "" {
+	if line := startingHandLine(t.DealtHand); line != "" {
 		log.StartOfTurn = append(log.StartOfTurn, line)
 	}
 	if line := startingArsenalLine(t.BestLine); line != "" {
@@ -44,11 +44,11 @@ func BuildTurnLog(t TurnSummary, startingRunechants int) TurnLog {
 		log.MyTurn = append(log.MyTurn, card.DisplayName(p.Card)+": "+roleLabelWithArsenal(p, "PITCH"))
 	}
 	// Chain entries are stored as LogEntry structs on State.Log to defer fmt cost off the
-	// per-permutation hot path — they're formatted to strings here, in the once-per-best-turn
-	// assembly step.
-	for _, e := range t.State.Log {
-		log.MyTurn = append(log.MyTurn, FormatLogEntry(e))
-	}
+	// per-permutation hot path — they're formatted (and grouped) here, in the
+	// once-per-best-turn assembly step. appendGroupedChainEntries clusters trigger lines
+	// underneath the chain line of the card that fired them so the printout reads as a tree
+	// instead of a strict chronological sequence.
+	log.MyTurn = appendGroupedChainEntries(log.MyTurn, t.State.Log)
 
 	// Opponent's turn: defense pitches, plain blocks, then Defense Reactions.
 	for _, p := range defensePitches {
@@ -75,20 +75,19 @@ func BuildTurnLog(t TurnSummary, startingRunechants int) TurnLog {
 	return log
 }
 
-// startingHandLine builds "Hand: A, B, C, D" from BestLine's hand cards (everything except
-// the arsenal-in entry). Names render in BestLine order — that's the canonical post-sort
-// order the partition enumerator settled on, which keeps the output deterministic across
-// runs of the same hand. Returns "" when no hand cards exist.
-func startingHandLine(line []CardAssignment) string {
-	var names []string
-	for _, a := range line {
-		if a.FromArsenal {
-			continue
-		}
-		names = append(names, card.DisplayName(a.Card))
-	}
-	if len(names) == 0 {
+// startingHandLine builds "Hand: A, B, C, D" from the turn's dealt hand — the cards drawn
+// at end of last turn, before any start-of-action-phase reveals (Sigil of the Arknight) or
+// mid-chain draws bulked the hand. The deck loop captures this snapshot in TurnSummary
+// before processTriggersAtStartOfTurn modifies the working hand slice, so reveals show up
+// only in MyTurn (where they actually resolve), not in this informational starting-state
+// line. Names render in deal order. Returns "" when the dealt hand was empty.
+func startingHandLine(dealtHand []card.Card) string {
+	if len(dealtHand) == 0 {
 		return ""
+	}
+	names := make([]string, len(dealtHand))
+	for i, c := range dealtHand {
+		names[i] = card.DisplayName(c)
 	}
 	return "Hand: " + strings.Join(names, ", ")
 }
@@ -219,10 +218,84 @@ func runechantPhrase(n int) string {
 	return fmt.Sprintf("%d Runechants", n)
 }
 
+// childEntryPrefix tags MyTurn entries that are trigger lines grouped beneath a parent chain
+// entry. FormatTurnLog detects the prefix, strips it, and renders the entry indented under
+// the parent without consuming a step number. The tag is in-band on the string so MyTurn
+// stays a flat []string for JSON round-tripping.
+const childEntryPrefix = "  "
+
+// appendGroupedChainEntries walks t.State.Log and emits each chain entry as a parent line
+// followed by its triggers as childEntryPrefix-tagged children. Triggers attribute back to
+// their parent via LogEntry.Source (the triggering card's DisplayName); pre-triggers (hero,
+// aura) sit before their parent in the log and post-triggers (ephemeral attack) sit after,
+// so we buffer pre-triggers until the matching chain line arrives and then peek forward for
+// post-triggers. An orphan trigger whose Source matches no chain line falls through as a
+// plain top-level entry via FormatLogEntry — keeps "(from <source>)" attribution visible
+// so the data isn't silently dropped if the parent-emit invariant ever loosens.
+func appendGroupedChainEntries(out []string, log []card.LogEntry) []string {
+	var pending []card.LogEntry
+	i := 0
+	for i < len(log) {
+		e := log[i]
+		if e.Source != "" {
+			pending = append(pending, e)
+			i++
+			continue
+		}
+		// Chain line: emit parent, then attach matching pre-triggers and any contiguous
+		// matching post-triggers.
+		parentName := chainEntryCardName(e.Label)
+		out = append(out, formatLabelWithDelta(e))
+		for _, pre := range pending {
+			if pre.Source == parentName {
+				out = append(out, childEntryPrefix+formatLabelWithDelta(pre))
+			} else {
+				out = append(out, FormatLogEntry(pre))
+			}
+		}
+		pending = pending[:0]
+		j := i + 1
+		for j < len(log) && log[j].Source == parentName {
+			out = append(out, childEntryPrefix+formatLabelWithDelta(log[j]))
+			j++
+		}
+		i = j
+	}
+	for _, p := range pending {
+		out = append(out, FormatLogEntry(p))
+	}
+	return out
+}
+
+// formatLabelWithDelta renders a LogEntry as just "<Label> (+N)" — the bare-Label form
+// suitable for both chain parents (Source=="") and grouped trigger children where the
+// indentation already conveys the source. Drops "(+0)" for zero-value entries. Orphan
+// triggers go through FormatLogEntry instead so they keep the "(from <source>)" tail.
+func formatLabelWithDelta(e card.LogEntry) string {
+	if e.N == 0 {
+		return e.Label
+	}
+	return fmt.Sprintf("%s (+%d)", e.Label, e.N)
+}
+
+// chainEntryCardName extracts the display name from a chain LogEntry's Label. The Label is
+// shaped "<DisplayName>: <VERB>[ from arsenal]" (see playSequenceWithMeta's recordValueAndLog
+// call), so the name is everything up to the first ": ". An unrecognised shape returns the
+// raw label — appendGroupedChainEntries then matches no triggers to it and just emits the
+// parent alone.
+func chainEntryCardName(label string) string {
+	if i := strings.Index(label, ": "); i >= 0 {
+		return label[:i]
+	}
+	return label
+}
+
 // FormatTurnLog renders a TurnLog into a printable string. Section headers and indentation
 // come from the formatter; chain events in MyTurn / OpponentTurn get a continuous numbered
 // prefix ("    1. ..."), while StartOfTurn / EndOfTurn entries are unnumbered informational
-// lines indented two extra spaces beneath the section header.
+// lines indented two extra spaces beneath the section header. MyTurn entries tagged with
+// childEntryPrefix render indented under the preceding numbered entry without their own
+// step number — this is the trigger-grouping mode appendGroupedChainEntries produces.
 func FormatTurnLog(log TurnLog) string {
 	var lines []string
 	step := 0
@@ -237,7 +310,16 @@ func FormatTurnLog(log TurnLog) string {
 	if len(log.MyTurn) > 0 {
 		lines = append(lines, "  My turn:")
 		for _, entry := range log.MyTurn {
-			lines = append(lines, fmt.Sprintf("    %d. %s", nextStep(), entry))
+			if rest, isChild := strings.CutPrefix(entry, childEntryPrefix); isChild {
+				// 9-space indent visually nests the child under the parent's card name.
+				// Aligns under the typical "    N. " parent prefix (4 + 3 = 7) plus 2
+				// extra spaces of padding; 2-digit step numbers (10+) shift the parent
+				// right one column so the child sits one column shy of perfect alignment
+				// — acceptable readability tradeoff for a fixed-width indent.
+				lines = append(lines, "         "+rest)
+			} else {
+				lines = append(lines, fmt.Sprintf("    %d. %s", nextStep(), entry))
+			}
 		}
 	}
 	if len(log.OpponentTurn) > 0 {
