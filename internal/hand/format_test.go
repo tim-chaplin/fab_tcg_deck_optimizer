@@ -359,6 +359,41 @@ func TestFormatBestTurn_EndOfTurnHandLine(t *testing.T) {
 	}
 }
 
+// TestFormatBestTurn_EndOfTurnAurasWithRunechants pins the End of turn "Auras: ..." entry —
+// surviving AuraTriggers + the live Runechant count render as one comma-separated line,
+// mirroring the start-of-turn formatting.
+func TestFormatBestTurn_EndOfTurnAurasWithRunechants(t *testing.T) {
+	summary := TurnSummary{
+		State: CarryState{
+			AuraTriggers: []card.AuraTrigger{
+				{Self: runeblade.MaleficIncantationRed{}},
+			},
+			Runechants: 2,
+		},
+	}
+	out := FormatBestTurn(summary, 0)
+	want := "Auras: Malefic Incantation (Red), 2 Runechants"
+	if !strings.Contains(out, want) {
+		t.Errorf("missing %q in:\n%s", want, out)
+	}
+}
+
+// TestFormatBestTurn_EndOfTurnArsenalStayedDirect drives endingArsenalLine's (stayed) branch
+// directly via a synthesised BestLine. Pairs with TestFormatBestTurn_EndOfTurnArsenalNew's
+// (new) branch coverage; the round-trip integration tests only exercise (new).
+func TestFormatBestTurn_EndOfTurnArsenalStayedDirect(t *testing.T) {
+	summary := TurnSummary{
+		BestLine: []CardAssignment{
+			{Card: generic.ToughenUpBlue{}, Role: Arsenal, FromArsenal: true},
+		},
+	}
+	out := FormatBestTurn(summary, 0)
+	want := "Arsenal: Toughen Up (Blue) (stayed)"
+	if !strings.Contains(out, want) {
+		t.Errorf("missing %q in:\n%s", want, out)
+	}
+}
+
 // TestFormatContribution_IntegerVsFractional covers the small helper that chooses between
 // integer and single-decimal rendering. Defense-share contributions can be fractional (e.g. 2
 // blockers splitting 3 incoming → 1.5 each).

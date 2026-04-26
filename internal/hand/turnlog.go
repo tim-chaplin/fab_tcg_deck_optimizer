@@ -1,9 +1,6 @@
 package hand
 
-// TurnLog assembly + formatting. BuildTurnLog walks a TurnSummary into the four-section
-// shape the JSON layer round-trips and the formatter renders. FormatTurnLog renders a
-// TurnLog into a printable string with section headers, indentation, and per-section
-// numbering rules.
+// TurnLog assembly (BuildTurnLog) and rendering (FormatTurnLog).
 
 import (
 	"fmt"
@@ -149,8 +146,9 @@ func endingHandLine(handHeld []card.Card) string {
 }
 
 // endingArsenalLine builds "Arsenal: cardname (stayed)" / "(new)" from BestLine's
-// Arsenal-role entries. The (stayed) tag fires when the slot's incumbent kept its place;
-// (new) fires when a Held card got promoted post-hoc. Returns "" when arsenal ended empty.
+// Arsenal-role entries. The tag derives from FromArsenal — the arsenal-in card kept the
+// slot when FromArsenal=true ("(stayed)"); any other origin (post-hoc Held promotion)
+// reads "(new)". Returns "" when arsenal ended empty.
 func endingArsenalLine(arsenal []CardAssignment) string {
 	if len(arsenal) == 0 {
 		return ""

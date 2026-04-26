@@ -104,7 +104,7 @@ func perCardMarginalFromJSON(entries []CardMarginalStatsJSON) (map[card.ID]deck.
 // StartOfTurnAuras, TriggersFromLastTurn, State) aren't reconstructed — fabsim's print path
 // renders Log via hand.FormatTurnLog. Returns a zero BestTurn when the JSON has no log.
 func bestTurnFromJSON(bj BestTurnJSON) (deck.BestTurn, error) {
-	if isEmptyJSONLog(bj.Log) {
+	if bj.Log.IsEmpty() {
 		return deck.BestTurn{}, nil
 	}
 	return deck.BestTurn{
@@ -112,14 +112,6 @@ func bestTurnFromJSON(bj BestTurnJSON) (deck.BestTurn, error) {
 		StartingRunechants: bj.StartingRunechants,
 		Log:                bj.Log,
 	}, nil
-}
-
-// isEmptyJSONLog reports whether the log decoded from JSON has any section content. Used to
-// short-circuit a missing log block (e.g. an unsimulated deck) so bestTurnFromJSON returns
-// the zero BestTurn rather than a half-populated value.
-func isEmptyJSONLog(log hand.TurnLog) bool {
-	return len(log.StartOfTurn) == 0 && len(log.MyTurn) == 0 &&
-		len(log.OpponentTurn) == 0 && len(log.EndOfTurn) == 0
 }
 
 // lookupCardByName resolves a card name from the JSON form to either a registered card or a

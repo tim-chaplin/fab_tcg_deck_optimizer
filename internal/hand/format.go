@@ -91,10 +91,9 @@ func splitPitchesByPhase(pitched []CardAssignment, drCost int) (defensePitches, 
 	return defensePitches, attackPitches
 }
 
-// FormatBestTurn is a convenience wrapper that builds a TurnLog from t and formats it. Most
-// callers want this end-to-end pipeline; deck-side code (where the TurnLog round-trips
-// through JSON) calls BuildTurnLog and FormatTurnLog separately so the structured shape is
-// the source of truth on disk.
+// FormatBestTurn renders a TurnSummary's best-turn printout in one call, equivalent to
+// FormatTurnLog(BuildTurnLog(t, startingRunechants)). Convenient for one-shot callers
+// (tests, ad-hoc tools) that don't need to retain the TurnLog separately.
 func FormatBestTurn(t TurnSummary, startingRunechants int) string {
 	return FormatTurnLog(BuildTurnLog(t, startingRunechants))
 }

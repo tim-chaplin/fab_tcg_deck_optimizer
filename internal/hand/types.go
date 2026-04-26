@@ -123,6 +123,14 @@ type TurnLog struct {
 	EndOfTurn []string `json:"end_of_turn,omitempty"`
 }
 
+// IsEmpty reports whether all four sections are empty — true for an unscored deck or a
+// hand where Best returned without a winning line. Marshal / Unmarshal / printBestTurn use
+// this to short-circuit the best-turn block.
+func (l TurnLog) IsEmpty() bool {
+	return len(l.StartOfTurn) == 0 && len(l.MyTurn) == 0 &&
+		len(l.OpponentTurn) == 0 && len(l.EndOfTurn) == 0
+}
+
 // ArsenalIn returns the assignment for the card that started the turn in the arsenal, if
 // any.
 func (t TurnSummary) ArsenalIn() (CardAssignment, bool) {

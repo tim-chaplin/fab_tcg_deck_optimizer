@@ -172,20 +172,12 @@ func histogramTitle(d *deck.Deck) string {
 // both cases.
 func printBestTurn(d *deck.Deck) {
 	b := d.Stats.Best
-	if isEmptyTurnLog(b.Log) {
+	if b.Log.IsEmpty() {
 		return
 	}
 	fmt.Println()
 	fmt.Printf("Best turn played (value %d):\n", b.Summary.Value)
 	fmt.Println(hand.FormatTurnLog(b.Log))
-}
-
-// isEmptyTurnLog reports whether all four TurnLog sections are empty — true for an unscored
-// deck. Mirrors deckio's same-named predicate; not worth a public hand.TurnLog method for a
-// one-line check.
-func isEmptyTurnLog(log hand.TurnLog) bool {
-	return len(log.StartOfTurn) == 0 && len(log.MyTurn) == 0 &&
-		len(log.OpponentTurn) == 0 && len(log.EndOfTurn) == 0
 }
 
 // printCardValues renders one row per unique card with the marginal +/- signal: mean turn

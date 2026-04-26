@@ -53,8 +53,8 @@ type BestTurn struct {
 	StartingRunechants int
 	// Log is the four-section structured record (StartOfTurn / MyTurn / OpponentTurn /
 	// EndOfTurn) of the best turn's printout. Each entry is content-only; the formatter
-	// owns indentation, section headers, and chain numbering. Populated once at end of
-	// EvaluateWith from t.State.Log + BestLine + State, then frozen.
+	// owns indentation, section headers, and chain numbering. EvaluateWith populates it
+	// once at end of run via hand.BuildTurnLog.
 	Log hand.TurnLog
 }
 
