@@ -95,10 +95,14 @@ func runicReapingPlay(s *card.TurnState, source card.Card, n int) int {
 		Source:  source,
 		Matches: runicReapingTargetMatches,
 		Handler: func(s *card.TurnState, target *card.CardState) int {
-			if card.LikelyToHit(target) {
-				return s.CreateRunechants(n)
+			if !card.LikelyToHit(target) {
+				return 0
 			}
-			return 0
+			return s.AddLogEntry(
+				card.DisplayName(source)+" "+runechantsCreatedOnHit(n),
+				card.DisplayName(target.Card),
+				s.CreateRunechants(n),
+			)
 		},
 	})
 	return 0

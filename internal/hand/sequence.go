@@ -13,44 +13,22 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/weapon"
 )
 
-// recordValueAndLog credits n to s.Value and appends a chain-event LogEntry (label + value)
-// to s.Log. Negative n clamps both contributions at 0 (FaB damage / prevention can't go
-// negative). The LogEntry is unformatted — FormatLogEntry renders it at snapshot time,
-// keeping per-permutation cost to a struct append.
-func recordValueAndLog(s *card.TurnState, label string, n int) {
-	n = max(0, n)
-	s.Value += n
-	s.Log = append(s.Log, card.LogEntry{Label: label, N: n})
-}
-
-// recordTrigger logs a trigger fire — same as recordValueAndLog but with a Source field
-// naming the card that caused the trigger. The display layer
-// (appendGroupedChainEntries) clusters trigger entries underneath the chain entry whose
-// DisplayName matches Source; the orphan-fallback FormatLogEntry surfaces the Source as a
-// "(from <source>)" tail when grouping isn't possible. Hero, aura, and ephemeral triggers
-// all route through here so the source attribution is uniform.
-func recordTrigger(s *card.TurnState, label, sourceName string, n int) {
-	n = max(0, n)
-	s.Value += n
-	s.Log = append(s.Log, card.LogEntry{Label: label, Source: sourceName, N: n})
-}
-
 // FormatLogEntry renders a LogEntry into its display string. Chain entries (Source=="")
 // with N=0 drop the "(+0)" suffix; trigger entries (Source!="") carry a "(from <source>)"
-// tail. The grouped MyTurn renderer prefers formatChildLogEntry / formatChainParent for
-// trigger entries that get clustered under their parent chain line; FormatLogEntry is the
-// fallback for orphan triggers and external callers that just need the verbose string.
+// tail. The grouped MyTurn renderer prefers formatLabelWithDelta for trigger entries that
+// get clustered under their parent chain line; FormatLogEntry is the fallback for orphan
+// triggers and external callers that just need the verbose string.
 func FormatLogEntry(e card.LogEntry) string {
 	if e.Source == "" {
 		if e.N == 0 {
-			return e.Label
+			return e.Text
 		}
-		return fmt.Sprintf("%s (+%d)", e.Label, e.N)
+		return fmt.Sprintf("%s (+%d)", e.Text, e.N)
 	}
 	if e.N == 0 {
-		return fmt.Sprintf("%s (from %s)", e.Label, e.Source)
+		return fmt.Sprintf("%s (from %s)", e.Text, e.Source)
 	}
-	return fmt.Sprintf("%s (+%d) (from %s)", e.Label, e.N, e.Source)
+	return fmt.Sprintf("%s (+%d) (from %s)", e.Text, e.N, e.Source)
 }
 
 // chainVerbFor picks the verb for a card's chain-step log line based on its types and the
@@ -249,17 +227,17 @@ type sequenceContext struct {
 	carryWinner CarryState
 }
 
-// fireAttackActionTriggers walks state.AuraTriggers after an attack action card resolves and
-// invokes every TriggerAttackAction entry whose OncePerTurn gate is open. Each fire
+// fireAttackActionTriggers walks state.AuraTriggers after an attack action card resolves
+// and invokes every TriggerAttackAction entry whose OncePerTurn gate is open. Each fire
 // decrements the trigger's Count; when Count hits zero the aura drops out of the list and
-// Self lands in the graveyard so downstream same-turn effects see the destroy. Each handler's
-// damage-equivalent is recorded via recordTrigger under the aura's DisplayName, with the
-// triggering card's DisplayName carried in LogEntry.Source so the display layer can group
-// the trigger underneath that card's chain entry.
+// Self lands in the graveyard so downstream same-turn effects see the destroy. The sim
+// publishes the triggering card via state.TriggeringCard before each handler runs and
+// clears it after; handlers read it through s.AddLogEntry to attribute their log line back
+// to the triggering card.
 //
 // Slice mutation: a survivors prefix is built in place over the existing slice; entries
 // kept after firing are written back at increasing indices, exhausted ones are skipped.
-func fireAttackActionTriggers(state *card.TurnState, triggeringCard string) {
+func fireAttackActionTriggers(state *card.TurnState, triggeringCard card.Card) {
 	triggers := state.AuraTriggers
 	dst := triggers[:0]
 	for i := range triggers {
@@ -268,10 +246,9 @@ func fireAttackActionTriggers(state *card.TurnState, triggeringCard string) {
 			dst = append(dst, t)
 			continue
 		}
-		n := t.Handler(state)
-		if n > 0 {
-			recordTrigger(state, card.DisplayName(t.Self)+": AURA TRIGGER", triggeringCard, n)
-		}
+		state.TriggeringCard = triggeringCard
+		t.Handler(state)
+		state.TriggeringCard = nil
 		t.FiredThisTurn = true
 		t.Count--
 		if t.Count <= 0 {
@@ -285,12 +262,11 @@ func fireAttackActionTriggers(state *card.TurnState, triggeringCard string) {
 
 // fireEphemeralAttackTriggers walks state.EphemeralAttackTriggers after an attack action
 // card resolves and invokes every entry whose Matches predicate accepts the attacker. Each
-// fire consumes the trigger (fire-once semantics) and records the handler's damage-
-// equivalent via recordTrigger under the registering card's DisplayName, with the attacker's
-// DisplayName carried in LogEntry.Source so the display layer can group the trigger
-// underneath the attacker's chain entry. Non-matching entries stay in the slice for a later
-// attack action; anything still in the list at end of chain fizzles silently (no graveyard
-// bookkeeping — the source was already graveyarded when its own Play resolved).
+// fire consumes the trigger (fire-once semantics). Handlers receive target as a direct
+// arg and call s.AddLogEntry themselves to log their damage-equivalent. Non-matching
+// entries stay in the slice for a later attack action; anything still in the list at end
+// of chain fizzles silently (no graveyard bookkeeping — the source was already graveyarded
+// when its own Play resolved).
 //
 // Slice mutation parallels fireAttackActionTriggers: a survivors prefix is built in place
 // over the existing slice, with fired entries skipped.
@@ -303,10 +279,7 @@ func fireEphemeralAttackTriggers(state *card.TurnState, target *card.CardState) 
 			dst = append(dst, t)
 			continue
 		}
-		n := t.Handler(state, target)
-		if n > 0 {
-			recordTrigger(state, card.DisplayName(t.Source)+": ATTACK TRIGGER", card.DisplayName(target.Card), n)
-		}
+		t.Handler(state, target)
 	}
 	state.EphemeralAttackTriggers = dst
 }
@@ -436,9 +409,10 @@ func (ctx *sequenceContext) playSequence(order []card.Card) (damage int, leftove
 // field a prior card's Play flips on a future card needs a per-permutation reset:
 // GrantedGoAgain (next-attack go-again grants) and BonusAttack (next-attack +N{p} grants).
 //
-// Damage flows through state.Value: each Play return, hero OnCardPlayed return, aura
-// trigger return, ephemeral trigger return, and BonusAttack grant is recorded via
-// state.RecordValue. The returned damage is just state.Value at end of chain.
+// Damage flows through state.Value: the dispatcher records the chain step's
+// Play+BonusAttack contribution via state.AddLogEntry; trigger handlers (hero, aura,
+// ephemeral) credit themselves through their own AddLogEntry calls. The returned damage
+// is just state.Value at end of chain.
 func (ctx *sequenceContext) playSequenceWithMeta(n int) (damage int, leftoverRunechants int, residualBudget int, legal bool) {
 	pcBuf := ctx.bufs.pcBuf
 	ptrBuf := ctx.bufs.ptrBuf
@@ -475,8 +449,9 @@ func (ctx *sequenceContext) playSequenceWithMeta(n int) (damage int, leftoverRun
 		// Hero ability fires BEFORE the card's own Play so "aura created this turn" checks
 		// inside the card's Play see the runechant (or other aura) the hero just made.
 		// Viserai's "another non-attack action" gate still excludes the current card because
-		// NonAttackActionPlayed isn't flipped until the end of the iteration.
-		heroDmg := ctx.hero.OnCardPlayed(pc.Card, state)
+		// NonAttackActionPlayed isn't flipped until the end of the iteration. The hero
+		// handler logs its own contribution via state.AddLogEntry; its int return is unused.
+		ctx.hero.OnCardPlayed(pc.Card, state)
 		ephemeralsBefore := len(state.EphemeralAttackTriggers)
 		playDmg := pc.Card.Play(state, pc)
 		// Stamp SourceIndex on any EphemeralAttackTriggers the card registered during Play
@@ -488,22 +463,22 @@ func (ctx *sequenceContext) playSequenceWithMeta(n int) (damage int, leftoverRun
 		// hero / aura triggers fire when the card is played (LL1), go on top of the stack,
 		// and resolve before the card itself — so their entries land above the card's chain
 		// entry in s.Log. Ephemeral "if hits" triggers fire after the attack lands and log
-		// below. Each trigger carries the triggering card's DisplayName in LogEntry.Source so
-		// appendGroupedChainEntries can cluster the trigger underneath the chain entry whose
-		// Label names that card.
-		triggeringCard := card.DisplayName(pc.Card)
-		if heroDmg > 0 {
-			recordTrigger(state, ctx.hero.Name()+": HERO TRIGGER", triggeringCard, heroDmg)
-		}
+		// below. Each trigger handler authors its own log line via state.AddLogEntry, with
+		// LogEntry.Source naming the triggering card so appendGroupedChainEntries can
+		// cluster the trigger underneath the chain entry that names that card.
 		if m.isAttackAction {
-			fireAttackActionTriggers(state, triggeringCard)
+			fireAttackActionTriggers(state, pc.Card)
 		}
-		// Card contribution: Play return plus any prior-card +N{p} grant. recordValueAndLog
+		// Card contribution: Play return plus any prior-card +N{p} grant. AddLogEntry
 		// clamps at 0 — FaB attack-power buffs can't drive an attack below 0 power (a -3
 		// grant on a 1-power attack resolves as a 0-power attack, not -2). The clamp covers
 		// the sum because playDmg may include rider damage (e.g. Blow for a Blow's on-hit
 		// +1) that EffectiveAttack doesn't see — clamping the sum preserves both pieces.
-		recordValueAndLog(state, card.DisplayName(pc.Card)+": "+chainVerbFor(m, pc.FromArsenal), playDmg+pc.BonusAttack)
+		state.AddLogEntry(
+			card.DisplayName(pc.Card)+": "+chainVerbFor(m, pc.FromArsenal),
+			"",
+			playDmg+pc.BonusAttack,
+		)
 		if m.isAttackAction {
 			// Fire ephemeral triggers AFTER hero and aura triggers so the handler sees the
 			// fully-resolved attacker state (Dominate grants, hero-created auras, fresh

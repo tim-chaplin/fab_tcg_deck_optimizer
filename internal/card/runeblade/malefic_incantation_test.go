@@ -48,12 +48,13 @@ func TestMaleficIncantation_PlayRegistersAttackActionTrigger(t *testing.T) {
 
 // TestMaleficIncantation_HandlerCreatesOneRunechantPerFire: invoking the handler creates one
 // live Runechant and credits 1 damage. Count tick + OncePerTurn gate are sim-managed, not
-// the handler's job.
+// the handler's job. chain.TriggeringCard is seeded to mimic the sim — the handler reads it
+// to source-attribute the log entry it writes.
 func TestMaleficIncantation_HandlerCreatesOneRunechantPerFire(t *testing.T) {
 	for _, c := range []card.Card{MaleficIncantationRed{}, MaleficIncantationYellow{}, MaleficIncantationBlue{}} {
 		var s card.TurnState
 		c.Play(&s, &card.CardState{})
-		var chain card.TurnState
+		chain := card.TurnState{TriggeringCard: c}
 		got := s.AuraTriggers[0].Handler(&chain)
 		if got != 1 {
 			t.Errorf("%s: handler damage = %d, want 1", c.Name(), got)

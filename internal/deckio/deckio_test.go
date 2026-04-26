@@ -122,7 +122,7 @@ func TestRoundTrip_PreservesBestTurnLog(t *testing.T) {
 		MyTurn: []string{
 			"Hocus Pocus [B]: PITCH",
 			"Consuming Volition [R]: ATTACK (+4)",
-			"Viserai: HERO TRIGGER (+1)",
+			"Viserai created a runechant (+1)",
 		},
 		EndOfTurn: []string{
 			"Hand: Hit the High Notes [R]",

@@ -9,7 +9,8 @@ import (
 
 // TestFireAttackActionTriggers_FiresOnceWhenGated: a single OncePerTurn AttackAction
 // trigger fires on the first call and is gated on the second within the same turn — its
-// Count ticks only once, FiredThisTurn latches. Each fire records into state.Value.
+// Count ticks only once, FiredThisTurn latches. Handlers credit Value through their own
+// AddLogEntry call (the dispatcher no longer does it on their behalf).
 func TestFireAttackActionTriggers_FiresOnceWhenGated(t *testing.T) {
 	aura := fake.RedAttack{}
 	calls := 0
@@ -18,16 +19,17 @@ func TestFireAttackActionTriggers_FiresOnceWhenGated(t *testing.T) {
 		Type:        card.TriggerAttackAction,
 		Count:       3,
 		OncePerTurn: true,
-		Handler: func(*card.TurnState) int {
+		Handler: func(s *card.TurnState) int {
 			calls++
-			return 1
+			return s.AddLogEntry("test trigger fired", "TestCard", 1)
 		},
 	}}}
-	fireAttackActionTriggers(state, "TestCard")
+	trigger := fake.RedAttack{}
+	fireAttackActionTriggers(state, trigger)
 	if state.Value != 1 {
 		t.Errorf("first fire Value = %d, want 1", state.Value)
 	}
-	fireAttackActionTriggers(state, "TestCard")
+	fireAttackActionTriggers(state, trigger)
 	if state.Value != 1 {
 		t.Errorf("second fire Value = %d, want 1 (OncePerTurn gate kept second fire from crediting)", state.Value)
 	}
@@ -52,7 +54,7 @@ func TestFireAttackActionTriggers_GraveyardsExhaustedAura(t *testing.T) {
 		Count:   1,
 		Handler: func(*card.TurnState) int { return 1 },
 	}}}
-	fireAttackActionTriggers(state, "TestCard")
+	fireAttackActionTriggers(state, fake.RedAttack{})
 	if len(state.AuraTriggers) != 0 {
 		t.Errorf("AuraTriggers = %+v, want empty (Count hit zero)", state.AuraTriggers)
 	}
@@ -73,7 +75,7 @@ func TestFireAttackActionTriggers_PassesThroughNonAttackActionTriggers(t *testin
 		Count:   1,
 		Handler: func(*card.TurnState) int { calls++; return 5 },
 	}}}
-	fireAttackActionTriggers(state, "TestCard")
+	fireAttackActionTriggers(state, fake.RedAttack{})
 	if state.Value != 0 {
 		t.Errorf("Value = %d, want 0 (start-of-turn trigger doesn't fire on attack action)", state.Value)
 	}

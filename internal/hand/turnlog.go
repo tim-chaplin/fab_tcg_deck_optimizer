@@ -244,11 +244,11 @@ func appendGroupedChainEntries(out []string, log []card.LogEntry) []string {
 		}
 		// Chain line: emit parent, then attach matching pre-triggers and any contiguous
 		// matching post-triggers.
-		parentName := chainEntryCardName(e.Label)
-		out = append(out, formatLabelWithDelta(e))
+		parentName := chainEntryCardName(e.Text)
+		out = append(out, formatTextWithDelta(e))
 		for _, pre := range pending {
 			if pre.Source == parentName {
-				out = append(out, childEntryPrefix+formatLabelWithDelta(pre))
+				out = append(out, childEntryPrefix+formatTextWithDelta(pre))
 			} else {
 				out = append(out, FormatLogEntry(pre))
 			}
@@ -256,7 +256,7 @@ func appendGroupedChainEntries(out []string, log []card.LogEntry) []string {
 		pending = pending[:0]
 		j := i + 1
 		for j < len(log) && log[j].Source == parentName {
-			out = append(out, childEntryPrefix+formatLabelWithDelta(log[j]))
+			out = append(out, childEntryPrefix+formatTextWithDelta(log[j]))
 			j++
 		}
 		i = j
@@ -267,27 +267,26 @@ func appendGroupedChainEntries(out []string, log []card.LogEntry) []string {
 	return out
 }
 
-// formatLabelWithDelta renders a LogEntry as just "<Label> (+N)" — the bare-Label form
+// formatTextWithDelta renders a LogEntry as just "<Text> (+N)" — the bare-Text form
 // suitable for both chain parents (Source=="") and grouped trigger children where the
 // indentation already conveys the source. Drops "(+0)" for zero-value entries. Orphan
 // triggers go through FormatLogEntry instead so they keep the "(from <source>)" tail.
-func formatLabelWithDelta(e card.LogEntry) string {
+func formatTextWithDelta(e card.LogEntry) string {
 	if e.N == 0 {
-		return e.Label
+		return e.Text
 	}
-	return fmt.Sprintf("%s (+%d)", e.Label, e.N)
+	return fmt.Sprintf("%s (+%d)", e.Text, e.N)
 }
 
-// chainEntryCardName extracts the display name from a chain LogEntry's Label. The Label is
-// shaped "<DisplayName>: <VERB>[ from arsenal]" (see playSequenceWithMeta's recordValueAndLog
-// call), so the name is everything up to the first ": ". An unrecognised shape returns the
-// raw label — appendGroupedChainEntries then matches no triggers to it and just emits the
-// parent alone.
-func chainEntryCardName(label string) string {
-	if i := strings.Index(label, ": "); i >= 0 {
-		return label[:i]
+// chainEntryCardName extracts the display name from a chain LogEntry's Text. Chain entries
+// the sim writes are shaped "<DisplayName>: <VERB>[ from arsenal]", so the name is
+// everything up to the first ": ". An unrecognised shape returns the raw text —
+// appendGroupedChainEntries then matches no triggers to it and just emits the parent alone.
+func chainEntryCardName(text string) string {
+	if i := strings.Index(text, ": "); i >= 0 {
+		return text[:i]
 	}
-	return label
+	return text
 }
 
 // FormatTurnLog renders a TurnLog into a printable string. Section headers and indentation

@@ -11,12 +11,14 @@ package card
 // (CardsPlayed, Pitched, IncomingDamage, etc.) are seeded by the sim per chain-step and
 // reset at the turn boundary.
 
-// LogEntry is one chain-event entry in TurnState.Log. Holds the label parts and value as
-// raw fields so the dispatcher can record events without paying fmt.Sprintf per entry —
-// formatting is deferred to snapshot time, so only the winning permutation pays the cost.
-// Source is set for trigger entries (hero / aura / ephemeral) and empty for direct plays.
+// LogEntry is one chain-event entry in TurnState.Log. Text is the freeform display string
+// the producer authored ("Viserai created a runechant", "Consuming Volition [R]: ATTACK")
+// — the format layer renders it verbatim, no further opinions on phrasing. Source names
+// the card whose play caused this entry to be added, used by the format layer to group
+// trigger entries beneath the chain entry whose name matches Source; empty for chain
+// steps. N is the damage-equivalent credited to s.Value when the entry was added.
 type LogEntry struct {
-	Label  string
+	Text   string
 	Source string
 	N      int
 }
@@ -63,15 +65,15 @@ type TurnState struct {
 	// --- Transient: reset by the sim per turn / chain step ---
 
 	// Value is the running damage-equivalent total for this chain — damage dealt + damage
-	// prevented + every aura-token / hero-trigger credit. The dispatcher calls RecordValue
-	// after each Play / hero / aura / ephemeral / weapon return; the solver compares
-	// permutations on this field. Reset by the sim per permutation.
+	// prevented + every aura-token / hero-trigger credit. The dispatcher records the chain
+	// step's Play+BonusAttack contribution via AddLogEntry; trigger handlers (hero, aura,
+	// ephemeral) credit themselves the same way. The solver compares permutations on this
+	// field. Reset by the sim per permutation.
 	Value int
-	// Log is the per-event chain trace — one entry per Play / hero / aura / ephemeral /
-	// weapon swing. Stored as LogEntry structs (label + value + optional source) so the
-	// dispatcher can append without allocating a formatted string per event; losing
-	// permutations never pay the fmt cost. Snapshot time formats each entry into the
-	// CarryState's []string. Reset per permutation.
+	// Log is the per-event chain trace — one entry per chain step / hero / aura /
+	// ephemeral / weapon swing. Producers (the sim for chain steps, cards / heroes for
+	// triggers) call AddLogEntry to append a pre-rendered display string plus the
+	// triggering source and damage-equivalent. Reset per permutation.
 	Log []LogEntry
 	// CardsPlayed is the sequence of cards played (as attacks) this turn, in order.
 	// Populated by the sim after each Play returns so later cards this turn see what was
@@ -110,6 +112,30 @@ type TurnState struct {
 	// Revealed is the side channel start-of-turn AuraTrigger handlers use to move a card
 	// from the top of the post-draw deck into the hand (Sigil of the Arknight's reveal).
 	Revealed []Card
+	// TriggeringCard is the card whose play caused the active aura attack-action trigger
+	// to fire. The sim sets it before each AuraTrigger handler runs and clears it after;
+	// the handler reads it to attribute its log line back to the triggering card. Hero
+	// and ephemeral handlers receive the triggering card as a direct arg already and don't
+	// need this field. Nil during direct chain-step resolution and start-of-turn fires.
+	TriggeringCard Card
+}
+
+// AddLogEntry appends a freeform log line and credits n damage-equivalent to s.Value.
+// text is the rendered display string the producer authors ("Viserai created a runechant");
+// source names the card whose play caused this entry, used by the format layer to group
+// trigger entries underneath the chain entry whose name matches source. Empty source marks
+// a chain-step or unattributed line. Returns the clamped n so callers can fold the call
+// into a Play / handler return:
+//
+//	return s.AddLogEntry("Viserai created a runechant",
+//	    card.DisplayName(played), s.CreateRunechant())
+func (s *TurnState) AddLogEntry(text, source string, n int) int {
+	if n < 0 {
+		n = 0
+	}
+	s.Value += n
+	s.Log = append(s.Log, LogEntry{Text: text, Source: source, N: n})
+	return n
 }
 
 // DrawOne models a mid-turn draw: pop the top of Deck and append it to Hand. No-op on an

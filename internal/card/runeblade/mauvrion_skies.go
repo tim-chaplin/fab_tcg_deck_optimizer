@@ -21,7 +21,21 @@
 
 package runeblade
 
-import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+import (
+	"fmt"
+
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+)
+
+// runechantsCreatedOnHit is the verb phrase the on-hit ephemeral attack triggers
+// (Mauvrion Skies, Runic Reaping) write to the log when n runechants get created.
+// Singular "a runechant" for n==1 keeps the phrase grammatically correct.
+func runechantsCreatedOnHit(n int) string {
+	if n == 1 {
+		return "created a runechant on hit"
+	}
+	return fmt.Sprintf("created %d runechants on hit", n)
+}
 
 var mauvrionSkiesTypes = card.NewTypeSet(card.TypeRuneblade, card.TypeAction)
 
@@ -51,10 +65,14 @@ func mauvrionSkiesPlay(s *card.TurnState, source card.Card, n int) int {
 		Source:  source,
 		Matches: mauvrionTargetMatches,
 		Handler: func(s *card.TurnState, target *card.CardState) int {
-			if card.LikelyToHit(target) {
-				return s.CreateRunechants(n)
+			if !card.LikelyToHit(target) {
+				return 0
 			}
-			return 0
+			return s.AddLogEntry(
+				card.DisplayName(source)+" "+runechantsCreatedOnHit(n),
+				card.DisplayName(target.Card),
+				s.CreateRunechants(n),
+			)
 		},
 	})
 	return 0
