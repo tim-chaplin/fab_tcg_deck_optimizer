@@ -6,126 +6,77 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 )
 
+// TestRunicReaping_NoNextAttackReturnsZero pins the no-target case: with no Runeblade attack
+// action card following Runic Reaping, neither rider lands — no BonusAttack, no trigger
+// registered, AuraCreated stays false.
 func TestRunicReaping_NoNextAttackReturnsZero(t *testing.T) {
-	// No attack action following → no bonus at all, and AuraCreated must remain false.
 	s := card.TurnState{Pitched: []card.Card{stubAttackWithPower{power: 4}}}
 	if got := (RunicReapingRed{}).Play(&s, &card.CardState{}); got != 0 {
-		t.Fatalf("want 0 when no next attack, got %d", got)
+		t.Fatalf("Play() = %d, want 0", got)
+	}
+	if len(s.EphemeralAttackTriggers) != 0 {
+		t.Fatalf("EphemeralAttackTriggers = %d, want 0 when no target matches", len(s.EphemeralAttackTriggers))
 	}
 	if s.AuraCreated {
-		t.Fatalf("AuraCreated should stay false when no bonus fires")
+		t.Fatalf("AuraCreated should stay false when no rider fires")
 	}
 }
 
+// TestRunicReaping_WeaponNextDoesNotQualify: a Runeblade weapon swing later in the turn is
+// not an attack action card, so neither rider applies.
 func TestRunicReaping_WeaponNextDoesNotQualify(t *testing.T) {
-	// A Runeblade weapon swing later in the turn is not an attack action card, so the rider doesn't
-	// trigger.
-	s := card.TurnState{CardsRemaining: []*card.CardState{{Card: stubRunebladeWeapon{}}}}
+	target := &card.CardState{Card: stubRunebladeWeapon{}}
+	s := card.TurnState{CardsRemaining: []*card.CardState{target}}
 	if got := (RunicReapingRed{}).Play(&s, &card.CardState{}); got != 0 {
-		t.Fatalf("want 0 with weapon-only next, got %d", got)
+		t.Fatalf("Play() = %d, want 0", got)
+	}
+	if target.BonusAttack != 0 {
+		t.Errorf("weapon target BonusAttack = %d, want 0 (weapons don't qualify)", target.BonusAttack)
+	}
+	if len(s.EphemeralAttackTriggers) != 0 {
+		t.Errorf("EphemeralAttackTriggers = %d, want 0 (weapons don't qualify)", len(s.EphemeralAttackTriggers))
 	}
 }
 
-func TestRunicReaping_LikelyHitTargetNoPitchedAttack(t *testing.T) {
-	// Target's printed power (4) is in the likely-to-hit set and nothing attack-typed was
-	// pitched → N Runechant tokens created. Play returns N (each token credited +1 at creation);
-	// the pitched-attack +1 rider doesn't fire.
-	cases := []struct {
-		c card.Card
-		n int
-	}{
-		{RunicReapingRed{}, 3},
-		{RunicReapingYellow{}, 2},
-		{RunicReapingBlue{}, 1},
+// TestRunicReaping_RegistersTriggerAndGrantsPitchedAttackBonus: with a Runeblade attack
+// action target queued and an attack-typed card pitched, Runic Reaping (a) sets +1
+// BonusAttack on the target so EffectiveAttack folds it into hit-likelihood, and (b)
+// registers an EphemeralAttackTrigger that defers the on-hit Runechant rider until the
+// target's full resolution. Play returns 0 — the trigger handler's damage routes back via
+// SourceIndex when the target lands.
+func TestRunicReaping_RegistersTriggerAndGrantsPitchedAttackBonus(t *testing.T) {
+	target := &card.CardState{Card: stubAttackWithPower{power: 3}}
+	s := card.TurnState{
+		CardsRemaining: []*card.CardState{target},
+		Pitched:        []card.Card{stubRunebladeAttack{}},
 	}
-	for _, tc := range cases {
-		s := card.TurnState{
-			CardsRemaining: []*card.CardState{{Card: stubAttackWithPower{power: 4}}},
-			Pitched:        []card.Card{stubNonAttack{}},
-		}
-		if got := tc.c.Play(&s, &card.CardState{}); got != tc.n {
-			t.Errorf("%s: Play() = %d, want %d", tc.c.Name(), got, tc.n)
-		}
-		if s.Runechants != tc.n {
-			t.Errorf("%s: Runechants = %d, want %d", tc.c.Name(), s.Runechants, tc.n)
-		}
-		if !s.AuraCreated {
-			t.Errorf("%s: AuraCreated should be set when bonus fires", tc.c.Name())
-		}
+	if got := (RunicReapingRed{}).Play(&s, &card.CardState{}); got != 0 {
+		t.Fatalf("Play() = %d, want 0 (rider fires through ephemeral trigger after target's resolution)", got)
+	}
+	if target.BonusAttack != 1 {
+		t.Errorf("target BonusAttack = %d, want 1 (pitched-attack +1{p} rider)", target.BonusAttack)
+	}
+	if len(s.EphemeralAttackTriggers) != 1 {
+		t.Fatalf("EphemeralAttackTriggers = %d, want 1 (on-hit Runechant rider deferred)", len(s.EphemeralAttackTriggers))
 	}
 }
 
-// TestRunicReaping_PitchedAttackBuffPushesIntoHitWindow: a printed-3 target buffed to 4 by
-// the pitched-attack +1{p} rider lands in the LikelyToHit window — both riders fire. The +1
-// rides on the target's BonusAttack so Play returns just the Runechant credits, and
-// EffectiveAttack already reflects the buff when the LikelyToHit check runs.
-func TestRunicReaping_PitchedAttackBuffPushesIntoHitWindow(t *testing.T) {
-	cases := []struct {
-		c card.Card
-		n int
-	}{
-		{RunicReapingRed{}, 3},
-		{RunicReapingYellow{}, 2},
-		{RunicReapingBlue{}, 1},
-	}
-	for _, tc := range cases {
-		target := &card.CardState{Card: stubAttackWithPower{power: 3}}
-		s := card.TurnState{
-			CardsRemaining: []*card.CardState{target},
-			Pitched:        []card.Card{stubRunebladeAttack{}},
-		}
-		if got := tc.c.Play(&s, &card.CardState{}); got != tc.n {
-			t.Errorf("%s: Play() = %d, want %d (Runechant tokens; +1 rides on target's BonusAttack)", tc.c.Name(), got, tc.n)
-		}
-		if target.BonusAttack != 1 {
-			t.Errorf("%s: target BonusAttack = %d, want 1 (pitched-attack +1{p} rider)", tc.c.Name(), target.BonusAttack)
-		}
-		if s.Runechants != tc.n {
-			t.Errorf("%s: Runechants = %d, want %d", tc.c.Name(), s.Runechants, tc.n)
-		}
-	}
-}
-
-// TestRunicReaping_PitchedAttackBuffPushesPastHitWindow: a printed-4 target buffed to 5 by
-// the pitched-attack +1{p} rider falls OUT of the LikelyToHit window (5 isn't in {1,4,7} and
-// isn't dominate 5+). The Runechant rider doesn't fire even though it would have on the
-// printed-4 attack alone — buffs flow through the LikelyToHit check, not around it.
-func TestRunicReaping_PitchedAttackBuffPushesPastHitWindow(t *testing.T) {
+// TestRunicReaping_NoPitchedAttackSkipsBonusButRegistersTrigger: without an attack-typed
+// card in Pitched the +1{p} rider doesn't fire, but the on-hit Runechant rider still
+// registers — the two riders are independent.
+func TestRunicReaping_NoPitchedAttackSkipsBonusButRegistersTrigger(t *testing.T) {
 	target := &card.CardState{Card: stubAttackWithPower{power: 4}}
 	s := card.TurnState{
 		CardsRemaining: []*card.CardState{target},
-		Pitched:        []card.Card{stubRunebladeAttack{}},
+		Pitched:        []card.Card{stubNonAttack{}},
 	}
 	if got := (RunicReapingRed{}).Play(&s, &card.CardState{}); got != 0 {
-		t.Errorf("Play() = %d, want 0 (buffed to 5 = blockable; runechant rider drops)", got)
+		t.Fatalf("Play() = %d, want 0", got)
 	}
-	if target.BonusAttack != 1 {
-		t.Errorf("target BonusAttack = %d, want 1 (pitched-attack +1{p} still grants)", target.BonusAttack)
+	if target.BonusAttack != 0 {
+		t.Errorf("target BonusAttack = %d, want 0 (no attack-typed card pitched)", target.BonusAttack)
 	}
-	if s.Runechants != 0 {
-		t.Errorf("Runechants = %d, want 0 (buffed-out-of-window target drops the rider)", s.Runechants)
-	}
-}
-
-// TestRunicReaping_BlockableTargetEvenAfterBuffDropsRunechants: a printed-2 target buffed to
-// 3 by the pitched-attack +1{p} rider still doesn't hit (3 isn't in {1,4,7}). The +1 lands
-// on the target's BonusAttack but the Runechant rider stays off.
-func TestRunicReaping_BlockableTargetEvenAfterBuffDropsRunechants(t *testing.T) {
-	target := &card.CardState{Card: stubAttackWithPower{power: 2}}
-	s := card.TurnState{
-		CardsRemaining: []*card.CardState{target},
-		Pitched:        []card.Card{stubRunebladeAttack{}},
-	}
-	if got := (RunicReapingRed{}).Play(&s, &card.CardState{}); got != 0 {
-		t.Errorf("Play() = %d, want 0 (buffed to 3 still blockable)", got)
-	}
-	if target.BonusAttack != 1 {
-		t.Errorf("target BonusAttack = %d, want 1", target.BonusAttack)
-	}
-	if s.Runechants != 0 {
-		t.Errorf("Runechants = %d, want 0", s.Runechants)
-	}
-	if s.AuraCreated {
-		t.Error("AuraCreated should stay false when no Runechant is created")
+	if len(s.EphemeralAttackTriggers) != 1 {
+		t.Fatalf("EphemeralAttackTriggers = %d, want 1", len(s.EphemeralAttackTriggers))
 	}
 }

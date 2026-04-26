@@ -5,17 +5,35 @@
 // attack action card you play this turn gains +1{p}. Go again."
 // (Red N=3, Yellow N=2, Blue N=1.)
 //
-// The N Runechants are credited only when the target's printed Attack() satisfies
-// card.LikelyToHit (on-hit clause fizzles when blocked). The +1{p} pitched-attack rider
-// isn't gated on hitting and fires if any attack-typed card was pitched this turn;
-// pitch-to-play attribution isn't tracked. Both riders target Runeblade attack action cards
-// only — weapon swings don't qualify.
+// Both riders target Runeblade attack action cards only — weapon swings don't qualify.
+//
+// Modelling splits the two riders by when they need to resolve:
+//   - The +1{p} pitched-attack rider is a static buff on the target's printed power, so it's
+//     applied via pc.BonusAttack on the look-ahead pass before the target plays. EffectiveAttack
+//     folds it in, the solver routes the +1 to the target's perCardOut slot, and a card playing
+//     between Runic Reaping and the target sees the buff if it scans target.BonusAttack.
+//   - The "if this hits, create N Runechants" rider depends on the target's fully-resolved
+//     attack state — same shape as Mauvrion Skies. A card that plays between Runic Reaping
+//     and the target may grant more BonusAttack (or Dominate, etc.), and we want LikelyToHit
+//     to see those grants. Play registers an EphemeralAttackTrigger; the handler runs after
+//     the target's Play and reads target.EffectiveAttack / target.EffectiveDominate. Damage
+//     attributes back to Runic Reaping via SourceIndex.
+//
+// Pitch-to-play attribution isn't tracked: any attack-typed card in Pitched satisfies the
+// +1{p} rider.
 
 package runeblade
 
 import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 
 var runicReapingTypes = card.NewTypeSet(card.TypeRuneblade, card.TypeAction)
+
+// runicReapingTargetMatches is the shared predicate for Runic Reaping's two riders: the next
+// Runeblade attack action card (weapons don't qualify).
+func runicReapingTargetMatches(target *card.CardState) bool {
+	t := target.Card.Types()
+	return t.Has(card.TypeRuneblade) && t.IsAttackAction()
+}
 
 type RunicReapingRed struct{}
 
@@ -27,7 +45,7 @@ func (RunicReapingRed) Attack() int                { return 0 }
 func (RunicReapingRed) Defense() int               { return 2 }
 func (RunicReapingRed) Types() card.TypeSet        { return runicReapingTypes }
 func (RunicReapingRed) GoAgain() bool              { return true }
-func (RunicReapingRed) Play(s *card.TurnState, _ *card.CardState) int { return runicReapingPlay(s, 3) }
+func (c RunicReapingRed) Play(s *card.TurnState, _ *card.CardState) int { return runicReapingPlay(s, c, 3) }
 
 type RunicReapingYellow struct{}
 
@@ -39,7 +57,7 @@ func (RunicReapingYellow) Attack() int                { return 0 }
 func (RunicReapingYellow) Defense() int               { return 2 }
 func (RunicReapingYellow) Types() card.TypeSet        { return runicReapingTypes }
 func (RunicReapingYellow) GoAgain() bool              { return true }
-func (RunicReapingYellow) Play(s *card.TurnState, _ *card.CardState) int { return runicReapingPlay(s, 2) }
+func (c RunicReapingYellow) Play(s *card.TurnState, _ *card.CardState) int { return runicReapingPlay(s, c, 2) }
 
 type RunicReapingBlue struct{}
 
@@ -51,19 +69,15 @@ func (RunicReapingBlue) Attack() int                { return 0 }
 func (RunicReapingBlue) Defense() int               { return 2 }
 func (RunicReapingBlue) Types() card.TypeSet        { return runicReapingTypes }
 func (RunicReapingBlue) GoAgain() bool              { return true }
-func (RunicReapingBlue) Play(s *card.TurnState, _ *card.CardState) int { return runicReapingPlay(s, 1) }
+func (c RunicReapingBlue) Play(s *card.TurnState, _ *card.CardState) int { return runicReapingPlay(s, c, 1) }
 
-// runicReapingPlay finds the next Runeblade attack action card and applies the +1{p}
-// pitched-attack rider via pc.BonusAttack so the buffed attack's EffectiveAttack folds it
-// into LikelyToHit. The Runechant rider gates on the target's hit-likelihood AFTER the
-// BonusAttack has been folded in, which can flip the rider on (e.g. a base-3 attack +1
-// becomes 4, which lands in {1,4,7}). The Runechants themselves stay credited to Runic
-// Reaping — they're its own contribution, separate from the attack-power buff on the target.
-func runicReapingPlay(s *card.TurnState, n int) int {
+// runicReapingPlay applies the pitched-attack +1{p} grant via the target's BonusAttack, then
+// registers the on-hit Runechant trigger. Returns 0 — Runic Reaping's contribution is whatever
+// the trigger handler creates after the target resolves, routed back via SourceIndex.
+func runicReapingPlay(s *card.TurnState, source card.Card, n int) int {
 	var target *card.CardState
 	for _, pc := range s.CardsRemaining {
-		t := pc.Card.Types()
-		if t.Has(card.TypeRuneblade) && t.IsAttackAction() {
+		if runicReapingTargetMatches(pc) {
 			target = pc
 			break
 		}
@@ -77,8 +91,15 @@ func runicReapingPlay(s *card.TurnState, n int) int {
 			break
 		}
 	}
-	if card.LikelyToHit(target) {
-		return s.CreateRunechants(n)
-	}
+	s.AddEphemeralAttackTrigger(card.EphemeralAttackTrigger{
+		Source:  source,
+		Matches: runicReapingTargetMatches,
+		Handler: func(s *card.TurnState, target *card.CardState) int {
+			if card.LikelyToHit(target) {
+				return s.CreateRunechants(n)
+			}
+			return 0
+		},
+	})
 	return 0
 }
