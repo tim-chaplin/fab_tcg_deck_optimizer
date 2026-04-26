@@ -225,41 +225,50 @@ func runechantPhrase(n int) string {
 const childEntryPrefix = "  "
 
 // appendGroupedChainEntries walks t.State.Log and emits each chain entry as a parent line
-// followed by its triggers as childEntryPrefix-tagged children. Triggers attribute back to
-// their parent via LogEntry.Source (the triggering card's DisplayName); pre-triggers (hero,
-// aura) sit before their parent in the log and post-triggers (ephemeral attack) sit after,
-// so we buffer pre-triggers until the matching chain line arrives and then peek forward for
-// post-triggers. An orphan trigger whose Source matches no chain line falls through as a
-// plain top-level entry via FormatLogEntry — keeps "(from <source>)" attribution visible
-// so the data isn't silently dropped if the parent-emit invariant ever loosens.
+// followed by its triggers as childEntryPrefix-tagged children. LogEntry.Kind tells
+// pre-triggers from post-triggers — the lookforward step only consumes post-triggers, so
+// a pre-trigger whose Source happens to match the previous chain entry's name (two cards
+// with the same display name in one chain) gets buffered and attaches to its real parent
+// instead. An orphan trigger whose Source matches no chain line falls through as a plain
+// top-level entry via FormatLogEntry — keeps "(from <source>)" attribution visible so
+// the data isn't silently dropped if the parent-emit invariant ever loosens.
 func appendGroupedChainEntries(out []string, log []card.LogEntry) []string {
 	var pending []card.LogEntry
 	i := 0
 	for i < len(log) {
 		e := log[i]
-		if e.Source != "" {
+		switch e.Kind {
+		case card.LogEntryPreTrigger:
 			pending = append(pending, e)
 			i++
-			continue
-		}
-		// Chain line: emit parent, then attach matching pre-triggers and any contiguous
-		// matching post-triggers.
-		parentName := chainEntryCardName(e.Label)
-		out = append(out, formatLabelWithDelta(e))
-		for _, pre := range pending {
-			if pre.Source == parentName {
-				out = append(out, childEntryPrefix+formatLabelWithDelta(pre))
-			} else {
-				out = append(out, FormatLogEntry(pre))
+		case card.LogEntryPostTrigger:
+			// Orphan post-trigger — no preceding chain step consumed it via the
+			// lookforward below. Surface as a top-level line.
+			out = append(out, FormatLogEntry(e))
+			i++
+		default:
+			// Chain step: emit parent, attach matching buffered pre-triggers, then look
+			// forward for matching post-triggers (only post — pre-triggers belong to a
+			// later chain entry).
+			parentName := chainEntryCardName(e.Text)
+			out = append(out, formatTextWithDelta(e))
+			for _, pre := range pending {
+				if pre.Source == parentName {
+					out = append(out, childEntryPrefix+formatTextWithDelta(pre))
+				} else {
+					out = append(out, FormatLogEntry(pre))
+				}
 			}
+			pending = pending[:0]
+			j := i + 1
+			for j < len(log) &&
+				log[j].Kind == card.LogEntryPostTrigger &&
+				log[j].Source == parentName {
+				out = append(out, childEntryPrefix+formatTextWithDelta(log[j]))
+				j++
+			}
+			i = j
 		}
-		pending = pending[:0]
-		j := i + 1
-		for j < len(log) && log[j].Source == parentName {
-			out = append(out, childEntryPrefix+formatLabelWithDelta(log[j]))
-			j++
-		}
-		i = j
 	}
 	for _, p := range pending {
 		out = append(out, FormatLogEntry(p))
@@ -267,27 +276,26 @@ func appendGroupedChainEntries(out []string, log []card.LogEntry) []string {
 	return out
 }
 
-// formatLabelWithDelta renders a LogEntry as just "<Label> (+N)" — the bare-Label form
+// formatTextWithDelta renders a LogEntry as just "<Text> (+N)" — the bare-Text form
 // suitable for both chain parents (Source=="") and grouped trigger children where the
 // indentation already conveys the source. Drops "(+0)" for zero-value entries. Orphan
 // triggers go through FormatLogEntry instead so they keep the "(from <source>)" tail.
-func formatLabelWithDelta(e card.LogEntry) string {
+func formatTextWithDelta(e card.LogEntry) string {
 	if e.N == 0 {
-		return e.Label
+		return e.Text
 	}
-	return fmt.Sprintf("%s (+%d)", e.Label, e.N)
+	return fmt.Sprintf("%s (+%d)", e.Text, e.N)
 }
 
-// chainEntryCardName extracts the display name from a chain LogEntry's Label. The Label is
-// shaped "<DisplayName>: <VERB>[ from arsenal]" (see playSequenceWithMeta's recordValueAndLog
-// call), so the name is everything up to the first ": ". An unrecognised shape returns the
-// raw label — appendGroupedChainEntries then matches no triggers to it and just emits the
-// parent alone.
-func chainEntryCardName(label string) string {
-	if i := strings.Index(label, ": "); i >= 0 {
-		return label[:i]
+// chainEntryCardName extracts the display name from a chain LogEntry's Text. Chain entries
+// the sim writes are shaped "<DisplayName>: <VERB>[ from arsenal]", so the name is
+// everything up to the first ": ". An unrecognised shape returns the raw text —
+// appendGroupedChainEntries then matches no triggers to it and just emits the parent alone.
+func chainEntryCardName(text string) string {
+	if i := strings.Index(text, ": "); i >= 0 {
+		return text[:i]
 	}
-	return label
+	return text
 }
 
 // FormatTurnLog renders a TurnLog into a printable string. Section headers and indentation

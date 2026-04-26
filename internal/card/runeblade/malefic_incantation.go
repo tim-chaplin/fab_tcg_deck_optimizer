@@ -58,14 +58,17 @@ func (c MaleficIncantationBlue) Play(s *card.TurnState, _ *card.CardState) int {
 	return maleficPlay(s, c, 1)
 }
 
-// maleficPlay registers the attack-action once-per-turn trigger. Same-turn Play returns 0.
+// maleficPlay registers the attack-action once-per-turn trigger. Same-turn Play returns 0;
+// each fire creates one Runechant.
 func maleficPlay(s *card.TurnState, self card.Card, n int) int {
 	s.AddAuraTrigger(card.AuraTrigger{
 		Self:        self,
 		Type:        card.TriggerAttackAction,
 		Count:       n,
 		OncePerTurn: true,
-		Handler:     func(s *card.TurnState) int { return s.CreateRunechants(1) },
+		Handler: func(s *card.TurnState) int {
+			return s.CreateAndLogRunechants(card.DisplayName(self), card.DisplayName(s.TriggeringCard), 1)
+		},
 	})
 	return 0
 }

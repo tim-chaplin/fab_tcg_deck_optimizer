@@ -98,27 +98,27 @@ func TestFormatBestTurn_NonAttackCardUsesPlayLabel(t *testing.T) {
 // The chain log should hit:
 //   - Mauvrion: PLAY (+0)             — non-attack action, no own damage
 //   - Consuming Volition: ATTACK (+N) — printed power, with the three triggers it fires
-//     attached underneath as indented children (Viserai HERO, Malefic AURA, Mauvrion
-//     ATTACK TRIGGER). The "(from Consuming Volition)" suffix is dropped because the
-//     visual grouping makes the source obvious.
+//     attached underneath as indented children. Each trigger handler authors its own log
+//     line (Viserai / Malefic / Mauvrion all create runechants). The "(from Consuming
+//     Volition)" suffix is dropped because the visual grouping makes the source obvious.
 func TestFormatBestTurn_LogAttributesEachTriggerSeparately(t *testing.T) {
 	h := []card.Card{generic.NimblismRed{}, runeblade.MauvrionSkiesRed{}, runeblade.ConsumingVolitionRed{}}
-	prior := []card.AuraTrigger{{
-		Self:        runeblade.MaleficIncantationRed{},
-		Type:        card.TriggerAttackAction,
-		Count:       2,
-		OncePerTurn: true,
-		Handler:     func(s *card.TurnState) int { return s.CreateRunechants(1) },
-	}}
+	// Use the real Malefic Incantation card's Play to register the prior trigger so the
+	// handler matches production exactly (logs via AddPreTriggerLogEntry, sources from
+	// state.TriggeringCard).
+	var bootstrap card.TurnState
+	runeblade.MaleficIncantationRed{}.Play(&bootstrap, &card.CardState{})
+	prior := bootstrap.AuraTriggers
 	got := BestWithTriggers(hero.Viserai{}, nil, h, 0, nil, 0, nil, prior)
 	out := FormatBestTurn(got, 0)
 	// Trigger lines render indented (9 spaces) with no "(from <source>)" suffix — the
-	// indentation under the parent chain entry conveys attribution.
+	// indentation under the parent chain entry conveys attribution. Each line carries
+	// the verb phrase the trigger handler authored.
 	wants := []string{
 		"Consuming Volition [R]: ATTACK",
-		"         Viserai: HERO TRIGGER (+1)",
-		"         Malefic Incantation [R]: AURA TRIGGER (+1)",
-		"         Mauvrion Skies [R]: ATTACK TRIGGER (+3)",
+		"         Viserai created a runechant (+1)",
+		"         Malefic Incantation [R] created a runechant (+1)",
+		"         Mauvrion Skies [R] created 3 runechants on hit (+3)",
 	}
 	for _, want := range wants {
 		if !strings.Contains(out, want) {
@@ -129,6 +129,13 @@ func TestFormatBestTurn_LogAttributesEachTriggerSeparately(t *testing.T) {
 	// drop it.
 	if strings.Contains(out, "(from Consuming Volition") {
 		t.Errorf("grouped trigger should not carry '(from <source>)' suffix; got:\n%s", out)
+	}
+	// Trigger lines are card-authored freeform text — generic dispatcher verbs like
+	// "HERO/AURA/ATTACK TRIGGER" only appear when a centralised format leaks back in.
+	for _, gone := range []string{"HERO TRIGGER", "AURA TRIGGER", "ATTACK TRIGGER"} {
+		if strings.Contains(out, gone) {
+			t.Errorf("trigger line still uses generic %q verb; got:\n%s", gone, out)
+		}
 	}
 }
 
@@ -143,7 +150,7 @@ func TestFormatBestTurn_LogSuppressesZeroTriggers(t *testing.T) {
 	// the chain log should be exactly one card-Play line, no trigger spam.
 	h := []card.Card{fake.RedAttack{}}
 	got := Best(hero.Viserai{}, nil, h, 0, nil, 0, nil)
-	if strings.Contains(FormatBestTurn(got, 0), "HERO TRIGGER") {
+	if strings.Contains(FormatBestTurn(got, 0), "Viserai created") {
 		t.Errorf("hero trigger line shouldn't render when Viserai contributed 0; got:\n%s",
 			FormatBestTurn(got, 0))
 	}
@@ -204,7 +211,7 @@ func TestFormatBestTurn_WeaponSwingInChain(t *testing.T) {
 	}
 	var sawWeaponLog bool
 	for _, e := range got.State.Log {
-		if strings.Contains(e.Label, "Reaping Blade: WEAPON ATTACK") {
+		if strings.Contains(e.Text, "Reaping Blade: WEAPON ATTACK") {
 			sawWeaponLog = true
 			break
 		}
@@ -339,32 +346,63 @@ func TestFormatBestTurn_TriggersFromLastTurnZeroEffectDropped(t *testing.T) {
 // TestAppendGroupedChainEntries_ClustersTriggersUnderTheirParent drives the grouping
 // helper directly with a synthesised LogEntry slice — covers the three placement cases
 // (pre-trigger before its parent, post-trigger after, trigger from card B interleaved
-// before card B's chain entry) without needing a full Best invocation.
+// before card B's chain entry) without needing a full Best invocation. Trigger Texts are
+// freeform card-authored phrases ("Viserai created a runechant"); the grouping helper
+// matches each trigger's Source field against the chain entry's "<Name>:" prefix.
 func TestAppendGroupedChainEntries_ClustersTriggersUnderTheirParent(t *testing.T) {
 	log := []card.LogEntry{
 		// Card A's pre-trigger fires from a hero/aura before A's chain entry resolves.
-		{Label: "Viserai: HERO TRIGGER", Source: "Card A", N: 1},
+		{Text: "Viserai created a runechant", Source: "Card A", Kind: card.LogEntryPreTrigger, N: 1},
 		// Card A resolves.
-		{Label: "Card A: ATTACK", N: 5},
+		{Text: "Card A: ATTACK", N: 5},
 		// Card A's ephemeral attack trigger fires after the hit.
-		{Label: "Aura: ATTACK TRIGGER", Source: "Card A", N: 3},
+		{Text: "Aura created 3 runechants on hit", Source: "Card A", Kind: card.LogEntryPostTrigger, N: 3},
 		// Card B's pre-trigger queues for B.
-		{Label: "Viserai: HERO TRIGGER", Source: "Card B", N: 1},
+		{Text: "Viserai created a runechant", Source: "Card B", Kind: card.LogEntryPreTrigger, N: 1},
 		// Card B resolves; its post-trigger follows.
-		{Label: "Card B: PLAY", N: 0},
-		{Label: "Aura: ATTACK TRIGGER", Source: "Card B", N: 2},
+		{Text: "Card B: PLAY", N: 0},
+		{Text: "Aura created 2 runechants on hit", Source: "Card B", Kind: card.LogEntryPostTrigger, N: 2},
 	}
 	got := appendGroupedChainEntries(nil, log)
 	want := []string{
 		"Card A: ATTACK (+5)",
-		"  Viserai: HERO TRIGGER (+1)",
-		"  Aura: ATTACK TRIGGER (+3)",
+		"  Viserai created a runechant (+1)",
+		"  Aura created 3 runechants on hit (+3)",
 		"Card B: PLAY",
-		"  Viserai: HERO TRIGGER (+1)",
-		"  Aura: ATTACK TRIGGER (+2)",
+		"  Viserai created a runechant (+1)",
+		"  Aura created 2 runechants on hit (+2)",
 	}
 	if !reflect.DeepEqual(got, want) {
 		t.Errorf("grouped output mismatch\n got: %#v\nwant: %#v", got, want)
+	}
+}
+
+// TestAppendGroupedChainEntries_PreTriggerAttachesToNextSameNameParent guards the
+// duplicate-name disambiguation: when two chain entries share a display name (e.g. two
+// copies of Mauvrion Skies in one chain), a pre-trigger between them belongs to the
+// SECOND parent — it fires before the second card's Play. Source-name match alone is
+// ambiguous in this case; Kind==LogEntryPreTrigger is what tells the grouping algorithm
+// to skip the first parent's post-trigger lookforward and let the entry fall through to
+// the next matching chain step.
+func TestAppendGroupedChainEntries_PreTriggerAttachesToNextSameNameParent(t *testing.T) {
+	log := []card.LogEntry{
+		// First Mauvrion plays (no triggers).
+		{Text: "Mauvrion Skies [R]: PLAY", N: 0},
+		// Second Mauvrion's hero pre-trigger fires (Viserai now sees a non-attack
+		// action played) — Source matches the first chain entry's name too, but it
+		// belongs to the second.
+		{Text: "Viserai created a runechant", Source: "Mauvrion Skies [R]", Kind: card.LogEntryPreTrigger, N: 1},
+		// Second Mauvrion's chain entry.
+		{Text: "Mauvrion Skies [R]: PLAY", N: 0},
+	}
+	got := appendGroupedChainEntries(nil, log)
+	want := []string{
+		"Mauvrion Skies [R]: PLAY",
+		"Mauvrion Skies [R]: PLAY",
+		"  Viserai created a runechant (+1)",
+	}
+	if !reflect.DeepEqual(got, want) {
+		t.Errorf("pre-trigger attached to wrong parent\n got: %#v\nwant: %#v", got, want)
 	}
 }
 
@@ -374,13 +412,13 @@ func TestAppendGroupedChainEntries_ClustersTriggersUnderTheirParent(t *testing.T
 // their parent) but the fallback keeps the data visible if that invariant ever loosens.
 func TestAppendGroupedChainEntries_OrphanTriggerSurfacesAtTopLevel(t *testing.T) {
 	log := []card.LogEntry{
-		{Label: "Card A: ATTACK", N: 5},
-		{Label: "Aura: ATTACK TRIGGER", Source: "Card Z", N: 2},
+		{Text: "Card A: ATTACK", N: 5},
+		{Text: "Aura created 2 runechants on hit", Source: "Card Z", Kind: card.LogEntryPostTrigger, N: 2},
 	}
 	got := appendGroupedChainEntries(nil, log)
 	want := []string{
 		"Card A: ATTACK (+5)",
-		"Aura: ATTACK TRIGGER (+2) (from Card Z)",
+		"Aura created 2 runechants on hit (+2) (from Card Z)",
 	}
 	if !reflect.DeepEqual(got, want) {
 		t.Errorf("orphan trigger should render as top-level line\n got: %#v\nwant: %#v",
