@@ -40,16 +40,22 @@ type CardPair struct {
 // cardPairs registry compact and lets future pairs reuse a group on both sides if needed
 // (e.g. a self-pair like "two copies of X").
 var (
-	moonWishGroup           = CardGroup{card.MoonWishRed, card.MoonWishYellow, card.MoonWishBlue}
-	sunKissGroup            = CardGroup{card.SunKissRed, card.SunKissYellow, card.SunKissBlue}
-	belittleGroup           = CardGroup{card.BelittleRed, card.BelittleYellow, card.BelittleBlue}
-	minnowismGroup          = CardGroup{card.MinnowismRed, card.MinnowismYellow, card.MinnowismBlue}
-	nimbleStrikeGroup       = CardGroup{card.NimbleStrikeRed, card.NimbleStrikeYellow, card.NimbleStrikeBlue}
-	nimblismGroup           = CardGroup{card.NimblismRed, card.NimblismYellow, card.NimblismBlue}
-	regurgitatingSlogGroup  = CardGroup{card.RegurgitatingSlogRed, card.RegurgitatingSlogYellow, card.RegurgitatingSlogBlue}
-	sloggismGroup           = CardGroup{card.SloggismRed, card.SloggismYellow, card.SloggismBlue}
-	amuletOfHavencallGroup  = CardGroup{card.AmuletOfHavencallBlue}
-	rallyTheRearguardGroup  = CardGroup{card.RallyTheRearguardRed, card.RallyTheRearguardYellow, card.RallyTheRearguardBlue}
+	moonWishGroup     = CardGroup{card.MoonWishRed, card.MoonWishYellow, card.MoonWishBlue}
+	sunKissGroup      = CardGroup{card.SunKissRed, card.SunKissYellow, card.SunKissBlue}
+	belittleGroup     = CardGroup{card.BelittleRed, card.BelittleYellow, card.BelittleBlue}
+	minnowismGroup    = CardGroup{card.MinnowismRed, card.MinnowismYellow, card.MinnowismBlue}
+	nimblismGroup     = CardGroup{card.NimblismRed, card.NimblismYellow, card.NimblismBlue}
+	sloggismGroup     = CardGroup{card.SloggismRed, card.SloggismYellow, card.SloggismBlue}
+	nimbleStrikeGroup = CardGroup{
+		card.NimbleStrikeRed, card.NimbleStrikeYellow, card.NimbleStrikeBlue,
+	}
+	regurgitatingSlogGroup = CardGroup{
+		card.RegurgitatingSlogRed, card.RegurgitatingSlogYellow, card.RegurgitatingSlogBlue,
+	}
+	amuletOfHavencallGroup = CardGroup{card.AmuletOfHavencallBlue}
+	rallyTheRearguardGroup = CardGroup{
+		card.RallyTheRearguardRed, card.RallyTheRearguardYellow, card.RallyTheRearguardBlue,
+	}
 )
 
 // cardPairs is the registry of synergy pairs the anneal mutation generator considers as
@@ -59,9 +65,8 @@ var (
 // iteration in ascending order.
 //
 // Pair-variant combos whose halves carry card.NotImplemented are skipped at enumeration
-// time; registering a pair here doesn't force the simulator to model the synergy yet, it
-// just promises that when both halves get implemented the mutation generator will discover
-// them as a unit.
+// time (see pairAddAllowed), so a pair stays valid to register even when one half is still
+// a stub — the combo activates once both halves are fully implemented.
 var cardPairs = []CardPair{
 	{First: moonWishGroup, Second: sunKissGroup},
 	{First: belittleGroup, Second: minnowismGroup},
@@ -97,16 +102,10 @@ type pairDedupeKey struct {
 // emitted (sorted-removed-IDs, sorted-add-IDs) tuples in pairDedupeKey form and drop
 // repeats.
 //
-// legal filters BOTH pair-variant adds: a combo where either variant is rejected by legal
-// (e.g. a banned printing) is skipped. Removal targets aren't filtered — same convention as
-// singleSwapMutations: a deck that arrived holding a banned card can still have it removed.
-//
-// NotImplemented filter: a pair-variant combo where either half carries the
-// card.NotImplemented marker is skipped, regardless of legal. The pair generator must never
-// route a NotImplemented card into a deck — the marker exists precisely to keep cards the
-// simulator can't faithfully model out of the search pool. This lets cardPairs register the
-// canonical pairing today even when one or both halves are still stubs; the combo lights up
-// automatically once each variant drops its marker.
+// Pair-variant adds run through pairAddAllowed: NotImplemented printings are filtered
+// unconditionally and the caller's legal predicate is honoured per-variant. Removal targets
+// aren't filtered — same convention as singleSwapMutations: a deck that arrived holding a
+// banned card can still have it removed.
 //
 // maxCopies enforcement is NOT applied here; AllMutations runs filterMaxCopiesViolations on
 // the combined output so single-slot and pair candidates share one cap-checking pass.
