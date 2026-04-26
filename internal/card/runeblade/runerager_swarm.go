@@ -54,7 +54,7 @@ func (RuneragerSwarmBlue) Play(s *card.TurnState, self *card.CardState) {
 	runeragerSwarmPlay(s, self)
 }
 func runeragerSwarmPlay(s *card.TurnState, self *card.CardState) {
-	if s.HasAuraInPlay() {
+	if s.HasPlayedOrCreatedAura() {
 		self.GrantedGoAgain = true
 	}
 	s.ApplyAndLogEffectiveAttack(self)

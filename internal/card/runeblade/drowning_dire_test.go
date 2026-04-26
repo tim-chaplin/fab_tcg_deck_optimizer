@@ -7,7 +7,7 @@ import (
 )
 
 // TestDrowningDire_NoAuraThisTurnDoesNotGrantDominate: without an aura played or created
-// this turn, s.HasAuraInPlay() is false and Drowning Dire's Dominate clause doesn't fire.
+// this turn, s.HasPlayedOrCreatedAura() is false and Drowning Dire's Dominate clause doesn't fire.
 // self.GrantedDominate stays false and the card is not effectively dominating.
 func TestDrowningDire_NoAuraThisTurnDoesNotGrantDominate(t *testing.T) {
 	cards := []card.Card{DrowningDireRed{}, DrowningDireYellow{}, DrowningDireBlue{}}
@@ -41,7 +41,7 @@ func TestDrowningDire_AuraCreatedThisTurnGrantsDominate(t *testing.T) {
 	}
 }
 
-// TestDrowningDire_AuraPlayedThisTurnGrantsDominate: HasAuraInPlay also catches auras
+// TestDrowningDire_AuraPlayedThisTurnGrantsDominate: HasPlayedOrCreatedAura also catches auras
 // present via CardsPlayed containing an Aura-typed card, so a prior explicit Aura play (not
 // just token creation) also satisfies the clause.
 func TestDrowningDire_AuraPlayedThisTurnGrantsDominate(t *testing.T) {

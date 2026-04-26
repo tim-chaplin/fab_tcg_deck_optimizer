@@ -88,21 +88,21 @@ func TestHasPlayedType_ScansCardsPlayed(t *testing.T) {
 	}
 }
 
-// TestHasAuraInPlay_FlagOrScan: fires on either the AuraCreated flag (Runechant creation,
-// token-only auras) OR a played Aura-typed card; returns false when neither.
-func TestHasAuraInPlay_FlagOrScan(t *testing.T) {
+// TestHasPlayedOrCreatedAura_FlagOrScan: fires on either the AuraCreated flag (Runechant
+// creation, token-only auras) OR a played Aura-typed card; returns false when neither.
+func TestHasPlayedOrCreatedAura_FlagOrScan(t *testing.T) {
 	var empty TurnState
-	if empty.HasAuraInPlay() {
+	if empty.HasPlayedOrCreatedAura() {
 		t.Error("no aura, no flag → should be false")
 	}
 
 	flagged := TurnState{AuraCreated: true}
-	if !flagged.HasAuraInPlay() {
+	if !flagged.HasPlayedOrCreatedAura() {
 		t.Error("AuraCreated=true → should be true")
 	}
 
 	playedAura := TurnState{CardsPlayed: []Card{stubCard{types: NewTypeSet(TypeAura)}}}
-	if !playedAura.HasAuraInPlay() {
+	if !playedAura.HasPlayedOrCreatedAura() {
 		t.Error("played aura card → should be true")
 	}
 }

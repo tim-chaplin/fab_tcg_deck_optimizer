@@ -68,7 +68,7 @@ func (VantagePointBlue) Play(s *card.TurnState, self *card.CardState) {
 // so the next attack picks up Overpower for any breakthrough-aware solver pass. Vantage Point
 // itself contributes zero to its own chain step.
 func vantagePointApplySideEffect(s *card.TurnState) {
-	if s.HasAuraInPlay() {
+	if s.HasPlayedOrCreatedAura() {
 		s.Overpower = true
 	}
 }

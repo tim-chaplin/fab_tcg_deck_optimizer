@@ -3,7 +3,7 @@
 // Printed power: Red 5, Yellow 4, Blue 3.
 // Text: "If you have played or created an aura this turn, Drowning Dire gains **dominate**."
 //
-// Modelling: the Dominate grant is conditional, gated on s.HasAuraInPlay(). Play flips
+// Modelling: the Dominate grant is conditional, gated on s.HasPlayedOrCreatedAura(). Play flips
 // self.GrantedDominate when the aura clause is live so EffectiveDominate reports the card as
 // dominating this turn — downstream scanners (and any future on-hit rider) that read
 // pc.EffectiveDominate() see the grant. Printed power never clears the +5 Dominate bar
@@ -19,7 +19,7 @@ var drowningDireTypes = card.NewTypeSet(card.TypeRuneblade, card.TypeAction, car
 // drowningDirePlay grants self Dominate when an aura has been played or created this turn,
 // then emits the chain step.
 func drowningDirePlay(s *card.TurnState, self *card.CardState) {
-	if s.HasAuraInPlay() {
+	if s.HasPlayedOrCreatedAura() {
 		self.GrantedDominate = true
 	}
 	s.ApplyAndLogEffectiveAttack(self)

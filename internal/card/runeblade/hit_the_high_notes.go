@@ -53,7 +53,7 @@ func (HitTheHighNotesBlue) Play(s *card.TurnState, self *card.CardState) {
 	s.ApplyAndLogEffectiveAttack(self)
 }
 func hitTheHighNotesBonus(s *card.TurnState) int {
-	if s.HasAuraInPlay() {
+	if s.HasPlayedOrCreatedAura() {
 		return 2
 	}
 	return 0
