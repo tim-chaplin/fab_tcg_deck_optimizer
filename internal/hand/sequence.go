@@ -13,24 +13,14 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/weapon"
 )
 
-// recordValueAndLog credits n to s.Value (positive only) and appends a "label (+n)" line to
-// s.Log. Centralizes the (Value, Log) update so the dispatcher and trigger helpers can stay
-// consistent on the format. n <= 0 still logs a "(+0)" entry — callers gate on whether the
-// event happened (a card resolving) versus whether it scored (a trigger firing).
+// recordValueAndLog credits n to s.Value and appends a "label (+n)" line to s.Log. Negative n
+// clamps both contributions at 0 (FaB damage / prevention can't go negative). Centralizes the
+// (Value, Log) update so the dispatcher and trigger helpers stay consistent on format and
+// clamp semantics.
 func recordValueAndLog(s *card.TurnState, label string, n int) {
-	if n > 0 {
-		s.Value += n
-	}
-	s.Log = append(s.Log, fmt.Sprintf("%s (+%d)", label, max0(n)))
-}
-
-// max0 returns n clamped at 0 — used by the log to render negative grants as "+0" matching
-// the actual Value contribution after RecordValue's clamp.
-func max0(n int) int {
-	if n < 0 {
-		return 0
-	}
-	return n
+	n = max(0, n)
+	s.Value += n
+	s.Log = append(s.Log, fmt.Sprintf("%s (+%d)", label, n))
 }
 
 // chainVerbFor picks the verb for a card's chain-step log line based on its types and the
@@ -454,14 +444,10 @@ func (ctx *sequenceContext) playSequenceWithMeta(n int) (damage int, leftoverRun
 		// Hero ability fires BEFORE the card's own Play so "aura created this turn" checks
 		// inside the card's Play see the runechant (or other aura) the hero just made.
 		// Viserai's "another non-attack action" gate still excludes the current card because
-		// NonAttackActionPlayed isn't flipped until the end of the iteration. The log entry
-		// for the trigger is deferred until after the card's own chain line so the printout
-		// reads "Card: ATTACK" then "Hero: HERO TRIGGER" in resolution order rather than
-		// hero-first.
+		// NonAttackActionPlayed isn't flipped until the end of the iteration. The Value /
+		// Log credit is deferred to after the card's own chain line so the printout reads in
+		// chain-resolution order: card first, then the hero trigger that fired off it.
 		heroDmg := ctx.hero.OnCardPlayed(pc.Card, state)
-		if heroDmg > 0 {
-			state.Value += heroDmg
-		}
 		ephemeralsBefore := len(state.EphemeralAttackTriggers)
 		playDmg := pc.Card.Play(state, pc)
 		// Stamp SourceIndex on any EphemeralAttackTriggers the card registered during Play
@@ -469,18 +455,14 @@ func (ctx *sequenceContext) playSequenceWithMeta(n int) (damage int, leftoverRun
 		for k := ephemeralsBefore; k < len(state.EphemeralAttackTriggers); k++ {
 			state.EphemeralAttackTriggers[k].SourceIndex = i
 		}
-		// Card contribution: Play return plus any prior-card +N{p} grant. Clamped at 0 — FaB
-		// attack-power buffs can't drive an attack below 0 power (a -3 grant on a 1-power
-		// attack resolves as a 0-power attack, not -2). The clamp covers the sum because
-		// playDmg may include rider damage (e.g. Blow for a Blow's on-hit +1) that
+		// Card contribution: Play return plus any prior-card +N{p} grant. recordValueAndLog
+		// clamps at 0 — FaB attack-power buffs can't drive an attack below 0 power (a -3 grant
+		// on a 1-power attack resolves as a 0-power attack, not -2). The clamp covers the sum
+		// because playDmg may include rider damage (e.g. Blow for a Blow's on-hit +1) that
 		// EffectiveAttack doesn't see — clamping the sum preserves both pieces.
-		cardContrib := playDmg + pc.BonusAttack
-		if cardContrib < 0 {
-			cardContrib = 0
-		}
-		recordValueAndLog(state, pc.Card.Name()+": "+chainVerbFor(m, pc.FromArsenal), cardContrib)
+		recordValueAndLog(state, pc.Card.Name()+": "+chainVerbFor(m, pc.FromArsenal), playDmg+pc.BonusAttack)
 		if heroDmg > 0 {
-			state.Log = append(state.Log, fmt.Sprintf("%s: HERO TRIGGER (+%d)", ctx.hero.Name(), heroDmg))
+			recordValueAndLog(state, ctx.hero.Name()+": HERO TRIGGER", heroDmg)
 		}
 		if m.isAttackAction {
 			fireAttackActionTriggers(state)

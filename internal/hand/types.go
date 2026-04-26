@@ -69,8 +69,11 @@ type TurnSummary struct {
 	// BestLine is the winning partition. Hand cards come first in canonical (post-sort)
 	// order; the previous-turn arsenal card, if any, is the last entry with FromArsenal=true.
 	BestLine []CardAssignment
-	// SwungWeapons names the weapons swung this turn in the winning permutation. Weapons have
-	// no BestLine entry (they're not hand cards), so the printout reads them from here.
+	// SwungWeapons names the weapons swung this turn in the winning permutation. Weapons
+	// resolve through the dispatcher and log "WEAPON ATTACK" lines into State.Log, so the
+	// numbered printout reads weapon swings from there. SwungWeapons stays on the summary
+	// for the deckio JSON round-trip — Marshal serialises it under "weapons" so a reloaded
+	// best turn still names the swung weapons even when State.Log is absent.
 	SwungWeapons []string
 	// Value is the turn's total score (damage dealt + damage prevented).
 	Value int
