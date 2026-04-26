@@ -57,8 +57,9 @@ func BuildTurnLog(t TurnSummary, startingRunechants int) TurnLog {
 	for _, b := range parts.plainBlocks {
 		log.OpponentTurn = append(log.OpponentTurn, formatBlockLine(b))
 	}
+	defenders := defendersFromParts(parts)
 	for _, dr := range parts.defenseReactions {
-		log.OpponentTurn = append(log.OpponentTurn, card.DisplayName(dr.Card)+": "+roleLabelWithArsenal(dr, "DEFENSE REACTION"))
+		log.OpponentTurn = append(log.OpponentTurn, formatDefenseReactionLine(dr, defenders))
 	}
 
 	// End of turn: surviving hand cards, arsenal slot's contents, auras still in play.
@@ -153,6 +154,39 @@ func formatBlockLine(a CardAssignment) string {
 		}
 	}
 	return fmt.Sprintf("%s: %s (+%d)", card.DisplayName(a.Card), roleLabelWithArsenal(a, "BLOCK"), def)
+}
+
+// formatDefenseReactionLine renders a Defense Reaction with a "(+N)" suffix that sums the
+// effective Defense (printed plus any ArsenalDefenseBonus) and the DR's Play return — the
+// arcane damage / runechant / rider credit it deals back. defenders is the full list of
+// cards committed to defense (DRs and plain blocks alike); we pass it through as the
+// reconstructed Graveyard so DRs that scan for banish targets see the same shape
+// defenseReactionDamage saw during partition evaluation.
+func formatDefenseReactionLine(a CardAssignment, defenders []card.Card) string {
+	def := a.Card.Defense()
+	if a.FromArsenal {
+		if ab, ok := a.Card.(card.ArsenalDefenseBonus); ok {
+			def += ab.ArsenalDefenseBonus()
+		}
+	}
+	state := card.TurnState{Graveyard: append([]card.Card(nil), defenders...)}
+	cs := card.CardState{Card: a.Card}
+	a.Card.Play(&state, &cs)
+	return fmt.Sprintf("%s: %s (+%d)", card.DisplayName(a.Card), roleLabelWithArsenal(a, "DEFENSE REACTION"), def+state.Value)
+}
+
+// defendersFromParts collects every card committed to defense — Defense Reactions and plain
+// blocks — into a single slice. Mirrors the defenders argument defenseReactionDamage takes
+// during partition evaluation so the formatter's per-DR Play call sees the same graveyard.
+func defendersFromParts(parts bestLineDisplayParts) []card.Card {
+	out := make([]card.Card, 0, len(parts.defenseReactions)+len(parts.plainBlocks))
+	for _, a := range parts.defenseReactions {
+		out = append(out, a.Card)
+	}
+	for _, a := range parts.plainBlocks {
+		out = append(out, a.Card)
+	}
+	return out
 }
 
 // endingHandLine builds "Hand: A, B" from the cards in hand at end of chain — the partition's

@@ -440,9 +440,12 @@ func (ctx *sequenceContext) playSequenceWithMeta(n int) (damage int, leftoverRun
 		// If this card is an attack or weapon and any Runechant is live, those tokens fire on
 		// its damage step. Set ArcaneDamageDealt now — before Play and OnCardPlayed — so Play
 		// effects that read "if you've dealt arcane damage this turn" see the flag for same-hand
-		// triggers. Cards that deal arcane damage via their Play text flip the flag themselves.
+		// triggers. Cards that deal arcane damage via their Play text flip the flag themselves
+		// through DealArcaneDamage. The flip is gated on LikelyDamageHits — same hit-likelihood
+		// model the rest of the arcane plumbing uses — so a single live runechant on an attack
+		// satisfies the gate but a live cluster the model treats as blockable doesn't.
 		isAttackOrWeapon := m.isAttackOrWeapon
-		if isAttackOrWeapon && state.Runechants > 0 {
+		if isAttackOrWeapon && state.Runechants > 0 && card.LikelyDamageHits(state.Runechants, false) {
 			state.ArcaneDamageDealt = true
 		}
 

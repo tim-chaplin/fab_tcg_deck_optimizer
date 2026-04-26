@@ -350,19 +350,22 @@ func runechantsCreatedPhrase(n int) string {
 	return fmt.Sprintf("created %d runechants", n)
 }
 
-// DealArcaneDamage flips ArcaneDamageDealt so same-turn triggers reading "if you've dealt
-// arcane damage this turn" fire, and returns n so callers can fold the arcane damage into
-// their Play return in one expression.
+// DealArcaneDamage credits n arcane damage and, when LikelyDamageHits(n, false) approves,
+// flips ArcaneDamageDealt so same-turn triggers reading "if you've dealt arcane damage this
+// turn" fire. The value is credited unconditionally — even if the opponent expends a card or
+// resource to negate it, that's still net tempo gained — so only the trigger flag is gated by
+// the hit heuristic. Returns n so callers can fold the arcane damage into their Play return.
 func (s *TurnState) DealArcaneDamage(n int) int {
-	s.ArcaneDamageDealt = true
+	if LikelyDamageHits(n, false) {
+		s.ArcaneDamageDealt = true
+	}
 	return n
 }
 
-// DealAndLogArcaneDamage is the rider-line variant: deals n arcane damage (flipping
-// ArcaneDamageDealt via the underlying DealArcaneDamage call so same-turn "if you've
-// dealt arcane damage this turn" gates fire) and writes a "Dealt N arcane damage" sub-
-// line sourced under self so the format layer attaches it as a child of self's chain
-// entry. n>0 only — n=0 returns 0 without flipping the flag or writing a line.
+// DealAndLogArcaneDamage is the rider-line variant: credits n arcane damage (routed through
+// DealArcaneDamage so the same hit-gated ArcaneDamageDealt flip applies) and writes a
+// "Dealt N arcane damage" sub-line sourced under self so the format layer attaches it as a
+// child of self's chain entry. n>0 only — n=0 returns 0 without writing a line.
 func (s *TurnState) DealAndLogArcaneDamage(self *CardState, n int) int {
 	if n <= 0 {
 		return 0

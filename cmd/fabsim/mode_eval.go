@@ -67,8 +67,8 @@ func runEval(outPath string, deepShuffles, incoming, maxCopies int, seed int64, 
 // the simulated deck so callers can print its stats. The sanitize pass (replacing any
 // card.NotImplemented copies with legal substitutes drawn at maxCopies under fmtValue) runs
 // before Evaluate so the on-disk avg always reflects the cards the binary can actually
-// simulate. The stderr "avg X → Y; rewriting <path>" line lets the operator see the re-score
-// happening before the printed output appears.
+// simulate. The stderr "avg X → Y in <elapsed>; rewriting <path>" line lets the operator see
+// the re-score happening before the printed output appears.
 func evaluateAndPersist(outPath string, deepShuffles, incoming, maxCopies int, seed int64, fmtValue deckformat.Format) *deck.Deck {
 	loaded := mustLoadDeck(outPath)
 	// Wrap the loaded hero/weapons/cards in a fresh Deck so Evaluate's stats start from zero
@@ -81,9 +81,11 @@ func evaluateAndPersist(outPath string, deepShuffles, incoming, maxCopies int, s
 	rng := rand.New(rand.NewSource(seed))
 	savedAvg := loaded.Stats.Mean()
 	sanitizeLoadedDeck(d, maxCopies, rng, fmtValue.IsLegal)
+	start := time.Now()
 	d.Evaluate(deepShuffles, incoming, rng)
-	fmt.Fprintf(os.Stderr, "eval: avg %.3f → %.3f (delta %+.3f); rewriting %s\n",
-		savedAvg, d.Stats.Mean(), d.Stats.Mean()-savedAvg, outPath)
+	elapsed := time.Since(start)
+	fmt.Fprintf(os.Stderr, "eval: avg %.3f → %.3f (delta %+.3f) in %s; rewriting %s\n",
+		savedAvg, d.Stats.Mean(), d.Stats.Mean()-savedAvg, elapsed.Round(time.Millisecond), outPath)
 	if err := writeDeck(d, outPath); err != nil {
 		die("%v", err)
 	}
