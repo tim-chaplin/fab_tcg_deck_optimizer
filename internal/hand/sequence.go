@@ -13,32 +13,39 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/weapon"
 )
 
-// recordValueAndLog credits n to s.Value and appends a "label (+n)" line to s.Log. Negative
-// n clamps both contributions at 0 (FaB damage / prevention can't go negative). When n is 0
-// the line drops the "(+0)" suffix and renders as just the label — the chain step happened
-// but added no value, so the noise of "(+0)" on every non-attack action would clutter the
-// printout.
+// recordValueAndLog credits n to s.Value and appends a chain-event LogEntry (label + value)
+// to s.Log. Negative n clamps both contributions at 0 (FaB damage / prevention can't go
+// negative). The LogEntry is unformatted — FormatLogEntry renders it at snapshot time,
+// keeping per-permutation cost to a struct append.
 func recordValueAndLog(s *card.TurnState, label string, n int) {
 	n = max(0, n)
 	s.Value += n
-	if n == 0 {
-		s.Log = append(s.Log, label)
-	} else {
-		s.Log = append(s.Log, fmt.Sprintf("%s (+%d)", label, n))
-	}
+	s.Log = append(s.Log, card.LogEntry{Label: label, N: n})
 }
 
-// recordTrigger logs a trigger fire — same as recordValueAndLog but appends "(from <source>)"
-// after the value tag so the reader can trace which card caused the trigger to fire. Hero,
-// aura, and ephemeral triggers all route through here so the suffix is uniform.
+// recordTrigger logs a trigger fire — same as recordValueAndLog but with a Source field so
+// FormatLogEntry can append "(from <source>)" naming the card that caused the trigger.
+// Hero, aura, and ephemeral triggers all route through here so the suffix is uniform.
 func recordTrigger(s *card.TurnState, label, sourceName string, n int) {
 	n = max(0, n)
 	s.Value += n
-	if n == 0 {
-		s.Log = append(s.Log, fmt.Sprintf("%s (from %s)", label, sourceName))
-	} else {
-		s.Log = append(s.Log, fmt.Sprintf("%s (+%d) (from %s)", label, n, sourceName))
+	s.Log = append(s.Log, card.LogEntry{Label: label, Source: sourceName, N: n})
+}
+
+// FormatLogEntry renders a LogEntry into its display string. Chain entries with N=0 drop
+// the "(+0)" suffix; trigger entries always carry the "(from Source)" tag. Called at
+// snapshot time and from anywhere else that needs to convert a stored entry to text.
+func FormatLogEntry(e card.LogEntry) string {
+	if e.Source == "" {
+		if e.N == 0 {
+			return e.Label
+		}
+		return fmt.Sprintf("%s (+%d)", e.Label, e.N)
 	}
+	if e.N == 0 {
+		return fmt.Sprintf("%s (from %s)", e.Label, e.Source)
+	}
+	return fmt.Sprintf("%s (+%d) (from %s)", e.Label, e.N, e.Source)
 }
 
 // chainVerbFor picks the verb for a card's chain-step log line based on its types and the
@@ -542,6 +549,6 @@ func snapshotCarry(s *card.TurnState) CarryState {
 		Banish:       append([]card.Card(nil), s.Banish...),
 		Runechants:   s.Runechants,
 		AuraTriggers: append([]card.AuraTrigger(nil), s.AuraTriggers...),
-		Log:          append([]string(nil), s.Log...),
+		Log:          append([]card.LogEntry(nil), s.Log...),
 	}
 }

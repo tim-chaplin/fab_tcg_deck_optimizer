@@ -491,7 +491,7 @@ func cloneCarryState(cs hand.CarryState) hand.CarryState {
 		out.AuraTriggers = append([]card.AuraTrigger(nil), cs.AuraTriggers...)
 	}
 	if len(cs.Log) > 0 {
-		out.Log = append([]string(nil), cs.Log...)
+		out.Log = append([]card.LogEntry(nil), cs.Log...)
 	}
 	return out
 }

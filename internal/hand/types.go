@@ -54,13 +54,13 @@ type CarryState struct {
 	Runechants int
 	// AuraTriggers is the surviving AuraTrigger set at end of chain. Carries across.
 	AuraTriggers []card.AuraTrigger
-	// Log is the per-line trace of the winning permutation's chain — one entry per Play, hero
-	// trigger, aura trigger, ephemeral trigger, weapon swing. FormatBestTurn dumps it
-	// verbatim into the "My turn:" attack-chain section. Doesn't carry across turns
-	// semantically (next turn's chain logs into a fresh slice) but lives on CarryState because
-	// the snapshot mechanism already deep-copies every Carry slice; piggybacking avoids a
-	// parallel snapshot path.
-	Log []string
+	// Log is the per-event chain trace of the winning permutation — one entry per Play, hero
+	// trigger, aura trigger, ephemeral trigger, weapon swing. Stored as raw card.LogEntry
+	// structs to defer fmt.Sprintf cost until BuildTurnLog runs at end of EvaluateWith,
+	// keeping the snapshot path allocation-light (only the winning permutation's log gets
+	// formatted, and only when the deck-level Best actually changes). Doesn't carry across
+	// turns semantically but rides on CarryState's snapshot mechanism for free.
+	Log []card.LogEntry
 }
 
 // TurnSummary is the result of running Best on a hand: the winning card-role assignments

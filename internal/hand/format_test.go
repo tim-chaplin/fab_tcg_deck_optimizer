@@ -194,8 +194,8 @@ func TestFormatBestTurn_WeaponSwingInChain(t *testing.T) {
 		t.Errorf("want the weapon in the chain, got:\n%s", out)
 	}
 	var sawWeaponLog bool
-	for _, line := range got.State.Log {
-		if strings.Contains(line, "Reaping Blade: WEAPON ATTACK") {
+	for _, e := range got.State.Log {
+		if strings.Contains(e.Label, "Reaping Blade: WEAPON ATTACK") {
 			sawWeaponLog = true
 			break
 		}

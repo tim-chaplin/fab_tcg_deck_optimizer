@@ -37,11 +37,15 @@ func BuildTurnLog(t TurnSummary, startingRunechants int) TurnLog {
 		}
 	}
 
-	// My turn: attack-phase pitches followed by the chain log.
+	// My turn: attack-phase pitches followed by the chain log. Chain entries are stored as
+	// LogEntry structs on State.Log to defer fmt cost off the per-permutation hot path —
+	// they're formatted to strings here, in the once-per-best-turn assembly step.
 	for _, p := range attackPitches {
 		log.MyTurn = append(log.MyTurn, p.Card.Name()+": "+roleLabelWithArsenal(p, "PITCH"))
 	}
-	log.MyTurn = append(log.MyTurn, t.State.Log...)
+	for _, e := range t.State.Log {
+		log.MyTurn = append(log.MyTurn, FormatLogEntry(e))
+	}
 
 	// Opponent's turn: defense pitches, plain blocks, then Defense Reactions.
 	for _, p := range defensePitches {
