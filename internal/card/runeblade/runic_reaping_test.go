@@ -55,10 +55,11 @@ func TestRunicReaping_LikelyHitTargetNoPitchedAttack(t *testing.T) {
 	}
 }
 
-func TestRunicReaping_LikelyHitTargetWithPitchedAttack(t *testing.T) {
-	// Target is likely-to-hit AND an attack card was pitched → Play returns N (token credits) plus
-	// 1 (the pitched-attack rider). state.Runechants holds only the N tokens — the rider damage is
-	// direct, not a runechant.
+// TestRunicReaping_PitchedAttackBuffPushesIntoHitWindow: a printed-3 target buffed to 4 by
+// the pitched-attack +1{p} rider lands in the LikelyToHit window — both riders fire. The +1
+// rides on the target's BonusAttack so Play returns just the Runechant credits, and
+// EffectiveAttack already reflects the buff when the LikelyToHit check runs.
+func TestRunicReaping_PitchedAttackBuffPushesIntoHitWindow(t *testing.T) {
 	cases := []struct {
 		c card.Card
 		n int
@@ -68,12 +69,16 @@ func TestRunicReaping_LikelyHitTargetWithPitchedAttack(t *testing.T) {
 		{RunicReapingBlue{}, 1},
 	}
 	for _, tc := range cases {
+		target := &card.CardState{Card: stubAttackWithPower{power: 3}}
 		s := card.TurnState{
-			CardsRemaining: []*card.CardState{{Card: stubAttackWithPower{power: 4}}},
+			CardsRemaining: []*card.CardState{target},
 			Pitched:        []card.Card{stubRunebladeAttack{}},
 		}
-		if got := tc.c.Play(&s, &card.CardState{}); got != tc.n+1 {
-			t.Errorf("%s: Play() = %d, want %d (N tokens + 1 pitched-attack bonus)", tc.c.Name(), got, tc.n+1)
+		if got := tc.c.Play(&s, &card.CardState{}); got != tc.n {
+			t.Errorf("%s: Play() = %d, want %d (Runechant tokens; +1 rides on target's BonusAttack)", tc.c.Name(), got, tc.n)
+		}
+		if target.BonusAttack != 1 {
+			t.Errorf("%s: target BonusAttack = %d, want 1 (pitched-attack +1{p} rider)", tc.c.Name(), target.BonusAttack)
 		}
 		if s.Runechants != tc.n {
 			t.Errorf("%s: Runechants = %d, want %d", tc.c.Name(), s.Runechants, tc.n)
@@ -81,19 +86,44 @@ func TestRunicReaping_LikelyHitTargetWithPitchedAttack(t *testing.T) {
 	}
 }
 
-// TestRunicReaping_BlockableTargetDropsRunechants pins the LikelyToHit gate: when the target's
-// printed power (3) falls in the blockable range, the "if this hits" Runechant clause fizzles.
-// The pitched-attack +1{p} rider still fires because it isn't gated on hitting.
-func TestRunicReaping_BlockableTargetDropsRunechants(t *testing.T) {
+// TestRunicReaping_PitchedAttackBuffPushesPastHitWindow: a printed-4 target buffed to 5 by
+// the pitched-attack +1{p} rider falls OUT of the LikelyToHit window (5 isn't in {1,4,7} and
+// isn't dominate 5+). The Runechant rider doesn't fire even though it would have on the
+// printed-4 attack alone — buffs flow through the LikelyToHit check, not around it.
+func TestRunicReaping_PitchedAttackBuffPushesPastHitWindow(t *testing.T) {
+	target := &card.CardState{Card: stubAttackWithPower{power: 4}}
 	s := card.TurnState{
-		CardsRemaining: []*card.CardState{{Card: stubAttackWithPower{power: 3}}},
+		CardsRemaining: []*card.CardState{target},
 		Pitched:        []card.Card{stubRunebladeAttack{}},
 	}
-	if got := (RunicReapingRed{}).Play(&s, &card.CardState{}); got != 1 {
-		t.Errorf("Play() = %d, want 1 (blockable target drops Runechants, pitched-attack +1 still fires)", got)
+	if got := (RunicReapingRed{}).Play(&s, &card.CardState{}); got != 0 {
+		t.Errorf("Play() = %d, want 0 (buffed to 5 = blockable; runechant rider drops)", got)
+	}
+	if target.BonusAttack != 1 {
+		t.Errorf("target BonusAttack = %d, want 1 (pitched-attack +1{p} still grants)", target.BonusAttack)
 	}
 	if s.Runechants != 0 {
-		t.Errorf("Runechants = %d, want 0 (no tokens when target is blockable)", s.Runechants)
+		t.Errorf("Runechants = %d, want 0 (buffed-out-of-window target drops the rider)", s.Runechants)
+	}
+}
+
+// TestRunicReaping_BlockableTargetEvenAfterBuffDropsRunechants: a printed-2 target buffed to
+// 3 by the pitched-attack +1{p} rider still doesn't hit (3 isn't in {1,4,7}). The +1 lands
+// on the target's BonusAttack but the Runechant rider stays off.
+func TestRunicReaping_BlockableTargetEvenAfterBuffDropsRunechants(t *testing.T) {
+	target := &card.CardState{Card: stubAttackWithPower{power: 2}}
+	s := card.TurnState{
+		CardsRemaining: []*card.CardState{target},
+		Pitched:        []card.Card{stubRunebladeAttack{}},
+	}
+	if got := (RunicReapingRed{}).Play(&s, &card.CardState{}); got != 0 {
+		t.Errorf("Play() = %d, want 0 (buffed to 3 still blockable)", got)
+	}
+	if target.BonusAttack != 1 {
+		t.Errorf("target BonusAttack = %d, want 1", target.BonusAttack)
+	}
+	if s.Runechants != 0 {
+		t.Errorf("Runechants = %d, want 0", s.Runechants)
 	}
 	if s.AuraCreated {
 		t.Error("AuraCreated should stay false when no Runechant is created")

@@ -15,7 +15,8 @@ func TestCondemnToSlaughter_NoNextAttackReturnsZero(t *testing.T) {
 }
 
 func TestCondemnToSlaughter_NextAttackActionTriggers(t *testing.T) {
-	// A Runeblade attack action card in CardsRemaining triggers the +N{p} rider.
+	// A Runeblade attack action card in CardsRemaining picks up +N{p} on its BonusAttack;
+	// Play returns 0 (the +N attributes to the buffed attack, not Condemn).
 	cases := []struct {
 		c card.Card
 		n int
@@ -25,18 +26,26 @@ func TestCondemnToSlaughter_NextAttackActionTriggers(t *testing.T) {
 		{CondemnToSlaughterBlue{}, 1},
 	}
 	for _, tc := range cases {
-		s := card.TurnState{CardsRemaining: []*card.CardState{{Card: stubRunebladeAttack{}}}}
-		if got := tc.c.Play(&s, &card.CardState{}); got != tc.n {
-			t.Errorf("%s: Play() = %d, want %d", tc.c.Name(), got, tc.n)
+		target := &card.CardState{Card: stubRunebladeAttack{}}
+		s := card.TurnState{CardsRemaining: []*card.CardState{target}}
+		if got := tc.c.Play(&s, &card.CardState{}); got != 0 {
+			t.Errorf("%s: Play() = %d, want 0 (granter returns 0; +N rides on target's BonusAttack)", tc.c.Name(), got)
+		}
+		if target.BonusAttack != tc.n {
+			t.Errorf("%s: target BonusAttack = %d, want %d", tc.c.Name(), target.BonusAttack, tc.n)
 		}
 	}
 }
 
 func TestCondemnToSlaughter_WeaponCountsAsNextAttack(t *testing.T) {
 	// Unlike Runic Reaping, Condemn's rider accepts weapon swings as the "next attack."
-	s := card.TurnState{CardsRemaining: []*card.CardState{{Card: stubRunebladeWeapon{}}}}
-	if got := (CondemnToSlaughterRed{}).Play(&s, &card.CardState{}); got != 3 {
-		t.Errorf("Play() = %d, want 3 (weapon should qualify)", got)
+	target := &card.CardState{Card: stubRunebladeWeapon{}}
+	s := card.TurnState{CardsRemaining: []*card.CardState{target}}
+	if got := (CondemnToSlaughterRed{}).Play(&s, &card.CardState{}); got != 0 {
+		t.Errorf("Play() = %d, want 0 (granter returns 0; +N rides on target's BonusAttack)", got)
+	}
+	if target.BonusAttack != 3 {
+		t.Errorf("target BonusAttack = %d, want 3 (weapon should qualify)", target.BonusAttack)
 	}
 }
 

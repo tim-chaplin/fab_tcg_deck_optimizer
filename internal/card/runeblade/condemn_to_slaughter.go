@@ -52,12 +52,15 @@ func (CondemnToSlaughterBlue) GoAgain() bool              { return true }
 func (CondemnToSlaughterBlue) NotImplemented()             {}
 func (CondemnToSlaughterBlue) Play(s *card.TurnState, _ *card.CardState) int { return condemnToSlaughterBonus(s, 1) }
 
-// condemnToSlaughterBonus returns n if some Runeblade attack (attack action card or weapon swing)
-// is scheduled later this turn, otherwise 0.
+// condemnToSlaughterBonus grants +n to the first scheduled Runeblade attack (attack action
+// card or weapon swing) via pc.BonusAttack so the buffed attack's EffectiveAttack folds the
+// bonus into LikelyToHit and the chain credit lands on the target's slot. Returns 0;
+// Condemn's own contribution is zero.
 func condemnToSlaughterBonus(s *card.TurnState, n int) int {
 	for _, pc := range s.CardsRemaining {
 		if pc.Card.Types().IsRunebladeAttack() {
-			return n
+			pc.BonusAttack += n
+			return 0
 		}
 	}
 	return 0

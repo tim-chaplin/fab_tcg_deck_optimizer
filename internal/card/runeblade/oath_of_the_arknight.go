@@ -45,13 +45,16 @@ func (OathOfTheArknightBlue) Types() card.TypeSet        { return oathOfTheArkni
 func (OathOfTheArknightBlue) GoAgain() bool              { return true }
 func (OathOfTheArknightBlue) Play(s *card.TurnState, _ *card.CardState) int { return oathPlay(s, 1) }
 
+// oathPlay grants +n to the first scheduled Runeblade attack via pc.BonusAttack so the
+// buffed attack's EffectiveAttack folds the bonus into LikelyToHit and the chain credit lands
+// on the target's slot, not Oath's. Always creates a Runechant token (+1 damage), which IS
+// Oath's own contribution.
 func oathPlay(s *card.TurnState, n int) int {
-	bonus := 0
 	for _, pc := range s.CardsRemaining {
 		if pc.Card.Types().IsRunebladeAttack() {
-			bonus = n
+			pc.BonusAttack += n
 			break
 		}
 	}
-	return s.CreateRunechant() + bonus
+	return s.CreateRunechant()
 }

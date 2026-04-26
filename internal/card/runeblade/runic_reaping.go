@@ -53,6 +53,12 @@ func (RunicReapingBlue) Types() card.TypeSet        { return runicReapingTypes }
 func (RunicReapingBlue) GoAgain() bool              { return true }
 func (RunicReapingBlue) Play(s *card.TurnState, _ *card.CardState) int { return runicReapingPlay(s, 1) }
 
+// runicReapingPlay finds the next Runeblade attack action card and applies the +1{p}
+// pitched-attack rider via pc.BonusAttack so the buffed attack's EffectiveAttack folds it
+// into LikelyToHit. The Runechant rider gates on the target's hit-likelihood AFTER the
+// BonusAttack has been folded in, which can flip the rider on (e.g. a base-3 attack +1
+// becomes 4, which lands in {1,4,7}). The Runechants themselves stay credited to Runic
+// Reaping — they're its own contribution, separate from the attack-power buff on the target.
 func runicReapingPlay(s *card.TurnState, n int) int {
 	var target *card.CardState
 	for _, pc := range s.CardsRemaining {
@@ -65,15 +71,14 @@ func runicReapingPlay(s *card.TurnState, n int) int {
 	if target == nil {
 		return 0
 	}
-	bonus := 0
 	for _, p := range s.Pitched {
 		if p.Types().Has(card.TypeAttack) {
-			bonus = 1
+			target.BonusAttack++
 			break
 		}
 	}
 	if card.LikelyToHit(target) {
-		return s.CreateRunechants(n) + bonus
+		return s.CreateRunechants(n)
 	}
-	return bonus
+	return 0
 }
