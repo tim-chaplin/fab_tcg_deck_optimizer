@@ -24,26 +24,27 @@ var moonWishTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.Type
 // VariableCost solver pre-screens.
 const moonWishPrintedCost = 2
 
-// moonWishCost returns 0 when the partition has any Held card to spend, else the printed
-// cost. Shared across all three pitch variants since the alt cost is identical.
+// moonWishCost returns 0 when there's any card left in hand to spend on the alt cost,
+// else the printed cost. Shared across all three pitch variants since the alt cost is
+// identical.
 func moonWishCost(s *card.TurnState) int {
-	if s != nil && len(s.Held) > 0 {
+	if s != nil && len(s.Hand) > 0 {
 		return 0
 	}
 	return moonWishPrintedCost
 }
 
-// moonWishPlay applies the alt cost mutation (when a Held card is available), runs the
+// moonWishPlay applies the alt cost mutation (when a hand card is available), runs the
 // printed attack, and on a likely hit tutors a Sun Kiss from the deck. Sun Kiss plays
-// immediately when self has go-again granted by a prior chain card; otherwise it carries to
-// the next hand via s.Drawn.
+// immediately when self has go-again granted by a prior chain card; otherwise it carries
+// to the next hand via s.Hand.
 func moonWishPlay(c card.Card, attack int, s *card.TurnState, self *card.CardState) int {
-	if len(s.Held) > 0 {
-		moved := s.Held[0]
-		s.Held = s.Held[1:]
-		s.ReturnedToTopOfDeck = append(s.ReturnedToTopOfDeck, moved)
-		// Prepend to deck so any same-turn deck-top reader (e.g. the Sun Kiss tutor's
-		// post-resolution DrawOne) sees it.
+	// Alt cost: pop a hand card and prepend to deck. Same-turn deck-top readers (the Sun
+	// Kiss tutor's post-resolution DrawOne) see it; the next turn's deal sees it too via
+	// the sim's end-of-turn copy of s.Deck.
+	if len(s.Hand) > 0 {
+		moved := s.Hand[0]
+		s.Hand = s.Hand[1:]
 		newDeck := make([]card.Card, 0, len(s.Deck)+1)
 		newDeck = append(newDeck, moved)
 		newDeck = append(newDeck, s.Deck...)
@@ -58,17 +59,16 @@ func moonWishPlay(c card.Card, attack int, s *card.TurnState, self *card.CardSta
 		return attack
 	}
 	s.Deck = removeFirstByID(s.Deck, sk.ID())
-	// Mirror the s.Deck slice rewrite into the underlying buf via applyTurnResult so the
-	// tutored card stays out of future turns.
-	s.DeckRemoved = append(s.DeckRemoved, sk)
 
 	if !self.EffectiveGoAgain() {
-		s.Drawn = append(s.Drawn, sk)
+		// Tutor lands the card in hand; carries to next turn via the sim's end-of-turn
+		// copy of s.Hand.
+		s.Hand = append(s.Hand, sk)
 		return attack
 	}
 	// Go-again means Moon Wish gets a chain extension this turn. Pre-append Moon Wish to
 	// CardsPlayed so Sun Kiss's "if you've played Moon Wish" synergy fires; pop after so
-	// the solver's normal post-Play append (in playSequenceWithMeta) doesn't double-add.
+	// the sim's normal post-Play append doesn't double-add.
 	s.CardsPlayed = append(s.CardsPlayed, c)
 	skSelf := &card.CardState{Card: sk}
 	skDmg := sk.Play(s, skSelf)

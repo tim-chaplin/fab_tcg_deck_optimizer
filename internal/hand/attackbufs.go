@@ -49,10 +49,10 @@ type attackBufs struct {
 	// pitchedValsScratch backs the per-leaf "pitched values" slice consumed by phase-mask
 	// enumeration. Re-sliced to [:0] at the start of every leaf to eliminate a per-leaf alloc.
 	pitchedValsScratch []int
-	pitchedBuf         []card.Card
-	attackersBuf       []card.Card
-	defendersBuf       []card.Card
-	heldBuf            []card.Card
+	pitchedBuf   []card.Card
+	attackersBuf []card.Card
+	defendersBuf []card.Card
+	heldBuf      []card.Card
 	// defenseGravScratch / attackGravScratch back state.Graveyard during DR Plays and attack-
 	// chain permutations respectively. Reset via [:0]+append per iteration so card effects can
 	// freely mutate their view without leaking into the next one. Split so the two phases
@@ -66,28 +66,6 @@ type attackBufs struct {
 	// permutations. Reset per permutation (empty, no cross-turn carry) so one ordering's
 	// registrations don't leak into the next.
 	ephemeralTriggersScratch []card.EphemeralAttackTrigger
-	// drawnWinnerScratch / auraTriggersWinnerScratch back sequenceContext.drawnWinner and
-	// auraTriggersWinner. Each sequenceContext borrows them at construction so the eval
-	// closure's winner snapshot (append-into-[:0] on every improved permutation) reuses one
-	// backing array per Best call. Without this, each of the thousands of sequenceContexts a
-	// Best call builds would start with a nil slice and allocate a fresh backing array the
-	// first time a winner's AuraTriggers or Drawn is non-empty — the hottest alloc site in the
-	// attack-enumeration inner loop. fillContributions clones the winners into summary.Drawn
-	// / summary.AuraTriggers before returning so no downstream reader aliases this shared
-	// storage.
-	drawnWinnerScratch        []card.Card
-	auraTriggersWinnerScratch []card.AuraTrigger
-	// returnedToTopOfDeckWinnerScratch backs sequenceContext.returnedToTopOfDeckWinner — the alt-cost-
-	// consumed Held cards from the winning permutation, surfaced on TurnSummary so the deck
-	// loop can suppress double-counting them in nextHeld.
-	returnedToTopOfDeckWinnerScratch []card.Card
-	// deckRemovedWinnerScratch backs sequenceContext.deckRemovedWinner — cards taken out of
-	// the deck this turn (DrawOne, tutor effects). The deck loop patches buf to remove each.
-	deckRemovedWinnerScratch []card.Card
-	// graveyardWinnerScratch backs sequenceContext.graveyardWinner — every card that landed
-	// in the graveyard during the winning permutation (played hand cards, tutored-and-played
-	// cards, AuraTriggers that destroyed themselves).
-	graveyardWinnerScratch []card.Card
 	// perCardScratch is sized maxAttackers (handSize + weaponCount). Written by playSequence only
 	// when the caller passes a non-nil perCardOut; bestSequence snapshots the winning
 	// permutation's per-card damage from here into the caller's output buffer. The partition-loop
@@ -159,16 +137,11 @@ func newAttackBufs(handSize, weaponCount int, weapons []weapon.Weapon) *attackBu
 		attackersBuf:              make([]card.Card, 0, handSize+1),
 		defendersBuf:              make([]card.Card, 0, handSize+1),
 		heldBuf:                   make([]card.Card, 0, handSize+1),
-		defenseGravScratch:        make([]card.Card, 0, handSize+1),
-		attackGravScratch:         make([]card.Card, 0, maxAttackers),
-		auraTriggersScratch:       make([]card.AuraTrigger, 0, maxAttackers),
-		ephemeralTriggersScratch:  make([]card.EphemeralAttackTrigger, 0, maxAttackers),
-		drawnWinnerScratch:        make([]card.Card, 0, maxAttackers),
-		auraTriggersWinnerScratch: make([]card.AuraTrigger, 0, maxAttackers),
-		returnedToTopOfDeckWinnerScratch: make([]card.Card, 0, handSize+1),
-		deckRemovedWinnerScratch:         make([]card.Card, 0, maxAttackers),
-		graveyardWinnerScratch:           make([]card.Card, 0, maxAttackers),
-		perCardScratch:            make([]float64, maxAttackers),
+		defenseGravScratch:       make([]card.Card, 0, handSize+1),
+		attackGravScratch:        make([]card.Card, 0, maxAttackers),
+		auraTriggersScratch:      make([]card.AuraTrigger, 0, maxAttackers),
+		ephemeralTriggersScratch: make([]card.EphemeralAttackTrigger, 0, maxAttackers),
+		perCardScratch:           make([]float64, maxAttackers),
 		perCardTriggerScratch:     make([]float64, maxAttackers),
 		perCardAuraTriggerScratch: make([]float64, maxAttackers),
 		fillContribWinnerOrder:    make([]card.Card, maxAttackers),
@@ -179,29 +152,11 @@ func newAttackBufs(handSize, weaponCount int, weapons []weapon.Weapon) *attackBu
 	}
 }
 
-// getAttackBufs returns this Evaluator's scratch-buffer set, rebuilding when (handSize, weapons)
-// changes. Single-slot per Evaluator: iterate runs tens of thousands of same-shape hands, so a
-// slot outperforms a keyed pool for this workload.
+// getAttackBufs returns a fresh attackBufs sized for this hand. The state-as-output refactor
+// dropped the per-Evaluator scratch caching; callers allocate fresh each time. If profiling
+// shows pressure, the cache can come back behind the same surface.
 func (e *Evaluator) getAttackBufs(handSize int, weapons []weapon.Weapon) *attackBufs {
-	var wids [2]card.ID
-	for i, w := range weapons {
-		if i >= len(wids) {
-			break
-		}
-		wids[i] = w.ID()
-	}
-	if e.bufsValid &&
-		e.bufsHandSize == handSize &&
-		e.bufsWeaponCount == len(weapons) &&
-		e.bufsWeaponIDs == wids {
-		return e.bufs
-	}
-	e.bufs = newAttackBufs(handSize, len(weapons), weapons)
-	e.bufsHandSize = handSize
-	e.bufsWeaponCount = len(weapons)
-	e.bufsWeaponIDs = wids
-	e.bufsValid = true
-	return e.bufs
+	return newAttackBufs(handSize, len(weapons), weapons)
 }
 
 // fillPartitionPerCardBufs writes the per-card values the partition recurse reads at each leaf:

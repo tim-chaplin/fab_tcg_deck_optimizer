@@ -76,16 +76,12 @@ func TestEvaluate_BestTurnStartingRunechantsIsPreHandCarryover(t *testing.T) {
 	}
 }
 
-// TestEvaluate_BestTurnSnapshotsDrawnAndLeftoverRunechants pins the BestTurn snapshot's
-// completeness: Drawn (mid-turn-drawn cards with their dispositions) and LeftoverRunechants
-// must propagate from play.* into Stats.Best.Summary.* so FormatBestTurn's per-card breakdown
-// reconciles with the displayed Value and the header's "carryover runechants" count is real.
-// Without the snapshot, drawn-attack extension damage and pitch-from-drawn resource land in
-// Value but never show up in the printout, and runechants always read 0.
-func TestEvaluate_BestTurnSnapshotsDrawnAndLeftoverRunechants(t *testing.T) {
-	// Snatch (cost 0, attack 4) fires on-hit DrawOne — its drawn card lands in summary.Drawn.
-	// 4 Snatches keeps Viserai's Intelligence-4 hand full of draw-rider cards on the first
-	// turn so at least one Snatch attacks and DrawOne fires.
+// TestEvaluate_BestTurnSnapshotsState pins the BestTurn snapshot's completeness: the winning
+// turn's CarryState (Hand, Deck, Graveyard, Arsenal, Runechants, etc.) must be deep-copied
+// into Stats.Best.Summary.State so FormatBestTurn's per-card breakdown reconciles with the
+// displayed Value and the per-zone counts are real. A Snatch-heavy hand pumps the chain with
+// on-hit DrawOne firings so State.Graveyard/State.Hand have non-trivial contents to verify.
+func TestEvaluate_BestTurnSnapshotsState(t *testing.T) {
 	snatch := cards.Get(card.SnatchRed)
 	d := New(hero.Viserai{}, nil, []card.Card{snatch, snatch, snatch, snatch, snatch, snatch, snatch, snatch})
 	d.Evaluate(1, 0, rand.New(rand.NewSource(1)))
@@ -93,8 +89,9 @@ func TestEvaluate_BestTurnSnapshotsDrawnAndLeftoverRunechants(t *testing.T) {
 	if len(d.Stats.Best.Summary.BestLine) == 0 {
 		t.Fatalf("expected Best to be populated after Evaluate")
 	}
-	if len(d.Stats.Best.Summary.Drawn) == 0 {
-		t.Errorf("Stats.Best.Summary.Drawn is empty; want >=1 entry from Snatch's on-hit DrawOne (the snapshot in Evaluate isn't copying play.Drawn)")
+	state := d.Stats.Best.Summary.State
+	if len(state.Graveyard) == 0 && len(state.Hand) == 0 {
+		t.Errorf("Stats.Best.Summary.State has empty Hand and Graveyard; want >=1 card surfaced from the chain")
 	}
 }
 

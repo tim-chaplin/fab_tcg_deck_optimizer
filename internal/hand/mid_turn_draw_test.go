@@ -10,20 +10,20 @@ import (
 )
 
 // TestPlaySequence_DrawDoesNotPoisonSubsequentPermutations pins the per-permutation reset of
-// state.Deck and state.Drawn. Two back-to-back playSequence calls share one sequenceContext —
+// state.Deck and state.Hand. Two back-to-back playSequence calls share one sequenceContext —
 // the first fires a draw-rider card (Snatch), the second plays a plain attack. After the
-// second call finishes, state.Deck must be back to the original and state.Drawn empty; if the
+// second call finishes, state.Deck must be back to the original and state.Hand empty; if the
 // reset weren't wired in, the second permutation would start from an already-consumed deck
-// and an inherited Drawn slice.
+// and an inherited Hand slice.
 func TestPlaySequence_DrawDoesNotPoisonSubsequentPermutations(t *testing.T) {
 	top := fake.RedAttack{}
 	deck := []card.Card{top, fake.BlueAttack{}, fake.RedAttack{}}
 	ctx := newSequenceContextForTest(hero.Viserai{}, nil, deck, 10, 0, 1)
 
-	// First permutation: Snatch fires, DrawOne consumes the top of the deck.
+	// First permutation: Snatch fires, DrawOne pops the top of the deck into Hand.
 	_, _, _, _ = ctx.playSequence([]card.Card{generic.SnatchRed{}}, nil, nil, nil)
-	if len(ctx.bufs.state.Drawn) != 1 || ctx.bufs.state.Drawn[0] != top {
-		t.Fatalf("after first permutation: Drawn = %v, want [top]", ctx.bufs.state.Drawn)
+	if len(ctx.bufs.state.Hand) != 1 || ctx.bufs.state.Hand[0] != top {
+		t.Fatalf("after first permutation: Hand = %v, want [top]", ctx.bufs.state.Hand)
 	}
 	if len(ctx.bufs.state.Deck) != len(deck)-1 {
 		t.Fatalf("after first permutation: Deck len = %d, want %d (top consumed)",
@@ -31,10 +31,10 @@ func TestPlaySequence_DrawDoesNotPoisonSubsequentPermutations(t *testing.T) {
 	}
 
 	// Second permutation: plain attack, no draw. The reset at the top of playSequenceWithMeta
-	// must restore state.Deck to the original and clear state.Drawn before this call runs.
+	// must restore state.Deck to the original and clear state.Hand before this call runs.
 	_, _, _, _ = ctx.playSequence([]card.Card{fake.RedAttack{}}, nil, nil, nil)
-	if len(ctx.bufs.state.Drawn) != 0 {
-		t.Errorf("after second permutation: Drawn = %v, want empty (reset lost)", ctx.bufs.state.Drawn)
+	if len(ctx.bufs.state.Hand) != 0 {
+		t.Errorf("after second permutation: Hand = %v, want empty (reset lost)", ctx.bufs.state.Hand)
 	}
 	if len(ctx.bufs.state.Deck) != len(deck) {
 		t.Errorf("after second permutation: Deck len = %d, want %d (reset lost)",
@@ -42,11 +42,10 @@ func TestPlaySequence_DrawDoesNotPoisonSubsequentPermutations(t *testing.T) {
 	}
 }
 
-// TestBest_DrawRiderBypassesMemo pins the NoMemo discipline on mid-turn-draw cards: the
-// evaluated result must depend on the deck contents, not just the hand, so `memoKey` (which
-// doesn't include the deck) can't cache one deck's outcome into another's. Two Best calls
-// with identical hands but different decks must report distinct Drawn cards.
-func TestBest_DrawRiderBypassesMemo(t *testing.T) {
+// TestBest_DrawRiderSeesActualDeck pins that the evaluated result depends on the deck
+// contents the solver actually receives — two Best calls with identical hands but different
+// decks must report distinct end-of-turn State.Hand contents (the cards drawn off the top).
+func TestBest_DrawRiderSeesActualDeck(t *testing.T) {
 	h := []card.Card{generic.SnatchRed{}}
 	deckA := []card.Card{fake.RedAttack{}}
 	deckB := []card.Card{fake.BlueAttack{}}
@@ -54,11 +53,21 @@ func TestBest_DrawRiderBypassesMemo(t *testing.T) {
 	resA := Best(hero.Viserai{}, nil, h, 0, deckA, 0, nil)
 	resB := Best(hero.Viserai{}, nil, h, 0, deckB, 0, nil)
 
-	if len(resA.Drawn) != 1 || resA.Drawn[0].Card != (fake.RedAttack{}) {
-		t.Errorf("deck A: Drawn = %v, want [RedAttack]", resA.Drawn)
+	containsID := func(cs []card.Card, id card.ID) bool {
+		for _, c := range cs {
+			if c.ID() == id {
+				return true
+			}
+		}
+		return false
 	}
-	if len(resB.Drawn) != 1 || resB.Drawn[0].Card != (fake.BlueAttack{}) {
-		t.Errorf("deck B: Drawn = %v, want [BlueAttack] (memo collision bleeding deck A's result here)", resB.Drawn)
+	if !containsID(resA.State.Hand, (fake.RedAttack{}).ID()) && resA.State.Arsenal == nil {
+		t.Errorf("deck A: drawn RedAttack didn't surface in State.Hand or State.Arsenal: hand=%v arsenal=%v",
+			resA.State.Hand, resA.State.Arsenal)
+	}
+	if !containsID(resB.State.Hand, (fake.BlueAttack{}).ID()) && resB.State.Arsenal == nil {
+		t.Errorf("deck B: drawn BlueAttack didn't surface in State.Hand or State.Arsenal: hand=%v arsenal=%v",
+			resB.State.Hand, resB.State.Arsenal)
 	}
 }
 

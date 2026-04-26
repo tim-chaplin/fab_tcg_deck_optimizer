@@ -2,7 +2,8 @@ package hand
 
 // Per-card contribution attribution: once the partition enumerator picks the winning line,
 // fillContributions runs a tracked replay so every BestLine entry carries its own damage /
-// block / pitch share, and AttackChain surfaces the weapons that never appear on BestLine.
+// block / pitch share, AttackChain surfaces the weapons that never appear on BestLine, and
+// summary.State carries the winning permutation's end-of-chain CarryState.
 
 import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
@@ -59,10 +60,14 @@ func fillDefenseContributions(line []CardAssignment, pitched []card.Card, deck [
 //   - Attack: per-card damage from the winning attack-chain replay.
 //   - Held / Arsenal: zero (contributed nothing this turn).
 //
-// Called once per Best call after the partition loop picks the winner. All transient slices
-// (pitched/attackers/chain/winnerOrder/perCard/used) borrow attackBufs slots so nothing
-// allocates here.
-func fillContributions(summary *TurnSummary, hero hero.Hero, weapons []weapon.Weapon, swungNames []string, budget chainBudget, deck []card.Card, bufs *attackBufs, incomingDamage, runechantCarryover int, priorAuraTriggers []card.AuraTrigger) {
+// Also captures the winning permutation's CarryState (end-of-chain Hand, Deck, Arsenal,
+// Graveyard, Banish, Runechants, AuraTriggers) into summary.State so the deck loop can adopt
+// it wholesale into next-turn state.
+//
+// arsenalAtChainStart is the arsenal-in card when the partition kept it in the slot, nil
+// otherwise — same value bestAttackWithWeapons received during enumeration. Threading it
+// through ensures the replay starts with the same s.Arsenal the winning permutation saw.
+func fillContributions(summary *TurnSummary, hero hero.Hero, weapons []weapon.Weapon, swungNames []string, budget chainBudget, deck []card.Card, arsenalAtChainStart card.Card, bufs *attackBufs, incomingDamage, runechantCarryover int, priorAuraTriggers []card.AuraTrigger) {
 	line := summary.BestLine
 
 	// Reconstruct pitched, attackers, and held from the winning line. The arsenal-in entry
@@ -110,59 +115,33 @@ func fillContributions(summary *TurnSummary, hero hero.Hero, weapons []weapon.We
 		// reproduces the exact permutation that won during enumeration; per-card damage
 		// depends on order.
 		ctx := &sequenceContext{
-			hero:               hero,
-			pitched:            pitched,
-			deck:               deck,
-			held:               held,
-			bufs:               bufs,
-			resourceBudget:     budget.resource,
-			runechantCarryover: runechantCarryover,
-			incomingDamage:     incomingDamage,
-			blockTotal:         sumDef,
-			hasAttackPitches:   budget.hasAttackPitches,
-			maxAttackPitch:     budget.maxPitch,
-			arsenalInIdx:       arsenalInIdx,
-			priorAuraTriggers:  priorAuraTriggers,
-			// Same borrow as bestAttackWithWeapons above — fillContributions clones the
-			// winners into summary before returning, so sharing bufs-backed storage is safe.
-			drawnWinner:               bufs.drawnWinnerScratch[:0],
-			auraTriggersWinner:        bufs.auraTriggersWinnerScratch[:0],
-			returnedToTopOfDeckWinner: bufs.returnedToTopOfDeckWinnerScratch[:0],
-			deckRemovedWinner:         bufs.deckRemovedWinnerScratch[:0],
-			graveyardWinner:           bufs.graveyardWinnerScratch[:0],
+			hero:                hero,
+			pitched:             pitched,
+			deck:                deck,
+			handStart:           held,
+			arsenalAtChainStart: arsenalAtChainStart,
+			bufs:                bufs,
+			resourceBudget:      budget.resource,
+			runechantCarryover:  runechantCarryover,
+			incomingDamage:      incomingDamage,
+			blockTotal:          sumDef,
+			hasAttackPitches:    budget.hasAttackPitches,
+			maxAttackPitch:      budget.maxPitch,
+			arsenalInIdx:        arsenalInIdx,
+			priorAuraTriggers:   priorAuraTriggers,
 		}
-		ctx.seedState()
 		fillAttackChainContributions(summary, chain, ctx)
-		// Copy the winning permutation's drawn cards out as CardAssignments. Read from
-		// ctx.drawnWinner (bestSequence's winner snapshot), not bufs.state.Drawn — state.Drawn
-		// reflects whichever permutation Heap's algorithm iterated last, which can diverge
-		// from the winner when different permutations trigger different draws. Drawn cards
-		// start Held with zero contribution; promoteRandomHeldToArsenal may flip one to
-		// Arsenal post-enumeration.
-		if drawn := ctx.drawnWinner; len(drawn) > 0 {
-			summary.Drawn = make([]CardAssignment, len(drawn))
-			for i, c := range drawn {
-				summary.Drawn[i] = CardAssignment{Card: c, Role: Held}
-			}
-		}
-		// Fresh slice so the returned TurnSummary doesn't alias ctx's buf-backed scratch — the
-		// memo keeps TurnSummaries around and a later Best call would otherwise overwrite the
-		// cached entry's triggers on its next permutation sweep.
-		if n := len(ctx.auraTriggersWinner); n > 0 {
-			summary.AuraTriggers = make([]card.AuraTrigger, n)
-			copy(summary.AuraTriggers, ctx.auraTriggersWinner)
-		}
-		if n := len(ctx.returnedToTopOfDeckWinner); n > 0 {
-			summary.ReturnedToTopOfDeck = make([]card.Card, n)
-			copy(summary.ReturnedToTopOfDeck, ctx.returnedToTopOfDeckWinner)
-		}
-		if n := len(ctx.deckRemovedWinner); n > 0 {
-			summary.DeckRemoved = make([]card.Card, n)
-			copy(summary.DeckRemoved, ctx.deckRemovedWinner)
-		}
-		if n := len(ctx.graveyardWinner); n > 0 {
-			summary.Graveyard = make([]card.Card, n)
-			copy(summary.Graveyard, ctx.graveyardWinner)
+		summary.State = ctx.carryWinner
+	} else {
+		// No chain: synthesise a CarryState from the partition + carryover so the deck loop
+		// still gets a usable next-turn seed (e.g. a hand with no attacks but a Held arsenal-in
+		// card and the unchanged deck).
+		summary.State = CarryState{
+			Hand:         append([]card.Card(nil), held...),
+			Deck:         append([]card.Card(nil), deck...),
+			Arsenal:      arsenalAtChainStart,
+			Runechants:   runechantCarryover,
+			AuraTriggers: append([]card.AuraTrigger(nil), priorAuraTriggers...),
 		}
 	}
 }

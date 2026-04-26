@@ -114,8 +114,8 @@ func TestBest_AllHeldWhenNoLegalPlay(t *testing.T) {
 	if got.BestLine[0].Role != Arsenal {
 		t.Errorf("role = %s, want ARSENAL (empty slot + Held card → promoted)", got.BestLine[0].Role)
 	}
-	if got.ArsenalCard == nil || got.ArsenalCard.ID() != card.ToughenUpBlue {
-		t.Errorf("ArsenalCard = %v, want Toughen Up Blue", got.ArsenalCard)
+	if got.State.Arsenal == nil || got.State.Arsenal.ID() != card.ToughenUpBlue {
+		t.Errorf("ArsenalCard = %v, want Toughen Up Blue", got.State.Arsenal)
 	}
 	if got.BestLine[0].Contribution != 0 {
 		t.Errorf("Contribution = %.1f, want 0 (card sits in arsenal, real value accrues on a later turn)", got.BestLine[0].Contribution)

@@ -2,8 +2,8 @@ package card
 
 import "testing"
 
-// TestDrawOne_AppendsTopAndAdvancesDeck: DrawOne moves the top card from Deck into Drawn and
-// preserves draw order for the caller.
+// TestDrawOne_AppendsTopAndAdvancesDeck: DrawOne pops the top of Deck and appends it to Hand,
+// preserving draw order for downstream effects.
 func TestDrawOne_AppendsTopAndAdvancesDeck(t *testing.T) {
 	a, b, c := stubCard{name: "a"}, stubCard{name: "b"}, stubCard{name: "c"}
 	s := &TurnState{Deck: []Card{a, b, c}}
@@ -15,23 +15,23 @@ func TestDrawOne_AppendsTopAndAdvancesDeck(t *testing.T) {
 	if s.Deck[0] != b {
 		t.Errorf("Deck[0] = %v, want b (top advanced past a)", s.Deck[0])
 	}
-	if len(s.Drawn) != 1 || s.Drawn[0] != a {
-		t.Errorf("Drawn = %v, want [a]", s.Drawn)
+	if len(s.Hand) != 1 || s.Hand[0] != a {
+		t.Errorf("Hand = %v, want [a]", s.Hand)
 	}
 
 	s.DrawOne()
-	if len(s.Drawn) != 2 || s.Drawn[1] != b {
-		t.Errorf("Drawn after second draw = %v, want [a, b]", s.Drawn)
+	if len(s.Hand) != 2 || s.Hand[1] != b {
+		t.Errorf("Hand after second draw = %v, want [a, b]", s.Hand)
 	}
 }
 
-// TestDrawOne_EmptyDeckIsNoOp: with an empty deck the helper returns silently; Drawn stays
-// nil so callers don't see a spurious zero-value card.
+// TestDrawOne_EmptyDeckIsNoOp: with an empty deck the helper returns silently; Hand stays
+// untouched so callers don't see a spurious zero-value card.
 func TestDrawOne_EmptyDeckIsNoOp(t *testing.T) {
 	s := &TurnState{}
 	s.DrawOne()
-	if len(s.Drawn) != 0 {
-		t.Errorf("Drawn = %v, want empty on no-deck draw", s.Drawn)
+	if len(s.Hand) != 0 {
+		t.Errorf("Hand = %v, want empty on no-deck draw", s.Hand)
 	}
 	if s.Deck != nil {
 		t.Errorf("Deck = %v, want nil", s.Deck)

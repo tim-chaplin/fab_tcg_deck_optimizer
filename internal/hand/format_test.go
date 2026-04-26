@@ -335,35 +335,18 @@ func TestFormatBestTurn_StartOfTurnHeaderRunechantsOnly(t *testing.T) {
 	}
 }
 
-// TestFormatBestTurn_DrawnCardsRendered pins each role a drawn card can take — Held in the
-// footer, Arsenal in the footer — to a tagged line in the printout. The summary is hand-built
-// so the test exercises only the formatter.
-func TestFormatBestTurn_DrawnCardsRendered(t *testing.T) {
-	t.Run("held lands in the footer", func(t *testing.T) {
-		summary := TurnSummary{
-			Drawn: []CardAssignment{
-				{Card: fake.RedAttack{}, Role: Held},
-			},
-		}
-		out := FormatBestTurn(summary, 0)
-		want := "(held: cardtest.RedAttack (drawn))"
-		if !strings.Contains(out, want) {
-			t.Errorf("missing %q in:\n%s", want, out)
-		}
-	})
-
-	t.Run("arsenal lands in the footer", func(t *testing.T) {
-		summary := TurnSummary{
-			Drawn: []CardAssignment{
-				{Card: fake.RedAttack{}, Role: Arsenal},
-			},
-		}
-		out := FormatBestTurn(summary, 0)
-		want := "(arsenal: cardtest.RedAttack (drawn))"
-		if !strings.Contains(out, want) {
-			t.Errorf("missing %q in:\n%s", want, out)
-		}
-	})
+// TestFormatBestTurn_HandHeldRenderedInFooter pins the held-footer rendering — every card in
+// State.Hand surfaces as one "(held: NAME)" trailing line, regardless of whether it started
+// the turn in hand or got drawn / tutored mid-chain (both flavours land in State.Hand).
+func TestFormatBestTurn_HandHeldRenderedInFooter(t *testing.T) {
+	summary := TurnSummary{
+		State: CarryState{Hand: []card.Card{fake.RedAttack{}}},
+	}
+	out := FormatBestTurn(summary, 0)
+	want := "(held: cardtest.RedAttack)"
+	if !strings.Contains(out, want) {
+		t.Errorf("missing %q in:\n%s", want, out)
+	}
 }
 
 // TestFormatContribution_IntegerVsFractional covers the small helper that chooses between
