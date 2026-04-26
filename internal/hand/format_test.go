@@ -295,9 +295,9 @@ func TestFormatBestTurn_ArsenalInPlayedOnChain(t *testing.T) {
 }
 
 // TestFormatBestTurn_WeaponSwingInChain makes sure a swung weapon shows up in the chain with
-// a WEAPON ATTACK label, sourced from the dispatcher's Log entry (chainVerbFor's TypeWeapon
-// branch). The State.Log assertion pins the dispatcher → log → format pipeline for weapons
-// since FormatBestTurn now reads weapon swings from State.Log rather than SwungWeapons.
+// a WEAPON ATTACK label, sourced from the dispatcher's Log entry. The State.Log assertion
+// pins the dispatcher → log → format pipeline for weapons; FormatBestTurn reads weapon
+// swings from State.Log rather than SwungWeapons.
 func TestFormatBestTurn_WeaponSwingInChain(t *testing.T) {
 	h := []card.Card{fake.RedAttack{}}
 	weapons := []weapon.Weapon{weapon.ReapingBlade{}}
