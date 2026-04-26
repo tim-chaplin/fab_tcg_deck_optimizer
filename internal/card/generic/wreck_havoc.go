@@ -24,7 +24,7 @@ func (WreckHavocRed) GoAgain() bool            { return false }
 // not implemented: defense-reaction lockout, on-hit arsenal banish
 func (WreckHavocRed) NotImplemented() {}
 func (WreckHavocRed) Play(s *card.TurnState, self *card.CardState) {
-	s.ApplyAndLogEffectiveAttackPlus(self, wreckHavocBonus(self))
+	s.ApplyAndLogEffectiveAttack(self)
 }
 
 type WreckHavocYellow struct{}
@@ -41,7 +41,7 @@ func (WreckHavocYellow) GoAgain() bool            { return false }
 // not implemented: defense-reaction lockout, on-hit arsenal banish
 func (WreckHavocYellow) NotImplemented() {}
 func (WreckHavocYellow) Play(s *card.TurnState, self *card.CardState) {
-	s.ApplyAndLogEffectiveAttackPlus(self, wreckHavocBonus(self))
+	s.ApplyAndLogEffectiveAttack(self)
 }
 
 type WreckHavocBlue struct{}
@@ -58,14 +58,5 @@ func (WreckHavocBlue) GoAgain() bool            { return false }
 // not implemented: defense-reaction lockout, on-hit arsenal banish
 func (WreckHavocBlue) NotImplemented() {}
 func (WreckHavocBlue) Play(s *card.TurnState, self *card.CardState) {
-	s.ApplyAndLogEffectiveAttackPlus(self, wreckHavocBonus(self))
-}
-
-// wreckHavocDamage is a breadcrumb for the on-hit "DR lockout + arsenal-face-up / banish DR"
-// rider — not modelled yet (see TODO.md). LikelyToHit marks where the rider value would plug in.
-func wreckHavocBonus(self *card.CardState) int {
-	if card.LikelyToHit(self) {
-		// TODO: model on-hit arsenal manipulation rider.
-	}
-	return 0
+	s.ApplyAndLogEffectiveAttack(self)
 }

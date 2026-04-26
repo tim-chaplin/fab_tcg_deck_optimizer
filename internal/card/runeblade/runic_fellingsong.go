@@ -13,10 +13,15 @@ import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 
 var runicFellingsongTypes = card.NewTypeSet(card.TypeRuneblade, card.TypeAction, card.TypeAttack)
 
-// runicFellingsongPlay emits the chain step with printed power + (1 if the banish rider
-// succeeds).
+// runicFellingsongPlay emits the chain step at printed power, then writes the banish-for-
+// arcane rider as a sub-line under self when an aura was successfully banished from the
+// graveyard. banishAuraFromGraveyard flips ArcaneDamageDealt internally as part of its
+// arcane-damage payload.
 func runicFellingsongPlay(s *card.TurnState, self *card.CardState) {
-	s.ApplyAndLogEffectiveAttackPlus(self, banishAuraFromGraveyard(s))
+	s.ApplyAndLogEffectiveAttack(self)
+	if n := banishAuraFromGraveyard(s); n > 0 {
+		s.LogRiderOnPlay(self, "Banished an aura, dealt 1 arcane damage", n)
+	}
 }
 
 type RunicFellingsongRed struct{}

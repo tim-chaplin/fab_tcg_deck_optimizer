@@ -13,7 +13,11 @@ import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 
 var sutcliffesResearchNotesTypes = card.NewTypeSet(card.TypeRuneblade, card.TypeAction)
 
-func sutcliffesResearchNotesPlay(revealCount int, s *card.TurnState) int {
+// sutcliffesResearchNotesPlay scans the top revealCount cards of s.Deck and creates one
+// runechant per Runeblade attack action card found, emitting the rider sub-line under self
+// when any are created.
+func sutcliffesResearchNotesPlay(s *card.TurnState, self *card.CardState, revealCount int) {
+	s.ApplyAndLogEffectiveAttack(self)
 	n := revealCount
 	if n > len(s.Deck) {
 		n = len(s.Deck)
@@ -25,7 +29,7 @@ func sutcliffesResearchNotesPlay(revealCount int, s *card.TurnState) int {
 			count++
 		}
 	}
-	return s.CreateRunechants(count)
+	s.CreateAndLogRunechantsOnPlay(self, count)
 }
 
 type SutcliffesResearchNotesRed struct{}
@@ -43,7 +47,7 @@ func (SutcliffesResearchNotesRed) NoMemo()                  {}
 // not implemented: top-of-deck reordering clause
 func (SutcliffesResearchNotesRed) NotImplemented() {}
 func (SutcliffesResearchNotesRed) Play(s *card.TurnState, self *card.CardState) {
-	s.ApplyAndLogEffectiveAttackPlus(self, sutcliffesResearchNotesPlay(3, s))
+	sutcliffesResearchNotesPlay(s, self, 3)
 }
 
 type SutcliffesResearchNotesYellow struct{}
@@ -61,7 +65,7 @@ func (SutcliffesResearchNotesYellow) NoMemo()                  {}
 // not implemented: top-of-deck reordering clause
 func (SutcliffesResearchNotesYellow) NotImplemented() {}
 func (SutcliffesResearchNotesYellow) Play(s *card.TurnState, self *card.CardState) {
-	s.ApplyAndLogEffectiveAttackPlus(self, sutcliffesResearchNotesPlay(2, s))
+	sutcliffesResearchNotesPlay(s, self, 2)
 }
 
 type SutcliffesResearchNotesBlue struct{}
@@ -79,5 +83,5 @@ func (SutcliffesResearchNotesBlue) NoMemo()                  {}
 // not implemented: top-of-deck reordering clause
 func (SutcliffesResearchNotesBlue) NotImplemented() {}
 func (SutcliffesResearchNotesBlue) Play(s *card.TurnState, self *card.CardState) {
-	s.ApplyAndLogEffectiveAttackPlus(self, sutcliffesResearchNotesPlay(1, s))
+	sutcliffesResearchNotesPlay(s, self, 1)
 }

@@ -11,7 +11,18 @@
 
 package generic
 
-import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+import (
+	"fmt"
+
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+)
+
+// fiddlersGreenPlay emits the chain step then writes the printed N{h} as a "Gained N
+// health (graveyard trigger)" sub-line under self. Health is valued 1-to-1 with damage.
+func fiddlersGreenPlay(s *card.TurnState, self *card.CardState, heal int) {
+	s.LogPlay(self)
+	s.LogRiderOnPlay(self, fmt.Sprintf("Gained %d health (graveyard trigger)", heal), heal)
+}
 
 type FiddlersGreenRed struct{}
 
@@ -25,7 +36,7 @@ func (FiddlersGreenRed) Types() card.TypeSet      { return defenseReactionTypes 
 func (FiddlersGreenRed) GoAgain() bool            { return false }
 func (FiddlersGreenRed) NotSilverAgeLegal()       {}
 func (FiddlersGreenRed) Play(s *card.TurnState, self *card.CardState) {
-	s.ApplyAndLogEffectiveAttackPlus(self, 3)
+	fiddlersGreenPlay(s, self, 3)
 }
 
 type FiddlersGreenYellow struct{}
@@ -40,7 +51,7 @@ func (FiddlersGreenYellow) Types() card.TypeSet      { return defenseReactionTyp
 func (FiddlersGreenYellow) GoAgain() bool            { return false }
 func (FiddlersGreenYellow) NotSilverAgeLegal()       {}
 func (FiddlersGreenYellow) Play(s *card.TurnState, self *card.CardState) {
-	s.ApplyAndLogEffectiveAttackPlus(self, 2)
+	fiddlersGreenPlay(s, self, 2)
 }
 
 type FiddlersGreenBlue struct{}
@@ -55,5 +66,5 @@ func (FiddlersGreenBlue) Types() card.TypeSet      { return defenseReactionTypes
 func (FiddlersGreenBlue) GoAgain() bool            { return false }
 func (FiddlersGreenBlue) NotSilverAgeLegal()       {}
 func (FiddlersGreenBlue) Play(s *card.TurnState, self *card.CardState) {
-	s.ApplyAndLogEffectiveAttackPlus(self, 1)
+	fiddlersGreenPlay(s, self, 1)
 }

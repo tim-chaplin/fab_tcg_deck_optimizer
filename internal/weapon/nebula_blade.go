@@ -30,9 +30,8 @@ func (c NebulaBlade) Play(s *card.TurnState, self *card.CardState) {
 	if s.NonAttackActionPlayed {
 		self.BonusAttack += 3
 	}
-	rider := 0
+	s.ApplyAndLogEffectiveAttack(self)
 	if card.LikelyToHit(self) {
-		rider = s.CreateRunechant()
+		s.LogRiderOnPlay(self, "On-hit created a runechant", s.CreateRunechant())
 	}
-	s.ApplyAndLogEffectiveAttackPlus(self, rider)
 }

@@ -25,5 +25,6 @@ func (SigilOfCyclesBlue) GoAgain() bool            { return true }
 // not implemented: start-of-action-phase self-destroy, leaves-arena discard/draw
 func (SigilOfCyclesBlue) NotImplemented() {}
 func (SigilOfCyclesBlue) Play(s *card.TurnState, self *card.CardState) {
-	s.ApplyAndLogEffectiveAttackPlus(self, setAuraCreated(s))
+	setAuraCreated(s)
+	s.ApplyAndLogEffectiveAttack(self)
 }

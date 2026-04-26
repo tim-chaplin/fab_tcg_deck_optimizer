@@ -12,11 +12,6 @@ import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 
 var arcanicCrackleTypes = card.NewTypeSet(card.TypeRuneblade, card.TypeAction, card.TypeAttack)
 
-// arcanicCracklePlay adds the printed +1 arcane to base damage and marks ArcaneDamageDealt.
-func arcanicCrackleBonus(s *card.TurnState) int {
-	return s.DealArcaneDamage(1)
-}
-
 type ArcanicCrackleRed struct{}
 
 func (ArcanicCrackleRed) ID() card.ID              { return card.ArcanicCrackleRed }
@@ -28,7 +23,8 @@ func (ArcanicCrackleRed) Defense() int             { return 3 }
 func (ArcanicCrackleRed) Types() card.TypeSet      { return arcanicCrackleTypes }
 func (ArcanicCrackleRed) GoAgain() bool            { return false }
 func (ArcanicCrackleRed) Play(s *card.TurnState, self *card.CardState) {
-	s.ApplyAndLogEffectiveAttackPlus(self, arcanicCrackleBonus(s))
+	s.ApplyAndLogEffectiveAttack(self)
+	s.DealAndLogArcaneDamage(self, 1)
 }
 
 type ArcanicCrackleYellow struct{}
@@ -42,7 +38,8 @@ func (ArcanicCrackleYellow) Defense() int             { return 3 }
 func (ArcanicCrackleYellow) Types() card.TypeSet      { return arcanicCrackleTypes }
 func (ArcanicCrackleYellow) GoAgain() bool            { return false }
 func (ArcanicCrackleYellow) Play(s *card.TurnState, self *card.CardState) {
-	s.ApplyAndLogEffectiveAttackPlus(self, arcanicCrackleBonus(s))
+	s.ApplyAndLogEffectiveAttack(self)
+	s.DealAndLogArcaneDamage(self, 1)
 }
 
 type ArcanicCrackleBlue struct{}
@@ -56,5 +53,6 @@ func (ArcanicCrackleBlue) Defense() int             { return 3 }
 func (ArcanicCrackleBlue) Types() card.TypeSet      { return arcanicCrackleTypes }
 func (ArcanicCrackleBlue) GoAgain() bool            { return false }
 func (ArcanicCrackleBlue) Play(s *card.TurnState, self *card.CardState) {
-	s.ApplyAndLogEffectiveAttackPlus(self, arcanicCrackleBonus(s))
+	s.ApplyAndLogEffectiveAttack(self)
+	s.DealAndLogArcaneDamage(self, 1)
 }

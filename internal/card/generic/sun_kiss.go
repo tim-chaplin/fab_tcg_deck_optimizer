@@ -11,21 +11,23 @@
 package generic
 
 import (
+	"fmt"
+
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 )
 
 var sunKissTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction)
 
-// sunKissPlay credits the printed health-gain (1-to-1 with damage) into the chain step
-// and, when Moon Wish has already played this turn, fires an extra mid-turn draw and a
-// go-again grant on self. Sun Kiss has Attack()=0; the heal flows in as the chain step's
-// rider so the printout reads "Sun Kiss [R]: PLAY (+3)" with the heal as (+N).
+// sunKissPlay emits the chain step ("Sun Kiss [R]: PLAY"), writes the heal as a sub-line
+// "Gained N health" under it, and — when Moon Wish has already played this turn — fires
+// an extra mid-turn draw and a go-again grant on self.
 func sunKissPlay(heal int, s *card.TurnState, self *card.CardState) {
 	if playedMoonWishThisTurn(s) {
 		s.DrawOne()
 		self.GrantedGoAgain = true
 	}
-	s.ApplyAndLogEffectiveAttackPlus(self, heal)
+	s.LogPlay(self)
+	s.LogRiderOnPlay(self, fmt.Sprintf("Gained %d health", heal), heal)
 }
 
 // playedMoonWishThisTurn reports whether any prior card resolved this turn was a Moon Wish

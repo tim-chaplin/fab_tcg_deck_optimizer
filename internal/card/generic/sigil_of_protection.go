@@ -25,7 +25,8 @@ func (SigilOfProtectionRed) GoAgain() bool            { return false }
 // not implemented: ward (opponent damage prevention)
 func (SigilOfProtectionRed) NotImplemented() {}
 func (SigilOfProtectionRed) Play(s *card.TurnState, self *card.CardState) {
-	s.ApplyAndLogEffectiveAttackPlus(self, setAuraCreated(s))
+	setAuraCreated(s)
+	s.ApplyAndLogEffectiveAttack(self)
 }
 
 type SigilOfProtectionYellow struct{}
@@ -42,7 +43,8 @@ func (SigilOfProtectionYellow) GoAgain() bool            { return false }
 // not implemented: ward (opponent damage prevention)
 func (SigilOfProtectionYellow) NotImplemented() {}
 func (SigilOfProtectionYellow) Play(s *card.TurnState, self *card.CardState) {
-	s.ApplyAndLogEffectiveAttackPlus(self, setAuraCreated(s))
+	setAuraCreated(s)
+	s.ApplyAndLogEffectiveAttack(self)
 }
 
 type SigilOfProtectionBlue struct{}
@@ -59,5 +61,6 @@ func (SigilOfProtectionBlue) GoAgain() bool            { return false }
 // not implemented: ward (opponent damage prevention)
 func (SigilOfProtectionBlue) NotImplemented() {}
 func (SigilOfProtectionBlue) Play(s *card.TurnState, self *card.CardState) {
-	s.ApplyAndLogEffectiveAttackPlus(self, setAuraCreated(s))
+	setAuraCreated(s)
+	s.ApplyAndLogEffectiveAttack(self)
 }

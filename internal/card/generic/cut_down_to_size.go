@@ -23,7 +23,7 @@ func (CutDownToSizeRed) GoAgain() bool            { return false }
 // not implemented: on-hit opponent discard (conditional on hand size)
 func (CutDownToSizeRed) NotImplemented() {}
 func (CutDownToSizeRed) Play(s *card.TurnState, self *card.CardState) {
-	s.ApplyAndLogEffectiveAttackPlus(self, cutDownToSizeBonus(self))
+	s.ApplyAndLogEffectiveAttack(self)
 }
 
 type CutDownToSizeYellow struct{}
@@ -40,7 +40,7 @@ func (CutDownToSizeYellow) GoAgain() bool            { return false }
 // not implemented: on-hit opponent discard (conditional on hand size)
 func (CutDownToSizeYellow) NotImplemented() {}
 func (CutDownToSizeYellow) Play(s *card.TurnState, self *card.CardState) {
-	s.ApplyAndLogEffectiveAttackPlus(self, cutDownToSizeBonus(self))
+	s.ApplyAndLogEffectiveAttack(self)
 }
 
 type CutDownToSizeBlue struct{}
@@ -57,14 +57,5 @@ func (CutDownToSizeBlue) GoAgain() bool            { return false }
 // not implemented: on-hit opponent discard (conditional on hand size)
 func (CutDownToSizeBlue) NotImplemented() {}
 func (CutDownToSizeBlue) Play(s *card.TurnState, self *card.CardState) {
-	s.ApplyAndLogEffectiveAttackPlus(self, cutDownToSizeBonus(self))
-}
-
-// cutDownToSizeDamage is a breadcrumb for the on-hit "discard a card if opponent has 4+ cards
-// in hand" rider — opponent hand size isn't tracked (see TODO.md).
-func cutDownToSizeBonus(self *card.CardState) int {
-	if card.LikelyToHit(self) {
-		// TODO: model on-hit conditional discard rider.
-	}
-	return 0
+	s.ApplyAndLogEffectiveAttack(self)
 }

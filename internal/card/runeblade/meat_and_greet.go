@@ -21,11 +21,10 @@ func meatAndGreetPlay(s *card.TurnState, self *card.CardState) {
 	if s.ArcaneDamageDealt {
 		self.GrantedGoAgain = true
 	}
-	rider := 0
+	s.ApplyAndLogEffectiveAttack(self)
 	if card.LikelyToHit(self) {
-		rider = s.CreateRunechant()
+		s.LogRiderOnPlay(self, "On-hit created a runechant", s.CreateRunechant())
 	}
-	s.ApplyAndLogEffectiveAttackPlus(self, rider)
 }
 
 type MeatAndGreetRed struct{}

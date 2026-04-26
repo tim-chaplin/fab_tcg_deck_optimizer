@@ -8,9 +8,20 @@
 
 package generic
 
-import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+import (
+	"fmt"
+
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+)
 
 var healingBalmTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction)
+
+// healingBalmPlay emits the chain step then writes the printed N{h} as a "Gained N health"
+// sub-line under self. Health is valued 1-to-1 with damage.
+func healingBalmPlay(s *card.TurnState, self *card.CardState, heal int) {
+	s.LogPlay(self)
+	s.LogRiderOnPlay(self, fmt.Sprintf("Gained %d health", heal), heal)
+}
 
 type HealingBalmRed struct{}
 
@@ -23,7 +34,7 @@ func (HealingBalmRed) Defense() int             { return 2 }
 func (HealingBalmRed) Types() card.TypeSet      { return healingBalmTypes }
 func (HealingBalmRed) GoAgain() bool            { return false }
 func (HealingBalmRed) Play(s *card.TurnState, self *card.CardState) {
-	s.ApplyAndLogEffectiveAttackPlus(self, 3)
+	healingBalmPlay(s, self, 3)
 }
 
 type HealingBalmYellow struct{}
@@ -37,7 +48,7 @@ func (HealingBalmYellow) Defense() int             { return 2 }
 func (HealingBalmYellow) Types() card.TypeSet      { return healingBalmTypes }
 func (HealingBalmYellow) GoAgain() bool            { return false }
 func (HealingBalmYellow) Play(s *card.TurnState, self *card.CardState) {
-	s.ApplyAndLogEffectiveAttackPlus(self, 2)
+	healingBalmPlay(s, self, 2)
 }
 
 type HealingBalmBlue struct{}
@@ -51,5 +62,5 @@ func (HealingBalmBlue) Defense() int             { return 2 }
 func (HealingBalmBlue) Types() card.TypeSet      { return healingBalmTypes }
 func (HealingBalmBlue) GoAgain() bool            { return false }
 func (HealingBalmBlue) Play(s *card.TurnState, self *card.CardState) {
-	s.ApplyAndLogEffectiveAttackPlus(self, 1)
+	healingBalmPlay(s, self, 1)
 }

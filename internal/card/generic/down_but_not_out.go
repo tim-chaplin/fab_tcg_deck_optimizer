@@ -25,7 +25,7 @@ func (DownButNotOutRed) GoAgain() bool            { return false }
 // not implemented: health/equipment/token comparison, agility/might/vigor tokens, overpower
 func (DownButNotOutRed) NotImplemented() {}
 func (DownButNotOutRed) Play(s *card.TurnState, self *card.CardState) {
-	s.ApplyAndLogEffectiveAttackPlus(self, downButNotOutBonus(self))
+	s.ApplyAndLogEffectiveAttack(self)
 }
 
 type DownButNotOutYellow struct{}
@@ -42,7 +42,7 @@ func (DownButNotOutYellow) GoAgain() bool            { return false }
 // not implemented: health/equipment/token comparison, agility/might/vigor tokens, overpower
 func (DownButNotOutYellow) NotImplemented() {}
 func (DownButNotOutYellow) Play(s *card.TurnState, self *card.CardState) {
-	s.ApplyAndLogEffectiveAttackPlus(self, downButNotOutBonus(self))
+	s.ApplyAndLogEffectiveAttack(self)
 }
 
 type DownButNotOutBlue struct{}
@@ -59,15 +59,5 @@ func (DownButNotOutBlue) GoAgain() bool            { return false }
 // not implemented: health/equipment/token comparison, agility/might/vigor tokens, overpower
 func (DownButNotOutBlue) NotImplemented() {}
 func (DownButNotOutBlue) Play(s *card.TurnState, self *card.CardState) {
-	s.ApplyAndLogEffectiveAttackPlus(self, downButNotOutBonus(self))
-}
-
-// downButNotOutDamage is a breadcrumb for the conditional "when this hits, create Agility +
-// Might + Vigor tokens" rider — gated on a health/equipment/token comparison we don't track
-// (see TODO.md).
-func downButNotOutBonus(self *card.CardState) int {
-	if card.LikelyToHit(self) {
-		// TODO: model on-hit status-token creation rider (requires life-total + token tracking).
-	}
-	return 0
+	s.ApplyAndLogEffectiveAttack(self)
 }

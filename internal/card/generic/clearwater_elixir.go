@@ -23,5 +23,6 @@ func (ClearwaterElixirRed) GoAgain() bool            { return true }
 // not implemented: Bloodrot Pox health-gain rider dropped (status tokens not tracked)
 func (ClearwaterElixirRed) NotImplemented() {}
 func (ClearwaterElixirRed) Play(s *card.TurnState, self *card.CardState) {
-	s.ApplyAndLogEffectiveAttackPlus(self, grantNextAttackActionBonus(s, 3))
+	grantNextAttackActionBonus(s, 3)
+	s.ApplyAndLogEffectiveAttack(self)
 }

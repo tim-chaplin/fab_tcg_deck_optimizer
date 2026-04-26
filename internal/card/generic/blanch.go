@@ -23,7 +23,7 @@ func (BlanchRed) GoAgain() bool            { return false }
 // not implemented: opponent 'lose all colors' debuff
 func (BlanchRed) NotImplemented() {}
 func (BlanchRed) Play(s *card.TurnState, self *card.CardState) {
-	s.ApplyAndLogEffectiveAttackPlus(self, blanchBonus(self))
+	s.ApplyAndLogEffectiveAttack(self)
 }
 
 type BlanchYellow struct{}
@@ -40,7 +40,7 @@ func (BlanchYellow) GoAgain() bool            { return false }
 // not implemented: opponent 'lose all colors' debuff
 func (BlanchYellow) NotImplemented() {}
 func (BlanchYellow) Play(s *card.TurnState, self *card.CardState) {
-	s.ApplyAndLogEffectiveAttackPlus(self, blanchBonus(self))
+	s.ApplyAndLogEffectiveAttack(self)
 }
 
 type BlanchBlue struct{}
@@ -57,14 +57,5 @@ func (BlanchBlue) GoAgain() bool            { return false }
 // not implemented: opponent 'lose all colors' debuff
 func (BlanchBlue) NotImplemented() {}
 func (BlanchBlue) Play(s *card.TurnState, self *card.CardState) {
-	s.ApplyAndLogEffectiveAttackPlus(self, blanchBonus(self))
-}
-
-// blanchDamage is a breadcrumb for the on-hit "cards they own lose all colors" rider — not
-// modelled yet (see TODO.md).
-func blanchBonus(self *card.CardState) int {
-	if card.LikelyToHit(self) {
-		// TODO: model on-hit opponent-card color-strip rider.
-	}
-	return 0
+	s.ApplyAndLogEffectiveAttack(self)
 }

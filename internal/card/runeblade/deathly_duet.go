@@ -24,7 +24,7 @@ func (DeathlyDuetRed) GoAgain() bool            { return false }
 // for which play (over-credits when both an attack and a non-attack action are pitched)
 func (DeathlyDuetRed) NotImplemented() {}
 func (DeathlyDuetRed) Play(s *card.TurnState, self *card.CardState) {
-	s.ApplyAndLogEffectiveAttackPlus(self, deathlyDuetApplyRiders(s, self))
+	deathlyDuetApplyRiders(s, self)
 }
 
 type DeathlyDuetYellow struct{}
@@ -42,7 +42,7 @@ func (DeathlyDuetYellow) GoAgain() bool            { return false }
 // for which play (over-credits when both an attack and a non-attack action are pitched)
 func (DeathlyDuetYellow) NotImplemented() {}
 func (DeathlyDuetYellow) Play(s *card.TurnState, self *card.CardState) {
-	s.ApplyAndLogEffectiveAttackPlus(self, deathlyDuetApplyRiders(s, self))
+	deathlyDuetApplyRiders(s, self)
 }
 
 type DeathlyDuetBlue struct{}
@@ -60,18 +60,18 @@ func (DeathlyDuetBlue) GoAgain() bool            { return false }
 // for which play (over-credits when both an attack and a non-attack action are pitched)
 func (DeathlyDuetBlue) NotImplemented() {}
 func (DeathlyDuetBlue) Play(s *card.TurnState, self *card.CardState) {
-	s.ApplyAndLogEffectiveAttackPlus(self, deathlyDuetApplyRiders(s, self))
+	deathlyDuetApplyRiders(s, self)
 }
 
 // deathlyDuetApplyRiders folds Deathly Duet's two pitch-conditional riders into self and
-// state and returns the runechant-damage rider for the chain step's (+N) display:
+// state, then emits the chain step:
 //   - Attack-action pitched → +2{p} power buff lands on self.BonusAttack so EffectiveAttack
-//     and LikelyToHit see the buffed power.
+//     and LikelyToHit see the buffed power, and the chain step's (+N) reflects it directly.
 //   - Non-attack-action pitched → 2 Runechants enter during Deathly Duet's own attack
-//     resolution; their +2 damage credit is the returned rider.
+//     resolution; the rider lands as a "Created 2 runechants" sub-line under self.
 //
 // Both riders can stack when both pitched roles are present.
-func deathlyDuetApplyRiders(s *card.TurnState, self *card.CardState) int {
+func deathlyDuetApplyRiders(s *card.TurnState, self *card.CardState) {
 	var attackPitched, nonAttackActionPitched bool
 	for _, p := range s.Pitched {
 		t := p.Types()
@@ -85,9 +85,8 @@ func deathlyDuetApplyRiders(s *card.TurnState, self *card.CardState) int {
 	if attackPitched {
 		self.BonusAttack += 2
 	}
-	rider := 0
+	s.ApplyAndLogEffectiveAttack(self)
 	if nonAttackActionPitched {
-		rider += s.CreateRunechants(2)
+		s.CreateAndLogRunechantsOnPlay(self, 2)
 	}
-	return rider
 }

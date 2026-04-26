@@ -24,7 +24,8 @@ func (PublicBountyRed) GoAgain() bool            { return true }
 // not implemented: mark not tracked; +3{p} 'marked defender' rider fires unconditionally
 func (PublicBountyRed) NotImplemented() {}
 func (PublicBountyRed) Play(s *card.TurnState, self *card.CardState) {
-	s.ApplyAndLogEffectiveAttackPlus(self, grantNextAttackActionBonus(s, 3))
+	grantNextAttackActionBonus(s, 3)
+	s.ApplyAndLogEffectiveAttack(self)
 }
 
 type PublicBountyYellow struct{}
@@ -41,7 +42,8 @@ func (PublicBountyYellow) GoAgain() bool            { return true }
 // not implemented: mark not tracked; +3{p} 'marked defender' rider fires unconditionally
 func (PublicBountyYellow) NotImplemented() {}
 func (PublicBountyYellow) Play(s *card.TurnState, self *card.CardState) {
-	s.ApplyAndLogEffectiveAttackPlus(self, grantNextAttackActionBonus(s, 2))
+	grantNextAttackActionBonus(s, 2)
+	s.ApplyAndLogEffectiveAttack(self)
 }
 
 type PublicBountyBlue struct{}
@@ -58,5 +60,6 @@ func (PublicBountyBlue) GoAgain() bool            { return true }
 // not implemented: mark not tracked; +3{p} 'marked defender' rider fires unconditionally
 func (PublicBountyBlue) NotImplemented() {}
 func (PublicBountyBlue) Play(s *card.TurnState, self *card.CardState) {
-	s.ApplyAndLogEffectiveAttackPlus(self, grantNextAttackActionBonus(s, 1))
+	grantNextAttackActionBonus(s, 1)
+	s.ApplyAndLogEffectiveAttack(self)
 }

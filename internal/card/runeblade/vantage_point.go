@@ -24,7 +24,8 @@ func (VantagePointRed) GoAgain() bool            { return false }
 // not implemented: Overpower flag is set on the aura condition but never consumed by the solver
 func (VantagePointRed) NotImplemented() {}
 func (VantagePointRed) Play(s *card.TurnState, self *card.CardState) {
-	s.ApplyAndLogEffectiveAttackPlus(self, vantagePointBonus(s))
+	vantagePointApplySideEffect(s)
+	s.ApplyAndLogEffectiveAttack(self)
 }
 
 type VantagePointYellow struct{}
@@ -41,7 +42,8 @@ func (VantagePointYellow) GoAgain() bool            { return false }
 // not implemented: Overpower flag is set on the aura condition but never consumed by the solver
 func (VantagePointYellow) NotImplemented() {}
 func (VantagePointYellow) Play(s *card.TurnState, self *card.CardState) {
-	s.ApplyAndLogEffectiveAttackPlus(self, vantagePointBonus(s))
+	vantagePointApplySideEffect(s)
+	s.ApplyAndLogEffectiveAttack(self)
 }
 
 type VantagePointBlue struct{}
@@ -58,11 +60,15 @@ func (VantagePointBlue) GoAgain() bool            { return false }
 // not implemented: Overpower flag is set on the aura condition but never consumed by the solver
 func (VantagePointBlue) NotImplemented() {}
 func (VantagePointBlue) Play(s *card.TurnState, self *card.CardState) {
-	s.ApplyAndLogEffectiveAttackPlus(self, vantagePointBonus(s))
+	vantagePointApplySideEffect(s)
+	s.ApplyAndLogEffectiveAttack(self)
 }
-func vantagePointBonus(s *card.TurnState) int {
+
+// vantagePointApplySideEffect flips s.Overpower when an aura entry has been seen this turn,
+// so the next attack picks up Overpower for any breakthrough-aware solver pass. Vantage Point
+// itself contributes zero to its own chain step.
+func vantagePointApplySideEffect(s *card.TurnState) {
 	if s.HasAuraInPlay() {
 		s.Overpower = true
 	}
-	return 0
 }

@@ -15,13 +15,15 @@ import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 
 var consumingVolitionTypes = card.NewTypeSet(card.TypeRuneblade, card.TypeAction, card.TypeAttack)
 
-// consumingVolitionDamage returns the base attack plus the discard rider when ArcaneDamageDealt
-// is set AND this card's printed attack is likely to land on its own.
-func consumingVolitionBonus(s *card.TurnState, self *card.CardState) int {
-	if s != nil && s.ArcaneDamageDealt && card.LikelyToHit(self) {
-		return card.DiscardValue
+// consumingVolitionApplyRider emits the on-hit discard rider as a sub-line under self's
+// chain step when ArcaneDamageDealt is set AND this card's printed attack is likely to
+// land on its own. The credit is card.DiscardValue; the line reads "On-hit discarded a
+// card (+N)" indented under the parent.
+func consumingVolitionApplyRider(s *card.TurnState, self *card.CardState) {
+	if s == nil || !s.ArcaneDamageDealt || !card.LikelyToHit(self) {
+		return
 	}
-	return 0
+	s.LogRiderOnPlay(self, "On-hit discarded a card", card.DiscardValue)
 }
 
 type ConsumingVolitionRed struct{}
@@ -35,7 +37,8 @@ func (ConsumingVolitionRed) Defense() int             { return 3 }
 func (ConsumingVolitionRed) Types() card.TypeSet      { return consumingVolitionTypes }
 func (ConsumingVolitionRed) GoAgain() bool            { return false }
 func (ConsumingVolitionRed) Play(s *card.TurnState, self *card.CardState) {
-	s.ApplyAndLogEffectiveAttackPlus(self, consumingVolitionBonus(s, self))
+	s.ApplyAndLogEffectiveAttack(self)
+	consumingVolitionApplyRider(s, self)
 }
 
 type ConsumingVolitionYellow struct{}
@@ -49,7 +52,8 @@ func (ConsumingVolitionYellow) Defense() int             { return 3 }
 func (ConsumingVolitionYellow) Types() card.TypeSet      { return consumingVolitionTypes }
 func (ConsumingVolitionYellow) GoAgain() bool            { return false }
 func (ConsumingVolitionYellow) Play(s *card.TurnState, self *card.CardState) {
-	s.ApplyAndLogEffectiveAttackPlus(self, consumingVolitionBonus(s, self))
+	s.ApplyAndLogEffectiveAttack(self)
+	consumingVolitionApplyRider(s, self)
 }
 
 type ConsumingVolitionBlue struct{}
@@ -63,5 +67,6 @@ func (ConsumingVolitionBlue) Defense() int             { return 3 }
 func (ConsumingVolitionBlue) Types() card.TypeSet      { return consumingVolitionTypes }
 func (ConsumingVolitionBlue) GoAgain() bool            { return false }
 func (ConsumingVolitionBlue) Play(s *card.TurnState, self *card.CardState) {
-	s.ApplyAndLogEffectiveAttackPlus(self, consumingVolitionBonus(s, self))
+	s.ApplyAndLogEffectiveAttack(self)
+	consumingVolitionApplyRider(s, self)
 }

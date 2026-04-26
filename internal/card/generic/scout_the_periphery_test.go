@@ -37,8 +37,10 @@ func TestScoutThePeriphery_HandPlayedAttackFizzles(t *testing.T) {
 	}
 }
 
-// TestScoutThePeriphery_NextArsenalAttackReturnsBonus: when the queued attack action is itself
-// played from arsenal the per-variant bonus fires (Red +3, Yellow +2, Blue +1).
+// TestScoutThePeriphery_NextArsenalAttackReturnsBonus: when the queued attack action is
+// itself played from arsenal the per-variant bonus lands on that card's BonusAttack so
+// the buffed attack's EffectiveAttack picks up the +N (Red +3, Yellow +2, Blue +1). The
+// granter itself credits 0 — the bonus rides on the target.
 func TestScoutThePeriphery_NextArsenalAttackReturnsBonus(t *testing.T) {
 	cases := []struct {
 		c    card.Card
@@ -49,10 +51,14 @@ func TestScoutThePeriphery_NextArsenalAttackReturnsBonus(t *testing.T) {
 		{ScoutThePeripheryBlue{}, 1},
 	}
 	for _, tc := range cases {
-		s := card.TurnState{CardsRemaining: []*card.CardState{{Card: stubGenericAttack(0, 0), FromArsenal: true}}}
+		target := &card.CardState{Card: stubGenericAttack(0, 0), FromArsenal: true}
+		s := card.TurnState{CardsRemaining: []*card.CardState{target}}
 		tc.c.Play(&s, &card.CardState{Card: tc.c})
-		if got := s.Value; got != tc.want {
-			t.Errorf("%s: Play() = %d, want %d", tc.c.Name(), got, tc.want)
+		if got := s.Value; got != 0 {
+			t.Errorf("%s: granter credits %d, want 0 (bonus rides on target)", tc.c.Name(), got)
+		}
+		if got := target.BonusAttack; got != tc.want {
+			t.Errorf("%s: target.BonusAttack = %d, want %d", tc.c.Name(), got, tc.want)
 		}
 	}
 }

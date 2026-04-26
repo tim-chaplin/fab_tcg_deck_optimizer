@@ -8,18 +8,18 @@ import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 
 var trotAlongTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction)
 
-// trotAlongPlay grants go again to the next qualifying attack action card scheduled later this turn.
-func trotAlongPlay(s *card.TurnState) int {
+// trotAlongApplySideEffect grants go again to the next qualifying attack action card scheduled
+// later this turn.
+func trotAlongApplySideEffect(s *card.TurnState) {
 	for _, pc := range s.CardsRemaining {
 		if !pc.Card.Types().IsAttackAction() {
 			continue
 		}
 		if pc.Card.Attack() <= 3 {
 			pc.GrantedGoAgain = true
-			return 0
+			return
 		}
 	}
-	return 0
 }
 
 type TrotAlongBlue struct{}
@@ -33,5 +33,6 @@ func (TrotAlongBlue) Defense() int             { return 3 }
 func (TrotAlongBlue) Types() card.TypeSet      { return trotAlongTypes }
 func (TrotAlongBlue) GoAgain() bool            { return true }
 func (TrotAlongBlue) Play(s *card.TurnState, self *card.CardState) {
-	s.ApplyAndLogEffectiveAttackPlus(self, trotAlongPlay(s))
+	trotAlongApplySideEffect(s)
+	s.ApplyAndLogEffectiveAttack(self)
 }

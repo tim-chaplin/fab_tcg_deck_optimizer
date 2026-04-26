@@ -24,7 +24,7 @@ func (BloodspillInvocationRed) Defense() int             { return 2 }
 func (BloodspillInvocationRed) Types() card.TypeSet      { return bloodspillInvocationTypes }
 func (BloodspillInvocationRed) GoAgain() bool            { return true }
 func (BloodspillInvocationRed) Play(s *card.TurnState, self *card.CardState) {
-	s.ApplyAndLogEffectiveAttackPlus(self, fragileAuraValue(s, 3, true))
+	fragileAuraPlay(s, self, 3, true)
 }
 
 type BloodspillInvocationYellow struct{}
@@ -38,7 +38,7 @@ func (BloodspillInvocationYellow) Defense() int             { return 2 }
 func (BloodspillInvocationYellow) Types() card.TypeSet      { return bloodspillInvocationTypes }
 func (BloodspillInvocationYellow) GoAgain() bool            { return true }
 func (BloodspillInvocationYellow) Play(s *card.TurnState, self *card.CardState) {
-	s.ApplyAndLogEffectiveAttackPlus(self, fragileAuraValue(s, 2, true))
+	fragileAuraPlay(s, self, 2, true)
 }
 
 type BloodspillInvocationBlue struct{}
@@ -52,5 +52,5 @@ func (BloodspillInvocationBlue) Defense() int             { return 2 }
 func (BloodspillInvocationBlue) Types() card.TypeSet      { return bloodspillInvocationTypes }
 func (BloodspillInvocationBlue) GoAgain() bool            { return true }
 func (BloodspillInvocationBlue) Play(s *card.TurnState, self *card.CardState) {
-	s.ApplyAndLogEffectiveAttackPlus(self, fragileAuraValue(s, 1, true))
+	fragileAuraPlay(s, self, 1, true)
 }

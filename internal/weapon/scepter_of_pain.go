@@ -20,5 +20,6 @@ func (ScepterOfPain) Types() card.TypeSet      { return scepterOfPainTypes }
 func (ScepterOfPain) GoAgain() bool            { return false }
 func (ScepterOfPain) Hands() int               { return 1 }
 func (c ScepterOfPain) Play(s *card.TurnState, self *card.CardState) {
-	s.ApplyAndLogEffectiveAttackPlus(self, s.CreateRunechant())
+	s.ApplyAndLogEffectiveAttack(self)
+	s.CreateAndLogRunechantsOnPlay(self, 1)
 }

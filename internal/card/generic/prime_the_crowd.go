@@ -25,7 +25,8 @@ func (PrimeTheCrowdRed) GoAgain() bool            { return true }
 // not implemented: Crowd cheers / Crowd boos keywords dropped
 func (PrimeTheCrowdRed) NotImplemented() {}
 func (PrimeTheCrowdRed) Play(s *card.TurnState, self *card.CardState) {
-	s.ApplyAndLogEffectiveAttackPlus(self, grantNextAttackActionBonus(s, 4))
+	grantNextAttackActionBonus(s, 4)
+	s.ApplyAndLogEffectiveAttack(self)
 }
 
 type PrimeTheCrowdYellow struct{}
@@ -42,7 +43,8 @@ func (PrimeTheCrowdYellow) GoAgain() bool            { return true }
 // not implemented: Crowd cheers / Crowd boos keywords dropped
 func (PrimeTheCrowdYellow) NotImplemented() {}
 func (PrimeTheCrowdYellow) Play(s *card.TurnState, self *card.CardState) {
-	s.ApplyAndLogEffectiveAttackPlus(self, grantNextAttackActionBonus(s, 3))
+	grantNextAttackActionBonus(s, 3)
+	s.ApplyAndLogEffectiveAttack(self)
 }
 
 type PrimeTheCrowdBlue struct{}
@@ -59,5 +61,6 @@ func (PrimeTheCrowdBlue) GoAgain() bool            { return true }
 // not implemented: Crowd cheers / Crowd boos keywords dropped
 func (PrimeTheCrowdBlue) NotImplemented() {}
 func (PrimeTheCrowdBlue) Play(s *card.TurnState, self *card.CardState) {
-	s.ApplyAndLogEffectiveAttackPlus(self, grantNextAttackActionBonus(s, 2))
+	grantNextAttackActionBonus(s, 2)
+	s.ApplyAndLogEffectiveAttack(self)
 }

@@ -37,5 +37,8 @@ func (c SigilOfSilphidaeBlue) Play(s *card.TurnState, self *card.CardState) {
 			return banishAuraFromGraveyard(s)
 		},
 	})
-	s.ApplyAndLogEffectiveAttackPlus(self, enterDamage)
+	s.ApplyAndLogEffectiveAttack(self)
+	if enterDamage > 0 {
+		s.LogRiderOnPlay(self, "Banished an aura, dealt 1 arcane damage", enterDamage)
+	}
 }

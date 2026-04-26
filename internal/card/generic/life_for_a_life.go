@@ -21,13 +21,13 @@ var lifeForALifeTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.
 // lifeForALifeHealValue is the damage-equivalent credited when the on-hit 1{h} gain fires.
 const lifeForALifeHealValue = 1
 
-// lifeForALifeDamage returns the base attack plus the heal rider when the attack is likely to
-// land.
-func lifeForALifeBonus(self *card.CardState) int {
-	if card.LikelyToHit(self) {
-		return lifeForALifeHealValue
+// lifeForALifeApplyRider emits the on-hit 1{h} heal as a sub-line under self's chain step
+// when the attack is likely to land.
+func lifeForALifeApplyRider(s *card.TurnState, self *card.CardState) {
+	if !card.LikelyToHit(self) {
+		return
 	}
-	return 0
+	s.LogRiderOnPlay(self, "On-hit gained 1 health", lifeForALifeHealValue)
 }
 
 type LifeForALifeRed struct{}
@@ -41,7 +41,8 @@ func (LifeForALifeRed) Defense() int             { return 2 }
 func (LifeForALifeRed) Types() card.TypeSet      { return lifeForALifeTypes }
 func (LifeForALifeRed) GoAgain() bool            { return simstate.HeroWantsLowerHealth() }
 func (LifeForALifeRed) Play(s *card.TurnState, self *card.CardState) {
-	s.ApplyAndLogEffectiveAttackPlus(self, lifeForALifeBonus(self))
+	s.ApplyAndLogEffectiveAttack(self)
+	lifeForALifeApplyRider(s, self)
 }
 
 type LifeForALifeYellow struct{}
@@ -55,7 +56,8 @@ func (LifeForALifeYellow) Defense() int             { return 2 }
 func (LifeForALifeYellow) Types() card.TypeSet      { return lifeForALifeTypes }
 func (LifeForALifeYellow) GoAgain() bool            { return simstate.HeroWantsLowerHealth() }
 func (LifeForALifeYellow) Play(s *card.TurnState, self *card.CardState) {
-	s.ApplyAndLogEffectiveAttackPlus(self, lifeForALifeBonus(self))
+	s.ApplyAndLogEffectiveAttack(self)
+	lifeForALifeApplyRider(s, self)
 }
 
 type LifeForALifeBlue struct{}
@@ -69,5 +71,6 @@ func (LifeForALifeBlue) Defense() int             { return 2 }
 func (LifeForALifeBlue) Types() card.TypeSet      { return lifeForALifeTypes }
 func (LifeForALifeBlue) GoAgain() bool            { return simstate.HeroWantsLowerHealth() }
 func (LifeForALifeBlue) Play(s *card.TurnState, self *card.CardState) {
-	s.ApplyAndLogEffectiveAttackPlus(self, lifeForALifeBonus(self))
+	s.ApplyAndLogEffectiveAttack(self)
+	lifeForALifeApplyRider(s, self)
 }

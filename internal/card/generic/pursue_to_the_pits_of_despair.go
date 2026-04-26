@@ -23,14 +23,5 @@ func (PursueToThePitsOfDespairRed) GoAgain() bool            { return false }
 // not implemented: on-hit mark
 func (PursueToThePitsOfDespairRed) NotImplemented() {}
 func (PursueToThePitsOfDespairRed) Play(s *card.TurnState, self *card.CardState) {
-	s.ApplyAndLogEffectiveAttackPlus(self, pursueToThePitsOfDespairBonus(self))
-}
-
-// pursueToThePitsOfDespairDamage is a breadcrumb for the on-hit "mark the hero" rider — marks
-// aren't tracked (see TODO.md).
-func pursueToThePitsOfDespairBonus(self *card.CardState) int {
-	if card.LikelyToHit(self) {
-		// TODO: model on-hit mark rider.
-	}
-	return 0
+	s.ApplyAndLogEffectiveAttack(self)
 }

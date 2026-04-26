@@ -158,10 +158,10 @@ func TestFormatBestTurn_LogSuppressesZeroTriggers(t *testing.T) {
 
 // TestFormatBestTurn_MoonWishTutorAndPlayLogsAsPostTrigger: the go-again branch tutors
 // Sun Kiss and immediately plays it. Moon Wish's chain step shows only its printed
-// attack; the tutor narration line "Moon Wish [Y] tutored Sun Kiss [R] and played it"
-// renders as a post-trigger child grouped beneath Moon Wish, and Sun Kiss authors its
-// own "Sun Kiss [R]: PLAY (+3)" chain entry below. The third hand card is the alt-cost
-// target so Flying High [R] stays in the chain to grant go-again.
+// attack; the tutor narration line renders as a post-trigger child grouped beneath Moon
+// Wish, Sun Kiss authors its own "PLAY" chain entry, and the heal lands as a "Gained 3
+// health (+3)" sub-line under Sun Kiss. The third hand card is the alt-cost target so
+// Flying High [R] stays in the chain to grant go-again.
 func TestFormatBestTurn_MoonWishTutorAndPlayLogsAsPostTrigger(t *testing.T) {
 	h := []card.Card{generic.FlyingHighRed{}, generic.MoonWishYellow{}, fake.BlueAttack{}}
 	deck := []card.Card{generic.SunKissRed{}}
@@ -170,16 +170,21 @@ func TestFormatBestTurn_MoonWishTutorAndPlayLogsAsPostTrigger(t *testing.T) {
 	wants := []string{
 		"Moon Wish [Y]: ATTACK (+4)",
 		"         Moon Wish [Y] tutored Sun Kiss [R] and played it",
-		"Sun Kiss [R]: PLAY (+3)",
+		"Sun Kiss [R]: PLAY",
+		"         Gained 3 health (+3)",
 	}
 	for _, want := range wants {
 		if !strings.Contains(out, want) {
 			t.Errorf("missing %q in:\n%s", want, out)
 		}
 	}
-	// The chain entry must NOT bundle Sun Kiss's damage into Moon Wish's (+N).
+	// The chain entry must NOT bundle Sun Kiss's damage into Moon Wish's (+N), and Sun
+	// Kiss's chain entry must NOT bundle the heal into its own (+N).
 	if strings.Contains(out, "Moon Wish [Y]: ATTACK (+7)") {
 		t.Errorf("chain entry bundled Sun Kiss damage; got:\n%s", out)
+	}
+	if strings.Contains(out, "Sun Kiss [R]: PLAY (+3)") {
+		t.Errorf("Sun Kiss chain entry bundled heal into (+N) instead of using a child line\n%s", out)
 	}
 }
 

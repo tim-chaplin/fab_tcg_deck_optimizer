@@ -246,19 +246,13 @@ func (s *TurnState) RecordValue(n int) {
 // ApplyAndLogEffectiveAttack is the canonical chain-step finisher every Card.Play invokes:
 // appends the chain-step log entry "<DisplayName>: <VERB>[ from arsenal]" (where VERB is
 // ATTACK for attack actions, WEAPON ATTACK for weapons, PLAY for everything else) and
-// credits Card.Attack() + self.BonusAttack to s.Value, clamped at 0. Use the Plus variant
-// when the card folds rider damage (conditional arcane bonuses, runechant creation that
-// bundles into the printed attack) into the same chain step's (+N) display.
+// credits Card.Attack() + self.BonusAttack to s.Value, clamped at 0. Cards with separable
+// rider effects (conditional arcane bonuses, runechant creation, on-hit credits) emit
+// each rider as its own post-trigger child line via LogRiderOnPlay /
+// CreateAndLogRunechantsOnPlay / DealAndLogArcaneDamage so the rider's contribution is
+// visible in the printout instead of bundled into the chain step's (+N).
 func (s *TurnState) ApplyAndLogEffectiveAttack(self *CardState) {
-	s.ApplyAndLogEffectiveAttackPlus(self, 0)
-}
-
-// ApplyAndLogEffectiveAttackPlus is ApplyAndLogEffectiveAttack with an additional rider
-// folded into the chain step's (+N) display. Cards with on-play sub-effects that credit
-// damage (Aether Slash's conditional arcane, Hocus Pocus's mid-Play Runechant) compute
-// the rider amount themselves and pass it here.
-func (s *TurnState) ApplyAndLogEffectiveAttackPlus(self *CardState, rider int) {
-	n := self.Card.Attack() + self.BonusAttack + rider
+	n := self.EffectiveAttack()
 	if n < 0 {
 		n = 0
 	}
@@ -329,6 +323,24 @@ func (s *TurnState) CreateAndLogRunechantsOnHit(selfName, sourceName string, n i
 	return s.AddPostTriggerLogEntry(selfName+" "+runechantsCreatedPhrase(n)+" on hit", sourceName, s.CreateRunechants(n))
 }
 
+// CreateAndLogRunechantsOnPlay is the on-play self-rider variant: the chain step's own
+// "Created N runechants" sub-line, sourced under self so the format layer attaches it as
+// a child of self's chain entry. The line uses indentation to convey source (no card-name
+// prefix, sentence-cap leading verb) since the format layer renders it indented under
+// self's chain entry. n>0 only — n=0 returns 0 without writing a line.
+func (s *TurnState) CreateAndLogRunechantsOnPlay(self *CardState, n int) int {
+	if n <= 0 {
+		return 0
+	}
+	var text string
+	if n == 1 {
+		text = "Created a runechant"
+	} else {
+		text = fmt.Sprintf("Created %d runechants", n)
+	}
+	return s.AddPostTriggerLogEntry(text, DisplayName(self.Card), s.CreateRunechants(n))
+}
+
 // runechantsCreatedPhrase returns "created a runechant" / "created N runechants" — the
 // canonical verb phrase for runechant-creation log lines.
 func runechantsCreatedPhrase(n int) string {
@@ -344,6 +356,33 @@ func runechantsCreatedPhrase(n int) string {
 func (s *TurnState) DealArcaneDamage(n int) int {
 	s.ArcaneDamageDealt = true
 	return n
+}
+
+// DealAndLogArcaneDamage is the rider-line variant: deals n arcane damage (flipping
+// ArcaneDamageDealt via the underlying DealArcaneDamage call so same-turn "if you've
+// dealt arcane damage this turn" gates fire) and writes a "Dealt N arcane damage" sub-
+// line sourced under self so the format layer attaches it as a child of self's chain
+// entry. n>0 only — n=0 returns 0 without flipping the flag or writing a line.
+func (s *TurnState) DealAndLogArcaneDamage(self *CardState, n int) int {
+	if n <= 0 {
+		return 0
+	}
+	var text string
+	if n == 1 {
+		text = "Dealt 1 arcane damage"
+	} else {
+		text = fmt.Sprintf("Dealt %d arcane damage", n)
+	}
+	return s.AddPostTriggerLogEntry(text, DisplayName(self.Card), s.DealArcaneDamage(n))
+}
+
+// LogRiderOnPlay writes a freeform rider sub-line under self's chain entry. text is a
+// terse description of what the rider did (e.g. "On-hit discarded a card", "Gained 3
+// health"); the format layer renders it indented under self's chain step, so the line
+// should read as a complete utterance without a card-name prefix. n is the damage-
+// equivalent credit. Returns the credited n (clamped at 0 by the underlying log helper).
+func (s *TurnState) LogRiderOnPlay(self *CardState, text string, n int) int {
+	return s.AddPostTriggerLogEntry(text, DisplayName(self.Card), n)
 }
 
 // AddToGraveyard appends c to s.Graveyard so later-resolving cards see it. Persistent-type

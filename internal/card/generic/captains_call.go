@@ -11,21 +11,20 @@ import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 
 var captainsCallTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction)
 
-// captainsCallPlay grants +2 to the first scheduled attack action card whose cost is at most
-// maxCost, by adding to its BonusAttack. Returns 0 — the +2 attributes to the buffed attack
-// (so EffectiveAttack picks it up in LikelyToHit) rather than to Captain's Call itself. The
+// captainsCallApplySideEffect grants +2 to the first scheduled attack action card whose cost is
+// at most maxCost, by adding to its BonusAttack. The +2 attributes to the buffed attack (so
+// EffectiveAttack picks it up in LikelyToHit) rather than to Captain's Call itself. The
 // alternative "go again" mode is dropped (covered by NotImplemented in Phase 2).
-func captainsCallPlay(s *card.TurnState, maxCost int) int {
+func captainsCallApplySideEffect(s *card.TurnState, maxCost int) {
 	for _, pc := range s.CardsRemaining {
 		if !pc.Card.Types().IsAttackAction() {
 			continue
 		}
 		if pc.Card.Cost(s) <= maxCost {
 			pc.BonusAttack += 2
-			return 0
+			return
 		}
 	}
-	return 0
 }
 
 type CaptainsCallRed struct{}
@@ -42,7 +41,8 @@ func (CaptainsCallRed) GoAgain() bool            { return true }
 // not implemented: modal pick hard-coded to +2{p}; 'go again' mode is dropped
 func (CaptainsCallRed) NotImplemented() {}
 func (CaptainsCallRed) Play(s *card.TurnState, self *card.CardState) {
-	s.ApplyAndLogEffectiveAttackPlus(self, captainsCallPlay(s, 2))
+	captainsCallApplySideEffect(s, 2)
+	s.ApplyAndLogEffectiveAttack(self)
 }
 
 type CaptainsCallYellow struct{}
@@ -59,7 +59,8 @@ func (CaptainsCallYellow) GoAgain() bool            { return true }
 // not implemented: modal pick hard-coded to +2{p}; 'go again' mode is dropped
 func (CaptainsCallYellow) NotImplemented() {}
 func (CaptainsCallYellow) Play(s *card.TurnState, self *card.CardState) {
-	s.ApplyAndLogEffectiveAttackPlus(self, captainsCallPlay(s, 1))
+	captainsCallApplySideEffect(s, 1)
+	s.ApplyAndLogEffectiveAttack(self)
 }
 
 type CaptainsCallBlue struct{}
@@ -76,5 +77,6 @@ func (CaptainsCallBlue) GoAgain() bool            { return true }
 // not implemented: modal pick hard-coded to +2{p}; 'go again' mode is dropped
 func (CaptainsCallBlue) NotImplemented() {}
 func (CaptainsCallBlue) Play(s *card.TurnState, self *card.CardState) {
-	s.ApplyAndLogEffectiveAttackPlus(self, captainsCallPlay(s, 0))
+	captainsCallApplySideEffect(s, 0)
+	s.ApplyAndLogEffectiveAttack(self)
 }

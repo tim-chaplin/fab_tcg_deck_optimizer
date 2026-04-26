@@ -13,18 +13,17 @@ import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 
 var performanceBonusTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeAttack)
 
-// performanceBonusPlay credits the on-hit Gold token rider, grants self Go again when this
-// copy was played from arsenal, and emits the chain step. The Gold-token credit folds into
-// the chain step's (+N) display.
+// performanceBonusPlay grants self Go again when this copy was played from arsenal, emits
+// the chain step, then writes the on-hit Gold-token rider as a sub-line when LikelyToHit
+// fires.
 func performanceBonusPlay(s *card.TurnState, self *card.CardState) {
 	if self.FromArsenal {
 		self.GrantedGoAgain = true
 	}
-	rider := 0
+	s.ApplyAndLogEffectiveAttack(self)
 	if card.LikelyToHit(self) {
-		rider = card.GoldTokenValue
+		s.LogRiderOnPlay(self, "On-hit created a gold token", card.GoldTokenValue)
 	}
-	s.ApplyAndLogEffectiveAttackPlus(self, rider)
 }
 
 type PerformanceBonusRed struct{}

@@ -12,13 +12,13 @@ import (
 
 var fyendalsFightingSpiritTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeAttack)
 
-// fyendalsFightingSpiritDamage returns attack plus the 1{h} gain credit when the current hero opts
-// into LowerHealthWanter.
-func fyendalsFightingSpiritBonus() int {
-	if simstate.HeroWantsLowerHealth() {
-		return 1
+// fyendalsFightingSpiritApplyRider emits the 1{h} gain as a sub-line under self when the
+// current hero opts into LowerHealthWanter.
+func fyendalsFightingSpiritApplyRider(s *card.TurnState, self *card.CardState) {
+	if !simstate.HeroWantsLowerHealth() {
+		return
 	}
-	return 0
+	s.LogRiderOnPlay(self, "Gained 1 health (lower health than opposing hero)", 1)
 }
 
 type FyendalsFightingSpiritRed struct{}
@@ -32,7 +32,8 @@ func (FyendalsFightingSpiritRed) Defense() int             { return 2 }
 func (FyendalsFightingSpiritRed) Types() card.TypeSet      { return fyendalsFightingSpiritTypes }
 func (FyendalsFightingSpiritRed) GoAgain() bool            { return false }
 func (FyendalsFightingSpiritRed) Play(s *card.TurnState, self *card.CardState) {
-	s.ApplyAndLogEffectiveAttackPlus(self, fyendalsFightingSpiritBonus())
+	s.ApplyAndLogEffectiveAttack(self)
+	fyendalsFightingSpiritApplyRider(s, self)
 }
 
 type FyendalsFightingSpiritYellow struct{}
@@ -46,7 +47,8 @@ func (FyendalsFightingSpiritYellow) Defense() int             { return 2 }
 func (FyendalsFightingSpiritYellow) Types() card.TypeSet      { return fyendalsFightingSpiritTypes }
 func (FyendalsFightingSpiritYellow) GoAgain() bool            { return false }
 func (FyendalsFightingSpiritYellow) Play(s *card.TurnState, self *card.CardState) {
-	s.ApplyAndLogEffectiveAttackPlus(self, fyendalsFightingSpiritBonus())
+	s.ApplyAndLogEffectiveAttack(self)
+	fyendalsFightingSpiritApplyRider(s, self)
 }
 
 type FyendalsFightingSpiritBlue struct{}
@@ -60,5 +62,6 @@ func (FyendalsFightingSpiritBlue) Defense() int             { return 2 }
 func (FyendalsFightingSpiritBlue) Types() card.TypeSet      { return fyendalsFightingSpiritTypes }
 func (FyendalsFightingSpiritBlue) GoAgain() bool            { return false }
 func (FyendalsFightingSpiritBlue) Play(s *card.TurnState, self *card.CardState) {
-	s.ApplyAndLogEffectiveAttackPlus(self, fyendalsFightingSpiritBonus())
+	s.ApplyAndLogEffectiveAttack(self)
+	fyendalsFightingSpiritApplyRider(s, self)
 }

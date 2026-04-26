@@ -9,20 +9,19 @@ import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 
 var sloggismTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction)
 
-// sloggismPlay grants +n to the first scheduled attack action card whose cost is 2 or more,
-// by adding to its BonusAttack. Returns 0 — the +n attributes to the buffed attack (so
+// sloggismApplySideEffect grants +n to the first scheduled attack action card whose cost is 2
+// or more, by adding to its BonusAttack. The +n attributes to the buffed attack (so
 // EffectiveAttack picks it up in LikelyToHit) rather than to Sloggism itself.
-func sloggismPlay(s *card.TurnState, n int) int {
+func sloggismApplySideEffect(s *card.TurnState, n int) {
 	for _, pc := range s.CardsRemaining {
 		if !pc.Card.Types().IsAttackAction() {
 			continue
 		}
 		if pc.Card.Cost(s) >= 2 {
 			pc.BonusAttack += n
-			return 0
+			return
 		}
 	}
-	return 0
 }
 
 type SloggismRed struct{}
@@ -36,7 +35,8 @@ func (SloggismRed) Defense() int             { return 2 }
 func (SloggismRed) Types() card.TypeSet      { return sloggismTypes }
 func (SloggismRed) GoAgain() bool            { return true }
 func (SloggismRed) Play(s *card.TurnState, self *card.CardState) {
-	s.ApplyAndLogEffectiveAttackPlus(self, sloggismPlay(s, 6))
+	sloggismApplySideEffect(s, 6)
+	s.ApplyAndLogEffectiveAttack(self)
 }
 
 type SloggismYellow struct{}
@@ -50,7 +50,8 @@ func (SloggismYellow) Defense() int             { return 2 }
 func (SloggismYellow) Types() card.TypeSet      { return sloggismTypes }
 func (SloggismYellow) GoAgain() bool            { return true }
 func (SloggismYellow) Play(s *card.TurnState, self *card.CardState) {
-	s.ApplyAndLogEffectiveAttackPlus(self, sloggismPlay(s, 5))
+	sloggismApplySideEffect(s, 5)
+	s.ApplyAndLogEffectiveAttack(self)
 }
 
 type SloggismBlue struct{}
@@ -64,5 +65,6 @@ func (SloggismBlue) Defense() int             { return 2 }
 func (SloggismBlue) Types() card.TypeSet      { return sloggismTypes }
 func (SloggismBlue) GoAgain() bool            { return true }
 func (SloggismBlue) Play(s *card.TurnState, self *card.CardState) {
-	s.ApplyAndLogEffectiveAttackPlus(self, sloggismPlay(s, 4))
+	sloggismApplySideEffect(s, 4)
+	s.ApplyAndLogEffectiveAttack(self)
 }

@@ -23,7 +23,8 @@ func (ForceSightRed) GoAgain() bool            { return true }
 // not implemented: arsenal-gated Opt 2
 func (ForceSightRed) NotImplemented() {}
 func (ForceSightRed) Play(s *card.TurnState, self *card.CardState) {
-	s.ApplyAndLogEffectiveAttackPlus(self, grantNextAttackActionBonus(s, 3))
+	grantNextAttackActionBonus(s, 3)
+	s.ApplyAndLogEffectiveAttack(self)
 }
 
 type ForceSightYellow struct{}
@@ -40,7 +41,8 @@ func (ForceSightYellow) GoAgain() bool            { return true }
 // not implemented: arsenal-gated Opt 2
 func (ForceSightYellow) NotImplemented() {}
 func (ForceSightYellow) Play(s *card.TurnState, self *card.CardState) {
-	s.ApplyAndLogEffectiveAttackPlus(self, grantNextAttackActionBonus(s, 2))
+	grantNextAttackActionBonus(s, 2)
+	s.ApplyAndLogEffectiveAttack(self)
 }
 
 type ForceSightBlue struct{}
@@ -57,5 +59,6 @@ func (ForceSightBlue) GoAgain() bool            { return true }
 // not implemented: arsenal-gated Opt 2
 func (ForceSightBlue) NotImplemented() {}
 func (ForceSightBlue) Play(s *card.TurnState, self *card.CardState) {
-	s.ApplyAndLogEffectiveAttackPlus(self, grantNextAttackActionBonus(s, 1))
+	grantNextAttackActionBonus(s, 1)
+	s.ApplyAndLogEffectiveAttack(self)
 }
