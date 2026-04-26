@@ -23,11 +23,11 @@ func TestFireAttackActionTriggers_FiresOnceWhenGated(t *testing.T) {
 			return 1
 		},
 	}}}
-	fireAttackActionTriggers(state)
+	fireAttackActionTriggers(state, "TestCard")
 	if state.Value != 1 {
 		t.Errorf("first fire Value = %d, want 1", state.Value)
 	}
-	fireAttackActionTriggers(state)
+	fireAttackActionTriggers(state, "TestCard")
 	if state.Value != 1 {
 		t.Errorf("second fire Value = %d, want 1 (OncePerTurn gate kept second fire from crediting)", state.Value)
 	}
@@ -52,7 +52,7 @@ func TestFireAttackActionTriggers_GraveyardsExhaustedAura(t *testing.T) {
 		Count:   1,
 		Handler: func(*card.TurnState) int { return 1 },
 	}}}
-	fireAttackActionTriggers(state)
+	fireAttackActionTriggers(state, "TestCard")
 	if len(state.AuraTriggers) != 0 {
 		t.Errorf("AuraTriggers = %+v, want empty (Count hit zero)", state.AuraTriggers)
 	}
@@ -73,7 +73,7 @@ func TestFireAttackActionTriggers_PassesThroughNonAttackActionTriggers(t *testin
 		Count:   1,
 		Handler: func(*card.TurnState) int { calls++; return 5 },
 	}}}
-	fireAttackActionTriggers(state)
+	fireAttackActionTriggers(state, "TestCard")
 	if state.Value != 0 {
 		t.Errorf("Value = %d, want 0 (start-of-turn trigger doesn't fire on attack action)", state.Value)
 	}

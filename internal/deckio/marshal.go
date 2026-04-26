@@ -102,16 +102,16 @@ func perCardMarginalToJSON(m map[card.ID]deck.CardMarginalStats) []CardMarginalS
 	return out
 }
 
-// bestTurnToJSON serialises deck.BestTurn.Lines verbatim. The structured TurnSummary stays
-// in memory for the live computation but never crosses the JSON boundary — the rendered
-// printout is the single source of truth on disk.
+// bestTurnToJSON serialises deck.BestTurn.Log directly. The structured TurnSummary stays in
+// memory for the live computation but never crosses the JSON boundary — the structured Log
+// is the single source of truth on disk and feeds the formatter at print time.
 func bestTurnToJSON(b deck.BestTurn) BestTurnJSON {
-	if len(b.Lines) == 0 {
+	if b.Log.IsEmpty() {
 		return BestTurnJSON{}
 	}
 	return BestTurnJSON{
 		Value:              b.Summary.Value,
 		StartingRunechants: b.StartingRunechants,
-		Lines:              append([]string(nil), b.Lines...),
+		Log:                b.Log,
 	}
 }

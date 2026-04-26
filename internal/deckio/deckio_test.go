@@ -104,28 +104,35 @@ func TestRoundTrip_PreservesPerCardMarginal(t *testing.T) {
 	}
 }
 
-// TestRoundTrip_PreservesStartOfTurnAuras locks in that the best turn's StartOfTurnAuras list
-// TestRoundTrip_PreservesBestTurnLines pins the on-disk best-turn round-trip: deck.BestTurn.
-// Lines is the rendered printout (header + chain body), and Marshal/Unmarshal carry it
-// verbatim so a reloaded deck's printBestTurn output matches the original byte-for-byte. No
-// structured fields (StartOfTurnAuras, ArsenalIn, TriggersFromLastTurn) round-trip anymore —
-// they're already baked into the rendered Lines.
-func TestRoundTrip_PreservesBestTurnLines(t *testing.T) {
+// TestRoundTrip_PreservesBestTurnLog pins the on-disk best-turn round-trip: deck.BestTurn.Log
+// is the structured per-section TurnLog, and Marshal/Unmarshal carry it verbatim so a
+// reloaded deck's TurnLog matches the original section-for-section. The formatter consumes
+// Log at print time, so this test pinning the structured shape implicitly pins the printout
+// shape too.
+func TestRoundTrip_PreservesBestTurnLog(t *testing.T) {
 	rng := rand.New(rand.NewSource(7))
 	d := deck.Random(hero.Viserai{}, 40, 2, rng, nil)
-	want := []string{
-		"Best turn played (value 21):",
-		"  Auras in play at start of turn: Sigil of the Arknight (Blue)",
-		"  My turn:",
-		"    1. Sigil of the Arknight (Blue): drew Hit the High Notes (Red) into hand",
-		"    2. Hocus Pocus (Blue): PITCH",
-		"    3. Consuming Volition (Red): ATTACK (+4)",
-		"    4. Viserai: HERO TRIGGER (+1)",
+	want := hand.TurnLog{
+		StartOfTurn: []string{
+			"Hand: Hocus Pocus (Blue), Consuming Volition (Red)",
+			"Arsenal: Sigil of the Arknight (Blue)",
+			"Auras: 1 Runechant",
+			"Sigil of the Arknight (Blue): drew Hit the High Notes (Red) into hand",
+		},
+		MyTurn: []string{
+			"Hocus Pocus (Blue): PITCH",
+			"Consuming Volition (Red): ATTACK (+4)",
+			"Viserai: HERO TRIGGER (+1)",
+		},
+		EndOfTurn: []string{
+			"Hand: Hit the High Notes (Red)",
+			"Auras: 1 Runechant",
+		},
 	}
 	d.Stats.Best = deck.BestTurn{
 		Summary:            hand.TurnSummary{Value: 21},
 		StartingRunechants: 0,
-		Lines:              want,
+		Log:                want,
 	}
 
 	data, err := Marshal(d)
@@ -137,14 +144,8 @@ func TestRoundTrip_PreservesBestTurnLines(t *testing.T) {
 		t.Fatalf("Unmarshal: %v", err)
 	}
 
-	gotLines := got.Stats.Best.Lines
-	if len(gotLines) != len(want) {
-		t.Fatalf("Lines len: got %d want %d (got=%v)", len(gotLines), len(want), gotLines)
-	}
-	for i := range want {
-		if gotLines[i] != want[i] {
-			t.Errorf("Lines[%d]: got %q want %q", i, gotLines[i], want[i])
-		}
+	if !reflect.DeepEqual(got.Stats.Best.Log, want) {
+		t.Errorf("Log: got %+v\n want %+v", got.Stats.Best.Log, want)
 	}
 	if got.Stats.Best.Summary.Value != 21 {
 		t.Errorf("Value: got %d want 21", got.Stats.Best.Summary.Value)
