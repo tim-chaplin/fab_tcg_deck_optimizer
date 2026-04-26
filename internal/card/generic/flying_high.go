@@ -31,7 +31,7 @@ func flyingHighPlay(s *card.TurnState, matchPitch int) int {
 type FlyingHighRed struct{}
 
 func (FlyingHighRed) ID() card.ID                 { return card.FlyingHighRed }
-func (FlyingHighRed) Name() string                { return "Flying High (Red)" }
+func (FlyingHighRed) Name() string                { return "Flying High" }
 func (FlyingHighRed) Cost(*card.TurnState) int                   { return 0 }
 func (FlyingHighRed) Pitch() int                  { return 1 }
 func (FlyingHighRed) Attack() int                 { return 0 }
@@ -43,7 +43,7 @@ func (FlyingHighRed) Play(s *card.TurnState, _ *card.CardState) int { return fly
 type FlyingHighYellow struct{}
 
 func (FlyingHighYellow) ID() card.ID                 { return card.FlyingHighYellow }
-func (FlyingHighYellow) Name() string                { return "Flying High (Yellow)" }
+func (FlyingHighYellow) Name() string                { return "Flying High" }
 func (FlyingHighYellow) Cost(*card.TurnState) int                   { return 0 }
 func (FlyingHighYellow) Pitch() int                  { return 2 }
 func (FlyingHighYellow) Attack() int                 { return 0 }
@@ -55,7 +55,7 @@ func (FlyingHighYellow) Play(s *card.TurnState, _ *card.CardState) int { return 
 type FlyingHighBlue struct{}
 
 func (FlyingHighBlue) ID() card.ID                 { return card.FlyingHighBlue }
-func (FlyingHighBlue) Name() string                { return "Flying High (Blue)" }
+func (FlyingHighBlue) Name() string                { return "Flying High" }
 func (FlyingHighBlue) Cost(*card.TurnState) int                   { return 0 }
 func (FlyingHighBlue) Pitch() int                  { return 3 }
 func (FlyingHighBlue) Attack() int                 { return 0 }

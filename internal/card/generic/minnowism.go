@@ -28,7 +28,7 @@ func minnowismPlay(s *card.TurnState, n int) int {
 type MinnowismRed struct{}
 
 func (MinnowismRed) ID() card.ID                 { return card.MinnowismRed }
-func (MinnowismRed) Name() string                { return "Minnowism (Red)" }
+func (MinnowismRed) Name() string                { return "Minnowism" }
 func (MinnowismRed) Cost(*card.TurnState) int                   { return 0 }
 func (MinnowismRed) Pitch() int                  { return 1 }
 func (MinnowismRed) Attack() int                 { return 0 }
@@ -40,7 +40,7 @@ func (MinnowismRed) Play(s *card.TurnState, _ *card.CardState) int { return minn
 type MinnowismYellow struct{}
 
 func (MinnowismYellow) ID() card.ID                 { return card.MinnowismYellow }
-func (MinnowismYellow) Name() string                { return "Minnowism (Yellow)" }
+func (MinnowismYellow) Name() string                { return "Minnowism" }
 func (MinnowismYellow) Cost(*card.TurnState) int                   { return 0 }
 func (MinnowismYellow) Pitch() int                  { return 2 }
 func (MinnowismYellow) Attack() int                 { return 0 }
@@ -52,7 +52,7 @@ func (MinnowismYellow) Play(s *card.TurnState, _ *card.CardState) int { return m
 type MinnowismBlue struct{}
 
 func (MinnowismBlue) ID() card.ID                 { return card.MinnowismBlue }
-func (MinnowismBlue) Name() string                { return "Minnowism (Blue)" }
+func (MinnowismBlue) Name() string                { return "Minnowism" }
 func (MinnowismBlue) Cost(*card.TurnState) int                   { return 0 }
 func (MinnowismBlue) Pitch() int                  { return 3 }
 func (MinnowismBlue) Attack() int                 { return 0 }

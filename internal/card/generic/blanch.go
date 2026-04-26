@@ -12,7 +12,7 @@ var blanchTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeAt
 type BlanchRed struct{}
 
 func (BlanchRed) ID() card.ID                 { return card.BlanchRed }
-func (BlanchRed) Name() string                { return "Blanch (Red)" }
+func (BlanchRed) Name() string                { return "Blanch" }
 func (BlanchRed) Cost(*card.TurnState) int                   { return 3 }
 func (BlanchRed) Pitch() int                  { return 1 }
 func (BlanchRed) Attack() int                 { return 7 }
@@ -26,7 +26,7 @@ func (c BlanchRed) Play(s *card.TurnState, self *card.CardState) int { return bl
 type BlanchYellow struct{}
 
 func (BlanchYellow) ID() card.ID                 { return card.BlanchYellow }
-func (BlanchYellow) Name() string                { return "Blanch (Yellow)" }
+func (BlanchYellow) Name() string                { return "Blanch" }
 func (BlanchYellow) Cost(*card.TurnState) int                   { return 3 }
 func (BlanchYellow) Pitch() int                  { return 2 }
 func (BlanchYellow) Attack() int                 { return 6 }
@@ -40,7 +40,7 @@ func (c BlanchYellow) Play(s *card.TurnState, self *card.CardState) int { return
 type BlanchBlue struct{}
 
 func (BlanchBlue) ID() card.ID                 { return card.BlanchBlue }
-func (BlanchBlue) Name() string                { return "Blanch (Blue)" }
+func (BlanchBlue) Name() string                { return "Blanch" }
 func (BlanchBlue) Cost(*card.TurnState) int                   { return 3 }
 func (BlanchBlue) Pitch() int                  { return 3 }
 func (BlanchBlue) Attack() int                 { return 5 }

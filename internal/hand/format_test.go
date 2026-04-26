@@ -42,7 +42,7 @@ func TestFormatBestLine_Compact(t *testing.T) {
 		{Card: generic.ToughenUpBlue{}, Role: Defend, FromArsenal: true},
 	}
 	got := FormatBestLine(line)
-	want := "cardtest.RedAttack: PITCH, cardtest.RedAttack: ATTACK, Toughen Up (Blue) (from arsenal): DEFEND"
+	want := "cardtest.RedAttack [R]: PITCH, cardtest.RedAttack [R]: ATTACK, Toughen Up [B] (from arsenal): DEFEND"
 	if got != want {
 		t.Errorf("FormatBestLine = %q\n  want = %q", got, want)
 	}
@@ -80,10 +80,10 @@ func TestFormatBestTurn_NonAttackCardUsesPlayLabel(t *testing.T) {
 	h := []card.Card{runeblade.MauvrionSkiesRed{}, runeblade.ShrillOfSkullformRed{}, runeblade.MaleficIncantationBlue{}}
 	got := Best(hero.Viserai{}, nil, h, 0, nil, 0, nil)
 	out := FormatBestTurn(got, 0)
-	if !strings.Contains(out, "Mauvrion Skies (Red): PLAY") {
+	if !strings.Contains(out, "Mauvrion Skies [R]: PLAY") {
 		t.Errorf("want Mauvrion (non-attack action) labelled PLAY, got:\n%s", out)
 	}
-	if !strings.Contains(out, "Shrill of Skullform (Red): ATTACK") {
+	if !strings.Contains(out, "Shrill of Skullform [R]: ATTACK") {
 		t.Errorf("want Shrill (attack action) labelled ATTACK, got:\n%s", out)
 	}
 }
@@ -111,10 +111,10 @@ func TestFormatBestTurn_LogAttributesEachTriggerSeparately(t *testing.T) {
 	got := BestWithTriggers(hero.Viserai{}, nil, h, 0, nil, 0, nil, prior)
 	out := FormatBestTurn(got, 0)
 	wants := []string{
-		"Consuming Volition (Red): ATTACK",
+		"Consuming Volition [R]: ATTACK",
 		"Viserai: HERO TRIGGER (+1)",
-		"Malefic Incantation (Red): AURA TRIGGER (+1)",
-		"Mauvrion Skies (Red): ATTACK TRIGGER (+3)",
+		"Malefic Incantation [R]: AURA TRIGGER (+1)",
+		"Mauvrion Skies [R]: ATTACK TRIGGER (+3)",
 	}
 	for _, want := range wants {
 		if !strings.Contains(out, want) {
@@ -155,7 +155,7 @@ func TestFormatBestTurn_ArsenalInPlayedAsDR(t *testing.T) {
 	if !strings.Contains(out, ": PITCH") {
 		t.Errorf("want a defense-phase pitch line, got:\n%s", out)
 	}
-	if !strings.Contains(out, "Toughen Up (Blue): DEFENSE REACTION from arsenal") {
+	if !strings.Contains(out, "Toughen Up [B]: DEFENSE REACTION from arsenal") {
 		t.Errorf("want 'DEFENSE REACTION from arsenal' on the role label, got:\n%s", out)
 	}
 }
@@ -163,7 +163,7 @@ func TestFormatBestTurn_ArsenalInPlayedAsDR(t *testing.T) {
 // TestFormatBestTurn_ArsenalInPlayedOnChain checks the role-label tag for an arsenal-in
 // card played as part of the my-turn chain. Hand: one BlueAttack (pitch 3, cost 1).
 // Arsenal-in: RedAttack (cost 1, attack 3). The solver pitches the Blue to pay the Red's
-// cost and attacks from arsenal for 3; the chain line reads "cardtest.RedAttack: ATTACK
+// cost and attacks from arsenal for 3; the chain line reads "cardtest.RedAttack [R]: ATTACK
 // from arsenal" — tag on the role, not on the card name.
 func TestFormatBestTurn_ArsenalInPlayedOnChain(t *testing.T) {
 	h := []card.Card{fake.BlueAttack{}}
@@ -172,11 +172,11 @@ func TestFormatBestTurn_ArsenalInPlayedOnChain(t *testing.T) {
 	if !strings.Contains(out, "  My turn:") {
 		t.Errorf("want 'My turn:' section header, got:\n%s", out)
 	}
-	if !strings.Contains(out, "cardtest.RedAttack: ATTACK from arsenal") {
+	if !strings.Contains(out, "cardtest.RedAttack [R]: ATTACK from arsenal") {
 		t.Errorf("want 'ATTACK from arsenal' on the role label, got:\n%s", out)
 	}
 	// The arsenal tag must hang off the role label, not the card name.
-	if strings.Contains(out, "cardtest.RedAttack (from arsenal)") {
+	if strings.Contains(out, "cardtest.RedAttack [R] (from arsenal)") {
 		t.Errorf("arsenal tag should live on the role label, not the card name; got:\n%s", out)
 	}
 }
@@ -208,12 +208,12 @@ func TestFormatBestTurn_WeaponSwingInChain(t *testing.T) {
 // TestFormatBestTurn_EndOfTurnArsenalNew pins the End of turn section's arsenal entry tagged
 // "(new)" when a Held hand card got promoted into an empty arsenal slot post-hoc. A lone DR
 // (no way to pay its cost, no incoming) is Held in the partition but then promoted to
-// Arsenal, so End of turn shows "Arsenal: Toughen Up (Blue) (new)".
+// Arsenal, so End of turn shows "Arsenal: Toughen Up [B] (new)".
 func TestFormatBestTurn_EndOfTurnArsenalNew(t *testing.T) {
 	h := []card.Card{generic.ToughenUpBlue{}}
 	got := Best(stubHero, nil, h, 4, nil, 0, nil)
 	out := FormatBestTurn(got, 0)
-	if !strings.Contains(out, "Arsenal: Toughen Up (Blue) (new)") {
+	if !strings.Contains(out, "Arsenal: Toughen Up [B] (new)") {
 		t.Errorf("want an end-of-turn arsenal entry tagged '(new)', got:\n%s", out)
 	}
 }
@@ -249,7 +249,7 @@ func TestFormatBestTurn_TriggersFromLastTurnLine(t *testing.T) {
 		},
 	}
 	out := FormatBestTurn(summary, 0)
-	want := "cardtest.RedAttack: START OF ACTION PHASE (+3)"
+	want := "cardtest.RedAttack [R]: START OF ACTION PHASE (+3)"
 	if !strings.Contains(out, want) {
 		t.Errorf("missing %q in:\n%s", want, out)
 	}
@@ -265,7 +265,7 @@ func TestFormatBestTurn_TriggersFromLastTurnRevealedLine(t *testing.T) {
 		},
 	}
 	out := FormatBestTurn(summary, 0)
-	want := "Sigil of the Arknight (Blue): drew Mauvrion Skies (Red) into hand"
+	want := "Sigil of the Arknight [B]: drew Mauvrion Skies [R] into hand"
 	if !strings.Contains(out, want) {
 		t.Errorf("missing %q in:\n%s", want, out)
 	}
@@ -298,7 +298,7 @@ func TestFormatBestTurn_StartOfTurnAurasLine(t *testing.T) {
 		},
 	}
 	out := FormatBestTurn(summary, 0)
-	want := "Auras: Malefic Incantation (Red), Malefic Incantation (Red), Sigil of the Arknight (Blue)"
+	want := "Auras: Malefic Incantation [R], Malefic Incantation [R], Sigil of the Arknight [B]"
 	if !strings.Contains(out, want) {
 		t.Errorf("missing %q in:\n%s", want, out)
 	}
@@ -323,7 +323,7 @@ func TestFormatBestTurn_StartOfTurnAurasWithRunechants(t *testing.T) {
 		StartOfTurnAuras: []card.Card{runeblade.MaleficIncantationRed{}},
 	}
 	out := FormatBestTurn(summary, 3)
-	want := "Auras: Malefic Incantation (Red), 3 Runechants"
+	want := "Auras: Malefic Incantation [R], 3 Runechants"
 	if !strings.Contains(out, want) {
 		t.Errorf("missing %q in:\n%s", want, out)
 	}
@@ -353,7 +353,7 @@ func TestFormatBestTurn_EndOfTurnHandLine(t *testing.T) {
 		State: CarryState{Hand: []card.Card{fake.RedAttack{}}},
 	}
 	out := FormatBestTurn(summary, 0)
-	want := "Hand: cardtest.RedAttack"
+	want := "Hand: cardtest.RedAttack [R]"
 	if !strings.Contains(out, want) {
 		t.Errorf("missing %q in:\n%s", want, out)
 	}
@@ -372,7 +372,7 @@ func TestFormatBestTurn_EndOfTurnAurasWithRunechants(t *testing.T) {
 		},
 	}
 	out := FormatBestTurn(summary, 0)
-	want := "Auras: Malefic Incantation (Red), 2 Runechants"
+	want := "Auras: Malefic Incantation [R], 2 Runechants"
 	if !strings.Contains(out, want) {
 		t.Errorf("missing %q in:\n%s", want, out)
 	}
@@ -388,7 +388,7 @@ func TestFormatBestTurn_EndOfTurnArsenalStayedDirect(t *testing.T) {
 		},
 	}
 	out := FormatBestTurn(summary, 0)
-	want := "Arsenal: Toughen Up (Blue) (stayed)"
+	want := "Arsenal: Toughen Up [B] (stayed)"
 	if !strings.Contains(out, want) {
 		t.Errorf("missing %q in:\n%s", want, out)
 	}

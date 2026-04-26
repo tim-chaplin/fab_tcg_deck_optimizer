@@ -98,7 +98,7 @@ type TriggerContribution struct {
 }
 
 // TurnLog is the structured record of a turn's printout, broken into four sections matching
-// the natural turn boundaries. Each entry is content-only — "Hocus Pocus (Blue): PITCH" —
+// the natural turn boundaries. Each entry is content-only — "Hocus Pocus [B]: PITCH" —
 // so the formatter owns indentation, section headers, numbering of chain events, and
 // join. JSON serializes the struct directly so the on-disk shape is browsable / diffable
 // per section.
@@ -107,7 +107,7 @@ type TurnLog struct {
 	// dealt hand, arsenal-in card, auras / runechants in play, then the carryover
 	// AuraTrigger handler effects (Sigil reveals, damage credits). Mixed format — informational
 	// lines like "Hand: A, B, C, D" sit alongside event lines like "Sigil of the Arknight
-	// (Blue): drew X into hand"; the formatter renders both unnumbered.
+	// [B]: drew X into hand"; the formatter renders both unnumbered.
 	StartOfTurn []string `json:"start_of_turn,omitempty"`
 	// MyTurn is the numbered entries for the "My turn:" section: attack-phase pitches
 	// followed by the chain (Play / hero trigger / aura trigger / ephemeral trigger / weapon

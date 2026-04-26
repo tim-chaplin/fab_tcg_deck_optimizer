@@ -24,7 +24,7 @@ func frontlineScoutPlay(c card.Card, self *card.CardState) int {
 type FrontlineScoutRed struct{}
 
 func (FrontlineScoutRed) ID() card.ID                 { return card.FrontlineScoutRed }
-func (FrontlineScoutRed) Name() string                { return "Frontline Scout (Red)" }
+func (FrontlineScoutRed) Name() string                { return "Frontline Scout" }
 func (FrontlineScoutRed) Cost(*card.TurnState) int                   { return 0 }
 func (FrontlineScoutRed) Pitch() int                  { return 1 }
 func (FrontlineScoutRed) Attack() int                 { return 3 }
@@ -38,7 +38,7 @@ func (c FrontlineScoutRed) Play(_ *card.TurnState, self *card.CardState) int { r
 type FrontlineScoutYellow struct{}
 
 func (FrontlineScoutYellow) ID() card.ID                 { return card.FrontlineScoutYellow }
-func (FrontlineScoutYellow) Name() string                { return "Frontline Scout (Yellow)" }
+func (FrontlineScoutYellow) Name() string                { return "Frontline Scout" }
 func (FrontlineScoutYellow) Cost(*card.TurnState) int                   { return 0 }
 func (FrontlineScoutYellow) Pitch() int                  { return 2 }
 func (FrontlineScoutYellow) Attack() int                 { return 2 }
@@ -52,7 +52,7 @@ func (c FrontlineScoutYellow) Play(_ *card.TurnState, self *card.CardState) int 
 type FrontlineScoutBlue struct{}
 
 func (FrontlineScoutBlue) ID() card.ID                 { return card.FrontlineScoutBlue }
-func (FrontlineScoutBlue) Name() string                { return "Frontline Scout (Blue)" }
+func (FrontlineScoutBlue) Name() string                { return "Frontline Scout" }
 func (FrontlineScoutBlue) Cost(*card.TurnState) int                   { return 0 }
 func (FrontlineScoutBlue) Pitch() int                  { return 3 }
 func (FrontlineScoutBlue) Attack() int                 { return 1 }

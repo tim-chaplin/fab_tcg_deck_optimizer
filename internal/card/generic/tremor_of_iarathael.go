@@ -13,7 +13,7 @@ var tremorOfIArathaelTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, 
 type TremorOfIArathaelRed struct{}
 
 func (TremorOfIArathaelRed) ID() card.ID                 { return card.TremorOfIArathaelRed }
-func (TremorOfIArathaelRed) Name() string                { return "Tremor of íArathael (Red)" }
+func (TremorOfIArathaelRed) Name() string                { return "Tremor of íArathael" }
 func (TremorOfIArathaelRed) Cost(*card.TurnState) int                   { return 1 }
 func (TremorOfIArathaelRed) Pitch() int                  { return 1 }
 func (TremorOfIArathaelRed) Attack() int                 { return 4 }
@@ -27,7 +27,7 @@ func (c TremorOfIArathaelRed) Play(s *card.TurnState, _ *card.CardState) int { r
 type TremorOfIArathaelYellow struct{}
 
 func (TremorOfIArathaelYellow) ID() card.ID                 { return card.TremorOfIArathaelYellow }
-func (TremorOfIArathaelYellow) Name() string                { return "Tremor of íArathael (Yellow)" }
+func (TremorOfIArathaelYellow) Name() string                { return "Tremor of íArathael" }
 func (TremorOfIArathaelYellow) Cost(*card.TurnState) int                   { return 1 }
 func (TremorOfIArathaelYellow) Pitch() int                  { return 2 }
 func (TremorOfIArathaelYellow) Attack() int                 { return 3 }
@@ -41,7 +41,7 @@ func (c TremorOfIArathaelYellow) Play(s *card.TurnState, _ *card.CardState) int 
 type TremorOfIArathaelBlue struct{}
 
 func (TremorOfIArathaelBlue) ID() card.ID                 { return card.TremorOfIArathaelBlue }
-func (TremorOfIArathaelBlue) Name() string                { return "Tremor of íArathael (Blue)" }
+func (TremorOfIArathaelBlue) Name() string                { return "Tremor of íArathael" }
 func (TremorOfIArathaelBlue) Cost(*card.TurnState) int                   { return 1 }
 func (TremorOfIArathaelBlue) Pitch() int                  { return 3 }
 func (TremorOfIArathaelBlue) Attack() int                 { return 2 }

@@ -11,7 +11,7 @@ import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 type RiseAboveRed struct{}
 
 func (RiseAboveRed) ID() card.ID                 { return card.RiseAboveRed }
-func (RiseAboveRed) Name() string             { return "Rise Above (Red)" }
+func (RiseAboveRed) Name() string             { return "Rise Above" }
 func (RiseAboveRed) Cost(*card.TurnState) int                { return 2 }
 func (RiseAboveRed) Pitch() int               { return 1 }
 func (RiseAboveRed) Attack() int              { return 0 }
@@ -25,7 +25,7 @@ func (RiseAboveRed) Play(*card.TurnState, *card.CardState) int { return 0 }
 type RiseAboveYellow struct{}
 
 func (RiseAboveYellow) ID() card.ID                 { return card.RiseAboveYellow }
-func (RiseAboveYellow) Name() string             { return "Rise Above (Yellow)" }
+func (RiseAboveYellow) Name() string             { return "Rise Above" }
 func (RiseAboveYellow) Cost(*card.TurnState) int                { return 2 }
 func (RiseAboveYellow) Pitch() int               { return 2 }
 func (RiseAboveYellow) Attack() int              { return 0 }
@@ -39,7 +39,7 @@ func (RiseAboveYellow) Play(*card.TurnState, *card.CardState) int { return 0 }
 type RiseAboveBlue struct{}
 
 func (RiseAboveBlue) ID() card.ID                 { return card.RiseAboveBlue }
-func (RiseAboveBlue) Name() string             { return "Rise Above (Blue)" }
+func (RiseAboveBlue) Name() string             { return "Rise Above" }
 func (RiseAboveBlue) Cost(*card.TurnState) int                { return 2 }
 func (RiseAboveBlue) Pitch() int               { return 3 }
 func (RiseAboveBlue) Attack() int              { return 0 }

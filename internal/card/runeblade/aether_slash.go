@@ -12,7 +12,7 @@ var aetherSlashTypes = card.NewTypeSet(card.TypeRuneblade, card.TypeAction, card
 type AetherSlashRed struct{}
 
 func (AetherSlashRed) ID() card.ID                 { return card.AetherSlashRed }
-func (AetherSlashRed) Name() string                 { return "Aether Slash (Red)" }
+func (AetherSlashRed) Name() string                 { return "Aether Slash" }
 func (AetherSlashRed) Cost(*card.TurnState) int                    { return 1 }
 func (AetherSlashRed) Pitch() int                   { return 1 }
 func (AetherSlashRed) Attack() int                  { return 4 }
@@ -28,7 +28,7 @@ func (c AetherSlashRed) Play(s *card.TurnState, _ *card.CardState) int { return 
 type AetherSlashYellow struct{}
 
 func (AetherSlashYellow) ID() card.ID                 { return card.AetherSlashYellow }
-func (AetherSlashYellow) Name() string                 { return "Aether Slash (Yellow)" }
+func (AetherSlashYellow) Name() string                 { return "Aether Slash" }
 func (AetherSlashYellow) Cost(*card.TurnState) int                    { return 1 }
 func (AetherSlashYellow) Pitch() int                   { return 2 }
 func (AetherSlashYellow) Attack() int                  { return 3 }
@@ -44,7 +44,7 @@ func (c AetherSlashYellow) Play(s *card.TurnState, _ *card.CardState) int { retu
 type AetherSlashBlue struct{}
 
 func (AetherSlashBlue) ID() card.ID                 { return card.AetherSlashBlue }
-func (AetherSlashBlue) Name() string                 { return "Aether Slash (Blue)" }
+func (AetherSlashBlue) Name() string                 { return "Aether Slash" }
 func (AetherSlashBlue) Cost(*card.TurnState) int                    { return 1 }
 func (AetherSlashBlue) Pitch() int                   { return 3 }
 func (AetherSlashBlue) Attack() int                  { return 2 }

@@ -11,7 +11,7 @@ var calmingBreezeTypes = card.NewTypeSet(card.TypeGeneric, card.TypeInstant)
 type CalmingBreezeRed struct{}
 
 func (CalmingBreezeRed) ID() card.ID                               { return card.CalmingBreezeRed }
-func (CalmingBreezeRed) Name() string                              { return "Calming Breeze (Red)" }
+func (CalmingBreezeRed) Name() string                              { return "Calming Breeze" }
 func (CalmingBreezeRed) Cost(*card.TurnState) int                  { return 0 }
 func (CalmingBreezeRed) Pitch() int                                { return 1 }
 func (CalmingBreezeRed) Attack() int                               { return 0 }

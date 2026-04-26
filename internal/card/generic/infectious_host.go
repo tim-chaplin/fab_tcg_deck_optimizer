@@ -13,7 +13,7 @@ var infectiousHostTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, car
 type InfectiousHostRed struct{}
 
 func (InfectiousHostRed) ID() card.ID                 { return card.InfectiousHostRed }
-func (InfectiousHostRed) Name() string                { return "Infectious Host (Red)" }
+func (InfectiousHostRed) Name() string                { return "Infectious Host" }
 func (InfectiousHostRed) Cost(*card.TurnState) int                   { return 0 }
 func (InfectiousHostRed) Pitch() int                  { return 1 }
 func (InfectiousHostRed) Attack() int                 { return 4 }
@@ -27,7 +27,7 @@ func (c InfectiousHostRed) Play(s *card.TurnState, _ *card.CardState) int { retu
 type InfectiousHostYellow struct{}
 
 func (InfectiousHostYellow) ID() card.ID                 { return card.InfectiousHostYellow }
-func (InfectiousHostYellow) Name() string                { return "Infectious Host (Yellow)" }
+func (InfectiousHostYellow) Name() string                { return "Infectious Host" }
 func (InfectiousHostYellow) Cost(*card.TurnState) int                   { return 0 }
 func (InfectiousHostYellow) Pitch() int                  { return 2 }
 func (InfectiousHostYellow) Attack() int                 { return 3 }
@@ -41,7 +41,7 @@ func (c InfectiousHostYellow) Play(s *card.TurnState, _ *card.CardState) int { r
 type InfectiousHostBlue struct{}
 
 func (InfectiousHostBlue) ID() card.ID                 { return card.InfectiousHostBlue }
-func (InfectiousHostBlue) Name() string                { return "Infectious Host (Blue)" }
+func (InfectiousHostBlue) Name() string                { return "Infectious Host" }
 func (InfectiousHostBlue) Cost(*card.TurnState) int                   { return 0 }
 func (InfectiousHostBlue) Pitch() int                  { return 3 }
 func (InfectiousHostBlue) Attack() int                 { return 2 }

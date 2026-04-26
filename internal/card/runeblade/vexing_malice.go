@@ -19,7 +19,7 @@ func vexingMalicePlay(attack int, s *card.TurnState) int {
 type VexingMaliceRed struct{}
 
 func (VexingMaliceRed) ID() card.ID                   { return card.VexingMaliceRed }
-func (VexingMaliceRed) Name() string                  { return "Vexing Malice (Red)" }
+func (VexingMaliceRed) Name() string                  { return "Vexing Malice" }
 func (VexingMaliceRed) Cost(*card.TurnState) int                     { return 1 }
 func (VexingMaliceRed) Pitch() int                    { return 1 }
 func (VexingMaliceRed) Attack() int                   { return 3 }
@@ -31,7 +31,7 @@ func (c VexingMaliceRed) Play(s *card.TurnState, _ *card.CardState) int  { retur
 type VexingMaliceYellow struct{}
 
 func (VexingMaliceYellow) ID() card.ID                   { return card.VexingMaliceYellow }
-func (VexingMaliceYellow) Name() string                  { return "Vexing Malice (Yellow)" }
+func (VexingMaliceYellow) Name() string                  { return "Vexing Malice" }
 func (VexingMaliceYellow) Cost(*card.TurnState) int                     { return 1 }
 func (VexingMaliceYellow) Pitch() int                    { return 2 }
 func (VexingMaliceYellow) Attack() int                   { return 2 }
@@ -43,7 +43,7 @@ func (c VexingMaliceYellow) Play(s *card.TurnState, _ *card.CardState) int  { re
 type VexingMaliceBlue struct{}
 
 func (VexingMaliceBlue) ID() card.ID                   { return card.VexingMaliceBlue }
-func (VexingMaliceBlue) Name() string                  { return "Vexing Malice (Blue)" }
+func (VexingMaliceBlue) Name() string                  { return "Vexing Malice" }
 func (VexingMaliceBlue) Cost(*card.TurnState) int                     { return 1 }
 func (VexingMaliceBlue) Pitch() int                    { return 3 }
 func (VexingMaliceBlue) Attack() int                   { return 1 }

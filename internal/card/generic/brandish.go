@@ -12,7 +12,7 @@ var brandishTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.Type
 type BrandishRed struct{}
 
 func (BrandishRed) ID() card.ID                 { return card.BrandishRed }
-func (BrandishRed) Name() string                { return "Brandish (Red)" }
+func (BrandishRed) Name() string                { return "Brandish" }
 func (BrandishRed) Cost(*card.TurnState) int                   { return 1 }
 func (BrandishRed) Pitch() int                  { return 1 }
 func (BrandishRed) Attack() int                 { return 3 }
@@ -26,7 +26,7 @@ func (c BrandishRed) Play(s *card.TurnState, _ *card.CardState) int { return c.A
 type BrandishYellow struct{}
 
 func (BrandishYellow) ID() card.ID                 { return card.BrandishYellow }
-func (BrandishYellow) Name() string                { return "Brandish (Yellow)" }
+func (BrandishYellow) Name() string                { return "Brandish" }
 func (BrandishYellow) Cost(*card.TurnState) int                   { return 1 }
 func (BrandishYellow) Pitch() int                  { return 2 }
 func (BrandishYellow) Attack() int                 { return 2 }
@@ -40,7 +40,7 @@ func (c BrandishYellow) Play(s *card.TurnState, _ *card.CardState) int { return 
 type BrandishBlue struct{}
 
 func (BrandishBlue) ID() card.ID                 { return card.BrandishBlue }
-func (BrandishBlue) Name() string                { return "Brandish (Blue)" }
+func (BrandishBlue) Name() string                { return "Brandish" }
 func (BrandishBlue) Cost(*card.TurnState) int                   { return 1 }
 func (BrandishBlue) Pitch() int                  { return 3 }
 func (BrandishBlue) Attack() int                 { return 1 }

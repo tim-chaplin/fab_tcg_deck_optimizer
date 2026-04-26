@@ -12,7 +12,7 @@ var eirinasPrayerTypes = card.NewTypeSet(card.TypeGeneric, card.TypeInstant)
 type EirinasPrayerRed struct{}
 
 func (EirinasPrayerRed) ID() card.ID                               { return card.EirinasPrayerRed }
-func (EirinasPrayerRed) Name() string                              { return "Eirina's Prayer (Red)" }
+func (EirinasPrayerRed) Name() string                              { return "Eirina's Prayer" }
 func (EirinasPrayerRed) Cost(*card.TurnState) int                  { return 1 }
 func (EirinasPrayerRed) Pitch() int                                { return 1 }
 func (EirinasPrayerRed) Attack() int                               { return 0 }
@@ -26,7 +26,7 @@ func (EirinasPrayerRed) Play(*card.TurnState, *card.CardState) int { return 0 }
 type EirinasPrayerYellow struct{}
 
 func (EirinasPrayerYellow) ID() card.ID                               { return card.EirinasPrayerYellow }
-func (EirinasPrayerYellow) Name() string                              { return "Eirina's Prayer (Yellow)" }
+func (EirinasPrayerYellow) Name() string                              { return "Eirina's Prayer" }
 func (EirinasPrayerYellow) Cost(*card.TurnState) int                  { return 1 }
 func (EirinasPrayerYellow) Pitch() int                                { return 2 }
 func (EirinasPrayerYellow) Attack() int                               { return 0 }
@@ -40,7 +40,7 @@ func (EirinasPrayerYellow) Play(*card.TurnState, *card.CardState) int { return 0
 type EirinasPrayerBlue struct{}
 
 func (EirinasPrayerBlue) ID() card.ID                               { return card.EirinasPrayerBlue }
-func (EirinasPrayerBlue) Name() string                              { return "Eirina's Prayer (Blue)" }
+func (EirinasPrayerBlue) Name() string                              { return "Eirina's Prayer" }
 func (EirinasPrayerBlue) Cost(*card.TurnState) int                  { return 1 }
 func (EirinasPrayerBlue) Pitch() int                                { return 3 }
 func (EirinasPrayerBlue) Attack() int                               { return 0 }

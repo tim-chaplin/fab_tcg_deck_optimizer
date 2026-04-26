@@ -11,7 +11,7 @@ var sigilOfSolaceTypes = card.NewTypeSet(card.TypeGeneric, card.TypeInstant)
 type SigilOfSolaceRed struct{}
 
 func (SigilOfSolaceRed) ID() card.ID                               { return card.SigilOfSolaceRed }
-func (SigilOfSolaceRed) Name() string                              { return "Sigil of Solace (Red)" }
+func (SigilOfSolaceRed) Name() string                              { return "Sigil of Solace" }
 func (SigilOfSolaceRed) Cost(*card.TurnState) int                  { return 0 }
 func (SigilOfSolaceRed) Pitch() int                                { return 1 }
 func (SigilOfSolaceRed) Attack() int                               { return 0 }
@@ -26,7 +26,7 @@ func (SigilOfSolaceRed) Play(*card.TurnState, *card.CardState) int { return 0 }
 type SigilOfSolaceYellow struct{}
 
 func (SigilOfSolaceYellow) ID() card.ID                               { return card.SigilOfSolaceYellow }
-func (SigilOfSolaceYellow) Name() string                              { return "Sigil of Solace (Yellow)" }
+func (SigilOfSolaceYellow) Name() string                              { return "Sigil of Solace" }
 func (SigilOfSolaceYellow) Cost(*card.TurnState) int                  { return 0 }
 func (SigilOfSolaceYellow) Pitch() int                                { return 2 }
 func (SigilOfSolaceYellow) Attack() int                               { return 0 }
@@ -41,7 +41,7 @@ func (SigilOfSolaceYellow) Play(*card.TurnState, *card.CardState) int { return 0
 type SigilOfSolaceBlue struct{}
 
 func (SigilOfSolaceBlue) ID() card.ID                               { return card.SigilOfSolaceBlue }
-func (SigilOfSolaceBlue) Name() string                              { return "Sigil of Solace (Blue)" }
+func (SigilOfSolaceBlue) Name() string                              { return "Sigil of Solace" }
 func (SigilOfSolaceBlue) Cost(*card.TurnState) int                  { return 0 }
 func (SigilOfSolaceBlue) Pitch() int                                { return 3 }
 func (SigilOfSolaceBlue) Attack() int                               { return 0 }

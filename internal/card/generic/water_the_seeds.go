@@ -30,7 +30,7 @@ func waterTheSeedsPlay(basePower int, s *card.TurnState) int {
 type WaterTheSeedsRed struct{}
 
 func (WaterTheSeedsRed) ID() card.ID                 { return card.WaterTheSeedsRed }
-func (WaterTheSeedsRed) Name() string                { return "Water the Seeds (Red)" }
+func (WaterTheSeedsRed) Name() string                { return "Water the Seeds" }
 func (WaterTheSeedsRed) Cost(*card.TurnState) int                   { return 1 }
 func (WaterTheSeedsRed) Pitch() int                  { return 1 }
 func (WaterTheSeedsRed) Attack() int                 { return 3 }
@@ -42,7 +42,7 @@ func (c WaterTheSeedsRed) Play(s *card.TurnState, _ *card.CardState) int { retur
 type WaterTheSeedsYellow struct{}
 
 func (WaterTheSeedsYellow) ID() card.ID                 { return card.WaterTheSeedsYellow }
-func (WaterTheSeedsYellow) Name() string                { return "Water the Seeds (Yellow)" }
+func (WaterTheSeedsYellow) Name() string                { return "Water the Seeds" }
 func (WaterTheSeedsYellow) Cost(*card.TurnState) int                   { return 1 }
 func (WaterTheSeedsYellow) Pitch() int                  { return 2 }
 func (WaterTheSeedsYellow) Attack() int                 { return 2 }
@@ -54,7 +54,7 @@ func (c WaterTheSeedsYellow) Play(s *card.TurnState, _ *card.CardState) int { re
 type WaterTheSeedsBlue struct{}
 
 func (WaterTheSeedsBlue) ID() card.ID                 { return card.WaterTheSeedsBlue }
-func (WaterTheSeedsBlue) Name() string                { return "Water the Seeds (Blue)" }
+func (WaterTheSeedsBlue) Name() string                { return "Water the Seeds" }
 func (WaterTheSeedsBlue) Cost(*card.TurnState) int                   { return 1 }
 func (WaterTheSeedsBlue) Pitch() int                  { return 3 }
 func (WaterTheSeedsBlue) Attack() int                 { return 1 }

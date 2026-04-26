@@ -26,7 +26,7 @@ func promiseOfPlentyPlay(c card.Card, self *card.CardState) int {
 type PromiseOfPlentyRed struct{}
 
 func (PromiseOfPlentyRed) ID() card.ID                 { return card.PromiseOfPlentyRed }
-func (PromiseOfPlentyRed) Name() string                { return "Promise of Plenty (Red)" }
+func (PromiseOfPlentyRed) Name() string                { return "Promise of Plenty" }
 func (PromiseOfPlentyRed) Cost(*card.TurnState) int                   { return 0 }
 func (PromiseOfPlentyRed) Pitch() int                  { return 1 }
 func (PromiseOfPlentyRed) Attack() int                 { return 3 }
@@ -40,7 +40,7 @@ func (c PromiseOfPlentyRed) Play(_ *card.TurnState, self *card.CardState) int { 
 type PromiseOfPlentyYellow struct{}
 
 func (PromiseOfPlentyYellow) ID() card.ID                 { return card.PromiseOfPlentyYellow }
-func (PromiseOfPlentyYellow) Name() string                { return "Promise of Plenty (Yellow)" }
+func (PromiseOfPlentyYellow) Name() string                { return "Promise of Plenty" }
 func (PromiseOfPlentyYellow) Cost(*card.TurnState) int                   { return 0 }
 func (PromiseOfPlentyYellow) Pitch() int                  { return 2 }
 func (PromiseOfPlentyYellow) Attack() int                 { return 2 }
@@ -54,7 +54,7 @@ func (c PromiseOfPlentyYellow) Play(_ *card.TurnState, self *card.CardState) int
 type PromiseOfPlentyBlue struct{}
 
 func (PromiseOfPlentyBlue) ID() card.ID                 { return card.PromiseOfPlentyBlue }
-func (PromiseOfPlentyBlue) Name() string                { return "Promise of Plenty (Blue)" }
+func (PromiseOfPlentyBlue) Name() string                { return "Promise of Plenty" }
 func (PromiseOfPlentyBlue) Cost(*card.TurnState) int                   { return 0 }
 func (PromiseOfPlentyBlue) Pitch() int                  { return 3 }
 func (PromiseOfPlentyBlue) Attack() int                 { return 1 }

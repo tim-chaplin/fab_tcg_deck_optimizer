@@ -14,7 +14,7 @@ var jackBeQuickTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.T
 type JackBeQuickRed struct{}
 
 func (JackBeQuickRed) ID() card.ID                 { return card.JackBeQuickRed }
-func (JackBeQuickRed) Name() string                { return "Jack Be Quick (Red)" }
+func (JackBeQuickRed) Name() string                { return "Jack Be Quick" }
 func (JackBeQuickRed) Cost(*card.TurnState) int                   { return 0 }
 func (JackBeQuickRed) Pitch() int                  { return 1 }
 func (JackBeQuickRed) Attack() int                 { return 3 }

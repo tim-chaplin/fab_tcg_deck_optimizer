@@ -12,7 +12,7 @@ var clapEmInIronsTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card
 type ClapEmInIronsBlue struct{}
 
 func (ClapEmInIronsBlue) ID() card.ID                               { return card.ClapEmInIronsBlue }
-func (ClapEmInIronsBlue) Name() string                              { return "Clap 'Em in Irons (Blue)" }
+func (ClapEmInIronsBlue) Name() string                              { return "Clap 'Em in Irons" }
 func (ClapEmInIronsBlue) Cost(*card.TurnState) int                  { return 0 }
 func (ClapEmInIronsBlue) Pitch() int                                { return 3 }
 func (ClapEmInIronsBlue) Attack() int                               { return 0 }

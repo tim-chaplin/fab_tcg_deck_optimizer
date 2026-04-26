@@ -28,7 +28,7 @@ func reduceToRunechantCost(s *card.TurnState) int {
 type ReduceToRunechantRed struct{}
 
 func (ReduceToRunechantRed) ID() card.ID                   { return card.ReduceToRunechantRed }
-func (ReduceToRunechantRed) Name() string                  { return "Reduce to Runechant (Red)" }
+func (ReduceToRunechantRed) Name() string                  { return "Reduce to Runechant" }
 func (ReduceToRunechantRed) Cost(s *card.TurnState) int    { return reduceToRunechantCost(s) }
 func (ReduceToRunechantRed) MinCost() int                  { return 0 }
 func (ReduceToRunechantRed) MaxCost() int                  { return reduceToRunechantPrintedCost }
@@ -42,7 +42,7 @@ func (ReduceToRunechantRed) Play(s *card.TurnState, _ *card.CardState) int    { 
 type ReduceToRunechantYellow struct{}
 
 func (ReduceToRunechantYellow) ID() card.ID                 { return card.ReduceToRunechantYellow }
-func (ReduceToRunechantYellow) Name() string                { return "Reduce to Runechant (Yellow)" }
+func (ReduceToRunechantYellow) Name() string                { return "Reduce to Runechant" }
 func (ReduceToRunechantYellow) Cost(s *card.TurnState) int  { return reduceToRunechantCost(s) }
 func (ReduceToRunechantYellow) MinCost() int                { return 0 }
 func (ReduceToRunechantYellow) MaxCost() int                { return reduceToRunechantPrintedCost }
@@ -56,7 +56,7 @@ func (ReduceToRunechantYellow) Play(s *card.TurnState, _ *card.CardState) int  {
 type ReduceToRunechantBlue struct{}
 
 func (ReduceToRunechantBlue) ID() card.ID                 { return card.ReduceToRunechantBlue }
-func (ReduceToRunechantBlue) Name() string                { return "Reduce to Runechant (Blue)" }
+func (ReduceToRunechantBlue) Name() string                { return "Reduce to Runechant" }
 func (ReduceToRunechantBlue) Cost(s *card.TurnState) int  { return reduceToRunechantCost(s) }
 func (ReduceToRunechantBlue) MinCost() int                { return 0 }
 func (ReduceToRunechantBlue) MaxCost() int                { return reduceToRunechantPrintedCost }

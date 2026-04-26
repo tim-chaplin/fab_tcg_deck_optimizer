@@ -24,7 +24,7 @@ func scourTheBattlescapePlay(c card.Card, self *card.CardState) int {
 type ScourTheBattlescapeRed struct{}
 
 func (ScourTheBattlescapeRed) ID() card.ID                 { return card.ScourTheBattlescapeRed }
-func (ScourTheBattlescapeRed) Name() string                { return "Scour the Battlescape (Red)" }
+func (ScourTheBattlescapeRed) Name() string                { return "Scour the Battlescape" }
 func (ScourTheBattlescapeRed) Cost(*card.TurnState) int                   { return 0 }
 func (ScourTheBattlescapeRed) Pitch() int                  { return 1 }
 func (ScourTheBattlescapeRed) Attack() int                 { return 3 }
@@ -38,7 +38,7 @@ func (c ScourTheBattlescapeRed) Play(_ *card.TurnState, self *card.CardState) in
 type ScourTheBattlescapeYellow struct{}
 
 func (ScourTheBattlescapeYellow) ID() card.ID                 { return card.ScourTheBattlescapeYellow }
-func (ScourTheBattlescapeYellow) Name() string                { return "Scour the Battlescape (Yellow)" }
+func (ScourTheBattlescapeYellow) Name() string                { return "Scour the Battlescape" }
 func (ScourTheBattlescapeYellow) Cost(*card.TurnState) int                   { return 0 }
 func (ScourTheBattlescapeYellow) Pitch() int                  { return 2 }
 func (ScourTheBattlescapeYellow) Attack() int                 { return 2 }
@@ -52,7 +52,7 @@ func (c ScourTheBattlescapeYellow) Play(_ *card.TurnState, self *card.CardState)
 type ScourTheBattlescapeBlue struct{}
 
 func (ScourTheBattlescapeBlue) ID() card.ID                 { return card.ScourTheBattlescapeBlue }
-func (ScourTheBattlescapeBlue) Name() string                { return "Scour the Battlescape (Blue)" }
+func (ScourTheBattlescapeBlue) Name() string                { return "Scour the Battlescape" }
 func (ScourTheBattlescapeBlue) Cost(*card.TurnState) int                   { return 0 }
 func (ScourTheBattlescapeBlue) Pitch() int                  { return 3 }
 func (ScourTheBattlescapeBlue) Attack() int                 { return 1 }

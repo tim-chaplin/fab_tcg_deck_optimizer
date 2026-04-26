@@ -12,7 +12,7 @@ var cutDownToSizeTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card
 type CutDownToSizeRed struct{}
 
 func (CutDownToSizeRed) ID() card.ID                 { return card.CutDownToSizeRed }
-func (CutDownToSizeRed) Name() string                { return "Cut Down to Size (Red)" }
+func (CutDownToSizeRed) Name() string                { return "Cut Down to Size" }
 func (CutDownToSizeRed) Cost(*card.TurnState) int                   { return 2 }
 func (CutDownToSizeRed) Pitch() int                  { return 1 }
 func (CutDownToSizeRed) Attack() int                 { return 6 }
@@ -26,7 +26,7 @@ func (c CutDownToSizeRed) Play(s *card.TurnState, self *card.CardState) int { re
 type CutDownToSizeYellow struct{}
 
 func (CutDownToSizeYellow) ID() card.ID                 { return card.CutDownToSizeYellow }
-func (CutDownToSizeYellow) Name() string                { return "Cut Down to Size (Yellow)" }
+func (CutDownToSizeYellow) Name() string                { return "Cut Down to Size" }
 func (CutDownToSizeYellow) Cost(*card.TurnState) int                   { return 2 }
 func (CutDownToSizeYellow) Pitch() int                  { return 2 }
 func (CutDownToSizeYellow) Attack() int                 { return 5 }
@@ -40,7 +40,7 @@ func (c CutDownToSizeYellow) Play(s *card.TurnState, self *card.CardState) int {
 type CutDownToSizeBlue struct{}
 
 func (CutDownToSizeBlue) ID() card.ID                 { return card.CutDownToSizeBlue }
-func (CutDownToSizeBlue) Name() string                { return "Cut Down to Size (Blue)" }
+func (CutDownToSizeBlue) Name() string                { return "Cut Down to Size" }
 func (CutDownToSizeBlue) Cost(*card.TurnState) int                   { return 2 }
 func (CutDownToSizeBlue) Pitch() int                  { return 3 }
 func (CutDownToSizeBlue) Attack() int                 { return 4 }

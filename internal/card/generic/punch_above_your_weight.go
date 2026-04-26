@@ -12,7 +12,7 @@ var punchAboveYourWeightTypes = card.NewTypeSet(card.TypeGeneric, card.TypeActio
 type PunchAboveYourWeightRed struct{}
 
 func (PunchAboveYourWeightRed) ID() card.ID                 { return card.PunchAboveYourWeightRed }
-func (PunchAboveYourWeightRed) Name() string                { return "Punch Above Your Weight (Red)" }
+func (PunchAboveYourWeightRed) Name() string                { return "Punch Above Your Weight" }
 func (PunchAboveYourWeightRed) Cost(*card.TurnState) int                   { return 0 }
 func (PunchAboveYourWeightRed) Pitch() int                  { return 1 }
 func (PunchAboveYourWeightRed) Attack() int                 { return 2 }
@@ -26,7 +26,7 @@ func (c PunchAboveYourWeightRed) Play(s *card.TurnState, _ *card.CardState) int 
 type PunchAboveYourWeightYellow struct{}
 
 func (PunchAboveYourWeightYellow) ID() card.ID                 { return card.PunchAboveYourWeightYellow }
-func (PunchAboveYourWeightYellow) Name() string                { return "Punch Above Your Weight (Yellow)" }
+func (PunchAboveYourWeightYellow) Name() string                { return "Punch Above Your Weight" }
 func (PunchAboveYourWeightYellow) Cost(*card.TurnState) int                   { return 0 }
 func (PunchAboveYourWeightYellow) Pitch() int                  { return 2 }
 func (PunchAboveYourWeightYellow) Attack() int                 { return 2 }
@@ -40,7 +40,7 @@ func (c PunchAboveYourWeightYellow) Play(s *card.TurnState, _ *card.CardState) i
 type PunchAboveYourWeightBlue struct{}
 
 func (PunchAboveYourWeightBlue) ID() card.ID                 { return card.PunchAboveYourWeightBlue }
-func (PunchAboveYourWeightBlue) Name() string                { return "Punch Above Your Weight (Blue)" }
+func (PunchAboveYourWeightBlue) Name() string                { return "Punch Above Your Weight" }
 func (PunchAboveYourWeightBlue) Cost(*card.TurnState) int                   { return 0 }
 func (PunchAboveYourWeightBlue) Pitch() int                  { return 3 }
 func (PunchAboveYourWeightBlue) Attack() int                 { return 2 }

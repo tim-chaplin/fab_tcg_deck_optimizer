@@ -77,7 +77,7 @@ func TestMoonWish_TutorPrefersRedSunKissThenYellowThenBlue(t *testing.T) {
 }
 
 // TestMoonWish_TutorRequiresHit: Moon Wish's hit check (LikelyToHit) gates the tutor. With
-// the printed 4 power Moon Wish (Yellow) sits in the hit window and tutors Sun Kiss into
+// the printed 4 power Moon Wish [Y] sits in the hit window and tutors Sun Kiss into
 // hand; with a -4 BonusAttack it doesn't and the deck stays intact.
 func TestMoonWish_TutorRequiresHit(t *testing.T) {
 	{
@@ -85,7 +85,7 @@ func TestMoonWish_TutorRequiresHit(t *testing.T) {
 		self := &card.CardState{Card: MoonWishYellow{}}
 		_ = MoonWishYellow{}.Play(&s, self)
 		if len(s.Hand) != 1 || s.Hand[0].ID() != card.SunKissRed {
-			t.Errorf("base hit: Hand = %v, want [Sun Kiss (Red)]", s.Hand)
+			t.Errorf("base hit: Hand = %v, want [Sun Kiss [R]]", s.Hand)
 		}
 		if len(s.Deck) != 0 {
 			t.Errorf("base hit: Deck = %v, want [] (tutor removed Sun Kiss)", s.Deck)
@@ -100,7 +100,7 @@ func TestMoonWish_TutorRequiresHit(t *testing.T) {
 			t.Errorf("dampened: Hand = %v, want [] (no hit, no tutor)", s.Hand)
 		}
 		if len(s.Deck) != 1 || s.Deck[0].ID() != card.SunKissRed {
-			t.Errorf("dampened: Deck = %v, want [Sun Kiss (Red)] (untouched)", s.Deck)
+			t.Errorf("dampened: Deck = %v, want [Sun Kiss [R]] (untouched)", s.Deck)
 		}
 	}
 }
@@ -120,7 +120,7 @@ func TestMoonWish_GoAgainPlaysSunKissImmediately(t *testing.T) {
 			t.Errorf("with go-again: Hand = %v, want [] (Sun Kiss played, not tutored to hand)", s.Hand)
 		}
 		if len(s.Graveyard) != 1 || s.Graveyard[0].ID() != card.SunKissRed {
-			t.Errorf("with go-again: Graveyard = %v, want [Sun Kiss (Red)]", s.Graveyard)
+			t.Errorf("with go-again: Graveyard = %v, want [Sun Kiss [R]]", s.Graveyard)
 		}
 	}
 	{
@@ -131,7 +131,7 @@ func TestMoonWish_GoAgainPlaysSunKissImmediately(t *testing.T) {
 			t.Errorf("no go-again: damage = %d, want 4 (Sun Kiss not played)", dmg)
 		}
 		if len(s.Hand) != 1 || s.Hand[0].ID() != card.SunKissRed {
-			t.Errorf("no go-again: Hand = %v, want [Sun Kiss (Red)]", s.Hand)
+			t.Errorf("no go-again: Hand = %v, want [Sun Kiss [R]]", s.Hand)
 		}
 	}
 }

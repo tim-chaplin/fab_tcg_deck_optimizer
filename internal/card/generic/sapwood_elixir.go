@@ -12,7 +12,7 @@ var sapwoodElixirTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction)
 type SapwoodElixirRed struct{}
 
 func (SapwoodElixirRed) ID() card.ID                 { return card.SapwoodElixirRed }
-func (SapwoodElixirRed) Name() string                { return "Sapwood Elixir (Red)" }
+func (SapwoodElixirRed) Name() string                { return "Sapwood Elixir" }
 func (SapwoodElixirRed) Cost(*card.TurnState) int                   { return 1 }
 func (SapwoodElixirRed) Pitch() int                  { return 1 }
 func (SapwoodElixirRed) Attack() int                 { return 0 }

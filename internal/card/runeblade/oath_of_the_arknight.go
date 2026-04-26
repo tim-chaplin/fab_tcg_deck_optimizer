@@ -12,7 +12,7 @@ var oathOfTheArknightTypes = card.NewTypeSet(card.TypeRuneblade, card.TypeAction
 type OathOfTheArknightRed struct{}
 
 func (OathOfTheArknightRed) ID() card.ID                 { return card.OathOfTheArknightRed }
-func (OathOfTheArknightRed) Name() string               { return "Oath of the Arknight (Red)" }
+func (OathOfTheArknightRed) Name() string               { return "Oath of the Arknight" }
 func (OathOfTheArknightRed) Cost(*card.TurnState) int                  { return 2 }
 func (OathOfTheArknightRed) Pitch() int                 { return 1 }
 func (OathOfTheArknightRed) Attack() int                { return 0 }
@@ -24,7 +24,7 @@ func (OathOfTheArknightRed) Play(s *card.TurnState, _ *card.CardState) int { ret
 type OathOfTheArknightYellow struct{}
 
 func (OathOfTheArknightYellow) ID() card.ID                 { return card.OathOfTheArknightYellow }
-func (OathOfTheArknightYellow) Name() string               { return "Oath of the Arknight (Yellow)" }
+func (OathOfTheArknightYellow) Name() string               { return "Oath of the Arknight" }
 func (OathOfTheArknightYellow) Cost(*card.TurnState) int                  { return 2 }
 func (OathOfTheArknightYellow) Pitch() int                 { return 2 }
 func (OathOfTheArknightYellow) Attack() int                { return 0 }
@@ -36,7 +36,7 @@ func (OathOfTheArknightYellow) Play(s *card.TurnState, _ *card.CardState) int { 
 type OathOfTheArknightBlue struct{}
 
 func (OathOfTheArknightBlue) ID() card.ID                 { return card.OathOfTheArknightBlue }
-func (OathOfTheArknightBlue) Name() string               { return "Oath of the Arknight (Blue)" }
+func (OathOfTheArknightBlue) Name() string               { return "Oath of the Arknight" }
 func (OathOfTheArknightBlue) Cost(*card.TurnState) int                  { return 2 }
 func (OathOfTheArknightBlue) Pitch() int                 { return 3 }
 func (OathOfTheArknightBlue) Attack() int                { return 0 }

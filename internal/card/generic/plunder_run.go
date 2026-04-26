@@ -15,7 +15,7 @@ var plunderRunTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction)
 type PlunderRunRed struct{}
 
 func (PlunderRunRed) ID() card.ID                 { return card.PlunderRunRed }
-func (PlunderRunRed) Name() string                { return "Plunder Run (Red)" }
+func (PlunderRunRed) Name() string                { return "Plunder Run" }
 func (PlunderRunRed) Cost(*card.TurnState) int                   { return 0 }
 func (PlunderRunRed) Pitch() int                  { return 1 }
 func (PlunderRunRed) Attack() int                 { return 0 }
@@ -35,7 +35,7 @@ func (PlunderRunRed) Play(s *card.TurnState, self *card.CardState) int {
 type PlunderRunYellow struct{}
 
 func (PlunderRunYellow) ID() card.ID                 { return card.PlunderRunYellow }
-func (PlunderRunYellow) Name() string                { return "Plunder Run (Yellow)" }
+func (PlunderRunYellow) Name() string                { return "Plunder Run" }
 func (PlunderRunYellow) Cost(*card.TurnState) int                   { return 0 }
 func (PlunderRunYellow) Pitch() int                  { return 2 }
 func (PlunderRunYellow) Attack() int                 { return 0 }
@@ -55,7 +55,7 @@ func (PlunderRunYellow) Play(s *card.TurnState, self *card.CardState) int {
 type PlunderRunBlue struct{}
 
 func (PlunderRunBlue) ID() card.ID                 { return card.PlunderRunBlue }
-func (PlunderRunBlue) Name() string                { return "Plunder Run (Blue)" }
+func (PlunderRunBlue) Name() string                { return "Plunder Run" }
 func (PlunderRunBlue) Cost(*card.TurnState) int                   { return 0 }
 func (PlunderRunBlue) Pitch() int                  { return 3 }
 func (PlunderRunBlue) Attack() int                 { return 0 }

@@ -73,7 +73,7 @@ func newAttackBufs(handSize, weaponCount int, weapons []weapon.Weapon) *attackBu
 		for i, w := range weapons {
 			if mask&(1<<i) != 0 {
 				cost += w.Cost(&card.TurnState{})
-				names = append(names, w.Name())
+				names = append(names, card.DisplayName(w))
 			}
 		}
 		weaponCosts[mask] = cost

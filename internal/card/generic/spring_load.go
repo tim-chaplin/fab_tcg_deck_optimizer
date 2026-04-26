@@ -12,7 +12,7 @@ var springLoadTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.Ty
 type SpringLoadRed struct{}
 
 func (SpringLoadRed) ID() card.ID                 { return card.SpringLoadRed }
-func (SpringLoadRed) Name() string                { return "Spring Load (Red)" }
+func (SpringLoadRed) Name() string                { return "Spring Load" }
 func (SpringLoadRed) Cost(*card.TurnState) int                   { return 1 }
 func (SpringLoadRed) Pitch() int                  { return 1 }
 func (SpringLoadRed) Attack() int                 { return 2 }
@@ -26,7 +26,7 @@ func (c SpringLoadRed) Play(s *card.TurnState, _ *card.CardState) int { return c
 type SpringLoadYellow struct{}
 
 func (SpringLoadYellow) ID() card.ID                 { return card.SpringLoadYellow }
-func (SpringLoadYellow) Name() string                { return "Spring Load (Yellow)" }
+func (SpringLoadYellow) Name() string                { return "Spring Load" }
 func (SpringLoadYellow) Cost(*card.TurnState) int                   { return 1 }
 func (SpringLoadYellow) Pitch() int                  { return 2 }
 func (SpringLoadYellow) Attack() int                 { return 2 }
@@ -40,7 +40,7 @@ func (c SpringLoadYellow) Play(s *card.TurnState, _ *card.CardState) int { retur
 type SpringLoadBlue struct{}
 
 func (SpringLoadBlue) ID() card.ID                 { return card.SpringLoadBlue }
-func (SpringLoadBlue) Name() string                { return "Spring Load (Blue)" }
+func (SpringLoadBlue) Name() string                { return "Spring Load" }
 func (SpringLoadBlue) Cost(*card.TurnState) int                   { return 1 }
 func (SpringLoadBlue) Pitch() int                  { return 3 }
 func (SpringLoadBlue) Attack() int                 { return 2 }

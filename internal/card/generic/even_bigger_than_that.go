@@ -14,7 +14,7 @@ var evenBiggerThanThatTypes = card.NewTypeSet(card.TypeGeneric, card.TypeInstant
 type EvenBiggerThanThatRed struct{}
 
 func (EvenBiggerThanThatRed) ID() card.ID                               { return card.EvenBiggerThanThatRed }
-func (EvenBiggerThanThatRed) Name() string                              { return "Even Bigger Than That! (Red)" }
+func (EvenBiggerThanThatRed) Name() string                              { return "Even Bigger Than That!" }
 func (EvenBiggerThanThatRed) Cost(*card.TurnState) int                  { return 0 }
 func (EvenBiggerThanThatRed) Pitch() int                                { return 1 }
 func (EvenBiggerThanThatRed) Attack() int                               { return 0 }
@@ -28,7 +28,7 @@ func (EvenBiggerThanThatRed) Play(*card.TurnState, *card.CardState) int { return
 type EvenBiggerThanThatYellow struct{}
 
 func (EvenBiggerThanThatYellow) ID() card.ID                               { return card.EvenBiggerThanThatYellow }
-func (EvenBiggerThanThatYellow) Name() string                              { return "Even Bigger Than That! (Yellow)" }
+func (EvenBiggerThanThatYellow) Name() string                              { return "Even Bigger Than That!" }
 func (EvenBiggerThanThatYellow) Cost(*card.TurnState) int                  { return 0 }
 func (EvenBiggerThanThatYellow) Pitch() int                                { return 2 }
 func (EvenBiggerThanThatYellow) Attack() int                               { return 0 }
@@ -42,7 +42,7 @@ func (EvenBiggerThanThatYellow) Play(*card.TurnState, *card.CardState) int { ret
 type EvenBiggerThanThatBlue struct{}
 
 func (EvenBiggerThanThatBlue) ID() card.ID                               { return card.EvenBiggerThanThatBlue }
-func (EvenBiggerThanThatBlue) Name() string                              { return "Even Bigger Than That! (Blue)" }
+func (EvenBiggerThanThatBlue) Name() string                              { return "Even Bigger Than That!" }
 func (EvenBiggerThanThatBlue) Cost(*card.TurnState) int                  { return 0 }
 func (EvenBiggerThanThatBlue) Pitch() int                                { return 3 }
 func (EvenBiggerThanThatBlue) Attack() int                               { return 0 }

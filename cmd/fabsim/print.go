@@ -38,10 +38,12 @@ func printCardList(d *deck.Deck) {
 
 // printGroupedCards writes one count-and-name line per unique card in cs, sorted by name.
 // Shared between the main card list and the sideboard block so formatting stays consistent.
+// card.DisplayName keeps pitch printings as distinct entries so the card list shows e.g.
+// "2x Aether Slash [R]" alongside "1x Aether Slash [Y]".
 func printGroupedCards(cs []card.Card) {
 	names := make([]string, len(cs))
 	for i, c := range cs {
-		names[i] = c.Name()
+		names[i] = card.DisplayName(c)
 	}
 	printGroupedStrings(names)
 }
@@ -197,7 +199,7 @@ func printCardValues(d *deck.Deck) {
 	}
 	rows := make([]row, 0, len(d.Stats.PerCardMarginal))
 	for id, m := range d.Stats.PerCardMarginal {
-		r := row{name: cards.Get(id).Name()}
+		r := row{name: card.DisplayName(cards.Get(id))}
 		if m.PresentHands > 0 && m.AbsentHands > 0 {
 			r.margin = m.Marginal()
 			r.hasMargin = true
@@ -586,12 +588,13 @@ func centerLabel(s string, width int) string {
 	return strings.Repeat(" ", left) + s
 }
 
-// maxNameLen returns the length of the longest Name() across cs, or 0 when empty. Used to
-// size fixed-width card-name columns in printed tables.
+// maxNameLen returns the length of the longest DisplayName across cs, or 0 when empty.
+// Used to size fixed-width card-name columns in printed tables — DisplayName so the column
+// reserves room for the pitch tag.
 func maxNameLen(cs []card.Card) int {
 	m := 0
 	for _, c := range cs {
-		if n := len(c.Name()); n > m {
+		if n := len(card.DisplayName(c)); n > m {
 			m = n
 		}
 	}
@@ -607,7 +610,7 @@ func weaponNames(ws []weapon.Weapon) string {
 	}
 	names := make([]string, len(ws))
 	for i, w := range ws {
-		names[i] = w.Name()
+		names[i] = card.DisplayName(w)
 	}
 	return strings.Join(names, ", ")
 }

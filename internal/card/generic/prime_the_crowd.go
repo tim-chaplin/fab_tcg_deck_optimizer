@@ -14,7 +14,7 @@ var primeTheCrowdTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction)
 type PrimeTheCrowdRed struct{}
 
 func (PrimeTheCrowdRed) ID() card.ID                 { return card.PrimeTheCrowdRed }
-func (PrimeTheCrowdRed) Name() string                { return "Prime the Crowd (Red)" }
+func (PrimeTheCrowdRed) Name() string                { return "Prime the Crowd" }
 func (PrimeTheCrowdRed) Cost(*card.TurnState) int                   { return 2 }
 func (PrimeTheCrowdRed) Pitch() int                  { return 1 }
 func (PrimeTheCrowdRed) Attack() int                 { return 0 }
@@ -28,7 +28,7 @@ func (PrimeTheCrowdRed) Play(s *card.TurnState, _ *card.CardState) int { return 
 type PrimeTheCrowdYellow struct{}
 
 func (PrimeTheCrowdYellow) ID() card.ID                 { return card.PrimeTheCrowdYellow }
-func (PrimeTheCrowdYellow) Name() string                { return "Prime the Crowd (Yellow)" }
+func (PrimeTheCrowdYellow) Name() string                { return "Prime the Crowd" }
 func (PrimeTheCrowdYellow) Cost(*card.TurnState) int                   { return 2 }
 func (PrimeTheCrowdYellow) Pitch() int                  { return 2 }
 func (PrimeTheCrowdYellow) Attack() int                 { return 0 }
@@ -42,7 +42,7 @@ func (PrimeTheCrowdYellow) Play(s *card.TurnState, _ *card.CardState) int { retu
 type PrimeTheCrowdBlue struct{}
 
 func (PrimeTheCrowdBlue) ID() card.ID                 { return card.PrimeTheCrowdBlue }
-func (PrimeTheCrowdBlue) Name() string                { return "Prime the Crowd (Blue)" }
+func (PrimeTheCrowdBlue) Name() string                { return "Prime the Crowd" }
 func (PrimeTheCrowdBlue) Cost(*card.TurnState) int                   { return 2 }
 func (PrimeTheCrowdBlue) Pitch() int                  { return 3 }
 func (PrimeTheCrowdBlue) Attack() int                 { return 0 }

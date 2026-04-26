@@ -81,6 +81,10 @@ type Card interface {
 	// ID returns the card's canonical registry identifier. Stable within a build. Lets callers
 	// key maps / slices on cards without string-hashing Name().
 	ID() ID
+	// Name returns the card's printed name without any pitch-color suffix — all three
+	// printings of "Aether Slash" return the same string. Cards comparing by name
+	// (synergies, "if you have played a card named X this turn" effects) use this directly.
+	// For display, callers route through DisplayName which appends the pitch tag.
 	Name() string
 	// Cost returns the card's current resource cost given the turn state. Cards with a static
 	// printed cost ignore s and return a constant; cards that read s (e.g. discount-per-token
@@ -104,6 +108,23 @@ type Card interface {
 	// to grant themselves Go again. The dispatcher folds the return into s.Value via
 	// s.RecordValue; cards don't call RecordValue themselves.
 	Play(s *TurnState, self *CardState) int
+}
+
+// DisplayName returns the card name with a pitch-color suffix — "Mauvrion Skies [Y]" for a
+// pitch-2 yellow printing. Use anywhere a human-readable identifier needs to disambiguate
+// pitch variants (log lines, deck listings, debug printouts). Pitch values outside 1-3
+// (printed-pitch-zero cards, weapons, items, hero cards) fall through to the bare Name()
+// with no suffix — there's no color to disambiguate.
+func DisplayName(c Card) string {
+	switch c.Pitch() {
+	case 1:
+		return c.Name() + " [R]"
+	case 2:
+		return c.Name() + " [Y]"
+	case 3:
+		return c.Name() + " [B]"
+	}
+	return c.Name()
 }
 
 // NoMemo is an optional marker. Cards that implement it opt out of the hand-evaluation memo —

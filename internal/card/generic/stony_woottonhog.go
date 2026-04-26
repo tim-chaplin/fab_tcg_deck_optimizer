@@ -12,7 +12,7 @@ var stonyWoottonhogTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, ca
 type StonyWoottonhogRed struct{}
 
 func (StonyWoottonhogRed) ID() card.ID                 { return card.StonyWoottonhogRed }
-func (StonyWoottonhogRed) Name() string                { return "Stony Woottonhog (Red)" }
+func (StonyWoottonhogRed) Name() string                { return "Stony Woottonhog" }
 func (StonyWoottonhogRed) Cost(*card.TurnState) int                   { return 2 }
 func (StonyWoottonhogRed) Pitch() int                  { return 1 }
 func (StonyWoottonhogRed) Attack() int                 { return 6 }
@@ -26,7 +26,7 @@ func (c StonyWoottonhogRed) Play(s *card.TurnState, _ *card.CardState) int { ret
 type StonyWoottonhogYellow struct{}
 
 func (StonyWoottonhogYellow) ID() card.ID                 { return card.StonyWoottonhogYellow }
-func (StonyWoottonhogYellow) Name() string                { return "Stony Woottonhog (Yellow)" }
+func (StonyWoottonhogYellow) Name() string                { return "Stony Woottonhog" }
 func (StonyWoottonhogYellow) Cost(*card.TurnState) int                   { return 2 }
 func (StonyWoottonhogYellow) Pitch() int                  { return 2 }
 func (StonyWoottonhogYellow) Attack() int                 { return 5 }
@@ -40,7 +40,7 @@ func (c StonyWoottonhogYellow) Play(s *card.TurnState, _ *card.CardState) int { 
 type StonyWoottonhogBlue struct{}
 
 func (StonyWoottonhogBlue) ID() card.ID                 { return card.StonyWoottonhogBlue }
-func (StonyWoottonhogBlue) Name() string                { return "Stony Woottonhog (Blue)" }
+func (StonyWoottonhogBlue) Name() string                { return "Stony Woottonhog" }
 func (StonyWoottonhogBlue) Cost(*card.TurnState) int                   { return 2 }
 func (StonyWoottonhogBlue) Pitch() int                  { return 3 }
 func (StonyWoottonhogBlue) Attack() int                 { return 4 }

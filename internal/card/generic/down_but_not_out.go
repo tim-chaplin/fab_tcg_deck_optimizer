@@ -14,7 +14,7 @@ var downButNotOutTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card
 type DownButNotOutRed struct{}
 
 func (DownButNotOutRed) ID() card.ID                 { return card.DownButNotOutRed }
-func (DownButNotOutRed) Name() string                { return "Down But Not Out (Red)" }
+func (DownButNotOutRed) Name() string                { return "Down But Not Out" }
 func (DownButNotOutRed) Cost(*card.TurnState) int                   { return 3 }
 func (DownButNotOutRed) Pitch() int                  { return 1 }
 func (DownButNotOutRed) Attack() int                 { return 5 }
@@ -28,7 +28,7 @@ func (c DownButNotOutRed) Play(s *card.TurnState, self *card.CardState) int { re
 type DownButNotOutYellow struct{}
 
 func (DownButNotOutYellow) ID() card.ID                 { return card.DownButNotOutYellow }
-func (DownButNotOutYellow) Name() string                { return "Down But Not Out (Yellow)" }
+func (DownButNotOutYellow) Name() string                { return "Down But Not Out" }
 func (DownButNotOutYellow) Cost(*card.TurnState) int                   { return 3 }
 func (DownButNotOutYellow) Pitch() int                  { return 2 }
 func (DownButNotOutYellow) Attack() int                 { return 4 }
@@ -42,7 +42,7 @@ func (c DownButNotOutYellow) Play(s *card.TurnState, self *card.CardState) int {
 type DownButNotOutBlue struct{}
 
 func (DownButNotOutBlue) ID() card.ID                 { return card.DownButNotOutBlue }
-func (DownButNotOutBlue) Name() string                { return "Down But Not Out (Blue)" }
+func (DownButNotOutBlue) Name() string                { return "Down But Not Out" }
 func (DownButNotOutBlue) Cost(*card.TurnState) int                   { return 3 }
 func (DownButNotOutBlue) Pitch() int                  { return 3 }
 func (DownButNotOutBlue) Attack() int                 { return 3 }

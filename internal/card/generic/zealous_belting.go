@@ -25,7 +25,7 @@ func zealousBeltingPlay(base int, s *card.TurnState, self *card.CardState) int {
 type ZealousBeltingRed struct{}
 
 func (ZealousBeltingRed) ID() card.ID                 { return card.ZealousBeltingRed }
-func (ZealousBeltingRed) Name() string                { return "Zealous Belting (Red)" }
+func (ZealousBeltingRed) Name() string                { return "Zealous Belting" }
 func (ZealousBeltingRed) Cost(*card.TurnState) int                   { return 2 }
 func (ZealousBeltingRed) Pitch() int                  { return 1 }
 func (ZealousBeltingRed) Attack() int                 { return 5 }
@@ -37,7 +37,7 @@ func (c ZealousBeltingRed) Play(s *card.TurnState, self *card.CardState) int { r
 type ZealousBeltingYellow struct{}
 
 func (ZealousBeltingYellow) ID() card.ID                 { return card.ZealousBeltingYellow }
-func (ZealousBeltingYellow) Name() string                { return "Zealous Belting (Yellow)" }
+func (ZealousBeltingYellow) Name() string                { return "Zealous Belting" }
 func (ZealousBeltingYellow) Cost(*card.TurnState) int                   { return 2 }
 func (ZealousBeltingYellow) Pitch() int                  { return 2 }
 func (ZealousBeltingYellow) Attack() int                 { return 4 }
@@ -49,7 +49,7 @@ func (c ZealousBeltingYellow) Play(s *card.TurnState, self *card.CardState) int 
 type ZealousBeltingBlue struct{}
 
 func (ZealousBeltingBlue) ID() card.ID                 { return card.ZealousBeltingBlue }
-func (ZealousBeltingBlue) Name() string                { return "Zealous Belting (Blue)" }
+func (ZealousBeltingBlue) Name() string                { return "Zealous Belting" }
 func (ZealousBeltingBlue) Cost(*card.TurnState) int                   { return 2 }
 func (ZealousBeltingBlue) Pitch() int                  { return 3 }
 func (ZealousBeltingBlue) Attack() int                 { return 3 }

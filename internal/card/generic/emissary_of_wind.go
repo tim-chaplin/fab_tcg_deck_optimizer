@@ -13,7 +13,7 @@ var emissaryOfWindTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, car
 type EmissaryOfWindRed struct{}
 
 func (EmissaryOfWindRed) ID() card.ID                 { return card.EmissaryOfWindRed }
-func (EmissaryOfWindRed) Name() string                { return "Emissary of Wind (Red)" }
+func (EmissaryOfWindRed) Name() string                { return "Emissary of Wind" }
 func (EmissaryOfWindRed) Cost(*card.TurnState) int                   { return 0 }
 func (EmissaryOfWindRed) Pitch() int                  { return 1 }
 func (EmissaryOfWindRed) Attack() int                 { return 4 }

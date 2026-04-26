@@ -12,7 +12,7 @@ var destructiveDeliberationTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAc
 type DestructiveDeliberationRed struct{}
 
 func (DestructiveDeliberationRed) ID() card.ID                 { return card.DestructiveDeliberationRed }
-func (DestructiveDeliberationRed) Name() string                { return "Destructive Deliberation (Red)" }
+func (DestructiveDeliberationRed) Name() string                { return "Destructive Deliberation" }
 func (DestructiveDeliberationRed) Cost(*card.TurnState) int                   { return 2 }
 func (DestructiveDeliberationRed) Pitch() int                  { return 1 }
 func (DestructiveDeliberationRed) Attack() int                 { return 5 }
@@ -26,7 +26,7 @@ func (c DestructiveDeliberationRed) Play(s *card.TurnState, self *card.CardState
 type DestructiveDeliberationYellow struct{}
 
 func (DestructiveDeliberationYellow) ID() card.ID                 { return card.DestructiveDeliberationYellow }
-func (DestructiveDeliberationYellow) Name() string                { return "Destructive Deliberation (Yellow)" }
+func (DestructiveDeliberationYellow) Name() string                { return "Destructive Deliberation" }
 func (DestructiveDeliberationYellow) Cost(*card.TurnState) int                   { return 2 }
 func (DestructiveDeliberationYellow) Pitch() int                  { return 2 }
 func (DestructiveDeliberationYellow) Attack() int                 { return 4 }
@@ -40,7 +40,7 @@ func (c DestructiveDeliberationYellow) Play(s *card.TurnState, self *card.CardSt
 type DestructiveDeliberationBlue struct{}
 
 func (DestructiveDeliberationBlue) ID() card.ID                 { return card.DestructiveDeliberationBlue }
-func (DestructiveDeliberationBlue) Name() string                { return "Destructive Deliberation (Blue)" }
+func (DestructiveDeliberationBlue) Name() string                { return "Destructive Deliberation" }
 func (DestructiveDeliberationBlue) Cost(*card.TurnState) int                   { return 2 }
 func (DestructiveDeliberationBlue) Pitch() int                  { return 3 }
 func (DestructiveDeliberationBlue) Attack() int                 { return 3 }

@@ -12,7 +12,7 @@ var clearwaterElixirTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction)
 type ClearwaterElixirRed struct{}
 
 func (ClearwaterElixirRed) ID() card.ID                 { return card.ClearwaterElixirRed }
-func (ClearwaterElixirRed) Name() string                { return "Clearwater Elixir (Red)" }
+func (ClearwaterElixirRed) Name() string                { return "Clearwater Elixir" }
 func (ClearwaterElixirRed) Cost(*card.TurnState) int                   { return 1 }
 func (ClearwaterElixirRed) Pitch() int                  { return 1 }
 func (ClearwaterElixirRed) Attack() int                 { return 0 }

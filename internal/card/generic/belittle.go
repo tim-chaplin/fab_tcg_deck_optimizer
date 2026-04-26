@@ -14,7 +14,7 @@ var belittleTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.Type
 type BelittleRed struct{}
 
 func (BelittleRed) ID() card.ID                 { return card.BelittleRed }
-func (BelittleRed) Name() string                { return "Belittle (Red)" }
+func (BelittleRed) Name() string                { return "Belittle" }
 func (BelittleRed) Cost(*card.TurnState) int                   { return 1 }
 func (BelittleRed) Pitch() int                  { return 1 }
 func (BelittleRed) Attack() int                 { return 3 }
@@ -29,7 +29,7 @@ func (c BelittleRed) Play(s *card.TurnState, _ *card.CardState) int { return c.A
 type BelittleYellow struct{}
 
 func (BelittleYellow) ID() card.ID                 { return card.BelittleYellow }
-func (BelittleYellow) Name() string                { return "Belittle (Yellow)" }
+func (BelittleYellow) Name() string                { return "Belittle" }
 func (BelittleYellow) Cost(*card.TurnState) int                   { return 1 }
 func (BelittleYellow) Pitch() int                  { return 2 }
 func (BelittleYellow) Attack() int                 { return 2 }
@@ -44,7 +44,7 @@ func (c BelittleYellow) Play(s *card.TurnState, _ *card.CardState) int { return 
 type BelittleBlue struct{}
 
 func (BelittleBlue) ID() card.ID                 { return card.BelittleBlue }
-func (BelittleBlue) Name() string                { return "Belittle (Blue)" }
+func (BelittleBlue) Name() string                { return "Belittle" }
 func (BelittleBlue) Cost(*card.TurnState) int                   { return 1 }
 func (BelittleBlue) Pitch() int                  { return 3 }
 func (BelittleBlue) Attack() int                 { return 1 }

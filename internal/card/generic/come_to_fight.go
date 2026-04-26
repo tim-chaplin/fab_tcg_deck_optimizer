@@ -13,7 +13,7 @@ var comeToFightTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction)
 type ComeToFightRed struct{}
 
 func (ComeToFightRed) ID() card.ID                 { return card.ComeToFightRed }
-func (ComeToFightRed) Name() string                { return "Come to Fight (Red)" }
+func (ComeToFightRed) Name() string                { return "Come to Fight" }
 func (ComeToFightRed) Cost(*card.TurnState) int                   { return 1 }
 func (ComeToFightRed) Pitch() int                  { return 1 }
 func (ComeToFightRed) Attack() int                 { return 0 }
@@ -25,7 +25,7 @@ func (ComeToFightRed) Play(s *card.TurnState, _ *card.CardState) int { return gr
 type ComeToFightYellow struct{}
 
 func (ComeToFightYellow) ID() card.ID                 { return card.ComeToFightYellow }
-func (ComeToFightYellow) Name() string                { return "Come to Fight (Yellow)" }
+func (ComeToFightYellow) Name() string                { return "Come to Fight" }
 func (ComeToFightYellow) Cost(*card.TurnState) int                   { return 1 }
 func (ComeToFightYellow) Pitch() int                  { return 2 }
 func (ComeToFightYellow) Attack() int                 { return 0 }
@@ -37,7 +37,7 @@ func (ComeToFightYellow) Play(s *card.TurnState, _ *card.CardState) int { return
 type ComeToFightBlue struct{}
 
 func (ComeToFightBlue) ID() card.ID                 { return card.ComeToFightBlue }
-func (ComeToFightBlue) Name() string                { return "Come to Fight (Blue)" }
+func (ComeToFightBlue) Name() string                { return "Come to Fight" }
 func (ComeToFightBlue) Cost(*card.TurnState) int                   { return 1 }
 func (ComeToFightBlue) Pitch() int                  { return 3 }
 func (ComeToFightBlue) Attack() int                 { return 0 }

@@ -31,7 +31,7 @@ func captainsCallPlay(s *card.TurnState, maxCost int) int {
 type CaptainsCallRed struct{}
 
 func (CaptainsCallRed) ID() card.ID                 { return card.CaptainsCallRed }
-func (CaptainsCallRed) Name() string                { return "Captain's Call (Red)" }
+func (CaptainsCallRed) Name() string                { return "Captain's Call" }
 func (CaptainsCallRed) Cost(*card.TurnState) int                   { return 0 }
 func (CaptainsCallRed) Pitch() int                  { return 1 }
 func (CaptainsCallRed) Attack() int                 { return 0 }
@@ -45,7 +45,7 @@ func (CaptainsCallRed) Play(s *card.TurnState, _ *card.CardState) int { return c
 type CaptainsCallYellow struct{}
 
 func (CaptainsCallYellow) ID() card.ID                 { return card.CaptainsCallYellow }
-func (CaptainsCallYellow) Name() string                { return "Captain's Call (Yellow)" }
+func (CaptainsCallYellow) Name() string                { return "Captain's Call" }
 func (CaptainsCallYellow) Cost(*card.TurnState) int                   { return 0 }
 func (CaptainsCallYellow) Pitch() int                  { return 2 }
 func (CaptainsCallYellow) Attack() int                 { return 0 }
@@ -59,7 +59,7 @@ func (CaptainsCallYellow) Play(s *card.TurnState, _ *card.CardState) int { retur
 type CaptainsCallBlue struct{}
 
 func (CaptainsCallBlue) ID() card.ID                 { return card.CaptainsCallBlue }
-func (CaptainsCallBlue) Name() string                { return "Captain's Call (Blue)" }
+func (CaptainsCallBlue) Name() string                { return "Captain's Call" }
 func (CaptainsCallBlue) Cost(*card.TurnState) int                   { return 0 }
 func (CaptainsCallBlue) Pitch() int                  { return 3 }
 func (CaptainsCallBlue) Attack() int                 { return 0 }

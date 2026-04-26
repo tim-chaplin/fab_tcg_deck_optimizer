@@ -18,7 +18,7 @@ var smashingGoodTimeTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction)
 type SmashingGoodTimeRed struct{}
 
 func (SmashingGoodTimeRed) ID() card.ID                 { return card.SmashingGoodTimeRed }
-func (SmashingGoodTimeRed) Name() string                { return "Smashing Good Time (Red)" }
+func (SmashingGoodTimeRed) Name() string                { return "Smashing Good Time" }
 func (SmashingGoodTimeRed) Cost(*card.TurnState) int                   { return 0 }
 func (SmashingGoodTimeRed) Pitch() int                  { return 1 }
 func (SmashingGoodTimeRed) Attack() int                 { return 0 }
@@ -37,7 +37,7 @@ func (SmashingGoodTimeRed) Play(s *card.TurnState, self *card.CardState) int {
 type SmashingGoodTimeYellow struct{}
 
 func (SmashingGoodTimeYellow) ID() card.ID                 { return card.SmashingGoodTimeYellow }
-func (SmashingGoodTimeYellow) Name() string                { return "Smashing Good Time (Yellow)" }
+func (SmashingGoodTimeYellow) Name() string                { return "Smashing Good Time" }
 func (SmashingGoodTimeYellow) Cost(*card.TurnState) int                   { return 0 }
 func (SmashingGoodTimeYellow) Pitch() int                  { return 2 }
 func (SmashingGoodTimeYellow) Attack() int                 { return 0 }
@@ -56,7 +56,7 @@ func (SmashingGoodTimeYellow) Play(s *card.TurnState, self *card.CardState) int 
 type SmashingGoodTimeBlue struct{}
 
 func (SmashingGoodTimeBlue) ID() card.ID                 { return card.SmashingGoodTimeBlue }
-func (SmashingGoodTimeBlue) Name() string                { return "Smashing Good Time (Blue)" }
+func (SmashingGoodTimeBlue) Name() string                { return "Smashing Good Time" }
 func (SmashingGoodTimeBlue) Cost(*card.TurnState) int                   { return 0 }
 func (SmashingGoodTimeBlue) Pitch() int                  { return 3 }
 func (SmashingGoodTimeBlue) Attack() int                 { return 0 }

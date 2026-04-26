@@ -13,7 +13,7 @@ var amuletOfIgnitionTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, c
 type AmuletOfIgnitionYellow struct{}
 
 func (AmuletOfIgnitionYellow) ID() card.ID                               { return card.AmuletOfIgnitionYellow }
-func (AmuletOfIgnitionYellow) Name() string                              { return "Amulet of Ignition (Yellow)" }
+func (AmuletOfIgnitionYellow) Name() string                              { return "Amulet of Ignition" }
 func (AmuletOfIgnitionYellow) Cost(*card.TurnState) int                  { return 0 }
 func (AmuletOfIgnitionYellow) Pitch() int                                { return 2 }
 func (AmuletOfIgnitionYellow) Attack() int                               { return 0 }

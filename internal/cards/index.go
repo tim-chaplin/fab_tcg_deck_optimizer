@@ -790,14 +790,16 @@ var byID = []card.Card{
 	card.FakeHugeAttack:   fake.HugeAttack{},
 }
 
-// byName maps Card.Name() → ID for reverse lookup. Built once at init.
+// byName maps card.DisplayName(c) → ID for reverse lookup. Built once at init. Keyed on
+// DisplayName (not bare Name) so each pitch variant gets a distinct entry — Card.Name()
+// collapses all three printings to the same base string, so it's not a unique key.
 var byName = func() map[string]ID {
 	m := make(map[string]ID, len(byID)-1)
 	for id, c := range byID {
 		if c == nil {
 			continue
 		}
-		m[c.Name()] = ID(id)
+		m[card.DisplayName(c)] = ID(id)
 	}
 	return m
 }()
@@ -811,7 +813,8 @@ func Get(id ID) card.Card {
 	return byID[id]
 }
 
-// ByName looks up an ID by the card's Name(). Returns (Invalid, false) if no such card.
+// ByName looks up an ID by the card's DisplayName ("Aether Slash [R]"). Returns
+// (Invalid, false) if no such card.
 func ByName(name string) (ID, bool) {
 	id, ok := byName[name]
 	return id, ok

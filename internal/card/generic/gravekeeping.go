@@ -12,7 +12,7 @@ var gravekeepingTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.
 type GravekeepingRed struct{}
 
 func (GravekeepingRed) ID() card.ID                 { return card.GravekeepingRed }
-func (GravekeepingRed) Name() string                { return "Gravekeeping (Red)" }
+func (GravekeepingRed) Name() string                { return "Gravekeeping" }
 func (GravekeepingRed) Cost(*card.TurnState) int                   { return 1 }
 func (GravekeepingRed) Pitch() int                  { return 1 }
 func (GravekeepingRed) Attack() int                 { return 5 }
@@ -26,7 +26,7 @@ func (c GravekeepingRed) Play(s *card.TurnState, _ *card.CardState) int { return
 type GravekeepingYellow struct{}
 
 func (GravekeepingYellow) ID() card.ID                 { return card.GravekeepingYellow }
-func (GravekeepingYellow) Name() string                { return "Gravekeeping (Yellow)" }
+func (GravekeepingYellow) Name() string                { return "Gravekeeping" }
 func (GravekeepingYellow) Cost(*card.TurnState) int                   { return 1 }
 func (GravekeepingYellow) Pitch() int                  { return 2 }
 func (GravekeepingYellow) Attack() int                 { return 4 }
@@ -40,7 +40,7 @@ func (c GravekeepingYellow) Play(s *card.TurnState, _ *card.CardState) int { ret
 type GravekeepingBlue struct{}
 
 func (GravekeepingBlue) ID() card.ID                 { return card.GravekeepingBlue }
-func (GravekeepingBlue) Name() string                { return "Gravekeeping (Blue)" }
+func (GravekeepingBlue) Name() string                { return "Gravekeeping" }
 func (GravekeepingBlue) Cost(*card.TurnState) int                   { return 1 }
 func (GravekeepingBlue) Pitch() int                  { return 3 }
 func (GravekeepingBlue) Attack() int                 { return 3 }

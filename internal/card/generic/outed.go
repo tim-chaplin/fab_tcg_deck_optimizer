@@ -12,7 +12,7 @@ var outedTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeAtt
 type OutedRed struct{}
 
 func (OutedRed) ID() card.ID                 { return card.OutedRed }
-func (OutedRed) Name() string                { return "Outed (Red)" }
+func (OutedRed) Name() string                { return "Outed" }
 func (OutedRed) Cost(*card.TurnState) int                   { return 0 }
 func (OutedRed) Pitch() int                  { return 1 }
 func (OutedRed) Attack() int                 { return 3 }

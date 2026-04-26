@@ -11,7 +11,7 @@ var clarityPotionTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card
 type ClarityPotionBlue struct{}
 
 func (ClarityPotionBlue) ID() card.ID                               { return card.ClarityPotionBlue }
-func (ClarityPotionBlue) Name() string                              { return "Clarity Potion (Blue)" }
+func (ClarityPotionBlue) Name() string                              { return "Clarity Potion" }
 func (ClarityPotionBlue) Cost(*card.TurnState) int                  { return 0 }
 func (ClarityPotionBlue) Pitch() int                                { return 3 }
 func (ClarityPotionBlue) Attack() int                               { return 0 }

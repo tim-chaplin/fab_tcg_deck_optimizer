@@ -11,7 +11,7 @@ var foolsGoldTypes = card.NewTypeSet(card.TypeGeneric)
 type FoolsGoldYellow struct{}
 
 func (FoolsGoldYellow) ID() card.ID                               { return card.FoolsGoldYellow }
-func (FoolsGoldYellow) Name() string                              { return "Fool's Gold (Yellow)" }
+func (FoolsGoldYellow) Name() string                              { return "Fool's Gold" }
 func (FoolsGoldYellow) Cost(*card.TurnState) int                  { return 0 }
 func (FoolsGoldYellow) Pitch() int                                { return 2 }
 func (FoolsGoldYellow) Attack() int                               { return 0 }

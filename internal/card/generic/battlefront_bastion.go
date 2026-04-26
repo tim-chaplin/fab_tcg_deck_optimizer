@@ -12,7 +12,7 @@ var battlefrontBastionTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction,
 type BattlefrontBastionRed struct{}
 
 func (BattlefrontBastionRed) ID() card.ID                 { return card.BattlefrontBastionRed }
-func (BattlefrontBastionRed) Name() string                { return "Battlefront Bastion (Red)" }
+func (BattlefrontBastionRed) Name() string                { return "Battlefront Bastion" }
 func (BattlefrontBastionRed) Cost(*card.TurnState) int                   { return 3 }
 func (BattlefrontBastionRed) Pitch() int                  { return 1 }
 func (BattlefrontBastionRed) Attack() int                 { return 7 }
@@ -26,7 +26,7 @@ func (c BattlefrontBastionRed) Play(s *card.TurnState, _ *card.CardState) int { 
 type BattlefrontBastionYellow struct{}
 
 func (BattlefrontBastionYellow) ID() card.ID                 { return card.BattlefrontBastionYellow }
-func (BattlefrontBastionYellow) Name() string                { return "Battlefront Bastion (Yellow)" }
+func (BattlefrontBastionYellow) Name() string                { return "Battlefront Bastion" }
 func (BattlefrontBastionYellow) Cost(*card.TurnState) int                   { return 3 }
 func (BattlefrontBastionYellow) Pitch() int                  { return 2 }
 func (BattlefrontBastionYellow) Attack() int                 { return 6 }
@@ -40,7 +40,7 @@ func (c BattlefrontBastionYellow) Play(s *card.TurnState, _ *card.CardState) int
 type BattlefrontBastionBlue struct{}
 
 func (BattlefrontBastionBlue) ID() card.ID                 { return card.BattlefrontBastionBlue }
-func (BattlefrontBastionBlue) Name() string                { return "Battlefront Bastion (Blue)" }
+func (BattlefrontBastionBlue) Name() string                { return "Battlefront Bastion" }
 func (BattlefrontBastionBlue) Cost(*card.TurnState) int                   { return 3 }
 func (BattlefrontBastionBlue) Pitch() int                  { return 3 }
 func (BattlefrontBastionBlue) Attack() int                 { return 5 }

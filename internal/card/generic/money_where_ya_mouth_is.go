@@ -17,7 +17,7 @@ var moneyWhereYaMouthIsTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction
 type MoneyWhereYaMouthIsRed struct{}
 
 func (MoneyWhereYaMouthIsRed) ID() card.ID                 { return card.MoneyWhereYaMouthIsRed }
-func (MoneyWhereYaMouthIsRed) Name() string                { return "Money Where Ya Mouth Is (Red)" }
+func (MoneyWhereYaMouthIsRed) Name() string                { return "Money Where Ya Mouth Is" }
 func (MoneyWhereYaMouthIsRed) Cost(*card.TurnState) int                   { return 1 }
 func (MoneyWhereYaMouthIsRed) Pitch() int                  { return 1 }
 func (MoneyWhereYaMouthIsRed) Attack() int                 { return 0 }
@@ -31,7 +31,7 @@ func (MoneyWhereYaMouthIsRed) Play(s *card.TurnState, _ *card.CardState) int { r
 type MoneyWhereYaMouthIsYellow struct{}
 
 func (MoneyWhereYaMouthIsYellow) ID() card.ID                 { return card.MoneyWhereYaMouthIsYellow }
-func (MoneyWhereYaMouthIsYellow) Name() string                { return "Money Where Ya Mouth Is (Yellow)" }
+func (MoneyWhereYaMouthIsYellow) Name() string                { return "Money Where Ya Mouth Is" }
 func (MoneyWhereYaMouthIsYellow) Cost(*card.TurnState) int                   { return 1 }
 func (MoneyWhereYaMouthIsYellow) Pitch() int                  { return 2 }
 func (MoneyWhereYaMouthIsYellow) Attack() int                 { return 0 }
@@ -45,7 +45,7 @@ func (MoneyWhereYaMouthIsYellow) Play(s *card.TurnState, _ *card.CardState) int 
 type MoneyWhereYaMouthIsBlue struct{}
 
 func (MoneyWhereYaMouthIsBlue) ID() card.ID                 { return card.MoneyWhereYaMouthIsBlue }
-func (MoneyWhereYaMouthIsBlue) Name() string                { return "Money Where Ya Mouth Is (Blue)" }
+func (MoneyWhereYaMouthIsBlue) Name() string                { return "Money Where Ya Mouth Is" }
 func (MoneyWhereYaMouthIsBlue) Cost(*card.TurnState) int                   { return 1 }
 func (MoneyWhereYaMouthIsBlue) Pitch() int                  { return 3 }
 func (MoneyWhereYaMouthIsBlue) Attack() int                 { return 0 }

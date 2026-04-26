@@ -12,7 +12,7 @@ var exposedTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAttackReaction)
 type ExposedBlue struct{}
 
 func (ExposedBlue) ID() card.ID                               { return card.ExposedBlue }
-func (ExposedBlue) Name() string                              { return "Exposed (Blue)" }
+func (ExposedBlue) Name() string                              { return "Exposed" }
 func (ExposedBlue) Cost(*card.TurnState) int                  { return 0 }
 func (ExposedBlue) Pitch() int                                { return 3 }
 func (ExposedBlue) Attack() int                               { return 0 }

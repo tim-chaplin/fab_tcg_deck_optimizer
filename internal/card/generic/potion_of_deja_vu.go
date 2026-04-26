@@ -12,7 +12,7 @@ var potionOfDejaVuTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, car
 type PotionOfDejaVuBlue struct{}
 
 func (PotionOfDejaVuBlue) ID() card.ID                               { return card.PotionOfDejaVuBlue }
-func (PotionOfDejaVuBlue) Name() string                              { return "Potion of Déjà Vu (Blue)" }
+func (PotionOfDejaVuBlue) Name() string                              { return "Potion of Déjà Vu" }
 func (PotionOfDejaVuBlue) Cost(*card.TurnState) int                  { return 0 }
 func (PotionOfDejaVuBlue) Pitch() int                                { return 3 }
 func (PotionOfDejaVuBlue) Attack() int                               { return 0 }

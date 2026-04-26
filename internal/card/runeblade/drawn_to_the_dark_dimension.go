@@ -28,7 +28,7 @@ func drawnToTheDarkDimensionCost(s *card.TurnState) int {
 type DrawnToTheDarkDimensionRed struct{}
 
 func (DrawnToTheDarkDimensionRed) ID() card.ID                 { return card.DrawnToTheDarkDimensionRed }
-func (DrawnToTheDarkDimensionRed) Name() string                { return "Drawn to the Dark Dimension (Red)" }
+func (DrawnToTheDarkDimensionRed) Name() string                { return "Drawn to the Dark Dimension" }
 func (DrawnToTheDarkDimensionRed) Cost(s *card.TurnState) int  { return drawnToTheDarkDimensionCost(s) }
 func (DrawnToTheDarkDimensionRed) MinCost() int                { return 0 }
 func (DrawnToTheDarkDimensionRed) MaxCost() int                { return drawnToTheDarkDimensionPrintedCost }
@@ -46,7 +46,7 @@ func (c DrawnToTheDarkDimensionRed) Play(s *card.TurnState, _ *card.CardState) i
 type DrawnToTheDarkDimensionYellow struct{}
 
 func (DrawnToTheDarkDimensionYellow) ID() card.ID                { return card.DrawnToTheDarkDimensionYellow }
-func (DrawnToTheDarkDimensionYellow) Name() string               { return "Drawn to the Dark Dimension (Yellow)" }
+func (DrawnToTheDarkDimensionYellow) Name() string               { return "Drawn to the Dark Dimension" }
 func (DrawnToTheDarkDimensionYellow) Cost(s *card.TurnState) int { return drawnToTheDarkDimensionCost(s) }
 func (DrawnToTheDarkDimensionYellow) MinCost() int               { return 0 }
 func (DrawnToTheDarkDimensionYellow) MaxCost() int               { return drawnToTheDarkDimensionPrintedCost }
@@ -64,7 +64,7 @@ func (c DrawnToTheDarkDimensionYellow) Play(s *card.TurnState, _ *card.CardState
 type DrawnToTheDarkDimensionBlue struct{}
 
 func (DrawnToTheDarkDimensionBlue) ID() card.ID                { return card.DrawnToTheDarkDimensionBlue }
-func (DrawnToTheDarkDimensionBlue) Name() string               { return "Drawn to the Dark Dimension (Blue)" }
+func (DrawnToTheDarkDimensionBlue) Name() string               { return "Drawn to the Dark Dimension" }
 func (DrawnToTheDarkDimensionBlue) Cost(s *card.TurnState) int { return drawnToTheDarkDimensionCost(s) }
 func (DrawnToTheDarkDimensionBlue) MinCost() int               { return 0 }
 func (DrawnToTheDarkDimensionBlue) MaxCost() int               { return drawnToTheDarkDimensionPrintedCost }

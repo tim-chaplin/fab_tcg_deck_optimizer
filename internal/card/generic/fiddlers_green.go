@@ -16,7 +16,7 @@ import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 type FiddlersGreenRed struct{}
 
 func (FiddlersGreenRed) ID() card.ID                 { return card.FiddlersGreenRed }
-func (FiddlersGreenRed) Name() string                { return "Fiddler's Green (Red)" }
+func (FiddlersGreenRed) Name() string                { return "Fiddler's Green" }
 func (FiddlersGreenRed) Cost(*card.TurnState) int                   { return 0 }
 func (FiddlersGreenRed) Pitch() int                  { return 1 }
 func (FiddlersGreenRed) Attack() int                 { return 0 }
@@ -29,7 +29,7 @@ func (FiddlersGreenRed) Play(s *card.TurnState, _ *card.CardState) int { return 
 type FiddlersGreenYellow struct{}
 
 func (FiddlersGreenYellow) ID() card.ID                 { return card.FiddlersGreenYellow }
-func (FiddlersGreenYellow) Name() string                { return "Fiddler's Green (Yellow)" }
+func (FiddlersGreenYellow) Name() string                { return "Fiddler's Green" }
 func (FiddlersGreenYellow) Cost(*card.TurnState) int                   { return 0 }
 func (FiddlersGreenYellow) Pitch() int                  { return 2 }
 func (FiddlersGreenYellow) Attack() int                 { return 0 }
@@ -42,7 +42,7 @@ func (FiddlersGreenYellow) Play(s *card.TurnState, _ *card.CardState) int { retu
 type FiddlersGreenBlue struct{}
 
 func (FiddlersGreenBlue) ID() card.ID                 { return card.FiddlersGreenBlue }
-func (FiddlersGreenBlue) Name() string                { return "Fiddler's Green (Blue)" }
+func (FiddlersGreenBlue) Name() string                { return "Fiddler's Green" }
 func (FiddlersGreenBlue) Cost(*card.TurnState) int                   { return 0 }
 func (FiddlersGreenBlue) Pitch() int                  { return 3 }
 func (FiddlersGreenBlue) Attack() int                 { return 0 }

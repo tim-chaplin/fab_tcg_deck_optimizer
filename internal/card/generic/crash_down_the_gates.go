@@ -14,7 +14,7 @@ var crashDownTheGatesTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, 
 type CrashDownTheGatesRed struct{}
 
 func (CrashDownTheGatesRed) ID() card.ID                 { return card.CrashDownTheGatesRed }
-func (CrashDownTheGatesRed) Name() string                { return "Crash Down the Gates (Red)" }
+func (CrashDownTheGatesRed) Name() string                { return "Crash Down the Gates" }
 func (CrashDownTheGatesRed) Cost(*card.TurnState) int                   { return 3 }
 func (CrashDownTheGatesRed) Pitch() int                  { return 1 }
 func (CrashDownTheGatesRed) Attack() int                 { return 6 }
@@ -28,7 +28,7 @@ func (c CrashDownTheGatesRed) Play(s *card.TurnState, self *card.CardState) int 
 type CrashDownTheGatesYellow struct{}
 
 func (CrashDownTheGatesYellow) ID() card.ID                 { return card.CrashDownTheGatesYellow }
-func (CrashDownTheGatesYellow) Name() string                { return "Crash Down the Gates (Yellow)" }
+func (CrashDownTheGatesYellow) Name() string                { return "Crash Down the Gates" }
 func (CrashDownTheGatesYellow) Cost(*card.TurnState) int                   { return 3 }
 func (CrashDownTheGatesYellow) Pitch() int                  { return 2 }
 func (CrashDownTheGatesYellow) Attack() int                 { return 5 }
@@ -42,7 +42,7 @@ func (c CrashDownTheGatesYellow) Play(s *card.TurnState, self *card.CardState) i
 type CrashDownTheGatesBlue struct{}
 
 func (CrashDownTheGatesBlue) ID() card.ID                 { return card.CrashDownTheGatesBlue }
-func (CrashDownTheGatesBlue) Name() string                { return "Crash Down the Gates (Blue)" }
+func (CrashDownTheGatesBlue) Name() string                { return "Crash Down the Gates" }
 func (CrashDownTheGatesBlue) Cost(*card.TurnState) int                   { return 3 }
 func (CrashDownTheGatesBlue) Pitch() int                  { return 3 }
 func (CrashDownTheGatesBlue) Attack() int                 { return 4 }

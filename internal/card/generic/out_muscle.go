@@ -12,7 +12,7 @@ var outMuscleTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.Typ
 type OutMuscleRed struct{}
 
 func (OutMuscleRed) ID() card.ID                 { return card.OutMuscleRed }
-func (OutMuscleRed) Name() string                { return "Out Muscle (Red)" }
+func (OutMuscleRed) Name() string                { return "Out Muscle" }
 func (OutMuscleRed) Cost(*card.TurnState) int                   { return 3 }
 func (OutMuscleRed) Pitch() int                  { return 1 }
 func (OutMuscleRed) Attack() int                 { return 6 }
@@ -26,7 +26,7 @@ func (c OutMuscleRed) Play(s *card.TurnState, _ *card.CardState) int { return c.
 type OutMuscleYellow struct{}
 
 func (OutMuscleYellow) ID() card.ID                 { return card.OutMuscleYellow }
-func (OutMuscleYellow) Name() string                { return "Out Muscle (Yellow)" }
+func (OutMuscleYellow) Name() string                { return "Out Muscle" }
 func (OutMuscleYellow) Cost(*card.TurnState) int                   { return 3 }
 func (OutMuscleYellow) Pitch() int                  { return 2 }
 func (OutMuscleYellow) Attack() int                 { return 5 }
@@ -40,7 +40,7 @@ func (c OutMuscleYellow) Play(s *card.TurnState, _ *card.CardState) int { return
 type OutMuscleBlue struct{}
 
 func (OutMuscleBlue) ID() card.ID                 { return card.OutMuscleBlue }
-func (OutMuscleBlue) Name() string                { return "Out Muscle (Blue)" }
+func (OutMuscleBlue) Name() string                { return "Out Muscle" }
 func (OutMuscleBlue) Cost(*card.TurnState) int                   { return 3 }
 func (OutMuscleBlue) Pitch() int                  { return 3 }
 func (OutMuscleBlue) Attack() int                 { return 4 }

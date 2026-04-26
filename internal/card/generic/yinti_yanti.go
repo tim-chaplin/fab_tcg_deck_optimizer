@@ -21,7 +21,7 @@ func yintiYantiPlay(base int, s *card.TurnState) int {
 type YintiYantiRed struct{}
 
 func (YintiYantiRed) ID() card.ID                 { return card.YintiYantiRed }
-func (YintiYantiRed) Name() string                { return "Yinti Yanti (Red)" }
+func (YintiYantiRed) Name() string                { return "Yinti Yanti" }
 func (YintiYantiRed) Cost(*card.TurnState) int                   { return 0 }
 func (YintiYantiRed) Pitch() int                  { return 1 }
 func (YintiYantiRed) Attack() int                 { return 3 }
@@ -36,7 +36,7 @@ func (c YintiYantiRed) Play(s *card.TurnState, _ *card.CardState) int { return y
 type YintiYantiYellow struct{}
 
 func (YintiYantiYellow) ID() card.ID                 { return card.YintiYantiYellow }
-func (YintiYantiYellow) Name() string                { return "Yinti Yanti (Yellow)" }
+func (YintiYantiYellow) Name() string                { return "Yinti Yanti" }
 func (YintiYantiYellow) Cost(*card.TurnState) int                   { return 0 }
 func (YintiYantiYellow) Pitch() int                  { return 2 }
 func (YintiYantiYellow) Attack() int                 { return 2 }
@@ -51,7 +51,7 @@ func (c YintiYantiYellow) Play(s *card.TurnState, _ *card.CardState) int { retur
 type YintiYantiBlue struct{}
 
 func (YintiYantiBlue) ID() card.ID                 { return card.YintiYantiBlue }
-func (YintiYantiBlue) Name() string                { return "Yinti Yanti (Blue)" }
+func (YintiYantiBlue) Name() string                { return "Yinti Yanti" }
 func (YintiYantiBlue) Cost(*card.TurnState) int                   { return 0 }
 func (YintiYantiBlue) Pitch() int                  { return 3 }
 func (YintiYantiBlue) Attack() int                 { return 1 }

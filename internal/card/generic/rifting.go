@@ -13,7 +13,7 @@ var riftingTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeA
 type RiftingRed struct{}
 
 func (RiftingRed) ID() card.ID                 { return card.RiftingRed }
-func (RiftingRed) Name() string                { return "Rifting (Red)" }
+func (RiftingRed) Name() string                { return "Rifting" }
 func (RiftingRed) Cost(*card.TurnState) int                   { return 2 }
 func (RiftingRed) Pitch() int                  { return 1 }
 func (RiftingRed) Attack() int                 { return 6 }
@@ -27,7 +27,7 @@ func (c RiftingRed) Play(s *card.TurnState, _ *card.CardState) int { return c.At
 type RiftingYellow struct{}
 
 func (RiftingYellow) ID() card.ID                 { return card.RiftingYellow }
-func (RiftingYellow) Name() string                { return "Rifting (Yellow)" }
+func (RiftingYellow) Name() string                { return "Rifting" }
 func (RiftingYellow) Cost(*card.TurnState) int                   { return 2 }
 func (RiftingYellow) Pitch() int                  { return 2 }
 func (RiftingYellow) Attack() int                 { return 5 }
@@ -41,7 +41,7 @@ func (c RiftingYellow) Play(s *card.TurnState, _ *card.CardState) int { return c
 type RiftingBlue struct{}
 
 func (RiftingBlue) ID() card.ID                 { return card.RiftingBlue }
-func (RiftingBlue) Name() string                { return "Rifting (Blue)" }
+func (RiftingBlue) Name() string                { return "Rifting" }
 func (RiftingBlue) Cost(*card.TurnState) int                   { return 2 }
 func (RiftingBlue) Pitch() int                  { return 3 }
 func (RiftingBlue) Attack() int                 { return 4 }

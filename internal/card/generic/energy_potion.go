@@ -11,7 +11,7 @@ var energyPotionTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.
 type EnergyPotionBlue struct{}
 
 func (EnergyPotionBlue) ID() card.ID                               { return card.EnergyPotionBlue }
-func (EnergyPotionBlue) Name() string                              { return "Energy Potion (Blue)" }
+func (EnergyPotionBlue) Name() string                              { return "Energy Potion" }
 func (EnergyPotionBlue) Cost(*card.TurnState) int                  { return 0 }
 func (EnergyPotionBlue) Pitch() int                                { return 3 }
 func (EnergyPotionBlue) Attack() int                               { return 0 }

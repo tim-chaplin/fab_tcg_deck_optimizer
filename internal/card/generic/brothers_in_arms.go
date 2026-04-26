@@ -12,7 +12,7 @@ var brothersInArmsTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, car
 type BrothersInArmsRed struct{}
 
 func (BrothersInArmsRed) ID() card.ID                 { return card.BrothersInArmsRed }
-func (BrothersInArmsRed) Name() string                { return "Brothers in Arms (Red)" }
+func (BrothersInArmsRed) Name() string                { return "Brothers in Arms" }
 func (BrothersInArmsRed) Cost(*card.TurnState) int                   { return 2 }
 func (BrothersInArmsRed) Pitch() int                  { return 1 }
 func (BrothersInArmsRed) Attack() int                 { return 6 }
@@ -26,7 +26,7 @@ func (c BrothersInArmsRed) Play(s *card.TurnState, _ *card.CardState) int { retu
 type BrothersInArmsYellow struct{}
 
 func (BrothersInArmsYellow) ID() card.ID                 { return card.BrothersInArmsYellow }
-func (BrothersInArmsYellow) Name() string                { return "Brothers in Arms (Yellow)" }
+func (BrothersInArmsYellow) Name() string                { return "Brothers in Arms" }
 func (BrothersInArmsYellow) Cost(*card.TurnState) int                   { return 2 }
 func (BrothersInArmsYellow) Pitch() int                  { return 2 }
 func (BrothersInArmsYellow) Attack() int                 { return 5 }
@@ -40,7 +40,7 @@ func (c BrothersInArmsYellow) Play(s *card.TurnState, _ *card.CardState) int { r
 type BrothersInArmsBlue struct{}
 
 func (BrothersInArmsBlue) ID() card.ID                 { return card.BrothersInArmsBlue }
-func (BrothersInArmsBlue) Name() string                { return "Brothers in Arms (Blue)" }
+func (BrothersInArmsBlue) Name() string                { return "Brothers in Arms" }
 func (BrothersInArmsBlue) Cost(*card.TurnState) int                   { return 2 }
 func (BrothersInArmsBlue) Pitch() int                  { return 3 }
 func (BrothersInArmsBlue) Attack() int                 { return 4 }

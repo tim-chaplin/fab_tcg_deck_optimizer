@@ -12,7 +12,7 @@ var destructiveTendenciesTypes = card.NewTypeSet(card.TypeGeneric, card.TypeInst
 type DestructiveTendenciesBlue struct{}
 
 func (DestructiveTendenciesBlue) ID() card.ID                               { return card.DestructiveTendenciesBlue }
-func (DestructiveTendenciesBlue) Name() string                              { return "Destructive Tendencies (Blue)" }
+func (DestructiveTendenciesBlue) Name() string                              { return "Destructive Tendencies" }
 func (DestructiveTendenciesBlue) Cost(*card.TurnState) int                  { return 0 }
 func (DestructiveTendenciesBlue) Pitch() int                                { return 3 }
 func (DestructiveTendenciesBlue) Attack() int                               { return 0 }

@@ -13,7 +13,7 @@ var humbleTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeAt
 type HumbleRed struct{}
 
 func (HumbleRed) ID() card.ID                 { return card.HumbleRed }
-func (HumbleRed) Name() string                { return "Humble (Red)" }
+func (HumbleRed) Name() string                { return "Humble" }
 func (HumbleRed) Cost(*card.TurnState) int                   { return 2 }
 func (HumbleRed) Pitch() int                  { return 1 }
 func (HumbleRed) Attack() int                 { return 6 }
@@ -27,7 +27,7 @@ func (c HumbleRed) Play(s *card.TurnState, self *card.CardState) int { return hu
 type HumbleYellow struct{}
 
 func (HumbleYellow) ID() card.ID                 { return card.HumbleYellow }
-func (HumbleYellow) Name() string                { return "Humble (Yellow)" }
+func (HumbleYellow) Name() string                { return "Humble" }
 func (HumbleYellow) Cost(*card.TurnState) int                   { return 2 }
 func (HumbleYellow) Pitch() int                  { return 2 }
 func (HumbleYellow) Attack() int                 { return 5 }
@@ -41,7 +41,7 @@ func (c HumbleYellow) Play(s *card.TurnState, self *card.CardState) int { return
 type HumbleBlue struct{}
 
 func (HumbleBlue) ID() card.ID                 { return card.HumbleBlue }
-func (HumbleBlue) Name() string                { return "Humble (Blue)" }
+func (HumbleBlue) Name() string                { return "Humble" }
 func (HumbleBlue) Cost(*card.TurnState) int                   { return 2 }
 func (HumbleBlue) Pitch() int                  { return 3 }
 func (HumbleBlue) Attack() int                 { return 4 }

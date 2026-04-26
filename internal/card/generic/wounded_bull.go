@@ -23,7 +23,7 @@ func woundedBullDamage(attack int) int {
 type WoundedBullRed struct{}
 
 func (WoundedBullRed) ID() card.ID                 { return card.WoundedBullRed }
-func (WoundedBullRed) Name() string                { return "Wounded Bull (Red)" }
+func (WoundedBullRed) Name() string                { return "Wounded Bull" }
 func (WoundedBullRed) Cost(*card.TurnState) int                   { return 3 }
 func (WoundedBullRed) Pitch() int                  { return 1 }
 func (WoundedBullRed) Attack() int                 { return 7 }
@@ -35,7 +35,7 @@ func (c WoundedBullRed) Play(s *card.TurnState, _ *card.CardState) int { return 
 type WoundedBullYellow struct{}
 
 func (WoundedBullYellow) ID() card.ID                 { return card.WoundedBullYellow }
-func (WoundedBullYellow) Name() string                { return "Wounded Bull (Yellow)" }
+func (WoundedBullYellow) Name() string                { return "Wounded Bull" }
 func (WoundedBullYellow) Cost(*card.TurnState) int                   { return 3 }
 func (WoundedBullYellow) Pitch() int                  { return 2 }
 func (WoundedBullYellow) Attack() int                 { return 6 }
@@ -47,7 +47,7 @@ func (c WoundedBullYellow) Play(s *card.TurnState, _ *card.CardState) int { retu
 type WoundedBullBlue struct{}
 
 func (WoundedBullBlue) ID() card.ID                 { return card.WoundedBullBlue }
-func (WoundedBullBlue) Name() string                { return "Wounded Bull (Blue)" }
+func (WoundedBullBlue) Name() string                { return "Wounded Bull" }
 func (WoundedBullBlue) Cost(*card.TurnState) int                   { return 3 }
 func (WoundedBullBlue) Pitch() int                  { return 3 }
 func (WoundedBullBlue) Attack() int                 { return 5 }

@@ -12,7 +12,7 @@ var potionOfLuckTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.
 type PotionOfLuckBlue struct{}
 
 func (PotionOfLuckBlue) ID() card.ID                               { return card.PotionOfLuckBlue }
-func (PotionOfLuckBlue) Name() string                              { return "Potion of Luck (Blue)" }
+func (PotionOfLuckBlue) Name() string                              { return "Potion of Luck" }
 func (PotionOfLuckBlue) Cost(*card.TurnState) int                  { return 0 }
 func (PotionOfLuckBlue) Pitch() int                                { return 3 }
 func (PotionOfLuckBlue) Attack() int                               { return 0 }

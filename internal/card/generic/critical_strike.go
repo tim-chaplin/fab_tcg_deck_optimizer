@@ -10,7 +10,7 @@ var criticalStrikeTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, car
 type CriticalStrikeRed struct{}
 
 func (CriticalStrikeRed) ID() card.ID                 { return card.CriticalStrikeRed }
-func (CriticalStrikeRed) Name() string                { return "Critical Strike (Red)" }
+func (CriticalStrikeRed) Name() string                { return "Critical Strike" }
 func (CriticalStrikeRed) Cost(*card.TurnState) int                   { return 1 }
 func (CriticalStrikeRed) Pitch() int                  { return 1 }
 func (CriticalStrikeRed) Attack() int                 { return 5 }
@@ -22,7 +22,7 @@ func (c CriticalStrikeRed) Play(s *card.TurnState, _ *card.CardState) int { retu
 type CriticalStrikeYellow struct{}
 
 func (CriticalStrikeYellow) ID() card.ID                 { return card.CriticalStrikeYellow }
-func (CriticalStrikeYellow) Name() string                { return "Critical Strike (Yellow)" }
+func (CriticalStrikeYellow) Name() string                { return "Critical Strike" }
 func (CriticalStrikeYellow) Cost(*card.TurnState) int                   { return 1 }
 func (CriticalStrikeYellow) Pitch() int                  { return 2 }
 func (CriticalStrikeYellow) Attack() int                 { return 4 }
@@ -34,7 +34,7 @@ func (c CriticalStrikeYellow) Play(s *card.TurnState, _ *card.CardState) int { r
 type CriticalStrikeBlue struct{}
 
 func (CriticalStrikeBlue) ID() card.ID                 { return card.CriticalStrikeBlue }
-func (CriticalStrikeBlue) Name() string                { return "Critical Strike (Blue)" }
+func (CriticalStrikeBlue) Name() string                { return "Critical Strike" }
 func (CriticalStrikeBlue) Cost(*card.TurnState) int                   { return 1 }
 func (CriticalStrikeBlue) Pitch() int                  { return 3 }
 func (CriticalStrikeBlue) Attack() int                 { return 3 }

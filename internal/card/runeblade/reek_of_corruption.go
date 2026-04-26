@@ -27,7 +27,7 @@ func reekOfCorruptionDamage(attack int, s *card.TurnState, self *card.CardState)
 type ReekOfCorruptionRed struct{}
 
 func (ReekOfCorruptionRed) ID() card.ID                  { return card.ReekOfCorruptionRed }
-func (ReekOfCorruptionRed) Name() string                 { return "Reek of Corruption (Red)" }
+func (ReekOfCorruptionRed) Name() string                 { return "Reek of Corruption" }
 func (ReekOfCorruptionRed) Cost(*card.TurnState) int                    { return 2 }
 func (ReekOfCorruptionRed) Pitch() int                   { return 1 }
 func (ReekOfCorruptionRed) Attack() int                  { return 4 }
@@ -39,7 +39,7 @@ func (c ReekOfCorruptionRed) Play(s *card.TurnState, self *card.CardState) int {
 type ReekOfCorruptionYellow struct{}
 
 func (ReekOfCorruptionYellow) ID() card.ID                  { return card.ReekOfCorruptionYellow }
-func (ReekOfCorruptionYellow) Name() string                 { return "Reek of Corruption (Yellow)" }
+func (ReekOfCorruptionYellow) Name() string                 { return "Reek of Corruption" }
 func (ReekOfCorruptionYellow) Cost(*card.TurnState) int                    { return 2 }
 func (ReekOfCorruptionYellow) Pitch() int                   { return 2 }
 func (ReekOfCorruptionYellow) Attack() int                  { return 3 }
@@ -51,7 +51,7 @@ func (c ReekOfCorruptionYellow) Play(s *card.TurnState, self *card.CardState) in
 type ReekOfCorruptionBlue struct{}
 
 func (ReekOfCorruptionBlue) ID() card.ID                  { return card.ReekOfCorruptionBlue }
-func (ReekOfCorruptionBlue) Name() string                 { return "Reek of Corruption (Blue)" }
+func (ReekOfCorruptionBlue) Name() string                 { return "Reek of Corruption" }
 func (ReekOfCorruptionBlue) Cost(*card.TurnState) int                    { return 2 }
 func (ReekOfCorruptionBlue) Pitch() int                   { return 3 }
 func (ReekOfCorruptionBlue) Attack() int                  { return 2 }

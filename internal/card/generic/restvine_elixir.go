@@ -12,7 +12,7 @@ var restvineElixirTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction)
 type RestvineElixirRed struct{}
 
 func (RestvineElixirRed) ID() card.ID                 { return card.RestvineElixirRed }
-func (RestvineElixirRed) Name() string                { return "Restvine Elixir (Red)" }
+func (RestvineElixirRed) Name() string                { return "Restvine Elixir" }
 func (RestvineElixirRed) Cost(*card.TurnState) int                   { return 1 }
 func (RestvineElixirRed) Pitch() int                  { return 1 }
 func (RestvineElixirRed) Attack() int                 { return 0 }

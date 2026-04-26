@@ -13,7 +13,7 @@ var pummelTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAttackReaction)
 type PummelRed struct{}
 
 func (PummelRed) ID() card.ID                               { return card.PummelRed }
-func (PummelRed) Name() string                              { return "Pummel (Red)" }
+func (PummelRed) Name() string                              { return "Pummel" }
 func (PummelRed) Cost(*card.TurnState) int                  { return 2 }
 func (PummelRed) Pitch() int                                { return 1 }
 func (PummelRed) Attack() int                               { return 0 }
@@ -28,7 +28,7 @@ func (PummelRed) Play(*card.TurnState, *card.CardState) int { return 0 }
 type PummelYellow struct{}
 
 func (PummelYellow) ID() card.ID                               { return card.PummelYellow }
-func (PummelYellow) Name() string                              { return "Pummel (Yellow)" }
+func (PummelYellow) Name() string                              { return "Pummel" }
 func (PummelYellow) Cost(*card.TurnState) int                  { return 2 }
 func (PummelYellow) Pitch() int                                { return 2 }
 func (PummelYellow) Attack() int                               { return 0 }
@@ -43,7 +43,7 @@ func (PummelYellow) Play(*card.TurnState, *card.CardState) int { return 0 }
 type PummelBlue struct{}
 
 func (PummelBlue) ID() card.ID                               { return card.PummelBlue }
-func (PummelBlue) Name() string                              { return "Pummel (Blue)" }
+func (PummelBlue) Name() string                              { return "Pummel" }
 func (PummelBlue) Cost(*card.TurnState) int                  { return 2 }
 func (PummelBlue) Pitch() int                                { return 3 }
 func (PummelBlue) Attack() int                               { return 0 }

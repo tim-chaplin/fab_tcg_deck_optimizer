@@ -12,7 +12,7 @@ var potionOfIronhideTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, c
 type PotionOfIronhideBlue struct{}
 
 func (PotionOfIronhideBlue) ID() card.ID                               { return card.PotionOfIronhideBlue }
-func (PotionOfIronhideBlue) Name() string                              { return "Potion of Ironhide (Blue)" }
+func (PotionOfIronhideBlue) Name() string                              { return "Potion of Ironhide" }
 func (PotionOfIronhideBlue) Cost(*card.TurnState) int                  { return 0 }
 func (PotionOfIronhideBlue) Pitch() int                                { return 3 }
 func (PotionOfIronhideBlue) Attack() int                               { return 0 }

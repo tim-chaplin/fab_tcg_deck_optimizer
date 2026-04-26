@@ -25,7 +25,7 @@ func trotAlongPlay(s *card.TurnState) int {
 type TrotAlongBlue struct{}
 
 func (TrotAlongBlue) ID() card.ID                 { return card.TrotAlongBlue }
-func (TrotAlongBlue) Name() string                { return "Trot Along (Blue)" }
+func (TrotAlongBlue) Name() string                { return "Trot Along" }
 func (TrotAlongBlue) Cost(*card.TurnState) int                   { return 0 }
 func (TrotAlongBlue) Pitch() int                  { return 3 }
 func (TrotAlongBlue) Attack() int                 { return 0 }

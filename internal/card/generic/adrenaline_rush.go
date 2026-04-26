@@ -23,7 +23,7 @@ func adrenalineRushDamage(attack int) int {
 type AdrenalineRushRed struct{}
 
 func (AdrenalineRushRed) ID() card.ID                 { return card.AdrenalineRushRed }
-func (AdrenalineRushRed) Name() string                { return "Adrenaline Rush (Red)" }
+func (AdrenalineRushRed) Name() string                { return "Adrenaline Rush" }
 func (AdrenalineRushRed) Cost(*card.TurnState) int                   { return 2 }
 func (AdrenalineRushRed) Pitch() int                  { return 1 }
 func (AdrenalineRushRed) Attack() int                 { return 4 }
@@ -35,7 +35,7 @@ func (c AdrenalineRushRed) Play(s *card.TurnState, _ *card.CardState) int { retu
 type AdrenalineRushYellow struct{}
 
 func (AdrenalineRushYellow) ID() card.ID                 { return card.AdrenalineRushYellow }
-func (AdrenalineRushYellow) Name() string                { return "Adrenaline Rush (Yellow)" }
+func (AdrenalineRushYellow) Name() string                { return "Adrenaline Rush" }
 func (AdrenalineRushYellow) Cost(*card.TurnState) int                   { return 2 }
 func (AdrenalineRushYellow) Pitch() int                  { return 2 }
 func (AdrenalineRushYellow) Attack() int                 { return 3 }
@@ -47,7 +47,7 @@ func (c AdrenalineRushYellow) Play(s *card.TurnState, _ *card.CardState) int { r
 type AdrenalineRushBlue struct{}
 
 func (AdrenalineRushBlue) ID() card.ID                 { return card.AdrenalineRushBlue }
-func (AdrenalineRushBlue) Name() string                { return "Adrenaline Rush (Blue)" }
+func (AdrenalineRushBlue) Name() string                { return "Adrenaline Rush" }
 func (AdrenalineRushBlue) Cost(*card.TurnState) int                   { return 2 }
 func (AdrenalineRushBlue) Pitch() int                  { return 3 }
 func (AdrenalineRushBlue) Attack() int                 { return 2 }

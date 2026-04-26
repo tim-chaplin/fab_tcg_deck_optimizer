@@ -22,20 +22,20 @@ func formatContribution(v float64) string {
 	return fmt.Sprintf("%.1f", v)
 }
 
-// assignmentName returns the card name, suffixed with " (from arsenal)" when the assignment came
-// from the arsenal slot — that tag tells readers why the card isn't in the dealt-hand list the
-// optimiser reports alongside. Used by FormatBestLine (debug one-liner) and the held/arsenal
-// footer; FormatBestTurn's numbered play order attaches the arsenal tag to the role label
-// instead ("PLAY from arsenal").
+// assignmentName returns the card's display name, suffixed with " (from arsenal)" when the
+// assignment came from the arsenal slot — that tag tells readers why the card isn't in the
+// dealt-hand list the optimiser reports alongside. Used by FormatBestLine (debug one-liner)
+// and the held/arsenal footer; FormatBestTurn's numbered play order attaches the arsenal
+// tag to the role label instead ("PLAY from arsenal").
 func assignmentName(a CardAssignment) string {
 	if a.FromArsenal {
-		return a.Card.Name() + " (from arsenal)"
+		return card.DisplayName(a.Card) + " (from arsenal)"
 	}
-	return a.Card.Name()
+	return card.DisplayName(a.Card)
 }
 
 // FormatBestLine pairs each card in BestLine with its assigned role for debug output, e.g.
-// "Hocus Pocus (Blue): PITCH, Runic Reaping (Red): ATTACK". Compact one-line form; use
+// "Hocus Pocus [B]: PITCH, Runic Reaping [R]: ATTACK". Compact one-line form; use
 // FormatBestTurn for chronological play order.
 func FormatBestLine(line []CardAssignment) string {
 	parts := make([]string, len(line))
@@ -46,7 +46,7 @@ func FormatBestLine(line []CardAssignment) string {
 }
 
 // roleLabelWithArsenal attaches " from arsenal" to the role label when a is arsenal-in, so the
-// numbered play order reads "Mauvrion Skies (Red): PLAY from arsenal" rather than tagging the
+// numbered play order reads "Mauvrion Skies [R]: PLAY from arsenal" rather than tagging the
 // card name. Bare label otherwise.
 func roleLabelWithArsenal(a CardAssignment, label string) string {
 	if a.FromArsenal {
@@ -68,7 +68,7 @@ func formatTriggerEffect(d TriggerContribution) string {
 		parts = append(parts, fmt.Sprintf("START OF ACTION PHASE (+%d)", d.Damage))
 	}
 	if d.Revealed != nil {
-		parts = append(parts, fmt.Sprintf("drew %s into hand", d.Revealed.Name()))
+		parts = append(parts, fmt.Sprintf("drew %s into hand", card.DisplayName(d.Revealed)))
 	}
 	return strings.Join(parts, ", ")
 }
@@ -150,10 +150,10 @@ func partitionBestLineForDisplay(line []CardAssignment) bestLineDisplayParts {
 func appendHeldArsenalFooter(lines []string, handHeld []card.Card, arsenal []CardAssignment) []string {
 	var footers []string
 	for _, c := range handHeld {
-		footers = append(footers, fmt.Sprintf("  (held: %s)", c.Name()))
+		footers = append(footers, fmt.Sprintf("  (held: %s)", card.DisplayName(c)))
 	}
 	for _, a := range arsenal {
-		label := a.Card.Name()
+		label := card.DisplayName(a.Card)
 		if a.FromArsenal {
 			label += " (stayed)"
 		} else {

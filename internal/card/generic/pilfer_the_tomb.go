@@ -12,7 +12,7 @@ var pilferTheTombTypes = card.NewTypeSet(card.TypeGeneric, card.TypeInstant)
 type PilferTheTombBlue struct{}
 
 func (PilferTheTombBlue) ID() card.ID                               { return card.PilferTheTombBlue }
-func (PilferTheTombBlue) Name() string                              { return "Pilfer the Tomb (Blue)" }
+func (PilferTheTombBlue) Name() string                              { return "Pilfer the Tomb" }
 func (PilferTheTombBlue) Cost(*card.TurnState) int                  { return 0 }
 func (PilferTheTombBlue) Pitch() int                                { return 3 }
 func (PilferTheTombBlue) Attack() int                               { return 0 }

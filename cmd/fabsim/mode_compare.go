@@ -6,6 +6,7 @@ import (
 	"sort"
 	"time"
 
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/deck"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/deckformat"
 )
@@ -143,14 +144,16 @@ func printCardDelta(name1, name2 string, d1, d2 *deck.Deck) {
 
 // loadoutCounts tallies the deck's cards and weapons by display name in a single map.
 // Weapon names don't collide with card names in the current registry, so a flat
-// name-keyed map cleanly captures both lists for diffing.
+// name-keyed map cleanly captures both lists for diffing. card.DisplayName keeps pitch
+// printings as distinct entries so a "-1 Aether Slash [R], +1 Aether Slash [Y]" diff is
+// legible.
 func loadoutCounts(d *deck.Deck) map[string]int {
 	out := make(map[string]int, len(d.Cards)+len(d.Weapons))
 	for _, c := range d.Cards {
-		out[c.Name()]++
+		out[card.DisplayName(c)]++
 	}
 	for _, w := range d.Weapons {
-		out[w.Name()]++
+		out[card.DisplayName(w)]++
 	}
 	return out
 }
@@ -161,7 +164,7 @@ func loadoutWeaponNames(decks ...*deck.Deck) map[string]struct{} {
 	out := map[string]struct{}{}
 	for _, d := range decks {
 		for _, w := range d.Weapons {
-			out[w.Name()] = struct{}{}
+			out[card.DisplayName(w)] = struct{}{}
 		}
 	}
 	return out

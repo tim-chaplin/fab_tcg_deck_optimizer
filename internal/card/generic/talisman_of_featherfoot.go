@@ -12,7 +12,7 @@ var talismanOfFeatherfootTypes = card.NewTypeSet(card.TypeGeneric, card.TypeActi
 type TalismanOfFeatherfootYellow struct{}
 
 func (TalismanOfFeatherfootYellow) ID() card.ID                               { return card.TalismanOfFeatherfootYellow }
-func (TalismanOfFeatherfootYellow) Name() string                              { return "Talisman of Featherfoot (Yellow)" }
+func (TalismanOfFeatherfootYellow) Name() string                              { return "Talisman of Featherfoot" }
 func (TalismanOfFeatherfootYellow) Cost(*card.TurnState) int                  { return 0 }
 func (TalismanOfFeatherfootYellow) Pitch() int                                { return 2 }
 func (TalismanOfFeatherfootYellow) Attack() int                               { return 0 }

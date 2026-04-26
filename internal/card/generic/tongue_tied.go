@@ -12,7 +12,7 @@ var tongueTiedTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.Ty
 type TongueTiedRed struct{}
 
 func (TongueTiedRed) ID() card.ID                 { return card.TongueTiedRed }
-func (TongueTiedRed) Name() string                { return "Tongue Tied (Red)" }
+func (TongueTiedRed) Name() string                { return "Tongue Tied" }
 func (TongueTiedRed) Cost(*card.TurnState) int                   { return 3 }
 func (TongueTiedRed) Pitch() int                  { return 1 }
 func (TongueTiedRed) Attack() int                 { return 7 }
