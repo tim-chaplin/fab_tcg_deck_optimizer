@@ -40,16 +40,39 @@ type CardPair struct {
 // cardPairs registry compact and lets future pairs reuse a group on both sides if needed
 // (e.g. a self-pair like "two copies of X").
 var (
-	moonWishGroup = CardGroup{card.MoonWishRed, card.MoonWishYellow, card.MoonWishBlue}
-	sunKissGroup  = CardGroup{card.SunKissRed, card.SunKissYellow, card.SunKissBlue}
+	moonWishGroup     = CardGroup{card.MoonWishRed, card.MoonWishYellow, card.MoonWishBlue}
+	sunKissGroup      = CardGroup{card.SunKissRed, card.SunKissYellow, card.SunKissBlue}
+	belittleGroup     = CardGroup{card.BelittleRed, card.BelittleYellow, card.BelittleBlue}
+	minnowismGroup    = CardGroup{card.MinnowismRed, card.MinnowismYellow, card.MinnowismBlue}
+	nimblismGroup     = CardGroup{card.NimblismRed, card.NimblismYellow, card.NimblismBlue}
+	sloggismGroup     = CardGroup{card.SloggismRed, card.SloggismYellow, card.SloggismBlue}
+	nimbleStrikeGroup = CardGroup{
+		card.NimbleStrikeRed, card.NimbleStrikeYellow, card.NimbleStrikeBlue,
+	}
+	regurgitatingSlogGroup = CardGroup{
+		card.RegurgitatingSlogRed, card.RegurgitatingSlogYellow, card.RegurgitatingSlogBlue,
+	}
+	amuletOfHavencallGroup = CardGroup{card.AmuletOfHavencallBlue}
+	rallyTheRearguardGroup = CardGroup{
+		card.RallyTheRearguardRed, card.RallyTheRearguardYellow, card.RallyTheRearguardBlue,
+	}
 )
 
 // cardPairs is the registry of synergy pairs the anneal mutation generator considers as
-// units. Order matters for deterministic mutation output: pairs are emitted in registry
-// order, with cross-product (firstVariant, secondVariant) enumeration in group-slice order
-// and (i, j) deck-index iteration in ascending order.
+// units — every pair where one card's printed text mentions the other by name. Order matters
+// for deterministic mutation output: pairs are emitted in registry order, with cross-product
+// (firstVariant, secondVariant) enumeration in group-slice order and (i, j) deck-index
+// iteration in ascending order.
+//
+// Pair-variant combos whose halves carry card.NotImplemented are skipped at enumeration
+// time (see pairAddAllowed), so a pair stays valid to register even when one half is still
+// a stub — the combo activates once both halves are fully implemented.
 var cardPairs = []CardPair{
 	{First: moonWishGroup, Second: sunKissGroup},
+	{First: belittleGroup, Second: minnowismGroup},
+	{First: nimbleStrikeGroup, Second: nimblismGroup},
+	{First: regurgitatingSlogGroup, Second: sloggismGroup},
+	{First: amuletOfHavencallGroup, Second: rallyTheRearguardGroup},
 }
 
 // pairDedupeKey is the canonical (sorted removed IDs, sorted add IDs) tuple identifying a
@@ -79,9 +102,10 @@ type pairDedupeKey struct {
 // emitted (sorted-removed-IDs, sorted-add-IDs) tuples in pairDedupeKey form and drop
 // repeats.
 //
-// legal filters BOTH pair-variant adds: a combo where either variant is rejected by legal
-// (e.g. a banned printing) is skipped. Removal targets aren't filtered — same convention as
-// singleSwapMutations: a deck that arrived holding a banned card can still have it removed.
+// Pair-variant adds run through pairAddAllowed: NotImplemented printings are filtered
+// unconditionally and the caller's legal predicate is honoured per-variant. Removal targets
+// aren't filtered — same convention as singleSwapMutations: a deck that arrived holding a
+// banned card can still have it removed.
 //
 // maxCopies enforcement is NOT applied here; AllMutations runs filterMaxCopiesViolations on
 // the combined output so single-slot and pair candidates share one cap-checking pass.
@@ -96,12 +120,12 @@ func pairSwapMutations(d *Deck, legal func(card.Card) bool) []Mutation {
 	for _, pair := range cardPairs {
 		for _, firstID := range pair.First {
 			first := cards.Get(firstID)
-			if legal != nil && !legal(first) {
+			if !pairAddAllowed(first, legal) {
 				continue
 			}
 			for _, secondID := range pair.Second {
 				second := cards.Get(secondID)
-				if legal != nil && !legal(second) {
+				if !pairAddAllowed(second, legal) {
 					continue
 				}
 				addA, addB := sortedIDPair(firstID, secondID)
@@ -134,6 +158,20 @@ func pairSwapMutations(d *Deck, legal func(card.Card) bool) []Mutation {
 		}
 	}
 	return out
+}
+
+// pairAddAllowed reports whether c is eligible as a pair-mutation add target. Rejects
+// anything carrying card.NotImplemented (the simulator can't model the rider, so introducing
+// the printing into a deck would corrupt the search) and applies the caller's legal filter
+// when present. legal=nil keeps every implemented card eligible.
+func pairAddAllowed(c card.Card, legal func(card.Card) bool) bool {
+	if _, unimplemented := c.(card.NotImplemented); unimplemented {
+		return false
+	}
+	if legal != nil && !legal(c) {
+		return false
+	}
+	return true
 }
 
 // sortedIDPair returns (a, b) sorted ascending so callers can build canonical

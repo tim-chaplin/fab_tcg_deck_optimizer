@@ -188,7 +188,13 @@ func expectedPairMutCount(d *Deck, maxCopies int) int {
 	total := 0
 	for _, p := range cardPairs {
 		for _, fID := range p.First {
+			if !pairAddAllowed(cards.Get(fID), nil) {
+				continue
+			}
 			for _, sID := range p.Second {
+				if !pairAddAllowed(cards.Get(sID), nil) {
+					continue
+				}
 				for combo := range combos {
 					if combo.a == fID || combo.a == sID ||
 						combo.b == fID || combo.b == sID {
