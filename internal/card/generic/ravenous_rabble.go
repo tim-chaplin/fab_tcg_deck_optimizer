@@ -4,9 +4,8 @@
 // Text: "When this attacks, reveal the top card of your deck. This gets -X{p}, where X is the pitch
 // value of the card revealed this way. **Go again**"
 //
-// Peek s.Deck[0].Pitch() and subtract from base power, floored at 0. Opts out of the memo because
-// the return depends on deck composition. If the deck is empty, no card is revealed so there's no
-// penalty.
+// Peek s.Deck[0].Pitch() and subtract from base power, floored at 0. If the deck is empty, no card
+// is revealed so there's no penalty.
 
 package generic
 
@@ -34,7 +33,6 @@ func (RavenousRabbleRed) Attack() int              { return 5 }
 func (RavenousRabbleRed) Defense() int             { return 2 }
 func (RavenousRabbleRed) Types() card.TypeSet      { return ravenousRabbleTypes }
 func (RavenousRabbleRed) GoAgain() bool            { return true }
-func (RavenousRabbleRed) NoMemo()                  {}
 func (RavenousRabbleRed) Play(s *card.TurnState, self *card.CardState) {
 	ravenousRabbleApplyDebuff(s, self)
 	s.ApplyAndLogEffectiveAttack(self)
@@ -50,7 +48,6 @@ func (RavenousRabbleYellow) Attack() int              { return 4 }
 func (RavenousRabbleYellow) Defense() int             { return 2 }
 func (RavenousRabbleYellow) Types() card.TypeSet      { return ravenousRabbleTypes }
 func (RavenousRabbleYellow) GoAgain() bool            { return true }
-func (RavenousRabbleYellow) NoMemo()                  {}
 func (RavenousRabbleYellow) Play(s *card.TurnState, self *card.CardState) {
 	ravenousRabbleApplyDebuff(s, self)
 	s.ApplyAndLogEffectiveAttack(self)
@@ -66,7 +63,6 @@ func (RavenousRabbleBlue) Attack() int              { return 3 }
 func (RavenousRabbleBlue) Defense() int             { return 2 }
 func (RavenousRabbleBlue) Types() card.TypeSet      { return ravenousRabbleTypes }
 func (RavenousRabbleBlue) GoAgain() bool            { return true }
-func (RavenousRabbleBlue) NoMemo()                  {}
 func (RavenousRabbleBlue) Play(s *card.TurnState, self *card.CardState) {
 	ravenousRabbleApplyDebuff(s, self)
 	s.ApplyAndLogEffectiveAttack(self)

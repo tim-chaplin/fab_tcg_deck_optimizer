@@ -1,8 +1,8 @@
 // Package card defines the Card interface used by the simulator and basic/test implementations.
 //
 // The per-card CardState wrapper, the Card interface itself, and the optional markers cards
-// opt into (NoMemo, VariableCost, Dominator, AddsFutureValue, ArsenalDefenseBonus, …) live in
-// this file. Cohesive concern groups are split across sibling files in this package:
+// opt into (VariableCost, Dominator, AddsFutureValue, ArsenalDefenseBonus, …) live in this
+// file. Cohesive concern groups are split across sibling files in this package:
 // types.go (CardType + TypeSet bitfield), turn_state.go (TurnState and its mutation helpers),
 // triggers.go (AuraTrigger + EphemeralAttackTrigger).
 package card
@@ -127,13 +127,6 @@ func DisplayName(c Card) string {
 		return c.Name() + " [B]"
 	}
 	return c.Name()
-}
-
-// NoMemo is an optional marker. Cards that implement it opt out of the hand-evaluation memo —
-// typically because the card's Play output depends on context (e.g. remaining deck composition)
-// that the memo key doesn't capture.
-type NoMemo interface {
-	NoMemo()
 }
 
 // VariableCost is optionally implemented by cards whose Cost(s) varies with TurnState (e.g.

@@ -14,10 +14,10 @@ import (
 )
 
 // TestEvaluateWith_ConcurrentNoMapPanic hammers deck.EvaluateWith from many goroutines with
-// each holding its own hand.Evaluator. Shared state includes the memo map and card-meta
-// lookup table; unsynchronised access would panic with "concurrent map read and map write"
-// or "concurrent map writes" and fail the test. Catches common race regressions without
-// depending on -race (which requires cgo).
+// each holding its own hand.Evaluator. Shared state includes the card-meta lookup table;
+// unsynchronised access would panic with "concurrent map read and map write" or "concurrent
+// map writes" and fail the test. Catches common race regressions without depending on -race
+// (which requires cgo).
 func TestEvaluateWith_ConcurrentNoMapPanic(t *testing.T) {
 	numWorkers := runtime.GOMAXPROCS(0)
 	if numWorkers < 2 {

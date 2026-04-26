@@ -150,10 +150,6 @@ func (MoonWishRed) Attack() int                { return 5 }
 func (MoonWishRed) Defense() int               { return 2 }
 func (MoonWishRed) Types() card.TypeSet        { return moonWishTypes }
 func (MoonWishRed) GoAgain() bool              { return false }
-
-// NoMemo: alt-cost mutates Deck and the tutor reads deck contents — both leak through the
-// memo key, so all three variants opt out.
-func (MoonWishRed) NoMemo() {}
 func (c MoonWishRed) Play(s *card.TurnState, self *card.CardState) {
 	moonWishPlay(c, s, self)
 }
@@ -170,7 +166,6 @@ func (MoonWishYellow) Attack() int                { return 4 }
 func (MoonWishYellow) Defense() int               { return 2 }
 func (MoonWishYellow) Types() card.TypeSet        { return moonWishTypes }
 func (MoonWishYellow) GoAgain() bool              { return false }
-func (MoonWishYellow) NoMemo()                    {}
 func (c MoonWishYellow) Play(s *card.TurnState, self *card.CardState) {
 	moonWishPlay(c, s, self)
 }
@@ -187,7 +182,6 @@ func (MoonWishBlue) Attack() int                { return 3 }
 func (MoonWishBlue) Defense() int               { return 2 }
 func (MoonWishBlue) Types() card.TypeSet        { return moonWishTypes }
 func (MoonWishBlue) GoAgain() bool              { return false }
-func (MoonWishBlue) NoMemo()                    {}
 func (c MoonWishBlue) Play(s *card.TurnState, self *card.CardState) {
 	moonWishPlay(c, s, self)
 }

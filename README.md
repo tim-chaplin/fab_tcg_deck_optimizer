@@ -161,7 +161,7 @@ The summary below groups the flags by subcommand.
 - `-quiet-load` — skip the baseline card-list dump at startup. Used by
   `scripts/anneal-reanneal.ps1` from pass 2 onward so the unchanging listing doesn't flood the
   log.
-- `-debug` — emit extra diagnostic output (e.g. memo cache size between rounds).
+- `-debug` — force per-round logs even when annealing is on (T>0 normally hides them).
 
 **`eval`** (re-score a deck and rewrite it; `-print-only` skips the sim and the rewrite):
 

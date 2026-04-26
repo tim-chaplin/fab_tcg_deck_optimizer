@@ -34,7 +34,6 @@ func (RunicFellingsongRed) Attack() int              { return 7 }
 func (RunicFellingsongRed) Defense() int             { return 3 }
 func (RunicFellingsongRed) Types() card.TypeSet      { return runicFellingsongTypes }
 func (RunicFellingsongRed) GoAgain() bool            { return false }
-func (RunicFellingsongRed) NoMemo()                  {}
 func (RunicFellingsongRed) Play(s *card.TurnState, self *card.CardState) {
 	runicFellingsongPlay(s, self)
 }
@@ -49,7 +48,6 @@ func (RunicFellingsongYellow) Attack() int              { return 6 }
 func (RunicFellingsongYellow) Defense() int             { return 3 }
 func (RunicFellingsongYellow) Types() card.TypeSet      { return runicFellingsongTypes }
 func (RunicFellingsongYellow) GoAgain() bool            { return false }
-func (RunicFellingsongYellow) NoMemo()                  {}
 func (RunicFellingsongYellow) Play(s *card.TurnState, self *card.CardState) {
 	runicFellingsongPlay(s, self)
 }
@@ -64,7 +62,6 @@ func (RunicFellingsongBlue) Attack() int              { return 5 }
 func (RunicFellingsongBlue) Defense() int             { return 3 }
 func (RunicFellingsongBlue) Types() card.TypeSet      { return runicFellingsongTypes }
 func (RunicFellingsongBlue) GoAgain() bool            { return false }
-func (RunicFellingsongBlue) NoMemo()                  {}
 func (RunicFellingsongBlue) Play(s *card.TurnState, self *card.CardState) {
 	runicFellingsongPlay(s, self)
 }
