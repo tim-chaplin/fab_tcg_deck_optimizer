@@ -1,13 +1,15 @@
 package hand
 
-// Turn-summary data shapes returned by Best: Role plus the per-card and aggregate records that
-// encode what the solver chose to do with a hand.
+// Turn-summary data shapes returned by Best: Role, CardAssignment, TurnSummary, plus the
+// CarryState snapshot that captures the winning permutation's end-of-chain TurnState. The
+// deck loop adopts CarryState wholesale into the next turn's seed — no per-field
+// reconstruction.
 
 import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 )
 
-// Role is what a card does on a given turn cycle.
+// Role is what a card did on a given turn cycle.
 type Role uint8
 
 const (
@@ -15,17 +17,17 @@ const (
 	Attack
 	Defend
 	Held
-	// Arsenal marks the card placed into the arsenal at end of turn. Contributes nothing to this
-	// turn's Value (it scores on the future turn it's played) and carries across the turn boundary
-	// as Play.ArsenalCard. At most one card in BestLine takes this role; when the partition
-	// enumerator leaves arsenal empty, Best post-hoc promotes one Held card.
+	// Arsenal marks the card placed into the arsenal slot at end of turn. Contributes
+	// nothing to this turn's Value (it scores on the future turn it's played) and carries
+	// across via TurnSummary.State.Arsenal.
 	Arsenal
 )
 
-// CardAssignment is a single card + the role it took this turn. Hand cards produce one per card;
-// an arsenal-in card contributes one with FromArsenal set so a turn fits in one slice.
-// Contribution is the per-card credit toward TurnSummary.Value (damage dealt, block share, or
-// pitch resource depending on Role), filled by fillContributions once the winner is picked.
+// CardAssignment is a single card + the role it took this turn. Hand cards produce one per
+// card; an arsenal-in card contributes one with FromArsenal set so a turn fits in one slice.
+// Contribution is the per-card credit toward TurnSummary.Value (damage dealt, block share,
+// or pitch resource depending on Role), filled by fillContributions once the winner is
+// picked.
 type CardAssignment struct {
 	Card         card.Card
 	Role         Role
@@ -33,74 +35,56 @@ type CardAssignment struct {
 	Contribution float64
 }
 
-// TurnSummary is the result of running Best on a hand: the winning card-role assignments plus
-// aggregate metadata about the turn.
-type TurnSummary struct {
-	// BestLine is the winning partition. Hand cards come first in canonical (post-sort) order;
-	// the previous-turn arsenal card, if any, is the last entry with FromArsenal=true. Never
-	// mutate — memoized results alias this slice.
-	BestLine []CardAssignment
-	// AttackChain is the winning chain in play order: attack-role cards from BestLine interleaved
-	// with any swung weapons at the positions the solver picked. Each entry carries its Play-time
-	// damage (plus hero-trigger damage for cards) so callers can attribute contribution for
-	// weapons, which have no BestLine entry. Swung weapons are recoverable by type-asserting
-	// AttackChainEntry.Card to weapon.Weapon. Empty when no attacks were played.
-	AttackChain []AttackChainEntry
-	// Value is the turn's total score (damage dealt + damage prevented). Equals the sum of
-	// BestLine[].Contribution plus any weapon-swing damage (weapons aren't in BestLine).
-	Value int
-	// LeftoverRunechants is the Runechant token count at end of the chosen chain; the caller
-	// feeds it back as the next turn's carryover. For partitions with no attacks, equals the
-	// carryover the caller passed in.
-	LeftoverRunechants int
-	// ArsenalCard is the card occupying the arsenal slot at end of turn — either a hand card
-	// just arsenaled (role=Arsenal) or a previous-turn arsenal card that stayed. Nil when empty.
-	// The caller feeds this back as the next turn's arsenalCardIn.
-	ArsenalCard card.Card
-	// Drawn is the cards the winning chain drew mid-turn, in draw order, each paired with the
-	// disposition the solver picked for it. Populated from state.Drawn during fillContributions's
-	// tracked replay. Role is one of Pitch (consumed to fund the chain, Contribution = Pitch()),
-	// Attack (played as a free-cost chain extension, Contribution = damage dealt), Arsenal
-	// (promoted into an empty slot post-enumeration, Contribution 0), or Held (carries into
-	// the next hand, Contribution 0). Nil when no draw rider fired.
-	Drawn []CardAssignment
-	// AuraTriggers is the surviving AuraTrigger set at end of this turn — triggers added by
-	// this turn's winning Play chain. The deck loop feeds this into next turn's start-of-turn
-	// trigger pass, closing the cross-turn loop. Nil when the turn played no trigger-creating
-	// aura.
+// CarryState is the slice of TurnState that carries across the turn boundary — the winning
+// permutation's end-of-chain snapshot. The deck loop adopts CarryState directly into next
+// turn's TurnState seed; no per-field "diff" interpretation. Cards that mutate state during
+// Play write through to whichever slice ends up here.
+type CarryState struct {
+	// Hand is the cards in hand at end of chain — partition Held cards plus anything
+	// tutored or drawn that didn't get played. Becomes next turn's Held prefix.
+	Hand []card.Card
+	// Deck is the deck at end of chain (top-to-bottom). Reflects every mid-chain mutation
+	// (DrawOne pops, tutor removals, alt-cost prepends). Becomes next turn's draw pile.
+	Deck []card.Card
+	// Arsenal is the arsenal slot at end of chain. Set by the partition (arsenal-in stayed),
+	// or filled post-hoc by promoting a Hand card when the slot is empty.
+	Arsenal card.Card
+	// Graveyard is every card that landed in the graveyard this turn — played hand cards,
+	// tutored-and-played cards, AuraTriggers that destroyed themselves.
+	Graveyard []card.Card
+	// Banish is cards moved into the banished zone this turn.
+	Banish []card.Card
+	// Runechants is the live token count at end of chain. Carries across.
+	Runechants int
+	// AuraTriggers is the surviving AuraTrigger set at end of chain. Carries across.
 	AuraTriggers []card.AuraTrigger
-	// TriggersFromLastTurn records the AuraTriggers whose start-of-turn handlers fired at the
-	// top of this turn, each with the damage-equivalent it credited. Populated by the deck
-	// loop before FormatBestTurn is called; Value already includes the sum.
+}
+
+// TurnSummary is the result of running Best on a hand: the winning card-role assignments
+// plus the CarryState snapshot the next turn inherits.
+type TurnSummary struct {
+	// BestLine is the winning partition. Hand cards come first in canonical (post-sort)
+	// order; the previous-turn arsenal card, if any, is the last entry with FromArsenal=true.
+	BestLine []CardAssignment
+	// AttackChain is the winning chain in play order: attack-role cards from BestLine
+	// interleaved with any swung weapons at the positions the solver picked.
+	AttackChain []AttackChainEntry
+	// Value is the turn's total score (damage dealt + damage prevented).
+	Value int
+	// State is the winning permutation's end-of-chain CarryState. The deck loop copies
+	// every field into next turn's seed.
+	State CarryState
+	// TriggersFromLastTurn records the AuraTriggers whose start-of-turn handlers fired at
+	// the top of this turn, each with the damage-equivalent it credited.
 	TriggersFromLastTurn []TriggerContribution
 	// StartOfTurnAuras lists the aura cards that were in play at the top of this turn — one
-	// entry per AuraTrigger carried in from the previous turn (so an aura that registered
-	// multiple triggers appears multiple times, and two copies of the same aura show twice).
-	// Populated by the deck loop before the start-of-turn fires run; surfaced in FormatBestTurn
-	// so the reader can see which carryover auras fed mid-chain "(+M aura trigger)" damage.
+	// entry per AuraTrigger carried in from the previous turn.
 	StartOfTurnAuras []card.Card
-	// ReturnedToTopOfDeck surfaces card.TurnState.ReturnedToTopOfDeck from the winning permutation; see
-	// that field for the alt-cost contract (deck loop skips Held → nextHeld carries for
-	// these cards, plus inserts each at the next-turn deck top).
-	ReturnedToTopOfDeck []card.Card
-	// DeckRemoved surfaces card.TurnState.DeckRemoved from the winning permutation; see
-	// that field for the buf-patch contract.
-	DeckRemoved []card.Card
-	// Graveyard surfaces card.TurnState.Graveyard from the winning permutation — every card
-	// that ended up in the graveyard this turn. Includes Action / Attack / Defense Reaction
-	// cards played from hand (added by playSequenceWithMeta), tutored-and-played cards
-	// (added via TurnState.AddToGraveyard from a card's Play), and AuraTriggers that
-	// destroyed themselves. Empty when no cards landed in the graveyard.
-	Graveyard []card.Card
 }
 
 // TriggerContribution is one start-of-turn AuraTrigger fire: the aura that fired plus the
-// Damage it credited (folded into Value) and the card (if any) the handler revealed onto the
-// hand. Surfaced in TurnSummary.TriggersFromLastTurn so FormatBestTurn can print a "(from
-// previous turn)" line naming the outcome.
-//
-// Revealed is the deck-top card the handler moved into the hand (e.g. Sigil of the Arknight
-// revealing an attack action). Nil when the handler didn't reveal anything.
+// Damage it credited (folded into Value) and the card (if any) the handler revealed onto
+// the hand.
 type TriggerContribution struct {
 	Card     card.Card
 	Damage   int
@@ -108,13 +92,9 @@ type TriggerContribution struct {
 }
 
 // AttackChainEntry is a single played attack — a card with role=Attack or a swung weapon —
-// carrying the damage it contributed when it resolved in the winning chain. Damage is the Play()
-// return; TriggerDamage is the hero's OnCardPlayed contribution (e.g. Viserai creating a
-// Runechant); AuraTriggerDamage is the mid-chain AuraTrigger contribution (e.g. a Malefic
-// Incantation played on a prior turn whose TriggerAttackAction fires when this card resolves).
-// The two trigger buckets are split so the display can attribute hero OnCardPlayed damage and
-// mid-chain aura damage on their own lines. For BestLine Attack entries Damage + TriggerDamage
-// + AuraTriggerDamage equals CardAssignment.Contribution; weapons live only here.
+// carrying the damage it contributed when it resolved in the winning chain. Damage is the
+// Play() return; TriggerDamage is the hero's OnCardPlayed contribution; AuraTriggerDamage
+// is the mid-chain AuraTrigger contribution.
 type AttackChainEntry struct {
 	Card              card.Card
 	Damage            float64
@@ -122,8 +102,8 @@ type AttackChainEntry struct {
 	AuraTriggerDamage float64
 }
 
-// ArsenalIn returns the assignment for the card that started the turn in the arsenal, if any.
-// Lets callers treat the arsenal-in card differently from hand cards without scanning BestLine.
+// ArsenalIn returns the assignment for the card that started the turn in the arsenal, if
+// any.
 func (t TurnSummary) ArsenalIn() (CardAssignment, bool) {
 	for _, a := range t.BestLine {
 		if a.FromArsenal {
@@ -133,7 +113,7 @@ func (t TurnSummary) ArsenalIn() (CardAssignment, bool) {
 	return CardAssignment{}, false
 }
 
-// String returns a human-readable role name ("PITCH", "ATTACK", "DEFEND", "HELD", "ARSENAL").
+// String returns a human-readable role name.
 func (r Role) String() string {
 	switch r {
 	case Pitch:

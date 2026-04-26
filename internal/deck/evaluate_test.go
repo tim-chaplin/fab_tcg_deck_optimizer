@@ -76,16 +76,14 @@ func TestEvaluate_BestTurnStartingRunechantsIsPreHandCarryover(t *testing.T) {
 	}
 }
 
-// TestEvaluate_BestTurnSnapshotsDrawnAndLeftoverRunechants pins the BestTurn snapshot's
-// completeness: Drawn (mid-turn-drawn cards with their dispositions) and LeftoverRunechants
-// must propagate from play.* into Stats.Best.Summary.* so FormatBestTurn's per-card breakdown
-// reconciles with the displayed Value and the header's "carryover runechants" count is real.
-// Without the snapshot, drawn-attack extension damage and pitch-from-drawn resource land in
-// Value but never show up in the printout, and runechants always read 0.
-func TestEvaluate_BestTurnSnapshotsDrawnAndLeftoverRunechants(t *testing.T) {
-	// Snatch (cost 0, attack 4) fires on-hit DrawOne — its drawn card lands in summary.Drawn.
-	// 4 Snatches keeps Viserai's Intelligence-4 hand full of draw-rider cards on the first
-	// turn so at least one Snatch attacks and DrawOne fires.
+// TestEvaluate_BestTurnSnapshotsState pins the BestTurn snapshot's completeness: the winning
+// turn's CarryState (Hand, Deck, Graveyard, Arsenal, Runechants, etc.) must be deep-copied
+// into Stats.Best.Summary.State. A Snatch-heavy Viserai hand attacks with at least one Snatch
+// (its draw-rider fires DrawOne, pulling another Snatch off the deck), so at least one drawn
+// card surfaces in State.Hand or State.Arsenal alongside the played Snatch in State.Graveyard.
+// The total card count across the three surfaces must exceed handSize (4) — proof the snapshot
+// carried the mid-chain draw rather than just the partition's static slice.
+func TestEvaluate_BestTurnSnapshotsState(t *testing.T) {
 	snatch := cards.Get(card.SnatchRed)
 	d := New(hero.Viserai{}, nil, []card.Card{snatch, snatch, snatch, snatch, snatch, snatch, snatch, snatch})
 	d.Evaluate(1, 0, rand.New(rand.NewSource(1)))
@@ -93,8 +91,18 @@ func TestEvaluate_BestTurnSnapshotsDrawnAndLeftoverRunechants(t *testing.T) {
 	if len(d.Stats.Best.Summary.BestLine) == 0 {
 		t.Fatalf("expected Best to be populated after Evaluate")
 	}
-	if len(d.Stats.Best.Summary.Drawn) == 0 {
-		t.Errorf("Stats.Best.Summary.Drawn is empty; want >=1 entry from Snatch's on-hit DrawOne (the snapshot in Evaluate isn't copying play.Drawn)")
+	state := d.Stats.Best.Summary.State
+	if len(state.Graveyard) == 0 {
+		t.Errorf("State.Graveyard is empty; want the played Snatch in graveyard")
+	}
+	surfaceCount := len(state.Hand) + len(state.Graveyard)
+	if state.Arsenal != nil {
+		surfaceCount++
+	}
+	const handSize = 4 // Viserai's Intelligence
+	if surfaceCount <= handSize {
+		t.Errorf("surface count = %d, want >%d (Hand=%d Arsenal=%v Graveyard=%d). The mid-turn-drawn Snatch should have surfaced — without the State snapshot the carry would lose it.",
+			surfaceCount, handSize, len(state.Hand), state.Arsenal, len(state.Graveyard))
 	}
 }
 

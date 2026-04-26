@@ -256,9 +256,11 @@ func TestEvalOneTurn_MidTurnDrawHeldWhenArsenalFull(t *testing.T) {
 // TestEvalOneTurn_MidTurnDrawSansGoAgainStaysHeld: hand is Snatch + Toughen Up Blue, top of
 // deck is Aether Slash. Snatch has no baseline Go again and nothing grants it, so the chain
 // ends right after Snatch — the Slash is drawn but not played. Turn 1 Value = 4 (Snatch
-// alone). Toughen Up and the drawn Slash share the Held pool that feeds post-enumeration
-// arsenal promotion; the deterministic hash picks Toughen Up for the arsenal slot this hand,
-// leaving Aether Slash to carry into turn 2's hand as the Held prefix of the refill.
+// alone). Toughen Up and the drawn Slash share the post-chain hand pool that feeds arsenal
+// promotion; the deterministic hash picks one for the arsenal slot, leaving the other to
+// carry into turn 2's hand alongside three fresh Blues. The test accepts either outcome of
+// the hash modulo so it stays stable across hash-input changes; the contract is "exactly one
+// of the two lands in arsenal, the other anchors turn 2's hand."
 func TestEvalOneTurn_MidTurnDrawSansGoAgainStaysHeld(t *testing.T) {
 	initialHand := []card.Card{
 		generic.SnatchRed{},
@@ -279,15 +281,24 @@ func TestEvalOneTurn_MidTurnDrawSansGoAgainStaysHeld(t *testing.T) {
 		t.Errorf("turn 1 Value = %d, want 4 (Snatch alone; chain couldn't extend)", state.PrevTurnValue)
 	}
 
-	// Toughen Up lands in the arsenal (hash pick over the {Toughen Up, Aether Slash} Held pool);
-	// the Slash falls through to turn 2's hand instead.
-	if _, ok := state.ArsenalCard.(generic.ToughenUpBlue); !ok {
-		t.Errorf("turn 2 arsenal = %v, want Toughen Up Blue (hash picks TU from the {TU, Aether Slash} Held pool)", state.ArsenalCard)
+	// One of {Toughen Up, Aether Slash} lands in arsenal; the other anchors turn 2's hand.
+	if state.ArsenalCard == nil {
+		t.Fatalf("turn 2 arsenal is nil; want one of {Toughen Up, Aether Slash}")
+	}
+	arsenalIsTU := state.ArsenalCard.ID() == card.ToughenUpBlue
+	arsenalIsSlash := state.ArsenalCard.ID() == card.AetherSlashRed
+	if !arsenalIsTU && !arsenalIsSlash {
+		t.Errorf("turn 2 arsenal = %v, want Toughen Up Blue or Aether Slash Red", state.ArsenalCard)
 	}
 
-	// Turn 2 hand: the Held Aether Slash plus three fresh Blues from the deck (positions 1..3).
+	// Turn 2 hand: the non-promoted of the two anchors the held prefix, then three fresh Blues
+	// from the deck (positions 1..3).
+	var wantAnchor card.Card = generic.ToughenUpBlue{}
+	if arsenalIsTU {
+		wantAnchor = runeblade.AetherSlashRed{}
+	}
 	wantHand := []card.Card{
-		runeblade.AetherSlashRed{},
+		wantAnchor,
 		fake.BlueAttack{},
 		fake.BlueAttack{},
 		fake.BlueAttack{},
@@ -297,7 +308,7 @@ func TestEvalOneTurn_MidTurnDrawSansGoAgainStaysHeld(t *testing.T) {
 	}
 
 	// Deck is fully consumed: 4 deck cards minus 1 Slash drawn mid-turn = 3 Blues, all in the
-	// turn 2 refill alongside the Held Slash.
+	// turn 2 refill alongside the held anchor.
 	if len(state.Deck) != 0 {
 		t.Errorf("turn 2 deck = %v, want empty", state.Deck)
 	}

@@ -197,7 +197,7 @@ func FormatBestTurn(t TurnSummary, startingRunechants int) string {
 		lines = append(lines, "  Opponent's turn:")
 		lines = append(lines, opponent...)
 	}
-	lines = appendHeldArsenalFooter(lines, parts.held, parts.arsenal, t.Drawn)
+	lines = appendHeldArsenalFooter(lines, t.State.Hand, parts.arsenal)
 	return strings.Join(lines, "\n")
 }
 
@@ -324,20 +324,15 @@ func partitionBestLineForDisplay(line []CardAssignment) bestLineDisplayParts {
 	return parts
 }
 
-// appendHeldArsenalFooter appends the trailing "(held: ...)" / "(arsenal: ...)" lines that show
-// unplayed cards outside the numbered sequence. Mid-turn-drawn Held / Arsenal cards render with
-// a "(drawn)" suffix so the reader can tell them from starting-hand entries; the arsenal card
-// itself shows "(stayed)" vs "(new)" so staying-in-place is distinguishable from being newly
-// placed this turn.
-func appendHeldArsenalFooter(lines []string, held, arsenal, drawn []CardAssignment) []string {
+// appendHeldArsenalFooter appends the trailing "(held: ...)" / "(arsenal: ...)" lines that
+// show unplayed cards outside the numbered sequence. handHeld is t.State.Hand (the chain's
+// end-of-turn hand — partition Held cards plus anything tutored or drawn that didn't get
+// played). The arsenal entry shows "(stayed)" vs "(new)" so staying-in-place is
+// distinguishable from being newly placed this turn.
+func appendHeldArsenalFooter(lines []string, handHeld []card.Card, arsenal []CardAssignment) []string {
 	var footers []string
-	for _, a := range held {
-		footers = append(footers, fmt.Sprintf("  (held: %s)", a.Card.Name()))
-	}
-	for _, d := range drawn {
-		if d.Role == Held {
-			footers = append(footers, fmt.Sprintf("  (held: %s (drawn))", d.Card.Name()))
-		}
+	for _, c := range handHeld {
+		footers = append(footers, fmt.Sprintf("  (held: %s)", c.Name()))
 	}
 	for _, a := range arsenal {
 		label := a.Card.Name()
@@ -347,11 +342,6 @@ func appendHeldArsenalFooter(lines []string, held, arsenal, drawn []CardAssignme
 			label += " (new)"
 		}
 		footers = append(footers, fmt.Sprintf("  (arsenal: %s)", label))
-	}
-	for _, d := range drawn {
-		if d.Role == Arsenal {
-			footers = append(footers, fmt.Sprintf("  (arsenal: %s (drawn))", d.Card.Name()))
-		}
 	}
 	return append(lines, footers...)
 }

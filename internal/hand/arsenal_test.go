@@ -13,22 +13,22 @@ import (
 // TestBest_EmptyArsenalClaimsHeldCard confirms the post-hoc Arsenal promotion fires when the
 // slot is empty and the winning partition has Held cards. A hand that can't play Toughen Up as
 // DR (no other card to pitch for the 2-cost) leaves the DR Held; with arsenalCardIn=nil the
-// slot is empty so the DR becomes Arsenal and rides into next turn as Play.ArsenalCard.
+// slot is empty so the DR becomes Arsenal and rides into next turn as got.State.Arsenal.
 func TestBest_EmptyArsenalClaimsHeldCard(t *testing.T) {
 	h := []card.Card{generic.ToughenUpBlue{}}
 	got := Best(stubHero, nil, h, 4, nil, 0, nil)
 	if got.BestLine[0].Role != Arsenal {
 		t.Errorf("Roles[0] = %s, want ARSENAL", got.BestLine[0].Role)
 	}
-	if got.ArsenalCard == nil || got.ArsenalCard.ID() != card.ToughenUpBlue {
-		t.Errorf("ArsenalCard = %v, want Toughen Up Blue", got.ArsenalCard)
+	if got.State.Arsenal == nil || got.State.Arsenal.ID() != card.ToughenUpBlue {
+		t.Errorf("ArsenalCard = %v, want Toughen Up Blue", got.State.Arsenal)
 	}
 }
 
 // TestBest_ArsenalInPlayDR covers the "arsenal card played as DR" branch. Previous turn left a
 // Toughen Up Blue in arsenal; this turn we draw a Blue Malefic (pitch 3, cost 0). The pitched
 // Malefic funds Toughen Up's 2-cost defense out of the arsenal, preventing 4 damage. Value = 4.
-// Play.ArsenalCard is nil because the slot was vacated and no hand card ends up Held.
+// got.State.Arsenal is nil because the slot was vacated and no hand card ends up Held.
 func TestBest_ArsenalInPlayDR(t *testing.T) {
 	h := []card.Card{runeblade.MaleficIncantationBlue{}}
 	got := Best(stubHero, nil, h, 4, nil, 0, generic.ToughenUpBlue{})
@@ -36,8 +36,8 @@ func TestBest_ArsenalInPlayDR(t *testing.T) {
 		t.Fatalf("Value = %d, want 4 (Malefic pitches to pay arsenal DR, prevents 4). Roles=[%s]",
 			got.Value, FormatBestLine(got.BestLine))
 	}
-	if got.ArsenalCard != nil {
-		t.Errorf("ArsenalCard = %v, want nil (slot was vacated, no Held card to promote)", got.ArsenalCard)
+	if got.State.Arsenal != nil {
+		t.Errorf("ArsenalCard = %v, want nil (slot was vacated, no Held card to promote)", got.State.Arsenal)
 	}
 	// ArsenalIn surfaces the arsenal-in assignment so callers (the best-hand printout) can flag
 	// that this card wasn't in hand this turn.
@@ -61,8 +61,8 @@ func TestBest_ArsenalInStayBlocksNewArsenal(t *testing.T) {
 	if got.BestLine[0].Role != Held {
 		t.Errorf("Roles[0] = %s, want HELD (slot occupied by arsenal-in, can't promote)", got.BestLine[0].Role)
 	}
-	if got.ArsenalCard == nil || got.ArsenalCard.ID() != card.ToughenUpBlue {
-		t.Errorf("ArsenalCard = %v, want Toughen Up Blue (the staying arsenal-in card)", got.ArsenalCard)
+	if got.State.Arsenal == nil || got.State.Arsenal.ID() != card.ToughenUpBlue {
+		t.Errorf("ArsenalCard = %v, want Toughen Up Blue (the staying arsenal-in card)", got.State.Arsenal)
 	}
 }
 
@@ -79,8 +79,8 @@ func TestBest_ArsenalInPlayAttack(t *testing.T) {
 		t.Fatalf("Value = %d, want 3 (arsenal Red played, hand Red pitched to fund it). Roles=[%s]",
 			got.Value, FormatBestLine(got.BestLine))
 	}
-	if got.ArsenalCard != nil {
-		t.Errorf("ArsenalCard = %v, want nil (slot vacated, no Held to promote)", got.ArsenalCard)
+	if got.State.Arsenal != nil {
+		t.Errorf("ArsenalCard = %v, want nil (slot vacated, no Held to promote)", got.State.Arsenal)
 	}
 }
 
@@ -97,8 +97,8 @@ func TestBest_ArsenalInNonAttackActionPlays(t *testing.T) {
 		t.Fatalf("Value = %d, want 3 (Malefic pitched, arsenal Cussing played for 3). Roles=[%s]",
 			got.Value, FormatBestLine(got.BestLine))
 	}
-	if got.ArsenalCard != nil {
-		t.Errorf("ArsenalCard = %v, want nil (Cussing played out of arsenal)", got.ArsenalCard)
+	if got.State.Arsenal != nil {
+		t.Errorf("ArsenalCard = %v, want nil (Cussing played out of arsenal)", got.State.Arsenal)
 	}
 }
 
@@ -150,16 +150,15 @@ func TestBest_ArsenalInSmashingGoodTimeGatesOnlyArsenalCopy(t *testing.T) {
 	}
 }
 
-// TestPromoteRandomHeldToArsenal_SpreadsAcrossHands pins the post-hoc Held→Arsenal promotion's
-// anti-bias property: the selection hashes the sorted hand IDs so different hands land on
-// different Held positions rather than always picking slot 0 (which, with IDs sorted, would
-// systematically prefer low-ID cards). Drives the helper directly with synthesised BestLine
-// entries — all slots Held, all equivalent in value — so only the hash-based index selection
-// is under test.
-func TestPromoteRandomHeldToArsenal_SpreadsAcrossHands(t *testing.T) {
+// TestPromoteRandomHandCardToArsenal_SpreadsAcrossHands pins the post-hoc Hand→Arsenal
+// promotion's anti-bias property: the selection hashes the input identifiers so different
+// hands land on different positions rather than always picking slot 0. Drives the helper
+// directly with synthesised State.Hand contents — all candidates equivalent — so only the
+// hash-based index selection is under test.
+func TestPromoteRandomHandCardToArsenal_SpreadsAcrossHands(t *testing.T) {
 	// 20 different 4-card hands using Wounding Blow Red/Yellow/Blue as "arbitrary cards with
-	// distinct IDs". Varying which card sits in which slot is enough to exercise the hash across
-	// different inputs.
+	// distinct IDs". Varying which card sits in which slot is enough to exercise the hash
+	// across different inputs.
 	wbR := generic.WoundingBlowRed{}
 	wbY := generic.WoundingBlowYellow{}
 	wbB := generic.WoundingBlowBlue{}
@@ -170,47 +169,37 @@ func TestPromoteRandomHeldToArsenal_SpreadsAcrossHands(t *testing.T) {
 		{wbB, wbB, wbB, wbB}, {wbR, wbY, wbY, wbY}, {wbR, wbR, wbY, wbR}, {wbB, wbR, wbY, wbR},
 		{wbB, wbY, wbR, wbR}, {wbR, wbB, wbB, wbY}, {wbR, wbR, wbB, wbY}, {wbY, wbR, wbB, wbB},
 	}
-	slots := map[int]int{}
+	picks := map[card.ID]int{}
 	for _, h := range hands {
-		// Sort to match bestUncached's canonical order. Build a BestLine where every slot is Held.
 		handCopy := append([]card.Card(nil), h...)
-		ids := make([]card.ID, len(handCopy))
-		for i, c := range handCopy {
-			ids[i] = c.ID()
-		}
-		sortHandByID(handCopy, ids, len(handCopy))
 		line := make([]CardAssignment, len(handCopy))
 		for i, c := range handCopy {
 			line[i] = CardAssignment{Card: c, Role: Held}
 		}
-		best := TurnSummary{BestLine: line}
-		promoteRandomHeldToArsenal(&best, handCopy, len(handCopy), nil)
-		idx := -1
-		for i, a := range best.BestLine {
-			if a.Role == Arsenal {
-				idx = i
-				break
-			}
+		best := TurnSummary{
+			BestLine: line,
+			State:    CarryState{Hand: append([]card.Card(nil), handCopy...)},
 		}
-		if idx < 0 {
-			t.Fatalf("hand %v: no Arsenal-role slot found in BestLine=%s", h, FormatBestLine(best.BestLine))
+		promoteRandomHandCardToArsenal(&best, handCopy, nil)
+		if best.State.Arsenal == nil {
+			t.Fatalf("hand %v: State.Arsenal nil after promotion", h)
 		}
-		slots[idx]++
+		picks[best.State.Arsenal.ID()]++
 	}
-	if len(slots) < 2 {
-		t.Errorf("arsenal promotion only ever landed on slot %v across %d hands; expected spread across multiple slots", slots, len(hands))
+	if len(picks) < 2 {
+		t.Errorf("arsenal promotion only ever landed on card %v across %d hands; expected spread", picks, len(hands))
 	}
 }
 
-// TestPromoteRandomHeldToArsenal_DeterministicPerHand pins the other half of the contract: a
-// given hand produces the SAME picked slot every call, so the memo cache doesn't drift between
-// hits and repeated simulations of the same deck stay reproducible.
-func TestPromoteRandomHeldToArsenal_DeterministicPerHand(t *testing.T) {
+// TestPromoteRandomHandCardToArsenal_DeterministicPerHand pins the other half of the contract:
+// a given hand produces the SAME picked card every call so repeated simulations of the same
+// deck stay reproducible.
+func TestPromoteRandomHandCardToArsenal_DeterministicPerHand(t *testing.T) {
 	hand := []card.Card{
 		generic.WoundingBlowRed{}, generic.WoundingBlowYellow{},
 		generic.WoundingBlowBlue{}, generic.WoundingBlowBlue{},
 	}
-	var firstIdx int
+	var firstID card.ID
 	for run := 0; run < 5; run++ {
 		line := []CardAssignment{
 			{Card: hand[0], Role: Held},
@@ -218,75 +207,76 @@ func TestPromoteRandomHeldToArsenal_DeterministicPerHand(t *testing.T) {
 			{Card: hand[2], Role: Held},
 			{Card: hand[3], Role: Held},
 		}
-		best := TurnSummary{BestLine: line}
-		promoteRandomHeldToArsenal(&best, hand, len(hand), nil)
-		idx := -1
-		for i, a := range best.BestLine {
-			if a.Role == Arsenal {
-				idx = i
-				break
-			}
+		best := TurnSummary{
+			BestLine: line,
+			State:    CarryState{Hand: append([]card.Card(nil), hand...)},
 		}
+		promoteRandomHandCardToArsenal(&best, hand, nil)
+		if best.State.Arsenal == nil {
+			t.Fatalf("run %d: State.Arsenal nil", run)
+		}
+		got := best.State.Arsenal.ID()
 		if run == 0 {
-			firstIdx = idx
+			firstID = got
 			continue
 		}
-		if idx != firstIdx {
-			t.Errorf("run %d: Arsenal at slot %d, want %d (deterministic per-hand)", run, idx, firstIdx)
+		if got != firstID {
+			t.Errorf("run %d: Arsenal = %v, want %v (deterministic per-hand)", run, got, firstID)
 		}
 	}
 }
 
-// TestPromoteRandomHeldToArsenal_SingleHeldAlwaysPicked covers the n=1 edge of the hash-modulo
-// selection: with exactly one Held index the modulo is deterministic (always 0), so the only
-// candidate gets promoted regardless of the hash value.
-func TestPromoteRandomHeldToArsenal_SingleHeldAlwaysPicked(t *testing.T) {
-	// Hand of two cards where one is Attack-role and one is Held-role — exactly one candidate
-	// for post-hoc promotion.
+// TestPromoteRandomHandCardToArsenal_SingleCandidateAlwaysPicked covers the n=1 edge of the
+// hash-modulo selection: with exactly one State.Hand entry the modulo is deterministic
+// (always 0), so the only candidate gets promoted.
+func TestPromoteRandomHandCardToArsenal_SingleCandidateAlwaysPicked(t *testing.T) {
 	hand := []card.Card{generic.WoundingBlowRed{}, generic.WoundingBlowBlue{}}
 	line := []CardAssignment{
 		{Card: hand[0], Role: Attack},
 		{Card: hand[1], Role: Held},
 	}
-	best := TurnSummary{BestLine: line}
-	promoteRandomHeldToArsenal(&best, hand, len(hand), nil)
-	if best.BestLine[1].Role != Arsenal {
-		t.Errorf("Role[1] = %s, want Arsenal (only Held candidate)", best.BestLine[1].Role)
+	best := TurnSummary{
+		BestLine: line,
+		State:    CarryState{Hand: []card.Card{hand[1]}},
 	}
-	if best.ArsenalCard == nil || best.ArsenalCard.ID() != hand[1].ID() {
-		t.Errorf("ArsenalCard = %v, want %s", best.ArsenalCard, hand[1].Name())
+	promoteRandomHandCardToArsenal(&best, hand, nil)
+	if best.BestLine[1].Role != Arsenal {
+		t.Errorf("Role[1] = %s, want Arsenal (only candidate)", best.BestLine[1].Role)
+	}
+	if best.State.Arsenal == nil || best.State.Arsenal.ID() != hand[1].ID() {
+		t.Errorf("State.Arsenal = %v, want %s", best.State.Arsenal, hand[1].Name())
 	}
 }
 
-// TestPromoteRandomHeldToArsenal_NoHeldIsNoop covers the other end: a partition where every
-// hand card plays/pitches/defends leaves zero Held candidates, so the promotion is a no-op and
-// the arsenal slot stays empty.
-func TestPromoteRandomHeldToArsenal_NoHeldIsNoop(t *testing.T) {
+// TestPromoteRandomHandCardToArsenal_EmptyHandIsNoop covers the other end: a partition where
+// every hand card plays/pitches/defends leaves State.Hand empty, so the promotion is a no-op
+// and the arsenal slot stays empty.
+func TestPromoteRandomHandCardToArsenal_EmptyHandIsNoop(t *testing.T) {
 	hand := []card.Card{generic.WoundingBlowRed{}, generic.WoundingBlowBlue{}}
 	line := []CardAssignment{
 		{Card: hand[0], Role: Attack},
 		{Card: hand[1], Role: Pitch},
 	}
-	best := TurnSummary{BestLine: line}
-	promoteRandomHeldToArsenal(&best, hand, len(hand), nil)
+	best := TurnSummary{BestLine: line, State: CarryState{}}
+	promoteRandomHandCardToArsenal(&best, hand, nil)
 	for i, a := range best.BestLine {
 		if a.Role == Arsenal {
-			t.Errorf("BestLine[%d].Role = Arsenal, want unchanged (no Held candidates)", i)
+			t.Errorf("BestLine[%d].Role = Arsenal, want unchanged (no candidates)", i)
 		}
 	}
-	if best.ArsenalCard != nil {
-		t.Errorf("ArsenalCard = %v, want nil (no promotion possible)", best.ArsenalCard)
+	if best.State.Arsenal != nil {
+		t.Errorf("State.Arsenal = %v, want nil (no promotion possible)", best.State.Arsenal)
 	}
 }
 
 // TestBeatsBest_ArsenalOccupancyTiebreaker pins the tiebreaker contract used by the partition
-// enumerator: when two candidates tie on Value and LeftoverRunechants, the one that will end
+// enumerator: when two candidates tie on Value and leftover Runechants, the one that will end
 // the turn with the arsenal slot occupied (either via arsenal-in staying OR a post-hoc Held →
 // Arsenal promotion) beats the one that won't. Exercised directly so a comparison-inversion
 // regression can't hide behind enumeration order at the Best() level.
 func TestBeatsBest_ArsenalOccupancyTiebreaker(t *testing.T) {
 	// Seed best: Value=10, Leftover=0, arsenal NOT occupied, no future-value plays.
-	best := TurnSummary{Value: 10, LeftoverRunechants: 0}
+	best := TurnSummary{Value: 10, State: CarryState{Runechants: 0}}
 	// Candidate with equal V/L/future-value but arsenal WILL be occupied — should beat.
 	if !beatsBest(10, 0, 0, true, best, 0, false) {
 		t.Error("willOccupy=true should beat a tied best with willOccupy=false")
@@ -309,17 +299,17 @@ func TestBeatsBest_ArsenalOccupancyTiebreaker(t *testing.T) {
 	}
 	// Strict-wins on leftover takes precedence over occupancy.
 	if !beatsBest(10, 1, 0, false, best, 0, true) {
-		t.Error("higher LeftoverRunechants should beat even without occupancy advantage")
+		t.Error("higher leftover Runechants should beat even without occupancy advantage")
 	}
 }
 
 // TestBeatsBest_FutureValueTiebreaker pins the future-value bias: at equal Value and
-// LeftoverRunechants, a partition that plays more card.AddsFutureValue cards wins over one
+// leftover Runechants, a partition that plays more card.AddsFutureValue cards wins over one
 // that plays fewer, regardless of arsenal occupancy. This corrects for the hidden later-turn
 // value those cards carry — without the bias, a lone sigil ends up Held → promoted to
 // arsenal because same-turn Value is 0 and arsenal occupancy wins the fallback tiebreak.
 func TestBeatsBest_FutureValueTiebreaker(t *testing.T) {
-	best := TurnSummary{Value: 5, LeftoverRunechants: 0}
+	best := TurnSummary{Value: 5, State: CarryState{Runechants: 0}}
 	// Candidate plays 1 future-value card, best plays 0 — candidate wins even though arsenal
 	// occupancy favours the best.
 	if !beatsBest(5, 0, 1, false, best, 0, true) {
@@ -334,8 +324,8 @@ func TestBeatsBest_FutureValueTiebreaker(t *testing.T) {
 	if !beatsBest(6, 0, 0, false, best, 5, false) {
 		t.Error("higher Value should beat even when the candidate plays fewer future-value cards")
 	}
-	// Strict-wins on LeftoverRunechants still takes precedence over future-value.
+	// Strict-wins on leftover Runechants still takes precedence over future-value.
 	if !beatsBest(5, 1, 0, false, best, 5, false) {
-		t.Error("higher LeftoverRunechants should beat even when the candidate plays fewer future-value cards")
+		t.Error("higher leftover Runechants should beat even when the candidate plays fewer future-value cards")
 	}
 }

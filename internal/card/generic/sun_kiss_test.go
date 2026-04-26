@@ -28,8 +28,8 @@ func TestSunKiss_SoloIsHealOnly(t *testing.T) {
 		if self.GrantedGoAgain {
 			t.Errorf("%s: solo grant set GrantedGoAgain", tc.c.Name())
 		}
-		if len(s.Drawn) != 0 {
-			t.Errorf("%s: solo grant drew a card (got %d in Drawn)", tc.c.Name(), len(s.Drawn))
+		if len(s.Hand) != 0 {
+			t.Errorf("%s: solo grant drew a card (got %d in Hand)", tc.c.Name(), len(s.Hand))
 		}
 	}
 }
@@ -62,9 +62,9 @@ func TestSunKiss_SynergyFiresOnPriorMoonWish(t *testing.T) {
 			if !self.GrantedGoAgain {
 				t.Errorf("%s after %s: GrantedGoAgain = false, want true", sk.c.Name(), mw.Name())
 			}
-			if len(s.Drawn) != 1 {
-				t.Errorf("%s after %s: Drawn len = %d, want 1 (one mid-turn draw)",
-					sk.c.Name(), mw.Name(), len(s.Drawn))
+			if len(s.Hand) != 1 {
+				t.Errorf("%s after %s: Hand len = %d, want 1 (one mid-turn draw)",
+					sk.c.Name(), mw.Name(), len(s.Hand))
 			}
 		}
 	}
@@ -88,8 +88,8 @@ func TestSunKiss_SynergyDoesNotFireOnUnrelatedAttacks(t *testing.T) {
 	if self.GrantedGoAgain {
 		t.Error("synergy fired on unrelated attack")
 	}
-	if len(s.Drawn) != 0 {
-		t.Errorf("synergy drew a card on unrelated attack (Drawn len = %d, want 0)", len(s.Drawn))
+	if len(s.Hand) != 0 {
+		t.Errorf("synergy drew a card on unrelated attack (Hand len = %d, want 0)", len(s.Hand))
 	}
 }
 
@@ -109,7 +109,7 @@ func TestSunKiss_SynergyHandlesEmptyDeck(t *testing.T) {
 	if !self.GrantedGoAgain {
 		t.Error("GrantedGoAgain = false; synergy should still grant go again on empty deck")
 	}
-	if len(s.Drawn) != 0 {
-		t.Errorf("Drawn len = %d, want 0 on empty deck", len(s.Drawn))
+	if len(s.Hand) != 0 {
+		t.Errorf("Hand len = %d, want 0 on empty deck", len(s.Hand))
 	}
 }

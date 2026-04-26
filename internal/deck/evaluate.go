@@ -6,6 +6,7 @@ package deck
 // arsenal, runechant carryover, start-of-turn AuraTrigger handling) lives here.
 
 import (
+	"fmt"
 	"math/rand"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
@@ -132,8 +133,8 @@ func (d *Deck) EvaluateWith(runs int, incomingDamage int, rng *rand.Rand, ev *ha
 			} else {
 				play = hand.BestWithTriggers(d.Hero, d.Weapons, h, incomingDamage, buf[head+drawCount:tail], runechantCarryover, arsenalCard, auraTriggerBuf)
 			}
-			runechantCarryover = play.LeftoverRunechants
-			arsenalCard = play.ArsenalCard
+			runechantCarryover = play.State.Runechants
+			arsenalCard = play.State.Arsenal
 			// Start-of-turn trigger credit is a flat additive on Value. Every partition
 			// benefits equally so Best's ranking is unaffected, but Value must include it so
 			// the best-hand pick and cycle averages reflect the real total.
@@ -162,8 +163,8 @@ func (d *Deck) EvaluateWith(runs int, incomingDamage int, rng *rand.Rand, ev *ha
 
 			attributePlayStats(&d.Stats, play.BestLine)
 			tallyMarginalPresence(marginalBuf, idIndex, presentBuf, h, arsenalIn, v)
-			nextHeld = applyTurnResult(play, buf, &head, &tail, drawCount, nextHeld[:0])
-			nextAuraTrigger = append(nextAuraTrigger[:0], play.AuraTriggers...)
+			nextHeld = applyTurnResult(play, buf, &head, &tail, nextHeld[:0])
+			nextAuraTrigger = append(nextAuraTrigger[:0], play.State.AuraTriggers...)
 			handIdx++
 			heldBuf, nextHeld = nextHeld, heldBuf
 			auraTriggerBuf, nextAuraTrigger = nextAuraTrigger, auraTriggerBuf
@@ -241,63 +242,44 @@ func processTriggersAtStartOfTurn(queued []card.AuraTrigger, postDrawDeck []card
 	return survivors, contribs, damage, ts.Runechants, ts.Revealed, ts.Graveyard
 }
 
-// applyTurnResult folds a completed turn's outcome into cross-turn state: pitched hand cards
-// recycle to the deck bottom (via recycleCardStates), head advances past initial draws and
-// every mid-turn-drawn card, and each drawn card is routed by disposition. Drawn-card Held
-// entries append into nextHeld; Arsenal flows through play.ArsenalCard and needs no
-// bookkeeping here.
-func applyTurnResult(play hand.TurnSummary, buf []card.Card, head, tail *int, drawCount int, nextHeld []card.Card) []card.Card {
-	nextHeld = recycleCardStates(play.BestLine, play.ReturnedToTopOfDeck, buf, tail, nextHeld)
-	// Advance head past this turn's dealt cards; mid-turn removals and inserts are applied
-	// to the active deck slice buf[*head:*tail] below.
-	*head += drawCount
-	insertOnDeckTop(buf, head, tail, play.ReturnedToTopOfDeck)
-	removeFromDeck(buf, *head, tail, play.DeckRemoved)
-	for _, d := range play.Drawn {
-		if d.Role == hand.Held {
-			nextHeld = append(nextHeld, d.Card)
-		}
+// applyTurnResult folds a completed turn's outcome into cross-turn state. The deck loop
+// adopts play.State.Deck wholesale (cards mutated freely during the chain — DrawOne pops,
+// alt-cost prepends, tutor removals — and the snapshot reflects every change), then
+// recycles pitched-role cards to the bottom of buf per FaB rules. nextHeld is replaced with
+// play.State.Hand, which carries partition Held cards plus anything tutored that didn't get
+// played. Panics if buf is undersized — the standard 2×deckSize sizing leaves enough room
+// for any plausible mid-chain growth, so a too-small buf signals a sizing bug at the caller.
+func applyTurnResult(play hand.TurnSummary, buf []card.Card, head, tail *int, nextHeld []card.Card) []card.Card {
+	newDeck := play.State.Deck
+	pitched := pitchedFromBestLine(play.BestLine)
+	totalLen := len(newDeck) + len(pitched)
+	if cap(buf) < totalLen {
+		panic(fmt.Sprintf("applyTurnResult: buf cap %d < required %d (newDeck=%d + pitched=%d) — caller under-sized buf",
+			cap(buf), totalLen, len(newDeck), len(pitched)))
 	}
+	*head = 0
+	copy(buf[:len(newDeck)], newDeck)
+	copy(buf[len(newDeck):totalLen], pitched)
+	*tail = totalLen
+	nextHeld = nextHeld[:0]
+	nextHeld = append(nextHeld, play.State.Hand...)
 	return nextHeld
 }
 
-// insertOnDeckTop shifts the active deck slice buf[*head:*tail] right by len(cards) and
-// writes cards at buf[*head:*head+len(cards)]. This makes each card the next-to-be-drawn
-// entry in registry order — the canonical "rather than pay" alt-cost placement. Tail grows
-// by len(cards). Caller guarantees buf has room (sized 2×deckSize plus a handSize cushion).
-func insertOnDeckTop(buf []card.Card, head, tail *int, cards []card.Card) {
-	n := len(cards)
-	if n == 0 {
-		return
-	}
-	copy(buf[*head+n:*tail+n], buf[*head:*tail])
-	for i, c := range cards {
-		buf[*head+i] = c
-	}
-	*tail += n
-}
-
-// removeFromDeck deletes the first occurrence of each card from the active deck slice
-// buf[head:*tail] (in the order cards lists them) and shifts later entries left. tail
-// shrinks by the count of cards actually found. Cards not present in the slice are
-// silently skipped — DrawOne plus alt-cost-prepend can produce a removal target that's no
-// longer in buf because a prior insertOnDeckTop wrote it back in then a later removal
-// already took it out.
-func removeFromDeck(buf []card.Card, head int, tail *int, cards []card.Card) {
-	for _, c := range cards {
-		idx := -1
-		for i := head; i < *tail; i++ {
-			if buf[i].ID() == c.ID() {
-				idx = i
-				break
-			}
-		}
-		if idx < 0 {
+// pitchedFromBestLine returns the cards in BestLine assigned the Pitch role (excluding the
+// arsenal-in slot, which never recycles into the deck). Used by applyTurnResult to put
+// pitched cards on the deck bottom per FaB's end-of-turn pitch-zone-to-deck rule.
+func pitchedFromBestLine(line []hand.CardAssignment) []card.Card {
+	var out []card.Card
+	for _, a := range line {
+		if a.FromArsenal {
 			continue
 		}
-		copy(buf[idx:*tail-1], buf[idx+1:*tail])
-		*tail--
+		if a.Role == hand.Pitch {
+			out = append(out, a.Card)
+		}
 	}
+	return out
 }
 
 // dealNextHand fills handBuf with this turn's dealt hand: the held prefix from heldBuf followed
@@ -405,17 +387,17 @@ func (d *Deck) EvalOneTurnForTesting(incomingDamage int, arsenalIn card.Card, in
 	play := hand.Best(d.Hero, d.Weapons, h, incomingDamage, buf[head:tail], 0, arsenalIn)
 	// drawCount=0: head already points past the starting hand, so applyTurnResult only needs
 	// to advance past mid-turn draws.
-	nextHeld := applyTurnResult(play, buf, &head, &tail, 0, nil)
-	triggerQueue := append([]card.AuraTrigger(nil), play.AuraTriggers...)
+	nextHeld := applyTurnResult(play, buf, &head, &tail, nil)
+	triggerQueue := append([]card.AuraTrigger(nil), play.State.AuraTriggers...)
 
 	// Deal turn 2's hand but stop short of running Best — the caller wants the pre-Best state.
 	turn2Hand, drawCount2, ok := dealNextHand(buf, handBuf, nextHeld, &head, &tail, handSize)
 	if !ok {
 		return TurnStartState{
-			ArsenalCard:       play.ArsenalCard,
-			Runechants:        play.LeftoverRunechants,
+			ArsenalCard:       play.State.Arsenal,
+			Runechants:        play.State.Runechants,
 			PrevTurnValue:     play.Value,
-			PrevTurnGraveyard: append([]card.Card(nil), play.Graveyard...),
+			PrevTurnGraveyard: append([]card.Card(nil), play.State.Graveyard...),
 		}
 	}
 	// Process turn-1 AuraTriggers at the turn-2 boundary the same way Evaluate does:
@@ -433,23 +415,23 @@ func (d *Deck) EvalOneTurnForTesting(incomingDamage int, arsenalIn card.Card, in
 
 	return TurnStartState{
 		Hand:                     handCopy,
-		ArsenalCard:              play.ArsenalCard,
+		ArsenalCard:              play.State.Arsenal,
 		Deck:                     deckLeft,
-		Runechants:               play.LeftoverRunechants + trigRunes,
+		Runechants:               play.State.Runechants + trigRunes,
 		PrevTurnValue:            play.Value,
 		PrevTurnBestLine:         lineCopy,
-		PrevTurnGraveyard:        append([]card.Card(nil), play.Graveyard...),
+		PrevTurnGraveyard:        append([]card.Card(nil), play.State.Graveyard...),
 		StartOfTurnTriggerDamage: trigDamage,
 		StartOfTurnGraveyard:     trigGraveyarded,
 	}
 }
 
-// recordBestTurn clones the winning turn's memo-owned slices into fresh storage and stamps
-// stats.Best with the resulting BestTurn. Every slice in play (BestLine, AttackChain, Drawn,
-// TriggersFromLastTurn, StartOfTurnAuras) aliases storage hand.Best may rewrite on the next
-// call, so retaining them directly would let a later evaluation mutate the saved peak.
-// Nil-length slices skip the clone so the captured hand.TurnSummary holds nil rather than a
-// zero-length allocation.
+// recordBestTurn clones the winning turn's slices into fresh storage and stamps stats.Best
+// with the resulting BestTurn. Every slice in play (BestLine, AttackChain,
+// TriggersFromLastTurn, StartOfTurnAuras, State.*) aliases scratch hand.Best may rewrite on
+// the next call, so retaining them directly would let a later evaluation mutate the saved
+// peak. Nil-length slices skip the clone so the captured hand.TurnSummary holds nil rather
+// than a zero-length allocation.
 func recordBestTurn(stats *Stats, play hand.TurnSummary, startingRunechants int) {
 	lineCopy := make([]hand.CardAssignment, len(play.BestLine))
 	copy(lineCopy, play.BestLine)
@@ -457,11 +439,6 @@ func recordBestTurn(stats *Stats, play hand.TurnSummary, startingRunechants int)
 	if len(play.AttackChain) > 0 {
 		chainCopy = make([]hand.AttackChainEntry, len(play.AttackChain))
 		copy(chainCopy, play.AttackChain)
-	}
-	var drawnCopy []hand.CardAssignment
-	if len(play.Drawn) > 0 {
-		drawnCopy = make([]hand.CardAssignment, len(play.Drawn))
-		copy(drawnCopy, play.Drawn)
 	}
 	var trigCopy []hand.TriggerContribution
 	if len(play.TriggersFromLastTurn) > 0 {
@@ -477,15 +454,38 @@ func recordBestTurn(stats *Stats, play hand.TurnSummary, startingRunechants int)
 		Summary: hand.TurnSummary{
 			BestLine:             lineCopy,
 			AttackChain:          chainCopy,
-			Drawn:                drawnCopy,
 			Value:                play.Value,
-			LeftoverRunechants:   play.LeftoverRunechants,
-			ArsenalCard:          play.ArsenalCard,
+			State:                cloneCarryState(play.State),
 			TriggersFromLastTurn: trigCopy,
 			StartOfTurnAuras:     aurasCopy,
 		},
 		StartingRunechants: startingRunechants,
 	}
+}
+
+// cloneCarryState deep-copies every slice in cs so the returned snapshot survives later
+// hand.Best calls overwriting their backing arrays.
+func cloneCarryState(cs hand.CarryState) hand.CarryState {
+	out := hand.CarryState{
+		Arsenal:    cs.Arsenal,
+		Runechants: cs.Runechants,
+	}
+	if len(cs.Hand) > 0 {
+		out.Hand = append([]card.Card(nil), cs.Hand...)
+	}
+	if len(cs.Deck) > 0 {
+		out.Deck = append([]card.Card(nil), cs.Deck...)
+	}
+	if len(cs.Graveyard) > 0 {
+		out.Graveyard = append([]card.Card(nil), cs.Graveyard...)
+	}
+	if len(cs.Banish) > 0 {
+		out.Banish = append([]card.Card(nil), cs.Banish...)
+	}
+	if len(cs.AuraTriggers) > 0 {
+		out.AuraTriggers = append([]card.AuraTrigger(nil), cs.AuraTriggers...)
+	}
+	return out
 }
 
 // uniqueDeckIDs returns the distinct card IDs in cs (in deck order of first appearance) and

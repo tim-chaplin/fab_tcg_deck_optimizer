@@ -21,11 +21,20 @@ func (e *Evaluator) bestUncached(hero hero.Hero, weapons []weapon.Weapon, hand [
 		totalN = n + 1
 	}
 
-	// Seed best.LeftoverRunechants with the carryover: partitions with no attacks don't reduce
+	// Seed best.State.Runechants with the carryover: partitions with no attacks don't reduce
 	// it, so carryover is the baseline to beat. BestLine starts with every hand card Held and
-	// the arsenal-in card (if any) staying in the slot, so a hand with no Value-adding partition
-	// still reports sensible "nothing played, nothing pitched" assignments.
-	best := TurnSummary{BestLine: make([]CardAssignment, totalN), LeftoverRunechants: runechantCarryover}
+	// the arsenal-in card (if any) staying in the slot, so a hand with no Value-adding
+	// partition still reports sensible "nothing played, nothing pitched" assignments.
+	best := TurnSummary{
+		BestLine: make([]CardAssignment, totalN),
+		State: CarryState{
+			Hand:         append([]card.Card(nil), hand...),
+			Deck:         append([]card.Card(nil), deck...),
+			Arsenal:      arsenalCardIn,
+			Runechants:   runechantCarryover,
+			AuraTriggers: append([]card.AuraTrigger(nil), priorAuraTriggers...),
+		},
+	}
 	// bestSwung holds the winning partition's swung weapon names so fillContributions can rebuild
 	// the chain it runs bestSequence over. Lives outside TurnSummary since weapons are
 	// recoverable from AttackChain once fillContributions finishes. bestBudget captures the
@@ -51,7 +60,6 @@ func (e *Evaluator) bestUncached(hero hero.Hero, weapons []weapon.Weapon, hand [
 	}
 	if arsenalCardIn != nil {
 		best.BestLine[n] = CardAssignment{Card: arsenalCardIn, Role: Arsenal, FromArsenal: true}
-		best.ArsenalCard = arsenalCardIn
 	}
 
 	// bufs is the pooled scratch space for this deck evaluation. Partition scratch is sized
@@ -109,16 +117,17 @@ func (e *Evaluator) bestUncached(hero hero.Hero, weapons []weapon.Weapon, hand [
 				arsenalInIdx = len(a) - 1
 			}
 			// Held cards (hand cards left without a Pitch / Attack / Defend role) thread
-			// through to TurnState.Held so alt-cost effects (e.g. Moon Wish's "use a Held
+			// through to TurnState.Hand so alt-cost effects (e.g. Moon Wish's "use a hand
 			// card") can read len > 0. Arsenal-in can never be Held (roleAllowed bars it).
 			h := gatherHeldCards(hand, rolesBuf[:n], held[:0])
-			attackDealt, defenseDealt, leftoverRunechants, budget, swung, ok := bestAttackWithWeapons(hero, weapons, a, d, p, h, deck, bufs, runechantCarryover, incomingDamage, defenseSum, arsenalInIdx, priorAuraTriggers)
+			arsenalAtChainStart := findArsenalCard(rolesBuf, arsenalCardIn, n)
+			attackDealt, defenseDealt, leftoverRunechants, budget, swung, _, ok := bestAttackWithWeapons(hero, weapons, a, d, p, h, deck, bufs, runechantCarryover, incomingDamage, defenseSum, arsenalInIdx, arsenalAtChainStart, priorAuraTriggers)
 			if !ok {
 				return
 			}
 
 			v := attackDealt + defenseDealt + prevented
-			arsenalCard := findArsenalCard(rolesBuf, arsenalCardIn, n)
+			arsenalCard := arsenalAtChainStart
 			// Hand cards never take Arsenal role during enumeration, so arsenalCard is only set
 			// when arsenal-in stayed; post-hoc promotion potential is tracked via hasHeld.
 			hasHeld := false
@@ -135,15 +144,15 @@ func (e *Evaluator) bestUncached(hero hero.Hero, weapons []weapon.Weapon, hand [
 				futureValuePlayed++
 			}
 			willOccupy := arsenalCard != nil || hasHeld
-			bestWillOccupy := best.ArsenalCard != nil || bestHasHeld
+			bestWillOccupy := best.State.Arsenal != nil || bestHasHeld
 			if !beatsBest(v, leftoverRunechants, futureValuePlayed, willOccupy, best, bestFutureValuePlayed, bestWillOccupy) {
 				return
 			}
 			best.Value = v
 			bestSwung = swung
 			bestBudget = budget
-			best.LeftoverRunechants = leftoverRunechants
-			best.ArsenalCard = arsenalCard
+			best.State.Runechants = leftoverRunechants
+			best.State.Arsenal = arsenalCard
 			bestHasHeld = hasHeld
 			bestFutureValuePlayed = futureValuePlayed
 			// Write the winning roles into BestLine. Cards and FromArsenal flags were populated
@@ -190,102 +199,63 @@ func (e *Evaluator) bestUncached(hero hero.Hero, weapons []weapon.Weapon, hand [
 	recurse(0, 0, 0)
 	// Once per Best call, on the winning line only, attribute per-card contribution.
 	if len(best.BestLine) > 0 {
-		fillContributions(&best, hero, weapons, bestSwung, bestBudget, deck, bufs, incomingDamage, runechantCarryover, priorAuraTriggers)
+		fillContributions(&best, hero, weapons, bestSwung, bestBudget, deck, best.State.Arsenal, bufs, incomingDamage, runechantCarryover, priorAuraTriggers)
 	}
-	// If the arsenal slot is empty after enumeration, promote one Held card into it. Held hand
-	// cards and Held mid-turn-drawn cards are treated as one pool — neither source is preferred,
-	// because both end the turn as a single card of equivalent future-turn value. The pick is
-	// deterministic per-hand (hashed from sorted card IDs + drawn card IDs + arsenal-in ID) so
-	// the memo stays consistent, but spreads across candidates to avoid a lowest-ID bias.
-	if best.ArsenalCard == nil {
-		promoteRandomHeldToArsenal(&best, hand, n, arsenalCardIn)
+	// If the arsenal slot is empty after the chain runs, promote one card from State.Hand
+	// into it (deterministic per-hand pick). State.Hand at this point holds the partition's
+	// Held cards plus anything tutored mid-chain; both are equivalent future-turn value, so
+	// the promotion picks across the combined pool.
+	if best.State.Arsenal == nil {
+		promoteRandomHandCardToArsenal(&best, hand, arsenalCardIn)
 	}
 	return best
 }
 
-// promoteRandomHeldToArsenal picks one Held card — a hand card in best.BestLine or a mid-turn-
-// drawn card in best.Drawn — and flips its role to Arsenal. Both sources share a single
-// candidate pool so the draw isn't preferred over hand Helds (nor the other way around). Cards
-// in best.ReturnedToTopOfDeck are skipped on the BestLine side because alt-cost effects already
-// re-routed them; their copies typically reappear in best.Drawn (e.g. Moon Wish's alt cost
-// puts a Held card on top of deck and Sun Kiss's tutor draws it). No-op when nothing is Held.
-func promoteRandomHeldToArsenal(best *TurnSummary, hand []card.Card, n int, arsenalCardIn card.Card) {
-	handHeldCount := countHeldInBestLine(best.BestLine, n, best.ReturnedToTopOfDeck)
-	drawnHeldCount := countHeldInDrawn(best.Drawn)
-	total := handHeldCount + drawnHeldCount
-	if total == 0 {
+// promoteRandomHandCardToArsenal picks one card from best.State.Hand (the chain's end-of-turn
+// hand — partition Held cards plus anything tutored mid-chain) and moves it into
+// best.State.Arsenal, removing it from State.Hand. Deterministic per-hand pick (hashed from
+// sorted starting-hand IDs + Hand IDs + arsenal-in ID) so equivalent inputs always promote
+// the same card. No-op when State.Hand is empty.
+//
+// When the promoted card matches a Held entry in BestLine, that entry's Role flips to
+// Arsenal so the per-card display still attributes the slot. Tutored cards (not in BestLine)
+// just live in State.Arsenal without a Role flip — there's no BestLine entry to update.
+func promoteRandomHandCardToArsenal(best *TurnSummary, startingHand []card.Card, arsenalCardIn card.Card) {
+	if len(best.State.Hand) == 0 {
 		return
 	}
-	pick := int(arsenalPromotionHash(hand, best.Drawn, arsenalCardIn) % uint64(total))
-	// Walk hand Helds first (in BestLine order), then drawn Helds (in draw order), mapping pick
-	// to the matching slot.
-	if pick < handHeldCount {
-		promoteNthHeldInBestLine(best, n, pick)
-		return
-	}
-	promoteNthHeldInDrawn(best, pick-handHeldCount)
-}
-
-// countHeldInBestLine returns how many of the first n BestLine entries are still Role=Held
-// after enumeration AND haven't been moved to deck top by an alt-cost effect (per
-// returnedToTopOfDeck). The first-n restriction excludes any arsenal-in entry (which lives
-// at index n and is never Held); the returnedToTopOfDeck skip prevents the moved copies
-// from competing for arsenal against the drawn copies they spawned.
-func countHeldInBestLine(line []CardAssignment, n int, returnedToTopOfDeck []card.Card) int {
-	c := 0
-	consumed := append([]card.Card(nil), returnedToTopOfDeck...)
-	for i := 0; i < n; i++ {
-		if line[i].Role != Held {
-			continue
-		}
-		if idx := indexOfCard(consumed, line[i].Card); idx >= 0 {
-			consumed = append(consumed[:idx], consumed[idx+1:]...)
-			continue
-		}
-		c++
-	}
-	return c
-}
-
-// indexOfCard returns the position of the first card in cs whose ID matches c, or -1 when
-// none. Used by the returnedToTopOfDeck match in countHeldInBestLine and promoteNthHeldInBestLine.
-func indexOfCard(cs []card.Card, c card.Card) int {
-	for i, x := range cs {
-		if x.ID() == c.ID() {
-			return i
+	pick := int(arsenalPromotionHash(startingHand, best.State.Hand, arsenalCardIn) % uint64(len(best.State.Hand)))
+	chosen := best.State.Hand[pick]
+	best.State.Arsenal = chosen
+	best.State.Hand = append(best.State.Hand[:pick:pick], best.State.Hand[pick+1:]...)
+	// Flip the matching BestLine entry from Held to Arsenal so per-card displays show the
+	// correct role. Match the first Held entry whose card ID equals chosen — covers tutored
+	// cards too if they happen to share an ID with a Held hand card, but harmlessly no-ops
+	// when the chosen card is purely a tutored printing.
+	for i := range best.BestLine {
+		if best.BestLine[i].Role == Held && best.BestLine[i].Card.ID() == chosen.ID() {
+			best.BestLine[i].Role = Arsenal
+			break
 		}
 	}
-	return -1
 }
 
-// countHeldInDrawn returns how many mid-turn-drawn cards are still Role=Held after the winning
-// chain resolved.
-func countHeldInDrawn(drawn []CardAssignment) int {
-	c := 0
-	for i := range drawn {
-		if drawn[i].Role == Held {
-			c++
-		}
-	}
-	return c
-}
-
-// arsenalPromotionHash computes the deterministic bucket seed that picks which Held card fills
-// an empty arsenal slot. Uses FNV-1a over the sorted hand IDs + drawn card IDs + arsenal-in ID —
-// the only requirement is a uniform spread across bucket counts 1..total so no lowest-ID bias
-// creeps in while the memo stays consistent per hand.
-func arsenalPromotionHash(hand []card.Card, drawn []CardAssignment, arsenalCardIn card.Card) uint64 {
+// arsenalPromotionHash computes the deterministic bucket seed that picks which hand card
+// fills an empty arsenal slot. FNV-1a over the starting-hand IDs + state-Hand IDs + arsenal-
+// in ID — the only requirement is a uniform spread across bucket counts so the same hand
+// always picks the same slot.
+func arsenalPromotionHash(startingHand, stateHand []card.Card, arsenalCardIn card.Card) uint64 {
 	const (
 		fnvOffsetBasis uint64 = 1469598103934665603
 		fnvPrime       uint64 = 1099511628211
 	)
 	h := fnvOffsetBasis
-	for _, c := range hand {
+	for _, c := range startingHand {
 		h ^= uint64(c.ID())
 		h *= fnvPrime
 	}
-	for _, d := range drawn {
-		h ^= uint64(d.Card.ID())
+	for _, c := range stateHand {
+		h ^= uint64(c.ID())
 		h *= fnvPrime
 	}
 	if arsenalCardIn != nil {
@@ -293,46 +263,6 @@ func arsenalPromotionHash(hand []card.Card, drawn []CardAssignment, arsenalCardI
 		h *= fnvPrime
 	}
 	return h
-}
-
-// promoteNthHeldInBestLine flips the pick-th non-consumed Held hand card (in BestLine order)
-// to Arsenal, and records it on best.ArsenalCard. Caller guarantees pick < count of eligible
-// Held entries (per countHeldInBestLine, which applies the same returnedToTopOfDeck skip).
-func promoteNthHeldInBestLine(best *TurnSummary, n, pick int) {
-	idx := 0
-	consumed := append([]card.Card(nil), best.ReturnedToTopOfDeck...)
-	for i := 0; i < n; i++ {
-		if best.BestLine[i].Role != Held {
-			continue
-		}
-		if k := indexOfCard(consumed, best.BestLine[i].Card); k >= 0 {
-			consumed = append(consumed[:k], consumed[k+1:]...)
-			continue
-		}
-		if idx == pick {
-			best.BestLine[i].Role = Arsenal
-			best.ArsenalCard = best.BestLine[i].Card
-			return
-		}
-		idx++
-	}
-}
-
-// promoteNthHeldInDrawn flips the pick-th Held mid-turn-drawn card (in draw order) to Arsenal,
-// and records it on best.ArsenalCard. Caller guarantees pick < count of Held drawn entries.
-func promoteNthHeldInDrawn(best *TurnSummary, pick int) {
-	idx := 0
-	for i := range best.Drawn {
-		if best.Drawn[i].Role != Held {
-			continue
-		}
-		if idx == pick {
-			best.Drawn[i].Role = Arsenal
-			best.ArsenalCard = best.Drawn[i].Card
-			return
-		}
-		idx++
-	}
 }
 
 // groupByRoleInto appends hand cards into caller-provided pitched/attackers/defenders slices
@@ -353,7 +283,7 @@ func groupByRoleInto(hand []card.Card, roles []Role, pitched, attackers, defende
 
 // gatherHeldCards appends every hand card with role Held into the caller-provided held slice
 // (passed pre-reset to length 0) and returns it. Threads the partition's Held set into
-// bestAttackWithWeapons so alt-cost effects can consult it via TurnState.Held.
+// bestAttackWithWeapons so alt-cost effects can consult it via TurnState.Hand.
 func gatherHeldCards(hand []card.Card, roles []Role, held []card.Card) []card.Card {
 	for i, c := range hand {
 		if roles[i] == Held {
@@ -398,10 +328,10 @@ func beatsBest(v, leftoverRunechants, futureValuePlayed int, willOccupyArsenal b
 	if v < best.Value {
 		return false
 	}
-	if leftoverRunechants > best.LeftoverRunechants {
+	if leftoverRunechants > best.State.Runechants {
 		return true
 	}
-	if leftoverRunechants < best.LeftoverRunechants {
+	if leftoverRunechants < best.State.Runechants {
 		return false
 	}
 	if futureValuePlayed > bestFutureValuePlayed {

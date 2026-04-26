@@ -104,7 +104,7 @@ func TestBest_RespectsResourceConstraint(t *testing.T) {
 // TestBest_AllHeldWhenNoLegalPlay covers the "hand does nothing this turn" case. A single
 // Toughen Up Blue DR (cost 2) with no pitched cards to pay it has Value = 0. The partition
 // leaves the card Held; post-hoc the empty arsenal slot claims it, so Role becomes Arsenal
-// and Play.ArsenalCard records the card for next turn's carryover.
+// and got.State.Arsenal records the card for next turn's carryover.
 func TestBest_AllHeldWhenNoLegalPlay(t *testing.T) {
 	h := []card.Card{generic.ToughenUpBlue{}}
 	got := Best(stubHero, nil, h, 4, nil, 0, nil)
@@ -114,8 +114,8 @@ func TestBest_AllHeldWhenNoLegalPlay(t *testing.T) {
 	if got.BestLine[0].Role != Arsenal {
 		t.Errorf("role = %s, want ARSENAL (empty slot + Held card → promoted)", got.BestLine[0].Role)
 	}
-	if got.ArsenalCard == nil || got.ArsenalCard.ID() != card.ToughenUpBlue {
-		t.Errorf("ArsenalCard = %v, want Toughen Up Blue", got.ArsenalCard)
+	if got.State.Arsenal == nil || got.State.Arsenal.ID() != card.ToughenUpBlue {
+		t.Errorf("ArsenalCard = %v, want Toughen Up Blue", got.State.Arsenal)
 	}
 	if got.BestLine[0].Contribution != 0 {
 		t.Errorf("Contribution = %.1f, want 0 (card sits in arsenal, real value accrues on a later turn)", got.BestLine[0].Contribution)
