@@ -240,8 +240,10 @@ func TestFormatBestTurn_EmptyBestLine(t *testing.T) {
 }
 
 // TestFormatBestTurn_TriggersFromLastTurnLine surfaces cross-turn AuraTrigger contributions
-// under the "Start of turn:" section as unnumbered entries — the reveal / damage fires at
-// the top of the action phase before the chain runs.
+// at the top of the "My turn:" section as numbered entries — the reveal / damage fires at
+// the top of the action phase before the chain runs, but it's an action, not pre-existing
+// state, so it belongs to the action-phase numbering rather than the unnumbered Start of
+// turn block.
 func TestFormatBestTurn_TriggersFromLastTurnLine(t *testing.T) {
 	summary := TurnSummary{
 		TriggersFromLastTurn: []TriggerContribution{
@@ -249,15 +251,22 @@ func TestFormatBestTurn_TriggersFromLastTurnLine(t *testing.T) {
 		},
 	}
 	out := FormatBestTurn(summary, 0)
-	want := "cardtest.RedAttack [R]: START OF ACTION PHASE (+3)"
+	want := "1. cardtest.RedAttack [R]: START OF ACTION PHASE (+3)"
 	if !strings.Contains(out, want) {
 		t.Errorf("missing %q in:\n%s", want, out)
+	}
+	if !strings.Contains(out, "  My turn:") {
+		t.Errorf("trigger line should sit under 'My turn:', got:\n%s", out)
+	}
+	if strings.Contains(out, "Start of turn:") {
+		t.Errorf("Start of turn section shouldn't render for trigger-only summary; got:\n%s", out)
 	}
 }
 
 // TestFormatBestTurn_TriggersFromLastTurnRevealedLine surfaces the card a trigger handler
 // revealed into the hand. Sigil of the Arknight fires at start of action phase with
-// Damage=0 but reveals the deck top; the Start of turn section names the card it drew.
+// Damage=0 but reveals the deck top; the My turn section's first numbered entry names the
+// card it drew.
 func TestFormatBestTurn_TriggersFromLastTurnRevealedLine(t *testing.T) {
 	summary := TurnSummary{
 		TriggersFromLastTurn: []TriggerContribution{
@@ -265,7 +274,7 @@ func TestFormatBestTurn_TriggersFromLastTurnRevealedLine(t *testing.T) {
 		},
 	}
 	out := FormatBestTurn(summary, 0)
-	want := "Sigil of the Arknight [B]: drew Mauvrion Skies [R] into hand"
+	want := "1. Sigil of the Arknight [B]: drew Mauvrion Skies [R] into hand"
 	if !strings.Contains(out, want) {
 		t.Errorf("missing %q in:\n%s", want, out)
 	}
@@ -283,6 +292,23 @@ func TestFormatBestTurn_TriggersFromLastTurnZeroEffectDropped(t *testing.T) {
 	out := FormatBestTurn(summary, 0)
 	if out != "" {
 		t.Errorf("zero-effect trigger with no other content should render empty; got:\n%s", out)
+	}
+}
+
+// TestFormatBestTurn_BlockLineCarriesDefenseValue pins the "(+N)" suffix on plain BLOCK
+// lines. Each block line shows the defender's effective Defense so the reader can sum the
+// wall against the incoming attack without re-checking each card. fake.RedAttack has
+// printed Defense=1; a synthesised BestLine drives the renderer directly.
+func TestFormatBestTurn_BlockLineCarriesDefenseValue(t *testing.T) {
+	summary := TurnSummary{
+		BestLine: []CardAssignment{
+			{Card: fake.RedAttack{}, Role: Defend},
+		},
+	}
+	out := FormatBestTurn(summary, 0)
+	want := "cardtest.RedAttack [R]: BLOCK (+1)"
+	if !strings.Contains(out, want) {
+		t.Errorf("missing %q in:\n%s", want, out)
 	}
 }
 
