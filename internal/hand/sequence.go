@@ -57,7 +57,7 @@ func chainVerbFor(m *attackerMeta, fromArsenal bool) string {
 // arsenalAtChainStart is the card sitting in the arsenal slot at the start of the chain — set
 // when the partition assigned arsenalCardIn the Arsenal role (it's staying), nil otherwise
 // (no arsenal-in, or arsenal-in is playing as Attack/Defend).
-func bestAttackWithWeapons(hero hero.Hero, weapons []weapon.Weapon, attackers, defenders, pitched, held, deck []card.Card, bufs *attackBufs, runechantCarryover, incomingDamage, blockTotal, arsenalInIdx int, arsenalAtChainStart card.Card, priorAuraTriggers []card.AuraTrigger) (int, int, int, chainBudget, []string, CarryState, bool) {
+func bestAttackWithWeapons(hero hero.Hero, weapons []weapon.Weapon, attackers, defenders, pitched, held, deck []card.Card, bufs *attackBufs, runechantCarryover, incomingDamage, blockTotal, arsenalInIdx, arsenalDefenderIdx int, arsenalAtChainStart card.Card, priorAuraTriggers []card.AuraTrigger) (int, int, int, chainBudget, []string, CarryState, bool) {
 	ctx := &sequenceContext{
 		hero:                hero,
 		pitched:             pitched,
@@ -71,13 +71,15 @@ func bestAttackWithWeapons(hero hero.Hero, weapons []weapon.Weapon, attackers, d
 		arsenalInIdx:        arsenalInIdx,
 		priorAuraTriggers:   priorAuraTriggers,
 	}
-	// Defense Reactions fire independently of ordering and attack chain (each sees a fresh
-	// TurnState with only Pitched + Deck), so their Play-return damage is constant across
-	// phase / weapon masks. Compute it once.
+	// Defenders fire independently of ordering and attack chain — DRs through Play, plain
+	// blocks as raw block credit — so their total Value contribution is constant across phase
+	// / weapon masks. Compute it once. Includes DR blocks + arcane / runechant riders + plain-
+	// block residual against the partition's incoming damage; over-blocked excess is discarded
+	// by the per-card cap.
 	hasDRs := containsDefenseReaction(defenders)
 	var defenseDealt int
-	if hasDRs {
-		defenseDealt, bufs.defenseGravScratch = defenseReactionDamage(defenders, pitched, deck, bufs.state, bufs.defenseGravScratch, &bufs.drCardStateScratch)
+	if len(defenders) > 0 {
+		defenseDealt, bufs.defenseGravScratch = defendersDamage(defenders, pitched, deck, bufs.state, bufs.defenseGravScratch, &bufs.drCardStateScratch, incomingDamage, arsenalDefenderIdx)
 	}
 
 	pitchedVals := bufs.pitchedValsScratch[:0]

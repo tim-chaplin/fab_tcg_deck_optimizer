@@ -482,6 +482,7 @@ func recordBestTurn(stats *Stats, play hand.TurnSummary, startingRunechants int)
 			TriggersFromLastTurn: trigCopy,
 			StartOfTurnAuras:     aurasCopy,
 			DealtHand:            dealtCopy,
+			IncomingDamage:       play.IncomingDamage,
 		},
 		StartingRunechants: startingRunechants,
 	}

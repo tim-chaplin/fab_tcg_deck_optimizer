@@ -92,6 +92,10 @@ type TurnSummary struct {
 	// the printout's "Start of turn → Hand:" line reflects the dealt cards only, with
 	// reveals showing up under MyTurn where they actually resolve.
 	DealtHand []card.Card
+	// IncomingDamage is the opponent damage the partition was scored against. Surfaced on
+	// the summary so format-time helpers (DR (+N) recompute) can reseed a fresh TurnState
+	// with the same value the simulator used.
+	IncomingDamage int
 }
 
 // TriggerContribution is one start-of-turn AuraTrigger fire: the aura that fired plus the

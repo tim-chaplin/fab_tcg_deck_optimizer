@@ -95,12 +95,13 @@ func TestGraveyard_PlainBlockEntersGraveyardRegardlessOfType(t *testing.T) {
 	var saw []card.Card
 	dr := gravSpyDR{saw: &saw}
 	bufs := newAttackBufs(2, 0, nil)
-	_, _ = defenseReactionDamage(
+	_, _ = defendersDamage(
 		[]card.Card{blocker, dr},
 		nil, nil,
 		bufs.state,
 		bufs.defenseGravScratch,
 		&bufs.drCardStateScratch,
+		0, -1,
 	)
 	foundBlocker := false
 	for _, c := range saw {

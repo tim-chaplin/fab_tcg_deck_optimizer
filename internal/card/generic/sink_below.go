@@ -20,8 +20,10 @@ func (SinkBelowRed) GoAgain() bool            { return false }
 func (SinkBelowRed) NotSilverAgeLegal()       {}
 
 // not implemented: discard-to-cycle rider (hand cycling not modelled)
-func (SinkBelowRed) NotImplemented()                              {}
-func (SinkBelowRed) Play(s *card.TurnState, self *card.CardState) { s.LogPlay(self) }
+func (SinkBelowRed) NotImplemented() {}
+func (SinkBelowRed) Play(s *card.TurnState, self *card.CardState) {
+	s.ApplyAndLogEffectiveDefense(self)
+}
 
 type SinkBelowYellow struct{}
 
@@ -36,8 +38,10 @@ func (SinkBelowYellow) GoAgain() bool            { return false }
 func (SinkBelowYellow) NotSilverAgeLegal()       {}
 
 // not implemented: discard-to-cycle rider (hand cycling not modelled)
-func (SinkBelowYellow) NotImplemented()                              {}
-func (SinkBelowYellow) Play(s *card.TurnState, self *card.CardState) { s.LogPlay(self) }
+func (SinkBelowYellow) NotImplemented() {}
+func (SinkBelowYellow) Play(s *card.TurnState, self *card.CardState) {
+	s.ApplyAndLogEffectiveDefense(self)
+}
 
 type SinkBelowBlue struct{}
 
@@ -52,5 +56,7 @@ func (SinkBelowBlue) GoAgain() bool            { return false }
 func (SinkBelowBlue) NotSilverAgeLegal()       {}
 
 // not implemented: discard-to-cycle rider (hand cycling not modelled)
-func (SinkBelowBlue) NotImplemented()                              {}
-func (SinkBelowBlue) Play(s *card.TurnState, self *card.CardState) { s.LogPlay(self) }
+func (SinkBelowBlue) NotImplemented() {}
+func (SinkBelowBlue) Play(s *card.TurnState, self *card.CardState) {
+	s.ApplyAndLogEffectiveDefense(self)
+}
