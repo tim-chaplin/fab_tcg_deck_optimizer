@@ -209,9 +209,10 @@ func (s *TurnState) HasPlayedType(t CardType) bool {
 	return false
 }
 
-// HasAuraInPlay reports whether an aura was played or created this turn — the condition
-// behind "if you've played or created an aura this turn" riders.
-func (s *TurnState) HasAuraInPlay() bool {
+// HasPlayedOrCreatedAura reports whether an aura was played or created this turn — the
+// condition behind "if you've played or created an aura this turn" riders. The aura need
+// not still be on the battlefield; the flag is sticky for the rest of the turn.
+func (s *TurnState) HasPlayedOrCreatedAura() bool {
 	return s.AuraCreated || s.HasPlayedType(TypeAura)
 }
 

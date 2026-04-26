@@ -4,7 +4,7 @@
 // Text: "If you have played or created an aura this turn, Reek of Corruption gains 'When this
 // hits a hero, they discard a card.'"
 //
-// Aura condition checked via s.HasAuraInPlay(). The "when this hits a hero" discard rider fires
+// Aura condition checked via s.HasPlayedOrCreatedAura(). The "when this hits a hero" discard rider fires
 // only when the aura clause is satisfied AND this card's printed attack is likely to land
 // (1/4/7 per card.LikelyToHit). Runechants alongside don't count — "this hits" is strictly
 // about this card's damage reaching the hero. On-hit discard credits +3.
@@ -19,7 +19,7 @@ var reekOfCorruptionTypes = card.NewTypeSet(card.TypeRuneblade, card.TypeAction,
 // chain step when the aura condition is satisfied AND this card's printed attack is likely
 // to land on its own.
 func reekOfCorruptionApplyRider(s *card.TurnState, self *card.CardState) {
-	if s == nil || !s.HasAuraInPlay() || !card.LikelyToHit(self) {
+	if s == nil || !s.HasPlayedOrCreatedAura() || !card.LikelyToHit(self) {
 		return
 	}
 	s.LogRiderOnPlay(self, "On-hit discarded a card", card.DiscardValue)

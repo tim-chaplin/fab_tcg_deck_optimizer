@@ -13,7 +13,7 @@ var yintiYantiTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.Ty
 // yintiYantiBonus returns the +1{p} power buff when any aura is in play (either created
 // this turn or played earlier), else 0.
 func yintiYantiBonus(s *card.TurnState) int {
-	if s != nil && s.HasAuraInPlay() {
+	if s != nil && s.HasPlayedOrCreatedAura() {
 		return 1
 	}
 	return 0

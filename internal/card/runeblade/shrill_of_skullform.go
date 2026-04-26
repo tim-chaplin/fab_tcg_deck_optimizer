@@ -54,7 +54,7 @@ func (ShrillOfSkullformBlue) Play(s *card.TurnState, self *card.CardState) {
 // and LikelyToHit see the buffed power, then emits the chain step at the buffed value. No
 // rider sub-line — this is a power buff, not a separable effect.
 func shrillPlay(s *card.TurnState, self *card.CardState) {
-	if s.HasAuraInPlay() {
+	if s.HasPlayedOrCreatedAura() {
 		self.BonusAttack += 3
 	}
 	s.ApplyAndLogEffectiveAttack(self)

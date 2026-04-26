@@ -75,7 +75,7 @@ implemented` riders across the card roster.
   earlier in this same chain (it sees `CardsPlayed` from earlier resolutions but not
   immediate-prior chain history needed for chain-history riders like Push the Point and
   Water the Seeds).
-- **Aura-created vs aura-played semantics.** `TurnState.HasAuraInPlay` covers most "have
+- **Aura-created vs aura-played semantics.** `TurnState.HasPlayedOrCreatedAura` covers most "have
   you played or created an aura this turn" reads, but a few specialised aura-state
   questions (e.g. trade-an-aura-for-a-runechant value) aren't surfaced.
 - **Arcane damage credited on Runechant creation.** Runechant tokens are credited +1
