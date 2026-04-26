@@ -14,6 +14,7 @@ const (
 	TypeAttackReaction                       // "Attack Reaction"
 	TypeAura                                 // "Aura"
 	TypeBlock                                // "Block"
+	TypeBook                                 // "Book"
 	TypeDefenseReaction                      // "Defense Reaction"
 	TypeGeneric                              // "Generic"
 	TypeHero                                 // "Hero"

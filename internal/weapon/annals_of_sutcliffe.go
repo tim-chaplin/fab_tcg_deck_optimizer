@@ -7,10 +7,7 @@ package weapon
 
 import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 
-// annalsOfSutcliffeTypes omits a Book bit because the codebase doesn't define one — no
-// existing card scans for "Book" specifically, so the weapon stays bucketed as a generic
-// Runeblade weapon.
-var annalsOfSutcliffeTypes = card.NewTypeSet(card.TypeRuneblade, card.TypeWeapon, card.TypeTwoHand)
+var annalsOfSutcliffeTypes = card.NewTypeSet(card.TypeRuneblade, card.TypeWeapon, card.TypeBook, card.TypeTwoHand)
 
 type AnnalsOfSutcliffe struct{}
 
