@@ -1,7 +1,6 @@
 package deck
 
 import (
-	"strings"
 	"testing"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
@@ -11,8 +10,10 @@ import (
 )
 
 func TestAllMutations_CountsAndShape(t *testing.T) {
-	// Build a tiny deck: 2 unique cards × 2 copies = 4 cards, plus one weapon.
-	a := cards.Get(card.AetherSlashRed)
+	// Build a tiny deck: 2 unique cards × 2 copies = 4 cards, plus one weapon. Both starter
+	// cards must be implemented (NOT carrying card.NotImplemented) so the legalPool / removal-
+	// counting math below holds. ArcanicCrackleRed and ArcanicSpikeRed are stable picks.
+	a := cards.Get(card.ArcanicCrackleRed)
 	b := cards.Get(card.ArcanicSpikeRed)
 	d := New(hero.Viserai{}, []weapon.Weapon{weapon.NebulaBlade{}}, []card.Card{a, a, b, b})
 
@@ -20,18 +21,21 @@ func TestAllMutations_CountsAndShape(t *testing.T) {
 
 	// Weapon mutations: every loadout except the current one. Card mutations at maxCopies=2:
 	// for each of the 2 unique removals, every pool entry except self (no-op) and the other
-	// in-deck card (already at cap) is a valid add — so 2 × (pool - 2). Use legalPool(nil)
-	// instead of cards.Deckable() directly so the expected count tracks AllMutations's own
-	// filtering (NotImplemented cards are skipped).
+	// in-deck card (already at cap) is a valid add — so 2 × (pool - 2). Pair mutations: for
+	// each registered cardPair whose halves are both absent, C(min(uniques, K), 2) candidates
+	// — with 2 unique deck IDs that's 1 per absent pair. Both halves absent ⇒ all pairs
+	// contribute. Use legalPool(nil) so the count tracks AllMutations's own filtering
+	// (NotImplemented cards are skipped).
 	loadouts := weaponLoadouts(weapon.All)
 	pool := legalPool(nil)
 	wantWeaponMuts := len(loadouts) - 1
 	wantCardMuts := 2 * (len(pool) - 2)
-	want := wantWeaponMuts + wantCardMuts
+	wantPairMuts := expectedPairMutCount(d, 2)
+	want := wantWeaponMuts + wantCardMuts + wantPairMuts
 
 	if len(muts) != want {
-		t.Fatalf("got %d mutations, want %d (%d weapon + %d card)",
-			len(muts), want, wantWeaponMuts, wantCardMuts)
+		t.Fatalf("got %d mutations, want %d (%d weapon + %d card + %d pair)",
+			len(muts), want, wantWeaponMuts, wantCardMuts, wantPairMuts)
 	}
 	for i, m := range muts {
 		if len(m.Deck.Cards) != 4 {
@@ -48,9 +52,12 @@ func TestAllMutations_CountsAndShape(t *testing.T) {
 
 // TestAllMutations_OddCountsAllowed exercises the single-card-swap semantics: a mutation may leave
 // the deck with an odd number of any given printing (e.g. 1×A + 3×B at maxCopies=3), and raising
-// maxCopies should open up adds to cards already in the deck that are below the cap.
+// maxCopies should open up adds to cards already in the deck that are below the cap. Both
+// starter cards must be implemented so the diff math holds (NotImplemented removals are absent
+// from the addID pool, which suppresses the "swap to in-deck other" mutation pair the diff
+// expects).
 func TestAllMutations_OddCountsAllowed(t *testing.T) {
-	a := cards.Get(card.AetherSlashRed)
+	a := cards.Get(card.ArcanicCrackleRed)
 	b := cards.Get(card.ArcanicSpikeRed)
 	d := New(hero.Viserai{}, []weapon.Weapon{weapon.NebulaBlade{}}, []card.Card{a, a, b, b})
 
@@ -85,46 +92,6 @@ func TestAllMutations_OddCountsAllowed(t *testing.T) {
 	}
 	if !sawOdd {
 		t.Errorf("expected at least one mutation with an odd-count card; single-card swaps always produce odd counts from a 2/2 starting deck")
-	}
-}
-
-// TestAllMutations_OrdersByAscendingAvg pins the iterate-friendly ordering: the removed card in
-// the first card-mutation batch should be the one with the lowest per-card Avg in the current
-// deck's stats. Run with both (lower-ID is low-avg) and (higher-ID is low-avg) so the test fails
-// if the implementation accidentally sorts only by card.ID and gets a free pass from whichever
-// direction happens to align.
-func TestAllMutations_OrdersByAscendingAvg(t *testing.T) {
-	a := cards.Get(card.AetherSlashRed)  // lower card.ID
-	b := cards.Get(card.ArcanicSpikeRed) // higher card.ID
-
-	cases := []struct {
-		name        string
-		lowAvgCard  card.Card
-		highAvgCard card.Card
-	}{
-		{"low-avg card has lower ID", a, b},
-		{"low-avg card has higher ID", b, a},
-	}
-	for _, tc := range cases {
-		t.Run(tc.name, func(t *testing.T) {
-			d := New(hero.Viserai{}, []weapon.Weapon{weapon.NebulaBlade{}},
-				[]card.Card{a, a, b, b})
-			// Both cards see the same Plays so only Avg (= TotalContribution / Plays) drives the
-			// ordering — no path for card.ID to sneak in via a sub-ordering rule.
-			d.Stats.PerCard = map[card.ID]CardPlayStats{
-				tc.lowAvgCard.ID():  {Plays: 10, TotalContribution: 10}, // Avg 1.0
-				tc.highAvgCard.ID(): {Plays: 10, TotalContribution: 80}, // Avg 8.0
-			}
-
-			muts := AllMutations(d, 2, nil)
-			// Skip the weapon-mutation block (len(loadouts)-1 entries, one per alternative loadout).
-			firstCardMut := muts[len(weaponLoadouts(weapon.All))-1]
-			wantPrefix := "-1 " + tc.lowAvgCard.Name() + ","
-			if !strings.HasPrefix(firstCardMut.Description, wantPrefix) {
-				t.Errorf("first card mutation removed wrong card\n  got:  %q\n  want prefix: %q",
-					firstCardMut.Description, wantPrefix)
-			}
-		})
 	}
 }
 
@@ -187,7 +154,7 @@ func TestAllMutations_Deterministic(t *testing.T) {
 }
 
 func TestAllMutations_NoDuplicateOfSource(t *testing.T) {
-	a := cards.Get(card.AetherSlashRed)
+	a := cards.Get(card.ArcanicCrackleRed)
 	d := New(hero.Viserai{}, []weapon.Weapon{weapon.NebulaBlade{}}, []card.Card{a, a, a, a})
 	srcKey := deckFingerprint(d)
 	for i, m := range AllMutations(d, 2, nil) {
@@ -195,4 +162,64 @@ func TestAllMutations_NoDuplicateOfSource(t *testing.T) {
 			t.Errorf("mutation %d equals the source deck", i)
 		}
 	}
+}
+
+// expectedPairMutCount mirrors pairSwapMutations's emission rule for a given deck so the
+// CountsAndShape test can predict the pair-mutation contribution without re-implementing the
+// generator. For each registered pair × variant cross-product, counts the distinct
+// (sorted-removed-IDs) combos that survive overlap suppression. Combos rejected by the
+// shared maxCopies post-filter are dropped at the end.
+func expectedPairMutCount(d *Deck, maxCopies int) int {
+	// Build the deduped removed-ID combo set the index-based generator collapses into.
+	type idPair struct{ a, b card.ID }
+	combos := map[idPair]bool{}
+	for i := 0; i < len(d.Cards); i++ {
+		for j := i + 1; j < len(d.Cards); j++ {
+			a, b := sortedIDPair(d.Cards[i].ID(), d.Cards[j].ID())
+			combos[idPair{a, b}] = true
+		}
+	}
+
+	srcCounts := map[card.ID]int{}
+	for _, c := range d.Cards {
+		srcCounts[c.ID()]++
+	}
+
+	total := 0
+	for _, p := range cardPairs {
+		for _, fID := range p.First {
+			for _, sID := range p.Second {
+				for combo := range combos {
+					if combo.a == fID || combo.a == sID ||
+						combo.b == fID || combo.b == sID {
+						continue
+					}
+					// Apply the shared maxCopies post-filter: simulate the swap and reject
+					// when any ID exceeds the cap in the result deck.
+					if !swapRespectsMaxCopies(srcCounts, combo.a, combo.b, fID, sID, maxCopies) {
+						continue
+					}
+					total++
+				}
+			}
+		}
+	}
+	return total
+}
+
+// swapRespectsMaxCopies checks whether removing one of each removeA / removeB and adding
+// one of each addA / addB leaves all card counts at or below maxCopies. Mirrors
+// respectsMaxCopies's contract on the pre-mutation count map without rebuilding the deck.
+func swapRespectsMaxCopies(srcCounts map[card.ID]int, removeA, removeB, addA, addB card.ID, maxCopies int) bool {
+	delta := map[card.ID]int{}
+	delta[removeA]--
+	delta[removeB]--
+	delta[addA]++
+	delta[addB]++
+	for id, change := range delta {
+		if srcCounts[id]+change > maxCopies {
+			return false
+		}
+	}
+	return true
 }
