@@ -11,7 +11,9 @@ import (
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/hand"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/hero"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/simstate"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/weapon"
 )
 
 // Evaluate simulates runs shuffles of the deck. For each run it assembles successive hands of
@@ -100,17 +102,7 @@ func (d *Deck) EvaluateWith(runs int, incomingDamage int, rng *rand.Rand, ev *ha
 			// Snapshot the starting carryover before Best overwrites it — the best-hand record
 			// wants the count in play when the hand was dealt, not what remained after.
 			startingRunechants := runechantCarryover
-			// Snapshot the aura cards in play at the top of this turn (one entry per queued
-			// AuraTrigger) before processTriggersAtStartOfTurn potentially destroys any. A
-			// fresh slice keeps the snapshot stable once auraTriggerBuf is rewritten with the
-			// survivors.
-			var startOfTurnAuras []card.Card
-			if len(auraTriggerBuf) > 0 {
-				startOfTurnAuras = make([]card.Card, len(auraTriggerBuf))
-				for i, t := range auraTriggerBuf {
-					startOfTurnAuras[i] = t.Self
-				}
-			}
+			startOfTurnAuras := snapshotStartOfTurnAuras(auraTriggerBuf)
 			// Snapshot the dealt hand BEFORE start-of-action-phase reveal handlers append
 			// their drawn cards — the printout's "Start of turn → Hand:" line wants the hand
 			// the player was actually dealt, not the post-reveal augmented version. Fresh
@@ -132,12 +124,7 @@ func (d *Deck) EvaluateWith(runs int, incomingDamage int, rng *rand.Rand, ev *ha
 			// Best decides what to put in arsenal-out. Marginal stats key on arsenalIn so the
 			// "card present in this turn's hand" set covers everything the solver had access to.
 			arsenalIn := arsenalCard
-			var play hand.TurnSummary
-			if ev != nil {
-				play = ev.BestWithTriggers(d.Hero, d.Weapons, h, incomingDamage, buf[head+drawCount:tail], runechantCarryover, arsenalCard, auraTriggerBuf)
-			} else {
-				play = hand.BestWithTriggers(d.Hero, d.Weapons, h, incomingDamage, buf[head+drawCount:tail], runechantCarryover, arsenalCard, auraTriggerBuf)
-			}
+			play := runBestForTurn(d.Hero, d.Weapons, h, incomingDamage, buf[head+drawCount:tail], runechantCarryover, arsenalCard, auraTriggerBuf, ev)
 			runechantCarryover = play.State.Runechants
 			arsenalCard = play.State.Arsenal
 			// Start-of-turn trigger credit is a flat additive on Value. Every partition
@@ -147,27 +134,9 @@ func (d *Deck) EvaluateWith(runs int, incomingDamage int, rng *rand.Rand, ev *ha
 			play.TriggersFromLastTurn = trigContribs
 			play.StartOfTurnAuras = startOfTurnAuras
 			play.DealtHand = dealtHand
-			v := float64(play.Value)
 
-			d.Stats.TotalValue += v
-			d.Stats.Hands++
-			if d.Stats.Histogram == nil {
-				d.Stats.Histogram = map[int]int{}
-			}
-			d.Stats.Histogram[play.Value]++
-			if play.Value > d.Stats.Best.Summary.Value || len(d.Stats.Best.Summary.BestLine) == 0 {
-				recordBestTurn(&d.Stats, play, startingRunechants)
-			}
-			switch handIdx / handsPerCycle {
-			case 0:
-				d.Stats.FirstCycle.Hands++
-				d.Stats.FirstCycle.Total += v
-			case 1:
-				d.Stats.SecondCycle.Hands++
-				d.Stats.SecondCycle.Total += v
-			}
-
-			tallyMarginalPresence(marginalBuf, idIndex, presentBuf, h, arsenalIn, v)
+			recordTurnStats(&d.Stats, play, startingRunechants, handIdx, handsPerCycle)
+			tallyMarginalPresence(marginalBuf, idIndex, presentBuf, h, arsenalIn, float64(play.Value))
 			nextHeld = applyTurnResult(play, buf, &head, &tail, nextHeld[:0])
 			nextAuraTrigger = append(nextAuraTrigger[:0], play.State.AuraTriggers...)
 			handIdx++
@@ -184,6 +153,66 @@ func (d *Deck) EvaluateWith(runs int, incomingDamage int, rng *rand.Rand, ev *ha
 		d.Stats.Best.Log = hand.BuildTurnLog(d.Stats.Best.Summary, d.Stats.Best.StartingRunechants)
 	}
 	return d.Stats
+}
+
+// snapshotStartOfTurnAuras returns a fresh slice of the Self cards backing every queued
+// AuraTrigger at the top of the turn — i.e. the auras in play before
+// processTriggersAtStartOfTurn fires and potentially destroys any. Returns nil when the
+// queue is empty so the snapshot allocates only when there is something to capture.
+func snapshotStartOfTurnAuras(queued []card.AuraTrigger) []card.Card {
+	if len(queued) == 0 {
+		return nil
+	}
+	out := make([]card.Card, len(queued))
+	for i, t := range queued {
+		out[i] = t.Self
+	}
+	return out
+}
+
+// runBestForTurn dispatches to ev.BestWithTriggers when an evaluator is supplied (the
+// hot-path goroutine-local case used by EvaluateWith / IterateParallel) and falls back to
+// the package-level hand.BestWithTriggers when ev is nil.
+func runBestForTurn(
+	hero hero.Hero,
+	weapons []weapon.Weapon,
+	h []card.Card,
+	incomingDamage int,
+	deck []card.Card,
+	runechantCarryover int,
+	arsenalCard card.Card,
+	priorAuraTriggers []card.AuraTrigger,
+	ev *hand.Evaluator,
+) hand.TurnSummary {
+	if ev != nil {
+		return ev.BestWithTriggers(hero, weapons, h, incomingDamage, deck, runechantCarryover, arsenalCard, priorAuraTriggers)
+	}
+	return hand.BestWithTriggers(hero, weapons, h, incomingDamage, deck, runechantCarryover, arsenalCard, priorAuraTriggers)
+}
+
+// recordTurnStats folds one resolved turn into stats: bumps Hands / TotalValue, lazily
+// initialises the Histogram, replaces the all-time best when this turn beats it (or when
+// no best is recorded yet), and credits the value to FirstCycle / SecondCycle based on
+// where handIdx sits relative to the deck's hands-per-cycle boundary.
+func recordTurnStats(stats *Stats, play hand.TurnSummary, startingRunechants, handIdx, handsPerCycle int) {
+	v := float64(play.Value)
+	stats.TotalValue += v
+	stats.Hands++
+	if stats.Histogram == nil {
+		stats.Histogram = map[int]int{}
+	}
+	stats.Histogram[play.Value]++
+	if play.Value > stats.Best.Summary.Value || len(stats.Best.Summary.BestLine) == 0 {
+		recordBestTurn(stats, play, startingRunechants)
+	}
+	switch handIdx / handsPerCycle {
+	case 0:
+		stats.FirstCycle.Hands++
+		stats.FirstCycle.Total += v
+	case 1:
+		stats.SecondCycle.Hands++
+		stats.SecondCycle.Total += v
+	}
 }
 
 // startOfTurnRevealRoom caps how many cards a start-of-turn AuraTrigger reveal can append
