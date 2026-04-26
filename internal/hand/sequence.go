@@ -28,6 +28,19 @@ func recordValueAndLog(s *card.TurnState, label string, n int) {
 	}
 }
 
+// recordTrigger logs a trigger fire — same as recordValueAndLog but appends "(from <source>)"
+// after the value tag so the reader can trace which card caused the trigger to fire. Hero,
+// aura, and ephemeral triggers all route through here so the suffix is uniform.
+func recordTrigger(s *card.TurnState, label, sourceName string, n int) {
+	n = max(0, n)
+	s.Value += n
+	if n == 0 {
+		s.Log = append(s.Log, fmt.Sprintf("%s (from %s)", label, sourceName))
+	} else {
+		s.Log = append(s.Log, fmt.Sprintf("%s (+%d) (from %s)", label, n, sourceName))
+	}
+}
+
 // chainVerbFor picks the verb for a card's chain-step log line based on its types and the
 // FromArsenal flag. Attack actions read "ATTACK"; non-attack actions read "PLAY"; weapons
 // read "WEAPON ATTACK" (their own swing). " from arsenal" suffixes when the card came from
@@ -228,12 +241,13 @@ type sequenceContext struct {
 // invokes every TriggerAttackAction entry whose OncePerTurn gate is open. Each fire
 // decrements the trigger's Count; when Count hits zero the aura drops out of the list and
 // Self lands in the graveyard so downstream same-turn effects see the destroy. Each handler's
-// damage-equivalent is recorded into state.Value AND state.Log via recordValueAndLog under
-// the aura's Self.Name() — one log line per fire so the printout attributes each separately.
+// damage-equivalent is recorded via recordTrigger under the aura's Self.Name() with a
+// "(from <triggeringCard>)" suffix so the log attributes both the source aura and the card
+// that triggered it.
 //
 // Slice mutation: a survivors prefix is built in place over the existing slice; entries
 // kept after firing are written back at increasing indices, exhausted ones are skipped.
-func fireAttackActionTriggers(state *card.TurnState) {
+func fireAttackActionTriggers(state *card.TurnState, triggeringCard string) {
 	triggers := state.AuraTriggers
 	dst := triggers[:0]
 	for i := range triggers {
@@ -244,7 +258,7 @@ func fireAttackActionTriggers(state *card.TurnState) {
 		}
 		n := t.Handler(state)
 		if n > 0 {
-			recordValueAndLog(state, t.Self.Name()+": AURA TRIGGER", n)
+			recordTrigger(state, t.Self.Name()+": AURA TRIGGER", triggeringCard, n)
 		}
 		t.FiredThisTurn = true
 		t.Count--
@@ -260,11 +274,11 @@ func fireAttackActionTriggers(state *card.TurnState) {
 // fireEphemeralAttackTriggers walks state.EphemeralAttackTriggers after an attack action
 // card resolves and invokes every entry whose Matches predicate accepts the attacker. Each
 // fire consumes the trigger (fire-once semantics) and records the handler's damage-
-// equivalent into state.Value AND state.Log via recordValueAndLog under the trigger's
-// Source.Name() so the printout credits the registering card, not the attacker that
-// happened to consume it. Non-matching entries stay in the slice for a later attack action;
-// anything still in the list at end of chain fizzles silently (no graveyard bookkeeping —
-// the source was already graveyarded when its own Play resolved).
+// equivalent via recordTrigger under the trigger's Source.Name() with a "(from <attacker>)"
+// suffix so the log credits the registering card and names the attack that triggered it.
+// Non-matching entries stay in the slice for a later attack action; anything still in the
+// list at end of chain fizzles silently (no graveyard bookkeeping — the source was already
+// graveyarded when its own Play resolved).
 //
 // Slice mutation parallels fireAttackActionTriggers: a survivors prefix is built in place
 // over the existing slice, with fired entries skipped.
@@ -279,7 +293,7 @@ func fireEphemeralAttackTriggers(state *card.TurnState, target *card.CardState) 
 		}
 		n := t.Handler(state, target)
 		if n > 0 {
-			recordValueAndLog(state, t.Source.Name()+": ATTACK TRIGGER", n)
+			recordTrigger(state, t.Source.Name()+": ATTACK TRIGGER", target.Card.Name(), n)
 		}
 	}
 	state.EphemeralAttackTriggers = dst
@@ -461,12 +475,15 @@ func (ctx *sequenceContext) playSequenceWithMeta(n int) (damage int, leftoverRun
 		// Log order matches FaB's stack-resolution order, not the dispatcher's call order:
 		// hero / aura triggers fire when the card is played (LL1), go on top of the stack,
 		// and resolve before the card itself — so their lines appear above the card's chain
-		// line. Ephemeral "if hits" triggers fire after the attack lands and log below.
+		// line. Each trigger line gets a "(from <triggeringCard>)" suffix so the reader can
+		// trace which card caused the trigger. Ephemeral "if hits" triggers fire after the
+		// attack lands and log below.
+		triggeringCard := pc.Card.Name()
 		if heroDmg > 0 {
-			recordValueAndLog(state, ctx.hero.Name()+": HERO TRIGGER", heroDmg)
+			recordTrigger(state, ctx.hero.Name()+": HERO TRIGGER", triggeringCard, heroDmg)
 		}
 		if m.isAttackAction {
-			fireAttackActionTriggers(state)
+			fireAttackActionTriggers(state, triggeringCard)
 		}
 		// Card contribution: Play return plus any prior-card +N{p} grant. recordValueAndLog
 		// clamps at 0 — FaB attack-power buffs can't drive an attack below 0 power (a -3
