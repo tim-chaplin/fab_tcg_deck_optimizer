@@ -88,7 +88,10 @@ func TestSanitizeNotImplemented_ReplacesTaggedSlotsAndKeepsSizeLegal(t *testing.
 		t.Skip("Strike Gold (Red) is no longer NotImplemented — pick another tagged card or drop this test")
 	}
 	tagged := cards.Get(card.StrikeGoldRed)
-	safe := cards.Get(card.AetherSlashRed)
+	safe := cards.Get(card.ArcanicCrackleRed)
+	if _, t2 := safe.(card.NotImplemented); t2 {
+		t.Fatal("ArcanicCrackleRed gained a NotImplemented marker — pick another implemented keeper for this test")
+	}
 	d := New(hero.Viserai{}, []weapon.Weapon{weapon.NebulaBlade{}},
 		[]card.Card{safe, safe, tagged, tagged})
 
@@ -127,7 +130,10 @@ func TestSanitizeNotImplemented_ReplacesTaggedSlotsAndKeepsSizeLegal(t *testing.
 // when the deck already has no NotImplemented cards: no replacements, no mutations to
 // Cards.
 func TestSanitizeNotImplemented_NoOpOnCleanDeck(t *testing.T) {
-	a := cards.Get(card.AetherSlashRed)
+	a := cards.Get(card.ArcanicCrackleRed)
+	if _, tagged := a.(card.NotImplemented); tagged {
+		t.Fatal("ArcanicCrackleRed gained a NotImplemented marker — pick another implemented sentinel")
+	}
 	d := New(hero.Viserai{}, []weapon.Weapon{weapon.NebulaBlade{}}, []card.Card{a, a, a, a})
 	before := append([]card.Card(nil), d.Cards...)
 
@@ -145,10 +151,14 @@ func TestSanitizeNotImplemented_NoOpOnCleanDeck(t *testing.T) {
 }
 
 // TestAllMutations_ExcludesNotImplementedAdditions confirms no single-slot mutation can
-// introduce a NotImplemented card. Starting deck contains only implemented cards so any
-// NotImplemented copy in a mutation output must have come from the add pool.
+// introduce a NotImplemented card. Starting deck must contain only implemented cards so any
+// NotImplemented copy in a mutation output must have come from the add pool;
+// ArcanicCrackleRed is the chosen sentinel (no NotImplemented marker).
 func TestAllMutations_ExcludesNotImplementedAdditions(t *testing.T) {
-	a := cards.Get(card.AetherSlashRed)
+	a := cards.Get(card.ArcanicCrackleRed)
+	if _, tagged := a.(card.NotImplemented); tagged {
+		t.Fatal("ArcanicCrackleRed gained a NotImplemented marker — pick another implemented sentinel for this test")
+	}
 	d := New(hero.Viserai{}, []weapon.Weapon{weapon.NebulaBlade{}}, []card.Card{a, a, a, a})
 	for _, m := range AllMutations(d, 2, nil) {
 		for _, c := range m.Deck.Cards {

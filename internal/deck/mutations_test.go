@@ -11,8 +11,10 @@ import (
 )
 
 func TestAllMutations_CountsAndShape(t *testing.T) {
-	// Build a tiny deck: 2 unique cards × 2 copies = 4 cards, plus one weapon.
-	a := cards.Get(card.AetherSlashRed)
+	// Build a tiny deck: 2 unique cards × 2 copies = 4 cards, plus one weapon. Both starter
+	// cards must be implemented (NOT carrying card.NotImplemented) so the legalPool / removal-
+	// counting math below holds. ArcanicCrackleRed and ArcanicSpikeRed are stable picks.
+	a := cards.Get(card.ArcanicCrackleRed)
 	b := cards.Get(card.ArcanicSpikeRed)
 	d := New(hero.Viserai{}, []weapon.Weapon{weapon.NebulaBlade{}}, []card.Card{a, a, b, b})
 
@@ -20,18 +22,21 @@ func TestAllMutations_CountsAndShape(t *testing.T) {
 
 	// Weapon mutations: every loadout except the current one. Card mutations at maxCopies=2:
 	// for each of the 2 unique removals, every pool entry except self (no-op) and the other
-	// in-deck card (already at cap) is a valid add — so 2 × (pool - 2). Use legalPool(nil)
-	// instead of cards.Deckable() directly so the expected count tracks AllMutations's own
-	// filtering (NotImplemented cards are skipped).
+	// in-deck card (already at cap) is a valid add — so 2 × (pool - 2). Pair mutations: for
+	// each registered cardPair whose halves are both absent, C(min(uniques, K), 2) candidates
+	// — with 2 unique deck IDs that's 1 per absent pair. Both halves absent ⇒ all pairs
+	// contribute. Use legalPool(nil) so the count tracks AllMutations's own filtering
+	// (NotImplemented cards are skipped).
 	loadouts := weaponLoadouts(weapon.All)
 	pool := legalPool(nil)
 	wantWeaponMuts := len(loadouts) - 1
 	wantCardMuts := 2 * (len(pool) - 2)
-	want := wantWeaponMuts + wantCardMuts
+	wantPairMuts := expectedPairMutCount(d, 2)
+	want := wantWeaponMuts + wantCardMuts + wantPairMuts
 
 	if len(muts) != want {
-		t.Fatalf("got %d mutations, want %d (%d weapon + %d card)",
-			len(muts), want, wantWeaponMuts, wantCardMuts)
+		t.Fatalf("got %d mutations, want %d (%d weapon + %d card + %d pair)",
+			len(muts), want, wantWeaponMuts, wantCardMuts, wantPairMuts)
 	}
 	for i, m := range muts {
 		if len(m.Deck.Cards) != 4 {
@@ -48,9 +53,12 @@ func TestAllMutations_CountsAndShape(t *testing.T) {
 
 // TestAllMutations_OddCountsAllowed exercises the single-card-swap semantics: a mutation may leave
 // the deck with an odd number of any given printing (e.g. 1×A + 3×B at maxCopies=3), and raising
-// maxCopies should open up adds to cards already in the deck that are below the cap.
+// maxCopies should open up adds to cards already in the deck that are below the cap. Both
+// starter cards must be implemented so the diff math holds (NotImplemented removals are absent
+// from the addID pool, which suppresses the "swap to in-deck other" mutation pair the diff
+// expects).
 func TestAllMutations_OddCountsAllowed(t *testing.T) {
-	a := cards.Get(card.AetherSlashRed)
+	a := cards.Get(card.ArcanicCrackleRed)
 	b := cards.Get(card.ArcanicSpikeRed)
 	d := New(hero.Viserai{}, []weapon.Weapon{weapon.NebulaBlade{}}, []card.Card{a, a, b, b})
 
@@ -187,7 +195,7 @@ func TestAllMutations_Deterministic(t *testing.T) {
 }
 
 func TestAllMutations_NoDuplicateOfSource(t *testing.T) {
-	a := cards.Get(card.AetherSlashRed)
+	a := cards.Get(card.ArcanicCrackleRed)
 	d := New(hero.Viserai{}, []weapon.Weapon{weapon.NebulaBlade{}}, []card.Card{a, a, a, a})
 	srcKey := deckFingerprint(d)
 	for i, m := range AllMutations(d, 2, nil) {
@@ -195,4 +203,27 @@ func TestAllMutations_NoDuplicateOfSource(t *testing.T) {
 			t.Errorf("mutation %d equals the source deck", i)
 		}
 	}
+}
+
+// expectedPairMutCount mirrors cardPairMutations's emission rule for a given deck so the
+// CountsAndShape test can predict the pair-mutation contribution without re-implementing the
+// generator. Counts pairs whose halves are both absent from d, then for each emits
+// C(min(uniques, cardPairTopK), 2) candidates.
+func expectedPairMutCount(d *Deck, maxCopies int) int {
+	counts := map[card.ID]int{}
+	for _, c := range d.Cards {
+		counts[c.ID()]++
+	}
+	uniques := len(counts)
+	if uniques > cardPairTopK {
+		uniques = cardPairTopK
+	}
+	perPair := uniques * (uniques - 1) / 2
+	absent := 0
+	for _, p := range cardPairs {
+		if counts[p.First] == 0 && counts[p.Second] == 0 {
+			absent++
+		}
+	}
+	return absent * perPair
 }

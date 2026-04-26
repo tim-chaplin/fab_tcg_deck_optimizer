@@ -23,9 +23,9 @@ type Mutation struct {
 
 // AllMutations returns every single-card mutation of d in a deterministic order: first every
 // alternative weapon loadout (sorted by loadout key), then every (removeID, addID) pair where
-// one copy of removeID is dropped and one copy of addID is added. removeID must be in the deck;
-// addID's post-mutation count must not exceed maxCopies. Pairs with removeID == addID are
-// skipped.
+// one copy of removeID is dropped and one copy of addID is added, then the synergy-pair
+// "swap two for two" mutations from cardPairMutations. removeID must be in the deck; addID's
+// post-mutation count must not exceed maxCopies. Pairs with removeID == addID are skipped.
 //
 // Card-mutation ordering: the outer loop iterates uniqueIDs by ascending per-card average
 // contribution (d.Stats.PerCard[id].Avg()), so low-value cards get swap candidates tried first.
@@ -34,7 +34,9 @@ type Mutation struct {
 // first-improvement hill climb.
 //
 // Single-card swaps (not paired swaps) let the hill climber reach decks with odd per-card counts
-// (e.g. 1× X + 3× Y at maxCopies=3).
+// (e.g. 1× X + 3× Y at maxCopies=3). The pair-swap layer is the orthogonal escape hatch for
+// synergies whose halves are individually weaker than competitors and would never enter the
+// deck via single-slot mutations alone — see cardPairs in card_pairs.go.
 //
 // legal filters the addition pool: only accepted IDs become swap-in candidates, so format-banned
 // cards can't be introduced. Removal targets aren't filtered — a deck that entered the climb
@@ -44,6 +46,7 @@ type Mutation struct {
 func AllMutations(d *Deck, maxCopies int, legal func(card.Card) bool) []Mutation {
 	out := weaponLoadoutMutations(d)
 	out = append(out, cardSwapMutations(d, maxCopies, legal)...)
+	out = append(out, cardPairMutations(d, maxCopies, legal)...)
 	return out
 }
 

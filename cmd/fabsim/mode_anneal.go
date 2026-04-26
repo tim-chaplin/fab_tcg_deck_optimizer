@@ -35,6 +35,11 @@ type annealConfig struct {
 	startTemp float64
 	tempDecay float64
 	minTemp   float64
+	// minImprovement is the noise-floor a strict (T==0) acceptance must clear: deepAvg must
+	// exceed bestAvg by more than this margin. Guards against infinite acceptance loops where
+	// shuffle noise lets a stream of near-zero "wins" keep firing. The probabilistic SA gate
+	// ignores this floor so annealing can still cross ties / shallow dips.
+	minImprovement float64
 	// quietLoad suppresses the baseline card-list dump in prepareBaseline. Set by wrapper
 	// scripts that re-invoke anneal repeatedly on the same deck; the listing is unchanging
 	// noise after the first pass.
@@ -68,8 +73,9 @@ func runAnnealCmd(args []string) {
 	formatFlag := fs.String("format", string(deckformat.SilverAge), "constructed format whose banlist restricts the card pool during search (only \"silver_age\" is supported today)")
 	debug := fs.Bool("debug", false, "emit extra diagnostic output (e.g. memo cache size between rounds)")
 	reevaluate := fs.Bool("reevaluate", false, "force re-evaluation of the loaded deck's baseline avg, even if its prior run count already matches -deep-shuffles. Use after adjusting modelling assumptions or fixing bugs that may have shifted the deck's true score.")
-	finalize := fs.Bool("finalize", false, "high-precision pass — overrides -shallow-shuffles to 10000 and -deep-shuffles to 100000. Use on a deck that's already converged to squeeze out the remaining sub-percent improvements.")
+	finalize := fs.Bool("finalize", false, "high-precision pass — overrides -shallow-shuffles to 10000, -deep-shuffles to 100000, and tightens -min-improvement to 0.01. Use on a deck that's already converged to squeeze out the remaining sub-percent improvements.")
 	startTemp := fs.Float64("start-temp", 0, "simulated-annealing starting temperature. 0 (default) runs a pure hill climb. Higher values probabilistically accept worse mutations early; acceptance probability is exp((avg - baseline) / T). Good starting range is ~0.05–0.5 given typical Value units.")
+	minImprovement := fs.Float64("min-improvement", 0.1, "noise floor on strict (T==0) acceptance: a mutation's deep avg must exceed the current avg by more than this margin to be accepted. Guards against infinite-loop acceptance of within-noise wins; raise it for chunkier improvements only, lower it (e.g. 0.01) for fine-grained finalize passes. The probabilistic SA gate at T>0 ignores this margin so annealing can still cross ties.")
 	tempDecay := fs.Float64("temp-decay", 0.95, "multiplicative cooling per acceptance — T ← T × decay, floored at -min-temp. Unused when -start-temp is 0.")
 	minTemp := fs.Float64("min-temp", 0, "minimum temperature. Once T reaches this floor the climb becomes greedy until a local maximum is found. 0 disables annealing in the converged tail.")
 	quietLoad := fs.Bool("quiet-load", false, "skip the baseline card-list dump at startup. Intended for wrapper scripts (e.g. anneal-reanneal.ps1) that re-invoke anneal many times on the same deck — the listing never changes pass-to-pass and floods the log.")
@@ -85,10 +91,12 @@ func runAnnealCmd(args []string) {
 	}
 
 	// -finalize is a shuffle-count shorthand, so apply it as a post-parse override rather than
-	// threading it into annealConfig.
+	// threading it into annealConfig. The -min-improvement floor also tightens here so the
+	// finalize pass can land sub-0.1 wins that the default 0.1 floor would otherwise reject.
 	if *finalize {
 		*shallowShuffles = 10000
 		*deepShuffles = 100000
+		*minImprovement = 0.01
 	}
 
 	name := *deckName
@@ -114,6 +122,7 @@ func runAnnealCmd(args []string) {
 		startTemp:       *startTemp,
 		tempDecay:       *tempDecay,
 		minTemp:         *minTemp,
+		minImprovement:  *minImprovement,
 		quietLoad:       *quietLoad,
 	}
 
@@ -181,7 +190,7 @@ func runAnneal(cfg annealConfig) annealResult {
 		stopTicker := startRoundTicker(round, len(mutations), start, &tested, &deepsDone,
 			temperature, currentAvg, bestEverAvg)
 		d, avg, idx, found := deck.IterateParallel(
-			ctx, mutations, currentAvg, temperature,
+			ctx, mutations, currentAvg, temperature, cfg.minImprovement,
 			cfg.shallowShuffles, cfg.deepShuffles, cfg.incoming, 0,
 			rng.Int63(), &tested, &deepsDone,
 		)

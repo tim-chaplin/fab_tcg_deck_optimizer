@@ -22,12 +22,18 @@ import (
 // (cancellation stops the others). Parallelising deep confirms keeps rounds with noisy
 // shallow screens bounded by max(shallow wall, deeps/workers × deep wall).
 //
-// Annealing: at temperature == 0 only strict improvements are accepted (classical hill
-// climb). At temperature > 0 worse mutations are also accepted with probability
-// exp((deepAvg - baseline) / temperature) — a Metropolis-style SA gate. The shallow
-// pre-screen widens proportionally (threshold = baseline - 3·T) so mutations likely to
-// clear the probabilistic gate aren't cut off early. 3·T covers ~95% of acceptable
-// mutations (exp(-3) ≈ 0.05).
+// Annealing: at temperature == 0 only strict improvements clearing the minImprovement
+// margin are accepted (classical hill climb with a noise floor). At temperature > 0 worse
+// mutations are also accepted with probability exp((deepAvg - baseline) / temperature) — a
+// Metropolis-style SA gate that bypasses the minImprovement margin entirely (so the SA walk
+// retains its escape-local-maxima behaviour even when the floor is non-zero). The shallow
+// pre-screen widens proportionally: at T==0 it cuts at baseline + minImprovement; at T>0 it
+// cuts at baseline - 3·T (covers ~95% of probabilistic acceptances; exp(-3) ≈ 0.05).
+//
+// minImprovement is the noise floor on strict improvements: a mutation must lift deepAvg by
+// more than this amount above bestAvg to be accepted at T==0. Prevents infinite loops where
+// repeated near-zero "wins" (within shuffle noise) keep accepting indefinitely. Pass 0 for
+// the original strict-greater behaviour.
 //
 // Mutations are pulled FIFO so the earliest-position-wins heuristic of serial iterate
 // generally holds, but a worker locked on a deep confirm at position 20 doesn't block
@@ -45,6 +51,7 @@ func IterateParallel(
 	mutations []Mutation,
 	bestAvg float64,
 	temperature float64,
+	minImprovement float64,
 	shallowShuffles, deepShuffles, incoming, numWorkers int,
 	seed int64,
 	shallowCompleted *atomic.Int64,
@@ -57,9 +64,11 @@ func IterateParallel(
 		return nil, bestAvg, -1, false
 	}
 
-	// Shallow threshold mirrors the deep acceptance gate's reach: strict at T=0, widened by
-	// 3·T at T>0 so probabilistically-acceptable mutations still clear the pre-screen.
-	shallowThreshold := bestAvg
+	// Shallow threshold mirrors the deep acceptance gate's reach: at T==0 require a clear of
+	// the noise floor (bestAvg + minImprovement); at T>0 widen to bestAvg - 3·T so
+	// probabilistically-acceptable mutations still clear the pre-screen. The probabilistic
+	// gate ignores minImprovement so the shallow gate ignores it too at T>0.
+	shallowThreshold := bestAvg + minImprovement
 	if temperature > 0 {
 		shallowThreshold = bestAvg - 3*temperature
 	}
@@ -113,7 +122,7 @@ func IterateParallel(
 				if deepsCompleted != nil {
 					deepsCompleted.Add(1)
 				}
-				if !acceptMutation(deepAvg, bestAvg, temperature, deepRng) {
+				if !acceptMutation(deepAvg, bestAvg, temperature, minImprovement, deepRng) {
 					continue
 				}
 				select {
@@ -161,11 +170,17 @@ func defaultWorkers() int {
 	return physical
 }
 
-// acceptMutation implements the Metropolis acceptance rule. Strict improvements (deepAvg >
-// bestAvg) always pass. Worse mutations pass with probability exp((deepAvg - bestAvg) / T)
-// when T > 0; at T == 0 they're rejected, recovering the classical hill-climb behaviour.
-func acceptMutation(deepAvg, bestAvg, temperature float64, rng *rand.Rand) bool {
-	if deepAvg > bestAvg {
+// acceptMutation implements the Metropolis acceptance rule with a noise-floor guard. Strict
+// improvements that clear the minImprovement margin (deepAvg > bestAvg + minImprovement)
+// always pass. Worse-or-marginal mutations pass with probability exp((deepAvg - bestAvg) /
+// T) when T > 0; at T == 0 they're rejected, recovering the classical hill-climb behaviour.
+//
+// minImprovement guards against infinite loops where shuffle noise lets repeated near-zero
+// "wins" keep accepting indefinitely. The probabilistic gate intentionally ignores it so SA
+// can still walk through ties / shallow dips to escape local maxima — without that bypass,
+// raising the floor would shrink the explorable region of the SA walk in proportion.
+func acceptMutation(deepAvg, bestAvg, temperature, minImprovement float64, rng *rand.Rand) bool {
+	if deepAvg > bestAvg+minImprovement {
 		return true
 	}
 	if temperature <= 0 {
