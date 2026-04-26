@@ -21,7 +21,8 @@ func (ReadTheRunesRed) Defense() int             { return 2 }
 func (ReadTheRunesRed) Types() card.TypeSet      { return readTheRunesTypes }
 func (ReadTheRunesRed) GoAgain() bool            { return false }
 func (ReadTheRunesRed) Play(s *card.TurnState, self *card.CardState) {
-	s.ApplyAndLogEffectiveAttackPlus(self, s.CreateRunechants(3))
+	s.ApplyAndLogEffectiveAttack(self)
+	s.CreateAndLogRunechantsOnPlay(self, 3)
 }
 
 type ReadTheRunesYellow struct{}
@@ -35,7 +36,8 @@ func (ReadTheRunesYellow) Defense() int             { return 2 }
 func (ReadTheRunesYellow) Types() card.TypeSet      { return readTheRunesTypes }
 func (ReadTheRunesYellow) GoAgain() bool            { return false }
 func (ReadTheRunesYellow) Play(s *card.TurnState, self *card.CardState) {
-	s.ApplyAndLogEffectiveAttackPlus(self, s.CreateRunechants(2))
+	s.ApplyAndLogEffectiveAttack(self)
+	s.CreateAndLogRunechantsOnPlay(self, 2)
 }
 
 type ReadTheRunesBlue struct{}
@@ -49,5 +51,6 @@ func (ReadTheRunesBlue) Defense() int             { return 2 }
 func (ReadTheRunesBlue) Types() card.TypeSet      { return readTheRunesTypes }
 func (ReadTheRunesBlue) GoAgain() bool            { return false }
 func (ReadTheRunesBlue) Play(s *card.TurnState, self *card.CardState) {
-	s.ApplyAndLogEffectiveAttackPlus(self, s.CreateRunechants(1))
+	s.ApplyAndLogEffectiveAttack(self)
+	s.CreateAndLogRunechantsOnPlay(self, 1)
 }

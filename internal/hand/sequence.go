@@ -455,8 +455,8 @@ func (ctx *sequenceContext) playSequenceWithMeta(n int) (damage int, leftoverRun
 		ctx.hero.OnCardPlayed(pc.Card, state)
 		ephemeralsBefore := len(state.EphemeralAttackTriggers)
 		// Card.Play owns its chain-step log line and value contribution: it calls
-		// state.ApplyAndLogEffectiveAttack / Plus / LogPlay before returning. The
-		// dispatcher just sequences the surrounding triggers.
+		// state.ApplyAndLogEffectiveAttack / LogPlay before returning. The dispatcher
+		// just sequences the surrounding triggers.
 		pc.Card.Play(state, pc)
 		// Stamp SourceIndex on any EphemeralAttackTriggers the card registered during Play
 		// so fireEphemeralAttackTriggers can attribute the fire back to this card.

@@ -104,10 +104,11 @@ type Card interface {
 	// Play is called when the card resolves — as an attack or as a defense reaction. Cards
 	// own state mutation: they read self.FromArsenal for arsenal-gated riders, write
 	// self.GrantedGoAgain to grant themselves Go again, and call s.ApplyAndLogEffectiveAttack
-	// to append the chain-step log entry and credit damage to s.Value. Sub-effect damage
-	// (runechant creation, conditional rider arcane, tutored sub-card plays) is credited via
-	// the appropriate AddLogEntry / AddPre/PostTriggerLogEntry / ApplyAndLogEffectiveAttackPlus
-	// path so the printout reads as a structured tree.
+	// (or s.LogPlay for non-attack cards) to append the chain-step log entry and credit
+	// damage to s.Value. Separable rider effects (runechant creation, conditional arcane,
+	// on-hit credits, tutored sub-card plays) emit their own post-trigger child lines via
+	// the LogRiderOnPlay / CreateAndLogRunechantsOnPlay / DealAndLogArcaneDamage /
+	// AddPostTriggerLogEntry helpers so the printout reads as a structured tree.
 	Play(s *TurnState, self *CardState)
 }
 

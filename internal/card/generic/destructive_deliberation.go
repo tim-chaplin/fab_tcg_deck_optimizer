@@ -23,7 +23,7 @@ func (DestructiveDeliberationRed) GoAgain() bool            { return false }
 // not implemented: ponder tokens
 func (DestructiveDeliberationRed) NotImplemented() {}
 func (DestructiveDeliberationRed) Play(s *card.TurnState, self *card.CardState) {
-	s.ApplyAndLogEffectiveAttackPlus(self, destructiveDeliberationBonus(self))
+	s.ApplyAndLogEffectiveAttack(self)
 }
 
 type DestructiveDeliberationYellow struct{}
@@ -40,7 +40,7 @@ func (DestructiveDeliberationYellow) GoAgain() bool            { return false }
 // not implemented: ponder tokens
 func (DestructiveDeliberationYellow) NotImplemented() {}
 func (DestructiveDeliberationYellow) Play(s *card.TurnState, self *card.CardState) {
-	s.ApplyAndLogEffectiveAttackPlus(self, destructiveDeliberationBonus(self))
+	s.ApplyAndLogEffectiveAttack(self)
 }
 
 type DestructiveDeliberationBlue struct{}
@@ -57,14 +57,5 @@ func (DestructiveDeliberationBlue) GoAgain() bool            { return false }
 // not implemented: ponder tokens
 func (DestructiveDeliberationBlue) NotImplemented() {}
 func (DestructiveDeliberationBlue) Play(s *card.TurnState, self *card.CardState) {
-	s.ApplyAndLogEffectiveAttackPlus(self, destructiveDeliberationBonus(self))
-}
-
-// destructiveDeliberationDamage is a breadcrumb for the on-hit "create a Ponder token" rider —
-// Ponder tokens aren't tracked (see TODO.md).
-func destructiveDeliberationBonus(self *card.CardState) int {
-	if card.LikelyToHit(self) {
-		// TODO: model on-hit Ponder token creation rider.
-	}
-	return 0
+	s.ApplyAndLogEffectiveAttack(self)
 }

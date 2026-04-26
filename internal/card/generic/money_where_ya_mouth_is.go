@@ -28,7 +28,8 @@ func (MoneyWhereYaMouthIsRed) GoAgain() bool            { return true }
 // not implemented: gold tokens
 func (MoneyWhereYaMouthIsRed) NotImplemented() {}
 func (MoneyWhereYaMouthIsRed) Play(s *card.TurnState, self *card.CardState) {
-	s.ApplyAndLogEffectiveAttackPlus(self, grantNextAttackActionBonus(s, 3))
+	grantNextAttackActionBonus(s, 3)
+	s.ApplyAndLogEffectiveAttack(self)
 }
 
 type MoneyWhereYaMouthIsYellow struct{}
@@ -45,7 +46,8 @@ func (MoneyWhereYaMouthIsYellow) GoAgain() bool            { return true }
 // not implemented: gold tokens
 func (MoneyWhereYaMouthIsYellow) NotImplemented() {}
 func (MoneyWhereYaMouthIsYellow) Play(s *card.TurnState, self *card.CardState) {
-	s.ApplyAndLogEffectiveAttackPlus(self, grantNextAttackActionBonus(s, 2))
+	grantNextAttackActionBonus(s, 2)
+	s.ApplyAndLogEffectiveAttack(self)
 }
 
 type MoneyWhereYaMouthIsBlue struct{}
@@ -62,5 +64,6 @@ func (MoneyWhereYaMouthIsBlue) GoAgain() bool            { return true }
 // not implemented: gold tokens
 func (MoneyWhereYaMouthIsBlue) NotImplemented() {}
 func (MoneyWhereYaMouthIsBlue) Play(s *card.TurnState, self *card.CardState) {
-	s.ApplyAndLogEffectiveAttackPlus(self, grantNextAttackActionBonus(s, 1))
+	grantNextAttackActionBonus(s, 1)
+	s.ApplyAndLogEffectiveAttack(self)
 }

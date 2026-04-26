@@ -31,9 +31,8 @@ func (BlowForABlowRed) Defense() int             { return 2 }
 func (BlowForABlowRed) Types() card.TypeSet      { return blowForABlowTypes }
 func (BlowForABlowRed) GoAgain() bool            { return simstate.HeroWantsLowerHealth() }
 func (BlowForABlowRed) Play(s *card.TurnState, self *card.CardState) {
-	rider := 0
+	s.ApplyAndLogEffectiveAttack(self)
 	if card.LikelyToHit(self) {
-		rider = blowForABlowPingValue
+		s.LogRiderOnPlay(self, "On-hit dealt 1 damage", blowForABlowPingValue)
 	}
-	s.ApplyAndLogEffectiveAttackPlus(self, rider)
 }

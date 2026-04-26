@@ -13,6 +13,15 @@ import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 
 var weepingBattlegroundTypes = card.NewTypeSet(card.TypeRuneblade, card.TypeDefenseReaction)
 
+// weepingBattlegroundPlay emits the chain step then writes the banish-for-arcane rider as
+// a sub-line under self when an aura was successfully banished from the graveyard.
+func weepingBattlegroundPlay(s *card.TurnState, self *card.CardState) {
+	s.ApplyAndLogEffectiveAttack(self)
+	if n := banishAuraFromGraveyard(s); n > 0 {
+		s.LogRiderOnPlay(self, "Banished an aura, dealt 1 arcane damage", n)
+	}
+}
+
 type WeepingBattlegroundRed struct{}
 
 func (WeepingBattlegroundRed) ID() card.ID              { return card.WeepingBattlegroundRed }
@@ -25,7 +34,7 @@ func (WeepingBattlegroundRed) Types() card.TypeSet      { return weepingBattlegr
 func (WeepingBattlegroundRed) GoAgain() bool            { return false }
 func (WeepingBattlegroundRed) NoMemo()                  {}
 func (WeepingBattlegroundRed) Play(s *card.TurnState, self *card.CardState) {
-	s.ApplyAndLogEffectiveAttackPlus(self, banishAuraFromGraveyard(s))
+	weepingBattlegroundPlay(s, self)
 }
 
 type WeepingBattlegroundYellow struct{}
@@ -40,7 +49,7 @@ func (WeepingBattlegroundYellow) Types() card.TypeSet      { return weepingBattl
 func (WeepingBattlegroundYellow) GoAgain() bool            { return false }
 func (WeepingBattlegroundYellow) NoMemo()                  {}
 func (WeepingBattlegroundYellow) Play(s *card.TurnState, self *card.CardState) {
-	s.ApplyAndLogEffectiveAttackPlus(self, banishAuraFromGraveyard(s))
+	weepingBattlegroundPlay(s, self)
 }
 
 type WeepingBattlegroundBlue struct{}
@@ -55,5 +64,5 @@ func (WeepingBattlegroundBlue) Types() card.TypeSet      { return weepingBattleg
 func (WeepingBattlegroundBlue) GoAgain() bool            { return false }
 func (WeepingBattlegroundBlue) NoMemo()                  {}
 func (WeepingBattlegroundBlue) Play(s *card.TurnState, self *card.CardState) {
-	s.ApplyAndLogEffectiveAttackPlus(self, banishAuraFromGraveyard(s))
+	weepingBattlegroundPlay(s, self)
 }

@@ -10,12 +10,6 @@ import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 
 var sigilOfSufferingTypes = card.NewTypeSet(card.TypeRuneblade, card.TypeDefenseReaction)
 
-// sigilOfSufferingPlay deals 1 arcane damage to the attacking hero and marks ArcaneDamageDealt
-// so same-turn triggers reading "if you've dealt arcane damage this turn" see it.
-func sigilOfSufferingPlay(s *card.TurnState) int {
-	return s.DealArcaneDamage(1)
-}
-
 type SigilOfSufferingRed struct{}
 
 func (SigilOfSufferingRed) ID() card.ID              { return card.SigilOfSufferingRed }
@@ -31,7 +25,8 @@ func (SigilOfSufferingRed) GoAgain() bool            { return false }
 // Defense — over-credits when the trigger condition isn't met
 func (SigilOfSufferingRed) NotImplemented() {}
 func (SigilOfSufferingRed) Play(s *card.TurnState, self *card.CardState) {
-	s.ApplyAndLogEffectiveAttackPlus(self, sigilOfSufferingPlay(s))
+	s.ApplyAndLogEffectiveAttack(self)
+	s.DealAndLogArcaneDamage(self, 1)
 }
 
 type SigilOfSufferingYellow struct{}
@@ -49,7 +44,8 @@ func (SigilOfSufferingYellow) GoAgain() bool            { return false }
 // Defense — over-credits when the trigger condition isn't met
 func (SigilOfSufferingYellow) NotImplemented() {}
 func (SigilOfSufferingYellow) Play(s *card.TurnState, self *card.CardState) {
-	s.ApplyAndLogEffectiveAttackPlus(self, sigilOfSufferingPlay(s))
+	s.ApplyAndLogEffectiveAttack(self)
+	s.DealAndLogArcaneDamage(self, 1)
 }
 
 type SigilOfSufferingBlue struct{}
@@ -67,5 +63,6 @@ func (SigilOfSufferingBlue) GoAgain() bool            { return false }
 // Defense — over-credits when the trigger condition isn't met
 func (SigilOfSufferingBlue) NotImplemented() {}
 func (SigilOfSufferingBlue) Play(s *card.TurnState, self *card.CardState) {
-	s.ApplyAndLogEffectiveAttackPlus(self, sigilOfSufferingPlay(s))
+	s.ApplyAndLogEffectiveAttack(self)
+	s.DealAndLogArcaneDamage(self, 1)
 }

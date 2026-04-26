@@ -12,14 +12,14 @@ import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 
 var skyFireLanternsTypes = card.NewTypeSet(card.TypeRuneblade, card.TypeAction)
 
-func skyFireLanternsPlay(selfPitch int, s *card.TurnState) int {
-	if len(s.Deck) == 0 {
-		return 0
+// skyFireLanternsPlay emits the chain step then writes a runechant rider sub-line under
+// self when the deck-top card matches this variant's pitch (color).
+func skyFireLanternsPlay(s *card.TurnState, self *card.CardState, selfPitch int) {
+	s.ApplyAndLogEffectiveAttack(self)
+	if len(s.Deck) == 0 || s.Deck[0].Pitch() != selfPitch {
+		return
 	}
-	if s.Deck[0].Pitch() != selfPitch {
-		return 0
-	}
-	return s.CreateRunechant()
+	s.CreateAndLogRunechantsOnPlay(self, 1)
 }
 
 type SkyFireLanternsRed struct{}
@@ -34,7 +34,7 @@ func (SkyFireLanternsRed) Types() card.TypeSet      { return skyFireLanternsType
 func (SkyFireLanternsRed) GoAgain() bool            { return true }
 func (SkyFireLanternsRed) NoMemo()                  {} // value depends on top of deck
 func (c SkyFireLanternsRed) Play(s *card.TurnState, self *card.CardState) {
-	s.ApplyAndLogEffectiveAttackPlus(self, skyFireLanternsPlay(c.Pitch(), s))
+	skyFireLanternsPlay(s, self, c.Pitch())
 }
 
 type SkyFireLanternsYellow struct{}
@@ -49,7 +49,7 @@ func (SkyFireLanternsYellow) Types() card.TypeSet      { return skyFireLanternsT
 func (SkyFireLanternsYellow) GoAgain() bool            { return true }
 func (SkyFireLanternsYellow) NoMemo()                  {}
 func (c SkyFireLanternsYellow) Play(s *card.TurnState, self *card.CardState) {
-	s.ApplyAndLogEffectiveAttackPlus(self, skyFireLanternsPlay(c.Pitch(), s))
+	skyFireLanternsPlay(s, self, c.Pitch())
 }
 
 type SkyFireLanternsBlue struct{}
@@ -64,5 +64,5 @@ func (SkyFireLanternsBlue) Types() card.TypeSet      { return skyFireLanternsTyp
 func (SkyFireLanternsBlue) GoAgain() bool            { return true }
 func (SkyFireLanternsBlue) NoMemo()                  {}
 func (c SkyFireLanternsBlue) Play(s *card.TurnState, self *card.CardState) {
-	s.ApplyAndLogEffectiveAttackPlus(self, skyFireLanternsPlay(c.Pitch(), s))
+	skyFireLanternsPlay(s, self, c.Pitch())
 }

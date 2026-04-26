@@ -16,19 +16,21 @@ import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 
 var scoutThePeripheryTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction)
 
-// nextArsenalAttackActionBonus returns n when some later card in the chain is an attack action
-// that was itself played from arsenal, otherwise 0. Used by riders whose grant targets "the next
-// attack action card you play from arsenal".
-func nextArsenalAttackActionBonus(s *card.TurnState, n int) int {
+// grantNextArsenalAttackActionBonus adds n to the first scheduled attack action played
+// from arsenal — its BonusAttack lands the buff so EffectiveAttack and LikelyToHit see
+// the buffed power on the buffed card, not on the granter. The arsenal can hold at most
+// one card, so this only fires when the arsenal-in card is itself an attack action queued
+// later in the chain. Fizzles silently when no qualifying target follows.
+func grantNextArsenalAttackActionBonus(s *card.TurnState, n int) {
 	for _, pc := range s.CardsRemaining {
 		if !pc.FromArsenal {
 			continue
 		}
 		if pc.Card.Types().IsAttackAction() {
-			return n
+			pc.BonusAttack += n
+			return
 		}
 	}
-	return 0
 }
 
 type ScoutThePeripheryRed struct{}
@@ -42,7 +44,8 @@ func (ScoutThePeripheryRed) Defense() int             { return 2 }
 func (ScoutThePeripheryRed) Types() card.TypeSet      { return scoutThePeripheryTypes }
 func (ScoutThePeripheryRed) GoAgain() bool            { return true }
 func (ScoutThePeripheryRed) Play(s *card.TurnState, self *card.CardState) {
-	s.ApplyAndLogEffectiveAttackPlus(self, nextArsenalAttackActionBonus(s, 3))
+	grantNextArsenalAttackActionBonus(s, 3)
+	s.ApplyAndLogEffectiveAttack(self)
 }
 
 type ScoutThePeripheryYellow struct{}
@@ -56,7 +59,8 @@ func (ScoutThePeripheryYellow) Defense() int             { return 2 }
 func (ScoutThePeripheryYellow) Types() card.TypeSet      { return scoutThePeripheryTypes }
 func (ScoutThePeripheryYellow) GoAgain() bool            { return true }
 func (ScoutThePeripheryYellow) Play(s *card.TurnState, self *card.CardState) {
-	s.ApplyAndLogEffectiveAttackPlus(self, nextArsenalAttackActionBonus(s, 2))
+	grantNextArsenalAttackActionBonus(s, 2)
+	s.ApplyAndLogEffectiveAttack(self)
 }
 
 type ScoutThePeripheryBlue struct{}
@@ -70,5 +74,6 @@ func (ScoutThePeripheryBlue) Defense() int             { return 2 }
 func (ScoutThePeripheryBlue) Types() card.TypeSet      { return scoutThePeripheryTypes }
 func (ScoutThePeripheryBlue) GoAgain() bool            { return true }
 func (ScoutThePeripheryBlue) Play(s *card.TurnState, self *card.CardState) {
-	s.ApplyAndLogEffectiveAttackPlus(self, nextArsenalAttackActionBonus(s, 1))
+	grantNextArsenalAttackActionBonus(s, 1)
+	s.ApplyAndLogEffectiveAttack(self)
 }

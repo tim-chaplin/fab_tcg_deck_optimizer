@@ -23,7 +23,7 @@ func (ArcaneCussingRed) Defense() int             { return 2 }
 func (ArcaneCussingRed) Types() card.TypeSet      { return arcaneCussingTypes }
 func (ArcaneCussingRed) GoAgain() bool            { return true }
 func (ArcaneCussingRed) Play(s *card.TurnState, self *card.CardState) {
-	s.ApplyAndLogEffectiveAttackPlus(self, fragileAuraValue(s, 3, false))
+	fragileAuraPlay(s, self, 3, false)
 }
 
 type ArcaneCussingYellow struct{}
@@ -37,7 +37,7 @@ func (ArcaneCussingYellow) Defense() int             { return 2 }
 func (ArcaneCussingYellow) Types() card.TypeSet      { return arcaneCussingTypes }
 func (ArcaneCussingYellow) GoAgain() bool            { return true }
 func (ArcaneCussingYellow) Play(s *card.TurnState, self *card.CardState) {
-	s.ApplyAndLogEffectiveAttackPlus(self, fragileAuraValue(s, 2, false))
+	fragileAuraPlay(s, self, 2, false)
 }
 
 type ArcaneCussingBlue struct{}
@@ -51,5 +51,5 @@ func (ArcaneCussingBlue) Defense() int             { return 2 }
 func (ArcaneCussingBlue) Types() card.TypeSet      { return arcaneCussingTypes }
 func (ArcaneCussingBlue) GoAgain() bool            { return true }
 func (ArcaneCussingBlue) Play(s *card.TurnState, self *card.CardState) {
-	s.ApplyAndLogEffectiveAttackPlus(self, fragileAuraValue(s, 1, false))
+	fragileAuraPlay(s, self, 1, false)
 }

@@ -11,11 +11,6 @@ import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 
 var vexingMaliceTypes = card.NewTypeSet(card.TypeRuneblade, card.TypeAction, card.TypeAttack)
 
-// vexingMalicePlay adds the 2 arcane to base damage and marks ArcaneDamageDealt.
-func vexingMaliceBonus(s *card.TurnState) int {
-	return s.DealArcaneDamage(2)
-}
-
 type VexingMaliceRed struct{}
 
 func (VexingMaliceRed) ID() card.ID              { return card.VexingMaliceRed }
@@ -27,7 +22,8 @@ func (VexingMaliceRed) Defense() int             { return 3 }
 func (VexingMaliceRed) Types() card.TypeSet      { return vexingMaliceTypes }
 func (VexingMaliceRed) GoAgain() bool            { return false }
 func (VexingMaliceRed) Play(s *card.TurnState, self *card.CardState) {
-	s.ApplyAndLogEffectiveAttackPlus(self, vexingMaliceBonus(s))
+	s.ApplyAndLogEffectiveAttack(self)
+	s.DealAndLogArcaneDamage(self, 2)
 }
 
 type VexingMaliceYellow struct{}
@@ -41,7 +37,8 @@ func (VexingMaliceYellow) Defense() int             { return 3 }
 func (VexingMaliceYellow) Types() card.TypeSet      { return vexingMaliceTypes }
 func (VexingMaliceYellow) GoAgain() bool            { return false }
 func (VexingMaliceYellow) Play(s *card.TurnState, self *card.CardState) {
-	s.ApplyAndLogEffectiveAttackPlus(self, vexingMaliceBonus(s))
+	s.ApplyAndLogEffectiveAttack(self)
+	s.DealAndLogArcaneDamage(self, 2)
 }
 
 type VexingMaliceBlue struct{}
@@ -55,5 +52,6 @@ func (VexingMaliceBlue) Defense() int             { return 3 }
 func (VexingMaliceBlue) Types() card.TypeSet      { return vexingMaliceTypes }
 func (VexingMaliceBlue) GoAgain() bool            { return false }
 func (VexingMaliceBlue) Play(s *card.TurnState, self *card.CardState) {
-	s.ApplyAndLogEffectiveAttackPlus(self, vexingMaliceBonus(s))
+	s.ApplyAndLogEffectiveAttack(self)
+	s.DealAndLogArcaneDamage(self, 2)
 }

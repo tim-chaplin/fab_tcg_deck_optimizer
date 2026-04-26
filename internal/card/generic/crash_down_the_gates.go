@@ -25,7 +25,7 @@ func (CrashDownTheGatesRed) GoAgain() bool            { return false }
 // not implemented: deck-reveal comparison + on-hit deck-top destruction
 func (CrashDownTheGatesRed) NotImplemented() {}
 func (CrashDownTheGatesRed) Play(s *card.TurnState, self *card.CardState) {
-	s.ApplyAndLogEffectiveAttackPlus(self, crashDownTheGatesBonus(self))
+	s.ApplyAndLogEffectiveAttack(self)
 }
 
 type CrashDownTheGatesYellow struct{}
@@ -42,7 +42,7 @@ func (CrashDownTheGatesYellow) GoAgain() bool            { return false }
 // not implemented: deck-reveal comparison + on-hit deck-top destruction
 func (CrashDownTheGatesYellow) NotImplemented() {}
 func (CrashDownTheGatesYellow) Play(s *card.TurnState, self *card.CardState) {
-	s.ApplyAndLogEffectiveAttackPlus(self, crashDownTheGatesBonus(self))
+	s.ApplyAndLogEffectiveAttack(self)
 }
 
 type CrashDownTheGatesBlue struct{}
@@ -59,14 +59,5 @@ func (CrashDownTheGatesBlue) GoAgain() bool            { return false }
 // not implemented: deck-reveal comparison + on-hit deck-top destruction
 func (CrashDownTheGatesBlue) NotImplemented() {}
 func (CrashDownTheGatesBlue) Play(s *card.TurnState, self *card.CardState) {
-	s.ApplyAndLogEffectiveAttackPlus(self, crashDownTheGatesBonus(self))
-}
-
-// crashDownTheGatesDamage is a breadcrumb for the on-hit "destroy top of their deck" rider —
-// not modelled yet (see TODO.md).
-func crashDownTheGatesBonus(self *card.CardState) int {
-	if card.LikelyToHit(self) {
-		// TODO: model on-hit deck-top destruction rider.
-	}
-	return 0
+	s.ApplyAndLogEffectiveAttack(self)
 }

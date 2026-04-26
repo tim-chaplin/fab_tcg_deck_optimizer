@@ -24,7 +24,8 @@ func (WarmongersRecitalRed) GoAgain() bool            { return true }
 // not implemented: bottom-of-deck rider on next-attack-action target
 func (WarmongersRecitalRed) NotImplemented() {}
 func (WarmongersRecitalRed) Play(s *card.TurnState, self *card.CardState) {
-	s.ApplyAndLogEffectiveAttackPlus(self, grantNextAttackActionBonus(s, 3))
+	grantNextAttackActionBonus(s, 3)
+	s.ApplyAndLogEffectiveAttack(self)
 }
 
 type WarmongersRecitalYellow struct{}
@@ -41,7 +42,8 @@ func (WarmongersRecitalYellow) GoAgain() bool            { return true }
 // not implemented: bottom-of-deck rider on next-attack-action target
 func (WarmongersRecitalYellow) NotImplemented() {}
 func (WarmongersRecitalYellow) Play(s *card.TurnState, self *card.CardState) {
-	s.ApplyAndLogEffectiveAttackPlus(self, grantNextAttackActionBonus(s, 2))
+	grantNextAttackActionBonus(s, 2)
+	s.ApplyAndLogEffectiveAttack(self)
 }
 
 type WarmongersRecitalBlue struct{}
@@ -58,5 +60,6 @@ func (WarmongersRecitalBlue) GoAgain() bool            { return true }
 // not implemented: bottom-of-deck rider on next-attack-action target
 func (WarmongersRecitalBlue) NotImplemented() {}
 func (WarmongersRecitalBlue) Play(s *card.TurnState, self *card.CardState) {
-	s.ApplyAndLogEffectiveAttackPlus(self, grantNextAttackActionBonus(s, 1))
+	grantNextAttackActionBonus(s, 1)
+	s.ApplyAndLogEffectiveAttack(self)
 }

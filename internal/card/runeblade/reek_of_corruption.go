@@ -15,13 +15,14 @@ import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 
 var reekOfCorruptionTypes = card.NewTypeSet(card.TypeRuneblade, card.TypeAction, card.TypeAttack)
 
-// reekOfCorruptionDamage returns the base attack plus the discard rider when the aura condition
-// is satisfied AND this card's printed attack is likely to land on its own.
-func reekOfCorruptionBonus(s *card.TurnState, self *card.CardState) int {
-	if s != nil && s.HasAuraInPlay() && card.LikelyToHit(self) {
-		return card.DiscardValue
+// reekOfCorruptionApplyRider emits the on-hit discard rider as a sub-line under self's
+// chain step when the aura condition is satisfied AND this card's printed attack is likely
+// to land on its own.
+func reekOfCorruptionApplyRider(s *card.TurnState, self *card.CardState) {
+	if s == nil || !s.HasAuraInPlay() || !card.LikelyToHit(self) {
+		return
 	}
-	return 0
+	s.LogRiderOnPlay(self, "On-hit discarded a card", card.DiscardValue)
 }
 
 type ReekOfCorruptionRed struct{}
@@ -35,7 +36,8 @@ func (ReekOfCorruptionRed) Defense() int             { return 3 }
 func (ReekOfCorruptionRed) Types() card.TypeSet      { return reekOfCorruptionTypes }
 func (ReekOfCorruptionRed) GoAgain() bool            { return false }
 func (ReekOfCorruptionRed) Play(s *card.TurnState, self *card.CardState) {
-	s.ApplyAndLogEffectiveAttackPlus(self, reekOfCorruptionBonus(s, self))
+	s.ApplyAndLogEffectiveAttack(self)
+	reekOfCorruptionApplyRider(s, self)
 }
 
 type ReekOfCorruptionYellow struct{}
@@ -49,7 +51,8 @@ func (ReekOfCorruptionYellow) Defense() int             { return 3 }
 func (ReekOfCorruptionYellow) Types() card.TypeSet      { return reekOfCorruptionTypes }
 func (ReekOfCorruptionYellow) GoAgain() bool            { return false }
 func (ReekOfCorruptionYellow) Play(s *card.TurnState, self *card.CardState) {
-	s.ApplyAndLogEffectiveAttackPlus(self, reekOfCorruptionBonus(s, self))
+	s.ApplyAndLogEffectiveAttack(self)
+	reekOfCorruptionApplyRider(s, self)
 }
 
 type ReekOfCorruptionBlue struct{}
@@ -63,5 +66,6 @@ func (ReekOfCorruptionBlue) Defense() int             { return 3 }
 func (ReekOfCorruptionBlue) Types() card.TypeSet      { return reekOfCorruptionTypes }
 func (ReekOfCorruptionBlue) GoAgain() bool            { return false }
 func (ReekOfCorruptionBlue) Play(s *card.TurnState, self *card.CardState) {
-	s.ApplyAndLogEffectiveAttackPlus(self, reekOfCorruptionBonus(s, self))
+	s.ApplyAndLogEffectiveAttack(self)
+	reekOfCorruptionApplyRider(s, self)
 }

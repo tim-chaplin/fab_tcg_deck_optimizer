@@ -23,14 +23,5 @@ func (TongueTiedRed) GoAgain() bool            { return false }
 // not implemented: on-hit opponent-arsenal manipulation rider
 func (TongueTiedRed) NotImplemented() {}
 func (TongueTiedRed) Play(s *card.TurnState, self *card.CardState) {
-	s.ApplyAndLogEffectiveAttackPlus(self, tongueTiedBonus(self))
-}
-
-// tongueTiedDamage is a breadcrumb for the on-hit "arsenal face-up + banish instant" rider —
-// not modelled yet (see TODO.md).
-func tongueTiedBonus(self *card.CardState) int {
-	if card.LikelyToHit(self) {
-		// TODO: model on-hit arsenal manipulation rider.
-	}
-	return 0
+	s.ApplyAndLogEffectiveAttack(self)
 }

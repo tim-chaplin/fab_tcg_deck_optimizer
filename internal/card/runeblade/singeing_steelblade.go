@@ -11,11 +11,6 @@ import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 
 var singeingSteelbladeTypes = card.NewTypeSet(card.TypeRuneblade, card.TypeAction, card.TypeAttack)
 
-// singeingSteelbladePlay adds the 1 arcane to base damage and marks ArcaneDamageDealt.
-func singeingSteelbladeBonus(s *card.TurnState) int {
-	return s.DealArcaneDamage(1)
-}
-
 type SingeingSteelbladeRed struct{}
 
 func (SingeingSteelbladeRed) ID() card.ID              { return card.SingeingSteelbladeRed }
@@ -27,7 +22,8 @@ func (SingeingSteelbladeRed) Defense() int             { return 3 }
 func (SingeingSteelbladeRed) Types() card.TypeSet      { return singeingSteelbladeTypes }
 func (SingeingSteelbladeRed) GoAgain() bool            { return false }
 func (SingeingSteelbladeRed) Play(s *card.TurnState, self *card.CardState) {
-	s.ApplyAndLogEffectiveAttackPlus(self, singeingSteelbladeBonus(s))
+	s.ApplyAndLogEffectiveAttack(self)
+	s.DealAndLogArcaneDamage(self, 1)
 }
 
 type SingeingSteelbladeYellow struct{}
@@ -41,7 +37,8 @@ func (SingeingSteelbladeYellow) Defense() int             { return 3 }
 func (SingeingSteelbladeYellow) Types() card.TypeSet      { return singeingSteelbladeTypes }
 func (SingeingSteelbladeYellow) GoAgain() bool            { return false }
 func (SingeingSteelbladeYellow) Play(s *card.TurnState, self *card.CardState) {
-	s.ApplyAndLogEffectiveAttackPlus(self, singeingSteelbladeBonus(s))
+	s.ApplyAndLogEffectiveAttack(self)
+	s.DealAndLogArcaneDamage(self, 1)
 }
 
 type SingeingSteelbladeBlue struct{}
@@ -55,5 +52,6 @@ func (SingeingSteelbladeBlue) Defense() int             { return 3 }
 func (SingeingSteelbladeBlue) Types() card.TypeSet      { return singeingSteelbladeTypes }
 func (SingeingSteelbladeBlue) GoAgain() bool            { return false }
 func (SingeingSteelbladeBlue) Play(s *card.TurnState, self *card.CardState) {
-	s.ApplyAndLogEffectiveAttackPlus(self, singeingSteelbladeBonus(s))
+	s.ApplyAndLogEffectiveAttack(self)
+	s.DealAndLogArcaneDamage(self, 1)
 }

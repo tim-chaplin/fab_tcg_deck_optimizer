@@ -22,5 +22,6 @@ func (RegainComposureBlue) GoAgain() bool            { return true }
 // not implemented: on-hit unfreeze rider (freeze/unfreeze state not tracked)
 func (RegainComposureBlue) NotImplemented() {}
 func (RegainComposureBlue) Play(s *card.TurnState, self *card.CardState) {
-	s.ApplyAndLogEffectiveAttackPlus(self, grantNextAttackActionBonus(s, 1))
+	grantNextAttackActionBonus(s, 1)
+	s.ApplyAndLogEffectiveAttack(self)
 }

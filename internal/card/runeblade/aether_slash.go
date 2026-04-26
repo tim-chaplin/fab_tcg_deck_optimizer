@@ -25,7 +25,8 @@ func (AetherSlashRed) GoAgain() bool            { return false }
 // an attack and a non-attack action are pitched)
 func (AetherSlashRed) NotImplemented() {}
 func (AetherSlashRed) Play(s *card.TurnState, self *card.CardState) {
-	s.ApplyAndLogEffectiveAttackPlus(self, aetherSlashBonus(s))
+	s.ApplyAndLogEffectiveAttack(self)
+	aetherSlashApplyRider(s, self)
 }
 
 type AetherSlashYellow struct{}
@@ -44,7 +45,8 @@ func (AetherSlashYellow) GoAgain() bool            { return false }
 // an attack and a non-attack action are pitched)
 func (AetherSlashYellow) NotImplemented() {}
 func (AetherSlashYellow) Play(s *card.TurnState, self *card.CardState) {
-	s.ApplyAndLogEffectiveAttackPlus(self, aetherSlashBonus(s))
+	s.ApplyAndLogEffectiveAttack(self)
+	aetherSlashApplyRider(s, self)
 }
 
 type AetherSlashBlue struct{}
@@ -63,13 +65,17 @@ func (AetherSlashBlue) GoAgain() bool            { return false }
 // an attack and a non-attack action are pitched)
 func (AetherSlashBlue) NotImplemented() {}
 func (AetherSlashBlue) Play(s *card.TurnState, self *card.CardState) {
-	s.ApplyAndLogEffectiveAttackPlus(self, aetherSlashBonus(s))
+	s.ApplyAndLogEffectiveAttack(self)
+	aetherSlashApplyRider(s, self)
 }
-func aetherSlashBonus(s *card.TurnState) int {
+
+// aetherSlashApplyRider deals 1 arcane and emits the rider sub-line when any non-attack
+// action was pitched to play this card.
+func aetherSlashApplyRider(s *card.TurnState, self *card.CardState) {
 	for _, p := range s.Pitched {
 		if p.Types().IsNonAttackAction() {
-			return s.DealArcaneDamage(1)
+			s.DealAndLogArcaneDamage(self, 1)
+			return
 		}
 	}
-	return 0
 }

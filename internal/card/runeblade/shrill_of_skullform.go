@@ -49,10 +49,13 @@ func (ShrillOfSkullformBlue) GoAgain() bool            { return false }
 func (ShrillOfSkullformBlue) Play(s *card.TurnState, self *card.CardState) {
 	shrillPlay(s, self)
 }
+
+// shrillPlay routes the +3{p} aura-in-play buff through self.BonusAttack so EffectiveAttack
+// and LikelyToHit see the buffed power, then emits the chain step at the buffed value. No
+// rider sub-line — this is a power buff, not a separable effect.
 func shrillPlay(s *card.TurnState, self *card.CardState) {
-	rider := 0
 	if s.HasAuraInPlay() {
-		rider = 3
+		self.BonusAttack += 3
 	}
-	s.ApplyAndLogEffectiveAttackPlus(self, rider)
+	s.ApplyAndLogEffectiveAttack(self)
 }

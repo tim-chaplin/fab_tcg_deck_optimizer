@@ -5,7 +5,21 @@
 
 package runeblade
 
-import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+import (
+	"fmt"
+
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+)
+
+// fragileAuraPlay emits the chain step for a fragile-aura card and writes the expected
+// payoff as a sub-line under self when fragileAuraValue is non-zero. Auras have Attack=0,
+// so LogPlay carries the chain entry; the rider line carries the predicted value.
+func fragileAuraPlay(s *card.TurnState, self *card.CardState, n int, attackActionOnly bool) {
+	s.LogPlay(self)
+	if v := fragileAuraValue(s, n, attackActionOnly); v > 0 {
+		s.LogRiderOnPlay(self, fmt.Sprintf("Aura expected to pay %d runechants", v), v)
+	}
+}
 
 // fragileAuraValue returns n when the aura is expected to pay out, 0 otherwise. Two paths
 // to payment: (1) we land a same-turn attack that pops the aura now, or (2) we block all

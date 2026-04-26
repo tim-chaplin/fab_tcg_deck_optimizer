@@ -9,20 +9,19 @@ import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 
 var nimblismTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction)
 
-// nimblismPlay grants +n to the first scheduled attack action card whose cost is 1 or less,
-// by adding to its BonusAttack. Returns 0 — the +n attributes to the buffed attack (so
+// nimblismApplySideEffect grants +n to the first scheduled attack action card whose cost is 1
+// or less, by adding to its BonusAttack. The +n attributes to the buffed attack (so
 // EffectiveAttack picks it up in LikelyToHit) rather than to Nimblism itself.
-func nimblismPlay(s *card.TurnState, n int) int {
+func nimblismApplySideEffect(s *card.TurnState, n int) {
 	for _, pc := range s.CardsRemaining {
 		if !pc.Card.Types().IsAttackAction() {
 			continue
 		}
 		if pc.Card.Cost(s) <= 1 {
 			pc.BonusAttack += n
-			return 0
+			return
 		}
 	}
-	return 0
 }
 
 type NimblismRed struct{}
@@ -36,7 +35,8 @@ func (NimblismRed) Defense() int             { return 2 }
 func (NimblismRed) Types() card.TypeSet      { return nimblismTypes }
 func (NimblismRed) GoAgain() bool            { return true }
 func (NimblismRed) Play(s *card.TurnState, self *card.CardState) {
-	s.ApplyAndLogEffectiveAttackPlus(self, nimblismPlay(s, 3))
+	nimblismApplySideEffect(s, 3)
+	s.ApplyAndLogEffectiveAttack(self)
 }
 
 type NimblismYellow struct{}
@@ -50,7 +50,8 @@ func (NimblismYellow) Defense() int             { return 2 }
 func (NimblismYellow) Types() card.TypeSet      { return nimblismTypes }
 func (NimblismYellow) GoAgain() bool            { return true }
 func (NimblismYellow) Play(s *card.TurnState, self *card.CardState) {
-	s.ApplyAndLogEffectiveAttackPlus(self, nimblismPlay(s, 2))
+	nimblismApplySideEffect(s, 2)
+	s.ApplyAndLogEffectiveAttack(self)
 }
 
 type NimblismBlue struct{}
@@ -64,5 +65,6 @@ func (NimblismBlue) Defense() int             { return 2 }
 func (NimblismBlue) Types() card.TypeSet      { return nimblismTypes }
 func (NimblismBlue) GoAgain() bool            { return true }
 func (NimblismBlue) Play(s *card.TurnState, self *card.CardState) {
-	s.ApplyAndLogEffectiveAttackPlus(self, nimblismPlay(s, 1))
+	nimblismApplySideEffect(s, 1)
+	s.ApplyAndLogEffectiveAttack(self)
 }

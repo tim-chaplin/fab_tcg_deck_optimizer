@@ -9,12 +9,12 @@ import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 
 var flyingHighTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction)
 
-// flyingHighPlay grants go again to the next attack action card scheduled later this turn.
-// If that target's pitch matches matchPitch (this card's own pitch), we also add +1 to its
-// BonusAttack — the "+1{p} if it's <matching color>" rider — so EffectiveAttack picks the
-// buff up in any LikelyToHit check on the buffed attack. Returns 0; the +1 attributes to
-// the target's slot, not Flying High's.
-func flyingHighPlay(s *card.TurnState, matchPitch int) int {
+// flyingHighApplySideEffect grants go again to the next attack action card scheduled later
+// this turn. If that target's pitch matches matchPitch (this card's own pitch), we also add
+// +1 to its BonusAttack — the "+1{p} if it's <matching color>" rider — so EffectiveAttack
+// picks the buff up in any LikelyToHit check on the buffed attack. The +1 attributes to the
+// target's slot, not Flying High's.
+func flyingHighApplySideEffect(s *card.TurnState, matchPitch int) {
 	for _, pc := range s.CardsRemaining {
 		if !pc.Card.Types().IsAttackAction() {
 			continue
@@ -23,9 +23,8 @@ func flyingHighPlay(s *card.TurnState, matchPitch int) int {
 		if pc.Card.Pitch() == matchPitch {
 			pc.BonusAttack++
 		}
-		return 0
+		return
 	}
-	return 0
 }
 
 type FlyingHighRed struct{}
@@ -39,7 +38,8 @@ func (FlyingHighRed) Defense() int             { return 2 }
 func (FlyingHighRed) Types() card.TypeSet      { return flyingHighTypes }
 func (FlyingHighRed) GoAgain() bool            { return true }
 func (FlyingHighRed) Play(s *card.TurnState, self *card.CardState) {
-	s.ApplyAndLogEffectiveAttackPlus(self, flyingHighPlay(s, 1))
+	flyingHighApplySideEffect(s, 1)
+	s.ApplyAndLogEffectiveAttack(self)
 }
 
 type FlyingHighYellow struct{}
@@ -53,7 +53,8 @@ func (FlyingHighYellow) Defense() int             { return 2 }
 func (FlyingHighYellow) Types() card.TypeSet      { return flyingHighTypes }
 func (FlyingHighYellow) GoAgain() bool            { return true }
 func (FlyingHighYellow) Play(s *card.TurnState, self *card.CardState) {
-	s.ApplyAndLogEffectiveAttackPlus(self, flyingHighPlay(s, 2))
+	flyingHighApplySideEffect(s, 2)
+	s.ApplyAndLogEffectiveAttack(self)
 }
 
 type FlyingHighBlue struct{}
@@ -67,5 +68,6 @@ func (FlyingHighBlue) Defense() int             { return 2 }
 func (FlyingHighBlue) Types() card.TypeSet      { return flyingHighTypes }
 func (FlyingHighBlue) GoAgain() bool            { return true }
 func (FlyingHighBlue) Play(s *card.TurnState, self *card.CardState) {
-	s.ApplyAndLogEffectiveAttackPlus(self, flyingHighPlay(s, 3))
+	flyingHighApplySideEffect(s, 3)
+	s.ApplyAndLogEffectiveAttack(self)
 }

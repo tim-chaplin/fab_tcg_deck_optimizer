@@ -25,14 +25,5 @@ func (JackBeQuickRed) GoAgain() bool            { return false }
 // not implemented: graveyard-banish cost + on-hit ally steal
 func (JackBeQuickRed) NotImplemented() {}
 func (JackBeQuickRed) Play(s *card.TurnState, self *card.CardState) {
-	s.ApplyAndLogEffectiveAttackPlus(self, jackBeQuickBonus(self))
-}
-
-// jackBeQuickDamage is a breadcrumb for the on-hit "unfreeze and steal an ally" rider — not
-// modelled yet (see TODO.md). The LikelyToHit call marks where the rider value would plug in.
-func jackBeQuickBonus(self *card.CardState) int {
-	if card.LikelyToHit(self) {
-		// TODO: model on-hit steal-ally rider.
-	}
-	return 0
+	s.ApplyAndLogEffectiveAttack(self)
 }
