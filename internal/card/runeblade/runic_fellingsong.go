@@ -13,9 +13,10 @@ import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 
 var runicFellingsongTypes = card.NewTypeSet(card.TypeRuneblade, card.TypeAction, card.TypeAttack)
 
-// runicFellingsongPlay returns printed power + (1 if the banish rider succeeds).
-func runicFellingsongPlay(c card.Card, s *card.TurnState) int {
-	return c.Attack() + banishAuraFromGraveyard(s)
+// runicFellingsongPlay emits the chain step with printed power + (1 if the banish rider
+// succeeds).
+func runicFellingsongPlay(s *card.TurnState, self *card.CardState) {
+	s.ApplyAndLogEffectiveAttackPlus(self, banishAuraFromGraveyard(s))
 }
 
 type RunicFellingsongRed struct{}
@@ -29,8 +30,8 @@ func (RunicFellingsongRed) Defense() int             { return 3 }
 func (RunicFellingsongRed) Types() card.TypeSet      { return runicFellingsongTypes }
 func (RunicFellingsongRed) GoAgain() bool            { return false }
 func (RunicFellingsongRed) NoMemo()                  {}
-func (c RunicFellingsongRed) Play(s *card.TurnState, _ *card.CardState) int {
-	return runicFellingsongPlay(c, s)
+func (RunicFellingsongRed) Play(s *card.TurnState, self *card.CardState) {
+	runicFellingsongPlay(s, self)
 }
 
 type RunicFellingsongYellow struct{}
@@ -44,8 +45,8 @@ func (RunicFellingsongYellow) Defense() int             { return 3 }
 func (RunicFellingsongYellow) Types() card.TypeSet      { return runicFellingsongTypes }
 func (RunicFellingsongYellow) GoAgain() bool            { return false }
 func (RunicFellingsongYellow) NoMemo()                  {}
-func (c RunicFellingsongYellow) Play(s *card.TurnState, _ *card.CardState) int {
-	return runicFellingsongPlay(c, s)
+func (RunicFellingsongYellow) Play(s *card.TurnState, self *card.CardState) {
+	runicFellingsongPlay(s, self)
 }
 
 type RunicFellingsongBlue struct{}
@@ -59,6 +60,6 @@ func (RunicFellingsongBlue) Defense() int             { return 3 }
 func (RunicFellingsongBlue) Types() card.TypeSet      { return runicFellingsongTypes }
 func (RunicFellingsongBlue) GoAgain() bool            { return false }
 func (RunicFellingsongBlue) NoMemo()                  {}
-func (c RunicFellingsongBlue) Play(s *card.TurnState, _ *card.CardState) int {
-	return runicFellingsongPlay(c, s)
+func (RunicFellingsongBlue) Play(s *card.TurnState, self *card.CardState) {
+	runicFellingsongPlay(s, self)
 }

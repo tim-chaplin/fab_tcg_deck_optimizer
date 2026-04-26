@@ -11,14 +11,17 @@ var clearwaterElixirTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction)
 
 type ClearwaterElixirRed struct{}
 
-func (ClearwaterElixirRed) ID() card.ID                 { return card.ClearwaterElixirRed }
-func (ClearwaterElixirRed) Name() string                { return "Clearwater Elixir" }
-func (ClearwaterElixirRed) Cost(*card.TurnState) int                   { return 1 }
-func (ClearwaterElixirRed) Pitch() int                  { return 1 }
-func (ClearwaterElixirRed) Attack() int                 { return 0 }
-func (ClearwaterElixirRed) Defense() int                { return 3 }
-func (ClearwaterElixirRed) Types() card.TypeSet         { return clearwaterElixirTypes }
-func (ClearwaterElixirRed) GoAgain() bool               { return true }
+func (ClearwaterElixirRed) ID() card.ID              { return card.ClearwaterElixirRed }
+func (ClearwaterElixirRed) Name() string             { return "Clearwater Elixir" }
+func (ClearwaterElixirRed) Cost(*card.TurnState) int { return 1 }
+func (ClearwaterElixirRed) Pitch() int               { return 1 }
+func (ClearwaterElixirRed) Attack() int              { return 0 }
+func (ClearwaterElixirRed) Defense() int             { return 3 }
+func (ClearwaterElixirRed) Types() card.TypeSet      { return clearwaterElixirTypes }
+func (ClearwaterElixirRed) GoAgain() bool            { return true }
+
 // not implemented: Bloodrot Pox health-gain rider dropped (status tokens not tracked)
-func (ClearwaterElixirRed) NotImplemented()             {}
-func (ClearwaterElixirRed) Play(s *card.TurnState, _ *card.CardState) int { return grantNextAttackActionBonus(s, 3) }
+func (ClearwaterElixirRed) NotImplemented() {}
+func (ClearwaterElixirRed) Play(s *card.TurnState, self *card.CardState) {
+	s.ApplyAndLogEffectiveAttackPlus(self, grantNextAttackActionBonus(s, 3))
+}

@@ -30,42 +30,51 @@ func captainsCallPlay(s *card.TurnState, maxCost int) int {
 
 type CaptainsCallRed struct{}
 
-func (CaptainsCallRed) ID() card.ID                 { return card.CaptainsCallRed }
-func (CaptainsCallRed) Name() string                { return "Captain's Call" }
-func (CaptainsCallRed) Cost(*card.TurnState) int                   { return 0 }
-func (CaptainsCallRed) Pitch() int                  { return 1 }
-func (CaptainsCallRed) Attack() int                 { return 0 }
-func (CaptainsCallRed) Defense() int                { return 2 }
-func (CaptainsCallRed) Types() card.TypeSet         { return captainsCallTypes }
-func (CaptainsCallRed) GoAgain() bool               { return true }
+func (CaptainsCallRed) ID() card.ID              { return card.CaptainsCallRed }
+func (CaptainsCallRed) Name() string             { return "Captain's Call" }
+func (CaptainsCallRed) Cost(*card.TurnState) int { return 0 }
+func (CaptainsCallRed) Pitch() int               { return 1 }
+func (CaptainsCallRed) Attack() int              { return 0 }
+func (CaptainsCallRed) Defense() int             { return 2 }
+func (CaptainsCallRed) Types() card.TypeSet      { return captainsCallTypes }
+func (CaptainsCallRed) GoAgain() bool            { return true }
+
 // not implemented: modal pick hard-coded to +2{p}; 'go again' mode is dropped
-func (CaptainsCallRed) NotImplemented()             {}
-func (CaptainsCallRed) Play(s *card.TurnState, _ *card.CardState) int { return captainsCallPlay(s, 2) }
+func (CaptainsCallRed) NotImplemented() {}
+func (CaptainsCallRed) Play(s *card.TurnState, self *card.CardState) {
+	s.ApplyAndLogEffectiveAttackPlus(self, captainsCallPlay(s, 2))
+}
 
 type CaptainsCallYellow struct{}
 
-func (CaptainsCallYellow) ID() card.ID                 { return card.CaptainsCallYellow }
-func (CaptainsCallYellow) Name() string                { return "Captain's Call" }
-func (CaptainsCallYellow) Cost(*card.TurnState) int                   { return 0 }
-func (CaptainsCallYellow) Pitch() int                  { return 2 }
-func (CaptainsCallYellow) Attack() int                 { return 0 }
-func (CaptainsCallYellow) Defense() int                { return 2 }
-func (CaptainsCallYellow) Types() card.TypeSet         { return captainsCallTypes }
-func (CaptainsCallYellow) GoAgain() bool               { return true }
+func (CaptainsCallYellow) ID() card.ID              { return card.CaptainsCallYellow }
+func (CaptainsCallYellow) Name() string             { return "Captain's Call" }
+func (CaptainsCallYellow) Cost(*card.TurnState) int { return 0 }
+func (CaptainsCallYellow) Pitch() int               { return 2 }
+func (CaptainsCallYellow) Attack() int              { return 0 }
+func (CaptainsCallYellow) Defense() int             { return 2 }
+func (CaptainsCallYellow) Types() card.TypeSet      { return captainsCallTypes }
+func (CaptainsCallYellow) GoAgain() bool            { return true }
+
 // not implemented: modal pick hard-coded to +2{p}; 'go again' mode is dropped
-func (CaptainsCallYellow) NotImplemented()             {}
-func (CaptainsCallYellow) Play(s *card.TurnState, _ *card.CardState) int { return captainsCallPlay(s, 1) }
+func (CaptainsCallYellow) NotImplemented() {}
+func (CaptainsCallYellow) Play(s *card.TurnState, self *card.CardState) {
+	s.ApplyAndLogEffectiveAttackPlus(self, captainsCallPlay(s, 1))
+}
 
 type CaptainsCallBlue struct{}
 
-func (CaptainsCallBlue) ID() card.ID                 { return card.CaptainsCallBlue }
-func (CaptainsCallBlue) Name() string                { return "Captain's Call" }
-func (CaptainsCallBlue) Cost(*card.TurnState) int                   { return 0 }
-func (CaptainsCallBlue) Pitch() int                  { return 3 }
-func (CaptainsCallBlue) Attack() int                 { return 0 }
-func (CaptainsCallBlue) Defense() int                { return 2 }
-func (CaptainsCallBlue) Types() card.TypeSet         { return captainsCallTypes }
-func (CaptainsCallBlue) GoAgain() bool               { return true }
+func (CaptainsCallBlue) ID() card.ID              { return card.CaptainsCallBlue }
+func (CaptainsCallBlue) Name() string             { return "Captain's Call" }
+func (CaptainsCallBlue) Cost(*card.TurnState) int { return 0 }
+func (CaptainsCallBlue) Pitch() int               { return 3 }
+func (CaptainsCallBlue) Attack() int              { return 0 }
+func (CaptainsCallBlue) Defense() int             { return 2 }
+func (CaptainsCallBlue) Types() card.TypeSet      { return captainsCallTypes }
+func (CaptainsCallBlue) GoAgain() bool            { return true }
+
 // not implemented: modal pick hard-coded to +2{p}; 'go again' mode is dropped
-func (CaptainsCallBlue) NotImplemented()             {}
-func (CaptainsCallBlue) Play(s *card.TurnState, _ *card.CardState) int { return captainsCallPlay(s, 0) }
+func (CaptainsCallBlue) NotImplemented() {}
+func (CaptainsCallBlue) Play(s *card.TurnState, self *card.CardState) {
+	s.ApplyAndLogEffectiveAttackPlus(self, captainsCallPlay(s, 0))
+}

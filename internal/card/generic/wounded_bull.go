@@ -13,45 +13,51 @@ import (
 var woundedBullTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeAttack)
 
 // woundedBullDamage returns attack plus +1 when the current hero opts into LowerHealthWanter.
-func woundedBullDamage(attack int) int {
+func woundedBullBonus() int {
 	if simstate.HeroWantsLowerHealth() {
-		return attack + 1
+		return 1
 	}
-	return attack
+	return 0
 }
 
 type WoundedBullRed struct{}
 
-func (WoundedBullRed) ID() card.ID                 { return card.WoundedBullRed }
-func (WoundedBullRed) Name() string                { return "Wounded Bull" }
-func (WoundedBullRed) Cost(*card.TurnState) int                   { return 3 }
-func (WoundedBullRed) Pitch() int                  { return 1 }
-func (WoundedBullRed) Attack() int                 { return 7 }
-func (WoundedBullRed) Defense() int                { return 2 }
-func (WoundedBullRed) Types() card.TypeSet         { return woundedBullTypes }
-func (WoundedBullRed) GoAgain() bool               { return false }
-func (c WoundedBullRed) Play(s *card.TurnState, _ *card.CardState) int { return woundedBullDamage(c.Attack()) }
+func (WoundedBullRed) ID() card.ID              { return card.WoundedBullRed }
+func (WoundedBullRed) Name() string             { return "Wounded Bull" }
+func (WoundedBullRed) Cost(*card.TurnState) int { return 3 }
+func (WoundedBullRed) Pitch() int               { return 1 }
+func (WoundedBullRed) Attack() int              { return 7 }
+func (WoundedBullRed) Defense() int             { return 2 }
+func (WoundedBullRed) Types() card.TypeSet      { return woundedBullTypes }
+func (WoundedBullRed) GoAgain() bool            { return false }
+func (WoundedBullRed) Play(s *card.TurnState, self *card.CardState) {
+	s.ApplyAndLogEffectiveAttackPlus(self, woundedBullBonus())
+}
 
 type WoundedBullYellow struct{}
 
-func (WoundedBullYellow) ID() card.ID                 { return card.WoundedBullYellow }
-func (WoundedBullYellow) Name() string                { return "Wounded Bull" }
-func (WoundedBullYellow) Cost(*card.TurnState) int                   { return 3 }
-func (WoundedBullYellow) Pitch() int                  { return 2 }
-func (WoundedBullYellow) Attack() int                 { return 6 }
-func (WoundedBullYellow) Defense() int                { return 2 }
-func (WoundedBullYellow) Types() card.TypeSet         { return woundedBullTypes }
-func (WoundedBullYellow) GoAgain() bool               { return false }
-func (c WoundedBullYellow) Play(s *card.TurnState, _ *card.CardState) int { return woundedBullDamage(c.Attack()) }
+func (WoundedBullYellow) ID() card.ID              { return card.WoundedBullYellow }
+func (WoundedBullYellow) Name() string             { return "Wounded Bull" }
+func (WoundedBullYellow) Cost(*card.TurnState) int { return 3 }
+func (WoundedBullYellow) Pitch() int               { return 2 }
+func (WoundedBullYellow) Attack() int              { return 6 }
+func (WoundedBullYellow) Defense() int             { return 2 }
+func (WoundedBullYellow) Types() card.TypeSet      { return woundedBullTypes }
+func (WoundedBullYellow) GoAgain() bool            { return false }
+func (WoundedBullYellow) Play(s *card.TurnState, self *card.CardState) {
+	s.ApplyAndLogEffectiveAttackPlus(self, woundedBullBonus())
+}
 
 type WoundedBullBlue struct{}
 
-func (WoundedBullBlue) ID() card.ID                 { return card.WoundedBullBlue }
-func (WoundedBullBlue) Name() string                { return "Wounded Bull" }
-func (WoundedBullBlue) Cost(*card.TurnState) int                   { return 3 }
-func (WoundedBullBlue) Pitch() int                  { return 3 }
-func (WoundedBullBlue) Attack() int                 { return 5 }
-func (WoundedBullBlue) Defense() int                { return 2 }
-func (WoundedBullBlue) Types() card.TypeSet         { return woundedBullTypes }
-func (WoundedBullBlue) GoAgain() bool               { return false }
-func (c WoundedBullBlue) Play(s *card.TurnState, _ *card.CardState) int { return woundedBullDamage(c.Attack()) }
+func (WoundedBullBlue) ID() card.ID              { return card.WoundedBullBlue }
+func (WoundedBullBlue) Name() string             { return "Wounded Bull" }
+func (WoundedBullBlue) Cost(*card.TurnState) int { return 3 }
+func (WoundedBullBlue) Pitch() int               { return 3 }
+func (WoundedBullBlue) Attack() int              { return 5 }
+func (WoundedBullBlue) Defense() int             { return 2 }
+func (WoundedBullBlue) Types() card.TypeSet      { return woundedBullTypes }
+func (WoundedBullBlue) GoAgain() bool            { return false }
+func (WoundedBullBlue) Play(s *card.TurnState, self *card.CardState) {
+	s.ApplyAndLogEffectiveAttackPlus(self, woundedBullBonus())
+}

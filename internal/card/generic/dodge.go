@@ -8,12 +8,12 @@ var defenseReactionTypes = card.NewTypeSet(card.TypeGeneric, card.TypeDefenseRea
 
 type DodgeBlue struct{}
 
-func (DodgeBlue) ID() card.ID                 { return card.DodgeBlue }
-func (DodgeBlue) Name() string             { return "Dodge" }
-func (DodgeBlue) Cost(*card.TurnState) int                { return 0 }
-func (DodgeBlue) Pitch() int               { return 3 }
-func (DodgeBlue) Attack() int              { return 0 }
-func (DodgeBlue) Defense() int             { return 2 }
-func (DodgeBlue) Types() card.TypeSet      { return defenseReactionTypes }
-func (DodgeBlue) GoAgain() bool            { return false }
-func (DodgeBlue) Play(*card.TurnState, *card.CardState) int { return 0 }
+func (DodgeBlue) ID() card.ID                                  { return card.DodgeBlue }
+func (DodgeBlue) Name() string                                 { return "Dodge" }
+func (DodgeBlue) Cost(*card.TurnState) int                     { return 0 }
+func (DodgeBlue) Pitch() int                                   { return 3 }
+func (DodgeBlue) Attack() int                                  { return 0 }
+func (DodgeBlue) Defense() int                                 { return 2 }
+func (DodgeBlue) Types() card.TypeSet                          { return defenseReactionTypes }
+func (DodgeBlue) GoAgain() bool                                { return false }
+func (DodgeBlue) Play(s *card.TurnState, self *card.CardState) { s.LogPlay(self) }

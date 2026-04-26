@@ -11,42 +11,51 @@ var pushThePointTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.
 
 type PushThePointRed struct{}
 
-func (PushThePointRed) ID() card.ID                 { return card.PushThePointRed }
-func (PushThePointRed) Name() string                { return "Push the Point" }
-func (PushThePointRed) Cost(*card.TurnState) int                   { return 1 }
-func (PushThePointRed) Pitch() int                  { return 1 }
-func (PushThePointRed) Attack() int                 { return 4 }
-func (PushThePointRed) Defense() int                { return 2 }
-func (PushThePointRed) Types() card.TypeSet         { return pushThePointTypes }
-func (PushThePointRed) GoAgain() bool               { return false }
+func (PushThePointRed) ID() card.ID              { return card.PushThePointRed }
+func (PushThePointRed) Name() string             { return "Push the Point" }
+func (PushThePointRed) Cost(*card.TurnState) int { return 1 }
+func (PushThePointRed) Pitch() int               { return 1 }
+func (PushThePointRed) Attack() int              { return 4 }
+func (PushThePointRed) Defense() int             { return 2 }
+func (PushThePointRed) Types() card.TypeSet      { return pushThePointTypes }
+func (PushThePointRed) GoAgain() bool            { return false }
+
 // not implemented: chain-history +2{p} rider (in-chain history not readable from Play)
-func (PushThePointRed) NotImplemented()             {}
-func (c PushThePointRed) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }
+func (PushThePointRed) NotImplemented() {}
+func (c PushThePointRed) Play(s *card.TurnState, self *card.CardState) {
+	s.ApplyAndLogEffectiveAttack(self)
+}
 
 type PushThePointYellow struct{}
 
-func (PushThePointYellow) ID() card.ID                 { return card.PushThePointYellow }
-func (PushThePointYellow) Name() string                { return "Push the Point" }
-func (PushThePointYellow) Cost(*card.TurnState) int                   { return 1 }
-func (PushThePointYellow) Pitch() int                  { return 2 }
-func (PushThePointYellow) Attack() int                 { return 3 }
-func (PushThePointYellow) Defense() int                { return 2 }
-func (PushThePointYellow) Types() card.TypeSet         { return pushThePointTypes }
-func (PushThePointYellow) GoAgain() bool               { return false }
+func (PushThePointYellow) ID() card.ID              { return card.PushThePointYellow }
+func (PushThePointYellow) Name() string             { return "Push the Point" }
+func (PushThePointYellow) Cost(*card.TurnState) int { return 1 }
+func (PushThePointYellow) Pitch() int               { return 2 }
+func (PushThePointYellow) Attack() int              { return 3 }
+func (PushThePointYellow) Defense() int             { return 2 }
+func (PushThePointYellow) Types() card.TypeSet      { return pushThePointTypes }
+func (PushThePointYellow) GoAgain() bool            { return false }
+
 // not implemented: chain-history +2{p} rider (in-chain history not readable from Play)
-func (PushThePointYellow) NotImplemented()             {}
-func (c PushThePointYellow) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }
+func (PushThePointYellow) NotImplemented() {}
+func (c PushThePointYellow) Play(s *card.TurnState, self *card.CardState) {
+	s.ApplyAndLogEffectiveAttack(self)
+}
 
 type PushThePointBlue struct{}
 
-func (PushThePointBlue) ID() card.ID                 { return card.PushThePointBlue }
-func (PushThePointBlue) Name() string                { return "Push the Point" }
-func (PushThePointBlue) Cost(*card.TurnState) int                   { return 1 }
-func (PushThePointBlue) Pitch() int                  { return 3 }
-func (PushThePointBlue) Attack() int                 { return 2 }
-func (PushThePointBlue) Defense() int                { return 2 }
-func (PushThePointBlue) Types() card.TypeSet         { return pushThePointTypes }
-func (PushThePointBlue) GoAgain() bool               { return false }
+func (PushThePointBlue) ID() card.ID              { return card.PushThePointBlue }
+func (PushThePointBlue) Name() string             { return "Push the Point" }
+func (PushThePointBlue) Cost(*card.TurnState) int { return 1 }
+func (PushThePointBlue) Pitch() int               { return 3 }
+func (PushThePointBlue) Attack() int              { return 2 }
+func (PushThePointBlue) Defense() int             { return 2 }
+func (PushThePointBlue) Types() card.TypeSet      { return pushThePointTypes }
+func (PushThePointBlue) GoAgain() bool            { return false }
+
 // not implemented: chain-history +2{p} rider (in-chain history not readable from Play)
-func (PushThePointBlue) NotImplemented()             {}
-func (c PushThePointBlue) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }
+func (PushThePointBlue) NotImplemented() {}
+func (c PushThePointBlue) Play(s *card.TurnState, self *card.CardState) {
+	s.ApplyAndLogEffectiveAttack(self)
+}

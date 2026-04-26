@@ -101,13 +101,14 @@ type Card interface {
 	// GoAgain reports whether playing this card grants an additional action point. Cards
 	// printed with "Go again" return true.
 	GoAgain() bool
-	// Play is called when the card resolves — as an attack or as a defense reaction. Returns
-	// damage dealt to the opposing hero (may differ from Attack() after conditional bonuses) and
-	// may read state to decide effects. self is the CardState wrapper for this resolution:
-	// cards read self.FromArsenal for arsenal-gated riders and write self.GrantedGoAgain = true
-	// to grant themselves Go again. The dispatcher folds the return into s.Value via
-	// s.RecordValue; cards don't call RecordValue themselves.
-	Play(s *TurnState, self *CardState) int
+	// Play is called when the card resolves — as an attack or as a defense reaction. Cards
+	// own state mutation: they read self.FromArsenal for arsenal-gated riders, write
+	// self.GrantedGoAgain to grant themselves Go again, and call s.ApplyAndLogEffectiveAttack
+	// to append the chain-step log entry and credit damage to s.Value. Sub-effect damage
+	// (runechant creation, conditional rider arcane, tutored sub-card plays) is credited via
+	// the appropriate AddLogEntry / AddPre/PostTriggerLogEntry / ApplyAndLogEffectiveAttackPlus
+	// path so the printout reads as a structured tree.
+	Play(s *TurnState, self *CardState)
 }
 
 // DisplayName returns the card name with a pitch-color suffix — "Mauvrion Skies [Y]" for a

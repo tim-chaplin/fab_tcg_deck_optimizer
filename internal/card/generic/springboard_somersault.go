@@ -12,13 +12,13 @@ import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 
 type SpringboardSomersaultYellow struct{}
 
-func (SpringboardSomersaultYellow) ID() card.ID                 { return card.SpringboardSomersaultYellow }
-func (SpringboardSomersaultYellow) Name() string             { return "Springboard Somersault" }
-func (SpringboardSomersaultYellow) Cost(*card.TurnState) int                { return 0 }
-func (SpringboardSomersaultYellow) Pitch() int               { return 2 }
-func (SpringboardSomersaultYellow) Attack() int              { return 0 }
-func (SpringboardSomersaultYellow) Defense() int             { return 2 }
-func (SpringboardSomersaultYellow) Types() card.TypeSet      { return defenseReactionTypes }
-func (SpringboardSomersaultYellow) GoAgain() bool            { return false }
-func (SpringboardSomersaultYellow) Play(*card.TurnState, *card.CardState) int { return 0 }
-func (SpringboardSomersaultYellow) ArsenalDefenseBonus() int { return 2 }
+func (SpringboardSomersaultYellow) ID() card.ID                                  { return card.SpringboardSomersaultYellow }
+func (SpringboardSomersaultYellow) Name() string                                 { return "Springboard Somersault" }
+func (SpringboardSomersaultYellow) Cost(*card.TurnState) int                     { return 0 }
+func (SpringboardSomersaultYellow) Pitch() int                                   { return 2 }
+func (SpringboardSomersaultYellow) Attack() int                                  { return 0 }
+func (SpringboardSomersaultYellow) Defense() int                                 { return 2 }
+func (SpringboardSomersaultYellow) Types() card.TypeSet                          { return defenseReactionTypes }
+func (SpringboardSomersaultYellow) GoAgain() bool                                { return false }
+func (SpringboardSomersaultYellow) Play(s *card.TurnState, self *card.CardState) { s.LogPlay(self) }
+func (SpringboardSomersaultYellow) ArsenalDefenseBonus() int                     { return 2 }

@@ -11,7 +11,8 @@ import (
 // registered, AuraCreated stays false.
 func TestRunicReaping_NoNextAttackReturnsZero(t *testing.T) {
 	s := card.TurnState{Pitched: []card.Card{stubAttackWithPower{power: 4}}}
-	if got := (RunicReapingRed{}).Play(&s, &card.CardState{}); got != 0 {
+	(RunicReapingRed{}).Play(&s, &card.CardState{Card: RunicReapingRed{}})
+	if got := s.Value; got != 0 {
 		t.Fatalf("Play() = %d, want 0", got)
 	}
 	if len(s.EphemeralAttackTriggers) != 0 {
@@ -27,7 +28,8 @@ func TestRunicReaping_NoNextAttackReturnsZero(t *testing.T) {
 func TestRunicReaping_WeaponNextDoesNotQualify(t *testing.T) {
 	target := &card.CardState{Card: stubRunebladeWeapon{}}
 	s := card.TurnState{CardsRemaining: []*card.CardState{target}}
-	if got := (RunicReapingRed{}).Play(&s, &card.CardState{}); got != 0 {
+	(RunicReapingRed{}).Play(&s, &card.CardState{Card: RunicReapingRed{}})
+	if got := s.Value; got != 0 {
 		t.Fatalf("Play() = %d, want 0", got)
 	}
 	if target.BonusAttack != 0 {
@@ -50,7 +52,8 @@ func TestRunicReaping_RegistersTriggerAndGrantsPitchedAttackBonus(t *testing.T) 
 		CardsRemaining: []*card.CardState{target},
 		Pitched:        []card.Card{stubRunebladeAttack{}},
 	}
-	if got := (RunicReapingRed{}).Play(&s, &card.CardState{}); got != 0 {
+	(RunicReapingRed{}).Play(&s, &card.CardState{Card: RunicReapingRed{}})
+	if got := s.Value; got != 0 {
 		t.Fatalf("Play() = %d, want 0 (rider fires through ephemeral trigger after target's resolution)", got)
 	}
 	if target.BonusAttack != 1 {
@@ -70,7 +73,8 @@ func TestRunicReaping_NoPitchedAttackSkipsBonusButRegistersTrigger(t *testing.T)
 		CardsRemaining: []*card.CardState{target},
 		Pitched:        []card.Card{stubNonAttack{}},
 	}
-	if got := (RunicReapingRed{}).Play(&s, &card.CardState{}); got != 0 {
+	(RunicReapingRed{}).Play(&s, &card.CardState{Card: RunicReapingRed{}})
+	if got := s.Value; got != 0 {
 		t.Fatalf("Play() = %d, want 0", got)
 	}
 	if target.BonusAttack != 0 {

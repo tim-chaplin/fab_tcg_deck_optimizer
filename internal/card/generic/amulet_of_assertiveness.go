@@ -12,15 +12,16 @@ var amuletOfAssertivenessTypes = card.NewTypeSet(card.TypeGeneric, card.TypeActi
 
 type AmuletOfAssertivenessYellow struct{}
 
-func (AmuletOfAssertivenessYellow) ID() card.ID                               { return card.AmuletOfAssertivenessYellow }
-func (AmuletOfAssertivenessYellow) Name() string                              { return "Amulet of Assertiveness" }
-func (AmuletOfAssertivenessYellow) Cost(*card.TurnState) int                  { return 0 }
-func (AmuletOfAssertivenessYellow) Pitch() int                                { return 2 }
-func (AmuletOfAssertivenessYellow) Attack() int                               { return 0 }
-func (AmuletOfAssertivenessYellow) Defense() int                              { return 0 }
-func (AmuletOfAssertivenessYellow) Types() card.TypeSet                       { return amuletOfAssertivenessTypes }
-func (AmuletOfAssertivenessYellow) GoAgain() bool                             { return true }
+func (AmuletOfAssertivenessYellow) ID() card.ID              { return card.AmuletOfAssertivenessYellow }
+func (AmuletOfAssertivenessYellow) Name() string             { return "Amulet of Assertiveness" }
+func (AmuletOfAssertivenessYellow) Cost(*card.TurnState) int { return 0 }
+func (AmuletOfAssertivenessYellow) Pitch() int               { return 2 }
+func (AmuletOfAssertivenessYellow) Attack() int              { return 0 }
+func (AmuletOfAssertivenessYellow) Defense() int             { return 0 }
+func (AmuletOfAssertivenessYellow) Types() card.TypeSet      { return amuletOfAssertivenessTypes }
+func (AmuletOfAssertivenessYellow) GoAgain() bool            { return true }
+
 // not implemented: AR grant: target attack 'banish top of deck on hit'; gated on 4+ cards
 // in hand
-func (AmuletOfAssertivenessYellow) NotImplemented()                           {}
-func (AmuletOfAssertivenessYellow) Play(*card.TurnState, *card.CardState) int { return 0 }
+func (AmuletOfAssertivenessYellow) NotImplemented()                              {}
+func (AmuletOfAssertivenessYellow) Play(s *card.TurnState, self *card.CardState) { s.LogPlay(self) }

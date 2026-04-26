@@ -11,42 +11,51 @@ var barragingBrawnhideTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction,
 
 type BarragingBrawnhideRed struct{}
 
-func (BarragingBrawnhideRed) ID() card.ID                 { return card.BarragingBrawnhideRed }
-func (BarragingBrawnhideRed) Name() string                { return "Barraging Brawnhide" }
-func (BarragingBrawnhideRed) Cost(*card.TurnState) int                   { return 3 }
-func (BarragingBrawnhideRed) Pitch() int                  { return 1 }
-func (BarragingBrawnhideRed) Attack() int                 { return 7 }
-func (BarragingBrawnhideRed) Defense() int                { return 2 }
-func (BarragingBrawnhideRed) Types() card.TypeSet         { return barragingBrawnhideTypes }
-func (BarragingBrawnhideRed) GoAgain() bool               { return false }
+func (BarragingBrawnhideRed) ID() card.ID              { return card.BarragingBrawnhideRed }
+func (BarragingBrawnhideRed) Name() string             { return "Barraging Brawnhide" }
+func (BarragingBrawnhideRed) Cost(*card.TurnState) int { return 3 }
+func (BarragingBrawnhideRed) Pitch() int               { return 1 }
+func (BarragingBrawnhideRed) Attack() int              { return 7 }
+func (BarragingBrawnhideRed) Defense() int             { return 2 }
+func (BarragingBrawnhideRed) Types() card.TypeSet      { return barragingBrawnhideTypes }
+func (BarragingBrawnhideRed) GoAgain() bool            { return false }
+
 // not implemented: defended-by-<2-non-equipment +1{p} rider
-func (BarragingBrawnhideRed) NotImplemented()             {}
-func (c BarragingBrawnhideRed) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }
+func (BarragingBrawnhideRed) NotImplemented() {}
+func (c BarragingBrawnhideRed) Play(s *card.TurnState, self *card.CardState) {
+	s.ApplyAndLogEffectiveAttack(self)
+}
 
 type BarragingBrawnhideYellow struct{}
 
-func (BarragingBrawnhideYellow) ID() card.ID                 { return card.BarragingBrawnhideYellow }
-func (BarragingBrawnhideYellow) Name() string                { return "Barraging Brawnhide" }
-func (BarragingBrawnhideYellow) Cost(*card.TurnState) int                   { return 3 }
-func (BarragingBrawnhideYellow) Pitch() int                  { return 2 }
-func (BarragingBrawnhideYellow) Attack() int                 { return 6 }
-func (BarragingBrawnhideYellow) Defense() int                { return 2 }
-func (BarragingBrawnhideYellow) Types() card.TypeSet         { return barragingBrawnhideTypes }
-func (BarragingBrawnhideYellow) GoAgain() bool               { return false }
+func (BarragingBrawnhideYellow) ID() card.ID              { return card.BarragingBrawnhideYellow }
+func (BarragingBrawnhideYellow) Name() string             { return "Barraging Brawnhide" }
+func (BarragingBrawnhideYellow) Cost(*card.TurnState) int { return 3 }
+func (BarragingBrawnhideYellow) Pitch() int               { return 2 }
+func (BarragingBrawnhideYellow) Attack() int              { return 6 }
+func (BarragingBrawnhideYellow) Defense() int             { return 2 }
+func (BarragingBrawnhideYellow) Types() card.TypeSet      { return barragingBrawnhideTypes }
+func (BarragingBrawnhideYellow) GoAgain() bool            { return false }
+
 // not implemented: defended-by-<2-non-equipment +1{p} rider
-func (BarragingBrawnhideYellow) NotImplemented()             {}
-func (c BarragingBrawnhideYellow) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }
+func (BarragingBrawnhideYellow) NotImplemented() {}
+func (c BarragingBrawnhideYellow) Play(s *card.TurnState, self *card.CardState) {
+	s.ApplyAndLogEffectiveAttack(self)
+}
 
 type BarragingBrawnhideBlue struct{}
 
-func (BarragingBrawnhideBlue) ID() card.ID                 { return card.BarragingBrawnhideBlue }
-func (BarragingBrawnhideBlue) Name() string                { return "Barraging Brawnhide" }
-func (BarragingBrawnhideBlue) Cost(*card.TurnState) int                   { return 3 }
-func (BarragingBrawnhideBlue) Pitch() int                  { return 3 }
-func (BarragingBrawnhideBlue) Attack() int                 { return 5 }
-func (BarragingBrawnhideBlue) Defense() int                { return 2 }
-func (BarragingBrawnhideBlue) Types() card.TypeSet         { return barragingBrawnhideTypes }
-func (BarragingBrawnhideBlue) GoAgain() bool               { return false }
+func (BarragingBrawnhideBlue) ID() card.ID              { return card.BarragingBrawnhideBlue }
+func (BarragingBrawnhideBlue) Name() string             { return "Barraging Brawnhide" }
+func (BarragingBrawnhideBlue) Cost(*card.TurnState) int { return 3 }
+func (BarragingBrawnhideBlue) Pitch() int               { return 3 }
+func (BarragingBrawnhideBlue) Attack() int              { return 5 }
+func (BarragingBrawnhideBlue) Defense() int             { return 2 }
+func (BarragingBrawnhideBlue) Types() card.TypeSet      { return barragingBrawnhideTypes }
+func (BarragingBrawnhideBlue) GoAgain() bool            { return false }
+
 // not implemented: defended-by-<2-non-equipment +1{p} rider
-func (BarragingBrawnhideBlue) NotImplemented()             {}
-func (c BarragingBrawnhideBlue) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }
+func (BarragingBrawnhideBlue) NotImplemented() {}
+func (c BarragingBrawnhideBlue) Play(s *card.TurnState, self *card.CardState) {
+	s.ApplyAndLogEffectiveAttack(self)
+}

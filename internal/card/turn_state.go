@@ -233,15 +233,66 @@ func ClashValue(s *TurnState, bonus int) int {
 }
 
 // RecordValue bumps s.Value by n, clamping at 0 (FaB damage / prevention can't drive the
-// running total negative). Negative n is a no-op. The dispatcher calls this after each
-// Play / hero trigger / aura trigger / weapon swing / defense block so s.Value is the
-// authoritative running total for the permutation. Cards don't call RecordValue themselves —
-// they return the damage-equivalent from Play and let the dispatcher record it.
+// running total negative). Negative n is a no-op. Cards rarely call this directly — the
+// AddLogEntry / AddPreTriggerLogEntry / AddPostTriggerLogEntry helpers credit Value while
+// also appending a log entry; ApplyAndLogEffectiveAttack does the same for the chain step.
 func (s *TurnState) RecordValue(n int) {
 	if n <= 0 {
 		return
 	}
 	s.Value += n
+}
+
+// ApplyAndLogEffectiveAttack is the canonical chain-step finisher every Card.Play invokes:
+// appends the chain-step log entry "<DisplayName>: <VERB>[ from arsenal]" (where VERB is
+// ATTACK for attack actions, WEAPON ATTACK for weapons, PLAY for everything else) and
+// credits Card.Attack() + self.BonusAttack to s.Value, clamped at 0. Use the Plus variant
+// when the card folds rider damage (conditional arcane bonuses, runechant creation that
+// bundles into the printed attack) into the same chain step's (+N) display.
+func (s *TurnState) ApplyAndLogEffectiveAttack(self *CardState) {
+	s.ApplyAndLogEffectiveAttackPlus(self, 0)
+}
+
+// ApplyAndLogEffectiveAttackPlus is ApplyAndLogEffectiveAttack with an additional rider
+// folded into the chain step's (+N) display. Cards with on-play sub-effects that credit
+// damage (Aether Slash's conditional arcane, Hocus Pocus's mid-Play Runechant) compute
+// the rider amount themselves and pass it here.
+func (s *TurnState) ApplyAndLogEffectiveAttackPlus(self *CardState, rider int) {
+	n := self.Card.Attack() + self.BonusAttack + rider
+	if n < 0 {
+		n = 0
+	}
+	s.AddLogEntry(chainStepText(self), n)
+}
+
+// LogPlay is the chain-step finisher for non-attack cards (auras, non-attack actions,
+// defense reactions, items) — emits "<DisplayName>: PLAY[ from arsenal]" with no value
+// contribution. The "(+0)" suffix is dropped because these cards never deal printed
+// damage; any value they contribute lands via separate AddPostTriggerLogEntry / aura
+// trigger paths.
+func (s *TurnState) LogPlay(self *CardState) {
+	s.AddLogEntry(chainStepText(self), 0)
+}
+
+// chainStepText renders the "<DisplayName>: <VERB>[ from arsenal]" prefix the chain-step
+// helper writes. VERB picks WEAPON ATTACK for weapon-typed cards, ATTACK for attack-action
+// cards, and PLAY for everything else. The "from arsenal" suffix tags entries played out
+// of the arsenal slot.
+func chainStepText(self *CardState) string {
+	types := self.Card.Types()
+	var verb string
+	switch {
+	case types.Has(TypeWeapon):
+		verb = "WEAPON ATTACK"
+	case types.IsAttackAction():
+		verb = "ATTACK"
+	default:
+		verb = "PLAY"
+	}
+	if self.FromArsenal {
+		verb += " from arsenal"
+	}
+	return DisplayName(self.Card) + ": " + verb
 }
 
 // CreateRunechants adds n Runechant token auras to the count, sets AuraCreated so effects

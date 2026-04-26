@@ -20,8 +20,9 @@ func TestSunKiss_SoloIsHealOnly(t *testing.T) {
 	}
 	for _, tc := range cases {
 		s := card.TurnState{Deck: []card.Card{stubGenericAttack(0, 0)}}
-		self := &card.CardState{}
-		got := tc.c.Play(&s, self)
+		self := &card.CardState{Card: tc.c}
+		tc.c.Play(&s, self)
+		got := s.Value
 		if got != tc.heal {
 			t.Errorf("%s: solo Play() = %d, want %d", tc.c.Name(), got, tc.heal)
 		}
@@ -53,8 +54,9 @@ func TestSunKiss_SynergyFiresOnPriorMoonWish(t *testing.T) {
 				CardsPlayed: []card.Card{mw},
 				Deck:        []card.Card{stubGenericAttack(0, 0)},
 			}
-			self := &card.CardState{}
-			got := sk.c.Play(&s, self)
+			self := &card.CardState{Card: sk.c}
+			sk.c.Play(&s, self)
+			got := s.Value
 			if got != sk.heal {
 				t.Errorf("%s after %s: Play() = %d, want %d (synergy still credits printed heal)",
 					sk.c.Name(), mw.Name(), got, sk.heal)
@@ -80,8 +82,9 @@ func TestSunKiss_SynergyDoesNotFireOnUnrelatedAttacks(t *testing.T) {
 		CardsPlayed: []card.Card{notMoonWish},
 		Deck:        []card.Card{stubGenericAttack(0, 0)},
 	}
-	self := &card.CardState{}
-	got := SunKissRed{}.Play(&s, self)
+	self := &card.CardState{Card: SunKissRed{}}
+	SunKissRed{}.Play(&s, self)
+	got := s.Value
 	if got != 3 {
 		t.Errorf("Play() = %d, want 3 (printed heal only)", got)
 	}
@@ -101,8 +104,9 @@ func TestSunKiss_SynergyHandlesEmptyDeck(t *testing.T) {
 		CardsPlayed: []card.Card{MoonWishRed{}},
 		// Deck intentionally nil.
 	}
-	self := &card.CardState{}
-	got := SunKissRed{}.Play(&s, self)
+	self := &card.CardState{Card: SunKissRed{}}
+	SunKissRed{}.Play(&s, self)
+	got := s.Value
 	if got != 3 {
 		t.Errorf("Play() = %d, want 3", got)
 	}

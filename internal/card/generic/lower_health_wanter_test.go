@@ -41,11 +41,15 @@ func TestLowerHealthWanter_DamageRiders(t *testing.T) {
 	}
 	for _, tc := range cases {
 		simstate.CurrentHero = stubLowHeroOff{}
-		if got := tc.card.Play(&card.TurnState{}, &card.CardState{Card: tc.card}); got != tc.wantOff {
+		var sOff card.TurnState
+		tc.card.Play(&sOff, &card.CardState{Card: tc.card})
+		if got := sOff.Value; got != tc.wantOff {
 			t.Errorf("%s: Play() off = %d, want %d (hero does not opt in)", tc.name, got, tc.wantOff)
 		}
 		simstate.CurrentHero = stubLowHeroOn{}
-		if got := tc.card.Play(&card.TurnState{}, &card.CardState{Card: tc.card}); got != tc.wantOn {
+		var sOn card.TurnState
+		tc.card.Play(&sOn, &card.CardState{Card: tc.card})
+		if got := sOn.Value; got != tc.wantOn {
 			t.Errorf("%s: Play() on = %d, want %d (hero opts in)", tc.name, got, tc.wantOn)
 		}
 	}
@@ -79,7 +83,9 @@ func TestLowerHealthWanter_GoAgainRiders(t *testing.T) {
 // must not fire.
 func TestLowerHealthWanter_NilHeroIsOff(t *testing.T) {
 	simstate.CurrentHero = nil
-	if got := (AdrenalineRushRed{}).Play(&card.TurnState{}, &card.CardState{Card: AdrenalineRushRed{}}); got != 4 {
+	var s card.TurnState
+	(AdrenalineRushRed{}).Play(&s, &card.CardState{Card: AdrenalineRushRed{}})
+	if got := s.Value; got != 4 {
 		t.Errorf("AdrenalineRushRed nil-hero Play() = %d, want 4", got)
 	}
 	if (ScarForAScarRed{}).GoAgain() {

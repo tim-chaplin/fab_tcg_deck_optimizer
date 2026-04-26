@@ -23,8 +23,8 @@ func (RunebloodIncantationRed) Defense() int             { return 2 }
 func (RunebloodIncantationRed) Types() card.TypeSet      { return runebloodIncantationTypes }
 func (RunebloodIncantationRed) GoAgain() bool            { return true }
 func (RunebloodIncantationRed) AddsFutureValue()         {}
-func (c RunebloodIncantationRed) Play(s *card.TurnState, _ *card.CardState) int {
-	return runebloodPlay(s, c, 3)
+func (c RunebloodIncantationRed) Play(s *card.TurnState, self *card.CardState) {
+	runebloodPlay(s, self, c, 3)
 }
 
 type RunebloodIncantationYellow struct{}
@@ -38,8 +38,8 @@ func (RunebloodIncantationYellow) Defense() int             { return 2 }
 func (RunebloodIncantationYellow) Types() card.TypeSet      { return runebloodIncantationTypes }
 func (RunebloodIncantationYellow) GoAgain() bool            { return true }
 func (RunebloodIncantationYellow) AddsFutureValue()         {}
-func (c RunebloodIncantationYellow) Play(s *card.TurnState, _ *card.CardState) int {
-	return runebloodPlay(s, c, 2)
+func (c RunebloodIncantationYellow) Play(s *card.TurnState, self *card.CardState) {
+	runebloodPlay(s, self, c, 2)
 }
 
 type RunebloodIncantationBlue struct{}
@@ -53,18 +53,18 @@ func (RunebloodIncantationBlue) Defense() int             { return 2 }
 func (RunebloodIncantationBlue) Types() card.TypeSet      { return runebloodIncantationTypes }
 func (RunebloodIncantationBlue) GoAgain() bool            { return true }
 func (RunebloodIncantationBlue) AddsFutureValue()         {}
-func (c RunebloodIncantationBlue) Play(s *card.TurnState, _ *card.CardState) int {
-	return runebloodPlay(s, c, 1)
+func (c RunebloodIncantationBlue) Play(s *card.TurnState, self *card.CardState) {
+	runebloodPlay(s, self, c, 1)
 }
 
-// runebloodPlay registers a start-of-turn trigger with Count=n. Same-turn Play returns 0;
-// every rune is credited at its future-turn fire.
-func runebloodPlay(s *card.TurnState, self card.Card, n int) int {
+// runebloodPlay registers a start-of-turn trigger with Count=n and emits the same-turn
+// chain step (no value contribution; every rune is credited at its future-turn fire).
+func runebloodPlay(s *card.TurnState, selfState *card.CardState, selfCard card.Card, n int) {
 	s.AddAuraTrigger(card.AuraTrigger{
-		Self:    self,
+		Self:    selfCard,
 		Type:    card.TriggerStartOfTurn,
 		Count:   n,
 		Handler: func(s *card.TurnState) int { return s.CreateRunechants(1) },
 	})
-	return 0
+	s.LogPlay(selfState)
 }

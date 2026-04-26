@@ -356,14 +356,16 @@ func roleAllowed(r Role, isArsenalSlot, isDefenseReaction bool) bool {
 	return !(r == Attack && isDefenseReaction)
 }
 
-// defenseReactionDamage runs Play() for every Defense Reaction in defenders and sums the damage
-// they deal back to the attacker (e.g. a banish-an-aura-for-arcane rider). Played in isolation
-// — no attack ordering; TurnState carries Pitched / Deck plus a per-DR fresh copy of the
-// defenders list in Graveyard so effects that scan the graveyard see plain blocks and other
-// defenders. Uncapped: this damage is dealt, not prevented.
+// defenseReactionDamage runs Play() for every Defense Reaction in defenders and sums the
+// damage they deal back to the attacker (e.g. a banish-an-aura-for-arcane rider). Played in
+// isolation — no attack ordering; TurnState carries Pitched / Deck plus a per-DR fresh
+// copy of the defenders list in Graveyard so effects that scan the graveyard see plain
+// blocks and other defenders. Uncapped: this damage is dealt, not prevented.
 //
-// state is caller-provided (from attackBufs) and reset per call. gravBuf is the caller-owned
-// scratch backing state.Graveyard; the returned slice is the (possibly grown) buffer for reuse.
+// state is caller-provided (from attackBufs) and reset per call. gravBuf is the caller-
+// owned scratch backing state.Graveyard; the returned slice is the (possibly grown) buffer
+// for reuse. Each DR's Play credits its own damage to state.Value via the chain-step
+// helper; we read the post-Play Value as that DR's contribution and accumulate into total.
 func defenseReactionDamage(defenders, pitched, deck []card.Card, state *card.TurnState, gravBuf []card.Card, cs *card.CardState) (int, []card.Card) {
 	total := 0
 	for _, d := range defenders {
@@ -373,7 +375,8 @@ func defenseReactionDamage(defenders, pitched, deck []card.Card, state *card.Tur
 		gravBuf = append(gravBuf[:0], defenders...)
 		*state = card.TurnState{Pitched: pitched, Deck: deck, Graveyard: gravBuf}
 		*cs = card.CardState{Card: d}
-		total += d.Play(state, cs)
+		d.Play(state, cs)
+		total += state.Value
 	}
 	return total, gravBuf
 }

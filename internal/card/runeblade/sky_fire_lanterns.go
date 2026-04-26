@@ -24,39 +24,45 @@ func skyFireLanternsPlay(selfPitch int, s *card.TurnState) int {
 
 type SkyFireLanternsRed struct{}
 
-func (SkyFireLanternsRed) ID() card.ID                 { return card.SkyFireLanternsRed }
-func (SkyFireLanternsRed) Name() string                 { return "Sky Fire Lanterns" }
-func (SkyFireLanternsRed) Cost(*card.TurnState) int                    { return 0 }
-func (SkyFireLanternsRed) Pitch() int                   { return 1 }
-func (SkyFireLanternsRed) Attack() int                  { return 0 }
-func (SkyFireLanternsRed) Defense() int                 { return 2 }
-func (SkyFireLanternsRed) Types() card.TypeSet          { return skyFireLanternsTypes }
-func (SkyFireLanternsRed) GoAgain() bool                { return true }
-func (SkyFireLanternsRed) NoMemo()                      {} // value depends on top of deck
-func (c SkyFireLanternsRed) Play(s *card.TurnState, _ *card.CardState) int { return skyFireLanternsPlay(c.Pitch(), s) }
+func (SkyFireLanternsRed) ID() card.ID              { return card.SkyFireLanternsRed }
+func (SkyFireLanternsRed) Name() string             { return "Sky Fire Lanterns" }
+func (SkyFireLanternsRed) Cost(*card.TurnState) int { return 0 }
+func (SkyFireLanternsRed) Pitch() int               { return 1 }
+func (SkyFireLanternsRed) Attack() int              { return 0 }
+func (SkyFireLanternsRed) Defense() int             { return 2 }
+func (SkyFireLanternsRed) Types() card.TypeSet      { return skyFireLanternsTypes }
+func (SkyFireLanternsRed) GoAgain() bool            { return true }
+func (SkyFireLanternsRed) NoMemo()                  {} // value depends on top of deck
+func (c SkyFireLanternsRed) Play(s *card.TurnState, self *card.CardState) {
+	s.ApplyAndLogEffectiveAttackPlus(self, skyFireLanternsPlay(c.Pitch(), s))
+}
 
 type SkyFireLanternsYellow struct{}
 
-func (SkyFireLanternsYellow) ID() card.ID                 { return card.SkyFireLanternsYellow }
-func (SkyFireLanternsYellow) Name() string                 { return "Sky Fire Lanterns" }
-func (SkyFireLanternsYellow) Cost(*card.TurnState) int                    { return 0 }
-func (SkyFireLanternsYellow) Pitch() int                   { return 2 }
-func (SkyFireLanternsYellow) Attack() int                  { return 0 }
-func (SkyFireLanternsYellow) Defense() int                 { return 2 }
-func (SkyFireLanternsYellow) Types() card.TypeSet          { return skyFireLanternsTypes }
-func (SkyFireLanternsYellow) GoAgain() bool                { return true }
-func (SkyFireLanternsYellow) NoMemo()                      {}
-func (c SkyFireLanternsYellow) Play(s *card.TurnState, _ *card.CardState) int { return skyFireLanternsPlay(c.Pitch(), s) }
+func (SkyFireLanternsYellow) ID() card.ID              { return card.SkyFireLanternsYellow }
+func (SkyFireLanternsYellow) Name() string             { return "Sky Fire Lanterns" }
+func (SkyFireLanternsYellow) Cost(*card.TurnState) int { return 0 }
+func (SkyFireLanternsYellow) Pitch() int               { return 2 }
+func (SkyFireLanternsYellow) Attack() int              { return 0 }
+func (SkyFireLanternsYellow) Defense() int             { return 2 }
+func (SkyFireLanternsYellow) Types() card.TypeSet      { return skyFireLanternsTypes }
+func (SkyFireLanternsYellow) GoAgain() bool            { return true }
+func (SkyFireLanternsYellow) NoMemo()                  {}
+func (c SkyFireLanternsYellow) Play(s *card.TurnState, self *card.CardState) {
+	s.ApplyAndLogEffectiveAttackPlus(self, skyFireLanternsPlay(c.Pitch(), s))
+}
 
 type SkyFireLanternsBlue struct{}
 
-func (SkyFireLanternsBlue) ID() card.ID                 { return card.SkyFireLanternsBlue }
-func (SkyFireLanternsBlue) Name() string                 { return "Sky Fire Lanterns" }
-func (SkyFireLanternsBlue) Cost(*card.TurnState) int                    { return 0 }
-func (SkyFireLanternsBlue) Pitch() int                   { return 3 }
-func (SkyFireLanternsBlue) Attack() int                  { return 0 }
-func (SkyFireLanternsBlue) Defense() int                 { return 2 }
-func (SkyFireLanternsBlue) Types() card.TypeSet          { return skyFireLanternsTypes }
-func (SkyFireLanternsBlue) GoAgain() bool                { return true }
-func (SkyFireLanternsBlue) NoMemo()                      {}
-func (c SkyFireLanternsBlue) Play(s *card.TurnState, _ *card.CardState) int { return skyFireLanternsPlay(c.Pitch(), s) }
+func (SkyFireLanternsBlue) ID() card.ID              { return card.SkyFireLanternsBlue }
+func (SkyFireLanternsBlue) Name() string             { return "Sky Fire Lanterns" }
+func (SkyFireLanternsBlue) Cost(*card.TurnState) int { return 0 }
+func (SkyFireLanternsBlue) Pitch() int               { return 3 }
+func (SkyFireLanternsBlue) Attack() int              { return 0 }
+func (SkyFireLanternsBlue) Defense() int             { return 2 }
+func (SkyFireLanternsBlue) Types() card.TypeSet      { return skyFireLanternsTypes }
+func (SkyFireLanternsBlue) GoAgain() bool            { return true }
+func (SkyFireLanternsBlue) NoMemo()                  {}
+func (c SkyFireLanternsBlue) Play(s *card.TurnState, self *card.CardState) {
+	s.ApplyAndLogEffectiveAttackPlus(self, skyFireLanternsPlay(c.Pitch(), s))
+}

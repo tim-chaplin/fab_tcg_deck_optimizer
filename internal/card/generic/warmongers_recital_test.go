@@ -10,7 +10,8 @@ import (
 func TestWarmongersRecital_NoAttackReturnsZero(t *testing.T) {
 	s := card.TurnState{}
 	for _, c := range []card.Card{WarmongersRecitalRed{}, WarmongersRecitalYellow{}, WarmongersRecitalBlue{}} {
-		if got := c.Play(&s, &card.CardState{}); got != 0 {
+		c.Play(&s, &card.CardState{Card: c})
+		if got := s.Value; got != 0 {
 			t.Errorf("%s: Play() = %d, want 0", c.Name(), got)
 		}
 	}
@@ -19,7 +20,8 @@ func TestWarmongersRecital_NoAttackReturnsZero(t *testing.T) {
 // TestWarmongersRecital_NonAttackInRemainingFizzles: non-attack action fails the predicate.
 func TestWarmongersRecital_NonAttackInRemainingFizzles(t *testing.T) {
 	s := card.TurnState{CardsRemaining: []*card.CardState{{Card: stubGenericAction()}}}
-	if got := (WarmongersRecitalRed{}).Play(&s, &card.CardState{}); got != 0 {
+	(WarmongersRecitalRed{}).Play(&s, &card.CardState{Card: WarmongersRecitalRed{}})
+	if got := s.Value; got != 0 {
 		t.Errorf("Play() = %d, want 0 (non-attack skipped)", got)
 	}
 }
@@ -38,7 +40,8 @@ func TestWarmongersRecital_NextAttackReturnsBonus(t *testing.T) {
 	for _, tc := range cases {
 		target := &card.CardState{Card: stubGenericAttack(0, 0)}
 		s := card.TurnState{CardsRemaining: []*card.CardState{target}}
-		if got := tc.c.Play(&s, &card.CardState{}); got != 0 {
+		tc.c.Play(&s, &card.CardState{Card: tc.c})
+		if got := s.Value; got != 0 {
 			t.Errorf("%s: Play() = %d, want 0 (granter returns 0; +N rides on target's BonusAttack)", tc.c.Name(), got)
 		}
 		if target.BonusAttack != tc.want {

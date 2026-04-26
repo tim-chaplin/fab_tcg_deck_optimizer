@@ -11,42 +11,51 @@ var feistyLocalsTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.
 
 type FeistyLocalsRed struct{}
 
-func (FeistyLocalsRed) ID() card.ID                 { return card.FeistyLocalsRed }
-func (FeistyLocalsRed) Name() string                { return "Feisty Locals" }
-func (FeistyLocalsRed) Cost(*card.TurnState) int                   { return 0 }
-func (FeistyLocalsRed) Pitch() int                  { return 1 }
-func (FeistyLocalsRed) Attack() int                 { return 3 }
-func (FeistyLocalsRed) Defense() int                { return 2 }
-func (FeistyLocalsRed) Types() card.TypeSet         { return feistyLocalsTypes }
-func (FeistyLocalsRed) GoAgain() bool               { return false }
+func (FeistyLocalsRed) ID() card.ID              { return card.FeistyLocalsRed }
+func (FeistyLocalsRed) Name() string             { return "Feisty Locals" }
+func (FeistyLocalsRed) Cost(*card.TurnState) int { return 0 }
+func (FeistyLocalsRed) Pitch() int               { return 1 }
+func (FeistyLocalsRed) Attack() int              { return 3 }
+func (FeistyLocalsRed) Defense() int             { return 2 }
+func (FeistyLocalsRed) Types() card.TypeSet      { return feistyLocalsTypes }
+func (FeistyLocalsRed) GoAgain() bool            { return false }
+
 // not implemented: defended-by-action-card +2{p} rider
-func (FeistyLocalsRed) NotImplemented()             {}
-func (c FeistyLocalsRed) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }
+func (FeistyLocalsRed) NotImplemented() {}
+func (c FeistyLocalsRed) Play(s *card.TurnState, self *card.CardState) {
+	s.ApplyAndLogEffectiveAttack(self)
+}
 
 type FeistyLocalsYellow struct{}
 
-func (FeistyLocalsYellow) ID() card.ID                 { return card.FeistyLocalsYellow }
-func (FeistyLocalsYellow) Name() string                { return "Feisty Locals" }
-func (FeistyLocalsYellow) Cost(*card.TurnState) int                   { return 0 }
-func (FeistyLocalsYellow) Pitch() int                  { return 2 }
-func (FeistyLocalsYellow) Attack() int                 { return 2 }
-func (FeistyLocalsYellow) Defense() int                { return 2 }
-func (FeistyLocalsYellow) Types() card.TypeSet         { return feistyLocalsTypes }
-func (FeistyLocalsYellow) GoAgain() bool               { return false }
+func (FeistyLocalsYellow) ID() card.ID              { return card.FeistyLocalsYellow }
+func (FeistyLocalsYellow) Name() string             { return "Feisty Locals" }
+func (FeistyLocalsYellow) Cost(*card.TurnState) int { return 0 }
+func (FeistyLocalsYellow) Pitch() int               { return 2 }
+func (FeistyLocalsYellow) Attack() int              { return 2 }
+func (FeistyLocalsYellow) Defense() int             { return 2 }
+func (FeistyLocalsYellow) Types() card.TypeSet      { return feistyLocalsTypes }
+func (FeistyLocalsYellow) GoAgain() bool            { return false }
+
 // not implemented: defended-by-action-card +2{p} rider
-func (FeistyLocalsYellow) NotImplemented()             {}
-func (c FeistyLocalsYellow) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }
+func (FeistyLocalsYellow) NotImplemented() {}
+func (c FeistyLocalsYellow) Play(s *card.TurnState, self *card.CardState) {
+	s.ApplyAndLogEffectiveAttack(self)
+}
 
 type FeistyLocalsBlue struct{}
 
-func (FeistyLocalsBlue) ID() card.ID                 { return card.FeistyLocalsBlue }
-func (FeistyLocalsBlue) Name() string                { return "Feisty Locals" }
-func (FeistyLocalsBlue) Cost(*card.TurnState) int                   { return 0 }
-func (FeistyLocalsBlue) Pitch() int                  { return 3 }
-func (FeistyLocalsBlue) Attack() int                 { return 1 }
-func (FeistyLocalsBlue) Defense() int                { return 2 }
-func (FeistyLocalsBlue) Types() card.TypeSet         { return feistyLocalsTypes }
-func (FeistyLocalsBlue) GoAgain() bool               { return false }
+func (FeistyLocalsBlue) ID() card.ID              { return card.FeistyLocalsBlue }
+func (FeistyLocalsBlue) Name() string             { return "Feisty Locals" }
+func (FeistyLocalsBlue) Cost(*card.TurnState) int { return 0 }
+func (FeistyLocalsBlue) Pitch() int               { return 3 }
+func (FeistyLocalsBlue) Attack() int              { return 1 }
+func (FeistyLocalsBlue) Defense() int             { return 2 }
+func (FeistyLocalsBlue) Types() card.TypeSet      { return feistyLocalsTypes }
+func (FeistyLocalsBlue) GoAgain() bool            { return false }
+
 // not implemented: defended-by-action-card +2{p} rider
-func (FeistyLocalsBlue) NotImplemented()             {}
-func (c FeistyLocalsBlue) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }
+func (FeistyLocalsBlue) NotImplemented() {}
+func (c FeistyLocalsBlue) Play(s *card.TurnState, self *card.CardState) {
+	s.ApplyAndLogEffectiveAttack(self)
+}

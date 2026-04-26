@@ -13,42 +13,48 @@ import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 var arcanicCrackleTypes = card.NewTypeSet(card.TypeRuneblade, card.TypeAction, card.TypeAttack)
 
 // arcanicCracklePlay adds the printed +1 arcane to base damage and marks ArcaneDamageDealt.
-func arcanicCracklePlay(attack int, s *card.TurnState) int {
-	return attack + s.DealArcaneDamage(1)
+func arcanicCrackleBonus(s *card.TurnState) int {
+	return s.DealArcaneDamage(1)
 }
 
 type ArcanicCrackleRed struct{}
 
-func (ArcanicCrackleRed) ID() card.ID                   { return card.ArcanicCrackleRed }
-func (ArcanicCrackleRed) Name() string                  { return "Arcanic Crackle" }
-func (ArcanicCrackleRed) Cost(*card.TurnState) int                     { return 0 }
-func (ArcanicCrackleRed) Pitch() int                    { return 1 }
-func (ArcanicCrackleRed) Attack() int                   { return 3 }
-func (ArcanicCrackleRed) Defense() int                  { return 3 }
-func (ArcanicCrackleRed) Types() card.TypeSet           { return arcanicCrackleTypes }
-func (ArcanicCrackleRed) GoAgain() bool                 { return false }
-func (c ArcanicCrackleRed) Play(s *card.TurnState, _ *card.CardState) int  { return arcanicCracklePlay(c.Attack(), s) }
+func (ArcanicCrackleRed) ID() card.ID              { return card.ArcanicCrackleRed }
+func (ArcanicCrackleRed) Name() string             { return "Arcanic Crackle" }
+func (ArcanicCrackleRed) Cost(*card.TurnState) int { return 0 }
+func (ArcanicCrackleRed) Pitch() int               { return 1 }
+func (ArcanicCrackleRed) Attack() int              { return 3 }
+func (ArcanicCrackleRed) Defense() int             { return 3 }
+func (ArcanicCrackleRed) Types() card.TypeSet      { return arcanicCrackleTypes }
+func (ArcanicCrackleRed) GoAgain() bool            { return false }
+func (ArcanicCrackleRed) Play(s *card.TurnState, self *card.CardState) {
+	s.ApplyAndLogEffectiveAttackPlus(self, arcanicCrackleBonus(s))
+}
 
 type ArcanicCrackleYellow struct{}
 
-func (ArcanicCrackleYellow) ID() card.ID                   { return card.ArcanicCrackleYellow }
-func (ArcanicCrackleYellow) Name() string                  { return "Arcanic Crackle" }
-func (ArcanicCrackleYellow) Cost(*card.TurnState) int                     { return 0 }
-func (ArcanicCrackleYellow) Pitch() int                    { return 2 }
-func (ArcanicCrackleYellow) Attack() int                   { return 2 }
-func (ArcanicCrackleYellow) Defense() int                  { return 3 }
-func (ArcanicCrackleYellow) Types() card.TypeSet           { return arcanicCrackleTypes }
-func (ArcanicCrackleYellow) GoAgain() bool                 { return false }
-func (c ArcanicCrackleYellow) Play(s *card.TurnState, _ *card.CardState) int  { return arcanicCracklePlay(c.Attack(), s) }
+func (ArcanicCrackleYellow) ID() card.ID              { return card.ArcanicCrackleYellow }
+func (ArcanicCrackleYellow) Name() string             { return "Arcanic Crackle" }
+func (ArcanicCrackleYellow) Cost(*card.TurnState) int { return 0 }
+func (ArcanicCrackleYellow) Pitch() int               { return 2 }
+func (ArcanicCrackleYellow) Attack() int              { return 2 }
+func (ArcanicCrackleYellow) Defense() int             { return 3 }
+func (ArcanicCrackleYellow) Types() card.TypeSet      { return arcanicCrackleTypes }
+func (ArcanicCrackleYellow) GoAgain() bool            { return false }
+func (ArcanicCrackleYellow) Play(s *card.TurnState, self *card.CardState) {
+	s.ApplyAndLogEffectiveAttackPlus(self, arcanicCrackleBonus(s))
+}
 
 type ArcanicCrackleBlue struct{}
 
-func (ArcanicCrackleBlue) ID() card.ID                   { return card.ArcanicCrackleBlue }
-func (ArcanicCrackleBlue) Name() string                  { return "Arcanic Crackle" }
-func (ArcanicCrackleBlue) Cost(*card.TurnState) int                     { return 0 }
-func (ArcanicCrackleBlue) Pitch() int                    { return 3 }
-func (ArcanicCrackleBlue) Attack() int                    { return 1 }
-func (ArcanicCrackleBlue) Defense() int                   { return 3 }
-func (ArcanicCrackleBlue) Types() card.TypeSet            { return arcanicCrackleTypes }
-func (ArcanicCrackleBlue) GoAgain() bool                  { return false }
-func (c ArcanicCrackleBlue) Play(s *card.TurnState, _ *card.CardState) int   { return arcanicCracklePlay(c.Attack(), s) }
+func (ArcanicCrackleBlue) ID() card.ID              { return card.ArcanicCrackleBlue }
+func (ArcanicCrackleBlue) Name() string             { return "Arcanic Crackle" }
+func (ArcanicCrackleBlue) Cost(*card.TurnState) int { return 0 }
+func (ArcanicCrackleBlue) Pitch() int               { return 3 }
+func (ArcanicCrackleBlue) Attack() int              { return 1 }
+func (ArcanicCrackleBlue) Defense() int             { return 3 }
+func (ArcanicCrackleBlue) Types() card.TypeSet      { return arcanicCrackleTypes }
+func (ArcanicCrackleBlue) GoAgain() bool            { return false }
+func (ArcanicCrackleBlue) Play(s *card.TurnState, self *card.CardState) {
+	s.ApplyAndLogEffectiveAttackPlus(self, arcanicCrackleBonus(s))
+}

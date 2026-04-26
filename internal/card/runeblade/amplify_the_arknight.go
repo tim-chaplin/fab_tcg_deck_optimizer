@@ -34,7 +34,9 @@ func (AmplifyTheArknightRed) Attack() int                { return 6 }
 func (AmplifyTheArknightRed) Defense() int               { return 3 }
 func (AmplifyTheArknightRed) Types() card.TypeSet        { return amplifyTheArknightTypes }
 func (AmplifyTheArknightRed) GoAgain() bool              { return false }
-func (c AmplifyTheArknightRed) Play(*card.TurnState, *card.CardState) int { return c.Attack() }
+func (AmplifyTheArknightRed) Play(s *card.TurnState, self *card.CardState) {
+	s.ApplyAndLogEffectiveAttack(self)
+}
 
 type AmplifyTheArknightYellow struct{}
 
@@ -48,7 +50,9 @@ func (AmplifyTheArknightYellow) Attack() int                { return 5 }
 func (AmplifyTheArknightYellow) Defense() int               { return 3 }
 func (AmplifyTheArknightYellow) Types() card.TypeSet        { return amplifyTheArknightTypes }
 func (AmplifyTheArknightYellow) GoAgain() bool              { return false }
-func (c AmplifyTheArknightYellow) Play(*card.TurnState, *card.CardState) int { return c.Attack() }
+func (AmplifyTheArknightYellow) Play(s *card.TurnState, self *card.CardState) {
+	s.ApplyAndLogEffectiveAttack(self)
+}
 
 type AmplifyTheArknightBlue struct{}
 
@@ -62,4 +66,6 @@ func (AmplifyTheArknightBlue) Attack() int                { return 4 }
 func (AmplifyTheArknightBlue) Defense() int               { return 3 }
 func (AmplifyTheArknightBlue) Types() card.TypeSet        { return amplifyTheArknightTypes }
 func (AmplifyTheArknightBlue) GoAgain() bool              { return false }
-func (c AmplifyTheArknightBlue) Play(*card.TurnState, *card.CardState) int { return c.Attack() }
+func (AmplifyTheArknightBlue) Play(s *card.TurnState, self *card.CardState) {
+	s.ApplyAndLogEffectiveAttack(self)
+}

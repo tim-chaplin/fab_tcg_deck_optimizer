@@ -27,36 +27,42 @@ func nimblismPlay(s *card.TurnState, n int) int {
 
 type NimblismRed struct{}
 
-func (NimblismRed) ID() card.ID                 { return card.NimblismRed }
-func (NimblismRed) Name() string                { return "Nimblism" }
-func (NimblismRed) Cost(*card.TurnState) int                   { return 0 }
-func (NimblismRed) Pitch() int                  { return 1 }
-func (NimblismRed) Attack() int                 { return 0 }
-func (NimblismRed) Defense() int                { return 2 }
-func (NimblismRed) Types() card.TypeSet         { return nimblismTypes }
-func (NimblismRed) GoAgain() bool               { return true }
-func (NimblismRed) Play(s *card.TurnState, _ *card.CardState) int { return nimblismPlay(s, 3) }
+func (NimblismRed) ID() card.ID              { return card.NimblismRed }
+func (NimblismRed) Name() string             { return "Nimblism" }
+func (NimblismRed) Cost(*card.TurnState) int { return 0 }
+func (NimblismRed) Pitch() int               { return 1 }
+func (NimblismRed) Attack() int              { return 0 }
+func (NimblismRed) Defense() int             { return 2 }
+func (NimblismRed) Types() card.TypeSet      { return nimblismTypes }
+func (NimblismRed) GoAgain() bool            { return true }
+func (NimblismRed) Play(s *card.TurnState, self *card.CardState) {
+	s.ApplyAndLogEffectiveAttackPlus(self, nimblismPlay(s, 3))
+}
 
 type NimblismYellow struct{}
 
-func (NimblismYellow) ID() card.ID                 { return card.NimblismYellow }
-func (NimblismYellow) Name() string                { return "Nimblism" }
-func (NimblismYellow) Cost(*card.TurnState) int                   { return 0 }
-func (NimblismYellow) Pitch() int                  { return 2 }
-func (NimblismYellow) Attack() int                 { return 0 }
-func (NimblismYellow) Defense() int                { return 2 }
-func (NimblismYellow) Types() card.TypeSet         { return nimblismTypes }
-func (NimblismYellow) GoAgain() bool               { return true }
-func (NimblismYellow) Play(s *card.TurnState, _ *card.CardState) int { return nimblismPlay(s, 2) }
+func (NimblismYellow) ID() card.ID              { return card.NimblismYellow }
+func (NimblismYellow) Name() string             { return "Nimblism" }
+func (NimblismYellow) Cost(*card.TurnState) int { return 0 }
+func (NimblismYellow) Pitch() int               { return 2 }
+func (NimblismYellow) Attack() int              { return 0 }
+func (NimblismYellow) Defense() int             { return 2 }
+func (NimblismYellow) Types() card.TypeSet      { return nimblismTypes }
+func (NimblismYellow) GoAgain() bool            { return true }
+func (NimblismYellow) Play(s *card.TurnState, self *card.CardState) {
+	s.ApplyAndLogEffectiveAttackPlus(self, nimblismPlay(s, 2))
+}
 
 type NimblismBlue struct{}
 
-func (NimblismBlue) ID() card.ID                 { return card.NimblismBlue }
-func (NimblismBlue) Name() string                { return "Nimblism" }
-func (NimblismBlue) Cost(*card.TurnState) int                   { return 0 }
-func (NimblismBlue) Pitch() int                  { return 3 }
-func (NimblismBlue) Attack() int                 { return 0 }
-func (NimblismBlue) Defense() int                { return 2 }
-func (NimblismBlue) Types() card.TypeSet         { return nimblismTypes }
-func (NimblismBlue) GoAgain() bool               { return true }
-func (NimblismBlue) Play(s *card.TurnState, _ *card.CardState) int { return nimblismPlay(s, 1) }
+func (NimblismBlue) ID() card.ID              { return card.NimblismBlue }
+func (NimblismBlue) Name() string             { return "Nimblism" }
+func (NimblismBlue) Cost(*card.TurnState) int { return 0 }
+func (NimblismBlue) Pitch() int               { return 3 }
+func (NimblismBlue) Attack() int              { return 0 }
+func (NimblismBlue) Defense() int             { return 2 }
+func (NimblismBlue) Types() card.TypeSet      { return nimblismTypes }
+func (NimblismBlue) GoAgain() bool            { return true }
+func (NimblismBlue) Play(s *card.TurnState, self *card.CardState) {
+	s.ApplyAndLogEffectiveAttackPlus(self, nimblismPlay(s, 1))
+}

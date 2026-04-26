@@ -11,7 +11,8 @@ import (
 func TestStrikeGold_LikelyHitCreditsToken(t *testing.T) {
 	var s card.TurnState
 	c := StrikeGoldRed{}
-	if got := c.Play(&s, &card.CardState{Card: c}); got != 4+card.GoldTokenValue {
+	c.Play(&s, &card.CardState{Card: c})
+	if got := s.Value; got != 4+card.GoldTokenValue {
 		t.Errorf("Red: Play() = %d, want %d (4 likely to hit + GoldTokenValue)", got, 4+card.GoldTokenValue)
 	}
 }
@@ -28,7 +29,8 @@ func TestStrikeGold_BlockableSuppressesToken(t *testing.T) {
 	}
 	for _, tc := range cases {
 		var s card.TurnState
-		if got := tc.c.Play(&s, &card.CardState{Card: tc.c}); got != tc.want {
+		tc.c.Play(&s, &card.CardState{Card: tc.c})
+		if got := s.Value; got != tc.want {
 			t.Errorf("%s: Play() = %d, want %d (blockable, no token)", tc.c.Name(), got, tc.want)
 		}
 	}

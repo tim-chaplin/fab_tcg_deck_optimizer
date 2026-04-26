@@ -10,14 +10,15 @@ var nipAtTheHeelsTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAttackReacti
 
 type NipAtTheHeelsBlue struct{}
 
-func (NipAtTheHeelsBlue) ID() card.ID                               { return card.NipAtTheHeelsBlue }
-func (NipAtTheHeelsBlue) Name() string                              { return "Nip at the Heels" }
-func (NipAtTheHeelsBlue) Cost(*card.TurnState) int                  { return 0 }
-func (NipAtTheHeelsBlue) Pitch() int                                { return 3 }
-func (NipAtTheHeelsBlue) Attack() int                               { return 0 }
-func (NipAtTheHeelsBlue) Defense() int                              { return 3 }
-func (NipAtTheHeelsBlue) Types() card.TypeSet                       { return nipAtTheHeelsTypes }
-func (NipAtTheHeelsBlue) GoAgain() bool                             { return false }
+func (NipAtTheHeelsBlue) ID() card.ID              { return card.NipAtTheHeelsBlue }
+func (NipAtTheHeelsBlue) Name() string             { return "Nip at the Heels" }
+func (NipAtTheHeelsBlue) Cost(*card.TurnState) int { return 0 }
+func (NipAtTheHeelsBlue) Pitch() int               { return 3 }
+func (NipAtTheHeelsBlue) Attack() int              { return 0 }
+func (NipAtTheHeelsBlue) Defense() int             { return 3 }
+func (NipAtTheHeelsBlue) Types() card.TypeSet      { return nipAtTheHeelsTypes }
+func (NipAtTheHeelsBlue) GoAgain() bool            { return false }
+
 // not implemented: AR +1{p} buff to a target attack with ≤3 base {p}
-func (NipAtTheHeelsBlue) NotImplemented()                           {}
-func (NipAtTheHeelsBlue) Play(*card.TurnState, *card.CardState) int { return 0 }
+func (NipAtTheHeelsBlue) NotImplemented()                              {}
+func (NipAtTheHeelsBlue) Play(s *card.TurnState, self *card.CardState) { s.LogPlay(self) }

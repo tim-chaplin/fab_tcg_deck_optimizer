@@ -9,12 +9,14 @@ var muscleMuttTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.Ty
 
 type MuscleMuttYellow struct{}
 
-func (MuscleMuttYellow) ID() card.ID                 { return card.MuscleMuttYellow }
-func (MuscleMuttYellow) Name() string                { return "Muscle Mutt" }
-func (MuscleMuttYellow) Cost(*card.TurnState) int                   { return 3 }
-func (MuscleMuttYellow) Pitch() int                  { return 2 }
-func (MuscleMuttYellow) Attack() int                 { return 6 }
-func (MuscleMuttYellow) Defense() int                { return 2 }
-func (MuscleMuttYellow) Types() card.TypeSet         { return muscleMuttTypes }
-func (MuscleMuttYellow) GoAgain() bool               { return false }
-func (c MuscleMuttYellow) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }
+func (MuscleMuttYellow) ID() card.ID              { return card.MuscleMuttYellow }
+func (MuscleMuttYellow) Name() string             { return "Muscle Mutt" }
+func (MuscleMuttYellow) Cost(*card.TurnState) int { return 3 }
+func (MuscleMuttYellow) Pitch() int               { return 2 }
+func (MuscleMuttYellow) Attack() int              { return 6 }
+func (MuscleMuttYellow) Defense() int             { return 2 }
+func (MuscleMuttYellow) Types() card.TypeSet      { return muscleMuttTypes }
+func (MuscleMuttYellow) GoAgain() bool            { return false }
+func (c MuscleMuttYellow) Play(s *card.TurnState, self *card.CardState) {
+	s.ApplyAndLogEffectiveAttack(self)
+}

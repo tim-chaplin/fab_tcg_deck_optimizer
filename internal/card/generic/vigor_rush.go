@@ -15,46 +15,52 @@ var vigorRushTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.Typ
 
 // vigorRushPlay grants go again when any non-attack Action has been played earlier this turn.
 // The solver maintains s.NonAttackActionPlayed as it walks the chain, so this is an O(1) flag
-// read rather than a scan of CardsPlayed.
-func vigorRushPlay(base int, s *card.TurnState, self *card.CardState) int {
+// read rather than a scan of CardsPlayed. Emits the chain step.
+func vigorRushPlay(s *card.TurnState, self *card.CardState) {
 	if s.NonAttackActionPlayed {
 		self.GrantedGoAgain = true
 	}
-	return base
+	s.ApplyAndLogEffectiveAttack(self)
 }
 
 type VigorRushRed struct{}
 
-func (VigorRushRed) ID() card.ID                                         { return card.VigorRushRed }
-func (VigorRushRed) Name() string                                        { return "Vigor Rush" }
-func (VigorRushRed) Cost(*card.TurnState) int                            { return 1 }
-func (VigorRushRed) Pitch() int                                          { return 1 }
-func (VigorRushRed) Attack() int                                         { return 4 }
-func (VigorRushRed) Defense() int                                        { return 2 }
-func (VigorRushRed) Types() card.TypeSet                                 { return vigorRushTypes }
-func (VigorRushRed) GoAgain() bool                                       { return false }
-func (c VigorRushRed) Play(s *card.TurnState, self *card.CardState) int { return vigorRushPlay(c.Attack(), s, self) }
+func (VigorRushRed) ID() card.ID              { return card.VigorRushRed }
+func (VigorRushRed) Name() string             { return "Vigor Rush" }
+func (VigorRushRed) Cost(*card.TurnState) int { return 1 }
+func (VigorRushRed) Pitch() int               { return 1 }
+func (VigorRushRed) Attack() int              { return 4 }
+func (VigorRushRed) Defense() int             { return 2 }
+func (VigorRushRed) Types() card.TypeSet      { return vigorRushTypes }
+func (VigorRushRed) GoAgain() bool            { return false }
+func (VigorRushRed) Play(s *card.TurnState, self *card.CardState) {
+	vigorRushPlay(s, self)
+}
 
 type VigorRushYellow struct{}
 
-func (VigorRushYellow) ID() card.ID                                         { return card.VigorRushYellow }
-func (VigorRushYellow) Name() string                                        { return "Vigor Rush" }
-func (VigorRushYellow) Cost(*card.TurnState) int                            { return 1 }
-func (VigorRushYellow) Pitch() int                                          { return 2 }
-func (VigorRushYellow) Attack() int                                         { return 3 }
-func (VigorRushYellow) Defense() int                                        { return 2 }
-func (VigorRushYellow) Types() card.TypeSet                                 { return vigorRushTypes }
-func (VigorRushYellow) GoAgain() bool                                       { return false }
-func (c VigorRushYellow) Play(s *card.TurnState, self *card.CardState) int { return vigorRushPlay(c.Attack(), s, self) }
+func (VigorRushYellow) ID() card.ID              { return card.VigorRushYellow }
+func (VigorRushYellow) Name() string             { return "Vigor Rush" }
+func (VigorRushYellow) Cost(*card.TurnState) int { return 1 }
+func (VigorRushYellow) Pitch() int               { return 2 }
+func (VigorRushYellow) Attack() int              { return 3 }
+func (VigorRushYellow) Defense() int             { return 2 }
+func (VigorRushYellow) Types() card.TypeSet      { return vigorRushTypes }
+func (VigorRushYellow) GoAgain() bool            { return false }
+func (VigorRushYellow) Play(s *card.TurnState, self *card.CardState) {
+	vigorRushPlay(s, self)
+}
 
 type VigorRushBlue struct{}
 
-func (VigorRushBlue) ID() card.ID                                         { return card.VigorRushBlue }
-func (VigorRushBlue) Name() string                                        { return "Vigor Rush" }
-func (VigorRushBlue) Cost(*card.TurnState) int                            { return 1 }
-func (VigorRushBlue) Pitch() int                                          { return 3 }
-func (VigorRushBlue) Attack() int                                         { return 2 }
-func (VigorRushBlue) Defense() int                                        { return 2 }
-func (VigorRushBlue) Types() card.TypeSet                                 { return vigorRushTypes }
-func (VigorRushBlue) GoAgain() bool                                       { return false }
-func (c VigorRushBlue) Play(s *card.TurnState, self *card.CardState) int { return vigorRushPlay(c.Attack(), s, self) }
+func (VigorRushBlue) ID() card.ID              { return card.VigorRushBlue }
+func (VigorRushBlue) Name() string             { return "Vigor Rush" }
+func (VigorRushBlue) Cost(*card.TurnState) int { return 1 }
+func (VigorRushBlue) Pitch() int               { return 3 }
+func (VigorRushBlue) Attack() int              { return 2 }
+func (VigorRushBlue) Defense() int             { return 2 }
+func (VigorRushBlue) Types() card.TypeSet      { return vigorRushTypes }
+func (VigorRushBlue) GoAgain() bool            { return false }
+func (VigorRushBlue) Play(s *card.TurnState, self *card.CardState) {
+	vigorRushPlay(s, self)
+}

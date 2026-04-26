@@ -12,42 +12,49 @@ var tradeInTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeA
 
 type TradeInRed struct{}
 
-func (TradeInRed) ID() card.ID                 { return card.TradeInRed }
-func (TradeInRed) Name() string                { return "Trade In" }
-func (TradeInRed) Cost(*card.TurnState) int                   { return 0 }
-func (TradeInRed) Pitch() int                  { return 1 }
-func (TradeInRed) Attack() int                 { return 3 }
-func (TradeInRed) Defense() int                { return 2 }
-func (TradeInRed) Types() card.TypeSet         { return tradeInTypes }
-func (TradeInRed) GoAgain() bool               { return false }
+func (TradeInRed) ID() card.ID              { return card.TradeInRed }
+func (TradeInRed) Name() string             { return "Trade In" }
+func (TradeInRed) Cost(*card.TurnState) int { return 0 }
+func (TradeInRed) Pitch() int               { return 1 }
+func (TradeInRed) Attack() int              { return 3 }
+func (TradeInRed) Defense() int             { return 2 }
+func (TradeInRed) Types() card.TypeSet      { return tradeInTypes }
+func (TradeInRed) GoAgain() bool            { return false }
+
 // not implemented: discard-to-draw rider, arsenal-conditional go again
-func (TradeInRed) NotImplemented()             {}
-func (c TradeInRed) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }
+func (TradeInRed) NotImplemented()                                {}
+func (c TradeInRed) Play(s *card.TurnState, self *card.CardState) { s.ApplyAndLogEffectiveAttack(self) }
 
 type TradeInYellow struct{}
 
-func (TradeInYellow) ID() card.ID                 { return card.TradeInYellow }
-func (TradeInYellow) Name() string                { return "Trade In" }
-func (TradeInYellow) Cost(*card.TurnState) int                   { return 0 }
-func (TradeInYellow) Pitch() int                  { return 2 }
-func (TradeInYellow) Attack() int                 { return 2 }
-func (TradeInYellow) Defense() int                { return 2 }
-func (TradeInYellow) Types() card.TypeSet         { return tradeInTypes }
-func (TradeInYellow) GoAgain() bool               { return false }
+func (TradeInYellow) ID() card.ID              { return card.TradeInYellow }
+func (TradeInYellow) Name() string             { return "Trade In" }
+func (TradeInYellow) Cost(*card.TurnState) int { return 0 }
+func (TradeInYellow) Pitch() int               { return 2 }
+func (TradeInYellow) Attack() int              { return 2 }
+func (TradeInYellow) Defense() int             { return 2 }
+func (TradeInYellow) Types() card.TypeSet      { return tradeInTypes }
+func (TradeInYellow) GoAgain() bool            { return false }
+
 // not implemented: discard-to-draw rider, arsenal-conditional go again
-func (TradeInYellow) NotImplemented()             {}
-func (c TradeInYellow) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }
+func (TradeInYellow) NotImplemented() {}
+func (c TradeInYellow) Play(s *card.TurnState, self *card.CardState) {
+	s.ApplyAndLogEffectiveAttack(self)
+}
 
 type TradeInBlue struct{}
 
-func (TradeInBlue) ID() card.ID                 { return card.TradeInBlue }
-func (TradeInBlue) Name() string                { return "Trade In" }
-func (TradeInBlue) Cost(*card.TurnState) int                   { return 0 }
-func (TradeInBlue) Pitch() int                  { return 3 }
-func (TradeInBlue) Attack() int                 { return 1 }
-func (TradeInBlue) Defense() int                { return 2 }
-func (TradeInBlue) Types() card.TypeSet         { return tradeInTypes }
-func (TradeInBlue) GoAgain() bool               { return false }
+func (TradeInBlue) ID() card.ID              { return card.TradeInBlue }
+func (TradeInBlue) Name() string             { return "Trade In" }
+func (TradeInBlue) Cost(*card.TurnState) int { return 0 }
+func (TradeInBlue) Pitch() int               { return 3 }
+func (TradeInBlue) Attack() int              { return 1 }
+func (TradeInBlue) Defense() int             { return 2 }
+func (TradeInBlue) Types() card.TypeSet      { return tradeInTypes }
+func (TradeInBlue) GoAgain() bool            { return false }
+
 // not implemented: discard-to-draw rider, arsenal-conditional go again
-func (TradeInBlue) NotImplemented()             {}
-func (c TradeInBlue) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }
+func (TradeInBlue) NotImplemented() {}
+func (c TradeInBlue) Play(s *card.TurnState, self *card.CardState) {
+	s.ApplyAndLogEffectiveAttack(self)
+}

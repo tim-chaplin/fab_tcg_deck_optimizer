@@ -11,7 +11,8 @@ import (
 func TestTestOfStrength_WinCreditsGoldToken(t *testing.T) {
 	for _, power := range []int{6, 7} {
 		s := &card.TurnState{Deck: []card.Card{stubGenericAttack(0, power)}}
-		if got := (TestOfStrengthRed{}).Play(s, &card.CardState{}); got != card.GoldTokenValue {
+		(TestOfStrengthRed{}).Play(s, &card.CardState{Card: TestOfStrengthRed{}})
+		if got := s.Value; got != card.GoldTokenValue {
 			t.Errorf("top power %d: Play() = %d, want %d", power, got, card.GoldTokenValue)
 		}
 	}
@@ -21,7 +22,8 @@ func TestTestOfStrength_WinCreditsGoldToken(t *testing.T) {
 // gets the Gold token, so Play returns 0.
 func TestTestOfStrength_TieCreditsZero(t *testing.T) {
 	s := &card.TurnState{Deck: []card.Card{stubGenericAttack(0, 5)}}
-	if got := (TestOfStrengthRed{}).Play(s, &card.CardState{}); got != 0 {
+	(TestOfStrengthRed{}).Play(s, &card.CardState{Card: TestOfStrengthRed{}})
+	if got := s.Value; got != 0 {
 		t.Errorf("top power 5: Play() = %d, want 0 (tie)", got)
 	}
 }
@@ -31,7 +33,8 @@ func TestTestOfStrength_TieCreditsZero(t *testing.T) {
 func TestTestOfStrength_LossSubtractsGoldToken(t *testing.T) {
 	for _, power := range []int{0, 1, 2, 3, 4} {
 		s := &card.TurnState{Deck: []card.Card{stubGenericAttack(0, power)}}
-		if got := (TestOfStrengthRed{}).Play(s, &card.CardState{}); got != -card.GoldTokenValue {
+		(TestOfStrengthRed{}).Play(s, &card.CardState{Card: TestOfStrengthRed{}})
+		if got := s.Value; got != -card.GoldTokenValue {
 			t.Errorf("top power %d: Play() = %d, want %d", power, got, -card.GoldTokenValue)
 		}
 	}
@@ -41,7 +44,8 @@ func TestTestOfStrength_LossSubtractsGoldToken(t *testing.T) {
 // comprehensive rules 8.5.45d); Play returns 0.
 func TestTestOfStrength_EmptyDeckReturnsZero(t *testing.T) {
 	s := &card.TurnState{}
-	if got := (TestOfStrengthRed{}).Play(s, &card.CardState{}); got != 0 {
+	(TestOfStrengthRed{}).Play(s, &card.CardState{Card: TestOfStrengthRed{}})
+	if got := s.Value; got != 0 {
 		t.Errorf("empty deck: Play() = %d, want 0 (clash fails)", got)
 	}
 }

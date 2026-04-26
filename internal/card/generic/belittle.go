@@ -13,45 +13,54 @@ var belittleTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.Type
 
 type BelittleRed struct{}
 
-func (BelittleRed) ID() card.ID                 { return card.BelittleRed }
-func (BelittleRed) Name() string                { return "Belittle" }
-func (BelittleRed) Cost(*card.TurnState) int                   { return 1 }
-func (BelittleRed) Pitch() int                  { return 1 }
-func (BelittleRed) Attack() int                 { return 3 }
-func (BelittleRed) Defense() int                { return 2 }
-func (BelittleRed) Types() card.TypeSet         { return belittleTypes }
-func (BelittleRed) GoAgain() bool               { return true }
-func (BelittleRed) NotSilverAgeLegal()           {}
+func (BelittleRed) ID() card.ID              { return card.BelittleRed }
+func (BelittleRed) Name() string             { return "Belittle" }
+func (BelittleRed) Cost(*card.TurnState) int { return 1 }
+func (BelittleRed) Pitch() int               { return 1 }
+func (BelittleRed) Attack() int              { return 3 }
+func (BelittleRed) Defense() int             { return 2 }
+func (BelittleRed) Types() card.TypeSet      { return belittleTypes }
+func (BelittleRed) GoAgain() bool            { return true }
+func (BelittleRed) NotSilverAgeLegal()       {}
+
 // not implemented: Minnowism deck-search tutor (additional-cost reveal)
-func (BelittleRed) NotImplemented()             {}
-func (c BelittleRed) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }
+func (BelittleRed) NotImplemented() {}
+func (c BelittleRed) Play(s *card.TurnState, self *card.CardState) {
+	s.ApplyAndLogEffectiveAttack(self)
+}
 
 type BelittleYellow struct{}
 
-func (BelittleYellow) ID() card.ID                 { return card.BelittleYellow }
-func (BelittleYellow) Name() string                { return "Belittle" }
-func (BelittleYellow) Cost(*card.TurnState) int                   { return 1 }
-func (BelittleYellow) Pitch() int                  { return 2 }
-func (BelittleYellow) Attack() int                 { return 2 }
-func (BelittleYellow) Defense() int                { return 2 }
-func (BelittleYellow) Types() card.TypeSet         { return belittleTypes }
-func (BelittleYellow) GoAgain() bool               { return true }
-func (BelittleYellow) NotSilverAgeLegal()           {}
+func (BelittleYellow) ID() card.ID              { return card.BelittleYellow }
+func (BelittleYellow) Name() string             { return "Belittle" }
+func (BelittleYellow) Cost(*card.TurnState) int { return 1 }
+func (BelittleYellow) Pitch() int               { return 2 }
+func (BelittleYellow) Attack() int              { return 2 }
+func (BelittleYellow) Defense() int             { return 2 }
+func (BelittleYellow) Types() card.TypeSet      { return belittleTypes }
+func (BelittleYellow) GoAgain() bool            { return true }
+func (BelittleYellow) NotSilverAgeLegal()       {}
+
 // not implemented: Minnowism deck-search tutor (additional-cost reveal)
-func (BelittleYellow) NotImplemented()             {}
-func (c BelittleYellow) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }
+func (BelittleYellow) NotImplemented() {}
+func (c BelittleYellow) Play(s *card.TurnState, self *card.CardState) {
+	s.ApplyAndLogEffectiveAttack(self)
+}
 
 type BelittleBlue struct{}
 
-func (BelittleBlue) ID() card.ID                 { return card.BelittleBlue }
-func (BelittleBlue) Name() string                { return "Belittle" }
-func (BelittleBlue) Cost(*card.TurnState) int                   { return 1 }
-func (BelittleBlue) Pitch() int                  { return 3 }
-func (BelittleBlue) Attack() int                 { return 1 }
-func (BelittleBlue) Defense() int                { return 2 }
-func (BelittleBlue) Types() card.TypeSet         { return belittleTypes }
-func (BelittleBlue) GoAgain() bool               { return true }
-func (BelittleBlue) NotSilverAgeLegal()           {}
+func (BelittleBlue) ID() card.ID              { return card.BelittleBlue }
+func (BelittleBlue) Name() string             { return "Belittle" }
+func (BelittleBlue) Cost(*card.TurnState) int { return 1 }
+func (BelittleBlue) Pitch() int               { return 3 }
+func (BelittleBlue) Attack() int              { return 1 }
+func (BelittleBlue) Defense() int             { return 2 }
+func (BelittleBlue) Types() card.TypeSet      { return belittleTypes }
+func (BelittleBlue) GoAgain() bool            { return true }
+func (BelittleBlue) NotSilverAgeLegal()       {}
+
 // not implemented: Minnowism deck-search tutor (additional-cost reveal)
-func (BelittleBlue) NotImplemented()             {}
-func (c BelittleBlue) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }
+func (BelittleBlue) NotImplemented() {}
+func (c BelittleBlue) Play(s *card.TurnState, self *card.CardState) {
+	s.ApplyAndLogEffectiveAttack(self)
+}

@@ -22,7 +22,8 @@ func TestReduceToRunechant_PlayCreditsCreatedToken(t *testing.T) {
 	}
 	for _, c := range cases {
 		s := &card.TurnState{}
-		got := c.Play(s, &card.CardState{})
+		c.Play(s, &card.CardState{Card: c})
+		got := s.Value
 		if got != 1 {
 			t.Errorf("%s: Play() = %d, want 1 (created Runechant credits +1)", c.Name(), got)
 		}

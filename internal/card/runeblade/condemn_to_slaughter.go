@@ -12,48 +12,57 @@ var condemnToSlaughterTypes = card.NewTypeSet(card.TypeRuneblade, card.TypeActio
 
 type CondemnToSlaughterRed struct{}
 
-func (CondemnToSlaughterRed) ID() card.ID                 { return card.CondemnToSlaughterRed }
-func (CondemnToSlaughterRed) Name() string               { return "Condemn to Slaughter" }
-func (CondemnToSlaughterRed) Cost(*card.TurnState) int                  { return 1 }
-func (CondemnToSlaughterRed) Pitch() int                 { return 1 }
-func (CondemnToSlaughterRed) Attack() int                { return 0 }
-func (CondemnToSlaughterRed) Defense() int               { return 3 }
-func (CondemnToSlaughterRed) Types() card.TypeSet     { return condemnToSlaughterTypes }
-func (CondemnToSlaughterRed) GoAgain() bool              { return true }
+func (CondemnToSlaughterRed) ID() card.ID              { return card.CondemnToSlaughterRed }
+func (CondemnToSlaughterRed) Name() string             { return "Condemn to Slaughter" }
+func (CondemnToSlaughterRed) Cost(*card.TurnState) int { return 1 }
+func (CondemnToSlaughterRed) Pitch() int               { return 1 }
+func (CondemnToSlaughterRed) Attack() int              { return 0 }
+func (CondemnToSlaughterRed) Defense() int             { return 3 }
+func (CondemnToSlaughterRed) Types() card.TypeSet      { return condemnToSlaughterTypes }
+func (CondemnToSlaughterRed) GoAgain() bool            { return true }
+
 // not implemented: aura-trade rider and opponent-aura destruction clause; only same-turn
 // Runeblade-attack +N{p} is modelled
-func (CondemnToSlaughterRed) NotImplemented()             {}
-func (CondemnToSlaughterRed) Play(s *card.TurnState, _ *card.CardState) int { return condemnToSlaughterBonus(s, 3) }
+func (CondemnToSlaughterRed) NotImplemented() {}
+func (CondemnToSlaughterRed) Play(s *card.TurnState, self *card.CardState) {
+	s.ApplyAndLogEffectiveAttackPlus(self, condemnToSlaughterBonus(s, 3))
+}
 
 type CondemnToSlaughterYellow struct{}
 
-func (CondemnToSlaughterYellow) ID() card.ID                 { return card.CondemnToSlaughterYellow }
-func (CondemnToSlaughterYellow) Name() string               { return "Condemn to Slaughter" }
-func (CondemnToSlaughterYellow) Cost(*card.TurnState) int                  { return 1 }
-func (CondemnToSlaughterYellow) Pitch() int                 { return 2 }
-func (CondemnToSlaughterYellow) Attack() int                { return 0 }
-func (CondemnToSlaughterYellow) Defense() int               { return 3 }
-func (CondemnToSlaughterYellow) Types() card.TypeSet     { return condemnToSlaughterTypes }
-func (CondemnToSlaughterYellow) GoAgain() bool              { return true }
+func (CondemnToSlaughterYellow) ID() card.ID              { return card.CondemnToSlaughterYellow }
+func (CondemnToSlaughterYellow) Name() string             { return "Condemn to Slaughter" }
+func (CondemnToSlaughterYellow) Cost(*card.TurnState) int { return 1 }
+func (CondemnToSlaughterYellow) Pitch() int               { return 2 }
+func (CondemnToSlaughterYellow) Attack() int              { return 0 }
+func (CondemnToSlaughterYellow) Defense() int             { return 3 }
+func (CondemnToSlaughterYellow) Types() card.TypeSet      { return condemnToSlaughterTypes }
+func (CondemnToSlaughterYellow) GoAgain() bool            { return true }
+
 // not implemented: aura-trade rider and opponent-aura destruction clause; only same-turn
 // Runeblade-attack +N{p} is modelled
-func (CondemnToSlaughterYellow) NotImplemented()             {}
-func (CondemnToSlaughterYellow) Play(s *card.TurnState, _ *card.CardState) int { return condemnToSlaughterBonus(s, 2) }
+func (CondemnToSlaughterYellow) NotImplemented() {}
+func (CondemnToSlaughterYellow) Play(s *card.TurnState, self *card.CardState) {
+	s.ApplyAndLogEffectiveAttackPlus(self, condemnToSlaughterBonus(s, 2))
+}
 
 type CondemnToSlaughterBlue struct{}
 
-func (CondemnToSlaughterBlue) ID() card.ID                 { return card.CondemnToSlaughterBlue }
-func (CondemnToSlaughterBlue) Name() string               { return "Condemn to Slaughter" }
-func (CondemnToSlaughterBlue) Cost(*card.TurnState) int                  { return 1 }
-func (CondemnToSlaughterBlue) Pitch() int                 { return 3 }
-func (CondemnToSlaughterBlue) Attack() int                { return 0 }
-func (CondemnToSlaughterBlue) Defense() int               { return 3 }
-func (CondemnToSlaughterBlue) Types() card.TypeSet     { return condemnToSlaughterTypes }
-func (CondemnToSlaughterBlue) GoAgain() bool              { return true }
+func (CondemnToSlaughterBlue) ID() card.ID              { return card.CondemnToSlaughterBlue }
+func (CondemnToSlaughterBlue) Name() string             { return "Condemn to Slaughter" }
+func (CondemnToSlaughterBlue) Cost(*card.TurnState) int { return 1 }
+func (CondemnToSlaughterBlue) Pitch() int               { return 3 }
+func (CondemnToSlaughterBlue) Attack() int              { return 0 }
+func (CondemnToSlaughterBlue) Defense() int             { return 3 }
+func (CondemnToSlaughterBlue) Types() card.TypeSet      { return condemnToSlaughterTypes }
+func (CondemnToSlaughterBlue) GoAgain() bool            { return true }
+
 // not implemented: aura-trade rider and opponent-aura destruction clause; only same-turn
 // Runeblade-attack +N{p} is modelled
-func (CondemnToSlaughterBlue) NotImplemented()             {}
-func (CondemnToSlaughterBlue) Play(s *card.TurnState, _ *card.CardState) int { return condemnToSlaughterBonus(s, 1) }
+func (CondemnToSlaughterBlue) NotImplemented() {}
+func (CondemnToSlaughterBlue) Play(s *card.TurnState, self *card.CardState) {
+	s.ApplyAndLogEffectiveAttackPlus(self, condemnToSlaughterBonus(s, 1))
+}
 
 // condemnToSlaughterBonus grants +n to the first scheduled Runeblade attack (attack action
 // card or weapon swing) via pc.BonusAttack so the buffed attack's EffectiveAttack folds the

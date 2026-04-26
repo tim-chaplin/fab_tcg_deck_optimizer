@@ -12,14 +12,15 @@ var ransackAndRazeTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction)
 
 type RansackAndRazeBlue struct{}
 
-func (RansackAndRazeBlue) ID() card.ID                 { return card.RansackAndRazeBlue }
-func (RansackAndRazeBlue) Name() string                { return "Ransack and Raze" }
-func (RansackAndRazeBlue) Cost(*card.TurnState) int                   { return 0 }
-func (RansackAndRazeBlue) Pitch() int                  { return 3 }
-func (RansackAndRazeBlue) Attack() int                 { return 0 }
-func (RansackAndRazeBlue) Defense() int                { return 3 }
-func (RansackAndRazeBlue) Types() card.TypeSet         { return ransackAndRazeTypes }
-func (RansackAndRazeBlue) GoAgain() bool               { return true }
+func (RansackAndRazeBlue) ID() card.ID              { return card.RansackAndRazeBlue }
+func (RansackAndRazeBlue) Name() string             { return "Ransack and Raze" }
+func (RansackAndRazeBlue) Cost(*card.TurnState) int { return 0 }
+func (RansackAndRazeBlue) Pitch() int               { return 3 }
+func (RansackAndRazeBlue) Attack() int              { return 0 }
+func (RansackAndRazeBlue) Defense() int             { return 3 }
+func (RansackAndRazeBlue) Types() card.TypeSet      { return ransackAndRazeTypes }
+func (RansackAndRazeBlue) GoAgain() bool            { return true }
+
 // not implemented: gold tokens, landmarks
-func (RansackAndRazeBlue) NotImplemented()             {}
-func (RansackAndRazeBlue) Play(s *card.TurnState, _ *card.CardState) int { return 0 }
+func (RansackAndRazeBlue) NotImplemented()                              {}
+func (RansackAndRazeBlue) Play(s *card.TurnState, self *card.CardState) { s.LogPlay(self) }

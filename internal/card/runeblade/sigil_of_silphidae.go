@@ -27,7 +27,7 @@ func (SigilOfSilphidaeBlue) Types() card.TypeSet      { return sigilOfSilphidaeT
 func (SigilOfSilphidaeBlue) GoAgain() bool            { return true }
 func (SigilOfSilphidaeBlue) AddsFutureValue()         {}
 func (SigilOfSilphidaeBlue) NoMemo()                  {}
-func (c SigilOfSilphidaeBlue) Play(s *card.TurnState, _ *card.CardState) int {
+func (c SigilOfSilphidaeBlue) Play(s *card.TurnState, self *card.CardState) {
 	enterDamage := banishAuraFromGraveyard(s)
 	s.AddAuraTrigger(card.AuraTrigger{
 		Self:  c,
@@ -37,5 +37,5 @@ func (c SigilOfSilphidaeBlue) Play(s *card.TurnState, _ *card.CardState) int {
 			return banishAuraFromGraveyard(s)
 		},
 	})
-	return enterDamage
+	s.ApplyAndLogEffectiveAttackPlus(self, enterDamage)
 }

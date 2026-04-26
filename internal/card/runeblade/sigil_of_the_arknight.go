@@ -26,14 +26,14 @@ func (SigilOfTheArknightBlue) Defense() int             { return 2 }
 func (SigilOfTheArknightBlue) Types() card.TypeSet      { return sigilOfTheArknightTypes }
 func (SigilOfTheArknightBlue) GoAgain() bool            { return true }
 func (SigilOfTheArknightBlue) AddsFutureValue()         {}
-func (c SigilOfTheArknightBlue) Play(s *card.TurnState, _ *card.CardState) int {
+func (c SigilOfTheArknightBlue) Play(s *card.TurnState, self *card.CardState) {
 	s.AddAuraTrigger(card.AuraTrigger{
 		Self:    c,
 		Type:    card.TriggerStartOfTurn,
 		Count:   1,
 		Handler: sigilOfTheArknightReveal,
 	})
-	return 0
+	s.LogPlay(self)
 }
 
 // sigilOfTheArknightReveal implements the handler described in the file docstring.

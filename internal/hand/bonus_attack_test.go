@@ -25,8 +25,8 @@ func (pitchOnlyRed) Defense() int             { return 0 }
 func (pitchOnlyRed) Types() card.TypeSet {
 	return card.NewTypeSet(card.TypeGeneric, card.TypeAction)
 }
-func (pitchOnlyRed) GoAgain() bool                                 { return false }
-func (pitchOnlyRed) Play(*card.TurnState, *card.CardState) int { return 0 }
+func (pitchOnlyRed) GoAgain() bool                         { return false }
+func (pitchOnlyRed) Play(*card.TurnState, *card.CardState) {}
 
 // grantBonusAttack is a test-only non-attack action card that scans CardsRemaining and adds n
 // to BonusAttack on the first attack action card it finds. Mirrors the production shape used
@@ -46,14 +46,14 @@ func (grantBonusAttack) Types() card.TypeSet {
 	return card.NewTypeSet(card.TypeGeneric, card.TypeAction)
 }
 func (grantBonusAttack) GoAgain() bool { return true }
-func (g grantBonusAttack) Play(s *card.TurnState, _ *card.CardState) int {
+func (g grantBonusAttack) Play(s *card.TurnState, self *card.CardState) {
 	for _, pc := range s.CardsRemaining {
 		if pc.Card.Types().IsAttackAction() {
 			pc.BonusAttack += g.n
-			return 0
+			break
 		}
 	}
-	return 0
+	s.LogPlay(self)
 }
 
 // grantBonusAttackWeapon scans CardsRemaining for the first weapon swing (TypeWeapon, no
@@ -71,14 +71,14 @@ func (grantBonusAttackWeapon) Types() card.TypeSet {
 	return card.NewTypeSet(card.TypeGeneric, card.TypeAction)
 }
 func (grantBonusAttackWeapon) GoAgain() bool { return true }
-func (g grantBonusAttackWeapon) Play(s *card.TurnState, _ *card.CardState) int {
+func (g grantBonusAttackWeapon) Play(s *card.TurnState, self *card.CardState) {
 	for _, pc := range s.CardsRemaining {
 		if pc.Card.Types().Has(card.TypeWeapon) {
 			pc.BonusAttack += g.n
-			return 0
+			break
 		}
 	}
-	return 0
+	s.LogPlay(self)
 }
 
 // TestPlaySequence_BonusAttackAppliedToTargetDamage pins the core wiring: a granter scheduled
@@ -219,16 +219,16 @@ func TestPlaySequence_BonusAttackPerPermutationReset(t *testing.T) {
 //   - 1 Runechant carrying over from the previous turn.
 //
 // Best chain:
-//   1. Pitch the red (1 resource) to fund Volition.
-//   2. Play Nimblism Blue (cost 0, go again) — scans CardsRemaining, finds Volition Yellow
-//      (cost 1, satisfies the cost-≤1 filter), and writes pc.BonusAttack += 1.
-//   3. Play Consuming Volition Yellow:
-//        - The runechant carryover fires when the attack starts, flipping
-//          state.ArcaneDamageDealt = true.
-//        - self.EffectiveAttack() = printed 3 + BonusAttack 1 = 4. LikelyToHit(self) is
-//          true (4 ∈ {1,4,7}), so the discard rider returns +DiscardValue (3).
-//        - Volition's Play returns 3 (printed) + 3 (discard rider) = 6.
-//        - Solver folds in BonusAttack: cardContrib = 6 + 1 = 7.
+//  1. Pitch the red (1 resource) to fund Volition.
+//  2. Play Nimblism Blue (cost 0, go again) — scans CardsRemaining, finds Volition Yellow
+//     (cost 1, satisfies the cost-≤1 filter), and writes pc.BonusAttack += 1.
+//  3. Play Consuming Volition Yellow:
+//     - The runechant carryover fires when the attack starts, flipping
+//     state.ArcaneDamageDealt = true.
+//     - self.EffectiveAttack() = printed 3 + BonusAttack 1 = 4. LikelyToHit(self) is
+//     true (4 ∈ {1,4,7}), so the discard rider returns +DiscardValue (3).
+//     - Volition's Play returns 3 (printed) + 3 (discard rider) = 6.
+//     - Solver folds in BonusAttack: cardContrib = 6 + 1 = 7.
 //
 // Total Value = 7 = 3 (Volition base) + 1 (Nimblism's grant via BonusAttack) + 3 (discard
 // rider, gated on ArcaneDamageDealt + LikelyToHit firing on the buffed attack).

@@ -11,15 +11,16 @@ var talismanOfCremationTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction
 
 type TalismanOfCremationBlue struct{}
 
-func (TalismanOfCremationBlue) ID() card.ID                               { return card.TalismanOfCremationBlue }
-func (TalismanOfCremationBlue) Name() string                              { return "Talisman of Cremation" }
-func (TalismanOfCremationBlue) Cost(*card.TurnState) int                  { return 0 }
-func (TalismanOfCremationBlue) Pitch() int                                { return 3 }
-func (TalismanOfCremationBlue) Attack() int                               { return 0 }
-func (TalismanOfCremationBlue) Defense() int                              { return 0 }
-func (TalismanOfCremationBlue) Types() card.TypeSet                       { return talismanOfCremationTypes }
-func (TalismanOfCremationBlue) GoAgain() bool                             { return true }
+func (TalismanOfCremationBlue) ID() card.ID              { return card.TalismanOfCremationBlue }
+func (TalismanOfCremationBlue) Name() string             { return "Talisman of Cremation" }
+func (TalismanOfCremationBlue) Cost(*card.TurnState) int { return 0 }
+func (TalismanOfCremationBlue) Pitch() int               { return 3 }
+func (TalismanOfCremationBlue) Attack() int              { return 0 }
+func (TalismanOfCremationBlue) Defense() int             { return 0 }
+func (TalismanOfCremationBlue) Types() card.TypeSet      { return talismanOfCremationTypes }
+func (TalismanOfCremationBlue) GoAgain() bool            { return true }
+
 // not implemented: self-destroys on play-from-banished → banish a named card from opposing
 // graveyards
-func (TalismanOfCremationBlue) NotImplemented()                           {}
-func (TalismanOfCremationBlue) Play(*card.TurnState, *card.CardState) int { return 0 }
+func (TalismanOfCremationBlue) NotImplemented()                              {}
+func (TalismanOfCremationBlue) Play(s *card.TurnState, self *card.CardState) { s.LogPlay(self) }

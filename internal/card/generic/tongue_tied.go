@@ -11,23 +11,26 @@ var tongueTiedTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.Ty
 
 type TongueTiedRed struct{}
 
-func (TongueTiedRed) ID() card.ID                 { return card.TongueTiedRed }
-func (TongueTiedRed) Name() string                { return "Tongue Tied" }
-func (TongueTiedRed) Cost(*card.TurnState) int                   { return 3 }
-func (TongueTiedRed) Pitch() int                  { return 1 }
-func (TongueTiedRed) Attack() int                 { return 7 }
-func (TongueTiedRed) Defense() int                { return 2 }
-func (TongueTiedRed) Types() card.TypeSet         { return tongueTiedTypes }
-func (TongueTiedRed) GoAgain() bool               { return false }
+func (TongueTiedRed) ID() card.ID              { return card.TongueTiedRed }
+func (TongueTiedRed) Name() string             { return "Tongue Tied" }
+func (TongueTiedRed) Cost(*card.TurnState) int { return 3 }
+func (TongueTiedRed) Pitch() int               { return 1 }
+func (TongueTiedRed) Attack() int              { return 7 }
+func (TongueTiedRed) Defense() int             { return 2 }
+func (TongueTiedRed) Types() card.TypeSet      { return tongueTiedTypes }
+func (TongueTiedRed) GoAgain() bool            { return false }
+
 // not implemented: on-hit opponent-arsenal manipulation rider
-func (TongueTiedRed) NotImplemented()             {}
-func (c TongueTiedRed) Play(s *card.TurnState, self *card.CardState) int { return tongueTiedDamage(c.Attack(), self) }
+func (TongueTiedRed) NotImplemented() {}
+func (TongueTiedRed) Play(s *card.TurnState, self *card.CardState) {
+	s.ApplyAndLogEffectiveAttackPlus(self, tongueTiedBonus(self))
+}
 
 // tongueTiedDamage is a breadcrumb for the on-hit "arsenal face-up + banish instant" rider —
 // not modelled yet (see TODO.md).
-func tongueTiedDamage(attack int, self *card.CardState) int {
+func tongueTiedBonus(self *card.CardState) int {
 	if card.LikelyToHit(self) {
 		// TODO: model on-hit arsenal manipulation rider.
 	}
-	return attack
+	return 0
 }

@@ -12,14 +12,17 @@ var emissaryOfMoonTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, car
 
 type EmissaryOfMoonRed struct{}
 
-func (EmissaryOfMoonRed) ID() card.ID                 { return card.EmissaryOfMoonRed }
-func (EmissaryOfMoonRed) Name() string                { return "Emissary of Moon" }
-func (EmissaryOfMoonRed) Cost(*card.TurnState) int                   { return 0 }
-func (EmissaryOfMoonRed) Pitch() int                  { return 1 }
-func (EmissaryOfMoonRed) Attack() int                 { return 4 }
-func (EmissaryOfMoonRed) Defense() int                { return 2 }
-func (EmissaryOfMoonRed) Types() card.TypeSet         { return emissaryOfMoonTypes }
-func (EmissaryOfMoonRed) GoAgain() bool               { return false }
+func (EmissaryOfMoonRed) ID() card.ID              { return card.EmissaryOfMoonRed }
+func (EmissaryOfMoonRed) Name() string             { return "Emissary of Moon" }
+func (EmissaryOfMoonRed) Cost(*card.TurnState) int { return 0 }
+func (EmissaryOfMoonRed) Pitch() int               { return 1 }
+func (EmissaryOfMoonRed) Attack() int              { return 4 }
+func (EmissaryOfMoonRed) Defense() int             { return 2 }
+func (EmissaryOfMoonRed) Types() card.TypeSet      { return emissaryOfMoonTypes }
+func (EmissaryOfMoonRed) GoAgain() bool            { return false }
+
 // not implemented: hand-cycle draw rider
-func (EmissaryOfMoonRed) NotImplemented()             {}
-func (c EmissaryOfMoonRed) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }
+func (EmissaryOfMoonRed) NotImplemented() {}
+func (c EmissaryOfMoonRed) Play(s *card.TurnState, self *card.CardState) {
+	s.ApplyAndLogEffectiveAttack(self)
+}

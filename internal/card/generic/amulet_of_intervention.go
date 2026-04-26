@@ -12,14 +12,15 @@ var amuletOfInterventionTypes = card.NewTypeSet(card.TypeGeneric, card.TypeActio
 
 type AmuletOfInterventionBlue struct{}
 
-func (AmuletOfInterventionBlue) ID() card.ID                               { return card.AmuletOfInterventionBlue }
-func (AmuletOfInterventionBlue) Name() string                              { return "Amulet of Intervention" }
-func (AmuletOfInterventionBlue) Cost(*card.TurnState) int                  { return 0 }
-func (AmuletOfInterventionBlue) Pitch() int                                { return 3 }
-func (AmuletOfInterventionBlue) Attack() int                               { return 0 }
-func (AmuletOfInterventionBlue) Defense() int                              { return 0 }
-func (AmuletOfInterventionBlue) Types() card.TypeSet                       { return amuletOfInterventionTypes }
-func (AmuletOfInterventionBlue) GoAgain() bool                             { return true }
+func (AmuletOfInterventionBlue) ID() card.ID              { return card.AmuletOfInterventionBlue }
+func (AmuletOfInterventionBlue) Name() string             { return "Amulet of Intervention" }
+func (AmuletOfInterventionBlue) Cost(*card.TurnState) int { return 0 }
+func (AmuletOfInterventionBlue) Pitch() int               { return 3 }
+func (AmuletOfInterventionBlue) Attack() int              { return 0 }
+func (AmuletOfInterventionBlue) Defense() int             { return 0 }
+func (AmuletOfInterventionBlue) Types() card.TypeSet      { return amuletOfInterventionTypes }
+func (AmuletOfInterventionBlue) GoAgain() bool            { return true }
+
 // not implemented: Instant 1 damage prevention; gated on a lethal incoming source
-func (AmuletOfInterventionBlue) NotImplemented()                           {}
-func (AmuletOfInterventionBlue) Play(*card.TurnState, *card.CardState) int { return 0 }
+func (AmuletOfInterventionBlue) NotImplemented()                              {}
+func (AmuletOfInterventionBlue) Play(s *card.TurnState, self *card.CardState) { s.LogPlay(self) }

@@ -10,7 +10,8 @@ import (
 func TestComeToFight_NoAttackReturnsZero(t *testing.T) {
 	s := card.TurnState{}
 	for _, c := range []card.Card{ComeToFightRed{}, ComeToFightYellow{}, ComeToFightBlue{}} {
-		if got := c.Play(&s, &card.CardState{}); got != 0 {
+		c.Play(&s, &card.CardState{Card: c})
+		if got := s.Value; got != 0 {
 			t.Errorf("%s: Play() = %d, want 0", c.Name(), got)
 		}
 	}
@@ -20,7 +21,8 @@ func TestComeToFight_NoAttackReturnsZero(t *testing.T) {
 // attack-action predicate rejects it.
 func TestComeToFight_NonAttackInRemainingFizzles(t *testing.T) {
 	s := card.TurnState{CardsRemaining: []*card.CardState{{Card: stubGenericAction()}}}
-	if got := (ComeToFightRed{}).Play(&s, &card.CardState{}); got != 0 {
+	(ComeToFightRed{}).Play(&s, &card.CardState{Card: ComeToFightRed{}})
+	if got := s.Value; got != 0 {
 		t.Errorf("Play() = %d, want 0 (non-attack skipped)", got)
 	}
 }
@@ -39,7 +41,8 @@ func TestComeToFight_NextAttackReturnsBonus(t *testing.T) {
 	for _, tc := range cases {
 		target := &card.CardState{Card: stubGenericAttack(0, 0)}
 		s := card.TurnState{CardsRemaining: []*card.CardState{target}}
-		if got := tc.c.Play(&s, &card.CardState{}); got != 0 {
+		tc.c.Play(&s, &card.CardState{Card: tc.c})
+		if got := s.Value; got != 0 {
 			t.Errorf("%s: Play() = %d, want 0 (granter returns 0; +N rides on target's BonusAttack)", tc.c.Name(), got)
 		}
 		if target.BonusAttack != tc.want {

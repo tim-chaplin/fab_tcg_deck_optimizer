@@ -12,51 +12,60 @@ var moneyOrYourLifeTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, ca
 
 type MoneyOrYourLifeRed struct{}
 
-func (MoneyOrYourLifeRed) ID() card.ID                 { return card.MoneyOrYourLifeRed }
-func (MoneyOrYourLifeRed) Name() string                { return "Money or Your Life?" }
-func (MoneyOrYourLifeRed) Cost(*card.TurnState) int                   { return 3 }
-func (MoneyOrYourLifeRed) Pitch() int                  { return 1 }
-func (MoneyOrYourLifeRed) Attack() int                 { return 6 }
-func (MoneyOrYourLifeRed) Defense() int                { return 2 }
-func (MoneyOrYourLifeRed) Types() card.TypeSet         { return moneyOrYourLifeTypes }
-func (MoneyOrYourLifeRed) GoAgain() bool               { return false }
+func (MoneyOrYourLifeRed) ID() card.ID              { return card.MoneyOrYourLifeRed }
+func (MoneyOrYourLifeRed) Name() string             { return "Money or Your Life?" }
+func (MoneyOrYourLifeRed) Cost(*card.TurnState) int { return 3 }
+func (MoneyOrYourLifeRed) Pitch() int               { return 1 }
+func (MoneyOrYourLifeRed) Attack() int              { return 6 }
+func (MoneyOrYourLifeRed) Defense() int             { return 2 }
+func (MoneyOrYourLifeRed) Types() card.TypeSet      { return moneyOrYourLifeTypes }
+func (MoneyOrYourLifeRed) GoAgain() bool            { return false }
+
 // not implemented: gold tokens
-func (MoneyOrYourLifeRed) NotImplemented()             {}
-func (c MoneyOrYourLifeRed) Play(s *card.TurnState, self *card.CardState) int { return moneyOrYourLifeDamage(c.Attack(), self) }
+func (MoneyOrYourLifeRed) NotImplemented() {}
+func (MoneyOrYourLifeRed) Play(s *card.TurnState, self *card.CardState) {
+	s.ApplyAndLogEffectiveAttackPlus(self, moneyOrYourLifeBonus(self))
+}
 
 type MoneyOrYourLifeYellow struct{}
 
-func (MoneyOrYourLifeYellow) ID() card.ID                 { return card.MoneyOrYourLifeYellow }
-func (MoneyOrYourLifeYellow) Name() string                { return "Money or Your Life?" }
-func (MoneyOrYourLifeYellow) Cost(*card.TurnState) int                   { return 3 }
-func (MoneyOrYourLifeYellow) Pitch() int                  { return 2 }
-func (MoneyOrYourLifeYellow) Attack() int                 { return 5 }
-func (MoneyOrYourLifeYellow) Defense() int                { return 2 }
-func (MoneyOrYourLifeYellow) Types() card.TypeSet         { return moneyOrYourLifeTypes }
-func (MoneyOrYourLifeYellow) GoAgain() bool               { return false }
+func (MoneyOrYourLifeYellow) ID() card.ID              { return card.MoneyOrYourLifeYellow }
+func (MoneyOrYourLifeYellow) Name() string             { return "Money or Your Life?" }
+func (MoneyOrYourLifeYellow) Cost(*card.TurnState) int { return 3 }
+func (MoneyOrYourLifeYellow) Pitch() int               { return 2 }
+func (MoneyOrYourLifeYellow) Attack() int              { return 5 }
+func (MoneyOrYourLifeYellow) Defense() int             { return 2 }
+func (MoneyOrYourLifeYellow) Types() card.TypeSet      { return moneyOrYourLifeTypes }
+func (MoneyOrYourLifeYellow) GoAgain() bool            { return false }
+
 // not implemented: gold tokens
-func (MoneyOrYourLifeYellow) NotImplemented()             {}
-func (c MoneyOrYourLifeYellow) Play(s *card.TurnState, self *card.CardState) int { return moneyOrYourLifeDamage(c.Attack(), self) }
+func (MoneyOrYourLifeYellow) NotImplemented() {}
+func (MoneyOrYourLifeYellow) Play(s *card.TurnState, self *card.CardState) {
+	s.ApplyAndLogEffectiveAttackPlus(self, moneyOrYourLifeBonus(self))
+}
 
 type MoneyOrYourLifeBlue struct{}
 
-func (MoneyOrYourLifeBlue) ID() card.ID                 { return card.MoneyOrYourLifeBlue }
-func (MoneyOrYourLifeBlue) Name() string                { return "Money or Your Life?" }
-func (MoneyOrYourLifeBlue) Cost(*card.TurnState) int                   { return 3 }
-func (MoneyOrYourLifeBlue) Pitch() int                  { return 3 }
-func (MoneyOrYourLifeBlue) Attack() int                 { return 4 }
-func (MoneyOrYourLifeBlue) Defense() int                { return 2 }
-func (MoneyOrYourLifeBlue) Types() card.TypeSet         { return moneyOrYourLifeTypes }
-func (MoneyOrYourLifeBlue) GoAgain() bool               { return false }
+func (MoneyOrYourLifeBlue) ID() card.ID              { return card.MoneyOrYourLifeBlue }
+func (MoneyOrYourLifeBlue) Name() string             { return "Money or Your Life?" }
+func (MoneyOrYourLifeBlue) Cost(*card.TurnState) int { return 3 }
+func (MoneyOrYourLifeBlue) Pitch() int               { return 3 }
+func (MoneyOrYourLifeBlue) Attack() int              { return 4 }
+func (MoneyOrYourLifeBlue) Defense() int             { return 2 }
+func (MoneyOrYourLifeBlue) Types() card.TypeSet      { return moneyOrYourLifeTypes }
+func (MoneyOrYourLifeBlue) GoAgain() bool            { return false }
+
 // not implemented: gold tokens
-func (MoneyOrYourLifeBlue) NotImplemented()             {}
-func (c MoneyOrYourLifeBlue) Play(s *card.TurnState, self *card.CardState) int { return moneyOrYourLifeDamage(c.Attack(), self) }
+func (MoneyOrYourLifeBlue) NotImplemented() {}
+func (MoneyOrYourLifeBlue) Play(s *card.TurnState, self *card.CardState) {
+	s.ApplyAndLogEffectiveAttackPlus(self, moneyOrYourLifeBonus(self))
+}
 
 // moneyOrYourLifeDamage is a breadcrumb for the on-hit "deal 2 damage unless they give Gold"
 // rider — Gold tokens aren't tracked, Thief-repeat isn't modelled (see TODO.md).
-func moneyOrYourLifeDamage(attack int, self *card.CardState) int {
+func moneyOrYourLifeBonus(self *card.CardState) int {
 	if card.LikelyToHit(self) {
 		// TODO: model on-hit Gold-trade rider.
 	}
-	return attack
+	return 0
 }

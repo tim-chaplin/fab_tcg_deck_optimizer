@@ -34,11 +34,14 @@ func moonWishCost(s *card.TurnState) int {
 	return moonWishPrintedCost
 }
 
-// moonWishPlay applies the alt cost mutation (when a hand card is available), runs the
-// printed attack, and on a likely hit tutors a Sun Kiss from the deck. Sun Kiss plays
-// immediately when self has go-again granted by a prior chain card; otherwise it carries
-// to the next hand via s.Hand.
-func moonWishPlay(c card.Card, attack int, s *card.TurnState, self *card.CardState) int {
+// moonWishPlay applies the alt cost mutation (when a hand card is available), emits Moon
+// Wish's chain step, and on a likely hit tutors a Sun Kiss from the deck. Sun Kiss plays
+// immediately when self has go-again granted by a prior chain card (its own chain step
+// emits with its printed heal as a post-Moon Wish entry); otherwise it carries to the
+// next hand via s.Hand. Tutor outcomes get a "tutored Sun Kiss" / "tutored Sun Kiss and
+// played it" / "found no Sun Kiss to tutor" post-trigger child line beneath Moon Wish's
+// chain step.
+func moonWishPlay(c card.Card, s *card.TurnState, self *card.CardState) {
 	// Alt cost: pop a hand card and prepend to deck. Same-turn deck-top readers (the Sun
 	// Kiss tutor's post-resolution DrawOne) see it; the next turn's deal sees it too via
 	// the sim's end-of-turn copy of s.Deck.
@@ -51,12 +54,18 @@ func moonWishPlay(c card.Card, attack int, s *card.TurnState, self *card.CardSta
 		s.Deck = newDeck
 	}
 
+	// Moon Wish's own chain step lands first so subsequent tutor lines + Sun Kiss's chain
+	// step (when go-again fires) follow it in order.
+	s.ApplyAndLogEffectiveAttack(self)
+
 	if !card.LikelyToHit(self) {
-		return attack
+		return
 	}
+	name := card.DisplayName(c)
 	sk := bestSunKissInDeck(s.Deck)
 	if sk == nil {
-		return attack
+		s.AddPostTriggerLogEntry(name+" found no Sun Kiss to tutor", name, 0)
+		return
 	}
 	s.Deck = removeFirstByID(s.Deck, sk.ID())
 
@@ -64,17 +73,20 @@ func moonWishPlay(c card.Card, attack int, s *card.TurnState, self *card.CardSta
 		// Tutor lands the card in hand; carries to next turn via the sim's end-of-turn
 		// copy of s.Hand.
 		s.Hand = append(s.Hand, sk)
-		return attack
+		s.AddPostTriggerLogEntry(name+" tutored "+card.DisplayName(sk), name, 0)
+		return
 	}
 	// Go-again means Moon Wish gets a chain extension this turn. Pre-append Moon Wish to
 	// CardsPlayed so Sun Kiss's "if you've played Moon Wish" synergy fires; pop after so
-	// the sim's normal post-Play append doesn't double-add.
+	// the sim's normal post-Play append doesn't double-add. Sun Kiss authors its own
+	// chain step inside its Play call — it appears as a separate top-level entry following
+	// Moon Wish's tutor narration.
+	s.AddPostTriggerLogEntry(name+" tutored "+card.DisplayName(sk)+" and played it", name, 0)
 	s.CardsPlayed = append(s.CardsPlayed, c)
 	skSelf := &card.CardState{Card: sk}
-	skDmg := sk.Play(s, skSelf)
+	sk.Play(s, skSelf)
 	s.CardsPlayed = s.CardsPlayed[:len(s.CardsPlayed)-1]
 	s.AddToGraveyard(sk)
-	return attack + skDmg
 }
 
 // bestSunKissInDeck returns the highest-priority Sun Kiss printing present in deck, or nil
@@ -123,21 +135,22 @@ func removeFirstByID(deck []card.Card, id card.ID) []card.Card {
 
 type MoonWishRed struct{}
 
-func (MoonWishRed) ID() card.ID                 { return card.MoonWishRed }
-func (MoonWishRed) Name() string                { return "Moon Wish" }
-func (MoonWishRed) Cost(s *card.TurnState) int  { return moonWishCost(s) }
-func (MoonWishRed) MinCost() int                { return 0 }
-func (MoonWishRed) MaxCost() int                { return moonWishPrintedCost }
-func (MoonWishRed) Pitch() int                  { return 1 }
-func (MoonWishRed) Attack() int                 { return 5 }
-func (MoonWishRed) Defense() int                { return 2 }
-func (MoonWishRed) Types() card.TypeSet         { return moonWishTypes }
-func (MoonWishRed) GoAgain() bool               { return false }
+func (MoonWishRed) ID() card.ID                { return card.MoonWishRed }
+func (MoonWishRed) Name() string               { return "Moon Wish" }
+func (MoonWishRed) Cost(s *card.TurnState) int { return moonWishCost(s) }
+func (MoonWishRed) MinCost() int               { return 0 }
+func (MoonWishRed) MaxCost() int               { return moonWishPrintedCost }
+func (MoonWishRed) Pitch() int                 { return 1 }
+func (MoonWishRed) Attack() int                { return 5 }
+func (MoonWishRed) Defense() int               { return 2 }
+func (MoonWishRed) Types() card.TypeSet        { return moonWishTypes }
+func (MoonWishRed) GoAgain() bool              { return false }
+
 // NoMemo: alt-cost mutates Deck and the tutor reads deck contents — both leak through the
 // memo key, so all three variants opt out.
-func (MoonWishRed) NoMemo()                     {}
-func (c MoonWishRed) Play(s *card.TurnState, self *card.CardState) int {
-	return moonWishPlay(c, c.Attack(), s, self)
+func (MoonWishRed) NoMemo() {}
+func (c MoonWishRed) Play(s *card.TurnState, self *card.CardState) {
+	moonWishPlay(c, s, self)
 }
 
 type MoonWishYellow struct{}
@@ -153,8 +166,8 @@ func (MoonWishYellow) Defense() int               { return 2 }
 func (MoonWishYellow) Types() card.TypeSet        { return moonWishTypes }
 func (MoonWishYellow) GoAgain() bool              { return false }
 func (MoonWishYellow) NoMemo()                    {}
-func (c MoonWishYellow) Play(s *card.TurnState, self *card.CardState) int {
-	return moonWishPlay(c, c.Attack(), s, self)
+func (c MoonWishYellow) Play(s *card.TurnState, self *card.CardState) {
+	moonWishPlay(c, s, self)
 }
 
 type MoonWishBlue struct{}
@@ -170,6 +183,6 @@ func (MoonWishBlue) Defense() int               { return 2 }
 func (MoonWishBlue) Types() card.TypeSet        { return moonWishTypes }
 func (MoonWishBlue) GoAgain() bool              { return false }
 func (MoonWishBlue) NoMemo()                    {}
-func (c MoonWishBlue) Play(s *card.TurnState, self *card.CardState) int {
-	return moonWishPlay(c, c.Attack(), s, self)
+func (c MoonWishBlue) Play(s *card.TurnState, self *card.CardState) {
+	moonWishPlay(c, s, self)
 }

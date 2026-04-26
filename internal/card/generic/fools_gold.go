@@ -10,14 +10,15 @@ var foolsGoldTypes = card.NewTypeSet(card.TypeGeneric)
 
 type FoolsGoldYellow struct{}
 
-func (FoolsGoldYellow) ID() card.ID                               { return card.FoolsGoldYellow }
-func (FoolsGoldYellow) Name() string                              { return "Fool's Gold" }
-func (FoolsGoldYellow) Cost(*card.TurnState) int                  { return 0 }
-func (FoolsGoldYellow) Pitch() int                                { return 2 }
-func (FoolsGoldYellow) Attack() int                               { return 0 }
-func (FoolsGoldYellow) Defense() int                              { return 0 }
-func (FoolsGoldYellow) Types() card.TypeSet                       { return foolsGoldTypes }
-func (FoolsGoldYellow) GoAgain() bool                             { return false }
+func (FoolsGoldYellow) ID() card.ID              { return card.FoolsGoldYellow }
+func (FoolsGoldYellow) Name() string             { return "Fool's Gold" }
+func (FoolsGoldYellow) Cost(*card.TurnState) int { return 0 }
+func (FoolsGoldYellow) Pitch() int               { return 2 }
+func (FoolsGoldYellow) Attack() int              { return 0 }
+func (FoolsGoldYellow) Defense() int             { return 0 }
+func (FoolsGoldYellow) Types() card.TypeSet      { return foolsGoldTypes }
+func (FoolsGoldYellow) GoAgain() bool            { return false }
+
 // not implemented: discard trigger creates a Gold token
-func (FoolsGoldYellow) NotImplemented()                           {}
-func (FoolsGoldYellow) Play(*card.TurnState, *card.CardState) int { return 0 }
+func (FoolsGoldYellow) NotImplemented()                              {}
+func (FoolsGoldYellow) Play(s *card.TurnState, self *card.CardState) { s.LogPlay(self) }

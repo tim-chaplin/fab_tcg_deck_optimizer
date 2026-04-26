@@ -24,12 +24,14 @@ func trotAlongPlay(s *card.TurnState) int {
 
 type TrotAlongBlue struct{}
 
-func (TrotAlongBlue) ID() card.ID                 { return card.TrotAlongBlue }
-func (TrotAlongBlue) Name() string                { return "Trot Along" }
-func (TrotAlongBlue) Cost(*card.TurnState) int                   { return 0 }
-func (TrotAlongBlue) Pitch() int                  { return 3 }
-func (TrotAlongBlue) Attack() int                 { return 0 }
-func (TrotAlongBlue) Defense() int                { return 3 }
-func (TrotAlongBlue) Types() card.TypeSet         { return trotAlongTypes }
-func (TrotAlongBlue) GoAgain() bool               { return true }
-func (TrotAlongBlue) Play(s *card.TurnState, _ *card.CardState) int { return trotAlongPlay(s) }
+func (TrotAlongBlue) ID() card.ID              { return card.TrotAlongBlue }
+func (TrotAlongBlue) Name() string             { return "Trot Along" }
+func (TrotAlongBlue) Cost(*card.TurnState) int { return 0 }
+func (TrotAlongBlue) Pitch() int               { return 3 }
+func (TrotAlongBlue) Attack() int              { return 0 }
+func (TrotAlongBlue) Defense() int             { return 3 }
+func (TrotAlongBlue) Types() card.TypeSet      { return trotAlongTypes }
+func (TrotAlongBlue) GoAgain() bool            { return true }
+func (TrotAlongBlue) Play(s *card.TurnState, self *card.CardState) {
+	s.ApplyAndLogEffectiveAttackPlus(self, trotAlongPlay(s))
+}

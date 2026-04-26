@@ -18,7 +18,8 @@ func TestHitTheHighNotes_NoAuraReturnsBase(t *testing.T) {
 	}
 	for _, tc := range cases {
 		var s card.TurnState
-		if got := tc.c.Play(&s, &card.CardState{}); got != tc.base {
+		tc.c.Play(&s, &card.CardState{Card: tc.c})
+		if got := s.Value; got != tc.base {
 			t.Errorf("%s: Play() = %d, want %d", tc.c.Name(), got, tc.base)
 		}
 	}
@@ -27,7 +28,8 @@ func TestHitTheHighNotes_NoAuraReturnsBase(t *testing.T) {
 func TestHitTheHighNotes_AuraPlayedTriggersBonus(t *testing.T) {
 	// An Aura-typed card earlier in the turn's CardsPlayed → +2 power.
 	s := card.TurnState{CardsPlayed: []card.Card{stubAura{}}}
-	if got := (HitTheHighNotesRed{}).Play(&s, &card.CardState{}); got != 6 {
+	(HitTheHighNotesRed{}).Play(&s, &card.CardState{Card: HitTheHighNotesRed{}})
+	if got := s.Value; got != 6 {
 		t.Errorf("Play() = %d, want 6 (base 4 + 2 aura bonus)", got)
 	}
 }
@@ -36,7 +38,8 @@ func TestHitTheHighNotes_AuraCreatedTriggersBonus(t *testing.T) {
 	// AuraCreated flag set earlier in the chain (e.g. Runechant creation) → +2 power, even
 	// without an Aura-typed card in CardsPlayed.
 	s := card.TurnState{AuraCreated: true}
-	if got := (HitTheHighNotesRed{}).Play(&s, &card.CardState{}); got != 6 {
+	(HitTheHighNotesRed{}).Play(&s, &card.CardState{Card: HitTheHighNotesRed{}})
+	if got := s.Value; got != 6 {
 		t.Errorf("Play() = %d, want 6 (base 4 + 2 AuraCreated bonus)", got)
 	}
 }

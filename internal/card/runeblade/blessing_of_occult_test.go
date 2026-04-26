@@ -13,7 +13,8 @@ func TestBlessingOfOccult_PlayCreatesAuraNoThisTurnRunes(t *testing.T) {
 	cases := []card.Card{BlessingOfOccultRed{}, BlessingOfOccultYellow{}, BlessingOfOccultBlue{}}
 	for _, c := range cases {
 		var s card.TurnState
-		if got := c.Play(&s, &card.CardState{}); got != 0 {
+		c.Play(&s, &card.CardState{Card: c})
+		if got := s.Value; got != 0 {
 			t.Errorf("%s: Play() = %d, want 0 (rune creation deferred to trigger)", c.Name(), got)
 		}
 		if !s.AuraCreated {
@@ -47,7 +48,7 @@ func TestBlessingOfOccult_TriggerHandlerCreatesNRunes(t *testing.T) {
 	}
 	for _, tc := range cases {
 		var play card.TurnState
-		tc.c.Play(&play, &card.CardState{})
+		tc.c.Play(&play, &card.CardState{Card: tc.c})
 		var next card.TurnState
 		got := play.AuraTriggers[0].Handler(&next)
 		if got != tc.n {

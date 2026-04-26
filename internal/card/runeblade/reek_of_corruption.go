@@ -17,45 +17,51 @@ var reekOfCorruptionTypes = card.NewTypeSet(card.TypeRuneblade, card.TypeAction,
 
 // reekOfCorruptionDamage returns the base attack plus the discard rider when the aura condition
 // is satisfied AND this card's printed attack is likely to land on its own.
-func reekOfCorruptionDamage(attack int, s *card.TurnState, self *card.CardState) int {
+func reekOfCorruptionBonus(s *card.TurnState, self *card.CardState) int {
 	if s != nil && s.HasAuraInPlay() && card.LikelyToHit(self) {
-		return attack + card.DiscardValue
+		return card.DiscardValue
 	}
-	return attack
+	return 0
 }
 
 type ReekOfCorruptionRed struct{}
 
-func (ReekOfCorruptionRed) ID() card.ID                  { return card.ReekOfCorruptionRed }
-func (ReekOfCorruptionRed) Name() string                 { return "Reek of Corruption" }
-func (ReekOfCorruptionRed) Cost(*card.TurnState) int                    { return 2 }
-func (ReekOfCorruptionRed) Pitch() int                   { return 1 }
-func (ReekOfCorruptionRed) Attack() int                  { return 4 }
-func (ReekOfCorruptionRed) Defense() int                 { return 3 }
-func (ReekOfCorruptionRed) Types() card.TypeSet          { return reekOfCorruptionTypes }
-func (ReekOfCorruptionRed) GoAgain() bool                { return false }
-func (c ReekOfCorruptionRed) Play(s *card.TurnState, self *card.CardState) int { return reekOfCorruptionDamage(c.Attack(), s, self) }
+func (ReekOfCorruptionRed) ID() card.ID              { return card.ReekOfCorruptionRed }
+func (ReekOfCorruptionRed) Name() string             { return "Reek of Corruption" }
+func (ReekOfCorruptionRed) Cost(*card.TurnState) int { return 2 }
+func (ReekOfCorruptionRed) Pitch() int               { return 1 }
+func (ReekOfCorruptionRed) Attack() int              { return 4 }
+func (ReekOfCorruptionRed) Defense() int             { return 3 }
+func (ReekOfCorruptionRed) Types() card.TypeSet      { return reekOfCorruptionTypes }
+func (ReekOfCorruptionRed) GoAgain() bool            { return false }
+func (ReekOfCorruptionRed) Play(s *card.TurnState, self *card.CardState) {
+	s.ApplyAndLogEffectiveAttackPlus(self, reekOfCorruptionBonus(s, self))
+}
 
 type ReekOfCorruptionYellow struct{}
 
-func (ReekOfCorruptionYellow) ID() card.ID                  { return card.ReekOfCorruptionYellow }
-func (ReekOfCorruptionYellow) Name() string                 { return "Reek of Corruption" }
-func (ReekOfCorruptionYellow) Cost(*card.TurnState) int                    { return 2 }
-func (ReekOfCorruptionYellow) Pitch() int                   { return 2 }
-func (ReekOfCorruptionYellow) Attack() int                  { return 3 }
-func (ReekOfCorruptionYellow) Defense() int                 { return 3 }
-func (ReekOfCorruptionYellow) Types() card.TypeSet          { return reekOfCorruptionTypes }
-func (ReekOfCorruptionYellow) GoAgain() bool                { return false }
-func (c ReekOfCorruptionYellow) Play(s *card.TurnState, self *card.CardState) int { return reekOfCorruptionDamage(c.Attack(), s, self) }
+func (ReekOfCorruptionYellow) ID() card.ID              { return card.ReekOfCorruptionYellow }
+func (ReekOfCorruptionYellow) Name() string             { return "Reek of Corruption" }
+func (ReekOfCorruptionYellow) Cost(*card.TurnState) int { return 2 }
+func (ReekOfCorruptionYellow) Pitch() int               { return 2 }
+func (ReekOfCorruptionYellow) Attack() int              { return 3 }
+func (ReekOfCorruptionYellow) Defense() int             { return 3 }
+func (ReekOfCorruptionYellow) Types() card.TypeSet      { return reekOfCorruptionTypes }
+func (ReekOfCorruptionYellow) GoAgain() bool            { return false }
+func (ReekOfCorruptionYellow) Play(s *card.TurnState, self *card.CardState) {
+	s.ApplyAndLogEffectiveAttackPlus(self, reekOfCorruptionBonus(s, self))
+}
 
 type ReekOfCorruptionBlue struct{}
 
-func (ReekOfCorruptionBlue) ID() card.ID                  { return card.ReekOfCorruptionBlue }
-func (ReekOfCorruptionBlue) Name() string                 { return "Reek of Corruption" }
-func (ReekOfCorruptionBlue) Cost(*card.TurnState) int                    { return 2 }
-func (ReekOfCorruptionBlue) Pitch() int                   { return 3 }
-func (ReekOfCorruptionBlue) Attack() int                  { return 2 }
-func (ReekOfCorruptionBlue) Defense() int                 { return 3 }
-func (ReekOfCorruptionBlue) Types() card.TypeSet          { return reekOfCorruptionTypes }
-func (ReekOfCorruptionBlue) GoAgain() bool                { return false }
-func (c ReekOfCorruptionBlue) Play(s *card.TurnState, self *card.CardState) int { return reekOfCorruptionDamage(c.Attack(), s, self) }
+func (ReekOfCorruptionBlue) ID() card.ID              { return card.ReekOfCorruptionBlue }
+func (ReekOfCorruptionBlue) Name() string             { return "Reek of Corruption" }
+func (ReekOfCorruptionBlue) Cost(*card.TurnState) int { return 2 }
+func (ReekOfCorruptionBlue) Pitch() int               { return 3 }
+func (ReekOfCorruptionBlue) Attack() int              { return 2 }
+func (ReekOfCorruptionBlue) Defense() int             { return 3 }
+func (ReekOfCorruptionBlue) Types() card.TypeSet      { return reekOfCorruptionTypes }
+func (ReekOfCorruptionBlue) GoAgain() bool            { return false }
+func (ReekOfCorruptionBlue) Play(s *card.TurnState, self *card.CardState) {
+	s.ApplyAndLogEffectiveAttackPlus(self, reekOfCorruptionBonus(s, self))
+}

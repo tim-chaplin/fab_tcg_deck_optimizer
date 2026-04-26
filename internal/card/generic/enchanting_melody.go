@@ -16,42 +16,51 @@ var enchantingMelodyTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, c
 
 type EnchantingMelodyRed struct{}
 
-func (EnchantingMelodyRed) ID() card.ID                 { return card.EnchantingMelodyRed }
-func (EnchantingMelodyRed) Name() string                { return "Enchanting Melody" }
-func (EnchantingMelodyRed) Cost(*card.TurnState) int                   { return 2 }
-func (EnchantingMelodyRed) Pitch() int                  { return 1 }
-func (EnchantingMelodyRed) Attack() int                 { return 0 }
-func (EnchantingMelodyRed) Defense() int                { return 2 }
-func (EnchantingMelodyRed) Types() card.TypeSet         { return enchantingMelodyTypes }
-func (EnchantingMelodyRed) GoAgain() bool               { return true }
+func (EnchantingMelodyRed) ID() card.ID              { return card.EnchantingMelodyRed }
+func (EnchantingMelodyRed) Name() string             { return "Enchanting Melody" }
+func (EnchantingMelodyRed) Cost(*card.TurnState) int { return 2 }
+func (EnchantingMelodyRed) Pitch() int               { return 1 }
+func (EnchantingMelodyRed) Attack() int              { return 0 }
+func (EnchantingMelodyRed) Defense() int             { return 2 }
+func (EnchantingMelodyRed) Types() card.TypeSet      { return enchantingMelodyTypes }
+func (EnchantingMelodyRed) GoAgain() bool            { return true }
+
 // not implemented: damage-prevention trigger, end-phase destruction clause
-func (EnchantingMelodyRed) NotImplemented()             {}
-func (EnchantingMelodyRed) Play(s *card.TurnState, _ *card.CardState) int { return setAuraCreated(s) }
+func (EnchantingMelodyRed) NotImplemented() {}
+func (EnchantingMelodyRed) Play(s *card.TurnState, self *card.CardState) {
+	s.ApplyAndLogEffectiveAttackPlus(self, setAuraCreated(s))
+}
 
 type EnchantingMelodyYellow struct{}
 
-func (EnchantingMelodyYellow) ID() card.ID                 { return card.EnchantingMelodyYellow }
-func (EnchantingMelodyYellow) Name() string                { return "Enchanting Melody" }
-func (EnchantingMelodyYellow) Cost(*card.TurnState) int                   { return 2 }
-func (EnchantingMelodyYellow) Pitch() int                  { return 2 }
-func (EnchantingMelodyYellow) Attack() int                 { return 0 }
-func (EnchantingMelodyYellow) Defense() int                { return 2 }
-func (EnchantingMelodyYellow) Types() card.TypeSet         { return enchantingMelodyTypes }
-func (EnchantingMelodyYellow) GoAgain() bool               { return true }
+func (EnchantingMelodyYellow) ID() card.ID              { return card.EnchantingMelodyYellow }
+func (EnchantingMelodyYellow) Name() string             { return "Enchanting Melody" }
+func (EnchantingMelodyYellow) Cost(*card.TurnState) int { return 2 }
+func (EnchantingMelodyYellow) Pitch() int               { return 2 }
+func (EnchantingMelodyYellow) Attack() int              { return 0 }
+func (EnchantingMelodyYellow) Defense() int             { return 2 }
+func (EnchantingMelodyYellow) Types() card.TypeSet      { return enchantingMelodyTypes }
+func (EnchantingMelodyYellow) GoAgain() bool            { return true }
+
 // not implemented: damage-prevention trigger, end-phase destruction clause
-func (EnchantingMelodyYellow) NotImplemented()             {}
-func (EnchantingMelodyYellow) Play(s *card.TurnState, _ *card.CardState) int { return setAuraCreated(s) }
+func (EnchantingMelodyYellow) NotImplemented() {}
+func (EnchantingMelodyYellow) Play(s *card.TurnState, self *card.CardState) {
+	s.ApplyAndLogEffectiveAttackPlus(self, setAuraCreated(s))
+}
 
 type EnchantingMelodyBlue struct{}
 
-func (EnchantingMelodyBlue) ID() card.ID                 { return card.EnchantingMelodyBlue }
-func (EnchantingMelodyBlue) Name() string                { return "Enchanting Melody" }
-func (EnchantingMelodyBlue) Cost(*card.TurnState) int                   { return 2 }
-func (EnchantingMelodyBlue) Pitch() int                  { return 3 }
-func (EnchantingMelodyBlue) Attack() int                 { return 0 }
-func (EnchantingMelodyBlue) Defense() int                { return 2 }
-func (EnchantingMelodyBlue) Types() card.TypeSet         { return enchantingMelodyTypes }
-func (EnchantingMelodyBlue) GoAgain() bool               { return true }
+func (EnchantingMelodyBlue) ID() card.ID              { return card.EnchantingMelodyBlue }
+func (EnchantingMelodyBlue) Name() string             { return "Enchanting Melody" }
+func (EnchantingMelodyBlue) Cost(*card.TurnState) int { return 2 }
+func (EnchantingMelodyBlue) Pitch() int               { return 3 }
+func (EnchantingMelodyBlue) Attack() int              { return 0 }
+func (EnchantingMelodyBlue) Defense() int             { return 2 }
+func (EnchantingMelodyBlue) Types() card.TypeSet      { return enchantingMelodyTypes }
+func (EnchantingMelodyBlue) GoAgain() bool            { return true }
+
 // not implemented: damage-prevention trigger, end-phase destruction clause
-func (EnchantingMelodyBlue) NotImplemented()             {}
-func (EnchantingMelodyBlue) Play(s *card.TurnState, _ *card.CardState) int { return setAuraCreated(s) }
+func (EnchantingMelodyBlue) NotImplemented() {}
+func (EnchantingMelodyBlue) Play(s *card.TurnState, self *card.CardState) {
+	s.ApplyAndLogEffectiveAttackPlus(self, setAuraCreated(s))
+}

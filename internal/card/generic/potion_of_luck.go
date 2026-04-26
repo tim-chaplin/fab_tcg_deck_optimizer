@@ -11,14 +11,15 @@ var potionOfLuckTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.
 
 type PotionOfLuckBlue struct{}
 
-func (PotionOfLuckBlue) ID() card.ID                               { return card.PotionOfLuckBlue }
-func (PotionOfLuckBlue) Name() string                              { return "Potion of Luck" }
-func (PotionOfLuckBlue) Cost(*card.TurnState) int                  { return 0 }
-func (PotionOfLuckBlue) Pitch() int                                { return 3 }
-func (PotionOfLuckBlue) Attack() int                               { return 0 }
-func (PotionOfLuckBlue) Defense() int                              { return 0 }
-func (PotionOfLuckBlue) Types() card.TypeSet                       { return potionOfLuckTypes }
-func (PotionOfLuckBlue) GoAgain() bool                             { return false }
+func (PotionOfLuckBlue) ID() card.ID              { return card.PotionOfLuckBlue }
+func (PotionOfLuckBlue) Name() string             { return "Potion of Luck" }
+func (PotionOfLuckBlue) Cost(*card.TurnState) int { return 0 }
+func (PotionOfLuckBlue) Pitch() int               { return 3 }
+func (PotionOfLuckBlue) Attack() int              { return 0 }
+func (PotionOfLuckBlue) Defense() int             { return 0 }
+func (PotionOfLuckBlue) Types() card.TypeSet      { return potionOfLuckTypes }
+func (PotionOfLuckBlue) GoAgain() bool            { return false }
+
 // not implemented: activated 'shuffle hand+arsenal into deck, draw that many'
-func (PotionOfLuckBlue) NotImplemented()                           {}
-func (PotionOfLuckBlue) Play(*card.TurnState, *card.CardState) int { return 0 }
+func (PotionOfLuckBlue) NotImplemented()                              {}
+func (PotionOfLuckBlue) Play(s *card.TurnState, self *card.CardState) { s.LogPlay(self) }

@@ -10,7 +10,8 @@ import (
 func TestMinnowism_NoAttackReturnsZero(t *testing.T) {
 	s := card.TurnState{}
 	for _, c := range []card.Card{MinnowismRed{}, MinnowismYellow{}, MinnowismBlue{}} {
-		if got := c.Play(&s, &card.CardState{}); got != 0 {
+		c.Play(&s, &card.CardState{Card: c})
+		if got := s.Value; got != 0 {
 			t.Errorf("%s: Play() = %d, want 0", c.Name(), got)
 		}
 	}
@@ -20,7 +21,8 @@ func TestMinnowism_NoAttackReturnsZero(t *testing.T) {
 // so the rider fizzles without falling through to a later match.
 func TestMinnowism_HighPowerFilteredOut(t *testing.T) {
 	s := card.TurnState{CardsRemaining: []*card.CardState{{Card: stubGenericAttack(0, 4)}}}
-	if got := (MinnowismRed{}).Play(&s, &card.CardState{}); got != 0 {
+	(MinnowismRed{}).Play(&s, &card.CardState{Card: MinnowismRed{}})
+	if got := s.Value; got != 0 {
 		t.Errorf("Play() = %d, want 0 (power 4 > 3)", got)
 	}
 }
@@ -39,7 +41,8 @@ func TestMinnowism_LowPowerReturnsBonus(t *testing.T) {
 	for _, tc := range cases {
 		target := &card.CardState{Card: stubGenericAttack(0, 3)}
 		s := card.TurnState{CardsRemaining: []*card.CardState{target}}
-		if got := tc.c.Play(&s, &card.CardState{}); got != 0 {
+		tc.c.Play(&s, &card.CardState{Card: tc.c})
+		if got := s.Value; got != 0 {
 			t.Errorf("%s: Play() = %d, want 0 (granter returns 0; +N rides on target's BonusAttack)", tc.c.Name(), got)
 		}
 		if target.BonusAttack != tc.want {

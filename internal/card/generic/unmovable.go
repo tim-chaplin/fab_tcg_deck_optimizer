@@ -13,39 +13,39 @@ import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 
 type UnmovableRed struct{}
 
-func (UnmovableRed) ID() card.ID                 { return card.UnmovableRed }
-func (UnmovableRed) Name() string             { return "Unmovable" }
-func (UnmovableRed) Cost(*card.TurnState) int                { return 3 }
-func (UnmovableRed) Pitch() int               { return 1 }
-func (UnmovableRed) Attack() int              { return 0 }
-func (UnmovableRed) Defense() int             { return 7 }
-func (UnmovableRed) Types() card.TypeSet      { return defenseReactionTypes }
-func (UnmovableRed) GoAgain() bool            { return false }
-func (UnmovableRed) Play(*card.TurnState, *card.CardState) int { return 0 }
-func (UnmovableRed) ArsenalDefenseBonus() int { return 1 }
+func (UnmovableRed) ID() card.ID                                  { return card.UnmovableRed }
+func (UnmovableRed) Name() string                                 { return "Unmovable" }
+func (UnmovableRed) Cost(*card.TurnState) int                     { return 3 }
+func (UnmovableRed) Pitch() int                                   { return 1 }
+func (UnmovableRed) Attack() int                                  { return 0 }
+func (UnmovableRed) Defense() int                                 { return 7 }
+func (UnmovableRed) Types() card.TypeSet                          { return defenseReactionTypes }
+func (UnmovableRed) GoAgain() bool                                { return false }
+func (UnmovableRed) Play(s *card.TurnState, self *card.CardState) { s.LogPlay(self) }
+func (UnmovableRed) ArsenalDefenseBonus() int                     { return 1 }
 
 type UnmovableYellow struct{}
 
-func (UnmovableYellow) ID() card.ID                 { return card.UnmovableYellow }
-func (UnmovableYellow) Name() string             { return "Unmovable" }
-func (UnmovableYellow) Cost(*card.TurnState) int                { return 3 }
-func (UnmovableYellow) Pitch() int               { return 2 }
-func (UnmovableYellow) Attack() int              { return 0 }
-func (UnmovableYellow) Defense() int             { return 6 }
-func (UnmovableYellow) Types() card.TypeSet      { return defenseReactionTypes }
-func (UnmovableYellow) GoAgain() bool            { return false }
-func (UnmovableYellow) Play(*card.TurnState, *card.CardState) int { return 0 }
-func (UnmovableYellow) ArsenalDefenseBonus() int { return 1 }
+func (UnmovableYellow) ID() card.ID                                  { return card.UnmovableYellow }
+func (UnmovableYellow) Name() string                                 { return "Unmovable" }
+func (UnmovableYellow) Cost(*card.TurnState) int                     { return 3 }
+func (UnmovableYellow) Pitch() int                                   { return 2 }
+func (UnmovableYellow) Attack() int                                  { return 0 }
+func (UnmovableYellow) Defense() int                                 { return 6 }
+func (UnmovableYellow) Types() card.TypeSet                          { return defenseReactionTypes }
+func (UnmovableYellow) GoAgain() bool                                { return false }
+func (UnmovableYellow) Play(s *card.TurnState, self *card.CardState) { s.LogPlay(self) }
+func (UnmovableYellow) ArsenalDefenseBonus() int                     { return 1 }
 
 type UnmovableBlue struct{}
 
-func (UnmovableBlue) ID() card.ID                 { return card.UnmovableBlue }
-func (UnmovableBlue) Name() string             { return "Unmovable" }
-func (UnmovableBlue) Cost(*card.TurnState) int                { return 3 }
-func (UnmovableBlue) Pitch() int               { return 3 }
-func (UnmovableBlue) Attack() int              { return 0 }
-func (UnmovableBlue) Defense() int             { return 5 }
-func (UnmovableBlue) Types() card.TypeSet      { return defenseReactionTypes }
-func (UnmovableBlue) GoAgain() bool            { return false }
-func (UnmovableBlue) Play(*card.TurnState, *card.CardState) int { return 0 }
-func (UnmovableBlue) ArsenalDefenseBonus() int { return 1 }
+func (UnmovableBlue) ID() card.ID                                  { return card.UnmovableBlue }
+func (UnmovableBlue) Name() string                                 { return "Unmovable" }
+func (UnmovableBlue) Cost(*card.TurnState) int                     { return 3 }
+func (UnmovableBlue) Pitch() int                                   { return 3 }
+func (UnmovableBlue) Attack() int                                  { return 0 }
+func (UnmovableBlue) Defense() int                                 { return 5 }
+func (UnmovableBlue) Types() card.TypeSet                          { return defenseReactionTypes }
+func (UnmovableBlue) GoAgain() bool                                { return false }
+func (UnmovableBlue) Play(s *card.TurnState, self *card.CardState) { s.LogPlay(self) }
+func (UnmovableBlue) ArsenalDefenseBonus() int                     { return 1 }

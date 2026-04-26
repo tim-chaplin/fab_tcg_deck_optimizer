@@ -10,14 +10,15 @@ var potionOfStrengthTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, c
 
 type PotionOfStrengthBlue struct{}
 
-func (PotionOfStrengthBlue) ID() card.ID                               { return card.PotionOfStrengthBlue }
-func (PotionOfStrengthBlue) Name() string                              { return "Potion of Strength" }
-func (PotionOfStrengthBlue) Cost(*card.TurnState) int                  { return 0 }
-func (PotionOfStrengthBlue) Pitch() int                                { return 3 }
-func (PotionOfStrengthBlue) Attack() int                               { return 0 }
-func (PotionOfStrengthBlue) Defense() int                              { return 0 }
-func (PotionOfStrengthBlue) Types() card.TypeSet                       { return potionOfStrengthTypes }
-func (PotionOfStrengthBlue) GoAgain() bool                             { return false }
+func (PotionOfStrengthBlue) ID() card.ID              { return card.PotionOfStrengthBlue }
+func (PotionOfStrengthBlue) Name() string             { return "Potion of Strength" }
+func (PotionOfStrengthBlue) Cost(*card.TurnState) int { return 0 }
+func (PotionOfStrengthBlue) Pitch() int               { return 3 }
+func (PotionOfStrengthBlue) Attack() int              { return 0 }
+func (PotionOfStrengthBlue) Defense() int             { return 0 }
+func (PotionOfStrengthBlue) Types() card.TypeSet      { return potionOfStrengthTypes }
+func (PotionOfStrengthBlue) GoAgain() bool            { return false }
+
 // not implemented: activated +2{p} on next attack
-func (PotionOfStrengthBlue) NotImplemented()                           {}
-func (PotionOfStrengthBlue) Play(*card.TurnState, *card.CardState) int { return 0 }
+func (PotionOfStrengthBlue) NotImplemented()                              {}
+func (PotionOfStrengthBlue) Play(s *card.TurnState, self *card.CardState) { s.LogPlay(self) }

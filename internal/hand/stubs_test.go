@@ -27,21 +27,21 @@ func cardNames(cs []card.Card) []string {
 // keep its grants from bleeding into a later permutation where grantSpy runs first.
 type grantAll struct{}
 
-func (grantAll) ID() card.ID               { return card.Invalid }
-func (grantAll) Name() string              { return "grantAll" }
-func (grantAll) Cost(*card.TurnState) int  { return 0 }
-func (grantAll) Pitch() int                { return 0 }
-func (grantAll) Attack() int               { return 0 }
-func (grantAll) Defense() int              { return 0 }
+func (grantAll) ID() card.ID              { return card.Invalid }
+func (grantAll) Name() string             { return "grantAll" }
+func (grantAll) Cost(*card.TurnState) int { return 0 }
+func (grantAll) Pitch() int               { return 0 }
+func (grantAll) Attack() int              { return 0 }
+func (grantAll) Defense() int             { return 0 }
 func (grantAll) Types() card.TypeSet {
 	return card.NewTypeSet(card.TypeRuneblade, card.TypeAction, card.TypeAttack)
 }
 func (grantAll) GoAgain() bool { return true }
-func (grantAll) Play(s *card.TurnState, _ *card.CardState) int {
+func (grantAll) Play(s *card.TurnState, self *card.CardState) {
 	for _, pc := range s.CardsRemaining {
 		pc.GrantedGoAgain = true
 	}
-	return 0
+	s.LogPlay(self)
 }
 
 // grantSpy is a test-only attacker that, when it plays FIRST in a permutation, records whether
@@ -61,14 +61,14 @@ func (grantSpy) Types() card.TypeSet {
 	return card.NewTypeSet(card.TypeRuneblade, card.TypeAction, card.TypeAttack)
 }
 func (grantSpy) GoAgain() bool { return true }
-func (g grantSpy) Play(s *card.TurnState, _ *card.CardState) int {
+func (g grantSpy) Play(s *card.TurnState, self *card.CardState) {
+	defer s.LogPlay(self)
 	if len(s.CardsPlayed) != 0 {
-		return 0
+		return
 	}
 	for _, pc := range s.CardsRemaining {
 		if pc.GrantedGoAgain {
 			*g.saw = true
 		}
 	}
-	return 0
 }

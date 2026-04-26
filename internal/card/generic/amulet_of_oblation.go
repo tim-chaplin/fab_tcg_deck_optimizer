@@ -12,14 +12,15 @@ var amuletOfOblationTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, c
 
 type AmuletOfOblationBlue struct{}
 
-func (AmuletOfOblationBlue) ID() card.ID                               { return card.AmuletOfOblationBlue }
-func (AmuletOfOblationBlue) Name() string                              { return "Amulet of Oblation" }
-func (AmuletOfOblationBlue) Cost(*card.TurnState) int                  { return 0 }
-func (AmuletOfOblationBlue) Pitch() int                                { return 3 }
-func (AmuletOfOblationBlue) Attack() int                               { return 0 }
-func (AmuletOfOblationBlue) Defense() int                              { return 0 }
-func (AmuletOfOblationBlue) Types() card.TypeSet                       { return amuletOfOblationTypes }
-func (AmuletOfOblationBlue) GoAgain() bool                             { return true }
+func (AmuletOfOblationBlue) ID() card.ID              { return card.AmuletOfOblationBlue }
+func (AmuletOfOblationBlue) Name() string             { return "Amulet of Oblation" }
+func (AmuletOfOblationBlue) Cost(*card.TurnState) int { return 0 }
+func (AmuletOfOblationBlue) Pitch() int               { return 3 }
+func (AmuletOfOblationBlue) Attack() int              { return 0 }
+func (AmuletOfOblationBlue) Defense() int             { return 0 }
+func (AmuletOfOblationBlue) Types() card.TypeSet      { return amuletOfOblationTypes }
+func (AmuletOfOblationBlue) GoAgain() bool            { return true }
+
 // not implemented: Instant 'graveyard → bottom of deck' replacement; gated on graveyard entry
-func (AmuletOfOblationBlue) NotImplemented()                           {}
-func (AmuletOfOblationBlue) Play(*card.TurnState, *card.CardState) int { return 0 }
+func (AmuletOfOblationBlue) NotImplemented()                              {}
+func (AmuletOfOblationBlue) Play(s *card.TurnState, self *card.CardState) { s.LogPlay(self) }

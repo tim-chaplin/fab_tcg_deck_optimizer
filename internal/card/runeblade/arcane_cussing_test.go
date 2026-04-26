@@ -20,7 +20,8 @@ func TestArcaneCussing_BlockCoversIncomingReturnsN(t *testing.T) {
 	}
 	for _, tc := range cases {
 		s := card.TurnState{IncomingDamage: 3, BlockTotal: 3}
-		if got := tc.c.Play(&s, &card.CardState{}); got != tc.n {
+		tc.c.Play(&s, &card.CardState{Card: tc.c})
+		if got := s.Value; got != tc.n {
 			t.Errorf("%s: Play() = %d, want %d (block == incoming)", tc.c.Name(), got, tc.n)
 		}
 	}
@@ -30,7 +31,8 @@ func TestArcaneCussing_BlockCoversIncomingReturnsN(t *testing.T) {
 // counts as covering incoming.
 func TestArcaneCussing_OverBlockReturnsN(t *testing.T) {
 	s := card.TurnState{IncomingDamage: 3, BlockTotal: 7}
-	if got := (ArcaneCussingRed{}).Play(&s, &card.CardState{}); got != 3 {
+	(ArcaneCussingRed{}).Play(&s, &card.CardState{Card: ArcaneCussingRed{}})
+	if got := s.Value; got != 3 {
 		t.Errorf("Play() = %d, want 3 (over-block still covers)", got)
 	}
 }
@@ -45,7 +47,8 @@ func TestArcaneCussing_BlockShortReturnsZero(t *testing.T) {
 	}
 	for _, c := range cases {
 		s := card.TurnState{IncomingDamage: 3, BlockTotal: 2}
-		if got := c.Play(&s, &card.CardState{}); got != 0 {
+		c.Play(&s, &card.CardState{Card: c})
+		if got := s.Value; got != 0 {
 			t.Errorf("%s: Play() = %d, want 0 (block < incoming, no same-turn pop)", c.Name(), got)
 		}
 	}
@@ -59,7 +62,8 @@ func TestArcaneCussing_SameTurnPopBySalientAttack(t *testing.T) {
 		BlockTotal:     0,
 		CardsRemaining: []*card.CardState{{Card: stubAttackWithPower{power: 4}}},
 	}
-	if got := (ArcaneCussingRed{}).Play(&s, &card.CardState{}); got != 3 {
+	(ArcaneCussingRed{}).Play(&s, &card.CardState{Card: ArcaneCussingRed{}})
+	if got := s.Value; got != 3 {
 		t.Errorf("Play() = %d, want 3 (Attack=4 likely to hit, pops Cussing same turn)", got)
 	}
 }
@@ -75,7 +79,8 @@ func TestArcaneCussing_SameTurnPopByWeaponSwing(t *testing.T) {
 		Runechants:     1,
 		CardsRemaining: []*card.CardState{{Card: stubRunebladeWeapon{}}},
 	}
-	if got := (ArcaneCussingRed{}).Play(&s, &card.CardState{}); got != 3 {
+	(ArcaneCussingRed{}).Play(&s, &card.CardState{Card: ArcaneCussingRed{}})
+	if got := s.Value; got != 3 {
 		t.Errorf("Play() = %d, want 3 (1 Runechant fires with weapon, likely to hit)", got)
 	}
 }
@@ -89,7 +94,8 @@ func TestArcaneCussing_SameTurnPopByRunechantAlone(t *testing.T) {
 		Runechants:     1,
 		CardsRemaining: []*card.CardState{{Card: stubAttackWithPower{power: 6}}},
 	}
-	if got := (ArcaneCussingRed{}).Play(&s, &card.CardState{}); got != 3 {
+	(ArcaneCussingRed{}).Play(&s, &card.CardState{Card: ArcaneCussingRed{}})
+	if got := s.Value; got != 3 {
 		t.Errorf("Play() = %d, want 3 (Attack=6 blockable, but 1 Runechant likely to slip through)", got)
 	}
 }
@@ -103,7 +109,8 @@ func TestArcaneCussing_BlockableAttackNoRunechantReturnsZero(t *testing.T) {
 		BlockTotal:     0,
 		CardsRemaining: []*card.CardState{{Card: stubAttackWithPower{power: 6}}},
 	}
-	if got := (ArcaneCussingRed{}).Play(&s, &card.CardState{}); got != 0 {
+	(ArcaneCussingRed{}).Play(&s, &card.CardState{Card: ArcaneCussingRed{}})
+	if got := s.Value; got != 0 {
 		t.Errorf("Play() = %d, want 0 (Attack=6 blockable, no Runechants, taking damage)", got)
 	}
 }

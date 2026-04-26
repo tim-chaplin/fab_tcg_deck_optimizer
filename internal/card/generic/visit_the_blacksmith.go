@@ -10,14 +10,15 @@ var visitTheBlacksmithTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction)
 
 type VisitTheBlacksmithBlue struct{}
 
-func (VisitTheBlacksmithBlue) ID() card.ID                 { return card.VisitTheBlacksmithBlue }
-func (VisitTheBlacksmithBlue) Name() string                { return "Visit the Blacksmith" }
-func (VisitTheBlacksmithBlue) Cost(*card.TurnState) int                   { return 0 }
-func (VisitTheBlacksmithBlue) Pitch() int                  { return 3 }
-func (VisitTheBlacksmithBlue) Attack() int                 { return 0 }
-func (VisitTheBlacksmithBlue) Defense() int                { return 2 }
-func (VisitTheBlacksmithBlue) Types() card.TypeSet         { return visitTheBlacksmithTypes }
-func (VisitTheBlacksmithBlue) GoAgain() bool               { return true }
+func (VisitTheBlacksmithBlue) ID() card.ID              { return card.VisitTheBlacksmithBlue }
+func (VisitTheBlacksmithBlue) Name() string             { return "Visit the Blacksmith" }
+func (VisitTheBlacksmithBlue) Cost(*card.TurnState) int { return 0 }
+func (VisitTheBlacksmithBlue) Pitch() int               { return 3 }
+func (VisitTheBlacksmithBlue) Attack() int              { return 0 }
+func (VisitTheBlacksmithBlue) Defense() int             { return 2 }
+func (VisitTheBlacksmithBlue) Types() card.TypeSet      { return visitTheBlacksmithTypes }
+func (VisitTheBlacksmithBlue) GoAgain() bool            { return true }
+
 // not implemented: next-sword-attack +1{p} grant (weapon chain not peeked)
-func (VisitTheBlacksmithBlue) NotImplemented()             {}
-func (VisitTheBlacksmithBlue) Play(s *card.TurnState, _ *card.CardState) int { return 0 }
+func (VisitTheBlacksmithBlue) NotImplemented()                              {}
+func (VisitTheBlacksmithBlue) Play(s *card.TurnState, self *card.CardState) { s.LogPlay(self) }

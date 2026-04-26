@@ -13,14 +13,17 @@ var soundTheAlarmTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card
 
 type SoundTheAlarmRed struct{}
 
-func (SoundTheAlarmRed) ID() card.ID                 { return card.SoundTheAlarmRed }
-func (SoundTheAlarmRed) Name() string                { return "Sound the Alarm" }
-func (SoundTheAlarmRed) Cost(*card.TurnState) int                   { return 1 }
-func (SoundTheAlarmRed) Pitch() int                  { return 1 }
-func (SoundTheAlarmRed) Attack() int                 { return 5 }
-func (SoundTheAlarmRed) Defense() int                { return 3 }
-func (SoundTheAlarmRed) Types() card.TypeSet         { return soundTheAlarmTypes }
-func (SoundTheAlarmRed) GoAgain() bool               { return false }
+func (SoundTheAlarmRed) ID() card.ID              { return card.SoundTheAlarmRed }
+func (SoundTheAlarmRed) Name() string             { return "Sound the Alarm" }
+func (SoundTheAlarmRed) Cost(*card.TurnState) int { return 1 }
+func (SoundTheAlarmRed) Pitch() int               { return 1 }
+func (SoundTheAlarmRed) Attack() int              { return 5 }
+func (SoundTheAlarmRed) Defense() int             { return 3 }
+func (SoundTheAlarmRed) Types() card.TypeSet      { return soundTheAlarmTypes }
+func (SoundTheAlarmRed) GoAgain() bool            { return false }
+
 // not implemented: opponent hand reveal, defense-reaction deck search
-func (SoundTheAlarmRed) NotImplemented()             {}
-func (c SoundTheAlarmRed) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }
+func (SoundTheAlarmRed) NotImplemented() {}
+func (c SoundTheAlarmRed) Play(s *card.TurnState, self *card.CardState) {
+	s.ApplyAndLogEffectiveAttack(self)
+}

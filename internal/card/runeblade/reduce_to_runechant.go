@@ -27,42 +27,48 @@ func reduceToRunechantCost(s *card.TurnState) int {
 
 type ReduceToRunechantRed struct{}
 
-func (ReduceToRunechantRed) ID() card.ID                   { return card.ReduceToRunechantRed }
-func (ReduceToRunechantRed) Name() string                  { return "Reduce to Runechant" }
-func (ReduceToRunechantRed) Cost(s *card.TurnState) int    { return reduceToRunechantCost(s) }
-func (ReduceToRunechantRed) MinCost() int                  { return 0 }
-func (ReduceToRunechantRed) MaxCost() int                  { return reduceToRunechantPrintedCost }
-func (ReduceToRunechantRed) Pitch() int                    { return 1 }
-func (ReduceToRunechantRed) Attack() int                   { return 0 }
-func (ReduceToRunechantRed) Defense() int                  { return 4 }
-func (ReduceToRunechantRed) Types() card.TypeSet           { return reduceToRunechantTypes }
-func (ReduceToRunechantRed) GoAgain() bool                 { return false }
-func (ReduceToRunechantRed) Play(s *card.TurnState, _ *card.CardState) int    { return s.CreateRunechant() }
+func (ReduceToRunechantRed) ID() card.ID                { return card.ReduceToRunechantRed }
+func (ReduceToRunechantRed) Name() string               { return "Reduce to Runechant" }
+func (ReduceToRunechantRed) Cost(s *card.TurnState) int { return reduceToRunechantCost(s) }
+func (ReduceToRunechantRed) MinCost() int               { return 0 }
+func (ReduceToRunechantRed) MaxCost() int               { return reduceToRunechantPrintedCost }
+func (ReduceToRunechantRed) Pitch() int                 { return 1 }
+func (ReduceToRunechantRed) Attack() int                { return 0 }
+func (ReduceToRunechantRed) Defense() int               { return 4 }
+func (ReduceToRunechantRed) Types() card.TypeSet        { return reduceToRunechantTypes }
+func (ReduceToRunechantRed) GoAgain() bool              { return false }
+func (ReduceToRunechantRed) Play(s *card.TurnState, self *card.CardState) {
+	s.ApplyAndLogEffectiveAttackPlus(self, s.CreateRunechant())
+}
 
 type ReduceToRunechantYellow struct{}
 
-func (ReduceToRunechantYellow) ID() card.ID                 { return card.ReduceToRunechantYellow }
-func (ReduceToRunechantYellow) Name() string                { return "Reduce to Runechant" }
-func (ReduceToRunechantYellow) Cost(s *card.TurnState) int  { return reduceToRunechantCost(s) }
-func (ReduceToRunechantYellow) MinCost() int                { return 0 }
-func (ReduceToRunechantYellow) MaxCost() int                { return reduceToRunechantPrintedCost }
-func (ReduceToRunechantYellow) Pitch() int                  { return 2 }
-func (ReduceToRunechantYellow) Attack() int                 { return 0 }
-func (ReduceToRunechantYellow) Defense() int                { return 3 }
-func (ReduceToRunechantYellow) Types() card.TypeSet         { return reduceToRunechantTypes }
-func (ReduceToRunechantYellow) GoAgain() bool               { return false }
-func (ReduceToRunechantYellow) Play(s *card.TurnState, _ *card.CardState) int  { return s.CreateRunechant() }
+func (ReduceToRunechantYellow) ID() card.ID                { return card.ReduceToRunechantYellow }
+func (ReduceToRunechantYellow) Name() string               { return "Reduce to Runechant" }
+func (ReduceToRunechantYellow) Cost(s *card.TurnState) int { return reduceToRunechantCost(s) }
+func (ReduceToRunechantYellow) MinCost() int               { return 0 }
+func (ReduceToRunechantYellow) MaxCost() int               { return reduceToRunechantPrintedCost }
+func (ReduceToRunechantYellow) Pitch() int                 { return 2 }
+func (ReduceToRunechantYellow) Attack() int                { return 0 }
+func (ReduceToRunechantYellow) Defense() int               { return 3 }
+func (ReduceToRunechantYellow) Types() card.TypeSet        { return reduceToRunechantTypes }
+func (ReduceToRunechantYellow) GoAgain() bool              { return false }
+func (ReduceToRunechantYellow) Play(s *card.TurnState, self *card.CardState) {
+	s.ApplyAndLogEffectiveAttackPlus(self, s.CreateRunechant())
+}
 
 type ReduceToRunechantBlue struct{}
 
-func (ReduceToRunechantBlue) ID() card.ID                 { return card.ReduceToRunechantBlue }
-func (ReduceToRunechantBlue) Name() string                { return "Reduce to Runechant" }
-func (ReduceToRunechantBlue) Cost(s *card.TurnState) int  { return reduceToRunechantCost(s) }
-func (ReduceToRunechantBlue) MinCost() int                { return 0 }
-func (ReduceToRunechantBlue) MaxCost() int                { return reduceToRunechantPrintedCost }
-func (ReduceToRunechantBlue) Pitch() int                  { return 3 }
-func (ReduceToRunechantBlue) Attack() int                 { return 0 }
-func (ReduceToRunechantBlue) Defense() int                { return 2 }
-func (ReduceToRunechantBlue) Types() card.TypeSet         { return reduceToRunechantTypes }
-func (ReduceToRunechantBlue) GoAgain() bool               { return false }
-func (ReduceToRunechantBlue) Play(s *card.TurnState, _ *card.CardState) int  { return s.CreateRunechant() }
+func (ReduceToRunechantBlue) ID() card.ID                { return card.ReduceToRunechantBlue }
+func (ReduceToRunechantBlue) Name() string               { return "Reduce to Runechant" }
+func (ReduceToRunechantBlue) Cost(s *card.TurnState) int { return reduceToRunechantCost(s) }
+func (ReduceToRunechantBlue) MinCost() int               { return 0 }
+func (ReduceToRunechantBlue) MaxCost() int               { return reduceToRunechantPrintedCost }
+func (ReduceToRunechantBlue) Pitch() int                 { return 3 }
+func (ReduceToRunechantBlue) Attack() int                { return 0 }
+func (ReduceToRunechantBlue) Defense() int               { return 2 }
+func (ReduceToRunechantBlue) Types() card.TypeSet        { return reduceToRunechantTypes }
+func (ReduceToRunechantBlue) GoAgain() bool              { return false }
+func (ReduceToRunechantBlue) Play(s *card.TurnState, self *card.CardState) {
+	s.ApplyAndLogEffectiveAttackPlus(self, s.CreateRunechant())
+}

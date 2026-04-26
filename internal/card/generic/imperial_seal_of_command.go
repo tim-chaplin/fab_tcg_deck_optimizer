@@ -12,14 +12,15 @@ var imperialSealOfCommandTypes = card.NewTypeSet(card.TypeGeneric, card.TypeActi
 
 type ImperialSealOfCommandRed struct{}
 
-func (ImperialSealOfCommandRed) ID() card.ID                               { return card.ImperialSealOfCommandRed }
-func (ImperialSealOfCommandRed) Name() string                              { return "Imperial Seal of Command" }
-func (ImperialSealOfCommandRed) Cost(*card.TurnState) int                  { return 0 }
-func (ImperialSealOfCommandRed) Pitch() int                                { return 1 }
-func (ImperialSealOfCommandRed) Attack() int                               { return 0 }
-func (ImperialSealOfCommandRed) Defense() int                              { return 0 }
-func (ImperialSealOfCommandRed) Types() card.TypeSet                       { return imperialSealOfCommandTypes }
-func (ImperialSealOfCommandRed) GoAgain() bool                             { return false }
+func (ImperialSealOfCommandRed) ID() card.ID              { return card.ImperialSealOfCommandRed }
+func (ImperialSealOfCommandRed) Name() string             { return "Imperial Seal of Command" }
+func (ImperialSealOfCommandRed) Cost(*card.TurnState) int { return 0 }
+func (ImperialSealOfCommandRed) Pitch() int               { return 1 }
+func (ImperialSealOfCommandRed) Attack() int              { return 0 }
+func (ImperialSealOfCommandRed) Defense() int             { return 0 }
+func (ImperialSealOfCommandRed) Types() card.TypeSet      { return imperialSealOfCommandTypes }
+func (ImperialSealOfCommandRed) GoAgain() bool            { return false }
+
 // not implemented: activated 'no DR this turn' + Royal-only arsenal-wipe on hit
-func (ImperialSealOfCommandRed) NotImplemented()                           {}
-func (ImperialSealOfCommandRed) Play(*card.TurnState, *card.CardState) int { return 0 }
+func (ImperialSealOfCommandRed) NotImplemented()                              {}
+func (ImperialSealOfCommandRed) Play(s *card.TurnState, self *card.CardState) { s.LogPlay(self) }

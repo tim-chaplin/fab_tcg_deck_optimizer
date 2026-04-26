@@ -10,36 +10,42 @@ var spellbladeStrikeTypes = card.NewTypeSet(card.TypeRuneblade, card.TypeAction,
 
 type SpellbladeStrikeRed struct{}
 
-func (SpellbladeStrikeRed) ID() card.ID                 { return card.SpellbladeStrikeRed }
-func (SpellbladeStrikeRed) Name() string               { return "Spellblade Strike" }
-func (SpellbladeStrikeRed) Cost(*card.TurnState) int                  { return 1 }
-func (SpellbladeStrikeRed) Pitch() int                 { return 1 }
-func (SpellbladeStrikeRed) Attack() int                { return 4 }
-func (SpellbladeStrikeRed) Defense() int               { return 3 }
-func (SpellbladeStrikeRed) Types() card.TypeSet        { return spellbladeStrikeTypes }
-func (SpellbladeStrikeRed) GoAgain() bool              { return false }
-func (c SpellbladeStrikeRed) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() + s.CreateRunechant() }
+func (SpellbladeStrikeRed) ID() card.ID              { return card.SpellbladeStrikeRed }
+func (SpellbladeStrikeRed) Name() string             { return "Spellblade Strike" }
+func (SpellbladeStrikeRed) Cost(*card.TurnState) int { return 1 }
+func (SpellbladeStrikeRed) Pitch() int               { return 1 }
+func (SpellbladeStrikeRed) Attack() int              { return 4 }
+func (SpellbladeStrikeRed) Defense() int             { return 3 }
+func (SpellbladeStrikeRed) Types() card.TypeSet      { return spellbladeStrikeTypes }
+func (SpellbladeStrikeRed) GoAgain() bool            { return false }
+func (SpellbladeStrikeRed) Play(s *card.TurnState, self *card.CardState) {
+	s.ApplyAndLogEffectiveAttackPlus(self, s.CreateRunechant())
+}
 
 type SpellbladeStrikeYellow struct{}
 
-func (SpellbladeStrikeYellow) ID() card.ID                 { return card.SpellbladeStrikeYellow }
-func (SpellbladeStrikeYellow) Name() string               { return "Spellblade Strike" }
-func (SpellbladeStrikeYellow) Cost(*card.TurnState) int                  { return 1 }
-func (SpellbladeStrikeYellow) Pitch() int                 { return 2 }
-func (SpellbladeStrikeYellow) Attack() int                { return 3 }
-func (SpellbladeStrikeYellow) Defense() int               { return 3 }
-func (SpellbladeStrikeYellow) Types() card.TypeSet        { return spellbladeStrikeTypes }
-func (SpellbladeStrikeYellow) GoAgain() bool              { return false }
-func (c SpellbladeStrikeYellow) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() + s.CreateRunechant() }
+func (SpellbladeStrikeYellow) ID() card.ID              { return card.SpellbladeStrikeYellow }
+func (SpellbladeStrikeYellow) Name() string             { return "Spellblade Strike" }
+func (SpellbladeStrikeYellow) Cost(*card.TurnState) int { return 1 }
+func (SpellbladeStrikeYellow) Pitch() int               { return 2 }
+func (SpellbladeStrikeYellow) Attack() int              { return 3 }
+func (SpellbladeStrikeYellow) Defense() int             { return 3 }
+func (SpellbladeStrikeYellow) Types() card.TypeSet      { return spellbladeStrikeTypes }
+func (SpellbladeStrikeYellow) GoAgain() bool            { return false }
+func (SpellbladeStrikeYellow) Play(s *card.TurnState, self *card.CardState) {
+	s.ApplyAndLogEffectiveAttackPlus(self, s.CreateRunechant())
+}
 
 type SpellbladeStrikeBlue struct{}
 
-func (SpellbladeStrikeBlue) ID() card.ID                 { return card.SpellbladeStrikeBlue }
-func (SpellbladeStrikeBlue) Name() string               { return "Spellblade Strike" }
-func (SpellbladeStrikeBlue) Cost(*card.TurnState) int                  { return 1 }
-func (SpellbladeStrikeBlue) Pitch() int                 { return 3 }
-func (SpellbladeStrikeBlue) Attack() int                { return 2 }
-func (SpellbladeStrikeBlue) Defense() int               { return 3 }
-func (SpellbladeStrikeBlue) Types() card.TypeSet        { return spellbladeStrikeTypes }
-func (SpellbladeStrikeBlue) GoAgain() bool              { return false }
-func (c SpellbladeStrikeBlue) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() + s.CreateRunechant() }
+func (SpellbladeStrikeBlue) ID() card.ID              { return card.SpellbladeStrikeBlue }
+func (SpellbladeStrikeBlue) Name() string             { return "Spellblade Strike" }
+func (SpellbladeStrikeBlue) Cost(*card.TurnState) int { return 1 }
+func (SpellbladeStrikeBlue) Pitch() int               { return 3 }
+func (SpellbladeStrikeBlue) Attack() int              { return 2 }
+func (SpellbladeStrikeBlue) Defense() int             { return 3 }
+func (SpellbladeStrikeBlue) Types() card.TypeSet      { return spellbladeStrikeTypes }
+func (SpellbladeStrikeBlue) GoAgain() bool            { return false }
+func (SpellbladeStrikeBlue) Play(s *card.TurnState, self *card.CardState) {
+	s.ApplyAndLogEffectiveAttackPlus(self, s.CreateRunechant())
+}

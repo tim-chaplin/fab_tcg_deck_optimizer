@@ -30,45 +30,54 @@ func sutcliffesResearchNotesPlay(revealCount int, s *card.TurnState) int {
 
 type SutcliffesResearchNotesRed struct{}
 
-func (SutcliffesResearchNotesRed) ID() card.ID                 { return card.SutcliffesResearchNotesRed }
-func (SutcliffesResearchNotesRed) Name() string                 { return "Sutcliffe's Research Notes" }
-func (SutcliffesResearchNotesRed) Cost(*card.TurnState) int                    { return 1 }
-func (SutcliffesResearchNotesRed) Pitch() int                   { return 1 }
-func (SutcliffesResearchNotesRed) Attack() int                  { return 0 }
-func (SutcliffesResearchNotesRed) Defense() int                 { return 2 }
-func (SutcliffesResearchNotesRed) Types() card.TypeSet          { return sutcliffesResearchNotesTypes }
-func (SutcliffesResearchNotesRed) GoAgain() bool                { return true }
-func (SutcliffesResearchNotesRed) NoMemo()                      {}
+func (SutcliffesResearchNotesRed) ID() card.ID              { return card.SutcliffesResearchNotesRed }
+func (SutcliffesResearchNotesRed) Name() string             { return "Sutcliffe's Research Notes" }
+func (SutcliffesResearchNotesRed) Cost(*card.TurnState) int { return 1 }
+func (SutcliffesResearchNotesRed) Pitch() int               { return 1 }
+func (SutcliffesResearchNotesRed) Attack() int              { return 0 }
+func (SutcliffesResearchNotesRed) Defense() int             { return 2 }
+func (SutcliffesResearchNotesRed) Types() card.TypeSet      { return sutcliffesResearchNotesTypes }
+func (SutcliffesResearchNotesRed) GoAgain() bool            { return true }
+func (SutcliffesResearchNotesRed) NoMemo()                  {}
+
 // not implemented: top-of-deck reordering clause
-func (SutcliffesResearchNotesRed) NotImplemented()              {}
-func (SutcliffesResearchNotesRed) Play(s *card.TurnState, _ *card.CardState) int   { return sutcliffesResearchNotesPlay(3, s) }
+func (SutcliffesResearchNotesRed) NotImplemented() {}
+func (SutcliffesResearchNotesRed) Play(s *card.TurnState, self *card.CardState) {
+	s.ApplyAndLogEffectiveAttackPlus(self, sutcliffesResearchNotesPlay(3, s))
+}
 
 type SutcliffesResearchNotesYellow struct{}
 
-func (SutcliffesResearchNotesYellow) ID() card.ID                 { return card.SutcliffesResearchNotesYellow }
-func (SutcliffesResearchNotesYellow) Name() string                 { return "Sutcliffe's Research Notes" }
-func (SutcliffesResearchNotesYellow) Cost(*card.TurnState) int                    { return 1 }
-func (SutcliffesResearchNotesYellow) Pitch() int                   { return 2 }
-func (SutcliffesResearchNotesYellow) Attack() int                  { return 0 }
-func (SutcliffesResearchNotesYellow) Defense() int                 { return 2 }
-func (SutcliffesResearchNotesYellow) Types() card.TypeSet          { return sutcliffesResearchNotesTypes }
-func (SutcliffesResearchNotesYellow) GoAgain() bool                { return true }
-func (SutcliffesResearchNotesYellow) NoMemo()                      {}
+func (SutcliffesResearchNotesYellow) ID() card.ID              { return card.SutcliffesResearchNotesYellow }
+func (SutcliffesResearchNotesYellow) Name() string             { return "Sutcliffe's Research Notes" }
+func (SutcliffesResearchNotesYellow) Cost(*card.TurnState) int { return 1 }
+func (SutcliffesResearchNotesYellow) Pitch() int               { return 2 }
+func (SutcliffesResearchNotesYellow) Attack() int              { return 0 }
+func (SutcliffesResearchNotesYellow) Defense() int             { return 2 }
+func (SutcliffesResearchNotesYellow) Types() card.TypeSet      { return sutcliffesResearchNotesTypes }
+func (SutcliffesResearchNotesYellow) GoAgain() bool            { return true }
+func (SutcliffesResearchNotesYellow) NoMemo()                  {}
+
 // not implemented: top-of-deck reordering clause
-func (SutcliffesResearchNotesYellow) NotImplemented()              {}
-func (SutcliffesResearchNotesYellow) Play(s *card.TurnState, _ *card.CardState) int   { return sutcliffesResearchNotesPlay(2, s) }
+func (SutcliffesResearchNotesYellow) NotImplemented() {}
+func (SutcliffesResearchNotesYellow) Play(s *card.TurnState, self *card.CardState) {
+	s.ApplyAndLogEffectiveAttackPlus(self, sutcliffesResearchNotesPlay(2, s))
+}
 
 type SutcliffesResearchNotesBlue struct{}
 
-func (SutcliffesResearchNotesBlue) ID() card.ID                 { return card.SutcliffesResearchNotesBlue }
-func (SutcliffesResearchNotesBlue) Name() string                 { return "Sutcliffe's Research Notes" }
-func (SutcliffesResearchNotesBlue) Cost(*card.TurnState) int                    { return 1 }
-func (SutcliffesResearchNotesBlue) Pitch() int                   { return 3 }
-func (SutcliffesResearchNotesBlue) Attack() int                  { return 0 }
-func (SutcliffesResearchNotesBlue) Defense() int                 { return 2 }
-func (SutcliffesResearchNotesBlue) Types() card.TypeSet          { return sutcliffesResearchNotesTypes }
-func (SutcliffesResearchNotesBlue) GoAgain() bool                { return true }
-func (SutcliffesResearchNotesBlue) NoMemo()                      {}
+func (SutcliffesResearchNotesBlue) ID() card.ID              { return card.SutcliffesResearchNotesBlue }
+func (SutcliffesResearchNotesBlue) Name() string             { return "Sutcliffe's Research Notes" }
+func (SutcliffesResearchNotesBlue) Cost(*card.TurnState) int { return 1 }
+func (SutcliffesResearchNotesBlue) Pitch() int               { return 3 }
+func (SutcliffesResearchNotesBlue) Attack() int              { return 0 }
+func (SutcliffesResearchNotesBlue) Defense() int             { return 2 }
+func (SutcliffesResearchNotesBlue) Types() card.TypeSet      { return sutcliffesResearchNotesTypes }
+func (SutcliffesResearchNotesBlue) GoAgain() bool            { return true }
+func (SutcliffesResearchNotesBlue) NoMemo()                  {}
+
 // not implemented: top-of-deck reordering clause
-func (SutcliffesResearchNotesBlue) NotImplemented()              {}
-func (SutcliffesResearchNotesBlue) Play(s *card.TurnState, _ *card.CardState) int   { return sutcliffesResearchNotesPlay(1, s) }
+func (SutcliffesResearchNotesBlue) NotImplemented() {}
+func (SutcliffesResearchNotesBlue) Play(s *card.TurnState, self *card.CardState) {
+	s.ApplyAndLogEffectiveAttackPlus(self, sutcliffesResearchNotesPlay(1, s))
+}

@@ -12,42 +12,51 @@ var warmongersRecitalTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction)
 
 type WarmongersRecitalRed struct{}
 
-func (WarmongersRecitalRed) ID() card.ID                 { return card.WarmongersRecitalRed }
-func (WarmongersRecitalRed) Name() string                { return "Warmonger's Recital" }
-func (WarmongersRecitalRed) Cost(*card.TurnState) int                   { return 1 }
-func (WarmongersRecitalRed) Pitch() int                  { return 1 }
-func (WarmongersRecitalRed) Attack() int                 { return 0 }
-func (WarmongersRecitalRed) Defense() int                { return 2 }
-func (WarmongersRecitalRed) Types() card.TypeSet         { return warmongersRecitalTypes }
-func (WarmongersRecitalRed) GoAgain() bool               { return true }
+func (WarmongersRecitalRed) ID() card.ID              { return card.WarmongersRecitalRed }
+func (WarmongersRecitalRed) Name() string             { return "Warmonger's Recital" }
+func (WarmongersRecitalRed) Cost(*card.TurnState) int { return 1 }
+func (WarmongersRecitalRed) Pitch() int               { return 1 }
+func (WarmongersRecitalRed) Attack() int              { return 0 }
+func (WarmongersRecitalRed) Defense() int             { return 2 }
+func (WarmongersRecitalRed) Types() card.TypeSet      { return warmongersRecitalTypes }
+func (WarmongersRecitalRed) GoAgain() bool            { return true }
+
 // not implemented: bottom-of-deck rider on next-attack-action target
-func (WarmongersRecitalRed) NotImplemented()             {}
-func (WarmongersRecitalRed) Play(s *card.TurnState, _ *card.CardState) int { return grantNextAttackActionBonus(s, 3) }
+func (WarmongersRecitalRed) NotImplemented() {}
+func (WarmongersRecitalRed) Play(s *card.TurnState, self *card.CardState) {
+	s.ApplyAndLogEffectiveAttackPlus(self, grantNextAttackActionBonus(s, 3))
+}
 
 type WarmongersRecitalYellow struct{}
 
-func (WarmongersRecitalYellow) ID() card.ID                 { return card.WarmongersRecitalYellow }
-func (WarmongersRecitalYellow) Name() string                { return "Warmonger's Recital" }
-func (WarmongersRecitalYellow) Cost(*card.TurnState) int                   { return 1 }
-func (WarmongersRecitalYellow) Pitch() int                  { return 2 }
-func (WarmongersRecitalYellow) Attack() int                 { return 0 }
-func (WarmongersRecitalYellow) Defense() int                { return 2 }
-func (WarmongersRecitalYellow) Types() card.TypeSet         { return warmongersRecitalTypes }
-func (WarmongersRecitalYellow) GoAgain() bool               { return true }
+func (WarmongersRecitalYellow) ID() card.ID              { return card.WarmongersRecitalYellow }
+func (WarmongersRecitalYellow) Name() string             { return "Warmonger's Recital" }
+func (WarmongersRecitalYellow) Cost(*card.TurnState) int { return 1 }
+func (WarmongersRecitalYellow) Pitch() int               { return 2 }
+func (WarmongersRecitalYellow) Attack() int              { return 0 }
+func (WarmongersRecitalYellow) Defense() int             { return 2 }
+func (WarmongersRecitalYellow) Types() card.TypeSet      { return warmongersRecitalTypes }
+func (WarmongersRecitalYellow) GoAgain() bool            { return true }
+
 // not implemented: bottom-of-deck rider on next-attack-action target
-func (WarmongersRecitalYellow) NotImplemented()             {}
-func (WarmongersRecitalYellow) Play(s *card.TurnState, _ *card.CardState) int { return grantNextAttackActionBonus(s, 2) }
+func (WarmongersRecitalYellow) NotImplemented() {}
+func (WarmongersRecitalYellow) Play(s *card.TurnState, self *card.CardState) {
+	s.ApplyAndLogEffectiveAttackPlus(self, grantNextAttackActionBonus(s, 2))
+}
 
 type WarmongersRecitalBlue struct{}
 
-func (WarmongersRecitalBlue) ID() card.ID                 { return card.WarmongersRecitalBlue }
-func (WarmongersRecitalBlue) Name() string                { return "Warmonger's Recital" }
-func (WarmongersRecitalBlue) Cost(*card.TurnState) int                   { return 1 }
-func (WarmongersRecitalBlue) Pitch() int                  { return 3 }
-func (WarmongersRecitalBlue) Attack() int                 { return 0 }
-func (WarmongersRecitalBlue) Defense() int                { return 2 }
-func (WarmongersRecitalBlue) Types() card.TypeSet         { return warmongersRecitalTypes }
-func (WarmongersRecitalBlue) GoAgain() bool               { return true }
+func (WarmongersRecitalBlue) ID() card.ID              { return card.WarmongersRecitalBlue }
+func (WarmongersRecitalBlue) Name() string             { return "Warmonger's Recital" }
+func (WarmongersRecitalBlue) Cost(*card.TurnState) int { return 1 }
+func (WarmongersRecitalBlue) Pitch() int               { return 3 }
+func (WarmongersRecitalBlue) Attack() int              { return 0 }
+func (WarmongersRecitalBlue) Defense() int             { return 2 }
+func (WarmongersRecitalBlue) Types() card.TypeSet      { return warmongersRecitalTypes }
+func (WarmongersRecitalBlue) GoAgain() bool            { return true }
+
 // not implemented: bottom-of-deck rider on next-attack-action target
-func (WarmongersRecitalBlue) NotImplemented()             {}
-func (WarmongersRecitalBlue) Play(s *card.TurnState, _ *card.CardState) int { return grantNextAttackActionBonus(s, 1) }
+func (WarmongersRecitalBlue) NotImplemented() {}
+func (WarmongersRecitalBlue) Play(s *card.TurnState, self *card.CardState) {
+	s.ApplyAndLogEffectiveAttackPlus(self, grantNextAttackActionBonus(s, 1))
+}

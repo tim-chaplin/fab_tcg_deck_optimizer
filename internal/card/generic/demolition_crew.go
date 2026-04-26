@@ -12,48 +12,57 @@ var demolitionCrewTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, car
 
 type DemolitionCrewRed struct{}
 
-func (DemolitionCrewRed) ID() card.ID                 { return card.DemolitionCrewRed }
-func (DemolitionCrewRed) Name() string                { return "Demolition Crew" }
-func (DemolitionCrewRed) Cost(*card.TurnState) int                   { return 2 }
-func (DemolitionCrewRed) Pitch() int                  { return 1 }
-func (DemolitionCrewRed) Attack() int                 { return 6 }
-func (DemolitionCrewRed) Defense() int                { return 2 }
-func (DemolitionCrewRed) Types() card.TypeSet         { return demolitionCrewTypes }
-func (DemolitionCrewRed) GoAgain() bool               { return false }
-func (DemolitionCrewRed) Dominate()                   {}
+func (DemolitionCrewRed) ID() card.ID              { return card.DemolitionCrewRed }
+func (DemolitionCrewRed) Name() string             { return "Demolition Crew" }
+func (DemolitionCrewRed) Cost(*card.TurnState) int { return 2 }
+func (DemolitionCrewRed) Pitch() int               { return 1 }
+func (DemolitionCrewRed) Attack() int              { return 6 }
+func (DemolitionCrewRed) Defense() int             { return 2 }
+func (DemolitionCrewRed) Types() card.TypeSet      { return demolitionCrewTypes }
+func (DemolitionCrewRed) GoAgain() bool            { return false }
+func (DemolitionCrewRed) Dominate()                {}
+
 // not implemented: additional cost "reveal a cost-2-or-greater card from hand" not enforced;
 // card always playable when its resource cost is met (over-credits hands without a 2+ cost card)
-func (DemolitionCrewRed) NotImplemented()             {}
-func (c DemolitionCrewRed) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }
+func (DemolitionCrewRed) NotImplemented() {}
+func (c DemolitionCrewRed) Play(s *card.TurnState, self *card.CardState) {
+	s.ApplyAndLogEffectiveAttack(self)
+}
 
 type DemolitionCrewYellow struct{}
 
-func (DemolitionCrewYellow) ID() card.ID                 { return card.DemolitionCrewYellow }
-func (DemolitionCrewYellow) Name() string                { return "Demolition Crew" }
-func (DemolitionCrewYellow) Cost(*card.TurnState) int                   { return 2 }
-func (DemolitionCrewYellow) Pitch() int                  { return 2 }
-func (DemolitionCrewYellow) Attack() int                 { return 5 }
-func (DemolitionCrewYellow) Defense() int                { return 2 }
-func (DemolitionCrewYellow) Types() card.TypeSet         { return demolitionCrewTypes }
-func (DemolitionCrewYellow) GoAgain() bool               { return false }
-func (DemolitionCrewYellow) Dominate()                   {}
+func (DemolitionCrewYellow) ID() card.ID              { return card.DemolitionCrewYellow }
+func (DemolitionCrewYellow) Name() string             { return "Demolition Crew" }
+func (DemolitionCrewYellow) Cost(*card.TurnState) int { return 2 }
+func (DemolitionCrewYellow) Pitch() int               { return 2 }
+func (DemolitionCrewYellow) Attack() int              { return 5 }
+func (DemolitionCrewYellow) Defense() int             { return 2 }
+func (DemolitionCrewYellow) Types() card.TypeSet      { return demolitionCrewTypes }
+func (DemolitionCrewYellow) GoAgain() bool            { return false }
+func (DemolitionCrewYellow) Dominate()                {}
+
 // not implemented: additional cost "reveal a cost-2-or-greater card from hand" not enforced;
 // card always playable when its resource cost is met (over-credits hands without a 2+ cost card)
-func (DemolitionCrewYellow) NotImplemented()             {}
-func (c DemolitionCrewYellow) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }
+func (DemolitionCrewYellow) NotImplemented() {}
+func (c DemolitionCrewYellow) Play(s *card.TurnState, self *card.CardState) {
+	s.ApplyAndLogEffectiveAttack(self)
+}
 
 type DemolitionCrewBlue struct{}
 
-func (DemolitionCrewBlue) ID() card.ID                 { return card.DemolitionCrewBlue }
-func (DemolitionCrewBlue) Name() string                { return "Demolition Crew" }
-func (DemolitionCrewBlue) Cost(*card.TurnState) int                   { return 2 }
-func (DemolitionCrewBlue) Pitch() int                  { return 3 }
-func (DemolitionCrewBlue) Attack() int                 { return 4 }
-func (DemolitionCrewBlue) Defense() int                { return 2 }
-func (DemolitionCrewBlue) Types() card.TypeSet         { return demolitionCrewTypes }
-func (DemolitionCrewBlue) GoAgain() bool               { return false }
-func (DemolitionCrewBlue) Dominate()                   {}
+func (DemolitionCrewBlue) ID() card.ID              { return card.DemolitionCrewBlue }
+func (DemolitionCrewBlue) Name() string             { return "Demolition Crew" }
+func (DemolitionCrewBlue) Cost(*card.TurnState) int { return 2 }
+func (DemolitionCrewBlue) Pitch() int               { return 3 }
+func (DemolitionCrewBlue) Attack() int              { return 4 }
+func (DemolitionCrewBlue) Defense() int             { return 2 }
+func (DemolitionCrewBlue) Types() card.TypeSet      { return demolitionCrewTypes }
+func (DemolitionCrewBlue) GoAgain() bool            { return false }
+func (DemolitionCrewBlue) Dominate()                {}
+
 // not implemented: additional cost "reveal a cost-2-or-greater card from hand" not enforced;
 // card always playable when its resource cost is met (over-credits hands without a 2+ cost card)
-func (DemolitionCrewBlue) NotImplemented()             {}
-func (c DemolitionCrewBlue) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }
+func (DemolitionCrewBlue) NotImplemented() {}
+func (c DemolitionCrewBlue) Play(s *card.TurnState, self *card.CardState) {
+	s.ApplyAndLogEffectiveAttack(self)
+}
