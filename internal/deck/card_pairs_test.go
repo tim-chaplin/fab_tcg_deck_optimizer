@@ -51,11 +51,10 @@ func TestCardPairMutations_EnumeratesAllVariantCrossProducts(t *testing.T) {
 	}
 }
 
-// TestCardPairMutations_FiresWhenOneHalfAlreadyPresent: pair mutations should still fire
-// when one half is partially in the deck (subject to per-variant maxCopies). The escape-hatch
-// behaviour isn't gated on "both halves absent" any more — single-slot still handles the
-// half-present case but pair adds remain available so the climber can grow the OTHER variant
-// of either side as a pair-shape mutation rather than two sequential swaps.
+// TestCardPairMutations_FiresWhenOneHalfAlreadyPresent: pair mutations fire whenever the
+// per-variant maxCopies cap allows the add. With one half partially present, the climber
+// can still grow the OTHER variant of that side as a pair-shape mutation rather than two
+// sequential single-slot swaps.
 //
 // Same-variant overlap suppression (e.g. -1 SunKissRed + +1 SunKissRed reducing to a
 // single-slot) is the orthogonal optimisation tested in
@@ -82,7 +81,8 @@ func TestCardPairMutations_FiresWhenOneHalfAlreadyPresent(t *testing.T) {
 		}
 	}
 	if !sawDifferentSunKissVariantAdd {
-		t.Error("expected at least one mutation adding a non-Red Sun Kiss variant when Red is already present")
+		t.Error("expected at least one mutation adding a non-Red Sun Kiss variant " +
+			"when Red is already present")
 	}
 }
 
@@ -214,8 +214,7 @@ func TestCardPairMutations_OverlapSuppressionSkipsRedundantSwaps(t *testing.T) {
 
 // TestCardPairMutations_RespectsLegalFilter: a legal predicate that rejects a single pair
 // variant suppresses only that variant's combos, not the whole pair. Sun Kiss (Yellow) gets
-// rejected; the remaining 3 × 2 = 6 cross-products still emit. Pre-change behaviour skipped
-// the entire pair on any rejection; the new shape is finer-grained and matches how
+// rejected; the remaining 3 × 2 = 6 cross-products still emit — matches how
 // cardSwapMutations treats per-printing legality.
 func TestCardPairMutations_RespectsLegalFilter(t *testing.T) {
 	a := cards.Get(card.ArcanicCrackleRed)

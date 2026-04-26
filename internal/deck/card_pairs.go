@@ -66,8 +66,8 @@ const cardPairTopK = 5
 // target and adds one copy of each pair variant.
 //
 // Per-variant maxCopies cap: a variant whose count would exceed maxCopies after the +1 add
-// is skipped. So a deck saturated with Red on both halves still gets Yellow/Blue cross-add
-// candidates.
+// is skipped. A deck saturated with Red on both halves yields Yellow/Blue cross-add
+// candidates only.
 //
 // Overlap suppression: when a removal ID matches one of the pair's add IDs, the mutation
 // reduces to a single-slot swap (the matching pair member's count is unchanged net of the
