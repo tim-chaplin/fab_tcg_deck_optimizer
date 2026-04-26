@@ -17,6 +17,7 @@ type Hero interface {
 	Types() card.TypeSet
 	// OnCardPlayed is called by the hand evaluator after each card's Play() resolves and before
 	// the card is appended to s.CardsPlayed. Returns any bonus damage the hero's printed ability
-	// contributes (e.g. Runechant tokens). Heroes without a triggered ability return 0.
+	// contributes (e.g. Runechant tokens). Heroes without a triggered ability return 0. The
+	// dispatcher folds the return into s.Value via s.RecordValue.
 	OnCardPlayed(played card.Card, s *card.TurnState) int
 }

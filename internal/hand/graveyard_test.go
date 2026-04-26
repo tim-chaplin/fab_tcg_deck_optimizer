@@ -13,7 +13,7 @@ import (
 func TestGraveyard_AttackChainAppends(t *testing.T) {
 	order := []card.Card{fake.RedAttack{}, fake.RedAttack{}, fake.RedAttack{}}
 	ctx := newSequenceContextForTest(stubHero, nil, nil, 1_000_000, 0, len(order))
-	if _, _, _, legal := ctx.playSequence(order, nil, nil, nil); !legal {
+	if _, _, _, legal := ctx.playSequence(order); !legal {
 		t.Fatalf("playSequence rejected the chain")
 	}
 	got := ctx.bufs.state.Graveyard
@@ -35,7 +35,7 @@ func TestGraveyard_WeaponSwingDoesNotEnterGraveyard(t *testing.T) {
 	swing := weapon.ReapingBlade{}
 	order := []card.Card{attack, swing}
 	ctx := newSequenceContextForTest(stubHero, nil, nil, 1_000_000, 0, len(order))
-	if _, _, _, legal := ctx.playSequence(order, nil, nil, nil); !legal {
+	if _, _, _, legal := ctx.playSequence(order); !legal {
 		t.Fatalf("playSequence rejected attack → weapon")
 	}
 	got := ctx.bufs.state.Graveyard
@@ -121,14 +121,14 @@ func TestGraveyard_PermutationReset(t *testing.T) {
 	second := []card.Card{fake.RedAttack{}}
 	ctx := newSequenceContextForTest(stubHero, nil, nil, 1_000_000, 0, len(first))
 
-	if _, _, _, legal := ctx.playSequence(first, nil, nil, nil); !legal {
+	if _, _, _, legal := ctx.playSequence(first); !legal {
 		t.Fatalf("first playSequence rejected")
 	}
 	if got := len(ctx.bufs.state.Graveyard); got != len(first) {
 		t.Fatalf("after first run, graveyard len = %d, want %d", got, len(first))
 	}
 
-	if _, _, _, legal := ctx.playSequence(second, nil, nil, nil); !legal {
+	if _, _, _, legal := ctx.playSequence(second); !legal {
 		t.Fatalf("second playSequence rejected")
 	}
 	if got := len(ctx.bufs.state.Graveyard); got != len(second) {

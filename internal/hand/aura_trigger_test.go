@@ -9,7 +9,7 @@ import (
 
 // TestFireAttackActionTriggers_FiresOnceWhenGated: a single OncePerTurn AttackAction
 // trigger fires on the first call and is gated on the second within the same turn — its
-// Count ticks only once, FiredThisTurn latches.
+// Count ticks only once, FiredThisTurn latches. Each fire records into state.Value.
 func TestFireAttackActionTriggers_FiresOnceWhenGated(t *testing.T) {
 	aura := fake.RedAttack{}
 	calls := 0
@@ -23,11 +23,13 @@ func TestFireAttackActionTriggers_FiresOnceWhenGated(t *testing.T) {
 			return 1
 		},
 	}}}
-	if got := fireAttackActionTriggers(state); got != 1 {
-		t.Errorf("first fire damage = %d, want 1", got)
+	fireAttackActionTriggers(state)
+	if state.Value != 1 {
+		t.Errorf("first fire Value = %d, want 1", state.Value)
 	}
-	if got := fireAttackActionTriggers(state); got != 0 {
-		t.Errorf("second fire damage = %d, want 0 (OncePerTurn gate closed)", got)
+	fireAttackActionTriggers(state)
+	if state.Value != 1 {
+		t.Errorf("second fire Value = %d, want 1 (OncePerTurn gate kept second fire from crediting)", state.Value)
 	}
 	if calls != 1 {
 		t.Errorf("handler call count = %d, want 1 (gate prevented second call)", calls)
@@ -71,8 +73,9 @@ func TestFireAttackActionTriggers_PassesThroughNonAttackActionTriggers(t *testin
 		Count:   1,
 		Handler: func(*card.TurnState) int { calls++; return 5 },
 	}}}
-	if got := fireAttackActionTriggers(state); got != 0 {
-		t.Errorf("damage = %d, want 0 (start-of-turn trigger doesn't fire on attack action)", got)
+	fireAttackActionTriggers(state)
+	if state.Value != 0 {
+		t.Errorf("Value = %d, want 0 (start-of-turn trigger doesn't fire on attack action)", state.Value)
 	}
 	if calls != 0 {
 		t.Errorf("handler call count = %d, want 0", calls)

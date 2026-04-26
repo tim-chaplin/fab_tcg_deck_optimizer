@@ -315,12 +315,9 @@ func TestEvaluate_TriggersFromLastTurnSurfacesInBest(t *testing.T) {
 	rng := rand.New(rand.NewSource(42))
 	d.Evaluate(20, 0, rng)
 
-	if d.Stats.PerCard[card.BlessingOfOccultRed].Plays == 0 {
-		t.Fatal("Blessing was never played — test fixture not provoking the code path")
-	}
 	if len(d.Stats.Best.Summary.TriggersFromLastTurn) == 0 {
-		t.Errorf("Stats.Best.Summary.TriggersFromLastTurn is empty; Best.Value=%d; Blessings played=%d",
-			d.Stats.Best.Summary.Value, d.Stats.PerCard[card.BlessingOfOccultRed].Plays)
+		t.Errorf("Stats.Best.Summary.TriggersFromLastTurn is empty; Best.Value=%d",
+			d.Stats.Best.Summary.Value)
 	}
 	// The best-turn snapshot must also list Blessing under StartOfTurnAuras — Blessing
 	// registers a carryover AuraTrigger on the turn it's played, and the best-scoring turn

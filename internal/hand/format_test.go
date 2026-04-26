@@ -49,10 +49,9 @@ func TestFormatBestLine_Compact(t *testing.T) {
 }
 
 // TestFormatBestTurn_AttackAndPitch verifies the basic numbered-list shape: pitches and the
-// attack chain both fall under the "My turn:" section header, pitches render as ": PITCH"
-// (no damage tag — resource isn't damage, and the section header disambiguates phase),
-// attacks come from AttackChain with their Play damage. Hand: 2 Red Attacks + 2 Blue (one
-// pitched to pay, one Held).
+// attack chain both fall under the "My turn:" section header. Hand: 2 Red Attacks + 2 Blues.
+// One Blue pitches for 3 resource, funding the 3-cost chain (Blue + Red + Red, all cost 1
+// each, all go-again).
 func TestFormatBestTurn_AttackAndPitch(t *testing.T) {
 	h := []card.Card{fake.BlueAttack{}, fake.BlueAttack{}, fake.RedAttack{}, fake.RedAttack{}}
 	got := Best(stubHero, nil, h, 0, nil, 0, nil)
@@ -60,8 +59,7 @@ func TestFormatBestTurn_AttackAndPitch(t *testing.T) {
 	if !strings.Contains(out, "  My turn:") {
 		t.Errorf("want 'My turn:' section header, got:\n%s", out)
 	}
-	// Exactly one PITCH line — a single Blue (pitch 3) covers the 1-cost Red attacks'
-	// combined cost of 2; the other Blue ends up Held.
+	// Exactly one PITCH line — one Blue funds the 3-cost chain.
 	if n := strings.Count(out, ": PITCH"); n != 1 {
 		t.Errorf("want 1 ': PITCH' line, got %d in:\n%s", n, out)
 	}
@@ -69,24 +67,9 @@ func TestFormatBestTurn_AttackAndPitch(t *testing.T) {
 	if strings.Contains(out, "Opponent's turn:") {
 		t.Errorf("didn't expect defense-phase section in:\n%s", out)
 	}
-	// Both Red attacks show up with their Attack() damage of 3.
-	if n := strings.Count(out, ": ATTACK (+3)"); n != 2 {
-		t.Errorf("want 2 Red attacks at +3 damage, got %d in:\n%s", n, out)
-	}
-}
-
-// TestFormatBestTurn_HeroTriggerAttribution exercises the explicit hero-trigger line on an
-// attack that fires OnCardPlayed. Viserai creates a Runechant on the 2nd+ non-attack action
-// played; with a non-attack action first in chain, the next attack's card slot gets a
-// "(+M hero trigger)" suffix rather than silently folding M into the attack's damage number.
-func TestFormatBestTurn_HeroTriggerAttribution(t *testing.T) {
-	h := []card.Card{runeblade.MauvrionSkiesRed{}, runeblade.ShrillOfSkullformRed{}, runeblade.MaleficIncantationBlue{}}
-	got := Best(hero.Viserai{}, nil, h, 0, nil, 0, nil)
-	out := FormatBestTurn(got, 0)
-	// The winning line plays Mauvrion (non-attack action) → Shrill (attack); Viserai triggers on
-	// Shrill for +1 runechant and the display should split that off into its own tag.
-	if !strings.Contains(out, "hero trigger") {
-		t.Errorf("want a hero trigger tag on the chain, got:\n%s", out)
+	// Three ATTACK lines: 1 Blue + 2 Reds chain on go-again.
+	if n := strings.Count(out, ": ATTACK"); n != 3 {
+		t.Errorf("want 3 ': ATTACK' lines, got %d in:\n%s", n, out)
 	}
 }
 
@@ -102,36 +85,6 @@ func TestFormatBestTurn_NonAttackCardUsesPlayLabel(t *testing.T) {
 	}
 	if !strings.Contains(out, "Shrill of Skullform (Red): ATTACK") {
 		t.Errorf("want Shrill (attack action) labelled ATTACK, got:\n%s", out)
-	}
-}
-
-// TestFormatBestTurn_AuraTriggerLabelledSeparately pins the chain display to attribute hero
-// OnCardPlayed damage and mid-chain AuraTrigger damage as distinct comma-separated items
-// inside a single trigger parenthesised group. When a Runeblade attack action triggers both
-// Viserai (hero ability, +1 Runechant) and a carryover Malefic Incantation
-// (TriggerAttackAction aura, +1 Runechant), the card line reads "(+1 hero trigger, +1 aura
-// trigger)" — one parenthesised group so the eye tracks two related items together.
-func TestFormatBestTurn_AuraTriggerLabelledSeparately(t *testing.T) {
-	// Hand: a Generic non-attack action (Nimblism — sets NonAttackActionPlayed without being
-	// Runeblade), a Runeblade non-attack action (Mauvrion — Viserai fires on it), and a
-	// Runeblade attack action (Consuming Volition — Viserai fires AND the carryover Malefic
-	// trigger fires). Viserai's contribution is +1; the carryover aura's is +1; the display
-	// must attribute them to distinct items inside one combined group.
-	h := []card.Card{generic.NimblismRed{}, runeblade.MauvrionSkiesRed{}, runeblade.ConsumingVolitionRed{}}
-	prior := []card.AuraTrigger{{
-		Self:        runeblade.MaleficIncantationRed{},
-		Type:        card.TriggerAttackAction,
-		Count:       2,
-		OncePerTurn: true,
-		Handler:     func(s *card.TurnState) int { return s.CreateRunechants(1) },
-	}}
-	got := BestWithTriggers(hero.Viserai{}, nil, h, 0, nil, 0, nil, prior)
-	out := FormatBestTurn(got, 0)
-	if !strings.Contains(out, "(+1 hero trigger, +1 aura trigger)") {
-		t.Errorf("want combined '(+1 hero trigger, +1 aura trigger)' tag, got:\n%s", out)
-	}
-	if strings.Contains(out, "(+2 hero trigger)") {
-		t.Errorf("the +1 aura damage must not appear under the hero tag; got:\n%s", out)
 	}
 }
 
@@ -153,9 +106,6 @@ func TestFormatBestTurn_ArsenalInPlayedAsDR(t *testing.T) {
 	if !strings.Contains(out, "Toughen Up (Blue): DEFENSE REACTION from arsenal") {
 		t.Errorf("want 'DEFENSE REACTION from arsenal' on the role label, got:\n%s", out)
 	}
-	if !strings.Contains(out, "+4 prevented") {
-		t.Errorf("want '+4 prevented' (4 incoming fully blocked by defense 4), got:\n%s", out)
-	}
 }
 
 // TestFormatBestTurn_ArsenalInPlayedOnChain checks the role-label tag for an arsenal-in
@@ -170,7 +120,7 @@ func TestFormatBestTurn_ArsenalInPlayedOnChain(t *testing.T) {
 	if !strings.Contains(out, "  My turn:") {
 		t.Errorf("want 'My turn:' section header, got:\n%s", out)
 	}
-	if !strings.Contains(out, "cardtest.RedAttack: ATTACK from arsenal (+3)") {
+	if !strings.Contains(out, "cardtest.RedAttack: ATTACK from arsenal") {
 		t.Errorf("want 'ATTACK from arsenal' on the role label, got:\n%s", out)
 	}
 	// The arsenal tag must hang off the role label, not the card name.
@@ -186,8 +136,7 @@ func TestFormatBestTurn_WeaponSwingInChain(t *testing.T) {
 	weapons := []weapon.Weapon{weapon.ReapingBlade{}}
 	got := Best(stubHero, weapons, h, 0, nil, 0, nil)
 	out := FormatBestTurn(got, 0)
-	// Reaping Blade attack is 3.
-	if !strings.Contains(out, "Reaping Blade: WEAPON ATTACK (+3)") {
+	if !strings.Contains(out, "Reaping Blade: WEAPON ATTACK") {
 		t.Errorf("want the weapon in the chain, got:\n%s", out)
 	}
 }

@@ -1,8 +1,8 @@
 package deckio
 
 // Runtime Deck → JSON encoding: Marshal is the public entry point; toJSON / statsToJSON /
-// perCardToJSON / bestTurnToJSON walk the deck, flatten interface values to names, and sort
-// the outputs so diffs across runs stay stable.
+// bestTurnToJSON walk the deck, flatten interface values to names, and sort the outputs so
+// diffs across runs stay stable.
 
 import (
 	"encoding/json"
@@ -11,7 +11,6 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/cards"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/deck"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/weapon"
 )
 
 // Marshal returns the JSON encoding of `d` (indented) with card/weapon/hero names in place of
@@ -71,40 +70,9 @@ func statsToJSON(s deck.Stats) StatsJSON {
 		FirstCycle:      s.FirstCycle,
 		SecondCycle:     s.SecondCycle,
 		Best:            bestTurnToJSON(s.Best),
-		PerCard:         perCardToJSON(s.PerCard),
 		PerCardMarginal: perCardMarginalToJSON(s.PerCardMarginal),
 		Histogram:       s.Histogram,
 	}
-}
-
-// perCardToJSON flattens the card.ID-keyed map into a slice sorted by Avg descending, total
-// appearances descending, then card name — so the JSON output is stable and the best-performing
-// cards surface at the top.
-func perCardToJSON(m map[card.ID]deck.CardPlayStats) []CardPlayStatsJSON {
-	if len(m) == 0 {
-		return nil
-	}
-	out := make([]CardPlayStatsJSON, 0, len(m))
-	for id, s := range m {
-		out = append(out, CardPlayStatsJSON{
-			Card:              cards.Get(id).Name(),
-			Plays:             s.Plays,
-			Pitches:           s.Pitches,
-			TotalContribution: s.TotalContribution,
-			Avg:               s.Avg(),
-		})
-	}
-	sort.Slice(out, func(i, j int) bool {
-		if out[i].Avg != out[j].Avg {
-			return out[i].Avg > out[j].Avg
-		}
-		ni, nj := out[i].Plays+out[i].Pitches, out[j].Plays+out[j].Pitches
-		if ni != nj {
-			return ni > nj
-		}
-		return out[i].Card < out[j].Card
-	})
-	return out
 }
 
 // perCardMarginalToJSON flattens the card.ID-keyed marginal-stats map into a slice sorted
@@ -139,37 +107,25 @@ func bestTurnToJSON(b deck.BestTurn) BestTurnJSON {
 		return BestTurnJSON{}
 	}
 	// JSON uses parallel name + role arrays for human readability; the in-memory BestLine is
-	// the single source of truth. Weapon names are extracted from AttackChain. Arsenal-in
-	// entries are emitted separately in ArsenalIn so reload can re-append them with
-	// FromArsenal=true, which keeps the "(from arsenal)" tag on the printout.
+	// the single source of truth. Arsenal-in entries are emitted separately in ArsenalIn so
+	// reload can re-append them with FromArsenal=true, which keeps the "(from arsenal)" tag
+	// on the printout.
 	var handNames, roles []string
-	var contribs []float64
 	var arsenalIn *ArsenalInJSON
 	for _, a := range b.Summary.BestLine {
 		if a.FromArsenal {
 			arsenalIn = &ArsenalInJSON{
-				Card:         a.Card.Name(),
-				Role:         a.Role.String(),
-				Contribution: a.Contribution,
+				Card: a.Card.Name(),
+				Role: a.Role.String(),
 			}
 			continue
 		}
 		handNames = append(handNames, a.Card.Name())
 		roles = append(roles, a.Role.String())
-		contribs = append(contribs, a.Contribution)
 	}
 	var weaponNames []string
-	var chain []AttackChainEntryJSON
-	for _, e := range b.Summary.AttackChain {
-		if w, ok := e.Card.(weapon.Weapon); ok {
-			weaponNames = append(weaponNames, w.Name())
-		}
-		chain = append(chain, AttackChainEntryJSON{
-			Card:              e.Card.Name(),
-			Damage:            e.Damage,
-			TriggerDamage:     e.TriggerDamage,
-			AuraTriggerDamage: e.AuraTriggerDamage,
-		})
+	if len(b.Summary.SwungWeapons) > 0 {
+		weaponNames = append([]string(nil), b.Summary.SwungWeapons...)
 	}
 	var startOfTurnAuras []string
 	if len(b.Summary.StartOfTurnAuras) > 0 {
@@ -189,9 +145,7 @@ func bestTurnToJSON(b deck.BestTurn) BestTurnJSON {
 	return BestTurnJSON{
 		Hand:                 handNames,
 		Roles:                roles,
-		Contributions:        contribs,
 		Weapons:              weaponNames,
-		Chain:                chain,
 		StartOfTurnAuras:     startOfTurnAuras,
 		ArsenalIn:            arsenalIn,
 		TriggersFromLastTurn: triggers,

@@ -13,42 +13,6 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/weapon"
 )
 
-// TestEvaluate_PerCardStatsPopulated pins per-card attribution: every card that's played or
-// pitched increments Plays+Pitches, and TotalContribution sums role-based per-card credit:
-// Attack → Card.Attack(), Defend → proportional share of block, Pitch → Card.Pitch(). Held and
-// Arsenal cards don't tick the counters (they didn't contribute to this turn's Value). A
-// single-printing deck makes the totals easy to assert against the card's printed stats.
-func TestEvaluate_PerCardStatsPopulated(t *testing.T) {
-	read := cards.Get(card.ReadTheRunesRed)
-	d := New(hero.Viserai{}, nil, []card.Card{read, read, read, read})
-	d.Evaluate(1, 0, rand.New(rand.NewSource(1)))
-
-	if d.Stats.PerCard == nil {
-		t.Fatalf("PerCard should be initialised after Evaluate")
-	}
-	stat, ok := d.Stats.PerCard[card.ReadTheRunesRed]
-	if !ok {
-		t.Fatalf("PerCard missing entry for Read the Runes (Red)")
-	}
-	// Read the Runes Red has no Go again, so the chain plays at most one per turn. With 4 in a
-	// 4-card hand, the solver plays one and the rest fall into Held/Arsenal roles which don't
-	// tick Plays or Pitches. Counter should be non-zero (at least one Play) but need not sum
-	// to 4.
-	if got := stat.Plays + stat.Pitches; got == 0 {
-		t.Errorf("Plays+Pitches = 0, want at least 1 (the chosen attacker plays once)")
-	}
-	// Contributions come from the winning chain replay (Play returns + hero triggers) plus
-	// role-based shares for pitch/defend. The exact total depends on rider/trigger damage, so
-	// assert the weaker property that it's positive and produces a positive Avg.
-	if stat.TotalContribution <= 0 {
-		t.Errorf("TotalContribution = %v, want >0 (played Read the Runes deals at least Attack+rider)",
-			stat.TotalContribution)
-	}
-	if stat.Avg() <= 0 {
-		t.Errorf("Avg() = %v, want >0", stat.Avg())
-	}
-}
-
 // TestEvaluate_BestTurnStartingRunechantsIsPreHandCarryover pins the contract of
 // BestTurn.StartingRunechants: it's the Runechant count carried in from the previous turn when
 // the hand was played, so for the first hand of a run it's always 0 — even if the hand itself
@@ -166,7 +130,7 @@ func TestEvaluate_PerCardMarginalAlwaysPresent(t *testing.T) {
 // card has no legal play (can't pay its 2-cost, can't pitch with nothing on the stack, DRs
 // can't Attack). Turn 1 holds then promotes it to Arsenal (empty slot). Turn 2 draws a new DR;
 // the arsenal card stays on tie, the new card goes Held, so drawCount = 0 next turn and the
-// loop halts at Stats.Hands = 2. Neither turn plays or pitches, so PerCard stays at 0.
+// loop halts at Stats.Hands = 2.
 func TestEvaluate_HeldCardDefersDrawToNextTurn(t *testing.T) {
 	// 40 copies of the DR so we have enough deck to fill many hands if held carryover weren't
 	// wired up — the assertion would fail catastrophically (loop or much larger Hands count).
@@ -179,11 +143,6 @@ func TestEvaluate_HeldCardDefersDrawToNextTurn(t *testing.T) {
 
 	if d.Stats.Hands != 2 {
 		t.Errorf("Stats.Hands = %d, want 2 (turn 1 arsenals the card, turn 2 holds its successor, turn 3 can't draw)", d.Stats.Hands)
-	}
-	tuStat := d.Stats.PerCard[card.ToughenUpBlue]
-	if tuStat.Plays != 0 || tuStat.Pitches != 0 {
-		t.Errorf("PerCard[ToughenUpBlue] Plays=%d Pitches=%d, want 0/0 (card was Held/Arsenaled, never played or pitched)",
-			tuStat.Plays, tuStat.Pitches)
 	}
 	// Best captures turn 1 (first hand with a recorded play). That hand's single card got
 	// promoted from Held to Arsenal by the post-hoc upgrade.

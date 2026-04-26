@@ -24,15 +24,17 @@ func TestFireEphemeralAttackTriggers_SingleFireDropsFromList(t *testing.T) {
 	target1 := &card.CardState{Card: fake.RedAttack{}}
 	target2 := &card.CardState{Card: fake.YellowAttack{}}
 
-	if got := fireEphemeralAttackTriggers(state, target1, nil); got != 1 {
-		t.Errorf("first fire damage = %d, want 1", got)
+	fireEphemeralAttackTriggers(state, target1)
+	if state.Value != 1 {
+		t.Errorf("first fire Value = %d, want 1", state.Value)
 	}
 	if len(state.EphemeralAttackTriggers) != 0 {
 		t.Errorf("after first fire EphemeralAttackTriggers = %+v, want empty (trigger consumed)",
 			state.EphemeralAttackTriggers)
 	}
-	if got := fireEphemeralAttackTriggers(state, target2, nil); got != 0 {
-		t.Errorf("second fire damage = %d, want 0 (trigger already consumed)", got)
+	fireEphemeralAttackTriggers(state, target2)
+	if state.Value != 1 {
+		t.Errorf("second fire Value = %d, want 1 (trigger already consumed; no second credit)", state.Value)
 	}
 	if calls != 1 {
 		t.Errorf("handler call count = %d, want 1 (a second attack must not re-fire a consumed trigger)",
@@ -59,39 +61,15 @@ func TestFireEphemeralAttackTriggers_NonMatchingTargetLeavesTriggerInPlace(t *te
 	}}}
 	generic := &card.CardState{Card: fake.RedAttack{}} // Generic, not Runeblade
 
-	if got := fireEphemeralAttackTriggers(state, generic, nil); got != 0 {
-		t.Errorf("non-matching fire damage = %d, want 0", got)
+	fireEphemeralAttackTriggers(state, generic)
+	if state.Value != 0 {
+		t.Errorf("non-matching fire Value = %d, want 0", state.Value)
 	}
 	if calls != 0 {
 		t.Errorf("handler ran %d times on a rejected target, want 0", calls)
 	}
 	if len(state.EphemeralAttackTriggers) != 1 {
 		t.Errorf("trigger should still be registered, got %+v", state.EphemeralAttackTriggers)
-	}
-}
-
-// TestFireEphemeralAttackTriggers_RoutesDamageToSourceIndex: the Handler's return is
-// credited to perCardOut[SourceIndex], not to the attacker that consumed the trigger. Pins
-// the attribution path that keeps Mauvrion's Runechants on Mauvrion's BestLine entry even
-// though the trigger physically fires during a downstream attacker's resolution.
-func TestFireEphemeralAttackTriggers_RoutesDamageToSourceIndex(t *testing.T) {
-	state := &card.TurnState{EphemeralAttackTriggers: []card.EphemeralAttackTrigger{{
-		Source:      fake.RedAttack{},
-		SourceIndex: 1,
-		Handler:     func(*card.TurnState, *card.CardState) int { return 3 },
-	}}}
-	target := &card.CardState{Card: fake.RedAttack{}}
-	perCard := []float64{0, 0, 0}
-
-	if got := fireEphemeralAttackTriggers(state, target, perCard); got != 3 {
-		t.Errorf("damage = %d, want 3", got)
-	}
-	want := []float64{0, 3, 0}
-	for i, got := range perCard {
-		if got != want[i] {
-			t.Errorf("perCard = %v, want %v (damage should route to SourceIndex=1)", perCard, want)
-			break
-		}
 	}
 }
 
@@ -105,8 +83,9 @@ func TestFireEphemeralAttackTriggers_NilMatchesAcceptsAnyTarget(t *testing.T) {
 	}}}
 	target := &card.CardState{Card: fake.YellowAttack{}} // Generic, but Matches=nil accepts all
 
-	if got := fireEphemeralAttackTriggers(state, target, nil); got != 2 {
-		t.Errorf("damage = %d, want 2 (nil Matches accepts any target)", got)
+	fireEphemeralAttackTriggers(state, target)
+	if state.Value != 2 {
+		t.Errorf("Value = %d, want 2 (nil Matches accepts any target)", state.Value)
 	}
 	if len(state.EphemeralAttackTriggers) != 0 {
 		t.Errorf("trigger should be consumed on nil-Matches fire, got %+v",

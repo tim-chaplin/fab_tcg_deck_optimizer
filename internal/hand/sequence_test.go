@@ -172,7 +172,7 @@ func TestIsLegalOrder_MauvrionCantSaveShrillWhenRuneragerIsAhead(t *testing.T) {
 		weapon.ReapingBlade{},
 	}
 	ctx := newSequenceContextForTest(hero.Viserai{}, nil, nil, 1_000_000, 0, len(order))
-	if _, _, _, legal := ctx.playSequence(order, nil, nil, nil); legal {
+	if _, _, _, legal := ctx.playSequence(order); legal {
 		t.Fatalf("ordering %v should be illegal (Shrill has no go-again and Mauvrion granted Runerager instead)",
 			cardNames(order))
 	}
@@ -210,7 +210,7 @@ func TestBestSequence_CardStateGrantsDontLeakAcrossPermutations(t *testing.T) {
 	var sawLeak bool
 	attackers := []card.Card{grantAll{}, grantSpy{saw: &sawLeak}, grantAll{}}
 	ctx := newSequenceContextForTest(stubHero, nil, nil, 1_000_000, 0, len(attackers))
-	_, _, _ = ctx.bestSequence(attackers, nil, nil, nil, nil)
+	_, _, _ = ctx.bestSequence(attackers)
 	if sawLeak {
 		t.Fatalf("CardState wrapper state leaked across permutations: grantSpy saw a pre-existing GrantedGoAgain when playing first")
 	}

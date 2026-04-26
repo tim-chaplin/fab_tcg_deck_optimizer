@@ -57,8 +57,7 @@ type AuraTrigger struct {
 // EphemeralAttackTrigger. target is the CardState of the attacker whose resolution triggered
 // the fire; the handler may read target.Card.Attack(), target.EffectiveDominate(), etc. to
 // decide whether a rider effect fires and what damage-equivalent to credit. Handlers mutate
-// the passed TurnState directly (e.g. s.CreateRunechants) and return the damage-equivalent;
-// the sim routes that damage back to the trigger's Source for per-card attribution.
+// the passed TurnState directly (e.g. s.CreateRunechants) and return the damage-equivalent.
 type OnEphemeralAttackTrigger func(s *TurnState, target *CardState) int
 
 // EphemeralAttackTrigger is a same-turn, fire-once "next attack" trigger registered by a

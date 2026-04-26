@@ -10,7 +10,6 @@ import (
 	"strings"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/weapon"
 )
 
 // formatContribution renders a contribution/damage value for the best-turn printout. Integers
@@ -92,64 +91,28 @@ func splitPitchesByPhase(pitched []CardAssignment, drCost int) (defensePitches, 
 	return defensePitches, attackPitches
 }
 
-// formatTriggerDamageTag joins non-zero hero and aura trigger damage into a single
-// parenthesised group like "(+1 hero trigger, +1 aura trigger)" so the chain line doesn't
-// stack two separate parens for what the reader sees as one composite effect block.
-// Returns "" when both are zero.
-func formatTriggerDamageTag(e AttackChainEntry) string {
-	var parts []string
-	if e.TriggerDamage > 0 {
-		parts = append(parts, fmt.Sprintf("+%s hero trigger", formatContribution(e.TriggerDamage)))
-	}
-	if e.AuraTriggerDamage > 0 {
-		parts = append(parts, fmt.Sprintf("+%s aura trigger", formatContribution(e.AuraTriggerDamage)))
-	}
-	if len(parts) == 0 {
-		return ""
-	}
-	return " (" + strings.Join(parts, ", ") + ")"
-}
-
-// appendAttackChainLines renders the Attack phase into playLines at 4-space indent (one level
-// deeper than section headers): one numbered entry per AttackChain step in solver-chosen play
-// order. nextStep advances the shared step counter so the chain's entries interleave with the
-// other my-turn entries built around it. Non-weapon entries cross-reference BestLine by ID so
-// arsenal-played cards get "PLAY from arsenal" / "ATTACK from arsenal" on the role label;
-// weapons skip the match since they have no BestLine entry. Cards that aren't attacks
-// (e.g. non-attack actions like Mauvrion Skies) use "PLAY" so the label matches what the card
-// actually does on the chain. Non-zero TriggerDamage / AuraTriggerDamage merge into a single
-// "(+M hero trigger, +M aura trigger)" tag so each source is attributed without fragmenting
-// the line into two parenthesised groups.
-func appendAttackChainLines(playLines []string, t TurnSummary, nextStep func() int) []string {
-	used := make([]bool, len(t.BestLine))
-	appendAttack := func(label, cardName string, e AttackChainEntry) {
-		line := fmt.Sprintf("    %d. %s: %s (+%s)", nextStep(), cardName, label, formatContribution(e.Damage))
-		line += formatTriggerDamageTag(e)
-		playLines = append(playLines, line)
-	}
-	for _, e := range t.AttackChain {
-		if _, isWeapon := e.Card.(weapon.Weapon); isWeapon {
-			appendAttack("WEAPON ATTACK", e.Card.Name(), e)
+// appendAttackChainLines renders the Attack phase into playLog at 4-space indent (one level
+// deeper than section headers): one numbered entry per Attack-role BestLine entry in solver
+// order, then one "WEAPON ATTACK" line per swung weapon. nextStep advances the shared step
+// counter so the chain's entries interleave with the other my-turn entries built around it.
+// No per-card damage attribution — phase 2's TurnState.Log will replace this entire helper
+// with a direct dump of the per-permutation log.
+func appendAttackChainLines(playLog []string, t TurnSummary, nextStep func() int) []string {
+	for _, a := range t.BestLine {
+		if a.Role != Attack {
 			continue
 		}
-		// Match the first unused Attack-role BestLine entry by ID so we can detect FromArsenal
-		// and pick the right role label.
-		var matched CardAssignment
-		for i := range t.BestLine {
-			if used[i] || t.BestLine[i].Role != Attack || t.BestLine[i].Card.ID() != e.Card.ID() {
-				continue
-			}
-			matched = t.BestLine[i]
-			used[i] = true
-			break
-		}
 		label := "ATTACK"
-		if !e.Card.Types().Has(card.TypeAttack) {
+		if !a.Card.Types().Has(card.TypeAttack) {
 			label = "PLAY"
 		}
-		appendAttack(roleLabelWithArsenal(matched, label), e.Card.Name(), e)
+		playLog = append(playLog, fmt.Sprintf("    %d. %s: %s",
+			nextStep(), a.Card.Name(), roleLabelWithArsenal(a, label)))
 	}
-	return playLines
+	for _, name := range t.SwungWeapons {
+		playLog = append(playLog, fmt.Sprintf("    %d. %s: WEAPON ATTACK", nextStep(), name))
+	}
+	return playLog
 }
 
 // FormatBestTurn renders a TurnSummary as a numbered play-order list grouped into two
@@ -268,14 +231,12 @@ func buildOpponentTurnLines(defensePitches, plainBlocks, defenseReactions []Card
 			nextStep(), a.Card.Name(), roleLabelWithArsenal(a, "PITCH")))
 	}
 	for _, a := range plainBlocks {
-		lines = append(lines, fmt.Sprintf("    %d. %s: %s (+%s prevented)",
-			nextStep(), a.Card.Name(), roleLabelWithArsenal(a, "BLOCK"),
-			formatContribution(a.Contribution)))
+		lines = append(lines, fmt.Sprintf("    %d. %s: %s",
+			nextStep(), a.Card.Name(), roleLabelWithArsenal(a, "BLOCK")))
 	}
 	for _, a := range defenseReactions {
-		lines = append(lines, fmt.Sprintf("    %d. %s: %s (+%s prevented)",
-			nextStep(), a.Card.Name(), roleLabelWithArsenal(a, "DEFENSE REACTION"),
-			formatContribution(a.Contribution)))
+		lines = append(lines, fmt.Sprintf("    %d. %s: %s",
+			nextStep(), a.Card.Name(), roleLabelWithArsenal(a, "DEFENSE REACTION")))
 	}
 	return lines
 }

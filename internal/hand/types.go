@@ -25,14 +25,10 @@ const (
 
 // CardAssignment is a single card + the role it took this turn. Hand cards produce one per
 // card; an arsenal-in card contributes one with FromArsenal set so a turn fits in one slice.
-// Contribution is the per-card credit toward TurnSummary.Value (damage dealt, block share,
-// or pitch resource depending on Role), filled by fillContributions once the winner is
-// picked.
 type CardAssignment struct {
-	Card         card.Card
-	Role         Role
-	FromArsenal  bool
-	Contribution float64
+	Card        card.Card
+	Role        Role
+	FromArsenal bool
 }
 
 // CarryState is the slice of TurnState that carries across the turn boundary — the winning
@@ -66,9 +62,9 @@ type TurnSummary struct {
 	// BestLine is the winning partition. Hand cards come first in canonical (post-sort)
 	// order; the previous-turn arsenal card, if any, is the last entry with FromArsenal=true.
 	BestLine []CardAssignment
-	// AttackChain is the winning chain in play order: attack-role cards from BestLine
-	// interleaved with any swung weapons at the positions the solver picked.
-	AttackChain []AttackChainEntry
+	// SwungWeapons names the weapons swung this turn in the winning permutation. Weapons have
+	// no BestLine entry (they're not hand cards), so the printout reads them from here.
+	SwungWeapons []string
 	// Value is the turn's total score (damage dealt + damage prevented).
 	Value int
 	// State is the winning permutation's end-of-chain CarryState. The deck loop copies
@@ -89,17 +85,6 @@ type TriggerContribution struct {
 	Card     card.Card
 	Damage   int
 	Revealed card.Card
-}
-
-// AttackChainEntry is a single played attack — a card with role=Attack or a swung weapon —
-// carrying the damage it contributed when it resolved in the winning chain. Damage is the
-// Play() return; TriggerDamage is the hero's OnCardPlayed contribution; AuraTriggerDamage
-// is the mid-chain AuraTrigger contribution.
-type AttackChainEntry struct {
-	Card              card.Card
-	Damage            float64
-	TriggerDamage     float64
-	AuraTriggerDamage float64
 }
 
 // ArsenalIn returns the assignment for the card that started the turn in the arsenal, if

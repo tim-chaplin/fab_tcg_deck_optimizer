@@ -161,7 +161,6 @@ func (d *Deck) EvaluateWith(runs int, incomingDamage int, rng *rand.Rand, ev *ha
 				d.Stats.SecondCycle.Total += v
 			}
 
-			attributePlayStats(&d.Stats, play.BestLine)
 			tallyMarginalPresence(marginalBuf, idIndex, presentBuf, h, arsenalIn, v)
 			nextHeld = applyTurnResult(play, buf, &head, &tail, nextHeld[:0])
 			nextAuraTrigger = append(nextAuraTrigger[:0], play.State.AuraTriggers...)
@@ -427,7 +426,7 @@ func (d *Deck) EvalOneTurnForTesting(incomingDamage int, arsenalIn card.Card, in
 }
 
 // recordBestTurn clones the winning turn's slices into fresh storage and stamps stats.Best
-// with the resulting BestTurn. Every slice in play (BestLine, AttackChain,
+// with the resulting BestTurn. Every slice in play (BestLine, SwungWeapons,
 // TriggersFromLastTurn, StartOfTurnAuras, State.*) aliases scratch hand.Best may rewrite on
 // the next call, so retaining them directly would let a later evaluation mutate the saved
 // peak. Nil-length slices skip the clone so the captured hand.TurnSummary holds nil rather
@@ -435,10 +434,9 @@ func (d *Deck) EvalOneTurnForTesting(incomingDamage int, arsenalIn card.Card, in
 func recordBestTurn(stats *Stats, play hand.TurnSummary, startingRunechants int) {
 	lineCopy := make([]hand.CardAssignment, len(play.BestLine))
 	copy(lineCopy, play.BestLine)
-	var chainCopy []hand.AttackChainEntry
-	if len(play.AttackChain) > 0 {
-		chainCopy = make([]hand.AttackChainEntry, len(play.AttackChain))
-		copy(chainCopy, play.AttackChain)
+	var swungCopy []string
+	if len(play.SwungWeapons) > 0 {
+		swungCopy = append([]string(nil), play.SwungWeapons...)
 	}
 	var trigCopy []hand.TriggerContribution
 	if len(play.TriggersFromLastTurn) > 0 {
@@ -453,7 +451,7 @@ func recordBestTurn(stats *Stats, play hand.TurnSummary, startingRunechants int)
 	stats.Best = BestTurn{
 		Summary: hand.TurnSummary{
 			BestLine:             lineCopy,
-			AttackChain:          chainCopy,
+			SwungWeapons:         swungCopy,
 			Value:                play.Value,
 			State:                cloneCarryState(play.State),
 			TriggersFromLastTurn: trigCopy,
@@ -554,30 +552,6 @@ func mergeMarginalBuf(stats *Stats, uniqueIDs []card.ID, marginalBuf []CardMargi
 		m.AbsentTotal += marginalBuf[i].AbsentTotal
 		m.AbsentHands += marginalBuf[i].AbsentHands
 		stats.PerCardMarginal[id] = m
-	}
-}
-
-// attributePlayStats folds the winning BestLine into per-card aggregates. hand.Best already
-// filled Contribution on each assignment. Held / Arsenal entries don't tick either counter
-// (Arsenal's real contribution accrues when it's played out of the slot on a later turn);
-// FromArsenal entries belong to a previous turn's hand and don't contribute to this hand.
-func attributePlayStats(stats *Stats, line []hand.CardAssignment) {
-	if stats.PerCard == nil {
-		stats.PerCard = map[card.ID]CardPlayStats{}
-	}
-	for _, a := range line {
-		if a.FromArsenal {
-			continue
-		}
-		stat := stats.PerCard[a.Card.ID()]
-		switch a.Role {
-		case hand.Pitch:
-			stat.Pitches++
-		case hand.Attack, hand.Defend:
-			stat.Plays++
-		}
-		stat.TotalContribution += a.Contribution
-		stats.PerCard[a.Card.ID()] = stat
 	}
 }
 
