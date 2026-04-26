@@ -705,11 +705,9 @@ def main():
             "import \"github.com/tim-chaplin/fab-deck-optimizer/internal/card\"\n"
             "\n"
             "// setAuraCreated marks the turn state so cards that read AuraCreated (e.g. Yinti Yanti,\n"
-            "// Runerager Swarm) see the aura entering play. Returns 0 — the aura itself contributes\n"
-            "// no direct damage; its value is in the flag it leaves behind.\n"
-            "func setAuraCreated(s *card.TurnState) int {\n"
+            "// Runerager Swarm) see the aura entering play.\n"
+            "func setAuraCreated(s *card.TurnState) {\n"
             "\ts.AuraCreated = true\n"
-            "\treturn 0\n"
             "}\n"
         )
         if not os.path.exists(helper_path):
