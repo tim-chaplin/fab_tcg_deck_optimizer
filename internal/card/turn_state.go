@@ -53,12 +53,13 @@ type TurnState struct {
 	// --- Transient: reset by the sim per turn / chain step ---
 
 	// Value is the running damage-equivalent total for this chain — damage dealt + damage
-	// prevented + every aura-token / hero-trigger credit. Cards bump it via RecordValue;
-	// the solver compares permutations on this field. Reset by the sim per permutation.
+	// prevented + every aura-token / hero-trigger credit. The dispatcher calls RecordValue
+	// after each Play / hero / aura / ephemeral / weapon return; the solver compares
+	// permutations on this field. Reset by the sim per permutation.
 	Value int
-	// Log is the per-permutation human-readable trace of what the chain did. Cards append
-	// "Card Name - VERB (+N)" lines via RecordValue so the display can render the winning
-	// chain without a post-hoc replay. Reset per permutation.
+	// Log is reserved for an upcoming per-line trace of the chain — the dispatcher does not
+	// yet write to it and FormatBestTurn does not yet read from it. Kept on the struct so the
+	// follow-up wiring is a one-place change. Reset per permutation.
 	Log []string
 	// CardsPlayed is the sequence of cards played (as attacks) this turn, in order.
 	// Populated by the sim after each Play returns so later cards this turn see what was

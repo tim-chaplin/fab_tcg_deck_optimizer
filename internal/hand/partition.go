@@ -147,15 +147,13 @@ func (e *Evaluator) bestUncached(hero hero.Hero, weapons []weapon.Weapon, hand [
 			best.Value = v
 			bestSwung = swung
 			// Adopt the winner's CarryState wholesale; arsenal-in occupancy overrides the
-			// snapshot's Arsenal so an arsenal-in card that stayed is preserved (carry's
-			// Arsenal also tracks this, but reading from arsenalCard keeps the partition
-			// rule explicit).
+			// snapshot's Arsenal so an arsenal-in card that stayed is preserved.
 			best.State = carry
 			best.State.Arsenal = arsenalCard
 			bestHasHeld = hasHeld
 			bestFutureValuePlayed = futureValuePlayed
-			// Write the winning roles into BestLine. Cards and FromArsenal flags were populated
-			// at construction; only Role varies.
+			// Cards and FromArsenal flags were populated at construction; Role is the only
+			// field that varies per-permutation.
 			for j := 0; j < totalN; j++ {
 				best.BestLine[j].Role = rolesBuf[j]
 			}

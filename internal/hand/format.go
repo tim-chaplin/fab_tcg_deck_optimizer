@@ -95,8 +95,6 @@ func splitPitchesByPhase(pitched []CardAssignment, drCost int) (defensePitches, 
 // deeper than section headers): one numbered entry per Attack-role BestLine entry in solver
 // order, then one "WEAPON ATTACK" line per swung weapon. nextStep advances the shared step
 // counter so the chain's entries interleave with the other my-turn entries built around it.
-// No per-card damage attribution — phase 2's TurnState.Log will replace this entire helper
-// with a direct dump of the per-permutation log.
 func appendAttackChainLines(playLog []string, t TurnSummary, nextStep func() int) []string {
 	for _, a := range t.BestLine {
 		if a.Role != Attack {

@@ -267,12 +267,8 @@ func (ctx *sequenceContext) resetStateForPermutation() {
 // by playSequenceWithMeta's resource / go-again / pitch-waste checks.
 //
 // Uses Heap's algorithm (iterative) — no closure/callback alloc, no recursive call per perm.
-//
-// When winnerOrderOut is non-nil (len >= len(attackers)) the winning permutation is copied into
-// it. perCardOut / perCardTriggerOut / perCardAuraTriggerOut (same size rule) receive the
-// winning line's per-card Play damage, hero-trigger damage, and mid-chain aura-trigger damage.
-// fillContributions uses these; the partition-loop caller passes nil for all four so the
-// permutation search stays allocation-free.
+// The winning permutation's end-of-chain CarryState lands in ctx.carryWinner so callers can
+// adopt the snapshot for next-turn state.
 func (ctx *sequenceContext) bestSequence(attackers []card.Card) (int, int, bool) {
 	n := len(attackers)
 	if n == 0 {
