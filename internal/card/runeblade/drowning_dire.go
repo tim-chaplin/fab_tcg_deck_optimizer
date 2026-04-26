@@ -1,14 +1,14 @@
 // Drowning Dire — Runeblade Action - Attack. Cost 2, Defense 3.
 // Printed pitch variants: Red 1, Yellow 2, Blue 3.
 // Printed power: Red 5, Yellow 4, Blue 3.
-// Text: "If you have played or created an aura this turn, Drowning Dire gains **dominate**."
+// Text: "If you have played or created an aura this turn, Drowning Dire gains **dominate**.
+//
+// When Drowning Dire hits, you may put a 'non-attack' action card from your graveyard on the
+// bottom of your deck."
 //
 // Modelling: the Dominate grant is conditional, gated on s.HasAuraInPlay(). Play flips
 // self.GrantedDominate when the aura clause is live so EffectiveDominate reports the card as
-// dominating this turn — downstream scanners (and any future on-hit rider) that read
-// pc.EffectiveDominate() see the grant. Printed power never clears the +5 Dominate bar
-// (R 5, Y 4, B 3), so today only Red flips from "blockable" to "hits" — but setting the
-// flag keeps the wiring honest in case a future card grants Drowning Dire an on-hit rider.
+// dominating this turn — downstream scanners that read pc.EffectiveDominate() see the grant.
 
 package runeblade
 
@@ -35,6 +35,10 @@ func (DrowningDireRed) Attack() int              { return 5 }
 func (DrowningDireRed) Defense() int             { return 3 }
 func (DrowningDireRed) Types() card.TypeSet      { return drowningDireTypes }
 func (DrowningDireRed) GoAgain() bool            { return false }
+
+// not implemented: on-hit "may put a non-attack action card from your graveyard on the bottom
+// of your deck" rider
+func (DrowningDireRed) NotImplemented() {}
 func (DrowningDireRed) Play(s *card.TurnState, self *card.CardState) {
 	drowningDirePlay(s, self)
 }
@@ -49,6 +53,10 @@ func (DrowningDireYellow) Attack() int              { return 4 }
 func (DrowningDireYellow) Defense() int             { return 3 }
 func (DrowningDireYellow) Types() card.TypeSet      { return drowningDireTypes }
 func (DrowningDireYellow) GoAgain() bool            { return false }
+
+// not implemented: on-hit "may put a non-attack action card from your graveyard on the bottom
+// of your deck" rider
+func (DrowningDireYellow) NotImplemented() {}
 func (DrowningDireYellow) Play(s *card.TurnState, self *card.CardState) {
 	drowningDirePlay(s, self)
 }
@@ -63,6 +71,10 @@ func (DrowningDireBlue) Attack() int              { return 3 }
 func (DrowningDireBlue) Defense() int             { return 3 }
 func (DrowningDireBlue) Types() card.TypeSet      { return drowningDireTypes }
 func (DrowningDireBlue) GoAgain() bool            { return false }
+
+// not implemented: on-hit "may put a non-attack action card from your graveyard on the bottom
+// of your deck" rider
+func (DrowningDireBlue) NotImplemented() {}
 func (DrowningDireBlue) Play(s *card.TurnState, self *card.CardState) {
 	drowningDirePlay(s, self)
 }
