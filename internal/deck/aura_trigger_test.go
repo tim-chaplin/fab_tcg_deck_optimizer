@@ -195,6 +195,41 @@ func TestProcessTriggersAtStartOfTurn_NonAttackActionTopSkipsReveal(t *testing.T
 	}
 }
 
+// TestProcessTriggersAtStartOfTurn_SigilHitAuthorsLogText: Sigil's handler authors a
+// "drew X into hand" Text on its TriggerContribution, captured from the trigger's
+// TurnState.Log so the format layer can render the line verbatim.
+func TestProcessTriggersAtStartOfTurn_SigilHitAuthorsLogText(t *testing.T) {
+	var play card.TurnState
+	sigil := runeblade.SigilOfTheArknightBlue{}
+	sigil.Play(&play, &card.CardState{Card: sigil})
+	_, contribs, _, _, _, _ := processTriggersAtStartOfTurn(play.AuraTriggers, []card.Card{runeblade.AetherSlashRed{}})
+	if len(contribs) != 1 {
+		t.Fatalf("contribs = %+v, want one entry", contribs)
+	}
+	want := "Sigil of the Arknight [B] drew Aether Slash [R] into hand"
+	if contribs[0].Text != want {
+		t.Errorf("contribs[0].Text = %q, want %q", contribs[0].Text, want)
+	}
+}
+
+// TestProcessTriggersAtStartOfTurn_SigilWhiffStillLogs: the whiff path (top is a non-attack
+// action) authors a "revealed X but didn't draw it" Text so the printout names the card
+// the player saw on top of the deck, not just the hits.
+func TestProcessTriggersAtStartOfTurn_SigilWhiffStillLogs(t *testing.T) {
+	var play card.TurnState
+	sigil := runeblade.SigilOfTheArknightBlue{}
+	sigil.Play(&play, &card.CardState{Card: sigil})
+	// Sigil itself is a non-attack action — convenient whiff top.
+	_, contribs, _, _, _, _ := processTriggersAtStartOfTurn(play.AuraTriggers, []card.Card{sigil})
+	if len(contribs) != 1 {
+		t.Fatalf("contribs = %+v, want one entry", contribs)
+	}
+	want := "Sigil of the Arknight [B] revealed Sigil of the Arknight [B] but didn't draw it"
+	if contribs[0].Text != want {
+		t.Errorf("contribs[0].Text = %q, want %q", contribs[0].Text, want)
+	}
+}
+
 // TestEvalOneTurn_SigilOfTheArknightRevealsIntoHand is the end-to-end 2-turn check: turn 1
 // starts with a Sigil of the Arknight as the ONLY card in hand. The solver plays it (the
 // beatsBest tiebreaker prefers playing trigger-creating auras at equal Value over Held →
