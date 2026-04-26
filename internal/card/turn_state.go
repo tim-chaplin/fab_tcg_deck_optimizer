@@ -274,9 +274,10 @@ func (s *TurnState) LogPlay(self *CardState) {
 // effective Defense (printed Defense + BonusDefense + ArsenalDefenseBonus when from arsenal)
 // to s.Value, clamped at the remaining IncomingDamage so an over-blocked DR doesn't credit
 // past what was actually prevented. The credited amount is decremented from s.IncomingDamage
-// so a later defender sees the reduced pool. Card riders (arcane pings, runechant creation)
-// emit their own post-trigger sub-lines via DealAndLogArcaneDamage / CreateAndLogRunechantsOnPlay
-// after the chain step.
+// so a later defender sees the reduced pool. Card riders (arcane pings, runechant creation,
+// conditional "+N{d}" bonuses) emit their own post-trigger sub-lines via
+// DealAndLogArcaneDamage / CreateAndLogRunechantsOnPlay / LogDefenseRiderOnPlay after the
+// chain step.
 func (s *TurnState) ApplyAndLogEffectiveDefense(self *CardState) {
 	n := self.EffectiveDefense()
 	if n > s.IncomingDamage {
@@ -408,6 +409,22 @@ func (s *TurnState) DealAndLogArcaneDamage(self *CardState, n int) int {
 // should read as a complete utterance without a card-name prefix. n is the damage-
 // equivalent credit. Returns the credited n (clamped at 0 by the underlying log helper).
 func (s *TurnState) LogRiderOnPlay(self *CardState, text string, n int) int {
+	return s.AddPostTriggerLogEntry(text, DisplayName(self.Card), n)
+}
+
+// LogDefenseRiderOnPlay is the Defense-Reaction analogue of LogRiderOnPlay for "+N{d}"
+// conditional bonuses (e.g. Sigil of Suffering's "+1{d} if you've dealt arcane damage").
+// Mirrors ApplyAndLogEffectiveDefense's clamp: n is capped at the remaining IncomingDamage
+// and the same amount is decremented from it, so an over-block bonus credits 0 and stays
+// off the log instead of pretending to absorb damage that wasn't there.
+func (s *TurnState) LogDefenseRiderOnPlay(self *CardState, text string, n int) int {
+	if n > s.IncomingDamage {
+		n = s.IncomingDamage
+	}
+	if n <= 0 {
+		return 0
+	}
+	s.IncomingDamage -= n
 	return s.AddPostTriggerLogEntry(text, DisplayName(self.Card), n)
 }
 

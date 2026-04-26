@@ -4,10 +4,11 @@
 // Text: "Deal 1 arcane damage to the attacking hero. If you have dealt arcane damage this turn,
 // Sigil of Suffering gains +1{d}."
 //
-// The Sigil's own arcane satisfies its conditional (printed-1 arcane lands per LikelyDamageHits),
-// so the +1{d} bonus is folded into BonusDefense before the chain step fires; the bonus only
-// credits when there's enough IncomingDamage left to consume it. The arcane logs as a separate
-// post-trigger sub-line under self.
+// The chain step credits printed Defense only; the arcane and the +1{d} bonus each land as
+// their own post-trigger sub-line under self. The Sigil's own arcane (LikelyDamageHits(1,
+// false) is true) satisfies the conditional, so the +1{d} fires whenever there's incoming
+// damage left for it to consume — LogDefenseRiderOnPlay caps the rider at the remaining
+// IncomingDamage so over-block discards quietly.
 
 package runeblade
 
@@ -16,11 +17,11 @@ import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 var sigilOfSufferingTypes = card.NewTypeSet(card.TypeRuneblade, card.TypeDefenseReaction)
 
 func sigilOfSufferingPlay(s *card.TurnState, self *card.CardState) {
-	if s.ArcaneDamageDealt || card.LikelyDamageHits(1, false) {
-		self.BonusDefense++
-	}
 	s.ApplyAndLogEffectiveDefense(self)
 	s.DealAndLogArcaneDamage(self, 1)
+	if s.ArcaneDamageDealt {
+		s.LogDefenseRiderOnPlay(self, "Gained +1{d} from arcane this turn", 1)
+	}
 }
 
 type SigilOfSufferingRed struct{}

@@ -58,8 +58,9 @@ func BuildTurnLog(t TurnSummary, startingRunechants int) TurnLog {
 		log.OpponentTurn = append(log.OpponentTurn, formatBlockLine(b))
 	}
 	defenders := defendersFromParts(parts)
+	remaining := t.IncomingDamage
 	for _, dr := range parts.defenseReactions {
-		log.OpponentTurn = append(log.OpponentTurn, formatDefenseReactionLine(dr, defenders, t.IncomingDamage))
+		log.OpponentTurn, remaining = appendDefenseReactionLines(log.OpponentTurn, dr, defenders, remaining)
 	}
 
 	// End of turn: surviving hand cards, arsenal slot's contents, auras still in play.
@@ -156,20 +157,21 @@ func formatBlockLine(a CardAssignment) string {
 	return fmt.Sprintf("%s: %s (+%d)", card.DisplayName(a.Card), roleLabelWithArsenal(a, "BLOCK"), def)
 }
 
-// formatDefenseReactionLine renders a Defense Reaction with a "(+N)" suffix that reflects the
-// DR's actual block + rider credit. We re-Play the DR with the same fresh state shape
-// defendersDamage uses (Graveyard = all defenders so banish-target scans see the right shape;
-// IncomingDamage seeded from the summary so the per-card cap in ApplyAndLogEffectiveDefense
-// matches simulation) and read state.Value directly — Play credits both the block and any
-// arcane / runechant / rider as the chain step + sub-lines.
-func formatDefenseReactionLine(a CardAssignment, defenders []card.Card, incomingDamage int) string {
+// appendDefenseReactionLines re-Plays the DR with the same fresh state shape defendersDamage
+// uses (Graveyard = all defenders so banish-target scans see the right shape; IncomingDamage
+// threaded across the DR loop so each defender sees what's left after earlier ones blocked)
+// and walks the resulting log: the chain step renders with its own (+N) for the block, and
+// any arcane / runechant / +1{d} riders attach as childEntryPrefix-tagged sub-lines via
+// appendGroupedChainEntries. Returns the updated remaining-incoming counter so the caller
+// can thread it into the next DR.
+func appendDefenseReactionLines(out []string, a CardAssignment, defenders []card.Card, remaining int) ([]string, int) {
 	state := card.TurnState{
 		Graveyard:      append([]card.Card(nil), defenders...),
-		IncomingDamage: incomingDamage,
+		IncomingDamage: remaining,
 	}
 	cs := card.CardState{Card: a.Card, FromArsenal: a.FromArsenal}
 	a.Card.Play(&state, &cs)
-	return fmt.Sprintf("%s: %s (+%d)", card.DisplayName(a.Card), roleLabelWithArsenal(a, "DEFENSE REACTION"), state.Value)
+	return appendGroupedChainEntries(out, state.Log), state.IncomingDamage
 }
 
 // defendersFromParts collects every card committed to defense — Defense Reactions and plain
@@ -368,7 +370,11 @@ func FormatTurnLog(log TurnLog) string {
 	if len(log.OpponentTurn) > 0 {
 		lines = append(lines, "  Opponent's turn:")
 		for _, entry := range log.OpponentTurn {
-			lines = append(lines, fmt.Sprintf("    %d. %s", nextStep(), entry))
+			if rest, isChild := strings.CutPrefix(entry, childEntryPrefix); isChild {
+				lines = append(lines, "         "+rest)
+			} else {
+				lines = append(lines, fmt.Sprintf("    %d. %s", nextStep(), entry))
+			}
 		}
 	}
 	if len(log.EndOfTurn) > 0 {
