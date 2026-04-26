@@ -55,6 +55,18 @@ type attackBufs struct {
 	// defenseGravScratch backs state.Graveyard during DR Plays. Reset via [:0]+append per
 	// iteration so card effects can freely mutate their view without leaking into the next one.
 	defenseGravScratch []card.Card
+	// Per-permutation backing slices reused across every Heap's-algorithm permutation in a
+	// leaf. resetStateForPermutation seeds the TurnState's slice fields from these (via
+	// append([:0], ...)) so an unmodified permutation never reallocates: only mid-chain
+	// growth past the pre-sized cap forces a new backing array. snapshotCarry clones the
+	// winning permutation's slices before the next permutation overwrites them.
+	deckBacking         []card.Card
+	handBacking         []card.Card
+	graveBacking        []card.Card
+	banishBacking       []card.Card
+	cardsPlayedBacking  []card.Card
+	logBacking          []card.LogEntry
+	auraTriggersBacking []card.AuraTrigger
 }
 
 func newAttackBufs(handSize, weaponCount int, weapons []weapon.Weapon) *attackBufs {
@@ -86,25 +98,39 @@ func newAttackBufs(handSize, weaponCount int, weapons []weapon.Weapon) *attackBu
 	for i := range pcBuf {
 		ptrBuf[i] = &pcBuf[i]
 	}
+	// Per-permutation backing capacities. Decks run ~40 cards but mid-turn draws and tutors can
+	// grow them, so size to a safe headroom. Log accumulates one entry per chain step + every
+	// rider/trigger (typically 2-6 per step) so 64 covers the long tail.
+	const (
+		deckBackingCap = 64
+		logBackingCap  = 64
+	)
 	return &attackBufs{
-		permMeta:           make([]*attackerMeta, maxAttackers),
-		pcBuf:              pcBuf,
-		ptrBuf:             ptrBuf,
-		state:              &card.TurnState{},
-		attackerBuf:        make([]card.Card, maxAttackers),
-		weaponCosts:        weaponCosts,
-		weaponNames:        weaponNames,
-		rolesBuf:           make([]Role, handSize+1),
-		pitchVals:          make([]int, handSize+1),
-		defenseVals:        make([]int, handSize+1),
-		isDRBuf:            make([]bool, handSize+1),
-		addsFutureValueBuf: make([]bool, handSize+1),
-		pitchedValsScratch: make([]int, 0, handSize+1),
-		pitchedBuf:         make([]card.Card, 0, handSize+1),
-		attackersBuf:       make([]card.Card, 0, handSize+1),
-		defendersBuf:       make([]card.Card, 0, handSize+1),
-		heldBuf:            make([]card.Card, 0, handSize+1),
-		defenseGravScratch: make([]card.Card, 0, handSize+1),
+		permMeta:            make([]*attackerMeta, maxAttackers),
+		pcBuf:               pcBuf,
+		ptrBuf:              ptrBuf,
+		state:               &card.TurnState{},
+		attackerBuf:         make([]card.Card, maxAttackers),
+		weaponCosts:         weaponCosts,
+		weaponNames:         weaponNames,
+		rolesBuf:            make([]Role, handSize+1),
+		pitchVals:           make([]int, handSize+1),
+		defenseVals:         make([]int, handSize+1),
+		isDRBuf:             make([]bool, handSize+1),
+		addsFutureValueBuf:  make([]bool, handSize+1),
+		pitchedValsScratch:  make([]int, 0, handSize+1),
+		pitchedBuf:          make([]card.Card, 0, handSize+1),
+		attackersBuf:        make([]card.Card, 0, handSize+1),
+		defendersBuf:        make([]card.Card, 0, handSize+1),
+		heldBuf:             make([]card.Card, 0, handSize+1),
+		defenseGravScratch:  make([]card.Card, 0, handSize+1),
+		deckBacking:         make([]card.Card, 0, deckBackingCap),
+		handBacking:         make([]card.Card, 0, maxAttackers),
+		graveBacking:        make([]card.Card, 0, maxAttackers),
+		banishBacking:       make([]card.Card, 0, handSize+1),
+		cardsPlayedBacking:  make([]card.Card, 0, maxAttackers),
+		logBacking:          make([]card.LogEntry, 0, logBackingCap),
+		auraTriggersBacking: make([]card.AuraTrigger, 0, handSize+1),
 	}
 }
 
