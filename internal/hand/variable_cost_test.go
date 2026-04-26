@@ -241,7 +241,7 @@ func TestBest_DiscountDefenderPaysByPitchWithoutCarryover(t *testing.T) {
 // TestBest_CarryoverFeedsDiscount verifies end-to-end: a hand containing a discount attacker is
 // playable when the previous turn left enough runechants behind.
 func TestBest_CarryoverFeedsDiscount(t *testing.T) {
-	// Single Amplify the Arknight (Red): printed cost 3, MinCost 0, Attack 6. With no pitch,
+	// Single Amplify the Arknight [R]: printed cost 3, MinCost 0, Attack 6. With no pitch,
 	// resource budget is 0. Without any runechants, effective cost 3 exceeds the budget — so
 	// attacking is illegal and Value should be 0.
 	h := []card.Card{runeblade.AmplifyTheArknightRed{}}

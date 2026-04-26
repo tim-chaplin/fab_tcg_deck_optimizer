@@ -13,7 +13,7 @@ var demolitionCrewTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, car
 type DemolitionCrewRed struct{}
 
 func (DemolitionCrewRed) ID() card.ID                 { return card.DemolitionCrewRed }
-func (DemolitionCrewRed) Name() string                { return "Demolition Crew (Red)" }
+func (DemolitionCrewRed) Name() string                { return "Demolition Crew" }
 func (DemolitionCrewRed) Cost(*card.TurnState) int                   { return 2 }
 func (DemolitionCrewRed) Pitch() int                  { return 1 }
 func (DemolitionCrewRed) Attack() int                 { return 6 }
@@ -29,7 +29,7 @@ func (c DemolitionCrewRed) Play(s *card.TurnState, _ *card.CardState) int { retu
 type DemolitionCrewYellow struct{}
 
 func (DemolitionCrewYellow) ID() card.ID                 { return card.DemolitionCrewYellow }
-func (DemolitionCrewYellow) Name() string                { return "Demolition Crew (Yellow)" }
+func (DemolitionCrewYellow) Name() string                { return "Demolition Crew" }
 func (DemolitionCrewYellow) Cost(*card.TurnState) int                   { return 2 }
 func (DemolitionCrewYellow) Pitch() int                  { return 2 }
 func (DemolitionCrewYellow) Attack() int                 { return 5 }
@@ -45,7 +45,7 @@ func (c DemolitionCrewYellow) Play(s *card.TurnState, _ *card.CardState) int { r
 type DemolitionCrewBlue struct{}
 
 func (DemolitionCrewBlue) ID() card.ID                 { return card.DemolitionCrewBlue }
-func (DemolitionCrewBlue) Name() string                { return "Demolition Crew (Blue)" }
+func (DemolitionCrewBlue) Name() string                { return "Demolition Crew" }
 func (DemolitionCrewBlue) Cost(*card.TurnState) int                   { return 2 }
 func (DemolitionCrewBlue) Pitch() int                  { return 3 }
 func (DemolitionCrewBlue) Attack() int                 { return 4 }

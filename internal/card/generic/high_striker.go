@@ -12,7 +12,7 @@ var highStrikerTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction)
 type HighStrikerRed struct{}
 
 func (HighStrikerRed) ID() card.ID                 { return card.HighStrikerRed }
-func (HighStrikerRed) Name() string                { return "High Striker (Red)" }
+func (HighStrikerRed) Name() string                { return "High Striker" }
 func (HighStrikerRed) Cost(*card.TurnState) int                   { return 0 }
 func (HighStrikerRed) Pitch() int                  { return 1 }
 func (HighStrikerRed) Attack() int                 { return 0 }
@@ -26,7 +26,7 @@ func (HighStrikerRed) Play(s *card.TurnState, _ *card.CardState) int { return 0 
 type HighStrikerYellow struct{}
 
 func (HighStrikerYellow) ID() card.ID                 { return card.HighStrikerYellow }
-func (HighStrikerYellow) Name() string                { return "High Striker (Yellow)" }
+func (HighStrikerYellow) Name() string                { return "High Striker" }
 func (HighStrikerYellow) Cost(*card.TurnState) int                   { return 0 }
 func (HighStrikerYellow) Pitch() int                  { return 2 }
 func (HighStrikerYellow) Attack() int                 { return 0 }
@@ -40,7 +40,7 @@ func (HighStrikerYellow) Play(s *card.TurnState, _ *card.CardState) int { return
 type HighStrikerBlue struct{}
 
 func (HighStrikerBlue) ID() card.ID                 { return card.HighStrikerBlue }
-func (HighStrikerBlue) Name() string                { return "High Striker (Blue)" }
+func (HighStrikerBlue) Name() string                { return "High Striker" }
 func (HighStrikerBlue) Cost(*card.TurnState) int                   { return 0 }
 func (HighStrikerBlue) Pitch() int                  { return 3 }
 func (HighStrikerBlue) Attack() int                 { return 0 }

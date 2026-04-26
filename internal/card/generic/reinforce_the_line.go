@@ -11,7 +11,7 @@ var reinforceTheLineTypes = card.NewTypeSet(card.TypeGeneric, card.TypeInstant)
 type ReinforceTheLineRed struct{}
 
 func (ReinforceTheLineRed) ID() card.ID                               { return card.ReinforceTheLineRed }
-func (ReinforceTheLineRed) Name() string                              { return "Reinforce the Line (Red)" }
+func (ReinforceTheLineRed) Name() string                              { return "Reinforce the Line" }
 func (ReinforceTheLineRed) Cost(*card.TurnState) int                  { return 0 }
 func (ReinforceTheLineRed) Pitch() int                                { return 1 }
 func (ReinforceTheLineRed) Attack() int                               { return 0 }
@@ -25,7 +25,7 @@ func (ReinforceTheLineRed) Play(*card.TurnState, *card.CardState) int { return 0
 type ReinforceTheLineYellow struct{}
 
 func (ReinforceTheLineYellow) ID() card.ID                               { return card.ReinforceTheLineYellow }
-func (ReinforceTheLineYellow) Name() string                              { return "Reinforce the Line (Yellow)" }
+func (ReinforceTheLineYellow) Name() string                              { return "Reinforce the Line" }
 func (ReinforceTheLineYellow) Cost(*card.TurnState) int                  { return 0 }
 func (ReinforceTheLineYellow) Pitch() int                                { return 2 }
 func (ReinforceTheLineYellow) Attack() int                               { return 0 }
@@ -39,7 +39,7 @@ func (ReinforceTheLineYellow) Play(*card.TurnState, *card.CardState) int { retur
 type ReinforceTheLineBlue struct{}
 
 func (ReinforceTheLineBlue) ID() card.ID                               { return card.ReinforceTheLineBlue }
-func (ReinforceTheLineBlue) Name() string                              { return "Reinforce the Line (Blue)" }
+func (ReinforceTheLineBlue) Name() string                              { return "Reinforce the Line" }
 func (ReinforceTheLineBlue) Cost(*card.TurnState) int                  { return 0 }
 func (ReinforceTheLineBlue) Pitch() int                                { return 3 }
 func (ReinforceTheLineBlue) Attack() int                               { return 0 }

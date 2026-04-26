@@ -25,7 +25,7 @@ func amplifyTheArknightCost(s *card.TurnState) int {
 type AmplifyTheArknightRed struct{}
 
 func (AmplifyTheArknightRed) ID() card.ID                { return card.AmplifyTheArknightRed }
-func (AmplifyTheArknightRed) Name() string               { return "Amplify the Arknight (Red)" }
+func (AmplifyTheArknightRed) Name() string               { return "Amplify the Arknight" }
 func (AmplifyTheArknightRed) Cost(s *card.TurnState) int { return amplifyTheArknightCost(s) }
 func (AmplifyTheArknightRed) MinCost() int               { return 0 }
 func (AmplifyTheArknightRed) MaxCost() int               { return amplifyTheArknightPrintedCost }
@@ -39,7 +39,7 @@ func (c AmplifyTheArknightRed) Play(*card.TurnState, *card.CardState) int { retu
 type AmplifyTheArknightYellow struct{}
 
 func (AmplifyTheArknightYellow) ID() card.ID                { return card.AmplifyTheArknightYellow }
-func (AmplifyTheArknightYellow) Name() string               { return "Amplify the Arknight (Yellow)" }
+func (AmplifyTheArknightYellow) Name() string               { return "Amplify the Arknight" }
 func (AmplifyTheArknightYellow) Cost(s *card.TurnState) int { return amplifyTheArknightCost(s) }
 func (AmplifyTheArknightYellow) MinCost() int               { return 0 }
 func (AmplifyTheArknightYellow) MaxCost() int               { return amplifyTheArknightPrintedCost }
@@ -53,7 +53,7 @@ func (c AmplifyTheArknightYellow) Play(*card.TurnState, *card.CardState) int { r
 type AmplifyTheArknightBlue struct{}
 
 func (AmplifyTheArknightBlue) ID() card.ID                { return card.AmplifyTheArknightBlue }
-func (AmplifyTheArknightBlue) Name() string               { return "Amplify the Arknight (Blue)" }
+func (AmplifyTheArknightBlue) Name() string               { return "Amplify the Arknight" }
 func (AmplifyTheArknightBlue) Cost(s *card.TurnState) int { return amplifyTheArknightCost(s) }
 func (AmplifyTheArknightBlue) MinCost() int               { return 0 }
 func (AmplifyTheArknightBlue) MaxCost() int               { return amplifyTheArknightPrintedCost }

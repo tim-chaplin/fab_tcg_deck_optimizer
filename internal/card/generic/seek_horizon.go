@@ -13,7 +13,7 @@ var seekHorizonTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.T
 type SeekHorizonRed struct{}
 
 func (SeekHorizonRed) ID() card.ID                 { return card.SeekHorizonRed }
-func (SeekHorizonRed) Name() string                { return "Seek Horizon (Red)" }
+func (SeekHorizonRed) Name() string                { return "Seek Horizon" }
 func (SeekHorizonRed) Cost(*card.TurnState) int                   { return 0 }
 func (SeekHorizonRed) Pitch() int                  { return 1 }
 func (SeekHorizonRed) Attack() int                 { return 4 }
@@ -27,7 +27,7 @@ func (c SeekHorizonRed) Play(s *card.TurnState, _ *card.CardState) int { return 
 type SeekHorizonYellow struct{}
 
 func (SeekHorizonYellow) ID() card.ID                 { return card.SeekHorizonYellow }
-func (SeekHorizonYellow) Name() string                { return "Seek Horizon (Yellow)" }
+func (SeekHorizonYellow) Name() string                { return "Seek Horizon" }
 func (SeekHorizonYellow) Cost(*card.TurnState) int                   { return 0 }
 func (SeekHorizonYellow) Pitch() int                  { return 2 }
 func (SeekHorizonYellow) Attack() int                 { return 3 }
@@ -41,7 +41,7 @@ func (c SeekHorizonYellow) Play(s *card.TurnState, _ *card.CardState) int { retu
 type SeekHorizonBlue struct{}
 
 func (SeekHorizonBlue) ID() card.ID                 { return card.SeekHorizonBlue }
-func (SeekHorizonBlue) Name() string                { return "Seek Horizon (Blue)" }
+func (SeekHorizonBlue) Name() string                { return "Seek Horizon" }
 func (SeekHorizonBlue) Cost(*card.TurnState) int                   { return 0 }
 func (SeekHorizonBlue) Pitch() int                  { return 3 }
 func (SeekHorizonBlue) Attack() int                 { return 2 }

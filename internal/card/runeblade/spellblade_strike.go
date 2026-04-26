@@ -11,7 +11,7 @@ var spellbladeStrikeTypes = card.NewTypeSet(card.TypeRuneblade, card.TypeAction,
 type SpellbladeStrikeRed struct{}
 
 func (SpellbladeStrikeRed) ID() card.ID                 { return card.SpellbladeStrikeRed }
-func (SpellbladeStrikeRed) Name() string               { return "Spellblade Strike (Red)" }
+func (SpellbladeStrikeRed) Name() string               { return "Spellblade Strike" }
 func (SpellbladeStrikeRed) Cost(*card.TurnState) int                  { return 1 }
 func (SpellbladeStrikeRed) Pitch() int                 { return 1 }
 func (SpellbladeStrikeRed) Attack() int                { return 4 }
@@ -23,7 +23,7 @@ func (c SpellbladeStrikeRed) Play(s *card.TurnState, _ *card.CardState) int { re
 type SpellbladeStrikeYellow struct{}
 
 func (SpellbladeStrikeYellow) ID() card.ID                 { return card.SpellbladeStrikeYellow }
-func (SpellbladeStrikeYellow) Name() string               { return "Spellblade Strike (Yellow)" }
+func (SpellbladeStrikeYellow) Name() string               { return "Spellblade Strike" }
 func (SpellbladeStrikeYellow) Cost(*card.TurnState) int                  { return 1 }
 func (SpellbladeStrikeYellow) Pitch() int                 { return 2 }
 func (SpellbladeStrikeYellow) Attack() int                { return 3 }
@@ -35,7 +35,7 @@ func (c SpellbladeStrikeYellow) Play(s *card.TurnState, _ *card.CardState) int {
 type SpellbladeStrikeBlue struct{}
 
 func (SpellbladeStrikeBlue) ID() card.ID                 { return card.SpellbladeStrikeBlue }
-func (SpellbladeStrikeBlue) Name() string               { return "Spellblade Strike (Blue)" }
+func (SpellbladeStrikeBlue) Name() string               { return "Spellblade Strike" }
 func (SpellbladeStrikeBlue) Cost(*card.TurnState) int                  { return 1 }
 func (SpellbladeStrikeBlue) Pitch() int                 { return 3 }
 func (SpellbladeStrikeBlue) Attack() int                { return 2 }

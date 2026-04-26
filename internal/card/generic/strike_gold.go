@@ -21,7 +21,7 @@ func strikeGoldDamage(attack int, self *card.CardState) int {
 type StrikeGoldRed struct{}
 
 func (StrikeGoldRed) ID() card.ID                  { return card.StrikeGoldRed }
-func (StrikeGoldRed) Name() string                 { return "Strike Gold (Red)" }
+func (StrikeGoldRed) Name() string                 { return "Strike Gold" }
 func (StrikeGoldRed) Cost(*card.TurnState) int                    { return 0 }
 func (StrikeGoldRed) Pitch() int                   { return 1 }
 func (StrikeGoldRed) Attack() int                  { return 4 }
@@ -35,7 +35,7 @@ func (c StrikeGoldRed) Play(s *card.TurnState, self *card.CardState) int { retur
 type StrikeGoldYellow struct{}
 
 func (StrikeGoldYellow) ID() card.ID                  { return card.StrikeGoldYellow }
-func (StrikeGoldYellow) Name() string                 { return "Strike Gold (Yellow)" }
+func (StrikeGoldYellow) Name() string                 { return "Strike Gold" }
 func (StrikeGoldYellow) Cost(*card.TurnState) int                    { return 0 }
 func (StrikeGoldYellow) Pitch() int                   { return 2 }
 func (StrikeGoldYellow) Attack() int                  { return 3 }
@@ -49,7 +49,7 @@ func (c StrikeGoldYellow) Play(s *card.TurnState, self *card.CardState) int { re
 type StrikeGoldBlue struct{}
 
 func (StrikeGoldBlue) ID() card.ID                  { return card.StrikeGoldBlue }
-func (StrikeGoldBlue) Name() string                 { return "Strike Gold (Blue)" }
+func (StrikeGoldBlue) Name() string                 { return "Strike Gold" }
 func (StrikeGoldBlue) Cost(*card.TurnState) int                    { return 0 }
 func (StrikeGoldBlue) Pitch() int                   { return 3 }
 func (StrikeGoldBlue) Attack() int                  { return 2 }

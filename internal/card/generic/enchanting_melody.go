@@ -17,7 +17,7 @@ var enchantingMelodyTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, c
 type EnchantingMelodyRed struct{}
 
 func (EnchantingMelodyRed) ID() card.ID                 { return card.EnchantingMelodyRed }
-func (EnchantingMelodyRed) Name() string                { return "Enchanting Melody (Red)" }
+func (EnchantingMelodyRed) Name() string                { return "Enchanting Melody" }
 func (EnchantingMelodyRed) Cost(*card.TurnState) int                   { return 2 }
 func (EnchantingMelodyRed) Pitch() int                  { return 1 }
 func (EnchantingMelodyRed) Attack() int                 { return 0 }
@@ -31,7 +31,7 @@ func (EnchantingMelodyRed) Play(s *card.TurnState, _ *card.CardState) int { retu
 type EnchantingMelodyYellow struct{}
 
 func (EnchantingMelodyYellow) ID() card.ID                 { return card.EnchantingMelodyYellow }
-func (EnchantingMelodyYellow) Name() string                { return "Enchanting Melody (Yellow)" }
+func (EnchantingMelodyYellow) Name() string                { return "Enchanting Melody" }
 func (EnchantingMelodyYellow) Cost(*card.TurnState) int                   { return 2 }
 func (EnchantingMelodyYellow) Pitch() int                  { return 2 }
 func (EnchantingMelodyYellow) Attack() int                 { return 0 }
@@ -45,7 +45,7 @@ func (EnchantingMelodyYellow) Play(s *card.TurnState, _ *card.CardState) int { r
 type EnchantingMelodyBlue struct{}
 
 func (EnchantingMelodyBlue) ID() card.ID                 { return card.EnchantingMelodyBlue }
-func (EnchantingMelodyBlue) Name() string                { return "Enchanting Melody (Blue)" }
+func (EnchantingMelodyBlue) Name() string                { return "Enchanting Melody" }
 func (EnchantingMelodyBlue) Cost(*card.TurnState) int                   { return 2 }
 func (EnchantingMelodyBlue) Pitch() int                  { return 3 }
 func (EnchantingMelodyBlue) Attack() int                 { return 0 }

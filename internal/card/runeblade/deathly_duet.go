@@ -12,7 +12,7 @@ var deathlyDuetTypes = card.NewTypeSet(card.TypeRuneblade, card.TypeAction, card
 type DeathlyDuetRed struct{}
 
 func (DeathlyDuetRed) ID() card.ID                 { return card.DeathlyDuetRed }
-func (DeathlyDuetRed) Name() string                 { return "Deathly Duet (Red)" }
+func (DeathlyDuetRed) Name() string                 { return "Deathly Duet" }
 func (DeathlyDuetRed) Cost(*card.TurnState) int                    { return 2 }
 func (DeathlyDuetRed) Pitch() int                   { return 1 }
 func (DeathlyDuetRed) Attack() int                  { return 4 }
@@ -27,7 +27,7 @@ func (c DeathlyDuetRed) Play(s *card.TurnState, _ *card.CardState) int { return 
 type DeathlyDuetYellow struct{}
 
 func (DeathlyDuetYellow) ID() card.ID                 { return card.DeathlyDuetYellow }
-func (DeathlyDuetYellow) Name() string                 { return "Deathly Duet (Yellow)" }
+func (DeathlyDuetYellow) Name() string                 { return "Deathly Duet" }
 func (DeathlyDuetYellow) Cost(*card.TurnState) int                    { return 2 }
 func (DeathlyDuetYellow) Pitch() int                   { return 2 }
 func (DeathlyDuetYellow) Attack() int                  { return 3 }
@@ -42,7 +42,7 @@ func (c DeathlyDuetYellow) Play(s *card.TurnState, _ *card.CardState) int { retu
 type DeathlyDuetBlue struct{}
 
 func (DeathlyDuetBlue) ID() card.ID                 { return card.DeathlyDuetBlue }
-func (DeathlyDuetBlue) Name() string                 { return "Deathly Duet (Blue)" }
+func (DeathlyDuetBlue) Name() string                 { return "Deathly Duet" }
 func (DeathlyDuetBlue) Cost(*card.TurnState) int                    { return 2 }
 func (DeathlyDuetBlue) Pitch() int                   { return 3 }
 func (DeathlyDuetBlue) Attack() int                  { return 2 }

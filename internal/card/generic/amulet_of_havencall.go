@@ -13,7 +13,7 @@ var amuletOfHavencallTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, 
 type AmuletOfHavencallBlue struct{}
 
 func (AmuletOfHavencallBlue) ID() card.ID                               { return card.AmuletOfHavencallBlue }
-func (AmuletOfHavencallBlue) Name() string                              { return "Amulet of Havencall (Blue)" }
+func (AmuletOfHavencallBlue) Name() string                              { return "Amulet of Havencall" }
 func (AmuletOfHavencallBlue) Cost(*card.TurnState) int                  { return 0 }
 func (AmuletOfHavencallBlue) Pitch() int                                { return 3 }
 func (AmuletOfHavencallBlue) Attack() int                               { return 0 }

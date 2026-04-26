@@ -14,7 +14,7 @@ var pickACardAnyCardTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction)
 type PickACardAnyCardRed struct{}
 
 func (PickACardAnyCardRed) ID() card.ID                 { return card.PickACardAnyCardRed }
-func (PickACardAnyCardRed) Name() string                { return "Pick a Card, Any Card (Red)" }
+func (PickACardAnyCardRed) Name() string                { return "Pick a Card, Any Card" }
 func (PickACardAnyCardRed) Cost(*card.TurnState) int                   { return 0 }
 func (PickACardAnyCardRed) Pitch() int                  { return 1 }
 func (PickACardAnyCardRed) Attack() int                 { return 0 }
@@ -28,7 +28,7 @@ func (PickACardAnyCardRed) Play(s *card.TurnState, _ *card.CardState) int { retu
 type PickACardAnyCardYellow struct{}
 
 func (PickACardAnyCardYellow) ID() card.ID                 { return card.PickACardAnyCardYellow }
-func (PickACardAnyCardYellow) Name() string                { return "Pick a Card, Any Card (Yellow)" }
+func (PickACardAnyCardYellow) Name() string                { return "Pick a Card, Any Card" }
 func (PickACardAnyCardYellow) Cost(*card.TurnState) int                   { return 0 }
 func (PickACardAnyCardYellow) Pitch() int                  { return 2 }
 func (PickACardAnyCardYellow) Attack() int                 { return 0 }
@@ -42,7 +42,7 @@ func (PickACardAnyCardYellow) Play(s *card.TurnState, _ *card.CardState) int { r
 type PickACardAnyCardBlue struct{}
 
 func (PickACardAnyCardBlue) ID() card.ID                 { return card.PickACardAnyCardBlue }
-func (PickACardAnyCardBlue) Name() string                { return "Pick a Card, Any Card (Blue)" }
+func (PickACardAnyCardBlue) Name() string                { return "Pick a Card, Any Card" }
 func (PickACardAnyCardBlue) Cost(*card.TurnState) int                   { return 0 }
 func (PickACardAnyCardBlue) Pitch() int                  { return 3 }
 func (PickACardAnyCardBlue) Attack() int                 { return 0 }

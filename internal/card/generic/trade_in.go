@@ -13,7 +13,7 @@ var tradeInTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeA
 type TradeInRed struct{}
 
 func (TradeInRed) ID() card.ID                 { return card.TradeInRed }
-func (TradeInRed) Name() string                { return "Trade In (Red)" }
+func (TradeInRed) Name() string                { return "Trade In" }
 func (TradeInRed) Cost(*card.TurnState) int                   { return 0 }
 func (TradeInRed) Pitch() int                  { return 1 }
 func (TradeInRed) Attack() int                 { return 3 }
@@ -27,7 +27,7 @@ func (c TradeInRed) Play(s *card.TurnState, _ *card.CardState) int { return c.At
 type TradeInYellow struct{}
 
 func (TradeInYellow) ID() card.ID                 { return card.TradeInYellow }
-func (TradeInYellow) Name() string                { return "Trade In (Yellow)" }
+func (TradeInYellow) Name() string                { return "Trade In" }
 func (TradeInYellow) Cost(*card.TurnState) int                   { return 0 }
 func (TradeInYellow) Pitch() int                  { return 2 }
 func (TradeInYellow) Attack() int                 { return 2 }
@@ -41,7 +41,7 @@ func (c TradeInYellow) Play(s *card.TurnState, _ *card.CardState) int { return c
 type TradeInBlue struct{}
 
 func (TradeInBlue) ID() card.ID                 { return card.TradeInBlue }
-func (TradeInBlue) Name() string                { return "Trade In (Blue)" }
+func (TradeInBlue) Name() string                { return "Trade In" }
 func (TradeInBlue) Cost(*card.TurnState) int                   { return 0 }
 func (TradeInBlue) Pitch() int                  { return 3 }
 func (TradeInBlue) Attack() int                 { return 1 }

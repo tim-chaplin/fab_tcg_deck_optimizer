@@ -80,21 +80,21 @@ func TestApplyDefaults_SideboardRespectsCopyCap(t *testing.T) {
 	// Main has 2 copies → sideboard should stay empty for this entry.
 	d := New(hero.Viserai{}, nil, []card.Card{readRunes, readRunes})
 	d.ApplyDefaults()
-	if nameCounts(d.Sideboard)["Read the Runes (Red)"] != 0 {
+	if nameCounts(d.Sideboard)["Read the Runes [R]"] != 0 {
 		t.Errorf("Read the Runes already at cap in main deck; sideboard should not add any. Got sideboard: %v", d.Sideboard)
 	}
 
 	// Main has 1 copy → sideboard gets 1 (total 2).
 	d = New(hero.Viserai{}, nil, []card.Card{readRunes})
 	d.ApplyDefaults()
-	if got := nameCounts(d.Sideboard)["Read the Runes (Red)"]; got != 1 {
+	if got := nameCounts(d.Sideboard)["Read the Runes [R]"]; got != 1 {
 		t.Errorf("sideboard Read the Runes count = %d, want 1 (topping up to 2 total)", got)
 	}
 
 	// Main has 0 copies → sideboard gets the entry's full target (2).
 	d = New(hero.Viserai{}, nil, nil)
 	d.ApplyDefaults()
-	if got := nameCounts(d.Sideboard)["Read the Runes (Red)"]; got != 2 {
+	if got := nameCounts(d.Sideboard)["Read the Runes [R]"]; got != 2 {
 		t.Errorf("sideboard Read the Runes count = %d, want 2", got)
 	}
 }

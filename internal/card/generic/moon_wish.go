@@ -124,7 +124,7 @@ func removeFirstByID(deck []card.Card, id card.ID) []card.Card {
 type MoonWishRed struct{}
 
 func (MoonWishRed) ID() card.ID                 { return card.MoonWishRed }
-func (MoonWishRed) Name() string                { return "Moon Wish (Red)" }
+func (MoonWishRed) Name() string                { return "Moon Wish" }
 func (MoonWishRed) Cost(s *card.TurnState) int  { return moonWishCost(s) }
 func (MoonWishRed) MinCost() int                { return 0 }
 func (MoonWishRed) MaxCost() int                { return moonWishPrintedCost }
@@ -143,7 +143,7 @@ func (c MoonWishRed) Play(s *card.TurnState, self *card.CardState) int {
 type MoonWishYellow struct{}
 
 func (MoonWishYellow) ID() card.ID                { return card.MoonWishYellow }
-func (MoonWishYellow) Name() string               { return "Moon Wish (Yellow)" }
+func (MoonWishYellow) Name() string               { return "Moon Wish" }
 func (MoonWishYellow) Cost(s *card.TurnState) int { return moonWishCost(s) }
 func (MoonWishYellow) MinCost() int               { return 0 }
 func (MoonWishYellow) MaxCost() int               { return moonWishPrintedCost }
@@ -160,7 +160,7 @@ func (c MoonWishYellow) Play(s *card.TurnState, self *card.CardState) int {
 type MoonWishBlue struct{}
 
 func (MoonWishBlue) ID() card.ID                { return card.MoonWishBlue }
-func (MoonWishBlue) Name() string               { return "Moon Wish (Blue)" }
+func (MoonWishBlue) Name() string               { return "Moon Wish" }
 func (MoonWishBlue) Cost(s *card.TurnState) int { return moonWishCost(s) }
 func (MoonWishBlue) MinCost() int               { return 0 }
 func (MoonWishBlue) MaxCost() int               { return moonWishPrintedCost }

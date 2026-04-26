@@ -13,7 +13,7 @@ var talismanOfBalanceTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, 
 type TalismanOfBalanceBlue struct{}
 
 func (TalismanOfBalanceBlue) ID() card.ID                               { return card.TalismanOfBalanceBlue }
-func (TalismanOfBalanceBlue) Name() string                              { return "Talisman of Balance (Blue)" }
+func (TalismanOfBalanceBlue) Name() string                              { return "Talisman of Balance" }
 func (TalismanOfBalanceBlue) Cost(*card.TurnState) int                  { return 0 }
 func (TalismanOfBalanceBlue) Pitch() int                                { return 3 }
 func (TalismanOfBalanceBlue) Attack() int                               { return 0 }

@@ -13,7 +13,7 @@ var warmongersRecitalTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction)
 type WarmongersRecitalRed struct{}
 
 func (WarmongersRecitalRed) ID() card.ID                 { return card.WarmongersRecitalRed }
-func (WarmongersRecitalRed) Name() string                { return "Warmonger's Recital (Red)" }
+func (WarmongersRecitalRed) Name() string                { return "Warmonger's Recital" }
 func (WarmongersRecitalRed) Cost(*card.TurnState) int                   { return 1 }
 func (WarmongersRecitalRed) Pitch() int                  { return 1 }
 func (WarmongersRecitalRed) Attack() int                 { return 0 }
@@ -27,7 +27,7 @@ func (WarmongersRecitalRed) Play(s *card.TurnState, _ *card.CardState) int { ret
 type WarmongersRecitalYellow struct{}
 
 func (WarmongersRecitalYellow) ID() card.ID                 { return card.WarmongersRecitalYellow }
-func (WarmongersRecitalYellow) Name() string                { return "Warmonger's Recital (Yellow)" }
+func (WarmongersRecitalYellow) Name() string                { return "Warmonger's Recital" }
 func (WarmongersRecitalYellow) Cost(*card.TurnState) int                   { return 1 }
 func (WarmongersRecitalYellow) Pitch() int                  { return 2 }
 func (WarmongersRecitalYellow) Attack() int                 { return 0 }
@@ -41,7 +41,7 @@ func (WarmongersRecitalYellow) Play(s *card.TurnState, _ *card.CardState) int { 
 type WarmongersRecitalBlue struct{}
 
 func (WarmongersRecitalBlue) ID() card.ID                 { return card.WarmongersRecitalBlue }
-func (WarmongersRecitalBlue) Name() string                { return "Warmonger's Recital (Blue)" }
+func (WarmongersRecitalBlue) Name() string                { return "Warmonger's Recital" }
 func (WarmongersRecitalBlue) Cost(*card.TurnState) int                   { return 1 }
 func (WarmongersRecitalBlue) Pitch() int                  { return 3 }
 func (WarmongersRecitalBlue) Attack() int                 { return 0 }

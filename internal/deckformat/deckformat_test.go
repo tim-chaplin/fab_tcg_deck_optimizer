@@ -76,7 +76,7 @@ func TestSilverAgeBanlistParity(t *testing.T) {
 
 // stripVariantSuffix drops the trailing color marker so variants collapse to one entry.
 func stripVariantSuffix(name string) string {
-	for _, suffix := range []string{" (Red)", " (Yellow)", " (Blue)"} {
+	for _, suffix := range []string{" [R]", " [Y]", " [B]"} {
 		if strings.HasSuffix(name, suffix) {
 			return strings.TrimSuffix(name, suffix)
 		}

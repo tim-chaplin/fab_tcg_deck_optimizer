@@ -12,7 +12,7 @@ var overloadTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.Type
 type OverloadRed struct{}
 
 func (OverloadRed) ID() card.ID                 { return card.OverloadRed }
-func (OverloadRed) Name() string                { return "Overload (Red)" }
+func (OverloadRed) Name() string                { return "Overload" }
 func (OverloadRed) Cost(*card.TurnState) int                   { return 0 }
 func (OverloadRed) Pitch() int                  { return 1 }
 func (OverloadRed) Attack() int                 { return 3 }
@@ -27,7 +27,7 @@ func (c OverloadRed) Play(s *card.TurnState, _ *card.CardState) int { return c.A
 type OverloadYellow struct{}
 
 func (OverloadYellow) ID() card.ID                 { return card.OverloadYellow }
-func (OverloadYellow) Name() string                { return "Overload (Yellow)" }
+func (OverloadYellow) Name() string                { return "Overload" }
 func (OverloadYellow) Cost(*card.TurnState) int                   { return 0 }
 func (OverloadYellow) Pitch() int                  { return 2 }
 func (OverloadYellow) Attack() int                 { return 2 }
@@ -42,7 +42,7 @@ func (c OverloadYellow) Play(s *card.TurnState, _ *card.CardState) int { return 
 type OverloadBlue struct{}
 
 func (OverloadBlue) ID() card.ID                 { return card.OverloadBlue }
-func (OverloadBlue) Name() string                { return "Overload (Blue)" }
+func (OverloadBlue) Name() string                { return "Overload" }
 func (OverloadBlue) Cost(*card.TurnState) int                   { return 0 }
 func (OverloadBlue) Pitch() int                  { return 3 }
 func (OverloadBlue) Attack() int                 { return 1 }

@@ -16,7 +16,7 @@ var maleficTypes = card.NewTypeSet(card.TypeRuneblade, card.TypeAction, card.Typ
 type MaleficIncantationRed struct{}
 
 func (MaleficIncantationRed) ID() card.ID              { return card.MaleficIncantationRed }
-func (MaleficIncantationRed) Name() string             { return "Malefic Incantation (Red)" }
+func (MaleficIncantationRed) Name() string             { return "Malefic Incantation" }
 func (MaleficIncantationRed) Cost(*card.TurnState) int { return 0 }
 func (MaleficIncantationRed) Pitch() int               { return 1 }
 func (MaleficIncantationRed) Attack() int              { return 0 }
@@ -31,7 +31,7 @@ func (c MaleficIncantationRed) Play(s *card.TurnState, _ *card.CardState) int {
 type MaleficIncantationYellow struct{}
 
 func (MaleficIncantationYellow) ID() card.ID              { return card.MaleficIncantationYellow }
-func (MaleficIncantationYellow) Name() string             { return "Malefic Incantation (Yellow)" }
+func (MaleficIncantationYellow) Name() string             { return "Malefic Incantation" }
 func (MaleficIncantationYellow) Cost(*card.TurnState) int { return 0 }
 func (MaleficIncantationYellow) Pitch() int               { return 2 }
 func (MaleficIncantationYellow) Attack() int              { return 0 }
@@ -46,7 +46,7 @@ func (c MaleficIncantationYellow) Play(s *card.TurnState, _ *card.CardState) int
 type MaleficIncantationBlue struct{}
 
 func (MaleficIncantationBlue) ID() card.ID              { return card.MaleficIncantationBlue }
-func (MaleficIncantationBlue) Name() string             { return "Malefic Incantation (Blue)" }
+func (MaleficIncantationBlue) Name() string             { return "Malefic Incantation" }
 func (MaleficIncantationBlue) Cost(*card.TurnState) int { return 0 }
 func (MaleficIncantationBlue) Pitch() int               { return 3 }
 func (MaleficIncantationBlue) Attack() int              { return 0 }

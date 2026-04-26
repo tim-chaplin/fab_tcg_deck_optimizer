@@ -9,7 +9,7 @@ var titaniumBaubleTypes = card.NewTypeSet(card.TypeGeneric)
 type TitaniumBaubleBlue struct{}
 
 func (TitaniumBaubleBlue) ID() card.ID                               { return card.TitaniumBaubleBlue }
-func (TitaniumBaubleBlue) Name() string                              { return "Titanium Bauble (Blue)" }
+func (TitaniumBaubleBlue) Name() string                              { return "Titanium Bauble" }
 func (TitaniumBaubleBlue) Cost(*card.TurnState) int                  { return 0 }
 func (TitaniumBaubleBlue) Pitch() int                                { return 3 }
 func (TitaniumBaubleBlue) Attack() int                               { return 0 }

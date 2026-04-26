@@ -13,7 +13,7 @@ var factFindingMissionTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction,
 type FactFindingMissionRed struct{}
 
 func (FactFindingMissionRed) ID() card.ID                 { return card.FactFindingMissionRed }
-func (FactFindingMissionRed) Name() string                { return "Fact-Finding Mission (Red)" }
+func (FactFindingMissionRed) Name() string                { return "Fact-Finding Mission" }
 func (FactFindingMissionRed) Cost(*card.TurnState) int                   { return 2 }
 func (FactFindingMissionRed) Pitch() int                  { return 1 }
 func (FactFindingMissionRed) Attack() int                 { return 6 }
@@ -27,7 +27,7 @@ func (c FactFindingMissionRed) Play(s *card.TurnState, self *card.CardState) int
 type FactFindingMissionYellow struct{}
 
 func (FactFindingMissionYellow) ID() card.ID                 { return card.FactFindingMissionYellow }
-func (FactFindingMissionYellow) Name() string                { return "Fact-Finding Mission (Yellow)" }
+func (FactFindingMissionYellow) Name() string                { return "Fact-Finding Mission" }
 func (FactFindingMissionYellow) Cost(*card.TurnState) int                   { return 2 }
 func (FactFindingMissionYellow) Pitch() int                  { return 2 }
 func (FactFindingMissionYellow) Attack() int                 { return 5 }
@@ -41,7 +41,7 @@ func (c FactFindingMissionYellow) Play(s *card.TurnState, self *card.CardState) 
 type FactFindingMissionBlue struct{}
 
 func (FactFindingMissionBlue) ID() card.ID                 { return card.FactFindingMissionBlue }
-func (FactFindingMissionBlue) Name() string                { return "Fact-Finding Mission (Blue)" }
+func (FactFindingMissionBlue) Name() string                { return "Fact-Finding Mission" }
 func (FactFindingMissionBlue) Cost(*card.TurnState) int                   { return 2 }
 func (FactFindingMissionBlue) Pitch() int                  { return 3 }
 func (FactFindingMissionBlue) Attack() int                 { return 4 }

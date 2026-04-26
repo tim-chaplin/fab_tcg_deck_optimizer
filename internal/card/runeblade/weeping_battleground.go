@@ -16,7 +16,7 @@ var weepingBattlegroundTypes = card.NewTypeSet(card.TypeRuneblade, card.TypeDefe
 type WeepingBattlegroundRed struct{}
 
 func (WeepingBattlegroundRed) ID() card.ID              { return card.WeepingBattlegroundRed }
-func (WeepingBattlegroundRed) Name() string             { return "Weeping Battleground (Red)" }
+func (WeepingBattlegroundRed) Name() string             { return "Weeping Battleground" }
 func (WeepingBattlegroundRed) Cost(*card.TurnState) int { return 0 }
 func (WeepingBattlegroundRed) Pitch() int               { return 1 }
 func (WeepingBattlegroundRed) Attack() int              { return 0 }
@@ -31,7 +31,7 @@ func (WeepingBattlegroundRed) Play(s *card.TurnState, _ *card.CardState) int {
 type WeepingBattlegroundYellow struct{}
 
 func (WeepingBattlegroundYellow) ID() card.ID              { return card.WeepingBattlegroundYellow }
-func (WeepingBattlegroundYellow) Name() string             { return "Weeping Battleground (Yellow)" }
+func (WeepingBattlegroundYellow) Name() string             { return "Weeping Battleground" }
 func (WeepingBattlegroundYellow) Cost(*card.TurnState) int { return 0 }
 func (WeepingBattlegroundYellow) Pitch() int               { return 2 }
 func (WeepingBattlegroundYellow) Attack() int              { return 0 }
@@ -46,7 +46,7 @@ func (WeepingBattlegroundYellow) Play(s *card.TurnState, _ *card.CardState) int 
 type WeepingBattlegroundBlue struct{}
 
 func (WeepingBattlegroundBlue) ID() card.ID              { return card.WeepingBattlegroundBlue }
-func (WeepingBattlegroundBlue) Name() string             { return "Weeping Battleground (Blue)" }
+func (WeepingBattlegroundBlue) Name() string             { return "Weeping Battleground" }
 func (WeepingBattlegroundBlue) Cost(*card.TurnState) int { return 0 }
 func (WeepingBattlegroundBlue) Pitch() int               { return 3 }
 func (WeepingBattlegroundBlue) Attack() int              { return 0 }

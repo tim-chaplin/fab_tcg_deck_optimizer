@@ -12,7 +12,7 @@ var amuletOfEchoesTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, car
 type AmuletOfEchoesBlue struct{}
 
 func (AmuletOfEchoesBlue) ID() card.ID                               { return card.AmuletOfEchoesBlue }
-func (AmuletOfEchoesBlue) Name() string                              { return "Amulet of Echoes (Blue)" }
+func (AmuletOfEchoesBlue) Name() string                              { return "Amulet of Echoes" }
 func (AmuletOfEchoesBlue) Cost(*card.TurnState) int                  { return 0 }
 func (AmuletOfEchoesBlue) Pitch() int                                { return 3 }
 func (AmuletOfEchoesBlue) Attack() int                               { return 0 }

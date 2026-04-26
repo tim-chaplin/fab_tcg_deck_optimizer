@@ -10,6 +10,7 @@ import (
 	"sort"
 	"strings"
 
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/deck"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/deckio"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/fabrary"
@@ -89,7 +90,7 @@ func readUntilFabraryFooter(r *bufio.Reader) ([]byte, error) {
 func summarizeImportedDeck(d *deck.Deck) {
 	weapons := make([]string, len(d.Weapons))
 	for i, w := range d.Weapons {
-		weapons[i] = w.Name()
+		weapons[i] = card.DisplayName(w)
 	}
 	fmt.Fprintf(os.Stderr, "  hero: %s, weapons: %v, cards: %d", d.Hero.Name(), weapons, len(d.Cards))
 	if len(d.Sideboard) > 0 {

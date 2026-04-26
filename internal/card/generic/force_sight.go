@@ -12,7 +12,7 @@ var forceSightTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction)
 type ForceSightRed struct{}
 
 func (ForceSightRed) ID() card.ID                 { return card.ForceSightRed }
-func (ForceSightRed) Name() string                { return "Force Sight (Red)" }
+func (ForceSightRed) Name() string                { return "Force Sight" }
 func (ForceSightRed) Cost(*card.TurnState) int                   { return 1 }
 func (ForceSightRed) Pitch() int                  { return 1 }
 func (ForceSightRed) Attack() int                 { return 0 }
@@ -26,7 +26,7 @@ func (ForceSightRed) Play(s *card.TurnState, _ *card.CardState) int { return gra
 type ForceSightYellow struct{}
 
 func (ForceSightYellow) ID() card.ID                 { return card.ForceSightYellow }
-func (ForceSightYellow) Name() string                { return "Force Sight (Yellow)" }
+func (ForceSightYellow) Name() string                { return "Force Sight" }
 func (ForceSightYellow) Cost(*card.TurnState) int                   { return 1 }
 func (ForceSightYellow) Pitch() int                  { return 2 }
 func (ForceSightYellow) Attack() int                 { return 0 }
@@ -40,7 +40,7 @@ func (ForceSightYellow) Play(s *card.TurnState, _ *card.CardState) int { return 
 type ForceSightBlue struct{}
 
 func (ForceSightBlue) ID() card.ID                 { return card.ForceSightBlue }
-func (ForceSightBlue) Name() string                { return "Force Sight (Blue)" }
+func (ForceSightBlue) Name() string                { return "Force Sight" }
 func (ForceSightBlue) Cost(*card.TurnState) int                   { return 1 }
 func (ForceSightBlue) Pitch() int                  { return 3 }
 func (ForceSightBlue) Attack() int                 { return 0 }

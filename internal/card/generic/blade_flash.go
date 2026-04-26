@@ -11,7 +11,7 @@ var bladeFlashTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAttackReaction)
 type BladeFlashBlue struct{}
 
 func (BladeFlashBlue) ID() card.ID                               { return card.BladeFlashBlue }
-func (BladeFlashBlue) Name() string                              { return "Blade Flash (Blue)" }
+func (BladeFlashBlue) Name() string                              { return "Blade Flash" }
 func (BladeFlashBlue) Cost(*card.TurnState) int                  { return 1 }
 func (BladeFlashBlue) Pitch() int                                { return 3 }
 func (BladeFlashBlue) Attack() int                               { return 0 }

@@ -12,7 +12,7 @@ var cashInTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction)
 type CashInYellow struct{}
 
 func (CashInYellow) ID() card.ID                 { return card.CashInYellow }
-func (CashInYellow) Name() string                { return "Cash In (Yellow)" }
+func (CashInYellow) Name() string                { return "Cash In" }
 func (CashInYellow) Cost(*card.TurnState) int                   { return 4 }
 func (CashInYellow) Pitch() int                  { return 2 }
 func (CashInYellow) Attack() int                 { return 0 }

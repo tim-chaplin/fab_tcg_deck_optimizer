@@ -11,7 +11,7 @@ var potionOfStrengthTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, c
 type PotionOfStrengthBlue struct{}
 
 func (PotionOfStrengthBlue) ID() card.ID                               { return card.PotionOfStrengthBlue }
-func (PotionOfStrengthBlue) Name() string                              { return "Potion of Strength (Blue)" }
+func (PotionOfStrengthBlue) Name() string                              { return "Potion of Strength" }
 func (PotionOfStrengthBlue) Cost(*card.TurnState) int                  { return 0 }
 func (PotionOfStrengthBlue) Pitch() int                                { return 3 }
 func (PotionOfStrengthBlue) Attack() int                               { return 0 }

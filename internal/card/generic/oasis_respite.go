@@ -12,7 +12,7 @@ var oasisRespiteTypes = card.NewTypeSet(card.TypeGeneric, card.TypeInstant)
 type OasisRespiteRed struct{}
 
 func (OasisRespiteRed) ID() card.ID                               { return card.OasisRespiteRed }
-func (OasisRespiteRed) Name() string                              { return "Oasis Respite (Red)" }
+func (OasisRespiteRed) Name() string                              { return "Oasis Respite" }
 func (OasisRespiteRed) Cost(*card.TurnState) int                  { return 1 }
 func (OasisRespiteRed) Pitch() int                                { return 1 }
 func (OasisRespiteRed) Attack() int                               { return 0 }
@@ -26,7 +26,7 @@ func (OasisRespiteRed) Play(*card.TurnState, *card.CardState) int { return 0 }
 type OasisRespiteYellow struct{}
 
 func (OasisRespiteYellow) ID() card.ID                               { return card.OasisRespiteYellow }
-func (OasisRespiteYellow) Name() string                              { return "Oasis Respite (Yellow)" }
+func (OasisRespiteYellow) Name() string                              { return "Oasis Respite" }
 func (OasisRespiteYellow) Cost(*card.TurnState) int                  { return 1 }
 func (OasisRespiteYellow) Pitch() int                                { return 2 }
 func (OasisRespiteYellow) Attack() int                               { return 0 }
@@ -40,7 +40,7 @@ func (OasisRespiteYellow) Play(*card.TurnState, *card.CardState) int { return 0 
 type OasisRespiteBlue struct{}
 
 func (OasisRespiteBlue) ID() card.ID                               { return card.OasisRespiteBlue }
-func (OasisRespiteBlue) Name() string                              { return "Oasis Respite (Blue)" }
+func (OasisRespiteBlue) Name() string                              { return "Oasis Respite" }
 func (OasisRespiteBlue) Cost(*card.TurnState) int                  { return 1 }
 func (OasisRespiteBlue) Pitch() int                                { return 3 }
 func (OasisRespiteBlue) Attack() int                               { return 0 }

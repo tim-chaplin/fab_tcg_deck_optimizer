@@ -14,7 +14,7 @@ var blessingOfOccultTypes = card.NewTypeSet(card.TypeRuneblade, card.TypeAction,
 type BlessingOfOccultRed struct{}
 
 func (BlessingOfOccultRed) ID() card.ID              { return card.BlessingOfOccultRed }
-func (BlessingOfOccultRed) Name() string             { return "Blessing of Occult (Red)" }
+func (BlessingOfOccultRed) Name() string             { return "Blessing of Occult" }
 func (BlessingOfOccultRed) Cost(*card.TurnState) int { return 1 }
 func (BlessingOfOccultRed) Pitch() int               { return 1 }
 func (BlessingOfOccultRed) Attack() int              { return 0 }
@@ -29,7 +29,7 @@ func (c BlessingOfOccultRed) Play(s *card.TurnState, _ *card.CardState) int {
 type BlessingOfOccultYellow struct{}
 
 func (BlessingOfOccultYellow) ID() card.ID              { return card.BlessingOfOccultYellow }
-func (BlessingOfOccultYellow) Name() string             { return "Blessing of Occult (Yellow)" }
+func (BlessingOfOccultYellow) Name() string             { return "Blessing of Occult" }
 func (BlessingOfOccultYellow) Cost(*card.TurnState) int { return 1 }
 func (BlessingOfOccultYellow) Pitch() int               { return 2 }
 func (BlessingOfOccultYellow) Attack() int              { return 0 }
@@ -44,7 +44,7 @@ func (c BlessingOfOccultYellow) Play(s *card.TurnState, _ *card.CardState) int {
 type BlessingOfOccultBlue struct{}
 
 func (BlessingOfOccultBlue) ID() card.ID              { return card.BlessingOfOccultBlue }
-func (BlessingOfOccultBlue) Name() string             { return "Blessing of Occult (Blue)" }
+func (BlessingOfOccultBlue) Name() string             { return "Blessing of Occult" }
 func (BlessingOfOccultBlue) Cost(*card.TurnState) int { return 1 }
 func (BlessingOfOccultBlue) Pitch() int               { return 3 }
 func (BlessingOfOccultBlue) Attack() int              { return 0 }

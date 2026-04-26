@@ -56,7 +56,7 @@ func Marshal(d *deck.Deck) string {
 func weaponCounts(ws []weapon.Weapon) map[string]int {
 	m := make(map[string]int, len(ws))
 	for _, w := range ws {
-		m[w.Name()]++
+		m[card.DisplayName(w)]++
 	}
 	return m
 }
@@ -64,7 +64,7 @@ func weaponCounts(ws []weapon.Weapon) map[string]int {
 func cardCountsForExport(cs []card.Card) map[string]int {
 	m := make(map[string]int, len(cs))
 	for _, c := range cs {
-		m[toFabraryCardName(c.Name())]++
+		m[toFabraryCardName(card.DisplayName(c))]++
 	}
 	return m
 }

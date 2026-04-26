@@ -13,7 +13,7 @@ var amuletOfInterventionTypes = card.NewTypeSet(card.TypeGeneric, card.TypeActio
 type AmuletOfInterventionBlue struct{}
 
 func (AmuletOfInterventionBlue) ID() card.ID                               { return card.AmuletOfInterventionBlue }
-func (AmuletOfInterventionBlue) Name() string                              { return "Amulet of Intervention (Blue)" }
+func (AmuletOfInterventionBlue) Name() string                              { return "Amulet of Intervention" }
 func (AmuletOfInterventionBlue) Cost(*card.TurnState) int                  { return 0 }
 func (AmuletOfInterventionBlue) Pitch() int                                { return 3 }
 func (AmuletOfInterventionBlue) Attack() int                               { return 0 }

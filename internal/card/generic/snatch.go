@@ -22,7 +22,7 @@ func snatchPlay(attack int, s *card.TurnState, self *card.CardState) int {
 type SnatchRed struct{}
 
 func (SnatchRed) ID() card.ID                  { return card.SnatchRed }
-func (SnatchRed) Name() string                 { return "Snatch (Red)" }
+func (SnatchRed) Name() string                 { return "Snatch" }
 func (SnatchRed) Cost(*card.TurnState) int                    { return 0 }
 func (SnatchRed) Pitch() int                   { return 1 }
 func (SnatchRed) Attack() int                  { return 4 }
@@ -38,7 +38,7 @@ func (c SnatchRed) Play(s *card.TurnState, self *card.CardState) int { return sn
 type SnatchYellow struct{}
 
 func (SnatchYellow) ID() card.ID                  { return card.SnatchYellow }
-func (SnatchYellow) Name() string                 { return "Snatch (Yellow)" }
+func (SnatchYellow) Name() string                 { return "Snatch" }
 func (SnatchYellow) Cost(*card.TurnState) int                    { return 0 }
 func (SnatchYellow) Pitch() int                   { return 2 }
 func (SnatchYellow) Attack() int                  { return 3 }
@@ -54,7 +54,7 @@ func (c SnatchYellow) Play(s *card.TurnState, self *card.CardState) int { return
 type SnatchBlue struct{}
 
 func (SnatchBlue) ID() card.ID                  { return card.SnatchBlue }
-func (SnatchBlue) Name() string                 { return "Snatch (Blue)" }
+func (SnatchBlue) Name() string                 { return "Snatch" }
 func (SnatchBlue) Cost(*card.TurnState) int                    { return 0 }
 func (SnatchBlue) Pitch() int                   { return 3 }
 func (SnatchBlue) Attack() int                  { return 2 }

@@ -265,7 +265,7 @@ func fireAttackActionTriggers(state *card.TurnState, triggeringCard string) {
 		}
 		n := t.Handler(state)
 		if n > 0 {
-			recordTrigger(state, t.Self.Name()+": AURA TRIGGER", triggeringCard, n)
+			recordTrigger(state, card.DisplayName(t.Self)+": AURA TRIGGER", triggeringCard, n)
 		}
 		t.FiredThisTurn = true
 		t.Count--
@@ -300,7 +300,7 @@ func fireEphemeralAttackTriggers(state *card.TurnState, target *card.CardState) 
 		}
 		n := t.Handler(state, target)
 		if n > 0 {
-			recordTrigger(state, t.Source.Name()+": ATTACK TRIGGER", target.Card.Name(), n)
+			recordTrigger(state, card.DisplayName(t.Source)+": ATTACK TRIGGER", card.DisplayName(target.Card), n)
 		}
 	}
 	state.EphemeralAttackTriggers = dst
@@ -485,7 +485,7 @@ func (ctx *sequenceContext) playSequenceWithMeta(n int) (damage int, leftoverRun
 		// line. Each trigger line gets a "(from <triggeringCard>)" suffix so the reader can
 		// trace which card caused the trigger. Ephemeral "if hits" triggers fire after the
 		// attack lands and log below.
-		triggeringCard := pc.Card.Name()
+		triggeringCard := card.DisplayName(pc.Card)
 		if heroDmg > 0 {
 			recordTrigger(state, ctx.hero.Name()+": HERO TRIGGER", triggeringCard, heroDmg)
 		}
@@ -497,7 +497,7 @@ func (ctx *sequenceContext) playSequenceWithMeta(n int) (damage int, leftoverRun
 		// grant on a 1-power attack resolves as a 0-power attack, not -2). The clamp covers
 		// the sum because playDmg may include rider damage (e.g. Blow for a Blow's on-hit
 		// +1) that EffectiveAttack doesn't see — clamping the sum preserves both pieces.
-		recordValueAndLog(state, pc.Card.Name()+": "+chainVerbFor(m, pc.FromArsenal), playDmg+pc.BonusAttack)
+		recordValueAndLog(state, card.DisplayName(pc.Card)+": "+chainVerbFor(m, pc.FromArsenal), playDmg+pc.BonusAttack)
 		if m.isAttackAction {
 			// Fire ephemeral triggers AFTER hero and aura triggers so the handler sees the
 			// fully-resolved attacker state (Dominate grants, hero-created auras, fresh

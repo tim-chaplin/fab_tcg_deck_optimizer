@@ -25,8 +25,8 @@ var moonWishHero = stubs.Hero{Intel: 4}
 // TestEvalOneTurn_MoonWishAltCostTutorsSunKissAndConsumesDeck is the canonical
 // no-go-again scenario for Moon Wish run end-to-end through one turn:
 //
-//   - Hand: Moon Wish (Yellow), Weeping Battleground (Red — a red Defense Reaction).
-//   - Deck: Sun Kiss (Red) plus filler.
+//   - Hand: Moon Wish [Y], Weeping Battleground (Red — a red Defense Reaction).
+//   - Deck: Sun Kiss [R] plus filler.
 //
 // Expected line: Moon Wish plays via its alt cost — Weeping Battleground is the consumed
 // hand card and gets returned to the deck. Moon Wish hits, tutors Sun Kiss out of the deck,
@@ -55,15 +55,15 @@ func TestEvalOneTurn_MoonWishAltCostTutorsSunKissAndConsumesDeck(t *testing.T) {
 			state.PrevTurnValue)
 	}
 	if state.ArsenalCard == nil || state.ArsenalCard.ID() != card.SunKissRed {
-		t.Errorf("ArsenalCard = %v, want Sun Kiss (Red) (post-hoc promoted from State.Hand)",
+		t.Errorf("ArsenalCard = %v, want Sun Kiss [R] (post-hoc promoted from State.Hand)",
 			state.ArsenalCard)
 	}
 	if got := countAcrossSurfaces(state, card.SunKissRed); got != 1 {
-		t.Errorf("Sun Kiss (Red) total across turn-2 Hand/Deck/Arsenal = %d, want 1 (in Arsenal)",
+		t.Errorf("Sun Kiss [R] total across turn-2 Hand/Deck/Arsenal = %d, want 1 (in Arsenal)",
 			got)
 	}
 	if got := countAcrossSurfaces(state, card.WeepingBattlegroundRed); got != 1 {
-		t.Errorf("Weeping Battleground (Red) total across turn-2 surfaces = %d, want 1 "+
+		t.Errorf("Weeping Battleground [R] total across turn-2 surfaces = %d, want 1 "+
 			"(alt cost returned it to deck — should still exist somewhere)",
 			got)
 	}
@@ -93,14 +93,14 @@ func TestEvalOneTurn_MoonWishAltCostTutorFizzlesWithoutSunKiss(t *testing.T) {
 			state.ArsenalCard)
 	}
 	if got := countAcrossSurfaces(state, card.WeepingBattlegroundRed); got != 1 {
-		t.Errorf("Weeping Battleground (Red) total across turn-2 surfaces = %d, want 1 "+
+		t.Errorf("Weeping Battleground [R] total across turn-2 surfaces = %d, want 1 "+
 			"(alt cost returned it to deck even when the tutor fizzled)",
 			got)
 	}
 }
 
 // TestEvalOneTurn_MoonWishWithFlyingHighPlaysTutoredSunKiss covers the go-again branch:
-// Flying High (Red) plays first in the chain and grants Moon Wish go-again. Moon Wish then
+// Flying High [R] plays first in the chain and grants Moon Wish go-again. Moon Wish then
 // alt-costs the Held DR, hits, tutors Sun Kiss, sees self.EffectiveGoAgain() = true, and
 // plays Sun Kiss immediately. Sun Kiss heads to the graveyard.
 //
@@ -141,11 +141,11 @@ func TestEvalOneTurn_MoonWishWithFlyingHighPlaysTutoredSunKiss(t *testing.T) {
 		}
 	}
 	if !skInGraveyard {
-		t.Errorf("Sun Kiss (Red) not in turn-1 Graveyard %v; want it there (tutored and played)",
+		t.Errorf("Sun Kiss [R] not in turn-1 Graveyard %v; want it there (tutored and played)",
 			cardNames(state.PrevTurnGraveyard))
 	}
 	if got := countAcrossSurfaces(state, card.SunKissRed); got != 0 {
-		t.Errorf("Sun Kiss (Red) total across turn-2 surfaces = %d, want 0 (it's in the graveyard)",
+		t.Errorf("Sun Kiss [R] total across turn-2 surfaces = %d, want 0 (it's in the graveyard)",
 			got)
 	}
 	if state.ArsenalCard == nil {

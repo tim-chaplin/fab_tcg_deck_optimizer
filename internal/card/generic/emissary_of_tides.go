@@ -13,7 +13,7 @@ var emissaryOfTidesTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, ca
 type EmissaryOfTidesRed struct{}
 
 func (EmissaryOfTidesRed) ID() card.ID                 { return card.EmissaryOfTidesRed }
-func (EmissaryOfTidesRed) Name() string                { return "Emissary of Tides (Red)" }
+func (EmissaryOfTidesRed) Name() string                { return "Emissary of Tides" }
 func (EmissaryOfTidesRed) Cost(*card.TurnState) int                   { return 0 }
 func (EmissaryOfTidesRed) Pitch() int                  { return 1 }
 func (EmissaryOfTidesRed) Attack() int                 { return 4 }

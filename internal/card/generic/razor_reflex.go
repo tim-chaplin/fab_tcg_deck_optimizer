@@ -13,7 +13,7 @@ var razorReflexTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAttackReaction
 type RazorReflexRed struct{}
 
 func (RazorReflexRed) ID() card.ID                               { return card.RazorReflexRed }
-func (RazorReflexRed) Name() string                              { return "Razor Reflex (Red)" }
+func (RazorReflexRed) Name() string                              { return "Razor Reflex" }
 func (RazorReflexRed) Cost(*card.TurnState) int                  { return 1 }
 func (RazorReflexRed) Pitch() int                                { return 1 }
 func (RazorReflexRed) Attack() int                               { return 0 }
@@ -28,7 +28,7 @@ func (RazorReflexRed) Play(*card.TurnState, *card.CardState) int { return 0 }
 type RazorReflexYellow struct{}
 
 func (RazorReflexYellow) ID() card.ID                               { return card.RazorReflexYellow }
-func (RazorReflexYellow) Name() string                              { return "Razor Reflex (Yellow)" }
+func (RazorReflexYellow) Name() string                              { return "Razor Reflex" }
 func (RazorReflexYellow) Cost(*card.TurnState) int                  { return 1 }
 func (RazorReflexYellow) Pitch() int                                { return 2 }
 func (RazorReflexYellow) Attack() int                               { return 0 }
@@ -43,7 +43,7 @@ func (RazorReflexYellow) Play(*card.TurnState, *card.CardState) int { return 0 }
 type RazorReflexBlue struct{}
 
 func (RazorReflexBlue) ID() card.ID                               { return card.RazorReflexBlue }
-func (RazorReflexBlue) Name() string                              { return "Razor Reflex (Blue)" }
+func (RazorReflexBlue) Name() string                              { return "Razor Reflex" }
 func (RazorReflexBlue) Cost(*card.TurnState) int                  { return 1 }
 func (RazorReflexBlue) Pitch() int                                { return 3 }
 func (RazorReflexBlue) Attack() int                               { return 0 }

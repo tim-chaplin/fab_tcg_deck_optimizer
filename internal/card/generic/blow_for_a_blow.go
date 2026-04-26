@@ -23,7 +23,7 @@ const blowForABlowPingValue = 1
 type BlowForABlowRed struct{}
 
 func (BlowForABlowRed) ID() card.ID         { return card.BlowForABlowRed }
-func (BlowForABlowRed) Name() string        { return "Blow for a Blow (Red)" }
+func (BlowForABlowRed) Name() string        { return "Blow for a Blow" }
 func (BlowForABlowRed) Cost(*card.TurnState) int           { return 2 }
 func (BlowForABlowRed) Pitch() int          { return 1 }
 func (BlowForABlowRed) Attack() int         { return 4 }

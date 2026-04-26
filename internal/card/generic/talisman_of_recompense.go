@@ -12,7 +12,7 @@ var talismanOfRecompenseTypes = card.NewTypeSet(card.TypeGeneric, card.TypeActio
 type TalismanOfRecompenseYellow struct{}
 
 func (TalismanOfRecompenseYellow) ID() card.ID                               { return card.TalismanOfRecompenseYellow }
-func (TalismanOfRecompenseYellow) Name() string                              { return "Talisman of Recompense (Yellow)" }
+func (TalismanOfRecompenseYellow) Name() string                              { return "Talisman of Recompense" }
 func (TalismanOfRecompenseYellow) Cost(*card.TurnState) int                  { return 0 }
 func (TalismanOfRecompenseYellow) Pitch() int                                { return 2 }
 func (TalismanOfRecompenseYellow) Attack() int                               { return 0 }

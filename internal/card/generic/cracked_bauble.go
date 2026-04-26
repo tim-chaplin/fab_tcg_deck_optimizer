@@ -12,7 +12,7 @@ var crackedBaubleTypes = card.NewTypeSet(card.TypeGeneric)
 type CrackedBaubleYellow struct{}
 
 func (CrackedBaubleYellow) ID() card.ID                               { return card.CrackedBaubleYellow }
-func (CrackedBaubleYellow) Name() string                              { return "Cracked Bauble (Yellow)" }
+func (CrackedBaubleYellow) Name() string                              { return "Cracked Bauble" }
 func (CrackedBaubleYellow) Cost(*card.TurnState) int                  { return 0 }
 func (CrackedBaubleYellow) Pitch() int                                { return 2 }
 func (CrackedBaubleYellow) Attack() int                               { return 0 }

@@ -17,7 +17,7 @@ var sirensOfSafeHarborTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction,
 type SirensOfSafeHarborRed struct{}
 
 func (SirensOfSafeHarborRed) ID() card.ID                 { return card.SirensOfSafeHarborRed }
-func (SirensOfSafeHarborRed) Name() string                { return "Sirens of Safe Harbor (Red)" }
+func (SirensOfSafeHarborRed) Name() string                { return "Sirens of Safe Harbor" }
 func (SirensOfSafeHarborRed) Cost(*card.TurnState) int                   { return 2 }
 func (SirensOfSafeHarborRed) Pitch() int                  { return 1 }
 func (SirensOfSafeHarborRed) Attack() int                 { return 6 }
@@ -30,7 +30,7 @@ func (c SirensOfSafeHarborRed) Play(s *card.TurnState, _ *card.CardState) int { 
 type SirensOfSafeHarborYellow struct{}
 
 func (SirensOfSafeHarborYellow) ID() card.ID                 { return card.SirensOfSafeHarborYellow }
-func (SirensOfSafeHarborYellow) Name() string                { return "Sirens of Safe Harbor (Yellow)" }
+func (SirensOfSafeHarborYellow) Name() string                { return "Sirens of Safe Harbor" }
 func (SirensOfSafeHarborYellow) Cost(*card.TurnState) int                   { return 2 }
 func (SirensOfSafeHarborYellow) Pitch() int                  { return 2 }
 func (SirensOfSafeHarborYellow) Attack() int                 { return 5 }
@@ -43,7 +43,7 @@ func (c SirensOfSafeHarborYellow) Play(s *card.TurnState, _ *card.CardState) int
 type SirensOfSafeHarborBlue struct{}
 
 func (SirensOfSafeHarborBlue) ID() card.ID                 { return card.SirensOfSafeHarborBlue }
-func (SirensOfSafeHarborBlue) Name() string                { return "Sirens of Safe Harbor (Blue)" }
+func (SirensOfSafeHarborBlue) Name() string                { return "Sirens of Safe Harbor" }
 func (SirensOfSafeHarborBlue) Cost(*card.TurnState) int                   { return 2 }
 func (SirensOfSafeHarborBlue) Pitch() int                  { return 3 }
 func (SirensOfSafeHarborBlue) Attack() int                 { return 4 }

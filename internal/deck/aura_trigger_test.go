@@ -158,7 +158,7 @@ func TestProcessTriggersAtStartOfTurn_AttributesRevealedToContribution(t *testin
 		t.Fatalf("contribs = %+v, want one entry", contribs)
 	}
 	if contribs[0].Revealed == nil || contribs[0].Revealed.ID() != card.AetherSlashRed {
-		t.Errorf("contribs[0].Revealed = %v, want Aether Slash (Red)", contribs[0].Revealed)
+		t.Errorf("contribs[0].Revealed = %v, want Aether Slash [R]", contribs[0].Revealed)
 	}
 }
 
@@ -289,7 +289,7 @@ func TestEvalOneTurn_BlessingOfOccultCreatesRunesAtStartOfNextTurn(t *testing.T)
 		t.Errorf("StartOfTurnTriggerDamage = %d, want 3", state.StartOfTurnTriggerDamage)
 	}
 	if len(state.StartOfTurnGraveyard) != 1 || state.StartOfTurnGraveyard[0].ID() != card.BlessingOfOccultRed {
-		t.Errorf("StartOfTurnGraveyard = %v, want [Blessing (Red)]", state.StartOfTurnGraveyard)
+		t.Errorf("StartOfTurnGraveyard = %v, want [Blessing [R]]", state.StartOfTurnGraveyard)
 	}
 }
 

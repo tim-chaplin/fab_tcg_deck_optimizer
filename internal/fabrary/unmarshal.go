@@ -100,7 +100,7 @@ func Unmarshal(text string) (*deck.Deck, map[string]int, error) {
 			// Sideboard is a name-only list the sim doesn't touch, so there's no registry
 			// lookup — any card or equipment piece the user lists comes back verbatim.
 			// fromFabraryCardName maps the lowercase pitch suffix back to the canonical
-			// "(Red)" form; names without a recognized suffix (e.g. equipment pieces like
+			// "[R]" form; names without a recognized suffix (e.g. equipment pieces like
 			// "Crown of Dichotomy") pass through unchanged.
 			canon := fromFabraryCardName(name)
 			for i := 0; i < qty; i++ {

@@ -12,7 +12,7 @@ var freewheelingRenegadesTypes = card.NewTypeSet(card.TypeGeneric, card.TypeActi
 type FreewheelingRenegadesRed struct{}
 
 func (FreewheelingRenegadesRed) ID() card.ID                 { return card.FreewheelingRenegadesRed }
-func (FreewheelingRenegadesRed) Name() string                { return "Freewheeling Renegades (Red)" }
+func (FreewheelingRenegadesRed) Name() string                { return "Freewheeling Renegades" }
 func (FreewheelingRenegadesRed) Cost(*card.TurnState) int                   { return 1 }
 func (FreewheelingRenegadesRed) Pitch() int                  { return 1 }
 func (FreewheelingRenegadesRed) Attack() int                 { return 6 }
@@ -26,7 +26,7 @@ func (c FreewheelingRenegadesRed) Play(s *card.TurnState, _ *card.CardState) int
 type FreewheelingRenegadesYellow struct{}
 
 func (FreewheelingRenegadesYellow) ID() card.ID                 { return card.FreewheelingRenegadesYellow }
-func (FreewheelingRenegadesYellow) Name() string                { return "Freewheeling Renegades (Yellow)" }
+func (FreewheelingRenegadesYellow) Name() string                { return "Freewheeling Renegades" }
 func (FreewheelingRenegadesYellow) Cost(*card.TurnState) int                   { return 1 }
 func (FreewheelingRenegadesYellow) Pitch() int                  { return 2 }
 func (FreewheelingRenegadesYellow) Attack() int                 { return 5 }
@@ -40,7 +40,7 @@ func (c FreewheelingRenegadesYellow) Play(s *card.TurnState, _ *card.CardState) 
 type FreewheelingRenegadesBlue struct{}
 
 func (FreewheelingRenegadesBlue) ID() card.ID                 { return card.FreewheelingRenegadesBlue }
-func (FreewheelingRenegadesBlue) Name() string                { return "Freewheeling Renegades (Blue)" }
+func (FreewheelingRenegadesBlue) Name() string                { return "Freewheeling Renegades" }
 func (FreewheelingRenegadesBlue) Cost(*card.TurnState) int                   { return 1 }
 func (FreewheelingRenegadesBlue) Pitch() int                  { return 3 }
 func (FreewheelingRenegadesBlue) Attack() int                 { return 4 }

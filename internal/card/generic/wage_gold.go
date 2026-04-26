@@ -12,7 +12,7 @@ var wageGoldTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.Type
 type WageGoldRed struct{}
 
 func (WageGoldRed) ID() card.ID                 { return card.WageGoldRed }
-func (WageGoldRed) Name() string                { return "Wage Gold (Red)" }
+func (WageGoldRed) Name() string                { return "Wage Gold" }
 func (WageGoldRed) Cost(*card.TurnState) int                   { return 3 }
 func (WageGoldRed) Pitch() int                  { return 1 }
 func (WageGoldRed) Attack() int                 { return 7 }
@@ -26,7 +26,7 @@ func (c WageGoldRed) Play(s *card.TurnState, _ *card.CardState) int { return c.A
 type WageGoldYellow struct{}
 
 func (WageGoldYellow) ID() card.ID                 { return card.WageGoldYellow }
-func (WageGoldYellow) Name() string                { return "Wage Gold (Yellow)" }
+func (WageGoldYellow) Name() string                { return "Wage Gold" }
 func (WageGoldYellow) Cost(*card.TurnState) int                   { return 3 }
 func (WageGoldYellow) Pitch() int                  { return 2 }
 func (WageGoldYellow) Attack() int                 { return 6 }
@@ -40,7 +40,7 @@ func (c WageGoldYellow) Play(s *card.TurnState, _ *card.CardState) int { return 
 type WageGoldBlue struct{}
 
 func (WageGoldBlue) ID() card.ID                 { return card.WageGoldBlue }
-func (WageGoldBlue) Name() string                { return "Wage Gold (Blue)" }
+func (WageGoldBlue) Name() string                { return "Wage Gold" }
 func (WageGoldBlue) Cost(*card.TurnState) int                   { return 3 }
 func (WageGoldBlue) Pitch() int                  { return 3 }
 func (WageGoldBlue) Attack() int                 { return 5 }

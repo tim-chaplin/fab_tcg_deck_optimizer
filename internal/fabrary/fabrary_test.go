@@ -6,6 +6,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/deck"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/hero"
 )
@@ -195,8 +196,8 @@ Deck cards
 	if len(d.Cards) != 0 {
 		t.Errorf("expected 0 known cards, got %d", len(d.Cards))
 	}
-	if skipped["Not A Real Card (Red)"] != 2 {
-		t.Errorf("skipped should contain Not A Real Card (Red) x2; got %v", skipped)
+	if skipped["Not A Real Card [R]"] != 2 {
+		t.Errorf("skipped should contain Not A Real Card [R] x2; got %v", skipped)
 	}
 }
 
@@ -207,9 +208,9 @@ func TestMarshalSideboardSection(t *testing.T) {
 	rng := rand.New(rand.NewSource(1))
 	d := deck.Random(hero.Viserai{}, 40, 2, rng, nil)
 
-	// Use Mauvrion Skies (Red) — its pitch-color suffix exercises the toFabraryCardName
+	// Use Mauvrion Skies [R] — its pitch-color suffix exercises the toFabraryCardName
 	// lowercase conversion. Sideboard is a string list; names are stored in canonical form.
-	d.Sideboard = []string{"Mauvrion Skies (Red)", "Mauvrion Skies (Red)"}
+	d.Sideboard = []string{"Mauvrion Skies [R]", "Mauvrion Skies [R]"}
 	text := Marshal(d)
 	if !strings.Contains(text, "\nSideboard\n") {
 		t.Errorf("populated sideboard should emit a Sideboard section; got:\n%s", text)
@@ -246,8 +247,8 @@ Sideboard
 	if len(skipped) != 0 {
 		t.Errorf("unexpected skipped cards: %v", skipped)
 	}
-	wantMain := map[string]int{"Aether Slash (Red)": 2}
-	wantSide := map[string]int{"Mauvrion Skies (Red)": 2, "Runic Reaping (Blue)": 1}
+	wantMain := map[string]int{"Aether Slash [R]": 2}
+	wantSide := map[string]int{"Mauvrion Skies [R]": 2, "Runic Reaping [B]": 1}
 	if got := cardNameCounts(d); !reflect.DeepEqual(got, wantMain) {
 		t.Errorf("main cards: got %v want %v", got, wantMain)
 	}
@@ -280,7 +281,7 @@ Deck cards
 func cardNameCounts(d *deck.Deck) map[string]int {
 	m := map[string]int{}
 	for _, c := range d.Cards {
-		m[c.Name()]++
+		m[card.DisplayName(c)]++
 	}
 	return m
 }
@@ -288,7 +289,7 @@ func cardNameCounts(d *deck.Deck) map[string]int {
 func weaponNameCounts(d *deck.Deck) map[string]int {
 	m := map[string]int{}
 	for _, w := range d.Weapons {
-		m[w.Name()]++
+		m[card.DisplayName(w)]++
 	}
 	return m
 }

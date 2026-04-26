@@ -15,7 +15,7 @@ import (
 )
 
 // Mutation is one candidate single-slot change: the mutated Deck plus a human-readable summary
-// (e.g. "swapped Aether Slash (Red) for Arcanic Spike (Red)"). Consumers use Deck to evaluate
+// (e.g. "swapped Aether Slash [R] for Arcanic Spike [R]"). Consumers use Deck to evaluate
 // and Description for logging.
 type Mutation struct {
 	Deck        *Deck

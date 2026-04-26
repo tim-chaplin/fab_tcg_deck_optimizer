@@ -13,7 +13,7 @@ var emissaryOfMoonTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, car
 type EmissaryOfMoonRed struct{}
 
 func (EmissaryOfMoonRed) ID() card.ID                 { return card.EmissaryOfMoonRed }
-func (EmissaryOfMoonRed) Name() string                { return "Emissary of Moon (Red)" }
+func (EmissaryOfMoonRed) Name() string                { return "Emissary of Moon" }
 func (EmissaryOfMoonRed) Cost(*card.TurnState) int                   { return 0 }
 func (EmissaryOfMoonRed) Pitch() int                  { return 1 }
 func (EmissaryOfMoonRed) Attack() int                 { return 4 }

@@ -12,7 +12,7 @@ var whisperOfTheOracleTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction)
 type WhisperOfTheOracleRed struct{}
 
 func (WhisperOfTheOracleRed) ID() card.ID                 { return card.WhisperOfTheOracleRed }
-func (WhisperOfTheOracleRed) Name() string                { return "Whisper of the Oracle (Red)" }
+func (WhisperOfTheOracleRed) Name() string                { return "Whisper of the Oracle" }
 func (WhisperOfTheOracleRed) Cost(*card.TurnState) int                   { return 0 }
 func (WhisperOfTheOracleRed) Pitch() int                  { return 1 }
 func (WhisperOfTheOracleRed) Attack() int                 { return 0 }
@@ -26,7 +26,7 @@ func (WhisperOfTheOracleRed) Play(s *card.TurnState, _ *card.CardState) int { re
 type WhisperOfTheOracleYellow struct{}
 
 func (WhisperOfTheOracleYellow) ID() card.ID                 { return card.WhisperOfTheOracleYellow }
-func (WhisperOfTheOracleYellow) Name() string                { return "Whisper of the Oracle (Yellow)" }
+func (WhisperOfTheOracleYellow) Name() string                { return "Whisper of the Oracle" }
 func (WhisperOfTheOracleYellow) Cost(*card.TurnState) int                   { return 0 }
 func (WhisperOfTheOracleYellow) Pitch() int                  { return 2 }
 func (WhisperOfTheOracleYellow) Attack() int                 { return 0 }
@@ -40,7 +40,7 @@ func (WhisperOfTheOracleYellow) Play(s *card.TurnState, _ *card.CardState) int {
 type WhisperOfTheOracleBlue struct{}
 
 func (WhisperOfTheOracleBlue) ID() card.ID                 { return card.WhisperOfTheOracleBlue }
-func (WhisperOfTheOracleBlue) Name() string                { return "Whisper of the Oracle (Blue)" }
+func (WhisperOfTheOracleBlue) Name() string                { return "Whisper of the Oracle" }
 func (WhisperOfTheOracleBlue) Cost(*card.TurnState) int                   { return 0 }
 func (WhisperOfTheOracleBlue) Pitch() int                  { return 3 }
 func (WhisperOfTheOracleBlue) Attack() int                 { return 0 }

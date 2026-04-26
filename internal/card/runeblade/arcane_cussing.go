@@ -15,7 +15,7 @@ var arcaneCussingTypes = card.NewTypeSet(card.TypeRuneblade, card.TypeAction, ca
 type ArcaneCussingRed struct{}
 
 func (ArcaneCussingRed) ID() card.ID                { return card.ArcaneCussingRed }
-func (ArcaneCussingRed) Name() string               { return "Arcane Cussing (Red)" }
+func (ArcaneCussingRed) Name() string               { return "Arcane Cussing" }
 func (ArcaneCussingRed) Cost(*card.TurnState) int                  { return 1 }
 func (ArcaneCussingRed) Pitch() int                 { return 1 }
 func (ArcaneCussingRed) Attack() int                { return 0 }
@@ -27,7 +27,7 @@ func (ArcaneCussingRed) Play(s *card.TurnState, _ *card.CardState) int { return 
 type ArcaneCussingYellow struct{}
 
 func (ArcaneCussingYellow) ID() card.ID                { return card.ArcaneCussingYellow }
-func (ArcaneCussingYellow) Name() string               { return "Arcane Cussing (Yellow)" }
+func (ArcaneCussingYellow) Name() string               { return "Arcane Cussing" }
 func (ArcaneCussingYellow) Cost(*card.TurnState) int                  { return 1 }
 func (ArcaneCussingYellow) Pitch() int                 { return 2 }
 func (ArcaneCussingYellow) Attack() int                { return 0 }
@@ -39,7 +39,7 @@ func (ArcaneCussingYellow) Play(s *card.TurnState, _ *card.CardState) int { retu
 type ArcaneCussingBlue struct{}
 
 func (ArcaneCussingBlue) ID() card.ID                { return card.ArcaneCussingBlue }
-func (ArcaneCussingBlue) Name() string               { return "Arcane Cussing (Blue)" }
+func (ArcaneCussingBlue) Name() string               { return "Arcane Cussing" }
 func (ArcaneCussingBlue) Cost(*card.TurnState) int                  { return 1 }
 func (ArcaneCussingBlue) Pitch() int                 { return 3 }
 func (ArcaneCussingBlue) Attack() int                { return 0 }

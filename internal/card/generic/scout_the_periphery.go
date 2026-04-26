@@ -34,7 +34,7 @@ func nextArsenalAttackActionBonus(s *card.TurnState, n int) int {
 type ScoutThePeripheryRed struct{}
 
 func (ScoutThePeripheryRed) ID() card.ID                 { return card.ScoutThePeripheryRed }
-func (ScoutThePeripheryRed) Name() string                { return "Scout the Periphery (Red)" }
+func (ScoutThePeripheryRed) Name() string                { return "Scout the Periphery" }
 func (ScoutThePeripheryRed) Cost(*card.TurnState) int                   { return 0 }
 func (ScoutThePeripheryRed) Pitch() int                  { return 1 }
 func (ScoutThePeripheryRed) Attack() int                 { return 0 }
@@ -46,7 +46,7 @@ func (ScoutThePeripheryRed) Play(s *card.TurnState, _ *card.CardState) int { ret
 type ScoutThePeripheryYellow struct{}
 
 func (ScoutThePeripheryYellow) ID() card.ID                 { return card.ScoutThePeripheryYellow }
-func (ScoutThePeripheryYellow) Name() string                { return "Scout the Periphery (Yellow)" }
+func (ScoutThePeripheryYellow) Name() string                { return "Scout the Periphery" }
 func (ScoutThePeripheryYellow) Cost(*card.TurnState) int                   { return 0 }
 func (ScoutThePeripheryYellow) Pitch() int                  { return 2 }
 func (ScoutThePeripheryYellow) Attack() int                 { return 0 }
@@ -58,7 +58,7 @@ func (ScoutThePeripheryYellow) Play(s *card.TurnState, _ *card.CardState) int { 
 type ScoutThePeripheryBlue struct{}
 
 func (ScoutThePeripheryBlue) ID() card.ID                 { return card.ScoutThePeripheryBlue }
-func (ScoutThePeripheryBlue) Name() string                { return "Scout the Periphery (Blue)" }
+func (ScoutThePeripheryBlue) Name() string                { return "Scout the Periphery" }
 func (ScoutThePeripheryBlue) Cost(*card.TurnState) int                   { return 0 }
 func (ScoutThePeripheryBlue) Pitch() int                  { return 3 }
 func (ScoutThePeripheryBlue) Attack() int                 { return 0 }

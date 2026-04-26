@@ -11,7 +11,7 @@ var onAKnifeEdgeTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction)
 type OnAKnifeEdgeYellow struct{}
 
 func (OnAKnifeEdgeYellow) ID() card.ID                 { return card.OnAKnifeEdgeYellow }
-func (OnAKnifeEdgeYellow) Name() string                { return "On a Knife Edge (Yellow)" }
+func (OnAKnifeEdgeYellow) Name() string                { return "On a Knife Edge" }
 func (OnAKnifeEdgeYellow) Cost(*card.TurnState) int                   { return 0 }
 func (OnAKnifeEdgeYellow) Pitch() int                  { return 2 }
 func (OnAKnifeEdgeYellow) Attack() int                 { return 0 }

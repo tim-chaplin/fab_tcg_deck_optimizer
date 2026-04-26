@@ -13,7 +13,7 @@ var strategicPlanningTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction)
 type StrategicPlanningRed struct{}
 
 func (StrategicPlanningRed) ID() card.ID                 { return card.StrategicPlanningRed }
-func (StrategicPlanningRed) Name() string                { return "Strategic Planning (Red)" }
+func (StrategicPlanningRed) Name() string                { return "Strategic Planning" }
 func (StrategicPlanningRed) Cost(*card.TurnState) int                   { return 1 }
 func (StrategicPlanningRed) Pitch() int                  { return 1 }
 func (StrategicPlanningRed) Attack() int                 { return 0 }
@@ -27,7 +27,7 @@ func (StrategicPlanningRed) Play(s *card.TurnState, _ *card.CardState) int { ret
 type StrategicPlanningYellow struct{}
 
 func (StrategicPlanningYellow) ID() card.ID                 { return card.StrategicPlanningYellow }
-func (StrategicPlanningYellow) Name() string                { return "Strategic Planning (Yellow)" }
+func (StrategicPlanningYellow) Name() string                { return "Strategic Planning" }
 func (StrategicPlanningYellow) Cost(*card.TurnState) int                   { return 1 }
 func (StrategicPlanningYellow) Pitch() int                  { return 2 }
 func (StrategicPlanningYellow) Attack() int                 { return 0 }
@@ -41,7 +41,7 @@ func (StrategicPlanningYellow) Play(s *card.TurnState, _ *card.CardState) int { 
 type StrategicPlanningBlue struct{}
 
 func (StrategicPlanningBlue) ID() card.ID                 { return card.StrategicPlanningBlue }
-func (StrategicPlanningBlue) Name() string                { return "Strategic Planning (Blue)" }
+func (StrategicPlanningBlue) Name() string                { return "Strategic Planning" }
 func (StrategicPlanningBlue) Cost(*card.TurnState) int                   { return 1 }
 func (StrategicPlanningBlue) Pitch() int                  { return 3 }
 func (StrategicPlanningBlue) Attack() int                 { return 0 }

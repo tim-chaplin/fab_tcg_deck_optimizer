@@ -13,7 +13,7 @@ var nimbleStrikeTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.
 type NimbleStrikeRed struct{}
 
 func (NimbleStrikeRed) ID() card.ID                 { return card.NimbleStrikeRed }
-func (NimbleStrikeRed) Name() string                { return "Nimble Strike (Red)" }
+func (NimbleStrikeRed) Name() string                { return "Nimble Strike" }
 func (NimbleStrikeRed) Cost(*card.TurnState) int                   { return 1 }
 func (NimbleStrikeRed) Pitch() int                  { return 1 }
 func (NimbleStrikeRed) Attack() int                 { return 4 }
@@ -27,7 +27,7 @@ func (c NimbleStrikeRed) Play(s *card.TurnState, _ *card.CardState) int { return
 type NimbleStrikeYellow struct{}
 
 func (NimbleStrikeYellow) ID() card.ID                 { return card.NimbleStrikeYellow }
-func (NimbleStrikeYellow) Name() string                { return "Nimble Strike (Yellow)" }
+func (NimbleStrikeYellow) Name() string                { return "Nimble Strike" }
 func (NimbleStrikeYellow) Cost(*card.TurnState) int                   { return 1 }
 func (NimbleStrikeYellow) Pitch() int                  { return 2 }
 func (NimbleStrikeYellow) Attack() int                 { return 3 }
@@ -41,7 +41,7 @@ func (c NimbleStrikeYellow) Play(s *card.TurnState, _ *card.CardState) int { ret
 type NimbleStrikeBlue struct{}
 
 func (NimbleStrikeBlue) ID() card.ID                 { return card.NimbleStrikeBlue }
-func (NimbleStrikeBlue) Name() string                { return "Nimble Strike (Blue)" }
+func (NimbleStrikeBlue) Name() string                { return "Nimble Strike" }
 func (NimbleStrikeBlue) Cost(*card.TurnState) int                   { return 1 }
 func (NimbleStrikeBlue) Pitch() int                  { return 3 }
 func (NimbleStrikeBlue) Attack() int                 { return 2 }

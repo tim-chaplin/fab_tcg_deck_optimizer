@@ -114,18 +114,18 @@ func TestRoundTrip_PreservesBestTurnLog(t *testing.T) {
 	d := deck.Random(hero.Viserai{}, 40, 2, rng, nil)
 	want := hand.TurnLog{
 		StartOfTurn: []string{
-			"Hand: Hocus Pocus (Blue), Consuming Volition (Red)",
-			"Arsenal: Sigil of the Arknight (Blue)",
+			"Hand: Hocus Pocus [B], Consuming Volition [R]",
+			"Arsenal: Sigil of the Arknight [B]",
 			"Auras: 1 Runechant",
-			"Sigil of the Arknight (Blue): drew Hit the High Notes (Red) into hand",
+			"Sigil of the Arknight [B]: drew Hit the High Notes [R] into hand",
 		},
 		MyTurn: []string{
-			"Hocus Pocus (Blue): PITCH",
-			"Consuming Volition (Red): ATTACK (+4)",
+			"Hocus Pocus [B]: PITCH",
+			"Consuming Volition [R]: ATTACK (+4)",
 			"Viserai: HERO TRIGGER (+1)",
 		},
 		EndOfTurn: []string{
-			"Hand: Hit the High Notes (Red)",
+			"Hand: Hit the High Notes [R]",
 			"Auras: 1 Runechant",
 		},
 	}
@@ -159,7 +159,7 @@ func TestRoundTrip_PreservesBestTurnLog(t *testing.T) {
 func TestRoundTrip_PreservesSideboard(t *testing.T) {
 	rng := rand.New(rand.NewSource(42))
 	d := deck.Random(hero.Viserai{}, 40, 2, rng, nil)
-	d.Sideboard = []string{"Aether Slash (Red)", "Aether Slash (Red)", "Arcanic Spike (Blue)"}
+	d.Sideboard = []string{"Aether Slash [R]", "Aether Slash [R]", "Arcanic Spike [B]"}
 
 	data, err := Marshal(d)
 	if err != nil {
@@ -170,7 +170,7 @@ func TestRoundTrip_PreservesSideboard(t *testing.T) {
 		t.Fatalf("Unmarshal: %v", err)
 	}
 
-	want := map[string]int{"Aether Slash (Red)": 2, "Arcanic Spike (Blue)": 1}
+	want := map[string]int{"Aether Slash [R]": 2, "Arcanic Spike [B]": 1}
 	gotCounts := map[string]int{}
 	for _, name := range got.Sideboard {
 		gotCounts[name]++

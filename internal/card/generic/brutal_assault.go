@@ -10,7 +10,7 @@ var brutalAssaultTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card
 type BrutalAssaultRed struct{}
 
 func (BrutalAssaultRed) ID() card.ID                 { return card.BrutalAssaultRed }
-func (BrutalAssaultRed) Name() string                { return "Brutal Assault (Red)" }
+func (BrutalAssaultRed) Name() string                { return "Brutal Assault" }
 func (BrutalAssaultRed) Cost(*card.TurnState) int                   { return 2 }
 func (BrutalAssaultRed) Pitch() int                  { return 1 }
 func (BrutalAssaultRed) Attack() int                 { return 6 }
@@ -22,7 +22,7 @@ func (c BrutalAssaultRed) Play(s *card.TurnState, _ *card.CardState) int { retur
 type BrutalAssaultYellow struct{}
 
 func (BrutalAssaultYellow) ID() card.ID                 { return card.BrutalAssaultYellow }
-func (BrutalAssaultYellow) Name() string                { return "Brutal Assault (Yellow)" }
+func (BrutalAssaultYellow) Name() string                { return "Brutal Assault" }
 func (BrutalAssaultYellow) Cost(*card.TurnState) int                   { return 2 }
 func (BrutalAssaultYellow) Pitch() int                  { return 2 }
 func (BrutalAssaultYellow) Attack() int                 { return 5 }
@@ -34,7 +34,7 @@ func (c BrutalAssaultYellow) Play(s *card.TurnState, _ *card.CardState) int { re
 type BrutalAssaultBlue struct{}
 
 func (BrutalAssaultBlue) ID() card.ID                 { return card.BrutalAssaultBlue }
-func (BrutalAssaultBlue) Name() string                { return "Brutal Assault (Blue)" }
+func (BrutalAssaultBlue) Name() string                { return "Brutal Assault" }
 func (BrutalAssaultBlue) Cost(*card.TurnState) int                   { return 2 }
 func (BrutalAssaultBlue) Pitch() int                  { return 3 }
 func (BrutalAssaultBlue) Attack() int                 { return 4 }

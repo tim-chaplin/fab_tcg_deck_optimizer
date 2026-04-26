@@ -18,7 +18,7 @@ var sigilOfTheArknightTypes = card.NewTypeSet(card.TypeRuneblade, card.TypeActio
 type SigilOfTheArknightBlue struct{}
 
 func (SigilOfTheArknightBlue) ID() card.ID              { return card.SigilOfTheArknightBlue }
-func (SigilOfTheArknightBlue) Name() string             { return "Sigil of the Arknight (Blue)" }
+func (SigilOfTheArknightBlue) Name() string             { return "Sigil of the Arknight" }
 func (SigilOfTheArknightBlue) Cost(*card.TurnState) int { return 0 }
 func (SigilOfTheArknightBlue) Pitch() int               { return 3 }
 func (SigilOfTheArknightBlue) Attack() int              { return 0 }

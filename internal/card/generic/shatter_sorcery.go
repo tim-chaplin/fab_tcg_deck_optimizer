@@ -12,7 +12,7 @@ var shatterSorceryTypes = card.NewTypeSet(card.TypeGeneric, card.TypeInstant)
 type ShatterSorceryBlue struct{}
 
 func (ShatterSorceryBlue) ID() card.ID                               { return card.ShatterSorceryBlue }
-func (ShatterSorceryBlue) Name() string                              { return "Shatter Sorcery (Blue)" }
+func (ShatterSorceryBlue) Name() string                              { return "Shatter Sorcery" }
 func (ShatterSorceryBlue) Cost(*card.TurnState) int                  { return 0 }
 func (ShatterSorceryBlue) Pitch() int                                { return 3 }
 func (ShatterSorceryBlue) Attack() int                               { return 0 }

@@ -9,7 +9,7 @@ var defenseReactionTypes = card.NewTypeSet(card.TypeGeneric, card.TypeDefenseRea
 type DodgeBlue struct{}
 
 func (DodgeBlue) ID() card.ID                 { return card.DodgeBlue }
-func (DodgeBlue) Name() string             { return "Dodge (Blue)" }
+func (DodgeBlue) Name() string             { return "Dodge" }
 func (DodgeBlue) Cost(*card.TurnState) int                { return 0 }
 func (DodgeBlue) Pitch() int               { return 3 }
 func (DodgeBlue) Attack() int              { return 0 }

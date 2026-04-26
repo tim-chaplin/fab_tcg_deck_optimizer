@@ -11,7 +11,7 @@ var talismanOfDousingTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, 
 type TalismanOfDousingYellow struct{}
 
 func (TalismanOfDousingYellow) ID() card.ID                               { return card.TalismanOfDousingYellow }
-func (TalismanOfDousingYellow) Name() string                              { return "Talisman of Dousing (Yellow)" }
+func (TalismanOfDousingYellow) Name() string                              { return "Talisman of Dousing" }
 func (TalismanOfDousingYellow) Cost(*card.TurnState) int                  { return 0 }
 func (TalismanOfDousingYellow) Pitch() int                                { return 2 }
 func (TalismanOfDousingYellow) Attack() int                               { return 0 }

@@ -12,7 +12,7 @@ var walkThePlankTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.
 type WalkThePlankRed struct{}
 
 func (WalkThePlankRed) ID() card.ID                 { return card.WalkThePlankRed }
-func (WalkThePlankRed) Name() string                { return "Walk the Plank (Red)" }
+func (WalkThePlankRed) Name() string                { return "Walk the Plank" }
 func (WalkThePlankRed) Cost(*card.TurnState) int                   { return 3 }
 func (WalkThePlankRed) Pitch() int                  { return 1 }
 func (WalkThePlankRed) Attack() int                 { return 7 }
@@ -26,7 +26,7 @@ func (c WalkThePlankRed) Play(s *card.TurnState, self *card.CardState) int { ret
 type WalkThePlankYellow struct{}
 
 func (WalkThePlankYellow) ID() card.ID                 { return card.WalkThePlankYellow }
-func (WalkThePlankYellow) Name() string                { return "Walk the Plank (Yellow)" }
+func (WalkThePlankYellow) Name() string                { return "Walk the Plank" }
 func (WalkThePlankYellow) Cost(*card.TurnState) int                   { return 3 }
 func (WalkThePlankYellow) Pitch() int                  { return 2 }
 func (WalkThePlankYellow) Attack() int                 { return 6 }
@@ -40,7 +40,7 @@ func (c WalkThePlankYellow) Play(s *card.TurnState, self *card.CardState) int { 
 type WalkThePlankBlue struct{}
 
 func (WalkThePlankBlue) ID() card.ID                 { return card.WalkThePlankBlue }
-func (WalkThePlankBlue) Name() string                { return "Walk the Plank (Blue)" }
+func (WalkThePlankBlue) Name() string                { return "Walk the Plank" }
 func (WalkThePlankBlue) Cost(*card.TurnState) int                   { return 3 }
 func (WalkThePlankBlue) Pitch() int                  { return 3 }
 func (WalkThePlankBlue) Attack() int                 { return 5 }

@@ -11,7 +11,7 @@ var chestPuffTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.Typ
 type ChestPuffRed struct{}
 
 func (ChestPuffRed) ID() card.ID                 { return card.ChestPuffRed }
-func (ChestPuffRed) Name() string                { return "Chest Puff (Red)" }
+func (ChestPuffRed) Name() string                { return "Chest Puff" }
 func (ChestPuffRed) Cost(*card.TurnState) int                   { return 2 }
 func (ChestPuffRed) Pitch() int                  { return 1 }
 func (ChestPuffRed) Attack() int                 { return 7 }

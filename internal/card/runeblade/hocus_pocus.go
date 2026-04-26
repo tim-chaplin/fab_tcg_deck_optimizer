@@ -11,7 +11,7 @@ var hocusPocusTypes = card.NewTypeSet(card.TypeRuneblade, card.TypeAction, card.
 type HocusPocusRed struct{}
 
 func (HocusPocusRed) ID() card.ID                 { return card.HocusPocusRed }
-func (HocusPocusRed) Name() string               { return "Hocus Pocus (Red)" }
+func (HocusPocusRed) Name() string               { return "Hocus Pocus" }
 func (HocusPocusRed) Cost(*card.TurnState) int                  { return 0 }
 func (HocusPocusRed) Pitch() int                 { return 1 }
 func (HocusPocusRed) Attack() int                { return 3 }
@@ -23,7 +23,7 @@ func (c HocusPocusRed) Play(s *card.TurnState, _ *card.CardState) int { return c
 type HocusPocusYellow struct{}
 
 func (HocusPocusYellow) ID() card.ID                 { return card.HocusPocusYellow }
-func (HocusPocusYellow) Name() string               { return "Hocus Pocus (Yellow)" }
+func (HocusPocusYellow) Name() string               { return "Hocus Pocus" }
 func (HocusPocusYellow) Cost(*card.TurnState) int                  { return 0 }
 func (HocusPocusYellow) Pitch() int                 { return 2 }
 func (HocusPocusYellow) Attack() int                { return 2 }
@@ -35,7 +35,7 @@ func (c HocusPocusYellow) Play(s *card.TurnState, _ *card.CardState) int { retur
 type HocusPocusBlue struct{}
 
 func (HocusPocusBlue) ID() card.ID                 { return card.HocusPocusBlue }
-func (HocusPocusBlue) Name() string               { return "Hocus Pocus (Blue)" }
+func (HocusPocusBlue) Name() string               { return "Hocus Pocus" }
 func (HocusPocusBlue) Cost(*card.TurnState) int                  { return 0 }
 func (HocusPocusBlue) Pitch() int                 { return 3 }
 func (HocusPocusBlue) Attack() int                { return 1 }

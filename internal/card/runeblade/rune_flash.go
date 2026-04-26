@@ -25,7 +25,7 @@ func runeFlashCost(s *card.TurnState) int {
 type RuneFlashRed struct{}
 
 func (RuneFlashRed) ID() card.ID                 { return card.RuneFlashRed }
-func (RuneFlashRed) Name() string                { return "Rune Flash (Red)" }
+func (RuneFlashRed) Name() string                { return "Rune Flash" }
 func (RuneFlashRed) Cost(s *card.TurnState) int  { return runeFlashCost(s) }
 func (RuneFlashRed) MinCost() int                { return 0 }
 func (RuneFlashRed) MaxCost() int                { return runeFlashPrintedCost }
@@ -39,7 +39,7 @@ func (c RuneFlashRed) Play(*card.TurnState, *card.CardState) int  { return c.Att
 type RuneFlashYellow struct{}
 
 func (RuneFlashYellow) ID() card.ID                 { return card.RuneFlashYellow }
-func (RuneFlashYellow) Name() string                { return "Rune Flash (Yellow)" }
+func (RuneFlashYellow) Name() string                { return "Rune Flash" }
 func (RuneFlashYellow) Cost(s *card.TurnState) int  { return runeFlashCost(s) }
 func (RuneFlashYellow) MinCost() int                { return 0 }
 func (RuneFlashYellow) MaxCost() int                { return runeFlashPrintedCost }
@@ -53,7 +53,7 @@ func (c RuneFlashYellow) Play(*card.TurnState, *card.CardState) int  { return c.
 type RuneFlashBlue struct{}
 
 func (RuneFlashBlue) ID() card.ID                 { return card.RuneFlashBlue }
-func (RuneFlashBlue) Name() string                { return "Rune Flash (Blue)" }
+func (RuneFlashBlue) Name() string                { return "Rune Flash" }
 func (RuneFlashBlue) Cost(s *card.TurnState) int  { return runeFlashCost(s) }
 func (RuneFlashBlue) MinCost() int                { return 0 }
 func (RuneFlashBlue) MaxCost() int                { return runeFlashPrintedCost }

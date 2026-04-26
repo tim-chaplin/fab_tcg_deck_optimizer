@@ -18,7 +18,7 @@ var sigilOfSilphidaeTypes = card.NewTypeSet(card.TypeRuneblade, card.TypeAction,
 type SigilOfSilphidaeBlue struct{}
 
 func (SigilOfSilphidaeBlue) ID() card.ID              { return card.SigilOfSilphidaeBlue }
-func (SigilOfSilphidaeBlue) Name() string             { return "Sigil of Silphidae (Blue)" }
+func (SigilOfSilphidaeBlue) Name() string             { return "Sigil of Silphidae" }
 func (SigilOfSilphidaeBlue) Cost(*card.TurnState) int { return 0 }
 func (SigilOfSilphidaeBlue) Pitch() int               { return 3 }
 func (SigilOfSilphidaeBlue) Attack() int              { return 0 }

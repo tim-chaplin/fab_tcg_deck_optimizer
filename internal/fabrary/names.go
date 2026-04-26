@@ -1,17 +1,17 @@
 package fabrary
 
-// Card-name conversion between the optimizer's canonical pitch suffix ("(Red)") and
-// fabrary's lowercase form ("(red)"). Shared by both marshalling (which lowercases on the
-// way out) and unmarshalling (which re-canonicalises on the way in).
+// Card-name conversion between the optimizer's canonical pitch suffix ("[R]") and
+// fabrary's lowercase parenthesised form ("(red)"). Shared by both marshalling (which
+// translates outbound) and unmarshalling (which translates inbound).
 
 import "strings"
 
-// pitchColors pairs the optimizer's canonical suffix ("(Red)") with fabrary's lowercase form
+// pitchColors pairs the optimizer's canonical suffix ("[R]") with fabrary's lowercase form
 // ("(red)"). One entry per color is enough — suffixes don't overlap.
 var pitchColors = []struct{ canon, fabrary string }{
-	{"(Red)", "(red)"},
-	{"(Yellow)", "(yellow)"},
-	{"(Blue)", "(blue)"},
+	{"[R]", "(red)"},
+	{"[Y]", "(yellow)"},
+	{"[B]", "(blue)"},
 }
 
 func toFabraryCardName(s string) string {

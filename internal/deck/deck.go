@@ -68,18 +68,17 @@ type defaultSideboardEntry struct {
 // card across main + sideboard). Equipment-slot items (Crown of Dichotomy, Nullrune
 // boots/gloves, Runebleed Robe) target 1 copy; deck cards target 2.
 //
-// Names must match card.Card.Name()'s canonical casing (e.g. "Read the Runes (Red)", not
-// "(red)"): ApplyDefaults dedupes by exact string and fabrary's lowercasing happens later
-// in sideboardCountsForExport, so a mixed-case entry here would leak duplicates into the
-// persisted Sideboard.
+// Card names must match card.DisplayName format ("Read the Runes [R]") since ApplyDefaults
+// dedupes via DisplayName-keyed counts. Equipment slots stay bare since they're not pitch-
+// varying cards.
 var defaultSideboard = []defaultSideboardEntry{
 	{"Crown of Dichotomy", 1},
 	{"Nullrune Boots", 1},
 	{"Nullrune Gloves", 1},
 	{"Runebleed Robe", 1},
-	{"Read the Runes (Red)", 2},
-	{"Reduce to Runechant (Red)", 2},
-	{"Sigil of Suffering (Red)", 2},
+	{"Read the Runes [R]", 2},
+	{"Reduce to Runechant [R]", 2},
+	{"Sigil of Suffering [R]", 2},
 }
 
 // sideboardCopyCap is the per-card copy limit across main deck + sideboard combined. The
@@ -107,7 +106,7 @@ func (d *Deck) ApplyDefaults() {
 
 	mainCounts := map[string]int{}
 	for _, c := range d.Cards {
-		mainCounts[c.Name()]++
+		mainCounts[card.DisplayName(c)]++
 	}
 	sideCounts := map[string]int{}
 	for _, name := range d.Sideboard {

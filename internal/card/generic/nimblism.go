@@ -28,7 +28,7 @@ func nimblismPlay(s *card.TurnState, n int) int {
 type NimblismRed struct{}
 
 func (NimblismRed) ID() card.ID                 { return card.NimblismRed }
-func (NimblismRed) Name() string                { return "Nimblism (Red)" }
+func (NimblismRed) Name() string                { return "Nimblism" }
 func (NimblismRed) Cost(*card.TurnState) int                   { return 0 }
 func (NimblismRed) Pitch() int                  { return 1 }
 func (NimblismRed) Attack() int                 { return 0 }
@@ -40,7 +40,7 @@ func (NimblismRed) Play(s *card.TurnState, _ *card.CardState) int { return nimbl
 type NimblismYellow struct{}
 
 func (NimblismYellow) ID() card.ID                 { return card.NimblismYellow }
-func (NimblismYellow) Name() string                { return "Nimblism (Yellow)" }
+func (NimblismYellow) Name() string                { return "Nimblism" }
 func (NimblismYellow) Cost(*card.TurnState) int                   { return 0 }
 func (NimblismYellow) Pitch() int                  { return 2 }
 func (NimblismYellow) Attack() int                 { return 0 }
@@ -52,7 +52,7 @@ func (NimblismYellow) Play(s *card.TurnState, _ *card.CardState) int { return ni
 type NimblismBlue struct{}
 
 func (NimblismBlue) ID() card.ID                 { return card.NimblismBlue }
-func (NimblismBlue) Name() string                { return "Nimblism (Blue)" }
+func (NimblismBlue) Name() string                { return "Nimblism" }
 func (NimblismBlue) Cost(*card.TurnState) int                   { return 0 }
 func (NimblismBlue) Pitch() int                  { return 3 }
 func (NimblismBlue) Attack() int                 { return 0 }

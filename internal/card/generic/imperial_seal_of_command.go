@@ -13,7 +13,7 @@ var imperialSealOfCommandTypes = card.NewTypeSet(card.TypeGeneric, card.TypeActi
 type ImperialSealOfCommandRed struct{}
 
 func (ImperialSealOfCommandRed) ID() card.ID                               { return card.ImperialSealOfCommandRed }
-func (ImperialSealOfCommandRed) Name() string                              { return "Imperial Seal of Command (Red)" }
+func (ImperialSealOfCommandRed) Name() string                              { return "Imperial Seal of Command" }
 func (ImperialSealOfCommandRed) Cost(*card.TurnState) int                  { return 0 }
 func (ImperialSealOfCommandRed) Pitch() int                                { return 1 }
 func (ImperialSealOfCommandRed) Attack() int                               { return 0 }

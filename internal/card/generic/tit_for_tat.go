@@ -11,7 +11,7 @@ var titForTatTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction)
 type TitForTatBlue struct{}
 
 func (TitForTatBlue) ID() card.ID                 { return card.TitForTatBlue }
-func (TitForTatBlue) Name() string                { return "Tit for Tat (Blue)" }
+func (TitForTatBlue) Name() string                { return "Tit for Tat" }
 func (TitForTatBlue) Cost(*card.TurnState) int                   { return 0 }
 func (TitForTatBlue) Pitch() int                  { return 3 }
 func (TitForTatBlue) Attack() int                 { return 0 }

@@ -13,7 +13,7 @@ var rallyTheCoastGuardTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction,
 type RallyTheCoastGuardRed struct{}
 
 func (RallyTheCoastGuardRed) ID() card.ID                 { return card.RallyTheCoastGuardRed }
-func (RallyTheCoastGuardRed) Name() string                { return "Rally the Coast Guard (Red)" }
+func (RallyTheCoastGuardRed) Name() string                { return "Rally the Coast Guard" }
 func (RallyTheCoastGuardRed) Cost(*card.TurnState) int                   { return 3 }
 func (RallyTheCoastGuardRed) Pitch() int                  { return 1 }
 func (RallyTheCoastGuardRed) Attack() int                 { return 7 }
@@ -27,7 +27,7 @@ func (c RallyTheCoastGuardRed) Play(s *card.TurnState, _ *card.CardState) int { 
 type RallyTheCoastGuardYellow struct{}
 
 func (RallyTheCoastGuardYellow) ID() card.ID                 { return card.RallyTheCoastGuardYellow }
-func (RallyTheCoastGuardYellow) Name() string                { return "Rally the Coast Guard (Yellow)" }
+func (RallyTheCoastGuardYellow) Name() string                { return "Rally the Coast Guard" }
 func (RallyTheCoastGuardYellow) Cost(*card.TurnState) int                   { return 3 }
 func (RallyTheCoastGuardYellow) Pitch() int                  { return 2 }
 func (RallyTheCoastGuardYellow) Attack() int                 { return 6 }
@@ -41,7 +41,7 @@ func (c RallyTheCoastGuardYellow) Play(s *card.TurnState, _ *card.CardState) int
 type RallyTheCoastGuardBlue struct{}
 
 func (RallyTheCoastGuardBlue) ID() card.ID                 { return card.RallyTheCoastGuardBlue }
-func (RallyTheCoastGuardBlue) Name() string                { return "Rally the Coast Guard (Blue)" }
+func (RallyTheCoastGuardBlue) Name() string                { return "Rally the Coast Guard" }
 func (RallyTheCoastGuardBlue) Cost(*card.TurnState) int                   { return 3 }
 func (RallyTheCoastGuardBlue) Pitch() int                  { return 3 }
 func (RallyTheCoastGuardBlue) Attack() int                 { return 5 }

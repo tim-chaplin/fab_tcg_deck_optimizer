@@ -18,7 +18,7 @@ var regurgitatingSlogTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, 
 type RegurgitatingSlogRed struct{}
 
 func (RegurgitatingSlogRed) ID() card.ID                 { return card.RegurgitatingSlogRed }
-func (RegurgitatingSlogRed) Name() string                { return "Regurgitating Slog (Red)" }
+func (RegurgitatingSlogRed) Name() string                { return "Regurgitating Slog" }
 func (RegurgitatingSlogRed) Cost(*card.TurnState) int                   { return 2 }
 func (RegurgitatingSlogRed) Pitch() int                  { return 1 }
 func (RegurgitatingSlogRed) Attack() int                 { return 6 }
@@ -33,7 +33,7 @@ func (c RegurgitatingSlogRed) Play(s *card.TurnState, _ *card.CardState) int { r
 type RegurgitatingSlogYellow struct{}
 
 func (RegurgitatingSlogYellow) ID() card.ID                 { return card.RegurgitatingSlogYellow }
-func (RegurgitatingSlogYellow) Name() string                { return "Regurgitating Slog (Yellow)" }
+func (RegurgitatingSlogYellow) Name() string                { return "Regurgitating Slog" }
 func (RegurgitatingSlogYellow) Cost(*card.TurnState) int                   { return 2 }
 func (RegurgitatingSlogYellow) Pitch() int                  { return 2 }
 func (RegurgitatingSlogYellow) Attack() int                 { return 5 }
@@ -48,7 +48,7 @@ func (c RegurgitatingSlogYellow) Play(s *card.TurnState, _ *card.CardState) int 
 type RegurgitatingSlogBlue struct{}
 
 func (RegurgitatingSlogBlue) ID() card.ID                 { return card.RegurgitatingSlogBlue }
-func (RegurgitatingSlogBlue) Name() string                { return "Regurgitating Slog (Blue)" }
+func (RegurgitatingSlogBlue) Name() string                { return "Regurgitating Slog" }
 func (RegurgitatingSlogBlue) Cost(*card.TurnState) int                   { return 2 }
 func (RegurgitatingSlogBlue) Pitch() int                  { return 3 }
 func (RegurgitatingSlogBlue) Attack() int                 { return 4 }

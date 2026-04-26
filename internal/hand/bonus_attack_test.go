@@ -215,7 +215,7 @@ func TestPlaySequence_BonusAttackPerPermutationReset(t *testing.T) {
 // likely-to-hit threshold so its arcane-damage discard rider fires.
 //
 // Setup:
-//   - Hand: Consuming Volition (Yellow) + Nimblism (Blue) + a pitch-1 red.
+//   - Hand: Consuming Volition [Y] + Nimblism [B] + a pitch-1 red.
 //   - 1 Runechant carrying over from the previous turn.
 //
 // Best chain:

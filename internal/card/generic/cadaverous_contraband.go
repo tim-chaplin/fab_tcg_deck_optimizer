@@ -13,7 +13,7 @@ var cadaverousContrabandTypes = card.NewTypeSet(card.TypeGeneric, card.TypeActio
 type CadaverousContrabandRed struct{}
 
 func (CadaverousContrabandRed) ID() card.ID                 { return card.CadaverousContrabandRed }
-func (CadaverousContrabandRed) Name() string                { return "Cadaverous Contraband (Red)" }
+func (CadaverousContrabandRed) Name() string                { return "Cadaverous Contraband" }
 func (CadaverousContrabandRed) Cost(*card.TurnState) int                   { return 2 }
 func (CadaverousContrabandRed) Pitch() int                  { return 1 }
 func (CadaverousContrabandRed) Attack() int                 { return 6 }
@@ -27,7 +27,7 @@ func (c CadaverousContrabandRed) Play(s *card.TurnState, _ *card.CardState) int 
 type CadaverousContrabandYellow struct{}
 
 func (CadaverousContrabandYellow) ID() card.ID                 { return card.CadaverousContrabandYellow }
-func (CadaverousContrabandYellow) Name() string                { return "Cadaverous Contraband (Yellow)" }
+func (CadaverousContrabandYellow) Name() string                { return "Cadaverous Contraband" }
 func (CadaverousContrabandYellow) Cost(*card.TurnState) int                   { return 2 }
 func (CadaverousContrabandYellow) Pitch() int                  { return 2 }
 func (CadaverousContrabandYellow) Attack() int                 { return 5 }
@@ -41,7 +41,7 @@ func (c CadaverousContrabandYellow) Play(s *card.TurnState, _ *card.CardState) i
 type CadaverousContrabandBlue struct{}
 
 func (CadaverousContrabandBlue) ID() card.ID                 { return card.CadaverousContrabandBlue }
-func (CadaverousContrabandBlue) Name() string                { return "Cadaverous Contraband (Blue)" }
+func (CadaverousContrabandBlue) Name() string                { return "Cadaverous Contraband" }
 func (CadaverousContrabandBlue) Cost(*card.TurnState) int                   { return 2 }
 func (CadaverousContrabandBlue) Pitch() int                  { return 3 }
 func (CadaverousContrabandBlue) Attack() int                 { return 4 }

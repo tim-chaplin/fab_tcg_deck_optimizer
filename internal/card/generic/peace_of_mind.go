@@ -12,7 +12,7 @@ var peaceOfMindTypes = card.NewTypeSet(card.TypeGeneric, card.TypeInstant)
 type PeaceOfMindRed struct{}
 
 func (PeaceOfMindRed) ID() card.ID                               { return card.PeaceOfMindRed }
-func (PeaceOfMindRed) Name() string                              { return "Peace of Mind (Red)" }
+func (PeaceOfMindRed) Name() string                              { return "Peace of Mind" }
 func (PeaceOfMindRed) Cost(*card.TurnState) int                  { return 2 }
 func (PeaceOfMindRed) Pitch() int                                { return 1 }
 func (PeaceOfMindRed) Attack() int                               { return 0 }
@@ -26,7 +26,7 @@ func (PeaceOfMindRed) Play(*card.TurnState, *card.CardState) int { return 0 }
 type PeaceOfMindYellow struct{}
 
 func (PeaceOfMindYellow) ID() card.ID                               { return card.PeaceOfMindYellow }
-func (PeaceOfMindYellow) Name() string                              { return "Peace of Mind (Yellow)" }
+func (PeaceOfMindYellow) Name() string                              { return "Peace of Mind" }
 func (PeaceOfMindYellow) Cost(*card.TurnState) int                  { return 2 }
 func (PeaceOfMindYellow) Pitch() int                                { return 2 }
 func (PeaceOfMindYellow) Attack() int                               { return 0 }
@@ -40,7 +40,7 @@ func (PeaceOfMindYellow) Play(*card.TurnState, *card.CardState) int { return 0 }
 type PeaceOfMindBlue struct{}
 
 func (PeaceOfMindBlue) ID() card.ID                               { return card.PeaceOfMindBlue }
-func (PeaceOfMindBlue) Name() string                              { return "Peace of Mind (Blue)" }
+func (PeaceOfMindBlue) Name() string                              { return "Peace of Mind" }
 func (PeaceOfMindBlue) Cost(*card.TurnState) int                  { return 2 }
 func (PeaceOfMindBlue) Pitch() int                                { return 3 }
 func (PeaceOfMindBlue) Attack() int                               { return 0 }

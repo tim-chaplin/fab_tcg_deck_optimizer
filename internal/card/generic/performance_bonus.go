@@ -34,7 +34,7 @@ func performanceBonusPlay(c card.Card, self *card.CardState) int {
 type PerformanceBonusRed struct{}
 
 func (PerformanceBonusRed) ID() card.ID                  { return card.PerformanceBonusRed }
-func (PerformanceBonusRed) Name() string                 { return "Performance Bonus (Red)" }
+func (PerformanceBonusRed) Name() string                 { return "Performance Bonus" }
 func (PerformanceBonusRed) Cost(*card.TurnState) int                    { return 0 }
 func (PerformanceBonusRed) Pitch() int                   { return 1 }
 func (PerformanceBonusRed) Attack() int                  { return 3 }
@@ -48,7 +48,7 @@ func (c PerformanceBonusRed) Play(_ *card.TurnState, self *card.CardState) int {
 type PerformanceBonusYellow struct{}
 
 func (PerformanceBonusYellow) ID() card.ID                  { return card.PerformanceBonusYellow }
-func (PerformanceBonusYellow) Name() string                 { return "Performance Bonus (Yellow)" }
+func (PerformanceBonusYellow) Name() string                 { return "Performance Bonus" }
 func (PerformanceBonusYellow) Cost(*card.TurnState) int                    { return 0 }
 func (PerformanceBonusYellow) Pitch() int                   { return 2 }
 func (PerformanceBonusYellow) Attack() int                  { return 2 }
@@ -62,7 +62,7 @@ func (c PerformanceBonusYellow) Play(_ *card.TurnState, self *card.CardState) in
 type PerformanceBonusBlue struct{}
 
 func (PerformanceBonusBlue) ID() card.ID                  { return card.PerformanceBonusBlue }
-func (PerformanceBonusBlue) Name() string                 { return "Performance Bonus (Blue)" }
+func (PerformanceBonusBlue) Name() string                 { return "Performance Bonus" }
 func (PerformanceBonusBlue) Cost(*card.TurnState) int                    { return 0 }
 func (PerformanceBonusBlue) Pitch() int                   { return 3 }
 func (PerformanceBonusBlue) Attack() int                  { return 1 }

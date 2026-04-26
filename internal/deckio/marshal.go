@@ -22,12 +22,12 @@ func Marshal(d *deck.Deck) ([]byte, error) {
 func toJSON(d *deck.Deck) *DeckJSON {
 	weapons := make([]string, len(d.Weapons))
 	for i, w := range d.Weapons {
-		weapons[i] = w.Name()
+		weapons[i] = card.DisplayName(w)
 	}
 	cardNames := make([]string, len(d.Cards))
 	var pitchCounts PitchCountsJSON
 	for i, c := range d.Cards {
-		cardNames[i] = c.Name()
+		cardNames[i] = card.DisplayName(c)
 		switch c.Pitch() {
 		case 1:
 			pitchCounts.Red++
@@ -85,7 +85,7 @@ func perCardMarginalToJSON(m map[card.ID]deck.CardMarginalStats) []CardMarginalS
 	out := make([]CardMarginalStatsJSON, 0, len(m))
 	for id, s := range m {
 		out = append(out, CardMarginalStatsJSON{
-			Card:         cards.Get(id).Name(),
+			Card:         card.DisplayName(cards.Get(id)),
 			PresentTotal: s.PresentTotal,
 			PresentHands: s.PresentHands,
 			AbsentTotal:  s.AbsentTotal,

@@ -11,7 +11,7 @@ var visitTheBlacksmithTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction)
 type VisitTheBlacksmithBlue struct{}
 
 func (VisitTheBlacksmithBlue) ID() card.ID                 { return card.VisitTheBlacksmithBlue }
-func (VisitTheBlacksmithBlue) Name() string                { return "Visit the Blacksmith (Blue)" }
+func (VisitTheBlacksmithBlue) Name() string                { return "Visit the Blacksmith" }
 func (VisitTheBlacksmithBlue) Cost(*card.TurnState) int                   { return 0 }
 func (VisitTheBlacksmithBlue) Pitch() int                  { return 3 }
 func (VisitTheBlacksmithBlue) Attack() int                 { return 0 }

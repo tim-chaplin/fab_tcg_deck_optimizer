@@ -63,17 +63,17 @@ func TestRandom_ExcludesNotImplemented(t *testing.T) {
 
 // TestLegalPool_ExcludesTaggedCardsByID gives TestLegalPool_SkipsNotImplemented teeth: it
 // picks a concrete registered card we know currently carries the NotImplemented marker
-// (Strike Gold (Red), gold-token rider) and asserts it's absent from legalPool's output.
+// (Strike Gold [R], gold-token rider) and asserts it's absent from legalPool's output.
 // Without at least one real tagged card the property test is vacuous, so this guards against
 // a regression where the marker interface itself silently breaks. Self-retires if Strike Gold
 // ever loses the tag (gold-token economy gets modelled) so maintenance is only a delete.
 func TestLegalPool_ExcludesTaggedCardsByID(t *testing.T) {
 	if _, ok := cards.Get(card.StrikeGoldRed).(card.NotImplemented); !ok {
-		t.Skip("Strike Gold (Red) is no longer NotImplemented — pick another tagged card or drop this test")
+		t.Skip("Strike Gold [R] is no longer NotImplemented — pick another tagged card or drop this test")
 	}
 	for _, id := range legalPool(nil) {
 		if id == card.StrikeGoldRed {
-			t.Fatalf("legalPool included Strike Gold (Red) despite its NotImplemented tag")
+			t.Fatalf("legalPool included Strike Gold [R] despite its NotImplemented tag")
 		}
 	}
 }
@@ -85,7 +85,7 @@ func TestLegalPool_ExcludesTaggedCardsByID(t *testing.T) {
 // exactly two swaps, each naming the original tagged card.
 func TestSanitizeNotImplemented_ReplacesTaggedSlotsAndKeepsSizeLegal(t *testing.T) {
 	if _, ok := cards.Get(card.StrikeGoldRed).(card.NotImplemented); !ok {
-		t.Skip("Strike Gold (Red) is no longer NotImplemented — pick another tagged card or drop this test")
+		t.Skip("Strike Gold [R] is no longer NotImplemented — pick another tagged card or drop this test")
 	}
 	tagged := cards.Get(card.StrikeGoldRed)
 	safe := cards.Get(card.ArcanicCrackleRed)
@@ -118,7 +118,7 @@ func TestSanitizeNotImplemented_ReplacesTaggedSlotsAndKeepsSizeLegal(t *testing.
 	}
 	for _, r := range replaced {
 		if r.From.ID() != card.StrikeGoldRed {
-			t.Errorf("replacement From = %s, want Strike Gold (Red)", r.From.Name())
+			t.Errorf("replacement From = %s, want Strike Gold [R]", r.From.Name())
 		}
 		if _, ok := r.To.(card.NotImplemented); ok {
 			t.Errorf("replacement To = %s implements NotImplemented", r.To.Name())
@@ -190,7 +190,7 @@ func TestAllMutations_FilterExcludesRejectedAdditions(t *testing.T) {
 				bannedIn++
 			}
 		}
-		// The starting deck has 2 copies of Plunder Run (Red). A mutation that removes one leaves
+		// The starting deck has 2 copies of Plunder Run [R]. A mutation that removes one leaves
 		// 1; a mutation that removes the other leaves 1; a weapon-only mutation leaves all 2. No
 		// mutation should ADD another copy.
 		if bannedIn > 2 {

@@ -13,7 +13,7 @@ var droneOfBrutalityTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, c
 type DroneOfBrutalityRed struct{}
 
 func (DroneOfBrutalityRed) ID() card.ID                 { return card.DroneOfBrutalityRed }
-func (DroneOfBrutalityRed) Name() string                { return "Drone of Brutality (Red)" }
+func (DroneOfBrutalityRed) Name() string                { return "Drone of Brutality" }
 func (DroneOfBrutalityRed) Cost(*card.TurnState) int                   { return 2 }
 func (DroneOfBrutalityRed) Pitch() int                  { return 1 }
 func (DroneOfBrutalityRed) Attack() int                 { return 6 }
@@ -28,7 +28,7 @@ func (c DroneOfBrutalityRed) Play(s *card.TurnState, _ *card.CardState) int { re
 type DroneOfBrutalityYellow struct{}
 
 func (DroneOfBrutalityYellow) ID() card.ID                 { return card.DroneOfBrutalityYellow }
-func (DroneOfBrutalityYellow) Name() string                { return "Drone of Brutality (Yellow)" }
+func (DroneOfBrutalityYellow) Name() string                { return "Drone of Brutality" }
 func (DroneOfBrutalityYellow) Cost(*card.TurnState) int                   { return 2 }
 func (DroneOfBrutalityYellow) Pitch() int                  { return 2 }
 func (DroneOfBrutalityYellow) Attack() int                 { return 5 }
@@ -43,7 +43,7 @@ func (c DroneOfBrutalityYellow) Play(s *card.TurnState, _ *card.CardState) int {
 type DroneOfBrutalityBlue struct{}
 
 func (DroneOfBrutalityBlue) ID() card.ID                 { return card.DroneOfBrutalityBlue }
-func (DroneOfBrutalityBlue) Name() string                { return "Drone of Brutality (Blue)" }
+func (DroneOfBrutalityBlue) Name() string                { return "Drone of Brutality" }
 func (DroneOfBrutalityBlue) Cost(*card.TurnState) int                   { return 2 }
 func (DroneOfBrutalityBlue) Pitch() int                  { return 3 }
 func (DroneOfBrutalityBlue) Attack() int                 { return 4 }

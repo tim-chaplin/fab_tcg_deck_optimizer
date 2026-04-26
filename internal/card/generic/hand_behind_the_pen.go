@@ -13,7 +13,7 @@ var handBehindThePenTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, c
 type HandBehindThePenRed struct{}
 
 func (HandBehindThePenRed) ID() card.ID                 { return card.HandBehindThePenRed }
-func (HandBehindThePenRed) Name() string                { return "Hand Behind the Pen (Red)" }
+func (HandBehindThePenRed) Name() string                { return "Hand Behind the Pen" }
 func (HandBehindThePenRed) Cost(*card.TurnState) int                   { return 2 }
 func (HandBehindThePenRed) Pitch() int                  { return 1 }
 func (HandBehindThePenRed) Attack() int                 { return 6 }

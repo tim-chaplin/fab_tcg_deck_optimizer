@@ -49,7 +49,7 @@ func TestBest_DefenseCappedAtIncoming(t *testing.T) {
 }
 
 func TestBest_DefenseReactionRequiresCostPaid(t *testing.T) {
-	// Toughen Up (Blue): Cost 2, Pitch 3, Defense 4. A hand of just this card can't pay its own
+	// Toughen Up [B]: Cost 2, Pitch 3, Defense 4. A hand of just this card can't pay its own
 	// 2-resource cost to play as a Defense Reaction (there's nothing else to pitch). The only
 	// legal lines are to pitch it (0 damage prevented) or do nothing — Value must be 0.
 	h := []card.Card{generic.ToughenUpBlue{}}
@@ -60,7 +60,7 @@ func TestBest_DefenseReactionRequiresCostPaid(t *testing.T) {
 }
 
 func TestBest_DefenseReactionAffordableResolves(t *testing.T) {
-	// Pitch 1 Blue Malefic (3 res), pay Toughen Up (Blue)'s cost 2, prevent 4 damage (capped at
+	// Pitch 1 Blue Malefic (3 res), pay Toughen Up [B]'s cost 2, prevent 4 damage (capped at
 	// incoming=4). Value = 4.
 	h := []card.Card{runeblade.MaleficIncantationBlue{}, generic.ToughenUpBlue{}}
 	got := Best(stubHero, nil, h, 4, nil, 0, nil)

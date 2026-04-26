@@ -41,7 +41,7 @@ func BuildTurnLog(t TurnSummary, startingRunechants int) TurnLog {
 	// LogEntry structs on State.Log to defer fmt cost off the per-permutation hot path —
 	// they're formatted to strings here, in the once-per-best-turn assembly step.
 	for _, p := range attackPitches {
-		log.MyTurn = append(log.MyTurn, p.Card.Name()+": "+roleLabelWithArsenal(p, "PITCH"))
+		log.MyTurn = append(log.MyTurn, card.DisplayName(p.Card)+": "+roleLabelWithArsenal(p, "PITCH"))
 	}
 	for _, e := range t.State.Log {
 		log.MyTurn = append(log.MyTurn, FormatLogEntry(e))
@@ -49,13 +49,13 @@ func BuildTurnLog(t TurnSummary, startingRunechants int) TurnLog {
 
 	// Opponent's turn: defense pitches, plain blocks, then Defense Reactions.
 	for _, p := range defensePitches {
-		log.OpponentTurn = append(log.OpponentTurn, p.Card.Name()+": "+roleLabelWithArsenal(p, "PITCH"))
+		log.OpponentTurn = append(log.OpponentTurn, card.DisplayName(p.Card)+": "+roleLabelWithArsenal(p, "PITCH"))
 	}
 	for _, b := range parts.plainBlocks {
-		log.OpponentTurn = append(log.OpponentTurn, b.Card.Name()+": "+roleLabelWithArsenal(b, "BLOCK"))
+		log.OpponentTurn = append(log.OpponentTurn, card.DisplayName(b.Card)+": "+roleLabelWithArsenal(b, "BLOCK"))
 	}
 	for _, dr := range parts.defenseReactions {
-		log.OpponentTurn = append(log.OpponentTurn, dr.Card.Name()+": "+roleLabelWithArsenal(dr, "DEFENSE REACTION"))
+		log.OpponentTurn = append(log.OpponentTurn, card.DisplayName(dr.Card)+": "+roleLabelWithArsenal(dr, "DEFENSE REACTION"))
 	}
 
 	// End of turn: surviving hand cards, arsenal slot's contents, auras still in play.
@@ -82,7 +82,7 @@ func startingHandLine(line []CardAssignment) string {
 		if a.FromArsenal {
 			continue
 		}
-		names = append(names, a.Card.Name())
+		names = append(names, card.DisplayName(a.Card))
 	}
 	if len(names) == 0 {
 		return ""
@@ -95,7 +95,7 @@ func startingHandLine(line []CardAssignment) string {
 func startingArsenalLine(line []CardAssignment) string {
 	for _, a := range line {
 		if a.FromArsenal {
-			return "Arsenal: " + a.Card.Name()
+			return "Arsenal: " + card.DisplayName(a.Card)
 		}
 	}
 	return ""
@@ -112,7 +112,7 @@ func startingAurasLine(auras []card.Card, startingRunechants int) string {
 	if len(auras) > 0 {
 		names := make([]string, len(auras))
 		for i, a := range auras {
-			names[i] = a.Name()
+			names[i] = card.DisplayName(a)
 		}
 		sort.Strings(names)
 		items = append(items, names...)
@@ -132,7 +132,7 @@ func startOfTurnTriggerLine(d TriggerContribution) string {
 	if suffix == "" {
 		return ""
 	}
-	return d.Card.Name() + ": " + suffix
+	return card.DisplayName(d.Card) + ": " + suffix
 }
 
 // endingHandLine builds "Hand: A, B" from the cards in hand at end of chain — the partition's
@@ -144,7 +144,7 @@ func endingHandLine(handHeld []card.Card) string {
 	}
 	names := make([]string, len(handHeld))
 	for i, c := range handHeld {
-		names[i] = c.Name()
+		names[i] = card.DisplayName(c)
 	}
 	return "Hand: " + strings.Join(names, ", ")
 }
@@ -159,7 +159,7 @@ func endingArsenalLine(arsenal []CardAssignment) string {
 	}
 	parts := make([]string, len(arsenal))
 	for i, a := range arsenal {
-		label := a.Card.Name()
+		label := card.DisplayName(a.Card)
 		if a.FromArsenal {
 			label += " (stayed)"
 		} else {
@@ -182,7 +182,7 @@ func endingAurasLine(triggers []card.AuraTrigger, runechants int) string {
 	if len(triggers) > 0 {
 		names := make([]string, len(triggers))
 		for i, t := range triggers {
-			names[i] = t.Self.Name()
+			names[i] = card.DisplayName(t.Self)
 		}
 		sort.Strings(names)
 		items = append(items, names...)

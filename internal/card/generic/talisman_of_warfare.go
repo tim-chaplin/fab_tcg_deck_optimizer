@@ -12,7 +12,7 @@ var talismanOfWarfareTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, 
 type TalismanOfWarfareYellow struct{}
 
 func (TalismanOfWarfareYellow) ID() card.ID                               { return card.TalismanOfWarfareYellow }
-func (TalismanOfWarfareYellow) Name() string                              { return "Talisman of Warfare (Yellow)" }
+func (TalismanOfWarfareYellow) Name() string                              { return "Talisman of Warfare" }
 func (TalismanOfWarfareYellow) Cost(*card.TurnState) int                  { return 0 }
 func (TalismanOfWarfareYellow) Pitch() int                                { return 2 }
 func (TalismanOfWarfareYellow) Attack() int                               { return 0 }

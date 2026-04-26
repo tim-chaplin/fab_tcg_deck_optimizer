@@ -95,8 +95,8 @@ func TestCardPairMutations_RemovesBothCopiesOfDuplicate(t *testing.T) {
 	}
 
 	for i, m := range muts {
-		if !strings.Contains(m.Description, "-1 Hocus Pocus (Blue), -1 Hocus Pocus (Blue)") {
-			t.Errorf("mutation %d (%s): expected both copies of Hocus Pocus (Blue) removed",
+		if !strings.Contains(m.Description, "-1 Hocus Pocus [B], -1 Hocus Pocus [B]") {
+			t.Errorf("mutation %d (%s): expected both copies of Hocus Pocus [B] removed",
 				i, m.Description)
 		}
 		// Result deck has 2 cards (the new pair), zero HocusPocusBlue.
@@ -105,7 +105,7 @@ func TestCardPairMutations_RemovesBothCopiesOfDuplicate(t *testing.T) {
 		}
 		for _, c := range m.Deck.Cards {
 			if c.ID() == card.HocusPocusBlue {
-				t.Errorf("mutation %d (%s): result deck still holds Hocus Pocus (Blue)",
+				t.Errorf("mutation %d (%s): result deck still holds Hocus Pocus [B]",
 					i, m.Description)
 			}
 		}
@@ -120,7 +120,7 @@ func TestCardPairMutations_RemovesBothCopiesOfDuplicate(t *testing.T) {
 // Same-ID overlap suppression (e.g. -1 SunKissRed + +1 SunKissRed reducing to a single-slot)
 // is the orthogonal optimisation tested in
 // TestCardPairMutations_OverlapSuppressionSkipsRedundantSwaps; here we check that
-// non-overlapping variant combinations still emit despite Sun Kiss (Red) being a removal
+// non-overlapping variant combinations still emit despite Sun Kiss [R] being a removal
 // candidate.
 func TestCardPairMutations_FiresWhenOneHalfAlreadyPresent(t *testing.T) {
 	a := cards.Get(card.ArcanicCrackleRed)
@@ -133,8 +133,8 @@ func TestCardPairMutations_FiresWhenOneHalfAlreadyPresent(t *testing.T) {
 	}
 	sawDifferentSunKissVariantAdd := false
 	for _, m := range muts {
-		if strings.Contains(m.Description, "+1 Sun Kiss (Yellow)") ||
-			strings.Contains(m.Description, "+1 Sun Kiss (Blue)") {
+		if strings.Contains(m.Description, "+1 Sun Kiss [Y]") ||
+			strings.Contains(m.Description, "+1 Sun Kiss [B]") {
 			sawDifferentSunKissVariantAdd = true
 			break
 		}
@@ -167,12 +167,12 @@ func TestCardPairMutations_GeneratesCapViolatingCandidates(t *testing.T) {
 		t.Fatalf("got %d pair mutations, want %d (cap-blind enumeration)", len(muts), want)
 	}
 
-	// At least one of those mutations must add Sun Kiss (Red) again — pushing the count to 3
+	// At least one of those mutations must add Sun Kiss [R] again — pushing the count to 3
 	// — which would violate maxCopies=2. pairSwapMutations does NOT enforce that; the post-
 	// filter in AllMutations does.
 	sawCapViolator := false
 	for _, m := range muts {
-		if strings.Contains(m.Description, "+1 Sun Kiss (Red)") {
+		if strings.Contains(m.Description, "+1 Sun Kiss [R]") {
 			counts := map[card.ID]int{}
 			for _, c := range m.Deck.Cards {
 				counts[c.ID()]++
@@ -240,16 +240,16 @@ func TestCardPairMutations_ResultDifferentFromSource(t *testing.T) {
 // TestCardPairMutations_OverlapSuppressionSkipsRedundantSwaps: when a removal target is
 // itself a pair member, the resulting mutation reduces to a single-slot swap (the matching
 // pair member's count is unchanged after -1 +1). Single-slot already covers that, so the
-// pair generator skips those combos. Drives this with a deck containing Sun Kiss (Red) as a
-// removal candidate and verifies no mutation removes and re-adds Sun Kiss (Red).
+// pair generator skips those combos. Drives this with a deck containing Sun Kiss [R] as a
+// removal candidate and verifies no mutation removes and re-adds Sun Kiss [R].
 func TestCardPairMutations_OverlapSuppressionSkipsRedundantSwaps(t *testing.T) {
 	skR := cards.Get(card.SunKissRed)
 	a := cards.Get(card.ArcanicCrackleRed)
 	d := New(hero.Viserai{}, []weapon.Weapon{weapon.NebulaBlade{}}, []card.Card{skR, a, a, a})
 	for i, m := range pairSwapMutations(d, nil) {
-		if strings.Contains(m.Description, "-1 Sun Kiss (Red)") &&
-			strings.Contains(m.Description, "+1 Sun Kiss (Red)") {
-			t.Errorf("mutation %d (%s): redundant -1/+1 of Sun Kiss (Red) — overlap suppression failed",
+		if strings.Contains(m.Description, "-1 Sun Kiss [R]") &&
+			strings.Contains(m.Description, "+1 Sun Kiss [R]") {
+			t.Errorf("mutation %d (%s): redundant -1/+1 of Sun Kiss [R] — overlap suppression failed",
 				i, m.Description)
 		}
 	}
@@ -276,7 +276,7 @@ func TestCardPairMutations_SkipsNotImplementedHalves(t *testing.T) {
 }
 
 // TestCardPairMutations_RespectsLegalFilter: a legal predicate that rejects a single pair
-// variant suppresses only that variant's combos, not the whole pair. Sun Kiss (Yellow) gets
+// variant suppresses only that variant's combos, not the whole pair. Sun Kiss [Y] gets
 // rejected; the remaining 3 × 2 = 6 cross-products still emit per unique removal combo —
 // matches how singleSwapMutations treats per-printing legality.
 func TestCardPairMutations_RespectsLegalFilter(t *testing.T) {
@@ -287,14 +287,14 @@ func TestCardPairMutations_RespectsLegalFilter(t *testing.T) {
 	legal := func(c card.Card) bool { return c.ID() != card.SunKissYellow }
 	muts := pairSwapMutations(d, legal)
 	for i, m := range muts {
-		if strings.Contains(m.Description, "Sun Kiss (Yellow)") {
-			t.Errorf("mutation %d (%s): added rejected Sun Kiss (Yellow)", i, m.Description)
+		if strings.Contains(m.Description, "Sun Kiss [Y]") {
+			t.Errorf("mutation %d (%s): added rejected Sun Kiss [Y]", i, m.Description)
 		}
 	}
 	// 3 unique removal combos × 6 surviving cross-products = 18.
 	const want = 18
 	if len(muts) != want {
-		t.Errorf("got %d mutations after rejecting Sun Kiss (Yellow), want %d", len(muts), want)
+		t.Errorf("got %d mutations after rejecting Sun Kiss [Y], want %d", len(muts), want)
 	}
 }
 
@@ -321,7 +321,7 @@ func TestCardPairMutations_DeterministicOrdering(t *testing.T) {
 
 // TestFilterMaxCopiesViolations_StripsCapViolators: the post-filter must drop any mutation
 // whose result deck holds more than maxCopies of a card. Built two synthetic mutations: one
-// clean (deck 4 cards, all distinct) and one violator (5 copies of Moon Wish (Red) at
+// clean (deck 4 cards, all distinct) and one violator (5 copies of Moon Wish [R] at
 // maxCopies=2). Filter keeps the clean one, drops the violator.
 func TestFilterMaxCopiesViolations_StripsCapViolators(t *testing.T) {
 	a := cards.Get(card.ArcanicCrackleRed)

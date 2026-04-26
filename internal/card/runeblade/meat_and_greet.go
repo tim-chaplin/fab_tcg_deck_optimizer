@@ -30,7 +30,7 @@ func meatAndGreetPlay(c card.Card, s *card.TurnState, self *card.CardState) int 
 type MeatAndGreetRed struct{}
 
 func (MeatAndGreetRed) ID() card.ID                   { return card.MeatAndGreetRed }
-func (MeatAndGreetRed) Name() string                  { return "Meat and Greet (Red)" }
+func (MeatAndGreetRed) Name() string                  { return "Meat and Greet" }
 func (MeatAndGreetRed) Cost(*card.TurnState) int                     { return 1 }
 func (MeatAndGreetRed) Pitch() int                    { return 1 }
 func (MeatAndGreetRed) Attack() int                   { return 4 }
@@ -42,7 +42,7 @@ func (c MeatAndGreetRed) Play(s *card.TurnState, self *card.CardState) int  { re
 type MeatAndGreetYellow struct{}
 
 func (MeatAndGreetYellow) ID() card.ID                   { return card.MeatAndGreetYellow }
-func (MeatAndGreetYellow) Name() string                  { return "Meat and Greet (Yellow)" }
+func (MeatAndGreetYellow) Name() string                  { return "Meat and Greet" }
 func (MeatAndGreetYellow) Cost(*card.TurnState) int                     { return 1 }
 func (MeatAndGreetYellow) Pitch() int                    { return 2 }
 func (MeatAndGreetYellow) Attack() int                   { return 3 }
@@ -54,7 +54,7 @@ func (c MeatAndGreetYellow) Play(s *card.TurnState, self *card.CardState) int  {
 type MeatAndGreetBlue struct{}
 
 func (MeatAndGreetBlue) ID() card.ID                   { return card.MeatAndGreetBlue }
-func (MeatAndGreetBlue) Name() string                  { return "Meat and Greet (Blue)" }
+func (MeatAndGreetBlue) Name() string                  { return "Meat and Greet" }
 func (MeatAndGreetBlue) Cost(*card.TurnState) int                     { return 1 }
 func (MeatAndGreetBlue) Pitch() int                    { return 3 }
 func (MeatAndGreetBlue) Attack() int                   { return 2 }

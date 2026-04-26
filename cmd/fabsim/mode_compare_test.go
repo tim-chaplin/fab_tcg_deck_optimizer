@@ -79,9 +79,9 @@ func TestPrintCardDelta_WeaponsLeadEachBlock(t *testing.T) {
 	lines := strings.Split(strings.TrimRight(out, "\n"), "\n")
 	wantOrder := []string{
 		"  -1 Nebula Blade",
-		"  -2 Read the Runes (Red)",
+		"  -2 Read the Runes [R]",
 		"  +1 Reaping Blade",
-		"  +2 Snatch (Red)",
+		"  +2 Snatch [R]",
 	}
 	got := make([]string, 0, len(wantOrder))
 	for _, l := range lines {

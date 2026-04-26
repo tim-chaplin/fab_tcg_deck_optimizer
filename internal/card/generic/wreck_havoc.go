@@ -13,7 +13,7 @@ var wreckHavocTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.Ty
 type WreckHavocRed struct{}
 
 func (WreckHavocRed) ID() card.ID                 { return card.WreckHavocRed }
-func (WreckHavocRed) Name() string                { return "Wreck Havoc (Red)" }
+func (WreckHavocRed) Name() string                { return "Wreck Havoc" }
 func (WreckHavocRed) Cost(*card.TurnState) int                   { return 2 }
 func (WreckHavocRed) Pitch() int                  { return 1 }
 func (WreckHavocRed) Attack() int                 { return 6 }
@@ -27,7 +27,7 @@ func (c WreckHavocRed) Play(s *card.TurnState, self *card.CardState) int { retur
 type WreckHavocYellow struct{}
 
 func (WreckHavocYellow) ID() card.ID                 { return card.WreckHavocYellow }
-func (WreckHavocYellow) Name() string                { return "Wreck Havoc (Yellow)" }
+func (WreckHavocYellow) Name() string                { return "Wreck Havoc" }
 func (WreckHavocYellow) Cost(*card.TurnState) int                   { return 2 }
 func (WreckHavocYellow) Pitch() int                  { return 2 }
 func (WreckHavocYellow) Attack() int                 { return 5 }
@@ -41,7 +41,7 @@ func (c WreckHavocYellow) Play(s *card.TurnState, self *card.CardState) int { re
 type WreckHavocBlue struct{}
 
 func (WreckHavocBlue) ID() card.ID                 { return card.WreckHavocBlue }
-func (WreckHavocBlue) Name() string                { return "Wreck Havoc (Blue)" }
+func (WreckHavocBlue) Name() string                { return "Wreck Havoc" }
 func (WreckHavocBlue) Cost(*card.TurnState) int                   { return 2 }
 func (WreckHavocBlue) Pitch() int                  { return 3 }
 func (WreckHavocBlue) Attack() int                 { return 4 }

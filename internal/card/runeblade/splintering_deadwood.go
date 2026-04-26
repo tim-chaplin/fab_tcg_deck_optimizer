@@ -12,7 +12,7 @@ var splinteringDeadwoodTypes = card.NewTypeSet(card.TypeRuneblade, card.TypeActi
 type SplinteringDeadwoodRed struct{}
 
 func (SplinteringDeadwoodRed) ID() card.ID                 { return card.SplinteringDeadwoodRed }
-func (SplinteringDeadwoodRed) Name() string               { return "Splintering Deadwood (Red)" }
+func (SplinteringDeadwoodRed) Name() string               { return "Splintering Deadwood" }
 func (SplinteringDeadwoodRed) Cost(*card.TurnState) int                  { return 3 }
 func (SplinteringDeadwoodRed) Pitch() int                 { return 1 }
 func (SplinteringDeadwoodRed) Attack() int                { return 7 }
@@ -27,7 +27,7 @@ func (c SplinteringDeadwoodRed) Play(*card.TurnState, *card.CardState) int { ret
 type SplinteringDeadwoodYellow struct{}
 
 func (SplinteringDeadwoodYellow) ID() card.ID                 { return card.SplinteringDeadwoodYellow }
-func (SplinteringDeadwoodYellow) Name() string               { return "Splintering Deadwood (Yellow)" }
+func (SplinteringDeadwoodYellow) Name() string               { return "Splintering Deadwood" }
 func (SplinteringDeadwoodYellow) Cost(*card.TurnState) int                  { return 3 }
 func (SplinteringDeadwoodYellow) Pitch() int                 { return 2 }
 func (SplinteringDeadwoodYellow) Attack() int                { return 6 }
@@ -42,7 +42,7 @@ func (c SplinteringDeadwoodYellow) Play(*card.TurnState, *card.CardState) int { 
 type SplinteringDeadwoodBlue struct{}
 
 func (SplinteringDeadwoodBlue) ID() card.ID                 { return card.SplinteringDeadwoodBlue }
-func (SplinteringDeadwoodBlue) Name() string               { return "Splintering Deadwood (Blue)" }
+func (SplinteringDeadwoodBlue) Name() string               { return "Splintering Deadwood" }
 func (SplinteringDeadwoodBlue) Cost(*card.TurnState) int                  { return 3 }
 func (SplinteringDeadwoodBlue) Pitch() int                 { return 3 }
 func (SplinteringDeadwoodBlue) Attack() int                { return 5 }

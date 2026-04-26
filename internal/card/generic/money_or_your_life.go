@@ -13,7 +13,7 @@ var moneyOrYourLifeTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, ca
 type MoneyOrYourLifeRed struct{}
 
 func (MoneyOrYourLifeRed) ID() card.ID                 { return card.MoneyOrYourLifeRed }
-func (MoneyOrYourLifeRed) Name() string                { return "Money or Your Life? (Red)" }
+func (MoneyOrYourLifeRed) Name() string                { return "Money or Your Life?" }
 func (MoneyOrYourLifeRed) Cost(*card.TurnState) int                   { return 3 }
 func (MoneyOrYourLifeRed) Pitch() int                  { return 1 }
 func (MoneyOrYourLifeRed) Attack() int                 { return 6 }
@@ -27,7 +27,7 @@ func (c MoneyOrYourLifeRed) Play(s *card.TurnState, self *card.CardState) int { 
 type MoneyOrYourLifeYellow struct{}
 
 func (MoneyOrYourLifeYellow) ID() card.ID                 { return card.MoneyOrYourLifeYellow }
-func (MoneyOrYourLifeYellow) Name() string                { return "Money or Your Life? (Yellow)" }
+func (MoneyOrYourLifeYellow) Name() string                { return "Money or Your Life?" }
 func (MoneyOrYourLifeYellow) Cost(*card.TurnState) int                   { return 3 }
 func (MoneyOrYourLifeYellow) Pitch() int                  { return 2 }
 func (MoneyOrYourLifeYellow) Attack() int                 { return 5 }
@@ -41,7 +41,7 @@ func (c MoneyOrYourLifeYellow) Play(s *card.TurnState, self *card.CardState) int
 type MoneyOrYourLifeBlue struct{}
 
 func (MoneyOrYourLifeBlue) ID() card.ID                 { return card.MoneyOrYourLifeBlue }
-func (MoneyOrYourLifeBlue) Name() string                { return "Money or Your Life? (Blue)" }
+func (MoneyOrYourLifeBlue) Name() string                { return "Money or Your Life?" }
 func (MoneyOrYourLifeBlue) Cost(*card.TurnState) int                   { return 3 }
 func (MoneyOrYourLifeBlue) Pitch() int                  { return 3 }
 func (MoneyOrYourLifeBlue) Attack() int                 { return 4 }

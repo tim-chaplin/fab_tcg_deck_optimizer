@@ -12,7 +12,7 @@ var flexTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeAtta
 type FlexRed struct{}
 
 func (FlexRed) ID() card.ID                 { return card.FlexRed }
-func (FlexRed) Name() string                { return "Flex (Red)" }
+func (FlexRed) Name() string                { return "Flex" }
 func (FlexRed) Cost(*card.TurnState) int                   { return 0 }
 func (FlexRed) Pitch() int                  { return 1 }
 func (FlexRed) Attack() int                 { return 4 }
@@ -26,7 +26,7 @@ func (c FlexRed) Play(s *card.TurnState, _ *card.CardState) int { return c.Attac
 type FlexYellow struct{}
 
 func (FlexYellow) ID() card.ID                 { return card.FlexYellow }
-func (FlexYellow) Name() string                { return "Flex (Yellow)" }
+func (FlexYellow) Name() string                { return "Flex" }
 func (FlexYellow) Cost(*card.TurnState) int                   { return 0 }
 func (FlexYellow) Pitch() int                  { return 2 }
 func (FlexYellow) Attack() int                 { return 3 }
@@ -40,7 +40,7 @@ func (c FlexYellow) Play(s *card.TurnState, _ *card.CardState) int { return c.At
 type FlexBlue struct{}
 
 func (FlexBlue) ID() card.ID                 { return card.FlexBlue }
-func (FlexBlue) Name() string                { return "Flex (Blue)" }
+func (FlexBlue) Name() string                { return "Flex" }
 func (FlexBlue) Cost(*card.TurnState) int                   { return 0 }
 func (FlexBlue) Pitch() int                  { return 3 }
 func (FlexBlue) Attack() int                 { return 2 }

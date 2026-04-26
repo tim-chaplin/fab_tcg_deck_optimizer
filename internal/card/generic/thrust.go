@@ -11,7 +11,7 @@ var thrustTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAttackReaction)
 type ThrustRed struct{}
 
 func (ThrustRed) ID() card.ID                               { return card.ThrustRed }
-func (ThrustRed) Name() string                              { return "Thrust (Red)" }
+func (ThrustRed) Name() string                              { return "Thrust" }
 func (ThrustRed) Cost(*card.TurnState) int                  { return 1 }
 func (ThrustRed) Pitch() int                                { return 1 }
 func (ThrustRed) Attack() int                               { return 0 }

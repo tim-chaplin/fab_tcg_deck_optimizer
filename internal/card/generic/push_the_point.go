@@ -12,7 +12,7 @@ var pushThePointTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.
 type PushThePointRed struct{}
 
 func (PushThePointRed) ID() card.ID                 { return card.PushThePointRed }
-func (PushThePointRed) Name() string                { return "Push the Point (Red)" }
+func (PushThePointRed) Name() string                { return "Push the Point" }
 func (PushThePointRed) Cost(*card.TurnState) int                   { return 1 }
 func (PushThePointRed) Pitch() int                  { return 1 }
 func (PushThePointRed) Attack() int                 { return 4 }
@@ -26,7 +26,7 @@ func (c PushThePointRed) Play(s *card.TurnState, _ *card.CardState) int { return
 type PushThePointYellow struct{}
 
 func (PushThePointYellow) ID() card.ID                 { return card.PushThePointYellow }
-func (PushThePointYellow) Name() string                { return "Push the Point (Yellow)" }
+func (PushThePointYellow) Name() string                { return "Push the Point" }
 func (PushThePointYellow) Cost(*card.TurnState) int                   { return 1 }
 func (PushThePointYellow) Pitch() int                  { return 2 }
 func (PushThePointYellow) Attack() int                 { return 3 }
@@ -40,7 +40,7 @@ func (c PushThePointYellow) Play(s *card.TurnState, _ *card.CardState) int { ret
 type PushThePointBlue struct{}
 
 func (PushThePointBlue) ID() card.ID                 { return card.PushThePointBlue }
-func (PushThePointBlue) Name() string                { return "Push the Point (Blue)" }
+func (PushThePointBlue) Name() string                { return "Push the Point" }
 func (PushThePointBlue) Cost(*card.TurnState) int                   { return 1 }
 func (PushThePointBlue) Pitch() int                  { return 3 }
 func (PushThePointBlue) Attack() int                 { return 2 }

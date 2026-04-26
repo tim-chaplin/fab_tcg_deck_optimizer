@@ -12,7 +12,7 @@ var talismanOfCremationTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction
 type TalismanOfCremationBlue struct{}
 
 func (TalismanOfCremationBlue) ID() card.ID                               { return card.TalismanOfCremationBlue }
-func (TalismanOfCremationBlue) Name() string                              { return "Talisman of Cremation (Blue)" }
+func (TalismanOfCremationBlue) Name() string                              { return "Talisman of Cremation" }
 func (TalismanOfCremationBlue) Cost(*card.TurnState) int                  { return 0 }
 func (TalismanOfCremationBlue) Pitch() int                                { return 3 }
 func (TalismanOfCremationBlue) Attack() int                               { return 0 }

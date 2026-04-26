@@ -39,14 +39,15 @@ func TestAllIDsResolve(t *testing.T) {
 	}
 }
 
-func TestNamesAreUnique(t *testing.T) {
-	// Card.Name() is used as the reverse-lookup key, so every registered card must have a distinct
-	// name. A collision would silently overwrite the earlier entry in byName.
+func TestDisplayNamesAreUnique(t *testing.T) {
+	// card.DisplayName(c) is used as the reverse-lookup key, so every registered card must
+	// have a distinct display name. A collision would silently overwrite the earlier entry
+	// in byName. (Bare Name() collides intentionally — pitch variants share it.)
 	seen := map[string]ID{}
 	for _, id := range All() {
-		name := Get(id).Name()
+		name := card.DisplayName(Get(id))
 		if prev, dup := seen[name]; dup {
-			t.Errorf("duplicate Name() %q for IDs %d and %d", name, prev, id)
+			t.Errorf("duplicate DisplayName %q for IDs %d and %d", name, prev, id)
 		}
 		seen[name] = id
 	}
@@ -54,7 +55,7 @@ func TestNamesAreUnique(t *testing.T) {
 
 func TestByNameRoundTrip(t *testing.T) {
 	for _, id := range All() {
-		name := Get(id).Name()
+		name := card.DisplayName(Get(id))
 		got, ok := ByName(name)
 		if !ok || got != id {
 			t.Errorf("ByName(%q) = (%d, %v), want (%d, true)", name, got, ok, id)

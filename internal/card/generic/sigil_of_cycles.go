@@ -14,7 +14,7 @@ var sigilOfCyclesTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card
 type SigilOfCyclesBlue struct{}
 
 func (SigilOfCyclesBlue) ID() card.ID                 { return card.SigilOfCyclesBlue }
-func (SigilOfCyclesBlue) Name() string                { return "Sigil of Cycles (Blue)" }
+func (SigilOfCyclesBlue) Name() string                { return "Sigil of Cycles" }
 func (SigilOfCyclesBlue) Cost(*card.TurnState) int                   { return 0 }
 func (SigilOfCyclesBlue) Pitch() int                  { return 3 }
 func (SigilOfCyclesBlue) Attack() int                 { return 0 }

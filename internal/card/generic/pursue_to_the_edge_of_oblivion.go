@@ -12,7 +12,7 @@ var pursueToTheEdgeOfOblivionTypes = card.NewTypeSet(card.TypeGeneric, card.Type
 type PursueToTheEdgeOfOblivionRed struct{}
 
 func (PursueToTheEdgeOfOblivionRed) ID() card.ID                 { return card.PursueToTheEdgeOfOblivionRed }
-func (PursueToTheEdgeOfOblivionRed) Name() string                { return "Pursue to the Edge of Oblivion (Red)" }
+func (PursueToTheEdgeOfOblivionRed) Name() string                { return "Pursue to the Edge of Oblivion" }
 func (PursueToTheEdgeOfOblivionRed) Cost(*card.TurnState) int                   { return 0 }
 func (PursueToTheEdgeOfOblivionRed) Pitch() int                  { return 1 }
 func (PursueToTheEdgeOfOblivionRed) Attack() int                 { return 4 }

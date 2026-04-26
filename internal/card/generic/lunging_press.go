@@ -11,7 +11,7 @@ var lungingPressTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAttackReactio
 type LungingPressBlue struct{}
 
 func (LungingPressBlue) ID() card.ID                               { return card.LungingPressBlue }
-func (LungingPressBlue) Name() string                              { return "Lunging Press (Blue)" }
+func (LungingPressBlue) Name() string                              { return "Lunging Press" }
 func (LungingPressBlue) Cost(*card.TurnState) int                  { return 0 }
 func (LungingPressBlue) Pitch() int                                { return 3 }
 func (LungingPressBlue) Attack() int                               { return 0 }

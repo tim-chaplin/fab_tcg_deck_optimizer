@@ -26,7 +26,7 @@ func vigorRushPlay(base int, s *card.TurnState, self *card.CardState) int {
 type VigorRushRed struct{}
 
 func (VigorRushRed) ID() card.ID                                         { return card.VigorRushRed }
-func (VigorRushRed) Name() string                                        { return "Vigor Rush (Red)" }
+func (VigorRushRed) Name() string                                        { return "Vigor Rush" }
 func (VigorRushRed) Cost(*card.TurnState) int                            { return 1 }
 func (VigorRushRed) Pitch() int                                          { return 1 }
 func (VigorRushRed) Attack() int                                         { return 4 }
@@ -38,7 +38,7 @@ func (c VigorRushRed) Play(s *card.TurnState, self *card.CardState) int { return
 type VigorRushYellow struct{}
 
 func (VigorRushYellow) ID() card.ID                                         { return card.VigorRushYellow }
-func (VigorRushYellow) Name() string                                        { return "Vigor Rush (Yellow)" }
+func (VigorRushYellow) Name() string                                        { return "Vigor Rush" }
 func (VigorRushYellow) Cost(*card.TurnState) int                            { return 1 }
 func (VigorRushYellow) Pitch() int                                          { return 2 }
 func (VigorRushYellow) Attack() int                                         { return 3 }
@@ -50,7 +50,7 @@ func (c VigorRushYellow) Play(s *card.TurnState, self *card.CardState) int { ret
 type VigorRushBlue struct{}
 
 func (VigorRushBlue) ID() card.ID                                         { return card.VigorRushBlue }
-func (VigorRushBlue) Name() string                                        { return "Vigor Rush (Blue)" }
+func (VigorRushBlue) Name() string                                        { return "Vigor Rush" }
 func (VigorRushBlue) Cost(*card.TurnState) int                            { return 1 }
 func (VigorRushBlue) Pitch() int                                          { return 3 }
 func (VigorRushBlue) Attack() int                                         { return 2 }
