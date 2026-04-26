@@ -18,9 +18,9 @@ type Hero interface {
 	// OnCardPlayed is called by the hand evaluator before each card's Play() resolves so the
 	// hero's printed ability fires ahead of the card itself (matching FaB stack order). Heroes
 	// that contribute damage-equivalent (e.g. a Runechant token) credit it through
-	// s.AddLogEntry, which both writes the trigger's log line and bumps s.Value. The int
-	// return is informational and discarded by the dispatcher — it's the value AddLogEntry
-	// already credited, surfaced so callers can fold the call into a single return statement.
-	// Heroes without a triggered ability return 0.
+	// s.AddTriggerLogEntry, which both writes the trigger's log line and bumps s.Value. The
+	// int return is informational and discarded by the dispatcher — it's the value
+	// AddTriggerLogEntry already credited, surfaced so callers can fold the call into a single
+	// return statement. Heroes without a triggered ability return 0.
 	OnCardPlayed(played card.Card, s *card.TurnState) int
 }

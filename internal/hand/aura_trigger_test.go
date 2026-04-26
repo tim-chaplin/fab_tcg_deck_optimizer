@@ -10,7 +10,7 @@ import (
 // TestFireAttackActionTriggers_FiresOnceWhenGated: a single OncePerTurn AttackAction
 // trigger fires on the first call and is gated on the second within the same turn — its
 // Count ticks only once, FiredThisTurn latches. Handlers credit Value through their own
-// AddLogEntry call (the dispatcher no longer does it on their behalf).
+// AddTriggerLogEntry call.
 func TestFireAttackActionTriggers_FiresOnceWhenGated(t *testing.T) {
 	aura := fake.RedAttack{}
 	calls := 0
@@ -21,7 +21,7 @@ func TestFireAttackActionTriggers_FiresOnceWhenGated(t *testing.T) {
 		OncePerTurn: true,
 		Handler: func(s *card.TurnState) int {
 			calls++
-			return s.AddLogEntry("test trigger fired", "TestCard", 1)
+			return s.AddTriggerLogEntry("test trigger fired", "TestCard", 1)
 		},
 	}}}
 	trigger := fake.RedAttack{}

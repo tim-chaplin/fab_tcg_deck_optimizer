@@ -13,13 +13,13 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/weapon"
 )
 
-// FormatLogEntry renders a LogEntry into its display string. Chain entries (Source=="")
-// with N=0 drop the "(+0)" suffix; trigger entries (Source!="") carry a "(from <source>)"
-// tail. The grouped MyTurn renderer prefers formatLabelWithDelta for trigger entries that
-// get clustered under their parent chain line; FormatLogEntry is the fallback for orphan
+// FormatLogEntry renders a LogEntry into its display string. Chain entries (IsTrigger
+// false) with N=0 drop the "(+0)" suffix; trigger entries carry a "(from <source>)" tail.
+// The grouped MyTurn renderer prefers formatTextWithDelta for trigger entries that get
+// clustered under their parent chain line; FormatLogEntry is the fallback for orphan
 // triggers and external callers that just need the verbose string.
 func FormatLogEntry(e card.LogEntry) string {
-	if e.Source == "" {
+	if !e.IsTrigger {
 		if e.N == 0 {
 			return e.Text
 		}
@@ -232,8 +232,8 @@ type sequenceContext struct {
 // decrements the trigger's Count; when Count hits zero the aura drops out of the list and
 // Self lands in the graveyard so downstream same-turn effects see the destroy. The sim
 // publishes the triggering card via state.TriggeringCard before each handler runs and
-// clears it after; handlers read it through s.AddLogEntry to attribute their log line back
-// to the triggering card.
+// clears it after; handlers read it through s.AddTriggerLogEntry to attribute their log
+// line back to the triggering card.
 //
 // Slice mutation: a survivors prefix is built in place over the existing slice; entries
 // kept after firing are written back at increasing indices, exhausted ones are skipped.
@@ -263,7 +263,7 @@ func fireAttackActionTriggers(state *card.TurnState, triggeringCard card.Card) {
 // fireEphemeralAttackTriggers walks state.EphemeralAttackTriggers after an attack action
 // card resolves and invokes every entry whose Matches predicate accepts the attacker. Each
 // fire consumes the trigger (fire-once semantics). Handlers receive target as a direct
-// arg and call s.AddLogEntry themselves to log their damage-equivalent. Non-matching
+// arg and call s.AddTriggerLogEntry themselves to log their damage-equivalent. Non-matching
 // entries stay in the slice for a later attack action; anything still in the list at end
 // of chain fizzles silently (no graveyard bookkeeping — the source was already graveyarded
 // when its own Play resolved).
@@ -411,8 +411,8 @@ func (ctx *sequenceContext) playSequence(order []card.Card) (damage int, leftove
 //
 // Damage flows through state.Value: the dispatcher records the chain step's
 // Play+BonusAttack contribution via state.AddLogEntry; trigger handlers (hero, aura,
-// ephemeral) credit themselves through their own AddLogEntry calls. The returned damage
-// is just state.Value at end of chain.
+// ephemeral) credit themselves through their own AddTriggerLogEntry calls. The returned
+// damage is just state.Value at end of chain.
 func (ctx *sequenceContext) playSequenceWithMeta(n int) (damage int, leftoverRunechants int, residualBudget int, legal bool) {
 	pcBuf := ctx.bufs.pcBuf
 	ptrBuf := ctx.bufs.ptrBuf
@@ -450,7 +450,8 @@ func (ctx *sequenceContext) playSequenceWithMeta(n int) (damage int, leftoverRun
 		// inside the card's Play see the runechant (or other aura) the hero just made.
 		// Viserai's "another non-attack action" gate still excludes the current card because
 		// NonAttackActionPlayed isn't flipped until the end of the iteration. The hero
-		// handler logs its own contribution via state.AddLogEntry; its int return is unused.
+		// handler logs its own contribution via state.AddTriggerLogEntry; its int return is
+		// unused.
 		ctx.hero.OnCardPlayed(pc.Card, state)
 		ephemeralsBefore := len(state.EphemeralAttackTriggers)
 		playDmg := pc.Card.Play(state, pc)
@@ -463,8 +464,8 @@ func (ctx *sequenceContext) playSequenceWithMeta(n int) (damage int, leftoverRun
 		// hero / aura triggers fire when the card is played (LL1), go on top of the stack,
 		// and resolve before the card itself — so their entries land above the card's chain
 		// entry in s.Log. Ephemeral "if hits" triggers fire after the attack lands and log
-		// below. Each trigger handler authors its own log line via state.AddLogEntry, with
-		// LogEntry.Source naming the triggering card so appendGroupedChainEntries can
+		// below. Each trigger handler authors its own log line via state.AddTriggerLogEntry,
+		// with LogEntry.Source naming the triggering card so appendGroupedChainEntries can
 		// cluster the trigger underneath the chain entry that names that card.
 		if m.isAttackAction {
 			fireAttackActionTriggers(state, pc.Card)
@@ -476,7 +477,6 @@ func (ctx *sequenceContext) playSequenceWithMeta(n int) (damage int, leftoverRun
 		// +1) that EffectiveAttack doesn't see — clamping the sum preserves both pieces.
 		state.AddLogEntry(
 			card.DisplayName(pc.Card)+": "+chainVerbFor(m, pc.FromArsenal),
-			"",
 			playDmg+pc.BonusAttack,
 		)
 		if m.isAttackAction {

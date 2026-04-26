@@ -1,5 +1,7 @@
 package card
 
+import "fmt"
+
 // Per-turn shared context threaded through Card.Play. Cards mutate state directly — moving
 // cards between Hand / Deck / Graveyard / Banish, registering triggers, creating runechants
 // — and the sim copies the winning permutation's final state into next-turn state. There's
@@ -13,14 +15,17 @@ package card
 
 // LogEntry is one chain-event entry in TurnState.Log. Text is the freeform display string
 // the producer authored ("Viserai created a runechant", "Consuming Volition [R]: ATTACK")
-// — the format layer renders it verbatim, no further opinions on phrasing. Source names
-// the card whose play caused this entry to be added, used by the format layer to group
-// trigger entries beneath the chain entry whose name matches Source; empty for chain
-// steps. N is the damage-equivalent credited to s.Value when the entry was added.
+// — the format layer renders it verbatim, no further opinions on phrasing. IsTrigger is
+// true when the entry is a trigger fire (hero / aura / ephemeral); the format layer
+// indents these underneath their parent chain entry. Source names the card whose play
+// caused the trigger and is matched against chain-entry names to pick the parent; only
+// meaningful when IsTrigger is true. N is the damage-equivalent credited to s.Value
+// when the entry was added.
 type LogEntry struct {
-	Text   string
-	Source string
-	N      int
+	Text      string
+	Source    string
+	IsTrigger bool
+	N         int
 }
 
 // TurnState is the shared turn-level context passed to Card.Play alongside the per-card
@@ -71,9 +76,10 @@ type TurnState struct {
 	// field. Reset by the sim per permutation.
 	Value int
 	// Log is the per-event chain trace — one entry per chain step / hero / aura /
-	// ephemeral / weapon swing. Producers (the sim for chain steps, cards / heroes for
-	// triggers) call AddLogEntry to append a pre-rendered display string plus the
-	// triggering source and damage-equivalent. Reset per permutation.
+	// ephemeral / weapon swing. Chain-step producers (the sim) call AddLogEntry; trigger
+	// handlers (hero / aura / ephemeral) call AddTriggerLogEntry with the triggering card
+	// as source so the format layer can cluster them under the right parent. Reset per
+	// permutation.
 	Log []LogEntry
 	// CardsPlayed is the sequence of cards played (as attacks) this turn, in order.
 	// Populated by the sim after each Play returns so later cards this turn see what was
@@ -120,21 +126,33 @@ type TurnState struct {
 	TriggeringCard Card
 }
 
-// AddLogEntry appends a freeform log line and credits n damage-equivalent to s.Value.
-// text is the rendered display string the producer authors ("Viserai created a runechant");
-// source names the card whose play caused this entry, used by the format layer to group
-// trigger entries underneath the chain entry whose name matches source. Empty source marks
-// a chain-step or unattributed line. Returns the clamped n so callers can fold the call
-// into a Play / handler return:
-//
-//	return s.AddLogEntry("Viserai created a runechant",
-//	    card.DisplayName(played), s.CreateRunechant())
-func (s *TurnState) AddLogEntry(text, source string, n int) int {
+// AddLogEntry appends a freeform top-level log line (a chain step or unattributed event)
+// and credits n damage-equivalent to s.Value. text is the rendered display string. Returns
+// the clamped n so callers can fold the call into a Play return. Trigger handlers should
+// call AddTriggerLogEntry instead so the format layer can group them under their parent.
+func (s *TurnState) AddLogEntry(text string, n int) int {
 	if n < 0 {
 		n = 0
 	}
 	s.Value += n
-	s.Log = append(s.Log, LogEntry{Text: text, Source: source, N: n})
+	s.Log = append(s.Log, LogEntry{Text: text, N: n})
+	return n
+}
+
+// AddTriggerLogEntry appends a trigger-fire log line and credits n damage-equivalent to
+// s.Value. text is the rendered display string ("Viserai created a runechant"); source is
+// the DisplayName of the card whose play caused the trigger to fire — the format layer
+// matches it against chain-entry names to nest the trigger underneath the right parent.
+// Returns the clamped n so handlers can fold the call into one expression:
+//
+//	return s.AddTriggerLogEntry("Viserai created a runechant",
+//	    card.DisplayName(played), s.CreateRunechant())
+func (s *TurnState) AddTriggerLogEntry(text, source string, n int) int {
+	if n < 0 {
+		n = 0
+	}
+	s.Value += n
+	s.Log = append(s.Log, LogEntry{Text: text, Source: source, IsTrigger: true, N: n})
 	return n
 }
 
@@ -211,6 +229,32 @@ func (s *TurnState) CreateRunechants(n int) int {
 // CreateRunechant is shorthand for CreateRunechants(1).
 func (s *TurnState) CreateRunechant() int {
 	return s.CreateRunechants(1)
+}
+
+// CreateAndLogRunechants creates n Runechant tokens, writes the canonical trigger log
+// line ("<selfName> created a runechant" for n==1, "<selfName> created N runechants" for
+// n>1) sourced under sourceName, and returns the damage-equivalent credited. Trigger
+// handlers (Viserai's hero ability, Malefic Incantation's aura) call this in a single
+// return statement.
+func (s *TurnState) CreateAndLogRunechants(selfName, sourceName string, n int) int {
+	return s.AddTriggerLogEntry(selfName+" "+runechantsCreatedPhrase(n), sourceName, s.CreateRunechants(n))
+}
+
+// CreateAndLogRunechantsOnHit is the on-hit-narration variant of CreateAndLogRunechants —
+// the trigger log line reads "<selfName> created N runechants on hit" so the conditional
+// gate on the ephemeral attack trigger (Mauvrion Skies, Runic Reaping) is visible in the
+// printout. Same return contract as CreateAndLogRunechants.
+func (s *TurnState) CreateAndLogRunechantsOnHit(selfName, sourceName string, n int) int {
+	return s.AddTriggerLogEntry(selfName+" "+runechantsCreatedPhrase(n)+" on hit", sourceName, s.CreateRunechants(n))
+}
+
+// runechantsCreatedPhrase returns "created a runechant" / "created N runechants" — the
+// canonical verb phrase for runechant-creation log lines.
+func runechantsCreatedPhrase(n int) string {
+	if n == 1 {
+		return "created a runechant"
+	}
+	return fmt.Sprintf("created %d runechants", n)
 }
 
 // DealArcaneDamage flips ArcaneDamageDealt so same-turn triggers reading "if you've dealt

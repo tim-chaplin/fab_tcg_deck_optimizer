@@ -67,11 +67,7 @@ func maleficPlay(s *card.TurnState, self card.Card, n int) int {
 		Count:       n,
 		OncePerTurn: true,
 		Handler: func(s *card.TurnState) int {
-			return s.AddLogEntry(
-				card.DisplayName(self)+" created a runechant",
-				card.DisplayName(s.TriggeringCard),
-				s.CreateRunechants(1),
-			)
+			return s.CreateAndLogRunechants(card.DisplayName(self), card.DisplayName(s.TriggeringCard), 1)
 		},
 	})
 	return 0

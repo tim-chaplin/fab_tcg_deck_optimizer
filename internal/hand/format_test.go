@@ -104,7 +104,7 @@ func TestFormatBestTurn_NonAttackCardUsesPlayLabel(t *testing.T) {
 func TestFormatBestTurn_LogAttributesEachTriggerSeparately(t *testing.T) {
 	h := []card.Card{generic.NimblismRed{}, runeblade.MauvrionSkiesRed{}, runeblade.ConsumingVolitionRed{}}
 	// Use the real Malefic Incantation card's Play to register the prior trigger so the
-	// handler matches production exactly (logs via AddLogEntry, sources from
+	// handler matches production exactly (logs via AddTriggerLogEntry, sources from
 	// state.TriggeringCard).
 	var bootstrap card.TurnState
 	runeblade.MaleficIncantationRed{}.Play(&bootstrap, &card.CardState{})
@@ -352,16 +352,16 @@ func TestFormatBestTurn_TriggersFromLastTurnZeroEffectDropped(t *testing.T) {
 func TestAppendGroupedChainEntries_ClustersTriggersUnderTheirParent(t *testing.T) {
 	log := []card.LogEntry{
 		// Card A's pre-trigger fires from a hero/aura before A's chain entry resolves.
-		{Text: "Viserai created a runechant", Source: "Card A", N: 1},
+		{Text: "Viserai created a runechant", Source: "Card A", IsTrigger: true, N: 1},
 		// Card A resolves.
 		{Text: "Card A: ATTACK", N: 5},
 		// Card A's ephemeral attack trigger fires after the hit.
-		{Text: "Aura created 3 runechants on hit", Source: "Card A", N: 3},
+		{Text: "Aura created 3 runechants on hit", Source: "Card A", IsTrigger: true, N: 3},
 		// Card B's pre-trigger queues for B.
-		{Text: "Viserai created a runechant", Source: "Card B", N: 1},
+		{Text: "Viserai created a runechant", Source: "Card B", IsTrigger: true, N: 1},
 		// Card B resolves; its post-trigger follows.
 		{Text: "Card B: PLAY", N: 0},
-		{Text: "Aura created 2 runechants on hit", Source: "Card B", N: 2},
+		{Text: "Aura created 2 runechants on hit", Source: "Card B", IsTrigger: true, N: 2},
 	}
 	got := appendGroupedChainEntries(nil, log)
 	want := []string{
@@ -384,7 +384,7 @@ func TestAppendGroupedChainEntries_ClustersTriggersUnderTheirParent(t *testing.T
 func TestAppendGroupedChainEntries_OrphanTriggerSurfacesAtTopLevel(t *testing.T) {
 	log := []card.LogEntry{
 		{Text: "Card A: ATTACK", N: 5},
-		{Text: "Aura created 2 runechants on hit", Source: "Card Z", N: 2},
+		{Text: "Aura created 2 runechants on hit", Source: "Card Z", IsTrigger: true, N: 2},
 	}
 	got := appendGroupedChainEntries(nil, log)
 	want := []string{

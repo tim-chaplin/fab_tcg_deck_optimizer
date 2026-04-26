@@ -225,19 +225,20 @@ func runechantPhrase(n int) string {
 const childEntryPrefix = "  "
 
 // appendGroupedChainEntries walks t.State.Log and emits each chain entry as a parent line
-// followed by its triggers as childEntryPrefix-tagged children. Triggers attribute back to
-// their parent via LogEntry.Source (the triggering card's DisplayName); pre-triggers (hero,
-// aura) sit before their parent in the log and post-triggers (ephemeral attack) sit after,
-// so we buffer pre-triggers until the matching chain line arrives and then peek forward for
-// post-triggers. An orphan trigger whose Source matches no chain line falls through as a
-// plain top-level entry via FormatLogEntry — keeps "(from <source>)" attribution visible
-// so the data isn't silently dropped if the parent-emit invariant ever loosens.
+// followed by its triggers as childEntryPrefix-tagged children. IsTrigger separates
+// triggers from chain steps; triggers attribute back to their parent via LogEntry.Source
+// (the triggering card's DisplayName). Pre-triggers (hero, aura) sit before their parent
+// in the log and post-triggers (ephemeral attack) sit after, so we buffer pre-triggers
+// until the matching chain line arrives and then peek forward for post-triggers. An
+// orphan trigger whose Source matches no chain line falls through as a plain top-level
+// entry via FormatLogEntry — keeps "(from <source>)" attribution visible so the data
+// isn't silently dropped if the parent-emit invariant ever loosens.
 func appendGroupedChainEntries(out []string, log []card.LogEntry) []string {
 	var pending []card.LogEntry
 	i := 0
 	for i < len(log) {
 		e := log[i]
-		if e.Source != "" {
+		if e.IsTrigger {
 			pending = append(pending, e)
 			i++
 			continue
@@ -255,7 +256,7 @@ func appendGroupedChainEntries(out []string, log []card.LogEntry) []string {
 		}
 		pending = pending[:0]
 		j := i + 1
-		for j < len(log) && log[j].Source == parentName {
+		for j < len(log) && log[j].IsTrigger && log[j].Source == parentName {
 			out = append(out, childEntryPrefix+formatTextWithDelta(log[j]))
 			j++
 		}

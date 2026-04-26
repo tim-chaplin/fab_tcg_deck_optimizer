@@ -27,7 +27,7 @@ func (Viserai) OnCardPlayed(played card.Card, s *card.TurnState) int {
 		return 0
 	}
 	if s.NonAttackActionPlayed {
-		return s.AddLogEntry("Viserai created a runechant", card.DisplayName(played), s.CreateRunechant())
+		return s.CreateAndLogRunechants("Viserai", card.DisplayName(played), 1)
 	}
 	return 0
 }

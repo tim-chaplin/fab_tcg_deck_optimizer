@@ -12,14 +12,14 @@ import (
 // later attack can't re-fire it even when its Matches predicate would have accepted. Pins
 // the core invariant that distinguishes EphemeralAttackTrigger from AuraTrigger's counted
 // fires: no OncePerTurn/Count bookkeeping needed because consumption IS the signal.
-// Handlers credit Value through their own AddLogEntry call.
+// Handlers credit Value through their own AddTriggerLogEntry call.
 func TestFireEphemeralAttackTriggers_SingleFireDropsFromList(t *testing.T) {
 	calls := 0
 	state := &card.TurnState{EphemeralAttackTriggers: []card.EphemeralAttackTrigger{{
 		Source: fake.RedAttack{},
 		Handler: func(s *card.TurnState, target *card.CardState) int {
 			calls++
-			return s.AddLogEntry("test ephemeral fired", card.DisplayName(target.Card), 1)
+			return s.AddTriggerLogEntry("test ephemeral fired", card.DisplayName(target.Card), 1)
 		},
 	}}}
 	target1 := &card.CardState{Card: fake.RedAttack{}}
@@ -81,7 +81,7 @@ func TestFireEphemeralAttackTriggers_NilMatchesAcceptsAnyTarget(t *testing.T) {
 	state := &card.TurnState{EphemeralAttackTriggers: []card.EphemeralAttackTrigger{{
 		Source: fake.RedAttack{},
 		Handler: func(s *card.TurnState, target *card.CardState) int {
-			return s.AddLogEntry("test ephemeral fired", card.DisplayName(target.Card), 2)
+			return s.AddTriggerLogEntry("test ephemeral fired", card.DisplayName(target.Card), 2)
 		},
 	}}}
 	target := &card.CardState{Card: fake.YellowAttack{}} // Generic, but Matches=nil accepts all
