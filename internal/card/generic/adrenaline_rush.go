@@ -32,7 +32,8 @@ func (AdrenalineRushRed) Defense() int             { return 2 }
 func (AdrenalineRushRed) Types() card.TypeSet      { return adrenalineRushTypes }
 func (AdrenalineRushRed) GoAgain() bool            { return false }
 func (AdrenalineRushRed) Play(s *card.TurnState, self *card.CardState) {
-	s.ApplyAndLogEffectiveAttackPlus(self, adrenalineRushBonus())
+	self.BonusAttack += adrenalineRushBonus()
+	s.ApplyAndLogEffectiveAttack(self)
 }
 
 type AdrenalineRushYellow struct{}
@@ -46,7 +47,8 @@ func (AdrenalineRushYellow) Defense() int             { return 2 }
 func (AdrenalineRushYellow) Types() card.TypeSet      { return adrenalineRushTypes }
 func (AdrenalineRushYellow) GoAgain() bool            { return false }
 func (AdrenalineRushYellow) Play(s *card.TurnState, self *card.CardState) {
-	s.ApplyAndLogEffectiveAttackPlus(self, adrenalineRushBonus())
+	self.BonusAttack += adrenalineRushBonus()
+	s.ApplyAndLogEffectiveAttack(self)
 }
 
 type AdrenalineRushBlue struct{}
@@ -60,5 +62,6 @@ func (AdrenalineRushBlue) Defense() int             { return 2 }
 func (AdrenalineRushBlue) Types() card.TypeSet      { return adrenalineRushTypes }
 func (AdrenalineRushBlue) GoAgain() bool            { return false }
 func (AdrenalineRushBlue) Play(s *card.TurnState, self *card.CardState) {
-	s.ApplyAndLogEffectiveAttackPlus(self, adrenalineRushBonus())
+	self.BonusAttack += adrenalineRushBonus()
+	s.ApplyAndLogEffectiveAttack(self)
 }

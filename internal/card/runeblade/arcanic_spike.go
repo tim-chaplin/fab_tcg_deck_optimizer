@@ -15,7 +15,7 @@ var arcanicSpikeTypes = card.NewTypeSet(card.TypeRuneblade, card.TypeAction, car
 // arcaneDamageBonus is the +2{p} gained when the "dealt arcane damage this turn" clause is live.
 const arcaneDamageBonus = 2
 
-// arcanicSpikeDamage returns the base attack plus the +2{p} rider when ArcaneDamageDealt is set.
+// arcanicSpikeBonus returns the +2{p} power buff when ArcaneDamageDealt is set, else 0.
 func arcanicSpikeBonus(s *card.TurnState) int {
 	if s != nil && s.ArcaneDamageDealt {
 		return arcaneDamageBonus
@@ -34,7 +34,8 @@ func (ArcanicSpikeRed) Defense() int             { return 3 }
 func (ArcanicSpikeRed) Types() card.TypeSet      { return arcanicSpikeTypes }
 func (ArcanicSpikeRed) GoAgain() bool            { return false }
 func (ArcanicSpikeRed) Play(s *card.TurnState, self *card.CardState) {
-	s.ApplyAndLogEffectiveAttackPlus(self, arcanicSpikeBonus(s))
+	self.BonusAttack += arcanicSpikeBonus(s)
+	s.ApplyAndLogEffectiveAttack(self)
 }
 
 type ArcanicSpikeYellow struct{}
@@ -48,7 +49,8 @@ func (ArcanicSpikeYellow) Defense() int             { return 3 }
 func (ArcanicSpikeYellow) Types() card.TypeSet      { return arcanicSpikeTypes }
 func (ArcanicSpikeYellow) GoAgain() bool            { return false }
 func (ArcanicSpikeYellow) Play(s *card.TurnState, self *card.CardState) {
-	s.ApplyAndLogEffectiveAttackPlus(self, arcanicSpikeBonus(s))
+	self.BonusAttack += arcanicSpikeBonus(s)
+	s.ApplyAndLogEffectiveAttack(self)
 }
 
 type ArcanicSpikeBlue struct{}
@@ -62,5 +64,6 @@ func (ArcanicSpikeBlue) Defense() int             { return 3 }
 func (ArcanicSpikeBlue) Types() card.TypeSet      { return arcanicSpikeTypes }
 func (ArcanicSpikeBlue) GoAgain() bool            { return false }
 func (ArcanicSpikeBlue) Play(s *card.TurnState, self *card.CardState) {
-	s.ApplyAndLogEffectiveAttackPlus(self, arcanicSpikeBonus(s))
+	self.BonusAttack += arcanicSpikeBonus(s)
+	s.ApplyAndLogEffectiveAttack(self)
 }

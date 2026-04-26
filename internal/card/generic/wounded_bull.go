@@ -12,7 +12,8 @@ import (
 
 var woundedBullTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeAttack)
 
-// woundedBullDamage returns attack plus +1 when the current hero opts into LowerHealthWanter.
+// woundedBullBonus returns the +1{p} power buff when the current hero opts into
+// LowerHealthWanter, else 0.
 func woundedBullBonus() int {
 	if simstate.HeroWantsLowerHealth() {
 		return 1
@@ -31,7 +32,8 @@ func (WoundedBullRed) Defense() int             { return 2 }
 func (WoundedBullRed) Types() card.TypeSet      { return woundedBullTypes }
 func (WoundedBullRed) GoAgain() bool            { return false }
 func (WoundedBullRed) Play(s *card.TurnState, self *card.CardState) {
-	s.ApplyAndLogEffectiveAttackPlus(self, woundedBullBonus())
+	self.BonusAttack += woundedBullBonus()
+	s.ApplyAndLogEffectiveAttack(self)
 }
 
 type WoundedBullYellow struct{}
@@ -45,7 +47,8 @@ func (WoundedBullYellow) Defense() int             { return 2 }
 func (WoundedBullYellow) Types() card.TypeSet      { return woundedBullTypes }
 func (WoundedBullYellow) GoAgain() bool            { return false }
 func (WoundedBullYellow) Play(s *card.TurnState, self *card.CardState) {
-	s.ApplyAndLogEffectiveAttackPlus(self, woundedBullBonus())
+	self.BonusAttack += woundedBullBonus()
+	s.ApplyAndLogEffectiveAttack(self)
 }
 
 type WoundedBullBlue struct{}
@@ -59,5 +62,6 @@ func (WoundedBullBlue) Defense() int             { return 2 }
 func (WoundedBullBlue) Types() card.TypeSet      { return woundedBullTypes }
 func (WoundedBullBlue) GoAgain() bool            { return false }
 func (WoundedBullBlue) Play(s *card.TurnState, self *card.CardState) {
-	s.ApplyAndLogEffectiveAttackPlus(self, woundedBullBonus())
+	self.BonusAttack += woundedBullBonus()
+	s.ApplyAndLogEffectiveAttack(self)
 }
