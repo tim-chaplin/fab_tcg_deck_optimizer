@@ -101,9 +101,8 @@ type Card interface {
 	// damage dealt to the opposing hero (may differ from Attack() after conditional bonuses) and
 	// may read state to decide effects. self is the CardState wrapper for this resolution:
 	// cards read self.FromArsenal for arsenal-gated riders and write self.GrantedGoAgain = true
-	// to grant themselves Go again. When called on a defense reaction, the returned damage is
-	// added uncapped to the turn's dealt total (the incoming-damage cap applies only to
-	// Defense()).
+	// to grant themselves Go again. The dispatcher folds the return into s.Value via
+	// s.RecordValue; cards don't call RecordValue themselves.
 	Play(s *TurnState, self *CardState) int
 }
 

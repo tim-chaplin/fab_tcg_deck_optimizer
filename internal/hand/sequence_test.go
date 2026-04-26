@@ -172,7 +172,7 @@ func TestIsLegalOrder_MauvrionCantSaveShrillWhenRuneragerIsAhead(t *testing.T) {
 		weapon.ReapingBlade{},
 	}
 	ctx := newSequenceContextForTest(hero.Viserai{}, nil, nil, 1_000_000, 0, len(order))
-	if _, _, _, legal := ctx.playSequence(order, nil, nil, nil); legal {
+	if _, _, _, legal := ctx.playSequence(order); legal {
 		t.Fatalf("ordering %v should be illegal (Shrill has no go-again and Mauvrion granted Runerager instead)",
 			cardNames(order))
 	}
@@ -195,6 +195,20 @@ func TestBest_ViseraiMauvrionChainsShrillIntoRuneragerIntoWeapon(t *testing.T) {
 	}
 }
 
+// TestBest_StateValueMatchesSummedReturns pins that state.Value (the new dispatcher bucket)
+// equals the explicit-summation total a hand's Plays would produce. Hand: 2 Blues + 2 Reds
+// vs no incoming damage. The optimal chain pitches one Blue (3 resource) and chains the
+// other Blue + 2 Reds — total 1 + 3 + 3 = 7 damage. If a future refactor breaks the
+// dispatcher's RecordValue plumbing, this catches the regression.
+func TestBest_StateValueMatchesSummedReturns(t *testing.T) {
+	h := []card.Card{fake.BlueAttack{}, fake.BlueAttack{}, fake.RedAttack{}, fake.RedAttack{}}
+	got := Best(stubHero, nil, h, 0, nil, 0, nil)
+	if got.Value != 7 {
+		t.Errorf("Value = %d, want 7 (Blue 1 + Red 3 + Red 3 chain off one Blue pitch). Roles=[%s]",
+			got.Value, FormatBestLine(got.BestLine))
+	}
+}
+
 // TestBestSequence_CardStateGrantsDontLeakAcrossPermutations pins the per-permutation reset
 // contract: the permutation loop in bestSequence must allocate fresh *CardState wrappers per
 // permutation so a grant applied by one permutation's Play() can't bleed into a later
@@ -210,7 +224,7 @@ func TestBestSequence_CardStateGrantsDontLeakAcrossPermutations(t *testing.T) {
 	var sawLeak bool
 	attackers := []card.Card{grantAll{}, grantSpy{saw: &sawLeak}, grantAll{}}
 	ctx := newSequenceContextForTest(stubHero, nil, nil, 1_000_000, 0, len(attackers))
-	_, _, _ = ctx.bestSequence(attackers, nil, nil, nil, nil)
+	_, _, _ = ctx.bestSequence(attackers)
 	if sawLeak {
 		t.Fatalf("CardState wrapper state leaked across permutations: grantSpy saw a pre-existing GrantedGoAgain when playing first")
 	}

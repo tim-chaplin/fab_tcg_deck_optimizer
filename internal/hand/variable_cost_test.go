@@ -34,14 +34,14 @@ func TestPlaySequence_SetsArcaneDamageDealtWhenRunechantsFire(t *testing.T) {
 
 	// No runechants → flag stays false.
 	ctx := newSequenceContextForTest(hero.Viserai{}, nil, nil, 10, 0, len(order))
-	_, _, _, _ = ctx.playSequence(order, nil, nil, nil)
+	_, _, _, _ = ctx.playSequence(order)
 	if ctx.bufs.state.ArcaneDamageDealt {
 		t.Errorf("no runechants carried over; expected ArcaneDamageDealt=false, got true")
 	}
 
 	// Carryover runechant → fires on the attack → flag set.
 	ctx = newSequenceContextForTest(hero.Viserai{}, nil, nil, 10, 1, len(order))
-	_, _, _, _ = ctx.playSequence(order, nil, nil, nil)
+	_, _, _, _ = ctx.playSequence(order)
 	if !ctx.bufs.state.ArcaneDamageDealt {
 		t.Errorf("runechant carryover fired on attack; expected ArcaneDamageDealt=true, got false")
 	}
@@ -54,7 +54,7 @@ func TestPlaySequence_DiscountRejectsInsufficientBudget(t *testing.T) {
 	order := []card.Card{runeblade.AmplifyTheArknightRed{}} // printed cost 3, MinCost 0
 	ctx := newSequenceContextForTest(hero.Viserai{}, nil, nil, 0, 0, len(order))
 	// Resource budget 0, carryover 0 → effective cost = 3 - 0 = 3 > 0, sequence illegal.
-	dmg, leftover, _, legal := ctx.playSequence(order, nil, nil, nil)
+	dmg, leftover, _, legal := ctx.playSequence(order)
 	if legal {
 		t.Fatalf("expected illegal sequence, got legal (dmg=%d, leftover=%d)", dmg, leftover)
 	}
@@ -67,7 +67,7 @@ func TestPlaySequence_DiscountAffordableWithBudget(t *testing.T) {
 	ctx := newSequenceContextForTest(hero.Viserai{}, nil, nil, 3, 0, len(order))
 	// Resource budget 3, carryover 0 → effective cost 3, budget just covers it. Amplify's
 	// Attack(6) is the only damage; no runechants to consume.
-	dmg, leftover, _, legal := ctx.playSequence(order, nil, nil, nil)
+	dmg, leftover, _, legal := ctx.playSequence(order)
 	if !legal {
 		t.Fatalf("expected legal sequence")
 	}
@@ -87,7 +87,7 @@ func TestPlaySequence_DiscountUsesCarryoverRunechants(t *testing.T) {
 	// Resource budget 0, carryover 3 → effective cost 3-3 = 0, legal. Damage is just Amplify's
 	// Attack(); the consumed carryover tokens aren't re-credited (they were credited on the
 	// previous turn when they were created).
-	dmg, leftover, _, legal := ctx.playSequence(order, nil, nil, nil)
+	dmg, leftover, _, legal := ctx.playSequence(order)
 	if !legal {
 		t.Fatalf("expected legal sequence")
 	}
@@ -104,7 +104,7 @@ func TestPlaySequence_DiscountUsesCarryoverRunechants(t *testing.T) {
 func TestPlaySequence_LeftoverFromNonAttackAction(t *testing.T) {
 	order := []card.Card{runeblade.ReadTheRunesRed{}} // creates 3 runechants, not an attack
 	ctx := newSequenceContextForTest(hero.Viserai{}, nil, nil, 0, 0, len(order))
-	dmg, leftover, _, legal := ctx.playSequence(order, nil, nil, nil)
+	dmg, leftover, _, legal := ctx.playSequence(order)
 	if !legal {
 		t.Fatalf("expected legal sequence")
 	}

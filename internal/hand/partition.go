@@ -35,13 +35,9 @@ func (e *Evaluator) bestUncached(hero hero.Hero, weapons []weapon.Weapon, hand [
 			AuraTriggers: append([]card.AuraTrigger(nil), priorAuraTriggers...),
 		},
 	}
-	// bestSwung holds the winning partition's swung weapon names so fillContributions can rebuild
-	// the chain it runs bestSequence over. Lives outside TurnSummary since weapons are
-	// recoverable from AttackChain once fillContributions finishes. bestBudget captures the
-	// winning phase-split's chain-resource state; the replay re-seeds ctx with it so
-	// bestSequence finds the exact permutation that won during enumeration.
+	// bestSwung holds the winning partition's swung weapon names — surfaced on the summary so
+	// the printout can list weapons that swung this turn (weapons have no BestLine entry).
 	var bestSwung []string
-	var bestBudget chainBudget
 	// bestHasHeld tracks whether the current best has at least one Held hand card — lets
 	// beatsBest distinguish "arsenal will be occupied post-hoc" from "arsenal will be empty."
 	// Seeded true when the hand is non-empty: the initial best puts every hand card into Held,
@@ -121,7 +117,7 @@ func (e *Evaluator) bestUncached(hero hero.Hero, weapons []weapon.Weapon, hand [
 			// card") can read len > 0. Arsenal-in can never be Held (roleAllowed bars it).
 			h := gatherHeldCards(hand, rolesBuf[:n], held[:0])
 			arsenalAtChainStart := findArsenalCard(rolesBuf, arsenalCardIn, n)
-			attackDealt, defenseDealt, leftoverRunechants, budget, swung, _, ok := bestAttackWithWeapons(hero, weapons, a, d, p, h, deck, bufs, runechantCarryover, incomingDamage, defenseSum, arsenalInIdx, arsenalAtChainStart, priorAuraTriggers)
+			attackDealt, defenseDealt, leftoverRunechants, _, swung, carry, ok := bestAttackWithWeapons(hero, weapons, a, d, p, h, deck, bufs, runechantCarryover, incomingDamage, defenseSum, arsenalInIdx, arsenalAtChainStart, priorAuraTriggers)
 			if !ok {
 				return
 			}
@@ -150,17 +146,16 @@ func (e *Evaluator) bestUncached(hero hero.Hero, weapons []weapon.Weapon, hand [
 			}
 			best.Value = v
 			bestSwung = swung
-			bestBudget = budget
-			best.State.Runechants = leftoverRunechants
+			// Adopt the winner's CarryState wholesale; arsenal-in occupancy overrides the
+			// snapshot's Arsenal so an arsenal-in card that stayed is preserved.
+			best.State = carry
 			best.State.Arsenal = arsenalCard
 			bestHasHeld = hasHeld
 			bestFutureValuePlayed = futureValuePlayed
-			// Write the winning roles into BestLine. Cards and FromArsenal flags were populated
-			// at construction; only Role varies. Contribution is cleared here and filled by
-			// fillContributions below for the winning line.
+			// Cards and FromArsenal flags were populated at construction; Role is the only
+			// field that varies per-permutation.
 			for j := 0; j < totalN; j++ {
 				best.BestLine[j].Role = rolesBuf[j]
-				best.BestLine[j].Contribution = 0
 			}
 			return
 		}
@@ -197,10 +192,7 @@ func (e *Evaluator) bestUncached(hero hero.Hero, weapons []weapon.Weapon, hand [
 		}
 	}
 	recurse(0, 0, 0)
-	// Once per Best call, on the winning line only, attribute per-card contribution.
-	if len(best.BestLine) > 0 {
-		fillContributions(&best, hero, weapons, bestSwung, bestBudget, deck, best.State.Arsenal, bufs, incomingDamage, runechantCarryover, priorAuraTriggers)
-	}
+	best.SwungWeapons = bestSwung
 	// If the arsenal slot is empty after the chain runs, promote one card from State.Hand
 	// into it (deterministic per-hand pick). State.Hand at this point holds the partition's
 	// Held cards plus anything tutored mid-chain; both are equivalent future-turn value, so

@@ -116,80 +116,6 @@ func TestRoundTrip_PreservesPerCardMarginal(t *testing.T) {
 	}
 }
 
-// TestRoundTrip_PreservesBestTurnContributions locks in that per-card Contribution and the
-// AttackChain's per-step Damage / TriggerDamage / AuraTriggerDamage round-trip through
-// Marshal/Unmarshal, so a reloaded deck renders with the same per-card numbers the live sim
-// produced.
-func TestRoundTrip_PreservesBestTurnContributions(t *testing.T) {
-	rng := rand.New(rand.NewSource(7))
-	d := deck.Random(hero.Viserai{}, 40, 2, rng, nil)
-	d.Evaluate(100, 0, rng)
-
-	if len(d.Stats.Best.Summary.BestLine) == 0 {
-		t.Skip("evaluation produced no best turn; rerun with a different seed")
-	}
-
-	// Locate at least one BestLine entry and one AttackChain entry with non-zero damage/contrib
-	// so the assertion below is meaningful — if the sim found nothing of value we'd be checking
-	// 0 == 0 and the test wouldn't catch a regression that dropped the fields.
-	var haveNonZeroContrib, haveNonZeroDamage bool
-	for _, a := range d.Stats.Best.Summary.BestLine {
-		if a.Contribution != 0 {
-			haveNonZeroContrib = true
-		}
-	}
-	for _, e := range d.Stats.Best.Summary.AttackChain {
-		if e.Damage != 0 || e.TriggerDamage != 0 {
-			haveNonZeroDamage = true
-		}
-	}
-	if !haveNonZeroContrib || !haveNonZeroDamage {
-		t.Skip("evaluation produced an all-zero best turn; rerun with a different seed")
-	}
-
-	data, err := Marshal(d)
-	if err != nil {
-		t.Fatalf("Marshal: %v", err)
-	}
-	got, err := Unmarshal(data)
-	if err != nil {
-		t.Fatalf("Unmarshal: %v", err)
-	}
-
-	// Arsenal-in entries (FromArsenal=true) belong to a previous turn's hand and are skipped by
-	// bestTurnToJSON; compare hand-only entries in parallel order.
-	wantLine := filterHand(d.Stats.Best.Summary.BestLine)
-	gotLine := filterHand(got.Stats.Best.Summary.BestLine)
-	if len(gotLine) != len(wantLine) {
-		t.Fatalf("BestLine hand len: got %d want %d", len(gotLine), len(wantLine))
-	}
-	for i := range wantLine {
-		if gotLine[i].Contribution != wantLine[i].Contribution {
-			t.Errorf("BestLine[%d].Contribution: got %.3f want %.3f", i, gotLine[i].Contribution, wantLine[i].Contribution)
-		}
-	}
-
-	wantChain := d.Stats.Best.Summary.AttackChain
-	gotChain := got.Stats.Best.Summary.AttackChain
-	if len(gotChain) != len(wantChain) {
-		t.Fatalf("AttackChain len: got %d want %d", len(gotChain), len(wantChain))
-	}
-	for i := range wantChain {
-		if gotChain[i].Card.Name() != wantChain[i].Card.Name() {
-			t.Errorf("AttackChain[%d].Card: got %q want %q", i, gotChain[i].Card.Name(), wantChain[i].Card.Name())
-		}
-		if gotChain[i].Damage != wantChain[i].Damage {
-			t.Errorf("AttackChain[%d].Damage: got %.3f want %.3f", i, gotChain[i].Damage, wantChain[i].Damage)
-		}
-		if gotChain[i].TriggerDamage != wantChain[i].TriggerDamage {
-			t.Errorf("AttackChain[%d].TriggerDamage: got %.3f want %.3f", i, gotChain[i].TriggerDamage, wantChain[i].TriggerDamage)
-		}
-		if gotChain[i].AuraTriggerDamage != wantChain[i].AuraTriggerDamage {
-			t.Errorf("AttackChain[%d].AuraTriggerDamage: got %.3f want %.3f", i, gotChain[i].AuraTriggerDamage, wantChain[i].AuraTriggerDamage)
-		}
-	}
-}
-
 // TestRoundTrip_PreservesStartOfTurnAuras locks in that the best turn's StartOfTurnAuras list
 // (the auras that were in play at the top of the captured turn) survives Marshal/Unmarshal by
 // card name, preserving duplicates and order. Without the round-trip, a reloaded deck's best
@@ -247,12 +173,8 @@ func TestRoundTrip_PreservesArsenalIn(t *testing.T) {
 	d.Stats.Best = deck.BestTurn{
 		Summary: hand.TurnSummary{
 			BestLine: []hand.CardAssignment{
-				{Card: handCard, Role: hand.Attack, Contribution: 6},
-				{Card: arsenalCard, Role: hand.Attack, Contribution: 3, FromArsenal: true},
-			},
-			AttackChain: []hand.AttackChainEntry{
-				{Card: arsenalCard, Damage: 3},
-				{Card: handCard, Damage: 6},
+				{Card: handCard, Role: hand.Attack},
+				{Card: arsenalCard, Role: hand.Attack, FromArsenal: true},
 			},
 			Value: 9,
 		},
@@ -284,9 +206,6 @@ func TestRoundTrip_PreservesArsenalIn(t *testing.T) {
 	}
 	if arsenalEntry.Role != hand.Attack {
 		t.Errorf("arsenal-in role: got %v want Attack", arsenalEntry.Role)
-	}
-	if arsenalEntry.Contribution != 3 {
-		t.Errorf("arsenal-in contribution: got %v want 3", arsenalEntry.Contribution)
 	}
 }
 

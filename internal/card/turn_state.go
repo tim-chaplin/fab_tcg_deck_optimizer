@@ -52,6 +52,15 @@ type TurnState struct {
 
 	// --- Transient: reset by the sim per turn / chain step ---
 
+	// Value is the running damage-equivalent total for this chain — damage dealt + damage
+	// prevented + every aura-token / hero-trigger credit. The dispatcher calls RecordValue
+	// after each Play / hero / aura / ephemeral / weapon return; the solver compares
+	// permutations on this field. Reset by the sim per permutation.
+	Value int
+	// Log is reserved for an upcoming per-line trace of the chain — the dispatcher does not
+	// yet write to it and FormatBestTurn does not yet read from it. Kept on the struct so the
+	// follow-up wiring is a one-place change. Reset per permutation.
+	Log []string
 	// CardsPlayed is the sequence of cards played (as attacks) this turn, in order.
 	// Populated by the sim after each Play returns so later cards this turn see what was
 	// played before them.
@@ -135,6 +144,18 @@ func ClashValue(s *TurnState, bonus int) int {
 	default:
 		return -bonus
 	}
+}
+
+// RecordValue bumps s.Value by n, clamping at 0 (FaB damage / prevention can't drive the
+// running total negative). Negative n is a no-op. The dispatcher calls this after each
+// Play / hero trigger / aura trigger / weapon swing / defense block so s.Value is the
+// authoritative running total for the permutation. Cards don't call RecordValue themselves —
+// they return the damage-equivalent from Play and let the dispatcher record it.
+func (s *TurnState) RecordValue(n int) {
+	if n <= 0 {
+		return
+	}
+	s.Value += n
 }
 
 // CreateRunechants adds n Runechant token auras to the count, sets AuraCreated so effects

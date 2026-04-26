@@ -99,7 +99,7 @@ func bestAttackWithWeapons(hero hero.Hero, weapons []weapon.Weapon, attackers, d
 					allAttackers = append(allAttackers, w)
 				}
 			}
-			dealt, leftoverRunechants, legal := ctx.bestSequence(allAttackers, nil, nil, nil, nil)
+			dealt, leftoverRunechants, legal := ctx.bestSequence(allAttackers)
 			if !legal {
 				continue
 			}
@@ -190,13 +190,13 @@ type sequenceContext struct {
 // fireAttackActionTriggers walks state.AuraTriggers after an attack action card resolves and
 // invokes every TriggerAttackAction entry whose OncePerTurn gate is open. Each fire
 // decrements the trigger's Count; when Count hits zero the aura drops out of the list and
-// Self lands in the graveyard so downstream same-turn effects see the destroy. Returns the
-// summed Damage from all fires, folded into chain damage by the caller.
+// Self lands in the graveyard so downstream same-turn effects see the destroy. Each handler's
+// damage-equivalent is recorded into state.Value via RecordValue per fire so phase-2 logging
+// can attribute each line independently.
 //
 // Slice mutation: a survivors prefix is built in place over the existing slice; entries
 // kept after firing are written back at increasing indices, exhausted ones are skipped.
-func fireAttackActionTriggers(state *card.TurnState) int {
-	total := 0
+func fireAttackActionTriggers(state *card.TurnState) {
 	triggers := state.AuraTriggers
 	dst := triggers[:0]
 	for i := range triggers {
@@ -205,7 +205,7 @@ func fireAttackActionTriggers(state *card.TurnState) int {
 			dst = append(dst, t)
 			continue
 		}
-		total += t.Handler(state)
+		state.RecordValue(t.Handler(state))
 		t.FiredThisTurn = true
 		t.Count--
 		if t.Count <= 0 {
@@ -215,22 +215,18 @@ func fireAttackActionTriggers(state *card.TurnState) int {
 		dst = append(dst, t)
 	}
 	state.AuraTriggers = dst
-	return total
 }
 
 // fireEphemeralAttackTriggers walks state.EphemeralAttackTriggers after an attack action
 // card resolves and invokes every entry whose Matches predicate accepts the attacker. Each
-// fire consumes the trigger (fire-once semantics) and routes its damage to the source's
-// perCardOut slot via SourceIndex — Mauvrion Skies's "if hits" Runechants, for instance,
-// surface on Mauvrion's BestLine entry rather than the attacker's. Non-matching entries stay
-// in the slice for a later attack action; anything still in the list at end of chain
-// fizzles silently (no graveyard bookkeeping — the source was already graveyarded when its
-// own Play resolved).
+// fire consumes the trigger (fire-once semantics) and records the handler's damage-
+// equivalent into state.Value via RecordValue. Non-matching entries stay in the slice for a
+// later attack action; anything still in the list at end of chain fizzles silently (no
+// graveyard bookkeeping — the source was already graveyarded when its own Play resolved).
 //
 // Slice mutation parallels fireAttackActionTriggers: a survivors prefix is built in place
 // over the existing slice, with fired entries skipped.
-func fireEphemeralAttackTriggers(state *card.TurnState, target *card.CardState, perCardOut []float64) int {
-	total := 0
+func fireEphemeralAttackTriggers(state *card.TurnState, target *card.CardState) {
 	triggers := state.EphemeralAttackTriggers
 	dst := triggers[:0]
 	for i := range triggers {
@@ -239,14 +235,9 @@ func fireEphemeralAttackTriggers(state *card.TurnState, target *card.CardState, 
 			dst = append(dst, t)
 			continue
 		}
-		dmg := t.Handler(state, target)
-		total += dmg
-		if perCardOut != nil && t.SourceIndex >= 0 && t.SourceIndex < len(perCardOut) {
-			perCardOut[t.SourceIndex] += float64(dmg)
-		}
+		state.RecordValue(t.Handler(state, target))
 	}
 	state.EphemeralAttackTriggers = dst
-	return total
 }
 
 // resetStateForPermutation rewrites every TurnState field to its per-permutation starting
@@ -254,6 +245,7 @@ func fireEphemeralAttackTriggers(state *card.TurnState, target *card.CardState, 
 // prepends) don't leak to the next permutation. The leaf-stable read-only fields (Pitched,
 // IncomingDamage, BlockTotal) come from ctx; AuraTriggers gets a fresh copy of
 // priorAuraTriggers so mid-chain firing's Count / FiredThisTurn mutations stay scoped.
+// Value resets to 0 so the dispatcher can use it as the permutation's running damage total.
 func (ctx *sequenceContext) resetStateForPermutation() {
 	s := ctx.bufs.state
 	*s = card.TurnState{
@@ -275,13 +267,9 @@ func (ctx *sequenceContext) resetStateForPermutation() {
 // by playSequenceWithMeta's resource / go-again / pitch-waste checks.
 //
 // Uses Heap's algorithm (iterative) — no closure/callback alloc, no recursive call per perm.
-//
-// When winnerOrderOut is non-nil (len >= len(attackers)) the winning permutation is copied into
-// it. perCardOut / perCardTriggerOut / perCardAuraTriggerOut (same size rule) receive the
-// winning line's per-card Play damage, hero-trigger damage, and mid-chain aura-trigger damage.
-// fillContributions uses these; the partition-loop caller passes nil for all four so the
-// permutation search stays allocation-free.
-func (ctx *sequenceContext) bestSequence(attackers, winnerOrderOut []card.Card, perCardOut, perCardTriggerOut, perCardAuraTriggerOut []float64) (int, int, bool) {
+// The winning permutation's end-of-chain CarryState lands in ctx.carryWinner so callers can
+// adopt the snapshot for next-turn state.
+func (ctx *sequenceContext) bestSequence(attackers []card.Card) (int, int, bool) {
 	n := len(attackers)
 	if n == 0 {
 		// No attackers means no chain costs are deducted — the attack phase spends zero from the
@@ -299,32 +287,12 @@ func (ctx *sequenceContext) bestSequence(attackers, winnerOrderOut []card.Card, 
 		pcBuf[idx] = card.CardState{Card: c, FromArsenal: idx == ctx.arsenalInIdx}
 	}
 
-	// Scratch buffers are playSequence's per-card outputs, overwritten every permutation. On a
-	// new winner we copy them into the caller's perCardOut / perCardTriggerOut /
-	// perCardAuraTriggerOut. Only populated when the caller asked to track.
-	var scratch, triggerScratch, auraTriggerScratch []float64
-	if perCardOut != nil {
-		scratch = ctx.bufs.perCardScratch[:n]
-	}
-	if perCardTriggerOut != nil {
-		if cap(ctx.bufs.perCardTriggerScratch) < n {
-			ctx.bufs.perCardTriggerScratch = make([]float64, n)
-		}
-		triggerScratch = ctx.bufs.perCardTriggerScratch[:n]
-	}
-	if perCardAuraTriggerOut != nil {
-		if cap(ctx.bufs.perCardAuraTriggerScratch) < n {
-			ctx.bufs.perCardAuraTriggerScratch = make([]float64, n)
-		}
-		auraTriggerScratch = ctx.bufs.perCardAuraTriggerScratch[:n]
-	}
-
 	best := 0
 	bestLeftoverRunechants := ctx.runechantCarryover
 	foundLegal := false
 	ctx.carryWinner = CarryState{}
 	eval := func() {
-		dmg, leftoverRunechants, _, legal := ctx.playSequenceWithMeta(n, scratch, triggerScratch, auraTriggerScratch)
+		dmg, leftoverRunechants, _, legal := ctx.playSequenceWithMeta(n)
 		if !legal {
 			return
 		}
@@ -334,20 +302,6 @@ func (ctx *sequenceContext) bestSequence(attackers, winnerOrderOut []card.Card, 
 			bestLeftoverRunechants = leftoverRunechants
 			foundLegal = true
 			ctx.carryWinner = snapshotCarry(ctx.bufs.state)
-			if winnerOrderOut != nil {
-				for i := 0; i < n; i++ {
-					winnerOrderOut[i] = pcBuf[i].Card
-				}
-			}
-			if perCardOut != nil {
-				copy(perCardOut[:n], scratch)
-			}
-			if perCardTriggerOut != nil {
-				copy(perCardTriggerOut[:n], triggerScratch)
-			}
-			if perCardAuraTriggerOut != nil {
-				copy(perCardAuraTriggerOut[:n], auraTriggerScratch)
-			}
 		}
 	}
 	eval()
@@ -380,11 +334,6 @@ func (ctx *sequenceContext) bestSequence(attackers, winnerOrderOut []card.Card, 
 // playSequence plays `order` as a sequence of cards, reusing ctx.bufs' pooled buffers.
 // Buffers are mutated in place; the caller must not read them concurrently.
 //
-// When perCardOut is non-nil (len >= n) each entry is the card's Play return for that
-// position; perCardTriggerOut (same size rule) receives the hero's OnCardPlayed return;
-// perCardAuraTriggerOut (same size rule) receives the mid-chain AuraTrigger return (e.g.
-// Malefic Incantation's TriggerAttackAction). The hot partition-loop callers pass nil.
-//
 // Runechant flow:
 //   - state.Runechants starts at ctx.runechantCarryover.
 //   - Play / OnCardPlayed calling CreateRunechants increments the count AND returns n damage
@@ -400,7 +349,7 @@ func (ctx *sequenceContext) bestSequence(attackers, winnerOrderOut []card.Card, 
 // Populates permMeta from order and then calls playSequenceWithMeta. The hot path
 // (bestSequence) builds meta once and calls playSequenceWithMeta directly to amortise
 // interface dispatch across the N! permutations.
-func (ctx *sequenceContext) playSequence(order []card.Card, perCardOut, perCardTriggerOut, perCardAuraTriggerOut []float64) (damage int, leftoverRunechants int, residualBudget int, legal bool) {
+func (ctx *sequenceContext) playSequence(order []card.Card) (damage int, leftoverRunechants int, residualBudget int, legal bool) {
 	n := len(order)
 	pcBuf := ctx.bufs.pcBuf
 	meta := ctx.bufs.permMeta[:n]
@@ -408,7 +357,7 @@ func (ctx *sequenceContext) playSequence(order []card.Card, perCardOut, perCardT
 		meta[i] = attackerMetaPtrFor(c)
 		pcBuf[i] = card.CardState{Card: c, FromArsenal: i == ctx.arsenalInIdx}
 	}
-	return ctx.playSequenceWithMeta(n, perCardOut, perCardTriggerOut, perCardAuraTriggerOut)
+	return ctx.playSequenceWithMeta(n)
 }
 
 // playSequenceWithMeta runs the permutation currently held in ctx.bufs.pcBuf[:n] with
@@ -416,34 +365,20 @@ func (ctx *sequenceContext) playSequence(order []card.Card, perCardOut, perCardT
 // field a prior card's Play flips on a future card needs a per-permutation reset:
 // GrantedGoAgain (next-attack go-again grants) and BonusAttack (next-attack +N{p} grants).
 //
-// Per-card output attribution:
-//   - perCardOut[i] = card's own Play return (plus any EphemeralAttackTrigger damage routed
-//     back to this slot via SourceIndex — ephemeral triggers credit their source card, not
-//     the attacker that happened to consume them).
-//   - perCardTriggerOut[i] = hero.OnCardPlayed return for this card.
-//   - perCardAuraTriggerOut[i] = fireAttackActionTriggers return fired by this card. Credited
-//     to the attack action card that resolved because prior-turn auras have no BestLine entry
-//     this turn — attributing to the aura would drop the damage off the chain display.
-func (ctx *sequenceContext) playSequenceWithMeta(n int, perCardOut, perCardTriggerOut, perCardAuraTriggerOut []float64) (damage int, leftoverRunechants int, residualBudget int, legal bool) {
+// Damage flows through state.Value: each Play return, hero OnCardPlayed return, aura
+// trigger return, ephemeral trigger return, and BonusAttack grant is recorded via
+// state.RecordValue. The returned damage is just state.Value at end of chain.
+func (ctx *sequenceContext) playSequenceWithMeta(n int) (damage int, leftoverRunechants int, residualBudget int, legal bool) {
 	pcBuf := ctx.bufs.pcBuf
 	ptrBuf := ctx.bufs.ptrBuf
 	meta := ctx.bufs.permMeta[:n]
 	for i := 0; i < n; i++ {
 		pcBuf[i].GrantedGoAgain = false
 		pcBuf[i].BonusAttack = 0
-		if perCardOut != nil {
-			perCardOut[i] = 0
-		}
-		if perCardTriggerOut != nil {
-			perCardTriggerOut[i] = 0
-		}
-		if perCardAuraTriggerOut != nil {
-			perCardAuraTriggerOut[i] = 0
-		}
 	}
 	played := ptrBuf[:n]
 	// Per-permutation reset: full-state rewrite. Hand and Deck are deep-copied so cards can
-	// mutate them freely without leaking to the next permutation.
+	// mutate them freely without leaking to the next permutation. state.Value resets to 0.
 	ctx.resetStateForPermutation()
 	state := ctx.bufs.state
 	resources := ctx.resourceBudget
@@ -470,52 +405,31 @@ func (ctx *sequenceContext) playSequenceWithMeta(n int, perCardOut, perCardTrigg
 		// inside the card's Play see the runechant (or other aura) the hero just made.
 		// Viserai's "another non-attack action" gate still excludes the current card because
 		// NonAttackActionPlayed isn't flipped until the end of the iteration.
-		triggerDmg := ctx.hero.OnCardPlayed(pc.Card, state)
+		state.RecordValue(ctx.hero.OnCardPlayed(pc.Card, state))
 		ephemeralsBefore := len(state.EphemeralAttackTriggers)
 		playDmg := pc.Card.Play(state, pc)
 		// Stamp SourceIndex on any EphemeralAttackTriggers the card registered during Play
-		// so fireEphemeralAttackTriggers can route their damage back to this card's
-		// perCardOut slot.
+		// so fireEphemeralAttackTriggers can attribute the fire back to this card in phase-2
+		// logging.
 		for k := ephemeralsBefore; k < len(state.EphemeralAttackTriggers); k++ {
 			state.EphemeralAttackTriggers[k].SourceIndex = i
 		}
-		auraTriggerDmg := 0
-		ephemeralDmg := 0
-		if m.isAttackAction {
-			auraTriggerDmg = fireAttackActionTriggers(state)
-			// Fire ephemeral triggers AFTER hero and aura triggers so the handler sees the
-			// fully-resolved attacker state (Dominate grants, hero-created auras, fresh
-			// Runechants from aura triggers). Damage is routed back to each trigger's
-			// source via SourceIndex, so perCardOut is updated in place inside the helper.
-			ephemeralDmg = fireEphemeralAttackTriggers(state, pc, perCardOut)
-		}
-		// BonusAttack is granted by a prior card's "next attack +N{p}" rider. The grant is
-		// folded in here (not by the target's Play) so the +N is attributed to the attack
-		// receiving the buff rather than the granter, and so any "if this hits" rider
-		// inside the target's Play can read self.EffectiveAttack() consistently. Applied
-		// unconditionally — picking who can legally receive a +N{p} grant is the grantor's
-		// responsibility (it scans CardsRemaining and matches the appropriate type, e.g.
-		// attack actions for Come to Fight, weapon swings for Brandish), and a future card
-		// that grants damage to a non-attack source shouldn't have to fight a solver-side
-		// type gate. Clamped at 0 because FaB attack-power buffs can't drive an attack
-		// below 0 power (a -3 grant on a 1-power attack resolves as a 0-power attack,
-		// not -2). We can't simply reuse pc.EffectiveAttack() here because playDmg is the
-		// card's full Play return — printed power plus any rider the card already folded
-		// in (e.g. Blow for a Blow's on-hit +1) — and EffectiveAttack only sees printed
-		// power, so substituting it would drop the rider component.
+		// Card contribution: Play return plus any prior-card +N{p} grant. Clamped at 0 — FaB
+		// attack-power buffs can't drive an attack below 0 power (a -3 grant on a 1-power
+		// attack resolves as a 0-power attack, not -2). The clamp covers the sum because
+		// playDmg may include rider damage (e.g. Blow for a Blow's on-hit +1) that
+		// EffectiveAttack doesn't see — clamping the sum preserves both pieces.
 		cardContrib := playDmg + pc.BonusAttack
 		if cardContrib < 0 {
 			cardContrib = 0
 		}
-		damage += cardContrib + triggerDmg + auraTriggerDmg + ephemeralDmg
-		if perCardOut != nil {
-			perCardOut[i] = float64(cardContrib)
-		}
-		if perCardTriggerOut != nil {
-			perCardTriggerOut[i] = float64(triggerDmg)
-		}
-		if perCardAuraTriggerOut != nil {
-			perCardAuraTriggerOut[i] = float64(auraTriggerDmg)
+		state.RecordValue(cardContrib)
+		if m.isAttackAction {
+			fireAttackActionTriggers(state)
+			// Fire ephemeral triggers AFTER hero and aura triggers so the handler sees the
+			// fully-resolved attacker state (Dominate grants, hero-created auras, fresh
+			// Runechants from aura triggers).
+			fireEphemeralAttackTriggers(state, pc)
 		}
 		state.CardsPlayed = append(state.CardsPlayed, pc.Card)
 		if m.types.IsNonAttackAction() {
@@ -540,17 +454,13 @@ func (ctx *sequenceContext) playSequenceWithMeta(n int, perCardOut, perCardTrigg
 		}
 	}
 
-	// Mid-turn-drawn cards always carry to the next hand as Held or compete for the empty
-	// arsenal slot; they never pitch or extend the chain. If they could, the solver's best line
-	// would depend on Deck[0], which the player commits before the draw reveals.
-
 	// Pitch-timing rule: every Pitch-role card must have paid for something on the stack. If the
 	// chain's leftover budget is at least the max attack-phase pitch, one pitch could have been
 	// Held instead — this permutation violates FaB's rules.
 	if ctx.hasAttackPitches && resources >= ctx.maxAttackPitch {
 		return 0, 0, 0, false
 	}
-	return damage, state.Runechants, resources, true
+	return state.Value, state.Runechants, resources, true
 }
 
 // snapshotCarry copies every persistent TurnState field that survives the turn boundary into

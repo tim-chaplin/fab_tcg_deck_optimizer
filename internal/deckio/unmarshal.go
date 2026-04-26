@@ -52,10 +52,6 @@ func fromJSON(dj *DeckJSON) (*deck.Deck, error) {
 	if err != nil {
 		return nil, err
 	}
-	perCard, err := perCardFromJSON(dj.Stats.PerCard)
-	if err != nil {
-		return nil, err
-	}
 	perCardMarginal, err := perCardMarginalFromJSON(dj.Stats.PerCardMarginal)
 	if err != nil {
 		return nil, err
@@ -77,30 +73,10 @@ func fromJSON(dj *DeckJSON) (*deck.Deck, error) {
 		FirstCycle:      dj.Stats.FirstCycle,
 		SecondCycle:     dj.Stats.SecondCycle,
 		Best:            best,
-		PerCard:         perCard,
 		PerCardMarginal: perCardMarginal,
 		Histogram:       dj.Stats.Histogram,
 	}
 	return d, nil
-}
-
-func perCardFromJSON(entries []CardPlayStatsJSON) (map[card.ID]deck.CardPlayStats, error) {
-	if len(entries) == 0 {
-		return nil, nil
-	}
-	out := make(map[card.ID]deck.CardPlayStats, len(entries))
-	for _, e := range entries {
-		id, ok := cards.ByName(e.Card)
-		if !ok {
-			return nil, fmt.Errorf("deckio: unknown card %q in per_card stats", e.Card)
-		}
-		out[id] = deck.CardPlayStats{
-			Plays:             e.Plays,
-			Pitches:           e.Pitches,
-			TotalContribution: e.TotalContribution,
-		}
-	}
-	return out, nil
 }
 
 func perCardMarginalFromJSON(entries []CardMarginalStatsJSON) (map[card.ID]deck.CardMarginalStats, error) {
@@ -130,9 +106,6 @@ func bestTurnFromJSON(bj BestTurnJSON) (deck.BestTurn, error) {
 	if len(bj.Roles) != len(bj.Hand) {
 		return deck.BestTurn{}, fmt.Errorf("deckio: best turn has %d cards but %d roles", len(bj.Hand), len(bj.Roles))
 	}
-	if len(bj.Contributions) != 0 && len(bj.Contributions) != len(bj.Hand) {
-		return deck.BestTurn{}, fmt.Errorf("deckio: best turn has %d cards but %d contributions", len(bj.Hand), len(bj.Contributions))
-	}
 	// Size the rebuilt line to include the arsenal-in entry when present so the "(from
 	// arsenal)" tag survives the round-trip. The arsenal-in entry goes at the tail,
 	// matching bestUncached's convention (hand cards at indices [0,n); arsenal-in at n).
@@ -150,11 +123,7 @@ func bestTurnFromJSON(bj BestTurnJSON) (deck.BestTurn, error) {
 		if err != nil {
 			return deck.BestTurn{}, err
 		}
-		ca := hand.CardAssignment{Card: cards.Get(id), Role: r}
-		if len(bj.Contributions) > 0 {
-			ca.Contribution = bj.Contributions[i]
-		}
-		line[i] = ca
+		line[i] = hand.CardAssignment{Card: cards.Get(id), Role: r}
 	}
 	if bj.ArsenalIn != nil {
 		ac, err := lookupCardByName(bj.ArsenalIn.Card)
@@ -166,15 +135,14 @@ func bestTurnFromJSON(bj BestTurnJSON) (deck.BestTurn, error) {
 			return deck.BestTurn{}, err
 		}
 		line[len(bj.Hand)] = hand.CardAssignment{
-			Card:         ac,
-			Role:         r,
-			Contribution: bj.ArsenalIn.Contribution,
-			FromArsenal:  true,
+			Card:        ac,
+			Role:        r,
+			FromArsenal: true,
 		}
 	}
-	chain, err := rebuildAttackChain(bj, line)
-	if err != nil {
-		return deck.BestTurn{}, err
+	var swungWeapons []string
+	if len(bj.Weapons) > 0 {
+		swungWeapons = append([]string(nil), bj.Weapons...)
 	}
 	var startOfTurnAuras []card.Card
 	if len(bj.StartOfTurnAuras) > 0 {
@@ -209,50 +177,13 @@ func bestTurnFromJSON(bj BestTurnJSON) (deck.BestTurn, error) {
 	return deck.BestTurn{
 		Summary: hand.TurnSummary{
 			BestLine:             line,
-			AttackChain:          chain,
+			SwungWeapons:         swungWeapons,
 			Value:                bj.Value,
 			StartOfTurnAuras:     startOfTurnAuras,
 			TriggersFromLastTurn: triggers,
 		},
 		StartingRunechants: bj.StartingRunechants,
 	}, nil
-}
-
-// rebuildAttackChain reconstructs TurnSummary.AttackChain from the JSON form. When the file has
-// an explicit Chain array we use it: it carries true play order plus per-step damage,
-// hero-trigger damage, and aura-trigger damage, which FormatBestTurn needs to render "+N"
-// contribution labels. Files without a Chain field fall back to a best-effort rebuild
-// (hand-order Attack-role cards then weapons) so they still load, though damage labels will
-// all read "+0".
-func rebuildAttackChain(bj BestTurnJSON, line []hand.CardAssignment) ([]hand.AttackChainEntry, error) {
-	if len(bj.Chain) > 0 {
-		chain := make([]hand.AttackChainEntry, len(bj.Chain))
-		for i, e := range bj.Chain {
-			c, err := lookupCardByName(e.Card)
-			if err != nil {
-				return nil, fmt.Errorf("%v in attack chain", err)
-			}
-			chain[i] = hand.AttackChainEntry{
-				Card:              c,
-				Damage:            e.Damage,
-				TriggerDamage:     e.TriggerDamage,
-				AuraTriggerDamage: e.AuraTriggerDamage,
-			}
-		}
-		return chain, nil
-	}
-	var chain []hand.AttackChainEntry
-	for _, a := range line {
-		if a.Role == hand.Attack {
-			chain = append(chain, hand.AttackChainEntry{Card: a.Card, Damage: a.Contribution})
-		}
-	}
-	for _, name := range bj.Weapons {
-		if w, ok := weapon.ByName(name); ok {
-			chain = append(chain, hand.AttackChainEntry{Card: w})
-		}
-	}
-	return chain, nil
 }
 
 // lookupCardByName resolves a card name from the JSON form to either a registered card or a

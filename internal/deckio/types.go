@@ -36,30 +36,18 @@ type StatsJSON struct {
 	// Avg is TotalValue/Hands, emitted for human readability when skimming the JSON. Loaders
 	// ignore it — Unmarshal rederives via Stats.Mean() so the canonical state is always
 	// (Runs, Hands, TotalValue). Kept first so it's the first number a human sees.
-	Avg         float64             `json:"avg"`
-	Runs        int                 `json:"runs"`
-	Hands       int                 `json:"hands"`
-	TotalValue  float64             `json:"total_value"`
-	FirstCycle  deck.CycleStats     `json:"first_cycle"`
-	SecondCycle deck.CycleStats     `json:"second_cycle"`
+	Avg             float64                 `json:"avg"`
+	Runs            int                     `json:"runs"`
+	Hands           int                     `json:"hands"`
+	TotalValue      float64                 `json:"total_value"`
+	FirstCycle      deck.CycleStats         `json:"first_cycle"`
+	SecondCycle     deck.CycleStats         `json:"second_cycle"`
 	Best            BestTurnJSON            `json:"best"`
-	PerCard         []CardPlayStatsJSON     `json:"per_card,omitempty"`
 	PerCardMarginal []CardMarginalStatsJSON `json:"per_card_marginal,omitempty"`
 	// Histogram counts hands seen at each Value. encoding/json writes int-keyed maps with the
 	// int formatted as a string ("7": 42), which round-trips fine since we declare the field
 	// as map[int]int. Omitted when empty so old files stay valid.
 	Histogram map[int]int `json:"histogram,omitempty"`
-}
-
-// CardPlayStatsJSON is the JSON form of deck.CardPlayStats keyed by card name. Avg is included
-// even though it's derivable from the other fields — it's what a human reader actually wants
-// when skimming the file.
-type CardPlayStatsJSON struct {
-	Card              string  `json:"card"`
-	Plays             int     `json:"plays"`
-	Pitches           int     `json:"pitches"`
-	TotalContribution float64 `json:"total_contribution"`
-	Avg               float64 `json:"avg"`
 }
 
 // CardMarginalStatsJSON is the JSON form of deck.CardMarginalStats keyed by card name.
@@ -76,21 +64,16 @@ type CardMarginalStatsJSON struct {
 }
 
 // BestTurnJSON is the JSON form of deck.BestTurn: card names and role names instead of
-// interface values. Contributions parallels Hand/Roles and carries
-// CardAssignment.Contribution for each hand slot. Chain is the ordered attack sequence —
-// cards and weapons in play order with their per-step damage. StartOfTurnAuras mirrors
-// hand.TurnSummary.StartOfTurnAuras as a list of card names; ArsenalIn carries the card
-// that started the turn in the arsenal slot (distinct from Hand, which is the dealt hand
-// only). TriggersFromLastTurn records carryover AuraTrigger fires so the "from previous
-// turn" printout round-trips across a reload. Omitempty-omitted fields fall back to
-// defaults (contributions = 0, chain rebuilt in hand order, no prior auras, no arsenal-in,
-// no carryover trigger lines).
+// interface values. Weapons names the weapons swung this turn (mirrors
+// hand.TurnSummary.SwungWeapons). StartOfTurnAuras mirrors hand.TurnSummary.StartOfTurnAuras
+// as a list of card names; ArsenalIn carries the card that started the turn in the arsenal
+// slot (distinct from Hand, which is the dealt hand only). TriggersFromLastTurn records
+// carryover AuraTrigger fires so the "from previous turn" printout round-trips across a
+// reload.
 type BestTurnJSON struct {
 	Hand                 []string                  `json:"hand"`
 	Roles                []string                  `json:"roles"`
-	Contributions        []float64                 `json:"contributions,omitempty"`
 	Weapons              []string                  `json:"weapons"`
-	Chain                []AttackChainEntryJSON    `json:"chain,omitempty"`
 	StartOfTurnAuras     []string                  `json:"start_of_turn_auras,omitempty"`
 	ArsenalIn            *ArsenalInJSON            `json:"arsenal_in,omitempty"`
 	TriggersFromLastTurn []TriggerContributionJSON `json:"triggers_from_last_turn,omitempty"`
@@ -103,9 +86,8 @@ type BestTurnJSON struct {
 // only dealt-hand entries; the arsenal-in card lives here separately because it belongs to
 // a previous turn and isn't part of the dealt hand the reader sees in the Card list.
 type ArsenalInJSON struct {
-	Card         string  `json:"card"`
-	Role         string  `json:"role"`
-	Contribution float64 `json:"contribution,omitempty"`
+	Card string `json:"card"`
+	Role string `json:"role"`
 }
 
 // TriggerContributionJSON is the serialised form of hand.TriggerContribution — one
@@ -117,15 +99,4 @@ type TriggerContributionJSON struct {
 	Card     string `json:"card"`
 	Damage   int    `json:"damage,omitempty"`
 	Revealed string `json:"revealed,omitempty"`
-}
-
-// AttackChainEntryJSON serialises one attack step (card or weapon) with the damage it dealt
-// in the sim's winning chain. TriggerDamage is the hero's OnCardPlayed contribution for that
-// step; AuraTriggerDamage is the mid-chain AuraTrigger contribution (e.g. a prior-turn Malefic
-// Incantation firing on this attack). Both are omitted when zero.
-type AttackChainEntryJSON struct {
-	Card              string  `json:"card"`
-	Damage            float64 `json:"damage"`
-	TriggerDamage     float64 `json:"trigger_damage,omitempty"`
-	AuraTriggerDamage float64 `json:"aura_trigger_damage,omitempty"`
 }

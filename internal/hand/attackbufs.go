@@ -55,27 +55,6 @@ type attackBufs struct {
 	// defenseGravScratch backs state.Graveyard during DR Plays. Reset via [:0]+append per
 	// iteration so card effects can freely mutate their view without leaking into the next one.
 	defenseGravScratch []card.Card
-	// perCardScratch is sized maxAttackers (handSize + weaponCount). Written by playSequence only
-	// when the caller passes a non-nil perCardOut; bestSequence snapshots the winning
-	// permutation's per-card damage from here into the caller's output buffer. The partition-loop
-	// hot path passes nil and never touches this slice.
-	perCardScratch []float64
-	// perCardTriggerScratch parallels perCardScratch for hero-trigger damage (OnCardPlayed
-	// return). Only written when the caller tracks.
-	perCardTriggerScratch []float64
-	// perCardAuraTriggerScratch parallels perCardScratch for mid-chain AuraTrigger damage
-	// (fireAttackActionTriggers return). Split out from perCardTriggerScratch so the display
-	// can separately attribute hero OnCardPlayed and mid-chain aura triggers.
-	perCardAuraTriggerScratch []float64
-	// fillContribWinnerOrder / fillContribPerCard are output buffers for bestSequence during
-	// fillContributions's tracked replay. Kept on attackBufs so each Best call reuses the slab.
-	fillContribWinnerOrder    []card.Card
-	fillContribPerCard        []float64
-	fillContribTriggerDmg     []float64
-	fillContribAuraTriggerDmg []float64
-	// fillContribUsed marks hand indices already assigned during chain→hand mapping. Sized
-	// handSize; reset with clear before each fillContributions pass.
-	fillContribUsed []bool
 }
 
 func newAttackBufs(handSize, weaponCount int, weapons []weapon.Weapon) *attackBufs {
@@ -108,32 +87,24 @@ func newAttackBufs(handSize, weaponCount int, weapons []weapon.Weapon) *attackBu
 		ptrBuf[i] = &pcBuf[i]
 	}
 	return &attackBufs{
-		permMeta:                  make([]*attackerMeta, maxAttackers),
-		pcBuf:                     pcBuf,
-		ptrBuf:                    ptrBuf,
-		state:                     &card.TurnState{},
-		attackerBuf:               make([]card.Card, maxAttackers),
-		weaponCosts:               weaponCosts,
-		weaponNames:               weaponNames,
-		rolesBuf:                  make([]Role, handSize+1),
-		pitchVals:                 make([]int, handSize+1),
-		defenseVals:               make([]int, handSize+1),
-		isDRBuf:                   make([]bool, handSize+1),
-		addsFutureValueBuf:        make([]bool, handSize+1),
-		pitchedValsScratch:        make([]int, 0, handSize+1),
-		pitchedBuf:                make([]card.Card, 0, handSize+1),
-		attackersBuf:              make([]card.Card, 0, handSize+1),
-		defendersBuf:              make([]card.Card, 0, handSize+1),
-		heldBuf:                   make([]card.Card, 0, handSize+1),
-		defenseGravScratch:        make([]card.Card, 0, handSize+1),
-		perCardScratch:            make([]float64, maxAttackers),
-		perCardTriggerScratch:     make([]float64, maxAttackers),
-		perCardAuraTriggerScratch: make([]float64, maxAttackers),
-		fillContribWinnerOrder:    make([]card.Card, maxAttackers),
-		fillContribPerCard:        make([]float64, maxAttackers),
-		fillContribTriggerDmg:     make([]float64, maxAttackers),
-		fillContribAuraTriggerDmg: make([]float64, maxAttackers),
-		fillContribUsed:           make([]bool, handSize),
+		permMeta:           make([]*attackerMeta, maxAttackers),
+		pcBuf:              pcBuf,
+		ptrBuf:             ptrBuf,
+		state:              &card.TurnState{},
+		attackerBuf:        make([]card.Card, maxAttackers),
+		weaponCosts:        weaponCosts,
+		weaponNames:        weaponNames,
+		rolesBuf:           make([]Role, handSize+1),
+		pitchVals:          make([]int, handSize+1),
+		defenseVals:        make([]int, handSize+1),
+		isDRBuf:            make([]bool, handSize+1),
+		addsFutureValueBuf: make([]bool, handSize+1),
+		pitchedValsScratch: make([]int, 0, handSize+1),
+		pitchedBuf:         make([]card.Card, 0, handSize+1),
+		attackersBuf:       make([]card.Card, 0, handSize+1),
+		defendersBuf:       make([]card.Card, 0, handSize+1),
+		heldBuf:            make([]card.Card, 0, handSize+1),
+		defenseGravScratch: make([]card.Card, 0, handSize+1),
 	}
 }
 
