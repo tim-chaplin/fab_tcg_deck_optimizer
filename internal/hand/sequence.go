@@ -292,17 +292,28 @@ func fireEphemeralAttackTriggers(state *card.TurnState, target *card.CardState) 
 // IncomingDamage, BlockTotal) come from ctx; AuraTriggers gets a fresh copy of
 // priorAuraTriggers so mid-chain firing's Count / FiredThisTurn mutations stay scoped.
 // Value resets to 0 so the dispatcher can use it as the permutation's running damage total.
+//
+// The transient slices (Hand, Deck, Graveyard, Banish, CardsPlayed, Log, AuraTriggers) all
+// borrow pre-allocated backing arrays from attackBufs via append([:0], src...) so unchanged
+// permutations don't allocate fresh slices. snapshotCarry clones the winning permutation's
+// slices before the next permutation overwrites these buffers; mid-chain growth past the
+// pre-sized cap is the only path that allocates a new backing array.
 func (ctx *sequenceContext) resetStateForPermutation() {
 	s := ctx.bufs.state
+	bufs := ctx.bufs
 	*s = card.TurnState{
-		Hand:           append([]card.Card(nil), ctx.handStart...),
-		Deck:           append([]card.Card(nil), ctx.deck...),
+		Hand:           append(bufs.handBacking[:0], ctx.handStart...),
+		Deck:           append(bufs.deckBacking[:0], ctx.deck...),
 		Arsenal:        ctx.arsenalAtChainStart,
+		Graveyard:      bufs.graveBacking[:0],
+		Banish:         bufs.banishBacking[:0],
+		CardsPlayed:    bufs.cardsPlayedBacking[:0],
+		Log:            bufs.logBacking[:0],
 		Pitched:        ctx.pitched,
 		IncomingDamage: ctx.incomingDamage,
 		BlockTotal:     ctx.blockTotal,
 		Runechants:     ctx.runechantCarryover,
-		AuraTriggers:   append([]card.AuraTrigger(nil), ctx.priorAuraTriggers...),
+		AuraTriggers:   append(bufs.auraTriggersBacking[:0], ctx.priorAuraTriggers...),
 	}
 }
 
