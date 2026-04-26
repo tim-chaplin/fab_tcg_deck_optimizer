@@ -7,9 +7,9 @@ import (
 )
 
 // TestSigilOfSuffering_FullCreditWhenIncomingAbsorbsBoost: with enough IncomingDamage to consume
-// the printed Defense plus the +1{d} rider, total Value reflects every component: printed
-// Defense (chain step) + 1 (arcane sub-line) + 1 (+1{d} rider sub-line). Each variant scales by
-// its printed Defense (Red 3, Yellow 2, Blue 1).
+// the printed Defense plus the +1{d} bonus, total Value reflects every component: printed
+// Defense + 1 (the +1{d} rider folded into BonusDefense) + 1 (arcane sub-line). Each variant
+// scales by its printed Defense (Red 3, Yellow 2, Blue 1).
 func TestSigilOfSuffering_FullCreditWhenIncomingAbsorbsBoost(t *testing.T) {
 	cases := []struct {
 		c    card.Card
@@ -54,7 +54,7 @@ func TestSigilOfSuffering_BoostWastedWhenIncomingMatchesDefense(t *testing.T) {
 }
 
 // TestSigilOfSuffering_DefenseIsPrinted pins each variant's Defense() to its printed block value
-// — the +1{d} bonus is credited as a separate Play-time rider sub-line, not baked into Defense.
+// — the +1{d} bonus is credited via BonusDefense at Play time, not baked into Defense.
 func TestSigilOfSuffering_DefenseIsPrinted(t *testing.T) {
 	cases := []struct {
 		c    card.Card

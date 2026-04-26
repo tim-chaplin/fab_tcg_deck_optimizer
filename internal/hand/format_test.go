@@ -232,11 +232,11 @@ func TestFormatBestTurn_ArsenalInPlayedAsDR(t *testing.T) {
 }
 
 // TestFormatBestTurn_DefenseReactionLinesAndRiders pins the per-DR rendering: the chain step's
-// "(+N)" reflects only the printed-Defense block credit, with arcane / +1{d} / etc. each landing
-// as their own indented sub-line under the parent. Sigil of Suffering Red against incoming 4 has
-// the Sigil block 3, deal 1 arcane, then credit a +1{d} bonus rider (the Sigil's own arcane
-// satisfies the conditional and there's 1 incoming left for the bonus to absorb). Dodge has no
-// riders, so it renders as a single chain step with "(+2)" — the printed Defense.
+// "(+N)" folds in BonusDefense (the +1{d} bonus is rolled in just like BonusAttack feeds the
+// attack chain step), and separable riders like the arcane ping each land as their own indented
+// sub-line under the parent. Sigil of Suffering Red against incoming 4 has the Sigil block 4
+// (printed 3 + 1 from the arcane-conditional bonus) and deal 1 arcane on a sub-line. Dodge has
+// no riders or bonuses, so it renders as a single chain step with "(+2)" — the printed Defense.
 func TestFormatBestTurn_DefenseReactionLinesAndRiders(t *testing.T) {
 	cases := []struct {
 		name     string
@@ -245,13 +245,12 @@ func TestFormatBestTurn_DefenseReactionLinesAndRiders(t *testing.T) {
 		wants    []string
 	}{
 		{
-			name:     "Sigil of Suffering credits arcane + rider as separate sub-lines",
+			name:     "Sigil of Suffering folds bonus into chain step + arcane sub-line",
 			hand:     []card.Card{runeblade.SigilOfSufferingRed{}, fake.RedAttack{}, fake.RedAttack{}, fake.RedAttack{}},
 			incoming: 4,
 			wants: []string{
-				"Sigil of Suffering [R]: DEFENSE REACTION (+3)",
+				"Sigil of Suffering [R]: DEFENSE REACTION (+4)",
 				"Dealt 1 arcane damage (+1)",
-				"Gained +1{d} from arcane this turn (+1)",
 			},
 		},
 		{

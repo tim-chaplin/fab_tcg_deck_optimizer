@@ -39,12 +39,11 @@ type CardState struct {
 	// Negative bonuses (defender-side -N{p} debuffs) clamp at 0 because FaB attack power
 	// can't go below 0.
 	BonusAttack int
-	// BonusDefense is the +{d} this card has accumulated from "+N{d}" grants by other cards
-	// in the chain — the defender-side counterpart to BonusAttack. Granters set
-	// pc.BonusDefense += N on the matching CardState; EffectiveDefense folds it into the
-	// chain step's (+N) so a buffed DR's block reflects the grant. Self-rider "+1{d} if X"
-	// bonuses don't write here — they fire as their own LogDefenseRiderOnPlay sub-line so
-	// the rider's contribution stays visible. Negative grants clamp at 0.
+	// BonusDefense is the +{d} this card has accumulated from "+N{d}" rider clauses, the
+	// defender-side counterpart to BonusAttack. Cross-card grants from other cards and self-
+	// riders ("if X, this gains +1{d}") both write into this field; EffectiveDefense folds it
+	// into the chain step's (+N) so a buffed DR's block reflects the grant. Negative grants
+	// clamp at 0.
 	BonusDefense int
 }
 
@@ -78,9 +77,7 @@ func (p *CardState) EffectiveAttack() int {
 // EffectiveDefense returns the card's printed Defense() plus any granted BonusDefense plus the
 // ArsenalDefenseBonus when this copy came from the arsenal slot, clamped at 0. Defense
 // Reactions feed this through ApplyAndLogEffectiveDefense so the chain step's (+N) reflects
-// the buffed block; conditional self-rider "+N{d}" bonuses (e.g. Sigil of Suffering's "+1{d}
-// if you've dealt arcane") fire as their own sub-line via LogDefenseRiderOnPlay instead so
-// each rider's contribution stays visible in the printout.
+// the buffed block.
 func (p *CardState) EffectiveDefense() int {
 	n := p.Card.Defense() + p.BonusDefense
 	if p.FromArsenal {
