@@ -2,15 +2,17 @@ package card
 
 // stubCard is a minimal Card implementation for exercising TurnState helpers. Tests only care
 // about identity and the Types / Attack / GoAgain hooks some helpers probe; everything else
-// returns a zero value.
+// returns a zero value. id defaults to Invalid (0); tests that reach into ID-keyed caches
+// should set it to a distinct value to avoid colliding on slot 0.
 type stubCard struct {
+	id      ID
 	name    string
 	types   TypeSet
 	attack  int
 	goAgain bool
 }
 
-func (c stubCard) ID() ID                    { return Invalid }
+func (c stubCard) ID() ID                    { return c.id }
 func (c stubCard) Name() string              { return c.name }
 func (stubCard) Cost(*TurnState) int         { return 0 }
 func (stubCard) Pitch() int                  { return 0 }

@@ -292,29 +292,6 @@ func (s *TurnState) ApplyAndLogEffectiveDefense(self *CardState) {
 	s.AddLogEntry(chainStepText(self), n)
 }
 
-// chainStepText renders the "<DisplayName>: <VERB>[ from arsenal]" prefix the chain-step
-// helper writes. VERB picks WEAPON ATTACK for weapon-typed cards, ATTACK for attack-action
-// cards, DEFENSE REACTION for Defense Reactions, and PLAY for everything else. The "from
-// arsenal" suffix tags entries played out of the arsenal slot.
-func chainStepText(self *CardState) string {
-	types := self.Card.Types()
-	var verb string
-	switch {
-	case types.Has(TypeWeapon):
-		verb = "WEAPON ATTACK"
-	case types.IsAttackAction():
-		verb = "ATTACK"
-	case types.IsDefenseReaction():
-		verb = "DEFENSE REACTION"
-	default:
-		verb = "PLAY"
-	}
-	if self.FromArsenal {
-		verb += " from arsenal"
-	}
-	return DisplayName(self.Card) + ": " + verb
-}
-
 // CreateRunechants adds n Runechant token auras to the count, sets AuraCreated so effects
 // that key on "aura created this turn" see it, and returns n — each token is credited as
 // +1 damage at creation time. Tokens that never fire (end-of-sim leftovers) are slightly
