@@ -231,38 +231,43 @@ func TestFormatBestTurn_ArsenalInPlayedAsDR(t *testing.T) {
 	}
 }
 
-// TestFormatBestTurn_DefenseReactionShowsValueSuffix pins the "(+N)" suffix on Defense Reaction
-// log lines. N is printed Defense plus the DR's Play return — for Sigil of Suffering Red that's
-// 3 block + 1 arcane + 1 rider (the +1{d} bonus credits because the Sigil's own arcane satisfies
-// "if you have dealt arcane damage this turn"), so the line ends in "(+5)". Dodge Blue has
-// Play.Value=0 so its suffix is "(+2)" — printed Defense only — confirming the suffix mirrors
-// plain blocks when no rider fires.
-func TestFormatBestTurn_DefenseReactionShowsValueSuffix(t *testing.T) {
+// TestFormatBestTurn_DefenseReactionLinesAndRiders pins the per-DR rendering: the chain step's
+// "(+N)" folds in BonusDefense (the +1{d} bonus is rolled in just like BonusAttack feeds the
+// attack chain step), and separable riders like the arcane ping each land as their own indented
+// sub-line under the parent. Sigil of Suffering Red against incoming 4 has the Sigil block 4
+// (printed 3 + 1 from the arcane-conditional bonus) and deal 1 arcane on a sub-line. Dodge has
+// no riders or bonuses, so it renders as a single chain step with "(+2)" — the printed Defense.
+func TestFormatBestTurn_DefenseReactionLinesAndRiders(t *testing.T) {
 	cases := []struct {
 		name     string
 		hand     []card.Card
 		incoming int
-		want     string
+		wants    []string
 	}{
 		{
-			name:     "Sigil of Suffering credits arcane + rider on top of Defense",
+			name:     "Sigil of Suffering folds bonus into chain step + arcane sub-line",
 			hand:     []card.Card{runeblade.SigilOfSufferingRed{}, fake.RedAttack{}, fake.RedAttack{}, fake.RedAttack{}},
 			incoming: 4,
-			want:     "Sigil of Suffering [R]: DEFENSE REACTION (+5)",
+			wants: []string{
+				"Sigil of Suffering [R]: DEFENSE REACTION (+4)",
+				"Dealt 1 arcane damage (+1)",
+			},
 		},
 		{
-			name:     "Dodge adds nothing on top of Defense",
+			name:     "Dodge has no riders, single chain line",
 			hand:     []card.Card{generic.DodgeBlue{}},
 			incoming: 2,
-			want:     "Dodge [B]: DEFENSE REACTION (+2)",
+			wants:    []string{"Dodge [B]: DEFENSE REACTION (+2)"},
 		},
 	}
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
 			got := Best(stubHero, nil, tc.hand, tc.incoming, nil, 0, nil)
 			out := FormatBestTurn(got, 0)
-			if !strings.Contains(out, tc.want) {
-				t.Errorf("want %q in:\n%s", tc.want, out)
+			for _, w := range tc.wants {
+				if !strings.Contains(out, w) {
+					t.Errorf("want %q in:\n%s", w, out)
+				}
 			}
 		})
 	}

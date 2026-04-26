@@ -274,9 +274,11 @@ func (s *TurnState) LogPlay(self *CardState) {
 // effective Defense (printed Defense + BonusDefense + ArsenalDefenseBonus when from arsenal)
 // to s.Value, clamped at the remaining IncomingDamage so an over-blocked DR doesn't credit
 // past what was actually prevented. The credited amount is decremented from s.IncomingDamage
-// so a later defender sees the reduced pool. Card riders (arcane pings, runechant creation)
-// emit their own post-trigger sub-lines via DealAndLogArcaneDamage / CreateAndLogRunechantsOnPlay
-// after the chain step.
+// so a later defender sees the reduced pool. Cards with separable rider effects (arcane
+// pings, runechant creation, on-hit credits) emit each rider as its own post-trigger child
+// line via DealAndLogArcaneDamage / CreateAndLogRunechantsOnPlay / LogRiderOnPlay after the
+// chain step; conditional "+N{d}" bonuses fold into BonusDefense before the chain step so
+// they roll into the same (+N), mirroring how BonusAttack feeds ApplyAndLogEffectiveAttack.
 func (s *TurnState) ApplyAndLogEffectiveDefense(self *CardState) {
 	n := self.EffectiveDefense()
 	if n > s.IncomingDamage {

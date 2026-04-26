@@ -39,10 +39,11 @@ type CardState struct {
 	// Negative bonuses (defender-side -N{p} debuffs) clamp at 0 because FaB attack power
 	// can't go below 0.
 	BonusAttack int
-	// BonusDefense is the +{d} this card has accumulated from "+N{d}" rider clauses, mirroring
-	// BonusAttack on the defender side. Self-riders ("if X, this gains +1{d}") and grants from
-	// other cards both write into this field; EffectiveDefense folds it into the chain step's
-	// (+N) so an over-blocked DR doesn't double-credit the bonus. Negative grants clamp at 0.
+	// BonusDefense is the +{d} this card has accumulated from "+N{d}" rider clauses, the
+	// defender-side counterpart to BonusAttack. Cross-card grants from other cards and self-
+	// riders ("if X, this gains +1{d}") both write into this field; EffectiveDefense folds it
+	// into the chain step's (+N) so a buffed DR's block reflects the grant. Negative grants
+	// clamp at 0.
 	BonusDefense int
 }
 
@@ -73,11 +74,10 @@ func (p *CardState) EffectiveAttack() int {
 	return n
 }
 
-// EffectiveDefense returns the card's printed Defense() plus any BonusDefense rider plus the
+// EffectiveDefense returns the card's printed Defense() plus any granted BonusDefense plus the
 // ArsenalDefenseBonus when this copy came from the arsenal slot, clamped at 0. Defense
-// Reactions feed this through ApplyAndLogEffectiveDefense so a +1{d} bonus rolls into the
-// chain step's (+N) without double-crediting; over-blocked excess is naturally discarded by
-// the helper's IncomingDamage clamp.
+// Reactions feed this through ApplyAndLogEffectiveDefense so the chain step's (+N) reflects
+// the buffed block.
 func (p *CardState) EffectiveDefense() int {
 	n := p.Card.Defense() + p.BonusDefense
 	if p.FromArsenal {
