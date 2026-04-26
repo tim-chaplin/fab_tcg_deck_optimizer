@@ -1,8 +1,9 @@
 package deck
 
 // Single-slot mutation generation for the iterate-mode hill climb: every alternative weapon
-// loadout plus every (remove one, add one) card swap the deck admits. Ordering is deterministic
-// so first-improvement search explores low-value removal slots first.
+// loadout plus every (remove one, add one) card swap the deck admits. Ordering is by
+// ascending card.ID for stability — no value-based bias. The anneal driver shuffles the
+// returned slice each round so exploration order is unbiased.
 
 import (
 	"fmt"
@@ -27,11 +28,9 @@ type Mutation struct {
 // "swap two for two" mutations from cardPairMutations. removeID must be in the deck; addID's
 // post-mutation count must not exceed maxCopies. Pairs with removeID == addID are skipped.
 //
-// Card-mutation ordering: the outer loop iterates uniqueIDs by ascending per-card average
-// contribution (d.Stats.PerCard[id].Avg()), so low-value cards get swap candidates tried first.
-// Cards without stats tie at 0 and fall back to card.ID. The inner loop iterates the addID pool
-// by card.ID. Favouring low-value removal slots surfaces useful swaps early for a
-// first-improvement hill climb.
+// Card-mutation ordering is by ascending card.ID for stability — no value-based bias. The
+// anneal driver shuffles the returned slice each round so neither the first-found classical
+// climb nor the probabilistic SA gate disproportionately samples the head of the slice.
 //
 // Single-card swaps (not paired swaps) let the hill climber reach decks with odd per-card counts
 // (e.g. 1× X + 3× Y at maxCopies=3). The pair-swap layer is the orthogonal escape hatch for
@@ -83,10 +82,9 @@ func weaponLoadoutMutations(d *Deck) []Mutation {
 	return out
 }
 
-// cardSwapMutations emits every single-card remove+add mutation the deck admits. Remove targets
-// iterate in ascending per-card avg contribution so the hill climb spends its budget on the
-// currently-worst cards first; with no Stats yet the tiebreak falls through to stable card.ID
-// order. Add candidates skip no-ops (same ID) and entries already at maxCopies.
+// cardSwapMutations emits every single-card remove+add mutation the deck admits. Remove
+// targets iterate in ascending card.ID for stability (no value-based bias; the anneal driver
+// shuffles afterward). Add candidates skip no-ops (same ID) and entries already at maxCopies.
 func cardSwapMutations(d *Deck, maxCopies int, legal func(card.Card) bool) []Mutation {
 	counts := map[card.ID]int{}
 	for _, c := range d.Cards {
@@ -96,14 +94,7 @@ func cardSwapMutations(d *Deck, maxCopies int, legal func(card.Card) bool) []Mut
 	for id := range counts {
 		uniqueIDs = append(uniqueIDs, id)
 	}
-	sort.Slice(uniqueIDs, func(i, j int) bool {
-		ai := d.Stats.PerCard[uniqueIDs[i]].Avg()
-		aj := d.Stats.PerCard[uniqueIDs[j]].Avg()
-		if ai != aj {
-			return ai < aj
-		}
-		return uniqueIDs[i] < uniqueIDs[j]
-	})
+	sort.Slice(uniqueIDs, func(i, j int) bool { return uniqueIDs[i] < uniqueIDs[j] })
 
 	// legalPool returns IDs in ascending order (cards.Deckable() iterates byID).
 	pool := legalPool(legal)

@@ -222,10 +222,15 @@ func runAnneal(cfg annealConfig) annealResult {
 	}
 }
 
-// buildRoundMutations produces the per-round mutation list: clears the shared hand memo (so the
-// next round starts with a bounded cache), enumerates every single-card/weapon mutation, and
-// under annealing shuffles the order so probabilistic acceptances aren't concentrated on the
-// weakest card. Also emits the debug memo-size line when -debug is set.
+// buildRoundMutations produces the per-round mutation list: clears the shared hand memo (so
+// the next round starts with a bounded cache), enumerates every single-card/weapon mutation,
+// and shuffles the order so exploration is unbiased. Also emits the debug memo-size line
+// when -debug is set.
+//
+// AllMutations returns a card.ID-sorted slice for stability; the unconditional shuffle here
+// is what keeps the first-improvement classical climb from sampling the head of the slice
+// disproportionately, and what keeps the probabilistic SA gate from concentrating its
+// acceptances on a fixed slice of the solution space.
 func buildRoundMutations(cfg annealConfig, rng *rand.Rand, current *deck.Deck, round int) []deck.Mutation {
 	// Drop the shared hand memo between rounds. Within a round the memo is load-bearing
 	// (same hand shapes recur across thousands of shuffles), but cross-round hit rate is
@@ -235,17 +240,9 @@ func buildRoundMutations(cfg annealConfig, rng *rand.Rand, current *deck.Deck, r
 	}
 	hand.ClearMemo()
 	mutations := deck.AllMutations(current, cfg.maxCopies, cfg.legalFilter())
-	if cfg.startTemp > 0 {
-		// AllMutations sorts weakest-card-first so a first-found classical climb tries the
-		// highest-expected-gain swaps early. Under annealing that same bias means the
-		// probabilistic acceptances disproportionately hit mutations against the weakest
-		// card in the deck — shrinking the slice of the solution space the walk actually
-		// explores. Shuffling each round gives every mutation an even shot at being the
-		// first one accepted at the current temperature.
-		rng.Shuffle(len(mutations), func(i, j int) {
-			mutations[i], mutations[j] = mutations[j], mutations[i]
-		})
-	}
+	rng.Shuffle(len(mutations), func(i, j int) {
+		mutations[i], mutations[j] = mutations[j], mutations[i]
+	})
 	return mutations
 }
 

@@ -50,20 +50,11 @@ var cardPairs = []CardPair{
 	{First: moonWishGroup, Second: sunKissGroup},
 }
 
-// cardPairTopK caps how many low-avg removal slots each pair-variant combo tries. The pair
-// generator emits one mutation per (i, j) drawn from the K lowest-avg unique IDs in the
-// deck, so total candidates per (firstVariant, secondVariant) combo is K*(K-1)/2. K=5 gives
-// 10 candidates per combo — enough to surface meaningful "drop the deck's two worst slots"
-// options without bloating round size: a Moon Wish × Sun Kiss pair with all 9 variant combos
-// then contributes ≤90 candidates per round, dwarfed by the thousands of single-slot
-// mutations.
-const cardPairTopK = 5
-
 // cardPairMutations emits paired add mutations for every entry in cardPairs. For each pair
 // the generator iterates (firstVariant, secondVariant) cross-products from the two groups
-// and, for each combo, emits one mutation per (i, j) pair drawn from the cardPairTopK
-// lowest-avg unique IDs in the deck. Each emitted mutation removes one copy of each removal
-// target and adds one copy of each pair variant.
+// and, for each combo, emits one mutation per (i, j) unique-ID pair drawn from the deck.
+// Each emitted mutation removes one copy of each removal target and adds one copy of each
+// pair variant.
 //
 // Per-variant maxCopies cap: a variant whose count would exceed maxCopies after the +1 add
 // is skipped. A deck saturated with Red on both halves yields Yellow/Blue cross-add
@@ -89,7 +80,7 @@ func cardPairMutations(d *Deck, maxCopies int, legal func(card.Card) bool) []Mut
 	for _, c := range d.Cards {
 		counts[c.ID()]++
 	}
-	uniqueIDs := lowestAvgUniqueIDs(d, counts, cardPairTopK)
+	uniqueIDs := sortedUniqueIDs(counts)
 	if len(uniqueIDs) < 2 {
 		return nil // need at least two distinct removal targets to emit a 2-for-2 swap.
 	}
@@ -151,26 +142,16 @@ func mutationsForPair(d *Deck, pair CardPair, counts map[card.ID]int, uniqueIDs 
 	return out
 }
 
-// lowestAvgUniqueIDs returns up to k unique card IDs from d's card list, ordered by ascending
-// per-card avg contribution (weakest first). Ties fall through to ascending card.ID — same
-// tiebreak rule as cardSwapMutations so removal-slot ordering stays consistent across the
-// single-slot and pair generators.
-func lowestAvgUniqueIDs(d *Deck, counts map[card.ID]int, k int) []card.ID {
+// sortedUniqueIDs returns every unique card ID that appears in counts, sorted by ascending
+// card.ID for stability — no value-based bias. Same ordering convention as cardSwapMutations
+// so removal-slot iteration stays consistent across the single-slot and pair generators; the
+// anneal driver shuffles the final mutation list either way.
+func sortedUniqueIDs(counts map[card.ID]int) []card.ID {
 	ids := make([]card.ID, 0, len(counts))
 	for id := range counts {
 		ids = append(ids, id)
 	}
-	sort.Slice(ids, func(i, j int) bool {
-		ai := d.Stats.PerCard[ids[i]].Avg()
-		aj := d.Stats.PerCard[ids[j]].Avg()
-		if ai != aj {
-			return ai < aj
-		}
-		return ids[i] < ids[j]
-	})
-	if len(ids) > k {
-		ids = ids[:k]
-	}
+	sort.Slice(ids, func(i, j int) bool { return ids[i] < ids[j] })
 	return ids
 }
 

@@ -189,20 +189,15 @@ func TestCardPairMutations_ResultDifferentFromSource(t *testing.T) {
 	}
 }
 
-// TestCardPairMutations_OverlapSuppressionSkipsRedundantSwaps: when a low-avg removal target
-// is itself a pair member, the resulting mutation reduces to a single-slot swap (the matching
+// TestCardPairMutations_OverlapSuppressionSkipsRedundantSwaps: when a removal target is
+// itself a pair member, the resulting mutation reduces to a single-slot swap (the matching
 // pair member's count is unchanged after -1 +1). Single-slot already covers that, so the
-// pair generator skips those combos. Drives this by making Sun Kiss (Red) a removal target
-// (lowest-avg unique) and verifying no mutation removes Sun Kiss (Red) while also adding it.
+// pair generator skips those combos. Drives this with a deck containing Sun Kiss (Red) as a
+// removal candidate and verifies no mutation removes and re-adds Sun Kiss (Red).
 func TestCardPairMutations_OverlapSuppressionSkipsRedundantSwaps(t *testing.T) {
 	skR := cards.Get(card.SunKissRed)
 	a := cards.Get(card.ArcanicCrackleRed)
 	d := New(hero.Viserai{}, []weapon.Weapon{weapon.NebulaBlade{}}, []card.Card{skR, a, a, a})
-	// Force Sun Kiss (Red) into the lowest-avg slot via stats.
-	d.Stats.PerCard = map[card.ID]CardPlayStats{
-		card.SunKissRed:        {Plays: 10, TotalContribution: 1},  // Avg 0.1
-		card.ArcanicCrackleRed: {Plays: 10, TotalContribution: 80}, // Avg 8.0
-	}
 	for i, m := range cardPairMutations(d, 2, nil) {
 		if strings.Contains(m.Description, "-1 Sun Kiss (Red)") &&
 			strings.Contains(m.Description, "+1 Sun Kiss (Red)") {

@@ -1,7 +1,6 @@
 package deck
 
 import (
-	"strings"
 	"testing"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
@@ -96,46 +95,6 @@ func TestAllMutations_OddCountsAllowed(t *testing.T) {
 	}
 }
 
-// TestAllMutations_OrdersByAscendingAvg pins the iterate-friendly ordering: the removed card in
-// the first card-mutation batch should be the one with the lowest per-card Avg in the current
-// deck's stats. Run with both (lower-ID is low-avg) and (higher-ID is low-avg) so the test fails
-// if the implementation accidentally sorts only by card.ID and gets a free pass from whichever
-// direction happens to align.
-func TestAllMutations_OrdersByAscendingAvg(t *testing.T) {
-	a := cards.Get(card.AetherSlashRed)  // lower card.ID
-	b := cards.Get(card.ArcanicSpikeRed) // higher card.ID
-
-	cases := []struct {
-		name        string
-		lowAvgCard  card.Card
-		highAvgCard card.Card
-	}{
-		{"low-avg card has lower ID", a, b},
-		{"low-avg card has higher ID", b, a},
-	}
-	for _, tc := range cases {
-		t.Run(tc.name, func(t *testing.T) {
-			d := New(hero.Viserai{}, []weapon.Weapon{weapon.NebulaBlade{}},
-				[]card.Card{a, a, b, b})
-			// Both cards see the same Plays so only Avg (= TotalContribution / Plays) drives the
-			// ordering — no path for card.ID to sneak in via a sub-ordering rule.
-			d.Stats.PerCard = map[card.ID]CardPlayStats{
-				tc.lowAvgCard.ID():  {Plays: 10, TotalContribution: 10}, // Avg 1.0
-				tc.highAvgCard.ID(): {Plays: 10, TotalContribution: 80}, // Avg 8.0
-			}
-
-			muts := AllMutations(d, 2, nil)
-			// Skip the weapon-mutation block (len(loadouts)-1 entries, one per alternative loadout).
-			firstCardMut := muts[len(weaponLoadouts(weapon.All))-1]
-			wantPrefix := "-1 " + tc.lowAvgCard.Name() + ","
-			if !strings.HasPrefix(firstCardMut.Description, wantPrefix) {
-				t.Errorf("first card mutation removed wrong card\n  got:  %q\n  want prefix: %q",
-					firstCardMut.Description, wantPrefix)
-			}
-		})
-	}
-}
-
 // TestAllMutations_PreservesSideboard pins that every derived Mutation inherits the source
 // deck's Sideboard verbatim. Without this guarantee an anneal round would silently drop the
 // user's hand-managed sideboard as soon as it accepted a mutation and wrote the deck back.
@@ -208,8 +167,8 @@ func TestAllMutations_NoDuplicateOfSource(t *testing.T) {
 // expectedPairMutCount mirrors cardPairMutations's emission rule for a given deck so the
 // CountsAndShape test can predict the pair-mutation contribution without re-implementing the
 // generator. For each registered pair, sums (firstVariant, secondVariant) cross-products that
-// pass the per-variant maxCopies cap, multiplied by C(min(uniques, K), 2) removal pairs that
-// don't overlap the pair adds.
+// pass the per-variant maxCopies cap, multiplied by C(uniques, 2) removal pairs that don't
+// overlap the pair adds.
 func expectedPairMutCount(d *Deck, maxCopies int) int {
 	counts := map[card.ID]int{}
 	for _, c := range d.Cards {
@@ -218,9 +177,6 @@ func expectedPairMutCount(d *Deck, maxCopies int) int {
 	uniqueIDs := make([]card.ID, 0, len(counts))
 	for id := range counts {
 		uniqueIDs = append(uniqueIDs, id)
-	}
-	if len(uniqueIDs) > cardPairTopK {
-		uniqueIDs = uniqueIDs[:cardPairTopK]
 	}
 
 	total := 0
