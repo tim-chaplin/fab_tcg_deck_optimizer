@@ -103,15 +103,15 @@ type TriggerContribution struct {
 // join. JSON serializes the struct directly so the on-disk shape is browsable / diffable
 // per section.
 type TurnLog struct {
-	// StartOfTurn captures the turn's starting state and any start-of-turn trigger fires:
-	// dealt hand, arsenal-in card, auras / runechants in play, then the carryover
-	// AuraTrigger handler effects (Sigil reveals, damage credits). Mixed format — informational
-	// lines like "Hand: A, B, C, D" sit alongside event lines like "Sigil of the Arknight
-	// [B]: drew X into hand"; the formatter renders both unnumbered.
+	// StartOfTurn captures the turn's starting state: dealt hand, arsenal-in card, auras /
+	// runechants in play. Informational only ("Hand: A, B, C, D", "Auras: X, 1 Runechant");
+	// the formatter renders entries unnumbered. Carryover AuraTrigger fires belong to
+	// MyTurn — they're top-of-action-phase actions, not pre-existing state.
 	StartOfTurn []string `json:"start_of_turn,omitempty"`
-	// MyTurn is the numbered entries for the "My turn:" section: attack-phase pitches
-	// followed by the chain (Play / hero trigger / aura trigger / ephemeral trigger / weapon
-	// swing lines, in resolution order).
+	// MyTurn is the numbered entries for the "My turn:" section: any carryover AuraTrigger
+	// fires (Sigil reveals, +N damage credits) at the top of the action phase, then
+	// attack-phase pitches, then the chain (Play / hero trigger / aura trigger / ephemeral
+	// trigger / weapon swing lines, in resolution order).
 	MyTurn []string `json:"my_turn,omitempty"`
 	// OpponentTurn is the numbered entries for the "Opponent's turn:" section: defense-phase
 	// pitches, plain blocks, and Defense Reactions, in that order.

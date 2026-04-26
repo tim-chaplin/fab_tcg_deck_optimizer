@@ -20,8 +20,9 @@ func BuildTurnLog(t TurnSummary, startingRunechants int) TurnLog {
 	parts := partitionBestLineForDisplay(t.BestLine)
 	defensePitches, attackPitches := splitPitchesByPhase(parts.pitched, parts.drCost)
 
-	// Start of turn: dealt hand, arsenal-in card, auras / runechants in play, then any
-	// carryover AuraTrigger fires.
+	// Start of turn: dealt hand, arsenal-in card, auras / runechants in play. Carryover
+	// AuraTrigger fires (Sigil reveals, +N damage credits) belong to MyTurn — they're
+	// actions resolving at the top of the action phase, not pre-existing state.
 	if line := startingHandLine(t.BestLine); line != "" {
 		log.StartOfTurn = append(log.StartOfTurn, line)
 	}
@@ -31,18 +32,20 @@ func BuildTurnLog(t TurnSummary, startingRunechants int) TurnLog {
 	if line := startingAurasLine(t.StartOfTurnAuras, startingRunechants); line != "" {
 		log.StartOfTurn = append(log.StartOfTurn, line)
 	}
+
+	// My turn: carryover trigger fires first (resolve at top of action phase), then
+	// attack-phase pitches, then the chain log.
 	for _, trig := range t.TriggersFromLastTurn {
 		if line := startOfTurnTriggerLine(trig); line != "" {
-			log.StartOfTurn = append(log.StartOfTurn, line)
+			log.MyTurn = append(log.MyTurn, line)
 		}
 	}
-
-	// My turn: attack-phase pitches followed by the chain log. Chain entries are stored as
-	// LogEntry structs on State.Log to defer fmt cost off the per-permutation hot path —
-	// they're formatted to strings here, in the once-per-best-turn assembly step.
 	for _, p := range attackPitches {
 		log.MyTurn = append(log.MyTurn, card.DisplayName(p.Card)+": "+roleLabelWithArsenal(p, "PITCH"))
 	}
+	// Chain entries are stored as LogEntry structs on State.Log to defer fmt cost off the
+	// per-permutation hot path — they're formatted to strings here, in the once-per-best-turn
+	// assembly step.
 	for _, e := range t.State.Log {
 		log.MyTurn = append(log.MyTurn, FormatLogEntry(e))
 	}
@@ -52,7 +55,7 @@ func BuildTurnLog(t TurnSummary, startingRunechants int) TurnLog {
 		log.OpponentTurn = append(log.OpponentTurn, card.DisplayName(p.Card)+": "+roleLabelWithArsenal(p, "PITCH"))
 	}
 	for _, b := range parts.plainBlocks {
-		log.OpponentTurn = append(log.OpponentTurn, card.DisplayName(b.Card)+": "+roleLabelWithArsenal(b, "BLOCK"))
+		log.OpponentTurn = append(log.OpponentTurn, formatBlockLine(b))
 	}
 	for _, dr := range parts.defenseReactions {
 		log.OpponentTurn = append(log.OpponentTurn, card.DisplayName(dr.Card)+": "+roleLabelWithArsenal(dr, "DEFENSE REACTION"))
@@ -123,8 +126,8 @@ func startingAurasLine(auras []card.Card, startingRunechants int) string {
 	return "Auras: " + strings.Join(items, ", ")
 }
 
-// startOfTurnTriggerLine renders one carryover AuraTrigger fire as a content line for the
-// StartOfTurn section: "Aura Name: drew X into hand" or "Aura Name: START OF ACTION PHASE
+// startOfTurnTriggerLine renders one carryover AuraTrigger fire as a content line at the top
+// of the MyTurn section: "Aura Name: drew X into hand" or "Aura Name: START OF ACTION PHASE
 // (+N)" (or both joined when a future trigger does both). Returns "" for zero-effect fires
 // so the section doesn't pad with bare aura-name lines.
 func startOfTurnTriggerLine(d TriggerContribution) string {
@@ -133,6 +136,20 @@ func startOfTurnTriggerLine(d TriggerContribution) string {
 		return ""
 	}
 	return card.DisplayName(d.Card) + ": " + suffix
+}
+
+// formatBlockLine renders a plain-block content line with the card's effective defense as a
+// "(+N)" suffix — printed Defense plus an ArsenalDefenseBonus rider when the blocker came
+// from arsenal. The suffix matches the attack chain's "(+N)" convention so the log reads
+// symmetrically across attack and defense phases.
+func formatBlockLine(a CardAssignment) string {
+	def := a.Card.Defense()
+	if a.FromArsenal {
+		if ab, ok := a.Card.(card.ArsenalDefenseBonus); ok {
+			def += ab.ArsenalDefenseBonus()
+		}
+	}
+	return fmt.Sprintf("%s: %s (+%d)", card.DisplayName(a.Card), roleLabelWithArsenal(a, "BLOCK"), def)
 }
 
 // endingHandLine builds "Hand: A, B" from the cards in hand at end of chain — the partition's
