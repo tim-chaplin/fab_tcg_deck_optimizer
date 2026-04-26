@@ -96,8 +96,7 @@ func TestIterateParallel_RunsWithoutPanic(t *testing.T) {
 // TestIterateParallel_AbortsOnContextCancel pins the abort path that iterate's stdin-listener
 // depends on: a context cancellation must unblock both the worker pool and the main-goroutine
 // select on ready[i], and IterateParallel must return promptly with found=false and ctx.Err()
-// set. Regression guard for the parallelism refactor originally blocking Enter abort until the
-// round's very last mutation had been shallow-screened.
+// set.
 //
 // Pre-cancels the context so the outcome is deterministic regardless of which worker happens to
 // deep-confirm first — the interesting assertion is "returns promptly with abort semantics,"

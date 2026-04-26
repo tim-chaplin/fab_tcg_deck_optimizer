@@ -6,9 +6,8 @@
 // When Drowning Dire hits, you may put a 'non-attack' action card from your graveyard on the
 // bottom of your deck."
 //
-// Modelling: the Dominate grant is conditional, gated on s.HasPlayedOrCreatedAura(). Play flips
-// self.GrantedDominate when the aura clause is live so EffectiveDominate reports the card as
-// dominating this turn — downstream scanners that read pc.EffectiveDominate() see the grant.
+// Modelling: the Dominate grant is conditional on s.HasPlayedOrCreatedAura(). Standard
+// self.GrantedDominate wiring (docs/dev-standards.md).
 
 package runeblade
 

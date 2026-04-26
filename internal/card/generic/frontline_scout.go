@@ -4,8 +4,8 @@
 // Text: "You may look at the defending hero's hand. If Frontline Scout is played from arsenal, it
 // gains **go again**."
 //
-// Modelling: Hand-peek isn't modelled. The played-from-arsenal go-again fires via
-// self.GrantedGoAgain when self.FromArsenal reports this copy came from the arsenal slot.
+// Modelling: hand-peek isn't modelled. Standard played-from-arsenal go-again
+// (docs/dev-standards.md).
 
 package generic
 

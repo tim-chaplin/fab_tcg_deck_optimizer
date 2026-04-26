@@ -5,9 +5,8 @@
 // card of their deck face down into their arsenal. If Promise of Plenty is played from arsenal, it
 // gains **go again**."
 //
-// Modelling: The arsenal-placement rider isn't modelled (arsenal/deck content tracking would
-// be required). The played-from-arsenal go-again fires via self.GrantedGoAgain when
-// self.FromArsenal reports this copy came from the arsenal slot.
+// Modelling: the arsenal-placement rider isn't modelled (arsenal/deck content tracking would
+// be required). Standard played-from-arsenal go-again (docs/dev-standards.md).
 
 package generic
 

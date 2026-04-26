@@ -2,9 +2,8 @@
 // Printed power: Red 3, Yellow 2, Blue 1.
 // Text: "If you've played or created an aura this turn, this gets go again."
 //
-// Go again is CONDITIONAL — it's not a printed keyword but a text-granted effect. Play sets
-// self.GrantedGoAgain when the aura condition is met so the chain-legality check sees the
-// grant.
+// Go again is conditional on the aura clause, not a printed keyword (docs/dev-standards.md
+// covers the conditional grant wiring).
 
 package runeblade
 

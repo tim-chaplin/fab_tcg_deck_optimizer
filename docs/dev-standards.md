@@ -56,6 +56,26 @@ later":
 Card docstrings should NOT restate this lifecycle. State only what's card-specific — the printed
 clause, `Count = N`, and whatever the handler returns.
 
+## Standard rider wiring
+
+Card docstrings should call out the printed rider and any modelling fudge, then stop. The
+following plumbing is uniform and lives once in `internal/card/card.go`:
+
+- **Played-from-arsenal go-again** (Fervent Forerunner, Frontline Scout, Performance Bonus,
+  Promise of Plenty, Scour the Battlescape, …): cards set `self.GrantedGoAgain = true` when
+  `self.FromArsenal` is true. Don't repeat the wiring per file — note that the rider only fires
+  when this copy came from the arsenal slot.
+- **+N{d} on arsenal-played defense reactions** (Springboard Somersault, Unmovable, …): cards
+  implement `card.ArsenalDefenseBonus` and return `N`; `CardState.EffectiveDefense` folds the
+  bonus in for the arsenal-in copy. Don't restate the wiring; just say "+N{d} when played from
+  arsenal."
+- **Conditional go-again / dominate grants** flip `self.GrantedGoAgain` /
+  `self.GrantedDominate`; `EffectiveGoAgain` / `EffectiveDominate` honour the flag. Card
+  docstrings call out the *condition*, not the flag.
+- **`card.VariableCost` markers** (Amplify the Arknight, Rune Flash, …): `Cost(s)` reads
+  TurnState; the marker exposes `MinCost` / `MaxCost` for the solver's pre-screen. Don't
+  re-document the dispatch — note the printed cost formula.
+
 ## Cross-file references
 
 If a comment's rationale would otherwise cite "matches the pattern in foo.go, bar.go,

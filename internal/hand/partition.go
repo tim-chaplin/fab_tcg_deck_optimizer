@@ -380,10 +380,7 @@ func defendersDamage(defenders, pitched, deck []card.Card, state *card.TurnState
 	return total, gravBuf
 }
 
-// chainBudget captures the winning phase-split's attack-chain resource state. Reusing it to seed
-// the replay ctx in fillContributions ensures playSequenceWithMeta finds the exact permutation
-// that won during partition enumeration — critical for per-card attribution since different
-// permutations can deal different per-card damage.
+// chainBudget captures the winning phase-split's attack-chain resource state.
 type chainBudget struct {
 	resource         int
 	maxPitch         int

@@ -5,9 +5,8 @@
 // variant value above.)
 //
 // Modelling: using this card to defend sends it to the graveyard, so the N{h} gain fires on
-// the DR Play path — credited as +N damage equivalent (health is valued 1-to-1 with damage).
-// Pitched copies go to the bottom of the deck, not the graveyard, so they don't trigger the
-// rider; the pitch-role contribution stays at the printed pitch value only.
+// the DR Play path — credited as +N damage equivalent. Pitched copies go to the bottom of the
+// deck instead, so they don't trigger the rider.
 
 package generic
 

@@ -104,11 +104,10 @@ func TestRoundTrip_PreservesPerCardMarginal(t *testing.T) {
 	}
 }
 
-// TestRoundTrip_PreservesBestTurnLog pins the on-disk best-turn round-trip: deck.BestTurn.Log
-// is the structured per-section TurnLog, and Marshal/Unmarshal carry it verbatim so a
-// reloaded deck's TurnLog matches the original section-for-section. The formatter consumes
-// Log at print time, so this test pinning the structured shape implicitly pins the printout
-// shape too.
+// TestRoundTrip_PreservesBestTurnLog pins the on-disk best-turn round-trip: Marshal/Unmarshal
+// carry deck.BestTurn.Log verbatim, so a reloaded TurnLog matches section-for-section. Since
+// the formatter consumes Log at print time, pinning the structured shape implicitly pins the
+// printout shape.
 func TestRoundTrip_PreservesBestTurnLog(t *testing.T) {
 	rng := rand.New(rand.NewSource(7))
 	d := deck.Random(hero.Viserai{}, 40, 2, rng, nil)

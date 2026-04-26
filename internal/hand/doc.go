@@ -4,16 +4,15 @@
 // roles (Pitch, Attack, Defend, Held, Arsenal) and return the TurnSummary (types.go) with the
 // highest Value.
 //
-// Internally the search runs in three layers:
+// Internally the search runs in two layers:
 //
 //   - Partition enumeration (partition.go) walks every role assignment and hands each leaf to
 //     bestAttackWithWeapons.
 //   - Attack-chain search (sequence.go) enumerates phase / weapon masks and permutes the
 //     resulting attackers via playSequenceWithMeta, which replays one ordering through a
 //     pooled TurnState while firing hero triggers and AuraTrigger / EphemeralAttackTrigger
-//     handlers.
-//   - Contribution attribution (contributions.go) replays the winning permutation once with
-//     per-card tracking so every BestLine entry carries its own damage / block / pitch share.
+//     handlers. Per-card damage / block / pitch attribution is read off the chain's LogEntry
+//     stream.
 //
 // The Evaluator type owns per-goroutine scratch buffers (attackbufs.go) so concurrent callers
 // each get their own alloc-free state. Per-card metadata (cardmeta.go) is cached lazily into a

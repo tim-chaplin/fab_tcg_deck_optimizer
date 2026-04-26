@@ -203,9 +203,8 @@ type sequenceContext struct {
 	// carryWinner snapshots the winning permutation's end-of-chain TurnState slice — every
 	// field that survives the turn boundary (Hand, Deck, Arsenal, Graveyard, Banish,
 	// Runechants, AuraTriggers). Heap's algorithm keeps iterating past the winner and the
-	// shared state.* fields reflect whatever ordering ran last, so this snapshot has to
-	// happen the moment a new winner is found. fillContributions clones the slices into
-	// summary.State so downstream readers don't alias attackBufs storage.
+	// shared state.* fields reflect whatever ordering ran last, so the snapshot has to
+	// happen the moment a new winner is found.
 	carryWinner CarryState
 }
 

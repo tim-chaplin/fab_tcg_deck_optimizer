@@ -4,8 +4,8 @@
 // Text: "When this hits, create a Gold token. If this was played from arsenal, it gets **Go
 // again**."
 //
-// The arsenal-conditional Go again fires via self.GrantedGoAgain when self.FromArsenal reports
-// this copy came from the arsenal slot.
+// Standard played-from-arsenal go-again (docs/dev-standards.md). Gold-token creation isn't
+// modelled.
 
 package generic
 

@@ -4,9 +4,8 @@
 // Text: "If Fervent Forerunner hits, **opt 2**. If Fervent Forerunner is played from arsenal, it
 // gains **go again**."
 //
-// Modelling: on-hit Opt 2 isn't modelled. The played-from-arsenal go-again fires via
-// self.GrantedGoAgain when self.FromArsenal reports this copy came from the arsenal slot.
-// GoAgain() stays false so hand-played copies don't get the grant.
+// Modelling: on-hit Opt 2 isn't modelled. Standard played-from-arsenal go-again
+// (docs/dev-standards.md).
 
 package generic
 

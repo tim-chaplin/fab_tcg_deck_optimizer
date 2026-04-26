@@ -169,9 +169,7 @@ func histogramTitle(d *deck.Deck) string {
 
 // printBestTurn renders the persisted peak-Value turn from its structured TurnLog —
 // "Best turn played (value N):" header plus hand.FormatTurnLog's per-section body. No-ops
-// on an unscored deck (empty TurnLog). Shared by printBestDeck and runEval; live and
-// reloaded decks render identically because the print path consumes the same TurnLog in
-// both cases.
+// on an unscored deck (empty TurnLog).
 func printBestTurn(d *deck.Deck) {
 	b := d.Stats.Best
 	if b.Log.IsEmpty() {

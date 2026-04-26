@@ -3,10 +3,9 @@
 //
 // Text: "When this is put into your graveyard from anywhere, gain 1{h}."
 //
-// Modelling: the card goes to graveyard after it resolves as an attack, so the 1{h} gain
-// fires on every Play — credited as +1 damage equivalent (health is valued 1-to-1 with
-// damage). Pitched copies go to the bottom of the deck, not the graveyard, so they don't
-// trigger the rider; pitched contributions stay at the printed pitch value only.
+// Modelling: the card hits the graveyard after resolving as an attack, so the 1{h} gain fires
+// on every Play — credited as +1 damage equivalent. Pitched copies go to the bottom of the
+// deck instead of the graveyard, so they don't trigger the rider.
 
 package generic
 

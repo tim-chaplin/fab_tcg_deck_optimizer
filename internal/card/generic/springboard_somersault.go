@@ -2,8 +2,7 @@
 // Yellow.
 // Text: "If Springboard Somersault is played from arsenal, it gains +2{d}."
 //
-// Modelling: The +2{d} rider opts in via card.ArsenalDefenseBonus; CardState.EffectiveDefense
-// folds it in only when this copy was the start-of-turn arsenal-in card.
+// +2{d} when played from arsenal via card.ArsenalDefenseBonus (docs/dev-standards.md).
 
 package generic
 

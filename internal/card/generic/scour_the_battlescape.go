@@ -4,8 +4,8 @@
 // Text: "You may put a card from your hand on the bottom of your deck. If you do, draw a card. If
 // Scour the Battlescape is played from arsenal, it gains **go again**."
 //
-// Modelling: The hand-cycle isn't modelled. The played-from-arsenal go-again fires via
-// self.GrantedGoAgain when self.FromArsenal reports this copy came from the arsenal slot.
+// Modelling: hand-cycle isn't modelled. Standard played-from-arsenal go-again
+// (docs/dev-standards.md).
 
 package generic
 

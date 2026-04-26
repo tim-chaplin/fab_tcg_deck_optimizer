@@ -3,8 +3,7 @@
 // Printed defense: Red 7, Yellow 6, Blue 5.
 // Text: "If Unmovable is played from arsenal, it gains +1{d}."
 //
-// Modelling: The +1{d} rider opts in via card.ArsenalDefenseBonus; CardState.EffectiveDefense
-// folds it in only when this copy was the start-of-turn arsenal-in card.
+// +1{d} when played from arsenal via card.ArsenalDefenseBonus (docs/dev-standards.md).
 
 package generic
 

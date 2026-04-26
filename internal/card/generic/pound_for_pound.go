@@ -4,11 +4,10 @@
 // Text: "When you play Pound for Pound, if you have less {h} than an opposing hero, it gains
 // **dominate**."
 //
-// Modelling: the "less {h} than an opposing hero" clause is modelled as a hero attribute — the
+// Modelling: the "less {h} than an opposing hero" clause is treated as a hero attribute — the
 // Dominate grant fires for heroes that implement card.LowerHealthWanter (via
-// simstate.HeroWantsLowerHealth) and never fires otherwise, the same coarse proxy Adrenaline
-// Rush / Blow for a Blow / Wounded Bull use to skip per-turn life tracking. Play flips
-// self.GrantedDominate so downstream scanners and any future on-hit rider see the grant.
+// simstate.HeroWantsLowerHealth) and never fires otherwise, a coarse proxy that skips per-turn
+// life tracking. Standard self.GrantedDominate wiring (docs/dev-standards.md).
 
 package generic
 
