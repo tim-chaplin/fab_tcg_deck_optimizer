@@ -52,3 +52,16 @@ func TestDrowningDire_AuraPlayedThisTurnGrantsDominate(t *testing.T) {
 		t.Error("GrantedDominate = false after aura played this turn, want true")
 	}
 }
+
+// TestDrowningDire_NotImplemented: every variant carries card.NotImplemented because the
+// on-hit "may put a non-attack action card from your graveyard on the bottom of your deck"
+// rider isn't modelled. Without the marker the optimizer would happily mutate Drowning Dire
+// into decks at face value, under-crediting the recycle.
+func TestDrowningDire_NotImplemented(t *testing.T) {
+	cards := []card.Card{DrowningDireRed{}, DrowningDireYellow{}, DrowningDireBlue{}}
+	for _, c := range cards {
+		if _, ok := c.(card.NotImplemented); !ok {
+			t.Errorf("%s: missing card.NotImplemented marker for the on-hit recycle rider", c.Name())
+		}
+	}
+}
