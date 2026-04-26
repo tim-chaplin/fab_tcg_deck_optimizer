@@ -156,6 +156,56 @@ func TestFormatBestTurn_LogSuppressesZeroTriggers(t *testing.T) {
 	}
 }
 
+// TestFormatBestTurn_MoonWishTutorAndPlayLogsAsPostTrigger: the go-again branch tutors
+// Sun Kiss and immediately plays it. Moon Wish's chain step shows only its printed
+// attack; the tutor narration line "Moon Wish [Y] tutored Sun Kiss [R] and played it"
+// renders as a post-trigger child grouped beneath Moon Wish, and Sun Kiss authors its
+// own "Sun Kiss [R]: PLAY (+3)" chain entry below. The third hand card is the alt-cost
+// target so Flying High [R] stays in the chain to grant go-again.
+func TestFormatBestTurn_MoonWishTutorAndPlayLogsAsPostTrigger(t *testing.T) {
+	h := []card.Card{generic.FlyingHighRed{}, generic.MoonWishYellow{}, fake.BlueAttack{}}
+	deck := []card.Card{generic.SunKissRed{}}
+	got := Best(stubHero, nil, h, 0, deck, 0, nil)
+	out := FormatBestTurn(got, 0)
+	wants := []string{
+		"Moon Wish [Y]: ATTACK (+4)",
+		"         Moon Wish [Y] tutored Sun Kiss [R] and played it",
+		"Sun Kiss [R]: PLAY (+3)",
+	}
+	for _, want := range wants {
+		if !strings.Contains(out, want) {
+			t.Errorf("missing %q in:\n%s", want, out)
+		}
+	}
+	// The chain entry must NOT bundle Sun Kiss's damage into Moon Wish's (+N).
+	if strings.Contains(out, "Moon Wish [Y]: ATTACK (+7)") {
+		t.Errorf("chain entry bundled Sun Kiss damage; got:\n%s", out)
+	}
+}
+
+// TestFormatBestTurn_MoonWishTutorOnlyLogsAsPostTrigger: the no-go-again branch tutors
+// Sun Kiss but doesn't play it (it lands in hand for next turn). The post-trigger line
+// "Moon Wish [Y] tutored Sun Kiss [R]" renders without a (+N) since no damage credits.
+// The Blue attack is held to satisfy Moon Wish's alt cost.
+func TestFormatBestTurn_MoonWishTutorOnlyLogsAsPostTrigger(t *testing.T) {
+	h := []card.Card{generic.MoonWishYellow{}, fake.BlueAttack{}}
+	deck := []card.Card{generic.SunKissRed{}}
+	got := Best(stubHero, nil, h, 0, deck, 0, nil)
+	out := FormatBestTurn(got, 0)
+	wants := []string{
+		"Moon Wish [Y]: ATTACK (+4)",
+		"         Moon Wish [Y] tutored Sun Kiss [R]",
+	}
+	for _, want := range wants {
+		if !strings.Contains(out, want) {
+			t.Errorf("missing %q in:\n%s", want, out)
+		}
+	}
+	if strings.Contains(out, "tutored Sun Kiss [R] (+") {
+		t.Errorf("tutor-only line shouldn't carry a (+N) suffix; got:\n%s", out)
+	}
+}
+
 // TestFormatBestTurn_ArsenalInPlayedAsDR checks the combined "arsenal-in played from the slot"
 // + "defense reaction prevented" rendering. Hand: one Malefic Blue (pitch 3). Arsenal-in:
 // Toughen Up Blue (DR cost 2). Malefic pitches to fund the DR, Toughen Up blocks 4 of 4 incoming.
@@ -325,6 +375,31 @@ func TestFormatBestTurn_TriggersFromLastTurnRevealedLine(t *testing.T) {
 	want := "1. Sigil of the Arknight [B]: drew Mauvrion Skies [R] into hand"
 	if !strings.Contains(out, want) {
 		t.Errorf("missing %q in:\n%s", want, out)
+	}
+}
+
+// TestFormatBestTurn_TriggersFromLastTurnHandlerAuthoredText: when the handler authors a
+// custom log line via state.AddPostTriggerLogEntry, the format layer renders Text verbatim
+// and skips the synthesised "Aura Name: drew X into hand" / "(+N)" suffix. Cards keep
+// full ownership of their printout wording.
+func TestFormatBestTurn_TriggersFromLastTurnHandlerAuthoredText(t *testing.T) {
+	summary := TurnSummary{
+		TriggersFromLastTurn: []TriggerContribution{
+			{
+				Card:     runeblade.SigilOfTheArknightBlue{},
+				Revealed: runeblade.MauvrionSkiesRed{},
+				Text:     "Sigil of the Arknight [B] revealed Mauvrion Skies [R] but didn't draw it",
+			},
+		},
+	}
+	out := FormatBestTurn(summary, 0)
+	want := "1. Sigil of the Arknight [B] revealed Mauvrion Skies [R] but didn't draw it"
+	if !strings.Contains(out, want) {
+		t.Errorf("missing %q in:\n%s", want, out)
+	}
+	// The synthesised "drew X into hand" must NOT appear — Text takes precedence.
+	if strings.Contains(out, "drew Mauvrion Skies [R] into hand") {
+		t.Errorf("synthesised suffix leaked despite Text override; got:\n%s", out)
 	}
 }
 

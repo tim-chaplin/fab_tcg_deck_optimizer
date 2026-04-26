@@ -231,6 +231,7 @@ func processTriggersAtStartOfTurn(queued []card.AuraTrigger, postDrawDeck []card
 			continue
 		}
 		preReveal := len(ts.Revealed)
+		preLog := len(ts.Log)
 		d := t.Handler(&ts)
 		damage += d
 		// Attribute any newly-revealed card to this trigger so the best-turn printout can
@@ -241,7 +242,14 @@ func processTriggersAtStartOfTurn(queued []card.AuraTrigger, postDrawDeck []card
 		if len(ts.Revealed) > preReveal {
 			revealed = ts.Revealed[preReveal]
 		}
-		contribs = append(contribs, hand.TriggerContribution{Card: t.Self, Damage: d, Revealed: revealed})
+		// Capture the handler's first authored log line, if any — Text takes precedence
+		// over the inferred "drew X into hand" / "START OF ACTION PHASE" suffix at format
+		// time so cards can fully own their printout wording.
+		var text string
+		if len(ts.Log) > preLog {
+			text = ts.Log[preLog].Text
+		}
+		contribs = append(contribs, hand.TriggerContribution{Card: t.Self, Damage: d, Revealed: revealed, Text: text})
 		t.Count--
 		if t.Count > 0 {
 			survivors = append(survivors, t)

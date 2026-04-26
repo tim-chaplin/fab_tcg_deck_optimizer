@@ -38,30 +38,35 @@ func moonWishCost(s *card.TurnState) int {
 // Wish's chain step, and on a likely hit tutors a Sun Kiss from the deck. Sun Kiss plays
 // immediately when self has go-again granted by a prior chain card (its own chain step
 // emits with its printed heal as a post-Moon Wish entry); otherwise it carries to the
-// next hand via s.Hand. Tutor outcomes get a "tutored Sun Kiss" / "tutored Sun Kiss and
-// played it" / "found no Sun Kiss to tutor" post-trigger child line beneath Moon Wish's
-// chain step.
+// next hand via s.Hand. Alt-cost fires get a "returned X to top of deck" line; tutor
+// outcomes get a "tutored Sun Kiss" / "tutored Sun Kiss and played it" / "found no Sun
+// Kiss to tutor" post-trigger child line beneath Moon Wish's chain step.
 func moonWishPlay(c card.Card, s *card.TurnState, self *card.CardState) {
+	name := card.DisplayName(c)
 	// Alt cost: pop a hand card and prepend to deck. Same-turn deck-top readers (the Sun
 	// Kiss tutor's post-resolution DrawOne) see it; the next turn's deal sees it too via
 	// the sim's end-of-turn copy of s.Deck.
+	var returned card.Card
 	if len(s.Hand) > 0 {
-		moved := s.Hand[0]
+		returned = s.Hand[0]
 		s.Hand = s.Hand[1:]
 		newDeck := make([]card.Card, 0, len(s.Deck)+1)
-		newDeck = append(newDeck, moved)
+		newDeck = append(newDeck, returned)
 		newDeck = append(newDeck, s.Deck...)
 		s.Deck = newDeck
 	}
 
-	// Moon Wish's own chain step lands first so subsequent tutor lines + Sun Kiss's chain
-	// step (when go-again fires) follow it in order.
+	// Moon Wish's own chain step lands first so subsequent alt-cost / tutor lines + Sun
+	// Kiss's chain step (when go-again fires) follow it in order.
 	s.ApplyAndLogEffectiveAttack(self)
+
+	if returned != nil {
+		s.AddPostTriggerLogEntry(name+" returned "+card.DisplayName(returned)+" to top of deck", name, 0)
+	}
 
 	if !card.LikelyToHit(self) {
 		return
 	}
-	name := card.DisplayName(c)
 	sk := bestSunKissInDeck(s.Deck)
 	if sk == nil {
 		s.AddPostTriggerLogEntry(name+" found no Sun Kiss to tutor", name, 0)

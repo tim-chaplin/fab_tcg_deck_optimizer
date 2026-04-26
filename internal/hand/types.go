@@ -96,11 +96,15 @@ type TurnSummary struct {
 
 // TriggerContribution is one start-of-turn AuraTrigger fire: the aura that fired plus the
 // Damage it credited (folded into Value) and the card (if any) the handler revealed onto
-// the hand.
+// the hand. Text is the card-authored display line — when set, the format layer renders
+// it verbatim and skips the inferred "drew X into hand" / "START OF ACTION PHASE (+N)"
+// suffix synthesis. Handlers populate Text by calling state.AddPostTriggerLogEntry on
+// the trigger's TurnState, which processTriggersAtStartOfTurn captures.
 type TriggerContribution struct {
 	Card     card.Card
 	Damage   int
 	Revealed card.Card
+	Text     string
 }
 
 // TurnLog is the structured record of a turn's printout, broken into four sections matching

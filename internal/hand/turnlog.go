@@ -125,11 +125,15 @@ func startingAurasLine(auras []card.Card, startingRunechants int) string {
 	return "Auras: " + strings.Join(items, ", ")
 }
 
-// startOfTurnTriggerLine renders one carryover AuraTrigger fire as a content line at the top
-// of the MyTurn section: "Aura Name: drew X into hand" or "Aura Name: START OF ACTION PHASE
-// (+N)" (or both joined when a future trigger does both). Returns "" for zero-effect fires
-// so the section doesn't pad with bare aura-name lines.
+// startOfTurnTriggerLine renders one carryover AuraTrigger fire as a content line at the
+// top of the MyTurn section. When d.Text is set the card owns the wording and renders
+// verbatim; otherwise we synthesise "Aura Name: drew X into hand" / "Aura Name: START
+// OF ACTION PHASE (+N)" from Damage and Revealed. Returns "" for zero-effect fires so
+// the section doesn't pad with bare aura-name lines.
 func startOfTurnTriggerLine(d TriggerContribution) string {
+	if d.Text != "" {
+		return d.Text
+	}
 	suffix := formatTriggerEffect(d)
 	if suffix == "" {
 		return ""

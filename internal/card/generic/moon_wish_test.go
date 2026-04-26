@@ -1,6 +1,7 @@
 package generic
 
 import (
+	"strings"
 	"testing"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
@@ -33,7 +34,8 @@ func TestMoonWish_VariableCost(t *testing.T) {
 
 // TestMoonWish_AltCostMovesHandCardToDeckTop: when Play fires the alt cost it pops the first
 // hand card and prepends it to s.Deck. Pins both the state-mutation contract and the
-// top-of-deck placement.
+// top-of-deck placement, plus the post-trigger "returned X to top of deck" log line that
+// names the moved card under Moon Wish's chain entry.
 func TestMoonWish_AltCostMovesHandCardToDeckTop(t *testing.T) {
 	dr := stubGenericAttack(0, 0)
 	dr.name = "dr"
@@ -51,6 +53,18 @@ func TestMoonWish_AltCostMovesHandCardToDeckTop(t *testing.T) {
 	if len(s.Deck) != 2 || s.Deck[0].Name() != "dr" || s.Deck[1].Name() != "deckTop" {
 		t.Errorf("Deck = %v, want [dr, deckTop] (alt-cost'd card on top)",
 			[]string{s.Deck[0].Name(), s.Deck[1].Name()})
+	}
+	// One of the post-trigger log entries should name the returned card.
+	wantSuffix := "returned " + card.DisplayName(dr) + " to top of deck"
+	found := false
+	for _, e := range s.Log {
+		if e.Source == "Moon Wish [Y]" && strings.HasSuffix(e.Text, wantSuffix) {
+			found = true
+			break
+		}
+	}
+	if !found {
+		t.Errorf("expected a Moon Wish post-trigger log line ending in %q; log = %+v", wantSuffix, s.Log)
 	}
 }
 
