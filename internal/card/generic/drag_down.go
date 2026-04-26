@@ -2,9 +2,6 @@
 // Defense 0.
 //
 // Text: "When this defends an attack, it gets -3{p}."
-//
-// Simplification: The -3{p} attacker debuff isn't modelled (solver doesn't expose defender-side
-// power reductions).
 
 package generic
 
@@ -20,6 +17,8 @@ func (DragDownRed) Attack() int                 { return 0 }
 func (DragDownRed) Defense() int                { return 0 }
 func (DragDownRed) Types() card.TypeSet         { return defenseReactionTypes }
 func (DragDownRed) GoAgain() bool               { return false }
+// not implemented: -3{p} attacker debuff (defender-side power reduction not exposed)
+func (DragDownRed) NotImplemented()             {}
 func (DragDownRed) Play(s *card.TurnState, _ *card.CardState) int { return 0 }
 
 type DragDownYellow struct{}
@@ -32,6 +31,8 @@ func (DragDownYellow) Attack() int                 { return 0 }
 func (DragDownYellow) Defense() int                { return 0 }
 func (DragDownYellow) Types() card.TypeSet         { return defenseReactionTypes }
 func (DragDownYellow) GoAgain() bool               { return false }
+// not implemented: -3{p} attacker debuff (defender-side power reduction not exposed)
+func (DragDownYellow) NotImplemented()             {}
 func (DragDownYellow) Play(s *card.TurnState, _ *card.CardState) int { return 0 }
 
 type DragDownBlue struct{}
@@ -44,4 +45,6 @@ func (DragDownBlue) Attack() int                 { return 0 }
 func (DragDownBlue) Defense() int                { return 0 }
 func (DragDownBlue) Types() card.TypeSet         { return defenseReactionTypes }
 func (DragDownBlue) GoAgain() bool               { return false }
+// not implemented: -3{p} attacker debuff (defender-side power reduction not exposed)
+func (DragDownBlue) NotImplemented()             {}
 func (DragDownBlue) Play(s *card.TurnState, _ *card.CardState) int { return 0 }

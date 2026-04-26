@@ -2,8 +2,6 @@
 //
 // Text: "If you are **marked**, you can't play this. If the defending hero is **marked**, this gets
 // +1{p}. **Go again**"
-//
-// Simplification: Marked-hero checks aren't modelled; the +1{p} rider never applies.
 
 package generic
 
@@ -21,4 +19,6 @@ func (OutedRed) Attack() int                 { return 3 }
 func (OutedRed) Defense() int                { return 0 }
 func (OutedRed) Types() card.TypeSet         { return outedTypes }
 func (OutedRed) GoAgain() bool               { return true }
+// not implemented: marked-hero state not tracked; +1{p}-vs-marked-defender rider never fires
+func (OutedRed) NotImplemented()             {}
 func (c OutedRed) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }

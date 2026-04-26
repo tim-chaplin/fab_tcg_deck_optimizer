@@ -3,8 +3,6 @@
 //
 // Text: "As an additional cost to play Looking for a Scrap, you may banish a card with 1{p} from
 // your graveyard. When you do, this gains +1{p} and **go again**."
-//
-// Simplification: Graveyard-banish additional cost and bonus rider aren't modelled.
 
 package generic
 
@@ -22,6 +20,8 @@ func (LookingForAScrapRed) Attack() int                 { return 4 }
 func (LookingForAScrapRed) Defense() int                { return 2 }
 func (LookingForAScrapRed) Types() card.TypeSet         { return lookingForAScrapTypes }
 func (LookingForAScrapRed) GoAgain() bool               { return false }
+// not implemented: graveyard-banish additional cost and the +1{p}/go-again bonus rider
+func (LookingForAScrapRed) NotImplemented()             {}
 func (c LookingForAScrapRed) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }
 
 type LookingForAScrapYellow struct{}
@@ -34,6 +34,8 @@ func (LookingForAScrapYellow) Attack() int                 { return 3 }
 func (LookingForAScrapYellow) Defense() int                { return 2 }
 func (LookingForAScrapYellow) Types() card.TypeSet         { return lookingForAScrapTypes }
 func (LookingForAScrapYellow) GoAgain() bool               { return false }
+// not implemented: graveyard-banish additional cost and the +1{p}/go-again bonus rider
+func (LookingForAScrapYellow) NotImplemented()             {}
 func (c LookingForAScrapYellow) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }
 
 type LookingForAScrapBlue struct{}
@@ -46,4 +48,6 @@ func (LookingForAScrapBlue) Attack() int                 { return 2 }
 func (LookingForAScrapBlue) Defense() int                { return 2 }
 func (LookingForAScrapBlue) Types() card.TypeSet         { return lookingForAScrapTypes }
 func (LookingForAScrapBlue) GoAgain() bool               { return false }
+// not implemented: graveyard-banish additional cost and the +1{p}/go-again bonus rider
+func (LookingForAScrapBlue) NotImplemented()             {}
 func (c LookingForAScrapBlue) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }

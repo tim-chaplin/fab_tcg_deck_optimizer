@@ -2,8 +2,6 @@
 // pitch variants: Red 1, Yellow 2, Blue 3. Defense 2.
 //
 // Text: "If this is defended by an action card, this gets +2{p}."
-//
-// Simplification: The 'defended by action card' +2{p} rider isn't modelled.
 
 package generic
 
@@ -21,6 +19,8 @@ func (FeistyLocalsRed) Attack() int                 { return 3 }
 func (FeistyLocalsRed) Defense() int                { return 2 }
 func (FeistyLocalsRed) Types() card.TypeSet         { return feistyLocalsTypes }
 func (FeistyLocalsRed) GoAgain() bool               { return false }
+// not implemented: defended-by-action-card +2{p} rider
+func (FeistyLocalsRed) NotImplemented()             {}
 func (c FeistyLocalsRed) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }
 
 type FeistyLocalsYellow struct{}
@@ -33,6 +33,8 @@ func (FeistyLocalsYellow) Attack() int                 { return 2 }
 func (FeistyLocalsYellow) Defense() int                { return 2 }
 func (FeistyLocalsYellow) Types() card.TypeSet         { return feistyLocalsTypes }
 func (FeistyLocalsYellow) GoAgain() bool               { return false }
+// not implemented: defended-by-action-card +2{p} rider
+func (FeistyLocalsYellow) NotImplemented()             {}
 func (c FeistyLocalsYellow) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }
 
 type FeistyLocalsBlue struct{}
@@ -45,4 +47,6 @@ func (FeistyLocalsBlue) Attack() int                 { return 1 }
 func (FeistyLocalsBlue) Defense() int                { return 2 }
 func (FeistyLocalsBlue) Types() card.TypeSet         { return feistyLocalsTypes }
 func (FeistyLocalsBlue) GoAgain() bool               { return false }
+// not implemented: defended-by-action-card +2{p} rider
+func (FeistyLocalsBlue) NotImplemented()             {}
 func (c FeistyLocalsBlue) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }

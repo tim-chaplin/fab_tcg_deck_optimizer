@@ -3,10 +3,6 @@
 // Printed defense: Red 3, Yellow 2, Blue 1.
 // Text: "Deal 1 arcane damage to the attacking hero. If you have dealt arcane damage this turn,
 // Sigil of Suffering gains +1{d}."
-// Simplification: the 1 arcane damage to the attacking hero is always dealt (reported as Play()'s
-// return so it counts toward dealt damage). The conditional +1{d} is always assumed to trigger
-// (i.e. assume arcane damage has already been dealt this turn) and is baked into the printed
-// Defense values below.
 
 package runeblade
 
@@ -30,6 +26,9 @@ func (SigilOfSufferingRed) Attack() int                   { return 0 }
 func (SigilOfSufferingRed) Defense() int                  { return 4 }
 func (SigilOfSufferingRed) Types() card.TypeSet           { return sigilOfSufferingTypes }
 func (SigilOfSufferingRed) GoAgain() bool                 { return false }
+// not implemented: conditional +1{d} 'if dealt arcane damage' is baked unconditionally into
+// Defense — over-credits when the trigger condition isn't met
+func (SigilOfSufferingRed) NotImplemented()             {}
 func (SigilOfSufferingRed) Play(s *card.TurnState, _ *card.CardState) int    { return sigilOfSufferingPlay(s) }
 
 type SigilOfSufferingYellow struct{}
@@ -42,6 +41,9 @@ func (SigilOfSufferingYellow) Attack() int                   { return 0 }
 func (SigilOfSufferingYellow) Defense() int                  { return 3 }
 func (SigilOfSufferingYellow) Types() card.TypeSet           { return sigilOfSufferingTypes }
 func (SigilOfSufferingYellow) GoAgain() bool                 { return false }
+// not implemented: conditional +1{d} 'if dealt arcane damage' is baked unconditionally into
+// Defense — over-credits when the trigger condition isn't met
+func (SigilOfSufferingYellow) NotImplemented()             {}
 func (SigilOfSufferingYellow) Play(s *card.TurnState, _ *card.CardState) int    { return sigilOfSufferingPlay(s) }
 
 type SigilOfSufferingBlue struct{}
@@ -54,4 +56,7 @@ func (SigilOfSufferingBlue) Attack() int                   { return 0 }
 func (SigilOfSufferingBlue) Defense() int                  { return 2 }
 func (SigilOfSufferingBlue) Types() card.TypeSet           { return sigilOfSufferingTypes }
 func (SigilOfSufferingBlue) GoAgain() bool                 { return false }
+// not implemented: conditional +1{d} 'if dealt arcane damage' is baked unconditionally into
+// Defense — over-credits when the trigger condition isn't met
+func (SigilOfSufferingBlue) NotImplemented()             {}
 func (SigilOfSufferingBlue) Play(s *card.TurnState, _ *card.CardState) int    { return sigilOfSufferingPlay(s) }

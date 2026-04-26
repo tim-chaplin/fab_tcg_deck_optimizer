@@ -33,6 +33,8 @@ func (PromiseOfPlentyRed) Attack() int                 { return 3 }
 func (PromiseOfPlentyRed) Defense() int                { return 2 }
 func (PromiseOfPlentyRed) Types() card.TypeSet         { return promiseOfPlentyTypes }
 func (PromiseOfPlentyRed) GoAgain() bool               { return false }
+// not implemented: on-hit arsenal-placement rider (arsenal/deck content tracking would be required)
+func (PromiseOfPlentyRed) NotImplemented()             {}
 func (c PromiseOfPlentyRed) Play(_ *card.TurnState, self *card.CardState) int { return promiseOfPlentyPlay(c, self) }
 
 type PromiseOfPlentyYellow struct{}
@@ -45,6 +47,8 @@ func (PromiseOfPlentyYellow) Attack() int                 { return 2 }
 func (PromiseOfPlentyYellow) Defense() int                { return 2 }
 func (PromiseOfPlentyYellow) Types() card.TypeSet         { return promiseOfPlentyTypes }
 func (PromiseOfPlentyYellow) GoAgain() bool               { return false }
+// not implemented: on-hit arsenal-placement rider (arsenal/deck content tracking would be required)
+func (PromiseOfPlentyYellow) NotImplemented()             {}
 func (c PromiseOfPlentyYellow) Play(_ *card.TurnState, self *card.CardState) int { return promiseOfPlentyPlay(c, self) }
 
 type PromiseOfPlentyBlue struct{}
@@ -57,4 +61,6 @@ func (PromiseOfPlentyBlue) Attack() int                 { return 1 }
 func (PromiseOfPlentyBlue) Defense() int                { return 2 }
 func (PromiseOfPlentyBlue) Types() card.TypeSet         { return promiseOfPlentyTypes }
 func (PromiseOfPlentyBlue) GoAgain() bool               { return false }
+// not implemented: on-hit arsenal-placement rider (arsenal/deck content tracking would be required)
+func (PromiseOfPlentyBlue) NotImplemented()             {}
 func (c PromiseOfPlentyBlue) Play(_ *card.TurnState, self *card.CardState) int { return promiseOfPlentyPlay(c, self) }

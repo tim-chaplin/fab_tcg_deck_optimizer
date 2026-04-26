@@ -2,10 +2,6 @@
 // pitch variants: Red 1, Yellow 2, Blue 3. Defense 2.
 //
 // Text: "When you play this, if you have less {h} than an opposing hero, this gains +1{p}."
-//
-// Simplification: The "less {h} than an opposing hero" clause is modelled as a hero attribute —
-// the +1{p} rider fires for heroes that implement card.LowerHealthWanter and never fires
-// otherwise.
 
 package generic
 

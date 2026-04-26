@@ -2,9 +2,6 @@
 // Printed pitch variants: Red 1, Yellow 2, Blue 3. Defense 2.
 //
 // Text: "When this is played, if you have less {h} than an opposing hero, it gets **go again**."
-//
-// Simplification: The "less {h} than an opposing hero" clause is modelled as a hero attribute —
-// go again fires for heroes that implement card.LowerHealthWanter and never fires otherwise.
 
 package generic
 

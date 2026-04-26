@@ -2,10 +2,6 @@
 //
 // Text: "The next attack action card you play this turn gains +N{p}. If Force Sight is played from
 // arsenal, **opt 2**. **Go again**" (Red N=3, Yellow N=2, Blue N=1.)
-//
-// Simplification: The arsenal-gated Opt 2 is skipped. Scans TurnState.CardsRemaining for the first
-// matching attack action card and credits the bonus assuming it will be played; if none is
-// scheduled after this card, the bonus fizzles.
 
 package generic
 
@@ -23,6 +19,8 @@ func (ForceSightRed) Attack() int                 { return 0 }
 func (ForceSightRed) Defense() int                { return 2 }
 func (ForceSightRed) Types() card.TypeSet         { return forceSightTypes }
 func (ForceSightRed) GoAgain() bool               { return true }
+// not implemented: arsenal-gated Opt 2
+func (ForceSightRed) NotImplemented()             {}
 func (ForceSightRed) Play(s *card.TurnState, _ *card.CardState) int { return grantNextAttackActionBonus(s, 3) }
 
 type ForceSightYellow struct{}
@@ -35,6 +33,8 @@ func (ForceSightYellow) Attack() int                 { return 0 }
 func (ForceSightYellow) Defense() int                { return 2 }
 func (ForceSightYellow) Types() card.TypeSet         { return forceSightTypes }
 func (ForceSightYellow) GoAgain() bool               { return true }
+// not implemented: arsenal-gated Opt 2
+func (ForceSightYellow) NotImplemented()             {}
 func (ForceSightYellow) Play(s *card.TurnState, _ *card.CardState) int { return grantNextAttackActionBonus(s, 2) }
 
 type ForceSightBlue struct{}
@@ -47,4 +47,6 @@ func (ForceSightBlue) Attack() int                 { return 0 }
 func (ForceSightBlue) Defense() int                { return 2 }
 func (ForceSightBlue) Types() card.TypeSet         { return forceSightTypes }
 func (ForceSightBlue) GoAgain() bool               { return true }
+// not implemented: arsenal-gated Opt 2
+func (ForceSightBlue) NotImplemented()             {}
 func (ForceSightBlue) Play(s *card.TurnState, _ *card.CardState) int { return grantNextAttackActionBonus(s, 1) }

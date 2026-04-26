@@ -3,8 +3,6 @@
 //
 // Text: "If a card has been put into your banished zone this turn, Tremor of íArathael gains
 // +2{p}."
-//
-// Simplification: Banished-zone tracking isn't modelled; +2{p} rider never fires.
 
 package generic
 
@@ -22,6 +20,8 @@ func (TremorOfIArathaelRed) Attack() int                 { return 4 }
 func (TremorOfIArathaelRed) Defense() int                { return 2 }
 func (TremorOfIArathaelRed) Types() card.TypeSet         { return tremorOfIArathaelTypes }
 func (TremorOfIArathaelRed) GoAgain() bool               { return false }
+// not implemented: banished-zone +2{p} rider (banished-zone count not tracked)
+func (TremorOfIArathaelRed) NotImplemented()             {}
 func (c TremorOfIArathaelRed) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }
 
 type TremorOfIArathaelYellow struct{}
@@ -34,6 +34,8 @@ func (TremorOfIArathaelYellow) Attack() int                 { return 3 }
 func (TremorOfIArathaelYellow) Defense() int                { return 2 }
 func (TremorOfIArathaelYellow) Types() card.TypeSet         { return tremorOfIArathaelTypes }
 func (TremorOfIArathaelYellow) GoAgain() bool               { return false }
+// not implemented: banished-zone +2{p} rider (banished-zone count not tracked)
+func (TremorOfIArathaelYellow) NotImplemented()             {}
 func (c TremorOfIArathaelYellow) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }
 
 type TremorOfIArathaelBlue struct{}
@@ -46,4 +48,6 @@ func (TremorOfIArathaelBlue) Attack() int                 { return 2 }
 func (TremorOfIArathaelBlue) Defense() int                { return 2 }
 func (TremorOfIArathaelBlue) Types() card.TypeSet         { return tremorOfIArathaelTypes }
 func (TremorOfIArathaelBlue) GoAgain() bool               { return false }
+// not implemented: banished-zone +2{p} rider (banished-zone count not tracked)
+func (TremorOfIArathaelBlue) NotImplemented()             {}
 func (c TremorOfIArathaelBlue) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }

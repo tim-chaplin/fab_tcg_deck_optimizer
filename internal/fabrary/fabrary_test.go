@@ -64,9 +64,12 @@ func TestMarshalFormat(t *testing.T) {
 // writeDeck does), Marshal's output carries the default equipment in Arena and the default
 // sideboard entries in Sideboard. The default lists themselves are pinned in the deck
 // package's tests; this one only checks the fabrary text picks them up verbatim.
+//
+// Builds a Deck directly instead of going through deck.Random so the test is stable across
+// pool changes (e.g. cards getting tagged NotImplemented and dropping out of the random pool,
+// causing a seed-1 deck to roll different cards that collide with sideboard-default cap).
 func TestMarshalRendersAppliedDefaults(t *testing.T) {
-	rng := rand.New(rand.NewSource(1))
-	d := deck.Random(hero.Viserai{}, 40, 2, rng, nil)
+	d := &deck.Deck{Hero: hero.Viserai{}}
 	d.ApplyDefaults()
 	text := Marshal(d)
 
@@ -163,11 +166,10 @@ See the full deck @ https://fabrary.net/decks/01KP1AZ5SAS425YN30WB779M41
 	if len(d.Cards) == 0 {
 		t.Fatalf("expected deck cards, got none")
 	}
-	// "Arcane Polarity" isn't in the registry yet; the sample has 2 red copies, so the skip map
-	// should report it. If/when it gets implemented this expectation needs to move to whichever
-	// card remains unimplemented in the sample.
-	if skipped["Arcane Polarity (Red)"] != 2 {
-		t.Errorf("skipped map should report Arcane Polarity (Red) x2; got %v", skipped)
+	// Every card in this sample is now in the registry (some as NotImplemented stubs); the
+	// unknown-card skip path is covered by TestUnmarshalUnknownCardSkipped instead.
+	if len(skipped) != 0 {
+		t.Errorf("expected no skipped cards on this sample; got %v", skipped)
 	}
 }
 

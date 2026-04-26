@@ -2,8 +2,6 @@
 // pitch variants: Red 1, Yellow 2, Blue 3. Defense 2.
 //
 // Text: "When this attacks, if you have no cards in hand, it gains +3{p}."
-//
-// Simplification: 'No cards in hand' +3{p} rider isn't modelled.
 
 package generic
 
@@ -21,6 +19,8 @@ func (SpringLoadRed) Attack() int                 { return 2 }
 func (SpringLoadRed) Defense() int                { return 2 }
 func (SpringLoadRed) Types() card.TypeSet         { return springLoadTypes }
 func (SpringLoadRed) GoAgain() bool               { return false }
+// not implemented: +3{p} 'no cards in hand' rider never fires
+func (SpringLoadRed) NotImplemented()             {}
 func (c SpringLoadRed) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }
 
 type SpringLoadYellow struct{}
@@ -33,6 +33,8 @@ func (SpringLoadYellow) Attack() int                 { return 2 }
 func (SpringLoadYellow) Defense() int                { return 2 }
 func (SpringLoadYellow) Types() card.TypeSet         { return springLoadTypes }
 func (SpringLoadYellow) GoAgain() bool               { return false }
+// not implemented: +3{p} 'no cards in hand' rider never fires
+func (SpringLoadYellow) NotImplemented()             {}
 func (c SpringLoadYellow) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }
 
 type SpringLoadBlue struct{}
@@ -45,4 +47,6 @@ func (SpringLoadBlue) Attack() int                 { return 2 }
 func (SpringLoadBlue) Defense() int                { return 2 }
 func (SpringLoadBlue) Types() card.TypeSet         { return springLoadTypes }
 func (SpringLoadBlue) GoAgain() bool               { return false }
+// not implemented: +3{p} 'no cards in hand' rider never fires
+func (SpringLoadBlue) NotImplemented()             {}
 func (c SpringLoadBlue) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }

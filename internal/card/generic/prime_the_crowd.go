@@ -4,10 +4,6 @@
 // Text: "The next attack action card you play this turn gets +N{p}. **The crowd cheers** each
 // Revered hero. **The crowd boos** each Reviled hero. **Go again**" (Red N=4, Yellow N=3, Blue
 // N=2.)
-//
-// Simplification: Crowd cheers/boos keywords are dropped. Scans TurnState.CardsRemaining for the
-// first matching attack action card and credits the bonus assuming it will be played; if none is
-// scheduled after this card, the bonus fizzles.
 
 package generic
 
@@ -25,6 +21,8 @@ func (PrimeTheCrowdRed) Attack() int                 { return 0 }
 func (PrimeTheCrowdRed) Defense() int                { return 2 }
 func (PrimeTheCrowdRed) Types() card.TypeSet         { return primeTheCrowdTypes }
 func (PrimeTheCrowdRed) GoAgain() bool               { return true }
+// not implemented: Crowd cheers / Crowd boos keywords dropped
+func (PrimeTheCrowdRed) NotImplemented()             {}
 func (PrimeTheCrowdRed) Play(s *card.TurnState, _ *card.CardState) int { return grantNextAttackActionBonus(s, 4) }
 
 type PrimeTheCrowdYellow struct{}
@@ -37,6 +35,8 @@ func (PrimeTheCrowdYellow) Attack() int                 { return 0 }
 func (PrimeTheCrowdYellow) Defense() int                { return 2 }
 func (PrimeTheCrowdYellow) Types() card.TypeSet         { return primeTheCrowdTypes }
 func (PrimeTheCrowdYellow) GoAgain() bool               { return true }
+// not implemented: Crowd cheers / Crowd boos keywords dropped
+func (PrimeTheCrowdYellow) NotImplemented()             {}
 func (PrimeTheCrowdYellow) Play(s *card.TurnState, _ *card.CardState) int { return grantNextAttackActionBonus(s, 3) }
 
 type PrimeTheCrowdBlue struct{}
@@ -49,4 +49,6 @@ func (PrimeTheCrowdBlue) Attack() int                 { return 0 }
 func (PrimeTheCrowdBlue) Defense() int                { return 2 }
 func (PrimeTheCrowdBlue) Types() card.TypeSet         { return primeTheCrowdTypes }
 func (PrimeTheCrowdBlue) GoAgain() bool               { return true }
+// not implemented: Crowd cheers / Crowd boos keywords dropped
+func (PrimeTheCrowdBlue) NotImplemented()             {}
 func (PrimeTheCrowdBlue) Play(s *card.TurnState, _ *card.CardState) int { return grantNextAttackActionBonus(s, 2) }

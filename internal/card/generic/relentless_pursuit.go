@@ -2,8 +2,6 @@
 //
 // Text: "**Mark** target opposing hero. If you've attacked them this turn, put this on the bottom
 // of its owner's deck. **Go again**"
-//
-// Simplification: Marks and 'attacked them this turn' tracking aren't modelled.
 
 package generic
 
@@ -21,4 +19,6 @@ func (RelentlessPursuitBlue) Attack() int                 { return 0 }
 func (RelentlessPursuitBlue) Defense() int                { return 3 }
 func (RelentlessPursuitBlue) Types() card.TypeSet         { return relentlessPursuitTypes }
 func (RelentlessPursuitBlue) GoAgain() bool               { return true }
+// not implemented: marked-target gate + 'attacked them this turn' chain rider
+func (RelentlessPursuitBlue) NotImplemented()             {}
 func (RelentlessPursuitBlue) Play(s *card.TurnState, _ *card.CardState) int { return 0 }

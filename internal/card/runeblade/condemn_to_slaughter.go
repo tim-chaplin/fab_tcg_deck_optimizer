@@ -3,10 +3,6 @@
 // Text: "Your next Runeblade attack this turn gets +N{p}. You may destroy an aura you control. If
 // you do, each opponent destroys an aura permanent they control. Go again."
 // (Red N=3, Yellow N=2, Blue N=1.)
-//
-// Simplification: the aura-trade rider and the opponent-aura-destruction clause are ignored.
-// The +N{p} fires only if a Runeblade attack (attack action card OR weapon swing) follows
-// later in this turn's ordering; in that case Play returns N as the bonus damage.
 
 package runeblade
 
@@ -24,6 +20,9 @@ func (CondemnToSlaughterRed) Attack() int                { return 0 }
 func (CondemnToSlaughterRed) Defense() int               { return 3 }
 func (CondemnToSlaughterRed) Types() card.TypeSet     { return condemnToSlaughterTypes }
 func (CondemnToSlaughterRed) GoAgain() bool              { return true }
+// not implemented: aura-trade rider and opponent-aura destruction clause; only same-turn
+// Runeblade-attack +N{p} is modelled
+func (CondemnToSlaughterRed) NotImplemented()             {}
 func (CondemnToSlaughterRed) Play(s *card.TurnState, _ *card.CardState) int { return condemnToSlaughterBonus(s, 3) }
 
 type CondemnToSlaughterYellow struct{}
@@ -36,6 +35,9 @@ func (CondemnToSlaughterYellow) Attack() int                { return 0 }
 func (CondemnToSlaughterYellow) Defense() int               { return 3 }
 func (CondemnToSlaughterYellow) Types() card.TypeSet     { return condemnToSlaughterTypes }
 func (CondemnToSlaughterYellow) GoAgain() bool              { return true }
+// not implemented: aura-trade rider and opponent-aura destruction clause; only same-turn
+// Runeblade-attack +N{p} is modelled
+func (CondemnToSlaughterYellow) NotImplemented()             {}
 func (CondemnToSlaughterYellow) Play(s *card.TurnState, _ *card.CardState) int { return condemnToSlaughterBonus(s, 2) }
 
 type CondemnToSlaughterBlue struct{}
@@ -48,14 +50,20 @@ func (CondemnToSlaughterBlue) Attack() int                { return 0 }
 func (CondemnToSlaughterBlue) Defense() int               { return 3 }
 func (CondemnToSlaughterBlue) Types() card.TypeSet     { return condemnToSlaughterTypes }
 func (CondemnToSlaughterBlue) GoAgain() bool              { return true }
+// not implemented: aura-trade rider and opponent-aura destruction clause; only same-turn
+// Runeblade-attack +N{p} is modelled
+func (CondemnToSlaughterBlue) NotImplemented()             {}
 func (CondemnToSlaughterBlue) Play(s *card.TurnState, _ *card.CardState) int { return condemnToSlaughterBonus(s, 1) }
 
-// condemnToSlaughterBonus returns n if some Runeblade attack (attack action card or weapon swing)
-// is scheduled later this turn, otherwise 0.
+// condemnToSlaughterBonus grants +n to the first scheduled Runeblade attack (attack action
+// card or weapon swing) via pc.BonusAttack so the buffed attack's EffectiveAttack folds the
+// bonus into LikelyToHit and the chain credit lands on the target's slot. Returns 0;
+// Condemn's own contribution is zero.
 func condemnToSlaughterBonus(s *card.TurnState, n int) int {
 	for _, pc := range s.CardsRemaining {
 		if pc.Card.Types().IsRunebladeAttack() {
-			return n
+			pc.BonusAttack += n
+			return 0
 		}
 	}
 	return 0

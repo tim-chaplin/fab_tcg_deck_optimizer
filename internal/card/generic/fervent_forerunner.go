@@ -32,6 +32,8 @@ func (FerventForerunnerRed) Attack() int                 { return 3 }
 func (FerventForerunnerRed) Defense() int                { return 2 }
 func (FerventForerunnerRed) Types() card.TypeSet         { return ferventForerunnerTypes }
 func (FerventForerunnerRed) GoAgain() bool               { return false }
+// not implemented: on-hit Opt 2 rider
+func (FerventForerunnerRed) NotImplemented()             {}
 func (c FerventForerunnerRed) Play(_ *card.TurnState, self *card.CardState) int { return ferventForerunnerPlay(c, self) }
 
 type FerventForerunnerYellow struct{}
@@ -44,6 +46,8 @@ func (FerventForerunnerYellow) Attack() int                 { return 2 }
 func (FerventForerunnerYellow) Defense() int                { return 2 }
 func (FerventForerunnerYellow) Types() card.TypeSet         { return ferventForerunnerTypes }
 func (FerventForerunnerYellow) GoAgain() bool               { return false }
+// not implemented: on-hit Opt 2 rider
+func (FerventForerunnerYellow) NotImplemented()             {}
 func (c FerventForerunnerYellow) Play(_ *card.TurnState, self *card.CardState) int { return ferventForerunnerPlay(c, self) }
 
 type FerventForerunnerBlue struct{}
@@ -56,4 +60,6 @@ func (FerventForerunnerBlue) Attack() int                 { return 1 }
 func (FerventForerunnerBlue) Defense() int                { return 2 }
 func (FerventForerunnerBlue) Types() card.TypeSet         { return ferventForerunnerTypes }
 func (FerventForerunnerBlue) GoAgain() bool               { return false }
+// not implemented: on-hit Opt 2 rider
+func (FerventForerunnerBlue) NotImplemented()             {}
 func (c FerventForerunnerBlue) Play(_ *card.TurnState, self *card.CardState) int { return ferventForerunnerPlay(c, self) }

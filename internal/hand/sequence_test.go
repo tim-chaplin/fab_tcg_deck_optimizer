@@ -88,11 +88,16 @@ func TestBest_ViseraiOathBlueHocusRedMalefic(t *testing.T) {
 }
 
 func TestBest_RunicReapingPrefersAttackPitch(t *testing.T) {
-	// Pitching the Blue Hocus Pocus (attack-typed, pitch 3) pays for Runic Reaping + Shrill AND
-	// satisfies Runic Reaping's pitched-attack rider. Pitching the Blue Malefic Aura instead would
-	// lose the rider. Blue Malefic (1 arcane + 1 Viserai runechant = 2) → Runic Reaping (3 + 1
-	// rider + 1 Viserai runechant = 5) → Shrill (4 base + 3 aura-created bonus = 7). Value = 2 + 5
-	// + 7 = 14.
+	// Pitching the Blue Hocus Pocus (attack-typed, pitch 3) pays for Runic Reaping + Shrill
+	// AND satisfies Runic Reaping's pitched-attack rider, granting +1 to Shrill via
+	// BonusAttack. Runic Reaping's "if this hits, create N Runechants" clause is registered
+	// as an EphemeralAttackTrigger (same shape as Mauvrion Skies) and fires after Shrill's
+	// full resolution: target.EffectiveAttack = printed 4 + BonusAttack 1 = 5, which falls
+	// OUT of the {1,4,7} LikelyToHit window, so the runechant rider drops. The only damage
+	// on Runic Reaping's slot is Viserai's runechant for the prior non-attack action.
+	// Blue Malefic (1 arcane + 1 Viserai runechant = 2) → Runic Reaping (0 own damage + 1
+	// Viserai runechant = 1) → Shrill (4 base + 3 aura-created bonus + 1 BonusAttack = 8).
+	// Value = 2 + 1 + 8 = 11.
 	h := []card.Card{
 		runeblade.HocusPocusBlue{},
 		runeblade.MaleficIncantationBlue{},
@@ -100,8 +105,8 @@ func TestBest_RunicReapingPrefersAttackPitch(t *testing.T) {
 		runeblade.ShrillOfSkullformRed{},
 	}
 	got := Best(hero.Viserai{}, nil, h, 0, nil, 0, nil)
-	if got.Value != 14 {
-		t.Fatalf("want value 14, got %d (roles=[%s])",
+	if got.Value != 11 {
+		t.Fatalf("want value 11, got %d (roles=[%s])",
 			got.Value, FormatBestLine(got.BestLine))
 	}
 }

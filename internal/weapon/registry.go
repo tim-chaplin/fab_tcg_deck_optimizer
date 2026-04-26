@@ -6,9 +6,12 @@ package weapon
 
 // All lists every implemented weapon. Used by deck-search code to enumerate loadouts.
 var All = []Weapon{
+	AnnalsOfSutcliffe{},
 	NebulaBlade{},
 	ReapingBlade{},
+	RosettaThorn{},
 	ScepterOfPain{},
+	Talishar{},
 }
 
 // byName maps Weapon.Name() → Weapon for reverse lookup. Built once at init.

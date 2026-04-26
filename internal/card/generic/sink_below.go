@@ -2,7 +2,6 @@
 // Printed pitch variants: Red 1, Yellow 2, Blue 3.
 // Printed defense: Red 4, Yellow 3, Blue 2.
 // Text: "You may put a card from your hand on the bottom of your deck. If you do, draw a card."
-// Simplification: the hand-cycling rider is ignored (card quality/draw isn't modelled).
 
 package generic
 
@@ -19,6 +18,8 @@ func (SinkBelowRed) Defense() int             { return 4 }
 func (SinkBelowRed) Types() card.TypeSet      { return defenseReactionTypes }
 func (SinkBelowRed) GoAgain() bool            { return false }
 func (SinkBelowRed) NotSilverAgeLegal()       {}
+// not implemented: discard-to-cycle rider (hand cycling not modelled)
+func (SinkBelowRed) NotImplemented()             {}
 func (SinkBelowRed) Play(*card.TurnState, *card.CardState) int { return 0 }
 
 type SinkBelowYellow struct{}
@@ -32,6 +33,8 @@ func (SinkBelowYellow) Defense() int             { return 3 }
 func (SinkBelowYellow) Types() card.TypeSet      { return defenseReactionTypes }
 func (SinkBelowYellow) GoAgain() bool            { return false }
 func (SinkBelowYellow) NotSilverAgeLegal()       {}
+// not implemented: discard-to-cycle rider (hand cycling not modelled)
+func (SinkBelowYellow) NotImplemented()             {}
 func (SinkBelowYellow) Play(*card.TurnState, *card.CardState) int { return 0 }
 
 type SinkBelowBlue struct{}
@@ -45,4 +48,6 @@ func (SinkBelowBlue) Defense() int             { return 2 }
 func (SinkBelowBlue) Types() card.TypeSet      { return defenseReactionTypes }
 func (SinkBelowBlue) GoAgain() bool            { return false }
 func (SinkBelowBlue) NotSilverAgeLegal()       {}
+// not implemented: discard-to-cycle rider (hand cycling not modelled)
+func (SinkBelowBlue) NotImplemented()             {}
 func (SinkBelowBlue) Play(*card.TurnState, *card.CardState) int { return 0 }

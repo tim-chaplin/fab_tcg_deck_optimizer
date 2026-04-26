@@ -31,6 +31,8 @@ func (ScourTheBattlescapeRed) Attack() int                 { return 3 }
 func (ScourTheBattlescapeRed) Defense() int                { return 2 }
 func (ScourTheBattlescapeRed) Types() card.TypeSet         { return scourTheBattlescapeTypes }
 func (ScourTheBattlescapeRed) GoAgain() bool               { return false }
+// not implemented: hand-cycle rider (put a card on bottom of deck, draw)
+func (ScourTheBattlescapeRed) NotImplemented()             {}
 func (c ScourTheBattlescapeRed) Play(_ *card.TurnState, self *card.CardState) int { return scourTheBattlescapePlay(c, self) }
 
 type ScourTheBattlescapeYellow struct{}
@@ -43,6 +45,8 @@ func (ScourTheBattlescapeYellow) Attack() int                 { return 2 }
 func (ScourTheBattlescapeYellow) Defense() int                { return 2 }
 func (ScourTheBattlescapeYellow) Types() card.TypeSet         { return scourTheBattlescapeTypes }
 func (ScourTheBattlescapeYellow) GoAgain() bool               { return false }
+// not implemented: hand-cycle rider (put a card on bottom of deck, draw)
+func (ScourTheBattlescapeYellow) NotImplemented()             {}
 func (c ScourTheBattlescapeYellow) Play(_ *card.TurnState, self *card.CardState) int { return scourTheBattlescapePlay(c, self) }
 
 type ScourTheBattlescapeBlue struct{}
@@ -55,4 +59,6 @@ func (ScourTheBattlescapeBlue) Attack() int                 { return 1 }
 func (ScourTheBattlescapeBlue) Defense() int                { return 2 }
 func (ScourTheBattlescapeBlue) Types() card.TypeSet         { return scourTheBattlescapeTypes }
 func (ScourTheBattlescapeBlue) GoAgain() bool               { return false }
+// not implemented: hand-cycle rider (put a card on bottom of deck, draw)
+func (ScourTheBattlescapeBlue) NotImplemented()             {}
 func (c ScourTheBattlescapeBlue) Play(_ *card.TurnState, self *card.CardState) int { return scourTheBattlescapePlay(c, self) }

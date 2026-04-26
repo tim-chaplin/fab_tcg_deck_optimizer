@@ -2,8 +2,6 @@
 // variants: Red 1, Yellow 2, Blue 3. Defense 2.
 //
 // Text: "When you attack or defend with Flex, you may pay {r}{r}. If you do, it gains +2{p}."
-//
-// Simplification: Pay-{r}{r}-for-+2{p} rider isn't modelled.
 
 package generic
 
@@ -21,6 +19,8 @@ func (FlexRed) Attack() int                 { return 4 }
 func (FlexRed) Defense() int                { return 2 }
 func (FlexRed) Types() card.TypeSet         { return flexTypes }
 func (FlexRed) GoAgain() bool               { return false }
+// not implemented: pay-{r}{r}-for-+2{p} attack/defence mode
+func (FlexRed) NotImplemented()             {}
 func (c FlexRed) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }
 
 type FlexYellow struct{}
@@ -33,6 +33,8 @@ func (FlexYellow) Attack() int                 { return 3 }
 func (FlexYellow) Defense() int                { return 2 }
 func (FlexYellow) Types() card.TypeSet         { return flexTypes }
 func (FlexYellow) GoAgain() bool               { return false }
+// not implemented: pay-{r}{r}-for-+2{p} attack/defence mode
+func (FlexYellow) NotImplemented()             {}
 func (c FlexYellow) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }
 
 type FlexBlue struct{}
@@ -45,4 +47,6 @@ func (FlexBlue) Attack() int                 { return 2 }
 func (FlexBlue) Defense() int                { return 2 }
 func (FlexBlue) Types() card.TypeSet         { return flexTypes }
 func (FlexBlue) GoAgain() bool               { return false }
+// not implemented: pay-{r}{r}-for-+2{p} attack/defence mode
+func (FlexBlue) NotImplemented()             {}
 func (c FlexBlue) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }

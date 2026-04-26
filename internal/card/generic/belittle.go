@@ -4,8 +4,6 @@
 // Text: "As an additional cost to play Belittle, you may reveal an attack action card with 3 or
 // less base {p} from your hand. If you do, search your deck for a card named Minnowism, reveal it,
 // put it into your hand, then shuffle your deck. **Go again**"
-//
-// Simplification: Additional-cost reveal and deck search for Minnowism aren't modelled.
 
 package generic
 
@@ -24,6 +22,8 @@ func (BelittleRed) Defense() int                { return 2 }
 func (BelittleRed) Types() card.TypeSet         { return belittleTypes }
 func (BelittleRed) GoAgain() bool               { return true }
 func (BelittleRed) NotSilverAgeLegal()           {}
+// not implemented: Minnowism deck-search tutor (additional-cost reveal)
+func (BelittleRed) NotImplemented()             {}
 func (c BelittleRed) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }
 
 type BelittleYellow struct{}
@@ -37,6 +37,8 @@ func (BelittleYellow) Defense() int                { return 2 }
 func (BelittleYellow) Types() card.TypeSet         { return belittleTypes }
 func (BelittleYellow) GoAgain() bool               { return true }
 func (BelittleYellow) NotSilverAgeLegal()           {}
+// not implemented: Minnowism deck-search tutor (additional-cost reveal)
+func (BelittleYellow) NotImplemented()             {}
 func (c BelittleYellow) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }
 
 type BelittleBlue struct{}
@@ -50,4 +52,6 @@ func (BelittleBlue) Defense() int                { return 2 }
 func (BelittleBlue) Types() card.TypeSet         { return belittleTypes }
 func (BelittleBlue) GoAgain() bool               { return true }
 func (BelittleBlue) NotSilverAgeLegal()           {}
+// not implemented: Minnowism deck-search tutor (additional-cost reveal)
+func (BelittleBlue) NotImplemented()             {}
 func (c BelittleBlue) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }

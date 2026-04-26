@@ -2,9 +2,6 @@
 // variants: Red 1, Yellow 2, Blue 3. Defense 2.
 //
 // Text: "If Brandish hits, your next weapon attack this turn gains +1{p}. **Go again**"
-//
-// Simplification: Next weapon attack +1{p} isn't modelled (weapons aren't scanned in
-// CardsRemaining).
 
 package generic
 
@@ -22,6 +19,8 @@ func (BrandishRed) Attack() int                 { return 3 }
 func (BrandishRed) Defense() int                { return 2 }
 func (BrandishRed) Types() card.TypeSet         { return brandishTypes }
 func (BrandishRed) GoAgain() bool               { return true }
+// not implemented: next-weapon-attack +1{p} grant (weapon chain not scanned)
+func (BrandishRed) NotImplemented()             {}
 func (c BrandishRed) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }
 
 type BrandishYellow struct{}
@@ -34,6 +33,8 @@ func (BrandishYellow) Attack() int                 { return 2 }
 func (BrandishYellow) Defense() int                { return 2 }
 func (BrandishYellow) Types() card.TypeSet         { return brandishTypes }
 func (BrandishYellow) GoAgain() bool               { return true }
+// not implemented: next-weapon-attack +1{p} grant (weapon chain not scanned)
+func (BrandishYellow) NotImplemented()             {}
 func (c BrandishYellow) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }
 
 type BrandishBlue struct{}
@@ -46,4 +47,6 @@ func (BrandishBlue) Attack() int                 { return 1 }
 func (BrandishBlue) Defense() int                { return 2 }
 func (BrandishBlue) Types() card.TypeSet         { return brandishTypes }
 func (BrandishBlue) GoAgain() bool               { return true }
+// not implemented: next-weapon-attack +1{p} grant (weapon chain not scanned)
+func (BrandishBlue) NotImplemented()             {}
 func (c BrandishBlue) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }

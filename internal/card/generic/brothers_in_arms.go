@@ -2,8 +2,6 @@
 // Printed pitch variants: Red 1, Yellow 2, Blue 3. Defense 2.
 //
 // Text: "When this defends, you may pay {r}. If you do, it gets +2{d}."
-//
-// Simplification: Pay-to-buff-defence rider isn't modelled (defence-side costs aren't solved).
 
 package generic
 
@@ -21,6 +19,8 @@ func (BrothersInArmsRed) Attack() int                 { return 6 }
 func (BrothersInArmsRed) Defense() int                { return 2 }
 func (BrothersInArmsRed) Types() card.TypeSet         { return brothersInArmsTypes }
 func (BrothersInArmsRed) GoAgain() bool               { return false }
+// not implemented: pay-{r}-for-+2{d} defence rider (defence-side costs aren't solved)
+func (BrothersInArmsRed) NotImplemented()             {}
 func (c BrothersInArmsRed) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }
 
 type BrothersInArmsYellow struct{}
@@ -33,6 +33,8 @@ func (BrothersInArmsYellow) Attack() int                 { return 5 }
 func (BrothersInArmsYellow) Defense() int                { return 2 }
 func (BrothersInArmsYellow) Types() card.TypeSet         { return brothersInArmsTypes }
 func (BrothersInArmsYellow) GoAgain() bool               { return false }
+// not implemented: pay-{r}-for-+2{d} defence rider (defence-side costs aren't solved)
+func (BrothersInArmsYellow) NotImplemented()             {}
 func (c BrothersInArmsYellow) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }
 
 type BrothersInArmsBlue struct{}
@@ -45,4 +47,6 @@ func (BrothersInArmsBlue) Attack() int                 { return 4 }
 func (BrothersInArmsBlue) Defense() int                { return 2 }
 func (BrothersInArmsBlue) Types() card.TypeSet         { return brothersInArmsTypes }
 func (BrothersInArmsBlue) GoAgain() bool               { return false }
+// not implemented: pay-{r}-for-+2{d} defence rider (defence-side costs aren't solved)
+func (BrothersInArmsBlue) NotImplemented()             {}
 func (c BrothersInArmsBlue) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }

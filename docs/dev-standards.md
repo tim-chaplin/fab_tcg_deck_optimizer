@@ -29,6 +29,19 @@ the upstream repo is the authority for every card file in the project.
   (how `AuraTrigger` is ticked, what `NoMemo` opts out of, how memoization works) belongs in
   framework docs in `internal/card/card.go` and `internal/hand/hand.go`, not repeated in every
   card.
+- Don't restate behavior that's already documented by an external function, type, or marker the
+  card uses. If a card calls `card.LikelyToHit`, the docstring shouldn't re-explain the
+  hit-likelihood heuristic; if a card carries `card.Dominator`, it shouldn't re-explain how
+  Dominate interacts with `LikelyToHit`; if a card has a `NotImplemented` marker plus a
+  `// not implemented: <quirk>` line, the docstring shouldn't repeat the same "rider isn't
+  modelled" sentence in prose. Examples:
+  - **Demolition Crew** (Generic Action - Attack with Dominate + an additional reveal cost) —
+    no "Modelling: Dominate is advertised via the `card.Dominator` marker..." block. The
+    `Dominator` interface implementation makes that link by itself; the additional reveal cost
+    is documented by the `// not implemented:` comment above its `NotImplemented` method.
+  - **Plunder Run** (a `// not implemented: on-hit draw rider...` line + a from-arsenal gate
+    inside `Play`) — the docstring needs to call out the from-arsenal gate (card-specific
+    quirk) but not the dropped on-hit draw (already on the marker).
 
 ## AuraTrigger lifecycle
 

@@ -2,8 +2,7 @@
 // Printed pitch variants: Red 1, Yellow 2, Blue 3.
 // Printed defense: Red 4, Yellow 3, Blue 2.
 // Text: "You may put a card from your hand on top of your deck rather than pay Rise Above's {r}
-// cost." Simplification: the alternative hand-as-cost option isn't modelled — we pay the printed
-// 2{r} or the partition's affordability check rejects the play.
+// cost."
 
 package generic
 
@@ -19,6 +18,8 @@ func (RiseAboveRed) Attack() int              { return 0 }
 func (RiseAboveRed) Defense() int             { return 4 }
 func (RiseAboveRed) Types() card.TypeSet      { return defenseReactionTypes }
 func (RiseAboveRed) GoAgain() bool            { return false }
+// not implemented: hand-as-cost alt cost not modelled; card fails when printed cost can't be paid
+func (RiseAboveRed) NotImplemented()             {}
 func (RiseAboveRed) Play(*card.TurnState, *card.CardState) int { return 0 }
 
 type RiseAboveYellow struct{}
@@ -31,6 +32,8 @@ func (RiseAboveYellow) Attack() int              { return 0 }
 func (RiseAboveYellow) Defense() int             { return 3 }
 func (RiseAboveYellow) Types() card.TypeSet      { return defenseReactionTypes }
 func (RiseAboveYellow) GoAgain() bool            { return false }
+// not implemented: hand-as-cost alt cost not modelled; card fails when printed cost can't be paid
+func (RiseAboveYellow) NotImplemented()             {}
 func (RiseAboveYellow) Play(*card.TurnState, *card.CardState) int { return 0 }
 
 type RiseAboveBlue struct{}
@@ -43,4 +46,6 @@ func (RiseAboveBlue) Attack() int              { return 0 }
 func (RiseAboveBlue) Defense() int             { return 2 }
 func (RiseAboveBlue) Types() card.TypeSet      { return defenseReactionTypes }
 func (RiseAboveBlue) GoAgain() bool            { return false }
+// not implemented: hand-as-cost alt cost not modelled; card fails when printed cost can't be paid
+func (RiseAboveBlue) NotImplemented()             {}
 func (RiseAboveBlue) Play(*card.TurnState, *card.CardState) int { return 0 }

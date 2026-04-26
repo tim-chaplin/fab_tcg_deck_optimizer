@@ -2,10 +2,6 @@
 // 5. Printed pitch variants: Red 1, Yellow 2, Blue 3. Defense 2.
 //
 // Text: "When this attacks or defends, if you have less {h} than an opposing hero, gain 1{h}."
-//
-// Simplification: The "less {h}" clause is modelled as a hero attribute — the 1{h} gain is credited
-// 1-to-1 with damage when this attacks and the current hero implements card.LowerHealthWanter. The
-// on-defend half isn't modelled (Play isn't called during a plain block).
 
 package generic
 

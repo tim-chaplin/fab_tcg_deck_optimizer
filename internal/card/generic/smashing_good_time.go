@@ -25,6 +25,8 @@ func (SmashingGoodTimeRed) Attack() int                 { return 0 }
 func (SmashingGoodTimeRed) Defense() int                { return 2 }
 func (SmashingGoodTimeRed) Types() card.TypeSet         { return smashingGoodTimeTypes }
 func (SmashingGoodTimeRed) GoAgain() bool               { return true }
+// not implemented: on-hit item-destruction rider
+func (SmashingGoodTimeRed) NotImplemented()             {}
 func (SmashingGoodTimeRed) Play(s *card.TurnState, self *card.CardState) int {
 	if !self.FromArsenal {
 		return 0
@@ -42,6 +44,8 @@ func (SmashingGoodTimeYellow) Attack() int                 { return 0 }
 func (SmashingGoodTimeYellow) Defense() int                { return 2 }
 func (SmashingGoodTimeYellow) Types() card.TypeSet         { return smashingGoodTimeTypes }
 func (SmashingGoodTimeYellow) GoAgain() bool               { return true }
+// not implemented: on-hit item-destruction rider
+func (SmashingGoodTimeYellow) NotImplemented()             {}
 func (SmashingGoodTimeYellow) Play(s *card.TurnState, self *card.CardState) int {
 	if !self.FromArsenal {
 		return 0
@@ -59,6 +63,8 @@ func (SmashingGoodTimeBlue) Attack() int                 { return 0 }
 func (SmashingGoodTimeBlue) Defense() int                { return 2 }
 func (SmashingGoodTimeBlue) Types() card.TypeSet         { return smashingGoodTimeTypes }
 func (SmashingGoodTimeBlue) GoAgain() bool               { return true }
+// not implemented: on-hit item-destruction rider
+func (SmashingGoodTimeBlue) NotImplemented()             {}
 func (SmashingGoodTimeBlue) Play(s *card.TurnState, self *card.CardState) int {
 	if !self.FromArsenal {
 		return 0

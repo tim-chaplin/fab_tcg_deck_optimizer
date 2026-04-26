@@ -1,8 +1,6 @@
 // Look Tuff — Generic Action - Attack. Cost 3, Pitch 1, Power 8, Defense 3. Only printed in Red.
 //
 // Text: "When this attacks, it gets -1{p} unless you pay {r}."
-//
-// Simplification: Pay {r} or lose 1{p} — base power is kept.
 
 package generic
 
@@ -20,4 +18,6 @@ func (LookTuffRed) Attack() int                 { return 8 }
 func (LookTuffRed) Defense() int                { return 3 }
 func (LookTuffRed) Types() card.TypeSet         { return lookTuffTypes }
 func (LookTuffRed) GoAgain() bool               { return false }
+// not implemented: pay {r} or lose 1{p} resolved as 'always pay'
+func (LookTuffRed) NotImplemented()             {}
 func (c LookTuffRed) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }

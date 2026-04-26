@@ -2,10 +2,6 @@
 // Printed pitch variants: Red 1, Yellow 2, Blue 3.
 // Text: "Your next Runeblade attack this turn gains +N{p}. Create a Runechant token. Go again."
 // (Red N=3, Yellow N=2, Blue N=1.)
-//
-// Simplification: the +N{p} rider contributes N damage only if a Runeblade attack (an attack
-// action card OR a weapon swing) follows later in this turn's ordering (peeking
-// TurnState.CardsRemaining). The Runechant is always created (+1 damage) regardless.
 
 package runeblade
 
@@ -49,13 +45,16 @@ func (OathOfTheArknightBlue) Types() card.TypeSet        { return oathOfTheArkni
 func (OathOfTheArknightBlue) GoAgain() bool              { return true }
 func (OathOfTheArknightBlue) Play(s *card.TurnState, _ *card.CardState) int { return oathPlay(s, 1) }
 
+// oathPlay grants +n to the first scheduled Runeblade attack via pc.BonusAttack so the
+// buffed attack's EffectiveAttack folds the bonus into LikelyToHit and the chain credit lands
+// on the target's slot, not Oath's. Always creates a Runechant token (+1 damage), which IS
+// Oath's own contribution.
 func oathPlay(s *card.TurnState, n int) int {
-	bonus := 0
 	for _, pc := range s.CardsRemaining {
 		if pc.Card.Types().IsRunebladeAttack() {
-			bonus = n
+			pc.BonusAttack += n
 			break
 		}
 	}
-	return s.CreateRunechant() + bonus
+	return s.CreateRunechant()
 }
