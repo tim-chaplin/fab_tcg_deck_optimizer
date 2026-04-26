@@ -97,6 +97,32 @@ type TriggerContribution struct {
 	Revealed card.Card
 }
 
+// TurnLog is the structured record of a turn's printout, broken into four sections matching
+// the natural turn boundaries. Each entry is content-only — "Hocus Pocus (Blue): PITCH" —
+// so the formatter owns indentation, section headers, numbering of chain events, and
+// join. JSON serializes the struct directly so the on-disk shape is browsable / diffable
+// per section.
+type TurnLog struct {
+	// StartOfTurn captures the turn's starting state and any start-of-turn trigger fires:
+	// dealt hand, arsenal-in card, auras / runechants in play, then the carryover
+	// AuraTrigger handler effects (Sigil reveals, damage credits). Mixed format — informational
+	// lines like "Hand: A, B, C, D" sit alongside event lines like "Sigil of the Arknight
+	// (Blue): drew X into hand"; the formatter renders both unnumbered.
+	StartOfTurn []string `json:"start_of_turn,omitempty"`
+	// MyTurn is the numbered entries for the "My turn:" section: attack-phase pitches
+	// followed by the chain (Play / hero trigger / aura trigger / ephemeral trigger / weapon
+	// swing lines, in resolution order).
+	MyTurn []string `json:"my_turn,omitempty"`
+	// OpponentTurn is the numbered entries for the "Opponent's turn:" section: defense-phase
+	// pitches, plain blocks, and Defense Reactions, in that order.
+	OpponentTurn []string `json:"opponent_turn,omitempty"`
+	// EndOfTurn captures the turn's ending state: the cards in hand, the arsenal slot's
+	// contents, and the auras / runechants surviving into the next turn. Mirrors
+	// StartOfTurn's mixed-informational format ("Hand: A, B", "Arsenal: X (stayed)",
+	// "Auras: Y, 1 Runechant"); the formatter renders unnumbered.
+	EndOfTurn []string `json:"end_of_turn,omitempty"`
+}
+
 // ArsenalIn returns the assignment for the card that started the turn in the arsenal, if
 // any.
 func (t TurnSummary) ArsenalIn() (CardAssignment, bool) {

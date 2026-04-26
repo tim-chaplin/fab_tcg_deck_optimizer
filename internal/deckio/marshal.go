@@ -11,6 +11,7 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/cards"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/deck"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/hand"
 )
 
 // Marshal returns the JSON encoding of `d` (indented) with card/weapon/hero names in place of
@@ -102,16 +103,24 @@ func perCardMarginalToJSON(m map[card.ID]deck.CardMarginalStats) []CardMarginalS
 	return out
 }
 
-// bestTurnToJSON serialises deck.BestTurn.Lines verbatim. The structured TurnSummary stays
-// in memory for the live computation but never crosses the JSON boundary — the rendered
-// printout is the single source of truth on disk.
+// bestTurnToJSON serialises deck.BestTurn.Log directly. The structured TurnSummary stays in
+// memory for the live computation but never crosses the JSON boundary — the structured Log
+// is the single source of truth on disk and feeds the formatter at print time.
 func bestTurnToJSON(b deck.BestTurn) BestTurnJSON {
-	if len(b.Lines) == 0 {
+	if isEmptyLog(b.Log) {
 		return BestTurnJSON{}
 	}
 	return BestTurnJSON{
 		Value:              b.Summary.Value,
 		StartingRunechants: b.StartingRunechants,
-		Lines:              append([]string(nil), b.Lines...),
+		Log:                b.Log,
 	}
+}
+
+// isEmptyLog reports whether a TurnLog has no content in any section. Used by Marshal to
+// elide the whole "best" block when the deck wasn't simulated. A populated Log is guaranteed
+// to have at least one section non-empty (BuildTurnLog only runs when BestLine is non-empty).
+func isEmptyLog(log hand.TurnLog) bool {
+	return len(log.StartOfTurn) == 0 && len(log.MyTurn) == 0 &&
+		len(log.OpponentTurn) == 0 && len(log.EndOfTurn) == 0
 }

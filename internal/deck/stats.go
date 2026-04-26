@@ -42,20 +42,20 @@ type Stats struct {
 }
 
 // BestTurn records a single hand and its optimal turn — the peak draw a deck saw during
-// simulation. Summary.BestLine carries the cards and roles in canonical order; Lines is the
-// rendered "Best turn played (value N):" + chain printout, populated at end of EvaluateWith
-// and round-tripped through the JSON layer verbatim. fabsim's print path consumes Lines
-// directly so saved decks render identically to live runs without rebuilding via
-// FormatBestTurn from a structured snapshot.
+// simulation. Summary.BestLine carries the cards and roles in canonical order; Log is the
+// structured per-section trace assembled at end of EvaluateWith via hand.BuildTurnLog and
+// round-tripped through the JSON layer verbatim. fabsim's print path renders Log via
+// hand.FormatTurnLog so saved decks produce the same output as live runs.
 type BestTurn struct {
 	Summary hand.TurnSummary
 	// StartingRunechants is the Runechant count carried in from the previous turn when this hand
 	// was played. Only meaningful for Runeblade heroes.
 	StartingRunechants int
-	// Lines is the human-readable rendering of the best turn — header + chain body — captured
-	// at end of Evaluate and printed verbatim by fabsim. Round-trips through JSON as-is so
-	// the printout never depends on reconstructing a TurnSummary from disk.
-	Lines []string
+	// Log is the four-section structured record (StartOfTurn / MyTurn / OpponentTurn /
+	// EndOfTurn) of the best turn's printout. Each entry is content-only; the formatter
+	// owns indentation, section headers, and chain numbering. Populated once at end of
+	// EvaluateWith from t.State.Log + BestLine + State, then frozen.
+	Log hand.TurnLog
 }
 
 // CardMarginalStats accumulates the with/without sums needed to compute a card's correlational

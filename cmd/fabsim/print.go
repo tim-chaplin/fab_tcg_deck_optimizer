@@ -14,6 +14,7 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/cards"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/deck"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/hand"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/weapon"
 )
 
@@ -164,19 +165,27 @@ func histogramTitle(d *deck.Deck) string {
 	return fmt.Sprintf("Hand-value distribution (%s hands):", commaInt(d.Stats.Hands))
 }
 
-// printBestTurn dumps the persisted peak-Value turn's pre-rendered lines — header plus
-// chain body, captured at end of Evaluate and round-tripped through JSON verbatim. No-ops on
-// an unscored deck (no Lines stored) so callers don't have to guard. Shared by printBestDeck
-// and runEval; live and reloaded decks render identically because the print path consumes
-// the same Lines slice in both cases.
+// printBestTurn renders the persisted peak-Value turn from its structured TurnLog —
+// "Best turn played (value N):" header plus hand.FormatTurnLog's per-section body. No-ops
+// on an unscored deck (empty TurnLog). Shared by printBestDeck and runEval; live and
+// reloaded decks render identically because the print path consumes the same TurnLog in
+// both cases.
 func printBestTurn(d *deck.Deck) {
-	if len(d.Stats.Best.Lines) == 0 {
+	b := d.Stats.Best
+	if isEmptyTurnLog(b.Log) {
 		return
 	}
 	fmt.Println()
-	for _, line := range d.Stats.Best.Lines {
-		fmt.Println(line)
-	}
+	fmt.Printf("Best turn played (value %d):\n", b.Summary.Value)
+	fmt.Println(hand.FormatTurnLog(b.Log))
+}
+
+// isEmptyTurnLog reports whether all four TurnLog sections are empty — true for an unscored
+// deck. Mirrors deckio's same-named predicate; not worth a public hand.TurnLog method for a
+// one-line check.
+func isEmptyTurnLog(log hand.TurnLog) bool {
+	return len(log.StartOfTurn) == 0 && len(log.MyTurn) == 0 &&
+		len(log.OpponentTurn) == 0 && len(log.EndOfTurn) == 0
 }
 
 // printCardValues renders one row per unique card with the marginal +/- signal: mean turn

@@ -8,7 +8,6 @@ package deck
 import (
 	"fmt"
 	"math/rand"
-	"strings"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/hand"
@@ -171,30 +170,14 @@ func (d *Deck) EvaluateWith(runs int, incomingDamage int, rng *rand.Rand, ev *ha
 		}
 	}
 	mergeMarginalBuf(&d.Stats, uniqueIDs, marginalBuf)
-	// Render the best turn's printout lines once, after the loop, so the in-memory snapshot
-	// and the on-disk JSON both carry the rendered form. Saves the JSON layer from
-	// reconstructing a TurnSummary from a structured schema and avoids per-turn render cost
-	// during the eval loop.
+	// Assemble the best turn's structured log once, after the loop, so the in-memory snapshot
+	// and the on-disk JSON both carry the same shape. The JSON layer round-trips Log
+	// verbatim; printing routes through hand.FormatTurnLog so live and reloaded decks render
+	// identically.
 	if len(d.Stats.Best.Summary.BestLine) > 0 {
-		d.Stats.Best.Lines = renderBestTurnLines(d.Stats.Best)
+		d.Stats.Best.Log = hand.BuildTurnLog(d.Stats.Best.Summary, d.Stats.Best.StartingRunechants)
 	}
 	return d.Stats
-}
-
-// renderBestTurnLines builds the human-readable "Best turn played (value N):" header plus
-// FormatBestTurn body and returns them as a flat []string. Stored on BestTurn.Lines and
-// round-tripped through the JSON layer verbatim so the printout never depends on
-// reconstructing a TurnSummary from disk.
-func renderBestTurnLines(b BestTurn) []string {
-	lines := []string{fmt.Sprintf("Best turn played (value %d):", b.Summary.Value)}
-	body := hand.FormatBestTurn(b.Summary, b.StartingRunechants)
-	if body == "" {
-		return lines
-	}
-	for _, line := range strings.Split(body, "\n") {
-		lines = append(lines, line)
-	}
-	return lines
 }
 
 // startOfTurnRevealRoom caps how many cards a start-of-turn AuraTrigger reveal can append

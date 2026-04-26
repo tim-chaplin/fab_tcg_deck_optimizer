@@ -7,6 +7,7 @@ package deckio
 
 import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/deck"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/hand"
 )
 
 // DeckJSON is the on-disk shape of a Deck with its Stats. Sideboard and Equipment are
@@ -63,14 +64,13 @@ type CardMarginalStatsJSON struct {
 	Marginal     float64 `json:"marginal"`
 }
 
-// BestTurnJSON is the on-disk shape of deck.BestTurn — just the rendered printout lines.
-// Marshal serialises deck.BestTurn.Lines verbatim; Unmarshal restores them into the loaded
-// deck so fabsim's print path can dump them directly without reconstructing a TurnSummary.
-// Value and StartingRunechants ride along for diff-friendly searchability of the file but
-// don't drive the printout — Lines already includes the "Best turn played (value N):"
-// header.
+// BestTurnJSON is the on-disk shape of deck.BestTurn — Value plus the structured TurnLog.
+// Marshal serialises deck.BestTurn.Log directly via hand.TurnLog's JSON tags; Unmarshal
+// restores it. Each TurnLog section is a list of content-only strings; the formatter adds
+// the "Best turn played (value N):" header, section headers, indentation, and chain
+// numbering at print time.
 type BestTurnJSON struct {
-	Value              int      `json:"value"`
-	StartingRunechants int      `json:"starting_runechants,omitempty"`
-	Lines              []string `json:"lines,omitempty"`
+	Value              int          `json:"value"`
+	StartingRunechants int          `json:"starting_runechants,omitempty"`
+	Log                hand.TurnLog `json:"log,omitempty"`
 }
