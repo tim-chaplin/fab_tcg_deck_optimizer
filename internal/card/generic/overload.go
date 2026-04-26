@@ -25,6 +25,8 @@ func (OverloadRed) Defense() int                { return 2 }
 func (OverloadRed) Types() card.TypeSet         { return overloadTypes }
 func (OverloadRed) GoAgain() bool               { return false }
 func (OverloadRed) Dominate()                   {}
+// not implemented: on-hit go-again rider (Overload's printed power tops out at 3 so it'd only matter once Dominate lets it land)
+func (OverloadRed) NotImplemented()             {}
 func (c OverloadRed) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }
 
 type OverloadYellow struct{}
@@ -38,6 +40,8 @@ func (OverloadYellow) Defense() int                { return 2 }
 func (OverloadYellow) Types() card.TypeSet         { return overloadTypes }
 func (OverloadYellow) GoAgain() bool               { return false }
 func (OverloadYellow) Dominate()                   {}
+// not implemented: on-hit go-again rider (Overload's printed power tops out at 3 so it'd only matter once Dominate lets it land)
+func (OverloadYellow) NotImplemented()             {}
 func (c OverloadYellow) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }
 
 type OverloadBlue struct{}
@@ -51,4 +55,6 @@ func (OverloadBlue) Defense() int                { return 2 }
 func (OverloadBlue) Types() card.TypeSet         { return overloadTypes }
 func (OverloadBlue) GoAgain() bool               { return false }
 func (OverloadBlue) Dominate()                   {}
+// not implemented: on-hit go-again rider (Overload's printed power tops out at 3 so it'd only matter once Dominate lets it land)
+func (OverloadBlue) NotImplemented()             {}
 func (c OverloadBlue) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }

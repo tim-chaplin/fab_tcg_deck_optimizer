@@ -2,7 +2,13 @@
 
 Running list of work we want to do on this project. Sectioned by theme.
 
-### Fully model effects where we currently just credit an integer value
+Per-card unimplemented riders are now annotated directly on the card files via the
+`card.NotImplemented` marker plus a `// not implemented: <quirk>` comment above it. To
+audit what's still rough on a given card, open the file. The sections below describe the
+broader state-tracking and framework-level gaps that gate multiple cards at once —
+landing any of them lets several `NotImplemented` markers come off in one pass.
+
+### Damage-equivalent constants in `effect_values.go`
 
 `internal/card/effect_values.go` centralises the damage-equivalents we use as stand-ins for
 "force opponent discard" (3) and "create a Gold token" (0). These are simplifications — the
@@ -11,336 +17,78 @@ Gold-token pool, opposing hand size) the rider implementations can cash out into
 future-turn draw instead of a flat integer, and the `effect_values.go` constants should
 disappear.
 
-### LikelyToHit breadcrumbs — on-hit riders awaiting modelling
+### State-tracking gaps that gate multiple cards
 
-Each of the generic attacks below has a
-`func <card>Damage(attack int, self *card.CardState) int` helper with an
-`if card.LikelyToHit(attack, self.EffectiveDominate()) { /* TODO */ }` block. The body is a
-placeholder so grep for `LikelyToHit` turns these up when we come back to wire the riders.
-Plug the rider's damage-equivalent into the body and remove the TODO.
+These are the systemic features the sim doesn't model yet. Each gates a bucket of `// not
+implemented` riders across the card roster.
 
-- **Jack Be Quick** — on-hit steal ally (hero-specific).
-- **Jack Be Nimble** — on-hit steal item (hero-specific).
-- **Wreck Havoc** — on-hit DR lockout + arsenal manipulation (hero-specific).
-- **Walk the Plank** — on-hit freeze target (Pirate hero-specific).
-- **Tongue Tied** — on-hit arsenal face-up + banish instant (hero-specific).
-- **Smash Up** — on-hit arsenal face-up + banish attack action (hero-specific).
-- **Pursue to the Edge of Oblivion** — on-hit mark (hero-specific).
-- **Pursue to the Pits of Despair** — on-hit mark (hero-specific).
-- **Money or Your Life?** — on-hit deal 2 unless Gold given (hero-specific, Thief-repeat).
-- **Humble** — on-hit hero-ability suppression.
-- **Hand Behind the Pen** — on-hit arsenal face-up + banish non-attack action.
-- **Fact-Finding Mission** — on-hit peek arsenal / equipment.
-- **Destructive Deliberation** — on-hit create Ponder token.
-- **Down But Not Out** — on-hit create Agility/Might/Vigor tokens (gated on life/equipment/token
-  comparison).
-- **Cut Down to Size** — on-hit conditional discard (4+ cards in hand).
-- **Crash Down the Gates** — on-hit destroy top of their deck.
-- **Blanch** — on-hit opponent's cards lose all colors.
+- **Hero health and life-total tracking.** No per-turn hero-life accounting. Life-comparison
+  riders ("if you have less {h} than an opposing hero") use the `card.LowerHealthWanter`
+  hero-attribute proxy: the rider fires for heroes that opt in and never fires otherwise.
+  Life-gain effects are credited 1-to-1 with damage at trigger time. Modelling real life
+  totals would let conditional grants fire correctly per-turn instead of per-hero.
+- **Gold / Silver / Copper / Quicken / Ponder / Frailty / Inertia / Bloodrot Pox token
+  economies.** None are tracked. Cards that mint or consume these tokens collapse to base
+  stats or a flat damage-equivalent. Adding a per-token counter on `TurnState` plus a
+  destroy-and-redeem hook would unblock the bulk of the affected riders.
+- **Action-point tracking.** The sim doesn't track action points; cards that grant them
+  drop the tempo payoff entirely.
+- **Marks and "attacked them this turn" tracking.** No per-hero mark state. Cards that gate
+  on a marked defender / attacker fall back to credit-unconditionally or drop-unconditionally.
+- **Opponent hand / arsenal / banished-zone visibility.** The sim doesn't expose the
+  opposing player's hand, arsenal, or banished zone, so peek / inspection / count riders
+  collapse.
+- **Freeze and tap state.** No tap/untap counter; freeze and unfreeze riders default off.
+- **Defender-side hooks during attacks.** The solver consumes `Defense()` before `Play()`
+  runs and doesn't expose what card is blocking nor reduce the attacker's power
+  defender-side. Riders keyed on "defended by X", "defended by < N non-equipment", or
+  defender-side debuffs need a defender-aware Play hook to land.
+- **Defence-prevention and damage-prevention triggers.** No "prevent the next N damage"
+  state; cards that grant Ward N or pre-emptive prevention return only their printed stats.
+- **Defence-time instant activations.** Cards whose printed text adds a chain-link defender
+  or activates an instant during an attack chain carry only their printed defence today.
+- **Pay-extra / modal cost choices.** "Pay {r} or lose 1{p}", "pay {r}{r} for +N{p}",
+  "choose go-again or +N{p}", and Crazy Brew substitutes don't probe the resource budget;
+  they pick one branch and stick with it. A pay-aware modal cost evaluator would let the
+  solver pick the best mode per partition.
+- **Hand-on-top / hand-as-cost alternative costs.** "Put a card on top of your deck rather
+  than pay {r}" isn't modelled — cards fall back to their printed cost.
+- **Mid-turn draw side-channels.** `TurnState.DrawOne` puts drawn cards into `Drawn` for
+  carry-as-Held or arsenal promotion, but drawn cards can't pitch or extend the attack
+  chain (would leak top-of-deck identity into the solver's line choice). Lookahead grants
+  that scan `CardsRemaining` silently fizzle when their target is drawn rather than in the
+  starting hand — a conservative under-count we tolerate.
+- **Graveyard-banish additional costs.** Several cards have "as an additional cost,
+  banish a card from your graveyard" riders that the sim treats as free — the banish step
+  isn't evaluated against actual graveyard contents.
+- **Graveyard-reorder and put-on-top-of-deck effects.** No deck-top mutation pipe.
+- **Deck-search tutors.** Belittle's Minnowism, Nimby's Nimblism, Sound the Alarm, Moon
+  Wish's Sun Kiss search — the tutor step drops, even when the searched card is in deck.
+- **Top-of-deck reveal and reorder.** Some cards peek `s.Deck` (Sky Fire Lanterns,
+  Ravenous Rabble, On the Horizon) but reorder steps are collapsed; reveal-comparison
+  riders like Crash Down the Gates collapse too.
+- **Weapon chain visibility from `Play`.** `CardsRemaining` only carries action cards;
+  weapon swings aren't visible to look-ahead riders that gate on "next sword attack" /
+  "next weapon attack". Brandish, On a Knife Edge, Visit the Blacksmith all drop their
+  riders.
+- **In-chain history readable from Play.** A card's `Play` doesn't see what played
+  earlier in this same chain (it sees `CardsPlayed` from earlier resolutions but not
+  immediate-prior chain history needed for chain-history riders like Push the Point and
+  Water the Seeds).
+- **Aura-created vs aura-played semantics.** `TurnState.HasAuraInPlay` covers most "have
+  you played or created an aura this turn" reads, but a few specialised aura-state
+  questions (e.g. trade-an-aura-for-a-runechant value) aren't surfaced.
+- **Arcane damage credited on Runechant creation.** Runechant tokens are credited +1
+  damage-equivalent at creation rather than on fire; leftover tokens at end-of-sim are
+  slightly over-credited (rare in practice).
 
-Most of these require state the sim doesn't currently track (arsenal, marks, Gold / Ponder /
-status tokens, opponent hand size, life totals, deck top). The relevant state-tracking gaps are
-called out in the sections below — landing any of them unlocks a subset of the breadcrumbs.
+### LikelyToHit / EffectiveAttack notes
 
-### On-hit / combat interactions
-
-- **Regurgitating Slog's Dominate grant isn't wired.** The "banish Sloggism" additional cost
-  the grant gates on isn't modelled, so flipping `self.GrantedDominate` unconditionally would
-  over-credit lines that don't actually have a Sloggism to banish. (Drowning Dire's
-  aura-gated grant and Pound for Pound's health-gated grant are both wired; Overload and
-  Demolition Crew's inherent Dominate runs through the `card.Dominator` marker.)
-- **On-hit go-again isn't granted.** Overload's on-hit clause never fires.
-- **Lay Low's marked-defender cost is ignored.** Card is treated as always legal and the attacker
-  debuff is dropped.
-
-### Defender-side interactions
-
-- **"Defended by X" riders never fire.** The solver doesn't expose what card is blocking, so
-  defended-by-action-card buffs/debuffs (Feisty Locals +2{p}, Freewheeling Renegades −2{p}),
-  defended-by-<2-non-equipment conditions (Barraging Brawnhide, Stony Woottonhog), Out Muscle's
-  equal-or-greater-power gate, and Surging Militia's +N{p} all default to off.
-- **Defender-side power and defence reductions aren't modelled.** Drag Down's −3{p} attacker
-  debuff and Right Behind You's defend-together +1{d} aren't simulated — the solver doesn't
-  expose either side's opposing attack.
-- **Defence-time instant activations are dropped.** Rally the Coast Guard and Rally the Rearguard
-  carry only their printed defence; Wreck Havoc's defence-reaction lockout isn't modelled.
-- **Defence-prevention and damage-prevention riders are dropped.** Battlefront Bastion's
-  prevent-defence clause, Sigil of Protection's Ward N, and Enchanting Melody's incoming-damage
-  prevention trigger all return only their printed stats.
-- **Yinti Yanti's defending-side +1{d} is ignored.** Defence is consumed by partition scoring
-  before `Play()` runs (same shape as the Sigil of Suffering hook needed below).
-
-### Hero health and life-total riders
-
-Hero health isn't tracked, so every life-gain and life-comparison rider collapses to one side.
-
-- **Life-total comparisons are modelled per-hero.** Adrenaline Rush (+3{p}), Fyendal's Fighting
-  Spirit (1{h} gain on attack), Life for a Life go-again, Blow for a Blow go-again, Scar for a
-  Scar go-again, and Wounded Bull (+1{p}) fire when the current hero implements
-  `card.LowerHealthWanter` (see `internal/card/card.go`) and stay off otherwise — a coarse proxy
-  that skips per-turn life tracking. No hero opts in yet. Down But Not Out's health / equipment /
-  tokens gate is not yet covered and still defaults off.
-- **Life-gain effects are credited 1-to-1 with damage** when the trigger fires unconditionally
-  (Healing Balm, Sun Kiss, Sirens of Safe Harbor's graveyard gain on attack, Sigil of Fyendal's
-  gain on leave, Fiddler's Green's gain on defense). The Clearwater / Restvine / Sapwood Elixir
-  trio (Bloodrot Pox / Inertia / Frailty riders, gated on status tokens we don't track) still
-  defaults off.
-
-### Token economies and resource trackers
-
-- **Gold tokens aren't tracked.** Cash In, Money or Your Life, Money Where Ya Mouth Is (Wager),
-  Performance Bonus, Ransack and Raze (X-cost → 0), Starting Stake, Strike Gold, Test of Strength
-  (winner rider), and Wage Gold all drop their token economies.
-- **Silver and Copper tokens aren't tracked.** Cash In, High Striker (Copper), and Pick a Card,
-  Any Card (Silver + opponent hand inspection) default to their base effects only.
-- **Action-point tracking isn't modelled.** Lead the Charge and Back Alley Breakline's
-  face-up-from-deck grant are dropped.
-- **Status tokens aren't created or tracked.** Infectious Host doesn't emit Frailty / Inertia /
-  Bloodrot Pox; Destructive Deliberation doesn't emit Ponder; Flock of the Feather Walkers
-  doesn't emit Quicken. The Elixir cycle consumes these tokens elsewhere, so their health-gain
-  riders (covered above) never fire either.
-
-### Marks, opponent state, and opponent-visible info
-
-- **Marks aren't tracked.** Outed's +1{p} on marked heroes, Pursue to the Edge of Oblivion /
-  Pursue to the Pits of Despair "mark on hit", Public Bounty's mark rider (currently credited
-  unconditionally), and Relentless Pursuit's mark-plus-"attacked them this turn" gate all
-  default off (or fire unconditionally where noted).
-- **Opponent hand / arsenal inspection isn't modelled.** Fact-Finding Mission, Pick a Card,
-  Frontline Scout's hand-peek, and Crash Down the Gates' reveal comparison drop the peek step.
-- **Opponent debuffs aren't modelled.** Blanch (lose all colors), Cut Down to Size (discard),
-  Humble (hero-ability suppression), and Walk the Plank (Pirate target-freezing) drop the
-  debuff; the printed attack is kept.
-- **Banished-zone tracking isn't modelled.** Tremor of íArathael's +2{p} rider never fires.
-
-### Pay-extra riders and modal choices
-
-- **"Pay {r} or lose 1{p}" is resolved as "keep power".** Bluster Buff, Chest Puff, and Look Tuff
-  assume the player can always afford the upkeep.
-- **Pay-to-buff-power modes are dropped.** Flex (+2{p} for {r}{r}), Punch Above Your Weight
-  (+5{p} for {r}{r}{r}), and Brothers in Arms (pay-to-buff-defence) all return base stats only.
-- **Modal choices are hard-coded to one branch.** Captain's Call always takes +2{p} (dropping
-  the alternative Go again mode); Life of the Party's Crazy Brew substitute + random-mode
-  selection isn't modelled.
-
-### Freeze / tap state
-
-- **Freeze / unfreeze isn't modelled.** Tit for Tat (tap/untap), Regain Composure's on-hit
-  unfreeze rider, and Walk the Plank's target-freeze all default off. Tip-Off's instant discard
-  activation falls in the same bucket.
-
-### Aura / graveyard state
-
-- **"Played or created an aura this turn" is assumed true** for cards that don't yet use the
-  live `AuraCreated` / `HasPlayedType(TypeAura)` check. Reek of Corruption, Hit the High Notes,
-  and Shrill of Skullform all gate this correctly; Yinti Yanti does as well. Nothing else on the
-  roster currently reads the clause.
-- **Graveyard-banish additional costs are ignored.** Gravekeeping, Jack Be Nimble, Jack Be Quick,
-  Looking for a Scrap, and Nimble Strike treat the banish step as free and either drop the
-  rider or credit it unconditionally where noted in the card.
-- **Graveyard-reorder effects aren't modelled.** Cadaverous Contraband (graveyard → top of deck)
-  and Drone of Brutality (graveyard-replacement-to-deck) both drop the reorder step.
-
-### Arsenal and hand-state effects
-
-- **"No cards in hand" riders never fire.** Spring Load's +3{p} rider defaults off.
-- **Draw / hand cycling is flattened.** Mid-turn draws (Snatch, Drawn to the Dark Dimension)
-  route through `TurnState.DrawOne`; the drawn card either carries as Held into the next hand
-  or competes for an empty end-of-turn arsenal slot. It cannot pitch or extend the attack
-  chain — letting it do either would leak top-of-deck identity into the solver's line choice
-  (the best line would shift depending on what card was waiting on top of the deck), and the
-  player doesn't actually know that until they commit to playing the draw. Lookahead grants
-  that scan `CardsRemaining` at play time (Flying High's next-attack grant, Mauvrion Skies,
-  Oath of the Arknight, Runic Reaping, Condemn to Slaughter, Captain's Call) silently fizzle
-  when their intended target is only drawn later in the chain — a conservative under-count
-  we tolerate to avoid a retroactive re-resolution pass. Sutcliffe's Research Notes ignores
-  its re-ordering clause; Sink Below drops its cycling rider; Rise Above's alternative
-  hand-as-cost option isn't simulated. The Emissary of Moon / Tides / Wind trio, Sift, Scour
-  the Battlescape, Whisper of the Oracle (Opt), and Strategic Planning all similarly drop
-  their draw / cycle steps. Trade In's discard-to-draw is dropped.
-- **Hand-on-top / hand-as-cost alternative costs aren't modelled.** Moon Wish (hand-on-top + Sun
-  Kiss search) and Seek Horizon (hand-on-top + conditional go-again) pick the base mode only.
-- **Fate Foreseen's "opt 1" is dropped** — block value is the printed defence only.
-
-### Deck search, reveal, and reorder
-
-- **Deck search isn't modelled.** Belittle (Minnowism), Nimby (Nimblism), Sound the Alarm, and
-  Moon Wish's Sun Kiss search all drop the tutor step.
-- **Deck reveal / peek isn't modelled.** On the Horizon's deck-peek trigger, Crash Down the
-  Gates' reveal comparison and top-of-deck destruction, Ravenous Rabble's −X{p} reveal rider,
-  and Demolition Crew's additional reveal cost are all collapsed.
-- **Put-in-deck / deck-reorder effects aren't tracked.** Sky Fire Lanterns peeks at the top card
-  (reading Deck) but any reorder step is collapsed. Warmonger's Recital's bottom-of-deck rider
-  is dropped; Right Behind You's deck-bottom rider is also dropped.
-
-### Weapon / sword chain
-
-- **The weapon chain isn't peeked for conditional riders.** Brandish (next-weapon-attack +1{p}),
-  On a Knife Edge (next-sword-attack go-again), and Visit the Blacksmith (next-sword-attack
-  bonuses) drop their riders because CardsRemaining only holds action cards.
-
-### Chain history
-
-- **In-chain history isn't readable from Play.** Push the Point's chain-history +2{p} and
-  Water the Seeds' chain-bonus for a later low-power attack both drop their riders.
-
-### Other approximations
-
-- **Put in Context's base-power cap is ignored** — every attack is assumed to qualify.
-- **Arcane damage is counted as regular damage at creation.** Runechant tokens are credited +1
-  immediately on creation; subsequent firing on attacks is purely state cleanup. Leftover tokens
-  that neither fire nor carry over (end-of-sim) are slightly over-credited.
-- **Regurgitating Slog's riders are fully dropped** — Play returns base power with no modelling
-  attempted.
-- **Uncommon keyword text is dropped.** Prime the Crowd's Crowd cheers/boos keywords, Wage Gold's
-  Universal keyword, and Smashing Good Time's item-destruction rider all collapse to base stats
-  plus whatever bonus we credit unconditionally. (Clash is now modelled via `card.ClashValue` —
-  Test of Strength is the only card that uses it today.)
-
-### Direction tags: undervalued vs overvalued
-
-Bullets tag every card whose implementation drops or bends a rider, based on whether that
-simplification tilts the sim's score above or below what the real card delivers. Undervalued is
-the priority bucket — those cards get rejected by the optimizer before they ever get a shot at
-playtesting. Cards whose assumption already appears verbatim earlier in the section are still
-listed here so the direction tag is co-located with the name.
-
-#### Undervalued (sim discounts a real card's effect)
-
-- **Back Alley Breakline (all colours)** — face-up-from-deck action-point grant dropped; action
-  points not tracked, so the tempo payoff is never scored.
-- **Barraging Brawnhide (all colours)** — defended-by-<2-non-equipment +1{p} never fires; the
-  card's own rider is dropped while printed power is left alone.
-- **Belittle (all colours)** — dropped Minnowism tutor step; the card prints go-again and searches
-  a specific follow-up, and only the go-again lands.
-- **Blanch (all colours)** — dropped on-hit "cards lose all colors" debuff; effectively vanilla
-  power.
-- **Brandish (all colours)** — dropped next-weapon-attack +1{p}; with go-again printed the rider
-  would typically cash out.
-- **Brothers in Arms (all colours)** — dropped pay-to-buff-defence rider; card never gets credit
-  for its +2{d} swing.
-- **Cadaverous Contraband** — dropped graveyard-top-of-deck fix-up; the card's whole point is
-  unavailable.
-- **Captain's Call (all colours)** — modal pick is hard-coded to +2{p}; the alternative go-again
-  mode that could chain a bigger attack is never chosen.
-- **Cash In (all colours)** — Gold / Silver / Copper economy plus draw riders dropped; card
-  returns only base stats.
-- **Clearwater / Restvine / Sapwood Elixir (all colours)** — health-gain rider dropped (still
-  credits the +{p} scan, so the loss is only the life side).
-- **Crash Down the Gates (all colours)** — on-hit deck destruction + reveal comparison dropped.
-- **Cut Down to Size (all colours)** — on-hit opponent discard dropped.
-- **Destructive Deliberation (all colours)** — Ponder-token creation dropped entirely.
-- **Down But Not Out (all colours)** — none of Agility / Might / Vigor token branches fire.
-- **Drone of Brutality (all colours)** — graveyard-replacement-to-deck rider dropped.
-- **Emissary of Moon (all colours)** — hand-cycle draw dropped.
-- **Emissary of Tides (all colours)** — hand-cycle-for-+2{p} dropped.
-- **Emissary of Wind (all colours)** — hand-cycle-for-go-again dropped.
-- **Enchanting Melody (all colours)** — damage-prevention trigger dropped (aura-created flag is
-  the only value credited).
-- **Fact-Finding Mission (all colours)** — opponent arsenal/equipment peek dropped.
-- **Fate Foreseen (all colours)** — Opt 1 dropped; block value is printed defence only.
-- **Feisty Locals (all colours)** — defended-by-action +2{p} rider never fires.
-- **Fervent Forerunner (all colours)** — on-hit Opt 2 dropped.
-- **Flex (all colours)** — pay-{r}{r}-for-+2{p} mode dropped; only printed power.
-- **Flock of the Feather Walkers (all colours)** — Quicken token creation dropped (and the
-  reveal cost too).
-- **Frontline Scout (all colours)** — hand-peek dropped.
-- **Fyendal's Fighting Spirit (all colours)** — on-defend 1{h} gain dropped; on-attack gain is
-  modelled for `card.LowerHealthWanter` heroes only.
-- **Gravekeeping (all colours)** — graveyard-banish additional value dropped.
-- **Hand Behind the Pen (all colours)** — on-hit arsenal / banish-instant dropped.
-- **High Striker (all colours)** — Copper-token economy dropped.
-- **Humble (all colours)** — hero-ability suppression debuff dropped.
-- **Infectious Host (all colours)** — Frailty / Inertia / Bloodrot Pox token emission dropped
-  (and the Elixir cycle that would consume them).
-- **Jack Be Nimble (all colours)** — graveyard-banish +1{p} / go-again and on-hit item steal
-  dropped.
-- **Jack Be Quick (all colours)** — graveyard-banish +1{p} / go-again and on-hit ally steal
-  dropped.
-- **Lead the Charge (all colours)** — face-up-from-deck action-point grant dropped.
-- **Life of the Party (all colours)** — all three modes default off including go-again; Crazy
-  Brew substitute never fires.
-- **Looking for a Scrap (all colours)** — graveyard-banish bonus dropped.
-- **Money or Your Life (all colours)** — Gold-exchange rider dropped; repeatable mode never
-  fires.
-- **Money Where Ya Mouth Is (all colours)** — Wager Gold payout dropped (scan bonus is still
-  credited).
-- **Moon Wish (all colours)** — hand-on-top alt cost plus Sun Kiss tutor dropped.
-- **Nimble Strike (all colours)** — graveyard-banish bonus dropped.
-- **Nimby (all colours)** — Nimblism tutor dropped.
-- **On a Knife Edge (all colours)** — next-sword-attack go-again dropped (weapon chain not
-  scanned).
-- **On the Horizon (all colours)** — deck-peek trigger dropped.
-- **Out Muscle (all colours)** — defender-power go-again gate dropped; the printed rider never
-  fires in the sim.
-- **Outed (all colours)** — +1{p} vs marked hero never fires.
-- **Performance Bonus (all colours)** — on-hit Gold credit retained; no other riders.
-- **Pick a Card, Any Card (all colours)** — opponent hand inspection and Silver-token rider
-  dropped.
-- **Promise of Plenty (all colours)** — arsenal-placement rider dropped (arsenal/deck content
-  tracking would be required).
-- **Pursue to the Edge of Oblivion (all colours)** — on-hit mark dropped.
-- **Pursue to the Pits of Despair (all colours)** — on-hit mark dropped.
-- **Push the Point (all colours)** — chain-history +2{p} dropped (chain history unreadable from
-  Play).
-- **Punch Above Your Weight (all colours)** — pay-{r}{r}{r}-for-+5{p} dropped.
-- **Rally the Coast Guard (all colours)** — defence-time instant activation dropped.
-- **Rally the Rearguard (all colours)** — defence-time instant activation dropped.
-- **Ransack and Raze (all colours)** — Gold / Landmarks X-cost treated as 0 so the ramp pay-off
-  never lands.
-- **Regain Composure (all colours)** — on-hit unfreeze dropped (scan-bonus itself is credited).
-- **Regurgitating Slog (all colours)** — Sloggism graveyard-banish Dominate rider fully dropped.
-- **Relentless Pursuit** — marked-target + attacked-them-this-turn chain rider dropped.
-- **Rifting (all colours)** — on-hit instant cast dropped.
-- **Right Behind You (all colours)** — defend-together +1{d} and deck-bottom rider dropped.
-- **Rise Above (all colours)** — hand-as-cost alt dropped (card fails cost check unless printed
-  cost is met).
-- **Runeblade Condemn to Slaughter (all colours)** — aura-trade rider and opponent-aura
-  destruction dropped (only same-turn Runeblade-attack +N is modelled).
-- **Runeblade Splintering Deadwood (all colours)** — aura-swap modelled as net-zero (no credit
-  for the tempo of trading a weak aura for a Runechant).
-- **Runeblade Sutcliffe's Research Notes (all colours)** — top-of-deck re-ordering clause
-  dropped.
-- **Scour the Battlescape (all colours)** — hand-cycle dropped.
-- **Seek Horizon (all colours)** — hand-on-top alt cost plus conditional go-again dropped.
-- **Sift (all colours)** — hand cycling dropped.
-- **Sigil of Cycles (all colours)** — end-phase discard-and-draw dropped.
-- **Sigil of Protection (all colours)** — Ward N dropped.
-- **Smash Up (all colours)** — on-hit arsenal face-up + banish attack action dropped.
-- **Snatch (all colours)** — currently fires the on-hit draw via TurnState.DrawOne, but a drawn
-  card only recovers part of a real draw's value in the sim (no cross-turn shuffle benefit).
-- **Sound the Alarm (all colours)** — deck-search rider dropped.
-- **Spring Load (all colours)** — +3{p} empty-hand rider never fires.
-- **Starting Stake (all colours)** — Gold-token economy dropped.
-- **Strategic Planning (all colours)** — graveyard recovery plus end-phase draw dropped.
-- **Stony Woottonhog (all colours)** — defended-by-<2-non-equipment rider dropped (same shape as
-  Barraging Brawnhide below).
-- **Sun Kiss (all colours)** — Moon Wish synergy (draw + go again) dropped; the 3{h} gain is
-  modelled.
-- **Surging Militia (all colours)** — defended-by +N{p} rider dropped.
-- **Tip-Off (all colours)** — instant discard activation dropped.
-- **Tongue Tied (all colours)** — on-hit arsenal face-up + banish instant dropped.
-- **Trade In (all colours)** — discard-to-draw plus arsenal-only go-again dropped.
-- **Tremor of íArathael (all colours)** — banished-zone +2{p} never fires.
-- **Visit the Blacksmith (all colours)** — next-sword-attack bonuses dropped.
-- **Wage Gold (all colours)** — Universal keyword plus Gold wager dropped.
-- **Walk the Plank (all colours)** — Pirate-specific target-freeze dropped.
-- **Warmonger's Recital (all colours)** — bottom-of-deck rider dropped (scan bonus credited).
-- **Whisper of the Oracle (all colours)** — Opt dropped.
-- **Wreck Havoc (all colours)** — defence-reaction lockout plus arsenal-banish dropped.
-- **Yinti Yanti (all colours)** — defending-side +1{d} dropped (aura-created clause is modelled).
-
-#### Overvalued (sim credits more than the real card delivers)
-
-- **Bluster Buff** — pay {r}-or-lose-1{p} resolved as "always pay"; player short on pitch would
-  lose the point, so base power is over-credited.
-- **Chest Puff** — pay {r}-or-lose-1{p} resolved as "always pay"; same shape as Bluster Buff.
-- **Deathly Duet (all colours)** — Pitched scan may let both riders fire even without the
-  specific attribution.
-- **Lay Low (all colours)** — treated as always legal even without a marked defender; real card
-  is uncastable when no hero is marked.
-- **Look Tuff** — pay {r}-or-lose-1{p} resolved as "always pay"; same shape as Bluster Buff.
-- **Public Bounty (all colours)** — mark rider fires unconditionally; real card requires the
-  opponent be marked and the rider is tied to the mark.
-- **Put in Context** — base-power cap on what it can block is ignored; every attack is assumed
-  to qualify so the defence is always live.
+- `EffectiveAttack` (printed `Card.Attack()` + `BonusAttack`, clamped at 0) is the canonical
+  attack-power read for hit-likelihood checks. `LikelyToHit(self)` folds it in along with
+  `EffectiveDominate`. Granters set `pc.BonusAttack += N` on the target's `CardState`
+  rather than returning the bonus from their own `Play` — the +N attributes to the buffed
+  attack's chain slot, and any "if this hits" rider on the target reads the buffed value.
+- For grants whose "if this hits" rider needs to see the target's *fully-resolved* attack
+  state (post-grants from later cards in the chain), use `AddEphemeralAttackTrigger` —
+  Mauvrion Skies and Runic Reaping route their on-hit Runechant clauses this way.

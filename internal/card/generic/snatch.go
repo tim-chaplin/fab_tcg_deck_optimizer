@@ -30,6 +30,8 @@ func (SnatchRed) Defense() int                 { return 2 }
 func (SnatchRed) Types() card.TypeSet          { return snatchTypes }
 func (SnatchRed) GoAgain() bool                { return false }
 func (SnatchRed) NoMemo()                      {} // on-hit DrawOne depends on top of deck
+// not implemented: drawn card recovers only part of a real draw's value (no cross-turn shuffle benefit)
+func (SnatchRed) NotImplemented()              {}
 func (c SnatchRed) Play(s *card.TurnState, self *card.CardState) int { return snatchPlay(c.Attack(), s, self) }
 
 type SnatchYellow struct{}
@@ -43,6 +45,8 @@ func (SnatchYellow) Defense() int                 { return 2 }
 func (SnatchYellow) Types() card.TypeSet          { return snatchTypes }
 func (SnatchYellow) GoAgain() bool                { return false }
 func (SnatchYellow) NoMemo()                      {}
+// not implemented: drawn card recovers only part of a real draw's value (no cross-turn shuffle benefit)
+func (SnatchYellow) NotImplemented()              {}
 func (c SnatchYellow) Play(s *card.TurnState, self *card.CardState) int { return snatchPlay(c.Attack(), s, self) }
 
 type SnatchBlue struct{}
@@ -56,4 +60,6 @@ func (SnatchBlue) Defense() int                 { return 2 }
 func (SnatchBlue) Types() card.TypeSet          { return snatchTypes }
 func (SnatchBlue) GoAgain() bool                { return false }
 func (SnatchBlue) NoMemo()                      {}
+// not implemented: drawn card recovers only part of a real draw's value (no cross-turn shuffle benefit)
+func (SnatchBlue) NotImplemented()              {}
 func (c SnatchBlue) Play(s *card.TurnState, self *card.CardState) int { return snatchPlay(c.Attack(), s, self) }

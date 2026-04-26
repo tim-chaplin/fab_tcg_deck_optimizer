@@ -31,6 +31,8 @@ func (FrontlineScoutRed) Attack() int                 { return 3 }
 func (FrontlineScoutRed) Defense() int                { return 2 }
 func (FrontlineScoutRed) Types() card.TypeSet         { return frontlineScoutTypes }
 func (FrontlineScoutRed) GoAgain() bool               { return false }
+// not implemented: opposing-hand-peek rider
+func (FrontlineScoutRed) NotImplemented()             {}
 func (c FrontlineScoutRed) Play(_ *card.TurnState, self *card.CardState) int { return frontlineScoutPlay(c, self) }
 
 type FrontlineScoutYellow struct{}
@@ -43,6 +45,8 @@ func (FrontlineScoutYellow) Attack() int                 { return 2 }
 func (FrontlineScoutYellow) Defense() int                { return 2 }
 func (FrontlineScoutYellow) Types() card.TypeSet         { return frontlineScoutTypes }
 func (FrontlineScoutYellow) GoAgain() bool               { return false }
+// not implemented: opposing-hand-peek rider
+func (FrontlineScoutYellow) NotImplemented()             {}
 func (c FrontlineScoutYellow) Play(_ *card.TurnState, self *card.CardState) int { return frontlineScoutPlay(c, self) }
 
 type FrontlineScoutBlue struct{}
@@ -55,4 +59,6 @@ func (FrontlineScoutBlue) Attack() int                 { return 1 }
 func (FrontlineScoutBlue) Defense() int                { return 2 }
 func (FrontlineScoutBlue) Types() card.TypeSet         { return frontlineScoutTypes }
 func (FrontlineScoutBlue) GoAgain() bool               { return false }
+// not implemented: opposing-hand-peek rider
+func (FrontlineScoutBlue) NotImplemented()             {}
 func (c FrontlineScoutBlue) Play(_ *card.TurnState, self *card.CardState) int { return frontlineScoutPlay(c, self) }
