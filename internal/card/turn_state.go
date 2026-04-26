@@ -99,17 +99,17 @@ type TurnState struct {
 	Revealed []Card
 	// Held is the partition's Held-role cards at start of the chain — the hand cards the
 	// solver assigned no Pitch / Attack / Defend role. Read-only by Play unless the card
-	// implements an alt-cost "use a Held card" effect, in which case Play pops the consumed
-	// card off Held and appends it to HeldConsumed so the post-chain accounting
+	// implements an alt-cost "use a Held card" effect, in which case Play pops the chosen
+	// card off Held and appends it to ReturnedToTopOfDeck so the post-chain accounting
 	// (recycleCardStates, arsenal-promotion candidate counts) skips it.
 	Held []Card
-	// HeldConsumed records cards moved out of Held by alt-cost effects mid-chain. The
-	// deck-loop accounting compares BestLine's Held-role cards against this list and
-	// suppresses the nextHeld carry for any match. Cards listed here are also inserted at
-	// the top of the next-turn deck buffer (the "rather than pay" rule), so the same card
-	// commonly reappears in the next turn's hand or feeds a same-turn DrawOne when a tutor
-	// fires.
-	HeldConsumed []Card
+	// ReturnedToTopOfDeck records cards an alt-cost "rather than pay" effect moved from
+	// hand onto the deck top mid-chain (typically a Held card). The deck-loop accounting
+	// inserts each at the top of the next-turn deck buffer so the move actually persists,
+	// and the BestLine[Held] → nextHeld carry skips any matching card so the same copy
+	// doesn't double-count. The same card commonly reappears in the next turn's hand or
+	// feeds a same-turn DrawOne when a tutor fires.
+	ReturnedToTopOfDeck []Card
 	// DeckRemoved records cards taken out of the deck this turn by any means — DrawOne,
 	// tutor effects (Moon Wish's Sun Kiss search), or future deck-search riders. The
 	// deck-loop's applyTurnResult patches the underlying deck buffer to actually remove

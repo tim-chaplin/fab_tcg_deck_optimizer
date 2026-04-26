@@ -32,7 +32,7 @@ func TestMoonWish_VariableCost(t *testing.T) {
 }
 
 // TestMoonWish_AltCostMovesHeldToDeckTop: when Play fires the alt cost it pops the first
-// Held card, prepends it to s.Deck, and records it on s.HeldConsumed. Pins both the
+// Held card, prepends it to s.Deck, and records it on s.ReturnedToTopOfDeck. Pins both the
 // state-mutation contract and the top-of-deck placement.
 func TestMoonWish_AltCostMovesHeldToDeckTop(t *testing.T) {
 	dr := stubGenericAttack(0, 0)
@@ -48,8 +48,8 @@ func TestMoonWish_AltCostMovesHeldToDeckTop(t *testing.T) {
 	if len(s.Held) != 0 {
 		t.Errorf("Held = %d entries, want 0 (alt cost should pop the only Held card)", len(s.Held))
 	}
-	if len(s.HeldConsumed) != 1 || s.HeldConsumed[0].Name() != "dr" {
-		t.Errorf("HeldConsumed = %v, want [dr]", s.HeldConsumed)
+	if len(s.ReturnedToTopOfDeck) != 1 || s.ReturnedToTopOfDeck[0].Name() != "dr" {
+		t.Errorf("ReturnedToTopOfDeck = %v, want [dr]", s.ReturnedToTopOfDeck)
 	}
 	if len(s.Deck) != 2 || s.Deck[0].Name() != "dr" || s.Deck[1].Name() != "deckTop" {
 		t.Errorf("Deck = %v, want [dr, deckTop] (alt-cost'd card on top)",

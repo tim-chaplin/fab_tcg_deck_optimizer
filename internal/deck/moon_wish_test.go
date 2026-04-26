@@ -159,7 +159,8 @@ func TestEvalOneTurn_MoonWishWithFlyingHighPlaysTutoredSunKiss(t *testing.T) {
 		t.Errorf("Moon Wish role = %s, want ATTACK", mw)
 	}
 	if dr != hand.Held {
-		t.Errorf("Weeping Battleground role = %s, want HELD (consumed via HeldConsumed, not flipped)", dr)
+		t.Errorf("Weeping Battleground role = %s, want HELD (moved via ReturnedToTopOfDeck, not flipped)",
+			dr)
 	}
 }
 

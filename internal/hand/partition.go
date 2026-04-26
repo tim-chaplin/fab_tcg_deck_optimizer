@@ -206,11 +206,11 @@ func (e *Evaluator) bestUncached(hero hero.Hero, weapons []weapon.Weapon, hand [
 // promoteRandomHeldToArsenal picks one Held card — a hand card in best.BestLine or a mid-turn-
 // drawn card in best.Drawn — and flips its role to Arsenal. Both sources share a single
 // candidate pool so the draw isn't preferred over hand Helds (nor the other way around). Cards
-// in best.HeldConsumed are skipped on the BestLine side because alt-cost effects already
+// in best.ReturnedToTopOfDeck are skipped on the BestLine side because alt-cost effects already
 // re-routed them; their copies typically reappear in best.Drawn (e.g. Moon Wish's alt cost
 // puts a Held card on top of deck and Sun Kiss's tutor draws it). No-op when nothing is Held.
 func promoteRandomHeldToArsenal(best *TurnSummary, hand []card.Card, n int, arsenalCardIn card.Card) {
-	handHeldCount := countHeldInBestLine(best.BestLine, n, best.HeldConsumed)
+	handHeldCount := countHeldInBestLine(best.BestLine, n, best.ReturnedToTopOfDeck)
 	drawnHeldCount := countHeldInDrawn(best.Drawn)
 	total := handHeldCount + drawnHeldCount
 	if total == 0 {
@@ -227,13 +227,13 @@ func promoteRandomHeldToArsenal(best *TurnSummary, hand []card.Card, n int, arse
 }
 
 // countHeldInBestLine returns how many of the first n BestLine entries are still Role=Held
-// after enumeration AND haven't been consumed by an alt-cost effect (per heldConsumed). The
-// first-n restriction excludes any arsenal-in entry (which lives at index n and is never
-// Held); the heldConsumed skip prevents alt-cost-rerouted copies from competing for arsenal
-// against the drawn copies they spawned.
-func countHeldInBestLine(line []CardAssignment, n int, heldConsumed []card.Card) int {
+// after enumeration AND haven't been moved to deck top by an alt-cost effect (per
+// returnedToTopOfDeck). The first-n restriction excludes any arsenal-in entry (which lives
+// at index n and is never Held); the returnedToTopOfDeck skip prevents the moved copies
+// from competing for arsenal against the drawn copies they spawned.
+func countHeldInBestLine(line []CardAssignment, n int, returnedToTopOfDeck []card.Card) int {
 	c := 0
-	consumed := append([]card.Card(nil), heldConsumed...)
+	consumed := append([]card.Card(nil), returnedToTopOfDeck...)
 	for i := 0; i < n; i++ {
 		if line[i].Role != Held {
 			continue
@@ -248,7 +248,7 @@ func countHeldInBestLine(line []CardAssignment, n int, heldConsumed []card.Card)
 }
 
 // indexOfCard returns the position of the first card in cs whose ID matches c, or -1 when
-// none. Used by the heldConsumed match in countHeldInBestLine and promoteNthHeldInBestLine.
+// none. Used by the returnedToTopOfDeck match in countHeldInBestLine and promoteNthHeldInBestLine.
 func indexOfCard(cs []card.Card, c card.Card) int {
 	for i, x := range cs {
 		if x.ID() == c.ID() {
@@ -297,10 +297,10 @@ func arsenalPromotionHash(hand []card.Card, drawn []CardAssignment, arsenalCardI
 
 // promoteNthHeldInBestLine flips the pick-th non-consumed Held hand card (in BestLine order)
 // to Arsenal, and records it on best.ArsenalCard. Caller guarantees pick < count of eligible
-// Held entries (per countHeldInBestLine, which applies the same heldConsumed skip).
+// Held entries (per countHeldInBestLine, which applies the same returnedToTopOfDeck skip).
 func promoteNthHeldInBestLine(best *TurnSummary, n, pick int) {
 	idx := 0
-	consumed := append([]card.Card(nil), best.HeldConsumed...)
+	consumed := append([]card.Card(nil), best.ReturnedToTopOfDeck...)
 	for i := 0; i < n; i++ {
 		if best.BestLine[i].Role != Held {
 			continue

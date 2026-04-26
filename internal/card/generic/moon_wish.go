@@ -41,7 +41,7 @@ func moonWishPlay(c card.Card, attack int, s *card.TurnState, self *card.CardSta
 	if len(s.Held) > 0 {
 		moved := s.Held[0]
 		s.Held = s.Held[1:]
-		s.HeldConsumed = append(s.HeldConsumed, moved)
+		s.ReturnedToTopOfDeck = append(s.ReturnedToTopOfDeck, moved)
 		// Prepend to deck so any same-turn deck-top reader (e.g. the Sun Kiss tutor's
 		// post-resolution DrawOne) sees it.
 		newDeck := make([]card.Card, 0, len(s.Deck)+1)
