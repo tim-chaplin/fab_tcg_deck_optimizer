@@ -20,7 +20,7 @@ func TestCardPairMutations_EnumeratesAllVariantCrossProducts(t *testing.T) {
 	b := cards.Get(card.ArcanicSpikeRed)
 	d := New(hero.Viserai{}, []weapon.Weapon{weapon.NebulaBlade{}}, []card.Card{a, a, b, b})
 
-	muts := cardPairMutations(d, nil)
+	muts := pairSwapMutations(d, nil)
 	const variantCombosPerPair = 3 * 3
 	const dedupedRemovalCombos = 3 // (a,a), (a,b), (b,b)
 	want := len(cardPairs) * variantCombosPerPair * dedupedRemovalCombos
@@ -58,7 +58,7 @@ func TestCardPairMutations_RemovesBothCopiesOfDuplicate(t *testing.T) {
 	hp := cards.Get(card.HocusPocusBlue)
 	d := New(hero.Viserai{}, []weapon.Weapon{weapon.NebulaBlade{}}, []card.Card{hp, hp})
 
-	muts := cardPairMutations(d, nil)
+	muts := pairSwapMutations(d, nil)
 	// Exactly one removed-ID combo (HocusPocusBlue, HocusPocusBlue) × 9 variant combos.
 	const want = 9
 	if len(muts) != want {
@@ -99,7 +99,7 @@ func TestCardPairMutations_FiresWhenOneHalfAlreadyPresent(t *testing.T) {
 	sk := cards.Get(card.SunKissRed)
 	d := New(hero.Viserai{}, []weapon.Weapon{weapon.NebulaBlade{}}, []card.Card{a, a, a, sk})
 
-	muts := cardPairMutations(d, nil)
+	muts := pairSwapMutations(d, nil)
 	if len(muts) == 0 {
 		t.Fatal("expected pair mutations even with one half present")
 	}
@@ -118,7 +118,7 @@ func TestCardPairMutations_FiresWhenOneHalfAlreadyPresent(t *testing.T) {
 }
 
 // TestCardPairMutations_GeneratesCapViolatingCandidates pins the cap-blind contract:
-// cardPairMutations enumerates every (i, j) × (firstVariant, secondVariant) tuple that
+// pairSwapMutations enumerates every (i, j) × (firstVariant, secondVariant) tuple that
 // survives overlap suppression — even ones whose result deck would violate maxCopies.
 // filterMaxCopiesViolations is the gate that strips violators downstream.
 func TestCardPairMutations_GeneratesCapViolatingCandidates(t *testing.T) {
@@ -133,14 +133,14 @@ func TestCardPairMutations_GeneratesCapViolatingCandidates(t *testing.T) {
 	//   (skR, skR) and (skR, a) each emit 9 - 3 = 6 surviving combos.
 	//   (a, a) emits all 9.
 	// Total = 6 + 6 + 9 = 21.
-	muts := cardPairMutations(d, nil)
+	muts := pairSwapMutations(d, nil)
 	const want = 21
 	if len(muts) != want {
 		t.Fatalf("got %d pair mutations, want %d (cap-blind enumeration)", len(muts), want)
 	}
 
 	// At least one of those mutations must add Sun Kiss (Red) again — pushing the count to 3
-	// — which would violate maxCopies=2. cardPairMutations does NOT enforce that; the post-
+	// — which would violate maxCopies=2. pairSwapMutations does NOT enforce that; the post-
 	// filter in AllMutations does.
 	sawCapViolator := false
 	for _, m := range muts {
@@ -156,7 +156,7 @@ func TestCardPairMutations_GeneratesCapViolatingCandidates(t *testing.T) {
 		}
 	}
 	if !sawCapViolator {
-		t.Error("expected at least one cap-violating candidate from cardPairMutations " +
+		t.Error("expected at least one cap-violating candidate from pairSwapMutations " +
 			"(filterMaxCopiesViolations is the responsible gate)")
 	}
 }
@@ -182,7 +182,7 @@ func TestCardPairMutations_HandlesUnbalancedHalfCounts(t *testing.T) {
 	}
 	d := New(hero.Viserai{}, []weapon.Weapon{weapon.NebulaBlade{}}, cardsList)
 
-	muts := cardPairMutations(d, nil)
+	muts := pairSwapMutations(d, nil)
 	if len(muts) == 0 {
 		t.Fatal("expected pair mutations on unbalanced deck")
 	}
@@ -202,7 +202,7 @@ func TestCardPairMutations_ResultDifferentFromSource(t *testing.T) {
 	b := cards.Get(card.ArcanicSpikeRed)
 	d := New(hero.Viserai{}, []weapon.Weapon{weapon.NebulaBlade{}}, []card.Card{a, a, b, b})
 	srcKey := cardMultisetKey(d.Cards)
-	for i, m := range cardPairMutations(d, nil) {
+	for i, m := range pairSwapMutations(d, nil) {
 		if cardMultisetKey(m.Deck.Cards) == srcKey {
 			t.Errorf("mutation %d (%s) produced a no-op (same multiset as source)", i, m.Description)
 		}
@@ -218,7 +218,7 @@ func TestCardPairMutations_OverlapSuppressionSkipsRedundantSwaps(t *testing.T) {
 	skR := cards.Get(card.SunKissRed)
 	a := cards.Get(card.ArcanicCrackleRed)
 	d := New(hero.Viserai{}, []weapon.Weapon{weapon.NebulaBlade{}}, []card.Card{skR, a, a, a})
-	for i, m := range cardPairMutations(d, nil) {
+	for i, m := range pairSwapMutations(d, nil) {
 		if strings.Contains(m.Description, "-1 Sun Kiss (Red)") &&
 			strings.Contains(m.Description, "+1 Sun Kiss (Red)") {
 			t.Errorf("mutation %d (%s): redundant -1/+1 of Sun Kiss (Red) — overlap suppression failed",
@@ -230,14 +230,14 @@ func TestCardPairMutations_OverlapSuppressionSkipsRedundantSwaps(t *testing.T) {
 // TestCardPairMutations_RespectsLegalFilter: a legal predicate that rejects a single pair
 // variant suppresses only that variant's combos, not the whole pair. Sun Kiss (Yellow) gets
 // rejected; the remaining 3 × 2 = 6 cross-products still emit per unique removal combo —
-// matches how cardSwapMutations treats per-printing legality.
+// matches how singleSwapMutations treats per-printing legality.
 func TestCardPairMutations_RespectsLegalFilter(t *testing.T) {
 	a := cards.Get(card.ArcanicCrackleRed)
 	b := cards.Get(card.ArcanicSpikeRed)
 	d := New(hero.Viserai{}, []weapon.Weapon{weapon.NebulaBlade{}}, []card.Card{a, a, b, b})
 
 	legal := func(c card.Card) bool { return c.ID() != card.SunKissYellow }
-	muts := cardPairMutations(d, legal)
+	muts := pairSwapMutations(d, legal)
 	for i, m := range muts {
 		if strings.Contains(m.Description, "Sun Kiss (Yellow)") {
 			t.Errorf("mutation %d (%s): added rejected Sun Kiss (Yellow)", i, m.Description)
@@ -258,8 +258,8 @@ func TestCardPairMutations_DeterministicOrdering(t *testing.T) {
 	b := cards.Get(card.ArcanicSpikeRed)
 	d := New(hero.Viserai{}, []weapon.Weapon{weapon.NebulaBlade{}}, []card.Card{a, a, b, b})
 
-	first := cardPairMutations(d, nil)
-	second := cardPairMutations(d, nil)
+	first := pairSwapMutations(d, nil)
+	second := pairSwapMutations(d, nil)
 	if len(first) != len(second) {
 		t.Fatalf("call counts differ: %d vs %d", len(first), len(second))
 	}

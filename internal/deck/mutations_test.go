@@ -164,7 +164,7 @@ func TestAllMutations_NoDuplicateOfSource(t *testing.T) {
 	}
 }
 
-// expectedPairMutCount mirrors cardPairMutations's emission rule for a given deck so the
+// expectedPairMutCount mirrors pairSwapMutations's emission rule for a given deck so the
 // CountsAndShape test can predict the pair-mutation contribution without re-implementing the
 // generator. For each registered pair × variant cross-product, counts the distinct
 // (sorted-removed-IDs) combos that survive overlap suppression. Combos rejected by the

@@ -53,13 +53,13 @@ var cardPairs = []CardPair{
 }
 
 // pairDedupeKey is the canonical (sorted removed IDs, sorted add IDs) tuple identifying a
-// pair-mutation candidate by content; see cardPairMutations for the iteration shape.
+// pair-mutation candidate by content; see pairSwapMutations for the iteration shape.
 type pairDedupeKey struct {
 	rmA, rmB   card.ID
 	addA, addB card.ID
 }
 
-// cardPairMutations emits paired add mutations for every entry in cardPairs by taking the
+// pairSwapMutations emits paired add mutations for every entry in cardPairs by taking the
 // cross-product of every (i, j) deck-index pair (i < j) with every (firstVariant,
 // secondVariant) combo from the pair's two groups. Each emitted mutation removes the cards
 // at positions i and j from a fresh copy of d.Cards and appends the chosen pair variants.
@@ -81,13 +81,13 @@ type pairDedupeKey struct {
 //
 // legal filters BOTH pair-variant adds: a combo where either variant is rejected by legal
 // (e.g. a banned printing) is skipped. Removal targets aren't filtered — same convention as
-// cardSwapMutations: a deck that arrived holding a banned card can still have it removed.
+// singleSwapMutations: a deck that arrived holding a banned card can still have it removed.
 //
 // maxCopies enforcement is NOT applied here; AllMutations runs filterMaxCopiesViolations on
 // the combined output so single-slot and pair candidates share one cap-checking pass.
 //
 // Returned decks have zero Stats and share no backing slices with d or each other.
-func cardPairMutations(d *Deck, legal func(card.Card) bool) []Mutation {
+func pairSwapMutations(d *Deck, legal func(card.Card) bool) []Mutation {
 	if len(cardPairs) == 0 || len(d.Cards) < 2 {
 		return nil
 	}

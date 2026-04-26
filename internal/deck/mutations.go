@@ -25,7 +25,7 @@ type Mutation struct {
 // AllMutations returns every single-card mutation of d in a deterministic order: first every
 // alternative weapon loadout (sorted by loadout key), then every (removeID, addID) pair where
 // one copy of removeID is dropped and one copy of addID is added, then the synergy-pair
-// "swap two for two" mutations from cardPairMutations. removeID must be in the deck. Pairs
+// "swap two for two" mutations from pairSwapMutations. removeID must be in the deck. Pairs
 // with removeID == addID are skipped.
 //
 // Card-mutation ordering is by ascending card.ID for stability — no value-based bias. The
@@ -48,8 +48,8 @@ type Mutation struct {
 // Returned decks have zero Stats and share no backing slices with d or each other.
 func AllMutations(d *Deck, maxCopies int, legal func(card.Card) bool) []Mutation {
 	out := weaponLoadoutMutations(d)
-	out = append(out, cardSwapMutations(d, legal)...)
-	out = append(out, cardPairMutations(d, legal)...)
+	out = append(out, singleSwapMutations(d, legal)...)
+	out = append(out, pairSwapMutations(d, legal)...)
 	return filterMaxCopiesViolations(out, maxCopies)
 }
 
@@ -86,11 +86,11 @@ func weaponLoadoutMutations(d *Deck) []Mutation {
 	return out
 }
 
-// cardSwapMutations emits every single-card remove+add mutation the deck admits. Remove
+// singleSwapMutations emits every single-card remove+add mutation the deck admits. Remove
 // targets iterate in ascending card.ID for stability (no value-based bias; the anneal driver
 // shuffles afterward). Add candidates skip no-ops (same ID); the maxCopies cap is enforced
 // by filterMaxCopiesViolations downstream so this generator stays cap-blind.
-func cardSwapMutations(d *Deck, legal func(card.Card) bool) []Mutation {
+func singleSwapMutations(d *Deck, legal func(card.Card) bool) []Mutation {
 	uniqueIDs := sortedDeckIDs(d.Cards)
 
 	// legalPool returns IDs in ascending order (cards.Deckable() iterates byID).
@@ -127,7 +127,7 @@ func cardSwapMutations(d *Deck, legal func(card.Card) bool) []Mutation {
 }
 
 // sortedDeckIDs returns every distinct card ID appearing in cs, sorted ascending. Used as
-// the removal-target ordering for cardSwapMutations; the order is purely for stability since
+// the removal-target ordering for singleSwapMutations; the order is purely for stability since
 // the anneal driver shuffles the final mutation slice.
 func sortedDeckIDs(cs []card.Card) []card.ID {
 	seen := map[card.ID]bool{}
