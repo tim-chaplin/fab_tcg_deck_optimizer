@@ -30,6 +30,7 @@ func bestAttackWithWeapons(hero hero.Hero, weapons []weapon.Weapon, attackers, d
 		drawnWinner:        bufs.drawnWinnerScratch[:0],
 		auraTriggersWinner: bufs.auraTriggersWinnerScratch[:0],
 		heldConsumedWinner: bufs.heldConsumedWinnerScratch[:0],
+		deckRemovedWinner:  bufs.deckRemovedWinnerScratch[:0],
 	}
 	// Hoist leaf-constant TurnState fields out of the per-permutation reset in
 	// playSequenceWithMeta.
@@ -187,6 +188,10 @@ type sequenceContext struct {
 	// winner. The deck loop reads this off TurnSummary to skip BestLine[Held]→nextHeld
 	// carries and arsenal-promotion candidates that have already been re-routed elsewhere.
 	heldConsumedWinner []card.Card
+	// deckRemovedWinner snapshots the winning permutation's DeckRemoved list (cards taken
+	// out of the deck this turn by DrawOne or tutor effects). The deck loop uses it to
+	// patch the underlying buf so the same card can't be drawn again on a later turn.
+	deckRemovedWinner []card.Card
 	// auraTriggersWinner snapshots the winning permutation's final state.AuraTriggers so the
 	// deck loop can carry them into next turn. Includes both inherited triggers from
 	// priorAuraTriggers (with mutated Count / FiredThisTurn) and ones added by Play.
@@ -323,6 +328,7 @@ func (ctx *sequenceContext) bestSequence(attackers, winnerOrderOut []card.Card, 
 	ctx.drawnWinner = ctx.drawnWinner[:0]
 	ctx.auraTriggersWinner = ctx.auraTriggersWinner[:0]
 	ctx.heldConsumedWinner = ctx.heldConsumedWinner[:0]
+	ctx.deckRemovedWinner = ctx.deckRemovedWinner[:0]
 	eval := func() {
 		dmg, leftoverRunechants, _, legal := ctx.playSequenceWithMeta(n, scratch, triggerScratch, auraTriggerScratch)
 		if !legal {
@@ -336,6 +342,7 @@ func (ctx *sequenceContext) bestSequence(attackers, winnerOrderOut []card.Card, 
 			ctx.drawnWinner = append(ctx.drawnWinner[:0], ctx.bufs.state.Drawn...)
 			ctx.auraTriggersWinner = append(ctx.auraTriggersWinner[:0], ctx.bufs.state.AuraTriggers...)
 			ctx.heldConsumedWinner = append(ctx.heldConsumedWinner[:0], ctx.bufs.state.HeldConsumed...)
+			ctx.deckRemovedWinner = append(ctx.deckRemovedWinner[:0], ctx.bufs.state.DeckRemoved...)
 			if winnerOrderOut != nil {
 				for i := 0; i < n; i++ {
 					winnerOrderOut[i] = pcBuf[i].Card
@@ -464,6 +471,10 @@ func (ctx *sequenceContext) playSequenceWithMeta(n int, perCardOut, perCardTrigg
 	// partition view back.
 	state.Held = ctx.held
 	state.HeldConsumed = nil
+	// DeckRemoved reset per permutation: DrawOne and tutor effects mutate it during Play,
+	// and the next permutation needs an empty list so its own draws/tutors aren't tainted
+	// by the previous permutation's removals.
+	state.DeckRemoved = nil
 	// Graveyard and Banish reset per permutation: cards append themselves to Graveyard as
 	// they resolve, and graveyard-banish effects shift cards into Banish. Reusing the scratch
 	// backing array keeps the reset allocation-free.

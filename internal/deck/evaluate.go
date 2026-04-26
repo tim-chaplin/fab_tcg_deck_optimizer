@@ -248,13 +248,56 @@ func processTriggersAtStartOfTurn(queued []card.AuraTrigger, postDrawDeck []card
 // bookkeeping here.
 func applyTurnResult(play hand.TurnSummary, buf []card.Card, head, tail *int, drawCount int, nextHeld []card.Card) []card.Card {
 	nextHeld = recycleCardStates(play.BestLine, play.HeldConsumed, buf, tail, nextHeld)
-	*head += drawCount + len(play.Drawn)
+	// Advance head past this turn's dealt cards; mid-turn removals and inserts are applied
+	// to the active deck slice buf[*head:*tail] below.
+	*head += drawCount
+	insertOnDeckTop(buf, head, tail, play.HeldConsumed)
+	removeFromDeck(buf, *head, tail, play.DeckRemoved)
 	for _, d := range play.Drawn {
 		if d.Role == hand.Held {
 			nextHeld = append(nextHeld, d.Card)
 		}
 	}
 	return nextHeld
+}
+
+// insertOnDeckTop shifts the active deck slice buf[*head:*tail] right by len(cards) and
+// writes cards at buf[*head:*head+len(cards)]. This makes each card the next-to-be-drawn
+// entry in registry order — the canonical "rather than pay" alt-cost placement. Tail grows
+// by len(cards). Caller guarantees buf has room (sized 2×deckSize plus a handSize cushion).
+func insertOnDeckTop(buf []card.Card, head, tail *int, cards []card.Card) {
+	n := len(cards)
+	if n == 0 {
+		return
+	}
+	copy(buf[*head+n:*tail+n], buf[*head:*tail])
+	for i, c := range cards {
+		buf[*head+i] = c
+	}
+	*tail += n
+}
+
+// removeFromDeck deletes the first occurrence of each card from the active deck slice
+// buf[head:*tail] (in the order cards lists them) and shifts later entries left. tail
+// shrinks by the count of cards actually found. Cards not present in the slice are
+// silently skipped — DrawOne plus alt-cost-prepend can produce a removal target that's no
+// longer in buf because a prior insertOnDeckTop wrote it back in then a later removal
+// already took it out.
+func removeFromDeck(buf []card.Card, head int, tail *int, cards []card.Card) {
+	for _, c := range cards {
+		idx := -1
+		for i := head; i < *tail; i++ {
+			if buf[i].ID() == c.ID() {
+				idx = i
+				break
+			}
+		}
+		if idx < 0 {
+			continue
+		}
+		copy(buf[idx:*tail-1], buf[idx+1:*tail])
+		*tail--
+	}
 }
 
 // dealNextHand fills handBuf with this turn's dealt hand: the held prefix from heldBuf followed

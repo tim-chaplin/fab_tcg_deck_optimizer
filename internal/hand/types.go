@@ -83,8 +83,13 @@ type TurnSummary struct {
 	// partition's Held set during the chain. The deck loop suppresses these cards in
 	// BestLine[Held]→nextHeld carries and arsenal-promotion candidate counts; without that
 	// suppression the consumed card would double-count against the next turn (still Held in
-	// BestLine, also routed via the alt-cost effect).
+	// BestLine, also routed via the alt-cost effect). Each HeldConsumed entry is also
+	// inserted at the top of the next-turn deck buffer by applyTurnResult.
 	HeldConsumed []card.Card
+	// DeckRemoved is the cards taken out of the deck this turn — DrawOne pulls plus tutor-
+	// style removals (Moon Wish's Sun Kiss search). applyTurnResult patches each out of the
+	// underlying deck buffer so the same card can't be drawn again on a later turn.
+	DeckRemoved []card.Card
 }
 
 // TriggerContribution is one start-of-turn AuraTrigger fire: the aura that fired plus the

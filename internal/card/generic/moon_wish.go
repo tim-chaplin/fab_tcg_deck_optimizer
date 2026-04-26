@@ -61,6 +61,10 @@ func moonWishPlay(c card.Card, attack int, s *card.TurnState, self *card.CardSta
 		return attack
 	}
 	s.Deck = removeFirstByID(s.Deck, sk.ID())
+	// Tell the deck loop to drop this card from the underlying buffer too — without it the
+	// tutored card would re-surface on a later turn (head only advances; the buf isn't
+	// patched by the local s.Deck slice rewrite above).
+	s.DeckRemoved = append(s.DeckRemoved, sk)
 
 	if !self.EffectiveGoAgain() {
 		s.Drawn = append(s.Drawn, sk)

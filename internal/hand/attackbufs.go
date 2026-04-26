@@ -81,6 +81,9 @@ type attackBufs struct {
 	// consumed Held cards from the winning permutation, surfaced on TurnSummary so the deck
 	// loop can suppress double-counting them in nextHeld.
 	heldConsumedWinnerScratch []card.Card
+	// deckRemovedWinnerScratch backs sequenceContext.deckRemovedWinner — cards taken out of
+	// the deck this turn (DrawOne, tutor effects). The deck loop patches buf to remove each.
+	deckRemovedWinnerScratch []card.Card
 	// perCardScratch is sized maxAttackers (handSize + weaponCount). Written by playSequence only
 	// when the caller passes a non-nil perCardOut; bestSequence snapshots the winning
 	// permutation's per-card damage from here into the caller's output buffer. The partition-loop
@@ -159,6 +162,7 @@ func newAttackBufs(handSize, weaponCount int, weapons []weapon.Weapon) *attackBu
 		drawnWinnerScratch:        make([]card.Card, 0, maxAttackers),
 		auraTriggersWinnerScratch: make([]card.AuraTrigger, 0, maxAttackers),
 		heldConsumedWinnerScratch: make([]card.Card, 0, handSize+1),
+		deckRemovedWinnerScratch:  make([]card.Card, 0, maxAttackers),
 		perCardScratch:            make([]float64, maxAttackers),
 		perCardTriggerScratch:     make([]float64, maxAttackers),
 		perCardAuraTriggerScratch: make([]float64, maxAttackers),

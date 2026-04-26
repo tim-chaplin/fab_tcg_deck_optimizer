@@ -128,6 +128,7 @@ func fillContributions(summary *TurnSummary, hero hero.Hero, weapons []weapon.We
 			drawnWinner:        bufs.drawnWinnerScratch[:0],
 			auraTriggersWinner: bufs.auraTriggersWinnerScratch[:0],
 			heldConsumedWinner: bufs.heldConsumedWinnerScratch[:0],
+			deckRemovedWinner:  bufs.deckRemovedWinnerScratch[:0],
 		}
 		ctx.seedState()
 		fillAttackChainContributions(summary, chain, ctx)
@@ -153,6 +154,10 @@ func fillContributions(summary *TurnSummary, hero hero.Hero, weapons []weapon.We
 		if n := len(ctx.heldConsumedWinner); n > 0 {
 			summary.HeldConsumed = make([]card.Card, n)
 			copy(summary.HeldConsumed, ctx.heldConsumedWinner)
+		}
+		if n := len(ctx.deckRemovedWinner); n > 0 {
+			summary.DeckRemoved = make([]card.Card, n)
+			copy(summary.DeckRemoved, ctx.deckRemovedWinner)
 		}
 	}
 }

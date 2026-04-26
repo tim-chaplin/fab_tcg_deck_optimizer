@@ -105,19 +105,30 @@ type TurnState struct {
 	Held []Card
 	// HeldConsumed records cards moved out of Held by alt-cost effects mid-chain. The
 	// deck-loop accounting compares BestLine's Held-role cards against this list and
-	// suppresses the nextHeld carry for any match — the consumed card has been re-routed
-	// elsewhere (typically onto deck top, sometimes pulled back into s.Drawn) and double-
-	// counting it would inflate the next hand.
+	// suppresses the nextHeld carry for any match. Cards listed here are also inserted at
+	// the top of the next-turn deck buffer (the "rather than pay" rule), so the same card
+	// commonly reappears in the next turn's hand or feeds a same-turn DrawOne when a tutor
+	// fires.
 	HeldConsumed []Card
+	// DeckRemoved records cards taken out of the deck this turn by any means — DrawOne,
+	// tutor effects (Moon Wish's Sun Kiss search), or future deck-search riders. The
+	// deck-loop's applyTurnResult patches the underlying deck buffer to actually remove
+	// each listed card so it can't be drawn again on a later turn. Without this list the
+	// buf would still hold the tutored card at its original position, and a duplicate would
+	// surface once the head pointer reached that slot.
+	DeckRemoved []Card
 }
 
 // DrawOne models a mid-turn draw: advance the deck by one card and append it to Drawn. No-op
-// on an empty deck. Every draw-rider card routes through this helper.
+// on an empty deck. Every draw-rider card routes through this helper. Also appends to
+// DeckRemoved so applyTurnResult patches the same card out of the underlying deck buffer.
 func (s *TurnState) DrawOne() {
 	if len(s.Deck) == 0 {
 		return
 	}
-	s.Drawn = append(s.Drawn, s.Deck[0])
+	c := s.Deck[0]
+	s.Drawn = append(s.Drawn, c)
+	s.DeckRemoved = append(s.DeckRemoved, c)
 	s.Deck = s.Deck[1:]
 }
 
