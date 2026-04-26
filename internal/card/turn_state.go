@@ -13,19 +13,39 @@ import "fmt"
 // (CardsPlayed, Pitched, IncomingDamage, etc.) are seeded by the sim per chain-step and
 // reset at the turn boundary.
 
+// LogEntryKind classifies a LogEntry. Triggers come in two flavours because they fire on
+// opposite sides of their parent in the FaB stack — the format layer needs to know which
+// side a given entry sits on so two cards with the same display name in the same chain
+// don't steal each other's triggers during grouping.
+type LogEntryKind int8
+
+const (
+	// LogEntryChainStep is the sim's "<Card>: <VERB>" line. Stands alone in the printout
+	// and acts as the parent that triggers attach to.
+	LogEntryChainStep LogEntryKind = iota
+	// LogEntryPreTrigger is a trigger that fires before its parent chain entry resolves
+	// (hero / aura attack-action triggers). The format layer attaches it to the next
+	// chain entry whose name matches Source.
+	LogEntryPreTrigger
+	// LogEntryPostTrigger is a trigger that fires after its parent chain entry resolves
+	// (ephemeral attack triggers). The format layer attaches it to the previous chain
+	// entry whose name matches Source.
+	LogEntryPostTrigger
+)
+
 // LogEntry is one chain-event entry in TurnState.Log. Text is the freeform display string
 // the producer authored ("Viserai created a runechant", "Consuming Volition [R]: ATTACK")
-// — the format layer renders it verbatim, no further opinions on phrasing. IsTrigger is
-// true when the entry is a trigger fire (hero / aura / ephemeral); the format layer
-// indents these underneath their parent chain entry. Source names the card whose play
-// caused the trigger and is matched against chain-entry names to pick the parent; only
-// meaningful when IsTrigger is true. N is the damage-equivalent credited to s.Value
+// — the format layer renders it verbatim, no further opinions on phrasing. Kind tags the
+// entry as a chain step or as a pre/post trigger so the grouping algorithm can attribute
+// triggers correctly even when sibling chain entries share a name. Source names the card
+// whose play caused the trigger and is matched against chain-entry names to pick the
+// parent; only meaningful for triggers. N is the damage-equivalent credited to s.Value
 // when the entry was added.
 type LogEntry struct {
-	Text      string
-	Source    string
-	IsTrigger bool
-	N         int
+	Text   string
+	Source string
+	Kind   LogEntryKind
+	N      int
 }
 
 // TurnState is the shared turn-level context passed to Card.Play alongside the per-card
@@ -76,10 +96,11 @@ type TurnState struct {
 	// field. Reset by the sim per permutation.
 	Value int
 	// Log is the per-event chain trace — one entry per chain step / hero / aura /
-	// ephemeral / weapon swing. Chain-step producers (the sim) call AddLogEntry; trigger
-	// handlers (hero / aura / ephemeral) call AddTriggerLogEntry with the triggering card
-	// as source so the format layer can cluster them under the right parent. Reset per
-	// permutation.
+	// ephemeral / weapon swing. Chain-step producers (the sim) call AddLogEntry; pre-
+	// trigger handlers (hero / aura attack-action) call AddPreTriggerLogEntry; post-
+	// trigger handlers (ephemeral attack) call AddPostTriggerLogEntry. The format layer
+	// uses the entry's Kind plus Source to cluster triggers under the right parent.
+	// Reset per permutation.
 	Log []LogEntry
 	// CardsPlayed is the sequence of cards played (as attacks) this turn, in order.
 	// Populated by the sim after each Play returns so later cards this turn see what was
@@ -126,34 +147,43 @@ type TurnState struct {
 	TriggeringCard Card
 }
 
-// AddLogEntry appends a freeform top-level log line (a chain step or unattributed event)
-// and credits n damage-equivalent to s.Value. text is the rendered display string. Returns
-// the clamped n so callers can fold the call into a Play return. Trigger handlers should
-// call AddTriggerLogEntry instead so the format layer can group them under their parent.
+// AddLogEntry appends a freeform chain-step log line and credits n damage-equivalent to
+// s.Value. text is the rendered display string. Returns the clamped n so callers can fold
+// the call into a Play return. Trigger handlers call AddPreTriggerLogEntry or
+// AddPostTriggerLogEntry instead so the format layer can group them under their parent.
 func (s *TurnState) AddLogEntry(text string, n int) int {
-	if n < 0 {
-		n = 0
-	}
-	s.Value += n
-	s.Log = append(s.Log, LogEntry{Text: text, N: n})
-	return n
+	return s.appendLog(LogEntry{Text: text, Kind: LogEntryChainStep, N: n})
 }
 
-// AddTriggerLogEntry appends a trigger-fire log line and credits n damage-equivalent to
-// s.Value. text is the rendered display string ("Viserai created a runechant"); source is
-// the DisplayName of the card whose play caused the trigger to fire — the format layer
-// matches it against chain-entry names to nest the trigger underneath the right parent.
-// Returns the clamped n so handlers can fold the call into one expression:
+// AddPreTriggerLogEntry appends a pre-trigger log line — a hero or aura-attack-action
+// trigger that fires before its parent chain entry. text is the rendered display string
+// ("Viserai created a runechant"); source is the DisplayName of the card whose play
+// caused the trigger to fire. The format layer attaches this entry to the next chain
+// entry whose name matches source. Returns the clamped n so handlers can fold the call
+// into a single return:
 //
-//	return s.AddTriggerLogEntry("Viserai created a runechant",
+//	return s.AddPreTriggerLogEntry("Viserai created a runechant",
 //	    card.DisplayName(played), s.CreateRunechant())
-func (s *TurnState) AddTriggerLogEntry(text, source string, n int) int {
-	if n < 0 {
-		n = 0
+func (s *TurnState) AddPreTriggerLogEntry(text, source string, n int) int {
+	return s.appendLog(LogEntry{Text: text, Source: source, Kind: LogEntryPreTrigger, N: n})
+}
+
+// AddPostTriggerLogEntry appends a post-trigger log line — an ephemeral attack trigger
+// that fires after its parent chain entry resolves. The format layer attaches this entry
+// to the previous chain entry whose name matches source. Same return contract as
+// AddPreTriggerLogEntry.
+func (s *TurnState) AddPostTriggerLogEntry(text, source string, n int) int {
+	return s.appendLog(LogEntry{Text: text, Source: source, Kind: LogEntryPostTrigger, N: n})
+}
+
+// appendLog credits the entry's N to s.Value (clamped at 0) and appends it to s.Log.
+func (s *TurnState) appendLog(e LogEntry) int {
+	if e.N < 0 {
+		e.N = 0
 	}
-	s.Value += n
-	s.Log = append(s.Log, LogEntry{Text: text, Source: source, IsTrigger: true, N: n})
-	return n
+	s.Value += e.N
+	s.Log = append(s.Log, e)
+	return e.N
 }
 
 // DrawOne models a mid-turn draw: pop the top of Deck and append it to Hand. No-op on an
@@ -231,21 +261,21 @@ func (s *TurnState) CreateRunechant() int {
 	return s.CreateRunechants(1)
 }
 
-// CreateAndLogRunechants creates n Runechant tokens, writes the canonical trigger log
+// CreateAndLogRunechants creates n Runechant tokens, writes the canonical pre-trigger log
 // line ("<selfName> created a runechant" for n==1, "<selfName> created N runechants" for
 // n>1) sourced under sourceName, and returns the damage-equivalent credited. Trigger
-// handlers (Viserai's hero ability, Malefic Incantation's aura) call this in a single
-// return statement.
+// handlers that fire before their parent (Viserai's hero ability, Malefic Incantation's
+// aura) call this in a single return statement.
 func (s *TurnState) CreateAndLogRunechants(selfName, sourceName string, n int) int {
-	return s.AddTriggerLogEntry(selfName+" "+runechantsCreatedPhrase(n), sourceName, s.CreateRunechants(n))
+	return s.AddPreTriggerLogEntry(selfName+" "+runechantsCreatedPhrase(n), sourceName, s.CreateRunechants(n))
 }
 
-// CreateAndLogRunechantsOnHit is the on-hit-narration variant of CreateAndLogRunechants —
+// CreateAndLogRunechantsOnHit is the post-trigger variant of CreateAndLogRunechants —
 // the trigger log line reads "<selfName> created N runechants on hit" so the conditional
 // gate on the ephemeral attack trigger (Mauvrion Skies, Runic Reaping) is visible in the
 // printout. Same return contract as CreateAndLogRunechants.
 func (s *TurnState) CreateAndLogRunechantsOnHit(selfName, sourceName string, n int) int {
-	return s.AddTriggerLogEntry(selfName+" "+runechantsCreatedPhrase(n)+" on hit", sourceName, s.CreateRunechants(n))
+	return s.AddPostTriggerLogEntry(selfName+" "+runechantsCreatedPhrase(n)+" on hit", sourceName, s.CreateRunechants(n))
 }
 
 // runechantsCreatedPhrase returns "created a runechant" / "created N runechants" — the

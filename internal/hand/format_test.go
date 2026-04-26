@@ -104,7 +104,7 @@ func TestFormatBestTurn_NonAttackCardUsesPlayLabel(t *testing.T) {
 func TestFormatBestTurn_LogAttributesEachTriggerSeparately(t *testing.T) {
 	h := []card.Card{generic.NimblismRed{}, runeblade.MauvrionSkiesRed{}, runeblade.ConsumingVolitionRed{}}
 	// Use the real Malefic Incantation card's Play to register the prior trigger so the
-	// handler matches production exactly (logs via AddTriggerLogEntry, sources from
+	// handler matches production exactly (logs via AddPreTriggerLogEntry, sources from
 	// state.TriggeringCard).
 	var bootstrap card.TurnState
 	runeblade.MaleficIncantationRed{}.Play(&bootstrap, &card.CardState{})
@@ -352,16 +352,16 @@ func TestFormatBestTurn_TriggersFromLastTurnZeroEffectDropped(t *testing.T) {
 func TestAppendGroupedChainEntries_ClustersTriggersUnderTheirParent(t *testing.T) {
 	log := []card.LogEntry{
 		// Card A's pre-trigger fires from a hero/aura before A's chain entry resolves.
-		{Text: "Viserai created a runechant", Source: "Card A", IsTrigger: true, N: 1},
+		{Text: "Viserai created a runechant", Source: "Card A", Kind: card.LogEntryPreTrigger, N: 1},
 		// Card A resolves.
 		{Text: "Card A: ATTACK", N: 5},
 		// Card A's ephemeral attack trigger fires after the hit.
-		{Text: "Aura created 3 runechants on hit", Source: "Card A", IsTrigger: true, N: 3},
+		{Text: "Aura created 3 runechants on hit", Source: "Card A", Kind: card.LogEntryPostTrigger, N: 3},
 		// Card B's pre-trigger queues for B.
-		{Text: "Viserai created a runechant", Source: "Card B", IsTrigger: true, N: 1},
+		{Text: "Viserai created a runechant", Source: "Card B", Kind: card.LogEntryPreTrigger, N: 1},
 		// Card B resolves; its post-trigger follows.
 		{Text: "Card B: PLAY", N: 0},
-		{Text: "Aura created 2 runechants on hit", Source: "Card B", IsTrigger: true, N: 2},
+		{Text: "Aura created 2 runechants on hit", Source: "Card B", Kind: card.LogEntryPostTrigger, N: 2},
 	}
 	got := appendGroupedChainEntries(nil, log)
 	want := []string{
@@ -377,6 +377,35 @@ func TestAppendGroupedChainEntries_ClustersTriggersUnderTheirParent(t *testing.T
 	}
 }
 
+// TestAppendGroupedChainEntries_PreTriggerAttachesToNextSameNameParent guards the
+// duplicate-name disambiguation: when two chain entries share a display name (e.g. two
+// copies of Mauvrion Skies in one chain), a pre-trigger between them belongs to the
+// SECOND parent — it fires before the second card's Play. Source-name match alone is
+// ambiguous in this case; Kind==LogEntryPreTrigger is what tells the grouping algorithm
+// to skip the first parent's post-trigger lookforward and let the entry fall through to
+// the next matching chain step.
+func TestAppendGroupedChainEntries_PreTriggerAttachesToNextSameNameParent(t *testing.T) {
+	log := []card.LogEntry{
+		// First Mauvrion plays (no triggers).
+		{Text: "Mauvrion Skies [R]: PLAY", N: 0},
+		// Second Mauvrion's hero pre-trigger fires (Viserai now sees a non-attack
+		// action played) — Source matches the first chain entry's name too, but it
+		// belongs to the second.
+		{Text: "Viserai created a runechant", Source: "Mauvrion Skies [R]", Kind: card.LogEntryPreTrigger, N: 1},
+		// Second Mauvrion's chain entry.
+		{Text: "Mauvrion Skies [R]: PLAY", N: 0},
+	}
+	got := appendGroupedChainEntries(nil, log)
+	want := []string{
+		"Mauvrion Skies [R]: PLAY",
+		"Mauvrion Skies [R]: PLAY",
+		"  Viserai created a runechant (+1)",
+	}
+	if !reflect.DeepEqual(got, want) {
+		t.Errorf("pre-trigger attached to wrong parent\n got: %#v\nwant: %#v", got, want)
+	}
+}
+
 // TestAppendGroupedChainEntries_OrphanTriggerSurfacesAtTopLevel guards the defensive
 // fallback: a trigger whose Source matches no chain entry shouldn't be silently dropped.
 // Currently impossible in practice (playSequenceWithMeta emits triggers immediately around
@@ -384,7 +413,7 @@ func TestAppendGroupedChainEntries_ClustersTriggersUnderTheirParent(t *testing.T
 func TestAppendGroupedChainEntries_OrphanTriggerSurfacesAtTopLevel(t *testing.T) {
 	log := []card.LogEntry{
 		{Text: "Card A: ATTACK", N: 5},
-		{Text: "Aura created 2 runechants on hit", Source: "Card Z", IsTrigger: true, N: 2},
+		{Text: "Aura created 2 runechants on hit", Source: "Card Z", Kind: card.LogEntryPostTrigger, N: 2},
 	}
 	got := appendGroupedChainEntries(nil, log)
 	want := []string{
