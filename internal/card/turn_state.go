@@ -97,6 +97,19 @@ type TurnState struct {
 	// appends each entry to the dealt hand in order. Cascading reveals work because each
 	// handler's pop shrinks the shared Deck view for the next handler.
 	Revealed []Card
+	// Held is the partition's Held-role cards at start of the chain — the hand cards the
+	// solver assigned no Pitch / Attack / Defend role. Read-only by Play unless the card
+	// implements an alt-cost "use a Held card" effect: such cards pop the consumed card off
+	// Held and append it to HeldConsumed so the post-chain accounting (recycleCardStates,
+	// arsenal-promotion candidate counts) skips it. Moon Wish is the pilot consumer: its
+	// "may put a card from your hand on top of your deck rather than pay" alt cost reads
+	// len(Held) > 0 from Cost(s) to drive a 0 / printed cost decision.
+	Held []Card
+	// HeldConsumed records cards moved out of Held by alt-cost effects mid-chain. The
+	// solver's deck-loop accounting compares BestLine's Held-role cards against this list and
+	// suppresses the nextHeld carry for any match — the consumed card has already been
+	// re-routed (e.g. to deck top + drawn into s.Drawn) and shouldn't double-count.
+	HeldConsumed []Card
 }
 
 // DrawOne models a mid-turn draw: advance the deck by one card and append it to Drawn. No-op

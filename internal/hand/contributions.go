@@ -65,11 +65,12 @@ func fillDefenseContributions(line []CardAssignment, pitched []card.Card, deck [
 func fillContributions(summary *TurnSummary, hero hero.Hero, weapons []weapon.Weapon, swungNames []string, budget chainBudget, deck []card.Card, bufs *attackBufs, incomingDamage, runechantCarryover int, priorAuraTriggers []card.AuraTrigger) {
 	line := summary.BestLine
 
-	// Reconstruct pitched and attackers from the winning line. The arsenal-in entry
+	// Reconstruct pitched, attackers, and held from the winning line. The arsenal-in entry
 	// (FromArsenal=true, last slot) participates in attackers / defenders identically to hand
-	// entries when its role is Attack / Defend.
+	// entries when its role is Attack / Defend; it can never be Held (roleAllowed bars it).
 	pitched := bufs.pitchedBuf[:0]
 	attackers := bufs.attackersBuf[:0]
+	held := bufs.heldBuf[:0]
 	arsenalInIdx := -1
 	var sumDef int
 	for _, a := range line {
@@ -89,6 +90,8 @@ func fillContributions(summary *TurnSummary, hero hero.Hero, weapons []weapon.We
 				}
 			}
 			sumDef += def
+		case Held:
+			held = append(held, a.Card)
 		}
 	}
 
@@ -110,6 +113,7 @@ func fillContributions(summary *TurnSummary, hero hero.Hero, weapons []weapon.We
 			hero:               hero,
 			pitched:            pitched,
 			deck:               deck,
+			held:               held,
 			bufs:               bufs,
 			resourceBudget:     budget.resource,
 			runechantCarryover: runechantCarryover,
@@ -123,6 +127,7 @@ func fillContributions(summary *TurnSummary, hero hero.Hero, weapons []weapon.We
 			// winners into summary before returning, so sharing bufs-backed storage is safe.
 			drawnWinner:        bufs.drawnWinnerScratch[:0],
 			auraTriggersWinner: bufs.auraTriggersWinnerScratch[:0],
+			heldConsumedWinner: bufs.heldConsumedWinnerScratch[:0],
 		}
 		ctx.seedState()
 		fillAttackChainContributions(summary, chain, ctx)
@@ -144,6 +149,10 @@ func fillContributions(summary *TurnSummary, hero hero.Hero, weapons []weapon.We
 		if n := len(ctx.auraTriggersWinner); n > 0 {
 			summary.AuraTriggers = make([]card.AuraTrigger, n)
 			copy(summary.AuraTriggers, ctx.auraTriggersWinner)
+		}
+		if n := len(ctx.heldConsumedWinner); n > 0 {
+			summary.HeldConsumed = make([]card.Card, n)
+			copy(summary.HeldConsumed, ctx.heldConsumedWinner)
 		}
 	}
 }

@@ -247,7 +247,7 @@ func processTriggersAtStartOfTurn(queued []card.AuraTrigger, postDrawDeck []card
 // entries append into nextHeld; Arsenal flows through play.ArsenalCard and needs no
 // bookkeeping here.
 func applyTurnResult(play hand.TurnSummary, buf []card.Card, head, tail *int, drawCount int, nextHeld []card.Card) []card.Card {
-	nextHeld = recycleCardStates(play.BestLine, buf, tail, nextHeld)
+	nextHeld = recycleCardStates(play.BestLine, play.HeldConsumed, buf, tail, nextHeld)
 	*head += drawCount + len(play.Drawn)
 	for _, d := range play.Drawn {
 		if d.Role == hand.Held {
@@ -534,10 +534,13 @@ func attributePlayStats(stats *Stats, line []hand.CardAssignment) {
 // recycleCardStates prepares next turn's draw queue from this turn's assignments: pitched
 // cards go to the bottom of buf[*tail:] (the backing array has room since moved cards are a
 // subset of those just consumed); Held cards go into nextHeld for the next turn; attacked and
-// defended cards are spent. Arsenal / arsenal-in entries thread through arsenalCard separately,
-// not here. Returns the updated nextHeld slice (pass a nil/empty slice or nextHeld[:0] to
-// start).
-func recycleCardStates(line []hand.CardAssignment, buf []card.Card, tail *int, nextHeld []card.Card) []card.Card {
+// defended cards are spent. Cards in heldConsumed (alt-cost effects re-routed them, e.g.
+// Moon Wish's "use a Held card") are skipped on the Held branch — those copies have already
+// been threaded into the next-turn state by the consuming card and double-counting them
+// against nextHeld would inflate the next hand. Arsenal / arsenal-in entries thread through
+// arsenalCard separately, not here. Returns the updated nextHeld slice (pass a nil/empty
+// slice or nextHeld[:0] to start).
+func recycleCardStates(line []hand.CardAssignment, heldConsumed []card.Card, buf []card.Card, tail *int, nextHeld []card.Card) []card.Card {
 	for _, a := range line {
 		if a.FromArsenal {
 			continue
@@ -547,8 +550,37 @@ func recycleCardStates(line []hand.CardAssignment, buf []card.Card, tail *int, n
 			buf[*tail] = a.Card
 			*tail++
 		case hand.Held:
+			if containsCardOnce(heldConsumed, a.Card) {
+				heldConsumed = removeCardOnce(heldConsumed, a.Card)
+				continue
+			}
 			nextHeld = append(nextHeld, a.Card)
 		}
 	}
 	return nextHeld
+}
+
+// containsCardOnce reports whether cs holds at least one occurrence of c (by ID). Linear
+// scan; heldConsumed lists are tiny (one entry per alt-cost-using card per chain) so a map
+// would just add overhead.
+func containsCardOnce(cs []card.Card, c card.Card) bool {
+	for _, x := range cs {
+		if x.ID() == c.ID() {
+			return true
+		}
+	}
+	return false
+}
+
+// removeCardOnce returns cs with the first occurrence of c (by ID) removed. Used by
+// recycleCardStates to consume a heldConsumed entry exactly once per matching BestLine slot,
+// so a deck that holds two copies of a card and consumes only one via alt cost still carries
+// the other to nextHeld.
+func removeCardOnce(cs []card.Card, c card.Card) []card.Card {
+	for i, x := range cs {
+		if x.ID() == c.ID() {
+			return append(cs[:i:i], cs[i+1:]...)
+		}
+	}
+	return cs
 }
