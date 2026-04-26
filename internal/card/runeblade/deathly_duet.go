@@ -24,7 +24,7 @@ func (DeathlyDuetRed) GoAgain() bool            { return false }
 // for which play (over-credits when both an attack and a non-attack action are pitched)
 func (DeathlyDuetRed) NotImplemented() {}
 func (DeathlyDuetRed) Play(s *card.TurnState, self *card.CardState) {
-	s.ApplyAndLogEffectiveAttackPlus(self, deathlyDuetBonus(s))
+	s.ApplyAndLogEffectiveAttackPlus(self, deathlyDuetApplyRiders(s, self))
 }
 
 type DeathlyDuetYellow struct{}
@@ -42,7 +42,7 @@ func (DeathlyDuetYellow) GoAgain() bool            { return false }
 // for which play (over-credits when both an attack and a non-attack action are pitched)
 func (DeathlyDuetYellow) NotImplemented() {}
 func (DeathlyDuetYellow) Play(s *card.TurnState, self *card.CardState) {
-	s.ApplyAndLogEffectiveAttackPlus(self, deathlyDuetBonus(s))
+	s.ApplyAndLogEffectiveAttackPlus(self, deathlyDuetApplyRiders(s, self))
 }
 
 type DeathlyDuetBlue struct{}
@@ -60,13 +60,18 @@ func (DeathlyDuetBlue) GoAgain() bool            { return false }
 // for which play (over-credits when both an attack and a non-attack action are pitched)
 func (DeathlyDuetBlue) NotImplemented() {}
 func (DeathlyDuetBlue) Play(s *card.TurnState, self *card.CardState) {
-	s.ApplyAndLogEffectiveAttackPlus(self, deathlyDuetBonus(s))
+	s.ApplyAndLogEffectiveAttackPlus(self, deathlyDuetApplyRiders(s, self))
 }
 
-// deathlyDuetBonus returns the rider damage applied on top of the printed attack: +2 if
-// any attack-typed card was pitched, +2 (via two Runechants entering on resolution) if any
-// non-attack-action card was pitched. Both can stack.
-func deathlyDuetBonus(s *card.TurnState) int {
+// deathlyDuetApplyRiders folds Deathly Duet's two pitch-conditional riders into self and
+// state and returns the runechant-damage rider for the chain step's (+N) display:
+//   - Attack-action pitched → +2{p} power buff lands on self.BonusAttack so EffectiveAttack
+//     and LikelyToHit see the buffed power.
+//   - Non-attack-action pitched → 2 Runechants enter during Deathly Duet's own attack
+//     resolution; their +2 damage credit is the returned rider.
+//
+// Both riders can stack when both pitched roles are present.
+func deathlyDuetApplyRiders(s *card.TurnState, self *card.CardState) int {
 	var attackPitched, nonAttackActionPitched bool
 	for _, p := range s.Pitched {
 		t := p.Types()
@@ -77,14 +82,12 @@ func deathlyDuetBonus(s *card.TurnState) int {
 			nonAttackActionPitched = true
 		}
 	}
-	bonus := 0
 	if attackPitched {
-		bonus += 2
+		self.BonusAttack += 2
 	}
+	rider := 0
 	if nonAttackActionPitched {
-		// Two Runechants enter during Deathly Duet's own attack resolution. No guard on a
-		// following attack existing — Deathly Duet itself is the attack.
-		bonus += s.CreateRunechants(2)
+		rider += s.CreateRunechants(2)
 	}
-	return bonus
+	return rider
 }

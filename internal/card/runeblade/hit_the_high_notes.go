@@ -19,7 +19,8 @@ func (HitTheHighNotesRed) Defense() int             { return 3 }
 func (HitTheHighNotesRed) Types() card.TypeSet      { return hitTheHighNotesTypes }
 func (HitTheHighNotesRed) GoAgain() bool            { return false }
 func (HitTheHighNotesRed) Play(s *card.TurnState, self *card.CardState) {
-	s.ApplyAndLogEffectiveAttackPlus(self, hitTheHighNotesBonus(s))
+	self.BonusAttack += hitTheHighNotesBonus(s)
+	s.ApplyAndLogEffectiveAttack(self)
 }
 
 type HitTheHighNotesYellow struct{}
@@ -33,7 +34,8 @@ func (HitTheHighNotesYellow) Defense() int             { return 3 }
 func (HitTheHighNotesYellow) Types() card.TypeSet      { return hitTheHighNotesTypes }
 func (HitTheHighNotesYellow) GoAgain() bool            { return false }
 func (HitTheHighNotesYellow) Play(s *card.TurnState, self *card.CardState) {
-	s.ApplyAndLogEffectiveAttackPlus(self, hitTheHighNotesBonus(s))
+	self.BonusAttack += hitTheHighNotesBonus(s)
+	s.ApplyAndLogEffectiveAttack(self)
 }
 
 type HitTheHighNotesBlue struct{}
@@ -47,7 +49,8 @@ func (HitTheHighNotesBlue) Defense() int             { return 3 }
 func (HitTheHighNotesBlue) Types() card.TypeSet      { return hitTheHighNotesTypes }
 func (HitTheHighNotesBlue) GoAgain() bool            { return false }
 func (HitTheHighNotesBlue) Play(s *card.TurnState, self *card.CardState) {
-	s.ApplyAndLogEffectiveAttackPlus(self, hitTheHighNotesBonus(s))
+	self.BonusAttack += hitTheHighNotesBonus(s)
+	s.ApplyAndLogEffectiveAttack(self)
 }
 func hitTheHighNotesBonus(s *card.TurnState) int {
 	if s.HasAuraInPlay() {

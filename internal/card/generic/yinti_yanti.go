@@ -10,7 +10,8 @@ import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 
 var yintiYantiTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeAttack)
 
-// yintiYantiPlay adds +1 when any aura is in play: either created this turn or played earlier.
+// yintiYantiBonus returns the +1{p} power buff when any aura is in play (either created
+// this turn or played earlier), else 0.
 func yintiYantiBonus(s *card.TurnState) int {
 	if s != nil && s.HasAuraInPlay() {
 		return 1
@@ -33,7 +34,8 @@ func (YintiYantiRed) GoAgain() bool            { return false }
 // +1{p} is modelled
 func (YintiYantiRed) NotImplemented() {}
 func (YintiYantiRed) Play(s *card.TurnState, self *card.CardState) {
-	s.ApplyAndLogEffectiveAttackPlus(self, yintiYantiBonus(s))
+	self.BonusAttack += yintiYantiBonus(s)
+	s.ApplyAndLogEffectiveAttack(self)
 }
 
 type YintiYantiYellow struct{}
@@ -51,7 +53,8 @@ func (YintiYantiYellow) GoAgain() bool            { return false }
 // +1{p} is modelled
 func (YintiYantiYellow) NotImplemented() {}
 func (YintiYantiYellow) Play(s *card.TurnState, self *card.CardState) {
-	s.ApplyAndLogEffectiveAttackPlus(self, yintiYantiBonus(s))
+	self.BonusAttack += yintiYantiBonus(s)
+	s.ApplyAndLogEffectiveAttack(self)
 }
 
 type YintiYantiBlue struct{}
@@ -69,5 +72,6 @@ func (YintiYantiBlue) GoAgain() bool            { return false }
 // +1{p} is modelled
 func (YintiYantiBlue) NotImplemented() {}
 func (YintiYantiBlue) Play(s *card.TurnState, self *card.CardState) {
-	s.ApplyAndLogEffectiveAttackPlus(self, yintiYantiBonus(s))
+	self.BonusAttack += yintiYantiBonus(s)
+	s.ApplyAndLogEffectiveAttack(self)
 }
