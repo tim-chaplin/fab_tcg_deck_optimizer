@@ -88,6 +88,58 @@ func TestFormatBestTurn_NonAttackCardUsesPlayLabel(t *testing.T) {
 	}
 }
 
+// TestFormatBestTurn_LogAttributesEachTriggerSeparately pins phase-2 logging: each event in
+// the chain (card Play, hero trigger, mid-chain aura trigger, ephemeral attack trigger) gets
+// its own attributed line. Hand: Nimblism (Generic non-attack action, sets
+// NonAttackActionPlayed) + Mauvrion (Runeblade non-attack action, registers an ephemeral
+// "if hits, +3" trigger) + Consuming Volition (Runeblade attack action). Prior aura: a
+// Malefic Incantation TriggerAttackAction. The chain log should hit:
+//   - Mauvrion: PLAY (+0)            — non-attack action, no own damage
+//   - Consuming Volition: ATTACK (+N) — printed power
+//   - Viserai: HERO TRIGGER (+1)     — fires on Volition (attack action)
+//   - Malefic Incantation: AURA TRIGGER (+1) — carryover aura fires on Volition
+//   - Mauvrion: ATTACK TRIGGER (+3)  — ephemeral fires on Volition's hit
+func TestFormatBestTurn_LogAttributesEachTriggerSeparately(t *testing.T) {
+	h := []card.Card{generic.NimblismRed{}, runeblade.MauvrionSkiesRed{}, runeblade.ConsumingVolitionRed{}}
+	prior := []card.AuraTrigger{{
+		Self:        runeblade.MaleficIncantationRed{},
+		Type:        card.TriggerAttackAction,
+		Count:       2,
+		OncePerTurn: true,
+		Handler:     func(s *card.TurnState) int { return s.CreateRunechants(1) },
+	}}
+	got := BestWithTriggers(hero.Viserai{}, nil, h, 0, nil, 0, nil, prior)
+	out := FormatBestTurn(got, 0)
+	wants := []string{
+		"Consuming Volition (Red): ATTACK",
+		"Viserai: HERO TRIGGER (+1)",
+		"Malefic Incantation (Red): AURA TRIGGER (+1)",
+		"Mauvrion Skies (Red): ATTACK TRIGGER (+3)",
+	}
+	for _, want := range wants {
+		if !strings.Contains(out, want) {
+			t.Errorf("missing %q in:\n%s", want, out)
+		}
+	}
+}
+
+// TestFormatBestTurn_LogSuppressesZeroTriggers pins that handlers returning 0 don't add a
+// "(+0)" line for the trigger — log entries for triggers gate on positive contribution to
+// avoid noise. Card-Play lines render unconditionally because the card resolved (the line
+// proves the chain step happened); trigger lines only render when the trigger actually
+// credited damage.
+func TestFormatBestTurn_LogSuppressesZeroTriggers(t *testing.T) {
+	// Hand: a single Red attack with no go-again. Viserai's OnCardPlayed contributes nothing
+	// (the gate needs another non-attack action played first), no priors, no ephemerals — so
+	// the chain log should be exactly one card-Play line, no trigger spam.
+	h := []card.Card{fake.RedAttack{}}
+	got := Best(hero.Viserai{}, nil, h, 0, nil, 0, nil)
+	if strings.Contains(FormatBestTurn(got, 0), "HERO TRIGGER") {
+		t.Errorf("hero trigger line shouldn't render when Viserai contributed 0; got:\n%s",
+			FormatBestTurn(got, 0))
+	}
+}
+
 // TestFormatBestTurn_ArsenalInPlayedAsDR checks the combined "arsenal-in played from the slot"
 // + "defense reaction prevented" rendering. Hand: one Malefic Blue (pitch 3). Arsenal-in:
 // Toughen Up Blue (DR cost 2). Malefic pitches to fund the DR, Toughen Up blocks 4 of 4 incoming.

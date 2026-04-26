@@ -92,23 +92,14 @@ func splitPitchesByPhase(pitched []CardAssignment, drCost int) (defensePitches, 
 }
 
 // appendAttackChainLines renders the Attack phase into playLog at 4-space indent (one level
-// deeper than section headers): one numbered entry per Attack-role BestLine entry in solver
-// order, then one "WEAPON ATTACK" line per swung weapon. nextStep advances the shared step
-// counter so the chain's entries interleave with the other my-turn entries built around it.
+// deeper than section headers): one numbered entry per line in t.State.Log — the dispatcher's
+// per-event trace of the winning permutation (Card: ATTACK / PLAY / WEAPON ATTACK lines, plus
+// HERO TRIGGER / AURA TRIGGER / ATTACK TRIGGER lines for each fire). nextStep advances the
+// shared step counter so the chain's entries interleave with the other my-turn entries built
+// around it.
 func appendAttackChainLines(playLog []string, t TurnSummary, nextStep func() int) []string {
-	for _, a := range t.BestLine {
-		if a.Role != Attack {
-			continue
-		}
-		label := "ATTACK"
-		if !a.Card.Types().Has(card.TypeAttack) {
-			label = "PLAY"
-		}
-		playLog = append(playLog, fmt.Sprintf("    %d. %s: %s",
-			nextStep(), a.Card.Name(), roleLabelWithArsenal(a, label)))
-	}
-	for _, name := range t.SwungWeapons {
-		playLog = append(playLog, fmt.Sprintf("    %d. %s: WEAPON ATTACK", nextStep(), name))
+	for _, line := range t.State.Log {
+		playLog = append(playLog, fmt.Sprintf("    %d. %s", nextStep(), line))
 	}
 	return playLog
 }
