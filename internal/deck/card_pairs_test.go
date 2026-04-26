@@ -13,20 +13,24 @@ import (
 // TestCardPairMutations_EnumeratesAllVariantCrossProducts: with neither pair half present,
 // the generator emits a candidate per (firstVariant, secondVariant) cross-product per
 // distinct removed-ID combo from the deck. For a [a, a, b, b] deck the unique removed-ID
-// combos are {(a,a), (a,b), (b,b)} = 3; with 9 (Moon Wish, Sun Kiss) cross-products that's
-// 3 × 9 = 27 mutations.
+// combos are {(a,a), (a,b), (b,b)} = 3; with 9 cross-products per implemented pair that's
+// 3 × 9 = 27 mutations per implemented pair.
+//
+// Pairs whose halves carry card.NotImplemented don't contribute — pairAddAllowed gates them
+// out — so the expected total scales with the count of fully-implemented pairs, not the
+// raw len(cardPairs).
 func TestCardPairMutations_EnumeratesAllVariantCrossProducts(t *testing.T) {
 	a := cards.Get(card.ArcanicCrackleRed)
 	b := cards.Get(card.ArcanicSpikeRed)
 	d := New(hero.Viserai{}, []weapon.Weapon{weapon.NebulaBlade{}}, []card.Card{a, a, b, b})
 
 	muts := pairSwapMutations(d, nil)
-	const variantCombosPerPair = 3 * 3
 	const dedupedRemovalCombos = 3 // (a,a), (a,b), (b,b)
-	want := len(cardPairs) * variantCombosPerPair * dedupedRemovalCombos
+	implementedCombos := countImplementedPairCombos()
+	want := implementedCombos * dedupedRemovalCombos
 	if len(muts) != want {
-		t.Fatalf("got %d pair mutations, want %d (%d pairs × %d variant combos × %d removal combos)",
-			len(muts), want, len(cardPairs), variantCombosPerPair, dedupedRemovalCombos)
+		t.Fatalf("got %d pair mutations, want %d (%d implemented variant combos × %d removal combos)",
+			len(muts), want, implementedCombos, dedupedRemovalCombos)
 	}
 
 	// Every (firstID, secondID) cross-product from cardPairs[0] must appear at least once.
@@ -47,6 +51,30 @@ func TestCardPairMutations_EnumeratesAllVariantCrossProducts(t *testing.T) {
 		t.Errorf("variant cross-product coverage: saw %d distinct (first, second) pairs, want %d",
 			len(seen), wantCombos)
 	}
+}
+
+// countImplementedPairCombos returns the total number of (firstVariant, secondVariant)
+// cross-product entries across cardPairs where both halves are free of card.NotImplemented
+// — exactly the combos pairAddAllowed lets through. Tests that compute expected mutation
+// counts use this so a future "drop NotImplemented from card X" change doesn't silently
+// make the assertion stale.
+func countImplementedPairCombos() int {
+	n := 0
+	for _, p := range cardPairs {
+		n += countImplementedInGroup(p.First) * countImplementedInGroup(p.Second)
+	}
+	return n
+}
+
+// countImplementedInGroup returns how many variants in g are free of card.NotImplemented.
+func countImplementedInGroup(g CardGroup) int {
+	n := 0
+	for _, id := range g {
+		if _, unimplemented := cards.Get(id).(card.NotImplemented); !unimplemented {
+			n++
+		}
+	}
+	return n
 }
 
 // TestCardPairMutations_RemovesBothCopiesOfDuplicate is the pilot for the index-based
@@ -223,6 +251,26 @@ func TestCardPairMutations_OverlapSuppressionSkipsRedundantSwaps(t *testing.T) {
 			strings.Contains(m.Description, "+1 Sun Kiss (Red)") {
 			t.Errorf("mutation %d (%s): redundant -1/+1 of Sun Kiss (Red) — overlap suppression failed",
 				i, m.Description)
+		}
+	}
+}
+
+// TestCardPairMutations_SkipsNotImplementedHalves: pair mutations never name a card that
+// carries card.NotImplemented as one of the +1 adds. cardPairs registers pairings whose
+// halves aren't all modelled yet (e.g. Belittle / Minnowism, Amulet of Havencall / Rally
+// the Rearguard); those entries shouldn't leak NotImplemented printings into the search
+// pool just because they're listed.
+func TestCardPairMutations_SkipsNotImplementedHalves(t *testing.T) {
+	a := cards.Get(card.ArcanicCrackleRed)
+	b := cards.Get(card.ArcanicSpikeRed)
+	d := New(hero.Viserai{}, []weapon.Weapon{weapon.NebulaBlade{}}, []card.Card{a, a, b, b})
+
+	for i, m := range pairSwapMutations(d, nil) {
+		for _, c := range m.Deck.Cards {
+			if _, unimplemented := c.(card.NotImplemented); unimplemented {
+				t.Errorf("mutation %d (%s) introduced NotImplemented card %s",
+					i, m.Description, c.Name())
+			}
 		}
 	}
 }
