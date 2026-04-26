@@ -3,11 +3,6 @@
 //
 // Text: "As an additional cost to play Demolition Crew, reveal a card in your hand with cost 2 or
 // greater. **Dominate**"
-//
-// Modelling: Dominate is advertised via the card.Dominator marker so LikelyToHit credits the
-// "defender capped at one blocker" bump at 5+ power. The additional reveal cost isn't
-// modelled — the sim doesn't enumerate hand reveals as payment, and the card is effectively
-// always playable if its resource cost is met.
 
 package generic
 

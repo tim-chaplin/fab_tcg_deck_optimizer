@@ -4,9 +4,7 @@
 // Run is played from arsenal, the next attack action card you play this turn gains +N{p}. **Go
 // again**" (Red N=3, Yellow N=2, Blue N=1.)
 //
-// Modelling: The on-hit draw rider isn't modelled. The +N{p} grant fires only when this copy
-// was played from arsenal (self.FromArsenal); when it does, scan TurnState.CardsRemaining for
-// the next attack action card and credit the bonus assuming it will be played.
+// The +N{p} grant only fires when this copy was played from arsenal (self.FromArsenal).
 
 package generic
 
