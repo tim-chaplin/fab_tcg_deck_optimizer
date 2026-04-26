@@ -16,9 +16,7 @@ var sigilOfSufferingTypes = card.NewTypeSet(card.TypeRuneblade, card.TypeDefense
 
 func sigilOfSufferingPlay(s *card.TurnState, self *card.CardState) {
 	s.ApplyAndLogEffectiveAttack(self)
-	if card.LikelyDamageHits(1, false) {
-		s.DealAndLogArcaneDamage(self, 1)
-	}
+	s.DealAndLogArcaneDamage(self, 1)
 	if s.ArcaneDamageDealt {
 		s.LogRiderOnPlay(self, "Gained +1{d} from arcane this turn", 1)
 	}
