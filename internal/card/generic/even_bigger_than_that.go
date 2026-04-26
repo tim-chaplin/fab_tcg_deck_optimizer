@@ -23,8 +23,7 @@ func (EvenBiggerThanThatRed) Types() card.TypeSet                       { return
 func (EvenBiggerThanThatRed) GoAgain() bool                             { return false }
 // not implemented: Opt + reveal-and-Quicken trigger; gated on damage dealt this turn
 func (EvenBiggerThanThatRed) NotImplemented()                           {}
-func (EvenBiggerThanThatRed) Play(*card.TurnState, *card.CardState) int { return 0 }
-
+func (EvenBiggerThanThatRed) Play(s *card.TurnState, self *card.CardState) { s.LogPlay(self) }
 type EvenBiggerThanThatYellow struct{}
 
 func (EvenBiggerThanThatYellow) ID() card.ID                               { return card.EvenBiggerThanThatYellow }
@@ -37,8 +36,7 @@ func (EvenBiggerThanThatYellow) Types() card.TypeSet                       { ret
 func (EvenBiggerThanThatYellow) GoAgain() bool                             { return false }
 // not implemented: Opt + reveal-and-Quicken trigger; gated on damage dealt this turn
 func (EvenBiggerThanThatYellow) NotImplemented()                           {}
-func (EvenBiggerThanThatYellow) Play(*card.TurnState, *card.CardState) int { return 0 }
-
+func (EvenBiggerThanThatYellow) Play(s *card.TurnState, self *card.CardState) { s.LogPlay(self) }
 type EvenBiggerThanThatBlue struct{}
 
 func (EvenBiggerThanThatBlue) ID() card.ID                               { return card.EvenBiggerThanThatBlue }
@@ -51,4 +49,4 @@ func (EvenBiggerThanThatBlue) Types() card.TypeSet                       { retur
 func (EvenBiggerThanThatBlue) GoAgain() bool                             { return false }
 // not implemented: Opt + reveal-and-Quicken trigger; gated on damage dealt this turn
 func (EvenBiggerThanThatBlue) NotImplemented()                           {}
-func (EvenBiggerThanThatBlue) Play(*card.TurnState, *card.CardState) int { return 0 }
+func (EvenBiggerThanThatBlue) Play(s *card.TurnState, self *card.CardState) { s.LogPlay(self) }

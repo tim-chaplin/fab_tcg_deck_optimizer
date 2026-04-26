@@ -11,15 +11,16 @@ import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 var zealousBeltingTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeAttack)
 
 // zealousBeltingPlay grants go again when any pitched card this turn has base power greater
-// than the card's own base power.
-func zealousBeltingPlay(base int, s *card.TurnState, self *card.CardState) int {
+// than the card's own base power, then emits the chain step.
+func zealousBeltingPlay(s *card.TurnState, self *card.CardState) {
+	base := self.Card.Attack()
 	for _, p := range s.Pitched {
 		if p.Attack() > base {
 			self.GrantedGoAgain = true
 			break
 		}
 	}
-	return base
+	s.ApplyAndLogEffectiveAttack(self)
 }
 
 type ZealousBeltingRed struct{}
@@ -32,8 +33,9 @@ func (ZealousBeltingRed) Attack() int                 { return 5 }
 func (ZealousBeltingRed) Defense() int                { return 2 }
 func (ZealousBeltingRed) Types() card.TypeSet         { return zealousBeltingTypes }
 func (ZealousBeltingRed) GoAgain() bool               { return false }
-func (c ZealousBeltingRed) Play(s *card.TurnState, self *card.CardState) int { return zealousBeltingPlay(c.Attack(), s, self) }
-
+func (ZealousBeltingRed) Play(s *card.TurnState, self *card.CardState) {
+	zealousBeltingPlay(s, self)
+}
 type ZealousBeltingYellow struct{}
 
 func (ZealousBeltingYellow) ID() card.ID                 { return card.ZealousBeltingYellow }
@@ -44,8 +46,9 @@ func (ZealousBeltingYellow) Attack() int                 { return 4 }
 func (ZealousBeltingYellow) Defense() int                { return 2 }
 func (ZealousBeltingYellow) Types() card.TypeSet         { return zealousBeltingTypes }
 func (ZealousBeltingYellow) GoAgain() bool               { return false }
-func (c ZealousBeltingYellow) Play(s *card.TurnState, self *card.CardState) int { return zealousBeltingPlay(c.Attack(), s, self) }
-
+func (ZealousBeltingYellow) Play(s *card.TurnState, self *card.CardState) {
+	zealousBeltingPlay(s, self)
+}
 type ZealousBeltingBlue struct{}
 
 func (ZealousBeltingBlue) ID() card.ID                 { return card.ZealousBeltingBlue }
@@ -56,4 +59,6 @@ func (ZealousBeltingBlue) Attack() int                 { return 3 }
 func (ZealousBeltingBlue) Defense() int                { return 2 }
 func (ZealousBeltingBlue) Types() card.TypeSet         { return zealousBeltingTypes }
 func (ZealousBeltingBlue) GoAgain() bool               { return false }
-func (c ZealousBeltingBlue) Play(s *card.TurnState, self *card.CardState) int { return zealousBeltingPlay(c.Attack(), s, self) }
+func (ZealousBeltingBlue) Play(s *card.TurnState, self *card.CardState) {
+	zealousBeltingPlay(s, self)
+}

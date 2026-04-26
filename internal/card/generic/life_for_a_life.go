@@ -40,8 +40,9 @@ func (LifeForALifeRed) Attack() int                  { return 4 }
 func (LifeForALifeRed) Defense() int                 { return 2 }
 func (LifeForALifeRed) Types() card.TypeSet          { return lifeForALifeTypes }
 func (LifeForALifeRed) GoAgain() bool                { return simstate.HeroWantsLowerHealth() }
-func (c LifeForALifeRed) Play(s *card.TurnState, self *card.CardState) int { return lifeForALifeDamage(c.Attack(), self) }
-
+func (c LifeForALifeRed) Play(s *card.TurnState, self *card.CardState) {
+	s.ApplyAndLogEffectiveAttackPlus(self, lifeForALifeDamage(c.Attack(), self)-self.Card.Attack())
+}
 type LifeForALifeYellow struct{}
 
 func (LifeForALifeYellow) ID() card.ID                  { return card.LifeForALifeYellow }
@@ -52,8 +53,9 @@ func (LifeForALifeYellow) Attack() int                  { return 3 }
 func (LifeForALifeYellow) Defense() int                 { return 2 }
 func (LifeForALifeYellow) Types() card.TypeSet          { return lifeForALifeTypes }
 func (LifeForALifeYellow) GoAgain() bool                { return simstate.HeroWantsLowerHealth() }
-func (c LifeForALifeYellow) Play(s *card.TurnState, self *card.CardState) int { return lifeForALifeDamage(c.Attack(), self) }
-
+func (c LifeForALifeYellow) Play(s *card.TurnState, self *card.CardState) {
+	s.ApplyAndLogEffectiveAttackPlus(self, lifeForALifeDamage(c.Attack(), self)-self.Card.Attack())
+}
 type LifeForALifeBlue struct{}
 
 func (LifeForALifeBlue) ID() card.ID                  { return card.LifeForALifeBlue }
@@ -64,4 +66,6 @@ func (LifeForALifeBlue) Attack() int                  { return 2 }
 func (LifeForALifeBlue) Defense() int                 { return 2 }
 func (LifeForALifeBlue) Types() card.TypeSet          { return lifeForALifeTypes }
 func (LifeForALifeBlue) GoAgain() bool                { return simstate.HeroWantsLowerHealth() }
-func (c LifeForALifeBlue) Play(s *card.TurnState, self *card.CardState) int { return lifeForALifeDamage(c.Attack(), self) }
+func (c LifeForALifeBlue) Play(s *card.TurnState, self *card.CardState) {
+	s.ApplyAndLogEffectiveAttackPlus(self, lifeForALifeDamage(c.Attack(), self)-self.Card.Attack())
+}

@@ -35,8 +35,9 @@ func (SloggismRed) Attack() int                 { return 0 }
 func (SloggismRed) Defense() int                { return 2 }
 func (SloggismRed) Types() card.TypeSet         { return sloggismTypes }
 func (SloggismRed) GoAgain() bool               { return true }
-func (SloggismRed) Play(s *card.TurnState, _ *card.CardState) int { return sloggismPlay(s, 6) }
-
+func (SloggismRed) Play(s *card.TurnState, self *card.CardState) {
+	s.ApplyAndLogEffectiveAttackPlus(self, sloggismPlay(s, 6))
+}
 type SloggismYellow struct{}
 
 func (SloggismYellow) ID() card.ID                 { return card.SloggismYellow }
@@ -47,8 +48,9 @@ func (SloggismYellow) Attack() int                 { return 0 }
 func (SloggismYellow) Defense() int                { return 2 }
 func (SloggismYellow) Types() card.TypeSet         { return sloggismTypes }
 func (SloggismYellow) GoAgain() bool               { return true }
-func (SloggismYellow) Play(s *card.TurnState, _ *card.CardState) int { return sloggismPlay(s, 5) }
-
+func (SloggismYellow) Play(s *card.TurnState, self *card.CardState) {
+	s.ApplyAndLogEffectiveAttackPlus(self, sloggismPlay(s, 5))
+}
 type SloggismBlue struct{}
 
 func (SloggismBlue) ID() card.ID                 { return card.SloggismBlue }
@@ -59,4 +61,6 @@ func (SloggismBlue) Attack() int                 { return 0 }
 func (SloggismBlue) Defense() int                { return 2 }
 func (SloggismBlue) Types() card.TypeSet         { return sloggismTypes }
 func (SloggismBlue) GoAgain() bool               { return true }
-func (SloggismBlue) Play(s *card.TurnState, _ *card.CardState) int { return sloggismPlay(s, 4) }
+func (SloggismBlue) Play(s *card.TurnState, self *card.CardState) {
+	s.ApplyAndLogEffectiveAttackPlus(self, sloggismPlay(s, 4))
+}

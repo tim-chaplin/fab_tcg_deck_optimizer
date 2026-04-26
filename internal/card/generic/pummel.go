@@ -23,8 +23,7 @@ func (PummelRed) GoAgain() bool                             { return false }
 // not implemented: modal AR +4{p}: club/hammer weapon attack OR cost-2+ attack action
 // (on-hit discard)
 func (PummelRed) NotImplemented()                           {}
-func (PummelRed) Play(*card.TurnState, *card.CardState) int { return 0 }
-
+func (PummelRed) Play(s *card.TurnState, self *card.CardState) { s.LogPlay(self) }
 type PummelYellow struct{}
 
 func (PummelYellow) ID() card.ID                               { return card.PummelYellow }
@@ -38,8 +37,7 @@ func (PummelYellow) GoAgain() bool                             { return false }
 // not implemented: modal AR +4{p}: club/hammer weapon attack OR cost-2+ attack action
 // (on-hit discard)
 func (PummelYellow) NotImplemented()                           {}
-func (PummelYellow) Play(*card.TurnState, *card.CardState) int { return 0 }
-
+func (PummelYellow) Play(s *card.TurnState, self *card.CardState) { s.LogPlay(self) }
 type PummelBlue struct{}
 
 func (PummelBlue) ID() card.ID                               { return card.PummelBlue }
@@ -53,4 +51,4 @@ func (PummelBlue) GoAgain() bool                             { return false }
 // not implemented: modal AR +4{p}: club/hammer weapon attack OR cost-2+ attack action
 // (on-hit discard)
 func (PummelBlue) NotImplemented()                           {}
-func (PummelBlue) Play(*card.TurnState, *card.CardState) int { return 0 }
+func (PummelBlue) Play(s *card.TurnState, self *card.CardState) { s.LogPlay(self) }

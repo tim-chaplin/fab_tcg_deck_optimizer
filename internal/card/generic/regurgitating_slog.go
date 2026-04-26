@@ -28,8 +28,7 @@ func (RegurgitatingSlogRed) GoAgain() bool               { return false }
 // not implemented: Sloggism graveyard-banish Dominate grant (additional cost not evaluated,
 // so the grant never fires)
 func (RegurgitatingSlogRed) NotImplemented()             {}
-func (c RegurgitatingSlogRed) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }
-
+func (c RegurgitatingSlogRed) Play(s *card.TurnState, self *card.CardState) { s.ApplyAndLogEffectiveAttack(self) }
 type RegurgitatingSlogYellow struct{}
 
 func (RegurgitatingSlogYellow) ID() card.ID                 { return card.RegurgitatingSlogYellow }
@@ -43,8 +42,7 @@ func (RegurgitatingSlogYellow) GoAgain() bool               { return false }
 // not implemented: Sloggism graveyard-banish Dominate grant (additional cost not evaluated,
 // so the grant never fires)
 func (RegurgitatingSlogYellow) NotImplemented()             {}
-func (c RegurgitatingSlogYellow) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }
-
+func (c RegurgitatingSlogYellow) Play(s *card.TurnState, self *card.CardState) { s.ApplyAndLogEffectiveAttack(self) }
 type RegurgitatingSlogBlue struct{}
 
 func (RegurgitatingSlogBlue) ID() card.ID                 { return card.RegurgitatingSlogBlue }
@@ -58,4 +56,4 @@ func (RegurgitatingSlogBlue) GoAgain() bool               { return false }
 // not implemented: Sloggism graveyard-banish Dominate grant (additional cost not evaluated,
 // so the grant never fires)
 func (RegurgitatingSlogBlue) NotImplemented()             {}
-func (c RegurgitatingSlogBlue) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }
+func (c RegurgitatingSlogBlue) Play(s *card.TurnState, self *card.CardState) { s.ApplyAndLogEffectiveAttack(self) }

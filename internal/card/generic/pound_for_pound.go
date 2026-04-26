@@ -20,12 +20,12 @@ import (
 var poundForPoundTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeAttack)
 
 // poundForPoundPlay grants self Dominate when the current hero opts into LowerHealthWanter,
-// then returns the base attack.
-func poundForPoundPlay(attack int, self *card.CardState) int {
+// then emits the chain step.
+func poundForPoundPlay(s *card.TurnState, self *card.CardState) {
 	if simstate.HeroWantsLowerHealth() {
 		self.GrantedDominate = true
 	}
-	return attack
+	s.ApplyAndLogEffectiveAttack(self)
 }
 
 type PoundForPoundRed struct{}
@@ -38,10 +38,9 @@ func (PoundForPoundRed) Attack() int                 { return 6 }
 func (PoundForPoundRed) Defense() int                { return 2 }
 func (PoundForPoundRed) Types() card.TypeSet         { return poundForPoundTypes }
 func (PoundForPoundRed) GoAgain() bool               { return false }
-func (c PoundForPoundRed) Play(_ *card.TurnState, self *card.CardState) int {
-	return poundForPoundPlay(c.Attack(), self)
+func (PoundForPoundRed) Play(s *card.TurnState, self *card.CardState) {
+	poundForPoundPlay(s, self)
 }
-
 type PoundForPoundYellow struct{}
 
 func (PoundForPoundYellow) ID() card.ID                 { return card.PoundForPoundYellow }
@@ -52,10 +51,9 @@ func (PoundForPoundYellow) Attack() int                 { return 5 }
 func (PoundForPoundYellow) Defense() int                { return 2 }
 func (PoundForPoundYellow) Types() card.TypeSet         { return poundForPoundTypes }
 func (PoundForPoundYellow) GoAgain() bool               { return false }
-func (c PoundForPoundYellow) Play(_ *card.TurnState, self *card.CardState) int {
-	return poundForPoundPlay(c.Attack(), self)
+func (PoundForPoundYellow) Play(s *card.TurnState, self *card.CardState) {
+	poundForPoundPlay(s, self)
 }
-
 type PoundForPoundBlue struct{}
 
 func (PoundForPoundBlue) ID() card.ID                 { return card.PoundForPoundBlue }
@@ -66,6 +64,6 @@ func (PoundForPoundBlue) Attack() int                 { return 4 }
 func (PoundForPoundBlue) Defense() int                { return 2 }
 func (PoundForPoundBlue) Types() card.TypeSet         { return poundForPoundTypes }
 func (PoundForPoundBlue) GoAgain() bool               { return false }
-func (c PoundForPoundBlue) Play(_ *card.TurnState, self *card.CardState) int {
-	return poundForPoundPlay(c.Attack(), self)
+func (PoundForPoundBlue) Play(s *card.TurnState, self *card.CardState) {
+	poundForPoundPlay(s, self)
 }

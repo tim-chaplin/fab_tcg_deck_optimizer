@@ -8,7 +8,8 @@ import (
 
 func TestSutcliffesResearchNotes_EmptyDeck(t *testing.T) {
 	s := &card.TurnState{}
-	if got := (SutcliffesResearchNotesRed{}).Play(s, &card.CardState{}); got != 0 {
+	(SutcliffesResearchNotesRed{}).Play(s, &card.CardState{Card: SutcliffesResearchNotesRed{}})
+	if got := s.Value; got != 0{
 		t.Errorf("Play() = %d, want 0 (empty deck reveals nothing)", got)
 	}
 }
@@ -20,7 +21,8 @@ func TestSutcliffesResearchNotes_CountsRunebladeAttackActions(t *testing.T) {
 		stubRunebladeAttack{},
 	}
 	s := &card.TurnState{Deck: deck}
-	if got := (SutcliffesResearchNotesRed{}).Play(s, &card.CardState{}); got != 2 {
+	(SutcliffesResearchNotesRed{}).Play(s, &card.CardState{Card: SutcliffesResearchNotesRed{}})
+	if got := s.Value; got != 2{
 		t.Errorf("Red (reveal 3): Play() = %d, want 2 (2 of 3 are Runeblade attack actions)", got)
 	}
 	if s.Runechants != 2 {
@@ -31,7 +33,8 @@ func TestSutcliffesResearchNotes_CountsRunebladeAttackActions(t *testing.T) {
 func TestSutcliffesResearchNotes_DeckShorterThanRevealCount(t *testing.T) {
 	deck := []card.Card{stubRunebladeAttack{}}
 	s := &card.TurnState{Deck: deck}
-	if got := (SutcliffesResearchNotesRed{}).Play(s, &card.CardState{}); got != 1 {
+	(SutcliffesResearchNotesRed{}).Play(s, &card.CardState{Card: SutcliffesResearchNotesRed{}})
+	if got := s.Value; got != 1{
 		t.Errorf("Red (reveal 3, deck 1): Play() = %d, want 1 (only 1 card to reveal)", got)
 	}
 }
@@ -41,7 +44,8 @@ func TestSutcliffesResearchNotes_RunebladeNonAttackIgnored(t *testing.T) {
 	// Attack type) shouldn't count toward the Runechant creation.
 	deck := []card.Card{ReadTheRunesRed{}}
 	s := &card.TurnState{Deck: deck}
-	if got := (SutcliffesResearchNotesRed{}).Play(s, &card.CardState{}); got != 0 {
+	(SutcliffesResearchNotesRed{}).Play(s, &card.CardState{Card: SutcliffesResearchNotesRed{}})
+	if got := s.Value; got != 0{
 		t.Errorf("Play() = %d, want 0 (Runeblade non-attack card shouldn't count)", got)
 	}
 }
@@ -50,7 +54,8 @@ func TestSutcliffesResearchNotes_NonRunebladeAttackIgnored(t *testing.T) {
 	// An attack action that isn't Runeblade-classed shouldn't count.
 	deck := []card.Card{stubNonRunebladeAttack{}}
 	s := &card.TurnState{Deck: deck}
-	if got := (SutcliffesResearchNotesRed{}).Play(s, &card.CardState{}); got != 0 {
+	(SutcliffesResearchNotesRed{}).Play(s, &card.CardState{Card: SutcliffesResearchNotesRed{}})
+	if got := s.Value; got != 0{
 		t.Errorf("Play() = %d, want 0 (non-Runeblade attack shouldn't count)", got)
 	}
 }
@@ -71,7 +76,8 @@ func TestSutcliffesResearchNotes_VariantRevealCounts(t *testing.T) {
 	}
 	for _, tc := range cases {
 		s := &card.TurnState{Deck: deck}
-		if got := tc.c.Play(s, &card.CardState{}); got != tc.want {
+		tc.c.Play(s, &card.CardState{Card: tc.c})
+		if got := s.Value; got != tc.want{
 			t.Errorf("%s: Play() = %d, want %d", tc.c.Name(), got, tc.want)
 		}
 	}

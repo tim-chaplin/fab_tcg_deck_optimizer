@@ -23,8 +23,7 @@ func (NimbyRed) GoAgain() bool               { return false }
 func (NimbyRed) NotSilverAgeLegal()           {}
 // not implemented: Nimblism deck-search tutor
 func (NimbyRed) NotImplemented()              {}
-func (c NimbyRed) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }
-
+func (c NimbyRed) Play(s *card.TurnState, self *card.CardState) { s.ApplyAndLogEffectiveAttack(self) }
 type NimbyYellow struct{}
 
 func (NimbyYellow) ID() card.ID                 { return card.NimbyYellow }
@@ -38,8 +37,7 @@ func (NimbyYellow) GoAgain() bool               { return false }
 func (NimbyYellow) NotSilverAgeLegal()           {}
 // not implemented: Nimblism deck-search tutor
 func (NimbyYellow) NotImplemented()              {}
-func (c NimbyYellow) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }
-
+func (c NimbyYellow) Play(s *card.TurnState, self *card.CardState) { s.ApplyAndLogEffectiveAttack(self) }
 type NimbyBlue struct{}
 
 func (NimbyBlue) ID() card.ID                 { return card.NimbyBlue }
@@ -53,4 +51,4 @@ func (NimbyBlue) GoAgain() bool               { return false }
 func (NimbyBlue) NotSilverAgeLegal()           {}
 // not implemented: Nimblism deck-search tutor
 func (NimbyBlue) NotImplemented()              {}
-func (c NimbyBlue) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }
+func (c NimbyBlue) Play(s *card.TurnState, self *card.CardState) { s.ApplyAndLogEffectiveAttack(self) }

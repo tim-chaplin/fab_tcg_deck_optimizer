@@ -20,4 +20,4 @@ func (ThrustRed) Types() card.TypeSet                       { return thrustTypes
 func (ThrustRed) GoAgain() bool                             { return false }
 // not implemented: AR +3{p} buff to a target sword attack
 func (ThrustRed) NotImplemented()                           {}
-func (ThrustRed) Play(*card.TurnState, *card.CardState) int { return 0 }
+func (ThrustRed) Play(s *card.TurnState, self *card.CardState) { s.LogPlay(self) }

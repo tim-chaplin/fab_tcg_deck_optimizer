@@ -18,4 +18,4 @@ func (TestOfStrengthRed) Types() card.TypeSet        { return defenseReactionTyp
 func (TestOfStrengthRed) GoAgain() bool              { return false }
 // not implemented: gold tokens
 func (TestOfStrengthRed) NotImplemented()            {}
-func (TestOfStrengthRed) Play(s *card.TurnState, _ *card.CardState) int { return card.ClashValue(s, card.GoldTokenValue) }
+func (TestOfStrengthRed) Play(s *card.TurnState, _ *card.CardState) { card.ClashValue(s, card.GoldTokenValue) }

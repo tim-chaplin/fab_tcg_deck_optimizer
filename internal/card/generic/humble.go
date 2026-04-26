@@ -22,8 +22,9 @@ func (HumbleRed) Types() card.TypeSet         { return humbleTypes }
 func (HumbleRed) GoAgain() bool               { return false }
 // not implemented: hero-ability suppression rider
 func (HumbleRed) NotImplemented()             {}
-func (c HumbleRed) Play(s *card.TurnState, self *card.CardState) int { return humbleDamage(c.Attack(), self) }
-
+func (c HumbleRed) Play(s *card.TurnState, self *card.CardState) {
+	s.ApplyAndLogEffectiveAttackPlus(self, humbleDamage(c.Attack(), self)-self.Card.Attack())
+}
 type HumbleYellow struct{}
 
 func (HumbleYellow) ID() card.ID                 { return card.HumbleYellow }
@@ -36,8 +37,9 @@ func (HumbleYellow) Types() card.TypeSet         { return humbleTypes }
 func (HumbleYellow) GoAgain() bool               { return false }
 // not implemented: hero-ability suppression rider
 func (HumbleYellow) NotImplemented()             {}
-func (c HumbleYellow) Play(s *card.TurnState, self *card.CardState) int { return humbleDamage(c.Attack(), self) }
-
+func (c HumbleYellow) Play(s *card.TurnState, self *card.CardState) {
+	s.ApplyAndLogEffectiveAttackPlus(self, humbleDamage(c.Attack(), self)-self.Card.Attack())
+}
 type HumbleBlue struct{}
 
 func (HumbleBlue) ID() card.ID                 { return card.HumbleBlue }
@@ -50,8 +52,9 @@ func (HumbleBlue) Types() card.TypeSet         { return humbleTypes }
 func (HumbleBlue) GoAgain() bool               { return false }
 // not implemented: hero-ability suppression rider
 func (HumbleBlue) NotImplemented()             {}
-func (c HumbleBlue) Play(s *card.TurnState, self *card.CardState) int { return humbleDamage(c.Attack(), self) }
-
+func (c HumbleBlue) Play(s *card.TurnState, self *card.CardState) {
+	s.ApplyAndLogEffectiveAttackPlus(self, humbleDamage(c.Attack(), self)-self.Card.Attack())
+}
 // humbleDamage is a breadcrumb for the on-hit "lose all hero card abilities" rider — not
 // modelled yet (see TODO.md).
 func humbleDamage(attack int, self *card.CardState) int {

@@ -22,8 +22,7 @@ func (BackAlleyBreaklineRed) Types() card.TypeSet         { return backAlleyBrea
 func (BackAlleyBreaklineRed) GoAgain() bool               { return false }
 // not implemented: face-up-from-deck action point grant
 func (BackAlleyBreaklineRed) NotImplemented()             {}
-func (c BackAlleyBreaklineRed) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }
-
+func (c BackAlleyBreaklineRed) Play(s *card.TurnState, self *card.CardState) { s.ApplyAndLogEffectiveAttack(self) }
 type BackAlleyBreaklineYellow struct{}
 
 func (BackAlleyBreaklineYellow) ID() card.ID                 { return card.BackAlleyBreaklineYellow }
@@ -36,8 +35,7 @@ func (BackAlleyBreaklineYellow) Types() card.TypeSet         { return backAlleyB
 func (BackAlleyBreaklineYellow) GoAgain() bool               { return false }
 // not implemented: face-up-from-deck action point grant
 func (BackAlleyBreaklineYellow) NotImplemented()             {}
-func (c BackAlleyBreaklineYellow) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }
-
+func (c BackAlleyBreaklineYellow) Play(s *card.TurnState, self *card.CardState) { s.ApplyAndLogEffectiveAttack(self) }
 type BackAlleyBreaklineBlue struct{}
 
 func (BackAlleyBreaklineBlue) ID() card.ID                 { return card.BackAlleyBreaklineBlue }
@@ -50,4 +48,4 @@ func (BackAlleyBreaklineBlue) Types() card.TypeSet         { return backAlleyBre
 func (BackAlleyBreaklineBlue) GoAgain() bool               { return false }
 // not implemented: face-up-from-deck action point grant
 func (BackAlleyBreaklineBlue) NotImplemented()             {}
-func (c BackAlleyBreaklineBlue) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }
+func (c BackAlleyBreaklineBlue) Play(s *card.TurnState, self *card.CardState) { s.ApplyAndLogEffectiveAttack(self) }

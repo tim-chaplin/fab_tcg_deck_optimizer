@@ -21,8 +21,7 @@ func (BattlefrontBastionRed) Types() card.TypeSet         { return battlefrontBa
 func (BattlefrontBastionRed) GoAgain() bool               { return false }
 // not implemented: defend-alone damage prevention rider
 func (BattlefrontBastionRed) NotImplemented()             {}
-func (c BattlefrontBastionRed) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }
-
+func (c BattlefrontBastionRed) Play(s *card.TurnState, self *card.CardState) { s.ApplyAndLogEffectiveAttack(self) }
 type BattlefrontBastionYellow struct{}
 
 func (BattlefrontBastionYellow) ID() card.ID                 { return card.BattlefrontBastionYellow }
@@ -35,8 +34,7 @@ func (BattlefrontBastionYellow) Types() card.TypeSet         { return battlefron
 func (BattlefrontBastionYellow) GoAgain() bool               { return false }
 // not implemented: defend-alone damage prevention rider
 func (BattlefrontBastionYellow) NotImplemented()             {}
-func (c BattlefrontBastionYellow) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }
-
+func (c BattlefrontBastionYellow) Play(s *card.TurnState, self *card.CardState) { s.ApplyAndLogEffectiveAttack(self) }
 type BattlefrontBastionBlue struct{}
 
 func (BattlefrontBastionBlue) ID() card.ID                 { return card.BattlefrontBastionBlue }
@@ -49,4 +47,4 @@ func (BattlefrontBastionBlue) Types() card.TypeSet         { return battlefrontB
 func (BattlefrontBastionBlue) GoAgain() bool               { return false }
 // not implemented: defend-alone damage prevention rider
 func (BattlefrontBastionBlue) NotImplemented()             {}
-func (c BattlefrontBastionBlue) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }
+func (c BattlefrontBastionBlue) Play(s *card.TurnState, self *card.CardState) { s.ApplyAndLogEffectiveAttack(self) }

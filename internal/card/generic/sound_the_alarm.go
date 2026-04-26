@@ -23,4 +23,4 @@ func (SoundTheAlarmRed) Types() card.TypeSet         { return soundTheAlarmTypes
 func (SoundTheAlarmRed) GoAgain() bool               { return false }
 // not implemented: opponent hand reveal, defense-reaction deck search
 func (SoundTheAlarmRed) NotImplemented()             {}
-func (c SoundTheAlarmRed) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }
+func (c SoundTheAlarmRed) Play(s *card.TurnState, self *card.CardState) { s.ApplyAndLogEffectiveAttack(self) }

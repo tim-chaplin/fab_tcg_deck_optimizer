@@ -23,8 +23,9 @@ func (DownButNotOutRed) Types() card.TypeSet         { return downButNotOutTypes
 func (DownButNotOutRed) GoAgain() bool               { return false }
 // not implemented: health/equipment/token comparison, agility/might/vigor tokens, overpower
 func (DownButNotOutRed) NotImplemented()             {}
-func (c DownButNotOutRed) Play(s *card.TurnState, self *card.CardState) int { return downButNotOutDamage(c.Attack(), self) }
-
+func (c DownButNotOutRed) Play(s *card.TurnState, self *card.CardState) {
+	s.ApplyAndLogEffectiveAttackPlus(self, downButNotOutDamage(c.Attack(), self)-self.Card.Attack())
+}
 type DownButNotOutYellow struct{}
 
 func (DownButNotOutYellow) ID() card.ID                 { return card.DownButNotOutYellow }
@@ -37,8 +38,9 @@ func (DownButNotOutYellow) Types() card.TypeSet         { return downButNotOutTy
 func (DownButNotOutYellow) GoAgain() bool               { return false }
 // not implemented: health/equipment/token comparison, agility/might/vigor tokens, overpower
 func (DownButNotOutYellow) NotImplemented()             {}
-func (c DownButNotOutYellow) Play(s *card.TurnState, self *card.CardState) int { return downButNotOutDamage(c.Attack(), self) }
-
+func (c DownButNotOutYellow) Play(s *card.TurnState, self *card.CardState) {
+	s.ApplyAndLogEffectiveAttackPlus(self, downButNotOutDamage(c.Attack(), self)-self.Card.Attack())
+}
 type DownButNotOutBlue struct{}
 
 func (DownButNotOutBlue) ID() card.ID                 { return card.DownButNotOutBlue }
@@ -51,8 +53,9 @@ func (DownButNotOutBlue) Types() card.TypeSet         { return downButNotOutType
 func (DownButNotOutBlue) GoAgain() bool               { return false }
 // not implemented: health/equipment/token comparison, agility/might/vigor tokens, overpower
 func (DownButNotOutBlue) NotImplemented()             {}
-func (c DownButNotOutBlue) Play(s *card.TurnState, self *card.CardState) int { return downButNotOutDamage(c.Attack(), self) }
-
+func (c DownButNotOutBlue) Play(s *card.TurnState, self *card.CardState) {
+	s.ApplyAndLogEffectiveAttackPlus(self, downButNotOutDamage(c.Attack(), self)-self.Card.Attack())
+}
 // downButNotOutDamage is a breadcrumb for the conditional "when this hits, create Agility +
 // Might + Vigor tokens" rider — gated on a health/equipment/token comparison we don't track
 // (see TODO.md).

@@ -26,8 +26,7 @@ func (pitchOnlyRed) Types() card.TypeSet {
 	return card.NewTypeSet(card.TypeGeneric, card.TypeAction)
 }
 func (pitchOnlyRed) GoAgain() bool                                 { return false }
-func (pitchOnlyRed) Play(*card.TurnState, *card.CardState) int { return 0 }
-
+func (pitchOnlyRed) Play(*card.TurnState, *card.CardState) {}
 // grantBonusAttack is a test-only non-attack action card that scans CardsRemaining and adds n
 // to BonusAttack on the first attack action card it finds. Mirrors the production shape used
 // by Come to Fight / Minnowism / Captain's Call once they migrate to the BonusAttack path:
@@ -46,14 +45,14 @@ func (grantBonusAttack) Types() card.TypeSet {
 	return card.NewTypeSet(card.TypeGeneric, card.TypeAction)
 }
 func (grantBonusAttack) GoAgain() bool { return true }
-func (g grantBonusAttack) Play(s *card.TurnState, _ *card.CardState) int {
+func (g grantBonusAttack) Play(s *card.TurnState, self *card.CardState) {
 	for _, pc := range s.CardsRemaining {
 		if pc.Card.Types().IsAttackAction() {
 			pc.BonusAttack += g.n
-			return 0
+			break
 		}
 	}
-	return 0
+	s.LogPlay(self)
 }
 
 // grantBonusAttackWeapon scans CardsRemaining for the first weapon swing (TypeWeapon, no
@@ -71,14 +70,14 @@ func (grantBonusAttackWeapon) Types() card.TypeSet {
 	return card.NewTypeSet(card.TypeGeneric, card.TypeAction)
 }
 func (grantBonusAttackWeapon) GoAgain() bool { return true }
-func (g grantBonusAttackWeapon) Play(s *card.TurnState, _ *card.CardState) int {
+func (g grantBonusAttackWeapon) Play(s *card.TurnState, self *card.CardState) {
 	for _, pc := range s.CardsRemaining {
 		if pc.Card.Types().Has(card.TypeWeapon) {
 			pc.BonusAttack += g.n
-			return 0
+			break
 		}
 	}
-	return 0
+	s.LogPlay(self)
 }
 
 // TestPlaySequence_BonusAttackAppliedToTargetDamage pins the core wiring: a granter scheduled

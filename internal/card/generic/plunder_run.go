@@ -25,11 +25,11 @@ func (PlunderRunRed) GoAgain() bool               { return true }
 func (PlunderRunRed) NotSilverAgeLegal()           {}
 // not implemented: on-hit draw rider for the next attack action card to hit this turn
 func (PlunderRunRed) NotImplemented()              {}
-func (PlunderRunRed) Play(s *card.TurnState, self *card.CardState) int {
-	if !self.FromArsenal {
-		return 0
+func (PlunderRunRed) Play(s *card.TurnState, self *card.CardState) {
+	if self.FromArsenal {
+		grantNextAttackActionBonus(s, 3)
 	}
-	return grantNextAttackActionBonus(s, 3)
+	s.LogPlay(self)
 }
 
 type PlunderRunYellow struct{}
@@ -45,11 +45,11 @@ func (PlunderRunYellow) GoAgain() bool               { return true }
 func (PlunderRunYellow) NotSilverAgeLegal()           {}
 // not implemented: on-hit draw rider for the next attack action card to hit this turn
 func (PlunderRunYellow) NotImplemented()              {}
-func (PlunderRunYellow) Play(s *card.TurnState, self *card.CardState) int {
-	if !self.FromArsenal {
-		return 0
+func (PlunderRunYellow) Play(s *card.TurnState, self *card.CardState) {
+	if self.FromArsenal {
+		grantNextAttackActionBonus(s, 2)
 	}
-	return grantNextAttackActionBonus(s, 2)
+	s.LogPlay(self)
 }
 
 type PlunderRunBlue struct{}
@@ -65,9 +65,9 @@ func (PlunderRunBlue) GoAgain() bool               { return true }
 func (PlunderRunBlue) NotSilverAgeLegal()           {}
 // not implemented: on-hit draw rider for the next attack action card to hit this turn
 func (PlunderRunBlue) NotImplemented()              {}
-func (PlunderRunBlue) Play(s *card.TurnState, self *card.CardState) int {
-	if !self.FromArsenal {
-		return 0
+func (PlunderRunBlue) Play(s *card.TurnState, self *card.CardState) {
+	if self.FromArsenal {
+		grantNextAttackActionBonus(s, 1)
 	}
-	return grantNextAttackActionBonus(s, 1)
+	s.LogPlay(self)
 }

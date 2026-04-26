@@ -21,8 +21,7 @@ func (SurgingMilitiaRed) Types() card.TypeSet         { return surgingMilitiaTyp
 func (SurgingMilitiaRed) GoAgain() bool               { return false }
 // not implemented: defended-by +N{p} rider (defender's hand contents not exposed)
 func (SurgingMilitiaRed) NotImplemented()             {}
-func (c SurgingMilitiaRed) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }
-
+func (c SurgingMilitiaRed) Play(s *card.TurnState, self *card.CardState) { s.ApplyAndLogEffectiveAttack(self) }
 type SurgingMilitiaYellow struct{}
 
 func (SurgingMilitiaYellow) ID() card.ID                 { return card.SurgingMilitiaYellow }
@@ -35,8 +34,7 @@ func (SurgingMilitiaYellow) Types() card.TypeSet         { return surgingMilitia
 func (SurgingMilitiaYellow) GoAgain() bool               { return false }
 // not implemented: defended-by +N{p} rider (defender's hand contents not exposed)
 func (SurgingMilitiaYellow) NotImplemented()             {}
-func (c SurgingMilitiaYellow) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }
-
+func (c SurgingMilitiaYellow) Play(s *card.TurnState, self *card.CardState) { s.ApplyAndLogEffectiveAttack(self) }
 type SurgingMilitiaBlue struct{}
 
 func (SurgingMilitiaBlue) ID() card.ID                 { return card.SurgingMilitiaBlue }
@@ -49,4 +47,4 @@ func (SurgingMilitiaBlue) Types() card.TypeSet         { return surgingMilitiaTy
 func (SurgingMilitiaBlue) GoAgain() bool               { return false }
 // not implemented: defended-by +N{p} rider (defender's hand contents not exposed)
 func (SurgingMilitiaBlue) NotImplemented()             {}
-func (c SurgingMilitiaBlue) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }
+func (c SurgingMilitiaBlue) Play(s *card.TurnState, self *card.CardState) { s.ApplyAndLogEffectiveAttack(self) }

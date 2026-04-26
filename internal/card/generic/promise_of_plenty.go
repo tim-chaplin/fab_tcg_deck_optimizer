@@ -15,12 +15,13 @@ import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 
 var promiseOfPlentyTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeAttack)
 
-// promiseOfPlentyPlay grants self Go again when this copy was played from arsenal.
-func promiseOfPlentyPlay(c card.Card, self *card.CardState) int {
+// promiseOfPlentyPlay grants self Go again when this copy was played from arsenal, then
+// emits the chain step.
+func promiseOfPlentyPlay(s *card.TurnState, self *card.CardState) {
 	if self.FromArsenal {
 		self.GrantedGoAgain = true
 	}
-	return c.Attack()
+	s.ApplyAndLogEffectiveAttack(self)
 }
 
 type PromiseOfPlentyRed struct{}
@@ -35,8 +36,9 @@ func (PromiseOfPlentyRed) Types() card.TypeSet         { return promiseOfPlentyT
 func (PromiseOfPlentyRed) GoAgain() bool               { return false }
 // not implemented: on-hit arsenal-placement rider (arsenal/deck content tracking would be required)
 func (PromiseOfPlentyRed) NotImplemented()             {}
-func (c PromiseOfPlentyRed) Play(_ *card.TurnState, self *card.CardState) int { return promiseOfPlentyPlay(c, self) }
-
+func (PromiseOfPlentyRed) Play(s *card.TurnState, self *card.CardState) {
+	promiseOfPlentyPlay(s, self)
+}
 type PromiseOfPlentyYellow struct{}
 
 func (PromiseOfPlentyYellow) ID() card.ID                 { return card.PromiseOfPlentyYellow }
@@ -49,8 +51,9 @@ func (PromiseOfPlentyYellow) Types() card.TypeSet         { return promiseOfPlen
 func (PromiseOfPlentyYellow) GoAgain() bool               { return false }
 // not implemented: on-hit arsenal-placement rider (arsenal/deck content tracking would be required)
 func (PromiseOfPlentyYellow) NotImplemented()             {}
-func (c PromiseOfPlentyYellow) Play(_ *card.TurnState, self *card.CardState) int { return promiseOfPlentyPlay(c, self) }
-
+func (PromiseOfPlentyYellow) Play(s *card.TurnState, self *card.CardState) {
+	promiseOfPlentyPlay(s, self)
+}
 type PromiseOfPlentyBlue struct{}
 
 func (PromiseOfPlentyBlue) ID() card.ID                 { return card.PromiseOfPlentyBlue }
@@ -63,4 +66,6 @@ func (PromiseOfPlentyBlue) Types() card.TypeSet         { return promiseOfPlenty
 func (PromiseOfPlentyBlue) GoAgain() bool               { return false }
 // not implemented: on-hit arsenal-placement rider (arsenal/deck content tracking would be required)
 func (PromiseOfPlentyBlue) NotImplemented()             {}
-func (c PromiseOfPlentyBlue) Play(_ *card.TurnState, self *card.CardState) int { return promiseOfPlentyPlay(c, self) }
+func (PromiseOfPlentyBlue) Play(s *card.TurnState, self *card.CardState) {
+	promiseOfPlentyPlay(s, self)
+}

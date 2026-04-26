@@ -21,8 +21,9 @@ func (ForceSightRed) Types() card.TypeSet         { return forceSightTypes }
 func (ForceSightRed) GoAgain() bool               { return true }
 // not implemented: arsenal-gated Opt 2
 func (ForceSightRed) NotImplemented()             {}
-func (ForceSightRed) Play(s *card.TurnState, _ *card.CardState) int { return grantNextAttackActionBonus(s, 3) }
-
+func (ForceSightRed) Play(s *card.TurnState, self *card.CardState) {
+	s.ApplyAndLogEffectiveAttackPlus(self, grantNextAttackActionBonus(s, 3))
+}
 type ForceSightYellow struct{}
 
 func (ForceSightYellow) ID() card.ID                 { return card.ForceSightYellow }
@@ -35,8 +36,9 @@ func (ForceSightYellow) Types() card.TypeSet         { return forceSightTypes }
 func (ForceSightYellow) GoAgain() bool               { return true }
 // not implemented: arsenal-gated Opt 2
 func (ForceSightYellow) NotImplemented()             {}
-func (ForceSightYellow) Play(s *card.TurnState, _ *card.CardState) int { return grantNextAttackActionBonus(s, 2) }
-
+func (ForceSightYellow) Play(s *card.TurnState, self *card.CardState) {
+	s.ApplyAndLogEffectiveAttackPlus(self, grantNextAttackActionBonus(s, 2))
+}
 type ForceSightBlue struct{}
 
 func (ForceSightBlue) ID() card.ID                 { return card.ForceSightBlue }
@@ -49,4 +51,6 @@ func (ForceSightBlue) Types() card.TypeSet         { return forceSightTypes }
 func (ForceSightBlue) GoAgain() bool               { return true }
 // not implemented: arsenal-gated Opt 2
 func (ForceSightBlue) NotImplemented()             {}
-func (ForceSightBlue) Play(s *card.TurnState, _ *card.CardState) int { return grantNextAttackActionBonus(s, 1) }
+func (ForceSightBlue) Play(s *card.TurnState, self *card.CardState) {
+	s.ApplyAndLogEffectiveAttackPlus(self, grantNextAttackActionBonus(s, 1))
+}

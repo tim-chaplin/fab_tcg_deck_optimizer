@@ -11,12 +11,13 @@ import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 
 var snatchTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeAttack)
 
-// snatchPlay fires the on-hit draw when the attack is likely to land and returns its damage.
-func snatchPlay(attack int, s *card.TurnState, self *card.CardState) int {
+// snatchPlay fires the on-hit draw when the attack is likely to land and emits the chain
+// step.
+func snatchPlay(s *card.TurnState, self *card.CardState) {
 	if card.LikelyToHit(self) {
 		s.DrawOne()
 	}
-	return attack
+	s.ApplyAndLogEffectiveAttack(self)
 }
 
 type SnatchRed struct{}
@@ -33,8 +34,9 @@ func (SnatchRed) NoMemo()                      {} // on-hit DrawOne depends on t
 // not implemented: drawn card recovers only part of a real draw's value (no cross-turn shuffle
 // benefit)
 func (SnatchRed) NotImplemented()              {}
-func (c SnatchRed) Play(s *card.TurnState, self *card.CardState) int { return snatchPlay(c.Attack(), s, self) }
-
+func (SnatchRed) Play(s *card.TurnState, self *card.CardState) {
+	snatchPlay(s, self)
+}
 type SnatchYellow struct{}
 
 func (SnatchYellow) ID() card.ID                  { return card.SnatchYellow }
@@ -49,8 +51,9 @@ func (SnatchYellow) NoMemo()                      {}
 // not implemented: drawn card recovers only part of a real draw's value (no cross-turn shuffle
 // benefit)
 func (SnatchYellow) NotImplemented()              {}
-func (c SnatchYellow) Play(s *card.TurnState, self *card.CardState) int { return snatchPlay(c.Attack(), s, self) }
-
+func (SnatchYellow) Play(s *card.TurnState, self *card.CardState) {
+	snatchPlay(s, self)
+}
 type SnatchBlue struct{}
 
 func (SnatchBlue) ID() card.ID                  { return card.SnatchBlue }
@@ -65,4 +68,6 @@ func (SnatchBlue) NoMemo()                      {}
 // not implemented: drawn card recovers only part of a real draw's value (no cross-turn shuffle
 // benefit)
 func (SnatchBlue) NotImplemented()              {}
-func (c SnatchBlue) Play(s *card.TurnState, self *card.CardState) int { return snatchPlay(c.Attack(), s, self) }
+func (SnatchBlue) Play(s *card.TurnState, self *card.CardState) {
+	snatchPlay(s, self)
+}

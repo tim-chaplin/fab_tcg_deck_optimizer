@@ -20,4 +20,4 @@ func (StartingStakeYellow) Types() card.TypeSet         { return startingStakeTy
 func (StartingStakeYellow) GoAgain() bool               { return false }
 // not implemented: gold tokens
 func (StartingStakeYellow) NotImplemented()             {}
-func (StartingStakeYellow) Play(s *card.TurnState, _ *card.CardState) int { return 0 }
+func (StartingStakeYellow) Play(s *card.TurnState, self *card.CardState) { s.LogPlay(self) }

@@ -21,8 +21,7 @@ func (BrandishRed) Types() card.TypeSet         { return brandishTypes }
 func (BrandishRed) GoAgain() bool               { return true }
 // not implemented: next-weapon-attack +1{p} grant (weapon chain not scanned)
 func (BrandishRed) NotImplemented()             {}
-func (c BrandishRed) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }
-
+func (c BrandishRed) Play(s *card.TurnState, self *card.CardState) { s.ApplyAndLogEffectiveAttack(self) }
 type BrandishYellow struct{}
 
 func (BrandishYellow) ID() card.ID                 { return card.BrandishYellow }
@@ -35,8 +34,7 @@ func (BrandishYellow) Types() card.TypeSet         { return brandishTypes }
 func (BrandishYellow) GoAgain() bool               { return true }
 // not implemented: next-weapon-attack +1{p} grant (weapon chain not scanned)
 func (BrandishYellow) NotImplemented()             {}
-func (c BrandishYellow) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }
-
+func (c BrandishYellow) Play(s *card.TurnState, self *card.CardState) { s.ApplyAndLogEffectiveAttack(self) }
 type BrandishBlue struct{}
 
 func (BrandishBlue) ID() card.ID                 { return card.BrandishBlue }
@@ -49,4 +47,4 @@ func (BrandishBlue) Types() card.TypeSet         { return brandishTypes }
 func (BrandishBlue) GoAgain() bool               { return true }
 // not implemented: next-weapon-attack +1{p} grant (weapon chain not scanned)
 func (BrandishBlue) NotImplemented()             {}
-func (c BrandishBlue) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }
+func (c BrandishBlue) Play(s *card.TurnState, self *card.CardState) { s.ApplyAndLogEffectiveAttack(self) }

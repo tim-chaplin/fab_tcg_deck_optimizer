@@ -21,8 +21,9 @@ func (WalkThePlankRed) Types() card.TypeSet         { return walkThePlankTypes }
 func (WalkThePlankRed) GoAgain() bool               { return false }
 // not implemented: pirate-target freeze rider
 func (WalkThePlankRed) NotImplemented()             {}
-func (c WalkThePlankRed) Play(s *card.TurnState, self *card.CardState) int { return walkThePlankDamage(c.Attack(), self) }
-
+func (c WalkThePlankRed) Play(s *card.TurnState, self *card.CardState) {
+	s.ApplyAndLogEffectiveAttackPlus(self, walkThePlankDamage(c.Attack(), self)-self.Card.Attack())
+}
 type WalkThePlankYellow struct{}
 
 func (WalkThePlankYellow) ID() card.ID                 { return card.WalkThePlankYellow }
@@ -35,8 +36,9 @@ func (WalkThePlankYellow) Types() card.TypeSet         { return walkThePlankType
 func (WalkThePlankYellow) GoAgain() bool               { return false }
 // not implemented: pirate-target freeze rider
 func (WalkThePlankYellow) NotImplemented()             {}
-func (c WalkThePlankYellow) Play(s *card.TurnState, self *card.CardState) int { return walkThePlankDamage(c.Attack(), self) }
-
+func (c WalkThePlankYellow) Play(s *card.TurnState, self *card.CardState) {
+	s.ApplyAndLogEffectiveAttackPlus(self, walkThePlankDamage(c.Attack(), self)-self.Card.Attack())
+}
 type WalkThePlankBlue struct{}
 
 func (WalkThePlankBlue) ID() card.ID                 { return card.WalkThePlankBlue }
@@ -49,8 +51,9 @@ func (WalkThePlankBlue) Types() card.TypeSet         { return walkThePlankTypes 
 func (WalkThePlankBlue) GoAgain() bool               { return false }
 // not implemented: pirate-target freeze rider
 func (WalkThePlankBlue) NotImplemented()             {}
-func (c WalkThePlankBlue) Play(s *card.TurnState, self *card.CardState) int { return walkThePlankDamage(c.Attack(), self) }
-
+func (c WalkThePlankBlue) Play(s *card.TurnState, self *card.CardState) {
+	s.ApplyAndLogEffectiveAttackPlus(self, walkThePlankDamage(c.Attack(), self)-self.Card.Attack())
+}
 // walkThePlankDamage is a breadcrumb for the on-hit "freeze target" rider — Pirate-specific,
 // not modelled yet (see TODO.md).
 func walkThePlankDamage(attack int, self *card.CardState) int {

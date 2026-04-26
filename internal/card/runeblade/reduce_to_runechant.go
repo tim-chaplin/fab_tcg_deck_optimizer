@@ -37,8 +37,9 @@ func (ReduceToRunechantRed) Attack() int                   { return 0 }
 func (ReduceToRunechantRed) Defense() int                  { return 4 }
 func (ReduceToRunechantRed) Types() card.TypeSet           { return reduceToRunechantTypes }
 func (ReduceToRunechantRed) GoAgain() bool                 { return false }
-func (ReduceToRunechantRed) Play(s *card.TurnState, _ *card.CardState) int    { return s.CreateRunechant() }
-
+func (ReduceToRunechantRed) Play(s *card.TurnState, self *card.CardState) {
+	s.ApplyAndLogEffectiveAttackPlus(self, s.CreateRunechant())
+}
 type ReduceToRunechantYellow struct{}
 
 func (ReduceToRunechantYellow) ID() card.ID                 { return card.ReduceToRunechantYellow }
@@ -51,8 +52,9 @@ func (ReduceToRunechantYellow) Attack() int                 { return 0 }
 func (ReduceToRunechantYellow) Defense() int                { return 3 }
 func (ReduceToRunechantYellow) Types() card.TypeSet         { return reduceToRunechantTypes }
 func (ReduceToRunechantYellow) GoAgain() bool               { return false }
-func (ReduceToRunechantYellow) Play(s *card.TurnState, _ *card.CardState) int  { return s.CreateRunechant() }
-
+func (ReduceToRunechantYellow) Play(s *card.TurnState, self *card.CardState) {
+	s.ApplyAndLogEffectiveAttackPlus(self, s.CreateRunechant())
+}
 type ReduceToRunechantBlue struct{}
 
 func (ReduceToRunechantBlue) ID() card.ID                 { return card.ReduceToRunechantBlue }
@@ -65,4 +67,6 @@ func (ReduceToRunechantBlue) Attack() int                 { return 0 }
 func (ReduceToRunechantBlue) Defense() int                { return 2 }
 func (ReduceToRunechantBlue) Types() card.TypeSet         { return reduceToRunechantTypes }
 func (ReduceToRunechantBlue) GoAgain() bool               { return false }
-func (ReduceToRunechantBlue) Play(s *card.TurnState, _ *card.CardState) int  { return s.CreateRunechant() }
+func (ReduceToRunechantBlue) Play(s *card.TurnState, self *card.CardState) {
+	s.ApplyAndLogEffectiveAttackPlus(self, s.CreateRunechant())
+}

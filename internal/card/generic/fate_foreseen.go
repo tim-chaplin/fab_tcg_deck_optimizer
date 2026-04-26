@@ -20,8 +20,7 @@ func (FateForeseenRed) GoAgain() bool            { return false }
 func (FateForeseenRed) NotSilverAgeLegal()       {}
 // not implemented: Opt 1 rider; block value is printed defence only
 func (FateForeseenRed) NotImplemented()           {}
-func (FateForeseenRed) Play(*card.TurnState, *card.CardState) int { return 0 }
-
+func (FateForeseenRed) Play(s *card.TurnState, self *card.CardState) { s.LogPlay(self) }
 type FateForeseenYellow struct{}
 
 func (FateForeseenYellow) ID() card.ID                 { return card.FateForeseenYellow }
@@ -35,8 +34,7 @@ func (FateForeseenYellow) GoAgain() bool            { return false }
 func (FateForeseenYellow) NotSilverAgeLegal()       {}
 // not implemented: Opt 1 rider; block value is printed defence only
 func (FateForeseenYellow) NotImplemented()           {}
-func (FateForeseenYellow) Play(*card.TurnState, *card.CardState) int { return 0 }
-
+func (FateForeseenYellow) Play(s *card.TurnState, self *card.CardState) { s.LogPlay(self) }
 type FateForeseenBlue struct{}
 
 func (FateForeseenBlue) ID() card.ID                 { return card.FateForeseenBlue }
@@ -50,4 +48,4 @@ func (FateForeseenBlue) GoAgain() bool            { return false }
 func (FateForeseenBlue) NotSilverAgeLegal()       {}
 // not implemented: Opt 1 rider; block value is printed defence only
 func (FateForeseenBlue) NotImplemented()           {}
-func (FateForeseenBlue) Play(*card.TurnState, *card.CardState) int { return 0 }
+func (FateForeseenBlue) Play(s *card.TurnState, self *card.CardState) { s.LogPlay(self) }

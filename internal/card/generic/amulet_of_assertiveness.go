@@ -23,4 +23,4 @@ func (AmuletOfAssertivenessYellow) GoAgain() bool                             { 
 // not implemented: AR grant: target attack 'banish top of deck on hit'; gated on 4+ cards
 // in hand
 func (AmuletOfAssertivenessYellow) NotImplemented()                           {}
-func (AmuletOfAssertivenessYellow) Play(*card.TurnState, *card.CardState) int { return 0 }
+func (AmuletOfAssertivenessYellow) Play(s *card.TurnState, self *card.CardState) { s.LogPlay(self) }

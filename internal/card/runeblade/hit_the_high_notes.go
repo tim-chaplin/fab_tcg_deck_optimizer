@@ -18,8 +18,9 @@ func (HitTheHighNotesRed) Attack() int                   { return 4 }
 func (HitTheHighNotesRed) Defense() int                  { return 3 }
 func (HitTheHighNotesRed) Types() card.TypeSet        { return hitTheHighNotesTypes }
 func (HitTheHighNotesRed) GoAgain() bool                 { return false }
-func (c HitTheHighNotesRed) Play(s *card.TurnState, _ *card.CardState) int  { return hitTheHighNotesPlay(c.Attack(), s) }
-
+func (c HitTheHighNotesRed) Play(s *card.TurnState, self *card.CardState) {
+	s.ApplyAndLogEffectiveAttackPlus(self, hitTheHighNotesPlay(c.Attack(), s)-self.Card.Attack())
+}
 type HitTheHighNotesYellow struct{}
 
 func (HitTheHighNotesYellow) ID() card.ID                 { return card.HitTheHighNotesYellow }
@@ -30,8 +31,9 @@ func (HitTheHighNotesYellow) Attack() int                  { return 3 }
 func (HitTheHighNotesYellow) Defense() int                 { return 3 }
 func (HitTheHighNotesYellow) Types() card.TypeSet       { return hitTheHighNotesTypes }
 func (HitTheHighNotesYellow) GoAgain() bool                { return false }
-func (c HitTheHighNotesYellow) Play(s *card.TurnState, _ *card.CardState) int { return hitTheHighNotesPlay(c.Attack(), s) }
-
+func (c HitTheHighNotesYellow) Play(s *card.TurnState, self *card.CardState) {
+	s.ApplyAndLogEffectiveAttackPlus(self, hitTheHighNotesPlay(c.Attack(), s)-self.Card.Attack())
+}
 type HitTheHighNotesBlue struct{}
 
 func (HitTheHighNotesBlue) ID() card.ID                 { return card.HitTheHighNotesBlue }
@@ -42,8 +44,9 @@ func (HitTheHighNotesBlue) Attack() int                  { return 2 }
 func (HitTheHighNotesBlue) Defense() int                 { return 3 }
 func (HitTheHighNotesBlue) Types() card.TypeSet       { return hitTheHighNotesTypes }
 func (HitTheHighNotesBlue) GoAgain() bool                { return false }
-func (c HitTheHighNotesBlue) Play(s *card.TurnState, _ *card.CardState) int { return hitTheHighNotesPlay(c.Attack(), s) }
-
+func (c HitTheHighNotesBlue) Play(s *card.TurnState, self *card.CardState) {
+	s.ApplyAndLogEffectiveAttackPlus(self, hitTheHighNotesPlay(c.Attack(), s)-self.Card.Attack())
+}
 func hitTheHighNotesPlay(base int, s *card.TurnState) int {
 	if s.HasAuraInPlay() {
 		return base + 2

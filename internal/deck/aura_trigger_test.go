@@ -131,7 +131,7 @@ func TestEvalOneTurn_SigilOfFyendalQueuesTrigger(t *testing.T) {
 // into the hand.
 func TestProcessTriggersAtStartOfTurn_RevealsAttackActionIntoHand(t *testing.T) {
 	var play card.TurnState
-	(runeblade.SigilOfTheArknightBlue{}).Play(&play, &card.CardState{})
+	(runeblade.SigilOfTheArknightBlue{}).Play(&play, &card.CardState{Card: runeblade.SigilOfTheArknightBlue{}})
 	slash := runeblade.AetherSlashRed{}
 	_, contribs, total, _, revealed, _ := processTriggersAtStartOfTurn(play.AuraTriggers, []card.Card{slash})
 	if total != 0 {
@@ -151,7 +151,7 @@ func TestProcessTriggersAtStartOfTurn_RevealsAttackActionIntoHand(t *testing.T) 
 // printout would know a reveal happened but not which aura caused it.
 func TestProcessTriggersAtStartOfTurn_AttributesRevealedToContribution(t *testing.T) {
 	var play card.TurnState
-	(runeblade.SigilOfTheArknightBlue{}).Play(&play, &card.CardState{})
+	(runeblade.SigilOfTheArknightBlue{}).Play(&play, &card.CardState{Card: runeblade.SigilOfTheArknightBlue{}})
 	slash := runeblade.AetherSlashRed{}
 	_, contribs, _, _, _, _ := processTriggersAtStartOfTurn(play.AuraTriggers, []card.Card{slash})
 	if len(contribs) != 1 {
@@ -166,8 +166,8 @@ func TestProcessTriggersAtStartOfTurn_AttributesRevealedToContribution(t *testin
 // reveal the current top, so the second sees the NEW top after the first pops its card.
 func TestProcessTriggersAtStartOfTurn_CascadingReveals(t *testing.T) {
 	var play card.TurnState
-	(runeblade.SigilOfTheArknightBlue{}).Play(&play, &card.CardState{})
-	(runeblade.SigilOfTheArknightBlue{}).Play(&play, &card.CardState{})
+	(runeblade.SigilOfTheArknightBlue{}).Play(&play, &card.CardState{Card: runeblade.SigilOfTheArknightBlue{}})
+	(runeblade.SigilOfTheArknightBlue{}).Play(&play, &card.CardState{Card: runeblade.SigilOfTheArknightBlue{}})
 	first := runeblade.AetherSlashRed{}
 	second := runeblade.ConsumingVolitionRed{}
 	_, _, _, _, revealed, _ := processTriggersAtStartOfTurn(play.AuraTriggers, []card.Card{first, second})
@@ -184,7 +184,7 @@ func TestProcessTriggersAtStartOfTurn_CascadingReveals(t *testing.T) {
 func TestProcessTriggersAtStartOfTurn_NonAttackActionTopSkipsReveal(t *testing.T) {
 	var play card.TurnState
 	sigil := runeblade.SigilOfTheArknightBlue{}
-	sigil.Play(&play, &card.CardState{})
+	sigil.Play(&play, &card.CardState{Card: sigil})
 	// Sigil itself is an Aura (non-attack action) — use it as a convenient non-attack top.
 	_, _, total, _, revealed, _ := processTriggersAtStartOfTurn(play.AuraTriggers, []card.Card{sigil})
 	if total != 0 {

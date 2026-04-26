@@ -22,8 +22,7 @@ func (OverloadRed) GoAgain() bool               { return false }
 func (OverloadRed) Dominate()                   {}
 // not implemented: on-hit go-again rider
 func (OverloadRed) NotImplemented()             {}
-func (c OverloadRed) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }
-
+func (c OverloadRed) Play(s *card.TurnState, self *card.CardState) { s.ApplyAndLogEffectiveAttack(self) }
 type OverloadYellow struct{}
 
 func (OverloadYellow) ID() card.ID                 { return card.OverloadYellow }
@@ -37,8 +36,7 @@ func (OverloadYellow) GoAgain() bool               { return false }
 func (OverloadYellow) Dominate()                   {}
 // not implemented: on-hit go-again rider
 func (OverloadYellow) NotImplemented()             {}
-func (c OverloadYellow) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }
-
+func (c OverloadYellow) Play(s *card.TurnState, self *card.CardState) { s.ApplyAndLogEffectiveAttack(self) }
 type OverloadBlue struct{}
 
 func (OverloadBlue) ID() card.ID                 { return card.OverloadBlue }
@@ -52,4 +50,4 @@ func (OverloadBlue) GoAgain() bool               { return false }
 func (OverloadBlue) Dominate()                   {}
 // not implemented: on-hit go-again rider
 func (OverloadBlue) NotImplemented()             {}
-func (c OverloadBlue) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }
+func (c OverloadBlue) Play(s *card.TurnState, self *card.CardState) { s.ApplyAndLogEffectiveAttack(self) }

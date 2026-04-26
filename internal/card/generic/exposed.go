@@ -21,4 +21,4 @@ func (ExposedBlue) Types() card.TypeSet                       { return exposedTy
 func (ExposedBlue) GoAgain() bool                             { return false }
 // not implemented: AR +1{p}; gated on attacker not being marked
 func (ExposedBlue) NotImplemented()                           {}
-func (ExposedBlue) Play(*card.TurnState, *card.CardState) int { return 0 }
+func (ExposedBlue) Play(s *card.TurnState, self *card.CardState) { s.LogPlay(self) }

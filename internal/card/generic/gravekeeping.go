@@ -21,8 +21,7 @@ func (GravekeepingRed) Types() card.TypeSet         { return gravekeepingTypes }
 func (GravekeepingRed) GoAgain() bool               { return false }
 // not implemented: opponent-graveyard banish rider
 func (GravekeepingRed) NotImplemented()             {}
-func (c GravekeepingRed) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }
-
+func (c GravekeepingRed) Play(s *card.TurnState, self *card.CardState) { s.ApplyAndLogEffectiveAttack(self) }
 type GravekeepingYellow struct{}
 
 func (GravekeepingYellow) ID() card.ID                 { return card.GravekeepingYellow }
@@ -35,8 +34,7 @@ func (GravekeepingYellow) Types() card.TypeSet         { return gravekeepingType
 func (GravekeepingYellow) GoAgain() bool               { return false }
 // not implemented: opponent-graveyard banish rider
 func (GravekeepingYellow) NotImplemented()             {}
-func (c GravekeepingYellow) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }
-
+func (c GravekeepingYellow) Play(s *card.TurnState, self *card.CardState) { s.ApplyAndLogEffectiveAttack(self) }
 type GravekeepingBlue struct{}
 
 func (GravekeepingBlue) ID() card.ID                 { return card.GravekeepingBlue }
@@ -49,4 +47,4 @@ func (GravekeepingBlue) Types() card.TypeSet         { return gravekeepingTypes 
 func (GravekeepingBlue) GoAgain() bool               { return false }
 // not implemented: opponent-graveyard banish rider
 func (GravekeepingBlue) NotImplemented()             {}
-func (c GravekeepingBlue) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }
+func (c GravekeepingBlue) Play(s *card.TurnState, self *card.CardState) { s.ApplyAndLogEffectiveAttack(self) }

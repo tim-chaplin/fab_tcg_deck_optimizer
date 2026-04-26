@@ -21,8 +21,9 @@ func (BlanchRed) Types() card.TypeSet         { return blanchTypes }
 func (BlanchRed) GoAgain() bool               { return false }
 // not implemented: opponent 'lose all colors' debuff
 func (BlanchRed) NotImplemented()             {}
-func (c BlanchRed) Play(s *card.TurnState, self *card.CardState) int { return blanchDamage(c.Attack(), self) }
-
+func (c BlanchRed) Play(s *card.TurnState, self *card.CardState) {
+	s.ApplyAndLogEffectiveAttackPlus(self, blanchDamage(c.Attack(), self)-self.Card.Attack())
+}
 type BlanchYellow struct{}
 
 func (BlanchYellow) ID() card.ID                 { return card.BlanchYellow }
@@ -35,8 +36,9 @@ func (BlanchYellow) Types() card.TypeSet         { return blanchTypes }
 func (BlanchYellow) GoAgain() bool               { return false }
 // not implemented: opponent 'lose all colors' debuff
 func (BlanchYellow) NotImplemented()             {}
-func (c BlanchYellow) Play(s *card.TurnState, self *card.CardState) int { return blanchDamage(c.Attack(), self) }
-
+func (c BlanchYellow) Play(s *card.TurnState, self *card.CardState) {
+	s.ApplyAndLogEffectiveAttackPlus(self, blanchDamage(c.Attack(), self)-self.Card.Attack())
+}
 type BlanchBlue struct{}
 
 func (BlanchBlue) ID() card.ID                 { return card.BlanchBlue }
@@ -49,8 +51,9 @@ func (BlanchBlue) Types() card.TypeSet         { return blanchTypes }
 func (BlanchBlue) GoAgain() bool               { return false }
 // not implemented: opponent 'lose all colors' debuff
 func (BlanchBlue) NotImplemented()             {}
-func (c BlanchBlue) Play(s *card.TurnState, self *card.CardState) int { return blanchDamage(c.Attack(), self) }
-
+func (c BlanchBlue) Play(s *card.TurnState, self *card.CardState) {
+	s.ApplyAndLogEffectiveAttackPlus(self, blanchDamage(c.Attack(), self)-self.Card.Attack())
+}
 // blanchDamage is a breadcrumb for the on-hit "cards they own lose all colors" rider — not
 // modelled yet (see TODO.md).
 func blanchDamage(attack int, self *card.CardState) int {

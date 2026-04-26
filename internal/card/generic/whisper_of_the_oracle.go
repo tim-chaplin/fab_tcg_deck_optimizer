@@ -21,8 +21,7 @@ func (WhisperOfTheOracleRed) Types() card.TypeSet         { return whisperOfTheO
 func (WhisperOfTheOracleRed) GoAgain() bool               { return true }
 // not implemented: opt (deck-top reorder)
 func (WhisperOfTheOracleRed) NotImplemented()             {}
-func (WhisperOfTheOracleRed) Play(s *card.TurnState, _ *card.CardState) int { return 0 }
-
+func (WhisperOfTheOracleRed) Play(s *card.TurnState, self *card.CardState) { s.LogPlay(self) }
 type WhisperOfTheOracleYellow struct{}
 
 func (WhisperOfTheOracleYellow) ID() card.ID                 { return card.WhisperOfTheOracleYellow }
@@ -35,8 +34,7 @@ func (WhisperOfTheOracleYellow) Types() card.TypeSet         { return whisperOfT
 func (WhisperOfTheOracleYellow) GoAgain() bool               { return true }
 // not implemented: opt (deck-top reorder)
 func (WhisperOfTheOracleYellow) NotImplemented()             {}
-func (WhisperOfTheOracleYellow) Play(s *card.TurnState, _ *card.CardState) int { return 0 }
-
+func (WhisperOfTheOracleYellow) Play(s *card.TurnState, self *card.CardState) { s.LogPlay(self) }
 type WhisperOfTheOracleBlue struct{}
 
 func (WhisperOfTheOracleBlue) ID() card.ID                 { return card.WhisperOfTheOracleBlue }
@@ -49,4 +47,4 @@ func (WhisperOfTheOracleBlue) Types() card.TypeSet         { return whisperOfThe
 func (WhisperOfTheOracleBlue) GoAgain() bool               { return true }
 // not implemented: opt (deck-top reorder)
 func (WhisperOfTheOracleBlue) NotImplemented()             {}
-func (WhisperOfTheOracleBlue) Play(s *card.TurnState, _ *card.CardState) int { return 0 }
+func (WhisperOfTheOracleBlue) Play(s *card.TurnState, self *card.CardState) { s.LogPlay(self) }

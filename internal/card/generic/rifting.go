@@ -22,8 +22,7 @@ func (RiftingRed) Types() card.TypeSet         { return riftingTypes }
 func (RiftingRed) GoAgain() bool               { return false }
 // not implemented: on-hit instant-casting grant
 func (RiftingRed) NotImplemented()             {}
-func (c RiftingRed) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }
-
+func (c RiftingRed) Play(s *card.TurnState, self *card.CardState) { s.ApplyAndLogEffectiveAttack(self) }
 type RiftingYellow struct{}
 
 func (RiftingYellow) ID() card.ID                 { return card.RiftingYellow }
@@ -36,8 +35,7 @@ func (RiftingYellow) Types() card.TypeSet         { return riftingTypes }
 func (RiftingYellow) GoAgain() bool               { return false }
 // not implemented: on-hit instant-casting grant
 func (RiftingYellow) NotImplemented()             {}
-func (c RiftingYellow) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }
-
+func (c RiftingYellow) Play(s *card.TurnState, self *card.CardState) { s.ApplyAndLogEffectiveAttack(self) }
 type RiftingBlue struct{}
 
 func (RiftingBlue) ID() card.ID                 { return card.RiftingBlue }
@@ -50,4 +48,4 @@ func (RiftingBlue) Types() card.TypeSet         { return riftingTypes }
 func (RiftingBlue) GoAgain() bool               { return false }
 // not implemented: on-hit instant-casting grant
 func (RiftingBlue) NotImplemented()             {}
-func (c RiftingBlue) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }
+func (c RiftingBlue) Play(s *card.TurnState, self *card.CardState) { s.ApplyAndLogEffectiveAttack(self) }

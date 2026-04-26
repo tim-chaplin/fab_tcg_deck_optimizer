@@ -21,4 +21,6 @@ func (RestvineElixirRed) Types() card.TypeSet         { return restvineElixirTyp
 func (RestvineElixirRed) GoAgain() bool               { return true }
 // not implemented: Inertia health-gain rider dropped (status tokens not tracked)
 func (RestvineElixirRed) NotImplemented()             {}
-func (RestvineElixirRed) Play(s *card.TurnState, _ *card.CardState) int { return grantNextAttackActionBonus(s, 3) }
+func (RestvineElixirRed) Play(s *card.TurnState, self *card.CardState) {
+	s.ApplyAndLogEffectiveAttackPlus(self, grantNextAttackActionBonus(s, 3))
+}

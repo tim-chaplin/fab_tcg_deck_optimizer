@@ -22,8 +22,7 @@ func (LeadTheChargeRed) Types() card.TypeSet         { return leadTheChargeTypes
 func (LeadTheChargeRed) GoAgain() bool               { return true }
 // not implemented: action point grant
 func (LeadTheChargeRed) NotImplemented()             {}
-func (LeadTheChargeRed) Play(s *card.TurnState, _ *card.CardState) int { return 0 }
-
+func (LeadTheChargeRed) Play(s *card.TurnState, self *card.CardState) { s.LogPlay(self) }
 type LeadTheChargeYellow struct{}
 
 func (LeadTheChargeYellow) ID() card.ID                 { return card.LeadTheChargeYellow }
@@ -36,8 +35,7 @@ func (LeadTheChargeYellow) Types() card.TypeSet         { return leadTheChargeTy
 func (LeadTheChargeYellow) GoAgain() bool               { return true }
 // not implemented: action point grant
 func (LeadTheChargeYellow) NotImplemented()             {}
-func (LeadTheChargeYellow) Play(s *card.TurnState, _ *card.CardState) int { return 0 }
-
+func (LeadTheChargeYellow) Play(s *card.TurnState, self *card.CardState) { s.LogPlay(self) }
 type LeadTheChargeBlue struct{}
 
 func (LeadTheChargeBlue) ID() card.ID                 { return card.LeadTheChargeBlue }
@@ -50,4 +48,4 @@ func (LeadTheChargeBlue) Types() card.TypeSet         { return leadTheChargeType
 func (LeadTheChargeBlue) GoAgain() bool               { return true }
 // not implemented: action point grant
 func (LeadTheChargeBlue) NotImplemented()             {}
-func (LeadTheChargeBlue) Play(s *card.TurnState, _ *card.CardState) int { return 0 }
+func (LeadTheChargeBlue) Play(s *card.TurnState, self *card.CardState) { s.LogPlay(self) }

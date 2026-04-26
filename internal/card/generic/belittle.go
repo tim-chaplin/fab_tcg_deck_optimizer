@@ -24,8 +24,7 @@ func (BelittleRed) GoAgain() bool               { return true }
 func (BelittleRed) NotSilverAgeLegal()           {}
 // not implemented: Minnowism deck-search tutor (additional-cost reveal)
 func (BelittleRed) NotImplemented()             {}
-func (c BelittleRed) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }
-
+func (c BelittleRed) Play(s *card.TurnState, self *card.CardState) { s.ApplyAndLogEffectiveAttack(self) }
 type BelittleYellow struct{}
 
 func (BelittleYellow) ID() card.ID                 { return card.BelittleYellow }
@@ -39,8 +38,7 @@ func (BelittleYellow) GoAgain() bool               { return true }
 func (BelittleYellow) NotSilverAgeLegal()           {}
 // not implemented: Minnowism deck-search tutor (additional-cost reveal)
 func (BelittleYellow) NotImplemented()             {}
-func (c BelittleYellow) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }
-
+func (c BelittleYellow) Play(s *card.TurnState, self *card.CardState) { s.ApplyAndLogEffectiveAttack(self) }
 type BelittleBlue struct{}
 
 func (BelittleBlue) ID() card.ID                 { return card.BelittleBlue }
@@ -54,4 +52,4 @@ func (BelittleBlue) GoAgain() bool               { return true }
 func (BelittleBlue) NotSilverAgeLegal()           {}
 // not implemented: Minnowism deck-search tutor (additional-cost reveal)
 func (BelittleBlue) NotImplemented()             {}
-func (c BelittleBlue) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }
+func (c BelittleBlue) Play(s *card.TurnState, self *card.CardState) { s.ApplyAndLogEffectiveAttack(self) }

@@ -20,4 +20,4 @@ func (EnergyPotionBlue) Types() card.TypeSet                       { return ener
 func (EnergyPotionBlue) GoAgain() bool                             { return false }
 // not implemented: activated 'gain {r}{r}'
 func (EnergyPotionBlue) NotImplemented()                           {}
-func (EnergyPotionBlue) Play(*card.TurnState, *card.CardState) int { return 0 }
+func (EnergyPotionBlue) Play(s *card.TurnState, self *card.CardState) { s.LogPlay(self) }

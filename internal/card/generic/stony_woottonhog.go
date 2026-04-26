@@ -21,8 +21,7 @@ func (StonyWoottonhogRed) Types() card.TypeSet         { return stonyWoottonhogT
 func (StonyWoottonhogRed) GoAgain() bool               { return false }
 // not implemented: defended-by-<2-non-equipment +1{p} rider
 func (StonyWoottonhogRed) NotImplemented()             {}
-func (c StonyWoottonhogRed) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }
-
+func (c StonyWoottonhogRed) Play(s *card.TurnState, self *card.CardState) { s.ApplyAndLogEffectiveAttack(self) }
 type StonyWoottonhogYellow struct{}
 
 func (StonyWoottonhogYellow) ID() card.ID                 { return card.StonyWoottonhogYellow }
@@ -35,8 +34,7 @@ func (StonyWoottonhogYellow) Types() card.TypeSet         { return stonyWoottonh
 func (StonyWoottonhogYellow) GoAgain() bool               { return false }
 // not implemented: defended-by-<2-non-equipment +1{p} rider
 func (StonyWoottonhogYellow) NotImplemented()             {}
-func (c StonyWoottonhogYellow) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }
-
+func (c StonyWoottonhogYellow) Play(s *card.TurnState, self *card.CardState) { s.ApplyAndLogEffectiveAttack(self) }
 type StonyWoottonhogBlue struct{}
 
 func (StonyWoottonhogBlue) ID() card.ID                 { return card.StonyWoottonhogBlue }
@@ -49,4 +47,4 @@ func (StonyWoottonhogBlue) Types() card.TypeSet         { return stonyWoottonhog
 func (StonyWoottonhogBlue) GoAgain() bool               { return false }
 // not implemented: defended-by-<2-non-equipment +1{p} rider
 func (StonyWoottonhogBlue) NotImplemented()             {}
-func (c StonyWoottonhogBlue) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }
+func (c StonyWoottonhogBlue) Play(s *card.TurnState, self *card.CardState) { s.ApplyAndLogEffectiveAttack(self) }

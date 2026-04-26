@@ -19,8 +19,7 @@ func (OnTheHorizonRed) Types() card.TypeSet         { return defenseReactionType
 func (OnTheHorizonRed) GoAgain() bool               { return false }
 // not implemented: deck-peek defend trigger
 func (OnTheHorizonRed) NotImplemented()             {}
-func (OnTheHorizonRed) Play(s *card.TurnState, _ *card.CardState) int { return 0 }
-
+func (OnTheHorizonRed) Play(s *card.TurnState, self *card.CardState) { s.LogPlay(self) }
 type OnTheHorizonYellow struct{}
 
 func (OnTheHorizonYellow) ID() card.ID                 { return card.OnTheHorizonYellow }
@@ -33,8 +32,7 @@ func (OnTheHorizonYellow) Types() card.TypeSet         { return defenseReactionT
 func (OnTheHorizonYellow) GoAgain() bool               { return false }
 // not implemented: deck-peek defend trigger
 func (OnTheHorizonYellow) NotImplemented()             {}
-func (OnTheHorizonYellow) Play(s *card.TurnState, _ *card.CardState) int { return 0 }
-
+func (OnTheHorizonYellow) Play(s *card.TurnState, self *card.CardState) { s.LogPlay(self) }
 type OnTheHorizonBlue struct{}
 
 func (OnTheHorizonBlue) ID() card.ID                 { return card.OnTheHorizonBlue }
@@ -47,4 +45,4 @@ func (OnTheHorizonBlue) Types() card.TypeSet         { return defenseReactionTyp
 func (OnTheHorizonBlue) GoAgain() bool               { return false }
 // not implemented: deck-peek defend trigger
 func (OnTheHorizonBlue) NotImplemented()             {}
-func (OnTheHorizonBlue) Play(s *card.TurnState, _ *card.CardState) int { return 0 }
+func (OnTheHorizonBlue) Play(s *card.TurnState, self *card.CardState) { s.LogPlay(self) }

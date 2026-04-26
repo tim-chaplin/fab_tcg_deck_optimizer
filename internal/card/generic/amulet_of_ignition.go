@@ -22,4 +22,4 @@ func (AmuletOfIgnitionYellow) Types() card.TypeSet                       { retur
 func (AmuletOfIgnitionYellow) GoAgain() bool                             { return true }
 // not implemented: Instant 'next activated ability costs {r} less'
 func (AmuletOfIgnitionYellow) NotImplemented()                           {}
-func (AmuletOfIgnitionYellow) Play(*card.TurnState, *card.CardState) int { return 0 }
+func (AmuletOfIgnitionYellow) Play(s *card.TurnState, self *card.CardState) { s.LogPlay(self) }

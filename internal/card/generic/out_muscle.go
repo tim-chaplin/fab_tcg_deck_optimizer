@@ -21,8 +21,7 @@ func (OutMuscleRed) Types() card.TypeSet         { return outMuscleTypes }
 func (OutMuscleRed) GoAgain() bool               { return false }
 // not implemented: defended-by-equal-or-greater-power go-again gate
 func (OutMuscleRed) NotImplemented()             {}
-func (c OutMuscleRed) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }
-
+func (c OutMuscleRed) Play(s *card.TurnState, self *card.CardState) { s.ApplyAndLogEffectiveAttack(self) }
 type OutMuscleYellow struct{}
 
 func (OutMuscleYellow) ID() card.ID                 { return card.OutMuscleYellow }
@@ -35,8 +34,7 @@ func (OutMuscleYellow) Types() card.TypeSet         { return outMuscleTypes }
 func (OutMuscleYellow) GoAgain() bool               { return false }
 // not implemented: defended-by-equal-or-greater-power go-again gate
 func (OutMuscleYellow) NotImplemented()             {}
-func (c OutMuscleYellow) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }
-
+func (c OutMuscleYellow) Play(s *card.TurnState, self *card.CardState) { s.ApplyAndLogEffectiveAttack(self) }
 type OutMuscleBlue struct{}
 
 func (OutMuscleBlue) ID() card.ID                 { return card.OutMuscleBlue }
@@ -49,4 +47,4 @@ func (OutMuscleBlue) Types() card.TypeSet         { return outMuscleTypes }
 func (OutMuscleBlue) GoAgain() bool               { return false }
 // not implemented: defended-by-equal-or-greater-power go-again gate
 func (OutMuscleBlue) NotImplemented()             {}
-func (c OutMuscleBlue) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }
+func (c OutMuscleBlue) Play(s *card.TurnState, self *card.CardState) { s.ApplyAndLogEffectiveAttack(self) }

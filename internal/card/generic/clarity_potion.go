@@ -20,4 +20,4 @@ func (ClarityPotionBlue) Types() card.TypeSet                       { return cla
 func (ClarityPotionBlue) GoAgain() bool                             { return false }
 // not implemented: activated Opt 2
 func (ClarityPotionBlue) NotImplemented()                           {}
-func (ClarityPotionBlue) Play(*card.TurnState, *card.CardState) int { return 0 }
+func (ClarityPotionBlue) Play(s *card.TurnState, self *card.CardState) { s.LogPlay(self) }

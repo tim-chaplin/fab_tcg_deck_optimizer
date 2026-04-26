@@ -21,8 +21,7 @@ func (BrothersInArmsRed) Types() card.TypeSet         { return brothersInArmsTyp
 func (BrothersInArmsRed) GoAgain() bool               { return false }
 // not implemented: pay-{r}-for-+2{d} defence rider (defence-side costs aren't solved)
 func (BrothersInArmsRed) NotImplemented()             {}
-func (c BrothersInArmsRed) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }
-
+func (c BrothersInArmsRed) Play(s *card.TurnState, self *card.CardState) { s.ApplyAndLogEffectiveAttack(self) }
 type BrothersInArmsYellow struct{}
 
 func (BrothersInArmsYellow) ID() card.ID                 { return card.BrothersInArmsYellow }
@@ -35,8 +34,7 @@ func (BrothersInArmsYellow) Types() card.TypeSet         { return brothersInArms
 func (BrothersInArmsYellow) GoAgain() bool               { return false }
 // not implemented: pay-{r}-for-+2{d} defence rider (defence-side costs aren't solved)
 func (BrothersInArmsYellow) NotImplemented()             {}
-func (c BrothersInArmsYellow) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }
-
+func (c BrothersInArmsYellow) Play(s *card.TurnState, self *card.CardState) { s.ApplyAndLogEffectiveAttack(self) }
 type BrothersInArmsBlue struct{}
 
 func (BrothersInArmsBlue) ID() card.ID                 { return card.BrothersInArmsBlue }
@@ -49,4 +47,4 @@ func (BrothersInArmsBlue) Types() card.TypeSet         { return brothersInArmsTy
 func (BrothersInArmsBlue) GoAgain() bool               { return false }
 // not implemented: pay-{r}-for-+2{d} defence rider (defence-side costs aren't solved)
 func (BrothersInArmsBlue) NotImplemented()             {}
-func (c BrothersInArmsBlue) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }
+func (c BrothersInArmsBlue) Play(s *card.TurnState, self *card.CardState) { s.ApplyAndLogEffectiveAttack(self) }

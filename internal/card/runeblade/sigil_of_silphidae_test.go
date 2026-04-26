@@ -11,7 +11,8 @@ import (
 // and a start-of-turn AuraTrigger is registered for the "destroy this" clause.
 func TestSigilOfSilphidae_PlayFizzlesWithoutAura(t *testing.T) {
 	var s card.TurnState
-	if got := (SigilOfSilphidaeBlue{}).Play(&s, nil); got != 0 {
+	(SigilOfSilphidaeBlue{}).Play(&s, &card.CardState{Card: SigilOfSilphidaeBlue{}})
+	if got := s.Value; got != 0{
 		t.Errorf("Play() = %d, want 0 (empty graveyard)", got)
 	}
 	if !s.AuraCreated {
@@ -30,7 +31,8 @@ func TestSigilOfSilphidae_PlayFizzlesWithoutAura(t *testing.T) {
 func TestSigilOfSilphidae_PlayBanishesAuraForOneArcane(t *testing.T) {
 	aura := BlessingOfOccultRed{}
 	s := card.TurnState{Graveyard: []card.Card{aura}}
-	if got := (SigilOfSilphidaeBlue{}).Play(&s, nil); got != 1 {
+	(SigilOfSilphidaeBlue{}).Play(&s, &card.CardState{Card: SigilOfSilphidaeBlue{}})
+	if got := s.Value; got != 1{
 		t.Errorf("Play() = %d, want 1", got)
 	}
 	if !s.ArcaneDamageDealt {
@@ -46,7 +48,7 @@ func TestSigilOfSilphidae_PlayBanishesAuraForOneArcane(t *testing.T) {
 // 0 damage.
 func TestSigilOfSilphidae_StartOfTurnHandlerFizzlesWithoutAnotherAura(t *testing.T) {
 	var play card.TurnState
-	(SigilOfSilphidaeBlue{}).Play(&play, nil)
+	(SigilOfSilphidaeBlue{}).Play(&play, &card.CardState{Card: SigilOfSilphidaeBlue{}})
 	var next card.TurnState
 	got := play.AuraTriggers[0].Handler(&next)
 	if got != 0 {
@@ -60,7 +62,7 @@ func TestSigilOfSilphidae_StartOfTurnHandlerFizzlesWithoutAnotherAura(t *testing
 // itself — the printed "another aura" restriction is satisfied naturally.
 func TestSigilOfSilphidae_StartOfTurnHandlerBanishesAnotherAura(t *testing.T) {
 	var play card.TurnState
-	(SigilOfSilphidaeBlue{}).Play(&play, nil)
+	(SigilOfSilphidaeBlue{}).Play(&play, &card.CardState{Card: SigilOfSilphidaeBlue{}})
 	other := BlessingOfOccultRed{}
 	next := card.TurnState{Graveyard: []card.Card{other}}
 	got := play.AuraTriggers[0].Handler(&next)

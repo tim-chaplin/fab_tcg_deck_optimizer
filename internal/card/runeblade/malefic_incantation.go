@@ -24,8 +24,8 @@ func (MaleficIncantationRed) Defense() int             { return 2 }
 func (MaleficIncantationRed) Types() card.TypeSet      { return maleficTypes }
 func (MaleficIncantationRed) GoAgain() bool            { return true }
 func (MaleficIncantationRed) AddsFutureValue()         {}
-func (c MaleficIncantationRed) Play(s *card.TurnState, _ *card.CardState) int {
-	return maleficPlay(s, c, 3)
+func (c MaleficIncantationRed) Play(s *card.TurnState, self *card.CardState) {
+	maleficPlay(s, self, c, 3)
 }
 
 type MaleficIncantationYellow struct{}
@@ -39,8 +39,8 @@ func (MaleficIncantationYellow) Defense() int             { return 2 }
 func (MaleficIncantationYellow) Types() card.TypeSet      { return maleficTypes }
 func (MaleficIncantationYellow) GoAgain() bool            { return true }
 func (MaleficIncantationYellow) AddsFutureValue()         {}
-func (c MaleficIncantationYellow) Play(s *card.TurnState, _ *card.CardState) int {
-	return maleficPlay(s, c, 2)
+func (c MaleficIncantationYellow) Play(s *card.TurnState, self *card.CardState) {
+	maleficPlay(s, self, c, 2)
 }
 
 type MaleficIncantationBlue struct{}
@@ -54,21 +54,26 @@ func (MaleficIncantationBlue) Defense() int             { return 2 }
 func (MaleficIncantationBlue) Types() card.TypeSet      { return maleficTypes }
 func (MaleficIncantationBlue) GoAgain() bool            { return true }
 func (MaleficIncantationBlue) AddsFutureValue()         {}
-func (c MaleficIncantationBlue) Play(s *card.TurnState, _ *card.CardState) int {
-	return maleficPlay(s, c, 1)
+func (c MaleficIncantationBlue) Play(s *card.TurnState, self *card.CardState) {
+	maleficPlay(s, self, c, 1)
 }
 
-// maleficPlay registers the attack-action once-per-turn trigger. Same-turn Play returns 0;
-// each fire creates one Runechant.
-func maleficPlay(s *card.TurnState, self card.Card, n int) int {
+// maleficPlay registers the attack-action once-per-turn trigger and emits the same-turn
+// chain step. Each trigger fire creates one Runechant — the trigger handler authors a
+// post-trigger log line so it groups beneath the triggering attack-action chain step.
+func maleficPlay(s *card.TurnState, selfState *card.CardState, selfCard card.Card, n int) {
 	s.AddAuraTrigger(card.AuraTrigger{
-		Self:        self,
+		Self:        selfCard,
 		Type:        card.TriggerAttackAction,
 		Count:       n,
 		OncePerTurn: true,
 		Handler: func(s *card.TurnState) int {
-			return s.CreateAndLogRunechants(card.DisplayName(self), card.DisplayName(s.TriggeringCard), 1)
+			return s.AddPostTriggerLogEntry(
+				card.DisplayName(selfCard)+" created a runechant",
+				card.DisplayName(s.TriggeringCard),
+				s.CreateRunechants(1),
+			)
 		},
 	})
-	return 0
+	s.LogPlay(selfState)
 }

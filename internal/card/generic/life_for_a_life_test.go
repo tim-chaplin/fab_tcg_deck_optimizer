@@ -11,7 +11,8 @@ import (
 func TestLifeForALife_LikelyHitCreditsHeal(t *testing.T) {
 	var s card.TurnState
 	c := LifeForALifeRed{}
-	if got := c.Play(&s, &card.CardState{Card: c}); got != 4+1 {
+	c.Play(&s, &card.CardState{Card: c})
+	if got := s.Value; got != 4+1{
 		t.Errorf("Red: Play() = %d, want 5 (4 likely to hit + 1 heal)", got)
 	}
 }
@@ -28,7 +29,8 @@ func TestLifeForALife_BlockableSuppressesHeal(t *testing.T) {
 	}
 	for _, tc := range cases {
 		var s card.TurnState
-		if got := tc.c.Play(&s, &card.CardState{Card: tc.c}); got != tc.want {
+		tc.c.Play(&s, &card.CardState{Card: tc.c})
+		if got := s.Value; got != tc.want{
 			t.Errorf("%s: Play() = %d, want %d (blockable, no heal)", tc.c.Name(), got, tc.want)
 		}
 	}

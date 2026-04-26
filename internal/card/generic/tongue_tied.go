@@ -21,8 +21,9 @@ func (TongueTiedRed) Types() card.TypeSet         { return tongueTiedTypes }
 func (TongueTiedRed) GoAgain() bool               { return false }
 // not implemented: on-hit opponent-arsenal manipulation rider
 func (TongueTiedRed) NotImplemented()             {}
-func (c TongueTiedRed) Play(s *card.TurnState, self *card.CardState) int { return tongueTiedDamage(c.Attack(), self) }
-
+func (c TongueTiedRed) Play(s *card.TurnState, self *card.CardState) {
+	s.ApplyAndLogEffectiveAttackPlus(self, tongueTiedDamage(c.Attack(), self)-self.Card.Attack())
+}
 // tongueTiedDamage is a breadcrumb for the on-hit "arsenal face-up + banish instant" rider —
 // not modelled yet (see TODO.md).
 func tongueTiedDamage(attack int, self *card.CardState) int {

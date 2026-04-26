@@ -22,4 +22,4 @@ func (AmuletOfOblationBlue) Types() card.TypeSet                       { return 
 func (AmuletOfOblationBlue) GoAgain() bool                             { return true }
 // not implemented: Instant 'graveyard → bottom of deck' replacement; gated on graveyard entry
 func (AmuletOfOblationBlue) NotImplemented()                           {}
-func (AmuletOfOblationBlue) Play(*card.TurnState, *card.CardState) int { return 0 }
+func (AmuletOfOblationBlue) Play(s *card.TurnState, self *card.CardState) { s.LogPlay(self) }

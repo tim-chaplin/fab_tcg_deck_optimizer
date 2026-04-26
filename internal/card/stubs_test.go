@@ -18,8 +18,7 @@ func (c stubCard) Attack() int                   { return c.attack }
 func (stubCard) Defense() int                    { return 0 }
 func (c stubCard) Types() TypeSet                { return c.types }
 func (c stubCard) GoAgain() bool                 { return c.goAgain }
-func (stubCard) Play(*TurnState, *CardState) int { return 0 }
-
+func (stubCard) Play(*TurnState, *CardState)    {}
 // dominatingStubCard is a stubCard that implements the Dominator marker — exercises the
 // printed-Dominate branch of EffectiveDominate / HasDominate.
 type dominatingStubCard struct {

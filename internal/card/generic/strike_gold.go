@@ -30,8 +30,9 @@ func (StrikeGoldRed) Types() card.TypeSet          { return strikeGoldTypes }
 func (StrikeGoldRed) GoAgain() bool                { return false }
 // not implemented: gold tokens
 func (StrikeGoldRed) NotImplemented()               {}
-func (c StrikeGoldRed) Play(s *card.TurnState, self *card.CardState) int { return strikeGoldDamage(c.Attack(), self) }
-
+func (c StrikeGoldRed) Play(s *card.TurnState, self *card.CardState) {
+	s.ApplyAndLogEffectiveAttackPlus(self, strikeGoldDamage(c.Attack(), self)-self.Card.Attack())
+}
 type StrikeGoldYellow struct{}
 
 func (StrikeGoldYellow) ID() card.ID                  { return card.StrikeGoldYellow }
@@ -44,8 +45,9 @@ func (StrikeGoldYellow) Types() card.TypeSet          { return strikeGoldTypes }
 func (StrikeGoldYellow) GoAgain() bool                { return false }
 // not implemented: gold tokens
 func (StrikeGoldYellow) NotImplemented()               {}
-func (c StrikeGoldYellow) Play(s *card.TurnState, self *card.CardState) int { return strikeGoldDamage(c.Attack(), self) }
-
+func (c StrikeGoldYellow) Play(s *card.TurnState, self *card.CardState) {
+	s.ApplyAndLogEffectiveAttackPlus(self, strikeGoldDamage(c.Attack(), self)-self.Card.Attack())
+}
 type StrikeGoldBlue struct{}
 
 func (StrikeGoldBlue) ID() card.ID                  { return card.StrikeGoldBlue }
@@ -58,4 +60,6 @@ func (StrikeGoldBlue) Types() card.TypeSet          { return strikeGoldTypes }
 func (StrikeGoldBlue) GoAgain() bool                { return false }
 // not implemented: gold tokens
 func (StrikeGoldBlue) NotImplemented()               {}
-func (c StrikeGoldBlue) Play(s *card.TurnState, self *card.CardState) int { return strikeGoldDamage(c.Attack(), self) }
+func (c StrikeGoldBlue) Play(s *card.TurnState, self *card.CardState) {
+	s.ApplyAndLogEffectiveAttackPlus(self, strikeGoldDamage(c.Attack(), self)-self.Card.Attack())
+}

@@ -17,14 +17,15 @@ var meatAndGreetTypes = card.NewTypeSet(card.TypeRuneblade, card.TypeAction, car
 
 // meatAndGreetPlay is the shared Play implementation. See the file docstring for rider
 // modelling.
-func meatAndGreetPlay(c card.Card, s *card.TurnState, self *card.CardState) int {
+func meatAndGreetPlay(s *card.TurnState, self *card.CardState) {
 	if s.ArcaneDamageDealt {
 		self.GrantedGoAgain = true
 	}
+	rider := 0
 	if card.LikelyToHit(self) {
-		return c.Attack() + s.CreateRunechant()
+		rider = s.CreateRunechant()
 	}
-	return c.Attack()
+	s.ApplyAndLogEffectiveAttackPlus(self, rider)
 }
 
 type MeatAndGreetRed struct{}
@@ -37,8 +38,9 @@ func (MeatAndGreetRed) Attack() int                   { return 4 }
 func (MeatAndGreetRed) Defense() int                  { return 3 }
 func (MeatAndGreetRed) Types() card.TypeSet           { return meatAndGreetTypes }
 func (MeatAndGreetRed) GoAgain() bool                 { return false }
-func (c MeatAndGreetRed) Play(s *card.TurnState, self *card.CardState) int  { return meatAndGreetPlay(c, s, self) }
-
+func (MeatAndGreetRed) Play(s *card.TurnState, self *card.CardState) {
+	meatAndGreetPlay(s, self)
+}
 type MeatAndGreetYellow struct{}
 
 func (MeatAndGreetYellow) ID() card.ID                   { return card.MeatAndGreetYellow }
@@ -49,8 +51,9 @@ func (MeatAndGreetYellow) Attack() int                   { return 3 }
 func (MeatAndGreetYellow) Defense() int                  { return 3 }
 func (MeatAndGreetYellow) Types() card.TypeSet           { return meatAndGreetTypes }
 func (MeatAndGreetYellow) GoAgain() bool                 { return false }
-func (c MeatAndGreetYellow) Play(s *card.TurnState, self *card.CardState) int  { return meatAndGreetPlay(c, s, self) }
-
+func (MeatAndGreetYellow) Play(s *card.TurnState, self *card.CardState) {
+	meatAndGreetPlay(s, self)
+}
 type MeatAndGreetBlue struct{}
 
 func (MeatAndGreetBlue) ID() card.ID                   { return card.MeatAndGreetBlue }
@@ -61,4 +64,6 @@ func (MeatAndGreetBlue) Attack() int                   { return 2 }
 func (MeatAndGreetBlue) Defense() int                  { return 3 }
 func (MeatAndGreetBlue) Types() card.TypeSet           { return meatAndGreetTypes }
 func (MeatAndGreetBlue) GoAgain() bool                 { return false }
-func (c MeatAndGreetBlue) Play(s *card.TurnState, self *card.CardState) int  { return meatAndGreetPlay(c, s, self) }
+func (MeatAndGreetBlue) Play(s *card.TurnState, self *card.CardState) {
+	meatAndGreetPlay(s, self)
+}

@@ -34,8 +34,9 @@ func (ConsumingVolitionRed) Attack() int                  { return 4 }
 func (ConsumingVolitionRed) Defense() int                 { return 3 }
 func (ConsumingVolitionRed) Types() card.TypeSet          { return consumingVolitionTypes }
 func (ConsumingVolitionRed) GoAgain() bool                { return false }
-func (c ConsumingVolitionRed) Play(s *card.TurnState, self *card.CardState) int { return consumingVolitionDamage(c.Attack(), s, self) }
-
+func (c ConsumingVolitionRed) Play(s *card.TurnState, self *card.CardState) {
+	s.ApplyAndLogEffectiveAttackPlus(self, consumingVolitionDamage(c.Attack(), s, self)-self.Card.Attack())
+}
 type ConsumingVolitionYellow struct{}
 
 func (ConsumingVolitionYellow) ID() card.ID                  { return card.ConsumingVolitionYellow }
@@ -46,8 +47,9 @@ func (ConsumingVolitionYellow) Attack() int                  { return 3 }
 func (ConsumingVolitionYellow) Defense() int                 { return 3 }
 func (ConsumingVolitionYellow) Types() card.TypeSet          { return consumingVolitionTypes }
 func (ConsumingVolitionYellow) GoAgain() bool                { return false }
-func (c ConsumingVolitionYellow) Play(s *card.TurnState, self *card.CardState) int { return consumingVolitionDamage(c.Attack(), s, self) }
-
+func (c ConsumingVolitionYellow) Play(s *card.TurnState, self *card.CardState) {
+	s.ApplyAndLogEffectiveAttackPlus(self, consumingVolitionDamage(c.Attack(), s, self)-self.Card.Attack())
+}
 type ConsumingVolitionBlue struct{}
 
 func (ConsumingVolitionBlue) ID() card.ID                  { return card.ConsumingVolitionBlue }
@@ -58,4 +60,6 @@ func (ConsumingVolitionBlue) Attack() int                  { return 2 }
 func (ConsumingVolitionBlue) Defense() int                 { return 3 }
 func (ConsumingVolitionBlue) Types() card.TypeSet          { return consumingVolitionTypes }
 func (ConsumingVolitionBlue) GoAgain() bool                { return false }
-func (c ConsumingVolitionBlue) Play(s *card.TurnState, self *card.CardState) int { return consumingVolitionDamage(c.Attack(), s, self) }
+func (c ConsumingVolitionBlue) Play(s *card.TurnState, self *card.CardState) {
+	s.ApplyAndLogEffectiveAttackPlus(self, consumingVolitionDamage(c.Attack(), s, self)-self.Card.Attack())
+}

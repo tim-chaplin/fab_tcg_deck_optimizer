@@ -23,4 +23,6 @@ func (AnnalsOfSutcliffe) Hands() int                                  { return 2
 // not implemented: draw rider and conditional Runechant rider; activation pays 3 resources
 // for zero modelled value, so the optimizer naturally avoids equipping it
 func (AnnalsOfSutcliffe) NotImplemented()                             {}
-func (AnnalsOfSutcliffe) Play(*card.TurnState, *card.CardState) int   { return 0 }
+func (AnnalsOfSutcliffe) Play(s *card.TurnState, self *card.CardState) {
+	s.ApplyAndLogEffectiveAttack(self)
+}

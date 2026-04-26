@@ -18,10 +18,9 @@ func (ShrillOfSkullformRed) Attack() int               { return 4 }
 func (ShrillOfSkullformRed) Defense() int              { return 3 }
 func (ShrillOfSkullformRed) Types() card.TypeSet       { return shrillTypes }
 func (ShrillOfSkullformRed) GoAgain() bool             { return false }
-func (c ShrillOfSkullformRed) Play(s *card.TurnState, _ *card.CardState) int {
-	return shrillPlay(c.Attack(), s)
+func (ShrillOfSkullformRed) Play(s *card.TurnState, self *card.CardState) {
+	shrillPlay(s, self)
 }
-
 type ShrillOfSkullformYellow struct{}
 
 func (ShrillOfSkullformYellow) ID() card.ID                 { return card.ShrillOfSkullformYellow }
@@ -32,10 +31,9 @@ func (ShrillOfSkullformYellow) Attack() int            { return 3 }
 func (ShrillOfSkullformYellow) Defense() int           { return 3 }
 func (ShrillOfSkullformYellow) Types() card.TypeSet    { return shrillTypes }
 func (ShrillOfSkullformYellow) GoAgain() bool          { return false }
-func (c ShrillOfSkullformYellow) Play(s *card.TurnState, _ *card.CardState) int {
-	return shrillPlay(c.Attack(), s)
+func (ShrillOfSkullformYellow) Play(s *card.TurnState, self *card.CardState) {
+	shrillPlay(s, self)
 }
-
 type ShrillOfSkullformBlue struct{}
 
 func (ShrillOfSkullformBlue) ID() card.ID                 { return card.ShrillOfSkullformBlue }
@@ -46,13 +44,13 @@ func (ShrillOfSkullformBlue) Attack() int              { return 2 }
 func (ShrillOfSkullformBlue) Defense() int             { return 3 }
 func (ShrillOfSkullformBlue) Types() card.TypeSet      { return shrillTypes }
 func (ShrillOfSkullformBlue) GoAgain() bool            { return false }
-func (c ShrillOfSkullformBlue) Play(s *card.TurnState, _ *card.CardState) int {
-	return shrillPlay(c.Attack(), s)
+func (ShrillOfSkullformBlue) Play(s *card.TurnState, self *card.CardState) {
+	shrillPlay(s, self)
 }
-
-func shrillPlay(base int, s *card.TurnState) int {
+func shrillPlay(s *card.TurnState, self *card.CardState) {
+	rider := 0
 	if s.HasAuraInPlay() {
-		return base + 3
+		rider = 3
 	}
-	return base
+	s.ApplyAndLogEffectiveAttackPlus(self, rider)
 }

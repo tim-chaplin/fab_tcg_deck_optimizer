@@ -20,4 +20,4 @@ func (NipAtTheHeelsBlue) Types() card.TypeSet                       { return nip
 func (NipAtTheHeelsBlue) GoAgain() bool                             { return false }
 // not implemented: AR +1{p} buff to a target attack with ≤3 base {p}
 func (NipAtTheHeelsBlue) NotImplemented()                           {}
-func (NipAtTheHeelsBlue) Play(*card.TurnState, *card.CardState) int { return 0 }
+func (NipAtTheHeelsBlue) Play(s *card.TurnState, self *card.CardState) { s.LogPlay(self) }

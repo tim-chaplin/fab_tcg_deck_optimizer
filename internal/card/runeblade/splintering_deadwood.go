@@ -22,8 +22,7 @@ func (SplinteringDeadwoodRed) GoAgain() bool              { return false }
 // not implemented: aura-swap rider modelled net-zero; no tempo credit for trading a weak aura
 // for a Runechant
 func (SplinteringDeadwoodRed) NotImplemented()             {}
-func (c SplinteringDeadwoodRed) Play(*card.TurnState, *card.CardState) int { return c.Attack() }
-
+func (SplinteringDeadwoodRed) Play(s *card.TurnState, self *card.CardState) { s.ApplyAndLogEffectiveAttack(self) }
 type SplinteringDeadwoodYellow struct{}
 
 func (SplinteringDeadwoodYellow) ID() card.ID                 { return card.SplinteringDeadwoodYellow }
@@ -37,8 +36,7 @@ func (SplinteringDeadwoodYellow) GoAgain() bool              { return false }
 // not implemented: aura-swap rider modelled net-zero; no tempo credit for trading a weak aura
 // for a Runechant
 func (SplinteringDeadwoodYellow) NotImplemented()             {}
-func (c SplinteringDeadwoodYellow) Play(*card.TurnState, *card.CardState) int { return c.Attack() }
-
+func (SplinteringDeadwoodYellow) Play(s *card.TurnState, self *card.CardState) { s.ApplyAndLogEffectiveAttack(self) }
 type SplinteringDeadwoodBlue struct{}
 
 func (SplinteringDeadwoodBlue) ID() card.ID                 { return card.SplinteringDeadwoodBlue }
@@ -52,4 +50,4 @@ func (SplinteringDeadwoodBlue) GoAgain() bool              { return false }
 // not implemented: aura-swap rider modelled net-zero; no tempo credit for trading a weak aura
 // for a Runechant
 func (SplinteringDeadwoodBlue) NotImplemented()             {}
-func (c SplinteringDeadwoodBlue) Play(*card.TurnState, *card.CardState) int { return c.Attack() }
+func (SplinteringDeadwoodBlue) Play(s *card.TurnState, self *card.CardState) { s.ApplyAndLogEffectiveAttack(self) }

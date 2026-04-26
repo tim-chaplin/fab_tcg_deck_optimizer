@@ -21,4 +21,4 @@ func (CrackedBaubleYellow) Types() card.TypeSet                       { return c
 func (CrackedBaubleYellow) GoAgain() bool                             { return false }
 // not implemented: draft-format pitch resource; no other effect
 func (CrackedBaubleYellow) NotImplemented()                           {}
-func (CrackedBaubleYellow) Play(*card.TurnState, *card.CardState) int { return 0 }
+func (CrackedBaubleYellow) Play(s *card.TurnState, self *card.CardState) { s.LogPlay(self) }

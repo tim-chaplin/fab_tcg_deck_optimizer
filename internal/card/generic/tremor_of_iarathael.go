@@ -22,8 +22,7 @@ func (TremorOfIArathaelRed) Types() card.TypeSet         { return tremorOfIArath
 func (TremorOfIArathaelRed) GoAgain() bool               { return false }
 // not implemented: banished-zone +2{p} rider (banished-zone count not tracked)
 func (TremorOfIArathaelRed) NotImplemented()             {}
-func (c TremorOfIArathaelRed) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }
-
+func (c TremorOfIArathaelRed) Play(s *card.TurnState, self *card.CardState) { s.ApplyAndLogEffectiveAttack(self) }
 type TremorOfIArathaelYellow struct{}
 
 func (TremorOfIArathaelYellow) ID() card.ID                 { return card.TremorOfIArathaelYellow }
@@ -36,8 +35,7 @@ func (TremorOfIArathaelYellow) Types() card.TypeSet         { return tremorOfIAr
 func (TremorOfIArathaelYellow) GoAgain() bool               { return false }
 // not implemented: banished-zone +2{p} rider (banished-zone count not tracked)
 func (TremorOfIArathaelYellow) NotImplemented()             {}
-func (c TremorOfIArathaelYellow) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }
-
+func (c TremorOfIArathaelYellow) Play(s *card.TurnState, self *card.CardState) { s.ApplyAndLogEffectiveAttack(self) }
 type TremorOfIArathaelBlue struct{}
 
 func (TremorOfIArathaelBlue) ID() card.ID                 { return card.TremorOfIArathaelBlue }
@@ -50,4 +48,4 @@ func (TremorOfIArathaelBlue) Types() card.TypeSet         { return tremorOfIArat
 func (TremorOfIArathaelBlue) GoAgain() bool               { return false }
 // not implemented: banished-zone +2{p} rider (banished-zone count not tracked)
 func (TremorOfIArathaelBlue) NotImplemented()             {}
-func (c TremorOfIArathaelBlue) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }
+func (c TremorOfIArathaelBlue) Play(s *card.TurnState, self *card.CardState) { s.ApplyAndLogEffectiveAttack(self) }

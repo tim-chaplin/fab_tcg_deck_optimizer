@@ -21,8 +21,7 @@ func (BarragingBrawnhideRed) Types() card.TypeSet         { return barragingBraw
 func (BarragingBrawnhideRed) GoAgain() bool               { return false }
 // not implemented: defended-by-<2-non-equipment +1{p} rider
 func (BarragingBrawnhideRed) NotImplemented()             {}
-func (c BarragingBrawnhideRed) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }
-
+func (c BarragingBrawnhideRed) Play(s *card.TurnState, self *card.CardState) { s.ApplyAndLogEffectiveAttack(self) }
 type BarragingBrawnhideYellow struct{}
 
 func (BarragingBrawnhideYellow) ID() card.ID                 { return card.BarragingBrawnhideYellow }
@@ -35,8 +34,7 @@ func (BarragingBrawnhideYellow) Types() card.TypeSet         { return barragingB
 func (BarragingBrawnhideYellow) GoAgain() bool               { return false }
 // not implemented: defended-by-<2-non-equipment +1{p} rider
 func (BarragingBrawnhideYellow) NotImplemented()             {}
-func (c BarragingBrawnhideYellow) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }
-
+func (c BarragingBrawnhideYellow) Play(s *card.TurnState, self *card.CardState) { s.ApplyAndLogEffectiveAttack(self) }
 type BarragingBrawnhideBlue struct{}
 
 func (BarragingBrawnhideBlue) ID() card.ID                 { return card.BarragingBrawnhideBlue }
@@ -49,4 +47,4 @@ func (BarragingBrawnhideBlue) Types() card.TypeSet         { return barragingBra
 func (BarragingBrawnhideBlue) GoAgain() bool               { return false }
 // not implemented: defended-by-<2-non-equipment +1{p} rider
 func (BarragingBrawnhideBlue) NotImplemented()             {}
-func (c BarragingBrawnhideBlue) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }
+func (c BarragingBrawnhideBlue) Play(s *card.TurnState, self *card.CardState) { s.ApplyAndLogEffectiveAttack(self) }

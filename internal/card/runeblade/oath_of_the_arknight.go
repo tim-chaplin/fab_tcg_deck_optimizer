@@ -19,8 +19,9 @@ func (OathOfTheArknightRed) Attack() int                { return 0 }
 func (OathOfTheArknightRed) Defense() int               { return 3 }
 func (OathOfTheArknightRed) Types() card.TypeSet        { return oathOfTheArknightTypes }
 func (OathOfTheArknightRed) GoAgain() bool              { return true }
-func (OathOfTheArknightRed) Play(s *card.TurnState, _ *card.CardState) int { return oathPlay(s, 3) }
-
+func (OathOfTheArknightRed) Play(s *card.TurnState, self *card.CardState) {
+	s.ApplyAndLogEffectiveAttackPlus(self, oathPlay(s, 3))
+}
 type OathOfTheArknightYellow struct{}
 
 func (OathOfTheArknightYellow) ID() card.ID                 { return card.OathOfTheArknightYellow }
@@ -31,8 +32,9 @@ func (OathOfTheArknightYellow) Attack() int                { return 0 }
 func (OathOfTheArknightYellow) Defense() int               { return 3 }
 func (OathOfTheArknightYellow) Types() card.TypeSet        { return oathOfTheArknightTypes }
 func (OathOfTheArknightYellow) GoAgain() bool              { return true }
-func (OathOfTheArknightYellow) Play(s *card.TurnState, _ *card.CardState) int { return oathPlay(s, 2) }
-
+func (OathOfTheArknightYellow) Play(s *card.TurnState, self *card.CardState) {
+	s.ApplyAndLogEffectiveAttackPlus(self, oathPlay(s, 2))
+}
 type OathOfTheArknightBlue struct{}
 
 func (OathOfTheArknightBlue) ID() card.ID                 { return card.OathOfTheArknightBlue }
@@ -43,8 +45,9 @@ func (OathOfTheArknightBlue) Attack() int                { return 0 }
 func (OathOfTheArknightBlue) Defense() int               { return 3 }
 func (OathOfTheArknightBlue) Types() card.TypeSet        { return oathOfTheArknightTypes }
 func (OathOfTheArknightBlue) GoAgain() bool              { return true }
-func (OathOfTheArknightBlue) Play(s *card.TurnState, _ *card.CardState) int { return oathPlay(s, 1) }
-
+func (OathOfTheArknightBlue) Play(s *card.TurnState, self *card.CardState) {
+	s.ApplyAndLogEffectiveAttackPlus(self, oathPlay(s, 1))
+}
 // oathPlay grants +n to the first scheduled Runeblade attack via pc.BonusAttack so the
 // buffed attack's EffectiveAttack folds the bonus into LikelyToHit and the chain credit lands
 // on the target's slot, not Oath's. Always creates a Runechant token (+1 damage), which IS

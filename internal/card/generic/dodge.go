@@ -16,4 +16,4 @@ func (DodgeBlue) Attack() int              { return 0 }
 func (DodgeBlue) Defense() int             { return 2 }
 func (DodgeBlue) Types() card.TypeSet      { return defenseReactionTypes }
 func (DodgeBlue) GoAgain() bool            { return false }
-func (DodgeBlue) Play(*card.TurnState, *card.CardState) int { return 0 }
+func (DodgeBlue) Play(s *card.TurnState, self *card.CardState) { s.LogPlay(self) }

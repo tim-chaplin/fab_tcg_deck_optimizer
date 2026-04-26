@@ -17,8 +17,7 @@ func (RagingOnslaughtRed) Attack() int                 { return 7 }
 func (RagingOnslaughtRed) Defense() int                { return 3 }
 func (RagingOnslaughtRed) Types() card.TypeSet         { return ragingOnslaughtTypes }
 func (RagingOnslaughtRed) GoAgain() bool               { return false }
-func (c RagingOnslaughtRed) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }
-
+func (c RagingOnslaughtRed) Play(s *card.TurnState, self *card.CardState) { s.ApplyAndLogEffectiveAttack(self) }
 type RagingOnslaughtYellow struct{}
 
 func (RagingOnslaughtYellow) ID() card.ID                 { return card.RagingOnslaughtYellow }
@@ -29,8 +28,7 @@ func (RagingOnslaughtYellow) Attack() int                 { return 6 }
 func (RagingOnslaughtYellow) Defense() int                { return 3 }
 func (RagingOnslaughtYellow) Types() card.TypeSet         { return ragingOnslaughtTypes }
 func (RagingOnslaughtYellow) GoAgain() bool               { return false }
-func (c RagingOnslaughtYellow) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }
-
+func (c RagingOnslaughtYellow) Play(s *card.TurnState, self *card.CardState) { s.ApplyAndLogEffectiveAttack(self) }
 type RagingOnslaughtBlue struct{}
 
 func (RagingOnslaughtBlue) ID() card.ID                 { return card.RagingOnslaughtBlue }
@@ -41,4 +39,4 @@ func (RagingOnslaughtBlue) Attack() int                 { return 5 }
 func (RagingOnslaughtBlue) Defense() int                { return 3 }
 func (RagingOnslaughtBlue) Types() card.TypeSet         { return ragingOnslaughtTypes }
 func (RagingOnslaughtBlue) GoAgain() bool               { return false }
-func (c RagingOnslaughtBlue) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }
+func (c RagingOnslaughtBlue) Play(s *card.TurnState, self *card.CardState) { s.ApplyAndLogEffectiveAttack(self) }

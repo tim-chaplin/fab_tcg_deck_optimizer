@@ -15,12 +15,12 @@ var vigorRushTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.Typ
 
 // vigorRushPlay grants go again when any non-attack Action has been played earlier this turn.
 // The solver maintains s.NonAttackActionPlayed as it walks the chain, so this is an O(1) flag
-// read rather than a scan of CardsPlayed.
-func vigorRushPlay(base int, s *card.TurnState, self *card.CardState) int {
+// read rather than a scan of CardsPlayed. Emits the chain step.
+func vigorRushPlay(s *card.TurnState, self *card.CardState) {
 	if s.NonAttackActionPlayed {
 		self.GrantedGoAgain = true
 	}
-	return base
+	s.ApplyAndLogEffectiveAttack(self)
 }
 
 type VigorRushRed struct{}
@@ -33,8 +33,9 @@ func (VigorRushRed) Attack() int                                         { retur
 func (VigorRushRed) Defense() int                                        { return 2 }
 func (VigorRushRed) Types() card.TypeSet                                 { return vigorRushTypes }
 func (VigorRushRed) GoAgain() bool                                       { return false }
-func (c VigorRushRed) Play(s *card.TurnState, self *card.CardState) int { return vigorRushPlay(c.Attack(), s, self) }
-
+func (VigorRushRed) Play(s *card.TurnState, self *card.CardState) {
+	vigorRushPlay(s, self)
+}
 type VigorRushYellow struct{}
 
 func (VigorRushYellow) ID() card.ID                                         { return card.VigorRushYellow }
@@ -45,8 +46,9 @@ func (VigorRushYellow) Attack() int                                         { re
 func (VigorRushYellow) Defense() int                                        { return 2 }
 func (VigorRushYellow) Types() card.TypeSet                                 { return vigorRushTypes }
 func (VigorRushYellow) GoAgain() bool                                       { return false }
-func (c VigorRushYellow) Play(s *card.TurnState, self *card.CardState) int { return vigorRushPlay(c.Attack(), s, self) }
-
+func (VigorRushYellow) Play(s *card.TurnState, self *card.CardState) {
+	vigorRushPlay(s, self)
+}
 type VigorRushBlue struct{}
 
 func (VigorRushBlue) ID() card.ID                                         { return card.VigorRushBlue }
@@ -57,4 +59,6 @@ func (VigorRushBlue) Attack() int                                         { retu
 func (VigorRushBlue) Defense() int                                        { return 2 }
 func (VigorRushBlue) Types() card.TypeSet                                 { return vigorRushTypes }
 func (VigorRushBlue) GoAgain() bool                                       { return false }
-func (c VigorRushBlue) Play(s *card.TurnState, self *card.CardState) int { return vigorRushPlay(c.Attack(), s, self) }
+func (VigorRushBlue) Play(s *card.TurnState, self *card.CardState) {
+	vigorRushPlay(s, self)
+}

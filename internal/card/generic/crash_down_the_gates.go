@@ -23,8 +23,9 @@ func (CrashDownTheGatesRed) Types() card.TypeSet         { return crashDownTheGa
 func (CrashDownTheGatesRed) GoAgain() bool               { return false }
 // not implemented: deck-reveal comparison + on-hit deck-top destruction
 func (CrashDownTheGatesRed) NotImplemented()             {}
-func (c CrashDownTheGatesRed) Play(s *card.TurnState, self *card.CardState) int { return crashDownTheGatesDamage(c.Attack(), self) }
-
+func (c CrashDownTheGatesRed) Play(s *card.TurnState, self *card.CardState) {
+	s.ApplyAndLogEffectiveAttackPlus(self, crashDownTheGatesDamage(c.Attack(), self)-self.Card.Attack())
+}
 type CrashDownTheGatesYellow struct{}
 
 func (CrashDownTheGatesYellow) ID() card.ID                 { return card.CrashDownTheGatesYellow }
@@ -37,8 +38,9 @@ func (CrashDownTheGatesYellow) Types() card.TypeSet         { return crashDownTh
 func (CrashDownTheGatesYellow) GoAgain() bool               { return false }
 // not implemented: deck-reveal comparison + on-hit deck-top destruction
 func (CrashDownTheGatesYellow) NotImplemented()             {}
-func (c CrashDownTheGatesYellow) Play(s *card.TurnState, self *card.CardState) int { return crashDownTheGatesDamage(c.Attack(), self) }
-
+func (c CrashDownTheGatesYellow) Play(s *card.TurnState, self *card.CardState) {
+	s.ApplyAndLogEffectiveAttackPlus(self, crashDownTheGatesDamage(c.Attack(), self)-self.Card.Attack())
+}
 type CrashDownTheGatesBlue struct{}
 
 func (CrashDownTheGatesBlue) ID() card.ID                 { return card.CrashDownTheGatesBlue }
@@ -51,8 +53,9 @@ func (CrashDownTheGatesBlue) Types() card.TypeSet         { return crashDownTheG
 func (CrashDownTheGatesBlue) GoAgain() bool               { return false }
 // not implemented: deck-reveal comparison + on-hit deck-top destruction
 func (CrashDownTheGatesBlue) NotImplemented()             {}
-func (c CrashDownTheGatesBlue) Play(s *card.TurnState, self *card.CardState) int { return crashDownTheGatesDamage(c.Attack(), self) }
-
+func (c CrashDownTheGatesBlue) Play(s *card.TurnState, self *card.CardState) {
+	s.ApplyAndLogEffectiveAttackPlus(self, crashDownTheGatesDamage(c.Attack(), self)-self.Card.Attack())
+}
 // crashDownTheGatesDamage is a breadcrumb for the on-hit "destroy top of their deck" rider —
 // not modelled yet (see TODO.md).
 func crashDownTheGatesDamage(attack int, self *card.CardState) int {

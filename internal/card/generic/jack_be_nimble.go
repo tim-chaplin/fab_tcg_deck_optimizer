@@ -23,8 +23,9 @@ func (JackBeNimbleRed) Types() card.TypeSet         { return jackBeNimbleTypes }
 func (JackBeNimbleRed) GoAgain() bool               { return false }
 // not implemented: graveyard-banish cost + on-hit item steal
 func (JackBeNimbleRed) NotImplemented()             {}
-func (c JackBeNimbleRed) Play(s *card.TurnState, self *card.CardState) int { return jackBeNimbleDamage(c.Attack(), self) }
-
+func (c JackBeNimbleRed) Play(s *card.TurnState, self *card.CardState) {
+	s.ApplyAndLogEffectiveAttackPlus(self, jackBeNimbleDamage(c.Attack(), self)-self.Card.Attack())
+}
 // jackBeNimbleDamage is a breadcrumb for the on-hit "steal an item" rider — not modelled yet
 // (see TODO.md). The LikelyToHit call marks where the rider value would plug in.
 func jackBeNimbleDamage(attack int, self *card.CardState) int {

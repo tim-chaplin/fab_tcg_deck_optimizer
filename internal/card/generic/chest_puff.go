@@ -20,4 +20,4 @@ func (ChestPuffRed) Types() card.TypeSet         { return chestPuffTypes }
 func (ChestPuffRed) GoAgain() bool               { return false }
 // not implemented: pay {r} or lose 1{p} resolved as 'always pay'
 func (ChestPuffRed) NotImplemented()             {}
-func (c ChestPuffRed) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }
+func (c ChestPuffRed) Play(s *card.TurnState, self *card.CardState) { s.ApplyAndLogEffectiveAttack(self) }

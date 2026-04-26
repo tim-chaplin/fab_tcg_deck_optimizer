@@ -22,8 +22,7 @@ func (LookingForAScrapRed) Types() card.TypeSet         { return lookingForAScra
 func (LookingForAScrapRed) GoAgain() bool               { return false }
 // not implemented: graveyard-banish additional cost and the +1{p}/go-again bonus rider
 func (LookingForAScrapRed) NotImplemented()             {}
-func (c LookingForAScrapRed) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }
-
+func (c LookingForAScrapRed) Play(s *card.TurnState, self *card.CardState) { s.ApplyAndLogEffectiveAttack(self) }
 type LookingForAScrapYellow struct{}
 
 func (LookingForAScrapYellow) ID() card.ID                 { return card.LookingForAScrapYellow }
@@ -36,8 +35,7 @@ func (LookingForAScrapYellow) Types() card.TypeSet         { return lookingForAS
 func (LookingForAScrapYellow) GoAgain() bool               { return false }
 // not implemented: graveyard-banish additional cost and the +1{p}/go-again bonus rider
 func (LookingForAScrapYellow) NotImplemented()             {}
-func (c LookingForAScrapYellow) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }
-
+func (c LookingForAScrapYellow) Play(s *card.TurnState, self *card.CardState) { s.ApplyAndLogEffectiveAttack(self) }
 type LookingForAScrapBlue struct{}
 
 func (LookingForAScrapBlue) ID() card.ID                 { return card.LookingForAScrapBlue }
@@ -50,4 +48,4 @@ func (LookingForAScrapBlue) Types() card.TypeSet         { return lookingForAScr
 func (LookingForAScrapBlue) GoAgain() bool               { return false }
 // not implemented: graveyard-banish additional cost and the +1{p}/go-again bonus rider
 func (LookingForAScrapBlue) NotImplemented()             {}
-func (c LookingForAScrapBlue) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }
+func (c LookingForAScrapBlue) Play(s *card.TurnState, self *card.CardState) { s.ApplyAndLogEffectiveAttack(self) }

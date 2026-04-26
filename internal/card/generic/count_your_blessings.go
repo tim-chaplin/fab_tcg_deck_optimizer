@@ -21,8 +21,7 @@ func (CountYourBlessingsRed) GoAgain() bool                             { return
 func (CountYourBlessingsRed) NotSilverAgeLegal()                        {}
 // not implemented: graveyard-scaled X{h} gain (also banlisted)
 func (CountYourBlessingsRed) NotImplemented()                           {}
-func (CountYourBlessingsRed) Play(*card.TurnState, *card.CardState) int { return 0 }
-
+func (CountYourBlessingsRed) Play(s *card.TurnState, self *card.CardState) { s.LogPlay(self) }
 type CountYourBlessingsYellow struct{}
 
 func (CountYourBlessingsYellow) ID() card.ID                               { return card.CountYourBlessingsYellow }
@@ -36,8 +35,7 @@ func (CountYourBlessingsYellow) GoAgain() bool                             { ret
 func (CountYourBlessingsYellow) NotSilverAgeLegal()                        {}
 // not implemented: graveyard-scaled X{h} gain (also banlisted)
 func (CountYourBlessingsYellow) NotImplemented()                           {}
-func (CountYourBlessingsYellow) Play(*card.TurnState, *card.CardState) int { return 0 }
-
+func (CountYourBlessingsYellow) Play(s *card.TurnState, self *card.CardState) { s.LogPlay(self) }
 type CountYourBlessingsBlue struct{}
 
 func (CountYourBlessingsBlue) ID() card.ID                               { return card.CountYourBlessingsBlue }
@@ -51,4 +49,4 @@ func (CountYourBlessingsBlue) GoAgain() bool                             { retur
 func (CountYourBlessingsBlue) NotSilverAgeLegal()                        {}
 // not implemented: graveyard-scaled X{h} gain (also banlisted)
 func (CountYourBlessingsBlue) NotImplemented()                           {}
-func (CountYourBlessingsBlue) Play(*card.TurnState, *card.CardState) int { return 0 }
+func (CountYourBlessingsBlue) Play(s *card.TurnState, self *card.CardState) { s.LogPlay(self) }

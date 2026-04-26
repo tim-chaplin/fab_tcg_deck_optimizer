@@ -21,4 +21,4 @@ func (ClapEmInIronsBlue) Types() card.TypeSet                       { return cla
 func (ClapEmInIronsBlue) GoAgain() bool                             { return true }
 // not implemented: passive tap-target Pirate; can't unfreeze; self-destroys at start of turn
 func (ClapEmInIronsBlue) NotImplemented()                           {}
-func (ClapEmInIronsBlue) Play(*card.TurnState, *card.CardState) int { return 0 }
+func (ClapEmInIronsBlue) Play(s *card.TurnState, self *card.CardState) { s.LogPlay(self) }

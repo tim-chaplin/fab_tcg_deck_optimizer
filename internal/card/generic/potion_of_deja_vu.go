@@ -21,4 +21,4 @@ func (PotionOfDejaVuBlue) Types() card.TypeSet                       { return po
 func (PotionOfDejaVuBlue) GoAgain() bool                             { return false }
 // not implemented: activated 'put pitch zone on top of deck in any order'
 func (PotionOfDejaVuBlue) NotImplemented()                           {}
-func (PotionOfDejaVuBlue) Play(*card.TurnState, *card.CardState) int { return 0 }
+func (PotionOfDejaVuBlue) Play(s *card.TurnState, self *card.CardState) { s.LogPlay(self) }

@@ -21,8 +21,7 @@ func (OasisRespiteRed) Types() card.TypeSet                       { return oasis
 func (OasisRespiteRed) GoAgain() bool                             { return false }
 // not implemented: Instant 'prevent N damage from chosen source to target hero'; conditional 1{h}
 func (OasisRespiteRed) NotImplemented()                           {}
-func (OasisRespiteRed) Play(*card.TurnState, *card.CardState) int { return 0 }
-
+func (OasisRespiteRed) Play(s *card.TurnState, self *card.CardState) { s.LogPlay(self) }
 type OasisRespiteYellow struct{}
 
 func (OasisRespiteYellow) ID() card.ID                               { return card.OasisRespiteYellow }
@@ -35,8 +34,7 @@ func (OasisRespiteYellow) Types() card.TypeSet                       { return oa
 func (OasisRespiteYellow) GoAgain() bool                             { return false }
 // not implemented: Instant 'prevent N damage from chosen source to target hero'; conditional 1{h}
 func (OasisRespiteYellow) NotImplemented()                           {}
-func (OasisRespiteYellow) Play(*card.TurnState, *card.CardState) int { return 0 }
-
+func (OasisRespiteYellow) Play(s *card.TurnState, self *card.CardState) { s.LogPlay(self) }
 type OasisRespiteBlue struct{}
 
 func (OasisRespiteBlue) ID() card.ID                               { return card.OasisRespiteBlue }
@@ -49,4 +47,4 @@ func (OasisRespiteBlue) Types() card.TypeSet                       { return oasi
 func (OasisRespiteBlue) GoAgain() bool                             { return false }
 // not implemented: Instant 'prevent N damage from chosen source to target hero'; conditional 1{h}
 func (OasisRespiteBlue) NotImplemented()                           {}
-func (OasisRespiteBlue) Play(*card.TurnState, *card.CardState) int { return 0 }
+func (OasisRespiteBlue) Play(s *card.TurnState, self *card.CardState) { s.LogPlay(self) }

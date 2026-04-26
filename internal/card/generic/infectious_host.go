@@ -22,8 +22,7 @@ func (InfectiousHostRed) Types() card.TypeSet         { return infectiousHostTyp
 func (InfectiousHostRed) GoAgain() bool               { return false }
 // not implemented: frailty/inertia/bloodrot pox tokens
 func (InfectiousHostRed) NotImplemented()             {}
-func (c InfectiousHostRed) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }
-
+func (c InfectiousHostRed) Play(s *card.TurnState, self *card.CardState) { s.ApplyAndLogEffectiveAttack(self) }
 type InfectiousHostYellow struct{}
 
 func (InfectiousHostYellow) ID() card.ID                 { return card.InfectiousHostYellow }
@@ -36,8 +35,7 @@ func (InfectiousHostYellow) Types() card.TypeSet         { return infectiousHost
 func (InfectiousHostYellow) GoAgain() bool               { return false }
 // not implemented: frailty/inertia/bloodrot pox tokens
 func (InfectiousHostYellow) NotImplemented()             {}
-func (c InfectiousHostYellow) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }
-
+func (c InfectiousHostYellow) Play(s *card.TurnState, self *card.CardState) { s.ApplyAndLogEffectiveAttack(self) }
 type InfectiousHostBlue struct{}
 
 func (InfectiousHostBlue) ID() card.ID                 { return card.InfectiousHostBlue }
@@ -50,4 +48,4 @@ func (InfectiousHostBlue) Types() card.TypeSet         { return infectiousHostTy
 func (InfectiousHostBlue) GoAgain() bool               { return false }
 // not implemented: frailty/inertia/bloodrot pox tokens
 func (InfectiousHostBlue) NotImplemented()             {}
-func (c InfectiousHostBlue) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }
+func (c InfectiousHostBlue) Play(s *card.TurnState, self *card.CardState) { s.ApplyAndLogEffectiveAttack(self) }

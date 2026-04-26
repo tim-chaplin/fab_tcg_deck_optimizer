@@ -22,8 +22,9 @@ func (FactFindingMissionRed) Types() card.TypeSet         { return factFindingMi
 func (FactFindingMissionRed) GoAgain() bool               { return false }
 // not implemented: on-hit opponent-arsenal/equipment peek
 func (FactFindingMissionRed) NotImplemented()             {}
-func (c FactFindingMissionRed) Play(s *card.TurnState, self *card.CardState) int { return factFindingMissionDamage(c.Attack(), self) }
-
+func (c FactFindingMissionRed) Play(s *card.TurnState, self *card.CardState) {
+	s.ApplyAndLogEffectiveAttackPlus(self, factFindingMissionDamage(c.Attack(), self)-self.Card.Attack())
+}
 type FactFindingMissionYellow struct{}
 
 func (FactFindingMissionYellow) ID() card.ID                 { return card.FactFindingMissionYellow }
@@ -36,8 +37,9 @@ func (FactFindingMissionYellow) Types() card.TypeSet         { return factFindin
 func (FactFindingMissionYellow) GoAgain() bool               { return false }
 // not implemented: on-hit opponent-arsenal/equipment peek
 func (FactFindingMissionYellow) NotImplemented()             {}
-func (c FactFindingMissionYellow) Play(s *card.TurnState, self *card.CardState) int { return factFindingMissionDamage(c.Attack(), self) }
-
+func (c FactFindingMissionYellow) Play(s *card.TurnState, self *card.CardState) {
+	s.ApplyAndLogEffectiveAttackPlus(self, factFindingMissionDamage(c.Attack(), self)-self.Card.Attack())
+}
 type FactFindingMissionBlue struct{}
 
 func (FactFindingMissionBlue) ID() card.ID                 { return card.FactFindingMissionBlue }
@@ -50,8 +52,9 @@ func (FactFindingMissionBlue) Types() card.TypeSet         { return factFindingM
 func (FactFindingMissionBlue) GoAgain() bool               { return false }
 // not implemented: on-hit opponent-arsenal/equipment peek
 func (FactFindingMissionBlue) NotImplemented()             {}
-func (c FactFindingMissionBlue) Play(s *card.TurnState, self *card.CardState) int { return factFindingMissionDamage(c.Attack(), self) }
-
+func (c FactFindingMissionBlue) Play(s *card.TurnState, self *card.CardState) {
+	s.ApplyAndLogEffectiveAttackPlus(self, factFindingMissionDamage(c.Attack(), self)-self.Card.Attack())
+}
 // factFindingMissionDamage is a breadcrumb for the on-hit "peek a face-down card in arsenal /
 // equipment" rider — opponent-side inspection isn't modelled (see TODO.md).
 func factFindingMissionDamage(attack int, self *card.CardState) int {

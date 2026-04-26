@@ -21,4 +21,4 @@ func (PotionOfLuckBlue) Types() card.TypeSet                       { return poti
 func (PotionOfLuckBlue) GoAgain() bool                             { return false }
 // not implemented: activated 'shuffle hand+arsenal into deck, draw that many'
 func (PotionOfLuckBlue) NotImplemented()                           {}
-func (PotionOfLuckBlue) Play(*card.TurnState, *card.CardState) int { return 0 }
+func (PotionOfLuckBlue) Play(s *card.TurnState, self *card.CardState) { s.LogPlay(self) }

@@ -30,8 +30,9 @@ func (AdrenalineRushRed) Attack() int                 { return 4 }
 func (AdrenalineRushRed) Defense() int                { return 2 }
 func (AdrenalineRushRed) Types() card.TypeSet         { return adrenalineRushTypes }
 func (AdrenalineRushRed) GoAgain() bool               { return false }
-func (c AdrenalineRushRed) Play(s *card.TurnState, _ *card.CardState) int { return adrenalineRushDamage(c.Attack()) }
-
+func (c AdrenalineRushRed) Play(s *card.TurnState, self *card.CardState) {
+	s.ApplyAndLogEffectiveAttackPlus(self, adrenalineRushDamage(c.Attack())-self.Card.Attack())
+}
 type AdrenalineRushYellow struct{}
 
 func (AdrenalineRushYellow) ID() card.ID                 { return card.AdrenalineRushYellow }
@@ -42,8 +43,9 @@ func (AdrenalineRushYellow) Attack() int                 { return 3 }
 func (AdrenalineRushYellow) Defense() int                { return 2 }
 func (AdrenalineRushYellow) Types() card.TypeSet         { return adrenalineRushTypes }
 func (AdrenalineRushYellow) GoAgain() bool               { return false }
-func (c AdrenalineRushYellow) Play(s *card.TurnState, _ *card.CardState) int { return adrenalineRushDamage(c.Attack()) }
-
+func (c AdrenalineRushYellow) Play(s *card.TurnState, self *card.CardState) {
+	s.ApplyAndLogEffectiveAttackPlus(self, adrenalineRushDamage(c.Attack())-self.Card.Attack())
+}
 type AdrenalineRushBlue struct{}
 
 func (AdrenalineRushBlue) ID() card.ID                 { return card.AdrenalineRushBlue }
@@ -54,4 +56,6 @@ func (AdrenalineRushBlue) Attack() int                 { return 2 }
 func (AdrenalineRushBlue) Defense() int                { return 2 }
 func (AdrenalineRushBlue) Types() card.TypeSet         { return adrenalineRushTypes }
 func (AdrenalineRushBlue) GoAgain() bool               { return false }
-func (c AdrenalineRushBlue) Play(s *card.TurnState, _ *card.CardState) int { return adrenalineRushDamage(c.Attack()) }
+func (c AdrenalineRushBlue) Play(s *card.TurnState, self *card.CardState) {
+	s.ApplyAndLogEffectiveAttackPlus(self, adrenalineRushDamage(c.Attack())-self.Card.Attack())
+}

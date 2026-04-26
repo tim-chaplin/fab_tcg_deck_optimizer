@@ -23,8 +23,9 @@ func (SigilOfProtectionRed) Types() card.TypeSet         { return sigilOfProtect
 func (SigilOfProtectionRed) GoAgain() bool               { return false }
 // not implemented: ward (opponent damage prevention)
 func (SigilOfProtectionRed) NotImplemented()             {}
-func (SigilOfProtectionRed) Play(s *card.TurnState, _ *card.CardState) int { return setAuraCreated(s) }
-
+func (SigilOfProtectionRed) Play(s *card.TurnState, self *card.CardState) {
+	s.ApplyAndLogEffectiveAttackPlus(self, setAuraCreated(s))
+}
 type SigilOfProtectionYellow struct{}
 
 func (SigilOfProtectionYellow) ID() card.ID                 { return card.SigilOfProtectionYellow }
@@ -37,8 +38,9 @@ func (SigilOfProtectionYellow) Types() card.TypeSet         { return sigilOfProt
 func (SigilOfProtectionYellow) GoAgain() bool               { return false }
 // not implemented: ward (opponent damage prevention)
 func (SigilOfProtectionYellow) NotImplemented()             {}
-func (SigilOfProtectionYellow) Play(s *card.TurnState, _ *card.CardState) int { return setAuraCreated(s) }
-
+func (SigilOfProtectionYellow) Play(s *card.TurnState, self *card.CardState) {
+	s.ApplyAndLogEffectiveAttackPlus(self, setAuraCreated(s))
+}
 type SigilOfProtectionBlue struct{}
 
 func (SigilOfProtectionBlue) ID() card.ID                 { return card.SigilOfProtectionBlue }
@@ -51,4 +53,6 @@ func (SigilOfProtectionBlue) Types() card.TypeSet         { return sigilOfProtec
 func (SigilOfProtectionBlue) GoAgain() bool               { return false }
 // not implemented: ward (opponent damage prevention)
 func (SigilOfProtectionBlue) NotImplemented()             {}
-func (SigilOfProtectionBlue) Play(s *card.TurnState, _ *card.CardState) int { return setAuraCreated(s) }
+func (SigilOfProtectionBlue) Play(s *card.TurnState, self *card.CardState) {
+	s.ApplyAndLogEffectiveAttackPlus(self, setAuraCreated(s))
+}

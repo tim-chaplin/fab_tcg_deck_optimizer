@@ -21,8 +21,7 @@ func (WageGoldRed) Types() card.TypeSet         { return wageGoldTypes }
 func (WageGoldRed) GoAgain() bool               { return false }
 // not implemented: gold tokens, universal keyword
 func (WageGoldRed) NotImplemented()              {}
-func (c WageGoldRed) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }
-
+func (c WageGoldRed) Play(s *card.TurnState, self *card.CardState) { s.ApplyAndLogEffectiveAttack(self) }
 type WageGoldYellow struct{}
 
 func (WageGoldYellow) ID() card.ID                 { return card.WageGoldYellow }
@@ -35,8 +34,7 @@ func (WageGoldYellow) Types() card.TypeSet         { return wageGoldTypes }
 func (WageGoldYellow) GoAgain() bool               { return false }
 // not implemented: gold tokens, universal keyword
 func (WageGoldYellow) NotImplemented()              {}
-func (c WageGoldYellow) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }
-
+func (c WageGoldYellow) Play(s *card.TurnState, self *card.CardState) { s.ApplyAndLogEffectiveAttack(self) }
 type WageGoldBlue struct{}
 
 func (WageGoldBlue) ID() card.ID                 { return card.WageGoldBlue }
@@ -49,4 +47,4 @@ func (WageGoldBlue) Types() card.TypeSet         { return wageGoldTypes }
 func (WageGoldBlue) GoAgain() bool               { return false }
 // not implemented: gold tokens, universal keyword
 func (WageGoldBlue) NotImplemented()              {}
-func (c WageGoldBlue) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }
+func (c WageGoldBlue) Play(s *card.TurnState, self *card.CardState) { s.ApplyAndLogEffectiveAttack(self) }

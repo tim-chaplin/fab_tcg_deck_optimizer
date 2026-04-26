@@ -26,13 +26,13 @@ func (NebulaBlade) Defense() int              { return 0 }
 func (NebulaBlade) Types() card.TypeSet        { return nebulaBladeTypes }
 func (NebulaBlade) GoAgain() bool             { return false }
 func (NebulaBlade) Hands() int                { return 2 }
-func (c NebulaBlade) Play(s *card.TurnState, self *card.CardState) int {
+func (c NebulaBlade) Play(s *card.TurnState, self *card.CardState) {
 	if s.NonAttackActionPlayed {
 		self.BonusAttack += 3
 	}
-	dmg := c.Attack()
+	rider := 0
 	if card.LikelyToHit(self) {
-		dmg += s.CreateRunechant()
+		rider = s.CreateRunechant()
 	}
-	return dmg
+	s.ApplyAndLogEffectiveAttackPlus(self, rider)
 }

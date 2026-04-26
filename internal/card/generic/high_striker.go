@@ -21,8 +21,7 @@ func (HighStrikerRed) Types() card.TypeSet         { return highStrikerTypes }
 func (HighStrikerRed) GoAgain() bool               { return true }
 // not implemented: copper tokens
 func (HighStrikerRed) NotImplemented()             {}
-func (HighStrikerRed) Play(s *card.TurnState, _ *card.CardState) int { return 0 }
-
+func (HighStrikerRed) Play(s *card.TurnState, self *card.CardState) { s.LogPlay(self) }
 type HighStrikerYellow struct{}
 
 func (HighStrikerYellow) ID() card.ID                 { return card.HighStrikerYellow }
@@ -35,8 +34,7 @@ func (HighStrikerYellow) Types() card.TypeSet         { return highStrikerTypes 
 func (HighStrikerYellow) GoAgain() bool               { return true }
 // not implemented: copper tokens
 func (HighStrikerYellow) NotImplemented()             {}
-func (HighStrikerYellow) Play(s *card.TurnState, _ *card.CardState) int { return 0 }
-
+func (HighStrikerYellow) Play(s *card.TurnState, self *card.CardState) { s.LogPlay(self) }
 type HighStrikerBlue struct{}
 
 func (HighStrikerBlue) ID() card.ID                 { return card.HighStrikerBlue }
@@ -49,4 +47,4 @@ func (HighStrikerBlue) Types() card.TypeSet         { return highStrikerTypes }
 func (HighStrikerBlue) GoAgain() bool               { return true }
 // not implemented: copper tokens
 func (HighStrikerBlue) NotImplemented()             {}
-func (HighStrikerBlue) Play(s *card.TurnState, _ *card.CardState) int { return 0 }
+func (HighStrikerBlue) Play(s *card.TurnState, self *card.CardState) { s.LogPlay(self) }

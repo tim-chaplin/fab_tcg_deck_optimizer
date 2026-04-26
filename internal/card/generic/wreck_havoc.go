@@ -22,8 +22,9 @@ func (WreckHavocRed) Types() card.TypeSet         { return wreckHavocTypes }
 func (WreckHavocRed) GoAgain() bool               { return false }
 // not implemented: defense-reaction lockout, on-hit arsenal banish
 func (WreckHavocRed) NotImplemented()             {}
-func (c WreckHavocRed) Play(s *card.TurnState, self *card.CardState) int { return wreckHavocDamage(c.Attack(), self) }
-
+func (c WreckHavocRed) Play(s *card.TurnState, self *card.CardState) {
+	s.ApplyAndLogEffectiveAttackPlus(self, wreckHavocDamage(c.Attack(), self)-self.Card.Attack())
+}
 type WreckHavocYellow struct{}
 
 func (WreckHavocYellow) ID() card.ID                 { return card.WreckHavocYellow }
@@ -36,8 +37,9 @@ func (WreckHavocYellow) Types() card.TypeSet         { return wreckHavocTypes }
 func (WreckHavocYellow) GoAgain() bool               { return false }
 // not implemented: defense-reaction lockout, on-hit arsenal banish
 func (WreckHavocYellow) NotImplemented()             {}
-func (c WreckHavocYellow) Play(s *card.TurnState, self *card.CardState) int { return wreckHavocDamage(c.Attack(), self) }
-
+func (c WreckHavocYellow) Play(s *card.TurnState, self *card.CardState) {
+	s.ApplyAndLogEffectiveAttackPlus(self, wreckHavocDamage(c.Attack(), self)-self.Card.Attack())
+}
 type WreckHavocBlue struct{}
 
 func (WreckHavocBlue) ID() card.ID                 { return card.WreckHavocBlue }
@@ -50,8 +52,9 @@ func (WreckHavocBlue) Types() card.TypeSet         { return wreckHavocTypes }
 func (WreckHavocBlue) GoAgain() bool               { return false }
 // not implemented: defense-reaction lockout, on-hit arsenal banish
 func (WreckHavocBlue) NotImplemented()             {}
-func (c WreckHavocBlue) Play(s *card.TurnState, self *card.CardState) int { return wreckHavocDamage(c.Attack(), self) }
-
+func (c WreckHavocBlue) Play(s *card.TurnState, self *card.CardState) {
+	s.ApplyAndLogEffectiveAttackPlus(self, wreckHavocDamage(c.Attack(), self)-self.Card.Attack())
+}
 // wreckHavocDamage is a breadcrumb for the on-hit "DR lockout + arsenal-face-up / banish DR"
 // rider — not modelled yet (see TODO.md). LikelyToHit marks where the rider value would plug in.
 func wreckHavocDamage(attack int, self *card.CardState) int {

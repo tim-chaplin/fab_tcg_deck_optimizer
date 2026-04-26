@@ -20,4 +20,4 @@ func (TitForTatBlue) Types() card.TypeSet         { return titForTatTypes }
 func (TitForTatBlue) GoAgain() bool               { return true }
 // not implemented: freeze/unfreeze
 func (TitForTatBlue) NotImplemented()             {}
-func (TitForTatBlue) Play(s *card.TurnState, _ *card.CardState) int { return 0 }
+func (TitForTatBlue) Play(s *card.TurnState, self *card.CardState) { s.LogPlay(self) }

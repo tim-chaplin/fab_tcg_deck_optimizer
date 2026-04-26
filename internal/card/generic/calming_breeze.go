@@ -20,4 +20,4 @@ func (CalmingBreezeRed) Types() card.TypeSet                       { return calm
 func (CalmingBreezeRed) GoAgain() bool                             { return false }
 // not implemented: Instant 'prevent 1 of each of the next 3 damage events'
 func (CalmingBreezeRed) NotImplemented()                           {}
-func (CalmingBreezeRed) Play(*card.TurnState, *card.CardState) int { return 0 }
+func (CalmingBreezeRed) Play(s *card.TurnState, self *card.CardState) { s.LogPlay(self) }

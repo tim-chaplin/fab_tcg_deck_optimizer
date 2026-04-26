@@ -21,8 +21,7 @@ func (EirinasPrayerRed) Types() card.TypeSet                       { return eiri
 func (EirinasPrayerRed) GoAgain() bool                             { return false }
 // not implemented: Instant prevent X arcane to your hero; X scaled by revealed top-card pitch
 func (EirinasPrayerRed) NotImplemented()                           {}
-func (EirinasPrayerRed) Play(*card.TurnState, *card.CardState) int { return 0 }
-
+func (EirinasPrayerRed) Play(s *card.TurnState, self *card.CardState) { s.LogPlay(self) }
 type EirinasPrayerYellow struct{}
 
 func (EirinasPrayerYellow) ID() card.ID                               { return card.EirinasPrayerYellow }
@@ -35,8 +34,7 @@ func (EirinasPrayerYellow) Types() card.TypeSet                       { return e
 func (EirinasPrayerYellow) GoAgain() bool                             { return false }
 // not implemented: Instant prevent X arcane to your hero; X scaled by revealed top-card pitch
 func (EirinasPrayerYellow) NotImplemented()                           {}
-func (EirinasPrayerYellow) Play(*card.TurnState, *card.CardState) int { return 0 }
-
+func (EirinasPrayerYellow) Play(s *card.TurnState, self *card.CardState) { s.LogPlay(self) }
 type EirinasPrayerBlue struct{}
 
 func (EirinasPrayerBlue) ID() card.ID                               { return card.EirinasPrayerBlue }
@@ -49,4 +47,4 @@ func (EirinasPrayerBlue) Types() card.TypeSet                       { return eir
 func (EirinasPrayerBlue) GoAgain() bool                             { return false }
 // not implemented: Instant prevent X arcane to your hero; X scaled by revealed top-card pitch
 func (EirinasPrayerBlue) NotImplemented()                           {}
-func (EirinasPrayerBlue) Play(*card.TurnState, *card.CardState) int { return 0 }
+func (EirinasPrayerBlue) Play(s *card.TurnState, self *card.CardState) { s.LogPlay(self) }

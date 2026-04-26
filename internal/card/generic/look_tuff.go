@@ -20,4 +20,4 @@ func (LookTuffRed) Types() card.TypeSet         { return lookTuffTypes }
 func (LookTuffRed) GoAgain() bool               { return false }
 // not implemented: pay {r} or lose 1{p} resolved as 'always pay'
 func (LookTuffRed) NotImplemented()             {}
-func (c LookTuffRed) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }
+func (c LookTuffRed) Play(s *card.TurnState, self *card.CardState) { s.ApplyAndLogEffectiveAttack(self) }

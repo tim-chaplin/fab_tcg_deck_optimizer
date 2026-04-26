@@ -26,4 +26,6 @@ func (RosettaThorn) NotSilverAgeLegal()                          {}
 // not implemented: on-attack 2 arcane damage rider gated on having played an attack action AND
 // a non-attack action this turn
 func (RosettaThorn) NotImplemented()                             {}
-func (c RosettaThorn) Play(*card.TurnState, *card.CardState) int { return c.Attack() }
+func (RosettaThorn) Play(s *card.TurnState, self *card.CardState) {
+	s.ApplyAndLogEffectiveAttack(self)
+}

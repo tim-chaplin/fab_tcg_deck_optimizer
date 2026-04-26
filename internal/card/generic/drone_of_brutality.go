@@ -23,8 +23,7 @@ func (DroneOfBrutalityRed) GoAgain() bool               { return false }
 func (DroneOfBrutalityRed) NotSilverAgeLegal()           {}
 // not implemented: graveyard-replacement-to-deck trigger
 func (DroneOfBrutalityRed) NotImplemented()              {}
-func (c DroneOfBrutalityRed) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }
-
+func (c DroneOfBrutalityRed) Play(s *card.TurnState, self *card.CardState) { s.ApplyAndLogEffectiveAttack(self) }
 type DroneOfBrutalityYellow struct{}
 
 func (DroneOfBrutalityYellow) ID() card.ID                 { return card.DroneOfBrutalityYellow }
@@ -38,8 +37,7 @@ func (DroneOfBrutalityYellow) GoAgain() bool               { return false }
 func (DroneOfBrutalityYellow) NotSilverAgeLegal()           {}
 // not implemented: graveyard-replacement-to-deck trigger
 func (DroneOfBrutalityYellow) NotImplemented()              {}
-func (c DroneOfBrutalityYellow) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }
-
+func (c DroneOfBrutalityYellow) Play(s *card.TurnState, self *card.CardState) { s.ApplyAndLogEffectiveAttack(self) }
 type DroneOfBrutalityBlue struct{}
 
 func (DroneOfBrutalityBlue) ID() card.ID                 { return card.DroneOfBrutalityBlue }
@@ -53,4 +51,4 @@ func (DroneOfBrutalityBlue) GoAgain() bool               { return false }
 func (DroneOfBrutalityBlue) NotSilverAgeLegal()           {}
 // not implemented: graveyard-replacement-to-deck trigger
 func (DroneOfBrutalityBlue) NotImplemented()              {}
-func (c DroneOfBrutalityBlue) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }
+func (c DroneOfBrutalityBlue) Play(s *card.TurnState, self *card.CardState) { s.ApplyAndLogEffectiveAttack(self) }

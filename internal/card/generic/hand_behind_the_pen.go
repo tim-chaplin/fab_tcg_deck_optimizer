@@ -22,8 +22,9 @@ func (HandBehindThePenRed) Types() card.TypeSet         { return handBehindThePe
 func (HandBehindThePenRed) GoAgain() bool               { return false }
 // not implemented: on-hit opponent-arsenal manipulation rider
 func (HandBehindThePenRed) NotImplemented()             {}
-func (c HandBehindThePenRed) Play(s *card.TurnState, self *card.CardState) int { return handBehindThePenDamage(c.Attack(), self) }
-
+func (c HandBehindThePenRed) Play(s *card.TurnState, self *card.CardState) {
+	s.ApplyAndLogEffectiveAttackPlus(self, handBehindThePenDamage(c.Attack(), self)-self.Card.Attack())
+}
 // handBehindThePenDamage is a breadcrumb for the on-hit "arsenal face-up + banish non-attack
 // action" rider — not modelled yet (see TODO.md).
 func handBehindThePenDamage(attack int, self *card.CardState) int {

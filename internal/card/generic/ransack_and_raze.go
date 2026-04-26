@@ -22,4 +22,4 @@ func (RansackAndRazeBlue) Types() card.TypeSet         { return ransackAndRazeTy
 func (RansackAndRazeBlue) GoAgain() bool               { return true }
 // not implemented: gold tokens, landmarks
 func (RansackAndRazeBlue) NotImplemented()             {}
-func (RansackAndRazeBlue) Play(s *card.TurnState, _ *card.CardState) int { return 0 }
+func (RansackAndRazeBlue) Play(s *card.TurnState, self *card.CardState) { s.LogPlay(self) }

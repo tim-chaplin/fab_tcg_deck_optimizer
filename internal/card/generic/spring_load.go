@@ -21,8 +21,7 @@ func (SpringLoadRed) Types() card.TypeSet         { return springLoadTypes }
 func (SpringLoadRed) GoAgain() bool               { return false }
 // not implemented: +3{p} 'no cards in hand' rider never fires
 func (SpringLoadRed) NotImplemented()             {}
-func (c SpringLoadRed) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }
-
+func (c SpringLoadRed) Play(s *card.TurnState, self *card.CardState) { s.ApplyAndLogEffectiveAttack(self) }
 type SpringLoadYellow struct{}
 
 func (SpringLoadYellow) ID() card.ID                 { return card.SpringLoadYellow }
@@ -35,8 +34,7 @@ func (SpringLoadYellow) Types() card.TypeSet         { return springLoadTypes }
 func (SpringLoadYellow) GoAgain() bool               { return false }
 // not implemented: +3{p} 'no cards in hand' rider never fires
 func (SpringLoadYellow) NotImplemented()             {}
-func (c SpringLoadYellow) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }
-
+func (c SpringLoadYellow) Play(s *card.TurnState, self *card.CardState) { s.ApplyAndLogEffectiveAttack(self) }
 type SpringLoadBlue struct{}
 
 func (SpringLoadBlue) ID() card.ID                 { return card.SpringLoadBlue }
@@ -49,4 +47,4 @@ func (SpringLoadBlue) Types() card.TypeSet         { return springLoadTypes }
 func (SpringLoadBlue) GoAgain() bool               { return false }
 // not implemented: +3{p} 'no cards in hand' rider never fires
 func (SpringLoadBlue) NotImplemented()             {}
-func (c SpringLoadBlue) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }
+func (c SpringLoadBlue) Play(s *card.TurnState, self *card.CardState) { s.ApplyAndLogEffectiveAttack(self) }

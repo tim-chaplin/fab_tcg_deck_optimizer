@@ -23,8 +23,7 @@ func (PickACardAnyCardRed) Types() card.TypeSet         { return pickACardAnyCar
 func (PickACardAnyCardRed) GoAgain() bool               { return true }
 // not implemented: silver tokens, opponent hand inspection
 func (PickACardAnyCardRed) NotImplemented()             {}
-func (PickACardAnyCardRed) Play(s *card.TurnState, _ *card.CardState) int { return 0 }
-
+func (PickACardAnyCardRed) Play(s *card.TurnState, self *card.CardState) { s.LogPlay(self) }
 type PickACardAnyCardYellow struct{}
 
 func (PickACardAnyCardYellow) ID() card.ID                 { return card.PickACardAnyCardYellow }
@@ -37,8 +36,7 @@ func (PickACardAnyCardYellow) Types() card.TypeSet         { return pickACardAny
 func (PickACardAnyCardYellow) GoAgain() bool               { return true }
 // not implemented: silver tokens, opponent hand inspection
 func (PickACardAnyCardYellow) NotImplemented()             {}
-func (PickACardAnyCardYellow) Play(s *card.TurnState, _ *card.CardState) int { return 0 }
-
+func (PickACardAnyCardYellow) Play(s *card.TurnState, self *card.CardState) { s.LogPlay(self) }
 type PickACardAnyCardBlue struct{}
 
 func (PickACardAnyCardBlue) ID() card.ID                 { return card.PickACardAnyCardBlue }
@@ -51,4 +49,4 @@ func (PickACardAnyCardBlue) Types() card.TypeSet         { return pickACardAnyCa
 func (PickACardAnyCardBlue) GoAgain() bool               { return true }
 // not implemented: silver tokens, opponent hand inspection
 func (PickACardAnyCardBlue) NotImplemented()             {}
-func (PickACardAnyCardBlue) Play(s *card.TurnState, _ *card.CardState) int { return 0 }
+func (PickACardAnyCardBlue) Play(s *card.TurnState, self *card.CardState) { s.LogPlay(self) }

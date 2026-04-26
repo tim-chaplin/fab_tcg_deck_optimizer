@@ -17,8 +17,7 @@ func (WoundingBlowRed) Attack() int                 { return 4 }
 func (WoundingBlowRed) Defense() int                { return 3 }
 func (WoundingBlowRed) Types() card.TypeSet         { return woundingBlowTypes }
 func (WoundingBlowRed) GoAgain() bool               { return false }
-func (c WoundingBlowRed) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }
-
+func (c WoundingBlowRed) Play(s *card.TurnState, self *card.CardState) { s.ApplyAndLogEffectiveAttack(self) }
 type WoundingBlowYellow struct{}
 
 func (WoundingBlowYellow) ID() card.ID                 { return card.WoundingBlowYellow }
@@ -29,8 +28,7 @@ func (WoundingBlowYellow) Attack() int                 { return 3 }
 func (WoundingBlowYellow) Defense() int                { return 3 }
 func (WoundingBlowYellow) Types() card.TypeSet         { return woundingBlowTypes }
 func (WoundingBlowYellow) GoAgain() bool               { return false }
-func (c WoundingBlowYellow) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }
-
+func (c WoundingBlowYellow) Play(s *card.TurnState, self *card.CardState) { s.ApplyAndLogEffectiveAttack(self) }
 type WoundingBlowBlue struct{}
 
 func (WoundingBlowBlue) ID() card.ID                 { return card.WoundingBlowBlue }
@@ -41,4 +39,4 @@ func (WoundingBlowBlue) Attack() int                 { return 2 }
 func (WoundingBlowBlue) Defense() int                { return 3 }
 func (WoundingBlowBlue) Types() card.TypeSet         { return woundingBlowTypes }
 func (WoundingBlowBlue) GoAgain() bool               { return false }
-func (c WoundingBlowBlue) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }
+func (c WoundingBlowBlue) Play(s *card.TurnState, self *card.CardState) { s.ApplyAndLogEffectiveAttack(self) }

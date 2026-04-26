@@ -22,8 +22,7 @@ func (RallyTheRearguardRed) Types() card.TypeSet         { return rallyTheReargu
 func (RallyTheRearguardRed) GoAgain() bool               { return false }
 // not implemented: defense-time instant activated ability
 func (RallyTheRearguardRed) NotImplemented()             {}
-func (c RallyTheRearguardRed) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }
-
+func (c RallyTheRearguardRed) Play(s *card.TurnState, self *card.CardState) { s.ApplyAndLogEffectiveAttack(self) }
 type RallyTheRearguardYellow struct{}
 
 func (RallyTheRearguardYellow) ID() card.ID                 { return card.RallyTheRearguardYellow }
@@ -36,8 +35,7 @@ func (RallyTheRearguardYellow) Types() card.TypeSet         { return rallyTheRea
 func (RallyTheRearguardYellow) GoAgain() bool               { return false }
 // not implemented: defense-time instant activated ability
 func (RallyTheRearguardYellow) NotImplemented()             {}
-func (c RallyTheRearguardYellow) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }
-
+func (c RallyTheRearguardYellow) Play(s *card.TurnState, self *card.CardState) { s.ApplyAndLogEffectiveAttack(self) }
 type RallyTheRearguardBlue struct{}
 
 func (RallyTheRearguardBlue) ID() card.ID                 { return card.RallyTheRearguardBlue }
@@ -50,4 +48,4 @@ func (RallyTheRearguardBlue) Types() card.TypeSet         { return rallyTheRearg
 func (RallyTheRearguardBlue) GoAgain() bool               { return false }
 // not implemented: defense-time instant activated ability
 func (RallyTheRearguardBlue) NotImplemented()             {}
-func (c RallyTheRearguardBlue) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }
+func (c RallyTheRearguardBlue) Play(s *card.TurnState, self *card.CardState) { s.ApplyAndLogEffectiveAttack(self) }

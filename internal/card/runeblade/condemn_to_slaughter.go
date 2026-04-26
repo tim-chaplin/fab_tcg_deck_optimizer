@@ -23,8 +23,9 @@ func (CondemnToSlaughterRed) GoAgain() bool              { return true }
 // not implemented: aura-trade rider and opponent-aura destruction clause; only same-turn
 // Runeblade-attack +N{p} is modelled
 func (CondemnToSlaughterRed) NotImplemented()             {}
-func (CondemnToSlaughterRed) Play(s *card.TurnState, _ *card.CardState) int { return condemnToSlaughterBonus(s, 3) }
-
+func (CondemnToSlaughterRed) Play(s *card.TurnState, self *card.CardState) {
+	s.ApplyAndLogEffectiveAttackPlus(self, condemnToSlaughterBonus(s, 3))
+}
 type CondemnToSlaughterYellow struct{}
 
 func (CondemnToSlaughterYellow) ID() card.ID                 { return card.CondemnToSlaughterYellow }
@@ -38,8 +39,9 @@ func (CondemnToSlaughterYellow) GoAgain() bool              { return true }
 // not implemented: aura-trade rider and opponent-aura destruction clause; only same-turn
 // Runeblade-attack +N{p} is modelled
 func (CondemnToSlaughterYellow) NotImplemented()             {}
-func (CondemnToSlaughterYellow) Play(s *card.TurnState, _ *card.CardState) int { return condemnToSlaughterBonus(s, 2) }
-
+func (CondemnToSlaughterYellow) Play(s *card.TurnState, self *card.CardState) {
+	s.ApplyAndLogEffectiveAttackPlus(self, condemnToSlaughterBonus(s, 2))
+}
 type CondemnToSlaughterBlue struct{}
 
 func (CondemnToSlaughterBlue) ID() card.ID                 { return card.CondemnToSlaughterBlue }
@@ -53,8 +55,9 @@ func (CondemnToSlaughterBlue) GoAgain() bool              { return true }
 // not implemented: aura-trade rider and opponent-aura destruction clause; only same-turn
 // Runeblade-attack +N{p} is modelled
 func (CondemnToSlaughterBlue) NotImplemented()             {}
-func (CondemnToSlaughterBlue) Play(s *card.TurnState, _ *card.CardState) int { return condemnToSlaughterBonus(s, 1) }
-
+func (CondemnToSlaughterBlue) Play(s *card.TurnState, self *card.CardState) {
+	s.ApplyAndLogEffectiveAttackPlus(self, condemnToSlaughterBonus(s, 1))
+}
 // condemnToSlaughterBonus grants +n to the first scheduled Runeblade attack (attack action
 // card or weapon swing) via pc.BonusAttack so the buffed attack's EffectiveAttack folds the
 // bonus into LikelyToHit and the chain credit lands on the target's slot. Returns 0;

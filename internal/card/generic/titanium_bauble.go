@@ -18,4 +18,4 @@ func (TitaniumBaubleBlue) Types() card.TypeSet                       { return ti
 func (TitaniumBaubleBlue) GoAgain() bool                             { return false }
 // not implemented: pitch-3 resource with 3{d}; no other effect
 func (TitaniumBaubleBlue) NotImplemented()                           {}
-func (TitaniumBaubleBlue) Play(*card.TurnState, *card.CardState) int { return 0 }
+func (TitaniumBaubleBlue) Play(s *card.TurnState, self *card.CardState) { s.LogPlay(self) }

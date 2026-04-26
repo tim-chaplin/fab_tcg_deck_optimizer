@@ -20,4 +20,4 @@ func (TimesnapPotionBlue) Types() card.TypeSet                       { return ti
 func (TimesnapPotionBlue) GoAgain() bool                             { return false }
 // not implemented: activated 'gain 2 action points'
 func (TimesnapPotionBlue) NotImplemented()                           {}
-func (TimesnapPotionBlue) Play(*card.TurnState, *card.CardState) int { return 0 }
+func (TimesnapPotionBlue) Play(s *card.TurnState, self *card.CardState) { s.LogPlay(self) }

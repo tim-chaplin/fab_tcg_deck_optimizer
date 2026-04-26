@@ -20,8 +20,7 @@ func (ArcanePolarityRed) Types() card.TypeSet                       { return arc
 func (ArcanePolarityRed) GoAgain() bool                             { return false }
 // not implemented: 1{h} gain (4/3/2{h} if dealt arcane damage this turn)
 func (ArcanePolarityRed) NotImplemented()                           {}
-func (ArcanePolarityRed) Play(*card.TurnState, *card.CardState) int { return 0 }
-
+func (ArcanePolarityRed) Play(s *card.TurnState, self *card.CardState) { s.LogPlay(self) }
 type ArcanePolarityYellow struct{}
 
 func (ArcanePolarityYellow) ID() card.ID                               { return card.ArcanePolarityYellow }
@@ -34,8 +33,7 @@ func (ArcanePolarityYellow) Types() card.TypeSet                       { return 
 func (ArcanePolarityYellow) GoAgain() bool                             { return false }
 // not implemented: 1{h} gain (4/3/2{h} if dealt arcane damage this turn)
 func (ArcanePolarityYellow) NotImplemented()                           {}
-func (ArcanePolarityYellow) Play(*card.TurnState, *card.CardState) int { return 0 }
-
+func (ArcanePolarityYellow) Play(s *card.TurnState, self *card.CardState) { s.LogPlay(self) }
 type ArcanePolarityBlue struct{}
 
 func (ArcanePolarityBlue) ID() card.ID                               { return card.ArcanePolarityBlue }
@@ -48,4 +46,4 @@ func (ArcanePolarityBlue) Types() card.TypeSet                       { return ar
 func (ArcanePolarityBlue) GoAgain() bool                             { return false }
 // not implemented: 1{h} gain (4/3/2{h} if dealt arcane damage this turn)
 func (ArcanePolarityBlue) NotImplemented()                           {}
-func (ArcanePolarityBlue) Play(*card.TurnState, *card.CardState) int { return 0 }
+func (ArcanePolarityBlue) Play(s *card.TurnState, self *card.CardState) { s.LogPlay(self) }

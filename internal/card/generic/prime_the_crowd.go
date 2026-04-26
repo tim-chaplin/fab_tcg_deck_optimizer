@@ -23,8 +23,9 @@ func (PrimeTheCrowdRed) Types() card.TypeSet         { return primeTheCrowdTypes
 func (PrimeTheCrowdRed) GoAgain() bool               { return true }
 // not implemented: Crowd cheers / Crowd boos keywords dropped
 func (PrimeTheCrowdRed) NotImplemented()             {}
-func (PrimeTheCrowdRed) Play(s *card.TurnState, _ *card.CardState) int { return grantNextAttackActionBonus(s, 4) }
-
+func (PrimeTheCrowdRed) Play(s *card.TurnState, self *card.CardState) {
+	s.ApplyAndLogEffectiveAttackPlus(self, grantNextAttackActionBonus(s, 4))
+}
 type PrimeTheCrowdYellow struct{}
 
 func (PrimeTheCrowdYellow) ID() card.ID                 { return card.PrimeTheCrowdYellow }
@@ -37,8 +38,9 @@ func (PrimeTheCrowdYellow) Types() card.TypeSet         { return primeTheCrowdTy
 func (PrimeTheCrowdYellow) GoAgain() bool               { return true }
 // not implemented: Crowd cheers / Crowd boos keywords dropped
 func (PrimeTheCrowdYellow) NotImplemented()             {}
-func (PrimeTheCrowdYellow) Play(s *card.TurnState, _ *card.CardState) int { return grantNextAttackActionBonus(s, 3) }
-
+func (PrimeTheCrowdYellow) Play(s *card.TurnState, self *card.CardState) {
+	s.ApplyAndLogEffectiveAttackPlus(self, grantNextAttackActionBonus(s, 3))
+}
 type PrimeTheCrowdBlue struct{}
 
 func (PrimeTheCrowdBlue) ID() card.ID                 { return card.PrimeTheCrowdBlue }
@@ -51,4 +53,6 @@ func (PrimeTheCrowdBlue) Types() card.TypeSet         { return primeTheCrowdType
 func (PrimeTheCrowdBlue) GoAgain() bool               { return true }
 // not implemented: Crowd cheers / Crowd boos keywords dropped
 func (PrimeTheCrowdBlue) NotImplemented()             {}
-func (PrimeTheCrowdBlue) Play(s *card.TurnState, _ *card.CardState) int { return grantNextAttackActionBonus(s, 2) }
+func (PrimeTheCrowdBlue) Play(s *card.TurnState, self *card.CardState) {
+	s.ApplyAndLogEffectiveAttackPlus(self, grantNextAttackActionBonus(s, 2))
+}

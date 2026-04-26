@@ -21,8 +21,7 @@ func (PushThePointRed) Types() card.TypeSet         { return pushThePointTypes }
 func (PushThePointRed) GoAgain() bool               { return false }
 // not implemented: chain-history +2{p} rider (in-chain history not readable from Play)
 func (PushThePointRed) NotImplemented()             {}
-func (c PushThePointRed) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }
-
+func (c PushThePointRed) Play(s *card.TurnState, self *card.CardState) { s.ApplyAndLogEffectiveAttack(self) }
 type PushThePointYellow struct{}
 
 func (PushThePointYellow) ID() card.ID                 { return card.PushThePointYellow }
@@ -35,8 +34,7 @@ func (PushThePointYellow) Types() card.TypeSet         { return pushThePointType
 func (PushThePointYellow) GoAgain() bool               { return false }
 // not implemented: chain-history +2{p} rider (in-chain history not readable from Play)
 func (PushThePointYellow) NotImplemented()             {}
-func (c PushThePointYellow) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }
-
+func (c PushThePointYellow) Play(s *card.TurnState, self *card.CardState) { s.ApplyAndLogEffectiveAttack(self) }
 type PushThePointBlue struct{}
 
 func (PushThePointBlue) ID() card.ID                 { return card.PushThePointBlue }
@@ -49,4 +47,4 @@ func (PushThePointBlue) Types() card.TypeSet         { return pushThePointTypes 
 func (PushThePointBlue) GoAgain() bool               { return false }
 // not implemented: chain-history +2{p} rider (in-chain history not readable from Play)
 func (PushThePointBlue) NotImplemented()             {}
-func (c PushThePointBlue) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }
+func (c PushThePointBlue) Play(s *card.TurnState, self *card.CardState) { s.ApplyAndLogEffectiveAttack(self) }

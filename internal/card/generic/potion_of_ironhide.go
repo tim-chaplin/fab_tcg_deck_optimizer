@@ -21,4 +21,4 @@ func (PotionOfIronhideBlue) Types() card.TypeSet                       { return 
 func (PotionOfIronhideBlue) GoAgain() bool                             { return false }
 // not implemented: activated +1{d} buff on all your attack actions this turn
 func (PotionOfIronhideBlue) NotImplemented()                           {}
-func (PotionOfIronhideBlue) Play(*card.TurnState, *card.CardState) int { return 0 }
+func (PotionOfIronhideBlue) Play(s *card.TurnState, self *card.CardState) { s.LogPlay(self) }

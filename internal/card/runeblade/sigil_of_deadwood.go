@@ -22,12 +22,12 @@ func (SigilOfDeadwoodBlue) Defense() int             { return 2 }
 func (SigilOfDeadwoodBlue) Types() card.TypeSet      { return sigilOfDeadwoodTypes }
 func (SigilOfDeadwoodBlue) GoAgain() bool            { return true }
 func (SigilOfDeadwoodBlue) AddsFutureValue()         {}
-func (c SigilOfDeadwoodBlue) Play(s *card.TurnState, _ *card.CardState) int {
+func (c SigilOfDeadwoodBlue) Play(s *card.TurnState, self *card.CardState) {
 	s.AddAuraTrigger(card.AuraTrigger{
 		Self:    c,
 		Type:    card.TriggerStartOfTurn,
 		Count:   1,
 		Handler: func(s *card.TurnState) int { return s.CreateRunechants(1) },
 	})
-	return 0
+	s.LogPlay(self)
 }

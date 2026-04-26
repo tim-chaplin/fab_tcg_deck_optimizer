@@ -20,8 +20,7 @@ func (zeroDefenseAura) Attack() int                               { return 0 }
 func (zeroDefenseAura) Defense() int                              { return 0 }
 func (zeroDefenseAura) Types() card.TypeSet                       { return card.NewTypeSet(card.TypeAura) }
 func (zeroDefenseAura) GoAgain() bool                             { return false }
-func (zeroDefenseAura) Play(*card.TurnState, *card.CardState) int { return 0 }
-
+func (zeroDefenseAura) Play(*card.TurnState, *card.CardState) {}
 // TestBest_WeepingBattlegroundBanishesAuraFromGraveyard: hand is Weeping Battleground + an
 // aura filler. The filler plain-blocks (0 defense, but lands in the graveyard via the
 // defense-phase seeding), WB plays as DR, banishes the filler for 1 arcane, and blocks 3 of

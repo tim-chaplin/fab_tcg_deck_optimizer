@@ -21,4 +21,4 @@ func (ShatterSorceryBlue) Types() card.TypeSet                       { return sh
 func (ShatterSorceryBlue) GoAgain() bool                             { return false }
 // not implemented: Instant: destroy a Sigil aura, and/or prevent 1 arcane damage
 func (ShatterSorceryBlue) NotImplemented()                           {}
-func (ShatterSorceryBlue) Play(*card.TurnState, *card.CardState) int { return 0 }
+func (ShatterSorceryBlue) Play(s *card.TurnState, self *card.CardState) { s.LogPlay(self) }

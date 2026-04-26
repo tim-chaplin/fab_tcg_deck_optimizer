@@ -22,8 +22,9 @@ func (MoneyOrYourLifeRed) Types() card.TypeSet         { return moneyOrYourLifeT
 func (MoneyOrYourLifeRed) GoAgain() bool               { return false }
 // not implemented: gold tokens
 func (MoneyOrYourLifeRed) NotImplemented()             {}
-func (c MoneyOrYourLifeRed) Play(s *card.TurnState, self *card.CardState) int { return moneyOrYourLifeDamage(c.Attack(), self) }
-
+func (c MoneyOrYourLifeRed) Play(s *card.TurnState, self *card.CardState) {
+	s.ApplyAndLogEffectiveAttackPlus(self, moneyOrYourLifeDamage(c.Attack(), self)-self.Card.Attack())
+}
 type MoneyOrYourLifeYellow struct{}
 
 func (MoneyOrYourLifeYellow) ID() card.ID                 { return card.MoneyOrYourLifeYellow }
@@ -36,8 +37,9 @@ func (MoneyOrYourLifeYellow) Types() card.TypeSet         { return moneyOrYourLi
 func (MoneyOrYourLifeYellow) GoAgain() bool               { return false }
 // not implemented: gold tokens
 func (MoneyOrYourLifeYellow) NotImplemented()             {}
-func (c MoneyOrYourLifeYellow) Play(s *card.TurnState, self *card.CardState) int { return moneyOrYourLifeDamage(c.Attack(), self) }
-
+func (c MoneyOrYourLifeYellow) Play(s *card.TurnState, self *card.CardState) {
+	s.ApplyAndLogEffectiveAttackPlus(self, moneyOrYourLifeDamage(c.Attack(), self)-self.Card.Attack())
+}
 type MoneyOrYourLifeBlue struct{}
 
 func (MoneyOrYourLifeBlue) ID() card.ID                 { return card.MoneyOrYourLifeBlue }
@@ -50,8 +52,9 @@ func (MoneyOrYourLifeBlue) Types() card.TypeSet         { return moneyOrYourLife
 func (MoneyOrYourLifeBlue) GoAgain() bool               { return false }
 // not implemented: gold tokens
 func (MoneyOrYourLifeBlue) NotImplemented()             {}
-func (c MoneyOrYourLifeBlue) Play(s *card.TurnState, self *card.CardState) int { return moneyOrYourLifeDamage(c.Attack(), self) }
-
+func (c MoneyOrYourLifeBlue) Play(s *card.TurnState, self *card.CardState) {
+	s.ApplyAndLogEffectiveAttackPlus(self, moneyOrYourLifeDamage(c.Attack(), self)-self.Card.Attack())
+}
 // moneyOrYourLifeDamage is a breadcrumb for the on-hit "deal 2 damage unless they give Gold"
 // rider — Gold tokens aren't tracked, Thief-repeat isn't modelled (see TODO.md).
 func moneyOrYourLifeDamage(attack int, self *card.CardState) int {

@@ -22,4 +22,4 @@ func (AmuletOfInterventionBlue) Types() card.TypeSet                       { ret
 func (AmuletOfInterventionBlue) GoAgain() bool                             { return true }
 // not implemented: Instant 1 damage prevention; gated on a lethal incoming source
 func (AmuletOfInterventionBlue) NotImplemented()                           {}
-func (AmuletOfInterventionBlue) Play(*card.TurnState, *card.CardState) int { return 0 }
+func (AmuletOfInterventionBlue) Play(s *card.TurnState, self *card.CardState) { s.LogPlay(self) }

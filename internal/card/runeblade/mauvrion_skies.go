@@ -32,9 +32,11 @@ func mauvrionTargetMatches(target *card.CardState) bool {
 	return t.Has(card.TypeRuneblade) && t.IsAttackAction()
 }
 
-// mauvrionSkiesPlay applies the go-again grant via look-ahead and registers the ephemeral
-// "if hits, create n Runechants" trigger for the same target's fully-resolved attack.
-func mauvrionSkiesPlay(s *card.TurnState, source card.Card, n int) int {
+// mauvrionSkiesPlay applies the go-again grant via look-ahead, registers the ephemeral
+// "if hits, create n Runechants" trigger for the same target's fully-resolved attack,
+// and emits the chain step (no value contribution; rider damage is credited via the
+// trigger handler).
+func mauvrionSkiesPlay(s *card.TurnState, selfState *card.CardState, source card.Card, n int) {
 	// Go again is static — flip it on the first matching target so its chain-legality check
 	// sees the grant before the target's Play runs.
 	for _, pc := range s.CardsRemaining {
@@ -57,7 +59,7 @@ func mauvrionSkiesPlay(s *card.TurnState, source card.Card, n int) int {
 			return s.CreateAndLogRunechantsOnHit(card.DisplayName(source), card.DisplayName(target.Card), n)
 		},
 	})
-	return 0
+	s.LogPlay(selfState)
 }
 
 type MauvrionSkiesRed struct{}
@@ -70,7 +72,9 @@ func (MauvrionSkiesRed) Attack() int                                     { retur
 func (MauvrionSkiesRed) Defense() int                                    { return 2 }
 func (MauvrionSkiesRed) Types() card.TypeSet                             { return mauvrionSkiesTypes }
 func (MauvrionSkiesRed) GoAgain() bool                                   { return true }
-func (c MauvrionSkiesRed) Play(s *card.TurnState, _ *card.CardState) int { return mauvrionSkiesPlay(s, c, 3) }
+func (c MauvrionSkiesRed) Play(s *card.TurnState, self *card.CardState) {
+	mauvrionSkiesPlay(s, self, c, 3)
+}
 
 type MauvrionSkiesYellow struct{}
 
@@ -82,7 +86,9 @@ func (MauvrionSkiesYellow) Attack() int                                     { re
 func (MauvrionSkiesYellow) Defense() int                                    { return 2 }
 func (MauvrionSkiesYellow) Types() card.TypeSet                             { return mauvrionSkiesTypes }
 func (MauvrionSkiesYellow) GoAgain() bool                                   { return true }
-func (c MauvrionSkiesYellow) Play(s *card.TurnState, _ *card.CardState) int { return mauvrionSkiesPlay(s, c, 2) }
+func (c MauvrionSkiesYellow) Play(s *card.TurnState, self *card.CardState) {
+	mauvrionSkiesPlay(s, self, c, 2)
+}
 
 type MauvrionSkiesBlue struct{}
 
@@ -94,4 +100,6 @@ func (MauvrionSkiesBlue) Attack() int                                     { retu
 func (MauvrionSkiesBlue) Defense() int                                    { return 2 }
 func (MauvrionSkiesBlue) Types() card.TypeSet                             { return mauvrionSkiesTypes }
 func (MauvrionSkiesBlue) GoAgain() bool                                   { return true }
-func (c MauvrionSkiesBlue) Play(s *card.TurnState, _ *card.CardState) int { return mauvrionSkiesPlay(s, c, 1) }
+func (c MauvrionSkiesBlue) Play(s *card.TurnState, self *card.CardState) {
+	mauvrionSkiesPlay(s, self, c, 1)
+}

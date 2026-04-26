@@ -26,8 +26,9 @@ func (MoneyWhereYaMouthIsRed) Types() card.TypeSet         { return moneyWhereYa
 func (MoneyWhereYaMouthIsRed) GoAgain() bool               { return true }
 // not implemented: gold tokens
 func (MoneyWhereYaMouthIsRed) NotImplemented()             {}
-func (MoneyWhereYaMouthIsRed) Play(s *card.TurnState, _ *card.CardState) int { return grantNextAttackActionBonus(s, 3) }
-
+func (MoneyWhereYaMouthIsRed) Play(s *card.TurnState, self *card.CardState) {
+	s.ApplyAndLogEffectiveAttackPlus(self, grantNextAttackActionBonus(s, 3))
+}
 type MoneyWhereYaMouthIsYellow struct{}
 
 func (MoneyWhereYaMouthIsYellow) ID() card.ID                 { return card.MoneyWhereYaMouthIsYellow }
@@ -40,8 +41,9 @@ func (MoneyWhereYaMouthIsYellow) Types() card.TypeSet         { return moneyWher
 func (MoneyWhereYaMouthIsYellow) GoAgain() bool               { return true }
 // not implemented: gold tokens
 func (MoneyWhereYaMouthIsYellow) NotImplemented()             {}
-func (MoneyWhereYaMouthIsYellow) Play(s *card.TurnState, _ *card.CardState) int { return grantNextAttackActionBonus(s, 2) }
-
+func (MoneyWhereYaMouthIsYellow) Play(s *card.TurnState, self *card.CardState) {
+	s.ApplyAndLogEffectiveAttackPlus(self, grantNextAttackActionBonus(s, 2))
+}
 type MoneyWhereYaMouthIsBlue struct{}
 
 func (MoneyWhereYaMouthIsBlue) ID() card.ID                 { return card.MoneyWhereYaMouthIsBlue }
@@ -54,4 +56,6 @@ func (MoneyWhereYaMouthIsBlue) Types() card.TypeSet         { return moneyWhereY
 func (MoneyWhereYaMouthIsBlue) GoAgain() bool               { return true }
 // not implemented: gold tokens
 func (MoneyWhereYaMouthIsBlue) NotImplemented()             {}
-func (MoneyWhereYaMouthIsBlue) Play(s *card.TurnState, _ *card.CardState) int { return grantNextAttackActionBonus(s, 1) }
+func (MoneyWhereYaMouthIsBlue) Play(s *card.TurnState, self *card.CardState) {
+	s.ApplyAndLogEffectiveAttackPlus(self, grantNextAttackActionBonus(s, 1))
+}

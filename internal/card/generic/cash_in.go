@@ -22,4 +22,4 @@ func (CashInYellow) GoAgain() bool               { return true }
 func (CashInYellow) NotSilverAgeLegal()           {}
 // not implemented: gold/silver/copper tokens, card draw
 func (CashInYellow) NotImplemented()              {}
-func (CashInYellow) Play(s *card.TurnState, _ *card.CardState) int { return 0 }
+func (CashInYellow) Play(s *card.TurnState, self *card.CardState) { s.LogPlay(self) }

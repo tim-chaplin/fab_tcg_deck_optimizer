@@ -22,8 +22,9 @@ func (VantagePointRed) Types() card.TypeSet        { return vantagePointTypes }
 func (VantagePointRed) GoAgain() bool              { return false }
 // not implemented: Overpower flag is set on the aura condition but never consumed by the solver
 func (VantagePointRed) NotImplemented()             {}
-func (c VantagePointRed) Play(s *card.TurnState, _ *card.CardState) int { return vantagePointPlay(c.Attack(), s) }
-
+func (c VantagePointRed) Play(s *card.TurnState, self *card.CardState) {
+	s.ApplyAndLogEffectiveAttackPlus(self, vantagePointPlay(c.Attack(), s)-self.Card.Attack())
+}
 type VantagePointYellow struct{}
 
 func (VantagePointYellow) ID() card.ID                 { return card.VantagePointYellow }
@@ -36,8 +37,9 @@ func (VantagePointYellow) Types() card.TypeSet          { return vantagePointTyp
 func (VantagePointYellow) GoAgain() bool                { return false }
 // not implemented: Overpower flag is set on the aura condition but never consumed by the solver
 func (VantagePointYellow) NotImplemented()             {}
-func (c VantagePointYellow) Play(s *card.TurnState, _ *card.CardState) int { return vantagePointPlay(c.Attack(), s) }
-
+func (c VantagePointYellow) Play(s *card.TurnState, self *card.CardState) {
+	s.ApplyAndLogEffectiveAttackPlus(self, vantagePointPlay(c.Attack(), s)-self.Card.Attack())
+}
 type VantagePointBlue struct{}
 
 func (VantagePointBlue) ID() card.ID                 { return card.VantagePointBlue }
@@ -50,8 +52,9 @@ func (VantagePointBlue) Types() card.TypeSet          { return vantagePointTypes
 func (VantagePointBlue) GoAgain() bool                { return false }
 // not implemented: Overpower flag is set on the aura condition but never consumed by the solver
 func (VantagePointBlue) NotImplemented()             {}
-func (c VantagePointBlue) Play(s *card.TurnState, _ *card.CardState) int { return vantagePointPlay(c.Attack(), s) }
-
+func (c VantagePointBlue) Play(s *card.TurnState, self *card.CardState) {
+	s.ApplyAndLogEffectiveAttackPlus(self, vantagePointPlay(c.Attack(), s)-self.Card.Attack())
+}
 func vantagePointPlay(base int, s *card.TurnState) int {
 	if s.HasAuraInPlay() {
 		s.Overpower = true

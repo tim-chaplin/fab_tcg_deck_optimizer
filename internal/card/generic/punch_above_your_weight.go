@@ -21,8 +21,7 @@ func (PunchAboveYourWeightRed) Types() card.TypeSet         { return punchAboveY
 func (PunchAboveYourWeightRed) GoAgain() bool               { return false }
 // not implemented: pay-{r}{r}{r}-for-+5{p} mode
 func (PunchAboveYourWeightRed) NotImplemented()             {}
-func (c PunchAboveYourWeightRed) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }
-
+func (c PunchAboveYourWeightRed) Play(s *card.TurnState, self *card.CardState) { s.ApplyAndLogEffectiveAttack(self) }
 type PunchAboveYourWeightYellow struct{}
 
 func (PunchAboveYourWeightYellow) ID() card.ID                 { return card.PunchAboveYourWeightYellow }
@@ -35,8 +34,7 @@ func (PunchAboveYourWeightYellow) Types() card.TypeSet         { return punchAbo
 func (PunchAboveYourWeightYellow) GoAgain() bool               { return false }
 // not implemented: pay-{r}{r}{r}-for-+5{p} mode
 func (PunchAboveYourWeightYellow) NotImplemented()             {}
-func (c PunchAboveYourWeightYellow) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }
-
+func (c PunchAboveYourWeightYellow) Play(s *card.TurnState, self *card.CardState) { s.ApplyAndLogEffectiveAttack(self) }
 type PunchAboveYourWeightBlue struct{}
 
 func (PunchAboveYourWeightBlue) ID() card.ID                 { return card.PunchAboveYourWeightBlue }
@@ -49,4 +47,4 @@ func (PunchAboveYourWeightBlue) Types() card.TypeSet         { return punchAbove
 func (PunchAboveYourWeightBlue) GoAgain() bool               { return false }
 // not implemented: pay-{r}{r}{r}-for-+5{p} mode
 func (PunchAboveYourWeightBlue) NotImplemented()             {}
-func (c PunchAboveYourWeightBlue) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }
+func (c PunchAboveYourWeightBlue) Play(s *card.TurnState, self *card.CardState) { s.ApplyAndLogEffectiveAttack(self) }

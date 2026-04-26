@@ -34,8 +34,9 @@ func (ReekOfCorruptionRed) Attack() int                  { return 4 }
 func (ReekOfCorruptionRed) Defense() int                 { return 3 }
 func (ReekOfCorruptionRed) Types() card.TypeSet          { return reekOfCorruptionTypes }
 func (ReekOfCorruptionRed) GoAgain() bool                { return false }
-func (c ReekOfCorruptionRed) Play(s *card.TurnState, self *card.CardState) int { return reekOfCorruptionDamage(c.Attack(), s, self) }
-
+func (c ReekOfCorruptionRed) Play(s *card.TurnState, self *card.CardState) {
+	s.ApplyAndLogEffectiveAttackPlus(self, reekOfCorruptionDamage(c.Attack(), s, self)-self.Card.Attack())
+}
 type ReekOfCorruptionYellow struct{}
 
 func (ReekOfCorruptionYellow) ID() card.ID                  { return card.ReekOfCorruptionYellow }
@@ -46,8 +47,9 @@ func (ReekOfCorruptionYellow) Attack() int                  { return 3 }
 func (ReekOfCorruptionYellow) Defense() int                 { return 3 }
 func (ReekOfCorruptionYellow) Types() card.TypeSet          { return reekOfCorruptionTypes }
 func (ReekOfCorruptionYellow) GoAgain() bool                { return false }
-func (c ReekOfCorruptionYellow) Play(s *card.TurnState, self *card.CardState) int { return reekOfCorruptionDamage(c.Attack(), s, self) }
-
+func (c ReekOfCorruptionYellow) Play(s *card.TurnState, self *card.CardState) {
+	s.ApplyAndLogEffectiveAttackPlus(self, reekOfCorruptionDamage(c.Attack(), s, self)-self.Card.Attack())
+}
 type ReekOfCorruptionBlue struct{}
 
 func (ReekOfCorruptionBlue) ID() card.ID                  { return card.ReekOfCorruptionBlue }
@@ -58,4 +60,6 @@ func (ReekOfCorruptionBlue) Attack() int                  { return 2 }
 func (ReekOfCorruptionBlue) Defense() int                 { return 3 }
 func (ReekOfCorruptionBlue) Types() card.TypeSet          { return reekOfCorruptionTypes }
 func (ReekOfCorruptionBlue) GoAgain() bool                { return false }
-func (c ReekOfCorruptionBlue) Play(s *card.TurnState, self *card.CardState) int { return reekOfCorruptionDamage(c.Attack(), s, self) }
+func (c ReekOfCorruptionBlue) Play(s *card.TurnState, self *card.CardState) {
+	s.ApplyAndLogEffectiveAttackPlus(self, reekOfCorruptionDamage(c.Attack(), s, self)-self.Card.Attack())
+}

@@ -18,4 +18,4 @@ func (PutInContextBlue) GoAgain() bool            { return false }
 // not implemented: base-power cap on what this can defend is ignored; treated as legal vs every
 // attack
 func (PutInContextBlue) NotImplemented()             {}
-func (PutInContextBlue) Play(*card.TurnState, *card.CardState) int { return 0 }
+func (PutInContextBlue) Play(s *card.TurnState, self *card.CardState) { s.LogPlay(self) }

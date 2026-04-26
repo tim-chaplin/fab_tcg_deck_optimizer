@@ -21,8 +21,7 @@ func (FreewheelingRenegadesRed) Types() card.TypeSet         { return freewheeli
 func (FreewheelingRenegadesRed) GoAgain() bool               { return false }
 // not implemented: defended-by-action-card -2{p} rider
 func (FreewheelingRenegadesRed) NotImplemented()             {}
-func (c FreewheelingRenegadesRed) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }
-
+func (c FreewheelingRenegadesRed) Play(s *card.TurnState, self *card.CardState) { s.ApplyAndLogEffectiveAttack(self) }
 type FreewheelingRenegadesYellow struct{}
 
 func (FreewheelingRenegadesYellow) ID() card.ID                 { return card.FreewheelingRenegadesYellow }
@@ -35,8 +34,7 @@ func (FreewheelingRenegadesYellow) Types() card.TypeSet         { return freewhe
 func (FreewheelingRenegadesYellow) GoAgain() bool               { return false }
 // not implemented: defended-by-action-card -2{p} rider
 func (FreewheelingRenegadesYellow) NotImplemented()             {}
-func (c FreewheelingRenegadesYellow) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }
-
+func (c FreewheelingRenegadesYellow) Play(s *card.TurnState, self *card.CardState) { s.ApplyAndLogEffectiveAttack(self) }
 type FreewheelingRenegadesBlue struct{}
 
 func (FreewheelingRenegadesBlue) ID() card.ID                 { return card.FreewheelingRenegadesBlue }
@@ -49,4 +47,4 @@ func (FreewheelingRenegadesBlue) Types() card.TypeSet         { return freewheel
 func (FreewheelingRenegadesBlue) GoAgain() bool               { return false }
 // not implemented: defended-by-action-card -2{p} rider
 func (FreewheelingRenegadesBlue) NotImplemented()             {}
-func (c FreewheelingRenegadesBlue) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }
+func (c FreewheelingRenegadesBlue) Play(s *card.TurnState, self *card.CardState) { s.ApplyAndLogEffectiveAttack(self) }

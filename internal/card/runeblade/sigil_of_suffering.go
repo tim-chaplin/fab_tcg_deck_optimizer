@@ -29,8 +29,9 @@ func (SigilOfSufferingRed) GoAgain() bool                 { return false }
 // not implemented: conditional +1{d} 'if dealt arcane damage' is baked unconditionally into
 // Defense — over-credits when the trigger condition isn't met
 func (SigilOfSufferingRed) NotImplemented()             {}
-func (SigilOfSufferingRed) Play(s *card.TurnState, _ *card.CardState) int    { return sigilOfSufferingPlay(s) }
-
+func (SigilOfSufferingRed) Play(s *card.TurnState, self *card.CardState) {
+	s.ApplyAndLogEffectiveAttackPlus(self, sigilOfSufferingPlay(s))
+}
 type SigilOfSufferingYellow struct{}
 
 func (SigilOfSufferingYellow) ID() card.ID                   { return card.SigilOfSufferingYellow }
@@ -44,8 +45,9 @@ func (SigilOfSufferingYellow) GoAgain() bool                 { return false }
 // not implemented: conditional +1{d} 'if dealt arcane damage' is baked unconditionally into
 // Defense — over-credits when the trigger condition isn't met
 func (SigilOfSufferingYellow) NotImplemented()             {}
-func (SigilOfSufferingYellow) Play(s *card.TurnState, _ *card.CardState) int    { return sigilOfSufferingPlay(s) }
-
+func (SigilOfSufferingYellow) Play(s *card.TurnState, self *card.CardState) {
+	s.ApplyAndLogEffectiveAttackPlus(self, sigilOfSufferingPlay(s))
+}
 type SigilOfSufferingBlue struct{}
 
 func (SigilOfSufferingBlue) ID() card.ID                   { return card.SigilOfSufferingBlue }
@@ -59,4 +61,6 @@ func (SigilOfSufferingBlue) GoAgain() bool                 { return false }
 // not implemented: conditional +1{d} 'if dealt arcane damage' is baked unconditionally into
 // Defense — over-credits when the trigger condition isn't met
 func (SigilOfSufferingBlue) NotImplemented()             {}
-func (SigilOfSufferingBlue) Play(s *card.TurnState, _ *card.CardState) int    { return sigilOfSufferingPlay(s) }
+func (SigilOfSufferingBlue) Play(s *card.TurnState, self *card.CardState) {
+	s.ApplyAndLogEffectiveAttackPlus(self, sigilOfSufferingPlay(s))
+}

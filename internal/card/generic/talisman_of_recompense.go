@@ -21,4 +21,4 @@ func (TalismanOfRecompenseYellow) Types() card.TypeSet                       { r
 func (TalismanOfRecompenseYellow) GoAgain() bool                             { return true }
 // not implemented: self-destroys on pitching a 1-resource card → gain {r}{r}{r} instead
 func (TalismanOfRecompenseYellow) NotImplemented()                           {}
-func (TalismanOfRecompenseYellow) Play(*card.TurnState, *card.CardState) int { return 0 }
+func (TalismanOfRecompenseYellow) Play(s *card.TurnState, self *card.CardState) { s.LogPlay(self) }

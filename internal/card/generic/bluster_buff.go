@@ -20,4 +20,4 @@ func (BlusterBuffRed) Types() card.TypeSet         { return blusterBuffTypes }
 func (BlusterBuffRed) GoAgain() bool               { return false }
 // not implemented: pay {r} or lose 1{p} resolved as 'always pay'
 func (BlusterBuffRed) NotImplemented()             {}
-func (c BlusterBuffRed) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }
+func (c BlusterBuffRed) Play(s *card.TurnState, self *card.CardState) { s.ApplyAndLogEffectiveAttack(self) }

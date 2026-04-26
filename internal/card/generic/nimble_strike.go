@@ -22,8 +22,7 @@ func (NimbleStrikeRed) Types() card.TypeSet         { return nimbleStrikeTypes }
 func (NimbleStrikeRed) GoAgain() bool               { return false }
 // not implemented: graveyard-banish-Nimblism additional cost and the +1{p}/go-again bonus rider
 func (NimbleStrikeRed) NotImplemented()             {}
-func (c NimbleStrikeRed) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }
-
+func (c NimbleStrikeRed) Play(s *card.TurnState, self *card.CardState) { s.ApplyAndLogEffectiveAttack(self) }
 type NimbleStrikeYellow struct{}
 
 func (NimbleStrikeYellow) ID() card.ID                 { return card.NimbleStrikeYellow }
@@ -36,8 +35,7 @@ func (NimbleStrikeYellow) Types() card.TypeSet         { return nimbleStrikeType
 func (NimbleStrikeYellow) GoAgain() bool               { return false }
 // not implemented: graveyard-banish-Nimblism additional cost and the +1{p}/go-again bonus rider
 func (NimbleStrikeYellow) NotImplemented()             {}
-func (c NimbleStrikeYellow) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }
-
+func (c NimbleStrikeYellow) Play(s *card.TurnState, self *card.CardState) { s.ApplyAndLogEffectiveAttack(self) }
 type NimbleStrikeBlue struct{}
 
 func (NimbleStrikeBlue) ID() card.ID                 { return card.NimbleStrikeBlue }
@@ -50,4 +48,4 @@ func (NimbleStrikeBlue) Types() card.TypeSet         { return nimbleStrikeTypes 
 func (NimbleStrikeBlue) GoAgain() bool               { return false }
 // not implemented: graveyard-banish-Nimblism additional cost and the +1{p}/go-again bonus rider
 func (NimbleStrikeBlue) NotImplemented()             {}
-func (c NimbleStrikeBlue) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }
+func (c NimbleStrikeBlue) Play(s *card.TurnState, self *card.CardState) { s.ApplyAndLogEffectiveAttack(self) }

@@ -25,8 +25,9 @@ func (SirensOfSafeHarborRed) Defense() int                { return 2 }
 func (SirensOfSafeHarborRed) Types() card.TypeSet         { return sirensOfSafeHarborTypes }
 func (SirensOfSafeHarborRed) GoAgain() bool               { return false }
 func (SirensOfSafeHarborRed) NotSilverAgeLegal()           {}
-func (c SirensOfSafeHarborRed) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() + 1 }
-
+func (SirensOfSafeHarborRed) Play(s *card.TurnState, self *card.CardState) {
+	s.ApplyAndLogEffectiveAttackPlus(self, 1)
+}
 type SirensOfSafeHarborYellow struct{}
 
 func (SirensOfSafeHarborYellow) ID() card.ID                 { return card.SirensOfSafeHarborYellow }
@@ -38,8 +39,9 @@ func (SirensOfSafeHarborYellow) Defense() int                { return 2 }
 func (SirensOfSafeHarborYellow) Types() card.TypeSet         { return sirensOfSafeHarborTypes }
 func (SirensOfSafeHarborYellow) GoAgain() bool               { return false }
 func (SirensOfSafeHarborYellow) NotSilverAgeLegal()           {}
-func (c SirensOfSafeHarborYellow) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() + 1 }
-
+func (SirensOfSafeHarborYellow) Play(s *card.TurnState, self *card.CardState) {
+	s.ApplyAndLogEffectiveAttackPlus(self, 1)
+}
 type SirensOfSafeHarborBlue struct{}
 
 func (SirensOfSafeHarborBlue) ID() card.ID                 { return card.SirensOfSafeHarborBlue }
@@ -51,4 +53,6 @@ func (SirensOfSafeHarborBlue) Defense() int                { return 2 }
 func (SirensOfSafeHarborBlue) Types() card.TypeSet         { return sirensOfSafeHarborTypes }
 func (SirensOfSafeHarborBlue) GoAgain() bool               { return false }
 func (SirensOfSafeHarborBlue) NotSilverAgeLegal()           {}
-func (c SirensOfSafeHarborBlue) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() + 1 }
+func (SirensOfSafeHarborBlue) Play(s *card.TurnState, self *card.CardState) {
+	s.ApplyAndLogEffectiveAttackPlus(self, 1)
+}

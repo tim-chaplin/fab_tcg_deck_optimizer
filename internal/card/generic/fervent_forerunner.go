@@ -14,12 +14,13 @@ import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 
 var ferventForerunnerTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeAttack)
 
-// ferventForerunnerPlay grants self Go again when this copy was played from arsenal.
-func ferventForerunnerPlay(c card.Card, self *card.CardState) int {
+// ferventForerunnerPlay grants self Go again when this copy was played from arsenal,
+// then emits the chain step.
+func ferventForerunnerPlay(s *card.TurnState, self *card.CardState) {
 	if self.FromArsenal {
 		self.GrantedGoAgain = true
 	}
-	return c.Attack()
+	s.ApplyAndLogEffectiveAttack(self)
 }
 
 type FerventForerunnerRed struct{}
@@ -34,8 +35,9 @@ func (FerventForerunnerRed) Types() card.TypeSet         { return ferventForerun
 func (FerventForerunnerRed) GoAgain() bool               { return false }
 // not implemented: on-hit Opt 2 rider
 func (FerventForerunnerRed) NotImplemented()             {}
-func (c FerventForerunnerRed) Play(_ *card.TurnState, self *card.CardState) int { return ferventForerunnerPlay(c, self) }
-
+func (FerventForerunnerRed) Play(s *card.TurnState, self *card.CardState) {
+	ferventForerunnerPlay(s, self)
+}
 type FerventForerunnerYellow struct{}
 
 func (FerventForerunnerYellow) ID() card.ID                 { return card.FerventForerunnerYellow }
@@ -48,8 +50,9 @@ func (FerventForerunnerYellow) Types() card.TypeSet         { return ferventFore
 func (FerventForerunnerYellow) GoAgain() bool               { return false }
 // not implemented: on-hit Opt 2 rider
 func (FerventForerunnerYellow) NotImplemented()             {}
-func (c FerventForerunnerYellow) Play(_ *card.TurnState, self *card.CardState) int { return ferventForerunnerPlay(c, self) }
-
+func (FerventForerunnerYellow) Play(s *card.TurnState, self *card.CardState) {
+	ferventForerunnerPlay(s, self)
+}
 type FerventForerunnerBlue struct{}
 
 func (FerventForerunnerBlue) ID() card.ID                 { return card.FerventForerunnerBlue }
@@ -62,4 +65,6 @@ func (FerventForerunnerBlue) Types() card.TypeSet         { return ferventForeru
 func (FerventForerunnerBlue) GoAgain() bool               { return false }
 // not implemented: on-hit Opt 2 rider
 func (FerventForerunnerBlue) NotImplemented()             {}
-func (c FerventForerunnerBlue) Play(_ *card.TurnState, self *card.CardState) int { return ferventForerunnerPlay(c, self) }
+func (FerventForerunnerBlue) Play(s *card.TurnState, self *card.CardState) {
+	ferventForerunnerPlay(s, self)
+}

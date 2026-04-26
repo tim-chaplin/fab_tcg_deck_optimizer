@@ -22,4 +22,4 @@ func (ImperialSealOfCommandRed) Types() card.TypeSet                       { ret
 func (ImperialSealOfCommandRed) GoAgain() bool                             { return false }
 // not implemented: activated 'no DR this turn' + Royal-only arsenal-wipe on hit
 func (ImperialSealOfCommandRed) NotImplemented()                           {}
-func (ImperialSealOfCommandRed) Play(*card.TurnState, *card.CardState) int { return 0 }
+func (ImperialSealOfCommandRed) Play(s *card.TurnState, self *card.CardState) { s.LogPlay(self) }

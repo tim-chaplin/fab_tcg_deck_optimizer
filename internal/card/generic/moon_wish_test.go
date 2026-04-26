@@ -44,7 +44,7 @@ func TestMoonWish_AltCostMovesHandCardToDeckTop(t *testing.T) {
 		Deck: []card.Card{other},
 	}
 	self := &card.CardState{Card: MoonWishYellow{}}
-	_ = MoonWishYellow{}.Play(&s, self)
+	MoonWishYellow{}.Play(&s, self)
 	if len(s.Hand) != 0 {
 		t.Errorf("Hand = %d entries, want 0 (alt cost should pop the only hand card)", len(s.Hand))
 	}
@@ -83,7 +83,7 @@ func TestMoonWish_TutorRequiresHit(t *testing.T) {
 	{
 		s := card.TurnState{Deck: []card.Card{SunKissRed{}}}
 		self := &card.CardState{Card: MoonWishYellow{}}
-		_ = MoonWishYellow{}.Play(&s, self)
+		MoonWishYellow{}.Play(&s, self)
 		if len(s.Hand) != 1 || s.Hand[0].ID() != card.SunKissRed {
 			t.Errorf("base hit: Hand = %v, want [Sun Kiss [R]]", s.Hand)
 		}
@@ -95,7 +95,7 @@ func TestMoonWish_TutorRequiresHit(t *testing.T) {
 		s := card.TurnState{Deck: []card.Card{SunKissRed{}}}
 		// Drive EffectiveAttack down so LikelyToHit fails (4 - 4 = 0, clamped, not in window).
 		self := &card.CardState{Card: MoonWishYellow{}, BonusAttack: -4}
-		_ = MoonWishYellow{}.Play(&s, self)
+		MoonWishYellow{}.Play(&s, self)
 		if len(s.Hand) != 0 {
 			t.Errorf("dampened: Hand = %v, want [] (no hit, no tutor)", s.Hand)
 		}
@@ -112,7 +112,8 @@ func TestMoonWish_GoAgainPlaysSunKissImmediately(t *testing.T) {
 	{
 		s := card.TurnState{Deck: []card.Card{SunKissRed{}}}
 		self := &card.CardState{Card: MoonWishYellow{}, GrantedGoAgain: true}
-		dmg := MoonWishYellow{}.Play(&s, self)
+		MoonWishYellow{}.Play(&s, self)
+		dmg := s.Value
 		if dmg != 4+3 {
 			t.Errorf("with go-again: damage = %d, want 7 (Moon Wish 4 + Sun Kiss 3)", dmg)
 		}
@@ -126,7 +127,8 @@ func TestMoonWish_GoAgainPlaysSunKissImmediately(t *testing.T) {
 	{
 		s := card.TurnState{Deck: []card.Card{SunKissRed{}}}
 		self := &card.CardState{Card: MoonWishYellow{}}
-		dmg := MoonWishYellow{}.Play(&s, self)
+		MoonWishYellow{}.Play(&s, self)
+		dmg := s.Value
 		if dmg != 4 {
 			t.Errorf("no go-again: damage = %d, want 4 (Sun Kiss not played)", dmg)
 		}

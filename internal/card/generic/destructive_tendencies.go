@@ -21,4 +21,4 @@ func (DestructiveTendenciesBlue) Types() card.TypeSet                       { re
 func (DestructiveTendenciesBlue) GoAgain() bool                             { return false }
 // not implemented: Instant 'remove counters from target item / aura token'
 func (DestructiveTendenciesBlue) NotImplemented()                           {}
-func (DestructiveTendenciesBlue) Play(*card.TurnState, *card.CardState) int { return 0 }
+func (DestructiveTendenciesBlue) Play(s *card.TurnState, self *card.CardState) { s.LogPlay(self) }

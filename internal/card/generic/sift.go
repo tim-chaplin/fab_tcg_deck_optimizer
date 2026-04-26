@@ -21,8 +21,7 @@ func (SiftRed) Types() card.TypeSet         { return siftTypes }
 func (SiftRed) GoAgain() bool               { return true }
 // not implemented: hand cycling
 func (SiftRed) NotImplemented()             {}
-func (SiftRed) Play(s *card.TurnState, _ *card.CardState) int { return 0 }
-
+func (SiftRed) Play(s *card.TurnState, self *card.CardState) { s.LogPlay(self) }
 type SiftYellow struct{}
 
 func (SiftYellow) ID() card.ID                 { return card.SiftYellow }
@@ -35,8 +34,7 @@ func (SiftYellow) Types() card.TypeSet         { return siftTypes }
 func (SiftYellow) GoAgain() bool               { return true }
 // not implemented: hand cycling
 func (SiftYellow) NotImplemented()             {}
-func (SiftYellow) Play(s *card.TurnState, _ *card.CardState) int { return 0 }
-
+func (SiftYellow) Play(s *card.TurnState, self *card.CardState) { s.LogPlay(self) }
 type SiftBlue struct{}
 
 func (SiftBlue) ID() card.ID                 { return card.SiftBlue }
@@ -49,4 +47,4 @@ func (SiftBlue) Types() card.TypeSet         { return siftTypes }
 func (SiftBlue) GoAgain() bool               { return true }
 // not implemented: hand cycling
 func (SiftBlue) NotImplemented()             {}
-func (SiftBlue) Play(s *card.TurnState, _ *card.CardState) int { return 0 }
+func (SiftBlue) Play(s *card.TurnState, self *card.CardState) { s.LogPlay(self) }

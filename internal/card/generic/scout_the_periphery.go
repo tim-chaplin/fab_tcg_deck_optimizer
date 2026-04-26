@@ -41,8 +41,9 @@ func (ScoutThePeripheryRed) Attack() int                 { return 0 }
 func (ScoutThePeripheryRed) Defense() int                { return 2 }
 func (ScoutThePeripheryRed) Types() card.TypeSet         { return scoutThePeripheryTypes }
 func (ScoutThePeripheryRed) GoAgain() bool               { return true }
-func (ScoutThePeripheryRed) Play(s *card.TurnState, _ *card.CardState) int { return nextArsenalAttackActionBonus(s, 3) }
-
+func (ScoutThePeripheryRed) Play(s *card.TurnState, self *card.CardState) {
+	s.ApplyAndLogEffectiveAttackPlus(self, nextArsenalAttackActionBonus(s, 3))
+}
 type ScoutThePeripheryYellow struct{}
 
 func (ScoutThePeripheryYellow) ID() card.ID                 { return card.ScoutThePeripheryYellow }
@@ -53,8 +54,9 @@ func (ScoutThePeripheryYellow) Attack() int                 { return 0 }
 func (ScoutThePeripheryYellow) Defense() int                { return 2 }
 func (ScoutThePeripheryYellow) Types() card.TypeSet         { return scoutThePeripheryTypes }
 func (ScoutThePeripheryYellow) GoAgain() bool               { return true }
-func (ScoutThePeripheryYellow) Play(s *card.TurnState, _ *card.CardState) int { return nextArsenalAttackActionBonus(s, 2) }
-
+func (ScoutThePeripheryYellow) Play(s *card.TurnState, self *card.CardState) {
+	s.ApplyAndLogEffectiveAttackPlus(self, nextArsenalAttackActionBonus(s, 2))
+}
 type ScoutThePeripheryBlue struct{}
 
 func (ScoutThePeripheryBlue) ID() card.ID                 { return card.ScoutThePeripheryBlue }
@@ -65,4 +67,6 @@ func (ScoutThePeripheryBlue) Attack() int                 { return 0 }
 func (ScoutThePeripheryBlue) Defense() int                { return 2 }
 func (ScoutThePeripheryBlue) Types() card.TypeSet         { return scoutThePeripheryTypes }
 func (ScoutThePeripheryBlue) GoAgain() bool               { return true }
-func (ScoutThePeripheryBlue) Play(s *card.TurnState, _ *card.CardState) int { return nextArsenalAttackActionBonus(s, 1) }
+func (ScoutThePeripheryBlue) Play(s *card.TurnState, self *card.CardState) {
+	s.ApplyAndLogEffectiveAttackPlus(self, nextArsenalAttackActionBonus(s, 1))
+}

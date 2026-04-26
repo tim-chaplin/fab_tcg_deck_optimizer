@@ -20,4 +20,4 @@ func (VisitTheBlacksmithBlue) Types() card.TypeSet         { return visitTheBlac
 func (VisitTheBlacksmithBlue) GoAgain() bool               { return true }
 // not implemented: next-sword-attack +1{p} grant (weapon chain not peeked)
 func (VisitTheBlacksmithBlue) NotImplemented()             {}
-func (VisitTheBlacksmithBlue) Play(s *card.TurnState, _ *card.CardState) int { return 0 }
+func (VisitTheBlacksmithBlue) Play(s *card.TurnState, self *card.CardState) { s.LogPlay(self) }

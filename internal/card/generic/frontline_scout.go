@@ -13,12 +13,13 @@ import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 
 var frontlineScoutTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeAttack)
 
-// frontlineScoutPlay grants self Go again when this copy was played from arsenal.
-func frontlineScoutPlay(c card.Card, self *card.CardState) int {
+// frontlineScoutPlay grants self Go again when this copy was played from arsenal, then
+// emits the chain step.
+func frontlineScoutPlay(s *card.TurnState, self *card.CardState) {
 	if self.FromArsenal {
 		self.GrantedGoAgain = true
 	}
-	return c.Attack()
+	s.ApplyAndLogEffectiveAttack(self)
 }
 
 type FrontlineScoutRed struct{}
@@ -33,8 +34,9 @@ func (FrontlineScoutRed) Types() card.TypeSet         { return frontlineScoutTyp
 func (FrontlineScoutRed) GoAgain() bool               { return false }
 // not implemented: opposing-hand-peek rider
 func (FrontlineScoutRed) NotImplemented()             {}
-func (c FrontlineScoutRed) Play(_ *card.TurnState, self *card.CardState) int { return frontlineScoutPlay(c, self) }
-
+func (FrontlineScoutRed) Play(s *card.TurnState, self *card.CardState) {
+	frontlineScoutPlay(s, self)
+}
 type FrontlineScoutYellow struct{}
 
 func (FrontlineScoutYellow) ID() card.ID                 { return card.FrontlineScoutYellow }
@@ -47,8 +49,9 @@ func (FrontlineScoutYellow) Types() card.TypeSet         { return frontlineScout
 func (FrontlineScoutYellow) GoAgain() bool               { return false }
 // not implemented: opposing-hand-peek rider
 func (FrontlineScoutYellow) NotImplemented()             {}
-func (c FrontlineScoutYellow) Play(_ *card.TurnState, self *card.CardState) int { return frontlineScoutPlay(c, self) }
-
+func (FrontlineScoutYellow) Play(s *card.TurnState, self *card.CardState) {
+	frontlineScoutPlay(s, self)
+}
 type FrontlineScoutBlue struct{}
 
 func (FrontlineScoutBlue) ID() card.ID                 { return card.FrontlineScoutBlue }
@@ -61,4 +64,6 @@ func (FrontlineScoutBlue) Types() card.TypeSet         { return frontlineScoutTy
 func (FrontlineScoutBlue) GoAgain() bool               { return false }
 // not implemented: opposing-hand-peek rider
 func (FrontlineScoutBlue) NotImplemented()             {}
-func (c FrontlineScoutBlue) Play(_ *card.TurnState, self *card.CardState) int { return frontlineScoutPlay(c, self) }
+func (FrontlineScoutBlue) Play(s *card.TurnState, self *card.CardState) {
+	frontlineScoutPlay(s, self)
+}

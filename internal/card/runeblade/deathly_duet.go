@@ -22,8 +22,9 @@ func (DeathlyDuetRed) GoAgain() bool                { return false }
 // not implemented: Pitched scan can fire both riders independently of which pitched card paid
 // for which play (over-credits when both an attack and a non-attack action are pitched)
 func (DeathlyDuetRed) NotImplemented()             {}
-func (c DeathlyDuetRed) Play(s *card.TurnState, _ *card.CardState) int { return deathlyDuetPlay(c.Attack(), s) }
-
+func (c DeathlyDuetRed) Play(s *card.TurnState, self *card.CardState) {
+	s.ApplyAndLogEffectiveAttackPlus(self, deathlyDuetPlay(c.Attack(), s)-self.Card.Attack())
+}
 type DeathlyDuetYellow struct{}
 
 func (DeathlyDuetYellow) ID() card.ID                 { return card.DeathlyDuetYellow }
@@ -37,8 +38,9 @@ func (DeathlyDuetYellow) GoAgain() bool                { return false }
 // not implemented: Pitched scan can fire both riders independently of which pitched card paid
 // for which play (over-credits when both an attack and a non-attack action are pitched)
 func (DeathlyDuetYellow) NotImplemented()             {}
-func (c DeathlyDuetYellow) Play(s *card.TurnState, _ *card.CardState) int { return deathlyDuetPlay(c.Attack(), s) }
-
+func (c DeathlyDuetYellow) Play(s *card.TurnState, self *card.CardState) {
+	s.ApplyAndLogEffectiveAttackPlus(self, deathlyDuetPlay(c.Attack(), s)-self.Card.Attack())
+}
 type DeathlyDuetBlue struct{}
 
 func (DeathlyDuetBlue) ID() card.ID                 { return card.DeathlyDuetBlue }
@@ -52,8 +54,9 @@ func (DeathlyDuetBlue) GoAgain() bool                { return false }
 // not implemented: Pitched scan can fire both riders independently of which pitched card paid
 // for which play (over-credits when both an attack and a non-attack action are pitched)
 func (DeathlyDuetBlue) NotImplemented()             {}
-func (c DeathlyDuetBlue) Play(s *card.TurnState, _ *card.CardState) int { return deathlyDuetPlay(c.Attack(), s) }
-
+func (c DeathlyDuetBlue) Play(s *card.TurnState, self *card.CardState) {
+	s.ApplyAndLogEffectiveAttackPlus(self, deathlyDuetPlay(c.Attack(), s)-self.Card.Attack())
+}
 func deathlyDuetPlay(base int, s *card.TurnState) int {
 	var attackPitched, nonAttackActionPitched bool
 	for _, p := range s.Pitched {

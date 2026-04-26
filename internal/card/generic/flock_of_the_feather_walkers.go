@@ -22,8 +22,7 @@ func (FlockOfTheFeatherWalkersRed) Types() card.TypeSet         { return flockOf
 func (FlockOfTheFeatherWalkersRed) GoAgain() bool               { return false }
 // not implemented: additional reveal cost, quicken tokens
 func (FlockOfTheFeatherWalkersRed) NotImplemented()             {}
-func (c FlockOfTheFeatherWalkersRed) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }
-
+func (c FlockOfTheFeatherWalkersRed) Play(s *card.TurnState, self *card.CardState) { s.ApplyAndLogEffectiveAttack(self) }
 type FlockOfTheFeatherWalkersYellow struct{}
 
 func (FlockOfTheFeatherWalkersYellow) ID() card.ID                 { return card.FlockOfTheFeatherWalkersYellow }
@@ -36,8 +35,7 @@ func (FlockOfTheFeatherWalkersYellow) Types() card.TypeSet         { return floc
 func (FlockOfTheFeatherWalkersYellow) GoAgain() bool               { return false }
 // not implemented: additional reveal cost, quicken tokens
 func (FlockOfTheFeatherWalkersYellow) NotImplemented()             {}
-func (c FlockOfTheFeatherWalkersYellow) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }
-
+func (c FlockOfTheFeatherWalkersYellow) Play(s *card.TurnState, self *card.CardState) { s.ApplyAndLogEffectiveAttack(self) }
 type FlockOfTheFeatherWalkersBlue struct{}
 
 func (FlockOfTheFeatherWalkersBlue) ID() card.ID                 { return card.FlockOfTheFeatherWalkersBlue }
@@ -50,4 +48,4 @@ func (FlockOfTheFeatherWalkersBlue) Types() card.TypeSet         { return flockO
 func (FlockOfTheFeatherWalkersBlue) GoAgain() bool               { return false }
 // not implemented: additional reveal cost, quicken tokens
 func (FlockOfTheFeatherWalkersBlue) NotImplemented()             {}
-func (c FlockOfTheFeatherWalkersBlue) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }
+func (c FlockOfTheFeatherWalkersBlue) Play(s *card.TurnState, self *card.CardState) { s.ApplyAndLogEffectiveAttack(self) }

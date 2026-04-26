@@ -21,4 +21,4 @@ func (AmuletOfEchoesBlue) Types() card.TypeSet                       { return am
 func (AmuletOfEchoesBlue) GoAgain() bool                             { return true }
 // not implemented: Instant 'opposing hero discards 2'; gated on a repeat-name play this turn
 func (AmuletOfEchoesBlue) NotImplemented()                           {}
-func (AmuletOfEchoesBlue) Play(*card.TurnState, *card.CardState) int { return 0 }
+func (AmuletOfEchoesBlue) Play(s *card.TurnState, self *card.CardState) { s.LogPlay(self) }

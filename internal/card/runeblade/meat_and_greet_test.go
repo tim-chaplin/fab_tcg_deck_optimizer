@@ -21,7 +21,8 @@ func TestMeatAndGreet_OnHitRunechantGatedByLikelyToHit(t *testing.T) {
 	for _, tc := range cases {
 		s := card.TurnState{}
 		self := &card.CardState{Card: tc.c}
-		if got := tc.c.Play(&s, self); got != tc.wantDmg {
+		tc.c.Play(&s, self)
+		if got := s.Value; got != tc.wantDmg{
 			t.Errorf("%s: Play() = %d, want %d", tc.c.Name(), got, tc.wantDmg)
 		}
 		if self.GrantedGoAgain {
@@ -46,7 +47,7 @@ func TestMeatAndGreet_ArcaneDamageDealtGrantsGoAgain(t *testing.T) {
 	for _, c := range cases {
 		s := card.TurnState{ArcaneDamageDealt: true}
 		self := &card.CardState{Card: c}
-		_ = c.Play(&s, self)
+		c.Play(&s, self)
 		if !self.GrantedGoAgain {
 			t.Errorf("%s: GrantedGoAgain = false, want true (ArcaneDamageDealt → go again)", c.Name())
 		}

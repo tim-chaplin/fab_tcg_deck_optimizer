@@ -20,4 +20,4 @@ func (LungingPressBlue) Types() card.TypeSet                       { return lung
 func (LungingPressBlue) GoAgain() bool                             { return false }
 // not implemented: AR +1{p} buff to a target attack action card
 func (LungingPressBlue) NotImplemented()                           {}
-func (LungingPressBlue) Play(*card.TurnState, *card.CardState) int { return 0 }
+func (LungingPressBlue) Play(s *card.TurnState, self *card.CardState) { s.LogPlay(self) }

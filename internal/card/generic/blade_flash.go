@@ -20,4 +20,4 @@ func (BladeFlashBlue) Types() card.TypeSet                       { return bladeF
 func (BladeFlashBlue) GoAgain() bool                             { return false }
 // not implemented: AR 'target sword attack gains go again'
 func (BladeFlashBlue) NotImplemented()                           {}
-func (BladeFlashBlue) Play(*card.TurnState, *card.CardState) int { return 0 }
+func (BladeFlashBlue) Play(s *card.TurnState, self *card.CardState) { s.LogPlay(self) }

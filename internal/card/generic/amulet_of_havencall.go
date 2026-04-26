@@ -22,4 +22,4 @@ func (AmuletOfHavencallBlue) Types() card.TypeSet                       { return
 func (AmuletOfHavencallBlue) GoAgain() bool                             { return true }
 // not implemented: DR tutor for Rally the Rearguard; gated on empty hand
 func (AmuletOfHavencallBlue) NotImplemented()                           {}
-func (AmuletOfHavencallBlue) Play(*card.TurnState, *card.CardState) int { return 0 }
+func (AmuletOfHavencallBlue) Play(s *card.TurnState, self *card.CardState) { s.LogPlay(self) }

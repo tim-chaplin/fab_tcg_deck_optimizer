@@ -22,8 +22,7 @@ func (RightBehindYouRed) Types() card.TypeSet         { return rightBehindYouTyp
 func (RightBehindYouRed) GoAgain() bool               { return false }
 // not implemented: defend-together +1{d} buff and deck-bottom peek rider
 func (RightBehindYouRed) NotImplemented()             {}
-func (c RightBehindYouRed) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }
-
+func (c RightBehindYouRed) Play(s *card.TurnState, self *card.CardState) { s.ApplyAndLogEffectiveAttack(self) }
 type RightBehindYouYellow struct{}
 
 func (RightBehindYouYellow) ID() card.ID                 { return card.RightBehindYouYellow }
@@ -36,8 +35,7 @@ func (RightBehindYouYellow) Types() card.TypeSet         { return rightBehindYou
 func (RightBehindYouYellow) GoAgain() bool               { return false }
 // not implemented: defend-together +1{d} buff and deck-bottom peek rider
 func (RightBehindYouYellow) NotImplemented()             {}
-func (c RightBehindYouYellow) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }
-
+func (c RightBehindYouYellow) Play(s *card.TurnState, self *card.CardState) { s.ApplyAndLogEffectiveAttack(self) }
 type RightBehindYouBlue struct{}
 
 func (RightBehindYouBlue) ID() card.ID                 { return card.RightBehindYouBlue }
@@ -50,4 +48,4 @@ func (RightBehindYouBlue) Types() card.TypeSet         { return rightBehindYouTy
 func (RightBehindYouBlue) GoAgain() bool               { return false }
 // not implemented: defend-together +1{d} buff and deck-bottom peek rider
 func (RightBehindYouBlue) NotImplemented()             {}
-func (c RightBehindYouBlue) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }
+func (c RightBehindYouBlue) Play(s *card.TurnState, self *card.CardState) { s.ApplyAndLogEffectiveAttack(self) }

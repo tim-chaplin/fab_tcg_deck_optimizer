@@ -21,4 +21,4 @@ func (RelentlessPursuitBlue) Types() card.TypeSet         { return relentlessPur
 func (RelentlessPursuitBlue) GoAgain() bool               { return true }
 // not implemented: marked-target gate + 'attacked them this turn' chain rider
 func (RelentlessPursuitBlue) NotImplemented()             {}
-func (RelentlessPursuitBlue) Play(s *card.TurnState, _ *card.CardState) int { return 0 }
+func (RelentlessPursuitBlue) Play(s *card.TurnState, self *card.CardState) { s.LogPlay(self) }

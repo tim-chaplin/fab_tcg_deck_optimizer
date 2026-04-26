@@ -22,4 +22,4 @@ func (TalismanOfCremationBlue) GoAgain() bool                             { retu
 // not implemented: self-destroys on play-from-banished → banish a named card from opposing
 // graveyards
 func (TalismanOfCremationBlue) NotImplemented()                           {}
-func (TalismanOfCremationBlue) Play(*card.TurnState, *card.CardState) int { return 0 }
+func (TalismanOfCremationBlue) Play(s *card.TurnState, self *card.CardState) { s.LogPlay(self) }

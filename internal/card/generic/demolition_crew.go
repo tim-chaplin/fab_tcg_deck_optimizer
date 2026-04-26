@@ -24,8 +24,7 @@ func (DemolitionCrewRed) Dominate()                   {}
 // not implemented: additional cost "reveal a cost-2-or-greater card from hand" not enforced;
 // card always playable when its resource cost is met (over-credits hands without a 2+ cost card)
 func (DemolitionCrewRed) NotImplemented()             {}
-func (c DemolitionCrewRed) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }
-
+func (c DemolitionCrewRed) Play(s *card.TurnState, self *card.CardState) { s.ApplyAndLogEffectiveAttack(self) }
 type DemolitionCrewYellow struct{}
 
 func (DemolitionCrewYellow) ID() card.ID                 { return card.DemolitionCrewYellow }
@@ -40,8 +39,7 @@ func (DemolitionCrewYellow) Dominate()                   {}
 // not implemented: additional cost "reveal a cost-2-or-greater card from hand" not enforced;
 // card always playable when its resource cost is met (over-credits hands without a 2+ cost card)
 func (DemolitionCrewYellow) NotImplemented()             {}
-func (c DemolitionCrewYellow) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }
-
+func (c DemolitionCrewYellow) Play(s *card.TurnState, self *card.CardState) { s.ApplyAndLogEffectiveAttack(self) }
 type DemolitionCrewBlue struct{}
 
 func (DemolitionCrewBlue) ID() card.ID                 { return card.DemolitionCrewBlue }
@@ -56,4 +54,4 @@ func (DemolitionCrewBlue) Dominate()                   {}
 // not implemented: additional cost "reveal a cost-2-or-greater card from hand" not enforced;
 // card always playable when its resource cost is met (over-credits hands without a 2+ cost card)
 func (DemolitionCrewBlue) NotImplemented()             {}
-func (c DemolitionCrewBlue) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }
+func (c DemolitionCrewBlue) Play(s *card.TurnState, self *card.CardState) { s.ApplyAndLogEffectiveAttack(self) }

@@ -19,8 +19,7 @@ func (stubRunebladeAttack) Types() card.TypeSet {
 	return card.NewTypeSet(card.TypeRuneblade, card.TypeAction, card.TypeAttack)
 }
 func (stubRunebladeAttack) GoAgain() bool            { return true }
-func (stubRunebladeAttack) Play(*card.TurnState, *card.CardState) int { return 0 }
-
+func (stubRunebladeAttack) Play(*card.TurnState, *card.CardState) {}
 // stubRunebladeWeapon is a Runeblade weapon — satisfies "next Runeblade attack" lookaheads
 // that include weapons but NOT ones restricted to attack action cards.
 type stubRunebladeWeapon struct{}
@@ -35,8 +34,7 @@ func (stubRunebladeWeapon) Types() card.TypeSet {
 	return card.NewTypeSet(card.TypeRuneblade, card.TypeWeapon)
 }
 func (stubRunebladeWeapon) GoAgain() bool            { return false }
-func (stubRunebladeWeapon) Play(*card.TurnState, *card.CardState) int { return 0 }
-
+func (stubRunebladeWeapon) Play(*card.TurnState, *card.CardState) {}
 // stubNonAttack is a non-attack card — covers "attack-typed predicate should reject
 // non-attack" cases.
 type stubNonAttack struct{}
@@ -49,8 +47,7 @@ func (stubNonAttack) Attack() int              { return 0 }
 func (stubNonAttack) Defense() int             { return 0 }
 func (stubNonAttack) Types() card.TypeSet       { return card.NewTypeSet(card.TypeAction) }
 func (stubNonAttack) GoAgain() bool            { return false }
-func (stubNonAttack) Play(*card.TurnState, *card.CardState) int { return 0 }
-
+func (stubNonAttack) Play(*card.TurnState, *card.CardState) {}
 // stubNonRunebladeAttack is a Generic Action-Attack — covers Runeblade-gated lookaheads
 // rejecting non-Runeblade attacks.
 type stubNonRunebladeAttack struct{}
@@ -65,8 +62,7 @@ func (stubNonRunebladeAttack) Types() card.TypeSet {
 	return card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeAttack)
 }
 func (stubNonRunebladeAttack) GoAgain() bool            { return true }
-func (stubNonRunebladeAttack) Play(*card.TurnState, *card.CardState) int { return 0 }
-
+func (stubNonRunebladeAttack) Play(*card.TurnState, *card.CardState) {}
 // stubAttackWithPower is a Runeblade attack-action card with a configurable printed Attack()
 // value. Tests set specific numbers to hit/miss the LikelyToHit heuristic (4 lands, 3 blocks).
 type stubAttackWithPower struct {
@@ -83,8 +79,7 @@ func (stubAttackWithPower) Types() card.TypeSet {
 	return card.NewTypeSet(card.TypeRuneblade, card.TypeAction, card.TypeAttack)
 }
 func (stubAttackWithPower) GoAgain() bool            { return true }
-func (stubAttackWithPower) Play(*card.TurnState, *card.CardState) int { return 0 }
-
+func (stubAttackWithPower) Play(*card.TurnState, *card.CardState) {}
 // stubDominatingAttackWithPower is stubAttackWithPower with the card.Dominator marker — tests
 // for scanners that credit "if this hits" on 5+ power dominating attacks use this to mark the
 // target as printed-Dominate without granting anything post-hoc.
@@ -105,4 +100,4 @@ func (stubAura) Attack() int              { return 0 }
 func (stubAura) Defense() int             { return 0 }
 func (stubAura) Types() card.TypeSet       { return card.NewTypeSet(card.TypeAura) }
 func (stubAura) GoAgain() bool            { return true }
-func (stubAura) Play(*card.TurnState, *card.CardState) int { return 0 }
+func (stubAura) Play(*card.TurnState, *card.CardState) {}

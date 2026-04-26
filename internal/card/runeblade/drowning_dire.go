@@ -17,12 +17,12 @@ import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 var drowningDireTypes = card.NewTypeSet(card.TypeRuneblade, card.TypeAction, card.TypeAttack)
 
 // drowningDirePlay grants self Dominate when an aura has been played or created this turn,
-// then returns the base attack.
-func drowningDirePlay(attack int, s *card.TurnState, self *card.CardState) int {
+// then emits the chain step.
+func drowningDirePlay(s *card.TurnState, self *card.CardState) {
 	if s.HasAuraInPlay() {
 		self.GrantedDominate = true
 	}
-	return attack
+	s.ApplyAndLogEffectiveAttack(self)
 }
 
 type DrowningDireRed struct{}
@@ -35,10 +35,9 @@ func (DrowningDireRed) Attack() int                 { return 5 }
 func (DrowningDireRed) Defense() int                { return 3 }
 func (DrowningDireRed) Types() card.TypeSet         { return drowningDireTypes }
 func (DrowningDireRed) GoAgain() bool               { return false }
-func (c DrowningDireRed) Play(s *card.TurnState, self *card.CardState) int {
-	return drowningDirePlay(c.Attack(), s, self)
+func (DrowningDireRed) Play(s *card.TurnState, self *card.CardState) {
+	drowningDirePlay(s, self)
 }
-
 type DrowningDireYellow struct{}
 
 func (DrowningDireYellow) ID() card.ID                 { return card.DrowningDireYellow }
@@ -49,10 +48,9 @@ func (DrowningDireYellow) Attack() int                 { return 4 }
 func (DrowningDireYellow) Defense() int                { return 3 }
 func (DrowningDireYellow) Types() card.TypeSet         { return drowningDireTypes }
 func (DrowningDireYellow) GoAgain() bool               { return false }
-func (c DrowningDireYellow) Play(s *card.TurnState, self *card.CardState) int {
-	return drowningDirePlay(c.Attack(), s, self)
+func (DrowningDireYellow) Play(s *card.TurnState, self *card.CardState) {
+	drowningDirePlay(s, self)
 }
-
 type DrowningDireBlue struct{}
 
 func (DrowningDireBlue) ID() card.ID                 { return card.DrowningDireBlue }
@@ -63,6 +61,6 @@ func (DrowningDireBlue) Attack() int                 { return 3 }
 func (DrowningDireBlue) Defense() int                { return 3 }
 func (DrowningDireBlue) Types() card.TypeSet         { return drowningDireTypes }
 func (DrowningDireBlue) GoAgain() bool               { return false }
-func (c DrowningDireBlue) Play(s *card.TurnState, self *card.CardState) int {
-	return drowningDirePlay(c.Attack(), s, self)
+func (DrowningDireBlue) Play(s *card.TurnState, self *card.CardState) {
+	drowningDirePlay(s, self)
 }

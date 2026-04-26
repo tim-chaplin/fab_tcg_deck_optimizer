@@ -13,12 +13,13 @@ import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 
 var scourTheBattlescapeTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeAttack)
 
-// scourTheBattlescapePlay grants self Go again when this copy was played from arsenal.
-func scourTheBattlescapePlay(c card.Card, self *card.CardState) int {
+// scourTheBattlescapePlay grants self Go again when this copy was played from arsenal,
+// then emits the chain step.
+func scourTheBattlescapePlay(s *card.TurnState, self *card.CardState) {
 	if self.FromArsenal {
 		self.GrantedGoAgain = true
 	}
-	return c.Attack()
+	s.ApplyAndLogEffectiveAttack(self)
 }
 
 type ScourTheBattlescapeRed struct{}
@@ -33,8 +34,9 @@ func (ScourTheBattlescapeRed) Types() card.TypeSet         { return scourTheBatt
 func (ScourTheBattlescapeRed) GoAgain() bool               { return false }
 // not implemented: hand-cycle rider (put a card on bottom of deck, draw)
 func (ScourTheBattlescapeRed) NotImplemented()             {}
-func (c ScourTheBattlescapeRed) Play(_ *card.TurnState, self *card.CardState) int { return scourTheBattlescapePlay(c, self) }
-
+func (ScourTheBattlescapeRed) Play(s *card.TurnState, self *card.CardState) {
+	scourTheBattlescapePlay(s, self)
+}
 type ScourTheBattlescapeYellow struct{}
 
 func (ScourTheBattlescapeYellow) ID() card.ID                 { return card.ScourTheBattlescapeYellow }
@@ -47,8 +49,9 @@ func (ScourTheBattlescapeYellow) Types() card.TypeSet         { return scourTheB
 func (ScourTheBattlescapeYellow) GoAgain() bool               { return false }
 // not implemented: hand-cycle rider (put a card on bottom of deck, draw)
 func (ScourTheBattlescapeYellow) NotImplemented()             {}
-func (c ScourTheBattlescapeYellow) Play(_ *card.TurnState, self *card.CardState) int { return scourTheBattlescapePlay(c, self) }
-
+func (ScourTheBattlescapeYellow) Play(s *card.TurnState, self *card.CardState) {
+	scourTheBattlescapePlay(s, self)
+}
 type ScourTheBattlescapeBlue struct{}
 
 func (ScourTheBattlescapeBlue) ID() card.ID                 { return card.ScourTheBattlescapeBlue }
@@ -61,4 +64,6 @@ func (ScourTheBattlescapeBlue) Types() card.TypeSet         { return scourTheBat
 func (ScourTheBattlescapeBlue) GoAgain() bool               { return false }
 // not implemented: hand-cycle rider (put a card on bottom of deck, draw)
 func (ScourTheBattlescapeBlue) NotImplemented()             {}
-func (c ScourTheBattlescapeBlue) Play(_ *card.TurnState, self *card.CardState) int { return scourTheBattlescapePlay(c, self) }
+func (ScourTheBattlescapeBlue) Play(s *card.TurnState, self *card.CardState) {
+	scourTheBattlescapePlay(s, self)
+}

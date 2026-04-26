@@ -20,4 +20,4 @@ func (OnAKnifeEdgeYellow) Types() card.TypeSet         { return onAKnifeEdgeType
 func (OnAKnifeEdgeYellow) GoAgain() bool               { return true }
 // not implemented: next-sword-attack go-again grant (weapon chain not scanned)
 func (OnAKnifeEdgeYellow) NotImplemented()             {}
-func (OnAKnifeEdgeYellow) Play(s *card.TurnState, _ *card.CardState) int { return 0 }
+func (OnAKnifeEdgeYellow) Play(s *card.TurnState, self *card.CardState) { s.LogPlay(self) }

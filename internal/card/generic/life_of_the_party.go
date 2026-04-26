@@ -24,8 +24,7 @@ func (LifeOfThePartyRed) GoAgain() bool               { return false }
 // not implemented: Crazy Brew substitute and random-mode pick not modelled; all three modes
 // default off
 func (LifeOfThePartyRed) NotImplemented()             {}
-func (c LifeOfThePartyRed) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }
-
+func (c LifeOfThePartyRed) Play(s *card.TurnState, self *card.CardState) { s.ApplyAndLogEffectiveAttack(self) }
 type LifeOfThePartyYellow struct{}
 
 func (LifeOfThePartyYellow) ID() card.ID                 { return card.LifeOfThePartyYellow }
@@ -39,8 +38,7 @@ func (LifeOfThePartyYellow) GoAgain() bool               { return false }
 // not implemented: Crazy Brew substitute and random-mode pick not modelled; all three modes
 // default off
 func (LifeOfThePartyYellow) NotImplemented()             {}
-func (c LifeOfThePartyYellow) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }
-
+func (c LifeOfThePartyYellow) Play(s *card.TurnState, self *card.CardState) { s.ApplyAndLogEffectiveAttack(self) }
 type LifeOfThePartyBlue struct{}
 
 func (LifeOfThePartyBlue) ID() card.ID                 { return card.LifeOfThePartyBlue }
@@ -54,4 +52,4 @@ func (LifeOfThePartyBlue) GoAgain() bool               { return false }
 // not implemented: Crazy Brew substitute and random-mode pick not modelled; all three modes
 // default off
 func (LifeOfThePartyBlue) NotImplemented()             {}
-func (c LifeOfThePartyBlue) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }
+func (c LifeOfThePartyBlue) Play(s *card.TurnState, self *card.CardState) { s.ApplyAndLogEffectiveAttack(self) }

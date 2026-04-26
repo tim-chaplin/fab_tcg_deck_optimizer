@@ -21,4 +21,4 @@ func (TalismanOfWarfareYellow) Types() card.TypeSet                       { retu
 func (TalismanOfWarfareYellow) GoAgain() bool                             { return true }
 // not implemented: self-destroys + wipes all arsenals on a 2-damage hit
 func (TalismanOfWarfareYellow) NotImplemented()                           {}
-func (TalismanOfWarfareYellow) Play(*card.TurnState, *card.CardState) int { return 0 }
+func (TalismanOfWarfareYellow) Play(s *card.TurnState, self *card.CardState) { s.LogPlay(self) }

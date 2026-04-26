@@ -21,8 +21,9 @@ func (DestructiveDeliberationRed) Types() card.TypeSet         { return destruct
 func (DestructiveDeliberationRed) GoAgain() bool               { return false }
 // not implemented: ponder tokens
 func (DestructiveDeliberationRed) NotImplemented()             {}
-func (c DestructiveDeliberationRed) Play(s *card.TurnState, self *card.CardState) int { return destructiveDeliberationDamage(c.Attack(), self) }
-
+func (c DestructiveDeliberationRed) Play(s *card.TurnState, self *card.CardState) {
+	s.ApplyAndLogEffectiveAttackPlus(self, destructiveDeliberationDamage(c.Attack(), self)-self.Card.Attack())
+}
 type DestructiveDeliberationYellow struct{}
 
 func (DestructiveDeliberationYellow) ID() card.ID                 { return card.DestructiveDeliberationYellow }
@@ -35,8 +36,9 @@ func (DestructiveDeliberationYellow) Types() card.TypeSet         { return destr
 func (DestructiveDeliberationYellow) GoAgain() bool               { return false }
 // not implemented: ponder tokens
 func (DestructiveDeliberationYellow) NotImplemented()             {}
-func (c DestructiveDeliberationYellow) Play(s *card.TurnState, self *card.CardState) int { return destructiveDeliberationDamage(c.Attack(), self) }
-
+func (c DestructiveDeliberationYellow) Play(s *card.TurnState, self *card.CardState) {
+	s.ApplyAndLogEffectiveAttackPlus(self, destructiveDeliberationDamage(c.Attack(), self)-self.Card.Attack())
+}
 type DestructiveDeliberationBlue struct{}
 
 func (DestructiveDeliberationBlue) ID() card.ID                 { return card.DestructiveDeliberationBlue }
@@ -49,8 +51,9 @@ func (DestructiveDeliberationBlue) Types() card.TypeSet         { return destruc
 func (DestructiveDeliberationBlue) GoAgain() bool               { return false }
 // not implemented: ponder tokens
 func (DestructiveDeliberationBlue) NotImplemented()             {}
-func (c DestructiveDeliberationBlue) Play(s *card.TurnState, self *card.CardState) int { return destructiveDeliberationDamage(c.Attack(), self) }
-
+func (c DestructiveDeliberationBlue) Play(s *card.TurnState, self *card.CardState) {
+	s.ApplyAndLogEffectiveAttackPlus(self, destructiveDeliberationDamage(c.Attack(), self)-self.Card.Attack())
+}
 // destructiveDeliberationDamage is a breadcrumb for the on-hit "create a Ponder token" rider —
 // Ponder tokens aren't tracked (see TODO.md).
 func destructiveDeliberationDamage(attack int, self *card.CardState) int {

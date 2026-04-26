@@ -26,8 +26,9 @@ func (EnchantingMelodyRed) Types() card.TypeSet         { return enchantingMelod
 func (EnchantingMelodyRed) GoAgain() bool               { return true }
 // not implemented: damage-prevention trigger, end-phase destruction clause
 func (EnchantingMelodyRed) NotImplemented()             {}
-func (EnchantingMelodyRed) Play(s *card.TurnState, _ *card.CardState) int { return setAuraCreated(s) }
-
+func (EnchantingMelodyRed) Play(s *card.TurnState, self *card.CardState) {
+	s.ApplyAndLogEffectiveAttackPlus(self, setAuraCreated(s))
+}
 type EnchantingMelodyYellow struct{}
 
 func (EnchantingMelodyYellow) ID() card.ID                 { return card.EnchantingMelodyYellow }
@@ -40,8 +41,9 @@ func (EnchantingMelodyYellow) Types() card.TypeSet         { return enchantingMe
 func (EnchantingMelodyYellow) GoAgain() bool               { return true }
 // not implemented: damage-prevention trigger, end-phase destruction clause
 func (EnchantingMelodyYellow) NotImplemented()             {}
-func (EnchantingMelodyYellow) Play(s *card.TurnState, _ *card.CardState) int { return setAuraCreated(s) }
-
+func (EnchantingMelodyYellow) Play(s *card.TurnState, self *card.CardState) {
+	s.ApplyAndLogEffectiveAttackPlus(self, setAuraCreated(s))
+}
 type EnchantingMelodyBlue struct{}
 
 func (EnchantingMelodyBlue) ID() card.ID                 { return card.EnchantingMelodyBlue }
@@ -54,4 +56,6 @@ func (EnchantingMelodyBlue) Types() card.TypeSet         { return enchantingMelo
 func (EnchantingMelodyBlue) GoAgain() bool               { return true }
 // not implemented: damage-prevention trigger, end-phase destruction clause
 func (EnchantingMelodyBlue) NotImplemented()             {}
-func (EnchantingMelodyBlue) Play(s *card.TurnState, _ *card.CardState) int { return setAuraCreated(s) }
+func (EnchantingMelodyBlue) Play(s *card.TurnState, self *card.CardState) {
+	s.ApplyAndLogEffectiveAttackPlus(self, setAuraCreated(s))
+}

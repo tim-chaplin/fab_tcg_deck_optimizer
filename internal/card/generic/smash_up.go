@@ -21,8 +21,9 @@ func (SmashUpRed) Types() card.TypeSet         { return smashUpTypes }
 func (SmashUpRed) GoAgain() bool               { return false }
 // not implemented: on-hit opponent-arsenal manipulation rider
 func (SmashUpRed) NotImplemented()             {}
-func (c SmashUpRed) Play(s *card.TurnState, self *card.CardState) int { return smashUpDamage(c.Attack(), self) }
-
+func (c SmashUpRed) Play(s *card.TurnState, self *card.CardState) {
+	s.ApplyAndLogEffectiveAttackPlus(self, smashUpDamage(c.Attack(), self)-self.Card.Attack())
+}
 // smashUpDamage is a breadcrumb for the on-hit "arsenal face-up + banish attack action" rider —
 // not modelled yet (see TODO.md).
 func smashUpDamage(attack int, self *card.CardState) int {

@@ -20,4 +20,6 @@ func (RegainComposureBlue) Types() card.TypeSet         { return regainComposure
 func (RegainComposureBlue) GoAgain() bool               { return true }
 // not implemented: on-hit unfreeze rider (freeze/unfreeze state not tracked)
 func (RegainComposureBlue) NotImplemented()             {}
-func (RegainComposureBlue) Play(s *card.TurnState, _ *card.CardState) int { return grantNextAttackActionBonus(s, 1) }
+func (RegainComposureBlue) Play(s *card.TurnState, self *card.CardState) {
+	s.ApplyAndLogEffectiveAttackPlus(self, grantNextAttackActionBonus(s, 1))
+}

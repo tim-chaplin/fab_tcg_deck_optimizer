@@ -20,8 +20,7 @@ func (ReinforceTheLineRed) Types() card.TypeSet                       { return r
 func (ReinforceTheLineRed) GoAgain() bool                             { return false }
 // not implemented: Instant +N{d} grant to a defending attack action card
 func (ReinforceTheLineRed) NotImplemented()                           {}
-func (ReinforceTheLineRed) Play(*card.TurnState, *card.CardState) int { return 0 }
-
+func (ReinforceTheLineRed) Play(s *card.TurnState, self *card.CardState) { s.LogPlay(self) }
 type ReinforceTheLineYellow struct{}
 
 func (ReinforceTheLineYellow) ID() card.ID                               { return card.ReinforceTheLineYellow }
@@ -34,8 +33,7 @@ func (ReinforceTheLineYellow) Types() card.TypeSet                       { retur
 func (ReinforceTheLineYellow) GoAgain() bool                             { return false }
 // not implemented: Instant +N{d} grant to a defending attack action card
 func (ReinforceTheLineYellow) NotImplemented()                           {}
-func (ReinforceTheLineYellow) Play(*card.TurnState, *card.CardState) int { return 0 }
-
+func (ReinforceTheLineYellow) Play(s *card.TurnState, self *card.CardState) { s.LogPlay(self) }
 type ReinforceTheLineBlue struct{}
 
 func (ReinforceTheLineBlue) ID() card.ID                               { return card.ReinforceTheLineBlue }
@@ -48,4 +46,4 @@ func (ReinforceTheLineBlue) Types() card.TypeSet                       { return 
 func (ReinforceTheLineBlue) GoAgain() bool                             { return false }
 // not implemented: Instant +N{d} grant to a defending attack action card
 func (ReinforceTheLineBlue) NotImplemented()                           {}
-func (ReinforceTheLineBlue) Play(*card.TurnState, *card.CardState) int { return 0 }
+func (ReinforceTheLineBlue) Play(s *card.TurnState, self *card.CardState) { s.LogPlay(self) }

@@ -20,4 +20,4 @@ func (HealingPotionBlue) Types() card.TypeSet                       { return hea
 func (HealingPotionBlue) GoAgain() bool                             { return false }
 // not implemented: activated 2{h} gain
 func (HealingPotionBlue) NotImplemented()                           {}
-func (HealingPotionBlue) Play(*card.TurnState, *card.CardState) int { return 0 }
+func (HealingPotionBlue) Play(s *card.TurnState, self *card.CardState) { s.LogPlay(self) }

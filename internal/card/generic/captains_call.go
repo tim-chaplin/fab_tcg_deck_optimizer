@@ -40,8 +40,9 @@ func (CaptainsCallRed) Types() card.TypeSet         { return captainsCallTypes }
 func (CaptainsCallRed) GoAgain() bool               { return true }
 // not implemented: modal pick hard-coded to +2{p}; 'go again' mode is dropped
 func (CaptainsCallRed) NotImplemented()             {}
-func (CaptainsCallRed) Play(s *card.TurnState, _ *card.CardState) int { return captainsCallPlay(s, 2) }
-
+func (CaptainsCallRed) Play(s *card.TurnState, self *card.CardState) {
+	s.ApplyAndLogEffectiveAttackPlus(self, captainsCallPlay(s, 2))
+}
 type CaptainsCallYellow struct{}
 
 func (CaptainsCallYellow) ID() card.ID                 { return card.CaptainsCallYellow }
@@ -54,8 +55,9 @@ func (CaptainsCallYellow) Types() card.TypeSet         { return captainsCallType
 func (CaptainsCallYellow) GoAgain() bool               { return true }
 // not implemented: modal pick hard-coded to +2{p}; 'go again' mode is dropped
 func (CaptainsCallYellow) NotImplemented()             {}
-func (CaptainsCallYellow) Play(s *card.TurnState, _ *card.CardState) int { return captainsCallPlay(s, 1) }
-
+func (CaptainsCallYellow) Play(s *card.TurnState, self *card.CardState) {
+	s.ApplyAndLogEffectiveAttackPlus(self, captainsCallPlay(s, 1))
+}
 type CaptainsCallBlue struct{}
 
 func (CaptainsCallBlue) ID() card.ID                 { return card.CaptainsCallBlue }
@@ -68,4 +70,6 @@ func (CaptainsCallBlue) Types() card.TypeSet         { return captainsCallTypes 
 func (CaptainsCallBlue) GoAgain() bool               { return true }
 // not implemented: modal pick hard-coded to +2{p}; 'go again' mode is dropped
 func (CaptainsCallBlue) NotImplemented()             {}
-func (CaptainsCallBlue) Play(s *card.TurnState, _ *card.CardState) int { return captainsCallPlay(s, 0) }
+func (CaptainsCallBlue) Play(s *card.TurnState, self *card.CardState) {
+	s.ApplyAndLogEffectiveAttackPlus(self, captainsCallPlay(s, 0))
+}

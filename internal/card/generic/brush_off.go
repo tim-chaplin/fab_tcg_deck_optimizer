@@ -20,8 +20,7 @@ func (BrushOffRed) Types() card.TypeSet                       { return brushOffT
 func (BrushOffRed) GoAgain() bool                             { return false }
 // not implemented: Instant 'prevent next damage of N or less' (3 / 2 / 1 by colour)
 func (BrushOffRed) NotImplemented()                           {}
-func (BrushOffRed) Play(*card.TurnState, *card.CardState) int { return 0 }
-
+func (BrushOffRed) Play(s *card.TurnState, self *card.CardState) { s.LogPlay(self) }
 type BrushOffYellow struct{}
 
 func (BrushOffYellow) ID() card.ID                               { return card.BrushOffYellow }
@@ -34,8 +33,7 @@ func (BrushOffYellow) Types() card.TypeSet                       { return brushO
 func (BrushOffYellow) GoAgain() bool                             { return false }
 // not implemented: Instant 'prevent next damage of N or less' (3 / 2 / 1 by colour)
 func (BrushOffYellow) NotImplemented()                           {}
-func (BrushOffYellow) Play(*card.TurnState, *card.CardState) int { return 0 }
-
+func (BrushOffYellow) Play(s *card.TurnState, self *card.CardState) { s.LogPlay(self) }
 type BrushOffBlue struct{}
 
 func (BrushOffBlue) ID() card.ID                               { return card.BrushOffBlue }
@@ -48,4 +46,4 @@ func (BrushOffBlue) Types() card.TypeSet                       { return brushOff
 func (BrushOffBlue) GoAgain() bool                             { return false }
 // not implemented: Instant 'prevent next damage of N or less' (3 / 2 / 1 by colour)
 func (BrushOffBlue) NotImplemented()                           {}
-func (BrushOffBlue) Play(*card.TurnState, *card.CardState) int { return 0 }
+func (BrushOffBlue) Play(s *card.TurnState, self *card.CardState) { s.LogPlay(self) }

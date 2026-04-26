@@ -22,8 +22,7 @@ func (CadaverousContrabandRed) Types() card.TypeSet         { return cadaverousC
 func (CadaverousContrabandRed) GoAgain() bool               { return false }
 // not implemented: on-hit graveyard → top-of-deck rider
 func (CadaverousContrabandRed) NotImplemented()             {}
-func (c CadaverousContrabandRed) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }
-
+func (c CadaverousContrabandRed) Play(s *card.TurnState, self *card.CardState) { s.ApplyAndLogEffectiveAttack(self) }
 type CadaverousContrabandYellow struct{}
 
 func (CadaverousContrabandYellow) ID() card.ID                 { return card.CadaverousContrabandYellow }
@@ -36,8 +35,7 @@ func (CadaverousContrabandYellow) Types() card.TypeSet         { return cadavero
 func (CadaverousContrabandYellow) GoAgain() bool               { return false }
 // not implemented: on-hit graveyard → top-of-deck rider
 func (CadaverousContrabandYellow) NotImplemented()             {}
-func (c CadaverousContrabandYellow) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }
-
+func (c CadaverousContrabandYellow) Play(s *card.TurnState, self *card.CardState) { s.ApplyAndLogEffectiveAttack(self) }
 type CadaverousContrabandBlue struct{}
 
 func (CadaverousContrabandBlue) ID() card.ID                 { return card.CadaverousContrabandBlue }
@@ -50,4 +48,4 @@ func (CadaverousContrabandBlue) Types() card.TypeSet         { return cadaverous
 func (CadaverousContrabandBlue) GoAgain() bool               { return false }
 // not implemented: on-hit graveyard → top-of-deck rider
 func (CadaverousContrabandBlue) NotImplemented()             {}
-func (c CadaverousContrabandBlue) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }
+func (c CadaverousContrabandBlue) Play(s *card.TurnState, self *card.CardState) { s.ApplyAndLogEffectiveAttack(self) }

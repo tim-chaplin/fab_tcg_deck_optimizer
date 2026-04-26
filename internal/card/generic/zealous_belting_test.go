@@ -13,7 +13,8 @@ func TestZealousBelting_NoQualifyingPitchNoGoAgain(t *testing.T) {
 	c := ZealousBeltingRed{}
 	s := card.TurnState{Pitched: []card.Card{stubGenericAttack(0, 5)}}
 	self := &card.CardState{Card: c}
-	if got := c.Play(&s, self); got != c.Attack() {
+	c.Play(&s, self)
+	if got := s.Value; got != c.Attack(){
 		t.Errorf("Play() = %d, want %d (no qualifying pitch)", got, c.Attack())
 	}
 	if self.GrantedGoAgain {
@@ -36,7 +37,7 @@ func TestZealousBelting_HigherPowerPitchGrantsGoAgain(t *testing.T) {
 	for _, tc := range cases {
 		s := card.TurnState{Pitched: []card.Card{stubGenericAttack(0, tc.pitchPow)}}
 		self := &card.CardState{Card: tc.c}
-		_ = tc.c.Play(&s, self)
+		tc.c.Play(&s, self)
 		if !self.GrantedGoAgain {
 			t.Errorf("%s: GrantedGoAgain = false, want true (pitched power %d > base)", tc.c.Name(), tc.pitchPow)
 		}

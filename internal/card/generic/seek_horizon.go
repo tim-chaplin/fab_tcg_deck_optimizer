@@ -22,8 +22,7 @@ func (SeekHorizonRed) Types() card.TypeSet         { return seekHorizonTypes }
 func (SeekHorizonRed) GoAgain() bool               { return false }
 // not implemented: hand-on-top alt cost and conditional go-again rider
 func (SeekHorizonRed) NotImplemented()             {}
-func (c SeekHorizonRed) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }
-
+func (c SeekHorizonRed) Play(s *card.TurnState, self *card.CardState) { s.ApplyAndLogEffectiveAttack(self) }
 type SeekHorizonYellow struct{}
 
 func (SeekHorizonYellow) ID() card.ID                 { return card.SeekHorizonYellow }
@@ -36,8 +35,7 @@ func (SeekHorizonYellow) Types() card.TypeSet         { return seekHorizonTypes 
 func (SeekHorizonYellow) GoAgain() bool               { return false }
 // not implemented: hand-on-top alt cost and conditional go-again rider
 func (SeekHorizonYellow) NotImplemented()             {}
-func (c SeekHorizonYellow) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }
-
+func (c SeekHorizonYellow) Play(s *card.TurnState, self *card.CardState) { s.ApplyAndLogEffectiveAttack(self) }
 type SeekHorizonBlue struct{}
 
 func (SeekHorizonBlue) ID() card.ID                 { return card.SeekHorizonBlue }
@@ -50,4 +48,4 @@ func (SeekHorizonBlue) Types() card.TypeSet         { return seekHorizonTypes }
 func (SeekHorizonBlue) GoAgain() bool               { return false }
 // not implemented: hand-on-top alt cost and conditional go-again rider
 func (SeekHorizonBlue) NotImplemented()             {}
-func (c SeekHorizonBlue) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }
+func (c SeekHorizonBlue) Play(s *card.TurnState, self *card.CardState) { s.ApplyAndLogEffectiveAttack(self) }

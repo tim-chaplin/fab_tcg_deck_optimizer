@@ -24,8 +24,7 @@ func (FiddlersGreenRed) Defense() int                { return 1 }
 func (FiddlersGreenRed) Types() card.TypeSet         { return defenseReactionTypes }
 func (FiddlersGreenRed) GoAgain() bool               { return false }
 func (FiddlersGreenRed) NotSilverAgeLegal()           {}
-func (FiddlersGreenRed) Play(s *card.TurnState, _ *card.CardState) int { return 3 }
-
+func (FiddlersGreenRed) Play(s *card.TurnState, self *card.CardState) { s.ApplyAndLogEffectiveAttackPlus(self, 3) }
 type FiddlersGreenYellow struct{}
 
 func (FiddlersGreenYellow) ID() card.ID                 { return card.FiddlersGreenYellow }
@@ -37,8 +36,7 @@ func (FiddlersGreenYellow) Defense() int                { return 1 }
 func (FiddlersGreenYellow) Types() card.TypeSet         { return defenseReactionTypes }
 func (FiddlersGreenYellow) GoAgain() bool               { return false }
 func (FiddlersGreenYellow) NotSilverAgeLegal()           {}
-func (FiddlersGreenYellow) Play(s *card.TurnState, _ *card.CardState) int { return 2 }
-
+func (FiddlersGreenYellow) Play(s *card.TurnState, self *card.CardState) { s.ApplyAndLogEffectiveAttackPlus(self, 2) }
 type FiddlersGreenBlue struct{}
 
 func (FiddlersGreenBlue) ID() card.ID                 { return card.FiddlersGreenBlue }
@@ -50,4 +48,4 @@ func (FiddlersGreenBlue) Defense() int                { return 1 }
 func (FiddlersGreenBlue) Types() card.TypeSet         { return defenseReactionTypes }
 func (FiddlersGreenBlue) GoAgain() bool               { return false }
 func (FiddlersGreenBlue) NotSilverAgeLegal()           {}
-func (FiddlersGreenBlue) Play(s *card.TurnState, _ *card.CardState) int { return 1 }
+func (FiddlersGreenBlue) Play(s *card.TurnState, self *card.CardState) { s.ApplyAndLogEffectiveAttackPlus(self, 1) }

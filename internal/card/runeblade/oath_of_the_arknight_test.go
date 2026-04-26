@@ -8,7 +8,8 @@ import (
 
 func TestOathOfTheArknight_NoRemainingCards(t *testing.T) {
 	s := &card.TurnState{}
-	if got := (OathOfTheArknightRed{}).Play(s, &card.CardState{}); got != 1 {
+	(OathOfTheArknightRed{}).Play(s, &card.CardState{Card: OathOfTheArknightRed{}})
+	if got := s.Value; got != 1{
 		t.Errorf("Play() = %d, want 1 (Runechant only, no attack to buff)", got)
 	}
 }
@@ -28,7 +29,8 @@ func TestOathOfTheArknight_RunebladeAttackInRemaining(t *testing.T) {
 	for _, tc := range cases {
 		target := &card.CardState{Card: stubRunebladeAttack{}}
 		s := &card.TurnState{CardsRemaining: []*card.CardState{target}}
-		if got := tc.c.Play(s, &card.CardState{}); got != 1 {
+		tc.c.Play(s, &card.CardState{Card: tc.c})
+		if got := s.Value; got != 1{
 			t.Errorf("%s: Play() = %d, want 1 (Runechant only; +N rides on target's BonusAttack)", tc.c.Name(), got)
 		}
 		if target.BonusAttack != tc.bonus {
@@ -40,7 +42,8 @@ func TestOathOfTheArknight_RunebladeAttackInRemaining(t *testing.T) {
 func TestOathOfTheArknight_WeaponCountsAsAttack(t *testing.T) {
 	target := &card.CardState{Card: stubRunebladeWeapon{}}
 	s := &card.TurnState{CardsRemaining: []*card.CardState{target}}
-	if got := (OathOfTheArknightRed{}).Play(s, &card.CardState{}); got != 1 {
+	(OathOfTheArknightRed{}).Play(s, &card.CardState{Card: OathOfTheArknightRed{}})
+	if got := s.Value; got != 1{
 		t.Errorf("Play() = %d, want 1 (Runechant only; +3 rides on weapon's BonusAttack)", got)
 	}
 	if target.BonusAttack != 3 {
@@ -50,7 +53,8 @@ func TestOathOfTheArknight_WeaponCountsAsAttack(t *testing.T) {
 
 func TestOathOfTheArknight_NonRunebladeAttackDoesNotQualify(t *testing.T) {
 	s := &card.TurnState{CardsRemaining: []*card.CardState{{Card: stubNonRunebladeAttack{}}}}
-	if got := (OathOfTheArknightRed{}).Play(s, &card.CardState{}); got != 1 {
+	(OathOfTheArknightRed{}).Play(s, &card.CardState{Card: OathOfTheArknightRed{}})
+	if got := s.Value; got != 1{
 		t.Errorf("Play() = %d, want 1 (non-Runeblade attack shouldn't trigger bonus)", got)
 	}
 }
@@ -58,7 +62,8 @@ func TestOathOfTheArknight_NonRunebladeAttackDoesNotQualify(t *testing.T) {
 func TestOathOfTheArknight_RunebladeNonAttackDoesNotQualify(t *testing.T) {
 	// Read the Runes is Runeblade + Action but NOT Attack or Weapon.
 	s := &card.TurnState{CardsRemaining: []*card.CardState{{Card: stubNonAttack{}}}}
-	if got := (OathOfTheArknightRed{}).Play(s, &card.CardState{}); got != 1 {
+	(OathOfTheArknightRed{}).Play(s, &card.CardState{Card: OathOfTheArknightRed{}})
+	if got := s.Value; got != 1{
 		t.Errorf("Play() = %d, want 1 (non-attack Runeblade card shouldn't trigger bonus)", got)
 	}
 }

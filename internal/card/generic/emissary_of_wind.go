@@ -22,4 +22,4 @@ func (EmissaryOfWindRed) Types() card.TypeSet         { return emissaryOfWindTyp
 func (EmissaryOfWindRed) GoAgain() bool               { return false }
 // not implemented: hand-cycle-for-go-again rider
 func (EmissaryOfWindRed) NotImplemented()             {}
-func (c EmissaryOfWindRed) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }
+func (c EmissaryOfWindRed) Play(s *card.TurnState, self *card.CardState) { s.ApplyAndLogEffectiveAttack(self) }

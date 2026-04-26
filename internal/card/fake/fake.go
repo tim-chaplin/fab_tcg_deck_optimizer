@@ -18,8 +18,7 @@ func (BlueAttack) Attack() int                { return 1 }
 func (BlueAttack) Defense() int               { return 3 }
 func (BlueAttack) Types() card.TypeSet        { return genericAttackTypes }
 func (BlueAttack) GoAgain() bool              { return true }
-func (c BlueAttack) Play(*card.TurnState, *card.CardState) int { return c.Attack() }
-
+func (BlueAttack) Play(s *card.TurnState, self *card.CardState) { s.ApplyAndLogEffectiveAttack(self) }
 // RedAttack is a generic red attack action: pitches 1, defends 1, attacks 3, costs 1.
 type RedAttack struct{}
 
@@ -31,8 +30,7 @@ func (RedAttack) Attack() int                { return 3 }
 func (RedAttack) Defense() int               { return 1 }
 func (RedAttack) Types() card.TypeSet        { return genericAttackTypes }
 func (RedAttack) GoAgain() bool              { return true }
-func (c RedAttack) Play(*card.TurnState, *card.CardState) int { return c.Attack() }
-
+func (RedAttack) Play(s *card.TurnState, self *card.CardState) { s.ApplyAndLogEffectiveAttack(self) }
 // YellowAttack is a generic yellow attack action: pitches 2, defends 2, attacks 2, costs 1.
 type YellowAttack struct{}
 
@@ -44,8 +42,7 @@ func (YellowAttack) Attack() int                { return 2 }
 func (YellowAttack) Defense() int               { return 2 }
 func (YellowAttack) Types() card.TypeSet        { return genericAttackTypes }
 func (YellowAttack) GoAgain() bool              { return true }
-func (c YellowAttack) Play(*card.TurnState, *card.CardState) int { return c.Attack() }
-
+func (YellowAttack) Play(s *card.TurnState, self *card.CardState) { s.ApplyAndLogEffectiveAttack(self) }
 // DrawCantrip is a generic free-cycling attack: cost 0, pitches 1, attacks 1, go again, and
 // fires DrawOne on play. Used by tests to exercise mid-turn-draw chains that extend themselves
 // (each cantrip plays, draws the next one, which plays, etc.).
@@ -59,9 +56,9 @@ func (DrawCantrip) Attack() int                { return 1 }
 func (DrawCantrip) Defense() int               { return 0 }
 func (DrawCantrip) Types() card.TypeSet        { return genericAttackTypes }
 func (DrawCantrip) GoAgain() bool              { return true }
-func (c DrawCantrip) Play(s *card.TurnState, _ *card.CardState) int {
+func (c DrawCantrip) Play(s *card.TurnState, self *card.CardState) {
 	s.DrawOne()
-	return c.Attack()
+	s.ApplyAndLogEffectiveAttack(self)
 }
 
 // genericActionTypes is a plain non-attack action (no Attack subtype). Used by CostlyDraw — a
@@ -83,7 +80,10 @@ func (CostlyDraw) Defense() int               { return 0 }
 func (CostlyDraw) Types() card.TypeSet        { return genericActionTypes }
 func (CostlyDraw) GoAgain() bool              { return true }
 func (CostlyDraw) NoMemo()                    {}
-func (CostlyDraw) Play(s *card.TurnState, _ *card.CardState) int { s.DrawOne(); return 0 }
+func (CostlyDraw) Play(s *card.TurnState, self *card.CardState) {
+	s.DrawOne()
+	s.LogPlay(self)
+}
 
 // CostlyAttack is a 1-cost, pitch-1, 3-damage attack action — the "deal 3 damage" alternative
 // the mid-turn-draw determinism test weighs against CostlyDraw.
@@ -97,8 +97,7 @@ func (CostlyAttack) Attack() int                 { return 3 }
 func (CostlyAttack) Defense() int                { return 0 }
 func (CostlyAttack) Types() card.TypeSet         { return genericAttackTypes }
 func (CostlyAttack) GoAgain() bool               { return false }
-func (c CostlyAttack) Play(*card.TurnState, *card.CardState) int  { return c.Attack() }
-
+func (CostlyAttack) Play(s *card.TurnState, self *card.CardState) { s.ApplyAndLogEffectiveAttack(self) }
 var genericDefenseReactionTypes = card.NewTypeSet(card.TypeGeneric, card.TypeDefenseReaction)
 
 // PitchOneDR is a 1-pitch-value defense reaction: cost 0, defense 3. It exists solely so tests
@@ -113,8 +112,7 @@ func (PitchOneDR) Attack() int                { return 0 }
 func (PitchOneDR) Defense() int               { return 3 }
 func (PitchOneDR) Types() card.TypeSet        { return genericDefenseReactionTypes }
 func (PitchOneDR) GoAgain() bool              { return false }
-func (PitchOneDR) Play(*card.TurnState, *card.CardState) int   { return 0 }
-
+func (PitchOneDR) Play(s *card.TurnState, self *card.CardState) { s.LogPlay(self) }
 // HugeAttack is a 0-cost "do one million damage" attack. Outrageous on purpose: as the top of
 // the deck it makes the CostlyDraw → HugeAttack chain blatantly better than the CostlyAttack
 // line, so an evaluator that peeks at the deck will pick a different role for the hand's draw
@@ -131,4 +129,4 @@ func (HugeAttack) Attack() int                { return hugeAttackDamage }
 func (HugeAttack) Defense() int               { return 0 }
 func (HugeAttack) Types() card.TypeSet        { return genericAttackTypes }
 func (HugeAttack) GoAgain() bool              { return false }
-func (c HugeAttack) Play(*card.TurnState, *card.CardState) int { return c.Attack() }
+func (HugeAttack) Play(s *card.TurnState, self *card.CardState) { s.ApplyAndLogEffectiveAttack(self) }

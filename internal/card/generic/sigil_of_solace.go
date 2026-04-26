@@ -21,8 +21,7 @@ func (SigilOfSolaceRed) GoAgain() bool                             { return fals
 func (SigilOfSolaceRed) NotSilverAgeLegal()                        {}
 // not implemented: 3/2/1{h} gain (also banlisted)
 func (SigilOfSolaceRed) NotImplemented()                           {}
-func (SigilOfSolaceRed) Play(*card.TurnState, *card.CardState) int { return 0 }
-
+func (SigilOfSolaceRed) Play(s *card.TurnState, self *card.CardState) { s.LogPlay(self) }
 type SigilOfSolaceYellow struct{}
 
 func (SigilOfSolaceYellow) ID() card.ID                               { return card.SigilOfSolaceYellow }
@@ -36,8 +35,7 @@ func (SigilOfSolaceYellow) GoAgain() bool                             { return f
 func (SigilOfSolaceYellow) NotSilverAgeLegal()                        {}
 // not implemented: 3/2/1{h} gain (also banlisted)
 func (SigilOfSolaceYellow) NotImplemented()                           {}
-func (SigilOfSolaceYellow) Play(*card.TurnState, *card.CardState) int { return 0 }
-
+func (SigilOfSolaceYellow) Play(s *card.TurnState, self *card.CardState) { s.LogPlay(self) }
 type SigilOfSolaceBlue struct{}
 
 func (SigilOfSolaceBlue) ID() card.ID                               { return card.SigilOfSolaceBlue }
@@ -51,4 +49,4 @@ func (SigilOfSolaceBlue) GoAgain() bool                             { return fal
 func (SigilOfSolaceBlue) NotSilverAgeLegal()                        {}
 // not implemented: 3/2/1{h} gain (also banlisted)
 func (SigilOfSolaceBlue) NotImplemented()                           {}
-func (SigilOfSolaceBlue) Play(*card.TurnState, *card.CardState) int { return 0 }
+func (SigilOfSolaceBlue) Play(s *card.TurnState, self *card.CardState) { s.LogPlay(self) }

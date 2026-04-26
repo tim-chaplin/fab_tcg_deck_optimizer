@@ -22,8 +22,7 @@ func (StrategicPlanningRed) Types() card.TypeSet         { return strategicPlann
 func (StrategicPlanningRed) GoAgain() bool               { return true }
 // not implemented: graveyard recovery, end-phase draw
 func (StrategicPlanningRed) NotImplemented()             {}
-func (StrategicPlanningRed) Play(s *card.TurnState, _ *card.CardState) int { return 0 }
-
+func (StrategicPlanningRed) Play(s *card.TurnState, self *card.CardState) { s.LogPlay(self) }
 type StrategicPlanningYellow struct{}
 
 func (StrategicPlanningYellow) ID() card.ID                 { return card.StrategicPlanningYellow }
@@ -36,8 +35,7 @@ func (StrategicPlanningYellow) Types() card.TypeSet         { return strategicPl
 func (StrategicPlanningYellow) GoAgain() bool               { return true }
 // not implemented: graveyard recovery, end-phase draw
 func (StrategicPlanningYellow) NotImplemented()             {}
-func (StrategicPlanningYellow) Play(s *card.TurnState, _ *card.CardState) int { return 0 }
-
+func (StrategicPlanningYellow) Play(s *card.TurnState, self *card.CardState) { s.LogPlay(self) }
 type StrategicPlanningBlue struct{}
 
 func (StrategicPlanningBlue) ID() card.ID                 { return card.StrategicPlanningBlue }
@@ -50,4 +48,4 @@ func (StrategicPlanningBlue) Types() card.TypeSet         { return strategicPlan
 func (StrategicPlanningBlue) GoAgain() bool               { return true }
 // not implemented: graveyard recovery, end-phase draw
 func (StrategicPlanningBlue) NotImplemented()             {}
-func (StrategicPlanningBlue) Play(s *card.TurnState, _ *card.CardState) int { return 0 }
+func (StrategicPlanningBlue) Play(s *card.TurnState, self *card.CardState) { s.LogPlay(self) }

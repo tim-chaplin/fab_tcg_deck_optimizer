@@ -37,8 +37,9 @@ func (WaterTheSeedsRed) Attack() int                 { return 3 }
 func (WaterTheSeedsRed) Defense() int                { return 2 }
 func (WaterTheSeedsRed) Types() card.TypeSet         { return waterTheSeedsTypes }
 func (WaterTheSeedsRed) GoAgain() bool               { return true }
-func (c WaterTheSeedsRed) Play(s *card.TurnState, _ *card.CardState) int { return waterTheSeedsPlay(c.Attack(), s) }
-
+func (c WaterTheSeedsRed) Play(s *card.TurnState, self *card.CardState) {
+	s.ApplyAndLogEffectiveAttackPlus(self, waterTheSeedsPlay(c.Attack(), s)-self.Card.Attack())
+}
 type WaterTheSeedsYellow struct{}
 
 func (WaterTheSeedsYellow) ID() card.ID                 { return card.WaterTheSeedsYellow }
@@ -49,8 +50,9 @@ func (WaterTheSeedsYellow) Attack() int                 { return 2 }
 func (WaterTheSeedsYellow) Defense() int                { return 2 }
 func (WaterTheSeedsYellow) Types() card.TypeSet         { return waterTheSeedsTypes }
 func (WaterTheSeedsYellow) GoAgain() bool               { return true }
-func (c WaterTheSeedsYellow) Play(s *card.TurnState, _ *card.CardState) int { return waterTheSeedsPlay(c.Attack(), s) }
-
+func (c WaterTheSeedsYellow) Play(s *card.TurnState, self *card.CardState) {
+	s.ApplyAndLogEffectiveAttackPlus(self, waterTheSeedsPlay(c.Attack(), s)-self.Card.Attack())
+}
 type WaterTheSeedsBlue struct{}
 
 func (WaterTheSeedsBlue) ID() card.ID                 { return card.WaterTheSeedsBlue }
@@ -61,4 +63,6 @@ func (WaterTheSeedsBlue) Attack() int                 { return 1 }
 func (WaterTheSeedsBlue) Defense() int                { return 2 }
 func (WaterTheSeedsBlue) Types() card.TypeSet         { return waterTheSeedsTypes }
 func (WaterTheSeedsBlue) GoAgain() bool               { return true }
-func (c WaterTheSeedsBlue) Play(s *card.TurnState, _ *card.CardState) int { return waterTheSeedsPlay(c.Attack(), s) }
+func (c WaterTheSeedsBlue) Play(s *card.TurnState, self *card.CardState) {
+	s.ApplyAndLogEffectiveAttackPlus(self, waterTheSeedsPlay(c.Attack(), s)-self.Card.Attack())
+}

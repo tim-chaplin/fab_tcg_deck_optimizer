@@ -22,8 +22,9 @@ func (PublicBountyRed) Types() card.TypeSet         { return publicBountyTypes }
 func (PublicBountyRed) GoAgain() bool               { return true }
 // not implemented: mark not tracked; +3{p} 'marked defender' rider fires unconditionally
 func (PublicBountyRed) NotImplemented()             {}
-func (PublicBountyRed) Play(s *card.TurnState, _ *card.CardState) int { return grantNextAttackActionBonus(s, 3) }
-
+func (PublicBountyRed) Play(s *card.TurnState, self *card.CardState) {
+	s.ApplyAndLogEffectiveAttackPlus(self, grantNextAttackActionBonus(s, 3))
+}
 type PublicBountyYellow struct{}
 
 func (PublicBountyYellow) ID() card.ID                 { return card.PublicBountyYellow }
@@ -36,8 +37,9 @@ func (PublicBountyYellow) Types() card.TypeSet         { return publicBountyType
 func (PublicBountyYellow) GoAgain() bool               { return true }
 // not implemented: mark not tracked; +3{p} 'marked defender' rider fires unconditionally
 func (PublicBountyYellow) NotImplemented()             {}
-func (PublicBountyYellow) Play(s *card.TurnState, _ *card.CardState) int { return grantNextAttackActionBonus(s, 2) }
-
+func (PublicBountyYellow) Play(s *card.TurnState, self *card.CardState) {
+	s.ApplyAndLogEffectiveAttackPlus(self, grantNextAttackActionBonus(s, 2))
+}
 type PublicBountyBlue struct{}
 
 func (PublicBountyBlue) ID() card.ID                 { return card.PublicBountyBlue }
@@ -50,4 +52,6 @@ func (PublicBountyBlue) Types() card.TypeSet         { return publicBountyTypes 
 func (PublicBountyBlue) GoAgain() bool               { return true }
 // not implemented: mark not tracked; +3{p} 'marked defender' rider fires unconditionally
 func (PublicBountyBlue) NotImplemented()             {}
-func (PublicBountyBlue) Play(s *card.TurnState, _ *card.CardState) int { return grantNextAttackActionBonus(s, 1) }
+func (PublicBountyBlue) Play(s *card.TurnState, self *card.CardState) {
+	s.ApplyAndLogEffectiveAttackPlus(self, grantNextAttackActionBonus(s, 1))
+}

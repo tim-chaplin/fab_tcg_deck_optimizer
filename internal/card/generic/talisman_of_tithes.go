@@ -22,4 +22,4 @@ func (TalismanOfTithesBlue) GoAgain() bool                             { return 
 // not implemented: self-destroys on an opposing draw during your action phase → opponent draws
 // minus 1
 func (TalismanOfTithesBlue) NotImplemented()                           {}
-func (TalismanOfTithesBlue) Play(*card.TurnState, *card.CardState) int { return 0 }
+func (TalismanOfTithesBlue) Play(s *card.TurnState, self *card.CardState) { s.LogPlay(self) }

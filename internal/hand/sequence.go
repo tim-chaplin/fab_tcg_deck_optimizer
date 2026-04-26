@@ -454,7 +454,10 @@ func (ctx *sequenceContext) playSequenceWithMeta(n int) (damage int, leftoverRun
 		// is unused.
 		ctx.hero.OnCardPlayed(pc.Card, state)
 		ephemeralsBefore := len(state.EphemeralAttackTriggers)
-		playDmg := pc.Card.Play(state, pc)
+		// Card.Play owns its chain-step log line and value contribution: it calls
+		// state.ApplyAndLogEffectiveAttack / Plus / LogPlay before returning. The
+		// dispatcher just sequences the surrounding triggers.
+		pc.Card.Play(state, pc)
 		// Stamp SourceIndex on any EphemeralAttackTriggers the card registered during Play
 		// so fireEphemeralAttackTriggers can attribute the fire back to this card.
 		for k := ephemeralsBefore; k < len(state.EphemeralAttackTriggers); k++ {
@@ -462,25 +465,13 @@ func (ctx *sequenceContext) playSequenceWithMeta(n int) (damage int, leftoverRun
 		}
 		// Log order matches FaB's stack-resolution order, not the dispatcher's call order:
 		// hero / aura triggers fire when the card is played (LL1), go on top of the stack,
-		// and resolve before the card itself — so their entries land above the card's chain
-		// entry in s.Log. Ephemeral "if hits" triggers fire after the attack lands and log
-		// below. Each trigger handler authors its own log line via the appropriate
-		// AddPre/PostTriggerLogEntry method, with LogEntry.Source naming the triggering
-		// card so appendGroupedChainEntries can cluster the trigger underneath the chain
-		// entry that names that card.
+		// and resolve before the card itself. Ephemeral "if hits" triggers fire after the
+		// attack lands and log below. Each trigger handler authors its own log line via
+		// AddPreTriggerLogEntry / AddPostTriggerLogEntry, with LogEntry.Source naming the
+		// triggering card so appendGroupedChainEntries clusters the trigger underneath the
+		// chain entry that names that card.
 		if m.isAttackAction {
 			fireAttackActionTriggers(state, pc.Card)
-		}
-		// Card contribution: Play return plus any prior-card +N{p} grant. AddLogEntry
-		// clamps at 0 — FaB attack-power buffs can't drive an attack below 0 power (a -3
-		// grant on a 1-power attack resolves as a 0-power attack, not -2). The clamp covers
-		// the sum because playDmg may include rider damage (e.g. Blow for a Blow's on-hit
-		// +1) that EffectiveAttack doesn't see — clamping the sum preserves both pieces.
-		state.AddLogEntry(
-			card.DisplayName(pc.Card)+": "+chainVerbFor(m, pc.FromArsenal),
-			playDmg+pc.BonusAttack,
-		)
-		if m.isAttackAction {
 			// Fire ephemeral triggers AFTER hero and aura triggers so the handler sees the
 			// fully-resolved attacker state (Dominate grants, hero-created auras, fresh
 			// Runechants from aura triggers).

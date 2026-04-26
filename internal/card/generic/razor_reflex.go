@@ -23,8 +23,7 @@ func (RazorReflexRed) GoAgain() bool                             { return false 
 // not implemented: modal AR +N{p}: dagger/sword weapon attack OR cost ≤1 attack action
 // (on-hit go again)
 func (RazorReflexRed) NotImplemented()                           {}
-func (RazorReflexRed) Play(*card.TurnState, *card.CardState) int { return 0 }
-
+func (RazorReflexRed) Play(s *card.TurnState, self *card.CardState) { s.LogPlay(self) }
 type RazorReflexYellow struct{}
 
 func (RazorReflexYellow) ID() card.ID                               { return card.RazorReflexYellow }
@@ -38,8 +37,7 @@ func (RazorReflexYellow) GoAgain() bool                             { return fal
 // not implemented: modal AR +N{p}: dagger/sword weapon attack OR cost ≤1 attack action
 // (on-hit go again)
 func (RazorReflexYellow) NotImplemented()                           {}
-func (RazorReflexYellow) Play(*card.TurnState, *card.CardState) int { return 0 }
-
+func (RazorReflexYellow) Play(s *card.TurnState, self *card.CardState) { s.LogPlay(self) }
 type RazorReflexBlue struct{}
 
 func (RazorReflexBlue) ID() card.ID                               { return card.RazorReflexBlue }
@@ -53,4 +51,4 @@ func (RazorReflexBlue) GoAgain() bool                             { return false
 // not implemented: modal AR +N{p}: dagger/sword weapon attack OR cost ≤1 attack action
 // (on-hit go again)
 func (RazorReflexBlue) NotImplemented()                           {}
-func (RazorReflexBlue) Play(*card.TurnState, *card.CardState) int { return 0 }
+func (RazorReflexBlue) Play(s *card.TurnState, self *card.CardState) { s.LogPlay(self) }

@@ -21,8 +21,7 @@ func (PeaceOfMindRed) Types() card.TypeSet                       { return peaceO
 func (PeaceOfMindRed) GoAgain() bool                             { return false }
 // not implemented: Instant 'prevent 4 of next {p}-damage hit'; creates a Ponder token
 func (PeaceOfMindRed) NotImplemented()                           {}
-func (PeaceOfMindRed) Play(*card.TurnState, *card.CardState) int { return 0 }
-
+func (PeaceOfMindRed) Play(s *card.TurnState, self *card.CardState) { s.LogPlay(self) }
 type PeaceOfMindYellow struct{}
 
 func (PeaceOfMindYellow) ID() card.ID                               { return card.PeaceOfMindYellow }
@@ -35,8 +34,7 @@ func (PeaceOfMindYellow) Types() card.TypeSet                       { return pea
 func (PeaceOfMindYellow) GoAgain() bool                             { return false }
 // not implemented: Instant 'prevent 4 of next {p}-damage hit'; creates a Ponder token
 func (PeaceOfMindYellow) NotImplemented()                           {}
-func (PeaceOfMindYellow) Play(*card.TurnState, *card.CardState) int { return 0 }
-
+func (PeaceOfMindYellow) Play(s *card.TurnState, self *card.CardState) { s.LogPlay(self) }
 type PeaceOfMindBlue struct{}
 
 func (PeaceOfMindBlue) ID() card.ID                               { return card.PeaceOfMindBlue }
@@ -49,4 +47,4 @@ func (PeaceOfMindBlue) Types() card.TypeSet                       { return peace
 func (PeaceOfMindBlue) GoAgain() bool                             { return false }
 // not implemented: Instant 'prevent 4 of next {p}-damage hit'; creates a Ponder token
 func (PeaceOfMindBlue) NotImplemented()                           {}
-func (PeaceOfMindBlue) Play(*card.TurnState, *card.CardState) int { return 0 }
+func (PeaceOfMindBlue) Play(s *card.TurnState, self *card.CardState) { s.LogPlay(self) }

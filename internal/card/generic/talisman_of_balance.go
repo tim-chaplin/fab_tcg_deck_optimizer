@@ -22,4 +22,4 @@ func (TalismanOfBalanceBlue) Types() card.TypeSet                       { return
 func (TalismanOfBalanceBlue) GoAgain() bool                             { return true }
 // not implemented: end-phase arsenal-fill from top of deck if behind on arsenal count
 func (TalismanOfBalanceBlue) NotImplemented()                           {}
-func (TalismanOfBalanceBlue) Play(*card.TurnState, *card.CardState) int { return 0 }
+func (TalismanOfBalanceBlue) Play(s *card.TurnState, self *card.CardState) { s.LogPlay(self) }

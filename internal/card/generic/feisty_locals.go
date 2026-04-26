@@ -21,8 +21,7 @@ func (FeistyLocalsRed) Types() card.TypeSet         { return feistyLocalsTypes }
 func (FeistyLocalsRed) GoAgain() bool               { return false }
 // not implemented: defended-by-action-card +2{p} rider
 func (FeistyLocalsRed) NotImplemented()             {}
-func (c FeistyLocalsRed) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }
-
+func (c FeistyLocalsRed) Play(s *card.TurnState, self *card.CardState) { s.ApplyAndLogEffectiveAttack(self) }
 type FeistyLocalsYellow struct{}
 
 func (FeistyLocalsYellow) ID() card.ID                 { return card.FeistyLocalsYellow }
@@ -35,8 +34,7 @@ func (FeistyLocalsYellow) Types() card.TypeSet         { return feistyLocalsType
 func (FeistyLocalsYellow) GoAgain() bool               { return false }
 // not implemented: defended-by-action-card +2{p} rider
 func (FeistyLocalsYellow) NotImplemented()             {}
-func (c FeistyLocalsYellow) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }
-
+func (c FeistyLocalsYellow) Play(s *card.TurnState, self *card.CardState) { s.ApplyAndLogEffectiveAttack(self) }
 type FeistyLocalsBlue struct{}
 
 func (FeistyLocalsBlue) ID() card.ID                 { return card.FeistyLocalsBlue }
@@ -49,4 +47,4 @@ func (FeistyLocalsBlue) Types() card.TypeSet         { return feistyLocalsTypes 
 func (FeistyLocalsBlue) GoAgain() bool               { return false }
 // not implemented: defended-by-action-card +2{p} rider
 func (FeistyLocalsBlue) NotImplemented()             {}
-func (c FeistyLocalsBlue) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }
+func (c FeistyLocalsBlue) Play(s *card.TurnState, self *card.CardState) { s.ApplyAndLogEffectiveAttack(self) }

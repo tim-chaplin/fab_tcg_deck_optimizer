@@ -21,8 +21,7 @@ func (MemorialGroundRed) Types() card.TypeSet                       { return mem
 func (MemorialGroundRed) GoAgain() bool                             { return false }
 // not implemented: Instant 'graveyard → top of deck' for low-cost attack action card
 func (MemorialGroundRed) NotImplemented()                           {}
-func (MemorialGroundRed) Play(*card.TurnState, *card.CardState) int { return 0 }
-
+func (MemorialGroundRed) Play(s *card.TurnState, self *card.CardState) { s.LogPlay(self) }
 type MemorialGroundYellow struct{}
 
 func (MemorialGroundYellow) ID() card.ID                               { return card.MemorialGroundYellow }
@@ -35,8 +34,7 @@ func (MemorialGroundYellow) Types() card.TypeSet                       { return 
 func (MemorialGroundYellow) GoAgain() bool                             { return false }
 // not implemented: Instant 'graveyard → top of deck' for low-cost attack action card
 func (MemorialGroundYellow) NotImplemented()                           {}
-func (MemorialGroundYellow) Play(*card.TurnState, *card.CardState) int { return 0 }
-
+func (MemorialGroundYellow) Play(s *card.TurnState, self *card.CardState) { s.LogPlay(self) }
 type MemorialGroundBlue struct{}
 
 func (MemorialGroundBlue) ID() card.ID                               { return card.MemorialGroundBlue }
@@ -49,4 +47,4 @@ func (MemorialGroundBlue) Types() card.TypeSet                       { return me
 func (MemorialGroundBlue) GoAgain() bool                             { return false }
 // not implemented: Instant 'graveyard → top of deck' for low-cost attack action card
 func (MemorialGroundBlue) NotImplemented()                           {}
-func (MemorialGroundBlue) Play(*card.TurnState, *card.CardState) int { return 0 }
+func (MemorialGroundBlue) Play(s *card.TurnState, self *card.CardState) { s.LogPlay(self) }

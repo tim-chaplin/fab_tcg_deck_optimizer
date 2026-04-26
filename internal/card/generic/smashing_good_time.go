@@ -27,11 +27,11 @@ func (SmashingGoodTimeRed) Types() card.TypeSet         { return smashingGoodTim
 func (SmashingGoodTimeRed) GoAgain() bool               { return true }
 // not implemented: on-hit item-destruction rider
 func (SmashingGoodTimeRed) NotImplemented()             {}
-func (SmashingGoodTimeRed) Play(s *card.TurnState, self *card.CardState) int {
-	if !self.FromArsenal {
-		return 0
+func (SmashingGoodTimeRed) Play(s *card.TurnState, self *card.CardState) {
+	if self.FromArsenal {
+		grantNextAttackActionBonus(s, 3)
 	}
-	return grantNextAttackActionBonus(s, 3)
+	s.LogPlay(self)
 }
 
 type SmashingGoodTimeYellow struct{}
@@ -46,11 +46,11 @@ func (SmashingGoodTimeYellow) Types() card.TypeSet         { return smashingGood
 func (SmashingGoodTimeYellow) GoAgain() bool               { return true }
 // not implemented: on-hit item-destruction rider
 func (SmashingGoodTimeYellow) NotImplemented()             {}
-func (SmashingGoodTimeYellow) Play(s *card.TurnState, self *card.CardState) int {
-	if !self.FromArsenal {
-		return 0
+func (SmashingGoodTimeYellow) Play(s *card.TurnState, self *card.CardState) {
+	if self.FromArsenal {
+		grantNextAttackActionBonus(s, 2)
 	}
-	return grantNextAttackActionBonus(s, 2)
+	s.LogPlay(self)
 }
 
 type SmashingGoodTimeBlue struct{}
@@ -65,9 +65,9 @@ func (SmashingGoodTimeBlue) Types() card.TypeSet         { return smashingGoodTi
 func (SmashingGoodTimeBlue) GoAgain() bool               { return true }
 // not implemented: on-hit item-destruction rider
 func (SmashingGoodTimeBlue) NotImplemented()             {}
-func (SmashingGoodTimeBlue) Play(s *card.TurnState, self *card.CardState) int {
-	if !self.FromArsenal {
-		return 0
+func (SmashingGoodTimeBlue) Play(s *card.TurnState, self *card.CardState) {
+	if self.FromArsenal {
+		grantNextAttackActionBonus(s, 1)
 	}
-	return grantNextAttackActionBonus(s, 1)
+	s.LogPlay(self)
 }

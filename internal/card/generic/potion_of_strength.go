@@ -20,4 +20,4 @@ func (PotionOfStrengthBlue) Types() card.TypeSet                       { return 
 func (PotionOfStrengthBlue) GoAgain() bool                             { return false }
 // not implemented: activated +2{p} on next attack
 func (PotionOfStrengthBlue) NotImplemented()                           {}
-func (PotionOfStrengthBlue) Play(*card.TurnState, *card.CardState) int { return 0 }
+func (PotionOfStrengthBlue) Play(s *card.TurnState, self *card.CardState) { s.LogPlay(self) }

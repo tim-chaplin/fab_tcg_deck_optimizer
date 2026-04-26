@@ -22,8 +22,9 @@ func (WarmongersRecitalRed) Types() card.TypeSet         { return warmongersReci
 func (WarmongersRecitalRed) GoAgain() bool               { return true }
 // not implemented: bottom-of-deck rider on next-attack-action target
 func (WarmongersRecitalRed) NotImplemented()             {}
-func (WarmongersRecitalRed) Play(s *card.TurnState, _ *card.CardState) int { return grantNextAttackActionBonus(s, 3) }
-
+func (WarmongersRecitalRed) Play(s *card.TurnState, self *card.CardState) {
+	s.ApplyAndLogEffectiveAttackPlus(self, grantNextAttackActionBonus(s, 3))
+}
 type WarmongersRecitalYellow struct{}
 
 func (WarmongersRecitalYellow) ID() card.ID                 { return card.WarmongersRecitalYellow }
@@ -36,8 +37,9 @@ func (WarmongersRecitalYellow) Types() card.TypeSet         { return warmongersR
 func (WarmongersRecitalYellow) GoAgain() bool               { return true }
 // not implemented: bottom-of-deck rider on next-attack-action target
 func (WarmongersRecitalYellow) NotImplemented()             {}
-func (WarmongersRecitalYellow) Play(s *card.TurnState, _ *card.CardState) int { return grantNextAttackActionBonus(s, 2) }
-
+func (WarmongersRecitalYellow) Play(s *card.TurnState, self *card.CardState) {
+	s.ApplyAndLogEffectiveAttackPlus(self, grantNextAttackActionBonus(s, 2))
+}
 type WarmongersRecitalBlue struct{}
 
 func (WarmongersRecitalBlue) ID() card.ID                 { return card.WarmongersRecitalBlue }
@@ -50,4 +52,6 @@ func (WarmongersRecitalBlue) Types() card.TypeSet         { return warmongersRec
 func (WarmongersRecitalBlue) GoAgain() bool               { return true }
 // not implemented: bottom-of-deck rider on next-attack-action target
 func (WarmongersRecitalBlue) NotImplemented()             {}
-func (WarmongersRecitalBlue) Play(s *card.TurnState, _ *card.CardState) int { return grantNextAttackActionBonus(s, 1) }
+func (WarmongersRecitalBlue) Play(s *card.TurnState, self *card.CardState) {
+	s.ApplyAndLogEffectiveAttackPlus(self, grantNextAttackActionBonus(s, 1))
+}

@@ -13,22 +13,18 @@ import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 
 var performanceBonusTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeAttack)
 
-// performanceBonusDamage returns the base attack plus the Gold-token rider when the attack is
-// likely to land.
-func performanceBonusDamage(attack int, self *card.CardState) int {
-	if card.LikelyToHit(self) {
-		return attack + card.GoldTokenValue
-	}
-	return attack
-}
-
-// performanceBonusPlay credits the on-hit Gold token and grants self Go again when this
-// copy was played from arsenal.
-func performanceBonusPlay(c card.Card, self *card.CardState) int {
+// performanceBonusPlay credits the on-hit Gold token rider, grants self Go again when this
+// copy was played from arsenal, and emits the chain step. The Gold-token credit folds into
+// the chain step's (+N) display.
+func performanceBonusPlay(s *card.TurnState, self *card.CardState) {
 	if self.FromArsenal {
 		self.GrantedGoAgain = true
 	}
-	return performanceBonusDamage(c.Attack(), self)
+	rider := 0
+	if card.LikelyToHit(self) {
+		rider = card.GoldTokenValue
+	}
+	s.ApplyAndLogEffectiveAttackPlus(self, rider)
 }
 
 type PerformanceBonusRed struct{}
@@ -43,8 +39,9 @@ func (PerformanceBonusRed) Types() card.TypeSet          { return performanceBon
 func (PerformanceBonusRed) GoAgain() bool                { return false }
 // not implemented: gold tokens
 func (PerformanceBonusRed) NotImplemented()              {}
-func (c PerformanceBonusRed) Play(_ *card.TurnState, self *card.CardState) int { return performanceBonusPlay(c, self) }
-
+func (PerformanceBonusRed) Play(s *card.TurnState, self *card.CardState) {
+	performanceBonusPlay(s, self)
+}
 type PerformanceBonusYellow struct{}
 
 func (PerformanceBonusYellow) ID() card.ID                  { return card.PerformanceBonusYellow }
@@ -57,8 +54,9 @@ func (PerformanceBonusYellow) Types() card.TypeSet          { return performance
 func (PerformanceBonusYellow) GoAgain() bool                { return false }
 // not implemented: gold tokens
 func (PerformanceBonusYellow) NotImplemented()              {}
-func (c PerformanceBonusYellow) Play(_ *card.TurnState, self *card.CardState) int { return performanceBonusPlay(c, self) }
-
+func (PerformanceBonusYellow) Play(s *card.TurnState, self *card.CardState) {
+	performanceBonusPlay(s, self)
+}
 type PerformanceBonusBlue struct{}
 
 func (PerformanceBonusBlue) ID() card.ID                  { return card.PerformanceBonusBlue }
@@ -71,4 +69,6 @@ func (PerformanceBonusBlue) Types() card.TypeSet          { return performanceBo
 func (PerformanceBonusBlue) GoAgain() bool                { return false }
 // not implemented: gold tokens
 func (PerformanceBonusBlue) NotImplemented()              {}
-func (c PerformanceBonusBlue) Play(_ *card.TurnState, self *card.CardState) int { return performanceBonusPlay(c, self) }
+func (PerformanceBonusBlue) Play(s *card.TurnState, self *card.CardState) {
+	performanceBonusPlay(s, self)
+}

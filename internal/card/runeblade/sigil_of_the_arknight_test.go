@@ -11,7 +11,8 @@ import (
 // happens when the sim fires the trigger next turn.
 func TestSigilOfTheArknight_PlayOnlySetsAuraCreated(t *testing.T) {
 	s := card.TurnState{Deck: []card.Card{stubRunebladeAttack{}}}
-	if got := (SigilOfTheArknightBlue{}).Play(&s, &card.CardState{}); got != 0 {
+	(SigilOfTheArknightBlue{}).Play(&s, &card.CardState{Card: SigilOfTheArknightBlue{}})
+	if got := s.Value; got != 0{
 		t.Errorf("Play() = %d, want 0 (reveal deferred to trigger)", got)
 	}
 	if !s.AuraCreated {
@@ -28,7 +29,7 @@ func TestSigilOfTheArknight_PlayOnlySetsAuraCreated(t *testing.T) {
 // extra card, not a flat credit).
 func TestSigilOfTheArknight_TriggerRevealsAttackActionIntoHand(t *testing.T) {
 	var play card.TurnState
-	(SigilOfTheArknightBlue{}).Play(&play, &card.CardState{})
+	(SigilOfTheArknightBlue{}).Play(&play, &card.CardState{Card: SigilOfTheArknightBlue{}})
 	top := stubRunebladeAttack{}
 	next := card.TurnState{Deck: []card.Card{top, stubNonAttack{}}}
 	if got := play.AuraTriggers[0].Handler(&next); got != 0 {
@@ -46,7 +47,7 @@ func TestSigilOfTheArknight_TriggerRevealsAttackActionIntoHand(t *testing.T) {
 // nil and Deck is untouched (the card stays on top of the deck in the real game).
 func TestSigilOfTheArknight_TriggerRevealsNonAttack(t *testing.T) {
 	var play card.TurnState
-	(SigilOfTheArknightBlue{}).Play(&play, &card.CardState{})
+	(SigilOfTheArknightBlue{}).Play(&play, &card.CardState{Card: SigilOfTheArknightBlue{}})
 	next := card.TurnState{Deck: []card.Card{stubAura{}, stubRunebladeAttack{}}}
 	if got := play.AuraTriggers[0].Handler(&next); got != 0 {
 		t.Errorf("handler damage = %d, want 0", got)
@@ -62,7 +63,7 @@ func TestSigilOfTheArknight_TriggerRevealsNonAttack(t *testing.T) {
 // TestSigilOfTheArknight_TriggerEmptyDeck: nothing to reveal → zero result, Revealed stays nil.
 func TestSigilOfTheArknight_TriggerEmptyDeck(t *testing.T) {
 	var play card.TurnState
-	(SigilOfTheArknightBlue{}).Play(&play, &card.CardState{})
+	(SigilOfTheArknightBlue{}).Play(&play, &card.CardState{Card: SigilOfTheArknightBlue{}})
 	var next card.TurnState
 	if got := play.AuraTriggers[0].Handler(&next); got != 0 {
 		t.Errorf("handler damage = %d, want 0", got)

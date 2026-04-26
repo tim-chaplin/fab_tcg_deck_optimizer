@@ -21,4 +21,6 @@ func (SapwoodElixirRed) Types() card.TypeSet         { return sapwoodElixirTypes
 func (SapwoodElixirRed) GoAgain() bool               { return true }
 // not implemented: Frailty health-gain rider dropped (status tokens not tracked)
 func (SapwoodElixirRed) NotImplemented()             {}
-func (SapwoodElixirRed) Play(s *card.TurnState, _ *card.CardState) int { return grantNextAttackActionBonus(s, 3) }
+func (SapwoodElixirRed) Play(s *card.TurnState, self *card.CardState) {
+	s.ApplyAndLogEffectiveAttackPlus(self, grantNextAttackActionBonus(s, 3))
+}
