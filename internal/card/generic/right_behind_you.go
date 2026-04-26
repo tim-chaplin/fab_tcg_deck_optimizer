@@ -3,8 +3,6 @@
 //
 // Text: "When this defends together with another card from hand, this gets +1{d} and you may look
 // at the top card of your deck. You may put it on the bottom."
-//
-// Simplification: Defend-together +1{d} and deck-bottom rider aren't modelled.
 
 package generic
 
@@ -22,6 +20,8 @@ func (RightBehindYouRed) Attack() int                 { return 7 }
 func (RightBehindYouRed) Defense() int                { return 2 }
 func (RightBehindYouRed) Types() card.TypeSet         { return rightBehindYouTypes }
 func (RightBehindYouRed) GoAgain() bool               { return false }
+// not implemented: defend-together +1{d} buff and deck-bottom peek rider
+func (RightBehindYouRed) NotImplemented()             {}
 func (c RightBehindYouRed) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }
 
 type RightBehindYouYellow struct{}
@@ -34,6 +34,8 @@ func (RightBehindYouYellow) Attack() int                 { return 6 }
 func (RightBehindYouYellow) Defense() int                { return 2 }
 func (RightBehindYouYellow) Types() card.TypeSet         { return rightBehindYouTypes }
 func (RightBehindYouYellow) GoAgain() bool               { return false }
+// not implemented: defend-together +1{d} buff and deck-bottom peek rider
+func (RightBehindYouYellow) NotImplemented()             {}
 func (c RightBehindYouYellow) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }
 
 type RightBehindYouBlue struct{}
@@ -46,4 +48,6 @@ func (RightBehindYouBlue) Attack() int                 { return 5 }
 func (RightBehindYouBlue) Defense() int                { return 2 }
 func (RightBehindYouBlue) Types() card.TypeSet         { return rightBehindYouTypes }
 func (RightBehindYouBlue) GoAgain() bool               { return false }
+// not implemented: defend-together +1{d} buff and deck-bottom peek rider
+func (RightBehindYouBlue) NotImplemented()             {}
 func (c RightBehindYouBlue) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }

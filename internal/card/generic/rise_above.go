@@ -2,8 +2,7 @@
 // Printed pitch variants: Red 1, Yellow 2, Blue 3.
 // Printed defense: Red 4, Yellow 3, Blue 2.
 // Text: "You may put a card from your hand on top of your deck rather than pay Rise Above's {r}
-// cost." Simplification: the alternative hand-as-cost option isn't modelled — we pay the printed
-// 2{r} or the partition's affordability check rejects the play.
+// cost."
 
 package generic
 

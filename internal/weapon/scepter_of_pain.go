@@ -1,10 +1,6 @@
 // Scepter of Pain — Runeblade Weapon - Scepter (1H). Cost 2, Arcane 1.
 // Text: "Once per Turn Action - {r}{r}: Deal 1 arcane damage to any opposing target. Create a
 // Runechant token for each damage dealt this way."
-//
-// Simplification: 1 arcane direct (Attack()=1) + 1 Runechant via CreateRunechant() = Play value 2.
-// The ability isn't an Attack-typed action in FaB, but the simulator treats any weapon swing as
-// the turn's damage step.
 
 package weapon
 
