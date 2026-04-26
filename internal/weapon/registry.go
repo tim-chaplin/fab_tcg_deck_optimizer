@@ -9,6 +9,7 @@ var All = []Weapon{
 	AnnalsOfSutcliffe{},
 	NebulaBlade{},
 	ReapingBlade{},
+	RosettaThorn{},
 	ScepterOfPain{},
 	Talishar{},
 }

@@ -26,6 +26,9 @@ func (DemolitionCrewRed) Defense() int                { return 2 }
 func (DemolitionCrewRed) Types() card.TypeSet         { return demolitionCrewTypes }
 func (DemolitionCrewRed) GoAgain() bool               { return false }
 func (DemolitionCrewRed) Dominate()                   {}
+// not implemented: additional cost "reveal a cost-2-or-greater card from hand" not enforced;
+// card always playable when its resource cost is met (over-credits hands without a 2+ cost card)
+func (DemolitionCrewRed) NotImplemented()             {}
 func (c DemolitionCrewRed) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }
 
 type DemolitionCrewYellow struct{}
@@ -39,6 +42,9 @@ func (DemolitionCrewYellow) Defense() int                { return 2 }
 func (DemolitionCrewYellow) Types() card.TypeSet         { return demolitionCrewTypes }
 func (DemolitionCrewYellow) GoAgain() bool               { return false }
 func (DemolitionCrewYellow) Dominate()                   {}
+// not implemented: additional cost "reveal a cost-2-or-greater card from hand" not enforced;
+// card always playable when its resource cost is met (over-credits hands without a 2+ cost card)
+func (DemolitionCrewYellow) NotImplemented()             {}
 func (c DemolitionCrewYellow) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }
 
 type DemolitionCrewBlue struct{}
@@ -52,4 +58,7 @@ func (DemolitionCrewBlue) Defense() int                { return 2 }
 func (DemolitionCrewBlue) Types() card.TypeSet         { return demolitionCrewTypes }
 func (DemolitionCrewBlue) GoAgain() bool               { return false }
 func (DemolitionCrewBlue) Dominate()                   {}
+// not implemented: additional cost "reveal a cost-2-or-greater card from hand" not enforced;
+// card always playable when its resource cost is met (over-credits hands without a 2+ cost card)
+func (DemolitionCrewBlue) NotImplemented()             {}
 func (c DemolitionCrewBlue) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }

@@ -553,6 +553,7 @@ const (
 	AnnalsOfSutcliffeID
 	NebulaBladeID
 	ReapingBladeID
+	RosettaThornID
 	ScepterOfPainID
 	TalisharID
 

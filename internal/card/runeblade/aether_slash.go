@@ -19,6 +19,10 @@ func (AetherSlashRed) Attack() int                  { return 4 }
 func (AetherSlashRed) Defense() int                 { return 3 }
 func (AetherSlashRed) Types() card.TypeSet       { return aetherSlashTypes }
 func (AetherSlashRed) GoAgain() bool                { return false }
+// not implemented: Pitched scan can fire the +1 arcane rider whenever any non-attack action is in
+// Pitched, regardless of which pitched card actually paid for Aether Slash (over-credits when both
+// an attack and a non-attack action are pitched)
+func (AetherSlashRed) NotImplemented()              {}
 func (c AetherSlashRed) Play(s *card.TurnState, _ *card.CardState) int { return aetherSlashPlay(c.Attack(), s) }
 
 type AetherSlashYellow struct{}
@@ -31,6 +35,10 @@ func (AetherSlashYellow) Attack() int                  { return 3 }
 func (AetherSlashYellow) Defense() int                 { return 3 }
 func (AetherSlashYellow) Types() card.TypeSet       { return aetherSlashTypes }
 func (AetherSlashYellow) GoAgain() bool                { return false }
+// not implemented: Pitched scan can fire the +1 arcane rider whenever any non-attack action is in
+// Pitched, regardless of which pitched card actually paid for Aether Slash (over-credits when both
+// an attack and a non-attack action are pitched)
+func (AetherSlashYellow) NotImplemented()              {}
 func (c AetherSlashYellow) Play(s *card.TurnState, _ *card.CardState) int { return aetherSlashPlay(c.Attack(), s) }
 
 type AetherSlashBlue struct{}
@@ -43,6 +51,10 @@ func (AetherSlashBlue) Attack() int                  { return 2 }
 func (AetherSlashBlue) Defense() int                 { return 3 }
 func (AetherSlashBlue) Types() card.TypeSet       { return aetherSlashTypes }
 func (AetherSlashBlue) GoAgain() bool                { return false }
+// not implemented: Pitched scan can fire the +1 arcane rider whenever any non-attack action is in
+// Pitched, regardless of which pitched card actually paid for Aether Slash (over-credits when both
+// an attack and a non-attack action are pitched)
+func (AetherSlashBlue) NotImplemented()              {}
 func (c AetherSlashBlue) Play(s *card.TurnState, _ *card.CardState) int { return aetherSlashPlay(c.Attack(), s) }
 
 func aetherSlashPlay(base int, s *card.TurnState) int {
