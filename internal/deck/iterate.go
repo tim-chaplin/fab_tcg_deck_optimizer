@@ -16,6 +16,31 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/hand"
 )
 
+// iterateImprovement is the per-acceptance message sent from a worker to the coordinator:
+// the mutation index that won, its deep-confirm average, and the deck-after-mutation that
+// produced it.
+type iterateImprovement struct {
+	idx  int
+	avg  float64
+	deck *Deck
+}
+
+// iterateWorkerConfig bundles every read-only parameter a worker shares with its peers so
+// the goroutine body can take a single struct instead of a long argument list.
+type iterateWorkerConfig struct {
+	mutations        []Mutation
+	bestAvg          float64
+	temperature      float64
+	minImprovement   float64
+	shallowThreshold float64
+	shallowShuffles  int
+	deepShuffles     int
+	incoming         int
+	seed             int64
+	shallowCompleted *atomic.Int64
+	deepsCompleted   *atomic.Int64
+}
+
 // IterateParallel runs one iterate-mode round. Workers share a queue; each goroutine does
 // the shallow screen and, if shallow clears the effective threshold, the deep-shuffles
 // confirmation for the same mutation. The first worker to land an acceptable mutation wins
@@ -76,12 +101,7 @@ func IterateParallel(
 	innerCtx, cancel := context.WithCancel(ctx)
 	defer cancel()
 
-	type improvement struct {
-		idx  int
-		avg  float64
-		deck *Deck
-	}
-	improvementCh := make(chan improvement, numWorkers)
+	improvementCh := make(chan iterateImprovement, numWorkers)
 
 	jobs := make(chan int, len(mutations))
 	for i := range mutations {
@@ -89,50 +109,26 @@ func IterateParallel(
 	}
 	close(jobs)
 
+	cfg := iterateWorkerConfig{
+		mutations:        mutations,
+		bestAvg:          bestAvg,
+		temperature:      temperature,
+		minImprovement:   minImprovement,
+		shallowThreshold: shallowThreshold,
+		shallowShuffles:  shallowShuffles,
+		deepShuffles:     deepShuffles,
+		incoming:         incoming,
+		seed:             seed,
+		shallowCompleted: shallowCompleted,
+		deepsCompleted:   deepsCompleted,
+	}
+
 	var wg sync.WaitGroup
 	for w := 0; w < numWorkers; w++ {
 		wg.Add(1)
 		go func(workerIdx int) {
 			defer wg.Done()
-			ev := hand.NewEvaluator()
-			shallowRng := rand.New(rand.NewSource(seed + int64(workerIdx)))
-			// Derive an independent deep stream so the two phases don't share rng state. The
-			// acceptance-roll rng shares the deep stream — the deep eval has already happened
-			// by the time the roll runs, so no cross-influence on the deep result.
-			deepRng := rand.New(rand.NewSource(seed ^ (int64(workerIdx)+1)*int64(0x9e3779b9)))
-			for i := range jobs {
-				if innerCtx.Err() != nil {
-					return
-				}
-				mut := mutations[i]
-				d := New(mut.Deck.Hero, mut.Deck.Weapons, mut.Deck.Cards)
-				shallowAvg := d.EvaluateWith(shallowShuffles, incoming, shallowRng, ev).Mean()
-				if shallowCompleted != nil {
-					shallowCompleted.Add(1)
-				}
-				if shallowAvg <= shallowThreshold {
-					continue
-				}
-				if innerCtx.Err() != nil {
-					return
-				}
-				// Fresh Deck for the deep pass so d.Stats from the shallow run doesn't leak in.
-				dd := New(mut.Deck.Hero, mut.Deck.Weapons, mut.Deck.Cards)
-				deepAvg := dd.EvaluateWith(deepShuffles, incoming, deepRng, ev).Mean()
-				if deepsCompleted != nil {
-					deepsCompleted.Add(1)
-				}
-				if !acceptMutation(deepAvg, bestAvg, temperature, minImprovement, deepRng) {
-					continue
-				}
-				select {
-				case improvementCh <- improvement{idx: i, avg: deepAvg, deck: dd}:
-				default:
-					// Another worker already filled the buffer; drop silently.
-				}
-				cancel()
-				return
-			}
+			runIterateWorker(innerCtx, cancel, workerIdx, cfg, jobs, improvementCh)
 		}(w)
 	}
 
@@ -154,6 +150,60 @@ func IterateParallel(
 		default:
 		}
 		return nil, bestAvg, -1, false
+	}
+}
+
+// runIterateWorker pulls mutation indices from jobs, runs the two-phase shallow / deep
+// evaluation, and on a passing deep result sends an iterateImprovement and cancels the
+// shared context. Each worker owns its own evaluator and rng pair so the inner loop is
+// allocation-free and free of cross-worker coupling. Returns when jobs is drained or when
+// the context is cancelled (either by another winner or by the caller).
+func runIterateWorker(
+	ctx context.Context,
+	cancel context.CancelFunc,
+	workerIdx int,
+	cfg iterateWorkerConfig,
+	jobs <-chan int,
+	improvementCh chan<- iterateImprovement,
+) {
+	ev := hand.NewEvaluator()
+	shallowRng := rand.New(rand.NewSource(cfg.seed + int64(workerIdx)))
+	// Derive an independent deep stream so the two phases don't share rng state. The
+	// acceptance-roll rng shares the deep stream — the deep eval has already happened by the
+	// time the roll runs, so no cross-influence on the deep result.
+	deepRng := rand.New(rand.NewSource(cfg.seed ^ (int64(workerIdx)+1)*int64(0x9e3779b9)))
+	for i := range jobs {
+		if ctx.Err() != nil {
+			return
+		}
+		mut := cfg.mutations[i]
+		d := New(mut.Deck.Hero, mut.Deck.Weapons, mut.Deck.Cards)
+		shallowAvg := d.EvaluateWith(cfg.shallowShuffles, cfg.incoming, shallowRng, ev).Mean()
+		if cfg.shallowCompleted != nil {
+			cfg.shallowCompleted.Add(1)
+		}
+		if shallowAvg <= cfg.shallowThreshold {
+			continue
+		}
+		if ctx.Err() != nil {
+			return
+		}
+		// Fresh Deck for the deep pass so d.Stats from the shallow run doesn't leak in.
+		dd := New(mut.Deck.Hero, mut.Deck.Weapons, mut.Deck.Cards)
+		deepAvg := dd.EvaluateWith(cfg.deepShuffles, cfg.incoming, deepRng, ev).Mean()
+		if cfg.deepsCompleted != nil {
+			cfg.deepsCompleted.Add(1)
+		}
+		if !acceptMutation(deepAvg, cfg.bestAvg, cfg.temperature, cfg.minImprovement, deepRng) {
+			continue
+		}
+		select {
+		case improvementCh <- iterateImprovement{idx: i, avg: deepAvg, deck: dd}:
+		default:
+			// Another worker already filled the buffer; drop silently.
+		}
+		cancel()
+		return
 	}
 }
 
