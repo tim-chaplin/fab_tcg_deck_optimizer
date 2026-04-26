@@ -141,25 +141,3 @@ func partitionBestLineForDisplay(line []CardAssignment) bestLineDisplayParts {
 	}
 	return parts
 }
-
-// appendHeldArsenalFooter appends the trailing "(held: ...)" / "(arsenal: ...)" lines that
-// show unplayed cards outside the numbered sequence. handHeld is t.State.Hand (the chain's
-// end-of-turn hand — partition Held cards plus anything tutored or drawn that didn't get
-// played). The arsenal entry shows "(stayed)" vs "(new)" so staying-in-place is
-// distinguishable from being newly placed this turn.
-func appendHeldArsenalFooter(lines []string, handHeld []card.Card, arsenal []CardAssignment) []string {
-	var footers []string
-	for _, c := range handHeld {
-		footers = append(footers, fmt.Sprintf("  (held: %s)", card.DisplayName(c)))
-	}
-	for _, a := range arsenal {
-		label := card.DisplayName(a.Card)
-		if a.FromArsenal {
-			label += " (stayed)"
-		} else {
-			label += " (new)"
-		}
-		footers = append(footers, fmt.Sprintf("  (arsenal: %s)", label))
-	}
-	return append(lines, footers...)
-}

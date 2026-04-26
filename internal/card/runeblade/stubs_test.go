@@ -85,15 +85,6 @@ func (stubAttackWithPower) Types() card.TypeSet {
 func (stubAttackWithPower) GoAgain() bool                         { return true }
 func (stubAttackWithPower) Play(*card.TurnState, *card.CardState) {}
 
-// stubDominatingAttackWithPower is stubAttackWithPower with the card.Dominator marker — tests
-// for scanners that credit "if this hits" on 5+ power dominating attacks use this to mark the
-// target as printed-Dominate without granting anything post-hoc.
-type stubDominatingAttackWithPower struct {
-	stubAttackWithPower
-}
-
-func (stubDominatingAttackWithPower) Dominate() {}
-
 // stubAura is a minimal Aura-typed card — exercises "aura played this turn" checks.
 type stubAura struct{}
 
