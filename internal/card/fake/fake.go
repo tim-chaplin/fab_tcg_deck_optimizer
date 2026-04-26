@@ -107,15 +107,17 @@ var genericDefenseReactionTypes = card.NewTypeSet(card.TypeGeneric, card.TypeDef
 // can pitch it (contributing 1 resource) to fund another 1-cost card without also playing it.
 type PitchOneDR struct{}
 
-func (PitchOneDR) ID() card.ID                                  { return card.FakePitchOneDR }
-func (PitchOneDR) Name() string                                 { return "cardtest.PitchOneDR" }
-func (PitchOneDR) Cost(*card.TurnState) int                     { return 0 }
-func (PitchOneDR) Pitch() int                                   { return 1 }
-func (PitchOneDR) Attack() int                                  { return 0 }
-func (PitchOneDR) Defense() int                                 { return 3 }
-func (PitchOneDR) Types() card.TypeSet                          { return genericDefenseReactionTypes }
-func (PitchOneDR) GoAgain() bool                                { return false }
-func (PitchOneDR) Play(s *card.TurnState, self *card.CardState) { s.LogPlay(self) }
+func (PitchOneDR) ID() card.ID              { return card.FakePitchOneDR }
+func (PitchOneDR) Name() string             { return "cardtest.PitchOneDR" }
+func (PitchOneDR) Cost(*card.TurnState) int { return 0 }
+func (PitchOneDR) Pitch() int               { return 1 }
+func (PitchOneDR) Attack() int              { return 0 }
+func (PitchOneDR) Defense() int             { return 3 }
+func (PitchOneDR) Types() card.TypeSet      { return genericDefenseReactionTypes }
+func (PitchOneDR) GoAgain() bool            { return false }
+func (PitchOneDR) Play(s *card.TurnState, self *card.CardState) {
+	s.ApplyAndLogEffectiveDefense(self)
+}
 
 // HugeAttack is a 0-cost "do one million damage" attack. Outrageous on purpose: as the top of
 // the deck it makes the CostlyDraw → HugeAttack chain blatantly better than the CostlyAttack

@@ -6,26 +6,55 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 )
 
-// TestSigilOfSuffering_PlayCreditsArcaneAndRider exercises the printed conditional: the Sigil's
-// own arcane fires first and flips ArcaneDamageDealt, so the +1{d} rider always lands when the
-// Sigil plays. Total Play credit is 1 (arcane) + 1 (rider) = 2 across every variant; the printed
-// block stays in Defense() and is consumed separately by the chain.
-func TestSigilOfSuffering_PlayCreditsArcaneAndRider(t *testing.T) {
-	cases := []card.Card{SigilOfSufferingRed{}, SigilOfSufferingYellow{}, SigilOfSufferingBlue{}}
-	for _, c := range cases {
-		var s card.TurnState
-		c.Play(&s, &card.CardState{Card: c})
-		if got := s.Value; got != 2 {
-			t.Errorf("%s: Play() = %d, want 2 (1 arcane + 1 rider)", card.DisplayName(c), got)
+// TestSigilOfSuffering_FullCreditWhenIncomingAbsorbsBoost: with enough IncomingDamage to consume
+// the printed Defense plus the +1{d} bonus, total Value reflects every component:
+// printed Defense + 1 (the +1{d} rider via BonusDefense) + 1 (arcane). Each variant scales by
+// its printed Defense (Red 3, Yellow 2, Blue 1).
+func TestSigilOfSuffering_FullCreditWhenIncomingAbsorbsBoost(t *testing.T) {
+	cases := []struct {
+		c    card.Card
+		want int
+	}{
+		{SigilOfSufferingRed{}, 5},    // 3 block + 1 boost + 1 arcane
+		{SigilOfSufferingYellow{}, 4}, // 2 block + 1 boost + 1 arcane
+		{SigilOfSufferingBlue{}, 3},   // 1 block + 1 boost + 1 arcane
+	}
+	for _, tc := range cases {
+		s := card.TurnState{IncomingDamage: 10}
+		tc.c.Play(&s, &card.CardState{Card: tc.c})
+		if got := s.Value; got != tc.want {
+			t.Errorf("%s: Play(IncomingDamage=10) Value = %d, want %d (block + boost + arcane)",
+				card.DisplayName(tc.c), got, tc.want)
 		}
-		if !s.ArcaneDamageDealt {
-			t.Errorf("%s: ArcaneDamageDealt = false, want true (Sigil's own arcane should flip the flag)", card.DisplayName(c))
+	}
+}
+
+// TestSigilOfSuffering_BoostWastedWhenIncomingMatchesDefense: with IncomingDamage exactly equal
+// to the printed Defense, the +1{d} bonus is over-block — ApplyAndLogEffectiveDefense's clamp
+// drops the extra point. Total Value collapses to printed Defense + 1 (arcane) — the boost
+// adds nothing because there's no more incoming for it to consume.
+func TestSigilOfSuffering_BoostWastedWhenIncomingMatchesDefense(t *testing.T) {
+	cases := []struct {
+		c        card.Card
+		incoming int
+		want     int
+	}{
+		{SigilOfSufferingRed{}, 3, 4},    // 3 block + 1 arcane (boost wasted)
+		{SigilOfSufferingYellow{}, 2, 3}, // 2 block + 1 arcane
+		{SigilOfSufferingBlue{}, 1, 2},   // 1 block + 1 arcane
+	}
+	for _, tc := range cases {
+		s := card.TurnState{IncomingDamage: tc.incoming}
+		tc.c.Play(&s, &card.CardState{Card: tc.c})
+		if got := s.Value; got != tc.want {
+			t.Errorf("%s: Play(IncomingDamage=%d) Value = %d, want %d (block at cap + arcane only)",
+				card.DisplayName(tc.c), tc.incoming, got, tc.want)
 		}
 	}
 }
 
 // TestSigilOfSuffering_DefenseIsPrinted pins each variant's Defense() to its printed block value
-// — the +1{d} bonus is credited as a Play-time rider, not baked into Defense.
+// — the +1{d} bonus is credited as a Play-time rider via BonusDefense, not baked into Defense.
 func TestSigilOfSuffering_DefenseIsPrinted(t *testing.T) {
 	cases := []struct {
 		c    card.Card

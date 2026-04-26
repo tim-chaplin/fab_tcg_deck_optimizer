@@ -19,5 +19,7 @@ func (LayLowYellow) GoAgain() bool            { return false }
 
 // not implemented: marked-defender state not tracked; treated as always legal and the -1{p}
 // attacker debuff is dropped
-func (LayLowYellow) NotImplemented()                              {}
-func (LayLowYellow) Play(s *card.TurnState, self *card.CardState) { s.LogPlay(self) }
+func (LayLowYellow) NotImplemented() {}
+func (LayLowYellow) Play(s *card.TurnState, self *card.CardState) {
+	s.ApplyAndLogEffectiveDefense(self)
+}

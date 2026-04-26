@@ -16,7 +16,7 @@ var weepingBattlegroundTypes = card.NewTypeSet(card.TypeRuneblade, card.TypeDefe
 // weepingBattlegroundPlay emits the chain step then writes the banish-for-arcane rider as
 // a sub-line under self when an aura was successfully banished from the graveyard.
 func weepingBattlegroundPlay(s *card.TurnState, self *card.CardState) {
-	s.ApplyAndLogEffectiveAttack(self)
+	s.ApplyAndLogEffectiveDefense(self)
 	if n := banishAuraFromGraveyard(s); n > 0 {
 		s.LogRiderOnPlay(self, "Banished an aura, dealt 1 arcane damage", n)
 	}

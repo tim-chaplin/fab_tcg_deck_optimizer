@@ -26,7 +26,8 @@ func (e *Evaluator) bestUncached(hero hero.Hero, weapons []weapon.Weapon, hand [
 	// the arsenal-in card (if any) staying in the slot, so a hand with no Value-adding
 	// partition still reports sensible "nothing played, nothing pitched" assignments.
 	best := TurnSummary{
-		BestLine: make([]CardAssignment, totalN),
+		BestLine:       make([]CardAssignment, totalN),
+		IncomingDamage: incomingDamage,
 		State: CarryState{
 			Hand:         append([]card.Card(nil), hand...),
 			Deck:         append([]card.Card(nil), deck...),
@@ -77,52 +78,43 @@ func (e *Evaluator) bestUncached(hero hero.Hero, weapons []weapon.Weapon, hand [
 	var recurse func(i, pitchSum, defenseSum int)
 	recurse = func(i, pitchSum, defenseSum int) {
 		if i == totalN {
-			prevented := defenseSum
-			if prevented > incomingDamage {
-				prevented = incomingDamage
-			}
 			// Group roles into played / pitched / defending buckets. Iterates the hand (size n),
 			// then layers in the arsenal slot (index n) based on its assigned role. Arsenal-role
-			// cards contribute nothing this turn whether they came from hand or the slot.
-			var p, a, d []card.Card
-			hasAnyDefender := hasReactions
-			if !hasAnyDefender && arsenalCardIn != nil && rolesBuf[n] == Defend {
-				hasAnyDefender = true
-			}
-			if hasAnyDefender {
-				p, a, d = groupByRoleInto(hand, rolesBuf[:n], pitched[:0], attackers[:0], defenders[:0])
-				if arsenalCardIn != nil {
-					switch rolesBuf[n] {
-					case Attack:
-						a = append(a, arsenalCardIn)
-					case Defend:
-						d = append(d, arsenalCardIn)
-					}
-				}
-			} else {
-				p, a = groupPitchAttack(hand, rolesBuf[:n], pitched[:0], attackers[:0])
-				if arsenalCardIn != nil && rolesBuf[n] == Attack {
+			// cards contribute nothing this turn whether they came from hand or the slot. Always
+			// populate the defenders slice — plain blocks credit their contribution through
+			// defendersDamage's per-card cap, and DRs scan defenders as a graveyard seed for
+			// banish-target effects.
+			p, a, d := groupByRoleInto(hand, rolesBuf[:n], pitched[:0], attackers[:0], defenders[:0])
+			if arsenalCardIn != nil {
+				switch rolesBuf[n] {
+				case Attack:
 					a = append(a, arsenalCardIn)
+				case Defend:
+					d = append(d, arsenalCardIn)
 				}
 			}
-			// Arsenal-in is appended last to a / d above, so its index in the attackers slice is
-			// len(a)-1 when present in the chain. -1 means no arsenal-in card in the attackers
-			// (either no arsenal-in card at all, or it took a different role).
+			// Arsenal-in is appended last to a / d above, so its index is len(slice)-1 when
+			// present in the chain. -1 means no arsenal-in card in that bucket (either no
+			// arsenal-in card at all, or it took a different role).
 			arsenalInIdx := -1
 			if arsenalCardIn != nil && rolesBuf[n] == Attack {
 				arsenalInIdx = len(a) - 1
+			}
+			arsenalDefenderIdx := -1
+			if arsenalCardIn != nil && rolesBuf[n] == Defend {
+				arsenalDefenderIdx = len(d) - 1
 			}
 			// Held cards (hand cards left without a Pitch / Attack / Defend role) thread
 			// through to TurnState.Hand so alt-cost effects (e.g. Moon Wish's "use a hand
 			// card") can read len > 0. Arsenal-in can never be Held (roleAllowed bars it).
 			h := gatherHeldCards(hand, rolesBuf[:n], held[:0])
 			arsenalAtChainStart := findArsenalCard(rolesBuf, arsenalCardIn, n)
-			attackDealt, defenseDealt, leftoverRunechants, _, swung, carry, ok := bestAttackWithWeapons(hero, weapons, a, d, p, h, deck, bufs, runechantCarryover, incomingDamage, defenseSum, arsenalInIdx, arsenalAtChainStart, priorAuraTriggers)
+			attackDealt, defenseDealt, leftoverRunechants, _, swung, carry, ok := bestAttackWithWeapons(hero, weapons, a, d, p, h, deck, bufs, runechantCarryover, incomingDamage, defenseSum, arsenalInIdx, arsenalDefenderIdx, arsenalAtChainStart, priorAuraTriggers)
 			if !ok {
 				return
 			}
 
-			v := attackDealt + defenseDealt + prevented
+			v := attackDealt + defenseDealt
 			arsenalCard := arsenalAtChainStart
 			// Hand cards never take Arsenal role during enumeration, so arsenalCard is only set
 			// when arsenal-in stayed; post-hoc promotion potential is tracked via hasHeld.
@@ -285,20 +277,6 @@ func gatherHeldCards(hand []card.Card, roles []Role, held []card.Card) []card.Ca
 	return held
 }
 
-// groupPitchAttack is the reaction-free leaf's grouping step: skips the defenders bucket (only
-// needed for Defense-Reaction-Play dispatch, which this path doesn't run).
-func groupPitchAttack(hand []card.Card, roles []Role, pitched, attackers []card.Card) ([]card.Card, []card.Card) {
-	for i, c := range hand {
-		switch roles[i] {
-		case Pitch:
-			pitched = append(pitched, c)
-		case Attack:
-			attackers = append(attackers, c)
-		}
-	}
-	return pitched, attackers
-}
-
 // findArsenalCard returns the arsenal-in card when it stays in the arsenal slot, nil otherwise.
 // Hand cards never take Arsenal role during enumeration (post-hoc promotion handles that), so
 // the only slot that can be Arsenal is the arsenal-in slot at index n.
@@ -356,27 +334,48 @@ func roleAllowed(r Role, isArsenalSlot, isDefenseReaction bool) bool {
 	return !(r == Attack && isDefenseReaction)
 }
 
-// defenseReactionDamage runs Play() for every Defense Reaction in defenders and sums the
-// damage they deal back to the attacker (e.g. a banish-an-aura-for-arcane rider). Played in
-// isolation — no attack ordering; TurnState carries Pitched / Deck plus a per-DR fresh
-// copy of the defenders list in Graveyard so effects that scan the graveyard see plain
-// blocks and other defenders. Uncapped: this damage is dealt, not prevented.
+// defendersDamage tallies the total Value contribution of the partition's defense phase. DRs
+// resolve first via Play (their ApplyAndLogEffectiveDefense decrements state.IncomingDamage
+// and credits the block, with arcane / runechant riders adding their own Value); plain blocks
+// then consume whatever incoming damage is left, capped per card. Played in isolation — no
+// attack ordering; per-DR TurnState carries Pitched / Deck plus a fresh copy of the defenders
+// list in Graveyard so DRs that scan for banish targets see the same shape across iterations.
 //
-// state is caller-provided (from attackBufs) and reset per call. gravBuf is the caller-
-// owned scratch backing state.Graveyard; the returned slice is the (possibly grown) buffer
-// for reuse. Each DR's Play credits its own damage to state.Value via the chain-step
-// helper; we read the post-Play Value as that DR's contribution and accumulate into total.
-func defenseReactionDamage(defenders, pitched, deck []card.Card, state *card.TurnState, gravBuf []card.Card, cs *card.CardState) (int, []card.Card) {
+// arsenalDefenderIdx is the position of the arsenal-in card in defenders when it took the
+// Defend role (-1 otherwise) — used to flag the matching CardState.FromArsenal so
+// EffectiveDefense picks up the ArsenalDefenseBonus rider.
+//
+// state is caller-provided (from attackBufs) and reset per DR. gravBuf is the caller-owned
+// scratch backing state.Graveyard; the returned slice is the (possibly grown) buffer for
+// reuse. The threaded incoming-damage counter persists across the DR loop and into the plain-
+// block loop so DRs see the full incoming pool first (maximising any +1{d} riders) and plain
+// blocks pick up the residual.
+func defendersDamage(defenders, pitched, deck []card.Card, state *card.TurnState, gravBuf []card.Card, cs *card.CardState, incomingDamage, arsenalDefenderIdx int) (int, []card.Card) {
 	total := 0
-	for _, d := range defenders {
+	remaining := incomingDamage
+	for i, d := range defenders {
 		if !d.Types().IsDefenseReaction() {
 			continue
 		}
 		gravBuf = append(gravBuf[:0], defenders...)
-		*state = card.TurnState{Pitched: pitched, Deck: deck, Graveyard: gravBuf}
-		*cs = card.CardState{Card: d}
+		*state = card.TurnState{Pitched: pitched, Deck: deck, Graveyard: gravBuf, IncomingDamage: remaining}
+		*cs = card.CardState{Card: d, FromArsenal: i == arsenalDefenderIdx}
 		d.Play(state, cs)
 		total += state.Value
+		remaining = state.IncomingDamage
+	}
+	for _, d := range defenders {
+		if d.Types().IsDefenseReaction() {
+			continue
+		}
+		block := d.Defense()
+		if block > remaining {
+			block = remaining
+		}
+		if block > 0 {
+			total += block
+			remaining -= block
+		}
 	}
 	return total, gravBuf
 }

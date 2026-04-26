@@ -125,8 +125,10 @@ type TurnState struct {
 	// CardsPlayed this turn. Maintained by the chain runner so hero triggers that ask "was a
 	// non-attack action played earlier?" can answer in O(1).
 	NonAttackActionPlayed bool
-	// IncomingDamage is the opponent damage this turn (the value passed to hand.Best).
-	// Constant across every partition the solver enumerates for this hand.
+	// IncomingDamage is the opponent damage this turn — seeded by the sim from the value
+	// passed to hand.Best, and decremented by ApplyAndLogEffectiveDefense as defenders block.
+	// Cards reading "did we block all incoming?" against the static partition aggregate use
+	// BlockTotal instead.
 	IncomingDamage int
 	// BlockTotal is the sum of Defense() across every Defend-role card in the current
 	// partition. Uncapped: if the partition over-blocks, BlockTotal is the full sum, not
@@ -259,19 +261,38 @@ func (s *TurnState) ApplyAndLogEffectiveAttack(self *CardState) {
 	s.AddLogEntry(chainStepText(self), n)
 }
 
-// LogPlay is the chain-step finisher for non-attack cards (auras, non-attack actions,
-// defense reactions, items) — emits "<DisplayName>: PLAY[ from arsenal]" with no value
-// contribution. The "(+0)" suffix is dropped because these cards never deal printed
-// damage; any value they contribute lands via separate AddPostTriggerLogEntry / aura
-// trigger paths.
+// LogPlay is the chain-step finisher for non-attack cards (auras, non-attack actions, items)
+// — emits "<DisplayName>: PLAY[ from arsenal]" with no value contribution. The "(+0)" suffix
+// is dropped because these cards never deal printed damage; any value they contribute lands
+// via separate AddPostTriggerLogEntry / aura trigger paths.
 func (s *TurnState) LogPlay(self *CardState) {
 	s.AddLogEntry(chainStepText(self), 0)
 }
 
+// ApplyAndLogEffectiveDefense is the Defense Reaction counterpart to ApplyAndLogEffectiveAttack:
+// emits the "<DisplayName>: DEFENSE REACTION[ from arsenal]" chain step and credits the
+// effective Defense (printed Defense + BonusDefense + ArsenalDefenseBonus when from arsenal)
+// to s.Value, clamped at the remaining IncomingDamage so an over-blocked DR doesn't credit
+// past what was actually prevented. The credited amount is decremented from s.IncomingDamage
+// so a later defender sees the reduced pool. Card riders (arcane pings, runechant creation)
+// emit their own post-trigger sub-lines via DealAndLogArcaneDamage / CreateAndLogRunechantsOnPlay
+// after the chain step.
+func (s *TurnState) ApplyAndLogEffectiveDefense(self *CardState) {
+	n := self.EffectiveDefense()
+	if n > s.IncomingDamage {
+		n = s.IncomingDamage
+	}
+	if n < 0 {
+		n = 0
+	}
+	s.IncomingDamage -= n
+	s.AddLogEntry(chainStepText(self), n)
+}
+
 // chainStepText renders the "<DisplayName>: <VERB>[ from arsenal]" prefix the chain-step
 // helper writes. VERB picks WEAPON ATTACK for weapon-typed cards, ATTACK for attack-action
-// cards, and PLAY for everything else. The "from arsenal" suffix tags entries played out
-// of the arsenal slot.
+// cards, DEFENSE REACTION for Defense Reactions, and PLAY for everything else. The "from
+// arsenal" suffix tags entries played out of the arsenal slot.
 func chainStepText(self *CardState) string {
 	types := self.Card.Types()
 	var verb string
@@ -280,6 +301,8 @@ func chainStepText(self *CardState) string {
 		verb = "WEAPON ATTACK"
 	case types.IsAttackAction():
 		verb = "ATTACK"
+	case types.IsDefenseReaction():
+		verb = "DEFENSE REACTION"
 	default:
 		verb = "PLAY"
 	}

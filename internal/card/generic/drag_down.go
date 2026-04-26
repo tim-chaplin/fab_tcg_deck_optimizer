@@ -19,8 +19,10 @@ func (DragDownRed) Types() card.TypeSet      { return defenseReactionTypes }
 func (DragDownRed) GoAgain() bool            { return false }
 
 // not implemented: -3{p} attacker debuff (defender-side power reduction not exposed)
-func (DragDownRed) NotImplemented()                              {}
-func (DragDownRed) Play(s *card.TurnState, self *card.CardState) { s.LogPlay(self) }
+func (DragDownRed) NotImplemented() {}
+func (DragDownRed) Play(s *card.TurnState, self *card.CardState) {
+	s.ApplyAndLogEffectiveDefense(self)
+}
 
 type DragDownYellow struct{}
 
@@ -34,8 +36,10 @@ func (DragDownYellow) Types() card.TypeSet      { return defenseReactionTypes }
 func (DragDownYellow) GoAgain() bool            { return false }
 
 // not implemented: -3{p} attacker debuff (defender-side power reduction not exposed)
-func (DragDownYellow) NotImplemented()                              {}
-func (DragDownYellow) Play(s *card.TurnState, self *card.CardState) { s.LogPlay(self) }
+func (DragDownYellow) NotImplemented() {}
+func (DragDownYellow) Play(s *card.TurnState, self *card.CardState) {
+	s.ApplyAndLogEffectiveDefense(self)
+}
 
 type DragDownBlue struct{}
 
@@ -49,5 +53,7 @@ func (DragDownBlue) Types() card.TypeSet      { return defenseReactionTypes }
 func (DragDownBlue) GoAgain() bool            { return false }
 
 // not implemented: -3{p} attacker debuff (defender-side power reduction not exposed)
-func (DragDownBlue) NotImplemented()                              {}
-func (DragDownBlue) Play(s *card.TurnState, self *card.CardState) { s.LogPlay(self) }
+func (DragDownBlue) NotImplemented() {}
+func (DragDownBlue) Play(s *card.TurnState, self *card.CardState) {
+	s.ApplyAndLogEffectiveDefense(self)
+}

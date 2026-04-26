@@ -20,8 +20,10 @@ func (RiseAboveRed) Types() card.TypeSet      { return defenseReactionTypes }
 func (RiseAboveRed) GoAgain() bool            { return false }
 
 // not implemented: hand-as-cost alt cost not modelled; card fails when printed cost can't be paid
-func (RiseAboveRed) NotImplemented()                              {}
-func (RiseAboveRed) Play(s *card.TurnState, self *card.CardState) { s.LogPlay(self) }
+func (RiseAboveRed) NotImplemented() {}
+func (RiseAboveRed) Play(s *card.TurnState, self *card.CardState) {
+	s.ApplyAndLogEffectiveDefense(self)
+}
 
 type RiseAboveYellow struct{}
 
@@ -35,8 +37,10 @@ func (RiseAboveYellow) Types() card.TypeSet      { return defenseReactionTypes }
 func (RiseAboveYellow) GoAgain() bool            { return false }
 
 // not implemented: hand-as-cost alt cost not modelled; card fails when printed cost can't be paid
-func (RiseAboveYellow) NotImplemented()                              {}
-func (RiseAboveYellow) Play(s *card.TurnState, self *card.CardState) { s.LogPlay(self) }
+func (RiseAboveYellow) NotImplemented() {}
+func (RiseAboveYellow) Play(s *card.TurnState, self *card.CardState) {
+	s.ApplyAndLogEffectiveDefense(self)
+}
 
 type RiseAboveBlue struct{}
 
@@ -50,5 +54,7 @@ func (RiseAboveBlue) Types() card.TypeSet      { return defenseReactionTypes }
 func (RiseAboveBlue) GoAgain() bool            { return false }
 
 // not implemented: hand-as-cost alt cost not modelled; card fails when printed cost can't be paid
-func (RiseAboveBlue) NotImplemented()                              {}
-func (RiseAboveBlue) Play(s *card.TurnState, self *card.CardState) { s.LogPlay(self) }
+func (RiseAboveBlue) NotImplemented() {}
+func (RiseAboveBlue) Play(s *card.TurnState, self *card.CardState) {
+	s.ApplyAndLogEffectiveDefense(self)
+}

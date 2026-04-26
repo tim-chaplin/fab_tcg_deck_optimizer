@@ -38,7 +38,7 @@ func (ReduceToRunechantRed) Defense() int               { return 4 }
 func (ReduceToRunechantRed) Types() card.TypeSet        { return reduceToRunechantTypes }
 func (ReduceToRunechantRed) GoAgain() bool              { return false }
 func (ReduceToRunechantRed) Play(s *card.TurnState, self *card.CardState) {
-	s.ApplyAndLogEffectiveAttack(self)
+	s.ApplyAndLogEffectiveDefense(self)
 	s.CreateAndLogRunechantsOnPlay(self, 1)
 }
 
@@ -55,7 +55,7 @@ func (ReduceToRunechantYellow) Defense() int               { return 3 }
 func (ReduceToRunechantYellow) Types() card.TypeSet        { return reduceToRunechantTypes }
 func (ReduceToRunechantYellow) GoAgain() bool              { return false }
 func (ReduceToRunechantYellow) Play(s *card.TurnState, self *card.CardState) {
-	s.ApplyAndLogEffectiveAttack(self)
+	s.ApplyAndLogEffectiveDefense(self)
 	s.CreateAndLogRunechantsOnPlay(self, 1)
 }
 
@@ -72,6 +72,6 @@ func (ReduceToRunechantBlue) Defense() int               { return 2 }
 func (ReduceToRunechantBlue) Types() card.TypeSet        { return reduceToRunechantTypes }
 func (ReduceToRunechantBlue) GoAgain() bool              { return false }
 func (ReduceToRunechantBlue) Play(s *card.TurnState, self *card.CardState) {
-	s.ApplyAndLogEffectiveAttack(self)
+	s.ApplyAndLogEffectiveDefense(self)
 	s.CreateAndLogRunechantsOnPlay(self, 1)
 }
