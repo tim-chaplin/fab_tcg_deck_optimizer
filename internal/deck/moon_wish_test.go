@@ -110,10 +110,10 @@ func TestEvalOneTurn_MoonWishAltCostTutorFizzlesWithoutSunKiss(t *testing.T) {
 //
 // Cross-turn assertions:
 //   - turn-1 Value = 7 (Moon Wish 4 + Sun Kiss 3) — confirms Sun Kiss actually played.
-//   - Sun Kiss appears in NEITHER turn-2 Hand NOR Deck NOR Arsenal — it was tutored AND
-//     played, so it's in the graveyard.
-//   - ArsenalCard is non-nil and is NOT Sun Kiss — Sun Kiss's DrawOne pulled some card off
-//     the (per printed rules, shuffled) deck top; the specific identity is random.
+//   - PrevTurnGraveyard contains Sun Kiss — proves it was both tutored AND played, not
+//     stuck in the deck or some intermediate state.
+//   - ArsenalCard is non-nil — Sun Kiss's DrawOne pulled some card off the (per printed
+//     rules, shuffled) deck top; the specific identity is random so we don't pin it.
 func TestEvalOneTurn_MoonWishWithFlyingHighPlaysTutoredSunKiss(t *testing.T) {
 	// Sun Kiss at index 2 (not 0) so a pre-fix head++ wouldn't accidentally consume its
 	// slot; verifying buf-removal logic actually patches the specific tutored card out.
@@ -133,15 +133,35 @@ func TestEvalOneTurn_MoonWishWithFlyingHighPlaysTutoredSunKiss(t *testing.T) {
 		t.Errorf("turn-1 Value = %d, want 7 (Moon Wish 4 + Sun Kiss 3 via Flying High go-again)",
 			state.PrevTurnValue)
 	}
+	skInGraveyard := false
+	for _, c := range state.PrevTurnGraveyard {
+		if c.ID() == card.SunKissRed {
+			skInGraveyard = true
+			break
+		}
+	}
+	if !skInGraveyard {
+		t.Errorf("Sun Kiss (Red) not in turn-1 Graveyard %v; want it there (tutored and played)",
+			cardNames(state.PrevTurnGraveyard))
+	}
 	if got := countAcrossSurfaces(state, card.SunKissRed); got != 0 {
-		t.Errorf("Sun Kiss (Red) total across turn-2 surfaces = %d, want 0 "+
-			"(tutored and played — should be in graveyard)",
+		t.Errorf("Sun Kiss (Red) total across turn-2 surfaces = %d, want 0 (it's in the graveyard)",
 			got)
 	}
 	if state.ArsenalCard == nil {
-		t.Error("ArsenalCard = nil; want any non-Sun-Kiss card (Sun Kiss's DrawOne should have " +
-			"pulled a card and Drawn → Arsenal promotion is the only candidate)")
+		t.Error("ArsenalCard = nil; want any card (Sun Kiss's DrawOne pulled one and Drawn → " +
+			"Arsenal promotion is the only candidate)")
 	}
+}
+
+// cardNames returns the names of cs in order — handy for error messages so a failure shows
+// what's actually in a slice instead of opaque %v formatting.
+func cardNames(cs []card.Card) []string {
+	out := make([]string, len(cs))
+	for i, c := range cs {
+		out[i] = c.Name()
+	}
+	return out
 }
 
 // countAcrossSurfaces totals the occurrences of id across turn-2 Hand, Deck, and Arsenal —

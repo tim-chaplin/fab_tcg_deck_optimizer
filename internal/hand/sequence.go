@@ -27,10 +27,11 @@ func bestAttackWithWeapons(hero hero.Hero, weapons []weapon.Weapon, attackers, d
 		priorAuraTriggers:  priorAuraTriggers,
 		// Borrow bufs' pre-sized winner scratch so the eval closure's append-winner step reuses
 		// one backing array per Best call instead of allocating per sequenceContext.
-		drawnWinner:        bufs.drawnWinnerScratch[:0],
-		auraTriggersWinner: bufs.auraTriggersWinnerScratch[:0],
+		drawnWinner:               bufs.drawnWinnerScratch[:0],
+		auraTriggersWinner:        bufs.auraTriggersWinnerScratch[:0],
 		returnedToTopOfDeckWinner: bufs.returnedToTopOfDeckWinnerScratch[:0],
-		deckRemovedWinner:  bufs.deckRemovedWinnerScratch[:0],
+		deckRemovedWinner:         bufs.deckRemovedWinnerScratch[:0],
+		graveyardWinner:           bufs.graveyardWinnerScratch[:0],
 	}
 	// Hoist leaf-constant TurnState fields out of the per-permutation reset in
 	// playSequenceWithMeta.
@@ -196,6 +197,11 @@ type sequenceContext struct {
 	// deck loop can carry them into next turn. Includes both inherited triggers from
 	// priorAuraTriggers (with mutated Count / FiredThisTurn) and ones added by Play.
 	auraTriggersWinner []card.AuraTrigger
+	// graveyardWinner snapshots the winning permutation's final state.Graveyard. Surfaces on
+	// TurnSummary so callers can see every card that ended up in the graveyard this turn —
+	// played hand cards (added by playSequenceWithMeta), tutored-and-played cards (added via
+	// AddToGraveyard from a card's Play), and any AuraTriggers that destroyed themselves.
+	graveyardWinner []card.Card
 }
 
 // fireAttackActionTriggers walks state.AuraTriggers after an attack action card resolves and
@@ -329,6 +335,7 @@ func (ctx *sequenceContext) bestSequence(attackers, winnerOrderOut []card.Card, 
 	ctx.auraTriggersWinner = ctx.auraTriggersWinner[:0]
 	ctx.returnedToTopOfDeckWinner = ctx.returnedToTopOfDeckWinner[:0]
 	ctx.deckRemovedWinner = ctx.deckRemovedWinner[:0]
+	ctx.graveyardWinner = ctx.graveyardWinner[:0]
 	eval := func() {
 		dmg, leftoverRunechants, _, legal := ctx.playSequenceWithMeta(n, scratch, triggerScratch, auraTriggerScratch)
 		if !legal {
@@ -343,6 +350,7 @@ func (ctx *sequenceContext) bestSequence(attackers, winnerOrderOut []card.Card, 
 			ctx.auraTriggersWinner = append(ctx.auraTriggersWinner[:0], ctx.bufs.state.AuraTriggers...)
 			ctx.returnedToTopOfDeckWinner = append(ctx.returnedToTopOfDeckWinner[:0], ctx.bufs.state.ReturnedToTopOfDeck...)
 			ctx.deckRemovedWinner = append(ctx.deckRemovedWinner[:0], ctx.bufs.state.DeckRemoved...)
+			ctx.graveyardWinner = append(ctx.graveyardWinner[:0], ctx.bufs.state.Graveyard...)
 			if winnerOrderOut != nil {
 				for i := 0; i < n; i++ {
 					winnerOrderOut[i] = pcBuf[i].Card

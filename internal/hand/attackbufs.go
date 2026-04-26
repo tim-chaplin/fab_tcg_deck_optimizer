@@ -84,6 +84,10 @@ type attackBufs struct {
 	// deckRemovedWinnerScratch backs sequenceContext.deckRemovedWinner — cards taken out of
 	// the deck this turn (DrawOne, tutor effects). The deck loop patches buf to remove each.
 	deckRemovedWinnerScratch []card.Card
+	// graveyardWinnerScratch backs sequenceContext.graveyardWinner — every card that landed
+	// in the graveyard during the winning permutation (played hand cards, tutored-and-played
+	// cards, AuraTriggers that destroyed themselves).
+	graveyardWinnerScratch []card.Card
 	// perCardScratch is sized maxAttackers (handSize + weaponCount). Written by playSequence only
 	// when the caller passes a non-nil perCardOut; bestSequence snapshots the winning
 	// permutation's per-card damage from here into the caller's output buffer. The partition-loop
@@ -162,7 +166,8 @@ func newAttackBufs(handSize, weaponCount int, weapons []weapon.Weapon) *attackBu
 		drawnWinnerScratch:        make([]card.Card, 0, maxAttackers),
 		auraTriggersWinnerScratch: make([]card.AuraTrigger, 0, maxAttackers),
 		returnedToTopOfDeckWinnerScratch: make([]card.Card, 0, handSize+1),
-		deckRemovedWinnerScratch:  make([]card.Card, 0, maxAttackers),
+		deckRemovedWinnerScratch:         make([]card.Card, 0, maxAttackers),
+		graveyardWinnerScratch:           make([]card.Card, 0, maxAttackers),
 		perCardScratch:            make([]float64, maxAttackers),
 		perCardTriggerScratch:     make([]float64, maxAttackers),
 		perCardAuraTriggerScratch: make([]float64, maxAttackers),

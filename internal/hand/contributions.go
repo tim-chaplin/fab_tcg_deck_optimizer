@@ -125,10 +125,11 @@ func fillContributions(summary *TurnSummary, hero hero.Hero, weapons []weapon.We
 			priorAuraTriggers:  priorAuraTriggers,
 			// Same borrow as bestAttackWithWeapons above — fillContributions clones the
 			// winners into summary before returning, so sharing bufs-backed storage is safe.
-			drawnWinner:        bufs.drawnWinnerScratch[:0],
-			auraTriggersWinner: bufs.auraTriggersWinnerScratch[:0],
+			drawnWinner:               bufs.drawnWinnerScratch[:0],
+			auraTriggersWinner:        bufs.auraTriggersWinnerScratch[:0],
 			returnedToTopOfDeckWinner: bufs.returnedToTopOfDeckWinnerScratch[:0],
-			deckRemovedWinner:  bufs.deckRemovedWinnerScratch[:0],
+			deckRemovedWinner:         bufs.deckRemovedWinnerScratch[:0],
+			graveyardWinner:           bufs.graveyardWinnerScratch[:0],
 		}
 		ctx.seedState()
 		fillAttackChainContributions(summary, chain, ctx)
@@ -158,6 +159,10 @@ func fillContributions(summary *TurnSummary, hero hero.Hero, weapons []weapon.We
 		if n := len(ctx.deckRemovedWinner); n > 0 {
 			summary.DeckRemoved = make([]card.Card, n)
 			copy(summary.DeckRemoved, ctx.deckRemovedWinner)
+		}
+		if n := len(ctx.graveyardWinner); n > 0 {
+			summary.Graveyard = make([]card.Card, n)
+			copy(summary.Graveyard, ctx.graveyardWinner)
 		}
 	}
 }

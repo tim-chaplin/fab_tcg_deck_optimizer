@@ -86,6 +86,12 @@ type TurnSummary struct {
 	// DeckRemoved surfaces card.TurnState.DeckRemoved from the winning permutation; see
 	// that field for the buf-patch contract.
 	DeckRemoved []card.Card
+	// Graveyard surfaces card.TurnState.Graveyard from the winning permutation — every card
+	// that ended up in the graveyard this turn. Includes Action / Attack / Defense Reaction
+	// cards played from hand (added by playSequenceWithMeta), tutored-and-played cards
+	// (added via TurnState.AddToGraveyard from a card's Play), and AuraTriggers that
+	// destroyed themselves. Empty when no cards landed in the graveyard.
+	Graveyard []card.Card
 }
 
 // TriggerContribution is one start-of-turn AuraTrigger fire: the aura that fired plus the

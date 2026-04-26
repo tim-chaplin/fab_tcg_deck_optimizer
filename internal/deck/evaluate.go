@@ -341,6 +341,11 @@ type TurnStartState struct {
 	// PrevTurnBestLine is the winning role assignment from turn 1, so tests can assert which
 	// card took which role.
 	PrevTurnBestLine []hand.CardAssignment
+	// PrevTurnGraveyard is the cards that ended up in the graveyard at the end of turn 1, in
+	// the order they landed there. Sourced from hand.TurnSummary.Graveyard so tests can
+	// distinguish "this card is in the graveyard" from "this card is just absent from the
+	// next-turn surfaces."
+	PrevTurnGraveyard []card.Card
 	// StartOfTurnTriggerDamage is the damage-equivalent credited by turn-2's start-of-turn
 	// AuraTrigger handlers — triggers registered during turn 1 that fired at the top of
 	// turn 2. Zero when no trigger survived into the pass. Production callers fold this
@@ -407,9 +412,10 @@ func (d *Deck) EvalOneTurnForTesting(incomingDamage int, arsenalIn card.Card, in
 	turn2Hand, drawCount2, ok := dealNextHand(buf, handBuf, nextHeld, &head, &tail, handSize)
 	if !ok {
 		return TurnStartState{
-			ArsenalCard:   play.ArsenalCard,
-			Runechants:    play.LeftoverRunechants,
-			PrevTurnValue: play.Value,
+			ArsenalCard:       play.ArsenalCard,
+			Runechants:        play.LeftoverRunechants,
+			PrevTurnValue:     play.Value,
+			PrevTurnGraveyard: append([]card.Card(nil), play.Graveyard...),
 		}
 	}
 	// Process turn-1 AuraTriggers at the turn-2 boundary the same way Evaluate does:
@@ -432,6 +438,7 @@ func (d *Deck) EvalOneTurnForTesting(incomingDamage int, arsenalIn card.Card, in
 		Runechants:               play.LeftoverRunechants + trigRunes,
 		PrevTurnValue:            play.Value,
 		PrevTurnBestLine:         lineCopy,
+		PrevTurnGraveyard:        append([]card.Card(nil), play.Graveyard...),
 		StartOfTurnTriggerDamage: trigDamage,
 		StartOfTurnGraveyard:     trigGraveyarded,
 	}
