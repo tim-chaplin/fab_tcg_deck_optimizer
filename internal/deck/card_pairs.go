@@ -4,12 +4,16 @@ package deck
 // step so the hill climb can discover combinations whose halves are individually weaker than
 // other candidates and would never be added by the regular single-slot generator.
 //
-// Sun Kiss / Moon Wish is the pilot pairing: Sun Kiss alone is a 3{h}-gain card identical in
-// solo value to Healing Balm; Moon Wish alone is a vanilla cost-2 attack with both printed
-// riders dropped. Either solo would be cut in seconds by a single-slot mutation, so the hill
-// climb never gets the chance to keep both around long enough to evaluate the synergy.
-// cardPairMutations forces the question by emitting "-X -Y, +A +B" candidates whenever a pair
-// is fully absent.
+// A pair is two CardGroups (variant lists). The generator enumerates every (firstVariant,
+// secondVariant) cross-product so the climber can try Red/Red, Red/Yellow, Red/Blue, … and
+// let the regular per-pitch single-slot mutations re-tune from there. Single-slot remains the
+// primary mutation source; pair mutations add the orthogonal "atomic 2-for-2 swap" the
+// single-slot generator can't express.
+//
+// Sun Kiss / Moon Wish is the pilot pairing: the synergy reads any Moon Wish printing in
+// CardsPlayed by name prefix, so any (Moon Wish variant, Sun Kiss variant) combination is a
+// legal pair entry; we register both card groups and let the cross-product enumeration cover
+// all 9 variant pairings.
 
 import (
 	"fmt"
@@ -19,45 +23,64 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/cards"
 )
 
-// CardPair is two card printings that an anneal mutation must add or remove together because
-// either alone has no realised value but the combination unlocks a hidden rider. First and
-// Second are concrete printing IDs; we add the printings the registry names and let the
-// regular per-pitch single-slot mutations re-tune colours afterwards.
+// CardGroup is a set of card IDs that share a printed name (i.e. all pitch variants of one
+// card). Pair mutations enumerate cross-products across two groups so every variant
+// combination becomes its own mutation candidate.
+type CardGroup []card.ID
+
+// CardPair is two card groups whose members an anneal mutation should add together because
+// either alone has weak realised value but the combination unlocks a hidden rider.
 type CardPair struct {
-	First  card.ID
-	Second card.ID
+	First  CardGroup
+	Second CardGroup
 }
+
+// Card-group definitions for registered pairs. Splitting them out as named vars keeps the
+// cardPairs registry compact and lets future pairs reuse a group on both sides if needed
+// (e.g. a self-pair like "two copies of X").
+var (
+	moonWishGroup = CardGroup{card.MoonWishRed, card.MoonWishYellow, card.MoonWishBlue}
+	sunKissGroup  = CardGroup{card.SunKissRed, card.SunKissYellow, card.SunKissBlue}
+)
 
 // cardPairs is the registry of synergy pairs the anneal mutation generator considers as
 // units. Order matters for deterministic mutation output: pairs are emitted in registry
-// order. Variant choice favours the Red printing (lowest pitch cost) so the pair lands at
-// minimum opportunity cost; the hill climb's normal per-pitch swaps can re-tune from there.
+// order, with cross-product (firstVariant, secondVariant) enumeration in group-slice order.
 var cardPairs = []CardPair{
-	{First: card.MoonWishRed, Second: card.SunKissRed},
+	{First: moonWishGroup, Second: sunKissGroup},
 }
 
-// cardPairTopK caps how many low-avg removal slots each absent pair tries. The pair generator
-// emits one mutation per (i, j) pair drawn from the K lowest-avg unique IDs in the deck, so
-// total candidates per absent pair is K*(K-1)/2. K=5 gives 10 candidates per pair — enough to
-// surface meaningful "remove the deck's two worst slots" options without bloating round size.
+// cardPairTopK caps how many low-avg removal slots each pair-variant combo tries. The pair
+// generator emits one mutation per (i, j) drawn from the K lowest-avg unique IDs in the
+// deck, so total candidates per (firstVariant, secondVariant) combo is K*(K-1)/2. K=5 gives
+// 10 candidates per combo — enough to surface meaningful "drop the deck's two worst slots"
+// options without bloating round size: a Moon Wish × Sun Kiss pair with all 9 variant combos
+// then contributes ≤90 candidates per round, dwarfed by the thousands of single-slot
+// mutations.
 const cardPairTopK = 5
 
-// cardPairMutations emits paired add/remove mutations for every entry in cardPairs whose two
-// halves are both absent from d.Cards. For each absent pair the generator removes one copy of
-// each of two distinct low-avg cards (drawn from the cardPairTopK lowest-avg unique IDs) and
-// adds one copy of each pair member.
+// cardPairMutations emits paired add mutations for every entry in cardPairs. For each pair
+// the generator iterates (firstVariant, secondVariant) cross-products from the two groups
+// and, for each combo, emits one mutation per (i, j) pair drawn from the cardPairTopK
+// lowest-avg unique IDs in the deck. Each emitted mutation removes one copy of each removal
+// target and adds one copy of each pair variant.
 //
-// "Both halves absent" is the only triggering case: when one half is already in deck the
-// regular single-slot generator can already propose adding the other. Pair mutations are
-// strictly the escape hatch for the "neither in deck" hill-climb cul-de-sac.
+// Per-variant maxCopies cap: a variant whose count would exceed maxCopies after the +1 add
+// is skipped. So a deck saturated with Red on both halves still gets Yellow/Blue cross-add
+// candidates.
 //
-// legal filters BOTH pair members: a pair where either half is rejected by legal (e.g. a
-// banned card) is skipped entirely. Removal targets aren't filtered — same convention as
+// Overlap suppression: when a removal ID matches one of the pair's add IDs, the mutation
+// reduces to a single-slot swap (the matching pair member's count is unchanged net of the
+// removal). The single-slot generator already covers that, so we skip those combos to keep
+// the pair generator strictly orthogonal.
+//
+// legal filters BOTH pair-variant adds: a combo where either variant is rejected by legal
+// (e.g. a banned printing) is skipped. Removal targets aren't filtered — same convention as
 // cardSwapMutations: a deck that arrived holding a banned card can still have it removed.
 //
 // Returned decks have zero Stats and share no backing slices with d or each other. No-op
 // mutations (resulting deck has the same card multiset as the source) are filtered out as a
-// defensive guard; the design above ensures none should arise, but the check is cheap.
+// defensive guard; the overlap suppression above ensures none should arise.
 func cardPairMutations(d *Deck, maxCopies int, legal func(card.Card) bool) []Mutation {
 	if len(cardPairs) == 0 {
 		return nil
@@ -67,39 +90,61 @@ func cardPairMutations(d *Deck, maxCopies int, legal func(card.Card) bool) []Mut
 		counts[c.ID()]++
 	}
 	uniqueIDs := lowestAvgUniqueIDs(d, counts, cardPairTopK)
+	if len(uniqueIDs) < 2 {
+		return nil // need at least two distinct removal targets to emit a 2-for-2 swap.
+	}
 
 	srcKey := cardMultisetKey(d.Cards)
 	var out []Mutation
 	for _, pair := range cardPairs {
-		if counts[pair.First] > 0 || counts[pair.Second] > 0 {
-			continue // single-slot generator handles half-present states.
-		}
-		first := cards.Get(pair.First)
-		second := cards.Get(pair.Second)
-		if legal != nil && (!legal(first) || !legal(second)) {
+		out = append(out, mutationsForPair(d, pair, counts, uniqueIDs, srcKey, maxCopies, legal)...)
+	}
+	return out
+}
+
+// mutationsForPair enumerates the (firstVariant, secondVariant) × (removeI, removeJ) candidates
+// for one pair entry. Split out so cardPairMutations stays a simple per-pair fan-out and the
+// per-pair loops are testable in isolation.
+func mutationsForPair(d *Deck, pair CardPair, counts map[card.ID]int, uniqueIDs []card.ID,
+	srcKey string, maxCopies int, legal func(card.Card) bool) []Mutation {
+	var out []Mutation
+	for _, firstID := range pair.First {
+		first := cards.Get(firstID)
+		if legal != nil && !legal(first) {
 			continue
 		}
-		// Both halves enter at +1 copy each; the cap check guards against a future registry
-		// where maxCopies < 1 (defensive — Random already panics in that case).
-		if counts[pair.First]+1 > maxCopies || counts[pair.Second]+1 > maxCopies {
+		if counts[firstID]+1 > maxCopies {
 			continue
 		}
-		for i := 0; i < len(uniqueIDs); i++ {
-			for j := i + 1; j < len(uniqueIDs); j++ {
-				removeI, removeJ := uniqueIDs[i], uniqueIDs[j]
-				newCards := pairSwapDeck(d.Cards, removeI, removeJ, first, second)
-				if cardMultisetKey(newCards) == srcKey {
-					continue // defensive no-op guard; should never trigger by construction.
+		for _, secondID := range pair.Second {
+			second := cards.Get(secondID)
+			if legal != nil && !legal(second) {
+				continue
+			}
+			if counts[secondID]+1 > maxCopies {
+				continue
+			}
+			for i := 0; i < len(uniqueIDs); i++ {
+				for j := i + 1; j < len(uniqueIDs); j++ {
+					removeI, removeJ := uniqueIDs[i], uniqueIDs[j]
+					if removeI == firstID || removeI == secondID ||
+						removeJ == firstID || removeJ == secondID {
+						continue // single-slot generator covers the overlap case.
+					}
+					newCards := pairSwapDeck(d.Cards, removeI, removeJ, first, second)
+					if cardMultisetKey(newCards) == srcKey {
+						continue // defensive no-op guard.
+					}
+					nd := New(d.Hero, d.Weapons, newCards)
+					nd.Sideboard = d.Sideboard
+					nd.Equipment = d.Equipment
+					out = append(out, Mutation{
+						Deck: nd,
+						Description: fmt.Sprintf("-1 %s, -1 %s, +1 %s, +1 %s",
+							cards.Get(removeI).Name(), cards.Get(removeJ).Name(),
+							first.Name(), second.Name()),
+					})
 				}
-				nd := New(d.Hero, d.Weapons, newCards)
-				nd.Sideboard = d.Sideboard
-				nd.Equipment = d.Equipment
-				out = append(out, Mutation{
-					Deck: nd,
-					Description: fmt.Sprintf("-1 %s, -1 %s, +1 %s, +1 %s",
-						cards.Get(removeI).Name(), cards.Get(removeJ).Name(),
-						first.Name(), second.Name()),
-				})
 			}
 		}
 	}

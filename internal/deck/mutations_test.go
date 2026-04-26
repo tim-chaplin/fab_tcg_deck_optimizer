@@ -207,23 +207,44 @@ func TestAllMutations_NoDuplicateOfSource(t *testing.T) {
 
 // expectedPairMutCount mirrors cardPairMutations's emission rule for a given deck so the
 // CountsAndShape test can predict the pair-mutation contribution without re-implementing the
-// generator. Counts pairs whose halves are both absent from d, then for each emits
-// C(min(uniques, cardPairTopK), 2) candidates.
+// generator. For each registered pair, sums (firstVariant, secondVariant) cross-products that
+// pass the per-variant maxCopies cap, multiplied by C(min(uniques, K), 2) removal pairs that
+// don't overlap the pair adds.
 func expectedPairMutCount(d *Deck, maxCopies int) int {
 	counts := map[card.ID]int{}
 	for _, c := range d.Cards {
 		counts[c.ID()]++
 	}
-	uniques := len(counts)
-	if uniques > cardPairTopK {
-		uniques = cardPairTopK
+	uniqueIDs := make([]card.ID, 0, len(counts))
+	for id := range counts {
+		uniqueIDs = append(uniqueIDs, id)
 	}
-	perPair := uniques * (uniques - 1) / 2
-	absent := 0
+	if len(uniqueIDs) > cardPairTopK {
+		uniqueIDs = uniqueIDs[:cardPairTopK]
+	}
+
+	total := 0
 	for _, p := range cardPairs {
-		if counts[p.First] == 0 && counts[p.Second] == 0 {
-			absent++
+		for _, fID := range p.First {
+			if counts[fID]+1 > maxCopies {
+				continue
+			}
+			for _, sID := range p.Second {
+				if counts[sID]+1 > maxCopies {
+					continue
+				}
+				// Count (i, j) removal pairs that don't overlap the pair adds.
+				for i := 0; i < len(uniqueIDs); i++ {
+					for j := i + 1; j < len(uniqueIDs); j++ {
+						if uniqueIDs[i] == fID || uniqueIDs[i] == sID ||
+							uniqueIDs[j] == fID || uniqueIDs[j] == sID {
+							continue
+						}
+						total++
+					}
+				}
+			}
 		}
 	}
-	return absent * perPair
+	return total
 }
