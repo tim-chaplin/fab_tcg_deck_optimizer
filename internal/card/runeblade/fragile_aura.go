@@ -17,7 +17,7 @@ import (
 func fragileAuraPlay(s *card.TurnState, self *card.CardState, n int, attackActionOnly bool) {
 	s.LogPlay(self)
 	if v := fragileAuraValue(s, n, attackActionOnly); v > 0 {
-		s.LogRiderOnPlay(self, fmt.Sprintf("Aura expected to pay %d runechants", v), v)
+		s.ApplyAndLogRiderOnPlay(self, fmt.Sprintf("Aura expected to pay %d runechants", v), v)
 	}
 }
 

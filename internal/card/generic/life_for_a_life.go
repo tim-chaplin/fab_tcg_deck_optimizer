@@ -21,15 +21,6 @@ var lifeForALifeTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.
 // lifeForALifeHealValue is the damage-equivalent credited when the on-hit 1{h} gain fires.
 const lifeForALifeHealValue = 1
 
-// lifeForALifeApplyRider emits the on-hit 1{h} heal as a sub-line under self's chain step
-// when the attack is likely to land.
-func lifeForALifeApplyRider(s *card.TurnState, self *card.CardState) {
-	if !card.LikelyToHit(self) {
-		return
-	}
-	s.LogRiderOnPlay(self, "On-hit gained 1 health", lifeForALifeHealValue)
-}
-
 type LifeForALifeRed struct{}
 
 func (LifeForALifeRed) ID() card.ID              { return card.LifeForALifeRed }
@@ -42,7 +33,7 @@ func (LifeForALifeRed) Types() card.TypeSet      { return lifeForALifeTypes }
 func (LifeForALifeRed) GoAgain() bool            { return simstate.HeroWantsLowerHealth() }
 func (LifeForALifeRed) Play(s *card.TurnState, self *card.CardState) {
 	s.ApplyAndLogEffectiveAttack(self)
-	lifeForALifeApplyRider(s, self)
+	s.ApplyAndLogRiderOnHit(self, "On-hit gained 1 health", lifeForALifeHealValue)
 }
 
 type LifeForALifeYellow struct{}
@@ -57,7 +48,7 @@ func (LifeForALifeYellow) Types() card.TypeSet      { return lifeForALifeTypes }
 func (LifeForALifeYellow) GoAgain() bool            { return simstate.HeroWantsLowerHealth() }
 func (LifeForALifeYellow) Play(s *card.TurnState, self *card.CardState) {
 	s.ApplyAndLogEffectiveAttack(self)
-	lifeForALifeApplyRider(s, self)
+	s.ApplyAndLogRiderOnHit(self, "On-hit gained 1 health", lifeForALifeHealValue)
 }
 
 type LifeForALifeBlue struct{}
@@ -72,5 +63,5 @@ func (LifeForALifeBlue) Types() card.TypeSet      { return lifeForALifeTypes }
 func (LifeForALifeBlue) GoAgain() bool            { return simstate.HeroWantsLowerHealth() }
 func (LifeForALifeBlue) Play(s *card.TurnState, self *card.CardState) {
 	s.ApplyAndLogEffectiveAttack(self)
-	lifeForALifeApplyRider(s, self)
+	s.ApplyAndLogRiderOnHit(self, "On-hit gained 1 health", lifeForALifeHealValue)
 }

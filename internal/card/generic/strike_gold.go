@@ -9,15 +9,6 @@ import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 
 var strikeGoldTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeAttack)
 
-// strikeGoldApplyRider emits the on-hit gold-token rider as a sub-line under self's chain
-// step when the attack is likely to land.
-func strikeGoldApplyRider(s *card.TurnState, self *card.CardState) {
-	if !card.LikelyToHit(self) {
-		return
-	}
-	s.LogRiderOnPlay(self, "On-hit created a gold token", card.GoldTokenValue)
-}
-
 type StrikeGoldRed struct{}
 
 func (StrikeGoldRed) ID() card.ID              { return card.StrikeGoldRed }
@@ -33,7 +24,7 @@ func (StrikeGoldRed) GoAgain() bool            { return false }
 func (StrikeGoldRed) NotImplemented() {}
 func (StrikeGoldRed) Play(s *card.TurnState, self *card.CardState) {
 	s.ApplyAndLogEffectiveAttack(self)
-	strikeGoldApplyRider(s, self)
+	s.ApplyAndLogRiderOnHit(self, "On-hit created a gold token", card.GoldTokenValue)
 }
 
 type StrikeGoldYellow struct{}
@@ -51,7 +42,7 @@ func (StrikeGoldYellow) GoAgain() bool            { return false }
 func (StrikeGoldYellow) NotImplemented() {}
 func (StrikeGoldYellow) Play(s *card.TurnState, self *card.CardState) {
 	s.ApplyAndLogEffectiveAttack(self)
-	strikeGoldApplyRider(s, self)
+	s.ApplyAndLogRiderOnHit(self, "On-hit created a gold token", card.GoldTokenValue)
 }
 
 type StrikeGoldBlue struct{}
@@ -69,5 +60,5 @@ func (StrikeGoldBlue) GoAgain() bool            { return false }
 func (StrikeGoldBlue) NotImplemented() {}
 func (StrikeGoldBlue) Play(s *card.TurnState, self *card.CardState) {
 	s.ApplyAndLogEffectiveAttack(self)
-	strikeGoldApplyRider(s, self)
+	s.ApplyAndLogRiderOnHit(self, "On-hit created a gold token", card.GoldTokenValue)
 }

@@ -23,7 +23,7 @@ func meatAndGreetPlay(s *card.TurnState, self *card.CardState) {
 	}
 	s.ApplyAndLogEffectiveAttack(self)
 	if card.LikelyToHit(self) {
-		s.LogRiderOnPlay(self, "On-hit created a runechant", s.CreateRunechant())
+		s.ApplyAndLogRiderOnPlay(self, "On-hit created a runechant", s.CreateRunechant())
 	}
 }
 

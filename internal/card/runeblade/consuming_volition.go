@@ -20,10 +20,10 @@ var consumingVolitionTypes = card.NewTypeSet(card.TypeRuneblade, card.TypeAction
 // land on its own. The credit is card.DiscardValue; the line reads "On-hit discarded a
 // card (+N)" indented under the parent.
 func consumingVolitionApplyRider(s *card.TurnState, self *card.CardState) {
-	if s == nil || !s.ArcaneDamageDealt || !card.LikelyToHit(self) {
+	if !s.ArcaneDamageDealt {
 		return
 	}
-	s.LogRiderOnPlay(self, "On-hit discarded a card", card.DiscardValue)
+	s.ApplyAndLogRiderOnHit(self, "On-hit discarded a card", card.DiscardValue)
 }
 
 type ConsumingVolitionRed struct{}

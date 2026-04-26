@@ -130,7 +130,7 @@ type Card interface {
 	// (or s.LogPlay for non-attack cards) to append the chain-step log entry and credit
 	// damage to s.Value. Separable rider effects (runechant creation, conditional arcane,
 	// on-hit credits, tutored sub-card plays) emit their own post-trigger child lines via
-	// the LogRiderOnPlay / CreateAndLogRunechantsOnPlay / DealAndLogArcaneDamage /
+	// the ApplyAndLogRiderOnPlay / CreateAndLogRunechantsOnPlay / DealAndLogArcaneDamage /
 	// AddPostTriggerLogEntry helpers so the printout reads as a structured tree.
 	Play(s *TurnState, self *CardState)
 }

@@ -20,7 +20,7 @@ var healingBalmTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction)
 // sub-line under self. Health is valued 1-to-1 with damage.
 func healingBalmPlay(s *card.TurnState, self *card.CardState, heal int) {
 	s.LogPlay(self)
-	s.LogRiderOnPlay(self, fmt.Sprintf("Gained %d health", heal), heal)
+	s.ApplyAndLogRiderOnPlay(self, fmt.Sprintf("Gained %d health", heal), heal)
 }
 
 type HealingBalmRed struct{}

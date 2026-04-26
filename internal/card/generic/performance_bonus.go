@@ -21,9 +21,7 @@ func performanceBonusPlay(s *card.TurnState, self *card.CardState) {
 		self.GrantedGoAgain = true
 	}
 	s.ApplyAndLogEffectiveAttack(self)
-	if card.LikelyToHit(self) {
-		s.LogRiderOnPlay(self, "On-hit created a gold token", card.GoldTokenValue)
-	}
+	s.ApplyAndLogRiderOnHit(self, "On-hit created a gold token", card.GoldTokenValue)
 }
 
 type PerformanceBonusRed struct{}

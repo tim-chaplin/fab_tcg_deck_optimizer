@@ -27,7 +27,7 @@ func (SirensOfSafeHarborRed) GoAgain() bool            { return false }
 func (SirensOfSafeHarborRed) NotSilverAgeLegal()       {}
 func (SirensOfSafeHarborRed) Play(s *card.TurnState, self *card.CardState) {
 	s.ApplyAndLogEffectiveAttack(self)
-	s.LogRiderOnPlay(self, "Gained 1 health (graveyard trigger)", 1)
+	s.ApplyAndLogRiderOnPlay(self, "Gained 1 health (graveyard trigger)", 1)
 }
 
 type SirensOfSafeHarborYellow struct{}
@@ -43,7 +43,7 @@ func (SirensOfSafeHarborYellow) GoAgain() bool            { return false }
 func (SirensOfSafeHarborYellow) NotSilverAgeLegal()       {}
 func (SirensOfSafeHarborYellow) Play(s *card.TurnState, self *card.CardState) {
 	s.ApplyAndLogEffectiveAttack(self)
-	s.LogRiderOnPlay(self, "Gained 1 health (graveyard trigger)", 1)
+	s.ApplyAndLogRiderOnPlay(self, "Gained 1 health (graveyard trigger)", 1)
 }
 
 type SirensOfSafeHarborBlue struct{}
@@ -59,5 +59,5 @@ func (SirensOfSafeHarborBlue) GoAgain() bool            { return false }
 func (SirensOfSafeHarborBlue) NotSilverAgeLegal()       {}
 func (SirensOfSafeHarborBlue) Play(s *card.TurnState, self *card.CardState) {
 	s.ApplyAndLogEffectiveAttack(self)
-	s.LogRiderOnPlay(self, "Gained 1 health (graveyard trigger)", 1)
+	s.ApplyAndLogRiderOnPlay(self, "Gained 1 health (graveyard trigger)", 1)
 }
