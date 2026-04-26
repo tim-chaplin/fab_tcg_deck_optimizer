@@ -11,7 +11,7 @@ func TestCaptainsCall_NoAttackReturnsZero(t *testing.T) {
 	s := card.TurnState{}
 	for _, c := range []card.Card{CaptainsCallRed{}, CaptainsCallYellow{}, CaptainsCallBlue{}} {
 		c.Play(&s, &card.CardState{Card: c})
-		if got := s.Value; got != 0{
+		if got := s.Value; got != 0 {
 			t.Errorf("%s: Play() = %d, want 0", c.Name(), got)
 		}
 	}
@@ -21,7 +21,7 @@ func TestCaptainsCall_NoAttackReturnsZero(t *testing.T) {
 func TestCaptainsCall_HighCostFilteredOut(t *testing.T) {
 	s := card.TurnState{CardsRemaining: []*card.CardState{{Card: stubGenericAttack(3, 0)}}}
 	(CaptainsCallRed{}).Play(&s, &card.CardState{Card: CaptainsCallRed{}})
-	if got := s.Value; got != 0{
+	if got := s.Value; got != 0 {
 		t.Errorf("Play() = %d, want 0 (cost 3 > 2)", got)
 	}
 }
@@ -49,7 +49,7 @@ func TestCaptainsCall_CostThresholdPerVariant(t *testing.T) {
 		target := &card.CardState{Card: stubGenericAttack(cost, 0)}
 		s := card.TurnState{CardsRemaining: []*card.CardState{target}}
 		c.Play(&s, &card.CardState{Card: c})
-		if got := s.Value; got != 0{
+		if got := s.Value; got != 0 {
 			t.Errorf("%s: Play() = %d, want 0 (granter returns 0; +N rides on target's BonusAttack)", label, got)
 		}
 		if target.BonusAttack != want {

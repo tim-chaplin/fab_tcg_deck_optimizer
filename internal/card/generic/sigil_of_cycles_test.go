@@ -10,7 +10,7 @@ import (
 func TestSigilOfCycles_SetsAuraCreated(t *testing.T) {
 	s := card.TurnState{}
 	(SigilOfCyclesBlue{}).Play(&s, &card.CardState{Card: SigilOfCyclesBlue{}})
-	if got := s.Value; got != 0{
+	if got := s.Value; got != 0 {
 		t.Errorf("Play() = %d, want 0", got)
 	}
 	if !s.AuraCreated {

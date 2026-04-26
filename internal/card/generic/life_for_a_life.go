@@ -32,40 +32,42 @@ func lifeForALifeDamage(attack int, self *card.CardState) int {
 
 type LifeForALifeRed struct{}
 
-func (LifeForALifeRed) ID() card.ID                  { return card.LifeForALifeRed }
-func (LifeForALifeRed) Name() string                 { return "Life for a Life" }
-func (LifeForALifeRed) Cost(*card.TurnState) int                    { return 1 }
-func (LifeForALifeRed) Pitch() int                   { return 1 }
-func (LifeForALifeRed) Attack() int                  { return 4 }
-func (LifeForALifeRed) Defense() int                 { return 2 }
-func (LifeForALifeRed) Types() card.TypeSet          { return lifeForALifeTypes }
-func (LifeForALifeRed) GoAgain() bool                { return simstate.HeroWantsLowerHealth() }
+func (LifeForALifeRed) ID() card.ID              { return card.LifeForALifeRed }
+func (LifeForALifeRed) Name() string             { return "Life for a Life" }
+func (LifeForALifeRed) Cost(*card.TurnState) int { return 1 }
+func (LifeForALifeRed) Pitch() int               { return 1 }
+func (LifeForALifeRed) Attack() int              { return 4 }
+func (LifeForALifeRed) Defense() int             { return 2 }
+func (LifeForALifeRed) Types() card.TypeSet      { return lifeForALifeTypes }
+func (LifeForALifeRed) GoAgain() bool            { return simstate.HeroWantsLowerHealth() }
 func (c LifeForALifeRed) Play(s *card.TurnState, self *card.CardState) {
 	s.ApplyAndLogEffectiveAttackPlus(self, lifeForALifeDamage(c.Attack(), self)-self.Card.Attack())
 }
+
 type LifeForALifeYellow struct{}
 
-func (LifeForALifeYellow) ID() card.ID                  { return card.LifeForALifeYellow }
-func (LifeForALifeYellow) Name() string                 { return "Life for a Life" }
-func (LifeForALifeYellow) Cost(*card.TurnState) int                    { return 1 }
-func (LifeForALifeYellow) Pitch() int                   { return 2 }
-func (LifeForALifeYellow) Attack() int                  { return 3 }
-func (LifeForALifeYellow) Defense() int                 { return 2 }
-func (LifeForALifeYellow) Types() card.TypeSet          { return lifeForALifeTypes }
-func (LifeForALifeYellow) GoAgain() bool                { return simstate.HeroWantsLowerHealth() }
+func (LifeForALifeYellow) ID() card.ID              { return card.LifeForALifeYellow }
+func (LifeForALifeYellow) Name() string             { return "Life for a Life" }
+func (LifeForALifeYellow) Cost(*card.TurnState) int { return 1 }
+func (LifeForALifeYellow) Pitch() int               { return 2 }
+func (LifeForALifeYellow) Attack() int              { return 3 }
+func (LifeForALifeYellow) Defense() int             { return 2 }
+func (LifeForALifeYellow) Types() card.TypeSet      { return lifeForALifeTypes }
+func (LifeForALifeYellow) GoAgain() bool            { return simstate.HeroWantsLowerHealth() }
 func (c LifeForALifeYellow) Play(s *card.TurnState, self *card.CardState) {
 	s.ApplyAndLogEffectiveAttackPlus(self, lifeForALifeDamage(c.Attack(), self)-self.Card.Attack())
 }
+
 type LifeForALifeBlue struct{}
 
-func (LifeForALifeBlue) ID() card.ID                  { return card.LifeForALifeBlue }
-func (LifeForALifeBlue) Name() string                 { return "Life for a Life" }
-func (LifeForALifeBlue) Cost(*card.TurnState) int                    { return 1 }
-func (LifeForALifeBlue) Pitch() int                   { return 3 }
-func (LifeForALifeBlue) Attack() int                  { return 2 }
-func (LifeForALifeBlue) Defense() int                 { return 2 }
-func (LifeForALifeBlue) Types() card.TypeSet          { return lifeForALifeTypes }
-func (LifeForALifeBlue) GoAgain() bool                { return simstate.HeroWantsLowerHealth() }
+func (LifeForALifeBlue) ID() card.ID              { return card.LifeForALifeBlue }
+func (LifeForALifeBlue) Name() string             { return "Life for a Life" }
+func (LifeForALifeBlue) Cost(*card.TurnState) int { return 1 }
+func (LifeForALifeBlue) Pitch() int               { return 3 }
+func (LifeForALifeBlue) Attack() int              { return 2 }
+func (LifeForALifeBlue) Defense() int             { return 2 }
+func (LifeForALifeBlue) Types() card.TypeSet      { return lifeForALifeTypes }
+func (LifeForALifeBlue) GoAgain() bool            { return simstate.HeroWantsLowerHealth() }
 func (c LifeForALifeBlue) Play(s *card.TurnState, self *card.CardState) {
 	s.ApplyAndLogEffectiveAttackPlus(self, lifeForALifeDamage(c.Attack(), self)-self.Card.Attack())
 }

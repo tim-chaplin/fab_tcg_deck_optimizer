@@ -11,40 +11,47 @@ var tipOffTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeAt
 
 type TipOffRed struct{}
 
-func (TipOffRed) ID() card.ID                 { return card.TipOffRed }
-func (TipOffRed) Name() string                { return "Tip-Off" }
-func (TipOffRed) Cost(*card.TurnState) int                   { return 1 }
-func (TipOffRed) Pitch() int                  { return 1 }
-func (TipOffRed) Attack() int                 { return 5 }
-func (TipOffRed) Defense() int                { return 2 }
-func (TipOffRed) Types() card.TypeSet         { return tipOffTypes }
-func (TipOffRed) GoAgain() bool               { return false }
+func (TipOffRed) ID() card.ID              { return card.TipOffRed }
+func (TipOffRed) Name() string             { return "Tip-Off" }
+func (TipOffRed) Cost(*card.TurnState) int { return 1 }
+func (TipOffRed) Pitch() int               { return 1 }
+func (TipOffRed) Attack() int              { return 5 }
+func (TipOffRed) Defense() int             { return 2 }
+func (TipOffRed) Types() card.TypeSet      { return tipOffTypes }
+func (TipOffRed) GoAgain() bool            { return false }
+
 // not implemented: instant discard-to-mark activation
-func (TipOffRed) NotImplemented()             {}
+func (TipOffRed) NotImplemented()                                {}
 func (c TipOffRed) Play(s *card.TurnState, self *card.CardState) { s.ApplyAndLogEffectiveAttack(self) }
+
 type TipOffYellow struct{}
 
-func (TipOffYellow) ID() card.ID                 { return card.TipOffYellow }
-func (TipOffYellow) Name() string                { return "Tip-Off" }
-func (TipOffYellow) Cost(*card.TurnState) int                   { return 1 }
-func (TipOffYellow) Pitch() int                  { return 2 }
-func (TipOffYellow) Attack() int                 { return 4 }
-func (TipOffYellow) Defense() int                { return 2 }
-func (TipOffYellow) Types() card.TypeSet         { return tipOffTypes }
-func (TipOffYellow) GoAgain() bool               { return false }
+func (TipOffYellow) ID() card.ID              { return card.TipOffYellow }
+func (TipOffYellow) Name() string             { return "Tip-Off" }
+func (TipOffYellow) Cost(*card.TurnState) int { return 1 }
+func (TipOffYellow) Pitch() int               { return 2 }
+func (TipOffYellow) Attack() int              { return 4 }
+func (TipOffYellow) Defense() int             { return 2 }
+func (TipOffYellow) Types() card.TypeSet      { return tipOffTypes }
+func (TipOffYellow) GoAgain() bool            { return false }
+
 // not implemented: instant discard-to-mark activation
-func (TipOffYellow) NotImplemented()             {}
-func (c TipOffYellow) Play(s *card.TurnState, self *card.CardState) { s.ApplyAndLogEffectiveAttack(self) }
+func (TipOffYellow) NotImplemented() {}
+func (c TipOffYellow) Play(s *card.TurnState, self *card.CardState) {
+	s.ApplyAndLogEffectiveAttack(self)
+}
+
 type TipOffBlue struct{}
 
-func (TipOffBlue) ID() card.ID                 { return card.TipOffBlue }
-func (TipOffBlue) Name() string                { return "Tip-Off" }
-func (TipOffBlue) Cost(*card.TurnState) int                   { return 1 }
-func (TipOffBlue) Pitch() int                  { return 3 }
-func (TipOffBlue) Attack() int                 { return 3 }
-func (TipOffBlue) Defense() int                { return 2 }
-func (TipOffBlue) Types() card.TypeSet         { return tipOffTypes }
-func (TipOffBlue) GoAgain() bool               { return false }
+func (TipOffBlue) ID() card.ID              { return card.TipOffBlue }
+func (TipOffBlue) Name() string             { return "Tip-Off" }
+func (TipOffBlue) Cost(*card.TurnState) int { return 1 }
+func (TipOffBlue) Pitch() int               { return 3 }
+func (TipOffBlue) Attack() int              { return 3 }
+func (TipOffBlue) Defense() int             { return 2 }
+func (TipOffBlue) Types() card.TypeSet      { return tipOffTypes }
+func (TipOffBlue) GoAgain() bool            { return false }
+
 // not implemented: instant discard-to-mark activation
-func (TipOffBlue) NotImplemented()             {}
+func (TipOffBlue) NotImplemented()                                {}
 func (c TipOffBlue) Play(s *card.TurnState, self *card.CardState) { s.ApplyAndLogEffectiveAttack(self) }

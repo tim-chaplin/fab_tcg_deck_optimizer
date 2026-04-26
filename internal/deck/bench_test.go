@@ -26,10 +26,10 @@ import (
 // Recommended invocation: `go test -bench=BenchmarkIterateImprovements -benchtime=5x -count=5`.
 func BenchmarkIterateImprovements(b *testing.B) {
 	const (
-		deckSize           = 40
-		maxCopies          = 2
-		shallowShuffles    = 100
-		deepShuffles       = 5000
+		deckSize        = 40
+		maxCopies       = 2
+		shallowShuffles = 100
+		deepShuffles    = 5000
 		// Non-zero incoming so the benchmark exercises the Defend-role partition branches.
 		// incoming=0 is rare in production use; 7 tracks a mid-game opponent swing that's
 		// typical of iterate sessions against the classic archetype.

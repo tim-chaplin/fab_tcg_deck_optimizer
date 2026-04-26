@@ -10,14 +10,15 @@ var healingPotionTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card
 
 type HealingPotionBlue struct{}
 
-func (HealingPotionBlue) ID() card.ID                               { return card.HealingPotionBlue }
-func (HealingPotionBlue) Name() string                              { return "Healing Potion" }
-func (HealingPotionBlue) Cost(*card.TurnState) int                  { return 0 }
-func (HealingPotionBlue) Pitch() int                                { return 3 }
-func (HealingPotionBlue) Attack() int                               { return 0 }
-func (HealingPotionBlue) Defense() int                              { return 0 }
-func (HealingPotionBlue) Types() card.TypeSet                       { return healingPotionTypes }
-func (HealingPotionBlue) GoAgain() bool                             { return false }
+func (HealingPotionBlue) ID() card.ID              { return card.HealingPotionBlue }
+func (HealingPotionBlue) Name() string             { return "Healing Potion" }
+func (HealingPotionBlue) Cost(*card.TurnState) int { return 0 }
+func (HealingPotionBlue) Pitch() int               { return 3 }
+func (HealingPotionBlue) Attack() int              { return 0 }
+func (HealingPotionBlue) Defense() int             { return 0 }
+func (HealingPotionBlue) Types() card.TypeSet      { return healingPotionTypes }
+func (HealingPotionBlue) GoAgain() bool            { return false }
+
 // not implemented: activated 2{h} gain
-func (HealingPotionBlue) NotImplemented()                           {}
+func (HealingPotionBlue) NotImplemented()                              {}
 func (HealingPotionBlue) Play(s *card.TurnState, self *card.CardState) { s.LogPlay(self) }

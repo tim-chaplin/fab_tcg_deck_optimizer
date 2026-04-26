@@ -11,14 +11,15 @@ var shatterSorceryTypes = card.NewTypeSet(card.TypeGeneric, card.TypeInstant)
 
 type ShatterSorceryBlue struct{}
 
-func (ShatterSorceryBlue) ID() card.ID                               { return card.ShatterSorceryBlue }
-func (ShatterSorceryBlue) Name() string                              { return "Shatter Sorcery" }
-func (ShatterSorceryBlue) Cost(*card.TurnState) int                  { return 0 }
-func (ShatterSorceryBlue) Pitch() int                                { return 3 }
-func (ShatterSorceryBlue) Attack() int                               { return 0 }
-func (ShatterSorceryBlue) Defense() int                              { return 0 }
-func (ShatterSorceryBlue) Types() card.TypeSet                       { return shatterSorceryTypes }
-func (ShatterSorceryBlue) GoAgain() bool                             { return false }
+func (ShatterSorceryBlue) ID() card.ID              { return card.ShatterSorceryBlue }
+func (ShatterSorceryBlue) Name() string             { return "Shatter Sorcery" }
+func (ShatterSorceryBlue) Cost(*card.TurnState) int { return 0 }
+func (ShatterSorceryBlue) Pitch() int               { return 3 }
+func (ShatterSorceryBlue) Attack() int              { return 0 }
+func (ShatterSorceryBlue) Defense() int             { return 0 }
+func (ShatterSorceryBlue) Types() card.TypeSet      { return shatterSorceryTypes }
+func (ShatterSorceryBlue) GoAgain() bool            { return false }
+
 // not implemented: Instant: destroy a Sigil aura, and/or prevent 1 arcane damage
-func (ShatterSorceryBlue) NotImplemented()                           {}
+func (ShatterSorceryBlue) NotImplemented()                              {}
 func (ShatterSorceryBlue) Play(s *card.TurnState, self *card.CardState) { s.LogPlay(self) }

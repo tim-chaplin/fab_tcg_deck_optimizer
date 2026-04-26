@@ -37,43 +37,46 @@ func runicReapingTargetMatches(target *card.CardState) bool {
 
 type RunicReapingRed struct{}
 
-func (RunicReapingRed) ID() card.ID                 { return card.RunicReapingRed }
-func (RunicReapingRed) Name() string               { return "Runic Reaping" }
-func (RunicReapingRed) Cost(*card.TurnState) int                  { return 1 }
-func (RunicReapingRed) Pitch() int                 { return 1 }
-func (RunicReapingRed) Attack() int                { return 0 }
-func (RunicReapingRed) Defense() int               { return 2 }
-func (RunicReapingRed) Types() card.TypeSet        { return runicReapingTypes }
-func (RunicReapingRed) GoAgain() bool              { return true }
+func (RunicReapingRed) ID() card.ID              { return card.RunicReapingRed }
+func (RunicReapingRed) Name() string             { return "Runic Reaping" }
+func (RunicReapingRed) Cost(*card.TurnState) int { return 1 }
+func (RunicReapingRed) Pitch() int               { return 1 }
+func (RunicReapingRed) Attack() int              { return 0 }
+func (RunicReapingRed) Defense() int             { return 2 }
+func (RunicReapingRed) Types() card.TypeSet      { return runicReapingTypes }
+func (RunicReapingRed) GoAgain() bool            { return true }
 func (c RunicReapingRed) Play(s *card.TurnState, self *card.CardState) {
 	runicReapingPlay(s, self, c, 3)
 }
+
 type RunicReapingYellow struct{}
 
-func (RunicReapingYellow) ID() card.ID                 { return card.RunicReapingYellow }
-func (RunicReapingYellow) Name() string               { return "Runic Reaping" }
-func (RunicReapingYellow) Cost(*card.TurnState) int                  { return 1 }
-func (RunicReapingYellow) Pitch() int                 { return 2 }
-func (RunicReapingYellow) Attack() int                { return 0 }
-func (RunicReapingYellow) Defense() int               { return 2 }
-func (RunicReapingYellow) Types() card.TypeSet        { return runicReapingTypes }
-func (RunicReapingYellow) GoAgain() bool              { return true }
+func (RunicReapingYellow) ID() card.ID              { return card.RunicReapingYellow }
+func (RunicReapingYellow) Name() string             { return "Runic Reaping" }
+func (RunicReapingYellow) Cost(*card.TurnState) int { return 1 }
+func (RunicReapingYellow) Pitch() int               { return 2 }
+func (RunicReapingYellow) Attack() int              { return 0 }
+func (RunicReapingYellow) Defense() int             { return 2 }
+func (RunicReapingYellow) Types() card.TypeSet      { return runicReapingTypes }
+func (RunicReapingYellow) GoAgain() bool            { return true }
 func (c RunicReapingYellow) Play(s *card.TurnState, self *card.CardState) {
 	runicReapingPlay(s, self, c, 2)
 }
+
 type RunicReapingBlue struct{}
 
-func (RunicReapingBlue) ID() card.ID                 { return card.RunicReapingBlue }
-func (RunicReapingBlue) Name() string               { return "Runic Reaping" }
-func (RunicReapingBlue) Cost(*card.TurnState) int                  { return 1 }
-func (RunicReapingBlue) Pitch() int                 { return 3 }
-func (RunicReapingBlue) Attack() int                { return 0 }
-func (RunicReapingBlue) Defense() int               { return 2 }
-func (RunicReapingBlue) Types() card.TypeSet        { return runicReapingTypes }
-func (RunicReapingBlue) GoAgain() bool              { return true }
+func (RunicReapingBlue) ID() card.ID              { return card.RunicReapingBlue }
+func (RunicReapingBlue) Name() string             { return "Runic Reaping" }
+func (RunicReapingBlue) Cost(*card.TurnState) int { return 1 }
+func (RunicReapingBlue) Pitch() int               { return 3 }
+func (RunicReapingBlue) Attack() int              { return 0 }
+func (RunicReapingBlue) Defense() int             { return 2 }
+func (RunicReapingBlue) Types() card.TypeSet      { return runicReapingTypes }
+func (RunicReapingBlue) GoAgain() bool            { return true }
 func (c RunicReapingBlue) Play(s *card.TurnState, self *card.CardState) {
 	runicReapingPlay(s, self, c, 1)
 }
+
 // runicReapingPlay applies the pitched-attack +1{p} grant via the target's BonusAttack,
 // registers the on-hit Runechant trigger, and emits Runic Reaping's chain step (no
 // value contribution — Runic Reaping itself doesn't deal damage; the trigger handler

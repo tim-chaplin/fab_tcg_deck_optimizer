@@ -28,7 +28,7 @@ func TestLifegainPerVariant(t *testing.T) {
 	for _, tc := range cases {
 		var s card.TurnState
 		tc.card.Play(&s, &card.CardState{Card: tc.card})
-		if got := s.Value; got != tc.want{
+		if got := s.Value; got != tc.want {
 			t.Errorf("%s: Play() = %d, want %d", tc.name, got, tc.want)
 		}
 	}

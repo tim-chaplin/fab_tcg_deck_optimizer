@@ -12,7 +12,7 @@ func TestRunicFellingsong_NoAuraCreditsPrintedPowerOnly(t *testing.T) {
 	var s card.TurnState
 	c := RunicFellingsongRed{}
 	c.Play(&s, &card.CardState{Card: c})
-	if got := s.Value; got != c.Attack(){
+	if got := s.Value; got != c.Attack() {
 		t.Errorf("Play() = %d, want %d (Attack only; banish fizzles)", got, c.Attack())
 	}
 }
@@ -25,7 +25,7 @@ func TestRunicFellingsong_AuraInGraveyardFiresBanishRider(t *testing.T) {
 	c := RunicFellingsongRed{}
 	want := c.Attack() + 1
 	c.Play(&s, &card.CardState{Card: c})
-	if got := s.Value; got != want{
+	if got := s.Value; got != want {
 		t.Errorf("Play() = %d, want %d (Attack + banish rider)", got, want)
 	}
 	if len(s.Banish) != 1 || s.Banish[0].ID() != aura.ID() {

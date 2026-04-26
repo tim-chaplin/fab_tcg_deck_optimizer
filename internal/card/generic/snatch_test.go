@@ -14,7 +14,7 @@ func TestSnatch_LikelyHitFiresDrawOne(t *testing.T) {
 	s := card.TurnState{Deck: []card.Card{top}}
 	c := SnatchRed{}
 	c.Play(&s, &card.CardState{Card: c})
-	if got := s.Value; got != 4{
+	if got := s.Value; got != 4 {
 		t.Errorf("Red: Play() = %d, want 4", got)
 	}
 	if len(s.Hand) != 1 || s.Hand[0] != top {
@@ -39,7 +39,7 @@ func TestSnatch_BlockableSuppressesDraw(t *testing.T) {
 		top := stubGenericAttack(0, 3)
 		s := card.TurnState{Deck: []card.Card{top}}
 		tc.c.Play(&s, &card.CardState{Card: tc.c})
-		if got := s.Value; got != tc.want{
+		if got := s.Value; got != tc.want {
 			t.Errorf("%s: Play() = %d, want %d (blockable, no draw)", tc.c.Name(), got, tc.want)
 		}
 		if len(s.Hand) != 0 {

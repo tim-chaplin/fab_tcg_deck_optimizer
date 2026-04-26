@@ -22,7 +22,7 @@ func TestMeatAndGreet_OnHitRunechantGatedByLikelyToHit(t *testing.T) {
 		s := card.TurnState{}
 		self := &card.CardState{Card: tc.c}
 		tc.c.Play(&s, self)
-		if got := s.Value; got != tc.wantDmg{
+		if got := s.Value; got != tc.wantDmg {
 			t.Errorf("%s: Play() = %d, want %d", tc.c.Name(), got, tc.wantDmg)
 		}
 		if self.GrantedGoAgain {

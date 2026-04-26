@@ -293,4 +293,3 @@ func weaponNameCounts(d *deck.Deck) map[string]int {
 	}
 	return m
 }
-

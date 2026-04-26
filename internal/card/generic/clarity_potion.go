@@ -10,14 +10,15 @@ var clarityPotionTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card
 
 type ClarityPotionBlue struct{}
 
-func (ClarityPotionBlue) ID() card.ID                               { return card.ClarityPotionBlue }
-func (ClarityPotionBlue) Name() string                              { return "Clarity Potion" }
-func (ClarityPotionBlue) Cost(*card.TurnState) int                  { return 0 }
-func (ClarityPotionBlue) Pitch() int                                { return 3 }
-func (ClarityPotionBlue) Attack() int                               { return 0 }
-func (ClarityPotionBlue) Defense() int                              { return 0 }
-func (ClarityPotionBlue) Types() card.TypeSet                       { return clarityPotionTypes }
-func (ClarityPotionBlue) GoAgain() bool                             { return false }
+func (ClarityPotionBlue) ID() card.ID              { return card.ClarityPotionBlue }
+func (ClarityPotionBlue) Name() string             { return "Clarity Potion" }
+func (ClarityPotionBlue) Cost(*card.TurnState) int { return 0 }
+func (ClarityPotionBlue) Pitch() int               { return 3 }
+func (ClarityPotionBlue) Attack() int              { return 0 }
+func (ClarityPotionBlue) Defense() int             { return 0 }
+func (ClarityPotionBlue) Types() card.TypeSet      { return clarityPotionTypes }
+func (ClarityPotionBlue) GoAgain() bool            { return false }
+
 // not implemented: activated Opt 2
-func (ClarityPotionBlue) NotImplemented()                           {}
+func (ClarityPotionBlue) NotImplemented()                              {}
 func (ClarityPotionBlue) Play(s *card.TurnState, self *card.CardState) { s.LogPlay(self) }

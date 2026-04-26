@@ -20,7 +20,7 @@ func TestConsumingVolition_ArcaneDamageNotDealtReturnsBaseAttack(t *testing.T) {
 	for _, tc := range cases {
 		s := card.TurnState{}
 		tc.c.Play(&s, &card.CardState{Card: tc.c})
-		if got := s.Value; got != tc.want{
+		if got := s.Value; got != tc.want {
 			t.Errorf("%s: Play() = %d, want %d (base attack, ArcaneDamageDealt=false)", tc.c.Name(), got, tc.want)
 		}
 	}
@@ -33,7 +33,7 @@ func TestConsumingVolition_LikelyToHitAndArcaneTriggersDiscard(t *testing.T) {
 	s := card.TurnState{ArcaneDamageDealt: true}
 	c := ConsumingVolitionRed{}
 	c.Play(&s, &card.CardState{Card: c})
-	if got := s.Value; got != 4+3{
+	if got := s.Value; got != 4+3 {
 		t.Errorf("Red with ArcaneDamageDealt: Play() = %d, want 7 (base 4 likely to hit + 3 discard)", got)
 	}
 }
@@ -52,7 +52,7 @@ func TestConsumingVolition_BlockableBaseSuppressesDiscard(t *testing.T) {
 	for _, tc := range cases {
 		s := card.TurnState{ArcaneDamageDealt: true}
 		tc.c.Play(&s, &card.CardState{Card: tc.c})
-		if got := s.Value; got != tc.want{
+		if got := s.Value; got != tc.want {
 			t.Errorf("%s with ArcaneDamageDealt: Play() = %d, want %d (blockable, no rider)", tc.c.Name(), got, tc.want)
 		}
 	}
@@ -65,7 +65,7 @@ func TestConsumingVolition_RunechantsDontRescue(t *testing.T) {
 	s := card.TurnState{ArcaneDamageDealt: true, Runechants: 1}
 	c := ConsumingVolitionYellow{}
 	c.Play(&s, &card.CardState{Card: c})
-	if got := s.Value; got != 3{
+	if got := s.Value; got != 3 {
 		t.Errorf("Yellow with 1 Runechant: Play() = %d, want 3 (runechant isn't 'this' damage)", got)
 	}
 }

@@ -64,42 +64,42 @@ func mauvrionSkiesPlay(s *card.TurnState, selfState *card.CardState, source card
 
 type MauvrionSkiesRed struct{}
 
-func (MauvrionSkiesRed) ID() card.ID                                     { return card.MauvrionSkiesRed }
-func (MauvrionSkiesRed) Name() string                                    { return "Mauvrion Skies" }
-func (MauvrionSkiesRed) Cost(*card.TurnState) int                        { return 0 }
-func (MauvrionSkiesRed) Pitch() int                                      { return 1 }
-func (MauvrionSkiesRed) Attack() int                                     { return 0 }
-func (MauvrionSkiesRed) Defense() int                                    { return 2 }
-func (MauvrionSkiesRed) Types() card.TypeSet                             { return mauvrionSkiesTypes }
-func (MauvrionSkiesRed) GoAgain() bool                                   { return true }
+func (MauvrionSkiesRed) ID() card.ID              { return card.MauvrionSkiesRed }
+func (MauvrionSkiesRed) Name() string             { return "Mauvrion Skies" }
+func (MauvrionSkiesRed) Cost(*card.TurnState) int { return 0 }
+func (MauvrionSkiesRed) Pitch() int               { return 1 }
+func (MauvrionSkiesRed) Attack() int              { return 0 }
+func (MauvrionSkiesRed) Defense() int             { return 2 }
+func (MauvrionSkiesRed) Types() card.TypeSet      { return mauvrionSkiesTypes }
+func (MauvrionSkiesRed) GoAgain() bool            { return true }
 func (c MauvrionSkiesRed) Play(s *card.TurnState, self *card.CardState) {
 	mauvrionSkiesPlay(s, self, c, 3)
 }
 
 type MauvrionSkiesYellow struct{}
 
-func (MauvrionSkiesYellow) ID() card.ID                                     { return card.MauvrionSkiesYellow }
-func (MauvrionSkiesYellow) Name() string                                    { return "Mauvrion Skies" }
-func (MauvrionSkiesYellow) Cost(*card.TurnState) int                        { return 0 }
-func (MauvrionSkiesYellow) Pitch() int                                      { return 2 }
-func (MauvrionSkiesYellow) Attack() int                                     { return 0 }
-func (MauvrionSkiesYellow) Defense() int                                    { return 2 }
-func (MauvrionSkiesYellow) Types() card.TypeSet                             { return mauvrionSkiesTypes }
-func (MauvrionSkiesYellow) GoAgain() bool                                   { return true }
+func (MauvrionSkiesYellow) ID() card.ID              { return card.MauvrionSkiesYellow }
+func (MauvrionSkiesYellow) Name() string             { return "Mauvrion Skies" }
+func (MauvrionSkiesYellow) Cost(*card.TurnState) int { return 0 }
+func (MauvrionSkiesYellow) Pitch() int               { return 2 }
+func (MauvrionSkiesYellow) Attack() int              { return 0 }
+func (MauvrionSkiesYellow) Defense() int             { return 2 }
+func (MauvrionSkiesYellow) Types() card.TypeSet      { return mauvrionSkiesTypes }
+func (MauvrionSkiesYellow) GoAgain() bool            { return true }
 func (c MauvrionSkiesYellow) Play(s *card.TurnState, self *card.CardState) {
 	mauvrionSkiesPlay(s, self, c, 2)
 }
 
 type MauvrionSkiesBlue struct{}
 
-func (MauvrionSkiesBlue) ID() card.ID                                     { return card.MauvrionSkiesBlue }
-func (MauvrionSkiesBlue) Name() string                                    { return "Mauvrion Skies" }
-func (MauvrionSkiesBlue) Cost(*card.TurnState) int                        { return 0 }
-func (MauvrionSkiesBlue) Pitch() int                                      { return 3 }
-func (MauvrionSkiesBlue) Attack() int                                     { return 0 }
-func (MauvrionSkiesBlue) Defense() int                                    { return 2 }
-func (MauvrionSkiesBlue) Types() card.TypeSet                             { return mauvrionSkiesTypes }
-func (MauvrionSkiesBlue) GoAgain() bool                                   { return true }
+func (MauvrionSkiesBlue) ID() card.ID              { return card.MauvrionSkiesBlue }
+func (MauvrionSkiesBlue) Name() string             { return "Mauvrion Skies" }
+func (MauvrionSkiesBlue) Cost(*card.TurnState) int { return 0 }
+func (MauvrionSkiesBlue) Pitch() int               { return 3 }
+func (MauvrionSkiesBlue) Attack() int              { return 0 }
+func (MauvrionSkiesBlue) Defense() int             { return 2 }
+func (MauvrionSkiesBlue) Types() card.TypeSet      { return mauvrionSkiesTypes }
+func (MauvrionSkiesBlue) GoAgain() bool            { return true }
 func (c MauvrionSkiesBlue) Play(s *card.TurnState, self *card.CardState) {
 	mauvrionSkiesPlay(s, self, c, 1)
 }

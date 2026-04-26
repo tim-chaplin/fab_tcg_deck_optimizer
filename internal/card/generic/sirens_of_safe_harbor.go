@@ -16,43 +16,45 @@ var sirensOfSafeHarborTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction,
 
 type SirensOfSafeHarborRed struct{}
 
-func (SirensOfSafeHarborRed) ID() card.ID                 { return card.SirensOfSafeHarborRed }
-func (SirensOfSafeHarborRed) Name() string                { return "Sirens of Safe Harbor" }
-func (SirensOfSafeHarborRed) Cost(*card.TurnState) int                   { return 2 }
-func (SirensOfSafeHarborRed) Pitch() int                  { return 1 }
-func (SirensOfSafeHarborRed) Attack() int                 { return 6 }
-func (SirensOfSafeHarborRed) Defense() int                { return 2 }
-func (SirensOfSafeHarborRed) Types() card.TypeSet         { return sirensOfSafeHarborTypes }
-func (SirensOfSafeHarborRed) GoAgain() bool               { return false }
-func (SirensOfSafeHarborRed) NotSilverAgeLegal()           {}
+func (SirensOfSafeHarborRed) ID() card.ID              { return card.SirensOfSafeHarborRed }
+func (SirensOfSafeHarborRed) Name() string             { return "Sirens of Safe Harbor" }
+func (SirensOfSafeHarborRed) Cost(*card.TurnState) int { return 2 }
+func (SirensOfSafeHarborRed) Pitch() int               { return 1 }
+func (SirensOfSafeHarborRed) Attack() int              { return 6 }
+func (SirensOfSafeHarborRed) Defense() int             { return 2 }
+func (SirensOfSafeHarborRed) Types() card.TypeSet      { return sirensOfSafeHarborTypes }
+func (SirensOfSafeHarborRed) GoAgain() bool            { return false }
+func (SirensOfSafeHarborRed) NotSilverAgeLegal()       {}
 func (SirensOfSafeHarborRed) Play(s *card.TurnState, self *card.CardState) {
 	s.ApplyAndLogEffectiveAttackPlus(self, 1)
 }
+
 type SirensOfSafeHarborYellow struct{}
 
-func (SirensOfSafeHarborYellow) ID() card.ID                 { return card.SirensOfSafeHarborYellow }
-func (SirensOfSafeHarborYellow) Name() string                { return "Sirens of Safe Harbor" }
-func (SirensOfSafeHarborYellow) Cost(*card.TurnState) int                   { return 2 }
-func (SirensOfSafeHarborYellow) Pitch() int                  { return 2 }
-func (SirensOfSafeHarborYellow) Attack() int                 { return 5 }
-func (SirensOfSafeHarborYellow) Defense() int                { return 2 }
-func (SirensOfSafeHarborYellow) Types() card.TypeSet         { return sirensOfSafeHarborTypes }
-func (SirensOfSafeHarborYellow) GoAgain() bool               { return false }
-func (SirensOfSafeHarborYellow) NotSilverAgeLegal()           {}
+func (SirensOfSafeHarborYellow) ID() card.ID              { return card.SirensOfSafeHarborYellow }
+func (SirensOfSafeHarborYellow) Name() string             { return "Sirens of Safe Harbor" }
+func (SirensOfSafeHarborYellow) Cost(*card.TurnState) int { return 2 }
+func (SirensOfSafeHarborYellow) Pitch() int               { return 2 }
+func (SirensOfSafeHarborYellow) Attack() int              { return 5 }
+func (SirensOfSafeHarborYellow) Defense() int             { return 2 }
+func (SirensOfSafeHarborYellow) Types() card.TypeSet      { return sirensOfSafeHarborTypes }
+func (SirensOfSafeHarborYellow) GoAgain() bool            { return false }
+func (SirensOfSafeHarborYellow) NotSilverAgeLegal()       {}
 func (SirensOfSafeHarborYellow) Play(s *card.TurnState, self *card.CardState) {
 	s.ApplyAndLogEffectiveAttackPlus(self, 1)
 }
+
 type SirensOfSafeHarborBlue struct{}
 
-func (SirensOfSafeHarborBlue) ID() card.ID                 { return card.SirensOfSafeHarborBlue }
-func (SirensOfSafeHarborBlue) Name() string                { return "Sirens of Safe Harbor" }
-func (SirensOfSafeHarborBlue) Cost(*card.TurnState) int                   { return 2 }
-func (SirensOfSafeHarborBlue) Pitch() int                  { return 3 }
-func (SirensOfSafeHarborBlue) Attack() int                 { return 4 }
-func (SirensOfSafeHarborBlue) Defense() int                { return 2 }
-func (SirensOfSafeHarborBlue) Types() card.TypeSet         { return sirensOfSafeHarborTypes }
-func (SirensOfSafeHarborBlue) GoAgain() bool               { return false }
-func (SirensOfSafeHarborBlue) NotSilverAgeLegal()           {}
+func (SirensOfSafeHarborBlue) ID() card.ID              { return card.SirensOfSafeHarborBlue }
+func (SirensOfSafeHarborBlue) Name() string             { return "Sirens of Safe Harbor" }
+func (SirensOfSafeHarborBlue) Cost(*card.TurnState) int { return 2 }
+func (SirensOfSafeHarborBlue) Pitch() int               { return 3 }
+func (SirensOfSafeHarborBlue) Attack() int              { return 4 }
+func (SirensOfSafeHarborBlue) Defense() int             { return 2 }
+func (SirensOfSafeHarborBlue) Types() card.TypeSet      { return sirensOfSafeHarborTypes }
+func (SirensOfSafeHarborBlue) GoAgain() bool            { return false }
+func (SirensOfSafeHarborBlue) NotSilverAgeLegal()       {}
 func (SirensOfSafeHarborBlue) Play(s *card.TurnState, self *card.CardState) {
 	s.ApplyAndLogEffectiveAttackPlus(self, 1)
 }

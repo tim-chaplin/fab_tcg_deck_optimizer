@@ -27,12 +27,12 @@ func cardNames(cs []card.Card) []string {
 // keep its grants from bleeding into a later permutation where grantSpy runs first.
 type grantAll struct{}
 
-func (grantAll) ID() card.ID               { return card.Invalid }
-func (grantAll) Name() string              { return "grantAll" }
-func (grantAll) Cost(*card.TurnState) int  { return 0 }
-func (grantAll) Pitch() int                { return 0 }
-func (grantAll) Attack() int               { return 0 }
-func (grantAll) Defense() int              { return 0 }
+func (grantAll) ID() card.ID              { return card.Invalid }
+func (grantAll) Name() string             { return "grantAll" }
+func (grantAll) Cost(*card.TurnState) int { return 0 }
+func (grantAll) Pitch() int               { return 0 }
+func (grantAll) Attack() int              { return 0 }
+func (grantAll) Defense() int             { return 0 }
 func (grantAll) Types() card.TypeSet {
 	return card.NewTypeSet(card.TypeRuneblade, card.TypeAction, card.TypeAttack)
 }

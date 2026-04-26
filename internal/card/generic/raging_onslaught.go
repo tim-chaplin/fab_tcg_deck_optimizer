@@ -9,34 +9,42 @@ var ragingOnslaughtTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, ca
 
 type RagingOnslaughtRed struct{}
 
-func (RagingOnslaughtRed) ID() card.ID                 { return card.RagingOnslaughtRed }
-func (RagingOnslaughtRed) Name() string                { return "Raging Onslaught" }
-func (RagingOnslaughtRed) Cost(*card.TurnState) int                   { return 3 }
-func (RagingOnslaughtRed) Pitch() int                  { return 1 }
-func (RagingOnslaughtRed) Attack() int                 { return 7 }
-func (RagingOnslaughtRed) Defense() int                { return 3 }
-func (RagingOnslaughtRed) Types() card.TypeSet         { return ragingOnslaughtTypes }
-func (RagingOnslaughtRed) GoAgain() bool               { return false }
-func (c RagingOnslaughtRed) Play(s *card.TurnState, self *card.CardState) { s.ApplyAndLogEffectiveAttack(self) }
+func (RagingOnslaughtRed) ID() card.ID              { return card.RagingOnslaughtRed }
+func (RagingOnslaughtRed) Name() string             { return "Raging Onslaught" }
+func (RagingOnslaughtRed) Cost(*card.TurnState) int { return 3 }
+func (RagingOnslaughtRed) Pitch() int               { return 1 }
+func (RagingOnslaughtRed) Attack() int              { return 7 }
+func (RagingOnslaughtRed) Defense() int             { return 3 }
+func (RagingOnslaughtRed) Types() card.TypeSet      { return ragingOnslaughtTypes }
+func (RagingOnslaughtRed) GoAgain() bool            { return false }
+func (c RagingOnslaughtRed) Play(s *card.TurnState, self *card.CardState) {
+	s.ApplyAndLogEffectiveAttack(self)
+}
+
 type RagingOnslaughtYellow struct{}
 
-func (RagingOnslaughtYellow) ID() card.ID                 { return card.RagingOnslaughtYellow }
-func (RagingOnslaughtYellow) Name() string                { return "Raging Onslaught" }
-func (RagingOnslaughtYellow) Cost(*card.TurnState) int                   { return 3 }
-func (RagingOnslaughtYellow) Pitch() int                  { return 2 }
-func (RagingOnslaughtYellow) Attack() int                 { return 6 }
-func (RagingOnslaughtYellow) Defense() int                { return 3 }
-func (RagingOnslaughtYellow) Types() card.TypeSet         { return ragingOnslaughtTypes }
-func (RagingOnslaughtYellow) GoAgain() bool               { return false }
-func (c RagingOnslaughtYellow) Play(s *card.TurnState, self *card.CardState) { s.ApplyAndLogEffectiveAttack(self) }
+func (RagingOnslaughtYellow) ID() card.ID              { return card.RagingOnslaughtYellow }
+func (RagingOnslaughtYellow) Name() string             { return "Raging Onslaught" }
+func (RagingOnslaughtYellow) Cost(*card.TurnState) int { return 3 }
+func (RagingOnslaughtYellow) Pitch() int               { return 2 }
+func (RagingOnslaughtYellow) Attack() int              { return 6 }
+func (RagingOnslaughtYellow) Defense() int             { return 3 }
+func (RagingOnslaughtYellow) Types() card.TypeSet      { return ragingOnslaughtTypes }
+func (RagingOnslaughtYellow) GoAgain() bool            { return false }
+func (c RagingOnslaughtYellow) Play(s *card.TurnState, self *card.CardState) {
+	s.ApplyAndLogEffectiveAttack(self)
+}
+
 type RagingOnslaughtBlue struct{}
 
-func (RagingOnslaughtBlue) ID() card.ID                 { return card.RagingOnslaughtBlue }
-func (RagingOnslaughtBlue) Name() string                { return "Raging Onslaught" }
-func (RagingOnslaughtBlue) Cost(*card.TurnState) int                   { return 3 }
-func (RagingOnslaughtBlue) Pitch() int                  { return 3 }
-func (RagingOnslaughtBlue) Attack() int                 { return 5 }
-func (RagingOnslaughtBlue) Defense() int                { return 3 }
-func (RagingOnslaughtBlue) Types() card.TypeSet         { return ragingOnslaughtTypes }
-func (RagingOnslaughtBlue) GoAgain() bool               { return false }
-func (c RagingOnslaughtBlue) Play(s *card.TurnState, self *card.CardState) { s.ApplyAndLogEffectiveAttack(self) }
+func (RagingOnslaughtBlue) ID() card.ID              { return card.RagingOnslaughtBlue }
+func (RagingOnslaughtBlue) Name() string             { return "Raging Onslaught" }
+func (RagingOnslaughtBlue) Cost(*card.TurnState) int { return 3 }
+func (RagingOnslaughtBlue) Pitch() int               { return 3 }
+func (RagingOnslaughtBlue) Attack() int              { return 5 }
+func (RagingOnslaughtBlue) Defense() int             { return 3 }
+func (RagingOnslaughtBlue) Types() card.TypeSet      { return ragingOnslaughtTypes }
+func (RagingOnslaughtBlue) GoAgain() bool            { return false }
+func (c RagingOnslaughtBlue) Play(s *card.TurnState, self *card.CardState) {
+	s.ApplyAndLogEffectiveAttack(self)
+}

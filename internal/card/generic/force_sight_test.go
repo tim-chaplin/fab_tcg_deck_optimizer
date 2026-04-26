@@ -11,7 +11,7 @@ func TestForceSight_NoAttackReturnsZero(t *testing.T) {
 	s := card.TurnState{}
 	for _, c := range []card.Card{ForceSightRed{}, ForceSightYellow{}, ForceSightBlue{}} {
 		c.Play(&s, &card.CardState{Card: c})
-		if got := s.Value; got != 0{
+		if got := s.Value; got != 0 {
 			t.Errorf("%s: Play() = %d, want 0", c.Name(), got)
 		}
 	}
@@ -21,7 +21,7 @@ func TestForceSight_NoAttackReturnsZero(t *testing.T) {
 func TestForceSight_NonAttackInRemainingFizzles(t *testing.T) {
 	s := card.TurnState{CardsRemaining: []*card.CardState{{Card: stubGenericAction()}}}
 	(ForceSightRed{}).Play(&s, &card.CardState{Card: ForceSightRed{}})
-	if got := s.Value; got != 0{
+	if got := s.Value; got != 0 {
 		t.Errorf("Play() = %d, want 0 (non-attack skipped)", got)
 	}
 }
@@ -41,7 +41,7 @@ func TestForceSight_NextAttackReturnsBonus(t *testing.T) {
 		target := &card.CardState{Card: stubGenericAttack(0, 0)}
 		s := card.TurnState{CardsRemaining: []*card.CardState{target}}
 		tc.c.Play(&s, &card.CardState{Card: tc.c})
-		if got := s.Value; got != 0{
+		if got := s.Value; got != 0 {
 			t.Errorf("%s: Play() = %d, want 0 (granter returns 0; +N rides on target's BonusAttack)", tc.c.Name(), got)
 		}
 		if target.BonusAttack != tc.want {

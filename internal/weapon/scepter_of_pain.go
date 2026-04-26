@@ -10,15 +10,15 @@ var scepterOfPainTypes = card.NewTypeSet(card.TypeRuneblade, card.TypeWeapon, ca
 
 type ScepterOfPain struct{}
 
-func (ScepterOfPain) ID() card.ID                  { return card.ScepterOfPainID }
-func (ScepterOfPain) Name() string                 { return "Scepter of Pain" }
-func (ScepterOfPain) Cost(*card.TurnState) int                    { return 2 }
-func (ScepterOfPain) Pitch() int                   { return 0 }
-func (ScepterOfPain) Attack() int                  { return 1 }
-func (ScepterOfPain) Defense() int                 { return 0 }
-func (ScepterOfPain) Types() card.TypeSet           { return scepterOfPainTypes }
-func (ScepterOfPain) GoAgain() bool                { return false }
-func (ScepterOfPain) Hands() int                   { return 1 }
+func (ScepterOfPain) ID() card.ID              { return card.ScepterOfPainID }
+func (ScepterOfPain) Name() string             { return "Scepter of Pain" }
+func (ScepterOfPain) Cost(*card.TurnState) int { return 2 }
+func (ScepterOfPain) Pitch() int               { return 0 }
+func (ScepterOfPain) Attack() int              { return 1 }
+func (ScepterOfPain) Defense() int             { return 0 }
+func (ScepterOfPain) Types() card.TypeSet      { return scepterOfPainTypes }
+func (ScepterOfPain) GoAgain() bool            { return false }
+func (ScepterOfPain) Hands() int               { return 1 }
 func (c ScepterOfPain) Play(s *card.TurnState, self *card.CardState) {
 	s.ApplyAndLogEffectiveAttackPlus(self, s.CreateRunechant())
 }

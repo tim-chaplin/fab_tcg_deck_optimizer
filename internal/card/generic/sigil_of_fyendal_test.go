@@ -12,7 +12,7 @@ import (
 func TestSigilOfFyendal_PlayRegistersStartOfTurnTrigger(t *testing.T) {
 	var s card.TurnState
 	(SigilOfFyendalBlue{}).Play(&s, &card.CardState{Card: SigilOfFyendalBlue{}})
-	if got := s.Value; got != 0{
+	if got := s.Value; got != 0 {
 		t.Errorf("Play() = %d, want 0 (1{h} gain deferred to trigger)", got)
 	}
 	if !s.AuraCreated {

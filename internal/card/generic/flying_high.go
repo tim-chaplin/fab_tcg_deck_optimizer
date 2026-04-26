@@ -30,40 +30,42 @@ func flyingHighPlay(s *card.TurnState, matchPitch int) int {
 
 type FlyingHighRed struct{}
 
-func (FlyingHighRed) ID() card.ID                 { return card.FlyingHighRed }
-func (FlyingHighRed) Name() string                { return "Flying High" }
-func (FlyingHighRed) Cost(*card.TurnState) int                   { return 0 }
-func (FlyingHighRed) Pitch() int                  { return 1 }
-func (FlyingHighRed) Attack() int                 { return 0 }
-func (FlyingHighRed) Defense() int                { return 2 }
-func (FlyingHighRed) Types() card.TypeSet         { return flyingHighTypes }
-func (FlyingHighRed) GoAgain() bool               { return true }
+func (FlyingHighRed) ID() card.ID              { return card.FlyingHighRed }
+func (FlyingHighRed) Name() string             { return "Flying High" }
+func (FlyingHighRed) Cost(*card.TurnState) int { return 0 }
+func (FlyingHighRed) Pitch() int               { return 1 }
+func (FlyingHighRed) Attack() int              { return 0 }
+func (FlyingHighRed) Defense() int             { return 2 }
+func (FlyingHighRed) Types() card.TypeSet      { return flyingHighTypes }
+func (FlyingHighRed) GoAgain() bool            { return true }
 func (FlyingHighRed) Play(s *card.TurnState, self *card.CardState) {
 	s.ApplyAndLogEffectiveAttackPlus(self, flyingHighPlay(s, 1))
 }
+
 type FlyingHighYellow struct{}
 
-func (FlyingHighYellow) ID() card.ID                 { return card.FlyingHighYellow }
-func (FlyingHighYellow) Name() string                { return "Flying High" }
-func (FlyingHighYellow) Cost(*card.TurnState) int                   { return 0 }
-func (FlyingHighYellow) Pitch() int                  { return 2 }
-func (FlyingHighYellow) Attack() int                 { return 0 }
-func (FlyingHighYellow) Defense() int                { return 2 }
-func (FlyingHighYellow) Types() card.TypeSet         { return flyingHighTypes }
-func (FlyingHighYellow) GoAgain() bool               { return true }
+func (FlyingHighYellow) ID() card.ID              { return card.FlyingHighYellow }
+func (FlyingHighYellow) Name() string             { return "Flying High" }
+func (FlyingHighYellow) Cost(*card.TurnState) int { return 0 }
+func (FlyingHighYellow) Pitch() int               { return 2 }
+func (FlyingHighYellow) Attack() int              { return 0 }
+func (FlyingHighYellow) Defense() int             { return 2 }
+func (FlyingHighYellow) Types() card.TypeSet      { return flyingHighTypes }
+func (FlyingHighYellow) GoAgain() bool            { return true }
 func (FlyingHighYellow) Play(s *card.TurnState, self *card.CardState) {
 	s.ApplyAndLogEffectiveAttackPlus(self, flyingHighPlay(s, 2))
 }
+
 type FlyingHighBlue struct{}
 
-func (FlyingHighBlue) ID() card.ID                 { return card.FlyingHighBlue }
-func (FlyingHighBlue) Name() string                { return "Flying High" }
-func (FlyingHighBlue) Cost(*card.TurnState) int                   { return 0 }
-func (FlyingHighBlue) Pitch() int                  { return 3 }
-func (FlyingHighBlue) Attack() int                 { return 0 }
-func (FlyingHighBlue) Defense() int                { return 2 }
-func (FlyingHighBlue) Types() card.TypeSet         { return flyingHighTypes }
-func (FlyingHighBlue) GoAgain() bool               { return true }
+func (FlyingHighBlue) ID() card.ID              { return card.FlyingHighBlue }
+func (FlyingHighBlue) Name() string             { return "Flying High" }
+func (FlyingHighBlue) Cost(*card.TurnState) int { return 0 }
+func (FlyingHighBlue) Pitch() int               { return 3 }
+func (FlyingHighBlue) Attack() int              { return 0 }
+func (FlyingHighBlue) Defense() int             { return 2 }
+func (FlyingHighBlue) Types() card.TypeSet      { return flyingHighTypes }
+func (FlyingHighBlue) GoAgain() bool            { return true }
 func (FlyingHighBlue) Play(s *card.TurnState, self *card.CardState) {
 	s.ApplyAndLogEffectiveAttackPlus(self, flyingHighPlay(s, 3))
 }

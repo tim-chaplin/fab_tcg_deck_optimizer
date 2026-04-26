@@ -17,15 +17,15 @@ var nebulaBladeTypes = card.NewTypeSet(card.TypeRuneblade, card.TypeWeapon, card
 
 type NebulaBlade struct{}
 
-func (NebulaBlade) ID() card.ID               { return card.NebulaBladeID }
-func (NebulaBlade) Name() string              { return "Nebula Blade" }
-func (NebulaBlade) Cost(*card.TurnState) int                 { return 2 }
-func (NebulaBlade) Pitch() int                { return 0 }
-func (NebulaBlade) Attack() int               { return 1 }
-func (NebulaBlade) Defense() int              { return 0 }
-func (NebulaBlade) Types() card.TypeSet        { return nebulaBladeTypes }
-func (NebulaBlade) GoAgain() bool             { return false }
-func (NebulaBlade) Hands() int                { return 2 }
+func (NebulaBlade) ID() card.ID              { return card.NebulaBladeID }
+func (NebulaBlade) Name() string             { return "Nebula Blade" }
+func (NebulaBlade) Cost(*card.TurnState) int { return 2 }
+func (NebulaBlade) Pitch() int               { return 0 }
+func (NebulaBlade) Attack() int              { return 1 }
+func (NebulaBlade) Defense() int             { return 0 }
+func (NebulaBlade) Types() card.TypeSet      { return nebulaBladeTypes }
+func (NebulaBlade) GoAgain() bool            { return false }
+func (NebulaBlade) Hands() int               { return 2 }
 func (c NebulaBlade) Play(s *card.TurnState, self *card.CardState) {
 	if s.NonAttackActionPlayed {
 		self.BonusAttack += 3

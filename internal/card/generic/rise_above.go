@@ -10,40 +10,45 @@ import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 
 type RiseAboveRed struct{}
 
-func (RiseAboveRed) ID() card.ID                 { return card.RiseAboveRed }
+func (RiseAboveRed) ID() card.ID              { return card.RiseAboveRed }
 func (RiseAboveRed) Name() string             { return "Rise Above" }
-func (RiseAboveRed) Cost(*card.TurnState) int                { return 2 }
+func (RiseAboveRed) Cost(*card.TurnState) int { return 2 }
 func (RiseAboveRed) Pitch() int               { return 1 }
 func (RiseAboveRed) Attack() int              { return 0 }
 func (RiseAboveRed) Defense() int             { return 4 }
 func (RiseAboveRed) Types() card.TypeSet      { return defenseReactionTypes }
 func (RiseAboveRed) GoAgain() bool            { return false }
+
 // not implemented: hand-as-cost alt cost not modelled; card fails when printed cost can't be paid
-func (RiseAboveRed) NotImplemented()             {}
+func (RiseAboveRed) NotImplemented()                              {}
 func (RiseAboveRed) Play(s *card.TurnState, self *card.CardState) { s.LogPlay(self) }
+
 type RiseAboveYellow struct{}
 
-func (RiseAboveYellow) ID() card.ID                 { return card.RiseAboveYellow }
+func (RiseAboveYellow) ID() card.ID              { return card.RiseAboveYellow }
 func (RiseAboveYellow) Name() string             { return "Rise Above" }
-func (RiseAboveYellow) Cost(*card.TurnState) int                { return 2 }
+func (RiseAboveYellow) Cost(*card.TurnState) int { return 2 }
 func (RiseAboveYellow) Pitch() int               { return 2 }
 func (RiseAboveYellow) Attack() int              { return 0 }
 func (RiseAboveYellow) Defense() int             { return 3 }
 func (RiseAboveYellow) Types() card.TypeSet      { return defenseReactionTypes }
 func (RiseAboveYellow) GoAgain() bool            { return false }
+
 // not implemented: hand-as-cost alt cost not modelled; card fails when printed cost can't be paid
-func (RiseAboveYellow) NotImplemented()             {}
+func (RiseAboveYellow) NotImplemented()                              {}
 func (RiseAboveYellow) Play(s *card.TurnState, self *card.CardState) { s.LogPlay(self) }
+
 type RiseAboveBlue struct{}
 
-func (RiseAboveBlue) ID() card.ID                 { return card.RiseAboveBlue }
+func (RiseAboveBlue) ID() card.ID              { return card.RiseAboveBlue }
 func (RiseAboveBlue) Name() string             { return "Rise Above" }
-func (RiseAboveBlue) Cost(*card.TurnState) int                { return 2 }
+func (RiseAboveBlue) Cost(*card.TurnState) int { return 2 }
 func (RiseAboveBlue) Pitch() int               { return 3 }
 func (RiseAboveBlue) Attack() int              { return 0 }
 func (RiseAboveBlue) Defense() int             { return 2 }
 func (RiseAboveBlue) Types() card.TypeSet      { return defenseReactionTypes }
 func (RiseAboveBlue) GoAgain() bool            { return false }
+
 // not implemented: hand-as-cost alt cost not modelled; card fails when printed cost can't be paid
-func (RiseAboveBlue) NotImplemented()             {}
+func (RiseAboveBlue) NotImplemented()                              {}
 func (RiseAboveBlue) Play(s *card.TurnState, self *card.CardState) { s.LogPlay(self) }

@@ -14,40 +14,42 @@ var arcaneCussingTypes = card.NewTypeSet(card.TypeRuneblade, card.TypeAction, ca
 
 type ArcaneCussingRed struct{}
 
-func (ArcaneCussingRed) ID() card.ID                { return card.ArcaneCussingRed }
-func (ArcaneCussingRed) Name() string               { return "Arcane Cussing" }
-func (ArcaneCussingRed) Cost(*card.TurnState) int                  { return 1 }
-func (ArcaneCussingRed) Pitch() int                 { return 1 }
-func (ArcaneCussingRed) Attack() int                { return 0 }
-func (ArcaneCussingRed) Defense() int               { return 2 }
-func (ArcaneCussingRed) Types() card.TypeSet        { return arcaneCussingTypes }
-func (ArcaneCussingRed) GoAgain() bool              { return true }
+func (ArcaneCussingRed) ID() card.ID              { return card.ArcaneCussingRed }
+func (ArcaneCussingRed) Name() string             { return "Arcane Cussing" }
+func (ArcaneCussingRed) Cost(*card.TurnState) int { return 1 }
+func (ArcaneCussingRed) Pitch() int               { return 1 }
+func (ArcaneCussingRed) Attack() int              { return 0 }
+func (ArcaneCussingRed) Defense() int             { return 2 }
+func (ArcaneCussingRed) Types() card.TypeSet      { return arcaneCussingTypes }
+func (ArcaneCussingRed) GoAgain() bool            { return true }
 func (ArcaneCussingRed) Play(s *card.TurnState, self *card.CardState) {
 	s.ApplyAndLogEffectiveAttackPlus(self, fragileAuraValue(s, 3, false))
 }
+
 type ArcaneCussingYellow struct{}
 
-func (ArcaneCussingYellow) ID() card.ID                { return card.ArcaneCussingYellow }
-func (ArcaneCussingYellow) Name() string               { return "Arcane Cussing" }
-func (ArcaneCussingYellow) Cost(*card.TurnState) int                  { return 1 }
-func (ArcaneCussingYellow) Pitch() int                 { return 2 }
-func (ArcaneCussingYellow) Attack() int                { return 0 }
-func (ArcaneCussingYellow) Defense() int               { return 2 }
-func (ArcaneCussingYellow) Types() card.TypeSet        { return arcaneCussingTypes }
-func (ArcaneCussingYellow) GoAgain() bool              { return true }
+func (ArcaneCussingYellow) ID() card.ID              { return card.ArcaneCussingYellow }
+func (ArcaneCussingYellow) Name() string             { return "Arcane Cussing" }
+func (ArcaneCussingYellow) Cost(*card.TurnState) int { return 1 }
+func (ArcaneCussingYellow) Pitch() int               { return 2 }
+func (ArcaneCussingYellow) Attack() int              { return 0 }
+func (ArcaneCussingYellow) Defense() int             { return 2 }
+func (ArcaneCussingYellow) Types() card.TypeSet      { return arcaneCussingTypes }
+func (ArcaneCussingYellow) GoAgain() bool            { return true }
 func (ArcaneCussingYellow) Play(s *card.TurnState, self *card.CardState) {
 	s.ApplyAndLogEffectiveAttackPlus(self, fragileAuraValue(s, 2, false))
 }
+
 type ArcaneCussingBlue struct{}
 
-func (ArcaneCussingBlue) ID() card.ID                { return card.ArcaneCussingBlue }
-func (ArcaneCussingBlue) Name() string               { return "Arcane Cussing" }
-func (ArcaneCussingBlue) Cost(*card.TurnState) int                  { return 1 }
-func (ArcaneCussingBlue) Pitch() int                 { return 3 }
-func (ArcaneCussingBlue) Attack() int                { return 0 }
-func (ArcaneCussingBlue) Defense() int               { return 2 }
-func (ArcaneCussingBlue) Types() card.TypeSet        { return arcaneCussingTypes }
-func (ArcaneCussingBlue) GoAgain() bool              { return true }
+func (ArcaneCussingBlue) ID() card.ID              { return card.ArcaneCussingBlue }
+func (ArcaneCussingBlue) Name() string             { return "Arcane Cussing" }
+func (ArcaneCussingBlue) Cost(*card.TurnState) int { return 1 }
+func (ArcaneCussingBlue) Pitch() int               { return 3 }
+func (ArcaneCussingBlue) Attack() int              { return 0 }
+func (ArcaneCussingBlue) Defense() int             { return 2 }
+func (ArcaneCussingBlue) Types() card.TypeSet      { return arcaneCussingTypes }
+func (ArcaneCussingBlue) GoAgain() bool            { return true }
 func (ArcaneCussingBlue) Play(s *card.TurnState, self *card.CardState) {
 	s.ApplyAndLogEffectiveAttackPlus(self, fragileAuraValue(s, 1, false))
 }

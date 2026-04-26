@@ -13,15 +13,15 @@ type stubCard struct {
 	types card.TypeSet
 }
 
-func (s stubCard) ID() card.ID                  { return card.Invalid }
-func (s stubCard) Name() string                 { return s.name }
-func (s stubCard) Cost(*card.TurnState) int                    { return s.cost }
-func (s stubCard) Pitch() int                   { return s.pitch }
-func (s stubCard) Attack() int                  { return s.power }
-func (s stubCard) Defense() int                 { return 0 }
-func (s stubCard) Types() card.TypeSet          { return s.types }
-func (s stubCard) GoAgain() bool                { return false }
-func (stubCard) Play(*card.TurnState, *card.CardState)           {}
+func (s stubCard) ID() card.ID                         { return card.Invalid }
+func (s stubCard) Name() string                        { return s.name }
+func (s stubCard) Cost(*card.TurnState) int            { return s.cost }
+func (s stubCard) Pitch() int                          { return s.pitch }
+func (s stubCard) Attack() int                         { return s.power }
+func (s stubCard) Defense() int                        { return 0 }
+func (s stubCard) Types() card.TypeSet                 { return s.types }
+func (s stubCard) GoAgain() bool                       { return false }
+func (stubCard) Play(*card.TurnState, *card.CardState) {}
 
 // stubGenericAttack returns a Generic Action - Attack stub with the given cost and base power.
 // Pitch defaults to 1; override via the pitch field if a test cares.

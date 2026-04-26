@@ -11,16 +11,17 @@ var sapwoodElixirTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction)
 
 type SapwoodElixirRed struct{}
 
-func (SapwoodElixirRed) ID() card.ID                 { return card.SapwoodElixirRed }
-func (SapwoodElixirRed) Name() string                { return "Sapwood Elixir" }
-func (SapwoodElixirRed) Cost(*card.TurnState) int                   { return 1 }
-func (SapwoodElixirRed) Pitch() int                  { return 1 }
-func (SapwoodElixirRed) Attack() int                 { return 0 }
-func (SapwoodElixirRed) Defense() int                { return 3 }
-func (SapwoodElixirRed) Types() card.TypeSet         { return sapwoodElixirTypes }
-func (SapwoodElixirRed) GoAgain() bool               { return true }
+func (SapwoodElixirRed) ID() card.ID              { return card.SapwoodElixirRed }
+func (SapwoodElixirRed) Name() string             { return "Sapwood Elixir" }
+func (SapwoodElixirRed) Cost(*card.TurnState) int { return 1 }
+func (SapwoodElixirRed) Pitch() int               { return 1 }
+func (SapwoodElixirRed) Attack() int              { return 0 }
+func (SapwoodElixirRed) Defense() int             { return 3 }
+func (SapwoodElixirRed) Types() card.TypeSet      { return sapwoodElixirTypes }
+func (SapwoodElixirRed) GoAgain() bool            { return true }
+
 // not implemented: Frailty health-gain rider dropped (status tokens not tracked)
-func (SapwoodElixirRed) NotImplemented()             {}
+func (SapwoodElixirRed) NotImplemented() {}
 func (SapwoodElixirRed) Play(s *card.TurnState, self *card.CardState) {
 	s.ApplyAndLogEffectiveAttackPlus(self, grantNextAttackActionBonus(s, 3))
 }

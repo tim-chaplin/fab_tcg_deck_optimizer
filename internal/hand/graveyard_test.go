@@ -57,8 +57,10 @@ func (gravSpyDR) Cost(*card.TurnState) int { return 0 }
 func (gravSpyDR) Pitch() int               { return 0 }
 func (gravSpyDR) Attack() int              { return 0 }
 func (gravSpyDR) Defense() int             { return 1 }
-func (gravSpyDR) Types() card.TypeSet      { return card.NewTypeSet(card.TypeGeneric, card.TypeDefenseReaction) }
-func (gravSpyDR) GoAgain() bool            { return false }
+func (gravSpyDR) Types() card.TypeSet {
+	return card.NewTypeSet(card.TypeGeneric, card.TypeDefenseReaction)
+}
+func (gravSpyDR) GoAgain() bool { return false }
 func (g gravSpyDR) Play(s *card.TurnState, self *card.CardState) {
 	*g.saw = append((*g.saw)[:0], s.Graveyard...)
 	s.LogPlay(self)
@@ -70,15 +72,16 @@ func (g gravSpyDR) Play(s *card.TurnState, self *card.CardState) {
 // seeding regardless of their type mask.
 type auraDefender struct{}
 
-func (auraDefender) ID() card.ID                               { return card.Invalid }
-func (auraDefender) Name() string                              { return "auraDefender" }
-func (auraDefender) Cost(*card.TurnState) int                  { return 0 }
-func (auraDefender) Pitch() int                                { return 0 }
-func (auraDefender) Attack() int                               { return 0 }
-func (auraDefender) Defense() int                              { return 3 }
-func (auraDefender) Types() card.TypeSet                       { return card.NewTypeSet(card.TypeAura) }
-func (auraDefender) GoAgain() bool                             { return false }
+func (auraDefender) ID() card.ID                           { return card.Invalid }
+func (auraDefender) Name() string                          { return "auraDefender" }
+func (auraDefender) Cost(*card.TurnState) int              { return 0 }
+func (auraDefender) Pitch() int                            { return 0 }
+func (auraDefender) Attack() int                           { return 0 }
+func (auraDefender) Defense() int                          { return 3 }
+func (auraDefender) Types() card.TypeSet                   { return card.NewTypeSet(card.TypeAura) }
+func (auraDefender) GoAgain() bool                         { return false }
 func (auraDefender) Play(*card.TurnState, *card.CardState) {}
+
 // TestGraveyard_PlainBlockEntersGraveyardRegardlessOfType: a defender whose type mask
 // normally keeps it in play still lands in the graveyard the instant it's used to block.
 // The test pairs an aura-typed plain blocker with a DR whose Play snapshots state.Graveyard

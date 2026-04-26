@@ -11,14 +11,15 @@ var crackedBaubleTypes = card.NewTypeSet(card.TypeGeneric)
 
 type CrackedBaubleYellow struct{}
 
-func (CrackedBaubleYellow) ID() card.ID                               { return card.CrackedBaubleYellow }
-func (CrackedBaubleYellow) Name() string                              { return "Cracked Bauble" }
-func (CrackedBaubleYellow) Cost(*card.TurnState) int                  { return 0 }
-func (CrackedBaubleYellow) Pitch() int                                { return 2 }
-func (CrackedBaubleYellow) Attack() int                               { return 0 }
-func (CrackedBaubleYellow) Defense() int                              { return 0 }
-func (CrackedBaubleYellow) Types() card.TypeSet                       { return crackedBaubleTypes }
-func (CrackedBaubleYellow) GoAgain() bool                             { return false }
+func (CrackedBaubleYellow) ID() card.ID              { return card.CrackedBaubleYellow }
+func (CrackedBaubleYellow) Name() string             { return "Cracked Bauble" }
+func (CrackedBaubleYellow) Cost(*card.TurnState) int { return 0 }
+func (CrackedBaubleYellow) Pitch() int               { return 2 }
+func (CrackedBaubleYellow) Attack() int              { return 0 }
+func (CrackedBaubleYellow) Defense() int             { return 0 }
+func (CrackedBaubleYellow) Types() card.TypeSet      { return crackedBaubleTypes }
+func (CrackedBaubleYellow) GoAgain() bool            { return false }
+
 // not implemented: draft-format pitch resource; no other effect
-func (CrackedBaubleYellow) NotImplemented()                           {}
+func (CrackedBaubleYellow) NotImplemented()                              {}
 func (CrackedBaubleYellow) Play(s *card.TurnState, self *card.CardState) { s.LogPlay(self) }

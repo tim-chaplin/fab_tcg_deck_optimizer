@@ -11,15 +11,16 @@ var talismanOfTithesTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, c
 
 type TalismanOfTithesBlue struct{}
 
-func (TalismanOfTithesBlue) ID() card.ID                               { return card.TalismanOfTithesBlue }
-func (TalismanOfTithesBlue) Name() string                              { return "Talisman of Tithes" }
-func (TalismanOfTithesBlue) Cost(*card.TurnState) int                  { return 0 }
-func (TalismanOfTithesBlue) Pitch() int                                { return 3 }
-func (TalismanOfTithesBlue) Attack() int                               { return 0 }
-func (TalismanOfTithesBlue) Defense() int                              { return 0 }
-func (TalismanOfTithesBlue) Types() card.TypeSet                       { return talismanOfTithesTypes }
-func (TalismanOfTithesBlue) GoAgain() bool                             { return true }
+func (TalismanOfTithesBlue) ID() card.ID              { return card.TalismanOfTithesBlue }
+func (TalismanOfTithesBlue) Name() string             { return "Talisman of Tithes" }
+func (TalismanOfTithesBlue) Cost(*card.TurnState) int { return 0 }
+func (TalismanOfTithesBlue) Pitch() int               { return 3 }
+func (TalismanOfTithesBlue) Attack() int              { return 0 }
+func (TalismanOfTithesBlue) Defense() int             { return 0 }
+func (TalismanOfTithesBlue) Types() card.TypeSet      { return talismanOfTithesTypes }
+func (TalismanOfTithesBlue) GoAgain() bool            { return true }
+
 // not implemented: self-destroys on an opposing draw during your action phase → opponent draws
 // minus 1
-func (TalismanOfTithesBlue) NotImplemented()                           {}
+func (TalismanOfTithesBlue) NotImplemented()                              {}
 func (TalismanOfTithesBlue) Play(s *card.TurnState, self *card.CardState) { s.LogPlay(self) }

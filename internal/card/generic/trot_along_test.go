@@ -11,7 +11,7 @@ import (
 func TestTrotAlong_NoAttackReturnsZero(t *testing.T) {
 	s := card.TurnState{}
 	(TrotAlongBlue{}).Play(&s, &card.CardState{Card: TrotAlongBlue{}})
-	if got := s.Value; got != 0{
+	if got := s.Value; got != 0 {
 		t.Errorf("Play() = %d, want 0", got)
 	}
 }
@@ -22,7 +22,7 @@ func TestTrotAlong_HighPowerAttackDoesNotFire(t *testing.T) {
 	target := &card.CardState{Card: stubGenericAttack(0, 4)}
 	s := card.TurnState{CardsRemaining: []*card.CardState{target}}
 	(TrotAlongBlue{}).Play(&s, &card.CardState{Card: TrotAlongBlue{}})
-	if got := s.Value; got != 0{
+	if got := s.Value; got != 0 {
 		t.Errorf("Play() = %d, want 0 (power 4 > 3)", got)
 	}
 	if target.GrantedGoAgain {
@@ -35,7 +35,7 @@ func TestTrotAlong_LowPowerAttackGrantsGoAgain(t *testing.T) {
 	target := &card.CardState{Card: stubGenericAttack(0, 3)}
 	s := card.TurnState{CardsRemaining: []*card.CardState{target}}
 	(TrotAlongBlue{}).Play(&s, &card.CardState{Card: TrotAlongBlue{}})
-	if got := s.Value; got != 0{
+	if got := s.Value; got != 0 {
 		t.Errorf("Play() = %d, want 0 (Trot Along grants go again, not damage)", got)
 	}
 	if !target.GrantedGoAgain {

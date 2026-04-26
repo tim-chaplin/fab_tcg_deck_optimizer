@@ -11,14 +11,15 @@ var talismanOfWarfareTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, 
 
 type TalismanOfWarfareYellow struct{}
 
-func (TalismanOfWarfareYellow) ID() card.ID                               { return card.TalismanOfWarfareYellow }
-func (TalismanOfWarfareYellow) Name() string                              { return "Talisman of Warfare" }
-func (TalismanOfWarfareYellow) Cost(*card.TurnState) int                  { return 0 }
-func (TalismanOfWarfareYellow) Pitch() int                                { return 2 }
-func (TalismanOfWarfareYellow) Attack() int                               { return 0 }
-func (TalismanOfWarfareYellow) Defense() int                              { return 0 }
-func (TalismanOfWarfareYellow) Types() card.TypeSet                       { return talismanOfWarfareTypes }
-func (TalismanOfWarfareYellow) GoAgain() bool                             { return true }
+func (TalismanOfWarfareYellow) ID() card.ID              { return card.TalismanOfWarfareYellow }
+func (TalismanOfWarfareYellow) Name() string             { return "Talisman of Warfare" }
+func (TalismanOfWarfareYellow) Cost(*card.TurnState) int { return 0 }
+func (TalismanOfWarfareYellow) Pitch() int               { return 2 }
+func (TalismanOfWarfareYellow) Attack() int              { return 0 }
+func (TalismanOfWarfareYellow) Defense() int             { return 0 }
+func (TalismanOfWarfareYellow) Types() card.TypeSet      { return talismanOfWarfareTypes }
+func (TalismanOfWarfareYellow) GoAgain() bool            { return true }
+
 // not implemented: self-destroys + wipes all arsenals on a 2-damage hit
-func (TalismanOfWarfareYellow) NotImplemented()                           {}
+func (TalismanOfWarfareYellow) NotImplemented()                              {}
 func (TalismanOfWarfareYellow) Play(s *card.TurnState, self *card.CardState) { s.LogPlay(self) }

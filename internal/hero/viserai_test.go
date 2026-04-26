@@ -9,44 +9,46 @@ import (
 // stubRuneAttack is a minimal Runeblade attack-action card.
 type stubRuneAttack struct{}
 
-func (stubRuneAttack) ID() card.ID             { return card.Invalid }
-func (stubRuneAttack) Name() string                { return "StubRuneAttack" }
-func (stubRuneAttack) Cost(*card.TurnState) int                   { return 0 }
-func (stubRuneAttack) Pitch() int                  { return 0 }
-func (stubRuneAttack) Attack() int                 { return 0 }
-func (stubRuneAttack) Defense() int                { return 0 }
+func (stubRuneAttack) ID() card.ID              { return card.Invalid }
+func (stubRuneAttack) Name() string             { return "StubRuneAttack" }
+func (stubRuneAttack) Cost(*card.TurnState) int { return 0 }
+func (stubRuneAttack) Pitch() int               { return 0 }
+func (stubRuneAttack) Attack() int              { return 0 }
+func (stubRuneAttack) Defense() int             { return 0 }
 func (stubRuneAttack) Types() card.TypeSet {
 	return card.NewTypeSet(card.TypeRuneblade, card.TypeAction, card.TypeAttack)
 }
-func (stubRuneAttack) GoAgain() bool            { return true }
+func (stubRuneAttack) GoAgain() bool                         { return true }
 func (stubRuneAttack) Play(*card.TurnState, *card.CardState) {}
+
 // stubRuneAura is a minimal Runeblade non-attack action (an Aura).
 type stubRuneAura struct{}
 
-func (stubRuneAura) ID() card.ID             { return card.Invalid }
-func (stubRuneAura) Name() string                { return "StubRuneAura" }
-func (stubRuneAura) Cost(*card.TurnState) int                   { return 0 }
-func (stubRuneAura) Pitch() int                  { return 0 }
-func (stubRuneAura) Attack() int                 { return 0 }
-func (stubRuneAura) Defense() int                { return 0 }
+func (stubRuneAura) ID() card.ID              { return card.Invalid }
+func (stubRuneAura) Name() string             { return "StubRuneAura" }
+func (stubRuneAura) Cost(*card.TurnState) int { return 0 }
+func (stubRuneAura) Pitch() int               { return 0 }
+func (stubRuneAura) Attack() int              { return 0 }
+func (stubRuneAura) Defense() int             { return 0 }
 func (stubRuneAura) Types() card.TypeSet {
 	return card.NewTypeSet(card.TypeRuneblade, card.TypeAction, card.TypeAura)
 }
-func (stubRuneAura) GoAgain() bool            { return true }
+func (stubRuneAura) GoAgain() bool                         { return true }
 func (stubRuneAura) Play(*card.TurnState, *card.CardState) {}
+
 // stubNonRuneblade is an Action-Attack with no Runeblade type — should never trigger Viserai.
 type stubNonRuneblade struct{}
 
-func (stubNonRuneblade) ID() card.ID             { return card.Invalid }
+func (stubNonRuneblade) ID() card.ID              { return card.Invalid }
 func (stubNonRuneblade) Name() string             { return "StubGeneric" }
-func (stubNonRuneblade) Cost(*card.TurnState) int                { return 0 }
+func (stubNonRuneblade) Cost(*card.TurnState) int { return 0 }
 func (stubNonRuneblade) Pitch() int               { return 0 }
 func (stubNonRuneblade) Attack() int              { return 0 }
 func (stubNonRuneblade) Defense() int             { return 0 }
 func (stubNonRuneblade) Types() card.TypeSet {
 	return card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeAttack)
 }
-func (stubNonRuneblade) GoAgain() bool            { return true }
+func (stubNonRuneblade) GoAgain() bool                         { return true }
 func (stubNonRuneblade) Play(*card.TurnState, *card.CardState) {}
 func TestViserai_RunebladeAfterNonAttackActionTriggers(t *testing.T) {
 	// Non-attack action played first, then a Runeblade attack. Viserai's OnCardPlayed creates a
@@ -84,16 +86,16 @@ func TestViserai_CardStateNotRuneblade(t *testing.T) {
 // when it swings.
 type stubRuneWeapon struct{}
 
-func (stubRuneWeapon) ID() card.ID             { return card.Invalid }
+func (stubRuneWeapon) ID() card.ID              { return card.Invalid }
 func (stubRuneWeapon) Name() string             { return "StubRuneWeapon" }
-func (stubRuneWeapon) Cost(*card.TurnState) int                { return 0 }
+func (stubRuneWeapon) Cost(*card.TurnState) int { return 0 }
 func (stubRuneWeapon) Pitch() int               { return 0 }
 func (stubRuneWeapon) Attack() int              { return 0 }
 func (stubRuneWeapon) Defense() int             { return 0 }
 func (stubRuneWeapon) Types() card.TypeSet {
 	return card.NewTypeSet(card.TypeRuneblade, card.TypeWeapon)
 }
-func (stubRuneWeapon) GoAgain() bool            { return true }
+func (stubRuneWeapon) GoAgain() bool                         { return true }
 func (stubRuneWeapon) Play(*card.TurnState, *card.CardState) {}
 func TestViserai_WeaponSwingDoesNotTrigger(t *testing.T) {
 	// Even with a prior non-attack action in CardsPlayed, swinging a Runeblade weapon isn't "playing a

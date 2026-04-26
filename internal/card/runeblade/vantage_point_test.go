@@ -19,7 +19,7 @@ func TestVantagePoint_BaseDamageNoAura(t *testing.T) {
 	for _, tc := range cases {
 		var s card.TurnState
 		tc.c.Play(&s, &card.CardState{Card: tc.c})
-		if got := s.Value; got != tc.base{
+		if got := s.Value; got != tc.base {
 			t.Errorf("%s: Play() = %d, want %d", tc.c.Name(), got, tc.base)
 		}
 		if s.Overpower {
@@ -33,7 +33,7 @@ func TestVantagePoint_AuraPlayedSetsOverpower(t *testing.T) {
 	// by the solver (incoming damage is a flat opponent profile, not blocked).
 	s := card.TurnState{CardsPlayed: []card.Card{stubAura{}}}
 	(VantagePointRed{}).Play(&s, &card.CardState{Card: VantagePointRed{}})
-	if got := s.Value; got != 7{
+	if got := s.Value; got != 7 {
 		t.Errorf("Play() = %d, want 7", got)
 	}
 	if !s.Overpower {
@@ -45,7 +45,7 @@ func TestVantagePoint_AuraCreatedSetsOverpower(t *testing.T) {
 	// AuraCreated flag (e.g. from an earlier Runechant-creating card) also triggers Overpower.
 	s := card.TurnState{AuraCreated: true}
 	(VantagePointRed{}).Play(&s, &card.CardState{Card: VantagePointRed{}})
-	if got := s.Value; got != 7{
+	if got := s.Value; got != 7 {
 		t.Errorf("Play() = %d, want 7", got)
 	}
 	if !s.Overpower {

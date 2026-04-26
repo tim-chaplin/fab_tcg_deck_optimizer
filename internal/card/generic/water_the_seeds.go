@@ -29,40 +29,42 @@ func waterTheSeedsPlay(basePower int, s *card.TurnState) int {
 
 type WaterTheSeedsRed struct{}
 
-func (WaterTheSeedsRed) ID() card.ID                 { return card.WaterTheSeedsRed }
-func (WaterTheSeedsRed) Name() string                { return "Water the Seeds" }
-func (WaterTheSeedsRed) Cost(*card.TurnState) int                   { return 1 }
-func (WaterTheSeedsRed) Pitch() int                  { return 1 }
-func (WaterTheSeedsRed) Attack() int                 { return 3 }
-func (WaterTheSeedsRed) Defense() int                { return 2 }
-func (WaterTheSeedsRed) Types() card.TypeSet         { return waterTheSeedsTypes }
-func (WaterTheSeedsRed) GoAgain() bool               { return true }
+func (WaterTheSeedsRed) ID() card.ID              { return card.WaterTheSeedsRed }
+func (WaterTheSeedsRed) Name() string             { return "Water the Seeds" }
+func (WaterTheSeedsRed) Cost(*card.TurnState) int { return 1 }
+func (WaterTheSeedsRed) Pitch() int               { return 1 }
+func (WaterTheSeedsRed) Attack() int              { return 3 }
+func (WaterTheSeedsRed) Defense() int             { return 2 }
+func (WaterTheSeedsRed) Types() card.TypeSet      { return waterTheSeedsTypes }
+func (WaterTheSeedsRed) GoAgain() bool            { return true }
 func (c WaterTheSeedsRed) Play(s *card.TurnState, self *card.CardState) {
 	s.ApplyAndLogEffectiveAttackPlus(self, waterTheSeedsPlay(c.Attack(), s)-self.Card.Attack())
 }
+
 type WaterTheSeedsYellow struct{}
 
-func (WaterTheSeedsYellow) ID() card.ID                 { return card.WaterTheSeedsYellow }
-func (WaterTheSeedsYellow) Name() string                { return "Water the Seeds" }
-func (WaterTheSeedsYellow) Cost(*card.TurnState) int                   { return 1 }
-func (WaterTheSeedsYellow) Pitch() int                  { return 2 }
-func (WaterTheSeedsYellow) Attack() int                 { return 2 }
-func (WaterTheSeedsYellow) Defense() int                { return 2 }
-func (WaterTheSeedsYellow) Types() card.TypeSet         { return waterTheSeedsTypes }
-func (WaterTheSeedsYellow) GoAgain() bool               { return true }
+func (WaterTheSeedsYellow) ID() card.ID              { return card.WaterTheSeedsYellow }
+func (WaterTheSeedsYellow) Name() string             { return "Water the Seeds" }
+func (WaterTheSeedsYellow) Cost(*card.TurnState) int { return 1 }
+func (WaterTheSeedsYellow) Pitch() int               { return 2 }
+func (WaterTheSeedsYellow) Attack() int              { return 2 }
+func (WaterTheSeedsYellow) Defense() int             { return 2 }
+func (WaterTheSeedsYellow) Types() card.TypeSet      { return waterTheSeedsTypes }
+func (WaterTheSeedsYellow) GoAgain() bool            { return true }
 func (c WaterTheSeedsYellow) Play(s *card.TurnState, self *card.CardState) {
 	s.ApplyAndLogEffectiveAttackPlus(self, waterTheSeedsPlay(c.Attack(), s)-self.Card.Attack())
 }
+
 type WaterTheSeedsBlue struct{}
 
-func (WaterTheSeedsBlue) ID() card.ID                 { return card.WaterTheSeedsBlue }
-func (WaterTheSeedsBlue) Name() string                { return "Water the Seeds" }
-func (WaterTheSeedsBlue) Cost(*card.TurnState) int                   { return 1 }
-func (WaterTheSeedsBlue) Pitch() int                  { return 3 }
-func (WaterTheSeedsBlue) Attack() int                 { return 1 }
-func (WaterTheSeedsBlue) Defense() int                { return 2 }
-func (WaterTheSeedsBlue) Types() card.TypeSet         { return waterTheSeedsTypes }
-func (WaterTheSeedsBlue) GoAgain() bool               { return true }
+func (WaterTheSeedsBlue) ID() card.ID              { return card.WaterTheSeedsBlue }
+func (WaterTheSeedsBlue) Name() string             { return "Water the Seeds" }
+func (WaterTheSeedsBlue) Cost(*card.TurnState) int { return 1 }
+func (WaterTheSeedsBlue) Pitch() int               { return 3 }
+func (WaterTheSeedsBlue) Attack() int              { return 1 }
+func (WaterTheSeedsBlue) Defense() int             { return 2 }
+func (WaterTheSeedsBlue) Types() card.TypeSet      { return waterTheSeedsTypes }
+func (WaterTheSeedsBlue) GoAgain() bool            { return true }
 func (c WaterTheSeedsBlue) Play(s *card.TurnState, self *card.CardState) {
 	s.ApplyAndLogEffectiveAttackPlus(self, waterTheSeedsPlay(c.Attack(), s)-self.Card.Attack())
 }

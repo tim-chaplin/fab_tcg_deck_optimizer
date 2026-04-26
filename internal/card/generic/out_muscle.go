@@ -11,40 +11,51 @@ var outMuscleTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.Typ
 
 type OutMuscleRed struct{}
 
-func (OutMuscleRed) ID() card.ID                 { return card.OutMuscleRed }
-func (OutMuscleRed) Name() string                { return "Out Muscle" }
-func (OutMuscleRed) Cost(*card.TurnState) int                   { return 3 }
-func (OutMuscleRed) Pitch() int                  { return 1 }
-func (OutMuscleRed) Attack() int                 { return 6 }
-func (OutMuscleRed) Defense() int                { return 2 }
-func (OutMuscleRed) Types() card.TypeSet         { return outMuscleTypes }
-func (OutMuscleRed) GoAgain() bool               { return false }
+func (OutMuscleRed) ID() card.ID              { return card.OutMuscleRed }
+func (OutMuscleRed) Name() string             { return "Out Muscle" }
+func (OutMuscleRed) Cost(*card.TurnState) int { return 3 }
+func (OutMuscleRed) Pitch() int               { return 1 }
+func (OutMuscleRed) Attack() int              { return 6 }
+func (OutMuscleRed) Defense() int             { return 2 }
+func (OutMuscleRed) Types() card.TypeSet      { return outMuscleTypes }
+func (OutMuscleRed) GoAgain() bool            { return false }
+
 // not implemented: defended-by-equal-or-greater-power go-again gate
-func (OutMuscleRed) NotImplemented()             {}
-func (c OutMuscleRed) Play(s *card.TurnState, self *card.CardState) { s.ApplyAndLogEffectiveAttack(self) }
+func (OutMuscleRed) NotImplemented() {}
+func (c OutMuscleRed) Play(s *card.TurnState, self *card.CardState) {
+	s.ApplyAndLogEffectiveAttack(self)
+}
+
 type OutMuscleYellow struct{}
 
-func (OutMuscleYellow) ID() card.ID                 { return card.OutMuscleYellow }
-func (OutMuscleYellow) Name() string                { return "Out Muscle" }
-func (OutMuscleYellow) Cost(*card.TurnState) int                   { return 3 }
-func (OutMuscleYellow) Pitch() int                  { return 2 }
-func (OutMuscleYellow) Attack() int                 { return 5 }
-func (OutMuscleYellow) Defense() int                { return 2 }
-func (OutMuscleYellow) Types() card.TypeSet         { return outMuscleTypes }
-func (OutMuscleYellow) GoAgain() bool               { return false }
+func (OutMuscleYellow) ID() card.ID              { return card.OutMuscleYellow }
+func (OutMuscleYellow) Name() string             { return "Out Muscle" }
+func (OutMuscleYellow) Cost(*card.TurnState) int { return 3 }
+func (OutMuscleYellow) Pitch() int               { return 2 }
+func (OutMuscleYellow) Attack() int              { return 5 }
+func (OutMuscleYellow) Defense() int             { return 2 }
+func (OutMuscleYellow) Types() card.TypeSet      { return outMuscleTypes }
+func (OutMuscleYellow) GoAgain() bool            { return false }
+
 // not implemented: defended-by-equal-or-greater-power go-again gate
-func (OutMuscleYellow) NotImplemented()             {}
-func (c OutMuscleYellow) Play(s *card.TurnState, self *card.CardState) { s.ApplyAndLogEffectiveAttack(self) }
+func (OutMuscleYellow) NotImplemented() {}
+func (c OutMuscleYellow) Play(s *card.TurnState, self *card.CardState) {
+	s.ApplyAndLogEffectiveAttack(self)
+}
+
 type OutMuscleBlue struct{}
 
-func (OutMuscleBlue) ID() card.ID                 { return card.OutMuscleBlue }
-func (OutMuscleBlue) Name() string                { return "Out Muscle" }
-func (OutMuscleBlue) Cost(*card.TurnState) int                   { return 3 }
-func (OutMuscleBlue) Pitch() int                  { return 3 }
-func (OutMuscleBlue) Attack() int                 { return 4 }
-func (OutMuscleBlue) Defense() int                { return 2 }
-func (OutMuscleBlue) Types() card.TypeSet         { return outMuscleTypes }
-func (OutMuscleBlue) GoAgain() bool               { return false }
+func (OutMuscleBlue) ID() card.ID              { return card.OutMuscleBlue }
+func (OutMuscleBlue) Name() string             { return "Out Muscle" }
+func (OutMuscleBlue) Cost(*card.TurnState) int { return 3 }
+func (OutMuscleBlue) Pitch() int               { return 3 }
+func (OutMuscleBlue) Attack() int              { return 4 }
+func (OutMuscleBlue) Defense() int             { return 2 }
+func (OutMuscleBlue) Types() card.TypeSet      { return outMuscleTypes }
+func (OutMuscleBlue) GoAgain() bool            { return false }
+
 // not implemented: defended-by-equal-or-greater-power go-again gate
-func (OutMuscleBlue) NotImplemented()             {}
-func (c OutMuscleBlue) Play(s *card.TurnState, self *card.CardState) { s.ApplyAndLogEffectiveAttack(self) }
+func (OutMuscleBlue) NotImplemented() {}
+func (c OutMuscleBlue) Play(s *card.TurnState, self *card.CardState) {
+	s.ApplyAndLogEffectiveAttack(self)
+}

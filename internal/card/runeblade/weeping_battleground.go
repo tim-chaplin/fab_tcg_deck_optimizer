@@ -27,6 +27,7 @@ func (WeepingBattlegroundRed) NoMemo()                  {}
 func (WeepingBattlegroundRed) Play(s *card.TurnState, self *card.CardState) {
 	s.ApplyAndLogEffectiveAttackPlus(self, banishAuraFromGraveyard(s))
 }
+
 type WeepingBattlegroundYellow struct{}
 
 func (WeepingBattlegroundYellow) ID() card.ID              { return card.WeepingBattlegroundYellow }
@@ -41,6 +42,7 @@ func (WeepingBattlegroundYellow) NoMemo()                  {}
 func (WeepingBattlegroundYellow) Play(s *card.TurnState, self *card.CardState) {
 	s.ApplyAndLogEffectiveAttackPlus(self, banishAuraFromGraveyard(s))
 }
+
 type WeepingBattlegroundBlue struct{}
 
 func (WeepingBattlegroundBlue) ID() card.ID              { return card.WeepingBattlegroundBlue }

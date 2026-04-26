@@ -12,14 +12,15 @@ var amuletOfIgnitionTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, c
 
 type AmuletOfIgnitionYellow struct{}
 
-func (AmuletOfIgnitionYellow) ID() card.ID                               { return card.AmuletOfIgnitionYellow }
-func (AmuletOfIgnitionYellow) Name() string                              { return "Amulet of Ignition" }
-func (AmuletOfIgnitionYellow) Cost(*card.TurnState) int                  { return 0 }
-func (AmuletOfIgnitionYellow) Pitch() int                                { return 2 }
-func (AmuletOfIgnitionYellow) Attack() int                               { return 0 }
-func (AmuletOfIgnitionYellow) Defense() int                              { return 0 }
-func (AmuletOfIgnitionYellow) Types() card.TypeSet                       { return amuletOfIgnitionTypes }
-func (AmuletOfIgnitionYellow) GoAgain() bool                             { return true }
+func (AmuletOfIgnitionYellow) ID() card.ID              { return card.AmuletOfIgnitionYellow }
+func (AmuletOfIgnitionYellow) Name() string             { return "Amulet of Ignition" }
+func (AmuletOfIgnitionYellow) Cost(*card.TurnState) int { return 0 }
+func (AmuletOfIgnitionYellow) Pitch() int               { return 2 }
+func (AmuletOfIgnitionYellow) Attack() int              { return 0 }
+func (AmuletOfIgnitionYellow) Defense() int             { return 0 }
+func (AmuletOfIgnitionYellow) Types() card.TypeSet      { return amuletOfIgnitionTypes }
+func (AmuletOfIgnitionYellow) GoAgain() bool            { return true }
+
 // not implemented: Instant 'next activated ability costs {r} less'
-func (AmuletOfIgnitionYellow) NotImplemented()                           {}
+func (AmuletOfIgnitionYellow) NotImplemented()                              {}
 func (AmuletOfIgnitionYellow) Play(s *card.TurnState, self *card.CardState) { s.LogPlay(self) }

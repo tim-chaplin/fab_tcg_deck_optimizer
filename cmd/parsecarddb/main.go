@@ -15,32 +15,32 @@ import (
 // Card mirrors the columns of card.csv (csvs/english/card.csv in the-fab-cube source repo).
 // One CSV row = one Card.
 type Card struct {
-	UniqueID                string
-	Name                    string
-	Color                   string
-	Pitch                   string
-	Cost                    string
-	Power                   string
-	Defense                 string
-	Health                  string
-	Intelligence            string
-	Arcane                  string
-	Types                   string
-	Traits                  string
-	CardKeywords            string
-	AbilitiesAndEffects     string
+	UniqueID                 string
+	Name                     string
+	Color                    string
+	Pitch                    string
+	Cost                     string
+	Power                    string
+	Defense                  string
+	Health                   string
+	Intelligence             string
+	Arcane                   string
+	Types                    string
+	Traits                   string
+	CardKeywords             string
+	AbilitiesAndEffects      string
 	AbilityAndEffectKeywords string
-	GrantedKeywords         string
-	RemovedKeywords         string
-	InteractsWithKeywords   string
-	FunctionalText          string
-	TypeText                string
-	CardPlayedHorizontally  string
-	BlitzLegal              string
-	CCLegal                 string
-	SilverAgeLegal          string
-	CommonerLegal           string
-	LLLegal                 string
+	GrantedKeywords          string
+	RemovedKeywords          string
+	InteractsWithKeywords    string
+	FunctionalText           string
+	TypeText                 string
+	CardPlayedHorizontally   string
+	BlitzLegal               string
+	CCLegal                  string
+	SilverAgeLegal           string
+	CommonerLegal            string
+	LLLegal                  string
 }
 
 // String pretty-prints a Card, omitting blank fields. Implements fmt.Stringer.

@@ -11,19 +11,21 @@ var pursueToTheEdgeOfOblivionTypes = card.NewTypeSet(card.TypeGeneric, card.Type
 
 type PursueToTheEdgeOfOblivionRed struct{}
 
-func (PursueToTheEdgeOfOblivionRed) ID() card.ID                 { return card.PursueToTheEdgeOfOblivionRed }
-func (PursueToTheEdgeOfOblivionRed) Name() string                { return "Pursue to the Edge of Oblivion" }
-func (PursueToTheEdgeOfOblivionRed) Cost(*card.TurnState) int                   { return 0 }
-func (PursueToTheEdgeOfOblivionRed) Pitch() int                  { return 1 }
-func (PursueToTheEdgeOfOblivionRed) Attack() int                 { return 4 }
-func (PursueToTheEdgeOfOblivionRed) Defense() int                { return 3 }
-func (PursueToTheEdgeOfOblivionRed) Types() card.TypeSet         { return pursueToTheEdgeOfOblivionTypes }
-func (PursueToTheEdgeOfOblivionRed) GoAgain() bool               { return false }
+func (PursueToTheEdgeOfOblivionRed) ID() card.ID              { return card.PursueToTheEdgeOfOblivionRed }
+func (PursueToTheEdgeOfOblivionRed) Name() string             { return "Pursue to the Edge of Oblivion" }
+func (PursueToTheEdgeOfOblivionRed) Cost(*card.TurnState) int { return 0 }
+func (PursueToTheEdgeOfOblivionRed) Pitch() int               { return 1 }
+func (PursueToTheEdgeOfOblivionRed) Attack() int              { return 4 }
+func (PursueToTheEdgeOfOblivionRed) Defense() int             { return 3 }
+func (PursueToTheEdgeOfOblivionRed) Types() card.TypeSet      { return pursueToTheEdgeOfOblivionTypes }
+func (PursueToTheEdgeOfOblivionRed) GoAgain() bool            { return false }
+
 // not implemented: on-hit mark
-func (PursueToTheEdgeOfOblivionRed) NotImplemented()             {}
+func (PursueToTheEdgeOfOblivionRed) NotImplemented() {}
 func (c PursueToTheEdgeOfOblivionRed) Play(s *card.TurnState, self *card.CardState) {
 	s.ApplyAndLogEffectiveAttackPlus(self, pursueToTheEdgeOfOblivionDamage(c.Attack(), self)-self.Card.Attack())
 }
+
 // pursueToTheEdgeOfOblivionDamage is a breadcrumb for the on-hit "mark the hero" rider — marks
 // aren't tracked (see TODO.md).
 func pursueToTheEdgeOfOblivionDamage(attack int, self *card.CardState) int {

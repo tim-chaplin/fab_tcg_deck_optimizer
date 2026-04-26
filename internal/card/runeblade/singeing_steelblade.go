@@ -18,40 +18,42 @@ func singeingSteelbladePlay(attack int, s *card.TurnState) int {
 
 type SingeingSteelbladeRed struct{}
 
-func (SingeingSteelbladeRed) ID() card.ID                 { return card.SingeingSteelbladeRed }
-func (SingeingSteelbladeRed) Name() string               { return "Singeing Steelblade" }
-func (SingeingSteelbladeRed) Cost(*card.TurnState) int                  { return 1 }
-func (SingeingSteelbladeRed) Pitch() int                 { return 1 }
-func (SingeingSteelbladeRed) Attack() int                { return 4 }
-func (SingeingSteelbladeRed) Defense() int               { return 3 }
-func (SingeingSteelbladeRed) Types() card.TypeSet        { return singeingSteelbladeTypes }
-func (SingeingSteelbladeRed) GoAgain() bool              { return false }
+func (SingeingSteelbladeRed) ID() card.ID              { return card.SingeingSteelbladeRed }
+func (SingeingSteelbladeRed) Name() string             { return "Singeing Steelblade" }
+func (SingeingSteelbladeRed) Cost(*card.TurnState) int { return 1 }
+func (SingeingSteelbladeRed) Pitch() int               { return 1 }
+func (SingeingSteelbladeRed) Attack() int              { return 4 }
+func (SingeingSteelbladeRed) Defense() int             { return 3 }
+func (SingeingSteelbladeRed) Types() card.TypeSet      { return singeingSteelbladeTypes }
+func (SingeingSteelbladeRed) GoAgain() bool            { return false }
 func (c SingeingSteelbladeRed) Play(s *card.TurnState, self *card.CardState) {
 	s.ApplyAndLogEffectiveAttackPlus(self, singeingSteelbladePlay(c.Attack(), s)-self.Card.Attack())
 }
+
 type SingeingSteelbladeYellow struct{}
 
-func (SingeingSteelbladeYellow) ID() card.ID                 { return card.SingeingSteelbladeYellow }
-func (SingeingSteelbladeYellow) Name() string               { return "Singeing Steelblade" }
-func (SingeingSteelbladeYellow) Cost(*card.TurnState) int                  { return 1 }
-func (SingeingSteelbladeYellow) Pitch() int                 { return 2 }
-func (SingeingSteelbladeYellow) Attack() int                { return 3 }
-func (SingeingSteelbladeYellow) Defense() int               { return 3 }
-func (SingeingSteelbladeYellow) Types() card.TypeSet        { return singeingSteelbladeTypes }
-func (SingeingSteelbladeYellow) GoAgain() bool              { return false }
+func (SingeingSteelbladeYellow) ID() card.ID              { return card.SingeingSteelbladeYellow }
+func (SingeingSteelbladeYellow) Name() string             { return "Singeing Steelblade" }
+func (SingeingSteelbladeYellow) Cost(*card.TurnState) int { return 1 }
+func (SingeingSteelbladeYellow) Pitch() int               { return 2 }
+func (SingeingSteelbladeYellow) Attack() int              { return 3 }
+func (SingeingSteelbladeYellow) Defense() int             { return 3 }
+func (SingeingSteelbladeYellow) Types() card.TypeSet      { return singeingSteelbladeTypes }
+func (SingeingSteelbladeYellow) GoAgain() bool            { return false }
 func (c SingeingSteelbladeYellow) Play(s *card.TurnState, self *card.CardState) {
 	s.ApplyAndLogEffectiveAttackPlus(self, singeingSteelbladePlay(c.Attack(), s)-self.Card.Attack())
 }
+
 type SingeingSteelbladeBlue struct{}
 
-func (SingeingSteelbladeBlue) ID() card.ID                 { return card.SingeingSteelbladeBlue }
-func (SingeingSteelbladeBlue) Name() string               { return "Singeing Steelblade" }
-func (SingeingSteelbladeBlue) Cost(*card.TurnState) int                  { return 1 }
-func (SingeingSteelbladeBlue) Pitch() int                 { return 3 }
-func (SingeingSteelbladeBlue) Attack() int                { return 2 }
-func (SingeingSteelbladeBlue) Defense() int               { return 3 }
-func (SingeingSteelbladeBlue) Types() card.TypeSet        { return singeingSteelbladeTypes }
-func (SingeingSteelbladeBlue) GoAgain() bool              { return false }
+func (SingeingSteelbladeBlue) ID() card.ID              { return card.SingeingSteelbladeBlue }
+func (SingeingSteelbladeBlue) Name() string             { return "Singeing Steelblade" }
+func (SingeingSteelbladeBlue) Cost(*card.TurnState) int { return 1 }
+func (SingeingSteelbladeBlue) Pitch() int               { return 3 }
+func (SingeingSteelbladeBlue) Attack() int              { return 2 }
+func (SingeingSteelbladeBlue) Defense() int             { return 3 }
+func (SingeingSteelbladeBlue) Types() card.TypeSet      { return singeingSteelbladeTypes }
+func (SingeingSteelbladeBlue) GoAgain() bool            { return false }
 func (c SingeingSteelbladeBlue) Play(s *card.TurnState, self *card.CardState) {
 	s.ApplyAndLogEffectiveAttackPlus(self, singeingSteelbladePlay(c.Attack(), s)-self.Card.Attack())
 }

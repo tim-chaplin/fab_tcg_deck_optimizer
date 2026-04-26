@@ -13,19 +13,21 @@ var jackBeNimbleTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.
 
 type JackBeNimbleRed struct{}
 
-func (JackBeNimbleRed) ID() card.ID                 { return card.JackBeNimbleRed }
-func (JackBeNimbleRed) Name() string                { return "Jack Be Nimble" }
-func (JackBeNimbleRed) Cost(*card.TurnState) int                   { return 0 }
-func (JackBeNimbleRed) Pitch() int                  { return 1 }
-func (JackBeNimbleRed) Attack() int                 { return 3 }
-func (JackBeNimbleRed) Defense() int                { return 3 }
-func (JackBeNimbleRed) Types() card.TypeSet         { return jackBeNimbleTypes }
-func (JackBeNimbleRed) GoAgain() bool               { return false }
+func (JackBeNimbleRed) ID() card.ID              { return card.JackBeNimbleRed }
+func (JackBeNimbleRed) Name() string             { return "Jack Be Nimble" }
+func (JackBeNimbleRed) Cost(*card.TurnState) int { return 0 }
+func (JackBeNimbleRed) Pitch() int               { return 1 }
+func (JackBeNimbleRed) Attack() int              { return 3 }
+func (JackBeNimbleRed) Defense() int             { return 3 }
+func (JackBeNimbleRed) Types() card.TypeSet      { return jackBeNimbleTypes }
+func (JackBeNimbleRed) GoAgain() bool            { return false }
+
 // not implemented: graveyard-banish cost + on-hit item steal
-func (JackBeNimbleRed) NotImplemented()             {}
+func (JackBeNimbleRed) NotImplemented() {}
 func (c JackBeNimbleRed) Play(s *card.TurnState, self *card.CardState) {
 	s.ApplyAndLogEffectiveAttackPlus(self, jackBeNimbleDamage(c.Attack(), self)-self.Card.Attack())
 }
+
 // jackBeNimbleDamage is a breadcrumb for the on-hit "steal an item" rider — not modelled yet
 // (see TODO.md). The LikelyToHit call marks where the rider value would plug in.
 func jackBeNimbleDamage(attack int, self *card.CardState) int {

@@ -11,7 +11,7 @@ func TestWeepingBattleground_AuraInGraveyard(t *testing.T) {
 	aura := SigilOfSilphidaeBlue{}
 	s := card.TurnState{Graveyard: []card.Card{aura}}
 	(WeepingBattlegroundRed{}).Play(&s, &card.CardState{Card: WeepingBattlegroundRed{}})
-	if got := s.Value; got != 1{
+	if got := s.Value; got != 1 {
 		t.Fatalf("Play() = %d, want 1", got)
 	}
 	if !s.ArcaneDamageDealt {
@@ -26,7 +26,7 @@ func TestWeepingBattleground_NoAuraInGraveyard(t *testing.T) {
 	nonAura := ShrillOfSkullformRed{}
 	s := card.TurnState{Graveyard: []card.Card{nonAura}}
 	(WeepingBattlegroundRed{}).Play(&s, &card.CardState{Card: WeepingBattlegroundRed{}})
-	if got := s.Value; got != 0{
+	if got := s.Value; got != 0 {
 		t.Fatalf("Play() = %d, want 0 (no aura to banish)", got)
 	}
 	if s.ArcaneDamageDealt {
@@ -38,7 +38,7 @@ func TestWeepingBattleground_NoAuraInGraveyard(t *testing.T) {
 func TestWeepingBattleground_EmptyGraveyard(t *testing.T) {
 	var s card.TurnState
 	(WeepingBattlegroundRed{}).Play(&s, &card.CardState{Card: WeepingBattlegroundRed{}})
-	if got := s.Value; got != 0{
+	if got := s.Value; got != 0 {
 		t.Fatalf("Play() = %d, want 0", got)
 	}
 }

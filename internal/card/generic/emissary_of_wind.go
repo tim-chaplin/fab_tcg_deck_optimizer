@@ -12,14 +12,17 @@ var emissaryOfWindTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, car
 
 type EmissaryOfWindRed struct{}
 
-func (EmissaryOfWindRed) ID() card.ID                 { return card.EmissaryOfWindRed }
-func (EmissaryOfWindRed) Name() string                { return "Emissary of Wind" }
-func (EmissaryOfWindRed) Cost(*card.TurnState) int                   { return 0 }
-func (EmissaryOfWindRed) Pitch() int                  { return 1 }
-func (EmissaryOfWindRed) Attack() int                 { return 4 }
-func (EmissaryOfWindRed) Defense() int                { return 2 }
-func (EmissaryOfWindRed) Types() card.TypeSet         { return emissaryOfWindTypes }
-func (EmissaryOfWindRed) GoAgain() bool               { return false }
+func (EmissaryOfWindRed) ID() card.ID              { return card.EmissaryOfWindRed }
+func (EmissaryOfWindRed) Name() string             { return "Emissary of Wind" }
+func (EmissaryOfWindRed) Cost(*card.TurnState) int { return 0 }
+func (EmissaryOfWindRed) Pitch() int               { return 1 }
+func (EmissaryOfWindRed) Attack() int              { return 4 }
+func (EmissaryOfWindRed) Defense() int             { return 2 }
+func (EmissaryOfWindRed) Types() card.TypeSet      { return emissaryOfWindTypes }
+func (EmissaryOfWindRed) GoAgain() bool            { return false }
+
 // not implemented: hand-cycle-for-go-again rider
-func (EmissaryOfWindRed) NotImplemented()             {}
-func (c EmissaryOfWindRed) Play(s *card.TurnState, self *card.CardState) { s.ApplyAndLogEffectiveAttack(self) }
+func (EmissaryOfWindRed) NotImplemented() {}
+func (c EmissaryOfWindRed) Play(s *card.TurnState, self *card.CardState) {
+	s.ApplyAndLogEffectiveAttack(self)
+}

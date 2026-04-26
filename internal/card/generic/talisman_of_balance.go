@@ -12,14 +12,15 @@ var talismanOfBalanceTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, 
 
 type TalismanOfBalanceBlue struct{}
 
-func (TalismanOfBalanceBlue) ID() card.ID                               { return card.TalismanOfBalanceBlue }
-func (TalismanOfBalanceBlue) Name() string                              { return "Talisman of Balance" }
-func (TalismanOfBalanceBlue) Cost(*card.TurnState) int                  { return 0 }
-func (TalismanOfBalanceBlue) Pitch() int                                { return 3 }
-func (TalismanOfBalanceBlue) Attack() int                               { return 0 }
-func (TalismanOfBalanceBlue) Defense() int                              { return 0 }
-func (TalismanOfBalanceBlue) Types() card.TypeSet                       { return talismanOfBalanceTypes }
-func (TalismanOfBalanceBlue) GoAgain() bool                             { return true }
+func (TalismanOfBalanceBlue) ID() card.ID              { return card.TalismanOfBalanceBlue }
+func (TalismanOfBalanceBlue) Name() string             { return "Talisman of Balance" }
+func (TalismanOfBalanceBlue) Cost(*card.TurnState) int { return 0 }
+func (TalismanOfBalanceBlue) Pitch() int               { return 3 }
+func (TalismanOfBalanceBlue) Attack() int              { return 0 }
+func (TalismanOfBalanceBlue) Defense() int             { return 0 }
+func (TalismanOfBalanceBlue) Types() card.TypeSet      { return talismanOfBalanceTypes }
+func (TalismanOfBalanceBlue) GoAgain() bool            { return true }
+
 // not implemented: end-phase arsenal-fill from top of deck if behind on arsenal count
-func (TalismanOfBalanceBlue) NotImplemented()                           {}
+func (TalismanOfBalanceBlue) NotImplemented()                              {}
 func (TalismanOfBalanceBlue) Play(s *card.TurnState, self *card.CardState) { s.LogPlay(self) }

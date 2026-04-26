@@ -63,7 +63,7 @@ func TestRavenousRabble_TopPitchSubtracted(t *testing.T) {
 func TestRavenousRabble_FloorsAtZero(t *testing.T) {
 	s := &card.TurnState{Deck: []card.Card{stubGenericAttackPitch(0, 0, 5)}}
 	(RavenousRabbleBlue{}).Play(s, &card.CardState{Card: RavenousRabbleBlue{}})
-	if got := s.Value; got != 0{
+	if got := s.Value; got != 0 {
 		t.Errorf("Blue vs pitch-5 top: Play() = %d, want 0 (floor)", got)
 	}
 }
@@ -77,7 +77,7 @@ func TestRavenousRabble_OnlyFirstDeckCardMatters(t *testing.T) {
 		stubGenericAttackPitch(0, 0, 3),
 	}}
 	(RavenousRabbleRed{}).Play(s, &card.CardState{Card: RavenousRabbleRed{}})
-	if got := s.Value; got != 4{
+	if got := s.Value; got != 4 {
 		t.Errorf("Play() = %d, want 4 (5 − top pitch 1, ignoring deeper cards)", got)
 	}
 }

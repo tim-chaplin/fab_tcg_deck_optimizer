@@ -17,16 +17,17 @@ var smashingGoodTimeTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction)
 
 type SmashingGoodTimeRed struct{}
 
-func (SmashingGoodTimeRed) ID() card.ID                 { return card.SmashingGoodTimeRed }
-func (SmashingGoodTimeRed) Name() string                { return "Smashing Good Time" }
-func (SmashingGoodTimeRed) Cost(*card.TurnState) int                   { return 0 }
-func (SmashingGoodTimeRed) Pitch() int                  { return 1 }
-func (SmashingGoodTimeRed) Attack() int                 { return 0 }
-func (SmashingGoodTimeRed) Defense() int                { return 2 }
-func (SmashingGoodTimeRed) Types() card.TypeSet         { return smashingGoodTimeTypes }
-func (SmashingGoodTimeRed) GoAgain() bool               { return true }
+func (SmashingGoodTimeRed) ID() card.ID              { return card.SmashingGoodTimeRed }
+func (SmashingGoodTimeRed) Name() string             { return "Smashing Good Time" }
+func (SmashingGoodTimeRed) Cost(*card.TurnState) int { return 0 }
+func (SmashingGoodTimeRed) Pitch() int               { return 1 }
+func (SmashingGoodTimeRed) Attack() int              { return 0 }
+func (SmashingGoodTimeRed) Defense() int             { return 2 }
+func (SmashingGoodTimeRed) Types() card.TypeSet      { return smashingGoodTimeTypes }
+func (SmashingGoodTimeRed) GoAgain() bool            { return true }
+
 // not implemented: on-hit item-destruction rider
-func (SmashingGoodTimeRed) NotImplemented()             {}
+func (SmashingGoodTimeRed) NotImplemented() {}
 func (SmashingGoodTimeRed) Play(s *card.TurnState, self *card.CardState) {
 	if self.FromArsenal {
 		grantNextAttackActionBonus(s, 3)
@@ -36,16 +37,17 @@ func (SmashingGoodTimeRed) Play(s *card.TurnState, self *card.CardState) {
 
 type SmashingGoodTimeYellow struct{}
 
-func (SmashingGoodTimeYellow) ID() card.ID                 { return card.SmashingGoodTimeYellow }
-func (SmashingGoodTimeYellow) Name() string                { return "Smashing Good Time" }
-func (SmashingGoodTimeYellow) Cost(*card.TurnState) int                   { return 0 }
-func (SmashingGoodTimeYellow) Pitch() int                  { return 2 }
-func (SmashingGoodTimeYellow) Attack() int                 { return 0 }
-func (SmashingGoodTimeYellow) Defense() int                { return 2 }
-func (SmashingGoodTimeYellow) Types() card.TypeSet         { return smashingGoodTimeTypes }
-func (SmashingGoodTimeYellow) GoAgain() bool               { return true }
+func (SmashingGoodTimeYellow) ID() card.ID              { return card.SmashingGoodTimeYellow }
+func (SmashingGoodTimeYellow) Name() string             { return "Smashing Good Time" }
+func (SmashingGoodTimeYellow) Cost(*card.TurnState) int { return 0 }
+func (SmashingGoodTimeYellow) Pitch() int               { return 2 }
+func (SmashingGoodTimeYellow) Attack() int              { return 0 }
+func (SmashingGoodTimeYellow) Defense() int             { return 2 }
+func (SmashingGoodTimeYellow) Types() card.TypeSet      { return smashingGoodTimeTypes }
+func (SmashingGoodTimeYellow) GoAgain() bool            { return true }
+
 // not implemented: on-hit item-destruction rider
-func (SmashingGoodTimeYellow) NotImplemented()             {}
+func (SmashingGoodTimeYellow) NotImplemented() {}
 func (SmashingGoodTimeYellow) Play(s *card.TurnState, self *card.CardState) {
 	if self.FromArsenal {
 		grantNextAttackActionBonus(s, 2)
@@ -55,16 +57,17 @@ func (SmashingGoodTimeYellow) Play(s *card.TurnState, self *card.CardState) {
 
 type SmashingGoodTimeBlue struct{}
 
-func (SmashingGoodTimeBlue) ID() card.ID                 { return card.SmashingGoodTimeBlue }
-func (SmashingGoodTimeBlue) Name() string                { return "Smashing Good Time" }
-func (SmashingGoodTimeBlue) Cost(*card.TurnState) int                   { return 0 }
-func (SmashingGoodTimeBlue) Pitch() int                  { return 3 }
-func (SmashingGoodTimeBlue) Attack() int                 { return 0 }
-func (SmashingGoodTimeBlue) Defense() int                { return 2 }
-func (SmashingGoodTimeBlue) Types() card.TypeSet         { return smashingGoodTimeTypes }
-func (SmashingGoodTimeBlue) GoAgain() bool               { return true }
+func (SmashingGoodTimeBlue) ID() card.ID              { return card.SmashingGoodTimeBlue }
+func (SmashingGoodTimeBlue) Name() string             { return "Smashing Good Time" }
+func (SmashingGoodTimeBlue) Cost(*card.TurnState) int { return 0 }
+func (SmashingGoodTimeBlue) Pitch() int               { return 3 }
+func (SmashingGoodTimeBlue) Attack() int              { return 0 }
+func (SmashingGoodTimeBlue) Defense() int             { return 2 }
+func (SmashingGoodTimeBlue) Types() card.TypeSet      { return smashingGoodTimeTypes }
+func (SmashingGoodTimeBlue) GoAgain() bool            { return true }
+
 // not implemented: on-hit item-destruction rider
-func (SmashingGoodTimeBlue) NotImplemented()             {}
+func (SmashingGoodTimeBlue) NotImplemented() {}
 func (SmashingGoodTimeBlue) Play(s *card.TurnState, self *card.CardState) {
 	if self.FromArsenal {
 		grantNextAttackActionBonus(s, 1)

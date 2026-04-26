@@ -11,40 +11,45 @@ var flexTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeAtta
 
 type FlexRed struct{}
 
-func (FlexRed) ID() card.ID                 { return card.FlexRed }
-func (FlexRed) Name() string                { return "Flex" }
-func (FlexRed) Cost(*card.TurnState) int                   { return 0 }
-func (FlexRed) Pitch() int                  { return 1 }
-func (FlexRed) Attack() int                 { return 4 }
-func (FlexRed) Defense() int                { return 2 }
-func (FlexRed) Types() card.TypeSet         { return flexTypes }
-func (FlexRed) GoAgain() bool               { return false }
+func (FlexRed) ID() card.ID              { return card.FlexRed }
+func (FlexRed) Name() string             { return "Flex" }
+func (FlexRed) Cost(*card.TurnState) int { return 0 }
+func (FlexRed) Pitch() int               { return 1 }
+func (FlexRed) Attack() int              { return 4 }
+func (FlexRed) Defense() int             { return 2 }
+func (FlexRed) Types() card.TypeSet      { return flexTypes }
+func (FlexRed) GoAgain() bool            { return false }
+
 // not implemented: pay-{r}{r}-for-+2{p} attack/defence mode
-func (FlexRed) NotImplemented()             {}
+func (FlexRed) NotImplemented()                                {}
 func (c FlexRed) Play(s *card.TurnState, self *card.CardState) { s.ApplyAndLogEffectiveAttack(self) }
+
 type FlexYellow struct{}
 
-func (FlexYellow) ID() card.ID                 { return card.FlexYellow }
-func (FlexYellow) Name() string                { return "Flex" }
-func (FlexYellow) Cost(*card.TurnState) int                   { return 0 }
-func (FlexYellow) Pitch() int                  { return 2 }
-func (FlexYellow) Attack() int                 { return 3 }
-func (FlexYellow) Defense() int                { return 2 }
-func (FlexYellow) Types() card.TypeSet         { return flexTypes }
-func (FlexYellow) GoAgain() bool               { return false }
+func (FlexYellow) ID() card.ID              { return card.FlexYellow }
+func (FlexYellow) Name() string             { return "Flex" }
+func (FlexYellow) Cost(*card.TurnState) int { return 0 }
+func (FlexYellow) Pitch() int               { return 2 }
+func (FlexYellow) Attack() int              { return 3 }
+func (FlexYellow) Defense() int             { return 2 }
+func (FlexYellow) Types() card.TypeSet      { return flexTypes }
+func (FlexYellow) GoAgain() bool            { return false }
+
 // not implemented: pay-{r}{r}-for-+2{p} attack/defence mode
-func (FlexYellow) NotImplemented()             {}
+func (FlexYellow) NotImplemented()                                {}
 func (c FlexYellow) Play(s *card.TurnState, self *card.CardState) { s.ApplyAndLogEffectiveAttack(self) }
+
 type FlexBlue struct{}
 
-func (FlexBlue) ID() card.ID                 { return card.FlexBlue }
-func (FlexBlue) Name() string                { return "Flex" }
-func (FlexBlue) Cost(*card.TurnState) int                   { return 0 }
-func (FlexBlue) Pitch() int                  { return 3 }
-func (FlexBlue) Attack() int                 { return 2 }
-func (FlexBlue) Defense() int                { return 2 }
-func (FlexBlue) Types() card.TypeSet         { return flexTypes }
-func (FlexBlue) GoAgain() bool               { return false }
+func (FlexBlue) ID() card.ID              { return card.FlexBlue }
+func (FlexBlue) Name() string             { return "Flex" }
+func (FlexBlue) Cost(*card.TurnState) int { return 0 }
+func (FlexBlue) Pitch() int               { return 3 }
+func (FlexBlue) Attack() int              { return 2 }
+func (FlexBlue) Defense() int             { return 2 }
+func (FlexBlue) Types() card.TypeSet      { return flexTypes }
+func (FlexBlue) GoAgain() bool            { return false }
+
 // not implemented: pay-{r}{r}-for-+2{p} attack/defence mode
-func (FlexBlue) NotImplemented()             {}
+func (FlexBlue) NotImplemented()                                {}
 func (c FlexBlue) Play(s *card.TurnState, self *card.CardState) { s.ApplyAndLogEffectiveAttack(self) }

@@ -21,7 +21,7 @@ func TestAetherSlash_BaseDamage(t *testing.T) {
 	for _, tc := range cases {
 		var s card.TurnState
 		tc.c.Play(&s, &card.CardState{Card: tc.c})
-		if got := s.Value; got != tc.want{
+		if got := s.Value; got != tc.want {
 			t.Errorf("%s: Play() = %d, want %d", tc.c.Name(), got, tc.want)
 		}
 	}
@@ -40,7 +40,7 @@ func TestAetherSlash_NonAttackActionPitchedAddsArcane(t *testing.T) {
 	for _, tc := range cases {
 		s := card.TurnState{Pitched: []card.Card{stubNonAttack{}}}
 		tc.c.Play(&s, &card.CardState{Card: tc.c})
-		if got := s.Value; got != tc.want{
+		if got := s.Value; got != tc.want {
 			t.Errorf("%s: Play() = %d, want %d", tc.c.Name(), got, tc.want)
 		}
 	}
@@ -50,7 +50,7 @@ func TestAetherSlash_AttackPitchedDoesNotTrigger(t *testing.T) {
 	// Pitching an attack card does NOT satisfy the "non-attack action pitched" rider.
 	s := card.TurnState{Pitched: []card.Card{stubRunebladeAttack{}}}
 	(AetherSlashRed{}).Play(&s, &card.CardState{Card: AetherSlashRed{}})
-	if got := s.Value; got != 4{
+	if got := s.Value; got != 4 {
 		t.Errorf("Aether Slash Red: Play() = %d, want 4 (no rider)", got)
 	}
 }

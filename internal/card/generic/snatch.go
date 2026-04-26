@@ -22,52 +22,56 @@ func snatchPlay(s *card.TurnState, self *card.CardState) {
 
 type SnatchRed struct{}
 
-func (SnatchRed) ID() card.ID                  { return card.SnatchRed }
-func (SnatchRed) Name() string                 { return "Snatch" }
-func (SnatchRed) Cost(*card.TurnState) int                    { return 0 }
-func (SnatchRed) Pitch() int                   { return 1 }
-func (SnatchRed) Attack() int                  { return 4 }
-func (SnatchRed) Defense() int                 { return 2 }
-func (SnatchRed) Types() card.TypeSet          { return snatchTypes }
-func (SnatchRed) GoAgain() bool                { return false }
-func (SnatchRed) NoMemo()                      {} // on-hit DrawOne depends on top of deck
+func (SnatchRed) ID() card.ID              { return card.SnatchRed }
+func (SnatchRed) Name() string             { return "Snatch" }
+func (SnatchRed) Cost(*card.TurnState) int { return 0 }
+func (SnatchRed) Pitch() int               { return 1 }
+func (SnatchRed) Attack() int              { return 4 }
+func (SnatchRed) Defense() int             { return 2 }
+func (SnatchRed) Types() card.TypeSet      { return snatchTypes }
+func (SnatchRed) GoAgain() bool            { return false }
+func (SnatchRed) NoMemo()                  {} // on-hit DrawOne depends on top of deck
 // not implemented: drawn card recovers only part of a real draw's value (no cross-turn shuffle
 // benefit)
-func (SnatchRed) NotImplemented()              {}
+func (SnatchRed) NotImplemented() {}
 func (SnatchRed) Play(s *card.TurnState, self *card.CardState) {
 	snatchPlay(s, self)
 }
+
 type SnatchYellow struct{}
 
-func (SnatchYellow) ID() card.ID                  { return card.SnatchYellow }
-func (SnatchYellow) Name() string                 { return "Snatch" }
-func (SnatchYellow) Cost(*card.TurnState) int                    { return 0 }
-func (SnatchYellow) Pitch() int                   { return 2 }
-func (SnatchYellow) Attack() int                  { return 3 }
-func (SnatchYellow) Defense() int                 { return 2 }
-func (SnatchYellow) Types() card.TypeSet          { return snatchTypes }
-func (SnatchYellow) GoAgain() bool                { return false }
-func (SnatchYellow) NoMemo()                      {}
+func (SnatchYellow) ID() card.ID              { return card.SnatchYellow }
+func (SnatchYellow) Name() string             { return "Snatch" }
+func (SnatchYellow) Cost(*card.TurnState) int { return 0 }
+func (SnatchYellow) Pitch() int               { return 2 }
+func (SnatchYellow) Attack() int              { return 3 }
+func (SnatchYellow) Defense() int             { return 2 }
+func (SnatchYellow) Types() card.TypeSet      { return snatchTypes }
+func (SnatchYellow) GoAgain() bool            { return false }
+func (SnatchYellow) NoMemo()                  {}
+
 // not implemented: drawn card recovers only part of a real draw's value (no cross-turn shuffle
 // benefit)
-func (SnatchYellow) NotImplemented()              {}
+func (SnatchYellow) NotImplemented() {}
 func (SnatchYellow) Play(s *card.TurnState, self *card.CardState) {
 	snatchPlay(s, self)
 }
+
 type SnatchBlue struct{}
 
-func (SnatchBlue) ID() card.ID                  { return card.SnatchBlue }
-func (SnatchBlue) Name() string                 { return "Snatch" }
-func (SnatchBlue) Cost(*card.TurnState) int                    { return 0 }
-func (SnatchBlue) Pitch() int                   { return 3 }
-func (SnatchBlue) Attack() int                  { return 2 }
-func (SnatchBlue) Defense() int                 { return 2 }
-func (SnatchBlue) Types() card.TypeSet          { return snatchTypes }
-func (SnatchBlue) GoAgain() bool                { return false }
-func (SnatchBlue) NoMemo()                      {}
+func (SnatchBlue) ID() card.ID              { return card.SnatchBlue }
+func (SnatchBlue) Name() string             { return "Snatch" }
+func (SnatchBlue) Cost(*card.TurnState) int { return 0 }
+func (SnatchBlue) Pitch() int               { return 3 }
+func (SnatchBlue) Attack() int              { return 2 }
+func (SnatchBlue) Defense() int             { return 2 }
+func (SnatchBlue) Types() card.TypeSet      { return snatchTypes }
+func (SnatchBlue) GoAgain() bool            { return false }
+func (SnatchBlue) NoMemo()                  {}
+
 // not implemented: drawn card recovers only part of a real draw's value (no cross-turn shuffle
 // benefit)
-func (SnatchBlue) NotImplemented()              {}
+func (SnatchBlue) NotImplemented() {}
 func (SnatchBlue) Play(s *card.TurnState, self *card.CardState) {
 	snatchPlay(s, self)
 }

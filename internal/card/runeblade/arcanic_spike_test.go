@@ -21,7 +21,7 @@ func TestArcanicSpike_ArcaneDamageNotDealtReturnsBaseAttack(t *testing.T) {
 	for _, tc := range cases {
 		s := card.TurnState{}
 		tc.c.Play(&s, &card.CardState{Card: tc.c})
-		if got := s.Value; got != tc.want{
+		if got := s.Value; got != tc.want {
 			t.Errorf("%s: Play() = %d, want %d (base attack, ArcaneDamageDealt=false)", tc.c.Name(), got, tc.want)
 		}
 	}
@@ -42,7 +42,7 @@ func TestArcanicSpike_ArcaneDamageDealtTriggersBonus(t *testing.T) {
 	for _, tc := range cases {
 		s := card.TurnState{ArcaneDamageDealt: true}
 		tc.c.Play(&s, &card.CardState{Card: tc.c})
-		if got := s.Value; got != tc.want{
+		if got := s.Value; got != tc.want {
 			t.Errorf("%s: Play() = %d, want %d (attack + arcane bonus)", tc.c.Name(), got, tc.want)
 		}
 	}

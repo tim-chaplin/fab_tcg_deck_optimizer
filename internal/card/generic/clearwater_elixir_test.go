@@ -10,7 +10,7 @@ import (
 func TestClearwaterElixir_NoAttackReturnsZero(t *testing.T) {
 	s := card.TurnState{}
 	(ClearwaterElixirRed{}).Play(&s, &card.CardState{Card: ClearwaterElixirRed{}})
-	if got := s.Value; got != 0{
+	if got := s.Value; got != 0 {
 		t.Errorf("Play() = %d, want 0", got)
 	}
 }
@@ -19,7 +19,7 @@ func TestClearwaterElixir_NoAttackReturnsZero(t *testing.T) {
 func TestClearwaterElixir_NonAttackInRemainingFizzles(t *testing.T) {
 	s := card.TurnState{CardsRemaining: []*card.CardState{{Card: stubGenericAction()}}}
 	(ClearwaterElixirRed{}).Play(&s, &card.CardState{Card: ClearwaterElixirRed{}})
-	if got := s.Value; got != 0{
+	if got := s.Value; got != 0 {
 		t.Errorf("Play() = %d, want 0 (non-attack skipped)", got)
 	}
 }
@@ -31,7 +31,7 @@ func TestClearwaterElixir_NextAttackGrantsBonusAttack(t *testing.T) {
 	target := &card.CardState{Card: stubGenericAttack(0, 0)}
 	s := card.TurnState{CardsRemaining: []*card.CardState{target}}
 	(ClearwaterElixirRed{}).Play(&s, &card.CardState{Card: ClearwaterElixirRed{}})
-	if got := s.Value; got != 0{
+	if got := s.Value; got != 0 {
 		t.Errorf("Play() = %d, want 0 (granter returns 0; +N rides on target's BonusAttack)", got)
 	}
 	if target.BonusAttack != 3 {

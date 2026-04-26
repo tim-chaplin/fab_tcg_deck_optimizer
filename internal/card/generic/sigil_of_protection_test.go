@@ -12,7 +12,7 @@ func TestSigilOfProtection_SetsAuraCreated(t *testing.T) {
 	for _, c := range cases {
 		s := card.TurnState{}
 		c.Play(&s, &card.CardState{Card: c})
-		if got := s.Value; got != 0{
+		if got := s.Value; got != 0 {
 			t.Errorf("%s: Play() = %d, want 0", c.Name(), got)
 		}
 		if !s.AuraCreated {

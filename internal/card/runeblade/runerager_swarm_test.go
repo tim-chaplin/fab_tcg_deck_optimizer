@@ -20,7 +20,7 @@ func TestRuneragerSwarm_NoAuraNoGoAgain(t *testing.T) {
 		s := card.TurnState{}
 		self := &card.CardState{Card: tc.c}
 		tc.c.Play(&s, self)
-		if got := s.Value; got != tc.want{
+		if got := s.Value; got != tc.want {
 			t.Errorf("%s: Play() = %d, want %d", tc.c.Name(), got, tc.want)
 		}
 		if self.GrantedGoAgain {

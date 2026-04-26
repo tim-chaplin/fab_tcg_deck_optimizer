@@ -13,43 +13,54 @@ var lifeOfThePartyTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, car
 
 type LifeOfThePartyRed struct{}
 
-func (LifeOfThePartyRed) ID() card.ID                 { return card.LifeOfThePartyRed }
-func (LifeOfThePartyRed) Name() string                { return "Life of the Party" }
-func (LifeOfThePartyRed) Cost(*card.TurnState) int                   { return 2 }
-func (LifeOfThePartyRed) Pitch() int                  { return 1 }
-func (LifeOfThePartyRed) Attack() int                 { return 4 }
-func (LifeOfThePartyRed) Defense() int                { return 2 }
-func (LifeOfThePartyRed) Types() card.TypeSet         { return lifeOfThePartyTypes }
-func (LifeOfThePartyRed) GoAgain() bool               { return false }
+func (LifeOfThePartyRed) ID() card.ID              { return card.LifeOfThePartyRed }
+func (LifeOfThePartyRed) Name() string             { return "Life of the Party" }
+func (LifeOfThePartyRed) Cost(*card.TurnState) int { return 2 }
+func (LifeOfThePartyRed) Pitch() int               { return 1 }
+func (LifeOfThePartyRed) Attack() int              { return 4 }
+func (LifeOfThePartyRed) Defense() int             { return 2 }
+func (LifeOfThePartyRed) Types() card.TypeSet      { return lifeOfThePartyTypes }
+func (LifeOfThePartyRed) GoAgain() bool            { return false }
+
 // not implemented: Crazy Brew substitute and random-mode pick not modelled; all three modes
 // default off
-func (LifeOfThePartyRed) NotImplemented()             {}
-func (c LifeOfThePartyRed) Play(s *card.TurnState, self *card.CardState) { s.ApplyAndLogEffectiveAttack(self) }
+func (LifeOfThePartyRed) NotImplemented() {}
+func (c LifeOfThePartyRed) Play(s *card.TurnState, self *card.CardState) {
+	s.ApplyAndLogEffectiveAttack(self)
+}
+
 type LifeOfThePartyYellow struct{}
 
-func (LifeOfThePartyYellow) ID() card.ID                 { return card.LifeOfThePartyYellow }
-func (LifeOfThePartyYellow) Name() string                { return "Life of the Party" }
-func (LifeOfThePartyYellow) Cost(*card.TurnState) int                   { return 2 }
-func (LifeOfThePartyYellow) Pitch() int                  { return 2 }
-func (LifeOfThePartyYellow) Attack() int                 { return 3 }
-func (LifeOfThePartyYellow) Defense() int                { return 2 }
-func (LifeOfThePartyYellow) Types() card.TypeSet         { return lifeOfThePartyTypes }
-func (LifeOfThePartyYellow) GoAgain() bool               { return false }
+func (LifeOfThePartyYellow) ID() card.ID              { return card.LifeOfThePartyYellow }
+func (LifeOfThePartyYellow) Name() string             { return "Life of the Party" }
+func (LifeOfThePartyYellow) Cost(*card.TurnState) int { return 2 }
+func (LifeOfThePartyYellow) Pitch() int               { return 2 }
+func (LifeOfThePartyYellow) Attack() int              { return 3 }
+func (LifeOfThePartyYellow) Defense() int             { return 2 }
+func (LifeOfThePartyYellow) Types() card.TypeSet      { return lifeOfThePartyTypes }
+func (LifeOfThePartyYellow) GoAgain() bool            { return false }
+
 // not implemented: Crazy Brew substitute and random-mode pick not modelled; all three modes
 // default off
-func (LifeOfThePartyYellow) NotImplemented()             {}
-func (c LifeOfThePartyYellow) Play(s *card.TurnState, self *card.CardState) { s.ApplyAndLogEffectiveAttack(self) }
+func (LifeOfThePartyYellow) NotImplemented() {}
+func (c LifeOfThePartyYellow) Play(s *card.TurnState, self *card.CardState) {
+	s.ApplyAndLogEffectiveAttack(self)
+}
+
 type LifeOfThePartyBlue struct{}
 
-func (LifeOfThePartyBlue) ID() card.ID                 { return card.LifeOfThePartyBlue }
-func (LifeOfThePartyBlue) Name() string                { return "Life of the Party" }
-func (LifeOfThePartyBlue) Cost(*card.TurnState) int                   { return 2 }
-func (LifeOfThePartyBlue) Pitch() int                  { return 3 }
-func (LifeOfThePartyBlue) Attack() int                 { return 2 }
-func (LifeOfThePartyBlue) Defense() int                { return 2 }
-func (LifeOfThePartyBlue) Types() card.TypeSet         { return lifeOfThePartyTypes }
-func (LifeOfThePartyBlue) GoAgain() bool               { return false }
+func (LifeOfThePartyBlue) ID() card.ID              { return card.LifeOfThePartyBlue }
+func (LifeOfThePartyBlue) Name() string             { return "Life of the Party" }
+func (LifeOfThePartyBlue) Cost(*card.TurnState) int { return 2 }
+func (LifeOfThePartyBlue) Pitch() int               { return 3 }
+func (LifeOfThePartyBlue) Attack() int              { return 2 }
+func (LifeOfThePartyBlue) Defense() int             { return 2 }
+func (LifeOfThePartyBlue) Types() card.TypeSet      { return lifeOfThePartyTypes }
+func (LifeOfThePartyBlue) GoAgain() bool            { return false }
+
 // not implemented: Crazy Brew substitute and random-mode pick not modelled; all three modes
 // default off
-func (LifeOfThePartyBlue) NotImplemented()             {}
-func (c LifeOfThePartyBlue) Play(s *card.TurnState, self *card.CardState) { s.ApplyAndLogEffectiveAttack(self) }
+func (LifeOfThePartyBlue) NotImplemented() {}
+func (c LifeOfThePartyBlue) Play(s *card.TurnState, self *card.CardState) {
+	s.ApplyAndLogEffectiveAttack(self)
+}

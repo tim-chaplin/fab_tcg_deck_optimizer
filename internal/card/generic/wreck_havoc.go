@@ -12,49 +12,55 @@ var wreckHavocTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.Ty
 
 type WreckHavocRed struct{}
 
-func (WreckHavocRed) ID() card.ID                 { return card.WreckHavocRed }
-func (WreckHavocRed) Name() string                { return "Wreck Havoc" }
-func (WreckHavocRed) Cost(*card.TurnState) int                   { return 2 }
-func (WreckHavocRed) Pitch() int                  { return 1 }
-func (WreckHavocRed) Attack() int                 { return 6 }
-func (WreckHavocRed) Defense() int                { return 2 }
-func (WreckHavocRed) Types() card.TypeSet         { return wreckHavocTypes }
-func (WreckHavocRed) GoAgain() bool               { return false }
+func (WreckHavocRed) ID() card.ID              { return card.WreckHavocRed }
+func (WreckHavocRed) Name() string             { return "Wreck Havoc" }
+func (WreckHavocRed) Cost(*card.TurnState) int { return 2 }
+func (WreckHavocRed) Pitch() int               { return 1 }
+func (WreckHavocRed) Attack() int              { return 6 }
+func (WreckHavocRed) Defense() int             { return 2 }
+func (WreckHavocRed) Types() card.TypeSet      { return wreckHavocTypes }
+func (WreckHavocRed) GoAgain() bool            { return false }
+
 // not implemented: defense-reaction lockout, on-hit arsenal banish
-func (WreckHavocRed) NotImplemented()             {}
+func (WreckHavocRed) NotImplemented() {}
 func (c WreckHavocRed) Play(s *card.TurnState, self *card.CardState) {
 	s.ApplyAndLogEffectiveAttackPlus(self, wreckHavocDamage(c.Attack(), self)-self.Card.Attack())
 }
+
 type WreckHavocYellow struct{}
 
-func (WreckHavocYellow) ID() card.ID                 { return card.WreckHavocYellow }
-func (WreckHavocYellow) Name() string                { return "Wreck Havoc" }
-func (WreckHavocYellow) Cost(*card.TurnState) int                   { return 2 }
-func (WreckHavocYellow) Pitch() int                  { return 2 }
-func (WreckHavocYellow) Attack() int                 { return 5 }
-func (WreckHavocYellow) Defense() int                { return 2 }
-func (WreckHavocYellow) Types() card.TypeSet         { return wreckHavocTypes }
-func (WreckHavocYellow) GoAgain() bool               { return false }
+func (WreckHavocYellow) ID() card.ID              { return card.WreckHavocYellow }
+func (WreckHavocYellow) Name() string             { return "Wreck Havoc" }
+func (WreckHavocYellow) Cost(*card.TurnState) int { return 2 }
+func (WreckHavocYellow) Pitch() int               { return 2 }
+func (WreckHavocYellow) Attack() int              { return 5 }
+func (WreckHavocYellow) Defense() int             { return 2 }
+func (WreckHavocYellow) Types() card.TypeSet      { return wreckHavocTypes }
+func (WreckHavocYellow) GoAgain() bool            { return false }
+
 // not implemented: defense-reaction lockout, on-hit arsenal banish
-func (WreckHavocYellow) NotImplemented()             {}
+func (WreckHavocYellow) NotImplemented() {}
 func (c WreckHavocYellow) Play(s *card.TurnState, self *card.CardState) {
 	s.ApplyAndLogEffectiveAttackPlus(self, wreckHavocDamage(c.Attack(), self)-self.Card.Attack())
 }
+
 type WreckHavocBlue struct{}
 
-func (WreckHavocBlue) ID() card.ID                 { return card.WreckHavocBlue }
-func (WreckHavocBlue) Name() string                { return "Wreck Havoc" }
-func (WreckHavocBlue) Cost(*card.TurnState) int                   { return 2 }
-func (WreckHavocBlue) Pitch() int                  { return 3 }
-func (WreckHavocBlue) Attack() int                 { return 4 }
-func (WreckHavocBlue) Defense() int                { return 2 }
-func (WreckHavocBlue) Types() card.TypeSet         { return wreckHavocTypes }
-func (WreckHavocBlue) GoAgain() bool               { return false }
+func (WreckHavocBlue) ID() card.ID              { return card.WreckHavocBlue }
+func (WreckHavocBlue) Name() string             { return "Wreck Havoc" }
+func (WreckHavocBlue) Cost(*card.TurnState) int { return 2 }
+func (WreckHavocBlue) Pitch() int               { return 3 }
+func (WreckHavocBlue) Attack() int              { return 4 }
+func (WreckHavocBlue) Defense() int             { return 2 }
+func (WreckHavocBlue) Types() card.TypeSet      { return wreckHavocTypes }
+func (WreckHavocBlue) GoAgain() bool            { return false }
+
 // not implemented: defense-reaction lockout, on-hit arsenal banish
-func (WreckHavocBlue) NotImplemented()             {}
+func (WreckHavocBlue) NotImplemented() {}
 func (c WreckHavocBlue) Play(s *card.TurnState, self *card.CardState) {
 	s.ApplyAndLogEffectiveAttackPlus(self, wreckHavocDamage(c.Attack(), self)-self.Card.Attack())
 }
+
 // wreckHavocDamage is a breadcrumb for the on-hit "DR lockout + arsenal-face-up / banish DR"
 // rider — not modelled yet (see TODO.md). LikelyToHit marks where the rider value would plug in.
 func wreckHavocDamage(attack int, self *card.CardState) int {

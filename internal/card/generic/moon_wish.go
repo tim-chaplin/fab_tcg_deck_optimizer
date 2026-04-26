@@ -135,19 +135,20 @@ func removeFirstByID(deck []card.Card, id card.ID) []card.Card {
 
 type MoonWishRed struct{}
 
-func (MoonWishRed) ID() card.ID                 { return card.MoonWishRed }
-func (MoonWishRed) Name() string                { return "Moon Wish" }
-func (MoonWishRed) Cost(s *card.TurnState) int  { return moonWishCost(s) }
-func (MoonWishRed) MinCost() int                { return 0 }
-func (MoonWishRed) MaxCost() int                { return moonWishPrintedCost }
-func (MoonWishRed) Pitch() int                  { return 1 }
-func (MoonWishRed) Attack() int                 { return 5 }
-func (MoonWishRed) Defense() int                { return 2 }
-func (MoonWishRed) Types() card.TypeSet         { return moonWishTypes }
-func (MoonWishRed) GoAgain() bool               { return false }
+func (MoonWishRed) ID() card.ID                { return card.MoonWishRed }
+func (MoonWishRed) Name() string               { return "Moon Wish" }
+func (MoonWishRed) Cost(s *card.TurnState) int { return moonWishCost(s) }
+func (MoonWishRed) MinCost() int               { return 0 }
+func (MoonWishRed) MaxCost() int               { return moonWishPrintedCost }
+func (MoonWishRed) Pitch() int                 { return 1 }
+func (MoonWishRed) Attack() int                { return 5 }
+func (MoonWishRed) Defense() int               { return 2 }
+func (MoonWishRed) Types() card.TypeSet        { return moonWishTypes }
+func (MoonWishRed) GoAgain() bool              { return false }
+
 // NoMemo: alt-cost mutates Deck and the tutor reads deck contents — both leak through the
 // memo key, so all three variants opt out.
-func (MoonWishRed) NoMemo()                     {}
+func (MoonWishRed) NoMemo() {}
 func (c MoonWishRed) Play(s *card.TurnState, self *card.CardState) {
 	moonWishPlay(c, s, self)
 }

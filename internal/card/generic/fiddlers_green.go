@@ -15,37 +15,45 @@ import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 
 type FiddlersGreenRed struct{}
 
-func (FiddlersGreenRed) ID() card.ID                 { return card.FiddlersGreenRed }
-func (FiddlersGreenRed) Name() string                { return "Fiddler's Green" }
-func (FiddlersGreenRed) Cost(*card.TurnState) int                   { return 0 }
-func (FiddlersGreenRed) Pitch() int                  { return 1 }
-func (FiddlersGreenRed) Attack() int                 { return 0 }
-func (FiddlersGreenRed) Defense() int                { return 1 }
-func (FiddlersGreenRed) Types() card.TypeSet         { return defenseReactionTypes }
-func (FiddlersGreenRed) GoAgain() bool               { return false }
-func (FiddlersGreenRed) NotSilverAgeLegal()           {}
-func (FiddlersGreenRed) Play(s *card.TurnState, self *card.CardState) { s.ApplyAndLogEffectiveAttackPlus(self, 3) }
+func (FiddlersGreenRed) ID() card.ID              { return card.FiddlersGreenRed }
+func (FiddlersGreenRed) Name() string             { return "Fiddler's Green" }
+func (FiddlersGreenRed) Cost(*card.TurnState) int { return 0 }
+func (FiddlersGreenRed) Pitch() int               { return 1 }
+func (FiddlersGreenRed) Attack() int              { return 0 }
+func (FiddlersGreenRed) Defense() int             { return 1 }
+func (FiddlersGreenRed) Types() card.TypeSet      { return defenseReactionTypes }
+func (FiddlersGreenRed) GoAgain() bool            { return false }
+func (FiddlersGreenRed) NotSilverAgeLegal()       {}
+func (FiddlersGreenRed) Play(s *card.TurnState, self *card.CardState) {
+	s.ApplyAndLogEffectiveAttackPlus(self, 3)
+}
+
 type FiddlersGreenYellow struct{}
 
-func (FiddlersGreenYellow) ID() card.ID                 { return card.FiddlersGreenYellow }
-func (FiddlersGreenYellow) Name() string                { return "Fiddler's Green" }
-func (FiddlersGreenYellow) Cost(*card.TurnState) int                   { return 0 }
-func (FiddlersGreenYellow) Pitch() int                  { return 2 }
-func (FiddlersGreenYellow) Attack() int                 { return 0 }
-func (FiddlersGreenYellow) Defense() int                { return 1 }
-func (FiddlersGreenYellow) Types() card.TypeSet         { return defenseReactionTypes }
-func (FiddlersGreenYellow) GoAgain() bool               { return false }
-func (FiddlersGreenYellow) NotSilverAgeLegal()           {}
-func (FiddlersGreenYellow) Play(s *card.TurnState, self *card.CardState) { s.ApplyAndLogEffectiveAttackPlus(self, 2) }
+func (FiddlersGreenYellow) ID() card.ID              { return card.FiddlersGreenYellow }
+func (FiddlersGreenYellow) Name() string             { return "Fiddler's Green" }
+func (FiddlersGreenYellow) Cost(*card.TurnState) int { return 0 }
+func (FiddlersGreenYellow) Pitch() int               { return 2 }
+func (FiddlersGreenYellow) Attack() int              { return 0 }
+func (FiddlersGreenYellow) Defense() int             { return 1 }
+func (FiddlersGreenYellow) Types() card.TypeSet      { return defenseReactionTypes }
+func (FiddlersGreenYellow) GoAgain() bool            { return false }
+func (FiddlersGreenYellow) NotSilverAgeLegal()       {}
+func (FiddlersGreenYellow) Play(s *card.TurnState, self *card.CardState) {
+	s.ApplyAndLogEffectiveAttackPlus(self, 2)
+}
+
 type FiddlersGreenBlue struct{}
 
-func (FiddlersGreenBlue) ID() card.ID                 { return card.FiddlersGreenBlue }
-func (FiddlersGreenBlue) Name() string                { return "Fiddler's Green" }
-func (FiddlersGreenBlue) Cost(*card.TurnState) int                   { return 0 }
-func (FiddlersGreenBlue) Pitch() int                  { return 3 }
-func (FiddlersGreenBlue) Attack() int                 { return 0 }
-func (FiddlersGreenBlue) Defense() int                { return 1 }
-func (FiddlersGreenBlue) Types() card.TypeSet         { return defenseReactionTypes }
-func (FiddlersGreenBlue) GoAgain() bool               { return false }
-func (FiddlersGreenBlue) NotSilverAgeLegal()           {}
-func (FiddlersGreenBlue) Play(s *card.TurnState, self *card.CardState) { s.ApplyAndLogEffectiveAttackPlus(self, 1) }
+func (FiddlersGreenBlue) ID() card.ID              { return card.FiddlersGreenBlue }
+func (FiddlersGreenBlue) Name() string             { return "Fiddler's Green" }
+func (FiddlersGreenBlue) Cost(*card.TurnState) int { return 0 }
+func (FiddlersGreenBlue) Pitch() int               { return 3 }
+func (FiddlersGreenBlue) Attack() int              { return 0 }
+func (FiddlersGreenBlue) Defense() int             { return 1 }
+func (FiddlersGreenBlue) Types() card.TypeSet      { return defenseReactionTypes }
+func (FiddlersGreenBlue) GoAgain() bool            { return false }
+func (FiddlersGreenBlue) NotSilverAgeLegal()       {}
+func (FiddlersGreenBlue) Play(s *card.TurnState, self *card.CardState) {
+	s.ApplyAndLogEffectiveAttackPlus(self, 1)
+}

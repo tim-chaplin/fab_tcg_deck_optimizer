@@ -10,7 +10,7 @@ import (
 func TestSapwoodElixir_NoAttackReturnsZero(t *testing.T) {
 	s := card.TurnState{}
 	(SapwoodElixirRed{}).Play(&s, &card.CardState{Card: SapwoodElixirRed{}})
-	if got := s.Value; got != 0{
+	if got := s.Value; got != 0 {
 		t.Errorf("Play() = %d, want 0", got)
 	}
 }
@@ -19,7 +19,7 @@ func TestSapwoodElixir_NoAttackReturnsZero(t *testing.T) {
 func TestSapwoodElixir_NonAttackInRemainingFizzles(t *testing.T) {
 	s := card.TurnState{CardsRemaining: []*card.CardState{{Card: stubGenericAction()}}}
 	(SapwoodElixirRed{}).Play(&s, &card.CardState{Card: SapwoodElixirRed{}})
-	if got := s.Value; got != 0{
+	if got := s.Value; got != 0 {
 		t.Errorf("Play() = %d, want 0 (non-attack skipped)", got)
 	}
 }
@@ -30,7 +30,7 @@ func TestSapwoodElixir_NextAttackGrantsBonusAttack(t *testing.T) {
 	target := &card.CardState{Card: stubGenericAttack(0, 0)}
 	s := card.TurnState{CardsRemaining: []*card.CardState{target}}
 	(SapwoodElixirRed{}).Play(&s, &card.CardState{Card: SapwoodElixirRed{}})
-	if got := s.Value; got != 0{
+	if got := s.Value; got != 0 {
 		t.Errorf("Play() = %d, want 0 (granter returns 0; +N rides on target's BonusAttack)", got)
 	}
 	if target.BonusAttack != 3 {

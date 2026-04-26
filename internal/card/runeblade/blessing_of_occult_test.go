@@ -14,7 +14,7 @@ func TestBlessingOfOccult_PlayCreatesAuraNoThisTurnRunes(t *testing.T) {
 	for _, c := range cases {
 		var s card.TurnState
 		c.Play(&s, &card.CardState{Card: c})
-		if got := s.Value; got != 0{
+		if got := s.Value; got != 0 {
 			t.Errorf("%s: Play() = %d, want 0 (rune creation deferred to trigger)", c.Name(), got)
 		}
 		if !s.AuraCreated {

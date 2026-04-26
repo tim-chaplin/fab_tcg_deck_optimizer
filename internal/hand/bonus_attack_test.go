@@ -25,8 +25,9 @@ func (pitchOnlyRed) Defense() int             { return 0 }
 func (pitchOnlyRed) Types() card.TypeSet {
 	return card.NewTypeSet(card.TypeGeneric, card.TypeAction)
 }
-func (pitchOnlyRed) GoAgain() bool                                 { return false }
+func (pitchOnlyRed) GoAgain() bool                         { return false }
 func (pitchOnlyRed) Play(*card.TurnState, *card.CardState) {}
+
 // grantBonusAttack is a test-only non-attack action card that scans CardsRemaining and adds n
 // to BonusAttack on the first attack action card it finds. Mirrors the production shape used
 // by Come to Fight / Minnowism / Captain's Call once they migrate to the BonusAttack path:

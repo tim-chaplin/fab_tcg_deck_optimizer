@@ -11,7 +11,7 @@ func TestScoutThePeriphery_NoAttackReturnsZero(t *testing.T) {
 	s := card.TurnState{}
 	for _, c := range []card.Card{ScoutThePeripheryRed{}, ScoutThePeripheryYellow{}, ScoutThePeripheryBlue{}} {
 		c.Play(&s, &card.CardState{Card: c})
-		if got := s.Value; got != 0{
+		if got := s.Value; got != 0 {
 			t.Errorf("%s: Play() = %d, want 0", c.Name(), got)
 		}
 	}
@@ -22,7 +22,7 @@ func TestScoutThePeriphery_NoAttackReturnsZero(t *testing.T) {
 func TestScoutThePeriphery_NonAttackInRemainingFizzles(t *testing.T) {
 	s := card.TurnState{CardsRemaining: []*card.CardState{{Card: stubGenericAction(), FromArsenal: true}}}
 	(ScoutThePeripheryRed{}).Play(&s, &card.CardState{Card: ScoutThePeripheryRed{}})
-	if got := s.Value; got != 0{
+	if got := s.Value; got != 0 {
 		t.Errorf("Play() = %d, want 0 (non-attack skipped)", got)
 	}
 }
@@ -32,7 +32,7 @@ func TestScoutThePeriphery_NonAttackInRemainingFizzles(t *testing.T) {
 func TestScoutThePeriphery_HandPlayedAttackFizzles(t *testing.T) {
 	s := card.TurnState{CardsRemaining: []*card.CardState{{Card: stubGenericAttack(0, 0)}}}
 	(ScoutThePeripheryRed{}).Play(&s, &card.CardState{Card: ScoutThePeripheryRed{}})
-	if got := s.Value; got != 0{
+	if got := s.Value; got != 0 {
 		t.Errorf("Play() = %d, want 0 (target attack not from arsenal)", got)
 	}
 }

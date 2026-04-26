@@ -22,7 +22,7 @@ func TestMaleficIncantation_PlayRegistersAttackActionTrigger(t *testing.T) {
 	for _, tc := range cases {
 		var s card.TurnState
 		tc.c.Play(&s, &card.CardState{Card: tc.c})
-		if got := s.Value; got != 0{
+		if got := s.Value; got != 0 {
 			t.Errorf("%s: Play() = %d, want 0 (rune comes from trigger, not Play)", tc.c.Name(), got)
 		}
 		if !s.AuraCreated {

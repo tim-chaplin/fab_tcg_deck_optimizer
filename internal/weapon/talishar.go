@@ -12,17 +12,18 @@ var talisharTypes = card.NewTypeSet(card.TypeGeneric, card.TypeWeapon, card.Type
 
 type Talishar struct{}
 
-func (Talishar) ID() card.ID                                 { return card.TalisharID }
-func (Talishar) Name() string                                { return "Talishar, the Lost Prince" }
-func (Talishar) Cost(*card.TurnState) int                    { return 0 }
-func (Talishar) Pitch() int                                  { return 0 }
-func (Talishar) Attack() int                                 { return 4 }
-func (Talishar) Defense() int                                { return 0 }
-func (Talishar) Types() card.TypeSet                         { return talisharTypes }
-func (Talishar) GoAgain() bool                               { return false }
-func (Talishar) Hands() int                                  { return 2 }
+func (Talishar) ID() card.ID              { return card.TalisharID }
+func (Talishar) Name() string             { return "Talishar, the Lost Prince" }
+func (Talishar) Cost(*card.TurnState) int { return 0 }
+func (Talishar) Pitch() int               { return 0 }
+func (Talishar) Attack() int              { return 4 }
+func (Talishar) Defense() int             { return 0 }
+func (Talishar) Types() card.TypeSet      { return talisharTypes }
+func (Talishar) GoAgain() bool            { return false }
+func (Talishar) Hands() int               { return 2 }
+
 // not implemented: rust-counter activation cost and end-phase self-destruct at 3+ counters
-func (Talishar) NotImplemented()                             {}
+func (Talishar) NotImplemented() {}
 func (Talishar) Play(s *card.TurnState, self *card.CardState) {
 	s.ApplyAndLogEffectiveAttack(self)
 }

@@ -27,43 +27,45 @@ func ravenousRabblePlay(basePower int, s *card.TurnState) int {
 
 type RavenousRabbleRed struct{}
 
-func (RavenousRabbleRed) ID() card.ID                 { return card.RavenousRabbleRed }
-func (RavenousRabbleRed) Name() string                { return "Ravenous Rabble" }
-func (RavenousRabbleRed) Cost(*card.TurnState) int                   { return 0 }
-func (RavenousRabbleRed) Pitch() int                  { return 1 }
-func (RavenousRabbleRed) Attack() int                 { return 5 }
-func (RavenousRabbleRed) Defense() int                { return 2 }
-func (RavenousRabbleRed) Types() card.TypeSet         { return ravenousRabbleTypes }
-func (RavenousRabbleRed) GoAgain() bool               { return true }
-func (RavenousRabbleRed) NoMemo()                     {}
+func (RavenousRabbleRed) ID() card.ID              { return card.RavenousRabbleRed }
+func (RavenousRabbleRed) Name() string             { return "Ravenous Rabble" }
+func (RavenousRabbleRed) Cost(*card.TurnState) int { return 0 }
+func (RavenousRabbleRed) Pitch() int               { return 1 }
+func (RavenousRabbleRed) Attack() int              { return 5 }
+func (RavenousRabbleRed) Defense() int             { return 2 }
+func (RavenousRabbleRed) Types() card.TypeSet      { return ravenousRabbleTypes }
+func (RavenousRabbleRed) GoAgain() bool            { return true }
+func (RavenousRabbleRed) NoMemo()                  {}
 func (c RavenousRabbleRed) Play(s *card.TurnState, self *card.CardState) {
 	s.ApplyAndLogEffectiveAttackPlus(self, ravenousRabblePlay(c.Attack(), s)-self.Card.Attack())
 }
+
 type RavenousRabbleYellow struct{}
 
-func (RavenousRabbleYellow) ID() card.ID                 { return card.RavenousRabbleYellow }
-func (RavenousRabbleYellow) Name() string                { return "Ravenous Rabble" }
-func (RavenousRabbleYellow) Cost(*card.TurnState) int                   { return 0 }
-func (RavenousRabbleYellow) Pitch() int                  { return 2 }
-func (RavenousRabbleYellow) Attack() int                 { return 4 }
-func (RavenousRabbleYellow) Defense() int                { return 2 }
-func (RavenousRabbleYellow) Types() card.TypeSet         { return ravenousRabbleTypes }
-func (RavenousRabbleYellow) GoAgain() bool               { return true }
-func (RavenousRabbleYellow) NoMemo()                     {}
+func (RavenousRabbleYellow) ID() card.ID              { return card.RavenousRabbleYellow }
+func (RavenousRabbleYellow) Name() string             { return "Ravenous Rabble" }
+func (RavenousRabbleYellow) Cost(*card.TurnState) int { return 0 }
+func (RavenousRabbleYellow) Pitch() int               { return 2 }
+func (RavenousRabbleYellow) Attack() int              { return 4 }
+func (RavenousRabbleYellow) Defense() int             { return 2 }
+func (RavenousRabbleYellow) Types() card.TypeSet      { return ravenousRabbleTypes }
+func (RavenousRabbleYellow) GoAgain() bool            { return true }
+func (RavenousRabbleYellow) NoMemo()                  {}
 func (c RavenousRabbleYellow) Play(s *card.TurnState, self *card.CardState) {
 	s.ApplyAndLogEffectiveAttackPlus(self, ravenousRabblePlay(c.Attack(), s)-self.Card.Attack())
 }
+
 type RavenousRabbleBlue struct{}
 
-func (RavenousRabbleBlue) ID() card.ID                 { return card.RavenousRabbleBlue }
-func (RavenousRabbleBlue) Name() string                { return "Ravenous Rabble" }
-func (RavenousRabbleBlue) Cost(*card.TurnState) int                   { return 0 }
-func (RavenousRabbleBlue) Pitch() int                  { return 3 }
-func (RavenousRabbleBlue) Attack() int                 { return 3 }
-func (RavenousRabbleBlue) Defense() int                { return 2 }
-func (RavenousRabbleBlue) Types() card.TypeSet         { return ravenousRabbleTypes }
-func (RavenousRabbleBlue) GoAgain() bool               { return true }
-func (RavenousRabbleBlue) NoMemo()                     {}
+func (RavenousRabbleBlue) ID() card.ID              { return card.RavenousRabbleBlue }
+func (RavenousRabbleBlue) Name() string             { return "Ravenous Rabble" }
+func (RavenousRabbleBlue) Cost(*card.TurnState) int { return 0 }
+func (RavenousRabbleBlue) Pitch() int               { return 3 }
+func (RavenousRabbleBlue) Attack() int              { return 3 }
+func (RavenousRabbleBlue) Defense() int             { return 2 }
+func (RavenousRabbleBlue) Types() card.TypeSet      { return ravenousRabbleTypes }
+func (RavenousRabbleBlue) GoAgain() bool            { return true }
+func (RavenousRabbleBlue) NoMemo()                  {}
 func (c RavenousRabbleBlue) Play(s *card.TurnState, self *card.CardState) {
 	s.ApplyAndLogEffectiveAttackPlus(self, ravenousRabblePlay(c.Attack(), s)-self.Card.Attack())
 }

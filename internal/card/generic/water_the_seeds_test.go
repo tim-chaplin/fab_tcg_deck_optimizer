@@ -31,7 +31,7 @@ func TestWaterTheSeeds_NoAttackReturnsBase(t *testing.T) {
 func TestWaterTheSeeds_HighPowerFizzles(t *testing.T) {
 	s := &card.TurnState{CardsRemaining: []*card.CardState{{Card: stubGenericAttack(0, 2)}}}
 	(WaterTheSeedsRed{}).Play(s, &card.CardState{Card: WaterTheSeedsRed{}})
-	if got := s.Value; got != 3{
+	if got := s.Value; got != 3 {
 		t.Errorf("Play() = %d, want 3 (power 2 > 1 → no bonus)", got)
 	}
 }
@@ -65,7 +65,7 @@ func TestWaterTheSeeds_SkipsPastNonMatchingAttacks(t *testing.T) {
 		{Card: stubGenericAttack(0, 0)},
 	}}
 	(WaterTheSeedsRed{}).Play(s, &card.CardState{Card: WaterTheSeedsRed{}})
-	if got := s.Value; got != 4{
+	if got := s.Value; got != 4 {
 		t.Errorf("Play() = %d, want 4 (rider waits for the power-0 attack)", got)
 	}
 }
@@ -75,7 +75,7 @@ func TestWaterTheSeeds_SkipsPastNonMatchingAttacks(t *testing.T) {
 func TestWaterTheSeeds_NonAttackInRemainingIgnored(t *testing.T) {
 	s := &card.TurnState{CardsRemaining: []*card.CardState{{Card: stubGenericAction()}}}
 	(WaterTheSeedsRed{}).Play(s, &card.CardState{Card: WaterTheSeedsRed{}})
-	if got := s.Value; got != 3{
+	if got := s.Value; got != 3 {
 		t.Errorf("Play() = %d, want 3 (non-attack ignored)", got)
 	}
 }

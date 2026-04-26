@@ -12,7 +12,7 @@ import (
 func TestSigilOfSilphidae_PlayFizzlesWithoutAura(t *testing.T) {
 	var s card.TurnState
 	(SigilOfSilphidaeBlue{}).Play(&s, &card.CardState{Card: SigilOfSilphidaeBlue{}})
-	if got := s.Value; got != 0{
+	if got := s.Value; got != 0 {
 		t.Errorf("Play() = %d, want 0 (empty graveyard)", got)
 	}
 	if !s.AuraCreated {
@@ -32,7 +32,7 @@ func TestSigilOfSilphidae_PlayBanishesAuraForOneArcane(t *testing.T) {
 	aura := BlessingOfOccultRed{}
 	s := card.TurnState{Graveyard: []card.Card{aura}}
 	(SigilOfSilphidaeBlue{}).Play(&s, &card.CardState{Card: SigilOfSilphidaeBlue{}})
-	if got := s.Value; got != 1{
+	if got := s.Value; got != 1 {
 		t.Errorf("Play() = %d, want 1", got)
 	}
 	if !s.ArcaneDamageDealt {

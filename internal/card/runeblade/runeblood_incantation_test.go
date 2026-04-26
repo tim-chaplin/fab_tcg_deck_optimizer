@@ -21,7 +21,7 @@ func TestRunebloodIncantation_PlayRegistersStartOfTurnTriggerWithCountN(t *testi
 	for _, tc := range cases {
 		var s card.TurnState
 		tc.c.Play(&s, &card.CardState{Card: tc.c})
-		if got := s.Value; got != 0{
+		if got := s.Value; got != 0 {
 			t.Errorf("%s: Play() = %d, want 0 (every rune fires on a future turn)", tc.c.Name(), got)
 		}
 		if !s.AuraCreated {

@@ -14,7 +14,7 @@ func TestZealousBelting_NoQualifyingPitchNoGoAgain(t *testing.T) {
 	s := card.TurnState{Pitched: []card.Card{stubGenericAttack(0, 5)}}
 	self := &card.CardState{Card: c}
 	c.Play(&s, self)
-	if got := s.Value; got != c.Attack(){
+	if got := s.Value; got != c.Attack() {
 		t.Errorf("Play() = %d, want %d (no qualifying pitch)", got, c.Attack())
 	}
 	if self.GrantedGoAgain {

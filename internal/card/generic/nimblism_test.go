@@ -11,7 +11,7 @@ func TestNimblism_NoAttackReturnsZero(t *testing.T) {
 	s := card.TurnState{}
 	for _, c := range []card.Card{NimblismRed{}, NimblismYellow{}, NimblismBlue{}} {
 		c.Play(&s, &card.CardState{Card: c})
-		if got := s.Value; got != 0{
+		if got := s.Value; got != 0 {
 			t.Errorf("%s: Play() = %d, want 0", c.Name(), got)
 		}
 	}
@@ -21,7 +21,7 @@ func TestNimblism_NoAttackReturnsZero(t *testing.T) {
 func TestNimblism_HighCostFilteredOut(t *testing.T) {
 	s := card.TurnState{CardsRemaining: []*card.CardState{{Card: stubGenericAttack(2, 0)}}}
 	(NimblismRed{}).Play(&s, &card.CardState{Card: NimblismRed{}})
-	if got := s.Value; got != 0{
+	if got := s.Value; got != 0 {
 		t.Errorf("Play() = %d, want 0 (cost 2 > 1)", got)
 	}
 }
@@ -41,7 +41,7 @@ func TestNimblism_LowCostReturnsBonus(t *testing.T) {
 		target := &card.CardState{Card: stubGenericAttack(1, 0)}
 		s := card.TurnState{CardsRemaining: []*card.CardState{target}}
 		tc.c.Play(&s, &card.CardState{Card: tc.c})
-		if got := s.Value; got != 0{
+		if got := s.Value; got != 0 {
 			t.Errorf("%s: Play() = %d, want 0 (granter returns 0; +N rides on target's BonusAttack)", tc.c.Name(), got)
 		}
 		if target.BonusAttack != tc.want {

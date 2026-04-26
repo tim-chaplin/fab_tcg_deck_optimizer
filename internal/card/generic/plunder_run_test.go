@@ -11,7 +11,7 @@ func TestPlunderRun_NoAttackReturnsZero(t *testing.T) {
 	s := card.TurnState{}
 	for _, c := range []card.Card{PlunderRunRed{}, PlunderRunYellow{}, PlunderRunBlue{}} {
 		c.Play(&s, &card.CardState{Card: c})
-		if got := s.Value; got != 0{
+		if got := s.Value; got != 0 {
 			t.Errorf("%s: Play() = %d, want 0", c.Name(), got)
 		}
 	}
@@ -21,7 +21,7 @@ func TestPlunderRun_NoAttackReturnsZero(t *testing.T) {
 func TestPlunderRun_NonAttackInRemainingFizzles(t *testing.T) {
 	s := card.TurnState{CardsRemaining: []*card.CardState{{Card: stubGenericAction()}}}
 	(PlunderRunRed{}).Play(&s, &card.CardState{Card: PlunderRunRed{}})
-	if got := s.Value; got != 0{
+	if got := s.Value; got != 0 {
 		t.Errorf("Play() = %d, want 0 (non-attack skipped)", got)
 	}
 }
@@ -43,7 +43,7 @@ func TestPlunderRun_NextAttackGrantsBonusAttack(t *testing.T) {
 		s := card.TurnState{CardsRemaining: []*card.CardState{target}}
 		self := &card.CardState{Card: tc.c, FromArsenal: true}
 		tc.c.Play(&s, self)
-		if got := s.Value; got != 0{
+		if got := s.Value; got != 0 {
 			t.Errorf("%s: Play() = %d, want 0 (granter returns 0; +N rides on target's BonusAttack)", tc.c.Name(), got)
 		}
 		if target.BonusAttack != tc.want {
@@ -58,7 +58,7 @@ func TestPlunderRun_HandPlayedFizzles(t *testing.T) {
 	s := card.TurnState{CardsRemaining: []*card.CardState{{Card: stubGenericAttack(0, 0)}}}
 	self := &card.CardState{Card: PlunderRunRed{}}
 	(PlunderRunRed{}).Play(&s, self)
-	if got := s.Value; got != 0{
+	if got := s.Value; got != 0 {
 		t.Errorf("Play() = %d, want 0 (hand-played, not from arsenal)", got)
 	}
 }

@@ -11,14 +11,15 @@ var relentlessPursuitTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction)
 
 type RelentlessPursuitBlue struct{}
 
-func (RelentlessPursuitBlue) ID() card.ID                 { return card.RelentlessPursuitBlue }
-func (RelentlessPursuitBlue) Name() string                { return "Relentless Pursuit" }
-func (RelentlessPursuitBlue) Cost(*card.TurnState) int                   { return 0 }
-func (RelentlessPursuitBlue) Pitch() int                  { return 3 }
-func (RelentlessPursuitBlue) Attack() int                 { return 0 }
-func (RelentlessPursuitBlue) Defense() int                { return 3 }
-func (RelentlessPursuitBlue) Types() card.TypeSet         { return relentlessPursuitTypes }
-func (RelentlessPursuitBlue) GoAgain() bool               { return true }
+func (RelentlessPursuitBlue) ID() card.ID              { return card.RelentlessPursuitBlue }
+func (RelentlessPursuitBlue) Name() string             { return "Relentless Pursuit" }
+func (RelentlessPursuitBlue) Cost(*card.TurnState) int { return 0 }
+func (RelentlessPursuitBlue) Pitch() int               { return 3 }
+func (RelentlessPursuitBlue) Attack() int              { return 0 }
+func (RelentlessPursuitBlue) Defense() int             { return 3 }
+func (RelentlessPursuitBlue) Types() card.TypeSet      { return relentlessPursuitTypes }
+func (RelentlessPursuitBlue) GoAgain() bool            { return true }
+
 // not implemented: marked-target gate + 'attacked them this turn' chain rider
-func (RelentlessPursuitBlue) NotImplemented()             {}
+func (RelentlessPursuitBlue) NotImplemented()                              {}
 func (RelentlessPursuitBlue) Play(s *card.TurnState, self *card.CardState) { s.LogPlay(self) }

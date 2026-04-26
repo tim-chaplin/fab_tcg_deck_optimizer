@@ -12,14 +12,15 @@ var amuletOfHavencallTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, 
 
 type AmuletOfHavencallBlue struct{}
 
-func (AmuletOfHavencallBlue) ID() card.ID                               { return card.AmuletOfHavencallBlue }
-func (AmuletOfHavencallBlue) Name() string                              { return "Amulet of Havencall" }
-func (AmuletOfHavencallBlue) Cost(*card.TurnState) int                  { return 0 }
-func (AmuletOfHavencallBlue) Pitch() int                                { return 3 }
-func (AmuletOfHavencallBlue) Attack() int                               { return 0 }
-func (AmuletOfHavencallBlue) Defense() int                              { return 0 }
-func (AmuletOfHavencallBlue) Types() card.TypeSet                       { return amuletOfHavencallTypes }
-func (AmuletOfHavencallBlue) GoAgain() bool                             { return true }
+func (AmuletOfHavencallBlue) ID() card.ID              { return card.AmuletOfHavencallBlue }
+func (AmuletOfHavencallBlue) Name() string             { return "Amulet of Havencall" }
+func (AmuletOfHavencallBlue) Cost(*card.TurnState) int { return 0 }
+func (AmuletOfHavencallBlue) Pitch() int               { return 3 }
+func (AmuletOfHavencallBlue) Attack() int              { return 0 }
+func (AmuletOfHavencallBlue) Defense() int             { return 0 }
+func (AmuletOfHavencallBlue) Types() card.TypeSet      { return amuletOfHavencallTypes }
+func (AmuletOfHavencallBlue) GoAgain() bool            { return true }
+
 // not implemented: DR tutor for Rally the Rearguard; gated on empty hand
-func (AmuletOfHavencallBlue) NotImplemented()                           {}
+func (AmuletOfHavencallBlue) NotImplemented()                              {}
 func (AmuletOfHavencallBlue) Play(s *card.TurnState, self *card.CardState) { s.LogPlay(self) }

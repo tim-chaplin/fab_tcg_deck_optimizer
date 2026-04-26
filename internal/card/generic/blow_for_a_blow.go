@@ -22,14 +22,14 @@ const blowForABlowPingValue = 1
 
 type BlowForABlowRed struct{}
 
-func (BlowForABlowRed) ID() card.ID         { return card.BlowForABlowRed }
-func (BlowForABlowRed) Name() string        { return "Blow for a Blow" }
-func (BlowForABlowRed) Cost(*card.TurnState) int           { return 2 }
-func (BlowForABlowRed) Pitch() int          { return 1 }
-func (BlowForABlowRed) Attack() int         { return 4 }
-func (BlowForABlowRed) Defense() int        { return 2 }
-func (BlowForABlowRed) Types() card.TypeSet { return blowForABlowTypes }
-func (BlowForABlowRed) GoAgain() bool       { return simstate.HeroWantsLowerHealth() }
+func (BlowForABlowRed) ID() card.ID              { return card.BlowForABlowRed }
+func (BlowForABlowRed) Name() string             { return "Blow for a Blow" }
+func (BlowForABlowRed) Cost(*card.TurnState) int { return 2 }
+func (BlowForABlowRed) Pitch() int               { return 1 }
+func (BlowForABlowRed) Attack() int              { return 4 }
+func (BlowForABlowRed) Defense() int             { return 2 }
+func (BlowForABlowRed) Types() card.TypeSet      { return blowForABlowTypes }
+func (BlowForABlowRed) GoAgain() bool            { return simstate.HeroWantsLowerHealth() }
 func (BlowForABlowRed) Play(s *card.TurnState, self *card.CardState) {
 	rider := 0
 	if card.LikelyToHit(self) {

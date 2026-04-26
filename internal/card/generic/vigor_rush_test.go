@@ -32,7 +32,7 @@ func TestVigorRush_NoNonAttackActionNoGoAgain(t *testing.T) {
 		}
 		self := &card.CardState{Card: c}
 		c.Play(&s, self)
-		if got := s.Value; got != c.Attack(){
+		if got := s.Value; got != c.Attack() {
 			t.Errorf("%s: Play() = %d, want %d (base power)", c.Name(), got, c.Attack())
 		}
 		if self.GrantedGoAgain {

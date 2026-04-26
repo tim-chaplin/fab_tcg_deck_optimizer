@@ -12,7 +12,7 @@ import (
 func TestSigilOfTheArknight_PlayOnlySetsAuraCreated(t *testing.T) {
 	s := card.TurnState{Deck: []card.Card{stubRunebladeAttack{}}}
 	(SigilOfTheArknightBlue{}).Play(&s, &card.CardState{Card: SigilOfTheArknightBlue{}})
-	if got := s.Value; got != 0{
+	if got := s.Value; got != 0 {
 		t.Errorf("Play() = %d, want 0 (reveal deferred to trigger)", got)
 	}
 	if !s.AuraCreated {
