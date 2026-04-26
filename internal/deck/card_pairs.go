@@ -52,9 +52,8 @@ var cardPairs = []CardPair{
 	{First: moonWishGroup, Second: sunKissGroup},
 }
 
-// pairDedupeKey identifies a pair-mutation candidate by its (sorted removed IDs, sorted add
-// IDs) tuple. Two index pairs that hold the same two card IDs (e.g. (0, 5) and (1, 5) both
-// resolving to (HocusPocusBlue, MoonWishRed)) collapse to one mutation under this key.
+// pairDedupeKey is the canonical (sorted removed IDs, sorted add IDs) tuple identifying a
+// pair-mutation candidate by content; see cardPairMutations for the iteration shape.
 type pairDedupeKey struct {
 	rmA, rmB   card.ID
 	addA, addB card.ID

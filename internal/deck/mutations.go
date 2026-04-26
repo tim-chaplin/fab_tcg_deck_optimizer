@@ -144,16 +144,20 @@ func sortedDeckIDs(cs []card.Card) []card.ID {
 	return ids
 }
 
-// filterMaxCopiesViolations returns the subset of muts whose post-mutation deck respects
-// the per-printing maxCopies cap. Centralising the cap check here keeps the per-mutation
-// generators free to enumerate cap-blind candidates; the shared post-pass guarantees no
-// downstream consumer ever sees a candidate that violates the construction limit.
+// filterMaxCopiesViolations returns a fresh slice holding the subset of muts whose
+// post-mutation deck respects the per-printing maxCopies cap. Centralising the cap check
+// here keeps the per-mutation generators free to enumerate cap-blind candidates; the shared
+// post-pass guarantees no downstream consumer ever sees a candidate that violates the
+// construction limit.
 //
 // Source decks that themselves violate maxCopies (e.g. a hand-curated deck loaded from
 // disk) flow through unchanged on weapon-only mutations; only mutations that grow a
 // violation strictly worse get filtered.
+//
+// The returned slice does not share storage with the input — callers can keep the original
+// muts slice intact for diagnostics if they want.
 func filterMaxCopiesViolations(muts []Mutation, maxCopies int) []Mutation {
-	out := muts[:0]
+	out := make([]Mutation, 0, len(muts))
 	for _, m := range muts {
 		if respectsMaxCopies(m.Deck.Cards, maxCopies) {
 			out = append(out, m)

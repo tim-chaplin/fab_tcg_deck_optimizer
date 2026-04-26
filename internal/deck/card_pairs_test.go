@@ -117,26 +117,22 @@ func TestCardPairMutations_FiresWhenOneHalfAlreadyPresent(t *testing.T) {
 	}
 }
 
-// TestCardPairMutations_GeneratesCapViolatingCandidates documents the contract change:
-// cardPairMutations is cap-blind, so a deck holding the maximum copies of a pair variant
-// can still see candidates that would push that variant past maxCopies. The shared
-// filterMaxCopiesViolations post-pass strips them when AllMutations runs; the per-generator
-// cap check is gone.
+// TestCardPairMutations_GeneratesCapViolatingCandidates pins the cap-blind contract:
+// cardPairMutations enumerates every (i, j) × (firstVariant, secondVariant) tuple that
+// survives overlap suppression — even ones whose result deck would violate maxCopies.
+// filterMaxCopiesViolations is the gate that strips violators downstream.
 func TestCardPairMutations_GeneratesCapViolatingCandidates(t *testing.T) {
 	skR := cards.Get(card.SunKissRed)
 	a := cards.Get(card.ArcanicCrackleRed)
 	d := New(hero.Viserai{}, []weapon.Weapon{weapon.NebulaBlade{}},
 		[]card.Card{skR, skR, a, a})
 
-	// The pair generator sees 4 indices with removed-ID combos (skR,skR), (skR,a), (a,a) —
-	// 3 unique combos. (skR,*) overlaps any combo whose secondID is SunKissRed (3 combos,
-	// suppressed); (a,a) and (skR,skR) trigger no overlap. So combos that DO emit:
-	//   (skR, skR) × 9 = 9 (all emit; overlap only fires on add-side IDs)
-	//   wait — overlap fires when removeID == addID. SunKissRed IS an add ID for 3 combos.
-	//   So (skR, skR) skipped for those 3 combos: 9 - 3 = 6 emit.
-	//   (skR, a) skipped for 3 combos: 9 - 3 = 6 emit.
-	//   (a, a) all 9 emit.
-	// Total: 6 + 6 + 9 = 21.
+	// 3 unique removed-ID combos after dedupe: (skR, skR), (skR, a), (a, a). Overlap
+	// suppression skips a combo when one of its removed IDs equals one of the add IDs;
+	// SunKissRed is an add ID for 3 of the 9 (Moon Wish, Sun Kiss) cross-products. So:
+	//   (skR, skR) and (skR, a) each emit 9 - 3 = 6 surviving combos.
+	//   (a, a) emits all 9.
+	// Total = 6 + 6 + 9 = 21.
 	muts := cardPairMutations(d, nil)
 	const want = 21
 	if len(muts) != want {
