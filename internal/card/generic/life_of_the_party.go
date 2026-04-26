@@ -21,7 +21,8 @@ func (LifeOfThePartyRed) Attack() int                 { return 4 }
 func (LifeOfThePartyRed) Defense() int                { return 2 }
 func (LifeOfThePartyRed) Types() card.TypeSet         { return lifeOfThePartyTypes }
 func (LifeOfThePartyRed) GoAgain() bool               { return false }
-// not implemented: Crazy Brew substitute and random-mode pick not modelled; all three modes default off
+// not implemented: Crazy Brew substitute and random-mode pick not modelled; all three modes
+// default off
 func (LifeOfThePartyRed) NotImplemented()             {}
 func (c LifeOfThePartyRed) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }
 
@@ -35,7 +36,8 @@ func (LifeOfThePartyYellow) Attack() int                 { return 3 }
 func (LifeOfThePartyYellow) Defense() int                { return 2 }
 func (LifeOfThePartyYellow) Types() card.TypeSet         { return lifeOfThePartyTypes }
 func (LifeOfThePartyYellow) GoAgain() bool               { return false }
-// not implemented: Crazy Brew substitute and random-mode pick not modelled; all three modes default off
+// not implemented: Crazy Brew substitute and random-mode pick not modelled; all three modes
+// default off
 func (LifeOfThePartyYellow) NotImplemented()             {}
 func (c LifeOfThePartyYellow) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }
 
@@ -49,6 +51,7 @@ func (LifeOfThePartyBlue) Attack() int                 { return 2 }
 func (LifeOfThePartyBlue) Defense() int                { return 2 }
 func (LifeOfThePartyBlue) Types() card.TypeSet         { return lifeOfThePartyTypes }
 func (LifeOfThePartyBlue) GoAgain() bool               { return false }
-// not implemented: Crazy Brew substitute and random-mode pick not modelled; all three modes default off
+// not implemented: Crazy Brew substitute and random-mode pick not modelled; all three modes
+// default off
 func (LifeOfThePartyBlue) NotImplemented()             {}
 func (c LifeOfThePartyBlue) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }

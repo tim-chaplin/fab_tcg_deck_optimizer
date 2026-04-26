@@ -28,7 +28,8 @@ func (YintiYantiRed) Attack() int                 { return 3 }
 func (YintiYantiRed) Defense() int                { return 2 }
 func (YintiYantiRed) Types() card.TypeSet         { return yintiYantiTypes }
 func (YintiYantiRed) GoAgain() bool               { return false }
-// not implemented: defending-side +1{d} buff (defence consumed before Play); aura-attack +1{p} is modelled
+// not implemented: defending-side +1{d} buff (defence consumed before Play); aura-attack
+// +1{p} is modelled
 func (YintiYantiRed) NotImplemented()             {}
 func (c YintiYantiRed) Play(s *card.TurnState, _ *card.CardState) int { return yintiYantiPlay(c.Attack(), s) }
 
@@ -42,7 +43,8 @@ func (YintiYantiYellow) Attack() int                 { return 2 }
 func (YintiYantiYellow) Defense() int                { return 2 }
 func (YintiYantiYellow) Types() card.TypeSet         { return yintiYantiTypes }
 func (YintiYantiYellow) GoAgain() bool               { return false }
-// not implemented: defending-side +1{d} buff (defence consumed before Play); aura-attack +1{p} is modelled
+// not implemented: defending-side +1{d} buff (defence consumed before Play); aura-attack
+// +1{p} is modelled
 func (YintiYantiYellow) NotImplemented()             {}
 func (c YintiYantiYellow) Play(s *card.TurnState, _ *card.CardState) int { return yintiYantiPlay(c.Attack(), s) }
 
@@ -56,6 +58,7 @@ func (YintiYantiBlue) Attack() int                 { return 1 }
 func (YintiYantiBlue) Defense() int                { return 2 }
 func (YintiYantiBlue) Types() card.TypeSet         { return yintiYantiTypes }
 func (YintiYantiBlue) GoAgain() bool               { return false }
-// not implemented: defending-side +1{d} buff (defence consumed before Play); aura-attack +1{p} is modelled
+// not implemented: defending-side +1{d} buff (defence consumed before Play); aura-attack
+// +1{p} is modelled
 func (YintiYantiBlue) NotImplemented()             {}
 func (c YintiYantiBlue) Play(s *card.TurnState, _ *card.CardState) int { return yintiYantiPlay(c.Attack(), s) }

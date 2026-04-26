@@ -19,6 +19,7 @@ func (TalismanOfCremationBlue) Attack() int                               { retu
 func (TalismanOfCremationBlue) Defense() int                              { return 0 }
 func (TalismanOfCremationBlue) Types() card.TypeSet                       { return talismanOfCremationTypes }
 func (TalismanOfCremationBlue) GoAgain() bool                             { return true }
-// not implemented: self-destroys on play-from-banished → banish a named card from opposing graveyards
+// not implemented: self-destroys on play-from-banished → banish a named card from opposing
+// graveyards
 func (TalismanOfCremationBlue) NotImplemented()                           {}
 func (TalismanOfCremationBlue) Play(*card.TurnState, *card.CardState) int { return 0 }

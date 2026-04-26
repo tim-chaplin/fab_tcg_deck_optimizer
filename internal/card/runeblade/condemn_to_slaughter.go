@@ -20,7 +20,8 @@ func (CondemnToSlaughterRed) Attack() int                { return 0 }
 func (CondemnToSlaughterRed) Defense() int               { return 3 }
 func (CondemnToSlaughterRed) Types() card.TypeSet     { return condemnToSlaughterTypes }
 func (CondemnToSlaughterRed) GoAgain() bool              { return true }
-// not implemented: aura-trade rider and opponent-aura destruction clause; only same-turn Runeblade-attack +N{p} is modelled
+// not implemented: aura-trade rider and opponent-aura destruction clause; only same-turn
+// Runeblade-attack +N{p} is modelled
 func (CondemnToSlaughterRed) NotImplemented()             {}
 func (CondemnToSlaughterRed) Play(s *card.TurnState, _ *card.CardState) int { return condemnToSlaughterBonus(s, 3) }
 
@@ -34,7 +35,8 @@ func (CondemnToSlaughterYellow) Attack() int                { return 0 }
 func (CondemnToSlaughterYellow) Defense() int               { return 3 }
 func (CondemnToSlaughterYellow) Types() card.TypeSet     { return condemnToSlaughterTypes }
 func (CondemnToSlaughterYellow) GoAgain() bool              { return true }
-// not implemented: aura-trade rider and opponent-aura destruction clause; only same-turn Runeblade-attack +N{p} is modelled
+// not implemented: aura-trade rider and opponent-aura destruction clause; only same-turn
+// Runeblade-attack +N{p} is modelled
 func (CondemnToSlaughterYellow) NotImplemented()             {}
 func (CondemnToSlaughterYellow) Play(s *card.TurnState, _ *card.CardState) int { return condemnToSlaughterBonus(s, 2) }
 
@@ -48,7 +50,8 @@ func (CondemnToSlaughterBlue) Attack() int                { return 0 }
 func (CondemnToSlaughterBlue) Defense() int               { return 3 }
 func (CondemnToSlaughterBlue) Types() card.TypeSet     { return condemnToSlaughterTypes }
 func (CondemnToSlaughterBlue) GoAgain() bool              { return true }
-// not implemented: aura-trade rider and opponent-aura destruction clause; only same-turn Runeblade-attack +N{p} is modelled
+// not implemented: aura-trade rider and opponent-aura destruction clause; only same-turn
+// Runeblade-attack +N{p} is modelled
 func (CondemnToSlaughterBlue) NotImplemented()             {}
 func (CondemnToSlaughterBlue) Play(s *card.TurnState, _ *card.CardState) int { return condemnToSlaughterBonus(s, 1) }
 

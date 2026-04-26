@@ -19,7 +19,8 @@ func (DeathlyDuetRed) Attack() int                  { return 4 }
 func (DeathlyDuetRed) Defense() int                 { return 3 }
 func (DeathlyDuetRed) Types() card.TypeSet       { return deathlyDuetTypes }
 func (DeathlyDuetRed) GoAgain() bool                { return false }
-// not implemented: Pitched scan can fire both riders independently of which pitched card paid for which play (over-credits when both an attack and a non-attack action are pitched)
+// not implemented: Pitched scan can fire both riders independently of which pitched card paid
+// for which play (over-credits when both an attack and a non-attack action are pitched)
 func (DeathlyDuetRed) NotImplemented()             {}
 func (c DeathlyDuetRed) Play(s *card.TurnState, _ *card.CardState) int { return deathlyDuetPlay(c.Attack(), s) }
 
@@ -33,7 +34,8 @@ func (DeathlyDuetYellow) Attack() int                  { return 3 }
 func (DeathlyDuetYellow) Defense() int                 { return 3 }
 func (DeathlyDuetYellow) Types() card.TypeSet       { return deathlyDuetTypes }
 func (DeathlyDuetYellow) GoAgain() bool                { return false }
-// not implemented: Pitched scan can fire both riders independently of which pitched card paid for which play (over-credits when both an attack and a non-attack action are pitched)
+// not implemented: Pitched scan can fire both riders independently of which pitched card paid
+// for which play (over-credits when both an attack and a non-attack action are pitched)
 func (DeathlyDuetYellow) NotImplemented()             {}
 func (c DeathlyDuetYellow) Play(s *card.TurnState, _ *card.CardState) int { return deathlyDuetPlay(c.Attack(), s) }
 
@@ -47,7 +49,8 @@ func (DeathlyDuetBlue) Attack() int                  { return 2 }
 func (DeathlyDuetBlue) Defense() int                 { return 3 }
 func (DeathlyDuetBlue) Types() card.TypeSet       { return deathlyDuetTypes }
 func (DeathlyDuetBlue) GoAgain() bool                { return false }
-// not implemented: Pitched scan can fire both riders independently of which pitched card paid for which play (over-credits when both an attack and a non-attack action are pitched)
+// not implemented: Pitched scan can fire both riders independently of which pitched card paid
+// for which play (over-credits when both an attack and a non-attack action are pitched)
 func (DeathlyDuetBlue) NotImplemented()             {}
 func (c DeathlyDuetBlue) Play(s *card.TurnState, _ *card.CardState) int { return deathlyDuetPlay(c.Attack(), s) }
 

@@ -19,6 +19,7 @@ func (TalismanOfTithesBlue) Attack() int                               { return 
 func (TalismanOfTithesBlue) Defense() int                              { return 0 }
 func (TalismanOfTithesBlue) Types() card.TypeSet                       { return talismanOfTithesTypes }
 func (TalismanOfTithesBlue) GoAgain() bool                             { return true }
-// not implemented: self-destroys on an opposing draw during your action phase → opponent draws minus 1
+// not implemented: self-destroys on an opposing draw during your action phase → opponent draws
+// minus 1
 func (TalismanOfTithesBlue) NotImplemented()                           {}
 func (TalismanOfTithesBlue) Play(*card.TurnState, *card.CardState) int { return 0 }

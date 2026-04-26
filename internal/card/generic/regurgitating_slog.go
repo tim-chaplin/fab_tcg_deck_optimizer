@@ -25,7 +25,8 @@ func (RegurgitatingSlogRed) Attack() int                 { return 6 }
 func (RegurgitatingSlogRed) Defense() int                { return 2 }
 func (RegurgitatingSlogRed) Types() card.TypeSet         { return regurgitatingSlogTypes }
 func (RegurgitatingSlogRed) GoAgain() bool               { return false }
-// not implemented: Sloggism graveyard-banish Dominate grant (additional cost not evaluated, so the grant never fires)
+// not implemented: Sloggism graveyard-banish Dominate grant (additional cost not evaluated,
+// so the grant never fires)
 func (RegurgitatingSlogRed) NotImplemented()             {}
 func (c RegurgitatingSlogRed) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }
 
@@ -39,7 +40,8 @@ func (RegurgitatingSlogYellow) Attack() int                 { return 5 }
 func (RegurgitatingSlogYellow) Defense() int                { return 2 }
 func (RegurgitatingSlogYellow) Types() card.TypeSet         { return regurgitatingSlogTypes }
 func (RegurgitatingSlogYellow) GoAgain() bool               { return false }
-// not implemented: Sloggism graveyard-banish Dominate grant (additional cost not evaluated, so the grant never fires)
+// not implemented: Sloggism graveyard-banish Dominate grant (additional cost not evaluated,
+// so the grant never fires)
 func (RegurgitatingSlogYellow) NotImplemented()             {}
 func (c RegurgitatingSlogYellow) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }
 
@@ -53,6 +55,7 @@ func (RegurgitatingSlogBlue) Attack() int                 { return 4 }
 func (RegurgitatingSlogBlue) Defense() int                { return 2 }
 func (RegurgitatingSlogBlue) Types() card.TypeSet         { return regurgitatingSlogTypes }
 func (RegurgitatingSlogBlue) GoAgain() bool               { return false }
-// not implemented: Sloggism graveyard-banish Dominate grant (additional cost not evaluated, so the grant never fires)
+// not implemented: Sloggism graveyard-banish Dominate grant (additional cost not evaluated,
+// so the grant never fires)
 func (RegurgitatingSlogBlue) NotImplemented()             {}
 func (c RegurgitatingSlogBlue) Play(s *card.TurnState, _ *card.CardState) int { return c.Attack() }

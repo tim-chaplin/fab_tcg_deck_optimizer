@@ -16,6 +16,7 @@ func (LayLowYellow) Attack() int              { return 0 }
 func (LayLowYellow) Defense() int             { return 3 }
 func (LayLowYellow) Types() card.TypeSet      { return defenseReactionTypes }
 func (LayLowYellow) GoAgain() bool            { return false }
-// not implemented: marked-defender state not tracked; treated as always legal and the -1{p} attacker debuff is dropped
+// not implemented: marked-defender state not tracked; treated as always legal and the -1{p}
+// attacker debuff is dropped
 func (LayLowYellow) NotImplemented()             {}
 func (LayLowYellow) Play(*card.TurnState, *card.CardState) int { return 0 }

@@ -46,7 +46,7 @@ implemented` riders across the card roster.
 - **Defence-prevention and damage-prevention triggers.** No "prevent the next N damage"
   state; cards that grant Ward N or pre-emptive prevention return only their printed stats.
 - **Defence-time instant activations.** Cards whose printed text adds a chain-link defender
-  or activates an instant during an attack chain carry only their printed defence today.
+  or activates an instant during an attack chain carry only their printed defence.
 - **Pay-extra / modal cost choices.** "Pay {r} or lose 1{p}", "pay {r}{r} for +N{p}",
   "choose go-again or +N{p}", and Crazy Brew substitutes don't probe the resource budget;
   they pick one branch and stick with it. A pay-aware modal cost evaluator would let the

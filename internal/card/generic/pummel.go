@@ -20,7 +20,8 @@ func (PummelRed) Attack() int                               { return 0 }
 func (PummelRed) Defense() int                              { return 2 }
 func (PummelRed) Types() card.TypeSet                       { return pummelTypes }
 func (PummelRed) GoAgain() bool                             { return false }
-// not implemented: modal AR +4{p}: club/hammer weapon attack OR cost-2+ attack action (on-hit discard)
+// not implemented: modal AR +4{p}: club/hammer weapon attack OR cost-2+ attack action
+// (on-hit discard)
 func (PummelRed) NotImplemented()                           {}
 func (PummelRed) Play(*card.TurnState, *card.CardState) int { return 0 }
 
@@ -34,7 +35,8 @@ func (PummelYellow) Attack() int                               { return 0 }
 func (PummelYellow) Defense() int                              { return 2 }
 func (PummelYellow) Types() card.TypeSet                       { return pummelTypes }
 func (PummelYellow) GoAgain() bool                             { return false }
-// not implemented: modal AR +4{p}: club/hammer weapon attack OR cost-2+ attack action (on-hit discard)
+// not implemented: modal AR +4{p}: club/hammer weapon attack OR cost-2+ attack action
+// (on-hit discard)
 func (PummelYellow) NotImplemented()                           {}
 func (PummelYellow) Play(*card.TurnState, *card.CardState) int { return 0 }
 
@@ -48,6 +50,7 @@ func (PummelBlue) Attack() int                               { return 0 }
 func (PummelBlue) Defense() int                              { return 2 }
 func (PummelBlue) Types() card.TypeSet                       { return pummelTypes }
 func (PummelBlue) GoAgain() bool                             { return false }
-// not implemented: modal AR +4{p}: club/hammer weapon attack OR cost-2+ attack action (on-hit discard)
+// not implemented: modal AR +4{p}: club/hammer weapon attack OR cost-2+ attack action
+// (on-hit discard)
 func (PummelBlue) NotImplemented()                           {}
 func (PummelBlue) Play(*card.TurnState, *card.CardState) int { return 0 }
