@@ -231,6 +231,43 @@ func TestFormatBestTurn_ArsenalInPlayedAsDR(t *testing.T) {
 	}
 }
 
+// TestFormatBestTurn_DefenseReactionShowsValueSuffix pins the "(+N)" suffix on Defense Reaction
+// log lines. N is printed Defense plus the DR's Play return — for Sigil of Suffering Red that's
+// 3 block + 1 arcane + 1 rider (the +1{d} bonus credits because the Sigil's own arcane satisfies
+// "if you have dealt arcane damage this turn"), so the line ends in "(+5)". Dodge Blue has
+// Play.Value=0 so its suffix is "(+2)" — printed Defense only — confirming the suffix mirrors
+// plain blocks when no rider fires.
+func TestFormatBestTurn_DefenseReactionShowsValueSuffix(t *testing.T) {
+	cases := []struct {
+		name     string
+		hand     []card.Card
+		incoming int
+		want     string
+	}{
+		{
+			name:     "Sigil of Suffering credits arcane + rider on top of Defense",
+			hand:     []card.Card{runeblade.SigilOfSufferingRed{}, fake.RedAttack{}, fake.RedAttack{}, fake.RedAttack{}},
+			incoming: 4,
+			want:     "Sigil of Suffering [R]: DEFENSE REACTION (+5)",
+		},
+		{
+			name:     "Dodge adds nothing on top of Defense",
+			hand:     []card.Card{generic.DodgeBlue{}},
+			incoming: 2,
+			want:     "Dodge [B]: DEFENSE REACTION (+2)",
+		},
+	}
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			got := Best(stubHero, nil, tc.hand, tc.incoming, nil, 0, nil)
+			out := FormatBestTurn(got, 0)
+			if !strings.Contains(out, tc.want) {
+				t.Errorf("want %q in:\n%s", tc.want, out)
+			}
+		})
+	}
+}
+
 // TestFormatBestTurn_ArsenalInPlayedOnChain checks the role-label tag for an arsenal-in
 // card played as part of the my-turn chain. Hand: one BlueAttack (pitch 3, cost 1).
 // Arsenal-in: RedAttack (cost 1, attack 3). The solver pitches the Blue to pay the Red's
