@@ -550,6 +550,7 @@ const (
 
 	// Weapon IDs. Weapons aren't in the card registry (decks don't hold weapons) but each gets a
 	// unique ID so every Card implementation has a non-zero ID.
+	AnnalsOfSutcliffeID
 	NebulaBladeID
 	ReapingBladeID
 	ScepterOfPainID
