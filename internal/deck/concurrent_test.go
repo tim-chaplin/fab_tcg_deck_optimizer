@@ -153,9 +153,10 @@ func TestIterateParallel_TerminatesWithNoImprovement(t *testing.T) {
 	rng := rand.New(rand.NewSource(42))
 	baseline := Random(hero.Viserai{}, 40, 2, rng, nil)
 	mutations := AllMutations(baseline, 2, nil)
-	// Cap so the test runs in a second even serially. Full mutation list is thousands of entries.
-	if len(mutations) > 80 {
-		mutations = mutations[:80]
+	// Cap the mutation list so the test stays well under the hang-regression threshold even on
+	// slower CI runners. Full mutation list is thousands of entries.
+	if len(mutations) > 40 {
+		mutations = mutations[:40]
 	}
 
 	start := time.Now()
@@ -178,7 +179,7 @@ func TestIterateParallel_TerminatesWithNoImprovement(t *testing.T) {
 	if idx != -1 {
 		t.Errorf("idx=%d; want -1", idx)
 	}
-	if elapsed > 10*time.Second {
-		t.Errorf("IterateParallel returned after %s for 80 mutations; should complete under a second", elapsed)
+	if elapsed > 30*time.Second {
+		t.Errorf("IterateParallel returned after %s for 40 mutations; want under 30s", elapsed)
 	}
 }

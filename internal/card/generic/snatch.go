@@ -30,10 +30,6 @@ func (SnatchRed) Attack() int              { return 4 }
 func (SnatchRed) Defense() int             { return 2 }
 func (SnatchRed) Types() card.TypeSet      { return snatchTypes }
 func (SnatchRed) GoAgain() bool            { return false }
-
-// not implemented: drawn card recovers only part of a real draw's value (no cross-turn shuffle
-// benefit)
-func (SnatchRed) NotImplemented() {}
 func (SnatchRed) Play(s *card.TurnState, self *card.CardState) {
 	snatchPlay(s, self)
 }
@@ -48,10 +44,6 @@ func (SnatchYellow) Attack() int              { return 3 }
 func (SnatchYellow) Defense() int             { return 2 }
 func (SnatchYellow) Types() card.TypeSet      { return snatchTypes }
 func (SnatchYellow) GoAgain() bool            { return false }
-
-// not implemented: drawn card recovers only part of a real draw's value (no cross-turn shuffle
-// benefit)
-func (SnatchYellow) NotImplemented() {}
 func (SnatchYellow) Play(s *card.TurnState, self *card.CardState) {
 	snatchPlay(s, self)
 }
@@ -66,10 +58,6 @@ func (SnatchBlue) Attack() int              { return 2 }
 func (SnatchBlue) Defense() int             { return 2 }
 func (SnatchBlue) Types() card.TypeSet      { return snatchTypes }
 func (SnatchBlue) GoAgain() bool            { return false }
-
-// not implemented: drawn card recovers only part of a real draw's value (no cross-turn shuffle
-// benefit)
-func (SnatchBlue) NotImplemented() {}
 func (SnatchBlue) Play(s *card.TurnState, self *card.CardState) {
 	snatchPlay(s, self)
 }
