@@ -4,11 +4,12 @@ package deck
 // step so the hill climb can discover combinations whose halves are individually weaker than
 // other candidates and would never be added by the regular single-slot generator.
 //
-// A pair is two CardGroups (variant lists). The generator enumerates every (firstVariant,
-// secondVariant) cross-product so the climber can try Red/Red, Red/Yellow, Red/Blue, … and
-// let the regular per-pitch single-slot mutations re-tune from there. Single-slot remains the
-// primary mutation source; pair mutations add the orthogonal "atomic 2-for-2 swap" the
-// single-slot generator can't express.
+// A pair is two CardGroups (variant lists). The generator enumerates the cross-product of
+// (deck-index pair) × (firstVariant, secondVariant) — every position pair in the deck times
+// every variant combination — so duplicate cards at distinct positions can both be removed
+// in one mutation (e.g. a deck of [HocusPocusBlue, HocusPocusBlue] swapping both copies for
+// a Sun Kiss / Moon Wish pair). Single-slot remains the primary mutation source; pair
+// mutations add the orthogonal "atomic 2-for-2 swap" the single-slot generator can't express.
 //
 // Sun Kiss / Moon Wish is the pilot pairing: the synergy reads any Moon Wish printing in
 // CardsPlayed by name prefix, so any (Moon Wish variant, Sun Kiss variant) combination is a
@@ -45,96 +46,90 @@ var (
 
 // cardPairs is the registry of synergy pairs the anneal mutation generator considers as
 // units. Order matters for deterministic mutation output: pairs are emitted in registry
-// order, with cross-product (firstVariant, secondVariant) enumeration in group-slice order.
+// order, with cross-product (firstVariant, secondVariant) enumeration in group-slice order
+// and (i, j) deck-index iteration in ascending order.
 var cardPairs = []CardPair{
 	{First: moonWishGroup, Second: sunKissGroup},
 }
 
-// cardPairMutations emits paired add mutations for every entry in cardPairs. For each pair
-// the generator iterates (firstVariant, secondVariant) cross-products from the two groups
-// and, for each combo, emits one mutation per (i, j) unique-ID pair drawn from the deck.
-// Each emitted mutation removes one copy of each removal target and adds one copy of each
-// pair variant.
+// pairDedupeKey identifies a pair-mutation candidate by its (sorted removed IDs, sorted add
+// IDs) tuple. Two index pairs that hold the same two card IDs (e.g. (0, 5) and (1, 5) both
+// resolving to (HocusPocusBlue, MoonWishRed)) collapse to one mutation under this key.
+type pairDedupeKey struct {
+	rmA, rmB   card.ID
+	addA, addB card.ID
+}
+
+// cardPairMutations emits paired add mutations for every entry in cardPairs by taking the
+// cross-product of every (i, j) deck-index pair (i < j) with every (firstVariant,
+// secondVariant) combo from the pair's two groups. Each emitted mutation removes the cards
+// at positions i and j from a fresh copy of d.Cards and appends the chosen pair variants.
 //
-// Per-variant maxCopies cap: a variant whose count would exceed maxCopies after the +1 add
-// is skipped. A deck saturated with Red on both halves yields Yellow/Blue cross-add
-// candidates only.
+// Index-based iteration is what makes "remove both copies of a card that appears twice"
+// reachable: with a [HocusPocusBlue, HocusPocusBlue] deck, the (0, 1) index pair removes
+// both copies in one mutation. A unique-ID iteration would skip this case (only one unique
+// ID, no inter-ID pair).
 //
-// Overlap suppression: when a removal ID matches one of the pair's add IDs, the mutation
-// reduces to a single-slot swap (the matching pair member's count is unchanged net of the
-// removal). The single-slot generator already covers that, so we skip those combos to keep
-// the pair generator strictly orthogonal.
+// Overlap suppression: when a removed card's ID equals one of the pair add IDs, the
+// mutation reduces to a single-slot swap (the matching pair member's count is unchanged
+// after -1 +1). Single-slot already covers that, so we skip those combos to keep the pair
+// generator strictly orthogonal — and correctness-wise, this filter is also what guarantees
+// pair mutations never produce a no-op (multiset unchanged) deck.
+//
+// Dedupe: duplicate cards at distinct indices generate the same result deck. We track
+// emitted (sorted-removed-IDs, sorted-add-IDs) tuples in pairDedupeKey form and drop
+// repeats.
 //
 // legal filters BOTH pair-variant adds: a combo where either variant is rejected by legal
 // (e.g. a banned printing) is skipped. Removal targets aren't filtered — same convention as
 // cardSwapMutations: a deck that arrived holding a banned card can still have it removed.
 //
-// Returned decks have zero Stats and share no backing slices with d or each other. No-op
-// mutations (resulting deck has the same card multiset as the source) are filtered out as a
-// defensive guard; the overlap suppression above ensures none should arise.
-func cardPairMutations(d *Deck, maxCopies int, legal func(card.Card) bool) []Mutation {
-	if len(cardPairs) == 0 {
+// maxCopies enforcement is NOT applied here; AllMutations runs filterMaxCopiesViolations on
+// the combined output so single-slot and pair candidates share one cap-checking pass.
+//
+// Returned decks have zero Stats and share no backing slices with d or each other.
+func cardPairMutations(d *Deck, legal func(card.Card) bool) []Mutation {
+	if len(cardPairs) == 0 || len(d.Cards) < 2 {
 		return nil
 	}
-	counts := map[card.ID]int{}
-	for _, c := range d.Cards {
-		counts[c.ID()]++
-	}
-	uniqueIDs := sortedUniqueIDs(counts)
-	if len(uniqueIDs) < 2 {
-		return nil // need at least two distinct removal targets to emit a 2-for-2 swap.
-	}
-
-	srcKey := cardMultisetKey(d.Cards)
+	seen := map[pairDedupeKey]bool{}
 	var out []Mutation
 	for _, pair := range cardPairs {
-		out = append(out, mutationsForPair(d, pair, counts, uniqueIDs, srcKey, maxCopies, legal)...)
-	}
-	return out
-}
-
-// mutationsForPair enumerates the (firstVariant, secondVariant) × (removeI, removeJ) candidates
-// for one pair entry. Split out so cardPairMutations stays a simple per-pair fan-out and the
-// per-pair loops are testable in isolation.
-func mutationsForPair(d *Deck, pair CardPair, counts map[card.ID]int, uniqueIDs []card.ID,
-	srcKey string, maxCopies int, legal func(card.Card) bool) []Mutation {
-	var out []Mutation
-	for _, firstID := range pair.First {
-		first := cards.Get(firstID)
-		if legal != nil && !legal(first) {
-			continue
-		}
-		if counts[firstID]+1 > maxCopies {
-			continue
-		}
-		for _, secondID := range pair.Second {
-			second := cards.Get(secondID)
-			if legal != nil && !legal(second) {
+		for _, firstID := range pair.First {
+			first := cards.Get(firstID)
+			if legal != nil && !legal(first) {
 				continue
 			}
-			if counts[secondID]+1 > maxCopies {
-				continue
-			}
-			for i := 0; i < len(uniqueIDs); i++ {
-				for j := i + 1; j < len(uniqueIDs); j++ {
-					removeI, removeJ := uniqueIDs[i], uniqueIDs[j]
-					if removeI == firstID || removeI == secondID ||
-						removeJ == firstID || removeJ == secondID {
-						continue // single-slot generator covers the overlap case.
+			for _, secondID := range pair.Second {
+				second := cards.Get(secondID)
+				if legal != nil && !legal(second) {
+					continue
+				}
+				addA, addB := sortedIDPair(firstID, secondID)
+				for i := 0; i < len(d.Cards); i++ {
+					for j := i + 1; j < len(d.Cards); j++ {
+						idI, idJ := d.Cards[i].ID(), d.Cards[j].ID()
+						if idI == firstID || idI == secondID ||
+							idJ == firstID || idJ == secondID {
+							continue
+						}
+						rmA, rmB := sortedIDPair(idI, idJ)
+						key := pairDedupeKey{rmA, rmB, addA, addB}
+						if seen[key] {
+							continue
+						}
+						seen[key] = true
+						newCards := pairSwapByIndex(d.Cards, i, j, first, second)
+						nd := New(d.Hero, d.Weapons, newCards)
+						nd.Sideboard = d.Sideboard
+						nd.Equipment = d.Equipment
+						out = append(out, Mutation{
+							Deck: nd,
+							Description: fmt.Sprintf("-1 %s, -1 %s, +1 %s, +1 %s",
+								d.Cards[i].Name(), d.Cards[j].Name(),
+								first.Name(), second.Name()),
+						})
 					}
-					newCards := pairSwapDeck(d.Cards, removeI, removeJ, first, second)
-					if cardMultisetKey(newCards) == srcKey {
-						continue // defensive no-op guard.
-					}
-					nd := New(d.Hero, d.Weapons, newCards)
-					nd.Sideboard = d.Sideboard
-					nd.Equipment = d.Equipment
-					out = append(out, Mutation{
-						Deck: nd,
-						Description: fmt.Sprintf("-1 %s, -1 %s, +1 %s, +1 %s",
-							cards.Get(removeI).Name(), cards.Get(removeJ).Name(),
-							first.Name(), second.Name()),
-					})
 				}
 			}
 		}
@@ -142,33 +137,22 @@ func mutationsForPair(d *Deck, pair CardPair, counts map[card.ID]int, uniqueIDs 
 	return out
 }
 
-// sortedUniqueIDs returns every unique card ID that appears in counts, sorted by ascending
-// card.ID for stability — no value-based bias. Same ordering convention as cardSwapMutations
-// so removal-slot iteration stays consistent across the single-slot and pair generators; the
-// anneal driver shuffles the final mutation list either way.
-func sortedUniqueIDs(counts map[card.ID]int) []card.ID {
-	ids := make([]card.ID, 0, len(counts))
-	for id := range counts {
-		ids = append(ids, id)
+// sortedIDPair returns (a, b) sorted ascending so callers can build canonical
+// order-independent keys.
+func sortedIDPair(a, b card.ID) (card.ID, card.ID) {
+	if b < a {
+		return b, a
 	}
-	sort.Slice(ids, func(i, j int) bool { return ids[i] < ids[j] })
-	return ids
+	return a, b
 }
 
-// pairSwapDeck builds the post-mutation card slice: copies d.Cards with one removeI removed,
-// one removeJ removed, then first and second appended. Removal is one-shot per ID so a deck
-// holding multiple copies keeps the rest. The returned slice shares no backing storage with
-// d.
-func pairSwapDeck(src []card.Card, removeI, removeJ card.ID, first, second card.Card) []card.Card {
+// pairSwapByIndex returns a fresh slice equal to src with positions i and j removed and
+// first and second appended. i and j must be distinct and in range; callers guarantee this
+// via i < j enumeration over a sized loop.
+func pairSwapByIndex(src []card.Card, i, j int, first, second card.Card) []card.Card {
 	out := make([]card.Card, 0, len(src))
-	removedI, removedJ := false, false
-	for _, c := range src {
-		if !removedI && c.ID() == removeI {
-			removedI = true
-			continue
-		}
-		if !removedJ && c.ID() == removeJ {
-			removedJ = true
+	for k, c := range src {
+		if k == i || k == j {
 			continue
 		}
 		out = append(out, c)
@@ -178,8 +162,8 @@ func pairSwapDeck(src []card.Card, removeI, removeJ card.ID, first, second card.
 }
 
 // cardMultisetKey returns a comparable string summarising a card slice's ID histogram. Two
-// slices with the same IDs in different orders produce equal keys; used by the no-op guard
-// to detect mutations whose result equals the source by composition.
+// slices with the same IDs in different orders produce equal keys. Tests use it to assert
+// pair mutations never produce a deck whose composition equals the source.
 func cardMultisetKey(cs []card.Card) string {
 	counts := map[card.ID]int{}
 	for _, c := range cs {

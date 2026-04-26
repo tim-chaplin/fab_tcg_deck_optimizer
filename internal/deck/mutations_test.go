@@ -166,41 +166,60 @@ func TestAllMutations_NoDuplicateOfSource(t *testing.T) {
 
 // expectedPairMutCount mirrors cardPairMutations's emission rule for a given deck so the
 // CountsAndShape test can predict the pair-mutation contribution without re-implementing the
-// generator. For each registered pair, sums (firstVariant, secondVariant) cross-products that
-// pass the per-variant maxCopies cap, multiplied by C(uniques, 2) removal pairs that don't
-// overlap the pair adds.
+// generator. For each registered pair × variant cross-product, counts the distinct
+// (sorted-removed-IDs) combos that survive overlap suppression. Combos rejected by the
+// shared maxCopies post-filter are dropped at the end.
 func expectedPairMutCount(d *Deck, maxCopies int) int {
-	counts := map[card.ID]int{}
-	for _, c := range d.Cards {
-		counts[c.ID()]++
+	// Build the deduped removed-ID combo set the index-based generator collapses into.
+	type idPair struct{ a, b card.ID }
+	combos := map[idPair]bool{}
+	for i := 0; i < len(d.Cards); i++ {
+		for j := i + 1; j < len(d.Cards); j++ {
+			a, b := sortedIDPair(d.Cards[i].ID(), d.Cards[j].ID())
+			combos[idPair{a, b}] = true
+		}
 	}
-	uniqueIDs := make([]card.ID, 0, len(counts))
-	for id := range counts {
-		uniqueIDs = append(uniqueIDs, id)
+
+	srcCounts := map[card.ID]int{}
+	for _, c := range d.Cards {
+		srcCounts[c.ID()]++
 	}
 
 	total := 0
 	for _, p := range cardPairs {
 		for _, fID := range p.First {
-			if counts[fID]+1 > maxCopies {
-				continue
-			}
 			for _, sID := range p.Second {
-				if counts[sID]+1 > maxCopies {
-					continue
-				}
-				// Count (i, j) removal pairs that don't overlap the pair adds.
-				for i := 0; i < len(uniqueIDs); i++ {
-					for j := i + 1; j < len(uniqueIDs); j++ {
-						if uniqueIDs[i] == fID || uniqueIDs[i] == sID ||
-							uniqueIDs[j] == fID || uniqueIDs[j] == sID {
-							continue
-						}
-						total++
+				for combo := range combos {
+					if combo.a == fID || combo.a == sID ||
+						combo.b == fID || combo.b == sID {
+						continue
 					}
+					// Apply the shared maxCopies post-filter: simulate the swap and reject
+					// when any ID exceeds the cap in the result deck.
+					if !swapRespectsMaxCopies(srcCounts, combo.a, combo.b, fID, sID, maxCopies) {
+						continue
+					}
+					total++
 				}
 			}
 		}
 	}
 	return total
+}
+
+// swapRespectsMaxCopies checks whether removing one of each removeA / removeB and adding
+// one of each addA / addB leaves all card counts at or below maxCopies. Mirrors
+// respectsMaxCopies's contract on the pre-mutation count map without rebuilding the deck.
+func swapRespectsMaxCopies(srcCounts map[card.ID]int, removeA, removeB, addA, addB card.ID, maxCopies int) bool {
+	delta := map[card.ID]int{}
+	delta[removeA]--
+	delta[removeB]--
+	delta[addA]++
+	delta[addB]++
+	for id, change := range delta {
+		if srcCounts[id]+change > maxCopies {
+			return false
+		}
+	}
+	return true
 }

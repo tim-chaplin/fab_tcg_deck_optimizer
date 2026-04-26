@@ -25,8 +25,8 @@ type Mutation struct {
 // AllMutations returns every single-card mutation of d in a deterministic order: first every
 // alternative weapon loadout (sorted by loadout key), then every (removeID, addID) pair where
 // one copy of removeID is dropped and one copy of addID is added, then the synergy-pair
-// "swap two for two" mutations from cardPairMutations. removeID must be in the deck; addID's
-// post-mutation count must not exceed maxCopies. Pairs with removeID == addID are skipped.
+// "swap two for two" mutations from cardPairMutations. removeID must be in the deck. Pairs
+// with removeID == addID are skipped.
 //
 // Card-mutation ordering is by ascending card.ID for stability — no value-based bias. The
 // anneal driver shuffles the returned slice each round so neither the first-found classical
@@ -41,12 +41,16 @@ type Mutation struct {
 // cards can't be introduced. Removal targets aren't filtered — a deck that entered the climb
 // holding a banned card can still have it swapped out. Pass nil to skip filtering.
 //
+// maxCopies is enforced by filterMaxCopiesViolations as a final post-pass over the combined
+// candidate list — both single-slot and pair generators emit cap-blind candidates and the
+// shared filter strips any whose result deck exceeds the per-printing limit.
+//
 // Returned decks have zero Stats and share no backing slices with d or each other.
 func AllMutations(d *Deck, maxCopies int, legal func(card.Card) bool) []Mutation {
 	out := weaponLoadoutMutations(d)
-	out = append(out, cardSwapMutations(d, maxCopies, legal)...)
-	out = append(out, cardPairMutations(d, maxCopies, legal)...)
-	return out
+	out = append(out, cardSwapMutations(d, legal)...)
+	out = append(out, cardPairMutations(d, legal)...)
+	return filterMaxCopiesViolations(out, maxCopies)
 }
 
 // weaponLoadoutMutations emits one Mutation per distinct weapon loadout that isn't the current
@@ -84,17 +88,10 @@ func weaponLoadoutMutations(d *Deck) []Mutation {
 
 // cardSwapMutations emits every single-card remove+add mutation the deck admits. Remove
 // targets iterate in ascending card.ID for stability (no value-based bias; the anneal driver
-// shuffles afterward). Add candidates skip no-ops (same ID) and entries already at maxCopies.
-func cardSwapMutations(d *Deck, maxCopies int, legal func(card.Card) bool) []Mutation {
-	counts := map[card.ID]int{}
-	for _, c := range d.Cards {
-		counts[c.ID()]++
-	}
-	uniqueIDs := make([]card.ID, 0, len(counts))
-	for id := range counts {
-		uniqueIDs = append(uniqueIDs, id)
-	}
-	sort.Slice(uniqueIDs, func(i, j int) bool { return uniqueIDs[i] < uniqueIDs[j] })
+// shuffles afterward). Add candidates skip no-ops (same ID); the maxCopies cap is enforced
+// by filterMaxCopiesViolations downstream so this generator stays cap-blind.
+func cardSwapMutations(d *Deck, legal func(card.Card) bool) []Mutation {
+	uniqueIDs := sortedDeckIDs(d.Cards)
 
 	// legalPool returns IDs in ascending order (cards.Deckable() iterates byID).
 	pool := legalPool(legal)
@@ -105,9 +102,6 @@ func cardSwapMutations(d *Deck, maxCopies int, legal func(card.Card) bool) []Mut
 		for _, addID := range pool {
 			if addID == removeID {
 				continue // no-op: remove one and add one of the same card.
-			}
-			if counts[addID] >= maxCopies {
-				continue // at max copies.
 			}
 			replacement := cards.Get(addID)
 			newCards := make([]card.Card, 0, len(d.Cards))
@@ -130,4 +124,53 @@ func cardSwapMutations(d *Deck, maxCopies int, legal func(card.Card) bool) []Mut
 		}
 	}
 	return out
+}
+
+// sortedDeckIDs returns every distinct card ID appearing in cs, sorted ascending. Used as
+// the removal-target ordering for cardSwapMutations; the order is purely for stability since
+// the anneal driver shuffles the final mutation slice.
+func sortedDeckIDs(cs []card.Card) []card.ID {
+	seen := map[card.ID]bool{}
+	ids := make([]card.ID, 0, len(cs))
+	for _, c := range cs {
+		id := c.ID()
+		if seen[id] {
+			continue
+		}
+		seen[id] = true
+		ids = append(ids, id)
+	}
+	sort.Slice(ids, func(i, j int) bool { return ids[i] < ids[j] })
+	return ids
+}
+
+// filterMaxCopiesViolations returns the subset of muts whose post-mutation deck respects
+// the per-printing maxCopies cap. Centralising the cap check here keeps the per-mutation
+// generators free to enumerate cap-blind candidates; the shared post-pass guarantees no
+// downstream consumer ever sees a candidate that violates the construction limit.
+//
+// Source decks that themselves violate maxCopies (e.g. a hand-curated deck loaded from
+// disk) flow through unchanged on weapon-only mutations; only mutations that grow a
+// violation strictly worse get filtered.
+func filterMaxCopiesViolations(muts []Mutation, maxCopies int) []Mutation {
+	out := muts[:0]
+	for _, m := range muts {
+		if respectsMaxCopies(m.Deck.Cards, maxCopies) {
+			out = append(out, m)
+		}
+	}
+	return out
+}
+
+// respectsMaxCopies reports whether every distinct ID in cs appears at most maxCopies times.
+// Returns false at the first overshoot so a single hot card short-circuits the count.
+func respectsMaxCopies(cs []card.Card, maxCopies int) bool {
+	counts := map[card.ID]int{}
+	for _, c := range cs {
+		counts[c.ID()]++
+		if counts[c.ID()] > maxCopies {
+			return false
+		}
+	}
+	return true
 }
