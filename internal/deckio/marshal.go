@@ -102,54 +102,16 @@ func perCardMarginalToJSON(m map[card.ID]deck.CardMarginalStats) []CardMarginalS
 	return out
 }
 
+// bestTurnToJSON serialises deck.BestTurn.Log directly. The structured TurnSummary stays in
+// memory for the live computation but never crosses the JSON boundary — the structured Log
+// is the single source of truth on disk and feeds the formatter at print time.
 func bestTurnToJSON(b deck.BestTurn) BestTurnJSON {
-	if len(b.Summary.BestLine) == 0 {
+	if b.Log.IsEmpty() {
 		return BestTurnJSON{}
 	}
-	// JSON uses parallel name + role arrays for human readability; the in-memory BestLine is
-	// the single source of truth. Arsenal-in entries are emitted separately in ArsenalIn so
-	// reload can re-append them with FromArsenal=true, which keeps the "(from arsenal)" tag
-	// on the printout.
-	var handNames, roles []string
-	var arsenalIn *ArsenalInJSON
-	for _, a := range b.Summary.BestLine {
-		if a.FromArsenal {
-			arsenalIn = &ArsenalInJSON{
-				Card: a.Card.Name(),
-				Role: a.Role.String(),
-			}
-			continue
-		}
-		handNames = append(handNames, a.Card.Name())
-		roles = append(roles, a.Role.String())
-	}
-	var weaponNames []string
-	if len(b.Summary.SwungWeapons) > 0 {
-		weaponNames = append([]string(nil), b.Summary.SwungWeapons...)
-	}
-	var startOfTurnAuras []string
-	if len(b.Summary.StartOfTurnAuras) > 0 {
-		startOfTurnAuras = make([]string, len(b.Summary.StartOfTurnAuras))
-		for i, a := range b.Summary.StartOfTurnAuras {
-			startOfTurnAuras[i] = a.Name()
-		}
-	}
-	var triggers []TriggerContributionJSON
-	for _, t := range b.Summary.TriggersFromLastTurn {
-		entry := TriggerContributionJSON{Card: t.Card.Name(), Damage: t.Damage}
-		if t.Revealed != nil {
-			entry.Revealed = t.Revealed.Name()
-		}
-		triggers = append(triggers, entry)
-	}
 	return BestTurnJSON{
-		Hand:                 handNames,
-		Roles:                roles,
-		Weapons:              weaponNames,
-		StartOfTurnAuras:     startOfTurnAuras,
-		ArsenalIn:            arsenalIn,
-		TriggersFromLastTurn: triggers,
-		Value:                b.Summary.Value,
-		StartingRunechants:   b.StartingRunechants,
+		Value:              b.Summary.Value,
+		StartingRunechants: b.StartingRunechants,
+		Log:                b.Log,
 	}
 }

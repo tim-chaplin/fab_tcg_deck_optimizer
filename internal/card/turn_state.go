@@ -11,6 +11,16 @@ package card
 // (CardsPlayed, Pitched, IncomingDamage, etc.) are seeded by the sim per chain-step and
 // reset at the turn boundary.
 
+// LogEntry is one chain-event entry in TurnState.Log. Holds the label parts and value as
+// raw fields so the dispatcher can record events without paying fmt.Sprintf per entry —
+// formatting is deferred to snapshot time, so only the winning permutation pays the cost.
+// Source is set for trigger entries (hero / aura / ephemeral) and empty for direct plays.
+type LogEntry struct {
+	Label  string
+	Source string
+	N      int
+}
+
 // TurnState is the shared turn-level context passed to Card.Play alongside the per-card
 // CardState wrapper.
 type TurnState struct {
@@ -57,10 +67,12 @@ type TurnState struct {
 	// after each Play / hero / aura / ephemeral / weapon return; the solver compares
 	// permutations on this field. Reset by the sim per permutation.
 	Value int
-	// Log is reserved for an upcoming per-line trace of the chain — the dispatcher does not
-	// yet write to it and FormatBestTurn does not yet read from it. Kept on the struct so the
-	// follow-up wiring is a one-place change. Reset per permutation.
-	Log []string
+	// Log is the per-event chain trace — one entry per Play / hero / aura / ephemeral /
+	// weapon swing. Stored as LogEntry structs (label + value + optional source) so the
+	// dispatcher can append without allocating a formatted string per event; losing
+	// permutations never pay the fmt cost. Snapshot time formats each entry into the
+	// CarryState's []string. Reset per permutation.
+	Log []LogEntry
 	// CardsPlayed is the sequence of cards played (as attacks) this turn, in order.
 	// Populated by the sim after each Play returns so later cards this turn see what was
 	// played before them.

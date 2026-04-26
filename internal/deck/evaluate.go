@@ -170,6 +170,13 @@ func (d *Deck) EvaluateWith(runs int, incomingDamage int, rng *rand.Rand, ev *ha
 		}
 	}
 	mergeMarginalBuf(&d.Stats, uniqueIDs, marginalBuf)
+	// Assemble the best turn's structured log once, after the loop, so the in-memory snapshot
+	// and the on-disk JSON both carry the same shape. The JSON layer round-trips Log
+	// verbatim; printing routes through hand.FormatTurnLog so live and reloaded decks render
+	// identically.
+	if len(d.Stats.Best.Summary.BestLine) > 0 {
+		d.Stats.Best.Log = hand.BuildTurnLog(d.Stats.Best.Summary, d.Stats.Best.StartingRunechants)
+	}
 	return d.Stats
 }
 
@@ -482,6 +489,9 @@ func cloneCarryState(cs hand.CarryState) hand.CarryState {
 	}
 	if len(cs.AuraTriggers) > 0 {
 		out.AuraTriggers = append([]card.AuraTrigger(nil), cs.AuraTriggers...)
+	}
+	if len(cs.Log) > 0 {
+		out.Log = append([]card.LogEntry(nil), cs.Log...)
 	}
 	return out
 }

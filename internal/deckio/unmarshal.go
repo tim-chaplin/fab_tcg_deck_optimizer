@@ -99,97 +99,24 @@ func perCardMarginalFromJSON(entries []CardMarginalStatsJSON) (map[card.ID]deck.
 	return out, nil
 }
 
+// bestTurnFromJSON restores the structured TurnLog plus the headline Value /
+// StartingRunechants ints. The structured TurnSummary fields (BestLine, SwungWeapons,
+// StartOfTurnAuras, TriggersFromLastTurn, State) aren't reconstructed — fabsim's print path
+// renders Log via hand.FormatTurnLog. Returns a zero BestTurn when the JSON has no log.
 func bestTurnFromJSON(bj BestTurnJSON) (deck.BestTurn, error) {
-	if len(bj.Hand) == 0 {
+	if bj.Log.IsEmpty() {
 		return deck.BestTurn{}, nil
 	}
-	if len(bj.Roles) != len(bj.Hand) {
-		return deck.BestTurn{}, fmt.Errorf("deckio: best turn has %d cards but %d roles", len(bj.Hand), len(bj.Roles))
-	}
-	// Size the rebuilt line to include the arsenal-in entry when present so the "(from
-	// arsenal)" tag survives the round-trip. The arsenal-in entry goes at the tail,
-	// matching bestUncached's convention (hand cards at indices [0,n); arsenal-in at n).
-	lineLen := len(bj.Hand)
-	if bj.ArsenalIn != nil {
-		lineLen++
-	}
-	line := make([]hand.CardAssignment, lineLen)
-	for i, name := range bj.Hand {
-		id, ok := cards.ByName(name)
-		if !ok {
-			return deck.BestTurn{}, fmt.Errorf("deckio: unknown card %q in best turn", name)
-		}
-		r, err := roleFromString(bj.Roles[i])
-		if err != nil {
-			return deck.BestTurn{}, err
-		}
-		line[i] = hand.CardAssignment{Card: cards.Get(id), Role: r}
-	}
-	if bj.ArsenalIn != nil {
-		ac, err := lookupCardByName(bj.ArsenalIn.Card)
-		if err != nil {
-			return deck.BestTurn{}, fmt.Errorf("deckio: unknown arsenal_in card %q", bj.ArsenalIn.Card)
-		}
-		r, err := roleFromString(bj.ArsenalIn.Role)
-		if err != nil {
-			return deck.BestTurn{}, err
-		}
-		line[len(bj.Hand)] = hand.CardAssignment{
-			Card:        ac,
-			Role:        r,
-			FromArsenal: true,
-		}
-	}
-	var swungWeapons []string
-	if len(bj.Weapons) > 0 {
-		swungWeapons = append([]string(nil), bj.Weapons...)
-	}
-	var startOfTurnAuras []card.Card
-	if len(bj.StartOfTurnAuras) > 0 {
-		startOfTurnAuras = make([]card.Card, len(bj.StartOfTurnAuras))
-		for i, name := range bj.StartOfTurnAuras {
-			c, err := lookupCardByName(name)
-			if err != nil {
-				return deck.BestTurn{}, fmt.Errorf("deckio: unknown start_of_turn_aura %q", name)
-			}
-			startOfTurnAuras[i] = c
-		}
-	}
-	var triggers []hand.TriggerContribution
-	if len(bj.TriggersFromLastTurn) > 0 {
-		triggers = make([]hand.TriggerContribution, len(bj.TriggersFromLastTurn))
-		for i, t := range bj.TriggersFromLastTurn {
-			c, err := lookupCardByName(t.Card)
-			if err != nil {
-				return deck.BestTurn{}, fmt.Errorf("deckio: unknown triggers_from_last_turn card %q", t.Card)
-			}
-			entry := hand.TriggerContribution{Card: c, Damage: t.Damage}
-			if t.Revealed != "" {
-				rc, err := lookupCardByName(t.Revealed)
-				if err != nil {
-					return deck.BestTurn{}, fmt.Errorf("deckio: unknown triggers_from_last_turn revealed %q", t.Revealed)
-				}
-				entry.Revealed = rc
-			}
-			triggers[i] = entry
-		}
-	}
 	return deck.BestTurn{
-		Summary: hand.TurnSummary{
-			BestLine:             line,
-			SwungWeapons:         swungWeapons,
-			Value:                bj.Value,
-			StartOfTurnAuras:     startOfTurnAuras,
-			TriggersFromLastTurn: triggers,
-		},
+		Summary:            hand.TurnSummary{Value: bj.Value},
 		StartingRunechants: bj.StartingRunechants,
+		Log:                bj.Log,
 	}, nil
 }
 
 // lookupCardByName resolves a card name from the JSON form to either a registered card or a
 // known weapon. Returns an error on unknown names so a corrupted file doesn't silently produce
-// nil entries that'd crash FormatBestTurn. Callers wrap the bare error with the field
-// context (attack chain, start-of-turn aura, etc.) since those strings differ.
+// nil entries that'd crash callers. Wrapped with field context by callers.
 func lookupCardByName(name string) (card.Card, error) {
 	if w, ok := weapon.ByName(name); ok {
 		return w, nil

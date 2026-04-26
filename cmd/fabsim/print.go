@@ -165,20 +165,19 @@ func histogramTitle(d *deck.Deck) string {
 	return fmt.Sprintf("Hand-value distribution (%s hands):", commaInt(d.Stats.Hands))
 }
 
-// printBestTurn renders the persisted peak-Value turn — "Best turn played (value N):"
-// header plus FormatBestTurn's sectioned play order — when Stats.Best holds one. No-ops on
-// an unscored deck so callers don't have to guard. Shared by printBestDeck and runEval.
-// Starting Runechants (Runeblade carryover state) pipe through to FormatBestTurn, which
-// folds a non-zero count into its "Auras in play at start of turn:" line; zero is omitted
-// entirely so only turns that actually started with pending tokens surface the detail.
+// printBestTurn renders the persisted peak-Value turn from its structured TurnLog —
+// "Best turn played (value N):" header plus hand.FormatTurnLog's per-section body. No-ops
+// on an unscored deck (empty TurnLog). Shared by printBestDeck and runEval; live and
+// reloaded decks render identically because the print path consumes the same TurnLog in
+// both cases.
 func printBestTurn(d *deck.Deck) {
 	b := d.Stats.Best
-	if len(b.Summary.BestLine) == 0 {
+	if b.Log.IsEmpty() {
 		return
 	}
 	fmt.Println()
 	fmt.Printf("Best turn played (value %d):\n", b.Summary.Value)
-	fmt.Println(hand.FormatBestTurn(b.Summary, b.StartingRunechants))
+	fmt.Println(hand.FormatTurnLog(b.Log))
 }
 
 // printCardValues renders one row per unique card with the marginal +/- signal: mean turn

@@ -88,6 +88,58 @@ func TestFormatBestTurn_NonAttackCardUsesPlayLabel(t *testing.T) {
 	}
 }
 
+// TestFormatBestTurn_LogAttributesEachTriggerSeparately pins phase-2 logging: each event in
+// the chain (card Play, hero trigger, mid-chain aura trigger, ephemeral attack trigger) gets
+// its own attributed line. Hand: Nimblism (Generic non-attack action, sets
+// NonAttackActionPlayed) + Mauvrion (Runeblade non-attack action, registers an ephemeral
+// "if hits, +3" trigger) + Consuming Volition (Runeblade attack action). Prior aura: a
+// Malefic Incantation TriggerAttackAction. The chain log should hit:
+//   - Mauvrion: PLAY (+0)            — non-attack action, no own damage
+//   - Consuming Volition: ATTACK (+N) — printed power
+//   - Viserai: HERO TRIGGER (+1)     — fires on Volition (attack action)
+//   - Malefic Incantation: AURA TRIGGER (+1) — carryover aura fires on Volition
+//   - Mauvrion: ATTACK TRIGGER (+3)  — ephemeral fires on Volition's hit
+func TestFormatBestTurn_LogAttributesEachTriggerSeparately(t *testing.T) {
+	h := []card.Card{generic.NimblismRed{}, runeblade.MauvrionSkiesRed{}, runeblade.ConsumingVolitionRed{}}
+	prior := []card.AuraTrigger{{
+		Self:        runeblade.MaleficIncantationRed{},
+		Type:        card.TriggerAttackAction,
+		Count:       2,
+		OncePerTurn: true,
+		Handler:     func(s *card.TurnState) int { return s.CreateRunechants(1) },
+	}}
+	got := BestWithTriggers(hero.Viserai{}, nil, h, 0, nil, 0, nil, prior)
+	out := FormatBestTurn(got, 0)
+	wants := []string{
+		"Consuming Volition (Red): ATTACK",
+		"Viserai: HERO TRIGGER (+1)",
+		"Malefic Incantation (Red): AURA TRIGGER (+1)",
+		"Mauvrion Skies (Red): ATTACK TRIGGER (+3)",
+	}
+	for _, want := range wants {
+		if !strings.Contains(out, want) {
+			t.Errorf("missing %q in:\n%s", want, out)
+		}
+	}
+}
+
+// TestFormatBestTurn_LogSuppressesZeroTriggers pins that handlers returning 0 don't add a
+// "(+0)" line for the trigger — log entries for triggers gate on positive contribution to
+// avoid noise. Card-Play lines render unconditionally because the card resolved (the line
+// proves the chain step happened); trigger lines only render when the trigger actually
+// credited damage.
+func TestFormatBestTurn_LogSuppressesZeroTriggers(t *testing.T) {
+	// Hand: a single Red attack with no go-again. Viserai's OnCardPlayed contributes nothing
+	// (the gate needs another non-attack action played first), no priors, no ephemerals — so
+	// the chain log should be exactly one card-Play line, no trigger spam.
+	h := []card.Card{fake.RedAttack{}}
+	got := Best(hero.Viserai{}, nil, h, 0, nil, 0, nil)
+	if strings.Contains(FormatBestTurn(got, 0), "HERO TRIGGER") {
+		t.Errorf("hero trigger line shouldn't render when Viserai contributed 0; got:\n%s",
+			FormatBestTurn(got, 0))
+	}
+}
+
 // TestFormatBestTurn_ArsenalInPlayedAsDR checks the combined "arsenal-in played from the slot"
 // + "defense reaction prevented" rendering. Hand: one Malefic Blue (pitch 3). Arsenal-in:
 // Toughen Up Blue (DR cost 2). Malefic pitches to fund the DR, Toughen Up blocks 4 of 4 incoming.
@@ -129,8 +181,10 @@ func TestFormatBestTurn_ArsenalInPlayedOnChain(t *testing.T) {
 	}
 }
 
-// TestFormatBestTurn_WeaponSwingInChain makes sure a swung weapon shows up in the chain with a
-// WEAPON ATTACK label and its damage.
+// TestFormatBestTurn_WeaponSwingInChain makes sure a swung weapon shows up in the chain with
+// a WEAPON ATTACK label, sourced from the dispatcher's Log entry (chainVerbFor's TypeWeapon
+// branch). The State.Log assertion pins the dispatcher → log → format pipeline for weapons
+// since FormatBestTurn now reads weapon swings from State.Log rather than SwungWeapons.
 func TestFormatBestTurn_WeaponSwingInChain(t *testing.T) {
 	h := []card.Card{fake.RedAttack{}}
 	weapons := []weapon.Weapon{weapon.ReapingBlade{}}
@@ -139,23 +193,34 @@ func TestFormatBestTurn_WeaponSwingInChain(t *testing.T) {
 	if !strings.Contains(out, "Reaping Blade: WEAPON ATTACK") {
 		t.Errorf("want the weapon in the chain, got:\n%s", out)
 	}
-}
-
-// TestFormatBestTurn_HeldAndArsenalFooter covers the trailing "(held: …)" / "(arsenal: …)"
-// bookkeeping. A lone DR (no way to pay its cost, no incoming) is Held in the partition but
-// then promoted to Arsenal post-hoc, so the output shows an arsenal footer (not a held footer).
-func TestFormatBestTurn_HeldAndArsenalFooter(t *testing.T) {
-	h := []card.Card{generic.ToughenUpBlue{}}
-	got := Best(stubHero, nil, h, 4, nil, 0, nil)
-	out := FormatBestTurn(got, 0)
-	if !strings.Contains(out, "(arsenal: Toughen Up (Blue) (new))") {
-		t.Errorf("want an arsenal footer tagged '(new)', got:\n%s", out)
+	var sawWeaponLog bool
+	for _, e := range got.State.Log {
+		if strings.Contains(e.Label, "Reaping Blade: WEAPON ATTACK") {
+			sawWeaponLog = true
+			break
+		}
+	}
+	if !sawWeaponLog {
+		t.Errorf("State.Log missing the weapon swing entry; format-layer match was a fluke. Log=%v", got.State.Log)
 	}
 }
 
-// TestFormatBestTurn_StayingArsenalFooter tags the carrying-over arsenal card with "(stayed)"
-// rather than "(new)" — useful for the reader to see the slot wasn't swapped this turn.
-func TestFormatBestTurn_StayingArsenalFooter(t *testing.T) {
+// TestFormatBestTurn_EndOfTurnArsenalNew pins the End of turn section's arsenal entry tagged
+// "(new)" when a Held hand card got promoted into an empty arsenal slot post-hoc. A lone DR
+// (no way to pay its cost, no incoming) is Held in the partition but then promoted to
+// Arsenal, so End of turn shows "Arsenal: Toughen Up (Blue) (new)".
+func TestFormatBestTurn_EndOfTurnArsenalNew(t *testing.T) {
+	h := []card.Card{generic.ToughenUpBlue{}}
+	got := Best(stubHero, nil, h, 4, nil, 0, nil)
+	out := FormatBestTurn(got, 0)
+	if !strings.Contains(out, "Arsenal: Toughen Up (Blue) (new)") {
+		t.Errorf("want an end-of-turn arsenal entry tagged '(new)', got:\n%s", out)
+	}
+}
+
+// TestFormatBestTurn_EndOfTurnArsenalStayed tags the carrying-over arsenal card with
+// "(stayed)" rather than "(new)" — useful for the reader to see the slot wasn't swapped.
+func TestFormatBestTurn_EndOfTurnArsenalStayed(t *testing.T) {
 	// Hand with no attacks / no pitches to pay for the arsenal DR at incoming=0 (defense is
 	// wasted anyway). Arsenal-in Toughen Up sits.
 	h := []card.Card{generic.ToughenUpBlue{}}
@@ -175,10 +240,8 @@ func TestFormatBestTurn_EmptyBestLine(t *testing.T) {
 }
 
 // TestFormatBestTurn_TriggersFromLastTurnLine surfaces cross-turn AuraTrigger contributions
-// under the "My turn:" section as the first numbered entries — the reveal / damage fires at
-// the top of the action phase before pitches resolve. The aura name stands alone (the
-// "Auras in play at start of turn" header already names the source, so a "(from previous
-// turn)" suffix would just repeat).
+// under the "Start of turn:" section as unnumbered entries — the reveal / damage fires at
+// the top of the action phase before the chain runs.
 func TestFormatBestTurn_TriggersFromLastTurnLine(t *testing.T) {
 	summary := TurnSummary{
 		TriggersFromLastTurn: []TriggerContribution{
@@ -186,7 +249,7 @@ func TestFormatBestTurn_TriggersFromLastTurnLine(t *testing.T) {
 		},
 	}
 	out := FormatBestTurn(summary, 0)
-	want := "1. cardtest.RedAttack: START OF ACTION PHASE (+3)"
+	want := "cardtest.RedAttack: START OF ACTION PHASE (+3)"
 	if !strings.Contains(out, want) {
 		t.Errorf("missing %q in:\n%s", want, out)
 	}
@@ -194,8 +257,7 @@ func TestFormatBestTurn_TriggersFromLastTurnLine(t *testing.T) {
 
 // TestFormatBestTurn_TriggersFromLastTurnRevealedLine surfaces the card a trigger handler
 // revealed into the hand. Sigil of the Arknight fires at start of action phase with
-// Damage=0 but reveals the deck top; the printout names the card it drew instead of a
-// bare "(+0)".
+// Damage=0 but reveals the deck top; the Start of turn section names the card it drew.
 func TestFormatBestTurn_TriggersFromLastTurnRevealedLine(t *testing.T) {
 	summary := TurnSummary{
 		TriggersFromLastTurn: []TriggerContribution{
@@ -203,7 +265,7 @@ func TestFormatBestTurn_TriggersFromLastTurnRevealedLine(t *testing.T) {
 		},
 	}
 	out := FormatBestTurn(summary, 0)
-	want := "1. Sigil of the Arknight (Blue): drew Mauvrion Skies (Red) into hand"
+	want := "Sigil of the Arknight (Blue): drew Mauvrion Skies (Red) into hand"
 	if !strings.Contains(out, want) {
 		t.Errorf("missing %q in:\n%s", want, out)
 	}
@@ -224,10 +286,10 @@ func TestFormatBestTurn_TriggersFromLastTurnZeroEffectDropped(t *testing.T) {
 	}
 }
 
-// TestFormatBestTurn_StartOfTurnAurasHeader pins the header line that lists the aura cards
-// in play at the top of the turn. Names sort alphabetically for determinism, and duplicates
-// are preserved (two copies of the same aura render twice).
-func TestFormatBestTurn_StartOfTurnAurasHeader(t *testing.T) {
+// TestFormatBestTurn_StartOfTurnAurasLine pins the Start of turn section's "Auras: ..."
+// entry. Names sort alphabetically for determinism, and duplicates are preserved (two copies
+// of the same aura render twice).
+func TestFormatBestTurn_StartOfTurnAurasLine(t *testing.T) {
 	summary := TurnSummary{
 		StartOfTurnAuras: []card.Card{
 			runeblade.MaleficIncantationRed{},
@@ -236,44 +298,43 @@ func TestFormatBestTurn_StartOfTurnAurasHeader(t *testing.T) {
 		},
 	}
 	out := FormatBestTurn(summary, 0)
-	want := "Auras in play at start of turn: Malefic Incantation (Red), Malefic Incantation (Red), Sigil of the Arknight (Blue)"
+	want := "Auras: Malefic Incantation (Red), Malefic Incantation (Red), Sigil of the Arknight (Blue)"
 	if !strings.Contains(out, want) {
 		t.Errorf("missing %q in:\n%s", want, out)
 	}
 }
 
-// TestFormatBestTurn_StartOfTurnAurasHeaderSuppressedWhenEmpty pins the omission of the header
-// line when no auras were in play and no starting runechants carry in — the empty state
-// shouldn't render a dangling label.
-func TestFormatBestTurn_StartOfTurnAurasHeaderSuppressedWhenEmpty(t *testing.T) {
+// TestFormatBestTurn_StartOfTurnAurasSuppressedWhenEmpty pins the omission of the Auras
+// entry when no auras were in play and no starting runechants carry in — the empty state
+// shouldn't render a dangling "Auras:" label.
+func TestFormatBestTurn_StartOfTurnAurasSuppressedWhenEmpty(t *testing.T) {
 	summary := TurnSummary{BestLine: []CardAssignment{{Card: fake.RedAttack{}, Role: Attack}}}
 	out := FormatBestTurn(summary, 0)
-	if strings.Contains(out, "Auras in play at start of turn") {
-		t.Errorf("unexpected header in output:\n%s", out)
+	if strings.Contains(out, "Auras: ") {
+		t.Errorf("unexpected Auras line in output:\n%s", out)
 	}
 }
 
-// TestFormatBestTurn_StartOfTurnHeaderWithRunechants folds a non-zero starting Runechant
-// carry into the "Auras in play at start of turn" line as the trailing item — a Runeblade
-// hero carrying tokens from the previous turn sees them alongside any auras, as one
-// combined start-of-turn state readout.
-func TestFormatBestTurn_StartOfTurnHeaderWithRunechants(t *testing.T) {
+// TestFormatBestTurn_StartOfTurnAurasWithRunechants folds a non-zero starting Runechant
+// carry into the "Auras:" entry as the trailing item — a Runeblade hero carrying tokens
+// from the previous turn sees them alongside any auras as one combined readout.
+func TestFormatBestTurn_StartOfTurnAurasWithRunechants(t *testing.T) {
 	summary := TurnSummary{
 		StartOfTurnAuras: []card.Card{runeblade.MaleficIncantationRed{}},
 	}
 	out := FormatBestTurn(summary, 3)
-	want := "Auras in play at start of turn: Malefic Incantation (Red), 3 Runechants"
+	want := "Auras: Malefic Incantation (Red), 3 Runechants"
 	if !strings.Contains(out, want) {
 		t.Errorf("missing %q in:\n%s", want, out)
 	}
 }
 
-// TestFormatBestTurn_StartOfTurnHeaderRunechantsOnly folds a non-zero starting Runechant
-// carry into the header even when no auras are in play, using singular "Runechant" when the
+// TestFormatBestTurn_StartOfTurnRunechantsOnly folds a non-zero starting Runechant carry
+// into the Auras entry even when no auras are in play, using singular "Runechant" when the
 // count is 1.
-func TestFormatBestTurn_StartOfTurnHeaderRunechantsOnly(t *testing.T) {
+func TestFormatBestTurn_StartOfTurnRunechantsOnly(t *testing.T) {
 	out := FormatBestTurn(TurnSummary{}, 1)
-	want := "Auras in play at start of turn: 1 Runechant"
+	want := "Auras: 1 Runechant"
 	if !strings.Contains(out, want) {
 		t.Errorf("missing %q in:\n%s", want, out)
 	}
@@ -284,15 +345,50 @@ func TestFormatBestTurn_StartOfTurnHeaderRunechantsOnly(t *testing.T) {
 	}
 }
 
-// TestFormatBestTurn_HandHeldRenderedInFooter pins the held-footer rendering — every card in
-// State.Hand surfaces as one "(held: NAME)" trailing line, regardless of whether it started
-// the turn in hand or got drawn / tutored mid-chain (both flavours land in State.Hand).
-func TestFormatBestTurn_HandHeldRenderedInFooter(t *testing.T) {
+// TestFormatBestTurn_EndOfTurnHandLine pins the End of turn "Hand: ..." entry — every card
+// in State.Hand surfaces as part of one comma-separated line, regardless of whether it
+// started the turn in hand or got drawn / tutored mid-chain.
+func TestFormatBestTurn_EndOfTurnHandLine(t *testing.T) {
 	summary := TurnSummary{
 		State: CarryState{Hand: []card.Card{fake.RedAttack{}}},
 	}
 	out := FormatBestTurn(summary, 0)
-	want := "(held: cardtest.RedAttack)"
+	want := "Hand: cardtest.RedAttack"
+	if !strings.Contains(out, want) {
+		t.Errorf("missing %q in:\n%s", want, out)
+	}
+}
+
+// TestFormatBestTurn_EndOfTurnAurasWithRunechants pins the End of turn "Auras: ..." entry —
+// surviving AuraTriggers + the live Runechant count render as one comma-separated line,
+// mirroring the start-of-turn formatting.
+func TestFormatBestTurn_EndOfTurnAurasWithRunechants(t *testing.T) {
+	summary := TurnSummary{
+		State: CarryState{
+			AuraTriggers: []card.AuraTrigger{
+				{Self: runeblade.MaleficIncantationRed{}},
+			},
+			Runechants: 2,
+		},
+	}
+	out := FormatBestTurn(summary, 0)
+	want := "Auras: Malefic Incantation (Red), 2 Runechants"
+	if !strings.Contains(out, want) {
+		t.Errorf("missing %q in:\n%s", want, out)
+	}
+}
+
+// TestFormatBestTurn_EndOfTurnArsenalStayedDirect drives endingArsenalLine's (stayed) branch
+// directly via a synthesised BestLine. Pairs with TestFormatBestTurn_EndOfTurnArsenalNew's
+// (new) branch coverage; the round-trip integration tests only exercise (new).
+func TestFormatBestTurn_EndOfTurnArsenalStayedDirect(t *testing.T) {
+	summary := TurnSummary{
+		BestLine: []CardAssignment{
+			{Card: generic.ToughenUpBlue{}, Role: Arsenal, FromArsenal: true},
+		},
+	}
+	out := FormatBestTurn(summary, 0)
+	want := "Arsenal: Toughen Up (Blue) (stayed)"
 	if !strings.Contains(out, want) {
 		t.Errorf("missing %q in:\n%s", want, out)
 	}

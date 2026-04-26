@@ -54,6 +54,13 @@ type CarryState struct {
 	Runechants int
 	// AuraTriggers is the surviving AuraTrigger set at end of chain. Carries across.
 	AuraTriggers []card.AuraTrigger
+	// Log is the per-event chain trace of the winning permutation — one entry per Play, hero
+	// trigger, aura trigger, ephemeral trigger, weapon swing. Stored as raw card.LogEntry
+	// structs to defer fmt.Sprintf cost until BuildTurnLog runs at end of EvaluateWith,
+	// keeping the snapshot path allocation-light (only the winning permutation's log gets
+	// formatted, and only when the deck-level Best actually changes). Doesn't carry across
+	// turns semantically but rides on CarryState's snapshot mechanism for free.
+	Log []card.LogEntry
 }
 
 // TurnSummary is the result of running Best on a hand: the winning card-role assignments
@@ -62,8 +69,11 @@ type TurnSummary struct {
 	// BestLine is the winning partition. Hand cards come first in canonical (post-sort)
 	// order; the previous-turn arsenal card, if any, is the last entry with FromArsenal=true.
 	BestLine []CardAssignment
-	// SwungWeapons names the weapons swung this turn in the winning permutation. Weapons have
-	// no BestLine entry (they're not hand cards), so the printout reads them from here.
+	// SwungWeapons names the weapons swung this turn in the winning permutation. Weapons
+	// resolve through the dispatcher and log "WEAPON ATTACK" lines into State.Log, so the
+	// numbered printout reads weapon swings from there. SwungWeapons stays on the summary
+	// for the deckio JSON round-trip — Marshal serialises it under "weapons" so a reloaded
+	// best turn still names the swung weapons even when State.Log is absent.
 	SwungWeapons []string
 	// Value is the turn's total score (damage dealt + damage prevented).
 	Value int
@@ -85,6 +95,40 @@ type TriggerContribution struct {
 	Card     card.Card
 	Damage   int
 	Revealed card.Card
+}
+
+// TurnLog is the structured record of a turn's printout, broken into four sections matching
+// the natural turn boundaries. Each entry is content-only — "Hocus Pocus (Blue): PITCH" —
+// so the formatter owns indentation, section headers, numbering of chain events, and
+// join. JSON serializes the struct directly so the on-disk shape is browsable / diffable
+// per section.
+type TurnLog struct {
+	// StartOfTurn captures the turn's starting state and any start-of-turn trigger fires:
+	// dealt hand, arsenal-in card, auras / runechants in play, then the carryover
+	// AuraTrigger handler effects (Sigil reveals, damage credits). Mixed format — informational
+	// lines like "Hand: A, B, C, D" sit alongside event lines like "Sigil of the Arknight
+	// (Blue): drew X into hand"; the formatter renders both unnumbered.
+	StartOfTurn []string `json:"start_of_turn,omitempty"`
+	// MyTurn is the numbered entries for the "My turn:" section: attack-phase pitches
+	// followed by the chain (Play / hero trigger / aura trigger / ephemeral trigger / weapon
+	// swing lines, in resolution order).
+	MyTurn []string `json:"my_turn,omitempty"`
+	// OpponentTurn is the numbered entries for the "Opponent's turn:" section: defense-phase
+	// pitches, plain blocks, and Defense Reactions, in that order.
+	OpponentTurn []string `json:"opponent_turn,omitempty"`
+	// EndOfTurn captures the turn's ending state: the cards in hand, the arsenal slot's
+	// contents, and the auras / runechants surviving into the next turn. Mirrors
+	// StartOfTurn's mixed-informational format ("Hand: A, B", "Arsenal: X (stayed)",
+	// "Auras: Y, 1 Runechant"); the formatter renders unnumbered.
+	EndOfTurn []string `json:"end_of_turn,omitempty"`
+}
+
+// IsEmpty reports whether all four sections are empty — true for an unscored deck or a
+// hand where Best returned without a winning line. Marshal / Unmarshal / printBestTurn use
+// this to short-circuit the best-turn block.
+func (l TurnLog) IsEmpty() bool {
+	return len(l.StartOfTurn) == 0 && len(l.MyTurn) == 0 &&
+		len(l.OpponentTurn) == 0 && len(l.EndOfTurn) == 0
 }
 
 // ArsenalIn returns the assignment for the card that started the turn in the arsenal, if
