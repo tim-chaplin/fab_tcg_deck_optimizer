@@ -31,26 +31,6 @@ func FormatLogEntry(e card.LogEntry) string {
 	return fmt.Sprintf("%s (+%d) (from %s)", e.Text, e.N, e.Source)
 }
 
-// chainVerbFor picks the verb for a card's chain-step log line based on its types and the
-// FromArsenal flag. Attack actions read "ATTACK"; non-attack actions read "PLAY"; weapons
-// read "WEAPON ATTACK" (their own swing). " from arsenal" suffixes when the card came from
-// the arsenal slot.
-func chainVerbFor(m *attackerMeta, fromArsenal bool) string {
-	var verb string
-	switch {
-	case m.types.Has(card.TypeWeapon):
-		verb = "WEAPON ATTACK"
-	case m.isAttackAction:
-		verb = "ATTACK"
-	default:
-		verb = "PLAY"
-	}
-	if fromArsenal {
-		verb += " from arsenal"
-	}
-	return verb
-}
-
 // Phase masks: when no Defense Reactions are present (or no pitches exist), all pitches go to
 // the attack phase, so we visit one configuration. Otherwise we enumerate 2^|pitched| splits.
 //
