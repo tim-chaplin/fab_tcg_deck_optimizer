@@ -13,7 +13,6 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/deck"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/deckformat"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/hand"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/hero"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/mydecks"
 )
@@ -71,7 +70,7 @@ func runAnnealCmd(args []string) {
 	maxCopies := fs.Int("max-copies", defaultMaxCopies, "maximum copies of any single card printing per deck")
 	seed := fs.Int64("seed", time.Now().UnixNano(), "RNG seed")
 	formatFlag := fs.String("format", string(deckformat.SilverAge), "constructed format whose banlist restricts the card pool during search (only \"silver_age\" is supported today)")
-	debug := fs.Bool("debug", false, "emit extra diagnostic output (e.g. memo cache size between rounds)")
+	debug := fs.Bool("debug", false, "force per-round logs even when annealing is on (T>0 normally hides them)")
 	reevaluate := fs.Bool("reevaluate", false, "force re-evaluation of the loaded deck's baseline avg, even if its prior run count already matches -deep-shuffles. Use after adjusting modelling assumptions or fixing bugs that may have shifted the deck's true score.")
 	finalize := fs.Bool("finalize", false, "high-precision pass — overrides -shallow-shuffles to 10000, -deep-shuffles to 100000, and tightens -min-improvement to 0.01. Use on a deck that's already converged to squeeze out the remaining sub-percent improvements.")
 	startTemp := fs.Float64("start-temp", 0, "simulated-annealing starting temperature. 0 (default) runs a pure hill climb. Higher values probabilistically accept worse mutations early; acceptance probability is exp((avg - baseline) / T). Good starting range is ~0.05–0.5 given typical Value units.")
@@ -179,7 +178,7 @@ func runAnneal(cfg annealConfig) annealResult {
 	start := time.Now()
 	for {
 		round++
-		mutations := buildRoundMutations(cfg, rng, current, round)
+		mutations := buildRoundMutations(cfg, rng, current)
 		tempLabel := formatTempLabel(temperature)
 		if verbose {
 			fmt.Fprintf(os.Stderr, "\n[round %d] evaluating %d mutations of avg %.3f%s (best ever %.3f)\n",
@@ -222,23 +221,14 @@ func runAnneal(cfg annealConfig) annealResult {
 	}
 }
 
-// buildRoundMutations produces the per-round mutation list: clears the shared hand memo (so
-// the next round starts with a bounded cache), enumerates every single-card/weapon mutation,
-// and shuffles the order so exploration is unbiased. Also emits the debug memo-size line
-// when -debug is set.
+// buildRoundMutations produces the per-round mutation list: enumerates every
+// single-card/weapon mutation and shuffles the order so exploration is unbiased.
 //
 // AllMutations returns a card.ID-sorted slice for stability; the unconditional shuffle here
 // is what keeps the first-improvement classical climb from sampling the head of the slice
 // disproportionately, and what keeps the probabilistic SA gate from concentrating its
 // acceptances on a fixed slice of the solution space.
-func buildRoundMutations(cfg annealConfig, rng *rand.Rand, current *deck.Deck, round int) []deck.Mutation {
-	// Drop the shared hand memo between rounds. Within a round the memo is load-bearing
-	// (same hand shapes recur across thousands of shuffles), but cross-round hit rate is
-	// near zero and unbounded growth would OOM long hill-climbs.
-	if cfg.debug {
-		fmt.Fprintf(os.Stderr, "[memo] clearing %d entries before round %d\n", hand.MemoLen(), round)
-	}
-	hand.ClearMemo()
+func buildRoundMutations(cfg annealConfig, rng *rand.Rand, current *deck.Deck) []deck.Mutation {
 	mutations := deck.AllMutations(current, cfg.maxCopies, cfg.legalFilter())
 	rng.Shuffle(len(mutations), func(i, j int) {
 		mutations[i], mutations[j] = mutations[j], mutations[i]

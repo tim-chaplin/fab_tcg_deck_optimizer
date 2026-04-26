@@ -27,7 +27,6 @@ func BenchmarkEvaluate(b *testing.B) {
 	b.ResetTimer()
 	for n := 0; n < b.N; n++ {
 		b.StopTimer()
-		hand.ClearMemo()
 		d.Stats = Stats{}
 		evalRNG = rand.New(rand.NewSource(42))
 		b.StartTimer()

@@ -56,9 +56,3 @@ func NewEvaluator() *Evaluator { return &Evaluator{} }
 // sharedEvaluator backs the package-level Best — single-threaded callers don't need to
 // construct their own.
 var sharedEvaluator = NewEvaluator()
-
-// ClearMemo is a no-op kept for diagnostic call-site compatibility.
-func ClearMemo() {}
-
-// MemoLen returns 0. Kept for diagnostic loggers that print "[memo] N entries".
-func MemoLen() int { return 0 }

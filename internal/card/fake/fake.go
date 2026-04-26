@@ -71,7 +71,7 @@ var genericActionTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction)
 
 // CostlyDraw is a 1-cost, pitch-1, no-damage "draw a card, go again" action. Used by the
 // mid-turn-draw determinism tests: plays for 0 damage but a chain can continue off its Go again
-// onto a drawn-later attack. Implements NoMemo because Play reads the deck via DrawOne.
+// onto a drawn-later attack.
 type CostlyDraw struct{}
 
 func (CostlyDraw) ID() card.ID              { return card.FakeCostlyDraw }
@@ -82,7 +82,6 @@ func (CostlyDraw) Attack() int              { return 0 }
 func (CostlyDraw) Defense() int             { return 0 }
 func (CostlyDraw) Types() card.TypeSet      { return genericActionTypes }
 func (CostlyDraw) GoAgain() bool            { return true }
-func (CostlyDraw) NoMemo()                  {}
 func (CostlyDraw) Play(s *card.TurnState, self *card.CardState) {
 	s.DrawOne()
 	s.LogPlay(self)

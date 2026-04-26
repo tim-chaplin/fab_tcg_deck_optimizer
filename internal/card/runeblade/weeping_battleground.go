@@ -32,7 +32,6 @@ func (WeepingBattlegroundRed) Attack() int              { return 0 }
 func (WeepingBattlegroundRed) Defense() int             { return 3 }
 func (WeepingBattlegroundRed) Types() card.TypeSet      { return weepingBattlegroundTypes }
 func (WeepingBattlegroundRed) GoAgain() bool            { return false }
-func (WeepingBattlegroundRed) NoMemo()                  {}
 func (WeepingBattlegroundRed) Play(s *card.TurnState, self *card.CardState) {
 	weepingBattlegroundPlay(s, self)
 }
@@ -47,7 +46,6 @@ func (WeepingBattlegroundYellow) Attack() int              { return 0 }
 func (WeepingBattlegroundYellow) Defense() int             { return 3 }
 func (WeepingBattlegroundYellow) Types() card.TypeSet      { return weepingBattlegroundTypes }
 func (WeepingBattlegroundYellow) GoAgain() bool            { return false }
-func (WeepingBattlegroundYellow) NoMemo()                  {}
 func (WeepingBattlegroundYellow) Play(s *card.TurnState, self *card.CardState) {
 	weepingBattlegroundPlay(s, self)
 }
@@ -62,7 +60,6 @@ func (WeepingBattlegroundBlue) Attack() int              { return 0 }
 func (WeepingBattlegroundBlue) Defense() int             { return 3 }
 func (WeepingBattlegroundBlue) Types() card.TypeSet      { return weepingBattlegroundTypes }
 func (WeepingBattlegroundBlue) GoAgain() bool            { return false }
-func (WeepingBattlegroundBlue) NoMemo()                  {}
 func (WeepingBattlegroundBlue) Play(s *card.TurnState, self *card.CardState) {
 	weepingBattlegroundPlay(s, self)
 }

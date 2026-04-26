@@ -10,7 +10,7 @@ Each card implementation lives in `internal/card/generic/` or `internal/card/run
 
 1. Declares a shared `TypeSet` var for the card's type line.
 2. Declares one struct per printed pitch variant (e.g. `FooRed`, `FooYellow`, `FooBlue`).
-3. Implements the `card.Card` interface plus any optional markers (`NoMemo`, `AddsFutureValue`,
+3. Implements the `card.Card` interface plus any optional markers (`AddsFutureValue`,
    `VariableCost`, …) on each variant.
 4. Shares a `fooPlay(...)` helper when variants differ only by a numeric parameter.
 
@@ -26,9 +26,8 @@ the upstream repo is the authority for every card file in the project.
 - Delete completed TODOs instead of rewording them.
 - Card docstrings cover card-SPECIFIC quirks — the printed rules text, any modelling fudge, and
   anything surprising about how this card interacts with the solver. Generic framework plumbing
-  (how `AuraTrigger` is ticked, what `NoMemo` opts out of, how memoization works) belongs in
-  framework docs in `internal/card/card.go` and `internal/hand/hand.go`, not repeated in every
-  card.
+  (how `AuraTrigger` is ticked, etc.) belongs in framework docs in `internal/card/card.go` and
+  `internal/hand/hand.go`, not repeated in every card.
 - Don't restate behavior that's already documented by an external function, type, or marker the
   card uses. If a card calls `card.LikelyToHit`, the docstring shouldn't re-explain the
   hit-likelihood heuristic; if a card carries `card.Dominator`, it shouldn't re-explain how
@@ -56,19 +55,6 @@ later":
 
 Card docstrings should NOT restate this lifecycle. State only what's card-specific — the printed
 clause, `Count = N`, and whatever the handler returns.
-
-## NoMemo
-
-Defined in `internal/card/card.go`. Cards whose `Play` depends on state not captured by the memo
-key (deck composition, graveyard contents, cross-turn trigger state) implement `NoMemo()` so
-`hand.Best` skips the cache. Restate only the card-specific reason in the docstring if it's not
-obvious.
-
-## Memoization
-
-`hand.Best` memoizes by `(heroID, sorted weapon IDs, sorted card IDs, incomingDamage,
-runechantCarryover, arsenal-in ID)`. Non-nil `priorAuraTriggers` or any `NoMemo` card in the
-hand disables the cache for that call.
 
 ## Cross-file references
 

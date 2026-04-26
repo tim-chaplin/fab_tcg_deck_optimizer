@@ -5,8 +5,7 @@
 // gains **go again**." (N is the printed variant value above.)
 //
 // The synergy is pitch-agnostic: it triggers off any Moon Wish printing in the same turn's
-// CardsPlayed. NoMemo on every variant because the bonus draw's value depends on the top of
-// the deck, which the memo key doesn't capture.
+// CardsPlayed.
 
 package generic
 
@@ -52,7 +51,6 @@ func (SunKissRed) Attack() int              { return 0 }
 func (SunKissRed) Defense() int             { return 2 }
 func (SunKissRed) Types() card.TypeSet      { return sunKissTypes }
 func (SunKissRed) GoAgain() bool            { return false }
-func (SunKissRed) NoMemo()                  {}
 func (SunKissRed) Play(s *card.TurnState, self *card.CardState) {
 	sunKissPlay(3, s, self)
 }
@@ -67,7 +65,6 @@ func (SunKissYellow) Attack() int              { return 0 }
 func (SunKissYellow) Defense() int             { return 2 }
 func (SunKissYellow) Types() card.TypeSet      { return sunKissTypes }
 func (SunKissYellow) GoAgain() bool            { return false }
-func (SunKissYellow) NoMemo()                  {}
 func (SunKissYellow) Play(s *card.TurnState, self *card.CardState) {
 	sunKissPlay(2, s, self)
 }
@@ -82,7 +79,6 @@ func (SunKissBlue) Attack() int              { return 0 }
 func (SunKissBlue) Defense() int             { return 2 }
 func (SunKissBlue) Types() card.TypeSet      { return sunKissTypes }
 func (SunKissBlue) GoAgain() bool            { return false }
-func (SunKissBlue) NoMemo()                  {}
 func (SunKissBlue) Play(s *card.TurnState, self *card.CardState) {
 	sunKissPlay(1, s, self)
 }

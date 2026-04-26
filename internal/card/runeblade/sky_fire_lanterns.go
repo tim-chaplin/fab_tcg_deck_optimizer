@@ -32,7 +32,6 @@ func (SkyFireLanternsRed) Attack() int              { return 0 }
 func (SkyFireLanternsRed) Defense() int             { return 2 }
 func (SkyFireLanternsRed) Types() card.TypeSet      { return skyFireLanternsTypes }
 func (SkyFireLanternsRed) GoAgain() bool            { return true }
-func (SkyFireLanternsRed) NoMemo()                  {} // value depends on top of deck
 func (c SkyFireLanternsRed) Play(s *card.TurnState, self *card.CardState) {
 	skyFireLanternsPlay(s, self, c.Pitch())
 }
@@ -47,7 +46,6 @@ func (SkyFireLanternsYellow) Attack() int              { return 0 }
 func (SkyFireLanternsYellow) Defense() int             { return 2 }
 func (SkyFireLanternsYellow) Types() card.TypeSet      { return skyFireLanternsTypes }
 func (SkyFireLanternsYellow) GoAgain() bool            { return true }
-func (SkyFireLanternsYellow) NoMemo()                  {}
 func (c SkyFireLanternsYellow) Play(s *card.TurnState, self *card.CardState) {
 	skyFireLanternsPlay(s, self, c.Pitch())
 }
@@ -62,7 +60,6 @@ func (SkyFireLanternsBlue) Attack() int              { return 0 }
 func (SkyFireLanternsBlue) Defense() int             { return 2 }
 func (SkyFireLanternsBlue) Types() card.TypeSet      { return skyFireLanternsTypes }
 func (SkyFireLanternsBlue) GoAgain() bool            { return true }
-func (SkyFireLanternsBlue) NoMemo()                  {}
 func (c SkyFireLanternsBlue) Play(s *card.TurnState, self *card.CardState) {
 	skyFireLanternsPlay(s, self, c.Pitch())
 }

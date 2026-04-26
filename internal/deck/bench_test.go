@@ -5,7 +5,6 @@ import (
 	"math/rand"
 	"testing"
 
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/hand"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/hero"
 )
 
@@ -15,10 +14,8 @@ import (
 // the rarer deep-confirm path in realistic proportions.
 //
 // Variance-control:
-//   - Each b.N iteration starts from a cold memo via hand.ClearMemo() so every sample
-//     measures the same work.
-//   - targetImprovements is sized so each iteration does ~5 full rounds, amortising cold-cache
-//     startup and per-round scheduling/GC blips.
+//   - targetImprovements is sized so each iteration does ~5 full rounds, amortising
+//     per-round scheduling/GC blips.
 //   - Shuffle counts (shallow=100, deep=5000) compress the production defaults (100 / 10000)
 //     to keep each iteration in single-digit seconds.
 //   - Seed is fixed so every iteration walks the same mutation-pick sequence.
@@ -43,7 +40,6 @@ func BenchmarkIterateImprovements(b *testing.B) {
 
 	for n := 0; n < b.N; n++ {
 		b.StopTimer()
-		hand.ClearMemo()
 		iterRNG := rand.New(rand.NewSource(42))
 		best := baseline
 		bestAvg := baselineAvg
