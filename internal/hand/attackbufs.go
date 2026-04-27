@@ -67,6 +67,7 @@ type attackBufs struct {
 	cardsPlayedBacking  []card.Card
 	logBacking          []card.LogEntry
 	auraTriggersBacking []card.AuraTrigger
+	ephemeralBacking    []card.EphemeralAttackTrigger
 }
 
 func newAttackBufs(handSize, weaponCount int, weapons []weapon.Weapon) *attackBufs {
@@ -131,6 +132,9 @@ func newAttackBufs(handSize, weaponCount int, weapons []weapon.Weapon) *attackBu
 		cardsPlayedBacking:  make([]card.Card, 0, maxAttackers),
 		logBacking:          make([]card.LogEntry, 0, logBackingCap),
 		auraTriggersBacking: make([]card.AuraTrigger, 0, handSize+1),
+		// Ephemeral attack triggers (Mauvrion Skies, Runic Reaping) typically register one per
+		// applicable card — pre-sized cap avoids the per-Play slice grow.
+		ephemeralBacking: make([]card.EphemeralAttackTrigger, 0, handSize+1),
 	}
 }
 
