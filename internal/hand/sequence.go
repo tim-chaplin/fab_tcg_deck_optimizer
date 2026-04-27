@@ -281,18 +281,19 @@ func (ctx *sequenceContext) resetStateForPermutation() {
 	s := ctx.bufs.state
 	bufs := ctx.bufs
 	*s = card.TurnState{
-		Hand:           append(bufs.handBacking[:0], ctx.handStart...),
-		Deck:           append(bufs.deckBacking[:0], ctx.deck...),
-		Arsenal:        ctx.arsenalAtChainStart,
-		Graveyard:      bufs.graveBacking[:0],
-		Banish:         bufs.banishBacking[:0],
-		CardsPlayed:    bufs.cardsPlayedBacking[:0],
-		Log:            bufs.logBacking[:0],
-		Pitched:        ctx.pitched,
-		IncomingDamage: ctx.incomingDamage,
-		BlockTotal:     ctx.blockTotal,
-		Runechants:     ctx.runechantCarryover,
-		AuraTriggers:   append(bufs.auraTriggersBacking[:0], ctx.priorAuraTriggers...),
+		Hand:                    append(bufs.handBacking[:0], ctx.handStart...),
+		Deck:                    append(bufs.deckBacking[:0], ctx.deck...),
+		Arsenal:                 ctx.arsenalAtChainStart,
+		Graveyard:               bufs.graveBacking[:0],
+		Banish:                  bufs.banishBacking[:0],
+		CardsPlayed:             bufs.cardsPlayedBacking[:0],
+		Log:                     bufs.logBacking[:0],
+		Pitched:                 ctx.pitched,
+		IncomingDamage:          ctx.incomingDamage,
+		BlockTotal:              ctx.blockTotal,
+		Runechants:              ctx.runechantCarryover,
+		AuraTriggers:            append(bufs.auraTriggersBacking[:0], ctx.priorAuraTriggers...),
+		EphemeralAttackTriggers: bufs.ephemeralBacking[:0],
 	}
 }
 
