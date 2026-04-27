@@ -6,7 +6,6 @@ import (
 	"time"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/card/generic"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/cards"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/hand"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/hero"
@@ -143,7 +142,7 @@ func TestEvaluate_HeldCardDefersDrawToNextTurn(t *testing.T) {
 	// wired up — the assertion would fail catastrophically (loop or much larger Hands count).
 	deckCards := make([]card.Card, 40)
 	for i := range deckCards {
-		deckCards[i] = generic.ToughenUpBlue{}
+		deckCards[i] = cards.ToughenUpBlue{}
 	}
 	d := New(int1StubHero, nil, deckCards)
 	d.Evaluate(1, 0, rand.New(rand.NewSource(1)))
@@ -169,7 +168,7 @@ func TestEvaluate_HeldCardDefersDrawToNextTurn(t *testing.T) {
 // pitched card (returned to deck bottom) and arsenals it again. Loop stops when the deck's
 // empty and nothing new can be drawn.
 func TestEvaluate_ArsenalPersistsAcrossTurns(t *testing.T) {
-	d := New(int1StubHero, nil, []card.Card{generic.ToughenUpBlue{}, generic.ToughenUpBlue{}})
+	d := New(int1StubHero, nil, []card.Card{cards.ToughenUpBlue{}, cards.ToughenUpBlue{}})
 	d.Evaluate(1, 4, rand.New(rand.NewSource(1)))
 
 	// Best captures turn 2 — only turn with Value > 0 (arsenal DR fires).
@@ -191,7 +190,7 @@ func TestEvaluate_ArsenalPersistsAcrossTurns(t *testing.T) {
 func TestEvaluate_TerminatesAfterTwoCycles(t *testing.T) {
 	deckCards := make([]card.Card, 40)
 	for i := range deckCards {
-		deckCards[i] = generic.ToughenUpBlue{}
+		deckCards[i] = cards.ToughenUpBlue{}
 	}
 	d := New(hero.Viserai{}, []weapon.Weapon{weapon.ReapingBlade{}}, deckCards)
 	done := make(chan struct{})

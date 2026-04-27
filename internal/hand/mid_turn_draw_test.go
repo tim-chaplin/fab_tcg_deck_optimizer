@@ -5,7 +5,7 @@ import (
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card/fake"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/card/generic"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/cards"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/hero"
 )
 
@@ -21,7 +21,7 @@ func TestPlaySequence_DrawDoesNotPoisonSubsequentPermutations(t *testing.T) {
 	ctx := newSequenceContextForTest(hero.Viserai{}, nil, deck, 10, 0, 1)
 
 	// First permutation: Snatch fires, DrawOne pops the top of the deck into Hand.
-	_, _, _, _ = ctx.playSequence([]card.Card{generic.SnatchRed{}})
+	_, _, _, _ = ctx.playSequence([]card.Card{cards.SnatchRed{}})
 	if len(ctx.bufs.state.Hand) != 1 || ctx.bufs.state.Hand[0] != top {
 		t.Fatalf("after first permutation: Hand = %v, want [top]", ctx.bufs.state.Hand)
 	}
@@ -46,7 +46,7 @@ func TestPlaySequence_DrawDoesNotPoisonSubsequentPermutations(t *testing.T) {
 // contents the solver actually receives — two Best calls with identical hands but different
 // decks must report distinct end-of-turn State.Hand contents (the cards drawn off the top).
 func TestBest_DrawRiderSeesActualDeck(t *testing.T) {
-	h := []card.Card{generic.SnatchRed{}}
+	h := []card.Card{cards.SnatchRed{}}
 	deckA := []card.Card{fake.RedAttack{}}
 	deckB := []card.Card{fake.BlueAttack{}}
 

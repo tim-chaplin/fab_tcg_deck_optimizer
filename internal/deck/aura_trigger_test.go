@@ -6,8 +6,7 @@ import (
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card/fake"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/card/generic"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/card/runeblade"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/cards"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/hand"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/hero"
 )
@@ -95,7 +94,7 @@ func TestProcessTriggersAtStartOfTurn_GraveyardsExhaustedAura(t *testing.T) {
 // the registered trigger: credit 1 damage-equivalent (the 1{h} gain) and graveyard the
 // sigil (Count hits zero).
 func TestEvalOneTurn_SigilOfFyendalQueuesTrigger(t *testing.T) {
-	sigil := generic.SigilOfFyendalBlue{}
+	sigil := cards.SigilOfFyendalBlue{}
 	deckCards := []card.Card{
 		fake.BlueAttack{},
 		fake.BlueAttack{},
@@ -131,8 +130,8 @@ func TestEvalOneTurn_SigilOfFyendalQueuesTrigger(t *testing.T) {
 // into the hand.
 func TestProcessTriggersAtStartOfTurn_RevealsAttackActionIntoHand(t *testing.T) {
 	var play card.TurnState
-	(runeblade.SigilOfTheArknightBlue{}).Play(&play, &card.CardState{Card: runeblade.SigilOfTheArknightBlue{}})
-	slash := runeblade.AetherSlashRed{}
+	(cards.SigilOfTheArknightBlue{}).Play(&play, &card.CardState{Card: cards.SigilOfTheArknightBlue{}})
+	slash := cards.AetherSlashRed{}
 	_, contribs, total, _, revealed, _ := processTriggersAtStartOfTurn(play.AuraTriggers, []card.Card{slash})
 	if total != 0 {
 		t.Errorf("total = %d, want 0 (reveal contributes via hand, not damage)", total)
@@ -151,8 +150,8 @@ func TestProcessTriggersAtStartOfTurn_RevealsAttackActionIntoHand(t *testing.T) 
 // printout would know a reveal happened but not which aura caused it.
 func TestProcessTriggersAtStartOfTurn_AttributesRevealedToContribution(t *testing.T) {
 	var play card.TurnState
-	(runeblade.SigilOfTheArknightBlue{}).Play(&play, &card.CardState{Card: runeblade.SigilOfTheArknightBlue{}})
-	slash := runeblade.AetherSlashRed{}
+	(cards.SigilOfTheArknightBlue{}).Play(&play, &card.CardState{Card: cards.SigilOfTheArknightBlue{}})
+	slash := cards.AetherSlashRed{}
 	_, contribs, _, _, _, _ := processTriggersAtStartOfTurn(play.AuraTriggers, []card.Card{slash})
 	if len(contribs) != 1 {
 		t.Fatalf("contribs = %+v, want one entry", contribs)
@@ -166,10 +165,10 @@ func TestProcessTriggersAtStartOfTurn_AttributesRevealedToContribution(t *testin
 // reveal the current top, so the second sees the NEW top after the first pops its card.
 func TestProcessTriggersAtStartOfTurn_CascadingReveals(t *testing.T) {
 	var play card.TurnState
-	(runeblade.SigilOfTheArknightBlue{}).Play(&play, &card.CardState{Card: runeblade.SigilOfTheArknightBlue{}})
-	(runeblade.SigilOfTheArknightBlue{}).Play(&play, &card.CardState{Card: runeblade.SigilOfTheArknightBlue{}})
-	first := runeblade.AetherSlashRed{}
-	second := runeblade.ConsumingVolitionRed{}
+	(cards.SigilOfTheArknightBlue{}).Play(&play, &card.CardState{Card: cards.SigilOfTheArknightBlue{}})
+	(cards.SigilOfTheArknightBlue{}).Play(&play, &card.CardState{Card: cards.SigilOfTheArknightBlue{}})
+	first := cards.AetherSlashRed{}
+	second := cards.ConsumingVolitionRed{}
 	_, _, _, _, revealed, _ := processTriggersAtStartOfTurn(play.AuraTriggers, []card.Card{first, second})
 	if len(revealed) != 2 {
 		t.Fatalf("len(revealed) = %d, want 2 (two cascading reveals)", len(revealed))
@@ -183,7 +182,7 @@ func TestProcessTriggersAtStartOfTurn_CascadingReveals(t *testing.T) {
 // non-attack top → no reveal. The top stays on the deck in the real game.
 func TestProcessTriggersAtStartOfTurn_NonAttackActionTopSkipsReveal(t *testing.T) {
 	var play card.TurnState
-	sigil := runeblade.SigilOfTheArknightBlue{}
+	sigil := cards.SigilOfTheArknightBlue{}
 	sigil.Play(&play, &card.CardState{Card: sigil})
 	// Sigil itself is an Aura (non-attack action) — use it as a convenient non-attack top.
 	_, _, total, _, revealed, _ := processTriggersAtStartOfTurn(play.AuraTriggers, []card.Card{sigil})
@@ -200,9 +199,9 @@ func TestProcessTriggersAtStartOfTurn_NonAttackActionTopSkipsReveal(t *testing.T
 // TurnState.Log so the format layer can render the line verbatim.
 func TestProcessTriggersAtStartOfTurn_SigilHitAuthorsLogText(t *testing.T) {
 	var play card.TurnState
-	sigil := runeblade.SigilOfTheArknightBlue{}
+	sigil := cards.SigilOfTheArknightBlue{}
 	sigil.Play(&play, &card.CardState{Card: sigil})
-	_, contribs, _, _, _, _ := processTriggersAtStartOfTurn(play.AuraTriggers, []card.Card{runeblade.AetherSlashRed{}})
+	_, contribs, _, _, _, _ := processTriggersAtStartOfTurn(play.AuraTriggers, []card.Card{cards.AetherSlashRed{}})
 	if len(contribs) != 1 {
 		t.Fatalf("contribs = %+v, want one entry", contribs)
 	}
@@ -217,7 +216,7 @@ func TestProcessTriggersAtStartOfTurn_SigilHitAuthorsLogText(t *testing.T) {
 // the player saw on top of the deck, not just the hits.
 func TestProcessTriggersAtStartOfTurn_SigilWhiffStillLogs(t *testing.T) {
 	var play card.TurnState
-	sigil := runeblade.SigilOfTheArknightBlue{}
+	sigil := cards.SigilOfTheArknightBlue{}
 	sigil.Play(&play, &card.CardState{Card: sigil})
 	// Sigil itself is a non-attack action — convenient whiff top.
 	_, contribs, _, _, _, _ := processTriggersAtStartOfTurn(play.AuraTriggers, []card.Card{sigil})
@@ -238,8 +237,8 @@ func TestProcessTriggersAtStartOfTurn_SigilWhiffStillLogs(t *testing.T) {
 // action) and moves it into the hand. The returned turn-2 hand should have 5 cards:
 // 4 normal refills plus the revealed Aether Slash appended at the tail.
 func TestEvalOneTurn_SigilOfTheArknightRevealsIntoHand(t *testing.T) {
-	sigil := runeblade.SigilOfTheArknightBlue{}
-	reveal := runeblade.AetherSlashRed{}
+	sigil := cards.SigilOfTheArknightBlue{}
+	reveal := cards.AetherSlashRed{}
 	// Deck layout: positions 0..3 are turn 2's normal refill (Blues), position 4 is the reveal
 	// target at the post-draw top, positions 5+ are unused filler.
 	deckCards := []card.Card{
@@ -292,7 +291,7 @@ func TestEvalOneTurn_SigilOfTheArknightRevealsIntoHand(t *testing.T) {
 // the solver still plays Blessing so the trigger queue picks it up. Turn 2's starting state
 // should have 3 Runechants in the carryover.
 func TestEvalOneTurn_BlessingOfOccultCreatesRunesAtStartOfNextTurn(t *testing.T) {
-	blessing := runeblade.BlessingOfOccultRed{}
+	blessing := cards.BlessingOfOccultRed{}
 	pitch := fake.PitchOneDR{}
 	deckCards := []card.Card{
 		fake.BlueAttack{},
@@ -334,8 +333,8 @@ func TestEvalOneTurn_BlessingOfOccultCreatesRunesAtStartOfNextTurn(t *testing.T)
 // Value directly, so a turn with Blessing queued from the prior turn reliably beats a turn
 // without — guaranteeing the best-turn picker selects a trigger-fired hand.
 func TestEvaluate_TriggersFromLastTurnSurfacesInBest(t *testing.T) {
-	blessing := runeblade.BlessingOfOccultRed{}
-	slash := runeblade.AetherSlashRed{}
+	blessing := cards.BlessingOfOccultRed{}
+	slash := cards.AetherSlashRed{}
 	deckCards := make([]card.Card, 0, 20)
 	for i := 0; i < 8; i++ {
 		deckCards = append(deckCards, blessing)
@@ -412,8 +411,8 @@ func TestProcessTriggersAtStartOfTurn_ReArmsOncePerTurnGate(t *testing.T) {
 // turn, but doesn't itself credit damage (Malefic is AttackAction-typed, not StartOfTurn).
 // Malefic survives with Count=2.
 func TestEvalOneTurn_MaleficIncantationOncePerTurnLimitsToOneRune(t *testing.T) {
-	malefic := runeblade.MaleficIncantationRed{}
-	hocus := runeblade.HocusPocusRed{}
+	malefic := cards.MaleficIncantationRed{}
+	hocus := cards.HocusPocusRed{}
 	// Filler deck so turn 2 can be dealt — content doesn't matter for what we assert.
 	deckCards := []card.Card{
 		fake.BlueAttack{},
@@ -461,7 +460,7 @@ func TestEvalOneTurn_MaleficIncantationOncePerTurnLimitsToOneRune(t *testing.T) 
 // trigger is what carries forward; this test pins the multi-turn fire shape end-to-end at
 // the deck-loop boundary.
 func TestEvalOneTurn_RunebloodIncantationTicksAcrossTurns(t *testing.T) {
-	runeblood := runeblade.RunebloodIncantationRed{}
+	runeblood := cards.RunebloodIncantationRed{}
 	pitch := fake.PitchOneDR{}
 	deckCards := []card.Card{
 		fake.BlueAttack{},

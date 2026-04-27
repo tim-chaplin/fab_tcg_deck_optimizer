@@ -6,8 +6,7 @@ import (
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card/fake"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/card/generic"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/card/runeblade"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/cards"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/hero"
 )
 
@@ -27,7 +26,7 @@ import (
 func TestEvalOneTurn_MidTurnDrawArsenalsWhenSlotEmpty(t *testing.T) {
 	beacon := fake.RedAttack{}
 	deckCards := []card.Card{
-		generic.SnatchRed{},
+		cards.SnatchRed{},
 		fake.BlueAttack{},
 		fake.BlueAttack{},
 		fake.BlueAttack{},
@@ -89,10 +88,10 @@ func TestEvalOneTurn_MidTurnDrawArsenalsWhenSlotEmpty(t *testing.T) {
 func TestEvalOneTurn_TwoMidTurnDraws_OneArsenalsOneHeld(t *testing.T) {
 	beacon := fake.RedAttack{}
 	deckCards := []card.Card{
-		generic.FlyingHighRed{},
-		generic.FlyingHighRed{},
-		generic.SnatchRed{},
-		generic.SnatchRed{},
+		cards.FlyingHighRed{},
+		cards.FlyingHighRed{},
+		cards.SnatchRed{},
+		cards.SnatchRed{},
 		beacon,
 		beacon,
 		fake.BlueAttack{},
@@ -149,12 +148,12 @@ func TestEvalOneTurn_TwoMidTurnDraws_OneArsenalsOneHeld(t *testing.T) {
 //     past the 2-card refill budget.
 func TestEvalOneTurn_ThreeMidTurnDraws_ArsenalFromDrawnPool(t *testing.T) {
 	beacon := fake.RedAttack{}
-	arsenalIn := generic.SnatchRed{}
+	arsenalIn := cards.SnatchRed{}
 	deckCards := []card.Card{
-		generic.FlyingHighRed{},
-		generic.FlyingHighRed{},
-		generic.SnatchRed{},
-		generic.SnatchRed{},
+		cards.FlyingHighRed{},
+		cards.FlyingHighRed{},
+		cards.SnatchRed{},
+		cards.SnatchRed{},
 		beacon,
 		beacon,
 		beacon,
@@ -207,9 +206,9 @@ func TestEvalOneTurn_ThreeMidTurnDraws_ArsenalFromDrawnPool(t *testing.T) {
 //   - positions 8..9 = Yellow tripwires that should stay in the deck.
 func TestEvalOneTurn_MidTurnDrawHeldWhenArsenalFull(t *testing.T) {
 	beacon := fake.RedAttack{}
-	arsenalIn := generic.ToughenUpBlue{} // DR, cost 2, defense 4 — stays in arsenal with incoming 0
+	arsenalIn := cards.ToughenUpBlue{} // DR, cost 2, defense 4 — stays in arsenal with incoming 0
 	deckCards := []card.Card{
-		generic.SnatchRed{},
+		cards.SnatchRed{},
 		fake.BlueAttack{},
 		fake.BlueAttack{},
 		fake.BlueAttack{},
@@ -263,11 +262,11 @@ func TestEvalOneTurn_MidTurnDrawHeldWhenArsenalFull(t *testing.T) {
 // of the two lands in arsenal, the other anchors turn 2's hand."
 func TestEvalOneTurn_MidTurnDrawSansGoAgainStaysHeld(t *testing.T) {
 	initialHand := []card.Card{
-		generic.SnatchRed{},
-		generic.ToughenUpBlue{},
+		cards.SnatchRed{},
+		cards.ToughenUpBlue{},
 	}
 	deckCards := []card.Card{
-		runeblade.AetherSlashRed{},
+		cards.AetherSlashRed{},
 		fake.BlueAttack{},
 		fake.BlueAttack{},
 		fake.BlueAttack{},
@@ -293,9 +292,9 @@ func TestEvalOneTurn_MidTurnDrawSansGoAgainStaysHeld(t *testing.T) {
 
 	// Turn 2 hand: the non-promoted of the two anchors the held prefix, then three fresh Blues
 	// from the deck (positions 1..3).
-	var wantAnchor card.Card = generic.ToughenUpBlue{}
+	var wantAnchor card.Card = cards.ToughenUpBlue{}
 	if arsenalIsTU {
-		wantAnchor = runeblade.AetherSlashRed{}
+		wantAnchor = cards.AetherSlashRed{}
 	}
 	wantHand := []card.Card{
 		wantAnchor,
@@ -324,7 +323,7 @@ func TestEvalOneTurn_MidTurnDrawSansGoAgainStaysHeld(t *testing.T) {
 // deal (deck stays empty through the turn), so the sim returns a TurnStartState with just
 // the previous-turn value and the arsenal/live runechants.
 func TestEvalOneTurn_DrawOneOnEmptyDeckIsNoop(t *testing.T) {
-	initialHand := []card.Card{generic.SnatchRed{}}
+	initialHand := []card.Card{cards.SnatchRed{}}
 	d := New(hero.Viserai{}, nil, nil)
 	state := d.EvalOneTurnForTesting(0, nil, initialHand)
 

@@ -5,8 +5,7 @@ import (
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card/fake"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/card/generic"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/card/runeblade"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/cards"
 )
 
 func TestBest_AllRedHand(t *testing.T) {
@@ -52,7 +51,7 @@ func TestBest_DefenseReactionRequiresCostPaid(t *testing.T) {
 	// Toughen Up [B]: Cost 2, Pitch 3, Defense 4. A hand of just this card can't pay its own
 	// 2-resource cost to play as a Defense Reaction (there's nothing else to pitch). The only
 	// legal lines are to pitch it (0 damage prevented) or do nothing — Value must be 0.
-	h := []card.Card{generic.ToughenUpBlue{}}
+	h := []card.Card{cards.ToughenUpBlue{}}
 	got := Best(stubHero, nil, h, 4, nil, 0, nil)
 	if got.Value != 0 {
 		t.Fatalf("want value 0 (cost unpaid), got %d", got.Value)
@@ -62,7 +61,7 @@ func TestBest_DefenseReactionRequiresCostPaid(t *testing.T) {
 func TestBest_DefenseReactionAffordableResolves(t *testing.T) {
 	// Pitch 1 Blue Malefic (3 res), pay Toughen Up [B]'s cost 2, prevent 4 damage (capped at
 	// incoming=4). Value = 4.
-	h := []card.Card{runeblade.MaleficIncantationBlue{}, generic.ToughenUpBlue{}}
+	h := []card.Card{cards.MaleficIncantationBlue{}, cards.ToughenUpBlue{}}
 	got := Best(stubHero, nil, h, 4, nil, 0, nil)
 	if got.Value != 4 {
 		t.Fatalf("want value 4 (cost paid, full block), got %d", got.Value)
@@ -106,7 +105,7 @@ func TestBest_RespectsResourceConstraint(t *testing.T) {
 // leaves the card Held; post-hoc the empty arsenal slot claims it, so Role becomes Arsenal
 // and got.State.Arsenal records the card for next turn's carryover.
 func TestBest_AllHeldWhenNoLegalPlay(t *testing.T) {
-	h := []card.Card{generic.ToughenUpBlue{}}
+	h := []card.Card{cards.ToughenUpBlue{}}
 	got := Best(stubHero, nil, h, 4, nil, 0, nil)
 	if got.Value != 0 {
 		t.Fatalf("Value = %d, want 0", got.Value)
@@ -128,7 +127,7 @@ func TestBest_AllHeldWhenNoLegalPlay(t *testing.T) {
 // plain-block with Malefic. Value = 3 (Red attack) + 2 (Malefic block) = 5. A single-pool
 // fallback would score 7 by funding both phases from one pitch — illegal, locked out here.
 func TestBest_AttackPitchCantCoverDefense(t *testing.T) {
-	h := []card.Card{runeblade.MaleficIncantationBlue{}, generic.ToughenUpBlue{}, fake.RedAttack{}}
+	h := []card.Card{cards.MaleficIncantationBlue{}, cards.ToughenUpBlue{}, fake.RedAttack{}}
 	got := Best(stubHero, nil, h, 4, nil, 0, nil)
 	if got.Value != 5 {
 		t.Fatalf("Value = %d, want 5 (attack and defense pitches are separate pools; Roles=[%s])",
@@ -142,9 +141,9 @@ func TestBest_AttackPitchCantCoverDefense(t *testing.T) {
 // 4 (full prevent) = 7.
 func TestBest_DRPitchNeedsSecondPitchedCard(t *testing.T) {
 	h := []card.Card{
-		runeblade.MaleficIncantationBlue{},
-		runeblade.MaleficIncantationBlue{},
-		generic.ToughenUpBlue{},
+		cards.MaleficIncantationBlue{},
+		cards.MaleficIncantationBlue{},
+		cards.ToughenUpBlue{},
 		fake.RedAttack{},
 	}
 	got := Best(stubHero, nil, h, 4, nil, 0, nil)
@@ -162,10 +161,10 @@ func TestBest_DRPitchNeedsSecondPitchedCard(t *testing.T) {
 // evaluates the 5-attacker partition — the buffer must survive that.
 func TestBest_AllAttackHandPlusArsenalNoWeapons(t *testing.T) {
 	h := []card.Card{
-		generic.WoundingBlowRed{}, generic.WoundingBlowRed{},
-		generic.WoundingBlowRed{}, generic.WoundingBlowRed{},
+		cards.WoundingBlowRed{}, cards.WoundingBlowRed{},
+		cards.WoundingBlowRed{}, cards.WoundingBlowRed{},
 	}
-	got := Best(stubHero, nil, h, 0, nil, 0, generic.WoundingBlowRed{})
+	got := Best(stubHero, nil, h, 0, nil, 0, cards.WoundingBlowRed{})
 	if got.Value != 4 {
 		t.Fatalf("Value = %d, want 4 (one Wounding Blow Red lands; rest can't chain without GoAgain). Roles=[%s]",
 			got.Value, FormatBestLine(got.BestLine))

@@ -5,8 +5,7 @@ import (
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card/fake"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/card/generic"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/card/runeblade"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/cards"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/weapon"
 )
 
@@ -235,8 +234,8 @@ func TestPlaySequence_BonusAttackPerPermutationReset(t *testing.T) {
 // creation, so it doesn't appear in this turn's Value.
 func TestBest_NimblismGrantsConsumingVolitionDiscardRider(t *testing.T) {
 	h := []card.Card{
-		runeblade.ConsumingVolitionYellow{},
-		generic.NimblismBlue{},
+		cards.ConsumingVolitionYellow{},
+		cards.NimblismBlue{},
 		pitchOnlyRed{},
 	}
 	got := Best(stubHero, nil, h, 0, nil, 1, nil)

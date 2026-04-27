@@ -5,7 +5,7 @@ import (
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card/fake"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/card/runeblade"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/cards"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/hero"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/weapon"
 )
@@ -18,10 +18,10 @@ func TestBest_ViseraiMaleficShrillCombo(t *testing.T) {
 	// turns will keep ticking each Malefic for two more runes apiece, but those don't show
 	// up in this turn's Value.
 	h := []card.Card{
-		runeblade.MaleficIncantationBlue{},
-		runeblade.MaleficIncantationRed{},
-		runeblade.MaleficIncantationRed{},
-		runeblade.ShrillOfSkullformRed{},
+		cards.MaleficIncantationBlue{},
+		cards.MaleficIncantationRed{},
+		cards.MaleficIncantationRed{},
+		cards.ShrillOfSkullformRed{},
 	}
 	got := Best(hero.Viserai{}, nil, h, 4, nil, 0, nil)
 	if got.Value != 11 {
@@ -37,10 +37,10 @@ func TestBest_ViseraiReapingBladeBlueMalefics(t *testing.T) {
 	// card. Value = 0 + 1 + 1 + 3 = 5. The 3 Malefic verse counters carry forward and pay
 	// out one rune apiece on future turns when an attack action lands.
 	h := []card.Card{
-		runeblade.MaleficIncantationBlue{},
-		runeblade.MaleficIncantationBlue{},
-		runeblade.MaleficIncantationBlue{},
-		runeblade.MaleficIncantationBlue{},
+		cards.MaleficIncantationBlue{},
+		cards.MaleficIncantationBlue{},
+		cards.MaleficIncantationBlue{},
+		cards.MaleficIncantationBlue{},
 	}
 	weapons := []weapon.Weapon{weapon.ReapingBlade{}}
 	got := Best(hero.Viserai{}, weapons, h, 0, nil, 0, nil)
@@ -55,10 +55,10 @@ func TestBest_ViseraiReapingBladeMaleficsPlusShrill(t *testing.T) {
 	// (cost 2, 4+3 aura bonus + 1 Runechant = 8). Reaping Blade stays holstered — Shrill has no
 	// Go again, so nothing can follow it. Value = 2 + 1 + 8 = 11.
 	h := []card.Card{
-		runeblade.MaleficIncantationBlue{},
-		runeblade.MaleficIncantationBlue{},
-		runeblade.MaleficIncantationBlue{},
-		runeblade.ShrillOfSkullformRed{},
+		cards.MaleficIncantationBlue{},
+		cards.MaleficIncantationBlue{},
+		cards.MaleficIncantationBlue{},
+		cards.ShrillOfSkullformRed{},
 	}
 	weapons := []weapon.Weapon{weapon.ReapingBlade{}}
 	got := Best(hero.Viserai{}, weapons, h, 0, nil, 0, nil)
@@ -75,9 +75,9 @@ func TestBest_ViseraiOathBlueHocusRedMalefic(t *testing.T) {
 	// (cost 1, 3 dmg) — Malefic's trigger doesn't fire (weapon swings aren't attack ACTION
 	// cards). Value = 5 + 3 = 8. Future turns will tick Malefic when an attack action lands.
 	h := []card.Card{
-		runeblade.HocusPocusBlue{},
-		runeblade.OathOfTheArknightRed{},
-		runeblade.MaleficIncantationRed{},
+		cards.HocusPocusBlue{},
+		cards.OathOfTheArknightRed{},
+		cards.MaleficIncantationRed{},
 	}
 	weapons := []weapon.Weapon{weapon.ReapingBlade{}}
 	got := Best(hero.Viserai{}, weapons, h, 0, nil, 0, nil)
@@ -99,10 +99,10 @@ func TestBest_RunicReapingPrefersAttackPitch(t *testing.T) {
 	// Viserai runechant = 1) → Shrill (4 base + 3 aura-created bonus + 1 BonusAttack = 8).
 	// Value = 2 + 1 + 8 = 11.
 	h := []card.Card{
-		runeblade.HocusPocusBlue{},
-		runeblade.MaleficIncantationBlue{},
-		runeblade.RunicReapingRed{},
-		runeblade.ShrillOfSkullformRed{},
+		cards.HocusPocusBlue{},
+		cards.MaleficIncantationBlue{},
+		cards.RunicReapingRed{},
+		cards.ShrillOfSkullformRed{},
 	}
 	got := Best(hero.Viserai{}, nil, h, 0, nil, 0, nil)
 	if got.Value != 11 {
@@ -119,10 +119,10 @@ func TestBest_ViseraiMauvrionGrantsGoAgainToShrill(t *testing.T) {
 	// Mauvrion (prior Malefic is a non-attack action) and +1 on Shrill (priors include non-attack
 	// actions). Value = 1 + 3 + 7 + 3 + 2 = 16.
 	h := []card.Card{
-		runeblade.HocusPocusBlue{},
-		runeblade.MaleficIncantationBlue{},
-		runeblade.MauvrionSkiesRed{},
-		runeblade.ShrillOfSkullformRed{},
+		cards.HocusPocusBlue{},
+		cards.MaleficIncantationBlue{},
+		cards.MauvrionSkiesRed{},
+		cards.ShrillOfSkullformRed{},
 	}
 	weapons := []weapon.Weapon{weapon.ReapingBlade{}}
 	got := Best(hero.Viserai{}, weapons, h, 0, nil, 0, nil)
@@ -151,8 +151,8 @@ func TestBest_ViseraiMauvrionGrantsGoAgainToShrill(t *testing.T) {
 // attack lands → Mauvrion's rider fires for 3 Runechants. Value = 3 + 5 + 1 = 9.
 func TestBest_ViseraiMauvrionPredictsDrowningDireDominate(t *testing.T) {
 	h := []card.Card{
-		runeblade.MauvrionSkiesRed{},
-		runeblade.DrowningDireRed{},
+		cards.MauvrionSkiesRed{},
+		cards.DrowningDireRed{},
 		fake.YellowAttack{},
 	}
 	got := Best(hero.Viserai{}, nil, h, 0, nil, 0, nil)
@@ -168,9 +168,9 @@ func TestIsLegalOrder_MauvrionCantSaveShrillWhenRuneragerIsAhead(t *testing.T) {
 	// Shrill never gets the grant. Shrill has no printed go-again, so the Shrill → weapon chain
 	// must break — isLegalOrder rejects the ordering.
 	order := []card.Card{
-		runeblade.MauvrionSkiesRed{},
-		runeblade.RuneragerSwarmRed{},
-		runeblade.ShrillOfSkullformRed{},
+		cards.MauvrionSkiesRed{},
+		cards.RuneragerSwarmRed{},
+		cards.ShrillOfSkullformRed{},
 		weapon.ReapingBlade{},
 	}
 	ctx := newSequenceContextForTest(hero.Viserai{}, nil, nil, 1_000_000, 0, len(order))
@@ -184,10 +184,10 @@ func TestBest_ViseraiMauvrionChainsShrillIntoRuneragerIntoWeapon(t *testing.T) {
 	// Pitch Blue Hocus → Mauvrion → Shrill → Runerager → Reaping Blade. Value = 3 + 7 + 3 + 3 + 2
 	// Viserai runechants = 18.
 	h := []card.Card{
-		runeblade.HocusPocusBlue{},
-		runeblade.MauvrionSkiesRed{},
-		runeblade.RuneragerSwarmRed{},
-		runeblade.ShrillOfSkullformRed{},
+		cards.HocusPocusBlue{},
+		cards.MauvrionSkiesRed{},
+		cards.RuneragerSwarmRed{},
+		cards.ShrillOfSkullformRed{},
 	}
 	weapons := []weapon.Weapon{weapon.ReapingBlade{}}
 	got := Best(hero.Viserai{}, weapons, h, 0, nil, 0, nil)

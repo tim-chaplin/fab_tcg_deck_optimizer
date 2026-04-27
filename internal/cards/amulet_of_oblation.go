@@ -1,0 +1,26 @@
+// Amulet of Oblation — Generic Action - Item. Cost 0. Printed pitch variants: Blue 3.
+//
+// Text: "**Go again** **Instant** - Destroy Amulet of Oblation: Until end of turn, target attack
+// action gains "If this would be put into a graveyard, instead put it on the bottom of its owner's
+// deck." Activate this ability only if a card has entered a graveyard this turn."
+
+package cards
+
+import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+
+var amuletOfOblationTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeItem)
+
+type AmuletOfOblationBlue struct{}
+
+func (AmuletOfOblationBlue) ID() card.ID              { return card.AmuletOfOblationBlue }
+func (AmuletOfOblationBlue) Name() string             { return "Amulet of Oblation" }
+func (AmuletOfOblationBlue) Cost(*card.TurnState) int { return 0 }
+func (AmuletOfOblationBlue) Pitch() int               { return 3 }
+func (AmuletOfOblationBlue) Attack() int              { return 0 }
+func (AmuletOfOblationBlue) Defense() int             { return 0 }
+func (AmuletOfOblationBlue) Types() card.TypeSet      { return amuletOfOblationTypes }
+func (AmuletOfOblationBlue) GoAgain() bool            { return true }
+
+// not implemented: Instant 'graveyard → bottom of deck' replacement; gated on graveyard entry
+func (AmuletOfOblationBlue) NotImplemented()                              {}
+func (AmuletOfOblationBlue) Play(s *card.TurnState, self *card.CardState) { s.LogPlay(self) }

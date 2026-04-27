@@ -5,8 +5,7 @@ import (
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card/fake"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/card/generic"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/card/runeblade"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/cards"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/hero"
 )
 
@@ -15,7 +14,7 @@ import (
 // DR (no other card to pitch for the 2-cost) leaves the DR Held; with arsenalCardIn=nil the
 // slot is empty so the DR becomes Arsenal and rides into next turn as got.State.Arsenal.
 func TestBest_EmptyArsenalClaimsHeldCard(t *testing.T) {
-	h := []card.Card{generic.ToughenUpBlue{}}
+	h := []card.Card{cards.ToughenUpBlue{}}
 	got := Best(stubHero, nil, h, 4, nil, 0, nil)
 	if got.BestLine[0].Role != Arsenal {
 		t.Errorf("Roles[0] = %s, want ARSENAL", got.BestLine[0].Role)
@@ -30,8 +29,8 @@ func TestBest_EmptyArsenalClaimsHeldCard(t *testing.T) {
 // Malefic funds Toughen Up's 2-cost defense out of the arsenal, preventing 4 damage. Value = 4.
 // got.State.Arsenal is nil because the slot was vacated and no hand card ends up Held.
 func TestBest_ArsenalInPlayDR(t *testing.T) {
-	h := []card.Card{runeblade.MaleficIncantationBlue{}}
-	got := Best(stubHero, nil, h, 4, nil, 0, generic.ToughenUpBlue{})
+	h := []card.Card{cards.MaleficIncantationBlue{}}
+	got := Best(stubHero, nil, h, 4, nil, 0, cards.ToughenUpBlue{})
 	if got.Value != 4 {
 		t.Fatalf("Value = %d, want 4 (Malefic pitches to pay arsenal DR, prevents 4). Roles=[%s]",
 			got.Value, FormatBestLine(got.BestLine))
@@ -56,8 +55,8 @@ func TestBest_ArsenalInPlayDR(t *testing.T) {
 // the arsenal-in Toughen Up Blue stays (incoming=0 makes defending pointless, and the hand
 // can't fund a DR anyway); post-hoc the slot is occupied so no promotion happens.
 func TestBest_ArsenalInStayBlocksNewArsenal(t *testing.T) {
-	h := []card.Card{generic.ToughenUpBlue{}}
-	got := Best(stubHero, nil, h, 0, nil, 0, generic.ToughenUpBlue{})
+	h := []card.Card{cards.ToughenUpBlue{}}
+	got := Best(stubHero, nil, h, 0, nil, 0, cards.ToughenUpBlue{})
 	if got.BestLine[0].Role != Held {
 		t.Errorf("Roles[0] = %s, want HELD (slot occupied by arsenal-in, can't promote)", got.BestLine[0].Role)
 	}
@@ -91,8 +90,8 @@ func TestBest_ArsenalInPlayAttack(t *testing.T) {
 // block all incoming). The winning line pitches Malefic to fund Cussing's 1-cost and plays
 // Cussing from arsenal for a flat 3.
 func TestBest_ArsenalInNonAttackActionPlays(t *testing.T) {
-	h := []card.Card{runeblade.MaleficIncantationBlue{}}
-	got := Best(stubHero, nil, h, 0, nil, 0, runeblade.ArcaneCussingRed{})
+	h := []card.Card{cards.MaleficIncantationBlue{}}
+	got := Best(stubHero, nil, h, 0, nil, 0, cards.ArcaneCussingRed{})
 	if got.Value != 3 {
 		t.Fatalf("Value = %d, want 3 (Malefic pitched, arsenal Cussing played for 3). Roles=[%s]",
 			got.Value, FormatBestLine(got.BestLine))
@@ -108,8 +107,8 @@ func TestBest_ArsenalInNonAttackActionPlays(t *testing.T) {
 // defense; effective defense is 7 + 1 (from-arsenal) = 8, fully blocking 8 incoming. Value = 8.
 // If the rider didn't fire, prevented would cap at 7.
 func TestBest_ArsenalInUnmovableGrantsDefenseBonus(t *testing.T) {
-	h := []card.Card{runeblade.MaleficIncantationBlue{}}
-	got := Best(stubHero, nil, h, 8, nil, 0, generic.UnmovableRed{})
+	h := []card.Card{cards.MaleficIncantationBlue{}}
+	got := Best(stubHero, nil, h, 8, nil, 0, cards.UnmovableRed{})
 	if got.Value != 8 {
 		t.Fatalf("Value = %d, want 8 (Unmovable from arsenal blocks 7+1). Roles=[%s]",
 			got.Value, FormatBestLine(got.BestLine))
@@ -121,7 +120,7 @@ func TestBest_ArsenalInUnmovableGrantsDefenseBonus(t *testing.T) {
 // Unmovable's 3-cost; effective defense stays at printed 7, so 8 incoming caps prevented at 7.
 // If the rider mistakenly fired from hand, prevented would be 8.
 func TestBest_HandUnmovableNoDefenseBonus(t *testing.T) {
-	h := []card.Card{runeblade.MaleficIncantationBlue{}, generic.UnmovableRed{}}
+	h := []card.Card{cards.MaleficIncantationBlue{}, cards.UnmovableRed{}}
 	got := Best(stubHero, nil, h, 8, nil, 0, nil)
 	if got.Value != 7 {
 		t.Fatalf("Value = %d, want 7 (hand-played Unmovable: no rider). Roles=[%s]",
@@ -140,10 +139,10 @@ func TestBest_HandUnmovableNoDefenseBonus(t *testing.T) {
 // be 11.
 func TestBest_ArsenalInSmashingGoodTimeGatesOnlyArsenalCopy(t *testing.T) {
 	h := []card.Card{
-		generic.SmashingGoodTimeRed{},
-		runeblade.HocusPocusRed{},
+		cards.SmashingGoodTimeRed{},
+		cards.HocusPocusRed{},
 	}
-	got := Best(hero.Viserai{}, nil, h, 0, nil, 0, generic.SmashingGoodTimeRed{})
+	got := Best(hero.Viserai{}, nil, h, 0, nil, 0, cards.SmashingGoodTimeRed{})
 	if got.Value != 8 {
 		t.Fatalf("Value = %d, want 8 (only arsenal SGT grants +3). Roles=[%s]",
 			got.Value, FormatBestLine(got.BestLine))
@@ -159,9 +158,9 @@ func TestPromoteRandomHandCardToArsenal_SpreadsAcrossHands(t *testing.T) {
 	// 20 different 4-card hands using Wounding Blow Red/Yellow/Blue as "arbitrary cards with
 	// distinct IDs". Varying which card sits in which slot is enough to exercise the hash
 	// across different inputs.
-	wbR := generic.WoundingBlowRed{}
-	wbY := generic.WoundingBlowYellow{}
-	wbB := generic.WoundingBlowBlue{}
+	wbR := cards.WoundingBlowRed{}
+	wbY := cards.WoundingBlowYellow{}
+	wbB := cards.WoundingBlowBlue{}
 	hands := [][]card.Card{
 		{wbR, wbR, wbR, wbY}, {wbR, wbR, wbY, wbY}, {wbR, wbR, wbY, wbB}, {wbR, wbY, wbY, wbB},
 		{wbR, wbY, wbB, wbB}, {wbR, wbR, wbR, wbB}, {wbR, wbR, wbB, wbB}, {wbY, wbY, wbY, wbB},
@@ -196,8 +195,8 @@ func TestPromoteRandomHandCardToArsenal_SpreadsAcrossHands(t *testing.T) {
 // deck stay reproducible.
 func TestPromoteRandomHandCardToArsenal_DeterministicPerHand(t *testing.T) {
 	hand := []card.Card{
-		generic.WoundingBlowRed{}, generic.WoundingBlowYellow{},
-		generic.WoundingBlowBlue{}, generic.WoundingBlowBlue{},
+		cards.WoundingBlowRed{}, cards.WoundingBlowYellow{},
+		cards.WoundingBlowBlue{}, cards.WoundingBlowBlue{},
 	}
 	var firstID card.ID
 	for run := 0; run < 5; run++ {
@@ -230,7 +229,7 @@ func TestPromoteRandomHandCardToArsenal_DeterministicPerHand(t *testing.T) {
 // hash-modulo selection: with exactly one State.Hand entry the modulo is deterministic
 // (always 0), so the only candidate gets promoted.
 func TestPromoteRandomHandCardToArsenal_SingleCandidateAlwaysPicked(t *testing.T) {
-	hand := []card.Card{generic.WoundingBlowRed{}, generic.WoundingBlowBlue{}}
+	hand := []card.Card{cards.WoundingBlowRed{}, cards.WoundingBlowBlue{}}
 	line := []CardAssignment{
 		{Card: hand[0], Role: Attack},
 		{Card: hand[1], Role: Held},
@@ -252,7 +251,7 @@ func TestPromoteRandomHandCardToArsenal_SingleCandidateAlwaysPicked(t *testing.T
 // every hand card plays/pitches/defends leaves State.Hand empty, so the promotion is a no-op
 // and the arsenal slot stays empty.
 func TestPromoteRandomHandCardToArsenal_EmptyHandIsNoop(t *testing.T) {
-	hand := []card.Card{generic.WoundingBlowRed{}, generic.WoundingBlowBlue{}}
+	hand := []card.Card{cards.WoundingBlowRed{}, cards.WoundingBlowBlue{}}
 	line := []CardAssignment{
 		{Card: hand[0], Role: Attack},
 		{Card: hand[1], Role: Pitch},

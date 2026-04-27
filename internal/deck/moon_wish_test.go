@@ -5,8 +5,7 @@ import (
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card/fake"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/card/generic"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/card/runeblade"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/cards"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/hero/stubs"
 )
 
@@ -40,14 +39,14 @@ var moonWishHero = stubs.Hero{Intel: 4}
 //     mechanism didn't drop the card on the floor (a pre-fix run lost it entirely).
 func TestEvalOneTurn_MoonWishAltCostTutorsSunKissAndConsumesDeck(t *testing.T) {
 	deckCards := []card.Card{
-		generic.SunKissRed{},
+		cards.SunKissRed{},
 		fake.RedAttack{}, fake.RedAttack{}, fake.RedAttack{},
 		fake.RedAttack{}, fake.RedAttack{},
 	}
 	d := New(moonWishHero, nil, deckCards)
 	state := d.EvalOneTurnForTesting(0, nil, []card.Card{
-		generic.MoonWishYellow{},
-		runeblade.WeepingBattlegroundRed{},
+		cards.MoonWishYellow{},
+		cards.WeepingBattlegroundRed{},
 	})
 
 	if state.PrevTurnValue != 4 {
@@ -80,8 +79,8 @@ func TestEvalOneTurn_MoonWishAltCostTutorFizzlesWithoutSunKiss(t *testing.T) {
 	}
 	d := New(moonWishHero, nil, deckCards)
 	state := d.EvalOneTurnForTesting(0, nil, []card.Card{
-		generic.MoonWishYellow{},
-		runeblade.WeepingBattlegroundRed{},
+		cards.MoonWishYellow{},
+		cards.WeepingBattlegroundRed{},
 	})
 
 	if state.PrevTurnValue != 4 {
@@ -119,14 +118,14 @@ func TestEvalOneTurn_MoonWishWithFlyingHighPlaysTutoredSunKiss(t *testing.T) {
 	// slot; verifying buf-removal logic actually patches the specific tutored card out.
 	deckCards := []card.Card{
 		fake.RedAttack{}, fake.RedAttack{},
-		generic.SunKissRed{},
+		cards.SunKissRed{},
 		fake.RedAttack{}, fake.RedAttack{}, fake.RedAttack{}, fake.RedAttack{},
 	}
 	d := New(moonWishHero, nil, deckCards)
 	state := d.EvalOneTurnForTesting(0, nil, []card.Card{
-		generic.FlyingHighRed{},
-		generic.MoonWishYellow{},
-		runeblade.WeepingBattlegroundRed{},
+		cards.FlyingHighRed{},
+		cards.MoonWishYellow{},
+		cards.WeepingBattlegroundRed{},
 	})
 
 	if state.PrevTurnValue != 7 {

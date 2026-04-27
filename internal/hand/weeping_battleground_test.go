@@ -4,7 +4,7 @@ import (
 	"testing"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/card/runeblade"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/cards"
 )
 
 // zeroDefenseAura is an aura-typed card that blocks for nothing — used to park an aura in
@@ -27,7 +27,7 @@ func (zeroDefenseAura) Play(*card.TurnState, *card.CardState) {}
 // defense-phase seeding), WB plays as DR, banishes the filler for 1 arcane, and blocks 3 of
 // the 4 incoming. Value = 3 prevented + 1 arcane = 4.
 func TestBest_WeepingBattlegroundBanishesAuraFromGraveyard(t *testing.T) {
-	h := []card.Card{runeblade.WeepingBattlegroundRed{}, zeroDefenseAura{}}
+	h := []card.Card{cards.WeepingBattlegroundRed{}, zeroDefenseAura{}}
 	got := Best(stubHero, nil, h, 4, nil, 0, nil)
 	if got.Value != 4 {
 		t.Errorf("Value = %d, want 4 (3 block + 1 arcane from banish). Roles=[%s]",
@@ -38,7 +38,7 @@ func TestBest_WeepingBattlegroundBanishesAuraFromGraveyard(t *testing.T) {
 // TestBest_WeepingBattlegroundFizzlesWithoutAura: hand is just Weeping Battleground — no
 // aura anywhere, so the banish rider fizzles. WB still blocks 3 of the 4 incoming. Value = 3.
 func TestBest_WeepingBattlegroundFizzlesWithoutAura(t *testing.T) {
-	h := []card.Card{runeblade.WeepingBattlegroundRed{}}
+	h := []card.Card{cards.WeepingBattlegroundRed{}}
 	got := Best(stubHero, nil, h, 4, nil, 0, nil)
 	if got.Value != 3 {
 		t.Errorf("Value = %d, want 3 (3 block only; banish fizzles). Roles=[%s]",
