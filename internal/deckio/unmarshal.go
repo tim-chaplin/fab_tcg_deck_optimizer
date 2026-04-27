@@ -113,33 +113,3 @@ func bestTurnFromJSON(bj BestTurnJSON) (deck.BestTurn, error) {
 		Log:                bj.Log,
 	}, nil
 }
-
-// lookupCardByName resolves a card name from the JSON form to either a registered card or a
-// known weapon. Returns an error on unknown names so a corrupted file doesn't silently produce
-// nil entries that'd crash callers. Wrapped with field context by callers.
-func lookupCardByName(name string) (card.Card, error) {
-	if w, ok := weapon.ByName(name); ok {
-		return w, nil
-	}
-	id, ok := cards.ByName(name)
-	if !ok {
-		return nil, fmt.Errorf("deckio: unknown card/weapon %q", name)
-	}
-	return cards.Get(id), nil
-}
-
-func roleFromString(s string) (hand.Role, error) {
-	switch s {
-	case "PITCH":
-		return hand.Pitch, nil
-	case "ATTACK":
-		return hand.Attack, nil
-	case "DEFEND":
-		return hand.Defend, nil
-	case "HELD":
-		return hand.Held, nil
-	case "ARSENAL":
-		return hand.Arsenal, nil
-	}
-	return 0, fmt.Errorf("deckio: unknown role %q", s)
-}
