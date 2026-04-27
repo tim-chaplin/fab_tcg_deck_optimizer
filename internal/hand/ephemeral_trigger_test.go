@@ -4,7 +4,7 @@ import (
 	"testing"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/card/fake"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
 )
 
 // TestFireEphemeralAttackTriggers_SingleFireDropsFromList: ephemeral triggers fire at most
@@ -17,14 +17,14 @@ import (
 func TestFireEphemeralAttackTriggers_SingleFireDropsFromList(t *testing.T) {
 	calls := 0
 	state := &card.TurnState{EphemeralAttackTriggers: []card.EphemeralAttackTrigger{{
-		Source: fake.RedAttack{},
+		Source: testutils.RedAttack{},
 		Handler: func(s *card.TurnState, target *card.CardState) int {
 			calls++
 			return s.AddPostTriggerLogEntry("test ephemeral fired", card.DisplayName(target.Card), 1)
 		},
 	}}}
-	target1 := &card.CardState{Card: fake.RedAttack{}}
-	target2 := &card.CardState{Card: fake.YellowAttack{}}
+	target1 := &card.CardState{Card: testutils.RedAttack{}}
+	target2 := &card.CardState{Card: testutils.YellowAttack{}}
 
 	fireEphemeralAttackTriggers(state, target1)
 	if state.Value != 1 {
@@ -52,7 +52,7 @@ func TestFireEphemeralAttackTriggers_SingleFireDropsFromList(t *testing.T) {
 func TestFireEphemeralAttackTriggers_NonMatchingTargetLeavesTriggerInPlace(t *testing.T) {
 	calls := 0
 	state := &card.TurnState{EphemeralAttackTriggers: []card.EphemeralAttackTrigger{{
-		Source: fake.RedAttack{},
+		Source: testutils.RedAttack{},
 		Matches: func(target *card.CardState) bool {
 			return target.Card.Types().Has(card.TypeRuneblade)
 		},
@@ -61,7 +61,7 @@ func TestFireEphemeralAttackTriggers_NonMatchingTargetLeavesTriggerInPlace(t *te
 			return 5
 		},
 	}}}
-	generic := &card.CardState{Card: fake.RedAttack{}} // Generic, not Runeblade
+	generic := &card.CardState{Card: testutils.RedAttack{}} // Generic, not Runeblade
 
 	fireEphemeralAttackTriggers(state, generic)
 	if state.Value != 0 {
@@ -80,12 +80,12 @@ func TestFireEphemeralAttackTriggers_NonMatchingTargetLeavesTriggerInPlace(t *te
 // accept-everything predicate.
 func TestFireEphemeralAttackTriggers_NilMatchesAcceptsAnyTarget(t *testing.T) {
 	state := &card.TurnState{EphemeralAttackTriggers: []card.EphemeralAttackTrigger{{
-		Source: fake.RedAttack{},
+		Source: testutils.RedAttack{},
 		Handler: func(s *card.TurnState, target *card.CardState) int {
 			return s.AddPostTriggerLogEntry("test ephemeral fired", card.DisplayName(target.Card), 2)
 		},
 	}}}
-	target := &card.CardState{Card: fake.YellowAttack{}} // Generic, but Matches=nil accepts all
+	target := &card.CardState{Card: testutils.YellowAttack{}} // Generic, but Matches=nil accepts all
 
 	fireEphemeralAttackTriggers(state, target)
 	if state.Value != 2 {

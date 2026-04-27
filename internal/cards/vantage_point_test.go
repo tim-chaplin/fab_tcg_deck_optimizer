@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
 )
 
 func TestVantagePoint_BaseDamageNoAura(t *testing.T) {
@@ -31,7 +32,7 @@ func TestVantagePoint_BaseDamageNoAura(t *testing.T) {
 func TestVantagePoint_AuraPlayedSetsOverpower(t *testing.T) {
 	// Aura in CardsPlayed → Overpower flag set; damage unchanged since Overpower isn't consumed
 	// by the solver (incoming damage is a flat opponent profile, not blocked).
-	s := card.TurnState{CardsPlayed: []card.Card{stubAura{}}}
+	s := card.TurnState{CardsPlayed: []card.Card{testutils.Aura{}}}
 	(VantagePointRed{}).Play(&s, &card.CardState{Card: VantagePointRed{}})
 	if got := s.Value; got != 7 {
 		t.Errorf("Play() = %d, want 7", got)

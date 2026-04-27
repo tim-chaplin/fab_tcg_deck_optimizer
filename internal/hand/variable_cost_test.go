@@ -4,9 +4,9 @@ import (
 	"testing"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/card/fake"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/cards"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/hero"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/weapon"
 )
 
@@ -30,7 +30,7 @@ func newSequenceContextForTest(h hero.Hero, pitched, deck []card.Card, resourceB
 // runechants leaves the flag false. Uses the fake generic attack (package fake) so the test
 // observes the playSequence pre-Play hook, not a card's own flag-setting inside its Play.
 func TestPlaySequence_SetsArcaneDamageDealtWhenRunechantsFire(t *testing.T) {
-	order := []card.Card{fake.RedAttack{}}
+	order := []card.Card{testutils.RedAttack{}}
 
 	// No runechants → flag stays false.
 	ctx := newSequenceContextForTest(hero.Viserai{}, nil, nil, 10, 0, len(order))
@@ -208,7 +208,7 @@ func TestBest_ReduceToRunechantUnaffordableWithoutCarryover(t *testing.T) {
 // played by pitching for the full printed cost when no Runechants are available. Amplify
 // (PrintedCost 3, Attack 6) + a pitch-3 card with zero carryover should land for 6.
 func TestBest_DiscountAttackerPaysByPitchWithoutCarryover(t *testing.T) {
-	h := []card.Card{cards.AmplifyTheArknightRed{}, fake.BlueAttack{}}
+	h := []card.Card{cards.AmplifyTheArknightRed{}, testutils.BlueAttack{}}
 	got := Best(stubHero, nil, h, 0, nil, 0 /* carryover */, nil)
 	if got.Value != 6 {
 		t.Errorf("Value = %d, want 6", got.Value)
@@ -219,7 +219,7 @@ func TestBest_DiscountAttackerPaysByPitchWithoutCarryover(t *testing.T) {
 // printed cost, and a tight pitch covers the remainder. Amplify (PrintedCost 3, Attack 6) with
 // 2 carryover Runechants (effective cost 1) and a fake pitch-1 card should land for 6.
 func TestBest_DiscountAttackerPaysByPartialCarryoverAndTightPitch(t *testing.T) {
-	h := []card.Card{cards.AmplifyTheArknightRed{}, fake.RedAttack{}}
+	h := []card.Card{cards.AmplifyTheArknightRed{}, testutils.RedAttack{}}
 	got := Best(stubHero, nil, h, 0, nil, 2 /* carryover */, nil)
 	if got.Value != 6 {
 		t.Errorf("Value = %d, want 6", got.Value)
@@ -231,7 +231,7 @@ func TestBest_DiscountAttackerPaysByPartialCarryoverAndTightPitch(t *testing.T) 
 // available. Reduce (PrintedCost 1, Defense 4, creates one Runechant) + a fake pitch-1 card,
 // zero carryover, against 4 incoming should land for 5 (4 prevented + 1 for the created token).
 func TestBest_DiscountDefenderPaysByPitchWithoutCarryover(t *testing.T) {
-	h := []card.Card{cards.ReduceToRunechantRed{}, fake.RedAttack{}}
+	h := []card.Card{cards.ReduceToRunechantRed{}, testutils.RedAttack{}}
 	got := Best(stubHero, nil, h, 4, nil, 0 /* carryover */, nil)
 	if got.Value != 5 {
 		t.Errorf("Value = %d, want 5", got.Value)

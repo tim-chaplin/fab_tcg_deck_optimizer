@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
 )
 
 // TestPlunderRun_NoAttackReturnsZero: no qualifying next attack card → +3 rider fizzles.
@@ -19,7 +20,7 @@ func TestPlunderRun_NoAttackReturnsZero(t *testing.T) {
 
 // TestPlunderRun_NonAttackInRemainingFizzles: non-attack action fails the predicate.
 func TestPlunderRun_NonAttackInRemainingFizzles(t *testing.T) {
-	s := card.TurnState{CardsRemaining: []*card.CardState{{Card: stubGenericAction()}}}
+	s := card.TurnState{CardsRemaining: []*card.CardState{{Card: testutils.GenericAction()}}}
 	(PlunderRunRed{}).Play(&s, &card.CardState{Card: PlunderRunRed{}})
 	if got := s.Value; got != 0 {
 		t.Errorf("Play() = %d, want 0 (non-attack skipped)", got)
@@ -39,7 +40,7 @@ func TestPlunderRun_NextAttackGrantsBonusAttack(t *testing.T) {
 		{PlunderRunBlue{}, 1},
 	}
 	for _, tc := range cases {
-		target := &card.CardState{Card: stubGenericAttack(0, 0)}
+		target := &card.CardState{Card: testutils.GenericAttack(0, 0)}
 		s := card.TurnState{CardsRemaining: []*card.CardState{target}}
 		self := &card.CardState{Card: tc.c, FromArsenal: true}
 		tc.c.Play(&s, self)
@@ -55,7 +56,7 @@ func TestPlunderRun_NextAttackGrantsBonusAttack(t *testing.T) {
 // TestPlunderRun_HandPlayedFizzles: hand-played copy fails the from-arsenal gate even when a
 // queued attack action would otherwise satisfy the rider.
 func TestPlunderRun_HandPlayedFizzles(t *testing.T) {
-	s := card.TurnState{CardsRemaining: []*card.CardState{{Card: stubGenericAttack(0, 0)}}}
+	s := card.TurnState{CardsRemaining: []*card.CardState{{Card: testutils.GenericAttack(0, 0)}}}
 	self := &card.CardState{Card: PlunderRunRed{}}
 	(PlunderRunRed{}).Play(&s, self)
 	if got := s.Value; got != 0 {

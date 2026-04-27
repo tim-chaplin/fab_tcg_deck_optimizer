@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
 )
 
 // TestMoonWish_VariableCost: Cost reads len(s.Hand). With any hand card the alt cost fires
@@ -13,7 +14,7 @@ import (
 func TestMoonWish_VariableCost(t *testing.T) {
 	cases := []card.Card{MoonWishRed{}, MoonWishYellow{}, MoonWishBlue{}}
 	for _, c := range cases {
-		held := card.TurnState{Hand: []card.Card{stubGenericAttack(0, 0)}}
+		held := card.TurnState{Hand: []card.Card{testutils.GenericAttack(0, 0)}}
 		if got := c.Cost(&held); got != 0 {
 			t.Errorf("%s: Cost(Hand) = %d, want 0", c.Name(), got)
 		}
@@ -37,10 +38,8 @@ func TestMoonWish_VariableCost(t *testing.T) {
 // top-of-deck placement, plus the post-trigger "returned X to top of deck" log line that
 // names the moved card under Moon Wish's chain entry.
 func TestMoonWish_AltCostMovesHandCardToDeckTop(t *testing.T) {
-	dr := stubGenericAttack(0, 0)
-	dr.name = "dr"
-	other := stubGenericAttack(0, 0)
-	other.name = "deckTop"
+	dr := testutils.GenericAttack(0, 0).WithName("dr")
+	other := testutils.GenericAttack(0, 0).WithName("deckTop")
 	s := card.TurnState{
 		Hand: []card.Card{dr},
 		Deck: []card.Card{other},

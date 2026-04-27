@@ -9,7 +9,6 @@ package cards
 
 import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/card/fake"
 )
 
 // ID aliases card.ID so callers of this package don't need two imports just to hold IDs.
@@ -777,15 +776,6 @@ var byID = []card.Card{
 	card.ZealousBeltingRed:    ZealousBeltingRed{},
 	card.ZealousBeltingYellow: ZealousBeltingYellow{},
 	card.ZealousBeltingBlue:   ZealousBeltingBlue{},
-
-	card.FakeRedAttack:    fake.RedAttack{},
-	card.FakeBlueAttack:   fake.BlueAttack{},
-	card.FakeYellowAttack: fake.YellowAttack{},
-	card.FakeDrawCantrip:  fake.DrawCantrip{},
-	card.FakeCostlyDraw:   fake.CostlyDraw{},
-	card.FakeCostlyAttack: fake.CostlyAttack{},
-	card.FakePitchOneDR:   fake.PitchOneDR{},
-	card.FakeHugeAttack:   fake.HugeAttack{},
 }
 
 // init eagerly populates package card's chain-step text and DisplayName caches so the
@@ -840,20 +830,11 @@ func All() []ID {
 	return out
 }
 
-// Deckable returns every registered card ID that's legal to put in a real deck — i.e. every
-// registered card except the test-only fakes. Freshly allocated; safe to mutate.
+// Deckable returns every registered card ID that's legal to put in a real deck. Freshly
+// allocated; safe to mutate. The fake card IDs (card.FakeRedAttack, …) are deliberately not
+// in the registry, so this is just All() under a different name — kept distinct so callers
+// who want "deck-legal cards" stay readable even if the registry ever holds non-deckable
+// entries again.
 func Deckable() []ID {
-	out := make([]ID, 0, len(byID)-1)
-	for id := 1; id < len(byID); id++ {
-		if byID[id] == nil {
-			continue
-		}
-		switch ID(id) {
-		case card.FakeRedAttack, card.FakeBlueAttack, card.FakeYellowAttack, card.FakeDrawCantrip,
-			card.FakeCostlyDraw, card.FakeCostlyAttack, card.FakePitchOneDR, card.FakeHugeAttack:
-			continue
-		}
-		out = append(out, ID(id))
-	}
-	return out
+	return All()
 }

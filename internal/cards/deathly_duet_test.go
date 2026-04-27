@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
 )
 
 func TestDeathlyDuet_BaseDamage(t *testing.T) {
@@ -27,7 +28,7 @@ func TestDeathlyDuet_BaseDamage(t *testing.T) {
 
 func TestDeathlyDuet_AttackPitchedAddsPower(t *testing.T) {
 	// Attack pitched → +2{p}.
-	s := card.TurnState{Pitched: []card.Card{stubRunebladeAttack{}}}
+	s := card.TurnState{Pitched: []card.Card{testutils.RunebladeAttack{}}}
 	(DeathlyDuetRed{}).Play(&s, &card.CardState{Card: DeathlyDuetRed{}})
 	if got := s.Value; got != 6 {
 		t.Errorf("Deathly Duet Red with attack pitched: Play() = %d, want 6", got)
@@ -38,7 +39,7 @@ func TestDeathlyDuet_NonAttackActionPitchedCreatesRunechants(t *testing.T) {
 	// Non-attack action pitched → 2 Runechant tokens enter play, credited +1 each at creation.
 	// Play returns base + 2 (Deathly Duet Red base 4 + 2 token credits = 6). state.Runechants=2
 	// for downstream consume bookkeeping.
-	s := card.TurnState{Pitched: []card.Card{stubNonAttack{}}}
+	s := card.TurnState{Pitched: []card.Card{testutils.NonAttack{}}}
 	(DeathlyDuetRed{}).Play(&s, &card.CardState{Card: DeathlyDuetRed{}})
 	if got := s.Value; got != 6 {
 		t.Errorf("Deathly Duet Red with non-attack pitched: Play() = %d, want 6 (base 4 + 2 token credits)", got)
@@ -54,7 +55,7 @@ func TestDeathlyDuet_NonAttackActionPitchedCreatesRunechants(t *testing.T) {
 func TestDeathlyDuet_BothBranchesFire(t *testing.T) {
 	// Both an attack AND a non-attack action in Pitched → both riders fire: +2 power bonus, plus
 	// 2 Runechants credited +1 each at creation. Play returns base 4 + 2 power + 2 tokens = 8.
-	s := card.TurnState{Pitched: []card.Card{stubRunebladeAttack{}, stubNonAttack{}}}
+	s := card.TurnState{Pitched: []card.Card{testutils.RunebladeAttack{}, testutils.NonAttack{}}}
 	(DeathlyDuetRed{}).Play(&s, &card.CardState{Card: DeathlyDuetRed{}})
 	if got := s.Value; got != 8 {
 		t.Errorf("Deathly Duet Red with both pitched: Play() = %d, want 8 (base 4 + 2 power + 2 token credits)", got)

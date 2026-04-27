@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
 )
 
 // TestBloodspillInvocation_BlockCoversIncomingReturnsN: the aura survives the opponent's turn
@@ -49,7 +50,7 @@ func TestBloodspillInvocation_SameTurnPopBySalientAttackAction(t *testing.T) {
 	s := card.TurnState{
 		IncomingDamage: 3,
 		BlockTotal:     0,
-		CardsRemaining: []*card.CardState{{Card: stubAttackWithPower{power: 4}}},
+		CardsRemaining: []*card.CardState{{Card: testutils.AttackWithPower{Power: 4}}},
 	}
 	(BloodspillInvocationRed{}).Play(&s, &card.CardState{Card: BloodspillInvocationRed{}})
 	if got := s.Value; got != 3 {
@@ -65,7 +66,7 @@ func TestBloodspillInvocation_WeaponDoesNotPop(t *testing.T) {
 		IncomingDamage: 3,
 		BlockTotal:     0,
 		Runechants:     1,
-		CardsRemaining: []*card.CardState{{Card: stubRunebladeWeapon{}}},
+		CardsRemaining: []*card.CardState{{Card: testutils.RunebladeWeapon{}}},
 	}
 	(BloodspillInvocationRed{}).Play(&s, &card.CardState{Card: BloodspillInvocationRed{}})
 	if got := s.Value; got != 0 {
@@ -80,7 +81,7 @@ func TestBloodspillInvocation_SameTurnPopByRunechant(t *testing.T) {
 		IncomingDamage: 3,
 		BlockTotal:     0,
 		Runechants:     1,
-		CardsRemaining: []*card.CardState{{Card: stubAttackWithPower{power: 6}}},
+		CardsRemaining: []*card.CardState{{Card: testutils.AttackWithPower{Power: 6}}},
 	}
 	(BloodspillInvocationRed{}).Play(&s, &card.CardState{Card: BloodspillInvocationRed{}})
 	if got := s.Value; got != 3 {

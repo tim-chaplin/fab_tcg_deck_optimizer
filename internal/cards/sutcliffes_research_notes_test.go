@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
 )
 
 func TestSutcliffesResearchNotes_EmptyDeck(t *testing.T) {
@@ -16,9 +17,9 @@ func TestSutcliffesResearchNotes_EmptyDeck(t *testing.T) {
 
 func TestSutcliffesResearchNotes_CountsRunebladeAttackActions(t *testing.T) {
 	deck := []card.Card{
-		stubRunebladeAttack{},
-		stubNonAttack{},
-		stubRunebladeAttack{},
+		testutils.RunebladeAttack{},
+		testutils.NonAttack{},
+		testutils.RunebladeAttack{},
 	}
 	s := &card.TurnState{Deck: deck}
 	(SutcliffesResearchNotesRed{}).Play(s, &card.CardState{Card: SutcliffesResearchNotesRed{}})
@@ -31,7 +32,7 @@ func TestSutcliffesResearchNotes_CountsRunebladeAttackActions(t *testing.T) {
 }
 
 func TestSutcliffesResearchNotes_DeckShorterThanRevealCount(t *testing.T) {
-	deck := []card.Card{stubRunebladeAttack{}}
+	deck := []card.Card{testutils.RunebladeAttack{}}
 	s := &card.TurnState{Deck: deck}
 	(SutcliffesResearchNotesRed{}).Play(s, &card.CardState{Card: SutcliffesResearchNotesRed{}})
 	if got := s.Value; got != 1 {
@@ -52,7 +53,7 @@ func TestSutcliffesResearchNotes_RunebladeNonAttackIgnored(t *testing.T) {
 
 func TestSutcliffesResearchNotes_NonRunebladeAttackIgnored(t *testing.T) {
 	// An attack action that isn't Runeblade-classed shouldn't count.
-	deck := []card.Card{stubNonRunebladeAttack{}}
+	deck := []card.Card{testutils.NonRunebladeAttack{}}
 	s := &card.TurnState{Deck: deck}
 	(SutcliffesResearchNotesRed{}).Play(s, &card.CardState{Card: SutcliffesResearchNotesRed{}})
 	if got := s.Value; got != 0 {
@@ -62,9 +63,9 @@ func TestSutcliffesResearchNotes_NonRunebladeAttackIgnored(t *testing.T) {
 
 func TestSutcliffesResearchNotes_VariantRevealCounts(t *testing.T) {
 	deck := []card.Card{
-		stubRunebladeAttack{},
-		stubRunebladeAttack{},
-		stubRunebladeAttack{},
+		testutils.RunebladeAttack{},
+		testutils.RunebladeAttack{},
+		testutils.RunebladeAttack{},
 	}
 	cases := []struct {
 		c    card.Card

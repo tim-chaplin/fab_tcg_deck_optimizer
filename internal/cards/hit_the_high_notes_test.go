@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
 )
 
 func TestHitTheHighNotes_NoAuraReturnsBase(t *testing.T) {
@@ -27,7 +28,7 @@ func TestHitTheHighNotes_NoAuraReturnsBase(t *testing.T) {
 
 func TestHitTheHighNotes_AuraPlayedTriggersBonus(t *testing.T) {
 	// An Aura-typed card earlier in the turn's CardsPlayed → +2 power.
-	s := card.TurnState{CardsPlayed: []card.Card{stubAura{}}}
+	s := card.TurnState{CardsPlayed: []card.Card{testutils.Aura{}}}
 	(HitTheHighNotesRed{}).Play(&s, &card.CardState{Card: HitTheHighNotesRed{}})
 	if got := s.Value; got != 6 {
 		t.Errorf("Play() = %d, want 6 (base 4 + 2 aura bonus)", got)

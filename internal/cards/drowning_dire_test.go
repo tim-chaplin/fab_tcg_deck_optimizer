@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
 )
 
 // TestDrowningDire_NoAuraThisTurnDoesNotGrantDominate: without an aura played or created
@@ -46,7 +47,7 @@ func TestDrowningDire_AuraCreatedThisTurnGrantsDominate(t *testing.T) {
 // just token creation) also satisfies the clause.
 func TestDrowningDire_AuraPlayedThisTurnGrantsDominate(t *testing.T) {
 	self := &card.CardState{Card: DrowningDireRed{}}
-	s := card.TurnState{CardsPlayed: []card.Card{stubAura{}}}
+	s := card.TurnState{CardsPlayed: []card.Card{testutils.Aura{}}}
 	(DrowningDireRed{}).Play(&s, self)
 	if !self.GrantedDominate {
 		t.Error("GrantedDominate = false after aura played this turn, want true")

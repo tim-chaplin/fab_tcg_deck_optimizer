@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
 )
 
 // TestSloggism_NoAttackReturnsZero: no qualifying next attack card → +6 rider fizzles.
@@ -19,7 +20,7 @@ func TestSloggism_NoAttackReturnsZero(t *testing.T) {
 
 // TestSloggism_LowCostFilteredOut: a cost-1 attack is seen but the cost>=2 filter rejects it.
 func TestSloggism_LowCostFilteredOut(t *testing.T) {
-	s := card.TurnState{CardsRemaining: []*card.CardState{{Card: stubGenericAttack(1, 0)}}}
+	s := card.TurnState{CardsRemaining: []*card.CardState{{Card: testutils.GenericAttack(1, 0)}}}
 	(SloggismRed{}).Play(&s, &card.CardState{Card: SloggismRed{}})
 	if got := s.Value; got != 0 {
 		t.Errorf("Play() = %d, want 0 (cost 1 < 2)", got)
@@ -38,7 +39,7 @@ func TestSloggism_HighCostReturnsBonus(t *testing.T) {
 		{SloggismBlue{}, 4},
 	}
 	for _, tc := range cases {
-		target := &card.CardState{Card: stubGenericAttack(2, 0)}
+		target := &card.CardState{Card: testutils.GenericAttack(2, 0)}
 		s := card.TurnState{CardsRemaining: []*card.CardState{target}}
 		tc.c.Play(&s, &card.CardState{Card: tc.c})
 		if got := s.Value; got != 0 {

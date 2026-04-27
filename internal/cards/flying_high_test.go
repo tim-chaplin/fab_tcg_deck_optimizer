@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
 )
 
 // TestFlyingHigh_NoAttackReturnsZero covers the miss branch: with nothing attack-typed in
@@ -19,7 +20,7 @@ func TestFlyingHigh_NoAttackReturnsZero(t *testing.T) {
 // TestFlyingHigh_NonAttackInRemainingFizzles confirms a non-attack action in CardsRemaining is
 // skipped by the attack-action predicate.
 func TestFlyingHigh_NonAttackInRemainingFizzles(t *testing.T) {
-	skipped := &card.CardState{Card: stubGenericAction()}
+	skipped := &card.CardState{Card: testutils.GenericAction()}
 	s := card.TurnState{CardsRemaining: []*card.CardState{skipped}}
 	(FlyingHighRed{}).Play(&s, &card.CardState{Card: FlyingHighRed{}})
 	if got := s.Value; got != 0 {
@@ -51,7 +52,7 @@ func TestFlyingHigh_ColorMatchGrantsBonus(t *testing.T) {
 			pitch int
 			want  int
 		}{{1, tc.wantRed}, {2, tc.wantYellow}, {3, tc.wantBlue}} {
-			pc := &card.CardState{Card: stubGenericAttackPitch(0, 0, target.pitch)}
+			pc := &card.CardState{Card: testutils.GenericAttackPitch(0, 0, target.pitch)}
 			s := card.TurnState{CardsRemaining: []*card.CardState{pc}}
 			tc.c.Play(&s, &card.CardState{Card: tc.c})
 			if got := s.Value; got != 0 {

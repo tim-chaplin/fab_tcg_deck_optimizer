@@ -4,13 +4,13 @@ import (
 	"testing"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/card/fake"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/cards"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
 )
 
 func TestBest_AllRedHand(t *testing.T) {
 	// Best: pitch 2 reds (2 res) to attack with the other 2 (cost 2, dealt 6). Value = 6.
-	h := []card.Card{fake.RedAttack{}, fake.RedAttack{}, fake.RedAttack{}, fake.RedAttack{}}
+	h := []card.Card{testutils.RedAttack{}, testutils.RedAttack{}, testutils.RedAttack{}, testutils.RedAttack{}}
 	got := Best(stubHero, nil, h, 4, nil, 0, nil)
 	if got.Value != 6 {
 		t.Fatalf("want value 6, got %d", got.Value)
@@ -20,7 +20,7 @@ func TestBest_AllRedHand(t *testing.T) {
 func TestBest_AllBlueHand(t *testing.T) {
 	// Best: pitch 1 blue (3 res), attack with 2 blues (cost 2, dealt 2), defend with 1 blue (prevented
 	// 3). Value = 5.
-	h := []card.Card{fake.BlueAttack{}, fake.BlueAttack{}, fake.BlueAttack{}, fake.BlueAttack{}}
+	h := []card.Card{testutils.BlueAttack{}, testutils.BlueAttack{}, testutils.BlueAttack{}, testutils.BlueAttack{}}
 	got := Best(stubHero, nil, h, 4, nil, 0, nil)
 	if got.Value != 5 {
 		t.Fatalf("want value 5, got %d", got.Value)
@@ -30,7 +30,7 @@ func TestBest_AllBlueHand(t *testing.T) {
 func TestBest_MixedHand(t *testing.T) {
 	// Best: pitch 1 blue (3 res), attack with 2 reds (cost 2, dealt 6), defend with 1 blue (prevented
 	// 3). Value = 9.
-	h := []card.Card{fake.BlueAttack{}, fake.BlueAttack{}, fake.RedAttack{}, fake.RedAttack{}}
+	h := []card.Card{testutils.BlueAttack{}, testutils.BlueAttack{}, testutils.RedAttack{}, testutils.RedAttack{}}
 	got := Best(stubHero, nil, h, 4, nil, 0, nil)
 	if got.Value != 9 {
 		t.Fatalf("want value 9, got %d", got.Value)
@@ -40,7 +40,7 @@ func TestBest_MixedHand(t *testing.T) {
 func TestBest_DefenseCappedAtIncoming(t *testing.T) {
 	// Best: pitch 1 blue, attack with 2 blues (dealt 2), defend with 1 blue (prevented capped at
 	// incoming=2). Value = 4.
-	h := []card.Card{fake.BlueAttack{}, fake.BlueAttack{}, fake.BlueAttack{}, fake.BlueAttack{}}
+	h := []card.Card{testutils.BlueAttack{}, testutils.BlueAttack{}, testutils.BlueAttack{}, testutils.BlueAttack{}}
 	got := Best(stubHero, nil, h, 2, nil, 0, nil)
 	if got.Value != 4 {
 		t.Fatalf("want value 4, got %d", got.Value)
@@ -71,7 +71,7 @@ func TestBest_DefenseReactionAffordableResolves(t *testing.T) {
 func TestBest_PlainBlockStillFree(t *testing.T) {
 	// Attack cards have no Defense-Reaction type, so using them as blockers costs nothing. One
 	// Red attacker (Defense 1) alone, used as a blocker against 1 incoming, prevents 1. Value = 1.
-	h := []card.Card{fake.RedAttack{}}
+	h := []card.Card{testutils.RedAttack{}}
 	got := Best(stubHero, nil, h, 1, nil, 0, nil)
 	if got.Value != 1 {
 		t.Fatalf("want value 1 (free plain block), got %d", got.Value)
@@ -81,7 +81,7 @@ func TestBest_PlainBlockStillFree(t *testing.T) {
 func TestBest_RespectsResourceConstraint(t *testing.T) {
 	// Best: pitch 2 reds (2 res) to attack with 2 reds (cost 2, dealt 6). Value = 6. Resources must
 	// cover costs.
-	h := []card.Card{fake.RedAttack{}, fake.RedAttack{}, fake.RedAttack{}, fake.RedAttack{}}
+	h := []card.Card{testutils.RedAttack{}, testutils.RedAttack{}, testutils.RedAttack{}, testutils.RedAttack{}}
 	got := Best(stubHero, nil, h, 0, nil, 0, nil)
 	if got.Value != 6 {
 		t.Fatalf("want value 6, got %d", got.Value)
@@ -127,7 +127,7 @@ func TestBest_AllHeldWhenNoLegalPlay(t *testing.T) {
 // plain-block with Malefic. Value = 3 (Red attack) + 2 (Malefic block) = 5. A single-pool
 // fallback would score 7 by funding both phases from one pitch — illegal, locked out here.
 func TestBest_AttackPitchCantCoverDefense(t *testing.T) {
-	h := []card.Card{cards.MaleficIncantationBlue{}, cards.ToughenUpBlue{}, fake.RedAttack{}}
+	h := []card.Card{cards.MaleficIncantationBlue{}, cards.ToughenUpBlue{}, testutils.RedAttack{}}
 	got := Best(stubHero, nil, h, 4, nil, 0, nil)
 	if got.Value != 5 {
 		t.Fatalf("Value = %d, want 5 (attack and defense pitches are separate pools; Roles=[%s])",
@@ -144,7 +144,7 @@ func TestBest_DRPitchNeedsSecondPitchedCard(t *testing.T) {
 		cards.MaleficIncantationBlue{},
 		cards.MaleficIncantationBlue{},
 		cards.ToughenUpBlue{},
-		fake.RedAttack{},
+		testutils.RedAttack{},
 	}
 	got := Best(stubHero, nil, h, 4, nil, 0, nil)
 	if got.Value != 7 {

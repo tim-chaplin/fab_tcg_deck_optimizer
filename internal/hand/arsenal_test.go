@@ -4,9 +4,9 @@ import (
 	"testing"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/card/fake"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/cards"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/hero"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
 )
 
 // TestBest_EmptyArsenalClaimsHeldCard confirms the post-hoc Arsenal promotion fires when the
@@ -72,8 +72,8 @@ func TestBest_ArsenalInStayBlocksNewArsenal(t *testing.T) {
 // hand Red) and leaves the hand slot consumed. Value = 3 (arsenal Red's attack). With the
 // arsenal slot now empty and no Held cards, ArsenalCard is nil.
 func TestBest_ArsenalInPlayAttack(t *testing.T) {
-	h := []card.Card{fake.RedAttack{}}
-	got := Best(stubHero, nil, h, 0, nil, 0, fake.RedAttack{})
+	h := []card.Card{testutils.RedAttack{}}
+	got := Best(stubHero, nil, h, 0, nil, 0, testutils.RedAttack{})
 	if got.Value != 3 {
 		t.Fatalf("Value = %d, want 3 (arsenal Red played, hand Red pitched to fund it). Roles=[%s]",
 			got.Value, FormatBestLine(got.BestLine))

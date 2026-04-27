@@ -4,14 +4,14 @@ import (
 	"testing"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/card/fake"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/weapon"
 )
 
 // TestGraveyard_AttackChainAppends: every attacker in the chain lands in state.Graveyard, in
 // play order. Confirms the solver actually populates the list as cards resolve.
 func TestGraveyard_AttackChainAppends(t *testing.T) {
-	order := []card.Card{fake.RedAttack{}, fake.RedAttack{}, fake.RedAttack{}}
+	order := []card.Card{testutils.RedAttack{}, testutils.RedAttack{}, testutils.RedAttack{}}
 	ctx := newSequenceContextForTest(stubHero, nil, nil, 1_000_000, 0, len(order))
 	if _, _, _, legal := ctx.playSequence(order); !legal {
 		t.Fatalf("playSequence rejected the chain")
@@ -31,7 +31,7 @@ func TestGraveyard_AttackChainAppends(t *testing.T) {
 // don't hit the graveyard — they stay equipped. The action-attack sitting next to them still
 // lands in the graveyard.
 func TestGraveyard_WeaponSwingDoesNotEnterGraveyard(t *testing.T) {
-	attack := fake.RedAttack{}
+	attack := testutils.RedAttack{}
 	swing := weapon.ReapingBlade{}
 	order := []card.Card{attack, swing}
 	ctx := newSequenceContextForTest(stubHero, nil, nil, 1_000_000, 0, len(order))
@@ -120,8 +120,8 @@ func TestGraveyard_PlainBlockEntersGraveyardRegardlessOfType(t *testing.T) {
 // between runs makes the leak obvious — the second graveyard's length should match the second
 // order.
 func TestGraveyard_PermutationReset(t *testing.T) {
-	first := []card.Card{fake.RedAttack{}, fake.RedAttack{}, fake.RedAttack{}}
-	second := []card.Card{fake.RedAttack{}}
+	first := []card.Card{testutils.RedAttack{}, testutils.RedAttack{}, testutils.RedAttack{}}
+	second := []card.Card{testutils.RedAttack{}}
 	ctx := newSequenceContextForTest(stubHero, nil, nil, 1_000_000, 0, len(first))
 
 	if _, _, _, legal := ctx.playSequence(first); !legal {

@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
 )
 
 // TestZealousBelting_NoQualifyingPitchNoGoAgain covers the miss branch: no pitched card this turn
@@ -11,7 +12,7 @@ import (
 // Red's base power is 5 — a pitched power-5 card fails the strict ">" check.
 func TestZealousBelting_NoQualifyingPitchNoGoAgain(t *testing.T) {
 	c := ZealousBeltingRed{}
-	s := card.TurnState{Pitched: []card.Card{stubGenericAttack(0, 5)}}
+	s := card.TurnState{Pitched: []card.Card{testutils.GenericAttack(0, 5)}}
 	self := &card.CardState{Card: c}
 	c.Play(&s, self)
 	if got := s.Value; got != c.Attack() {
@@ -35,7 +36,7 @@ func TestZealousBelting_HigherPowerPitchGrantsGoAgain(t *testing.T) {
 		{ZealousBeltingBlue{}, 4},   // base 3, pitched power 4
 	}
 	for _, tc := range cases {
-		s := card.TurnState{Pitched: []card.Card{stubGenericAttack(0, tc.pitchPow)}}
+		s := card.TurnState{Pitched: []card.Card{testutils.GenericAttack(0, tc.pitchPow)}}
 		self := &card.CardState{Card: tc.c}
 		tc.c.Play(&s, self)
 		if !self.GrantedGoAgain {

@@ -4,8 +4,8 @@ import (
 	"testing"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/card/fake"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/cards"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/weapon"
 )
 
@@ -83,7 +83,7 @@ func (g grantBonusAttackWeapon) Play(s *card.TurnState, self *card.CardState) {
 // buff into damage at the target's Play step rather than the granter's, so the chain total
 // reflects printed-attack + bonus.
 func TestPlaySequence_BonusAttackAppliedToTargetDamage(t *testing.T) {
-	order := []card.Card{grantBonusAttack{n: 3}, fake.RedAttack{}}
+	order := []card.Card{grantBonusAttack{n: 3}, testutils.RedAttack{}}
 	ctx := newSequenceContextForTest(stubHero, nil, nil, 10, 0, len(order))
 	dmg, _, _, legal := ctx.playSequence(order)
 	if !legal {
@@ -114,7 +114,7 @@ func TestPlaySequence_BonusAttackNoTargetFizzles(t *testing.T) {
 // TestPlaySequence_BonusAttackStacksAcrossGranters pins that two granters in front of the
 // same target both write to BonusAttack; the field accumulates rather than overwriting.
 func TestPlaySequence_BonusAttackStacksAcrossGranters(t *testing.T) {
-	order := []card.Card{grantBonusAttack{n: 3}, grantBonusAttack{n: 2}, fake.RedAttack{}}
+	order := []card.Card{grantBonusAttack{n: 3}, grantBonusAttack{n: 2}, testutils.RedAttack{}}
 	ctx := newSequenceContextForTest(stubHero, nil, nil, 10, 0, len(order))
 	dmg, _, _, legal := ctx.playSequence(order)
 	if !legal {
@@ -148,7 +148,7 @@ func TestPlaySequence_BonusAttackAppliesToWeapon(t *testing.T) {
 // target attack's contribution but never drives it below 0. A 1-power attack with a -3
 // grant deals 0, not -2 — the chain total is unchanged below the floor.
 func TestPlaySequence_BonusAttackNegativeClampsAtZero(t *testing.T) {
-	order := []card.Card{grantBonusAttack{n: -3}, fake.BlueAttack{}}
+	order := []card.Card{grantBonusAttack{n: -3}, testutils.BlueAttack{}}
 	ctx := newSequenceContextForTest(stubHero, nil, nil, 10, 0, len(order))
 	dmg, _, _, legal := ctx.playSequence(order)
 	if !legal {
@@ -165,7 +165,7 @@ func TestPlaySequence_BonusAttackNegativeClampsAtZero(t *testing.T) {
 // grant that doesn't drive the target below 0 reduces the contribution by the full bonus,
 // no clamp.
 func TestPlaySequence_BonusAttackNegativePartialReduction(t *testing.T) {
-	order := []card.Card{grantBonusAttack{n: -2}, fake.RedAttack{}}
+	order := []card.Card{grantBonusAttack{n: -2}, testutils.RedAttack{}}
 	ctx := newSequenceContextForTest(stubHero, nil, nil, 10, 0, len(order))
 	dmg, _, _, legal := ctx.playSequence(order)
 	if !legal {
@@ -198,7 +198,7 @@ func TestPlaySequence_BonusAttackNoAttackTargetFizzles(t *testing.T) {
 // same hand twice through one playSequence (which re-enters playSequenceWithMeta): each run
 // must start with BonusAttack = 0 and the totals must match.
 func TestPlaySequence_BonusAttackPerPermutationReset(t *testing.T) {
-	order := []card.Card{grantBonusAttack{n: 3}, fake.RedAttack{}}
+	order := []card.Card{grantBonusAttack{n: 3}, testutils.RedAttack{}}
 	ctx := newSequenceContextForTest(stubHero, nil, nil, 10, 0, len(order))
 	first, _, _, _ := ctx.playSequence(order)
 	second, _, _, _ := ctx.playSequence(order)

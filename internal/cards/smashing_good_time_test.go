@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
 )
 
 // TestSmashingGoodTime_NoAttackReturnsZero: no qualifying next attack card → +3 rider fizzles.
@@ -19,7 +20,7 @@ func TestSmashingGoodTime_NoAttackReturnsZero(t *testing.T) {
 
 // TestSmashingGoodTime_NonAttackInRemainingFizzles: non-attack action fails the predicate.
 func TestSmashingGoodTime_NonAttackInRemainingFizzles(t *testing.T) {
-	s := card.TurnState{CardsRemaining: []*card.CardState{{Card: stubGenericAction()}}}
+	s := card.TurnState{CardsRemaining: []*card.CardState{{Card: testutils.GenericAction()}}}
 	(SmashingGoodTimeRed{}).Play(&s, &card.CardState{Card: SmashingGoodTimeRed{}})
 	if got := s.Value; got != 0 {
 		t.Errorf("Play() = %d, want 0 (non-attack skipped)", got)
@@ -39,7 +40,7 @@ func TestSmashingGoodTime_NextAttackGrantsBonusAttack(t *testing.T) {
 		{SmashingGoodTimeBlue{}, 1},
 	}
 	for _, tc := range cases {
-		target := &card.CardState{Card: stubGenericAttack(0, 0)}
+		target := &card.CardState{Card: testutils.GenericAttack(0, 0)}
 		s := card.TurnState{CardsRemaining: []*card.CardState{target}}
 		self := &card.CardState{Card: tc.c, FromArsenal: true}
 		tc.c.Play(&s, self)
@@ -55,7 +56,7 @@ func TestSmashingGoodTime_NextAttackGrantsBonusAttack(t *testing.T) {
 // TestSmashingGoodTime_HandPlayedFizzles: hand-played copy fails the from-arsenal gate.
 func TestSmashingGoodTime_HandPlayedFizzles(t *testing.T) {
 	for _, c := range []card.Card{SmashingGoodTimeRed{}, SmashingGoodTimeYellow{}, SmashingGoodTimeBlue{}} {
-		s := card.TurnState{CardsRemaining: []*card.CardState{{Card: stubGenericAttack(0, 0)}}}
+		s := card.TurnState{CardsRemaining: []*card.CardState{{Card: testutils.GenericAttack(0, 0)}}}
 		self := &card.CardState{Card: c}
 		c.Play(&s, self)
 		if got := s.Value; got != 0 {

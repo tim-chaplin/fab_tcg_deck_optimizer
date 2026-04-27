@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
 )
 
 // TestReekOfCorruption_NoAuraReturnsBaseAttack: without an aura played or created this turn the
@@ -40,7 +41,7 @@ func TestReekOfCorruption_LikelyToHitWithAuraCreatedTriggersDiscard(t *testing.T
 // TestReekOfCorruption_AuraPlayedTriggersDiscard: the HasPlayedType(TypeAura) branch satisfies
 // the rider the same as AuraCreated.
 func TestReekOfCorruption_AuraPlayedTriggersDiscard(t *testing.T) {
-	s := card.TurnState{CardsPlayed: []card.Card{stubAura{}}}
+	s := card.TurnState{CardsPlayed: []card.Card{testutils.Aura{}}}
 	c := ReekOfCorruptionRed{}
 	c.Play(&s, &card.CardState{Card: c})
 	if got := s.Value; got != 4+3 {

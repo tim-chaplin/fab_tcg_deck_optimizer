@@ -4,8 +4,8 @@ import (
 	"testing"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/card/fake"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/cards"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/weapon"
 )
 
@@ -31,7 +31,7 @@ func TestBest_MauvrionAloneFizzlesWithoutDamage(t *testing.T) {
 // attack action card, so Mauvrion's Matches predicate rejects it and the trigger fizzles.
 // Total damage is just the weapon's own contribution.
 func TestBest_MauvrionBladeOnlyFizzles(t *testing.T) {
-	h := []card.Card{cards.MauvrionSkiesRed{}, fake.YellowAttack{}}
+	h := []card.Card{cards.MauvrionSkiesRed{}, testutils.YellowAttack{}}
 	weapons := []weapon.Weapon{weapon.ReapingBlade{}}
 	got := Best(stubHero, weapons, h, 0, nil, 0, nil)
 	// Pitch YellowAttack (2 res) → play Mauvrion (cost 0, go again) → Blade swing (cost 1,
@@ -46,7 +46,7 @@ func TestBest_MauvrionBladeOnlyFizzles(t *testing.T) {
 // is still an attack action but isn't a Runeblade attack, so Mauvrion's Matches predicate
 // rejects it and the trigger fizzles.
 func TestBest_MauvrionNonRunebladeAttackFizzles(t *testing.T) {
-	h := []card.Card{cards.MauvrionSkiesRed{}, fake.RedAttack{}, fake.YellowAttack{}}
+	h := []card.Card{cards.MauvrionSkiesRed{}, testutils.RedAttack{}, testutils.YellowAttack{}}
 	got := Best(stubHero, nil, h, 0, nil, 0, nil)
 	// Pitch YellowAttack (2 res) → play Mauvrion (cost 0, go again) → play fake RedAttack
 	// (cost 1, 3 damage, go again). The Generic attack action doesn't qualify for
@@ -66,7 +66,7 @@ func TestBest_MauvrionLikelyHitRunebladeAttackCreditsRider(t *testing.T) {
 	h := []card.Card{
 		cards.MauvrionSkiesRed{},
 		cards.ShrillOfSkullformRed{},
-		fake.YellowAttack{},
+		testutils.YellowAttack{},
 	}
 	got := Best(stubHero, nil, h, 0, nil, 0, nil)
 	// Pitch YellowAttack (2 res) → Mauvrion (cost 0, go again, grants go-again to Shrill +
@@ -88,7 +88,7 @@ func TestBest_MauvrionBlockableRunebladeAttackDropsRider(t *testing.T) {
 	h := []card.Card{
 		cards.MauvrionSkiesRed{},
 		cards.ShrillOfSkullformBlue{},
-		fake.YellowAttack{},
+		testutils.YellowAttack{},
 	}
 	got := Best(stubHero, nil, h, 0, nil, 0, nil)
 	// Pitch YellowAttack (2 res) → Mauvrion (cost 0) → Shrill Blue (cost 2, power 2).

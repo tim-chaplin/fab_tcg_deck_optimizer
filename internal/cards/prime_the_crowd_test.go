@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
 )
 
 // TestPrimeTheCrowd_NoAttackReturnsZero: no qualifying next attack card → +4 rider fizzles.
@@ -19,7 +20,7 @@ func TestPrimeTheCrowd_NoAttackReturnsZero(t *testing.T) {
 
 // TestPrimeTheCrowd_NonAttackInRemainingFizzles: non-attack action fails the predicate.
 func TestPrimeTheCrowd_NonAttackInRemainingFizzles(t *testing.T) {
-	s := card.TurnState{CardsRemaining: []*card.CardState{{Card: stubGenericAction()}}}
+	s := card.TurnState{CardsRemaining: []*card.CardState{{Card: testutils.GenericAction()}}}
 	(PrimeTheCrowdRed{}).Play(&s, &card.CardState{Card: PrimeTheCrowdRed{}})
 	if got := s.Value; got != 0 {
 		t.Errorf("Play() = %d, want 0 (non-attack skipped)", got)
@@ -38,7 +39,7 @@ func TestPrimeTheCrowd_NextAttackReturnsBonus(t *testing.T) {
 		{PrimeTheCrowdBlue{}, 2},
 	}
 	for _, tc := range cases {
-		target := &card.CardState{Card: stubGenericAttack(0, 0)}
+		target := &card.CardState{Card: testutils.GenericAttack(0, 0)}
 		s := card.TurnState{CardsRemaining: []*card.CardState{target}}
 		tc.c.Play(&s, &card.CardState{Card: tc.c})
 		if got := s.Value; got != 0 {

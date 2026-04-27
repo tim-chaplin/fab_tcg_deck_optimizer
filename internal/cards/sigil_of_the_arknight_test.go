@@ -4,13 +4,14 @@ import (
 	"testing"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
 )
 
 // TestSigilOfTheArknight_PlayOnlySetsAuraCreated verifies Play defers the reveal effect — it
 // flips AuraCreated, registers a TriggerStartOfTurn entry, and returns 0. The deck peek
 // happens when the sim fires the trigger next turn.
 func TestSigilOfTheArknight_PlayOnlySetsAuraCreated(t *testing.T) {
-	s := card.TurnState{Deck: []card.Card{stubRunebladeAttack{}}}
+	s := card.TurnState{Deck: []card.Card{testutils.RunebladeAttack{}}}
 	(SigilOfTheArknightBlue{}).Play(&s, &card.CardState{Card: SigilOfTheArknightBlue{}})
 	if got := s.Value; got != 0 {
 		t.Errorf("Play() = %d, want 0 (reveal deferred to trigger)", got)
@@ -30,16 +31,16 @@ func TestSigilOfTheArknight_PlayOnlySetsAuraCreated(t *testing.T) {
 func TestSigilOfTheArknight_TriggerRevealsAttackActionIntoHand(t *testing.T) {
 	var play card.TurnState
 	(SigilOfTheArknightBlue{}).Play(&play, &card.CardState{Card: SigilOfTheArknightBlue{}})
-	top := stubRunebladeAttack{}
-	next := card.TurnState{Deck: []card.Card{top, stubNonAttack{}}}
+	top := testutils.RunebladeAttack{}
+	next := card.TurnState{Deck: []card.Card{top, testutils.NonAttack{}}}
 	if got := play.AuraTriggers[0].Handler(&next); got != 0 {
 		t.Errorf("handler damage = %d, want 0 (tempo credited via Revealed, not damage)", got)
 	}
 	if len(next.Revealed) != 1 || next.Revealed[0] != top {
 		t.Errorf("Revealed = %v, want [%v] (top of post-draw deck)", next.Revealed, top)
 	}
-	if len(next.Deck) != 1 || next.Deck[0] != (stubNonAttack{}) {
-		t.Errorf("Deck = %v, want top popped leaving [stubNonAttack]", next.Deck)
+	if len(next.Deck) != 1 || next.Deck[0] != (testutils.NonAttack{}) {
+		t.Errorf("Deck = %v, want top popped leaving [testutils.NonAttack]", next.Deck)
 	}
 }
 
@@ -48,7 +49,7 @@ func TestSigilOfTheArknight_TriggerRevealsAttackActionIntoHand(t *testing.T) {
 func TestSigilOfTheArknight_TriggerRevealsNonAttack(t *testing.T) {
 	var play card.TurnState
 	(SigilOfTheArknightBlue{}).Play(&play, &card.CardState{Card: SigilOfTheArknightBlue{}})
-	next := card.TurnState{Deck: []card.Card{stubAura{}, stubRunebladeAttack{}}}
+	next := card.TurnState{Deck: []card.Card{testutils.Aura{}, testutils.RunebladeAttack{}}}
 	if got := play.AuraTriggers[0].Handler(&next); got != 0 {
 		t.Errorf("handler damage = %d, want 0", got)
 	}

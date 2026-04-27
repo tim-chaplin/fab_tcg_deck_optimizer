@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
 )
 
 // TestArcaneCussing_BlockCoversIncomingReturnsN confirms the aura's value is N when the
@@ -60,7 +61,7 @@ func TestArcaneCussing_SameTurnPopBySalientAttack(t *testing.T) {
 	s := card.TurnState{
 		IncomingDamage: 3,
 		BlockTotal:     0,
-		CardsRemaining: []*card.CardState{{Card: stubAttackWithPower{power: 4}}},
+		CardsRemaining: []*card.CardState{{Card: testutils.AttackWithPower{Power: 4}}},
 	}
 	(ArcaneCussingRed{}).Play(&s, &card.CardState{Card: ArcaneCussingRed{}})
 	if got := s.Value; got != 3 {
@@ -77,7 +78,7 @@ func TestArcaneCussing_SameTurnPopByWeaponSwing(t *testing.T) {
 		IncomingDamage: 3,
 		BlockTotal:     0,
 		Runechants:     1,
-		CardsRemaining: []*card.CardState{{Card: stubRunebladeWeapon{}}},
+		CardsRemaining: []*card.CardState{{Card: testutils.RunebladeWeapon{}}},
 	}
 	(ArcaneCussingRed{}).Play(&s, &card.CardState{Card: ArcaneCussingRed{}})
 	if got := s.Value; got != 3 {
@@ -92,7 +93,7 @@ func TestArcaneCussing_SameTurnPopByRunechantAlone(t *testing.T) {
 		IncomingDamage: 3,
 		BlockTotal:     0,
 		Runechants:     1,
-		CardsRemaining: []*card.CardState{{Card: stubAttackWithPower{power: 6}}},
+		CardsRemaining: []*card.CardState{{Card: testutils.AttackWithPower{Power: 6}}},
 	}
 	(ArcaneCussingRed{}).Play(&s, &card.CardState{Card: ArcaneCussingRed{}})
 	if got := s.Value; got != 3 {
@@ -107,7 +108,7 @@ func TestArcaneCussing_BlockableAttackNoRunechantReturnsZero(t *testing.T) {
 	s := card.TurnState{
 		IncomingDamage: 3,
 		BlockTotal:     0,
-		CardsRemaining: []*card.CardState{{Card: stubAttackWithPower{power: 6}}},
+		CardsRemaining: []*card.CardState{{Card: testutils.AttackWithPower{Power: 6}}},
 	}
 	(ArcaneCussingRed{}).Play(&s, &card.CardState{Card: ArcaneCussingRed{}})
 	if got := s.Value; got != 0 {

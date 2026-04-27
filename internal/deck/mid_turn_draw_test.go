@@ -5,9 +5,9 @@ import (
 	"testing"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/card/fake"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/cards"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/hero"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
 )
 
 // TestEvalOneTurn_MidTurnDrawArsenalsWhenSlotEmpty pins the ARSENAL disposition for mid-turn-
@@ -19,32 +19,32 @@ import (
 // Deck layout (consumed in source order):
 //   - positions 0..3 = turn 1's hand: Snatch Red (cost 0, attack 4, on-hit DrawOne) + three
 //     Blues that chain for Value 6 (pitch 1 Blue, Blue + Blue + Snatch for 1 + 1 + 4 damage).
-//   - position 4 = the beacon (fake.RedAttack) that Snatch draws mid-turn.
+//   - position 4 = the beacon (testutils.RedAttack) that Snatch draws mid-turn.
 //   - positions 5..7 = Blues that make up turn 2's refill.
 //   - positions 8..9 = Yellow tripwires — a Yellow only shows up in turn 2's hand when the
 //     sim over-draws past the expected refill count.
 func TestEvalOneTurn_MidTurnDrawArsenalsWhenSlotEmpty(t *testing.T) {
-	beacon := fake.RedAttack{}
+	beacon := testutils.RedAttack{}
 	deckCards := []card.Card{
 		cards.SnatchRed{},
-		fake.BlueAttack{},
-		fake.BlueAttack{},
-		fake.BlueAttack{},
+		testutils.BlueAttack{},
+		testutils.BlueAttack{},
+		testutils.BlueAttack{},
 		beacon,
-		fake.BlueAttack{},
-		fake.BlueAttack{},
-		fake.BlueAttack{},
-		fake.YellowAttack{},
-		fake.YellowAttack{},
+		testutils.BlueAttack{},
+		testutils.BlueAttack{},
+		testutils.BlueAttack{},
+		testutils.YellowAttack{},
+		testutils.YellowAttack{},
 	}
 	d := New(hero.Viserai{}, nil, deckCards)
 	state := d.EvalOneTurnForTesting(0, nil, nil)
 
 	wantHand := []card.Card{
-		fake.BlueAttack{},
-		fake.BlueAttack{},
-		fake.BlueAttack{},
-		fake.YellowAttack{},
+		testutils.BlueAttack{},
+		testutils.BlueAttack{},
+		testutils.BlueAttack{},
+		testutils.YellowAttack{},
 	}
 	if !reflect.DeepEqual(state.Hand, wantHand) {
 		t.Errorf("turn 2 hand = %v, want %v (full 4-card refill from positions 5..8; Yellow at slot 3 proves drawn card arsenaled rather than held)", state.Hand, wantHand)
@@ -57,8 +57,8 @@ func TestEvalOneTurn_MidTurnDrawArsenalsWhenSlotEmpty(t *testing.T) {
 	// Remaining deck: one untouched Yellow from source position 9, then the pitched Blue
 	// recycled to the bottom on turn 1.
 	wantDeck := []card.Card{
-		fake.YellowAttack{},
-		fake.BlueAttack{},
+		testutils.YellowAttack{},
+		testutils.BlueAttack{},
 	}
 	if !reflect.DeepEqual(state.Deck, wantDeck) {
 		t.Errorf("turn 2 deck = %v, want %v", state.Deck, wantDeck)
@@ -86,7 +86,7 @@ func TestEvalOneTurn_MidTurnDrawArsenalsWhenSlotEmpty(t *testing.T) {
 //   - position 9 = Yellow tripwire — showing up in turn 2's hand would indicate the sim
 //     pulled more than handSize - 1 refill cards.
 func TestEvalOneTurn_TwoMidTurnDraws_OneArsenalsOneHeld(t *testing.T) {
-	beacon := fake.RedAttack{}
+	beacon := testutils.RedAttack{}
 	deckCards := []card.Card{
 		cards.FlyingHighRed{},
 		cards.FlyingHighRed{},
@@ -94,10 +94,10 @@ func TestEvalOneTurn_TwoMidTurnDraws_OneArsenalsOneHeld(t *testing.T) {
 		cards.SnatchRed{},
 		beacon,
 		beacon,
-		fake.BlueAttack{},
-		fake.BlueAttack{},
-		fake.BlueAttack{},
-		fake.YellowAttack{},
+		testutils.BlueAttack{},
+		testutils.BlueAttack{},
+		testutils.BlueAttack{},
+		testutils.YellowAttack{},
 	}
 	d := New(hero.Viserai{}, nil, deckCards)
 	state := d.EvalOneTurnForTesting(0, nil, nil)
@@ -106,9 +106,9 @@ func TestEvalOneTurn_TwoMidTurnDraws_OneArsenalsOneHeld(t *testing.T) {
 	// refill from deck positions 6..8.
 	wantHand := []card.Card{
 		beacon,
-		fake.BlueAttack{},
-		fake.BlueAttack{},
-		fake.BlueAttack{},
+		testutils.BlueAttack{},
+		testutils.BlueAttack{},
+		testutils.BlueAttack{},
 	}
 	if !reflect.DeepEqual(state.Hand, wantHand) {
 		t.Errorf("turn 2 hand = %v, want %v (one beacon held + 3 fresh Blues; two beacons here would mean neither got arsenaled, a Yellow would mean the sim over-drew)", state.Hand, wantHand)
@@ -121,7 +121,7 @@ func TestEvalOneTurn_TwoMidTurnDraws_OneArsenalsOneHeld(t *testing.T) {
 	// Remaining deck: only the Yellow tripwire at source position 9. Turn 1 had no pitches
 	// (all four cards played as attacks), so nothing recycled to the bottom.
 	wantDeck := []card.Card{
-		fake.YellowAttack{},
+		testutils.YellowAttack{},
 	}
 	if !reflect.DeepEqual(state.Deck, wantDeck) {
 		t.Errorf("turn 2 deck = %v, want %v", state.Deck, wantDeck)
@@ -147,7 +147,7 @@ func TestEvalOneTurn_TwoMidTurnDraws_OneArsenalsOneHeld(t *testing.T) {
 //   - position 9 = Yellow tripwire — appearing in turn 2's hand would mean the sim over-drew
 //     past the 2-card refill budget.
 func TestEvalOneTurn_ThreeMidTurnDraws_ArsenalFromDrawnPool(t *testing.T) {
-	beacon := fake.RedAttack{}
+	beacon := testutils.RedAttack{}
 	arsenalIn := cards.SnatchRed{}
 	deckCards := []card.Card{
 		cards.FlyingHighRed{},
@@ -157,9 +157,9 @@ func TestEvalOneTurn_ThreeMidTurnDraws_ArsenalFromDrawnPool(t *testing.T) {
 		beacon,
 		beacon,
 		beacon,
-		fake.BlueAttack{},
-		fake.BlueAttack{},
-		fake.YellowAttack{},
+		testutils.BlueAttack{},
+		testutils.BlueAttack{},
+		testutils.YellowAttack{},
 	}
 	d := New(hero.Viserai{}, nil, deckCards)
 	state := d.EvalOneTurnForTesting(0, arsenalIn, nil)
@@ -168,8 +168,8 @@ func TestEvalOneTurn_ThreeMidTurnDraws_ArsenalFromDrawnPool(t *testing.T) {
 	wantHand := []card.Card{
 		beacon,
 		beacon,
-		fake.BlueAttack{},
-		fake.BlueAttack{},
+		testutils.BlueAttack{},
+		testutils.BlueAttack{},
 	}
 	if !reflect.DeepEqual(state.Hand, wantHand) {
 		t.Errorf("turn 2 hand = %v, want %v (two beacons held + 2 fresh Blues; a Yellow here would indicate the sim pulled more than 2 refill cards)", state.Hand, wantHand)
@@ -181,7 +181,7 @@ func TestEvalOneTurn_ThreeMidTurnDraws_ArsenalFromDrawnPool(t *testing.T) {
 
 	// Remaining deck: only the Yellow tripwire. Turn 1 had no pitches.
 	wantDeck := []card.Card{
-		fake.YellowAttack{},
+		testutils.YellowAttack{},
 	}
 	if !reflect.DeepEqual(state.Deck, wantDeck) {
 		t.Errorf("turn 2 deck = %v, want %v", state.Deck, wantDeck)
@@ -205,28 +205,28 @@ func TestEvalOneTurn_ThreeMidTurnDraws_ArsenalFromDrawnPool(t *testing.T) {
 //   - positions 5..7 = Blues that make up turn 2's refill behind the held beacon.
 //   - positions 8..9 = Yellow tripwires that should stay in the deck.
 func TestEvalOneTurn_MidTurnDrawHeldWhenArsenalFull(t *testing.T) {
-	beacon := fake.RedAttack{}
+	beacon := testutils.RedAttack{}
 	arsenalIn := cards.ToughenUpBlue{} // DR, cost 2, defense 4 — stays in arsenal with incoming 0
 	deckCards := []card.Card{
 		cards.SnatchRed{},
-		fake.BlueAttack{},
-		fake.BlueAttack{},
-		fake.BlueAttack{},
+		testutils.BlueAttack{},
+		testutils.BlueAttack{},
+		testutils.BlueAttack{},
 		beacon,
-		fake.BlueAttack{},
-		fake.BlueAttack{},
-		fake.BlueAttack{},
-		fake.YellowAttack{},
-		fake.YellowAttack{},
+		testutils.BlueAttack{},
+		testutils.BlueAttack{},
+		testutils.BlueAttack{},
+		testutils.YellowAttack{},
+		testutils.YellowAttack{},
 	}
 	d := New(hero.Viserai{}, nil, deckCards)
 	state := d.EvalOneTurnForTesting(0, arsenalIn, nil)
 
 	wantHand := []card.Card{
 		beacon,
-		fake.BlueAttack{},
-		fake.BlueAttack{},
-		fake.BlueAttack{},
+		testutils.BlueAttack{},
+		testutils.BlueAttack{},
+		testutils.BlueAttack{},
 	}
 	if !reflect.DeepEqual(state.Hand, wantHand) {
 		t.Errorf("turn 2 hand = %v, want %v (beacon held + 3 fresh Blues; a Yellow here means the sim over-drew past the 3-card budget)", state.Hand, wantHand)
@@ -239,9 +239,9 @@ func TestEvalOneTurn_MidTurnDrawHeldWhenArsenalFull(t *testing.T) {
 	// Remaining deck: two untouched Yellows from positions 8..9, then the pitched Blue
 	// recycled to the bottom on turn 1.
 	wantDeck := []card.Card{
-		fake.YellowAttack{},
-		fake.YellowAttack{},
-		fake.BlueAttack{},
+		testutils.YellowAttack{},
+		testutils.YellowAttack{},
+		testutils.BlueAttack{},
 	}
 	if !reflect.DeepEqual(state.Deck, wantDeck) {
 		t.Errorf("turn 2 deck = %v, want %v", state.Deck, wantDeck)
@@ -267,9 +267,9 @@ func TestEvalOneTurn_MidTurnDrawSansGoAgainStaysHeld(t *testing.T) {
 	}
 	deckCards := []card.Card{
 		cards.AetherSlashRed{},
-		fake.BlueAttack{},
-		fake.BlueAttack{},
-		fake.BlueAttack{},
+		testutils.BlueAttack{},
+		testutils.BlueAttack{},
+		testutils.BlueAttack{},
 	}
 	d := New(hero.Viserai{}, nil, deckCards)
 	state := d.EvalOneTurnForTesting(0, nil, initialHand)
@@ -298,9 +298,9 @@ func TestEvalOneTurn_MidTurnDrawSansGoAgainStaysHeld(t *testing.T) {
 	}
 	wantHand := []card.Card{
 		wantAnchor,
-		fake.BlueAttack{},
-		fake.BlueAttack{},
-		fake.BlueAttack{},
+		testutils.BlueAttack{},
+		testutils.BlueAttack{},
+		testutils.BlueAttack{},
 	}
 	if !reflect.DeepEqual(state.Hand, wantHand) {
 		t.Errorf("turn 2 hand = %v, want %v", state.Hand, wantHand)

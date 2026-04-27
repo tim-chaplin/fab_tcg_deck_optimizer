@@ -4,9 +4,9 @@ import (
 	"testing"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/card/fake"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/cards"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/hero"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/weapon"
 )
 
@@ -153,7 +153,7 @@ func TestBest_ViseraiMauvrionPredictsDrowningDireDominate(t *testing.T) {
 	h := []card.Card{
 		cards.MauvrionSkiesRed{},
 		cards.DrowningDireRed{},
-		fake.YellowAttack{},
+		testutils.YellowAttack{},
 	}
 	got := Best(hero.Viserai{}, nil, h, 0, nil, 0, nil)
 	if got.Value != 9 {
@@ -202,7 +202,7 @@ func TestBest_ViseraiMauvrionChainsShrillIntoRuneragerIntoWeapon(t *testing.T) {
 // chain pitches one Blue (3 resource) and chains the other Blue + 2 Reds — total 1 + 3 + 3 = 7
 // damage.
 func TestBest_StateValueMatchesSummedReturns(t *testing.T) {
-	h := []card.Card{fake.BlueAttack{}, fake.BlueAttack{}, fake.RedAttack{}, fake.RedAttack{}}
+	h := []card.Card{testutils.BlueAttack{}, testutils.BlueAttack{}, testutils.RedAttack{}, testutils.RedAttack{}}
 	got := Best(stubHero, nil, h, 0, nil, 0, nil)
 	if got.Value != 7 {
 		t.Errorf("Value = %d, want 7 (Blue 1 + Red 3 + Red 3 chain off one Blue pitch). Roles=[%s]",

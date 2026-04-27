@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
 )
 
 // TestClearwaterElixir_NoAttackReturnsZero: no qualifying next attack card → +3 rider fizzles.
@@ -17,7 +18,7 @@ func TestClearwaterElixir_NoAttackReturnsZero(t *testing.T) {
 
 // TestClearwaterElixir_NonAttackInRemainingFizzles: non-attack action fails the predicate.
 func TestClearwaterElixir_NonAttackInRemainingFizzles(t *testing.T) {
-	s := card.TurnState{CardsRemaining: []*card.CardState{{Card: stubGenericAction()}}}
+	s := card.TurnState{CardsRemaining: []*card.CardState{{Card: testutils.GenericAction()}}}
 	(ClearwaterElixirRed{}).Play(&s, &card.CardState{Card: ClearwaterElixirRed{}})
 	if got := s.Value; got != 0 {
 		t.Errorf("Play() = %d, want 0 (non-attack skipped)", got)
@@ -28,7 +29,7 @@ func TestClearwaterElixir_NonAttackInRemainingFizzles(t *testing.T) {
 // BonusAttack so EffectiveAttack folds it into LikelyToHit and the solver routes the bonus
 // to the buffed attack's chain slot. Granter returns 0 — the +3 attributes to the target.
 func TestClearwaterElixir_NextAttackGrantsBonusAttack(t *testing.T) {
-	target := &card.CardState{Card: stubGenericAttack(0, 0)}
+	target := &card.CardState{Card: testutils.GenericAttack(0, 0)}
 	s := card.TurnState{CardsRemaining: []*card.CardState{target}}
 	(ClearwaterElixirRed{}).Play(&s, &card.CardState{Card: ClearwaterElixirRed{}})
 	if got := s.Value; got != 0 {

@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
 )
 
 // TestMinnowism_NoAttackReturnsZero: no qualifying next attack card → +3 rider fizzles.
@@ -20,7 +21,7 @@ func TestMinnowism_NoAttackReturnsZero(t *testing.T) {
 // TestMinnowism_HighPowerFilteredOut: a power-4 attack is seen but the power<=3 filter rejects it,
 // so the rider fizzles without falling through to a later match.
 func TestMinnowism_HighPowerFilteredOut(t *testing.T) {
-	s := card.TurnState{CardsRemaining: []*card.CardState{{Card: stubGenericAttack(0, 4)}}}
+	s := card.TurnState{CardsRemaining: []*card.CardState{{Card: testutils.GenericAttack(0, 4)}}}
 	(MinnowismRed{}).Play(&s, &card.CardState{Card: MinnowismRed{}})
 	if got := s.Value; got != 0 {
 		t.Errorf("Play() = %d, want 0 (power 4 > 3)", got)
@@ -39,7 +40,7 @@ func TestMinnowism_LowPowerReturnsBonus(t *testing.T) {
 		{MinnowismBlue{}, 1},
 	}
 	for _, tc := range cases {
-		target := &card.CardState{Card: stubGenericAttack(0, 3)}
+		target := &card.CardState{Card: testutils.GenericAttack(0, 3)}
 		s := card.TurnState{CardsRemaining: []*card.CardState{target}}
 		tc.c.Play(&s, &card.CardState{Card: tc.c})
 		if got := s.Value; got != 0 {

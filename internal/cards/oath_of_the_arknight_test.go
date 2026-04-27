@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
 )
 
 func TestOathOfTheArknight_NoRemainingCards(t *testing.T) {
@@ -27,7 +28,7 @@ func TestOathOfTheArknight_RunebladeAttackInRemaining(t *testing.T) {
 		{OathOfTheArknightBlue{}, 1},
 	}
 	for _, tc := range cases {
-		target := &card.CardState{Card: stubRunebladeAttack{}}
+		target := &card.CardState{Card: testutils.RunebladeAttack{}}
 		s := &card.TurnState{CardsRemaining: []*card.CardState{target}}
 		tc.c.Play(s, &card.CardState{Card: tc.c})
 		if got := s.Value; got != 1 {
@@ -40,7 +41,7 @@ func TestOathOfTheArknight_RunebladeAttackInRemaining(t *testing.T) {
 }
 
 func TestOathOfTheArknight_WeaponCountsAsAttack(t *testing.T) {
-	target := &card.CardState{Card: stubRunebladeWeapon{}}
+	target := &card.CardState{Card: testutils.RunebladeWeapon{}}
 	s := &card.TurnState{CardsRemaining: []*card.CardState{target}}
 	(OathOfTheArknightRed{}).Play(s, &card.CardState{Card: OathOfTheArknightRed{}})
 	if got := s.Value; got != 1 {
@@ -52,7 +53,7 @@ func TestOathOfTheArknight_WeaponCountsAsAttack(t *testing.T) {
 }
 
 func TestOathOfTheArknight_NonRunebladeAttackDoesNotQualify(t *testing.T) {
-	s := &card.TurnState{CardsRemaining: []*card.CardState{{Card: stubNonRunebladeAttack{}}}}
+	s := &card.TurnState{CardsRemaining: []*card.CardState{{Card: testutils.NonRunebladeAttack{}}}}
 	(OathOfTheArknightRed{}).Play(s, &card.CardState{Card: OathOfTheArknightRed{}})
 	if got := s.Value; got != 1 {
 		t.Errorf("Play() = %d, want 1 (non-Runeblade attack shouldn't trigger bonus)", got)
@@ -61,7 +62,7 @@ func TestOathOfTheArknight_NonRunebladeAttackDoesNotQualify(t *testing.T) {
 
 func TestOathOfTheArknight_RunebladeNonAttackDoesNotQualify(t *testing.T) {
 	// Read the Runes is Runeblade + Action but NOT Attack or Weapon.
-	s := &card.TurnState{CardsRemaining: []*card.CardState{{Card: stubNonAttack{}}}}
+	s := &card.TurnState{CardsRemaining: []*card.CardState{{Card: testutils.NonAttack{}}}}
 	(OathOfTheArknightRed{}).Play(s, &card.CardState{Card: OathOfTheArknightRed{}})
 	if got := s.Value; got != 1 {
 		t.Errorf("Play() = %d, want 1 (non-attack Runeblade card shouldn't trigger bonus)", got)

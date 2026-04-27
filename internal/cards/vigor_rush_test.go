@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
 )
 
 // TestVigorRush_BaseGoAgainFalse pins the correctness of GoAgain() — it must be false so
@@ -27,7 +28,7 @@ func TestVigorRush_NoNonAttackActionNoGoAgain(t *testing.T) {
 	cases := []card.Card{VigorRushRed{}, VigorRushYellow{}, VigorRushBlue{}}
 	for _, c := range cases {
 		s := card.TurnState{
-			CardsPlayed:           []card.Card{stubGenericAttack(0, 0)}, // attack action, not non-attack
+			CardsPlayed:           []card.Card{testutils.GenericAttack(0, 0)}, // attack action, not non-attack
 			NonAttackActionPlayed: false,
 		}
 		self := &card.CardState{Card: c}
@@ -47,7 +48,7 @@ func TestVigorRush_NonAttackActionGrantsGoAgain(t *testing.T) {
 	cases := []card.Card{VigorRushRed{}, VigorRushYellow{}, VigorRushBlue{}}
 	for _, c := range cases {
 		s := card.TurnState{
-			CardsPlayed:           []card.Card{stubGenericAction()},
+			CardsPlayed:           []card.Card{testutils.GenericAction()},
 			NonAttackActionPlayed: true,
 		}
 		self := &card.CardState{Card: c}

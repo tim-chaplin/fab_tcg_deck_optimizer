@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
 )
 
 // TestWaterTheSeeds_NoAttackReturnsBase: with nothing attack-typed in CardsRemaining the +1 rider
@@ -29,7 +30,7 @@ func TestWaterTheSeeds_NoAttackReturnsBase(t *testing.T) {
 // TestWaterTheSeeds_HighPowerFizzles: a power-2 attack is past the base-{p}-<=1 gate, so the
 // rider keeps searching. With no matching attack below it, the bonus fizzles.
 func TestWaterTheSeeds_HighPowerFizzles(t *testing.T) {
-	s := &card.TurnState{CardsRemaining: []*card.CardState{{Card: stubGenericAttack(0, 2)}}}
+	s := &card.TurnState{CardsRemaining: []*card.CardState{{Card: testutils.GenericAttack(0, 2)}}}
 	(WaterTheSeedsRed{}).Play(s, &card.CardState{Card: WaterTheSeedsRed{}})
 	if got := s.Value; got != 3 {
 		t.Errorf("Play() = %d, want 3 (power 2 > 1 → no bonus)", got)
@@ -41,7 +42,7 @@ func TestWaterTheSeeds_HighPowerFizzles(t *testing.T) {
 // the +1, not the granter's chain step.
 func TestWaterTheSeeds_LowPowerTriggersBonus(t *testing.T) {
 	for _, c := range []card.Card{WaterTheSeedsRed{}, WaterTheSeedsYellow{}, WaterTheSeedsBlue{}} {
-		target := &card.CardState{Card: stubGenericAttack(0, 1)}
+		target := &card.CardState{Card: testutils.GenericAttack(0, 1)}
 		s := &card.TurnState{CardsRemaining: []*card.CardState{target}}
 		c.Play(s, &card.CardState{Card: c})
 		if got := target.BonusAttack; got != 1 {
@@ -54,8 +55,8 @@ func TestWaterTheSeeds_LowPowerTriggersBonus(t *testing.T) {
 // lasts until a matching attack resolves, so a power-3 attack scheduled before a power-0
 // attack shouldn't consume the rider — the +1 lands on the power-0 target.
 func TestWaterTheSeeds_SkipsPastNonMatchingAttacks(t *testing.T) {
-	skipped := &card.CardState{Card: stubGenericAttack(0, 3)}
-	target := &card.CardState{Card: stubGenericAttack(0, 0)}
+	skipped := &card.CardState{Card: testutils.GenericAttack(0, 3)}
+	target := &card.CardState{Card: testutils.GenericAttack(0, 0)}
 	s := &card.TurnState{CardsRemaining: []*card.CardState{skipped, target}}
 	(WaterTheSeedsRed{}).Play(s, &card.CardState{Card: WaterTheSeedsRed{}})
 	if got := skipped.BonusAttack; got != 0 {
@@ -69,7 +70,7 @@ func TestWaterTheSeeds_SkipsPastNonMatchingAttacks(t *testing.T) {
 // TestWaterTheSeeds_NonAttackInRemainingIgnored: only attack-action cards in CardsRemaining count
 // as potential triggers.
 func TestWaterTheSeeds_NonAttackInRemainingIgnored(t *testing.T) {
-	s := &card.TurnState{CardsRemaining: []*card.CardState{{Card: stubGenericAction()}}}
+	s := &card.TurnState{CardsRemaining: []*card.CardState{{Card: testutils.GenericAction()}}}
 	(WaterTheSeedsRed{}).Play(s, &card.CardState{Card: WaterTheSeedsRed{}})
 	if got := s.Value; got != 3 {
 		t.Errorf("Play() = %d, want 3 (non-attack ignored)", got)

@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
 )
 
 // TestSunKiss_SoloIsHealOnly: with no Moon Wish in CardsPlayed the printed health-gain
@@ -19,7 +20,7 @@ func TestSunKiss_SoloIsHealOnly(t *testing.T) {
 		{SunKissBlue{}, 1},
 	}
 	for _, tc := range cases {
-		s := card.TurnState{Deck: []card.Card{stubGenericAttack(0, 0)}}
+		s := card.TurnState{Deck: []card.Card{testutils.GenericAttack(0, 0)}}
 		self := &card.CardState{Card: tc.c}
 		tc.c.Play(&s, self)
 		got := s.Value
@@ -52,7 +53,7 @@ func TestSunKiss_SynergyFiresOnPriorMoonWish(t *testing.T) {
 		} {
 			s := card.TurnState{
 				CardsPlayed: []card.Card{mw},
-				Deck:        []card.Card{stubGenericAttack(0, 0)},
+				Deck:        []card.Card{testutils.GenericAttack(0, 0)},
 			}
 			self := &card.CardState{Card: sk.c}
 			sk.c.Play(&s, self)
@@ -77,10 +78,10 @@ func TestSunKiss_SynergyFiresOnPriorMoonWish(t *testing.T) {
 // Sentinel for the name-prefix scan: if the predicate ever loosens to "any attack with 'wish'
 // in the name" or similar, this catches it.
 func TestSunKiss_SynergyDoesNotFireOnUnrelatedAttacks(t *testing.T) {
-	notMoonWish := stubGenericAttackPitch(0, 0, 1)
+	notMoonWish := testutils.GenericAttackPitch(0, 0, 1)
 	s := card.TurnState{
 		CardsPlayed: []card.Card{notMoonWish},
-		Deck:        []card.Card{stubGenericAttack(0, 0)},
+		Deck:        []card.Card{testutils.GenericAttack(0, 0)},
 	}
 	self := &card.CardState{Card: SunKissRed{}}
 	SunKissRed{}.Play(&s, self)

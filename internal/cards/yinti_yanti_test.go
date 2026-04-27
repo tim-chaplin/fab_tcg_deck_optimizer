@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
 )
 
 // TestYintiYanti_NoAuraReturnsBase covers the miss branch: without an aura played or created this
@@ -50,7 +51,7 @@ func TestYintiYanti_AuraCreatedAddsOne(t *testing.T) {
 // in CardsPlayed also satisfies the rider even if AuraCreated is still false (e.g. an Aura card
 // that entered via a non-creation path).
 func TestYintiYanti_AuraPlayedAddsOne(t *testing.T) {
-	s := card.TurnState{CardsPlayed: []card.Card{stubGenericAura()}}
+	s := card.TurnState{CardsPlayed: []card.Card{testutils.GenericAura()}}
 	(YintiYantiRed{}).Play(&s, &card.CardState{Card: YintiYantiRed{}})
 	if got := s.Value; got != 4 {
 		t.Errorf("Play() = %d, want 4 (aura in CardsPlayed → +1)", got)

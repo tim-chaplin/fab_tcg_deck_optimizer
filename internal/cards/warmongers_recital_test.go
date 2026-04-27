@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
 )
 
 // TestWarmongersRecital_NoAttackReturnsZero: no qualifying next attack card → +3 rider fizzles.
@@ -19,7 +20,7 @@ func TestWarmongersRecital_NoAttackReturnsZero(t *testing.T) {
 
 // TestWarmongersRecital_NonAttackInRemainingFizzles: non-attack action fails the predicate.
 func TestWarmongersRecital_NonAttackInRemainingFizzles(t *testing.T) {
-	s := card.TurnState{CardsRemaining: []*card.CardState{{Card: stubGenericAction()}}}
+	s := card.TurnState{CardsRemaining: []*card.CardState{{Card: testutils.GenericAction()}}}
 	(WarmongersRecitalRed{}).Play(&s, &card.CardState{Card: WarmongersRecitalRed{}})
 	if got := s.Value; got != 0 {
 		t.Errorf("Play() = %d, want 0 (non-attack skipped)", got)
@@ -38,7 +39,7 @@ func TestWarmongersRecital_NextAttackReturnsBonus(t *testing.T) {
 		{WarmongersRecitalBlue{}, 1},
 	}
 	for _, tc := range cases {
-		target := &card.CardState{Card: stubGenericAttack(0, 0)}
+		target := &card.CardState{Card: testutils.GenericAttack(0, 0)}
 		s := card.TurnState{CardsRemaining: []*card.CardState{target}}
 		tc.c.Play(&s, &card.CardState{Card: tc.c})
 		if got := s.Value; got != 0 {

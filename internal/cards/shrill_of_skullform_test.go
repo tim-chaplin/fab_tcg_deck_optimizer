@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
 )
 
 func TestShrillOfSkullform_BaseDamage(t *testing.T) {
@@ -37,7 +38,7 @@ func TestShrillOfSkullform_AuraBonus(t *testing.T) {
 		{ShrillOfSkullformBlue{}, 5},
 	}
 	for _, tc := range cases {
-		s := card.TurnState{CardsPlayed: []card.Card{stubAura{}}}
+		s := card.TurnState{CardsPlayed: []card.Card{testutils.Aura{}}}
 		tc.c.Play(&s, &card.CardState{Card: tc.c})
 		got := s.Value
 		if got != tc.want {

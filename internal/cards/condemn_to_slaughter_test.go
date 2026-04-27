@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
 )
 
 func TestCondemnToSlaughter_NoNextAttackReturnsZero(t *testing.T) {
@@ -27,7 +28,7 @@ func TestCondemnToSlaughter_NextAttackActionTriggers(t *testing.T) {
 		{CondemnToSlaughterBlue{}, 1},
 	}
 	for _, tc := range cases {
-		target := &card.CardState{Card: stubRunebladeAttack{}}
+		target := &card.CardState{Card: testutils.RunebladeAttack{}}
 		s := card.TurnState{CardsRemaining: []*card.CardState{target}}
 		tc.c.Play(&s, &card.CardState{Card: tc.c})
 		if got := s.Value; got != 0 {
@@ -41,7 +42,7 @@ func TestCondemnToSlaughter_NextAttackActionTriggers(t *testing.T) {
 
 func TestCondemnToSlaughter_WeaponCountsAsNextAttack(t *testing.T) {
 	// Unlike Runic Reaping, Condemn's rider accepts weapon swings as the "next attack."
-	target := &card.CardState{Card: stubRunebladeWeapon{}}
+	target := &card.CardState{Card: testutils.RunebladeWeapon{}}
 	s := card.TurnState{CardsRemaining: []*card.CardState{target}}
 	(CondemnToSlaughterRed{}).Play(&s, &card.CardState{Card: CondemnToSlaughterRed{}})
 	if got := s.Value; got != 0 {
@@ -54,7 +55,7 @@ func TestCondemnToSlaughter_WeaponCountsAsNextAttack(t *testing.T) {
 
 func TestCondemnToSlaughter_NonRunebladeAttackDoesNotQualify(t *testing.T) {
 	// A Generic attack-action card later in the chain doesn't satisfy the Runeblade-only rider.
-	s := card.TurnState{CardsRemaining: []*card.CardState{{Card: stubNonRunebladeAttack{}}}}
+	s := card.TurnState{CardsRemaining: []*card.CardState{{Card: testutils.NonRunebladeAttack{}}}}
 	(CondemnToSlaughterRed{}).Play(&s, &card.CardState{Card: CondemnToSlaughterRed{}})
 	if got := s.Value; got != 0 {
 		t.Errorf("Play() = %d, want 0 (non-Runeblade attack shouldn't qualify)", got)

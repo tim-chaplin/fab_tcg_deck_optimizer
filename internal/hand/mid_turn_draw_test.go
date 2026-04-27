@@ -4,9 +4,9 @@ import (
 	"testing"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/card/fake"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/cards"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/hero"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
 )
 
 // TestPlaySequence_DrawDoesNotPoisonSubsequentPermutations pins the per-permutation reset of
@@ -16,8 +16,8 @@ import (
 // reset weren't wired in, the second permutation would start from an already-consumed deck
 // and an inherited Hand slice.
 func TestPlaySequence_DrawDoesNotPoisonSubsequentPermutations(t *testing.T) {
-	top := fake.RedAttack{}
-	deck := []card.Card{top, fake.BlueAttack{}, fake.RedAttack{}}
+	top := testutils.RedAttack{}
+	deck := []card.Card{top, testutils.BlueAttack{}, testutils.RedAttack{}}
 	ctx := newSequenceContextForTest(hero.Viserai{}, nil, deck, 10, 0, 1)
 
 	// First permutation: Snatch fires, DrawOne pops the top of the deck into Hand.
@@ -32,7 +32,7 @@ func TestPlaySequence_DrawDoesNotPoisonSubsequentPermutations(t *testing.T) {
 
 	// Second permutation: plain attack, no draw. The reset at the top of playSequenceWithMeta
 	// must restore state.Deck to the original and clear state.Hand before this call runs.
-	_, _, _, _ = ctx.playSequence([]card.Card{fake.RedAttack{}})
+	_, _, _, _ = ctx.playSequence([]card.Card{testutils.RedAttack{}})
 	if len(ctx.bufs.state.Hand) != 0 {
 		t.Errorf("after second permutation: Hand = %v, want empty (reset lost)", ctx.bufs.state.Hand)
 	}
@@ -47,8 +47,8 @@ func TestPlaySequence_DrawDoesNotPoisonSubsequentPermutations(t *testing.T) {
 // decks must report distinct end-of-turn State.Hand contents (the cards drawn off the top).
 func TestBest_DrawRiderSeesActualDeck(t *testing.T) {
 	h := []card.Card{cards.SnatchRed{}}
-	deckA := []card.Card{fake.RedAttack{}}
-	deckB := []card.Card{fake.BlueAttack{}}
+	deckA := []card.Card{testutils.RedAttack{}}
+	deckB := []card.Card{testutils.BlueAttack{}}
 
 	resA := Best(hero.Viserai{}, nil, h, 0, deckA, 0, nil)
 	resB := Best(hero.Viserai{}, nil, h, 0, deckB, 0, nil)
@@ -61,11 +61,11 @@ func TestBest_DrawRiderSeesActualDeck(t *testing.T) {
 		}
 		return false
 	}
-	if !containsID(resA.State.Hand, (fake.RedAttack{}).ID()) && resA.State.Arsenal == nil {
+	if !containsID(resA.State.Hand, (testutils.RedAttack{}).ID()) && resA.State.Arsenal == nil {
 		t.Errorf("deck A: drawn RedAttack didn't surface in State.Hand or State.Arsenal: hand=%v arsenal=%v",
 			resA.State.Hand, resA.State.Arsenal)
 	}
-	if !containsID(resB.State.Hand, (fake.BlueAttack{}).ID()) && resB.State.Arsenal == nil {
+	if !containsID(resB.State.Hand, (testutils.BlueAttack{}).ID()) && resB.State.Arsenal == nil {
 		t.Errorf("deck B: drawn BlueAttack didn't surface in State.Hand or State.Arsenal: hand=%v arsenal=%v",
 			resB.State.Hand, resB.State.Arsenal)
 	}
@@ -88,9 +88,9 @@ func TestBest_DrawRiderSeesActualDeck(t *testing.T) {
 // card is allowed to be played or not; the invariant is that the choice can't flip as a
 // function of deck order alone.
 func TestBest_DeckOrderDoesNotAffectHandRoles(t *testing.T) {
-	h := []card.Card{fake.CostlyDraw{}, fake.CostlyAttack{}, fake.PitchOneDR{}}
-	deckA := []card.Card{fake.HugeAttack{}, fake.PitchOneDR{}}
-	deckB := []card.Card{fake.PitchOneDR{}, fake.HugeAttack{}}
+	h := []card.Card{testutils.CostlyDraw{}, testutils.CostlyAttack{}, testutils.PitchOneDR{}}
+	deckA := []card.Card{testutils.HugeAttack{}, testutils.PitchOneDR{}}
+	deckB := []card.Card{testutils.PitchOneDR{}, testutils.HugeAttack{}}
 
 	rolesFor := func(summary TurnSummary) map[card.ID]Role {
 		m := make(map[card.ID]Role, len(summary.BestLine))

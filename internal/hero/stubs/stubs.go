@@ -1,8 +1,7 @@
 // Package stubs provides a generic stub Hero implementation used by tests in multiple packages
 // (hand, deck). It is a no-op hero — health 20, zero types, no OnCardPlayed bonus — with a
 // configurable Intelligence so tests can pin hand-size-dependent behaviour without pulling in
-// a real hero whose printed ability would perturb the measured value. Named `stubs` so the
-// import coexists with `internal/card/fake` (Card stubs) without an alias.
+// a real hero whose printed ability would perturb the measured value.
 package stubs
 
 import (

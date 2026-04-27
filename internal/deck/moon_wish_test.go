@@ -4,9 +4,9 @@ import (
 	"testing"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/card/fake"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/cards"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/hero/stubs"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
 )
 
 // moonWishHero is the no-op hero used by the Moon Wish e2e tests so the assertions on Value
@@ -40,8 +40,8 @@ var moonWishHero = stubs.Hero{Intel: 4}
 func TestEvalOneTurn_MoonWishAltCostTutorsSunKissAndConsumesDeck(t *testing.T) {
 	deckCards := []card.Card{
 		cards.SunKissRed{},
-		fake.RedAttack{}, fake.RedAttack{}, fake.RedAttack{},
-		fake.RedAttack{}, fake.RedAttack{},
+		testutils.RedAttack{}, testutils.RedAttack{}, testutils.RedAttack{},
+		testutils.RedAttack{}, testutils.RedAttack{},
 	}
 	d := New(moonWishHero, nil, deckCards)
 	state := d.EvalOneTurnForTesting(0, nil, []card.Card{
@@ -74,8 +74,8 @@ func TestEvalOneTurn_MoonWishAltCostTutorsSunKissAndConsumesDeck(t *testing.T) {
 // Held candidate was consumed by alt cost).
 func TestEvalOneTurn_MoonWishAltCostTutorFizzlesWithoutSunKiss(t *testing.T) {
 	deckCards := []card.Card{
-		fake.RedAttack{}, fake.RedAttack{}, fake.RedAttack{},
-		fake.RedAttack{}, fake.RedAttack{}, fake.RedAttack{},
+		testutils.RedAttack{}, testutils.RedAttack{}, testutils.RedAttack{},
+		testutils.RedAttack{}, testutils.RedAttack{}, testutils.RedAttack{},
 	}
 	d := New(moonWishHero, nil, deckCards)
 	state := d.EvalOneTurnForTesting(0, nil, []card.Card{
@@ -117,9 +117,9 @@ func TestEvalOneTurn_MoonWishWithFlyingHighPlaysTutoredSunKiss(t *testing.T) {
 	// Sun Kiss at index 2 (not 0) so a pre-fix head++ wouldn't accidentally consume its
 	// slot; verifying buf-removal logic actually patches the specific tutored card out.
 	deckCards := []card.Card{
-		fake.RedAttack{}, fake.RedAttack{},
+		testutils.RedAttack{}, testutils.RedAttack{},
 		cards.SunKissRed{},
-		fake.RedAttack{}, fake.RedAttack{}, fake.RedAttack{}, fake.RedAttack{},
+		testutils.RedAttack{}, testutils.RedAttack{}, testutils.RedAttack{}, testutils.RedAttack{},
 	}
 	d := New(moonWishHero, nil, deckCards)
 	state := d.EvalOneTurnForTesting(0, nil, []card.Card{

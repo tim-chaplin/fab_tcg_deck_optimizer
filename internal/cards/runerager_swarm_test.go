@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
 )
 
 func TestRuneragerSwarm_NoAuraNoGoAgain(t *testing.T) {
@@ -32,7 +33,7 @@ func TestRuneragerSwarm_NoAuraNoGoAgain(t *testing.T) {
 func TestRuneragerSwarm_AuraPlayedGrantsGoAgain(t *testing.T) {
 	// An aura in CardsPlayed satisfies the "played an aura this turn" condition.
 	for _, c := range []card.Card{RuneragerSwarmRed{}, RuneragerSwarmYellow{}, RuneragerSwarmBlue{}} {
-		s := card.TurnState{CardsPlayed: []card.Card{stubAura{}}}
+		s := card.TurnState{CardsPlayed: []card.Card{testutils.Aura{}}}
 		self := &card.CardState{Card: c}
 		c.Play(&s, self)
 		if !self.GrantedGoAgain {

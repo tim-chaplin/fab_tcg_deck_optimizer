@@ -1,10 +1,174 @@
-// Package fake provides generic stub Card implementations used by tests in multiple packages (hand,
-// sim). These are not real FaB cards — they're deliberately simple attack actions with known stat
-// lines so partition/ordering tests have predictable optimal values.
-package fake
+// Package testutils provides Card stubs and fake card implementations shared by tests in
+// multiple packages (card, cards, deck, hand, sim). The configurable Card stub framework
+// (Card, GenericAttack, RunebladeAttack, …) builds CardsRemaining / CardsPlayed / Pitched
+// lists with specific type, cost, power, and pitch shapes so predicate / lookahead tests
+// have predictable inputs. The fixed-stat-line fakes (RedAttack, BlueAttack, DrawCantrip,
+// …) are deliberately simple attack actions tests use as deck contents when partition /
+// ordering assertions need known optimal values.
+package testutils
 
 import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 
+// Card is a configurable Card implementation used across tests to build CardsRemaining /
+// CardsPlayed / Pitched lists with specific type, cost, power, and pitch shapes. Zero-value
+// fields mean "don't care" — tests set only what the helper under test predicates on.
+type Card struct {
+	name  string
+	cost  int
+	power int
+	pitch int
+	types card.TypeSet
+}
+
+func (s Card) ID() card.ID  { return card.Invalid }
+func (s Card) Name() string { return s.name }
+
+// WithName returns a copy of s with its display name overridden. Lets cross-package tests
+// distinguish multiple Card stubs in log assertions even though `name` is unexported.
+func (s Card) WithName(name string) Card { s.name = name; return s }
+
+func (s Card) Cost(*card.TurnState) int            { return s.cost }
+func (s Card) Pitch() int                          { return s.pitch }
+func (s Card) Attack() int                         { return s.power }
+func (s Card) Defense() int                        { return 0 }
+func (s Card) Types() card.TypeSet                 { return s.types }
+func (s Card) GoAgain() bool                       { return false }
+func (Card) Play(*card.TurnState, *card.CardState) {}
+
+// GenericAttack returns a Generic Action - Attack stub with the given cost and base power.
+// Pitch defaults to 1; override via GenericAttackPitch if a test cares.
+func GenericAttack(cost, power int) Card {
+	return Card{
+		name:  "GenericAttack",
+		cost:  cost,
+		power: power,
+		pitch: 1,
+		types: card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeAttack),
+	}
+}
+
+// GenericAttackPitch is GenericAttack with an explicit pitch value. Flying High's red
+// variant rider reads pitch, so tests that exercise the +1 bonus set this.
+func GenericAttackPitch(cost, power, pitch int) Card {
+	s := GenericAttack(cost, power)
+	s.pitch = pitch
+	return s
+}
+
+// GenericAction returns a Generic Action (non-attack) stub for attack-typed-lookahead
+// rejection cases.
+func GenericAction() Card {
+	return Card{
+		name:  "GenericAction",
+		types: card.NewTypeSet(card.TypeGeneric, card.TypeAction),
+	}
+}
+
+// GenericAura returns a Generic Aura stub — covers Yinti Yanti's HasPlayedType(TypeAura) check.
+func GenericAura() Card {
+	return Card{
+		name:  "GenericAura",
+		types: card.NewTypeSet(card.TypeGeneric, card.TypeAura),
+	}
+}
+
+// Shared stub Cards. Each is a zero-value struct with a fixed type line; tests mix and match to
+// exercise lookahead / predicate logic on card effects.
+
+// RunebladeAttack is a minimal Runeblade Action-Attack card — satisfies "next Runeblade
+// attack action card" lookaheads.
+type RunebladeAttack struct{}
+
+func (RunebladeAttack) ID() card.ID              { return card.Invalid }
+func (RunebladeAttack) Name() string             { return "RunebladeAttack" }
+func (RunebladeAttack) Cost(*card.TurnState) int { return 0 }
+func (RunebladeAttack) Pitch() int               { return 0 }
+func (RunebladeAttack) Attack() int              { return 0 }
+func (RunebladeAttack) Defense() int             { return 0 }
+func (RunebladeAttack) Types() card.TypeSet {
+	return card.NewTypeSet(card.TypeRuneblade, card.TypeAction, card.TypeAttack)
+}
+func (RunebladeAttack) GoAgain() bool                         { return true }
+func (RunebladeAttack) Play(*card.TurnState, *card.CardState) {}
+
+// RunebladeWeapon is a Runeblade weapon — satisfies "next Runeblade attack" lookaheads
+// that include weapons but NOT ones restricted to attack action cards.
+type RunebladeWeapon struct{}
+
+func (RunebladeWeapon) ID() card.ID              { return card.Invalid }
+func (RunebladeWeapon) Name() string             { return "RunebladeWeapon" }
+func (RunebladeWeapon) Cost(*card.TurnState) int { return 0 }
+func (RunebladeWeapon) Pitch() int               { return 0 }
+func (RunebladeWeapon) Attack() int              { return 0 }
+func (RunebladeWeapon) Defense() int             { return 0 }
+func (RunebladeWeapon) Types() card.TypeSet {
+	return card.NewTypeSet(card.TypeRuneblade, card.TypeWeapon)
+}
+func (RunebladeWeapon) GoAgain() bool                         { return false }
+func (RunebladeWeapon) Play(*card.TurnState, *card.CardState) {}
+
+// NonAttack is a non-attack card — covers "attack-typed predicate should reject
+// non-attack" cases.
+type NonAttack struct{}
+
+func (NonAttack) ID() card.ID                           { return card.Invalid }
+func (NonAttack) Name() string                          { return "NonAttack" }
+func (NonAttack) Cost(*card.TurnState) int              { return 0 }
+func (NonAttack) Pitch() int                            { return 0 }
+func (NonAttack) Attack() int                           { return 0 }
+func (NonAttack) Defense() int                          { return 0 }
+func (NonAttack) Types() card.TypeSet                   { return card.NewTypeSet(card.TypeAction) }
+func (NonAttack) GoAgain() bool                         { return false }
+func (NonAttack) Play(*card.TurnState, *card.CardState) {}
+
+// NonRunebladeAttack is a Generic Action-Attack — covers Runeblade-gated lookaheads
+// rejecting non-Runeblade attacks.
+type NonRunebladeAttack struct{}
+
+func (NonRunebladeAttack) ID() card.ID              { return card.Invalid }
+func (NonRunebladeAttack) Name() string             { return "NonRunebladeAttack" }
+func (NonRunebladeAttack) Cost(*card.TurnState) int { return 0 }
+func (NonRunebladeAttack) Pitch() int               { return 0 }
+func (NonRunebladeAttack) Attack() int              { return 0 }
+func (NonRunebladeAttack) Defense() int             { return 0 }
+func (NonRunebladeAttack) Types() card.TypeSet {
+	return card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeAttack)
+}
+func (NonRunebladeAttack) GoAgain() bool                         { return true }
+func (NonRunebladeAttack) Play(*card.TurnState, *card.CardState) {}
+
+// AttackWithPower is a Runeblade attack-action card with a configurable printed Attack()
+// value. Tests set specific numbers to hit/miss the LikelyToHit heuristic (4 lands, 3 blocks).
+type AttackWithPower struct {
+	Power int
+}
+
+func (AttackWithPower) ID() card.ID              { return card.Invalid }
+func (AttackWithPower) Name() string             { return "AttackWithPower" }
+func (AttackWithPower) Cost(*card.TurnState) int { return 0 }
+func (AttackWithPower) Pitch() int               { return 0 }
+func (s AttackWithPower) Attack() int            { return s.Power }
+func (AttackWithPower) Defense() int             { return 0 }
+func (AttackWithPower) Types() card.TypeSet {
+	return card.NewTypeSet(card.TypeRuneblade, card.TypeAction, card.TypeAttack)
+}
+func (AttackWithPower) GoAgain() bool                         { return true }
+func (AttackWithPower) Play(*card.TurnState, *card.CardState) {}
+
+// Aura is a minimal Aura-typed card — exercises "aura played this turn" checks.
+type Aura struct{}
+
+func (Aura) ID() card.ID                           { return card.Invalid }
+func (Aura) Name() string                          { return "Aura" }
+func (Aura) Cost(*card.TurnState) int              { return 0 }
+func (Aura) Pitch() int                            { return 0 }
+func (Aura) Attack() int                           { return 0 }
+func (Aura) Defense() int                          { return 0 }
+func (Aura) Types() card.TypeSet                   { return card.NewTypeSet(card.TypeAura) }
+func (Aura) GoAgain() bool                         { return true }
+func (Aura) Play(*card.TurnState, *card.CardState) {}
+
+// genericAttackTypes is the type line shared by every attack-action fake below.
 var genericAttackTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeAttack)
 
 // BlueAttack is a generic blue attack action: pitches 3, defends 3, attacks 1, costs 1.

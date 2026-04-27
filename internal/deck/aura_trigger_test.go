@@ -5,10 +5,10 @@ import (
 	"testing"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/card/fake"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/cards"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/hand"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/hero"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
 )
 
 // damageTrigger returns a StartOfTurn AuraTrigger crediting the given damage and exhausting
@@ -30,7 +30,7 @@ func damageTrigger(self card.Card, damage int, calls *int) card.AuraTrigger {
 // trigger's handler is invoked exactly once per pass, contributions are reported, and a
 // trigger whose Count hits zero drops out of survivors.
 func TestProcessTriggersAtStartOfTurn_FiresEachQueuedTriggerOnce(t *testing.T) {
-	aura := fake.RedAttack{}
+	aura := testutils.RedAttack{}
 	var callsA, callsB int
 	queue := []card.AuraTrigger{damageTrigger(aura, 2, &callsA), damageTrigger(aura, 3, &callsB)}
 	survivors, contribs, total, _, _, _ := processTriggersAtStartOfTurn(queue, nil)
@@ -65,12 +65,12 @@ func TestProcessTriggersAtStartOfTurn_EmptyQueue(t *testing.T) {
 // aura with a graveyard-banish rider) see it. Asserts the contract without relying on any
 // specific card to model the "look at graveyard" side.
 func TestProcessTriggersAtStartOfTurn_GraveyardsExhaustedAura(t *testing.T) {
-	aura := fake.RedAttack{}
+	aura := testutils.RedAttack{}
 	var seen []card.Card
 	// Second trigger's handler records what's currently in the graveyard so we can check the
 	// first trigger's destroy happened BEFORE the second fires.
 	watcher := card.AuraTrigger{
-		Self:  fake.YellowAttack{},
+		Self:  testutils.YellowAttack{},
 		Type:  card.TriggerStartOfTurn,
 		Count: 1,
 		Handler: func(s *card.TurnState) int {
@@ -96,10 +96,10 @@ func TestProcessTriggersAtStartOfTurn_GraveyardsExhaustedAura(t *testing.T) {
 func TestEvalOneTurn_SigilOfFyendalQueuesTrigger(t *testing.T) {
 	sigil := cards.SigilOfFyendalBlue{}
 	deckCards := []card.Card{
-		fake.BlueAttack{},
-		fake.BlueAttack{},
-		fake.BlueAttack{},
-		fake.BlueAttack{},
+		testutils.BlueAttack{},
+		testutils.BlueAttack{},
+		testutils.BlueAttack{},
+		testutils.BlueAttack{},
 	}
 	d := New(hero.Viserai{}, nil, deckCards)
 	state := d.EvalOneTurnForTesting(0, nil, []card.Card{sigil})
@@ -242,12 +242,12 @@ func TestEvalOneTurn_SigilOfTheArknightRevealsIntoHand(t *testing.T) {
 	// Deck layout: positions 0..3 are turn 2's normal refill (Blues), position 4 is the reveal
 	// target at the post-draw top, positions 5+ are unused filler.
 	deckCards := []card.Card{
-		fake.BlueAttack{},
-		fake.BlueAttack{},
-		fake.BlueAttack{},
-		fake.BlueAttack{},
+		testutils.BlueAttack{},
+		testutils.BlueAttack{},
+		testutils.BlueAttack{},
+		testutils.BlueAttack{},
 		reveal,
-		fake.BlueAttack{},
+		testutils.BlueAttack{},
 	}
 	d := New(hero.Viserai{}, nil, deckCards)
 	state := d.EvalOneTurnForTesting(0, nil, []card.Card{sigil})
@@ -266,10 +266,10 @@ func TestEvalOneTurn_SigilOfTheArknightRevealsIntoHand(t *testing.T) {
 	// Turn 2: 4 normal draws + 1 revealed = 5 cards. deckCards[0..3] refill turn 2's hand;
 	// deckCards[4] is the reveal target appended at the tail.
 	wantHand := []card.Card{
-		fake.BlueAttack{},
-		fake.BlueAttack{},
-		fake.BlueAttack{},
-		fake.BlueAttack{},
+		testutils.BlueAttack{},
+		testutils.BlueAttack{},
+		testutils.BlueAttack{},
+		testutils.BlueAttack{},
 		reveal,
 	}
 	if len(state.Hand) != len(wantHand) {
@@ -292,12 +292,12 @@ func TestEvalOneTurn_SigilOfTheArknightRevealsIntoHand(t *testing.T) {
 // should have 3 Runechants in the carryover.
 func TestEvalOneTurn_BlessingOfOccultCreatesRunesAtStartOfNextTurn(t *testing.T) {
 	blessing := cards.BlessingOfOccultRed{}
-	pitch := fake.PitchOneDR{}
+	pitch := testutils.PitchOneDR{}
 	deckCards := []card.Card{
-		fake.BlueAttack{},
-		fake.BlueAttack{},
-		fake.BlueAttack{},
-		fake.BlueAttack{},
+		testutils.BlueAttack{},
+		testutils.BlueAttack{},
+		testutils.BlueAttack{},
+		testutils.BlueAttack{},
 	}
 	d := New(hero.Viserai{}, nil, deckCards)
 	state := d.EvalOneTurnForTesting(0, nil, []card.Card{blessing, pitch})
@@ -343,7 +343,7 @@ func TestEvaluate_TriggersFromLastTurnSurfacesInBest(t *testing.T) {
 		deckCards = append(deckCards, slash)
 	}
 	for i := 0; i < 6; i++ {
-		deckCards = append(deckCards, fake.BlueAttack{})
+		deckCards = append(deckCards, testutils.BlueAttack{})
 	}
 	d := New(hero.Viserai{}, nil, deckCards)
 	rng := rand.New(rand.NewSource(42))
@@ -374,7 +374,7 @@ func TestEvaluate_TriggersFromLastTurnSurfacesInBest(t *testing.T) {
 // fired last turn can fire again this turn. Asserts the re-arm contract through the helper
 // rather than waiting for the end-to-end multi-turn path to surface a regression.
 func TestProcessTriggersAtStartOfTurn_ReArmsOncePerTurnGate(t *testing.T) {
-	aura := fake.RedAttack{}
+	aura := testutils.RedAttack{}
 	exhausted := card.AuraTrigger{
 		Self:          aura,
 		Type:          card.TriggerAttackAction,
@@ -415,10 +415,10 @@ func TestEvalOneTurn_MaleficIncantationOncePerTurnLimitsToOneRune(t *testing.T) 
 	hocus := cards.HocusPocusRed{}
 	// Filler deck so turn 2 can be dealt — content doesn't matter for what we assert.
 	deckCards := []card.Card{
-		fake.BlueAttack{},
-		fake.BlueAttack{},
-		fake.BlueAttack{},
-		fake.BlueAttack{},
+		testutils.BlueAttack{},
+		testutils.BlueAttack{},
+		testutils.BlueAttack{},
+		testutils.BlueAttack{},
 	}
 	d := New(hero.Viserai{}, nil, deckCards)
 	state := d.EvalOneTurnForTesting(0, nil, []card.Card{malefic, hocus})
@@ -461,12 +461,12 @@ func TestEvalOneTurn_MaleficIncantationOncePerTurnLimitsToOneRune(t *testing.T) 
 // the deck-loop boundary.
 func TestEvalOneTurn_RunebloodIncantationTicksAcrossTurns(t *testing.T) {
 	runeblood := cards.RunebloodIncantationRed{}
-	pitch := fake.PitchOneDR{}
+	pitch := testutils.PitchOneDR{}
 	deckCards := []card.Card{
-		fake.BlueAttack{},
-		fake.BlueAttack{},
-		fake.BlueAttack{},
-		fake.BlueAttack{},
+		testutils.BlueAttack{},
+		testutils.BlueAttack{},
+		testutils.BlueAttack{},
+		testutils.BlueAttack{},
 	}
 	d := New(hero.Viserai{}, nil, deckCards)
 	state := d.EvalOneTurnForTesting(0, nil, []card.Card{runeblood, pitch})
