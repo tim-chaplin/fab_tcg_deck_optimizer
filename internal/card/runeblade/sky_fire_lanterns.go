@@ -3,8 +3,8 @@
 // Text: "Reveal the top card of your deck. If it's <same color as this variant>, create a
 // Runechant token."
 //
-// Peek s.Deck[0] and compare its pitch to this variant's pitch (color). On match, create
-// one Runechant.
+// Peek the deck top via s.Deck() and compare its pitch to this variant's pitch (color).
+// On match, create one Runechant. Reading the deck flips Cacheable=false.
 
 package runeblade
 
@@ -16,7 +16,8 @@ var skyFireLanternsTypes = card.NewTypeSet(card.TypeRuneblade, card.TypeAction)
 // self when the deck-top card matches this variant's pitch (color).
 func skyFireLanternsPlay(s *card.TurnState, self *card.CardState, selfPitch int) {
 	s.ApplyAndLogEffectiveAttack(self)
-	if len(s.Deck) == 0 || s.Deck[0].Pitch() != selfPitch {
+	deck := s.Deck()
+	if len(deck) == 0 || deck[0].Pitch() != selfPitch {
 		return
 	}
 	s.CreateAndLogRunechantsOnPlay(self, 1)

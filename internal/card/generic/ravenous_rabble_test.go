@@ -39,17 +39,17 @@ func TestRavenousRabble_TopPitchSubtracted(t *testing.T) {
 		{"pitch 3", 3, 2, 1, 0},
 	}
 	for _, tc := range cases {
-		sRed := &card.TurnState{Deck: []card.Card{stubGenericAttackPitch(0, 0, tc.topPitch)}}
+		sRed := card.NewTurnState([]card.Card{stubGenericAttackPitch(0, 0, tc.topPitch)}, nil)
 		(RavenousRabbleRed{}).Play(sRed, &card.CardState{Card: RavenousRabbleRed{}})
 		if got := sRed.Value; got != tc.red {
 			t.Errorf("%s Red: Play() = %d, want %d", tc.name, got, tc.red)
 		}
-		sYellow := &card.TurnState{Deck: []card.Card{stubGenericAttackPitch(0, 0, tc.topPitch)}}
+		sYellow := card.NewTurnState([]card.Card{stubGenericAttackPitch(0, 0, tc.topPitch)}, nil)
 		(RavenousRabbleYellow{}).Play(sYellow, &card.CardState{Card: RavenousRabbleYellow{}})
 		if got := sYellow.Value; got != tc.yellow {
 			t.Errorf("%s Yellow: Play() = %d, want %d", tc.name, got, tc.yellow)
 		}
-		sBlue := &card.TurnState{Deck: []card.Card{stubGenericAttackPitch(0, 0, tc.topPitch)}}
+		sBlue := card.NewTurnState([]card.Card{stubGenericAttackPitch(0, 0, tc.topPitch)}, nil)
 		(RavenousRabbleBlue{}).Play(sBlue, &card.CardState{Card: RavenousRabbleBlue{}})
 		if got := sBlue.Value; got != tc.blue {
 			t.Errorf("%s Blue: Play() = %d, want %d", tc.name, got, tc.blue)
@@ -61,7 +61,7 @@ func TestRavenousRabble_TopPitchSubtracted(t *testing.T) {
 // Verify the floor explicitly by reducing well past zero: Blue vs a (hypothetical) pitch-5 card
 // should still return 0, not a negative number that'd turn into negative damage downstream.
 func TestRavenousRabble_FloorsAtZero(t *testing.T) {
-	s := &card.TurnState{Deck: []card.Card{stubGenericAttackPitch(0, 0, 5)}}
+	s := card.NewTurnState([]card.Card{stubGenericAttackPitch(0, 0, 5)}, nil)
 	(RavenousRabbleBlue{}).Play(s, &card.CardState{Card: RavenousRabbleBlue{}})
 	if got := s.Value; got != 0 {
 		t.Errorf("Blue vs pitch-5 top: Play() = %d, want 0 (floor)", got)
@@ -71,11 +71,11 @@ func TestRavenousRabble_FloorsAtZero(t *testing.T) {
 // TestRavenousRabble_OnlyFirstDeckCardMatters: the reveal is the top card; cards below it don't
 // affect the result.
 func TestRavenousRabble_OnlyFirstDeckCardMatters(t *testing.T) {
-	s := &card.TurnState{Deck: []card.Card{
+	s := card.NewTurnState([]card.Card{
 		stubGenericAttackPitch(0, 0, 1),
 		stubGenericAttackPitch(0, 0, 3),
 		stubGenericAttackPitch(0, 0, 3),
-	}}
+	}, nil)
 	(RavenousRabbleRed{}).Play(s, &card.CardState{Card: RavenousRabbleRed{}})
 	if got := s.Value; got != 4 {
 		t.Errorf("Play() = %d, want 4 (5 − top pitch 1, ignoring deeper cards)", got)

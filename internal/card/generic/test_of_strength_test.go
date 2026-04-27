@@ -10,7 +10,7 @@ import (
 // returns +card.GoldTokenValue.
 func TestTestOfStrength_WinCreditsGoldToken(t *testing.T) {
 	for _, power := range []int{6, 7} {
-		s := &card.TurnState{Deck: []card.Card{stubGenericAttack(0, power)}}
+		s := card.NewTurnState([]card.Card{stubGenericAttack(0, power)}, nil)
 		(TestOfStrengthRed{}).Play(s, &card.CardState{Card: TestOfStrengthRed{}})
 		if got := s.Value; got != card.GoldTokenValue {
 			t.Errorf("top power %d: Play() = %d, want %d", power, got, card.GoldTokenValue)
@@ -21,7 +21,7 @@ func TestTestOfStrength_WinCreditsGoldToken(t *testing.T) {
 // TestTestOfStrength_TieCreditsZero: a top-of-deck attack of exactly 5 ties the clash; nobody
 // gets the Gold token, so Play returns 0.
 func TestTestOfStrength_TieCreditsZero(t *testing.T) {
-	s := &card.TurnState{Deck: []card.Card{stubGenericAttack(0, 5)}}
+	s := card.NewTurnState([]card.Card{stubGenericAttack(0, 5)}, nil)
 	(TestOfStrengthRed{}).Play(s, &card.CardState{Card: TestOfStrengthRed{}})
 	if got := s.Value; got != 0 {
 		t.Errorf("top power 5: Play() = %d, want 0 (tie)", got)
@@ -32,7 +32,7 @@ func TestTestOfStrength_TieCreditsZero(t *testing.T) {
 // the opponent creates the Gold token, so Play returns -card.GoldTokenValue.
 func TestTestOfStrength_LossSubtractsGoldToken(t *testing.T) {
 	for _, power := range []int{0, 1, 2, 3, 4} {
-		s := &card.TurnState{Deck: []card.Card{stubGenericAttack(0, power)}}
+		s := card.NewTurnState([]card.Card{stubGenericAttack(0, power)}, nil)
 		(TestOfStrengthRed{}).Play(s, &card.CardState{Card: TestOfStrengthRed{}})
 		if got := s.Value; got != -card.GoldTokenValue {
 			t.Errorf("top power %d: Play() = %d, want %d", power, got, -card.GoldTokenValue)

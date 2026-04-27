@@ -287,9 +287,7 @@ func (ctx *sequenceContext) resetStateForPermutation() {
 	bufs := ctx.bufs
 	*s = card.TurnState{
 		Hand:                    append(bufs.handBacking[:0], ctx.handStart...),
-		Deck:                    append(bufs.deckBacking[:0], ctx.deck...),
 		Arsenal:                 ctx.arsenalAtChainStart,
-		Graveyard:               bufs.graveBacking[:0],
 		Banish:                  bufs.banishBacking[:0],
 		CardsPlayed:             bufs.cardsPlayedBacking[:0],
 		Log:                     bufs.logBacking[:0],
@@ -301,6 +299,9 @@ func (ctx *sequenceContext) resetStateForPermutation() {
 		EphemeralAttackTriggers: bufs.ephemeralBacking[:0],
 		SkipLog:                 ctx.skipLog,
 	}
+	// Deck / graveyard route through SetDeck / SetGraveyard — the fields are package-private.
+	s.SetDeck(append(bufs.deckBacking[:0], ctx.deck...))
+	s.SetGraveyard(bufs.graveBacking[:0])
 }
 
 // bestSequence tries every ordering of attackers and returns the max total damage plus the
@@ -488,7 +489,7 @@ func (ctx *sequenceContext) playSequenceWithMeta(n int) (damage int, leftoverRun
 		// trigger. Everything else — Actions, Attack Reactions, Defense Reactions, Blocks,
 		// Instants — heads to the graveyard immediately.
 		if !m.types.PersistsInPlay() {
-			state.Graveyard = append(state.Graveyard, pc.Card)
+			state.AddToGraveyard(pc.Card)
 		}
 
 		// Attacks and weapon swings consume all runechants in play. Damage isn't re-added: each
@@ -518,9 +519,9 @@ func (ctx *sequenceContext) playSequenceWithMeta(n int) (damage int, leftoverRun
 func snapshotCarry(s *card.TurnState) CarryState {
 	return CarryState{
 		Hand:         append([]card.Card(nil), s.Hand...),
-		Deck:         append([]card.Card(nil), s.Deck...),
+		Deck:         s.CopyDeck(),
 		Arsenal:      s.Arsenal,
-		Graveyard:    append([]card.Card(nil), s.Graveyard...),
+		Graveyard:    s.CopyGraveyard(),
 		Banish:       append([]card.Card(nil), s.Banish...),
 		Runechants:   s.Runechants,
 		AuraTriggers: append([]card.AuraTrigger(nil), s.AuraTriggers...),

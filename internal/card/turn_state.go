@@ -56,19 +56,22 @@ type TurnState struct {
 	// append to Hand; alt-cost effects pop from Hand. Whatever's in Hand at end of chain
 	// becomes next turn's Held cards.
 	Hand []Card
-	// Deck is the deck top-to-bottom. Cards mutate freely: DrawOne pops Deck[0]; tutor
-	// removes a specific card; alt cost prepends to Deck. Whatever's in Deck at end of
-	// chain becomes next turn's deck.
-	Deck []Card
+	// deck is the deck top-to-bottom. Package-private so reads route through Deck() (which
+	// flips Cacheable=false — reading deck order makes the chain output depend on hidden
+	// shuffle state). Writes go through SetDeck(); appends-only graveyard mutations go
+	// through AddToGraveyard() (no flip; append is deterministic from input + cards played).
+	deck []Card
 	// Arsenal is the arsenal slot's contents at this point in the chain — the arsenal-in
 	// card at start of turn, nil after it plays / defends, refilled post-chain by the
 	// arsenal-promotion step. Cards that read "from arsenal" use CardState.FromArsenal,
 	// not this field.
 	Arsenal Card
-	// Graveyard is cards that have entered the graveyard this turn — every card played or
-	// blocked lands here after resolving. Pitched cards do not (they recycle to deck
-	// bottom). Cards that destroy themselves mid-chain route through AddToGraveyard.
-	Graveyard []Card
+	// graveyard is cards that have entered the graveyard this turn — every card played or
+	// blocked lands here after resolving. Package-private so reads route through Graveyard()
+	// (flips Cacheable=false — scanning the graveyard for past plays makes the result
+	// depend on prior turns' hidden state). AddToGraveyard appends without flipping (the
+	// post-graveyard is input.graveyard ++ played cards, deterministic).
+	graveyard []Card
 	// Banish holds cards moved into the banished zone this turn (e.g. an aura-banish-for-
 	// arcane rider).
 	Banish []Card
@@ -155,6 +158,79 @@ type TurnState struct {
 	// the printout. Per-shuffle Log churn was the dominant allocation source — snapshotCarry's
 	// Log slice copy was the biggest single field by bytes.
 	SkipLog bool
+
+	// uncacheable is the per-permutation flag a future hand-eval cache reads to decide
+	// whether the chain output is keyable on inputs alone. Stored inverted (uncacheable
+	// rather than cacheable) so the zero-value at struct-init means "still cacheable" —
+	// per-permutation TurnState resets via *s = TurnState{...} get the right default
+	// without a separate reset call. Deck / Graveyard read accessors flip it to true the
+	// moment a card's Play (or a framework helper like DrawOne / ClashValue) reads either
+	// field, since those reads make the chain output depend on hidden shuffle state that
+	// isn't part of the (hand, arsenal, incoming, runechants, auras, weapons) cache key.
+	// Writes via SetDeck / SetGraveyard / AddToGraveyard don't flip on their own — those
+	// post-states are deterministic from inputs + played cards, so they can be replayed at
+	// retrieval time. Read via IsCacheable().
+	uncacheable bool
+}
+
+// Deck returns the deck top-to-bottom and flips IsCacheable() to false. Callers reading
+// deck contents (peek-top, scan-top-N, tutor search) accept that the chain's output now
+// depends on hidden shuffle state that isn't part of the cache key.
+func (s *TurnState) Deck() []Card {
+	s.uncacheable = true
+	return s.deck
+}
+
+// SetDeck replaces the deck slice. No flip — writes are deterministic from input + chain
+// operations, so they don't make the output depend on hidden order.
+func (s *TurnState) SetDeck(d []Card) {
+	s.deck = d
+}
+
+// Graveyard returns the graveyard contents and flips IsCacheable() to false. Callers
+// scanning the graveyard (e.g. Weeping Battleground looking for an aura to banish) read
+// prior-turn hidden state, so the chain becomes uncacheable.
+func (s *TurnState) Graveyard() []Card {
+	s.uncacheable = true
+	return s.graveyard
+}
+
+// SetGraveyard replaces the graveyard slice. No flip — same reasoning as SetDeck.
+func (s *TurnState) SetGraveyard(g []Card) {
+	s.graveyard = g
+}
+
+// IsCacheable reports whether this chain is still cacheable — true at the start of each
+// permutation and false the moment any card or framework helper reads deck / graveyard
+// contents. The hand-eval cache reads this after the chain finishes to decide whether to
+// store the result keyed on the chain's inputs.
+func (s *TurnState) IsCacheable() bool {
+	return !s.uncacheable
+}
+
+// NewTurnState returns a fresh *TurnState seeded with deck (top-to-bottom) and graveyard
+// contents. Pass nil for an empty zone. Convenient for tests and ad-hoc framework code
+// that needs to spin up a TurnState in one line; the per-permutation reset path uses
+// SetDeck / SetGraveyard directly on a struct-literal-initialised TurnState.
+func NewTurnState(deck, graveyard []Card) *TurnState {
+	s := &TurnState{}
+	s.SetDeck(deck)
+	s.SetGraveyard(graveyard)
+	return s
+}
+
+// CopyDeck returns a fresh slice with the deck's current contents. Framework-only escape
+// hatch for the per-turn snapshot path: snapshotting the chain's end-state for next turn
+// isn't a card-driven content read, so this accessor doesn't flip IsCacheable(). Cards
+// must read deck contents through Deck() instead.
+func (s *TurnState) CopyDeck() []Card {
+	return append([]Card(nil), s.deck...)
+}
+
+// CopyGraveyard returns a fresh slice with the graveyard's current contents. Same
+// framework-only semantics as CopyDeck — used by the snapshot path, not by card logic.
+func (s *TurnState) CopyGraveyard() []Card {
+	return append([]Card(nil), s.graveyard...)
 }
 
 // AddLogEntry appends a freeform chain-step log line and credits n damage-equivalent to
@@ -202,13 +278,15 @@ func (s *TurnState) appendLog(e LogEntry) int {
 }
 
 // DrawOne models a mid-turn draw: pop the top of Deck and append it to Hand. No-op on an
-// empty deck. Every draw-rider card routes through this helper.
+// empty deck. Every draw-rider card routes through this helper. Reads s.Deck() to peek
+// the top card, so flips Cacheable=false — drawn-card identity depends on hidden shuffle.
 func (s *TurnState) DrawOne() {
-	if len(s.Deck) == 0 {
+	deck := s.Deck()
+	if len(deck) == 0 {
 		return
 	}
-	c := s.Deck[0]
-	s.Deck = s.Deck[1:]
+	c := deck[0]
+	s.SetDeck(deck[1:])
 	s.Hand = append(s.Hand, c)
 }
 
@@ -231,14 +309,16 @@ func (s *TurnState) HasPlayedOrCreatedAura() bool {
 
 // ClashValue returns the net damage-equivalent of a clash (see comprehensive rules 8.5.45):
 // we and the opponent reveal the top card of our decks and the higher {p} wins. We model
-// from our side only — our deck's top card is read from s.Deck; the opponent's top is
+// from our side only — our deck's top card is read via s.Deck(); the opponent's top is
 // approximated as 5-power. So our {p} of 6-7 wins (credit +bonus), 5 ties (credit 0), and
-// anything below 5 loses (credit -bonus). Returns 0 when s.Deck is empty.
+// anything below 5 loses (credit -bonus). Returns 0 when s.Deck() is empty. Flips
+// Cacheable=false (clash-outcome depends on hidden shuffle state).
 func ClashValue(s *TurnState, bonus int) int {
-	if len(s.Deck) == 0 {
+	deck := s.Deck()
+	if len(deck) == 0 {
 		return 0
 	}
-	switch top := s.Deck[0].Attack(); {
+	switch top := deck[0].Attack(); {
 	case top >= 6:
 		return bonus
 	case top == 5:
@@ -419,11 +499,13 @@ func (s *TurnState) ApplyAndLogRiderOnHit(self *CardState, text string, n int) i
 	return s.ApplyAndLogRiderOnPlay(self, text, n)
 }
 
-// AddToGraveyard appends c to s.Graveyard so later-resolving cards see it. Persistent-type
-// cards (Auras, Items) don't enter the graveyard on play, so effects that destroy or banish
-// themselves mid-chain route through here to make the move visible to downstream readers.
+// AddToGraveyard appends c to the graveyard so later-resolving cards see it. Persistent-
+// type cards (Auras, Items) don't enter the graveyard on play, so effects that destroy or
+// banish themselves mid-chain route through here to make the move visible to downstream
+// readers. Append-only; doesn't flip Cacheable since the post-graveyard is deterministic
+// from input + cards played.
 func (s *TurnState) AddToGraveyard(c Card) {
-	s.Graveyard = append(s.Graveyard, c)
+	s.graveyard = append(s.graveyard, c)
 }
 
 // AddAuraTrigger is the Play-side combo every Action - Aura card reaches for: flip

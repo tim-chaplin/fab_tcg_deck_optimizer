@@ -4,9 +4,9 @@
 // Text: "At the beginning of your action phase, destroy this. When this leaves the arena,
 // reveal the top card of your deck. If it's an attack action card, put it into your hand."
 //
-// Handler fires next turn on the post-draw deck: if s.Deck[0] is an attack action, append
-// it to s.Revealed (the deck loop moves revealed cards into the hand) and pop it off
-// s.Deck; non-attack reveals leave the top untouched. Damage is 0 either way — the tempo
+// Handler fires next turn on the post-draw deck: if s.Deck()[0] is an attack action, append
+// it to s.Revealed (the deck loop moves revealed cards into the hand) and pop it off the
+// deck via SetDeck; non-attack reveals leave the top untouched. Damage is 0 either way — the tempo
 // is the extra card, not a flat credit. The handler always logs (hit or whiff) via
 // state.AddPostTriggerLogEntry so the printout names the card revealed in both cases.
 
@@ -37,14 +37,15 @@ func (c SigilOfTheArknightBlue) Play(s *card.TurnState, self *card.CardState) {
 // it" on a whiff — so the printout makes the random reveal visible either way. Empty deck
 // is the silent edge case (no card to name).
 func sigilOfTheArknightReveal(s *card.TurnState) int {
-	if len(s.Deck) == 0 {
+	deck := s.Deck()
+	if len(deck) == 0 {
 		return 0
 	}
-	top := s.Deck[0]
+	top := deck[0]
 	self := card.DisplayName(SigilOfTheArknightBlue{})
 	if top.Types().IsAttackAction() {
 		s.Revealed = append(s.Revealed, top)
-		s.Deck = s.Deck[1:]
+		s.SetDeck(deck[1:])
 		s.AddPostTriggerLogEntry(self+" drew "+card.DisplayName(top)+" into hand", self, 0)
 		return 0
 	}

@@ -30,7 +30,8 @@ func TestSigilOfSilphidae_PlayFizzlesWithoutAura(t *testing.T) {
 // enter banish — the aura moves to Banish, Play returns 1, and ArcaneDamageDealt flips.
 func TestSigilOfSilphidae_PlayBanishesAuraForOneArcane(t *testing.T) {
 	aura := BlessingOfOccultRed{}
-	s := card.TurnState{Graveyard: []card.Card{aura}}
+	var s card.TurnState
+	s.SetGraveyard([]card.Card{aura})
 	(SigilOfSilphidaeBlue{}).Play(&s, &card.CardState{Card: SigilOfSilphidaeBlue{}})
 	if got := s.Value; got != 1 {
 		t.Errorf("Play() = %d, want 1", got)
@@ -64,7 +65,8 @@ func TestSigilOfSilphidae_StartOfTurnHandlerBanishesAnotherAura(t *testing.T) {
 	var play card.TurnState
 	(SigilOfSilphidaeBlue{}).Play(&play, &card.CardState{Card: SigilOfSilphidaeBlue{}})
 	other := BlessingOfOccultRed{}
-	next := card.TurnState{Graveyard: []card.Card{other}}
+	var next card.TurnState
+	next.SetGraveyard([]card.Card{other})
 	got := play.AuraTriggers[0].Handler(&next)
 	if got != 1 {
 		t.Errorf("handler damage = %d, want 1 (banished another aura)", got)

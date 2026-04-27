@@ -10,7 +10,8 @@ import (
 // flips AuraCreated, registers a TriggerStartOfTurn entry, and returns 0. The deck peek
 // happens when the sim fires the trigger next turn.
 func TestSigilOfTheArknight_PlayOnlySetsAuraCreated(t *testing.T) {
-	s := card.TurnState{Deck: []card.Card{stubRunebladeAttack{}}}
+	var s card.TurnState
+	s.SetDeck([]card.Card{stubRunebladeAttack{}})
 	(SigilOfTheArknightBlue{}).Play(&s, &card.CardState{Card: SigilOfTheArknightBlue{}})
 	if got := s.Value; got != 0 {
 		t.Errorf("Play() = %d, want 0 (reveal deferred to trigger)", got)
@@ -31,15 +32,17 @@ func TestSigilOfTheArknight_TriggerRevealsAttackActionIntoHand(t *testing.T) {
 	var play card.TurnState
 	(SigilOfTheArknightBlue{}).Play(&play, &card.CardState{Card: SigilOfTheArknightBlue{}})
 	top := stubRunebladeAttack{}
-	next := card.TurnState{Deck: []card.Card{top, stubNonAttack{}}}
+	var next card.TurnState
+	next.SetDeck([]card.Card{top, stubNonAttack{}})
 	if got := play.AuraTriggers[0].Handler(&next); got != 0 {
 		t.Errorf("handler damage = %d, want 0 (tempo credited via Revealed, not damage)", got)
 	}
 	if len(next.Revealed) != 1 || next.Revealed[0] != top {
 		t.Errorf("Revealed = %v, want [%v] (top of post-draw deck)", next.Revealed, top)
 	}
-	if len(next.Deck) != 1 || next.Deck[0] != (stubNonAttack{}) {
-		t.Errorf("Deck = %v, want top popped leaving [stubNonAttack]", next.Deck)
+	deck := next.Deck()
+	if len(deck) != 1 || deck[0] != (stubNonAttack{}) {
+		t.Errorf("Deck = %v, want top popped leaving [stubNonAttack]", deck)
 	}
 }
 
@@ -48,15 +51,16 @@ func TestSigilOfTheArknight_TriggerRevealsAttackActionIntoHand(t *testing.T) {
 func TestSigilOfTheArknight_TriggerRevealsNonAttack(t *testing.T) {
 	var play card.TurnState
 	(SigilOfTheArknightBlue{}).Play(&play, &card.CardState{Card: SigilOfTheArknightBlue{}})
-	next := card.TurnState{Deck: []card.Card{stubAura{}, stubRunebladeAttack{}}}
+	var next card.TurnState
+	next.SetDeck([]card.Card{stubAura{}, stubRunebladeAttack{}})
 	if got := play.AuraTriggers[0].Handler(&next); got != 0 {
 		t.Errorf("handler damage = %d, want 0", got)
 	}
 	if next.Revealed != nil {
 		t.Errorf("Revealed = %v, want nil (non-attack top, no reveal)", next.Revealed)
 	}
-	if len(next.Deck) != 2 {
-		t.Errorf("Deck len = %d, want 2 (non-attack tops aren't moved)", len(next.Deck))
+	if len(next.Deck()) != 2 {
+		t.Errorf("Deck len = %d, want 2 (non-attack tops aren't moved)", len(next.Deck()))
 	}
 }
 

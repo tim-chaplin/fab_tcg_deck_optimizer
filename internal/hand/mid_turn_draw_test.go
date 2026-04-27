@@ -25,9 +25,9 @@ func TestPlaySequence_DrawDoesNotPoisonSubsequentPermutations(t *testing.T) {
 	if len(ctx.bufs.state.Hand) != 1 || ctx.bufs.state.Hand[0] != top {
 		t.Fatalf("after first permutation: Hand = %v, want [top]", ctx.bufs.state.Hand)
 	}
-	if len(ctx.bufs.state.Deck) != len(deck)-1 {
+	if len(ctx.bufs.state.Deck()) != len(deck)-1 {
 		t.Fatalf("after first permutation: Deck len = %d, want %d (top consumed)",
-			len(ctx.bufs.state.Deck), len(deck)-1)
+			len(ctx.bufs.state.Deck()), len(deck)-1)
 	}
 
 	// Second permutation: plain attack, no draw. The reset at the top of playSequenceWithMeta
@@ -36,9 +36,9 @@ func TestPlaySequence_DrawDoesNotPoisonSubsequentPermutations(t *testing.T) {
 	if len(ctx.bufs.state.Hand) != 0 {
 		t.Errorf("after second permutation: Hand = %v, want empty (reset lost)", ctx.bufs.state.Hand)
 	}
-	if len(ctx.bufs.state.Deck) != len(deck) {
+	if len(ctx.bufs.state.Deck()) != len(deck) {
 		t.Errorf("after second permutation: Deck len = %d, want %d (reset lost)",
-			len(ctx.bufs.state.Deck), len(deck))
+			len(ctx.bufs.state.Deck()), len(deck))
 	}
 }
 

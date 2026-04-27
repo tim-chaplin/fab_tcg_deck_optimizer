@@ -6,14 +6,15 @@ import "testing"
 // preserving draw order for downstream effects.
 func TestDrawOne_AppendsTopAndAdvancesDeck(t *testing.T) {
 	a, b, c := stubCard{name: "a"}, stubCard{name: "b"}, stubCard{name: "c"}
-	s := &TurnState{Deck: []Card{a, b, c}}
+	s := &TurnState{}
+	s.SetDeck([]Card{a, b, c})
 
 	s.DrawOne()
-	if got := len(s.Deck); got != 2 {
+	if got := len(s.Deck()); got != 2 {
 		t.Fatalf("Deck len = %d, want 2", got)
 	}
-	if s.Deck[0] != b {
-		t.Errorf("Deck[0] = %v, want b (top advanced past a)", s.Deck[0])
+	if s.Deck()[0] != b {
+		t.Errorf("Deck[0] = %v, want b (top advanced past a)", s.Deck()[0])
 	}
 	if len(s.Hand) != 1 || s.Hand[0] != a {
 		t.Errorf("Hand = %v, want [a]", s.Hand)
@@ -33,8 +34,95 @@ func TestDrawOne_EmptyDeckIsNoOp(t *testing.T) {
 	if len(s.Hand) != 0 {
 		t.Errorf("Hand = %v, want empty on no-deck draw", s.Hand)
 	}
-	if s.Deck != nil {
-		t.Errorf("Deck = %v, want nil", s.Deck)
+	if s.Deck() != nil {
+		t.Errorf("Deck = %v, want nil", s.Deck())
+	}
+}
+
+// TestIsCacheable_DefaultsTrue: a freshly-constructed TurnState reports IsCacheable=true.
+// The inverted-storage trick (uncacheable bool, default false) gives us the right default
+// without requiring a constructor or per-permutation reset call.
+func TestIsCacheable_DefaultsTrue(t *testing.T) {
+	var s TurnState
+	if !s.IsCacheable() {
+		t.Error("zero-valued TurnState should be cacheable")
+	}
+}
+
+// TestIsCacheable_SetDeckDoesNotFlip: SetDeck is a write — same input + chain operations
+// give the same output deck, so writes don't make the result depend on hidden order.
+func TestIsCacheable_SetDeckDoesNotFlip(t *testing.T) {
+	var s TurnState
+	s.SetDeck([]Card{stubCard{name: "a"}})
+	if !s.IsCacheable() {
+		t.Error("SetDeck should not flip cacheable")
+	}
+}
+
+// TestIsCacheable_DeckReadFlips: Deck() reads contents, which makes the chain output
+// depend on hidden shuffle state — flips IsCacheable to false.
+func TestIsCacheable_DeckReadFlips(t *testing.T) {
+	var s TurnState
+	s.SetDeck([]Card{stubCard{name: "a"}})
+	_ = s.Deck()
+	if s.IsCacheable() {
+		t.Error("Deck() read should flip IsCacheable to false")
+	}
+}
+
+// TestIsCacheable_GraveyardReadFlips: Graveyard() scan (e.g. aura-banish) reads prior-turn
+// hidden state, so the chain becomes uncacheable.
+func TestIsCacheable_GraveyardReadFlips(t *testing.T) {
+	var s TurnState
+	_ = s.Graveyard()
+	if s.IsCacheable() {
+		t.Error("Graveyard() read should flip IsCacheable to false")
+	}
+}
+
+// TestIsCacheable_AddToGraveyardDoesNotFlip: append-only graveyard mutations are
+// deterministic from inputs + cards played, so they don't make the chain uncacheable.
+// This is the per-played-card path the framework uses for every chain-step finisher.
+func TestIsCacheable_AddToGraveyardDoesNotFlip(t *testing.T) {
+	var s TurnState
+	s.AddToGraveyard(stubCard{name: "a"})
+	if !s.IsCacheable() {
+		t.Error("AddToGraveyard should not flip cacheable (append-only mutation)")
+	}
+}
+
+// TestIsCacheable_DrawOneFlips: DrawOne reads the deck top, so it flips. Cards calling
+// DrawOne (Snatch, Sun Kiss, Drawn to the Dark Dimension) inherit the flip without
+// having to set anything explicitly — that's the structural-enforcement guarantee.
+func TestIsCacheable_DrawOneFlips(t *testing.T) {
+	var s TurnState
+	s.SetDeck([]Card{stubCard{name: "a"}})
+	s.DrawOne()
+	if s.IsCacheable() {
+		t.Error("DrawOne should flip IsCacheable to false (reads deck top)")
+	}
+}
+
+// TestIsCacheable_ClashValueFlips: ClashValue compares deck-top to opponent's; reading
+// deck-top flips cacheable. Test of Strength routes through this helper.
+func TestIsCacheable_ClashValueFlips(t *testing.T) {
+	var s TurnState
+	s.SetDeck([]Card{stubCard{attack: 6}})
+	_ = ClashValue(&s, 1)
+	if s.IsCacheable() {
+		t.Error("ClashValue should flip IsCacheable to false (reads deck top)")
+	}
+}
+
+// TestIsCacheable_CopyDeckDoesNotFlip: framework snapshot path returns the deck contents
+// for end-of-chain CarryState capture. That's not a card decision, so it must not flip.
+func TestIsCacheable_CopyDeckDoesNotFlip(t *testing.T) {
+	var s TurnState
+	s.SetDeck([]Card{stubCard{name: "a"}})
+	_ = s.CopyDeck()
+	_ = s.CopyGraveyard()
+	if !s.IsCacheable() {
+		t.Error("CopyDeck/CopyGraveyard should not flip cacheable (framework snapshot path)")
 	}
 }
 
@@ -192,8 +280,9 @@ func TestAddToGraveyard_AppendsInOrder(t *testing.T) {
 	var s TurnState
 	s.AddToGraveyard(a)
 	s.AddToGraveyard(b)
-	if len(s.Graveyard) != 2 || s.Graveyard[0] != a || s.Graveyard[1] != b {
-		t.Errorf("Graveyard = %v, want [a, b]", s.Graveyard)
+	gy := s.Graveyard()
+	if len(gy) != 2 || gy[0] != a || gy[1] != b {
+		t.Errorf("Graveyard = %v, want [a, b]", gy)
 	}
 }
 
@@ -218,7 +307,7 @@ func TestClashValue_WinTieLose(t *testing.T) {
 	for _, tc := range cases {
 		var s TurnState
 		if tc.deckLen > 0 {
-			s.Deck = []Card{stubCard{attack: tc.topAtk}}
+			s.SetDeck([]Card{stubCard{attack: tc.topAtk}})
 		}
 		if got := ClashValue(&s, tc.bonus); got != tc.want {
 			t.Errorf("%s: ClashValue = %d, want %d", tc.name, got, tc.want)

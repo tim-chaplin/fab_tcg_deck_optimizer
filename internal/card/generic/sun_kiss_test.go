@@ -19,9 +19,9 @@ func TestSunKiss_SoloIsHealOnly(t *testing.T) {
 		{SunKissBlue{}, 1},
 	}
 	for _, tc := range cases {
-		s := card.TurnState{Deck: []card.Card{stubGenericAttack(0, 0)}}
+		s := card.NewTurnState([]card.Card{stubGenericAttack(0, 0)}, nil)
 		self := &card.CardState{Card: tc.c}
-		tc.c.Play(&s, self)
+		tc.c.Play(s, self)
 		got := s.Value
 		if got != tc.heal {
 			t.Errorf("%s: solo Play() = %d, want %d", tc.c.Name(), got, tc.heal)
@@ -50,12 +50,10 @@ func TestSunKiss_SynergyFiresOnPriorMoonWish(t *testing.T) {
 			{SunKissYellow{}, 2},
 			{SunKissBlue{}, 1},
 		} {
-			s := card.TurnState{
-				CardsPlayed: []card.Card{mw},
-				Deck:        []card.Card{stubGenericAttack(0, 0)},
-			}
+			s := card.NewTurnState([]card.Card{stubGenericAttack(0, 0)}, nil)
+			s.CardsPlayed = []card.Card{mw}
 			self := &card.CardState{Card: sk.c}
-			sk.c.Play(&s, self)
+			sk.c.Play(s, self)
 			got := s.Value
 			if got != sk.heal {
 				t.Errorf("%s after %s: Play() = %d, want %d (synergy still credits printed heal)",
@@ -78,12 +76,10 @@ func TestSunKiss_SynergyFiresOnPriorMoonWish(t *testing.T) {
 // in the name" or similar, this catches it.
 func TestSunKiss_SynergyDoesNotFireOnUnrelatedAttacks(t *testing.T) {
 	notMoonWish := stubGenericAttackPitch(0, 0, 1)
-	s := card.TurnState{
-		CardsPlayed: []card.Card{notMoonWish},
-		Deck:        []card.Card{stubGenericAttack(0, 0)},
-	}
+	s := card.NewTurnState([]card.Card{stubGenericAttack(0, 0)}, nil)
+	s.CardsPlayed = []card.Card{notMoonWish}
 	self := &card.CardState{Card: SunKissRed{}}
-	SunKissRed{}.Play(&s, self)
+	SunKissRed{}.Play(s, self)
 	got := s.Value
 	if got != 3 {
 		t.Errorf("Play() = %d, want 3 (printed heal only)", got)

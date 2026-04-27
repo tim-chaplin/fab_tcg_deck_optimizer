@@ -21,7 +21,8 @@ func TestRunicFellingsong_NoAuraCreditsPrintedPowerOnly(t *testing.T) {
 // Attack() + 1 (the banish rider's arcane).
 func TestRunicFellingsong_AuraInGraveyardFiresBanishRider(t *testing.T) {
 	aura := BlessingOfOccultRed{}
-	s := card.TurnState{Graveyard: []card.Card{aura}}
+	var s card.TurnState
+	s.SetGraveyard([]card.Card{aura})
 	c := RunicFellingsongRed{}
 	want := c.Attack() + 1
 	c.Play(&s, &card.CardState{Card: c})

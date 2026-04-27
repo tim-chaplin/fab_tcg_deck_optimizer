@@ -4,8 +4,8 @@
 // action card revealed this way, then put the cards on top of your deck in any order." (N = 3
 // Red / 2 Yellow / 1 Blue.)
 //
-// Scan the top N cards of s.Deck; credit +1 per Runeblade attack action card revealed. The
-// re-ordering clause isn't modelled.
+// Scan the top N cards of s.Deck(); credit +1 per Runeblade attack action card revealed.
+// Reading the deck flips Cacheable=false. The re-ordering clause isn't modelled.
 
 package runeblade
 
@@ -13,18 +13,19 @@ import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 
 var sutcliffesResearchNotesTypes = card.NewTypeSet(card.TypeRuneblade, card.TypeAction)
 
-// sutcliffesResearchNotesPlay scans the top revealCount cards of s.Deck and creates one
+// sutcliffesResearchNotesPlay scans the top revealCount cards of s.Deck() and creates one
 // runechant per Runeblade attack action card found, emitting the rider sub-line under self
-// when any are created.
+// when any are created. Reading the deck flips Cacheable=false.
 func sutcliffesResearchNotesPlay(s *card.TurnState, self *card.CardState, revealCount int) {
 	s.ApplyAndLogEffectiveAttack(self)
+	deck := s.Deck()
 	n := revealCount
-	if n > len(s.Deck) {
-		n = len(s.Deck)
+	if n > len(deck) {
+		n = len(deck)
 	}
 	count := 0
 	for i := 0; i < n; i++ {
-		t := s.Deck[i].Types()
+		t := deck[i].Types()
 		if t.Has(card.TypeRuneblade) && t.IsAttackAction() {
 			count++
 		}

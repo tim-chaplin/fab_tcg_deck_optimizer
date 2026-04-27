@@ -4,8 +4,8 @@
 // Text: "When this attacks, reveal the top card of your deck. This gets -X{p}, where X is the pitch
 // value of the card revealed this way. **Go again**"
 //
-// Peek s.Deck[0].Pitch() and subtract from base power, floored at 0. If the deck is empty, no card
-// is revealed so there's no penalty.
+// Peek s.Deck()[0].Pitch() and subtract from base power, floored at 0. If the deck is empty,
+// no card is revealed so there's no penalty. Reading the deck flips Cacheable=false.
 
 package generic
 
@@ -17,10 +17,11 @@ var ravenousRabbleTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, car
 // through self.BonusAttack so EffectiveAttack and LikelyToHit see the debuffed power; the
 // chain step's (+N) reflects the post-clamp result. No deck top means no penalty.
 func ravenousRabbleApplyDebuff(s *card.TurnState, self *card.CardState) {
-	if len(s.Deck) == 0 {
+	deck := s.Deck()
+	if len(deck) == 0 {
 		return
 	}
-	self.BonusAttack -= s.Deck[0].Pitch()
+	self.BonusAttack -= deck[0].Pitch()
 }
 
 type RavenousRabbleRed struct{}

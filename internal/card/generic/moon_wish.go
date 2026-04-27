@@ -45,15 +45,17 @@ func moonWishPlay(c card.Card, s *card.TurnState, self *card.CardState) {
 	name := card.DisplayName(c)
 	// Alt cost: pop a hand card and prepend to deck. Same-turn deck-top readers (the Sun
 	// Kiss tutor's post-resolution DrawOne) see it; the next turn's deal sees it too via
-	// the sim's end-of-turn copy of s.Deck.
+	// the sim's end-of-turn copy of the deck. Reading s.Deck() flips Cacheable=false (post-
+	// chain deck depends on the original deck-top order).
 	var returned card.Card
 	if len(s.Hand) > 0 {
 		returned = s.Hand[0]
 		s.Hand = s.Hand[1:]
-		newDeck := make([]card.Card, 0, len(s.Deck)+1)
+		deck := s.Deck()
+		newDeck := make([]card.Card, 0, len(deck)+1)
 		newDeck = append(newDeck, returned)
-		newDeck = append(newDeck, s.Deck...)
-		s.Deck = newDeck
+		newDeck = append(newDeck, deck...)
+		s.SetDeck(newDeck)
 	}
 
 	// Moon Wish's own chain step lands first so subsequent alt-cost / tutor lines + Sun
@@ -67,12 +69,12 @@ func moonWishPlay(c card.Card, s *card.TurnState, self *card.CardState) {
 	if !card.LikelyToHit(self) {
 		return
 	}
-	sk := bestSunKissInDeck(s.Deck)
+	sk := bestSunKissInDeck(s.Deck())
 	if sk == nil {
 		s.AddPostTriggerLogEntry(name+" found no Sun Kiss to tutor", name, 0)
 		return
 	}
-	s.Deck = removeFirstByID(s.Deck, sk.ID())
+	s.SetDeck(removeFirstByID(s.Deck(), sk.ID()))
 
 	if !self.EffectiveGoAgain() {
 		// Tutor lands the card in hand; carries to next turn via the sim's end-of-turn

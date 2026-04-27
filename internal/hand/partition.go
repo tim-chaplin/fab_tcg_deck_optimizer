@@ -358,7 +358,9 @@ func defendersDamage(defenders, pitched, deck []card.Card, state *card.TurnState
 			continue
 		}
 		gravBuf = append(gravBuf[:0], defenders...)
-		*state = card.TurnState{Pitched: pitched, Deck: deck, Graveyard: gravBuf, IncomingDamage: remaining}
+		*state = card.TurnState{Pitched: pitched, IncomingDamage: remaining}
+		state.SetDeck(deck)
+		state.SetGraveyard(gravBuf)
 		*cs = card.CardState{Card: d, FromArsenal: i == arsenalDefenderIdx}
 		d.Play(state, cs)
 		total += state.Value
