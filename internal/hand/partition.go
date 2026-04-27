@@ -28,6 +28,10 @@ func (e *Evaluator) findBest(hero hero.Hero, weapons []weapon.Weapon, hand []car
 	best := TurnSummary{
 		BestLine:       make([]CardAssignment, totalN),
 		IncomingDamage: incomingDamage,
+		// Cacheable starts true and gets cleared if any partition's chain reads deck or
+		// graveyard. The early-out "no partitions feasible" path keeps this true — a hand
+		// with no playable line trivially has no hidden-state-dependent reads.
+		Cacheable: true,
 		State: CarryState{
 			Hand:         append([]card.Card(nil), hand...),
 			Deck:         append([]card.Card(nil), deck...),
@@ -109,7 +113,14 @@ func (e *Evaluator) findBest(hero hero.Hero, weapons []weapon.Weapon, hand []car
 			// card") can read len > 0. Arsenal-in can never be Held (roleAllowed bars it).
 			h := gatherHeldCards(hand, rolesBuf[:n], held[:0])
 			arsenalAtChainStart := findArsenalCard(rolesBuf, arsenalCardIn, n)
-			attackDealt, defenseDealt, leftoverRunechants, _, swung, carry, ok := bestAttackWithWeapons(hero, weapons, a, d, p, h, deck, bufs, runechantCarryover, incomingDamage, defenseSum, arsenalInIdx, arsenalDefenderIdx, arsenalAtChainStart, priorAuraTriggers, skipLog)
+			attackDealt, defenseDealt, leftoverRunechants, _, swung, carry, ok, uncacheable := bestAttackWithWeapons(hero, weapons, a, d, p, h, deck, bufs, runechantCarryover, incomingDamage, defenseSum, arsenalInIdx, arsenalDefenderIdx, arsenalAtChainStart, priorAuraTriggers, skipLog)
+			// Aggregate cacheability across every partition leaf — any chain that reads
+			// deck or graveyard poisons the whole TurnSummary, since the cache key is
+			// hand-level and can't distinguish "the cacheable partition's result" from
+			// "the uncacheable partition's result."
+			if uncacheable {
+				best.Cacheable = false
+			}
 			if !ok {
 				return
 			}
@@ -349,10 +360,13 @@ func roleAllowed(r Role, isArsenalSlot, isDefenseReaction bool) bool {
 // scratch backing state.Graveyard; the returned slice is the (possibly grown) buffer for
 // reuse. The threaded incoming-damage counter persists across the DR loop and into the plain-
 // block loop so DRs see the full incoming pool first (maximising any +1{d} riders) and plain
-// blocks pick up the residual.
-func defendersDamage(defenders, pitched, deck []card.Card, state *card.TurnState, gravBuf []card.Card, cs *card.CardState, incomingDamage, arsenalDefenderIdx int) (int, []card.Card) {
+// blocks pick up the residual. Returns uncacheable=true if any DR's Play read deck or
+// graveyard (no current DR does, but the framework tracks it for forward-compat with cards
+// like Hyper Driver that might inspect deck-top from defense).
+func defendersDamage(defenders, pitched, deck []card.Card, state *card.TurnState, gravBuf []card.Card, cs *card.CardState, incomingDamage, arsenalDefenderIdx int) (int, []card.Card, bool) {
 	total := 0
 	remaining := incomingDamage
+	uncacheable := false
 	for i, d := range defenders {
 		if !d.Types().IsDefenseReaction() {
 			continue
@@ -363,6 +377,9 @@ func defendersDamage(defenders, pitched, deck []card.Card, state *card.TurnState
 		state.SetGraveyard(gravBuf)
 		*cs = card.CardState{Card: d, FromArsenal: i == arsenalDefenderIdx}
 		d.Play(state, cs)
+		if !state.IsCacheable() {
+			uncacheable = true
+		}
 		total += state.Value
 		remaining = state.IncomingDamage
 	}
@@ -379,7 +396,7 @@ func defendersDamage(defenders, pitched, deck []card.Card, state *card.TurnState
 			remaining -= block
 		}
 	}
-	return total, gravBuf
+	return total, gravBuf, uncacheable
 }
 
 // chainBudget captures the winning phase-split's attack-chain resource state.

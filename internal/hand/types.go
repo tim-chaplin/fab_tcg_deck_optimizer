@@ -96,6 +96,13 @@ type TurnSummary struct {
 	// the summary so format-time helpers (DR (+N) recompute) can reseed a fresh TurnState
 	// with the same value the simulator used.
 	IncomingDamage int
+	// Cacheable reports whether every partition leaf's chain ran without reading
+	// TurnState.Deck or TurnState.Graveyard. A future hand-eval cache keyed on
+	// (hand, arsenal, incoming, runechants, weapons, aura triggers) can store this result
+	// only when Cacheable is true — when false, the chain output depended on hidden
+	// shuffle / prior-turn-graveyard state that isn't part of the cache key, so storing it
+	// would let a different shuffle's lookup return a wrong answer.
+	Cacheable bool
 }
 
 // TriggerContribution is one start-of-turn AuraTrigger fire: the aura that fired plus the

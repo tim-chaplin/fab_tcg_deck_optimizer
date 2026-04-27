@@ -37,7 +37,7 @@ func FormatLogEntry(e card.LogEntry) string {
 // arsenalAtChainStart is the card sitting in the arsenal slot at the start of the chain — set
 // when the partition assigned arsenalCardIn the Arsenal role (it's staying), nil otherwise
 // (no arsenal-in, or arsenal-in is playing as Attack/Defend).
-func bestAttackWithWeapons(hero hero.Hero, weapons []weapon.Weapon, attackers, defenders, pitched, held, deck []card.Card, bufs *attackBufs, runechantCarryover, incomingDamage, blockTotal, arsenalInIdx, arsenalDefenderIdx int, arsenalAtChainStart card.Card, priorAuraTriggers []card.AuraTrigger, skipLog bool) (int, int, int, chainBudget, []string, CarryState, bool) {
+func bestAttackWithWeapons(hero hero.Hero, weapons []weapon.Weapon, attackers, defenders, pitched, held, deck []card.Card, bufs *attackBufs, runechantCarryover, incomingDamage, blockTotal, arsenalInIdx, arsenalDefenderIdx int, arsenalAtChainStart card.Card, priorAuraTriggers []card.AuraTrigger, skipLog bool) (int, int, int, chainBudget, []string, CarryState, bool, bool) {
 	ctx := &sequenceContext{
 		hero:                hero,
 		pitched:             pitched,
@@ -60,7 +60,11 @@ func bestAttackWithWeapons(hero hero.Hero, weapons []weapon.Weapon, attackers, d
 	hasDRs := containsDefenseReaction(defenders)
 	var defenseDealt int
 	if len(defenders) > 0 {
-		defenseDealt, bufs.defenseGravScratch = defendersDamage(defenders, pitched, deck, bufs.state, bufs.defenseGravScratch, &bufs.drCardStateScratch, incomingDamage, arsenalDefenderIdx)
+		var drUncacheable bool
+		defenseDealt, bufs.defenseGravScratch, drUncacheable = defendersDamage(defenders, pitched, deck, bufs.state, bufs.defenseGravScratch, &bufs.drCardStateScratch, incomingDamage, arsenalDefenderIdx)
+		if drUncacheable {
+			ctx.uncacheable = true
+		}
 	}
 
 	pitchedVals := bufs.pitchedValsScratch[:0]
@@ -158,9 +162,9 @@ func bestAttackWithWeapons(hero hero.Hero, weapons []weapon.Weapon, attackers, d
 	}
 
 	if !foundFeasible {
-		return 0, 0, 0, chainBudget{}, nil, CarryState{}, false
+		return 0, 0, 0, chainBudget{}, nil, CarryState{}, false, ctx.uncacheable
 	}
-	return bestDealt, defenseDealt, bestLeftoverRunechants, bestBudget, bestSwung, bestCarry, true
+	return bestDealt, defenseDealt, bestLeftoverRunechants, bestBudget, bestSwung, bestCarry, true, ctx.uncacheable
 }
 
 // sequenceContext carries the stable per-partition-leaf environment: hero (for OnCardPlayed
@@ -211,6 +215,12 @@ type sequenceContext struct {
 	// chains run with Log appends elided (Value still credited); the caller is replaying
 	// later with skipLog=false to materialise the printout.
 	skipLog bool
+	// uncacheable accumulates the per-permutation IsCacheable() reads. The bit is OR-ed in
+	// after each playSequenceWithMeta call so it survives the next permutation's TurnState
+	// reset. Once true, it stays true for the rest of the bestAttackWithWeapons run.
+	// Surfaces on TurnSummary.Cacheable as `!uncacheable` so callers (a future hand-eval
+	// cache) can decide whether the chain output is keyable on inputs alone.
+	uncacheable bool
 }
 
 // fireAttackActionTriggers walks state.AuraTriggers after an attack action card resolves
@@ -337,6 +347,13 @@ func (ctx *sequenceContext) bestSequence(attackers []card.Card) (int, int, bool)
 	ctx.carryWinner = CarryState{}
 	eval := func() {
 		dmg, leftoverRunechants, _, legal := ctx.playSequenceWithMeta(n)
+		// Capture cacheability BEFORE the next permutation's reset clears the per-state
+		// flag. Sticky on ctx.uncacheable so any single permutation's read poisons the
+		// whole run; the !ctx.uncacheable short-circuit skips the inter-package
+		// IsCacheable() call once the bit's already poisoned.
+		if !ctx.uncacheable && !ctx.bufs.state.IsCacheable() {
+			ctx.uncacheable = true
+		}
 		if !legal {
 			return
 		}
