@@ -24,7 +24,7 @@ func runCompareCmd(args []string) {
 		fmt.Fprintln(fs.Output(), "Flags:")
 		fs.PrintDefaults()
 	}
-	deepShuffles := fs.Int("deep-shuffles", 10000, "shuffles per deck used to re-score each deck before comparing")
+	shuffles := fs.Int("shuffles", 10000, "shuffles per deck used to re-score each deck before comparing (compare always uses fixed shuffles so the two decks are scored under matched conditions)")
 	incoming := fs.Int("incoming", 0, "opponent damage per turn (required — both decks are re-scored against this value)")
 	seed := fs.Int64("seed", time.Now().UnixNano(), "RNG seed (each deck builds an independent RNG from this seed)")
 	formatFlag := fs.String("format", string(deckformat.SilverAge), "constructed format predicate applied to replacement picks when a loaded deck contains NotImplemented cards")
@@ -38,21 +38,24 @@ func runCompareCmd(args []string) {
 	if err != nil {
 		die("%v", err)
 	}
-	runCompare(fs.Arg(0), fs.Arg(1), *deepShuffles, *incoming, *maxCopies, *seed, fmtValue)
+	runCompare(fs.Arg(0), fs.Arg(1), *shuffles, *incoming, *maxCopies, *seed, fmtValue)
 }
 
-// runCompare re-evaluates both decks under identical (deepShuffles, incoming) settings so the
+// runCompare re-evaluates both decks under identical (shuffles, incoming) settings so the
 // printed stats are apples to apples regardless of what conditions either deck happened to be
 // scored under last, then prints a stat-by-stat side-by-side comparison: pitch counts, mean
 // hand value, per-cycle means, the hand-value histograms, and finally the per-card count
-// delta. The header line at the top of the output records the (deepShuffles, incoming)
+// delta. The header line at the top of the output records the (shuffles, incoming)
 // settings so the per-section rows don't have to repeat them.
-func runCompare(name1, name2 string, deepShuffles, incoming, maxCopies int, seed int64, fmtValue deckformat.Format) {
-	d1 := evaluateAndPersist(resolveDeckPath(name1), deepShuffles, incoming, maxCopies, seed, fmtValue)
-	d2 := evaluateAndPersist(resolveDeckPath(name2), deepShuffles, incoming, maxCopies, seed, fmtValue)
+func runCompare(name1, name2 string, shuffles, incoming, maxCopies int, seed int64, fmtValue deckformat.Format) {
+	// compare always uses a fixed -shuffles count so the two decks are scored under matched
+	// conditions. Adaptive stop would let one deck terminate at a different shuffle count
+	// than the other, breaking the apples-to-apples invariant the per-stat comparison rests on.
+	d1 := evaluateAndPersist(resolveDeckPath(name1), shuffles, incoming, maxCopies, seed, fmtValue)
+	d2 := evaluateAndPersist(resolveDeckPath(name2), shuffles, incoming, maxCopies, seed, fmtValue)
 	s1, s2 := d1.Stats, d2.Stats
 
-	fmt.Printf("compare: -deep-shuffles=%s -incoming=%d\n", commaInt(deepShuffles), incoming)
+	fmt.Printf("compare: -shuffles=%s -incoming=%d\n", commaInt(shuffles), incoming)
 	fmt.Println()
 
 	printSideBySideStats(name1, name2, []statSection{

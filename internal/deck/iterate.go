@@ -28,46 +28,43 @@ type iterateImprovement struct {
 // iterateWorkerConfig bundles every read-only parameter a worker shares with its peers so
 // the goroutine body can take a single struct instead of a long argument list.
 type iterateWorkerConfig struct {
-	mutations        []Mutation
-	bestAvg          float64
-	temperature      float64
-	minImprovement   float64
-	shallowThreshold float64
-	shallowShuffles  int
-	deepShuffles     int
-	incoming         int
-	seed             int64
-	shallowCompleted *atomic.Int64
-	deepsCompleted   *atomic.Int64
+	mutations      []Mutation
+	bestAvg        float64
+	temperature    float64
+	minImprovement float64
+	shuffles       int
+	incoming       int
+	seed           int64
+	completed      *atomic.Int64
+	// adaptive=true swaps the eval for EvaluateAdaptiveWith (early-stop on SE target);
+	// false uses EvaluateWith with shuffles as a fixed count. Callers pick the mode based
+	// on whether the user pinned -shuffles for repro / apples-to-apples flows.
+	adaptive bool
 }
 
-// IterateParallel runs one iterate-mode round. Workers share a queue; each goroutine does
-// the shallow screen and, if shallow clears the effective threshold, the deep-shuffles
-// confirmation for the same mutation. The first worker to land an acceptable mutation wins
-// (cancellation stops the others). Parallelising deep confirms keeps rounds with noisy
-// shallow screens bounded by max(shallow wall, deeps/workers × deep wall).
+// IterateParallel runs one iterate-mode round. Workers share a queue; each goroutine
+// evaluates one mutation at a time and, on a passing result, sends an iterateImprovement
+// and cancels the shared context. The first worker to land an acceptable mutation wins.
 //
 // Annealing: at temperature == 0 only strict improvements clearing the minImprovement
 // margin are accepted (classical hill climb with a noise floor). At temperature > 0 worse
-// mutations are also accepted with probability exp((deepAvg - baseline) / temperature) — a
-// Metropolis-style SA gate that bypasses the minImprovement margin entirely (so the SA walk
-// retains its escape-local-maxima behaviour even when the floor is non-zero). The shallow
-// pre-screen widens proportionally: at T==0 it cuts at baseline + minImprovement; at T>0 it
-// cuts at baseline - 3·T (covers ~95% of probabilistic acceptances; exp(-3) ≈ 0.05).
+// mutations are also accepted with probability exp((avg - baseline) / temperature) — a
+// Metropolis-style SA gate that bypasses the minImprovement margin entirely (so the SA
+// walk retains its escape-local-maxima behaviour even when the floor is non-zero).
 //
-// minImprovement is the noise floor on strict improvements: a mutation must lift deepAvg by
-// more than this amount above bestAvg to be accepted at T==0. Prevents infinite loops where
-// repeated near-zero "wins" (within shuffle noise) keep accepting indefinitely. Pass 0 to
-// disable the floor (any strictly-greater deepAvg passes).
+// minImprovement is the noise floor on strict improvements: a mutation must lift avg by
+// more than this amount above bestAvg to be accepted at T==0. Prevents infinite loops
+// where repeated near-zero "wins" (within shuffle noise) keep accepting indefinitely.
+// Pass 0 to disable the floor (any strictly-greater avg passes).
 //
-// Mutations are pulled FIFO so the earliest-position-wins heuristic of serial iterate
-// generally holds, but a worker locked on a deep confirm at position 20 doesn't block
-// position 25 — a later-position mutation can occasionally win if its deep confirm
-// finishes first.
+// Mutations are pulled FIFO so the earliest-position-wins heuristic generally holds, but
+// a worker locked on an eval at position 20 doesn't block position 25 — a later-position
+// mutation can occasionally win if its eval finishes first.
 //
 // bestAvg is the current deck's avg (SA "current state", not the all-time best). seed is
-// a base; worker w uses (seed + w) for shallow and a derived stream for deep + acceptance
-// rolls. shallowCompleted / deepsCompleted are optional live-progress counters.
+// a base; worker w uses a derived stream. completed is an optional live-progress counter.
+// adaptive=true makes per-mutation evals stop early when the SE target is met (capped by
+// the deck package's adaptiveShufflesCap, ignoring the shuffles arg).
 //
 // Returns (acceptedDeck, acceptedAvg, acceptedIndex, true) on first acceptance, or
 // (nil, bestAvg, -1, false) if nothing cleared the gate or ctx was cancelled.
@@ -77,25 +74,16 @@ func IterateParallel(
 	bestAvg float64,
 	temperature float64,
 	minImprovement float64,
-	shallowShuffles, deepShuffles, incoming, numWorkers int,
+	shuffles, incoming, numWorkers int,
 	seed int64,
-	shallowCompleted *atomic.Int64,
-	deepsCompleted *atomic.Int64,
+	completed *atomic.Int64,
+	adaptive bool,
 ) (*Deck, float64, int, bool) {
 	if numWorkers <= 0 {
 		numWorkers = defaultWorkers()
 	}
 	if len(mutations) == 0 {
 		return nil, bestAvg, -1, false
-	}
-
-	// Shallow threshold mirrors the deep acceptance gate's reach: at T==0 require a clear of
-	// the noise floor (bestAvg + minImprovement); at T>0 widen to bestAvg - 3·T so
-	// probabilistically-acceptable mutations still clear the pre-screen. The probabilistic
-	// gate ignores minImprovement so the shallow gate ignores it too at T>0.
-	shallowThreshold := bestAvg + minImprovement
-	if temperature > 0 {
-		shallowThreshold = bestAvg - 3*temperature
 	}
 
 	innerCtx, cancel := context.WithCancel(ctx)
@@ -110,17 +98,15 @@ func IterateParallel(
 	close(jobs)
 
 	cfg := iterateWorkerConfig{
-		mutations:        mutations,
-		bestAvg:          bestAvg,
-		temperature:      temperature,
-		minImprovement:   minImprovement,
-		shallowThreshold: shallowThreshold,
-		shallowShuffles:  shallowShuffles,
-		deepShuffles:     deepShuffles,
-		incoming:         incoming,
-		seed:             seed,
-		shallowCompleted: shallowCompleted,
-		deepsCompleted:   deepsCompleted,
+		mutations:      mutations,
+		bestAvg:        bestAvg,
+		temperature:    temperature,
+		minImprovement: minImprovement,
+		shuffles:       shuffles,
+		incoming:       incoming,
+		seed:           seed,
+		completed:      completed,
+		adaptive:       adaptive,
 	}
 
 	var wg sync.WaitGroup
@@ -153,11 +139,11 @@ func IterateParallel(
 	}
 }
 
-// runIterateWorker pulls mutation indices from jobs, runs the two-phase shallow / deep
-// evaluation, and on a passing deep result sends an iterateImprovement and cancels the
-// shared context. Each worker owns its own evaluator and rng pair so the inner loop is
-// allocation-free and free of cross-worker coupling. Returns when jobs is drained or when
-// the context is cancelled (either by another winner or by the caller).
+// runIterateWorker pulls mutation indices from jobs, evaluates each, and on a passing
+// result sends an iterateImprovement and cancels the shared context. Each worker owns its
+// own evaluator and rng so the inner loop is allocation-free and free of cross-worker
+// coupling. Returns when jobs is drained or when the context is cancelled (either by
+// another winner or by the caller).
 func runIterateWorker(
 	ctx context.Context,
 	cancel context.CancelFunc,
@@ -167,38 +153,27 @@ func runIterateWorker(
 	improvementCh chan<- iterateImprovement,
 ) {
 	ev := hand.NewEvaluator()
-	shallowRng := rand.New(rand.NewSource(cfg.seed + int64(workerIdx)))
-	// Derive an independent deep stream so the two phases don't share rng state. The
-	// acceptance-roll rng shares the deep stream — the deep eval has already happened by the
-	// time the roll runs, so no cross-influence on the deep result.
-	deepRng := rand.New(rand.NewSource(cfg.seed ^ (int64(workerIdx)+1)*int64(0x9e3779b9)))
+	rng := rand.New(rand.NewSource(cfg.seed ^ (int64(workerIdx)+1)*int64(0x9e3779b9)))
 	for i := range jobs {
 		if ctx.Err() != nil {
 			return
 		}
 		mut := cfg.mutations[i]
 		d := New(mut.Deck.Hero, mut.Deck.Weapons, mut.Deck.Cards)
-		shallowAvg := d.EvaluateWith(cfg.shallowShuffles, cfg.incoming, shallowRng, ev).Mean()
-		if cfg.shallowCompleted != nil {
-			cfg.shallowCompleted.Add(1)
+		var avg float64
+		if cfg.adaptive {
+			avg = d.EvaluateAdaptiveWith(cfg.incoming, rng, ev).Mean()
+		} else {
+			avg = d.EvaluateWith(cfg.shuffles, cfg.incoming, rng, ev).Mean()
 		}
-		if shallowAvg <= cfg.shallowThreshold {
-			continue
+		if cfg.completed != nil {
+			cfg.completed.Add(1)
 		}
-		if ctx.Err() != nil {
-			return
-		}
-		// Fresh Deck for the deep pass so d.Stats from the shallow run doesn't leak in.
-		dd := New(mut.Deck.Hero, mut.Deck.Weapons, mut.Deck.Cards)
-		deepAvg := dd.EvaluateWith(cfg.deepShuffles, cfg.incoming, deepRng, ev).Mean()
-		if cfg.deepsCompleted != nil {
-			cfg.deepsCompleted.Add(1)
-		}
-		if !acceptMutation(deepAvg, cfg.bestAvg, cfg.temperature, cfg.minImprovement, deepRng) {
+		if !acceptMutation(avg, cfg.bestAvg, cfg.temperature, cfg.minImprovement, rng) {
 			continue
 		}
 		select {
-		case improvementCh <- iterateImprovement{idx: i, avg: deepAvg, deck: dd}:
+		case improvementCh <- iterateImprovement{idx: i, avg: avg, deck: d}:
 		default:
 			// Another worker already filled the buffer; drop silently.
 		}

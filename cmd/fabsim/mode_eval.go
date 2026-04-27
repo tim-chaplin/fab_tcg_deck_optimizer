@@ -21,7 +21,7 @@ func runEvalCmd(args []string) {
 		fmt.Fprintln(fs.Output(), "Flags:")
 		fs.PrintDefaults()
 	}
-	deepShuffles := fs.Int("deep-shuffles", 10000, "shuffles per deck used to re-score the deck")
+	shuffles := fs.Int("shuffles", -1, "per-eval shuffle budget. -1 (default) runs adaptively, stopping once the per-turn mean's standard error drops below the built-in target. Any non-negative value runs exactly that many shuffles (apples-to-apples re-scores, repro flows).")
 	incoming := fs.Int("incoming", 0, "opponent damage per turn (required unless -print-only is set — must match the value the deck was annealed at for comparable numbers)")
 	seed := fs.Int64("seed", time.Now().UnixNano(), "RNG seed")
 	formatFlag := fs.String("format", string(deckformat.SilverAge), "constructed format predicate applied to replacement picks when the loaded deck contains NotImplemented cards")
@@ -39,7 +39,7 @@ func runEvalCmd(args []string) {
 	if err != nil {
 		die("%v", err)
 	}
-	runEval(resolveDeckPath(fs.Arg(0)), *deepShuffles, *incoming, *maxCopies, *seed, fmtValue, *printOnly, *brief)
+	runEval(resolveDeckPath(fs.Arg(0)), *shuffles, *incoming, *maxCopies, *seed, fmtValue, *printOnly, *brief)
 }
 
 // runEval loads the deck at outPath and prints its stats. Default behaviour (printOnly=false)
@@ -55,23 +55,23 @@ func runEvalCmd(args []string) {
 //     per-card stats.
 //   - brief=true: score summary only. Good for scripted re-scoring where the card list and
 //     best turn are noise.
-func runEval(outPath string, deepShuffles, incoming, maxCopies int, seed int64, fmtValue deckformat.Format, printOnly, brief bool) {
+func runEval(outPath string, shuffles, incoming, maxCopies int, seed int64, fmtValue deckformat.Format, printOnly, brief bool) {
 	if !printOnly {
-		evaluateAndPersist(outPath, deepShuffles, incoming, maxCopies, seed, fmtValue)
+		evaluateAndPersist(outPath, shuffles, incoming, maxCopies, seed, fmtValue)
 	}
 	printLoadedDeck(mustLoadDeck(outPath), brief)
 }
 
-// evaluateAndPersist loads the deck at outPath, re-simulates it for deepShuffles hands against
-// incoming, and writes the fresh stats back to disk (.json + sibling fabrary .txt). Returns
-// the simulated deck so callers can print its stats. The sanitize pass (replacing any
-// card.NotImplemented copies with legal substitutes drawn at maxCopies under fmtValue) runs
-// before Evaluate so the on-disk avg always reflects the cards the binary can actually
-// simulate. The stderr "avg X → Y in <elapsed>; rewriting <path>" line lets the operator see
-// the re-score happening before the printed output appears.
-func evaluateAndPersist(outPath string, deepShuffles, incoming, maxCopies int, seed int64, fmtValue deckformat.Format) *deck.Deck {
+// evaluateAndPersist runs the deck eval — adaptive when shuffles is negative (capped at
+// adaptiveShufflesCap), fixed otherwise — then writes the fresh stats back to disk
+// (.json + sibling fabrary .txt). Returns the simulated deck so callers can print its
+// stats. The sanitize pass (replacing any card.NotImplemented copies with legal substitutes
+// drawn at maxCopies under fmtValue) runs before the eval so the on-disk avg always
+// reflects the cards the binary can actually simulate. The stderr summary lets the operator
+// see the re-score happening before the printed output appears.
+func evaluateAndPersist(outPath string, shuffles, incoming, maxCopies int, seed int64, fmtValue deckformat.Format) *deck.Deck {
 	loaded := mustLoadDeck(outPath)
-	// Wrap the loaded hero/weapons/cards in a fresh Deck so Evaluate's stats start from zero
+	// Wrap the loaded hero/weapons/cards in a fresh Deck so the eval's stats start from zero
 	// instead of accumulating on top of the persisted Stats. Sideboard and Equipment carry
 	// over verbatim — the sim ignores both, but the post-eval writeDeck round-trips them
 	// back to disk so the user's hand-managed lists aren't dropped by a re-score.
@@ -82,10 +82,14 @@ func evaluateAndPersist(outPath string, deepShuffles, incoming, maxCopies int, s
 	savedAvg := loaded.Stats.Mean()
 	sanitizeLoadedDeck(d, maxCopies, rng, fmtValue.IsLegal)
 	start := time.Now()
-	d.Evaluate(deepShuffles, incoming, rng)
+	if shuffles < 0 {
+		d.EvaluateAdaptive(incoming, rng)
+	} else {
+		d.Evaluate(shuffles, incoming, rng)
+	}
 	elapsed := time.Since(start)
-	fmt.Fprintf(os.Stderr, "eval: avg %.3f → %.3f (delta %+.3f) in %s; rewriting %s\n",
-		savedAvg, d.Stats.Mean(), d.Stats.Mean()-savedAvg, elapsed.Round(time.Millisecond), outPath)
+	fmt.Fprintf(os.Stderr, "eval: avg %.3f → %.3f (delta %+.3f) in %s (%s shuffles); rewriting %s\n",
+		savedAvg, d.Stats.Mean(), d.Stats.Mean()-savedAvg, elapsed.Round(time.Millisecond), commaInt(d.Stats.Runs), outPath)
 	if err := writeDeck(d, outPath); err != nil {
 		die("%v", err)
 	}

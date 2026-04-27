@@ -212,3 +212,63 @@ func TestEvaluate_TerminatesAfterTwoCycles(t *testing.T) {
 			d.Stats.Hands, maxHands)
 	}
 }
+
+// TestEvaluateAdaptive_StopsBeforeMaxRunsWhenSEMet runs a deck whose per-turn variance is
+// low enough that the SE target is met well before the cap. The actual run count should
+// land on a multiple of adaptiveCheckInterval and be strictly less than adaptiveShufflesCap.
+func TestEvaluateAdaptive_StopsBeforeMaxRunsWhenSEMet(t *testing.T) {
+	deckCards := append([]card.Card{},
+		cards.Get(card.ReadTheRunesRed), cards.Get(card.ReadTheRunesRed),
+		cards.Get(card.ReadTheRunesYellow), cards.Get(card.ReadTheRunesYellow),
+	)
+	for len(deckCards) < 40 {
+		deckCards = append(deckCards, cards.Get(card.ReadTheRunesBlue))
+	}
+	d := New(hero.Viserai{}, []weapon.Weapon{weapon.ReapingBlade{}}, deckCards)
+	stats := d.EvaluateAdaptive(0, rand.New(rand.NewSource(42)))
+	if stats.Runs >= adaptiveShufflesCap {
+		t.Errorf("Runs = %d; expected adaptive stop well before cap=%d", stats.Runs, adaptiveShufflesCap)
+	}
+	if stats.Runs%adaptiveCheckInterval != 0 {
+		t.Errorf("Runs = %d; expected a multiple of adaptiveCheckInterval=%d", stats.Runs, adaptiveCheckInterval)
+	}
+}
+
+// TestEvaluateAdaptive_RespectsMaxRunsCapWhenSEUnreachable pins the cap behavior: when the
+// SE target is structurally unreachable, the loop runs to the cap rather than overshooting.
+// Goes through evaluateImpl directly so the test can use a small cap (production uses
+// adaptiveShufflesCap=50000 which is too slow for a unit test).
+func TestEvaluateAdaptive_RespectsMaxRunsCapWhenSEUnreachable(t *testing.T) {
+	deckCards := append([]card.Card{},
+		cards.Get(card.ReadTheRunesRed), cards.Get(card.ReadTheRunesRed),
+		cards.Get(card.ReadTheRunesYellow), cards.Get(card.ReadTheRunesYellow),
+	)
+	for len(deckCards) < 40 {
+		deckCards = append(deckCards, cards.Get(card.ReadTheRunesBlue))
+	}
+	d := New(hero.Viserai{}, []weapon.Weapon{weapon.ReapingBlade{}}, deckCards)
+	// Negative targetSE is structurally unreachable — meanStandardError is always >= 0, so
+	// the `<= targetSE` predicate never fires. Loop should exhaust at maxRuns regardless of
+	// the deck's actual variance (which can be zero for trivially-identical-card decks).
+	stats := d.evaluateImpl(1000, 0, rand.New(rand.NewSource(42)), nil, makeAdaptiveStop(-1))
+	if stats.Runs != 1000 {
+		t.Errorf("Runs = %d; expected exactly maxRuns=1000 when SE target is unreachable", stats.Runs)
+	}
+}
+
+// TestMeanStandardError_FromHistogram verifies the histogram-based SE computation against a
+// hand-computed expected value.
+func TestMeanStandardError_FromHistogram(t *testing.T) {
+	// Three turns: values 10, 12, 14. Mean = 12, sample variance = ((10-12)^2 + (12-12)^2 +
+	// (14-12)^2) / (3-1) = 8/2 = 4. SE = sqrt(4/3) ≈ 1.1547.
+	stats := &Stats{
+		Hands:      3,
+		TotalValue: 36,
+		Histogram:  map[int]int{10: 1, 12: 1, 14: 1},
+	}
+	got := meanStandardError(stats)
+	const want = 1.1547005383792515
+	if abs := got - want; abs < -1e-9 || abs > 1e-9 {
+		t.Errorf("meanStandardError = %v, want ~%v", got, want)
+	}
+}

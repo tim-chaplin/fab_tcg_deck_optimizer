@@ -19,25 +19,28 @@ import (
 
 // annealConfig bundles the knobs runAnneal needs. Built by runAnnealCmd from its flag.FlagSet.
 type annealConfig struct {
-	shallowShuffles int
-	deepShuffles    int
-	incoming        int
-	deckSize        int
-	maxCopies       int
-	seed            int64
-	outPath         string
-	format          deckformat.Format
-	debug           bool
-	reevaluate      bool
+	// shuffles is the per-eval shuffle budget when adaptive is false (apples-to-apples
+	// acceptance, repro flows). Ignored when adaptive is true — the deck package's
+	// adaptive path uses its own SE target and cap.
+	shuffles   int
+	adaptive   bool
+	incoming   int
+	deckSize   int
+	maxCopies  int
+	seed       int64
+	outPath    string
+	format     deckformat.Format
+	debug      bool
+	reevaluate bool
 	// startTemp / tempDecay / minTemp are the simulated-annealing knobs. startTemp of 0
 	// degenerates to the classical hill-climb (strict > baseline acceptance).
 	startTemp float64
 	tempDecay float64
 	minTemp   float64
-	// minImprovement is the noise-floor a strict (T==0) acceptance must clear: deepAvg must
+	// minImprovement is the noise-floor a strict (T==0) acceptance must clear: avg must
 	// exceed bestAvg by more than this margin. Guards against infinite acceptance loops where
 	// shuffle noise lets a stream of near-zero "wins" keep firing. The probabilistic SA gate
-	// ignores this floor so annealing can still cross ties / shallow dips.
+	// ignores this floor so annealing can still cross ties / dips.
 	minImprovement float64
 	// quietLoad suppresses the baseline card-list dump in prepareBaseline. Set by wrapper
 	// scripts that re-invoke anneal repeatedly on the same deck; the listing is unchanging
@@ -63,18 +66,17 @@ func defaultDeckNameFor(h hero.Hero, f deckformat.Format, incoming int) string {
 func runAnnealCmd(args []string) {
 	fs := flag.NewFlagSet("anneal", flag.ExitOnError)
 	deckName := fs.String("deck", "", "deck name; resolved to mydecks/<name>.json (\".json\" suffix optional). Defaults to <hero>_<format>_<incoming>_incoming so different (hero, format, -incoming) regimes keep separate deck files. When the named deck exists, anneal resumes from it as a checkpoint.")
-	shallowShuffles := fs.Int("shallow-shuffles", 100, "shuffles per deck used to screen mutations before deep confirmation")
-	deepShuffles := fs.Int("deep-shuffles", 10000, "shuffles per deck used to confirm improvements and to baseline loaded decks")
+	shuffles := fs.Int("shuffles", -1, "per-eval shuffle budget. -1 (default) runs adaptively, stopping once the per-turn mean's standard error drops below the built-in target. Any non-negative value runs exactly that many shuffles for apples-to-apples acceptance / repro flows.")
 	incoming := fs.Int("incoming", 0, "opponent damage per turn (required — different values produce different optimal decks, so this is explicit rather than defaulted)")
 	deckSize := fs.Int("deck-size", 40, "number of cards per deck")
 	maxCopies := fs.Int("max-copies", defaultMaxCopies, "maximum copies of any single card printing per deck")
 	seed := fs.Int64("seed", time.Now().UnixNano(), "RNG seed")
 	formatFlag := fs.String("format", string(deckformat.SilverAge), "constructed format whose banlist restricts the card pool during search (only \"silver_age\" is supported today)")
 	debug := fs.Bool("debug", false, "force per-round logs even when annealing is on (T>0 normally hides them)")
-	reevaluate := fs.Bool("reevaluate", false, "force re-evaluation of the loaded deck's baseline avg, even if its prior run count already matches -deep-shuffles. Use after adjusting modelling assumptions or fixing bugs that may have shifted the deck's true score.")
-	finalize := fs.Bool("finalize", false, "high-precision pass — overrides -shallow-shuffles to 10000, -deep-shuffles to 100000, and tightens -min-improvement to 0.01. Use on a deck that's already converged to squeeze out the remaining sub-percent improvements.")
+	reevaluate := fs.Bool("reevaluate", false, "force re-evaluation of the loaded deck's baseline avg, even if its prior run count already matches the current -shuffles budget. Use after adjusting modelling assumptions or fixing bugs that may have shifted the deck's true score.")
+	finalize := fs.Bool("finalize", false, "high-precision pass — sets -shuffles to 100000 (fixed) and tightens -min-improvement to 0.01. Use on a deck that's already converged to squeeze out the remaining sub-percent improvements.")
 	startTemp := fs.Float64("start-temp", 0, "simulated-annealing starting temperature. 0 (default) runs a pure hill climb. Higher values probabilistically accept worse mutations early; acceptance probability is exp((avg - baseline) / T). Good starting range is ~0.05–0.5 given typical Value units.")
-	minImprovement := fs.Float64("min-improvement", 0.1, "noise floor on strict (T==0) acceptance: a mutation's deep avg must exceed the current avg by more than this margin to be accepted. Guards against infinite-loop acceptance of within-noise wins; raise it for chunkier improvements only, lower it (e.g. 0.01) for fine-grained finalize passes. The probabilistic SA gate at T>0 ignores this margin so annealing can still cross ties.")
+	minImprovement := fs.Float64("min-improvement", 0.1, "noise floor on strict (T==0) acceptance: a mutation's avg must exceed the current avg by more than this margin to be accepted. Guards against infinite-loop acceptance of within-noise wins; raise it for chunkier improvements only, lower it (e.g. 0.01) for fine-grained finalize passes. The probabilistic SA gate at T>0 ignores this margin so annealing can still cross ties.")
 	tempDecay := fs.Float64("temp-decay", 0.95, "multiplicative cooling per acceptance — T ← T × decay, floored at -min-temp. Unused when -start-temp is 0.")
 	minTemp := fs.Float64("min-temp", 0, "minimum temperature. Once T reaches this floor the climb becomes greedy until a local maximum is found. 0 disables annealing in the converged tail.")
 	quietLoad := fs.Bool("quiet-load", false, "skip the baseline card-list dump at startup. Intended for wrapper scripts (e.g. anneal-reanneal.ps1) that re-invoke anneal many times on the same deck — the listing never changes pass-to-pass and floods the log.")
@@ -89,12 +91,11 @@ func runAnnealCmd(args []string) {
 		die("%v", err)
 	}
 
-	// -finalize bundles the high-precision overrides — heavier shuffle counts plus a tighter
+	// -finalize bundles the high-precision overrides — pinned shuffle count plus a tighter
 	// noise floor so sub-0.1 wins land that the default 0.1 -min-improvement gate would reject.
 	// Applied as a post-parse override so it composes cleanly with explicit per-flag values.
 	if *finalize {
-		*shallowShuffles = 10000
-		*deepShuffles = 100000
+		*shuffles = 100000
 		*minImprovement = 0.01
 	}
 
@@ -108,21 +109,21 @@ func runAnnealCmd(args []string) {
 	}
 
 	cfg := annealConfig{
-		shallowShuffles: *shallowShuffles,
-		deepShuffles:    *deepShuffles,
-		incoming:        *incoming,
-		deckSize:        *deckSize,
-		maxCopies:       *maxCopies,
-		seed:            *seed,
-		outPath:         outPath,
-		format:          fmtValue,
-		debug:           *debug,
-		reevaluate:      *reevaluate,
-		startTemp:       *startTemp,
-		tempDecay:       *tempDecay,
-		minTemp:         *minTemp,
-		minImprovement:  *minImprovement,
-		quietLoad:       *quietLoad,
+		shuffles:       *shuffles,
+		adaptive:       *shuffles < 0,
+		incoming:       *incoming,
+		deckSize:       *deckSize,
+		maxCopies:      *maxCopies,
+		seed:           *seed,
+		outPath:        outPath,
+		format:         fmtValue,
+		debug:          *debug,
+		reevaluate:     *reevaluate,
+		startTemp:      *startTemp,
+		tempDecay:      *tempDecay,
+		minTemp:        *minTemp,
+		minImprovement: *minImprovement,
+		quietLoad:      *quietLoad,
 	}
 
 	// Print the session-level delta (starting best vs final best) on any exit path, then
@@ -185,13 +186,13 @@ func runAnneal(cfg annealConfig) annealResult {
 				round, len(mutations), currentAvg, tempLabel, bestEverAvg)
 		}
 
-		var tested, deepsDone atomic.Int64
-		stopTicker := startRoundTicker(round, len(mutations), start, &tested, &deepsDone,
+		var completed atomic.Int64
+		stopTicker := startRoundTicker(round, len(mutations), start, &completed,
 			temperature, currentAvg, bestEverAvg)
 		d, avg, idx, found := deck.IterateParallel(
 			ctx, mutations, currentAvg, temperature, cfg.minImprovement,
-			cfg.shallowShuffles, cfg.deepShuffles, cfg.incoming, 0,
-			rng.Int63(), &tested, &deepsDone,
+			cfg.shuffles, cfg.incoming, 0,
+			rng.Int63(), &completed, cfg.adaptive,
 		)
 		stopTicker()
 
@@ -311,11 +312,25 @@ func coolDown(temperature, decay, minTemp float64) float64 {
 	return next
 }
 
-// prepareBaseline returns the starting deck for the hill climb with its deep-shuffles avg.
-// Four cases: no deck on disk (generate random + evaluate); loaded deck under deepShuffles
-// (re-evaluate for an apples-to-apples baseline); -reevaluate set (force re-evaluation even
-// if the run count already matches); or deck already deep-evaluated (use as-is). File
-// exists but doesn't parse → die loudly rather than silently overwrite a corrupt checkpoint.
+// baselineEvaluate runs the eval used for every prepareBaseline path. Adaptive when
+// cfg.adaptive is true (no -shuffles pinned); fixed-shuffles otherwise. The two paths
+// return the same Stats shape; Stats.Runs reflects the actual shuffle count so the next
+// prepareBaseline call's "already evaluated" check still works (an adaptive run may finish
+// below the cap and prompt a re-evaluation next session, which is fine — adaptive runs
+// are cheap).
+func baselineEvaluate(d *deck.Deck, cfg annealConfig, rng *rand.Rand) deck.Stats {
+	if cfg.adaptive {
+		return d.EvaluateAdaptive(cfg.incoming, rng)
+	}
+	return d.Evaluate(cfg.shuffles, cfg.incoming, rng)
+}
+
+// prepareBaseline returns the starting deck for the hill climb with its baseline avg.
+// Four cases: no deck on disk (generate random + evaluate); loaded deck under the current
+// shuffle budget (re-evaluate for an apples-to-apples baseline); -reevaluate set (force
+// re-evaluation even if the run count already matches); or deck already evaluated at the
+// budget (use as-is). File exists but doesn't parse → die loudly rather than silently
+// overwrite a corrupt checkpoint.
 //
 // A loaded deck that contains card.NotImplemented copies (e.g. a pre-tag deck recovered
 // from disk) is sanitized before any of the above branches: the tagged slots are replaced
@@ -329,7 +344,7 @@ func prepareBaseline(cfg annealConfig, rng *rand.Rand) (*deck.Deck, float64) {
 	if best == nil {
 		fmt.Fprintf(os.Stderr, "no deck at %s; generating a random starting deck\n", cfg.outPath)
 		best = deck.Random(hero.Viserai{}, cfg.deckSize, cfg.maxCopies, rng, cfg.legalFilter())
-		bestAvg = best.Evaluate(cfg.deepShuffles, cfg.incoming, rng).Mean()
+		bestAvg = baselineEvaluate(best, cfg, rng).Mean()
 		if err := writeDeck(best, cfg.outPath); err != nil {
 			die("%v", err)
 		}
@@ -345,9 +360,14 @@ func prepareBaseline(cfg annealConfig, rng *rand.Rand) (*deck.Deck, float64) {
 	if len(sanitized) > 0 {
 		best.Stats.Runs = 0
 	}
-	if cfg.reevaluate || best.Stats.Runs < cfg.deepShuffles {
+	// Re-evaluate when the saved deck was scored at fewer shuffles than the current budget,
+	// or when -reevaluate forces it. Adaptive runs always take the re-evaluate path because
+	// the recorded Stats.Runs reflects whatever count the previous adaptive run terminated
+	// at, which carries no precision guarantee for the new run's target.
+	needReeval := cfg.adaptive || cfg.reevaluate || best.Stats.Runs < cfg.shuffles
+	if needReeval {
 		reason := fmt.Sprintf("from %d shuffles", best.Stats.Runs)
-		if cfg.reevaluate && best.Stats.Runs >= cfg.deepShuffles {
+		if cfg.reevaluate && best.Stats.Runs >= cfg.shuffles {
 			reason = "-reevaluate forced"
 		}
 		if len(sanitized) > 0 {
@@ -356,8 +376,12 @@ func prepareBaseline(cfg annealConfig, rng *rand.Rand) (*deck.Deck, float64) {
 		// Label the loaded number "saved avg" so it can't be mistaken for the re-evaluated
 		// score. Decks scored under older simulation logic can have saved avgs that diverge
 		// substantially from what today's simulator produces.
-		fmt.Printf("Loaded best deck (saved avg %.3f, %s); re-evaluating at %d shuffles for an apples-to-apples baseline\n",
-			bestAvg, reason, cfg.deepShuffles)
+		budgetLabel := fmt.Sprintf("%d shuffles", cfg.shuffles)
+		if cfg.adaptive {
+			budgetLabel = "adaptive shuffles"
+		}
+		fmt.Printf("Loaded best deck (saved avg %.3f, %s); re-evaluating at %s for an apples-to-apples baseline\n",
+			bestAvg, reason, budgetLabel)
 		savedAvg := bestAvg
 		// Sideboard and Equipment are user-managed and don't feed the sim — preserve
 		// them across the stats reset so the re-evaluated deck writes back unchanged.
@@ -366,7 +390,7 @@ func prepareBaseline(cfg annealConfig, rng *rand.Rand) (*deck.Deck, float64) {
 		best = deck.New(best.Hero, best.Weapons, best.Cards)
 		best.Sideboard = sideboard
 		best.Equipment = equipment
-		bestAvg = best.Evaluate(cfg.deepShuffles, cfg.incoming, rng).Mean()
+		bestAvg = baselineEvaluate(best, cfg, rng).Mean()
 		if err := writeDeck(best, cfg.outPath); err != nil {
 			die("%v", err)
 		}
@@ -412,7 +436,7 @@ func watchStdinForAbort(cancel context.CancelFunc) {
 // (the per-round / per-mutation logs are suppressed without -debug), so keeping the snapshot
 // rich enough to track the walk is what makes silent mode bearable. Returns a stop function
 // the caller must call when the round finishes.
-func startRoundTicker(round, total int, start time.Time, tested, deepsDone *atomic.Int64, temperature, currentAvg, bestEverAvg float64) func() {
+func startRoundTicker(round, total int, start time.Time, completed *atomic.Int64, temperature, currentAvg, bestEverAvg float64) func() {
 	done := make(chan struct{})
 	go func() {
 		t := time.NewTicker(500 * time.Millisecond)
@@ -427,7 +451,7 @@ func startRoundTicker(round, total int, start time.Time, tested, deepsDone *atom
 					tempLabel = fmt.Sprintf("  T=%.4f", temperature)
 				}
 				fmt.Fprintf(os.Stderr, "\r[round %d] tested %d/%d  cur %.3f  best %.3f%s  %s elapsed        ",
-					round, tested.Load(), total, currentAvg, bestEverAvg, tempLabel,
+					round, completed.Load(), total, currentAvg, bestEverAvg, tempLabel,
 					time.Since(start).Truncate(time.Second))
 			}
 		}

@@ -83,9 +83,8 @@ that apply.
 
 - **`anneal`** — simulated-annealing search on the deck at `-deck`, or on a fresh random deck
   if the file doesn't exist yet. Each round enumerates every single-slot mutation (every
-  alternative weapon loadout + every (card-in-deck, card-out-of-deck) swap). Mutations are
-  screened at `-shallow-shuffles`; candidates that clear the acceptance gate are re-evaluated
-  at `-deep-shuffles` to confirm. The acceptance gate is the Metropolis rule: strict
+  alternative weapon loadout + every (card-in-deck, card-out-of-deck) swap) and evaluates each
+  one at the current `-shuffles` budget. The acceptance gate is the Metropolis rule: strict
   improvements are always accepted, worse mutations are accepted with probability
   `exp((avg - baseline) / T)` when `-start-temp > 0`. Temperature decays geometrically per
   acceptance (`-temp-decay`, floored at `-min-temp`). At `-start-temp 0` the gate is strictly
@@ -93,21 +92,38 @@ that apply.
   is treated as a local maximum and anneal exits. Press Enter to abort mid-round (exits 130 so
   wrapper scripts can tell this apart from natural convergence). Only the best-ever deck is
   persisted to disk — walks through worse states under annealing don't regress the JSON.
-- **`eval`** — `fabsim eval <deck>`. Loads the deck file, simulates it for `-deep-shuffles`
-  hands against `-incoming` damage, prints the resulting stats, and rewrites both the `.json`
-  and sibling fabrary `.txt` so the saved copy stays in sync with the current binary's
-  modelling. Pass `-print-only` to skip the sim and just print the last run's stats without
-  touching the file.
+- **`eval`** — `fabsim eval <deck>`. Loads the deck file, simulates it for `-shuffles` hands
+  against `-incoming` damage, prints the resulting stats, and rewrites both the `.json` and
+  sibling fabrary `.txt` so the saved copy stays in sync with the current binary's modelling.
+  Pass `-print-only` to skip the sim and just print the last run's stats without touching the
+  file.
 - **`import`** — interactively imports a deck from fabrary.net. Prompts for a deck name, then
   asks you to paste the plain-text export; input ends automatically at fabrary's
   `See the full deck @ …` footer. Saves the result as `mydecks/<name>.json`. Cards the
   optimizer hasn't implemented yet are skipped with a warning rather than blocking the import.
-- **`compare`** — `fabsim compare <deck1> <deck2> -incoming N`. Re-scores both decks under the
-  same `-deep-shuffles` / `-incoming` so the comparison is apples-to-apples (the .json files
+- **`compare`** — `fabsim compare <deck1> <deck2> -incoming N`. Re-scores both decks at the
+  same fixed `-shuffles` / `-incoming` so the comparison is apples-to-apples (the .json files
   are rewritten with the fresh stats — card lists are unchanged), then prints a stat-by-stat
   side-by-side report: pitch counts, mean hand value, per-cycle means, the two hand-value
-  histograms, and the per-card count delta. The (deep-shuffles, incoming) settings ride at the
-  top so the per-section rows don't repeat them.
+  histograms, and the per-card count delta. The (shuffles, incoming) settings ride at the top
+  so the per-section rows don't repeat them.
+
+#### Adaptive vs fixed shuffles
+
+`-shuffles` controls the per-eval shuffle budget across all subcommands:
+
+- `-shuffles -1` (default for `anneal` and `eval`) — adaptive. Each eval keeps shuffling until
+  the per-turn mean's standard error drops below an internal target (~±0.05), then stops.
+  Typical Viserai decks converge in 200–400 shuffles; an internal cap stops a pathological
+  high-variance regime that doesn't converge. Use this for everyday hill-climbs and one-off
+  re-scores where ±0.05 precision on the mean is plenty.
+- `-shuffles N` (any non-negative value) — fixed. Every eval runs exactly N shuffles, giving
+  apples-to-apples comparisons across mutations. Use this for repro flows and any time you
+  want every eval scored at the same budget.
+- `compare` always uses fixed `-shuffles` (default 10000); adaptive isn't allowed there because
+  the side-by-side comparison needs matched conditions on both decks.
+- `anneal -finalize` pins `-shuffles` to 100000 and tightens `-min-improvement` to 0.01 — a
+  high-precision pass for decks that have already converged.
 
 ### Suggested workflow
 
@@ -139,9 +155,8 @@ The summary below groups the flags by subcommand.
 - `-deck` — checkpoint name; resolved to `mydecks/<name>.json` (default
   `<hero>_<format>_<incoming>_incoming`, keyed off the hero, format, and `-incoming`). The
   `mydecks/` directory is created automatically. If the file exists anneal resumes from it.
-- `-shallow-shuffles` — shuffles per deck when screening mutations (default 100)
-- `-deep-shuffles` — shuffles per deck when confirming improvements / baselining the loaded
-  deck (default 10000)
+- `-shuffles` — per-eval shuffle budget. `-1` (default) runs adaptively; any non-negative value
+  pins a fixed count for apples-to-apples acceptance. See "Adaptive vs fixed shuffles" above.
 - `-incoming` — opponent damage per turn (default 0)
 - `-deck-size` — cards per deck, used only for random starting decks (default 40)
 - `-max-copies` — max copies of any single card printing (default 2)
@@ -153,11 +168,12 @@ The summary below groups the flags by subcommand.
   probabilistically accept worse mutations early (Metropolis rule).
 - `-temp-decay` — multiplicative cooling per acceptance (default 0.95).
 - `-min-temp` — temperature floor (default 0).
-- `-finalize` — high-precision pass — overrides `-shallow-shuffles` to 10000 and
-  `-deep-shuffles` to 100000. Use on a deck that's already converged to squeeze out the
+- `-finalize` — high-precision pass — sets `-shuffles` to 100000 (fixed) and tightens
+  `-min-improvement` to 0.01. Use on a deck that's already converged to squeeze out the
   remaining sub-percent improvements.
 - `-reevaluate` — force re-evaluation of the loaded deck's baseline avg even if its prior run
-  count already matches `-deep-shuffles`. Use after adjusting modelling assumptions.
+  count already matches the current `-shuffles` budget. Use after adjusting modelling
+  assumptions.
 - `-quiet-load` — skip the baseline card-list dump at startup. Used by
   `scripts/anneal-reanneal.ps1` from pass 2 onward so the unchanging listing doesn't flood the
   log.
@@ -165,7 +181,8 @@ The summary below groups the flags by subcommand.
 
 **`eval`** (re-score a deck and rewrite it; `-print-only` skips the sim and the rewrite):
 
-- `-deep-shuffles` — shuffles per deck used for the re-score (default 10000)
+- `-shuffles` — per-eval shuffle budget. `-1` (default) runs adaptively; any non-negative
+  value runs exactly that many shuffles. See "Adaptive vs fixed shuffles" above.
 - `-incoming` — opponent damage per turn (required unless `-print-only` is set)
 - `-seed` — RNG seed (default: time-based)
 - `-format` — format predicate applied to replacement picks when the loaded deck contains
@@ -178,7 +195,8 @@ The summary below groups the flags by subcommand.
 
 **`compare`** (re-score both decks at matched settings before reporting):
 
-- `-deep-shuffles` — shuffles per deck used for the re-score (default 10000)
+- `-shuffles` — shuffles per deck used for the re-score (default 10000). compare always runs
+  fixed shuffles; adaptive isn't allowed because both decks need matched conditions.
 - `-incoming` — opponent damage per turn (required; both decks are re-scored against this value)
 - `-seed` — RNG seed (default: time-based)
 - `-format` — format predicate applied to replacement picks when a loaded deck contains
