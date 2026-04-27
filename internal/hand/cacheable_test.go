@@ -176,6 +176,57 @@ func TestBest_CacheabilityIsAggregatedAcrossPartitions(t *testing.T) {
 	}
 }
 
+// TestBest_CacheableSnatchYellowDoesntHit: Yellow Snatch (attack 3) is in the
+// uncacheableCards family — Snatch's Play calls DrawOne when LikelyToHit. But
+// LikelyDamageHits(n, false) is true only for n ∈ {1, 4, 7}, so attack 3 doesn't hit and
+// the DrawOne branch is skipped at runtime. With Snatch alone in hand, every partition
+// path either runs Play-without-DrawOne (Attack role) or runs no Play at all (Pitch /
+// Defend-as-plain-block / Held). Result must be cacheable.
+//
+// This pins the structural-enforcement principle's payoff: cacheability tracks ACTUAL
+// reads, not card identity. A card "in the uncacheableCards family" doesn't poison the
+// chain unless its Play actually fires the read on this run.
+func TestBest_CacheableSnatchYellowDoesntHit(t *testing.T) {
+	h := []card.Card{generic.SnatchYellow{}}
+	got := Best(stubHero, nil, h, 0, nil, 0, nil)
+	if !got.Cacheable {
+		t.Errorf("Yellow Snatch (attack 3) skips DrawOne via LikelyToHit gate; expected Cacheable=true (BestLine=%s)",
+			FormatBestLine(got.BestLine))
+	}
+}
+
+// TestBest_CacheableSnatchBlueWithRedAttacker: Blue Snatch (attack 2) misses on every
+// partition where it plays as Attack, and never runs Play when pitched / blocked / held.
+// The companion Red attacker (fake.RedAttack, attack 3) is a non-reader stub. All paths
+// cacheable.
+func TestBest_CacheableSnatchBlueWithRedAttacker(t *testing.T) {
+	h := []card.Card{generic.SnatchBlue{}, fake.RedAttack{}}
+	got := Best(stubHero, nil, h, 1, nil, 0, nil)
+	if !got.Cacheable {
+		t.Errorf("Blue Snatch (attack 2, never hits) + plain Red attacker should be cacheable; got Cacheable=false (BestLine=%s)",
+			FormatBestLine(got.BestLine))
+	}
+}
+
+// TestBest_CacheableMoonWishBlockedAtCostCheck: Red Moon Wish alone in hand can never
+// resolve as Attack — its 2-cost can't be paid (no other card to pitch, no other card to
+// alt-cost), and the playSequenceWithMeta cost check rejects the permutation BEFORE Play
+// runs. So no deck read fires from the tutor branch. The other partition roles never run
+// Play either: Pitch (no Play), plain Defend against incoming > 0 (Moon Wish isn't a DR;
+// plain blocks credit Defense() without Play), Held / Arsenal (no Play). All paths
+// cacheable.
+//
+// Pins that the pre-Play resource gate is sufficient to keep would-be-uncacheable cards
+// from poisoning a chain when partition enumeration would otherwise try them.
+func TestBest_CacheableMoonWishBlockedAtCostCheck(t *testing.T) {
+	h := []card.Card{generic.MoonWishRed{}}
+	got := Best(stubHero, nil, h, 4, nil, 0, nil)
+	if !got.Cacheable {
+		t.Errorf("Red Moon Wish alone (cost 2, no payment source) should be cacheable; got Cacheable=false (BestLine=%s)",
+			FormatBestLine(got.BestLine))
+	}
+}
+
 // TestBest_CacheabilityResetsAcrossCalls: a single Evaluator reused across two calls — first
 // with a deck-reader, then without — must report the second call as cacheable. The
 // per-permutation TurnState reset zeroes the bit for free; if the reset path leaked the
