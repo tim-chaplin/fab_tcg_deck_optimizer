@@ -20,7 +20,7 @@ var runicFellingsongTypes = card.NewTypeSet(card.TypeRuneblade, card.TypeAction,
 func runicFellingsongPlay(s *card.TurnState, self *card.CardState) {
 	s.ApplyAndLogEffectiveAttack(self)
 	if n := banishAuraFromGraveyard(s); n > 0 {
-		s.LogRiderOnPlay(self, "Banished an aura, dealt 1 arcane damage", n)
+		s.ApplyAndLogRiderOnPlay(self, "Banished an aura, dealt 1 arcane damage", n)
 	}
 }
 

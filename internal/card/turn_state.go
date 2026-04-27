@@ -251,7 +251,7 @@ func (s *TurnState) RecordValue(n int) {
 // ATTACK for attack actions, WEAPON ATTACK for weapons, PLAY for everything else) and
 // credits Card.Attack() + self.BonusAttack to s.Value, clamped at 0. Cards with separable
 // rider effects (conditional arcane bonuses, runechant creation, on-hit credits) emit
-// each rider as its own post-trigger child line via LogRiderOnPlay /
+// each rider as its own post-trigger child line via ApplyAndLogRiderOnPlay /
 // CreateAndLogRunechantsOnPlay / DealAndLogArcaneDamage so the rider's contribution is
 // visible in the printout instead of bundled into the chain step's (+N).
 func (s *TurnState) ApplyAndLogEffectiveAttack(self *CardState) {
@@ -277,7 +277,7 @@ func (s *TurnState) LogPlay(self *CardState) {
 // past what was actually prevented. The credited amount is decremented from s.IncomingDamage
 // so a later defender sees the reduced pool. Cards with separable rider effects (arcane
 // pings, runechant creation, on-hit credits) emit each rider as its own post-trigger child
-// line via DealAndLogArcaneDamage / CreateAndLogRunechantsOnPlay / LogRiderOnPlay after the
+// line via DealAndLogArcaneDamage / CreateAndLogRunechantsOnPlay / ApplyAndLogRiderOnPlay after the
 // chain step; conditional "+N{d}" bonuses fold into BonusDefense before the chain step so
 // they roll into the same (+N), mirroring how BonusAttack feeds ApplyAndLogEffectiveAttack.
 func (s *TurnState) ApplyAndLogEffectiveDefense(self *CardState) {
@@ -382,13 +382,28 @@ func (s *TurnState) DealAndLogArcaneDamage(self *CardState, n int) int {
 	return s.AddPostTriggerLogEntry(text, DisplayName(self.Card), s.DealArcaneDamage(n))
 }
 
-// LogRiderOnPlay writes a freeform rider sub-line under self's chain entry. text is a
+// ApplyAndLogRiderOnPlay writes a freeform rider sub-line under self's chain entry. text is a
 // terse description of what the rider did (e.g. "On-hit discarded a card", "Gained 3
 // health"); the format layer renders it indented under self's chain step, so the line
 // should read as a complete utterance without a card-name prefix. n is the damage-
 // equivalent credit. Returns the credited n (clamped at 0 by the underlying log helper).
-func (s *TurnState) LogRiderOnPlay(self *CardState, text string, n int) int {
+func (s *TurnState) ApplyAndLogRiderOnPlay(self *CardState, text string, n int) int {
 	return s.AddPostTriggerLogEntry(text, DisplayName(self.Card), n)
+}
+
+// ApplyAndLogRiderOnHit is the on-hit-gated variant of ApplyAndLogRiderOnPlay: writes the rider sub-line
+// only when self's effective attack is likely to land (per LikelyToHit), otherwise no log
+// entry is written and no value is credited. Use this for "When this hits, …" riders whose
+// only gate is the hit check; riders with extra preconditions (ArcaneDamageDealt,
+// HasPlayedOrCreatedAura, …) should test the precondition first and call this for the hit gate.
+// Don't use this when n is computed via a side-effecting expression that must fire only on
+// hit (e.g. s.CreateRunechant()) — Go evaluates the argument before the call, so the side
+// effect would always fire. Returns 0 on miss, the credited n on hit.
+func (s *TurnState) ApplyAndLogRiderOnHit(self *CardState, text string, n int) int {
+	if !LikelyToHit(self) {
+		return 0
+	}
+	return s.ApplyAndLogRiderOnPlay(self, text, n)
 }
 
 // AddToGraveyard appends c to s.Graveyard so later-resolving cards see it. Persistent-type

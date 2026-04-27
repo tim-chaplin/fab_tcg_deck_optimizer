@@ -21,7 +21,7 @@ import (
 // health (graveyard trigger)" sub-line under self. Health is valued 1-to-1 with damage.
 func fiddlersGreenPlay(s *card.TurnState, self *card.CardState, heal int) {
 	s.ApplyAndLogEffectiveDefense(self)
-	s.LogRiderOnPlay(self, fmt.Sprintf("Gained %d health (graveyard trigger)", heal), heal)
+	s.ApplyAndLogRiderOnPlay(self, fmt.Sprintf("Gained %d health (graveyard trigger)", heal), heal)
 }
 
 type FiddlersGreenRed struct{}
