@@ -790,11 +790,13 @@ var byID = []card.Card{
 	card.FakeHugeAttack:   fake.HugeAttack{},
 }
 
-// init eagerly populates package card's chain-step text cache so the per-Play hot path is
-// pure cache reads. Done at registration time because the registry is the only place that
-// knows the full card set, and the cache is sized for the full ID space.
+// init eagerly populates package card's chain-step text and DisplayName caches so the
+// per-Play hot path is pure cache reads. Done at registration time because the registry
+// is the only place that knows the full card set, and the caches are sized for the full
+// ID space.
 func init() {
 	card.WarmChainStepCache(byID)
+	card.WarmDisplayNameCache(byID)
 }
 
 // byName maps card.DisplayName(c) → ID for reverse lookup. Built once at init. Keyed on

@@ -136,20 +136,10 @@ type Card interface {
 
 // DisplayName returns the card name with a pitch-color suffix — "Mauvrion Skies [Y]" for a
 // pitch-2 yellow printing. Use anywhere a human-readable identifier needs to disambiguate
-// pitch variants (log lines, deck listings, debug printouts). Pitch values outside 1-3
-// (printed-pitch-zero cards, weapons, items, hero cards) fall through to the bare Name()
-// with no suffix — there's no color to disambiguate.
-func DisplayName(c Card) string {
-	switch c.Pitch() {
-	case 1:
-		return c.Name() + " [R]"
-	case 2:
-		return c.Name() + " [Y]"
-	case 3:
-		return c.Name() + " [B]"
-	}
-	return c.Name()
-}
+// pitch variants (log lines, deck listings, debug printouts).
+//
+// Implementation in display_name_cache.go — memoised by Card.ID so the hot path is a pure
+// cache read.
 
 // VariableCost is optionally implemented by cards whose Cost(s) varies with TurnState (e.g.
 // discount-per-token effects). MinCost and MaxCost are static bounds on the Cost output across
