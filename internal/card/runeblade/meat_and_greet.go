@@ -5,9 +5,8 @@
 // hero this turn, this gets go again."
 //
 // On-hit Runechant fires only when the attack's printed power satisfies card.LikelyToHit;
-// blockable variants drop the rider. Go-again rider flips self.GrantedGoAgain when
-// TurnState.ArcaneDamageDealt is live. The card's own Runechant fires on a future turn, so
-// it can't satisfy its own rider.
+// blockable variants drop the rider. Go-again is conditional on TurnState.ArcaneDamageDealt.
+// The card's own Runechant fires on a future turn, so it can't satisfy its own rider.
 
 package runeblade
 

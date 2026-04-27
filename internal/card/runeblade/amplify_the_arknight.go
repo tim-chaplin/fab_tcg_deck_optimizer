@@ -3,8 +3,8 @@
 // Printed power: Red 6, Yellow 5, Blue 4.
 // Text: "Amplify the Arknight costs {r} less to play for each Runechant you control."
 //
-// Variable cost: Cost reads s.Runechants to return max(0, printed - Runechants) at play time.
-// Implements card.VariableCost so the solver can pre-screen with MinCost / MaxCost bounds.
+// Variable cost: Cost reads s.Runechants to return max(0, printed - Runechants).
+// Standard card.VariableCost wiring (docs/dev-standards.md).
 
 package runeblade
 

@@ -4,11 +4,10 @@
 // Text: "Look at the top card of target hero's deck. The next attack action card you play from
 // arsenal this turn gains +N{p}. **Go again**" (Red N=3, Yellow N=2, Blue N=1.)
 //
-// Modelling: The deck-peek rider isn't modelled. The +N{p} grant requires the target attack
-// action card to itself have been played from arsenal — scan TurnState.CardsRemaining for the
-// first attack action with CardState.FromArsenal set, and credit the bonus assuming it will
-// resolve. The arsenal can hold at most one card, so this only fires when the arsenal-in card
-// is itself an attack action queued later in the chain.
+// Modelling: deck-peek rider isn't modelled. The +N{p} grant targets an attack action card
+// that itself was played from arsenal — scan CardsRemaining for the first attack action with
+// CardState.FromArsenal set. Since the arsenal holds at most one card, the grant only fires
+// when the arsenal-in card is an attack action queued later in the chain.
 
 package generic
 

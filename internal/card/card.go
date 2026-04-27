@@ -29,15 +29,14 @@ type CardState struct {
 	// self.FromArsenal.
 	FromArsenal bool
 	// BonusAttack is the +{p} this card has accumulated from prior cards' "next attack +N{p}"
-	// riders. Granters set pc.BonusAttack += N on the matching CardState in CardsRemaining
-	// instead of returning the bonus from their own Play return — that way the damage is
-	// attributed to the attack receiving the buff, and EffectiveAttack folds it into
-	// hit-likelihood checks (LikelyToHit) so a +N buff bumps a 4-power attack into the 5+
-	// dominate window or a 6 into the unblockable 7. The solver applies BonusAttack to every
-	// CardState's contribution unconditionally; deciding which CardStates are legal targets
-	// (attack actions, weapons, future card types) is the grantor's job, not the solver's.
-	// Negative bonuses (defender-side -N{p} debuffs) clamp at 0 because FaB attack power
-	// can't go below 0.
+	// riders. Granters set pc.BonusAttack += N on the matching CardState in CardsRemaining so
+	// the damage is attributed to the attack receiving the buff, and EffectiveAttack folds it
+	// into hit-likelihood checks (LikelyToHit) — a +N buff can bump a 4-power attack into the
+	// 5+ dominate window or a 6 into the unblockable 7. The solver applies BonusAttack to
+	// every CardState's contribution unconditionally; deciding which CardStates are legal
+	// targets (attack actions, weapons, future card types) is the grantor's job. Negative
+	// bonuses (defender-side -N{p} debuffs) clamp at 0 because FaB attack power can't go
+	// below 0.
 	BonusAttack int
 	// BonusDefense is the +{d} this card has accumulated from "+N{d}" rider clauses, the
 	// defender-side counterpart to BonusAttack. Cross-card grants from other cards and self-

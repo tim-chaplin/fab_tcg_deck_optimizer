@@ -109,9 +109,9 @@ func TestLoadExisting_MissingReturnsNilNoError(t *testing.T) {
 }
 
 // TestLoadExisting_CorruptReturnsError: when the file exists but isn't valid JSON / a valid
-// deck, loadExisting MUST return an error so the caller refuses to overwrite. The user-visible
-// failure that motivated this fix was a Ctrl-C-truncated deck file getting silently
-// replaced with a random deck on the next anneal pass.
+// deck, loadExisting MUST return an error so the caller refuses to overwrite. Guards against
+// a Ctrl-C-truncated deck file getting silently replaced with a random deck on the next
+// anneal pass.
 func TestLoadExisting_CorruptReturnsError(t *testing.T) {
 	path := filepath.Join(t.TempDir(), "corrupt.json")
 	if err := os.WriteFile(path, []byte("{not valid json"), 0o644); err != nil {

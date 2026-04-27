@@ -3,7 +3,7 @@
 //
 // Text: "Gain N{h}." (N is the printed variant value above.)
 //
-// Modelling: health is valued 1-to-1 with damage, so Play returns +N damage-equivalent per
+// Modelling: health is valued 1-to-1 with damage, so Play credits +N damage-equivalent per
 // variant.
 
 package generic

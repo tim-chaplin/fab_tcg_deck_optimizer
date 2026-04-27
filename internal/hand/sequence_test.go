@@ -197,11 +197,10 @@ func TestBest_ViseraiMauvrionChainsShrillIntoRuneragerIntoWeapon(t *testing.T) {
 	}
 }
 
-// TestBest_StateValueMatchesSummedReturns pins that state.Value (the new dispatcher bucket)
-// equals the explicit-summation total a hand's Plays would produce. Hand: 2 Blues + 2 Reds
-// vs no incoming damage. The optimal chain pitches one Blue (3 resource) and chains the
-// other Blue + 2 Reds — total 1 + 3 + 3 = 7 damage. If a future refactor breaks the
-// dispatcher's RecordValue plumbing, this catches the regression.
+// TestBest_StateValueMatchesSummedReturns pins that state.Value equals the explicit-summation
+// total a hand's Plays would produce. Hand: 2 Blues + 2 Reds vs no incoming damage. The optimal
+// chain pitches one Blue (3 resource) and chains the other Blue + 2 Reds — total 1 + 3 + 3 = 7
+// damage.
 func TestBest_StateValueMatchesSummedReturns(t *testing.T) {
 	h := []card.Card{fake.BlueAttack{}, fake.BlueAttack{}, fake.RedAttack{}, fake.RedAttack{}}
 	got := Best(stubHero, nil, h, 0, nil, 0, nil)

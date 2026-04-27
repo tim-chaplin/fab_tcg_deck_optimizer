@@ -5,9 +5,8 @@
 // control with cost 2 or less. If Smashing Good Time is played from arsenal, the next attack action
 // card you play this turn gains +N{p}. **Go again**" (Red N=3, Yellow N=2, Blue N=1.)
 //
-// Modelling: The item-destruction rider isn't modelled. The +N{p} grant fires only when this
-// copy was played from arsenal (self.FromArsenal); when it does, scan TurnState.CardsRemaining
-// for the next attack action card and credit the bonus assuming it will be played.
+// Modelling: item-destruction rider isn't modelled. The +N{p} grant requires self.FromArsenal;
+// when set, scan CardsRemaining for the next attack action card and credit the bonus.
 
 package generic
 

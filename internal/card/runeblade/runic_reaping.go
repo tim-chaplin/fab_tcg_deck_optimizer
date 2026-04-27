@@ -10,14 +10,13 @@
 // Modelling splits the two riders by when they need to resolve:
 //   - The +1{p} pitched-attack rider is a static buff on the target's printed power, so it's
 //     applied via pc.BonusAttack on the look-ahead pass before the target plays. EffectiveAttack
-//     folds it in, the solver routes the +1 to the target's perCardOut slot, and a card playing
-//     between Runic Reaping and the target sees the buff if it scans target.BonusAttack.
+//     folds it in and a card playing between Runic Reaping and the target sees the buff if it
+//     scans target.BonusAttack.
 //   - The "if this hits, create N Runechants" rider depends on the target's fully-resolved
-//     attack state — same shape as Mauvrion Skies. A card that plays between Runic Reaping
-//     and the target may grant more BonusAttack (or Dominate, etc.), and we want LikelyToHit
-//     to see those grants. Play registers an EphemeralAttackTrigger; the handler runs after
-//     the target's Play and reads target.EffectiveAttack / target.EffectiveDominate. Damage
-//     attributes back to Runic Reaping via SourceIndex.
+//     attack state. A card that plays between Runic Reaping and the target may grant more
+//     BonusAttack (or Dominate, etc.), and LikelyToHit needs to see those grants. Play
+//     registers an EphemeralAttackTrigger; the handler runs after the target's Play and
+//     reads target.EffectiveAttack / target.EffectiveDominate.
 //
 // Pitch-to-play attribution isn't tracked: any attack-typed card in Pitched satisfies the
 // +1{p} rider.

@@ -252,7 +252,7 @@ func TestHistChartWidth(t *testing.T) {
 	if got := histChartWidth(15); got != 43 {
 		t.Errorf("histChartWidth(15) = %d, want 43 ((rng-1)*slot+1)", got)
 	}
-	// Medium range (25 values): stretch to 24*3+1 = 73 cols (no longer clamped).
+	// Medium range (25 values): stretch to 24*3+1 = 73 cols.
 	if got := histChartWidth(25); got != 73 {
 		t.Errorf("histChartWidth(25) = %d, want 73 ((rng-1)*slot+1)", got)
 	}

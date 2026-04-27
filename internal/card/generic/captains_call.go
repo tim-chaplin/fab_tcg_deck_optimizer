@@ -14,7 +14,7 @@ var captainsCallTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction)
 // captainsCallApplySideEffect grants +2 to the first scheduled attack action card whose cost is
 // at most maxCost, by adding to its BonusAttack. The +2 attributes to the buffed attack (so
 // EffectiveAttack picks it up in LikelyToHit) rather than to Captain's Call itself. The
-// alternative "go again" mode is dropped (covered by NotImplemented in Phase 2).
+// alternative "go again" mode is dropped (advertised on each variant's NotImplemented marker).
 func captainsCallApplySideEffect(s *card.TurnState, maxCost int) {
 	for _, pc := range s.CardsRemaining {
 		if !pc.Card.Types().IsAttackAction() {

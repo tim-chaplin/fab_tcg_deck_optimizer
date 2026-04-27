@@ -146,9 +146,8 @@ func (d *Deck) EvaluateWith(runs int, incomingDamage int, rng *rand.Rand, ev *ha
 	}
 	mergeMarginalBuf(&d.Stats, uniqueIDs, marginalBuf)
 	// Assemble the best turn's structured log once, after the loop, so the in-memory snapshot
-	// and the on-disk JSON both carry the same shape. The JSON layer round-trips Log
-	// verbatim; printing routes through hand.FormatTurnLog so live and reloaded decks render
-	// identically.
+	// and the on-disk JSON carry the same shape. JSON round-trips Log verbatim; printing
+	// routes through hand.FormatTurnLog.
 	if len(d.Stats.Best.Summary.BestLine) > 0 {
 		d.Stats.Best.Log = hand.BuildTurnLog(d.Stats.Best.Summary, d.Stats.Best.StartingRunechants)
 	}

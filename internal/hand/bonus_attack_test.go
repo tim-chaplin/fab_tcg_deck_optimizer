@@ -29,11 +29,9 @@ func (pitchOnlyRed) GoAgain() bool                         { return false }
 func (pitchOnlyRed) Play(*card.TurnState, *card.CardState) {}
 
 // grantBonusAttack is a test-only non-attack action card that scans CardsRemaining and adds n
-// to BonusAttack on the first attack action card it finds. Mirrors the production shape used
-// by Come to Fight / Minnowism / Captain's Call once they migrate to the BonusAttack path:
-// the grant lives on the target's CardState rather than being returned from the granter's
-// own Play, so the buff is attributed to the attack being buffed and feeds EffectiveAttack
-// for any "if this hits" rider on that target.
+// to BonusAttack on the first attack action card it finds. Mirrors production "next attack
+// +N{p}" grants: the buff lands on the target's CardState so it's attributed to the attack
+// being buffed and feeds EffectiveAttack for any "if this hits" rider on that target.
 type grantBonusAttack struct{ n int }
 
 func (grantBonusAttack) ID() card.ID              { return card.Invalid }
