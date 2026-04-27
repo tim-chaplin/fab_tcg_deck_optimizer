@@ -147,6 +147,14 @@ type TurnState struct {
 	// and ephemeral handlers receive the triggering card as a direct arg already and don't
 	// need this field. Nil during direct chain-step resolution and start-of-turn fires.
 	TriggeringCard Card
+	// SkipLog short-circuits Log appends for chains the caller doesn't intend to display.
+	// Value is still credited (the sim's running damage tally is correct) and triggers fire
+	// normally (their Value contributions still flow through), but appendLog skips the slice
+	// append so most chains pay zero Log cost. The eval loop runs every turn with SkipLog=true;
+	// only the rare new-deck-best turn re-runs with SkipLog=false to materialise the Log for
+	// the printout. Per-shuffle Log churn was the dominant allocation source — snapshotCarry's
+	// Log slice copy was the biggest single field by bytes.
+	SkipLog bool
 }
 
 // AddLogEntry appends a freeform chain-step log line and credits n damage-equivalent to
@@ -178,13 +186,18 @@ func (s *TurnState) AddPostTriggerLogEntry(text, source string, n int) int {
 	return s.appendLog(LogEntry{Text: text, Source: source, Kind: LogEntryPostTrigger, N: n})
 }
 
-// appendLog credits the entry's N to s.Value (clamped at 0) and appends it to s.Log.
+// appendLog credits the entry's N to s.Value (clamped at 0) and, when SkipLog is false,
+// appends it to s.Log. SkipLog=true keeps the Value tally accurate but elides every Log
+// append in the chain — used for chains that won't be displayed (every turn except the
+// rare new-deck-best, which is replayed with SkipLog=false to materialise its Log).
 func (s *TurnState) appendLog(e LogEntry) int {
 	if e.N < 0 {
 		e.N = 0
 	}
 	s.Value += e.N
-	s.Log = append(s.Log, e)
+	if !s.SkipLog {
+		s.Log = append(s.Log, e)
+	}
 	return e.N
 }
 
