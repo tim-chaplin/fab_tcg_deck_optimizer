@@ -135,7 +135,18 @@ func (d *Deck) EvaluateWith(runs int, incomingDamage int, rng *rand.Rand, ev *ha
 			play.StartOfTurnAuras = startOfTurnAuras
 			play.DealtHand = dealtHand
 
-			recordTurnStats(&d.Stats, play, startingRunechants, handIdx, handsPerCycle)
+			if recordTurnStats(&d.Stats, play, handIdx, handsPerCycle) {
+				// New deck-best — replay this turn with full logging so the printout has the
+				// chain trace. SkipLog mode elided per-event Log appends on the bulk of turns;
+				// this single replay (~2ms) gives us the trace we need for the rare turns
+				// that actually become the displayed best.
+				replay := replayBestForTurnWithLog(d.Hero, d.Weapons, h, incomingDamage, buf[head+drawCount:tail], startingRunechants, arsenalIn, auraTriggerBuf, ev)
+				replay.Value = play.Value
+				replay.TriggersFromLastTurn = trigContribs
+				replay.StartOfTurnAuras = startOfTurnAuras
+				replay.DealtHand = dealtHand
+				recordBestTurn(&d.Stats, replay, startingRunechants)
+			}
 			tallyMarginalPresence(marginalBuf, idIndex, presentBuf, h, arsenalIn, float64(play.Value))
 			nextHeld = applyTurnResult(play, buf, &head, &tail, nextHeld[:0])
 			nextAuraTrigger = append(nextAuraTrigger[:0], play.State.AuraTriggers...)
@@ -169,10 +180,36 @@ func snapshotStartOfTurnAuras(queued []card.AuraTrigger) []card.Card {
 	return out
 }
 
-// runBestForTurn dispatches to ev.BestWithTriggers when an evaluator is supplied (the
+// runBestForTurn dispatches to ev.BestWithTriggersSkipLog when an evaluator is supplied (the
 // hot-path goroutine-local case used by EvaluateWith / IterateParallel) and falls back to
-// the package-level hand.BestWithTriggers when ev is nil.
+// the package-level hand.BestWithTriggers when ev is nil. The returned TurnSummary has
+// State.Log empty for the SkipLog path; callers that want a populated Log (the rare new-
+// deck-best case) call replayBestForTurnWithLog with the same inputs.
 func runBestForTurn(
+	hero hero.Hero,
+	weapons []weapon.Weapon,
+	h []card.Card,
+	incomingDamage int,
+	deck []card.Card,
+	runechantCarryover int,
+	arsenalCard card.Card,
+	priorAuraTriggers []card.AuraTrigger,
+	ev *hand.Evaluator,
+) hand.TurnSummary {
+	if ev != nil {
+		return ev.BestWithTriggersSkipLog(hero, weapons, h, incomingDamage, deck, runechantCarryover, arsenalCard, priorAuraTriggers)
+	}
+	// No-evaluator path retains the populated-Log behaviour for direct callers (tests, ad-hoc
+	// tools) that don't have a deck-eval loop to drive the replay step.
+	return hand.BestWithTriggers(hero, weapons, h, incomingDamage, deck, runechantCarryover, arsenalCard, priorAuraTriggers)
+}
+
+// replayBestForTurnWithLog re-runs the Best search with full Log materialisation. Same
+// inputs and same algorithm as runBestForTurn — Best is deterministic given the inputs, so
+// the returned TurnSummary has identical Value, BestLine, and CarryState to the SkipLog
+// run, plus a fully populated State.Log. Used only when a turn becomes the new deck-best,
+// so the replay cost amortises across the bulk of turns that don't.
+func replayBestForTurnWithLog(
 	hero hero.Hero,
 	weapons []weapon.Weapon,
 	h []card.Card,
@@ -189,11 +226,16 @@ func runBestForTurn(
 	return hand.BestWithTriggers(hero, weapons, h, incomingDamage, deck, runechantCarryover, arsenalCard, priorAuraTriggers)
 }
 
-// recordTurnStats folds one resolved turn into stats: bumps Hands / TotalValue, lazily
-// initialises the Histogram, replaces the all-time best when this turn beats it (or when
-// no best is recorded yet), and credits the value to FirstCycle / SecondCycle based on
-// where handIdx sits relative to the deck's hands-per-cycle boundary.
-func recordTurnStats(stats *Stats, play hand.TurnSummary, startingRunechants, handIdx, handsPerCycle int) {
+// recordTurnStats folds one resolved turn's accumulators into stats: bumps Hands /
+// TotalValue, lazily initialises the Histogram, and credits the value to FirstCycle /
+// SecondCycle based on where handIdx sits relative to the deck's hands-per-cycle boundary.
+//
+// Returns true when this turn's Value beats the current stats.Best — the caller is then
+// responsible for calling recordBestTurn with a TurnSummary that has its State.Log fully
+// populated (replayed via replayBestForTurnWithLog when the SkipLog path was used). Keeping
+// the recordBestTurn clone out of here means the SkipLog run isn't cloned uselessly when
+// the caller plans to overwrite with the replayed result.
+func recordTurnStats(stats *Stats, play hand.TurnSummary, handIdx, handsPerCycle int) bool {
 	v := float64(play.Value)
 	stats.TotalValue += v
 	stats.Hands++
@@ -201,9 +243,7 @@ func recordTurnStats(stats *Stats, play hand.TurnSummary, startingRunechants, ha
 		stats.Histogram = map[int]int{}
 	}
 	stats.Histogram[play.Value]++
-	if play.Value > stats.Best.Summary.Value || len(stats.Best.Summary.BestLine) == 0 {
-		recordBestTurn(stats, play, startingRunechants)
-	}
+	newBest := play.Value > stats.Best.Summary.Value || len(stats.Best.Summary.BestLine) == 0
 	switch handIdx / handsPerCycle {
 	case 0:
 		stats.FirstCycle.Hands++
@@ -212,6 +252,7 @@ func recordTurnStats(stats *Stats, play hand.TurnSummary, startingRunechants, ha
 		stats.SecondCycle.Hands++
 		stats.SecondCycle.Total += v
 	}
+	return newBest
 }
 
 // startOfTurnRevealRoom caps how many cards a start-of-turn AuraTrigger reveal can append

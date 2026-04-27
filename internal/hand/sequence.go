@@ -37,7 +37,7 @@ func FormatLogEntry(e card.LogEntry) string {
 // arsenalAtChainStart is the card sitting in the arsenal slot at the start of the chain — set
 // when the partition assigned arsenalCardIn the Arsenal role (it's staying), nil otherwise
 // (no arsenal-in, or arsenal-in is playing as Attack/Defend).
-func bestAttackWithWeapons(hero hero.Hero, weapons []weapon.Weapon, attackers, defenders, pitched, held, deck []card.Card, bufs *attackBufs, runechantCarryover, incomingDamage, blockTotal, arsenalInIdx, arsenalDefenderIdx int, arsenalAtChainStart card.Card, priorAuraTriggers []card.AuraTrigger) (int, int, int, chainBudget, []string, CarryState, bool) {
+func bestAttackWithWeapons(hero hero.Hero, weapons []weapon.Weapon, attackers, defenders, pitched, held, deck []card.Card, bufs *attackBufs, runechantCarryover, incomingDamage, blockTotal, arsenalInIdx, arsenalDefenderIdx int, arsenalAtChainStart card.Card, priorAuraTriggers []card.AuraTrigger, skipLog bool) (int, int, int, chainBudget, []string, CarryState, bool) {
 	ctx := &sequenceContext{
 		hero:                hero,
 		pitched:             pitched,
@@ -50,6 +50,7 @@ func bestAttackWithWeapons(hero hero.Hero, weapons []weapon.Weapon, attackers, d
 		blockTotal:          blockTotal,
 		arsenalInIdx:        arsenalInIdx,
 		priorAuraTriggers:   priorAuraTriggers,
+		skipLog:             skipLog,
 	}
 	// Defenders fire independently of ordering and attack chain — DRs through Play, plain
 	// blocks as raw block credit — so their total Value contribution is constant across phase
@@ -206,6 +207,10 @@ type sequenceContext struct {
 	// shared state.* fields reflect whatever ordering ran last, so the snapshot has to
 	// happen the moment a new winner is found.
 	carryWinner CarryState
+	// skipLog propagates into TurnState.SkipLog on every permutation reset. When true,
+	// chains run with Log appends elided (Value still credited); the caller is replaying
+	// later with skipLog=false to materialise the printout.
+	skipLog bool
 }
 
 // fireAttackActionTriggers walks state.AuraTriggers after an attack action card resolves
@@ -294,6 +299,7 @@ func (ctx *sequenceContext) resetStateForPermutation() {
 		Runechants:              ctx.runechantCarryover,
 		AuraTriggers:            append(bufs.auraTriggersBacking[:0], ctx.priorAuraTriggers...),
 		EphemeralAttackTriggers: bufs.ephemeralBacking[:0],
+		SkipLog:                 ctx.skipLog,
 	}
 }
 
