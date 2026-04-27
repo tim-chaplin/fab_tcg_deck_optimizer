@@ -134,10 +134,37 @@ func newAttackBufs(handSize, weaponCount int, weapons []weapon.Weapon) *attackBu
 	}
 }
 
-// getAttackBufs returns a fresh attackBufs sized for this hand. Callers allocate fresh per
-// Best call.
+// getAttackBufs returns the Evaluator's cached attackBufs when (handSize, weapons) match the
+// last call; otherwise allocates a fresh one and caches it. weapons are zero-size structs so
+// interface equality is a stable identity check. For a single deck eval (10k shuffles, same
+// hand size + same weapons) this allocates once and reuses on every subsequent call —
+// attackBufs is the second-biggest allocator after the eval-time slice copies.
 func (e *Evaluator) getAttackBufs(handSize int, weapons []weapon.Weapon) *attackBufs {
-	return newAttackBufs(handSize, len(weapons), weapons)
+	if e.cachedBufs != nil && e.cachedHandSize == handSize && sameWeapons(e.cachedWeapons, weapons) {
+		return e.cachedBufs
+	}
+	e.cachedBufs = newAttackBufs(handSize, len(weapons), weapons)
+	e.cachedHandSize = handSize
+	// Snapshot the weapons slice header — caller may reuse the slice across calls. The
+	// underlying weapon.Weapon values are zero-size structs; interface equality compares
+	// (type, nil-data) tuples that are stable across calls.
+	e.cachedWeapons = append(e.cachedWeapons[:0], weapons...)
+	return e.cachedBufs
+}
+
+// sameWeapons reports whether two weapon slices contain the same weapons in the same order.
+// Element-wise interface equality works because every weapon implementation is a zero-size
+// struct, making interface values comparable and stable across calls.
+func sameWeapons(a, b []weapon.Weapon) bool {
+	if len(a) != len(b) {
+		return false
+	}
+	for i := range a {
+		if a[i] != b[i] {
+			return false
+		}
+	}
+	return true
 }
 
 // fillPartitionPerCardBufs writes the per-card values the partition recurse reads at each leaf:
