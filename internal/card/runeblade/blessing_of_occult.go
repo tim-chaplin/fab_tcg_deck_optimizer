@@ -7,7 +7,11 @@
 
 package runeblade
 
-import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+import (
+	"fmt"
+
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+)
 
 var blessingOfOccultTypes = card.NewTypeSet(card.TypeRuneblade, card.TypeAction, card.TypeAura)
 
@@ -60,11 +64,10 @@ func (c BlessingOfOccultBlue) Play(s *card.TurnState, self *card.CardState) {
 // and emits the same-turn chain step (no value contribution; all credit is deferred to
 // the trigger).
 func blessingOfOccultPlay(s *card.TurnState, selfState *card.CardState, selfCard card.Card, n int) {
-	s.AddAuraTrigger(card.AuraTrigger{
-		Self:    selfCard,
-		Type:    card.TriggerStartOfTurn,
-		Count:   1,
-		Handler: func(s *card.TurnState) int { return s.CreateRunechants(n) },
-	})
+	text := "Created a runechant"
+	if n > 1 {
+		text = fmt.Sprintf("Created %d runechants", n)
+	}
+	s.RegisterStartOfTurn(selfCard, 1, text, func(s *card.TurnState) int { return s.CreateRunechants(n) })
 	s.LogPlay(selfState)
 }

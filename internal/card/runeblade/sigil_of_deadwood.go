@@ -23,11 +23,6 @@ func (SigilOfDeadwoodBlue) Types() card.TypeSet      { return sigilOfDeadwoodTyp
 func (SigilOfDeadwoodBlue) GoAgain() bool            { return true }
 func (SigilOfDeadwoodBlue) AddsFutureValue()         {}
 func (c SigilOfDeadwoodBlue) Play(s *card.TurnState, self *card.CardState) {
-	s.AddAuraTrigger(card.AuraTrigger{
-		Self:    c,
-		Type:    card.TriggerStartOfTurn,
-		Count:   1,
-		Handler: func(s *card.TurnState) int { return s.CreateRunechants(1) },
-	})
+	s.RegisterStartOfTurn(c, 1, "Created a runechant", func(s *card.TurnState) int { return s.CreateRunechants(1) })
 	s.LogPlay(self)
 }

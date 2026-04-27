@@ -225,3 +225,66 @@ func TestClashValue_WinTieLose(t *testing.T) {
 		}
 	}
 }
+
+// TestRegisterStartOfTurn_AutoLogsWithText: when text is non-empty and the handler returns
+// n > 0, the wrapper writes a post-trigger log entry "<DisplayName>: text (+n)" attributed
+// to self before returning. This is what processTriggersAtStartOfTurn captures as the
+// trigger's contribution Text so the rendered turn log names the effect instead of falling
+// back to "START OF ACTION PHASE (+N)".
+func TestRegisterStartOfTurn_AutoLogsWithText(t *testing.T) {
+	self := stubCard{name: "Test Aura", types: NewTypeSet(TypeAura)}
+	var s TurnState
+	s.RegisterStartOfTurn(self, 1, "Gained 1 health", func(*TurnState) int { return 1 })
+	if len(s.AuraTriggers) != 1 {
+		t.Fatalf("AuraTriggers len = %d, want 1", len(s.AuraTriggers))
+	}
+
+	var fired TurnState
+	got := s.AuraTriggers[0].Handler(&fired)
+	if got != 1 {
+		t.Errorf("handler return = %d, want 1 (passes through inner return)", got)
+	}
+	if len(fired.Log) != 1 {
+		t.Fatalf("Log len = %d, want 1 entry from auto-log", len(fired.Log))
+	}
+	if want := "Test Aura: Gained 1 health (+1)"; fired.Log[0].Text != want {
+		t.Errorf("auto-log text = %q, want %q", fired.Log[0].Text, want)
+	}
+}
+
+// TestRegisterStartOfTurn_NoLogOnZero: text is set but the handler returned 0 — wrapper
+// skips the log entry so a no-op fire (e.g. Sigil of Silphidae's leave trigger when the
+// graveyard has no aura to banish) doesn't emit a misleading "Banished an aura" line.
+func TestRegisterStartOfTurn_NoLogOnZero(t *testing.T) {
+	self := stubCard{name: "Test Aura", types: NewTypeSet(TypeAura)}
+	var s TurnState
+	s.RegisterStartOfTurn(self, 1, "Did the thing", func(*TurnState) int { return 0 })
+
+	var fired TurnState
+	s.AuraTriggers[0].Handler(&fired)
+	if len(fired.Log) != 0 {
+		t.Errorf("Log = %v, want empty (handler returned 0)", fired.Log)
+	}
+}
+
+// TestRegisterStartOfTurn_EmptyTextLeavesHandlerAlone: text == "" means the card authors its
+// own log line inside the handler (Sigil of the Arknight's "drew X into hand", Silphidae's
+// conditional banish line). The wrapper must not append any extra entries — handler logs are
+// the only entries written.
+func TestRegisterStartOfTurn_EmptyTextLeavesHandlerAlone(t *testing.T) {
+	self := stubCard{name: "Test Aura", types: NewTypeSet(TypeAura)}
+	var s TurnState
+	s.RegisterStartOfTurn(self, 1, "", func(s *TurnState) int {
+		s.AddPostTriggerLogEntry("custom handler text", "Test Aura", 0)
+		return 0
+	})
+
+	var fired TurnState
+	s.AuraTriggers[0].Handler(&fired)
+	if len(fired.Log) != 1 {
+		t.Fatalf("Log len = %d, want exactly 1 (handler-authored only)", len(fired.Log))
+	}
+	if fired.Log[0].Text != "custom handler text" {
+		t.Errorf("Log[0].Text = %q, want handler's own text", fired.Log[0].Text)
+	}
+}

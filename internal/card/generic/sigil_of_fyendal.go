@@ -23,11 +23,6 @@ func (SigilOfFyendalBlue) Types() card.TypeSet      { return sigilOfFyendalTypes
 func (SigilOfFyendalBlue) GoAgain() bool            { return true }
 func (SigilOfFyendalBlue) AddsFutureValue()         {}
 func (c SigilOfFyendalBlue) Play(s *card.TurnState, self *card.CardState) {
-	s.AddAuraTrigger(card.AuraTrigger{
-		Self:    c,
-		Type:    card.TriggerStartOfTurn,
-		Count:   1,
-		Handler: func(*card.TurnState) int { return 1 },
-	})
+	s.RegisterStartOfTurn(c, 1, "Gained 1 health", func(*card.TurnState) int { return 1 })
 	s.LogPlay(self)
 }

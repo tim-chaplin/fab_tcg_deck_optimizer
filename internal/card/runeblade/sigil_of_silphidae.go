@@ -28,13 +28,8 @@ func (SigilOfSilphidaeBlue) GoAgain() bool            { return true }
 func (SigilOfSilphidaeBlue) AddsFutureValue()         {}
 func (c SigilOfSilphidaeBlue) Play(s *card.TurnState, self *card.CardState) {
 	enterDamage := banishAuraFromGraveyard(s)
-	s.AddAuraTrigger(card.AuraTrigger{
-		Self:  c,
-		Type:  card.TriggerStartOfTurn,
-		Count: 1,
-		Handler: func(s *card.TurnState) int {
-			return banishAuraFromGraveyard(s)
-		},
+	s.RegisterStartOfTurn(c, 1, "Banished an aura, dealt 1 arcane damage", func(s *card.TurnState) int {
+		return banishAuraFromGraveyard(s)
 	})
 	s.ApplyAndLogEffectiveAttack(self)
 	if enterDamage > 0 {
