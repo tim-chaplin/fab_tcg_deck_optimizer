@@ -534,11 +534,15 @@ func (ctx *sequenceContext) playSequenceWithMeta(n int) (damage int, leftoverRun
 // scratch storage and the next permutation will overwrite them. The deck loop adopts these
 // slices wholesale into the next-turn state.
 func snapshotCarry(s *card.TurnState) CarryState {
+	// Deck() / Graveyard() flip s.uncacheable=true; harmless here because the eval loop's
+	// per-permutation cacheable check ran before snapshotCarry and resetStateForPermutation
+	// zeroes the bit before the next permutation. We append-copy the returned live slices
+	// — the next permutation's reset will overwrite the underlying arrays.
 	return CarryState{
 		Hand:         append([]card.Card(nil), s.Hand...),
-		Deck:         s.CopyDeck(),
+		Deck:         append([]card.Card(nil), s.Deck()...),
 		Arsenal:      s.Arsenal,
-		Graveyard:    s.CopyGraveyard(),
+		Graveyard:    append([]card.Card(nil), s.Graveyard()...),
 		Banish:       append([]card.Card(nil), s.Banish...),
 		Runechants:   s.Runechants,
 		AuraTriggers: append([]card.AuraTrigger(nil), s.AuraTriggers...),

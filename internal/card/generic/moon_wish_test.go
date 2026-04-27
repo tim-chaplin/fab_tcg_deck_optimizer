@@ -69,6 +69,8 @@ func TestMoonWish_AltCostMovesHandCardToDeckTop(t *testing.T) {
 
 // TestMoonWish_TutorPrefersRedSunKissThenYellowThenBlue: when multiple Sun Kiss variants are
 // in deck the tutor picks the highest-power printing first — Red heals 3, Yellow 2, Blue 1.
+// Drives the priority through the actual TutorFromDeck call rather than the score helper
+// directly, so a future score-function rewrite that breaks priority surfaces here.
 func TestMoonWish_TutorPrefersRedSunKissThenYellowThenBlue(t *testing.T) {
 	cases := []struct {
 		name string
@@ -81,9 +83,10 @@ func TestMoonWish_TutorPrefersRedSunKissThenYellowThenBlue(t *testing.T) {
 	}
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
-			got := bestSunKissInDeck(tc.deck)
-			if got == nil || got.ID() != tc.want {
-				t.Errorf("bestSunKissInDeck = %v, want %v", got, tc.want)
+			s := card.NewTurnState(tc.deck, nil)
+			got, ok := s.TutorFromDeck(sunKissTutorPriority)
+			if !ok || got.ID() != tc.want {
+				t.Errorf("TutorFromDeck(sunKissTutorPriority) = %v, want %v", got, tc.want)
 			}
 		})
 	}

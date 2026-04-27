@@ -409,7 +409,7 @@ func processTriggersAtStartOfTurn(queued []card.AuraTrigger, postDrawDeck []card
 		// it in state.Graveyard.
 		ts.AddToGraveyard(t.Self)
 	}
-	return survivors, contribs, damage, ts.Runechants, ts.Revealed, ts.CopyGraveyard()
+	return survivors, contribs, damage, ts.Runechants, ts.Revealed, append([]card.Card(nil), ts.Graveyard()...)
 }
 
 // applyTurnResult folds a completed turn's outcome into cross-turn state. The deck loop

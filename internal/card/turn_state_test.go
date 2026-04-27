@@ -114,15 +114,52 @@ func TestIsCacheable_ClashValueFlips(t *testing.T) {
 	}
 }
 
-// TestIsCacheable_CopyDeckDoesNotFlip: framework snapshot path returns the deck contents
-// for end-of-chain CarryState capture. That's not a card decision, so it must not flip.
-func TestIsCacheable_CopyDeckDoesNotFlip(t *testing.T) {
+// TestIsCacheable_PopDeckTopFlips: PopDeckTop is a card-callable mutator that reads the
+// deck top to return it; flips IsCacheable since the popped card's identity depends on
+// hidden shuffle state.
+func TestIsCacheable_PopDeckTopFlips(t *testing.T) {
 	var s TurnState
 	s.SetDeck([]Card{stubCard{name: "a"}})
-	_ = s.CopyDeck()
-	_ = s.CopyGraveyard()
+	if _, ok := s.PopDeckTop(); !ok {
+		t.Fatal("PopDeckTop returned false on a non-empty deck")
+	}
+	if s.IsCacheable() {
+		t.Error("PopDeckTop should flip IsCacheable to false")
+	}
+}
+
+// TestIsCacheable_PrependToDeckFlips: PrependToDeck mutates deck-top, so subsequent
+// readers see this card on top — flips since the post-state depends on the pre-state's
+// hidden order.
+func TestIsCacheable_PrependToDeckFlips(t *testing.T) {
+	var s TurnState
+	s.PrependToDeck(stubCard{name: "a"})
+	if s.IsCacheable() {
+		t.Error("PrependToDeck should flip IsCacheable to false")
+	}
+}
+
+// TestIsCacheable_TutorFromDeckFlips: TutorFromDeck scans the whole deck — reading the
+// contents clearly flips.
+func TestIsCacheable_TutorFromDeckFlips(t *testing.T) {
+	var s TurnState
+	s.SetDeck([]Card{stubCard{name: "a"}})
+	s.TutorFromDeck(func(Card) int { return 1 })
+	if s.IsCacheable() {
+		t.Error("TutorFromDeck should flip IsCacheable to false")
+	}
+}
+
+// TestIsCacheable_BanishFromGraveyardFlips: BanishFromGraveyard scans the graveyard.
+func TestIsCacheable_BanishFromGraveyardFlips(t *testing.T) {
+	var s TurnState
+	s.AddToGraveyard(stubCard{name: "a"})
 	if !s.IsCacheable() {
-		t.Error("CopyDeck/CopyGraveyard should not flip cacheable (framework snapshot path)")
+		t.Fatal("pre: AddToGraveyard alone should keep cacheable")
+	}
+	s.BanishFromGraveyard(func(Card) bool { return true })
+	if s.IsCacheable() {
+		t.Error("BanishFromGraveyard should flip IsCacheable to false")
 	}
 }
 

@@ -21,11 +21,10 @@ func TestRunicFellingsong_NoAuraCreditsPrintedPowerOnly(t *testing.T) {
 // Attack() + 1 (the banish rider's arcane).
 func TestRunicFellingsong_AuraInGraveyardFiresBanishRider(t *testing.T) {
 	aura := BlessingOfOccultRed{}
-	var s card.TurnState
-	s.SetGraveyard([]card.Card{aura})
+	s := card.NewTurnState(nil, []card.Card{aura})
 	c := RunicFellingsongRed{}
 	want := c.Attack() + 1
-	c.Play(&s, &card.CardState{Card: c})
+	c.Play(s, &card.CardState{Card: c})
 	if got := s.Value; got != want {
 		t.Errorf("Play() = %d, want %d (Attack + banish rider)", got, want)
 	}

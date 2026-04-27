@@ -10,9 +10,8 @@ import (
 // flips AuraCreated, registers a TriggerStartOfTurn entry, and returns 0. The deck peek
 // happens when the sim fires the trigger next turn.
 func TestSigilOfTheArknight_PlayOnlySetsAuraCreated(t *testing.T) {
-	var s card.TurnState
-	s.SetDeck([]card.Card{stubRunebladeAttack{}})
-	(SigilOfTheArknightBlue{}).Play(&s, &card.CardState{Card: SigilOfTheArknightBlue{}})
+	s := card.NewTurnState([]card.Card{stubRunebladeAttack{}}, nil)
+	(SigilOfTheArknightBlue{}).Play(s, &card.CardState{Card: SigilOfTheArknightBlue{}})
 	if got := s.Value; got != 0 {
 		t.Errorf("Play() = %d, want 0 (reveal deferred to trigger)", got)
 	}
@@ -32,9 +31,8 @@ func TestSigilOfTheArknight_TriggerRevealsAttackActionIntoHand(t *testing.T) {
 	var play card.TurnState
 	(SigilOfTheArknightBlue{}).Play(&play, &card.CardState{Card: SigilOfTheArknightBlue{}})
 	top := stubRunebladeAttack{}
-	var next card.TurnState
-	next.SetDeck([]card.Card{top, stubNonAttack{}})
-	if got := play.AuraTriggers[0].Handler(&next); got != 0 {
+	next := card.NewTurnState([]card.Card{top, stubNonAttack{}}, nil)
+	if got := play.AuraTriggers[0].Handler(next); got != 0 {
 		t.Errorf("handler damage = %d, want 0 (tempo credited via Revealed, not damage)", got)
 	}
 	if len(next.Revealed) != 1 || next.Revealed[0] != top {
@@ -51,9 +49,8 @@ func TestSigilOfTheArknight_TriggerRevealsAttackActionIntoHand(t *testing.T) {
 func TestSigilOfTheArknight_TriggerRevealsNonAttack(t *testing.T) {
 	var play card.TurnState
 	(SigilOfTheArknightBlue{}).Play(&play, &card.CardState{Card: SigilOfTheArknightBlue{}})
-	var next card.TurnState
-	next.SetDeck([]card.Card{stubAura{}, stubRunebladeAttack{}})
-	if got := play.AuraTriggers[0].Handler(&next); got != 0 {
+	next := card.NewTurnState([]card.Card{stubAura{}, stubRunebladeAttack{}}, nil)
+	if got := play.AuraTriggers[0].Handler(next); got != 0 {
 		t.Errorf("handler damage = %d, want 0", got)
 	}
 	if next.Revealed != nil {

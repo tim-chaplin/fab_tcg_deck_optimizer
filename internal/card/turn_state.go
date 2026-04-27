@@ -173,31 +173,90 @@ type TurnState struct {
 	uncacheable bool
 }
 
-// Deck returns the deck top-to-bottom and flips IsCacheable() to false. Callers reading
-// deck contents (peek-top, scan-top-N, tutor search) accept that the chain's output now
-// depends on hidden shuffle state that isn't part of the cache key.
+// Deck returns the live deck slice (top-to-bottom) and flips IsCacheable() to false.
+// Cards use this for read-only scans (peek-top, scan-top-N); they must NOT mutate the
+// returned slice — mutations bypass the cacheable-tracking mechanics and corrupt state.
+// Cards that need to modify the deck go through the verb-based mutators (PopDeckTop,
+// PrependToDeck, TutorFromDeck) which flip and update atomically. The flip on read
+// captures that the chain output now depends on hidden shuffle state, which the cache
+// key wouldn't otherwise include.
 func (s *TurnState) Deck() []Card {
 	s.uncacheable = true
 	return s.deck
 }
 
-// SetDeck replaces the deck slice. No flip — writes are deterministic from input + chain
-// operations, so they don't make the output depend on hidden order.
-func (s *TurnState) SetDeck(d []Card) {
-	s.deck = d
-}
-
-// Graveyard returns the graveyard contents and flips IsCacheable() to false. Callers
-// scanning the graveyard (e.g. Weeping Battleground looking for an aura to banish) read
-// prior-turn hidden state, so the chain becomes uncacheable.
+// Graveyard returns the live graveyard slice and flips IsCacheable() to false. Same
+// read-only contract as Deck — cards mutate via BanishFromGraveyard or AddToGraveyard,
+// not by writing into the returned slice. Reading the graveyard makes the chain depend on
+// prior-turn hidden state.
 func (s *TurnState) Graveyard() []Card {
 	s.uncacheable = true
 	return s.graveyard
 }
 
-// SetGraveyard replaces the graveyard slice. No flip — same reasoning as SetDeck.
-func (s *TurnState) SetGraveyard(g []Card) {
-	s.graveyard = g
+// PopDeckTop removes and returns the top card of the deck. Returns (nil, false) on an
+// empty deck. Flips IsCacheable() — the popped card's identity depends on hidden shuffle
+// state, and the post-deck the next card sees does too.
+func (s *TurnState) PopDeckTop() (Card, bool) {
+	s.uncacheable = true
+	if len(s.deck) == 0 {
+		return nil, false
+	}
+	c := s.deck[0]
+	s.deck = s.deck[1:]
+	return c, true
+}
+
+// PrependToDeck pushes c to the top of the deck. Used by alt-cost effects ("put a card
+// from your hand on top of your deck") and end-of-chain top-of-deck riders. Flips
+// IsCacheable() because the post-chain deck top is now this card — visible to any
+// subsequent reader (mid-chain DrawOne, end-of-chain CarryState consumer) that the cache
+// key wouldn't capture.
+func (s *TurnState) PrependToDeck(c Card) {
+	s.uncacheable = true
+	s.deck = append([]Card{c}, s.deck...)
+}
+
+// TutorFromDeck scans the deck and removes the highest-scored card. score returns 0 for
+// "not eligible" and a positive priority otherwise (higher wins). Returns (nil, false) when
+// nothing scores positive. Flips IsCacheable() — the tutored card's identity depends on
+// what was in the deck, which is hidden-shuffle state.
+func (s *TurnState) TutorFromDeck(score func(Card) int) (Card, bool) {
+	s.uncacheable = true
+	bestIdx, bestScore := -1, 0
+	for i, c := range s.deck {
+		if sc := score(c); sc > bestScore {
+			bestIdx, bestScore = i, sc
+		}
+	}
+	if bestIdx < 0 {
+		return nil, false
+	}
+	tutored := s.deck[bestIdx]
+	out := make([]Card, 0, len(s.deck)-1)
+	out = append(out, s.deck[:bestIdx]...)
+	out = append(out, s.deck[bestIdx+1:]...)
+	s.deck = out
+	return tutored, true
+}
+
+// BanishFromGraveyard finds the first graveyard entry matching pred, removes it from the
+// graveyard, appends it to s.Banish, and returns it. Returns (nil, false) when no match.
+// Flips IsCacheable() since scanning the graveyard reads prior-turn hidden state.
+func (s *TurnState) BanishFromGraveyard(pred func(Card) bool) (Card, bool) {
+	s.uncacheable = true
+	for i, c := range s.graveyard {
+		if !pred(c) {
+			continue
+		}
+		s.Banish = append(s.Banish, c)
+		out := make([]Card, 0, len(s.graveyard)-1)
+		out = append(out, s.graveyard[:i]...)
+		out = append(out, s.graveyard[i+1:]...)
+		s.graveyard = out
+		return c, true
+	}
+	return nil, false
 }
 
 // IsCacheable reports whether this chain is still cacheable — true at the start of each
@@ -209,9 +268,9 @@ func (s *TurnState) IsCacheable() bool {
 }
 
 // NewTurnState returns a fresh *TurnState seeded with deck (top-to-bottom) and graveyard
-// contents. Pass nil for an empty zone. Convenient for tests and ad-hoc framework code
-// that needs to spin up a TurnState in one line; the per-permutation reset path uses
-// SetDeck / SetGraveyard directly on a struct-literal-initialised TurnState.
+// contents. Pass nil for an empty zone. Test/utility constructor; the framework's per-
+// permutation reset path uses SetDeck / SetGraveyard directly on a struct-literal-
+// initialised TurnState.
 func NewTurnState(deck, graveyard []Card) *TurnState {
 	s := &TurnState{}
 	s.SetDeck(deck)
@@ -219,18 +278,31 @@ func NewTurnState(deck, graveyard []Card) *TurnState {
 	return s
 }
 
-// CopyDeck returns a fresh slice with the deck's current contents. Framework-only escape
-// hatch for the per-turn snapshot path: snapshotting the chain's end-state for next turn
-// isn't a card-driven content read, so this accessor doesn't flip IsCacheable(). Cards
-// must read deck contents through Deck() instead.
-func (s *TurnState) CopyDeck() []Card {
-	return append([]Card(nil), s.deck...)
+// SetDeck and SetGraveyard are FRAMEWORK-ONLY raw setters, not part of the card-facing
+// API. They wholesale-replace the underlying slice without flipping IsCacheable(), so a
+// card that called them would silently bypass the cacheable-tracking guarantee.
+//
+// Go's package model has no "framework-only" visibility — exporting these methods makes
+// them callable from any package that imports `card`, including the card subpackages. The
+// static check in cardlint_test.go closes that loophole at build time: it scans
+// internal/card/runeblade/... and internal/card/generic/... and fails the test (and the
+// CI build) if any file references SetDeck or SetGraveyard. Cards must seed deck /
+// graveyard mutations through the safe verbs (PopDeckTop / PrependToDeck / TutorFromDeck
+// / BanishFromGraveyard / AddToGraveyard).
+//
+// The framework call sites are: resetStateForPermutation (internal/hand/sequence.go),
+// defendersDamage and appendDefenseReactionLines (internal/hand), and
+// processTriggersAtStartOfTurn (internal/deck/evaluate.go) — places that build a fresh
+// TurnState shape between permutations or for an isolated DR / start-of-turn run.
+
+// SetDeck wholesale-replaces the deck slice. FRAMEWORK-ONLY; see comment above.
+func (s *TurnState) SetDeck(d []Card) {
+	s.deck = d
 }
 
-// CopyGraveyard returns a fresh slice with the graveyard's current contents. Same
-// framework-only semantics as CopyDeck — used by the snapshot path, not by card logic.
-func (s *TurnState) CopyGraveyard() []Card {
-	return append([]Card(nil), s.graveyard...)
+// SetGraveyard wholesale-replaces the graveyard slice. FRAMEWORK-ONLY; see comment above.
+func (s *TurnState) SetGraveyard(g []Card) {
+	s.graveyard = g
 }
 
 // AddLogEntry appends a freeform chain-step log line and credits n damage-equivalent to
