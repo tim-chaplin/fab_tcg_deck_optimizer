@@ -7,6 +7,7 @@ package deck
 
 import (
 	"fmt"
+	"math"
 	"math/rand"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
@@ -36,7 +37,80 @@ func (d *Deck) Evaluate(runs int, incomingDamage int, rng *rand.Rand) Stats {
 // EvaluateWith is Evaluate using the given hand.Evaluator. Pass a dedicated Evaluator per
 // goroutine for parallel runs; nil reuses the package-level shared Evaluator.
 func (d *Deck) EvaluateWith(runs int, incomingDamage int, rng *rand.Rand, ev *hand.Evaluator) Stats {
-	d.Stats.Runs += runs
+	return d.evaluateImpl(runs, incomingDamage, rng, ev, nil)
+}
+
+// EvaluateAdaptive runs shuffles until the standard error of the per-turn mean Value drops
+// below adaptiveTargetSE, capped at adaptiveShufflesCap. The SE check fires every
+// adaptiveCheckInterval shuffles to amortise the histogram walk; there's no minimum
+// shuffle floor — typical Viserai decks converge in 200-400 shuffles. Returns the same
+// Stats shape as Evaluate; Stats.Runs reflects the actual number of shuffles run.
+//
+// Use when "knowing the mean to ±adaptiveTargetSE" is enough — e.g. fabsim eval / anneal
+// default runs. Modes that need apples-to-apples shuffle counts across runs (compare,
+// explicit -shuffles) should keep using EvaluateWith with a fixed runs count.
+func (d *Deck) EvaluateAdaptive(incomingDamage int, rng *rand.Rand) Stats {
+	return d.EvaluateAdaptiveWith(incomingDamage, rng, nil)
+}
+
+// EvaluateAdaptiveWith is EvaluateAdaptive using the given hand.Evaluator.
+func (d *Deck) EvaluateAdaptiveWith(incomingDamage int, rng *rand.Rand, ev *hand.Evaluator) Stats {
+	return d.evaluateImpl(adaptiveShufflesCap, incomingDamage, rng, ev, makeAdaptiveStop(adaptiveTargetSE))
+}
+
+// shuffleStopper is the early-stop policy for the eval shuffle loop. Called once after each
+// shuffle's stats are recorded; returning true breaks the loop. nil disables early stop.
+type shuffleStopper func(stats *Stats, runs int) bool
+
+const (
+	// adaptiveCheckInterval is how often (in shuffles) the adaptive stop check fires.
+	// Larger values mean we may overshoot the target SE by a few hundred shuffles; smaller
+	// values mean more histogram walks. 50 keeps overshoot small for low-variance decks
+	// where SE drops below target inside 200-300 shuffles.
+	adaptiveCheckInterval = 50
+	// adaptiveTargetSE is the standard-error target the adaptive shuffle path stops at.
+	// ±0.05 is roughly the precision useful for "is this deck ~13.5 vs ~13.6" comparisons;
+	// tighter than that pays diminishing returns. Hand-value sigma sits around 4-6, so
+	// SE = 0.05 typically converges inside 1k shuffles.
+	adaptiveTargetSE = 0.05
+	// adaptiveShufflesCap is the upper bound on the adaptive shuffle path. Caps a
+	// pathological high-variance regime that doesn't converge to adaptiveTargetSE — the
+	// run still terminates at this many shuffles even if the SE target was never hit.
+	adaptiveShufflesCap = 50000
+)
+
+// makeAdaptiveStop returns a shuffleStopper that fires when the per-turn mean's standard
+// error drops below targetSE. Checks every adaptiveCheckInterval shuffles so the
+// histogram walk doesn't run on every iteration.
+func makeAdaptiveStop(targetSE float64) shuffleStopper {
+	return func(stats *Stats, runs int) bool {
+		if runs%adaptiveCheckInterval != 0 {
+			return false
+		}
+		return meanStandardError(stats) <= targetSE
+	}
+}
+
+// meanStandardError computes the standard error of the per-turn mean Value: sigma / sqrt(N)
+// where sigma is the unbiased per-turn sample standard deviation. Walks the histogram so
+// it's O(unique values) ~ O(30) per call rather than O(N). Returns +Inf when fewer than two
+// turns have been simulated (variance is undefined).
+func meanStandardError(stats *Stats) float64 {
+	n := float64(stats.Hands)
+	if n < 2 {
+		return math.Inf(1)
+	}
+	mean := stats.TotalValue / n
+	sumSq := 0.0
+	for v, count := range stats.Histogram {
+		diff := float64(v) - mean
+		sumSq += diff * diff * float64(count)
+	}
+	variance := sumSq / (n - 1)
+	return math.Sqrt(variance / n)
+}
+
+func (d *Deck) evaluateImpl(maxRuns int, incomingDamage int, rng *rand.Rand, ev *hand.Evaluator, stop shuffleStopper) Stats {
 	simstate.CurrentHero = d.Hero
 	handSize := d.Hero.Intelligence()
 	deckSize := len(d.Cards)
@@ -76,7 +150,8 @@ func (d *Deck) EvaluateWith(runs int, incomingDamage int, rng *rand.Rand, ev *ha
 	// with nextAuraTrigger like heldBuf so the swap is allocation-free.
 	auraTriggerBuf := make([]card.AuraTrigger, 0, handSize)
 	nextAuraTrigger := make([]card.AuraTrigger, 0, handSize)
-	for r := 0; r < runs; r++ {
+	actualRuns := 0
+	for r := 0; r < maxRuns; r++ {
 		copy(buf, d.Cards)
 		// Inline Fisher-Yates: rng.Shuffle would heap-allocate a closure over buf every run.
 		for i := deckSize - 1; i > 0; i-- {
@@ -154,7 +229,12 @@ func (d *Deck) EvaluateWith(runs int, incomingDamage int, rng *rand.Rand, ev *ha
 			heldBuf, nextHeld = nextHeld, heldBuf
 			auraTriggerBuf, nextAuraTrigger = nextAuraTrigger, auraTriggerBuf
 		}
+		actualRuns = r + 1
+		if stop != nil && stop(&d.Stats, actualRuns) {
+			break
+		}
 	}
+	d.Stats.Runs += actualRuns
 	mergeMarginalBuf(&d.Stats, uniqueIDs, marginalBuf)
 	// Assemble the best turn's structured log once, after the loop, so the in-memory snapshot
 	// and the on-disk JSON carry the same shape. JSON round-trips Log verbatim; printing
