@@ -43,7 +43,7 @@ func (e *Evaluator) Best(hero hero.Hero, weapons []weapon.Weapon, hand []card.Ca
 // BestWithTriggers is the method form of the package-level BestWithTriggers. Returns a
 // TurnSummary with State.Log fully populated.
 func (e *Evaluator) BestWithTriggers(hero hero.Hero, weapons []weapon.Weapon, hand []card.Card, incomingDamage int, deck []card.Card, runechantCarryover int, arsenalCardIn card.Card, priorAuraTriggers []card.AuraTrigger) TurnSummary {
-	return e.bestUncached(hero, weapons, hand, incomingDamage, deck, runechantCarryover, arsenalCardIn, priorAuraTriggers, false)
+	return e.findBest(hero, weapons, hand, incomingDamage, deck, runechantCarryover, arsenalCardIn, priorAuraTriggers, false)
 }
 
 // BestWithTriggersSkipLog is BestWithTriggers without populating State.Log. Same Value and
@@ -51,7 +51,7 @@ func (e *Evaluator) BestWithTriggers(hero hero.Hero, weapons []weapon.Weapon, ha
 // every turn to skip the per-chain Log slice copy that dominates allocation bytes; only
 // turns that become the new deck-best are replayed via BestWithTriggers to recover Log.
 func (e *Evaluator) BestWithTriggersSkipLog(hero hero.Hero, weapons []weapon.Weapon, hand []card.Card, incomingDamage int, deck []card.Card, runechantCarryover int, arsenalCardIn card.Card, priorAuraTriggers []card.AuraTrigger) TurnSummary {
-	return e.bestUncached(hero, weapons, hand, incomingDamage, deck, runechantCarryover, arsenalCardIn, priorAuraTriggers, true)
+	return e.findBest(hero, weapons, hand, incomingDamage, deck, runechantCarryover, arsenalCardIn, priorAuraTriggers, true)
 }
 
 // Evaluator caches per-goroutine scratch state across Best calls. The first call allocates

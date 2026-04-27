@@ -1,6 +1,6 @@
 package hand
 
-// Top-level hand enumeration: bestUncached walks every partition (Pitch / Attack / Defend /
+// Top-level hand enumeration: findBest walks every partition (Pitch / Attack / Defend /
 // Held / Arsenal assignment) and delegates each leaf's chain-feasibility check to
 // bestAttackWithWeapons. Post-enumeration helpers decide how an empty arsenal slot gets
 // filled, plus the beatsBest / roleAllowed policy functions that shape the partition tree.
@@ -11,7 +11,7 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/weapon"
 )
 
-func (e *Evaluator) bestUncached(hero hero.Hero, weapons []weapon.Weapon, hand []card.Card, incomingDamage int, deck []card.Card, runechantCarryover int, arsenalCardIn card.Card, priorAuraTriggers []card.AuraTrigger, skipLog bool) TurnSummary {
+func (e *Evaluator) findBest(hero hero.Hero, weapons []weapon.Weapon, hand []card.Card, incomingDamage int, deck []card.Card, runechantCarryover int, arsenalCardIn card.Card, priorAuraTriggers []card.AuraTrigger, skipLog bool) TurnSummary {
 	n := len(hand)
 	// The partition recurse treats the arsenal-in card as an extra entry at index n with a
 	// restricted role menu (Arsenal / Attack / Defend), so everything about it is decided inside

@@ -1,6 +1,6 @@
 package hand
 
-// Pre-allocated scratch buffers threaded through the attack-evaluation pipeline (bestUncached
+// Pre-allocated scratch buffers threaded through the attack-evaluation pipeline (findBest
 // partition loop, bestAttackWithWeapons phase/weapon masks, bestSequence permutation search).
 // Pooled on the Evaluator so one sizing amortises across every hand a long-running iterate pass
 // evaluates.
@@ -11,7 +11,7 @@ import (
 )
 
 // attackBufs holds pre-allocated buffers for the attack-evaluation pipeline (bestSequence →
-// playSequence) and the partition loop in bestUncached. Allocated once and cached on the
+// playSequence) and the partition loop in findBest. Allocated once and cached on the
 // Evaluator so a deck eval reuses them across every partition, mask, and permutation.
 type attackBufs struct {
 	pcBuf  []card.CardState
@@ -35,7 +35,7 @@ type attackBufs struct {
 	// inner loop skips interface dispatch on Types / GoAgain and reads cached cost bounds.
 	// Pointer-valued so bestSequence's permutation swaps move 8 bytes instead of a full struct.
 	permMeta []*attackerMeta
-	// Partition-loop buffers, consumed by bestUncached. Sized handSize+1 to cover the optional
+	// Partition-loop buffers, consumed by findBest. Sized handSize+1 to cover the optional
 	// arsenal-in slot the enumerator treats as index n. isDRBuf caches TypeDefenseReaction
 	// membership to skip Types().Has calls; addsFutureValueBuf caches
 	// card.AddsFutureValue implementation so the beatsBest tiebreaker can count how many
