@@ -10,7 +10,7 @@ import (
 	"testing"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/deckformat"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/hero"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/heroes"
 )
 
 // TestFabraryPathFor pins the sibling-path derivation: .json is swapped for .txt; anything else
@@ -204,7 +204,7 @@ func TestDefaultDeckNameFor(t *testing.T) {
 		{deckformat.SilverAge, 4, "viserai_silver_age_4_incoming"},
 	}
 	for _, c := range cases {
-		if got := defaultDeckNameFor(hero.Viserai{}, c.f, c.in); got != c.want {
+		if got := defaultDeckNameFor(heroes.Viserai{}, c.f, c.in); got != c.want {
 			t.Errorf("defaultDeckNameFor(Viserai, %q, %d) = %q, want %q", c.f, c.in, got, c.want)
 		}
 	}

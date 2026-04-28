@@ -6,16 +6,15 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/deck"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/hero"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/heroes"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 )
 
 // TestMarshalUnmarshalRoundTrip exercises a random deck through Marshal → Unmarshal and checks that
 // weapons, cards, and hero all come back intact (stats are intentionally not round-tripped).
 func TestMarshalUnmarshalRoundTrip(t *testing.T) {
 	rng := rand.New(rand.NewSource(1))
-	d := deck.Random(hero.Viserai{}, 40, 2, rng, nil)
+	d := sim.Random(heroes.Viserai{}, 40, 2, rng, nil)
 
 	text := Marshal(d)
 	got, skipped, err := Unmarshal(text)
@@ -45,7 +44,7 @@ func TestMarshalUnmarshalRoundTrip(t *testing.T) {
 // update consciously.
 func TestMarshalFormat(t *testing.T) {
 	rng := rand.New(rand.NewSource(1))
-	d := deck.Random(hero.Viserai{}, 40, 2, rng, nil)
+	d := sim.Random(heroes.Viserai{}, 40, 2, rng, nil)
 	text := Marshal(d)
 
 	wantPrefix := "Name: Viserai\nHero: Viserai\nFormat: Silver Age\n\nArena cards\n"
@@ -66,16 +65,16 @@ func TestMarshalFormat(t *testing.T) {
 // sideboard entries in Sideboard. The default lists themselves are pinned in the deck
 // package's tests; this one only checks the fabrary text picks them up verbatim.
 //
-// Builds a Deck directly instead of going through deck.Random so the test is stable across
+// Builds a Deck directly instead of going through sim.Random so the test is stable across
 // pool changes (e.g. cards getting tagged NotImplemented and dropping out of the random pool,
 // causing a seed-1 deck to roll different cards that collide with sideboard-default cap).
 func TestMarshalRendersAppliedDefaults(t *testing.T) {
-	d := &deck.Deck{Hero: hero.Viserai{}}
+	d := &sim.Deck{Hero: heroes.Viserai{}}
 	d.ApplyDefaults()
 	text := Marshal(d)
 
 	// Pick representative entries from each default list — full-list coverage belongs in
-	// deck.TestApplyDefaults_*.
+	// sim.TestApplyDefaults_*.
 	for _, want := range []string{
 		"1x Beckoning Haunt\n",
 		"1x Blade Beckoner Helm\n",
@@ -206,7 +205,7 @@ Deck cards
 // placed after Deck cards.
 func TestMarshalSideboardSection(t *testing.T) {
 	rng := rand.New(rand.NewSource(1))
-	d := deck.Random(hero.Viserai{}, 40, 2, rng, nil)
+	d := sim.Random(heroes.Viserai{}, 40, 2, rng, nil)
 
 	// Use Mauvrion Skies [R] — its pitch-color suffix exercises the toFabraryCardName
 	// lowercase conversion. Sideboard is a string list; names are stored in canonical form.
@@ -278,18 +277,18 @@ Deck cards
 	}
 }
 
-func cardNameCounts(d *deck.Deck) map[string]int {
+func cardNameCounts(d *sim.Deck) map[string]int {
 	m := map[string]int{}
 	for _, c := range d.Cards {
-		m[card.DisplayName(c)]++
+		m[sim.DisplayName(c)]++
 	}
 	return m
 }
 
-func weaponNameCounts(d *deck.Deck) map[string]int {
+func weaponNameCounts(d *sim.Deck) map[string]int {
 	m := map[string]int{}
 	for _, w := range d.Weapons {
-		m[card.DisplayName(w)]++
+		m[w.Name()]++
 	}
 	return m
 }

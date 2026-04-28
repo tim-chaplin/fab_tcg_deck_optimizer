@@ -12,26 +12,23 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/cards"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/deck"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/hero"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/weapon"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 )
 
-// Unmarshal parses fabrary-style deck text and returns a *deck.Deck plus a count-keyed map of
+// Unmarshal parses fabrary-style deck text and returns a *sim.Deck plus a count-keyed map of
 // deck cards whose names aren't in the optimizer's registry. Callers should surface the skipped
 // map so users aren't surprised by a silently-reduced deck. Stats aren't round-tripped.
 //
 // Arena-section entries split by lookup: weapon names land in d.Weapons, everything else lands
 // in d.Equipment (the user-managed arena list) so the round-trip preserves the full loadout.
 // A missing hero aborts: the deck can't be constructed without one.
-func Unmarshal(text string) (*deck.Deck, map[string]int, error) {
+func Unmarshal(text string) (*sim.Deck, map[string]int, error) {
 	var (
 		heroName  string
 		section   string
-		weapons   []weapon.Weapon
-		cardList  []card.Card
+		weapons   []sim.Weapon
+		cardList  []sim.Card
 		sideboard []string
 		equipment []string
 		skipped   = map[string]int{}
@@ -73,7 +70,7 @@ func Unmarshal(text string) (*deck.Deck, map[string]int, error) {
 		}
 		switch section {
 		case "arena":
-			if w, ok := weapon.ByName(name); ok {
+			if w, ok := registry.WeaponByName(name); ok {
 				for i := 0; i < qty; i++ {
 					weapons = append(weapons, w)
 				}
@@ -87,12 +84,12 @@ func Unmarshal(text string) (*deck.Deck, map[string]int, error) {
 			}
 		case "deck":
 			canon := fromFabraryCardName(name)
-			id, ok := cards.ByName(canon)
+			id, ok := registry.CardByName(canon)
 			if !ok {
 				skipped[canon] += qty
 				continue
 			}
-			c := cards.Get(id)
+			c := registry.GetCard(id)
 			for i := 0; i < qty; i++ {
 				cardList = append(cardList, c)
 			}
@@ -111,11 +108,11 @@ func Unmarshal(text string) (*deck.Deck, map[string]int, error) {
 	if err := sc.Err(); err != nil {
 		return nil, nil, err
 	}
-	h, ok := hero.ByName(heroName)
+	h, ok := registry.HeroByName(heroName)
 	if !ok {
 		return nil, nil, fmt.Errorf("fabrary: unknown hero %q", heroName)
 	}
-	d := deck.New(h, weapons, cardList)
+	d := sim.New(h, weapons, cardList)
 	d.Sideboard = sideboard
 	d.Equipment = equipment
 	return d, skipped, nil

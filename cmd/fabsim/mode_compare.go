@@ -6,9 +6,8 @@ import (
 	"sort"
 	"time"
 
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/deck"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/deckformat"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 )
 
 // runCompareCmd parses compare's flags and dispatches to runCompare. Both decks are positional
@@ -86,7 +85,7 @@ func runCompare(name1, name2 string, shuffles, incoming, maxCopies int, seed int
 // are sim-relevant loadout choices a comparison reader needs to see. Hero, Equipment, and
 // Sideboard are out of scope. When the two loadouts match exactly an explicit confirmation
 // line replaces the empty body so silence can't be mistaken for a failure.
-func printCardDelta(name1, name2 string, d1, d2 *deck.Deck) {
+func printCardDelta(name1, name2 string, d1, d2 *sim.Deck) {
 	counts1 := loadoutCounts(d1)
 	counts2 := loadoutCounts(d2)
 	weaponNames := loadoutWeaponNames(d1, d2)
@@ -147,27 +146,27 @@ func printCardDelta(name1, name2 string, d1, d2 *deck.Deck) {
 
 // loadoutCounts tallies the deck's cards and weapons by display name in a single map.
 // Weapon names don't collide with card names in the current registry, so a flat
-// name-keyed map cleanly captures both lists for diffing. card.DisplayName keeps pitch
+// name-keyed map cleanly captures both lists for diffing. sim.DisplayName keeps pitch
 // printings as distinct entries so a "-1 Aether Slash [R], +1 Aether Slash [Y]" diff is
 // legible.
-func loadoutCounts(d *deck.Deck) map[string]int {
+func loadoutCounts(d *sim.Deck) map[string]int {
 	out := make(map[string]int, len(d.Cards)+len(d.Weapons))
 	for _, c := range d.Cards {
-		out[card.DisplayName(c)]++
+		out[sim.DisplayName(c)]++
 	}
 	for _, w := range d.Weapons {
-		out[card.DisplayName(w)]++
+		out[w.Name()]++
 	}
 	return out
 }
 
 // loadoutWeaponNames returns the set of weapon display names appearing in either deck,
 // used to flag which diff entries should sort first within their +/- block.
-func loadoutWeaponNames(decks ...*deck.Deck) map[string]struct{} {
+func loadoutWeaponNames(decks ...*sim.Deck) map[string]struct{} {
 	out := map[string]struct{}{}
 	for _, d := range decks {
 		for _, w := range d.Weapons {
-			out[card.DisplayName(w)] = struct{}{}
+			out[w.Name()] = struct{}{}
 		}
 	}
 	return out

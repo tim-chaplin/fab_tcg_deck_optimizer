@@ -8,11 +8,11 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/cards"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/deck"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/hero"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/weapon"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/heroes"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/weapons"
 )
 
 // captureStdout drains os.Stdout into a buffer for the duration of f and restores it after.
@@ -46,9 +46,9 @@ func captureStdout(t *testing.T, f func()) string {
 // swap as a -/+ pair so a loadout diff that lives only in the weapon list isn't silently
 // collapsed into the "identical card lists" branch.
 func TestPrintCardDelta_IncludesWeaponDifferences(t *testing.T) {
-	cs := []card.Card{cards.Get(card.ReadTheRunesRed)}
-	d1 := deck.New(hero.Viserai{}, []weapon.Weapon{weapon.NebulaBlade{}}, cs)
-	d2 := deck.New(hero.Viserai{}, []weapon.Weapon{weapon.ReapingBlade{}}, cs)
+	cs := []sim.Card{registry.GetCard(ids.ReadTheRunesRed)}
+	d1 := sim.New(heroes.Viserai{}, []sim.Weapon{weapons.NebulaBlade{}}, cs)
+	d2 := sim.New(heroes.Viserai{}, []sim.Weapon{weapons.ReapingBlade{}}, cs)
 
 	out := captureStdout(t, func() { printCardDelta("d1", "d2", d1, d2) })
 
@@ -67,10 +67,10 @@ func TestPrintCardDelta_IncludesWeaponDifferences(t *testing.T) {
 // top of the minus block and at the top of the plus block, ahead of any card lines, so the
 // loadout-defining piece is the first thing the reader sees in each direction.
 func TestPrintCardDelta_WeaponsLeadEachBlock(t *testing.T) {
-	read := cards.Get(card.ReadTheRunesRed)
-	snatch := cards.Get(card.SnatchRed)
-	d1 := deck.New(hero.Viserai{}, []weapon.Weapon{weapon.NebulaBlade{}}, []card.Card{read, read})
-	d2 := deck.New(hero.Viserai{}, []weapon.Weapon{weapon.ReapingBlade{}}, []card.Card{snatch, snatch})
+	read := registry.GetCard(ids.ReadTheRunesRed)
+	snatch := registry.GetCard(ids.SnatchRed)
+	d1 := sim.New(heroes.Viserai{}, []sim.Weapon{weapons.NebulaBlade{}}, []sim.Card{read, read})
+	d2 := sim.New(heroes.Viserai{}, []sim.Weapon{weapons.ReapingBlade{}}, []sim.Card{snatch, snatch})
 
 	out := captureStdout(t, func() { printCardDelta("d1", "d2", d1, d2) })
 
@@ -103,10 +103,10 @@ func TestPrintCardDelta_WeaponsLeadEachBlock(t *testing.T) {
 // both decks have the same cards AND the same weapons, the line reports both totals so the
 // reader knows the comparison covered weapons and not just cards.
 func TestPrintCardDelta_IdenticalLoadoutNotesBothCounts(t *testing.T) {
-	cs := []card.Card{cards.Get(card.ReadTheRunesRed), cards.Get(card.SnatchRed)}
-	weps := []weapon.Weapon{weapon.NebulaBlade{}}
-	d1 := deck.New(hero.Viserai{}, weps, cs)
-	d2 := deck.New(hero.Viserai{}, weps, cs)
+	cs := []sim.Card{registry.GetCard(ids.ReadTheRunesRed), registry.GetCard(ids.SnatchRed)}
+	weps := []sim.Weapon{weapons.NebulaBlade{}}
+	d1 := sim.New(heroes.Viserai{}, weps, cs)
+	d2 := sim.New(heroes.Viserai{}, weps, cs)
 
 	out := captureStdout(t, func() { printCardDelta("d1", "d2", d1, d2) })
 

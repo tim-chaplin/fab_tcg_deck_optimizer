@@ -1,5 +1,6 @@
-"""Rewrite the generic block of internal/card/id.go and internal/cards/index.go to include
-newly generated card IDs, merged alphabetically with the existing hand-written ones.
+"""Rewrite the generic block of internal/registry/ids/card_ids.go and
+internal/registry/card_registry.go to include newly generated card IDs, merged
+alphabetically with the existing hand-written ones.
 """
 import os
 import re
@@ -26,8 +27,10 @@ COLOR_ORDER = {"Red": 0, "Yellow": 1, "Blue": 2, "": 3}
 
 
 def read_existing_generic_ids(content):
+    # The generic-IDs block runs from "// Generic card IDs." down to the test-only fakes
+    # block (weapon IDs now live in registry/ids/weapon_ids.go, not in this file).
     gen_start = content.index("\t// Generic card IDs.")
-    gen_end = content.index("\t// Weapon IDs.")
+    gen_end = content.index("\t// Test-only synthetic")
     gen_block = content[gen_start:gen_end]
     ids = []
     for line in gen_block.splitlines():
@@ -50,7 +53,7 @@ def build_ordered_ids(existing, new_ids):
 
 
 def render_id_block(ordered):
-    lines = ["\t// Generic card IDs. Ordered alphabetically by card name, Red \u2192 Yellow \u2192 Blue within each family."]
+    lines = ["\t// Generic card IDs. Ordered alphabetically by card name, Red → Yellow → Blue within each family."]
     for fam_ids in ordered:
         for i in fam_ids:
             lines.append("\t" + i)
@@ -58,7 +61,7 @@ def render_id_block(ordered):
 
 
 def update_id_go(new_ids):
-    path = os.path.join(ROOT, "internal", "card", "id.go")
+    path = os.path.join(ROOT, "internal", "registry", "ids", "card_ids.go")
     with open(path, encoding="utf-8") as f:
         content = f.read()
     gen_start, gen_end, existing = read_existing_generic_ids(content)
@@ -71,13 +74,13 @@ def update_id_go(new_ids):
 
 
 def read_existing_registry_entries(content):
-    # The generic registry block runs from the first `card.DodgeBlue:` line
-    # to the FakeRedAttack line.
-    idx = content.index("\tcard.DodgeBlue:")
-    end = content.index("\tcard.FakeRedAttack:")
+    # The generic registry block runs from the first `ids.AdrenalineRushRed:` line
+    # to the closing `}` of the cardsByID map.
+    idx = content.index("\tids.AdrenalineRushRed:")
+    end = content.index("\n}\n", idx)
     existing_block = content[idx:end]
-    # Each entry is like: card.DodgeBlue: generic.DodgeBlue{},
-    pat = re.compile(r"^\tcard\.([A-Za-z0-9]+):\s+generic\.[A-Za-z0-9]+\{\},\s*$", re.M)
+    # Each entry is like: ids.DodgeBlue: cards.DodgeBlue{},
+    pat = re.compile(r"^\tids\.([A-Za-z0-9]+):\s+cards\.[A-Za-z0-9]+\{\},\s*$", re.M)
     ids = pat.findall(existing_block)
     return idx, end, ids
 
@@ -86,7 +89,7 @@ def render_registry_block(ordered_families, max_name_len):
     lines = []
     for fam_ids in ordered_families:
         for i in fam_ids:
-            lines.append(f"\tcard.{i}: generic.{i}{{}},")
+            lines.append(f"\tids.{i}: cards.{i}{{}},")
         lines.append("")
     # trim trailing blank
     while lines and lines[-1] == "":
@@ -95,14 +98,13 @@ def render_registry_block(ordered_families, max_name_len):
 
 
 def update_index_go(new_ids):
-    path = os.path.join(ROOT, "internal", "cards", "index.go")
+    path = os.path.join(ROOT, "internal", "registry", "card_registry.go")
     with open(path, encoding="utf-8") as f:
         content = f.read()
     idx, end, existing = read_existing_registry_entries(content)
     ordered = build_ordered_ids(existing, new_ids)
     new_block = render_registry_block(ordered, 0)
-    # Ensure there's an extra blank line before the FakeRedAttack block.
-    new_content = content[:idx] + new_block + "\n" + content[end:]
+    new_content = content[:idx] + new_block + content[end:]
     with open(path, "w", encoding="utf-8", newline="\n") as f:
         f.write(new_content)
     print("updated", path, "with", sum(len(x) for x in ordered), "generic entries")

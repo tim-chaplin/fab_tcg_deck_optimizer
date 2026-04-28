@@ -1,6 +1,6 @@
 // Package deckformat enumerates the deck-construction formats fabsim supports and provides the
 // per-format legality filter used by deck generation and mutation. Cards opt out via marker
-// interfaces on card.Card (e.g. card.NotSilverAgeLegal); Format translates to the predicate.
+// interfaces on sim.Card (e.g. sim.NotSilverAgeLegal); Format translates to the predicate.
 //
 // Named deckformat rather than format so the import doesn't collide with the stdlib fmt /
 // package-local fmt aliases callers already lean on.
@@ -9,7 +9,7 @@ package deckformat
 import (
 	"fmt"
 
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 )
 
 // Format identifies a deck-construction format. Every fabsim run is scoped to one format —
@@ -33,11 +33,11 @@ func Parse(s string) (Format, error) {
 }
 
 // IsLegal reports whether c may appear in a deck built for this format. Silver Age rejects
-// cards tagged with the card.NotSilverAgeLegal marker; other formats (when added) plug in here.
-func (f Format) IsLegal(c card.Card) bool {
+// cards tagged with the sim.NotSilverAgeLegal marker; other formats (when added) plug in here.
+func (f Format) IsLegal(c sim.Card) bool {
 	switch f {
 	case SilverAge:
-		_, banned := c.(card.NotSilverAgeLegal)
+		_, banned := c.(sim.NotSilverAgeLegal)
 		return !banned
 	default:
 		panic(fmt.Sprintf("deckformat: IsLegal called on unknown Format %q", f))

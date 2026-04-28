@@ -82,6 +82,29 @@ implemented` riders across the card roster.
   damage-equivalent at creation rather than on fire; leftover tokens at end-of-sim are
   slightly over-credited (rare in practice).
 
+### Weapons are Cards
+
+The Weapon interface includes the Card interface; weapons are sometimes cardlike (they
+have attack power, which can be buffed, they can be granted Go Again, etc.) but are also
+different from cards (they're never played, drawn from the deck, pitched, etc.). They
+should really be treated as a completely separate type. However, parts of the sim currently
+treat Weapons as Cards, so that will have to be carefully disentangled.
+
+BUG: Flying High should grant Go Again to "your next attack", but it only currently applies
+to Action Attack cards.
+
+`internal/registry/ids/weapon_ids.go` aliases `WeaponID = CardID` and anchors the weapon
+constants at `FakeHugeAttack + iota + 1` so they don't collide with card / fake IDs in the
+shared cache slots. Ideally weapons would have their own `WeaponID uint16` type starting at
+1, separate from `CardID`. Blocked by depth: every weapon swing flows through the same
+chain runner as deck cards (`bestSequence` permutes one `[]card.Card` slice; weapons rely
+on `*card.CardState` for `BonusAttack` / `GrantedGoAgain` and call helpers like
+`s.ApplyAndLogEffectiveAttack(self)` / `s.ApplyAndLogRiderOnPlay(self, …)` that read
+`self.Card.*`; the chain step / display name / attacker meta caches are keyed by `CardID`).
+Splitting the type cleanly needs either a slot-tagged permutation that branches per-step
+between card and weapon paths, or a parallel `WeaponState` + parallel helpers — ~200–300
+lines across `card/`, `weapon/`, `hand/` plus every weapon impl.
+
 ### LikelyToHit / EffectiveAttack notes
 
 - `EffectiveAttack` (printed `Card.Attack()` + `BonusAttack`, clamped at 0) is the canonical
@@ -92,3 +115,17 @@ implemented` riders across the card roster.
 - For grants whose "if this hits" rider needs to see the target's *fully-resolved* attack
   state (post-grants from later cards in the chain), use `AddEphemeralAttackTrigger` —
   Mauvrion Skies and Runic Reaping route their on-hit Runechant clauses this way.
+
+### Tech debt
+
+- sim_test package: get rid of these functional tests that are almost e2e tests, but require exposing internals of the sim (in exports_test.go; get rid of this too). instead, just have one well-defined interface for full e2e tests, and migrate all larger-than-unit tests to it. move all those tests to their own e2etests package
+- TurnState, CarryState, and TurnSummary are all very conceptually overlapping; do we really need all 3?
+- move all the serialization, I/O type stuff into one package (deckformat, deckio, fabrary, mydecks)
+- move all the card definitions into one folder (cards, weapons, heroes)
+- move card/types.go to sim/card_types.go
+- move testutils/ package files to test.go files so they don't get compiled into the main binary
+- audit everything under sim/ package and see if it makes sense where it is
+- do something with all the "stubs_test" files
+- combine hand_aura_trigger_test.go and deck_aura_trigger_test.go into just aura_trigger_test.go, ditto for "mid_turn_draw_test"
+- fix all the docstrings that say "Package Foo is..." but are no longer in package Foo
+- get rid of the "dot import" eg: . "github.com/tim-chaplin/fab-deck-optimizer/internal/sim"

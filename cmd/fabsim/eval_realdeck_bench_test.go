@@ -6,14 +6,13 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/deck"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/deckio"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/hand"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 )
 
 // BenchmarkEvalRealDeck mimics what `fabsim eval <deck> -incoming 5 -deep-shuffles 10000`
 // does end-to-end: loads a saved 40-card Viserai deck and runs 10,000 shuffles through
-// Evaluate. Sized to match real-eval workloads — internal/deck.BenchmarkEvaluate runs only
+// Evaluate. Sized to match real-eval workloads — internal/sim.BenchmarkEvaluate runs only
 // 500 shuffles and uses Random() output, whose card mix and cache-hit profile can drift
 // from production. Use this benchmark when reasoning about end-to-end fabsim eval speedups.
 //
@@ -36,13 +35,13 @@ func BenchmarkEvalRealDeck(b *testing.B) {
 	if err != nil {
 		b.Fatalf("unmarshal deck: %v", err)
 	}
-	ev := hand.NewEvaluator()
+	ev := sim.NewEvaluator()
 
 	b.ReportAllocs()
 	b.ResetTimer()
 	for n := 0; n < b.N; n++ {
 		b.StopTimer()
-		d := deck.New(loaded.Hero, loaded.Weapons, loaded.Cards)
+		d := sim.New(loaded.Hero, loaded.Weapons, loaded.Cards)
 		evalRNG := rand.New(rand.NewSource(42))
 		b.StartTimer()
 		d.EvaluateWith(shuffles, incoming, evalRNG, ev)

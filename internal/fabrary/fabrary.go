@@ -1,4 +1,4 @@
-// Package fabrary converts a deck.Deck to and from fabrary.net's plain-text deck format
+// Package fabrary converts a sim.Deck to and from fabrary.net's plain-text deck format
 // (https://fabrary.net/decks?tab=import). The format has a `Name:` / `Hero:` / `Format:` header,
 // an "Arena cards" section for equipment and weapons, a "Deck cards" section with pitch cards
 // carrying a lowercase color suffix (e.g. "2x Aether Slash (red)"), and an optional

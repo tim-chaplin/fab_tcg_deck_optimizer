@@ -5,9 +5,9 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/card/generic"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/cards"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 )
 
 func TestParse(t *testing.T) {
@@ -62,13 +62,13 @@ func TestSilverAgeBanlistParity(t *testing.T) {
 		t.Fatal("banlist file parsed to zero entries")
 	}
 
-	for _, id := range cards.All() {
-		c := cards.Get(id)
+	for _, id := range registry.AllCards() {
+		c := registry.GetCard(id)
 		base := normalizeName(stripVariantSuffix(c.Name()))
 		if !banned[base] {
 			continue
 		}
-		if _, ok := c.(card.NotSilverAgeLegal); !ok {
+		if _, ok := c.(sim.NotSilverAgeLegal); !ok {
 			t.Errorf("%s is on the Silver Age banlist but isn't tagged with NotSilverAgeLegal", c.Name())
 		}
 	}
@@ -93,21 +93,21 @@ func normalizeName(s string) string {
 // TestIsLegal uses one card with NotSilverAgeLegal and one without to confirm Silver Age
 // rejects the banned one and accepts the other.
 func TestIsLegal(t *testing.T) {
-	banned := generic.PlunderRunRed{}
-	legal := generic.NimblismRed{}
+	banned := cards.PlunderRunRed{}
+	legal := cards.NimblismRed{}
 
 	// Sanity: the marker is present on the banned card and absent on the legal one. Guards
 	// against accidentally dropping the tag.
-	if _, ok := card.Card(banned).(card.NotSilverAgeLegal); !ok {
+	if _, ok := sim.Card(banned).(sim.NotSilverAgeLegal); !ok {
 		t.Fatal("PlunderRunRed: missing NotSilverAgeLegal marker")
 	}
-	if _, ok := card.Card(legal).(card.NotSilverAgeLegal); ok {
+	if _, ok := sim.Card(legal).(sim.NotSilverAgeLegal); ok {
 		t.Fatal("NimblismRed: has NotSilverAgeLegal marker but shouldn't")
 	}
 
 	cases := []struct {
 		f    Format
-		c    card.Card
+		c    sim.Card
 		want bool
 	}{
 		{SilverAge, banned, false},

@@ -9,9 +9,7 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/deck"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/weapon"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 )
 
 // defaultFormat is emitted in the Format: header. Update when a new format comes online.
@@ -27,7 +25,7 @@ const defaultFormat = "Silver Age"
 // Callers that want the hardcoded default equipment / sideboard loadout baked in should run
 // d.ApplyDefaults() before Marshal. writeDeck does that automatically so the persisted .txt
 // always carries the full loadout.
-func Marshal(d *deck.Deck) string {
+func Marshal(d *sim.Deck) string {
 	var b strings.Builder
 	name := d.Hero.Name()
 	fmt.Fprintf(&b, "Name: %s\n", name)
@@ -53,24 +51,24 @@ func Marshal(d *deck.Deck) string {
 	return b.String()
 }
 
-func weaponCounts(ws []weapon.Weapon) map[string]int {
+func weaponCounts(ws []sim.Weapon) map[string]int {
 	m := make(map[string]int, len(ws))
 	for _, w := range ws {
-		m[card.DisplayName(w)]++
+		m[w.Name()]++
 	}
 	return m
 }
 
-func cardCountsForExport(cs []card.Card) map[string]int {
+func cardCountsForExport(cs []sim.Card) map[string]int {
 	m := make(map[string]int, len(cs))
 	for _, c := range cs {
-		m[toFabraryCardName(card.DisplayName(c))]++
+		m[toFabraryCardName(sim.DisplayName(c))]++
 	}
 	return m
 }
 
 // sideboardCountsForExport mirrors cardCountsForExport for the Sideboard — a string slice
-// rather than []card.Card, since the optimizer doesn't resolve sideboard entries through
+// rather than []sim.Card, since the optimizer doesn't resolve sideboard entries through
 // the card registry. Names are converted to fabrary's lowercase-pitch-color form if they
 // match a known canonical suffix.
 func sideboardCountsForExport(ss []string) map[string]int {

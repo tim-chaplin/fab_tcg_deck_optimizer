@@ -7,8 +7,8 @@ import (
 	"os"
 	"time"
 
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/deck"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/deckformat"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 )
 
 // runEvalCmd parses eval's flags and dispatches to runEval. eval always operates on an
@@ -65,17 +65,17 @@ func runEval(outPath string, shuffles, incoming, maxCopies int, seed int64, fmtV
 // evaluateAndPersist runs the deck eval — adaptive when shuffles is negative (capped at
 // adaptiveShufflesCap), fixed otherwise — then writes the fresh stats back to disk
 // (.json + sibling fabrary .txt). Returns the simulated deck so callers can print its
-// stats. The sanitize pass (replacing any card.NotImplemented copies with legal substitutes
+// stats. The sanitize pass (replacing any sim.NotImplemented copies with legal substitutes
 // drawn at maxCopies under fmtValue) runs before the eval so the on-disk avg always
 // reflects the cards the binary can actually simulate. The stderr summary lets the operator
 // see the re-score happening before the printed output appears.
-func evaluateAndPersist(outPath string, shuffles, incoming, maxCopies int, seed int64, fmtValue deckformat.Format) *deck.Deck {
+func evaluateAndPersist(outPath string, shuffles, incoming, maxCopies int, seed int64, fmtValue deckformat.Format) *sim.Deck {
 	loaded := mustLoadDeck(outPath)
 	// Wrap the loaded hero/weapons/cards in a fresh Deck so the eval's stats start from zero
 	// instead of accumulating on top of the persisted Stats. Sideboard and Equipment carry
 	// over verbatim — the sim ignores both, but the post-eval writeDeck round-trips them
 	// back to disk so the user's hand-managed lists aren't dropped by a re-score.
-	d := deck.New(loaded.Hero, loaded.Weapons, loaded.Cards)
+	d := sim.New(loaded.Hero, loaded.Weapons, loaded.Cards)
 	d.Sideboard = loaded.Sideboard
 	d.Equipment = loaded.Equipment
 	rng := rand.New(rand.NewSource(seed))
@@ -98,7 +98,7 @@ func evaluateAndPersist(outPath string, shuffles, incoming, maxCopies int, seed 
 
 // printLoadedDeck dispatches between the brief summary and the full printBestDeck dump;
 // used by both the simulate path and -print-only.
-func printLoadedDeck(d *deck.Deck, brief bool) {
+func printLoadedDeck(d *sim.Deck, brief bool) {
 	if brief {
 		printDeckSummary(d)
 		return
