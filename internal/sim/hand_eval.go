@@ -69,18 +69,33 @@ type Evaluator struct {
 	cachedHandSize int
 	cachedWeapons  []Weapon
 	cache          *evalCache
+	// numWorkers tells EvaluateWith how many goroutines to fan the shuffle loop across.
+	// 0 or 1 runs sequentially in the calling goroutine, reusing cachedBufs as the per-
+	// call scratch — the original single-threaded behaviour and the right default for
+	// tests that want deterministic single-RNG runs. > 1 spawns N workers that share the
+	// cache (which is RWMutex-protected) but each carry their own attackBufs scratch;
+	// fabsim eval / anneal / compare use this path.
+	numWorkers int
 }
 
-// NewEvaluator returns a fresh Evaluator with the hand-eval cache enabled. Safe for
-// concurrent use across goroutines as long as each goroutine uses its own instance —
-// internal scratch state is not synchronised.
+// NewEvaluator returns a fresh Evaluator with the hand-eval cache enabled and the shuffle
+// loop running single-threaded. Safe for concurrent use across goroutines as long as each
+// goroutine uses its own instance — internal scratch state is not synchronised.
 func NewEvaluator() *Evaluator {
 	return &Evaluator{cache: newEvalCache()}
 }
 
+// NewEvaluatorParallel returns an Evaluator that fans the shuffle loop across numWorkers
+// goroutines. Each worker carries its own attackBufs scratch but they all share one
+// thread-safe cache. fabsim eval / anneal / compare use this path; tests that want a
+// deterministic single-RNG run construct via NewEvaluator instead.
+func NewEvaluatorParallel(numWorkers int) *Evaluator {
+	return &Evaluator{cache: newEvalCache(), numWorkers: numWorkers}
+}
+
 // NewEvaluatorWithoutCache returns a fresh Evaluator with the hand-eval cache disabled.
 // Used for the from-scratch path in benchmarks and equivalence tests; production callers
-// route through NewEvaluator.
+// route through NewEvaluator / NewEvaluatorParallel.
 func NewEvaluatorWithoutCache() *Evaluator {
 	return &Evaluator{}
 }
