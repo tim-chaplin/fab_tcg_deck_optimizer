@@ -3,17 +3,17 @@ package cards
 import (
 	"testing"
 
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 )
 
 // TestBlessingOfOccult_PlayCreatesAuraNoThisTurnRunes: Play flips AuraCreated so same-turn
 // readers see an aura was created; no runes are made this turn (deferred to the trigger).
 // The registered trigger is TriggerStartOfTurn with Count=1.
 func TestBlessingOfOccult_PlayCreatesAuraNoThisTurnRunes(t *testing.T) {
-	cases := []card.Card{BlessingOfOccultRed{}, BlessingOfOccultYellow{}, BlessingOfOccultBlue{}}
+	cases := []sim.Card{BlessingOfOccultRed{}, BlessingOfOccultYellow{}, BlessingOfOccultBlue{}}
 	for _, c := range cases {
-		var s card.TurnState
-		c.Play(&s, &card.CardState{Card: c})
+		var s sim.TurnState
+		c.Play(&s, &sim.CardState{Card: c})
 		if got := s.Value; got != 0 {
 			t.Errorf("%s: Play() = %d, want 0 (rune creation deferred to trigger)", c.Name(), got)
 		}
@@ -26,7 +26,7 @@ func TestBlessingOfOccult_PlayCreatesAuraNoThisTurnRunes(t *testing.T) {
 		if len(s.AuraTriggers) != 1 {
 			t.Fatalf("%s: AuraTriggers len = %d, want 1", c.Name(), len(s.AuraTriggers))
 		}
-		if s.AuraTriggers[0].Type != card.TriggerStartOfTurn {
+		if s.AuraTriggers[0].Type != sim.TriggerStartOfTurn {
 			t.Errorf("%s: trigger Type = %d, want TriggerStartOfTurn", c.Name(), s.AuraTriggers[0].Type)
 		}
 		if s.AuraTriggers[0].Count != 1 {
@@ -39,7 +39,7 @@ func TestBlessingOfOccult_PlayCreatesAuraNoThisTurnRunes(t *testing.T) {
 // fresh TurnState creates N live Runechants and credits matching damage.
 func TestBlessingOfOccult_TriggerHandlerCreatesNRunes(t *testing.T) {
 	cases := []struct {
-		c card.Card
+		c sim.Card
 		n int
 	}{
 		{BlessingOfOccultRed{}, 3},
@@ -47,9 +47,9 @@ func TestBlessingOfOccult_TriggerHandlerCreatesNRunes(t *testing.T) {
 		{BlessingOfOccultBlue{}, 1},
 	}
 	for _, tc := range cases {
-		var play card.TurnState
-		tc.c.Play(&play, &card.CardState{Card: tc.c})
-		var next card.TurnState
+		var play sim.TurnState
+		tc.c.Play(&play, &sim.CardState{Card: tc.c})
+		var next sim.TurnState
 		got := play.AuraTriggers[0].Handler(&next)
 		if got != tc.n {
 			t.Errorf("%s: handler damage = %d, want %d", tc.c.Name(), got, tc.n)

@@ -11,11 +11,8 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/deck"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/hand"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/weapons"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 )
 
 // printCardList writes the deck's card list in canonical "Card list:" form: one
@@ -23,7 +20,7 @@ import (
 // Equipment or Sideboard sections, trailing "Equipment:" / "Sideboard:" blocks list their
 // contents in the same grouped form — empty sections are silently skipped so stock decks
 // stay untouched.
-func printCardList(d *deck.Deck) {
+func printCardList(d *sim.Deck) {
 	fmt.Println("Card list:")
 	printGroupedCards(d.Cards)
 	if len(d.Equipment) > 0 {
@@ -38,12 +35,12 @@ func printCardList(d *deck.Deck) {
 
 // printGroupedCards writes one count-and-name line per unique card in cs, sorted by name.
 // Shared between the main card list and the sideboard block so formatting stays consistent.
-// card.DisplayName keeps pitch printings as distinct entries so the card list shows e.g.
+// sim.DisplayName keeps pitch printings as distinct entries so the card list shows e.g.
 // "2x Aether Slash [R]" alongside "1x Aether Slash [Y]".
-func printGroupedCards(cs []card.Card) {
+func printGroupedCards(cs []sim.Card) {
 	names := make([]string, len(cs))
 	for i, c := range cs {
-		names[i] = card.DisplayName(c)
+		names[i] = sim.DisplayName(c)
 	}
 	printGroupedStrings(names)
 }
@@ -70,7 +67,7 @@ func printGroupedStrings(ss []string) {
 // printBestDeck wraps this with the card list, best-turn block, and per-card stats;
 // `fabsim eval -brief` calls printDeckSummary directly so a scripted re-score gets just the
 // numbers without the card-list scroll.
-func printDeckSummary(d *deck.Deck) {
+func printDeckSummary(d *sim.Deck) {
 	s := d.Stats
 	fmt.Printf("Hero:    %s\n", d.Hero.Name())
 	fmt.Printf("Weapons: %s\n", weaponNames(d.Weapons))
@@ -83,14 +80,14 @@ func printDeckSummary(d *deck.Deck) {
 
 // pitchCountsLine returns the "20 red / 8 yellow / 12 blue" rendering of the deck's pitch
 // distribution.
-func pitchCountsLine(cs []card.Card) string {
+func pitchCountsLine(cs []sim.Card) string {
 	red, yellow, blue := pitchCounts(cs)
 	return fmt.Sprintf("%d red / %d yellow / %d blue", red, yellow, blue)
 }
 
 // meanValueLine returns "14.041 (10,000 shuffles)" — the deck's overall mean plus the run
 // count that produced it.
-func meanValueLine(s deck.Stats) string {
+func meanValueLine(s sim.Stats) string {
 	return fmt.Sprintf("%.3f (%s shuffles)", s.Mean(), commaInt(s.Runs))
 }
 
@@ -130,7 +127,7 @@ func printSideBySideStats(name1, name2 string, sections []statSection) {
 
 // pitchCounts tallies red/yellow/blue copies by Pitch() value. Cards with pitch outside 1-3
 // contribute to no bucket.
-func pitchCounts(cs []card.Card) (red, yellow, blue int) {
+func pitchCounts(cs []sim.Card) (red, yellow, blue int) {
 	for _, c := range cs {
 		switch c.Pitch() {
 		case 1:
@@ -149,7 +146,7 @@ func pitchCounts(cs []card.Card) (red, yellow, blue int) {
 // contribution with its correlational marginal hand-value lift. Sections silently skip
 // themselves when the underlying Stats slice/map is empty so unscored decks still render
 // the parts that do exist.
-func printBestDeck(d *deck.Deck) {
+func printBestDeck(d *sim.Deck) {
 	printDeckSummary(d)
 	fmt.Println()
 	printCardList(d)
@@ -163,21 +160,21 @@ func printBestDeck(d *deck.Deck) {
 }
 
 // histogramTitle returns the standard "Hand-value distribution (N hands):" header.
-func histogramTitle(d *deck.Deck) string {
+func histogramTitle(d *sim.Deck) string {
 	return fmt.Sprintf("Hand-value distribution (%s hands):", commaInt(d.Stats.Hands))
 }
 
 // printBestTurn renders the persisted peak-Value turn from its structured TurnLog —
-// "Best turn played (value N):" header plus hand.FormatTurnLog's per-section body. No-ops
+// "Best turn played (value N):" header plus sim.FormatTurnLog's per-section body. No-ops
 // on an unscored deck (empty TurnLog).
-func printBestTurn(d *deck.Deck) {
+func printBestTurn(d *sim.Deck) {
 	b := d.Stats.Best
 	if b.Log.IsEmpty() {
 		return
 	}
 	fmt.Println()
 	fmt.Printf("Best turn played (value %d):\n", b.Summary.Value)
-	fmt.Println(hand.FormatTurnLog(b.Log))
+	fmt.Println(sim.FormatTurnLog(b.Log))
 }
 
 // printCardValues renders one row per unique card with the marginal +/- signal: mean turn
@@ -187,9 +184,9 @@ func printBestTurn(d *deck.Deck) {
 //
 // Sorted by marginal descending so suspected above-curve cards surface at the top and the
 // drags sit at the bottom — the spread is a smell test for buggy implementations or
-// oversimplified mechanics. See deck.Stats.PerCardMarginal for the cross-turn caveat that
+// oversimplified mechanics. See sim.Stats.PerCardMarginal for the cross-turn caveat that
 // limits this view's reach for next-turn-payoff cards.
-func printCardValues(d *deck.Deck) {
+func printCardValues(d *sim.Deck) {
 	type row struct {
 		name      string
 		margin    float64
@@ -197,7 +194,7 @@ func printCardValues(d *deck.Deck) {
 	}
 	rows := make([]row, 0, len(d.Stats.PerCardMarginal))
 	for id, m := range d.Stats.PerCardMarginal {
-		r := row{name: card.DisplayName(registry.GetCard(id))}
+		r := row{name: sim.DisplayName(registry.GetCard(id))}
 		if m.PresentHands > 0 && m.AbsentHands > 0 {
 			r.margin = m.Marginal()
 			r.hasMargin = true
@@ -268,7 +265,7 @@ type histogramScale struct {
 
 // naturalHistogramScale returns the histogramScale derived from d's own min/max/peak — what to
 // pass to printHistogram for a single-deck chart at its native resolution.
-func naturalHistogramScale(d *deck.Deck) histogramScale {
+func naturalHistogramScale(d *sim.Deck) histogramScale {
 	minV := d.Stats.Min()
 	maxV := d.Stats.Max()
 	_, peak := buildHistogramColumns(d.Stats.Histogram, minV, maxV, histChartWidth(maxV-minV+1))
@@ -278,7 +275,7 @@ func naturalHistogramScale(d *deck.Deck) histogramScale {
 // unionHistogramScale returns the smallest scale that fits both decks' data, so the two
 // charts can be rendered with matching x and y axes. The peak is computed under the union
 // range and width because binning shifts when the range widens.
-func unionHistogramScale(d1, d2 *deck.Deck) histogramScale {
+func unionHistogramScale(d1, d2 *sim.Deck) histogramScale {
 	minV := min(d1.Stats.Min(), d2.Stats.Min())
 	maxV := max(d1.Stats.Max(), d2.Stats.Max())
 	width := histChartWidth(maxV - minV + 1)
@@ -295,7 +292,7 @@ func unionHistogramScale(d1, d2 *deck.Deck) histogramScale {
 // for. The scale fixes both axes; values outside scale.minV..scale.maxV contribute nothing,
 // and bars scale against scale.peak rather than this deck's natural peak. No-ops when
 // scale.peak == 0.
-func printHistogram(d *deck.Deck, title string, scale histogramScale) {
+func printHistogram(d *sim.Deck, title string, scale histogramScale) {
 	if scale.peak == 0 {
 		return
 	}
@@ -589,10 +586,10 @@ func centerLabel(s string, width int) string {
 // maxNameLen returns the length of the longest DisplayName across cs, or 0 when empty.
 // Used to size fixed-width card-name columns in printed tables — DisplayName so the column
 // reserves room for the pitch tag.
-func maxNameLen(cs []card.Card) int {
+func maxNameLen(cs []sim.Card) int {
 	m := 0
 	for _, c := range cs {
-		if n := len(card.DisplayName(c)); n > m {
+		if n := len(sim.DisplayName(c)); n > m {
 			m = n
 		}
 	}
@@ -602,7 +599,7 @@ func maxNameLen(cs []card.Card) int {
 // weaponNames joins the deck's weapon names with ", " for the summary's "Weapons:" line.
 // A single-weapon loadout prints the name bare; an empty loadout prints "none" so the column
 // stays filled rather than rendering as a trailing blank.
-func weaponNames(ws []weapons.Weapon) string {
+func weaponNames(ws []sim.Weapon) string {
 	if len(ws) == 0 {
 		return "none"
 	}

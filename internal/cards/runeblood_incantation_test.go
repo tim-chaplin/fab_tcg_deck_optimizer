@@ -3,7 +3,7 @@ package cards
 import (
 	"testing"
 
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 )
 
 // TestRunebloodIncantation_PlayRegistersStartOfTurnTriggerWithCountN: Play flips AuraCreated
@@ -11,7 +11,7 @@ import (
 // same-turn damage credit — every Runechant lands on a real future-turn fire.
 func TestRunebloodIncantation_PlayRegistersStartOfTurnTriggerWithCountN(t *testing.T) {
 	cases := []struct {
-		c card.Card
+		c sim.Card
 		n int
 	}{
 		{RunebloodIncantationRed{}, 3},
@@ -19,8 +19,8 @@ func TestRunebloodIncantation_PlayRegistersStartOfTurnTriggerWithCountN(t *testi
 		{RunebloodIncantationBlue{}, 1},
 	}
 	for _, tc := range cases {
-		var s card.TurnState
-		tc.c.Play(&s, &card.CardState{Card: tc.c})
+		var s sim.TurnState
+		tc.c.Play(&s, &sim.CardState{Card: tc.c})
 		if got := s.Value; got != 0 {
 			t.Errorf("%s: Play() = %d, want 0 (every rune fires on a future turn)", tc.c.Name(), got)
 		}
@@ -34,7 +34,7 @@ func TestRunebloodIncantation_PlayRegistersStartOfTurnTriggerWithCountN(t *testi
 			t.Fatalf("%s: AuraTriggers len = %d, want 1", tc.c.Name(), len(s.AuraTriggers))
 		}
 		tr := s.AuraTriggers[0]
-		if tr.Type != card.TriggerStartOfTurn {
+		if tr.Type != sim.TriggerStartOfTurn {
 			t.Errorf("%s: trigger Type = %d, want TriggerStartOfTurn", tc.c.Name(), tr.Type)
 		}
 		if tr.Count != tc.n {
@@ -47,10 +47,10 @@ func TestRunebloodIncantation_PlayRegistersStartOfTurnTriggerWithCountN(t *testi
 // creates exactly one live Runechant — the multi-fire behaviour comes from the sim ticking
 // Count, not from the handler doing more work each call.
 func TestRunebloodIncantation_HandlerCreatesOneRunechantPerFire(t *testing.T) {
-	for _, c := range []card.Card{RunebloodIncantationRed{}, RunebloodIncantationYellow{}, RunebloodIncantationBlue{}} {
-		var play card.TurnState
-		c.Play(&play, &card.CardState{Card: c})
-		var fire card.TurnState
+	for _, c := range []sim.Card{RunebloodIncantationRed{}, RunebloodIncantationYellow{}, RunebloodIncantationBlue{}} {
+		var play sim.TurnState
+		c.Play(&play, &sim.CardState{Card: c})
+		var fire sim.TurnState
 		got := play.AuraTriggers[0].Handler(&fire)
 		if got != 1 {
 			t.Errorf("%s: handler damage = %d, want 1", c.Name(), got)

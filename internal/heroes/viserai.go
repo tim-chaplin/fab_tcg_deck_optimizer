@@ -7,6 +7,7 @@ package heroes
 import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 )
 
 var viseraiTypes = card.NewTypeSet(card.TypeRuneblade, card.TypeHero, card.TypeYoung)
@@ -23,14 +24,14 @@ func (Viserai) Types() card.TypeSet { return viseraiTypes }
 // OnCardPlayed implements Viserai's hero ability: whenever a Runeblade card is played, if a
 // non-attack action (Action without Attack) has been played this turn, create a Runechant
 // token.
-func (Viserai) OnCardPlayed(played card.Card, s *card.TurnState) int {
+func (Viserai) OnCardPlayed(played sim.Card, s *sim.TurnState) int {
 	t := played.Types()
 	// Weapon swings aren't "playing a card" and don't trigger Viserai.
 	if !t.Has(card.TypeRuneblade) || t.Has(card.TypeWeapon) {
 		return 0
 	}
 	if s.NonAttackActionPlayed {
-		return s.CreateAndLogRunechants("Viserai", card.DisplayName(played), 1)
+		return s.CreateAndLogRunechants("Viserai", sim.DisplayName(played), 1)
 	}
 	return 0
 }

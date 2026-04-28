@@ -3,15 +3,15 @@ package cards
 import (
 	"testing"
 
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 )
 
 // TestSigilOfSilphidae_PlayFizzlesWithoutAura: no aura in s.Graveyard means the enter trigger
 // can't banish anything and Play returns 0. AuraCreated still fires (Silphidae IS an aura)
 // and a start-of-turn AuraTrigger is registered for the "destroy this" clause.
 func TestSigilOfSilphidae_PlayFizzlesWithoutAura(t *testing.T) {
-	var s card.TurnState
-	(SigilOfSilphidaeBlue{}).Play(&s, &card.CardState{Card: SigilOfSilphidaeBlue{}})
+	var s sim.TurnState
+	(SigilOfSilphidaeBlue{}).Play(&s, &sim.CardState{Card: SigilOfSilphidaeBlue{}})
 	if got := s.Value; got != 0 {
 		t.Errorf("Play() = %d, want 0 (empty graveyard)", got)
 	}
@@ -21,7 +21,7 @@ func TestSigilOfSilphidae_PlayFizzlesWithoutAura(t *testing.T) {
 	if s.ArcaneDamageDealt {
 		t.Errorf("ArcaneDamageDealt should stay false when banish fizzles")
 	}
-	if len(s.AuraTriggers) != 1 || s.AuraTriggers[0].Type != card.TriggerStartOfTurn {
+	if len(s.AuraTriggers) != 1 || s.AuraTriggers[0].Type != sim.TriggerStartOfTurn {
 		t.Errorf("AuraTriggers = %+v, want one TriggerStartOfTurn entry", s.AuraTriggers)
 	}
 }
@@ -30,8 +30,8 @@ func TestSigilOfSilphidae_PlayFizzlesWithoutAura(t *testing.T) {
 // enter banish — the aura moves to Banish, Play returns 1, and ArcaneDamageDealt flips.
 func TestSigilOfSilphidae_PlayBanishesAuraForOneArcane(t *testing.T) {
 	aura := BlessingOfOccultRed{}
-	s := card.TurnState{Graveyard: []card.Card{aura}}
-	(SigilOfSilphidaeBlue{}).Play(&s, &card.CardState{Card: SigilOfSilphidaeBlue{}})
+	s := sim.TurnState{Graveyard: []sim.Card{aura}}
+	(SigilOfSilphidaeBlue{}).Play(&s, &sim.CardState{Card: SigilOfSilphidaeBlue{}})
 	if got := s.Value; got != 1 {
 		t.Errorf("Play() = %d, want 1", got)
 	}
@@ -47,9 +47,9 @@ func TestSigilOfSilphidae_PlayBanishesAuraForOneArcane(t *testing.T) {
 // start-of-turn graveyard, the leave trigger has no OTHER aura to banish — handler returns
 // 0 damage.
 func TestSigilOfSilphidae_StartOfTurnHandlerFizzlesWithoutAnotherAura(t *testing.T) {
-	var play card.TurnState
-	(SigilOfSilphidaeBlue{}).Play(&play, &card.CardState{Card: SigilOfSilphidaeBlue{}})
-	var next card.TurnState
+	var play sim.TurnState
+	(SigilOfSilphidaeBlue{}).Play(&play, &sim.CardState{Card: SigilOfSilphidaeBlue{}})
+	var next sim.TurnState
 	got := play.AuraTriggers[0].Handler(&next)
 	if got != 0 {
 		t.Errorf("handler damage = %d, want 0 (no other aura to banish)", got)
@@ -61,10 +61,10 @@ func TestSigilOfSilphidae_StartOfTurnHandlerFizzlesWithoutAnotherAura(t *testing
 // graveyards Self only AFTER this handler returns, so the scan can't pick up Silphidae
 // itself — the printed "another aura" restriction is satisfied naturally.
 func TestSigilOfSilphidae_StartOfTurnHandlerBanishesAnotherAura(t *testing.T) {
-	var play card.TurnState
-	(SigilOfSilphidaeBlue{}).Play(&play, &card.CardState{Card: SigilOfSilphidaeBlue{}})
+	var play sim.TurnState
+	(SigilOfSilphidaeBlue{}).Play(&play, &sim.CardState{Card: SigilOfSilphidaeBlue{}})
 	other := BlessingOfOccultRed{}
-	next := card.TurnState{Graveyard: []card.Card{other}}
+	next := sim.TurnState{Graveyard: []sim.Card{other}}
 	got := play.AuraTriggers[0].Handler(&next)
 	if got != 1 {
 		t.Errorf("handler damage = %d, want 1 (banished another aura)", got)

@@ -12,6 +12,7 @@ package cards
 import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 )
 
 var ravenousRabbleTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeAttack)
@@ -19,7 +20,7 @@ var ravenousRabbleTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, car
 // ravenousRabbleApplyDebuff routes the -X{p} self-debuff (X = revealed deck-top pitch)
 // through self.BonusAttack so EffectiveAttack and LikelyToHit see the debuffed power; the
 // chain step's (+N) reflects the post-clamp result. No deck top means no penalty.
-func ravenousRabbleApplyDebuff(s *card.TurnState, self *card.CardState) {
+func ravenousRabbleApplyDebuff(s *sim.TurnState, self *sim.CardState) {
 	if len(s.Deck) == 0 {
 		return
 	}
@@ -28,45 +29,45 @@ func ravenousRabbleApplyDebuff(s *card.TurnState, self *card.CardState) {
 
 type RavenousRabbleRed struct{}
 
-func (RavenousRabbleRed) ID() ids.CardID           { return ids.RavenousRabbleRed }
-func (RavenousRabbleRed) Name() string             { return "Ravenous Rabble" }
-func (RavenousRabbleRed) Cost(*card.TurnState) int { return 0 }
-func (RavenousRabbleRed) Pitch() int               { return 1 }
-func (RavenousRabbleRed) Attack() int              { return 5 }
-func (RavenousRabbleRed) Defense() int             { return 2 }
-func (RavenousRabbleRed) Types() card.TypeSet      { return ravenousRabbleTypes }
-func (RavenousRabbleRed) GoAgain() bool            { return true }
-func (RavenousRabbleRed) Play(s *card.TurnState, self *card.CardState) {
+func (RavenousRabbleRed) ID() ids.CardID          { return ids.RavenousRabbleRed }
+func (RavenousRabbleRed) Name() string            { return "Ravenous Rabble" }
+func (RavenousRabbleRed) Cost(*sim.TurnState) int { return 0 }
+func (RavenousRabbleRed) Pitch() int              { return 1 }
+func (RavenousRabbleRed) Attack() int             { return 5 }
+func (RavenousRabbleRed) Defense() int            { return 2 }
+func (RavenousRabbleRed) Types() card.TypeSet     { return ravenousRabbleTypes }
+func (RavenousRabbleRed) GoAgain() bool           { return true }
+func (RavenousRabbleRed) Play(s *sim.TurnState, self *sim.CardState) {
 	ravenousRabbleApplyDebuff(s, self)
 	s.ApplyAndLogEffectiveAttack(self)
 }
 
 type RavenousRabbleYellow struct{}
 
-func (RavenousRabbleYellow) ID() ids.CardID           { return ids.RavenousRabbleYellow }
-func (RavenousRabbleYellow) Name() string             { return "Ravenous Rabble" }
-func (RavenousRabbleYellow) Cost(*card.TurnState) int { return 0 }
-func (RavenousRabbleYellow) Pitch() int               { return 2 }
-func (RavenousRabbleYellow) Attack() int              { return 4 }
-func (RavenousRabbleYellow) Defense() int             { return 2 }
-func (RavenousRabbleYellow) Types() card.TypeSet      { return ravenousRabbleTypes }
-func (RavenousRabbleYellow) GoAgain() bool            { return true }
-func (RavenousRabbleYellow) Play(s *card.TurnState, self *card.CardState) {
+func (RavenousRabbleYellow) ID() ids.CardID          { return ids.RavenousRabbleYellow }
+func (RavenousRabbleYellow) Name() string            { return "Ravenous Rabble" }
+func (RavenousRabbleYellow) Cost(*sim.TurnState) int { return 0 }
+func (RavenousRabbleYellow) Pitch() int              { return 2 }
+func (RavenousRabbleYellow) Attack() int             { return 4 }
+func (RavenousRabbleYellow) Defense() int            { return 2 }
+func (RavenousRabbleYellow) Types() card.TypeSet     { return ravenousRabbleTypes }
+func (RavenousRabbleYellow) GoAgain() bool           { return true }
+func (RavenousRabbleYellow) Play(s *sim.TurnState, self *sim.CardState) {
 	ravenousRabbleApplyDebuff(s, self)
 	s.ApplyAndLogEffectiveAttack(self)
 }
 
 type RavenousRabbleBlue struct{}
 
-func (RavenousRabbleBlue) ID() ids.CardID           { return ids.RavenousRabbleBlue }
-func (RavenousRabbleBlue) Name() string             { return "Ravenous Rabble" }
-func (RavenousRabbleBlue) Cost(*card.TurnState) int { return 0 }
-func (RavenousRabbleBlue) Pitch() int               { return 3 }
-func (RavenousRabbleBlue) Attack() int              { return 3 }
-func (RavenousRabbleBlue) Defense() int             { return 2 }
-func (RavenousRabbleBlue) Types() card.TypeSet      { return ravenousRabbleTypes }
-func (RavenousRabbleBlue) GoAgain() bool            { return true }
-func (RavenousRabbleBlue) Play(s *card.TurnState, self *card.CardState) {
+func (RavenousRabbleBlue) ID() ids.CardID          { return ids.RavenousRabbleBlue }
+func (RavenousRabbleBlue) Name() string            { return "Ravenous Rabble" }
+func (RavenousRabbleBlue) Cost(*sim.TurnState) int { return 0 }
+func (RavenousRabbleBlue) Pitch() int              { return 3 }
+func (RavenousRabbleBlue) Attack() int             { return 3 }
+func (RavenousRabbleBlue) Defense() int            { return 2 }
+func (RavenousRabbleBlue) Types() card.TypeSet     { return ravenousRabbleTypes }
+func (RavenousRabbleBlue) GoAgain() bool           { return true }
+func (RavenousRabbleBlue) Play(s *sim.TurnState, self *sim.CardState) {
 	ravenousRabbleApplyDebuff(s, self)
 	s.ApplyAndLogEffectiveAttack(self)
 }

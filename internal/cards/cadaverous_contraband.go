@@ -9,57 +9,58 @@ package cards
 import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 )
 
 var cadaverousContrabandTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeAttack)
 
 type CadaverousContrabandRed struct{}
 
-func (CadaverousContrabandRed) ID() ids.CardID           { return ids.CadaverousContrabandRed }
-func (CadaverousContrabandRed) Name() string             { return "Cadaverous Contraband" }
-func (CadaverousContrabandRed) Cost(*card.TurnState) int { return 2 }
-func (CadaverousContrabandRed) Pitch() int               { return 1 }
-func (CadaverousContrabandRed) Attack() int              { return 6 }
-func (CadaverousContrabandRed) Defense() int             { return 2 }
-func (CadaverousContrabandRed) Types() card.TypeSet      { return cadaverousContrabandTypes }
-func (CadaverousContrabandRed) GoAgain() bool            { return false }
+func (CadaverousContrabandRed) ID() ids.CardID          { return ids.CadaverousContrabandRed }
+func (CadaverousContrabandRed) Name() string            { return "Cadaverous Contraband" }
+func (CadaverousContrabandRed) Cost(*sim.TurnState) int { return 2 }
+func (CadaverousContrabandRed) Pitch() int              { return 1 }
+func (CadaverousContrabandRed) Attack() int             { return 6 }
+func (CadaverousContrabandRed) Defense() int            { return 2 }
+func (CadaverousContrabandRed) Types() card.TypeSet     { return cadaverousContrabandTypes }
+func (CadaverousContrabandRed) GoAgain() bool           { return false }
 
 // not implemented: on-hit graveyard → top-of-deck rider
 func (CadaverousContrabandRed) NotImplemented() {}
-func (c CadaverousContrabandRed) Play(s *card.TurnState, self *card.CardState) {
+func (c CadaverousContrabandRed) Play(s *sim.TurnState, self *sim.CardState) {
 	s.ApplyAndLogEffectiveAttack(self)
 }
 
 type CadaverousContrabandYellow struct{}
 
-func (CadaverousContrabandYellow) ID() ids.CardID           { return ids.CadaverousContrabandYellow }
-func (CadaverousContrabandYellow) Name() string             { return "Cadaverous Contraband" }
-func (CadaverousContrabandYellow) Cost(*card.TurnState) int { return 2 }
-func (CadaverousContrabandYellow) Pitch() int               { return 2 }
-func (CadaverousContrabandYellow) Attack() int              { return 5 }
-func (CadaverousContrabandYellow) Defense() int             { return 2 }
-func (CadaverousContrabandYellow) Types() card.TypeSet      { return cadaverousContrabandTypes }
-func (CadaverousContrabandYellow) GoAgain() bool            { return false }
+func (CadaverousContrabandYellow) ID() ids.CardID          { return ids.CadaverousContrabandYellow }
+func (CadaverousContrabandYellow) Name() string            { return "Cadaverous Contraband" }
+func (CadaverousContrabandYellow) Cost(*sim.TurnState) int { return 2 }
+func (CadaverousContrabandYellow) Pitch() int              { return 2 }
+func (CadaverousContrabandYellow) Attack() int             { return 5 }
+func (CadaverousContrabandYellow) Defense() int            { return 2 }
+func (CadaverousContrabandYellow) Types() card.TypeSet     { return cadaverousContrabandTypes }
+func (CadaverousContrabandYellow) GoAgain() bool           { return false }
 
 // not implemented: on-hit graveyard → top-of-deck rider
 func (CadaverousContrabandYellow) NotImplemented() {}
-func (c CadaverousContrabandYellow) Play(s *card.TurnState, self *card.CardState) {
+func (c CadaverousContrabandYellow) Play(s *sim.TurnState, self *sim.CardState) {
 	s.ApplyAndLogEffectiveAttack(self)
 }
 
 type CadaverousContrabandBlue struct{}
 
-func (CadaverousContrabandBlue) ID() ids.CardID           { return ids.CadaverousContrabandBlue }
-func (CadaverousContrabandBlue) Name() string             { return "Cadaverous Contraband" }
-func (CadaverousContrabandBlue) Cost(*card.TurnState) int { return 2 }
-func (CadaverousContrabandBlue) Pitch() int               { return 3 }
-func (CadaverousContrabandBlue) Attack() int              { return 4 }
-func (CadaverousContrabandBlue) Defense() int             { return 2 }
-func (CadaverousContrabandBlue) Types() card.TypeSet      { return cadaverousContrabandTypes }
-func (CadaverousContrabandBlue) GoAgain() bool            { return false }
+func (CadaverousContrabandBlue) ID() ids.CardID          { return ids.CadaverousContrabandBlue }
+func (CadaverousContrabandBlue) Name() string            { return "Cadaverous Contraband" }
+func (CadaverousContrabandBlue) Cost(*sim.TurnState) int { return 2 }
+func (CadaverousContrabandBlue) Pitch() int              { return 3 }
+func (CadaverousContrabandBlue) Attack() int             { return 4 }
+func (CadaverousContrabandBlue) Defense() int            { return 2 }
+func (CadaverousContrabandBlue) Types() card.TypeSet     { return cadaverousContrabandTypes }
+func (CadaverousContrabandBlue) GoAgain() bool           { return false }
 
 // not implemented: on-hit graveyard → top-of-deck rider
 func (CadaverousContrabandBlue) NotImplemented() {}
-func (c CadaverousContrabandBlue) Play(s *card.TurnState, self *card.CardState) {
+func (c CadaverousContrabandBlue) Play(s *sim.TurnState, self *sim.CardState) {
 	s.ApplyAndLogEffectiveAttack(self)
 }

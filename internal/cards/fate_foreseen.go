@@ -8,58 +8,59 @@ package cards
 import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 )
 
 type FateForeseenRed struct{}
 
-func (FateForeseenRed) ID() ids.CardID           { return ids.FateForeseenRed }
-func (FateForeseenRed) Name() string             { return "Fate Foreseen" }
-func (FateForeseenRed) Cost(*card.TurnState) int { return 0 }
-func (FateForeseenRed) Pitch() int               { return 1 }
-func (FateForeseenRed) Attack() int              { return 0 }
-func (FateForeseenRed) Defense() int             { return 4 }
-func (FateForeseenRed) Types() card.TypeSet      { return defenseReactionTypes }
-func (FateForeseenRed) GoAgain() bool            { return false }
-func (FateForeseenRed) NotSilverAgeLegal()       {}
+func (FateForeseenRed) ID() ids.CardID          { return ids.FateForeseenRed }
+func (FateForeseenRed) Name() string            { return "Fate Foreseen" }
+func (FateForeseenRed) Cost(*sim.TurnState) int { return 0 }
+func (FateForeseenRed) Pitch() int              { return 1 }
+func (FateForeseenRed) Attack() int             { return 0 }
+func (FateForeseenRed) Defense() int            { return 4 }
+func (FateForeseenRed) Types() card.TypeSet     { return defenseReactionTypes }
+func (FateForeseenRed) GoAgain() bool           { return false }
+func (FateForeseenRed) NotSilverAgeLegal()      {}
 
 // not implemented: Opt 1 rider; block value is printed defence only
 func (FateForeseenRed) NotImplemented() {}
-func (FateForeseenRed) Play(s *card.TurnState, self *card.CardState) {
+func (FateForeseenRed) Play(s *sim.TurnState, self *sim.CardState) {
 	s.ApplyAndLogEffectiveDefense(self)
 }
 
 type FateForeseenYellow struct{}
 
-func (FateForeseenYellow) ID() ids.CardID           { return ids.FateForeseenYellow }
-func (FateForeseenYellow) Name() string             { return "Fate Foreseen" }
-func (FateForeseenYellow) Cost(*card.TurnState) int { return 0 }
-func (FateForeseenYellow) Pitch() int               { return 2 }
-func (FateForeseenYellow) Attack() int              { return 0 }
-func (FateForeseenYellow) Defense() int             { return 3 }
-func (FateForeseenYellow) Types() card.TypeSet      { return defenseReactionTypes }
-func (FateForeseenYellow) GoAgain() bool            { return false }
-func (FateForeseenYellow) NotSilverAgeLegal()       {}
+func (FateForeseenYellow) ID() ids.CardID          { return ids.FateForeseenYellow }
+func (FateForeseenYellow) Name() string            { return "Fate Foreseen" }
+func (FateForeseenYellow) Cost(*sim.TurnState) int { return 0 }
+func (FateForeseenYellow) Pitch() int              { return 2 }
+func (FateForeseenYellow) Attack() int             { return 0 }
+func (FateForeseenYellow) Defense() int            { return 3 }
+func (FateForeseenYellow) Types() card.TypeSet     { return defenseReactionTypes }
+func (FateForeseenYellow) GoAgain() bool           { return false }
+func (FateForeseenYellow) NotSilverAgeLegal()      {}
 
 // not implemented: Opt 1 rider; block value is printed defence only
 func (FateForeseenYellow) NotImplemented() {}
-func (FateForeseenYellow) Play(s *card.TurnState, self *card.CardState) {
+func (FateForeseenYellow) Play(s *sim.TurnState, self *sim.CardState) {
 	s.ApplyAndLogEffectiveDefense(self)
 }
 
 type FateForeseenBlue struct{}
 
-func (FateForeseenBlue) ID() ids.CardID           { return ids.FateForeseenBlue }
-func (FateForeseenBlue) Name() string             { return "Fate Foreseen" }
-func (FateForeseenBlue) Cost(*card.TurnState) int { return 0 }
-func (FateForeseenBlue) Pitch() int               { return 3 }
-func (FateForeseenBlue) Attack() int              { return 0 }
-func (FateForeseenBlue) Defense() int             { return 2 }
-func (FateForeseenBlue) Types() card.TypeSet      { return defenseReactionTypes }
-func (FateForeseenBlue) GoAgain() bool            { return false }
-func (FateForeseenBlue) NotSilverAgeLegal()       {}
+func (FateForeseenBlue) ID() ids.CardID          { return ids.FateForeseenBlue }
+func (FateForeseenBlue) Name() string            { return "Fate Foreseen" }
+func (FateForeseenBlue) Cost(*sim.TurnState) int { return 0 }
+func (FateForeseenBlue) Pitch() int              { return 3 }
+func (FateForeseenBlue) Attack() int             { return 0 }
+func (FateForeseenBlue) Defense() int            { return 2 }
+func (FateForeseenBlue) Types() card.TypeSet     { return defenseReactionTypes }
+func (FateForeseenBlue) GoAgain() bool           { return false }
+func (FateForeseenBlue) NotSilverAgeLegal()      {}
 
 // not implemented: Opt 1 rider; block value is printed defence only
 func (FateForeseenBlue) NotImplemented() {}
-func (FateForeseenBlue) Play(s *card.TurnState, self *card.CardState) {
+func (FateForeseenBlue) Play(s *sim.TurnState, self *sim.CardState) {
 	s.ApplyAndLogEffectiveDefense(self)
 }

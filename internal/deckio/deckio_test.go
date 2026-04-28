@@ -6,15 +6,14 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/deck"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/hand"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/heroes"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 )
 
 func TestMarshalUnmarshalRoundTrip(t *testing.T) {
 	rng := rand.New(rand.NewSource(1))
-	d := deck.Random(heroes.Viserai{}, 40, 2, rng, nil)
+	d := sim.Random(heroes.Viserai{}, 40, 2, rng, nil)
 	d.Evaluate(50, 4, rng)
 
 	data, err := Marshal(d)
@@ -60,7 +59,7 @@ func TestMarshalUnmarshalRoundTrip(t *testing.T) {
 // underlying fields surfaces.
 func TestRoundTrip_PreservesPerCardMarginal(t *testing.T) {
 	rng := rand.New(rand.NewSource(13))
-	d := deck.Random(heroes.Viserai{}, 40, 2, rng, nil)
+	d := sim.Random(heroes.Viserai{}, 40, 2, rng, nil)
 	d.Evaluate(50, 4, rng)
 	if len(d.Stats.PerCardMarginal) == 0 {
 		t.Fatalf("baseline deck produced no PerCardMarginal entries; test can't differentiate good from bad")
@@ -105,13 +104,13 @@ func TestRoundTrip_PreservesPerCardMarginal(t *testing.T) {
 }
 
 // TestRoundTrip_PreservesBestTurnLog pins the on-disk best-turn round-trip: Marshal/Unmarshal
-// carry deck.BestTurn.Log verbatim, so a reloaded TurnLog matches section-for-section. Since
+// carry sim.BestTurn.Log verbatim, so a reloaded TurnLog matches section-for-section. Since
 // the formatter consumes Log at print time, pinning the structured shape implicitly pins the
 // printout shape.
 func TestRoundTrip_PreservesBestTurnLog(t *testing.T) {
 	rng := rand.New(rand.NewSource(7))
-	d := deck.Random(heroes.Viserai{}, 40, 2, rng, nil)
-	want := hand.TurnLog{
+	d := sim.Random(heroes.Viserai{}, 40, 2, rng, nil)
+	want := sim.TurnLog{
 		StartOfTurn: []string{
 			"Hand: Hocus Pocus [B], Consuming Volition [R]",
 			"Arsenal: Sigil of the Arknight [B]",
@@ -128,8 +127,8 @@ func TestRoundTrip_PreservesBestTurnLog(t *testing.T) {
 			"Auras: 1 Runechant",
 		},
 	}
-	d.Stats.Best = deck.BestTurn{
-		Summary:            hand.TurnSummary{Value: 21},
+	d.Stats.Best = sim.BestTurn{
+		Summary:            sim.TurnSummary{Value: 21},
 		StartingRunechants: 0,
 		Log:                want,
 	}
@@ -157,7 +156,7 @@ func TestRoundTrip_PreservesBestTurnLog(t *testing.T) {
 // can preserve them across runs even when they'd otherwise drop the data.
 func TestRoundTrip_PreservesSideboard(t *testing.T) {
 	rng := rand.New(rand.NewSource(42))
-	d := deck.Random(heroes.Viserai{}, 40, 2, rng, nil)
+	d := sim.Random(heroes.Viserai{}, 40, 2, rng, nil)
 	d.Sideboard = []string{"Aether Slash [R]", "Aether Slash [R]", "Arcanic Spike [B]"}
 
 	data, err := Marshal(d)
@@ -184,7 +183,7 @@ func TestRoundTrip_PreservesSideboard(t *testing.T) {
 // a re-serialize.
 func TestMarshal_OmitsEmptySideboard(t *testing.T) {
 	rng := rand.New(rand.NewSource(1))
-	d := deck.Random(heroes.Viserai{}, 40, 2, rng, nil)
+	d := sim.Random(heroes.Viserai{}, 40, 2, rng, nil)
 	data, err := Marshal(d)
 	if err != nil {
 		t.Fatalf("Marshal: %v", err)
@@ -222,7 +221,7 @@ func TestUnmarshal_SideboardAcceptsAnyName(t *testing.T) {
 // model equipment pieces).
 func TestRoundTrip_PreservesEquipment(t *testing.T) {
 	rng := rand.New(rand.NewSource(1))
-	d := deck.Random(heroes.Viserai{}, 40, 2, rng, nil)
+	d := sim.Random(heroes.Viserai{}, 40, 2, rng, nil)
 	d.Equipment = []string{"Beckoning Haunt", "Nullrune Boots", "Blade Beckoner Helm"}
 
 	data, err := Marshal(d)
@@ -244,7 +243,7 @@ func TestRoundTrip_PreservesEquipment(t *testing.T) {
 // the field at all, keeping existing files byte-identical after a re-serialize.
 func TestMarshal_OmitsEmptyEquipment(t *testing.T) {
 	rng := rand.New(rand.NewSource(1))
-	d := deck.Random(heroes.Viserai{}, 40, 2, rng, nil)
+	d := sim.Random(heroes.Viserai{}, 40, 2, rng, nil)
 	data, err := Marshal(d)
 	if err != nil {
 		t.Fatalf("Marshal: %v", err)

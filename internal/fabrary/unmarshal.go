@@ -12,25 +12,23 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/deck"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/weapons"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 )
 
-// Unmarshal parses fabrary-style deck text and returns a *deck.Deck plus a count-keyed map of
+// Unmarshal parses fabrary-style deck text and returns a *sim.Deck plus a count-keyed map of
 // deck cards whose names aren't in the optimizer's registry. Callers should surface the skipped
 // map so users aren't surprised by a silently-reduced deck. Stats aren't round-tripped.
 //
 // Arena-section entries split by lookup: weapon names land in d.Weapons, everything else lands
 // in d.Equipment (the user-managed arena list) so the round-trip preserves the full loadout.
 // A missing hero aborts: the deck can't be constructed without one.
-func Unmarshal(text string) (*deck.Deck, map[string]int, error) {
+func Unmarshal(text string) (*sim.Deck, map[string]int, error) {
 	var (
 		heroName  string
 		section   string
-		weapons   []weapons.Weapon
-		cardList  []card.Card
+		weapons   []sim.Weapon
+		cardList  []sim.Card
 		sideboard []string
 		equipment []string
 		skipped   = map[string]int{}
@@ -114,7 +112,7 @@ func Unmarshal(text string) (*deck.Deck, map[string]int, error) {
 	if !ok {
 		return nil, nil, fmt.Errorf("fabrary: unknown hero %q", heroName)
 	}
-	d := deck.New(h, weapons, cardList)
+	d := sim.New(h, weapons, cardList)
 	d.Sideboard = sideboard
 	d.Equipment = equipment
 	return d, skipped, nil

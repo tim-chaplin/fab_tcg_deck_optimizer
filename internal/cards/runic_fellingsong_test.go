@@ -3,15 +3,15 @@ package cards
 import (
 	"testing"
 
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 )
 
 // TestRunicFellingsong_NoAuraCreditsPrintedPowerOnly: an empty graveyard fizzles the banish
 // rider, so Play returns just Attack().
 func TestRunicFellingsong_NoAuraCreditsPrintedPowerOnly(t *testing.T) {
-	var s card.TurnState
+	var s sim.TurnState
 	c := RunicFellingsongRed{}
-	c.Play(&s, &card.CardState{Card: c})
+	c.Play(&s, &sim.CardState{Card: c})
 	if got := s.Value; got != c.Attack() {
 		t.Errorf("Play() = %d, want %d (Attack only; banish fizzles)", got, c.Attack())
 	}
@@ -21,10 +21,10 @@ func TestRunicFellingsong_NoAuraCreditsPrintedPowerOnly(t *testing.T) {
 // Attack() + 1 (the banish rider's arcane).
 func TestRunicFellingsong_AuraInGraveyardFiresBanishRider(t *testing.T) {
 	aura := BlessingOfOccultRed{}
-	s := card.TurnState{Graveyard: []card.Card{aura}}
+	s := sim.TurnState{Graveyard: []sim.Card{aura}}
 	c := RunicFellingsongRed{}
 	want := c.Attack() + 1
-	c.Play(&s, &card.CardState{Card: c})
+	c.Play(&s, &sim.CardState{Card: c})
 	if got := s.Value; got != want {
 		t.Errorf("Play() = %d, want %d (Attack + banish rider)", got, want)
 	}

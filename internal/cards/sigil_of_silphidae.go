@@ -14,24 +14,25 @@ package cards
 import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 )
 
 var sigilOfSilphidaeTypes = card.NewTypeSet(card.TypeRuneblade, card.TypeAction, card.TypeAura)
 
 type SigilOfSilphidaeBlue struct{}
 
-func (SigilOfSilphidaeBlue) ID() ids.CardID           { return ids.SigilOfSilphidaeBlue }
-func (SigilOfSilphidaeBlue) Name() string             { return "Sigil of Silphidae" }
-func (SigilOfSilphidaeBlue) Cost(*card.TurnState) int { return 0 }
-func (SigilOfSilphidaeBlue) Pitch() int               { return 3 }
-func (SigilOfSilphidaeBlue) Attack() int              { return 0 }
-func (SigilOfSilphidaeBlue) Defense() int             { return 3 }
-func (SigilOfSilphidaeBlue) Types() card.TypeSet      { return sigilOfSilphidaeTypes }
-func (SigilOfSilphidaeBlue) GoAgain() bool            { return true }
-func (SigilOfSilphidaeBlue) AddsFutureValue()         {}
-func (c SigilOfSilphidaeBlue) Play(s *card.TurnState, self *card.CardState) {
+func (SigilOfSilphidaeBlue) ID() ids.CardID          { return ids.SigilOfSilphidaeBlue }
+func (SigilOfSilphidaeBlue) Name() string            { return "Sigil of Silphidae" }
+func (SigilOfSilphidaeBlue) Cost(*sim.TurnState) int { return 0 }
+func (SigilOfSilphidaeBlue) Pitch() int              { return 3 }
+func (SigilOfSilphidaeBlue) Attack() int             { return 0 }
+func (SigilOfSilphidaeBlue) Defense() int            { return 3 }
+func (SigilOfSilphidaeBlue) Types() card.TypeSet     { return sigilOfSilphidaeTypes }
+func (SigilOfSilphidaeBlue) GoAgain() bool           { return true }
+func (SigilOfSilphidaeBlue) AddsFutureValue()        {}
+func (c SigilOfSilphidaeBlue) Play(s *sim.TurnState, self *sim.CardState) {
 	enterDamage := banishAuraFromGraveyard(s)
-	s.RegisterStartOfTurn(c, 1, "Banished an aura, dealt 1 arcane damage", func(s *card.TurnState) int {
+	s.RegisterStartOfTurn(c, 1, "Banished an aura, dealt 1 arcane damage", func(s *sim.TurnState) int {
 		return banishAuraFromGraveyard(s)
 	})
 	s.ApplyAndLogEffectiveAttack(self)

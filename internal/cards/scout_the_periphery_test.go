@@ -3,15 +3,15 @@ package cards
 import (
 	"testing"
 
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
 )
 
 // TestScoutThePeriphery_NoAttackReturnsZero: no qualifying next attack card → +3 rider fizzles.
 func TestScoutThePeriphery_NoAttackReturnsZero(t *testing.T) {
-	s := card.TurnState{}
-	for _, c := range []card.Card{ScoutThePeripheryRed{}, ScoutThePeripheryYellow{}, ScoutThePeripheryBlue{}} {
-		c.Play(&s, &card.CardState{Card: c})
+	s := sim.TurnState{}
+	for _, c := range []sim.Card{ScoutThePeripheryRed{}, ScoutThePeripheryYellow{}, ScoutThePeripheryBlue{}} {
+		c.Play(&s, &sim.CardState{Card: c})
 		if got := s.Value; got != 0 {
 			t.Errorf("%s: Play() = %d, want 0", c.Name(), got)
 		}
@@ -21,8 +21,8 @@ func TestScoutThePeriphery_NoAttackReturnsZero(t *testing.T) {
 // TestScoutThePeriphery_NonAttackInRemainingFizzles: non-attack action (even from arsenal)
 // fails the predicate — only attack actions count as the rider's target.
 func TestScoutThePeriphery_NonAttackInRemainingFizzles(t *testing.T) {
-	s := card.TurnState{CardsRemaining: []*card.CardState{{Card: testutils.GenericAction(), FromArsenal: true}}}
-	(ScoutThePeripheryRed{}).Play(&s, &card.CardState{Card: ScoutThePeripheryRed{}})
+	s := sim.TurnState{CardsRemaining: []*sim.CardState{{Card: testutils.GenericAction(), FromArsenal: true}}}
+	(ScoutThePeripheryRed{}).Play(&s, &sim.CardState{Card: ScoutThePeripheryRed{}})
 	if got := s.Value; got != 0 {
 		t.Errorf("Play() = %d, want 0 (non-attack skipped)", got)
 	}
@@ -31,8 +31,8 @@ func TestScoutThePeriphery_NonAttackInRemainingFizzles(t *testing.T) {
 // TestScoutThePeriphery_HandPlayedAttackFizzles: queued attack action that wasn't played from
 // arsenal fails the rider's "next attack action card you play from arsenal" target gate.
 func TestScoutThePeriphery_HandPlayedAttackFizzles(t *testing.T) {
-	s := card.TurnState{CardsRemaining: []*card.CardState{{Card: testutils.GenericAttack(0, 0)}}}
-	(ScoutThePeripheryRed{}).Play(&s, &card.CardState{Card: ScoutThePeripheryRed{}})
+	s := sim.TurnState{CardsRemaining: []*sim.CardState{{Card: testutils.GenericAttack(0, 0)}}}
+	(ScoutThePeripheryRed{}).Play(&s, &sim.CardState{Card: ScoutThePeripheryRed{}})
 	if got := s.Value; got != 0 {
 		t.Errorf("Play() = %d, want 0 (target attack not from arsenal)", got)
 	}
@@ -44,7 +44,7 @@ func TestScoutThePeriphery_HandPlayedAttackFizzles(t *testing.T) {
 // granter itself credits 0 — the bonus rides on the target.
 func TestScoutThePeriphery_NextArsenalAttackReturnsBonus(t *testing.T) {
 	cases := []struct {
-		c    card.Card
+		c    sim.Card
 		want int
 	}{
 		{ScoutThePeripheryRed{}, 3},
@@ -52,9 +52,9 @@ func TestScoutThePeriphery_NextArsenalAttackReturnsBonus(t *testing.T) {
 		{ScoutThePeripheryBlue{}, 1},
 	}
 	for _, tc := range cases {
-		target := &card.CardState{Card: testutils.GenericAttack(0, 0), FromArsenal: true}
-		s := card.TurnState{CardsRemaining: []*card.CardState{target}}
-		tc.c.Play(&s, &card.CardState{Card: tc.c})
+		target := &sim.CardState{Card: testutils.GenericAttack(0, 0), FromArsenal: true}
+		s := sim.TurnState{CardsRemaining: []*sim.CardState{target}}
+		tc.c.Play(&s, &sim.CardState{Card: tc.c})
 		if got := s.Value; got != 0 {
 			t.Errorf("%s: granter credits %d, want 0 (bonus rides on target)", tc.c.Name(), got)
 		}

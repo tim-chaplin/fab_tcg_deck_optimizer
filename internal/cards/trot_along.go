@@ -7,13 +7,14 @@ package cards
 import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 )
 
 var trotAlongTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction)
 
 // trotAlongApplySideEffect grants go again to the next qualifying attack action card scheduled
 // later this turn.
-func trotAlongApplySideEffect(s *card.TurnState) {
+func trotAlongApplySideEffect(s *sim.TurnState) {
 	for _, pc := range s.CardsRemaining {
 		if !pc.Card.Types().IsAttackAction() {
 			continue
@@ -27,15 +28,15 @@ func trotAlongApplySideEffect(s *card.TurnState) {
 
 type TrotAlongBlue struct{}
 
-func (TrotAlongBlue) ID() ids.CardID           { return ids.TrotAlongBlue }
-func (TrotAlongBlue) Name() string             { return "Trot Along" }
-func (TrotAlongBlue) Cost(*card.TurnState) int { return 0 }
-func (TrotAlongBlue) Pitch() int               { return 3 }
-func (TrotAlongBlue) Attack() int              { return 0 }
-func (TrotAlongBlue) Defense() int             { return 3 }
-func (TrotAlongBlue) Types() card.TypeSet      { return trotAlongTypes }
-func (TrotAlongBlue) GoAgain() bool            { return true }
-func (TrotAlongBlue) Play(s *card.TurnState, self *card.CardState) {
+func (TrotAlongBlue) ID() ids.CardID          { return ids.TrotAlongBlue }
+func (TrotAlongBlue) Name() string            { return "Trot Along" }
+func (TrotAlongBlue) Cost(*sim.TurnState) int { return 0 }
+func (TrotAlongBlue) Pitch() int              { return 3 }
+func (TrotAlongBlue) Attack() int             { return 0 }
+func (TrotAlongBlue) Defense() int            { return 3 }
+func (TrotAlongBlue) Types() card.TypeSet     { return trotAlongTypes }
+func (TrotAlongBlue) GoAgain() bool           { return true }
+func (TrotAlongBlue) Play(s *sim.TurnState, self *sim.CardState) {
 	trotAlongApplySideEffect(s)
 	s.ApplyAndLogEffectiveAttack(self)
 }

@@ -3,7 +3,7 @@ package cards
 import (
 	"testing"
 
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
 )
 
@@ -11,7 +11,7 @@ import (
 // when we block all incoming damage, and pays N on a future-turn pop.
 func TestBloodspillInvocation_BlockCoversIncomingReturnsN(t *testing.T) {
 	cases := []struct {
-		c card.Card
+		c sim.Card
 		n int
 	}{
 		{BloodspillInvocationRed{}, 3},
@@ -19,8 +19,8 @@ func TestBloodspillInvocation_BlockCoversIncomingReturnsN(t *testing.T) {
 		{BloodspillInvocationBlue{}, 1},
 	}
 	for _, tc := range cases {
-		s := card.TurnState{IncomingDamage: 3, BlockTotal: 3}
-		tc.c.Play(&s, &card.CardState{Card: tc.c})
+		s := sim.TurnState{IncomingDamage: 3, BlockTotal: 3}
+		tc.c.Play(&s, &sim.CardState{Card: tc.c})
 		if got := s.Value; got != tc.n {
 			t.Errorf("%s: Play() = %d, want %d (block == incoming)", tc.c.Name(), got, tc.n)
 		}
@@ -30,14 +30,14 @@ func TestBloodspillInvocation_BlockCoversIncomingReturnsN(t *testing.T) {
 // TestBloodspillInvocation_BlockShortReturnsZero: if we take damage and have no same-turn
 // attack action likely to hit, Bloodspill dies without creating Runechants.
 func TestBloodspillInvocation_BlockShortReturnsZero(t *testing.T) {
-	cases := []card.Card{
+	cases := []sim.Card{
 		BloodspillInvocationRed{},
 		BloodspillInvocationYellow{},
 		BloodspillInvocationBlue{},
 	}
 	for _, c := range cases {
-		s := card.TurnState{IncomingDamage: 3, BlockTotal: 2}
-		c.Play(&s, &card.CardState{Card: c})
+		s := sim.TurnState{IncomingDamage: 3, BlockTotal: 2}
+		c.Play(&s, &sim.CardState{Card: c})
 		if got := s.Value; got != 0 {
 			t.Errorf("%s: Play() = %d, want 0 (block < incoming, no same-turn pop)", c.Name(), got)
 		}
@@ -47,12 +47,12 @@ func TestBloodspillInvocation_BlockShortReturnsZero(t *testing.T) {
 // TestBloodspillInvocation_SameTurnPopBySalientAttackAction: a later attack action with a
 // likely-to-hit power pops Bloodspill this turn for its full N — even if we're taking damage.
 func TestBloodspillInvocation_SameTurnPopBySalientAttackAction(t *testing.T) {
-	s := card.TurnState{
+	s := sim.TurnState{
 		IncomingDamage: 3,
 		BlockTotal:     0,
-		CardsRemaining: []*card.CardState{{Card: testutils.AttackWithPower{Power: 4}}},
+		CardsRemaining: []*sim.CardState{{Card: testutils.AttackWithPower{Power: 4}}},
 	}
-	(BloodspillInvocationRed{}).Play(&s, &card.CardState{Card: BloodspillInvocationRed{}})
+	(BloodspillInvocationRed{}).Play(&s, &sim.CardState{Card: BloodspillInvocationRed{}})
 	if got := s.Value; got != 3 {
 		t.Errorf("Play() = %d, want 3 (Attack=4 attack action pops Bloodspill same turn)", got)
 	}
@@ -62,13 +62,13 @@ func TestBloodspillInvocation_SameTurnPopBySalientAttackAction(t *testing.T) {
 // hitting — a weapon swing that hits doesn't trigger its destruction, even with a Runechant
 // firing alongside.
 func TestBloodspillInvocation_WeaponDoesNotPop(t *testing.T) {
-	s := card.TurnState{
+	s := sim.TurnState{
 		IncomingDamage: 3,
 		BlockTotal:     0,
 		Runechants:     1,
-		CardsRemaining: []*card.CardState{{Card: testutils.RunebladeWeapon{}}},
+		CardsRemaining: []*sim.CardState{{Card: testutils.RunebladeWeapon{}}},
 	}
-	(BloodspillInvocationRed{}).Play(&s, &card.CardState{Card: BloodspillInvocationRed{}})
+	(BloodspillInvocationRed{}).Play(&s, &sim.CardState{Card: BloodspillInvocationRed{}})
 	if got := s.Value; got != 0 {
 		t.Errorf("Play() = %d, want 0 (weapon hits don't trigger Bloodspill; under-block collapses value)", got)
 	}
@@ -77,13 +77,13 @@ func TestBloodspillInvocation_WeaponDoesNotPop(t *testing.T) {
 // TestBloodspillInvocation_SameTurnPopByRunechant: a blockable attack action still pops
 // Bloodspill when a lone Runechant fires alongside — the 1 arcane is likely to slip through.
 func TestBloodspillInvocation_SameTurnPopByRunechant(t *testing.T) {
-	s := card.TurnState{
+	s := sim.TurnState{
 		IncomingDamage: 3,
 		BlockTotal:     0,
 		Runechants:     1,
-		CardsRemaining: []*card.CardState{{Card: testutils.AttackWithPower{Power: 6}}},
+		CardsRemaining: []*sim.CardState{{Card: testutils.AttackWithPower{Power: 6}}},
 	}
-	(BloodspillInvocationRed{}).Play(&s, &card.CardState{Card: BloodspillInvocationRed{}})
+	(BloodspillInvocationRed{}).Play(&s, &sim.CardState{Card: BloodspillInvocationRed{}})
 	if got := s.Value; got != 3 {
 		t.Errorf("Play() = %d, want 3 (Attack=6 blockable, 1 Runechant likely to hit)", got)
 	}

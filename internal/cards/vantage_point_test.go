@@ -3,14 +3,14 @@ package cards
 import (
 	"testing"
 
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
 )
 
 func TestVantagePoint_BaseDamageNoAura(t *testing.T) {
 	// No aura → just printed power, Overpower stays false.
 	cases := []struct {
-		c    card.Card
+		c    sim.Card
 		base int
 	}{
 		{VantagePointRed{}, 7},
@@ -18,8 +18,8 @@ func TestVantagePoint_BaseDamageNoAura(t *testing.T) {
 		{VantagePointBlue{}, 5},
 	}
 	for _, tc := range cases {
-		var s card.TurnState
-		tc.c.Play(&s, &card.CardState{Card: tc.c})
+		var s sim.TurnState
+		tc.c.Play(&s, &sim.CardState{Card: tc.c})
 		if got := s.Value; got != tc.base {
 			t.Errorf("%s: Play() = %d, want %d", tc.c.Name(), got, tc.base)
 		}
@@ -32,8 +32,8 @@ func TestVantagePoint_BaseDamageNoAura(t *testing.T) {
 func TestVantagePoint_AuraPlayedSetsOverpower(t *testing.T) {
 	// Aura in CardsPlayed → Overpower flag set; damage unchanged since Overpower isn't consumed
 	// by the solver (incoming damage is a flat opponent profile, not blocked).
-	s := card.TurnState{CardsPlayed: []card.Card{testutils.Aura{}}}
-	(VantagePointRed{}).Play(&s, &card.CardState{Card: VantagePointRed{}})
+	s := sim.TurnState{CardsPlayed: []sim.Card{testutils.Aura{}}}
+	(VantagePointRed{}).Play(&s, &sim.CardState{Card: VantagePointRed{}})
 	if got := s.Value; got != 7 {
 		t.Errorf("Play() = %d, want 7", got)
 	}
@@ -44,8 +44,8 @@ func TestVantagePoint_AuraPlayedSetsOverpower(t *testing.T) {
 
 func TestVantagePoint_AuraCreatedSetsOverpower(t *testing.T) {
 	// AuraCreated flag (e.g. from an earlier Runechant-creating card) also triggers Overpower.
-	s := card.TurnState{AuraCreated: true}
-	(VantagePointRed{}).Play(&s, &card.CardState{Card: VantagePointRed{}})
+	s := sim.TurnState{AuraCreated: true}
+	(VantagePointRed{}).Play(&s, &sim.CardState{Card: VantagePointRed{}})
 	if got := s.Value; got != 7 {
 		t.Errorf("Play() = %d, want 7", got)
 	}

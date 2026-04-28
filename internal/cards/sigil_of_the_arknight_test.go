@@ -3,7 +3,7 @@ package cards
 import (
 	"testing"
 
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
 )
 
@@ -11,15 +11,15 @@ import (
 // flips AuraCreated, registers a TriggerStartOfTurn entry, and returns 0. The deck peek
 // happens when the sim fires the trigger next turn.
 func TestSigilOfTheArknight_PlayOnlySetsAuraCreated(t *testing.T) {
-	s := card.TurnState{Deck: []card.Card{testutils.RunebladeAttack{}}}
-	(SigilOfTheArknightBlue{}).Play(&s, &card.CardState{Card: SigilOfTheArknightBlue{}})
+	s := sim.TurnState{Deck: []sim.Card{testutils.RunebladeAttack{}}}
+	(SigilOfTheArknightBlue{}).Play(&s, &sim.CardState{Card: SigilOfTheArknightBlue{}})
 	if got := s.Value; got != 0 {
 		t.Errorf("Play() = %d, want 0 (reveal deferred to trigger)", got)
 	}
 	if !s.AuraCreated {
 		t.Error("AuraCreated = false, want true")
 	}
-	if len(s.AuraTriggers) != 1 || s.AuraTriggers[0].Type != card.TriggerStartOfTurn {
+	if len(s.AuraTriggers) != 1 || s.AuraTriggers[0].Type != sim.TriggerStartOfTurn {
 		t.Errorf("AuraTriggers = %+v, want one TriggerStartOfTurn entry", s.AuraTriggers)
 	}
 }
@@ -29,10 +29,10 @@ func TestSigilOfTheArknight_PlayOnlySetsAuraCreated(t *testing.T) {
 // loop appends the card to that turn's hand. Damage stays 0 (tempo is captured by the
 // extra card, not a flat credit).
 func TestSigilOfTheArknight_TriggerRevealsAttackActionIntoHand(t *testing.T) {
-	var play card.TurnState
-	(SigilOfTheArknightBlue{}).Play(&play, &card.CardState{Card: SigilOfTheArknightBlue{}})
+	var play sim.TurnState
+	(SigilOfTheArknightBlue{}).Play(&play, &sim.CardState{Card: SigilOfTheArknightBlue{}})
 	top := testutils.RunebladeAttack{}
-	next := card.TurnState{Deck: []card.Card{top, testutils.NonAttack{}}}
+	next := sim.TurnState{Deck: []sim.Card{top, testutils.NonAttack{}}}
 	if got := play.AuraTriggers[0].Handler(&next); got != 0 {
 		t.Errorf("handler damage = %d, want 0 (tempo credited via Revealed, not damage)", got)
 	}
@@ -47,9 +47,9 @@ func TestSigilOfTheArknight_TriggerRevealsAttackActionIntoHand(t *testing.T) {
 // TestSigilOfTheArknight_TriggerRevealsNonAttack: top card is non-attack → Revealed stays
 // nil and Deck is untouched (the card stays on top of the deck in the real game).
 func TestSigilOfTheArknight_TriggerRevealsNonAttack(t *testing.T) {
-	var play card.TurnState
-	(SigilOfTheArknightBlue{}).Play(&play, &card.CardState{Card: SigilOfTheArknightBlue{}})
-	next := card.TurnState{Deck: []card.Card{testutils.Aura{}, testutils.RunebladeAttack{}}}
+	var play sim.TurnState
+	(SigilOfTheArknightBlue{}).Play(&play, &sim.CardState{Card: SigilOfTheArknightBlue{}})
+	next := sim.TurnState{Deck: []sim.Card{testutils.Aura{}, testutils.RunebladeAttack{}}}
 	if got := play.AuraTriggers[0].Handler(&next); got != 0 {
 		t.Errorf("handler damage = %d, want 0", got)
 	}
@@ -63,9 +63,9 @@ func TestSigilOfTheArknight_TriggerRevealsNonAttack(t *testing.T) {
 
 // TestSigilOfTheArknight_TriggerEmptyDeck: nothing to reveal → zero result, Revealed stays nil.
 func TestSigilOfTheArknight_TriggerEmptyDeck(t *testing.T) {
-	var play card.TurnState
-	(SigilOfTheArknightBlue{}).Play(&play, &card.CardState{Card: SigilOfTheArknightBlue{}})
-	var next card.TurnState
+	var play sim.TurnState
+	(SigilOfTheArknightBlue{}).Play(&play, &sim.CardState{Card: SigilOfTheArknightBlue{}})
+	var next sim.TurnState
 	if got := play.AuraTriggers[0].Handler(&next); got != 0 {
 		t.Errorf("handler damage = %d, want 0", got)
 	}
@@ -77,8 +77,8 @@ func TestSigilOfTheArknight_TriggerEmptyDeck(t *testing.T) {
 // TestSigilOfTheArknight_ImplementsAddsFutureValue pins the marker so the solver's
 // beatsBest tiebreaker counts this card as future-value-adding.
 func TestSigilOfTheArknight_ImplementsAddsFutureValue(t *testing.T) {
-	var c card.Card = SigilOfTheArknightBlue{}
-	if _, ok := c.(card.AddsFutureValue); !ok {
-		t.Error("SigilOfTheArknightBlue should implement card.AddsFutureValue")
+	var c sim.Card = SigilOfTheArknightBlue{}
+	if _, ok := c.(sim.AddsFutureValue); !ok {
+		t.Error("SigilOfTheArknightBlue should implement sim.AddsFutureValue")
 	}
 }

@@ -15,22 +15,23 @@ package cards
 import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 )
 
 var sigilOfTheArknightTypes = card.NewTypeSet(card.TypeRuneblade, card.TypeAction, card.TypeAura)
 
 type SigilOfTheArknightBlue struct{}
 
-func (SigilOfTheArknightBlue) ID() ids.CardID           { return ids.SigilOfTheArknightBlue }
-func (SigilOfTheArknightBlue) Name() string             { return "Sigil of the Arknight" }
-func (SigilOfTheArknightBlue) Cost(*card.TurnState) int { return 0 }
-func (SigilOfTheArknightBlue) Pitch() int               { return 3 }
-func (SigilOfTheArknightBlue) Attack() int              { return 0 }
-func (SigilOfTheArknightBlue) Defense() int             { return 2 }
-func (SigilOfTheArknightBlue) Types() card.TypeSet      { return sigilOfTheArknightTypes }
-func (SigilOfTheArknightBlue) GoAgain() bool            { return true }
-func (SigilOfTheArknightBlue) AddsFutureValue()         {}
-func (c SigilOfTheArknightBlue) Play(s *card.TurnState, self *card.CardState) {
+func (SigilOfTheArknightBlue) ID() ids.CardID          { return ids.SigilOfTheArknightBlue }
+func (SigilOfTheArknightBlue) Name() string            { return "Sigil of the Arknight" }
+func (SigilOfTheArknightBlue) Cost(*sim.TurnState) int { return 0 }
+func (SigilOfTheArknightBlue) Pitch() int              { return 3 }
+func (SigilOfTheArknightBlue) Attack() int             { return 0 }
+func (SigilOfTheArknightBlue) Defense() int            { return 2 }
+func (SigilOfTheArknightBlue) Types() card.TypeSet     { return sigilOfTheArknightTypes }
+func (SigilOfTheArknightBlue) GoAgain() bool           { return true }
+func (SigilOfTheArknightBlue) AddsFutureValue()        {}
+func (c SigilOfTheArknightBlue) Play(s *sim.TurnState, self *sim.CardState) {
 	s.RegisterStartOfTurn(c, 1, "", sigilOfTheArknightReveal)
 	s.LogPlay(self)
 }
@@ -39,18 +40,18 @@ func (c SigilOfTheArknightBlue) Play(s *card.TurnState, self *card.CardState) {
 // the outcome on every fire — "drew X into hand" on a hit or "revealed X but didn't draw
 // it" on a whiff — so the printout makes the random reveal visible either way. Empty deck
 // is the silent edge case (no card to name).
-func sigilOfTheArknightReveal(s *card.TurnState) int {
+func sigilOfTheArknightReveal(s *sim.TurnState) int {
 	if len(s.Deck) == 0 {
 		return 0
 	}
 	top := s.Deck[0]
-	self := card.DisplayName(SigilOfTheArknightBlue{})
+	self := sim.DisplayName(SigilOfTheArknightBlue{})
 	if top.Types().IsAttackAction() {
 		s.Revealed = append(s.Revealed, top)
 		s.Deck = s.Deck[1:]
-		s.AddPostTriggerLogEntry(self+" drew "+card.DisplayName(top)+" into hand", self, 0)
+		s.AddPostTriggerLogEntry(self+" drew "+sim.DisplayName(top)+" into hand", self, 0)
 		return 0
 	}
-	s.AddPostTriggerLogEntry(self+" revealed "+card.DisplayName(top)+" but didn't draw it", self, 0)
+	s.AddPostTriggerLogEntry(self+" revealed "+sim.DisplayName(top)+" but didn't draw it", self, 0)
 	return 0
 }

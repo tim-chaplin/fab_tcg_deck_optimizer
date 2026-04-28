@@ -3,7 +3,7 @@ package cards
 import (
 	"testing"
 
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
 )
 
@@ -11,7 +11,7 @@ import (
 // fizzles and each variant returns its base power.
 func TestWaterTheSeeds_NoAttackReturnsBase(t *testing.T) {
 	cases := []struct {
-		c    card.Card
+		c    sim.Card
 		want int
 	}{
 		{WaterTheSeedsRed{}, 3},
@@ -19,8 +19,8 @@ func TestWaterTheSeeds_NoAttackReturnsBase(t *testing.T) {
 		{WaterTheSeedsBlue{}, 1},
 	}
 	for _, tc := range cases {
-		s := &card.TurnState{}
-		tc.c.Play(s, &card.CardState{Card: tc.c})
+		s := &sim.TurnState{}
+		tc.c.Play(s, &sim.CardState{Card: tc.c})
 		if got := s.Value; got != tc.want {
 			t.Errorf("%s: Play() = %d, want %d (no lookahead target)", tc.c.Name(), got, tc.want)
 		}
@@ -30,8 +30,8 @@ func TestWaterTheSeeds_NoAttackReturnsBase(t *testing.T) {
 // TestWaterTheSeeds_HighPowerFizzles: a power-2 attack is past the base-{p}-<=1 gate, so the
 // rider keeps searching. With no matching attack below it, the bonus fizzles.
 func TestWaterTheSeeds_HighPowerFizzles(t *testing.T) {
-	s := &card.TurnState{CardsRemaining: []*card.CardState{{Card: testutils.GenericAttack(0, 2)}}}
-	(WaterTheSeedsRed{}).Play(s, &card.CardState{Card: WaterTheSeedsRed{}})
+	s := &sim.TurnState{CardsRemaining: []*sim.CardState{{Card: testutils.GenericAttack(0, 2)}}}
+	(WaterTheSeedsRed{}).Play(s, &sim.CardState{Card: WaterTheSeedsRed{}})
 	if got := s.Value; got != 3 {
 		t.Errorf("Play() = %d, want 3 (power 2 > 1 → no bonus)", got)
 	}
@@ -41,10 +41,10 @@ func TestWaterTheSeeds_HighPowerFizzles(t *testing.T) {
 // +1 rider — the buff lands on the target's BonusAttack so its EffectiveAttack picks up
 // the +1, not the granter's chain step.
 func TestWaterTheSeeds_LowPowerTriggersBonus(t *testing.T) {
-	for _, c := range []card.Card{WaterTheSeedsRed{}, WaterTheSeedsYellow{}, WaterTheSeedsBlue{}} {
-		target := &card.CardState{Card: testutils.GenericAttack(0, 1)}
-		s := &card.TurnState{CardsRemaining: []*card.CardState{target}}
-		c.Play(s, &card.CardState{Card: c})
+	for _, c := range []sim.Card{WaterTheSeedsRed{}, WaterTheSeedsYellow{}, WaterTheSeedsBlue{}} {
+		target := &sim.CardState{Card: testutils.GenericAttack(0, 1)}
+		s := &sim.TurnState{CardsRemaining: []*sim.CardState{target}}
+		c.Play(s, &sim.CardState{Card: c})
 		if got := target.BonusAttack; got != 1 {
 			t.Errorf("%s: target.BonusAttack = %d, want 1 (power-1 target triggers +1)", c.Name(), got)
 		}
@@ -55,10 +55,10 @@ func TestWaterTheSeeds_LowPowerTriggersBonus(t *testing.T) {
 // lasts until a matching attack resolves, so a power-3 attack scheduled before a power-0
 // attack shouldn't consume the rider — the +1 lands on the power-0 target.
 func TestWaterTheSeeds_SkipsPastNonMatchingAttacks(t *testing.T) {
-	skipped := &card.CardState{Card: testutils.GenericAttack(0, 3)}
-	target := &card.CardState{Card: testutils.GenericAttack(0, 0)}
-	s := &card.TurnState{CardsRemaining: []*card.CardState{skipped, target}}
-	(WaterTheSeedsRed{}).Play(s, &card.CardState{Card: WaterTheSeedsRed{}})
+	skipped := &sim.CardState{Card: testutils.GenericAttack(0, 3)}
+	target := &sim.CardState{Card: testutils.GenericAttack(0, 0)}
+	s := &sim.TurnState{CardsRemaining: []*sim.CardState{skipped, target}}
+	(WaterTheSeedsRed{}).Play(s, &sim.CardState{Card: WaterTheSeedsRed{}})
 	if got := skipped.BonusAttack; got != 0 {
 		t.Errorf("skipped.BonusAttack = %d, want 0 (power-3 target shouldn't consume rider)", got)
 	}
@@ -70,8 +70,8 @@ func TestWaterTheSeeds_SkipsPastNonMatchingAttacks(t *testing.T) {
 // TestWaterTheSeeds_NonAttackInRemainingIgnored: only attack-action cards in CardsRemaining count
 // as potential triggers.
 func TestWaterTheSeeds_NonAttackInRemainingIgnored(t *testing.T) {
-	s := &card.TurnState{CardsRemaining: []*card.CardState{{Card: testutils.GenericAction()}}}
-	(WaterTheSeedsRed{}).Play(s, &card.CardState{Card: WaterTheSeedsRed{}})
+	s := &sim.TurnState{CardsRemaining: []*sim.CardState{{Card: testutils.GenericAction()}}}
+	(WaterTheSeedsRed{}).Play(s, &sim.CardState{Card: WaterTheSeedsRed{}})
 	if got := s.Value; got != 3 {
 		t.Errorf("Play() = %d, want 3 (non-attack ignored)", got)
 	}

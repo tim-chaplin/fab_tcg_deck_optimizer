@@ -7,21 +7,22 @@ package cards
 import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 )
 
 var thrustTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAttackReaction)
 
 type ThrustRed struct{}
 
-func (ThrustRed) ID() ids.CardID           { return ids.ThrustRed }
-func (ThrustRed) Name() string             { return "Thrust" }
-func (ThrustRed) Cost(*card.TurnState) int { return 1 }
-func (ThrustRed) Pitch() int               { return 1 }
-func (ThrustRed) Attack() int              { return 0 }
-func (ThrustRed) Defense() int             { return 2 }
-func (ThrustRed) Types() card.TypeSet      { return thrustTypes }
-func (ThrustRed) GoAgain() bool            { return false }
+func (ThrustRed) ID() ids.CardID          { return ids.ThrustRed }
+func (ThrustRed) Name() string            { return "Thrust" }
+func (ThrustRed) Cost(*sim.TurnState) int { return 1 }
+func (ThrustRed) Pitch() int              { return 1 }
+func (ThrustRed) Attack() int             { return 0 }
+func (ThrustRed) Defense() int            { return 2 }
+func (ThrustRed) Types() card.TypeSet     { return thrustTypes }
+func (ThrustRed) GoAgain() bool           { return false }
 
 // not implemented: AR +3{p} buff to a target sword attack
-func (ThrustRed) NotImplemented()                              {}
-func (ThrustRed) Play(s *card.TurnState, self *card.CardState) { s.LogPlay(self) }
+func (ThrustRed) NotImplemented()                            {}
+func (ThrustRed) Play(s *sim.TurnState, self *sim.CardState) { s.LogPlay(self) }

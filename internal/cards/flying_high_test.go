@@ -3,15 +3,15 @@ package cards
 import (
 	"testing"
 
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
 )
 
 // TestFlyingHigh_NoAttackReturnsZero covers the miss branch: with nothing attack-typed in
 // CardsRemaining the grant fizzles and Play returns 0.
 func TestFlyingHigh_NoAttackReturnsZero(t *testing.T) {
-	s := card.TurnState{}
-	(FlyingHighRed{}).Play(&s, &card.CardState{Card: FlyingHighRed{}})
+	s := sim.TurnState{}
+	(FlyingHighRed{}).Play(&s, &sim.CardState{Card: FlyingHighRed{}})
 	if got := s.Value; got != 0 {
 		t.Errorf("Play() = %d, want 0", got)
 	}
@@ -20,9 +20,9 @@ func TestFlyingHigh_NoAttackReturnsZero(t *testing.T) {
 // TestFlyingHigh_NonAttackInRemainingFizzles confirms a non-attack action in CardsRemaining is
 // skipped by the attack-action predicate.
 func TestFlyingHigh_NonAttackInRemainingFizzles(t *testing.T) {
-	skipped := &card.CardState{Card: testutils.GenericAction()}
-	s := card.TurnState{CardsRemaining: []*card.CardState{skipped}}
-	(FlyingHighRed{}).Play(&s, &card.CardState{Card: FlyingHighRed{}})
+	skipped := &sim.CardState{Card: testutils.GenericAction()}
+	s := sim.TurnState{CardsRemaining: []*sim.CardState{skipped}}
+	(FlyingHighRed{}).Play(&s, &sim.CardState{Card: FlyingHighRed{}})
 	if got := s.Value; got != 0 {
 		t.Errorf("Play() = %d, want 0 (non-attack skipped)", got)
 	}
@@ -38,7 +38,7 @@ func TestFlyingHigh_NonAttackInRemainingFizzles(t *testing.T) {
 func TestFlyingHigh_ColorMatchGrantsBonus(t *testing.T) {
 	cases := []struct {
 		name       string
-		c          card.Card
+		c          sim.Card
 		wantRed    int
 		wantYellow int
 		wantBlue   int
@@ -52,9 +52,9 @@ func TestFlyingHigh_ColorMatchGrantsBonus(t *testing.T) {
 			pitch int
 			want  int
 		}{{1, tc.wantRed}, {2, tc.wantYellow}, {3, tc.wantBlue}} {
-			pc := &card.CardState{Card: testutils.GenericAttackPitch(0, 0, target.pitch)}
-			s := card.TurnState{CardsRemaining: []*card.CardState{pc}}
-			tc.c.Play(&s, &card.CardState{Card: tc.c})
+			pc := &sim.CardState{Card: testutils.GenericAttackPitch(0, 0, target.pitch)}
+			s := sim.TurnState{CardsRemaining: []*sim.CardState{pc}}
+			tc.c.Play(&s, &sim.CardState{Card: tc.c})
 			if got := s.Value; got != 0 {
 				t.Errorf("%s vs pitch-%d target: Play() = %d, want 0 (granter returns 0; +1 rides on target's BonusAttack when colour matches)",
 					tc.name, target.pitch, got)

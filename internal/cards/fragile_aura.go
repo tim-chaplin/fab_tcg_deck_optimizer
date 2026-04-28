@@ -7,14 +7,15 @@ package cards
 
 import (
 	"fmt"
-
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 )
 
 // fragileAuraPlay emits the chain step for a fragile-aura card and writes the expected
 // payoff as a sub-line under self when fragileAuraValue is non-zero. Auras have Attack=0,
 // so LogPlay carries the chain entry; the rider line carries the predicted value.
-func fragileAuraPlay(s *card.TurnState, self *card.CardState, n int, attackActionOnly bool) {
+func fragileAuraPlay(s *sim.TurnState, self *sim.CardState, n int, attackActionOnly bool) {
 	s.LogPlay(self)
 	if v := fragileAuraValue(s, n, attackActionOnly); v > 0 {
 		s.ApplyAndLogRiderOnPlay(self, fmt.Sprintf("Aura expected to pay %d runechants", v), v)
@@ -27,7 +28,7 @@ func fragileAuraPlay(s *card.TurnState, self *card.CardState, n int, attackActio
 //
 // attackActionOnly gates the same-turn-pop check. Triggers restricted to "attack action
 // card" pass true (weapon swings don't qualify); triggers off any damage source pass false.
-func fragileAuraValue(s *card.TurnState, n int, attackActionOnly bool) int {
+func fragileAuraValue(s *sim.TurnState, n int, attackActionOnly bool) int {
 	if popsThisTurn(s, attackActionOnly) {
 		return n
 	}
@@ -47,7 +48,7 @@ func fragileAuraValue(s *card.TurnState, n int, attackActionOnly bool) int {
 // damage from aura tokens, not a card attack — Dominate is an attack-keyword and doesn't
 // apply. The attacker-power check threads pc.EffectiveDominate() so a target with printed
 // (or granted) Dominate clears the 5+ bar.
-func popsThisTurn(s *card.TurnState, attackActionOnly bool) bool {
+func popsThisTurn(s *sim.TurnState, attackActionOnly bool) bool {
 	firstAttacker := true
 	for _, pc := range s.CardsRemaining {
 		if !qualifiesAsAttacker(pc.Card, attackActionOnly) {
@@ -58,14 +59,14 @@ func popsThisTurn(s *card.TurnState, attackActionOnly bool) bool {
 			runechants = s.Runechants
 			firstAttacker = false
 		}
-		if card.LikelyToHit(pc) || card.LikelyDamageHits(runechants, false) {
+		if sim.LikelyToHit(pc) || sim.LikelyDamageHits(runechants, false) {
 			return true
 		}
 	}
 	return false
 }
 
-func qualifiesAsAttacker(c card.Card, attackActionOnly bool) bool {
+func qualifiesAsAttacker(c sim.Card, attackActionOnly bool) bool {
 	ts := c.Types()
 	if attackActionOnly {
 		return ts.Has(card.TypeAttack)

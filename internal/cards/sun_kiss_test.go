@@ -3,7 +3,7 @@ package cards
 import (
 	"testing"
 
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
 )
 
@@ -12,7 +12,7 @@ import (
 // shape.
 func TestSunKiss_SoloIsHealOnly(t *testing.T) {
 	cases := []struct {
-		c    card.Card
+		c    sim.Card
 		heal int
 	}{
 		{SunKissRed{}, 3},
@@ -20,8 +20,8 @@ func TestSunKiss_SoloIsHealOnly(t *testing.T) {
 		{SunKissBlue{}, 1},
 	}
 	for _, tc := range cases {
-		s := card.TurnState{Deck: []card.Card{testutils.GenericAttack(0, 0)}}
-		self := &card.CardState{Card: tc.c}
+		s := sim.TurnState{Deck: []sim.Card{testutils.GenericAttack(0, 0)}}
+		self := &sim.CardState{Card: tc.c}
 		tc.c.Play(&s, self)
 		got := s.Value
 		if got != tc.heal {
@@ -41,21 +41,21 @@ func TestSunKiss_SoloIsHealOnly(t *testing.T) {
 // (Sun Kiss variant × Moon Wish variant) cross-products with one representative each so a
 // future Moon Wish printing renaming would surface as a clear failure.
 func TestSunKiss_SynergyFiresOnPriorMoonWish(t *testing.T) {
-	moonWishVariants := []card.Card{MoonWishRed{}, MoonWishYellow{}, MoonWishBlue{}}
+	moonWishVariants := []sim.Card{MoonWishRed{}, MoonWishYellow{}, MoonWishBlue{}}
 	for _, mw := range moonWishVariants {
 		for _, sk := range []struct {
-			c    card.Card
+			c    sim.Card
 			heal int
 		}{
 			{SunKissRed{}, 3},
 			{SunKissYellow{}, 2},
 			{SunKissBlue{}, 1},
 		} {
-			s := card.TurnState{
-				CardsPlayed: []card.Card{mw},
-				Deck:        []card.Card{testutils.GenericAttack(0, 0)},
+			s := sim.TurnState{
+				CardsPlayed: []sim.Card{mw},
+				Deck:        []sim.Card{testutils.GenericAttack(0, 0)},
 			}
-			self := &card.CardState{Card: sk.c}
+			self := &sim.CardState{Card: sk.c}
 			sk.c.Play(&s, self)
 			got := s.Value
 			if got != sk.heal {
@@ -79,11 +79,11 @@ func TestSunKiss_SynergyFiresOnPriorMoonWish(t *testing.T) {
 // in the name" or similar, this catches it.
 func TestSunKiss_SynergyDoesNotFireOnUnrelatedAttacks(t *testing.T) {
 	notMoonWish := testutils.GenericAttackPitch(0, 0, 1)
-	s := card.TurnState{
-		CardsPlayed: []card.Card{notMoonWish},
-		Deck:        []card.Card{testutils.GenericAttack(0, 0)},
+	s := sim.TurnState{
+		CardsPlayed: []sim.Card{notMoonWish},
+		Deck:        []sim.Card{testutils.GenericAttack(0, 0)},
 	}
-	self := &card.CardState{Card: SunKissRed{}}
+	self := &sim.CardState{Card: SunKissRed{}}
 	SunKissRed{}.Play(&s, self)
 	got := s.Value
 	if got != 3 {
@@ -101,11 +101,11 @@ func TestSunKiss_SynergyDoesNotFireOnUnrelatedAttacks(t *testing.T) {
 // resolves, the synergy still grants go-again but the draw silently no-ops (DrawOne contract).
 // Guards against a future regression that panics on Deck[0] read with no top.
 func TestSunKiss_SynergyHandlesEmptyDeck(t *testing.T) {
-	s := card.TurnState{
-		CardsPlayed: []card.Card{MoonWishRed{}},
+	s := sim.TurnState{
+		CardsPlayed: []sim.Card{MoonWishRed{}},
 		// Deck intentionally nil.
 	}
-	self := &card.CardState{Card: SunKissRed{}}
+	self := &sim.CardState{Card: SunKissRed{}}
 	SunKissRed{}.Play(&s, self)
 	got := s.Value
 	if got != 3 {

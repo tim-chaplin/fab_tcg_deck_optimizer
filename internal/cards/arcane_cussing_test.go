@@ -3,7 +3,7 @@ package cards
 import (
 	"testing"
 
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
 )
 
@@ -12,7 +12,7 @@ import (
 // survives to pay out later.
 func TestArcaneCussing_BlockCoversIncomingReturnsN(t *testing.T) {
 	cases := []struct {
-		c card.Card
+		c sim.Card
 		n int
 	}{
 		{ArcaneCussingRed{}, 3},
@@ -20,8 +20,8 @@ func TestArcaneCussing_BlockCoversIncomingReturnsN(t *testing.T) {
 		{ArcaneCussingBlue{}, 1},
 	}
 	for _, tc := range cases {
-		s := card.TurnState{IncomingDamage: 3, BlockTotal: 3}
-		tc.c.Play(&s, &card.CardState{Card: tc.c})
+		s := sim.TurnState{IncomingDamage: 3, BlockTotal: 3}
+		tc.c.Play(&s, &sim.CardState{Card: tc.c})
 		if got := s.Value; got != tc.n {
 			t.Errorf("%s: Play() = %d, want %d (block == incoming)", tc.c.Name(), got, tc.n)
 		}
@@ -31,8 +31,8 @@ func TestArcaneCussing_BlockCoversIncomingReturnsN(t *testing.T) {
 // TestArcaneCussing_OverBlockReturnsN pins that BlockTotal is uncapped — over-blocking still
 // counts as covering incoming.
 func TestArcaneCussing_OverBlockReturnsN(t *testing.T) {
-	s := card.TurnState{IncomingDamage: 3, BlockTotal: 7}
-	(ArcaneCussingRed{}).Play(&s, &card.CardState{Card: ArcaneCussingRed{}})
+	s := sim.TurnState{IncomingDamage: 3, BlockTotal: 7}
+	(ArcaneCussingRed{}).Play(&s, &sim.CardState{Card: ArcaneCussingRed{}})
 	if got := s.Value; got != 3 {
 		t.Errorf("Play() = %d, want 3 (over-block still covers)", got)
 	}
@@ -41,14 +41,14 @@ func TestArcaneCussing_OverBlockReturnsN(t *testing.T) {
 // TestArcaneCussing_BlockShortReturnsZero confirms the aura collapses to 0 when incoming damage
 // gets through — we take damage, aura dies without pay-out, no same-turn attack to save it.
 func TestArcaneCussing_BlockShortReturnsZero(t *testing.T) {
-	cases := []card.Card{
+	cases := []sim.Card{
 		ArcaneCussingRed{},
 		ArcaneCussingYellow{},
 		ArcaneCussingBlue{},
 	}
 	for _, c := range cases {
-		s := card.TurnState{IncomingDamage: 3, BlockTotal: 2}
-		c.Play(&s, &card.CardState{Card: c})
+		s := sim.TurnState{IncomingDamage: 3, BlockTotal: 2}
+		c.Play(&s, &sim.CardState{Card: c})
 		if got := s.Value; got != 0 {
 			t.Errorf("%s: Play() = %d, want 0 (block < incoming, no same-turn pop)", c.Name(), got)
 		}
@@ -58,12 +58,12 @@ func TestArcaneCussing_BlockShortReturnsZero(t *testing.T) {
 // TestArcaneCussing_SameTurnPopBySalientAttack: even if we're taking damage, a later attack
 // with a likely-to-hit power pops the aura this turn for its full N.
 func TestArcaneCussing_SameTurnPopBySalientAttack(t *testing.T) {
-	s := card.TurnState{
+	s := sim.TurnState{
 		IncomingDamage: 3,
 		BlockTotal:     0,
-		CardsRemaining: []*card.CardState{{Card: testutils.AttackWithPower{Power: 4}}},
+		CardsRemaining: []*sim.CardState{{Card: testutils.AttackWithPower{Power: 4}}},
 	}
-	(ArcaneCussingRed{}).Play(&s, &card.CardState{Card: ArcaneCussingRed{}})
+	(ArcaneCussingRed{}).Play(&s, &sim.CardState{Card: ArcaneCussingRed{}})
 	if got := s.Value; got != 3 {
 		t.Errorf("Play() = %d, want 3 (Attack=4 likely to hit, pops Cussing same turn)", got)
 	}
@@ -74,13 +74,13 @@ func TestArcaneCussing_SameTurnPopBySalientAttack(t *testing.T) {
 // pops the aura. Weapon stub has Attack=0, so the weapon swing alone can't pop it — we use a
 // carryover Runechant to satisfy the likely-to-hit check.
 func TestArcaneCussing_SameTurnPopByWeaponSwing(t *testing.T) {
-	s := card.TurnState{
+	s := sim.TurnState{
 		IncomingDamage: 3,
 		BlockTotal:     0,
 		Runechants:     1,
-		CardsRemaining: []*card.CardState{{Card: testutils.RunebladeWeapon{}}},
+		CardsRemaining: []*sim.CardState{{Card: testutils.RunebladeWeapon{}}},
 	}
-	(ArcaneCussingRed{}).Play(&s, &card.CardState{Card: ArcaneCussingRed{}})
+	(ArcaneCussingRed{}).Play(&s, &sim.CardState{Card: ArcaneCussingRed{}})
 	if got := s.Value; got != 3 {
 		t.Errorf("Play() = %d, want 3 (1 Runechant fires with weapon, likely to hit)", got)
 	}
@@ -89,13 +89,13 @@ func TestArcaneCussing_SameTurnPopByWeaponSwing(t *testing.T) {
 // TestArcaneCussing_SameTurnPopByRunechantAlone: even an attack whose Attack value is a
 // multiple of 3 (blockable) pops the aura if a single Runechant fires alongside it.
 func TestArcaneCussing_SameTurnPopByRunechantAlone(t *testing.T) {
-	s := card.TurnState{
+	s := sim.TurnState{
 		IncomingDamage: 3,
 		BlockTotal:     0,
 		Runechants:     1,
-		CardsRemaining: []*card.CardState{{Card: testutils.AttackWithPower{Power: 6}}},
+		CardsRemaining: []*sim.CardState{{Card: testutils.AttackWithPower{Power: 6}}},
 	}
-	(ArcaneCussingRed{}).Play(&s, &card.CardState{Card: ArcaneCussingRed{}})
+	(ArcaneCussingRed{}).Play(&s, &sim.CardState{Card: ArcaneCussingRed{}})
 	if got := s.Value; got != 3 {
 		t.Errorf("Play() = %d, want 3 (Attack=6 blockable, but 1 Runechant likely to slip through)", got)
 	}
@@ -105,12 +105,12 @@ func TestArcaneCussing_SameTurnPopByRunechantAlone(t *testing.T) {
 // multiple of 3 (blockable) and no Runechants firing can't pop Cussing — and we're taking
 // damage, so value collapses to 0.
 func TestArcaneCussing_BlockableAttackNoRunechantReturnsZero(t *testing.T) {
-	s := card.TurnState{
+	s := sim.TurnState{
 		IncomingDamage: 3,
 		BlockTotal:     0,
-		CardsRemaining: []*card.CardState{{Card: testutils.AttackWithPower{Power: 6}}},
+		CardsRemaining: []*sim.CardState{{Card: testutils.AttackWithPower{Power: 6}}},
 	}
-	(ArcaneCussingRed{}).Play(&s, &card.CardState{Card: ArcaneCussingRed{}})
+	(ArcaneCussingRed{}).Play(&s, &sim.CardState{Card: ArcaneCussingRed{}})
 	if got := s.Value; got != 0 {
 		t.Errorf("Play() = %d, want 0 (Attack=6 blockable, no Runechants, taking damage)", got)
 	}

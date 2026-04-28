@@ -8,7 +8,7 @@ package cards
 import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/simstate"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 )
 
 var adrenalineRushTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeAttack)
@@ -16,7 +16,7 @@ var adrenalineRushTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, car
 // adrenalineRushBonus returns the +3{p} rider when the current hero opts into
 // LowerHealthWanter, else 0.
 func adrenalineRushBonus() int {
-	if simstate.HeroWantsLowerHealth() {
+	if sim.HeroWantsLowerHealth() {
 		return 3
 	}
 	return 0
@@ -24,45 +24,45 @@ func adrenalineRushBonus() int {
 
 type AdrenalineRushRed struct{}
 
-func (AdrenalineRushRed) ID() ids.CardID           { return ids.AdrenalineRushRed }
-func (AdrenalineRushRed) Name() string             { return "Adrenaline Rush" }
-func (AdrenalineRushRed) Cost(*card.TurnState) int { return 2 }
-func (AdrenalineRushRed) Pitch() int               { return 1 }
-func (AdrenalineRushRed) Attack() int              { return 4 }
-func (AdrenalineRushRed) Defense() int             { return 2 }
-func (AdrenalineRushRed) Types() card.TypeSet      { return adrenalineRushTypes }
-func (AdrenalineRushRed) GoAgain() bool            { return false }
-func (AdrenalineRushRed) Play(s *card.TurnState, self *card.CardState) {
+func (AdrenalineRushRed) ID() ids.CardID          { return ids.AdrenalineRushRed }
+func (AdrenalineRushRed) Name() string            { return "Adrenaline Rush" }
+func (AdrenalineRushRed) Cost(*sim.TurnState) int { return 2 }
+func (AdrenalineRushRed) Pitch() int              { return 1 }
+func (AdrenalineRushRed) Attack() int             { return 4 }
+func (AdrenalineRushRed) Defense() int            { return 2 }
+func (AdrenalineRushRed) Types() card.TypeSet     { return adrenalineRushTypes }
+func (AdrenalineRushRed) GoAgain() bool           { return false }
+func (AdrenalineRushRed) Play(s *sim.TurnState, self *sim.CardState) {
 	self.BonusAttack += adrenalineRushBonus()
 	s.ApplyAndLogEffectiveAttack(self)
 }
 
 type AdrenalineRushYellow struct{}
 
-func (AdrenalineRushYellow) ID() ids.CardID           { return ids.AdrenalineRushYellow }
-func (AdrenalineRushYellow) Name() string             { return "Adrenaline Rush" }
-func (AdrenalineRushYellow) Cost(*card.TurnState) int { return 2 }
-func (AdrenalineRushYellow) Pitch() int               { return 2 }
-func (AdrenalineRushYellow) Attack() int              { return 3 }
-func (AdrenalineRushYellow) Defense() int             { return 2 }
-func (AdrenalineRushYellow) Types() card.TypeSet      { return adrenalineRushTypes }
-func (AdrenalineRushYellow) GoAgain() bool            { return false }
-func (AdrenalineRushYellow) Play(s *card.TurnState, self *card.CardState) {
+func (AdrenalineRushYellow) ID() ids.CardID          { return ids.AdrenalineRushYellow }
+func (AdrenalineRushYellow) Name() string            { return "Adrenaline Rush" }
+func (AdrenalineRushYellow) Cost(*sim.TurnState) int { return 2 }
+func (AdrenalineRushYellow) Pitch() int              { return 2 }
+func (AdrenalineRushYellow) Attack() int             { return 3 }
+func (AdrenalineRushYellow) Defense() int            { return 2 }
+func (AdrenalineRushYellow) Types() card.TypeSet     { return adrenalineRushTypes }
+func (AdrenalineRushYellow) GoAgain() bool           { return false }
+func (AdrenalineRushYellow) Play(s *sim.TurnState, self *sim.CardState) {
 	self.BonusAttack += adrenalineRushBonus()
 	s.ApplyAndLogEffectiveAttack(self)
 }
 
 type AdrenalineRushBlue struct{}
 
-func (AdrenalineRushBlue) ID() ids.CardID           { return ids.AdrenalineRushBlue }
-func (AdrenalineRushBlue) Name() string             { return "Adrenaline Rush" }
-func (AdrenalineRushBlue) Cost(*card.TurnState) int { return 2 }
-func (AdrenalineRushBlue) Pitch() int               { return 3 }
-func (AdrenalineRushBlue) Attack() int              { return 2 }
-func (AdrenalineRushBlue) Defense() int             { return 2 }
-func (AdrenalineRushBlue) Types() card.TypeSet      { return adrenalineRushTypes }
-func (AdrenalineRushBlue) GoAgain() bool            { return false }
-func (AdrenalineRushBlue) Play(s *card.TurnState, self *card.CardState) {
+func (AdrenalineRushBlue) ID() ids.CardID          { return ids.AdrenalineRushBlue }
+func (AdrenalineRushBlue) Name() string            { return "Adrenaline Rush" }
+func (AdrenalineRushBlue) Cost(*sim.TurnState) int { return 2 }
+func (AdrenalineRushBlue) Pitch() int              { return 3 }
+func (AdrenalineRushBlue) Attack() int             { return 2 }
+func (AdrenalineRushBlue) Defense() int            { return 2 }
+func (AdrenalineRushBlue) Types() card.TypeSet     { return adrenalineRushTypes }
+func (AdrenalineRushBlue) GoAgain() bool           { return false }
+func (AdrenalineRushBlue) Play(s *sim.TurnState, self *sim.CardState) {
 	self.BonusAttack += adrenalineRushBonus()
 	s.ApplyAndLogEffectiveAttack(self)
 }

@@ -8,57 +8,58 @@ package cards
 import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 )
 
 var pushThePointTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeAttack)
 
 type PushThePointRed struct{}
 
-func (PushThePointRed) ID() ids.CardID           { return ids.PushThePointRed }
-func (PushThePointRed) Name() string             { return "Push the Point" }
-func (PushThePointRed) Cost(*card.TurnState) int { return 1 }
-func (PushThePointRed) Pitch() int               { return 1 }
-func (PushThePointRed) Attack() int              { return 4 }
-func (PushThePointRed) Defense() int             { return 2 }
-func (PushThePointRed) Types() card.TypeSet      { return pushThePointTypes }
-func (PushThePointRed) GoAgain() bool            { return false }
+func (PushThePointRed) ID() ids.CardID          { return ids.PushThePointRed }
+func (PushThePointRed) Name() string            { return "Push the Point" }
+func (PushThePointRed) Cost(*sim.TurnState) int { return 1 }
+func (PushThePointRed) Pitch() int              { return 1 }
+func (PushThePointRed) Attack() int             { return 4 }
+func (PushThePointRed) Defense() int            { return 2 }
+func (PushThePointRed) Types() card.TypeSet     { return pushThePointTypes }
+func (PushThePointRed) GoAgain() bool           { return false }
 
 // not implemented: chain-history +2{p} rider (in-chain history not readable from Play)
 func (PushThePointRed) NotImplemented() {}
-func (c PushThePointRed) Play(s *card.TurnState, self *card.CardState) {
+func (c PushThePointRed) Play(s *sim.TurnState, self *sim.CardState) {
 	s.ApplyAndLogEffectiveAttack(self)
 }
 
 type PushThePointYellow struct{}
 
-func (PushThePointYellow) ID() ids.CardID           { return ids.PushThePointYellow }
-func (PushThePointYellow) Name() string             { return "Push the Point" }
-func (PushThePointYellow) Cost(*card.TurnState) int { return 1 }
-func (PushThePointYellow) Pitch() int               { return 2 }
-func (PushThePointYellow) Attack() int              { return 3 }
-func (PushThePointYellow) Defense() int             { return 2 }
-func (PushThePointYellow) Types() card.TypeSet      { return pushThePointTypes }
-func (PushThePointYellow) GoAgain() bool            { return false }
+func (PushThePointYellow) ID() ids.CardID          { return ids.PushThePointYellow }
+func (PushThePointYellow) Name() string            { return "Push the Point" }
+func (PushThePointYellow) Cost(*sim.TurnState) int { return 1 }
+func (PushThePointYellow) Pitch() int              { return 2 }
+func (PushThePointYellow) Attack() int             { return 3 }
+func (PushThePointYellow) Defense() int            { return 2 }
+func (PushThePointYellow) Types() card.TypeSet     { return pushThePointTypes }
+func (PushThePointYellow) GoAgain() bool           { return false }
 
 // not implemented: chain-history +2{p} rider (in-chain history not readable from Play)
 func (PushThePointYellow) NotImplemented() {}
-func (c PushThePointYellow) Play(s *card.TurnState, self *card.CardState) {
+func (c PushThePointYellow) Play(s *sim.TurnState, self *sim.CardState) {
 	s.ApplyAndLogEffectiveAttack(self)
 }
 
 type PushThePointBlue struct{}
 
-func (PushThePointBlue) ID() ids.CardID           { return ids.PushThePointBlue }
-func (PushThePointBlue) Name() string             { return "Push the Point" }
-func (PushThePointBlue) Cost(*card.TurnState) int { return 1 }
-func (PushThePointBlue) Pitch() int               { return 3 }
-func (PushThePointBlue) Attack() int              { return 2 }
-func (PushThePointBlue) Defense() int             { return 2 }
-func (PushThePointBlue) Types() card.TypeSet      { return pushThePointTypes }
-func (PushThePointBlue) GoAgain() bool            { return false }
+func (PushThePointBlue) ID() ids.CardID          { return ids.PushThePointBlue }
+func (PushThePointBlue) Name() string            { return "Push the Point" }
+func (PushThePointBlue) Cost(*sim.TurnState) int { return 1 }
+func (PushThePointBlue) Pitch() int              { return 3 }
+func (PushThePointBlue) Attack() int             { return 2 }
+func (PushThePointBlue) Defense() int            { return 2 }
+func (PushThePointBlue) Types() card.TypeSet     { return pushThePointTypes }
+func (PushThePointBlue) GoAgain() bool           { return false }
 
 // not implemented: chain-history +2{p} rider (in-chain history not readable from Play)
 func (PushThePointBlue) NotImplemented() {}
-func (c PushThePointBlue) Play(s *card.TurnState, self *card.CardState) {
+func (c PushThePointBlue) Play(s *sim.TurnState, self *sim.CardState) {
 	s.ApplyAndLogEffectiveAttack(self)
 }

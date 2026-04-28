@@ -3,14 +3,14 @@ package cards
 import (
 	"testing"
 
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
 )
 
 // TestRavenousRabble_EmptyDeckReturnsBasePower: with no deck, no card is revealed → no penalty.
 func TestRavenousRabble_EmptyDeckReturnsBasePower(t *testing.T) {
 	cases := []struct {
-		c    card.Card
+		c    sim.Card
 		want int
 	}{
 		{RavenousRabbleRed{}, 5},
@@ -18,8 +18,8 @@ func TestRavenousRabble_EmptyDeckReturnsBasePower(t *testing.T) {
 		{RavenousRabbleBlue{}, 3},
 	}
 	for _, tc := range cases {
-		s := &card.TurnState{}
-		tc.c.Play(s, &card.CardState{Card: tc.c})
+		s := &sim.TurnState{}
+		tc.c.Play(s, &sim.CardState{Card: tc.c})
 		if got := s.Value; got != tc.want {
 			t.Errorf("%s: Play() = %d, want %d (empty deck → base power)", tc.c.Name(), got, tc.want)
 		}
@@ -40,18 +40,18 @@ func TestRavenousRabble_TopPitchSubtracted(t *testing.T) {
 		{"pitch 3", 3, 2, 1, 0},
 	}
 	for _, tc := range cases {
-		sRed := &card.TurnState{Deck: []card.Card{testutils.GenericAttackPitch(0, 0, tc.topPitch)}}
-		(RavenousRabbleRed{}).Play(sRed, &card.CardState{Card: RavenousRabbleRed{}})
+		sRed := &sim.TurnState{Deck: []sim.Card{testutils.GenericAttackPitch(0, 0, tc.topPitch)}}
+		(RavenousRabbleRed{}).Play(sRed, &sim.CardState{Card: RavenousRabbleRed{}})
 		if got := sRed.Value; got != tc.red {
 			t.Errorf("%s Red: Play() = %d, want %d", tc.name, got, tc.red)
 		}
-		sYellow := &card.TurnState{Deck: []card.Card{testutils.GenericAttackPitch(0, 0, tc.topPitch)}}
-		(RavenousRabbleYellow{}).Play(sYellow, &card.CardState{Card: RavenousRabbleYellow{}})
+		sYellow := &sim.TurnState{Deck: []sim.Card{testutils.GenericAttackPitch(0, 0, tc.topPitch)}}
+		(RavenousRabbleYellow{}).Play(sYellow, &sim.CardState{Card: RavenousRabbleYellow{}})
 		if got := sYellow.Value; got != tc.yellow {
 			t.Errorf("%s Yellow: Play() = %d, want %d", tc.name, got, tc.yellow)
 		}
-		sBlue := &card.TurnState{Deck: []card.Card{testutils.GenericAttackPitch(0, 0, tc.topPitch)}}
-		(RavenousRabbleBlue{}).Play(sBlue, &card.CardState{Card: RavenousRabbleBlue{}})
+		sBlue := &sim.TurnState{Deck: []sim.Card{testutils.GenericAttackPitch(0, 0, tc.topPitch)}}
+		(RavenousRabbleBlue{}).Play(sBlue, &sim.CardState{Card: RavenousRabbleBlue{}})
 		if got := sBlue.Value; got != tc.blue {
 			t.Errorf("%s Blue: Play() = %d, want %d", tc.name, got, tc.blue)
 		}
@@ -62,8 +62,8 @@ func TestRavenousRabble_TopPitchSubtracted(t *testing.T) {
 // Verify the floor explicitly by reducing well past zero: Blue vs a (hypothetical) pitch-5 card
 // should still return 0, not a negative number that'd turn into negative damage downstream.
 func TestRavenousRabble_FloorsAtZero(t *testing.T) {
-	s := &card.TurnState{Deck: []card.Card{testutils.GenericAttackPitch(0, 0, 5)}}
-	(RavenousRabbleBlue{}).Play(s, &card.CardState{Card: RavenousRabbleBlue{}})
+	s := &sim.TurnState{Deck: []sim.Card{testutils.GenericAttackPitch(0, 0, 5)}}
+	(RavenousRabbleBlue{}).Play(s, &sim.CardState{Card: RavenousRabbleBlue{}})
 	if got := s.Value; got != 0 {
 		t.Errorf("Blue vs pitch-5 top: Play() = %d, want 0 (floor)", got)
 	}
@@ -72,12 +72,12 @@ func TestRavenousRabble_FloorsAtZero(t *testing.T) {
 // TestRavenousRabble_OnlyFirstDeckCardMatters: the reveal is the top card; cards below it don't
 // affect the result.
 func TestRavenousRabble_OnlyFirstDeckCardMatters(t *testing.T) {
-	s := &card.TurnState{Deck: []card.Card{
+	s := &sim.TurnState{Deck: []sim.Card{
 		testutils.GenericAttackPitch(0, 0, 1),
 		testutils.GenericAttackPitch(0, 0, 3),
 		testutils.GenericAttackPitch(0, 0, 3),
 	}}
-	(RavenousRabbleRed{}).Play(s, &card.CardState{Card: RavenousRabbleRed{}})
+	(RavenousRabbleRed{}).Play(s, &sim.CardState{Card: RavenousRabbleRed{}})
 	if got := s.Value; got != 4 {
 		t.Errorf("Play() = %d, want 4 (5 − top pitch 1, ignoring deeper cards)", got)
 	}

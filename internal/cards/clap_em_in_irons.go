@@ -8,21 +8,22 @@ package cards
 import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 )
 
 var clapEmInIronsTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeItem)
 
 type ClapEmInIronsBlue struct{}
 
-func (ClapEmInIronsBlue) ID() ids.CardID           { return ids.ClapEmInIronsBlue }
-func (ClapEmInIronsBlue) Name() string             { return "Clap 'Em in Irons" }
-func (ClapEmInIronsBlue) Cost(*card.TurnState) int { return 0 }
-func (ClapEmInIronsBlue) Pitch() int               { return 3 }
-func (ClapEmInIronsBlue) Attack() int              { return 0 }
-func (ClapEmInIronsBlue) Defense() int             { return 0 }
-func (ClapEmInIronsBlue) Types() card.TypeSet      { return clapEmInIronsTypes }
-func (ClapEmInIronsBlue) GoAgain() bool            { return true }
+func (ClapEmInIronsBlue) ID() ids.CardID          { return ids.ClapEmInIronsBlue }
+func (ClapEmInIronsBlue) Name() string            { return "Clap 'Em in Irons" }
+func (ClapEmInIronsBlue) Cost(*sim.TurnState) int { return 0 }
+func (ClapEmInIronsBlue) Pitch() int              { return 3 }
+func (ClapEmInIronsBlue) Attack() int             { return 0 }
+func (ClapEmInIronsBlue) Defense() int            { return 0 }
+func (ClapEmInIronsBlue) Types() card.TypeSet     { return clapEmInIronsTypes }
+func (ClapEmInIronsBlue) GoAgain() bool           { return true }
 
 // not implemented: passive tap-target Pirate; can't unfreeze; self-destroys at start of turn
-func (ClapEmInIronsBlue) NotImplemented()                              {}
-func (ClapEmInIronsBlue) Play(s *card.TurnState, self *card.CardState) { s.LogPlay(self) }
+func (ClapEmInIronsBlue) NotImplemented()                            {}
+func (ClapEmInIronsBlue) Play(s *sim.TurnState, self *sim.CardState) { s.LogPlay(self) }

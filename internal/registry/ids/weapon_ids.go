@@ -5,9 +5,9 @@ package ids
 // KLUDGE: aliased to CardID and anchored after the last fake card ID. Ideally weapons
 // would have their own number space (starting at 1), but every weapon swing flows through
 // the same chain-runner pipeline as deck cards: Weapon's methods structurally satisfy
-// card.Card so weapons can sit alongside cards in the chain's permutation slice without an
+// sim.Card so weapons can sit alongside cards in the chain's permutation slice without an
 // adapter, and the per-card caches (chain step text, display name, attacker meta) are
-// keyed by ids.CardID. With distinct types we'd need either a card.Card-shaped wrapper or
+// keyed by ids.CardID. With distinct types we'd need either a sim.Card-shaped wrapper or
 // a deeper refactor that branches the chain runner per slot kind. See TODO.md → "Weapon
 // IDs share the CardID space".
 type WeaponID = CardID

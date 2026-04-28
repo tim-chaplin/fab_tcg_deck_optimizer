@@ -8,21 +8,22 @@ package cards
 import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 )
 
 var talismanOfRecompenseTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeItem)
 
 type TalismanOfRecompenseYellow struct{}
 
-func (TalismanOfRecompenseYellow) ID() ids.CardID           { return ids.TalismanOfRecompenseYellow }
-func (TalismanOfRecompenseYellow) Name() string             { return "Talisman of Recompense" }
-func (TalismanOfRecompenseYellow) Cost(*card.TurnState) int { return 0 }
-func (TalismanOfRecompenseYellow) Pitch() int               { return 2 }
-func (TalismanOfRecompenseYellow) Attack() int              { return 0 }
-func (TalismanOfRecompenseYellow) Defense() int             { return 0 }
-func (TalismanOfRecompenseYellow) Types() card.TypeSet      { return talismanOfRecompenseTypes }
-func (TalismanOfRecompenseYellow) GoAgain() bool            { return true }
+func (TalismanOfRecompenseYellow) ID() ids.CardID          { return ids.TalismanOfRecompenseYellow }
+func (TalismanOfRecompenseYellow) Name() string            { return "Talisman of Recompense" }
+func (TalismanOfRecompenseYellow) Cost(*sim.TurnState) int { return 0 }
+func (TalismanOfRecompenseYellow) Pitch() int              { return 2 }
+func (TalismanOfRecompenseYellow) Attack() int             { return 0 }
+func (TalismanOfRecompenseYellow) Defense() int            { return 0 }
+func (TalismanOfRecompenseYellow) Types() card.TypeSet     { return talismanOfRecompenseTypes }
+func (TalismanOfRecompenseYellow) GoAgain() bool           { return true }
 
 // not implemented: self-destroys on pitching a 1-resource card → gain {r}{r}{r} instead
-func (TalismanOfRecompenseYellow) NotImplemented()                              {}
-func (TalismanOfRecompenseYellow) Play(s *card.TurnState, self *card.CardState) { s.LogPlay(self) }
+func (TalismanOfRecompenseYellow) NotImplemented()                            {}
+func (TalismanOfRecompenseYellow) Play(s *sim.TurnState, self *sim.CardState) { s.LogPlay(self) }

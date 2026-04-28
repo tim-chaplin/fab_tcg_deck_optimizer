@@ -3,14 +3,14 @@ package cards
 import (
 	"testing"
 
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 )
 
 // TestConsumingVolition_ArcaneDamageNotDealtReturnsBaseAttack: without the arcane-damage clause
 // satisfied, the discard rider can't fire regardless of hit likelihood.
 func TestConsumingVolition_ArcaneDamageNotDealtReturnsBaseAttack(t *testing.T) {
 	cases := []struct {
-		c    card.Card
+		c    sim.Card
 		want int
 	}{
 		{ConsumingVolitionRed{}, 4},
@@ -18,8 +18,8 @@ func TestConsumingVolition_ArcaneDamageNotDealtReturnsBaseAttack(t *testing.T) {
 		{ConsumingVolitionBlue{}, 2},
 	}
 	for _, tc := range cases {
-		s := card.TurnState{}
-		tc.c.Play(&s, &card.CardState{Card: tc.c})
+		s := sim.TurnState{}
+		tc.c.Play(&s, &sim.CardState{Card: tc.c})
 		if got := s.Value; got != tc.want {
 			t.Errorf("%s: Play() = %d, want %d (base attack, ArcaneDamageDealt=false)", tc.c.Name(), got, tc.want)
 		}
@@ -30,9 +30,9 @@ func TestConsumingVolition_ArcaneDamageNotDealtReturnsBaseAttack(t *testing.T) {
 // whose printed attack lands in the likely set ({1,4,7}). With ArcaneDamageDealt set the rider
 // fires and Play returns attack+3.
 func TestConsumingVolition_LikelyToHitAndArcaneTriggersDiscard(t *testing.T) {
-	s := card.TurnState{ArcaneDamageDealt: true}
+	s := sim.TurnState{ArcaneDamageDealt: true}
 	c := ConsumingVolitionRed{}
-	c.Play(&s, &card.CardState{Card: c})
+	c.Play(&s, &sim.CardState{Card: c})
 	if got := s.Value; got != 4+3 {
 		t.Errorf("Red with ArcaneDamageDealt: Play() = %d, want 7 (base 4 likely to hit + 3 discard)", got)
 	}
@@ -43,15 +43,15 @@ func TestConsumingVolition_LikelyToHitAndArcaneTriggersDiscard(t *testing.T) {
 // arcane-damage clause satisfied.
 func TestConsumingVolition_BlockableBaseSuppressesDiscard(t *testing.T) {
 	cases := []struct {
-		c    card.Card
+		c    sim.Card
 		want int
 	}{
 		{ConsumingVolitionYellow{}, 3},
 		{ConsumingVolitionBlue{}, 2},
 	}
 	for _, tc := range cases {
-		s := card.TurnState{ArcaneDamageDealt: true}
-		tc.c.Play(&s, &card.CardState{Card: tc.c})
+		s := sim.TurnState{ArcaneDamageDealt: true}
+		tc.c.Play(&s, &sim.CardState{Card: tc.c})
 		if got := s.Value; got != tc.want {
 			t.Errorf("%s with ArcaneDamageDealt: Play() = %d, want %d (blockable, no rider)", tc.c.Name(), got, tc.want)
 		}
@@ -62,9 +62,9 @@ func TestConsumingVolition_BlockableBaseSuppressesDiscard(t *testing.T) {
 // own damage reaching the hero. Runechants firing alongside are separate arcane damage and
 // don't count toward "this" card hitting, so they can't rescue a blockable variant.
 func TestConsumingVolition_RunechantsDontRescue(t *testing.T) {
-	s := card.TurnState{ArcaneDamageDealt: true, Runechants: 1}
+	s := sim.TurnState{ArcaneDamageDealt: true, Runechants: 1}
 	c := ConsumingVolitionYellow{}
-	c.Play(&s, &card.CardState{Card: c})
+	c.Play(&s, &sim.CardState{Card: c})
 	if got := s.Value; got != 3 {
 		t.Errorf("Yellow with 1 Runechant: Play() = %d, want 3 (runechant isn't 'this' damage)", got)
 	}

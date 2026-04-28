@@ -19,6 +19,7 @@ package cards
 import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 )
 
 var moonWishTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeAttack)
@@ -30,7 +31,7 @@ const moonWishPrintedCost = 2
 // moonWishCost returns 0 when there's any card left in hand to spend on the alt cost,
 // else the printed cost. Shared across all three pitch variants since the alt cost is
 // identical.
-func moonWishCost(s *card.TurnState) int {
+func moonWishCost(s *sim.TurnState) int {
 	if s != nil && len(s.Hand) > 0 {
 		return 0
 	}
@@ -44,16 +45,16 @@ func moonWishCost(s *card.TurnState) int {
 // next hand via s.Hand. Alt-cost fires get a "returned X to top of deck" line; tutor
 // outcomes get a "tutored Sun Kiss" / "tutored Sun Kiss and played it" / "found no Sun
 // Kiss to tutor" post-trigger child line beneath Moon Wish's chain step.
-func moonWishPlay(c card.Card, s *card.TurnState, self *card.CardState) {
-	name := card.DisplayName(c)
+func moonWishPlay(c sim.Card, s *sim.TurnState, self *sim.CardState) {
+	name := sim.DisplayName(c)
 	// Alt cost: pop a hand card and prepend to deck. Same-turn deck-top readers (the Sun
 	// Kiss tutor's post-resolution DrawOne) see it; the next turn's deal sees it too via
 	// the sim's end-of-turn copy of s.Deck.
-	var returned card.Card
+	var returned sim.Card
 	if len(s.Hand) > 0 {
 		returned = s.Hand[0]
 		s.Hand = s.Hand[1:]
-		newDeck := make([]card.Card, 0, len(s.Deck)+1)
+		newDeck := make([]sim.Card, 0, len(s.Deck)+1)
 		newDeck = append(newDeck, returned)
 		newDeck = append(newDeck, s.Deck...)
 		s.Deck = newDeck
@@ -64,10 +65,10 @@ func moonWishPlay(c card.Card, s *card.TurnState, self *card.CardState) {
 	s.ApplyAndLogEffectiveAttack(self)
 
 	if returned != nil {
-		s.AddPostTriggerLogEntry(name+" returned "+card.DisplayName(returned)+" to top of deck", name, 0)
+		s.AddPostTriggerLogEntry(name+" returned "+sim.DisplayName(returned)+" to top of deck", name, 0)
 	}
 
-	if !card.LikelyToHit(self) {
+	if !sim.LikelyToHit(self) {
 		return
 	}
 	sk := bestSunKissInDeck(s.Deck)
@@ -81,7 +82,7 @@ func moonWishPlay(c card.Card, s *card.TurnState, self *card.CardState) {
 		// Tutor lands the card in hand; carries to next turn via the sim's end-of-turn
 		// copy of s.Hand.
 		s.Hand = append(s.Hand, sk)
-		s.AddPostTriggerLogEntry(name+" tutored "+card.DisplayName(sk), name, 0)
+		s.AddPostTriggerLogEntry(name+" tutored "+sim.DisplayName(sk), name, 0)
 		return
 	}
 	// Go-again means Moon Wish gets a chain extension this turn. Pre-append Moon Wish to
@@ -89,9 +90,9 @@ func moonWishPlay(c card.Card, s *card.TurnState, self *card.CardState) {
 	// the sim's normal post-Play append doesn't double-add. Sun Kiss authors its own
 	// chain step inside its Play call — it appears as a separate top-level entry following
 	// Moon Wish's tutor narration.
-	s.AddPostTriggerLogEntry(name+" tutored "+card.DisplayName(sk)+" and played it", name, 0)
+	s.AddPostTriggerLogEntry(name+" tutored "+sim.DisplayName(sk)+" and played it", name, 0)
 	s.CardsPlayed = append(s.CardsPlayed, c)
-	skSelf := &card.CardState{Card: sk}
+	skSelf := &sim.CardState{Card: sk}
 	sk.Play(s, skSelf)
 	s.CardsPlayed = s.CardsPlayed[:len(s.CardsPlayed)-1]
 	s.AddToGraveyard(sk)
@@ -100,8 +101,8 @@ func moonWishPlay(c card.Card, s *card.TurnState, self *card.CardState) {
 // bestSunKissInDeck returns the highest-priority Sun Kiss printing present in deck, or nil
 // when no Sun Kiss is in the deck. Priority order is Red > Yellow > Blue: Red heals the
 // most ({3,2,1}{h} by colour), so the highest-power variant present wins.
-func bestSunKissInDeck(deck []card.Card) card.Card {
-	var pickedRed, pickedYellow, pickedBlue card.Card
+func bestSunKissInDeck(deck []sim.Card) sim.Card {
+	var pickedRed, pickedYellow, pickedBlue sim.Card
 	for _, c := range deck {
 		switch c.ID() {
 		case ids.SunKissRed:
@@ -129,10 +130,10 @@ func bestSunKissInDeck(deck []card.Card) card.Card {
 // removeFirstByID returns deck with the first occurrence of id removed. The returned slice
 // shares no backing storage with deck so subsequent mutations on the returned slice can't
 // poison the per-leaf deck reference.
-func removeFirstByID(deck []card.Card, id ids.CardID) []card.Card {
+func removeFirstByID(deck []sim.Card, id ids.CardID) []sim.Card {
 	for i, c := range deck {
 		if c.ID() == id {
-			out := make([]card.Card, 0, len(deck)-1)
+			out := make([]sim.Card, 0, len(deck)-1)
 			out = append(out, deck[:i]...)
 			out = append(out, deck[i+1:]...)
 			return out
@@ -143,48 +144,48 @@ func removeFirstByID(deck []card.Card, id ids.CardID) []card.Card {
 
 type MoonWishRed struct{}
 
-func (MoonWishRed) ID() ids.CardID             { return ids.MoonWishRed }
-func (MoonWishRed) Name() string               { return "Moon Wish" }
-func (MoonWishRed) Cost(s *card.TurnState) int { return moonWishCost(s) }
-func (MoonWishRed) MinCost() int               { return 0 }
-func (MoonWishRed) MaxCost() int               { return moonWishPrintedCost }
-func (MoonWishRed) Pitch() int                 { return 1 }
-func (MoonWishRed) Attack() int                { return 5 }
-func (MoonWishRed) Defense() int               { return 2 }
-func (MoonWishRed) Types() card.TypeSet        { return moonWishTypes }
-func (MoonWishRed) GoAgain() bool              { return false }
-func (c MoonWishRed) Play(s *card.TurnState, self *card.CardState) {
+func (MoonWishRed) ID() ids.CardID            { return ids.MoonWishRed }
+func (MoonWishRed) Name() string              { return "Moon Wish" }
+func (MoonWishRed) Cost(s *sim.TurnState) int { return moonWishCost(s) }
+func (MoonWishRed) MinCost() int              { return 0 }
+func (MoonWishRed) MaxCost() int              { return moonWishPrintedCost }
+func (MoonWishRed) Pitch() int                { return 1 }
+func (MoonWishRed) Attack() int               { return 5 }
+func (MoonWishRed) Defense() int              { return 2 }
+func (MoonWishRed) Types() card.TypeSet       { return moonWishTypes }
+func (MoonWishRed) GoAgain() bool             { return false }
+func (c MoonWishRed) Play(s *sim.TurnState, self *sim.CardState) {
 	moonWishPlay(c, s, self)
 }
 
 type MoonWishYellow struct{}
 
-func (MoonWishYellow) ID() ids.CardID             { return ids.MoonWishYellow }
-func (MoonWishYellow) Name() string               { return "Moon Wish" }
-func (MoonWishYellow) Cost(s *card.TurnState) int { return moonWishCost(s) }
-func (MoonWishYellow) MinCost() int               { return 0 }
-func (MoonWishYellow) MaxCost() int               { return moonWishPrintedCost }
-func (MoonWishYellow) Pitch() int                 { return 2 }
-func (MoonWishYellow) Attack() int                { return 4 }
-func (MoonWishYellow) Defense() int               { return 2 }
-func (MoonWishYellow) Types() card.TypeSet        { return moonWishTypes }
-func (MoonWishYellow) GoAgain() bool              { return false }
-func (c MoonWishYellow) Play(s *card.TurnState, self *card.CardState) {
+func (MoonWishYellow) ID() ids.CardID            { return ids.MoonWishYellow }
+func (MoonWishYellow) Name() string              { return "Moon Wish" }
+func (MoonWishYellow) Cost(s *sim.TurnState) int { return moonWishCost(s) }
+func (MoonWishYellow) MinCost() int              { return 0 }
+func (MoonWishYellow) MaxCost() int              { return moonWishPrintedCost }
+func (MoonWishYellow) Pitch() int                { return 2 }
+func (MoonWishYellow) Attack() int               { return 4 }
+func (MoonWishYellow) Defense() int              { return 2 }
+func (MoonWishYellow) Types() card.TypeSet       { return moonWishTypes }
+func (MoonWishYellow) GoAgain() bool             { return false }
+func (c MoonWishYellow) Play(s *sim.TurnState, self *sim.CardState) {
 	moonWishPlay(c, s, self)
 }
 
 type MoonWishBlue struct{}
 
-func (MoonWishBlue) ID() ids.CardID             { return ids.MoonWishBlue }
-func (MoonWishBlue) Name() string               { return "Moon Wish" }
-func (MoonWishBlue) Cost(s *card.TurnState) int { return moonWishCost(s) }
-func (MoonWishBlue) MinCost() int               { return 0 }
-func (MoonWishBlue) MaxCost() int               { return moonWishPrintedCost }
-func (MoonWishBlue) Pitch() int                 { return 3 }
-func (MoonWishBlue) Attack() int                { return 3 }
-func (MoonWishBlue) Defense() int               { return 2 }
-func (MoonWishBlue) Types() card.TypeSet        { return moonWishTypes }
-func (MoonWishBlue) GoAgain() bool              { return false }
-func (c MoonWishBlue) Play(s *card.TurnState, self *card.CardState) {
+func (MoonWishBlue) ID() ids.CardID            { return ids.MoonWishBlue }
+func (MoonWishBlue) Name() string              { return "Moon Wish" }
+func (MoonWishBlue) Cost(s *sim.TurnState) int { return moonWishCost(s) }
+func (MoonWishBlue) MinCost() int              { return 0 }
+func (MoonWishBlue) MaxCost() int              { return moonWishPrintedCost }
+func (MoonWishBlue) Pitch() int                { return 3 }
+func (MoonWishBlue) Attack() int               { return 3 }
+func (MoonWishBlue) Defense() int              { return 2 }
+func (MoonWishBlue) Types() card.TypeSet       { return moonWishTypes }
+func (MoonWishBlue) GoAgain() bool             { return false }
+func (c MoonWishBlue) Play(s *sim.TurnState, self *sim.CardState) {
 	moonWishPlay(c, s, self)
 }

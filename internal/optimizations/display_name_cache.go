@@ -8,25 +8,25 @@ package optimizations
 import (
 	"sync/atomic"
 
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 )
 
-// bareDisplayName is the uncached card.DisplayName captured before init swaps in the
+// bareDisplayName is the uncached sim.DisplayName captured before init swaps in the
 // memoised version. The slow path delegates to it so the build logic stays in one place
 // (card.go).
-var bareDisplayName = card.DisplayName
+var bareDisplayName = sim.DisplayName
 
 func init() {
-	card.DisplayName = cachedDisplayName
+	sim.DisplayName = cachedDisplayName
 }
 
-// cachedDisplayName is the memoised DisplayName installed over card.DisplayName at init.
+// cachedDisplayName is the memoised DisplayName installed over sim.DisplayName at init.
 // Result depends only on Card.ID(), so it's keyed in a per-ID table sized for the full
 // uint16 ID space. Invalid (id == 0) is the slot test stubs and ad-hoc fakes share, so we
 // skip the cache there — distinct stubs with the same zero ID would otherwise return each
 // other's strings.
-func cachedDisplayName(c card.Card) string {
+func cachedDisplayName(c sim.Card) string {
 	id := c.ID()
 	if id == ids.InvalidCard {
 		return bareDisplayName(c)
@@ -48,7 +48,7 @@ var displayNameCache [1 << 16]atomic.Pointer[string]
 //
 // Multiple goroutines computing the same entry race-safely converge on the first writer's
 // string — every writer produces the same value, so reads after a race still match spec.
-func displayNameSlow(c card.Card, id ids.CardID) string {
+func displayNameSlow(c sim.Card, id ids.CardID) string {
 	out := bareDisplayName(c)
 	displayNameCache[id].Store(&out)
 	return out
@@ -58,7 +58,7 @@ func displayNameSlow(c card.Card, id ids.CardID) string {
 // Idempotent. The registry package's init calls this once with the registry slice so the
 // runtime hot path is pure cache reads — fakes/test stubs created without registration
 // still work via cachedDisplayName's lazy backfill.
-func WarmDisplayNameCache(cards []card.Card) {
+func WarmDisplayNameCache(cards []sim.Card) {
 	for _, c := range cards {
 		if c == nil {
 			continue

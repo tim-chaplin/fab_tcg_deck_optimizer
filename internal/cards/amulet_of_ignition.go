@@ -9,21 +9,22 @@ package cards
 import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 )
 
 var amuletOfIgnitionTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeItem)
 
 type AmuletOfIgnitionYellow struct{}
 
-func (AmuletOfIgnitionYellow) ID() ids.CardID           { return ids.AmuletOfIgnitionYellow }
-func (AmuletOfIgnitionYellow) Name() string             { return "Amulet of Ignition" }
-func (AmuletOfIgnitionYellow) Cost(*card.TurnState) int { return 0 }
-func (AmuletOfIgnitionYellow) Pitch() int               { return 2 }
-func (AmuletOfIgnitionYellow) Attack() int              { return 0 }
-func (AmuletOfIgnitionYellow) Defense() int             { return 0 }
-func (AmuletOfIgnitionYellow) Types() card.TypeSet      { return amuletOfIgnitionTypes }
-func (AmuletOfIgnitionYellow) GoAgain() bool            { return true }
+func (AmuletOfIgnitionYellow) ID() ids.CardID          { return ids.AmuletOfIgnitionYellow }
+func (AmuletOfIgnitionYellow) Name() string            { return "Amulet of Ignition" }
+func (AmuletOfIgnitionYellow) Cost(*sim.TurnState) int { return 0 }
+func (AmuletOfIgnitionYellow) Pitch() int              { return 2 }
+func (AmuletOfIgnitionYellow) Attack() int             { return 0 }
+func (AmuletOfIgnitionYellow) Defense() int            { return 0 }
+func (AmuletOfIgnitionYellow) Types() card.TypeSet     { return amuletOfIgnitionTypes }
+func (AmuletOfIgnitionYellow) GoAgain() bool           { return true }
 
 // not implemented: Instant 'next activated ability costs {r} less'
-func (AmuletOfIgnitionYellow) NotImplemented()                              {}
-func (AmuletOfIgnitionYellow) Play(s *card.TurnState, self *card.CardState) { s.LogPlay(self) }
+func (AmuletOfIgnitionYellow) NotImplemented()                            {}
+func (AmuletOfIgnitionYellow) Play(s *sim.TurnState, self *sim.CardState) { s.LogPlay(self) }

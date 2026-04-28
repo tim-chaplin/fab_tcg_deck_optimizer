@@ -7,23 +7,24 @@ package cards
 import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 )
 
 var chestPuffTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeAttack)
 
 type ChestPuffRed struct{}
 
-func (ChestPuffRed) ID() ids.CardID           { return ids.ChestPuffRed }
-func (ChestPuffRed) Name() string             { return "Chest Puff" }
-func (ChestPuffRed) Cost(*card.TurnState) int { return 2 }
-func (ChestPuffRed) Pitch() int               { return 1 }
-func (ChestPuffRed) Attack() int              { return 7 }
-func (ChestPuffRed) Defense() int             { return 3 }
-func (ChestPuffRed) Types() card.TypeSet      { return chestPuffTypes }
-func (ChestPuffRed) GoAgain() bool            { return false }
+func (ChestPuffRed) ID() ids.CardID          { return ids.ChestPuffRed }
+func (ChestPuffRed) Name() string            { return "Chest Puff" }
+func (ChestPuffRed) Cost(*sim.TurnState) int { return 2 }
+func (ChestPuffRed) Pitch() int              { return 1 }
+func (ChestPuffRed) Attack() int             { return 7 }
+func (ChestPuffRed) Defense() int            { return 3 }
+func (ChestPuffRed) Types() card.TypeSet     { return chestPuffTypes }
+func (ChestPuffRed) GoAgain() bool           { return false }
 
 // not implemented: pay {r} or lose 1{p} resolved as 'always pay'
 func (ChestPuffRed) NotImplemented() {}
-func (c ChestPuffRed) Play(s *card.TurnState, self *card.CardState) {
+func (c ChestPuffRed) Play(s *sim.TurnState, self *sim.CardState) {
 	s.ApplyAndLogEffectiveAttack(self)
 }

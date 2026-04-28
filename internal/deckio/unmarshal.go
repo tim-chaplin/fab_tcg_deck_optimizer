@@ -9,17 +9,14 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/deck"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/hand"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/weapons"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 )
 
-// Unmarshal decodes JSON produced by Marshal into a *deck.Deck. Returns an error if any card,
+// Unmarshal decodes JSON produced by Marshal into a *sim.Deck. Returns an error if any card,
 // weapon, or hero name isn't recognized.
-func Unmarshal(data []byte) (*deck.Deck, error) {
+func Unmarshal(data []byte) (*sim.Deck, error) {
 	var dj DeckJSON
 	if err := json.Unmarshal(data, &dj); err != nil {
 		return nil, err
@@ -27,12 +24,12 @@ func Unmarshal(data []byte) (*deck.Deck, error) {
 	return fromJSON(&dj)
 }
 
-func fromJSON(dj *DeckJSON) (*deck.Deck, error) {
+func fromJSON(dj *DeckJSON) (*sim.Deck, error) {
 	h, ok := registry.HeroByName(dj.Hero)
 	if !ok {
 		return nil, fmt.Errorf("deckio: unknown hero %q", dj.Hero)
 	}
-	weapons := make([]weapons.Weapon, len(dj.Weapons))
+	weapons := make([]sim.Weapon, len(dj.Weapons))
 	for i, name := range dj.Weapons {
 		w, ok := registry.WeaponByName(name)
 		if !ok {
@@ -40,7 +37,7 @@ func fromJSON(dj *DeckJSON) (*deck.Deck, error) {
 		}
 		weapons[i] = w
 	}
-	cs := make([]card.Card, len(dj.Cards))
+	cs := make([]sim.Card, len(dj.Cards))
 	for i, name := range dj.Cards {
 		id, ok := registry.CardByName(name)
 		if !ok {
@@ -56,7 +53,7 @@ func fromJSON(dj *DeckJSON) (*deck.Deck, error) {
 	if err != nil {
 		return nil, err
 	}
-	d := deck.New(h, weapons, cs)
+	d := sim.New(h, weapons, cs)
 	// Sideboard and Equipment are name-only lists — the optimizer doesn't read them and the
 	// registry isn't consulted (so the user can list equipment pieces or any other items
 	// the sim doesn't model). Copy the names through verbatim.
@@ -66,7 +63,7 @@ func fromJSON(dj *DeckJSON) (*deck.Deck, error) {
 	if len(dj.Equipment) > 0 {
 		d.Equipment = append([]string(nil), dj.Equipment...)
 	}
-	d.Stats = deck.Stats{
+	d.Stats = sim.Stats{
 		Runs:            dj.Stats.Runs,
 		Hands:           dj.Stats.Hands,
 		TotalValue:      dj.Stats.TotalValue,
@@ -79,17 +76,17 @@ func fromJSON(dj *DeckJSON) (*deck.Deck, error) {
 	return d, nil
 }
 
-func perCardMarginalFromJSON(entries []CardMarginalStatsJSON) (map[ids.CardID]deck.CardMarginalStats, error) {
+func perCardMarginalFromJSON(entries []CardMarginalStatsJSON) (map[ids.CardID]sim.CardMarginalStats, error) {
 	if len(entries) == 0 {
 		return nil, nil
 	}
-	out := make(map[ids.CardID]deck.CardMarginalStats, len(entries))
+	out := make(map[ids.CardID]sim.CardMarginalStats, len(entries))
 	for _, e := range entries {
 		id, ok := registry.CardByName(e.Card)
 		if !ok {
 			return nil, fmt.Errorf("deckio: unknown card %q in per_card_marginal stats", e.Card)
 		}
-		out[id] = deck.CardMarginalStats{
+		out[id] = sim.CardMarginalStats{
 			PresentTotal: e.PresentTotal,
 			PresentHands: e.PresentHands,
 			AbsentTotal:  e.AbsentTotal,
@@ -102,13 +99,13 @@ func perCardMarginalFromJSON(entries []CardMarginalStatsJSON) (map[ids.CardID]de
 // bestTurnFromJSON restores the structured TurnLog plus the headline Value /
 // StartingRunechants ints. The structured TurnSummary fields (BestLine, SwungWeapons,
 // StartOfTurnAuras, TriggersFromLastTurn, State) aren't reconstructed — fabsim's print path
-// renders Log via hand.FormatTurnLog. Returns a zero BestTurn when the JSON has no log.
-func bestTurnFromJSON(bj BestTurnJSON) (deck.BestTurn, error) {
+// renders Log via sim.FormatTurnLog. Returns a zero BestTurn when the JSON has no log.
+func bestTurnFromJSON(bj BestTurnJSON) (sim.BestTurn, error) {
 	if bj.Log.IsEmpty() {
-		return deck.BestTurn{}, nil
+		return sim.BestTurn{}, nil
 	}
-	return deck.BestTurn{
-		Summary:            hand.TurnSummary{Value: bj.Value},
+	return sim.BestTurn{
+		Summary:            sim.TurnSummary{Value: bj.Value},
 		StartingRunechants: bj.StartingRunechants,
 		Log:                bj.Log,
 	}, nil

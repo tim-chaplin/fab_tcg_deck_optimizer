@@ -12,6 +12,7 @@ package cards
 import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 )
 
 var waterTheSeedsTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeAttack)
@@ -20,7 +21,7 @@ var waterTheSeedsTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card
 // of 1 or less — the buff lands on that card's BonusAttack so EffectiveAttack and
 // LikelyToHit see the buffed power on the buffed card, not on the granter. Fizzles
 // silently when no qualifying target follows.
-func grantWaterTheSeedsBonus(s *card.TurnState) {
+func grantWaterTheSeedsBonus(s *sim.TurnState) {
 	for _, pc := range s.CardsRemaining {
 		if !pc.Card.Types().IsAttackAction() {
 			continue
@@ -34,45 +35,45 @@ func grantWaterTheSeedsBonus(s *card.TurnState) {
 
 type WaterTheSeedsRed struct{}
 
-func (WaterTheSeedsRed) ID() ids.CardID           { return ids.WaterTheSeedsRed }
-func (WaterTheSeedsRed) Name() string             { return "Water the Seeds" }
-func (WaterTheSeedsRed) Cost(*card.TurnState) int { return 1 }
-func (WaterTheSeedsRed) Pitch() int               { return 1 }
-func (WaterTheSeedsRed) Attack() int              { return 3 }
-func (WaterTheSeedsRed) Defense() int             { return 2 }
-func (WaterTheSeedsRed) Types() card.TypeSet      { return waterTheSeedsTypes }
-func (WaterTheSeedsRed) GoAgain() bool            { return true }
-func (WaterTheSeedsRed) Play(s *card.TurnState, self *card.CardState) {
+func (WaterTheSeedsRed) ID() ids.CardID          { return ids.WaterTheSeedsRed }
+func (WaterTheSeedsRed) Name() string            { return "Water the Seeds" }
+func (WaterTheSeedsRed) Cost(*sim.TurnState) int { return 1 }
+func (WaterTheSeedsRed) Pitch() int              { return 1 }
+func (WaterTheSeedsRed) Attack() int             { return 3 }
+func (WaterTheSeedsRed) Defense() int            { return 2 }
+func (WaterTheSeedsRed) Types() card.TypeSet     { return waterTheSeedsTypes }
+func (WaterTheSeedsRed) GoAgain() bool           { return true }
+func (WaterTheSeedsRed) Play(s *sim.TurnState, self *sim.CardState) {
 	grantWaterTheSeedsBonus(s)
 	s.ApplyAndLogEffectiveAttack(self)
 }
 
 type WaterTheSeedsYellow struct{}
 
-func (WaterTheSeedsYellow) ID() ids.CardID           { return ids.WaterTheSeedsYellow }
-func (WaterTheSeedsYellow) Name() string             { return "Water the Seeds" }
-func (WaterTheSeedsYellow) Cost(*card.TurnState) int { return 1 }
-func (WaterTheSeedsYellow) Pitch() int               { return 2 }
-func (WaterTheSeedsYellow) Attack() int              { return 2 }
-func (WaterTheSeedsYellow) Defense() int             { return 2 }
-func (WaterTheSeedsYellow) Types() card.TypeSet      { return waterTheSeedsTypes }
-func (WaterTheSeedsYellow) GoAgain() bool            { return true }
-func (WaterTheSeedsYellow) Play(s *card.TurnState, self *card.CardState) {
+func (WaterTheSeedsYellow) ID() ids.CardID          { return ids.WaterTheSeedsYellow }
+func (WaterTheSeedsYellow) Name() string            { return "Water the Seeds" }
+func (WaterTheSeedsYellow) Cost(*sim.TurnState) int { return 1 }
+func (WaterTheSeedsYellow) Pitch() int              { return 2 }
+func (WaterTheSeedsYellow) Attack() int             { return 2 }
+func (WaterTheSeedsYellow) Defense() int            { return 2 }
+func (WaterTheSeedsYellow) Types() card.TypeSet     { return waterTheSeedsTypes }
+func (WaterTheSeedsYellow) GoAgain() bool           { return true }
+func (WaterTheSeedsYellow) Play(s *sim.TurnState, self *sim.CardState) {
 	grantWaterTheSeedsBonus(s)
 	s.ApplyAndLogEffectiveAttack(self)
 }
 
 type WaterTheSeedsBlue struct{}
 
-func (WaterTheSeedsBlue) ID() ids.CardID           { return ids.WaterTheSeedsBlue }
-func (WaterTheSeedsBlue) Name() string             { return "Water the Seeds" }
-func (WaterTheSeedsBlue) Cost(*card.TurnState) int { return 1 }
-func (WaterTheSeedsBlue) Pitch() int               { return 3 }
-func (WaterTheSeedsBlue) Attack() int              { return 1 }
-func (WaterTheSeedsBlue) Defense() int             { return 2 }
-func (WaterTheSeedsBlue) Types() card.TypeSet      { return waterTheSeedsTypes }
-func (WaterTheSeedsBlue) GoAgain() bool            { return true }
-func (WaterTheSeedsBlue) Play(s *card.TurnState, self *card.CardState) {
+func (WaterTheSeedsBlue) ID() ids.CardID          { return ids.WaterTheSeedsBlue }
+func (WaterTheSeedsBlue) Name() string            { return "Water the Seeds" }
+func (WaterTheSeedsBlue) Cost(*sim.TurnState) int { return 1 }
+func (WaterTheSeedsBlue) Pitch() int              { return 3 }
+func (WaterTheSeedsBlue) Attack() int             { return 1 }
+func (WaterTheSeedsBlue) Defense() int            { return 2 }
+func (WaterTheSeedsBlue) Types() card.TypeSet     { return waterTheSeedsTypes }
+func (WaterTheSeedsBlue) GoAgain() bool           { return true }
+func (WaterTheSeedsBlue) Play(s *sim.TurnState, self *sim.CardState) {
 	grantWaterTheSeedsBonus(s)
 	s.ApplyAndLogEffectiveAttack(self)
 }

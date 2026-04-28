@@ -3,7 +3,7 @@ package cards
 import (
 	"testing"
 
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
 )
 
@@ -12,9 +12,9 @@ import (
 // appending it to s.Hand. Play returns just the attack.
 func TestSnatch_LikelyHitFiresDrawOne(t *testing.T) {
 	top := testutils.GenericAttack(0, 3)
-	s := card.TurnState{Deck: []card.Card{top}}
+	s := sim.TurnState{Deck: []sim.Card{top}}
 	c := SnatchRed{}
-	c.Play(&s, &card.CardState{Card: c})
+	c.Play(&s, &sim.CardState{Card: c})
 	if got := s.Value; got != 4 {
 		t.Errorf("Red: Play() = %d, want 4", got)
 	}
@@ -30,7 +30,7 @@ func TestSnatch_LikelyHitFiresDrawOne(t *testing.T) {
 // doesn't fire, so the deck is untouched and Hand stays empty.
 func TestSnatch_BlockableSuppressesDraw(t *testing.T) {
 	cases := []struct {
-		c    card.Card
+		c    sim.Card
 		want int
 	}{
 		{SnatchYellow{}, 3},
@@ -38,8 +38,8 @@ func TestSnatch_BlockableSuppressesDraw(t *testing.T) {
 	}
 	for _, tc := range cases {
 		top := testutils.GenericAttack(0, 3)
-		s := card.TurnState{Deck: []card.Card{top}}
-		tc.c.Play(&s, &card.CardState{Card: tc.c})
+		s := sim.TurnState{Deck: []sim.Card{top}}
+		tc.c.Play(&s, &sim.CardState{Card: tc.c})
 		if got := s.Value; got != tc.want {
 			t.Errorf("%s: Play() = %d, want %d (blockable, no draw)", tc.c.Name(), got, tc.want)
 		}

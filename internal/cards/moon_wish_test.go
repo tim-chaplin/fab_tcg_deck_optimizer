@@ -4,8 +4,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
 )
 
@@ -13,19 +13,19 @@ import (
 // and the card costs 0; without one we fall back to the printed 2. Bounds are static (Min=0,
 // Max=2) for the solver pre-screens.
 func TestMoonWish_VariableCost(t *testing.T) {
-	cases := []card.Card{MoonWishRed{}, MoonWishYellow{}, MoonWishBlue{}}
+	cases := []sim.Card{MoonWishRed{}, MoonWishYellow{}, MoonWishBlue{}}
 	for _, c := range cases {
-		held := card.TurnState{Hand: []card.Card{testutils.GenericAttack(0, 0)}}
+		held := sim.TurnState{Hand: []sim.Card{testutils.GenericAttack(0, 0)}}
 		if got := c.Cost(&held); got != 0 {
 			t.Errorf("%s: Cost(Hand) = %d, want 0", c.Name(), got)
 		}
-		empty := card.TurnState{}
+		empty := sim.TurnState{}
 		if got := c.Cost(&empty); got != 2 {
 			t.Errorf("%s: Cost(empty) = %d, want 2", c.Name(), got)
 		}
-		vc, ok := c.(card.VariableCost)
+		vc, ok := c.(sim.VariableCost)
 		if !ok {
-			t.Errorf("%s: missing card.VariableCost", c.Name())
+			t.Errorf("%s: missing sim.VariableCost", c.Name())
 			continue
 		}
 		if vc.MinCost() != 0 || vc.MaxCost() != 2 {
@@ -41,11 +41,11 @@ func TestMoonWish_VariableCost(t *testing.T) {
 func TestMoonWish_AltCostMovesHandCardToDeckTop(t *testing.T) {
 	dr := testutils.GenericAttack(0, 0).WithName("dr")
 	other := testutils.GenericAttack(0, 0).WithName("deckTop")
-	s := card.TurnState{
-		Hand: []card.Card{dr},
-		Deck: []card.Card{other},
+	s := sim.TurnState{
+		Hand: []sim.Card{dr},
+		Deck: []sim.Card{other},
 	}
-	self := &card.CardState{Card: MoonWishYellow{}}
+	self := &sim.CardState{Card: MoonWishYellow{}}
 	MoonWishYellow{}.Play(&s, self)
 	if len(s.Hand) != 0 {
 		t.Errorf("Hand = %d entries, want 0 (alt cost should pop the only hand card)", len(s.Hand))
@@ -55,7 +55,7 @@ func TestMoonWish_AltCostMovesHandCardToDeckTop(t *testing.T) {
 			[]string{s.Deck[0].Name(), s.Deck[1].Name()})
 	}
 	// One of the post-trigger log entries should name the returned card.
-	wantSuffix := "returned " + card.DisplayName(dr) + " to top of deck"
+	wantSuffix := "returned " + sim.DisplayName(dr) + " to top of deck"
 	found := false
 	for _, e := range s.Log {
 		if e.Source == "Moon Wish [Y]" && strings.HasSuffix(e.Text, wantSuffix) {
@@ -73,12 +73,12 @@ func TestMoonWish_AltCostMovesHandCardToDeckTop(t *testing.T) {
 func TestMoonWish_TutorPrefersRedSunKissThenYellowThenBlue(t *testing.T) {
 	cases := []struct {
 		name string
-		deck []card.Card
+		deck []sim.Card
 		want ids.CardID
 	}{
-		{"red beats yellow and blue", []card.Card{SunKissBlue{}, SunKissYellow{}, SunKissRed{}}, ids.SunKissRed},
-		{"yellow beats blue", []card.Card{SunKissBlue{}, SunKissYellow{}}, ids.SunKissYellow},
-		{"blue alone wins", []card.Card{SunKissBlue{}}, ids.SunKissBlue},
+		{"red beats yellow and blue", []sim.Card{SunKissBlue{}, SunKissYellow{}, SunKissRed{}}, ids.SunKissRed},
+		{"yellow beats blue", []sim.Card{SunKissBlue{}, SunKissYellow{}}, ids.SunKissYellow},
+		{"blue alone wins", []sim.Card{SunKissBlue{}}, ids.SunKissBlue},
 	}
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
@@ -95,8 +95,8 @@ func TestMoonWish_TutorPrefersRedSunKissThenYellowThenBlue(t *testing.T) {
 // hand; with a -4 BonusAttack it doesn't and the deck stays intact.
 func TestMoonWish_TutorRequiresHit(t *testing.T) {
 	{
-		s := card.TurnState{Deck: []card.Card{SunKissRed{}}}
-		self := &card.CardState{Card: MoonWishYellow{}}
+		s := sim.TurnState{Deck: []sim.Card{SunKissRed{}}}
+		self := &sim.CardState{Card: MoonWishYellow{}}
 		MoonWishYellow{}.Play(&s, self)
 		if len(s.Hand) != 1 || s.Hand[0].ID() != ids.SunKissRed {
 			t.Errorf("base hit: Hand = %v, want [Sun Kiss [R]]", s.Hand)
@@ -106,9 +106,9 @@ func TestMoonWish_TutorRequiresHit(t *testing.T) {
 		}
 	}
 	{
-		s := card.TurnState{Deck: []card.Card{SunKissRed{}}}
+		s := sim.TurnState{Deck: []sim.Card{SunKissRed{}}}
 		// Drive EffectiveAttack down so LikelyToHit fails (4 - 4 = 0, clamped, not in window).
-		self := &card.CardState{Card: MoonWishYellow{}, BonusAttack: -4}
+		self := &sim.CardState{Card: MoonWishYellow{}, BonusAttack: -4}
 		MoonWishYellow{}.Play(&s, self)
 		if len(s.Hand) != 0 {
 			t.Errorf("dampened: Hand = %v, want [] (no hit, no tutor)", s.Hand)
@@ -124,8 +124,8 @@ func TestMoonWish_TutorRequiresHit(t *testing.T) {
 // NOT land in s.Hand. Without go-again it stays in s.Hand for the next turn.
 func TestMoonWish_GoAgainPlaysSunKissImmediately(t *testing.T) {
 	{
-		s := card.TurnState{Deck: []card.Card{SunKissRed{}}}
-		self := &card.CardState{Card: MoonWishYellow{}, GrantedGoAgain: true}
+		s := sim.TurnState{Deck: []sim.Card{SunKissRed{}}}
+		self := &sim.CardState{Card: MoonWishYellow{}, GrantedGoAgain: true}
 		MoonWishYellow{}.Play(&s, self)
 		dmg := s.Value
 		if dmg != 4+3 {
@@ -139,8 +139,8 @@ func TestMoonWish_GoAgainPlaysSunKissImmediately(t *testing.T) {
 		}
 	}
 	{
-		s := card.TurnState{Deck: []card.Card{SunKissRed{}}}
-		self := &card.CardState{Card: MoonWishYellow{}}
+		s := sim.TurnState{Deck: []sim.Card{SunKissRed{}}}
+		self := &sim.CardState{Card: MoonWishYellow{}}
 		MoonWishYellow{}.Play(&s, self)
 		dmg := s.Value
 		if dmg != 4 {

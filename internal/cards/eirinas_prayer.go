@@ -8,51 +8,52 @@ package cards
 import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 )
 
 var eirinasPrayerTypes = card.NewTypeSet(card.TypeGeneric, card.TypeInstant)
 
 type EirinasPrayerRed struct{}
 
-func (EirinasPrayerRed) ID() ids.CardID           { return ids.EirinasPrayerRed }
-func (EirinasPrayerRed) Name() string             { return "Eirina's Prayer" }
-func (EirinasPrayerRed) Cost(*card.TurnState) int { return 1 }
-func (EirinasPrayerRed) Pitch() int               { return 1 }
-func (EirinasPrayerRed) Attack() int              { return 0 }
-func (EirinasPrayerRed) Defense() int             { return 0 }
-func (EirinasPrayerRed) Types() card.TypeSet      { return eirinasPrayerTypes }
-func (EirinasPrayerRed) GoAgain() bool            { return false }
+func (EirinasPrayerRed) ID() ids.CardID          { return ids.EirinasPrayerRed }
+func (EirinasPrayerRed) Name() string            { return "Eirina's Prayer" }
+func (EirinasPrayerRed) Cost(*sim.TurnState) int { return 1 }
+func (EirinasPrayerRed) Pitch() int              { return 1 }
+func (EirinasPrayerRed) Attack() int             { return 0 }
+func (EirinasPrayerRed) Defense() int            { return 0 }
+func (EirinasPrayerRed) Types() card.TypeSet     { return eirinasPrayerTypes }
+func (EirinasPrayerRed) GoAgain() bool           { return false }
 
 // not implemented: Instant prevent X arcane to your hero; X scaled by revealed top-card pitch
-func (EirinasPrayerRed) NotImplemented()                              {}
-func (EirinasPrayerRed) Play(s *card.TurnState, self *card.CardState) { s.LogPlay(self) }
+func (EirinasPrayerRed) NotImplemented()                            {}
+func (EirinasPrayerRed) Play(s *sim.TurnState, self *sim.CardState) { s.LogPlay(self) }
 
 type EirinasPrayerYellow struct{}
 
-func (EirinasPrayerYellow) ID() ids.CardID           { return ids.EirinasPrayerYellow }
-func (EirinasPrayerYellow) Name() string             { return "Eirina's Prayer" }
-func (EirinasPrayerYellow) Cost(*card.TurnState) int { return 1 }
-func (EirinasPrayerYellow) Pitch() int               { return 2 }
-func (EirinasPrayerYellow) Attack() int              { return 0 }
-func (EirinasPrayerYellow) Defense() int             { return 0 }
-func (EirinasPrayerYellow) Types() card.TypeSet      { return eirinasPrayerTypes }
-func (EirinasPrayerYellow) GoAgain() bool            { return false }
+func (EirinasPrayerYellow) ID() ids.CardID          { return ids.EirinasPrayerYellow }
+func (EirinasPrayerYellow) Name() string            { return "Eirina's Prayer" }
+func (EirinasPrayerYellow) Cost(*sim.TurnState) int { return 1 }
+func (EirinasPrayerYellow) Pitch() int              { return 2 }
+func (EirinasPrayerYellow) Attack() int             { return 0 }
+func (EirinasPrayerYellow) Defense() int            { return 0 }
+func (EirinasPrayerYellow) Types() card.TypeSet     { return eirinasPrayerTypes }
+func (EirinasPrayerYellow) GoAgain() bool           { return false }
 
 // not implemented: Instant prevent X arcane to your hero; X scaled by revealed top-card pitch
-func (EirinasPrayerYellow) NotImplemented()                              {}
-func (EirinasPrayerYellow) Play(s *card.TurnState, self *card.CardState) { s.LogPlay(self) }
+func (EirinasPrayerYellow) NotImplemented()                            {}
+func (EirinasPrayerYellow) Play(s *sim.TurnState, self *sim.CardState) { s.LogPlay(self) }
 
 type EirinasPrayerBlue struct{}
 
-func (EirinasPrayerBlue) ID() ids.CardID           { return ids.EirinasPrayerBlue }
-func (EirinasPrayerBlue) Name() string             { return "Eirina's Prayer" }
-func (EirinasPrayerBlue) Cost(*card.TurnState) int { return 1 }
-func (EirinasPrayerBlue) Pitch() int               { return 3 }
-func (EirinasPrayerBlue) Attack() int              { return 0 }
-func (EirinasPrayerBlue) Defense() int             { return 0 }
-func (EirinasPrayerBlue) Types() card.TypeSet      { return eirinasPrayerTypes }
-func (EirinasPrayerBlue) GoAgain() bool            { return false }
+func (EirinasPrayerBlue) ID() ids.CardID          { return ids.EirinasPrayerBlue }
+func (EirinasPrayerBlue) Name() string            { return "Eirina's Prayer" }
+func (EirinasPrayerBlue) Cost(*sim.TurnState) int { return 1 }
+func (EirinasPrayerBlue) Pitch() int              { return 3 }
+func (EirinasPrayerBlue) Attack() int             { return 0 }
+func (EirinasPrayerBlue) Defense() int            { return 0 }
+func (EirinasPrayerBlue) Types() card.TypeSet     { return eirinasPrayerTypes }
+func (EirinasPrayerBlue) GoAgain() bool           { return false }
 
 // not implemented: Instant prevent X arcane to your hero; X scaled by revealed top-card pitch
-func (EirinasPrayerBlue) NotImplemented()                              {}
-func (EirinasPrayerBlue) Play(s *card.TurnState, self *card.CardState) { s.LogPlay(self) }
+func (EirinasPrayerBlue) NotImplemented()                            {}
+func (EirinasPrayerBlue) Play(s *sim.TurnState, self *sim.CardState) { s.LogPlay(self) }

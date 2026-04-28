@@ -4,16 +4,16 @@
 // Text: "When this is played, if you have less {h} than an opposing hero, it gets **go again**.
 // When this hits, deal 1 damage to any target."
 //
-// The on-hit 1 damage is modelled as +1 damage-equivalent, gated on card.LikelyToHit. The
+// The on-hit 1 damage is modelled as +1 damage-equivalent, gated on sim.LikelyToHit. The
 // "less {h} than an opposing hero" clause is modelled as a hero attribute — go again fires for
-// heroes that implement card.LowerHealthWanter and never fires otherwise.
+// heroes that implement sim.LowerHealthWanter and never fires otherwise.
 
 package cards
 
 import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/simstate"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 )
 
 var blowForABlowTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeAttack)
@@ -23,15 +23,15 @@ const blowForABlowPingValue = 1
 
 type BlowForABlowRed struct{}
 
-func (BlowForABlowRed) ID() ids.CardID           { return ids.BlowForABlowRed }
-func (BlowForABlowRed) Name() string             { return "Blow for a Blow" }
-func (BlowForABlowRed) Cost(*card.TurnState) int { return 2 }
-func (BlowForABlowRed) Pitch() int               { return 1 }
-func (BlowForABlowRed) Attack() int              { return 4 }
-func (BlowForABlowRed) Defense() int             { return 2 }
-func (BlowForABlowRed) Types() card.TypeSet      { return blowForABlowTypes }
-func (BlowForABlowRed) GoAgain() bool            { return simstate.HeroWantsLowerHealth() }
-func (BlowForABlowRed) Play(s *card.TurnState, self *card.CardState) {
+func (BlowForABlowRed) ID() ids.CardID          { return ids.BlowForABlowRed }
+func (BlowForABlowRed) Name() string            { return "Blow for a Blow" }
+func (BlowForABlowRed) Cost(*sim.TurnState) int { return 2 }
+func (BlowForABlowRed) Pitch() int              { return 1 }
+func (BlowForABlowRed) Attack() int             { return 4 }
+func (BlowForABlowRed) Defense() int            { return 2 }
+func (BlowForABlowRed) Types() card.TypeSet     { return blowForABlowTypes }
+func (BlowForABlowRed) GoAgain() bool           { return sim.HeroWantsLowerHealth() }
+func (BlowForABlowRed) Play(s *sim.TurnState, self *sim.CardState) {
 	s.ApplyAndLogEffectiveAttack(self)
 	s.ApplyAndLogRiderOnHit(self, "On-hit dealt 1 damage", blowForABlowPingValue)
 }

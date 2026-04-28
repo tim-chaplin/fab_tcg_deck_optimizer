@@ -9,57 +9,58 @@ package cards
 import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 )
 
 var tremorOfIArathaelTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeAttack)
 
 type TremorOfIArathaelRed struct{}
 
-func (TremorOfIArathaelRed) ID() ids.CardID           { return ids.TremorOfIArathaelRed }
-func (TremorOfIArathaelRed) Name() string             { return "Tremor of íArathael" }
-func (TremorOfIArathaelRed) Cost(*card.TurnState) int { return 1 }
-func (TremorOfIArathaelRed) Pitch() int               { return 1 }
-func (TremorOfIArathaelRed) Attack() int              { return 4 }
-func (TremorOfIArathaelRed) Defense() int             { return 2 }
-func (TremorOfIArathaelRed) Types() card.TypeSet      { return tremorOfIArathaelTypes }
-func (TremorOfIArathaelRed) GoAgain() bool            { return false }
+func (TremorOfIArathaelRed) ID() ids.CardID          { return ids.TremorOfIArathaelRed }
+func (TremorOfIArathaelRed) Name() string            { return "Tremor of íArathael" }
+func (TremorOfIArathaelRed) Cost(*sim.TurnState) int { return 1 }
+func (TremorOfIArathaelRed) Pitch() int              { return 1 }
+func (TremorOfIArathaelRed) Attack() int             { return 4 }
+func (TremorOfIArathaelRed) Defense() int            { return 2 }
+func (TremorOfIArathaelRed) Types() card.TypeSet     { return tremorOfIArathaelTypes }
+func (TremorOfIArathaelRed) GoAgain() bool           { return false }
 
 // not implemented: banished-zone +2{p} rider (banished-zone count not tracked)
 func (TremorOfIArathaelRed) NotImplemented() {}
-func (c TremorOfIArathaelRed) Play(s *card.TurnState, self *card.CardState) {
+func (c TremorOfIArathaelRed) Play(s *sim.TurnState, self *sim.CardState) {
 	s.ApplyAndLogEffectiveAttack(self)
 }
 
 type TremorOfIArathaelYellow struct{}
 
-func (TremorOfIArathaelYellow) ID() ids.CardID           { return ids.TremorOfIArathaelYellow }
-func (TremorOfIArathaelYellow) Name() string             { return "Tremor of íArathael" }
-func (TremorOfIArathaelYellow) Cost(*card.TurnState) int { return 1 }
-func (TremorOfIArathaelYellow) Pitch() int               { return 2 }
-func (TremorOfIArathaelYellow) Attack() int              { return 3 }
-func (TremorOfIArathaelYellow) Defense() int             { return 2 }
-func (TremorOfIArathaelYellow) Types() card.TypeSet      { return tremorOfIArathaelTypes }
-func (TremorOfIArathaelYellow) GoAgain() bool            { return false }
+func (TremorOfIArathaelYellow) ID() ids.CardID          { return ids.TremorOfIArathaelYellow }
+func (TremorOfIArathaelYellow) Name() string            { return "Tremor of íArathael" }
+func (TremorOfIArathaelYellow) Cost(*sim.TurnState) int { return 1 }
+func (TremorOfIArathaelYellow) Pitch() int              { return 2 }
+func (TremorOfIArathaelYellow) Attack() int             { return 3 }
+func (TremorOfIArathaelYellow) Defense() int            { return 2 }
+func (TremorOfIArathaelYellow) Types() card.TypeSet     { return tremorOfIArathaelTypes }
+func (TremorOfIArathaelYellow) GoAgain() bool           { return false }
 
 // not implemented: banished-zone +2{p} rider (banished-zone count not tracked)
 func (TremorOfIArathaelYellow) NotImplemented() {}
-func (c TremorOfIArathaelYellow) Play(s *card.TurnState, self *card.CardState) {
+func (c TremorOfIArathaelYellow) Play(s *sim.TurnState, self *sim.CardState) {
 	s.ApplyAndLogEffectiveAttack(self)
 }
 
 type TremorOfIArathaelBlue struct{}
 
-func (TremorOfIArathaelBlue) ID() ids.CardID           { return ids.TremorOfIArathaelBlue }
-func (TremorOfIArathaelBlue) Name() string             { return "Tremor of íArathael" }
-func (TremorOfIArathaelBlue) Cost(*card.TurnState) int { return 1 }
-func (TremorOfIArathaelBlue) Pitch() int               { return 3 }
-func (TremorOfIArathaelBlue) Attack() int              { return 2 }
-func (TremorOfIArathaelBlue) Defense() int             { return 2 }
-func (TremorOfIArathaelBlue) Types() card.TypeSet      { return tremorOfIArathaelTypes }
-func (TremorOfIArathaelBlue) GoAgain() bool            { return false }
+func (TremorOfIArathaelBlue) ID() ids.CardID          { return ids.TremorOfIArathaelBlue }
+func (TremorOfIArathaelBlue) Name() string            { return "Tremor of íArathael" }
+func (TremorOfIArathaelBlue) Cost(*sim.TurnState) int { return 1 }
+func (TremorOfIArathaelBlue) Pitch() int              { return 3 }
+func (TremorOfIArathaelBlue) Attack() int             { return 2 }
+func (TremorOfIArathaelBlue) Defense() int            { return 2 }
+func (TremorOfIArathaelBlue) Types() card.TypeSet     { return tremorOfIArathaelTypes }
+func (TremorOfIArathaelBlue) GoAgain() bool           { return false }
 
 // not implemented: banished-zone +2{p} rider (banished-zone count not tracked)
 func (TremorOfIArathaelBlue) NotImplemented() {}
-func (c TremorOfIArathaelBlue) Play(s *card.TurnState, self *card.CardState) {
+func (c TremorOfIArathaelBlue) Play(s *sim.TurnState, self *sim.CardState) {
 	s.ApplyAndLogEffectiveAttack(self)
 }

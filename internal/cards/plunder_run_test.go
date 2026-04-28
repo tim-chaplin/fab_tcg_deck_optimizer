@@ -3,15 +3,15 @@ package cards
 import (
 	"testing"
 
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
 )
 
 // TestPlunderRun_NoAttackReturnsZero: no qualifying next attack card → +3 rider fizzles.
 func TestPlunderRun_NoAttackReturnsZero(t *testing.T) {
-	s := card.TurnState{}
-	for _, c := range []card.Card{PlunderRunRed{}, PlunderRunYellow{}, PlunderRunBlue{}} {
-		c.Play(&s, &card.CardState{Card: c})
+	s := sim.TurnState{}
+	for _, c := range []sim.Card{PlunderRunRed{}, PlunderRunYellow{}, PlunderRunBlue{}} {
+		c.Play(&s, &sim.CardState{Card: c})
 		if got := s.Value; got != 0 {
 			t.Errorf("%s: Play() = %d, want 0", c.Name(), got)
 		}
@@ -20,8 +20,8 @@ func TestPlunderRun_NoAttackReturnsZero(t *testing.T) {
 
 // TestPlunderRun_NonAttackInRemainingFizzles: non-attack action fails the predicate.
 func TestPlunderRun_NonAttackInRemainingFizzles(t *testing.T) {
-	s := card.TurnState{CardsRemaining: []*card.CardState{{Card: testutils.GenericAction()}}}
-	(PlunderRunRed{}).Play(&s, &card.CardState{Card: PlunderRunRed{}})
+	s := sim.TurnState{CardsRemaining: []*sim.CardState{{Card: testutils.GenericAction()}}}
+	(PlunderRunRed{}).Play(&s, &sim.CardState{Card: PlunderRunRed{}})
 	if got := s.Value; got != 0 {
 		t.Errorf("Play() = %d, want 0 (non-attack skipped)", got)
 	}
@@ -32,7 +32,7 @@ func TestPlunderRun_NonAttackInRemainingFizzles(t *testing.T) {
 // BonusAttack — granter returns 0; the +N attributes to the buffed attack.
 func TestPlunderRun_NextAttackGrantsBonusAttack(t *testing.T) {
 	cases := []struct {
-		c    card.Card
+		c    sim.Card
 		want int
 	}{
 		{PlunderRunRed{}, 3},
@@ -40,9 +40,9 @@ func TestPlunderRun_NextAttackGrantsBonusAttack(t *testing.T) {
 		{PlunderRunBlue{}, 1},
 	}
 	for _, tc := range cases {
-		target := &card.CardState{Card: testutils.GenericAttack(0, 0)}
-		s := card.TurnState{CardsRemaining: []*card.CardState{target}}
-		self := &card.CardState{Card: tc.c, FromArsenal: true}
+		target := &sim.CardState{Card: testutils.GenericAttack(0, 0)}
+		s := sim.TurnState{CardsRemaining: []*sim.CardState{target}}
+		self := &sim.CardState{Card: tc.c, FromArsenal: true}
 		tc.c.Play(&s, self)
 		if got := s.Value; got != 0 {
 			t.Errorf("%s: Play() = %d, want 0 (granter returns 0; +N rides on target's BonusAttack)", tc.c.Name(), got)
@@ -56,8 +56,8 @@ func TestPlunderRun_NextAttackGrantsBonusAttack(t *testing.T) {
 // TestPlunderRun_HandPlayedFizzles: hand-played copy fails the from-arsenal gate even when a
 // queued attack action would otherwise satisfy the rider.
 func TestPlunderRun_HandPlayedFizzles(t *testing.T) {
-	s := card.TurnState{CardsRemaining: []*card.CardState{{Card: testutils.GenericAttack(0, 0)}}}
-	self := &card.CardState{Card: PlunderRunRed{}}
+	s := sim.TurnState{CardsRemaining: []*sim.CardState{{Card: testutils.GenericAttack(0, 0)}}}
+	self := &sim.CardState{Card: PlunderRunRed{}}
 	(PlunderRunRed{}).Play(&s, self)
 	if got := s.Value; got != 0 {
 		t.Errorf("Play() = %d, want 0 (hand-played, not from arsenal)", got)

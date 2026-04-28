@@ -6,8 +6,7 @@ package deckio
 // the runtime Deck / Stats.
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/deck"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/hand"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 )
 
 // DeckJSON is the on-disk shape of a Deck with its Stats. Sideboard and Equipment are
@@ -32,7 +31,7 @@ type PitchCountsJSON struct {
 	Blue   int `json:"blue"`
 }
 
-// StatsJSON mirrors deck.Stats with card references flattened to names.
+// StatsJSON mirrors sim.Stats with card references flattened to names.
 type StatsJSON struct {
 	// Avg is TotalValue/Hands, emitted for human readability when skimming the JSON. Loaders
 	// ignore it — Unmarshal rederives via Stats.Mean() so the canonical state is always
@@ -41,8 +40,8 @@ type StatsJSON struct {
 	Runs            int                     `json:"runs"`
 	Hands           int                     `json:"hands"`
 	TotalValue      float64                 `json:"total_value"`
-	FirstCycle      deck.CycleStats         `json:"first_cycle"`
-	SecondCycle     deck.CycleStats         `json:"second_cycle"`
+	FirstCycle      sim.CycleStats          `json:"first_cycle"`
+	SecondCycle     sim.CycleStats          `json:"second_cycle"`
 	Best            BestTurnJSON            `json:"best"`
 	PerCardMarginal []CardMarginalStatsJSON `json:"per_card_marginal,omitempty"`
 	// Histogram counts hands seen at each Value. encoding/json writes int-keyed maps with the
@@ -51,7 +50,7 @@ type StatsJSON struct {
 	Histogram map[int]int `json:"histogram,omitempty"`
 }
 
-// CardMarginalStatsJSON is the JSON form of deck.CardMarginalStats keyed by card name.
+// CardMarginalStatsJSON is the JSON form of sim.CardMarginalStats keyed by card name.
 // Marginal (PresentMean - AbsentMean) is the actionable smell-test signal a human reader
 // scans for, so it's included alongside the raw with/without sums even though it's
 // derivable.
@@ -64,13 +63,13 @@ type CardMarginalStatsJSON struct {
 	Marginal     float64 `json:"marginal"`
 }
 
-// BestTurnJSON is the on-disk shape of deck.BestTurn — Value plus the structured TurnLog.
-// Marshal serialises deck.BestTurn.Log directly via hand.TurnLog's JSON tags; Unmarshal
+// BestTurnJSON is the on-disk shape of sim.BestTurn — Value plus the structured TurnLog.
+// Marshal serialises sim.BestTurn.Log directly via sim.TurnLog's JSON tags; Unmarshal
 // restores it. Each TurnLog section is a list of content-only strings; the formatter adds
 // the "Best turn played (value N):" header, section headers, indentation, and chain
 // numbering at print time.
 type BestTurnJSON struct {
-	Value              int          `json:"value"`
-	StartingRunechants int          `json:"starting_runechants,omitempty"`
-	Log                hand.TurnLog `json:"log,omitempty"`
+	Value              int         `json:"value"`
+	StartingRunechants int         `json:"starting_runechants,omitempty"`
+	Log                sim.TurnLog `json:"log,omitempty"`
 }

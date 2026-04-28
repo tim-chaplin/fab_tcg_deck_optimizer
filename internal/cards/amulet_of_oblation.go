@@ -9,21 +9,22 @@ package cards
 import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 )
 
 var amuletOfOblationTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeItem)
 
 type AmuletOfOblationBlue struct{}
 
-func (AmuletOfOblationBlue) ID() ids.CardID           { return ids.AmuletOfOblationBlue }
-func (AmuletOfOblationBlue) Name() string             { return "Amulet of Oblation" }
-func (AmuletOfOblationBlue) Cost(*card.TurnState) int { return 0 }
-func (AmuletOfOblationBlue) Pitch() int               { return 3 }
-func (AmuletOfOblationBlue) Attack() int              { return 0 }
-func (AmuletOfOblationBlue) Defense() int             { return 0 }
-func (AmuletOfOblationBlue) Types() card.TypeSet      { return amuletOfOblationTypes }
-func (AmuletOfOblationBlue) GoAgain() bool            { return true }
+func (AmuletOfOblationBlue) ID() ids.CardID          { return ids.AmuletOfOblationBlue }
+func (AmuletOfOblationBlue) Name() string            { return "Amulet of Oblation" }
+func (AmuletOfOblationBlue) Cost(*sim.TurnState) int { return 0 }
+func (AmuletOfOblationBlue) Pitch() int              { return 3 }
+func (AmuletOfOblationBlue) Attack() int             { return 0 }
+func (AmuletOfOblationBlue) Defense() int            { return 0 }
+func (AmuletOfOblationBlue) Types() card.TypeSet     { return amuletOfOblationTypes }
+func (AmuletOfOblationBlue) GoAgain() bool           { return true }
 
 // not implemented: Instant 'graveyard → bottom of deck' replacement; gated on graveyard entry
-func (AmuletOfOblationBlue) NotImplemented()                              {}
-func (AmuletOfOblationBlue) Play(s *card.TurnState, self *card.CardState) { s.LogPlay(self) }
+func (AmuletOfOblationBlue) NotImplemented()                            {}
+func (AmuletOfOblationBlue) Play(s *sim.TurnState, self *sim.CardState) { s.LogPlay(self) }

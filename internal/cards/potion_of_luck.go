@@ -8,21 +8,22 @@ package cards
 import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 )
 
 var potionOfLuckTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeItem)
 
 type PotionOfLuckBlue struct{}
 
-func (PotionOfLuckBlue) ID() ids.CardID           { return ids.PotionOfLuckBlue }
-func (PotionOfLuckBlue) Name() string             { return "Potion of Luck" }
-func (PotionOfLuckBlue) Cost(*card.TurnState) int { return 0 }
-func (PotionOfLuckBlue) Pitch() int               { return 3 }
-func (PotionOfLuckBlue) Attack() int              { return 0 }
-func (PotionOfLuckBlue) Defense() int             { return 0 }
-func (PotionOfLuckBlue) Types() card.TypeSet      { return potionOfLuckTypes }
-func (PotionOfLuckBlue) GoAgain() bool            { return false }
+func (PotionOfLuckBlue) ID() ids.CardID          { return ids.PotionOfLuckBlue }
+func (PotionOfLuckBlue) Name() string            { return "Potion of Luck" }
+func (PotionOfLuckBlue) Cost(*sim.TurnState) int { return 0 }
+func (PotionOfLuckBlue) Pitch() int              { return 3 }
+func (PotionOfLuckBlue) Attack() int             { return 0 }
+func (PotionOfLuckBlue) Defense() int            { return 0 }
+func (PotionOfLuckBlue) Types() card.TypeSet     { return potionOfLuckTypes }
+func (PotionOfLuckBlue) GoAgain() bool           { return false }
 
 // not implemented: activated 'shuffle hand+arsenal into deck, draw that many'
-func (PotionOfLuckBlue) NotImplemented()                              {}
-func (PotionOfLuckBlue) Play(s *card.TurnState, self *card.CardState) { s.LogPlay(self) }
+func (PotionOfLuckBlue) NotImplemented()                            {}
+func (PotionOfLuckBlue) Play(s *sim.TurnState, self *sim.CardState) { s.LogPlay(self) }

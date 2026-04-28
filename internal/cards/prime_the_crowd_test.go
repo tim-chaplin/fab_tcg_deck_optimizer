@@ -3,15 +3,15 @@ package cards
 import (
 	"testing"
 
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
 )
 
 // TestPrimeTheCrowd_NoAttackReturnsZero: no qualifying next attack card → +4 rider fizzles.
 func TestPrimeTheCrowd_NoAttackReturnsZero(t *testing.T) {
-	s := card.TurnState{}
-	for _, c := range []card.Card{PrimeTheCrowdRed{}, PrimeTheCrowdYellow{}, PrimeTheCrowdBlue{}} {
-		c.Play(&s, &card.CardState{Card: c})
+	s := sim.TurnState{}
+	for _, c := range []sim.Card{PrimeTheCrowdRed{}, PrimeTheCrowdYellow{}, PrimeTheCrowdBlue{}} {
+		c.Play(&s, &sim.CardState{Card: c})
 		if got := s.Value; got != 0 {
 			t.Errorf("%s: Play() = %d, want 0", c.Name(), got)
 		}
@@ -20,8 +20,8 @@ func TestPrimeTheCrowd_NoAttackReturnsZero(t *testing.T) {
 
 // TestPrimeTheCrowd_NonAttackInRemainingFizzles: non-attack action fails the predicate.
 func TestPrimeTheCrowd_NonAttackInRemainingFizzles(t *testing.T) {
-	s := card.TurnState{CardsRemaining: []*card.CardState{{Card: testutils.GenericAction()}}}
-	(PrimeTheCrowdRed{}).Play(&s, &card.CardState{Card: PrimeTheCrowdRed{}})
+	s := sim.TurnState{CardsRemaining: []*sim.CardState{{Card: testutils.GenericAction()}}}
+	(PrimeTheCrowdRed{}).Play(&s, &sim.CardState{Card: PrimeTheCrowdRed{}})
 	if got := s.Value; got != 0 {
 		t.Errorf("Play() = %d, want 0 (non-attack skipped)", got)
 	}
@@ -31,7 +31,7 @@ func TestPrimeTheCrowd_NonAttackInRemainingFizzles(t *testing.T) {
 // (Red +4, Yellow +3, Blue +2).
 func TestPrimeTheCrowd_NextAttackReturnsBonus(t *testing.T) {
 	cases := []struct {
-		c    card.Card
+		c    sim.Card
 		want int
 	}{
 		{PrimeTheCrowdRed{}, 4},
@@ -39,9 +39,9 @@ func TestPrimeTheCrowd_NextAttackReturnsBonus(t *testing.T) {
 		{PrimeTheCrowdBlue{}, 2},
 	}
 	for _, tc := range cases {
-		target := &card.CardState{Card: testutils.GenericAttack(0, 0)}
-		s := card.TurnState{CardsRemaining: []*card.CardState{target}}
-		tc.c.Play(&s, &card.CardState{Card: tc.c})
+		target := &sim.CardState{Card: testutils.GenericAttack(0, 0)}
+		s := sim.TurnState{CardsRemaining: []*sim.CardState{target}}
+		tc.c.Play(&s, &sim.CardState{Card: tc.c})
 		if got := s.Value; got != 0 {
 			t.Errorf("%s: Play() = %d, want 0 (granter returns 0; +N rides on target's BonusAttack)", tc.c.Name(), got)
 		}

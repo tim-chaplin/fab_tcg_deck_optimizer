@@ -7,24 +7,25 @@ package cards
 import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 )
 
 var regainComposureTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction)
 
 type RegainComposureBlue struct{}
 
-func (RegainComposureBlue) ID() ids.CardID           { return ids.RegainComposureBlue }
-func (RegainComposureBlue) Name() string             { return "Regain Composure" }
-func (RegainComposureBlue) Cost(*card.TurnState) int { return 0 }
-func (RegainComposureBlue) Pitch() int               { return 3 }
-func (RegainComposureBlue) Attack() int              { return 0 }
-func (RegainComposureBlue) Defense() int             { return 2 }
-func (RegainComposureBlue) Types() card.TypeSet      { return regainComposureTypes }
-func (RegainComposureBlue) GoAgain() bool            { return true }
+func (RegainComposureBlue) ID() ids.CardID          { return ids.RegainComposureBlue }
+func (RegainComposureBlue) Name() string            { return "Regain Composure" }
+func (RegainComposureBlue) Cost(*sim.TurnState) int { return 0 }
+func (RegainComposureBlue) Pitch() int              { return 3 }
+func (RegainComposureBlue) Attack() int             { return 0 }
+func (RegainComposureBlue) Defense() int            { return 2 }
+func (RegainComposureBlue) Types() card.TypeSet     { return regainComposureTypes }
+func (RegainComposureBlue) GoAgain() bool           { return true }
 
 // not implemented: on-hit unfreeze rider (freeze/unfreeze state not tracked)
 func (RegainComposureBlue) NotImplemented() {}
-func (RegainComposureBlue) Play(s *card.TurnState, self *card.CardState) {
+func (RegainComposureBlue) Play(s *sim.TurnState, self *sim.CardState) {
 	grantNextAttackActionBonus(s, 1)
 	s.ApplyAndLogEffectiveAttack(self)
 }

@@ -3,23 +3,23 @@ package optimizations
 import (
 	"sync/atomic"
 
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 )
 
-// bareChainStepText is the uncached card.ChainStepText captured before init swaps in the
+// bareChainStepText is the uncached sim.ChainStepText captured before init swaps in the
 // memoised version. The slow path delegates to it.
-var bareChainStepText = card.ChainStepText
+var bareChainStepText = sim.ChainStepText
 
 func init() {
-	card.ChainStepText = cachedChainStepText
+	sim.ChainStepText = cachedChainStepText
 }
 
-// cachedChainStepText is the memoised ChainStepText installed over card.ChainStepText at
+// cachedChainStepText is the memoised ChainStepText installed over sim.ChainStepText at
 // init. The text depends only on (Card.ID, FromArsenal) — DisplayName, types, and the
 // verb selection are all static — so results live in a pre-warmed table; the per-Play
 // string concat / DisplayName allocation disappears on the hot path.
-func cachedChainStepText(self *card.CardState) string {
+func cachedChainStepText(self *sim.CardState) string {
 	idx := chainStepCacheIndex(self.Card.ID(), self.FromArsenal)
 	if s := chainStepCache[idx].Load(); s != nil {
 		return *s
@@ -53,7 +53,7 @@ func chainStepCacheIndex(id ids.CardID, fromArsenal bool) uint32 {
 //
 // Multiple goroutines computing the same entry race-safely converge on the first writer's
 // string — every writer produces the same value, so reads after a race still match spec.
-func chainStepTextSlow(self *card.CardState, idx uint32) string {
+func chainStepTextSlow(self *sim.CardState, idx uint32) string {
 	out := bareChainStepText(self)
 	chainStepCache[idx].Store(&out)
 	return out
@@ -64,8 +64,8 @@ func chainStepTextSlow(self *card.CardState, idx uint32) string {
 // Idempotent. The registry package's init calls this once with the registry slice so the
 // runtime hot path is pure cache reads — fakes/test stubs created without registration
 // still work via cachedChainStepText's lazy backfill.
-func WarmChainStepCache(cards []card.Card) {
-	var self card.CardState
+func WarmChainStepCache(cards []sim.Card) {
+	var self sim.CardState
 	for _, c := range cards {
 		if c == nil {
 			continue

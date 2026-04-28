@@ -10,52 +10,53 @@ package cards
 import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 )
 
 var runeragerSwarmTypes = card.NewTypeSet(card.TypeRuneblade, card.TypeAction, card.TypeAttack)
 
 type RuneragerSwarmRed struct{}
 
-func (RuneragerSwarmRed) ID() ids.CardID           { return ids.RuneragerSwarmRed }
-func (RuneragerSwarmRed) Name() string             { return "Runerager Swarm" }
-func (RuneragerSwarmRed) Cost(*card.TurnState) int { return 0 }
-func (RuneragerSwarmRed) Pitch() int               { return 1 }
-func (RuneragerSwarmRed) Attack() int              { return 3 }
-func (RuneragerSwarmRed) Defense() int             { return 3 }
-func (RuneragerSwarmRed) Types() card.TypeSet      { return runeragerSwarmTypes }
-func (RuneragerSwarmRed) GoAgain() bool            { return false }
-func (RuneragerSwarmRed) Play(s *card.TurnState, self *card.CardState) {
+func (RuneragerSwarmRed) ID() ids.CardID          { return ids.RuneragerSwarmRed }
+func (RuneragerSwarmRed) Name() string            { return "Runerager Swarm" }
+func (RuneragerSwarmRed) Cost(*sim.TurnState) int { return 0 }
+func (RuneragerSwarmRed) Pitch() int              { return 1 }
+func (RuneragerSwarmRed) Attack() int             { return 3 }
+func (RuneragerSwarmRed) Defense() int            { return 3 }
+func (RuneragerSwarmRed) Types() card.TypeSet     { return runeragerSwarmTypes }
+func (RuneragerSwarmRed) GoAgain() bool           { return false }
+func (RuneragerSwarmRed) Play(s *sim.TurnState, self *sim.CardState) {
 	runeragerSwarmPlay(s, self)
 }
 
 type RuneragerSwarmYellow struct{}
 
-func (RuneragerSwarmYellow) ID() ids.CardID           { return ids.RuneragerSwarmYellow }
-func (RuneragerSwarmYellow) Name() string             { return "Runerager Swarm" }
-func (RuneragerSwarmYellow) Cost(*card.TurnState) int { return 0 }
-func (RuneragerSwarmYellow) Pitch() int               { return 2 }
-func (RuneragerSwarmYellow) Attack() int              { return 2 }
-func (RuneragerSwarmYellow) Defense() int             { return 3 }
-func (RuneragerSwarmYellow) Types() card.TypeSet      { return runeragerSwarmTypes }
-func (RuneragerSwarmYellow) GoAgain() bool            { return false }
-func (RuneragerSwarmYellow) Play(s *card.TurnState, self *card.CardState) {
+func (RuneragerSwarmYellow) ID() ids.CardID          { return ids.RuneragerSwarmYellow }
+func (RuneragerSwarmYellow) Name() string            { return "Runerager Swarm" }
+func (RuneragerSwarmYellow) Cost(*sim.TurnState) int { return 0 }
+func (RuneragerSwarmYellow) Pitch() int              { return 2 }
+func (RuneragerSwarmYellow) Attack() int             { return 2 }
+func (RuneragerSwarmYellow) Defense() int            { return 3 }
+func (RuneragerSwarmYellow) Types() card.TypeSet     { return runeragerSwarmTypes }
+func (RuneragerSwarmYellow) GoAgain() bool           { return false }
+func (RuneragerSwarmYellow) Play(s *sim.TurnState, self *sim.CardState) {
 	runeragerSwarmPlay(s, self)
 }
 
 type RuneragerSwarmBlue struct{}
 
-func (RuneragerSwarmBlue) ID() ids.CardID           { return ids.RuneragerSwarmBlue }
-func (RuneragerSwarmBlue) Name() string             { return "Runerager Swarm" }
-func (RuneragerSwarmBlue) Cost(*card.TurnState) int { return 0 }
-func (RuneragerSwarmBlue) Pitch() int               { return 3 }
-func (RuneragerSwarmBlue) Attack() int              { return 1 }
-func (RuneragerSwarmBlue) Defense() int             { return 3 }
-func (RuneragerSwarmBlue) Types() card.TypeSet      { return runeragerSwarmTypes }
-func (RuneragerSwarmBlue) GoAgain() bool            { return false }
-func (RuneragerSwarmBlue) Play(s *card.TurnState, self *card.CardState) {
+func (RuneragerSwarmBlue) ID() ids.CardID          { return ids.RuneragerSwarmBlue }
+func (RuneragerSwarmBlue) Name() string            { return "Runerager Swarm" }
+func (RuneragerSwarmBlue) Cost(*sim.TurnState) int { return 0 }
+func (RuneragerSwarmBlue) Pitch() int              { return 3 }
+func (RuneragerSwarmBlue) Attack() int             { return 1 }
+func (RuneragerSwarmBlue) Defense() int            { return 3 }
+func (RuneragerSwarmBlue) Types() card.TypeSet     { return runeragerSwarmTypes }
+func (RuneragerSwarmBlue) GoAgain() bool           { return false }
+func (RuneragerSwarmBlue) Play(s *sim.TurnState, self *sim.CardState) {
 	runeragerSwarmPlay(s, self)
 }
-func runeragerSwarmPlay(s *card.TurnState, self *card.CardState) {
+func runeragerSwarmPlay(s *sim.TurnState, self *sim.CardState) {
 	if s.HasPlayedOrCreatedAura() {
 		self.GrantedGoAgain = true
 	}

@@ -3,7 +3,7 @@ package cards
 import (
 	"testing"
 
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 )
 
 // TestLifegainPerVariant guards against a regression where all three colour variants of a
@@ -12,7 +12,7 @@ import (
 func TestLifegainPerVariant(t *testing.T) {
 	cases := []struct {
 		name string
-		card card.Card
+		card sim.Card
 		want int
 	}{
 		{"HealingBalmRed", HealingBalmRed{}, 3},
@@ -26,8 +26,8 @@ func TestLifegainPerVariant(t *testing.T) {
 		{"FiddlersGreenBlue", FiddlersGreenBlue{}, 1},
 	}
 	for _, tc := range cases {
-		var s card.TurnState
-		tc.card.Play(&s, &card.CardState{Card: tc.card})
+		var s sim.TurnState
+		tc.card.Play(&s, &sim.CardState{Card: tc.card})
 		if got := s.Value; got != tc.want {
 			t.Errorf("%s: Play() = %d, want %d", tc.name, got, tc.want)
 		}

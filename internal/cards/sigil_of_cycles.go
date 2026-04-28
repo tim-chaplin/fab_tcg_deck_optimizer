@@ -10,24 +10,25 @@ package cards
 import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 )
 
 var sigilOfCyclesTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeAura)
 
 type SigilOfCyclesBlue struct{}
 
-func (SigilOfCyclesBlue) ID() ids.CardID           { return ids.SigilOfCyclesBlue }
-func (SigilOfCyclesBlue) Name() string             { return "Sigil of Cycles" }
-func (SigilOfCyclesBlue) Cost(*card.TurnState) int { return 0 }
-func (SigilOfCyclesBlue) Pitch() int               { return 3 }
-func (SigilOfCyclesBlue) Attack() int              { return 0 }
-func (SigilOfCyclesBlue) Defense() int             { return 2 }
-func (SigilOfCyclesBlue) Types() card.TypeSet      { return sigilOfCyclesTypes }
-func (SigilOfCyclesBlue) GoAgain() bool            { return true }
+func (SigilOfCyclesBlue) ID() ids.CardID          { return ids.SigilOfCyclesBlue }
+func (SigilOfCyclesBlue) Name() string            { return "Sigil of Cycles" }
+func (SigilOfCyclesBlue) Cost(*sim.TurnState) int { return 0 }
+func (SigilOfCyclesBlue) Pitch() int              { return 3 }
+func (SigilOfCyclesBlue) Attack() int             { return 0 }
+func (SigilOfCyclesBlue) Defense() int            { return 2 }
+func (SigilOfCyclesBlue) Types() card.TypeSet     { return sigilOfCyclesTypes }
+func (SigilOfCyclesBlue) GoAgain() bool           { return true }
 
 // not implemented: start-of-action-phase self-destroy, leaves-arena discard/draw
 func (SigilOfCyclesBlue) NotImplemented() {}
-func (SigilOfCyclesBlue) Play(s *card.TurnState, self *card.CardState) {
+func (SigilOfCyclesBlue) Play(s *sim.TurnState, self *sim.CardState) {
 	setAuraCreated(s)
 	s.ApplyAndLogEffectiveAttack(self)
 }

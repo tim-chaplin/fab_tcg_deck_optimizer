@@ -3,7 +3,7 @@ package cards
 import (
 	"testing"
 
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 )
 
 // TestSigilOfSuffering_FullCreditWhenIncomingAbsorbsBoost: with enough IncomingDamage to consume
@@ -12,7 +12,7 @@ import (
 // scales by its printed Defense (Red 3, Yellow 2, Blue 1).
 func TestSigilOfSuffering_FullCreditWhenIncomingAbsorbsBoost(t *testing.T) {
 	cases := []struct {
-		c    card.Card
+		c    sim.Card
 		want int
 	}{
 		{SigilOfSufferingRed{}, 5},    // 3 block + 1 boost + 1 arcane
@@ -20,11 +20,11 @@ func TestSigilOfSuffering_FullCreditWhenIncomingAbsorbsBoost(t *testing.T) {
 		{SigilOfSufferingBlue{}, 3},   // 1 block + 1 boost + 1 arcane
 	}
 	for _, tc := range cases {
-		s := card.TurnState{IncomingDamage: 10}
-		tc.c.Play(&s, &card.CardState{Card: tc.c})
+		s := sim.TurnState{IncomingDamage: 10}
+		tc.c.Play(&s, &sim.CardState{Card: tc.c})
 		if got := s.Value; got != tc.want {
 			t.Errorf("%s: Play(IncomingDamage=10) Value = %d, want %d (block + boost + arcane)",
-				card.DisplayName(tc.c), got, tc.want)
+				sim.DisplayName(tc.c), got, tc.want)
 		}
 	}
 }
@@ -35,7 +35,7 @@ func TestSigilOfSuffering_FullCreditWhenIncomingAbsorbsBoost(t *testing.T) {
 // adds nothing because there's no more incoming for it to consume.
 func TestSigilOfSuffering_BoostWastedWhenIncomingMatchesDefense(t *testing.T) {
 	cases := []struct {
-		c        card.Card
+		c        sim.Card
 		incoming int
 		want     int
 	}{
@@ -44,11 +44,11 @@ func TestSigilOfSuffering_BoostWastedWhenIncomingMatchesDefense(t *testing.T) {
 		{SigilOfSufferingBlue{}, 1, 2},   // 1 block + 1 arcane
 	}
 	for _, tc := range cases {
-		s := card.TurnState{IncomingDamage: tc.incoming}
-		tc.c.Play(&s, &card.CardState{Card: tc.c})
+		s := sim.TurnState{IncomingDamage: tc.incoming}
+		tc.c.Play(&s, &sim.CardState{Card: tc.c})
 		if got := s.Value; got != tc.want {
 			t.Errorf("%s: Play(IncomingDamage=%d) Value = %d, want %d (block at cap + arcane only)",
-				card.DisplayName(tc.c), tc.incoming, got, tc.want)
+				sim.DisplayName(tc.c), tc.incoming, got, tc.want)
 		}
 	}
 }
@@ -57,7 +57,7 @@ func TestSigilOfSuffering_BoostWastedWhenIncomingMatchesDefense(t *testing.T) {
 // — the +1{d} bonus is credited via BonusDefense at Play time, not baked into Defense.
 func TestSigilOfSuffering_DefenseIsPrinted(t *testing.T) {
 	cases := []struct {
-		c    card.Card
+		c    sim.Card
 		want int
 	}{
 		{SigilOfSufferingRed{}, 3},
@@ -66,7 +66,7 @@ func TestSigilOfSuffering_DefenseIsPrinted(t *testing.T) {
 	}
 	for _, tc := range cases {
 		if got := tc.c.Defense(); got != tc.want {
-			t.Errorf("%s: Defense() = %d, want %d (printed)", card.DisplayName(tc.c), got, tc.want)
+			t.Errorf("%s: Defense() = %d, want %d (printed)", sim.DisplayName(tc.c), got, tc.want)
 		}
 	}
 }

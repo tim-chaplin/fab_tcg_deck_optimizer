@@ -8,19 +8,18 @@ import (
 	"encoding/json"
 	"sort"
 
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/deck"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 )
 
 // Marshal returns the JSON encoding of `d` (indented) with card/weapon/hero names in place of
 // interface values.
-func Marshal(d *deck.Deck) ([]byte, error) {
+func Marshal(d *sim.Deck) ([]byte, error) {
 	return json.MarshalIndent(toJSON(d), "", "  ")
 }
 
-func toJSON(d *deck.Deck) *DeckJSON {
+func toJSON(d *sim.Deck) *DeckJSON {
 	weapons := make([]string, len(d.Weapons))
 	for i, w := range d.Weapons {
 		weapons[i] = w.Name()
@@ -28,7 +27,7 @@ func toJSON(d *deck.Deck) *DeckJSON {
 	cardNames := make([]string, len(d.Cards))
 	var pitchCounts PitchCountsJSON
 	for i, c := range d.Cards {
-		cardNames[i] = card.DisplayName(c)
+		cardNames[i] = sim.DisplayName(c)
 		switch c.Pitch() {
 		case 1:
 			pitchCounts.Red++
@@ -62,7 +61,7 @@ func sortedStrings(ss []string) []string {
 	return out
 }
 
-func statsToJSON(s deck.Stats) StatsJSON {
+func statsToJSON(s sim.Stats) StatsJSON {
 	return StatsJSON{
 		Runs:            s.Runs,
 		Hands:           s.Hands,
@@ -79,14 +78,14 @@ func statsToJSON(s deck.Stats) StatsJSON {
 // perCardMarginalToJSON flattens the ids.CardID-keyed marginal-stats map into a slice sorted
 // by Marginal descending, then by card name — matching the on-screen card-value table's
 // order so the JSON and the printout read in lockstep.
-func perCardMarginalToJSON(m map[ids.CardID]deck.CardMarginalStats) []CardMarginalStatsJSON {
+func perCardMarginalToJSON(m map[ids.CardID]sim.CardMarginalStats) []CardMarginalStatsJSON {
 	if len(m) == 0 {
 		return nil
 	}
 	out := make([]CardMarginalStatsJSON, 0, len(m))
 	for id, s := range m {
 		out = append(out, CardMarginalStatsJSON{
-			Card:         card.DisplayName(registry.GetCard(id)),
+			Card:         sim.DisplayName(registry.GetCard(id)),
 			PresentTotal: s.PresentTotal,
 			PresentHands: s.PresentHands,
 			AbsentTotal:  s.AbsentTotal,
@@ -103,10 +102,10 @@ func perCardMarginalToJSON(m map[ids.CardID]deck.CardMarginalStats) []CardMargin
 	return out
 }
 
-// bestTurnToJSON serialises deck.BestTurn.Log directly. The structured TurnSummary stays in
+// bestTurnToJSON serialises sim.BestTurn.Log directly. The structured TurnSummary stays in
 // memory for the live computation but never crosses the JSON boundary — the structured Log
 // is the single source of truth on disk and feeds the formatter at print time.
-func bestTurnToJSON(b deck.BestTurn) BestTurnJSON {
+func bestTurnToJSON(b sim.BestTurn) BestTurnJSON {
 	if b.Log.IsEmpty() {
 		return BestTurnJSON{}
 	}

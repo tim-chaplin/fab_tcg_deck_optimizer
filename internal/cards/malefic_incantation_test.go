@@ -3,7 +3,7 @@ package cards
 import (
 	"testing"
 
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 )
 
 // TestMaleficIncantation_PlayRegistersAttackActionTrigger: Play credits 0 same-turn damage —
@@ -12,7 +12,7 @@ import (
 // + OncePerTurn with Count=N (Red 3, Yellow 2, Blue 1).
 func TestMaleficIncantation_PlayRegistersAttackActionTrigger(t *testing.T) {
 	cases := []struct {
-		c card.Card
+		c sim.Card
 		n int
 	}{
 		{MaleficIncantationRed{}, 3},
@@ -20,8 +20,8 @@ func TestMaleficIncantation_PlayRegistersAttackActionTrigger(t *testing.T) {
 		{MaleficIncantationBlue{}, 1},
 	}
 	for _, tc := range cases {
-		var s card.TurnState
-		tc.c.Play(&s, &card.CardState{Card: tc.c})
+		var s sim.TurnState
+		tc.c.Play(&s, &sim.CardState{Card: tc.c})
 		if got := s.Value; got != 0 {
 			t.Errorf("%s: Play() = %d, want 0 (rune comes from trigger, not Play)", tc.c.Name(), got)
 		}
@@ -35,7 +35,7 @@ func TestMaleficIncantation_PlayRegistersAttackActionTrigger(t *testing.T) {
 			t.Fatalf("%s: AuraTriggers len = %d, want 1", tc.c.Name(), len(s.AuraTriggers))
 		}
 		tr := s.AuraTriggers[0]
-		if tr.Type != card.TriggerAttackAction {
+		if tr.Type != sim.TriggerAttackAction {
 			t.Errorf("%s: trigger Type = %d, want TriggerAttackAction", tc.c.Name(), tr.Type)
 		}
 		if !tr.OncePerTurn {
@@ -52,10 +52,10 @@ func TestMaleficIncantation_PlayRegistersAttackActionTrigger(t *testing.T) {
 // the handler's job. chain.TriggeringCard is seeded to mimic the sim — the handler reads it
 // to source-attribute the log entry it writes.
 func TestMaleficIncantation_HandlerCreatesOneRunechantPerFire(t *testing.T) {
-	for _, c := range []card.Card{MaleficIncantationRed{}, MaleficIncantationYellow{}, MaleficIncantationBlue{}} {
-		var s card.TurnState
-		c.Play(&s, &card.CardState{Card: c})
-		chain := card.TurnState{TriggeringCard: c}
+	for _, c := range []sim.Card{MaleficIncantationRed{}, MaleficIncantationYellow{}, MaleficIncantationBlue{}} {
+		var s sim.TurnState
+		c.Play(&s, &sim.CardState{Card: c})
+		chain := sim.TurnState{TriggeringCard: c}
 		got := s.AuraTriggers[0].Handler(&chain)
 		if got != 1 {
 			t.Errorf("%s: handler damage = %d, want 1", c.Name(), got)
@@ -70,9 +70,9 @@ func TestMaleficIncantation_HandlerCreatesOneRunechantPerFire(t *testing.T) {
 // beatsBest tiebreaker counts this card as future-value-adding — without it a lone Malefic
 // loses to Held → arsenal promotion at equal current-turn Value.
 func TestMaleficIncantation_ImplementsAddsFutureValue(t *testing.T) {
-	for _, c := range []card.Card{MaleficIncantationRed{}, MaleficIncantationYellow{}, MaleficIncantationBlue{}} {
-		if _, ok := c.(card.AddsFutureValue); !ok {
-			t.Errorf("%s should implement card.AddsFutureValue", c.Name())
+	for _, c := range []sim.Card{MaleficIncantationRed{}, MaleficIncantationYellow{}, MaleficIncantationBlue{}} {
+		if _, ok := c.(sim.AddsFutureValue); !ok {
+			t.Errorf("%s should implement sim.AddsFutureValue", c.Name())
 		}
 	}
 }

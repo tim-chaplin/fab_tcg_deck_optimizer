@@ -547,7 +547,7 @@ const (
 	ZealousBeltingYellow
 	ZealousBeltingBlue
 
-	// Test-only synthetic card IDs. Registered so hand.Best's cache key lookup doesn't panic on
+	// Test-only synthetic card IDs. Registered so sim.Best's cache key lookup doesn't panic on
 	// them. Not real FaB cards and must not appear in production decks.
 	FakeRedAttack
 	FakeBlueAttack

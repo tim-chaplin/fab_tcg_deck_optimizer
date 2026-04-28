@@ -9,23 +9,24 @@ package cards
 import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 )
 
 var emissaryOfWindTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeAttack)
 
 type EmissaryOfWindRed struct{}
 
-func (EmissaryOfWindRed) ID() ids.CardID           { return ids.EmissaryOfWindRed }
-func (EmissaryOfWindRed) Name() string             { return "Emissary of Wind" }
-func (EmissaryOfWindRed) Cost(*card.TurnState) int { return 0 }
-func (EmissaryOfWindRed) Pitch() int               { return 1 }
-func (EmissaryOfWindRed) Attack() int              { return 4 }
-func (EmissaryOfWindRed) Defense() int             { return 2 }
-func (EmissaryOfWindRed) Types() card.TypeSet      { return emissaryOfWindTypes }
-func (EmissaryOfWindRed) GoAgain() bool            { return false }
+func (EmissaryOfWindRed) ID() ids.CardID          { return ids.EmissaryOfWindRed }
+func (EmissaryOfWindRed) Name() string            { return "Emissary of Wind" }
+func (EmissaryOfWindRed) Cost(*sim.TurnState) int { return 0 }
+func (EmissaryOfWindRed) Pitch() int              { return 1 }
+func (EmissaryOfWindRed) Attack() int             { return 4 }
+func (EmissaryOfWindRed) Defense() int            { return 2 }
+func (EmissaryOfWindRed) Types() card.TypeSet     { return emissaryOfWindTypes }
+func (EmissaryOfWindRed) GoAgain() bool           { return false }
 
 // not implemented: hand-cycle-for-go-again rider
 func (EmissaryOfWindRed) NotImplemented() {}
-func (c EmissaryOfWindRed) Play(s *card.TurnState, self *card.CardState) {
+func (c EmissaryOfWindRed) Play(s *sim.TurnState, self *sim.CardState) {
 	s.ApplyAndLogEffectiveAttack(self)
 }

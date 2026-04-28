@@ -9,22 +9,23 @@ package cards
 import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 )
 
 var amuletOfAssertivenessTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeItem)
 
 type AmuletOfAssertivenessYellow struct{}
 
-func (AmuletOfAssertivenessYellow) ID() ids.CardID           { return ids.AmuletOfAssertivenessYellow }
-func (AmuletOfAssertivenessYellow) Name() string             { return "Amulet of Assertiveness" }
-func (AmuletOfAssertivenessYellow) Cost(*card.TurnState) int { return 0 }
-func (AmuletOfAssertivenessYellow) Pitch() int               { return 2 }
-func (AmuletOfAssertivenessYellow) Attack() int              { return 0 }
-func (AmuletOfAssertivenessYellow) Defense() int             { return 0 }
-func (AmuletOfAssertivenessYellow) Types() card.TypeSet      { return amuletOfAssertivenessTypes }
-func (AmuletOfAssertivenessYellow) GoAgain() bool            { return true }
+func (AmuletOfAssertivenessYellow) ID() ids.CardID          { return ids.AmuletOfAssertivenessYellow }
+func (AmuletOfAssertivenessYellow) Name() string            { return "Amulet of Assertiveness" }
+func (AmuletOfAssertivenessYellow) Cost(*sim.TurnState) int { return 0 }
+func (AmuletOfAssertivenessYellow) Pitch() int              { return 2 }
+func (AmuletOfAssertivenessYellow) Attack() int             { return 0 }
+func (AmuletOfAssertivenessYellow) Defense() int            { return 0 }
+func (AmuletOfAssertivenessYellow) Types() card.TypeSet     { return amuletOfAssertivenessTypes }
+func (AmuletOfAssertivenessYellow) GoAgain() bool           { return true }
 
 // not implemented: AR grant: target attack 'banish top of deck on hit'; gated on 4+ cards
 // in hand
-func (AmuletOfAssertivenessYellow) NotImplemented()                              {}
-func (AmuletOfAssertivenessYellow) Play(s *card.TurnState, self *card.CardState) { s.LogPlay(self) }
+func (AmuletOfAssertivenessYellow) NotImplemented()                            {}
+func (AmuletOfAssertivenessYellow) Play(s *sim.TurnState, self *sim.CardState) { s.LogPlay(self) }

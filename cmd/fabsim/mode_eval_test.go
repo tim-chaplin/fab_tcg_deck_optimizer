@@ -10,9 +10,9 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/deck"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/deckformat"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/heroes"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 )
 
 // captureEvalOutput redirects os.Stdout / os.Stderr into pipes, drains them concurrently
@@ -62,7 +62,7 @@ func TestRunEval_DefaultRewritesFile(t *testing.T) {
 	// Seed a deck with a stale Stats.Avg the fresh sim is guaranteed to overwrite. 40
 	// random Viserai cards gives the sim enough to produce non-zero Value.
 	rng := rand.New(rand.NewSource(1))
-	d := deck.Random(heroes.Viserai{}, 40, 2, rng, nil)
+	d := sim.Random(heroes.Viserai{}, 40, 2, rng, nil)
 	d.Stats.TotalValue = 0
 	d.Stats.Hands = 0
 	if err := writeDeck(d, path); err != nil {
@@ -107,7 +107,7 @@ func TestRunEval_PrintOnlyLeavesFileUnchanged(t *testing.T) {
 	// overwrite Hands>0 with a different number; -print-only must preserve the seeded file
 	// byte-for-byte.
 	rng := rand.New(rand.NewSource(1))
-	d := deck.Random(heroes.Viserai{}, 40, 2, rng, nil)
+	d := sim.Random(heroes.Viserai{}, 40, 2, rng, nil)
 	d.Evaluate(20, 0, rng)
 	if err := writeDeck(d, path); err != nil {
 		t.Fatalf("seed writeDeck: %v", err)
@@ -154,7 +154,7 @@ func TestRunEval_DefaultPrintsFullDump(t *testing.T) {
 	path := filepath.Join(dir, "deck.json")
 
 	rng := rand.New(rand.NewSource(1))
-	d := deck.Random(heroes.Viserai{}, 40, 2, rng, nil)
+	d := sim.Random(heroes.Viserai{}, 40, 2, rng, nil)
 	if err := writeDeck(d, path); err != nil {
 		t.Fatalf("seed writeDeck: %v", err)
 	}
@@ -187,7 +187,7 @@ func TestRunEval_BriefSkipsBestTurnAndCardList(t *testing.T) {
 	path := filepath.Join(dir, "deck.json")
 
 	rng := rand.New(rand.NewSource(1))
-	d := deck.Random(heroes.Viserai{}, 40, 2, rng, nil)
+	d := sim.Random(heroes.Viserai{}, 40, 2, rng, nil)
 	if err := writeDeck(d, path); err != nil {
 		t.Fatalf("seed writeDeck: %v", err)
 	}

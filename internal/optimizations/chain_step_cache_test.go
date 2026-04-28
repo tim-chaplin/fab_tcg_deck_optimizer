@@ -1,10 +1,11 @@
 package optimizations
 
 import (
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"testing"
 
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 )
 
 // stubCard is a minimal Card implementation for these cache tests. Tests set ID + Types +
@@ -15,15 +16,15 @@ type stubCard struct {
 	types card.TypeSet
 }
 
-func (c stubCard) ID() ids.CardID                      { return c.id }
-func (c stubCard) Name() string                        { return c.name }
-func (stubCard) Cost(*card.TurnState) int              { return 0 }
-func (stubCard) Pitch() int                            { return 0 }
-func (stubCard) Attack() int                           { return 0 }
-func (stubCard) Defense() int                          { return 0 }
-func (c stubCard) Types() card.TypeSet                 { return c.types }
-func (stubCard) GoAgain() bool                         { return false }
-func (stubCard) Play(*card.TurnState, *card.CardState) {}
+func (c stubCard) ID() ids.CardID                    { return c.id }
+func (c stubCard) Name() string                      { return c.name }
+func (stubCard) Cost(*sim.TurnState) int             { return 0 }
+func (stubCard) Pitch() int                          { return 0 }
+func (stubCard) Attack() int                         { return 0 }
+func (stubCard) Defense() int                        { return 0 }
+func (c stubCard) Types() card.TypeSet               { return c.types }
+func (stubCard) GoAgain() bool                       { return false }
+func (stubCard) Play(*sim.TurnState, *sim.CardState) {}
 
 // TestWarmChainStepCache_PopulatesBothFromArsenalRows: WarmChainStepCache must fill both
 // the (id, false) and (id, true) cells for every non-nil card so the runtime hot path is
@@ -34,7 +35,7 @@ func TestWarmChainStepCache_PopulatesBothFromArsenalRows(t *testing.T) {
 	chainStepCache[chainStepCacheIndex(c.ID(), false)].Store(nil)
 	chainStepCache[chainStepCacheIndex(c.ID(), true)].Store(nil)
 
-	WarmChainStepCache([]card.Card{c})
+	WarmChainStepCache([]sim.Card{c})
 
 	gotInHand := chainStepCache[chainStepCacheIndex(c.ID(), false)].Load()
 	if gotInHand == nil {
@@ -56,7 +57,7 @@ func TestWarmChainStepCache_PopulatesBothFromArsenalRows(t *testing.T) {
 // TestWarmChainStepCache_SkipsNil: the registry slice has nil at index 0 (Invalid).
 // Passing it through must not panic and must leave that slot untouched.
 func TestWarmChainStepCache_SkipsNil(t *testing.T) {
-	WarmChainStepCache([]card.Card{nil})
+	WarmChainStepCache([]sim.Card{nil})
 	if got := chainStepCache[0].Load(); got != nil {
 		t.Errorf("nil entry should leave slot 0 empty, got %q", *got)
 	}
@@ -70,7 +71,7 @@ func TestChainStepText_LazyBackfillForUnregisteredCards(t *testing.T) {
 	idx := chainStepCacheIndex(c.ID(), false)
 	chainStepCache[idx].Store(nil)
 
-	self := &card.CardState{Card: c}
+	self := &sim.CardState{Card: c}
 	got := cachedChainStepText(self)
 	if want := "Unregistered: PLAY"; got != want {
 		t.Errorf("first call = %q, want %q", got, want)
@@ -100,7 +101,7 @@ func TestBuildChainStepText_VerbSelection(t *testing.T) {
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
 			c := stubCard{name: "X", types: tc.types}
-			self := &card.CardState{Card: c, FromArsenal: tc.fromArsenal}
+			self := &sim.CardState{Card: c, FromArsenal: tc.fromArsenal}
 			if got := bareChainStepText(self); got != tc.want {
 				t.Errorf("bareChainStepText = %q, want %q", got, tc.want)
 			}

@@ -8,17 +8,17 @@
 package registry
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/cards"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/optimizations"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 )
 
 // CardID aliases ids.CardID so callers of this package don't need two imports just to hold IDs.
 type CardID = ids.CardID
 
 // cardsByID is indexed directly by CardID. Index 0 (Invalid) is nil.
-var cardsByID = []card.Card{
+var cardsByID = []sim.Card{
 	ids.InvalidCard: nil,
 
 	ids.AetherSlashRed:    cards.AetherSlashRed{},
@@ -778,16 +778,21 @@ var cardsByID = []card.Card{
 	ids.ZealousBeltingBlue:   cards.ZealousBeltingBlue{},
 }
 
-// init eagerly populates package card's chain-step text and DisplayName caches so the
-// per-Play hot path is pure cache reads. Done at registration time because the registry
-// is the only place that knows the full card set, and the caches are sized for the full
-// ID space.
+// init eagerly populates package sim's chain-step text and DisplayName caches so the
+// per-Play hot path is pure cache reads, and wires the sim → registry forward-declared
+// hooks (sim.GetCard / sim.DeckableCards / sim.AllWeapons) so sim's deck builder can
+// reach the registry without importing it (would cycle through cards → sim → registry).
+// Done at registration time because the registry is the only place that knows the full
+// card set, and the caches are sized for the full ID space.
 func init() {
 	optimizations.WarmChainStepCache(cardsByID)
 	optimizations.WarmDisplayNameCache(cardsByID)
+	sim.GetCard = GetCard
+	sim.DeckableCards = func() []ids.CardID { return DeckableCards() }
+	sim.AllWeapons = AllWeapons
 }
 
-// cardsByName maps card.DisplayName(c) → CardID for reverse lookup. Built once at init. Keyed
+// cardsByName maps sim.DisplayName(c) → CardID for reverse lookup. Built once at init. Keyed
 // on DisplayName (not bare Name) so each pitch variant gets a distinct entry — Card.Name()
 // collapses all three printings to the same base string, so it's not a unique key.
 var cardsByName = func() map[string]CardID {
@@ -796,14 +801,14 @@ var cardsByName = func() map[string]CardID {
 		if c == nil {
 			continue
 		}
-		m[card.DisplayName(c)] = CardID(id)
+		m[sim.DisplayName(c)] = CardID(id)
 	}
 	return m
 }()
 
 // GetCard returns the card for the given ID. Panics if id is Invalid or out of range —
 // callers should only pass IDs they got from this package.
-func GetCard(id CardID) card.Card {
+func GetCard(id CardID) sim.Card {
 	if id == ids.InvalidCard || int(id) >= len(cardsByID) || cardsByID[id] == nil {
 		panic("cardindex: invalid card ID")
 	}

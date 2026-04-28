@@ -10,6 +10,7 @@ package cards
 import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 )
 
 var captainsCallTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction)
@@ -18,7 +19,7 @@ var captainsCallTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction)
 // at most maxCost, by adding to its BonusAttack. The +2 attributes to the buffed attack (so
 // EffectiveAttack picks it up in LikelyToHit) rather than to Captain's Call itself. The
 // alternative "go again" mode is dropped (advertised on each variant's NotImplemented marker).
-func captainsCallApplySideEffect(s *card.TurnState, maxCost int) {
+func captainsCallApplySideEffect(s *sim.TurnState, maxCost int) {
 	for _, pc := range s.CardsRemaining {
 		if !pc.Card.Types().IsAttackAction() {
 			continue
@@ -32,54 +33,54 @@ func captainsCallApplySideEffect(s *card.TurnState, maxCost int) {
 
 type CaptainsCallRed struct{}
 
-func (CaptainsCallRed) ID() ids.CardID           { return ids.CaptainsCallRed }
-func (CaptainsCallRed) Name() string             { return "Captain's Call" }
-func (CaptainsCallRed) Cost(*card.TurnState) int { return 0 }
-func (CaptainsCallRed) Pitch() int               { return 1 }
-func (CaptainsCallRed) Attack() int              { return 0 }
-func (CaptainsCallRed) Defense() int             { return 2 }
-func (CaptainsCallRed) Types() card.TypeSet      { return captainsCallTypes }
-func (CaptainsCallRed) GoAgain() bool            { return true }
+func (CaptainsCallRed) ID() ids.CardID          { return ids.CaptainsCallRed }
+func (CaptainsCallRed) Name() string            { return "Captain's Call" }
+func (CaptainsCallRed) Cost(*sim.TurnState) int { return 0 }
+func (CaptainsCallRed) Pitch() int              { return 1 }
+func (CaptainsCallRed) Attack() int             { return 0 }
+func (CaptainsCallRed) Defense() int            { return 2 }
+func (CaptainsCallRed) Types() card.TypeSet     { return captainsCallTypes }
+func (CaptainsCallRed) GoAgain() bool           { return true }
 
 // not implemented: modal pick hard-coded to +2{p}; 'go again' mode is dropped
 func (CaptainsCallRed) NotImplemented() {}
-func (CaptainsCallRed) Play(s *card.TurnState, self *card.CardState) {
+func (CaptainsCallRed) Play(s *sim.TurnState, self *sim.CardState) {
 	captainsCallApplySideEffect(s, 2)
 	s.ApplyAndLogEffectiveAttack(self)
 }
 
 type CaptainsCallYellow struct{}
 
-func (CaptainsCallYellow) ID() ids.CardID           { return ids.CaptainsCallYellow }
-func (CaptainsCallYellow) Name() string             { return "Captain's Call" }
-func (CaptainsCallYellow) Cost(*card.TurnState) int { return 0 }
-func (CaptainsCallYellow) Pitch() int               { return 2 }
-func (CaptainsCallYellow) Attack() int              { return 0 }
-func (CaptainsCallYellow) Defense() int             { return 2 }
-func (CaptainsCallYellow) Types() card.TypeSet      { return captainsCallTypes }
-func (CaptainsCallYellow) GoAgain() bool            { return true }
+func (CaptainsCallYellow) ID() ids.CardID          { return ids.CaptainsCallYellow }
+func (CaptainsCallYellow) Name() string            { return "Captain's Call" }
+func (CaptainsCallYellow) Cost(*sim.TurnState) int { return 0 }
+func (CaptainsCallYellow) Pitch() int              { return 2 }
+func (CaptainsCallYellow) Attack() int             { return 0 }
+func (CaptainsCallYellow) Defense() int            { return 2 }
+func (CaptainsCallYellow) Types() card.TypeSet     { return captainsCallTypes }
+func (CaptainsCallYellow) GoAgain() bool           { return true }
 
 // not implemented: modal pick hard-coded to +2{p}; 'go again' mode is dropped
 func (CaptainsCallYellow) NotImplemented() {}
-func (CaptainsCallYellow) Play(s *card.TurnState, self *card.CardState) {
+func (CaptainsCallYellow) Play(s *sim.TurnState, self *sim.CardState) {
 	captainsCallApplySideEffect(s, 1)
 	s.ApplyAndLogEffectiveAttack(self)
 }
 
 type CaptainsCallBlue struct{}
 
-func (CaptainsCallBlue) ID() ids.CardID           { return ids.CaptainsCallBlue }
-func (CaptainsCallBlue) Name() string             { return "Captain's Call" }
-func (CaptainsCallBlue) Cost(*card.TurnState) int { return 0 }
-func (CaptainsCallBlue) Pitch() int               { return 3 }
-func (CaptainsCallBlue) Attack() int              { return 0 }
-func (CaptainsCallBlue) Defense() int             { return 2 }
-func (CaptainsCallBlue) Types() card.TypeSet      { return captainsCallTypes }
-func (CaptainsCallBlue) GoAgain() bool            { return true }
+func (CaptainsCallBlue) ID() ids.CardID          { return ids.CaptainsCallBlue }
+func (CaptainsCallBlue) Name() string            { return "Captain's Call" }
+func (CaptainsCallBlue) Cost(*sim.TurnState) int { return 0 }
+func (CaptainsCallBlue) Pitch() int              { return 3 }
+func (CaptainsCallBlue) Attack() int             { return 0 }
+func (CaptainsCallBlue) Defense() int            { return 2 }
+func (CaptainsCallBlue) Types() card.TypeSet     { return captainsCallTypes }
+func (CaptainsCallBlue) GoAgain() bool           { return true }
 
 // not implemented: modal pick hard-coded to +2{p}; 'go again' mode is dropped
 func (CaptainsCallBlue) NotImplemented() {}
-func (CaptainsCallBlue) Play(s *card.TurnState, self *card.CardState) {
+func (CaptainsCallBlue) Play(s *sim.TurnState, self *sim.CardState) {
 	captainsCallApplySideEffect(s, 0)
 	s.ApplyAndLogEffectiveAttack(self)
 }

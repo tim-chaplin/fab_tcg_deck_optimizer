@@ -3,15 +3,15 @@ package cards
 import (
 	"testing"
 
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
 )
 
 // TestCaptainsCall_NoAttackReturnsZero: no qualifying next attack card → +2 rider fizzles.
 func TestCaptainsCall_NoAttackReturnsZero(t *testing.T) {
-	s := card.TurnState{}
-	for _, c := range []card.Card{CaptainsCallRed{}, CaptainsCallYellow{}, CaptainsCallBlue{}} {
-		c.Play(&s, &card.CardState{Card: c})
+	s := sim.TurnState{}
+	for _, c := range []sim.Card{CaptainsCallRed{}, CaptainsCallYellow{}, CaptainsCallBlue{}} {
+		c.Play(&s, &sim.CardState{Card: c})
 		if got := s.Value; got != 0 {
 			t.Errorf("%s: Play() = %d, want 0", c.Name(), got)
 		}
@@ -20,8 +20,8 @@ func TestCaptainsCall_NoAttackReturnsZero(t *testing.T) {
 
 // TestCaptainsCall_HighCostFilteredOut: a cost-3 attack is past Red's cost<=2 gate.
 func TestCaptainsCall_HighCostFilteredOut(t *testing.T) {
-	s := card.TurnState{CardsRemaining: []*card.CardState{{Card: testutils.GenericAttack(3, 0)}}}
-	(CaptainsCallRed{}).Play(&s, &card.CardState{Card: CaptainsCallRed{}})
+	s := sim.TurnState{CardsRemaining: []*sim.CardState{{Card: testutils.GenericAttack(3, 0)}}}
+	(CaptainsCallRed{}).Play(&s, &sim.CardState{Card: CaptainsCallRed{}})
 	if got := s.Value; got != 0 {
 		t.Errorf("Play() = %d, want 0 (cost 3 > 2)", got)
 	}
@@ -45,11 +45,11 @@ func TestCaptainsCall_CostThresholdPerVariant(t *testing.T) {
 		{"cost 1", 1, 2, 2, 0},
 		{"cost 0", 0, 2, 2, 2},
 	}
-	check := func(t *testing.T, label string, c card.Card, cost, want int) {
+	check := func(t *testing.T, label string, c sim.Card, cost, want int) {
 		t.Helper()
-		target := &card.CardState{Card: testutils.GenericAttack(cost, 0)}
-		s := card.TurnState{CardsRemaining: []*card.CardState{target}}
-		c.Play(&s, &card.CardState{Card: c})
+		target := &sim.CardState{Card: testutils.GenericAttack(cost, 0)}
+		s := sim.TurnState{CardsRemaining: []*sim.CardState{target}}
+		c.Play(&s, &sim.CardState{Card: c})
 		if got := s.Value; got != 0 {
 			t.Errorf("%s: Play() = %d, want 0 (granter returns 0; +N rides on target's BonusAttack)", label, got)
 		}

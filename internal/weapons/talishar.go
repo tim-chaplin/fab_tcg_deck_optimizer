@@ -9,24 +9,25 @@ package weapons
 import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 )
 
 var talisharTypes = card.NewTypeSet(card.TypeGeneric, card.TypeWeapon, card.TypeSword, card.TypeTwoHand)
 
 type Talishar struct{}
 
-func (Talishar) ID() ids.WeaponID         { return ids.TalisharID }
-func (Talishar) Name() string             { return "Talishar, the Lost Prince" }
-func (Talishar) Cost(*card.TurnState) int { return 0 }
-func (Talishar) Pitch() int               { return 0 }
-func (Talishar) Attack() int              { return 4 }
-func (Talishar) Defense() int             { return 0 }
-func (Talishar) Types() card.TypeSet      { return talisharTypes }
-func (Talishar) GoAgain() bool            { return false }
-func (Talishar) Hands() int               { return 2 }
+func (Talishar) ID() ids.WeaponID        { return ids.TalisharID }
+func (Talishar) Name() string            { return "Talishar, the Lost Prince" }
+func (Talishar) Cost(*sim.TurnState) int { return 0 }
+func (Talishar) Pitch() int              { return 0 }
+func (Talishar) Attack() int             { return 4 }
+func (Talishar) Defense() int            { return 0 }
+func (Talishar) Types() card.TypeSet     { return talisharTypes }
+func (Talishar) GoAgain() bool           { return false }
+func (Talishar) Hands() int              { return 2 }
 
 // not implemented: rust-counter activation cost and end-phase self-destruct at 3+ counters
 func (Talishar) NotImplemented() {}
-func (Talishar) Play(s *card.TurnState, self *card.CardState) {
+func (Talishar) Play(s *sim.TurnState, self *sim.CardState) {
 	s.ApplyAndLogEffectiveAttack(self)
 }

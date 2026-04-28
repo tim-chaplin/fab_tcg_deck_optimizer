@@ -10,51 +10,52 @@ package cards
 import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 )
 
 var evenBiggerThanThatTypes = card.NewTypeSet(card.TypeGeneric, card.TypeInstant)
 
 type EvenBiggerThanThatRed struct{}
 
-func (EvenBiggerThanThatRed) ID() ids.CardID           { return ids.EvenBiggerThanThatRed }
-func (EvenBiggerThanThatRed) Name() string             { return "Even Bigger Than That!" }
-func (EvenBiggerThanThatRed) Cost(*card.TurnState) int { return 0 }
-func (EvenBiggerThanThatRed) Pitch() int               { return 1 }
-func (EvenBiggerThanThatRed) Attack() int              { return 0 }
-func (EvenBiggerThanThatRed) Defense() int             { return 0 }
-func (EvenBiggerThanThatRed) Types() card.TypeSet      { return evenBiggerThanThatTypes }
-func (EvenBiggerThanThatRed) GoAgain() bool            { return false }
+func (EvenBiggerThanThatRed) ID() ids.CardID          { return ids.EvenBiggerThanThatRed }
+func (EvenBiggerThanThatRed) Name() string            { return "Even Bigger Than That!" }
+func (EvenBiggerThanThatRed) Cost(*sim.TurnState) int { return 0 }
+func (EvenBiggerThanThatRed) Pitch() int              { return 1 }
+func (EvenBiggerThanThatRed) Attack() int             { return 0 }
+func (EvenBiggerThanThatRed) Defense() int            { return 0 }
+func (EvenBiggerThanThatRed) Types() card.TypeSet     { return evenBiggerThanThatTypes }
+func (EvenBiggerThanThatRed) GoAgain() bool           { return false }
 
 // not implemented: Opt + reveal-and-Quicken trigger; gated on damage dealt this turn
-func (EvenBiggerThanThatRed) NotImplemented()                              {}
-func (EvenBiggerThanThatRed) Play(s *card.TurnState, self *card.CardState) { s.LogPlay(self) }
+func (EvenBiggerThanThatRed) NotImplemented()                            {}
+func (EvenBiggerThanThatRed) Play(s *sim.TurnState, self *sim.CardState) { s.LogPlay(self) }
 
 type EvenBiggerThanThatYellow struct{}
 
-func (EvenBiggerThanThatYellow) ID() ids.CardID           { return ids.EvenBiggerThanThatYellow }
-func (EvenBiggerThanThatYellow) Name() string             { return "Even Bigger Than That!" }
-func (EvenBiggerThanThatYellow) Cost(*card.TurnState) int { return 0 }
-func (EvenBiggerThanThatYellow) Pitch() int               { return 2 }
-func (EvenBiggerThanThatYellow) Attack() int              { return 0 }
-func (EvenBiggerThanThatYellow) Defense() int             { return 0 }
-func (EvenBiggerThanThatYellow) Types() card.TypeSet      { return evenBiggerThanThatTypes }
-func (EvenBiggerThanThatYellow) GoAgain() bool            { return false }
+func (EvenBiggerThanThatYellow) ID() ids.CardID          { return ids.EvenBiggerThanThatYellow }
+func (EvenBiggerThanThatYellow) Name() string            { return "Even Bigger Than That!" }
+func (EvenBiggerThanThatYellow) Cost(*sim.TurnState) int { return 0 }
+func (EvenBiggerThanThatYellow) Pitch() int              { return 2 }
+func (EvenBiggerThanThatYellow) Attack() int             { return 0 }
+func (EvenBiggerThanThatYellow) Defense() int            { return 0 }
+func (EvenBiggerThanThatYellow) Types() card.TypeSet     { return evenBiggerThanThatTypes }
+func (EvenBiggerThanThatYellow) GoAgain() bool           { return false }
 
 // not implemented: Opt + reveal-and-Quicken trigger; gated on damage dealt this turn
-func (EvenBiggerThanThatYellow) NotImplemented()                              {}
-func (EvenBiggerThanThatYellow) Play(s *card.TurnState, self *card.CardState) { s.LogPlay(self) }
+func (EvenBiggerThanThatYellow) NotImplemented()                            {}
+func (EvenBiggerThanThatYellow) Play(s *sim.TurnState, self *sim.CardState) { s.LogPlay(self) }
 
 type EvenBiggerThanThatBlue struct{}
 
-func (EvenBiggerThanThatBlue) ID() ids.CardID           { return ids.EvenBiggerThanThatBlue }
-func (EvenBiggerThanThatBlue) Name() string             { return "Even Bigger Than That!" }
-func (EvenBiggerThanThatBlue) Cost(*card.TurnState) int { return 0 }
-func (EvenBiggerThanThatBlue) Pitch() int               { return 3 }
-func (EvenBiggerThanThatBlue) Attack() int              { return 0 }
-func (EvenBiggerThanThatBlue) Defense() int             { return 0 }
-func (EvenBiggerThanThatBlue) Types() card.TypeSet      { return evenBiggerThanThatTypes }
-func (EvenBiggerThanThatBlue) GoAgain() bool            { return false }
+func (EvenBiggerThanThatBlue) ID() ids.CardID          { return ids.EvenBiggerThanThatBlue }
+func (EvenBiggerThanThatBlue) Name() string            { return "Even Bigger Than That!" }
+func (EvenBiggerThanThatBlue) Cost(*sim.TurnState) int { return 0 }
+func (EvenBiggerThanThatBlue) Pitch() int              { return 3 }
+func (EvenBiggerThanThatBlue) Attack() int             { return 0 }
+func (EvenBiggerThanThatBlue) Defense() int            { return 0 }
+func (EvenBiggerThanThatBlue) Types() card.TypeSet     { return evenBiggerThanThatTypes }
+func (EvenBiggerThanThatBlue) GoAgain() bool           { return false }
 
 // not implemented: Opt + reveal-and-Quicken trigger; gated on damage dealt this turn
-func (EvenBiggerThanThatBlue) NotImplemented()                              {}
-func (EvenBiggerThanThatBlue) Play(s *card.TurnState, self *card.CardState) { s.LogPlay(self) }
+func (EvenBiggerThanThatBlue) NotImplemented()                            {}
+func (EvenBiggerThanThatBlue) Play(s *sim.TurnState, self *sim.CardState) { s.LogPlay(self) }

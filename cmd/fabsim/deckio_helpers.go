@@ -13,11 +13,10 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/deck"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/deckio"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/fabrary"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/mydecks"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 )
 
 // loadExisting reads and deserializes the deck at path. Returns (nil, 0, nil) when the file
@@ -25,7 +24,7 @@ import (
 // Returns (nil, 0, err) when the file exists but can't be read or parsed: callers must NOT
 // treat that as "missing" or they'd silently overwrite a corrupt file with a random deck
 // (looping wrapper scripts would clobber a converged deck after a Ctrl-C mid-write).
-func loadExisting(path string) (*deck.Deck, float64, error) {
+func loadExisting(path string) (*sim.Deck, float64, error) {
 	data, err := os.ReadFile(path)
 	if err != nil {
 		if errors.Is(err, os.ErrNotExist) {
@@ -53,7 +52,7 @@ func loadExisting(path string) (*deck.Deck, float64, error) {
 // Both files are written atomically via writeFileAtomic: data lands in <path>.tmp first,
 // then os.Rename swaps it into place, so a Ctrl-C mid-write can never leave the destination
 // empty or partially written.
-func writeDeck(d *deck.Deck, path string) error {
+func writeDeck(d *sim.Deck, path string) error {
 	d.ApplyDefaults()
 	data, err := deckio.Marshal(d)
 	if err != nil {
@@ -101,7 +100,7 @@ func fabraryPathFor(jsonPath string) string {
 	return jsonPath + ".txt"
 }
 
-// sanitizeLoadedDeck swaps every card.NotImplemented copy in d for a random legal
+// sanitizeLoadedDeck swaps every sim.NotImplemented copy in d for a random legal
 // replacement, prints a warning summary on stderr when any swap was made, and returns the
 // ordered list of swaps. maxCopies caps post-sanitize copies per printing; legal restricts
 // the replacement pool (typically the run's format predicate). Returns nil when the deck
@@ -109,14 +108,14 @@ func fabraryPathFor(jsonPath string) string {
 //
 // The sanitizer mutates d.Cards in place. Callers that care about the pre-sanitize score
 // for a delta warning should capture it before calling this.
-func sanitizeLoadedDeck(d *deck.Deck, maxCopies int, rng *rand.Rand, legal func(card.Card) bool) []deck.NotImplementedReplacement {
+func sanitizeLoadedDeck(d *sim.Deck, maxCopies int, rng *rand.Rand, legal func(sim.Card) bool) []sim.NotImplementedReplacement {
 	replaced := d.SanitizeNotImplemented(maxCopies, rng, legal)
 	if len(replaced) == 0 {
 		return nil
 	}
 	fmt.Fprintf(os.Stderr, "warning: loaded deck contained %d NotImplemented card(s); replacing with legal substitutes:\n", len(replaced))
 	for _, r := range replaced {
-		fmt.Fprintf(os.Stderr, "  -1 %s, +1 %s\n", card.DisplayName(r.From), card.DisplayName(r.To))
+		fmt.Fprintf(os.Stderr, "  -1 %s, +1 %s\n", sim.DisplayName(r.From), sim.DisplayName(r.To))
 	}
 	return replaced
 }
@@ -125,7 +124,7 @@ func sanitizeLoadedDeck(d *deck.Deck, maxCopies int, rng *rand.Rand, legal func(
 // existing deck (eval, diff), both "missing" and "corrupt" are fatal. anneal handles the
 // distinction itself: "missing" is a valid input ("no deck yet, generate one") while
 // "corrupt" needs the loud refusal to overwrite.
-func mustLoadDeck(path string) *deck.Deck {
+func mustLoadDeck(path string) *sim.Deck {
 	d, _, err := loadExisting(path)
 	if err != nil {
 		die("%v", err)

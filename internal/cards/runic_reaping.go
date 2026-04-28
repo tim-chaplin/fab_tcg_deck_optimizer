@@ -26,56 +26,57 @@ package cards
 import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 )
 
 var runicReapingTypes = card.NewTypeSet(card.TypeRuneblade, card.TypeAction)
 
 // runicReapingTargetMatches is the shared predicate for Runic Reaping's two riders: the next
 // Runeblade attack action card (weapons don't qualify).
-func runicReapingTargetMatches(target *card.CardState) bool {
+func runicReapingTargetMatches(target *sim.CardState) bool {
 	t := target.Card.Types()
 	return t.Has(card.TypeRuneblade) && t.IsAttackAction()
 }
 
 type RunicReapingRed struct{}
 
-func (RunicReapingRed) ID() ids.CardID           { return ids.RunicReapingRed }
-func (RunicReapingRed) Name() string             { return "Runic Reaping" }
-func (RunicReapingRed) Cost(*card.TurnState) int { return 1 }
-func (RunicReapingRed) Pitch() int               { return 1 }
-func (RunicReapingRed) Attack() int              { return 0 }
-func (RunicReapingRed) Defense() int             { return 2 }
-func (RunicReapingRed) Types() card.TypeSet      { return runicReapingTypes }
-func (RunicReapingRed) GoAgain() bool            { return true }
-func (c RunicReapingRed) Play(s *card.TurnState, self *card.CardState) {
+func (RunicReapingRed) ID() ids.CardID          { return ids.RunicReapingRed }
+func (RunicReapingRed) Name() string            { return "Runic Reaping" }
+func (RunicReapingRed) Cost(*sim.TurnState) int { return 1 }
+func (RunicReapingRed) Pitch() int              { return 1 }
+func (RunicReapingRed) Attack() int             { return 0 }
+func (RunicReapingRed) Defense() int            { return 2 }
+func (RunicReapingRed) Types() card.TypeSet     { return runicReapingTypes }
+func (RunicReapingRed) GoAgain() bool           { return true }
+func (c RunicReapingRed) Play(s *sim.TurnState, self *sim.CardState) {
 	runicReapingPlay(s, self, c, 3)
 }
 
 type RunicReapingYellow struct{}
 
-func (RunicReapingYellow) ID() ids.CardID           { return ids.RunicReapingYellow }
-func (RunicReapingYellow) Name() string             { return "Runic Reaping" }
-func (RunicReapingYellow) Cost(*card.TurnState) int { return 1 }
-func (RunicReapingYellow) Pitch() int               { return 2 }
-func (RunicReapingYellow) Attack() int              { return 0 }
-func (RunicReapingYellow) Defense() int             { return 2 }
-func (RunicReapingYellow) Types() card.TypeSet      { return runicReapingTypes }
-func (RunicReapingYellow) GoAgain() bool            { return true }
-func (c RunicReapingYellow) Play(s *card.TurnState, self *card.CardState) {
+func (RunicReapingYellow) ID() ids.CardID          { return ids.RunicReapingYellow }
+func (RunicReapingYellow) Name() string            { return "Runic Reaping" }
+func (RunicReapingYellow) Cost(*sim.TurnState) int { return 1 }
+func (RunicReapingYellow) Pitch() int              { return 2 }
+func (RunicReapingYellow) Attack() int             { return 0 }
+func (RunicReapingYellow) Defense() int            { return 2 }
+func (RunicReapingYellow) Types() card.TypeSet     { return runicReapingTypes }
+func (RunicReapingYellow) GoAgain() bool           { return true }
+func (c RunicReapingYellow) Play(s *sim.TurnState, self *sim.CardState) {
 	runicReapingPlay(s, self, c, 2)
 }
 
 type RunicReapingBlue struct{}
 
-func (RunicReapingBlue) ID() ids.CardID           { return ids.RunicReapingBlue }
-func (RunicReapingBlue) Name() string             { return "Runic Reaping" }
-func (RunicReapingBlue) Cost(*card.TurnState) int { return 1 }
-func (RunicReapingBlue) Pitch() int               { return 3 }
-func (RunicReapingBlue) Attack() int              { return 0 }
-func (RunicReapingBlue) Defense() int             { return 2 }
-func (RunicReapingBlue) Types() card.TypeSet      { return runicReapingTypes }
-func (RunicReapingBlue) GoAgain() bool            { return true }
-func (c RunicReapingBlue) Play(s *card.TurnState, self *card.CardState) {
+func (RunicReapingBlue) ID() ids.CardID          { return ids.RunicReapingBlue }
+func (RunicReapingBlue) Name() string            { return "Runic Reaping" }
+func (RunicReapingBlue) Cost(*sim.TurnState) int { return 1 }
+func (RunicReapingBlue) Pitch() int              { return 3 }
+func (RunicReapingBlue) Attack() int             { return 0 }
+func (RunicReapingBlue) Defense() int            { return 2 }
+func (RunicReapingBlue) Types() card.TypeSet     { return runicReapingTypes }
+func (RunicReapingBlue) GoAgain() bool           { return true }
+func (c RunicReapingBlue) Play(s *sim.TurnState, self *sim.CardState) {
 	runicReapingPlay(s, self, c, 1)
 }
 
@@ -83,8 +84,8 @@ func (c RunicReapingBlue) Play(s *card.TurnState, self *card.CardState) {
 // registers the on-hit Runechant trigger, and emits Runic Reaping's chain step (no
 // value contribution — Runic Reaping itself doesn't deal damage; the trigger handler
 // credits whatever runechants get created after the target resolves).
-func runicReapingPlay(s *card.TurnState, selfState *card.CardState, source card.Card, n int) {
-	var target *card.CardState
+func runicReapingPlay(s *sim.TurnState, selfState *sim.CardState, source sim.Card, n int) {
+	var target *sim.CardState
 	for _, pc := range s.CardsRemaining {
 		if runicReapingTargetMatches(pc) {
 			target = pc
@@ -101,14 +102,14 @@ func runicReapingPlay(s *card.TurnState, selfState *card.CardState, source card.
 			break
 		}
 	}
-	s.AddEphemeralAttackTrigger(card.EphemeralAttackTrigger{
+	s.AddEphemeralAttackTrigger(sim.EphemeralAttackTrigger{
 		Source:  source,
 		Matches: runicReapingTargetMatches,
-		Handler: func(s *card.TurnState, target *card.CardState) int {
-			if !card.LikelyToHit(target) {
+		Handler: func(s *sim.TurnState, target *sim.CardState) int {
+			if !sim.LikelyToHit(target) {
 				return 0
 			}
-			return s.CreateAndLogRunechantsOnHit(card.DisplayName(source), card.DisplayName(target.Card), n)
+			return s.CreateAndLogRunechantsOnHit(sim.DisplayName(source), sim.DisplayName(target.Card), n)
 		},
 	})
 	s.LogPlay(selfState)

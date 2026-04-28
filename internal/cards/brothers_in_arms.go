@@ -8,57 +8,58 @@ package cards
 import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 )
 
 var brothersInArmsTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeAttack)
 
 type BrothersInArmsRed struct{}
 
-func (BrothersInArmsRed) ID() ids.CardID           { return ids.BrothersInArmsRed }
-func (BrothersInArmsRed) Name() string             { return "Brothers in Arms" }
-func (BrothersInArmsRed) Cost(*card.TurnState) int { return 2 }
-func (BrothersInArmsRed) Pitch() int               { return 1 }
-func (BrothersInArmsRed) Attack() int              { return 6 }
-func (BrothersInArmsRed) Defense() int             { return 2 }
-func (BrothersInArmsRed) Types() card.TypeSet      { return brothersInArmsTypes }
-func (BrothersInArmsRed) GoAgain() bool            { return false }
+func (BrothersInArmsRed) ID() ids.CardID          { return ids.BrothersInArmsRed }
+func (BrothersInArmsRed) Name() string            { return "Brothers in Arms" }
+func (BrothersInArmsRed) Cost(*sim.TurnState) int { return 2 }
+func (BrothersInArmsRed) Pitch() int              { return 1 }
+func (BrothersInArmsRed) Attack() int             { return 6 }
+func (BrothersInArmsRed) Defense() int            { return 2 }
+func (BrothersInArmsRed) Types() card.TypeSet     { return brothersInArmsTypes }
+func (BrothersInArmsRed) GoAgain() bool           { return false }
 
 // not implemented: pay-{r}-for-+2{d} defence rider (defence-side costs aren't solved)
 func (BrothersInArmsRed) NotImplemented() {}
-func (c BrothersInArmsRed) Play(s *card.TurnState, self *card.CardState) {
+func (c BrothersInArmsRed) Play(s *sim.TurnState, self *sim.CardState) {
 	s.ApplyAndLogEffectiveAttack(self)
 }
 
 type BrothersInArmsYellow struct{}
 
-func (BrothersInArmsYellow) ID() ids.CardID           { return ids.BrothersInArmsYellow }
-func (BrothersInArmsYellow) Name() string             { return "Brothers in Arms" }
-func (BrothersInArmsYellow) Cost(*card.TurnState) int { return 2 }
-func (BrothersInArmsYellow) Pitch() int               { return 2 }
-func (BrothersInArmsYellow) Attack() int              { return 5 }
-func (BrothersInArmsYellow) Defense() int             { return 2 }
-func (BrothersInArmsYellow) Types() card.TypeSet      { return brothersInArmsTypes }
-func (BrothersInArmsYellow) GoAgain() bool            { return false }
+func (BrothersInArmsYellow) ID() ids.CardID          { return ids.BrothersInArmsYellow }
+func (BrothersInArmsYellow) Name() string            { return "Brothers in Arms" }
+func (BrothersInArmsYellow) Cost(*sim.TurnState) int { return 2 }
+func (BrothersInArmsYellow) Pitch() int              { return 2 }
+func (BrothersInArmsYellow) Attack() int             { return 5 }
+func (BrothersInArmsYellow) Defense() int            { return 2 }
+func (BrothersInArmsYellow) Types() card.TypeSet     { return brothersInArmsTypes }
+func (BrothersInArmsYellow) GoAgain() bool           { return false }
 
 // not implemented: pay-{r}-for-+2{d} defence rider (defence-side costs aren't solved)
 func (BrothersInArmsYellow) NotImplemented() {}
-func (c BrothersInArmsYellow) Play(s *card.TurnState, self *card.CardState) {
+func (c BrothersInArmsYellow) Play(s *sim.TurnState, self *sim.CardState) {
 	s.ApplyAndLogEffectiveAttack(self)
 }
 
 type BrothersInArmsBlue struct{}
 
-func (BrothersInArmsBlue) ID() ids.CardID           { return ids.BrothersInArmsBlue }
-func (BrothersInArmsBlue) Name() string             { return "Brothers in Arms" }
-func (BrothersInArmsBlue) Cost(*card.TurnState) int { return 2 }
-func (BrothersInArmsBlue) Pitch() int               { return 3 }
-func (BrothersInArmsBlue) Attack() int              { return 4 }
-func (BrothersInArmsBlue) Defense() int             { return 2 }
-func (BrothersInArmsBlue) Types() card.TypeSet      { return brothersInArmsTypes }
-func (BrothersInArmsBlue) GoAgain() bool            { return false }
+func (BrothersInArmsBlue) ID() ids.CardID          { return ids.BrothersInArmsBlue }
+func (BrothersInArmsBlue) Name() string            { return "Brothers in Arms" }
+func (BrothersInArmsBlue) Cost(*sim.TurnState) int { return 2 }
+func (BrothersInArmsBlue) Pitch() int              { return 3 }
+func (BrothersInArmsBlue) Attack() int             { return 4 }
+func (BrothersInArmsBlue) Defense() int            { return 2 }
+func (BrothersInArmsBlue) Types() card.TypeSet     { return brothersInArmsTypes }
+func (BrothersInArmsBlue) GoAgain() bool           { return false }
 
 // not implemented: pay-{r}-for-+2{d} defence rider (defence-side costs aren't solved)
 func (BrothersInArmsBlue) NotImplemented() {}
-func (c BrothersInArmsBlue) Play(s *card.TurnState, self *card.CardState) {
+func (c BrothersInArmsBlue) Play(s *sim.TurnState, self *sim.CardState) {
 	s.ApplyAndLogEffectiveAttack(self)
 }
