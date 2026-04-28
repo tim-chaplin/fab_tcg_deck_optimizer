@@ -39,19 +39,22 @@ func (c SigilOfTheArknightBlue) Play(s *sim.TurnState, self *sim.CardState) {
 // sigilOfTheArknightReveal implements the handler described in the file docstring. Logs
 // the outcome on every fire — "drew X into hand" on a hit or "revealed X but didn't draw
 // it" on a whiff — so the printout makes the random reveal visible either way. Empty deck
-// is the silent edge case (no card to name).
+// is the silent edge case (no card to name). Pops the top via PopDeckTop on a hit; on a
+// whiff puts the card back via PrependToDeck so the deck order is preserved (both verbs
+// flip the cacheable bit, which is what we want — the reveal outcome depends on shuffle).
 func sigilOfTheArknightReveal(s *sim.TurnState) int {
-	if len(s.Deck) == 0 {
+	top, ok := s.PopDeckTop()
+	if !ok {
 		return 0
 	}
-	top := s.Deck[0]
 	self := sim.DisplayName(SigilOfTheArknightBlue{})
 	if top.Types().IsAttackAction() {
 		s.Revealed = append(s.Revealed, top)
-		s.Deck = s.Deck[1:]
 		s.AddPostTriggerLogEntry(self+" drew "+sim.DisplayName(top)+" into hand", self, 0)
 		return 0
 	}
+	// Whiff — restore the deck top so non-attack reveals leave deck order untouched.
+	s.PrependToDeck(top)
 	s.AddPostTriggerLogEntry(self+" revealed "+sim.DisplayName(top)+" but didn't draw it", self, 0)
 	return 0
 }

@@ -21,9 +21,13 @@ func (e *Evaluator) findBest(hero Hero, weapons []Weapon, hand []Card, incomingD
 	// it, so carryover is the baseline to beat. BestLine starts with every hand card Held and
 	// the arsenal-in card (if any) staying in the slot, so a hand with no Value-adding
 	// partition still reports sensible "nothing played, nothing pitched" assignments.
+	// Cacheable starts true: the no-feasible-line fallback ran no chain and read no hidden
+	// state, so the seed is trivially cacheable. Each leaf's uncacheable bit ORs into a
+	// running sticky and the final !sticky stamps best.Cacheable.
 	best := TurnSummary{
 		BestLine:       make([]CardAssignment, totalN),
 		IncomingDamage: incomingDamage,
+		Cacheable:      true,
 		State: CarryState{
 			Hand:         append([]Card(nil), hand...),
 			Deck:         append([]Card(nil), deck...),
@@ -32,6 +36,7 @@ func (e *Evaluator) findBest(hero Hero, weapons []Weapon, hand []Card, incomingD
 			AuraTriggers: append([]AuraTrigger(nil), priorAuraTriggers...),
 		},
 	}
+	uncacheable := false
 	// bestSwung holds the winning partition's swung weapon names — surfaced on the summary so
 	// the printout can list weapons that swung this turn (weapons have no BestLine entry).
 	var bestSwung []string
@@ -105,7 +110,14 @@ func (e *Evaluator) findBest(hero Hero, weapons []Weapon, hand []Card, incomingD
 			// card") can read len > 0. Arsenal-in can never be Held (roleAllowed bars it).
 			h := gatherHeldCards(hand, rolesBuf[:n], held[:0])
 			arsenalAtChainStart := findArsenalCard(rolesBuf, arsenalCardIn, n)
-			attackDealt, defenseDealt, leftoverRunechants, _, swung, carry, ok := bestAttackWithWeapons(hero, weapons, a, d, p, h, deck, bufs, runechantCarryover, incomingDamage, defenseSum, arsenalInIdx, arsenalDefenderIdx, arsenalAtChainStart, priorAuraTriggers, skipLog)
+			attackDealt, defenseDealt, leftoverRunechants, _, swung, carry, ok, leafUncacheable := bestAttackWithWeapons(hero, weapons, a, d, p, h, deck, bufs, runechantCarryover, incomingDamage, defenseSum, arsenalInIdx, arsenalDefenderIdx, arsenalAtChainStart, priorAuraTriggers, skipLog)
+			// Aggregate per leaf — an infeasible attack chain still surfaces its DR-side
+			// reads (defendersDamage runs before the feasibility gate inside
+			// bestAttackWithWeapons) so a DR scanning the graveyard pins cacheable=false
+			// even when the partition's chain rejects.
+			if leafUncacheable {
+				uncacheable = true
+			}
 			if !ok {
 				return
 			}
@@ -181,6 +193,10 @@ func (e *Evaluator) findBest(hero Hero, weapons []Weapon, hand []Card, incomingD
 	}
 	recurse(0, 0, 0)
 	best.SwungWeapons = bestSwung
+	// Stamp Cacheable last from the OR-aggregated sticky bit so every leaf the search
+	// touched (feasible or rejected) contributes. The post-hoc arsenal promotion below
+	// doesn't run a chain, so it doesn't move the bit.
+	best.Cacheable = !uncacheable
 	// If the arsenal slot is empty after the chain runs, promote one card from State.Hand
 	// into it (deterministic per-hand pick). State.Hand at this point holds the partition's
 	// Held cards plus anything tutored mid-chain; both are equivalent future-turn value, so
@@ -334,31 +350,39 @@ func roleAllowed(r Role, isArsenalSlot, isDefenseReaction bool) bool {
 // resolve first via Play (their ApplyAndLogEffectiveDefense decrements state.IncomingDamage
 // and credits the block, with arcane / runechant riders adding their own Value); plain blocks
 // then consume whatever incoming damage is left, capped per card. Played in isolation — no
-// attack ordering; per-DR TurnState carries Pitched / Deck plus a fresh copy of the defenders
-// list in Graveyard so DRs that scan for banish targets see the same shape across iterations.
+// attack ordering; per-DR TurnState carries Pitched / deck plus a fresh copy of the defenders
+// list in graveyard so DRs that scan for banish targets see the same shape across iterations.
 //
 // arsenalDefenderIdx is the position of the arsenal-in card in defenders when it took the
 // Defend role (-1 otherwise) — used to flag the matching CardState.FromArsenal so
 // EffectiveDefense picks up the ArsenalDefenseBonus rider.
 //
 // state is caller-provided (from attackBufs) and reset per DR. gravBuf is the caller-owned
-// scratch backing state.Graveyard; the returned slice is the (possibly grown) buffer for
+// scratch backing state's graveyard; the returned slice is the (possibly grown) buffer for
 // reuse. The threaded incoming-damage counter persists across the DR loop and into the plain-
 // block loop so DRs see the full incoming pool first (maximising any +1{d} riders) and plain
 // blocks pick up the residual.
-func defendersDamage(defenders, pitched, deck []Card, state *TurnState, gravBuf []Card, cs *CardState, incomingDamage, arsenalDefenderIdx int) (int, []Card) {
+//
+// Returns the per-DR uncacheable status as a sticky bit — once a DR reads deck or graveyard
+// via the accessors, the partition's defense-phase output isn't safe to cache; aggregated up
+// through bestAttackWithWeapons.
+func defendersDamage(defenders, pitched, deck []Card, state *TurnState, gravBuf []Card, cs *CardState, incomingDamage, arsenalDefenderIdx int) (int, []Card, bool) {
 	total := 0
 	remaining := incomingDamage
+	uncacheable := false
 	for i, d := range defenders {
 		if !d.Types().IsDefenseReaction() {
 			continue
 		}
 		gravBuf = append(gravBuf[:0], defenders...)
-		*state = TurnState{Pitched: pitched, Deck: deck, Graveyard: gravBuf, IncomingDamage: remaining}
+		*state = TurnState{Pitched: pitched, deck: deck, graveyard: gravBuf, IncomingDamage: remaining}
 		*cs = CardState{Card: d, FromArsenal: i == arsenalDefenderIdx}
 		d.Play(state, cs)
 		total += state.Value
 		remaining = state.IncomingDamage
+		if !state.IsCacheable() {
+			uncacheable = true
+		}
 	}
 	for _, d := range defenders {
 		if d.Types().IsDefenseReaction() {
@@ -373,7 +397,7 @@ func defendersDamage(defenders, pitched, deck []Card, state *TurnState, gravBuf 
 			remaining -= block
 		}
 	}
-	return total, gravBuf
+	return total, gravBuf, uncacheable
 }
 
 // chainBudget captures the winning phase-split's attack-chain resource state.

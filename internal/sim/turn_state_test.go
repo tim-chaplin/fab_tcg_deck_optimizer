@@ -5,18 +5,18 @@ import (
 	"testing"
 )
 
-// TestDrawOne_AppendsTopAndAdvancesDeck: DrawOne pops the top of Deck and appends it to Hand,
-// preserving draw order for downstream effects.
+// TestDrawOne_AppendsTopAndAdvancesDeck: DrawOne pops the top of the deck and appends it to
+// Hand, preserving draw order for downstream effects.
 func TestDrawOne_AppendsTopAndAdvancesDeck(t *testing.T) {
 	a, b, c := stubCard{name: "a"}, stubCard{name: "b"}, stubCard{name: "c"}
-	s := &TurnState{Deck: []Card{a, b, c}}
+	s := NewTurnState([]Card{a, b, c}, nil)
 
 	s.DrawOne()
-	if got := len(s.Deck); got != 2 {
+	if got := len(s.Deck()); got != 2 {
 		t.Fatalf("Deck len = %d, want 2", got)
 	}
-	if s.Deck[0] != b {
-		t.Errorf("Deck[0] = %v, want b (top advanced past a)", s.Deck[0])
+	if s.Deck()[0] != b {
+		t.Errorf("Deck[0] = %v, want b (top advanced past a)", s.Deck()[0])
 	}
 	if len(s.Hand) != 1 || s.Hand[0] != a {
 		t.Errorf("Hand = %v, want [a]", s.Hand)
@@ -36,8 +36,8 @@ func TestDrawOne_EmptyDeckIsNoOp(t *testing.T) {
 	if len(s.Hand) != 0 {
 		t.Errorf("Hand = %v, want empty on no-deck draw", s.Hand)
 	}
-	if s.Deck != nil {
-		t.Errorf("Deck = %v, want nil", s.Deck)
+	if s.Deck() != nil {
+		t.Errorf("Deck = %v, want nil", s.Deck())
 	}
 }
 
@@ -195,8 +195,9 @@ func TestAddToGraveyard_AppendsInOrder(t *testing.T) {
 	var s TurnState
 	s.AddToGraveyard(a)
 	s.AddToGraveyard(b)
-	if len(s.Graveyard) != 2 || s.Graveyard[0] != a || s.Graveyard[1] != b {
-		t.Errorf("Graveyard = %v, want [a, b]", s.Graveyard)
+	g := s.Graveyard()
+	if len(g) != 2 || g[0] != a || g[1] != b {
+		t.Errorf("Graveyard = %v, want [a, b]", g)
 	}
 }
 
@@ -219,11 +220,13 @@ func TestClashValue_WinTieLose(t *testing.T) {
 		{"empty deck short-circuits", 99, 0, 5, 0},
 	}
 	for _, tc := range cases {
-		var s TurnState
+		var s *TurnState
 		if tc.deckLen > 0 {
-			s.Deck = []Card{stubCard{attack: tc.topAtk}}
+			s = NewTurnState([]Card{stubCard{attack: tc.topAtk}}, nil)
+		} else {
+			s = &TurnState{}
 		}
-		if got := ClashValue(&s, tc.bonus); got != tc.want {
+		if got := ClashValue(s, tc.bonus); got != tc.want {
 			t.Errorf("%s: ClashValue = %d, want %d", tc.name, got, tc.want)
 		}
 	}
@@ -289,5 +292,188 @@ func TestRegisterStartOfTurn_EmptyTextLeavesHandlerAlone(t *testing.T) {
 	}
 	if fired.Log[0].Text != "custom handler text" {
 		t.Errorf("Log[0].Text = %q, want handler's own text", fired.Log[0].Text)
+	}
+}
+
+// TestIsCacheable_DefaultsTrue: a fresh TurnState reports cacheable. The zero value of the
+// internal uncacheable bit is false, so the inverted reader returns true without explicit
+// initialization — important because resetStateForPermutation seeds via TurnState{} and
+// every permutation must start with a clean cacheable bit.
+func TestIsCacheable_DefaultsTrue(t *testing.T) {
+	var s TurnState
+	if !s.IsCacheable() {
+		t.Errorf("zero TurnState should be cacheable, got IsCacheable=false")
+	}
+}
+
+// TestIsCacheable_DeckReadFlips: calling Deck() flips the bit even when only inspecting
+// the slice — a card that reads deck contents binds the chain output to hidden shuffle
+// order regardless of whether it modifies the deck.
+func TestIsCacheable_DeckReadFlips(t *testing.T) {
+	s := NewTurnState([]Card{stubCard{name: "x"}}, nil)
+	_ = s.Deck()
+	if s.IsCacheable() {
+		t.Error("Deck() read should flip IsCacheable to false")
+	}
+}
+
+// TestIsCacheable_GraveyardReadFlips: same as Deck — Graveyard() reads prior-turn graveyard
+// contents, so the read alone makes the chain output uncacheable.
+func TestIsCacheable_GraveyardReadFlips(t *testing.T) {
+	s := NewTurnState(nil, []Card{stubCard{name: "g"}})
+	_ = s.Graveyard()
+	if s.IsCacheable() {
+		t.Error("Graveyard() read should flip IsCacheable to false")
+	}
+}
+
+// TestIsCacheable_PopDeckTopFlips: the verb-based mutator flips the bit + mutates atomically
+// so a card that pops the top can't sneak past the cacheable signal.
+func TestIsCacheable_PopDeckTopFlips(t *testing.T) {
+	a := stubCard{name: "a"}
+	s := NewTurnState([]Card{a, stubCard{name: "b"}}, nil)
+	got, ok := s.PopDeckTop()
+	if !ok || got != a {
+		t.Errorf("PopDeckTop = (%v, %v), want (a, true)", got, ok)
+	}
+	if s.IsCacheable() {
+		t.Error("PopDeckTop should flip IsCacheable to false")
+	}
+}
+
+// TestIsCacheable_PopDeckTopEmptyFlips: even the empty-deck no-op flips — a card that
+// reads "is the deck empty" binds the chain output to that information.
+func TestIsCacheable_PopDeckTopEmptyFlips(t *testing.T) {
+	var s TurnState
+	if got, ok := s.PopDeckTop(); got != nil || ok {
+		t.Errorf("PopDeckTop on empty = (%v, %v), want (nil, false)", got, ok)
+	}
+	if s.IsCacheable() {
+		t.Error("PopDeckTop on empty should still flip IsCacheable to false")
+	}
+}
+
+// TestIsCacheable_PrependToDeckFlips: writes to deck order make the next deck-top reader's
+// answer depend on this chain step, so the bit flips as soon as any deck mutation lands.
+func TestIsCacheable_PrependToDeckFlips(t *testing.T) {
+	s := NewTurnState([]Card{stubCard{name: "x"}}, nil)
+	added := stubCard{name: "y"}
+	s.PrependToDeck(added)
+	if s.IsCacheable() {
+		t.Error("PrependToDeck should flip IsCacheable to false")
+	}
+	if d := s.Deck(); len(d) != 2 || d[0] != added {
+		t.Errorf("Deck = %v, want [y, x] after PrependToDeck", d)
+	}
+}
+
+// TestIsCacheable_TutorFromDeckFlips: tutoring scans deck contents — even a no-match scan
+// flips because the result's "no card found" answer depends on shuffle.
+func TestIsCacheable_TutorFromDeckFlips(t *testing.T) {
+	target := stubCard{name: "target"}
+	deck := []Card{stubCard{name: "a"}, target, stubCard{name: "b"}}
+	s := NewTurnState(append([]Card(nil), deck...), nil)
+	got, ok := s.TutorFromDeck(func(c Card) int {
+		if c == target {
+			return 1
+		}
+		return 0
+	})
+	if !ok || got != target {
+		t.Errorf("TutorFromDeck = (%v, %v), want (target, true)", got, ok)
+	}
+	if s.IsCacheable() {
+		t.Error("TutorFromDeck should flip IsCacheable to false")
+	}
+	// Tutor removes the matched card.
+	if d := s.Deck(); len(d) != 2 {
+		t.Errorf("Deck after tutor = %v, want 2 cards remaining", d)
+	}
+}
+
+// TestIsCacheable_TutorFromDeckNoMatchFlips: the score function returning 0 for every entry
+// still flips — the scan ran, the answer depended on the deck contents.
+func TestIsCacheable_TutorFromDeckNoMatchFlips(t *testing.T) {
+	s := NewTurnState([]Card{stubCard{name: "a"}, stubCard{name: "b"}}, nil)
+	if got, ok := s.TutorFromDeck(func(Card) int { return 0 }); got != nil || ok {
+		t.Errorf("TutorFromDeck no-match = (%v, %v), want (nil, false)", got, ok)
+	}
+	if s.IsCacheable() {
+		t.Error("TutorFromDeck (no match) should still flip IsCacheable to false")
+	}
+}
+
+// TestIsCacheable_BanishFromGraveyardFlips: banishing scans the graveyard — even a pred
+// that never matches still flips.
+func TestIsCacheable_BanishFromGraveyardFlips(t *testing.T) {
+	target := stubCard{name: "target"}
+	s := NewTurnState(nil, []Card{stubCard{name: "a"}, target})
+	got, ok := s.BanishFromGraveyard(func(c Card) bool { return c == target })
+	if !ok || got != target {
+		t.Errorf("BanishFromGraveyard = (%v, %v), want (target, true)", got, ok)
+	}
+	if s.IsCacheable() {
+		t.Error("BanishFromGraveyard should flip IsCacheable to false")
+	}
+	if len(s.Banish) != 1 || s.Banish[0] != target {
+		t.Errorf("Banish = %v, want [target]", s.Banish)
+	}
+}
+
+// TestIsCacheable_BanishFromGraveyardNoMatchFlips: same scan-flip rule on the no-match path.
+func TestIsCacheable_BanishFromGraveyardNoMatchFlips(t *testing.T) {
+	s := NewTurnState(nil, []Card{stubCard{name: "a"}})
+	if got, ok := s.BanishFromGraveyard(func(Card) bool { return false }); got != nil || ok {
+		t.Errorf("BanishFromGraveyard no-match = (%v, %v), want (nil, false)", got, ok)
+	}
+	if s.IsCacheable() {
+		t.Error("BanishFromGraveyard (no match) should still flip IsCacheable to false")
+	}
+}
+
+// TestIsCacheable_AddToGraveyardDoesNotFlip: append-only graveyard adds are deterministic
+// from inputs and cards played, so they don't poison the cacheable bit. Pins this invariant
+// — moving cards into the graveyard mid-chain is the most common write and would inflate
+// false-positive uncacheability if it flipped.
+func TestIsCacheable_AddToGraveyardDoesNotFlip(t *testing.T) {
+	var s TurnState
+	s.AddToGraveyard(stubCard{name: "x"})
+	s.AddToGraveyard(stubCard{name: "y"})
+	if !s.IsCacheable() {
+		t.Error("AddToGraveyard should not flip IsCacheable")
+	}
+}
+
+// TestIsCacheable_DrawOneFlipsThroughPopDeckTop: DrawOne is a thin wrapper over PopDeckTop,
+// so it inherits the flip — pins that the framework helper doesn't cheat by reading the
+// private slice directly.
+func TestIsCacheable_DrawOneFlipsThroughPopDeckTop(t *testing.T) {
+	s := NewTurnState([]Card{stubCard{name: "x"}}, nil)
+	s.DrawOne()
+	if s.IsCacheable() {
+		t.Error("DrawOne should flip IsCacheable to false (inherits via PopDeckTop)")
+	}
+}
+
+// TestIsCacheable_ClashValueFlipsThroughDeck: ClashValue reads s.Deck() to peek the top
+// card; the call should propagate the flip.
+func TestIsCacheable_ClashValueFlipsThroughDeck(t *testing.T) {
+	s := NewTurnState([]Card{stubCard{attack: 7}}, nil)
+	if got := ClashValue(s, 1); got != 1 {
+		t.Errorf("ClashValue = %d, want 1 (top atk 7 wins)", got)
+	}
+	if s.IsCacheable() {
+		t.Error("ClashValue should flip IsCacheable to false (inherits via Deck())")
+	}
+}
+
+// TestIsCacheable_NewTurnStateSeedingDoesNotFlip: the constructor seeds the private deck /
+// graveyard fields without going through the accessor path, so the bit stays default-true
+// after construction. Pins that the seeding contract can't accidentally start a state in
+// uncacheable mode just because the test wrote a deck.
+func TestIsCacheable_NewTurnStateSeedingDoesNotFlip(t *testing.T) {
+	s := NewTurnState([]Card{stubCard{name: "x"}}, []Card{stubCard{name: "y"}})
+	if !s.IsCacheable() {
+		t.Error("NewTurnState seeding should not flip IsCacheable")
 	}
 }

@@ -96,9 +96,11 @@ func AppendGroupedChainEntries(out []string, log []LogEntry) []string {
 	return appendGroupedChainEntries(out, log)
 }
 
-// DefendersDamage re-exports defendersDamage for sim_test consumers.
+// DefendersDamage re-exports defendersDamage for sim_test consumers. Drops the trailing
+// uncacheable bool so call sites that don't care about cacheable propagation stay terse.
 func DefendersDamage(defenders, pitched, deck []Card, state *TurnState, gravBuf []Card, cs *CardState, incomingDamage, arsenalDefenderIdx int) (int, []Card) {
-	return defendersDamage(defenders, pitched, deck, state, gravBuf, cs, incomingDamage, arsenalDefenderIdx)
+	total, gravBuf, _ := defendersDamage(defenders, pitched, deck, state, gravBuf, cs, incomingDamage, arsenalDefenderIdx)
+	return total, gravBuf
 }
 
 // FormatContribution re-exports formatContribution for sim_test consumers.

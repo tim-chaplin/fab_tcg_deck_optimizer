@@ -365,7 +365,7 @@ func processTriggersAtStartOfTurn(queued []AuraTrigger, postDrawDeck []Card) (
 	if len(queued) == 0 {
 		return queued[:0], nil, 0, 0, nil, nil
 	}
-	ts := TurnState{Deck: postDrawDeck}
+	ts := TurnState{deck: postDrawDeck}
 	survivors = queued[:0]
 	for _, t := range queued {
 		// Re-arm the OncePerTurn gate before the start-of-turn fire so handlers that read
@@ -404,7 +404,7 @@ func processTriggersAtStartOfTurn(queued []AuraTrigger, postDrawDeck []Card) (
 		// it in state.Graveyard.
 		ts.AddToGraveyard(t.Self)
 	}
-	return survivors, contribs, damage, ts.Runechants, ts.Revealed, ts.Graveyard
+	return survivors, contribs, damage, ts.Runechants, ts.Revealed, ts.graveyard
 }
 
 // applyTurnResult folds a completed turn's outcome into cross-turn state. The deck loop

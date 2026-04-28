@@ -49,15 +49,14 @@ func moonWishPlay(c sim.Card, s *sim.TurnState, self *sim.CardState) {
 	name := sim.DisplayName(c)
 	// Alt cost: pop a hand card and prepend to deck. Same-turn deck-top readers (the Sun
 	// Kiss tutor's post-resolution DrawOne) see it; the next turn's deal sees it too via
-	// the sim's end-of-turn copy of s.Deck.
+	// the sim's end-of-turn deck snapshot. Routes the prepend through PrependToDeck so the
+	// cacheable bit flips — modifying deck order makes the chain depend on hidden state
+	// (and downstream cards reading the new top will themselves flip).
 	var returned sim.Card
 	if len(s.Hand) > 0 {
 		returned = s.Hand[0]
 		s.Hand = s.Hand[1:]
-		newDeck := make([]sim.Card, 0, len(s.Deck)+1)
-		newDeck = append(newDeck, returned)
-		newDeck = append(newDeck, s.Deck...)
-		s.Deck = newDeck
+		s.PrependToDeck(returned)
 	}
 
 	// Moon Wish's own chain step lands first so subsequent alt-cost / tutor lines + Sun
@@ -71,12 +70,11 @@ func moonWishPlay(c sim.Card, s *sim.TurnState, self *sim.CardState) {
 	if !sim.LikelyToHit(self) {
 		return
 	}
-	sk := bestSunKissInDeck(s.Deck)
-	if sk == nil {
+	sk, ok := s.TutorFromDeck(sunKissTutorPriority)
+	if !ok {
 		s.AddPostTriggerLogEntry(name+" found no Sun Kiss to tutor", name, 0)
 		return
 	}
-	s.Deck = removeFirstByID(s.Deck, sk.ID())
 
 	if !self.EffectiveGoAgain() {
 		// Tutor lands the card in hand; carries to next turn via the sim's end-of-turn
@@ -98,48 +96,21 @@ func moonWishPlay(c sim.Card, s *sim.TurnState, self *sim.CardState) {
 	s.AddToGraveyard(sk)
 }
 
-// bestSunKissInDeck returns the highest-priority Sun Kiss printing present in deck, or nil
-// when no Sun Kiss is in the deck. Priority order is Red > Yellow > Blue: Red heals the
-// most ({3,2,1}{h} by colour), so the highest-power variant present wins.
-func bestSunKissInDeck(deck []sim.Card) sim.Card {
-	var pickedRed, pickedYellow, pickedBlue sim.Card
-	for _, c := range deck {
-		switch c.ID() {
-		case ids.SunKissRed:
-			pickedRed = c
-		case ids.SunKissYellow:
-			if pickedYellow == nil {
-				pickedYellow = c
-			}
-		case ids.SunKissBlue:
-			if pickedBlue == nil {
-				pickedBlue = c
-			}
-		}
-	}
-	switch {
-	case pickedRed != nil:
-		return pickedRed
-	case pickedYellow != nil:
-		return pickedYellow
+// sunKissTutorPriority is the score function passed to TurnState.TutorFromDeck — picks the
+// highest-priority Sun Kiss printing present in the deck. Priority order is Red > Yellow >
+// Blue: Red heals the most ({3,2,1}{h} by colour), so the highest-power variant present
+// wins. A score of 0 (non-Sun-Kiss card) tells TutorFromDeck to skip the entry.
+func sunKissTutorPriority(c sim.Card) int {
+	switch c.ID() {
+	case ids.SunKissRed:
+		return 3
+	case ids.SunKissYellow:
+		return 2
+	case ids.SunKissBlue:
+		return 1
 	default:
-		return pickedBlue
+		return 0
 	}
-}
-
-// removeFirstByID returns deck with the first occurrence of id removed. The returned slice
-// shares no backing storage with deck so subsequent mutations on the returned slice can't
-// poison the per-leaf deck reference.
-func removeFirstByID(deck []sim.Card, id ids.CardID) []sim.Card {
-	for i, c := range deck {
-		if c.ID() == id {
-			out := make([]sim.Card, 0, len(deck)-1)
-			out = append(out, deck[:i]...)
-			out = append(out, deck[i+1:]...)
-			return out
-		}
-	}
-	return deck
 }
 
 type MoonWishRed struct{}

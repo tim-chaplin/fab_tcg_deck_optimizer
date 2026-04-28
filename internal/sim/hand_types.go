@@ -94,6 +94,16 @@ type TurnSummary struct {
 	// the summary so format-time helpers (DR (+N) recompute) can reseed a fresh TurnState
 	// with the same value the simulator used.
 	IncomingDamage int
+	// Cacheable reports whether the chain that produced this summary did not depend on any
+	// hidden state — i.e. no card in the winning chain (or any sibling chain explored
+	// during the search) read or mutated deck / graveyard via TurnState.Deck() / Graveyard()
+	// / PopDeckTop / PrependToDeck / TutorFromDeck / BanishFromGraveyard. Aggregated across
+	// every partition leaf and DR run: if any path during the search touched hidden state,
+	// Cacheable is false. Currently informational — a future hand-eval cache stores results
+	// only when this is true. Defaults to true on the seed TurnSummary so the no-feasible-
+	// line fallback (everything Held, post-hoc arsenal promotion) reports cacheable
+	// trivially: no chain ran, no hidden state was read.
+	Cacheable bool
 }
 
 // TriggerContribution is one start-of-turn AuraTrigger fire: the aura that fired plus the

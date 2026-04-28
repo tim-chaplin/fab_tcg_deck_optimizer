@@ -164,7 +164,7 @@ func formatBlockLine(a CardAssignment) string {
 // can thread it into the next DR.
 func appendDefenseReactionLines(out []string, a CardAssignment, defenders []Card, remaining int) ([]string, int) {
 	state := TurnState{
-		Graveyard:      append([]Card(nil), defenders...),
+		graveyard:      append([]Card(nil), defenders...),
 		IncomingDamage: remaining,
 	}
 	cs := CardState{Card: a.Card, FromArsenal: a.FromArsenal}
