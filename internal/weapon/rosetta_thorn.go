@@ -16,7 +16,7 @@ var rosettaThornTypes = card.NewTypeSet(card.TypeRuneblade, card.TypeWeapon, car
 
 type RosettaThorn struct{}
 
-func (RosettaThorn) ID() ids.CardID           { return ids.RosettaThornID }
+func (RosettaThorn) ID() ids.WeaponID         { return ids.RosettaThornID }
 func (RosettaThorn) Name() string             { return "Rosetta Thorn" }
 func (RosettaThorn) Cost(*card.TurnState) int { return 1 }
 func (RosettaThorn) Pitch() int               { return 0 }

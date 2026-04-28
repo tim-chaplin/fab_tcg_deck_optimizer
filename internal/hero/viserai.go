@@ -4,14 +4,17 @@
 
 package hero
 
-import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+import (
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
+)
 
 var viseraiTypes = card.NewTypeSet(card.TypeRuneblade, card.TypeHero, card.TypeYoung)
 
 // Viserai is Young Viserai.
 type Viserai struct{}
 
-func (Viserai) ID() ID              { return ViseraiID }
+func (Viserai) ID() ids.HeroID      { return ids.ViseraiID }
 func (Viserai) Name() string        { return "Viserai" }
 func (Viserai) Health() int         { return 20 }
 func (Viserai) Intelligence() int   { return 4 }

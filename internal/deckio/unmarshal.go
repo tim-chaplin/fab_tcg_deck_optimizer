@@ -12,7 +12,6 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/deck"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/hand"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/hero"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/weapon"
@@ -29,13 +28,13 @@ func Unmarshal(data []byte) (*deck.Deck, error) {
 }
 
 func fromJSON(dj *DeckJSON) (*deck.Deck, error) {
-	h, ok := hero.ByName(dj.Hero)
+	h, ok := registry.HeroByName(dj.Hero)
 	if !ok {
 		return nil, fmt.Errorf("deckio: unknown hero %q", dj.Hero)
 	}
 	weapons := make([]weapon.Weapon, len(dj.Weapons))
 	for i, name := range dj.Weapons {
-		w, ok := weapon.ByName(name)
+		w, ok := registry.WeaponByName(name)
 		if !ok {
 			return nil, fmt.Errorf("deckio: unknown weapon %q", name)
 		}

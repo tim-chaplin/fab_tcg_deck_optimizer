@@ -23,7 +23,7 @@ func Marshal(d *deck.Deck) ([]byte, error) {
 func toJSON(d *deck.Deck) *DeckJSON {
 	weapons := make([]string, len(d.Weapons))
 	for i, w := range d.Weapons {
-		weapons[i] = card.DisplayName(w)
+		weapons[i] = w.Name()
 	}
 	cardNames := make([]string, len(d.Cards))
 	var pitchCounts PitchCountsJSON

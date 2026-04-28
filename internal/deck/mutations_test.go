@@ -27,7 +27,7 @@ func TestAllMutations_CountsAndShape(t *testing.T) {
 	// — with 2 unique deck IDs that's 1 per absent pair. Both halves absent ⇒ all pairs
 	// contribute. Use legalPool(nil) so the count tracks AllMutations's own filtering
 	// (NotImplemented cards are skipped).
-	loadouts := weaponLoadouts(weapon.All)
+	loadouts := weaponLoadouts(registry.AllWeapons)
 	pool := legalPool(nil)
 	wantWeaponMuts := len(loadouts) - 1
 	wantCardMuts := 2 * (len(pool) - 2)

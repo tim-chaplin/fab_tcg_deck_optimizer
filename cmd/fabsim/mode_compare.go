@@ -156,7 +156,7 @@ func loadoutCounts(d *deck.Deck) map[string]int {
 		out[card.DisplayName(c)]++
 	}
 	for _, w := range d.Weapons {
-		out[card.DisplayName(w)]++
+		out[w.Name()]++
 	}
 	return out
 }
@@ -167,7 +167,7 @@ func loadoutWeaponNames(decks ...*deck.Deck) map[string]struct{} {
 	out := map[string]struct{}{}
 	for _, d := range decks {
 		for _, w := range d.Weapons {
-			out[card.DisplayName(w)] = struct{}{}
+			out[w.Name()] = struct{}{}
 		}
 	}
 	return out

@@ -20,7 +20,7 @@ var nebulaBladeTypes = card.NewTypeSet(card.TypeRuneblade, card.TypeWeapon, card
 
 type NebulaBlade struct{}
 
-func (NebulaBlade) ID() ids.CardID           { return ids.NebulaBladeID }
+func (NebulaBlade) ID() ids.WeaponID         { return ids.NebulaBladeID }
 func (NebulaBlade) Name() string             { return "Nebula Blade" }
 func (NebulaBlade) Cost(*card.TurnState) int { return 2 }
 func (NebulaBlade) Pitch() int               { return 0 }

@@ -608,7 +608,7 @@ func weaponNames(ws []weapon.Weapon) string {
 	}
 	names := make([]string, len(ws))
 	for i, w := range ws {
-		names[i] = card.DisplayName(w)
+		names[i] = w.Name()
 	}
 	return strings.Join(names, ", ")
 }

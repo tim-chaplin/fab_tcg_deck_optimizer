@@ -14,7 +14,7 @@ var annalsOfSutcliffeTypes = card.NewTypeSet(card.TypeRuneblade, card.TypeWeapon
 
 type AnnalsOfSutcliffe struct{}
 
-func (AnnalsOfSutcliffe) ID() ids.CardID           { return ids.AnnalsOfSutcliffeID }
+func (AnnalsOfSutcliffe) ID() ids.WeaponID         { return ids.AnnalsOfSutcliffeID }
 func (AnnalsOfSutcliffe) Name() string             { return "Annals of Sutcliffe" }
 func (AnnalsOfSutcliffe) Cost(*card.TurnState) int { return 3 }
 func (AnnalsOfSutcliffe) Pitch() int               { return 0 }

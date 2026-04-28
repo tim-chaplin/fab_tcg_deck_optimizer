@@ -82,6 +82,29 @@ implemented` riders across the card roster.
   damage-equivalent at creation rather than on fire; leftover tokens at end-of-sim are
   slightly over-credited (rare in practice).
 
+### Weapons are Cards
+
+The Weapon interface includes the Card interface; weapons are sometimes cardlike (they
+have attack power, which can be buffed, they can be granted Go Again, etc.) but are also
+different from cards (they're never played, drawn from the deck, pitched, etc.). They
+should really be treated as a completely separate type. However, parts of the sim currently
+treat Weapons as Cards, so that will have to be carefully disentangled.
+
+BUG: Flying High should grant Go Again to "your next attack", but it only currently applies
+to Action Attack cards.
+
+`internal/registry/ids/weapon_ids.go` aliases `WeaponID = CardID` and anchors the weapon
+constants at `FakeHugeAttack + iota + 1` so they don't collide with card / fake IDs in the
+shared cache slots. Ideally weapons would have their own `WeaponID uint16` type starting at
+1, separate from `CardID`. Blocked by depth: every weapon swing flows through the same
+chain runner as deck cards (`bestSequence` permutes one `[]card.Card` slice; weapons rely
+on `*card.CardState` for `BonusAttack` / `GrantedGoAgain` and call helpers like
+`s.ApplyAndLogEffectiveAttack(self)` / `s.ApplyAndLogRiderOnPlay(self, …)` that read
+`self.Card.*`; the chain step / display name / attacker meta caches are keyed by `CardID`).
+Splitting the type cleanly needs either a slot-tagged permutation that branches per-step
+between card and weapon paths, or a parallel `WeaponState` + parallel helpers — ~200–300
+lines across `card/`, `weapon/`, `hand/` plus every weapon impl.
+
 ### LikelyToHit / EffectiveAttack notes
 
 - `EffectiveAttack` (printed `Card.Attack()` + `BonusAttack`, clamped at 0) is the canonical

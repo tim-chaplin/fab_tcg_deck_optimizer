@@ -3,13 +3,16 @@
 // shapes the simulation.
 package hero
 
-import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+import (
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
+)
 
 // Hero is a FaB hero card. Intelligence is the hand size drawn per turn; Health is starting
 // life total; Types is the hero's class/talent/age set (e.g. Runeblade, Hero, Young) for O(1)
 // lookup. ID is the stable uint16 identifier.
 type Hero interface {
-	ID() ID
+	ID() ids.HeroID
 	Name() string
 	Health() int
 	Intelligence() int

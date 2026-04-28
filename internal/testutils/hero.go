@@ -7,7 +7,7 @@ package testutils
 
 import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/hero"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
 )
 
 // Hero is a minimal hero.Hero. Intel is the Intelligence (hand-draw size) the stub reports;
@@ -17,7 +17,7 @@ type Hero struct {
 	Intel int
 }
 
-func (Hero) ID() hero.ID                                 { return hero.Invalid }
+func (Hero) ID() ids.HeroID                              { return ids.InvalidHero }
 func (Hero) Name() string                                { return "testutils.Hero" }
 func (Hero) Health() int                                 { return 20 }
 func (h Hero) Intelligence() int                         { return h.Intel }

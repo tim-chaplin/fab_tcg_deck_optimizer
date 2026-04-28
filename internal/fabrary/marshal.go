@@ -56,7 +56,7 @@ func Marshal(d *deck.Deck) string {
 func weaponCounts(ws []weapon.Weapon) map[string]int {
 	m := make(map[string]int, len(ws))
 	for _, w := range ws {
-		m[card.DisplayName(w)]++
+		m[w.Name()]++
 	}
 	return m
 }

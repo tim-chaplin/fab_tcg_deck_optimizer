@@ -132,7 +132,7 @@ func (d *Deck) ApplyDefaults() {
 	}
 }
 
-// Random generates a random legal deck for h: a random weapon loadout from weapon.All (one 2H
+// Random generates a random legal deck for h: a random weapon loadout from registry.AllWeapons (one 2H
 // or two 1H; dual-wielding the same weapon allowed) and size cards drawn uniformly from
 // registry.DeckableCards() one at a time, skipping any roll that would exceed maxCopies for the picked
 // ID. Matches the single-slot granularity of deck.AllMutations so the hill-climb can explore
@@ -145,7 +145,7 @@ func Random(h hero.Hero, size, maxCopies int, rng *rand.Rand, legal func(card.Ca
 	if maxCopies < 1 {
 		panic(fmt.Sprintf("deck: Random requires maxCopies >= 1 (got %d)", maxCopies))
 	}
-	loadouts := weaponLoadouts(weapon.All)
+	loadouts := weaponLoadouts(registry.AllWeapons)
 	weapons := loadouts[rng.Intn(len(loadouts))]
 
 	pool := legalPool(legal)

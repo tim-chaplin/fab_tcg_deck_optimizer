@@ -15,7 +15,7 @@ var talisharTypes = card.NewTypeSet(card.TypeGeneric, card.TypeWeapon, card.Type
 
 type Talishar struct{}
 
-func (Talishar) ID() ids.CardID           { return ids.TalisharID }
+func (Talishar) ID() ids.WeaponID         { return ids.TalisharID }
 func (Talishar) Name() string             { return "Talishar, the Lost Prince" }
 func (Talishar) Cost(*card.TurnState) int { return 0 }
 func (Talishar) Pitch() int               { return 0 }

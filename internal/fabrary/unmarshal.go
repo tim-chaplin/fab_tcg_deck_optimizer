@@ -14,7 +14,6 @@ import (
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/deck"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/hero"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/weapon"
 )
@@ -73,7 +72,7 @@ func Unmarshal(text string) (*deck.Deck, map[string]int, error) {
 		}
 		switch section {
 		case "arena":
-			if w, ok := weapon.ByName(name); ok {
+			if w, ok := registry.WeaponByName(name); ok {
 				for i := 0; i < qty; i++ {
 					weapons = append(weapons, w)
 				}
@@ -111,7 +110,7 @@ func Unmarshal(text string) (*deck.Deck, map[string]int, error) {
 	if err := sc.Err(); err != nil {
 		return nil, nil, err
 	}
-	h, ok := hero.ByName(heroName)
+	h, ok := registry.HeroByName(heroName)
 	if !ok {
 		return nil, nil, fmt.Errorf("fabrary: unknown hero %q", heroName)
 	}

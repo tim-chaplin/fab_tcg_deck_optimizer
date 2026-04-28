@@ -547,15 +547,6 @@ const (
 	ZealousBeltingYellow
 	ZealousBeltingBlue
 
-	// Weapon IDs. Weapons aren't in the card registry (decks don't hold weapons) but each gets a
-	// unique ID so every Card implementation has a non-zero ID.
-	AnnalsOfSutcliffeID
-	NebulaBladeID
-	ReapingBladeID
-	RosettaThornID
-	ScepterOfPainID
-	TalisharID
-
 	// Test-only synthetic card IDs. Registered so hand.Best's cache key lookup doesn't panic on
 	// them. Not real FaB cards and must not appear in production decks.
 	FakeRedAttack

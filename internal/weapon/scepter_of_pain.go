@@ -13,7 +13,7 @@ var scepterOfPainTypes = card.NewTypeSet(card.TypeRuneblade, card.TypeWeapon, ca
 
 type ScepterOfPain struct{}
 
-func (ScepterOfPain) ID() ids.CardID           { return ids.ScepterOfPainID }
+func (ScepterOfPain) ID() ids.WeaponID         { return ids.ScepterOfPainID }
 func (ScepterOfPain) Name() string             { return "Scepter of Pain" }
 func (ScepterOfPain) Cost(*card.TurnState) int { return 2 }
 func (ScepterOfPain) Pitch() int               { return 0 }
