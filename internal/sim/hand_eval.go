@@ -56,7 +56,8 @@ func (e *Evaluator) BestWithTriggersSkipLog(hero Hero, weapons []Weapon, hand []
 // allocator after the eval-time slice copies). Different shapes invalidate the cache and
 // allocate fresh — fine for normal use because a single deck eval reuses one shape across
 // every shuffle. Not safe for concurrent use; concurrent callers construct one Evaluator per
-// goroutine (iterate.go's worker pool already does this).
+// goroutine (the parallel-shuffle path inside evaluateImpl already does this — each worker
+// in the fan-out builds its own private Evaluator pointing to ev.cache).
 //
 // The hand-eval cache (cache field) memoizes the optimal partition for each unique
 // (handMultiset, incomingDamage, runechantCarryover, arsenalCardIn) tuple seen during the
@@ -78,49 +79,27 @@ type Evaluator struct {
 	numWorkers int
 }
 
-// NewEvaluator returns a fresh Evaluator with its own private cache and the shuffle loop
-// running single-threaded. Safe for concurrent use across goroutines as long as each
+// NewEvaluator returns a fresh Evaluator with the hand-eval cache enabled and the shuffle
+// loop running single-threaded. Safe for concurrent use across goroutines as long as each
 // goroutine uses its own instance — internal scratch state is not synchronised.
 func NewEvaluator() *Evaluator {
 	return &Evaluator{cache: newEvalCache()}
 }
 
 // NewEvaluatorParallel returns an Evaluator that fans the shuffle loop across numWorkers
-// goroutines. Each spawned worker carries its own attackBufs scratch but they all share
-// the Evaluator's cache. fabsim eval / compare use this path for shuffle-level
-// parallelism on a single deck; iterate-mode prefers mutation-level parallelism via
-// NewEvaluatorWithCache (one shared Cache, N workers each running mutations
-// single-threaded so the shuffle inner loop doesn't serialize behind a barrier).
+// goroutines. Each worker carries its own attackBufs scratch but they all share one
+// thread-safe cache. fabsim eval / anneal / compare use this path; tests that want a
+// deterministic single-RNG run construct via NewEvaluator instead.
 func NewEvaluatorParallel(numWorkers int) *Evaluator {
 	return &Evaluator{cache: newEvalCache(), numWorkers: numWorkers}
 }
 
-// NewEvaluatorWithCache returns an Evaluator pointing at an existing Cache. Used by
-// iterate-mode's mutation-parallel worker pool: each worker constructs its own Evaluator
-// (own attackBufs scratch) pointing to the same Cache so every worker's lookups and
-// stores hit a unified memo, and the round's cache scope ends when IterateParallel
-// returns and drops its reference. The returned Evaluator runs the shuffle loop
-// single-threaded; numWorkers can be set after construction if the caller wants
-// shuffle-level fan-out on top of cache sharing.
-func NewEvaluatorWithCache(c *Cache) *Evaluator {
-	return &Evaluator{cache: c}
-}
-
 // NewEvaluatorWithoutCache returns a fresh Evaluator with the hand-eval cache disabled.
 // Used for the from-scratch path in benchmarks and equivalence tests; production callers
-// route through NewEvaluator / NewEvaluatorParallel / NewEvaluatorWithCache.
+// route through NewEvaluator / NewEvaluatorParallel.
 func NewEvaluatorWithoutCache() *Evaluator {
 	return &Evaluator{}
 }
-
-// Cache is the thread-safe hand-eval cache shared across multiple Evaluators. Use
-// NewCache to construct one and pass it to NewEvaluatorWithCache for each worker that
-// should share the memo. The cache's lookup path takes a read lock for map access
-// (concurrent readers don't serialise); store and reset take the write lock.
-type Cache = evalCache
-
-// NewCache returns a fresh shared cache.
-func NewCache() *Cache { return newEvalCache() }
 
 // ResetCache drops the cached entries while preserving the stats counters. Use between
 // distinct decks when reusing one Evaluator across many of them (the iterate-mode worker
