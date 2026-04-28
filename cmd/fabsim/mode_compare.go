@@ -50,8 +50,8 @@ func runCompare(name1, name2 string, shuffles, incoming, maxCopies int, seed int
 	// compare always uses a fixed -shuffles count so the two decks are scored under matched
 	// conditions. Adaptive stop would let one deck terminate at a different shuffle count
 	// than the other, breaking the apples-to-apples invariant the per-stat comparison rests on.
-	d1 := evaluateAndPersist(resolveDeckPath(name1), shuffles, incoming, maxCopies, seed, fmtValue)
-	d2 := evaluateAndPersist(resolveDeckPath(name2), shuffles, incoming, maxCopies, seed, fmtValue)
+	d1 := evaluateAndPersist(resolveDeckPath(name1), shuffles, incoming, maxCopies, seed, fmtValue, false)
+	d2 := evaluateAndPersist(resolveDeckPath(name2), shuffles, incoming, maxCopies, seed, fmtValue, false)
 	s1, s2 := d1.Stats, d2.Stats
 
 	fmt.Printf("compare: -shuffles=%s -incoming=%d\n", commaInt(shuffles), incoming)

@@ -8,6 +8,29 @@ package sim
 import ()
 
 func (e *Evaluator) findBest(hero Hero, weapons []Weapon, hand []Card, incomingDamage int, deck []Card, runechantCarryover int, arsenalCardIn Card, priorAuraTriggers []AuraTrigger, skipLog bool) TurnSummary {
+	// Cache fast-path. priorAuraTriggers != 0 disables the cache entirely — carryover
+	// triggers add a hidden state input the key doesn't model, and serializing
+	// AuraTrigger.Handler closures isn't worth the complexity. Cache disabled (e.cache nil)
+	// or hand too big to fingerprint also bypass.
+	var cacheKey evalCacheKey
+	cacheUsable := e.cache != nil && len(priorAuraTriggers) == 0
+	if cacheUsable {
+		var keyOK bool
+		cacheKey, keyOK = makeCacheKey(hero, weapons, hand, incomingDamage, runechantCarryover, arsenalCardIn)
+		if !keyOK {
+			cacheUsable = false
+		}
+	}
+	if cacheUsable {
+		if entry, ok := e.cache.lookup(cacheKey); ok {
+			e.cache.hits++
+			return e.replayBest(entry, hero, weapons, hand, incomingDamage, deck, runechantCarryover, arsenalCardIn, skipLog)
+		}
+		e.cache.misses++
+	} else if e.cache != nil && len(priorAuraTriggers) > 0 {
+		e.cache.skipsTriggers++
+	}
+
 	n := len(hand)
 	// The partition recurse treats the arsenal-in card as an extra entry at index n with a
 	// restricted role menu (Arsenal / Attack / Defend), so everything about it is decided inside
@@ -203,6 +226,20 @@ func (e *Evaluator) findBest(hero Hero, weapons []Weapon, hand []Card, incomingD
 	// the promotion picks across the combined pool.
 	if best.State.Arsenal == nil {
 		promoteRandomHandCardToArsenal(&best, hand, arsenalCardIn)
+	}
+	// Cache store happens after post-hoc arsenal promotion so the cached BestLine reflects
+	// final roles (one Held entry may have flipped to Arsenal). Only stores when the chain
+	// reported Cacheable=true at end of search — uncacheable results would be unsafe to
+	// reuse for a future call with the same key but different deck contents.
+	if cacheUsable {
+		if best.Cacheable {
+			e.cache.store(cacheKey, evalCacheEntry{
+				line:         append([]CardAssignment(nil), best.BestLine...),
+				swungWeapons: append([]string(nil), best.SwungWeapons...),
+			})
+		} else {
+			e.cache.uncacheable++
+		}
 	}
 	return best
 }
