@@ -25,5 +25,5 @@ func (TestOfStrengthRed) GoAgain() bool           { return false }
 func (TestOfStrengthRed) NotImplemented() {}
 func (TestOfStrengthRed) Play(s *sim.TurnState, self *sim.CardState) {
 	s.ApplyAndLogEffectiveDefense(self)
-	sim.ClashValue(s, sim.GoldTokenValue)
+	s.ClashValue(sim.GoldTokenValue)
 }

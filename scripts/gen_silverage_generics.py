@@ -256,8 +256,8 @@ BLOCKS_NO_RIDER = {
 MODELED_BLOCKS = {
     "Test of Strength": dict(
         helper="",
-        call="card.ClashValue(s, card.GoldTokenValue)",
-        simp="Rider modelled: Gold token to the Clash winner, staked at card.GoldTokenValue via card.ClashValue.",
+        call="s.ClashValue(card.GoldTokenValue)",
+        simp="Rider modelled: Gold token to the Clash winner, staked at card.GoldTokenValue via TurnState.ClashValue.",
     ),
 }
 

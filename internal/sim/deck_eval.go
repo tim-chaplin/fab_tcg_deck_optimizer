@@ -401,8 +401,10 @@ func processTriggersAtStartOfTurn(queued []AuraTrigger, postDrawDeck []Card) (
 			continue
 		}
 		// Aura destroyed — Self joins the start-of-turn graveyard so subsequent handlers see
-		// it in state.Graveyard.
-		ts.AddToGraveyard(t.Self)
+		// it via Graveyard(). Direct field write because this is framework-internal
+		// trigger bookkeeping, not card-driven, so the cacheable bit doesn't move; the
+		// trigger handler's own reads (if any) flipped it already.
+		ts.graveyard = append(ts.graveyard, t.Self)
 	}
 	return survivors, contribs, damage, ts.Runechants, ts.Revealed, ts.graveyard
 }

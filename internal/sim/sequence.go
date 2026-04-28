@@ -245,7 +245,10 @@ func fireAttackActionTriggers(state *TurnState, triggeringCard Card) {
 		t.FiredThisTurn = true
 		t.Count--
 		if t.Count <= 0 {
-			state.AddToGraveyard(t.Self)
+			// Direct field write — the framework destroying an exhausted aura is
+			// deterministic from cards played, not a card-driven content read, so no
+			// cacheable flip.
+			state.graveyard = append(state.graveyard, t.Self)
 			continue
 		}
 		dst = append(dst, t)

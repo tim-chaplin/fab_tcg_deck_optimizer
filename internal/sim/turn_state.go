@@ -80,8 +80,11 @@ type TurnState struct {
 	// graveyard is cards that have entered the graveyard this turn — every card played or
 	// blocked lands here after resolving. Pitched cards do not (they recycle to deck
 	// bottom). Unexported for the same reason as deck: cards reach it only via Graveyard()
-	// / BanishFromGraveyard (both flip uncacheable) or AddToGraveyard (no flip — append is
-	// deterministic from inputs and cards played).
+	// / BanishFromGraveyard / AddToGraveyard, all of which flip uncacheable. Framework
+	// code in this package writes graveyard directly (the dispatcher's "card resolved →
+	// non-persistent goes to graveyard" rule, fireAttackActionTriggers's aura-destroy on
+	// count zero, processTriggersAtStartOfTurn's start-of-turn trigger destroy) so the
+	// non-card-driven append doesn't poison cacheable.
 	graveyard []Card
 	// Banish holds cards moved into the banished zone this turn (e.g. an aura-banish-for-
 	// arcane rider).
@@ -359,7 +362,7 @@ func (s *TurnState) HasPlayedOrCreatedAura() bool {
 // anything below 5 loses (credit -bonus). Returns 0 when the deck is empty. Reading the
 // deck top through Deck() flips IsCacheable to false — a clash result depends on hidden
 // shuffle order.
-func ClashValue(s *TurnState, bonus int) int {
+func (s *TurnState) ClashValue(bonus int) int {
 	deck := s.Deck()
 	if len(deck) == 0 {
 		return 0
@@ -545,13 +548,15 @@ func (s *TurnState) ApplyAndLogRiderOnHit(self *CardState, text string, n int) i
 	return s.ApplyAndLogRiderOnPlay(self, text, n)
 }
 
-// AddToGraveyard appends c to graveyard so later-resolving cards see it. Persistent-type
-// cards (Auras, Items) don't enter the graveyard on play, so effects that destroy or banish
-// themselves mid-chain route through here to make the move visible to downstream readers.
-// Doesn't flip IsCacheable — append is deterministic from inputs and cards played, so the
-// resulting graveyard contents are recoverable from the cache key without reading hidden
-// state.
+// AddToGraveyard appends c to graveyard so later-resolving cards see it. Used by cards
+// running a mini-dispatcher inline (Moon Wish's go-again Sun Kiss play) that need to route
+// the inline-played card through the same "non-persistent → graveyard" rule the framework
+// dispatcher applies. Flips IsCacheable to false so the convention "every public accessor
+// that touches deck / graveyard flips cacheable" stays universal — framework code that
+// graveyards a played card writes s.graveyard directly (same package, no flip) and only
+// card-driven calls reach this method, so the flip is sound and conservative.
 func (s *TurnState) AddToGraveyard(c Card) {
+	s.uncacheable = true
 	s.graveyard = append(s.graveyard, c)
 }
 

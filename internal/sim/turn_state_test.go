@@ -226,7 +226,7 @@ func TestClashValue_WinTieLose(t *testing.T) {
 		} else {
 			s = &TurnState{}
 		}
-		if got := ClashValue(s, tc.bonus); got != tc.want {
+		if got := s.ClashValue(tc.bonus); got != tc.want {
 			t.Errorf("%s: ClashValue = %d, want %d", tc.name, got, tc.want)
 		}
 	}
@@ -431,16 +431,16 @@ func TestIsCacheable_BanishFromGraveyardNoMatchFlips(t *testing.T) {
 	}
 }
 
-// TestIsCacheable_AddToGraveyardDoesNotFlip: append-only graveyard adds are deterministic
-// from inputs and cards played, so they don't poison the cacheable bit. Pins this invariant
-// — moving cards into the graveyard mid-chain is the most common write and would inflate
-// false-positive uncacheability if it flipped.
-func TestIsCacheable_AddToGraveyardDoesNotFlip(t *testing.T) {
+// TestIsCacheable_AddToGraveyardFlips: card-driven graveyard adds flip cacheable so the
+// universal "every public deck/graveyard accessor flips" convention holds. The only card
+// that calls AddToGraveyard today (Moon Wish's go-again Sun Kiss play) already flipped
+// via TutorFromDeck, so the additional flip is benign — but pinning it here keeps the
+// convention consistent for future cards.
+func TestIsCacheable_AddToGraveyardFlips(t *testing.T) {
 	var s TurnState
 	s.AddToGraveyard(stubCard{name: "x"})
-	s.AddToGraveyard(stubCard{name: "y"})
-	if !s.IsCacheable() {
-		t.Error("AddToGraveyard should not flip IsCacheable")
+	if s.IsCacheable() {
+		t.Error("AddToGraveyard should flip IsCacheable to false")
 	}
 }
 
@@ -459,7 +459,7 @@ func TestIsCacheable_DrawOneFlipsThroughPopDeckTop(t *testing.T) {
 // card; the call should propagate the flip.
 func TestIsCacheable_ClashValueFlipsThroughDeck(t *testing.T) {
 	s := NewTurnState([]Card{stubCard{attack: 7}}, nil)
-	if got := ClashValue(s, 1); got != 1 {
+	if got := s.ClashValue(1); got != 1 {
 		t.Errorf("ClashValue = %d, want 1 (top atk 7 wins)", got)
 	}
 	if s.IsCacheable() {
