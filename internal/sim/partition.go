@@ -24,10 +24,10 @@ func (e *Evaluator) findBest(hero Hero, weapons []Weapon, hand []Card, incomingD
 	}
 	if cacheUsable {
 		if entry, ok := e.cache.lookup(cacheKey); ok {
-			e.cache.hits++
+			e.cache.hits.Add(1)
 			return e.replayBest(entry, hero, weapons, hand, incomingDamage, deck, runechantCarryover, arsenalCardIn, priorAuraTriggers, skipLog)
 		}
-		e.cache.misses++
+		e.cache.misses.Add(1)
 	}
 
 	n := len(hand)
@@ -207,7 +207,7 @@ func (e *Evaluator) findBest(hero Hero, weapons []Weapon, hand []Card, incomingD
 				swungWeapons: append([]string(nil), best.SwungWeapons...),
 			})
 		} else {
-			e.cache.uncacheable++
+			e.cache.uncacheable.Add(1)
 		}
 	}
 	return best

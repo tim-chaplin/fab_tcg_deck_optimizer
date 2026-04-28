@@ -89,26 +89,31 @@ func NewEvaluatorWithoutCache() *Evaluator {
 // distinct decks when reusing one Evaluator across many of them (the iterate-mode worker
 // pool's per-mutation loop): entries from one deck rarely help another — different card
 // sets produce different hand multisets — so dropping them at deck boundaries caps memory
-// at one-deck's-worth of entries. No-op when caching is disabled.
+// at one-deck's-worth of entries. No-op when caching is disabled. Routes through the
+// cache's reset method so the write lock guards against concurrent lookups in a parallel-
+// shuffle worker pool.
 func (e *Evaluator) ResetCache() {
 	if e.cache != nil {
-		// Drop the map entirely; lookup() handles a nil entries map and store() lazily
-		// re-allocates on the next miss.
-		e.cache.entries = nil
+		e.cache.reset()
 	}
 }
 
 // CacheStats returns a snapshot of the Evaluator's cache counters. Returns a zero-valued
-// CacheStats when the Evaluator was constructed without a cache.
+// CacheStats when the Evaluator was constructed without a cache. Reads atomic counters
+// without taking the entries lock; the entries-count read takes the read lock briefly to
+// avoid racing a concurrent reset.
 func (e *Evaluator) CacheStats() CacheStats {
 	if e.cache == nil {
 		return CacheStats{}
 	}
+	e.cache.mu.RLock()
+	entries := len(e.cache.entries)
+	e.cache.mu.RUnlock()
 	return CacheStats{
-		Hits:        e.cache.hits,
-		Misses:      e.cache.misses,
-		Uncacheable: e.cache.uncacheable,
-		Entries:     len(e.cache.entries),
+		Hits:        int(e.cache.hits.Load()),
+		Misses:      int(e.cache.misses.Load()),
+		Uncacheable: int(e.cache.uncacheable.Load()),
+		Entries:     entries,
 	}
 }
 
