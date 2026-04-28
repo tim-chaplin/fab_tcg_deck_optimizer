@@ -7,6 +7,8 @@ package sim
 // does after the search loop, so the resulting summary is byte-identical to a full
 // from-scratch Best call.
 
+import "fmt"
+
 // replayBest is the cache-hit body. Parallels findBest's miss path but runs only one
 // partition: the one whose roles entry caches. Caller has already verified the key is
 // valid (priorAuraTriggers empty, hand size in bounds, key matches an existing entry).
@@ -40,9 +42,14 @@ func (e *Evaluator) replayBest(
 	rolesBuf := bufs.rolesBuf[:totalN]
 	postPromotedFromHeld := -1 // index in `hand` of the post-hoc-promoted Held card, -1 if no promotion happened
 	if !mapCachedRolesToHand(entry.line, hand, arsenalCardIn, rolesBuf, &postPromotedFromHeld) {
-		// Multiset mismatch — should never happen because the cache key locked it down.
-		// Fall through to a full search rather than risk an inconsistent state.
-		return e.findBestUncached(hero, weapons, hand, incomingDamage, deck, runechantCarryover, arsenalCardIn, nil, skipLog)
+		// Multiset mismatch can't happen by construction — the cache key sorts hand IDs
+		// and the entry was stored under that exact key, so a hit means the multisets are
+		// identical. Reaching here indicates a bug somewhere (key collision, cache
+		// corruption, mid-call mutation of cachedLine, etc.) that's already compromised
+		// correctness; panic loudly so the operator notices instead of falling back to a
+		// silent re-search that hides the cache bug.
+		panic(fmt.Sprintf("replayBest: mapCachedRolesToHand failed despite cache hit — cache invariant violated (hand=%d, cachedLine=%d, arsenal=%v)",
+			len(hand), len(entry.line), arsenalCardIn != nil))
 	}
 
 	// The cached partition tells us which cards Pitched / Attacked / Defended / Held /
@@ -109,10 +116,14 @@ func (e *Evaluator) replayBest(
 		arsenalAtChainStart, nil, skipLog,
 	)
 	if !ok {
-		// The cached partition is no longer feasible against the current inputs. This
-		// shouldn't happen given the cache key (same multiset, same constants), but if
-		// it does we fall back to a from-scratch search to maintain correctness.
-		return e.findBestUncached(hero, weapons, hand, incomingDamage, deck, runechantCarryover, arsenalCardIn, nil, skipLog)
+		// Infeasible-partition replay can't happen by construction — the cached entry was
+		// only stored after best.Cacheable=true, which means a feasible partition was
+		// found AND no leaf read deck/graveyard. Reaching here means either the cache
+		// stored an infeasible result (bug), or the inputs that should be deterministic
+		// (resourceBudget, costs) somehow shifted. Panic so the operator notices rather
+		// than silently re-searching and hiding a real correctness bug.
+		panic(fmt.Sprintf("replayBest: cached partition is infeasible — cache invariant violated (hand=%d, runechantCarryover=%d, incomingDamage=%d)",
+			len(hand), runechantCarryover, incomingDamage))
 	}
 
 	// Build the TurnSummary. BestLine cards come from the new call's hand (so the printout
@@ -142,7 +153,8 @@ func (e *Evaluator) replayBest(
 
 // mapCachedRolesToHand walks entry.line and the new call's hand, assigning each hand /
 // arsenal-in card a role from the cached entry by ID. Returns false on multiset mismatch
-// (the cache key normally prevents this; a false return means "fall back to uncached").
+// — a should-never-happen condition because the cache key locks the multiset down;
+// replayBest panics on a false return so any cache invariant violation is loud.
 //
 // The arsenal-in card (if present) maps to the cached entry whose FromArsenal is true.
 // Hand cards consume the remaining ID-matched roles in order. postPromotedFromHeld is set
@@ -200,17 +212,3 @@ func mapCachedRolesToHand(cachedLine []CardAssignment, hand []Card, arsenalCardI
 	return true
 }
 
-// findBestUncached runs the original from-scratch search regardless of the cache. Used
-// as a fallback from replayBest when the cached entry can't be projected onto the new
-// call's hand (a should-never-happen invariant violation we recover from rather than
-// panic). Disabling the cache for this one call avoids re-storing the same entry.
-func (e *Evaluator) findBestUncached(
-	hero Hero, weapons []Weapon, hand []Card,
-	incomingDamage int, deck []Card, runechantCarryover int,
-	arsenalCardIn Card, priorAuraTriggers []AuraTrigger, skipLog bool,
-) TurnSummary {
-	saved := e.cache
-	e.cache = nil
-	defer func() { e.cache = saved }()
-	return e.findBest(hero, weapons, hand, incomingDamage, deck, runechantCarryover, arsenalCardIn, priorAuraTriggers, skipLog)
-}
