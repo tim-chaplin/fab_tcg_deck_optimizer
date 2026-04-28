@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"math"
 	"math/rand"
+	"sort"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
 )
@@ -439,7 +440,13 @@ func applyTurnResult(play TurnSummary, buf []Card, head, tail *int, nextHeld []C
 
 // pitchedFromBestLine returns the cards in BestLine assigned the Pitch role (excluding the
 // arsenal-in slot, which never recycles into the deck). Used by applyTurnResult to put
-// pitched cards on the deck bottom per FaB's end-of-turn pitch-zone-to-deck rule.
+// pitched cards on the deck bottom per FaB's end-of-turn pitch-zone-to-deck rule. Sorted
+// by ID so the deck-bottom recycle order is canonical-by-multiset rather than dependent
+// on BestLine positional ordering — a same-multiset partition produced by the cache-
+// replay path may have different positional roles than the from-scratch search would
+// pick (different tie-break winner among optimal partitions), and without canonical
+// sorting the two paths' recycled decks would diverge by card position even though the
+// chain output is identical.
 func pitchedFromBestLine(line []CardAssignment) []Card {
 	var out []Card
 	for _, a := range line {
@@ -450,6 +457,7 @@ func pitchedFromBestLine(line []CardAssignment) []Card {
 			out = append(out, a.Card)
 		}
 	}
+	sort.Slice(out, func(i, j int) bool { return out[i].ID() < out[j].ID() })
 	return out
 }
 

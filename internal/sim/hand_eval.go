@@ -57,16 +57,54 @@ func (e *Evaluator) BestWithTriggersSkipLog(hero Hero, weapons []Weapon, hand []
 // allocate fresh — fine for normal use because a single deck eval reuses one shape across
 // every shuffle. Not safe for concurrent use; concurrent callers construct one Evaluator per
 // goroutine (iterate.go's worker pool already does this).
+//
+// The hand-eval cache (cache field) memoizes the optimal partition for each unique
+// (handMultiset, incomingDamage, runechantCarryover, arsenalCardIn) tuple seen during the
+// Evaluator's lifetime. On a hit, Best skips the partition search and replays the chain
+// against the cached BestLine; on a miss, the search runs and the result is stored when
+// the chain didn't depend on hidden state. nil disables caching — used by benchmark and
+// test helpers that want the from-scratch path.
 type Evaluator struct {
 	cachedBufs     *attackBufs
 	cachedHandSize int
 	cachedWeapons  []Weapon
+	cache          *evalCache
 }
 
-// NewEvaluator returns a fresh Evaluator. Safe for concurrent use across goroutines as long
-// as each goroutine uses its own instance — internal scratch state is not synchronised.
-func NewEvaluator() *Evaluator { return &Evaluator{} }
+// NewEvaluator returns a fresh Evaluator with the hand-eval cache enabled. Safe for
+// concurrent use across goroutines as long as each goroutine uses its own instance —
+// internal scratch state is not synchronised.
+func NewEvaluator() *Evaluator {
+	return &Evaluator{cache: newEvalCache()}
+}
+
+// NewEvaluatorWithoutCache returns a fresh Evaluator with the hand-eval cache disabled.
+// Used for the from-scratch path in benchmarks and equivalence tests; production callers
+// route through NewEvaluator.
+func NewEvaluatorWithoutCache() *Evaluator {
+	return &Evaluator{}
+}
+
+// CacheStats returns a snapshot of the Evaluator's cache counters. Returns a zero-valued
+// CacheStats when the Evaluator was constructed without a cache.
+func (e *Evaluator) CacheStats() CacheStats {
+	if e.cache == nil {
+		return CacheStats{}
+	}
+	return CacheStats{
+		Hits:          e.cache.hits,
+		Misses:        e.cache.misses,
+		SkipsTriggers: e.cache.skipsTriggers,
+		Uncacheable:   e.cache.uncacheable,
+		Entries:       len(e.cache.entries),
+	}
+}
 
 // sharedEvaluator backs the package-level Best — single-threaded callers don't need to
-// construct their own.
-var sharedEvaluator = NewEvaluator()
+// construct their own. Caching is OFF here: the cache key omits incomingDamage on the
+// premise that an Evaluator's lifetime spans calls at constant incomingDamage, which is
+// true for production callers (each constructs their own Evaluator at a fixed incoming)
+// but NOT for the test suite, which exercises Best at many different incoming values
+// against the same package-level entry point. Tests that want cache behaviour construct
+// their own Evaluator via NewEvaluator.
+var sharedEvaluator = NewEvaluatorWithoutCache()

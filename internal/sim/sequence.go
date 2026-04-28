@@ -337,6 +337,12 @@ func (ctx *sequenceContext) bestSequence(attackers []Card) (int, int, bool) {
 		if ctx.hasAttackPitches && ctx.resourceBudget >= ctx.maxAttackPitch {
 			return 0, 0, false
 		}
+		// Empty-chain leaves still need a populated CarryState — the cache-replay path
+		// adopts ctx.carryWinner directly and the snapshot must reflect the held cards in
+		// state.Hand so post-hoc arsenal promotion has something to pick from. Reset+snapshot
+		// mirrors the per-permutation work eval() does for n>0 chains.
+		ctx.resetStateForPermutation()
+		ctx.carryWinner = snapshotCarry(ctx.bufs.state)
 		return 0, ctx.runechantCarryover, true
 	}
 	pcBuf := ctx.bufs.pcBuf[:n]

@@ -8,6 +8,29 @@ package sim
 import ()
 
 func (e *Evaluator) findBest(hero Hero, weapons []Weapon, hand []Card, incomingDamage int, deck []Card, runechantCarryover int, arsenalCardIn Card, priorAuraTriggers []AuraTrigger, skipLog bool) TurnSummary {
+	// Cache fast-path. priorAuraTriggers != 0 disables the cache entirely — carryover
+	// triggers add a hidden state input the key doesn't model, and serializing
+	// AuraTrigger.Handler closures isn't worth the complexity. Cache disabled (e.cache nil)
+	// or hand too big to fingerprint also bypass.
+	var cacheKey evalCacheKey
+	cacheUsable := e.cache != nil && len(priorAuraTriggers) == 0
+	if cacheUsable {
+		var keyOK bool
+		cacheKey, keyOK = makeCacheKey(hero, weapons, hand, runechantCarryover, arsenalCardIn)
+		if !keyOK {
+			cacheUsable = false
+		}
+	}
+	if cacheUsable {
+		if entry, ok := e.cache.lookup(cacheKey); ok {
+			e.cache.hits++
+			return e.replayBest(entry, hero, weapons, hand, incomingDamage, deck, runechantCarryover, arsenalCardIn, skipLog)
+		}
+		e.cache.misses++
+	} else if e.cache != nil && len(priorAuraTriggers) > 0 {
+		e.cache.skipsTriggers++
+	}
+
 	n := len(hand)
 	// The partition recurse treats the arsenal-in card as an extra entry at index n with a
 	// restricted role menu (Arsenal / Attack / Defend), so everything about it is decided inside
@@ -71,46 +94,16 @@ func (e *Evaluator) findBest(hero Hero, weapons []Weapon, hand []Card, incomingD
 	addsFutureValue := bufs.addsFutureValueBuf[:totalN]
 
 	hasReactions := fillPartitionPerCardBufs(hand, n, totalN, arsenalCardIn, pvals, dvals, isDR, addsFutureValue)
-	pitched := bufs.pitchedBuf
-	attackers := bufs.attackersBuf
-	defenders := bufs.defendersBuf
-	held := bufs.heldBuf
 
 	var recurse func(i, pitchSum, defenseSum int)
 	recurse = func(i, pitchSum, defenseSum int) {
 		if i == totalN {
-			// Group roles into played / pitched / defending buckets. Iterates the hand (size n),
-			// then layers in the arsenal slot (index n) based on its assigned role. Arsenal-role
-			// cards contribute nothing this turn whether they came from hand or the slot. Always
-			// populate the defenders slice — plain blocks credit their contribution through
-			// defendersDamage's per-card cap, and DRs scan defenders as a graveyard seed for
-			// banish-target effects.
-			p, a, d := groupByRoleInto(hand, rolesBuf[:n], pitched[:0], attackers[:0], defenders[:0])
-			if arsenalCardIn != nil {
-				switch rolesBuf[n] {
-				case Attack:
-					a = append(a, arsenalCardIn)
-				case Defend:
-					d = append(d, arsenalCardIn)
-				}
-			}
-			// Arsenal-in is appended last to a / d above, so its index is len(slice)-1 when
-			// present in the chain. -1 means no arsenal-in card in that bucket (either no
-			// arsenal-in card at all, or it took a different role).
-			arsenalInIdx := -1
-			if arsenalCardIn != nil && rolesBuf[n] == Attack {
-				arsenalInIdx = len(a) - 1
-			}
-			arsenalDefenderIdx := -1
-			if arsenalCardIn != nil && rolesBuf[n] == Defend {
-				arsenalDefenderIdx = len(d) - 1
-			}
-			// Held cards (hand cards left without a Pitch / Attack / Defend role) thread
-			// through to TurnState.Hand so alt-cost effects (e.g. Moon Wish's "use a hand
-			// card") can read len > 0. Arsenal-in can never be Held (roleAllowed bars it).
-			h := gatherHeldCards(hand, rolesBuf[:n], held[:0])
-			arsenalAtChainStart := findArsenalCard(rolesBuf, arsenalCardIn, n)
-			attackDealt, defenseDealt, leftoverRunechants, _, swung, carry, ok, leafCacheable := bestAttackWithWeapons(hero, weapons, a, d, p, h, deck, bufs, runechantCarryover, incomingDamage, defenseSum, arsenalInIdx, arsenalDefenderIdx, arsenalAtChainStart, priorAuraTriggers, skipLog)
+			attackDealt, defenseDealt, leftoverRunechants, swung, carry, ok, leafCacheable, arsenalAtChainStart := e.evaluatePartition(
+				hero, weapons, hand, deck, arsenalCardIn,
+				rolesBuf, n, bufs,
+				runechantCarryover, incomingDamage, defenseSum,
+				priorAuraTriggers, skipLog,
+			)
 			// Aggregate per leaf — an infeasible attack chain still surfaces its DR-side
 			// reads (defendersDamage runs before the feasibility gate inside
 			// bestAttackWithWeapons) so a DR scanning the graveyard pins cacheable=false
@@ -203,6 +196,20 @@ func (e *Evaluator) findBest(hero Hero, weapons []Weapon, hand []Card, incomingD
 	// the promotion picks across the combined pool.
 	if best.State.Arsenal == nil {
 		promoteRandomHandCardToArsenal(&best, hand, arsenalCardIn)
+	}
+	// Cache store happens after post-hoc arsenal promotion so the cached BestLine reflects
+	// final roles (one Held entry may have flipped to Arsenal). Only stores when the chain
+	// reported Cacheable=true at end of search — uncacheable results would be unsafe to
+	// reuse for a future call with the same key but different deck contents.
+	if cacheUsable {
+		if best.Cacheable {
+			e.cache.store(cacheKey, evalCacheEntry{
+				line:         append([]CardAssignment(nil), best.BestLine...),
+				swungWeapons: append([]string(nil), best.SwungWeapons...),
+			})
+		} else {
+			e.cache.uncacheable++
+		}
 	}
 	return best
 }
@@ -455,3 +462,4 @@ func containsDefenseReaction(cards []Card) bool {
 	}
 	return false
 }
+
