@@ -16,7 +16,7 @@ func (e *Evaluator) findBest(hero Hero, weapons []Weapon, hand []Card, incomingD
 	cacheUsable := e.cache != nil && len(priorAuraTriggers) == 0
 	if cacheUsable {
 		var keyOK bool
-		cacheKey, keyOK = makeCacheKey(hero, weapons, hand, incomingDamage, runechantCarryover, arsenalCardIn)
+		cacheKey, keyOK = makeCacheKey(hero, weapons, hand, runechantCarryover, arsenalCardIn)
 		if !keyOK {
 			cacheUsable = false
 		}

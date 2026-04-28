@@ -101,5 +101,10 @@ func (e *Evaluator) CacheStats() CacheStats {
 }
 
 // sharedEvaluator backs the package-level Best — single-threaded callers don't need to
-// construct their own. Has caching enabled via NewEvaluator.
-var sharedEvaluator = NewEvaluator()
+// construct their own. Caching is OFF here: the cache key omits incomingDamage on the
+// premise that an Evaluator's lifetime spans calls at constant incomingDamage, which is
+// true for production callers (each constructs their own Evaluator at a fixed incoming)
+// but NOT for the test suite, which exercises Best at many different incoming values
+// against the same package-level entry point. Tests that want cache behaviour construct
+// their own Evaluator via NewEvaluator.
+var sharedEvaluator = NewEvaluatorWithoutCache()

@@ -44,12 +44,19 @@ const maxCachedWeapons = 4
 // 4-card hand whose first 3 IDs match can't collide on the trailing zero pad. heroID and
 // weaponIDs[..weaponLen] capture the player's loadout — different heroes / weapon sets
 // can produce different optimal partitions for the same hand, so they must key the cache.
+//
+// incomingDamage is intentionally NOT in the key. An Evaluator's lifetime spans calls at
+// a constant incomingDamage in production (the iterate-mode worker pool, fabsim eval, and
+// fabsim compare each fix incoming up front and reuse one Evaluator across many decks).
+// Adding it would just bloat the key for no real-world hit-rate gain. Tests that mix
+// incoming values across calls must use NewEvaluatorWithoutCache (sharedEvaluator already
+// does for that reason) — otherwise a cached entry from incoming=A would silently apply
+// to a query at incoming=B.
 type evalCacheKey struct {
 	handIDs            [maxCachedHandSize]ids.CardID
 	weaponIDs          [maxCachedWeapons]ids.WeaponID
 	handLen            int
 	weaponLen          int
-	incomingDamage     int
 	runechantCarryover int
 	heroID             ids.HeroID
 	arsenalID          ids.CardID
@@ -121,10 +128,11 @@ func newEvalCache() *evalCache {
 // IDs are NOT sorted because the weapon order is stable across calls (same loadout, same
 // slice header) and bestAttackWithWeapons enumerates weapon masks in slice order; reordering
 // would still produce the same Value but the cached BestLine's swung-weapon names would
-// drift, so we just preserve the input order.
+// drift, so we just preserve the input order. incomingDamage is omitted from the key by
+// the Evaluator-lifetime-constant assumption (see evalCacheKey doc).
 func makeCacheKey(
 	hero Hero, weapons []Weapon, hand []Card,
-	incomingDamage, runechantCarryover int, arsenalCardIn Card,
+	runechantCarryover int, arsenalCardIn Card,
 ) (evalCacheKey, bool) {
 	if len(hand) > maxCachedHandSize || len(weapons) > maxCachedWeapons {
 		return evalCacheKey{}, false
@@ -147,7 +155,6 @@ func makeCacheKey(
 	for i, w := range weapons {
 		key.weaponIDs[i] = w.ID()
 	}
-	key.incomingDamage = incomingDamage
 	key.runechantCarryover = runechantCarryover
 	if hero != nil {
 		key.heroID = hero.ID()
