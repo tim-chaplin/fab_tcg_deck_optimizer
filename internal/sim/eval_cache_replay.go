@@ -9,18 +9,18 @@ package sim
 
 import "fmt"
 
-// replayBest is the cache-hit body. Parallels findBest's miss path but runs only one
-// partition: the one whose roles entry caches. Caller has already verified the key is
-// valid (priorAuraTriggers empty, hand size in bounds, key matches an existing entry).
+// replayBest is the cache-hit body. Thin wrapper around evaluatePartition: project the
+// cached BestLine onto the new call's hand to fill rolesBuf, hand off to evaluatePartition
+// for the actual chain run, then assemble the TurnSummary from its outputs. The cache
+// search / store gate in findBest already guarantees priorAuraTriggers is empty and the
+// hand multiset matches the entry's, so the chain output here is byte-identical to what
+// the original cached call produced.
 //
-// Steps:
-//  1. Walk the cached BestLine and project its (cardID, role, fromArsenal) tuples back
-//     onto the new call's hand + arsenal-in. Produces the same a / d / p / h slices the
-//     original search's winning leaf passed to bestAttackWithWeapons.
-//  2. Run bestAttackWithWeapons once with that one partition. Returns the same Value /
-//     CarryState the original search produced (Best is deterministic given inputs).
-//  3. Build the TurnSummary: copy BestLine roles, attach SwungWeapons, adopt CarryState,
-//     re-do the post-hoc arsenal promotion when needed.
+// One quirk in projecting the BestLine: the cached entry may tag a hand card with
+// Role=Arsenal (the post-hoc promotion target). Hand cards never have that role during
+// the chain run — the search treats them as Held and the post-hoc step re-flips at the
+// end — so we flip the entry back to Held before evaluatePartition and re-stamp Arsenal
+// on the BestLine afterward.
 func (e *Evaluator) replayBest(
 	entry evalCacheEntry,
 	hero Hero, weapons []Weapon, hand []Card,
@@ -34,96 +34,53 @@ func (e *Evaluator) replayBest(
 	}
 
 	bufs := e.getAttackBufs(n, weapons)
-
-	// Project the cached role tuples back onto this call's slice positions. The cached
-	// BestLine and the new hand share the same multiset (we keyed on it), so we walk the
-	// new hand in order and assign each card the next-available cached role for its ID.
-	// arsenalCardIn (if present) maps to whichever cached entry has FromArsenal=true.
 	rolesBuf := bufs.rolesBuf[:totalN]
-	postPromotedFromHeld := -1 // index in `hand` of the post-hoc-promoted Held card, -1 if no promotion happened
+	postPromotedFromHeld := -1
 	if !mapCachedRolesToHand(entry.line, hand, arsenalCardIn, rolesBuf, &postPromotedFromHeld) {
 		// Multiset mismatch can't happen by construction — the cache key sorts hand IDs
 		// and the entry was stored under that exact key, so a hit means the multisets are
-		// identical. Reaching here indicates a bug somewhere (key collision, cache
-		// corruption, mid-call mutation of cachedLine, etc.) that's already compromised
-		// correctness; panic loudly so the operator notices instead of falling back to a
-		// silent re-search that hides the cache bug.
+		// identical. Reaching here indicates a bug (key collision, cache corruption,
+		// mid-call mutation of cachedLine, etc.) that's already compromised correctness;
+		// panic loudly so the operator notices instead of falling back to a silent
+		// re-search that hides the cache bug.
 		panic(fmt.Sprintf("replayBest: mapCachedRolesToHand failed despite cache hit — cache invariant violated (hand=%d, cachedLine=%d, arsenal=%v)",
 			len(hand), len(entry.line), arsenalCardIn != nil))
 	}
 
-	// The cached partition tells us which cards Pitched / Attacked / Defended / Held /
-	// went to Arsenal. The post-hoc promotion already happened in the cached entry: a
-	// Held card may show role=Arsenal; we treat it as Held during the chain run (so it
-	// threads through state.Hand / the held buf), then re-do the promotion below to make
-	// sure best.State.Arsenal lands the right card and BestLine.Role flips back.
-	pitched := bufs.pitchedBuf[:0]
-	attackers := bufs.attackersBuf[:0]
-	defenders := bufs.defendersBuf[:0]
-	held := bufs.heldBuf[:0]
-	for i, c := range hand {
-		role := rolesBuf[i]
-		if i == postPromotedFromHeld {
-			role = Held // chain-run treats it as Held; promotion re-runs after
-		}
-		switch role {
-		case Pitch:
-			pitched = append(pitched, c)
-		case Attack:
-			attackers = append(attackers, c)
-		case Defend:
-			defenders = append(defenders, c)
-		case Held:
-			held = append(held, c)
-		}
-	}
-	arsenalInIdx := -1
-	arsenalDefenderIdx := -1
-	var arsenalAtChainStart Card
-	if arsenalCardIn != nil {
-		switch rolesBuf[n] {
-		case Attack:
-			attackers = append(attackers, arsenalCardIn)
-			arsenalInIdx = len(attackers) - 1
-		case Defend:
-			defenders = append(defenders, arsenalCardIn)
-			arsenalDefenderIdx = len(defenders) - 1
-		case Arsenal:
-			arsenalAtChainStart = arsenalCardIn
-		}
+	// Flip post-hoc-promoted hand entry from Arsenal back to Held for the chain run; the
+	// promotion re-runs below and re-stamps Arsenal on the BestLine.
+	if postPromotedFromHeld >= 0 {
+		rolesBuf[postPromotedFromHeld] = Held
 	}
 
 	// defenseSum has to match what the original search computed — sum of Defense() across
 	// every Defend-role card (DR or plain), per fillPartitionPerCardBufs. It feeds
 	// state.BlockTotal so DR Plays that read "did we block all incoming?" see the right
-	// shape. defendersDamage's per-DR seed reads it from state.IncomingDamage, not
-	// BlockTotal, so this only matters for cards that consult state.BlockTotal directly.
-	defenseSum := 0
-	for _, d := range defenders {
-		defenseSum += d.Defense()
-		// Arsenal-defender DRs that opt into +N{d} from arsenal use ArsenalDefenseBonus;
-		// match fillPartitionPerCardBufs's behavior so BlockTotal includes the rider.
-	}
-	if arsenalDefenderIdx >= 0 {
-		if ab, ok := defenders[arsenalDefenderIdx].(ArsenalDefenseBonus); ok {
-			defenseSum += ab.ArsenalDefenseBonus()
-		}
-	}
+	// shape. We compute it here rather than via fillPartitionPerCardBufs because the
+	// recurse path's accumulator-arg threading isn't available — replay knows the role
+	// assignment directly.
+	defenseSum := defenseSumFromRoles(hand, arsenalCardIn, rolesBuf, n)
 
-	attackDealt, defenseDealt, _, _, swung, carry, ok, _ := bestAttackWithWeapons(
-		hero, weapons, attackers, defenders, pitched, held, deck, bufs,
-		runechantCarryover, incomingDamage, defenseSum, arsenalInIdx, arsenalDefenderIdx,
-		arsenalAtChainStart, nil, skipLog,
+	attackDealt, defenseDealt, _, swung, carry, ok, _, arsenalAtChainStart := e.evaluatePartition(
+		hero, weapons, hand, deck, arsenalCardIn,
+		rolesBuf, n, bufs,
+		runechantCarryover, incomingDamage, defenseSum,
+		nil, skipLog,
 	)
 	if !ok {
-		// Infeasible-partition replay can't happen by construction — the cached entry was
-		// only stored after best.Cacheable=true, which means a feasible partition was
-		// found AND no leaf read deck/graveyard. Reaching here means either the cache
-		// stored an infeasible result (bug), or the inputs that should be deterministic
-		// (resourceBudget, costs) somehow shifted. Panic so the operator notices rather
+		// Infeasible-partition replay can't happen by construction — the cached entry
+		// was only stored after best.Cacheable=true with a feasible winning partition.
+		// Reaching here means either the cache stored an infeasible result (bug) or some
+		// "should be deterministic" input drifted. Panic so the operator notices rather
 		// than silently re-searching and hiding a real correctness bug.
 		panic(fmt.Sprintf("replayBest: cached partition is infeasible — cache invariant violated (hand=%d, runechantCarryover=%d, incomingDamage=%d)",
 			len(hand), runechantCarryover, incomingDamage))
+	}
+
+	// Re-stamp the post-hoc-promoted entry's Arsenal role so the BestLine matches the
+	// cached layout (and the post-promotion step below sees the same shape findBest did).
+	if postPromotedFromHeld >= 0 {
+		rolesBuf[postPromotedFromHeld] = Arsenal
 	}
 
 	// Build the TurnSummary. BestLine cards come from the new call's hand (so the printout
@@ -149,6 +106,27 @@ func (e *Evaluator) replayBest(
 		promoteRandomHandCardToArsenal(&best, hand, arsenalCardIn)
 	}
 	return best
+}
+
+// defenseSumFromRoles totals Defense() across every Defend-role card per the rolesBuf
+// assignment. The arsenal-in slot's bonus (ArsenalDefenseBonus) is added when it took the
+// Defend role — matching fillPartitionPerCardBufs's per-card dvals layout. Hand cards
+// that opt into ArsenalDefenseBonus don't get the bonus here because they aren't in the
+// arsenal slot; the bonus only applies to cards actually played from arsenal.
+func defenseSumFromRoles(hand []Card, arsenalCardIn Card, rolesBuf []Role, n int) int {
+	sum := 0
+	for i := 0; i < n; i++ {
+		if rolesBuf[i] == Defend {
+			sum += hand[i].Defense()
+		}
+	}
+	if arsenalCardIn != nil && rolesBuf[n] == Defend {
+		sum += arsenalCardIn.Defense()
+		if ab, ok := arsenalCardIn.(ArsenalDefenseBonus); ok {
+			sum += ab.ArsenalDefenseBonus()
+		}
+	}
+	return sum
 }
 
 // mapCachedRolesToHand walks entry.line and the new call's hand, assigning each hand /

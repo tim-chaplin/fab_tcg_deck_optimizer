@@ -94,46 +94,16 @@ func (e *Evaluator) findBest(hero Hero, weapons []Weapon, hand []Card, incomingD
 	addsFutureValue := bufs.addsFutureValueBuf[:totalN]
 
 	hasReactions := fillPartitionPerCardBufs(hand, n, totalN, arsenalCardIn, pvals, dvals, isDR, addsFutureValue)
-	pitched := bufs.pitchedBuf
-	attackers := bufs.attackersBuf
-	defenders := bufs.defendersBuf
-	held := bufs.heldBuf
 
 	var recurse func(i, pitchSum, defenseSum int)
 	recurse = func(i, pitchSum, defenseSum int) {
 		if i == totalN {
-			// Group roles into played / pitched / defending buckets. Iterates the hand (size n),
-			// then layers in the arsenal slot (index n) based on its assigned role. Arsenal-role
-			// cards contribute nothing this turn whether they came from hand or the slot. Always
-			// populate the defenders slice — plain blocks credit their contribution through
-			// defendersDamage's per-card cap, and DRs scan defenders as a graveyard seed for
-			// banish-target effects.
-			p, a, d := groupByRoleInto(hand, rolesBuf[:n], pitched[:0], attackers[:0], defenders[:0])
-			if arsenalCardIn != nil {
-				switch rolesBuf[n] {
-				case Attack:
-					a = append(a, arsenalCardIn)
-				case Defend:
-					d = append(d, arsenalCardIn)
-				}
-			}
-			// Arsenal-in is appended last to a / d above, so its index is len(slice)-1 when
-			// present in the chain. -1 means no arsenal-in card in that bucket (either no
-			// arsenal-in card at all, or it took a different role).
-			arsenalInIdx := -1
-			if arsenalCardIn != nil && rolesBuf[n] == Attack {
-				arsenalInIdx = len(a) - 1
-			}
-			arsenalDefenderIdx := -1
-			if arsenalCardIn != nil && rolesBuf[n] == Defend {
-				arsenalDefenderIdx = len(d) - 1
-			}
-			// Held cards (hand cards left without a Pitch / Attack / Defend role) thread
-			// through to TurnState.Hand so alt-cost effects (e.g. Moon Wish's "use a hand
-			// card") can read len > 0. Arsenal-in can never be Held (roleAllowed bars it).
-			h := gatherHeldCards(hand, rolesBuf[:n], held[:0])
-			arsenalAtChainStart := findArsenalCard(rolesBuf, arsenalCardIn, n)
-			attackDealt, defenseDealt, leftoverRunechants, _, swung, carry, ok, leafCacheable := bestAttackWithWeapons(hero, weapons, a, d, p, h, deck, bufs, runechantCarryover, incomingDamage, defenseSum, arsenalInIdx, arsenalDefenderIdx, arsenalAtChainStart, priorAuraTriggers, skipLog)
+			attackDealt, defenseDealt, leftoverRunechants, swung, carry, ok, leafCacheable, arsenalAtChainStart := e.evaluatePartition(
+				hero, weapons, hand, deck, arsenalCardIn,
+				rolesBuf, n, bufs,
+				runechantCarryover, incomingDamage, defenseSum,
+				priorAuraTriggers, skipLog,
+			)
 			// Aggregate per leaf — an infeasible attack chain still surfaces its DR-side
 			// reads (defendersDamage runs before the feasibility gate inside
 			// bestAttackWithWeapons) so a DR scanning the graveyard pins cacheable=false
