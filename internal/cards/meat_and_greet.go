@@ -10,7 +10,10 @@
 
 package cards
 
-import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+import (
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
+)
 
 var meatAndGreetTypes = card.NewTypeSet(card.TypeRuneblade, card.TypeAction, card.TypeAttack)
 
@@ -28,7 +31,7 @@ func meatAndGreetPlay(s *card.TurnState, self *card.CardState) {
 
 type MeatAndGreetRed struct{}
 
-func (MeatAndGreetRed) ID() card.ID              { return card.MeatAndGreetRed }
+func (MeatAndGreetRed) ID() ids.CardID           { return ids.MeatAndGreetRed }
 func (MeatAndGreetRed) Name() string             { return "Meat and Greet" }
 func (MeatAndGreetRed) Cost(*card.TurnState) int { return 1 }
 func (MeatAndGreetRed) Pitch() int               { return 1 }
@@ -42,7 +45,7 @@ func (MeatAndGreetRed) Play(s *card.TurnState, self *card.CardState) {
 
 type MeatAndGreetYellow struct{}
 
-func (MeatAndGreetYellow) ID() card.ID              { return card.MeatAndGreetYellow }
+func (MeatAndGreetYellow) ID() ids.CardID           { return ids.MeatAndGreetYellow }
 func (MeatAndGreetYellow) Name() string             { return "Meat and Greet" }
 func (MeatAndGreetYellow) Cost(*card.TurnState) int { return 1 }
 func (MeatAndGreetYellow) Pitch() int               { return 2 }
@@ -56,7 +59,7 @@ func (MeatAndGreetYellow) Play(s *card.TurnState, self *card.CardState) {
 
 type MeatAndGreetBlue struct{}
 
-func (MeatAndGreetBlue) ID() card.ID              { return card.MeatAndGreetBlue }
+func (MeatAndGreetBlue) ID() ids.CardID           { return ids.MeatAndGreetBlue }
 func (MeatAndGreetBlue) Name() string             { return "Meat and Greet" }
 func (MeatAndGreetBlue) Cost(*card.TurnState) int { return 1 }
 func (MeatAndGreetBlue) Pitch() int               { return 3 }

@@ -5,13 +5,16 @@
 
 package cards
 
-import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+import (
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
+)
 
 var restvineElixirTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction)
 
 type RestvineElixirRed struct{}
 
-func (RestvineElixirRed) ID() card.ID              { return card.RestvineElixirRed }
+func (RestvineElixirRed) ID() ids.CardID           { return ids.RestvineElixirRed }
 func (RestvineElixirRed) Name() string             { return "Restvine Elixir" }
 func (RestvineElixirRed) Cost(*card.TurnState) int { return 1 }
 func (RestvineElixirRed) Pitch() int               { return 1 }

@@ -5,6 +5,7 @@ import (
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/cards"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
 )
 
 // zeroDefenseAura is an aura-typed card that blocks for nothing — used to park an aura in
@@ -12,7 +13,7 @@ import (
 // tests can isolate Weeping Battleground's +1 arcane banish rider.
 type zeroDefenseAura struct{}
 
-func (zeroDefenseAura) ID() card.ID                           { return card.Invalid }
+func (zeroDefenseAura) ID() ids.CardID                        { return ids.InvalidCard }
 func (zeroDefenseAura) Name() string                          { return "zeroDefenseAura" }
 func (zeroDefenseAura) Cost(*card.TurnState) int              { return 0 }
 func (zeroDefenseAura) Pitch() int                            { return 0 }

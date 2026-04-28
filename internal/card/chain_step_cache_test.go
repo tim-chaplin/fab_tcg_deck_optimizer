@@ -1,13 +1,17 @@
 package card
 
-import "testing"
+import (
+	"testing"
+
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
+)
 
 // TestWarmChainStepCache_PopulatesBothFromArsenalRows: WarmChainStepCache must fill both
 // the (id, false) and (id, true) cells for every non-nil card so the runtime hot path is
 // pure reads. Sample a known card and confirm both entries are present and produce the
 // expected "<DisplayName>: <VERB>[ from arsenal]" string.
 func TestWarmChainStepCache_PopulatesBothFromArsenalRows(t *testing.T) {
-	c := stubCard{id: FakeRedAttack, name: "Test", types: NewTypeSet(TypeAttack, TypeAction)}
+	c := stubCard{id: ids.FakeRedAttack, name: "Test", types: NewTypeSet(TypeAttack, TypeAction)}
 	chainStepCache[chainStepCacheIndex(c.ID(), false)].Store(nil)
 	chainStepCache[chainStepCacheIndex(c.ID(), true)].Store(nil)
 
@@ -43,7 +47,7 @@ func TestWarmChainStepCache_SkipsNil(t *testing.T) {
 // point. A card never seen by WarmChainStepCache (test fakes, ad-hoc stubs) must still
 // produce the right string and populate the cache so the next call is a hit.
 func TestChainStepText_LazyBackfillForUnregisteredCards(t *testing.T) {
-	c := stubCard{id: FakeHugeAttack, name: "Unregistered", types: NewTypeSet(TypeAction)}
+	c := stubCard{id: ids.FakeHugeAttack, name: "Unregistered", types: NewTypeSet(TypeAction)}
 	idx := chainStepCacheIndex(c.ID(), false)
 	chainStepCache[idx].Store(nil)
 

@@ -1,6 +1,10 @@
 package card
 
-import "sync/atomic"
+import (
+	"sync/atomic"
+
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
+)
 
 // chainStepText is what callers reach for; on the hot path every chain-step log line
 // flows through here. The text depends only on (Card.ID, FromArsenal) — DisplayName,
@@ -28,7 +32,7 @@ var chainStepCache [chainStepCacheSize]atomic.Pointer[string]
 // chainStepCacheIndex packs (id, fromArsenal) into a single uint32 cache index. Bit 16 is
 // the FromArsenal flag, bits 0-15 are the card ID — keeps the in-hand and from-arsenal
 // variants in adjacent slots so the hot path is a plain array read.
-func chainStepCacheIndex(id ID, fromArsenal bool) uint32 {
+func chainStepCacheIndex(id ids.CardID, fromArsenal bool) uint32 {
 	idx := uint32(id)
 	if fromArsenal {
 		idx |= 1 << 16

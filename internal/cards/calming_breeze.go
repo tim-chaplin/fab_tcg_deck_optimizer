@@ -4,13 +4,16 @@
 
 package cards
 
-import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+import (
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
+)
 
 var calmingBreezeTypes = card.NewTypeSet(card.TypeGeneric, card.TypeInstant)
 
 type CalmingBreezeRed struct{}
 
-func (CalmingBreezeRed) ID() card.ID              { return card.CalmingBreezeRed }
+func (CalmingBreezeRed) ID() ids.CardID           { return ids.CalmingBreezeRed }
 func (CalmingBreezeRed) Name() string             { return "Calming Breeze" }
 func (CalmingBreezeRed) Cost(*card.TurnState) int { return 0 }
 func (CalmingBreezeRed) Pitch() int               { return 1 }

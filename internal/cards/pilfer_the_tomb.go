@@ -5,13 +5,16 @@
 
 package cards
 
-import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+import (
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
+)
 
 var pilferTheTombTypes = card.NewTypeSet(card.TypeGeneric, card.TypeInstant)
 
 type PilferTheTombBlue struct{}
 
-func (PilferTheTombBlue) ID() card.ID              { return card.PilferTheTombBlue }
+func (PilferTheTombBlue) ID() ids.CardID           { return ids.PilferTheTombBlue }
 func (PilferTheTombBlue) Name() string             { return "Pilfer the Tomb" }
 func (PilferTheTombBlue) Cost(*card.TurnState) int { return 0 }
 func (PilferTheTombBlue) Pitch() int               { return 3 }

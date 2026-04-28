@@ -8,7 +8,10 @@
 
 package cards
 
-import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+import (
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
+)
 
 var runeFlashTypes = card.NewTypeSet(card.TypeRuneblade, card.TypeAction, card.TypeAttack)
 
@@ -24,7 +27,7 @@ func runeFlashCost(s *card.TurnState) int {
 
 type RuneFlashRed struct{}
 
-func (RuneFlashRed) ID() card.ID                                  { return card.RuneFlashRed }
+func (RuneFlashRed) ID() ids.CardID                               { return ids.RuneFlashRed }
 func (RuneFlashRed) Name() string                                 { return "Rune Flash" }
 func (RuneFlashRed) Cost(s *card.TurnState) int                   { return runeFlashCost(s) }
 func (RuneFlashRed) MinCost() int                                 { return 0 }
@@ -38,7 +41,7 @@ func (RuneFlashRed) Play(s *card.TurnState, self *card.CardState) { s.ApplyAndLo
 
 type RuneFlashYellow struct{}
 
-func (RuneFlashYellow) ID() card.ID                { return card.RuneFlashYellow }
+func (RuneFlashYellow) ID() ids.CardID             { return ids.RuneFlashYellow }
 func (RuneFlashYellow) Name() string               { return "Rune Flash" }
 func (RuneFlashYellow) Cost(s *card.TurnState) int { return runeFlashCost(s) }
 func (RuneFlashYellow) MinCost() int               { return 0 }
@@ -54,7 +57,7 @@ func (RuneFlashYellow) Play(s *card.TurnState, self *card.CardState) {
 
 type RuneFlashBlue struct{}
 
-func (RuneFlashBlue) ID() card.ID                { return card.RuneFlashBlue }
+func (RuneFlashBlue) ID() ids.CardID             { return ids.RuneFlashBlue }
 func (RuneFlashBlue) Name() string               { return "Rune Flash" }
 func (RuneFlashBlue) Cost(s *card.TurnState) int { return runeFlashCost(s) }
 func (RuneFlashBlue) MinCost() int               { return 0 }

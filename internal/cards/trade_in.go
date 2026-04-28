@@ -6,13 +6,16 @@
 
 package cards
 
-import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+import (
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
+)
 
 var tradeInTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeAttack)
 
 type TradeInRed struct{}
 
-func (TradeInRed) ID() card.ID              { return card.TradeInRed }
+func (TradeInRed) ID() ids.CardID           { return ids.TradeInRed }
 func (TradeInRed) Name() string             { return "Trade In" }
 func (TradeInRed) Cost(*card.TurnState) int { return 0 }
 func (TradeInRed) Pitch() int               { return 1 }
@@ -27,7 +30,7 @@ func (c TradeInRed) Play(s *card.TurnState, self *card.CardState) { s.ApplyAndLo
 
 type TradeInYellow struct{}
 
-func (TradeInYellow) ID() card.ID              { return card.TradeInYellow }
+func (TradeInYellow) ID() ids.CardID           { return ids.TradeInYellow }
 func (TradeInYellow) Name() string             { return "Trade In" }
 func (TradeInYellow) Cost(*card.TurnState) int { return 0 }
 func (TradeInYellow) Pitch() int               { return 2 }
@@ -44,7 +47,7 @@ func (c TradeInYellow) Play(s *card.TurnState, self *card.CardState) {
 
 type TradeInBlue struct{}
 
-func (TradeInBlue) ID() card.ID              { return card.TradeInBlue }
+func (TradeInBlue) ID() ids.CardID           { return ids.TradeInBlue }
 func (TradeInBlue) Name() string             { return "Trade In" }
 func (TradeInBlue) Cost(*card.TurnState) int { return 0 }
 func (TradeInBlue) Pitch() int               { return 3 }

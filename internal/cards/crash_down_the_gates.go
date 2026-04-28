@@ -7,13 +7,16 @@
 
 package cards
 
-import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+import (
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
+)
 
 var crashDownTheGatesTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeAttack)
 
 type CrashDownTheGatesRed struct{}
 
-func (CrashDownTheGatesRed) ID() card.ID              { return card.CrashDownTheGatesRed }
+func (CrashDownTheGatesRed) ID() ids.CardID           { return ids.CrashDownTheGatesRed }
 func (CrashDownTheGatesRed) Name() string             { return "Crash Down the Gates" }
 func (CrashDownTheGatesRed) Cost(*card.TurnState) int { return 3 }
 func (CrashDownTheGatesRed) Pitch() int               { return 1 }
@@ -30,7 +33,7 @@ func (CrashDownTheGatesRed) Play(s *card.TurnState, self *card.CardState) {
 
 type CrashDownTheGatesYellow struct{}
 
-func (CrashDownTheGatesYellow) ID() card.ID              { return card.CrashDownTheGatesYellow }
+func (CrashDownTheGatesYellow) ID() ids.CardID           { return ids.CrashDownTheGatesYellow }
 func (CrashDownTheGatesYellow) Name() string             { return "Crash Down the Gates" }
 func (CrashDownTheGatesYellow) Cost(*card.TurnState) int { return 3 }
 func (CrashDownTheGatesYellow) Pitch() int               { return 2 }
@@ -47,7 +50,7 @@ func (CrashDownTheGatesYellow) Play(s *card.TurnState, self *card.CardState) {
 
 type CrashDownTheGatesBlue struct{}
 
-func (CrashDownTheGatesBlue) ID() card.ID              { return card.CrashDownTheGatesBlue }
+func (CrashDownTheGatesBlue) ID() ids.CardID           { return ids.CrashDownTheGatesBlue }
 func (CrashDownTheGatesBlue) Name() string             { return "Crash Down the Gates" }
 func (CrashDownTheGatesBlue) Cost(*card.TurnState) int { return 3 }
 func (CrashDownTheGatesBlue) Pitch() int               { return 3 }

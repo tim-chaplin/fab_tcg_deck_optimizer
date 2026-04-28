@@ -4,13 +4,16 @@
 
 package cards
 
-import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+import (
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
+)
 
 var shrillTypes = card.NewTypeSet(card.TypeRuneblade, card.TypeAction, card.TypeAttack)
 
 type ShrillOfSkullformRed struct{}
 
-func (ShrillOfSkullformRed) ID() card.ID              { return card.ShrillOfSkullformRed }
+func (ShrillOfSkullformRed) ID() ids.CardID           { return ids.ShrillOfSkullformRed }
 func (ShrillOfSkullformRed) Name() string             { return "Shrill of Skullform" }
 func (ShrillOfSkullformRed) Cost(*card.TurnState) int { return 2 }
 func (ShrillOfSkullformRed) Pitch() int               { return 1 }
@@ -24,7 +27,7 @@ func (ShrillOfSkullformRed) Play(s *card.TurnState, self *card.CardState) {
 
 type ShrillOfSkullformYellow struct{}
 
-func (ShrillOfSkullformYellow) ID() card.ID              { return card.ShrillOfSkullformYellow }
+func (ShrillOfSkullformYellow) ID() ids.CardID           { return ids.ShrillOfSkullformYellow }
 func (ShrillOfSkullformYellow) Name() string             { return "Shrill of Skullform" }
 func (ShrillOfSkullformYellow) Cost(*card.TurnState) int { return 2 }
 func (ShrillOfSkullformYellow) Pitch() int               { return 2 }
@@ -38,7 +41,7 @@ func (ShrillOfSkullformYellow) Play(s *card.TurnState, self *card.CardState) {
 
 type ShrillOfSkullformBlue struct{}
 
-func (ShrillOfSkullformBlue) ID() card.ID              { return card.ShrillOfSkullformBlue }
+func (ShrillOfSkullformBlue) ID() ids.CardID           { return ids.ShrillOfSkullformBlue }
 func (ShrillOfSkullformBlue) Name() string             { return "Shrill of Skullform" }
 func (ShrillOfSkullformBlue) Cost(*card.TurnState) int { return 2 }
 func (ShrillOfSkullformBlue) Pitch() int               { return 3 }

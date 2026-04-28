@@ -5,13 +5,16 @@
 
 package cards
 
-import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+import (
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
+)
 
 var oathOfTheArknightTypes = card.NewTypeSet(card.TypeRuneblade, card.TypeAction)
 
 type OathOfTheArknightRed struct{}
 
-func (OathOfTheArknightRed) ID() card.ID              { return card.OathOfTheArknightRed }
+func (OathOfTheArknightRed) ID() ids.CardID           { return ids.OathOfTheArknightRed }
 func (OathOfTheArknightRed) Name() string             { return "Oath of the Arknight" }
 func (OathOfTheArknightRed) Cost(*card.TurnState) int { return 2 }
 func (OathOfTheArknightRed) Pitch() int               { return 1 }
@@ -25,7 +28,7 @@ func (OathOfTheArknightRed) Play(s *card.TurnState, self *card.CardState) {
 
 type OathOfTheArknightYellow struct{}
 
-func (OathOfTheArknightYellow) ID() card.ID              { return card.OathOfTheArknightYellow }
+func (OathOfTheArknightYellow) ID() ids.CardID           { return ids.OathOfTheArknightYellow }
 func (OathOfTheArknightYellow) Name() string             { return "Oath of the Arknight" }
 func (OathOfTheArknightYellow) Cost(*card.TurnState) int { return 2 }
 func (OathOfTheArknightYellow) Pitch() int               { return 2 }
@@ -39,7 +42,7 @@ func (OathOfTheArknightYellow) Play(s *card.TurnState, self *card.CardState) {
 
 type OathOfTheArknightBlue struct{}
 
-func (OathOfTheArknightBlue) ID() card.ID              { return card.OathOfTheArknightBlue }
+func (OathOfTheArknightBlue) ID() ids.CardID           { return ids.OathOfTheArknightBlue }
 func (OathOfTheArknightBlue) Name() string             { return "Oath of the Arknight" }
 func (OathOfTheArknightBlue) Cost(*card.TurnState) int { return 2 }
 func (OathOfTheArknightBlue) Pitch() int               { return 3 }

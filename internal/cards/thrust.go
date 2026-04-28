@@ -4,13 +4,16 @@
 
 package cards
 
-import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+import (
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
+)
 
 var thrustTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAttackReaction)
 
 type ThrustRed struct{}
 
-func (ThrustRed) ID() card.ID              { return card.ThrustRed }
+func (ThrustRed) ID() ids.CardID           { return ids.ThrustRed }
 func (ThrustRed) Name() string             { return "Thrust" }
 func (ThrustRed) Cost(*card.TurnState) int { return 1 }
 func (ThrustRed) Pitch() int               { return 1 }

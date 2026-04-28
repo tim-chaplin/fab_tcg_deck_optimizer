@@ -6,13 +6,16 @@
 
 package cards
 
-import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+import (
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
+)
 
 var factFindingMissionTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeAttack)
 
 type FactFindingMissionRed struct{}
 
-func (FactFindingMissionRed) ID() card.ID              { return card.FactFindingMissionRed }
+func (FactFindingMissionRed) ID() ids.CardID           { return ids.FactFindingMissionRed }
 func (FactFindingMissionRed) Name() string             { return "Fact-Finding Mission" }
 func (FactFindingMissionRed) Cost(*card.TurnState) int { return 2 }
 func (FactFindingMissionRed) Pitch() int               { return 1 }
@@ -29,7 +32,7 @@ func (FactFindingMissionRed) Play(s *card.TurnState, self *card.CardState) {
 
 type FactFindingMissionYellow struct{}
 
-func (FactFindingMissionYellow) ID() card.ID              { return card.FactFindingMissionYellow }
+func (FactFindingMissionYellow) ID() ids.CardID           { return ids.FactFindingMissionYellow }
 func (FactFindingMissionYellow) Name() string             { return "Fact-Finding Mission" }
 func (FactFindingMissionYellow) Cost(*card.TurnState) int { return 2 }
 func (FactFindingMissionYellow) Pitch() int               { return 2 }
@@ -46,7 +49,7 @@ func (FactFindingMissionYellow) Play(s *card.TurnState, self *card.CardState) {
 
 type FactFindingMissionBlue struct{}
 
-func (FactFindingMissionBlue) ID() card.ID              { return card.FactFindingMissionBlue }
+func (FactFindingMissionBlue) ID() ids.CardID           { return ids.FactFindingMissionBlue }
 func (FactFindingMissionBlue) Name() string             { return "Fact-Finding Mission" }
 func (FactFindingMissionBlue) Cost(*card.TurnState) int { return 2 }
 func (FactFindingMissionBlue) Pitch() int               { return 3 }

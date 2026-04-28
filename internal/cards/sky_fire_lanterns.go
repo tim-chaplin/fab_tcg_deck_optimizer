@@ -8,7 +8,10 @@
 
 package cards
 
-import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+import (
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
+)
 
 var skyFireLanternsTypes = card.NewTypeSet(card.TypeRuneblade, card.TypeAction)
 
@@ -24,7 +27,7 @@ func skyFireLanternsPlay(s *card.TurnState, self *card.CardState, selfPitch int)
 
 type SkyFireLanternsRed struct{}
 
-func (SkyFireLanternsRed) ID() card.ID              { return card.SkyFireLanternsRed }
+func (SkyFireLanternsRed) ID() ids.CardID           { return ids.SkyFireLanternsRed }
 func (SkyFireLanternsRed) Name() string             { return "Sky Fire Lanterns" }
 func (SkyFireLanternsRed) Cost(*card.TurnState) int { return 0 }
 func (SkyFireLanternsRed) Pitch() int               { return 1 }
@@ -38,7 +41,7 @@ func (c SkyFireLanternsRed) Play(s *card.TurnState, self *card.CardState) {
 
 type SkyFireLanternsYellow struct{}
 
-func (SkyFireLanternsYellow) ID() card.ID              { return card.SkyFireLanternsYellow }
+func (SkyFireLanternsYellow) ID() ids.CardID           { return ids.SkyFireLanternsYellow }
 func (SkyFireLanternsYellow) Name() string             { return "Sky Fire Lanterns" }
 func (SkyFireLanternsYellow) Cost(*card.TurnState) int { return 0 }
 func (SkyFireLanternsYellow) Pitch() int               { return 2 }
@@ -52,7 +55,7 @@ func (c SkyFireLanternsYellow) Play(s *card.TurnState, self *card.CardState) {
 
 type SkyFireLanternsBlue struct{}
 
-func (SkyFireLanternsBlue) ID() card.ID              { return card.SkyFireLanternsBlue }
+func (SkyFireLanternsBlue) ID() ids.CardID           { return ids.SkyFireLanternsBlue }
 func (SkyFireLanternsBlue) Name() string             { return "Sky Fire Lanterns" }
 func (SkyFireLanternsBlue) Cost(*card.TurnState) int { return 0 }
 func (SkyFireLanternsBlue) Pitch() int               { return 3 }

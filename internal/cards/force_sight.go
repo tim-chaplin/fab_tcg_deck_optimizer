@@ -5,13 +5,16 @@
 
 package cards
 
-import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+import (
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
+)
 
 var forceSightTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction)
 
 type ForceSightRed struct{}
 
-func (ForceSightRed) ID() card.ID              { return card.ForceSightRed }
+func (ForceSightRed) ID() ids.CardID           { return ids.ForceSightRed }
 func (ForceSightRed) Name() string             { return "Force Sight" }
 func (ForceSightRed) Cost(*card.TurnState) int { return 1 }
 func (ForceSightRed) Pitch() int               { return 1 }
@@ -29,7 +32,7 @@ func (ForceSightRed) Play(s *card.TurnState, self *card.CardState) {
 
 type ForceSightYellow struct{}
 
-func (ForceSightYellow) ID() card.ID              { return card.ForceSightYellow }
+func (ForceSightYellow) ID() ids.CardID           { return ids.ForceSightYellow }
 func (ForceSightYellow) Name() string             { return "Force Sight" }
 func (ForceSightYellow) Cost(*card.TurnState) int { return 1 }
 func (ForceSightYellow) Pitch() int               { return 2 }
@@ -47,7 +50,7 @@ func (ForceSightYellow) Play(s *card.TurnState, self *card.CardState) {
 
 type ForceSightBlue struct{}
 
-func (ForceSightBlue) ID() card.ID              { return card.ForceSightBlue }
+func (ForceSightBlue) ID() ids.CardID           { return ids.ForceSightBlue }
 func (ForceSightBlue) Name() string             { return "Force Sight" }
 func (ForceSightBlue) Cost(*card.TurnState) int { return 1 }
 func (ForceSightBlue) Pitch() int               { return 3 }

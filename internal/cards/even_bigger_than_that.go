@@ -7,13 +7,16 @@
 
 package cards
 
-import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+import (
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
+)
 
 var evenBiggerThanThatTypes = card.NewTypeSet(card.TypeGeneric, card.TypeInstant)
 
 type EvenBiggerThanThatRed struct{}
 
-func (EvenBiggerThanThatRed) ID() card.ID              { return card.EvenBiggerThanThatRed }
+func (EvenBiggerThanThatRed) ID() ids.CardID           { return ids.EvenBiggerThanThatRed }
 func (EvenBiggerThanThatRed) Name() string             { return "Even Bigger Than That!" }
 func (EvenBiggerThanThatRed) Cost(*card.TurnState) int { return 0 }
 func (EvenBiggerThanThatRed) Pitch() int               { return 1 }
@@ -28,7 +31,7 @@ func (EvenBiggerThanThatRed) Play(s *card.TurnState, self *card.CardState) { s.L
 
 type EvenBiggerThanThatYellow struct{}
 
-func (EvenBiggerThanThatYellow) ID() card.ID              { return card.EvenBiggerThanThatYellow }
+func (EvenBiggerThanThatYellow) ID() ids.CardID           { return ids.EvenBiggerThanThatYellow }
 func (EvenBiggerThanThatYellow) Name() string             { return "Even Bigger Than That!" }
 func (EvenBiggerThanThatYellow) Cost(*card.TurnState) int { return 0 }
 func (EvenBiggerThanThatYellow) Pitch() int               { return 2 }
@@ -43,7 +46,7 @@ func (EvenBiggerThanThatYellow) Play(s *card.TurnState, self *card.CardState) { 
 
 type EvenBiggerThanThatBlue struct{}
 
-func (EvenBiggerThanThatBlue) ID() card.ID              { return card.EvenBiggerThanThatBlue }
+func (EvenBiggerThanThatBlue) ID() ids.CardID           { return ids.EvenBiggerThanThatBlue }
 func (EvenBiggerThanThatBlue) Name() string             { return "Even Bigger Than That!" }
 func (EvenBiggerThanThatBlue) Cost(*card.TurnState) int { return 0 }
 func (EvenBiggerThanThatBlue) Pitch() int               { return 3 }

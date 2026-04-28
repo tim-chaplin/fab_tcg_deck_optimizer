@@ -6,13 +6,16 @@
 
 package cards
 
-import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+import (
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
+)
 
 var strategicPlanningTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction)
 
 type StrategicPlanningRed struct{}
 
-func (StrategicPlanningRed) ID() card.ID              { return card.StrategicPlanningRed }
+func (StrategicPlanningRed) ID() ids.CardID           { return ids.StrategicPlanningRed }
 func (StrategicPlanningRed) Name() string             { return "Strategic Planning" }
 func (StrategicPlanningRed) Cost(*card.TurnState) int { return 1 }
 func (StrategicPlanningRed) Pitch() int               { return 1 }
@@ -27,7 +30,7 @@ func (StrategicPlanningRed) Play(s *card.TurnState, self *card.CardState) { s.Lo
 
 type StrategicPlanningYellow struct{}
 
-func (StrategicPlanningYellow) ID() card.ID              { return card.StrategicPlanningYellow }
+func (StrategicPlanningYellow) ID() ids.CardID           { return ids.StrategicPlanningYellow }
 func (StrategicPlanningYellow) Name() string             { return "Strategic Planning" }
 func (StrategicPlanningYellow) Cost(*card.TurnState) int { return 1 }
 func (StrategicPlanningYellow) Pitch() int               { return 2 }
@@ -42,7 +45,7 @@ func (StrategicPlanningYellow) Play(s *card.TurnState, self *card.CardState) { s
 
 type StrategicPlanningBlue struct{}
 
-func (StrategicPlanningBlue) ID() card.ID              { return card.StrategicPlanningBlue }
+func (StrategicPlanningBlue) ID() ids.CardID           { return ids.StrategicPlanningBlue }
 func (StrategicPlanningBlue) Name() string             { return "Strategic Planning" }
 func (StrategicPlanningBlue) Cost(*card.TurnState) int { return 1 }
 func (StrategicPlanningBlue) Pitch() int               { return 3 }

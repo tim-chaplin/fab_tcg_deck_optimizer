@@ -5,6 +5,7 @@ import (
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/cards"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/weapon"
 )
@@ -15,7 +16,7 @@ import (
 // don't see it as a candidate target for their "next attack action" grants.
 type pitchOnlyRed struct{}
 
-func (pitchOnlyRed) ID() card.ID              { return card.Invalid }
+func (pitchOnlyRed) ID() ids.CardID           { return ids.InvalidCard }
 func (pitchOnlyRed) Name() string             { return "pitchOnlyRed" }
 func (pitchOnlyRed) Cost(*card.TurnState) int { return 0 }
 func (pitchOnlyRed) Pitch() int               { return 1 }
@@ -33,7 +34,7 @@ func (pitchOnlyRed) Play(*card.TurnState, *card.CardState) {}
 // being buffed and feeds EffectiveAttack for any "if this hits" rider on that target.
 type grantBonusAttack struct{ n int }
 
-func (grantBonusAttack) ID() card.ID              { return card.Invalid }
+func (grantBonusAttack) ID() ids.CardID           { return ids.InvalidCard }
 func (grantBonusAttack) Name() string             { return "grantBonusAttack" }
 func (grantBonusAttack) Cost(*card.TurnState) int { return 0 }
 func (grantBonusAttack) Pitch() int               { return 0 }
@@ -58,7 +59,7 @@ func (g grantBonusAttack) Play(s *card.TurnState, self *card.CardState) {
 // "next weapon attack +1{p}" rider — the target is a weapon, not an attack action.
 type grantBonusAttackWeapon struct{ n int }
 
-func (grantBonusAttackWeapon) ID() card.ID              { return card.Invalid }
+func (grantBonusAttackWeapon) ID() ids.CardID           { return ids.InvalidCard }
 func (grantBonusAttackWeapon) Name() string             { return "grantBonusAttackWeapon" }
 func (grantBonusAttackWeapon) Cost(*card.TurnState) int { return 0 }
 func (grantBonusAttackWeapon) Pitch() int               { return 0 }

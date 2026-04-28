@@ -6,13 +6,16 @@
 
 package cards
 
-import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+import (
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
+)
 
 var publicBountyTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction)
 
 type PublicBountyRed struct{}
 
-func (PublicBountyRed) ID() card.ID              { return card.PublicBountyRed }
+func (PublicBountyRed) ID() ids.CardID           { return ids.PublicBountyRed }
 func (PublicBountyRed) Name() string             { return "Public Bounty" }
 func (PublicBountyRed) Cost(*card.TurnState) int { return 1 }
 func (PublicBountyRed) Pitch() int               { return 1 }
@@ -30,7 +33,7 @@ func (PublicBountyRed) Play(s *card.TurnState, self *card.CardState) {
 
 type PublicBountyYellow struct{}
 
-func (PublicBountyYellow) ID() card.ID              { return card.PublicBountyYellow }
+func (PublicBountyYellow) ID() ids.CardID           { return ids.PublicBountyYellow }
 func (PublicBountyYellow) Name() string             { return "Public Bounty" }
 func (PublicBountyYellow) Cost(*card.TurnState) int { return 1 }
 func (PublicBountyYellow) Pitch() int               { return 2 }
@@ -48,7 +51,7 @@ func (PublicBountyYellow) Play(s *card.TurnState, self *card.CardState) {
 
 type PublicBountyBlue struct{}
 
-func (PublicBountyBlue) ID() card.ID              { return card.PublicBountyBlue }
+func (PublicBountyBlue) ID() ids.CardID           { return ids.PublicBountyBlue }
 func (PublicBountyBlue) Name() string             { return "Public Bounty" }
 func (PublicBountyBlue) Cost(*card.TurnState) int { return 1 }
 func (PublicBountyBlue) Pitch() int               { return 3 }

@@ -5,13 +5,16 @@
 
 package cards
 
-import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+import (
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
+)
 
 var pursueToTheEdgeOfOblivionTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeAttack)
 
 type PursueToTheEdgeOfOblivionRed struct{}
 
-func (PursueToTheEdgeOfOblivionRed) ID() card.ID              { return card.PursueToTheEdgeOfOblivionRed }
+func (PursueToTheEdgeOfOblivionRed) ID() ids.CardID           { return ids.PursueToTheEdgeOfOblivionRed }
 func (PursueToTheEdgeOfOblivionRed) Name() string             { return "Pursue to the Edge of Oblivion" }
 func (PursueToTheEdgeOfOblivionRed) Cost(*card.TurnState) int { return 0 }
 func (PursueToTheEdgeOfOblivionRed) Pitch() int               { return 1 }

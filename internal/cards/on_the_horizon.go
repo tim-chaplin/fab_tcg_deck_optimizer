@@ -5,11 +5,14 @@
 
 package cards
 
-import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+import (
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
+)
 
 type OnTheHorizonRed struct{}
 
-func (OnTheHorizonRed) ID() card.ID              { return card.OnTheHorizonRed }
+func (OnTheHorizonRed) ID() ids.CardID           { return ids.OnTheHorizonRed }
 func (OnTheHorizonRed) Name() string             { return "On the Horizon" }
 func (OnTheHorizonRed) Cost(*card.TurnState) int { return 0 }
 func (OnTheHorizonRed) Pitch() int               { return 1 }
@@ -26,7 +29,7 @@ func (OnTheHorizonRed) Play(s *card.TurnState, self *card.CardState) {
 
 type OnTheHorizonYellow struct{}
 
-func (OnTheHorizonYellow) ID() card.ID              { return card.OnTheHorizonYellow }
+func (OnTheHorizonYellow) ID() ids.CardID           { return ids.OnTheHorizonYellow }
 func (OnTheHorizonYellow) Name() string             { return "On the Horizon" }
 func (OnTheHorizonYellow) Cost(*card.TurnState) int { return 0 }
 func (OnTheHorizonYellow) Pitch() int               { return 2 }
@@ -43,7 +46,7 @@ func (OnTheHorizonYellow) Play(s *card.TurnState, self *card.CardState) {
 
 type OnTheHorizonBlue struct{}
 
-func (OnTheHorizonBlue) ID() card.ID              { return card.OnTheHorizonBlue }
+func (OnTheHorizonBlue) ID() ids.CardID           { return ids.OnTheHorizonBlue }
 func (OnTheHorizonBlue) Name() string             { return "On the Horizon" }
 func (OnTheHorizonBlue) Cost(*card.TurnState) int { return 0 }
 func (OnTheHorizonBlue) Pitch() int               { return 3 }

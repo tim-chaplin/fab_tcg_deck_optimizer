@@ -225,7 +225,7 @@ func runAnneal(cfg annealConfig) annealResult {
 // buildRoundMutations produces the per-round mutation list: enumerates every
 // single-card/weapon mutation and shuffles the order so exploration is unbiased.
 //
-// AllMutations returns a card.ID-sorted slice for stability; the unconditional shuffle here
+// AllMutations returns a ids.CardID-sorted slice for stability; the unconditional shuffle here
 // is what keeps the first-improvement classical climb from sampling the head of the slice
 // disproportionately, and what keeps the probabilistic SA gate from concentrating its
 // acceptances on a fixed slice of the solution space.

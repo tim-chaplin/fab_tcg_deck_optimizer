@@ -7,13 +7,16 @@
 
 package cards
 
-import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+import (
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
+)
 
 var jackBeQuickTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeAttack)
 
 type JackBeQuickRed struct{}
 
-func (JackBeQuickRed) ID() card.ID              { return card.JackBeQuickRed }
+func (JackBeQuickRed) ID() ids.CardID           { return ids.JackBeQuickRed }
 func (JackBeQuickRed) Name() string             { return "Jack Be Quick" }
 func (JackBeQuickRed) Cost(*card.TurnState) int { return 0 }
 func (JackBeQuickRed) Pitch() int               { return 1 }

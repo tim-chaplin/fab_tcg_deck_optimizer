@@ -12,7 +12,10 @@
 
 package cards
 
-import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+import (
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
+)
 
 var sigilOfSufferingTypes = card.NewTypeSet(card.TypeRuneblade, card.TypeDefenseReaction)
 
@@ -26,7 +29,7 @@ func sigilOfSufferingPlay(s *card.TurnState, self *card.CardState) {
 
 type SigilOfSufferingRed struct{}
 
-func (SigilOfSufferingRed) ID() card.ID              { return card.SigilOfSufferingRed }
+func (SigilOfSufferingRed) ID() ids.CardID           { return ids.SigilOfSufferingRed }
 func (SigilOfSufferingRed) Name() string             { return "Sigil of Suffering" }
 func (SigilOfSufferingRed) Cost(*card.TurnState) int { return 0 }
 func (SigilOfSufferingRed) Pitch() int               { return 1 }
@@ -40,7 +43,7 @@ func (SigilOfSufferingRed) Play(s *card.TurnState, self *card.CardState) {
 
 type SigilOfSufferingYellow struct{}
 
-func (SigilOfSufferingYellow) ID() card.ID              { return card.SigilOfSufferingYellow }
+func (SigilOfSufferingYellow) ID() ids.CardID           { return ids.SigilOfSufferingYellow }
 func (SigilOfSufferingYellow) Name() string             { return "Sigil of Suffering" }
 func (SigilOfSufferingYellow) Cost(*card.TurnState) int { return 0 }
 func (SigilOfSufferingYellow) Pitch() int               { return 2 }
@@ -54,7 +57,7 @@ func (SigilOfSufferingYellow) Play(s *card.TurnState, self *card.CardState) {
 
 type SigilOfSufferingBlue struct{}
 
-func (SigilOfSufferingBlue) ID() card.ID              { return card.SigilOfSufferingBlue }
+func (SigilOfSufferingBlue) ID() ids.CardID           { return ids.SigilOfSufferingBlue }
 func (SigilOfSufferingBlue) Name() string             { return "Sigil of Suffering" }
 func (SigilOfSufferingBlue) Cost(*card.TurnState) int { return 0 }
 func (SigilOfSufferingBlue) Pitch() int               { return 3 }

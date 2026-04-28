@@ -6,13 +6,16 @@
 
 package cards
 
-import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+import (
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
+)
 
 var rallyTheCoastGuardTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeAttack)
 
 type RallyTheCoastGuardRed struct{}
 
-func (RallyTheCoastGuardRed) ID() card.ID              { return card.RallyTheCoastGuardRed }
+func (RallyTheCoastGuardRed) ID() ids.CardID           { return ids.RallyTheCoastGuardRed }
 func (RallyTheCoastGuardRed) Name() string             { return "Rally the Coast Guard" }
 func (RallyTheCoastGuardRed) Cost(*card.TurnState) int { return 3 }
 func (RallyTheCoastGuardRed) Pitch() int               { return 1 }
@@ -29,7 +32,7 @@ func (c RallyTheCoastGuardRed) Play(s *card.TurnState, self *card.CardState) {
 
 type RallyTheCoastGuardYellow struct{}
 
-func (RallyTheCoastGuardYellow) ID() card.ID              { return card.RallyTheCoastGuardYellow }
+func (RallyTheCoastGuardYellow) ID() ids.CardID           { return ids.RallyTheCoastGuardYellow }
 func (RallyTheCoastGuardYellow) Name() string             { return "Rally the Coast Guard" }
 func (RallyTheCoastGuardYellow) Cost(*card.TurnState) int { return 3 }
 func (RallyTheCoastGuardYellow) Pitch() int               { return 2 }
@@ -46,7 +49,7 @@ func (c RallyTheCoastGuardYellow) Play(s *card.TurnState, self *card.CardState) 
 
 type RallyTheCoastGuardBlue struct{}
 
-func (RallyTheCoastGuardBlue) ID() card.ID              { return card.RallyTheCoastGuardBlue }
+func (RallyTheCoastGuardBlue) ID() ids.CardID           { return ids.RallyTheCoastGuardBlue }
 func (RallyTheCoastGuardBlue) Name() string             { return "Rally the Coast Guard" }
 func (RallyTheCoastGuardBlue) Cost(*card.TurnState) int { return 3 }
 func (RallyTheCoastGuardBlue) Pitch() int               { return 3 }

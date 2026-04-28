@@ -5,13 +5,16 @@
 
 package cards
 
-import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+import (
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
+)
 
 var feistyLocalsTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeAttack)
 
 type FeistyLocalsRed struct{}
 
-func (FeistyLocalsRed) ID() card.ID              { return card.FeistyLocalsRed }
+func (FeistyLocalsRed) ID() ids.CardID           { return ids.FeistyLocalsRed }
 func (FeistyLocalsRed) Name() string             { return "Feisty Locals" }
 func (FeistyLocalsRed) Cost(*card.TurnState) int { return 0 }
 func (FeistyLocalsRed) Pitch() int               { return 1 }
@@ -28,7 +31,7 @@ func (c FeistyLocalsRed) Play(s *card.TurnState, self *card.CardState) {
 
 type FeistyLocalsYellow struct{}
 
-func (FeistyLocalsYellow) ID() card.ID              { return card.FeistyLocalsYellow }
+func (FeistyLocalsYellow) ID() ids.CardID           { return ids.FeistyLocalsYellow }
 func (FeistyLocalsYellow) Name() string             { return "Feisty Locals" }
 func (FeistyLocalsYellow) Cost(*card.TurnState) int { return 0 }
 func (FeistyLocalsYellow) Pitch() int               { return 2 }
@@ -45,7 +48,7 @@ func (c FeistyLocalsYellow) Play(s *card.TurnState, self *card.CardState) {
 
 type FeistyLocalsBlue struct{}
 
-func (FeistyLocalsBlue) ID() card.ID              { return card.FeistyLocalsBlue }
+func (FeistyLocalsBlue) ID() ids.CardID           { return ids.FeistyLocalsBlue }
 func (FeistyLocalsBlue) Name() string             { return "Feisty Locals" }
 func (FeistyLocalsBlue) Cost(*card.TurnState) int { return 0 }
 func (FeistyLocalsBlue) Pitch() int               { return 3 }

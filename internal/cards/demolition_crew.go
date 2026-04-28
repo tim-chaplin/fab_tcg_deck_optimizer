@@ -6,13 +6,16 @@
 
 package cards
 
-import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+import (
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
+)
 
 var demolitionCrewTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeAttack)
 
 type DemolitionCrewRed struct{}
 
-func (DemolitionCrewRed) ID() card.ID              { return card.DemolitionCrewRed }
+func (DemolitionCrewRed) ID() ids.CardID           { return ids.DemolitionCrewRed }
 func (DemolitionCrewRed) Name() string             { return "Demolition Crew" }
 func (DemolitionCrewRed) Cost(*card.TurnState) int { return 2 }
 func (DemolitionCrewRed) Pitch() int               { return 1 }
@@ -31,7 +34,7 @@ func (c DemolitionCrewRed) Play(s *card.TurnState, self *card.CardState) {
 
 type DemolitionCrewYellow struct{}
 
-func (DemolitionCrewYellow) ID() card.ID              { return card.DemolitionCrewYellow }
+func (DemolitionCrewYellow) ID() ids.CardID           { return ids.DemolitionCrewYellow }
 func (DemolitionCrewYellow) Name() string             { return "Demolition Crew" }
 func (DemolitionCrewYellow) Cost(*card.TurnState) int { return 2 }
 func (DemolitionCrewYellow) Pitch() int               { return 2 }
@@ -50,7 +53,7 @@ func (c DemolitionCrewYellow) Play(s *card.TurnState, self *card.CardState) {
 
 type DemolitionCrewBlue struct{}
 
-func (DemolitionCrewBlue) ID() card.ID              { return card.DemolitionCrewBlue }
+func (DemolitionCrewBlue) ID() ids.CardID           { return ids.DemolitionCrewBlue }
 func (DemolitionCrewBlue) Name() string             { return "Demolition Crew" }
 func (DemolitionCrewBlue) Cost(*card.TurnState) int { return 2 }
 func (DemolitionCrewBlue) Pitch() int               { return 3 }

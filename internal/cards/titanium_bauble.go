@@ -2,13 +2,16 @@
 
 package cards
 
-import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+import (
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
+)
 
 var titaniumBaubleTypes = card.NewTypeSet(card.TypeGeneric)
 
 type TitaniumBaubleBlue struct{}
 
-func (TitaniumBaubleBlue) ID() card.ID              { return card.TitaniumBaubleBlue }
+func (TitaniumBaubleBlue) ID() ids.CardID           { return ids.TitaniumBaubleBlue }
 func (TitaniumBaubleBlue) Name() string             { return "Titanium Bauble" }
 func (TitaniumBaubleBlue) Cost(*card.TurnState) int { return 0 }
 func (TitaniumBaubleBlue) Pitch() int               { return 3 }

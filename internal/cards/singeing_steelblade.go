@@ -7,13 +7,16 @@
 
 package cards
 
-import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+import (
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
+)
 
 var singeingSteelbladeTypes = card.NewTypeSet(card.TypeRuneblade, card.TypeAction, card.TypeAttack)
 
 type SingeingSteelbladeRed struct{}
 
-func (SingeingSteelbladeRed) ID() card.ID              { return card.SingeingSteelbladeRed }
+func (SingeingSteelbladeRed) ID() ids.CardID           { return ids.SingeingSteelbladeRed }
 func (SingeingSteelbladeRed) Name() string             { return "Singeing Steelblade" }
 func (SingeingSteelbladeRed) Cost(*card.TurnState) int { return 1 }
 func (SingeingSteelbladeRed) Pitch() int               { return 1 }
@@ -28,7 +31,7 @@ func (SingeingSteelbladeRed) Play(s *card.TurnState, self *card.CardState) {
 
 type SingeingSteelbladeYellow struct{}
 
-func (SingeingSteelbladeYellow) ID() card.ID              { return card.SingeingSteelbladeYellow }
+func (SingeingSteelbladeYellow) ID() ids.CardID           { return ids.SingeingSteelbladeYellow }
 func (SingeingSteelbladeYellow) Name() string             { return "Singeing Steelblade" }
 func (SingeingSteelbladeYellow) Cost(*card.TurnState) int { return 1 }
 func (SingeingSteelbladeYellow) Pitch() int               { return 2 }
@@ -43,7 +46,7 @@ func (SingeingSteelbladeYellow) Play(s *card.TurnState, self *card.CardState) {
 
 type SingeingSteelbladeBlue struct{}
 
-func (SingeingSteelbladeBlue) ID() card.ID              { return card.SingeingSteelbladeBlue }
+func (SingeingSteelbladeBlue) ID() ids.CardID           { return ids.SingeingSteelbladeBlue }
 func (SingeingSteelbladeBlue) Name() string             { return "Singeing Steelblade" }
 func (SingeingSteelbladeBlue) Cost(*card.TurnState) int { return 1 }
 func (SingeingSteelbladeBlue) Pitch() int               { return 3 }

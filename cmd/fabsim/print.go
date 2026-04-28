@@ -12,9 +12,9 @@ import (
 	"strings"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/cards"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/deck"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/hand"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/weapon"
 )
 
@@ -197,7 +197,7 @@ func printCardValues(d *deck.Deck) {
 	}
 	rows := make([]row, 0, len(d.Stats.PerCardMarginal))
 	for id, m := range d.Stats.PerCardMarginal {
-		r := row{name: card.DisplayName(cards.Get(id))}
+		r := row{name: card.DisplayName(registry.GetCard(id))}
 		if m.PresentHands > 0 && m.AbsentHands > 0 {
 			r.margin = m.Marginal()
 			r.hasMargin = true

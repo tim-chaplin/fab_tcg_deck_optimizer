@@ -4,13 +4,16 @@
 
 package cards
 
-import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+import (
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
+)
 
 var countYourBlessingsTypes = card.NewTypeSet(card.TypeGeneric, card.TypeInstant)
 
 type CountYourBlessingsRed struct{}
 
-func (CountYourBlessingsRed) ID() card.ID              { return card.CountYourBlessingsRed }
+func (CountYourBlessingsRed) ID() ids.CardID           { return ids.CountYourBlessingsRed }
 func (CountYourBlessingsRed) Name() string             { return "Count Your Blessings" }
 func (CountYourBlessingsRed) Cost(*card.TurnState) int { return 2 }
 func (CountYourBlessingsRed) Pitch() int               { return 1 }
@@ -26,7 +29,7 @@ func (CountYourBlessingsRed) Play(s *card.TurnState, self *card.CardState) { s.L
 
 type CountYourBlessingsYellow struct{}
 
-func (CountYourBlessingsYellow) ID() card.ID              { return card.CountYourBlessingsYellow }
+func (CountYourBlessingsYellow) ID() ids.CardID           { return ids.CountYourBlessingsYellow }
 func (CountYourBlessingsYellow) Name() string             { return "Count Your Blessings" }
 func (CountYourBlessingsYellow) Cost(*card.TurnState) int { return 2 }
 func (CountYourBlessingsYellow) Pitch() int               { return 2 }
@@ -42,7 +45,7 @@ func (CountYourBlessingsYellow) Play(s *card.TurnState, self *card.CardState) { 
 
 type CountYourBlessingsBlue struct{}
 
-func (CountYourBlessingsBlue) ID() card.ID              { return card.CountYourBlessingsBlue }
+func (CountYourBlessingsBlue) ID() ids.CardID           { return ids.CountYourBlessingsBlue }
 func (CountYourBlessingsBlue) Name() string             { return "Count Your Blessings" }
 func (CountYourBlessingsBlue) Cost(*card.TurnState) int { return 2 }
 func (CountYourBlessingsBlue) Pitch() int               { return 3 }

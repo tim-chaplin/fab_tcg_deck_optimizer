@@ -5,7 +5,10 @@
 
 package cards
 
-import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+import (
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
+)
 
 var flyingHighTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction)
 
@@ -29,7 +32,7 @@ func flyingHighApplySideEffect(s *card.TurnState, matchPitch int) {
 
 type FlyingHighRed struct{}
 
-func (FlyingHighRed) ID() card.ID              { return card.FlyingHighRed }
+func (FlyingHighRed) ID() ids.CardID           { return ids.FlyingHighRed }
 func (FlyingHighRed) Name() string             { return "Flying High" }
 func (FlyingHighRed) Cost(*card.TurnState) int { return 0 }
 func (FlyingHighRed) Pitch() int               { return 1 }
@@ -44,7 +47,7 @@ func (FlyingHighRed) Play(s *card.TurnState, self *card.CardState) {
 
 type FlyingHighYellow struct{}
 
-func (FlyingHighYellow) ID() card.ID              { return card.FlyingHighYellow }
+func (FlyingHighYellow) ID() ids.CardID           { return ids.FlyingHighYellow }
 func (FlyingHighYellow) Name() string             { return "Flying High" }
 func (FlyingHighYellow) Cost(*card.TurnState) int { return 0 }
 func (FlyingHighYellow) Pitch() int               { return 2 }
@@ -59,7 +62,7 @@ func (FlyingHighYellow) Play(s *card.TurnState, self *card.CardState) {
 
 type FlyingHighBlue struct{}
 
-func (FlyingHighBlue) ID() card.ID              { return card.FlyingHighBlue }
+func (FlyingHighBlue) ID() ids.CardID           { return ids.FlyingHighBlue }
 func (FlyingHighBlue) Name() string             { return "Flying High" }
 func (FlyingHighBlue) Cost(*card.TurnState) int { return 0 }
 func (FlyingHighBlue) Pitch() int               { return 3 }

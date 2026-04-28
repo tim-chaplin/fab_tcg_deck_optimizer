@@ -13,6 +13,7 @@ package cards
 
 import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/simstate"
 )
 
@@ -23,7 +24,7 @@ const lifeForALifeHealValue = 1
 
 type LifeForALifeRed struct{}
 
-func (LifeForALifeRed) ID() card.ID              { return card.LifeForALifeRed }
+func (LifeForALifeRed) ID() ids.CardID           { return ids.LifeForALifeRed }
 func (LifeForALifeRed) Name() string             { return "Life for a Life" }
 func (LifeForALifeRed) Cost(*card.TurnState) int { return 1 }
 func (LifeForALifeRed) Pitch() int               { return 1 }
@@ -38,7 +39,7 @@ func (LifeForALifeRed) Play(s *card.TurnState, self *card.CardState) {
 
 type LifeForALifeYellow struct{}
 
-func (LifeForALifeYellow) ID() card.ID              { return card.LifeForALifeYellow }
+func (LifeForALifeYellow) ID() ids.CardID           { return ids.LifeForALifeYellow }
 func (LifeForALifeYellow) Name() string             { return "Life for a Life" }
 func (LifeForALifeYellow) Cost(*card.TurnState) int { return 1 }
 func (LifeForALifeYellow) Pitch() int               { return 2 }
@@ -53,7 +54,7 @@ func (LifeForALifeYellow) Play(s *card.TurnState, self *card.CardState) {
 
 type LifeForALifeBlue struct{}
 
-func (LifeForALifeBlue) ID() card.ID              { return card.LifeForALifeBlue }
+func (LifeForALifeBlue) ID() ids.CardID           { return ids.LifeForALifeBlue }
 func (LifeForALifeBlue) Name() string             { return "Life for a Life" }
 func (LifeForALifeBlue) Cost(*card.TurnState) int { return 1 }
 func (LifeForALifeBlue) Pitch() int               { return 3 }

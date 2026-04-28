@@ -21,13 +21,14 @@ import (
 	"sort"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/cards"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
 )
 
 // CardGroup is a set of card IDs that share a printed name (i.e. all pitch variants of one
 // card). Pair mutations enumerate cross-products across two groups so every variant
 // combination becomes its own mutation candidate.
-type CardGroup []card.ID
+type CardGroup []ids.CardID
 
 // CardPair is two card groups whose members an anneal mutation should add together because
 // either alone has weak realised value but the combination unlocks a hidden rider.
@@ -40,21 +41,21 @@ type CardPair struct {
 // cardPairs registry compact and lets future pairs reuse a group on both sides if needed
 // (e.g. a self-pair like "two copies of X").
 var (
-	moonWishGroup     = CardGroup{card.MoonWishRed, card.MoonWishYellow, card.MoonWishBlue}
-	sunKissGroup      = CardGroup{card.SunKissRed, card.SunKissYellow, card.SunKissBlue}
-	belittleGroup     = CardGroup{card.BelittleRed, card.BelittleYellow, card.BelittleBlue}
-	minnowismGroup    = CardGroup{card.MinnowismRed, card.MinnowismYellow, card.MinnowismBlue}
-	nimblismGroup     = CardGroup{card.NimblismRed, card.NimblismYellow, card.NimblismBlue}
-	sloggismGroup     = CardGroup{card.SloggismRed, card.SloggismYellow, card.SloggismBlue}
+	moonWishGroup     = CardGroup{ids.MoonWishRed, ids.MoonWishYellow, ids.MoonWishBlue}
+	sunKissGroup      = CardGroup{ids.SunKissRed, ids.SunKissYellow, ids.SunKissBlue}
+	belittleGroup     = CardGroup{ids.BelittleRed, ids.BelittleYellow, ids.BelittleBlue}
+	minnowismGroup    = CardGroup{ids.MinnowismRed, ids.MinnowismYellow, ids.MinnowismBlue}
+	nimblismGroup     = CardGroup{ids.NimblismRed, ids.NimblismYellow, ids.NimblismBlue}
+	sloggismGroup     = CardGroup{ids.SloggismRed, ids.SloggismYellow, ids.SloggismBlue}
 	nimbleStrikeGroup = CardGroup{
-		card.NimbleStrikeRed, card.NimbleStrikeYellow, card.NimbleStrikeBlue,
+		ids.NimbleStrikeRed, ids.NimbleStrikeYellow, ids.NimbleStrikeBlue,
 	}
 	regurgitatingSlogGroup = CardGroup{
-		card.RegurgitatingSlogRed, card.RegurgitatingSlogYellow, card.RegurgitatingSlogBlue,
+		ids.RegurgitatingSlogRed, ids.RegurgitatingSlogYellow, ids.RegurgitatingSlogBlue,
 	}
-	amuletOfHavencallGroup = CardGroup{card.AmuletOfHavencallBlue}
+	amuletOfHavencallGroup = CardGroup{ids.AmuletOfHavencallBlue}
 	rallyTheRearguardGroup = CardGroup{
-		card.RallyTheRearguardRed, card.RallyTheRearguardYellow, card.RallyTheRearguardBlue,
+		ids.RallyTheRearguardRed, ids.RallyTheRearguardYellow, ids.RallyTheRearguardBlue,
 	}
 )
 
@@ -78,8 +79,8 @@ var cardPairs = []CardPair{
 // pairDedupeKey is the canonical (sorted removed IDs, sorted add IDs) tuple identifying a
 // pair-mutation candidate by content; see pairSwapMutations for the iteration shape.
 type pairDedupeKey struct {
-	rmA, rmB   card.ID
-	addA, addB card.ID
+	rmA, rmB   ids.CardID
+	addA, addB ids.CardID
 }
 
 // pairSwapMutations emits paired add mutations for every entry in cardPairs by taking the
@@ -119,12 +120,12 @@ func pairSwapMutations(d *Deck, legal func(card.Card) bool) []Mutation {
 	var out []Mutation
 	for _, pair := range cardPairs {
 		for _, firstID := range pair.First {
-			first := cards.Get(firstID)
+			first := registry.GetCard(firstID)
 			if !pairAddAllowed(first, legal) {
 				continue
 			}
 			for _, secondID := range pair.Second {
-				second := cards.Get(secondID)
+				second := registry.GetCard(secondID)
 				if !pairAddAllowed(second, legal) {
 					continue
 				}
@@ -176,7 +177,7 @@ func pairAddAllowed(c card.Card, legal func(card.Card) bool) bool {
 
 // sortedIDPair returns (a, b) sorted ascending so callers can build canonical
 // order-independent keys.
-func sortedIDPair(a, b card.ID) (card.ID, card.ID) {
+func sortedIDPair(a, b ids.CardID) (ids.CardID, ids.CardID) {
 	if b < a {
 		return b, a
 	}
@@ -202,18 +203,18 @@ func pairSwapByIndex(src []card.Card, i, j int, first, second card.Card) []card.
 // slices with the same IDs in different orders produce equal keys. Tests use it to assert
 // pair mutations never produce a deck whose composition equals the source.
 func cardMultisetKey(cs []card.Card) string {
-	counts := map[card.ID]int{}
+	counts := map[ids.CardID]int{}
 	for _, c := range cs {
 		counts[c.ID()]++
 	}
-	ids := make([]int, 0, len(counts))
+	keys := make([]int, 0, len(counts))
 	for id := range counts {
-		ids = append(ids, int(id))
+		keys = append(keys, int(id))
 	}
-	sort.Ints(ids)
+	sort.Ints(keys)
 	var b []byte
-	for _, id := range ids {
-		b = append(b, fmt.Sprintf("%d:%d,", id, counts[card.ID(id)])...)
+	for _, id := range keys {
+		b = append(b, fmt.Sprintf("%d:%d,", id, counts[ids.CardID(id)])...)
 	}
 	return string(b)
 }

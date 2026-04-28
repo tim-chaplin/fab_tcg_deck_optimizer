@@ -4,13 +4,16 @@
 
 package cards
 
-import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+import (
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
+)
 
 var sigilOfSolaceTypes = card.NewTypeSet(card.TypeGeneric, card.TypeInstant)
 
 type SigilOfSolaceRed struct{}
 
-func (SigilOfSolaceRed) ID() card.ID              { return card.SigilOfSolaceRed }
+func (SigilOfSolaceRed) ID() ids.CardID           { return ids.SigilOfSolaceRed }
 func (SigilOfSolaceRed) Name() string             { return "Sigil of Solace" }
 func (SigilOfSolaceRed) Cost(*card.TurnState) int { return 0 }
 func (SigilOfSolaceRed) Pitch() int               { return 1 }
@@ -26,7 +29,7 @@ func (SigilOfSolaceRed) Play(s *card.TurnState, self *card.CardState) { s.LogPla
 
 type SigilOfSolaceYellow struct{}
 
-func (SigilOfSolaceYellow) ID() card.ID              { return card.SigilOfSolaceYellow }
+func (SigilOfSolaceYellow) ID() ids.CardID           { return ids.SigilOfSolaceYellow }
 func (SigilOfSolaceYellow) Name() string             { return "Sigil of Solace" }
 func (SigilOfSolaceYellow) Cost(*card.TurnState) int { return 0 }
 func (SigilOfSolaceYellow) Pitch() int               { return 2 }
@@ -42,7 +45,7 @@ func (SigilOfSolaceYellow) Play(s *card.TurnState, self *card.CardState) { s.Log
 
 type SigilOfSolaceBlue struct{}
 
-func (SigilOfSolaceBlue) ID() card.ID              { return card.SigilOfSolaceBlue }
+func (SigilOfSolaceBlue) ID() ids.CardID           { return ids.SigilOfSolaceBlue }
 func (SigilOfSolaceBlue) Name() string             { return "Sigil of Solace" }
 func (SigilOfSolaceBlue) Cost(*card.TurnState) int { return 0 }
 func (SigilOfSolaceBlue) Pitch() int               { return 3 }

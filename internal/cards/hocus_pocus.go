@@ -4,13 +4,16 @@
 
 package cards
 
-import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+import (
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
+)
 
 var hocusPocusTypes = card.NewTypeSet(card.TypeRuneblade, card.TypeAction, card.TypeAttack)
 
 type HocusPocusRed struct{}
 
-func (HocusPocusRed) ID() card.ID              { return card.HocusPocusRed }
+func (HocusPocusRed) ID() ids.CardID           { return ids.HocusPocusRed }
 func (HocusPocusRed) Name() string             { return "Hocus Pocus" }
 func (HocusPocusRed) Cost(*card.TurnState) int { return 0 }
 func (HocusPocusRed) Pitch() int               { return 1 }
@@ -25,7 +28,7 @@ func (HocusPocusRed) Play(s *card.TurnState, self *card.CardState) {
 
 type HocusPocusYellow struct{}
 
-func (HocusPocusYellow) ID() card.ID              { return card.HocusPocusYellow }
+func (HocusPocusYellow) ID() ids.CardID           { return ids.HocusPocusYellow }
 func (HocusPocusYellow) Name() string             { return "Hocus Pocus" }
 func (HocusPocusYellow) Cost(*card.TurnState) int { return 0 }
 func (HocusPocusYellow) Pitch() int               { return 2 }
@@ -40,7 +43,7 @@ func (HocusPocusYellow) Play(s *card.TurnState, self *card.CardState) {
 
 type HocusPocusBlue struct{}
 
-func (HocusPocusBlue) ID() card.ID              { return card.HocusPocusBlue }
+func (HocusPocusBlue) ID() ids.CardID           { return ids.HocusPocusBlue }
 func (HocusPocusBlue) Name() string             { return "Hocus Pocus" }
 func (HocusPocusBlue) Cost(*card.TurnState) int { return 0 }
 func (HocusPocusBlue) Pitch() int               { return 3 }

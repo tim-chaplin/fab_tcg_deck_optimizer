@@ -6,7 +6,7 @@ package hero
 // IDs are stable within a build but NOT a persistence format: adding or removing heroes may
 // renumber existing entries. Treat IDs as opaque in-process handles.
 //
-// Same width as card.ID so (hero, card) tuples stay fixed-size integer structs rather than
+// Same width as ids.CardID so (hero, card) tuples stay fixed-size integer structs rather than
 // string-keyed by display name.
 type ID uint16
 

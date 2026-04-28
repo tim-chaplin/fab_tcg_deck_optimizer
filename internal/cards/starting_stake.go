@@ -4,13 +4,16 @@
 
 package cards
 
-import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+import (
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
+)
 
 var startingStakeTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction)
 
 type StartingStakeYellow struct{}
 
-func (StartingStakeYellow) ID() card.ID              { return card.StartingStakeYellow }
+func (StartingStakeYellow) ID() ids.CardID           { return ids.StartingStakeYellow }
 func (StartingStakeYellow) Name() string             { return "Starting Stake" }
 func (StartingStakeYellow) Cost(*card.TurnState) int { return 0 }
 func (StartingStakeYellow) Pitch() int               { return 2 }

@@ -5,13 +5,16 @@
 
 package cards
 
-import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+import (
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
+)
 
 var freewheelingRenegadesTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeAttack)
 
 type FreewheelingRenegadesRed struct{}
 
-func (FreewheelingRenegadesRed) ID() card.ID              { return card.FreewheelingRenegadesRed }
+func (FreewheelingRenegadesRed) ID() ids.CardID           { return ids.FreewheelingRenegadesRed }
 func (FreewheelingRenegadesRed) Name() string             { return "Freewheeling Renegades" }
 func (FreewheelingRenegadesRed) Cost(*card.TurnState) int { return 1 }
 func (FreewheelingRenegadesRed) Pitch() int               { return 1 }
@@ -28,7 +31,7 @@ func (c FreewheelingRenegadesRed) Play(s *card.TurnState, self *card.CardState) 
 
 type FreewheelingRenegadesYellow struct{}
 
-func (FreewheelingRenegadesYellow) ID() card.ID              { return card.FreewheelingRenegadesYellow }
+func (FreewheelingRenegadesYellow) ID() ids.CardID           { return ids.FreewheelingRenegadesYellow }
 func (FreewheelingRenegadesYellow) Name() string             { return "Freewheeling Renegades" }
 func (FreewheelingRenegadesYellow) Cost(*card.TurnState) int { return 1 }
 func (FreewheelingRenegadesYellow) Pitch() int               { return 2 }
@@ -45,7 +48,7 @@ func (c FreewheelingRenegadesYellow) Play(s *card.TurnState, self *card.CardStat
 
 type FreewheelingRenegadesBlue struct{}
 
-func (FreewheelingRenegadesBlue) ID() card.ID              { return card.FreewheelingRenegadesBlue }
+func (FreewheelingRenegadesBlue) ID() ids.CardID           { return ids.FreewheelingRenegadesBlue }
 func (FreewheelingRenegadesBlue) Name() string             { return "Freewheeling Renegades" }
 func (FreewheelingRenegadesBlue) Cost(*card.TurnState) int { return 1 }
 func (FreewheelingRenegadesBlue) Pitch() int               { return 3 }

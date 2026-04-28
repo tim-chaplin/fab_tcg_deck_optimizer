@@ -3,13 +3,16 @@
 
 package cards
 
-import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+import (
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
+)
 
 var brutalAssaultTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeAttack)
 
 type BrutalAssaultRed struct{}
 
-func (BrutalAssaultRed) ID() card.ID              { return card.BrutalAssaultRed }
+func (BrutalAssaultRed) ID() ids.CardID           { return ids.BrutalAssaultRed }
 func (BrutalAssaultRed) Name() string             { return "Brutal Assault" }
 func (BrutalAssaultRed) Cost(*card.TurnState) int { return 2 }
 func (BrutalAssaultRed) Pitch() int               { return 1 }
@@ -23,7 +26,7 @@ func (c BrutalAssaultRed) Play(s *card.TurnState, self *card.CardState) {
 
 type BrutalAssaultYellow struct{}
 
-func (BrutalAssaultYellow) ID() card.ID              { return card.BrutalAssaultYellow }
+func (BrutalAssaultYellow) ID() ids.CardID           { return ids.BrutalAssaultYellow }
 func (BrutalAssaultYellow) Name() string             { return "Brutal Assault" }
 func (BrutalAssaultYellow) Cost(*card.TurnState) int { return 2 }
 func (BrutalAssaultYellow) Pitch() int               { return 2 }
@@ -37,7 +40,7 @@ func (c BrutalAssaultYellow) Play(s *card.TurnState, self *card.CardState) {
 
 type BrutalAssaultBlue struct{}
 
-func (BrutalAssaultBlue) ID() card.ID              { return card.BrutalAssaultBlue }
+func (BrutalAssaultBlue) ID() ids.CardID           { return ids.BrutalAssaultBlue }
 func (BrutalAssaultBlue) Name() string             { return "Brutal Assault" }
 func (BrutalAssaultBlue) Cost(*card.TurnState) int { return 2 }
 func (BrutalAssaultBlue) Pitch() int               { return 3 }

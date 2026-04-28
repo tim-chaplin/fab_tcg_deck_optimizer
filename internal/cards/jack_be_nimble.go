@@ -7,13 +7,16 @@
 
 package cards
 
-import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+import (
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
+)
 
 var jackBeNimbleTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeAttack)
 
 type JackBeNimbleRed struct{}
 
-func (JackBeNimbleRed) ID() card.ID              { return card.JackBeNimbleRed }
+func (JackBeNimbleRed) ID() ids.CardID           { return ids.JackBeNimbleRed }
 func (JackBeNimbleRed) Name() string             { return "Jack Be Nimble" }
 func (JackBeNimbleRed) Cost(*card.TurnState) int { return 0 }
 func (JackBeNimbleRed) Pitch() int               { return 1 }

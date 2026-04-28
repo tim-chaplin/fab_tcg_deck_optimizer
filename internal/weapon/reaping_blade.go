@@ -7,13 +7,16 @@
 
 package weapon
 
-import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+import (
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
+)
 
 var reapingBladeTypes = card.NewTypeSet(card.TypeRuneblade, card.TypeWeapon, card.TypeSword, card.TypeTwoHand)
 
 type ReapingBlade struct{}
 
-func (ReapingBlade) ID() card.ID              { return card.ReapingBladeID }
+func (ReapingBlade) ID() ids.CardID           { return ids.ReapingBladeID }
 func (ReapingBlade) Name() string             { return "Reaping Blade" }
 func (ReapingBlade) Cost(*card.TurnState) int { return 1 }
 func (ReapingBlade) Pitch() int               { return 0 }

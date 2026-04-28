@@ -6,13 +6,16 @@
 
 package cards
 
-import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+import (
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
+)
 
 var riftingTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeAttack)
 
 type RiftingRed struct{}
 
-func (RiftingRed) ID() card.ID              { return card.RiftingRed }
+func (RiftingRed) ID() ids.CardID           { return ids.RiftingRed }
 func (RiftingRed) Name() string             { return "Rifting" }
 func (RiftingRed) Cost(*card.TurnState) int { return 2 }
 func (RiftingRed) Pitch() int               { return 1 }
@@ -27,7 +30,7 @@ func (c RiftingRed) Play(s *card.TurnState, self *card.CardState) { s.ApplyAndLo
 
 type RiftingYellow struct{}
 
-func (RiftingYellow) ID() card.ID              { return card.RiftingYellow }
+func (RiftingYellow) ID() ids.CardID           { return ids.RiftingYellow }
 func (RiftingYellow) Name() string             { return "Rifting" }
 func (RiftingYellow) Cost(*card.TurnState) int { return 2 }
 func (RiftingYellow) Pitch() int               { return 2 }
@@ -44,7 +47,7 @@ func (c RiftingYellow) Play(s *card.TurnState, self *card.CardState) {
 
 type RiftingBlue struct{}
 
-func (RiftingBlue) ID() card.ID              { return card.RiftingBlue }
+func (RiftingBlue) ID() ids.CardID           { return ids.RiftingBlue }
 func (RiftingBlue) Name() string             { return "Rifting" }
 func (RiftingBlue) Cost(*card.TurnState) int { return 2 }
 func (RiftingBlue) Pitch() int               { return 3 }

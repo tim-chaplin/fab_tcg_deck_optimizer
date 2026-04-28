@@ -7,8 +7,8 @@ package deck
 import (
 	"sort"
 
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/hand"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
 )
 
 // Stats holds aggregate hand-value statistics across all simulated runs.
@@ -34,7 +34,7 @@ type Stats struct {
 	// out of the hand by the time its value lands, so the correlation hits whichever cards
 	// happened to share the payoff turn instead. A regression-based estimator over per-hand
 	// presence vectors would credit such effects more cleanly.
-	PerCardMarginal map[card.ID]CardMarginalStats
+	PerCardMarginal map[ids.CardID]CardMarginalStats
 	// Histogram counts hands seen at each integer Value. Keyed by TurnSummary.Value so Min /
 	// Median can be derived without retaining every hand's value. Nil until the first hand is
 	// evaluated.

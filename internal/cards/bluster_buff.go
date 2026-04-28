@@ -4,13 +4,16 @@
 
 package cards
 
-import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+import (
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
+)
 
 var blusterBuffTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeAttack)
 
 type BlusterBuffRed struct{}
 
-func (BlusterBuffRed) ID() card.ID              { return card.BlusterBuffRed }
+func (BlusterBuffRed) ID() ids.CardID           { return ids.BlusterBuffRed }
 func (BlusterBuffRed) Name() string             { return "Bluster Buff" }
 func (BlusterBuffRed) Cost(*card.TurnState) int { return 1 }
 func (BlusterBuffRed) Pitch() int               { return 1 }

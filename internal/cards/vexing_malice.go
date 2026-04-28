@@ -7,13 +7,16 @@
 
 package cards
 
-import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+import (
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
+)
 
 var vexingMaliceTypes = card.NewTypeSet(card.TypeRuneblade, card.TypeAction, card.TypeAttack)
 
 type VexingMaliceRed struct{}
 
-func (VexingMaliceRed) ID() card.ID              { return card.VexingMaliceRed }
+func (VexingMaliceRed) ID() ids.CardID           { return ids.VexingMaliceRed }
 func (VexingMaliceRed) Name() string             { return "Vexing Malice" }
 func (VexingMaliceRed) Cost(*card.TurnState) int { return 1 }
 func (VexingMaliceRed) Pitch() int               { return 1 }
@@ -28,7 +31,7 @@ func (VexingMaliceRed) Play(s *card.TurnState, self *card.CardState) {
 
 type VexingMaliceYellow struct{}
 
-func (VexingMaliceYellow) ID() card.ID              { return card.VexingMaliceYellow }
+func (VexingMaliceYellow) ID() ids.CardID           { return ids.VexingMaliceYellow }
 func (VexingMaliceYellow) Name() string             { return "Vexing Malice" }
 func (VexingMaliceYellow) Cost(*card.TurnState) int { return 1 }
 func (VexingMaliceYellow) Pitch() int               { return 2 }
@@ -43,7 +46,7 @@ func (VexingMaliceYellow) Play(s *card.TurnState, self *card.CardState) {
 
 type VexingMaliceBlue struct{}
 
-func (VexingMaliceBlue) ID() card.ID              { return card.VexingMaliceBlue }
+func (VexingMaliceBlue) ID() ids.CardID           { return ids.VexingMaliceBlue }
 func (VexingMaliceBlue) Name() string             { return "Vexing Malice" }
 func (VexingMaliceBlue) Cost(*card.TurnState) int { return 1 }
 func (VexingMaliceBlue) Pitch() int               { return 3 }

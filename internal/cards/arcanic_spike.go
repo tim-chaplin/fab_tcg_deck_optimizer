@@ -8,7 +8,10 @@
 
 package cards
 
-import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+import (
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
+)
 
 var arcanicSpikeTypes = card.NewTypeSet(card.TypeRuneblade, card.TypeAction, card.TypeAttack)
 
@@ -25,7 +28,7 @@ func arcanicSpikeBonus(s *card.TurnState) int {
 
 type ArcanicSpikeRed struct{}
 
-func (ArcanicSpikeRed) ID() card.ID              { return card.ArcanicSpikeRed }
+func (ArcanicSpikeRed) ID() ids.CardID           { return ids.ArcanicSpikeRed }
 func (ArcanicSpikeRed) Name() string             { return "Arcanic Spike" }
 func (ArcanicSpikeRed) Cost(*card.TurnState) int { return 2 }
 func (ArcanicSpikeRed) Pitch() int               { return 1 }
@@ -40,7 +43,7 @@ func (ArcanicSpikeRed) Play(s *card.TurnState, self *card.CardState) {
 
 type ArcanicSpikeYellow struct{}
 
-func (ArcanicSpikeYellow) ID() card.ID              { return card.ArcanicSpikeYellow }
+func (ArcanicSpikeYellow) ID() ids.CardID           { return ids.ArcanicSpikeYellow }
 func (ArcanicSpikeYellow) Name() string             { return "Arcanic Spike" }
 func (ArcanicSpikeYellow) Cost(*card.TurnState) int { return 2 }
 func (ArcanicSpikeYellow) Pitch() int               { return 2 }
@@ -55,7 +58,7 @@ func (ArcanicSpikeYellow) Play(s *card.TurnState, self *card.CardState) {
 
 type ArcanicSpikeBlue struct{}
 
-func (ArcanicSpikeBlue) ID() card.ID              { return card.ArcanicSpikeBlue }
+func (ArcanicSpikeBlue) ID() ids.CardID           { return ids.ArcanicSpikeBlue }
 func (ArcanicSpikeBlue) Name() string             { return "Arcanic Spike" }
 func (ArcanicSpikeBlue) Cost(*card.TurnState) int { return 2 }
 func (ArcanicSpikeBlue) Pitch() int               { return 3 }

@@ -6,7 +6,10 @@
 
 package cards
 
-import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+import (
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
+)
 
 var yintiYantiTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeAttack)
 
@@ -21,7 +24,7 @@ func yintiYantiBonus(s *card.TurnState) int {
 
 type YintiYantiRed struct{}
 
-func (YintiYantiRed) ID() card.ID              { return card.YintiYantiRed }
+func (YintiYantiRed) ID() ids.CardID           { return ids.YintiYantiRed }
 func (YintiYantiRed) Name() string             { return "Yinti Yanti" }
 func (YintiYantiRed) Cost(*card.TurnState) int { return 0 }
 func (YintiYantiRed) Pitch() int               { return 1 }
@@ -40,7 +43,7 @@ func (YintiYantiRed) Play(s *card.TurnState, self *card.CardState) {
 
 type YintiYantiYellow struct{}
 
-func (YintiYantiYellow) ID() card.ID              { return card.YintiYantiYellow }
+func (YintiYantiYellow) ID() ids.CardID           { return ids.YintiYantiYellow }
 func (YintiYantiYellow) Name() string             { return "Yinti Yanti" }
 func (YintiYantiYellow) Cost(*card.TurnState) int { return 0 }
 func (YintiYantiYellow) Pitch() int               { return 2 }
@@ -59,7 +62,7 @@ func (YintiYantiYellow) Play(s *card.TurnState, self *card.CardState) {
 
 type YintiYantiBlue struct{}
 
-func (YintiYantiBlue) ID() card.ID              { return card.YintiYantiBlue }
+func (YintiYantiBlue) ID() ids.CardID           { return ids.YintiYantiBlue }
 func (YintiYantiBlue) Name() string             { return "Yinti Yanti" }
 func (YintiYantiBlue) Cost(*card.TurnState) int { return 0 }
 func (YintiYantiBlue) Pitch() int               { return 3 }

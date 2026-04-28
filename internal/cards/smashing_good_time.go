@@ -10,13 +10,16 @@
 
 package cards
 
-import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+import (
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
+)
 
 var smashingGoodTimeTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction)
 
 type SmashingGoodTimeRed struct{}
 
-func (SmashingGoodTimeRed) ID() card.ID              { return card.SmashingGoodTimeRed }
+func (SmashingGoodTimeRed) ID() ids.CardID           { return ids.SmashingGoodTimeRed }
 func (SmashingGoodTimeRed) Name() string             { return "Smashing Good Time" }
 func (SmashingGoodTimeRed) Cost(*card.TurnState) int { return 0 }
 func (SmashingGoodTimeRed) Pitch() int               { return 1 }
@@ -36,7 +39,7 @@ func (SmashingGoodTimeRed) Play(s *card.TurnState, self *card.CardState) {
 
 type SmashingGoodTimeYellow struct{}
 
-func (SmashingGoodTimeYellow) ID() card.ID              { return card.SmashingGoodTimeYellow }
+func (SmashingGoodTimeYellow) ID() ids.CardID           { return ids.SmashingGoodTimeYellow }
 func (SmashingGoodTimeYellow) Name() string             { return "Smashing Good Time" }
 func (SmashingGoodTimeYellow) Cost(*card.TurnState) int { return 0 }
 func (SmashingGoodTimeYellow) Pitch() int               { return 2 }
@@ -56,7 +59,7 @@ func (SmashingGoodTimeYellow) Play(s *card.TurnState, self *card.CardState) {
 
 type SmashingGoodTimeBlue struct{}
 
-func (SmashingGoodTimeBlue) ID() card.ID              { return card.SmashingGoodTimeBlue }
+func (SmashingGoodTimeBlue) ID() ids.CardID           { return ids.SmashingGoodTimeBlue }
 func (SmashingGoodTimeBlue) Name() string             { return "Smashing Good Time" }
 func (SmashingGoodTimeBlue) Cost(*card.TurnState) int { return 0 }
 func (SmashingGoodTimeBlue) Pitch() int               { return 3 }

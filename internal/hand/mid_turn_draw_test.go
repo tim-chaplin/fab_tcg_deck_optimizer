@@ -6,6 +6,7 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/cards"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/hero"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
 )
 
@@ -53,7 +54,7 @@ func TestBest_DrawRiderSeesActualDeck(t *testing.T) {
 	resA := Best(hero.Viserai{}, nil, h, 0, deckA, 0, nil)
 	resB := Best(hero.Viserai{}, nil, h, 0, deckB, 0, nil)
 
-	containsID := func(cs []card.Card, id card.ID) bool {
+	containsID := func(cs []card.Card, id ids.CardID) bool {
 		for _, c := range cs {
 			if c.ID() == id {
 				return true
@@ -92,8 +93,8 @@ func TestBest_DeckOrderDoesNotAffectHandRoles(t *testing.T) {
 	deckA := []card.Card{testutils.HugeAttack{}, testutils.PitchOneDR{}}
 	deckB := []card.Card{testutils.PitchOneDR{}, testutils.HugeAttack{}}
 
-	rolesFor := func(summary TurnSummary) map[card.ID]Role {
-		m := make(map[card.ID]Role, len(summary.BestLine))
+	rolesFor := func(summary TurnSummary) map[ids.CardID]Role {
+		m := make(map[ids.CardID]Role, len(summary.BestLine))
 		for _, a := range summary.BestLine {
 			m[a.Card.ID()] = a.Role
 		}

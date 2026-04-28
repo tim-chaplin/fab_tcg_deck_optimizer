@@ -7,7 +7,10 @@
 // ordering assertions need known optimal values.
 package testutils
 
-import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+import (
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
+)
 
 // Card is a configurable Card implementation used across tests to build CardsRemaining /
 // CardsPlayed / Pitched lists with specific type, cost, power, and pitch shapes. Zero-value
@@ -20,8 +23,8 @@ type Card struct {
 	types card.TypeSet
 }
 
-func (s Card) ID() card.ID  { return card.Invalid }
-func (s Card) Name() string { return s.name }
+func (s Card) ID() ids.CardID { return ids.InvalidCard }
+func (s Card) Name() string   { return s.name }
 
 // WithName returns a copy of s with its display name overridden. Lets cross-package tests
 // distinguish multiple Card stubs in log assertions even though `name` is unexported.
@@ -79,7 +82,7 @@ func GenericAura() Card {
 // attack action card" lookaheads.
 type RunebladeAttack struct{}
 
-func (RunebladeAttack) ID() card.ID              { return card.Invalid }
+func (RunebladeAttack) ID() ids.CardID           { return ids.InvalidCard }
 func (RunebladeAttack) Name() string             { return "RunebladeAttack" }
 func (RunebladeAttack) Cost(*card.TurnState) int { return 0 }
 func (RunebladeAttack) Pitch() int               { return 0 }
@@ -95,7 +98,7 @@ func (RunebladeAttack) Play(*card.TurnState, *card.CardState) {}
 // that include weapons but NOT ones restricted to attack action cards.
 type RunebladeWeapon struct{}
 
-func (RunebladeWeapon) ID() card.ID              { return card.Invalid }
+func (RunebladeWeapon) ID() ids.CardID           { return ids.InvalidCard }
 func (RunebladeWeapon) Name() string             { return "RunebladeWeapon" }
 func (RunebladeWeapon) Cost(*card.TurnState) int { return 0 }
 func (RunebladeWeapon) Pitch() int               { return 0 }
@@ -111,7 +114,7 @@ func (RunebladeWeapon) Play(*card.TurnState, *card.CardState) {}
 // non-attack" cases.
 type NonAttack struct{}
 
-func (NonAttack) ID() card.ID                           { return card.Invalid }
+func (NonAttack) ID() ids.CardID                        { return ids.InvalidCard }
 func (NonAttack) Name() string                          { return "NonAttack" }
 func (NonAttack) Cost(*card.TurnState) int              { return 0 }
 func (NonAttack) Pitch() int                            { return 0 }
@@ -125,7 +128,7 @@ func (NonAttack) Play(*card.TurnState, *card.CardState) {}
 // rejecting non-Runeblade attacks.
 type NonRunebladeAttack struct{}
 
-func (NonRunebladeAttack) ID() card.ID              { return card.Invalid }
+func (NonRunebladeAttack) ID() ids.CardID           { return ids.InvalidCard }
 func (NonRunebladeAttack) Name() string             { return "NonRunebladeAttack" }
 func (NonRunebladeAttack) Cost(*card.TurnState) int { return 0 }
 func (NonRunebladeAttack) Pitch() int               { return 0 }
@@ -143,7 +146,7 @@ type AttackWithPower struct {
 	Power int
 }
 
-func (AttackWithPower) ID() card.ID              { return card.Invalid }
+func (AttackWithPower) ID() ids.CardID           { return ids.InvalidCard }
 func (AttackWithPower) Name() string             { return "AttackWithPower" }
 func (AttackWithPower) Cost(*card.TurnState) int { return 0 }
 func (AttackWithPower) Pitch() int               { return 0 }
@@ -158,7 +161,7 @@ func (AttackWithPower) Play(*card.TurnState, *card.CardState) {}
 // Aura is a minimal Aura-typed card — exercises "aura played this turn" checks.
 type Aura struct{}
 
-func (Aura) ID() card.ID                           { return card.Invalid }
+func (Aura) ID() ids.CardID                        { return ids.InvalidCard }
 func (Aura) Name() string                          { return "Aura" }
 func (Aura) Cost(*card.TurnState) int              { return 0 }
 func (Aura) Pitch() int                            { return 0 }
@@ -174,7 +177,7 @@ var genericAttackTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card
 // BlueAttack is a generic blue attack action: pitches 3, defends 3, attacks 1, costs 1.
 type BlueAttack struct{}
 
-func (BlueAttack) ID() card.ID                                  { return card.FakeBlueAttack }
+func (BlueAttack) ID() ids.CardID                               { return ids.FakeBlueAttack }
 func (BlueAttack) Name() string                                 { return "cardtest.BlueAttack" }
 func (BlueAttack) Cost(*card.TurnState) int                     { return 1 }
 func (BlueAttack) Pitch() int                                   { return 3 }
@@ -187,7 +190,7 @@ func (BlueAttack) Play(s *card.TurnState, self *card.CardState) { s.ApplyAndLogE
 // RedAttack is a generic red attack action: pitches 1, defends 1, attacks 3, costs 1.
 type RedAttack struct{}
 
-func (RedAttack) ID() card.ID                                  { return card.FakeRedAttack }
+func (RedAttack) ID() ids.CardID                               { return ids.FakeRedAttack }
 func (RedAttack) Name() string                                 { return "cardtest.RedAttack" }
 func (RedAttack) Cost(*card.TurnState) int                     { return 1 }
 func (RedAttack) Pitch() int                                   { return 1 }
@@ -200,7 +203,7 @@ func (RedAttack) Play(s *card.TurnState, self *card.CardState) { s.ApplyAndLogEf
 // YellowAttack is a generic yellow attack action: pitches 2, defends 2, attacks 2, costs 1.
 type YellowAttack struct{}
 
-func (YellowAttack) ID() card.ID                                  { return card.FakeYellowAttack }
+func (YellowAttack) ID() ids.CardID                               { return ids.FakeYellowAttack }
 func (YellowAttack) Name() string                                 { return "cardtest.YellowAttack" }
 func (YellowAttack) Cost(*card.TurnState) int                     { return 1 }
 func (YellowAttack) Pitch() int                                   { return 2 }
@@ -215,7 +218,7 @@ func (YellowAttack) Play(s *card.TurnState, self *card.CardState) { s.ApplyAndLo
 // (each cantrip plays, draws the next one, which plays, etc.).
 type DrawCantrip struct{}
 
-func (DrawCantrip) ID() card.ID              { return card.FakeDrawCantrip }
+func (DrawCantrip) ID() ids.CardID           { return ids.FakeDrawCantrip }
 func (DrawCantrip) Name() string             { return "cardtest.DrawCantrip" }
 func (DrawCantrip) Cost(*card.TurnState) int { return 0 }
 func (DrawCantrip) Pitch() int               { return 1 }
@@ -238,7 +241,7 @@ var genericActionTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction)
 // onto a drawn-later attack.
 type CostlyDraw struct{}
 
-func (CostlyDraw) ID() card.ID              { return card.FakeCostlyDraw }
+func (CostlyDraw) ID() ids.CardID           { return ids.FakeCostlyDraw }
 func (CostlyDraw) Name() string             { return "cardtest.CostlyDraw" }
 func (CostlyDraw) Cost(*card.TurnState) int { return 1 }
 func (CostlyDraw) Pitch() int               { return 1 }
@@ -255,7 +258,7 @@ func (CostlyDraw) Play(s *card.TurnState, self *card.CardState) {
 // the mid-turn-draw determinism test weighs against CostlyDraw.
 type CostlyAttack struct{}
 
-func (CostlyAttack) ID() card.ID                                  { return card.FakeCostlyAttack }
+func (CostlyAttack) ID() ids.CardID                               { return ids.FakeCostlyAttack }
 func (CostlyAttack) Name() string                                 { return "cardtest.CostlyAttack" }
 func (CostlyAttack) Cost(*card.TurnState) int                     { return 1 }
 func (CostlyAttack) Pitch() int                                   { return 1 }
@@ -271,7 +274,7 @@ var genericDefenseReactionTypes = card.NewTypeSet(card.TypeGeneric, card.TypeDef
 // can pitch it (contributing 1 resource) to fund another 1-cost card without also playing it.
 type PitchOneDR struct{}
 
-func (PitchOneDR) ID() card.ID              { return card.FakePitchOneDR }
+func (PitchOneDR) ID() ids.CardID           { return ids.FakePitchOneDR }
 func (PitchOneDR) Name() string             { return "cardtest.PitchOneDR" }
 func (PitchOneDR) Cost(*card.TurnState) int { return 0 }
 func (PitchOneDR) Pitch() int               { return 1 }
@@ -291,7 +294,7 @@ type HugeAttack struct{}
 
 const hugeAttackDamage = 1_000_000
 
-func (HugeAttack) ID() card.ID                                  { return card.FakeHugeAttack }
+func (HugeAttack) ID() ids.CardID                               { return ids.FakeHugeAttack }
 func (HugeAttack) Name() string                                 { return "cardtest.HugeAttack" }
 func (HugeAttack) Cost(*card.TurnState) int                     { return 0 }
 func (HugeAttack) Pitch() int                                   { return 1 }

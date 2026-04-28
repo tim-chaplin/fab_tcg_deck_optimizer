@@ -5,13 +5,16 @@
 
 package cards
 
-import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+import (
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
+)
 
 var whisperOfTheOracleTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction)
 
 type WhisperOfTheOracleRed struct{}
 
-func (WhisperOfTheOracleRed) ID() card.ID              { return card.WhisperOfTheOracleRed }
+func (WhisperOfTheOracleRed) ID() ids.CardID           { return ids.WhisperOfTheOracleRed }
 func (WhisperOfTheOracleRed) Name() string             { return "Whisper of the Oracle" }
 func (WhisperOfTheOracleRed) Cost(*card.TurnState) int { return 0 }
 func (WhisperOfTheOracleRed) Pitch() int               { return 1 }
@@ -26,7 +29,7 @@ func (WhisperOfTheOracleRed) Play(s *card.TurnState, self *card.CardState) { s.L
 
 type WhisperOfTheOracleYellow struct{}
 
-func (WhisperOfTheOracleYellow) ID() card.ID              { return card.WhisperOfTheOracleYellow }
+func (WhisperOfTheOracleYellow) ID() ids.CardID           { return ids.WhisperOfTheOracleYellow }
 func (WhisperOfTheOracleYellow) Name() string             { return "Whisper of the Oracle" }
 func (WhisperOfTheOracleYellow) Cost(*card.TurnState) int { return 0 }
 func (WhisperOfTheOracleYellow) Pitch() int               { return 2 }
@@ -41,7 +44,7 @@ func (WhisperOfTheOracleYellow) Play(s *card.TurnState, self *card.CardState) { 
 
 type WhisperOfTheOracleBlue struct{}
 
-func (WhisperOfTheOracleBlue) ID() card.ID              { return card.WhisperOfTheOracleBlue }
+func (WhisperOfTheOracleBlue) ID() ids.CardID           { return ids.WhisperOfTheOracleBlue }
 func (WhisperOfTheOracleBlue) Name() string             { return "Whisper of the Oracle" }
 func (WhisperOfTheOracleBlue) Cost(*card.TurnState) int { return 0 }
 func (WhisperOfTheOracleBlue) Pitch() int               { return 3 }

@@ -6,13 +6,16 @@
 
 package cards
 
-import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+import (
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
+)
 
 var handBehindThePenTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeAttack)
 
 type HandBehindThePenRed struct{}
 
-func (HandBehindThePenRed) ID() card.ID              { return card.HandBehindThePenRed }
+func (HandBehindThePenRed) ID() ids.CardID           { return ids.HandBehindThePenRed }
 func (HandBehindThePenRed) Name() string             { return "Hand Behind the Pen" }
 func (HandBehindThePenRed) Cost(*card.TurnState) int { return 2 }
 func (HandBehindThePenRed) Pitch() int               { return 1 }

@@ -5,13 +5,16 @@
 
 package cards
 
-import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+import (
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
+)
 
 var talismanOfRecompenseTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeItem)
 
 type TalismanOfRecompenseYellow struct{}
 
-func (TalismanOfRecompenseYellow) ID() card.ID              { return card.TalismanOfRecompenseYellow }
+func (TalismanOfRecompenseYellow) ID() ids.CardID           { return ids.TalismanOfRecompenseYellow }
 func (TalismanOfRecompenseYellow) Name() string             { return "Talisman of Recompense" }
 func (TalismanOfRecompenseYellow) Cost(*card.TurnState) int { return 0 }
 func (TalismanOfRecompenseYellow) Pitch() int               { return 2 }

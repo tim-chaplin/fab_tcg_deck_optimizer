@@ -6,6 +6,7 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/cards"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/hero"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
 )
 
@@ -19,7 +20,7 @@ func TestBest_EmptyArsenalClaimsHeldCard(t *testing.T) {
 	if got.BestLine[0].Role != Arsenal {
 		t.Errorf("Roles[0] = %s, want ARSENAL", got.BestLine[0].Role)
 	}
-	if got.State.Arsenal == nil || got.State.Arsenal.ID() != card.ToughenUpBlue {
+	if got.State.Arsenal == nil || got.State.Arsenal.ID() != ids.ToughenUpBlue {
 		t.Errorf("ArsenalCard = %v, want Toughen Up Blue", got.State.Arsenal)
 	}
 }
@@ -41,7 +42,7 @@ func TestBest_ArsenalInPlayDR(t *testing.T) {
 	// ArsenalIn surfaces the arsenal-in assignment so callers (the best-hand printout) can flag
 	// that this card wasn't in hand this turn.
 	ai, hasArsenal := got.ArsenalIn()
-	if !hasArsenal || ai.Card.ID() != card.ToughenUpBlue {
+	if !hasArsenal || ai.Card.ID() != ids.ToughenUpBlue {
 		t.Errorf("ArsenalIn = %v, want Toughen Up Blue", ai)
 	}
 	if ai.Role != Defend {
@@ -60,7 +61,7 @@ func TestBest_ArsenalInStayBlocksNewArsenal(t *testing.T) {
 	if got.BestLine[0].Role != Held {
 		t.Errorf("Roles[0] = %s, want HELD (slot occupied by arsenal-in, can't promote)", got.BestLine[0].Role)
 	}
-	if got.State.Arsenal == nil || got.State.Arsenal.ID() != card.ToughenUpBlue {
+	if got.State.Arsenal == nil || got.State.Arsenal.ID() != ids.ToughenUpBlue {
 		t.Errorf("ArsenalCard = %v, want Toughen Up Blue (the staying arsenal-in card)", got.State.Arsenal)
 	}
 }
@@ -168,7 +169,7 @@ func TestPromoteRandomHandCardToArsenal_SpreadsAcrossHands(t *testing.T) {
 		{wbB, wbB, wbB, wbB}, {wbR, wbY, wbY, wbY}, {wbR, wbR, wbY, wbR}, {wbB, wbR, wbY, wbR},
 		{wbB, wbY, wbR, wbR}, {wbR, wbB, wbB, wbY}, {wbR, wbR, wbB, wbY}, {wbY, wbR, wbB, wbB},
 	}
-	picks := map[card.ID]int{}
+	picks := map[ids.CardID]int{}
 	for _, h := range hands {
 		handCopy := append([]card.Card(nil), h...)
 		line := make([]CardAssignment, len(handCopy))
@@ -198,7 +199,7 @@ func TestPromoteRandomHandCardToArsenal_DeterministicPerHand(t *testing.T) {
 		cards.WoundingBlowRed{}, cards.WoundingBlowYellow{},
 		cards.WoundingBlowBlue{}, cards.WoundingBlowBlue{},
 	}
-	var firstID card.ID
+	var firstID ids.CardID
 	for run := 0; run < 5; run++ {
 		line := []CardAssignment{
 			{Card: hand[0], Role: Held},

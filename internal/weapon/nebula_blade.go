@@ -11,13 +11,16 @@
 
 package weapon
 
-import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+import (
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
+)
 
 var nebulaBladeTypes = card.NewTypeSet(card.TypeRuneblade, card.TypeWeapon, card.TypeSword, card.TypeTwoHand)
 
 type NebulaBlade struct{}
 
-func (NebulaBlade) ID() card.ID              { return card.NebulaBladeID }
+func (NebulaBlade) ID() ids.CardID           { return ids.NebulaBladeID }
 func (NebulaBlade) Name() string             { return "Nebula Blade" }
 func (NebulaBlade) Cost(*card.TurnState) int { return 2 }
 func (NebulaBlade) Pitch() int               { return 0 }

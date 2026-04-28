@@ -5,7 +5,10 @@
 
 package cards
 
-import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+import (
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
+)
 
 var minnowismTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction)
 
@@ -26,7 +29,7 @@ func minnowismApplySideEffect(s *card.TurnState, n int) {
 
 type MinnowismRed struct{}
 
-func (MinnowismRed) ID() card.ID              { return card.MinnowismRed }
+func (MinnowismRed) ID() ids.CardID           { return ids.MinnowismRed }
 func (MinnowismRed) Name() string             { return "Minnowism" }
 func (MinnowismRed) Cost(*card.TurnState) int { return 0 }
 func (MinnowismRed) Pitch() int               { return 1 }
@@ -41,7 +44,7 @@ func (MinnowismRed) Play(s *card.TurnState, self *card.CardState) {
 
 type MinnowismYellow struct{}
 
-func (MinnowismYellow) ID() card.ID              { return card.MinnowismYellow }
+func (MinnowismYellow) ID() ids.CardID           { return ids.MinnowismYellow }
 func (MinnowismYellow) Name() string             { return "Minnowism" }
 func (MinnowismYellow) Cost(*card.TurnState) int { return 0 }
 func (MinnowismYellow) Pitch() int               { return 2 }
@@ -56,7 +59,7 @@ func (MinnowismYellow) Play(s *card.TurnState, self *card.CardState) {
 
 type MinnowismBlue struct{}
 
-func (MinnowismBlue) ID() card.ID              { return card.MinnowismBlue }
+func (MinnowismBlue) ID() ids.CardID           { return ids.MinnowismBlue }
 func (MinnowismBlue) Name() string             { return "Minnowism" }
 func (MinnowismBlue) Cost(*card.TurnState) int { return 0 }
 func (MinnowismBlue) Pitch() int               { return 3 }

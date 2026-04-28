@@ -9,8 +9,9 @@ import (
 	"sort"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/cards"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/deck"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
 )
 
 // Marshal returns the JSON encoding of `d` (indented) with card/weapon/hero names in place of
@@ -75,17 +76,17 @@ func statsToJSON(s deck.Stats) StatsJSON {
 	}
 }
 
-// perCardMarginalToJSON flattens the card.ID-keyed marginal-stats map into a slice sorted
+// perCardMarginalToJSON flattens the ids.CardID-keyed marginal-stats map into a slice sorted
 // by Marginal descending, then by card name — matching the on-screen card-value table's
 // order so the JSON and the printout read in lockstep.
-func perCardMarginalToJSON(m map[card.ID]deck.CardMarginalStats) []CardMarginalStatsJSON {
+func perCardMarginalToJSON(m map[ids.CardID]deck.CardMarginalStats) []CardMarginalStatsJSON {
 	if len(m) == 0 {
 		return nil
 	}
 	out := make([]CardMarginalStatsJSON, 0, len(m))
 	for id, s := range m {
 		out = append(out, CardMarginalStatsJSON{
-			Card:         card.DisplayName(cards.Get(id)),
+			Card:         card.DisplayName(registry.GetCard(id)),
 			PresentTotal: s.PresentTotal,
 			PresentHands: s.PresentHands,
 			AbsentTotal:  s.AbsentTotal,

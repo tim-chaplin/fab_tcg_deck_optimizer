@@ -5,13 +5,16 @@
 
 package cards
 
-import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+import (
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
+)
 
 var gravekeepingTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeAttack)
 
 type GravekeepingRed struct{}
 
-func (GravekeepingRed) ID() card.ID              { return card.GravekeepingRed }
+func (GravekeepingRed) ID() ids.CardID           { return ids.GravekeepingRed }
 func (GravekeepingRed) Name() string             { return "Gravekeeping" }
 func (GravekeepingRed) Cost(*card.TurnState) int { return 1 }
 func (GravekeepingRed) Pitch() int               { return 1 }
@@ -28,7 +31,7 @@ func (c GravekeepingRed) Play(s *card.TurnState, self *card.CardState) {
 
 type GravekeepingYellow struct{}
 
-func (GravekeepingYellow) ID() card.ID              { return card.GravekeepingYellow }
+func (GravekeepingYellow) ID() ids.CardID           { return ids.GravekeepingYellow }
 func (GravekeepingYellow) Name() string             { return "Gravekeeping" }
 func (GravekeepingYellow) Cost(*card.TurnState) int { return 1 }
 func (GravekeepingYellow) Pitch() int               { return 2 }
@@ -45,7 +48,7 @@ func (c GravekeepingYellow) Play(s *card.TurnState, self *card.CardState) {
 
 type GravekeepingBlue struct{}
 
-func (GravekeepingBlue) ID() card.ID              { return card.GravekeepingBlue }
+func (GravekeepingBlue) ID() ids.CardID           { return ids.GravekeepingBlue }
 func (GravekeepingBlue) Name() string             { return "Gravekeeping" }
 func (GravekeepingBlue) Cost(*card.TurnState) int { return 1 }
 func (GravekeepingBlue) Pitch() int               { return 3 }

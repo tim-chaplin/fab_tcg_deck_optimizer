@@ -7,6 +7,7 @@ package cards
 
 import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/simstate"
 )
 
@@ -23,7 +24,7 @@ func adrenalineRushBonus() int {
 
 type AdrenalineRushRed struct{}
 
-func (AdrenalineRushRed) ID() card.ID              { return card.AdrenalineRushRed }
+func (AdrenalineRushRed) ID() ids.CardID           { return ids.AdrenalineRushRed }
 func (AdrenalineRushRed) Name() string             { return "Adrenaline Rush" }
 func (AdrenalineRushRed) Cost(*card.TurnState) int { return 2 }
 func (AdrenalineRushRed) Pitch() int               { return 1 }
@@ -38,7 +39,7 @@ func (AdrenalineRushRed) Play(s *card.TurnState, self *card.CardState) {
 
 type AdrenalineRushYellow struct{}
 
-func (AdrenalineRushYellow) ID() card.ID              { return card.AdrenalineRushYellow }
+func (AdrenalineRushYellow) ID() ids.CardID           { return ids.AdrenalineRushYellow }
 func (AdrenalineRushYellow) Name() string             { return "Adrenaline Rush" }
 func (AdrenalineRushYellow) Cost(*card.TurnState) int { return 2 }
 func (AdrenalineRushYellow) Pitch() int               { return 2 }
@@ -53,7 +54,7 @@ func (AdrenalineRushYellow) Play(s *card.TurnState, self *card.CardState) {
 
 type AdrenalineRushBlue struct{}
 
-func (AdrenalineRushBlue) ID() card.ID              { return card.AdrenalineRushBlue }
+func (AdrenalineRushBlue) ID() ids.CardID           { return ids.AdrenalineRushBlue }
 func (AdrenalineRushBlue) Name() string             { return "Adrenaline Rush" }
 func (AdrenalineRushBlue) Cost(*card.TurnState) int { return 2 }
 func (AdrenalineRushBlue) Pitch() int               { return 3 }

@@ -11,13 +11,14 @@ import (
 	"fmt"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
 )
 
 var blessingOfOccultTypes = card.NewTypeSet(card.TypeRuneblade, card.TypeAction, card.TypeAura)
 
 type BlessingOfOccultRed struct{}
 
-func (BlessingOfOccultRed) ID() card.ID              { return card.BlessingOfOccultRed }
+func (BlessingOfOccultRed) ID() ids.CardID           { return ids.BlessingOfOccultRed }
 func (BlessingOfOccultRed) Name() string             { return "Blessing of Occult" }
 func (BlessingOfOccultRed) Cost(*card.TurnState) int { return 1 }
 func (BlessingOfOccultRed) Pitch() int               { return 1 }
@@ -32,7 +33,7 @@ func (c BlessingOfOccultRed) Play(s *card.TurnState, self *card.CardState) {
 
 type BlessingOfOccultYellow struct{}
 
-func (BlessingOfOccultYellow) ID() card.ID              { return card.BlessingOfOccultYellow }
+func (BlessingOfOccultYellow) ID() ids.CardID           { return ids.BlessingOfOccultYellow }
 func (BlessingOfOccultYellow) Name() string             { return "Blessing of Occult" }
 func (BlessingOfOccultYellow) Cost(*card.TurnState) int { return 1 }
 func (BlessingOfOccultYellow) Pitch() int               { return 2 }
@@ -47,7 +48,7 @@ func (c BlessingOfOccultYellow) Play(s *card.TurnState, self *card.CardState) {
 
 type BlessingOfOccultBlue struct{}
 
-func (BlessingOfOccultBlue) ID() card.ID              { return card.BlessingOfOccultBlue }
+func (BlessingOfOccultBlue) ID() ids.CardID           { return ids.BlessingOfOccultBlue }
 func (BlessingOfOccultBlue) Name() string             { return "Blessing of Occult" }
 func (BlessingOfOccultBlue) Cost(*card.TurnState) int { return 1 }
 func (BlessingOfOccultBlue) Pitch() int               { return 3 }

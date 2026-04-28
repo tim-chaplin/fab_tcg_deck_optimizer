@@ -5,13 +5,16 @@
 
 package cards
 
-import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+import (
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
+)
 
 var walkThePlankTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeAttack)
 
 type WalkThePlankRed struct{}
 
-func (WalkThePlankRed) ID() card.ID              { return card.WalkThePlankRed }
+func (WalkThePlankRed) ID() ids.CardID           { return ids.WalkThePlankRed }
 func (WalkThePlankRed) Name() string             { return "Walk the Plank" }
 func (WalkThePlankRed) Cost(*card.TurnState) int { return 3 }
 func (WalkThePlankRed) Pitch() int               { return 1 }
@@ -28,7 +31,7 @@ func (WalkThePlankRed) Play(s *card.TurnState, self *card.CardState) {
 
 type WalkThePlankYellow struct{}
 
-func (WalkThePlankYellow) ID() card.ID              { return card.WalkThePlankYellow }
+func (WalkThePlankYellow) ID() ids.CardID           { return ids.WalkThePlankYellow }
 func (WalkThePlankYellow) Name() string             { return "Walk the Plank" }
 func (WalkThePlankYellow) Cost(*card.TurnState) int { return 3 }
 func (WalkThePlankYellow) Pitch() int               { return 2 }
@@ -45,7 +48,7 @@ func (WalkThePlankYellow) Play(s *card.TurnState, self *card.CardState) {
 
 type WalkThePlankBlue struct{}
 
-func (WalkThePlankBlue) ID() card.ID              { return card.WalkThePlankBlue }
+func (WalkThePlankBlue) ID() ids.CardID           { return ids.WalkThePlankBlue }
 func (WalkThePlankBlue) Name() string             { return "Walk the Plank" }
 func (WalkThePlankBlue) Cost(*card.TurnState) int { return 3 }
 func (WalkThePlankBlue) Pitch() int               { return 3 }

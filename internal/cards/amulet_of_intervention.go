@@ -6,13 +6,16 @@
 
 package cards
 
-import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+import (
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
+)
 
 var amuletOfInterventionTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeItem)
 
 type AmuletOfInterventionBlue struct{}
 
-func (AmuletOfInterventionBlue) ID() card.ID              { return card.AmuletOfInterventionBlue }
+func (AmuletOfInterventionBlue) ID() ids.CardID           { return ids.AmuletOfInterventionBlue }
 func (AmuletOfInterventionBlue) Name() string             { return "Amulet of Intervention" }
 func (AmuletOfInterventionBlue) Cost(*card.TurnState) int { return 0 }
 func (AmuletOfInterventionBlue) Pitch() int               { return 3 }

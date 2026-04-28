@@ -23,7 +23,10 @@
 
 package cards
 
-import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+import (
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
+)
 
 var runicReapingTypes = card.NewTypeSet(card.TypeRuneblade, card.TypeAction)
 
@@ -36,7 +39,7 @@ func runicReapingTargetMatches(target *card.CardState) bool {
 
 type RunicReapingRed struct{}
 
-func (RunicReapingRed) ID() card.ID              { return card.RunicReapingRed }
+func (RunicReapingRed) ID() ids.CardID           { return ids.RunicReapingRed }
 func (RunicReapingRed) Name() string             { return "Runic Reaping" }
 func (RunicReapingRed) Cost(*card.TurnState) int { return 1 }
 func (RunicReapingRed) Pitch() int               { return 1 }
@@ -50,7 +53,7 @@ func (c RunicReapingRed) Play(s *card.TurnState, self *card.CardState) {
 
 type RunicReapingYellow struct{}
 
-func (RunicReapingYellow) ID() card.ID              { return card.RunicReapingYellow }
+func (RunicReapingYellow) ID() ids.CardID           { return ids.RunicReapingYellow }
 func (RunicReapingYellow) Name() string             { return "Runic Reaping" }
 func (RunicReapingYellow) Cost(*card.TurnState) int { return 1 }
 func (RunicReapingYellow) Pitch() int               { return 2 }
@@ -64,7 +67,7 @@ func (c RunicReapingYellow) Play(s *card.TurnState, self *card.CardState) {
 
 type RunicReapingBlue struct{}
 
-func (RunicReapingBlue) ID() card.ID              { return card.RunicReapingBlue }
+func (RunicReapingBlue) ID() ids.CardID           { return ids.RunicReapingBlue }
 func (RunicReapingBlue) Name() string             { return "Runic Reaping" }
 func (RunicReapingBlue) Cost(*card.TurnState) int { return 1 }
 func (RunicReapingBlue) Pitch() int               { return 3 }

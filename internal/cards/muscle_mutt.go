@@ -3,13 +3,16 @@
 
 package cards
 
-import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+import (
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
+)
 
 var muscleMuttTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeAttack)
 
 type MuscleMuttYellow struct{}
 
-func (MuscleMuttYellow) ID() card.ID              { return card.MuscleMuttYellow }
+func (MuscleMuttYellow) ID() ids.CardID           { return ids.MuscleMuttYellow }
 func (MuscleMuttYellow) Name() string             { return "Muscle Mutt" }
 func (MuscleMuttYellow) Cost(*card.TurnState) int { return 3 }
 func (MuscleMuttYellow) Pitch() int               { return 2 }

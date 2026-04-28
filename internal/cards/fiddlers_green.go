@@ -14,6 +14,7 @@ import (
 	"fmt"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
 )
 
 // fiddlersGreenPlay emits the chain step then writes the printed N{h} as a "Gained N
@@ -25,7 +26,7 @@ func fiddlersGreenPlay(s *card.TurnState, self *card.CardState, heal int) {
 
 type FiddlersGreenRed struct{}
 
-func (FiddlersGreenRed) ID() card.ID              { return card.FiddlersGreenRed }
+func (FiddlersGreenRed) ID() ids.CardID           { return ids.FiddlersGreenRed }
 func (FiddlersGreenRed) Name() string             { return "Fiddler's Green" }
 func (FiddlersGreenRed) Cost(*card.TurnState) int { return 0 }
 func (FiddlersGreenRed) Pitch() int               { return 1 }
@@ -40,7 +41,7 @@ func (FiddlersGreenRed) Play(s *card.TurnState, self *card.CardState) {
 
 type FiddlersGreenYellow struct{}
 
-func (FiddlersGreenYellow) ID() card.ID              { return card.FiddlersGreenYellow }
+func (FiddlersGreenYellow) ID() ids.CardID           { return ids.FiddlersGreenYellow }
 func (FiddlersGreenYellow) Name() string             { return "Fiddler's Green" }
 func (FiddlersGreenYellow) Cost(*card.TurnState) int { return 0 }
 func (FiddlersGreenYellow) Pitch() int               { return 2 }
@@ -55,7 +56,7 @@ func (FiddlersGreenYellow) Play(s *card.TurnState, self *card.CardState) {
 
 type FiddlersGreenBlue struct{}
 
-func (FiddlersGreenBlue) ID() card.ID              { return card.FiddlersGreenBlue }
+func (FiddlersGreenBlue) ID() ids.CardID           { return ids.FiddlersGreenBlue }
 func (FiddlersGreenBlue) Name() string             { return "Fiddler's Green" }
 func (FiddlersGreenBlue) Cost(*card.TurnState) int { return 0 }
 func (FiddlersGreenBlue) Pitch() int               { return 3 }

@@ -3,13 +3,16 @@
 
 package cards
 
-import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+import (
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
+)
 
 var criticalStrikeTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeAttack)
 
 type CriticalStrikeRed struct{}
 
-func (CriticalStrikeRed) ID() card.ID              { return card.CriticalStrikeRed }
+func (CriticalStrikeRed) ID() ids.CardID           { return ids.CriticalStrikeRed }
 func (CriticalStrikeRed) Name() string             { return "Critical Strike" }
 func (CriticalStrikeRed) Cost(*card.TurnState) int { return 1 }
 func (CriticalStrikeRed) Pitch() int               { return 1 }
@@ -23,7 +26,7 @@ func (c CriticalStrikeRed) Play(s *card.TurnState, self *card.CardState) {
 
 type CriticalStrikeYellow struct{}
 
-func (CriticalStrikeYellow) ID() card.ID              { return card.CriticalStrikeYellow }
+func (CriticalStrikeYellow) ID() ids.CardID           { return ids.CriticalStrikeYellow }
 func (CriticalStrikeYellow) Name() string             { return "Critical Strike" }
 func (CriticalStrikeYellow) Cost(*card.TurnState) int { return 1 }
 func (CriticalStrikeYellow) Pitch() int               { return 2 }
@@ -37,7 +40,7 @@ func (c CriticalStrikeYellow) Play(s *card.TurnState, self *card.CardState) {
 
 type CriticalStrikeBlue struct{}
 
-func (CriticalStrikeBlue) ID() card.ID              { return card.CriticalStrikeBlue }
+func (CriticalStrikeBlue) ID() ids.CardID           { return ids.CriticalStrikeBlue }
 func (CriticalStrikeBlue) Name() string             { return "Critical Strike" }
 func (CriticalStrikeBlue) Cost(*card.TurnState) int { return 1 }
 func (CriticalStrikeBlue) Pitch() int               { return 3 }

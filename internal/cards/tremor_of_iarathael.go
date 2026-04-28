@@ -6,13 +6,16 @@
 
 package cards
 
-import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+import (
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
+)
 
 var tremorOfIArathaelTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeAttack)
 
 type TremorOfIArathaelRed struct{}
 
-func (TremorOfIArathaelRed) ID() card.ID              { return card.TremorOfIArathaelRed }
+func (TremorOfIArathaelRed) ID() ids.CardID           { return ids.TremorOfIArathaelRed }
 func (TremorOfIArathaelRed) Name() string             { return "Tremor of íArathael" }
 func (TremorOfIArathaelRed) Cost(*card.TurnState) int { return 1 }
 func (TremorOfIArathaelRed) Pitch() int               { return 1 }
@@ -29,7 +32,7 @@ func (c TremorOfIArathaelRed) Play(s *card.TurnState, self *card.CardState) {
 
 type TremorOfIArathaelYellow struct{}
 
-func (TremorOfIArathaelYellow) ID() card.ID              { return card.TremorOfIArathaelYellow }
+func (TremorOfIArathaelYellow) ID() ids.CardID           { return ids.TremorOfIArathaelYellow }
 func (TremorOfIArathaelYellow) Name() string             { return "Tremor of íArathael" }
 func (TremorOfIArathaelYellow) Cost(*card.TurnState) int { return 1 }
 func (TremorOfIArathaelYellow) Pitch() int               { return 2 }
@@ -46,7 +49,7 @@ func (c TremorOfIArathaelYellow) Play(s *card.TurnState, self *card.CardState) {
 
 type TremorOfIArathaelBlue struct{}
 
-func (TremorOfIArathaelBlue) ID() card.ID              { return card.TremorOfIArathaelBlue }
+func (TremorOfIArathaelBlue) ID() ids.CardID           { return ids.TremorOfIArathaelBlue }
 func (TremorOfIArathaelBlue) Name() string             { return "Tremor of íArathael" }
 func (TremorOfIArathaelBlue) Cost(*card.TurnState) int { return 1 }
 func (TremorOfIArathaelBlue) Pitch() int               { return 3 }

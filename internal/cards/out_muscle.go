@@ -5,13 +5,16 @@
 
 package cards
 
-import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+import (
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
+)
 
 var outMuscleTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeAttack)
 
 type OutMuscleRed struct{}
 
-func (OutMuscleRed) ID() card.ID              { return card.OutMuscleRed }
+func (OutMuscleRed) ID() ids.CardID           { return ids.OutMuscleRed }
 func (OutMuscleRed) Name() string             { return "Out Muscle" }
 func (OutMuscleRed) Cost(*card.TurnState) int { return 3 }
 func (OutMuscleRed) Pitch() int               { return 1 }
@@ -28,7 +31,7 @@ func (c OutMuscleRed) Play(s *card.TurnState, self *card.CardState) {
 
 type OutMuscleYellow struct{}
 
-func (OutMuscleYellow) ID() card.ID              { return card.OutMuscleYellow }
+func (OutMuscleYellow) ID() ids.CardID           { return ids.OutMuscleYellow }
 func (OutMuscleYellow) Name() string             { return "Out Muscle" }
 func (OutMuscleYellow) Cost(*card.TurnState) int { return 3 }
 func (OutMuscleYellow) Pitch() int               { return 2 }
@@ -45,7 +48,7 @@ func (c OutMuscleYellow) Play(s *card.TurnState, self *card.CardState) {
 
 type OutMuscleBlue struct{}
 
-func (OutMuscleBlue) ID() card.ID              { return card.OutMuscleBlue }
+func (OutMuscleBlue) ID() ids.CardID           { return ids.OutMuscleBlue }
 func (OutMuscleBlue) Name() string             { return "Out Muscle" }
 func (OutMuscleBlue) Cost(*card.TurnState) int { return 3 }
 func (OutMuscleBlue) Pitch() int               { return 3 }

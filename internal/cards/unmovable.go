@@ -7,11 +7,14 @@
 
 package cards
 
-import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+import (
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
+)
 
 type UnmovableRed struct{}
 
-func (UnmovableRed) ID() card.ID              { return card.UnmovableRed }
+func (UnmovableRed) ID() ids.CardID           { return ids.UnmovableRed }
 func (UnmovableRed) Name() string             { return "Unmovable" }
 func (UnmovableRed) Cost(*card.TurnState) int { return 3 }
 func (UnmovableRed) Pitch() int               { return 1 }
@@ -26,7 +29,7 @@ func (UnmovableRed) ArsenalDefenseBonus() int { return 1 }
 
 type UnmovableYellow struct{}
 
-func (UnmovableYellow) ID() card.ID              { return card.UnmovableYellow }
+func (UnmovableYellow) ID() ids.CardID           { return ids.UnmovableYellow }
 func (UnmovableYellow) Name() string             { return "Unmovable" }
 func (UnmovableYellow) Cost(*card.TurnState) int { return 3 }
 func (UnmovableYellow) Pitch() int               { return 2 }
@@ -41,7 +44,7 @@ func (UnmovableYellow) ArsenalDefenseBonus() int { return 1 }
 
 type UnmovableBlue struct{}
 
-func (UnmovableBlue) ID() card.ID              { return card.UnmovableBlue }
+func (UnmovableBlue) ID() ids.CardID           { return ids.UnmovableBlue }
 func (UnmovableBlue) Name() string             { return "Unmovable" }
 func (UnmovableBlue) Cost(*card.TurnState) int { return 3 }
 func (UnmovableBlue) Pitch() int               { return 3 }

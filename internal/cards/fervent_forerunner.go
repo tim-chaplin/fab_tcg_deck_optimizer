@@ -9,7 +9,10 @@
 
 package cards
 
-import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+import (
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
+)
 
 var ferventForerunnerTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeAttack)
 
@@ -24,7 +27,7 @@ func ferventForerunnerPlay(s *card.TurnState, self *card.CardState) {
 
 type FerventForerunnerRed struct{}
 
-func (FerventForerunnerRed) ID() card.ID              { return card.FerventForerunnerRed }
+func (FerventForerunnerRed) ID() ids.CardID           { return ids.FerventForerunnerRed }
 func (FerventForerunnerRed) Name() string             { return "Fervent Forerunner" }
 func (FerventForerunnerRed) Cost(*card.TurnState) int { return 0 }
 func (FerventForerunnerRed) Pitch() int               { return 1 }
@@ -41,7 +44,7 @@ func (FerventForerunnerRed) Play(s *card.TurnState, self *card.CardState) {
 
 type FerventForerunnerYellow struct{}
 
-func (FerventForerunnerYellow) ID() card.ID              { return card.FerventForerunnerYellow }
+func (FerventForerunnerYellow) ID() ids.CardID           { return ids.FerventForerunnerYellow }
 func (FerventForerunnerYellow) Name() string             { return "Fervent Forerunner" }
 func (FerventForerunnerYellow) Cost(*card.TurnState) int { return 0 }
 func (FerventForerunnerYellow) Pitch() int               { return 2 }
@@ -58,7 +61,7 @@ func (FerventForerunnerYellow) Play(s *card.TurnState, self *card.CardState) {
 
 type FerventForerunnerBlue struct{}
 
-func (FerventForerunnerBlue) ID() card.ID              { return card.FerventForerunnerBlue }
+func (FerventForerunnerBlue) ID() ids.CardID           { return ids.FerventForerunnerBlue }
 func (FerventForerunnerBlue) Name() string             { return "Fervent Forerunner" }
 func (FerventForerunnerBlue) Cost(*card.TurnState) int { return 0 }
 func (FerventForerunnerBlue) Pitch() int               { return 3 }

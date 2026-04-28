@@ -11,7 +11,10 @@
 
 package cards
 
-import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+import (
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
+)
 
 var reduceToRunechantTypes = card.NewTypeSet(card.TypeRuneblade, card.TypeDefenseReaction)
 
@@ -27,7 +30,7 @@ func reduceToRunechantCost(s *card.TurnState) int {
 
 type ReduceToRunechantRed struct{}
 
-func (ReduceToRunechantRed) ID() card.ID                { return card.ReduceToRunechantRed }
+func (ReduceToRunechantRed) ID() ids.CardID             { return ids.ReduceToRunechantRed }
 func (ReduceToRunechantRed) Name() string               { return "Reduce to Runechant" }
 func (ReduceToRunechantRed) Cost(s *card.TurnState) int { return reduceToRunechantCost(s) }
 func (ReduceToRunechantRed) MinCost() int               { return 0 }
@@ -44,7 +47,7 @@ func (ReduceToRunechantRed) Play(s *card.TurnState, self *card.CardState) {
 
 type ReduceToRunechantYellow struct{}
 
-func (ReduceToRunechantYellow) ID() card.ID                { return card.ReduceToRunechantYellow }
+func (ReduceToRunechantYellow) ID() ids.CardID             { return ids.ReduceToRunechantYellow }
 func (ReduceToRunechantYellow) Name() string               { return "Reduce to Runechant" }
 func (ReduceToRunechantYellow) Cost(s *card.TurnState) int { return reduceToRunechantCost(s) }
 func (ReduceToRunechantYellow) MinCost() int               { return 0 }
@@ -61,7 +64,7 @@ func (ReduceToRunechantYellow) Play(s *card.TurnState, self *card.CardState) {
 
 type ReduceToRunechantBlue struct{}
 
-func (ReduceToRunechantBlue) ID() card.ID                { return card.ReduceToRunechantBlue }
+func (ReduceToRunechantBlue) ID() ids.CardID             { return ids.ReduceToRunechantBlue }
 func (ReduceToRunechantBlue) Name() string               { return "Reduce to Runechant" }
 func (ReduceToRunechantBlue) Cost(s *card.TurnState) int { return reduceToRunechantCost(s) }
 func (ReduceToRunechantBlue) MinCost() int               { return 0 }

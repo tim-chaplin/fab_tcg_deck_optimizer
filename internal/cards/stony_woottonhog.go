@@ -5,13 +5,16 @@
 
 package cards
 
-import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+import (
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
+)
 
 var stonyWoottonhogTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeAttack)
 
 type StonyWoottonhogRed struct{}
 
-func (StonyWoottonhogRed) ID() card.ID              { return card.StonyWoottonhogRed }
+func (StonyWoottonhogRed) ID() ids.CardID           { return ids.StonyWoottonhogRed }
 func (StonyWoottonhogRed) Name() string             { return "Stony Woottonhog" }
 func (StonyWoottonhogRed) Cost(*card.TurnState) int { return 2 }
 func (StonyWoottonhogRed) Pitch() int               { return 1 }
@@ -28,7 +31,7 @@ func (c StonyWoottonhogRed) Play(s *card.TurnState, self *card.CardState) {
 
 type StonyWoottonhogYellow struct{}
 
-func (StonyWoottonhogYellow) ID() card.ID              { return card.StonyWoottonhogYellow }
+func (StonyWoottonhogYellow) ID() ids.CardID           { return ids.StonyWoottonhogYellow }
 func (StonyWoottonhogYellow) Name() string             { return "Stony Woottonhog" }
 func (StonyWoottonhogYellow) Cost(*card.TurnState) int { return 2 }
 func (StonyWoottonhogYellow) Pitch() int               { return 2 }
@@ -45,7 +48,7 @@ func (c StonyWoottonhogYellow) Play(s *card.TurnState, self *card.CardState) {
 
 type StonyWoottonhogBlue struct{}
 
-func (StonyWoottonhogBlue) ID() card.ID              { return card.StonyWoottonhogBlue }
+func (StonyWoottonhogBlue) ID() ids.CardID           { return ids.StonyWoottonhogBlue }
 func (StonyWoottonhogBlue) Name() string             { return "Stony Woottonhog" }
 func (StonyWoottonhogBlue) Cost(*card.TurnState) int { return 2 }
 func (StonyWoottonhogBlue) Pitch() int               { return 3 }

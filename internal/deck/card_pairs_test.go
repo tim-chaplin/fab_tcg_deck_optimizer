@@ -5,8 +5,9 @@ import (
 	"testing"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/cards"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/hero"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/weapon"
 )
 
@@ -20,8 +21,8 @@ import (
 // out — so the expected total scales with the count of fully-implemented pairs, not the
 // raw len(cardPairs).
 func TestCardPairMutations_EnumeratesAllVariantCrossProducts(t *testing.T) {
-	a := cards.Get(card.ArcanicCrackleRed)
-	b := cards.Get(card.ArcanicSpikeRed)
+	a := registry.GetCard(ids.ArcanicCrackleRed)
+	b := registry.GetCard(ids.ArcanicSpikeRed)
 	d := New(hero.Viserai{}, []weapon.Weapon{weapon.NebulaBlade{}}, []card.Card{a, a, b, b})
 
 	muts := pairSwapMutations(d, nil)
@@ -34,13 +35,13 @@ func TestCardPairMutations_EnumeratesAllVariantCrossProducts(t *testing.T) {
 	}
 
 	// Every (firstID, secondID) cross-product from cardPairs[0] must appear at least once.
-	type combo struct{ first, second card.ID }
+	type combo struct{ first, second ids.CardID }
 	seen := map[combo]bool{}
 	for _, m := range muts {
 		for _, fID := range cardPairs[0].First {
 			for _, sID := range cardPairs[0].Second {
-				if strings.Contains(m.Description, "+1 "+cards.Get(fID).Name()) &&
-					strings.Contains(m.Description, "+1 "+cards.Get(sID).Name()) {
+				if strings.Contains(m.Description, "+1 "+registry.GetCard(fID).Name()) &&
+					strings.Contains(m.Description, "+1 "+registry.GetCard(sID).Name()) {
 					seen[combo{fID, sID}] = true
 				}
 			}
@@ -70,7 +71,7 @@ func countImplementedPairCombos() int {
 func countImplementedInGroup(g CardGroup) int {
 	n := 0
 	for _, id := range g {
-		if _, unimplemented := cards.Get(id).(card.NotImplemented); !unimplemented {
+		if _, unimplemented := registry.GetCard(id).(card.NotImplemented); !unimplemented {
 			n++
 		}
 	}
@@ -83,7 +84,7 @@ func countImplementedInGroup(g CardGroup) int {
 // generator would skip this (only one unique ID, no inter-ID pair exists); index-based
 // iteration over (0, 1) reaches it directly.
 func TestCardPairMutations_RemovesBothCopiesOfDuplicate(t *testing.T) {
-	hp := cards.Get(card.HocusPocusBlue)
+	hp := registry.GetCard(ids.HocusPocusBlue)
 	d := New(hero.Viserai{}, []weapon.Weapon{weapon.NebulaBlade{}}, []card.Card{hp, hp})
 
 	muts := pairSwapMutations(d, nil)
@@ -104,7 +105,7 @@ func TestCardPairMutations_RemovesBothCopiesOfDuplicate(t *testing.T) {
 			t.Errorf("mutation %d (%s): card count %d, want 2", i, m.Description, len(m.Deck.Cards))
 		}
 		for _, c := range m.Deck.Cards {
-			if c.ID() == card.HocusPocusBlue {
+			if c.ID() == ids.HocusPocusBlue {
 				t.Errorf("mutation %d (%s): result deck still holds Hocus Pocus [B]",
 					i, m.Description)
 			}
@@ -123,8 +124,8 @@ func TestCardPairMutations_RemovesBothCopiesOfDuplicate(t *testing.T) {
 // non-overlapping variant combinations still emit despite Sun Kiss [R] being a removal
 // candidate.
 func TestCardPairMutations_FiresWhenOneHalfAlreadyPresent(t *testing.T) {
-	a := cards.Get(card.ArcanicCrackleRed)
-	sk := cards.Get(card.SunKissRed)
+	a := registry.GetCard(ids.ArcanicCrackleRed)
+	sk := registry.GetCard(ids.SunKissRed)
 	d := New(hero.Viserai{}, []weapon.Weapon{weapon.NebulaBlade{}}, []card.Card{a, a, a, sk})
 
 	muts := pairSwapMutations(d, nil)
@@ -150,8 +151,8 @@ func TestCardPairMutations_FiresWhenOneHalfAlreadyPresent(t *testing.T) {
 // survives overlap suppression — even ones whose result deck would violate maxCopies.
 // filterMaxCopiesViolations is the gate that strips violators downstream.
 func TestCardPairMutations_GeneratesCapViolatingCandidates(t *testing.T) {
-	skR := cards.Get(card.SunKissRed)
-	a := cards.Get(card.ArcanicCrackleRed)
+	skR := registry.GetCard(ids.SunKissRed)
+	a := registry.GetCard(ids.ArcanicCrackleRed)
 	d := New(hero.Viserai{}, []weapon.Weapon{weapon.NebulaBlade{}},
 		[]card.Card{skR, skR, a, a})
 
@@ -173,11 +174,11 @@ func TestCardPairMutations_GeneratesCapViolatingCandidates(t *testing.T) {
 	sawCapViolator := false
 	for _, m := range muts {
 		if strings.Contains(m.Description, "+1 Sun Kiss [R]") {
-			counts := map[card.ID]int{}
+			counts := map[ids.CardID]int{}
 			for _, c := range m.Deck.Cards {
 				counts[c.ID()]++
 			}
-			if counts[card.SunKissRed] > 2 {
+			if counts[ids.SunKissRed] > 2 {
 				sawCapViolator = true
 				break
 			}
@@ -195,14 +196,14 @@ func TestCardPairMutations_GeneratesCapViolatingCandidates(t *testing.T) {
 // enumeration emits candidates regardless of saturation; the resulting decks must remain at
 // the original card count.
 func TestCardPairMutations_HandlesUnbalancedHalfCounts(t *testing.T) {
-	mwR := cards.Get(card.MoonWishRed)
-	mwY := cards.Get(card.MoonWishYellow)
-	mwB := cards.Get(card.MoonWishBlue)
-	skR := cards.Get(card.SunKissRed)
-	skY := cards.Get(card.SunKissYellow)
-	skB := cards.Get(card.SunKissBlue)
-	a := cards.Get(card.ArcanicCrackleRed)
-	b := cards.Get(card.ArcanicSpikeRed)
+	mwR := registry.GetCard(ids.MoonWishRed)
+	mwY := registry.GetCard(ids.MoonWishYellow)
+	mwB := registry.GetCard(ids.MoonWishBlue)
+	skR := registry.GetCard(ids.SunKissRed)
+	skY := registry.GetCard(ids.SunKissYellow)
+	skB := registry.GetCard(ids.SunKissBlue)
+	a := registry.GetCard(ids.ArcanicCrackleRed)
+	b := registry.GetCard(ids.ArcanicSpikeRed)
 	cardsList := []card.Card{
 		mwR, mwR, mwY, mwY, mwB,
 		skR, skY, skB,
@@ -226,8 +227,8 @@ func TestCardPairMutations_HandlesUnbalancedHalfCounts(t *testing.T) {
 // deck with a different card multiset than the source. Defensive against a future bug where
 // the overlap-suppression check misses a path that ends up at the source composition.
 func TestCardPairMutations_ResultDifferentFromSource(t *testing.T) {
-	a := cards.Get(card.ArcanicCrackleRed)
-	b := cards.Get(card.ArcanicSpikeRed)
+	a := registry.GetCard(ids.ArcanicCrackleRed)
+	b := registry.GetCard(ids.ArcanicSpikeRed)
 	d := New(hero.Viserai{}, []weapon.Weapon{weapon.NebulaBlade{}}, []card.Card{a, a, b, b})
 	srcKey := cardMultisetKey(d.Cards)
 	for i, m := range pairSwapMutations(d, nil) {
@@ -243,8 +244,8 @@ func TestCardPairMutations_ResultDifferentFromSource(t *testing.T) {
 // pair generator skips those combos. Drives this with a deck containing Sun Kiss [R] as a
 // removal candidate and verifies no mutation removes and re-adds Sun Kiss [R].
 func TestCardPairMutations_OverlapSuppressionSkipsRedundantSwaps(t *testing.T) {
-	skR := cards.Get(card.SunKissRed)
-	a := cards.Get(card.ArcanicCrackleRed)
+	skR := registry.GetCard(ids.SunKissRed)
+	a := registry.GetCard(ids.ArcanicCrackleRed)
 	d := New(hero.Viserai{}, []weapon.Weapon{weapon.NebulaBlade{}}, []card.Card{skR, a, a, a})
 	for i, m := range pairSwapMutations(d, nil) {
 		if strings.Contains(m.Description, "-1 Sun Kiss [R]") &&
@@ -261,8 +262,8 @@ func TestCardPairMutations_OverlapSuppressionSkipsRedundantSwaps(t *testing.T) {
 // the Rearguard); those entries shouldn't leak NotImplemented printings into the search
 // pool just because they're listed.
 func TestCardPairMutations_SkipsNotImplementedHalves(t *testing.T) {
-	a := cards.Get(card.ArcanicCrackleRed)
-	b := cards.Get(card.ArcanicSpikeRed)
+	a := registry.GetCard(ids.ArcanicCrackleRed)
+	b := registry.GetCard(ids.ArcanicSpikeRed)
 	d := New(hero.Viserai{}, []weapon.Weapon{weapon.NebulaBlade{}}, []card.Card{a, a, b, b})
 
 	for i, m := range pairSwapMutations(d, nil) {
@@ -280,11 +281,11 @@ func TestCardPairMutations_SkipsNotImplementedHalves(t *testing.T) {
 // rejected; the remaining 3 × 2 = 6 cross-products still emit per unique removal combo —
 // matches how singleSwapMutations treats per-printing legality.
 func TestCardPairMutations_RespectsLegalFilter(t *testing.T) {
-	a := cards.Get(card.ArcanicCrackleRed)
-	b := cards.Get(card.ArcanicSpikeRed)
+	a := registry.GetCard(ids.ArcanicCrackleRed)
+	b := registry.GetCard(ids.ArcanicSpikeRed)
 	d := New(hero.Viserai{}, []weapon.Weapon{weapon.NebulaBlade{}}, []card.Card{a, a, b, b})
 
-	legal := func(c card.Card) bool { return c.ID() != card.SunKissYellow }
+	legal := func(c card.Card) bool { return c.ID() != ids.SunKissYellow }
 	muts := pairSwapMutations(d, legal)
 	for i, m := range muts {
 		if strings.Contains(m.Description, "Sun Kiss [Y]") {
@@ -302,8 +303,8 @@ func TestCardPairMutations_RespectsLegalFilter(t *testing.T) {
 // mutation sequence. AllMutations consumers (the iterate-mode worker pool) rely on stable
 // indexing for reproducibility under a fixed seed.
 func TestCardPairMutations_DeterministicOrdering(t *testing.T) {
-	a := cards.Get(card.ArcanicCrackleRed)
-	b := cards.Get(card.ArcanicSpikeRed)
+	a := registry.GetCard(ids.ArcanicCrackleRed)
+	b := registry.GetCard(ids.ArcanicSpikeRed)
 	d := New(hero.Viserai{}, []weapon.Weapon{weapon.NebulaBlade{}}, []card.Card{a, a, b, b})
 
 	first := pairSwapMutations(d, nil)
@@ -324,9 +325,9 @@ func TestCardPairMutations_DeterministicOrdering(t *testing.T) {
 // clean (deck 4 cards, all distinct) and one violator (5 copies of Moon Wish [R] at
 // maxCopies=2). Filter keeps the clean one, drops the violator.
 func TestFilterMaxCopiesViolations_StripsCapViolators(t *testing.T) {
-	a := cards.Get(card.ArcanicCrackleRed)
-	b := cards.Get(card.ArcanicSpikeRed)
-	mw := cards.Get(card.MoonWishRed)
+	a := registry.GetCard(ids.ArcanicCrackleRed)
+	b := registry.GetCard(ids.ArcanicSpikeRed)
+	mw := registry.GetCard(ids.MoonWishRed)
 	clean := New(hero.Viserai{}, []weapon.Weapon{weapon.NebulaBlade{}}, []card.Card{a, b, mw, mw})
 	violator := New(hero.Viserai{}, []weapon.Weapon{weapon.NebulaBlade{}},
 		[]card.Card{mw, mw, mw, mw, mw})
@@ -348,7 +349,7 @@ func TestFilterMaxCopiesViolations_StripsCapViolators(t *testing.T) {
 // count exceeds the cap, without scanning the full slice. Sentinel for the inner-loop fast
 // path in filterMaxCopiesViolations.
 func TestRespectsMaxCopies_ShortCircuits(t *testing.T) {
-	a := cards.Get(card.ArcanicCrackleRed)
+	a := registry.GetCard(ids.ArcanicCrackleRed)
 	cs := []card.Card{a, a, a}
 	if respectsMaxCopies(cs, 2) {
 		t.Error("3 copies at maxCopies=2 should fail respectsMaxCopies")

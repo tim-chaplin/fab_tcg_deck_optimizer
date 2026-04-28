@@ -5,13 +5,16 @@
 
 package cards
 
-import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+import (
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
+)
 
 var siftTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction)
 
 type SiftRed struct{}
 
-func (SiftRed) ID() card.ID              { return card.SiftRed }
+func (SiftRed) ID() ids.CardID           { return ids.SiftRed }
 func (SiftRed) Name() string             { return "Sift" }
 func (SiftRed) Cost(*card.TurnState) int { return 0 }
 func (SiftRed) Pitch() int               { return 1 }
@@ -26,7 +29,7 @@ func (SiftRed) Play(s *card.TurnState, self *card.CardState) { s.LogPlay(self) }
 
 type SiftYellow struct{}
 
-func (SiftYellow) ID() card.ID              { return card.SiftYellow }
+func (SiftYellow) ID() ids.CardID           { return ids.SiftYellow }
 func (SiftYellow) Name() string             { return "Sift" }
 func (SiftYellow) Cost(*card.TurnState) int { return 0 }
 func (SiftYellow) Pitch() int               { return 2 }
@@ -41,7 +44,7 @@ func (SiftYellow) Play(s *card.TurnState, self *card.CardState) { s.LogPlay(self
 
 type SiftBlue struct{}
 
-func (SiftBlue) ID() card.ID              { return card.SiftBlue }
+func (SiftBlue) ID() ids.CardID           { return ids.SiftBlue }
 func (SiftBlue) Name() string             { return "Sift" }
 func (SiftBlue) Cost(*card.TurnState) int { return 0 }
 func (SiftBlue) Pitch() int               { return 3 }

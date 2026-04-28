@@ -5,7 +5,10 @@
 
 package cards
 
-import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+import (
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
+)
 
 var nimblismTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction)
 
@@ -26,7 +29,7 @@ func nimblismApplySideEffect(s *card.TurnState, n int) {
 
 type NimblismRed struct{}
 
-func (NimblismRed) ID() card.ID              { return card.NimblismRed }
+func (NimblismRed) ID() ids.CardID           { return ids.NimblismRed }
 func (NimblismRed) Name() string             { return "Nimblism" }
 func (NimblismRed) Cost(*card.TurnState) int { return 0 }
 func (NimblismRed) Pitch() int               { return 1 }
@@ -41,7 +44,7 @@ func (NimblismRed) Play(s *card.TurnState, self *card.CardState) {
 
 type NimblismYellow struct{}
 
-func (NimblismYellow) ID() card.ID              { return card.NimblismYellow }
+func (NimblismYellow) ID() ids.CardID           { return ids.NimblismYellow }
 func (NimblismYellow) Name() string             { return "Nimblism" }
 func (NimblismYellow) Cost(*card.TurnState) int { return 0 }
 func (NimblismYellow) Pitch() int               { return 2 }
@@ -56,7 +59,7 @@ func (NimblismYellow) Play(s *card.TurnState, self *card.CardState) {
 
 type NimblismBlue struct{}
 
-func (NimblismBlue) ID() card.ID              { return card.NimblismBlue }
+func (NimblismBlue) ID() ids.CardID           { return ids.NimblismBlue }
 func (NimblismBlue) Name() string             { return "Nimblism" }
 func (NimblismBlue) Cost(*card.TurnState) int { return 0 }
 func (NimblismBlue) Pitch() int               { return 3 }

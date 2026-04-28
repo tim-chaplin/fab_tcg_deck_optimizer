@@ -5,13 +5,16 @@
 
 package cards
 
-import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+import (
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
+)
 
 var pursueToThePitsOfDespairTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeAttack)
 
 type PursueToThePitsOfDespairRed struct{}
 
-func (PursueToThePitsOfDespairRed) ID() card.ID              { return card.PursueToThePitsOfDespairRed }
+func (PursueToThePitsOfDespairRed) ID() ids.CardID           { return ids.PursueToThePitsOfDespairRed }
 func (PursueToThePitsOfDespairRed) Name() string             { return "Pursue to the Pits of Despair" }
 func (PursueToThePitsOfDespairRed) Cost(*card.TurnState) int { return 1 }
 func (PursueToThePitsOfDespairRed) Pitch() int               { return 1 }

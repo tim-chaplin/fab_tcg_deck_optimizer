@@ -13,6 +13,7 @@ import (
 	"fmt"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
 )
 
 var sunKissTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction)
@@ -43,7 +44,7 @@ func playedMoonWishThisTurn(s *card.TurnState) bool {
 
 type SunKissRed struct{}
 
-func (SunKissRed) ID() card.ID              { return card.SunKissRed }
+func (SunKissRed) ID() ids.CardID           { return ids.SunKissRed }
 func (SunKissRed) Name() string             { return "Sun Kiss" }
 func (SunKissRed) Cost(*card.TurnState) int { return 0 }
 func (SunKissRed) Pitch() int               { return 1 }
@@ -57,7 +58,7 @@ func (SunKissRed) Play(s *card.TurnState, self *card.CardState) {
 
 type SunKissYellow struct{}
 
-func (SunKissYellow) ID() card.ID              { return card.SunKissYellow }
+func (SunKissYellow) ID() ids.CardID           { return ids.SunKissYellow }
 func (SunKissYellow) Name() string             { return "Sun Kiss" }
 func (SunKissYellow) Cost(*card.TurnState) int { return 0 }
 func (SunKissYellow) Pitch() int               { return 2 }
@@ -71,7 +72,7 @@ func (SunKissYellow) Play(s *card.TurnState, self *card.CardState) {
 
 type SunKissBlue struct{}
 
-func (SunKissBlue) ID() card.ID              { return card.SunKissBlue }
+func (SunKissBlue) ID() ids.CardID           { return ids.SunKissBlue }
 func (SunKissBlue) Name() string             { return "Sun Kiss" }
 func (SunKissBlue) Cost(*card.TurnState) int { return 0 }
 func (SunKissBlue) Pitch() int               { return 3 }

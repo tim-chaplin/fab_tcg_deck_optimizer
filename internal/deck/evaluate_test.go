@@ -9,6 +9,8 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/cards"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/hand"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/hero"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/weapon"
 )
 
@@ -19,7 +21,7 @@ import (
 func TestEvaluate_BestTurnStartingRunechantsIsPreHandCarryover(t *testing.T) {
 	// Viserai has Intelligence 4. A 4-card deck gives exactly one hand per run, so the Best
 	// record always reflects that first hand — no previous turn ever existed.
-	read := cards.Get(card.ReadTheRunesRed)
+	read := registry.GetCard(ids.ReadTheRunesRed)
 	d := New(hero.Viserai{}, nil, []card.Card{read, read, read, read})
 
 	// Seed doesn't matter (all cards identical), but fix it for determinism.
@@ -47,7 +49,7 @@ func TestEvaluate_BestTurnStartingRunechantsIsPreHandCarryover(t *testing.T) {
 // The total card count across the three surfaces must exceed handSize (4) — proof the snapshot
 // carried the mid-chain draw rather than just the partition's static slice.
 func TestEvaluate_BestTurnSnapshotsState(t *testing.T) {
-	snatch := cards.Get(card.SnatchRed)
+	snatch := registry.GetCard(ids.SnatchRed)
 	d := New(hero.Viserai{}, nil, []card.Card{snatch, snatch, snatch, snatch, snatch, snatch, snatch, snatch})
 	d.Evaluate(1, 0, rand.New(rand.NewSource(1)))
 
@@ -77,13 +79,13 @@ func TestEvaluate_BestTurnSnapshotsState(t *testing.T) {
 }
 
 // TestEvaluate_PerCardMarginalCoversEveryHand pins the marginal-stats invariant: for every
-// unique card.ID in the deck, PresentHands + AbsentHands equals Stats.Hands. The bucket sums
+// unique ids.CardID in the deck, PresentHands + AbsentHands equals Stats.Hands. The bucket sums
 // are also non-negative and reflect the per-turn hand-value tally so a regression that
 // double-counts (or skips) a hand surfaces immediately. A multi-card deck mixes "present
 // every turn" vs "present some turns" so both buckets are exercised.
 func TestEvaluate_PerCardMarginalCoversEveryHand(t *testing.T) {
-	read := cards.Get(card.ReadTheRunesRed)
-	snatch := cards.Get(card.SnatchRed)
+	read := registry.GetCard(ids.ReadTheRunesRed)
+	snatch := registry.GetCard(ids.SnatchRed)
 	// 4 of each so Snatch isn't pinned to a single hand and the absent bucket gets exercised.
 	deckCards := []card.Card{read, read, read, read, snatch, snatch, snatch, snatch}
 	d := New(hero.Viserai{}, nil, deckCards)
@@ -92,19 +94,19 @@ func TestEvaluate_PerCardMarginalCoversEveryHand(t *testing.T) {
 	if d.Stats.PerCardMarginal == nil {
 		t.Fatalf("PerCardMarginal should be initialised after Evaluate")
 	}
-	for _, id := range []card.ID{card.ReadTheRunesRed, card.SnatchRed} {
+	for _, id := range []ids.CardID{ids.ReadTheRunesRed, ids.SnatchRed} {
 		m, ok := d.Stats.PerCardMarginal[id]
 		if !ok {
-			t.Errorf("PerCardMarginal missing entry for %s", cards.Get(id).Name())
+			t.Errorf("PerCardMarginal missing entry for %s", registry.GetCard(id).Name())
 			continue
 		}
 		if got := m.PresentHands + m.AbsentHands; got != d.Stats.Hands {
 			t.Errorf("%s: PresentHands+AbsentHands = %d, want Stats.Hands = %d (every hand must end up in exactly one bucket)",
-				cards.Get(id).Name(), got, d.Stats.Hands)
+				registry.GetCard(id).Name(), got, d.Stats.Hands)
 		}
 		if m.PresentHands == 0 {
 			t.Errorf("%s: PresentHands = 0 — this card should have been in at least one dealt hand across 20 shuffles",
-				cards.Get(id).Name())
+				registry.GetCard(id).Name())
 		}
 	}
 }
@@ -114,11 +116,11 @@ func TestEvaluate_PerCardMarginalCoversEveryHand(t *testing.T) {
 // Mean, and Marginal is 0 (no comparison possible). Single-card decks are a degenerate but
 // realistic test fixture.
 func TestEvaluate_PerCardMarginalAlwaysPresent(t *testing.T) {
-	read := cards.Get(card.ReadTheRunesRed)
+	read := registry.GetCard(ids.ReadTheRunesRed)
 	d := New(hero.Viserai{}, nil, []card.Card{read, read, read, read, read, read, read, read})
 	d.Evaluate(5, 0, rand.New(rand.NewSource(1)))
 
-	m := d.Stats.PerCardMarginal[card.ReadTheRunesRed]
+	m := d.Stats.PerCardMarginal[ids.ReadTheRunesRed]
 	if m.AbsentHands != 0 {
 		t.Errorf("AbsentHands = %d, want 0 (single-card deck means card is always present)", m.AbsentHands)
 	}
@@ -217,11 +219,11 @@ func TestEvaluate_TerminatesAfterTwoCycles(t *testing.T) {
 // land on a multiple of adaptiveCheckInterval and be strictly less than adaptiveShufflesCap.
 func TestEvaluateAdaptive_StopsBeforeMaxRunsWhenSEMet(t *testing.T) {
 	deckCards := append([]card.Card{},
-		cards.Get(card.ReadTheRunesRed), cards.Get(card.ReadTheRunesRed),
-		cards.Get(card.ReadTheRunesYellow), cards.Get(card.ReadTheRunesYellow),
+		registry.GetCard(ids.ReadTheRunesRed), registry.GetCard(ids.ReadTheRunesRed),
+		registry.GetCard(ids.ReadTheRunesYellow), registry.GetCard(ids.ReadTheRunesYellow),
 	)
 	for len(deckCards) < 40 {
-		deckCards = append(deckCards, cards.Get(card.ReadTheRunesBlue))
+		deckCards = append(deckCards, registry.GetCard(ids.ReadTheRunesBlue))
 	}
 	d := New(hero.Viserai{}, []weapon.Weapon{weapon.ReapingBlade{}}, deckCards)
 	stats := d.EvaluateAdaptive(0, rand.New(rand.NewSource(42)))
@@ -239,11 +241,11 @@ func TestEvaluateAdaptive_StopsBeforeMaxRunsWhenSEMet(t *testing.T) {
 // adaptiveShufflesCap=50000 which is too slow for a unit test).
 func TestEvaluateAdaptive_RespectsMaxRunsCapWhenSEUnreachable(t *testing.T) {
 	deckCards := append([]card.Card{},
-		cards.Get(card.ReadTheRunesRed), cards.Get(card.ReadTheRunesRed),
-		cards.Get(card.ReadTheRunesYellow), cards.Get(card.ReadTheRunesYellow),
+		registry.GetCard(ids.ReadTheRunesRed), registry.GetCard(ids.ReadTheRunesRed),
+		registry.GetCard(ids.ReadTheRunesYellow), registry.GetCard(ids.ReadTheRunesYellow),
 	)
 	for len(deckCards) < 40 {
-		deckCards = append(deckCards, cards.Get(card.ReadTheRunesBlue))
+		deckCards = append(deckCards, registry.GetCard(ids.ReadTheRunesBlue))
 	}
 	d := New(hero.Viserai{}, []weapon.Weapon{weapon.ReapingBlade{}}, deckCards)
 	// Negative targetSE is structurally unreachable — meanStandardError is always >= 0, so

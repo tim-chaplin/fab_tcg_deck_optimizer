@@ -10,13 +10,16 @@
 
 package cards
 
-import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+import (
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
+)
 
 var enchantingMelodyTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeAura)
 
 type EnchantingMelodyRed struct{}
 
-func (EnchantingMelodyRed) ID() card.ID              { return card.EnchantingMelodyRed }
+func (EnchantingMelodyRed) ID() ids.CardID           { return ids.EnchantingMelodyRed }
 func (EnchantingMelodyRed) Name() string             { return "Enchanting Melody" }
 func (EnchantingMelodyRed) Cost(*card.TurnState) int { return 2 }
 func (EnchantingMelodyRed) Pitch() int               { return 1 }
@@ -34,7 +37,7 @@ func (EnchantingMelodyRed) Play(s *card.TurnState, self *card.CardState) {
 
 type EnchantingMelodyYellow struct{}
 
-func (EnchantingMelodyYellow) ID() card.ID              { return card.EnchantingMelodyYellow }
+func (EnchantingMelodyYellow) ID() ids.CardID           { return ids.EnchantingMelodyYellow }
 func (EnchantingMelodyYellow) Name() string             { return "Enchanting Melody" }
 func (EnchantingMelodyYellow) Cost(*card.TurnState) int { return 2 }
 func (EnchantingMelodyYellow) Pitch() int               { return 2 }
@@ -52,7 +55,7 @@ func (EnchantingMelodyYellow) Play(s *card.TurnState, self *card.CardState) {
 
 type EnchantingMelodyBlue struct{}
 
-func (EnchantingMelodyBlue) ID() card.ID              { return card.EnchantingMelodyBlue }
+func (EnchantingMelodyBlue) ID() ids.CardID           { return ids.EnchantingMelodyBlue }
 func (EnchantingMelodyBlue) Name() string             { return "Enchanting Melody" }
 func (EnchantingMelodyBlue) Cost(*card.TurnState) int { return 2 }
 func (EnchantingMelodyBlue) Pitch() int               { return 3 }

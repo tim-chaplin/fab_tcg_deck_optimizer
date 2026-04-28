@@ -7,13 +7,16 @@
 
 package cards
 
-import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+import (
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
+)
 
 var pickACardAnyCardTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction)
 
 type PickACardAnyCardRed struct{}
 
-func (PickACardAnyCardRed) ID() card.ID              { return card.PickACardAnyCardRed }
+func (PickACardAnyCardRed) ID() ids.CardID           { return ids.PickACardAnyCardRed }
 func (PickACardAnyCardRed) Name() string             { return "Pick a Card, Any Card" }
 func (PickACardAnyCardRed) Cost(*card.TurnState) int { return 0 }
 func (PickACardAnyCardRed) Pitch() int               { return 1 }
@@ -28,7 +31,7 @@ func (PickACardAnyCardRed) Play(s *card.TurnState, self *card.CardState) { s.Log
 
 type PickACardAnyCardYellow struct{}
 
-func (PickACardAnyCardYellow) ID() card.ID              { return card.PickACardAnyCardYellow }
+func (PickACardAnyCardYellow) ID() ids.CardID           { return ids.PickACardAnyCardYellow }
 func (PickACardAnyCardYellow) Name() string             { return "Pick a Card, Any Card" }
 func (PickACardAnyCardYellow) Cost(*card.TurnState) int { return 0 }
 func (PickACardAnyCardYellow) Pitch() int               { return 2 }
@@ -43,7 +46,7 @@ func (PickACardAnyCardYellow) Play(s *card.TurnState, self *card.CardState) { s.
 
 type PickACardAnyCardBlue struct{}
 
-func (PickACardAnyCardBlue) ID() card.ID              { return card.PickACardAnyCardBlue }
+func (PickACardAnyCardBlue) ID() ids.CardID           { return ids.PickACardAnyCardBlue }
 func (PickACardAnyCardBlue) Name() string             { return "Pick a Card, Any Card" }
 func (PickACardAnyCardBlue) Cost(*card.TurnState) int { return 0 }
 func (PickACardAnyCardBlue) Pitch() int               { return 3 }

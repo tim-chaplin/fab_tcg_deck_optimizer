@@ -7,13 +7,16 @@
 
 package cards
 
-import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+import (
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
+)
 
 var downButNotOutTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeAttack)
 
 type DownButNotOutRed struct{}
 
-func (DownButNotOutRed) ID() card.ID              { return card.DownButNotOutRed }
+func (DownButNotOutRed) ID() ids.CardID           { return ids.DownButNotOutRed }
 func (DownButNotOutRed) Name() string             { return "Down But Not Out" }
 func (DownButNotOutRed) Cost(*card.TurnState) int { return 3 }
 func (DownButNotOutRed) Pitch() int               { return 1 }
@@ -30,7 +33,7 @@ func (DownButNotOutRed) Play(s *card.TurnState, self *card.CardState) {
 
 type DownButNotOutYellow struct{}
 
-func (DownButNotOutYellow) ID() card.ID              { return card.DownButNotOutYellow }
+func (DownButNotOutYellow) ID() ids.CardID           { return ids.DownButNotOutYellow }
 func (DownButNotOutYellow) Name() string             { return "Down But Not Out" }
 func (DownButNotOutYellow) Cost(*card.TurnState) int { return 3 }
 func (DownButNotOutYellow) Pitch() int               { return 2 }
@@ -47,7 +50,7 @@ func (DownButNotOutYellow) Play(s *card.TurnState, self *card.CardState) {
 
 type DownButNotOutBlue struct{}
 
-func (DownButNotOutBlue) ID() card.ID              { return card.DownButNotOutBlue }
+func (DownButNotOutBlue) ID() ids.CardID           { return ids.DownButNotOutBlue }
 func (DownButNotOutBlue) Name() string             { return "Down But Not Out" }
 func (DownButNotOutBlue) Cost(*card.TurnState) int { return 3 }
 func (DownButNotOutBlue) Pitch() int               { return 3 }

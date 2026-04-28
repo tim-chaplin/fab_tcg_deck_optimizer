@@ -8,13 +8,16 @@
 
 package cards
 
-import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+import (
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
+)
 
 var runebloodIncantationTypes = card.NewTypeSet(card.TypeRuneblade, card.TypeAction, card.TypeAura)
 
 type RunebloodIncantationRed struct{}
 
-func (RunebloodIncantationRed) ID() card.ID              { return card.RunebloodIncantationRed }
+func (RunebloodIncantationRed) ID() ids.CardID           { return ids.RunebloodIncantationRed }
 func (RunebloodIncantationRed) Name() string             { return "Runeblood Incantation" }
 func (RunebloodIncantationRed) Cost(*card.TurnState) int { return 1 }
 func (RunebloodIncantationRed) Pitch() int               { return 1 }
@@ -29,7 +32,7 @@ func (c RunebloodIncantationRed) Play(s *card.TurnState, self *card.CardState) {
 
 type RunebloodIncantationYellow struct{}
 
-func (RunebloodIncantationYellow) ID() card.ID              { return card.RunebloodIncantationYellow }
+func (RunebloodIncantationYellow) ID() ids.CardID           { return ids.RunebloodIncantationYellow }
 func (RunebloodIncantationYellow) Name() string             { return "Runeblood Incantation" }
 func (RunebloodIncantationYellow) Cost(*card.TurnState) int { return 1 }
 func (RunebloodIncantationYellow) Pitch() int               { return 2 }
@@ -44,7 +47,7 @@ func (c RunebloodIncantationYellow) Play(s *card.TurnState, self *card.CardState
 
 type RunebloodIncantationBlue struct{}
 
-func (RunebloodIncantationBlue) ID() card.ID              { return card.RunebloodIncantationBlue }
+func (RunebloodIncantationBlue) ID() ids.CardID           { return ids.RunebloodIncantationBlue }
 func (RunebloodIncantationBlue) Name() string             { return "Runeblood Incantation" }
 func (RunebloodIncantationBlue) Cost(*card.TurnState) int { return 1 }
 func (RunebloodIncantationBlue) Pitch() int               { return 3 }

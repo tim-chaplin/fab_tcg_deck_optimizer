@@ -6,13 +6,16 @@
 
 package cards
 
-import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+import (
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
+)
 
 var nimbyTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeAttack)
 
 type NimbyRed struct{}
 
-func (NimbyRed) ID() card.ID              { return card.NimbyRed }
+func (NimbyRed) ID() ids.CardID           { return ids.NimbyRed }
 func (NimbyRed) Name() string             { return "Nimby" }
 func (NimbyRed) Cost(*card.TurnState) int { return 0 }
 func (NimbyRed) Pitch() int               { return 1 }
@@ -28,7 +31,7 @@ func (c NimbyRed) Play(s *card.TurnState, self *card.CardState) { s.ApplyAndLogE
 
 type NimbyYellow struct{}
 
-func (NimbyYellow) ID() card.ID              { return card.NimbyYellow }
+func (NimbyYellow) ID() ids.CardID           { return ids.NimbyYellow }
 func (NimbyYellow) Name() string             { return "Nimby" }
 func (NimbyYellow) Cost(*card.TurnState) int { return 0 }
 func (NimbyYellow) Pitch() int               { return 2 }
@@ -46,7 +49,7 @@ func (c NimbyYellow) Play(s *card.TurnState, self *card.CardState) {
 
 type NimbyBlue struct{}
 
-func (NimbyBlue) ID() card.ID              { return card.NimbyBlue }
+func (NimbyBlue) ID() ids.CardID           { return ids.NimbyBlue }
 func (NimbyBlue) Name() string             { return "Nimby" }
 func (NimbyBlue) Cost(*card.TurnState) int { return 0 }
 func (NimbyBlue) Pitch() int               { return 3 }

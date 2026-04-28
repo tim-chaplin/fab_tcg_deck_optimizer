@@ -5,13 +5,16 @@
 
 package cards
 
-import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+import (
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
+)
 
 var wageGoldTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeAttack)
 
 type WageGoldRed struct{}
 
-func (WageGoldRed) ID() card.ID              { return card.WageGoldRed }
+func (WageGoldRed) ID() ids.CardID           { return ids.WageGoldRed }
 func (WageGoldRed) Name() string             { return "Wage Gold" }
 func (WageGoldRed) Cost(*card.TurnState) int { return 3 }
 func (WageGoldRed) Pitch() int               { return 1 }
@@ -28,7 +31,7 @@ func (c WageGoldRed) Play(s *card.TurnState, self *card.CardState) {
 
 type WageGoldYellow struct{}
 
-func (WageGoldYellow) ID() card.ID              { return card.WageGoldYellow }
+func (WageGoldYellow) ID() ids.CardID           { return ids.WageGoldYellow }
 func (WageGoldYellow) Name() string             { return "Wage Gold" }
 func (WageGoldYellow) Cost(*card.TurnState) int { return 3 }
 func (WageGoldYellow) Pitch() int               { return 2 }
@@ -45,7 +48,7 @@ func (c WageGoldYellow) Play(s *card.TurnState, self *card.CardState) {
 
 type WageGoldBlue struct{}
 
-func (WageGoldBlue) ID() card.ID              { return card.WageGoldBlue }
+func (WageGoldBlue) ID() ids.CardID           { return ids.WageGoldBlue }
 func (WageGoldBlue) Name() string             { return "Wage Gold" }
 func (WageGoldBlue) Cost(*card.TurnState) int { return 3 }
 func (WageGoldBlue) Pitch() int               { return 3 }

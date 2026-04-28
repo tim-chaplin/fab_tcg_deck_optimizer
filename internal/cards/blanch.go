@@ -5,13 +5,16 @@
 
 package cards
 
-import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+import (
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
+)
 
 var blanchTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeAttack)
 
 type BlanchRed struct{}
 
-func (BlanchRed) ID() card.ID              { return card.BlanchRed }
+func (BlanchRed) ID() ids.CardID           { return ids.BlanchRed }
 func (BlanchRed) Name() string             { return "Blanch" }
 func (BlanchRed) Cost(*card.TurnState) int { return 3 }
 func (BlanchRed) Pitch() int               { return 1 }
@@ -28,7 +31,7 @@ func (BlanchRed) Play(s *card.TurnState, self *card.CardState) {
 
 type BlanchYellow struct{}
 
-func (BlanchYellow) ID() card.ID              { return card.BlanchYellow }
+func (BlanchYellow) ID() ids.CardID           { return ids.BlanchYellow }
 func (BlanchYellow) Name() string             { return "Blanch" }
 func (BlanchYellow) Cost(*card.TurnState) int { return 3 }
 func (BlanchYellow) Pitch() int               { return 2 }
@@ -45,7 +48,7 @@ func (BlanchYellow) Play(s *card.TurnState, self *card.CardState) {
 
 type BlanchBlue struct{}
 
-func (BlanchBlue) ID() card.ID              { return card.BlanchBlue }
+func (BlanchBlue) ID() ids.CardID           { return ids.BlanchBlue }
 func (BlanchBlue) Name() string             { return "Blanch" }
 func (BlanchBlue) Cost(*card.TurnState) int { return 3 }
 func (BlanchBlue) Pitch() int               { return 3 }

@@ -3,13 +3,16 @@
 
 package cards
 
-import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+import (
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
+)
 
 var ragingOnslaughtTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeAttack)
 
 type RagingOnslaughtRed struct{}
 
-func (RagingOnslaughtRed) ID() card.ID              { return card.RagingOnslaughtRed }
+func (RagingOnslaughtRed) ID() ids.CardID           { return ids.RagingOnslaughtRed }
 func (RagingOnslaughtRed) Name() string             { return "Raging Onslaught" }
 func (RagingOnslaughtRed) Cost(*card.TurnState) int { return 3 }
 func (RagingOnslaughtRed) Pitch() int               { return 1 }
@@ -23,7 +26,7 @@ func (c RagingOnslaughtRed) Play(s *card.TurnState, self *card.CardState) {
 
 type RagingOnslaughtYellow struct{}
 
-func (RagingOnslaughtYellow) ID() card.ID              { return card.RagingOnslaughtYellow }
+func (RagingOnslaughtYellow) ID() ids.CardID           { return ids.RagingOnslaughtYellow }
 func (RagingOnslaughtYellow) Name() string             { return "Raging Onslaught" }
 func (RagingOnslaughtYellow) Cost(*card.TurnState) int { return 3 }
 func (RagingOnslaughtYellow) Pitch() int               { return 2 }
@@ -37,7 +40,7 @@ func (c RagingOnslaughtYellow) Play(s *card.TurnState, self *card.CardState) {
 
 type RagingOnslaughtBlue struct{}
 
-func (RagingOnslaughtBlue) ID() card.ID              { return card.RagingOnslaughtBlue }
+func (RagingOnslaughtBlue) ID() ids.CardID           { return ids.RagingOnslaughtBlue }
 func (RagingOnslaughtBlue) Name() string             { return "Raging Onslaught" }
 func (RagingOnslaughtBlue) Cost(*card.TurnState) int { return 3 }
 func (RagingOnslaughtBlue) Pitch() int               { return 3 }

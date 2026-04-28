@@ -5,13 +5,16 @@
 
 package weapon
 
-import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+import (
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
+)
 
 var annalsOfSutcliffeTypes = card.NewTypeSet(card.TypeRuneblade, card.TypeWeapon, card.TypeBook, card.TypeTwoHand)
 
 type AnnalsOfSutcliffe struct{}
 
-func (AnnalsOfSutcliffe) ID() card.ID              { return card.AnnalsOfSutcliffeID }
+func (AnnalsOfSutcliffe) ID() ids.CardID           { return ids.AnnalsOfSutcliffeID }
 func (AnnalsOfSutcliffe) Name() string             { return "Annals of Sutcliffe" }
 func (AnnalsOfSutcliffe) Cost(*card.TurnState) int { return 3 }
 func (AnnalsOfSutcliffe) Pitch() int               { return 0 }

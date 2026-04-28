@@ -4,13 +4,16 @@
 
 package cards
 
-import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+import (
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
+)
 
 var onAKnifeEdgeTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction)
 
 type OnAKnifeEdgeYellow struct{}
 
-func (OnAKnifeEdgeYellow) ID() card.ID              { return card.OnAKnifeEdgeYellow }
+func (OnAKnifeEdgeYellow) ID() ids.CardID           { return ids.OnAKnifeEdgeYellow }
 func (OnAKnifeEdgeYellow) Name() string             { return "On a Knife Edge" }
 func (OnAKnifeEdgeYellow) Cost(*card.TurnState) int { return 0 }
 func (OnAKnifeEdgeYellow) Pitch() int               { return 2 }

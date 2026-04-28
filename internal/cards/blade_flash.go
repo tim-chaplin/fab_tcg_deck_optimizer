@@ -4,13 +4,16 @@
 
 package cards
 
-import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+import (
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
+)
 
 var bladeFlashTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAttackReaction)
 
 type BladeFlashBlue struct{}
 
-func (BladeFlashBlue) ID() card.ID              { return card.BladeFlashBlue }
+func (BladeFlashBlue) ID() ids.CardID           { return ids.BladeFlashBlue }
 func (BladeFlashBlue) Name() string             { return "Blade Flash" }
 func (BladeFlashBlue) Cost(*card.TurnState) int { return 1 }
 func (BladeFlashBlue) Pitch() int               { return 3 }

@@ -5,13 +5,16 @@
 
 package cards
 
-import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+import (
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
+)
 
 var clearwaterElixirTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction)
 
 type ClearwaterElixirRed struct{}
 
-func (ClearwaterElixirRed) ID() card.ID              { return card.ClearwaterElixirRed }
+func (ClearwaterElixirRed) ID() ids.CardID           { return ids.ClearwaterElixirRed }
 func (ClearwaterElixirRed) Name() string             { return "Clearwater Elixir" }
 func (ClearwaterElixirRed) Cost(*card.TurnState) int { return 1 }
 func (ClearwaterElixirRed) Pitch() int               { return 1 }

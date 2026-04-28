@@ -7,13 +7,16 @@
 
 package cards
 
-import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+import (
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
+)
 
 var sigilOfDeadwoodTypes = card.NewTypeSet(card.TypeRuneblade, card.TypeAction, card.TypeAura)
 
 type SigilOfDeadwoodBlue struct{}
 
-func (SigilOfDeadwoodBlue) ID() card.ID              { return card.SigilOfDeadwoodBlue }
+func (SigilOfDeadwoodBlue) ID() ids.CardID           { return ids.SigilOfDeadwoodBlue }
 func (SigilOfDeadwoodBlue) Name() string             { return "Sigil of Deadwood" }
 func (SigilOfDeadwoodBlue) Cost(*card.TurnState) int { return 0 }
 func (SigilOfDeadwoodBlue) Pitch() int               { return 3 }

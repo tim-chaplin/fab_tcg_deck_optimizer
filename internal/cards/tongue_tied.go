@@ -5,13 +5,16 @@
 
 package cards
 
-import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+import (
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
+)
 
 var tongueTiedTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeAttack)
 
 type TongueTiedRed struct{}
 
-func (TongueTiedRed) ID() card.ID              { return card.TongueTiedRed }
+func (TongueTiedRed) ID() ids.CardID           { return ids.TongueTiedRed }
 func (TongueTiedRed) Name() string             { return "Tongue Tied" }
 func (TongueTiedRed) Cost(*card.TurnState) int { return 3 }
 func (TongueTiedRed) Pitch() int               { return 1 }

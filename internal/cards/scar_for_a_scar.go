@@ -7,6 +7,7 @@ package cards
 
 import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/simstate"
 )
 
@@ -14,7 +15,7 @@ var scarForAScarTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.
 
 type ScarForAScarRed struct{}
 
-func (ScarForAScarRed) ID() card.ID              { return card.ScarForAScarRed }
+func (ScarForAScarRed) ID() ids.CardID           { return ids.ScarForAScarRed }
 func (ScarForAScarRed) Name() string             { return "Scar for a Scar" }
 func (ScarForAScarRed) Cost(*card.TurnState) int { return 0 }
 func (ScarForAScarRed) Pitch() int               { return 1 }
@@ -28,7 +29,7 @@ func (c ScarForAScarRed) Play(s *card.TurnState, self *card.CardState) {
 
 type ScarForAScarYellow struct{}
 
-func (ScarForAScarYellow) ID() card.ID              { return card.ScarForAScarYellow }
+func (ScarForAScarYellow) ID() ids.CardID           { return ids.ScarForAScarYellow }
 func (ScarForAScarYellow) Name() string             { return "Scar for a Scar" }
 func (ScarForAScarYellow) Cost(*card.TurnState) int { return 0 }
 func (ScarForAScarYellow) Pitch() int               { return 2 }
@@ -42,7 +43,7 @@ func (c ScarForAScarYellow) Play(s *card.TurnState, self *card.CardState) {
 
 type ScarForAScarBlue struct{}
 
-func (ScarForAScarBlue) ID() card.ID              { return card.ScarForAScarBlue }
+func (ScarForAScarBlue) ID() ids.CardID           { return ids.ScarForAScarBlue }
 func (ScarForAScarBlue) Name() string             { return "Scar for a Scar" }
 func (ScarForAScarBlue) Cost(*card.TurnState) int { return 0 }
 func (ScarForAScarBlue) Pitch() int               { return 3 }

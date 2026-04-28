@@ -6,13 +6,16 @@
 
 package cards
 
-import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+import (
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
+)
 
 var lookingForAScrapTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeAttack)
 
 type LookingForAScrapRed struct{}
 
-func (LookingForAScrapRed) ID() card.ID              { return card.LookingForAScrapRed }
+func (LookingForAScrapRed) ID() ids.CardID           { return ids.LookingForAScrapRed }
 func (LookingForAScrapRed) Name() string             { return "Looking for a Scrap" }
 func (LookingForAScrapRed) Cost(*card.TurnState) int { return 1 }
 func (LookingForAScrapRed) Pitch() int               { return 1 }
@@ -29,7 +32,7 @@ func (c LookingForAScrapRed) Play(s *card.TurnState, self *card.CardState) {
 
 type LookingForAScrapYellow struct{}
 
-func (LookingForAScrapYellow) ID() card.ID              { return card.LookingForAScrapYellow }
+func (LookingForAScrapYellow) ID() ids.CardID           { return ids.LookingForAScrapYellow }
 func (LookingForAScrapYellow) Name() string             { return "Looking for a Scrap" }
 func (LookingForAScrapYellow) Cost(*card.TurnState) int { return 1 }
 func (LookingForAScrapYellow) Pitch() int               { return 2 }
@@ -46,7 +49,7 @@ func (c LookingForAScrapYellow) Play(s *card.TurnState, self *card.CardState) {
 
 type LookingForAScrapBlue struct{}
 
-func (LookingForAScrapBlue) ID() card.ID              { return card.LookingForAScrapBlue }
+func (LookingForAScrapBlue) ID() ids.CardID           { return ids.LookingForAScrapBlue }
 func (LookingForAScrapBlue) Name() string             { return "Looking for a Scrap" }
 func (LookingForAScrapBlue) Cost(*card.TurnState) int { return 1 }
 func (LookingForAScrapBlue) Pitch() int               { return 3 }

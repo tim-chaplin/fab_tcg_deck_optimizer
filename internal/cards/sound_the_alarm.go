@@ -7,13 +7,16 @@
 
 package cards
 
-import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+import (
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
+)
 
 var soundTheAlarmTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeAttack)
 
 type SoundTheAlarmRed struct{}
 
-func (SoundTheAlarmRed) ID() card.ID              { return card.SoundTheAlarmRed }
+func (SoundTheAlarmRed) ID() ids.CardID           { return ids.SoundTheAlarmRed }
 func (SoundTheAlarmRed) Name() string             { return "Sound the Alarm" }
 func (SoundTheAlarmRed) Cost(*card.TurnState) int { return 1 }
 func (SoundTheAlarmRed) Pitch() int               { return 1 }

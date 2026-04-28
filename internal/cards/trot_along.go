@@ -4,7 +4,10 @@
 
 package cards
 
-import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+import (
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
+)
 
 var trotAlongTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction)
 
@@ -24,7 +27,7 @@ func trotAlongApplySideEffect(s *card.TurnState) {
 
 type TrotAlongBlue struct{}
 
-func (TrotAlongBlue) ID() card.ID              { return card.TrotAlongBlue }
+func (TrotAlongBlue) ID() ids.CardID           { return ids.TrotAlongBlue }
 func (TrotAlongBlue) Name() string             { return "Trot Along" }
 func (TrotAlongBlue) Cost(*card.TurnState) int { return 0 }
 func (TrotAlongBlue) Pitch() int               { return 3 }

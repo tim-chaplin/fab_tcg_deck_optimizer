@@ -7,13 +7,16 @@
 
 package weapon
 
-import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+import (
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
+)
 
 var rosettaThornTypes = card.NewTypeSet(card.TypeRuneblade, card.TypeWeapon, card.TypeSword, card.TypeTwoHand)
 
 type RosettaThorn struct{}
 
-func (RosettaThorn) ID() card.ID              { return card.RosettaThornID }
+func (RosettaThorn) ID() ids.CardID           { return ids.RosettaThornID }
 func (RosettaThorn) Name() string             { return "Rosetta Thorn" }
 func (RosettaThorn) Cost(*card.TurnState) int { return 1 }
 func (RosettaThorn) Pitch() int               { return 0 }

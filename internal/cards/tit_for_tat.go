@@ -4,13 +4,16 @@
 
 package cards
 
-import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+import (
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
+)
 
 var titForTatTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction)
 
 type TitForTatBlue struct{}
 
-func (TitForTatBlue) ID() card.ID              { return card.TitForTatBlue }
+func (TitForTatBlue) ID() ids.CardID           { return ids.TitForTatBlue }
 func (TitForTatBlue) Name() string             { return "Tit for Tat" }
 func (TitForTatBlue) Cost(*card.TurnState) int { return 0 }
 func (TitForTatBlue) Pitch() int               { return 3 }

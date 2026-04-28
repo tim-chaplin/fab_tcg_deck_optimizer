@@ -9,7 +9,10 @@
 
 package cards
 
-import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+import (
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
+)
 
 var performanceBonusTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeAttack)
 
@@ -26,7 +29,7 @@ func performanceBonusPlay(s *card.TurnState, self *card.CardState) {
 
 type PerformanceBonusRed struct{}
 
-func (PerformanceBonusRed) ID() card.ID              { return card.PerformanceBonusRed }
+func (PerformanceBonusRed) ID() ids.CardID           { return ids.PerformanceBonusRed }
 func (PerformanceBonusRed) Name() string             { return "Performance Bonus" }
 func (PerformanceBonusRed) Cost(*card.TurnState) int { return 0 }
 func (PerformanceBonusRed) Pitch() int               { return 1 }
@@ -43,7 +46,7 @@ func (PerformanceBonusRed) Play(s *card.TurnState, self *card.CardState) {
 
 type PerformanceBonusYellow struct{}
 
-func (PerformanceBonusYellow) ID() card.ID              { return card.PerformanceBonusYellow }
+func (PerformanceBonusYellow) ID() ids.CardID           { return ids.PerformanceBonusYellow }
 func (PerformanceBonusYellow) Name() string             { return "Performance Bonus" }
 func (PerformanceBonusYellow) Cost(*card.TurnState) int { return 0 }
 func (PerformanceBonusYellow) Pitch() int               { return 2 }
@@ -60,7 +63,7 @@ func (PerformanceBonusYellow) Play(s *card.TurnState, self *card.CardState) {
 
 type PerformanceBonusBlue struct{}
 
-func (PerformanceBonusBlue) ID() card.ID              { return card.PerformanceBonusBlue }
+func (PerformanceBonusBlue) ID() ids.CardID           { return ids.PerformanceBonusBlue }
 func (PerformanceBonusBlue) Name() string             { return "Performance Bonus" }
 func (PerformanceBonusBlue) Cost(*card.TurnState) int { return 0 }
 func (PerformanceBonusBlue) Pitch() int               { return 3 }

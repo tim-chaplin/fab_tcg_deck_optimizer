@@ -7,7 +7,10 @@
 
 package cards
 
-import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+import (
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
+)
 
 var captainsCallTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction)
 
@@ -29,7 +32,7 @@ func captainsCallApplySideEffect(s *card.TurnState, maxCost int) {
 
 type CaptainsCallRed struct{}
 
-func (CaptainsCallRed) ID() card.ID              { return card.CaptainsCallRed }
+func (CaptainsCallRed) ID() ids.CardID           { return ids.CaptainsCallRed }
 func (CaptainsCallRed) Name() string             { return "Captain's Call" }
 func (CaptainsCallRed) Cost(*card.TurnState) int { return 0 }
 func (CaptainsCallRed) Pitch() int               { return 1 }
@@ -47,7 +50,7 @@ func (CaptainsCallRed) Play(s *card.TurnState, self *card.CardState) {
 
 type CaptainsCallYellow struct{}
 
-func (CaptainsCallYellow) ID() card.ID              { return card.CaptainsCallYellow }
+func (CaptainsCallYellow) ID() ids.CardID           { return ids.CaptainsCallYellow }
 func (CaptainsCallYellow) Name() string             { return "Captain's Call" }
 func (CaptainsCallYellow) Cost(*card.TurnState) int { return 0 }
 func (CaptainsCallYellow) Pitch() int               { return 2 }
@@ -65,7 +68,7 @@ func (CaptainsCallYellow) Play(s *card.TurnState, self *card.CardState) {
 
 type CaptainsCallBlue struct{}
 
-func (CaptainsCallBlue) ID() card.ID              { return card.CaptainsCallBlue }
+func (CaptainsCallBlue) ID() ids.CardID           { return ids.CaptainsCallBlue }
 func (CaptainsCallBlue) Name() string             { return "Captain's Call" }
 func (CaptainsCallBlue) Cost(*card.TurnState) int { return 0 }
 func (CaptainsCallBlue) Pitch() int               { return 3 }

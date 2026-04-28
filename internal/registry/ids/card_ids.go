@@ -1,22 +1,21 @@
-package card
+package ids
 
-// ID uniquely identifies a printed card. The zero value (Invalid) is reserved so zero-valued
-// IDs in other data structures can be detected as "unset".
+// CardID uniquely identifies a printed card. The zero value (Invalid) is reserved so zero-valued
+// CardIDs in other data structures can be detected as "unset".
 //
-// IDs are stable within a build but NOT a persistence format: adding or removing cards may
+// CardIDs are stable within a build but NOT a persistence format: adding or removing cards may
 // renumber existing entries. Treat IDs as opaque in-process handles.
 //
-// Each pitch variant (Red / Yellow / Blue) is a distinct card and gets its own ID. Weapons get
-// IDs too so every Card implementation has a unique, non-zero identifier.
-type ID uint16
+// Each pitch variant (Red / Yellow / Blue) is a distinct card and gets its own CardID.
+type CardID uint16
 
 // Invalid is the sentinel zero value. Valid IDs start at 1.
-const Invalid ID = 0
+const InvalidCard CardID = 0
 
 // Runeblade card IDs. Ordered alphabetically by card name, Red → Yellow → Blue within each family.
 // Sigil of Deadwood only has a Blue variant (no R/Y printings).
 const (
-	AetherSlashRed ID = iota + 1
+	AetherSlashRed CardID = iota + 1
 	AetherSlashYellow
 	AetherSlashBlue
 	AmplifyTheArknightRed

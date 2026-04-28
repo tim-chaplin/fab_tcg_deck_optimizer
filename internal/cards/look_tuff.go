@@ -4,13 +4,16 @@
 
 package cards
 
-import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+import (
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
+)
 
 var lookTuffTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeAttack)
 
 type LookTuffRed struct{}
 
-func (LookTuffRed) ID() card.ID              { return card.LookTuffRed }
+func (LookTuffRed) ID() ids.CardID           { return ids.LookTuffRed }
 func (LookTuffRed) Name() string             { return "Look Tuff" }
 func (LookTuffRed) Cost(*card.TurnState) int { return 3 }
 func (LookTuffRed) Pitch() int               { return 1 }

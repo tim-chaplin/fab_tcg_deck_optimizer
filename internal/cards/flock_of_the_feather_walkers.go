@@ -6,13 +6,16 @@
 
 package cards
 
-import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+import (
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
+)
 
 var flockOfTheFeatherWalkersTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeAttack)
 
 type FlockOfTheFeatherWalkersRed struct{}
 
-func (FlockOfTheFeatherWalkersRed) ID() card.ID              { return card.FlockOfTheFeatherWalkersRed }
+func (FlockOfTheFeatherWalkersRed) ID() ids.CardID           { return ids.FlockOfTheFeatherWalkersRed }
 func (FlockOfTheFeatherWalkersRed) Name() string             { return "Flock of the Feather Walkers" }
 func (FlockOfTheFeatherWalkersRed) Cost(*card.TurnState) int { return 1 }
 func (FlockOfTheFeatherWalkersRed) Pitch() int               { return 1 }
@@ -29,7 +32,7 @@ func (c FlockOfTheFeatherWalkersRed) Play(s *card.TurnState, self *card.CardStat
 
 type FlockOfTheFeatherWalkersYellow struct{}
 
-func (FlockOfTheFeatherWalkersYellow) ID() card.ID              { return card.FlockOfTheFeatherWalkersYellow }
+func (FlockOfTheFeatherWalkersYellow) ID() ids.CardID           { return ids.FlockOfTheFeatherWalkersYellow }
 func (FlockOfTheFeatherWalkersYellow) Name() string             { return "Flock of the Feather Walkers" }
 func (FlockOfTheFeatherWalkersYellow) Cost(*card.TurnState) int { return 1 }
 func (FlockOfTheFeatherWalkersYellow) Pitch() int               { return 2 }
@@ -46,7 +49,7 @@ func (c FlockOfTheFeatherWalkersYellow) Play(s *card.TurnState, self *card.CardS
 
 type FlockOfTheFeatherWalkersBlue struct{}
 
-func (FlockOfTheFeatherWalkersBlue) ID() card.ID              { return card.FlockOfTheFeatherWalkersBlue }
+func (FlockOfTheFeatherWalkersBlue) ID() ids.CardID           { return ids.FlockOfTheFeatherWalkersBlue }
 func (FlockOfTheFeatherWalkersBlue) Name() string             { return "Flock of the Feather Walkers" }
 func (FlockOfTheFeatherWalkersBlue) Cost(*card.TurnState) int { return 1 }
 func (FlockOfTheFeatherWalkersBlue) Pitch() int               { return 3 }

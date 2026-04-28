@@ -5,13 +5,16 @@
 
 package cards
 
-import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+import (
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
+)
 
 var peaceOfMindTypes = card.NewTypeSet(card.TypeGeneric, card.TypeInstant)
 
 type PeaceOfMindRed struct{}
 
-func (PeaceOfMindRed) ID() card.ID              { return card.PeaceOfMindRed }
+func (PeaceOfMindRed) ID() ids.CardID           { return ids.PeaceOfMindRed }
 func (PeaceOfMindRed) Name() string             { return "Peace of Mind" }
 func (PeaceOfMindRed) Cost(*card.TurnState) int { return 2 }
 func (PeaceOfMindRed) Pitch() int               { return 1 }
@@ -26,7 +29,7 @@ func (PeaceOfMindRed) Play(s *card.TurnState, self *card.CardState) { s.LogPlay(
 
 type PeaceOfMindYellow struct{}
 
-func (PeaceOfMindYellow) ID() card.ID              { return card.PeaceOfMindYellow }
+func (PeaceOfMindYellow) ID() ids.CardID           { return ids.PeaceOfMindYellow }
 func (PeaceOfMindYellow) Name() string             { return "Peace of Mind" }
 func (PeaceOfMindYellow) Cost(*card.TurnState) int { return 2 }
 func (PeaceOfMindYellow) Pitch() int               { return 2 }
@@ -41,7 +44,7 @@ func (PeaceOfMindYellow) Play(s *card.TurnState, self *card.CardState) { s.LogPl
 
 type PeaceOfMindBlue struct{}
 
-func (PeaceOfMindBlue) ID() card.ID              { return card.PeaceOfMindBlue }
+func (PeaceOfMindBlue) ID() ids.CardID           { return ids.PeaceOfMindBlue }
 func (PeaceOfMindBlue) Name() string             { return "Peace of Mind" }
 func (PeaceOfMindBlue) Cost(*card.TurnState) int { return 2 }
 func (PeaceOfMindBlue) Pitch() int               { return 3 }

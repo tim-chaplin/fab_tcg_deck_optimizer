@@ -6,13 +6,16 @@
 
 package cards
 
-import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+import (
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
+)
 
 var condemnToSlaughterTypes = card.NewTypeSet(card.TypeRuneblade, card.TypeAction)
 
 type CondemnToSlaughterRed struct{}
 
-func (CondemnToSlaughterRed) ID() card.ID              { return card.CondemnToSlaughterRed }
+func (CondemnToSlaughterRed) ID() ids.CardID           { return ids.CondemnToSlaughterRed }
 func (CondemnToSlaughterRed) Name() string             { return "Condemn to Slaughter" }
 func (CondemnToSlaughterRed) Cost(*card.TurnState) int { return 1 }
 func (CondemnToSlaughterRed) Pitch() int               { return 1 }
@@ -31,7 +34,7 @@ func (CondemnToSlaughterRed) Play(s *card.TurnState, self *card.CardState) {
 
 type CondemnToSlaughterYellow struct{}
 
-func (CondemnToSlaughterYellow) ID() card.ID              { return card.CondemnToSlaughterYellow }
+func (CondemnToSlaughterYellow) ID() ids.CardID           { return ids.CondemnToSlaughterYellow }
 func (CondemnToSlaughterYellow) Name() string             { return "Condemn to Slaughter" }
 func (CondemnToSlaughterYellow) Cost(*card.TurnState) int { return 1 }
 func (CondemnToSlaughterYellow) Pitch() int               { return 2 }
@@ -50,7 +53,7 @@ func (CondemnToSlaughterYellow) Play(s *card.TurnState, self *card.CardState) {
 
 type CondemnToSlaughterBlue struct{}
 
-func (CondemnToSlaughterBlue) ID() card.ID              { return card.CondemnToSlaughterBlue }
+func (CondemnToSlaughterBlue) ID() ids.CardID           { return ids.CondemnToSlaughterBlue }
 func (CondemnToSlaughterBlue) Name() string             { return "Condemn to Slaughter" }
 func (CondemnToSlaughterBlue) Cost(*card.TurnState) int { return 1 }
 func (CondemnToSlaughterBlue) Pitch() int               { return 3 }

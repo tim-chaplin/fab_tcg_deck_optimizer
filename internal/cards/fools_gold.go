@@ -4,13 +4,16 @@
 
 package cards
 
-import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+import (
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
+)
 
 var foolsGoldTypes = card.NewTypeSet(card.TypeGeneric)
 
 type FoolsGoldYellow struct{}
 
-func (FoolsGoldYellow) ID() card.ID              { return card.FoolsGoldYellow }
+func (FoolsGoldYellow) ID() ids.CardID           { return ids.FoolsGoldYellow }
 func (FoolsGoldYellow) Name() string             { return "Fool's Gold" }
 func (FoolsGoldYellow) Cost(*card.TurnState) int { return 0 }
 func (FoolsGoldYellow) Pitch() int               { return 2 }

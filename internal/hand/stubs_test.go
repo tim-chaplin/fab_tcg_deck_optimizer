@@ -2,6 +2,7 @@ package hand
 
 import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
 )
 
@@ -27,7 +28,7 @@ func cardNames(cs []card.Card) []string {
 // keep its grants from bleeding into a later permutation where grantSpy runs first.
 type grantAll struct{}
 
-func (grantAll) ID() card.ID              { return card.Invalid }
+func (grantAll) ID() ids.CardID           { return ids.InvalidCard }
 func (grantAll) Name() string             { return "grantAll" }
 func (grantAll) Cost(*card.TurnState) int { return 0 }
 func (grantAll) Pitch() int               { return 0 }
@@ -51,7 +52,7 @@ func (grantAll) Play(s *card.TurnState, self *card.CardState) {
 // visible here — tripping the spy.
 type grantSpy struct{ saw *bool }
 
-func (grantSpy) ID() card.ID              { return card.Invalid }
+func (grantSpy) ID() ids.CardID           { return ids.InvalidCard }
 func (grantSpy) Name() string             { return "grantSpy" }
 func (grantSpy) Cost(*card.TurnState) int { return 0 }
 func (grantSpy) Pitch() int               { return 0 }

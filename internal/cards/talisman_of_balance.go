@@ -6,13 +6,16 @@
 
 package cards
 
-import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+import (
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
+)
 
 var talismanOfBalanceTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeItem)
 
 type TalismanOfBalanceBlue struct{}
 
-func (TalismanOfBalanceBlue) ID() card.ID              { return card.TalismanOfBalanceBlue }
+func (TalismanOfBalanceBlue) ID() ids.CardID           { return ids.TalismanOfBalanceBlue }
 func (TalismanOfBalanceBlue) Name() string             { return "Talisman of Balance" }
 func (TalismanOfBalanceBlue) Cost(*card.TurnState) int { return 0 }
 func (TalismanOfBalanceBlue) Pitch() int               { return 3 }

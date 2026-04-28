@@ -4,13 +4,16 @@
 
 package cards
 
-import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+import (
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
+)
 
 var reinforceTheLineTypes = card.NewTypeSet(card.TypeGeneric, card.TypeInstant)
 
 type ReinforceTheLineRed struct{}
 
-func (ReinforceTheLineRed) ID() card.ID              { return card.ReinforceTheLineRed }
+func (ReinforceTheLineRed) ID() ids.CardID           { return ids.ReinforceTheLineRed }
 func (ReinforceTheLineRed) Name() string             { return "Reinforce the Line" }
 func (ReinforceTheLineRed) Cost(*card.TurnState) int { return 0 }
 func (ReinforceTheLineRed) Pitch() int               { return 1 }
@@ -25,7 +28,7 @@ func (ReinforceTheLineRed) Play(s *card.TurnState, self *card.CardState) { s.Log
 
 type ReinforceTheLineYellow struct{}
 
-func (ReinforceTheLineYellow) ID() card.ID              { return card.ReinforceTheLineYellow }
+func (ReinforceTheLineYellow) ID() ids.CardID           { return ids.ReinforceTheLineYellow }
 func (ReinforceTheLineYellow) Name() string             { return "Reinforce the Line" }
 func (ReinforceTheLineYellow) Cost(*card.TurnState) int { return 0 }
 func (ReinforceTheLineYellow) Pitch() int               { return 2 }
@@ -40,7 +43,7 @@ func (ReinforceTheLineYellow) Play(s *card.TurnState, self *card.CardState) { s.
 
 type ReinforceTheLineBlue struct{}
 
-func (ReinforceTheLineBlue) ID() card.ID              { return card.ReinforceTheLineBlue }
+func (ReinforceTheLineBlue) ID() ids.CardID           { return ids.ReinforceTheLineBlue }
 func (ReinforceTheLineBlue) Name() string             { return "Reinforce the Line" }
 func (ReinforceTheLineBlue) Cost(*card.TurnState) int { return 0 }
 func (ReinforceTheLineBlue) Pitch() int               { return 3 }

@@ -5,13 +5,16 @@
 
 package cards
 
-import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+import (
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
+)
 
 var splinteringDeadwoodTypes = card.NewTypeSet(card.TypeRuneblade, card.TypeAction, card.TypeAttack)
 
 type SplinteringDeadwoodRed struct{}
 
-func (SplinteringDeadwoodRed) ID() card.ID              { return card.SplinteringDeadwoodRed }
+func (SplinteringDeadwoodRed) ID() ids.CardID           { return ids.SplinteringDeadwoodRed }
 func (SplinteringDeadwoodRed) Name() string             { return "Splintering Deadwood" }
 func (SplinteringDeadwoodRed) Cost(*card.TurnState) int { return 3 }
 func (SplinteringDeadwoodRed) Pitch() int               { return 1 }
@@ -29,7 +32,7 @@ func (SplinteringDeadwoodRed) Play(s *card.TurnState, self *card.CardState) {
 
 type SplinteringDeadwoodYellow struct{}
 
-func (SplinteringDeadwoodYellow) ID() card.ID              { return card.SplinteringDeadwoodYellow }
+func (SplinteringDeadwoodYellow) ID() ids.CardID           { return ids.SplinteringDeadwoodYellow }
 func (SplinteringDeadwoodYellow) Name() string             { return "Splintering Deadwood" }
 func (SplinteringDeadwoodYellow) Cost(*card.TurnState) int { return 3 }
 func (SplinteringDeadwoodYellow) Pitch() int               { return 2 }
@@ -47,7 +50,7 @@ func (SplinteringDeadwoodYellow) Play(s *card.TurnState, self *card.CardState) {
 
 type SplinteringDeadwoodBlue struct{}
 
-func (SplinteringDeadwoodBlue) ID() card.ID              { return card.SplinteringDeadwoodBlue }
+func (SplinteringDeadwoodBlue) ID() ids.CardID           { return ids.SplinteringDeadwoodBlue }
 func (SplinteringDeadwoodBlue) Name() string             { return "Splintering Deadwood" }
 func (SplinteringDeadwoodBlue) Cost(*card.TurnState) int { return 3 }
 func (SplinteringDeadwoodBlue) Pitch() int               { return 3 }

@@ -8,13 +8,16 @@
 
 package cards
 
-import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+import (
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
+)
 
 var arcanicCrackleTypes = card.NewTypeSet(card.TypeRuneblade, card.TypeAction, card.TypeAttack)
 
 type ArcanicCrackleRed struct{}
 
-func (ArcanicCrackleRed) ID() card.ID              { return card.ArcanicCrackleRed }
+func (ArcanicCrackleRed) ID() ids.CardID           { return ids.ArcanicCrackleRed }
 func (ArcanicCrackleRed) Name() string             { return "Arcanic Crackle" }
 func (ArcanicCrackleRed) Cost(*card.TurnState) int { return 0 }
 func (ArcanicCrackleRed) Pitch() int               { return 1 }
@@ -29,7 +32,7 @@ func (ArcanicCrackleRed) Play(s *card.TurnState, self *card.CardState) {
 
 type ArcanicCrackleYellow struct{}
 
-func (ArcanicCrackleYellow) ID() card.ID              { return card.ArcanicCrackleYellow }
+func (ArcanicCrackleYellow) ID() ids.CardID           { return ids.ArcanicCrackleYellow }
 func (ArcanicCrackleYellow) Name() string             { return "Arcanic Crackle" }
 func (ArcanicCrackleYellow) Cost(*card.TurnState) int { return 0 }
 func (ArcanicCrackleYellow) Pitch() int               { return 2 }
@@ -44,7 +47,7 @@ func (ArcanicCrackleYellow) Play(s *card.TurnState, self *card.CardState) {
 
 type ArcanicCrackleBlue struct{}
 
-func (ArcanicCrackleBlue) ID() card.ID              { return card.ArcanicCrackleBlue }
+func (ArcanicCrackleBlue) ID() ids.CardID           { return ids.ArcanicCrackleBlue }
 func (ArcanicCrackleBlue) Name() string             { return "Arcanic Crackle" }
 func (ArcanicCrackleBlue) Cost(*card.TurnState) int { return 0 }
 func (ArcanicCrackleBlue) Pitch() int               { return 3 }

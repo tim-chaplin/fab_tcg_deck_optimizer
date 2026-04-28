@@ -5,8 +5,9 @@ import (
 	"testing"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/cards"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/hero"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
 )
 
 // nameCounts returns a multiset of names for comparison in the tests below. Using maps
@@ -75,7 +76,7 @@ func TestApplyDefaults_Idempotent(t *testing.T) {
 // deck already holds copies of a default sideboard entry, ApplyDefaults tops the sideboard
 // up only far enough to keep the combined total at or below sideboardCopyCap.
 func TestApplyDefaults_SideboardRespectsCopyCap(t *testing.T) {
-	readRunes := cards.Get(card.ReadTheRunesRed)
+	readRunes := registry.GetCard(ids.ReadTheRunesRed)
 
 	// Main has 2 copies → sideboard should stay empty for this entry.
 	d := New(hero.Viserai{}, nil, []card.Card{readRunes, readRunes})

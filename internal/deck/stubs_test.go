@@ -1,7 +1,7 @@
 package deck
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
 )
 
@@ -14,14 +14,14 @@ var int1StubHero = testutils.Hero{Intel: 1}
 // produce identical simulations.
 func deckFingerprint(d *Deck) string {
 	s := weaponKey(d.Weapons) + "|"
-	counts := map[card.ID]int{}
+	counts := map[ids.CardID]int{}
 	for _, c := range d.Cards {
 		counts[c.ID()]++
 	}
 	// Stable ordering — iterate over all possible IDs in byID order isn't exposed, so use a
 	// sorted slice of (id, count).
 	type pair struct {
-		id card.ID
+		id ids.CardID
 		n  int
 	}
 	var pairs []pair

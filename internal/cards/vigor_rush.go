@@ -9,7 +9,10 @@
 
 package cards
 
-import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+import (
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
+)
 
 var vigorRushTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeAttack)
 
@@ -25,7 +28,7 @@ func vigorRushPlay(s *card.TurnState, self *card.CardState) {
 
 type VigorRushRed struct{}
 
-func (VigorRushRed) ID() card.ID              { return card.VigorRushRed }
+func (VigorRushRed) ID() ids.CardID           { return ids.VigorRushRed }
 func (VigorRushRed) Name() string             { return "Vigor Rush" }
 func (VigorRushRed) Cost(*card.TurnState) int { return 1 }
 func (VigorRushRed) Pitch() int               { return 1 }
@@ -39,7 +42,7 @@ func (VigorRushRed) Play(s *card.TurnState, self *card.CardState) {
 
 type VigorRushYellow struct{}
 
-func (VigorRushYellow) ID() card.ID              { return card.VigorRushYellow }
+func (VigorRushYellow) ID() ids.CardID           { return ids.VigorRushYellow }
 func (VigorRushYellow) Name() string             { return "Vigor Rush" }
 func (VigorRushYellow) Cost(*card.TurnState) int { return 1 }
 func (VigorRushYellow) Pitch() int               { return 2 }
@@ -53,7 +56,7 @@ func (VigorRushYellow) Play(s *card.TurnState, self *card.CardState) {
 
 type VigorRushBlue struct{}
 
-func (VigorRushBlue) ID() card.ID              { return card.VigorRushBlue }
+func (VigorRushBlue) ID() ids.CardID           { return ids.VigorRushBlue }
 func (VigorRushBlue) Name() string             { return "Vigor Rush" }
 func (VigorRushBlue) Cost(*card.TurnState) int { return 1 }
 func (VigorRushBlue) Pitch() int               { return 3 }

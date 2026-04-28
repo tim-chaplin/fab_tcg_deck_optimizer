@@ -7,6 +7,8 @@
 // triggers.go (AuraTrigger + EphemeralAttackTrigger).
 package card
 
+import "github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
+
 // CardState wraps a Card with per-turn mutable flags that other cards' effects can toggle.
 // Instances are created by the solver at the start of each attack chain and live only for that
 // chain. Effects that grant keywords to "the next X" scan TurnState.CardsRemaining and flip
@@ -102,7 +104,7 @@ type Hero interface {
 type Card interface {
 	// ID returns the card's canonical registry identifier. Stable within a build. Lets callers
 	// key maps / slices on cards without string-hashing Name().
-	ID() ID
+	ID() ids.CardID
 	// Name returns the card's printed name without any pitch-color suffix — all three
 	// printings of "Aether Slash" return the same string. Cards comparing by name
 	// (synergies, "if you have played a card named X this turn" effects) use this directly.

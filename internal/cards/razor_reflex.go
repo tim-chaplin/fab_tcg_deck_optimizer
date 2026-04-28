@@ -6,13 +6,16 @@
 
 package cards
 
-import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+import (
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
+)
 
 var razorReflexTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAttackReaction)
 
 type RazorReflexRed struct{}
 
-func (RazorReflexRed) ID() card.ID              { return card.RazorReflexRed }
+func (RazorReflexRed) ID() ids.CardID           { return ids.RazorReflexRed }
 func (RazorReflexRed) Name() string             { return "Razor Reflex" }
 func (RazorReflexRed) Cost(*card.TurnState) int { return 1 }
 func (RazorReflexRed) Pitch() int               { return 1 }
@@ -28,7 +31,7 @@ func (RazorReflexRed) Play(s *card.TurnState, self *card.CardState) { s.LogPlay(
 
 type RazorReflexYellow struct{}
 
-func (RazorReflexYellow) ID() card.ID              { return card.RazorReflexYellow }
+func (RazorReflexYellow) ID() ids.CardID           { return ids.RazorReflexYellow }
 func (RazorReflexYellow) Name() string             { return "Razor Reflex" }
 func (RazorReflexYellow) Cost(*card.TurnState) int { return 1 }
 func (RazorReflexYellow) Pitch() int               { return 2 }
@@ -44,7 +47,7 @@ func (RazorReflexYellow) Play(s *card.TurnState, self *card.CardState) { s.LogPl
 
 type RazorReflexBlue struct{}
 
-func (RazorReflexBlue) ID() card.ID              { return card.RazorReflexBlue }
+func (RazorReflexBlue) ID() ids.CardID           { return ids.RazorReflexBlue }
 func (RazorReflexBlue) Name() string             { return "Razor Reflex" }
 func (RazorReflexBlue) Cost(*card.TurnState) int { return 1 }
 func (RazorReflexBlue) Pitch() int               { return 3 }

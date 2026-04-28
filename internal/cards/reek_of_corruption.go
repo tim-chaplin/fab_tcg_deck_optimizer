@@ -10,7 +10,10 @@
 
 package cards
 
-import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+import (
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
+)
 
 var reekOfCorruptionTypes = card.NewTypeSet(card.TypeRuneblade, card.TypeAction, card.TypeAttack)
 
@@ -25,7 +28,7 @@ func reekOfCorruptionApplyRider(s *card.TurnState, self *card.CardState) {
 
 type ReekOfCorruptionRed struct{}
 
-func (ReekOfCorruptionRed) ID() card.ID              { return card.ReekOfCorruptionRed }
+func (ReekOfCorruptionRed) ID() ids.CardID           { return ids.ReekOfCorruptionRed }
 func (ReekOfCorruptionRed) Name() string             { return "Reek of Corruption" }
 func (ReekOfCorruptionRed) Cost(*card.TurnState) int { return 2 }
 func (ReekOfCorruptionRed) Pitch() int               { return 1 }
@@ -40,7 +43,7 @@ func (ReekOfCorruptionRed) Play(s *card.TurnState, self *card.CardState) {
 
 type ReekOfCorruptionYellow struct{}
 
-func (ReekOfCorruptionYellow) ID() card.ID              { return card.ReekOfCorruptionYellow }
+func (ReekOfCorruptionYellow) ID() ids.CardID           { return ids.ReekOfCorruptionYellow }
 func (ReekOfCorruptionYellow) Name() string             { return "Reek of Corruption" }
 func (ReekOfCorruptionYellow) Cost(*card.TurnState) int { return 2 }
 func (ReekOfCorruptionYellow) Pitch() int               { return 2 }
@@ -55,7 +58,7 @@ func (ReekOfCorruptionYellow) Play(s *card.TurnState, self *card.CardState) {
 
 type ReekOfCorruptionBlue struct{}
 
-func (ReekOfCorruptionBlue) ID() card.ID              { return card.ReekOfCorruptionBlue }
+func (ReekOfCorruptionBlue) ID() ids.CardID           { return ids.ReekOfCorruptionBlue }
 func (ReekOfCorruptionBlue) Name() string             { return "Reek of Corruption" }
 func (ReekOfCorruptionBlue) Cost(*card.TurnState) int { return 2 }
 func (ReekOfCorruptionBlue) Pitch() int               { return 3 }

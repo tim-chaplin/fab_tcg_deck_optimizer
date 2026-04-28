@@ -10,10 +10,11 @@ import (
 	"fmt"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/cards"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/deck"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/hand"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/hero"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/weapon"
 )
 
@@ -42,11 +43,11 @@ func fromJSON(dj *DeckJSON) (*deck.Deck, error) {
 	}
 	cs := make([]card.Card, len(dj.Cards))
 	for i, name := range dj.Cards {
-		id, ok := cards.ByName(name)
+		id, ok := registry.CardByName(name)
 		if !ok {
 			return nil, fmt.Errorf("deckio: unknown card %q", name)
 		}
-		cs[i] = cards.Get(id)
+		cs[i] = registry.GetCard(id)
 	}
 	best, err := bestTurnFromJSON(dj.Stats.Best)
 	if err != nil {
@@ -79,13 +80,13 @@ func fromJSON(dj *DeckJSON) (*deck.Deck, error) {
 	return d, nil
 }
 
-func perCardMarginalFromJSON(entries []CardMarginalStatsJSON) (map[card.ID]deck.CardMarginalStats, error) {
+func perCardMarginalFromJSON(entries []CardMarginalStatsJSON) (map[ids.CardID]deck.CardMarginalStats, error) {
 	if len(entries) == 0 {
 		return nil, nil
 	}
-	out := make(map[card.ID]deck.CardMarginalStats, len(entries))
+	out := make(map[ids.CardID]deck.CardMarginalStats, len(entries))
 	for _, e := range entries {
-		id, ok := cards.ByName(e.Card)
+		id, ok := registry.CardByName(e.Card)
 		if !ok {
 			return nil, fmt.Errorf("deckio: unknown card %q in per_card_marginal stats", e.Card)
 		}

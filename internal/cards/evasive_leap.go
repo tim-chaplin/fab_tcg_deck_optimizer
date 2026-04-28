@@ -4,11 +4,14 @@
 
 package cards
 
-import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+import (
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
+)
 
 type EvasiveLeapRed struct{}
 
-func (EvasiveLeapRed) ID() card.ID              { return card.EvasiveLeapRed }
+func (EvasiveLeapRed) ID() ids.CardID           { return ids.EvasiveLeapRed }
 func (EvasiveLeapRed) Name() string             { return "Evasive Leap" }
 func (EvasiveLeapRed) Cost(*card.TurnState) int { return 0 }
 func (EvasiveLeapRed) Pitch() int               { return 1 }
@@ -22,7 +25,7 @@ func (EvasiveLeapRed) Play(s *card.TurnState, self *card.CardState) {
 
 type EvasiveLeapYellow struct{}
 
-func (EvasiveLeapYellow) ID() card.ID              { return card.EvasiveLeapYellow }
+func (EvasiveLeapYellow) ID() ids.CardID           { return ids.EvasiveLeapYellow }
 func (EvasiveLeapYellow) Name() string             { return "Evasive Leap" }
 func (EvasiveLeapYellow) Cost(*card.TurnState) int { return 0 }
 func (EvasiveLeapYellow) Pitch() int               { return 2 }
@@ -36,7 +39,7 @@ func (EvasiveLeapYellow) Play(s *card.TurnState, self *card.CardState) {
 
 type EvasiveLeapBlue struct{}
 
-func (EvasiveLeapBlue) ID() card.ID              { return card.EvasiveLeapBlue }
+func (EvasiveLeapBlue) ID() ids.CardID           { return ids.EvasiveLeapBlue }
 func (EvasiveLeapBlue) Name() string             { return "Evasive Leap" }
 func (EvasiveLeapBlue) Cost(*card.TurnState) int { return 0 }
 func (EvasiveLeapBlue) Pitch() int               { return 3 }

@@ -5,11 +5,14 @@
 
 package cards
 
-import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+import (
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
+)
 
 type DragDownRed struct{}
 
-func (DragDownRed) ID() card.ID              { return card.DragDownRed }
+func (DragDownRed) ID() ids.CardID           { return ids.DragDownRed }
 func (DragDownRed) Name() string             { return "Drag Down" }
 func (DragDownRed) Cost(*card.TurnState) int { return 0 }
 func (DragDownRed) Pitch() int               { return 1 }
@@ -26,7 +29,7 @@ func (DragDownRed) Play(s *card.TurnState, self *card.CardState) {
 
 type DragDownYellow struct{}
 
-func (DragDownYellow) ID() card.ID              { return card.DragDownYellow }
+func (DragDownYellow) ID() ids.CardID           { return ids.DragDownYellow }
 func (DragDownYellow) Name() string             { return "Drag Down" }
 func (DragDownYellow) Cost(*card.TurnState) int { return 0 }
 func (DragDownYellow) Pitch() int               { return 2 }
@@ -43,7 +46,7 @@ func (DragDownYellow) Play(s *card.TurnState, self *card.CardState) {
 
 type DragDownBlue struct{}
 
-func (DragDownBlue) ID() card.ID              { return card.DragDownBlue }
+func (DragDownBlue) ID() ids.CardID           { return ids.DragDownBlue }
 func (DragDownBlue) Name() string             { return "Drag Down" }
 func (DragDownBlue) Cost(*card.TurnState) int { return 0 }
 func (DragDownBlue) Pitch() int               { return 3 }

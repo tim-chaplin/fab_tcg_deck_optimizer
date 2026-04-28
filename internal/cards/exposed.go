@@ -5,13 +5,16 @@
 
 package cards
 
-import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+import (
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
+)
 
 var exposedTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAttackReaction)
 
 type ExposedBlue struct{}
 
-func (ExposedBlue) ID() card.ID              { return card.ExposedBlue }
+func (ExposedBlue) ID() ids.CardID           { return ids.ExposedBlue }
 func (ExposedBlue) Name() string             { return "Exposed" }
 func (ExposedBlue) Cost(*card.TurnState) int { return 0 }
 func (ExposedBlue) Pitch() int               { return 3 }

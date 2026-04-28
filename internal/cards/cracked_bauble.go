@@ -5,13 +5,16 @@
 
 package cards
 
-import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+import (
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
+)
 
 var crackedBaubleTypes = card.NewTypeSet(card.TypeGeneric)
 
 type CrackedBaubleYellow struct{}
 
-func (CrackedBaubleYellow) ID() card.ID              { return card.CrackedBaubleYellow }
+func (CrackedBaubleYellow) ID() ids.CardID           { return ids.CrackedBaubleYellow }
 func (CrackedBaubleYellow) Name() string             { return "Cracked Bauble" }
 func (CrackedBaubleYellow) Cost(*card.TurnState) int { return 0 }
 func (CrackedBaubleYellow) Pitch() int               { return 2 }

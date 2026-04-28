@@ -4,13 +4,16 @@
 
 package cards
 
-import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+import (
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
+)
 
 var timesnapPotionTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeItem)
 
 type TimesnapPotionBlue struct{}
 
-func (TimesnapPotionBlue) ID() card.ID              { return card.TimesnapPotionBlue }
+func (TimesnapPotionBlue) ID() ids.CardID           { return ids.TimesnapPotionBlue }
 func (TimesnapPotionBlue) Name() string             { return "Timesnap Potion" }
 func (TimesnapPotionBlue) Cost(*card.TurnState) int { return 0 }
 func (TimesnapPotionBlue) Pitch() int               { return 3 }

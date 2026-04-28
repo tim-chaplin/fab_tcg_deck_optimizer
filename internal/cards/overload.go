@@ -5,13 +5,16 @@
 
 package cards
 
-import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+import (
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
+)
 
 var overloadTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeAttack)
 
 type OverloadRed struct{}
 
-func (OverloadRed) ID() card.ID              { return card.OverloadRed }
+func (OverloadRed) ID() ids.CardID           { return ids.OverloadRed }
 func (OverloadRed) Name() string             { return "Overload" }
 func (OverloadRed) Cost(*card.TurnState) int { return 0 }
 func (OverloadRed) Pitch() int               { return 1 }
@@ -29,7 +32,7 @@ func (c OverloadRed) Play(s *card.TurnState, self *card.CardState) {
 
 type OverloadYellow struct{}
 
-func (OverloadYellow) ID() card.ID              { return card.OverloadYellow }
+func (OverloadYellow) ID() ids.CardID           { return ids.OverloadYellow }
 func (OverloadYellow) Name() string             { return "Overload" }
 func (OverloadYellow) Cost(*card.TurnState) int { return 0 }
 func (OverloadYellow) Pitch() int               { return 2 }
@@ -47,7 +50,7 @@ func (c OverloadYellow) Play(s *card.TurnState, self *card.CardState) {
 
 type OverloadBlue struct{}
 
-func (OverloadBlue) ID() card.ID              { return card.OverloadBlue }
+func (OverloadBlue) ID() ids.CardID           { return ids.OverloadBlue }
 func (OverloadBlue) Name() string             { return "Overload" }
 func (OverloadBlue) Cost(*card.TurnState) int { return 0 }
 func (OverloadBlue) Pitch() int               { return 3 }

@@ -7,13 +7,16 @@
 
 package cards
 
-import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+import (
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
+)
 
 var primeTheCrowdTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction)
 
 type PrimeTheCrowdRed struct{}
 
-func (PrimeTheCrowdRed) ID() card.ID              { return card.PrimeTheCrowdRed }
+func (PrimeTheCrowdRed) ID() ids.CardID           { return ids.PrimeTheCrowdRed }
 func (PrimeTheCrowdRed) Name() string             { return "Prime the Crowd" }
 func (PrimeTheCrowdRed) Cost(*card.TurnState) int { return 2 }
 func (PrimeTheCrowdRed) Pitch() int               { return 1 }
@@ -31,7 +34,7 @@ func (PrimeTheCrowdRed) Play(s *card.TurnState, self *card.CardState) {
 
 type PrimeTheCrowdYellow struct{}
 
-func (PrimeTheCrowdYellow) ID() card.ID              { return card.PrimeTheCrowdYellow }
+func (PrimeTheCrowdYellow) ID() ids.CardID           { return ids.PrimeTheCrowdYellow }
 func (PrimeTheCrowdYellow) Name() string             { return "Prime the Crowd" }
 func (PrimeTheCrowdYellow) Cost(*card.TurnState) int { return 2 }
 func (PrimeTheCrowdYellow) Pitch() int               { return 2 }
@@ -49,7 +52,7 @@ func (PrimeTheCrowdYellow) Play(s *card.TurnState, self *card.CardState) {
 
 type PrimeTheCrowdBlue struct{}
 
-func (PrimeTheCrowdBlue) ID() card.ID              { return card.PrimeTheCrowdBlue }
+func (PrimeTheCrowdBlue) ID() ids.CardID           { return ids.PrimeTheCrowdBlue }
 func (PrimeTheCrowdBlue) Name() string             { return "Prime the Crowd" }
 func (PrimeTheCrowdBlue) Cost(*card.TurnState) int { return 2 }
 func (PrimeTheCrowdBlue) Pitch() int               { return 3 }

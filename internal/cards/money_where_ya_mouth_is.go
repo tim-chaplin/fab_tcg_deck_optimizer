@@ -10,13 +10,16 @@
 
 package cards
 
-import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+import (
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
+)
 
 var moneyWhereYaMouthIsTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction)
 
 type MoneyWhereYaMouthIsRed struct{}
 
-func (MoneyWhereYaMouthIsRed) ID() card.ID              { return card.MoneyWhereYaMouthIsRed }
+func (MoneyWhereYaMouthIsRed) ID() ids.CardID           { return ids.MoneyWhereYaMouthIsRed }
 func (MoneyWhereYaMouthIsRed) Name() string             { return "Money Where Ya Mouth Is" }
 func (MoneyWhereYaMouthIsRed) Cost(*card.TurnState) int { return 1 }
 func (MoneyWhereYaMouthIsRed) Pitch() int               { return 1 }
@@ -34,7 +37,7 @@ func (MoneyWhereYaMouthIsRed) Play(s *card.TurnState, self *card.CardState) {
 
 type MoneyWhereYaMouthIsYellow struct{}
 
-func (MoneyWhereYaMouthIsYellow) ID() card.ID              { return card.MoneyWhereYaMouthIsYellow }
+func (MoneyWhereYaMouthIsYellow) ID() ids.CardID           { return ids.MoneyWhereYaMouthIsYellow }
 func (MoneyWhereYaMouthIsYellow) Name() string             { return "Money Where Ya Mouth Is" }
 func (MoneyWhereYaMouthIsYellow) Cost(*card.TurnState) int { return 1 }
 func (MoneyWhereYaMouthIsYellow) Pitch() int               { return 2 }
@@ -52,7 +55,7 @@ func (MoneyWhereYaMouthIsYellow) Play(s *card.TurnState, self *card.CardState) {
 
 type MoneyWhereYaMouthIsBlue struct{}
 
-func (MoneyWhereYaMouthIsBlue) ID() card.ID              { return card.MoneyWhereYaMouthIsBlue }
+func (MoneyWhereYaMouthIsBlue) ID() ids.CardID           { return ids.MoneyWhereYaMouthIsBlue }
 func (MoneyWhereYaMouthIsBlue) Name() string             { return "Money Where Ya Mouth Is" }
 func (MoneyWhereYaMouthIsBlue) Cost(*card.TurnState) int { return 1 }
 func (MoneyWhereYaMouthIsBlue) Pitch() int               { return 3 }

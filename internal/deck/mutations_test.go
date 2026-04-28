@@ -4,8 +4,9 @@ import (
 	"testing"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/cards"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/hero"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/weapon"
 )
 
@@ -13,8 +14,8 @@ func TestAllMutations_CountsAndShape(t *testing.T) {
 	// Build a tiny deck: 2 unique cards × 2 copies = 4 cards, plus one weapon. Both starter
 	// cards must be implemented (NOT carrying card.NotImplemented) so the legalPool / removal-
 	// counting math below holds. ArcanicCrackleRed and ArcanicSpikeRed are stable picks.
-	a := cards.Get(card.ArcanicCrackleRed)
-	b := cards.Get(card.ArcanicSpikeRed)
+	a := registry.GetCard(ids.ArcanicCrackleRed)
+	b := registry.GetCard(ids.ArcanicSpikeRed)
 	d := New(hero.Viserai{}, []weapon.Weapon{weapon.NebulaBlade{}}, []card.Card{a, a, b, b})
 
 	muts := AllMutations(d, 2, nil)
@@ -57,8 +58,8 @@ func TestAllMutations_CountsAndShape(t *testing.T) {
 // from the addID pool, which suppresses the "swap to in-deck other" mutation pair the diff
 // expects).
 func TestAllMutations_OddCountsAllowed(t *testing.T) {
-	a := cards.Get(card.ArcanicCrackleRed)
-	b := cards.Get(card.ArcanicSpikeRed)
+	a := registry.GetCard(ids.ArcanicCrackleRed)
+	b := registry.GetCard(ids.ArcanicSpikeRed)
 	d := New(hero.Viserai{}, []weapon.Weapon{weapon.NebulaBlade{}}, []card.Card{a, a, b, b})
 
 	// At maxCopies=3, each of the 2 in-deck cards (a, b) is below the cap, so "remove a, add b"
@@ -77,7 +78,7 @@ func TestAllMutations_OddCountsAllowed(t *testing.T) {
 		if len(m.Deck.Cards) != 4 {
 			t.Errorf("card count %d, want 4", len(m.Deck.Cards))
 		}
-		counts := map[card.ID]int{}
+		counts := map[ids.CardID]int{}
 		for _, c := range m.Deck.Cards {
 			counts[c.ID()]++
 		}
@@ -99,8 +100,8 @@ func TestAllMutations_OddCountsAllowed(t *testing.T) {
 // deck's Sideboard verbatim. Without this guarantee an anneal round would silently drop the
 // user's hand-managed sideboard as soon as it accepted a mutation and wrote the deck back.
 func TestAllMutations_PreservesSideboard(t *testing.T) {
-	a := cards.Get(card.AetherSlashRed)
-	b := cards.Get(card.ArcanicSpikeRed)
+	a := registry.GetCard(ids.AetherSlashRed)
+	b := registry.GetCard(ids.ArcanicSpikeRed)
 	d := New(hero.Viserai{}, []weapon.Weapon{weapon.NebulaBlade{}}, []card.Card{a, a, b, b})
 	d.Sideboard = []string{a.Name(), b.Name(), b.Name()}
 
@@ -126,8 +127,8 @@ func TestAllMutations_PreservesSideboard(t *testing.T) {
 }
 
 func TestAllMutations_Deterministic(t *testing.T) {
-	a := cards.Get(card.AetherSlashRed)
-	b := cards.Get(card.ArcanicSpikeRed)
+	a := registry.GetCard(ids.AetherSlashRed)
+	b := registry.GetCard(ids.ArcanicSpikeRed)
 	d := New(hero.Viserai{}, []weapon.Weapon{weapon.NebulaBlade{}}, []card.Card{a, a, b, b})
 
 	first := AllMutations(d, 2, nil)
@@ -154,7 +155,7 @@ func TestAllMutations_Deterministic(t *testing.T) {
 }
 
 func TestAllMutations_NoDuplicateOfSource(t *testing.T) {
-	a := cards.Get(card.ArcanicCrackleRed)
+	a := registry.GetCard(ids.ArcanicCrackleRed)
 	d := New(hero.Viserai{}, []weapon.Weapon{weapon.NebulaBlade{}}, []card.Card{a, a, a, a})
 	srcKey := deckFingerprint(d)
 	for i, m := range AllMutations(d, 2, nil) {
@@ -171,7 +172,7 @@ func TestAllMutations_NoDuplicateOfSource(t *testing.T) {
 // shared maxCopies post-filter are dropped at the end.
 func expectedPairMutCount(d *Deck, maxCopies int) int {
 	// Build the deduped removed-ID combo set the index-based generator collapses into.
-	type idPair struct{ a, b card.ID }
+	type idPair struct{ a, b ids.CardID }
 	combos := map[idPair]bool{}
 	for i := 0; i < len(d.Cards); i++ {
 		for j := i + 1; j < len(d.Cards); j++ {
@@ -180,7 +181,7 @@ func expectedPairMutCount(d *Deck, maxCopies int) int {
 		}
 	}
 
-	srcCounts := map[card.ID]int{}
+	srcCounts := map[ids.CardID]int{}
 	for _, c := range d.Cards {
 		srcCounts[c.ID()]++
 	}
@@ -188,11 +189,11 @@ func expectedPairMutCount(d *Deck, maxCopies int) int {
 	total := 0
 	for _, p := range cardPairs {
 		for _, fID := range p.First {
-			if !pairAddAllowed(cards.Get(fID), nil) {
+			if !pairAddAllowed(registry.GetCard(fID), nil) {
 				continue
 			}
 			for _, sID := range p.Second {
-				if !pairAddAllowed(cards.Get(sID), nil) {
+				if !pairAddAllowed(registry.GetCard(sID), nil) {
 					continue
 				}
 				for combo := range combos {
@@ -216,8 +217,8 @@ func expectedPairMutCount(d *Deck, maxCopies int) int {
 // swapRespectsMaxCopies checks whether removing one of each removeA / removeB and adding
 // one of each addA / addB leaves all card counts at or below maxCopies. Mirrors
 // respectsMaxCopies's contract on the pre-mutation count map without rebuilding the deck.
-func swapRespectsMaxCopies(srcCounts map[card.ID]int, removeA, removeB, addA, addB card.ID, maxCopies int) bool {
-	delta := map[card.ID]int{}
+func swapRespectsMaxCopies(srcCounts map[ids.CardID]int, removeA, removeB, addA, addB ids.CardID, maxCopies int) bool {
+	delta := map[ids.CardID]int{}
 	delta[removeA]--
 	delta[removeB]--
 	delta[addA]++

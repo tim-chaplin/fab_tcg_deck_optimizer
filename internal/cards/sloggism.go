@@ -5,7 +5,10 @@
 
 package cards
 
-import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+import (
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
+)
 
 var sloggismTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction)
 
@@ -26,7 +29,7 @@ func sloggismApplySideEffect(s *card.TurnState, n int) {
 
 type SloggismRed struct{}
 
-func (SloggismRed) ID() card.ID              { return card.SloggismRed }
+func (SloggismRed) ID() ids.CardID           { return ids.SloggismRed }
 func (SloggismRed) Name() string             { return "Sloggism" }
 func (SloggismRed) Cost(*card.TurnState) int { return 3 }
 func (SloggismRed) Pitch() int               { return 1 }
@@ -41,7 +44,7 @@ func (SloggismRed) Play(s *card.TurnState, self *card.CardState) {
 
 type SloggismYellow struct{}
 
-func (SloggismYellow) ID() card.ID              { return card.SloggismYellow }
+func (SloggismYellow) ID() ids.CardID           { return ids.SloggismYellow }
 func (SloggismYellow) Name() string             { return "Sloggism" }
 func (SloggismYellow) Cost(*card.TurnState) int { return 3 }
 func (SloggismYellow) Pitch() int               { return 2 }
@@ -56,7 +59,7 @@ func (SloggismYellow) Play(s *card.TurnState, self *card.CardState) {
 
 type SloggismBlue struct{}
 
-func (SloggismBlue) ID() card.ID              { return card.SloggismBlue }
+func (SloggismBlue) ID() ids.CardID           { return ids.SloggismBlue }
 func (SloggismBlue) Name() string             { return "Sloggism" }
 func (SloggismBlue) Cost(*card.TurnState) int { return 3 }
 func (SloggismBlue) Pitch() int               { return 3 }

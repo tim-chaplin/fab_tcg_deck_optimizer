@@ -7,6 +7,7 @@ package cards
 
 import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/simstate"
 )
 
@@ -23,7 +24,7 @@ func woundedBullBonus() int {
 
 type WoundedBullRed struct{}
 
-func (WoundedBullRed) ID() card.ID              { return card.WoundedBullRed }
+func (WoundedBullRed) ID() ids.CardID           { return ids.WoundedBullRed }
 func (WoundedBullRed) Name() string             { return "Wounded Bull" }
 func (WoundedBullRed) Cost(*card.TurnState) int { return 3 }
 func (WoundedBullRed) Pitch() int               { return 1 }
@@ -38,7 +39,7 @@ func (WoundedBullRed) Play(s *card.TurnState, self *card.CardState) {
 
 type WoundedBullYellow struct{}
 
-func (WoundedBullYellow) ID() card.ID              { return card.WoundedBullYellow }
+func (WoundedBullYellow) ID() ids.CardID           { return ids.WoundedBullYellow }
 func (WoundedBullYellow) Name() string             { return "Wounded Bull" }
 func (WoundedBullYellow) Cost(*card.TurnState) int { return 3 }
 func (WoundedBullYellow) Pitch() int               { return 2 }
@@ -53,7 +54,7 @@ func (WoundedBullYellow) Play(s *card.TurnState, self *card.CardState) {
 
 type WoundedBullBlue struct{}
 
-func (WoundedBullBlue) ID() card.ID              { return card.WoundedBullBlue }
+func (WoundedBullBlue) ID() ids.CardID           { return ids.WoundedBullBlue }
 func (WoundedBullBlue) Name() string             { return "Wounded Bull" }
 func (WoundedBullBlue) Cost(*card.TurnState) int { return 3 }
 func (WoundedBullBlue) Pitch() int               { return 3 }

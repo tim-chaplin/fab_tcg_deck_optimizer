@@ -8,7 +8,10 @@
 
 package cards
 
-import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+import (
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
+)
 
 var amplifyTheArknightTypes = card.NewTypeSet(card.TypeRuneblade, card.TypeAction, card.TypeAttack)
 
@@ -24,7 +27,7 @@ func amplifyTheArknightCost(s *card.TurnState) int {
 
 type AmplifyTheArknightRed struct{}
 
-func (AmplifyTheArknightRed) ID() card.ID                { return card.AmplifyTheArknightRed }
+func (AmplifyTheArknightRed) ID() ids.CardID             { return ids.AmplifyTheArknightRed }
 func (AmplifyTheArknightRed) Name() string               { return "Amplify the Arknight" }
 func (AmplifyTheArknightRed) Cost(s *card.TurnState) int { return amplifyTheArknightCost(s) }
 func (AmplifyTheArknightRed) MinCost() int               { return 0 }
@@ -40,7 +43,7 @@ func (AmplifyTheArknightRed) Play(s *card.TurnState, self *card.CardState) {
 
 type AmplifyTheArknightYellow struct{}
 
-func (AmplifyTheArknightYellow) ID() card.ID                { return card.AmplifyTheArknightYellow }
+func (AmplifyTheArknightYellow) ID() ids.CardID             { return ids.AmplifyTheArknightYellow }
 func (AmplifyTheArknightYellow) Name() string               { return "Amplify the Arknight" }
 func (AmplifyTheArknightYellow) Cost(s *card.TurnState) int { return amplifyTheArknightCost(s) }
 func (AmplifyTheArknightYellow) MinCost() int               { return 0 }
@@ -56,7 +59,7 @@ func (AmplifyTheArknightYellow) Play(s *card.TurnState, self *card.CardState) {
 
 type AmplifyTheArknightBlue struct{}
 
-func (AmplifyTheArknightBlue) ID() card.ID                { return card.AmplifyTheArknightBlue }
+func (AmplifyTheArknightBlue) ID() ids.CardID             { return ids.AmplifyTheArknightBlue }
 func (AmplifyTheArknightBlue) Name() string               { return "Amplify the Arknight" }
 func (AmplifyTheArknightBlue) Cost(s *card.TurnState) int { return amplifyTheArknightCost(s) }
 func (AmplifyTheArknightBlue) MinCost() int               { return 0 }

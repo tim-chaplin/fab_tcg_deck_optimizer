@@ -7,13 +7,16 @@
 
 package cards
 
-import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+import (
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
+)
 
 var belittleTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeAttack)
 
 type BelittleRed struct{}
 
-func (BelittleRed) ID() card.ID              { return card.BelittleRed }
+func (BelittleRed) ID() ids.CardID           { return ids.BelittleRed }
 func (BelittleRed) Name() string             { return "Belittle" }
 func (BelittleRed) Cost(*card.TurnState) int { return 1 }
 func (BelittleRed) Pitch() int               { return 1 }
@@ -31,7 +34,7 @@ func (c BelittleRed) Play(s *card.TurnState, self *card.CardState) {
 
 type BelittleYellow struct{}
 
-func (BelittleYellow) ID() card.ID              { return card.BelittleYellow }
+func (BelittleYellow) ID() ids.CardID           { return ids.BelittleYellow }
 func (BelittleYellow) Name() string             { return "Belittle" }
 func (BelittleYellow) Cost(*card.TurnState) int { return 1 }
 func (BelittleYellow) Pitch() int               { return 2 }
@@ -49,7 +52,7 @@ func (c BelittleYellow) Play(s *card.TurnState, self *card.CardState) {
 
 type BelittleBlue struct{}
 
-func (BelittleBlue) ID() card.ID              { return card.BelittleBlue }
+func (BelittleBlue) ID() ids.CardID           { return ids.BelittleBlue }
 func (BelittleBlue) Name() string             { return "Belittle" }
 func (BelittleBlue) Cost(*card.TurnState) int { return 1 }
 func (BelittleBlue) Pitch() int               { return 3 }

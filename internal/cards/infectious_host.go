@@ -6,13 +6,16 @@
 
 package cards
 
-import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+import (
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
+)
 
 var infectiousHostTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeAttack)
 
 type InfectiousHostRed struct{}
 
-func (InfectiousHostRed) ID() card.ID              { return card.InfectiousHostRed }
+func (InfectiousHostRed) ID() ids.CardID           { return ids.InfectiousHostRed }
 func (InfectiousHostRed) Name() string             { return "Infectious Host" }
 func (InfectiousHostRed) Cost(*card.TurnState) int { return 0 }
 func (InfectiousHostRed) Pitch() int               { return 1 }
@@ -29,7 +32,7 @@ func (c InfectiousHostRed) Play(s *card.TurnState, self *card.CardState) {
 
 type InfectiousHostYellow struct{}
 
-func (InfectiousHostYellow) ID() card.ID              { return card.InfectiousHostYellow }
+func (InfectiousHostYellow) ID() ids.CardID           { return ids.InfectiousHostYellow }
 func (InfectiousHostYellow) Name() string             { return "Infectious Host" }
 func (InfectiousHostYellow) Cost(*card.TurnState) int { return 0 }
 func (InfectiousHostYellow) Pitch() int               { return 2 }
@@ -46,7 +49,7 @@ func (c InfectiousHostYellow) Play(s *card.TurnState, self *card.CardState) {
 
 type InfectiousHostBlue struct{}
 
-func (InfectiousHostBlue) ID() card.ID              { return card.InfectiousHostBlue }
+func (InfectiousHostBlue) ID() ids.CardID           { return ids.InfectiousHostBlue }
 func (InfectiousHostBlue) Name() string             { return "Infectious Host" }
 func (InfectiousHostBlue) Cost(*card.TurnState) int { return 0 }
 func (InfectiousHostBlue) Pitch() int               { return 3 }

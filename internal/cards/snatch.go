@@ -7,7 +7,10 @@
 
 package cards
 
-import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+import (
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
+)
 
 var snatchTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeAttack)
 
@@ -22,7 +25,7 @@ func snatchPlay(s *card.TurnState, self *card.CardState) {
 
 type SnatchRed struct{}
 
-func (SnatchRed) ID() card.ID              { return card.SnatchRed }
+func (SnatchRed) ID() ids.CardID           { return ids.SnatchRed }
 func (SnatchRed) Name() string             { return "Snatch" }
 func (SnatchRed) Cost(*card.TurnState) int { return 0 }
 func (SnatchRed) Pitch() int               { return 1 }
@@ -36,7 +39,7 @@ func (SnatchRed) Play(s *card.TurnState, self *card.CardState) {
 
 type SnatchYellow struct{}
 
-func (SnatchYellow) ID() card.ID              { return card.SnatchYellow }
+func (SnatchYellow) ID() ids.CardID           { return ids.SnatchYellow }
 func (SnatchYellow) Name() string             { return "Snatch" }
 func (SnatchYellow) Cost(*card.TurnState) int { return 0 }
 func (SnatchYellow) Pitch() int               { return 2 }
@@ -50,7 +53,7 @@ func (SnatchYellow) Play(s *card.TurnState, self *card.CardState) {
 
 type SnatchBlue struct{}
 
-func (SnatchBlue) ID() card.ID              { return card.SnatchBlue }
+func (SnatchBlue) ID() ids.CardID           { return ids.SnatchBlue }
 func (SnatchBlue) Name() string             { return "Snatch" }
 func (SnatchBlue) Cost(*card.TurnState) int { return 0 }
 func (SnatchBlue) Pitch() int               { return 3 }

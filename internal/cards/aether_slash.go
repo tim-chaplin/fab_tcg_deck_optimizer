@@ -5,13 +5,16 @@
 
 package cards
 
-import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+import (
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
+)
 
 var aetherSlashTypes = card.NewTypeSet(card.TypeRuneblade, card.TypeAction, card.TypeAttack)
 
 type AetherSlashRed struct{}
 
-func (AetherSlashRed) ID() card.ID              { return card.AetherSlashRed }
+func (AetherSlashRed) ID() ids.CardID           { return ids.AetherSlashRed }
 func (AetherSlashRed) Name() string             { return "Aether Slash" }
 func (AetherSlashRed) Cost(*card.TurnState) int { return 1 }
 func (AetherSlashRed) Pitch() int               { return 1 }
@@ -31,7 +34,7 @@ func (AetherSlashRed) Play(s *card.TurnState, self *card.CardState) {
 
 type AetherSlashYellow struct{}
 
-func (AetherSlashYellow) ID() card.ID              { return card.AetherSlashYellow }
+func (AetherSlashYellow) ID() ids.CardID           { return ids.AetherSlashYellow }
 func (AetherSlashYellow) Name() string             { return "Aether Slash" }
 func (AetherSlashYellow) Cost(*card.TurnState) int { return 1 }
 func (AetherSlashYellow) Pitch() int               { return 2 }
@@ -51,7 +54,7 @@ func (AetherSlashYellow) Play(s *card.TurnState, self *card.CardState) {
 
 type AetherSlashBlue struct{}
 
-func (AetherSlashBlue) ID() card.ID              { return card.AetherSlashBlue }
+func (AetherSlashBlue) ID() ids.CardID           { return ids.AetherSlashBlue }
 func (AetherSlashBlue) Name() string             { return "Aether Slash" }
 func (AetherSlashBlue) Cost(*card.TurnState) int { return 1 }
 func (AetherSlashBlue) Pitch() int               { return 3 }

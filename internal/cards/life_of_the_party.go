@@ -7,13 +7,16 @@
 
 package cards
 
-import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+import (
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
+)
 
 var lifeOfThePartyTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeAttack)
 
 type LifeOfThePartyRed struct{}
 
-func (LifeOfThePartyRed) ID() card.ID              { return card.LifeOfThePartyRed }
+func (LifeOfThePartyRed) ID() ids.CardID           { return ids.LifeOfThePartyRed }
 func (LifeOfThePartyRed) Name() string             { return "Life of the Party" }
 func (LifeOfThePartyRed) Cost(*card.TurnState) int { return 2 }
 func (LifeOfThePartyRed) Pitch() int               { return 1 }
@@ -31,7 +34,7 @@ func (c LifeOfThePartyRed) Play(s *card.TurnState, self *card.CardState) {
 
 type LifeOfThePartyYellow struct{}
 
-func (LifeOfThePartyYellow) ID() card.ID              { return card.LifeOfThePartyYellow }
+func (LifeOfThePartyYellow) ID() ids.CardID           { return ids.LifeOfThePartyYellow }
 func (LifeOfThePartyYellow) Name() string             { return "Life of the Party" }
 func (LifeOfThePartyYellow) Cost(*card.TurnState) int { return 2 }
 func (LifeOfThePartyYellow) Pitch() int               { return 2 }
@@ -49,7 +52,7 @@ func (c LifeOfThePartyYellow) Play(s *card.TurnState, self *card.CardState) {
 
 type LifeOfThePartyBlue struct{}
 
-func (LifeOfThePartyBlue) ID() card.ID              { return card.LifeOfThePartyBlue }
+func (LifeOfThePartyBlue) ID() ids.CardID           { return ids.LifeOfThePartyBlue }
 func (LifeOfThePartyBlue) Name() string             { return "Life of the Party" }
 func (LifeOfThePartyBlue) Cost(*card.TurnState) int { return 2 }
 func (LifeOfThePartyBlue) Pitch() int               { return 3 }

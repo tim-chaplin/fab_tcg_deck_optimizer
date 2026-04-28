@@ -9,7 +9,10 @@
 
 package cards
 
-import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+import (
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
+)
 
 var sutcliffesResearchNotesTypes = card.NewTypeSet(card.TypeRuneblade, card.TypeAction)
 
@@ -34,7 +37,7 @@ func sutcliffesResearchNotesPlay(s *card.TurnState, self *card.CardState, reveal
 
 type SutcliffesResearchNotesRed struct{}
 
-func (SutcliffesResearchNotesRed) ID() card.ID              { return card.SutcliffesResearchNotesRed }
+func (SutcliffesResearchNotesRed) ID() ids.CardID           { return ids.SutcliffesResearchNotesRed }
 func (SutcliffesResearchNotesRed) Name() string             { return "Sutcliffe's Research Notes" }
 func (SutcliffesResearchNotesRed) Cost(*card.TurnState) int { return 1 }
 func (SutcliffesResearchNotesRed) Pitch() int               { return 1 }
@@ -51,7 +54,7 @@ func (SutcliffesResearchNotesRed) Play(s *card.TurnState, self *card.CardState) 
 
 type SutcliffesResearchNotesYellow struct{}
 
-func (SutcliffesResearchNotesYellow) ID() card.ID              { return card.SutcliffesResearchNotesYellow }
+func (SutcliffesResearchNotesYellow) ID() ids.CardID           { return ids.SutcliffesResearchNotesYellow }
 func (SutcliffesResearchNotesYellow) Name() string             { return "Sutcliffe's Research Notes" }
 func (SutcliffesResearchNotesYellow) Cost(*card.TurnState) int { return 1 }
 func (SutcliffesResearchNotesYellow) Pitch() int               { return 2 }
@@ -68,7 +71,7 @@ func (SutcliffesResearchNotesYellow) Play(s *card.TurnState, self *card.CardStat
 
 type SutcliffesResearchNotesBlue struct{}
 
-func (SutcliffesResearchNotesBlue) ID() card.ID              { return card.SutcliffesResearchNotesBlue }
+func (SutcliffesResearchNotesBlue) ID() ids.CardID           { return ids.SutcliffesResearchNotesBlue }
 func (SutcliffesResearchNotesBlue) Name() string             { return "Sutcliffe's Research Notes" }
 func (SutcliffesResearchNotesBlue) Cost(*card.TurnState) int { return 1 }
 func (SutcliffesResearchNotesBlue) Pitch() int               { return 3 }

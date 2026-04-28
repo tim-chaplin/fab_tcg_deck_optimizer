@@ -6,13 +6,16 @@
 
 package cards
 
-import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+import (
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
+)
 
 var rightBehindYouTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeAttack)
 
 type RightBehindYouRed struct{}
 
-func (RightBehindYouRed) ID() card.ID              { return card.RightBehindYouRed }
+func (RightBehindYouRed) ID() ids.CardID           { return ids.RightBehindYouRed }
 func (RightBehindYouRed) Name() string             { return "Right Behind You" }
 func (RightBehindYouRed) Cost(*card.TurnState) int { return 3 }
 func (RightBehindYouRed) Pitch() int               { return 1 }
@@ -29,7 +32,7 @@ func (c RightBehindYouRed) Play(s *card.TurnState, self *card.CardState) {
 
 type RightBehindYouYellow struct{}
 
-func (RightBehindYouYellow) ID() card.ID              { return card.RightBehindYouYellow }
+func (RightBehindYouYellow) ID() ids.CardID           { return ids.RightBehindYouYellow }
 func (RightBehindYouYellow) Name() string             { return "Right Behind You" }
 func (RightBehindYouYellow) Cost(*card.TurnState) int { return 3 }
 func (RightBehindYouYellow) Pitch() int               { return 2 }
@@ -46,7 +49,7 @@ func (c RightBehindYouYellow) Play(s *card.TurnState, self *card.CardState) {
 
 type RightBehindYouBlue struct{}
 
-func (RightBehindYouBlue) ID() card.ID              { return card.RightBehindYouBlue }
+func (RightBehindYouBlue) ID() ids.CardID           { return ids.RightBehindYouBlue }
 func (RightBehindYouBlue) Name() string             { return "Right Behind You" }
 func (RightBehindYouBlue) Cost(*card.TurnState) int { return 3 }
 func (RightBehindYouBlue) Pitch() int               { return 3 }

@@ -5,6 +5,7 @@ import (
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/cards"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
 )
 
@@ -113,7 +114,7 @@ func TestBest_AllHeldWhenNoLegalPlay(t *testing.T) {
 	if got.BestLine[0].Role != Arsenal {
 		t.Errorf("role = %s, want ARSENAL (empty slot + Held card → promoted)", got.BestLine[0].Role)
 	}
-	if got.State.Arsenal == nil || got.State.Arsenal.ID() != card.ToughenUpBlue {
+	if got.State.Arsenal == nil || got.State.Arsenal.ID() != ids.ToughenUpBlue {
 		t.Errorf("ArsenalCard = %v, want Toughen Up Blue", got.State.Arsenal)
 	}
 }

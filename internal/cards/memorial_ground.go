@@ -5,13 +5,16 @@
 
 package cards
 
-import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+import (
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
+)
 
 var memorialGroundTypes = card.NewTypeSet(card.TypeGeneric, card.TypeInstant)
 
 type MemorialGroundRed struct{}
 
-func (MemorialGroundRed) ID() card.ID              { return card.MemorialGroundRed }
+func (MemorialGroundRed) ID() ids.CardID           { return ids.MemorialGroundRed }
 func (MemorialGroundRed) Name() string             { return "Memorial Ground" }
 func (MemorialGroundRed) Cost(*card.TurnState) int { return 0 }
 func (MemorialGroundRed) Pitch() int               { return 1 }
@@ -26,7 +29,7 @@ func (MemorialGroundRed) Play(s *card.TurnState, self *card.CardState) { s.LogPl
 
 type MemorialGroundYellow struct{}
 
-func (MemorialGroundYellow) ID() card.ID              { return card.MemorialGroundYellow }
+func (MemorialGroundYellow) ID() ids.CardID           { return ids.MemorialGroundYellow }
 func (MemorialGroundYellow) Name() string             { return "Memorial Ground" }
 func (MemorialGroundYellow) Cost(*card.TurnState) int { return 0 }
 func (MemorialGroundYellow) Pitch() int               { return 2 }
@@ -41,7 +44,7 @@ func (MemorialGroundYellow) Play(s *card.TurnState, self *card.CardState) { s.Lo
 
 type MemorialGroundBlue struct{}
 
-func (MemorialGroundBlue) ID() card.ID              { return card.MemorialGroundBlue }
+func (MemorialGroundBlue) ID() ids.CardID           { return ids.MemorialGroundBlue }
 func (MemorialGroundBlue) Name() string             { return "Memorial Ground" }
 func (MemorialGroundBlue) Cost(*card.TurnState) int { return 0 }
 func (MemorialGroundBlue) Pitch() int               { return 3 }

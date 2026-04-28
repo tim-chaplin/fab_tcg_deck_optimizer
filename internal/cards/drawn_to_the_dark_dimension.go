@@ -11,7 +11,10 @@
 
 package cards
 
-import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+import (
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
+)
 
 var drawnToTheDarkDimensionTypes = card.NewTypeSet(card.TypeRuneblade, card.TypeAction, card.TypeAttack)
 
@@ -27,7 +30,7 @@ func drawnToTheDarkDimensionCost(s *card.TurnState) int {
 
 type DrawnToTheDarkDimensionRed struct{}
 
-func (DrawnToTheDarkDimensionRed) ID() card.ID                { return card.DrawnToTheDarkDimensionRed }
+func (DrawnToTheDarkDimensionRed) ID() ids.CardID             { return ids.DrawnToTheDarkDimensionRed }
 func (DrawnToTheDarkDimensionRed) Name() string               { return "Drawn to the Dark Dimension" }
 func (DrawnToTheDarkDimensionRed) Cost(s *card.TurnState) int { return drawnToTheDarkDimensionCost(s) }
 func (DrawnToTheDarkDimensionRed) MinCost() int               { return 0 }
@@ -44,8 +47,8 @@ func (c DrawnToTheDarkDimensionRed) Play(s *card.TurnState, self *card.CardState
 
 type DrawnToTheDarkDimensionYellow struct{}
 
-func (DrawnToTheDarkDimensionYellow) ID() card.ID  { return card.DrawnToTheDarkDimensionYellow }
-func (DrawnToTheDarkDimensionYellow) Name() string { return "Drawn to the Dark Dimension" }
+func (DrawnToTheDarkDimensionYellow) ID() ids.CardID { return ids.DrawnToTheDarkDimensionYellow }
+func (DrawnToTheDarkDimensionYellow) Name() string   { return "Drawn to the Dark Dimension" }
 func (DrawnToTheDarkDimensionYellow) Cost(s *card.TurnState) int {
 	return drawnToTheDarkDimensionCost(s)
 }
@@ -63,7 +66,7 @@ func (c DrawnToTheDarkDimensionYellow) Play(s *card.TurnState, self *card.CardSt
 
 type DrawnToTheDarkDimensionBlue struct{}
 
-func (DrawnToTheDarkDimensionBlue) ID() card.ID                { return card.DrawnToTheDarkDimensionBlue }
+func (DrawnToTheDarkDimensionBlue) ID() ids.CardID             { return ids.DrawnToTheDarkDimensionBlue }
 func (DrawnToTheDarkDimensionBlue) Name() string               { return "Drawn to the Dark Dimension" }
 func (DrawnToTheDarkDimensionBlue) Cost(s *card.TurnState) int { return drawnToTheDarkDimensionCost(s) }
 func (DrawnToTheDarkDimensionBlue) MinCost() int               { return 0 }

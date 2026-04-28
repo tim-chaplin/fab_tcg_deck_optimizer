@@ -7,13 +7,16 @@
 
 package cards
 
-import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+import (
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
+)
 
 var sigilOfFyendalTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeAura)
 
 type SigilOfFyendalBlue struct{}
 
-func (SigilOfFyendalBlue) ID() card.ID              { return card.SigilOfFyendalBlue }
+func (SigilOfFyendalBlue) ID() ids.CardID           { return ids.SigilOfFyendalBlue }
 func (SigilOfFyendalBlue) Name() string             { return "Sigil of Fyendal" }
 func (SigilOfFyendalBlue) Cost(*card.TurnState) int { return 0 }
 func (SigilOfFyendalBlue) Pitch() int               { return 3 }

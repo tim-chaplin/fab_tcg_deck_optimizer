@@ -10,7 +10,10 @@
 
 package cards
 
-import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+import (
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
+)
 
 var promiseOfPlentyTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeAttack)
 
@@ -25,7 +28,7 @@ func promiseOfPlentyPlay(s *card.TurnState, self *card.CardState) {
 
 type PromiseOfPlentyRed struct{}
 
-func (PromiseOfPlentyRed) ID() card.ID              { return card.PromiseOfPlentyRed }
+func (PromiseOfPlentyRed) ID() ids.CardID           { return ids.PromiseOfPlentyRed }
 func (PromiseOfPlentyRed) Name() string             { return "Promise of Plenty" }
 func (PromiseOfPlentyRed) Cost(*card.TurnState) int { return 0 }
 func (PromiseOfPlentyRed) Pitch() int               { return 1 }
@@ -42,7 +45,7 @@ func (PromiseOfPlentyRed) Play(s *card.TurnState, self *card.CardState) {
 
 type PromiseOfPlentyYellow struct{}
 
-func (PromiseOfPlentyYellow) ID() card.ID              { return card.PromiseOfPlentyYellow }
+func (PromiseOfPlentyYellow) ID() ids.CardID           { return ids.PromiseOfPlentyYellow }
 func (PromiseOfPlentyYellow) Name() string             { return "Promise of Plenty" }
 func (PromiseOfPlentyYellow) Cost(*card.TurnState) int { return 0 }
 func (PromiseOfPlentyYellow) Pitch() int               { return 2 }
@@ -59,7 +62,7 @@ func (PromiseOfPlentyYellow) Play(s *card.TurnState, self *card.CardState) {
 
 type PromiseOfPlentyBlue struct{}
 
-func (PromiseOfPlentyBlue) ID() card.ID              { return card.PromiseOfPlentyBlue }
+func (PromiseOfPlentyBlue) ID() ids.CardID           { return ids.PromiseOfPlentyBlue }
 func (PromiseOfPlentyBlue) Name() string             { return "Promise of Plenty" }
 func (PromiseOfPlentyBlue) Cost(*card.TurnState) int { return 0 }
 func (PromiseOfPlentyBlue) Pitch() int               { return 3 }

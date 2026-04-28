@@ -11,7 +11,10 @@
 
 package cards
 
-import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+import (
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
+)
 
 var scoutThePeripheryTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction)
 
@@ -34,7 +37,7 @@ func grantNextArsenalAttackActionBonus(s *card.TurnState, n int) {
 
 type ScoutThePeripheryRed struct{}
 
-func (ScoutThePeripheryRed) ID() card.ID              { return card.ScoutThePeripheryRed }
+func (ScoutThePeripheryRed) ID() ids.CardID           { return ids.ScoutThePeripheryRed }
 func (ScoutThePeripheryRed) Name() string             { return "Scout the Periphery" }
 func (ScoutThePeripheryRed) Cost(*card.TurnState) int { return 0 }
 func (ScoutThePeripheryRed) Pitch() int               { return 1 }
@@ -49,7 +52,7 @@ func (ScoutThePeripheryRed) Play(s *card.TurnState, self *card.CardState) {
 
 type ScoutThePeripheryYellow struct{}
 
-func (ScoutThePeripheryYellow) ID() card.ID              { return card.ScoutThePeripheryYellow }
+func (ScoutThePeripheryYellow) ID() ids.CardID           { return ids.ScoutThePeripheryYellow }
 func (ScoutThePeripheryYellow) Name() string             { return "Scout the Periphery" }
 func (ScoutThePeripheryYellow) Cost(*card.TurnState) int { return 0 }
 func (ScoutThePeripheryYellow) Pitch() int               { return 2 }
@@ -64,7 +67,7 @@ func (ScoutThePeripheryYellow) Play(s *card.TurnState, self *card.CardState) {
 
 type ScoutThePeripheryBlue struct{}
 
-func (ScoutThePeripheryBlue) ID() card.ID              { return card.ScoutThePeripheryBlue }
+func (ScoutThePeripheryBlue) ID() ids.CardID           { return ids.ScoutThePeripheryBlue }
 func (ScoutThePeripheryBlue) Name() string             { return "Scout the Periphery" }
 func (ScoutThePeripheryBlue) Cost(*card.TurnState) int { return 0 }
 func (ScoutThePeripheryBlue) Pitch() int               { return 3 }

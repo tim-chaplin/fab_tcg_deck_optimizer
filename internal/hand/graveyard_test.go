@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/weapon"
 )
@@ -51,7 +52,7 @@ func TestGraveyard_WeaponSwingDoesNotEnterGraveyard(t *testing.T) {
 // tests can assert the solver seeded it with the expected defenders before the DR resolved.
 type gravSpyDR struct{ saw *[]card.Card }
 
-func (gravSpyDR) ID() card.ID              { return card.Invalid }
+func (gravSpyDR) ID() ids.CardID           { return ids.InvalidCard }
 func (gravSpyDR) Name() string             { return "gravSpyDR" }
 func (gravSpyDR) Cost(*card.TurnState) int { return 0 }
 func (gravSpyDR) Pitch() int               { return 0 }
@@ -72,7 +73,7 @@ func (g gravSpyDR) Play(s *card.TurnState, self *card.CardState) {
 // seeding regardless of their type mask.
 type auraDefender struct{}
 
-func (auraDefender) ID() card.ID                           { return card.Invalid }
+func (auraDefender) ID() ids.CardID                        { return ids.InvalidCard }
 func (auraDefender) Name() string                          { return "auraDefender" }
 func (auraDefender) Cost(*card.TurnState) int              { return 0 }
 func (auraDefender) Pitch() int                            { return 0 }

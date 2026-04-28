@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
 )
 
@@ -73,11 +74,11 @@ func TestMoonWish_TutorPrefersRedSunKissThenYellowThenBlue(t *testing.T) {
 	cases := []struct {
 		name string
 		deck []card.Card
-		want card.ID
+		want ids.CardID
 	}{
-		{"red beats yellow and blue", []card.Card{SunKissBlue{}, SunKissYellow{}, SunKissRed{}}, card.SunKissRed},
-		{"yellow beats blue", []card.Card{SunKissBlue{}, SunKissYellow{}}, card.SunKissYellow},
-		{"blue alone wins", []card.Card{SunKissBlue{}}, card.SunKissBlue},
+		{"red beats yellow and blue", []card.Card{SunKissBlue{}, SunKissYellow{}, SunKissRed{}}, ids.SunKissRed},
+		{"yellow beats blue", []card.Card{SunKissBlue{}, SunKissYellow{}}, ids.SunKissYellow},
+		{"blue alone wins", []card.Card{SunKissBlue{}}, ids.SunKissBlue},
 	}
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
@@ -97,7 +98,7 @@ func TestMoonWish_TutorRequiresHit(t *testing.T) {
 		s := card.TurnState{Deck: []card.Card{SunKissRed{}}}
 		self := &card.CardState{Card: MoonWishYellow{}}
 		MoonWishYellow{}.Play(&s, self)
-		if len(s.Hand) != 1 || s.Hand[0].ID() != card.SunKissRed {
+		if len(s.Hand) != 1 || s.Hand[0].ID() != ids.SunKissRed {
 			t.Errorf("base hit: Hand = %v, want [Sun Kiss [R]]", s.Hand)
 		}
 		if len(s.Deck) != 0 {
@@ -112,7 +113,7 @@ func TestMoonWish_TutorRequiresHit(t *testing.T) {
 		if len(s.Hand) != 0 {
 			t.Errorf("dampened: Hand = %v, want [] (no hit, no tutor)", s.Hand)
 		}
-		if len(s.Deck) != 1 || s.Deck[0].ID() != card.SunKissRed {
+		if len(s.Deck) != 1 || s.Deck[0].ID() != ids.SunKissRed {
 			t.Errorf("dampened: Deck = %v, want [Sun Kiss [R]] (untouched)", s.Deck)
 		}
 	}
@@ -133,7 +134,7 @@ func TestMoonWish_GoAgainPlaysSunKissImmediately(t *testing.T) {
 		if len(s.Hand) != 0 {
 			t.Errorf("with go-again: Hand = %v, want [] (Sun Kiss played, not tutored to hand)", s.Hand)
 		}
-		if len(s.Graveyard) != 1 || s.Graveyard[0].ID() != card.SunKissRed {
+		if len(s.Graveyard) != 1 || s.Graveyard[0].ID() != ids.SunKissRed {
 			t.Errorf("with go-again: Graveyard = %v, want [Sun Kiss [R]]", s.Graveyard)
 		}
 	}
@@ -145,7 +146,7 @@ func TestMoonWish_GoAgainPlaysSunKissImmediately(t *testing.T) {
 		if dmg != 4 {
 			t.Errorf("no go-again: damage = %d, want 4 (Sun Kiss not played)", dmg)
 		}
-		if len(s.Hand) != 1 || s.Hand[0].ID() != card.SunKissRed {
+		if len(s.Hand) != 1 || s.Hand[0].ID() != ids.SunKissRed {
 			t.Errorf("no go-again: Hand = %v, want [Sun Kiss [R]]", s.Hand)
 		}
 	}

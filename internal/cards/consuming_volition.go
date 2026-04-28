@@ -11,7 +11,10 @@
 
 package cards
 
-import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+import (
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
+)
 
 var consumingVolitionTypes = card.NewTypeSet(card.TypeRuneblade, card.TypeAction, card.TypeAttack)
 
@@ -28,7 +31,7 @@ func consumingVolitionApplyRider(s *card.TurnState, self *card.CardState) {
 
 type ConsumingVolitionRed struct{}
 
-func (ConsumingVolitionRed) ID() card.ID              { return card.ConsumingVolitionRed }
+func (ConsumingVolitionRed) ID() ids.CardID           { return ids.ConsumingVolitionRed }
 func (ConsumingVolitionRed) Name() string             { return "Consuming Volition" }
 func (ConsumingVolitionRed) Cost(*card.TurnState) int { return 1 }
 func (ConsumingVolitionRed) Pitch() int               { return 1 }
@@ -43,7 +46,7 @@ func (ConsumingVolitionRed) Play(s *card.TurnState, self *card.CardState) {
 
 type ConsumingVolitionYellow struct{}
 
-func (ConsumingVolitionYellow) ID() card.ID              { return card.ConsumingVolitionYellow }
+func (ConsumingVolitionYellow) ID() ids.CardID           { return ids.ConsumingVolitionYellow }
 func (ConsumingVolitionYellow) Name() string             { return "Consuming Volition" }
 func (ConsumingVolitionYellow) Cost(*card.TurnState) int { return 1 }
 func (ConsumingVolitionYellow) Pitch() int               { return 2 }
@@ -58,7 +61,7 @@ func (ConsumingVolitionYellow) Play(s *card.TurnState, self *card.CardState) {
 
 type ConsumingVolitionBlue struct{}
 
-func (ConsumingVolitionBlue) ID() card.ID              { return card.ConsumingVolitionBlue }
+func (ConsumingVolitionBlue) ID() ids.CardID           { return ids.ConsumingVolitionBlue }
 func (ConsumingVolitionBlue) Name() string             { return "Consuming Volition" }
 func (ConsumingVolitionBlue) Cost(*card.TurnState) int { return 1 }
 func (ConsumingVolitionBlue) Pitch() int               { return 3 }

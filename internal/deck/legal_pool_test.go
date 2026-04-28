@@ -5,8 +5,9 @@ import (
 	"testing"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/cards"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/hero"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/weapon"
 )
 
@@ -14,10 +15,10 @@ import (
 // candidate pool: a filter that blocks Plunder Run (all variants) should produce decks that
 // never contain any Plunder Run printing, even across many samples.
 func TestRandom_FilterExcludesRejected(t *testing.T) {
-	bannedIDs := map[card.ID]bool{
-		card.PlunderRunRed:    true,
-		card.PlunderRunYellow: true,
-		card.PlunderRunBlue:   true,
+	bannedIDs := map[ids.CardID]bool{
+		ids.PlunderRunRed:    true,
+		ids.PlunderRunYellow: true,
+		ids.PlunderRunBlue:   true,
 	}
 	legal := func(c card.Card) bool { return !bannedIDs[c.ID()] }
 	rng := rand.New(rand.NewSource(1))
@@ -38,7 +39,7 @@ func TestRandom_FilterExcludesRejected(t *testing.T) {
 func TestLegalPool_SkipsNotImplemented(t *testing.T) {
 	for _, pred := range []func(card.Card) bool{nil, func(card.Card) bool { return true }} {
 		for _, id := range legalPool(pred) {
-			c := cards.Get(id)
+			c := registry.GetCard(id)
 			if _, ok := c.(card.NotImplemented); ok {
 				t.Errorf("legalPool included NotImplemented card %s", c.Name())
 			}
@@ -68,11 +69,11 @@ func TestRandom_ExcludesNotImplemented(t *testing.T) {
 // a regression where the marker interface itself silently breaks. Self-retires if Strike Gold
 // ever loses the tag (gold-token economy gets modelled) so maintenance is only a delete.
 func TestLegalPool_ExcludesTaggedCardsByID(t *testing.T) {
-	if _, ok := cards.Get(card.StrikeGoldRed).(card.NotImplemented); !ok {
+	if _, ok := registry.GetCard(ids.StrikeGoldRed).(card.NotImplemented); !ok {
 		t.Skip("Strike Gold [R] is no longer NotImplemented — pick another tagged card or drop this test")
 	}
 	for _, id := range legalPool(nil) {
-		if id == card.StrikeGoldRed {
+		if id == ids.StrikeGoldRed {
 			t.Fatalf("legalPool included Strike Gold [R] despite its NotImplemented tag")
 		}
 	}
@@ -84,11 +85,11 @@ func TestLegalPool_ExcludesTaggedCardsByID(t *testing.T) {
 // be the same size, (c) respect maxCopies across the post-sanitize distribution, (d) report
 // exactly two swaps, each naming the original tagged card.
 func TestSanitizeNotImplemented_ReplacesTaggedSlotsAndKeepsSizeLegal(t *testing.T) {
-	if _, ok := cards.Get(card.StrikeGoldRed).(card.NotImplemented); !ok {
+	if _, ok := registry.GetCard(ids.StrikeGoldRed).(card.NotImplemented); !ok {
 		t.Skip("Strike Gold [R] is no longer NotImplemented — pick another tagged card or drop this test")
 	}
-	tagged := cards.Get(card.StrikeGoldRed)
-	safe := cards.Get(card.ArcanicCrackleRed)
+	tagged := registry.GetCard(ids.StrikeGoldRed)
+	safe := registry.GetCard(ids.ArcanicCrackleRed)
 	if _, t2 := safe.(card.NotImplemented); t2 {
 		t.Fatal("ArcanicCrackleRed gained a NotImplemented marker — pick another implemented keeper for this test")
 	}
@@ -109,7 +110,7 @@ func TestSanitizeNotImplemented_ReplacesTaggedSlotsAndKeepsSizeLegal(t *testing.
 			t.Errorf("card[%d] = %s still implements NotImplemented", i, c.Name())
 		}
 	}
-	counts := map[card.ID]int{}
+	counts := map[ids.CardID]int{}
 	for _, c := range d.Cards {
 		counts[c.ID()]++
 		if counts[c.ID()] > 2 {
@@ -117,7 +118,7 @@ func TestSanitizeNotImplemented_ReplacesTaggedSlotsAndKeepsSizeLegal(t *testing.
 		}
 	}
 	for _, r := range replaced {
-		if r.From.ID() != card.StrikeGoldRed {
+		if r.From.ID() != ids.StrikeGoldRed {
 			t.Errorf("replacement From = %s, want Strike Gold [R]", r.From.Name())
 		}
 		if _, ok := r.To.(card.NotImplemented); ok {
@@ -130,7 +131,7 @@ func TestSanitizeNotImplemented_ReplacesTaggedSlotsAndKeepsSizeLegal(t *testing.
 // when the deck already has no NotImplemented cards: no replacements, no mutations to
 // Cards.
 func TestSanitizeNotImplemented_NoOpOnCleanDeck(t *testing.T) {
-	a := cards.Get(card.ArcanicCrackleRed)
+	a := registry.GetCard(ids.ArcanicCrackleRed)
 	if _, tagged := a.(card.NotImplemented); tagged {
 		t.Fatal("ArcanicCrackleRed gained a NotImplemented marker — pick another implemented sentinel")
 	}
@@ -155,7 +156,7 @@ func TestSanitizeNotImplemented_NoOpOnCleanDeck(t *testing.T) {
 // NotImplemented copy in a mutation output must have come from the add pool;
 // ArcanicCrackleRed is the chosen sentinel (no NotImplemented marker).
 func TestAllMutations_ExcludesNotImplementedAdditions(t *testing.T) {
-	a := cards.Get(card.ArcanicCrackleRed)
+	a := registry.GetCard(ids.ArcanicCrackleRed)
 	if _, tagged := a.(card.NotImplemented); tagged {
 		t.Fatal("ArcanicCrackleRed gained a NotImplemented marker — pick another implemented sentinel for this test")
 	}
@@ -174,13 +175,13 @@ func TestAllMutations_ExcludesNotImplementedAdditions(t *testing.T) {
 // hill climb must be able to swap it out — so we assert that the starting deck's banned card is
 // never in the post-mutation card list either (which would require it to have been added back).
 func TestAllMutations_FilterExcludesRejectedAdditions(t *testing.T) {
-	bannedIDs := map[card.ID]bool{
-		card.PlunderRunRed: true,
+	bannedIDs := map[ids.CardID]bool{
+		ids.PlunderRunRed: true,
 	}
 	legal := func(c card.Card) bool { return !bannedIDs[c.ID()] }
 
-	pr := cards.Get(card.PlunderRunRed)
-	other := cards.Get(card.AetherSlashRed)
+	pr := registry.GetCard(ids.PlunderRunRed)
+	other := registry.GetCard(ids.AetherSlashRed)
 	d := New(hero.Viserai{}, []weapon.Weapon{weapon.NebulaBlade{}}, []card.Card{pr, pr, other, other})
 
 	for i, m := range AllMutations(d, 2, legal) {

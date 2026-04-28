@@ -1,6 +1,10 @@
 package card
 
-import "sync/atomic"
+import (
+	"sync/atomic"
+
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
+)
 
 // DisplayName returns the human-readable identifier "<Name> [R/Y/B]" used in log lines,
 // deck listings, and debug printouts. Pitch values outside 1-3 (weapons, items, hero
@@ -13,7 +17,7 @@ func DisplayName(c Card) string {
 	id := c.ID()
 	// Invalid (id == 0) is the slot test stubs and ad-hoc fakes share — skip the cache so
 	// distinct stubs with the same zero ID don't return each other's strings.
-	if id == Invalid {
+	if id == ids.InvalidCard {
 		return buildDisplayName(c)
 	}
 	if s := displayNameCache[id].Load(); s != nil {
@@ -33,7 +37,7 @@ var displayNameCache [1 << 16]atomic.Pointer[string]
 //
 // Multiple goroutines computing the same entry race-safely converge on the first writer's
 // string — every writer produces the same value, so reads after a race still match spec.
-func displayNameSlow(c Card, id ID) string {
+func displayNameSlow(c Card, id ids.CardID) string {
 	out := buildDisplayName(c)
 	displayNameCache[id].Store(&out)
 	return out

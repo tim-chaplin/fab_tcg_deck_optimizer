@@ -9,7 +9,10 @@
 
 package cards
 
-import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+import (
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
+)
 
 var waterTheSeedsTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeAttack)
 
@@ -31,7 +34,7 @@ func grantWaterTheSeedsBonus(s *card.TurnState) {
 
 type WaterTheSeedsRed struct{}
 
-func (WaterTheSeedsRed) ID() card.ID              { return card.WaterTheSeedsRed }
+func (WaterTheSeedsRed) ID() ids.CardID           { return ids.WaterTheSeedsRed }
 func (WaterTheSeedsRed) Name() string             { return "Water the Seeds" }
 func (WaterTheSeedsRed) Cost(*card.TurnState) int { return 1 }
 func (WaterTheSeedsRed) Pitch() int               { return 1 }
@@ -46,7 +49,7 @@ func (WaterTheSeedsRed) Play(s *card.TurnState, self *card.CardState) {
 
 type WaterTheSeedsYellow struct{}
 
-func (WaterTheSeedsYellow) ID() card.ID              { return card.WaterTheSeedsYellow }
+func (WaterTheSeedsYellow) ID() ids.CardID           { return ids.WaterTheSeedsYellow }
 func (WaterTheSeedsYellow) Name() string             { return "Water the Seeds" }
 func (WaterTheSeedsYellow) Cost(*card.TurnState) int { return 1 }
 func (WaterTheSeedsYellow) Pitch() int               { return 2 }
@@ -61,7 +64,7 @@ func (WaterTheSeedsYellow) Play(s *card.TurnState, self *card.CardState) {
 
 type WaterTheSeedsBlue struct{}
 
-func (WaterTheSeedsBlue) ID() card.ID              { return card.WaterTheSeedsBlue }
+func (WaterTheSeedsBlue) ID() ids.CardID           { return ids.WaterTheSeedsBlue }
 func (WaterTheSeedsBlue) Name() string             { return "Water the Seeds" }
 func (WaterTheSeedsBlue) Cost(*card.TurnState) int { return 1 }
 func (WaterTheSeedsBlue) Pitch() int               { return 3 }

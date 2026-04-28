@@ -2,11 +2,14 @@
 
 package cards
 
-import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+import (
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
+)
 
 type ToughenUpBlue struct{}
 
-func (ToughenUpBlue) ID() card.ID              { return card.ToughenUpBlue }
+func (ToughenUpBlue) ID() ids.CardID           { return ids.ToughenUpBlue }
 func (ToughenUpBlue) Name() string             { return "Toughen Up" }
 func (ToughenUpBlue) Cost(*card.TurnState) int { return 2 }
 func (ToughenUpBlue) Pitch() int               { return 3 }

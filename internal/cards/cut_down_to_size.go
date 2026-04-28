@@ -5,13 +5,16 @@
 
 package cards
 
-import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+import (
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
+)
 
 var cutDownToSizeTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeAttack)
 
 type CutDownToSizeRed struct{}
 
-func (CutDownToSizeRed) ID() card.ID              { return card.CutDownToSizeRed }
+func (CutDownToSizeRed) ID() ids.CardID           { return ids.CutDownToSizeRed }
 func (CutDownToSizeRed) Name() string             { return "Cut Down to Size" }
 func (CutDownToSizeRed) Cost(*card.TurnState) int { return 2 }
 func (CutDownToSizeRed) Pitch() int               { return 1 }
@@ -28,7 +31,7 @@ func (CutDownToSizeRed) Play(s *card.TurnState, self *card.CardState) {
 
 type CutDownToSizeYellow struct{}
 
-func (CutDownToSizeYellow) ID() card.ID              { return card.CutDownToSizeYellow }
+func (CutDownToSizeYellow) ID() ids.CardID           { return ids.CutDownToSizeYellow }
 func (CutDownToSizeYellow) Name() string             { return "Cut Down to Size" }
 func (CutDownToSizeYellow) Cost(*card.TurnState) int { return 2 }
 func (CutDownToSizeYellow) Pitch() int               { return 2 }
@@ -45,7 +48,7 @@ func (CutDownToSizeYellow) Play(s *card.TurnState, self *card.CardState) {
 
 type CutDownToSizeBlue struct{}
 
-func (CutDownToSizeBlue) ID() card.ID              { return card.CutDownToSizeBlue }
+func (CutDownToSizeBlue) ID() ids.CardID           { return ids.CutDownToSizeBlue }
 func (CutDownToSizeBlue) Name() string             { return "Cut Down to Size" }
 func (CutDownToSizeBlue) Cost(*card.TurnState) int { return 2 }
 func (CutDownToSizeBlue) Pitch() int               { return 3 }

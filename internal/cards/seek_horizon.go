@@ -6,13 +6,16 @@
 
 package cards
 
-import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+import (
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
+)
 
 var seekHorizonTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeAttack)
 
 type SeekHorizonRed struct{}
 
-func (SeekHorizonRed) ID() card.ID              { return card.SeekHorizonRed }
+func (SeekHorizonRed) ID() ids.CardID           { return ids.SeekHorizonRed }
 func (SeekHorizonRed) Name() string             { return "Seek Horizon" }
 func (SeekHorizonRed) Cost(*card.TurnState) int { return 0 }
 func (SeekHorizonRed) Pitch() int               { return 1 }
@@ -29,7 +32,7 @@ func (c SeekHorizonRed) Play(s *card.TurnState, self *card.CardState) {
 
 type SeekHorizonYellow struct{}
 
-func (SeekHorizonYellow) ID() card.ID              { return card.SeekHorizonYellow }
+func (SeekHorizonYellow) ID() ids.CardID           { return ids.SeekHorizonYellow }
 func (SeekHorizonYellow) Name() string             { return "Seek Horizon" }
 func (SeekHorizonYellow) Cost(*card.TurnState) int { return 0 }
 func (SeekHorizonYellow) Pitch() int               { return 2 }
@@ -46,7 +49,7 @@ func (c SeekHorizonYellow) Play(s *card.TurnState, self *card.CardState) {
 
 type SeekHorizonBlue struct{}
 
-func (SeekHorizonBlue) ID() card.ID              { return card.SeekHorizonBlue }
+func (SeekHorizonBlue) ID() ids.CardID           { return ids.SeekHorizonBlue }
 func (SeekHorizonBlue) Name() string             { return "Seek Horizon" }
 func (SeekHorizonBlue) Cost(*card.TurnState) int { return 0 }
 func (SeekHorizonBlue) Pitch() int               { return 3 }

@@ -6,13 +6,16 @@
 
 package weapon
 
-import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+import (
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
+)
 
 var talisharTypes = card.NewTypeSet(card.TypeGeneric, card.TypeWeapon, card.TypeSword, card.TypeTwoHand)
 
 type Talishar struct{}
 
-func (Talishar) ID() card.ID              { return card.TalisharID }
+func (Talishar) ID() ids.CardID           { return ids.TalisharID }
 func (Talishar) Name() string             { return "Talishar, the Lost Prince" }
 func (Talishar) Cost(*card.TurnState) int { return 0 }
 func (Talishar) Pitch() int               { return 0 }

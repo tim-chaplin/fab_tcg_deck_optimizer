@@ -5,13 +5,16 @@
 
 package cards
 
-import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+import (
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
+)
 
 var deathlyDuetTypes = card.NewTypeSet(card.TypeRuneblade, card.TypeAction, card.TypeAttack)
 
 type DeathlyDuetRed struct{}
 
-func (DeathlyDuetRed) ID() card.ID              { return card.DeathlyDuetRed }
+func (DeathlyDuetRed) ID() ids.CardID           { return ids.DeathlyDuetRed }
 func (DeathlyDuetRed) Name() string             { return "Deathly Duet" }
 func (DeathlyDuetRed) Cost(*card.TurnState) int { return 2 }
 func (DeathlyDuetRed) Pitch() int               { return 1 }
@@ -29,7 +32,7 @@ func (DeathlyDuetRed) Play(s *card.TurnState, self *card.CardState) {
 
 type DeathlyDuetYellow struct{}
 
-func (DeathlyDuetYellow) ID() card.ID              { return card.DeathlyDuetYellow }
+func (DeathlyDuetYellow) ID() ids.CardID           { return ids.DeathlyDuetYellow }
 func (DeathlyDuetYellow) Name() string             { return "Deathly Duet" }
 func (DeathlyDuetYellow) Cost(*card.TurnState) int { return 2 }
 func (DeathlyDuetYellow) Pitch() int               { return 2 }
@@ -47,7 +50,7 @@ func (DeathlyDuetYellow) Play(s *card.TurnState, self *card.CardState) {
 
 type DeathlyDuetBlue struct{}
 
-func (DeathlyDuetBlue) ID() card.ID              { return card.DeathlyDuetBlue }
+func (DeathlyDuetBlue) ID() ids.CardID           { return ids.DeathlyDuetBlue }
 func (DeathlyDuetBlue) Name() string             { return "Deathly Duet" }
 func (DeathlyDuetBlue) Cost(*card.TurnState) int { return 2 }
 func (DeathlyDuetBlue) Pitch() int               { return 3 }

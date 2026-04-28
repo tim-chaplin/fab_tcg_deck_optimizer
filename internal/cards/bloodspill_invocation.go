@@ -9,13 +9,16 @@
 
 package cards
 
-import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+import (
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
+)
 
 var bloodspillInvocationTypes = card.NewTypeSet(card.TypeRuneblade, card.TypeAction, card.TypeAura)
 
 type BloodspillInvocationRed struct{}
 
-func (BloodspillInvocationRed) ID() card.ID              { return card.BloodspillInvocationRed }
+func (BloodspillInvocationRed) ID() ids.CardID           { return ids.BloodspillInvocationRed }
 func (BloodspillInvocationRed) Name() string             { return "Bloodspill Invocation" }
 func (BloodspillInvocationRed) Cost(*card.TurnState) int { return 1 }
 func (BloodspillInvocationRed) Pitch() int               { return 1 }
@@ -29,7 +32,7 @@ func (BloodspillInvocationRed) Play(s *card.TurnState, self *card.CardState) {
 
 type BloodspillInvocationYellow struct{}
 
-func (BloodspillInvocationYellow) ID() card.ID              { return card.BloodspillInvocationYellow }
+func (BloodspillInvocationYellow) ID() ids.CardID           { return ids.BloodspillInvocationYellow }
 func (BloodspillInvocationYellow) Name() string             { return "Bloodspill Invocation" }
 func (BloodspillInvocationYellow) Cost(*card.TurnState) int { return 1 }
 func (BloodspillInvocationYellow) Pitch() int               { return 2 }
@@ -43,7 +46,7 @@ func (BloodspillInvocationYellow) Play(s *card.TurnState, self *card.CardState) 
 
 type BloodspillInvocationBlue struct{}
 
-func (BloodspillInvocationBlue) ID() card.ID              { return card.BloodspillInvocationBlue }
+func (BloodspillInvocationBlue) ID() ids.CardID           { return ids.BloodspillInvocationBlue }
 func (BloodspillInvocationBlue) Name() string             { return "Bloodspill Invocation" }
 func (BloodspillInvocationBlue) Cost(*card.TurnState) int { return 1 }
 func (BloodspillInvocationBlue) Pitch() int               { return 3 }

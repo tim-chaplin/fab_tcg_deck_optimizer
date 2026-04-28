@@ -5,13 +5,16 @@
 
 package cards
 
-import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+import (
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
+)
 
 var flexTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeAttack)
 
 type FlexRed struct{}
 
-func (FlexRed) ID() card.ID              { return card.FlexRed }
+func (FlexRed) ID() ids.CardID           { return ids.FlexRed }
 func (FlexRed) Name() string             { return "Flex" }
 func (FlexRed) Cost(*card.TurnState) int { return 0 }
 func (FlexRed) Pitch() int               { return 1 }
@@ -26,7 +29,7 @@ func (c FlexRed) Play(s *card.TurnState, self *card.CardState) { s.ApplyAndLogEf
 
 type FlexYellow struct{}
 
-func (FlexYellow) ID() card.ID              { return card.FlexYellow }
+func (FlexYellow) ID() ids.CardID           { return ids.FlexYellow }
 func (FlexYellow) Name() string             { return "Flex" }
 func (FlexYellow) Cost(*card.TurnState) int { return 0 }
 func (FlexYellow) Pitch() int               { return 2 }
@@ -41,7 +44,7 @@ func (c FlexYellow) Play(s *card.TurnState, self *card.CardState) { s.ApplyAndLo
 
 type FlexBlue struct{}
 
-func (FlexBlue) ID() card.ID              { return card.FlexBlue }
+func (FlexBlue) ID() ids.CardID           { return ids.FlexBlue }
 func (FlexBlue) Name() string             { return "Flex" }
 func (FlexBlue) Cost(*card.TurnState) int { return 0 }
 func (FlexBlue) Pitch() int               { return 3 }

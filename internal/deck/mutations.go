@@ -2,7 +2,7 @@ package deck
 
 // Single-slot mutation generation for the iterate-mode hill climb: every alternative weapon
 // loadout plus every (remove one, add one) card swap the deck admits. Ordering is by
-// ascending card.ID for stability — no value-based bias. The anneal driver shuffles the
+// ascending ids.CardID for stability — no value-based bias. The anneal driver shuffles the
 // returned slice each round so exploration order is unbiased.
 
 import (
@@ -10,7 +10,8 @@ import (
 	"sort"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/cards"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/weapon"
 )
 
@@ -28,7 +29,7 @@ type Mutation struct {
 // "swap two for two" mutations from pairSwapMutations. removeID must be in the deck. Pairs
 // with removeID == addID are skipped.
 //
-// Card-mutation ordering is by ascending card.ID for stability — no value-based bias. The
+// Card-mutation ordering is by ascending ids.CardID for stability — no value-based bias. The
 // anneal driver shuffles the returned slice each round so neither the first-found classical
 // climb nor the probabilistic SA gate disproportionately samples the head of the slice.
 //
@@ -87,23 +88,23 @@ func weaponLoadoutMutations(d *Deck) []Mutation {
 }
 
 // singleSwapMutations emits every single-card remove+add mutation the deck admits. Remove
-// targets iterate in ascending card.ID for stability (no value-based bias; the anneal driver
+// targets iterate in ascending ids.CardID for stability (no value-based bias; the anneal driver
 // shuffles afterward). Add candidates skip no-ops (same ID); the maxCopies cap is enforced
 // by filterMaxCopiesViolations downstream so this generator stays cap-blind.
 func singleSwapMutations(d *Deck, legal func(card.Card) bool) []Mutation {
 	uniqueIDs := sortedDeckIDs(d.Cards)
 
-	// legalPool returns IDs in ascending order (cards.Deckable() iterates byID).
+	// legalPool returns IDs in ascending order (registry.DeckableCards() iterates byID).
 	pool := legalPool(legal)
 
 	var out []Mutation
 	for _, removeID := range uniqueIDs {
-		removed := cards.Get(removeID)
+		removed := registry.GetCard(removeID)
 		for _, addID := range pool {
 			if addID == removeID {
 				continue // no-op: remove one and add one of the same card.
 			}
-			replacement := cards.Get(addID)
+			replacement := registry.GetCard(addID)
 			newCards := make([]card.Card, 0, len(d.Cards))
 			removed1 := false
 			for _, c := range d.Cards {
@@ -129,9 +130,9 @@ func singleSwapMutations(d *Deck, legal func(card.Card) bool) []Mutation {
 // sortedDeckIDs returns every distinct card ID appearing in cs, sorted ascending. Used as
 // the removal-target ordering for singleSwapMutations; the order is purely for stability since
 // the anneal driver shuffles the final mutation slice.
-func sortedDeckIDs(cs []card.Card) []card.ID {
-	seen := map[card.ID]bool{}
-	ids := make([]card.ID, 0, len(cs))
+func sortedDeckIDs(cs []card.Card) []ids.CardID {
+	seen := map[ids.CardID]bool{}
+	ids := make([]ids.CardID, 0, len(cs))
 	for _, c := range cs {
 		id := c.ID()
 		if seen[id] {
@@ -169,7 +170,7 @@ func filterMaxCopiesViolations(muts []Mutation, maxCopies int) []Mutation {
 // respectsMaxCopies reports whether every distinct ID in cs appears at most maxCopies times.
 // Returns false at the first overshoot so a single hot card short-circuits the count.
 func respectsMaxCopies(cs []card.Card, maxCopies int) bool {
-	counts := map[card.ID]int{}
+	counts := map[ids.CardID]int{}
 	for _, c := range cs {
 		counts[c.ID()]++
 		if counts[c.ID()] > maxCopies {

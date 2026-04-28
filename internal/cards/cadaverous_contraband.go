@@ -6,13 +6,16 @@
 
 package cards
 
-import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+import (
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
+)
 
 var cadaverousContrabandTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeAttack)
 
 type CadaverousContrabandRed struct{}
 
-func (CadaverousContrabandRed) ID() card.ID              { return card.CadaverousContrabandRed }
+func (CadaverousContrabandRed) ID() ids.CardID           { return ids.CadaverousContrabandRed }
 func (CadaverousContrabandRed) Name() string             { return "Cadaverous Contraband" }
 func (CadaverousContrabandRed) Cost(*card.TurnState) int { return 2 }
 func (CadaverousContrabandRed) Pitch() int               { return 1 }
@@ -29,7 +32,7 @@ func (c CadaverousContrabandRed) Play(s *card.TurnState, self *card.CardState) {
 
 type CadaverousContrabandYellow struct{}
 
-func (CadaverousContrabandYellow) ID() card.ID              { return card.CadaverousContrabandYellow }
+func (CadaverousContrabandYellow) ID() ids.CardID           { return ids.CadaverousContrabandYellow }
 func (CadaverousContrabandYellow) Name() string             { return "Cadaverous Contraband" }
 func (CadaverousContrabandYellow) Cost(*card.TurnState) int { return 2 }
 func (CadaverousContrabandYellow) Pitch() int               { return 2 }
@@ -46,7 +49,7 @@ func (c CadaverousContrabandYellow) Play(s *card.TurnState, self *card.CardState
 
 type CadaverousContrabandBlue struct{}
 
-func (CadaverousContrabandBlue) ID() card.ID              { return card.CadaverousContrabandBlue }
+func (CadaverousContrabandBlue) ID() ids.CardID           { return ids.CadaverousContrabandBlue }
 func (CadaverousContrabandBlue) Name() string             { return "Cadaverous Contraband" }
 func (CadaverousContrabandBlue) Cost(*card.TurnState) int { return 2 }
 func (CadaverousContrabandBlue) Pitch() int               { return 3 }

@@ -7,6 +7,7 @@ import (
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/cards"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry"
 )
 
 func TestParse(t *testing.T) {
@@ -61,8 +62,8 @@ func TestSilverAgeBanlistParity(t *testing.T) {
 		t.Fatal("banlist file parsed to zero entries")
 	}
 
-	for _, id := range cards.All() {
-		c := cards.Get(id)
+	for _, id := range registry.AllCards() {
+		c := registry.GetCard(id)
 		base := normalizeName(stripVariantSuffix(c.Name()))
 		if !banned[base] {
 			continue

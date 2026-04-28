@@ -4,13 +4,16 @@
 
 package cards
 
-import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+import (
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
+)
 
 var brushOffTypes = card.NewTypeSet(card.TypeGeneric, card.TypeInstant)
 
 type BrushOffRed struct{}
 
-func (BrushOffRed) ID() card.ID              { return card.BrushOffRed }
+func (BrushOffRed) ID() ids.CardID           { return ids.BrushOffRed }
 func (BrushOffRed) Name() string             { return "Brush Off" }
 func (BrushOffRed) Cost(*card.TurnState) int { return 0 }
 func (BrushOffRed) Pitch() int               { return 1 }
@@ -25,7 +28,7 @@ func (BrushOffRed) Play(s *card.TurnState, self *card.CardState) { s.LogPlay(sel
 
 type BrushOffYellow struct{}
 
-func (BrushOffYellow) ID() card.ID              { return card.BrushOffYellow }
+func (BrushOffYellow) ID() ids.CardID           { return ids.BrushOffYellow }
 func (BrushOffYellow) Name() string             { return "Brush Off" }
 func (BrushOffYellow) Cost(*card.TurnState) int { return 0 }
 func (BrushOffYellow) Pitch() int               { return 2 }
@@ -40,7 +43,7 @@ func (BrushOffYellow) Play(s *card.TurnState, self *card.CardState) { s.LogPlay(
 
 type BrushOffBlue struct{}
 
-func (BrushOffBlue) ID() card.ID              { return card.BrushOffBlue }
+func (BrushOffBlue) ID() ids.CardID           { return ids.BrushOffBlue }
 func (BrushOffBlue) Name() string             { return "Brush Off" }
 func (BrushOffBlue) Cost(*card.TurnState) int { return 0 }
 func (BrushOffBlue) Pitch() int               { return 3 }

@@ -21,7 +21,10 @@
 
 package cards
 
-import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+import (
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
+)
 
 var mauvrionSkiesTypes = card.NewTypeSet(card.TypeRuneblade, card.TypeAction)
 
@@ -64,7 +67,7 @@ func mauvrionSkiesPlay(s *card.TurnState, selfState *card.CardState, source card
 
 type MauvrionSkiesRed struct{}
 
-func (MauvrionSkiesRed) ID() card.ID              { return card.MauvrionSkiesRed }
+func (MauvrionSkiesRed) ID() ids.CardID           { return ids.MauvrionSkiesRed }
 func (MauvrionSkiesRed) Name() string             { return "Mauvrion Skies" }
 func (MauvrionSkiesRed) Cost(*card.TurnState) int { return 0 }
 func (MauvrionSkiesRed) Pitch() int               { return 1 }
@@ -78,7 +81,7 @@ func (c MauvrionSkiesRed) Play(s *card.TurnState, self *card.CardState) {
 
 type MauvrionSkiesYellow struct{}
 
-func (MauvrionSkiesYellow) ID() card.ID              { return card.MauvrionSkiesYellow }
+func (MauvrionSkiesYellow) ID() ids.CardID           { return ids.MauvrionSkiesYellow }
 func (MauvrionSkiesYellow) Name() string             { return "Mauvrion Skies" }
 func (MauvrionSkiesYellow) Cost(*card.TurnState) int { return 0 }
 func (MauvrionSkiesYellow) Pitch() int               { return 2 }
@@ -92,7 +95,7 @@ func (c MauvrionSkiesYellow) Play(s *card.TurnState, self *card.CardState) {
 
 type MauvrionSkiesBlue struct{}
 
-func (MauvrionSkiesBlue) ID() card.ID              { return card.MauvrionSkiesBlue }
+func (MauvrionSkiesBlue) ID() ids.CardID           { return ids.MauvrionSkiesBlue }
 func (MauvrionSkiesBlue) Name() string             { return "Mauvrion Skies" }
 func (MauvrionSkiesBlue) Cost(*card.TurnState) int { return 0 }
 func (MauvrionSkiesBlue) Pitch() int               { return 3 }

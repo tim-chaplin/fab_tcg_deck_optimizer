@@ -3,11 +3,14 @@
 
 package cards
 
-import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+import (
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
+)
 
 type PutInContextBlue struct{}
 
-func (PutInContextBlue) ID() card.ID              { return card.PutInContextBlue }
+func (PutInContextBlue) ID() ids.CardID           { return ids.PutInContextBlue }
 func (PutInContextBlue) Name() string             { return "Put in Context" }
 func (PutInContextBlue) Cost(*card.TurnState) int { return 0 }
 func (PutInContextBlue) Pitch() int               { return 3 }

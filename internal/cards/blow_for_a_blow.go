@@ -12,6 +12,7 @@ package cards
 
 import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/simstate"
 )
 
@@ -22,7 +23,7 @@ const blowForABlowPingValue = 1
 
 type BlowForABlowRed struct{}
 
-func (BlowForABlowRed) ID() card.ID              { return card.BlowForABlowRed }
+func (BlowForABlowRed) ID() ids.CardID           { return ids.BlowForABlowRed }
 func (BlowForABlowRed) Name() string             { return "Blow for a Blow" }
 func (BlowForABlowRed) Cost(*card.TurnState) int { return 2 }
 func (BlowForABlowRed) Pitch() int               { return 1 }

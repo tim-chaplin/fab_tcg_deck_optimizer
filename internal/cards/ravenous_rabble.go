@@ -9,7 +9,10 @@
 
 package cards
 
-import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+import (
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
+)
 
 var ravenousRabbleTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeAttack)
 
@@ -25,7 +28,7 @@ func ravenousRabbleApplyDebuff(s *card.TurnState, self *card.CardState) {
 
 type RavenousRabbleRed struct{}
 
-func (RavenousRabbleRed) ID() card.ID              { return card.RavenousRabbleRed }
+func (RavenousRabbleRed) ID() ids.CardID           { return ids.RavenousRabbleRed }
 func (RavenousRabbleRed) Name() string             { return "Ravenous Rabble" }
 func (RavenousRabbleRed) Cost(*card.TurnState) int { return 0 }
 func (RavenousRabbleRed) Pitch() int               { return 1 }
@@ -40,7 +43,7 @@ func (RavenousRabbleRed) Play(s *card.TurnState, self *card.CardState) {
 
 type RavenousRabbleYellow struct{}
 
-func (RavenousRabbleYellow) ID() card.ID              { return card.RavenousRabbleYellow }
+func (RavenousRabbleYellow) ID() ids.CardID           { return ids.RavenousRabbleYellow }
 func (RavenousRabbleYellow) Name() string             { return "Ravenous Rabble" }
 func (RavenousRabbleYellow) Cost(*card.TurnState) int { return 0 }
 func (RavenousRabbleYellow) Pitch() int               { return 2 }
@@ -55,7 +58,7 @@ func (RavenousRabbleYellow) Play(s *card.TurnState, self *card.CardState) {
 
 type RavenousRabbleBlue struct{}
 
-func (RavenousRabbleBlue) ID() card.ID              { return card.RavenousRabbleBlue }
+func (RavenousRabbleBlue) ID() ids.CardID           { return ids.RavenousRabbleBlue }
 func (RavenousRabbleBlue) Name() string             { return "Ravenous Rabble" }
 func (RavenousRabbleBlue) Cost(*card.TurnState) int { return 0 }
 func (RavenousRabbleBlue) Pitch() int               { return 3 }

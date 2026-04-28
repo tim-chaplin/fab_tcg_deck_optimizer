@@ -6,13 +6,16 @@
 
 package cards
 
-import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+import (
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
+)
 
 var readTheRunesTypes = card.NewTypeSet(card.TypeRuneblade, card.TypeAction)
 
 type ReadTheRunesRed struct{}
 
-func (ReadTheRunesRed) ID() card.ID              { return card.ReadTheRunesRed }
+func (ReadTheRunesRed) ID() ids.CardID           { return ids.ReadTheRunesRed }
 func (ReadTheRunesRed) Name() string             { return "Read the Runes" }
 func (ReadTheRunesRed) Cost(*card.TurnState) int { return 0 }
 func (ReadTheRunesRed) Pitch() int               { return 1 }
@@ -27,7 +30,7 @@ func (ReadTheRunesRed) Play(s *card.TurnState, self *card.CardState) {
 
 type ReadTheRunesYellow struct{}
 
-func (ReadTheRunesYellow) ID() card.ID              { return card.ReadTheRunesYellow }
+func (ReadTheRunesYellow) ID() ids.CardID           { return ids.ReadTheRunesYellow }
 func (ReadTheRunesYellow) Name() string             { return "Read the Runes" }
 func (ReadTheRunesYellow) Cost(*card.TurnState) int { return 0 }
 func (ReadTheRunesYellow) Pitch() int               { return 2 }
@@ -42,7 +45,7 @@ func (ReadTheRunesYellow) Play(s *card.TurnState, self *card.CardState) {
 
 type ReadTheRunesBlue struct{}
 
-func (ReadTheRunesBlue) ID() card.ID              { return card.ReadTheRunesBlue }
+func (ReadTheRunesBlue) ID() ids.CardID           { return ids.ReadTheRunesBlue }
 func (ReadTheRunesBlue) Name() string             { return "Read the Runes" }
 func (ReadTheRunesBlue) Cost(*card.TurnState) int { return 0 }
 func (ReadTheRunesBlue) Pitch() int               { return 3 }

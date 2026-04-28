@@ -13,6 +13,7 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/hand"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/hero"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/simstate"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/weapon"
 )
@@ -120,7 +121,7 @@ func (d *Deck) evaluateImpl(maxRuns int, incomingDamage int, rng *rand.Rand, ev 
 	handsPerCycle := deckSize / handSize
 
 	// uniqueIDs / idIndex / presentBuf / marginalBuf back the per-turn marginal-stats
-	// accounting. uniqueIDs lists every distinct card.ID that appears in d.Cards (one entry
+	// accounting. uniqueIDs lists every distinct ids.CardID that appears in d.Cards (one entry
 	// per ID, in deck order of first appearance). idIndex maps an ID back to its position so
 	// the per-turn presence walk over the dealt hand is O(handSize) map lookups instead of
 	// an O(handSize × uniqueIDs) scan. presentBuf is reused each turn — zeroed via clear()
@@ -668,18 +669,18 @@ func cloneCarryState(cs hand.CarryState) hand.CarryState {
 // uniqueDeckIDs returns the distinct card IDs in cs (in deck order of first appearance) and
 // a position-lookup map keyed by ID. The caller uses uniqueIDs to iterate every card the deck
 // could ever score against and idIndex to flip per-turn presence flags from the dealt hand.
-func uniqueDeckIDs(cs []card.Card) ([]card.ID, map[card.ID]int) {
-	ids := make([]card.ID, 0, len(cs))
-	idx := make(map[card.ID]int, len(cs))
+func uniqueDeckIDs(cs []card.Card) ([]ids.CardID, map[ids.CardID]int) {
+	out := make([]ids.CardID, 0, len(cs))
+	idx := make(map[ids.CardID]int, len(cs))
 	for _, c := range cs {
 		id := c.ID()
 		if _, seen := idx[id]; seen {
 			continue
 		}
-		idx[id] = len(ids)
-		ids = append(ids, id)
+		idx[id] = len(out)
+		out = append(out, id)
 	}
-	return ids, idx
+	return out, idx
 }
 
 // tallyMarginalPresence credits this turn's value to each entry in marginalBuf, bucketed by
@@ -687,7 +688,7 @@ func uniqueDeckIDs(cs []card.Card) ([]card.ID, map[card.ID]int) {
 // ran. presentBuf is a scratch slice indexed parallel to marginalBuf; the caller owns both
 // across turns to keep this path allocation-free. Operates entirely on slices so the inner
 // loop avoids the per-turn map churn a direct Stats.PerCardMarginal[id] update would cost.
-func tallyMarginalPresence(marginalBuf []CardMarginalStats, idIndex map[card.ID]int, presentBuf []bool, dealt []card.Card, arsenalIn card.Card, value float64) {
+func tallyMarginalPresence(marginalBuf []CardMarginalStats, idIndex map[ids.CardID]int, presentBuf []bool, dealt []card.Card, arsenalIn card.Card, value float64) {
 	if len(marginalBuf) == 0 {
 		return
 	}
@@ -717,12 +718,12 @@ func tallyMarginalPresence(marginalBuf []CardMarginalStats, idIndex map[card.ID]
 // summing into existing entries so multiple Evaluate calls accumulate the same way PerCard
 // does. The map is lazily initialised so decks that never get evaluated don't pay for an
 // empty map.
-func mergeMarginalBuf(stats *Stats, uniqueIDs []card.ID, marginalBuf []CardMarginalStats) {
+func mergeMarginalBuf(stats *Stats, uniqueIDs []ids.CardID, marginalBuf []CardMarginalStats) {
 	if len(uniqueIDs) == 0 {
 		return
 	}
 	if stats.PerCardMarginal == nil {
-		stats.PerCardMarginal = make(map[card.ID]CardMarginalStats, len(uniqueIDs))
+		stats.PerCardMarginal = make(map[ids.CardID]CardMarginalStats, len(uniqueIDs))
 	}
 	for i, id := range uniqueIDs {
 		m := stats.PerCardMarginal[id]

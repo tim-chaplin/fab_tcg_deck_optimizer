@@ -7,6 +7,7 @@ package cards
 
 import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/simstate"
 )
 
@@ -23,7 +24,7 @@ func fyendalsFightingSpiritApplyRider(s *card.TurnState, self *card.CardState) {
 
 type FyendalsFightingSpiritRed struct{}
 
-func (FyendalsFightingSpiritRed) ID() card.ID              { return card.FyendalsFightingSpiritRed }
+func (FyendalsFightingSpiritRed) ID() ids.CardID           { return ids.FyendalsFightingSpiritRed }
 func (FyendalsFightingSpiritRed) Name() string             { return "Fyendal's Fighting Spirit" }
 func (FyendalsFightingSpiritRed) Cost(*card.TurnState) int { return 3 }
 func (FyendalsFightingSpiritRed) Pitch() int               { return 1 }
@@ -38,7 +39,7 @@ func (FyendalsFightingSpiritRed) Play(s *card.TurnState, self *card.CardState) {
 
 type FyendalsFightingSpiritYellow struct{}
 
-func (FyendalsFightingSpiritYellow) ID() card.ID              { return card.FyendalsFightingSpiritYellow }
+func (FyendalsFightingSpiritYellow) ID() ids.CardID           { return ids.FyendalsFightingSpiritYellow }
 func (FyendalsFightingSpiritYellow) Name() string             { return "Fyendal's Fighting Spirit" }
 func (FyendalsFightingSpiritYellow) Cost(*card.TurnState) int { return 3 }
 func (FyendalsFightingSpiritYellow) Pitch() int               { return 2 }
@@ -53,7 +54,7 @@ func (FyendalsFightingSpiritYellow) Play(s *card.TurnState, self *card.CardState
 
 type FyendalsFightingSpiritBlue struct{}
 
-func (FyendalsFightingSpiritBlue) ID() card.ID              { return card.FyendalsFightingSpiritBlue }
+func (FyendalsFightingSpiritBlue) ID() ids.CardID           { return ids.FyendalsFightingSpiritBlue }
 func (FyendalsFightingSpiritBlue) Name() string             { return "Fyendal's Fighting Spirit" }
 func (FyendalsFightingSpiritBlue) Cost(*card.TurnState) int { return 3 }
 func (FyendalsFightingSpiritBlue) Pitch() int               { return 3 }

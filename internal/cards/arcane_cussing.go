@@ -8,13 +8,16 @@
 
 package cards
 
-import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+import (
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
+)
 
 var arcaneCussingTypes = card.NewTypeSet(card.TypeRuneblade, card.TypeAction, card.TypeAura)
 
 type ArcaneCussingRed struct{}
 
-func (ArcaneCussingRed) ID() card.ID              { return card.ArcaneCussingRed }
+func (ArcaneCussingRed) ID() ids.CardID           { return ids.ArcaneCussingRed }
 func (ArcaneCussingRed) Name() string             { return "Arcane Cussing" }
 func (ArcaneCussingRed) Cost(*card.TurnState) int { return 1 }
 func (ArcaneCussingRed) Pitch() int               { return 1 }
@@ -28,7 +31,7 @@ func (ArcaneCussingRed) Play(s *card.TurnState, self *card.CardState) {
 
 type ArcaneCussingYellow struct{}
 
-func (ArcaneCussingYellow) ID() card.ID              { return card.ArcaneCussingYellow }
+func (ArcaneCussingYellow) ID() ids.CardID           { return ids.ArcaneCussingYellow }
 func (ArcaneCussingYellow) Name() string             { return "Arcane Cussing" }
 func (ArcaneCussingYellow) Cost(*card.TurnState) int { return 1 }
 func (ArcaneCussingYellow) Pitch() int               { return 2 }
@@ -42,7 +45,7 @@ func (ArcaneCussingYellow) Play(s *card.TurnState, self *card.CardState) {
 
 type ArcaneCussingBlue struct{}
 
-func (ArcaneCussingBlue) ID() card.ID              { return card.ArcaneCussingBlue }
+func (ArcaneCussingBlue) ID() ids.CardID           { return ids.ArcaneCussingBlue }
 func (ArcaneCussingBlue) Name() string             { return "Arcane Cussing" }
 func (ArcaneCussingBlue) Cost(*card.TurnState) int { return 1 }
 func (ArcaneCussingBlue) Pitch() int               { return 3 }

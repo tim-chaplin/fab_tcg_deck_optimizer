@@ -5,13 +5,16 @@
 
 package cards
 
-import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+import (
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
+)
 
 var destructiveDeliberationTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeAttack)
 
 type DestructiveDeliberationRed struct{}
 
-func (DestructiveDeliberationRed) ID() card.ID              { return card.DestructiveDeliberationRed }
+func (DestructiveDeliberationRed) ID() ids.CardID           { return ids.DestructiveDeliberationRed }
 func (DestructiveDeliberationRed) Name() string             { return "Destructive Deliberation" }
 func (DestructiveDeliberationRed) Cost(*card.TurnState) int { return 2 }
 func (DestructiveDeliberationRed) Pitch() int               { return 1 }
@@ -28,7 +31,7 @@ func (DestructiveDeliberationRed) Play(s *card.TurnState, self *card.CardState) 
 
 type DestructiveDeliberationYellow struct{}
 
-func (DestructiveDeliberationYellow) ID() card.ID              { return card.DestructiveDeliberationYellow }
+func (DestructiveDeliberationYellow) ID() ids.CardID           { return ids.DestructiveDeliberationYellow }
 func (DestructiveDeliberationYellow) Name() string             { return "Destructive Deliberation" }
 func (DestructiveDeliberationYellow) Cost(*card.TurnState) int { return 2 }
 func (DestructiveDeliberationYellow) Pitch() int               { return 2 }
@@ -45,7 +48,7 @@ func (DestructiveDeliberationYellow) Play(s *card.TurnState, self *card.CardStat
 
 type DestructiveDeliberationBlue struct{}
 
-func (DestructiveDeliberationBlue) ID() card.ID              { return card.DestructiveDeliberationBlue }
+func (DestructiveDeliberationBlue) ID() ids.CardID           { return ids.DestructiveDeliberationBlue }
 func (DestructiveDeliberationBlue) Name() string             { return "Destructive Deliberation" }
 func (DestructiveDeliberationBlue) Cost(*card.TurnState) int { return 2 }
 func (DestructiveDeliberationBlue) Pitch() int               { return 3 }

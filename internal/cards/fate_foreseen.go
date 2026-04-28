@@ -5,11 +5,14 @@
 
 package cards
 
-import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+import (
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
+)
 
 type FateForeseenRed struct{}
 
-func (FateForeseenRed) ID() card.ID              { return card.FateForeseenRed }
+func (FateForeseenRed) ID() ids.CardID           { return ids.FateForeseenRed }
 func (FateForeseenRed) Name() string             { return "Fate Foreseen" }
 func (FateForeseenRed) Cost(*card.TurnState) int { return 0 }
 func (FateForeseenRed) Pitch() int               { return 1 }
@@ -27,7 +30,7 @@ func (FateForeseenRed) Play(s *card.TurnState, self *card.CardState) {
 
 type FateForeseenYellow struct{}
 
-func (FateForeseenYellow) ID() card.ID              { return card.FateForeseenYellow }
+func (FateForeseenYellow) ID() ids.CardID           { return ids.FateForeseenYellow }
 func (FateForeseenYellow) Name() string             { return "Fate Foreseen" }
 func (FateForeseenYellow) Cost(*card.TurnState) int { return 0 }
 func (FateForeseenYellow) Pitch() int               { return 2 }
@@ -45,7 +48,7 @@ func (FateForeseenYellow) Play(s *card.TurnState, self *card.CardState) {
 
 type FateForeseenBlue struct{}
 
-func (FateForeseenBlue) ID() card.ID              { return card.FateForeseenBlue }
+func (FateForeseenBlue) ID() ids.CardID           { return ids.FateForeseenBlue }
 func (FateForeseenBlue) Name() string             { return "Fate Foreseen" }
 func (FateForeseenBlue) Cost(*card.TurnState) int { return 0 }
 func (FateForeseenBlue) Pitch() int               { return 3 }

@@ -9,7 +9,10 @@
 
 package cards
 
-import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+import (
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
+)
 
 var frontlineScoutTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeAttack)
 
@@ -24,7 +27,7 @@ func frontlineScoutPlay(s *card.TurnState, self *card.CardState) {
 
 type FrontlineScoutRed struct{}
 
-func (FrontlineScoutRed) ID() card.ID              { return card.FrontlineScoutRed }
+func (FrontlineScoutRed) ID() ids.CardID           { return ids.FrontlineScoutRed }
 func (FrontlineScoutRed) Name() string             { return "Frontline Scout" }
 func (FrontlineScoutRed) Cost(*card.TurnState) int { return 0 }
 func (FrontlineScoutRed) Pitch() int               { return 1 }
@@ -41,7 +44,7 @@ func (FrontlineScoutRed) Play(s *card.TurnState, self *card.CardState) {
 
 type FrontlineScoutYellow struct{}
 
-func (FrontlineScoutYellow) ID() card.ID              { return card.FrontlineScoutYellow }
+func (FrontlineScoutYellow) ID() ids.CardID           { return ids.FrontlineScoutYellow }
 func (FrontlineScoutYellow) Name() string             { return "Frontline Scout" }
 func (FrontlineScoutYellow) Cost(*card.TurnState) int { return 0 }
 func (FrontlineScoutYellow) Pitch() int               { return 2 }
@@ -58,7 +61,7 @@ func (FrontlineScoutYellow) Play(s *card.TurnState, self *card.CardState) {
 
 type FrontlineScoutBlue struct{}
 
-func (FrontlineScoutBlue) ID() card.ID              { return card.FrontlineScoutBlue }
+func (FrontlineScoutBlue) ID() ids.CardID           { return ids.FrontlineScoutBlue }
 func (FrontlineScoutBlue) Name() string             { return "Frontline Scout" }
 func (FrontlineScoutBlue) Cost(*card.TurnState) int { return 0 }
 func (FrontlineScoutBlue) Pitch() int               { return 3 }

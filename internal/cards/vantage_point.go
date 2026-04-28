@@ -6,13 +6,16 @@
 
 package cards
 
-import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+import (
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
+)
 
 var vantagePointTypes = card.NewTypeSet(card.TypeRuneblade, card.TypeAction, card.TypeAttack)
 
 type VantagePointRed struct{}
 
-func (VantagePointRed) ID() card.ID              { return card.VantagePointRed }
+func (VantagePointRed) ID() ids.CardID           { return ids.VantagePointRed }
 func (VantagePointRed) Name() string             { return "Vantage Point" }
 func (VantagePointRed) Cost(*card.TurnState) int { return 3 }
 func (VantagePointRed) Pitch() int               { return 1 }
@@ -30,7 +33,7 @@ func (VantagePointRed) Play(s *card.TurnState, self *card.CardState) {
 
 type VantagePointYellow struct{}
 
-func (VantagePointYellow) ID() card.ID              { return card.VantagePointYellow }
+func (VantagePointYellow) ID() ids.CardID           { return ids.VantagePointYellow }
 func (VantagePointYellow) Name() string             { return "Vantage Point" }
 func (VantagePointYellow) Cost(*card.TurnState) int { return 3 }
 func (VantagePointYellow) Pitch() int               { return 2 }
@@ -48,7 +51,7 @@ func (VantagePointYellow) Play(s *card.TurnState, self *card.CardState) {
 
 type VantagePointBlue struct{}
 
-func (VantagePointBlue) ID() card.ID              { return card.VantagePointBlue }
+func (VantagePointBlue) ID() ids.CardID           { return ids.VantagePointBlue }
 func (VantagePointBlue) Name() string             { return "Vantage Point" }
 func (VantagePointBlue) Cost(*card.TurnState) int { return 3 }
 func (VantagePointBlue) Pitch() int               { return 3 }

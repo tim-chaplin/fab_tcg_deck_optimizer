@@ -5,13 +5,16 @@
 
 package cards
 
-import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+import (
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
+)
 
 var springLoadTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeAttack)
 
 type SpringLoadRed struct{}
 
-func (SpringLoadRed) ID() card.ID              { return card.SpringLoadRed }
+func (SpringLoadRed) ID() ids.CardID           { return ids.SpringLoadRed }
 func (SpringLoadRed) Name() string             { return "Spring Load" }
 func (SpringLoadRed) Cost(*card.TurnState) int { return 1 }
 func (SpringLoadRed) Pitch() int               { return 1 }
@@ -28,7 +31,7 @@ func (c SpringLoadRed) Play(s *card.TurnState, self *card.CardState) {
 
 type SpringLoadYellow struct{}
 
-func (SpringLoadYellow) ID() card.ID              { return card.SpringLoadYellow }
+func (SpringLoadYellow) ID() ids.CardID           { return ids.SpringLoadYellow }
 func (SpringLoadYellow) Name() string             { return "Spring Load" }
 func (SpringLoadYellow) Cost(*card.TurnState) int { return 1 }
 func (SpringLoadYellow) Pitch() int               { return 2 }
@@ -45,7 +48,7 @@ func (c SpringLoadYellow) Play(s *card.TurnState, self *card.CardState) {
 
 type SpringLoadBlue struct{}
 
-func (SpringLoadBlue) ID() card.ID              { return card.SpringLoadBlue }
+func (SpringLoadBlue) ID() ids.CardID           { return ids.SpringLoadBlue }
 func (SpringLoadBlue) Name() string             { return "Spring Load" }
 func (SpringLoadBlue) Cost(*card.TurnState) int { return 1 }
 func (SpringLoadBlue) Pitch() int               { return 3 }

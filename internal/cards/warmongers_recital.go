@@ -6,13 +6,16 @@
 
 package cards
 
-import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+import (
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
+)
 
 var warmongersRecitalTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction)
 
 type WarmongersRecitalRed struct{}
 
-func (WarmongersRecitalRed) ID() card.ID              { return card.WarmongersRecitalRed }
+func (WarmongersRecitalRed) ID() ids.CardID           { return ids.WarmongersRecitalRed }
 func (WarmongersRecitalRed) Name() string             { return "Warmonger's Recital" }
 func (WarmongersRecitalRed) Cost(*card.TurnState) int { return 1 }
 func (WarmongersRecitalRed) Pitch() int               { return 1 }
@@ -30,7 +33,7 @@ func (WarmongersRecitalRed) Play(s *card.TurnState, self *card.CardState) {
 
 type WarmongersRecitalYellow struct{}
 
-func (WarmongersRecitalYellow) ID() card.ID              { return card.WarmongersRecitalYellow }
+func (WarmongersRecitalYellow) ID() ids.CardID           { return ids.WarmongersRecitalYellow }
 func (WarmongersRecitalYellow) Name() string             { return "Warmonger's Recital" }
 func (WarmongersRecitalYellow) Cost(*card.TurnState) int { return 1 }
 func (WarmongersRecitalYellow) Pitch() int               { return 2 }
@@ -48,7 +51,7 @@ func (WarmongersRecitalYellow) Play(s *card.TurnState, self *card.CardState) {
 
 type WarmongersRecitalBlue struct{}
 
-func (WarmongersRecitalBlue) ID() card.ID              { return card.WarmongersRecitalBlue }
+func (WarmongersRecitalBlue) ID() ids.CardID           { return ids.WarmongersRecitalBlue }
 func (WarmongersRecitalBlue) Name() string             { return "Warmonger's Recital" }
 func (WarmongersRecitalBlue) Cost(*card.TurnState) int { return 1 }
 func (WarmongersRecitalBlue) Pitch() int               { return 3 }

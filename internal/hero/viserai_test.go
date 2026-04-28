@@ -4,12 +4,13 @@ import (
 	"testing"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
 )
 
 // stubRuneAttack is a minimal Runeblade attack-action card.
 type stubRuneAttack struct{}
 
-func (stubRuneAttack) ID() card.ID              { return card.Invalid }
+func (stubRuneAttack) ID() ids.CardID           { return ids.InvalidCard }
 func (stubRuneAttack) Name() string             { return "StubRuneAttack" }
 func (stubRuneAttack) Cost(*card.TurnState) int { return 0 }
 func (stubRuneAttack) Pitch() int               { return 0 }
@@ -24,7 +25,7 @@ func (stubRuneAttack) Play(*card.TurnState, *card.CardState) {}
 // stubRuneAura is a minimal Runeblade non-attack action (an Aura).
 type stubRuneAura struct{}
 
-func (stubRuneAura) ID() card.ID              { return card.Invalid }
+func (stubRuneAura) ID() ids.CardID           { return ids.InvalidCard }
 func (stubRuneAura) Name() string             { return "StubRuneAura" }
 func (stubRuneAura) Cost(*card.TurnState) int { return 0 }
 func (stubRuneAura) Pitch() int               { return 0 }
@@ -39,7 +40,7 @@ func (stubRuneAura) Play(*card.TurnState, *card.CardState) {}
 // stubNonRuneblade is an Action-Attack with no Runeblade type — should never trigger Viserai.
 type stubNonRuneblade struct{}
 
-func (stubNonRuneblade) ID() card.ID              { return card.Invalid }
+func (stubNonRuneblade) ID() ids.CardID           { return ids.InvalidCard }
 func (stubNonRuneblade) Name() string             { return "StubGeneric" }
 func (stubNonRuneblade) Cost(*card.TurnState) int { return 0 }
 func (stubNonRuneblade) Pitch() int               { return 0 }
@@ -86,7 +87,7 @@ func TestViserai_CardStateNotRuneblade(t *testing.T) {
 // when it swings.
 type stubRuneWeapon struct{}
 
-func (stubRuneWeapon) ID() card.ID              { return card.Invalid }
+func (stubRuneWeapon) ID() ids.CardID           { return ids.InvalidCard }
 func (stubRuneWeapon) Name() string             { return "StubRuneWeapon" }
 func (stubRuneWeapon) Cost(*card.TurnState) int { return 0 }
 func (stubRuneWeapon) Pitch() int               { return 0 }

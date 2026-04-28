@@ -6,13 +6,16 @@
 
 package cards
 
-import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+import (
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
+)
 
 var imperialSealOfCommandTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeItem)
 
 type ImperialSealOfCommandRed struct{}
 
-func (ImperialSealOfCommandRed) ID() card.ID              { return card.ImperialSealOfCommandRed }
+func (ImperialSealOfCommandRed) ID() ids.CardID           { return ids.ImperialSealOfCommandRed }
 func (ImperialSealOfCommandRed) Name() string             { return "Imperial Seal of Command" }
 func (ImperialSealOfCommandRed) Cost(*card.TurnState) int { return 0 }
 func (ImperialSealOfCommandRed) Pitch() int               { return 1 }

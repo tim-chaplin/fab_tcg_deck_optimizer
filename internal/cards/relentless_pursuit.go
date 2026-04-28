@@ -5,13 +5,16 @@
 
 package cards
 
-import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+import (
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
+)
 
 var relentlessPursuitTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction)
 
 type RelentlessPursuitBlue struct{}
 
-func (RelentlessPursuitBlue) ID() card.ID              { return card.RelentlessPursuitBlue }
+func (RelentlessPursuitBlue) ID() ids.CardID           { return ids.RelentlessPursuitBlue }
 func (RelentlessPursuitBlue) Name() string             { return "Relentless Pursuit" }
 func (RelentlessPursuitBlue) Cost(*card.TurnState) int { return 0 }
 func (RelentlessPursuitBlue) Pitch() int               { return 3 }

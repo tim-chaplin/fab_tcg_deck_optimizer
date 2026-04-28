@@ -6,7 +6,10 @@
 
 package cards
 
-import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+import (
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
+)
 
 var zealousBeltingTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeAttack)
 
@@ -25,7 +28,7 @@ func zealousBeltingPlay(s *card.TurnState, self *card.CardState) {
 
 type ZealousBeltingRed struct{}
 
-func (ZealousBeltingRed) ID() card.ID              { return card.ZealousBeltingRed }
+func (ZealousBeltingRed) ID() ids.CardID           { return ids.ZealousBeltingRed }
 func (ZealousBeltingRed) Name() string             { return "Zealous Belting" }
 func (ZealousBeltingRed) Cost(*card.TurnState) int { return 2 }
 func (ZealousBeltingRed) Pitch() int               { return 1 }
@@ -39,7 +42,7 @@ func (ZealousBeltingRed) Play(s *card.TurnState, self *card.CardState) {
 
 type ZealousBeltingYellow struct{}
 
-func (ZealousBeltingYellow) ID() card.ID              { return card.ZealousBeltingYellow }
+func (ZealousBeltingYellow) ID() ids.CardID           { return ids.ZealousBeltingYellow }
 func (ZealousBeltingYellow) Name() string             { return "Zealous Belting" }
 func (ZealousBeltingYellow) Cost(*card.TurnState) int { return 2 }
 func (ZealousBeltingYellow) Pitch() int               { return 2 }
@@ -53,7 +56,7 @@ func (ZealousBeltingYellow) Play(s *card.TurnState, self *card.CardState) {
 
 type ZealousBeltingBlue struct{}
 
-func (ZealousBeltingBlue) ID() card.ID              { return card.ZealousBeltingBlue }
+func (ZealousBeltingBlue) ID() ids.CardID           { return ids.ZealousBeltingBlue }
 func (ZealousBeltingBlue) Name() string             { return "Zealous Belting" }
 func (ZealousBeltingBlue) Cost(*card.TurnState) int { return 2 }
 func (ZealousBeltingBlue) Pitch() int               { return 3 }

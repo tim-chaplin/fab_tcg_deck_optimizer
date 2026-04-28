@@ -13,8 +13,9 @@ import (
 	"math/rand"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/cards"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/hero"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/weapon"
 )
 
@@ -133,11 +134,11 @@ func (d *Deck) ApplyDefaults() {
 
 // Random generates a random legal deck for h: a random weapon loadout from weapon.All (one 2H
 // or two 1H; dual-wielding the same weapon allowed) and size cards drawn uniformly from
-// cards.Deckable() one at a time, skipping any roll that would exceed maxCopies for the picked
+// registry.DeckableCards() one at a time, skipping any roll that would exceed maxCopies for the picked
 // ID. Matches the single-slot granularity of deck.AllMutations so the hill-climb can explore
 // the space the generator actually produces.
 //
-// legal filters the card pool: only IDs for which legal(cards.Get(id)) returns true are
+// legal filters the card pool: only IDs for which legal(registry.GetCard(id)) returns true are
 // candidates. Pass nil for no filtering. Callers typically wire deckformat.Format.IsLegal
 // through here to restrict generation to a constructed format's banlist.
 func Random(h hero.Hero, size, maxCopies int, rng *rand.Rand, legal func(card.Card) bool) *Deck {
@@ -151,7 +152,7 @@ func Random(h hero.Hero, size, maxCopies int, rng *rand.Rand, legal func(card.Ca
 	if len(pool) == 0 {
 		panic("deck: Random's legal filter rejected every card — cannot build a deck")
 	}
-	counts := map[card.ID]int{}
+	counts := map[ids.CardID]int{}
 	picks := make([]card.Card, 0, size)
 	for len(picks) < size {
 		id := pool[rng.Intn(len(pool))]
@@ -159,7 +160,7 @@ func Random(h hero.Hero, size, maxCopies int, rng *rand.Rand, legal func(card.Ca
 			continue
 		}
 		counts[id]++
-		picks = append(picks, cards.Get(id))
+		picks = append(picks, registry.GetCard(id))
 	}
 	return New(h, weapons, picks)
 }
@@ -196,7 +197,7 @@ func (d *Deck) SanitizeNotImplemented(maxCopies int, rng *rand.Rand, legal func(
 	// Seed counts with the implemented-keeper cards already in the deck so replacements
 	// respect maxCopies against the surviving slots. The tagged slots we're about to
 	// overwrite don't count.
-	counts := map[card.ID]int{}
+	counts := map[ids.CardID]int{}
 	var slots []int
 	for i, c := range d.Cards {
 		if _, unimplemented := c.(card.NotImplemented); unimplemented {
@@ -210,7 +211,7 @@ func (d *Deck) SanitizeNotImplemented(maxCopies int, rng *rand.Rand, legal func(
 	}
 	replacements := make([]NotImplementedReplacement, 0, len(slots))
 	for _, idx := range slots {
-		var pick card.ID
+		var pick ids.CardID
 		for {
 			pick = pool[rng.Intn(len(pool))]
 			if counts[pick]+1 <= maxCopies {
@@ -219,23 +220,23 @@ func (d *Deck) SanitizeNotImplemented(maxCopies int, rng *rand.Rand, legal func(
 		}
 		counts[pick]++
 		from := d.Cards[idx]
-		to := cards.Get(pick)
+		to := registry.GetCard(pick)
 		d.Cards[idx] = to
 		replacements = append(replacements, NotImplementedReplacement{From: from, To: to})
 	}
 	return replacements
 }
 
-// legalPool returns cards.Deckable() filtered by legal, with any card carrying the
+// legalPool returns registry.DeckableCards() filtered by legal, with any card carrying the
 // card.NotImplemented marker removed. The NotImplemented filter is always applied — a card
 // whose printed effect the sim can't faithfully reproduce shouldn't land in a random deck or
 // become a mutation candidate regardless of format legality. Pass nil for legal to apply only
 // the NotImplemented filter. Shared by Random and AllMutations so both agree on the pool.
-func legalPool(legal func(card.Card) bool) []card.ID {
-	pool := cards.Deckable()
+func legalPool(legal func(card.Card) bool) []ids.CardID {
+	pool := registry.DeckableCards()
 	filtered := pool[:0]
 	for _, id := range pool {
-		c := cards.Get(id)
+		c := registry.GetCard(id)
 		if _, unimplemented := c.(card.NotImplemented); unimplemented {
 			continue
 		}

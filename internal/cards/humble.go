@@ -6,13 +6,16 @@
 
 package cards
 
-import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+import (
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
+)
 
 var humbleTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeAttack)
 
 type HumbleRed struct{}
 
-func (HumbleRed) ID() card.ID              { return card.HumbleRed }
+func (HumbleRed) ID() ids.CardID           { return ids.HumbleRed }
 func (HumbleRed) Name() string             { return "Humble" }
 func (HumbleRed) Cost(*card.TurnState) int { return 2 }
 func (HumbleRed) Pitch() int               { return 1 }
@@ -29,7 +32,7 @@ func (HumbleRed) Play(s *card.TurnState, self *card.CardState) {
 
 type HumbleYellow struct{}
 
-func (HumbleYellow) ID() card.ID              { return card.HumbleYellow }
+func (HumbleYellow) ID() ids.CardID           { return ids.HumbleYellow }
 func (HumbleYellow) Name() string             { return "Humble" }
 func (HumbleYellow) Cost(*card.TurnState) int { return 2 }
 func (HumbleYellow) Pitch() int               { return 2 }
@@ -46,7 +49,7 @@ func (HumbleYellow) Play(s *card.TurnState, self *card.CardState) {
 
 type HumbleBlue struct{}
 
-func (HumbleBlue) ID() card.ID              { return card.HumbleBlue }
+func (HumbleBlue) ID() ids.CardID           { return ids.HumbleBlue }
 func (HumbleBlue) Name() string             { return "Humble" }
 func (HumbleBlue) Cost(*card.TurnState) int { return 2 }
 func (HumbleBlue) Pitch() int               { return 3 }

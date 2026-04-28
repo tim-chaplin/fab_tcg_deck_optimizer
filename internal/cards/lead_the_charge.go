@@ -6,13 +6,16 @@
 
 package cards
 
-import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+import (
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
+)
 
 var leadTheChargeTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction)
 
 type LeadTheChargeRed struct{}
 
-func (LeadTheChargeRed) ID() card.ID              { return card.LeadTheChargeRed }
+func (LeadTheChargeRed) ID() ids.CardID           { return ids.LeadTheChargeRed }
 func (LeadTheChargeRed) Name() string             { return "Lead the Charge" }
 func (LeadTheChargeRed) Cost(*card.TurnState) int { return 0 }
 func (LeadTheChargeRed) Pitch() int               { return 1 }
@@ -27,7 +30,7 @@ func (LeadTheChargeRed) Play(s *card.TurnState, self *card.CardState) { s.LogPla
 
 type LeadTheChargeYellow struct{}
 
-func (LeadTheChargeYellow) ID() card.ID              { return card.LeadTheChargeYellow }
+func (LeadTheChargeYellow) ID() ids.CardID           { return ids.LeadTheChargeYellow }
 func (LeadTheChargeYellow) Name() string             { return "Lead the Charge" }
 func (LeadTheChargeYellow) Cost(*card.TurnState) int { return 0 }
 func (LeadTheChargeYellow) Pitch() int               { return 2 }
@@ -42,7 +45,7 @@ func (LeadTheChargeYellow) Play(s *card.TurnState, self *card.CardState) { s.Log
 
 type LeadTheChargeBlue struct{}
 
-func (LeadTheChargeBlue) ID() card.ID              { return card.LeadTheChargeBlue }
+func (LeadTheChargeBlue) ID() ids.CardID           { return ids.LeadTheChargeBlue }
 func (LeadTheChargeBlue) Name() string             { return "Lead the Charge" }
 func (LeadTheChargeBlue) Cost(*card.TurnState) int { return 0 }
 func (LeadTheChargeBlue) Pitch() int               { return 3 }

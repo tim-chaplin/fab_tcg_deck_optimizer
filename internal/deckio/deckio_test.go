@@ -6,10 +6,10 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/cards"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/deck"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/hand"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/hero"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry"
 )
 
 func TestMarshalUnmarshalRoundTrip(t *testing.T) {
@@ -54,7 +54,7 @@ func TestMarshalUnmarshalRoundTrip(t *testing.T) {
 }
 
 // TestRoundTrip_PreservesPerCardMarginal pins that the per-card marginal-stats accumulator
-// (PresentTotal/PresentHands and AbsentTotal/AbsentHands per unique card.ID) survives a
+// (PresentTotal/PresentHands and AbsentTotal/AbsentHands per unique ids.CardID) survives a
 // Marshal/Unmarshal so a re-loaded deck can render the marginal-value table without a
 // fresh sim. Compared via the public Marginal() so a regression in any of the four
 // underlying fields surfaces.
@@ -82,23 +82,23 @@ func TestRoundTrip_PreservesPerCardMarginal(t *testing.T) {
 	for id, want := range d.Stats.PerCardMarginal {
 		gotEntry, ok := got.Stats.PerCardMarginal[id]
 		if !ok {
-			t.Errorf("PerCardMarginal missing entry for %s after round trip", cards.Get(id).Name())
+			t.Errorf("PerCardMarginal missing entry for %s after round trip", registry.GetCard(id).Name())
 			continue
 		}
 		if gotEntry.PresentHands != want.PresentHands || gotEntry.AbsentHands != want.AbsentHands {
 			t.Errorf("%s bucket counts: got present=%d absent=%d, want present=%d absent=%d",
-				cards.Get(id).Name(),
+				registry.GetCard(id).Name(),
 				gotEntry.PresentHands, gotEntry.AbsentHands,
 				want.PresentHands, want.AbsentHands)
 		}
 		if gotEntry.PresentTotal != want.PresentTotal || gotEntry.AbsentTotal != want.AbsentTotal {
 			t.Errorf("%s bucket totals: got present=%v absent=%v, want present=%v absent=%v",
-				cards.Get(id).Name(),
+				registry.GetCard(id).Name(),
 				gotEntry.PresentTotal, gotEntry.AbsentTotal,
 				want.PresentTotal, want.AbsentTotal)
 		}
 		if gotEntry.Marginal() != want.Marginal() {
-			t.Errorf("%s Marginal(): got %v want %v", cards.Get(id).Name(),
+			t.Errorf("%s Marginal(): got %v want %v", registry.GetCard(id).Name(),
 				gotEntry.Marginal(), want.Marginal())
 		}
 	}

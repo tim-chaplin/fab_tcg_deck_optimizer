@@ -5,13 +5,16 @@
 
 package cards
 
-import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+import (
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
+)
 
 var strikeGoldTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeAttack)
 
 type StrikeGoldRed struct{}
 
-func (StrikeGoldRed) ID() card.ID              { return card.StrikeGoldRed }
+func (StrikeGoldRed) ID() ids.CardID           { return ids.StrikeGoldRed }
 func (StrikeGoldRed) Name() string             { return "Strike Gold" }
 func (StrikeGoldRed) Cost(*card.TurnState) int { return 0 }
 func (StrikeGoldRed) Pitch() int               { return 1 }
@@ -29,7 +32,7 @@ func (StrikeGoldRed) Play(s *card.TurnState, self *card.CardState) {
 
 type StrikeGoldYellow struct{}
 
-func (StrikeGoldYellow) ID() card.ID              { return card.StrikeGoldYellow }
+func (StrikeGoldYellow) ID() ids.CardID           { return ids.StrikeGoldYellow }
 func (StrikeGoldYellow) Name() string             { return "Strike Gold" }
 func (StrikeGoldYellow) Cost(*card.TurnState) int { return 0 }
 func (StrikeGoldYellow) Pitch() int               { return 2 }
@@ -47,7 +50,7 @@ func (StrikeGoldYellow) Play(s *card.TurnState, self *card.CardState) {
 
 type StrikeGoldBlue struct{}
 
-func (StrikeGoldBlue) ID() card.ID              { return card.StrikeGoldBlue }
+func (StrikeGoldBlue) ID() ids.CardID           { return ids.StrikeGoldBlue }
 func (StrikeGoldBlue) Name() string             { return "Strike Gold" }
 func (StrikeGoldBlue) Cost(*card.TurnState) int { return 0 }
 func (StrikeGoldBlue) Pitch() int               { return 3 }

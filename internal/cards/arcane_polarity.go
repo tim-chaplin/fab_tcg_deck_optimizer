@@ -4,13 +4,16 @@
 
 package cards
 
-import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+import (
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
+)
 
 var arcanePolarityTypes = card.NewTypeSet(card.TypeGeneric, card.TypeInstant)
 
 type ArcanePolarityRed struct{}
 
-func (ArcanePolarityRed) ID() card.ID              { return card.ArcanePolarityRed }
+func (ArcanePolarityRed) ID() ids.CardID           { return ids.ArcanePolarityRed }
 func (ArcanePolarityRed) Name() string             { return "Arcane Polarity" }
 func (ArcanePolarityRed) Cost(*card.TurnState) int { return 0 }
 func (ArcanePolarityRed) Pitch() int               { return 1 }
@@ -25,7 +28,7 @@ func (ArcanePolarityRed) Play(s *card.TurnState, self *card.CardState) { s.LogPl
 
 type ArcanePolarityYellow struct{}
 
-func (ArcanePolarityYellow) ID() card.ID              { return card.ArcanePolarityYellow }
+func (ArcanePolarityYellow) ID() ids.CardID           { return ids.ArcanePolarityYellow }
 func (ArcanePolarityYellow) Name() string             { return "Arcane Polarity" }
 func (ArcanePolarityYellow) Cost(*card.TurnState) int { return 0 }
 func (ArcanePolarityYellow) Pitch() int               { return 2 }
@@ -40,7 +43,7 @@ func (ArcanePolarityYellow) Play(s *card.TurnState, self *card.CardState) { s.Lo
 
 type ArcanePolarityBlue struct{}
 
-func (ArcanePolarityBlue) ID() card.ID              { return card.ArcanePolarityBlue }
+func (ArcanePolarityBlue) ID() ids.CardID           { return ids.ArcanePolarityBlue }
 func (ArcanePolarityBlue) Name() string             { return "Arcane Polarity" }
 func (ArcanePolarityBlue) Cost(*card.TurnState) int { return 0 }
 func (ArcanePolarityBlue) Pitch() int               { return 3 }

@@ -3,13 +3,16 @@
 
 package cards
 
-import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+import (
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
+)
 
 var woundingBlowTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeAttack)
 
 type WoundingBlowRed struct{}
 
-func (WoundingBlowRed) ID() card.ID              { return card.WoundingBlowRed }
+func (WoundingBlowRed) ID() ids.CardID           { return ids.WoundingBlowRed }
 func (WoundingBlowRed) Name() string             { return "Wounding Blow" }
 func (WoundingBlowRed) Cost(*card.TurnState) int { return 0 }
 func (WoundingBlowRed) Pitch() int               { return 1 }
@@ -23,7 +26,7 @@ func (c WoundingBlowRed) Play(s *card.TurnState, self *card.CardState) {
 
 type WoundingBlowYellow struct{}
 
-func (WoundingBlowYellow) ID() card.ID              { return card.WoundingBlowYellow }
+func (WoundingBlowYellow) ID() ids.CardID           { return ids.WoundingBlowYellow }
 func (WoundingBlowYellow) Name() string             { return "Wounding Blow" }
 func (WoundingBlowYellow) Cost(*card.TurnState) int { return 0 }
 func (WoundingBlowYellow) Pitch() int               { return 2 }
@@ -37,7 +40,7 @@ func (c WoundingBlowYellow) Play(s *card.TurnState, self *card.CardState) {
 
 type WoundingBlowBlue struct{}
 
-func (WoundingBlowBlue) ID() card.ID              { return card.WoundingBlowBlue }
+func (WoundingBlowBlue) ID() ids.CardID           { return ids.WoundingBlowBlue }
 func (WoundingBlowBlue) Name() string             { return "Wounding Blow" }
 func (WoundingBlowBlue) Cost(*card.TurnState) int { return 0 }
 func (WoundingBlowBlue) Pitch() int               { return 3 }

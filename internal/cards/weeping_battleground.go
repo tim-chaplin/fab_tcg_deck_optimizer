@@ -9,7 +9,10 @@
 
 package cards
 
-import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+import (
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
+)
 
 var weepingBattlegroundTypes = card.NewTypeSet(card.TypeRuneblade, card.TypeDefenseReaction)
 
@@ -24,7 +27,7 @@ func weepingBattlegroundPlay(s *card.TurnState, self *card.CardState) {
 
 type WeepingBattlegroundRed struct{}
 
-func (WeepingBattlegroundRed) ID() card.ID              { return card.WeepingBattlegroundRed }
+func (WeepingBattlegroundRed) ID() ids.CardID           { return ids.WeepingBattlegroundRed }
 func (WeepingBattlegroundRed) Name() string             { return "Weeping Battleground" }
 func (WeepingBattlegroundRed) Cost(*card.TurnState) int { return 0 }
 func (WeepingBattlegroundRed) Pitch() int               { return 1 }
@@ -38,7 +41,7 @@ func (WeepingBattlegroundRed) Play(s *card.TurnState, self *card.CardState) {
 
 type WeepingBattlegroundYellow struct{}
 
-func (WeepingBattlegroundYellow) ID() card.ID              { return card.WeepingBattlegroundYellow }
+func (WeepingBattlegroundYellow) ID() ids.CardID           { return ids.WeepingBattlegroundYellow }
 func (WeepingBattlegroundYellow) Name() string             { return "Weeping Battleground" }
 func (WeepingBattlegroundYellow) Cost(*card.TurnState) int { return 0 }
 func (WeepingBattlegroundYellow) Pitch() int               { return 2 }
@@ -52,7 +55,7 @@ func (WeepingBattlegroundYellow) Play(s *card.TurnState, self *card.CardState) {
 
 type WeepingBattlegroundBlue struct{}
 
-func (WeepingBattlegroundBlue) ID() card.ID              { return card.WeepingBattlegroundBlue }
+func (WeepingBattlegroundBlue) ID() ids.CardID           { return ids.WeepingBattlegroundBlue }
 func (WeepingBattlegroundBlue) Name() string             { return "Weeping Battleground" }
 func (WeepingBattlegroundBlue) Cost(*card.TurnState) int { return 0 }
 func (WeepingBattlegroundBlue) Pitch() int               { return 3 }

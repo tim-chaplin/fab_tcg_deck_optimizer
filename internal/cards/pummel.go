@@ -6,13 +6,16 @@
 
 package cards
 
-import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+import (
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
+)
 
 var pummelTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAttackReaction)
 
 type PummelRed struct{}
 
-func (PummelRed) ID() card.ID              { return card.PummelRed }
+func (PummelRed) ID() ids.CardID           { return ids.PummelRed }
 func (PummelRed) Name() string             { return "Pummel" }
 func (PummelRed) Cost(*card.TurnState) int { return 2 }
 func (PummelRed) Pitch() int               { return 1 }
@@ -28,7 +31,7 @@ func (PummelRed) Play(s *card.TurnState, self *card.CardState) { s.LogPlay(self)
 
 type PummelYellow struct{}
 
-func (PummelYellow) ID() card.ID              { return card.PummelYellow }
+func (PummelYellow) ID() ids.CardID           { return ids.PummelYellow }
 func (PummelYellow) Name() string             { return "Pummel" }
 func (PummelYellow) Cost(*card.TurnState) int { return 2 }
 func (PummelYellow) Pitch() int               { return 2 }
@@ -44,7 +47,7 @@ func (PummelYellow) Play(s *card.TurnState, self *card.CardState) { s.LogPlay(se
 
 type PummelBlue struct{}
 
-func (PummelBlue) ID() card.ID              { return card.PummelBlue }
+func (PummelBlue) ID() ids.CardID           { return ids.PummelBlue }
 func (PummelBlue) Name() string             { return "Pummel" }
 func (PummelBlue) Cost(*card.TurnState) int { return 2 }
 func (PummelBlue) Pitch() int               { return 3 }

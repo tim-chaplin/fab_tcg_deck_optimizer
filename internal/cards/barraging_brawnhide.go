@@ -5,13 +5,16 @@
 
 package cards
 
-import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+import (
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
+)
 
 var barragingBrawnhideTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeAttack)
 
 type BarragingBrawnhideRed struct{}
 
-func (BarragingBrawnhideRed) ID() card.ID              { return card.BarragingBrawnhideRed }
+func (BarragingBrawnhideRed) ID() ids.CardID           { return ids.BarragingBrawnhideRed }
 func (BarragingBrawnhideRed) Name() string             { return "Barraging Brawnhide" }
 func (BarragingBrawnhideRed) Cost(*card.TurnState) int { return 3 }
 func (BarragingBrawnhideRed) Pitch() int               { return 1 }
@@ -28,7 +31,7 @@ func (c BarragingBrawnhideRed) Play(s *card.TurnState, self *card.CardState) {
 
 type BarragingBrawnhideYellow struct{}
 
-func (BarragingBrawnhideYellow) ID() card.ID              { return card.BarragingBrawnhideYellow }
+func (BarragingBrawnhideYellow) ID() ids.CardID           { return ids.BarragingBrawnhideYellow }
 func (BarragingBrawnhideYellow) Name() string             { return "Barraging Brawnhide" }
 func (BarragingBrawnhideYellow) Cost(*card.TurnState) int { return 3 }
 func (BarragingBrawnhideYellow) Pitch() int               { return 2 }
@@ -45,7 +48,7 @@ func (c BarragingBrawnhideYellow) Play(s *card.TurnState, self *card.CardState) 
 
 type BarragingBrawnhideBlue struct{}
 
-func (BarragingBrawnhideBlue) ID() card.ID              { return card.BarragingBrawnhideBlue }
+func (BarragingBrawnhideBlue) ID() ids.CardID           { return ids.BarragingBrawnhideBlue }
 func (BarragingBrawnhideBlue) Name() string             { return "Barraging Brawnhide" }
 func (BarragingBrawnhideBlue) Cost(*card.TurnState) int { return 3 }
 func (BarragingBrawnhideBlue) Pitch() int               { return 3 }

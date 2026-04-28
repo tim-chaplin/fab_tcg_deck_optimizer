@@ -6,11 +6,14 @@
 
 package cards
 
-import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+import (
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
+)
 
 type SpringboardSomersaultYellow struct{}
 
-func (SpringboardSomersaultYellow) ID() card.ID              { return card.SpringboardSomersaultYellow }
+func (SpringboardSomersaultYellow) ID() ids.CardID           { return ids.SpringboardSomersaultYellow }
 func (SpringboardSomersaultYellow) Name() string             { return "Springboard Somersault" }
 func (SpringboardSomersaultYellow) Cost(*card.TurnState) int { return 0 }
 func (SpringboardSomersaultYellow) Pitch() int               { return 2 }

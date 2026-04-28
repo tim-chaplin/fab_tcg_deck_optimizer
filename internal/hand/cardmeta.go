@@ -9,6 +9,7 @@ import (
 	"sync/atomic"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
 )
 
 // attackerMeta caches the scalar card attributes playSequence reads on every permutation. With
@@ -70,7 +71,7 @@ func attackerMetaPtrFor(c card.Card) *attackerMeta {
 }
 
 // cardMetaSlowPath populates the cache entry under cardMetaMu and returns the computed meta.
-func cardMetaSlowPath(c card.Card, id card.ID) attackerMeta {
+func cardMetaSlowPath(c card.Card, id ids.CardID) attackerMeta {
 	cardMetaMu.Lock()
 	defer cardMetaMu.Unlock()
 	// Re-check under lock: another goroutine may have populated between the atomic load and here.

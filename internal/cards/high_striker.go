@@ -5,13 +5,16 @@
 
 package cards
 
-import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+import (
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
+)
 
 var highStrikerTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction)
 
 type HighStrikerRed struct{}
 
-func (HighStrikerRed) ID() card.ID              { return card.HighStrikerRed }
+func (HighStrikerRed) ID() ids.CardID           { return ids.HighStrikerRed }
 func (HighStrikerRed) Name() string             { return "High Striker" }
 func (HighStrikerRed) Cost(*card.TurnState) int { return 0 }
 func (HighStrikerRed) Pitch() int               { return 1 }
@@ -26,7 +29,7 @@ func (HighStrikerRed) Play(s *card.TurnState, self *card.CardState) { s.LogPlay(
 
 type HighStrikerYellow struct{}
 
-func (HighStrikerYellow) ID() card.ID              { return card.HighStrikerYellow }
+func (HighStrikerYellow) ID() ids.CardID           { return ids.HighStrikerYellow }
 func (HighStrikerYellow) Name() string             { return "High Striker" }
 func (HighStrikerYellow) Cost(*card.TurnState) int { return 0 }
 func (HighStrikerYellow) Pitch() int               { return 2 }
@@ -41,7 +44,7 @@ func (HighStrikerYellow) Play(s *card.TurnState, self *card.CardState) { s.LogPl
 
 type HighStrikerBlue struct{}
 
-func (HighStrikerBlue) ID() card.ID              { return card.HighStrikerBlue }
+func (HighStrikerBlue) ID() ids.CardID           { return ids.HighStrikerBlue }
 func (HighStrikerBlue) Name() string             { return "High Striker" }
 func (HighStrikerBlue) Cost(*card.TurnState) int { return 0 }
 func (HighStrikerBlue) Pitch() int               { return 3 }

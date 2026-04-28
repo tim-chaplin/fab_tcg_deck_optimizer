@@ -5,13 +5,16 @@
 
 package cards
 
-import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+import (
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
+)
 
 var pushThePointTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeAttack)
 
 type PushThePointRed struct{}
 
-func (PushThePointRed) ID() card.ID              { return card.PushThePointRed }
+func (PushThePointRed) ID() ids.CardID           { return ids.PushThePointRed }
 func (PushThePointRed) Name() string             { return "Push the Point" }
 func (PushThePointRed) Cost(*card.TurnState) int { return 1 }
 func (PushThePointRed) Pitch() int               { return 1 }
@@ -28,7 +31,7 @@ func (c PushThePointRed) Play(s *card.TurnState, self *card.CardState) {
 
 type PushThePointYellow struct{}
 
-func (PushThePointYellow) ID() card.ID              { return card.PushThePointYellow }
+func (PushThePointYellow) ID() ids.CardID           { return ids.PushThePointYellow }
 func (PushThePointYellow) Name() string             { return "Push the Point" }
 func (PushThePointYellow) Cost(*card.TurnState) int { return 1 }
 func (PushThePointYellow) Pitch() int               { return 2 }
@@ -45,7 +48,7 @@ func (c PushThePointYellow) Play(s *card.TurnState, self *card.CardState) {
 
 type PushThePointBlue struct{}
 
-func (PushThePointBlue) ID() card.ID              { return card.PushThePointBlue }
+func (PushThePointBlue) ID() ids.CardID           { return ids.PushThePointBlue }
 func (PushThePointBlue) Name() string             { return "Push the Point" }
 func (PushThePointBlue) Cost(*card.TurnState) int { return 1 }
 func (PushThePointBlue) Pitch() int               { return 3 }

@@ -2,13 +2,16 @@
 
 package cards
 
-import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+import (
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
+)
 
 var defenseReactionTypes = card.NewTypeSet(card.TypeGeneric, card.TypeDefenseReaction)
 
 type DodgeBlue struct{}
 
-func (DodgeBlue) ID() card.ID              { return card.DodgeBlue }
+func (DodgeBlue) ID() ids.CardID           { return ids.DodgeBlue }
 func (DodgeBlue) Name() string             { return "Dodge" }
 func (DodgeBlue) Cost(*card.TurnState) int { return 0 }
 func (DodgeBlue) Pitch() int               { return 3 }

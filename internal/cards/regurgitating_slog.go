@@ -10,13 +10,16 @@
 
 package cards
 
-import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+import (
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
+)
 
 var regurgitatingSlogTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeAttack)
 
 type RegurgitatingSlogRed struct{}
 
-func (RegurgitatingSlogRed) ID() card.ID              { return card.RegurgitatingSlogRed }
+func (RegurgitatingSlogRed) ID() ids.CardID           { return ids.RegurgitatingSlogRed }
 func (RegurgitatingSlogRed) Name() string             { return "Regurgitating Slog" }
 func (RegurgitatingSlogRed) Cost(*card.TurnState) int { return 2 }
 func (RegurgitatingSlogRed) Pitch() int               { return 1 }
@@ -34,7 +37,7 @@ func (c RegurgitatingSlogRed) Play(s *card.TurnState, self *card.CardState) {
 
 type RegurgitatingSlogYellow struct{}
 
-func (RegurgitatingSlogYellow) ID() card.ID              { return card.RegurgitatingSlogYellow }
+func (RegurgitatingSlogYellow) ID() ids.CardID           { return ids.RegurgitatingSlogYellow }
 func (RegurgitatingSlogYellow) Name() string             { return "Regurgitating Slog" }
 func (RegurgitatingSlogYellow) Cost(*card.TurnState) int { return 2 }
 func (RegurgitatingSlogYellow) Pitch() int               { return 2 }
@@ -52,7 +55,7 @@ func (c RegurgitatingSlogYellow) Play(s *card.TurnState, self *card.CardState) {
 
 type RegurgitatingSlogBlue struct{}
 
-func (RegurgitatingSlogBlue) ID() card.ID              { return card.RegurgitatingSlogBlue }
+func (RegurgitatingSlogBlue) ID() ids.CardID           { return ids.RegurgitatingSlogBlue }
 func (RegurgitatingSlogBlue) Name() string             { return "Regurgitating Slog" }
 func (RegurgitatingSlogBlue) Cost(*card.TurnState) int { return 2 }
 func (RegurgitatingSlogBlue) Pitch() int               { return 3 }

@@ -6,13 +6,16 @@
 
 package cards
 
-import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+import (
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
+)
 
 var emissaryOfWindTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeAttack)
 
 type EmissaryOfWindRed struct{}
 
-func (EmissaryOfWindRed) ID() card.ID              { return card.EmissaryOfWindRed }
+func (EmissaryOfWindRed) ID() ids.CardID           { return ids.EmissaryOfWindRed }
 func (EmissaryOfWindRed) Name() string             { return "Emissary of Wind" }
 func (EmissaryOfWindRed) Cost(*card.TurnState) int { return 0 }
 func (EmissaryOfWindRed) Pitch() int               { return 1 }

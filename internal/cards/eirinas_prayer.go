@@ -5,13 +5,16 @@
 
 package cards
 
-import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+import (
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
+)
 
 var eirinasPrayerTypes = card.NewTypeSet(card.TypeGeneric, card.TypeInstant)
 
 type EirinasPrayerRed struct{}
 
-func (EirinasPrayerRed) ID() card.ID              { return card.EirinasPrayerRed }
+func (EirinasPrayerRed) ID() ids.CardID           { return ids.EirinasPrayerRed }
 func (EirinasPrayerRed) Name() string             { return "Eirina's Prayer" }
 func (EirinasPrayerRed) Cost(*card.TurnState) int { return 1 }
 func (EirinasPrayerRed) Pitch() int               { return 1 }
@@ -26,7 +29,7 @@ func (EirinasPrayerRed) Play(s *card.TurnState, self *card.CardState) { s.LogPla
 
 type EirinasPrayerYellow struct{}
 
-func (EirinasPrayerYellow) ID() card.ID              { return card.EirinasPrayerYellow }
+func (EirinasPrayerYellow) ID() ids.CardID           { return ids.EirinasPrayerYellow }
 func (EirinasPrayerYellow) Name() string             { return "Eirina's Prayer" }
 func (EirinasPrayerYellow) Cost(*card.TurnState) int { return 1 }
 func (EirinasPrayerYellow) Pitch() int               { return 2 }
@@ -41,7 +44,7 @@ func (EirinasPrayerYellow) Play(s *card.TurnState, self *card.CardState) { s.Log
 
 type EirinasPrayerBlue struct{}
 
-func (EirinasPrayerBlue) ID() card.ID              { return card.EirinasPrayerBlue }
+func (EirinasPrayerBlue) ID() ids.CardID           { return ids.EirinasPrayerBlue }
 func (EirinasPrayerBlue) Name() string             { return "Eirina's Prayer" }
 func (EirinasPrayerBlue) Cost(*card.TurnState) int { return 1 }
 func (EirinasPrayerBlue) Pitch() int               { return 3 }

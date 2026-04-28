@@ -4,13 +4,16 @@
 
 package weapon
 
-import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+import (
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
+)
 
 var scepterOfPainTypes = card.NewTypeSet(card.TypeRuneblade, card.TypeWeapon, card.TypeScepter, card.TypeOneHand)
 
 type ScepterOfPain struct{}
 
-func (ScepterOfPain) ID() card.ID              { return card.ScepterOfPainID }
+func (ScepterOfPain) ID() ids.CardID           { return ids.ScepterOfPainID }
 func (ScepterOfPain) Name() string             { return "Scepter of Pain" }
 func (ScepterOfPain) Cost(*card.TurnState) int { return 2 }
 func (ScepterOfPain) Pitch() int               { return 0 }

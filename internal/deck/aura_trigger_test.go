@@ -8,6 +8,7 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/cards"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/hand"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/hero"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
 )
 
@@ -106,7 +107,7 @@ func TestEvalOneTurn_SigilOfFyendalQueuesTrigger(t *testing.T) {
 
 	sigilPlayed := false
 	for _, a := range state.PrevTurnBestLine {
-		if a.Card.ID() == card.SigilOfFyendalBlue && a.Role == hand.Attack {
+		if a.Card.ID() == ids.SigilOfFyendalBlue && a.Role == hand.Attack {
 			sigilPlayed = true
 			break
 		}
@@ -118,7 +119,7 @@ func TestEvalOneTurn_SigilOfFyendalQueuesTrigger(t *testing.T) {
 		t.Errorf("StartOfTurnTriggerDamage = %d, want 1 (Fyendal's 1{h} gain fires at start of turn 2)",
 			state.StartOfTurnTriggerDamage)
 	}
-	if len(state.StartOfTurnGraveyard) != 1 || state.StartOfTurnGraveyard[0].ID() != card.SigilOfFyendalBlue {
+	if len(state.StartOfTurnGraveyard) != 1 || state.StartOfTurnGraveyard[0].ID() != ids.SigilOfFyendalBlue {
 		t.Errorf("StartOfTurnGraveyard = %v, want [Sigil of Fyendal] (Count hit zero after firing)",
 			state.StartOfTurnGraveyard)
 	}
@@ -139,7 +140,7 @@ func TestProcessTriggersAtStartOfTurn_RevealsAttackActionIntoHand(t *testing.T) 
 	if len(revealed) != 1 || revealed[0] != slash {
 		t.Errorf("revealed = %v, want [%v]", revealed, slash)
 	}
-	if len(contribs) != 1 || contribs[0].Card.ID() != card.SigilOfTheArknightBlue {
+	if len(contribs) != 1 || contribs[0].Card.ID() != ids.SigilOfTheArknightBlue {
 		t.Errorf("contribs = %+v, want one entry for the sigil", contribs)
 	}
 }
@@ -156,7 +157,7 @@ func TestProcessTriggersAtStartOfTurn_AttributesRevealedToContribution(t *testin
 	if len(contribs) != 1 {
 		t.Fatalf("contribs = %+v, want one entry", contribs)
 	}
-	if contribs[0].Revealed == nil || contribs[0].Revealed.ID() != card.AetherSlashRed {
+	if contribs[0].Revealed == nil || contribs[0].Revealed.ID() != ids.AetherSlashRed {
 		t.Errorf("contribs[0].Revealed = %v, want Aether Slash [R]", contribs[0].Revealed)
 	}
 }
@@ -254,7 +255,7 @@ func TestEvalOneTurn_SigilOfTheArknightRevealsIntoHand(t *testing.T) {
 
 	sigilPlayed := false
 	for _, a := range state.PrevTurnBestLine {
-		if a.Card.ID() == card.SigilOfTheArknightBlue && a.Role == hand.Attack {
+		if a.Card.ID() == ids.SigilOfTheArknightBlue && a.Role == hand.Attack {
 			sigilPlayed = true
 			break
 		}
@@ -280,7 +281,7 @@ func TestEvalOneTurn_SigilOfTheArknightRevealsIntoHand(t *testing.T) {
 			t.Errorf("turn 2 hand[%d] = %v, want %v", i, state.Hand[i], want)
 		}
 	}
-	if len(state.StartOfTurnGraveyard) != 1 || state.StartOfTurnGraveyard[0].ID() != card.SigilOfTheArknightBlue {
+	if len(state.StartOfTurnGraveyard) != 1 || state.StartOfTurnGraveyard[0].ID() != ids.SigilOfTheArknightBlue {
 		t.Errorf("StartOfTurnGraveyard = %v, want [Sigil of the Arknight]", state.StartOfTurnGraveyard)
 	}
 }
@@ -307,7 +308,7 @@ func TestEvalOneTurn_BlessingOfOccultCreatesRunesAtStartOfNextTurn(t *testing.T)
 	}
 	blessingPlayed := false
 	for _, a := range state.PrevTurnBestLine {
-		if a.Card.ID() == card.BlessingOfOccultRed && a.Role == hand.Attack {
+		if a.Card.ID() == ids.BlessingOfOccultRed && a.Role == hand.Attack {
 			blessingPlayed = true
 			break
 		}
@@ -322,7 +323,7 @@ func TestEvalOneTurn_BlessingOfOccultCreatesRunesAtStartOfNextTurn(t *testing.T)
 	if state.StartOfTurnTriggerDamage != 3 {
 		t.Errorf("StartOfTurnTriggerDamage = %d, want 3", state.StartOfTurnTriggerDamage)
 	}
-	if len(state.StartOfTurnGraveyard) != 1 || state.StartOfTurnGraveyard[0].ID() != card.BlessingOfOccultRed {
+	if len(state.StartOfTurnGraveyard) != 1 || state.StartOfTurnGraveyard[0].ID() != ids.BlessingOfOccultRed {
 		t.Errorf("StartOfTurnGraveyard = %v, want [Blessing [R]]", state.StartOfTurnGraveyard)
 	}
 }
@@ -358,7 +359,7 @@ func TestEvaluate_TriggersFromLastTurnSurfacesInBest(t *testing.T) {
 	// is the one where that trigger fires, so the aura has to be in play at the top.
 	foundBlessing := false
 	for _, a := range d.Stats.Best.Summary.StartOfTurnAuras {
-		if a.ID() == card.BlessingOfOccultRed {
+		if a.ID() == ids.BlessingOfOccultRed {
 			foundBlessing = true
 			break
 		}
@@ -425,10 +426,10 @@ func TestEvalOneTurn_MaleficIncantationOncePerTurnLimitsToOneRune(t *testing.T) 
 
 	maleficPlayed, hocusPlayed := false, false
 	for _, a := range state.PrevTurnBestLine {
-		if a.Card.ID() == card.MaleficIncantationRed && a.Role == hand.Attack {
+		if a.Card.ID() == ids.MaleficIncantationRed && a.Role == hand.Attack {
 			maleficPlayed = true
 		}
-		if a.Card.ID() == card.HocusPocusRed && a.Role == hand.Attack {
+		if a.Card.ID() == ids.HocusPocusRed && a.Role == hand.Attack {
 			hocusPlayed = true
 		}
 	}
@@ -473,7 +474,7 @@ func TestEvalOneTurn_RunebloodIncantationTicksAcrossTurns(t *testing.T) {
 
 	runebloodPlayed := false
 	for _, a := range state.PrevTurnBestLine {
-		if a.Card.ID() == card.RunebloodIncantationRed && a.Role == hand.Attack {
+		if a.Card.ID() == ids.RunebloodIncantationRed && a.Role == hand.Attack {
 			runebloodPlayed = true
 			break
 		}

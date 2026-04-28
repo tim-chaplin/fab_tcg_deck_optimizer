@@ -5,13 +5,16 @@
 
 package cards
 
-import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+import (
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
+)
 
 var oasisRespiteTypes = card.NewTypeSet(card.TypeGeneric, card.TypeInstant)
 
 type OasisRespiteRed struct{}
 
-func (OasisRespiteRed) ID() card.ID              { return card.OasisRespiteRed }
+func (OasisRespiteRed) ID() ids.CardID           { return ids.OasisRespiteRed }
 func (OasisRespiteRed) Name() string             { return "Oasis Respite" }
 func (OasisRespiteRed) Cost(*card.TurnState) int { return 1 }
 func (OasisRespiteRed) Pitch() int               { return 1 }
@@ -26,7 +29,7 @@ func (OasisRespiteRed) Play(s *card.TurnState, self *card.CardState) { s.LogPlay
 
 type OasisRespiteYellow struct{}
 
-func (OasisRespiteYellow) ID() card.ID              { return card.OasisRespiteYellow }
+func (OasisRespiteYellow) ID() ids.CardID           { return ids.OasisRespiteYellow }
 func (OasisRespiteYellow) Name() string             { return "Oasis Respite" }
 func (OasisRespiteYellow) Cost(*card.TurnState) int { return 1 }
 func (OasisRespiteYellow) Pitch() int               { return 2 }
@@ -41,7 +44,7 @@ func (OasisRespiteYellow) Play(s *card.TurnState, self *card.CardState) { s.LogP
 
 type OasisRespiteBlue struct{}
 
-func (OasisRespiteBlue) ID() card.ID              { return card.OasisRespiteBlue }
+func (OasisRespiteBlue) ID() ids.CardID           { return ids.OasisRespiteBlue }
 func (OasisRespiteBlue) Name() string             { return "Oasis Respite" }
 func (OasisRespiteBlue) Cost(*card.TurnState) int { return 1 }
 func (OasisRespiteBlue) Pitch() int               { return 3 }

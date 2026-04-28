@@ -5,13 +5,16 @@
 
 package cards
 
-import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+import (
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
+)
 
 var sapwoodElixirTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction)
 
 type SapwoodElixirRed struct{}
 
-func (SapwoodElixirRed) ID() card.ID              { return card.SapwoodElixirRed }
+func (SapwoodElixirRed) ID() ids.CardID           { return ids.SapwoodElixirRed }
 func (SapwoodElixirRed) Name() string             { return "Sapwood Elixir" }
 func (SapwoodElixirRed) Cost(*card.TurnState) int { return 1 }
 func (SapwoodElixirRed) Pitch() int               { return 1 }

@@ -11,7 +11,10 @@
 
 package cards
 
-import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+import (
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
+)
 
 var drowningDireTypes = card.NewTypeSet(card.TypeRuneblade, card.TypeAction, card.TypeAttack)
 
@@ -26,7 +29,7 @@ func drowningDirePlay(s *card.TurnState, self *card.CardState) {
 
 type DrowningDireRed struct{}
 
-func (DrowningDireRed) ID() card.ID              { return card.DrowningDireRed }
+func (DrowningDireRed) ID() ids.CardID           { return ids.DrowningDireRed }
 func (DrowningDireRed) Name() string             { return "Drowning Dire" }
 func (DrowningDireRed) Cost(*card.TurnState) int { return 2 }
 func (DrowningDireRed) Pitch() int               { return 1 }
@@ -44,7 +47,7 @@ func (DrowningDireRed) Play(s *card.TurnState, self *card.CardState) {
 
 type DrowningDireYellow struct{}
 
-func (DrowningDireYellow) ID() card.ID              { return card.DrowningDireYellow }
+func (DrowningDireYellow) ID() ids.CardID           { return ids.DrowningDireYellow }
 func (DrowningDireYellow) Name() string             { return "Drowning Dire" }
 func (DrowningDireYellow) Cost(*card.TurnState) int { return 2 }
 func (DrowningDireYellow) Pitch() int               { return 2 }
@@ -62,7 +65,7 @@ func (DrowningDireYellow) Play(s *card.TurnState, self *card.CardState) {
 
 type DrowningDireBlue struct{}
 
-func (DrowningDireBlue) ID() card.ID              { return card.DrowningDireBlue }
+func (DrowningDireBlue) ID() ids.CardID           { return ids.DrowningDireBlue }
 func (DrowningDireBlue) Name() string             { return "Drowning Dire" }
 func (DrowningDireBlue) Cost(*card.TurnState) int { return 2 }
 func (DrowningDireBlue) Pitch() int               { return 3 }

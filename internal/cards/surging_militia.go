@@ -5,13 +5,16 @@
 
 package cards
 
-import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+import (
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
+)
 
 var surgingMilitiaTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeAttack)
 
 type SurgingMilitiaRed struct{}
 
-func (SurgingMilitiaRed) ID() card.ID              { return card.SurgingMilitiaRed }
+func (SurgingMilitiaRed) ID() ids.CardID           { return ids.SurgingMilitiaRed }
 func (SurgingMilitiaRed) Name() string             { return "Surging Militia" }
 func (SurgingMilitiaRed) Cost(*card.TurnState) int { return 2 }
 func (SurgingMilitiaRed) Pitch() int               { return 1 }
@@ -28,7 +31,7 @@ func (c SurgingMilitiaRed) Play(s *card.TurnState, self *card.CardState) {
 
 type SurgingMilitiaYellow struct{}
 
-func (SurgingMilitiaYellow) ID() card.ID              { return card.SurgingMilitiaYellow }
+func (SurgingMilitiaYellow) ID() ids.CardID           { return ids.SurgingMilitiaYellow }
 func (SurgingMilitiaYellow) Name() string             { return "Surging Militia" }
 func (SurgingMilitiaYellow) Cost(*card.TurnState) int { return 2 }
 func (SurgingMilitiaYellow) Pitch() int               { return 2 }
@@ -45,7 +48,7 @@ func (c SurgingMilitiaYellow) Play(s *card.TurnState, self *card.CardState) {
 
 type SurgingMilitiaBlue struct{}
 
-func (SurgingMilitiaBlue) ID() card.ID              { return card.SurgingMilitiaBlue }
+func (SurgingMilitiaBlue) ID() ids.CardID           { return ids.SurgingMilitiaBlue }
 func (SurgingMilitiaBlue) Name() string             { return "Surging Militia" }
 func (SurgingMilitiaBlue) Cost(*card.TurnState) int { return 2 }
 func (SurgingMilitiaBlue) Pitch() int               { return 3 }

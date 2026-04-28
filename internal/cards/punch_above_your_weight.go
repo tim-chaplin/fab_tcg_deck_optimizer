@@ -5,13 +5,16 @@
 
 package cards
 
-import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+import (
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
+)
 
 var punchAboveYourWeightTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeAttack)
 
 type PunchAboveYourWeightRed struct{}
 
-func (PunchAboveYourWeightRed) ID() card.ID              { return card.PunchAboveYourWeightRed }
+func (PunchAboveYourWeightRed) ID() ids.CardID           { return ids.PunchAboveYourWeightRed }
 func (PunchAboveYourWeightRed) Name() string             { return "Punch Above Your Weight" }
 func (PunchAboveYourWeightRed) Cost(*card.TurnState) int { return 0 }
 func (PunchAboveYourWeightRed) Pitch() int               { return 1 }
@@ -28,7 +31,7 @@ func (c PunchAboveYourWeightRed) Play(s *card.TurnState, self *card.CardState) {
 
 type PunchAboveYourWeightYellow struct{}
 
-func (PunchAboveYourWeightYellow) ID() card.ID              { return card.PunchAboveYourWeightYellow }
+func (PunchAboveYourWeightYellow) ID() ids.CardID           { return ids.PunchAboveYourWeightYellow }
 func (PunchAboveYourWeightYellow) Name() string             { return "Punch Above Your Weight" }
 func (PunchAboveYourWeightYellow) Cost(*card.TurnState) int { return 0 }
 func (PunchAboveYourWeightYellow) Pitch() int               { return 2 }
@@ -45,7 +48,7 @@ func (c PunchAboveYourWeightYellow) Play(s *card.TurnState, self *card.CardState
 
 type PunchAboveYourWeightBlue struct{}
 
-func (PunchAboveYourWeightBlue) ID() card.ID              { return card.PunchAboveYourWeightBlue }
+func (PunchAboveYourWeightBlue) ID() ids.CardID           { return ids.PunchAboveYourWeightBlue }
 func (PunchAboveYourWeightBlue) Name() string             { return "Punch Above Your Weight" }
 func (PunchAboveYourWeightBlue) Cost(*card.TurnState) int { return 0 }
 func (PunchAboveYourWeightBlue) Pitch() int               { return 3 }

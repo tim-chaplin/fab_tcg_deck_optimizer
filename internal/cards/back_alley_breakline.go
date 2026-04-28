@@ -6,13 +6,16 @@
 
 package cards
 
-import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+import (
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
+)
 
 var backAlleyBreaklineTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeAttack)
 
 type BackAlleyBreaklineRed struct{}
 
-func (BackAlleyBreaklineRed) ID() card.ID              { return card.BackAlleyBreaklineRed }
+func (BackAlleyBreaklineRed) ID() ids.CardID           { return ids.BackAlleyBreaklineRed }
 func (BackAlleyBreaklineRed) Name() string             { return "Back Alley Breakline" }
 func (BackAlleyBreaklineRed) Cost(*card.TurnState) int { return 1 }
 func (BackAlleyBreaklineRed) Pitch() int               { return 1 }
@@ -29,7 +32,7 @@ func (c BackAlleyBreaklineRed) Play(s *card.TurnState, self *card.CardState) {
 
 type BackAlleyBreaklineYellow struct{}
 
-func (BackAlleyBreaklineYellow) ID() card.ID              { return card.BackAlleyBreaklineYellow }
+func (BackAlleyBreaklineYellow) ID() ids.CardID           { return ids.BackAlleyBreaklineYellow }
 func (BackAlleyBreaklineYellow) Name() string             { return "Back Alley Breakline" }
 func (BackAlleyBreaklineYellow) Cost(*card.TurnState) int { return 1 }
 func (BackAlleyBreaklineYellow) Pitch() int               { return 2 }
@@ -46,7 +49,7 @@ func (c BackAlleyBreaklineYellow) Play(s *card.TurnState, self *card.CardState) 
 
 type BackAlleyBreaklineBlue struct{}
 
-func (BackAlleyBreaklineBlue) ID() card.ID              { return card.BackAlleyBreaklineBlue }
+func (BackAlleyBreaklineBlue) ID() ids.CardID           { return ids.BackAlleyBreaklineBlue }
 func (BackAlleyBreaklineBlue) Name() string             { return "Back Alley Breakline" }
 func (BackAlleyBreaklineBlue) Cost(*card.TurnState) int { return 1 }
 func (BackAlleyBreaklineBlue) Pitch() int               { return 3 }

@@ -12,6 +12,7 @@ import (
 	"fmt"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
 )
 
 var healingBalmTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction)
@@ -25,7 +26,7 @@ func healingBalmPlay(s *card.TurnState, self *card.CardState, heal int) {
 
 type HealingBalmRed struct{}
 
-func (HealingBalmRed) ID() card.ID              { return card.HealingBalmRed }
+func (HealingBalmRed) ID() ids.CardID           { return ids.HealingBalmRed }
 func (HealingBalmRed) Name() string             { return "Healing Balm" }
 func (HealingBalmRed) Cost(*card.TurnState) int { return 0 }
 func (HealingBalmRed) Pitch() int               { return 1 }
@@ -39,7 +40,7 @@ func (HealingBalmRed) Play(s *card.TurnState, self *card.CardState) {
 
 type HealingBalmYellow struct{}
 
-func (HealingBalmYellow) ID() card.ID              { return card.HealingBalmYellow }
+func (HealingBalmYellow) ID() ids.CardID           { return ids.HealingBalmYellow }
 func (HealingBalmYellow) Name() string             { return "Healing Balm" }
 func (HealingBalmYellow) Cost(*card.TurnState) int { return 0 }
 func (HealingBalmYellow) Pitch() int               { return 2 }
@@ -53,7 +54,7 @@ func (HealingBalmYellow) Play(s *card.TurnState, self *card.CardState) {
 
 type HealingBalmBlue struct{}
 
-func (HealingBalmBlue) ID() card.ID              { return card.HealingBalmBlue }
+func (HealingBalmBlue) ID() ids.CardID           { return ids.HealingBalmBlue }
 func (HealingBalmBlue) Name() string             { return "Healing Balm" }
 func (HealingBalmBlue) Cost(*card.TurnState) int { return 0 }
 func (HealingBalmBlue) Pitch() int               { return 3 }

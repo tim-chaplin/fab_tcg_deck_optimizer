@@ -7,6 +7,7 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/cards"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/hero"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
 )
 
@@ -284,8 +285,8 @@ func TestEvalOneTurn_MidTurnDrawSansGoAgainStaysHeld(t *testing.T) {
 	if state.ArsenalCard == nil {
 		t.Fatalf("turn 2 arsenal is nil; want one of {Toughen Up, Aether Slash}")
 	}
-	arsenalIsTU := state.ArsenalCard.ID() == card.ToughenUpBlue
-	arsenalIsSlash := state.ArsenalCard.ID() == card.AetherSlashRed
+	arsenalIsTU := state.ArsenalCard.ID() == ids.ToughenUpBlue
+	arsenalIsSlash := state.ArsenalCard.ID() == ids.AetherSlashRed
 	if !arsenalIsTU && !arsenalIsSlash {
 		t.Errorf("turn 2 arsenal = %v, want Toughen Up Blue or Aether Slash Red", state.ArsenalCard)
 	}

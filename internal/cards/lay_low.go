@@ -4,11 +4,14 @@
 
 package cards
 
-import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+import (
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
+)
 
 type LayLowYellow struct{}
 
-func (LayLowYellow) ID() card.ID              { return card.LayLowYellow }
+func (LayLowYellow) ID() ids.CardID           { return ids.LayLowYellow }
 func (LayLowYellow) Name() string             { return "Lay Low" }
 func (LayLowYellow) Cost(*card.TurnState) int { return 0 }
 func (LayLowYellow) Pitch() int               { return 2 }

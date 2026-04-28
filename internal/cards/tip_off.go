@@ -5,13 +5,16 @@
 
 package cards
 
-import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+import (
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
+)
 
 var tipOffTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeAttack)
 
 type TipOffRed struct{}
 
-func (TipOffRed) ID() card.ID              { return card.TipOffRed }
+func (TipOffRed) ID() ids.CardID           { return ids.TipOffRed }
 func (TipOffRed) Name() string             { return "Tip-Off" }
 func (TipOffRed) Cost(*card.TurnState) int { return 1 }
 func (TipOffRed) Pitch() int               { return 1 }
@@ -26,7 +29,7 @@ func (c TipOffRed) Play(s *card.TurnState, self *card.CardState) { s.ApplyAndLog
 
 type TipOffYellow struct{}
 
-func (TipOffYellow) ID() card.ID              { return card.TipOffYellow }
+func (TipOffYellow) ID() ids.CardID           { return ids.TipOffYellow }
 func (TipOffYellow) Name() string             { return "Tip-Off" }
 func (TipOffYellow) Cost(*card.TurnState) int { return 1 }
 func (TipOffYellow) Pitch() int               { return 2 }
@@ -43,7 +46,7 @@ func (c TipOffYellow) Play(s *card.TurnState, self *card.CardState) {
 
 type TipOffBlue struct{}
 
-func (TipOffBlue) ID() card.ID              { return card.TipOffBlue }
+func (TipOffBlue) ID() ids.CardID           { return ids.TipOffBlue }
 func (TipOffBlue) Name() string             { return "Tip-Off" }
 func (TipOffBlue) Cost(*card.TurnState) int { return 1 }
 func (TipOffBlue) Pitch() int               { return 3 }

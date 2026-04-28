@@ -13,9 +13,9 @@ import (
 	"strings"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/cards"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/deck"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/hero"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/weapon"
 )
 
@@ -87,12 +87,12 @@ func Unmarshal(text string) (*deck.Deck, map[string]int, error) {
 			}
 		case "deck":
 			canon := fromFabraryCardName(name)
-			id, ok := cards.ByName(canon)
+			id, ok := registry.CardByName(canon)
 			if !ok {
 				skipped[canon] += qty
 				continue
 			}
-			c := cards.Get(id)
+			c := registry.GetCard(id)
 			for i := 0; i < qty; i++ {
 				cardList = append(cardList, c)
 			}

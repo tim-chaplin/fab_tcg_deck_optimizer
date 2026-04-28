@@ -9,13 +9,16 @@
 
 package cards
 
-import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+import (
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
+)
 
 var maleficTypes = card.NewTypeSet(card.TypeRuneblade, card.TypeAction, card.TypeAura)
 
 type MaleficIncantationRed struct{}
 
-func (MaleficIncantationRed) ID() card.ID              { return card.MaleficIncantationRed }
+func (MaleficIncantationRed) ID() ids.CardID           { return ids.MaleficIncantationRed }
 func (MaleficIncantationRed) Name() string             { return "Malefic Incantation" }
 func (MaleficIncantationRed) Cost(*card.TurnState) int { return 0 }
 func (MaleficIncantationRed) Pitch() int               { return 1 }
@@ -30,7 +33,7 @@ func (c MaleficIncantationRed) Play(s *card.TurnState, self *card.CardState) {
 
 type MaleficIncantationYellow struct{}
 
-func (MaleficIncantationYellow) ID() card.ID              { return card.MaleficIncantationYellow }
+func (MaleficIncantationYellow) ID() ids.CardID           { return ids.MaleficIncantationYellow }
 func (MaleficIncantationYellow) Name() string             { return "Malefic Incantation" }
 func (MaleficIncantationYellow) Cost(*card.TurnState) int { return 0 }
 func (MaleficIncantationYellow) Pitch() int               { return 2 }
@@ -45,7 +48,7 @@ func (c MaleficIncantationYellow) Play(s *card.TurnState, self *card.CardState) 
 
 type MaleficIncantationBlue struct{}
 
-func (MaleficIncantationBlue) ID() card.ID              { return card.MaleficIncantationBlue }
+func (MaleficIncantationBlue) ID() ids.CardID           { return ids.MaleficIncantationBlue }
 func (MaleficIncantationBlue) Name() string             { return "Malefic Incantation" }
 func (MaleficIncantationBlue) Cost(*card.TurnState) int { return 0 }
 func (MaleficIncantationBlue) Pitch() int               { return 3 }

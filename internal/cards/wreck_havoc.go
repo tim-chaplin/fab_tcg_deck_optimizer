@@ -6,13 +6,16 @@
 
 package cards
 
-import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+import (
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
+)
 
 var wreckHavocTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeAttack)
 
 type WreckHavocRed struct{}
 
-func (WreckHavocRed) ID() card.ID              { return card.WreckHavocRed }
+func (WreckHavocRed) ID() ids.CardID           { return ids.WreckHavocRed }
 func (WreckHavocRed) Name() string             { return "Wreck Havoc" }
 func (WreckHavocRed) Cost(*card.TurnState) int { return 2 }
 func (WreckHavocRed) Pitch() int               { return 1 }
@@ -29,7 +32,7 @@ func (WreckHavocRed) Play(s *card.TurnState, self *card.CardState) {
 
 type WreckHavocYellow struct{}
 
-func (WreckHavocYellow) ID() card.ID              { return card.WreckHavocYellow }
+func (WreckHavocYellow) ID() ids.CardID           { return ids.WreckHavocYellow }
 func (WreckHavocYellow) Name() string             { return "Wreck Havoc" }
 func (WreckHavocYellow) Cost(*card.TurnState) int { return 2 }
 func (WreckHavocYellow) Pitch() int               { return 2 }
@@ -46,7 +49,7 @@ func (WreckHavocYellow) Play(s *card.TurnState, self *card.CardState) {
 
 type WreckHavocBlue struct{}
 
-func (WreckHavocBlue) ID() card.ID              { return card.WreckHavocBlue }
+func (WreckHavocBlue) ID() ids.CardID           { return ids.WreckHavocBlue }
 func (WreckHavocBlue) Name() string             { return "Wreck Havoc" }
 func (WreckHavocBlue) Cost(*card.TurnState) int { return 2 }
 func (WreckHavocBlue) Pitch() int               { return 3 }

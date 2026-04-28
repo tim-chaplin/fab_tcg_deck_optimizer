@@ -6,11 +6,14 @@
 
 package cards
 
-import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+import (
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
+)
 
 type RiseAboveRed struct{}
 
-func (RiseAboveRed) ID() card.ID              { return card.RiseAboveRed }
+func (RiseAboveRed) ID() ids.CardID           { return ids.RiseAboveRed }
 func (RiseAboveRed) Name() string             { return "Rise Above" }
 func (RiseAboveRed) Cost(*card.TurnState) int { return 2 }
 func (RiseAboveRed) Pitch() int               { return 1 }
@@ -27,7 +30,7 @@ func (RiseAboveRed) Play(s *card.TurnState, self *card.CardState) {
 
 type RiseAboveYellow struct{}
 
-func (RiseAboveYellow) ID() card.ID              { return card.RiseAboveYellow }
+func (RiseAboveYellow) ID() ids.CardID           { return ids.RiseAboveYellow }
 func (RiseAboveYellow) Name() string             { return "Rise Above" }
 func (RiseAboveYellow) Cost(*card.TurnState) int { return 2 }
 func (RiseAboveYellow) Pitch() int               { return 2 }
@@ -44,7 +47,7 @@ func (RiseAboveYellow) Play(s *card.TurnState, self *card.CardState) {
 
 type RiseAboveBlue struct{}
 
-func (RiseAboveBlue) ID() card.ID              { return card.RiseAboveBlue }
+func (RiseAboveBlue) ID() ids.CardID           { return ids.RiseAboveBlue }
 func (RiseAboveBlue) Name() string             { return "Rise Above" }
 func (RiseAboveBlue) Cost(*card.TurnState) int { return 2 }
 func (RiseAboveBlue) Pitch() int               { return 3 }

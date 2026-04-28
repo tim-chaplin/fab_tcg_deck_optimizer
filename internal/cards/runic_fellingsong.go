@@ -9,7 +9,10 @@
 
 package cards
 
-import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+import (
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
+)
 
 var runicFellingsongTypes = card.NewTypeSet(card.TypeRuneblade, card.TypeAction, card.TypeAttack)
 
@@ -26,7 +29,7 @@ func runicFellingsongPlay(s *card.TurnState, self *card.CardState) {
 
 type RunicFellingsongRed struct{}
 
-func (RunicFellingsongRed) ID() card.ID              { return card.RunicFellingsongRed }
+func (RunicFellingsongRed) ID() ids.CardID           { return ids.RunicFellingsongRed }
 func (RunicFellingsongRed) Name() string             { return "Runic Fellingsong" }
 func (RunicFellingsongRed) Cost(*card.TurnState) int { return 3 }
 func (RunicFellingsongRed) Pitch() int               { return 1 }
@@ -40,7 +43,7 @@ func (RunicFellingsongRed) Play(s *card.TurnState, self *card.CardState) {
 
 type RunicFellingsongYellow struct{}
 
-func (RunicFellingsongYellow) ID() card.ID              { return card.RunicFellingsongYellow }
+func (RunicFellingsongYellow) ID() ids.CardID           { return ids.RunicFellingsongYellow }
 func (RunicFellingsongYellow) Name() string             { return "Runic Fellingsong" }
 func (RunicFellingsongYellow) Cost(*card.TurnState) int { return 3 }
 func (RunicFellingsongYellow) Pitch() int               { return 2 }
@@ -54,7 +57,7 @@ func (RunicFellingsongYellow) Play(s *card.TurnState, self *card.CardState) {
 
 type RunicFellingsongBlue struct{}
 
-func (RunicFellingsongBlue) ID() card.ID              { return card.RunicFellingsongBlue }
+func (RunicFellingsongBlue) ID() ids.CardID           { return ids.RunicFellingsongBlue }
 func (RunicFellingsongBlue) Name() string             { return "Runic Fellingsong" }
 func (RunicFellingsongBlue) Cost(*card.TurnState) int { return 3 }
 func (RunicFellingsongBlue) Pitch() int               { return 3 }
