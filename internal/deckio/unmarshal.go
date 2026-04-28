@@ -14,7 +14,7 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/hand"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/weapon"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/weapons"
 )
 
 // Unmarshal decodes JSON produced by Marshal into a *deck.Deck. Returns an error if any card,
@@ -32,7 +32,7 @@ func fromJSON(dj *DeckJSON) (*deck.Deck, error) {
 	if !ok {
 		return nil, fmt.Errorf("deckio: unknown hero %q", dj.Hero)
 	}
-	weapons := make([]weapon.Weapon, len(dj.Weapons))
+	weapons := make([]weapons.Weapon, len(dj.Weapons))
 	for i, name := range dj.Weapons {
 		w, ok := registry.WeaponByName(name)
 		if !ok {

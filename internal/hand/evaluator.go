@@ -7,8 +7,8 @@ package hand
 
 import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/hero"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/weapon"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/heroes"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/weapons"
 )
 
 // Best returns the optimal TurnSummary for the given hand against an opponent that will
@@ -24,25 +24,25 @@ import (
 // runechantCarryover is the Runechant token count carrying in from the previous turn.
 // TurnSummary.State.Runechants is the count at end of the chosen chain; feed it back as
 // the next turn's carryover.
-func Best(hero hero.Hero, weapons []weapon.Weapon, hand []card.Card, incomingDamage int, deck []card.Card, runechantCarryover int, arsenalCardIn card.Card) TurnSummary {
+func Best(hero heroes.Hero, weapons []weapons.Weapon, hand []card.Card, incomingDamage int, deck []card.Card, runechantCarryover int, arsenalCardIn card.Card) TurnSummary {
 	return sharedEvaluator.BestWithTriggers(hero, weapons, hand, incomingDamage, deck, runechantCarryover, arsenalCardIn, nil)
 }
 
 // BestWithTriggers is Best plus an explicit priorAuraTriggers input — the AuraTriggers
 // carrying in from the previous turn. Mid-chain triggers (Malefic Incantation's
 // TriggerAttackAction rune, etc.) may fire and contribute damage to this turn's Value.
-func BestWithTriggers(hero hero.Hero, weapons []weapon.Weapon, hand []card.Card, incomingDamage int, deck []card.Card, runechantCarryover int, arsenalCardIn card.Card, priorAuraTriggers []card.AuraTrigger) TurnSummary {
+func BestWithTriggers(hero heroes.Hero, weapons []weapons.Weapon, hand []card.Card, incomingDamage int, deck []card.Card, runechantCarryover int, arsenalCardIn card.Card, priorAuraTriggers []card.AuraTrigger) TurnSummary {
 	return sharedEvaluator.BestWithTriggers(hero, weapons, hand, incomingDamage, deck, runechantCarryover, arsenalCardIn, priorAuraTriggers)
 }
 
 // Best is the method form of the package-level Best.
-func (e *Evaluator) Best(hero hero.Hero, weapons []weapon.Weapon, hand []card.Card, incomingDamage int, deck []card.Card, runechantCarryover int, arsenalCardIn card.Card) TurnSummary {
+func (e *Evaluator) Best(hero heroes.Hero, weapons []weapons.Weapon, hand []card.Card, incomingDamage int, deck []card.Card, runechantCarryover int, arsenalCardIn card.Card) TurnSummary {
 	return e.BestWithTriggers(hero, weapons, hand, incomingDamage, deck, runechantCarryover, arsenalCardIn, nil)
 }
 
 // BestWithTriggers is the method form of the package-level BestWithTriggers. Returns a
 // TurnSummary with State.Log fully populated.
-func (e *Evaluator) BestWithTriggers(hero hero.Hero, weapons []weapon.Weapon, hand []card.Card, incomingDamage int, deck []card.Card, runechantCarryover int, arsenalCardIn card.Card, priorAuraTriggers []card.AuraTrigger) TurnSummary {
+func (e *Evaluator) BestWithTriggers(hero heroes.Hero, weapons []weapons.Weapon, hand []card.Card, incomingDamage int, deck []card.Card, runechantCarryover int, arsenalCardIn card.Card, priorAuraTriggers []card.AuraTrigger) TurnSummary {
 	return e.findBest(hero, weapons, hand, incomingDamage, deck, runechantCarryover, arsenalCardIn, priorAuraTriggers, false)
 }
 
@@ -50,7 +50,7 @@ func (e *Evaluator) BestWithTriggers(hero hero.Hero, weapons []weapon.Weapon, ha
 // non-Log carry-state fields; State.Log comes back empty. The deck-eval loop uses this for
 // every turn to skip the per-chain Log slice copy that dominates allocation bytes; only
 // turns that become the new deck-best are replayed via BestWithTriggers to recover Log.
-func (e *Evaluator) BestWithTriggersSkipLog(hero hero.Hero, weapons []weapon.Weapon, hand []card.Card, incomingDamage int, deck []card.Card, runechantCarryover int, arsenalCardIn card.Card, priorAuraTriggers []card.AuraTrigger) TurnSummary {
+func (e *Evaluator) BestWithTriggersSkipLog(hero heroes.Hero, weapons []weapons.Weapon, hand []card.Card, incomingDamage int, deck []card.Card, runechantCarryover int, arsenalCardIn card.Card, priorAuraTriggers []card.AuraTrigger) TurnSummary {
 	return e.findBest(hero, weapons, hand, incomingDamage, deck, runechantCarryover, arsenalCardIn, priorAuraTriggers, true)
 }
 
@@ -64,7 +64,7 @@ func (e *Evaluator) BestWithTriggersSkipLog(hero hero.Hero, weapons []weapon.Wea
 type Evaluator struct {
 	cachedBufs     *attackBufs
 	cachedHandSize int
-	cachedWeapons  []weapon.Weapon
+	cachedWeapons  []weapons.Weapon
 }
 
 // NewEvaluator returns a fresh Evaluator. Safe for concurrent use across goroutines as long

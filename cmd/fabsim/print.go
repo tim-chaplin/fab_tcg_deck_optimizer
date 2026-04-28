@@ -15,7 +15,7 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/deck"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/hand"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/weapon"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/weapons"
 )
 
 // printCardList writes the deck's card list in canonical "Card list:" form: one
@@ -602,7 +602,7 @@ func maxNameLen(cs []card.Card) int {
 // weaponNames joins the deck's weapon names with ", " for the summary's "Weapons:" line.
 // A single-weapon loadout prints the name bare; an empty loadout prints "none" so the column
 // stays filled rather than rendering as a trailing blank.
-func weaponNames(ws []weapon.Weapon) string {
+func weaponNames(ws []weapons.Weapon) string {
 	if len(ws) == 0 {
 		return "none"
 	}

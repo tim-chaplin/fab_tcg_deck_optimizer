@@ -12,7 +12,7 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/weapon"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/weapons"
 )
 
 // Mutation is one candidate single-slot change: the mutated Deck plus a human-readable summary
@@ -62,7 +62,7 @@ func weaponLoadoutMutations(d *Deck) []Mutation {
 	currentKey := weaponKey(d.Weapons)
 	type keyedLoadout struct {
 		key     string
-		weapons []weapon.Weapon
+		weapons []weapons.Weapon
 	}
 	sortedLoadouts := make([]keyedLoadout, 0, len(loadouts))
 	for _, l := range loadouts {

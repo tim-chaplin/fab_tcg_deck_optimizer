@@ -4,7 +4,7 @@
 // **Attack** At the beginning of your end phase, if Talishar, the Lost Prince has 3 or more rust
 // counters on it, destroy it."
 
-package weapon
+package weapons
 
 import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"

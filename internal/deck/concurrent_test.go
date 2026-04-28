@@ -10,7 +10,7 @@ import (
 	"time"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/hand"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/hero"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/heroes"
 )
 
 // TestEvaluateWith_ConcurrentNoMapPanic hammers deck.EvaluateWith from many goroutines with
@@ -25,7 +25,7 @@ func TestEvaluateWith_ConcurrentNoMapPanic(t *testing.T) {
 	}
 	const iterations = 25
 
-	baseline := Random(hero.Viserai{}, 40, 2, rand.New(rand.NewSource(42)), nil)
+	baseline := Random(heroes.Viserai{}, 40, 2, rand.New(rand.NewSource(42)), nil)
 
 	var wg sync.WaitGroup
 	for w := 0; w < numWorkers; w++ {
@@ -56,7 +56,7 @@ func TestEvaluateWith_ConcurrentNoMapPanic(t *testing.T) {
 // found is seed-dependent, so the test only asserts invariants.
 func TestIterateParallel_RunsWithoutPanic(t *testing.T) {
 	rng := rand.New(rand.NewSource(42))
-	baseline := Random(hero.Viserai{}, 40, 2, rng, nil)
+	baseline := Random(heroes.Viserai{}, 40, 2, rng, nil)
 	baseAvg := baseline.Evaluate(10, 0, rng).Mean()
 	mutations := AllMutations(baseline, 2, nil)
 	// Cap mutations so the test stays under a second; full list is thousands of entries.
@@ -103,7 +103,7 @@ func TestIterateParallel_RunsWithoutPanic(t *testing.T) {
 // not "cancel races vs shallow completion."
 func TestIterateParallel_AbortsOnContextCancel(t *testing.T) {
 	rng := rand.New(rand.NewSource(42))
-	baseline := Random(hero.Viserai{}, 40, 2, rng, nil)
+	baseline := Random(heroes.Viserai{}, 40, 2, rng, nil)
 	baseAvg := baseline.Evaluate(10, 0, rng).Mean()
 	mutations := AllMutations(baseline, 2, nil)
 
@@ -150,7 +150,7 @@ func TestIterateParallel_AbortsOnContextCancel(t *testing.T) {
 // "drain-queue-no-improvement-found" path.
 func TestIterateParallel_TerminatesWithNoImprovement(t *testing.T) {
 	rng := rand.New(rand.NewSource(42))
-	baseline := Random(hero.Viserai{}, 40, 2, rng, nil)
+	baseline := Random(heroes.Viserai{}, 40, 2, rng, nil)
 	mutations := AllMutations(baseline, 2, nil)
 	// Cap the mutation list so the test stays well under the hang-regression threshold even on
 	// slower CI runners. Full mutation list is thousands of entries.

@@ -4,10 +4,10 @@ import (
 	"testing"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/hero"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/heroes"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/weapon"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/weapons"
 )
 
 func TestAllMutations_CountsAndShape(t *testing.T) {
@@ -16,7 +16,7 @@ func TestAllMutations_CountsAndShape(t *testing.T) {
 	// counting math below holds. ArcanicCrackleRed and ArcanicSpikeRed are stable picks.
 	a := registry.GetCard(ids.ArcanicCrackleRed)
 	b := registry.GetCard(ids.ArcanicSpikeRed)
-	d := New(hero.Viserai{}, []weapon.Weapon{weapon.NebulaBlade{}}, []card.Card{a, a, b, b})
+	d := New(heroes.Viserai{}, []weapons.Weapon{weapons.NebulaBlade{}}, []card.Card{a, a, b, b})
 
 	muts := AllMutations(d, 2, nil)
 
@@ -60,7 +60,7 @@ func TestAllMutations_CountsAndShape(t *testing.T) {
 func TestAllMutations_OddCountsAllowed(t *testing.T) {
 	a := registry.GetCard(ids.ArcanicCrackleRed)
 	b := registry.GetCard(ids.ArcanicSpikeRed)
-	d := New(hero.Viserai{}, []weapon.Weapon{weapon.NebulaBlade{}}, []card.Card{a, a, b, b})
+	d := New(heroes.Viserai{}, []weapons.Weapon{weapons.NebulaBlade{}}, []card.Card{a, a, b, b})
 
 	// At maxCopies=3, each of the 2 in-deck cards (a, b) is below the cap, so "remove a, add b"
 	// (and the mirror) become legal. That's 2 more card mutations than the maxCopies=2 case.
@@ -102,7 +102,7 @@ func TestAllMutations_OddCountsAllowed(t *testing.T) {
 func TestAllMutations_PreservesSideboard(t *testing.T) {
 	a := registry.GetCard(ids.AetherSlashRed)
 	b := registry.GetCard(ids.ArcanicSpikeRed)
-	d := New(hero.Viserai{}, []weapon.Weapon{weapon.NebulaBlade{}}, []card.Card{a, a, b, b})
+	d := New(heroes.Viserai{}, []weapons.Weapon{weapons.NebulaBlade{}}, []card.Card{a, a, b, b})
 	d.Sideboard = []string{a.Name(), b.Name(), b.Name()}
 
 	muts := AllMutations(d, 2, nil)
@@ -129,7 +129,7 @@ func TestAllMutations_PreservesSideboard(t *testing.T) {
 func TestAllMutations_Deterministic(t *testing.T) {
 	a := registry.GetCard(ids.AetherSlashRed)
 	b := registry.GetCard(ids.ArcanicSpikeRed)
-	d := New(hero.Viserai{}, []weapon.Weapon{weapon.NebulaBlade{}}, []card.Card{a, a, b, b})
+	d := New(heroes.Viserai{}, []weapons.Weapon{weapons.NebulaBlade{}}, []card.Card{a, a, b, b})
 
 	first := AllMutations(d, 2, nil)
 	second := AllMutations(d, 2, nil)
@@ -156,7 +156,7 @@ func TestAllMutations_Deterministic(t *testing.T) {
 
 func TestAllMutations_NoDuplicateOfSource(t *testing.T) {
 	a := registry.GetCard(ids.ArcanicCrackleRed)
-	d := New(hero.Viserai{}, []weapon.Weapon{weapon.NebulaBlade{}}, []card.Card{a, a, a, a})
+	d := New(heroes.Viserai{}, []weapons.Weapon{weapons.NebulaBlade{}}, []card.Card{a, a, a, a})
 	srcKey := deckFingerprint(d)
 	for i, m := range AllMutations(d, 2, nil) {
 		if deckFingerprint(m.Deck) == srcKey {

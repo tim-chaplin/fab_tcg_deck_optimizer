@@ -1,6 +1,6 @@
 // Package weapon defines the Weapon interface for Flesh and Blood weapons (equipment, not
 // deck cards). A deck equips 0–2 weapons under the "2 × 1H or 1 × 2H" rule.
-package weapon
+package weapons
 
 import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"

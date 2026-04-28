@@ -15,7 +15,7 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/deck"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/weapon"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/weapons"
 )
 
 // Unmarshal parses fabrary-style deck text and returns a *deck.Deck plus a count-keyed map of
@@ -29,7 +29,7 @@ func Unmarshal(text string) (*deck.Deck, map[string]int, error) {
 	var (
 		heroName  string
 		section   string
-		weapons   []weapon.Weapon
+		weapons   []weapons.Weapon
 		cardList  []card.Card
 		sideboard []string
 		equipment []string

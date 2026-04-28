@@ -5,7 +5,7 @@
 // Simulation: modelled as an attack source costing 1 resource, dealing 3 damage. The
 // health-symmetry rider is ignored (irrelevant to single-turn damage evaluation).
 
-package weapon
+package weapons
 
 import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"

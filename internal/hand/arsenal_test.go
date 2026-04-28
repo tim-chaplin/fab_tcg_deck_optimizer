@@ -5,7 +5,7 @@ import (
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/cards"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/hero"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/heroes"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
 )
@@ -143,7 +143,7 @@ func TestBest_ArsenalInSmashingGoodTimeGatesOnlyArsenalCopy(t *testing.T) {
 		cards.SmashingGoodTimeRed{},
 		cards.HocusPocusRed{},
 	}
-	got := Best(hero.Viserai{}, nil, h, 0, nil, 0, cards.SmashingGoodTimeRed{})
+	got := Best(heroes.Viserai{}, nil, h, 0, nil, 0, cards.SmashingGoodTimeRed{})
 	if got.Value != 8 {
 		t.Fatalf("Value = %d, want 8 (only arsenal SGT grants +3). Roles=[%s]",
 			got.Value, FormatBestLine(got.BestLine))

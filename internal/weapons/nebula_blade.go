@@ -9,7 +9,7 @@
 // matches "always create a rune", but gating explicitly tracks any future retune of LikelyToHit
 // without a follow-up patch.
 
-package weapon
+package weapons
 
 import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"

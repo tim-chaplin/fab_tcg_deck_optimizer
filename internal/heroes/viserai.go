@@ -2,7 +2,7 @@
 // Text: "Whenever you play a Runeblade card, if you have played another 'non-attack' action card
 // this turn, create a Runechant token."
 
-package hero
+package heroes
 
 import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"

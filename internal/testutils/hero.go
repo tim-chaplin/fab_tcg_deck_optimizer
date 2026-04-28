@@ -1,6 +1,6 @@
 package testutils
 
-// Hero is a minimal hero.Hero used by tests in multiple packages (hand, deck). It is a
+// Hero is a minimal heroes.Hero used by tests in multiple packages (hand, deck). It is a
 // no-op hero — health 20, zero types, no OnCardPlayed bonus — with a configurable
 // Intelligence so tests can pin hand-size-dependent behaviour without pulling in a real
 // hero whose printed ability would perturb the measured value.
@@ -10,7 +10,7 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
 )
 
-// Hero is a minimal hero.Hero. Intel is the Intelligence (hand-draw size) the stub reports;
+// Hero is a minimal heroes.Hero. Intel is the Intelligence (hand-draw size) the stub reports;
 // every other method returns a fixed zero value so the caller measures hand / deck behaviour
 // in isolation from hero ability contributions.
 type Hero struct {

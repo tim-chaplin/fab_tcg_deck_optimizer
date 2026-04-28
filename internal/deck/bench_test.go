@@ -5,7 +5,7 @@ import (
 	"math/rand"
 	"testing"
 
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/hero"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/heroes"
 )
 
 // BenchmarkAnnealRound mimics anneal's per-round workload: build the mutation pool for a
@@ -45,7 +45,7 @@ func BenchmarkAnnealRound(b *testing.B) {
 	)
 
 	setupRNG := rand.New(rand.NewSource(42))
-	baseline := Random(hero.Viserai{}, deckSize, maxCopies, setupRNG, nil)
+	baseline := Random(heroes.Viserai{}, deckSize, maxCopies, setupRNG, nil)
 	all := AllMutations(baseline, maxCopies, nil)
 	if len(all) < mutationSampleSize {
 		b.Fatalf("mutation pool size %d < sample size %d; bench setup needs a larger deck", len(all), mutationSampleSize)
@@ -95,7 +95,7 @@ func BenchmarkIterateImprovements(b *testing.B) {
 	)
 
 	setupRNG := rand.New(rand.NewSource(42))
-	baseline := Random(hero.Viserai{}, deckSize, maxCopies, setupRNG, nil)
+	baseline := Random(heroes.Viserai{}, deckSize, maxCopies, setupRNG, nil)
 	baselineAvg := baseline.Evaluate(shuffles, incoming, setupRNG).Mean()
 
 	for n := 0; n < b.N; n++ {

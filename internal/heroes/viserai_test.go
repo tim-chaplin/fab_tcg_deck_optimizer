@@ -1,4 +1,4 @@
-package hero
+package heroes
 
 import (
 	"testing"

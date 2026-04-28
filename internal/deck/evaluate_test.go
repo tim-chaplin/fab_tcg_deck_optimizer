@@ -8,10 +8,10 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/cards"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/hand"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/hero"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/heroes"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/weapon"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/weapons"
 )
 
 // TestEvaluate_BestTurnStartingRunechantsIsPreHandCarryover pins the contract of
@@ -22,7 +22,7 @@ func TestEvaluate_BestTurnStartingRunechantsIsPreHandCarryover(t *testing.T) {
 	// Viserai has Intelligence 4. A 4-card deck gives exactly one hand per run, so the Best
 	// record always reflects that first hand — no previous turn ever existed.
 	read := registry.GetCard(ids.ReadTheRunesRed)
-	d := New(hero.Viserai{}, nil, []card.Card{read, read, read, read})
+	d := New(heroes.Viserai{}, nil, []card.Card{read, read, read, read})
 
 	// Seed doesn't matter (all cards identical), but fix it for determinism.
 	d.Evaluate(1, 0, rand.New(rand.NewSource(1)))
@@ -50,7 +50,7 @@ func TestEvaluate_BestTurnStartingRunechantsIsPreHandCarryover(t *testing.T) {
 // carried the mid-chain draw rather than just the partition's static slice.
 func TestEvaluate_BestTurnSnapshotsState(t *testing.T) {
 	snatch := registry.GetCard(ids.SnatchRed)
-	d := New(hero.Viserai{}, nil, []card.Card{snatch, snatch, snatch, snatch, snatch, snatch, snatch, snatch})
+	d := New(heroes.Viserai{}, nil, []card.Card{snatch, snatch, snatch, snatch, snatch, snatch, snatch, snatch})
 	d.Evaluate(1, 0, rand.New(rand.NewSource(1)))
 
 	if len(d.Stats.Best.Summary.BestLine) == 0 {
@@ -88,7 +88,7 @@ func TestEvaluate_PerCardMarginalCoversEveryHand(t *testing.T) {
 	snatch := registry.GetCard(ids.SnatchRed)
 	// 4 of each so Snatch isn't pinned to a single hand and the absent bucket gets exercised.
 	deckCards := []card.Card{read, read, read, read, snatch, snatch, snatch, snatch}
-	d := New(hero.Viserai{}, nil, deckCards)
+	d := New(heroes.Viserai{}, nil, deckCards)
 	d.Evaluate(20, 0, rand.New(rand.NewSource(1)))
 
 	if d.Stats.PerCardMarginal == nil {
@@ -117,7 +117,7 @@ func TestEvaluate_PerCardMarginalCoversEveryHand(t *testing.T) {
 // realistic test fixture.
 func TestEvaluate_PerCardMarginalAlwaysPresent(t *testing.T) {
 	read := registry.GetCard(ids.ReadTheRunesRed)
-	d := New(hero.Viserai{}, nil, []card.Card{read, read, read, read, read, read, read, read})
+	d := New(heroes.Viserai{}, nil, []card.Card{read, read, read, read, read, read, read, read})
 	d.Evaluate(5, 0, rand.New(rand.NewSource(1)))
 
 	m := d.Stats.PerCardMarginal[ids.ReadTheRunesRed]
@@ -194,7 +194,7 @@ func TestEvaluate_TerminatesAfterTwoCycles(t *testing.T) {
 	for i := range deckCards {
 		deckCards[i] = cards.ToughenUpBlue{}
 	}
-	d := New(hero.Viserai{}, []weapon.Weapon{weapon.ReapingBlade{}}, deckCards)
+	d := New(heroes.Viserai{}, []weapons.Weapon{weapons.ReapingBlade{}}, deckCards)
 	done := make(chan struct{})
 	go func() {
 		d.Evaluate(1, 0, rand.New(rand.NewSource(1)))
@@ -206,7 +206,7 @@ func TestEvaluate_TerminatesAfterTwoCycles(t *testing.T) {
 		t.Fatalf("Evaluate did not terminate within 2 seconds — infinite loop regression")
 	}
 	// Two cycles of a 40-card / 4-hand-size deck is exactly 20 hands.
-	handsPerCycle := len(deckCards) / hero.Viserai{}.Intelligence()
+	handsPerCycle := len(deckCards) / heroes.Viserai{}.Intelligence()
 	maxHands := 2 * handsPerCycle
 	if d.Stats.Hands != maxHands {
 		t.Errorf("Stats.Hands = %d, want exactly %d (steady-state pitched-pitch loop hits the cap)",
@@ -225,7 +225,7 @@ func TestEvaluateAdaptive_StopsBeforeMaxRunsWhenSEMet(t *testing.T) {
 	for len(deckCards) < 40 {
 		deckCards = append(deckCards, registry.GetCard(ids.ReadTheRunesBlue))
 	}
-	d := New(hero.Viserai{}, []weapon.Weapon{weapon.ReapingBlade{}}, deckCards)
+	d := New(heroes.Viserai{}, []weapons.Weapon{weapons.ReapingBlade{}}, deckCards)
 	stats := d.EvaluateAdaptive(0, rand.New(rand.NewSource(42)))
 	if stats.Runs >= adaptiveShufflesCap {
 		t.Errorf("Runs = %d; expected adaptive stop well before cap=%d", stats.Runs, adaptiveShufflesCap)
@@ -247,7 +247,7 @@ func TestEvaluateAdaptive_RespectsMaxRunsCapWhenSEUnreachable(t *testing.T) {
 	for len(deckCards) < 40 {
 		deckCards = append(deckCards, registry.GetCard(ids.ReadTheRunesBlue))
 	}
-	d := New(hero.Viserai{}, []weapon.Weapon{weapon.ReapingBlade{}}, deckCards)
+	d := New(heroes.Viserai{}, []weapons.Weapon{weapons.ReapingBlade{}}, deckCards)
 	// Negative targetSE is structurally unreachable — meanStandardError is always >= 0, so
 	// the `<= targetSE` predicate never fires. Loop should exhaust at maxRuns regardless of
 	// the deck's actual variance (which can be zero for trivially-identical-card decks).

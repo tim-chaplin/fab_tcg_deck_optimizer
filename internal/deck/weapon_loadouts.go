@@ -9,13 +9,13 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/weapon"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/weapons"
 )
 
 // sortedWeaponNames returns the weapon names in ascending order. The canonical form both
 // loadoutLabel and weaponKey build on so two loadouts with the same weapons in different orders
 // compare equal.
-func sortedWeaponNames(ws []weapon.Weapon) []string {
+func sortedWeaponNames(ws []weapons.Weapon) []string {
 	names := make([]string, len(ws))
 	for i, w := range ws {
 		names[i] = w.Name()
@@ -26,7 +26,7 @@ func sortedWeaponNames(ws []weapon.Weapon) []string {
 
 // loadoutLabel formats a weapon loadout for mutation descriptions, e.g. "[Nebula Blade]" or
 // "[Reaping Blade, Scepter of Pain]".
-func loadoutLabel(ws []weapon.Weapon) string {
+func loadoutLabel(ws []weapons.Weapon) string {
 	if len(ws) == 0 {
 		return "[]"
 	}
@@ -34,14 +34,14 @@ func loadoutLabel(ws []weapon.Weapon) string {
 }
 
 // weaponKey returns a comparable string for a weapon loadout so we can check equality.
-func weaponKey(ws []weapon.Weapon) string {
+func weaponKey(ws []weapons.Weapon) string {
 	return strings.Join(sortedWeaponNames(ws), ",")
 }
 
 // weaponLoadouts enumerates every legal equip combination from ws: each 2H weapon as a solo
 // loadout, plus every unordered pair of 1H weapons (including dual-wielding the same weapon).
-func weaponLoadouts(ws []weapon.Weapon) [][]weapon.Weapon {
-	var oneHand, twoHand []weapon.Weapon
+func weaponLoadouts(ws []weapons.Weapon) [][]weapons.Weapon {
+	var oneHand, twoHand []weapons.Weapon
 	for _, w := range ws {
 		if w.Hands() == 1 {
 			oneHand = append(oneHand, w)
@@ -49,19 +49,19 @@ func weaponLoadouts(ws []weapon.Weapon) [][]weapon.Weapon {
 			twoHand = append(twoHand, w)
 		}
 	}
-	var out [][]weapon.Weapon
+	var out [][]weapons.Weapon
 	for _, w := range twoHand {
-		out = append(out, []weapon.Weapon{w})
+		out = append(out, []weapons.Weapon{w})
 	}
 	for i := 0; i < len(oneHand); i++ {
 		for j := i; j < len(oneHand); j++ {
-			out = append(out, []weapon.Weapon{oneHand[i], oneHand[j]})
+			out = append(out, []weapons.Weapon{oneHand[i], oneHand[j]})
 		}
 	}
 	return out
 }
 
-func validateWeapons(weapons []weapon.Weapon) {
+func validateWeapons(weapons []weapons.Weapon) {
 	switch len(weapons) {
 	case 0, 1:
 		return

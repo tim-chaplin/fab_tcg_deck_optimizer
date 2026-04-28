@@ -7,7 +7,7 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/cards"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/weapon"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/weapons"
 )
 
 // pitchOnlyRed is a 0-cost, pitch-1, 0-attack, 0-defense red action: pure resource fodder for
@@ -131,7 +131,7 @@ func TestPlaySequence_BonusAttackStacksAcrossGranters(t *testing.T) {
 // not just attack action cards. Brandish, Razor Reflex's sword/dagger branch, Thrust, and
 // Visit the Blacksmith all target weapon attacks.
 func TestPlaySequence_BonusAttackAppliesToWeapon(t *testing.T) {
-	order := []card.Card{grantBonusAttackWeapon{n: 2}, weapon.ReapingBlade{}}
+	order := []card.Card{grantBonusAttackWeapon{n: 2}, weapons.ReapingBlade{}}
 	ctx := newSequenceContextForTest(stubHero, nil, nil, 10, 0, len(order))
 	dmg, _, _, legal := ctx.playSequence(order)
 	if !legal {

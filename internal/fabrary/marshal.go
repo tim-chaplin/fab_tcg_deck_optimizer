@@ -11,7 +11,7 @@ import (
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/deck"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/weapon"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/weapons"
 )
 
 // defaultFormat is emitted in the Format: header. Update when a new format comes online.
@@ -53,7 +53,7 @@ func Marshal(d *deck.Deck) string {
 	return b.String()
 }
 
-func weaponCounts(ws []weapon.Weapon) map[string]int {
+func weaponCounts(ws []weapons.Weapon) map[string]int {
 	m := make(map[string]int, len(ws))
 	for _, w := range ws {
 		m[w.Name()]++

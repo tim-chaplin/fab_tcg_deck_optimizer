@@ -92,7 +92,7 @@ func (p *CardState) EffectiveDefense() int {
 	return n
 }
 
-// Hero is the minimal hero profile card effects need. Narrower than hero.Hero to avoid an
+// Hero is the minimal hero profile card effects need. Narrower than heroes.Hero to avoid an
 // import cycle; package simstate holds the active hero for the run.
 type Hero interface {
 	Name() string

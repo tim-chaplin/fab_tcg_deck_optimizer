@@ -7,7 +7,7 @@ package hand
 
 import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/weapon"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/weapons"
 )
 
 // attackBufs holds pre-allocated buffers for the attack-evaluation pipeline (bestSequence →
@@ -70,7 +70,7 @@ type attackBufs struct {
 	ephemeralBacking    []card.EphemeralAttackTrigger
 }
 
-func newAttackBufs(handSize, weaponCount int, weapons []weapon.Weapon) *attackBufs {
+func newAttackBufs(handSize, weaponCount int, weapons []weapons.Weapon) *attackBufs {
 	// +1 reserves a slot for the arsenal-in card, which joins attackers or defenders when the
 	// enumerator plays it from arsenal. +maxDrawnExtensions leaves headroom for mid-turn-drawn
 	// cards that play as chain extensions — cheap cycling cards (cost 0, Go again, draws a
@@ -143,14 +143,14 @@ func newAttackBufs(handSize, weaponCount int, weapons []weapon.Weapon) *attackBu
 // interface equality is a stable identity check. For a single deck eval (10k shuffles, same
 // hand size + same weapons) this allocates once and reuses on every subsequent call —
 // attackBufs is the second-biggest allocator after the eval-time slice copies.
-func (e *Evaluator) getAttackBufs(handSize int, weapons []weapon.Weapon) *attackBufs {
+func (e *Evaluator) getAttackBufs(handSize int, weapons []weapons.Weapon) *attackBufs {
 	if e.cachedBufs != nil && e.cachedHandSize == handSize && sameWeapons(e.cachedWeapons, weapons) {
 		return e.cachedBufs
 	}
 	e.cachedBufs = newAttackBufs(handSize, len(weapons), weapons)
 	e.cachedHandSize = handSize
 	// Snapshot the weapons slice header — caller may reuse the slice across calls. The
-	// underlying weapon.Weapon values are zero-size structs; interface equality compares
+	// underlying weapons.Weapon values are zero-size structs; interface equality compares
 	// (type, nil-data) tuples that are stable across calls.
 	e.cachedWeapons = append(e.cachedWeapons[:0], weapons...)
 	return e.cachedBufs
@@ -159,7 +159,7 @@ func (e *Evaluator) getAttackBufs(handSize int, weapons []weapon.Weapon) *attack
 // sameWeapons reports whether two weapon slices contain the same weapons in the same order.
 // Element-wise interface equality works because every weapon implementation is a zero-size
 // struct, making interface values comparable and stable across calls.
-func sameWeapons(a, b []weapon.Weapon) bool {
+func sameWeapons(a, b []weapons.Weapon) bool {
 	if len(a) != len(b) {
 		return false
 	}

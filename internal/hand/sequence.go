@@ -9,8 +9,8 @@ import (
 	"fmt"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/hero"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/weapon"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/heroes"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/weapons"
 )
 
 // FormatLogEntry renders a LogEntry into its display string. Chain entries with N=0 drop
@@ -37,7 +37,7 @@ func FormatLogEntry(e card.LogEntry) string {
 // arsenalAtChainStart is the card sitting in the arsenal slot at the start of the chain — set
 // when the partition assigned arsenalCardIn the Arsenal role (it's staying), nil otherwise
 // (no arsenal-in, or arsenal-in is playing as Attack/Defend).
-func bestAttackWithWeapons(hero hero.Hero, weapons []weapon.Weapon, attackers, defenders, pitched, held, deck []card.Card, bufs *attackBufs, runechantCarryover, incomingDamage, blockTotal, arsenalInIdx, arsenalDefenderIdx int, arsenalAtChainStart card.Card, priorAuraTriggers []card.AuraTrigger, skipLog bool) (int, int, int, chainBudget, []string, CarryState, bool) {
+func bestAttackWithWeapons(hero heroes.Hero, weapons []weapons.Weapon, attackers, defenders, pitched, held, deck []card.Card, bufs *attackBufs, runechantCarryover, incomingDamage, blockTotal, arsenalInIdx, arsenalDefenderIdx int, arsenalAtChainStart card.Card, priorAuraTriggers []card.AuraTrigger, skipLog bool) (int, int, int, chainBudget, []string, CarryState, bool) {
 	ctx := &sequenceContext{
 		hero:                hero,
 		pitched:             pitched,
@@ -173,7 +173,7 @@ func bestAttackWithWeapons(hero hero.Hero, weapons []weapon.Weapon, attackers, d
 // permutations whose final residual breaks FaB's pitch-timing rule (excess >= max pitch means
 // one pitch could have been Held instead).
 type sequenceContext struct {
-	hero          hero.Hero
+	hero          heroes.Hero
 	pitched, deck []card.Card
 	// handStart is the partition's Held-role hand cards — what state.Hand starts as before
 	// the chain runs. Cards mutating state.Hand mid-chain (DrawOne, Moon Wish tutor) work

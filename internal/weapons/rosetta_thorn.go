@@ -5,7 +5,7 @@
 // Whenever you attack with Rosetta Thorn, if you've played an attack action card and a
 // 'non-attack' action card this turn, deal 2 arcane damage to target hero."
 
-package weapon
+package weapons
 
 import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"

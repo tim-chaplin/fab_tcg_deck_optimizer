@@ -2,7 +2,7 @@
 // Text: "Once per Turn Action - {r}{r}: Deal 1 arcane damage to any opposing target. Create a
 // Runechant token for each damage dealt this way."
 
-package weapon
+package weapons
 
 import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"

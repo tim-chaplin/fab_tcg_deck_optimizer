@@ -13,10 +13,10 @@ import (
 	"math/rand"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/hero"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/heroes"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/weapon"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/weapons"
 )
 
 // Deck is a hero, equipped weapons, a deck of cards, and the simulated hand-value stats.
@@ -29,8 +29,8 @@ import (
 // wants on their sideboard list (e.g. Nullrune cycle) aren't in the card registry, so a
 // registry-backed field would force the user's data through a lossy lookup.
 type Deck struct {
-	Hero      hero.Hero
-	Weapons   []weapon.Weapon
+	Hero      heroes.Hero
+	Weapons   []weapons.Weapon
 	Cards     []card.Card
 	Sideboard []string
 	Equipment []string
@@ -40,7 +40,7 @@ type Deck struct {
 // New constructs a Deck. Panics if the weapon loadout violates the "0–2 weapons; if 2, both 1H"
 // equipment rule. Sideboard and Equipment start empty; callers assign them directly when
 // carrying them over.
-func New(h hero.Hero, weapons []weapon.Weapon, cards []card.Card) *Deck {
+func New(h heroes.Hero, weapons []weapons.Weapon, cards []card.Card) *Deck {
 	validateWeapons(weapons)
 	return &Deck{Hero: h, Weapons: weapons, Cards: cards}
 }
@@ -141,7 +141,7 @@ func (d *Deck) ApplyDefaults() {
 // legal filters the card pool: only IDs for which legal(registry.GetCard(id)) returns true are
 // candidates. Pass nil for no filtering. Callers typically wire deckformat.Format.IsLegal
 // through here to restrict generation to a constructed format's banlist.
-func Random(h hero.Hero, size, maxCopies int, rng *rand.Rand, legal func(card.Card) bool) *Deck {
+func Random(h heroes.Hero, size, maxCopies int, rng *rand.Rand, legal func(card.Card) bool) *Deck {
 	if maxCopies < 1 {
 		panic(fmt.Sprintf("deck: Random requires maxCopies >= 1 (got %d)", maxCopies))
 	}

@@ -7,7 +7,7 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/cards"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/hand"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/hero"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/heroes"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
 )
@@ -102,7 +102,7 @@ func TestEvalOneTurn_SigilOfFyendalQueuesTrigger(t *testing.T) {
 		testutils.BlueAttack{},
 		testutils.BlueAttack{},
 	}
-	d := New(hero.Viserai{}, nil, deckCards)
+	d := New(heroes.Viserai{}, nil, deckCards)
 	state := d.EvalOneTurnForTesting(0, nil, []card.Card{sigil})
 
 	sigilPlayed := false
@@ -250,7 +250,7 @@ func TestEvalOneTurn_SigilOfTheArknightRevealsIntoHand(t *testing.T) {
 		reveal,
 		testutils.BlueAttack{},
 	}
-	d := New(hero.Viserai{}, nil, deckCards)
+	d := New(heroes.Viserai{}, nil, deckCards)
 	state := d.EvalOneTurnForTesting(0, nil, []card.Card{sigil})
 
 	sigilPlayed := false
@@ -300,7 +300,7 @@ func TestEvalOneTurn_BlessingOfOccultCreatesRunesAtStartOfNextTurn(t *testing.T)
 		testutils.BlueAttack{},
 		testutils.BlueAttack{},
 	}
-	d := New(hero.Viserai{}, nil, deckCards)
+	d := New(heroes.Viserai{}, nil, deckCards)
 	state := d.EvalOneTurnForTesting(0, nil, []card.Card{blessing, pitch})
 
 	if state.PrevTurnValue != 0 {
@@ -346,7 +346,7 @@ func TestEvaluate_TriggersFromLastTurnSurfacesInBest(t *testing.T) {
 	for i := 0; i < 6; i++ {
 		deckCards = append(deckCards, testutils.BlueAttack{})
 	}
-	d := New(hero.Viserai{}, nil, deckCards)
+	d := New(heroes.Viserai{}, nil, deckCards)
 	rng := rand.New(rand.NewSource(42))
 	d.Evaluate(20, 0, rng)
 
@@ -421,7 +421,7 @@ func TestEvalOneTurn_MaleficIncantationOncePerTurnLimitsToOneRune(t *testing.T) 
 		testutils.BlueAttack{},
 		testutils.BlueAttack{},
 	}
-	d := New(hero.Viserai{}, nil, deckCards)
+	d := New(heroes.Viserai{}, nil, deckCards)
 	state := d.EvalOneTurnForTesting(0, nil, []card.Card{malefic, hocus})
 
 	maleficPlayed, hocusPlayed := false, false
@@ -469,7 +469,7 @@ func TestEvalOneTurn_RunebloodIncantationTicksAcrossTurns(t *testing.T) {
 		testutils.BlueAttack{},
 		testutils.BlueAttack{},
 	}
-	d := New(hero.Viserai{}, nil, deckCards)
+	d := New(heroes.Viserai{}, nil, deckCards)
 	state := d.EvalOneTurnForTesting(0, nil, []card.Card{runeblood, pitch})
 
 	runebloodPlayed := false

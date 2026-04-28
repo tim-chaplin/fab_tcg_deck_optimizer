@@ -13,7 +13,7 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/deck"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/deckformat"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/hero"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/heroes"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/mydecks"
 )
 
@@ -57,7 +57,7 @@ func (c annealConfig) legalFilter() func(card.Card) bool {
 // defaultDeckNameFor returns the deck name when -deck isn't supplied, keyed by hero, format, and
 // -incoming. Different regimes produce different optimal decks, so each gets its own file to
 // avoid hill-climbing one regime's best under another regime's objective.
-func defaultDeckNameFor(h hero.Hero, f deckformat.Format, incoming int) string {
+func defaultDeckNameFor(h heroes.Hero, f deckformat.Format, incoming int) string {
 	return fmt.Sprintf("%s_%s_%d_incoming", strings.ToLower(h.Name()), f, incoming)
 }
 
@@ -101,7 +101,7 @@ func runAnnealCmd(args []string) {
 
 	name := *deckName
 	if name == "" {
-		name = defaultDeckNameFor(hero.Viserai{}, fmtValue, *incoming)
+		name = defaultDeckNameFor(heroes.Viserai{}, fmtValue, *incoming)
 	}
 	outPath, err := mydecks.Path(name)
 	if err != nil {
@@ -343,7 +343,7 @@ func prepareBaseline(cfg annealConfig, rng *rand.Rand) (*deck.Deck, float64) {
 	}
 	if best == nil {
 		fmt.Fprintf(os.Stderr, "no deck at %s; generating a random starting deck\n", cfg.outPath)
-		best = deck.Random(hero.Viserai{}, cfg.deckSize, cfg.maxCopies, rng, cfg.legalFilter())
+		best = deck.Random(heroes.Viserai{}, cfg.deckSize, cfg.maxCopies, rng, cfg.legalFilter())
 		bestAvg = baselineEvaluate(best, cfg, rng).Mean()
 		if err := writeDeck(best, cfg.outPath); err != nil {
 			die("%v", err)

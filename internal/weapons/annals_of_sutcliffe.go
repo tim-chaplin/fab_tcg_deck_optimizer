@@ -3,7 +3,7 @@
 // Text: "**Once per Turn Action** - {r}{r}{r}: Draw a card. If an attack action card and a
 // 'non-attack' action card were pitched this way, create a Runechant token."
 
-package weapon
+package weapons
 
 import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"

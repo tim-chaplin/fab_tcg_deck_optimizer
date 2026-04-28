@@ -7,9 +7,9 @@ import (
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/cards"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/hero"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/heroes"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/weapon"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/weapons"
 )
 
 // TestRole_String pins the human-readable labels for each Role value so display strings stay
@@ -78,7 +78,7 @@ func TestFormatBestTurn_AttackAndPitch(t *testing.T) {
 // label so the reader can distinguish damage-dealing chain steps from resource/setup plays.
 func TestFormatBestTurn_NonAttackCardUsesPlayLabel(t *testing.T) {
 	h := []card.Card{cards.MauvrionSkiesRed{}, cards.ShrillOfSkullformRed{}, cards.MaleficIncantationBlue{}}
-	got := Best(hero.Viserai{}, nil, h, 0, nil, 0, nil)
+	got := Best(heroes.Viserai{}, nil, h, 0, nil, 0, nil)
 	out := FormatBestTurn(got, 0)
 	if !strings.Contains(out, "Mauvrion Skies [R]: PLAY") {
 		t.Errorf("want Mauvrion (non-attack action) labelled PLAY, got:\n%s", out)
@@ -108,7 +108,7 @@ func TestFormatBestTurn_LogAttributesEachTriggerSeparately(t *testing.T) {
 	var bootstrap card.TurnState
 	cards.MaleficIncantationRed{}.Play(&bootstrap, &card.CardState{Card: cards.MaleficIncantationRed{}})
 	prior := bootstrap.AuraTriggers
-	got := BestWithTriggers(hero.Viserai{}, nil, h, 0, nil, 0, nil, prior)
+	got := BestWithTriggers(heroes.Viserai{}, nil, h, 0, nil, 0, nil, prior)
 	out := FormatBestTurn(got, 0)
 	// Trigger lines render indented (9 spaces) with no "(from <source>)" suffix — the
 	// indentation under the parent chain entry conveys attribution. Each line carries
@@ -148,7 +148,7 @@ func TestFormatBestTurn_LogSuppressesZeroTriggers(t *testing.T) {
 	// (the gate needs another non-attack action played first), no priors, no ephemerals — so
 	// the chain log should be exactly one card-Play line, no trigger spam.
 	h := []card.Card{testutils.RedAttack{}}
-	got := Best(hero.Viserai{}, nil, h, 0, nil, 0, nil)
+	got := Best(heroes.Viserai{}, nil, h, 0, nil, 0, nil)
 	if strings.Contains(FormatBestTurn(got, 0), "Viserai created") {
 		t.Errorf("hero trigger line shouldn't render when Viserai contributed 0; got:\n%s",
 			FormatBestTurn(got, 0))
@@ -299,7 +299,7 @@ func TestFormatBestTurn_ArsenalInPlayedOnChain(t *testing.T) {
 // swings from State.Log rather than SwungWeapons.
 func TestFormatBestTurn_WeaponSwingInChain(t *testing.T) {
 	h := []card.Card{testutils.RedAttack{}}
-	weapons := []weapon.Weapon{weapon.ReapingBlade{}}
+	weapons := []weapons.Weapon{weapons.ReapingBlade{}}
 	got := Best(stubHero, weapons, h, 0, nil, 0, nil)
 	out := FormatBestTurn(got, 0)
 	if !strings.Contains(out, "Reaping Blade: WEAPON ATTACK") {

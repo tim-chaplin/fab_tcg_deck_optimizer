@@ -5,10 +5,10 @@ import (
 	"testing"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/hero"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/heroes"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/weapon"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/weapons"
 )
 
 // TestRandom_FilterExcludesRejected confirms the legal predicate is actually applied to the
@@ -23,7 +23,7 @@ func TestRandom_FilterExcludesRejected(t *testing.T) {
 	legal := func(c card.Card) bool { return !bannedIDs[c.ID()] }
 	rng := rand.New(rand.NewSource(1))
 	for i := 0; i < 20; i++ {
-		d := Random(hero.Viserai{}, 40, 2, rng, legal)
+		d := Random(heroes.Viserai{}, 40, 2, rng, legal)
 		for j, c := range d.Cards {
 			if bannedIDs[c.ID()] {
 				t.Errorf("sample %d: card[%d] = %s was in the banlist", i, j, c.Name())
@@ -53,7 +53,7 @@ func TestLegalPool_SkipsNotImplemented(t *testing.T) {
 func TestRandom_ExcludesNotImplemented(t *testing.T) {
 	rng := rand.New(rand.NewSource(1))
 	for i := 0; i < 20; i++ {
-		d := Random(hero.Viserai{}, 40, 2, rng, nil)
+		d := Random(heroes.Viserai{}, 40, 2, rng, nil)
 		for j, c := range d.Cards {
 			if _, ok := c.(card.NotImplemented); ok {
 				t.Errorf("sample %d card[%d] = %s implements NotImplemented", i, j, c.Name())
@@ -93,7 +93,7 @@ func TestSanitizeNotImplemented_ReplacesTaggedSlotsAndKeepsSizeLegal(t *testing.
 	if _, t2 := safe.(card.NotImplemented); t2 {
 		t.Fatal("ArcanicCrackleRed gained a NotImplemented marker — pick another implemented keeper for this test")
 	}
-	d := New(hero.Viserai{}, []weapon.Weapon{weapon.NebulaBlade{}},
+	d := New(heroes.Viserai{}, []weapons.Weapon{weapons.NebulaBlade{}},
 		[]card.Card{safe, safe, tagged, tagged})
 
 	rng := rand.New(rand.NewSource(1))
@@ -135,7 +135,7 @@ func TestSanitizeNotImplemented_NoOpOnCleanDeck(t *testing.T) {
 	if _, tagged := a.(card.NotImplemented); tagged {
 		t.Fatal("ArcanicCrackleRed gained a NotImplemented marker — pick another implemented sentinel")
 	}
-	d := New(hero.Viserai{}, []weapon.Weapon{weapon.NebulaBlade{}}, []card.Card{a, a, a, a})
+	d := New(heroes.Viserai{}, []weapons.Weapon{weapons.NebulaBlade{}}, []card.Card{a, a, a, a})
 	before := append([]card.Card(nil), d.Cards...)
 
 	rng := rand.New(rand.NewSource(1))
@@ -160,7 +160,7 @@ func TestAllMutations_ExcludesNotImplementedAdditions(t *testing.T) {
 	if _, tagged := a.(card.NotImplemented); tagged {
 		t.Fatal("ArcanicCrackleRed gained a NotImplemented marker — pick another implemented sentinel for this test")
 	}
-	d := New(hero.Viserai{}, []weapon.Weapon{weapon.NebulaBlade{}}, []card.Card{a, a, a, a})
+	d := New(heroes.Viserai{}, []weapons.Weapon{weapons.NebulaBlade{}}, []card.Card{a, a, a, a})
 	for _, m := range AllMutations(d, 2, nil) {
 		for _, c := range m.Deck.Cards {
 			if _, ok := c.(card.NotImplemented); ok {
@@ -182,7 +182,7 @@ func TestAllMutations_FilterExcludesRejectedAdditions(t *testing.T) {
 
 	pr := registry.GetCard(ids.PlunderRunRed)
 	other := registry.GetCard(ids.AetherSlashRed)
-	d := New(hero.Viserai{}, []weapon.Weapon{weapon.NebulaBlade{}}, []card.Card{pr, pr, other, other})
+	d := New(heroes.Viserai{}, []weapons.Weapon{weapons.NebulaBlade{}}, []card.Card{pr, pr, other, other})
 
 	for i, m := range AllMutations(d, 2, legal) {
 		bannedIn := 0

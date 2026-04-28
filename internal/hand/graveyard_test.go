@@ -6,7 +6,7 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/weapon"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/weapons"
 )
 
 // TestGraveyard_AttackChainAppends: every attacker in the chain lands in state.Graveyard, in
@@ -33,7 +33,7 @@ func TestGraveyard_AttackChainAppends(t *testing.T) {
 // lands in the graveyard.
 func TestGraveyard_WeaponSwingDoesNotEnterGraveyard(t *testing.T) {
 	attack := testutils.RedAttack{}
-	swing := weapon.ReapingBlade{}
+	swing := weapons.ReapingBlade{}
 	order := []card.Card{attack, swing}
 	ctx := newSequenceContextForTest(stubHero, nil, nil, 1_000_000, 0, len(order))
 	if _, _, _, legal := ctx.playSequence(order); !legal {

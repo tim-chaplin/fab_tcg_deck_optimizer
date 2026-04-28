@@ -5,7 +5,7 @@ import (
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/cards"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/hero"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/heroes"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
 )
@@ -19,7 +19,7 @@ import (
 func TestPlaySequence_DrawDoesNotPoisonSubsequentPermutations(t *testing.T) {
 	top := testutils.RedAttack{}
 	deck := []card.Card{top, testutils.BlueAttack{}, testutils.RedAttack{}}
-	ctx := newSequenceContextForTest(hero.Viserai{}, nil, deck, 10, 0, 1)
+	ctx := newSequenceContextForTest(heroes.Viserai{}, nil, deck, 10, 0, 1)
 
 	// First permutation: Snatch fires, DrawOne pops the top of the deck into Hand.
 	_, _, _, _ = ctx.playSequence([]card.Card{cards.SnatchRed{}})
@@ -51,8 +51,8 @@ func TestBest_DrawRiderSeesActualDeck(t *testing.T) {
 	deckA := []card.Card{testutils.RedAttack{}}
 	deckB := []card.Card{testutils.BlueAttack{}}
 
-	resA := Best(hero.Viserai{}, nil, h, 0, deckA, 0, nil)
-	resB := Best(hero.Viserai{}, nil, h, 0, deckB, 0, nil)
+	resA := Best(heroes.Viserai{}, nil, h, 0, deckA, 0, nil)
+	resB := Best(heroes.Viserai{}, nil, h, 0, deckB, 0, nil)
 
 	containsID := func(cs []card.Card, id ids.CardID) bool {
 		for _, c := range cs {

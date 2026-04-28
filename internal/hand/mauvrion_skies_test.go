@@ -6,7 +6,7 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/cards"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/weapon"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/weapons"
 )
 
 // End-to-end coverage for Mauvrion Skies's EphemeralAttackTrigger. Each test plays a full
@@ -32,7 +32,7 @@ func TestBest_MauvrionAloneFizzlesWithoutDamage(t *testing.T) {
 // Total damage is just the weapon's own contribution.
 func TestBest_MauvrionBladeOnlyFizzles(t *testing.T) {
 	h := []card.Card{cards.MauvrionSkiesRed{}, testutils.YellowAttack{}}
-	weapons := []weapon.Weapon{weapon.ReapingBlade{}}
+	weapons := []weapons.Weapon{weapons.ReapingBlade{}}
 	got := Best(stubHero, weapons, h, 0, nil, 0, nil)
 	// Pitch YellowAttack (2 res) → play Mauvrion (cost 0, go again) → Blade swing (cost 1,
 	// 3 damage). Mauvrion's trigger doesn't match the weapon, so no Runechants.

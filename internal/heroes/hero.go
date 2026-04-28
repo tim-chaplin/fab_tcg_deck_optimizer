@@ -1,7 +1,7 @@
 // Package hero defines the Hero interface for Flesh and Blood heroes. A deck is built around
 // exactly one hero, whose class/talents gate which cards are legal and whose printed ability
 // shapes the simulation.
-package hero
+package heroes
 
 import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"

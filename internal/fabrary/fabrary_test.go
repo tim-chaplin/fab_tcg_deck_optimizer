@@ -8,14 +8,14 @@ import (
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/deck"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/hero"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/heroes"
 )
 
 // TestMarshalUnmarshalRoundTrip exercises a random deck through Marshal → Unmarshal and checks that
 // weapons, cards, and hero all come back intact (stats are intentionally not round-tripped).
 func TestMarshalUnmarshalRoundTrip(t *testing.T) {
 	rng := rand.New(rand.NewSource(1))
-	d := deck.Random(hero.Viserai{}, 40, 2, rng, nil)
+	d := deck.Random(heroes.Viserai{}, 40, 2, rng, nil)
 
 	text := Marshal(d)
 	got, skipped, err := Unmarshal(text)
@@ -45,7 +45,7 @@ func TestMarshalUnmarshalRoundTrip(t *testing.T) {
 // update consciously.
 func TestMarshalFormat(t *testing.T) {
 	rng := rand.New(rand.NewSource(1))
-	d := deck.Random(hero.Viserai{}, 40, 2, rng, nil)
+	d := deck.Random(heroes.Viserai{}, 40, 2, rng, nil)
 	text := Marshal(d)
 
 	wantPrefix := "Name: Viserai\nHero: Viserai\nFormat: Silver Age\n\nArena cards\n"
@@ -70,7 +70,7 @@ func TestMarshalFormat(t *testing.T) {
 // pool changes (e.g. cards getting tagged NotImplemented and dropping out of the random pool,
 // causing a seed-1 deck to roll different cards that collide with sideboard-default cap).
 func TestMarshalRendersAppliedDefaults(t *testing.T) {
-	d := &deck.Deck{Hero: hero.Viserai{}}
+	d := &deck.Deck{Hero: heroes.Viserai{}}
 	d.ApplyDefaults()
 	text := Marshal(d)
 
@@ -206,7 +206,7 @@ Deck cards
 // placed after Deck cards.
 func TestMarshalSideboardSection(t *testing.T) {
 	rng := rand.New(rand.NewSource(1))
-	d := deck.Random(hero.Viserai{}, 40, 2, rng, nil)
+	d := deck.Random(heroes.Viserai{}, 40, 2, rng, nil)
 
 	// Use Mauvrion Skies [R] — its pitch-color suffix exercises the toFabraryCardName
 	// lowercase conversion. Sideboard is a string list; names are stored in canonical form.

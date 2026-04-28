@@ -12,10 +12,10 @@ import (
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/hand"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/hero"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/heroes"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/simstate"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/weapon"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/weapons"
 )
 
 // Evaluate simulates runs shuffles of the deck. For each run it assembles successive hands of
@@ -267,8 +267,8 @@ func snapshotStartOfTurnAuras(queued []card.AuraTrigger) []card.Card {
 // State.Log empty for the SkipLog path; callers that want a populated Log (the rare new-
 // deck-best case) call replayBestForTurnWithLog with the same inputs.
 func runBestForTurn(
-	hero hero.Hero,
-	weapons []weapon.Weapon,
+	hero heroes.Hero,
+	weapons []weapons.Weapon,
 	h []card.Card,
 	incomingDamage int,
 	deck []card.Card,
@@ -291,8 +291,8 @@ func runBestForTurn(
 // run, plus a fully populated State.Log. Used only when a turn becomes the new deck-best,
 // so the replay cost amortises across the bulk of turns that don't.
 func replayBestForTurnWithLog(
-	hero hero.Hero,
-	weapons []weapon.Weapon,
+	hero heroes.Hero,
+	weapons []weapons.Weapon,
 	h []card.Card,
 	incomingDamage int,
 	deck []card.Card,
