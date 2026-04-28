@@ -92,6 +92,44 @@ func max1(n int) int {
 	return n
 }
 
+// TestEvalCache_ResetCache pins that ResetCache drops cached entries while leaving the
+// stats counters intact, so the iterate-mode worker pool can clear the cache between
+// mutations without losing the running hit/miss tally for diagnostics.
+func TestEvalCache_ResetCache(t *testing.T) {
+	ev := NewEvaluator()
+	hand := []Card{cards.MaleficIncantationBlue{}, cards.MaleficIncantationBlue{}}
+
+	// First call populates the cache (miss + store).
+	ev.Best(heroes.Viserai{}, nil, hand, 0, nil, 0, nil)
+	preStats := ev.CacheStats()
+	if preStats.Entries == 0 {
+		t.Fatalf("expected cache to have an entry after first Best call")
+	}
+
+	// Second call hits the cache.
+	ev.Best(heroes.Viserai{}, nil, hand, 0, nil, 0, nil)
+	if got := ev.CacheStats().Hits; got != preStats.Hits+1 {
+		t.Errorf("hits = %d, want %d (one new hit on second call)", got, preStats.Hits+1)
+	}
+
+	// Reset drops entries; stats counters survive.
+	ev.ResetCache()
+	post := ev.CacheStats()
+	if post.Entries != 0 {
+		t.Errorf("Entries = %d after ResetCache, want 0", post.Entries)
+	}
+	if post.Hits != preStats.Hits+1 || post.Misses != preStats.Misses {
+		t.Errorf("stats wiped by ResetCache: pre=%+v post=%+v", preStats, post)
+	}
+
+	// Same hand after reset is now a miss — confirms entries are actually gone, not just
+	// the count reading wrong.
+	ev.Best(heroes.Viserai{}, nil, hand, 0, nil, 0, nil)
+	if got := ev.CacheStats().Misses; got != post.Misses+1 {
+		t.Errorf("missed = %d, want %d (one new miss after reset)", got, post.Misses+1)
+	}
+}
+
 // TestEvalCache_PerHandEquivalence pins that for the same hand inputs, the cache-replay
 // path produces a TurnSummary whose Value matches a from-scratch search. Walks several
 // runs of a fixed-shape Viserai hand sequence, asserting Value equality on every Best

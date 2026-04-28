@@ -157,6 +157,11 @@ func runIterateWorker(
 		if ctx.Err() != nil {
 			return
 		}
+		// Drop the cache between mutations. Different mutations evaluate different decks
+		// whose hand multisets rarely overlap, so retaining entries from the previous
+		// deck would just bloat memory without saving search work — a worker that
+		// processes many mutations would grow unboundedly otherwise.
+		ev.ResetCache()
 		mut := cfg.mutations[i]
 		d := New(mut.Deck.Hero, mut.Deck.Weapons, mut.Deck.Cards)
 		var avg float64
