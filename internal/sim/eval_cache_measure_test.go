@@ -77,17 +77,12 @@ func TestEvalCache_HitRateMeasurement(t *testing.T) {
 	baseline.EvaluateWith(shuffles, incoming, rng, ev)
 
 	stats := ev.CacheStats()
-	total := stats.Hits + stats.Misses + stats.SkipsTriggers
+	total := stats.Hits + stats.Misses
 	t.Logf("cache stats over %d shuffles × ~10 turns/shuffle (~%d Best calls):", shuffles, total)
-	t.Logf("  hits:           %d (%.1f%%)", stats.Hits, 100*stats.HitRate())
-	t.Logf("  misses:         %d (%.1f%%)", stats.Misses, 100*float64(stats.Misses)/float64(max1(total)))
-	t.Logf("  skips-triggers: %d (%.1f%%)", stats.SkipsTriggers, 100*float64(stats.SkipsTriggers)/float64(max1(total)))
-	t.Logf("  uncacheable:    %d (%.1f%% of misses)", stats.Uncacheable, 100*float64(stats.Uncacheable)/float64(max1(stats.Misses)))
-	t.Logf("  entries:        %d", stats.Entries)
-	t.Logf("  potential hit rate with trigger support: %.1f%% (current %.1f%% + skips %.1f%%)",
-		100*stats.PotentialHitRateWithTriggers(),
-		100*stats.HitRate(),
-		100*float64(stats.SkipsTriggers)/float64(max1(total)))
+	t.Logf("  hits:        %d (%.1f%%)", stats.Hits, 100*stats.HitRate())
+	t.Logf("  misses:      %d (%.1f%%)", stats.Misses, 100*float64(stats.Misses)/float64(max1(total)))
+	t.Logf("  uncacheable: %d (%.1f%% of misses)", stats.Uncacheable, 100*float64(stats.Uncacheable)/float64(max1(stats.Misses)))
+	t.Logf("  entries:     %d", stats.Entries)
 }
 
 func max1(n int) int {
@@ -95,6 +90,44 @@ func max1(n int) int {
 		return 1
 	}
 	return n
+}
+
+// TestEvalCache_ResetCache pins that ResetCache drops cached entries while leaving the
+// stats counters intact, so the iterate-mode worker pool can clear the cache between
+// mutations without losing the running hit/miss tally for diagnostics.
+func TestEvalCache_ResetCache(t *testing.T) {
+	ev := NewEvaluator()
+	hand := []Card{cards.MaleficIncantationBlue{}, cards.MaleficIncantationBlue{}}
+
+	// First call populates the cache (miss + store).
+	ev.Best(heroes.Viserai{}, nil, hand, 0, nil, 0, nil)
+	preStats := ev.CacheStats()
+	if preStats.Entries == 0 {
+		t.Fatalf("expected cache to have an entry after first Best call")
+	}
+
+	// Second call hits the cache.
+	ev.Best(heroes.Viserai{}, nil, hand, 0, nil, 0, nil)
+	if got := ev.CacheStats().Hits; got != preStats.Hits+1 {
+		t.Errorf("hits = %d, want %d (one new hit on second call)", got, preStats.Hits+1)
+	}
+
+	// Reset drops entries; stats counters survive.
+	ev.ResetCache()
+	post := ev.CacheStats()
+	if post.Entries != 0 {
+		t.Errorf("Entries = %d after ResetCache, want 0", post.Entries)
+	}
+	if post.Hits != preStats.Hits+1 || post.Misses != preStats.Misses {
+		t.Errorf("stats wiped by ResetCache: pre=%+v post=%+v", preStats, post)
+	}
+
+	// Same hand after reset is now a miss — confirms entries are actually gone, not just
+	// the count reading wrong.
+	ev.Best(heroes.Viserai{}, nil, hand, 0, nil, 0, nil)
+	if got := ev.CacheStats().Misses; got != post.Misses+1 {
+		t.Errorf("missed = %d, want %d (one new miss after reset)", got, post.Misses+1)
+	}
 }
 
 // TestEvalCache_PerHandEquivalence pins that for the same hand inputs, the cache-replay

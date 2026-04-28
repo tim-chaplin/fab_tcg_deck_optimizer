@@ -11,10 +11,9 @@ import "fmt"
 
 // replayBest is the cache-hit body. Thin wrapper around evaluatePartition: project the
 // cached BestLine onto the new call's hand to fill rolesBuf, hand off to evaluatePartition
-// for the actual chain run, then assemble the TurnSummary from its outputs. The cache
-// search / store gate in findBest already guarantees priorAuraTriggers is empty and the
-// hand multiset matches the entry's, so the chain output here is byte-identical to what
-// the original cached call produced.
+// for the actual chain run, then assemble the TurnSummary from its outputs. The cache key
+// already locked the inputs (hand multiset, runechantCarryover, arsenalCardIn, auras) so
+// the chain output here is byte-identical to what the original cached call produced.
 //
 // One quirk in projecting the BestLine: the cached entry may tag a hand card with
 // Role=Arsenal (the post-hoc promotion target). Hand cards never have that role during
@@ -25,7 +24,7 @@ func (e *Evaluator) replayBest(
 	entry evalCacheEntry,
 	hero Hero, weapons []Weapon, hand []Card,
 	incomingDamage int, deck []Card, runechantCarryover int,
-	arsenalCardIn Card, skipLog bool,
+	arsenalCardIn Card, priorAuraTriggers []AuraTrigger, skipLog bool,
 ) TurnSummary {
 	n := len(hand)
 	totalN := n
@@ -65,7 +64,7 @@ func (e *Evaluator) replayBest(
 		hero, weapons, hand, deck, arsenalCardIn,
 		rolesBuf, n, bufs,
 		runechantCarryover, incomingDamage, defenseSum,
-		nil, skipLog,
+		priorAuraTriggers, skipLog,
 	)
 	if !ok {
 		// Infeasible-partition replay can't happen by construction — the cached entry

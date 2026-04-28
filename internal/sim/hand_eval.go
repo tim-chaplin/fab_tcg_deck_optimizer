@@ -85,6 +85,19 @@ func NewEvaluatorWithoutCache() *Evaluator {
 	return &Evaluator{}
 }
 
+// ResetCache drops the cached entries while preserving the stats counters. Use between
+// distinct decks when reusing one Evaluator across many of them (the iterate-mode worker
+// pool's per-mutation loop): entries from one deck rarely help another — different card
+// sets produce different hand multisets — so dropping them at deck boundaries caps memory
+// at one-deck's-worth of entries. No-op when caching is disabled.
+func (e *Evaluator) ResetCache() {
+	if e.cache != nil {
+		// Drop the map entirely; lookup() handles a nil entries map and store() lazily
+		// re-allocates on the next miss.
+		e.cache.entries = nil
+	}
+}
+
 // CacheStats returns a snapshot of the Evaluator's cache counters. Returns a zero-valued
 // CacheStats when the Evaluator was constructed without a cache.
 func (e *Evaluator) CacheStats() CacheStats {
@@ -92,11 +105,10 @@ func (e *Evaluator) CacheStats() CacheStats {
 		return CacheStats{}
 	}
 	return CacheStats{
-		Hits:          e.cache.hits,
-		Misses:        e.cache.misses,
-		SkipsTriggers: e.cache.skipsTriggers,
-		Uncacheable:   e.cache.uncacheable,
-		Entries:       len(e.cache.entries),
+		Hits:        e.cache.hits,
+		Misses:      e.cache.misses,
+		Uncacheable: e.cache.uncacheable,
+		Entries:     len(e.cache.entries),
 	}
 }
 
