@@ -8,15 +8,16 @@ package sim
 import ()
 
 func (e *Evaluator) findBest(hero Hero, weapons []Weapon, hand []Card, incomingDamage int, deck []Card, runechantCarryover int, arsenalCardIn Card, priorAuraTriggers []AuraTrigger, skipLog bool) TurnSummary {
-	// Cache fast-path. priorAuraTriggers != 0 disables the cache entirely — carryover
-	// triggers add a hidden state input the key doesn't model, and serializing
-	// AuraTrigger.Handler closures isn't worth the complexity. Cache disabled (e.cache nil)
-	// or hand too big to fingerprint also bypass.
+	// Cache fast-path. The cache is bypassed when disabled (e.cache nil) or when any of
+	// the inputs (hand, weapons, auras) overflows its fixed-size slot in the cache key.
+	// Overflow is rare in practice — adult hand sizes top out around 7, weapons at 2,
+	// auras at ~3 — but the fallback keeps correctness when an unusual deck shape pushes
+	// past those bounds.
 	var cacheKey evalCacheKey
-	cacheUsable := e.cache != nil && len(priorAuraTriggers) == 0
+	cacheUsable := e.cache != nil
 	if cacheUsable {
 		var keyOK bool
-		cacheKey, keyOK = makeCacheKey(hero, weapons, hand, runechantCarryover, arsenalCardIn)
+		cacheKey, keyOK = makeCacheKey(hero, weapons, hand, runechantCarryover, arsenalCardIn, priorAuraTriggers)
 		if !keyOK {
 			cacheUsable = false
 		}
@@ -24,11 +25,9 @@ func (e *Evaluator) findBest(hero Hero, weapons []Weapon, hand []Card, incomingD
 	if cacheUsable {
 		if entry, ok := e.cache.lookup(cacheKey); ok {
 			e.cache.hits++
-			return e.replayBest(entry, hero, weapons, hand, incomingDamage, deck, runechantCarryover, arsenalCardIn, skipLog)
+			return e.replayBest(entry, hero, weapons, hand, incomingDamage, deck, runechantCarryover, arsenalCardIn, priorAuraTriggers, skipLog)
 		}
 		e.cache.misses++
-	} else if e.cache != nil && len(priorAuraTriggers) > 0 {
-		e.cache.skipsTriggers++
 	}
 
 	n := len(hand)

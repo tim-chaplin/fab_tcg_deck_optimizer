@@ -77,17 +77,12 @@ func TestEvalCache_HitRateMeasurement(t *testing.T) {
 	baseline.EvaluateWith(shuffles, incoming, rng, ev)
 
 	stats := ev.CacheStats()
-	total := stats.Hits + stats.Misses + stats.SkipsTriggers
+	total := stats.Hits + stats.Misses
 	t.Logf("cache stats over %d shuffles × ~10 turns/shuffle (~%d Best calls):", shuffles, total)
-	t.Logf("  hits:           %d (%.1f%%)", stats.Hits, 100*stats.HitRate())
-	t.Logf("  misses:         %d (%.1f%%)", stats.Misses, 100*float64(stats.Misses)/float64(max1(total)))
-	t.Logf("  skips-triggers: %d (%.1f%%)", stats.SkipsTriggers, 100*float64(stats.SkipsTriggers)/float64(max1(total)))
-	t.Logf("  uncacheable:    %d (%.1f%% of misses)", stats.Uncacheable, 100*float64(stats.Uncacheable)/float64(max1(stats.Misses)))
-	t.Logf("  entries:        %d", stats.Entries)
-	t.Logf("  potential hit rate with trigger support: %.1f%% (current %.1f%% + skips %.1f%%)",
-		100*stats.PotentialHitRateWithTriggers(),
-		100*stats.HitRate(),
-		100*float64(stats.SkipsTriggers)/float64(max1(total)))
+	t.Logf("  hits:        %d (%.1f%%)", stats.Hits, 100*stats.HitRate())
+	t.Logf("  misses:      %d (%.1f%%)", stats.Misses, 100*float64(stats.Misses)/float64(max1(total)))
+	t.Logf("  uncacheable: %d (%.1f%% of misses)", stats.Uncacheable, 100*float64(stats.Uncacheable)/float64(max1(stats.Misses)))
+	t.Logf("  entries:     %d", stats.Entries)
 }
 
 func max1(n int) int {

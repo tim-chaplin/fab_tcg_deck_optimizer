@@ -92,11 +92,10 @@ func (e *Evaluator) CacheStats() CacheStats {
 		return CacheStats{}
 	}
 	return CacheStats{
-		Hits:          e.cache.hits,
-		Misses:        e.cache.misses,
-		SkipsTriggers: e.cache.skipsTriggers,
-		Uncacheable:   e.cache.uncacheable,
-		Entries:       len(e.cache.entries),
+		Hits:        e.cache.hits,
+		Misses:      e.cache.misses,
+		Uncacheable: e.cache.uncacheable,
+		Entries:     len(e.cache.entries),
 	}
 }
 

@@ -115,19 +115,17 @@ func evaluateAndPersist(outPath string, shuffles, incoming, maxCopies int, seed 
 // today — iterate / anneal use a worker pool with one Evaluator per worker, so a single
 // cache-stats line wouldn't capture the workload.
 func printCacheStats(s sim.CacheStats) {
-	total := s.Hits + s.Misses + s.SkipsTriggers
+	total := s.Hits + s.Misses
 	if total == 0 {
 		fmt.Fprintln(os.Stderr, "cache: no Best calls recorded")
 		return
 	}
-	fmt.Fprintf(os.Stderr, "cache: %d calls — %.1f%% hits (%d), %.1f%% misses (%d), %.1f%% skips-triggers (%d); %d entries; %.1f%% of misses uncacheable; potential hit rate w/ trigger support: %.1f%%\n",
+	fmt.Fprintf(os.Stderr, "cache: %d calls — %.1f%% hits (%d), %.1f%% misses (%d); %d entries; %.1f%% of misses uncacheable\n",
 		total,
 		100*s.HitRate(), s.Hits,
 		100*float64(s.Misses)/float64(total), s.Misses,
-		100*float64(s.SkipsTriggers)/float64(total), s.SkipsTriggers,
 		s.Entries,
 		100*safePct(s.Uncacheable, s.Misses),
-		100*s.PotentialHitRateWithTriggers(),
 	)
 }
 
