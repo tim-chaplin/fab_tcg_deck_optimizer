@@ -11,8 +11,8 @@ import (
 // flips AuraCreated, registers a TriggerStartOfTurn entry, and returns 0. The deck peek
 // happens when the sim fires the trigger next turn.
 func TestSigilOfTheArknight_PlayOnlySetsAuraCreated(t *testing.T) {
-	s := sim.TurnState{Deck: []sim.Card{testutils.RunebladeAttack{}}}
-	(SigilOfTheArknightBlue{}).Play(&s, &sim.CardState{Card: SigilOfTheArknightBlue{}})
+	s := sim.NewTurnState([]sim.Card{testutils.RunebladeAttack{}}, nil)
+	(SigilOfTheArknightBlue{}).Play(s, &sim.CardState{Card: SigilOfTheArknightBlue{}})
 	if got := s.Value; got != 0 {
 		t.Errorf("Play() = %d, want 0 (reveal deferred to trigger)", got)
 	}
@@ -32,15 +32,15 @@ func TestSigilOfTheArknight_TriggerRevealsAttackActionIntoHand(t *testing.T) {
 	var play sim.TurnState
 	(SigilOfTheArknightBlue{}).Play(&play, &sim.CardState{Card: SigilOfTheArknightBlue{}})
 	top := testutils.RunebladeAttack{}
-	next := sim.TurnState{Deck: []sim.Card{top, testutils.NonAttack{}}}
-	if got := play.AuraTriggers[0].Handler(&next); got != 0 {
+	next := sim.NewTurnState([]sim.Card{top, testutils.NonAttack{}}, nil)
+	if got := play.AuraTriggers[0].Handler(next); got != 0 {
 		t.Errorf("handler damage = %d, want 0 (tempo credited via Revealed, not damage)", got)
 	}
 	if len(next.Revealed) != 1 || next.Revealed[0] != top {
 		t.Errorf("Revealed = %v, want [%v] (top of post-draw deck)", next.Revealed, top)
 	}
-	if len(next.Deck) != 1 || next.Deck[0] != (testutils.NonAttack{}) {
-		t.Errorf("Deck = %v, want top popped leaving [testutils.NonAttack]", next.Deck)
+	if d := next.Deck(); len(d) != 1 || d[0] != (testutils.NonAttack{}) {
+		t.Errorf("Deck = %v, want top popped leaving [testutils.NonAttack]", d)
 	}
 }
 
@@ -49,15 +49,15 @@ func TestSigilOfTheArknight_TriggerRevealsAttackActionIntoHand(t *testing.T) {
 func TestSigilOfTheArknight_TriggerRevealsNonAttack(t *testing.T) {
 	var play sim.TurnState
 	(SigilOfTheArknightBlue{}).Play(&play, &sim.CardState{Card: SigilOfTheArknightBlue{}})
-	next := sim.TurnState{Deck: []sim.Card{testutils.Aura{}, testutils.RunebladeAttack{}}}
-	if got := play.AuraTriggers[0].Handler(&next); got != 0 {
+	next := sim.NewTurnState([]sim.Card{testutils.Aura{}, testutils.RunebladeAttack{}}, nil)
+	if got := play.AuraTriggers[0].Handler(next); got != 0 {
 		t.Errorf("handler damage = %d, want 0", got)
 	}
 	if next.Revealed != nil {
 		t.Errorf("Revealed = %v, want nil (non-attack top, no reveal)", next.Revealed)
 	}
-	if len(next.Deck) != 2 {
-		t.Errorf("Deck len = %d, want 2 (non-attack tops aren't moved)", len(next.Deck))
+	if d := next.Deck(); len(d) != 2 {
+		t.Errorf("Deck len = %d, want 2 (non-attack tops aren't moved)", len(d))
 	}
 }
 

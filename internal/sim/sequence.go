@@ -33,7 +33,7 @@ func FormatLogEntry(e LogEntry) string {
 // arsenalAtChainStart is the card sitting in the arsenal slot at the start of the chain — set
 // when the partition assigned arsenalCardIn the Arsenal role (it's staying), nil otherwise
 // (no arsenal-in, or arsenal-in is playing as Attack/Defend).
-func bestAttackWithWeapons(hero Hero, weapons []Weapon, attackers, defenders, pitched, held, deck []Card, bufs *attackBufs, runechantCarryover, incomingDamage, blockTotal, arsenalInIdx, arsenalDefenderIdx int, arsenalAtChainStart Card, priorAuraTriggers []AuraTrigger, skipLog bool) (int, int, int, chainBudget, []string, CarryState, bool) {
+func bestAttackWithWeapons(hero Hero, weapons []Weapon, attackers, defenders, pitched, held, deck []Card, bufs *attackBufs, runechantCarryover, incomingDamage, blockTotal, arsenalInIdx, arsenalDefenderIdx int, arsenalAtChainStart Card, priorAuraTriggers []AuraTrigger, skipLog bool) (int, int, int, chainBudget, []string, CarryState, bool, bool) {
 	ctx := &sequenceContext{
 		hero:                hero,
 		pitched:             pitched,
@@ -47,6 +47,7 @@ func bestAttackWithWeapons(hero Hero, weapons []Weapon, attackers, defenders, pi
 		arsenalInIdx:        arsenalInIdx,
 		priorAuraTriggers:   priorAuraTriggers,
 		skipLog:             skipLog,
+		cacheable:           true,
 	}
 	// Defenders fire independently of ordering and attack chain — DRs through Play, plain
 	// blocks as raw block credit — so their total Value contribution is constant across phase
@@ -55,8 +56,11 @@ func bestAttackWithWeapons(hero Hero, weapons []Weapon, attackers, defenders, pi
 	// by the per-card cap.
 	hasDRs := containsDefenseReaction(defenders)
 	var defenseDealt int
+	// defenseCacheable defaults to true — a partition with no defenders runs no DR Plays,
+	// so nothing in the defense phase reads hidden state.
+	defenseCacheable := true
 	if len(defenders) > 0 {
-		defenseDealt, bufs.defenseGravScratch = defendersDamage(defenders, pitched, deck, bufs.state, bufs.defenseGravScratch, &bufs.drCardStateScratch, incomingDamage, arsenalDefenderIdx)
+		defenseDealt, bufs.defenseGravScratch, defenseCacheable = defendersDamage(defenders, pitched, deck, bufs.state, bufs.defenseGravScratch, &bufs.drCardStateScratch, incomingDamage, arsenalDefenderIdx)
 	}
 
 	pitchedVals := bufs.pitchedValsScratch[:0]
@@ -154,9 +158,12 @@ func bestAttackWithWeapons(hero Hero, weapons []Weapon, attackers, defenders, pi
 	}
 
 	if !foundFeasible {
-		return 0, 0, 0, chainBudget{}, nil, CarryState{}, false
+		// No-feasible-line leaves still surface the defense-phase cacheable bit — DR Plays
+		// ran independently of the (rejected) attack chain so a DR that read graveyard
+		// poisons the result regardless of attack-feasibility.
+		return 0, 0, 0, chainBudget{}, nil, CarryState{}, false, defenseCacheable
 	}
-	return bestDealt, defenseDealt, bestLeftoverRunechants, bestBudget, bestSwung, bestCarry, true
+	return bestDealt, defenseDealt, bestLeftoverRunechants, bestBudget, bestSwung, bestCarry, true, ctx.cacheable && defenseCacheable
 }
 
 // sequenceContext carries the stable per-partition-leaf environment: hero (for OnCardPlayed
@@ -207,6 +214,13 @@ type sequenceContext struct {
 	// chains run with Log appends elided (Value still credited); the caller is replaying
 	// later with skipLog=false to materialise the printout.
 	skipLog bool
+	// cacheable is a sticky bit ANDed in after every permutation in bestSequence. Starts
+	// true on context construction; flips to false the first time a permutation's chain
+	// reports !state.IsCacheable() at end of chain — once a card in any sibling chain reads
+	// hidden state, the partition's output isn't safe to cache. Carries across phase /
+	// weapon masks within the same leaf because the solver explores all configurations and
+	// the cache key would have to disambiguate which the winner came from.
+	cacheable bool
 }
 
 // fireAttackActionTriggers walks state.AuraTriggers after an attack action card resolves
@@ -234,7 +248,10 @@ func fireAttackActionTriggers(state *TurnState, triggeringCard Card) {
 		t.FiredThisTurn = true
 		t.Count--
 		if t.Count <= 0 {
-			state.AddToGraveyard(t.Self)
+			// Direct field write — the framework destroying an exhausted aura is
+			// deterministic from cards played, not a card-driven content read, so no
+			// cacheable flip.
+			state.graveyard = append(state.graveyard, t.Self)
 			continue
 		}
 		dst = append(dst, t)
@@ -283,9 +300,9 @@ func (ctx *sequenceContext) resetStateForPermutation() {
 	bufs := ctx.bufs
 	*s = TurnState{
 		Hand:                    append(bufs.handBacking[:0], ctx.handStart...),
-		Deck:                    append(bufs.deckBacking[:0], ctx.deck...),
+		deck:                    append(bufs.deckBacking[:0], ctx.deck...),
 		Arsenal:                 ctx.arsenalAtChainStart,
-		Graveyard:               bufs.graveBacking[:0],
+		graveyard:               bufs.graveBacking[:0],
 		Banish:                  bufs.banishBacking[:0],
 		CardsPlayed:             bufs.cardsPlayedBacking[:0],
 		Log:                     bufs.logBacking[:0],
@@ -296,6 +313,9 @@ func (ctx *sequenceContext) resetStateForPermutation() {
 		AuraTriggers:            append(bufs.auraTriggersBacking[:0], ctx.priorAuraTriggers...),
 		EphemeralAttackTriggers: bufs.ephemeralBacking[:0],
 		SkipLog:                 ctx.skipLog,
+		// Permutation seed starts cacheable; the first card-driven deck / graveyard read
+		// in this permutation flips it to false. Set explicitly because zero-value is false.
+		cacheable: true,
 	}
 }
 
@@ -330,8 +350,17 @@ func (ctx *sequenceContext) bestSequence(attackers []Card) (int, int, bool) {
 	bestLeftoverRunechants := ctx.runechantCarryover
 	foundLegal := false
 	ctx.carryWinner = CarryState{}
+	state := ctx.bufs.state
 	eval := func() {
 		dmg, leftoverRunechants, _, legal := ctx.playSequenceWithMeta(n)
+		// AND in this permutation's cacheable status before the legality gate — even an
+		// illegal permutation that read hidden state during Play poisons the leaf, since
+		// the solver's pre-screens didn't catch it and a real run would have reached that
+		// read. Short-circuited once already poisoned to avoid the field read on chains
+		// that already failed cacheability.
+		if ctx.cacheable && !state.IsCacheable() {
+			ctx.cacheable = false
+		}
 		if !legal {
 			return
 		}
@@ -340,7 +369,7 @@ func (ctx *sequenceContext) bestSequence(attackers []Card) (int, int, bool) {
 			best = dmg
 			bestLeftoverRunechants = leftoverRunechants
 			foundLegal = true
-			ctx.carryWinner = snapshotCarry(ctx.bufs.state)
+			ctx.carryWinner = snapshotCarry(state)
 		}
 	}
 	eval()
@@ -482,9 +511,10 @@ func (ctx *sequenceContext) playSequenceWithMeta(n int) (damage int, leftoverRun
 		// Weapons and persistent card types (Auras, Items) stay in their zone when they
 		// resolve; any destroy event that should send them to the graveyard is a separate
 		// trigger. Everything else — Actions, Attack Reactions, Defense Reactions, Blocks,
-		// Instants — heads to the graveyard immediately.
+		// Instants — heads to the graveyard immediately. Direct field write — the framework
+		// driving the chain isn't a card-driven content read, so no cacheable flip.
 		if !m.types.PersistsInPlay() {
-			state.Graveyard = append(state.Graveyard, pc.Card)
+			state.graveyard = append(state.graveyard, pc.Card)
 		}
 
 		// Attacks and weapon swings consume all runechants in play. Damage isn't re-added: each
@@ -510,13 +540,15 @@ func (ctx *sequenceContext) playSequenceWithMeta(n int) (damage int, leftoverRun
 // snapshotCarry copies every persistent TurnState field that survives the turn boundary into
 // a CarryState. The slice copies are intentional: mid-chain state.* slices alias attackBufs
 // scratch storage and the next permutation will overwrite them. The deck loop adopts these
-// slices wholesale into the next-turn state.
+// slices wholesale into the next-turn state. Reads s.deck / s.graveyard directly so the
+// snapshot itself doesn't poison cacheable — the per-permutation cacheable check ran before
+// snapshotCarry, and resetStateForPermutation clears the bit before the next permutation.
 func snapshotCarry(s *TurnState) CarryState {
 	return CarryState{
 		Hand:         append([]Card(nil), s.Hand...),
-		Deck:         append([]Card(nil), s.Deck...),
+		Deck:         append([]Card(nil), s.deck...),
 		Arsenal:      s.Arsenal,
-		Graveyard:    append([]Card(nil), s.Graveyard...),
+		Graveyard:    append([]Card(nil), s.graveyard...),
 		Banish:       append([]Card(nil), s.Banish...),
 		Runechants:   s.Runechants,
 		AuraTriggers: append([]AuraTrigger(nil), s.AuraTriggers...),

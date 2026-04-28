@@ -58,8 +58,9 @@ func TestFireAttackActionTriggers_GraveyardsExhaustedAura(t *testing.T) {
 	if len(state.AuraTriggers) != 0 {
 		t.Errorf("AuraTriggers = %+v, want empty (Count hit zero)", state.AuraTriggers)
 	}
-	if len(state.Graveyard) != 1 || state.Graveyard[0] != aura {
-		t.Errorf("Graveyard = %v, want [aura]", state.Graveyard)
+	g := state.Graveyard()
+	if len(g) != 1 || g[0] != aura {
+		t.Errorf("Graveyard = %v, want [aura]", g)
 	}
 }
 

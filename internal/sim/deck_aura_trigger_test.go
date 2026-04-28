@@ -74,7 +74,7 @@ func TestProcessTriggersAtStartOfTurn_GraveyardsExhaustedAura(t *testing.T) {
 		Type:  TriggerStartOfTurn,
 		Count: 1,
 		Handler: func(s *TurnState) int {
-			seen = append([]Card(nil), s.Graveyard...)
+			seen = append([]Card(nil), s.Graveyard()...)
 			return 0
 		},
 	}

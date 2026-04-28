@@ -163,12 +163,10 @@ func formatBlockLine(a CardAssignment) string {
 // appendGroupedChainEntries. Returns the updated remaining-incoming counter so the caller
 // can thread it into the next DR.
 func appendDefenseReactionLines(out []string, a CardAssignment, defenders []Card, remaining int) ([]string, int) {
-	state := TurnState{
-		Graveyard:      append([]Card(nil), defenders...),
-		IncomingDamage: remaining,
-	}
+	state := NewTurnState(nil, append([]Card(nil), defenders...))
+	state.IncomingDamage = remaining
 	cs := CardState{Card: a.Card, FromArsenal: a.FromArsenal}
-	a.Card.Play(&state, &cs)
+	a.Card.Play(state, &cs)
 	return appendGroupedChainEntries(out, state.Log), state.IncomingDamage
 }
 

@@ -365,7 +365,11 @@ func processTriggersAtStartOfTurn(queued []AuraTrigger, postDrawDeck []Card) (
 	if len(queued) == 0 {
 		return queued[:0], nil, 0, 0, nil, nil
 	}
-	ts := TurnState{Deck: postDrawDeck}
+	// Start-of-turn trigger seed starts cacheable; reveal handlers like Sigil of the
+	// Arknight will flip it via PopDeckTop. The result isn't currently consumed (callers
+	// don't read ts.IsCacheable) but routing through NewTurnState keeps the per-state
+	// semantics consistent with the rest of the framework.
+	ts := NewTurnState(postDrawDeck, nil)
 	survivors = queued[:0]
 	for _, t := range queued {
 		// Re-arm the OncePerTurn gate before the start-of-turn fire so handlers that read
@@ -377,7 +381,7 @@ func processTriggersAtStartOfTurn(queued []AuraTrigger, postDrawDeck []Card) (
 		}
 		preReveal := len(ts.Revealed)
 		preLog := len(ts.Log)
-		d := t.Handler(&ts)
+		d := t.Handler(ts)
 		damage += d
 		// Attribute any newly-revealed card to this trigger so the best-turn printout can
 		// show what the handler drew (e.g. Sigil of the Arknight: "drew X into hand"). Taking
@@ -401,10 +405,12 @@ func processTriggersAtStartOfTurn(queued []AuraTrigger, postDrawDeck []Card) (
 			continue
 		}
 		// Aura destroyed — Self joins the start-of-turn graveyard so subsequent handlers see
-		// it in state.Graveyard.
-		ts.AddToGraveyard(t.Self)
+		// it via Graveyard(). Direct field write because this is framework-internal
+		// trigger bookkeeping, not card-driven, so the cacheable bit doesn't move; the
+		// trigger handler's own reads (if any) flipped it already.
+		ts.graveyard = append(ts.graveyard, t.Self)
 	}
-	return survivors, contribs, damage, ts.Runechants, ts.Revealed, ts.Graveyard
+	return survivors, contribs, damage, ts.Runechants, ts.Revealed, ts.graveyard
 }
 
 // applyTurnResult folds a completed turn's outcome into cross-turn state. The deck loop
