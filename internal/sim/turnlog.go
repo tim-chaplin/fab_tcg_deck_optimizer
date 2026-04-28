@@ -163,16 +163,10 @@ func formatBlockLine(a CardAssignment) string {
 // appendGroupedChainEntries. Returns the updated remaining-incoming counter so the caller
 // can thread it into the next DR.
 func appendDefenseReactionLines(out []string, a CardAssignment, defenders []Card, remaining int) ([]string, int) {
-	state := TurnState{
-		graveyard:      append([]Card(nil), defenders...),
-		IncomingDamage: remaining,
-		// Format-time DR replay; cacheable isn't consumed but seed it consistent with the
-		// other framework TurnState construction sites so a future reader doesn't get
-		// confused by an inconsistent default.
-		cacheable: true,
-	}
+	state := NewTurnState(nil, append([]Card(nil), defenders...))
+	state.IncomingDamage = remaining
 	cs := CardState{Card: a.Card, FromArsenal: a.FromArsenal}
-	a.Card.Play(&state, &cs)
+	a.Card.Play(state, &cs)
 	return appendGroupedChainEntries(out, state.Log), state.IncomingDamage
 }
 
