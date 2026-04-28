@@ -19,7 +19,12 @@ package sim
 //     CarryState the original search produced (Best is deterministic given inputs).
 //  3. Build the TurnSummary: copy BestLine roles, attach SwungWeapons, adopt CarryState,
 //     re-do the post-hoc arsenal promotion when needed.
-func (e *Evaluator) replayBest(entry evalCacheEntry, hero Hero, weapons []Weapon, hand []Card, incomingDamage int, deck []Card, runechantCarryover int, arsenalCardIn Card, skipLog bool) TurnSummary {
+func (e *Evaluator) replayBest(
+	entry evalCacheEntry,
+	hero Hero, weapons []Weapon, hand []Card,
+	incomingDamage int, deck []Card, runechantCarryover int,
+	arsenalCardIn Card, skipLog bool,
+) TurnSummary {
 	n := len(hand)
 	totalN := n
 	if arsenalCardIn != nil {
@@ -199,7 +204,11 @@ func mapCachedRolesToHand(cachedLine []CardAssignment, hand []Card, arsenalCardI
 // as a fallback from replayBest when the cached entry can't be projected onto the new
 // call's hand (a should-never-happen invariant violation we recover from rather than
 // panic). Disabling the cache for this one call avoids re-storing the same entry.
-func (e *Evaluator) findBestUncached(hero Hero, weapons []Weapon, hand []Card, incomingDamage int, deck []Card, runechantCarryover int, arsenalCardIn Card, priorAuraTriggers []AuraTrigger, skipLog bool) TurnSummary {
+func (e *Evaluator) findBestUncached(
+	hero Hero, weapons []Weapon, hand []Card,
+	incomingDamage int, deck []Card, runechantCarryover int,
+	arsenalCardIn Card, priorAuraTriggers []AuraTrigger, skipLog bool,
+) TurnSummary {
 	saved := e.cache
 	e.cache = nil
 	defer func() { e.cache = saved }()

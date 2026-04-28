@@ -337,12 +337,10 @@ func (ctx *sequenceContext) bestSequence(attackers []Card) (int, int, bool) {
 		if ctx.hasAttackPitches && ctx.resourceBudget >= ctx.maxAttackPitch {
 			return 0, 0, false
 		}
-		// Seed ctx.carryWinner from a freshly-reset state so the empty-chain leaf surfaces a
-		// CarryState whose Hand reflects the held cards. The miss-path findBest used to rely
-		// on the seeded best.State for this case (beatsBest filtered out the all-Held leaf),
-		// but the cache-replay path adopts ctx.carryWinner directly and needs a correctly
-		// populated snapshot. Reset+snapshot mirrors the per-permutation work done inside
-		// eval() for n>0 chains.
+		// Empty-chain leaves still need a populated CarryState — the cache-replay path
+		// adopts ctx.carryWinner directly and the snapshot must reflect the held cards in
+		// state.Hand so post-hoc arsenal promotion has something to pick from. Reset+snapshot
+		// mirrors the per-permutation work eval() does for n>0 chains.
 		ctx.resetStateForPermutation()
 		ctx.carryWinner = snapshotCarry(ctx.bufs.state)
 		return 0, ctx.runechantCarryover, true

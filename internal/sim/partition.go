@@ -492,3 +492,4 @@ func containsDefenseReaction(cards []Card) bool {
 	}
 	return false
 }
+

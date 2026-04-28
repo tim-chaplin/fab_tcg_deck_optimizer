@@ -122,7 +122,10 @@ func newEvalCache() *evalCache {
 // slice header) and bestAttackWithWeapons enumerates weapon masks in slice order; reordering
 // would still produce the same Value but the cached BestLine's swung-weapon names would
 // drift, so we just preserve the input order.
-func makeCacheKey(hero Hero, weapons []Weapon, hand []Card, incomingDamage, runechantCarryover int, arsenalCardIn Card) (evalCacheKey, bool) {
+func makeCacheKey(
+	hero Hero, weapons []Weapon, hand []Card,
+	incomingDamage, runechantCarryover int, arsenalCardIn Card,
+) (evalCacheKey, bool) {
 	if len(hand) > maxCachedHandSize || len(weapons) > maxCachedWeapons {
 		return evalCacheKey{}, false
 	}

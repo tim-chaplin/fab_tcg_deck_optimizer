@@ -14,6 +14,7 @@ import (
 
 	. "github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/cards"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/heroes"
 )
 
@@ -57,6 +58,74 @@ func max1(n int) int {
 		return 1
 	}
 	return n
+}
+
+// TestEvalCache_PerHandEquivalence pins that for the same hand inputs, the cache-replay
+// path produces a TurnSummary whose Value matches a from-scratch search. Walks several
+// runs of a fixed-shape Viserai hand sequence, asserting Value equality on every Best
+// call. This is the unit-level equivalence — the deck-eval-loop integration test below
+// catches the same drift through the aggregate Stats.
+func TestEvalCache_PerHandEquivalence(t *testing.T) {
+	hands := [][]Card{
+		{cards.SkyFireLanternsRed{}, cards.MaleficIncantationBlue{}},
+		{cards.MoonWishYellow{}, cards.FlyingHighRed{}},
+		{cards.RavenousRabbleRed{}, cards.RavenousRabbleRed{}},
+	}
+	deck := []Card{cards.MaleficIncantationBlue{}, cards.SunKissRed{}}
+	cachedEv := NewEvaluator()
+	freshEv := NewEvaluatorWithoutCache()
+	for _, h := range hands {
+		// Run twice to exercise cache hit on the second invocation.
+		for i := 0; i < 2; i++ {
+			cached := cachedEv.Best(heroes.Viserai{}, nil, h, 0, deck, 0, nil)
+			fresh := freshEv.Best(heroes.Viserai{}, nil, h, 0, deck, 0, nil)
+			if cached.Value != fresh.Value {
+				t.Errorf("hand=%v iter=%d: cached.Value=%d fresh.Value=%d", h, i, cached.Value, fresh.Value)
+			}
+		}
+	}
+}
+
+// TestEvalCache_EquivalenceWithUncached pins that the cache-replay path produces summary
+// numbers WITHIN A SMALL TOLERANCE of a from-scratch search. The cache stores the winning
+// partition's role multiset; replay applies that multiset to the new call. When multiple
+// optimal partitions tie on Value/leftoverRunechants/futureValuePlayed/willOccupy, the
+// from-scratch search picks the FIRST in iteration order (which depends on input hand
+// order). Replay reproduces the cached multiset, which may differ from what fresh search
+// would pick on a same-multiset hand in a different positional order. Both are valid
+// optima — same Value for that turn — but the BestLine multiset can differ, which
+// cascades through the deck-eval loop (different held / arsenal cards into the next turn,
+// different next-hand multiset, different next-turn Value). Empirically the drift is
+// tiny — order-of-1-Value over 100 shuffles on a Viserai deck — so we tolerate a small
+// percentage gap.
+func TestEvalCache_EquivalenceWithUncached(t *testing.T) {
+	const (
+		deckSize  = 40
+		maxCopies = 2
+		incoming  = 7
+		shuffles  = 100
+		// driftTolerance bounds the per-turn-mean absolute difference. Empirically <0.001
+		// for the workloads we care about; 0.05 leaves substantial headroom while still
+		// catching a real correctness regression (which would be orders of magnitude larger).
+		driftTolerance = 0.05
+	)
+	setupRNG := rand.New(rand.NewSource(123))
+	baseline := Random(heroes.Viserai{}, deckSize, maxCopies, setupRNG, nil)
+
+	cached := New(baseline.Hero, baseline.Weapons, baseline.Cards)
+	cached.EvaluateWith(shuffles, incoming, rand.New(rand.NewSource(99)), NewEvaluator())
+
+	uncached := New(baseline.Hero, baseline.Weapons, baseline.Cards)
+	uncached.EvaluateWith(shuffles, incoming, rand.New(rand.NewSource(99)), NewEvaluatorWithoutCache())
+
+	if cached.Stats.Hands != uncached.Stats.Hands {
+		t.Errorf("Hands: cached=%d uncached=%d", cached.Stats.Hands, uncached.Stats.Hands)
+	}
+	drift := cached.Stats.Mean() - uncached.Stats.Mean()
+	if drift < -driftTolerance || drift > driftTolerance {
+		t.Errorf("mean drift %.6f exceeds tolerance %.6f (cached=%.6f uncached=%.6f)",
+			drift, driftTolerance, cached.Stats.Mean(), uncached.Stats.Mean())
+	}
 }
 
 // BenchmarkEvalCache_SingleDeck compares one full Evaluate of a fixed-shape Viserai deck
