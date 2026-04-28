@@ -1,8 +1,9 @@
-// Package stubs provides a generic stub Hero implementation used by tests in multiple packages
-// (hand, deck). It is a no-op hero — health 20, zero types, no OnCardPlayed bonus — with a
-// configurable Intelligence so tests can pin hand-size-dependent behaviour without pulling in
-// a real hero whose printed ability would perturb the measured value.
-package stubs
+package testutils
+
+// Hero is a minimal hero.Hero used by tests in multiple packages (hand, deck). It is a
+// no-op hero — health 20, zero types, no OnCardPlayed bonus — with a configurable
+// Intelligence so tests can pin hand-size-dependent behaviour without pulling in a real
+// hero whose printed ability would perturb the measured value.
 
 import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
@@ -17,7 +18,7 @@ type Hero struct {
 }
 
 func (Hero) ID() hero.ID                                 { return hero.Invalid }
-func (Hero) Name() string                                { return "stubs.Hero" }
+func (Hero) Name() string                                { return "testutils.Hero" }
 func (Hero) Health() int                                 { return 20 }
 func (h Hero) Intelligence() int                         { return h.Intel }
 func (Hero) Types() card.TypeSet                         { return 0 }

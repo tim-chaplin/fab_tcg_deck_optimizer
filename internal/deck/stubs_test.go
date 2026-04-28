@@ -2,12 +2,12 @@ package deck
 
 import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/hero/stubs"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
 )
 
 // int1StubHero is a no-op hero with Intelligence=1 so tests can isolate per-hand behaviour
 // without interaction between multiple drawn cards.
-var int1StubHero = stubs.Hero{Intel: 1}
+var int1StubHero = testutils.Hero{Intel: 1}
 
 // deckFingerprint builds a comparable summary of a deck for equality checks in tests. Hashes
 // the weapon loadout and a sorted card-count histogram so decks compare equal iff they would

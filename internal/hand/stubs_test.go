@@ -2,13 +2,13 @@ package hand
 
 import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/hero/stubs"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
 )
 
 // stubHero is the package-wide no-op hero for tests measuring raw hand value with no
 // hero-ability contribution. Intel=4 matches real adult hero hand size so solver tests see
 // the same draw-up depth as production.
-var stubHero = stubs.Hero{Intel: 4}
+var stubHero = testutils.Hero{Intel: 4}
 
 // cardNames renders a slice of Card names for test failure messages. Lives here rather than
 // next to the one ordering test that uses it so other tests can reuse it without a forced

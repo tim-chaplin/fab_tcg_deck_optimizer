@@ -5,7 +5,6 @@ import (
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/cards"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/hero/stubs"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
 )
 
@@ -13,7 +12,7 @@ import (
 // / Hand / Deck / Arsenal reflect Moon Wish's plumbing alone (no Viserai-style
 // OnCardPlayed runechant credit perturbing the numbers). Intel matches a typical adult hero
 // hand size.
-var moonWishHero = stubs.Hero{Intel: 4}
+var moonWishHero = testutils.Hero{Intel: 4}
 
 // Moon Wish's printed text shuffles the deck after the on-hit Sun Kiss tutor; assertions
 // here therefore avoid pinning specific deck positions or which card lands in arsenal off a
