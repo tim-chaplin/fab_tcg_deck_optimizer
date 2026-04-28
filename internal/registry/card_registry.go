@@ -10,6 +10,7 @@ package registry
 import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/cards"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/optimizations"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
 )
 
@@ -782,8 +783,8 @@ var cardsByID = []card.Card{
 // is the only place that knows the full card set, and the caches are sized for the full
 // ID space.
 func init() {
-	card.WarmChainStepCache(cardsByID)
-	card.WarmDisplayNameCache(cardsByID)
+	optimizations.WarmChainStepCache(cardsByID)
+	optimizations.WarmDisplayNameCache(cardsByID)
 }
 
 // cardsByName maps card.DisplayName(c) → CardID for reverse lookup. Built once at init. Keyed

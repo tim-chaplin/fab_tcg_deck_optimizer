@@ -136,12 +136,51 @@ type Card interface {
 	Play(s *TurnState, self *CardState)
 }
 
-// DisplayName returns the card name with a pitch-color suffix — "Mauvrion Skies [Y]" for a
-// pitch-2 yellow printing. Use anywhere a human-readable identifier needs to disambiguate
-// pitch variants (log lines, deck listings, debug printouts).
+// DisplayName returns the card name with a pitch-color suffix — "Mauvrion Skies [Y]" for
+// a pitch-2 yellow printing. Use anywhere a human-readable identifier needs to
+// disambiguate pitch variants (log lines, deck listings, debug printouts).
 //
-// Implementation in display_name_cache.go — memoised by Card.ID so the hot path is a pure
-// cache read.
+// Backed by a function variable so the optimizations package can install a memoised
+// version at init without an import cycle. Default value is the bare build; the
+// optimizations package captures the bare version before swapping in its cached one so
+// the slow path stays a single source of truth.
+var DisplayName = func(c Card) string {
+	switch c.Pitch() {
+	case 1:
+		return c.Name() + " [R]"
+	case 2:
+		return c.Name() + " [Y]"
+	case 3:
+		return c.Name() + " [B]"
+	}
+	return c.Name()
+}
+
+// ChainStepText returns the "<DisplayName>: <VERB>[ from arsenal]" prefix the chain-step
+// log line is built from. VERB picks WEAPON ATTACK for weapon-typed cards, ATTACK for
+// attack-action cards, DEFENSE REACTION for Defense Reactions, and PLAY for everything
+// else; the "from arsenal" suffix tags entries played out of the arsenal slot.
+//
+// Same hook shape as DisplayName: the optimizations package replaces the body with a
+// memoised version at init.
+var ChainStepText = func(self *CardState) string {
+	types := self.Card.Types()
+	var verb string
+	switch {
+	case types.Has(TypeWeapon):
+		verb = "WEAPON ATTACK"
+	case types.IsAttackAction():
+		verb = "ATTACK"
+	case types.IsDefenseReaction():
+		verb = "DEFENSE REACTION"
+	default:
+		verb = "PLAY"
+	}
+	if self.FromArsenal {
+		verb += " from arsenal"
+	}
+	return DisplayName(self.Card) + ": " + verb
+}
 
 // VariableCost is optionally implemented by cards whose Cost(s) varies with TurnState (e.g.
 // discount-per-token effects). MinCost and MaxCost are static bounds on the Cost output across

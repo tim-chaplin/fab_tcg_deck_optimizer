@@ -272,7 +272,7 @@ func (s *TurnState) ApplyAndLogEffectiveAttack(self *CardState) {
 	if n < 0 {
 		n = 0
 	}
-	s.AddLogEntry(chainStepText(self), n)
+	s.AddLogEntry(ChainStepText(self), n)
 }
 
 // LogPlay is the chain-step finisher for non-attack cards (auras, non-attack actions, items)
@@ -280,7 +280,7 @@ func (s *TurnState) ApplyAndLogEffectiveAttack(self *CardState) {
 // is dropped because these cards never deal printed damage; any value they contribute lands
 // via separate AddPostTriggerLogEntry / aura trigger paths.
 func (s *TurnState) LogPlay(self *CardState) {
-	s.AddLogEntry(chainStepText(self), 0)
+	s.AddLogEntry(ChainStepText(self), 0)
 }
 
 // ApplyAndLogEffectiveDefense is the Defense Reaction counterpart to ApplyAndLogEffectiveAttack:
@@ -302,7 +302,7 @@ func (s *TurnState) ApplyAndLogEffectiveDefense(self *CardState) {
 		n = 0
 	}
 	s.IncomingDamage -= n
-	s.AddLogEntry(chainStepText(self), n)
+	s.AddLogEntry(ChainStepText(self), n)
 }
 
 // CreateRunechants adds n Runechant token auras to the count, sets AuraCreated so effects
