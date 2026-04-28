@@ -22,8 +22,8 @@ func (e *Evaluator) findBest(hero Hero, weapons []Weapon, hand []Card, incomingD
 	// the arsenal-in card (if any) staying in the slot, so a hand with no Value-adding
 	// partition still reports sensible "nothing played, nothing pitched" assignments.
 	// Cacheable starts true: the no-feasible-line fallback ran no chain and read no hidden
-	// state, so the seed is trivially cacheable. Each leaf's uncacheable bit ORs into a
-	// running sticky and the final !sticky stamps best.Cacheable.
+	// state, so the seed is trivially cacheable. Each leaf's cacheable bit ANDs into a
+	// running sticky and the final value stamps best.Cacheable.
 	best := TurnSummary{
 		BestLine:       make([]CardAssignment, totalN),
 		IncomingDamage: incomingDamage,
@@ -36,7 +36,7 @@ func (e *Evaluator) findBest(hero Hero, weapons []Weapon, hand []Card, incomingD
 			AuraTriggers: append([]AuraTrigger(nil), priorAuraTriggers...),
 		},
 	}
-	uncacheable := false
+	cacheable := true
 	// bestSwung holds the winning partition's swung weapon names — surfaced on the summary so
 	// the printout can list weapons that swung this turn (weapons have no BestLine entry).
 	var bestSwung []string
@@ -110,13 +110,13 @@ func (e *Evaluator) findBest(hero Hero, weapons []Weapon, hand []Card, incomingD
 			// card") can read len > 0. Arsenal-in can never be Held (roleAllowed bars it).
 			h := gatherHeldCards(hand, rolesBuf[:n], held[:0])
 			arsenalAtChainStart := findArsenalCard(rolesBuf, arsenalCardIn, n)
-			attackDealt, defenseDealt, leftoverRunechants, _, swung, carry, ok, leafUncacheable := bestAttackWithWeapons(hero, weapons, a, d, p, h, deck, bufs, runechantCarryover, incomingDamage, defenseSum, arsenalInIdx, arsenalDefenderIdx, arsenalAtChainStart, priorAuraTriggers, skipLog)
+			attackDealt, defenseDealt, leftoverRunechants, _, swung, carry, ok, leafCacheable := bestAttackWithWeapons(hero, weapons, a, d, p, h, deck, bufs, runechantCarryover, incomingDamage, defenseSum, arsenalInIdx, arsenalDefenderIdx, arsenalAtChainStart, priorAuraTriggers, skipLog)
 			// Aggregate per leaf — an infeasible attack chain still surfaces its DR-side
 			// reads (defendersDamage runs before the feasibility gate inside
 			// bestAttackWithWeapons) so a DR scanning the graveyard pins cacheable=false
 			// even when the partition's chain rejects.
-			if leafUncacheable {
-				uncacheable = true
+			if !leafCacheable {
+				cacheable = false
 			}
 			if !ok {
 				return
@@ -193,10 +193,10 @@ func (e *Evaluator) findBest(hero Hero, weapons []Weapon, hand []Card, incomingD
 	}
 	recurse(0, 0, 0)
 	best.SwungWeapons = bestSwung
-	// Stamp Cacheable last from the OR-aggregated sticky bit so every leaf the search
+	// Stamp Cacheable last from the AND-aggregated sticky bit so every leaf the search
 	// touched (feasible or rejected) contributes. The post-hoc arsenal promotion below
 	// doesn't run a chain, so it doesn't move the bit.
-	best.Cacheable = !uncacheable
+	best.Cacheable = cacheable
 	// If the arsenal slot is empty after the chain runs, promote one card from State.Hand
 	// into it (deterministic per-hand pick). State.Hand at this point holds the partition's
 	// Held cards plus anything tutored mid-chain; both are equivalent future-turn value, so
@@ -363,25 +363,27 @@ func roleAllowed(r Role, isArsenalSlot, isDefenseReaction bool) bool {
 // block loop so DRs see the full incoming pool first (maximising any +1{d} riders) and plain
 // blocks pick up the residual.
 //
-// Returns the per-DR uncacheable status as a sticky bit — once a DR reads deck or graveyard
+// Returns the per-DR cacheable status as a sticky bit — once a DR reads deck or graveyard
 // via the accessors, the partition's defense-phase output isn't safe to cache; aggregated up
 // through bestAttackWithWeapons.
 func defendersDamage(defenders, pitched, deck []Card, state *TurnState, gravBuf []Card, cs *CardState, incomingDamage, arsenalDefenderIdx int) (int, []Card, bool) {
 	total := 0
 	remaining := incomingDamage
-	uncacheable := false
+	cacheable := true
 	for i, d := range defenders {
 		if !d.Types().IsDefenseReaction() {
 			continue
 		}
 		gravBuf = append(gravBuf[:0], defenders...)
-		*state = TurnState{Pitched: pitched, deck: deck, graveyard: gravBuf, IncomingDamage: remaining}
+		// Per-DR seed starts cacheable; the DR's Play flips it via accessors if it reads
+		// deck or graveyard. Set explicitly because TurnState's zero-value is uncacheable.
+		*state = TurnState{Pitched: pitched, deck: deck, graveyard: gravBuf, IncomingDamage: remaining, cacheable: true}
 		*cs = CardState{Card: d, FromArsenal: i == arsenalDefenderIdx}
 		d.Play(state, cs)
 		total += state.Value
 		remaining = state.IncomingDamage
 		if !state.IsCacheable() {
-			uncacheable = true
+			cacheable = false
 		}
 	}
 	for _, d := range defenders {
@@ -397,7 +399,7 @@ func defendersDamage(defenders, pitched, deck []Card, state *TurnState, gravBuf 
 			remaining -= block
 		}
 	}
-	return total, gravBuf, uncacheable
+	return total, gravBuf, cacheable
 }
 
 // chainBudget captures the winning phase-split's attack-chain resource state.

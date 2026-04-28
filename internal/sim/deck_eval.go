@@ -365,7 +365,11 @@ func processTriggersAtStartOfTurn(queued []AuraTrigger, postDrawDeck []Card) (
 	if len(queued) == 0 {
 		return queued[:0], nil, 0, 0, nil, nil
 	}
-	ts := TurnState{deck: postDrawDeck}
+	// Start-of-turn trigger seed starts cacheable; reveal handlers like Sigil of the
+	// Arknight will flip it via PopDeckTop. Set explicitly because TurnState's zero-value
+	// is uncacheable. The result isn't currently consumed (callers don't read ts.IsCacheable),
+	// but seeding correctly keeps the per-state semantics consistent.
+	ts := TurnState{deck: postDrawDeck, cacheable: true}
 	survivors = queued[:0]
 	for _, t := range queued {
 		// Re-arm the OncePerTurn gate before the start-of-turn fire so handlers that read

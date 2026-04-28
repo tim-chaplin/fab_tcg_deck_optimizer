@@ -166,6 +166,10 @@ func appendDefenseReactionLines(out []string, a CardAssignment, defenders []Card
 	state := TurnState{
 		graveyard:      append([]Card(nil), defenders...),
 		IncomingDamage: remaining,
+		// Format-time DR replay; cacheable isn't consumed but seed it consistent with the
+		// other framework TurnState construction sites so a future reader doesn't get
+		// confused by an inconsistent default.
+		cacheable: true,
 	}
 	cs := CardState{Card: a.Card, FromArsenal: a.FromArsenal}
 	a.Card.Play(&state, &cs)

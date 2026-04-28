@@ -17,7 +17,7 @@ import (
 // reset at the turn boundary.
 //
 // deck and graveyard are unexported so card subpackages (internal/cards) can only reach them
-// through the accessor methods below. Every accessor flips uncacheable so a future hand-eval
+// through the accessor methods below. Every accessor clears cacheable so a future hand-eval
 // cache can key on the inputs and store only when IsCacheable() is true at chain end. The
 // framework (this package) accesses the slices directly to seed and snapshot state without
 // poisoning the bit; card code in a different package can't see the unexported field name,
@@ -68,7 +68,7 @@ type TurnState struct {
 	Hand []Card
 	// deck is the deck top-to-bottom. Unexported so card subpackages can only reach it via
 	// the public Deck() / PopDeckTop / PrependToDeck / TutorFromDeck accessors, each of
-	// which flips uncacheable. Framework code in this package reads / writes deck directly
+	// which clears cacheable. Framework code in this package reads / writes deck directly
 	// (resetStateForPermutation seed, snapshotCarry copy, applyTurnResult adoption) so the
 	// non-card-driven path doesn't poison the cacheable bit.
 	deck []Card
@@ -80,7 +80,7 @@ type TurnState struct {
 	// graveyard is cards that have entered the graveyard this turn — every card played or
 	// blocked lands here after resolving. Pitched cards do not (they recycle to deck
 	// bottom). Unexported for the same reason as deck: cards reach it only via Graveyard()
-	// / BanishFromGraveyard / AddToGraveyard, all of which flip uncacheable. Framework
+	// / BanishFromGraveyard / AddToGraveyard, all of which clear cacheable. Framework
 	// code in this package writes graveyard directly (the dispatcher's "card resolved →
 	// non-persistent goes to graveyard" rule, fireAttackActionTriggers's aura-destroy on
 	// count zero, processTriggersAtStartOfTurn's start-of-turn trigger destroy) so the
@@ -173,28 +173,28 @@ type TurnState struct {
 	// Log slice copy was the biggest single field by bytes.
 	SkipLog bool
 
-	// uncacheable is set true once a card-driven access reads or mutates deck or graveyard
-	// via one of the public accessor methods (Deck / Graveyard / PopDeckTop / PrependToDeck
-	// / TutorFromDeck / BanishFromGraveyard) or through the framework helpers built on them
-	// (DrawOne, ClashValue). Stored inverted from the user-visible "cacheable" name so the
-	// zero-value default reports IsCacheable()==true, which is correct for a fresh state
-	// that hasn't accessed hidden shuffle / prior-turn-graveyard contents yet. Reset to
-	// false by resetStateForPermutation each permutation so the bit tracks per-chain reads
-	// rather than persisting across permutations within a leaf.
-	uncacheable bool
+	// cacheable is true while the chain hasn't read or mutated deck / graveyard through any
+	// public accessor (Deck / Graveyard / PopDeckTop / PrependToDeck / TutorFromDeck /
+	// BanishFromGraveyard / AddToGraveyard) or framework helper built on them (DrawOne,
+	// ClashValue). Set to false by the accessor on first card-driven access; never restored
+	// within a permutation. Constructors (NewTurnState, resetStateForPermutation,
+	// defendersDamage's per-DR seed) explicitly set cacheable=true so a fresh state starts
+	// cacheable; a zero-value `var s TurnState{}` defaults to false (uncacheable) — the more
+	// conservative default that surfaces missing initialization rather than hiding it.
+	cacheable bool
 }
 
 // IsCacheable reports whether the chain so far has not depended on hidden state — i.e. no
 // card in this chain has read or mutated deck / graveyard via an accessor. A future
 // hand-eval cache stores results only when this is true at chain end.
-func (s *TurnState) IsCacheable() bool { return !s.uncacheable }
+func (s *TurnState) IsCacheable() bool { return s.cacheable }
 
 // Deck returns the live deck top-to-bottom and flips IsCacheable to false. Cards must not
 // mutate the returned slice; use PopDeckTop / PrependToDeck / TutorFromDeck for mutations.
 // Read-only callers that only inspect the slice still flip — the cache key can't depend on
 // what the deck-order read produced.
 func (s *TurnState) Deck() []Card {
-	s.uncacheable = true
+	s.cacheable = false
 	return s.deck
 }
 
@@ -202,14 +202,14 @@ func (s *TurnState) Deck() []Card {
 // not mutate the returned slice; use BanishFromGraveyard for mutations or AddToGraveyard
 // for the deterministic append-only path.
 func (s *TurnState) Graveyard() []Card {
-	s.uncacheable = true
+	s.cacheable = false
 	return s.graveyard
 }
 
 // PopDeckTop removes the top card of the deck and returns it. Returns (nil, false) when
 // the deck is empty. Flips IsCacheable to false.
 func (s *TurnState) PopDeckTop() (Card, bool) {
-	s.uncacheable = true
+	s.cacheable = false
 	if len(s.deck) == 0 {
 		return nil, false
 	}
@@ -222,7 +222,7 @@ func (s *TurnState) PopDeckTop() (Card, bool) {
 // fresh backing slice so subsequent mid-chain mutations don't poison sibling permutations
 // that share the per-leaf deck reference.
 func (s *TurnState) PrependToDeck(c Card) {
-	s.uncacheable = true
+	s.cacheable = false
 	newDeck := make([]Card, 0, len(s.deck)+1)
 	newDeck = append(newDeck, c)
 	newDeck = append(newDeck, s.deck...)
@@ -234,7 +234,7 @@ func (s *TurnState) PrependToDeck(c Card) {
 // Allocates a fresh backing slice so the per-leaf deck reference shared across
 // permutations stays untouched.
 func (s *TurnState) TutorFromDeck(score func(Card) int) (Card, bool) {
-	s.uncacheable = true
+	s.cacheable = false
 	bestIdx := -1
 	bestScore := 0
 	for i, c := range s.deck {
@@ -260,7 +260,7 @@ func (s *TurnState) TutorFromDeck(score func(Card) int) (Card, bool) {
 // to false. Reads graveyard contents from a previous turn (or from this turn's plain
 // blocks the partition put there) — the chain output depends on hidden prior-turn state.
 func (s *TurnState) BanishFromGraveyard(pred func(Card) bool) (Card, bool) {
-	s.uncacheable = true
+	s.cacheable = false
 	for i, c := range s.graveyard {
 		if !pred(c) {
 			continue
@@ -276,10 +276,10 @@ func (s *TurnState) BanishFromGraveyard(pred func(Card) bool) (Card, bool) {
 // utility constructor: the unexported deck / graveyard fields aren't reachable via a
 // composite literal from outside this package, so callers in card subpackages and other
 // non-sim packages route through this constructor (or set the slices via the accessor
-// methods after construction). The returned state has IsCacheable()==true; the seeding
-// itself doesn't flip the bit.
+// methods after construction). The returned state has IsCacheable()==true; cacheable
+// has to be set explicitly because the field's zero value is false (see the field doc).
 func NewTurnState(deck, graveyard []Card) *TurnState {
-	return &TurnState{deck: deck, graveyard: graveyard}
+	return &TurnState{deck: deck, graveyard: graveyard, cacheable: true}
 }
 
 // AddLogEntry appends a freeform chain-step log line and credits n damage-equivalent to
@@ -556,7 +556,7 @@ func (s *TurnState) ApplyAndLogRiderOnHit(self *CardState, text string, n int) i
 // graveyards a played card writes s.graveyard directly (same package, no flip) and only
 // card-driven calls reach this method, so the flip is sound and conservative.
 func (s *TurnState) AddToGraveyard(c Card) {
-	s.uncacheable = true
+	s.cacheable = false
 	s.graveyard = append(s.graveyard, c)
 }
 

@@ -47,6 +47,7 @@ func bestAttackWithWeapons(hero Hero, weapons []Weapon, attackers, defenders, pi
 		arsenalInIdx:        arsenalInIdx,
 		priorAuraTriggers:   priorAuraTriggers,
 		skipLog:             skipLog,
+		cacheable:           true,
 	}
 	// Defenders fire independently of ordering and attack chain — DRs through Play, plain
 	// blocks as raw block credit — so their total Value contribution is constant across phase
@@ -55,9 +56,11 @@ func bestAttackWithWeapons(hero Hero, weapons []Weapon, attackers, defenders, pi
 	// by the per-card cap.
 	hasDRs := containsDefenseReaction(defenders)
 	var defenseDealt int
-	var defenseUncacheable bool
+	// defenseCacheable defaults to true — a partition with no defenders runs no DR Plays,
+	// so nothing in the defense phase reads hidden state.
+	defenseCacheable := true
 	if len(defenders) > 0 {
-		defenseDealt, bufs.defenseGravScratch, defenseUncacheable = defendersDamage(defenders, pitched, deck, bufs.state, bufs.defenseGravScratch, &bufs.drCardStateScratch, incomingDamage, arsenalDefenderIdx)
+		defenseDealt, bufs.defenseGravScratch, defenseCacheable = defendersDamage(defenders, pitched, deck, bufs.state, bufs.defenseGravScratch, &bufs.drCardStateScratch, incomingDamage, arsenalDefenderIdx)
 	}
 
 	pitchedVals := bufs.pitchedValsScratch[:0]
@@ -158,9 +161,9 @@ func bestAttackWithWeapons(hero Hero, weapons []Weapon, attackers, defenders, pi
 		// No-feasible-line leaves still surface the defense-phase cacheable bit — DR Plays
 		// ran independently of the (rejected) attack chain so a DR that read graveyard
 		// poisons the result regardless of attack-feasibility.
-		return 0, 0, 0, chainBudget{}, nil, CarryState{}, false, defenseUncacheable
+		return 0, 0, 0, chainBudget{}, nil, CarryState{}, false, defenseCacheable
 	}
-	return bestDealt, defenseDealt, bestLeftoverRunechants, bestBudget, bestSwung, bestCarry, true, ctx.uncacheable || defenseUncacheable
+	return bestDealt, defenseDealt, bestLeftoverRunechants, bestBudget, bestSwung, bestCarry, true, ctx.cacheable && defenseCacheable
 }
 
 // sequenceContext carries the stable per-partition-leaf environment: hero (for OnCardPlayed
@@ -211,13 +214,13 @@ type sequenceContext struct {
 	// chains run with Log appends elided (Value still credited); the caller is replaying
 	// later with skipLog=false to materialise the printout.
 	skipLog bool
-	// uncacheable is a sticky bit ORed in after every permutation in bestSequence. Any
-	// permutation reporting !state.IsCacheable() at chain end pins the leaf as uncacheable
-	// — once a card in any sibling chain reads hidden state, the partition's output isn't
-	// safe to cache. Carries across phase / weapon masks within the same leaf because the
-	// solver explores all configurations and the cache key would have to disambiguate
-	// which the winner came from.
-	uncacheable bool
+	// cacheable is a sticky bit ANDed in after every permutation in bestSequence. Starts
+	// true on context construction; flips to false the first time a permutation's chain
+	// reports !state.IsCacheable() at end of chain — once a card in any sibling chain reads
+	// hidden state, the partition's output isn't safe to cache. Carries across phase /
+	// weapon masks within the same leaf because the solver explores all configurations and
+	// the cache key would have to disambiguate which the winner came from.
+	cacheable bool
 }
 
 // fireAttackActionTriggers walks state.AuraTriggers after an attack action card resolves
@@ -310,6 +313,9 @@ func (ctx *sequenceContext) resetStateForPermutation() {
 		AuraTriggers:            append(bufs.auraTriggersBacking[:0], ctx.priorAuraTriggers...),
 		EphemeralAttackTriggers: bufs.ephemeralBacking[:0],
 		SkipLog:                 ctx.skipLog,
+		// Permutation seed starts cacheable; the first card-driven deck / graveyard read
+		// in this permutation flips it to false. Set explicitly because zero-value is false.
+		cacheable: true,
 	}
 }
 
@@ -347,13 +353,13 @@ func (ctx *sequenceContext) bestSequence(attackers []Card) (int, int, bool) {
 	state := ctx.bufs.state
 	eval := func() {
 		dmg, leftoverRunechants, _, legal := ctx.playSequenceWithMeta(n)
-		// OR in this permutation's cacheable status before the legality gate — even an
+		// AND in this permutation's cacheable status before the legality gate — even an
 		// illegal permutation that read hidden state during Play poisons the leaf, since
 		// the solver's pre-screens didn't catch it and a real run would have reached that
-		// read. Short-circuited once already poisoned to avoid the field read on
-		// already-uncacheable hands.
-		if !ctx.uncacheable && !state.IsCacheable() {
-			ctx.uncacheable = true
+		// read. Short-circuited once already poisoned to avoid the field read on chains
+		// that already failed cacheability.
+		if ctx.cacheable && !state.IsCacheable() {
+			ctx.cacheable = false
 		}
 		if !legal {
 			return

@@ -148,9 +148,9 @@ func TestBest_ResetBetweenCallsClearsCacheableState(t *testing.T) {
 	ev := NewEvaluator()
 	deck := []Card{testutils.RedAttack{}}
 
-	// First call: Sky Fire Lanterns reads the deck top → uncacheable.
-	uncacheable := ev.Best(StubHero, nil, []Card{cards.SkyFireLanternsRed{}}, 0, deck, 0, nil)
-	if uncacheable.Cacheable {
+	// First call: Sky Fire Lanterns reads the deck top → expected Cacheable=false.
+	first := ev.Best(StubHero, nil, []Card{cards.SkyFireLanternsRed{}}, 0, deck, 0, nil)
+	if first.Cacheable {
 		t.Fatalf("first call: Cacheable = true, want false (Sky Fire reads deck)")
 	}
 

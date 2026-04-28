@@ -295,14 +295,15 @@ func TestRegisterStartOfTurn_EmptyTextLeavesHandlerAlone(t *testing.T) {
 	}
 }
 
-// TestIsCacheable_DefaultsTrue: a fresh TurnState reports cacheable. The zero value of the
-// internal uncacheable bit is false, so the inverted reader returns true without explicit
-// initialization — important because resetStateForPermutation seeds via TurnState{} and
-// every permutation must start with a clean cacheable bit.
-func TestIsCacheable_DefaultsTrue(t *testing.T) {
-	var s TurnState
+// TestIsCacheable_NewTurnStateSeedsCacheable: NewTurnState explicitly seeds cacheable=true
+// so a fresh state starts cacheable. A bare `var s TurnState` zero-values to cacheable=false
+// (the conservative default) — production framework paths that want a cacheable seed
+// (NewTurnState, resetStateForPermutation, defendersDamage's per-DR seed) initialize the
+// field explicitly.
+func TestIsCacheable_NewTurnStateSeedsCacheable(t *testing.T) {
+	s := NewTurnState(nil, nil)
 	if !s.IsCacheable() {
-		t.Errorf("zero TurnState should be cacheable, got IsCacheable=false")
+		t.Errorf("NewTurnState should seed cacheable=true, got IsCacheable=false")
 	}
 }
 
@@ -344,7 +345,7 @@ func TestIsCacheable_PopDeckTopFlips(t *testing.T) {
 // TestIsCacheable_PopDeckTopEmptyFlips: even the empty-deck no-op flips — a card that
 // reads "is the deck empty" binds the chain output to that information.
 func TestIsCacheable_PopDeckTopEmptyFlips(t *testing.T) {
-	var s TurnState
+	s := NewTurnState(nil, nil)
 	if got, ok := s.PopDeckTop(); got != nil || ok {
 		t.Errorf("PopDeckTop on empty = (%v, %v), want (nil, false)", got, ok)
 	}
@@ -435,9 +436,10 @@ func TestIsCacheable_BanishFromGraveyardNoMatchFlips(t *testing.T) {
 // universal "every public deck/graveyard accessor flips" convention holds. The only card
 // that calls AddToGraveyard today (Moon Wish's go-again Sun Kiss play) already flipped
 // via TutorFromDeck, so the additional flip is benign — but pinning it here keeps the
-// convention consistent for future cards.
+// convention consistent for future cards. Start from a NewTurnState'd seed (cacheable=true)
+// so the assertion observes the flip rather than the zero-value default.
 func TestIsCacheable_AddToGraveyardFlips(t *testing.T) {
-	var s TurnState
+	s := NewTurnState(nil, nil)
 	s.AddToGraveyard(stubCard{name: "x"})
 	if s.IsCacheable() {
 		t.Error("AddToGraveyard should flip IsCacheable to false")
