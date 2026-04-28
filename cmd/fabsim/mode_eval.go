@@ -28,7 +28,7 @@ func runEvalCmd(args []string) {
 	maxCopies := fs.Int("max-copies", defaultMaxCopies, "maximum copies of any single card printing per deck, applied when replacing NotImplemented cards in the loaded deck")
 	printOnly := fs.Bool("print-only", false, "load the deck and print the stats from the last run without simulating or rewriting the on-disk .json / .txt")
 	brief := fs.Bool("brief", false, "print only the score summary (no card list, per-card stats, or best turn)")
-	cacheStats := fs.Bool("cache-stats", false, "print hand-eval cache hit rate to stderr after the run (debug; only meaningful for the eval path which uses one Evaluator)")
+	debug := fs.Bool("debug", false, "print extra telemetry to stderr after the run — currently the hand-eval cache hit rate")
 	_ = parseFlagsAnywhere(fs, args)
 	if fs.NArg() != 1 {
 		die("eval: need exactly one positional <deck> (got %d); try `fabsim eval <deck>`", fs.NArg())
@@ -40,7 +40,7 @@ func runEvalCmd(args []string) {
 	if err != nil {
 		die("%v", err)
 	}
-	runEval(resolveDeckPath(fs.Arg(0)), *shuffles, *incoming, *maxCopies, *seed, fmtValue, *printOnly, *brief, *cacheStats)
+	runEval(resolveDeckPath(fs.Arg(0)), *shuffles, *incoming, *maxCopies, *seed, fmtValue, *printOnly, *brief, *debug)
 }
 
 // runEval loads the deck at outPath and prints its stats. Default behaviour (printOnly=false)
@@ -57,12 +57,12 @@ func runEvalCmd(args []string) {
 //   - brief=true: score summary only. Good for scripted re-scoring where the card list and
 //     best turn are noise.
 //
-// cacheStats=true prints a hand-eval cache hit-rate line to stderr after the run — debug
-// telemetry for tuning the cacheable-tracking refactor. Only meaningful when a fresh
-// simulation actually ran (printOnly=false); otherwise the Evaluator never spun up.
-func runEval(outPath string, shuffles, incoming, maxCopies int, seed int64, fmtValue deckformat.Format, printOnly, brief, cacheStats bool) {
+// debug=true prints extra telemetry to stderr after the run — currently the hand-eval
+// cache hit rate. Only meaningful when a fresh simulation actually ran (printOnly=false);
+// otherwise the Evaluator never spun up.
+func runEval(outPath string, shuffles, incoming, maxCopies int, seed int64, fmtValue deckformat.Format, printOnly, brief, debug bool) {
 	if !printOnly {
-		evaluateAndPersist(outPath, shuffles, incoming, maxCopies, seed, fmtValue, cacheStats)
+		evaluateAndPersist(outPath, shuffles, incoming, maxCopies, seed, fmtValue, debug)
 	}
 	printLoadedDeck(mustLoadDeck(outPath), brief)
 }
@@ -74,7 +74,12 @@ func runEval(outPath string, shuffles, incoming, maxCopies int, seed int64, fmtV
 // drawn at maxCopies under fmtValue) runs before the eval so the on-disk avg always
 // reflects the cards the binary can actually simulate. The stderr summary lets the operator
 // see the re-score happening before the printed output appears.
-func evaluateAndPersist(outPath string, shuffles, incoming, maxCopies int, seed int64, fmtValue deckformat.Format, cacheStats bool) *sim.Deck {
+//
+// Always uses a dedicated Evaluator (rather than the package-level shared one) so the
+// per-Evaluator cache stats are always available. debug=true prints them after the run;
+// otherwise they're computed-but-discarded — the cache itself runs unconditionally because
+// it speeds up the eval regardless of whether the operator wants the telemetry.
+func evaluateAndPersist(outPath string, shuffles, incoming, maxCopies int, seed int64, fmtValue deckformat.Format, debug bool) *sim.Deck {
 	loaded := mustLoadDeck(outPath)
 	// Wrap the loaded hero/weapons/cards in a fresh Deck so the eval's stats start from zero
 	// instead of accumulating on top of the persisted Stats. Sideboard and Equipment carry
@@ -86,13 +91,7 @@ func evaluateAndPersist(outPath string, shuffles, incoming, maxCopies int, seed 
 	rng := rand.New(rand.NewSource(seed))
 	savedAvg := loaded.Stats.Mean()
 	sanitizeLoadedDeck(d, maxCopies, rng, fmtValue.IsLegal)
-	// Use a dedicated Evaluator when the caller wants cache stats so we can read the
-	// per-Evaluator counters after the run; otherwise fall through to the package-level
-	// shared Evaluator (no behavioural difference, just no stats handle).
-	var ev *sim.Evaluator
-	if cacheStats {
-		ev = sim.NewEvaluator()
-	}
+	ev := sim.NewEvaluator()
 	start := time.Now()
 	if shuffles < 0 {
 		d.EvaluateAdaptiveWith(incoming, rng, ev)
@@ -102,7 +101,7 @@ func evaluateAndPersist(outPath string, shuffles, incoming, maxCopies int, seed 
 	elapsed := time.Since(start)
 	fmt.Fprintf(os.Stderr, "eval: avg %.3f → %.3f (delta %+.3f) in %s (%s shuffles); rewriting %s\n",
 		savedAvg, d.Stats.Mean(), d.Stats.Mean()-savedAvg, elapsed.Round(time.Millisecond), commaInt(d.Stats.Runs), outPath)
-	if cacheStats && ev != nil {
+	if debug {
 		printCacheStats(ev.CacheStats())
 	}
 	if err := writeDeck(d, outPath); err != nil {
@@ -111,10 +110,10 @@ func evaluateAndPersist(outPath string, shuffles, incoming, maxCopies int, seed 
 	return d
 }
 
-// printCacheStats writes the hand-eval cache counters to stderr in a single annotated
-// block. Lives in this file (rather than a shared util) because eval is the only mode
-// that exposes per-Evaluator stats today; iterate / anneal use a worker pool with one
-// Evaluator per worker so a single cache-stats line doesn't capture the workload.
+// printCacheStats writes the hand-eval cache counters to stderr as a single annotated
+// line. Lives in this file because eval is the only mode that exposes per-Evaluator stats
+// today — iterate / anneal use a worker pool with one Evaluator per worker, so a single
+// cache-stats line wouldn't capture the workload.
 func printCacheStats(s sim.CacheStats) {
 	total := s.Hits + s.Misses + s.SkipsTriggers
 	if total == 0 {
