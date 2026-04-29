@@ -66,7 +66,7 @@ func BenchmarkAnnealRound(b *testing.B) {
 		// adaptive=true matches the production default; the shuffles arg is ignored in that mode.
 		_, _, _, found := IterateParallel(
 			context.Background(), mutations, unreachableBaseline, 0, 0,
-			0, incoming, 0,
+			0, incoming, 0, 0,
 			iterRNG.Int63(), nil, true,
 		)
 		if found {
@@ -114,7 +114,7 @@ func BenchmarkIterateImprovements(b *testing.B) {
 			mutations := AllMutations(best, maxCopies, nil)
 			d, avg, _, found := IterateParallel(
 				context.Background(), mutations, bestAvg, 0, 0,
-				shuffles, incoming, 0,
+				shuffles, incoming, 0, 0,
 				iterRNG.Int63(), nil, false,
 			)
 			if !found {

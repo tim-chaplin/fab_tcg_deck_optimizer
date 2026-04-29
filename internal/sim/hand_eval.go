@@ -79,27 +79,44 @@ type Evaluator struct {
 	numWorkers int
 }
 
-// NewEvaluator returns a fresh Evaluator with the hand-eval cache enabled and the shuffle
-// loop running single-threaded. Safe for concurrent use across goroutines as long as each
+// NewEvaluator returns a fresh Evaluator with its own private cache and the shuffle loop
+// running single-threaded. Safe for concurrent use across goroutines as long as each
 // goroutine uses its own instance — internal scratch state is not synchronised.
 func NewEvaluator() *Evaluator {
 	return &Evaluator{cache: newEvalCache()}
 }
 
 // NewEvaluatorParallel returns an Evaluator that fans the shuffle loop across numWorkers
-// goroutines. Each worker carries its own attackBufs scratch but they all share one
-// thread-safe cache. fabsim eval / anneal / compare use this path; tests that want a
-// deterministic single-RNG run construct via NewEvaluator instead.
+// goroutines, each carrying its own attackBufs scratch and sharing the Evaluator's
+// private cache. Single-deck callers (fabsim eval, compare) use this for shuffle-level
+// parallelism.
 func NewEvaluatorParallel(numWorkers int) *Evaluator {
 	return &Evaluator{cache: newEvalCache(), numWorkers: numWorkers}
 }
 
+// NewEvaluatorWithCache returns an Evaluator pointing at an existing shared Cache. Used
+// by iterate-mode's mutation-parallel pool so every worker's lookups and stores hit one
+// memo. numWorkers is 0 (shuffle loop runs single-threaded); set the field directly on
+// the returned pointer to layer shuffle parallelism on top.
+func NewEvaluatorWithCache(c *Cache) *Evaluator {
+	return &Evaluator{cache: c}
+}
+
 // NewEvaluatorWithoutCache returns a fresh Evaluator with the hand-eval cache disabled.
 // Used for the from-scratch path in benchmarks and equivalence tests; production callers
-// route through NewEvaluator / NewEvaluatorParallel.
+// route through NewEvaluator / NewEvaluatorParallel / NewEvaluatorWithCache.
 func NewEvaluatorWithoutCache() *Evaluator {
 	return &Evaluator{}
 }
+
+// Cache is the thread-safe hand-eval cache shared across multiple Evaluators. Use
+// NewCache to construct one and pass it to NewEvaluatorWithCache for each worker that
+// should share the memo. The cache's lookup path takes a read lock for map access
+// (concurrent readers don't serialise); store and reset take the write lock.
+type Cache = evalCache
+
+// NewCache returns a fresh shared cache.
+func NewCache() *Cache { return newEvalCache() }
 
 // ResetCache drops the cached entries while preserving the stats counters. Use between
 // distinct decks when reusing one Evaluator across many of them (the iterate-mode worker

@@ -190,7 +190,7 @@ func runAnneal(cfg annealConfig) annealResult {
 			temperature, currentAvg, bestEverAvg)
 		d, avg, idx, found := sim.IterateParallel(
 			ctx, mutations, currentAvg, temperature, cfg.minImprovement,
-			cfg.shuffles, cfg.incoming, 0,
+			cfg.shuffles, cfg.incoming, 0, 0,
 			rng.Int63(), &completed, cfg.adaptive,
 		)
 		stopTicker()
