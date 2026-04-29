@@ -143,6 +143,9 @@ func (b *attackBufs) DRCardStateScratch() *CardState       { return &b.drCardSta
 // LegalPool re-exports legalPool for sim_test consumers.
 func LegalPool(legal func(Card) bool) []ids.CardID { return legalPool(legal) }
 
+// LegalWeapons re-exports legalWeapons for sim_test consumers.
+func LegalWeapons() []Weapon { return legalWeapons() }
+
 // WeaponLoadouts re-exports weaponLoadouts for sim_test consumers.
 func WeaponLoadouts(ws []Weapon) [][]Weapon { return weaponLoadouts(ws) }
 

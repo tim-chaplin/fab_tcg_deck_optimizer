@@ -169,6 +169,66 @@ func TestAllMutations_ExcludesNotImplementedAdditions(t *testing.T) {
 	}
 }
 
+// TestLegalWeapons_SkipsNotImplemented pins the weapon-side counterpart to
+// TestLegalPool_SkipsNotImplemented: every weapon LegalWeapons surfaces must not implement
+// NotImplemented, regardless of which weapons currently carry the tag.
+func TestLegalWeapons_SkipsNotImplemented(t *testing.T) {
+	for _, w := range LegalWeapons() {
+		if _, ok := w.(NotImplemented); ok {
+			t.Errorf("LegalWeapons included NotImplemented weapon %s", w.Name())
+		}
+	}
+}
+
+// TestRandom_ExcludesNotImplementedWeapons confirms no sampled random deck equips a weapon
+// tagged with NotImplemented. Mirrors TestRandom_ExcludesNotImplemented for the weapon side.
+func TestRandom_ExcludesNotImplementedWeapons(t *testing.T) {
+	rng := rand.New(rand.NewSource(1))
+	for i := 0; i < 20; i++ {
+		d := Random(heroes.Viserai{}, 40, 2, rng, nil)
+		for j, w := range d.Weapons {
+			if _, ok := w.(NotImplemented); ok {
+				t.Errorf("sample %d weapon[%d] = %s implements NotImplemented", i, j, w.Name())
+			}
+		}
+	}
+}
+
+// TestLegalWeapons_ExcludesTaggedWeaponByID gives TestLegalWeapons_SkipsNotImplemented teeth
+// by picking a concrete registered weapon we know currently carries the marker (Annals of
+// Sutcliffe) and asserting it's absent from LegalWeapons. Self-retires if Annals ever loses
+// the tag so maintenance is only a delete.
+func TestLegalWeapons_ExcludesTaggedWeaponByID(t *testing.T) {
+	tagged := weapons.AnnalsOfSutcliffe{}
+	if _, ok := any(tagged).(NotImplemented); !ok {
+		t.Skip("Annals of Sutcliffe is no longer NotImplemented — pick another tagged weapon or drop this test")
+	}
+	for _, w := range LegalWeapons() {
+		if w.ID() == tagged.ID() {
+			t.Fatalf("LegalWeapons included Annals of Sutcliffe despite its NotImplemented tag")
+		}
+	}
+}
+
+// TestAllMutations_ExcludesNotImplementedWeaponLoadouts confirms no weapon-loadout mutation
+// proposes a loadout that contains a NotImplemented weapon. Starting deck equips the
+// implemented Nebula Blade so any NotImplemented weapon in a mutation output came from the
+// loadout pool, not the starting deck.
+func TestAllMutations_ExcludesNotImplementedWeaponLoadouts(t *testing.T) {
+	a := GetCard(ids.ArcanicCrackleRed)
+	if _, tagged := a.(NotImplemented); tagged {
+		t.Fatal("ArcanicCrackleRed gained a NotImplemented marker — pick another implemented sentinel for this test")
+	}
+	d := New(heroes.Viserai{}, []Weapon{weapons.NebulaBlade{}}, []Card{a, a, a, a})
+	for _, m := range AllMutations(d, 2, nil) {
+		for _, w := range m.Deck.Weapons {
+			if _, ok := w.(NotImplemented); ok {
+				t.Errorf("%s introduced NotImplemented weapon %s", m.Description, w.Name())
+			}
+		}
+	}
+}
+
 // TestAllMutations_FilterExcludesRejectedAdditions confirms banned cards never appear as
 // swap-in candidates. A banned card already in the deck IS still a valid removal target — the
 // hill climb must be able to swap it out — so we assert that the starting deck's banned card is

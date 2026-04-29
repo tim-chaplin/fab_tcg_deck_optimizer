@@ -24,9 +24,9 @@ func TestAllMutations_CountsAndShape(t *testing.T) {
 	// in-deck card (already at cap) is a valid add — so 2 × (pool - 2). Pair mutations: for
 	// each registered cardPair whose halves are both absent, C(min(uniques, K), 2) candidates
 	// — with 2 unique deck IDs that's 1 per absent pair. Both halves absent ⇒ all pairs
-	// contribute. Use LegalPool(nil) so the count tracks AllMutations's own filtering
-	// (NotImplemented cards are skipped).
-	loadouts := WeaponLoadouts(AllWeapons)
+	// contribute. Use LegalPool / LegalWeapons so the counts track AllMutations's own
+	// filtering (NotImplemented cards and weapons are skipped on both sides).
+	loadouts := WeaponLoadouts(LegalWeapons())
 	pool := LegalPool(nil)
 	wantWeaponMuts := len(loadouts) - 1
 	wantCardMuts := 2 * (len(pool) - 2)
