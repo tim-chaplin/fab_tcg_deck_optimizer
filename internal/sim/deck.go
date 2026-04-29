@@ -141,7 +141,7 @@ func Random(h Hero, size, maxCopies int, rng *rand.Rand, legal func(Card) bool) 
 	if maxCopies < 1 {
 		panic(fmt.Sprintf("deck: Random requires maxCopies >= 1 (got %d)", maxCopies))
 	}
-	loadouts := weaponLoadouts(AllWeapons)
+	loadouts := weaponLoadouts(legalWeapons())
 	weapons := loadouts[rng.Intn(len(loadouts))]
 
 	pool := legalPool(legal)
@@ -242,4 +242,19 @@ func legalPool(legal func(Card) bool) []ids.CardID {
 		filtered = append(filtered, id)
 	}
 	return filtered
+}
+
+// legalWeapons is the weapon-side analogue of legalPool: AllWeapons minus any weapon
+// carrying the NotImplemented marker. Shared by Random's loadout pick and
+// weaponLoadoutMutations so neither path proposes a weapon whose printed effect the sim
+// can't faithfully reproduce.
+func legalWeapons() []Weapon {
+	out := make([]Weapon, 0, len(AllWeapons))
+	for _, w := range AllWeapons {
+		if _, unimplemented := w.(NotImplemented); unimplemented {
+			continue
+		}
+		out = append(out, w)
+	}
+	return out
 }
