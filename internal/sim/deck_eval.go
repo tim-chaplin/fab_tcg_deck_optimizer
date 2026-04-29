@@ -61,16 +61,21 @@ func (d *Deck) EvaluateAdaptiveWith(incomingDamage int, rng *rand.Rand, ev *Eval
 type shuffleStopper func(stats *Stats, runs int) bool
 
 const (
-	// adaptiveCheckInterval is how often (in shuffles) the adaptive stop check fires.
-	// Larger values mean we may overshoot the target SE by a few hundred shuffles; smaller
-	// values mean more histogram walks. 50 keeps overshoot small for low-variance decks
-	// where SE drops below target inside 200-300 shuffles.
+	// adaptiveCheckInterval is the per-worker chunk size in the parallel-shuffle path —
+	// after every numWorkers × adaptiveCheckInterval shuffles, the worker pool barrier-
+	// merges into d.Stats and runs the adaptive stop check. 50 is the empirical sweet
+	// spot: smaller values save shuffles by stopping closer to the SE convergence point
+	// (overshoot-cost decreases linearly with chunk size), but the barrier overhead
+	// flattens out below ~50 shuffles per worker per chunk. Going from 1000 → 50 cut
+	// the anneal-bench wall-clock by 2.4× because random Viserai decks converge in
+	// ~2000 shuffles instead of being forced to 8000 by a too-large chunk; going below
+	// 50 saves another few percent but the barrier-frequency tradeoff stops paying off.
 	adaptiveCheckInterval = 50
 	// adaptiveTargetSE is the standard-error target the adaptive shuffle path stops at.
-	// ±0.05 is roughly the precision useful for "is this deck ~13.5 vs ~13.6" comparisons;
-	// tighter than that pays diminishing returns. Hand-value sigma sits around 4-6, so
-	// SE = 0.05 typically converges inside 1k shuffles.
-	adaptiveTargetSE = 0.05
+	// ±0.01 is tight enough to distinguish small per-deck differences during anneal
+	// optimisation. Hand-value sigma sits around 4-6, so SE = 0.01 typically takes
+	// 5-7k shuffles to converge.
+	adaptiveTargetSE = 0.01
 	// adaptiveShufflesCap is the upper bound on the adaptive shuffle path. Caps a
 	// pathological high-variance regime that doesn't converge to adaptiveTargetSE — the
 	// run still terminates at this many shuffles even if the SE target was never hit.
