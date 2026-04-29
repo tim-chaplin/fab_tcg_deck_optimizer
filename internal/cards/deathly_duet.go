@@ -2,6 +2,10 @@
 // Printed power: Red 4, Yellow 3, Blue 2.
 // Text: "When Deathly Duet attacks, if an attack action card was pitched to play it, it gains
 // +2{p}. If a 'non-attack' action card was pitched to play it, create 2 Runechant tokens."
+//
+// Both riders read self.PitchedToPlay (the cards the chain runner attributed to funding
+// THIS copy's cost) — they fire independently when those exact cards include an attack
+// action / non-attack action respectively.
 
 package cards
 
@@ -23,10 +27,6 @@ func (DeathlyDuetRed) Attack() int             { return 4 }
 func (DeathlyDuetRed) Defense() int            { return 3 }
 func (DeathlyDuetRed) Types() card.TypeSet     { return deathlyDuetTypes }
 func (DeathlyDuetRed) GoAgain() bool           { return false }
-
-// not implemented: Pitched scan can fire both riders independently of which pitched card paid
-// for which play (over-credits when both an attack and a non-attack action are pitched)
-func (DeathlyDuetRed) NotImplemented() {}
 func (DeathlyDuetRed) Play(s *sim.TurnState, self *sim.CardState) {
 	deathlyDuetApplyRiders(s, self)
 }
@@ -41,10 +41,6 @@ func (DeathlyDuetYellow) Attack() int             { return 3 }
 func (DeathlyDuetYellow) Defense() int            { return 3 }
 func (DeathlyDuetYellow) Types() card.TypeSet     { return deathlyDuetTypes }
 func (DeathlyDuetYellow) GoAgain() bool           { return false }
-
-// not implemented: Pitched scan can fire both riders independently of which pitched card paid
-// for which play (over-credits when both an attack and a non-attack action are pitched)
-func (DeathlyDuetYellow) NotImplemented() {}
 func (DeathlyDuetYellow) Play(s *sim.TurnState, self *sim.CardState) {
 	deathlyDuetApplyRiders(s, self)
 }
@@ -59,25 +55,21 @@ func (DeathlyDuetBlue) Attack() int             { return 2 }
 func (DeathlyDuetBlue) Defense() int            { return 3 }
 func (DeathlyDuetBlue) Types() card.TypeSet     { return deathlyDuetTypes }
 func (DeathlyDuetBlue) GoAgain() bool           { return false }
-
-// not implemented: Pitched scan can fire both riders independently of which pitched card paid
-// for which play (over-credits when both an attack and a non-attack action are pitched)
-func (DeathlyDuetBlue) NotImplemented() {}
 func (DeathlyDuetBlue) Play(s *sim.TurnState, self *sim.CardState) {
 	deathlyDuetApplyRiders(s, self)
 }
 
 // deathlyDuetApplyRiders folds Deathly Duet's two pitch-conditional riders into self and
 // state, then emits the chain step:
-//   - Attack-action pitched → +2{p} power buff lands on self.BonusAttack so EffectiveAttack
+//   - Attack-action attributed → +2{p} power buff lands on self.BonusAttack so EffectiveAttack
 //     and LikelyToHit see the buffed power, and the chain step's (+N) reflects it directly.
-//   - Non-attack-action pitched → 2 Runechants enter during Deathly Duet's own attack
+//   - Non-attack-action attributed → 2 Runechants enter during Deathly Duet's own attack
 //     resolution; the rider lands as a "Created 2 runechants" sub-line under self.
 //
-// Both riders can stack when both pitched roles are present.
+// Both riders can stack when self.PitchedToPlay contains both roles.
 func deathlyDuetApplyRiders(s *sim.TurnState, self *sim.CardState) {
 	var attackPitched, nonAttackActionPitched bool
-	for _, p := range s.Pitched {
+	for _, p := range self.PitchedToPlay {
 		t := p.Types()
 		if t.Has(card.TypeAttack) {
 			attackPitched = true

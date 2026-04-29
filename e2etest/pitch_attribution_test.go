@@ -29,6 +29,19 @@ func TestPitchAttribution_AetherSlashAttackPitchDoesNotFireRider(t *testing.T) {
 	}
 }
 
+// Tests that Deathly Duet fires both riders when its cost is funded by an attack and a non-attack action.
+func TestPitchAttribution_DeathlyDuetBothRidersFireFromMixedFunding(t *testing.T) {
+	d := sim.New(heroes.Viserai{}, nil, fillerDeck())
+	hand := []sim.Card{
+		cards.DeathlyDuetRed{},
+		cards.AetherSlashRed{},
+		cards.MaleficIncantationBlue{},
+	}
+	if got := d.EvalOneTurnForTesting(0, nil, hand).PrevTurnValue; got != 8 {
+		t.Fatalf("PrevTurnValue = %d, want 8 (Deathly Duet 4 + attack rider 2 + 2 runechants)", got)
+	}
+}
+
 // Tests that a single pitch paying for multiple Aether Slashes activates the bonus on each.
 func TestPitchAttribution_OneNonAttackPitchFundsMultipleAetherSlashes(t *testing.T) {
 	d := sim.New(heroes.Viserai{}, nil, fillerDeck())
