@@ -67,7 +67,7 @@ func TestEvaluate_BestTurnSnapshotsState(t *testing.T) {
 		t.Errorf("surface count = %d, want >%d (Hand=%d Arsenal=%v Graveyard=%d). The mid-turn-drawn Snatch should have surfaced — without the State snapshot the carry would lose it.",
 			surfaceCount, handSize, len(state.Hand), state.Arsenal, len(state.Graveyard))
 	}
-	// State.Log carries the per-event chain trace; recordBestTurn → cloneCarryState must copy
+	// State.Log carries the per-event chain trace; recordBestTurn → CarryState.Clone must copy
 	// it through so fabsim eval's "Best turn played" printout has the chain attribution lines.
 	// A Snatch chain has at least one ATTACK entry — if Log is empty the deck-level snapshot
 	// dropped the Log field on the floor.

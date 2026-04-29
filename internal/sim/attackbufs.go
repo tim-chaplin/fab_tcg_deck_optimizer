@@ -53,10 +53,7 @@ type attackBufs struct {
 	// Per-permutation backing slices reused across every Heap's-algorithm permutation in a
 	// leaf. resetStateForPermutation seeds the TurnState's slice fields from these (via
 	// append([:0], ...)) so an unmodified permutation never reallocates: only mid-chain
-	// growth past the pre-sized cap forces a new backing array. snapshotCarryInto
-	// reuses carryWinnerScratch's backing arrays before the next permutation overwrites
-	// the per-permutation backings; the mask-combo new-best clones via cloneCarryState
-	// when promoting carryWinnerScratch to bestCarry.
+	// growth past the pre-sized cap forces a new backing array.
 	deckBacking         []Card
 	handBacking         []Card
 	graveBacking        []Card
@@ -66,22 +63,23 @@ type attackBufs struct {
 	auraTriggersBacking []AuraTrigger
 	ephemeralBacking    []EphemeralAttackTrigger
 	// carryWinnerScratch is the per-Best-call sliding window into which bestSequence
-	// snapshots the current winning permutation's end-of-chain state. The slice backing
-	// arrays grow once across the lifetime of the Evaluator's cached attackBufs and stay
-	// reused on every snapshotCarryInto call so per-Best snapshots avoid reallocation.
-	// Cleared via resetCarryStateScratch at the top of each bestSequence call so a
-	// stale value can't leak through when no permutation lands a new best.
+	// snapshots the current winning permutation's end-of-chain state via
+	// CarryState.SnapshotFromTurn. Slice backing arrays grow once across the lifetime of
+	// the Evaluator's cached attackBufs and stay reused on every snapshot — per-Best
+	// snapshots avoid reallocation. Reset (lengths to 0, scalars zeroed) at the top of
+	// each bestSequence call so a stale value can't leak through when no permutation
+	// lands a new best.
 	carryWinnerScratch CarryState
 	// bestCarryScratch is the mask-combo-level sliding window inside
-	// bestAttackWithWeapons: each new-best (pmask, wmask) update copies carryWinnerScratch
-	// into this scratch via copyCarryStateInto (allocation-free after the first sizing).
+	// bestAttackWithWeapons. Each new-best (pmask, wmask) update copies carryWinnerScratch
+	// into this scratch via CarryState.CopyFrom (allocation-free after the first sizing).
 	// bestAttackWithWeapons returns it as an alias — invalidated by the next call into
 	// bestAttackWithWeapons against the same bufs, so callers that need the data to
 	// outlive the next call must copy it out.
 	bestCarryScratch CarryState
 	// findBestCarryScratch is findBest's running-winner sliding window. When the recurse
-	// promotes a new-best leaf, copyCarryStateInto writes the leaf's CarryState (an alias
-	// to bestCarryScratch) into this scratch so later (non-winning) leaves whose
+	// promotes a new-best leaf, CarryState.CopyFrom writes the leaf's CarryState (an
+	// alias to bestCarryScratch) into this scratch so later (non-winning) leaves whose
 	// bestAttackWithWeapons call clobbers bestCarryScratch can't disturb the running
 	// winner. findBest clones this scratch once at exit so the returned TurnSummary's
 	// State owns independent backing.

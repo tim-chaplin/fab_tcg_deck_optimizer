@@ -66,11 +66,23 @@ func PromoteRandomHandCardToArsenal(best *TurnSummary, startingHand []Card, arse
 	promoteRandomHandCardToArsenal(best, startingHand, arsenalCardIn)
 }
 
-// BeatsBest re-exports beatsBest for sim_test consumers exercising the partition-tiebreak
-// policy in isolation. The shim accepts a TurnSummary and unwraps the (Value,
-// State.Runechants) scalars the in-package signature takes.
+// BeatsBest is the test-only entry point for the partition-tiebreaker policy. The shim
+// builds a runningCarry seeded with the comparison's "current best" stats and asks
+// whether the candidate would displace it; that's the same path findBest's recurse
+// takes, so the tiebreak order under test is the production order.
+//
+// hasHeld is synthesised from bestWillOccupyArsenal: any non-nil arsenal already
+// satisfies the willOccupy predicate, so passing hasHeld=true is enough to make the
+// running winner's willOccupy=true regardless of the (test-ignored) arsenal field.
 func BeatsBest(v, leftoverRunechants, futureValuePlayed int, willOccupyArsenal bool, best TurnSummary, bestFutureValuePlayed int, bestWillOccupyArsenal bool) bool {
-	return beatsBest(v, leftoverRunechants, futureValuePlayed, willOccupyArsenal, best.Value, best.State.Runechants, bestFutureValuePlayed, bestWillOccupyArsenal)
+	r := runningCarry{
+		seen:               true,
+		value:              best.Value,
+		leftoverRunechants: best.State.Runechants,
+		futureValuePlayed:  bestFutureValuePlayed,
+		hasHeld:            bestWillOccupyArsenal,
+	}
+	return r.Beats(v, leftoverRunechants, futureValuePlayed, willOccupyArsenal)
 }
 
 // PairSwapMutations re-exports pairSwapMutations for sim_test consumers.
