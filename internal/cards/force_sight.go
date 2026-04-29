@@ -2,9 +2,6 @@
 //
 // Text: "The next attack action card you play this turn gains +N{p}. If Force Sight is played from
 // arsenal, **opt 2**. **Go again**" (Red N=3, Yellow N=2, Blue N=1.)
-//
-// Modelling: arsenal-gated Opt 2 (deck-cycling cosmetic) isn't modelled — the card credits zero
-// EV for that rider. The +N{p} grant on the next attack action carries the card's value.
 
 package cards
 
@@ -26,6 +23,9 @@ func (ForceSightRed) Attack() int             { return 0 }
 func (ForceSightRed) Defense() int            { return 2 }
 func (ForceSightRed) Types() card.TypeSet     { return forceSightTypes }
 func (ForceSightRed) GoAgain() bool           { return true }
+
+// not implemented: arsenal-gated Opt 2
+func (ForceSightRed) NotImplemented() {}
 func (ForceSightRed) Play(s *sim.TurnState, self *sim.CardState) {
 	grantNextAttackActionBonus(s, 3)
 	s.ApplyAndLogEffectiveAttack(self)
@@ -41,6 +41,9 @@ func (ForceSightYellow) Attack() int             { return 0 }
 func (ForceSightYellow) Defense() int            { return 2 }
 func (ForceSightYellow) Types() card.TypeSet     { return forceSightTypes }
 func (ForceSightYellow) GoAgain() bool           { return true }
+
+// not implemented: arsenal-gated Opt 2
+func (ForceSightYellow) NotImplemented() {}
 func (ForceSightYellow) Play(s *sim.TurnState, self *sim.CardState) {
 	grantNextAttackActionBonus(s, 2)
 	s.ApplyAndLogEffectiveAttack(self)
@@ -56,6 +59,9 @@ func (ForceSightBlue) Attack() int             { return 0 }
 func (ForceSightBlue) Defense() int            { return 2 }
 func (ForceSightBlue) Types() card.TypeSet     { return forceSightTypes }
 func (ForceSightBlue) GoAgain() bool           { return true }
+
+// not implemented: arsenal-gated Opt 2
+func (ForceSightBlue) NotImplemented() {}
 func (ForceSightBlue) Play(s *sim.TurnState, self *sim.CardState) {
 	grantNextAttackActionBonus(s, 1)
 	s.ApplyAndLogEffectiveAttack(self)

@@ -2,10 +2,6 @@
 // Printed power: Red 4, Yellow 3, Blue 2.
 // Text: "When Aether Slash attacks, if a 'non-attack' action card was pitched to play it, deal 1
 // arcane damage to any target."
-//
-// Pitch-to-play attribution isn't tracked: any non-attack action in Pitched satisfies the
-// rider, even when another card in the chain is the one that actually consumed it. Same
-// approximation as Runic Reaping.
 
 package cards
 
@@ -27,6 +23,11 @@ func (AetherSlashRed) Attack() int             { return 4 }
 func (AetherSlashRed) Defense() int            { return 3 }
 func (AetherSlashRed) Types() card.TypeSet     { return aetherSlashTypes }
 func (AetherSlashRed) GoAgain() bool           { return false }
+
+// not implemented: Pitched scan can fire the +1 arcane rider whenever any non-attack action is in
+// Pitched, regardless of which pitched card actually paid for Aether Slash (over-credits when both
+// an attack and a non-attack action are pitched)
+func (AetherSlashRed) NotImplemented() {}
 func (AetherSlashRed) Play(s *sim.TurnState, self *sim.CardState) {
 	s.ApplyAndLogEffectiveAttack(self)
 	aetherSlashApplyRider(s, self)
@@ -42,6 +43,11 @@ func (AetherSlashYellow) Attack() int             { return 3 }
 func (AetherSlashYellow) Defense() int            { return 3 }
 func (AetherSlashYellow) Types() card.TypeSet     { return aetherSlashTypes }
 func (AetherSlashYellow) GoAgain() bool           { return false }
+
+// not implemented: Pitched scan can fire the +1 arcane rider whenever any non-attack action is in
+// Pitched, regardless of which pitched card actually paid for Aether Slash (over-credits when both
+// an attack and a non-attack action are pitched)
+func (AetherSlashYellow) NotImplemented() {}
 func (AetherSlashYellow) Play(s *sim.TurnState, self *sim.CardState) {
 	s.ApplyAndLogEffectiveAttack(self)
 	aetherSlashApplyRider(s, self)
@@ -57,6 +63,11 @@ func (AetherSlashBlue) Attack() int             { return 2 }
 func (AetherSlashBlue) Defense() int            { return 3 }
 func (AetherSlashBlue) Types() card.TypeSet     { return aetherSlashTypes }
 func (AetherSlashBlue) GoAgain() bool           { return false }
+
+// not implemented: Pitched scan can fire the +1 arcane rider whenever any non-attack action is in
+// Pitched, regardless of which pitched card actually paid for Aether Slash (over-credits when both
+// an attack and a non-attack action are pitched)
+func (AetherSlashBlue) NotImplemented() {}
 func (AetherSlashBlue) Play(s *sim.TurnState, self *sim.CardState) {
 	s.ApplyAndLogEffectiveAttack(self)
 	aetherSlashApplyRider(s, self)
