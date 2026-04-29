@@ -557,4 +557,5 @@ const (
 	FakeCostlyAttack
 	FakePitchOneDR
 	FakeHugeAttack
+	FakeBluePitch
 )
