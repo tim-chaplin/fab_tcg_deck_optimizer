@@ -11,9 +11,11 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 )
 
-// BenchmarkAnnealRoundOnViseraiV4 is BenchmarkAnnealRound anchored on a real saved deck
-// (mydecks/viserai_v4.json) instead of a Random() Viserai pool. The unreachable baseline
-// forces every sampled mutation to drain end-to-end.
+// BenchmarkAnnealRoundOnViseraiV4 mimics anneal's per-round workload anchored on
+// mydecks/viserai_v4.json: build the mutation pool, run the first sampleSize mutations
+// through IterateParallel against an unreachable baseline so the worker pool drains every
+// sampled mutation end-to-end. This is the gold-standard anneal bench — the workload PGO
+// profiles target and the canonical reference for measuring per-mutation-eval changes.
 //
 // To refresh cmd/fabsim/default.pgo (the profile fabsim builds with via -pgo=auto):
 //
