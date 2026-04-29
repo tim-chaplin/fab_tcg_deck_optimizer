@@ -23,7 +23,7 @@ import (
 // Tests that pitching a single blue and playing Spring Load fires the +3{p} rider.
 func TestHandState_SpringLoadAlonePitchEmptiesHand(t *testing.T) {
 	d := sim.New(heroes.Viserai{}, nil, fillerDeck())
-	hand := []sim.Card{testutils.BlueAttack{}, cards.SpringLoadRed{}}
+	hand := []sim.Card{testutils.BluePitch{}, cards.SpringLoadRed{}}
 	if got := d.EvalOneTurnForTesting(0, nil, hand).PrevTurnValue; got != 5 {
 		t.Fatalf("PrevTurnValue = %d, want 5 (Spring Load 2 + rider 3)", got)
 	}
@@ -32,11 +32,11 @@ func TestHandState_SpringLoadAlonePitchEmptiesHand(t *testing.T) {
 // Tests that a card committed to blocking counts as out-of-hand for Spring Load's rider.
 func TestHandState_BlockerEmptiesHandForSpringLoad(t *testing.T) {
 	d := sim.New(heroes.Viserai{}, nil, fillerDeck())
-	hand := []sim.Card{testutils.BlueAttack{}, testutils.BlueAttack{}, cards.SpringLoadRed{}}
-	// Incoming = 3 → one BlueAttack defends for 3, the other is pitched, Spring Load
-	// resolves with empty hand. Value = 5 (Spring Load + rider) + 3 (blocked).
-	if got := d.EvalOneTurnForTesting(3, nil, hand).PrevTurnValue; got != 8 {
-		t.Fatalf("PrevTurnValue = %d, want 8 (Spring Load 2 + rider 3 + blocked 3)", got)
+	hand := []sim.Card{testutils.BluePitch{}, cards.DodgeBlue{}, cards.SpringLoadRed{}}
+	// Incoming = 3 → BluePitch pitched (3 res), Dodge played as DR for 2 prevented,
+	// Spring Load resolves with empty hand. Value = 5 (Spring Load + rider) + 2 (Dodge).
+	if got := d.EvalOneTurnForTesting(3, nil, hand).PrevTurnValue; got != 7 {
+		t.Fatalf("PrevTurnValue = %d, want 7 (Spring Load 2 + rider 3 + Dodge 2)", got)
 	}
 }
 
@@ -44,11 +44,11 @@ func TestHandState_BlockerEmptiesHandForSpringLoad(t *testing.T) {
 func TestHandState_UpcomingChainStepBlocksFirstSpringLoadRider(t *testing.T) {
 	d := sim.New(heroes.Viserai{}, nil, fillerDeck())
 	hand := []sim.Card{
-		testutils.BlueAttack{},
+		testutils.BluePitch{},
 		cards.FlyingHighBlue{},
 		cards.SpringLoadRed{}, cards.SpringLoadRed{},
 	}
-	// Pitch BlueAttack (3 res) → fund Flying High (0) + Spring Load × 2 (1 + 1).
+	// Pitch BluePitch (3 res) → fund Flying High (0) + Spring Load × 2 (1 + 1).
 	// Chain order [FH, SL1, SL2]: at SL1's Play, SL2 is upcoming → Hand non-empty,
 	// rider blocked. At SL2's Play, hand is empty → rider fires. Value = 0 + 2 + 5 = 7.
 	if got := d.EvalOneTurnForTesting(0, nil, hand).PrevTurnValue; got != 7 {
@@ -61,12 +61,12 @@ func TestHandState_UpcomingChainStepBlocksFirstSpringLoadRider(t *testing.T) {
 func TestHandState_MidChainDrawBlocksSpringLoadRider(t *testing.T) {
 	d := sim.New(heroes.Viserai{}, nil, fillerDeck())
 	hand := []sim.Card{
-		testutils.BlueAttack{},
+		testutils.BluePitch{},
 		cards.FlyingHighBlue{},
 		cards.SnatchRed{},
 		cards.SpringLoadRed{},
 	}
-	// Pitch BlueAttack (3 res) → fund Flying High (0) + Snatch (0) + Spring Load (1).
+	// Pitch BluePitch (3 res) → fund Flying High (0) + Snatch (0) + Spring Load (1).
 	// Either chain order keeps Spring Load's rider blocked:
 	//   [FH, SL, Snatch] — SL plays before Snatch, Snatch in upcoming → Hand non-empty.
 	//   [FH, Snatch, SL] — Snatch hits, draws into Hand → SL sees the drawn card.
@@ -80,18 +80,18 @@ func TestHandState_MidChainDrawBlocksSpringLoadRider(t *testing.T) {
 // Tests that a card stuck in hand (no profitable role) keeps Spring Load's rider off.
 func TestHandState_HeldCardBlocksSpringLoadRider(t *testing.T) {
 	d := sim.New(heroes.Viserai{}, nil, fillerDeck())
-	hand := []sim.Card{testutils.BlueAttack{}, testutils.BlueAttack{}, cards.SpringLoadRed{}}
-	// Same hand as TestHandState_BlockerEmptiesHandForSpringLoad but with incoming = 0,
-	// so the Defend role can't profitably absorb the second BlueAttack — it sits Held in
-	// the hand at Spring Load's Play, blocking the rider. Value = Spring Load's base 2.
+	hand := []sim.Card{testutils.BluePitch{}, cards.DodgeBlue{}, cards.SpringLoadRed{}}
+	// Same hand as TestHandState_BlockerEmptiesHandForSpringLoad but with incoming = 0
+	// so there's no damage for Dodge to defend against. Per the test's stated intent,
+	// Dodge sits Held → hand non-empty at Spring Load's Play → rider blocked. Value = 2.
 	//
-	// Caveat: the optimizer may still find chain [BlueAttack, SpringLoad] pitching the
-	// other BlueAttack, where the BA-attacker plays first and Spring Load (with the right
-	// hand snapshot) sees Hand == []. That path scores 1 + 5 = 6, beating the held-card
-	// scenario above. If we want this test to genuinely pin the held-card case, we likely
-	// need a "block" card the optimizer can't repurpose as an attacker — happy to swap
-	// the setup based on what you intended.
+	// Caveat: under the strict "used to Block → out of hand" reading, the optimizer can
+	// still commit Dodge to the Defend role even with 0 incoming (Dodge's DR cost is 0,
+	// so it plays for free and prevents 0). That empties the hand and fires the rider
+	// for Value 5. Whether a no-op Defend assignment should still count as "stuck in
+	// hand" is a sim-semantics call beyond the chain-step Hand snapshot — flagged for
+	// review.
 	if got := d.EvalOneTurnForTesting(0, nil, hand).PrevTurnValue; got != 2 {
-		t.Fatalf("PrevTurnValue = %d, want 2 (Spring Load base 2; rider blocked by held BlueAttack)", got)
+		t.Fatalf("PrevTurnValue = %d, want 2 (Spring Load base 2; rider blocked by held Dodge)", got)
 	}
 }
