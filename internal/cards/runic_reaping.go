@@ -17,9 +17,6 @@
 //     BonusAttack (or Dominate, etc.), and LikelyToHit needs to see those grants. Play
 //     registers an EphemeralAttackTrigger; the handler runs after the target's Play and
 //     reads target.EffectiveAttack / target.EffectiveDominate.
-//
-// Pitch-to-play attribution isn't tracked: any attack-typed card in Pitched satisfies the
-// +1{p} rider.
 
 package cards
 
@@ -96,7 +93,7 @@ func runicReapingPlay(s *sim.TurnState, selfState *sim.CardState, source sim.Car
 		s.LogPlay(selfState)
 		return
 	}
-	for _, p := range s.Pitched {
+	for _, p := range selfState.PitchedToPlay {
 		if p.Types().Has(card.TypeAttack) {
 			target.BonusAttack++
 			break
