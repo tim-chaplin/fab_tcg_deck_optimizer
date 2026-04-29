@@ -68,6 +68,16 @@ func (e *Evaluator) findBest(hero Hero, weapons []Weapon, hand []Card, incomingD
 	// so a post-hoc promotion would fill arsenal. Candidates need both a Value/leftover tie and
 	// some way to end with arsenal occupied to displace it.
 	bestHasHeld := n > 0
+	// bestArsenal tracks the running winner's end-of-chain arsenal slot. Seeded with the
+	// initial best's value so a no-feasible-leaf search keeps the arsenal-in card; updated
+	// per new-best leaf with the leaf's arsenalAtChainStart. Read by the willOccupy
+	// comparison so we don't have to materialise best.State.Arsenal until findBest exits.
+	bestArsenal := arsenalCardIn
+	// bestLeftoverRunechants is the running winner's end-of-chain Runechant count —
+	// seeded with the carryover (the seed's Runechants) and updated per new-best leaf.
+	// Read by beatsBest's tiebreaker; threading it as a scalar lets the recurse defer
+	// best.State.* slice writes until the single post-recurse clone.
+	bestLeftoverRunechants := runechantCarryover
 	// bestFutureValuePlayed tracks how many AddsFutureValue cards the current best is
 	// playing (Role=Attack). Seeded 0 because the initial best assigns every card Held. The
 	// beatsBest tiebreaker prefers partitions that play MORE future-value cards at equal
@@ -75,6 +85,9 @@ func (e *Evaluator) findBest(hero Hero, weapons []Weapon, hand []Card, incomingD
 	// score, so without this bias a lone sigil loses to Held → arsenal promotion on the
 	// arsenal-occupancy tiebreak.
 	bestFutureValuePlayed := 0
+	// seenFeasible gates the post-recurse cloneCarryState — when no leaf promoted,
+	// bufs.findBestCarryScratch is unwritten and best.State stays at the seed value.
+	seenFeasible := false
 	for i := 0; i < n; i++ {
 		best.BestLine[i] = CardAssignment{Card: hand[i], Role: Held}
 	}
@@ -132,16 +145,27 @@ func (e *Evaluator) findBest(hero Hero, weapons []Weapon, hand []Card, incomingD
 				futureValuePlayed++
 			}
 			willOccupy := arsenalCard != nil || hasHeld
-			bestWillOccupy := best.State.Arsenal != nil || bestHasHeld
-			if !beatsBest(v, leftoverRunechants, futureValuePlayed, willOccupy, best, bestFutureValuePlayed, bestWillOccupy) {
+			bestWillOccupy := bestArsenal != nil || bestHasHeld
+			if !beatsBest(
+				v, leftoverRunechants, futureValuePlayed, willOccupy,
+				best.Value, bestLeftoverRunechants, bestFutureValuePlayed, bestWillOccupy,
+			) {
 				return
 			}
 			best.Value = v
 			bestSwung = swung
-			// Adopt the winner's CarryState wholesale; arsenal-in occupancy overrides the
-			// snapshot's Arsenal so an arsenal-in card that stayed is preserved.
-			best.State = carry
-			best.State.Arsenal = arsenalCard
+			// Copy the winner's CarryState into bufs.findBestCarryScratch so subsequent
+			// (non-winning) leaves' bestAttackWithWeapons calls — which clobber
+			// bufs.bestCarryScratch — can't disturb the running winner. findBest clones
+			// the scratch into best.State once at exit so the returned TurnSummary owns
+			// independent backing.
+			copyCarryStateInto(&bufs.findBestCarryScratch, carry)
+			seenFeasible = true
+			// Arsenal-in occupancy overrides the snapshot's Arsenal so an arsenal-in
+			// card that stayed is preserved.
+			bufs.findBestCarryScratch.Arsenal = arsenalCard
+			bestArsenal = arsenalCard
+			bestLeftoverRunechants = leftoverRunechants
 			bestHasHeld = hasHeld
 			bestFutureValuePlayed = futureValuePlayed
 			// Cards and FromArsenal flags were populated at construction; Role is the only
@@ -185,6 +209,14 @@ func (e *Evaluator) findBest(hero Hero, weapons []Weapon, hand []Card, incomingD
 	}
 	recurse(0, 0, 0)
 	best.SwungWeapons = bestSwung
+	// Promote the running winner's CarryState into best.State. Inner-loop new-bests wrote
+	// into bufs.findBestCarryScratch (allocation-free per leaf via copyCarryStateInto);
+	// this single cloneCarryState gives the returned TurnSummary independent backing
+	// arrays. seenFeasible=false leaves the seed best.State (allocated at the top) in
+	// place — that's the correct fallback when no leaf produced a feasible chain.
+	if seenFeasible {
+		best.State = cloneCarryState(bufs.findBestCarryScratch)
+	}
 	// Stamp Cacheable last from the AND-aggregated sticky bit so every leaf the search
 	// touched (feasible or rejected) contributes. The post-hoc arsenal promotion below
 	// doesn't run a chain, so it doesn't move the bit.
@@ -309,17 +341,20 @@ func findArsenalCard(rolesBuf []Role, arsenalCardIn Card, n int) Card {
 // order: Value → leftover runechants (future arcane) → more AddsFutureValue cards played
 // (hidden later-turn payoff the current-turn Value misses) → arsenal slot ending occupied
 // (saves a hand slot next refill; covers both arsenal-in-stayed and Held-for-promotion).
-func beatsBest(v, leftoverRunechants, futureValuePlayed int, willOccupyArsenal bool, best TurnSummary, bestFutureValuePlayed int, bestWillOccupyArsenal bool) bool {
-	if v > best.Value {
+// beatsBest compares a candidate leaf's outputs against the running winner's. The
+// winner's stats arrive as scalars so callers can track the running winner without
+// materialising a TurnSummary on every leaf.
+func beatsBest(v, leftoverRunechants, futureValuePlayed int, willOccupyArsenal bool, bestValue, bestLeftoverRunechants, bestFutureValuePlayed int, bestWillOccupyArsenal bool) bool {
+	if v > bestValue {
 		return true
 	}
-	if v < best.Value {
+	if v < bestValue {
 		return false
 	}
-	if leftoverRunechants > best.State.Runechants {
+	if leftoverRunechants > bestLeftoverRunechants {
 		return true
 	}
-	if leftoverRunechants < best.State.Runechants {
+	if leftoverRunechants < bestLeftoverRunechants {
 		return false
 	}
 	if futureValuePlayed > bestFutureValuePlayed {
@@ -461,4 +496,3 @@ func containsDefenseReaction(cards []Card) bool {
 	}
 	return false
 }
-

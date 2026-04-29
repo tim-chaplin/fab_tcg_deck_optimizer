@@ -75,10 +75,17 @@ type attackBufs struct {
 	// bestCarryScratch is the mask-combo-level sliding window inside
 	// bestAttackWithWeapons: each new-best (pmask, wmask) update copies carryWinnerScratch
 	// into this scratch via copyCarryStateInto (allocation-free after the first sizing).
-	// At the end of the leaf, bestCarryScratch is cloned via cloneCarryState so the
-	// returned CarryState owns independent backing — one alloc per leaf with a feasible
-	// chain.
+	// bestAttackWithWeapons returns it as an alias — invalidated by the next call into
+	// bestAttackWithWeapons against the same bufs, so callers that need the data to
+	// outlive the next call must copy it out.
 	bestCarryScratch CarryState
+	// findBestCarryScratch is findBest's running-winner sliding window. When the recurse
+	// promotes a new-best leaf, copyCarryStateInto writes the leaf's CarryState (an alias
+	// to bestCarryScratch) into this scratch so later (non-winning) leaves whose
+	// bestAttackWithWeapons call clobbers bestCarryScratch can't disturb the running
+	// winner. findBest clones this scratch once at exit so the returned TurnSummary's
+	// State owns independent backing.
+	findBestCarryScratch CarryState
 }
 
 func newAttackBufs(handSize, weaponCount int, weapons []Weapon) *attackBufs {

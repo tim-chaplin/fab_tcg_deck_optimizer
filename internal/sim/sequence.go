@@ -169,11 +169,12 @@ func bestAttackWithWeapons(hero Hero, weapons []Weapon, attackers, defenders, pi
 		// poisons the result regardless of attack-feasibility.
 		return 0, 0, 0, chainBudget{}, nil, CarryState{}, false, defenseCacheable
 	}
-	// Clone bufs.bestCarryScratch into the return value so the returned CarryState owns
-	// independent backing arrays — bufs.bestCarryScratch is shared across leaves and the
-	// next bestAttackWithWeapons call would otherwise overwrite this one's data.
-	bestCarry := cloneCarryState(bufs.bestCarryScratch)
-	return bestDealt, defenseDealt, bestLeftoverRunechants, bestBudget, bestSwung, bestCarry, true, ctx.cacheable && defenseCacheable
+	// Return bestCarryScratch as an alias — the caller (findBest's recurse, replayBest)
+	// must copy or clone before the next bestAttackWithWeapons call against the same bufs.
+	// findBest's recurse copies the alias into bufs.findBestCarryScratch via
+	// copyCarryStateInto on a new-best leaf and clones once at end of findBest; the
+	// replayBest path consumes the alias before any second call to bestAttackWithWeapons.
+	return bestDealt, defenseDealt, bestLeftoverRunechants, bestBudget, bestSwung, bufs.bestCarryScratch, true, ctx.cacheable && defenseCacheable
 }
 
 // sequenceContext carries the stable per-partition-leaf environment: hero (for OnCardPlayed
