@@ -67,9 +67,10 @@ func PromoteRandomHandCardToArsenal(best *TurnSummary, startingHand []Card, arse
 }
 
 // BeatsBest re-exports beatsBest for sim_test consumers exercising the partition-tiebreak
-// policy in isolation.
+// policy in isolation. The shim accepts a TurnSummary and unwraps the (Value,
+// State.Runechants) scalars the in-package signature takes.
 func BeatsBest(v, leftoverRunechants, futureValuePlayed int, willOccupyArsenal bool, best TurnSummary, bestFutureValuePlayed int, bestWillOccupyArsenal bool) bool {
-	return beatsBest(v, leftoverRunechants, futureValuePlayed, willOccupyArsenal, best, bestFutureValuePlayed, bestWillOccupyArsenal)
+	return beatsBest(v, leftoverRunechants, futureValuePlayed, willOccupyArsenal, best.Value, best.State.Runechants, bestFutureValuePlayed, bestWillOccupyArsenal)
 }
 
 // PairSwapMutations re-exports pairSwapMutations for sim_test consumers.
