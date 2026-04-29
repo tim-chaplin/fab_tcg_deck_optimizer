@@ -3,8 +3,8 @@
 // Text: "When Aether Slash attacks, if a 'non-attack' action card was pitched to play it, deal 1
 // arcane damage to any target."
 //
-// Reads self.PitchedToPlay (via the PitchAttributionReader marker) to gate the +1 arcane
-// rider on a non-attack action funding THIS copy specifically.
+// Reads self.PitchedToPlay (the cards the chain runner attributed to funding THIS copy's
+// cost) to gate the +1 arcane rider.
 
 package cards
 
@@ -26,7 +26,6 @@ func (AetherSlashRed) Attack() int             { return 4 }
 func (AetherSlashRed) Defense() int            { return 3 }
 func (AetherSlashRed) Types() card.TypeSet     { return aetherSlashTypes }
 func (AetherSlashRed) GoAgain() bool           { return false }
-func (AetherSlashRed) ReadsPitchAttribution()  {}
 func (AetherSlashRed) Play(s *sim.TurnState, self *sim.CardState) {
 	s.ApplyAndLogEffectiveAttack(self)
 	aetherSlashApplyRider(s, self)
@@ -42,7 +41,6 @@ func (AetherSlashYellow) Attack() int             { return 3 }
 func (AetherSlashYellow) Defense() int            { return 3 }
 func (AetherSlashYellow) Types() card.TypeSet     { return aetherSlashTypes }
 func (AetherSlashYellow) GoAgain() bool           { return false }
-func (AetherSlashYellow) ReadsPitchAttribution()  {}
 func (AetherSlashYellow) Play(s *sim.TurnState, self *sim.CardState) {
 	s.ApplyAndLogEffectiveAttack(self)
 	aetherSlashApplyRider(s, self)
@@ -58,7 +56,6 @@ func (AetherSlashBlue) Attack() int             { return 2 }
 func (AetherSlashBlue) Defense() int            { return 3 }
 func (AetherSlashBlue) Types() card.TypeSet     { return aetherSlashTypes }
 func (AetherSlashBlue) GoAgain() bool           { return false }
-func (AetherSlashBlue) ReadsPitchAttribution()  {}
 func (AetherSlashBlue) Play(s *sim.TurnState, self *sim.CardState) {
 	s.ApplyAndLogEffectiveAttack(self)
 	aetherSlashApplyRider(s, self)

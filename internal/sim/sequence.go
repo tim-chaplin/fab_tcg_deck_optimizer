@@ -228,18 +228,11 @@ type sequenceContext struct {
 	// attackPitchVals parallels attackPitchPerm: attackPitchVals[i] is the cached Pitch()
 	// of attackPitchPerm[i]. Permuted in lockstep with attackPitchPerm so the per-pop
 	// resource math reads ints instead of going through the Card.Pitch() interface call.
-	attackPitchVals []int
-	// populateAttribution flags chains where at least one card opted into
-	// PitchAttributionReader. When true, playSequenceWithMeta records per-card
-	// CardState.PitchedToPlay slice headers as it pops pitches and bestSequence enumerates
-	// every pitch ordering. When false, the inner loop still pops pitches to validate the
-	// ordering but skips the slice-header bookkeeping, and the outer loop stops on the first
-	// legal ordering.
-	populateAttribution bool
-	resourceBudget      int
-	runechantCarryover  int
-	incomingDamage      int
-	blockTotal          int
+	attackPitchVals    []int
+	resourceBudget     int
+	runechantCarryover int
+	incomingDamage     int
+	blockTotal         int
 	// arsenalInIdx is the index in the attackers slice (the slice passed to bestSequence) of
 	// the card that came from the arsenal slot at start of turn, or -1 when no arsenal-in card
 	// is in the chain. Lets bestSequence flag the matching pcBuf entry's FromArsenal as the
@@ -394,23 +387,10 @@ func (ctx *sequenceContext) bestSequence(attackers []Card) (int, int, bool) {
 	}
 	pcBuf := ctx.bufs.pcBuf[:n]
 	permMeta := ctx.bufs.permMeta[:n]
-	// needsAttribution flips true when at least one chain card opts into the
-	// PitchAttributionReader marker. Attribution-blind chains see identical Value across
-	// every pitch ordering (riders that read the unordered s.Pitched bag are unaffected by
-	// pop order), so the inner pitch Heap can stop on the first legal ordering AND
-	// playSequenceWithMeta skips per-card PitchedToPlay slice-header writes. Cards that opt
-	// in get the full enumeration plus per-card attribution.
-	needsAttribution := false
 	for idx, c := range attackers {
 		permMeta[idx] = attackerMetaPtrFor(c)
 		pcBuf[idx] = CardState{Card: c, FromArsenal: idx == ctx.arsenalInIdx}
-		if !needsAttribution {
-			if _, ok := c.(PitchAttributionReader); ok {
-				needsAttribution = true
-			}
-		}
 	}
-	ctx.populateAttribution = needsAttribution
 
 	best := 0
 	bestLeftoverRunechants := ctx.runechantCarryover
@@ -427,27 +407,20 @@ func (ctx *sequenceContext) bestSequence(attackers []Card) (int, int, bool) {
 	// eval runs the active attack permutation against every pitch ordering it can legally
 	// pair with — initial ordering plus Heap's enumeration over attackPitchPerm. The pitch
 	// Heap walks indices [0, pn) so 0 / 1 pitch counts naturally collapse to the single
-	// initial call without entering the inner loop body. When needsAttribution is false the
-	// inner pitch loop short-circuits the moment a legal ordering wins (every remaining
-	// pitch ordering produces identical Value); the outer attacker Heap still runs every
-	// permutation. The pitch-perm body is inlined twice (initial + post-swap) to keep the
-	// closure capture set small — single closure for the outer Heap to drive.
+	// initial call without entering the inner loop body. The pitch-perm body is inlined
+	// twice (initial + post-swap) to keep the closure capture set small — single closure
+	// for the outer Heap to drive.
 	eval := func() {
 		dmg, leftoverRunechants, _, legal := ctx.playSequenceWithMeta(n)
 		if ctx.cacheable && !state.IsCacheable() {
 			ctx.cacheable = false
 		}
-		if legal {
-			if !foundLegal || dmg > best ||
-				(dmg == best && leftoverRunechants > bestLeftoverRunechants) {
-				best = dmg
-				bestLeftoverRunechants = leftoverRunechants
-				foundLegal = true
-				ctx.carryWinner.SnapshotFromTurn(state)
-			}
-			if !needsAttribution {
-				return
-			}
+		if legal && (!foundLegal || dmg > best ||
+			(dmg == best && leftoverRunechants > bestLeftoverRunechants)) {
+			best = dmg
+			bestLeftoverRunechants = leftoverRunechants
+			foundLegal = true
+			ctx.carryWinner.SnapshotFromTurn(state)
 		}
 		var pc [8]int
 		pi := 0
@@ -464,17 +437,12 @@ func (ctx *sequenceContext) bestSequence(attackers []Card) (int, int, bool) {
 				if ctx.cacheable && !state.IsCacheable() {
 					ctx.cacheable = false
 				}
-				if legal {
-					if !foundLegal || dmg > best ||
-						(dmg == best && leftoverRunechants > bestLeftoverRunechants) {
-						best = dmg
-						bestLeftoverRunechants = leftoverRunechants
-						foundLegal = true
-						ctx.carryWinner.SnapshotFromTurn(state)
-					}
-					if !needsAttribution {
-						return
-					}
+				if legal && (!foundLegal || dmg > best ||
+					(dmg == best && leftoverRunechants > bestLeftoverRunechants)) {
+					best = dmg
+					bestLeftoverRunechants = leftoverRunechants
+					foundLegal = true
+					ctx.carryWinner.SnapshotFromTurn(state)
 				}
 				pc[pi]++
 				pi = 0
@@ -564,13 +532,10 @@ func (ctx *sequenceContext) playSequenceWithMeta(n int) (damage int, leftoverRun
 	pcBuf := ctx.bufs.pcBuf
 	ptrBuf := ctx.bufs.ptrBuf
 	meta := ctx.bufs.permMeta[:n]
-	populateAttribution := ctx.populateAttribution
 	for i := 0; i < n; i++ {
 		pcBuf[i].GrantedGoAgain = false
 		pcBuf[i].BonusAttack = 0
-		if populateAttribution {
-			pcBuf[i].PitchedToPlay = nil
-		}
+		pcBuf[i].PitchedToPlay = nil
 	}
 	played := ptrBuf[:n]
 	// Per-permutation reset: full-state rewrite. Hand and Deck are deep-copied so cards can
@@ -582,34 +547,23 @@ func (ctx *sequenceContext) playSequenceWithMeta(n int) (damage int, leftoverRun
 	pitchIdx := 0
 	pn := len(pitchPerm)
 	carry := ctx.resourceBudget
-	// attrBuf is the per-permutation flat backing for pc.PitchedToPlay slices, used only
-	// when populateAttribution is true. Pre-sized once at construction to handSize+1 so
-	// append never reallocates — the slice headers pcBuf entries hold stay valid for the
-	// duration of this permutation.
+	// attrBuf is the per-permutation flat backing for pc.PitchedToPlay slices. Pre-sized
+	// once at construction to handSize+1 so append never reallocates — the slice headers
+	// pcBuf entries hold stay valid for the duration of this permutation.
 	attrBuf := ctx.bufs.pitchAttrBuf[:0]
 	for i, pc := range played {
 		m := meta[i]
 		cost := m.costAt(state)
-		if populateAttribution {
-			attrStart := len(attrBuf)
-			for carry < cost {
-				if pitchIdx >= pn {
-					return 0, 0, 0, false
-				}
-				attrBuf = append(attrBuf, pitchPerm[pitchIdx])
-				carry += pitchVals[pitchIdx]
-				pitchIdx++
+		attrStart := len(attrBuf)
+		for carry < cost {
+			if pitchIdx >= pn {
+				return 0, 0, 0, false
 			}
-			pc.PitchedToPlay = attrBuf[attrStart:len(attrBuf)]
-		} else {
-			for carry < cost {
-				if pitchIdx >= pn {
-					return 0, 0, 0, false
-				}
-				carry += pitchVals[pitchIdx]
-				pitchIdx++
-			}
+			attrBuf = append(attrBuf, pitchPerm[pitchIdx])
+			carry += pitchVals[pitchIdx]
+			pitchIdx++
 		}
+		pc.PitchedToPlay = attrBuf[attrStart:len(attrBuf)]
 		carry -= cost
 
 		state.CardsRemaining = played[i+1:]

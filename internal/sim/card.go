@@ -176,19 +176,6 @@ type Dominator interface {
 	Dominate()
 }
 
-// PitchAttributionReader is an optional marker. Cards whose printed text gates on which
-// pitched cards funded THIS card's cost ("if a non-attack action card was pitched to play
-// it") opt in. The marker's only job is to tell the chain runner to enumerate pitch
-// orderings inside each attack permutation so the rider's input — CardState.PitchedToPlay
-// — varies. Without any markers in a chain, every pitch ordering yields the same Value
-// and the runner picks the first valid ordering for cheap. Cards that scan the unordered
-// pitch bag (`s.Pitched`) for "if any X was pitched this turn"-style riders don't need
-// this marker — those reads aren't position-sensitive and stay correct under any
-// ordering.
-type PitchAttributionReader interface {
-	ReadsPitchAttribution()
-}
-
 // HasDominate reports whether c is printed with the Dominate keyword — a type assertion to
 // the Dominator marker. Used by CardState.EffectiveDominate and any future scanner that
 // needs the static printed-keyword check without going through a CardState.
