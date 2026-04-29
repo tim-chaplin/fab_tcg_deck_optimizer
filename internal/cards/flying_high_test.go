@@ -70,3 +70,19 @@ func TestFlyingHigh_ColorMatchGrantsBonus(t *testing.T) {
 		}
 	}
 }
+
+// TestFlyingHigh_GrantsGoAgainToWeaponSwing pins the "your next attack" wording: the next
+// scheduled attack can be a weapon swing (TypeWeapon, no TypeAction), and Flying High
+// must grant go again to it. Weapons have no printed pitch so the "+1{p} if matching
+// colour" rider never fires; only the go-again grant lands.
+func TestFlyingHigh_GrantsGoAgainToWeaponSwing(t *testing.T) {
+	pc := &sim.CardState{Card: testutils.RunebladeWeapon{}}
+	s := sim.TurnState{CardsRemaining: []*sim.CardState{pc}}
+	(FlyingHighRed{}).Play(&s, &sim.CardState{Card: FlyingHighRed{}})
+	if !pc.GrantedGoAgain {
+		t.Error("weapon swing should get go again ('your next attack' has no 'action card' qualifier)")
+	}
+	if pc.BonusAttack != 0 {
+		t.Errorf("weapon BonusAttack = %d, want 0 (weapons have no pitch)", pc.BonusAttack)
+	}
+}

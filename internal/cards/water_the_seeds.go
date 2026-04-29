@@ -17,13 +17,14 @@ import (
 
 var waterTheSeedsTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeAttack)
 
-// grantWaterTheSeedsBonus adds +1 to the first scheduled attack action card with base {p}
-// of 1 or less — the buff lands on that card's BonusAttack so EffectiveAttack and
-// LikelyToHit see the buffed power on the buffed card, not on the granter. Fizzles
-// silently when no qualifying target follows.
+// grantWaterTheSeedsBonus adds +1 to the first scheduled attack with base {p} of 1 or
+// less — attack action card OR weapon swing per the "your next attack" wording. The buff
+// lands on that card's BonusAttack so EffectiveAttack and LikelyToHit see the buffed
+// power on the buffed card, not on the granter. Fizzles silently when no qualifying
+// target follows.
 func grantWaterTheSeedsBonus(s *sim.TurnState) {
 	for _, pc := range s.CardsRemaining {
-		if !pc.Card.Types().IsAttackAction() {
+		if !pc.Card.Types().IsAttack() {
 			continue
 		}
 		if pc.Card.Attack() <= 1 {

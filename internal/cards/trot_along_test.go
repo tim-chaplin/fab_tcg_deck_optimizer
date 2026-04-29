@@ -43,3 +43,15 @@ func TestTrotAlong_LowPowerAttackGrantsGoAgain(t *testing.T) {
 		t.Error("target GrantedGoAgain = false, want true (power 3 ≤ 3)")
 	}
 }
+
+// TestTrotAlong_GrantsGoAgainToWeaponSwing pins the "your next attack" wording: a weapon
+// swing (TypeWeapon, no TypeAction) with base power ≤ 3 qualifies. RunebladeWeapon's
+// Attack() is 0 so the power gate trivially passes.
+func TestTrotAlong_GrantsGoAgainToWeaponSwing(t *testing.T) {
+	target := &sim.CardState{Card: testutils.RunebladeWeapon{}}
+	s := sim.TurnState{CardsRemaining: []*sim.CardState{target}}
+	(TrotAlongBlue{}).Play(&s, &sim.CardState{Card: TrotAlongBlue{}})
+	if !target.GrantedGoAgain {
+		t.Error("weapon swing should get go again ('your next attack' has no 'action card' qualifier)")
+	}
+}

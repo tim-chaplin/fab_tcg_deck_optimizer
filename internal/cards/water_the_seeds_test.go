@@ -67,12 +67,25 @@ func TestWaterTheSeeds_SkipsPastNonMatchingAttacks(t *testing.T) {
 	}
 }
 
-// TestWaterTheSeeds_NonAttackInRemainingIgnored: only attack-action cards in CardsRemaining count
-// as potential triggers.
+// TestWaterTheSeeds_NonAttackInRemainingIgnored: a generic action card in CardsRemaining
+// doesn't qualify as "your next attack" — the rider walks past it without firing.
 func TestWaterTheSeeds_NonAttackInRemainingIgnored(t *testing.T) {
 	s := &sim.TurnState{CardsRemaining: []*sim.CardState{{Card: testutils.GenericAction()}}}
 	(WaterTheSeedsRed{}).Play(s, &sim.CardState{Card: WaterTheSeedsRed{}})
 	if got := s.Value; got != 3 {
 		t.Errorf("Play() = %d, want 3 (non-attack ignored)", got)
+	}
+}
+
+// TestWaterTheSeeds_BonusLandsOnWeaponSwing pins the "your next attack" wording: a
+// weapon swing (TypeWeapon, no TypeAction) with base power ≤ 1 qualifies for the +1
+// rider just like an attack action card does. RunebladeWeapon's Attack() is 0 so the
+// power gate trivially passes.
+func TestWaterTheSeeds_BonusLandsOnWeaponSwing(t *testing.T) {
+	target := &sim.CardState{Card: testutils.RunebladeWeapon{}}
+	s := &sim.TurnState{CardsRemaining: []*sim.CardState{target}}
+	(WaterTheSeedsRed{}).Play(s, &sim.CardState{Card: WaterTheSeedsRed{}})
+	if got := target.BonusAttack; got != 1 {
+		t.Errorf("weapon BonusAttack = %d, want 1 (no 'action card' qualifier on 'next attack')", got)
 	}
 }
