@@ -31,26 +31,24 @@ func TestPitchAttribution_AetherSlashAttackPitchDoesNotFireRider(t *testing.T) {
 
 // Tests that a single pitch paying for multiple Aether Slashes activates the bonus on each.
 func TestPitchAttribution_OneNonAttackPitchFundsMultipleAetherSlashes(t *testing.T) {
+	d := sim.New(heroes.Viserai{}, nil, fillerDeck())
+
 	withNonAttack := []sim.Card{
 		cards.MauvrionSkiesRed{},
 		cards.AetherSlashRed{}, cards.AetherSlashRed{},
 		cards.MaleficIncantationBlue{},
 	}
+	if got := d.EvalOneTurnForTesting(0, nil, withNonAttack).PrevTurnValue; got != 15 {
+		t.Errorf("non-attack pitch: PrevTurnValue = %d, want 15", got)
+	}
+
 	withAttack := []sim.Card{
 		cards.MauvrionSkiesRed{},
 		cards.AetherSlashRed{}, cards.AetherSlashRed{},
 		testutils.BlueAttack{},
 	}
-
-	d := sim.New(heroes.Viserai{}, nil, fillerDeck())
-	gotNonAttack := d.EvalOneTurnForTesting(0, nil, withNonAttack).PrevTurnValue
-	gotAttack := d.EvalOneTurnForTesting(0, nil, withAttack).PrevTurnValue
-
-	if diff := gotNonAttack - gotAttack; diff != 2 {
-		t.Fatalf("value diff = %d, want 2 (one Aether Slash rider per spent resource)\n"+
-			"\tnon-attack pitch (Malefic) value = %d\n"+
-			"\tattack pitch (BlueAttack) value = %d",
-			diff, gotNonAttack, gotAttack)
+	if got := d.EvalOneTurnForTesting(0, nil, withAttack).PrevTurnValue; got != 13 {
+		t.Errorf("attack pitch: PrevTurnValue = %d, want 13", got)
 	}
 }
 
