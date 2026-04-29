@@ -404,13 +404,9 @@ func (ctx *sequenceContext) bestSequence(attackers []Card) (int, int, bool) {
 	pitchPerm := ctx.attackPitchPerm
 	pitchVals := ctx.attackPitchVals
 	pn := len(pitchPerm)
-	// eval runs the active attack permutation against every pitch ordering it can legally
-	// pair with — initial ordering plus Heap's enumeration over attackPitchPerm. The pitch
-	// Heap walks indices [0, pn) so 0 / 1 pitch counts naturally collapse to the single
-	// initial call without entering the inner loop body. The pitch-perm body is inlined
-	// twice (initial + post-swap) to keep the closure capture set small — single closure
-	// for the outer Heap to drive.
-	eval := func() {
+	// tryPitchOrdering plays the chain against the current attack-permutation × pitch-
+	// permutation pair, threads cacheable, and folds a legal result into the running best.
+	tryPitchOrdering := func() {
 		dmg, leftoverRunechants, _, legal := ctx.playSequenceWithMeta(n)
 		if ctx.cacheable && !state.IsCacheable() {
 			ctx.cacheable = false
@@ -422,6 +418,13 @@ func (ctx *sequenceContext) bestSequence(attackers []Card) (int, int, bool) {
 			foundLegal = true
 			ctx.carryWinner.SnapshotFromTurn(state)
 		}
+	}
+	// eval runs the active attack permutation against every pitch ordering — initial
+	// ordering plus Heap's enumeration over attackPitchPerm. pn ∈ {0,1} naturally collapse
+	// to the single initial call (the inner loop's bound rejects). The pitch Heap swaps
+	// pitchPerm and pitchVals in lockstep so the cached Pitch() values stay aligned.
+	eval := func() {
+		tryPitchOrdering()
 		var pc [8]int
 		pi := 0
 		for pi < pn {
@@ -433,17 +436,7 @@ func (ctx *sequenceContext) bestSequence(attackers []Card) (int, int, bool) {
 					pitchPerm[pc[pi]], pitchPerm[pi] = pitchPerm[pi], pitchPerm[pc[pi]]
 					pitchVals[pc[pi]], pitchVals[pi] = pitchVals[pi], pitchVals[pc[pi]]
 				}
-				dmg, leftoverRunechants, _, legal := ctx.playSequenceWithMeta(n)
-				if ctx.cacheable && !state.IsCacheable() {
-					ctx.cacheable = false
-				}
-				if legal && (!foundLegal || dmg > best ||
-					(dmg == best && leftoverRunechants > bestLeftoverRunechants)) {
-					best = dmg
-					bestLeftoverRunechants = leftoverRunechants
-					foundLegal = true
-					ctx.carryWinner.SnapshotFromTurn(state)
-				}
+				tryPitchOrdering()
 				pc[pi]++
 				pi = 0
 			} else {
