@@ -13,6 +13,14 @@ import (
 
 var springLoadTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeAttack)
 
+// springLoadPlay applies the +3{p} 'no cards in hand' rider, then emits the chain step.
+func springLoadPlay(s *sim.TurnState, self *sim.CardState) {
+	if len(s.Hand) == 0 {
+		self.BonusAttack += 3
+	}
+	s.ApplyAndLogEffectiveAttack(self)
+}
+
 type SpringLoadRed struct{}
 
 func (SpringLoadRed) ID() ids.CardID          { return ids.SpringLoadRed }
@@ -23,11 +31,8 @@ func (SpringLoadRed) Attack() int             { return 2 }
 func (SpringLoadRed) Defense() int            { return 2 }
 func (SpringLoadRed) Types() card.TypeSet     { return springLoadTypes }
 func (SpringLoadRed) GoAgain() bool           { return false }
-
-// not implemented: +3{p} 'no cards in hand' rider never fires
-func (SpringLoadRed) NotImplemented() {}
-func (c SpringLoadRed) Play(s *sim.TurnState, self *sim.CardState) {
-	s.ApplyAndLogEffectiveAttack(self)
+func (SpringLoadRed) Play(s *sim.TurnState, self *sim.CardState) {
+	springLoadPlay(s, self)
 }
 
 type SpringLoadYellow struct{}
@@ -40,11 +45,8 @@ func (SpringLoadYellow) Attack() int             { return 2 }
 func (SpringLoadYellow) Defense() int            { return 2 }
 func (SpringLoadYellow) Types() card.TypeSet     { return springLoadTypes }
 func (SpringLoadYellow) GoAgain() bool           { return false }
-
-// not implemented: +3{p} 'no cards in hand' rider never fires
-func (SpringLoadYellow) NotImplemented() {}
-func (c SpringLoadYellow) Play(s *sim.TurnState, self *sim.CardState) {
-	s.ApplyAndLogEffectiveAttack(self)
+func (SpringLoadYellow) Play(s *sim.TurnState, self *sim.CardState) {
+	springLoadPlay(s, self)
 }
 
 type SpringLoadBlue struct{}
@@ -57,9 +59,6 @@ func (SpringLoadBlue) Attack() int             { return 2 }
 func (SpringLoadBlue) Defense() int            { return 2 }
 func (SpringLoadBlue) Types() card.TypeSet     { return springLoadTypes }
 func (SpringLoadBlue) GoAgain() bool           { return false }
-
-// not implemented: +3{p} 'no cards in hand' rider never fires
-func (SpringLoadBlue) NotImplemented() {}
-func (c SpringLoadBlue) Play(s *sim.TurnState, self *sim.CardState) {
-	s.ApplyAndLogEffectiveAttack(self)
+func (SpringLoadBlue) Play(s *sim.TurnState, self *sim.CardState) {
+	springLoadPlay(s, self)
 }

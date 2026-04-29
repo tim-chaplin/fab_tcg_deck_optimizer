@@ -1,6 +1,9 @@
 // Visit the Blacksmith — Generic Action. Cost 0, Pitch 3, Defense 2. Only printed in Blue.
 //
 // Text: "Your next sword attack this turn gains +1{p}. **Go again**"
+//
+// "Sword attack" matches both sword-typed attack action cards and sword-typed weapon swings —
+// the rules text says "attack" with no "action card" qualifier.
 
 package cards
 
@@ -22,7 +25,13 @@ func (VisitTheBlacksmithBlue) Attack() int             { return 0 }
 func (VisitTheBlacksmithBlue) Defense() int            { return 2 }
 func (VisitTheBlacksmithBlue) Types() card.TypeSet     { return visitTheBlacksmithTypes }
 func (VisitTheBlacksmithBlue) GoAgain() bool           { return true }
-
-// not implemented: next-sword-attack +1{p} grant (weapon chain not peeked)
-func (VisitTheBlacksmithBlue) NotImplemented()                            {}
-func (VisitTheBlacksmithBlue) Play(s *sim.TurnState, self *sim.CardState) { s.LogPlay(self) }
+func (VisitTheBlacksmithBlue) Play(s *sim.TurnState, self *sim.CardState) {
+	for _, pc := range s.CardsRemaining {
+		t := pc.Card.Types()
+		if t.Has(card.TypeSword) && t.IsAttack() {
+			pc.BonusAttack++
+			break
+		}
+	}
+	s.LogPlay(self)
+}
