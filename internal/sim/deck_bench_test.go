@@ -40,13 +40,11 @@ func BenchmarkAnnealRound(b *testing.B) {
 		// first improvement, but the per-mutation-eval cost is the same; a full-drain
 		// sample just exposes that cost cleanly.
 		unreachableBaseline = 1_000_000.0
-		// mutationSampleSize sized so a `-benchtime=2x -count=2` invocation finishes in
-		// ~30s on a typical 8-core box. With adaptive SE=0.01 each parallel-shuffle eval
-		// runs ~8k shuffles (one chunk-merge barrier, no second round) for ~2.5s wall;
-		// 1 mutation × 2.5s × 2x × 2 count + AllMutations build ≈ 30s. Bumping to 2
-		// blew past 60s due to fixed startup + non-linear scaling, so 1 is the sweet
-		// spot for "fits in a minute, gives stable adaptive-vs-fixed signal."
-		mutationSampleSize = 1
+		// mutationSampleSize=8 matches the worker_sweep test depth so apples-to-apples
+		// comparisons against main (which uses pure mutation parallelism with per-worker
+		// caches) measure the same total work. 8 mutations × ~1.5s parallel = ~12s per
+		// iteration, fitting under a minute at -benchtime=2x.
+		mutationSampleSize = 8
 	)
 
 	setupRNG := rand.New(rand.NewSource(42))
