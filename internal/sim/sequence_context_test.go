@@ -5,12 +5,14 @@ package sim
 // common shape is centralised. Lives in a sim test file (rather than sim_test) so
 // exports_test.go's NewSequenceContextForTest wrapper can reach it.
 func newSequenceContextForTest(h Hero, pitched, deck []Card, resourceBudget, runechantCarryover, chainLen int) *sequenceContext {
+	bufs := newAttackBufs(chainLen, 0, nil)
 	return &sequenceContext{
 		hero:               h,
 		pitched:            pitched,
 		deck:               deck,
-		bufs:               newAttackBufs(chainLen, 0, nil),
+		bufs:               bufs,
 		resourceBudget:     resourceBudget,
 		runechantCarryover: runechantCarryover,
+		carryWinner:        &bufs.carryWinnerScratch,
 	}
 }

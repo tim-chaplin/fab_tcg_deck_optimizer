@@ -53,8 +53,10 @@ type attackBufs struct {
 	// Per-permutation backing slices reused across every Heap's-algorithm permutation in a
 	// leaf. resetStateForPermutation seeds the TurnState's slice fields from these (via
 	// append([:0], ...)) so an unmodified permutation never reallocates: only mid-chain
-	// growth past the pre-sized cap forces a new backing array. snapshotCarry clones the
-	// winning permutation's slices before the next permutation overwrites them.
+	// growth past the pre-sized cap forces a new backing array. snapshotCarryInto
+	// reuses carryWinnerScratch's backing arrays before the next permutation overwrites
+	// the per-permutation backings; the mask-combo new-best clones via cloneCarryState
+	// when promoting carryWinnerScratch to bestCarry.
 	deckBacking         []Card
 	handBacking         []Card
 	graveBacking        []Card
@@ -63,6 +65,20 @@ type attackBufs struct {
 	logBacking          []LogEntry
 	auraTriggersBacking []AuraTrigger
 	ephemeralBacking    []EphemeralAttackTrigger
+	// carryWinnerScratch is the per-Best-call sliding window into which bestSequence
+	// snapshots the current winning permutation's end-of-chain state. The slice backing
+	// arrays grow once across the lifetime of the Evaluator's cached attackBufs and stay
+	// reused on every snapshotCarryInto call so per-Best snapshots avoid reallocation.
+	// Cleared via resetCarryStateScratch at the top of each bestSequence call so a
+	// stale value can't leak through when no permutation lands a new best.
+	carryWinnerScratch CarryState
+	// bestCarryScratch is the mask-combo-level sliding window inside
+	// bestAttackWithWeapons: each new-best (pmask, wmask) update copies carryWinnerScratch
+	// into this scratch via copyCarryStateInto (allocation-free after the first sizing).
+	// At the end of the leaf, bestCarryScratch is cloned via cloneCarryState so the
+	// returned CarryState owns independent backing — one alloc per leaf with a feasible
+	// chain.
+	bestCarryScratch CarryState
 }
 
 func newAttackBufs(handSize, weaponCount int, weapons []Weapon) *attackBufs {
