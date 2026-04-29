@@ -4,8 +4,8 @@
 // Text: "You may look at the defending hero's hand. If Frontline Scout is played from arsenal, it
 // gains **go again**."
 //
-// Modelling: opposing-hand peek (pure information, no own-side EV) isn't modelled. Standard
-// played-from-arsenal go-again (docs/dev-standards.md).
+// Modelling: hand-peek isn't modelled. Standard played-from-arsenal go-again
+// (docs/dev-standards.md).
 
 package cards
 
@@ -36,6 +36,9 @@ func (FrontlineScoutRed) Attack() int             { return 3 }
 func (FrontlineScoutRed) Defense() int            { return 2 }
 func (FrontlineScoutRed) Types() card.TypeSet     { return frontlineScoutTypes }
 func (FrontlineScoutRed) GoAgain() bool           { return false }
+
+// not implemented: opposing-hand-peek rider
+func (FrontlineScoutRed) NotImplemented() {}
 func (FrontlineScoutRed) Play(s *sim.TurnState, self *sim.CardState) {
 	frontlineScoutPlay(s, self)
 }
@@ -50,6 +53,9 @@ func (FrontlineScoutYellow) Attack() int             { return 2 }
 func (FrontlineScoutYellow) Defense() int            { return 2 }
 func (FrontlineScoutYellow) Types() card.TypeSet     { return frontlineScoutTypes }
 func (FrontlineScoutYellow) GoAgain() bool           { return false }
+
+// not implemented: opposing-hand-peek rider
+func (FrontlineScoutYellow) NotImplemented() {}
 func (FrontlineScoutYellow) Play(s *sim.TurnState, self *sim.CardState) {
 	frontlineScoutPlay(s, self)
 }
@@ -64,6 +70,9 @@ func (FrontlineScoutBlue) Attack() int             { return 1 }
 func (FrontlineScoutBlue) Defense() int            { return 2 }
 func (FrontlineScoutBlue) Types() card.TypeSet     { return frontlineScoutTypes }
 func (FrontlineScoutBlue) GoAgain() bool           { return false }
+
+// not implemented: opposing-hand-peek rider
+func (FrontlineScoutBlue) NotImplemented() {}
 func (FrontlineScoutBlue) Play(s *sim.TurnState, self *sim.CardState) {
 	frontlineScoutPlay(s, self)
 }
