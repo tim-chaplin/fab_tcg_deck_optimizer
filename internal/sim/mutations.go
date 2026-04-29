@@ -55,7 +55,7 @@ func AllMutations(d *Deck, maxCopies int, legal func(Card) bool) []Mutation {
 // one. Loadouts are canonicalised by weaponKey (names sorted) and processed in key order so
 // the output is deterministic regardless of map-iteration randomness.
 func weaponLoadoutMutations(d *Deck) []Mutation {
-	loadouts := weaponLoadouts(AllWeapons)
+	loadouts := weaponLoadouts(legalWeapons())
 	currentKey := weaponKey(d.Weapons)
 	type keyedLoadout struct {
 		key     string
