@@ -81,3 +81,32 @@ following plumbing is uniform and lives once in `internal/card/card.go`:
 If a comment's rationale would otherwise cite "matches the pattern in foo.go, bar.go,
 baz.go", factor the shared rule into this file and cite only the local behaviour at the call
 site.
+
+## Test layout
+
+Two homes for tests:
+
+- **Unit tests** live next to the code they cover (`internal/sim/foo_test.go` for
+  `internal/sim/foo.go`, `internal/cards/foo_test.go` for `internal/cards/foo.go`, etc.).
+  They may use the in-package `package sim` or the black-box `package sim_test` form. They
+  may exercise unexported helpers via test exports — but only when no public entry point
+  reaches the same behaviour. Each card under `internal/cards/` covers its own rider via a
+  unit test that calls the card's `Play` directly.
+- **End-to-end tests** live in the top-level `e2etest/` package. They exercise the
+  simulator through public entry points only: `(*Deck).EvalOneTurnForTesting` for chain
+  evaluation, `(*Deck).EvaluateWith` for full multi-turn runs. They use real heroes from
+  `internal/heroes` (e.g. `heroes.Viserai{}`) rather than package-private stubs. Anything
+  that would otherwise need an `exports_test.go` re-export goes here instead.
+
+`sim.Best` and `sim.BestWithTriggers` carry a "Test convention" doc paragraph pointing at
+`EvalOneTurnForTesting`. They aren't `// Deprecated:` because the simulator itself calls
+them internally; the convention is for new test code only. New e2e tests should not call
+`sim.Best` directly — they should drive the deck through `EvalOneTurnForTesting` so the
+test mirrors production's per-turn loop.
+
+### Test docstrings
+
+A test's doc comment is a single brief sentence stating the behavior under test, e.g.
+`// Tests that a single pitch paying for multiple Aether Slashes activates the bonus on
+each.` Inputs, expected values, and the chain shape are visible in the test body and
+don't belong in the comment. The same rule applies to unit tests and e2e tests.

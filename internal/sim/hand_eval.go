@@ -20,6 +20,11 @@ import ()
 // runechantCarryover is the Runechant token count carrying in from the previous turn.
 // TurnSummary.State.Runechants is the count at end of the chosen chain; feed it back as
 // the next turn's carryover.
+//
+// Test convention: end-to-end tests should drive the chain runner through
+// (*Deck).EvalOneTurnForTesting (deck-level entry point, mirrors production's per-turn
+// loop). Calling Best directly is reserved for Best's own unit tests and for production
+// plumbing inside this package.
 func Best(hero Hero, weapons []Weapon, hand []Card, incomingDamage int, deck []Card, runechantCarryover int, arsenalCardIn Card) TurnSummary {
 	return sharedEvaluator.BestWithTriggers(hero, weapons, hand, incomingDamage, deck, runechantCarryover, arsenalCardIn, nil)
 }
@@ -27,6 +32,7 @@ func Best(hero Hero, weapons []Weapon, hand []Card, incomingDamage int, deck []C
 // BestWithTriggers is Best plus an explicit priorAuraTriggers input — the AuraTriggers
 // carrying in from the previous turn. Mid-chain triggers (Malefic Incantation's
 // TriggerAttackAction rune, etc.) may fire and contribute damage to this turn's Value.
+// Same test convention as Best: e2e tests should go through (*Deck).EvalOneTurnForTesting.
 func BestWithTriggers(hero Hero, weapons []Weapon, hand []Card, incomingDamage int, deck []Card, runechantCarryover int, arsenalCardIn Card, priorAuraTriggers []AuraTrigger) TurnSummary {
 	return sharedEvaluator.BestWithTriggers(hero, weapons, hand, incomingDamage, deck, runechantCarryover, arsenalCardIn, priorAuraTriggers)
 }

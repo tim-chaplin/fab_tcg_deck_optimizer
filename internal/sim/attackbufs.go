@@ -52,9 +52,24 @@ type shapeBufs struct {
 	// enumeration. Re-sliced to [:0] at the start of every leaf to eliminate a per-leaf alloc.
 	pitchedValsScratch []int
 	pitchedBuf         []Card
-	attackersBuf       []Card
-	defendersBuf       []Card
-	heldBuf            []Card
+	// pitchPermBuf is the per-leaf pitch-ordering scratch — the chain runner permutes
+	// pitched cards in place via Heap's algorithm, just like the attacker permutation. Sized
+	// to handSize+1 so any pitch-role count the partition produces fits.
+	pitchPermBuf []Card
+	// pitchPermValsBuf parallels pitchPermBuf: pitchPermValsBuf[i] is the cached Pitch() of
+	// pitchPermBuf[i]. The pitch Heap swaps both slices together so playSequenceWithMeta
+	// can fetch pitch values without re-entering the Card.Pitch() interface call on every
+	// pop — millions of permutations make per-pop dispatch one of the costliest paths.
+	pitchPermValsBuf []int
+	// pitchAttrBuf is the per-permutation flat backing array for per-CardState PitchedToPlay
+	// slices. Layout: card 0's slice = pitchAttrBuf[s0:s1], card 1's = pitchAttrBuf[s1:s2],
+	// adjacent windows. Total length across cards = pitches consumed (≤ len(pitched)). Sized
+	// at construction to handSize+1 so append never reallocates the backing array — slice
+	// headers stored on CardState stay valid across the active permutation.
+	pitchAttrBuf []Card
+	attackersBuf []Card
+	defendersBuf []Card
+	heldBuf      []Card
 	// defenseGravScratch backs state.Graveyard during DR Plays. Reset via [:0]+append per
 	// iteration so card effects can freely mutate their view without leaking into the next one.
 	defenseGravScratch []Card
@@ -175,6 +190,9 @@ func newAttackBufs(handSize, weaponCount int, weapons []Weapon) *attackBufs {
 			addsFutureValueBuf: make([]bool, handSize+1),
 			pitchedValsScratch: make([]int, 0, handSize+1),
 			pitchedBuf:         make([]Card, 0, handSize+1),
+			pitchPermBuf:       make([]Card, 0, handSize+1),
+			pitchPermValsBuf:   make([]int, 0, handSize+1),
+			pitchAttrBuf:       make([]Card, 0, handSize+1),
 			attackersBuf:       make([]Card, 0, handSize+1),
 			defendersBuf:       make([]Card, 0, handSize+1),
 			heldBuf:            make([]Card, 0, handSize+1),

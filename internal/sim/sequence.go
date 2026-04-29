@@ -103,9 +103,23 @@ func bestAttackWithWeapons(hero Hero, weapons []Weapon, attackers, defenders, pi
 	for pmask := 0; pmask < phaseCount; pmask++ {
 		phase := splitPitchesAcrossPhases(pitchedVals, pmask, phaseCount)
 
-		ctx.resourceBudget = phase.attackBudget
-		ctx.hasAttackPitches = phase.hasAttackPitches
-		ctx.maxAttackPitch = phase.maxAttackPitch
+		// Production path uses real pitched cards via attackPitchPerm; resourceBudget is the
+		// synthetic-carry escape hatch reserved for tests, so leave it 0 here.
+		ctx.resourceBudget = 0
+		// Populate attackPitchPerm with the pmask-selected attack-phase pitches in original
+		// order, plus a parallel int slice with their Pitch() values cached. bestSequence's
+		// nested Heap permutes both slices in lockstep.
+		attackPitchPerm := bufs.pitchPermBuf[:0]
+		attackPitchVals := bufs.pitchPermValsBuf[:0]
+		for i, c := range pitched {
+			if phaseCount > 1 && pmask&(1<<i) != 0 {
+				continue
+			}
+			attackPitchPerm = append(attackPitchPerm, c)
+			attackPitchVals = append(attackPitchVals, pitchedVals[i])
+		}
+		ctx.attackPitchPerm = attackPitchPerm
+		ctx.attackPitchVals = attackPitchVals
 
 		for wmask := 0; wmask < 1<<len(weapons); wmask++ {
 			weaponCost := bufs.weaponCosts[wmask] // weapons are static-cost
@@ -178,14 +192,21 @@ func bestAttackWithWeapons(hero Hero, weapons []Weapon, attackers, defenders, pi
 }
 
 // sequenceContext carries the stable per-partition-leaf environment: hero (for OnCardPlayed
-// triggers), pitched / deck refs for Card.Play, shared scratch buffers, and the numeric budgets
-// that persist across permutation and mask iterations. Built once per leaf so the hot inner
-// calls (playSequence, bestSequence) shrink to their varying inputs and tracking outputs.
+// triggers), pitched / deck refs for Card.Play, shared scratch buffers, and the active pitch
+// ordering that funds the attack chain. Built once per leaf so the hot inner calls
+// (playSequence, bestSequence) shrink to their varying inputs and tracking outputs.
 //
-// resourceBudget / hasAttackPitches / maxAttackPitch are rewritten by bestAttackWithWeapons on
-// each phase-mask iteration: they fund the attack chain and let playSequenceWithMeta reject
-// permutations whose final residual breaks FaB's pitch-timing rule (excess >= max pitch means
-// one pitch could have been Held instead).
+// attackPitchPerm is rewritten by bestAttackWithWeapons on each pmask iteration with the
+// attack-phase pitched cards in their original order, then permuted in place by bestSequence's
+// pitch Heap loop. playSequenceWithMeta walks it left-to-right, popping cards as costs come up
+// and carrying any over-pitch forward; per-card attribution lands in CardState.PitchedToPlay.
+// A permutation is rejected if a chain step needs more resources than the remaining pitch
+// pool can supply or if any pitch card stays unpopped at end of chain (FaB's pitch-timing
+// rule).
+//
+// resourceBudget is the synthetic starting carry — 0 in the production path (real pitches
+// fund every chain step) but set by tests that drive playSequence with a budget number
+// instead of a real pitched bag.
 type sequenceContext struct {
 	hero          Hero
 	pitched, deck []Card
@@ -199,12 +220,19 @@ type sequenceContext struct {
 	// during Play would mutate state.Arsenal, but the simulator doesn't model that today.
 	arsenalAtChainStart Card
 	bufs                *attackBufs
-	resourceBudget      int
-	runechantCarryover  int
-	incomingDamage      int
-	blockTotal          int
-	hasAttackPitches    bool
-	maxAttackPitch      int
+	// attackPitchPerm is the active pitch ordering for the attack phase — the pmask-selected
+	// subset of ctx.pitched, populated by bestAttackWithWeapons in original order and
+	// permuted in place by bestSequence's pitch Heap loop. Backing array is bufs.pitchPermBuf
+	// so per-leaf reuse never allocates.
+	attackPitchPerm []Card
+	// attackPitchVals parallels attackPitchPerm: attackPitchVals[i] is the cached Pitch()
+	// of attackPitchPerm[i]. Permuted in lockstep with attackPitchPerm so the per-pop
+	// resource math reads ints instead of going through the Card.Pitch() interface call.
+	attackPitchVals    []int
+	resourceBudget     int
+	runechantCarryover int
+	incomingDamage     int
+	blockTotal         int
 	// arsenalInIdx is the index in the attackers slice (the slice passed to bestSequence) of
 	// the card that came from the arsenal slot at start of turn, or -1 when no arsenal-in card
 	// is in the chain. Lets bestSequence flag the matching pcBuf entry's FromArsenal as the
@@ -343,10 +371,10 @@ func (ctx *sequenceContext) resetStateForPermutation() {
 func (ctx *sequenceContext) bestSequence(attackers []Card) (int, int, bool) {
 	n := len(attackers)
 	if n == 0 {
-		// No attackers means no chain costs are deducted — the attack phase spends zero from the
-		// budget. If any attack-phase pitches exist they over-pay (residual == budget >= maxPitch
-		// since the budget is the sum of those pitches); pitch-timing fails.
-		if ctx.hasAttackPitches && ctx.resourceBudget >= ctx.maxAttackPitch {
+		// No chain steps means no costs to pay. Any unspent pitch card in the attack phase
+		// breaks FaB's pitch-timing rule — pitching is only legal to fund a cost on the stack
+		// — so a non-empty attackPitchPerm rejects the empty chain.
+		if len(ctx.attackPitchPerm) > 0 {
 			return 0, 0, false
 		}
 		// Empty-chain leaves still need a populated CarryState — the cache-replay path
@@ -373,25 +401,48 @@ func (ctx *sequenceContext) bestSequence(attackers []Card) (int, int, bool) {
 	// next SnapshotFromTurn refills via append([:0], src...) without allocating.
 	ctx.carryWinner.Reset()
 	state := ctx.bufs.state
-	eval := func() {
+	pitchPerm := ctx.attackPitchPerm
+	pitchVals := ctx.attackPitchVals
+	pn := len(pitchPerm)
+	// tryPitchOrdering plays the chain against the current attack-permutation × pitch-
+	// permutation pair, threads cacheable, and folds a legal result into the running best.
+	tryPitchOrdering := func() {
 		dmg, leftoverRunechants, _, legal := ctx.playSequenceWithMeta(n)
-		// AND in this permutation's cacheable status before the legality gate — even an
-		// illegal permutation that read hidden state during Play poisons the leaf, since
-		// the solver's pre-screens didn't catch it and a real run would have reached that
-		// read. Short-circuited once already poisoned to avoid the field read on chains
-		// that already failed cacheability.
 		if ctx.cacheable && !state.IsCacheable() {
 			ctx.cacheable = false
 		}
-		if !legal {
-			return
-		}
-		if !foundLegal || dmg > best ||
-			(dmg == best && leftoverRunechants > bestLeftoverRunechants) {
+		if legal && (!foundLegal || dmg > best ||
+			(dmg == best && leftoverRunechants > bestLeftoverRunechants)) {
 			best = dmg
 			bestLeftoverRunechants = leftoverRunechants
 			foundLegal = true
 			ctx.carryWinner.SnapshotFromTurn(state)
+		}
+	}
+	// eval runs the active attack permutation against every pitch ordering — initial
+	// ordering plus Heap's enumeration over attackPitchPerm. pn ∈ {0,1} naturally collapse
+	// to the single initial call (the inner loop's bound rejects). The pitch Heap swaps
+	// pitchPerm and pitchVals in lockstep so the cached Pitch() values stay aligned.
+	eval := func() {
+		tryPitchOrdering()
+		var pc [8]int
+		pi := 0
+		for pi < pn {
+			if pc[pi] < pi {
+				if pi&1 == 0 {
+					pitchPerm[0], pitchPerm[pi] = pitchPerm[pi], pitchPerm[0]
+					pitchVals[0], pitchVals[pi] = pitchVals[pi], pitchVals[0]
+				} else {
+					pitchPerm[pc[pi]], pitchPerm[pi] = pitchPerm[pi], pitchPerm[pc[pi]]
+					pitchVals[pc[pi]], pitchVals[pi] = pitchVals[pi], pitchVals[pc[pi]]
+				}
+				tryPitchOrdering()
+				pc[pi]++
+				pi = 0
+			} else {
+				pc[pi] = 0
+				pi++
+			}
 		}
 	}
 	eval()
@@ -433,8 +484,7 @@ func (ctx *sequenceContext) bestSequence(attackers []Card) (int, int, bool) {
 //     creation).
 //   - At end of the sequence, state.Runechants is the leftover count carrying into next turn.
 //
-// Resource flow: ctx.resourceBudget is the starting pool; each card deducts
-// attackerMeta.costAt(state). Negative remaining budget returns legal=false.
+// Resource flow lives on playSequenceWithMeta; this wrapper just forwards.
 //
 // Populates permMeta from order and then calls playSequenceWithMeta. The hot path
 // (bestSequence) builds meta once and calls playSequenceWithMeta directly to amortise
@@ -453,7 +503,15 @@ func (ctx *sequenceContext) playSequence(order []Card) (damage int, leftoverRune
 // playSequenceWithMeta runs the permutation currently held in ctx.bufs.pcBuf[:n] with
 // aligned permMeta[:n]. CardState (Card + FromArsenal) persists across permutations, so any
 // field a prior card's Play flips on a future card needs a per-permutation reset:
-// GrantedGoAgain (next-attack go-again grants) and BonusAttack (next-attack +N{p} grants).
+// GrantedGoAgain (next-attack go-again grants), BonusAttack (next-attack +N{p} grants),
+// and PitchedToPlay (per-card pitch attribution recomputed against the active pitch
+// ordering).
+//
+// Resource flow: each chain step's cost is paid by pitchPool.pay against the pool seeded
+// from ctx.attackPitchPerm × ctx.attackPitchVals (and ctx.resourceBudget for the test-
+// only synthetic-budget path). The pool returns the pitched cards that funded this step,
+// which land directly on pc.PitchedToPlay. End-of-chain validity: pool.idx must equal
+// pool.n — a pitched card held back without funding any cost rejects the permutation.
 //
 // Damage flows through state.Value: the dispatcher records the chain step's
 // Play+BonusAttack contribution via state.AddLogEntry; pre-trigger handlers (hero, aura)
@@ -466,20 +524,27 @@ func (ctx *sequenceContext) playSequenceWithMeta(n int) (damage int, leftoverRun
 	for i := 0; i < n; i++ {
 		pcBuf[i].GrantedGoAgain = false
 		pcBuf[i].BonusAttack = 0
+		pcBuf[i].PitchedToPlay = nil
 	}
 	played := ptrBuf[:n]
 	// Per-permutation reset: full-state rewrite. Hand and Deck are deep-copied so cards can
 	// mutate them freely without leaking to the next permutation. state.Value resets to 0.
 	ctx.resetStateForPermutation()
 	state := ctx.bufs.state
-	resources := ctx.resourceBudget
+	pool := pitchPool{
+		perm:      ctx.attackPitchPerm,
+		vals:      ctx.attackPitchVals,
+		n:         len(ctx.attackPitchPerm),
+		remaining: ctx.resourceBudget,
+		attr:      ctx.bufs.pitchAttrBuf[:0],
+	}
 	for i, pc := range played {
 		m := meta[i]
-		cost := m.costAt(state)
-		resources -= cost
-		if resources < 0 {
+		contrib, ok := pool.pay(m.costAt(state))
+		if !ok {
 			return 0, 0, 0, false
 		}
+		pc.PitchedToPlay = contrib
 
 		state.CardsRemaining = played[i+1:]
 
@@ -550,11 +615,12 @@ func (ctx *sequenceContext) playSequenceWithMeta(n int) (damage int, leftoverRun
 		}
 	}
 
-	// Pitch-timing rule: every Pitch-role card must have paid for something on the stack. If the
-	// chain's leftover budget is at least the max attack-phase pitch, one pitch could have been
-	// Held instead — this permutation violates FaB's rules.
-	if ctx.hasAttackPitches && resources >= ctx.maxAttackPitch {
+	// Pitch-timing rule: every Pitch-role card must have paid for something on the stack. If
+	// the chain finished with pitches still queued, one of them was held back without funding
+	// any cost — illegal in FaB. Leftover carry on the front (frontRemaining > 0) is fine —
+	// that's the over-pitch surplus on the last popped card, not a held-back pitch.
+	if pool.idx < pool.n {
 		return 0, 0, 0, false
 	}
-	return state.Value, state.Runechants, resources, true
+	return state.Value, state.Runechants, pool.remaining, true
 }

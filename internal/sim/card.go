@@ -49,6 +49,15 @@ type CardState struct {
 	// into the chain step's (+N) so a buffed DR's block reflects the grant. Negative grants
 	// clamp at 0.
 	BonusDefense int
+	// PitchedToPlay is the pitched cards the chain runner attributed to paying this card's
+	// resource cost during the active permutation. Populated by the chain runner before each
+	// Card.Play: as costs come up, pitched cards are popped from the active pitch ordering
+	// (carrying over any excess to fund subsequent cards) and the popped slice is exposed
+	// here. Cards whose printed text gates on "if X was pitched to play this" iterate this
+	// slice instead of the unordered s.Pitched bag — the same pitched bag still lives on
+	// TurnState for cards that read it as a multiset. Empty for cards whose cost was fully
+	// paid by carry from a prior pitch.
+	PitchedToPlay []Card
 }
 
 // EffectiveGoAgain reports whether this card has Go again this turn — from printed text or a
