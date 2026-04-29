@@ -12,7 +12,12 @@ package sim
 //
 // Use:
 //
-//	r := runningCarry{scratch: &bufs.findBestCarryScratch, arsenal: arsenalSeed, hasHeld: n > 0, leftoverRunechants: runechantCarryover}
+//	r := runningCarry{
+//	    scratch:            &bufs.findBestCarryScratch,
+//	    arsenal:            arsenalSeed,
+//	    hasHeld:            n > 0,
+//	    leftoverRunechants: runechantCarryover,
+//	}
 //	for each candidate {
 //	    if !r.Beats(value, leftoverRunechants, futureValuePlayed, willOccupy) { continue }
 //	    r.Promote(value, leftoverRunechants, futureValuePlayed, hasHeld, arsenal, &carry)
@@ -52,7 +57,9 @@ type runningCarry struct {
 // higher Value wins; equal Value, higher leftoverRunechants wins; equal both, more
 // futureValuePlayed wins; equal all three, only displace if the candidate ends with
 // arsenal occupied AND the running winner doesn't.
-func (r *runningCarry) Beats(value, leftoverRunechants, futureValuePlayed int, willOccupy bool) bool {
+func (r *runningCarry) Beats(
+	value, leftoverRunechants, futureValuePlayed int, willOccupy bool,
+) bool {
 	if !r.seen {
 		// No candidate yet — any feasible leaf wins, regardless of stats.
 		return true
@@ -73,7 +80,10 @@ func (r *runningCarry) Beats(value, leftoverRunechants, futureValuePlayed int, w
 // Promote records the candidate as the new running winner. carry's slice contents are
 // copied into the scratch (allocation-free after the first sizing); arsenal overrides
 // the snapshot's Arsenal so an arsenal-in card that stayed is preserved.
-func (r *runningCarry) Promote(value, leftoverRunechants, futureValuePlayed int, hasHeld bool, arsenal Card, carry *CarryState) {
+func (r *runningCarry) Promote(
+	value, leftoverRunechants, futureValuePlayed int,
+	hasHeld bool, arsenal Card, carry *CarryState,
+) {
 	r.scratch.CopyFrom(carry)
 	r.scratch.Arsenal = arsenal
 	r.value = value

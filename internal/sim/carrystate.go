@@ -2,8 +2,7 @@ package sim
 
 // CarryState's reuse / clone helpers. CarryState owns its slice fields, so the methods
 // that copy it from various sources or duplicate it for ownership transfer live with the
-// type — adding a new persistent field on the struct means updating one method per
-// helper, not chasing four sibling free functions.
+// type — adding a new persistent field means updating one method per helper.
 //
 // The four helpers come in two pairs by allocation behavior:
 //

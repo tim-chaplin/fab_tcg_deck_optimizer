@@ -18,7 +18,7 @@ package sim
 //                       across iterations at that level via CarryState.CopyFrom; ownership
 //                       rules are documented per field.
 //
-// Embedded so call sites stay terse — bufs.pcBuf still works, no bufs.shape.pcBuf churn.
+// Embedded so call sites address fields directly (bufs.pcBuf) without a sub-struct prefix.
 
 // shapeBufs holds the buffers sized once at construction from (handSize, weapons). They
 // stay shape-stable across every call against this attackBufs and never need re-sizing.
