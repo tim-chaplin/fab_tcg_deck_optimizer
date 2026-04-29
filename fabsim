@@ -2,11 +2,6 @@
 # Convenience wrapper: run the fabsim CLI from the repo root without typing
 # `go run ./cmd/fabsim …`. Resolves to the repo root so it also works when
 # invoked from a subdirectory (e.g. ./fabsim from anywhere below the root).
-#
-# -pgo=auto applies cmd/fabsim/default.pgo (the captured anneal profile) at
-# build time. Go 1.21+ defaults to -pgo=auto already, but naming it here
-# documents the intent — drop the flag and you still get PGO; rename / move
-# default.pgo and you don't.
 set -e
 repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-exec go run -pgo=auto "$repo_root/cmd/fabsim" "$@"
+exec go run "$repo_root/cmd/fabsim" "$@"
