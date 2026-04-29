@@ -9,12 +9,7 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
 )
 
-// TestPitchAttribution_AetherSlashSingleNonAttackPitchFiresRider drives the chain runner
-// through (*Deck).EvalOneTurnForTesting: Aether Slash Red costs 1, Malefic Incantation Blue
-// pitches 3 (non-attack action), so the only feasible chain pitches Malefic to play Aether
-// Slash. Pitch attribution gives Aether Slash the Malefic pitch, firing the +1 arcane
-// rider — Aether Slash deals 4 (its base power) plus 1 (the rider). The Malefic pitch's
-// residual carry (3 - 1 = 2) is fine; it just goes unused.
+// Tests that a non-attack pitch funding Aether Slash activates the +1 arcane rider.
 func TestPitchAttribution_AetherSlashSingleNonAttackPitchFiresRider(t *testing.T) {
 	hand := []sim.Card{cards.AetherSlashRed{}, cards.MaleficIncantationBlue{}}
 	d := sim.New(heroes.Viserai{}, nil, fillerDeck())
@@ -24,10 +19,7 @@ func TestPitchAttribution_AetherSlashSingleNonAttackPitchFiresRider(t *testing.T
 	}
 }
 
-// TestPitchAttribution_AetherSlashAttackPitchDoesNotFireRider mirrors the previous test but
-// swaps Malefic for testutils.YellowAttack (pitch 2, attack-typed). Now no non-attack
-// pitch is available, so the rider can't fire under any ordering. The optimizer pitches
-// the Yellow Attack to fund Aether Slash; total damage is just Aether Slash's 4.
+// Tests that an attack-typed pitch funding Aether Slash does not activate the rider.
 func TestPitchAttribution_AetherSlashAttackPitchDoesNotFireRider(t *testing.T) {
 	hand := []sim.Card{cards.AetherSlashRed{}, testutils.YellowAttack{}}
 	d := sim.New(heroes.Viserai{}, nil, fillerDeck())
@@ -37,17 +29,7 @@ func TestPitchAttribution_AetherSlashAttackPitchDoesNotFireRider(t *testing.T) {
 	}
 }
 
-// TestPitchAttribution_OneNonAttackPitchFundsMultipleAetherSlashes verifies the pool-based
-// attribution rule: when Malefic Incantation Blue (pitch 3, non-attack action) funds two
-// Aether Slashes (cost 1 each) via [Mauvrion Skies, AS, AS], BOTH Aether Slashes see
-// Malefic in their PitchedToPlay slice — Malefic's resources flow across both 1-cost
-// payments. Comparing against the same hand with testutils.BlueAttack swapped in for
-// Malefic (same pitch value, attack-typed) isolates the rider's contribution: the diff
-// is exactly 2 (two riders firing at +1 arcane each).
-//
-// Mauvrion Skies grants go-again to the next runeblade attack action, which lets the
-// chain reach the second Aether Slash. The MS ephemeral fires once on AS#1 (creating 3
-// runechants) — a constant across both hands, so it cancels in the diff.
+// Tests that a single pitch paying for multiple Aether Slashes activates the bonus on each.
 func TestPitchAttribution_OneNonAttackPitchFundsMultipleAetherSlashes(t *testing.T) {
 	withNonAttack := []sim.Card{
 		cards.MauvrionSkiesRed{},

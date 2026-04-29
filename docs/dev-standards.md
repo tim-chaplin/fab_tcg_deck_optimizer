@@ -103,3 +103,10 @@ Two homes for tests:
 them internally; the convention is for new test code only. New e2e tests should not call
 `sim.Best` directly — they should drive the deck through `EvalOneTurnForTesting` so the
 test mirrors production's per-turn loop.
+
+### Test docstrings
+
+A test's doc comment is a single brief sentence stating the behavior under test, e.g.
+`// Tests that a single pitch paying for multiple Aether Slashes activates the bonus on
+each.` Inputs, expected values, and the chain shape are visible in the test body and
+don't belong in the comment. The same rule applies to unit tests and e2e tests.
