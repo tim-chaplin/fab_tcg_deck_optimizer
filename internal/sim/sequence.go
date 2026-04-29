@@ -515,14 +515,19 @@ func (ctx *sequenceContext) playSequence(order []Card) (damage int, leftoverRune
 // ordering).
 //
 // Resource flow: the chain's pitch pool is ctx.attackPitchPerm in its current Heap-permuted
-// order. carry starts at ctx.resourceBudget (0 in production, set by tests for synthetic
-// budgets) and grows whenever the cumulative cost out-runs it: pitch cards pop from
-// attackPitchPerm one at a time until carry covers the current step's cost, with the
-// popped slice landing on pc.PitchedToPlay so attribution-aware riders can read which
-// pitches funded this step. Carry between steps is fine — a 3-pitch funding two 1-cost
-// cards leaves 1 unspent on the second's PitchedToPlay (empty). At end of chain every
-// pitch must have popped (FaB's pitch-timing rule); a leftover pitched card rejects the
-// permutation.
+// order. Each chain step pays its cost by drawing from the front of the pool — popping new
+// pitches off attackPitchPerm one at a time when the front exhausts. Every pitched card
+// whose resources contribute (even partially) to a step's payment lands in that step's
+// PitchedToPlay slice. So pitching one 3-resource non-attack to fund three 1-cost plays
+// attributes the non-attack to all three, not just the one whose payment popped it.
+// Leftover front-of-pool resources between steps roll forward — they aren't wasted, just
+// reused. At end of chain every pitched CARD must have popped (FaB's pitch-timing rule);
+// a leftover pitched card rejects the permutation, but residual carry from the last
+// popped pitch is fine (it's surplus, not a held-back pitch).
+//
+// ctx.resourceBudget seeds the front-of-pool resources without any backing card. In
+// production it's always 0 (real pitches fund every step). Tests set it for synthetic-
+// budget plays that bypass the pitch pool entirely.
 //
 // Damage flows through state.Value: the dispatcher records the chain step's
 // Play+BonusAttack contribution via state.AddLogEntry; pre-trigger handlers (hero, aura)
@@ -546,7 +551,15 @@ func (ctx *sequenceContext) playSequenceWithMeta(n int) (damage int, leftoverRun
 	pitchVals := ctx.attackPitchVals
 	pitchIdx := 0
 	pn := len(pitchPerm)
-	carry := ctx.resourceBudget
+	// frontCard / frontRemaining track the unfunded balance of the partially-consumed
+	// pitched card carried over from a previous chain step. Between chain steps either
+	// (a) front is empty (frontCard==nil && frontRemaining==0) or (b) one pitched card sits
+	// at the front with leftover resources. Within a single chain step's payment, the
+	// front may pop and be replaced by the next pitch as carry exhausts. The synthetic
+	// budget path (resourceBudget != 0, tests with no real pitches) seeds frontRemaining
+	// with no backing card so attribution stays empty for those test plays.
+	var frontCard Card
+	frontRemaining := ctx.resourceBudget
 	// attrBuf is the per-permutation flat backing for pc.PitchedToPlay slices. Pre-sized
 	// once at construction to handSize+1 so append never reallocates — the slice headers
 	// pcBuf entries hold stay valid for the duration of this permutation.
@@ -555,16 +568,34 @@ func (ctx *sequenceContext) playSequenceWithMeta(n int) (damage int, leftoverRun
 		m := meta[i]
 		cost := m.costAt(state)
 		attrStart := len(attrBuf)
-		for carry < cost {
-			if pitchIdx >= pn {
-				return 0, 0, 0, false
+		// Pay this step's cost by drawing from the front of the pitch pool. Any pitched
+		// card whose resources contribute even partially to this step lands in the
+		// attribution slice — including the front carrying over from a prior step. So
+		// pitching one Malefic (3) to fund three 1-cost plays attributes Malefic to all
+		// three, not just the one whose payment popped it off the deck.
+		remaining := cost
+		for remaining > 0 {
+			if frontCard == nil && frontRemaining == 0 {
+				if pitchIdx >= pn {
+					return 0, 0, 0, false
+				}
+				frontCard = pitchPerm[pitchIdx]
+				frontRemaining = pitchVals[pitchIdx]
+				pitchIdx++
 			}
-			attrBuf = append(attrBuf, pitchPerm[pitchIdx])
-			carry += pitchVals[pitchIdx]
-			pitchIdx++
+			if frontCard != nil {
+				attrBuf = append(attrBuf, frontCard)
+			}
+			if frontRemaining > remaining {
+				frontRemaining -= remaining
+				remaining = 0
+			} else {
+				remaining -= frontRemaining
+				frontRemaining = 0
+				frontCard = nil
+			}
 		}
 		pc.PitchedToPlay = attrBuf[attrStart:len(attrBuf)]
-		carry -= cost
 
 		state.CardsRemaining = played[i+1:]
 
@@ -637,9 +668,10 @@ func (ctx *sequenceContext) playSequenceWithMeta(n int) (damage int, leftoverRun
 
 	// Pitch-timing rule: every Pitch-role card must have paid for something on the stack. If
 	// the chain finished with pitches still queued, one of them was held back without funding
-	// any cost — illegal in FaB.
+	// any cost — illegal in FaB. Leftover carry on the front (frontRemaining > 0) is fine —
+	// that's the over-pitch surplus on the last popped card, not a held-back pitch.
 	if pitchIdx < pn {
 		return 0, 0, 0, false
 	}
-	return state.Value, state.Runechants, carry, true
+	return state.Value, state.Runechants, frontRemaining, true
 }

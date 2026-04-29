@@ -37,6 +37,41 @@ func TestPitchAttribution_AetherSlashAttackPitchDoesNotFireRider(t *testing.T) {
 	}
 }
 
+// TestPitchAttribution_OneNonAttackPitchFundsMultipleAetherSlashes verifies the pool-based
+// attribution rule: when Malefic Incantation Blue (pitch 3, non-attack action) funds two
+// Aether Slashes (cost 1 each) via [Mauvrion Skies, AS, AS], BOTH Aether Slashes see
+// Malefic in their PitchedToPlay slice — Malefic's resources flow across both 1-cost
+// payments. Comparing against the same hand with testutils.BlueAttack swapped in for
+// Malefic (same pitch value, attack-typed) isolates the rider's contribution: the diff
+// is exactly 2 (two riders firing at +1 arcane each).
+//
+// Mauvrion Skies grants go-again to the next runeblade attack action, which lets the
+// chain reach the second Aether Slash. The MS ephemeral fires once on AS#1 (creating 3
+// runechants) — a constant across both hands, so it cancels in the diff.
+func TestPitchAttribution_OneNonAttackPitchFundsMultipleAetherSlashes(t *testing.T) {
+	withNonAttack := []sim.Card{
+		cards.MauvrionSkiesRed{},
+		cards.AetherSlashRed{}, cards.AetherSlashRed{},
+		cards.MaleficIncantationBlue{},
+	}
+	withAttack := []sim.Card{
+		cards.MauvrionSkiesRed{},
+		cards.AetherSlashRed{}, cards.AetherSlashRed{},
+		testutils.BlueAttack{},
+	}
+
+	d := sim.New(heroes.Viserai{}, nil, fillerDeck())
+	gotNonAttack := d.EvalOneTurnForTesting(0, nil, withNonAttack).PrevTurnValue
+	gotAttack := d.EvalOneTurnForTesting(0, nil, withAttack).PrevTurnValue
+
+	if diff := gotNonAttack - gotAttack; diff != 2 {
+		t.Fatalf("value diff = %d, want 2 (one Aether Slash rider per spent resource)\n"+
+			"\tnon-attack pitch (Malefic) value = %d\n"+
+			"\tattack pitch (BlueAttack) value = %d",
+			diff, gotNonAttack, gotAttack)
+	}
+}
+
 // fillerDeck is a no-op deck body for EvalOneTurnForTesting calls that supply their own
 // initialHand. The cards never enter play this turn (the caller's hand is the only thing
 // the chain runner sees) but EvalOneTurnForTesting still wants a non-empty Deck.Cards so
