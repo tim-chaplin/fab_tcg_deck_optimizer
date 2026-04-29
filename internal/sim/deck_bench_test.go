@@ -40,9 +40,11 @@ func BenchmarkAnnealRound(b *testing.B) {
 		// first improvement, but the per-mutation-eval cost is the same; a full-drain
 		// sample just exposes that cost cleanly.
 		unreachableBaseline = 1_000_000.0
-		// mutationSampleSize is small enough to keep iteration time tractable, large
-		// enough to amortise per-Best fixed costs across many distinct mutation states.
-		mutationSampleSize = 50
+		// mutationSampleSize=8 matches the worker_sweep test depth so apples-to-apples
+		// comparisons against main (which uses pure mutation parallelism with per-worker
+		// caches) measure the same total work. 8 mutations × ~1.5s parallel = ~12s per
+		// iteration, fitting under a minute at -benchtime=2x.
+		mutationSampleSize = 8
 	)
 
 	setupRNG := rand.New(rand.NewSource(42))
@@ -62,7 +64,7 @@ func BenchmarkAnnealRound(b *testing.B) {
 		// adaptive=true matches the production default; the shuffles arg is ignored in that mode.
 		_, _, _, found := IterateParallel(
 			context.Background(), mutations, unreachableBaseline, 0, 0,
-			0, incoming, 0,
+			0, incoming, 0, 0,
 			iterRNG.Int63(), nil, true,
 		)
 		if found {
@@ -110,7 +112,7 @@ func BenchmarkIterateImprovements(b *testing.B) {
 			mutations := AllMutations(best, maxCopies, nil)
 			d, avg, _, found := IterateParallel(
 				context.Background(), mutations, bestAvg, 0, 0,
-				shuffles, incoming, 0,
+				shuffles, incoming, 0, 0,
 				iterRNG.Int63(), nil, false,
 			)
 			if !found {

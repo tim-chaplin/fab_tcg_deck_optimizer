@@ -10,6 +10,7 @@ import (
 	"math"
 	"math/rand"
 	"sort"
+	"sync"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
 )
@@ -60,16 +61,21 @@ func (d *Deck) EvaluateAdaptiveWith(incomingDamage int, rng *rand.Rand, ev *Eval
 type shuffleStopper func(stats *Stats, runs int) bool
 
 const (
-	// adaptiveCheckInterval is how often (in shuffles) the adaptive stop check fires.
-	// Larger values mean we may overshoot the target SE by a few hundred shuffles; smaller
-	// values mean more histogram walks. 50 keeps overshoot small for low-variance decks
-	// where SE drops below target inside 200-300 shuffles.
+	// adaptiveCheckInterval is the per-worker chunk size in the parallel-shuffle path —
+	// after every numWorkers × adaptiveCheckInterval shuffles, the worker pool barrier-
+	// merges into d.Stats and runs the adaptive stop check. 50 is the empirical sweet
+	// spot: smaller values save shuffles by stopping closer to the SE convergence point
+	// (overshoot-cost decreases linearly with chunk size), but the barrier overhead
+	// flattens out below ~50 shuffles per worker per chunk. Going from 1000 → 50 cut
+	// the anneal-bench wall-clock by 2.4× because random Viserai decks converge in
+	// ~2000 shuffles instead of being forced to 8000 by a too-large chunk; going below
+	// 50 saves another few percent but the barrier-frequency tradeoff stops paying off.
 	adaptiveCheckInterval = 50
 	// adaptiveTargetSE is the standard-error target the adaptive shuffle path stops at.
-	// ±0.05 is roughly the precision useful for "is this deck ~13.5 vs ~13.6" comparisons;
-	// tighter than that pays diminishing returns. Hand-value sigma sits around 4-6, so
-	// SE = 0.05 typically converges inside 1k shuffles.
-	adaptiveTargetSE = 0.05
+	// ±0.01 is tight enough to distinguish small per-deck differences during anneal
+	// optimisation. Hand-value sigma sits around 4-6, so SE = 0.01 typically takes
+	// 5-7k shuffles to converge.
+	adaptiveTargetSE = 0.01
 	// adaptiveShufflesCap is the upper bound on the adaptive shuffle path. Caps a
 	// pathological high-variance regime that doesn't converge to adaptiveTargetSE — the
 	// run still terminates at this many shuffles even if the SE target was never hit.
@@ -114,132 +120,240 @@ func (d *Deck) evaluateImpl(maxRuns int, incomingDamage int, rng *rand.Rand, ev 
 	if handSize <= 0 || deckSize < handSize {
 		return d.Stats
 	}
+	if ev != nil && ev.numWorkers > 1 {
+		return d.evaluateParallelImpl(maxRuns, incomingDamage, rng, ev, stop, handSize, deckSize)
+	}
+	return d.evaluateSequentialImpl(maxRuns, incomingDamage, rng, ev, stop, handSize, deckSize)
+}
+
+// evaluateSequentialImpl runs the shuffle loop in the calling goroutine, using ev's
+// cachedBufs scratch directly. This is the deterministic-RNG path tests rely on.
+func (d *Deck) evaluateSequentialImpl(maxRuns int, incomingDamage int, rng *rand.Rand, ev *Evaluator, stop shuffleStopper, handSize, deckSize int) Stats {
 	handsPerCycle := deckSize / handSize
-
-	// uniqueIDs / idIndex / presentBuf / marginalBuf back the per-turn marginal-stats
-	// accounting. uniqueIDs lists every distinct ids.CardID that appears in d.Cards (one entry
-	// per ID, in deck order of first appearance). idIndex maps an ID back to its position so
-	// the per-turn presence walk over the dealt hand is O(handSize) map lookups instead of
-	// an O(handSize × uniqueIDs) scan. presentBuf is reused each turn — zeroed via clear()
-	// — to mark which uniqueIDs sat in this turn's dealt hand or arsenal-in slot.
-	// marginalBuf accumulates the with/without sums in a flat slice so the inner loop avoids
-	// per-turn map churn (~30ns × 2 ops × 21 IDs/turn would dominate Evaluate's hot path on
-	// large anneal benchmarks); the slice is folded into Stats.PerCardMarginal once after
-	// every shuffle finishes.
 	uniqueIDs, idIndex := uniqueDeckIDs(d.Cards)
-	presentBuf := make([]bool, len(uniqueIDs))
-	marginalBuf := make([]CardMarginalStats, len(uniqueIDs))
+	scratch := newShuffleScratch(deckSize, handSize, len(uniqueIDs))
 
-	// buf is a single-allocation slab holding deck state for the run. [head:tail] is the
-	// remaining deck in top-to-bottom order. Dealt cards advance head; pitched cards are
-	// re-appended at tail. Sized 2×deckSize so there's always room to append before compacting;
-	// compaction (shifting [head:tail] down) happens at most once per deckSize/handSize
-	// iterations. The head/tail pointers keep the per-hand path allocation-free.
-	buf := make([]Card, deckSize*2)
-	// handBuf is the per-turn working hand: Held prefix + fresh draws. heldBuf holds Held
-	// cards between turns. Sized once per Evaluate so the inner loop stays allocation-free.
-	// handBuf's capacity exceeds handSize so a start-of-turn AuraTrigger reveal can append
-	// the revealed card to the dealt hand without reallocating.
-	handBuf := make([]Card, handSize, handSize+startOfTurnRevealRoom)
-	heldBuf := make([]Card, 0, handSize)
-	nextHeld := make([]Card, 0, handSize)
-	// auraTriggerBuf carries AuraTriggers left alive at the end of last turn. Double-buffered
-	// with nextAuraTrigger like heldBuf so the swap is allocation-free.
-	auraTriggerBuf := make([]AuraTrigger, 0, handSize)
-	nextAuraTrigger := make([]AuraTrigger, 0, handSize)
 	actualRuns := 0
 	for r := 0; r < maxRuns; r++ {
-		copy(buf, d.Cards)
-		// Inline Fisher-Yates: rng.Shuffle would heap-allocate a closure over buf every run.
-		for i := deckSize - 1; i > 0; i-- {
-			j := rng.Intn(i + 1)
-			buf[i], buf[j] = buf[j], buf[i]
-		}
-
-		head, tail := 0, deckSize
-		handIdx := 0
-		runechantCarryover := 0
-		var arsenalCard Card
-		heldBuf = heldBuf[:0]
-		auraTriggerBuf = auraTriggerBuf[:0]
-		// Cap the run at two full cycles. A pitch-everything-swing-a-weapon loop recycles the
-		// same cards forever (Best returns identical summaries each iteration, so head and
-		// tail advance in lockstep); two cycles also match FirstCycle / SecondCycle stats.
-		maxHands := 2 * handsPerCycle
-		for handIdx < maxHands {
-			h, drawCount, ok := dealNextHand(buf, handBuf, heldBuf, &head, &tail, handSize)
-			if !ok {
-				break
-			}
-			// Snapshot the starting carryover before Best overwrites it — the best-hand record
-			// wants the count in play when the hand was dealt, not what remained after.
-			startingRunechants := runechantCarryover
-			startOfTurnAuras := snapshotStartOfTurnAuras(auraTriggerBuf)
-			// Snapshot the dealt hand BEFORE start-of-action-phase reveal handlers append
-			// their drawn cards — the printout's "Start of turn → Hand:" line wants the hand
-			// the player was actually dealt, not the post-reveal augmented version. Fresh
-			// slice so a later Best mutation of h (Hand mid-chain) doesn't bleed back.
-			dealtHand := append([]Card(nil), h...)
-			// Process AuraTriggers carried in from last turn before the best-line search.
-			// Survivors become this turn's priorAuraTriggers. Reveal handlers pop the deck top
-			// and append it to the hand so the best-line search sees the augmented hand.
-			var trigContribs []TriggerContribution
-			var trigDamage, trigRunes int
-			var trigRevealed []Card
-			auraTriggerBuf, trigContribs, trigDamage, trigRunes, trigRevealed, _ = processTriggersAtStartOfTurn(auraTriggerBuf, buf[head+drawCount:tail])
-			for range trigRevealed {
-				h = append(h, buf[head+drawCount])
-				drawCount++
-			}
-			runechantCarryover += trigRunes
-			// arsenalIn snapshots the arsenal slot's contents at the top of this turn, before
-			// Best decides what to put in arsenal-out. Marginal stats key on arsenalIn so the
-			// "card present in this turn's hand" set covers everything the solver had access to.
-			arsenalIn := arsenalCard
-			play := runBestForTurn(d.Hero, d.Weapons, h, incomingDamage, buf[head+drawCount:tail], runechantCarryover, arsenalCard, auraTriggerBuf, ev)
-			runechantCarryover = play.State.Runechants
-			arsenalCard = play.State.Arsenal
-			// Start-of-turn trigger credit is a flat additive on Value. Every partition
-			// benefits equally so Best's ranking is unaffected, but Value must include it so
-			// the best-hand pick and cycle averages reflect the real total.
-			play.Value += trigDamage
-			play.TriggersFromLastTurn = trigContribs
-			play.StartOfTurnAuras = startOfTurnAuras
-			play.DealtHand = dealtHand
-
-			if recordTurnStats(&d.Stats, play, handIdx, handsPerCycle) {
-				// New deck-best — replay this turn with full logging so the printout has the
-				// chain trace. SkipLog mode elided per-event Log appends on the bulk of turns;
-				// this single replay (~2ms) gives us the trace we need for the rare turns
-				// that actually become the displayed best.
-				replay := replayBestForTurnWithLog(d.Hero, d.Weapons, h, incomingDamage, buf[head+drawCount:tail], startingRunechants, arsenalIn, auraTriggerBuf, ev)
-				replay.Value = play.Value
-				replay.TriggersFromLastTurn = trigContribs
-				replay.StartOfTurnAuras = startOfTurnAuras
-				replay.DealtHand = dealtHand
-				recordBestTurn(&d.Stats, replay, startingRunechants)
-			}
-			tallyMarginalPresence(marginalBuf, idIndex, presentBuf, h, arsenalIn, float64(play.Value))
-			nextHeld = applyTurnResult(play, buf, &head, &tail, nextHeld[:0])
-			nextAuraTrigger = append(nextAuraTrigger[:0], play.State.AuraTriggers...)
-			handIdx++
-			heldBuf, nextHeld = nextHeld, heldBuf
-			auraTriggerBuf, nextAuraTrigger = nextAuraTrigger, auraTriggerBuf
-		}
+		runOneShuffle(d, &d.Stats, scratch, idIndex, ev, rng, incomingDamage, handsPerCycle, deckSize, handSize)
 		actualRuns = r + 1
 		if stop != nil && stop(&d.Stats, actualRuns) {
 			break
 		}
 	}
 	d.Stats.Runs += actualRuns
-	mergeMarginalBuf(&d.Stats, uniqueIDs, marginalBuf)
-	// Assemble the best turn's structured log once, after the loop, so the in-memory snapshot
-	// and the on-disk JSON carry the same shape. JSON round-trips Log verbatim; printing
-	// routes through FormatTurnLog.
-	if len(d.Stats.Best.Summary.BestLine) > 0 {
-		d.Stats.Best.Log = BuildTurnLog(d.Stats.Best.Summary, d.Stats.Best.StartingRunechants)
-	}
+	mergeMarginalBuf(&d.Stats, uniqueIDs, scratch.marginalBuf)
+	finalizeBestTurnLog(&d.Stats)
 	return d.Stats
+}
+
+// evaluateParallelImpl fans the shuffle loop across ev.numWorkers goroutines that share
+// ev.cache (RWMutex-protected) but each carry their own per-call scratch. Shuffles are
+// processed in chunks of (numWorkers × adaptiveCheckInterval); after each chunk the main
+// goroutine merges every worker's local Stats into d.Stats and runs the adaptive stop
+// check. Per-worker RNG seeds are derived from rng.Int63() so the chunk distribution is
+// deterministic given the input rng.
+func (d *Deck) evaluateParallelImpl(maxRuns int, incomingDamage int, rng *rand.Rand, ev *Evaluator, stop shuffleStopper, handSize, deckSize int) Stats {
+	numWorkers := ev.numWorkers
+	handsPerCycle := deckSize / handSize
+	uniqueIDs, idIndex := uniqueDeckIDs(d.Cards)
+	aggregateMarginal := make([]CardMarginalStats, len(uniqueIDs))
+
+	chunkPerWorker := adaptiveCheckInterval
+	maxChunk := numWorkers * chunkPerWorker
+
+	type partial struct {
+		stats    Stats
+		marginal []CardMarginalStats
+	}
+	results := make(chan partial, numWorkers)
+
+	actualRuns := 0
+	for actualRuns < maxRuns {
+		sz := maxChunk
+		if actualRuns+sz > maxRuns {
+			sz = maxRuns - actualRuns
+		}
+		runsPerWorker := sz / numWorkers
+		extras := sz % numWorkers
+
+		spawned := 0
+		var wg sync.WaitGroup
+		for w := 0; w < numWorkers; w++ {
+			myRuns := runsPerWorker
+			if w < extras {
+				myRuns++
+			}
+			if myRuns == 0 {
+				continue
+			}
+			mySeed := rng.Int63()
+			spawned++
+			wg.Add(1)
+			go func(seed int64, runs int) {
+				defer wg.Done()
+				workerEv := &Evaluator{cache: ev.cache}
+				workerRNG := rand.New(rand.NewSource(seed))
+				scratch := newShuffleScratch(deckSize, handSize, len(uniqueIDs))
+				var local Stats
+				for r := 0; r < runs; r++ {
+					runOneShuffle(d, &local, scratch, idIndex, workerEv, workerRNG, incomingDamage, handsPerCycle, deckSize, handSize)
+				}
+				results <- partial{stats: local, marginal: scratch.marginalBuf}
+			}(mySeed, myRuns)
+		}
+		wg.Wait()
+		// Drain spawned-many results from the buffered channel.
+		for i := 0; i < spawned; i++ {
+			r := <-results
+			mergeStatsInto(&d.Stats, &r.stats)
+			for j := range aggregateMarginal {
+				aggregateMarginal[j].PresentTotal += r.marginal[j].PresentTotal
+				aggregateMarginal[j].PresentHands += r.marginal[j].PresentHands
+				aggregateMarginal[j].AbsentTotal += r.marginal[j].AbsentTotal
+				aggregateMarginal[j].AbsentHands += r.marginal[j].AbsentHands
+			}
+		}
+		actualRuns += sz
+		if stop != nil && stop(&d.Stats, actualRuns) {
+			break
+		}
+	}
+	d.Stats.Runs += actualRuns
+	mergeMarginalBuf(&d.Stats, uniqueIDs, aggregateMarginal)
+	finalizeBestTurnLog(&d.Stats)
+	return d.Stats
+}
+
+// shuffleScratch holds the per-goroutine slabs the shuffle loop reuses across iterations.
+// Each call to runOneShuffle reads/writes through these buffers without allocating, so the
+// hot path stays alloc-free after the initial newShuffleScratch construction.
+type shuffleScratch struct {
+	buf                              []Card
+	handBuf                          []Card
+	heldBuf, nextHeld                []Card
+	auraTriggerBuf, nextAuraTrigger  []AuraTrigger
+	presentBuf                       []bool
+	marginalBuf                      []CardMarginalStats
+}
+
+// newShuffleScratch sizes the per-shuffle reusable buffers for a given deck shape. Called
+// once per worker (or once per evaluate-call for the sequential path); the returned scratch
+// is hot-loop reused across every shuffle the worker runs.
+func newShuffleScratch(deckSize, handSize, numUniqueIDs int) *shuffleScratch {
+	return &shuffleScratch{
+		buf:             make([]Card, deckSize*2),
+		handBuf:         make([]Card, handSize, handSize+startOfTurnRevealRoom),
+		heldBuf:         make([]Card, 0, handSize),
+		nextHeld:        make([]Card, 0, handSize),
+		auraTriggerBuf:  make([]AuraTrigger, 0, handSize),
+		nextAuraTrigger: make([]AuraTrigger, 0, handSize),
+		presentBuf:      make([]bool, numUniqueIDs),
+		marginalBuf:     make([]CardMarginalStats, numUniqueIDs),
+	}
+}
+
+// runOneShuffle simulates a single shuffle of the deck end-to-end (shuffle, walk turns,
+// record stats). Accumulates results into the caller-owned *Stats so the parallel path
+// can pass a per-worker-local Stats while the sequential path passes &d.Stats. The
+// "winning so far" tracking inside recordTurnStats / recordBestTurn observes the local
+// Stats only — the parallel path's chunk-merge merges per-worker bests into d.Stats
+// after every chunk.
+func runOneShuffle(d *Deck, stats *Stats, scratch *shuffleScratch, idIndex map[ids.CardID]int, ev *Evaluator, rng *rand.Rand, incomingDamage, handsPerCycle, deckSize, handSize int) {
+	buf := scratch.buf
+	copy(buf, d.Cards)
+	// Inline Fisher-Yates: rng.Shuffle would heap-allocate a closure over buf every run.
+	for i := deckSize - 1; i > 0; i-- {
+		j := rng.Intn(i + 1)
+		buf[i], buf[j] = buf[j], buf[i]
+	}
+
+	head, tail := 0, deckSize
+	handIdx := 0
+	runechantCarryover := 0
+	var arsenalCard Card
+	heldBuf := scratch.heldBuf[:0]
+	auraTriggerBuf := scratch.auraTriggerBuf[:0]
+	nextHeld := scratch.nextHeld
+	nextAuraTrigger := scratch.nextAuraTrigger
+	handBuf := scratch.handBuf
+	maxHands := 2 * handsPerCycle
+	for handIdx < maxHands {
+		h, drawCount, ok := dealNextHand(buf, handBuf, heldBuf, &head, &tail, handSize)
+		if !ok {
+			break
+		}
+		startingRunechants := runechantCarryover
+		startOfTurnAuras := snapshotStartOfTurnAuras(auraTriggerBuf)
+		dealtHand := append([]Card(nil), h...)
+		var trigContribs []TriggerContribution
+		var trigDamage, trigRunes int
+		var trigRevealed []Card
+		auraTriggerBuf, trigContribs, trigDamage, trigRunes, trigRevealed, _ = processTriggersAtStartOfTurn(auraTriggerBuf, buf[head+drawCount:tail])
+		for range trigRevealed {
+			h = append(h, buf[head+drawCount])
+			drawCount++
+		}
+		runechantCarryover += trigRunes
+		arsenalIn := arsenalCard
+		play := runBestForTurn(d.Hero, d.Weapons, h, incomingDamage, buf[head+drawCount:tail], runechantCarryover, arsenalCard, auraTriggerBuf, ev)
+		runechantCarryover = play.State.Runechants
+		arsenalCard = play.State.Arsenal
+		play.Value += trigDamage
+		play.TriggersFromLastTurn = trigContribs
+		play.StartOfTurnAuras = startOfTurnAuras
+		play.DealtHand = dealtHand
+
+		if recordTurnStats(stats, play, handIdx, handsPerCycle) {
+			replay := replayBestForTurnWithLog(d.Hero, d.Weapons, h, incomingDamage, buf[head+drawCount:tail], startingRunechants, arsenalIn, auraTriggerBuf, ev)
+			replay.Value = play.Value
+			replay.TriggersFromLastTurn = trigContribs
+			replay.StartOfTurnAuras = startOfTurnAuras
+			replay.DealtHand = dealtHand
+			recordBestTurn(stats, replay, startingRunechants)
+		}
+		tallyMarginalPresence(scratch.marginalBuf, idIndex, scratch.presentBuf, h, arsenalIn, float64(play.Value))
+		nextHeld = applyTurnResult(play, buf, &head, &tail, nextHeld[:0])
+		nextAuraTrigger = append(nextAuraTrigger[:0], play.State.AuraTriggers...)
+		handIdx++
+		heldBuf, nextHeld = nextHeld, heldBuf
+		auraTriggerBuf, nextAuraTrigger = nextAuraTrigger, auraTriggerBuf
+	}
+	scratch.heldBuf = heldBuf
+	scratch.nextHeld = nextHeld
+	scratch.auraTriggerBuf = auraTriggerBuf
+	scratch.nextAuraTrigger = nextAuraTrigger
+}
+
+// mergeStatsInto folds src's per-shuffle accumulators into dst. Used by the parallel path
+// to merge each worker's local Stats into d.Stats after a chunk barrier. Histogram /
+// PerCardMarginal merging is handled separately (the latter via mergeMarginalBuf at the
+// end of the run).
+func mergeStatsInto(dst, src *Stats) {
+	dst.Hands += src.Hands
+	dst.TotalValue += src.TotalValue
+	dst.FirstCycle.Hands += src.FirstCycle.Hands
+	dst.FirstCycle.Total += src.FirstCycle.Total
+	dst.SecondCycle.Hands += src.SecondCycle.Hands
+	dst.SecondCycle.Total += src.SecondCycle.Total
+	if dst.Histogram == nil && len(src.Histogram) > 0 {
+		dst.Histogram = make(map[int]int, len(src.Histogram))
+	}
+	for v, c := range src.Histogram {
+		dst.Histogram[v] += c
+	}
+	if len(src.Best.Summary.BestLine) > 0 &&
+		(len(dst.Best.Summary.BestLine) == 0 || src.Best.Summary.Value > dst.Best.Summary.Value) {
+		dst.Best = src.Best
+	}
+}
+
+// finalizeBestTurnLog assembles the best turn's structured Log from State.Log once at end
+// of run. JSON round-trips Log verbatim; printing routes through FormatTurnLog.
+func finalizeBestTurnLog(stats *Stats) {
+	if len(stats.Best.Summary.BestLine) > 0 {
+		stats.Best.Log = BuildTurnLog(stats.Best.Summary, stats.Best.StartingRunechants)
+	}
 }
 
 // snapshotStartOfTurnAuras returns a fresh slice of the Self cards backing every queued

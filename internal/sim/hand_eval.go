@@ -56,7 +56,8 @@ func (e *Evaluator) BestWithTriggersSkipLog(hero Hero, weapons []Weapon, hand []
 // allocator after the eval-time slice copies). Different shapes invalidate the cache and
 // allocate fresh — fine for normal use because a single deck eval reuses one shape across
 // every shuffle. Not safe for concurrent use; concurrent callers construct one Evaluator per
-// goroutine (iterate.go's worker pool already does this).
+// goroutine (the parallel-shuffle path inside evaluateImpl already does this — each worker
+// in the fan-out builds its own private Evaluator pointing to ev.cache).
 //
 // The hand-eval cache (cache field) memoizes the optimal partition for each unique
 // (handMultiset, incomingDamage, runechantCarryover, arsenalCardIn) tuple seen during the
@@ -69,46 +70,83 @@ type Evaluator struct {
 	cachedHandSize int
 	cachedWeapons  []Weapon
 	cache          *evalCache
+	// numWorkers tells EvaluateWith how many goroutines to fan the shuffle loop across.
+	// 0 or 1 runs sequentially in the calling goroutine, reusing cachedBufs as the per-
+	// call scratch — the original single-threaded behaviour and the right default for
+	// tests that want deterministic single-RNG runs. > 1 spawns N workers that share the
+	// cache (which is RWMutex-protected) but each carry their own attackBufs scratch;
+	// fabsim eval / anneal / compare use this path.
+	numWorkers int
 }
 
-// NewEvaluator returns a fresh Evaluator with the hand-eval cache enabled. Safe for
-// concurrent use across goroutines as long as each goroutine uses its own instance —
-// internal scratch state is not synchronised.
+// NewEvaluator returns a fresh Evaluator with its own private cache and the shuffle loop
+// running single-threaded. Safe for concurrent use across goroutines as long as each
+// goroutine uses its own instance — internal scratch state is not synchronised.
 func NewEvaluator() *Evaluator {
 	return &Evaluator{cache: newEvalCache()}
 }
 
+// NewEvaluatorParallel returns an Evaluator that fans the shuffle loop across numWorkers
+// goroutines, each carrying its own attackBufs scratch and sharing the Evaluator's
+// private cache. Single-deck callers (fabsim eval, compare) use this for shuffle-level
+// parallelism.
+func NewEvaluatorParallel(numWorkers int) *Evaluator {
+	return &Evaluator{cache: newEvalCache(), numWorkers: numWorkers}
+}
+
+// NewEvaluatorWithCache returns an Evaluator pointing at an existing shared Cache. Used
+// by iterate-mode's mutation-parallel pool so every worker's lookups and stores hit one
+// memo. numWorkers is 0 (shuffle loop runs single-threaded); set the field directly on
+// the returned pointer to layer shuffle parallelism on top.
+func NewEvaluatorWithCache(c *Cache) *Evaluator {
+	return &Evaluator{cache: c}
+}
+
 // NewEvaluatorWithoutCache returns a fresh Evaluator with the hand-eval cache disabled.
 // Used for the from-scratch path in benchmarks and equivalence tests; production callers
-// route through NewEvaluator.
+// route through NewEvaluator / NewEvaluatorParallel / NewEvaluatorWithCache.
 func NewEvaluatorWithoutCache() *Evaluator {
 	return &Evaluator{}
 }
+
+// Cache is the thread-safe hand-eval cache shared across multiple Evaluators. Use
+// NewCache to construct one and pass it to NewEvaluatorWithCache for each worker that
+// should share the memo. The cache's lookup path takes a read lock for map access
+// (concurrent readers don't serialise); store and reset take the write lock.
+type Cache = evalCache
+
+// NewCache returns a fresh shared cache.
+func NewCache() *Cache { return newEvalCache() }
 
 // ResetCache drops the cached entries while preserving the stats counters. Use between
 // distinct decks when reusing one Evaluator across many of them (the iterate-mode worker
 // pool's per-mutation loop): entries from one deck rarely help another — different card
 // sets produce different hand multisets — so dropping them at deck boundaries caps memory
-// at one-deck's-worth of entries. No-op when caching is disabled.
+// at one-deck's-worth of entries. No-op when caching is disabled. Routes through the
+// cache's reset method so the write lock guards against concurrent lookups in a parallel-
+// shuffle worker pool.
 func (e *Evaluator) ResetCache() {
 	if e.cache != nil {
-		// Drop the map entirely; lookup() handles a nil entries map and store() lazily
-		// re-allocates on the next miss.
-		e.cache.entries = nil
+		e.cache.reset()
 	}
 }
 
 // CacheStats returns a snapshot of the Evaluator's cache counters. Returns a zero-valued
-// CacheStats when the Evaluator was constructed without a cache.
+// CacheStats when the Evaluator was constructed without a cache. Reads atomic counters
+// without taking the entries lock; the entries-count read takes the read lock briefly to
+// avoid racing a concurrent reset.
 func (e *Evaluator) CacheStats() CacheStats {
 	if e.cache == nil {
 		return CacheStats{}
 	}
+	e.cache.mu.RLock()
+	entries := len(e.cache.entries)
+	e.cache.mu.RUnlock()
 	return CacheStats{
-		Hits:        e.cache.hits,
-		Misses:      e.cache.misses,
-		Uncacheable: e.cache.uncacheable,
-		Entries:     len(e.cache.entries),
+		Hits:        int(e.cache.hits.Load()),
+		Misses:      int(e.cache.misses.Load()),
+		Uncacheable: int(e.cache.uncacheable.Load()),
+		Entries:     entries,
 	}
 }
 

@@ -12,6 +12,7 @@ package sim_test
 // so go test ./... still passes on a fresh checkout that doesn't carry the saved deck.
 
 import (
+	"fmt"
 	"math/rand"
 	"os"
 	"path/filepath"
@@ -90,6 +91,47 @@ func max1(n int) int {
 		return 1
 	}
 	return n
+}
+
+// TestEvalCache_ParallelEquivalentToSequential pins that the parallel-shuffle path
+// produces the same per-turn-mean within a small tolerance as the single-threaded path.
+// Same fixed-seed deck on both, run once with NewEvaluatorParallel(N) and once with
+// NewEvaluator(); the per-turn-mean should agree at the same shuffle count modulo the
+// expected RNG-distribution drift (parallel path derives per-worker seeds from the input
+// rng, so the actual sequence of shuffled decks differs from sequential — but the mean
+// over enough shuffles converges to the same number).
+func TestEvalCache_ParallelEquivalentToSequential(t *testing.T) {
+	const (
+		deckSize  = 40
+		maxCopies = 2
+		incoming  = 7
+		shuffles  = 1000
+		// drift bound: per-turn-mean across 1k shuffles is empirically ±0.1 between
+		// parallel and sequential RNG streams. 0.5 leaves plenty of headroom while
+		// catching a real correctness regression (which would shift by ≥1 unit).
+		driftTolerance = 0.5
+	)
+	setupRNG := rand.New(rand.NewSource(123))
+	baseline := Random(heroes.Viserai{}, deckSize, maxCopies, setupRNG, nil)
+
+	seq := New(baseline.Hero, baseline.Weapons, baseline.Cards)
+	seq.EvaluateWith(shuffles, incoming, rand.New(rand.NewSource(99)), NewEvaluator())
+
+	par := New(baseline.Hero, baseline.Weapons, baseline.Cards)
+	par.EvaluateWith(shuffles, incoming, rand.New(rand.NewSource(99)), NewEvaluatorParallel(4))
+
+	// Hands counts can differ slightly because parallel and sequential consume different
+	// per-shuffle RNG streams: a shuffle that runs out of deck cards on hand 7 in one
+	// stream might deal hand 8 in the other. Empirically <1% drift on 1k-shuffle runs.
+	handsRatio := float64(seq.Stats.Hands-par.Stats.Hands) / float64(seq.Stats.Hands)
+	if handsRatio < -0.02 || handsRatio > 0.02 {
+		t.Errorf("Hands count drift %.4f exceeds 2%% (seq=%d par=%d)", handsRatio, seq.Stats.Hands, par.Stats.Hands)
+	}
+	drift := seq.Stats.Mean() - par.Stats.Mean()
+	if drift < -driftTolerance || drift > driftTolerance {
+		t.Errorf("mean drift %.6f exceeds tolerance %.6f (seq=%.6f par=%.6f)",
+			drift, driftTolerance, seq.Stats.Mean(), par.Stats.Mean())
+	}
 }
 
 // TestEvalCache_ResetCache pins that ResetCache drops cached entries while leaving the
@@ -237,4 +279,33 @@ func BenchmarkEvalCache_SingleDeck(b *testing.B) {
 			d.EvaluateWith(shuffles, incoming, rng, ev)
 		}
 	})
+}
+
+// BenchmarkEvalCache_ParallelDeck mirrors BenchmarkEvalCache_SingleDeck but runs the
+// shuffle loop across multiple workers via NewEvaluatorParallel. Compares to the existing
+// single-threaded with-cache run as the baseline.
+func BenchmarkEvalCache_ParallelDeck(b *testing.B) {
+	const (
+		incoming = 7
+		shuffles = 1000
+	)
+	loaded := loadRealDeck(b)
+	if loaded == nil {
+		b.Skip("mydecks/viserai_v4.json not found — saved deck needed for realistic bench")
+	}
+	for _, workers := range []int{1, 2, 4, 8} {
+		w := workers
+		b.Run(fmt.Sprintf("workers=%d", w), func(b *testing.B) {
+			b.ReportAllocs()
+			b.ResetTimer()
+			for n := 0; n < b.N; n++ {
+				b.StopTimer()
+				ev := NewEvaluatorParallel(w)
+				rng := rand.New(rand.NewSource(42))
+				d := New(loaded.Hero, loaded.Weapons, loaded.Cards)
+				b.StartTimer()
+				d.EvaluateWith(shuffles, incoming, rng, ev)
+			}
+		})
+	}
 }

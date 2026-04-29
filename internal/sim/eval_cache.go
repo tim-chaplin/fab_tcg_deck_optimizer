@@ -25,6 +25,9 @@ package sim
 // affects chain output. See auraCacheKey for caveats.
 
 import (
+	"sync"
+	"sync/atomic"
+
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
 )
 
@@ -98,15 +101,22 @@ type evalCacheEntry struct {
 	swungWeapons []string
 }
 
-// evalCache holds per-Evaluator cached Best results plus the running stats counters the
-// debug printout reads.
+// evalCache holds cached Best results plus the running stats counters the debug printout
+// reads. Thread-safe: mu guards entries (map writes use Lock; reads use RLock); hits /
+// misses / uncacheable are atomic so the lookup hot path bumps them without contending
+// with the entries lock. A single evalCache can be shared across multiple Evaluators —
+// each Evaluator's per-call scratch (attackBufs) is goroutine-local but the cache lookup
+// and store are concurrency-safe, which lets a shuffle-parallel worker pool reuse the
+// same Cache across all workers.
 type evalCache struct {
+	mu      sync.RWMutex
 	entries map[evalCacheKey]evalCacheEntry
 	// hits / misses count cache lookup outcomes (every Best call increments exactly one).
 	// uncacheable counts misses where the search ran but Cacheable=false at the end so
 	// the result wasn't stored — useful for quantifying how much hidden-state reading
-	// we'd need to remove to bump the hit rate further.
-	hits, misses, uncacheable int
+	// we'd need to remove to bump the hit rate further. Atomic so the lookup path bumps
+	// them without taking the map lock.
+	hits, misses, uncacheable atomic.Int64
 }
 
 // CacheStats is the public snapshot of an Evaluator's cache counters, returned by
@@ -207,20 +217,35 @@ func auraEntryLess(a, b auraCacheKey) bool {
 	return a.Count < b.Count
 }
 
-// lookup returns the cached entry for key, or (zero, false) on miss. Doesn't bump
-// counters — the caller does after confirming a hit / miss / skip.
+// lookup returns the cached entry for key, or (zero, false) on miss. Doesn't bump the
+// stats counters — the caller does after confirming a hit / miss. Holds the read lock for
+// the map access only; the lock is released before the caller bumps counters or runs any
+// further work, which keeps lookup contention minimal under a parallel-shuffle worker
+// pool reading the same cache.
 func (c *evalCache) lookup(key evalCacheKey) (evalCacheEntry, bool) {
-	if c.entries == nil {
-		return evalCacheEntry{}, false
-	}
+	c.mu.RLock()
 	e, ok := c.entries[key]
+	c.mu.RUnlock()
 	return e, ok
 }
 
-// store inserts entry under key, lazily allocating the backing map.
+// store inserts entry under key, lazily allocating the backing map. Takes the write lock;
+// concurrent miss-then-store from sibling workers may both store the same key (the second
+// write overwrites identical data) but never observes a partially-constructed map.
 func (c *evalCache) store(key evalCacheKey, entry evalCacheEntry) {
+	c.mu.Lock()
 	if c.entries == nil {
 		c.entries = make(map[evalCacheKey]evalCacheEntry)
 	}
 	c.entries[key] = entry
+	c.mu.Unlock()
+}
+
+// reset drops the entries map (lazy realloc on next store) under the write lock so a
+// concurrent reader/writer can never see a half-cleared state. Stats counters survive
+// the reset — see Evaluator.ResetCache for the rationale.
+func (c *evalCache) reset() {
+	c.mu.Lock()
+	c.entries = nil
+	c.mu.Unlock()
 }
