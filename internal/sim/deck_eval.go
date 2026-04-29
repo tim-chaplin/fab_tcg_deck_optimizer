@@ -229,12 +229,12 @@ func (d *Deck) evaluateParallelImpl(maxRuns int, incomingDamage int, rng *rand.R
 // Each call to runOneShuffle reads/writes through these buffers without allocating, so the
 // hot path stays alloc-free after the initial newShuffleScratch construction.
 type shuffleScratch struct {
-	buf                              []Card
-	handBuf                          []Card
-	heldBuf, nextHeld                []Card
-	auraTriggerBuf, nextAuraTrigger  []AuraTrigger
-	presentBuf                       []bool
-	marginalBuf                      []CardMarginalStats
+	buf                             []Card
+	handBuf                         []Card
+	heldBuf, nextHeld               []Card
+	auraTriggerBuf, nextAuraTrigger []AuraTrigger
+	presentBuf                      []bool
+	marginalBuf                     []CardMarginalStats
 }
 
 // newShuffleScratch sizes the per-shuffle reusable buffers for a given deck shape. Called
@@ -751,7 +751,7 @@ func recordBestTurn(stats *Stats, play TurnSummary, startingRunechants int) {
 			BestLine:             lineCopy,
 			SwungWeapons:         swungCopy,
 			Value:                play.Value,
-			State:                cloneCarryState(play.State),
+			State:                play.State.Clone(),
 			TriggersFromLastTurn: trigCopy,
 			StartOfTurnAuras:     aurasCopy,
 			DealtHand:            dealtCopy,
@@ -759,34 +759,6 @@ func recordBestTurn(stats *Stats, play TurnSummary, startingRunechants int) {
 		},
 		StartingRunechants: startingRunechants,
 	}
-}
-
-// cloneCarryState deep-copies every slice in cs so the returned snapshot survives later
-// Best calls overwriting their backing arrays.
-func cloneCarryState(cs CarryState) CarryState {
-	out := CarryState{
-		Arsenal:    cs.Arsenal,
-		Runechants: cs.Runechants,
-	}
-	if len(cs.Hand) > 0 {
-		out.Hand = append([]Card(nil), cs.Hand...)
-	}
-	if len(cs.Deck) > 0 {
-		out.Deck = append([]Card(nil), cs.Deck...)
-	}
-	if len(cs.Graveyard) > 0 {
-		out.Graveyard = append([]Card(nil), cs.Graveyard...)
-	}
-	if len(cs.Banish) > 0 {
-		out.Banish = append([]Card(nil), cs.Banish...)
-	}
-	if len(cs.AuraTriggers) > 0 {
-		out.AuraTriggers = append([]AuraTrigger(nil), cs.AuraTriggers...)
-	}
-	if len(cs.Log) > 0 {
-		out.Log = append([]LogEntry(nil), cs.Log...)
-	}
-	return out
 }
 
 // uniqueDeckIDs returns the distinct card IDs in cs (in deck order of first appearance) and

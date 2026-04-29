@@ -4,37 +4,45 @@ package sim
 // partition loop, bestAttackWithWeapons phase/weapon masks, bestSequence permutation search).
 // Pooled on the Evaluator so one sizing amortises across every hand a long-running iterate pass
 // evaluates.
+//
+// Fields are grouped by lifetime via embedded sub-structs:
+//
+//   - shapeBufs         constructed once per (handSize, weapons) pair, reused across all
+//                       calls against the same shape. Sized at construction; never grows.
+//   - permBufs          backing arrays for the per-permutation TurnState slice fields.
+//                       resetStateForPermutation re-slices these to [:0] on every
+//                       permutation; mid-chain growth past the pre-sized cap allocates a
+//                       fresh backing array (rare).
+//   - carryWinnerBufs   sliding-window CarryState scratches, one per nesting level
+//                       (sequence / mask-combo / leaf). Each level's scratch is reused
+//                       across iterations at that level via CarryState.CopyFrom; ownership
+//                       rules are documented per field.
+//
+// Embedded so call sites address fields directly (bufs.pcBuf) without a sub-struct prefix.
 
-// attackBufs holds pre-allocated buffers for the attack-evaluation pipeline (bestSequence →
-// playSequence) and the partition loop in findBest. Allocated once and cached on the
-// Evaluator so a deck eval reuses them across every partition, mask, and permutation.
-type attackBufs struct {
+// shapeBufs holds the buffers sized once at construction from (handSize, weapons). They
+// stay shape-stable across every call against this attackBufs and never need re-sizing.
+type shapeBufs struct {
 	pcBuf  []CardState
 	ptrBuf []*CardState
 	state  *TurnState
-	// drScratch is a pooled TurnState for defense-reaction cost probing inside the
-	// (pmask × wmask) loop; reusing its heap slot avoids a per-iteration alloc caused by
-	// interface-call escape.
-	drScratch TurnState
-	// drCardStateScratch is a pooled *CardState handed to DR Card.Play calls. Each Play takes
-	// a *CardState through an interface boundary so a literal &CardState{} would escape
-	// and heap-alloc once per DR per partition — reusing this slot keeps the whole defense-phase
-	// replay allocation-free. Reset per call by the caller.
-	drCardStateScratch CardState
-	attackerBuf        []Card // for bestAttackWithWeapons mask iteration
-	// Pre-computed per-mask weapon data. Indexed by bitmask (0 to 2^len(weapons)-1):
-	// weaponCosts[mask] is total Cost; weaponNames[mask] is the pre-built []string of names.
-	weaponCosts []int
-	weaponNames [][]string
 	// permMeta parallels pcBuf: each entry points into the global cardMetaCache so playSequence's
 	// inner loop skips interface dispatch on Types / GoAgain and reads cached cost bounds.
 	// Pointer-valued so bestSequence's permutation swaps move 8 bytes instead of a full struct.
 	permMeta []*attackerMeta
+	// attackerBuf is the per-mask-combo working slice that bestAttackWithWeapons fills with
+	// the partition's attackers + the weapon-mask's selected weapons before handing off to
+	// bestSequence. Sized at construction; the slice header re-slices to [:n] per call.
+	attackerBuf []Card
+	// Pre-computed per-mask weapon data. Indexed by bitmask (0 to 2^len(weapons)-1):
+	// weaponCosts[mask] is total Cost; weaponNames[mask] is the pre-built []string of names.
+	weaponCosts []int
+	weaponNames [][]string
 	// Partition-loop buffers, consumed by findBest. Sized handSize+1 to cover the optional
 	// arsenal-in slot the enumerator treats as index n. isDRBuf caches card.TypeDefenseReaction
-	// membership to skip Types().Has calls; addsFutureValueBuf caches
-	// AddsFutureValue implementation so the beatsBest tiebreaker can count how many
-	// hidden-future-value cards a partition queues.
+	// membership to skip Types().Has calls; addsFutureValueBuf caches AddsFutureValue
+	// implementation so the runningCarry tiebreaker can count how many hidden-future-value
+	// cards a partition queues.
 	rolesBuf           []Role
 	pitchVals          []int
 	defenseVals        []int
@@ -50,13 +58,13 @@ type attackBufs struct {
 	// defenseGravScratch backs state.Graveyard during DR Plays. Reset via [:0]+append per
 	// iteration so card effects can freely mutate their view without leaking into the next one.
 	defenseGravScratch []Card
-	// Per-permutation backing slices reused across every Heap's-algorithm permutation in a
-	// leaf. resetStateForPermutation seeds the TurnState's slice fields from these (via
-	// append([:0], ...)) so an unmodified permutation never reallocates: only mid-chain
-	// growth past the pre-sized cap forces a new backing array. snapshotCarryInto
-	// reuses carryWinnerScratch's backing arrays before the next permutation overwrites
-	// the per-permutation backings; the mask-combo new-best clones via cloneCarryState
-	// when promoting carryWinnerScratch to bestCarry.
+}
+
+// permBufs holds the per-permutation slice backings. resetStateForPermutation seeds the
+// TurnState's slice fields from these (via append([:0], ...)) so an unmodified permutation
+// never reallocates: only mid-chain growth past the pre-sized cap forces a new backing
+// array.
+type permBufs struct {
 	deckBacking         []Card
 	handBacking         []Card
 	graveBacking        []Card
@@ -65,27 +73,54 @@ type attackBufs struct {
 	logBacking          []LogEntry
 	auraTriggersBacking []AuraTrigger
 	ephemeralBacking    []EphemeralAttackTrigger
+}
+
+// carryWinnerBufs holds the running-winner CarryState scratches — one per nesting level
+// in the partition / mask-combo / permutation hierarchy. Each level's scratch is updated
+// allocation-free via CarryState.CopyFrom; the ownership / aliasing rules per scratch
+// are documented inline.
+type carryWinnerBufs struct {
 	// carryWinnerScratch is the per-Best-call sliding window into which bestSequence
-	// snapshots the current winning permutation's end-of-chain state. The slice backing
-	// arrays grow once across the lifetime of the Evaluator's cached attackBufs and stay
-	// reused on every snapshotCarryInto call so per-Best snapshots avoid reallocation.
-	// Cleared via resetCarryStateScratch at the top of each bestSequence call so a
-	// stale value can't leak through when no permutation lands a new best.
+	// snapshots the current winning permutation's end-of-chain state via
+	// CarryState.SnapshotFromTurn. Slice backing arrays grow once across the lifetime of
+	// the Evaluator's cached attackBufs and stay reused on every snapshot — per-Best
+	// snapshots avoid reallocation. Reset (lengths to 0, scalars zeroed) at the top of
+	// each bestSequence call so a stale value can't leak through when no permutation
+	// lands a new best.
 	carryWinnerScratch CarryState
 	// bestCarryScratch is the mask-combo-level sliding window inside
-	// bestAttackWithWeapons: each new-best (pmask, wmask) update copies carryWinnerScratch
-	// into this scratch via copyCarryStateInto (allocation-free after the first sizing).
+	// bestAttackWithWeapons. Each new-best (pmask, wmask) update copies carryWinnerScratch
+	// into this scratch via CarryState.CopyFrom (allocation-free after the first sizing).
 	// bestAttackWithWeapons returns it as an alias — invalidated by the next call into
 	// bestAttackWithWeapons against the same bufs, so callers that need the data to
 	// outlive the next call must copy it out.
 	bestCarryScratch CarryState
 	// findBestCarryScratch is findBest's running-winner sliding window. When the recurse
-	// promotes a new-best leaf, copyCarryStateInto writes the leaf's CarryState (an alias
-	// to bestCarryScratch) into this scratch so later (non-winning) leaves whose
-	// bestAttackWithWeapons call clobbers bestCarryScratch can't disturb the running
-	// winner. findBest clones this scratch once at exit so the returned TurnSummary's
-	// State owns independent backing.
+	// promotes a new-best leaf, runningCarry.Promote calls CarryState.CopyFrom on the
+	// leaf's CarryState (an alias to bestCarryScratch) so later (non-winning) leaves
+	// whose bestAttackWithWeapons call clobbers bestCarryScratch can't disturb the
+	// running winner. findBest clones this scratch once at exit so the returned
+	// TurnSummary's State owns independent backing.
 	findBestCarryScratch CarryState
+}
+
+// attackBufs is the pooled scratch the attack-evaluation pipeline threads through every
+// call. The Evaluator caches it so a single sizing amortises across every hand a deck
+// eval visits.
+type attackBufs struct {
+	shapeBufs
+	permBufs
+	carryWinnerBufs
+	// drScratch is a pooled TurnState for defense-reaction cost probing inside the
+	// (pmask × wmask) loop; reusing its heap slot avoids a per-iteration alloc caused by
+	// interface-call escape. Doesn't fit a sub-struct cleanly — it's a one-off TurnState
+	// rather than a slice backing or a winner scratch.
+	drScratch TurnState
+	// drCardStateScratch is a pooled *CardState handed to DR Card.Play calls. Each Play
+	// takes a *CardState through an interface boundary so a literal &CardState{} would
+	// escape and heap-alloc once per DR per partition — reusing this slot keeps the
+	// whole defense-phase replay allocation-free. Reset per call by the caller.
+	drCardStateScratch CardState
 }
 
 func newAttackBufs(handSize, weaponCount int, weapons []Weapon) *attackBufs {
@@ -125,34 +160,39 @@ func newAttackBufs(handSize, weaponCount int, weapons []Weapon) *attackBufs {
 		logBackingCap  = 64
 	)
 	return &attackBufs{
-		permMeta:            make([]*attackerMeta, maxAttackers),
-		pcBuf:               pcBuf,
-		ptrBuf:              ptrBuf,
-		state:               &TurnState{},
-		attackerBuf:         make([]Card, maxAttackers),
-		weaponCosts:         weaponCosts,
-		weaponNames:         weaponNames,
-		rolesBuf:            make([]Role, handSize+1),
-		pitchVals:           make([]int, handSize+1),
-		defenseVals:         make([]int, handSize+1),
-		isDRBuf:             make([]bool, handSize+1),
-		addsFutureValueBuf:  make([]bool, handSize+1),
-		pitchedValsScratch:  make([]int, 0, handSize+1),
-		pitchedBuf:          make([]Card, 0, handSize+1),
-		attackersBuf:        make([]Card, 0, handSize+1),
-		defendersBuf:        make([]Card, 0, handSize+1),
-		heldBuf:             make([]Card, 0, handSize+1),
-		defenseGravScratch:  make([]Card, 0, handSize+1),
-		deckBacking:         make([]Card, 0, deckBackingCap),
-		handBacking:         make([]Card, 0, maxAttackers),
-		graveBacking:        make([]Card, 0, maxAttackers),
-		banishBacking:       make([]Card, 0, handSize+1),
-		cardsPlayedBacking:  make([]Card, 0, maxAttackers),
-		logBacking:          make([]LogEntry, 0, logBackingCap),
-		auraTriggersBacking: make([]AuraTrigger, 0, handSize+1),
-		// Ephemeral attack triggers (Mauvrion Skies, Runic Reaping) typically register one per
-		// applicable card — pre-sized cap avoids the per-Play slice grow.
-		ephemeralBacking: make([]EphemeralAttackTrigger, 0, handSize+1),
+		shapeBufs: shapeBufs{
+			pcBuf:              pcBuf,
+			ptrBuf:             ptrBuf,
+			state:              &TurnState{},
+			permMeta:           make([]*attackerMeta, maxAttackers),
+			attackerBuf:        make([]Card, maxAttackers),
+			weaponCosts:        weaponCosts,
+			weaponNames:        weaponNames,
+			rolesBuf:           make([]Role, handSize+1),
+			pitchVals:          make([]int, handSize+1),
+			defenseVals:        make([]int, handSize+1),
+			isDRBuf:            make([]bool, handSize+1),
+			addsFutureValueBuf: make([]bool, handSize+1),
+			pitchedValsScratch: make([]int, 0, handSize+1),
+			pitchedBuf:         make([]Card, 0, handSize+1),
+			attackersBuf:       make([]Card, 0, handSize+1),
+			defendersBuf:       make([]Card, 0, handSize+1),
+			heldBuf:            make([]Card, 0, handSize+1),
+			defenseGravScratch: make([]Card, 0, handSize+1),
+		},
+		permBufs: permBufs{
+			deckBacking:         make([]Card, 0, deckBackingCap),
+			handBacking:         make([]Card, 0, maxAttackers),
+			graveBacking:        make([]Card, 0, maxAttackers),
+			banishBacking:       make([]Card, 0, handSize+1),
+			cardsPlayedBacking:  make([]Card, 0, maxAttackers),
+			logBacking:          make([]LogEntry, 0, logBackingCap),
+			auraTriggersBacking: make([]AuraTrigger, 0, handSize+1),
+			// Ephemeral attack triggers (Mauvrion Skies, Runic Reaping) typically register one per
+			// applicable card — pre-sized cap avoids the per-Play slice grow.
+			ephemeralBacking: make([]EphemeralAttackTrigger, 0, handSize+1),
+		},
+		// carryWinnerBufs starts zero-valued — the slice backings grow on first use.
 	}
 }
 

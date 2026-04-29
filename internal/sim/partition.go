@@ -3,7 +3,11 @@ package sim
 // Top-level hand enumeration: findBest walks every partition (Pitch / Attack / Defend /
 // Held / Arsenal assignment) and delegates each leaf's chain-feasibility check to
 // bestAttackWithWeapons. Post-enumeration helpers decide how an empty arsenal slot gets
-// filled, plus the beatsBest / roleAllowed policy functions that shape the partition tree.
+// filled, plus the roleAllowed policy function that shapes the partition tree. Tiebreak
+// order across partition leaves lives on runningCarry (see running_carry.go): Value →
+// leftover runechants (future arcane) → more AddsFutureValue cards played (hidden
+// later-turn payoff the current-turn Value misses) → arsenal slot ending occupied
+// (saves a hand slot next refill; covers both arsenal-in-stayed and Held-for-promotion).
 
 import ()
 
@@ -62,32 +66,6 @@ func (e *Evaluator) findBest(hero Hero, weapons []Weapon, hand []Card, incomingD
 	// bestSwung holds the winning partition's swung weapon names — surfaced on the summary so
 	// the printout can list weapons that swung this turn (weapons have no BestLine entry).
 	var bestSwung []string
-	// bestHasHeld tracks whether the current best has at least one Held hand card — lets
-	// beatsBest distinguish "arsenal will be occupied post-hoc" from "arsenal will be empty."
-	// Seeded true when the hand is non-empty: the initial best puts every hand card into Held,
-	// so a post-hoc promotion would fill arsenal. Candidates need both a Value/leftover tie and
-	// some way to end with arsenal occupied to displace it.
-	bestHasHeld := n > 0
-	// bestArsenal tracks the running winner's end-of-chain arsenal slot. Seeded with the
-	// initial best's value so a no-feasible-leaf search keeps the arsenal-in card; updated
-	// per new-best leaf with the leaf's arsenalAtChainStart. Read by the willOccupy
-	// comparison so we don't have to materialise best.State.Arsenal until findBest exits.
-	bestArsenal := arsenalCardIn
-	// bestLeftoverRunechants is the running winner's end-of-chain Runechant count —
-	// seeded with the carryover (the seed's Runechants) and updated per new-best leaf.
-	// Read by beatsBest's tiebreaker; threading it as a scalar lets the recurse defer
-	// best.State.* slice writes until the single post-recurse clone.
-	bestLeftoverRunechants := runechantCarryover
-	// bestFutureValuePlayed tracks how many AddsFutureValue cards the current best is
-	// playing (Role=Attack). Seeded 0 because the initial best assigns every card Held. The
-	// beatsBest tiebreaker prefers partitions that play MORE future-value cards at equal
-	// Value/leftover — their hidden-later-turn payoff is invisible to the current-turn
-	// score, so without this bias a lone sigil loses to Held → arsenal promotion on the
-	// arsenal-occupancy tiebreak.
-	bestFutureValuePlayed := 0
-	// seenFeasible gates the post-recurse cloneCarryState — when no leaf promoted,
-	// bufs.findBestCarryScratch is unwritten and best.State stays at the seed value.
-	seenFeasible := false
 	for i := 0; i < n; i++ {
 		best.BestLine[i] = CardAssignment{Card: hand[i], Role: Held}
 	}
@@ -99,6 +77,17 @@ func (e *Evaluator) findBest(hero Hero, weapons []Weapon, hand []Card, incomingD
 	// handSize+1, big enough for totalN when an arsenal-in card inflates the effective hand.
 	// Each field is re-sliced and rewritten below, so carry-over from prior calls can't leak.
 	bufs := e.getAttackBufs(n, weapons)
+	// running tracks the new-best leaf as the recurse explores partitions. It seeds with
+	// the no-feasible-leaf fallback's state (arsenal-in stays, runechant carryover, every
+	// hand card Held so a post-hoc promotion would fill arsenal) so the tiebreaker treats
+	// the seed as a valid baseline. Finalize clones the scratch into best.State once at
+	// the end so the returned TurnSummary owns independent backing.
+	running := runningCarry{
+		scratch:            &bufs.findBestCarryScratch,
+		leftoverRunechants: runechantCarryover,
+		arsenal:            arsenalCardIn,
+		hasHeld:            n > 0,
+	}
 	rolesBuf := bufs.rolesBuf[:totalN]
 	pvals := bufs.pitchVals[:totalN]
 	dvals := bufs.defenseVals[:totalN]
@@ -145,29 +134,12 @@ func (e *Evaluator) findBest(hero Hero, weapons []Weapon, hand []Card, incomingD
 				futureValuePlayed++
 			}
 			willOccupy := arsenalCard != nil || hasHeld
-			bestWillOccupy := bestArsenal != nil || bestHasHeld
-			if !beatsBest(
-				v, leftoverRunechants, futureValuePlayed, willOccupy,
-				best.Value, bestLeftoverRunechants, bestFutureValuePlayed, bestWillOccupy,
-			) {
+			if !running.Beats(v, leftoverRunechants, futureValuePlayed, willOccupy) {
 				return
 			}
+			running.Promote(v, leftoverRunechants, futureValuePlayed, hasHeld, arsenalCard, &carry)
 			best.Value = v
 			bestSwung = swung
-			// Copy the winner's CarryState into bufs.findBestCarryScratch so subsequent
-			// (non-winning) leaves' bestAttackWithWeapons calls — which clobber
-			// bufs.bestCarryScratch — can't disturb the running winner. findBest clones
-			// the scratch into best.State once at exit so the returned TurnSummary owns
-			// independent backing.
-			copyCarryStateInto(&bufs.findBestCarryScratch, carry)
-			seenFeasible = true
-			// Arsenal-in occupancy overrides the snapshot's Arsenal so an arsenal-in
-			// card that stayed is preserved.
-			bufs.findBestCarryScratch.Arsenal = arsenalCard
-			bestArsenal = arsenalCard
-			bestLeftoverRunechants = leftoverRunechants
-			bestHasHeld = hasHeld
-			bestFutureValuePlayed = futureValuePlayed
 			// Cards and FromArsenal flags were populated at construction; Role is the only
 			// field that varies per-permutation.
 			for j := 0; j < totalN; j++ {
@@ -209,14 +181,10 @@ func (e *Evaluator) findBest(hero Hero, weapons []Weapon, hand []Card, incomingD
 	}
 	recurse(0, 0, 0)
 	best.SwungWeapons = bestSwung
-	// Promote the running winner's CarryState into best.State. Inner-loop new-bests wrote
-	// into bufs.findBestCarryScratch (allocation-free per leaf via copyCarryStateInto);
-	// this single cloneCarryState gives the returned TurnSummary independent backing
-	// arrays. seenFeasible=false leaves the seed best.State (allocated at the top) in
-	// place — that's the correct fallback when no leaf produced a feasible chain.
-	if seenFeasible {
-		best.State = cloneCarryState(bufs.findBestCarryScratch)
-	}
+	// Promote the running winner's CarryState into best.State. Finalize clones the scratch
+	// once so best.State owns independent backing, or leaves the seed in place when no
+	// leaf produced a feasible chain.
+	running.Finalize(&best.State)
 	// Stamp Cacheable last from the AND-aggregated sticky bit so every leaf the search
 	// touched (feasible or rejected) contributes. The post-hoc arsenal promotion below
 	// doesn't run a chain, so it doesn't move the bit.
@@ -335,35 +303,6 @@ func findArsenalCard(rolesBuf []Role, arsenalCardIn Card, n int) Card {
 		return arsenalCardIn
 	}
 	return nil
-}
-
-// beatsBest decides whether a candidate partition displaces the current best. Tiebreak
-// order: Value → leftover runechants (future arcane) → more AddsFutureValue cards played
-// (hidden later-turn payoff the current-turn Value misses) → arsenal slot ending occupied
-// (saves a hand slot next refill; covers both arsenal-in-stayed and Held-for-promotion).
-// beatsBest compares a candidate leaf's outputs against the running winner's. The
-// winner's stats arrive as scalars so callers can track the running winner without
-// materialising a TurnSummary on every leaf.
-func beatsBest(v, leftoverRunechants, futureValuePlayed int, willOccupyArsenal bool, bestValue, bestLeftoverRunechants, bestFutureValuePlayed int, bestWillOccupyArsenal bool) bool {
-	if v > bestValue {
-		return true
-	}
-	if v < bestValue {
-		return false
-	}
-	if leftoverRunechants > bestLeftoverRunechants {
-		return true
-	}
-	if leftoverRunechants < bestLeftoverRunechants {
-		return false
-	}
-	if futureValuePlayed > bestFutureValuePlayed {
-		return true
-	}
-	if futureValuePlayed < bestFutureValuePlayed {
-		return false
-	}
-	return willOccupyArsenal && !bestWillOccupyArsenal
 }
 
 // roleAllowed decides whether the partition enumerator may assign role r to the current card.
