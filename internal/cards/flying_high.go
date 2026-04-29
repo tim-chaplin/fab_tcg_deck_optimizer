@@ -13,18 +13,19 @@ import (
 
 var flyingHighTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction)
 
-// flyingHighApplySideEffect grants go again to the next attack action card scheduled later
-// this turn. If that target's pitch matches matchPitch (this card's own pitch), we also add
-// +1 to its BonusAttack — the "+1{p} if it's <matching color>" rider — so EffectiveAttack
-// picks the buff up in any LikelyToHit check on the buffed attack. The +1 attributes to the
-// target's slot, not Flying High's.
+// flyingHighApplySideEffect grants go again to the next attack scheduled later this turn
+// — attack action card OR weapon swing per the "your next attack" wording. If the target
+// is an attack action card whose pitch matches matchPitch (this card's own pitch), we
+// also add +1 to its BonusAttack — the "+1{p} if it's <matching color>" rider — so
+// EffectiveAttack picks the buff up in any LikelyToHit check on the buffed attack. The
+// +1 attributes to the target's slot, not Flying High's.
 func flyingHighApplySideEffect(s *sim.TurnState, matchPitch int) {
 	for _, pc := range s.CardsRemaining {
-		if !pc.Card.Types().IsAttackAction() {
+		if !pc.Card.Types().IsAttack() {
 			continue
 		}
 		pc.GrantedGoAgain = true
-		if pc.Card.Pitch() == matchPitch {
+		if pc.Card.Types().IsAttackAction() && pc.Card.Pitch() == matchPitch {
 			pc.BonusAttack++
 		}
 		return
