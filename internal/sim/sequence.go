@@ -531,6 +531,15 @@ func (ctx *sequenceContext) playSequenceWithMeta(n int) (damage int, leftoverRun
 	// mutate them freely without leaking to the next permutation. state.Value resets to 0.
 	ctx.resetStateForPermutation()
 	state := ctx.bufs.state
+	// Seed state.Hand with the upcoming chain attackers so each chain step's Play sees an
+	// accurate "in hand right now" snapshot — committed cards (pitched, defending, already
+	// played, the playing card) are out, but cards going to be played later in this chain
+	// stay in. The current card gets removed at the top of each iteration. handStart (Held
+	// cards) is already in state.Hand from resetStateForPermutation; mid-chain DrawOne
+	// continues to append; chain attackers join here.
+	for k := 0; k < n; k++ {
+		state.Hand = append(state.Hand, played[k].Card)
+	}
 	pool := pitchPool{
 		perm:      ctx.attackPitchPerm,
 		vals:      ctx.attackPitchVals,
@@ -540,6 +549,16 @@ func (ctx *sequenceContext) playSequenceWithMeta(n int) (damage int, leftoverRun
 	}
 	for i, pc := range played {
 		m := meta[i]
+		// Remove the playing card from state.Hand before resolving — it's leaving the hand
+		// to enter the chain. Linear search by interface equality works because every card
+		// implementation is a zero-sized struct, so two copies compare equal and any one of
+		// them is fine to drop.
+		for j := range state.Hand {
+			if state.Hand[j] == pc.Card {
+				state.Hand = append(state.Hand[:j], state.Hand[j+1:]...)
+				break
+			}
+		}
 		contrib, ok := pool.pay(m.costAt(state))
 		if !ok {
 			return 0, 0, 0, false

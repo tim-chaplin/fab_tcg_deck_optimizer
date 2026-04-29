@@ -252,11 +252,8 @@ func sameWeapons(a, b []Weapon) bool {
 // satisfaction. Computing them up front keeps the recurse's inner body free of card-method /
 // type-assert calls, which would otherwise repeat on every leaf. totalN covers the optional
 // arsenal-in slot at index n; when present, its Defense picks up ArsenalDefenseBonus so the
-// partition / capping pipeline sees the effective value. Returns whether any card is a
-// Defense Reaction so the leaf branch can pick between the full three-bucket grouper and the
-// faster reaction-free grouper.
-func fillPartitionPerCardBufs(hand []Card, n, totalN int, arsenalCardIn Card, pvals, dvals []int, isDR, addsFutureValue []bool) bool {
-	hasReactions := false
+// partition / capping pipeline sees the effective value.
+func fillPartitionPerCardBufs(hand []Card, n, totalN int, arsenalCardIn Card, pvals, dvals []int, isDR, addsFutureValue []bool) {
 	for i := 0; i < totalN; i++ {
 		var c Card
 		if i < n {
@@ -276,10 +273,6 @@ func fillPartitionPerCardBufs(hand []Card, n, totalN int, arsenalCardIn Card, pv
 			}
 		}
 		isDR[i] = c.Types().IsDefenseReaction()
-		if isDR[i] {
-			hasReactions = true
-		}
 		_, addsFutureValue[i] = c.(AddsFutureValue)
 	}
-	return hasReactions
 }
