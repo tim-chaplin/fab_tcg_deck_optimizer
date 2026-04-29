@@ -48,6 +48,9 @@ func bestAttackWithWeapons(hero Hero, weapons []Weapon, attackers, defenders, pi
 		priorAuraTriggers:   priorAuraTriggers,
 		skipLog:             skipLog,
 		cacheable:           true,
+		// Point carryWinner at the bufs-persistent scratch so snapshotCarryInto reuses
+		// backing arrays across leaves and Best calls (bufs is Evaluator-cached).
+		carryWinner: &bufs.carryWinnerScratch,
 	}
 	// Defenders fire independently of ordering and attack chain — DRs through Play, plain
 	// blocks as raw block credit — so their total Value contribution is constant across phase
@@ -95,7 +98,6 @@ func bestAttackWithWeapons(hero Hero, weapons []Weapon, attackers, defenders, pi
 	bestLeftoverRunechants := runechantCarryover
 	var bestSwung []string
 	var bestBudget chainBudget
-	var bestCarry CarryState
 	foundFeasible := false
 
 	for pmask := 0; pmask < phaseCount; pmask++ {
@@ -151,7 +153,11 @@ func bestAttackWithWeapons(hero Hero, weapons []Weapon, attackers, defenders, pi
 				bestLeftoverRunechants = leftoverRunechants
 				bestSwung = bufs.weaponNames[wmask]
 				bestBudget = chainBudget{resource: phase.attackBudget, maxPitch: phase.maxAttackPitch, hasAttackPitches: phase.hasAttackPitches}
-				bestCarry = ctx.carryWinner
+				// Reuse bufs.bestCarryScratch's backing arrays so the per-mask-combo
+				// update is allocation-free. The single cloneCarryState below the loop
+				// gives the returned CarryState its own backing — one alloc per leaf
+				// instead of one per mask-combo new-best.
+				copyCarryStateInto(&bufs.bestCarryScratch, *ctx.carryWinner)
 				foundFeasible = true
 			}
 		}
@@ -163,6 +169,10 @@ func bestAttackWithWeapons(hero Hero, weapons []Weapon, attackers, defenders, pi
 		// poisons the result regardless of attack-feasibility.
 		return 0, 0, 0, chainBudget{}, nil, CarryState{}, false, defenseCacheable
 	}
+	// Clone bufs.bestCarryScratch into the return value so the returned CarryState owns
+	// independent backing arrays — bufs.bestCarryScratch is shared across leaves and the
+	// next bestAttackWithWeapons call would otherwise overwrite this one's data.
+	bestCarry := cloneCarryState(bufs.bestCarryScratch)
 	return bestDealt, defenseDealt, bestLeftoverRunechants, bestBudget, bestSwung, bestCarry, true, ctx.cacheable && defenseCacheable
 }
 
@@ -204,12 +214,13 @@ type sequenceContext struct {
 	// seeds state.AuraTriggers with a fresh copy of this slice so mid-chain firing can
 	// decrement Count / set FiredThisTurn without leaking those mutations across permutations.
 	priorAuraTriggers []AuraTrigger
-	// carryWinner snapshots the winning permutation's end-of-chain TurnState slice — every
-	// field that survives the turn boundary (Hand, Deck, Arsenal, Graveyard, Banish,
-	// Runechants, AuraTriggers). Heap's algorithm keeps iterating past the winner and the
-	// shared state.* fields reflect whatever ordering ran last, so the snapshot has to
-	// happen the moment a new winner is found.
-	carryWinner CarryState
+	// carryWinner is a slice header POINTING into bufs.carryWinnerScratch — the persistent
+	// snapshot buffer that survives across Best calls via the Evaluator's cached attackBufs.
+	// Heap's algorithm keeps iterating past the winner and the shared state.* fields reflect
+	// whatever ordering ran last, so the snapshot has to happen the moment a new winner is
+	// found; reusing the bufs-owned backing arrays makes that snapshot allocation-free
+	// after the first sizing.
+	carryWinner *CarryState
 	// skipLog propagates into TurnState.SkipLog on every permutation reset. When true,
 	// chains run with Log appends elided (Value still credited); the caller is replaying
 	// later with skipLog=false to materialise the printout.
@@ -342,7 +353,7 @@ func (ctx *sequenceContext) bestSequence(attackers []Card) (int, int, bool) {
 		// state.Hand so post-hoc arsenal promotion has something to pick from. Reset+snapshot
 		// mirrors the per-permutation work eval() does for n>0 chains.
 		ctx.resetStateForPermutation()
-		ctx.carryWinner = snapshotCarry(ctx.bufs.state)
+		snapshotCarryInto(ctx.carryWinner, ctx.bufs.state)
 		return 0, ctx.runechantCarryover, true
 	}
 	pcBuf := ctx.bufs.pcBuf[:n]
@@ -355,7 +366,11 @@ func (ctx *sequenceContext) bestSequence(attackers []Card) (int, int, bool) {
 	best := 0
 	bestLeftoverRunechants := ctx.runechantCarryover
 	foundLegal := false
-	ctx.carryWinner = CarryState{}
+	// Zero ctx.carryWinner's contents (preserving slice backing arrays) so a stale value
+	// from a previous Best call's leaf can't leak through when no permutation lands a new
+	// best in this leaf. The slice lengths drop to 0 but backing arrays survive — the
+	// next snapshotCarryInto refills via append([:0], src...) without allocating.
+	resetCarryStateScratch(ctx.carryWinner)
 	state := ctx.bufs.state
 	eval := func() {
 		dmg, leftoverRunechants, _, legal := ctx.playSequenceWithMeta(n)
@@ -375,7 +390,7 @@ func (ctx *sequenceContext) bestSequence(attackers []Card) (int, int, bool) {
 			best = dmg
 			bestLeftoverRunechants = leftoverRunechants
 			foundLegal = true
-			ctx.carryWinner = snapshotCarry(state)
+			snapshotCarryInto(ctx.carryWinner, state)
 		}
 	}
 	eval()
@@ -543,21 +558,58 @@ func (ctx *sequenceContext) playSequenceWithMeta(n int) (damage int, leftoverRun
 	return state.Value, state.Runechants, resources, true
 }
 
-// snapshotCarry copies every persistent TurnState field that survives the turn boundary into
-// a CarryState. The slice copies are intentional: mid-chain state.* slices alias attackBufs
-// scratch storage and the next permutation will overwrite them. The deck loop adopts these
-// slices wholesale into the next-turn state. Reads s.deck / s.graveyard directly so the
-// snapshot itself doesn't poison cacheable — the per-permutation cacheable check ran before
-// snapshotCarry, and resetStateForPermutation clears the bit before the next permutation.
-func snapshotCarry(s *TurnState) CarryState {
-	return CarryState{
-		Hand:         append([]Card(nil), s.Hand...),
-		Deck:         append([]Card(nil), s.deck...),
-		Arsenal:      s.Arsenal,
-		Graveyard:    append([]Card(nil), s.graveyard...),
-		Banish:       append([]Card(nil), s.Banish...),
-		Runechants:   s.Runechants,
-		AuraTriggers: append([]AuraTrigger(nil), s.AuraTriggers...),
-		Log:          append([]LogEntry(nil), s.Log...),
-	}
+// snapshotCarryInto copies every persistent TurnState field that survives the turn
+// boundary into out, REUSING out's slice backing arrays via append([:0], src...). The
+// slice copies are intentional: mid-chain state.* slices alias attackBufs scratch
+// storage and the next permutation will overwrite them. Reusing out's backing arrays
+// across many "new best" updates within a single bestSequence call keeps the per-
+// permutation snapshot allocation-free once the buffers are sized. Reads s.deck /
+// s.graveyard directly so the snapshot itself doesn't poison cacheable.
+//
+// Caller invariant: out must not be aliased by any value that needs to outlive the next
+// snapshotCarryInto call against the same out — the backing arrays are shared and the
+// next call overwrites their contents. Callers that promote out into a longer-lived
+// CarryState (the partition leaf new-best in findBest's recurse) clone explicitly via
+// cloneCarryState before the next snapshotCarryInto.
+func snapshotCarryInto(out *CarryState, s *TurnState) {
+	out.Hand = append(out.Hand[:0], s.Hand...)
+	out.Deck = append(out.Deck[:0], s.deck...)
+	out.Arsenal = s.Arsenal
+	out.Graveyard = append(out.Graveyard[:0], s.graveyard...)
+	out.Banish = append(out.Banish[:0], s.Banish...)
+	out.Runechants = s.Runechants
+	out.AuraTriggers = append(out.AuraTriggers[:0], s.AuraTriggers...)
+	out.Log = append(out.Log[:0], s.Log...)
+}
+
+// resetCarryStateScratch zeros every persistent field of out while preserving slice
+// backing arrays. Slice lengths drop to 0 (backing array kept for reuse via the next
+// append([:0], ...)); scalar / pointer fields zero out. Sibling to snapshotCarryInto /
+// copyCarryStateInto so the field list stays in one place — adding a new CarryState
+// field requires updating all three together.
+func resetCarryStateScratch(out *CarryState) {
+	out.Hand = out.Hand[:0]
+	out.Deck = out.Deck[:0]
+	out.Arsenal = nil
+	out.Graveyard = out.Graveyard[:0]
+	out.Banish = out.Banish[:0]
+	out.Runechants = 0
+	out.AuraTriggers = out.AuraTriggers[:0]
+	out.Log = out.Log[:0]
+}
+
+// copyCarryStateInto is snapshotCarryInto for a CarryState source — reuses out's slice
+// backings so promoting one already-built CarryState into a different scratch is
+// allocation-free after the first sizing. Used by the mask-combo loop in
+// bestAttackWithWeapons to cache the running winner so the leaf pays one clone instead
+// of one per new-best update.
+func copyCarryStateInto(out *CarryState, src CarryState) {
+	out.Hand = append(out.Hand[:0], src.Hand...)
+	out.Deck = append(out.Deck[:0], src.Deck...)
+	out.Arsenal = src.Arsenal
+	out.Graveyard = append(out.Graveyard[:0], src.Graveyard...)
+	out.Banish = append(out.Banish[:0], src.Banish...)
+	out.Runechants = src.Runechants
+	out.AuraTriggers = append(out.AuraTriggers[:0], src.AuraTriggers...)
+	out.Log = append(out.Log[:0], src.Log...)
 }
