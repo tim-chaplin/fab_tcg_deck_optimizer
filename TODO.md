@@ -90,9 +90,6 @@ different from cards (they're never played, drawn from the deck, pitched, etc.).
 should really be treated as a completely separate type. However, parts of the sim currently
 treat Weapons as Cards, so that will have to be carefully disentangled.
 
-BUG: Flying High should grant Go Again to "your next attack", but it only currently applies
-to Action Attack cards.
-
 `internal/registry/ids/weapon_ids.go` aliases `WeaponID = CardID` and anchors the weapon
 constants at `FakeHugeAttack + iota + 1` so they don't collide with card / fake IDs in the
 shared cache slots. Ideally weapons would have their own `WeaponID uint16` type starting at
