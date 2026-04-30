@@ -3,8 +3,8 @@
 //
 // Text: "**Opt 4** **Go again**"
 //
-// The Opt 4 (deck-top reorder) is dropped — it only re-shapes future draws, which the single-turn
-// solver doesn't credit. Go again is wired so the printed pitch + defense remain valid.
+// The Opt 4 (deck-top reorder) isn't modelled. Go again is wired so the printed pitch + defense
+// remain valid.
 
 package cards
 

@@ -5,8 +5,7 @@
 // Red / 2 Yellow / 1 Blue.)
 //
 // Scan the top N cards of s.Deck; credit +1 per Runeblade attack action card revealed. The
-// post-reveal reorder is dropped — it only re-shapes future draws, which the single-turn
-// solver doesn't credit.
+// post-reveal reorder isn't modelled.
 
 package cards
 

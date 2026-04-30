@@ -3,8 +3,7 @@
 // Printed defense: Red 4, Yellow 3, Blue 2.
 // Text: "Opt 1"
 //
-// The Opt 1 (deck-top reorder) is dropped — it only re-shapes future draws, which the single-turn
-// solver doesn't credit. Block value is the printed defense.
+// The Opt 1 (deck-top reorder) isn't modelled; block value is the printed defense.
 
 package cards
 

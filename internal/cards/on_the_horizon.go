@@ -3,8 +3,8 @@
 //
 // Text: "When this defends, look at the top card of your deck."
 //
-// The deck-peek defend trigger is dropped — it only reveals information for future-turn play
-// decisions, which the single-turn solver doesn't credit.
+// The deck-peek defend trigger isn't modelled — it surfaces information for the player,
+// not a state change the solver can credit.
 
 package cards
 
