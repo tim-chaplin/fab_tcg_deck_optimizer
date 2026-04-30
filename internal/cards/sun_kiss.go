@@ -84,3 +84,7 @@ func (SunKissBlue) GoAgain() bool           { return false }
 func (SunKissBlue) Play(s *sim.TurnState, self *sim.CardState) {
 	sunKissPlay(1, s, self)
 }
+
+func (SunKissRed) ConditionalGoAgain()    {}
+func (SunKissYellow) ConditionalGoAgain() {}
+func (SunKissBlue) ConditionalGoAgain()   {}

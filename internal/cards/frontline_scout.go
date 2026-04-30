@@ -76,3 +76,7 @@ func (FrontlineScoutBlue) NotImplemented() {}
 func (FrontlineScoutBlue) Play(s *sim.TurnState, self *sim.CardState) {
 	frontlineScoutPlay(s, self)
 }
+
+func (FrontlineScoutRed) ConditionalGoAgain()    {}
+func (FrontlineScoutYellow) ConditionalGoAgain() {}
+func (FrontlineScoutBlue) ConditionalGoAgain()   {}

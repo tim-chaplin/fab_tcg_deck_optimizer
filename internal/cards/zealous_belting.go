@@ -68,3 +68,7 @@ func (ZealousBeltingBlue) GoAgain() bool           { return false }
 func (ZealousBeltingBlue) Play(s *sim.TurnState, self *sim.CardState) {
 	zealousBeltingPlay(s, self)
 }
+
+func (ZealousBeltingRed) ConditionalGoAgain()    {}
+func (ZealousBeltingYellow) ConditionalGoAgain() {}
+func (ZealousBeltingBlue) ConditionalGoAgain()   {}

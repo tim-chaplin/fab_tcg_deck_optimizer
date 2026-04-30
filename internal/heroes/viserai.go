@@ -110,15 +110,28 @@ func (s viseraiOptSlots) union(other viseraiOptSlots) viseraiOptSlots {
 }
 
 // viseraiSlotsFor classifies c into Viserai's Opt-heuristic slots. The Go-again check
-// routes through sim.HasGoAgainHeuristic so cards with conditional Go again at play
-// time (Runerager Swarm in this archetype, etc.) aren't treated as one-per-hand
-// finishers.
+// routes through mightHaveGoAgain so cards with the ConditionalGoAgain marker (Runerager
+// Swarm et al., printed GoAgain() == false but conditionally granted at play time)
+// aren't treated as one-per-hand finishers.
 func viseraiSlotsFor(c sim.Card) viseraiOptSlots {
 	t := c.Types()
 	return viseraiOptSlots{
 		nonAttackEnabler: t.IsNonAttackAction(),
-		nonGoAgainAction: t.Has(card.TypeAction) && !sim.HasGoAgainHeuristic(c),
+		nonGoAgainAction: t.Has(card.TypeAction) && !mightHaveGoAgain(c),
 		defender:         t.IsDefenseReaction() || t.Has(card.TypeBlock),
 		bluePitch:        c.Pitch() == 3,
 	}
+}
+
+// mightHaveGoAgain reports whether c could resolve with Go again at play time —
+// printed Go again, or the sim.ConditionalGoAgain marker indicating the card grants
+// itself under some runtime condition. Deliberately scoped to this slot heuristic and
+// named "might" rather than "has" so callers don't accidentally treat the result as
+// proof of go-again on the next play.
+func mightHaveGoAgain(c sim.Card) bool {
+	if c.GoAgain() {
+		return true
+	}
+	_, ok := c.(sim.ConditionalGoAgain)
+	return ok
 }

@@ -78,3 +78,7 @@ func (PerformanceBonusBlue) NotImplemented() {}
 func (PerformanceBonusBlue) Play(s *sim.TurnState, self *sim.CardState) {
 	performanceBonusPlay(s, self)
 }
+
+func (PerformanceBonusRed) ConditionalGoAgain()    {}
+func (PerformanceBonusYellow) ConditionalGoAgain() {}
+func (PerformanceBonusBlue) ConditionalGoAgain()   {}
