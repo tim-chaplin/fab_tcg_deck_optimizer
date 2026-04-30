@@ -2,6 +2,8 @@ package sim
 
 import (
 	"fmt"
+	"strings"
+
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 )
 
@@ -245,6 +247,10 @@ func (s *TurnState) PrependToDeck(c Card) {
 // chain becomes uncacheable regardless of whether n is positive or whether any cards
 // were available.
 //
+// Emits a log entry "Opted X, put Y on top, put Z on bottom" naming the revealed cards
+// and the chosen split when the handler ran (no-op paths skip the log to keep the trace
+// quiet on degenerate cases).
+//
 // Panics if the handler's combined output isn't exactly the input multiset. The contract
 // is that Opt only re-orders cards; adding, dropping, or substituting any card is a bug.
 //
@@ -270,6 +276,23 @@ func (s *TurnState) Opt(n int) {
 	newDeck = append(newDeck, rest...)
 	newDeck = append(newDeck, bottom...)
 	s.deck = newDeck
+
+	s.AddLogEntry(fmt.Sprintf("Opted %s, put %s on top, put %s on bottom",
+		formatCardList(cards), formatCardList(top), formatCardList(bottom)), 0)
+}
+
+// formatCardList renders cs as "[name1, name2, ...]" using DisplayName for each entry, or
+// "[]" when cs is empty. Used by the Opt log entry so an empty top / bottom list shows up
+// as a clear no-cards token rather than blank.
+func formatCardList(cs []Card) string {
+	if len(cs) == 0 {
+		return "[]"
+	}
+	parts := make([]string, len(cs))
+	for i, c := range cs {
+		parts[i] = DisplayName(c)
+	}
+	return "[" + strings.Join(parts, ", ") + "]"
 }
 
 // panicIfOptViolatesMultiset enforces TurnState.Opt's contract that the hero handler's

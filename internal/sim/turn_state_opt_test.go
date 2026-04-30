@@ -141,6 +141,72 @@ func TestTurnStateOpt_NonPositiveNSkipsHandler(t *testing.T) {
 	}
 }
 
+// Tests that Opt emits a "Opted X, put Y on top, put Z on bottom" log entry naming the
+// revealed cards and the handler's split when it ran.
+func TestTurnStateOpt_LogsOutcome(t *testing.T) {
+	a := testutils.NewStubCard("a")
+	b := testutils.NewStubCard("b")
+	c := testutils.NewStubCard("c")
+	withOptHero(t, testutils.Hero{
+		OptStrategy: func(cards []Card) (top, bottom []Card) {
+			return []Card{cards[1]}, []Card{cards[0]}
+		},
+	}, func() {
+		s := NewTurnState([]Card{a, b, c}, nil)
+		s.Opt(2)
+		if len(s.Log) != 1 {
+			t.Fatalf("Log len = %d, want 1", len(s.Log))
+		}
+		want := "Opted [a, b], put [b] on top, put [a] on bottom"
+		if got := s.Log[0].Text; got != want {
+			t.Errorf("log entry = %q, want %q", got, want)
+		}
+		if s.Log[0].N != 0 {
+			t.Errorf("log N = %d, want 0 (Opt is value-neutral; reshape effect surfaces in later turns)", s.Log[0].N)
+		}
+	})
+}
+
+// Tests that the log entry renders an empty top or bottom list as "[]".
+func TestTurnStateOpt_LogShowsEmptyListsAsBrackets(t *testing.T) {
+	a := testutils.NewStubCard("a")
+	b := testutils.NewStubCard("b")
+	withOptHero(t, testutils.Hero{
+		OptStrategy: func(cards []Card) (top, bottom []Card) {
+			return cards, nil // bottom empty
+		},
+	}, func() {
+		s := NewTurnState([]Card{a, b}, nil)
+		s.Opt(2)
+		want := "Opted [a, b], put [a, b] on top, put [] on bottom"
+		if got := s.Log[0].Text; got != want {
+			t.Errorf("log entry = %q, want %q", got, want)
+		}
+	})
+}
+
+// Tests that the no-op paths skip the log entry entirely.
+func TestTurnStateOpt_NoOpPathsSkipLog(t *testing.T) {
+	cases := []struct {
+		name string
+		deck []Card
+		n    int
+	}{
+		{"empty deck", nil, 3},
+		{"zero n", []Card{testutils.NewStubCard("x")}, 0},
+		{"negative n", []Card{testutils.NewStubCard("x")}, -1},
+	}
+	withOptHero(t, testutils.Hero{}, func() {
+		for _, tc := range cases {
+			s := NewTurnState(tc.deck, nil)
+			s.Opt(tc.n)
+			if len(s.Log) != 0 {
+				t.Errorf("%s: Log = %v, want empty", tc.name, s.Log)
+			}
+		}
+	})
+}
+
 // Tests that Opt always flips IsCacheable to false, even on the no-op paths (n <= 0,
 // empty deck) — the chain reading the deck implies an order dependency regardless of
 // whether the handler ran.
