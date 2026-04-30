@@ -75,7 +75,7 @@ const (
 	// ±0.01 is tight enough to distinguish small per-deck differences during anneal
 	// optimisation. Hand-value sigma sits around 4-6, so SE = 0.01 typically takes
 	// 5-7k shuffles to converge.
-	adaptiveTargetSE = 0.01
+	adaptiveTargetSE = 0.05
 	// adaptiveShufflesCap is the upper bound on the adaptive shuffle path. Caps a
 	// pathological high-variance regime that doesn't converge to adaptiveTargetSE — the
 	// run still terminates at this many shuffles even if the SE target was never hit.

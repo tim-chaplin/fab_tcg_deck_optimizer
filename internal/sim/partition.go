@@ -94,7 +94,7 @@ func (e *Evaluator) findBest(hero Hero, weapons []Weapon, hand []Card, incomingD
 	isDR := bufs.isDRBuf[:totalN]
 	addsFutureValue := bufs.addsFutureValueBuf[:totalN]
 
-	hasReactions := fillPartitionPerCardBufs(hand, n, totalN, arsenalCardIn, pvals, dvals, isDR, addsFutureValue)
+	fillPartitionPerCardBufs(hand, n, totalN, arsenalCardIn, pvals, dvals, isDR, addsFutureValue)
 
 	var recurse func(i, pitchSum, defenseSum int)
 	recurse = func(i, pitchSum, defenseSum int) {
@@ -158,14 +158,11 @@ func (e *Evaluator) findBest(hero Hero, weapons []Weapon, hand []Card, incomingD
 			if !roleAllowed(r, isArsenalSlot, isDR[i]) {
 				continue
 			}
-			// With no damage coming in and no Defense Reactions in the hand, a non-DR card's
-			// Defend contribution is 0 — same as Held — and nothing scans the defender set,
-			// so the two partitions produce the same Value / leftover / futureValuePlayed and
-			// Held wins the arsenal-occupancy tiebreaker. Skip the dominated Defend branch.
-			// DR-present hands keep Defend because DR Play effects scan defenders as a
-			// graveyard seed (e.g. Weeping Battleground banishing an aura a non-DR blocker
-			// put there).
-			if r == Defend && incomingDamage == 0 && !isDR[i] && !hasReactions {
+			// FaB rule: defense reactions and plain blocks only happen during the defend step
+			// of an attack chain. With 0 incoming there is no defend step, so the Defend role
+			// is illegal for every card type — DR or otherwise. Skipping it here also avoids
+			// no-op DR Plays leaving an empty hand to a downstream len(s.Hand)==0 gate.
+			if r == Defend && incomingDamage == 0 {
 				continue
 			}
 			rolesBuf[i] = r
