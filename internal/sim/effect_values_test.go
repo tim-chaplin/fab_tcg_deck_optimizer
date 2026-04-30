@@ -1,6 +1,11 @@
-package sim
+package sim_test
 
-import "testing"
+import (
+	"testing"
+
+	. "github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
+)
 
 // TestLikelyDamageHits_OnlyAwkwardAmounts: without Dominate, 1 / 4 / 7 damage slip past
 // typical blocks (cards are ~3 points of value, so opponents won't over-pay with a 3-block
@@ -59,9 +64,10 @@ func TestLikelyToHit_FoldsEffectiveAttackAndDominate(t *testing.T) {
 		{"printed 4, +1 bonus, granted Dominate → still in 1/4/7 OR 5+", 4, 1, true, false, true},
 	}
 	for _, tc := range cases {
-		var c Card = stubCard{name: tc.name, attack: tc.printed}
+		base := testutils.NewStubCard(tc.name).WithAttack(tc.printed)
+		var c Card = base
 		if tc.printedDom {
-			c = dominatingStubCard{stubCard: stubCard{name: tc.name, attack: tc.printed}}
+			c = testutils.DominatingStubCard{StubCard: base}
 		}
 		p := &CardState{Card: c, BonusAttack: tc.bonusAttack, GrantedDominate: tc.grantedDom}
 		if got := LikelyToHit(p); got != tc.want {

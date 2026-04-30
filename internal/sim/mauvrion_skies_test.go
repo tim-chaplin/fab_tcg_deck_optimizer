@@ -20,7 +20,7 @@ import (
 // value line, which is to simply play Mauvrion for zero damage.
 func TestBest_MauvrionAloneFizzlesWithoutDamage(t *testing.T) {
 	h := []Card{cards.MauvrionSkiesRed{}}
-	got := Best(StubHero, nil, h, 0, nil, 0, nil)
+	got := Best(testutils.Hero{Intel: 4}, nil, h, 0, nil, 0, nil)
 	if got.Value != 0 {
 		t.Fatalf("want value 0 (trigger has no target), got %d (roles=[%s])",
 			got.Value, FormatBestLine(got.BestLine))
@@ -33,7 +33,7 @@ func TestBest_MauvrionAloneFizzlesWithoutDamage(t *testing.T) {
 func TestBest_MauvrionBladeOnlyFizzles(t *testing.T) {
 	h := []Card{cards.MauvrionSkiesRed{}, testutils.YellowAttack{}}
 	weapons := []Weapon{weapons.ReapingBlade{}}
-	got := Best(StubHero, weapons, h, 0, nil, 0, nil)
+	got := Best(testutils.Hero{Intel: 4}, weapons, h, 0, nil, 0, nil)
 	// Pitch YellowAttack (2 res) → play Mauvrion (cost 0, go again) → Blade swing (cost 1,
 	// 3 damage). Mauvrion's trigger doesn't match the weapon, so no Runechants.
 	if got.Value != 3 {
@@ -47,7 +47,7 @@ func TestBest_MauvrionBladeOnlyFizzles(t *testing.T) {
 // rejects it and the trigger fizzles.
 func TestBest_MauvrionNonRunebladeAttackFizzles(t *testing.T) {
 	h := []Card{cards.MauvrionSkiesRed{}, testutils.RedAttack{}, testutils.YellowAttack{}}
-	got := Best(StubHero, nil, h, 0, nil, 0, nil)
+	got := Best(testutils.Hero{Intel: 4}, nil, h, 0, nil, 0, nil)
 	// Pitch YellowAttack (2 res) → play Mauvrion (cost 0, go again) → play fake RedAttack
 	// (cost 1, 3 damage, go again). The Generic attack action doesn't qualify for
 	// Mauvrion's rider, so Runechants never fire.
@@ -68,10 +68,10 @@ func TestBest_MauvrionLikelyHitRunebladeAttackCreditsRider(t *testing.T) {
 		cards.ShrillOfSkullformRed{},
 		testutils.YellowAttack{},
 	}
-	got := Best(StubHero, nil, h, 0, nil, 0, nil)
+	got := Best(testutils.Hero{Intel: 4}, nil, h, 0, nil, 0, nil)
 	// Pitch YellowAttack (2 res) → Mauvrion (cost 0, go again, grants go-again to Shrill +
 	// registers trigger) → Shrill (cost 2, power 4). No aura exists when Shrill's Play
-	// runs (StubHero has no trigger and Mauvrion's trigger hasn't fired yet), so Shrill's
+	// runs (testutils.Hero{Intel: 4} has no trigger and Mauvrion's trigger hasn't fired yet), so Shrill's
 	// own +3 "aura played" bonus stays off. After Shrill, Mauvrion's ephemeral fires:
 	// LikelyToHit(4) is true, so it creates 3 Runechants (+3 damage, credited to Mauvrion).
 	// Total: 4 (Shrill) + 3 (Mauvrion's rider) = 7.
@@ -90,7 +90,7 @@ func TestBest_MauvrionBlockableRunebladeAttackDropsRider(t *testing.T) {
 		cards.ShrillOfSkullformBlue{},
 		testutils.YellowAttack{},
 	}
-	got := Best(StubHero, nil, h, 0, nil, 0, nil)
+	got := Best(testutils.Hero{Intel: 4}, nil, h, 0, nil, 0, nil)
 	// Pitch YellowAttack (2 res) → Mauvrion (cost 0) → Shrill Blue (cost 2, power 2).
 	// Trigger fires on Shrill's resolution but LikelyToHit(2) is false, so Mauvrion's
 	// Runechants don't land. Shrill's own +3 aura bonus also stays off (no auras).

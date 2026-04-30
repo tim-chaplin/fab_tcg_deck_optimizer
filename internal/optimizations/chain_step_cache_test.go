@@ -4,34 +4,18 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"testing"
 
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
 )
-
-// stubCard is a minimal Card implementation for these cache tests. Tests set ID + Types +
-// Name to drive the cache lookups and verb selection; everything else returns a zero value.
-type stubCard struct {
-	id    ids.CardID
-	name  string
-	types card.TypeSet
-}
-
-func (c stubCard) ID() ids.CardID                    { return c.id }
-func (c stubCard) Name() string                      { return c.name }
-func (stubCard) Cost(*sim.TurnState) int             { return 0 }
-func (stubCard) Pitch() int                          { return 0 }
-func (stubCard) Attack() int                         { return 0 }
-func (stubCard) Defense() int                        { return 0 }
-func (c stubCard) Types() card.TypeSet               { return c.types }
-func (stubCard) GoAgain() bool                       { return false }
-func (stubCard) Play(*sim.TurnState, *sim.CardState) {}
 
 // TestWarmChainStepCache_PopulatesBothFromArsenalRows: WarmChainStepCache must fill both
 // the (id, false) and (id, true) cells for every non-nil card so the runtime hot path is
 // pure reads. Sample a known card and confirm both entries are present and produce the
 // expected "<DisplayName>: <VERB>[ from arsenal]" string.
 func TestWarmChainStepCache_PopulatesBothFromArsenalRows(t *testing.T) {
-	c := stubCard{id: ids.FakeRedAttack, name: "Test", types: card.NewTypeSet(card.TypeAttack, card.TypeAction)}
+	c := testutils.NewStubCard("Test").
+		WithID(testutils.FakeRedAttack).
+		WithTypes(card.NewTypeSet(card.TypeAttack, card.TypeAction))
 	chainStepCache[chainStepCacheIndex(c.ID(), false)].Store(nil)
 	chainStepCache[chainStepCacheIndex(c.ID(), true)].Store(nil)
 
@@ -67,7 +51,9 @@ func TestWarmChainStepCache_SkipsNil(t *testing.T) {
 // entry point. A card never seen by WarmChainStepCache (test fakes, ad-hoc stubs) must
 // still produce the right string and populate the cache so the next call is a hit.
 func TestChainStepText_LazyBackfillForUnregisteredCards(t *testing.T) {
-	c := stubCard{id: ids.FakeHugeAttack, name: "Unregistered", types: card.NewTypeSet(card.TypeAction)}
+	c := testutils.NewStubCard("Unregistered").
+		WithID(testutils.FakeHugeAttack).
+		WithTypes(card.NewTypeSet(card.TypeAction))
 	idx := chainStepCacheIndex(c.ID(), false)
 	chainStepCache[idx].Store(nil)
 
@@ -100,7 +86,7 @@ func TestBuildChainStepText_VerbSelection(t *testing.T) {
 	}
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
-			c := stubCard{name: "X", types: tc.types}
+			c := testutils.NewStubCard("X").WithTypes(tc.types)
 			self := &sim.CardState{Card: c, FromArsenal: tc.fromArsenal}
 			if got := bareChainStepText(self); got != tc.want {
 				t.Errorf("bareChainStepText = %q, want %q", got, tc.want)

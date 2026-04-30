@@ -9,6 +9,7 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/cards"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/heroes"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/weapons"
 )
 
@@ -144,7 +145,7 @@ func TestEvaluate_HeldCardDefersDrawToNextTurn(t *testing.T) {
 	for i := range deckCards {
 		deckCards[i] = cards.ToughenUpBlue{}
 	}
-	d := New(Int1StubHero, nil, deckCards)
+	d := New(testutils.Hero{Intel: 1}, nil, deckCards)
 	d.Evaluate(1, 0, rand.New(rand.NewSource(1)))
 
 	if d.Stats.Hands != 2 {
@@ -168,7 +169,7 @@ func TestEvaluate_HeldCardDefersDrawToNextTurn(t *testing.T) {
 // pitched card (returned to deck bottom) and arsenals it again. Loop stops when the deck's
 // empty and nothing new can be drawn.
 func TestEvaluate_ArsenalPersistsAcrossTurns(t *testing.T) {
-	d := New(Int1StubHero, nil, []Card{cards.ToughenUpBlue{}, cards.ToughenUpBlue{}})
+	d := New(testutils.Hero{Intel: 1}, nil, []Card{cards.ToughenUpBlue{}, cards.ToughenUpBlue{}})
 	d.Evaluate(1, 4, rand.New(rand.NewSource(1)))
 
 	// Best captures turn 2 — only turn with Value > 0 (arsenal DR fires).
