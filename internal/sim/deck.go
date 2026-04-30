@@ -162,24 +162,23 @@ func Random(h Hero, size, maxCopies int, rng *rand.Rand, legal func(Card) bool) 
 }
 
 // NotImplementedReplacement records one swap made by Deck.SanitizeNotImplemented: the
-// NotImplemented-tagged card that was removed and the NotImplemented-free card
-// that took its slot.
+// pool-excluded card that was removed and the pool-eligible card that took its slot.
 type NotImplementedReplacement struct {
 	From Card
 	To   Card
 }
 
-// SanitizeNotImplemented scans d.Cards in order and replaces every card carrying
-// NotImplemented with a random legal replacement drawn from legalPool(legal), rolling
-// again if the pick would exceed maxCopies for that printing. Weapons and hero are
-// untouched. The sanitized deck stays size-stable and copy-cap-legal so the caller can
-// re-evaluate directly.
+// SanitizeNotImplemented scans d.Cards in order and replaces every card excluded from the
+// pool (NotImplemented or Unplayable) with a random legal replacement drawn from
+// legalPool(legal), rolling again if the pick would exceed maxCopies for that printing.
+// Weapons and hero are untouched. The sanitized deck stays size-stable and copy-cap-legal
+// so the caller can re-evaluate directly.
 //
 // Returns the ordered list of swaps made (one entry per replaced slot; duplicates of the
 // same tagged ID produce one entry each since each slot is picked independently). Returns
 // an empty slice when nothing needed replacement.
 //
-// Panics when maxCopies < 1 or when the legal/NotImplemented pool is smaller than the
+// Panics when maxCopies < 1 or when the legal/excluded pool is smaller than the
 // per-printing maxCopies budget d already uses — both indicate a config so degenerate that
 // there's no sensible recovery.
 func (d *Deck) SanitizeNotImplemented(maxCopies int, rng *rand.Rand, legal func(Card) bool) []NotImplementedReplacement {
@@ -188,15 +187,15 @@ func (d *Deck) SanitizeNotImplemented(maxCopies int, rng *rand.Rand, legal func(
 	}
 	pool := legalPool(legal)
 	if len(pool) == 0 {
-		panic("deck: SanitizeNotImplemented's legal filter rejected every implemented card — cannot build a replacement")
+		panic("deck: SanitizeNotImplemented's legal filter rejected every pool-eligible card — cannot build a replacement")
 	}
-	// Seed counts with the implemented-keeper cards already in the deck so replacements
-	// respect maxCopies against the surviving slots. The tagged slots we're about to
-	// overwrite don't count.
+	// Seed counts with the keeper cards already in the deck so replacements respect
+	// maxCopies against the surviving slots. The excluded slots we're about to overwrite
+	// don't count.
 	counts := map[ids.CardID]int{}
 	var slots []int
 	for i, c := range d.Cards {
-		if _, unimplemented := c.(NotImplemented); unimplemented {
+		if isExcludedFromPool(c) {
 			slots = append(slots, i)
 			continue
 		}
@@ -223,17 +222,18 @@ func (d *Deck) SanitizeNotImplemented(maxCopies int, rng *rand.Rand, legal func(
 	return replacements
 }
 
-// legalPool returns DeckableCards() filtered by legal, with any card carrying the
-// NotImplemented marker removed. The NotImplemented filter is always applied — a card
-// whose printed effect the sim can't faithfully reproduce shouldn't land in a random deck or
-// become a mutation candidate regardless of format legality. Pass nil for legal to apply only
-// the NotImplemented filter. Shared by Random and AllMutations so both agree on the pool.
+// legalPool returns DeckableCards() filtered by legal, with any card carrying a pool-
+// exclusion marker (NotImplemented or Unplayable) removed. The exclusion filter is always
+// applied — a card the sim can't model faithfully or one whose effect is too weak to ever
+// pick shouldn't land in a random deck or become a mutation candidate regardless of format
+// legality. Pass nil for legal to apply only the exclusion filter. Shared by Random and
+// AllMutations so both agree on the pool.
 func legalPool(legal func(Card) bool) []ids.CardID {
 	pool := DeckableCards()
 	filtered := pool[:0]
 	for _, id := range pool {
 		c := GetCard(id)
-		if _, unimplemented := c.(NotImplemented); unimplemented {
+		if isExcludedFromPool(c) {
 			continue
 		}
 		if legal != nil && !legal(c) {
@@ -245,13 +245,13 @@ func legalPool(legal func(Card) bool) []ids.CardID {
 }
 
 // legalWeapons is the weapon-side analogue of legalPool: AllWeapons minus any weapon
-// carrying the NotImplemented marker. Shared by Random's loadout pick and
-// weaponLoadoutMutations so neither path proposes a weapon whose printed effect the sim
-// can't faithfully reproduce.
+// carrying a pool-exclusion marker (NotImplemented or Unplayable). Shared by Random's
+// loadout pick and weaponLoadoutMutations so neither path proposes a weapon the sim can't
+// faithfully model or one whose effect is too weak to ever pick.
 func legalWeapons() []Weapon {
 	out := make([]Weapon, 0, len(AllWeapons))
 	for _, w := range AllWeapons {
-		if _, unimplemented := w.(NotImplemented); unimplemented {
+		if isExcludedWeaponFromPool(w) {
 			continue
 		}
 		out = append(out, w)

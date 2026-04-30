@@ -2,8 +2,9 @@
 //
 // Text: "**Instant** - Destroy Potion of Seeing: Look at target hero's hand."
 //
-// The activated opposing-hand reveal isn't modelled — opponents' hand contents aren't tracked.
-// The card resolves as a pitch-only Item with no on-play effect.
+// Marked sim.Unplayable: a pitch-only Item with 0/0 stats and an opponent-info-only
+// activated effect — the optimizer would never pick it even with the reveal modelled, so
+// it's filtered from random / mutation pools.
 
 package cards
 
@@ -25,4 +26,5 @@ func (PotionOfSeeingBlue) Attack() int                                { return 0
 func (PotionOfSeeingBlue) Defense() int                               { return 0 }
 func (PotionOfSeeingBlue) Types() card.TypeSet                        { return potionOfSeeingTypes }
 func (PotionOfSeeingBlue) GoAgain() bool                              { return false }
+func (PotionOfSeeingBlue) Unplayable()                                {}
 func (PotionOfSeeingBlue) Play(s *sim.TurnState, self *sim.CardState) { s.LogPlay(self) }

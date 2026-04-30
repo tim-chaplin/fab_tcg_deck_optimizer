@@ -42,3 +42,11 @@ type notImplementedStubCard struct {
 }
 
 func (notImplementedStubCard) NotImplemented() {}
+
+// unplayableStubCard is a stubCard that implements the Unplayable marker — exercises the
+// second pool-exclusion path the deck legal-pool filter keys on.
+type unplayableStubCard struct {
+	stubCard
+}
+
+func (unplayableStubCard) Unplayable() {}
