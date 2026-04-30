@@ -584,6 +584,16 @@ func (ctx *sequenceContext) playSequenceWithMeta(n int) (damage int, leftoverRun
 				}
 			}
 		}
+		// Cards with non-resource additional costs (PlayPrecondition opt-in) get one more
+		// gate: a false return means the additional cost can't be paid AT THIS HAND, so
+		// the play is illegal in FaB rules and the permutation is rejected. The check
+		// runs after pitch popping so the precondition reads only cards genuinely still
+		// in hand — a pitch source can't double as a reveal target.
+		if pre, ok := pc.Card.(PlayPrecondition); ok {
+			if !pre.PlayPrecondition(state, pc) {
+				return 0, 0, 0, false
+			}
+		}
 
 		state.CardsRemaining = played[i+1:]
 

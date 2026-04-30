@@ -176,6 +176,17 @@ type Dominator interface {
 	Dominate()
 }
 
+// PlayPrecondition is an optional Card marker for cards whose printed text imposes a
+// non-resource additional cost beyond Cost(). Implementers return false when THIS play
+// can't legally happen (e.g. Demolition Crew's "reveal a card in your hand with cost 2 or
+// greater" with no eligible target); the chain runner rejects the permutation and the
+// card's Play is not called. The check runs after the chain runner has removed the
+// playing card and popped this card's funding pitches from s.Hand, so scans see only
+// cards that genuinely remain in hand — a pitch source can't double as a reveal target.
+type PlayPrecondition interface {
+	PlayPrecondition(s *TurnState, self *CardState) bool
+}
+
 // HasDominate reports whether c is printed with the Dominate keyword — a type assertion to
 // the Dominator marker. Used by CardState.EffectiveDominate and any future scanner that
 // needs the static printed-keyword check without going through a CardState.
