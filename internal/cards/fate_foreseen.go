@@ -13,7 +13,7 @@ import (
 
 func fateForeseenPlay(s *sim.TurnState, self *sim.CardState) {
 	s.ApplyAndLogEffectiveDefense(self)
-	s.ApplyAndLogRiderOnPlay(self, "Opt 1", sim.OptValue)
+	s.Opt(1)
 }
 
 type FateForeseenRed struct{}

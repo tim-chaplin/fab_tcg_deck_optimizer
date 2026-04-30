@@ -15,13 +15,15 @@ import (
 var ferventForerunnerTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeAttack)
 
 // ferventForerunnerPlay grants self Go again when this copy was played from arsenal,
-// emits the chain step, and credits the on-hit Opt 2 rider as a sub-line.
+// emits the chain step, and resolves the on-hit Opt 2 (gated on LikelyToHit).
 func ferventForerunnerPlay(s *sim.TurnState, self *sim.CardState) {
 	if self.FromArsenal {
 		self.GrantedGoAgain = true
 	}
 	s.ApplyAndLogEffectiveAttack(self)
-	s.ApplyAndLogRiderOnHit(self, "On-hit Opt 2", 2*sim.OptValue)
+	if sim.LikelyToHit(self) {
+		s.Opt(2)
+	}
 }
 
 type FerventForerunnerRed struct{}
