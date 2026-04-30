@@ -50,3 +50,25 @@ func TestForceSight_NextAttackReturnsBonus(t *testing.T) {
 		}
 	}
 }
+
+// Tests that Force Sight from hand doesn't fire the Opt 2 rider (arsenal gate fails).
+func TestForceSight_HandPlayDropsOpt(t *testing.T) {
+	for _, c := range []sim.Card{ForceSightRed{}, ForceSightYellow{}, ForceSightBlue{}} {
+		var s sim.TurnState
+		c.Play(&s, &sim.CardState{Card: c})
+		if s.Value != 0 {
+			t.Errorf("%s: Play() from hand Value = %d, want 0 (Opt gated on arsenal)", c.Name(), s.Value)
+		}
+	}
+}
+
+// Tests that Force Sight played from arsenal credits the Opt 2 rider on every variant.
+func TestForceSight_ArsenalPlayCreditsOpt2(t *testing.T) {
+	for _, c := range []sim.Card{ForceSightRed{}, ForceSightYellow{}, ForceSightBlue{}} {
+		var s sim.TurnState
+		c.Play(&s, &sim.CardState{Card: c, FromArsenal: true})
+		if want := 2 * sim.OptValue; s.Value != want {
+			t.Errorf("%s: Play() from arsenal Value = %d, want %d", c.Name(), s.Value, want)
+		}
+	}
+}
