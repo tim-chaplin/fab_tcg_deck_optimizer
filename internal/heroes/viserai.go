@@ -45,8 +45,11 @@ func (Viserai) OnCardPlayed(played sim.Card, s *sim.TurnState) int {
 //     attack drops a runechant.
 //   - Action without Go again: an Action card that doesn't extend the chain on its own —
 //     one is enough to close out a chain; further copies just sit in hand.
-//   - Defender: any card with a printed Defense > 0 — one block per turn covers the
-//     usual incoming-damage budget.
+//   - Block-only defender: a card whose only role is defending — Defense Reaction or
+//     Block subtype. Most cards carry a non-zero printed Defense value as a secondary
+//     option, so Defense > 0 alone is too broad — we only count cards that are
+//     defenders first and foremost. One block per turn covers the usual incoming-damage
+//     budget.
 //   - Blue pitch: any card with Pitch == 3 — one fully funds a 3-cost play; redundant
 //     blues stack resources we won't spend.
 //
@@ -116,7 +119,7 @@ func viseraiSlotsFor(c sim.Card) viseraiOptSlots {
 	return viseraiOptSlots{
 		nonAttackEnabler: t.IsNonAttackAction(),
 		nonGoAgainAction: t.Has(card.TypeAction) && !c.GoAgain(),
-		defender:         c.Defense() > 0,
+		defender:         t.IsDefenseReaction() || t.Has(card.TypeBlock),
 		bluePitch:        c.Pitch() == 3,
 	}
 }

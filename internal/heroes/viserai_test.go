@@ -284,3 +284,40 @@ func TestViseraiOpt_EmptyInput(t *testing.T) {
 		t.Errorf("Opt(nil) = (%v, %v), want both empty", top, bottom)
 	}
 }
+
+// Tests that the defender slot keys on the type line, not on Defense > 0 — an attack
+// action with a printed defense value (most attack actions in the game) doesn't fill
+// the slot, so a real defender behind it still gets kept on top.
+func TestViseraiOpt_DefenseValueAloneDoesNotFillDefenderSlot(t *testing.T) {
+	// attackWithDefense is an attack action with positive Defense — represents the typical
+	// FaB attack that doubles as a block. Should not key the defender slot.
+	attackWithDefense := testutils.NewStubCard("atkWithDef").
+		WithTypes(actionAttackTypes).
+		WithDefense(3).
+		WithPitch(1)
+	defender := defenderCard("dr", 3)
+	top, bottom := (Viserai{}).Opt([]sim.Card{attackWithDefense, defender})
+	if !reflect.DeepEqual(top, []sim.Card{attackWithDefense, defender}) {
+		t.Errorf("top = %v, want [%v %v]", top, attackWithDefense, defender)
+	}
+	if len(bottom) != 0 {
+		t.Errorf("bottom = %v, want empty (DR not eclipsed by attack-with-defense)", bottom)
+	}
+}
+
+// Tests that a Block-typed card fills the defender slot alongside Defense Reactions.
+func TestViseraiOpt_BlockTypeFillsDefenderSlot(t *testing.T) {
+	dr := defenderCard("dr", 3)
+	blocker := testutils.NewStubCard("block").
+		WithTypes(card.NewTypeSet(card.TypeGeneric, card.TypeBlock)).
+		WithDefense(3).
+		WithPitch(1)
+	top, bottom := (Viserai{}).Opt([]sim.Card{dr, blocker})
+	if !reflect.DeepEqual(top, []sim.Card{dr}) {
+		t.Errorf("top = %v, want [%v]", top, dr)
+	}
+	if !reflect.DeepEqual(bottom, []sim.Card{blocker}) {
+		t.Errorf("bottom = %v, want [%v] (Block-typed card competes with DR for defender slot)",
+			bottom, blocker)
+	}
+}
