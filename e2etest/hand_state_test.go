@@ -95,3 +95,25 @@ func TestHandState_HeldCardBlocksSpringLoadRider(t *testing.T) {
 		t.Fatalf("PrevTurnValue = %d, want 2 (Spring Load base 2; rider blocked by held Dodge)", got)
 	}
 }
+
+// Tests that a to-be-pitched card stays in hand long enough for Demolition Crew's reveal.
+func TestHandState_DemolitionCrewSeesUncommittedPitchInHand(t *testing.T) {
+	d := sim.New(heroes.Viserai{}, nil, fillerDeck())
+	// Hand has 4 cards + Flying High in arsenal so the chain has 5 cards available without
+	// exceeding Viserai's intel=4 hand size. Optimal line: Flying High plays from arsenal
+	// (granting go-again + matching-pitch +1{p} to the next attack action — Demolition Crew),
+	// pitch Drag Down [Y] to play Demolition Crew (which reveals Toughen Up — the only
+	// non-self cost-2 card still in hand at that moment), then pitch Toughen Up to fund
+	// Brandish. Toughen Up has to be in hand at Demolition Crew's Play even though it's
+	// queued to pitch later in the chain — that's the pitch-tracking semantic under test.
+	// Value: 0 (Flying High) + 7 (Demolition Crew base 6 + Flying High +1{p}) + 3 (Brandish) = 10.
+	hand := []sim.Card{
+		cards.DemolitionCrewRed{},
+		cards.ToughenUpBlue{},
+		cards.DragDownYellow{},
+		cards.BrandishRed{},
+	}
+	if got := d.EvalOneTurnForTesting(0, cards.FlyingHighRed{}, hand).PrevTurnValue; got != 10 {
+		t.Fatalf("PrevTurnValue = %d, want 10 (FH 0 + DC 7 + Brandish 3 — DC reveal sees pitched Toughen Up)", got)
+	}
+}
