@@ -6,14 +6,14 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 )
 
-// Tests that Whisper of the Oracle resolves with no chain-step credit (the Opt 4 reorder is the
-// only on-play effect and it isn't modelled).
-func TestWhisperOfTheOracle_PlayCreditsNothing(t *testing.T) {
+// Tests that every variant credits Opt 4 at 4 * sim.OptValue.
+func TestWhisperOfTheOracle_PlayCreditsOpt4(t *testing.T) {
+	want := 4 * sim.OptValue
 	for _, c := range []sim.Card{WhisperOfTheOracleRed{}, WhisperOfTheOracleYellow{}, WhisperOfTheOracleBlue{}} {
 		var s sim.TurnState
 		c.Play(&s, &sim.CardState{Card: c})
-		if got := s.Value; got != 0 {
-			t.Errorf("%s: Play() Value = %d, want 0", c.Name(), got)
+		if got := s.Value; got != want {
+			t.Errorf("%s: Play() Value = %d, want %d", c.Name(), got, want)
 		}
 	}
 }

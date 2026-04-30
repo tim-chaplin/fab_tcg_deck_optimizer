@@ -3,7 +3,7 @@
 // Printed defense: Red 4, Yellow 3, Blue 2.
 // Text: "Opt 1"
 //
-// The Opt 1 (deck-top reorder) isn't modelled; block value is the printed defense.
+// Opt 1 is credited at sim.OptValue on top of the printed defense.
 
 package cards
 
@@ -12,6 +12,12 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 )
+
+// fateForeseenPlay applies the printed defense and credits the Opt 1 rider as a sub-line.
+func fateForeseenPlay(s *sim.TurnState, self *sim.CardState) {
+	s.ApplyAndLogEffectiveDefense(self)
+	s.ApplyAndLogRiderOnPlay(self, "Opt 1", sim.OptValue)
+}
 
 type FateForeseenRed struct{}
 
@@ -25,7 +31,7 @@ func (FateForeseenRed) Types() card.TypeSet     { return defenseReactionTypes }
 func (FateForeseenRed) GoAgain() bool           { return false }
 func (FateForeseenRed) NotSilverAgeLegal()      {}
 func (FateForeseenRed) Play(s *sim.TurnState, self *sim.CardState) {
-	s.ApplyAndLogEffectiveDefense(self)
+	fateForeseenPlay(s, self)
 }
 
 type FateForeseenYellow struct{}
@@ -40,7 +46,7 @@ func (FateForeseenYellow) Types() card.TypeSet     { return defenseReactionTypes
 func (FateForeseenYellow) GoAgain() bool           { return false }
 func (FateForeseenYellow) NotSilverAgeLegal()      {}
 func (FateForeseenYellow) Play(s *sim.TurnState, self *sim.CardState) {
-	s.ApplyAndLogEffectiveDefense(self)
+	fateForeseenPlay(s, self)
 }
 
 type FateForeseenBlue struct{}
@@ -55,5 +61,5 @@ func (FateForeseenBlue) Types() card.TypeSet     { return defenseReactionTypes }
 func (FateForeseenBlue) GoAgain() bool           { return false }
 func (FateForeseenBlue) NotSilverAgeLegal()      {}
 func (FateForeseenBlue) Play(s *sim.TurnState, self *sim.CardState) {
-	s.ApplyAndLogEffectiveDefense(self)
+	fateForeseenPlay(s, self)
 }
