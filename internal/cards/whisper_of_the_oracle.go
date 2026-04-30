@@ -2,6 +2,9 @@
 // Defense 3.
 //
 // Text: "**Opt 4** **Go again**"
+//
+// The Opt 4 (deck-top reorder) is dropped — it only re-shapes future draws, which the single-turn
+// solver doesn't credit. Go again is wired so the printed pitch + defense remain valid.
 
 package cards
 
@@ -15,45 +18,36 @@ var whisperOfTheOracleTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction)
 
 type WhisperOfTheOracleRed struct{}
 
-func (WhisperOfTheOracleRed) ID() ids.CardID          { return ids.WhisperOfTheOracleRed }
-func (WhisperOfTheOracleRed) Name() string            { return "Whisper of the Oracle" }
-func (WhisperOfTheOracleRed) Cost(*sim.TurnState) int { return 0 }
-func (WhisperOfTheOracleRed) Pitch() int              { return 1 }
-func (WhisperOfTheOracleRed) Attack() int             { return 0 }
-func (WhisperOfTheOracleRed) Defense() int            { return 3 }
-func (WhisperOfTheOracleRed) Types() card.TypeSet     { return whisperOfTheOracleTypes }
-func (WhisperOfTheOracleRed) GoAgain() bool           { return true }
-
-// not implemented: opt (deck-top reorder)
-func (WhisperOfTheOracleRed) NotImplemented()                            {}
+func (WhisperOfTheOracleRed) ID() ids.CardID                             { return ids.WhisperOfTheOracleRed }
+func (WhisperOfTheOracleRed) Name() string                               { return "Whisper of the Oracle" }
+func (WhisperOfTheOracleRed) Cost(*sim.TurnState) int                    { return 0 }
+func (WhisperOfTheOracleRed) Pitch() int                                 { return 1 }
+func (WhisperOfTheOracleRed) Attack() int                                { return 0 }
+func (WhisperOfTheOracleRed) Defense() int                               { return 3 }
+func (WhisperOfTheOracleRed) Types() card.TypeSet                        { return whisperOfTheOracleTypes }
+func (WhisperOfTheOracleRed) GoAgain() bool                              { return true }
 func (WhisperOfTheOracleRed) Play(s *sim.TurnState, self *sim.CardState) { s.LogPlay(self) }
 
 type WhisperOfTheOracleYellow struct{}
 
-func (WhisperOfTheOracleYellow) ID() ids.CardID          { return ids.WhisperOfTheOracleYellow }
-func (WhisperOfTheOracleYellow) Name() string            { return "Whisper of the Oracle" }
-func (WhisperOfTheOracleYellow) Cost(*sim.TurnState) int { return 0 }
-func (WhisperOfTheOracleYellow) Pitch() int              { return 2 }
-func (WhisperOfTheOracleYellow) Attack() int             { return 0 }
-func (WhisperOfTheOracleYellow) Defense() int            { return 3 }
-func (WhisperOfTheOracleYellow) Types() card.TypeSet     { return whisperOfTheOracleTypes }
-func (WhisperOfTheOracleYellow) GoAgain() bool           { return true }
-
-// not implemented: opt (deck-top reorder)
-func (WhisperOfTheOracleYellow) NotImplemented()                            {}
+func (WhisperOfTheOracleYellow) ID() ids.CardID                             { return ids.WhisperOfTheOracleYellow }
+func (WhisperOfTheOracleYellow) Name() string                               { return "Whisper of the Oracle" }
+func (WhisperOfTheOracleYellow) Cost(*sim.TurnState) int                    { return 0 }
+func (WhisperOfTheOracleYellow) Pitch() int                                 { return 2 }
+func (WhisperOfTheOracleYellow) Attack() int                                { return 0 }
+func (WhisperOfTheOracleYellow) Defense() int                               { return 3 }
+func (WhisperOfTheOracleYellow) Types() card.TypeSet                        { return whisperOfTheOracleTypes }
+func (WhisperOfTheOracleYellow) GoAgain() bool                              { return true }
 func (WhisperOfTheOracleYellow) Play(s *sim.TurnState, self *sim.CardState) { s.LogPlay(self) }
 
 type WhisperOfTheOracleBlue struct{}
 
-func (WhisperOfTheOracleBlue) ID() ids.CardID          { return ids.WhisperOfTheOracleBlue }
-func (WhisperOfTheOracleBlue) Name() string            { return "Whisper of the Oracle" }
-func (WhisperOfTheOracleBlue) Cost(*sim.TurnState) int { return 0 }
-func (WhisperOfTheOracleBlue) Pitch() int              { return 3 }
-func (WhisperOfTheOracleBlue) Attack() int             { return 0 }
-func (WhisperOfTheOracleBlue) Defense() int            { return 3 }
-func (WhisperOfTheOracleBlue) Types() card.TypeSet     { return whisperOfTheOracleTypes }
-func (WhisperOfTheOracleBlue) GoAgain() bool           { return true }
-
-// not implemented: opt (deck-top reorder)
-func (WhisperOfTheOracleBlue) NotImplemented()                            {}
+func (WhisperOfTheOracleBlue) ID() ids.CardID                             { return ids.WhisperOfTheOracleBlue }
+func (WhisperOfTheOracleBlue) Name() string                               { return "Whisper of the Oracle" }
+func (WhisperOfTheOracleBlue) Cost(*sim.TurnState) int                    { return 0 }
+func (WhisperOfTheOracleBlue) Pitch() int                                 { return 3 }
+func (WhisperOfTheOracleBlue) Attack() int                                { return 0 }
+func (WhisperOfTheOracleBlue) Defense() int                               { return 3 }
+func (WhisperOfTheOracleBlue) Types() card.TypeSet                        { return whisperOfTheOracleTypes }
+func (WhisperOfTheOracleBlue) GoAgain() bool                              { return true }
 func (WhisperOfTheOracleBlue) Play(s *sim.TurnState, self *sim.CardState) { s.LogPlay(self) }
