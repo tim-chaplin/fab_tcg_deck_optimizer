@@ -93,6 +93,13 @@ type TurnState struct {
 	// CreateRunechants increments it; the attack pipeline consumes the running total on each
 	// attack / weapon swing.
 	Runechants int
+	// ActionPoints is the chain runner's running Action Point pool. Seeded to 1 at the start
+	// of each permutation, decremented by 1 before each non-Instant card resolves, and
+	// incremented by 1 after a card with Go again (printed or granted) resolves. Action
+	// cards (attack and non-attack) and weapon swings all cost 1 AP; only Instants
+	// (card.TypeInstant) cost 0 AP. The chain is illegal when a non-Instant card would
+	// resolve with no AP available.
+	ActionPoints int
 	// ArcaneDamageDealt sticks true once any source of arcane damage fires this turn:
 	// a Runechant token consuming itself on an attack / weapon swing, or a card whose Play
 	// deals arcane directly. Effects that read "if you've dealt arcane damage this turn"

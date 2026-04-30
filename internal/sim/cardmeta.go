@@ -27,13 +27,17 @@ type attackerMeta struct {
 	minCost          int
 	maxCost          int
 	isVariable       bool
-	baseGoAgain      bool
 	isAttackOrWeapon bool
 	// isAttackAction is the "attack action card" test (Action+Attack, no Weapon) the sim uses
 	// to pick which Play resolutions fire TriggerAttackAction AuraTriggers. Weapons carry
 	// card.TypeAttack but aren't attack action CARDS; only the Action+Attack bitmask matches the
 	// printed trigger text on cards like Malefic Incantation.
 	isAttackAction bool
+	// isInstant flags cards with the Instant subtype. The chain runner skips the Action Point
+	// debit on Instants — they cost 0 AP per FaB rules and can resolve mid-chain without
+	// requiring Go again on the prior step. Action cards (attack and non-attack) and weapon
+	// swings all cost 1 AP and so don't set this.
+	isInstant bool
 }
 
 // costAt returns the card's effective cost given the current TurnState. Static cards return the
@@ -83,9 +87,9 @@ func cardMetaSlowPath(c Card, id ids.CardID) attackerMeta {
 	m := attackerMeta{
 		types:            t,
 		card:             c,
-		baseGoAgain:      c.GoAgain(),
 		isAttackOrWeapon: t.Has(card.TypeAttack) || t.Has(card.TypeWeapon),
 		isAttackAction:   t.IsAttackAction(),
+		isInstant:        t.Has(card.TypeInstant),
 	}
 	if vc, ok := c.(VariableCost); ok {
 		m.minCost = vc.MinCost()

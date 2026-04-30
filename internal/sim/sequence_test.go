@@ -230,3 +230,42 @@ func TestBestSequence_CardStateGrantsDontLeakAcrossPermutations(t *testing.T) {
 		t.Fatalf("CardState wrapper state leaked across permutations: GrantSpy saw a pre-existing GrantedGoAgain when playing first")
 	}
 }
+
+// Tests that a non-Go-again attack followed by a non-Instant card rejects the chain — the
+// AP pool drains to 0 on the first card and the second can't pay its 1 AP cost.
+func TestPlaySequence_NonGoAgainStopsChain(t *testing.T) {
+	order := []Card{NoGoAgainAttackStub{}, NoGoAgainAttackStub{}}
+	ctx := NewSequenceContextForTest(StubHero, nil, nil, 1_000_000, 0, len(order))
+	if _, _, _, legal := ctx.PlaySequence(order); legal {
+		t.Fatalf("ordering %v should be illegal (no Go again grant after card 0)", CardNames(order))
+	}
+}
+
+// Tests that an Instant follow-up after a non-Go-again card resolves legally — Instants cost
+// 0 AP so the empty pool isn't a barrier.
+func TestPlaySequence_InstantBypassesAPRequirement(t *testing.T) {
+	order := []Card{NoGoAgainAttackStub{}, InstantStub{}}
+	ctx := NewSequenceContextForTest(StubHero, nil, nil, 1_000_000, 0, len(order))
+	dmg, _, _, legal := ctx.PlaySequence(order)
+	if !legal {
+		t.Fatalf("ordering %v should be legal (Instant costs 0 AP)", CardNames(order))
+	}
+	if dmg != 1 {
+		t.Errorf("dmg = %d, want 1 (NoGoAgainAttack 1 + Instant 0)", dmg)
+	}
+}
+
+// Tests that a chain of two Instants opens with neither card paying AP — the AP pool stays
+// at 1 the whole way, and a non-Instant follow-up still works (which would fail if Instants
+// had silently consumed AP).
+func TestPlaySequence_InstantsDontConsumeAP(t *testing.T) {
+	order := []Card{InstantStub{}, InstantStub{}, NoGoAgainAttackStub{}}
+	ctx := NewSequenceContextForTest(StubHero, nil, nil, 1_000_000, 0, len(order))
+	dmg, _, _, legal := ctx.PlaySequence(order)
+	if !legal {
+		t.Fatalf("ordering %v should be legal (Instants cost 0 AP)", CardNames(order))
+	}
+	if dmg != 1 {
+		t.Errorf("dmg = %d, want 1 (two Instants at 0 + NoGoAgainAttack 1)", dmg)
+	}
+}

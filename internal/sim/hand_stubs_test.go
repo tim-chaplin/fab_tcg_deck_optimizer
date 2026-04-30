@@ -40,6 +40,43 @@ func cardNames(cs []Card) []string {
 	return out
 }
 
+// instantStub is a 0-cost, 0-power Generic Action - Instant card with no Go again. Tests
+// chain-runner behaviour around the Action Point debit: an Instant after a non-Go-again
+// card should still resolve because Instants cost 0 AP. ID is a distinct fake-card slot
+// so cardMetaCache doesn't share its meta with another stub at slot 0.
+type instantStub struct{}
+
+func (instantStub) ID() ids.CardID      { return ids.FakeInstant }
+func (instantStub) Name() string        { return "instantStub" }
+func (instantStub) Cost(*TurnState) int { return 0 }
+func (instantStub) Pitch() int          { return 0 }
+func (instantStub) Attack() int         { return 0 }
+func (instantStub) Defense() int        { return 0 }
+func (instantStub) Types() card.TypeSet {
+	return card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeInstant)
+}
+func (instantStub) GoAgain() bool                      { return false }
+func (instantStub) Play(s *TurnState, self *CardState) { s.LogPlay(self) }
+
+// noGoAgainAttackStub is a 0-cost, 1-power attack action card with no Go again. Tests
+// chain-runner behaviour after the AP pool runs out: a non-Instant follow-up should be
+// rejected.
+type noGoAgainAttackStub struct{}
+
+func (noGoAgainAttackStub) ID() ids.CardID      { return ids.FakeNoGoAgainAttack }
+func (noGoAgainAttackStub) Name() string        { return "noGoAgainAttack" }
+func (noGoAgainAttackStub) Cost(*TurnState) int { return 0 }
+func (noGoAgainAttackStub) Pitch() int          { return 0 }
+func (noGoAgainAttackStub) Attack() int         { return 1 }
+func (noGoAgainAttackStub) Defense() int        { return 0 }
+func (noGoAgainAttackStub) Types() card.TypeSet {
+	return card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeAttack)
+}
+func (noGoAgainAttackStub) GoAgain() bool { return false }
+func (noGoAgainAttackStub) Play(s *TurnState, self *CardState) {
+	s.ApplyAndLogEffectiveAttack(self)
+}
+
 // grantAll is a test-only attacker that sets GrantedGoAgain=true on every CardState remaining in
 // CardsRemaining. Used with grantSpy to detect cross-permutation CardState wrapper leakage in
 // bestSequence: if grantAll runs first in one permutation, the fresh-wrapper invariant must

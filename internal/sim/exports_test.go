@@ -29,6 +29,11 @@ func CardNames(cs []Card) []string { return cardNames(cs) }
 type GrantAll = grantAll
 type GrantSpy = grantSpy
 
+// InstantStub / NoGoAgainAttackStub re-export the chain-runner Action Point fixture stubs
+// defined in hand_stubs_test.go.
+type InstantStub = instantStub
+type NoGoAgainAttackStub = noGoAgainAttackStub
+
 // SequenceContextForTest wraps *sequenceContext so sim_test files can drive
 // playSequence / bestSequence without touching the unexported type directly. Production
 // callers go through Best / BestWithTriggers instead.

@@ -18,7 +18,7 @@ const InvalidWeapon WeaponID = 0
 // Weapon IDs. Anchored after the last fake card so weapons don't share cache slots with
 // cards in the shared CardID space.
 const (
-	AnnalsOfSutcliffeID WeaponID = FakeHugeAttack + iota + 1
+	AnnalsOfSutcliffeID WeaponID = FakeNoGoAgainAttack + iota + 1
 	NebulaBladeID
 	ReapingBladeID
 	RosettaThornID
