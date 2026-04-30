@@ -4,9 +4,10 @@
 // Text: "As an additional cost to play Demolition Crew, reveal a card in your hand with cost 2 or
 // greater. **Dominate**"
 //
-// The reveal is non-consuming — the revealed card stays in hand. With no eligible reveal the
-// additional cost can't be paid and the card resolves as a no-op so the optimizer can compare
-// cleanly against the Held alternative.
+// The reveal is non-consuming — the revealed card stays in hand. The "reveal a cost-2+ card"
+// clause is the additional cost, modelled via the PlayPrecondition opt-in: with no eligible
+// reveal target the chain runner aborts the permutation as illegal (FaB rule: a card whose
+// costs you can't fully pay is illegal to declare).
 
 package cards
 
@@ -18,17 +19,17 @@ import (
 
 var demolitionCrewTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeAttack)
 
-// demolitionCrewPlay applies the additional-cost gate before crediting the attack. The
-// chain runner removes self from s.Hand at iteration start, so the scan can't pick the
-// Demolition Crew copy resolving right now as its own reveal target.
-func demolitionCrewPlay(s *sim.TurnState, self *sim.CardState) {
+// demolitionCrewPrecondition is the shared additional-cost check across all 3 pitch
+// variants. The chain runner's hand snapshot has already removed the playing card and
+// popped this card's pitches by the time PlayPrecondition runs, so the scan only sees
+// cards that genuinely remain in hand.
+func demolitionCrewPrecondition(s *sim.TurnState) bool {
 	for _, c := range s.Hand {
 		if c.Cost(s) >= 2 {
-			s.ApplyAndLogEffectiveAttack(self)
-			return
+			return true
 		}
 	}
-	s.LogPlay(self)
+	return false
 }
 
 type DemolitionCrewRed struct{}
@@ -42,8 +43,11 @@ func (DemolitionCrewRed) Defense() int            { return 2 }
 func (DemolitionCrewRed) Types() card.TypeSet     { return demolitionCrewTypes }
 func (DemolitionCrewRed) GoAgain() bool           { return false }
 func (DemolitionCrewRed) Dominate()               {}
+func (DemolitionCrewRed) PlayPrecondition(s *sim.TurnState, _ *sim.CardState) bool {
+	return demolitionCrewPrecondition(s)
+}
 func (c DemolitionCrewRed) Play(s *sim.TurnState, self *sim.CardState) {
-	demolitionCrewPlay(s, self)
+	s.ApplyAndLogEffectiveAttack(self)
 }
 
 type DemolitionCrewYellow struct{}
@@ -57,8 +61,11 @@ func (DemolitionCrewYellow) Defense() int            { return 2 }
 func (DemolitionCrewYellow) Types() card.TypeSet     { return demolitionCrewTypes }
 func (DemolitionCrewYellow) GoAgain() bool           { return false }
 func (DemolitionCrewYellow) Dominate()               {}
+func (DemolitionCrewYellow) PlayPrecondition(s *sim.TurnState, _ *sim.CardState) bool {
+	return demolitionCrewPrecondition(s)
+}
 func (c DemolitionCrewYellow) Play(s *sim.TurnState, self *sim.CardState) {
-	demolitionCrewPlay(s, self)
+	s.ApplyAndLogEffectiveAttack(self)
 }
 
 type DemolitionCrewBlue struct{}
@@ -72,6 +79,9 @@ func (DemolitionCrewBlue) Defense() int            { return 2 }
 func (DemolitionCrewBlue) Types() card.TypeSet     { return demolitionCrewTypes }
 func (DemolitionCrewBlue) GoAgain() bool           { return false }
 func (DemolitionCrewBlue) Dominate()               {}
+func (DemolitionCrewBlue) PlayPrecondition(s *sim.TurnState, _ *sim.CardState) bool {
+	return demolitionCrewPrecondition(s)
+}
 func (c DemolitionCrewBlue) Play(s *sim.TurnState, self *sim.CardState) {
-	demolitionCrewPlay(s, self)
+	s.ApplyAndLogEffectiveAttack(self)
 }
