@@ -11,23 +11,25 @@ import (
 // stubLowHeroOn implements sim.LowerHealthWanter — used to exercise the "hero opts in" branch.
 type stubLowHeroOn struct{}
 
-func (stubLowHeroOn) ID() ids.HeroID                            { return ids.InvalidHero }
-func (stubLowHeroOn) Name() string                              { return "stubLowHeroOn" }
-func (stubLowHeroOn) Health() int                               { return 20 }
-func (stubLowHeroOn) Intelligence() int                         { return 4 }
-func (stubLowHeroOn) Types() card.TypeSet                       { return 0 }
-func (stubLowHeroOn) OnCardPlayed(sim.Card, *sim.TurnState) int { return 0 }
-func (stubLowHeroOn) WantsLowerHealth()                         {}
+func (stubLowHeroOn) ID() ids.HeroID                                { return ids.InvalidHero }
+func (stubLowHeroOn) Name() string                                  { return "stubLowHeroOn" }
+func (stubLowHeroOn) Health() int                                   { return 20 }
+func (stubLowHeroOn) Intelligence() int                             { return 4 }
+func (stubLowHeroOn) Types() card.TypeSet                           { return 0 }
+func (stubLowHeroOn) OnCardPlayed(sim.Card, *sim.TurnState) int     { return 0 }
+func (stubLowHeroOn) Opt(cards []sim.Card) (top, bottom []sim.Card) { return cards, nil }
+func (stubLowHeroOn) WantsLowerHealth()                             {}
 
 // stubLowHeroOff does NOT implement sim.LowerHealthWanter — the default-hero branch.
 type stubLowHeroOff struct{}
 
-func (stubLowHeroOff) ID() ids.HeroID                            { return ids.InvalidHero }
-func (stubLowHeroOff) Name() string                              { return "stubLowHeroOff" }
-func (stubLowHeroOff) Health() int                               { return 20 }
-func (stubLowHeroOff) Intelligence() int                         { return 4 }
-func (stubLowHeroOff) Types() card.TypeSet                       { return 0 }
-func (stubLowHeroOff) OnCardPlayed(sim.Card, *sim.TurnState) int { return 0 }
+func (stubLowHeroOff) ID() ids.HeroID                                { return ids.InvalidHero }
+func (stubLowHeroOff) Name() string                                  { return "stubLowHeroOff" }
+func (stubLowHeroOff) Health() int                                   { return 20 }
+func (stubLowHeroOff) Intelligence() int                             { return 4 }
+func (stubLowHeroOff) Types() card.TypeSet                           { return 0 }
+func (stubLowHeroOff) OnCardPlayed(sim.Card, *sim.TurnState) int     { return 0 }
+func (stubLowHeroOff) Opt(cards []sim.Card) (top, bottom []sim.Card) { return cards, nil }
 
 // TestLowerHealthWanter_DamageRiders checks the +3{p} / +1{p} / +1{h} damage riders fire iff the
 // current hero opts into sim.LowerHealthWanter.

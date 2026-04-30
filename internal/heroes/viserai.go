@@ -35,3 +35,10 @@ func (Viserai) OnCardPlayed(played sim.Card, s *sim.TurnState) int {
 	}
 	return 0
 }
+
+// Opt returns every revealed card on top in input order — a no-op reshape.
+//
+// TODO: replace with a Viserai-specific heuristic that biases toward bottoming.
+func (Viserai) Opt(cards []sim.Card) (top, bottom []sim.Card) {
+	return cards, nil
+}
