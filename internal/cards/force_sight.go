@@ -15,11 +15,12 @@ import (
 
 var forceSightTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction)
 
-// forceSightPlay grants the next attack action +bonus{p}, applies Force Sight's chain
-// step, and credits the arsenal-gated Opt 2 rider as a sub-line.
+// forceSightPlay grants the next attack action +bonus{p}, logs the chain step (Force
+// Sight is a non-attack action — no Attack() to apply), and credits the arsenal-gated
+// Opt 2 rider as a sub-line.
 func forceSightPlay(s *sim.TurnState, self *sim.CardState, bonus int) {
 	grantNextAttackActionBonus(s, bonus)
-	s.ApplyAndLogEffectiveAttack(self)
+	s.LogPlay(self)
 	if self.FromArsenal {
 		s.ApplyAndLogRiderOnPlay(self, "Opt 2", 2*sim.OptValue)
 	}
