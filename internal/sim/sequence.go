@@ -540,6 +540,13 @@ func (ctx *sequenceContext) playSequenceWithMeta(n int) (damage int, leftoverRun
 	for k := 0; k < n; k++ {
 		state.Hand = append(state.Hand, played[k].Card)
 	}
+	// Pitched cards stay in hand until the pool actually pops them to fund a cost — a card
+	// in the partition's Pitch role isn't "pitched" yet, just queued. Mid-chain cards
+	// reading state.Hand should see the as-yet-unconsumed pitches alongside upcoming chain
+	// steps and the Held cards.
+	for _, c := range ctx.attackPitchPerm {
+		state.Hand = append(state.Hand, c)
+	}
 	pool := pitchPool{
 		perm:      ctx.attackPitchPerm,
 		vals:      ctx.attackPitchVals,
@@ -559,11 +566,24 @@ func (ctx *sequenceContext) playSequenceWithMeta(n int) (damage int, leftoverRun
 				break
 			}
 		}
+		prevPitchIdx := pool.idx
 		contrib, ok := pool.pay(m.costAt(state))
 		if !ok {
 			return 0, 0, 0, false
 		}
 		pc.PitchedToPlay = contrib
+		// Drop pitches the pool freshly popped on this card's behalf. Same interface-equality
+		// removal as the playing-card drop above; Carry-from-prior-step pitches were already
+		// removed when their own pay call popped them.
+		for k := prevPitchIdx; k < pool.idx; k++ {
+			popped := pool.perm[k]
+			for j := range state.Hand {
+				if state.Hand[j] == popped {
+					state.Hand = append(state.Hand[:j], state.Hand[j+1:]...)
+					break
+				}
+			}
+		}
 
 		state.CardsRemaining = played[i+1:]
 
