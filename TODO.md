@@ -125,7 +125,6 @@ lines across `card/`, `weapon/`, `hand/` plus every weapon impl.
 - move card/types.go to sim/card_types.go
 - move testutils/ package files to test.go files so they don't get compiled into the main binary
 - audit everything under sim/ package and see if it makes sense where it is
-- do something with all the "stubs_test" files
 - combine hand_aura_trigger_test.go and deck_aura_trigger_test.go into just aura_trigger_test.go, ditto for "mid_turn_draw_test"
 - fix all the docstrings that say "Package Foo is..." but are no longer in package Foo
 - get rid of the "dot import" eg: . "github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
