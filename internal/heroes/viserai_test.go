@@ -1,11 +1,13 @@
 package heroes
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"reflect"
 	"testing"
 
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
 )
 
 // stubRuneAttack is a minimal Runeblade attack-action card.
@@ -113,5 +115,172 @@ func TestViserai_EmptyTurn(t *testing.T) {
 	var s sim.TurnState
 	if got := (Viserai{}).OnCardPlayed(stubRuneAura{}, &s); got != 0 {
 		t.Fatalf("expected 0 on empty turn, got %d", got)
+	}
+}
+
+// genericActionTypes / actionAttackTypes / defenseReactionTypes back the slot-classification
+// fixtures below — kept terse so the test bodies read as scenario tables, not boilerplate.
+var (
+	genericActionTypes   = card.NewTypeSet(card.TypeGeneric, card.TypeAction)
+	actionAttackTypes    = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeAttack)
+	defenseReactionTypes = card.NewTypeSet(card.TypeGeneric, card.TypeDefenseReaction)
+)
+
+// nonAttackEnablerCard returns a non-attack action — slot 1 only (no defense, red pitch,
+// no go-again so it would also fit slot 2; we suppress slot 2 by giving it Go again).
+func nonAttackEnablerCard(name string) sim.Card {
+	return testutils.NewStubCard(name).WithTypes(genericActionTypes).WithGoAgain()
+}
+
+// nonGoAgainActionCard returns an attack action without Go again — slot 2 only.
+func nonGoAgainActionCard(name string) sim.Card {
+	return testutils.NewStubCard(name).WithTypes(actionAttackTypes)
+}
+
+// defenderCard returns a defense reaction with positive defense — slot 3 only (no Action
+// type → not slots 1 or 2; red pitch → not slot 4).
+func defenderCard(name string, defense int) sim.Card {
+	return testutils.NewStubCard(name).WithTypes(defenseReactionTypes).WithDefense(defense).WithPitch(1)
+}
+
+// bluePitchOnlyCard returns a non-action card with blue pitch — slot 4 only.
+func bluePitchOnlyCard(name string) sim.Card {
+	return testutils.NewStubCard(name).WithTypes(card.NewTypeSet(card.TypeGeneric)).WithPitch(3)
+}
+
+// noSlotCard returns an attack action with Go again, red pitch, no defense — none of the
+// four Viserai slots apply.
+func noSlotCard(name string) sim.Card {
+	return testutils.NewStubCard(name).WithTypes(actionAttackTypes).WithGoAgain().WithPitch(1)
+}
+
+// Tests that Opt(1) always tops the only revealed card.
+func TestViseraiOpt_SingleCardAlwaysTop(t *testing.T) {
+	c := defenderCard("d", 3)
+	top, bottom := (Viserai{}).Opt([]sim.Card{c})
+	if !reflect.DeepEqual(top, []sim.Card{c}) {
+		t.Errorf("top = %v, want [%v]", top, c)
+	}
+	if len(bottom) != 0 {
+		t.Errorf("bottom = %v, want empty", bottom)
+	}
+}
+
+// Tests that two cards in the same single slot bottom the second.
+func TestViseraiOpt_TwoSameSlotBottomsSecond(t *testing.T) {
+	a := defenderCard("a", 3)
+	b := defenderCard("b", 2)
+	top, bottom := (Viserai{}).Opt([]sim.Card{a, b})
+	if !reflect.DeepEqual(top, []sim.Card{a}) {
+		t.Errorf("top = %v, want [%v]", top, a)
+	}
+	if !reflect.DeepEqual(bottom, []sim.Card{b}) {
+		t.Errorf("bottom = %v, want [%v]", bottom, b)
+	}
+}
+
+// Tests that two cards in different slots both stay on top.
+func TestViseraiOpt_DifferentSlotsBothTop(t *testing.T) {
+	a := nonAttackEnablerCard("a")
+	b := defenderCard("b", 3)
+	top, bottom := (Viserai{}).Opt([]sim.Card{a, b})
+	if !reflect.DeepEqual(top, []sim.Card{a, b}) {
+		t.Errorf("top = %v, want [%v %v]", top, a, b)
+	}
+	if len(bottom) != 0 {
+		t.Errorf("bottom = %v, want empty", bottom)
+	}
+}
+
+// Tests that a card whose every slot is already covered gets bottomed even when it spans
+// multiple slots.
+func TestViseraiOpt_MultiSlotCardBottomedWhenAllCovered(t *testing.T) {
+	a := nonAttackEnablerCard("a")
+	defender := defenderCard("def", 3)
+	// b is non-attack-enabler AND defender — both slots already covered by a + defender.
+	b := testutils.NewStubCard("b").
+		WithTypes(genericActionTypes).
+		WithGoAgain().
+		WithDefense(3).
+		WithPitch(1)
+	top, bottom := (Viserai{}).Opt([]sim.Card{a, defender, b})
+	if !reflect.DeepEqual(top, []sim.Card{a, defender}) {
+		t.Errorf("top = %v, want [%v %v]", top, a, defender)
+	}
+	if !reflect.DeepEqual(bottom, []sim.Card{b}) {
+		t.Errorf("bottom = %v, want [%v]", bottom, b)
+	}
+}
+
+// Tests that a multi-slot card is kept when it covers at least one new slot, even if some
+// of its slots are already covered.
+func TestViseraiOpt_MultiSlotCardKeptWhenAnySlotNew(t *testing.T) {
+	defender := defenderCard("def", 3)
+	// b is non-attack-enabler (uncovered) AND defender (covered). Should still be kept
+	// because nonAttackEnabler is fresh.
+	b := testutils.NewStubCard("b").
+		WithTypes(genericActionTypes).
+		WithGoAgain().
+		WithDefense(3).
+		WithPitch(1)
+	top, bottom := (Viserai{}).Opt([]sim.Card{defender, b})
+	if !reflect.DeepEqual(top, []sim.Card{defender, b}) {
+		t.Errorf("top = %v, want [%v %v]", top, defender, b)
+	}
+	if len(bottom) != 0 {
+		t.Errorf("bottom = %v, want empty", bottom)
+	}
+}
+
+// Tests that cards with no slot membership stay on top regardless of order.
+func TestViseraiOpt_NoSlotCardsStayTop(t *testing.T) {
+	a := noSlotCard("a")
+	b := noSlotCard("b")
+	top, bottom := (Viserai{}).Opt([]sim.Card{a, b})
+	if !reflect.DeepEqual(top, []sim.Card{a, b}) {
+		t.Errorf("top = %v, want [%v %v]", top, a, b)
+	}
+	if len(bottom) != 0 {
+		t.Errorf("bottom = %v, want empty", bottom)
+	}
+}
+
+// Tests Opt 4 with one card per slot category — every card belongs to a distinct slot,
+// so all four stay on top.
+func TestViseraiOpt_OneCardPerSlotAllKept(t *testing.T) {
+	enabler := nonAttackEnablerCard("enabler")
+	finisher := nonGoAgainActionCard("finisher")
+	defender := defenderCard("defender", 3)
+	bluePitch := bluePitchOnlyCard("blue")
+	cards := []sim.Card{enabler, finisher, defender, bluePitch}
+	top, bottom := (Viserai{}).Opt(cards)
+	if !reflect.DeepEqual(top, cards) {
+		t.Errorf("top = %v, want %v (one per slot, all kept)", top, cards)
+	}
+	if len(bottom) != 0 {
+		t.Errorf("bottom = %v, want empty", bottom)
+	}
+}
+
+// Tests Opt 4 with two cards per slot category — the second card in each slot bottoms.
+func TestViseraiOpt_DoublesInEachSlotBottomedDownToOne(t *testing.T) {
+	defA := defenderCard("defA", 3)
+	defB := defenderCard("defB", 2)
+	bluePitchA := bluePitchOnlyCard("blueA")
+	bluePitchB := bluePitchOnlyCard("blueB")
+	top, bottom := (Viserai{}).Opt([]sim.Card{defA, defB, bluePitchA, bluePitchB})
+	if !reflect.DeepEqual(top, []sim.Card{defA, bluePitchA}) {
+		t.Errorf("top = %v, want [%v %v]", top, defA, bluePitchA)
+	}
+	if !reflect.DeepEqual(bottom, []sim.Card{defB, bluePitchB}) {
+		t.Errorf("bottom = %v, want [%v %v]", bottom, defB, bluePitchB)
+	}
+}
+
+// Tests that the empty input returns empty top and bottom.
+func TestViseraiOpt_EmptyInput(t *testing.T) {
+	top, bottom := (Viserai{}).Opt(nil)
+	if len(top) != 0 || len(bottom) != 0 {
+		t.Errorf("Opt(nil) = (%v, %v), want both empty", top, bottom)
 	}
 }
