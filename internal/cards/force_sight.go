@@ -2,6 +2,8 @@
 //
 // Text: "The next attack action card you play this turn gains +N{p}. If Force Sight is played from
 // arsenal, **opt 2**. **Go again**" (Red N=3, Yellow N=2, Blue N=1.)
+//
+// The Opt 2 fires only when this copy was played from arsenal (self.FromArsenal).
 
 package cards
 
@@ -13,6 +15,17 @@ import (
 
 var forceSightTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction)
 
+// forceSightPlay grants the next attack action +bonus{p}, logs the chain step (Force
+// Sight is a non-attack action — no Attack() to apply), and credits the arsenal-gated
+// Opt 2 rider as a sub-line.
+func forceSightPlay(s *sim.TurnState, self *sim.CardState, bonus int) {
+	grantNextAttackActionBonus(s, bonus)
+	s.LogPlay(self)
+	if self.FromArsenal {
+		s.ApplyAndLogRiderOnPlay(self, "Opt 2", 2*sim.OptValue)
+	}
+}
+
 type ForceSightRed struct{}
 
 func (ForceSightRed) ID() ids.CardID          { return ids.ForceSightRed }
@@ -23,12 +36,8 @@ func (ForceSightRed) Attack() int             { return 0 }
 func (ForceSightRed) Defense() int            { return 2 }
 func (ForceSightRed) Types() card.TypeSet     { return forceSightTypes }
 func (ForceSightRed) GoAgain() bool           { return true }
-
-// not implemented: arsenal-gated Opt 2
-func (ForceSightRed) NotImplemented() {}
 func (ForceSightRed) Play(s *sim.TurnState, self *sim.CardState) {
-	grantNextAttackActionBonus(s, 3)
-	s.ApplyAndLogEffectiveAttack(self)
+	forceSightPlay(s, self, 3)
 }
 
 type ForceSightYellow struct{}
@@ -41,12 +50,8 @@ func (ForceSightYellow) Attack() int             { return 0 }
 func (ForceSightYellow) Defense() int            { return 2 }
 func (ForceSightYellow) Types() card.TypeSet     { return forceSightTypes }
 func (ForceSightYellow) GoAgain() bool           { return true }
-
-// not implemented: arsenal-gated Opt 2
-func (ForceSightYellow) NotImplemented() {}
 func (ForceSightYellow) Play(s *sim.TurnState, self *sim.CardState) {
-	grantNextAttackActionBonus(s, 2)
-	s.ApplyAndLogEffectiveAttack(self)
+	forceSightPlay(s, self, 2)
 }
 
 type ForceSightBlue struct{}
@@ -59,10 +64,6 @@ func (ForceSightBlue) Attack() int             { return 0 }
 func (ForceSightBlue) Defense() int            { return 2 }
 func (ForceSightBlue) Types() card.TypeSet     { return forceSightTypes }
 func (ForceSightBlue) GoAgain() bool           { return true }
-
-// not implemented: arsenal-gated Opt 2
-func (ForceSightBlue) NotImplemented() {}
 func (ForceSightBlue) Play(s *sim.TurnState, self *sim.CardState) {
-	grantNextAttackActionBonus(s, 1)
-	s.ApplyAndLogEffectiveAttack(self)
+	forceSightPlay(s, self, 1)
 }
