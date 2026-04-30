@@ -160,11 +160,10 @@ func pairSwapMutations(d *Deck, legal func(Card) bool) []Mutation {
 }
 
 // pairAddAllowed reports whether c is eligible as a pair-mutation add target. Rejects
-// anything carrying NotImplemented (the simulator can't model the rider, so introducing
-// the printing into a deck would corrupt the search) and applies the caller's legal filter
-// when present. legal=nil keeps every implemented card eligible.
+// anything carrying a pool-exclusion marker (NotImplemented or Unplayable) and applies the
+// caller's legal filter when present. legal=nil keeps every pool-eligible card eligible.
 func pairAddAllowed(c Card, legal func(Card) bool) bool {
-	if _, unimplemented := c.(NotImplemented); unimplemented {
+	if isExcludedFromPool(c) {
 		return false
 	}
 	if legal != nil && !legal(c) {

@@ -11,6 +11,11 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 )
 
+func fateForeseenPlay(s *sim.TurnState, self *sim.CardState) {
+	s.ApplyAndLogEffectiveDefense(self)
+	s.ApplyAndLogRiderOnPlay(self, "Opt 1", sim.OptValue)
+}
+
 type FateForeseenRed struct{}
 
 func (FateForeseenRed) ID() ids.CardID          { return ids.FateForeseenRed }
@@ -22,11 +27,8 @@ func (FateForeseenRed) Defense() int            { return 4 }
 func (FateForeseenRed) Types() card.TypeSet     { return defenseReactionTypes }
 func (FateForeseenRed) GoAgain() bool           { return false }
 func (FateForeseenRed) NotSilverAgeLegal()      {}
-
-// not implemented: Opt 1 rider; block value is printed defence only
-func (FateForeseenRed) NotImplemented() {}
 func (FateForeseenRed) Play(s *sim.TurnState, self *sim.CardState) {
-	s.ApplyAndLogEffectiveDefense(self)
+	fateForeseenPlay(s, self)
 }
 
 type FateForeseenYellow struct{}
@@ -40,11 +42,8 @@ func (FateForeseenYellow) Defense() int            { return 3 }
 func (FateForeseenYellow) Types() card.TypeSet     { return defenseReactionTypes }
 func (FateForeseenYellow) GoAgain() bool           { return false }
 func (FateForeseenYellow) NotSilverAgeLegal()      {}
-
-// not implemented: Opt 1 rider; block value is printed defence only
-func (FateForeseenYellow) NotImplemented() {}
 func (FateForeseenYellow) Play(s *sim.TurnState, self *sim.CardState) {
-	s.ApplyAndLogEffectiveDefense(self)
+	fateForeseenPlay(s, self)
 }
 
 type FateForeseenBlue struct{}
@@ -58,9 +57,6 @@ func (FateForeseenBlue) Defense() int            { return 2 }
 func (FateForeseenBlue) Types() card.TypeSet     { return defenseReactionTypes }
 func (FateForeseenBlue) GoAgain() bool           { return false }
 func (FateForeseenBlue) NotSilverAgeLegal()      {}
-
-// not implemented: Opt 1 rider; block value is printed defence only
-func (FateForeseenBlue) NotImplemented() {}
 func (FateForeseenBlue) Play(s *sim.TurnState, self *sim.CardState) {
-	s.ApplyAndLogEffectiveDefense(self)
+	fateForeseenPlay(s, self)
 }

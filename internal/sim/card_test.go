@@ -17,6 +17,42 @@ func TestNotImplementedMarker(t *testing.T) {
 	}
 }
 
+// TestUnplayableMarker mirrors TestNotImplementedMarker for the Unplayable interface — opt-in,
+// not implicit, and orthogonal to NotImplemented (a plain stub satisfies neither, an
+// Unplayable stub satisfies Unplayable but not NotImplemented).
+func TestUnplayableMarker(t *testing.T) {
+	var plain Card = stubCard{name: "plain"}
+	if _, ok := plain.(Unplayable); ok {
+		t.Error("plain stub satisfied Unplayable — the marker must be opt-in, not implicit")
+	}
+	var tagged Card = unplayableStubCard{stubCard{name: "tagged"}}
+	if _, ok := tagged.(Unplayable); !ok {
+		t.Error("tagged stub failed Unplayable assertion — defining Unplayable() must opt in")
+	}
+	if _, ok := tagged.(NotImplemented); ok {
+		t.Error("Unplayable stub also satisfied NotImplemented — the markers must be orthogonal")
+	}
+}
+
+// TestIsExcludedFromPool_BothMarkers pins the centralised pool-exclusion check: NotImplemented
+// OR Unplayable trips the filter, plain stubs don't.
+func TestIsExcludedFromPool_BothMarkers(t *testing.T) {
+	cases := []struct {
+		name string
+		card Card
+		want bool
+	}{
+		{"plain", stubCard{name: "plain"}, false},
+		{"NotImplemented", notImplementedStubCard{stubCard{name: "ni"}}, true},
+		{"Unplayable", unplayableStubCard{stubCard{name: "up"}}, true},
+	}
+	for _, tc := range cases {
+		if got := isExcludedFromPool(tc.card); got != tc.want {
+			t.Errorf("%s: isExcludedFromPool = %v, want %v", tc.name, got, tc.want)
+		}
+	}
+}
+
 // TestCardState_EffectiveGoAgain: printed GoAgain OR a mid-chain grant (Mauvrion Skies et al)
 // each qualifies the card for Go again. Neither printed nor granted → false.
 func TestCardState_EffectiveGoAgain(t *testing.T) {

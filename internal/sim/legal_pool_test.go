@@ -78,6 +78,21 @@ func TestLegalPool_ExcludesTaggedCardsByID(t *testing.T) {
 	}
 }
 
+// TestLegalPool_ExcludesUnplayableByID is the Unplayable-side counterpart of
+// TestLegalPool_ExcludesTaggedCardsByID: picks a concrete registered card we know currently
+// carries the Unplayable marker (Potion of Seeing [B], opponent-info-only effect) and asserts
+// it's absent from LegalPool's output. Self-retires if the card ever loses the tag.
+func TestLegalPool_ExcludesUnplayableByID(t *testing.T) {
+	if _, ok := GetCard(ids.PotionOfSeeingBlue).(Unplayable); !ok {
+		t.Skip("Potion of Seeing [B] no longer Unplayable; pick another tagged card or drop test")
+	}
+	for _, id := range LegalPool(nil) {
+		if id == ids.PotionOfSeeingBlue {
+			t.Fatalf("LegalPool included Potion of Seeing [B] despite its Unplayable tag")
+		}
+	}
+}
+
 // TestSanitizeNotImplemented_ReplacesTaggedSlotsAndKeepsSizeLegal drives the sanitizer
 // against a deck that starts with two NotImplemented copies in it (Strike Gold Red is a real
 // tagged card). After sanitization the deck must: (a) have zero NotImplemented cards, (b)

@@ -168,6 +168,42 @@ type NotImplemented interface {
 	NotImplemented()
 }
 
+// Unplayable is an optional marker with identical pool-exclusion semantics to NotImplemented:
+// random deck generation, mutation pools, and SanitizeNotImplemented all treat it as a
+// reject-from-pool tag. The distinction is intent — NotImplemented means "we haven't gotten
+// around to modelling this card's effect"; Unplayable means "this card's effect is so weak
+// the optimizer would never pick it even if fully modelled, so don't bother". Both still
+// satisfy Card and remain valid in pre-built hands; only the deck-construction pipeline
+// filters them out.
+type Unplayable interface {
+	Unplayable()
+}
+
+// isExcludedFromPool reports whether c carries either pool-exclusion marker (NotImplemented
+// or Unplayable). The two have identical effect on pool membership; this helper centralises
+// the OR so the deck-construction pipeline reads cleanly and future markers can join the set
+// in one place.
+func isExcludedFromPool(c Card) bool {
+	if _, ok := c.(NotImplemented); ok {
+		return true
+	}
+	if _, ok := c.(Unplayable); ok {
+		return true
+	}
+	return false
+}
+
+// isExcludedWeaponFromPool is the weapon-side analogue of isExcludedFromPool.
+func isExcludedWeaponFromPool(w Weapon) bool {
+	if _, ok := w.(NotImplemented); ok {
+		return true
+	}
+	if _, ok := w.(Unplayable); ok {
+		return true
+	}
+	return false
+}
+
 // Dominator is an optional marker. Attack action cards printed with the Dominate keyword
 // implement it; the defender is capped at one blocking card, so LikelyToHit credits the
 // "slips past one block" bump at 5+ power. Conditional grants ("if X, it gains dominate")

@@ -13,6 +13,11 @@ import (
 
 var whisperOfTheOracleTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction)
 
+func whisperOfTheOraclePlay(s *sim.TurnState, self *sim.CardState) {
+	s.LogPlay(self)
+	s.ApplyAndLogRiderOnPlay(self, "Opt 4", 4*sim.OptValue)
+}
+
 type WhisperOfTheOracleRed struct{}
 
 func (WhisperOfTheOracleRed) ID() ids.CardID          { return ids.WhisperOfTheOracleRed }
@@ -23,10 +28,9 @@ func (WhisperOfTheOracleRed) Attack() int             { return 0 }
 func (WhisperOfTheOracleRed) Defense() int            { return 3 }
 func (WhisperOfTheOracleRed) Types() card.TypeSet     { return whisperOfTheOracleTypes }
 func (WhisperOfTheOracleRed) GoAgain() bool           { return true }
-
-// not implemented: opt (deck-top reorder)
-func (WhisperOfTheOracleRed) NotImplemented()                            {}
-func (WhisperOfTheOracleRed) Play(s *sim.TurnState, self *sim.CardState) { s.LogPlay(self) }
+func (WhisperOfTheOracleRed) Play(s *sim.TurnState, self *sim.CardState) {
+	whisperOfTheOraclePlay(s, self)
+}
 
 type WhisperOfTheOracleYellow struct{}
 
@@ -38,10 +42,9 @@ func (WhisperOfTheOracleYellow) Attack() int             { return 0 }
 func (WhisperOfTheOracleYellow) Defense() int            { return 3 }
 func (WhisperOfTheOracleYellow) Types() card.TypeSet     { return whisperOfTheOracleTypes }
 func (WhisperOfTheOracleYellow) GoAgain() bool           { return true }
-
-// not implemented: opt (deck-top reorder)
-func (WhisperOfTheOracleYellow) NotImplemented()                            {}
-func (WhisperOfTheOracleYellow) Play(s *sim.TurnState, self *sim.CardState) { s.LogPlay(self) }
+func (WhisperOfTheOracleYellow) Play(s *sim.TurnState, self *sim.CardState) {
+	whisperOfTheOraclePlay(s, self)
+}
 
 type WhisperOfTheOracleBlue struct{}
 
@@ -53,7 +56,6 @@ func (WhisperOfTheOracleBlue) Attack() int             { return 0 }
 func (WhisperOfTheOracleBlue) Defense() int            { return 3 }
 func (WhisperOfTheOracleBlue) Types() card.TypeSet     { return whisperOfTheOracleTypes }
 func (WhisperOfTheOracleBlue) GoAgain() bool           { return true }
-
-// not implemented: opt (deck-top reorder)
-func (WhisperOfTheOracleBlue) NotImplemented()                            {}
-func (WhisperOfTheOracleBlue) Play(s *sim.TurnState, self *sim.CardState) { s.LogPlay(self) }
+func (WhisperOfTheOracleBlue) Play(s *sim.TurnState, self *sim.CardState) {
+	whisperOfTheOraclePlay(s, self)
+}

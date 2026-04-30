@@ -5,7 +5,7 @@
 // Red / 2 Yellow / 1 Blue.)
 //
 // Scan the top N cards of s.Deck; credit +1 per Runeblade attack action card revealed. The
-// re-ordering clause isn't modelled.
+// post-reveal reorder isn't modelled.
 
 package cards
 
@@ -48,9 +48,6 @@ func (SutcliffesResearchNotesRed) Attack() int             { return 0 }
 func (SutcliffesResearchNotesRed) Defense() int            { return 2 }
 func (SutcliffesResearchNotesRed) Types() card.TypeSet     { return sutcliffesResearchNotesTypes }
 func (SutcliffesResearchNotesRed) GoAgain() bool           { return true }
-
-// not implemented: top-of-deck reordering clause
-func (SutcliffesResearchNotesRed) NotImplemented() {}
 func (SutcliffesResearchNotesRed) Play(s *sim.TurnState, self *sim.CardState) {
 	sutcliffesResearchNotesPlay(s, self, 3)
 }
@@ -65,9 +62,6 @@ func (SutcliffesResearchNotesYellow) Attack() int             { return 0 }
 func (SutcliffesResearchNotesYellow) Defense() int            { return 2 }
 func (SutcliffesResearchNotesYellow) Types() card.TypeSet     { return sutcliffesResearchNotesTypes }
 func (SutcliffesResearchNotesYellow) GoAgain() bool           { return true }
-
-// not implemented: top-of-deck reordering clause
-func (SutcliffesResearchNotesYellow) NotImplemented() {}
 func (SutcliffesResearchNotesYellow) Play(s *sim.TurnState, self *sim.CardState) {
 	sutcliffesResearchNotesPlay(s, self, 2)
 }
@@ -82,9 +76,6 @@ func (SutcliffesResearchNotesBlue) Attack() int             { return 0 }
 func (SutcliffesResearchNotesBlue) Defense() int            { return 2 }
 func (SutcliffesResearchNotesBlue) Types() card.TypeSet     { return sutcliffesResearchNotesTypes }
 func (SutcliffesResearchNotesBlue) GoAgain() bool           { return true }
-
-// not implemented: top-of-deck reordering clause
-func (SutcliffesResearchNotesBlue) NotImplemented() {}
 func (SutcliffesResearchNotesBlue) Play(s *sim.TurnState, self *sim.CardState) {
 	sutcliffesResearchNotesPlay(s, self, 1)
 }
