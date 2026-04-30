@@ -84,7 +84,7 @@ func TestLegalPool_ExcludesTaggedCardsByID(t *testing.T) {
 // it's absent from LegalPool's output. Self-retires if the card ever loses the tag.
 func TestLegalPool_ExcludesUnplayableByID(t *testing.T) {
 	if _, ok := GetCard(ids.PotionOfSeeingBlue).(Unplayable); !ok {
-		t.Skip("Potion of Seeing [B] is no longer Unplayable — pick another tagged card or drop this test")
+		t.Skip("Potion of Seeing [B] no longer Unplayable; pick another tagged card or drop test")
 	}
 	for _, id := range LegalPool(nil) {
 		if id == ids.PotionOfSeeingBlue {
