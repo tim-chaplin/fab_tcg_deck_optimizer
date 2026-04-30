@@ -2,8 +2,6 @@
 // Defense 3.
 //
 // Text: "**Opt 4** **Go again**"
-//
-// Opt 4 is the only on-play effect — credited at sim.OptValue per opted card.
 
 package cards
 
@@ -15,7 +13,6 @@ import (
 
 var whisperOfTheOracleTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction)
 
-// whisperOfTheOraclePlay logs the play and credits the Opt 4 rider as a sub-line.
 func whisperOfTheOraclePlay(s *sim.TurnState, self *sim.CardState) {
 	s.LogPlay(self)
 	s.ApplyAndLogRiderOnPlay(self, "Opt 4", 4*sim.OptValue)

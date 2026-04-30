@@ -2,8 +2,6 @@
 // Printed pitch variants: Red 1, Yellow 2, Blue 3.
 // Printed defense: Red 4, Yellow 3, Blue 2.
 // Text: "Opt 1"
-//
-// Opt 1 is credited at sim.OptValue on top of the printed defense.
 
 package cards
 
@@ -13,7 +11,6 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 )
 
-// fateForeseenPlay applies the printed defense and credits the Opt 1 rider as a sub-line.
 func fateForeseenPlay(s *sim.TurnState, self *sim.CardState) {
 	s.ApplyAndLogEffectiveDefense(self)
 	s.ApplyAndLogRiderOnPlay(self, "Opt 1", sim.OptValue)
