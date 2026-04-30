@@ -350,6 +350,7 @@ func (ctx *sequenceContext) resetStateForPermutation() {
 		IncomingDamage:          ctx.incomingDamage,
 		BlockTotal:              ctx.blockTotal,
 		Runechants:              ctx.runechantCarryover,
+		ActionPoints:            1,
 		AuraTriggers:            append(bufs.auraTriggersBacking[:0], ctx.priorAuraTriggers...),
 		EphemeralAttackTriggers: bufs.ephemeralBacking[:0],
 		SkipLog:                 ctx.skipLog,
@@ -556,6 +557,17 @@ func (ctx *sequenceContext) playSequenceWithMeta(n int) (damage int, leftoverRun
 	}
 	for i, pc := range played {
 		m := meta[i]
+		// Action Point gate: every non-Instant card costs 1 AP. Instants cost 0 AP and skip
+		// the debit. A non-Instant card that would resolve with no AP available rejects the
+		// permutation — the chain ran out of action points before the next card could be
+		// played, which is illegal in FaB rules. Subsequent steps (Go again post-Play, AP
+		// grants from future card-driven effects) restock the pool.
+		if !m.isInstant {
+			if state.ActionPoints <= 0 {
+				return 0, 0, 0, false
+			}
+			state.ActionPoints--
+		}
 		// Remove the playing card from state.Hand before resolving — it's leaving the hand
 		// to enter the chain. Linear search by interface equality works because every card
 		// implementation is a zero-sized struct, so two copies compare equal and any one of
@@ -659,8 +671,11 @@ func (ctx *sequenceContext) playSequenceWithMeta(n int) (damage int, leftoverRun
 			state.Runechants = 0
 		}
 
-		if i < n-1 && !(m.baseGoAgain || pc.GrantedGoAgain) {
-			return 0, 0, 0, false
+		// Go again grants 1 AP after the card resolves. EffectiveGoAgain folds in both
+		// printed Go again and mid-chain conditional grants — by the time we get here the
+		// card's Play has had a chance to flip GrantedGoAgain on itself.
+		if pc.EffectiveGoAgain() {
+			state.ActionPoints++
 		}
 	}
 

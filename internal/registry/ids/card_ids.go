@@ -558,4 +558,6 @@ const (
 	FakePitchOneDR
 	FakeHugeAttack
 	FakeBluePitch
+	FakeInstant
+	FakeNoGoAgainAttack
 )
