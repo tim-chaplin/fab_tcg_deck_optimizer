@@ -87,7 +87,7 @@ func (g grantBonusAttackWeapon) Play(s *TurnState, self *CardState) {
 // reflects printed-attack + bonus.
 func TestPlaySequence_BonusAttackAppliedToTargetDamage(t *testing.T) {
 	order := []Card{grantBonusAttack{n: 3}, testutils.RedAttack{}}
-	ctx := NewSequenceContextForTest(StubHero, nil, nil, 10, 0, len(order))
+	ctx := NewSequenceContextForTest(testutils.Hero{Intel: 4}, nil, nil, 10, 0, len(order))
 	dmg, _, _, legal := ctx.PlaySequence(order)
 	if !legal {
 		t.Fatalf("playSequence returned legal=false; expected granter→RedAttack to chain via go-again")
@@ -104,7 +104,7 @@ func TestPlaySequence_BonusAttackAppliedToTargetDamage(t *testing.T) {
 // state simply stays 0.
 func TestPlaySequence_BonusAttackNoTargetFizzles(t *testing.T) {
 	order := []Card{grantBonusAttack{n: 3}}
-	ctx := NewSequenceContextForTest(StubHero, nil, nil, 10, 0, len(order))
+	ctx := NewSequenceContextForTest(testutils.Hero{Intel: 4}, nil, nil, 10, 0, len(order))
 	dmg, _, _, legal := ctx.PlaySequence(order)
 	if !legal {
 		t.Fatalf("playSequence returned legal=false; expected granter alone to be a legal 1-card chain")
@@ -118,7 +118,7 @@ func TestPlaySequence_BonusAttackNoTargetFizzles(t *testing.T) {
 // same target both write to BonusAttack; the field accumulates rather than overwriting.
 func TestPlaySequence_BonusAttackStacksAcrossGranters(t *testing.T) {
 	order := []Card{grantBonusAttack{n: 3}, grantBonusAttack{n: 2}, testutils.RedAttack{}}
-	ctx := NewSequenceContextForTest(StubHero, nil, nil, 10, 0, len(order))
+	ctx := NewSequenceContextForTest(testutils.Hero{Intel: 4}, nil, nil, 10, 0, len(order))
 	dmg, _, _, legal := ctx.PlaySequence(order)
 	if !legal {
 		t.Fatalf("playSequence returned legal=false; expected two granters→RedAttack to chain via go-again")
@@ -134,7 +134,7 @@ func TestPlaySequence_BonusAttackStacksAcrossGranters(t *testing.T) {
 // Visit the Blacksmith all target weapon attacks.
 func TestPlaySequence_BonusAttackAppliesToWeapon(t *testing.T) {
 	order := []Card{grantBonusAttackWeapon{n: 2}, weapons.ReapingBlade{}}
-	ctx := NewSequenceContextForTest(StubHero, nil, nil, 10, 0, len(order))
+	ctx := NewSequenceContextForTest(testutils.Hero{Intel: 4}, nil, nil, 10, 0, len(order))
 	dmg, _, _, legal := ctx.PlaySequence(order)
 	if !legal {
 		t.Fatalf("playSequence returned legal=false; expected granter→weapon swing to chain via go-again")
@@ -152,7 +152,7 @@ func TestPlaySequence_BonusAttackAppliesToWeapon(t *testing.T) {
 // grant deals 0, not -2 — the chain total is unchanged below the floor.
 func TestPlaySequence_BonusAttackNegativeClampsAtZero(t *testing.T) {
 	order := []Card{grantBonusAttack{n: -3}, testutils.BlueAttack{}}
-	ctx := NewSequenceContextForTest(StubHero, nil, nil, 10, 0, len(order))
+	ctx := NewSequenceContextForTest(testutils.Hero{Intel: 4}, nil, nil, 10, 0, len(order))
 	dmg, _, _, legal := ctx.PlaySequence(order)
 	if !legal {
 		t.Fatalf("playSequence returned legal=false")
@@ -169,7 +169,7 @@ func TestPlaySequence_BonusAttackNegativeClampsAtZero(t *testing.T) {
 // no clamp.
 func TestPlaySequence_BonusAttackNegativePartialReduction(t *testing.T) {
 	order := []Card{grantBonusAttack{n: -2}, testutils.RedAttack{}}
-	ctx := NewSequenceContextForTest(StubHero, nil, nil, 10, 0, len(order))
+	ctx := NewSequenceContextForTest(testutils.Hero{Intel: 4}, nil, nil, 10, 0, len(order))
 	dmg, _, _, legal := ctx.PlaySequence(order)
 	if !legal {
 		t.Fatalf("playSequence returned legal=false")
@@ -184,7 +184,7 @@ func TestPlaySequence_BonusAttackNegativePartialReduction(t *testing.T) {
 // action follows the granter, the rider has nowhere to land and total damage stays 0.
 func TestPlaySequence_BonusAttackNoAttackTargetFizzles(t *testing.T) {
 	order := []Card{grantBonusAttack{n: 3}, grantBonusAttack{n: 2}}
-	ctx := NewSequenceContextForTest(StubHero, nil, nil, 10, 0, len(order))
+	ctx := NewSequenceContextForTest(testutils.Hero{Intel: 4}, nil, nil, 10, 0, len(order))
 	dmg, _, _, legal := ctx.PlaySequence(order)
 	if !legal {
 		t.Fatalf("playSequence returned legal=false")
@@ -202,7 +202,7 @@ func TestPlaySequence_BonusAttackNoAttackTargetFizzles(t *testing.T) {
 // must start with BonusAttack = 0 and the totals must match.
 func TestPlaySequence_BonusAttackPerPermutationReset(t *testing.T) {
 	order := []Card{grantBonusAttack{n: 3}, testutils.RedAttack{}}
-	ctx := NewSequenceContextForTest(StubHero, nil, nil, 10, 0, len(order))
+	ctx := NewSequenceContextForTest(testutils.Hero{Intel: 4}, nil, nil, 10, 0, len(order))
 	first, _, _, _ := ctx.PlaySequence(order)
 	second, _, _, _ := ctx.PlaySequence(order)
 	if first != 6 || second != 6 {
@@ -241,7 +241,7 @@ func TestBest_NimblismGrantsConsumingVolitionDiscardRider(t *testing.T) {
 		cards.NimblismBlue{},
 		pitchOnlyRed{},
 	}
-	got := Best(StubHero, nil, h, 0, nil, 1, nil)
+	got := Best(testutils.Hero{Intel: 4}, nil, h, 0, nil, 1, nil)
 	if got.Value != 7 {
 		t.Fatalf("Value = %d, want 7 (Volition 3 base + Nimblism +1 BonusAttack + discard rider 3 from runechant-driven ArcaneDamageDealt × LikelyToHit on buffed 4-power attack); line=[%s]",
 			got.Value, FormatBestLine(got.BestLine))

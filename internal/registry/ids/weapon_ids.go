@@ -15,10 +15,11 @@ type WeaponID = CardID
 // InvalidWeapon is the sentinel zero value.
 const InvalidWeapon WeaponID = 0
 
-// Weapon IDs. Anchored after the last fake card so weapons don't share cache slots with
-// cards in the shared CardID space.
+// Weapon IDs. Anchored after the last real card so weapons don't share cache slots with
+// cards in the shared CardID space. Test-fake card IDs (testutils.FakeRedAttack, …) anchor
+// past the last weapon ID so they don't collide either.
 const (
-	AnnalsOfSutcliffeID WeaponID = FakeNoGoAgainAttack + iota + 1
+	AnnalsOfSutcliffeID WeaponID = ZealousBeltingBlue + iota + 1
 	NebulaBladeID
 	ReapingBladeID
 	RosettaThornID

@@ -37,7 +37,7 @@ func TestEvalOneTurn_MoonWishAltCostTutorsSunKissAndConsumesDeck(t *testing.T) {
 		testutils.RedAttack{}, testutils.RedAttack{}, testutils.RedAttack{},
 		testutils.RedAttack{}, testutils.RedAttack{},
 	}
-	d := New(MoonWishHero, nil, deckCards)
+	d := New(testutils.Hero{Intel: 4}, nil, deckCards)
 	state := d.EvalOneTurnForTesting(0, nil, []Card{
 		cards.MoonWishYellow{},
 		cards.WeepingBattlegroundRed{},
@@ -71,7 +71,7 @@ func TestEvalOneTurn_MoonWishAltCostTutorFizzlesWithoutSunKiss(t *testing.T) {
 		testutils.RedAttack{}, testutils.RedAttack{}, testutils.RedAttack{},
 		testutils.RedAttack{}, testutils.RedAttack{}, testutils.RedAttack{},
 	}
-	d := New(MoonWishHero, nil, deckCards)
+	d := New(testutils.Hero{Intel: 4}, nil, deckCards)
 	state := d.EvalOneTurnForTesting(0, nil, []Card{
 		cards.MoonWishYellow{},
 		cards.WeepingBattlegroundRed{},
@@ -115,7 +115,7 @@ func TestEvalOneTurn_MoonWishWithFlyingHighPlaysTutoredSunKiss(t *testing.T) {
 		cards.SunKissRed{},
 		testutils.RedAttack{}, testutils.RedAttack{}, testutils.RedAttack{}, testutils.RedAttack{},
 	}
-	d := New(MoonWishHero, nil, deckCards)
+	d := New(testutils.Hero{Intel: 4}, nil, deckCards)
 	state := d.EvalOneTurnForTesting(0, nil, []Card{
 		cards.FlyingHighRed{},
 		cards.MoonWishYellow{},
@@ -135,7 +135,7 @@ func TestEvalOneTurn_MoonWishWithFlyingHighPlaysTutoredSunKiss(t *testing.T) {
 	}
 	if !skInGraveyard {
 		t.Errorf("Sun Kiss [R] not in turn-1 Graveyard %v; want it there (tutored and played)",
-			CardNames(state.PrevTurnGraveyard))
+			testutils.CardNames(state.PrevTurnGraveyard))
 	}
 	if got := countAcrossSurfaces(state, ids.SunKissRed); got != 0 {
 		t.Errorf("Sun Kiss [R] total across turn-2 surfaces = %d, want 0 (it's in the graveyard)",

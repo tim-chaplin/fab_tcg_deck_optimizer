@@ -1,17 +1,22 @@
-package sim
+package sim_test
 
-import "testing"
+import (
+	"testing"
+
+	. "github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
+)
 
 // TestNotImplementedMarker pins the type-assertion contract: a plain Card does NOT satisfy the
 // NotImplemented interface, and a Card whose type carries a NotImplemented() method does.
 // That's the exact check the deck legal-pool filter performs when deciding whether to skip a
 // card in random generation or mutation pools.
 func TestNotImplementedMarker(t *testing.T) {
-	var plain Card = stubCard{name: "plain"}
+	var plain Card = testutils.NewStubCard("plain")
 	if _, ok := plain.(NotImplemented); ok {
 		t.Error("plain stub satisfied NotImplemented — the marker must be opt-in, not implicit")
 	}
-	var tagged Card = notImplementedStubCard{stubCard{name: "tagged"}}
+	var tagged Card = testutils.NotImplementedStubCard{StubCard: testutils.NewStubCard("tagged")}
 	if _, ok := tagged.(NotImplemented); !ok {
 		t.Error("tagged stub failed NotImplemented assertion — defining NotImplemented() must opt in")
 	}
@@ -21,11 +26,11 @@ func TestNotImplementedMarker(t *testing.T) {
 // not implicit, and orthogonal to NotImplemented (a plain stub satisfies neither, an
 // Unplayable stub satisfies Unplayable but not NotImplemented).
 func TestUnplayableMarker(t *testing.T) {
-	var plain Card = stubCard{name: "plain"}
+	var plain Card = testutils.NewStubCard("plain")
 	if _, ok := plain.(Unplayable); ok {
 		t.Error("plain stub satisfied Unplayable — the marker must be opt-in, not implicit")
 	}
-	var tagged Card = unplayableStubCard{stubCard{name: "tagged"}}
+	var tagged Card = testutils.UnplayableStubCard{StubCard: testutils.NewStubCard("tagged")}
 	if _, ok := tagged.(Unplayable); !ok {
 		t.Error("tagged stub failed Unplayable assertion — defining Unplayable() must opt in")
 	}
@@ -42,13 +47,13 @@ func TestIsExcludedFromPool_BothMarkers(t *testing.T) {
 		card Card
 		want bool
 	}{
-		{"plain", stubCard{name: "plain"}, false},
-		{"NotImplemented", notImplementedStubCard{stubCard{name: "ni"}}, true},
-		{"Unplayable", unplayableStubCard{stubCard{name: "up"}}, true},
+		{"plain", testutils.NewStubCard("plain"), false},
+		{"NotImplemented", testutils.NotImplementedStubCard{StubCard: testutils.NewStubCard("ni")}, true},
+		{"Unplayable", testutils.UnplayableStubCard{StubCard: testutils.NewStubCard("up")}, true},
 	}
 	for _, tc := range cases {
-		if got := isExcludedFromPool(tc.card); got != tc.want {
-			t.Errorf("%s: isExcludedFromPool = %v, want %v", tc.name, got, tc.want)
+		if got := IsExcludedFromPool(tc.card); got != tc.want {
+			t.Errorf("%s: IsExcludedFromPool = %v, want %v", tc.name, got, tc.want)
 		}
 	}
 }
@@ -68,7 +73,11 @@ func TestCardState_EffectiveGoAgain(t *testing.T) {
 		{"both", true, true, true},
 	}
 	for _, tc := range cases {
-		p := &CardState{Card: stubCard{name: tc.name, goAgain: tc.printed}, GrantedGoAgain: tc.granted}
+		base := testutils.NewStubCard(tc.name)
+		if tc.printed {
+			base = base.WithGoAgain()
+		}
+		p := &CardState{Card: base, GrantedGoAgain: tc.granted}
 		if got := p.EffectiveGoAgain(); got != tc.want {
 			t.Errorf("%s: EffectiveGoAgain() = %v, want %v", tc.name, got, tc.want)
 		}
@@ -78,8 +87,8 @@ func TestCardState_EffectiveGoAgain(t *testing.T) {
 // TestCardState_EffectiveDominate: the Dominator marker OR a mid-chain grant (a "gains
 // dominate" rider flipping self.GrantedDominate) each qualifies the attack as dominating.
 func TestCardState_EffectiveDominate(t *testing.T) {
-	plain := stubCard{name: "plain"}
-	dominator := dominatingStubCard{stubCard: stubCard{name: "printed"}}
+	plain := testutils.NewStubCard("plain")
+	dominator := testutils.DominatingStubCard{StubCard: testutils.NewStubCard("printed")}
 
 	cases := []struct {
 		name    string
@@ -103,10 +112,10 @@ func TestCardState_EffectiveDominate(t *testing.T) {
 // TestHasDominate_MatchesMarker: the free helper is the static printed-keyword check;
 // type assertion to Dominator decides.
 func TestHasDominate_MatchesMarker(t *testing.T) {
-	if HasDominate(stubCard{name: "plain"}) {
+	if HasDominate(testutils.NewStubCard("plain")) {
 		t.Error("HasDominate(plain) = true, want false")
 	}
-	if !HasDominate(dominatingStubCard{}) {
+	if !HasDominate(testutils.DominatingStubCard{}) {
 		t.Error("HasDominate(dominator) = false, want true")
 	}
 }
@@ -131,7 +140,10 @@ func TestCardState_EffectiveAttack(t *testing.T) {
 		{"large negative on a 4-power attack still clamps at 0", 4, -10, 0},
 	}
 	for _, tc := range cases {
-		p := &CardState{Card: stubCard{name: tc.name, attack: tc.printed}, BonusAttack: tc.bonusAttack}
+		p := &CardState{
+			Card:        testutils.NewStubCard(tc.name).WithAttack(tc.printed),
+			BonusAttack: tc.bonusAttack,
+		}
 		if got := p.EffectiveAttack(); got != tc.want {
 			t.Errorf("%s: EffectiveAttack() = %d, want %d", tc.name, got, tc.want)
 		}

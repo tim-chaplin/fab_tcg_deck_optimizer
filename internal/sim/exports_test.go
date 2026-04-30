@@ -13,26 +13,9 @@ import (
 // in package sim. The fix is to keep those tests in package sim_test (a separate test
 // package); this file re-exports the unexported helpers they rely on.
 
-// Test stubs (re-exported by reference; the underlying values still live in their
-// respective *_test.go files).
-var (
-	StubHero     = stubHero
-	Int1StubHero = int1StubHero
-	MoonWishHero = moonWishHero
-)
-
-// CardNames re-exports cardNames for sim_test consumers.
-func CardNames(cs []Card) []string { return cardNames(cs) }
-
-// GrantAll / GrantSpy re-export the test-only attacker types defined in
-// hand_stubs_test.go.
-type GrantAll = grantAll
-type GrantSpy = grantSpy
-
-// InstantStub / NoGoAgainAttackStub re-export the chain-runner Action Point fixture stubs
-// defined in hand_stubs_test.go.
-type InstantStub = instantStub
-type NoGoAgainAttackStub = noGoAgainAttackStub
+// IsExcludedFromPool re-exports isExcludedFromPool for sim_test consumers exercising the
+// pool-exclusion marker contract directly.
+func IsExcludedFromPool(c Card) bool { return isExcludedFromPool(c) }
 
 // SequenceContextForTest wraps *sequenceContext so sim_test files can drive
 // playSequence / bestSequence without touching the unexported type directly. Production
@@ -160,7 +143,8 @@ func WeaponKey(ws []Weapon) string { return weaponKey(ws) }
 // SortedIDPair re-exports sortedIDPair for sim_test consumers.
 func SortedIDPair(a, b ids.CardID) (ids.CardID, ids.CardID) { return sortedIDPair(a, b) }
 
-// DeckFingerprint re-exports deckFingerprint (defined in deck_stubs_test.go).
+// DeckFingerprint re-exports deckFingerprint, the deck-equality helper used by sim_test
+// files. The underlying helper is in package sim because it reads the unexported weaponKey.
 func DeckFingerprint(d *Deck) string { return deckFingerprint(d) }
 
 // PairAddAllowed re-exports pairAddAllowed for sim_test consumers.

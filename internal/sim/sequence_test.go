@@ -176,7 +176,7 @@ func TestIsLegalOrder_MauvrionCantSaveShrillWhenRuneragerIsAhead(t *testing.T) {
 	ctx := NewSequenceContextForTest(heroes.Viserai{}, nil, nil, 1_000_000, 0, len(order))
 	if _, _, _, legal := ctx.PlaySequence(order); legal {
 		t.Fatalf("ordering %v should be illegal (Shrill has no go-again and Mauvrion granted Runerager instead)",
-			CardNames(order))
+			testutils.CardNames(order))
 	}
 }
 
@@ -203,7 +203,7 @@ func TestBest_ViseraiMauvrionChainsShrillIntoRuneragerIntoWeapon(t *testing.T) {
 // damage.
 func TestBest_StateValueMatchesSummedReturns(t *testing.T) {
 	h := []Card{testutils.BlueAttack{}, testutils.BlueAttack{}, testutils.RedAttack{}, testutils.RedAttack{}}
-	got := Best(StubHero, nil, h, 0, nil, 0, nil)
+	got := Best(testutils.Hero{Intel: 4}, nil, h, 0, nil, 0, nil)
 	if got.Value != 7 {
 		t.Errorf("Value = %d, want 7 (Blue 1 + Red 3 + Red 3 chain off one Blue pitch). Roles=[%s]",
 			got.Value, FormatBestLine(got.BestLine))
@@ -223,8 +223,8 @@ func TestBest_StateValueMatchesSummedReturns(t *testing.T) {
 // If the wrappers were reused across permutations the spy would see leaked grants and trip.
 func TestBestSequence_CardStateGrantsDontLeakAcrossPermutations(t *testing.T) {
 	var sawLeak bool
-	attackers := []Card{GrantAll{}, GrantSpy{Saw: &sawLeak}, GrantAll{}}
-	ctx := NewSequenceContextForTest(StubHero, nil, nil, 1_000_000, 0, len(attackers))
+	attackers := []Card{testutils.GrantAll{}, testutils.GrantSpy{Saw: &sawLeak}, testutils.GrantAll{}}
+	ctx := NewSequenceContextForTest(testutils.Hero{Intel: 4}, nil, nil, 1_000_000, 0, len(attackers))
 	_, _, _ = ctx.BestSequence(attackers)
 	if sawLeak {
 		t.Fatalf("CardState wrapper state leaked across permutations: GrantSpy saw a pre-existing GrantedGoAgain when playing first")
@@ -234,21 +234,21 @@ func TestBestSequence_CardStateGrantsDontLeakAcrossPermutations(t *testing.T) {
 // Tests that a non-Go-again attack followed by a non-Instant card rejects the chain — the
 // AP pool drains to 0 on the first card and the second can't pay its 1 AP cost.
 func TestPlaySequence_NonGoAgainStopsChain(t *testing.T) {
-	order := []Card{NoGoAgainAttackStub{}, NoGoAgainAttackStub{}}
-	ctx := NewSequenceContextForTest(StubHero, nil, nil, 1_000_000, 0, len(order))
+	order := []Card{testutils.NoGoAgainAttackStub{}, testutils.NoGoAgainAttackStub{}}
+	ctx := NewSequenceContextForTest(testutils.Hero{Intel: 4}, nil, nil, 1_000_000, 0, len(order))
 	if _, _, _, legal := ctx.PlaySequence(order); legal {
-		t.Fatalf("ordering %v should be illegal (no Go again grant after card 0)", CardNames(order))
+		t.Fatalf("ordering %v should be illegal (no Go again grant after card 0)", testutils.CardNames(order))
 	}
 }
 
 // Tests that an Instant follow-up after a non-Go-again card resolves legally — Instants cost
 // 0 AP so the empty pool isn't a barrier.
 func TestPlaySequence_InstantBypassesAPRequirement(t *testing.T) {
-	order := []Card{NoGoAgainAttackStub{}, InstantStub{}}
-	ctx := NewSequenceContextForTest(StubHero, nil, nil, 1_000_000, 0, len(order))
+	order := []Card{testutils.NoGoAgainAttackStub{}, testutils.InstantStub{}}
+	ctx := NewSequenceContextForTest(testutils.Hero{Intel: 4}, nil, nil, 1_000_000, 0, len(order))
 	dmg, _, _, legal := ctx.PlaySequence(order)
 	if !legal {
-		t.Fatalf("ordering %v should be legal (Instant costs 0 AP)", CardNames(order))
+		t.Fatalf("ordering %v should be legal (Instant costs 0 AP)", testutils.CardNames(order))
 	}
 	if dmg != 1 {
 		t.Errorf("dmg = %d, want 1 (NoGoAgainAttack 1 + Instant 0)", dmg)
@@ -259,11 +259,11 @@ func TestPlaySequence_InstantBypassesAPRequirement(t *testing.T) {
 // at 1 the whole way, and a non-Instant follow-up still works (which would fail if Instants
 // had silently consumed AP).
 func TestPlaySequence_InstantsDontConsumeAP(t *testing.T) {
-	order := []Card{InstantStub{}, InstantStub{}, NoGoAgainAttackStub{}}
-	ctx := NewSequenceContextForTest(StubHero, nil, nil, 1_000_000, 0, len(order))
+	order := []Card{testutils.InstantStub{}, testutils.InstantStub{}, testutils.NoGoAgainAttackStub{}}
+	ctx := NewSequenceContextForTest(testutils.Hero{Intel: 4}, nil, nil, 1_000_000, 0, len(order))
 	dmg, _, _, legal := ctx.PlaySequence(order)
 	if !legal {
-		t.Fatalf("ordering %v should be legal (Instants cost 0 AP)", CardNames(order))
+		t.Fatalf("ordering %v should be legal (Instants cost 0 AP)", testutils.CardNames(order))
 	}
 	if dmg != 1 {
 		t.Errorf("dmg = %d, want 1 (two Instants at 0 + NoGoAgainAttack 1)", dmg)

@@ -90,9 +90,6 @@ different from cards (they're never played, drawn from the deck, pitched, etc.).
 should really be treated as a completely separate type. However, parts of the sim currently
 treat Weapons as Cards, so that will have to be carefully disentangled.
 
-BUG: Flying High should grant Go Again to "your next attack", but it only currently applies
-to Action Attack cards.
-
 `internal/registry/ids/weapon_ids.go` aliases `WeaponID = CardID` and anchors the weapon
 constants at `FakeHugeAttack + iota + 1` so they don't collide with card / fake IDs in the
 shared cache slots. Ideally weapons would have their own `WeaponID uint16` type starting at
@@ -125,7 +122,6 @@ lines across `card/`, `weapon/`, `hand/` plus every weapon impl.
 - move card/types.go to sim/card_types.go
 - move testutils/ package files to test.go files so they don't get compiled into the main binary
 - audit everything under sim/ package and see if it makes sense where it is
-- do something with all the "stubs_test" files
 - combine hand_aura_trigger_test.go and deck_aura_trigger_test.go into just aura_trigger_test.go, ditto for "mid_turn_draw_test"
 - fix all the docstrings that say "Package Foo is..." but are no longer in package Foo
 - get rid of the "dot import" eg: . "github.com/tim-chaplin/fab-deck-optimizer/internal/sim"

@@ -181,7 +181,7 @@ var genericAttackTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card
 // reasonable use is to pitch it.
 type BluePitch struct{}
 
-func (BluePitch) ID() ids.CardID          { return ids.FakeBluePitch }
+func (BluePitch) ID() ids.CardID          { return FakeBluePitch }
 func (BluePitch) Name() string            { return "cardtest.BluePitch" }
 func (BluePitch) Cost(*sim.TurnState) int { return 0 }
 func (BluePitch) Pitch() int              { return 3 }
@@ -196,7 +196,7 @@ func (BluePitch) Play(s *sim.TurnState, self *sim.CardState) { s.LogPlay(self) }
 // BlueAttack is a generic blue attack action: pitches 3, defends 3, attacks 1, costs 1.
 type BlueAttack struct{}
 
-func (BlueAttack) ID() ids.CardID                             { return ids.FakeBlueAttack }
+func (BlueAttack) ID() ids.CardID                             { return FakeBlueAttack }
 func (BlueAttack) Name() string                               { return "cardtest.BlueAttack" }
 func (BlueAttack) Cost(*sim.TurnState) int                    { return 1 }
 func (BlueAttack) Pitch() int                                 { return 3 }
@@ -209,7 +209,7 @@ func (BlueAttack) Play(s *sim.TurnState, self *sim.CardState) { s.ApplyAndLogEff
 // RedAttack is a generic red attack action: pitches 1, defends 1, attacks 3, costs 1.
 type RedAttack struct{}
 
-func (RedAttack) ID() ids.CardID                             { return ids.FakeRedAttack }
+func (RedAttack) ID() ids.CardID                             { return FakeRedAttack }
 func (RedAttack) Name() string                               { return "cardtest.RedAttack" }
 func (RedAttack) Cost(*sim.TurnState) int                    { return 1 }
 func (RedAttack) Pitch() int                                 { return 1 }
@@ -222,7 +222,7 @@ func (RedAttack) Play(s *sim.TurnState, self *sim.CardState) { s.ApplyAndLogEffe
 // YellowAttack is a generic yellow attack action: pitches 2, defends 2, attacks 2, costs 1.
 type YellowAttack struct{}
 
-func (YellowAttack) ID() ids.CardID                             { return ids.FakeYellowAttack }
+func (YellowAttack) ID() ids.CardID                             { return FakeYellowAttack }
 func (YellowAttack) Name() string                               { return "cardtest.YellowAttack" }
 func (YellowAttack) Cost(*sim.TurnState) int                    { return 1 }
 func (YellowAttack) Pitch() int                                 { return 2 }
@@ -237,7 +237,7 @@ func (YellowAttack) Play(s *sim.TurnState, self *sim.CardState) { s.ApplyAndLogE
 // (each cantrip plays, draws the next one, which plays, etc.).
 type DrawCantrip struct{}
 
-func (DrawCantrip) ID() ids.CardID          { return ids.FakeDrawCantrip }
+func (DrawCantrip) ID() ids.CardID          { return FakeDrawCantrip }
 func (DrawCantrip) Name() string            { return "cardtest.DrawCantrip" }
 func (DrawCantrip) Cost(*sim.TurnState) int { return 0 }
 func (DrawCantrip) Pitch() int              { return 1 }
@@ -260,7 +260,7 @@ var genericActionTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction)
 // onto a drawn-later attack.
 type CostlyDraw struct{}
 
-func (CostlyDraw) ID() ids.CardID          { return ids.FakeCostlyDraw }
+func (CostlyDraw) ID() ids.CardID          { return FakeCostlyDraw }
 func (CostlyDraw) Name() string            { return "cardtest.CostlyDraw" }
 func (CostlyDraw) Cost(*sim.TurnState) int { return 1 }
 func (CostlyDraw) Pitch() int              { return 1 }
@@ -277,7 +277,7 @@ func (CostlyDraw) Play(s *sim.TurnState, self *sim.CardState) {
 // the mid-turn-draw determinism test weighs against CostlyDraw.
 type CostlyAttack struct{}
 
-func (CostlyAttack) ID() ids.CardID                             { return ids.FakeCostlyAttack }
+func (CostlyAttack) ID() ids.CardID                             { return FakeCostlyAttack }
 func (CostlyAttack) Name() string                               { return "cardtest.CostlyAttack" }
 func (CostlyAttack) Cost(*sim.TurnState) int                    { return 1 }
 func (CostlyAttack) Pitch() int                                 { return 1 }
@@ -293,7 +293,7 @@ var genericDefenseReactionTypes = card.NewTypeSet(card.TypeGeneric, card.TypeDef
 // can pitch it (contributing 1 resource) to fund another 1-cost card without also playing it.
 type PitchOneDR struct{}
 
-func (PitchOneDR) ID() ids.CardID          { return ids.FakePitchOneDR }
+func (PitchOneDR) ID() ids.CardID          { return FakePitchOneDR }
 func (PitchOneDR) Name() string            { return "cardtest.PitchOneDR" }
 func (PitchOneDR) Cost(*sim.TurnState) int { return 0 }
 func (PitchOneDR) Pitch() int              { return 1 }
@@ -313,7 +313,7 @@ type HugeAttack struct{}
 
 const hugeAttackDamage = 1_000_000
 
-func (HugeAttack) ID() ids.CardID                             { return ids.FakeHugeAttack }
+func (HugeAttack) ID() ids.CardID                             { return FakeHugeAttack }
 func (HugeAttack) Name() string                               { return "cardtest.HugeAttack" }
 func (HugeAttack) Cost(*sim.TurnState) int                    { return 0 }
 func (HugeAttack) Pitch() int                                 { return 1 }
@@ -322,3 +322,155 @@ func (HugeAttack) Defense() int                               { return 0 }
 func (HugeAttack) Types() card.TypeSet                        { return genericAttackTypes }
 func (HugeAttack) GoAgain() bool                              { return false }
 func (HugeAttack) Play(s *sim.TurnState, self *sim.CardState) { s.ApplyAndLogEffectiveAttack(self) }
+
+// StubCard is a minimal sim.Card. Tests construct it via NewStubCard plus the With…
+// builder methods so call sites only set the fields they care about — every other field
+// returns a zero value through the Card interface methods. ID defaults to InvalidCard;
+// tests that reach into ID-keyed caches (cardMetaCache, chainStepCache) should attach a
+// distinct ID via WithID(testutils.FakeX) to avoid sharing slot 0.
+type StubCard struct {
+	id      ids.CardID
+	name    string
+	types   card.TypeSet
+	attack  int
+	goAgain bool
+}
+
+// NewStubCard returns a StubCard with just a name set. Use the With… mutators below to
+// attach additional fields.
+func NewStubCard(name string) StubCard { return StubCard{name: name} }
+
+// WithID returns a copy of c with id set.
+func (c StubCard) WithID(id ids.CardID) StubCard { c.id = id; return c }
+
+// WithTypes returns a copy of c with types set.
+func (c StubCard) WithTypes(t card.TypeSet) StubCard { c.types = t; return c }
+
+// WithAttack returns a copy of c with the printed attack value set.
+func (c StubCard) WithAttack(a int) StubCard { c.attack = a; return c }
+
+// WithGoAgain returns a copy of c with goAgain=true.
+func (c StubCard) WithGoAgain() StubCard { c.goAgain = true; return c }
+
+func (c StubCard) ID() ids.CardID                    { return c.id }
+func (c StubCard) Name() string                      { return c.name }
+func (StubCard) Cost(*sim.TurnState) int             { return 0 }
+func (StubCard) Pitch() int                          { return 0 }
+func (c StubCard) Attack() int                       { return c.attack }
+func (StubCard) Defense() int                        { return 0 }
+func (c StubCard) Types() card.TypeSet               { return c.types }
+func (c StubCard) GoAgain() bool                     { return c.goAgain }
+func (StubCard) Play(*sim.TurnState, *sim.CardState) {}
+
+// DominatingStubCard embeds StubCard and adds the sim.Dominator marker — exercises the
+// printed-Dominate branch of EffectiveDominate / HasDominate.
+type DominatingStubCard struct{ StubCard }
+
+func (DominatingStubCard) Dominate() {}
+
+// NotImplementedStubCard embeds StubCard and adds the sim.NotImplemented marker —
+// exercises the type assertion the deck legal-pool filter keys on.
+type NotImplementedStubCard struct{ StubCard }
+
+func (NotImplementedStubCard) NotImplemented() {}
+
+// UnplayableStubCard embeds StubCard and adds the sim.Unplayable marker — exercises the
+// second pool-exclusion path the deck legal-pool filter keys on.
+type UnplayableStubCard struct{ StubCard }
+
+func (UnplayableStubCard) Unplayable() {}
+
+// InstantStub is a 0-cost, 0-power Generic Action - Instant card with no Go again.
+// Tests chain-runner behaviour around the Action Point debit: an Instant after a
+// non-Go-again card should still resolve because Instants cost 0 AP.
+type InstantStub struct{}
+
+func (InstantStub) ID() ids.CardID          { return FakeInstant }
+func (InstantStub) Name() string            { return "InstantStub" }
+func (InstantStub) Cost(*sim.TurnState) int { return 0 }
+func (InstantStub) Pitch() int              { return 0 }
+func (InstantStub) Attack() int             { return 0 }
+func (InstantStub) Defense() int            { return 0 }
+func (InstantStub) Types() card.TypeSet {
+	return card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeInstant)
+}
+func (InstantStub) GoAgain() bool                              { return false }
+func (InstantStub) Play(s *sim.TurnState, self *sim.CardState) { s.LogPlay(self) }
+
+// NoGoAgainAttackStub is a 0-cost, 1-power Generic Action - Attack card with no Go again.
+// Tests chain-runner behaviour after the AP pool runs out: a non-Instant follow-up
+// should be rejected.
+type NoGoAgainAttackStub struct{}
+
+func (NoGoAgainAttackStub) ID() ids.CardID          { return FakeNoGoAgainAttack }
+func (NoGoAgainAttackStub) Name() string            { return "NoGoAgainAttack" }
+func (NoGoAgainAttackStub) Cost(*sim.TurnState) int { return 0 }
+func (NoGoAgainAttackStub) Pitch() int              { return 0 }
+func (NoGoAgainAttackStub) Attack() int             { return 1 }
+func (NoGoAgainAttackStub) Defense() int            { return 0 }
+func (NoGoAgainAttackStub) Types() card.TypeSet     { return genericAttackTypes }
+func (NoGoAgainAttackStub) GoAgain() bool           { return false }
+func (NoGoAgainAttackStub) Play(s *sim.TurnState, self *sim.CardState) {
+	s.ApplyAndLogEffectiveAttack(self)
+}
+
+// GrantAll is a Runeblade attack-action card that flips GrantedGoAgain=true on every
+// remaining CardState in CardsRemaining when it resolves. Used with GrantSpy to detect
+// cross-permutation CardState wrapper leakage in bestSequence: the fresh-wrapper
+// invariant must keep grants from bleeding across permutations.
+type GrantAll struct{}
+
+func (GrantAll) ID() ids.CardID          { return ids.InvalidCard }
+func (GrantAll) Name() string            { return "GrantAll" }
+func (GrantAll) Cost(*sim.TurnState) int { return 0 }
+func (GrantAll) Pitch() int              { return 0 }
+func (GrantAll) Attack() int             { return 0 }
+func (GrantAll) Defense() int            { return 0 }
+func (GrantAll) Types() card.TypeSet {
+	return card.NewTypeSet(card.TypeRuneblade, card.TypeAction, card.TypeAttack)
+}
+func (GrantAll) GoAgain() bool { return true }
+func (GrantAll) Play(s *sim.TurnState, self *sim.CardState) {
+	for _, pc := range s.CardsRemaining {
+		pc.GrantedGoAgain = true
+	}
+	s.LogPlay(self)
+}
+
+// GrantSpy is a Runeblade attack-action card. When it plays first in a permutation it
+// records (via *Saw) whether any CardState in CardsRemaining already has
+// GrantedGoAgain=true. With per-permutation fresh wrappers that should never happen —
+// no prior card in this permutation has run yet. If wrappers leak across permutations,
+// a prior permutation's GrantAll Play would still be visible and the spy trips.
+type GrantSpy struct{ Saw *bool }
+
+func (GrantSpy) ID() ids.CardID          { return ids.InvalidCard }
+func (GrantSpy) Name() string            { return "GrantSpy" }
+func (GrantSpy) Cost(*sim.TurnState) int { return 0 }
+func (GrantSpy) Pitch() int              { return 0 }
+func (GrantSpy) Attack() int             { return 0 }
+func (GrantSpy) Defense() int            { return 0 }
+func (GrantSpy) Types() card.TypeSet {
+	return card.NewTypeSet(card.TypeRuneblade, card.TypeAction, card.TypeAttack)
+}
+func (GrantSpy) GoAgain() bool { return true }
+func (g GrantSpy) Play(s *sim.TurnState, self *sim.CardState) {
+	defer s.LogPlay(self)
+	if len(s.CardsPlayed) != 0 {
+		return
+	}
+	for _, pc := range s.CardsRemaining {
+		if pc.GrantedGoAgain {
+			*g.Saw = true
+		}
+	}
+}
+
+// CardNames renders a slice of Card names for test failure messages.
+func CardNames(cs []sim.Card) []string {
+	out := make([]string, len(cs))
+	for i, c := range cs {
+		out[i] = c.Name()
+	}
+	return out
+}

@@ -14,7 +14,7 @@ import (
 // play order. Confirms the solver actually populates the list as cards resolve.
 func TestGraveyard_AttackChainAppends(t *testing.T) {
 	order := []Card{testutils.RedAttack{}, testutils.RedAttack{}, testutils.RedAttack{}}
-	ctx := NewSequenceContextForTest(StubHero, nil, nil, 1_000_000, 0, len(order))
+	ctx := NewSequenceContextForTest(testutils.Hero{Intel: 4}, nil, nil, 1_000_000, 0, len(order))
 	if _, _, _, legal := ctx.PlaySequence(order); !legal {
 		t.Fatalf("playSequence rejected the chain")
 	}
@@ -36,7 +36,7 @@ func TestGraveyard_WeaponSwingDoesNotEnterGraveyard(t *testing.T) {
 	attack := testutils.RedAttack{}
 	swing := weapons.ReapingBlade{}
 	order := []Card{attack, swing}
-	ctx := NewSequenceContextForTest(StubHero, nil, nil, 1_000_000, 0, len(order))
+	ctx := NewSequenceContextForTest(testutils.Hero{Intel: 4}, nil, nil, 1_000_000, 0, len(order))
 	if _, _, _, legal := ctx.PlaySequence(order); !legal {
 		t.Fatalf("playSequence rejected attack → weapon")
 	}
@@ -124,7 +124,7 @@ func TestGraveyard_PlainBlockEntersGraveyardRegardlessOfType(t *testing.T) {
 func TestGraveyard_PermutationReset(t *testing.T) {
 	first := []Card{testutils.RedAttack{}, testutils.RedAttack{}, testutils.RedAttack{}}
 	second := []Card{testutils.RedAttack{}}
-	ctx := NewSequenceContextForTest(StubHero, nil, nil, 1_000_000, 0, len(first))
+	ctx := NewSequenceContextForTest(testutils.Hero{Intel: 4}, nil, nil, 1_000_000, 0, len(first))
 
 	if _, _, _, legal := ctx.PlaySequence(first); !legal {
 		t.Fatalf("first playSequence rejected")

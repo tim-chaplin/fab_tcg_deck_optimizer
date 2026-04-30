@@ -836,10 +836,10 @@ func AllCards() []CardID {
 }
 
 // DeckableCards returns every registered card ID that's legal to put in a real deck.
-// Freshly allocated; safe to mutate. The fake card IDs (ids.FakeRedAttack, …) are
-// deliberately not in the registry, so this is just AllCards() under a different name —
-// kept distinct so callers who want "deck-legal cards" stay readable even if the registry
-// ever holds non-deckable entries again.
+// Freshly allocated; safe to mutate. Test-only synthetic IDs (testutils.FakeRedAttack, …)
+// live in the testutils package and aren't registered here, so this is just AllCards()
+// under a different name — kept distinct so callers who want "deck-legal cards" stay
+// readable even if the registry ever holds non-deckable entries again.
 func DeckableCards() []CardID {
 	return AllCards()
 }
