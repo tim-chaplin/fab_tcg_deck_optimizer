@@ -15,7 +15,6 @@ const (
 	FakeRedAttack ids.CardID = ids.TalisharID + iota + 1
 	FakeBlueAttack
 	FakeYellowAttack
-	FakeDrawCantrip
 	FakeCostlyDraw
 	FakeCostlyAttack
 	FakePitchOneDR
