@@ -3,12 +3,6 @@
 // Text: "**Go again** **Defense Reaction** - Destroy Amulet of Havencall: Search your deck for a
 // card named Rally the Rearguard, add it to this chain link as a defending card, then shuffle.
 // Activate this ability only if you have no cards in hand."
-//
-// Marked sim.Unplayable: the card itself is too weak to want in a deck. Best-case output is a
-// tutored Rally the Rearguard added as a defender (~3 block), gated on empty hand and on the
-// deck actually containing Rally — niche even in dedicated builds. Even fully modelled, the
-// EV doesn't beat just running Rally directly; the chain-link defender plumbing is a
-// secondary modelling cost but not the deciding factor.
 
 package cards
 

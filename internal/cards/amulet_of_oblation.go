@@ -3,12 +3,6 @@
 // Text: "**Go again** **Instant** - Destroy Amulet of Oblation: Until end of turn, target attack
 // action gains "If this would be put into a graveyard, instead put it on the bottom of its owner's
 // deck." Activate this ability only if a card has entered a graveyard this turn."
-//
-// Marked sim.Unplayable: the card itself is too weak to want in a deck. Best-case output is
-// recycling one attack action back to the bottom of the deck — saves the card from the
-// graveyard, but a deck-bottom recycle is worth ~1-2 future-turn value at most, and you've
-// spent a card slot to get it. Even fully modelled the EV doesn't beat the slot cost; the
-// per-turn evaluation caveat is a secondary modelling concern but not the deciding factor.
 
 package cards
 

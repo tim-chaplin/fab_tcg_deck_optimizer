@@ -3,12 +3,6 @@
 // Text: "**Go again** **Instant** - Destroy Amulet of Ignition: The next ability you activate this
 // turn costs {r} less. Activate this ability only if you haven't played a card or activated an
 // ability this turn."
-//
-// Marked sim.Unplayable: the card itself is too weak to want in a deck. Best-case output is a
-// 1{r} discount on the next activated ability — gated on being the first action of the turn,
-// so spending one card slot to save one resource on one future ability. Even fully modelled
-// the EV is below the cost of the slot it occupies; the activated-ability-cost-search
-// limitation is a secondary modelling concern but not the deciding factor.
 
 package cards
 

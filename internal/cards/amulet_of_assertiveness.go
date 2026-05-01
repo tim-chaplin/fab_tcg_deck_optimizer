@@ -3,12 +3,6 @@
 // Text: "**Go again** **Attack Reaction** - Destroy Amulet of Assertiveness: Target attack gains
 // "When this hits, banish the top card of your deck. If it's an attack action card, you may play it
 // this turn." Activate this ability only if you have 4 or more cards in hand."
-//
-// Marked sim.Unplayable: the card itself is too weak to want in a deck. Best-case output is
-// a single chain-extending attack action when the activation gate (hand ≥ 4) and on-hit
-// banish-and-replay both connect — net ~1-3 value after paying for the slot. Even with the
-// grant fully modelled the optimizer wouldn't pick it; the opposing-block dependency is a
-// secondary reason to skip it but not the deciding one.
 
 package cards
 
