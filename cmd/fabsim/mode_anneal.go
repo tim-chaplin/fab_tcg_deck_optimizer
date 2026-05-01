@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"math/rand"
 	"os"
+	"runtime"
+	"runtime/pprof"
 	"strings"
 	"sync/atomic"
 	"time"
@@ -45,6 +47,10 @@ type annealConfig struct {
 	// scripts that re-invoke anneal repeatedly on the same deck; the listing is unchanging
 	// noise after the first pass.
 	quietLoad bool
+	// maxDuration caps the run's wall-clock time. Zero means no cap (anneal runs until the user
+	// hits Enter). The deadline aborts the same way the stdin watcher does, so any outstanding
+	// round finishes evaluating before the loop exits and the deck still saves.
+	maxDuration time.Duration
 }
 
 // legalFilter returns the card-pool predicate for this run's format. anneal always runs under a
@@ -79,6 +85,9 @@ func runAnnealCmd(args []string) {
 	tempDecay := fs.Float64("temp-decay", 0.95, "multiplicative cooling per acceptance — T ← T × decay, floored at -min-temp. Unused when -start-temp is 0.")
 	minTemp := fs.Float64("min-temp", 0, "minimum temperature. Once T reaches this floor the climb becomes greedy until a local maximum is found. 0 disables annealing in the converged tail.")
 	quietLoad := fs.Bool("quiet-load", false, "skip the baseline card-list dump at startup. Intended for wrapper scripts (e.g. anneal-reanneal.ps1) that re-invoke anneal many times on the same deck — the listing never changes pass-to-pass and floods the log.")
+	cpuprofile := fs.String("cpuprofile", "", "if set, write a CPU profile to this path covering the entire anneal run. Pair with -max-duration for a time-boxed profile-driven optimization pass.")
+	memprofile := fs.String("memprofile", "", "if set, write a heap profile to this path at exit (after a runtime.GC()).")
+	maxDuration := fs.Duration("max-duration", 0, "cap wall-clock duration; the run aborts cleanly at the deadline like a stdin Enter. Zero (default) runs until the user hits Enter.")
 	_ = parseFlagsAnywhere(fs, args)
 	if fs.NArg() > 0 {
 		die("anneal: unexpected positional argument(s): %v (did you mean -deck %s?)", fs.Args(), fs.Args()[0])
@@ -123,17 +132,49 @@ func runAnnealCmd(args []string) {
 		minTemp:        *minTemp,
 		minImprovement: *minImprovement,
 		quietLoad:      *quietLoad,
+		maxDuration:    *maxDuration,
 	}
 
-	// Print the session-level delta (starting best vs final best) on any exit path, then
-	// surface abort via a non-zero exit so wrapper scripts (anneal-reanneal.ps1 et al.) can
-	// tell Enter-initiated termination from natural convergence and stop looping.
+	// Run inside a wrapper that owns the profile lifecycle: deferred StopCPUProfile / heap dump
+	// must fire on every exit path (clean finish OR abort) but os.Exit skips defers, so do the
+	// exit-code dispatch only after the wrapper returns.
+	aborted := runAnnealWithProfiling(cfg, *cpuprofile, *memprofile)
+	if aborted {
+		os.Exit(130)
+	}
+}
+
+// runAnnealWithProfiling wraps runAnneal with optional CPU + heap profile capture. CPU profile
+// runs across the entire anneal session; heap profile snapshots once at exit after a forced GC
+// so live-only allocations dominate the result. Returns the aborted flag so the caller can
+// pick the right exit code.
+func runAnnealWithProfiling(cfg annealConfig, cpuprofile, memprofile string) bool {
+	if cpuprofile != "" {
+		f, err := os.Create(cpuprofile)
+		if err != nil {
+			die("create cpuprofile: %v", err)
+		}
+		defer f.Close()
+		if err := pprof.StartCPUProfile(f); err != nil {
+			die("start cpuprofile: %v", err)
+		}
+		defer pprof.StopCPUProfile()
+	}
 	res := runAnneal(cfg)
 	fmt.Fprintf(os.Stderr, "\nSession summary: avg %.3f → %.3f (%+.3f)\n",
 		res.startingAvg, res.bestEverAvg, res.bestEverAvg-res.startingAvg)
-	if res.aborted {
-		os.Exit(130)
+	if memprofile != "" {
+		f, err := os.Create(memprofile)
+		if err != nil {
+			die("create memprofile: %v", err)
+		}
+		defer f.Close()
+		runtime.GC()
+		if err := pprof.WriteHeapProfile(f); err != nil {
+			die("write memprofile: %v", err)
+		}
 	}
+	return res.aborted
 }
 
 // annealResult carries the outcome of a single runAnneal pass. aborted is true when the
@@ -158,7 +199,13 @@ func runAnneal(cfg annealConfig) annealResult {
 	startingAvg := currentAvg
 	fmt.Println("Press Enter to abort.")
 
-	ctx, cancel := context.WithCancel(context.Background())
+	var ctx context.Context
+	var cancel context.CancelFunc
+	if cfg.maxDuration > 0 {
+		ctx, cancel = context.WithTimeout(context.Background(), cfg.maxDuration)
+	} else {
+		ctx, cancel = context.WithCancel(context.Background())
+	}
 	defer cancel()
 	watchStdinForAbort(cancel)
 
