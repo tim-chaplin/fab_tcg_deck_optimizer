@@ -692,12 +692,14 @@ func (s *TurnState) AddAuraTrigger(t AuraTrigger) {
 func (s *TurnState) RegisterStartOfTurn(self Card, count int, text string, handler OnAuraTrigger) {
 	finalHandler := handler
 	if text != "" {
-		source := DisplayName(self)
-		prefix := source + ": " + text
+		// Capture self/text only; defer DisplayName + prefix concat + Sprintf into the
+		// trigger body so the closure pays just three pointer-sized captures up front and the
+		// SkipLog-suppressed firing path costs no string allocs at all.
 		finalHandler = func(s *TurnState) int {
 			n := handler(s)
-			if n > 0 {
-				s.AddPostTriggerLogEntry(fmt.Sprintf("%s (+%d)", prefix, n), source, n)
+			if n > 0 && !s.SkipLog {
+				source := DisplayName(self)
+				s.AddPostTriggerLogEntry(fmt.Sprintf("%s: %s (+%d)", source, text, n), source, n)
 			}
 			return n
 		}
