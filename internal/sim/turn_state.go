@@ -505,6 +505,14 @@ func (s *TurnState) ApplyAndLogEffectiveAttack(self *CardState) {
 	if n < 0 {
 		n = 0
 	}
+	// SkipLog discards the entry, so the ChainStepText render — and the
+	// DisplayName + verb-selection work behind it — is wasted on every chain
+	// step. Credit Value directly to skip both the cachedChainStepText lookup
+	// and the AddLogEntry / appendLog wrappers' bookkeeping.
+	if s.SkipLog {
+		s.Value += n
+		return
+	}
 	s.AddLogEntry(ChainStepText(self), n)
 }
 
@@ -513,6 +521,13 @@ func (s *TurnState) ApplyAndLogEffectiveAttack(self *CardState) {
 // is dropped because these cards never deal printed damage; any value they contribute lands
 // via separate AddPostTriggerLogEntry / aura trigger paths.
 func (s *TurnState) LogPlay(self *CardState) {
+	// SkipLog drops the entry — and LogPlay credits no Value — so the entire call
+	// is a no-op. Skip ChainStepText too: the cached lookup runs an interface call
+	// for self.Card.ID() and wastes the slot read on every chain step under
+	// SkipLog when we won't keep the result.
+	if s.SkipLog {
+		return
+	}
 	s.AddLogEntry(ChainStepText(self), 0)
 }
 
@@ -535,6 +550,13 @@ func (s *TurnState) ApplyAndLogEffectiveDefense(self *CardState) {
 		n = 0
 	}
 	s.IncomingDamage -= n
+	// SkipLog drops the entry; the ChainStepText render and the AddLogEntry /
+	// appendLog wrappers are wasted on every defense step. Credit Value directly
+	// (matching appendLog's clamp + bump) and return.
+	if s.SkipLog {
+		s.Value += n
+		return
+	}
 	s.AddLogEntry(ChainStepText(self), n)
 }
 
@@ -646,13 +668,24 @@ func (s *TurnState) DealAndLogArcaneDamage(self *CardState, n int) int {
 	if n <= 0 {
 		return 0
 	}
+	dealt := s.DealArcaneDamage(n)
+	// SkipLog discards the sub-line; the Sprintf and DisplayName lookup are
+	// wasted. Credit Value directly (matching appendLog's clamp + bump) and
+	// return early.
+	if s.SkipLog {
+		if dealt < 0 {
+			dealt = 0
+		}
+		s.Value += dealt
+		return dealt
+	}
 	var text string
 	if n == 1 {
 		text = "Dealt 1 arcane damage"
 	} else {
 		text = fmt.Sprintf("Dealt %d arcane damage", n)
 	}
-	return s.AddPostTriggerLogEntry(text, DisplayName(self.Card), s.DealArcaneDamage(n))
+	return s.AddPostTriggerLogEntry(text, DisplayName(self.Card), dealt)
 }
 
 // ApplyAndLogRiderOnPlay writes a freeform rider sub-line under self's chain entry. text is a
@@ -661,6 +694,16 @@ func (s *TurnState) DealAndLogArcaneDamage(self *CardState, n int) int {
 // should read as a complete utterance without a card-name prefix. n is the damage-
 // equivalent credit. Returns the credited n (clamped at 0 by the underlying log helper).
 func (s *TurnState) ApplyAndLogRiderOnPlay(self *CardState, text string, n int) int {
+	// SkipLog discards the rider line; the DisplayName lookup + LogEntry build
+	// AddPostTriggerLogEntry would do is wasted. Match appendLog's clamp + Value
+	// bump and return early so the hot path skips both.
+	if s.SkipLog {
+		if n < 0 {
+			n = 0
+		}
+		s.Value += n
+		return n
+	}
 	return s.AddPostTriggerLogEntry(text, DisplayName(self.Card), n)
 }
 
