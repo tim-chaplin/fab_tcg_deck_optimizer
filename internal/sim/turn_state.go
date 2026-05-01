@@ -561,8 +561,8 @@ func (s *TurnState) CreateAndLogRunechants(selfName, sourceName string, n int) i
 
 // CreateAndLogRunechantsOnHit is the post-trigger variant of CreateAndLogRunechants —
 // the trigger log line reads "<selfName> created N runechants on hit" so the conditional
-// gate on the ephemeral attack trigger (Mauvrion Skies, Runic Reaping) is visible in the
-// printout. Same return contract as CreateAndLogRunechants.
+// gate on the ephemeral attack trigger is visible in the printout. Same return contract
+// as CreateAndLogRunechants.
 func (s *TurnState) CreateAndLogRunechantsOnHit(selfName, sourceName string, n int) int {
 	return s.AddPostTriggerLogEntry(selfName+" "+runechantsCreatedPhrase(n)+" on hit", sourceName, s.CreateRunechants(n))
 }

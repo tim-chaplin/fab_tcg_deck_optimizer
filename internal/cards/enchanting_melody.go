@@ -5,8 +5,7 @@
 // prevent 4 damage that source would deal. At the beginning of your end phase, destroy Enchanting
 // Melody unless you have played a 'non-attack' action card this turn."
 //
-// The aura-created flag is set so same-turn aura-readers (Yinti Yanti, Runerager Swarm, etc.)
-// see the entry.
+// Sets s.AuraCreated so same-turn aura-readers see the entry.
 
 package cards
 

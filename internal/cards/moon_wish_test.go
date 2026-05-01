@@ -10,8 +10,7 @@ import (
 )
 
 // TestMoonWish_VariableCost: Cost reads len(s.Hand). With any hand card the alt cost fires
-// and the card costs 0; without one we fall back to the printed 2. Bounds are static (Min=0,
-// Max=2) for the solver pre-screens.
+// and the card costs 0; without one we fall back to the printed 2. Static bounds: Min=0, Max=2.
 func TestMoonWish_VariableCost(t *testing.T) {
 	cases := []sim.Card{MoonWishRed{}, MoonWishYellow{}, MoonWishBlue{}}
 	for _, c := range cases {

@@ -6,8 +6,7 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 )
 
-// Compile-time: the Drawn to the Dark Dimension variants must implement sim.VariableCost,
-// otherwise the solver can't pre-screen with MinCost / MaxCost bounds.
+// Compile-time: the Drawn to the Dark Dimension variants must implement sim.VariableCost.
 var (
 	_ sim.VariableCost = DrawnToTheDarkDimensionRed{}
 	_ sim.VariableCost = DrawnToTheDarkDimensionYellow{}

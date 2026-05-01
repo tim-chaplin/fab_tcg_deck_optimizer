@@ -20,10 +20,8 @@ import (
 var scoutThePeripheryTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction)
 
 // grantNextArsenalAttackActionBonus adds n to the first scheduled attack action played
-// from arsenal — its BonusAttack lands the buff so EffectiveAttack and LikelyToHit see
-// the buffed power on the buffed card, not on the granter. The arsenal can hold at most
-// one card, so this only fires when the arsenal-in card is itself an attack action queued
-// later in the chain. Fizzles silently when no qualifying target follows.
+// from arsenal via its BonusAttack so the buff lands on the buffed card. Fizzles silently
+// when no qualifying target follows.
 func grantNextArsenalAttackActionBonus(s *sim.TurnState, n int) {
 	for _, pc := range s.CardsRemaining {
 		if !pc.FromArsenal {

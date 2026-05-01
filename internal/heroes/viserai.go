@@ -45,9 +45,9 @@ func (Viserai) OnCardPlayed(played sim.Card, s *sim.TurnState) int {
 //     attack drops a runechant.
 //   - Action without Go again: an Action card that doesn't extend the chain — one is
 //     enough to close out a chain; further copies just sit in hand. The Go again check
-//     routes through sim.HasGoAgainHeuristic so cards with conditional Go again
-//     (Runerager Swarm et al., printed GoAgain() == false but reliably granted at
-//     play time in this archetype) DON'T fall in this slot.
+//     routes through mightHaveGoAgain so cards carrying ConditionalGoAgain (printed
+//     GoAgain() == false but reliably granted at play time in this archetype) DON'T fall
+//     in this slot.
 //   - Block-only defender: a card whose only role is defending — Defense Reaction or
 //     Block subtype. Most cards carry a non-zero printed Defense value as a secondary
 //     option, so Defense > 0 alone is too broad — we only count cards that are
@@ -110,9 +110,9 @@ func (s viseraiOptSlots) union(other viseraiOptSlots) viseraiOptSlots {
 }
 
 // viseraiSlotsFor classifies c into Viserai's Opt-heuristic slots. The Go-again check
-// routes through mightHaveGoAgain so cards with the ConditionalGoAgain marker (Runerager
-// Swarm et al., printed GoAgain() == false but conditionally granted at play time)
-// aren't treated as one-per-hand finishers.
+// routes through mightHaveGoAgain so cards carrying ConditionalGoAgain (printed
+// GoAgain() == false but conditionally granted at play time) aren't treated as
+// one-per-hand finishers.
 func viseraiSlotsFor(c sim.Card) viseraiOptSlots {
 	t := c.Types()
 	return viseraiOptSlots{
