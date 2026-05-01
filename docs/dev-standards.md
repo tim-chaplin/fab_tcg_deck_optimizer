@@ -77,6 +77,47 @@ following plumbing is uniform and lives once in `internal/card/card.go`:
   TurnState; the marker exposes `MinCost` / `MaxCost` for the solver's pre-screen. Don't
   re-document the dispatch — note the printed cost formula.
 
+## Logging idioms
+
+Card.Play uses two orthogonal `TurnState` primitives: `AddValue(n)` mutates `s.Value`,
+and `Log` / `LogRider` / `LogPreTrigger` / `LogPostTrigger` (plus their `f` formatted
+variants) append a `LogEntry`. They never collude — each does one thing, and the
+internal `skipLog` gate lives inside the Log helpers so cards never check it.
+
+**A line that starts with `s.Log(...` (or any `Log*` helper) must have no side effects.**
+Put the value change on its own preceding line:
+
+```go
+// Good — Log line is pure:
+s.AddValue(s.CreateRunechants(2))
+s.LogRider(self, 2, "Created 2 runechants")
+
+// Bad — side effect hidden inside the Log call:
+s.LogRider(self, s.AddValue(s.CreateRunechants(2)), "Created 2 runechants")
+```
+
+Reasons: a reader scanning for "what does this card do at runtime" can skip every
+`Log*` line knowing it's just printout, and a future profile-driven optimisation that
+short-circuits log construction (e.g. a `WantsLog()` gate cards consult locally) won't
+silently drop the side effect.
+
+For attack and defense chain steps the standard idiom is two lines: capture the credited
+amount via `self.DealEffectiveAttack(s)` / `DealEffectiveDefense(s)` (which encapsulates
+the AddValue side effect) and pass it to `s.Log(self, n)`:
+
+```go
+// Attack action:
+n := self.DealEffectiveAttack(s)
+s.Log(self, n)
+
+// Defense reaction:
+n := self.DealEffectiveDefense(s)
+s.Log(self, n)
+
+// Non-attack chain step:
+s.Log(self, 0)
+```
+
 ## Cross-file references
 
 If a comment's rationale would otherwise cite "matches the pattern in foo.go, bar.go,
