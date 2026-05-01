@@ -347,8 +347,8 @@ var cardsByName = func() map[string]CardID {
 // GetCard returns the card for the given ID, or nil when the ID has no registered card —
 // the case for NotImplemented and Unplayable IDs whose subpackages aren't imported by the
 // registry. Panics if id is the Invalid sentinel or out of the registered ID range, since
-// those indicate a programming error (using a stale ID after the registry's max shifted).
-// Callers iterating IDs should null-check the result.
+// those indicate a programming error (an out-of-range or sentinel ID). Callers iterating
+// IDs should null-check the result.
 func GetCard(id CardID) sim.Card {
 	if id == ids.InvalidCard || int(id) >= len(cardsByID) {
 		panic("cardindex: invalid card ID")

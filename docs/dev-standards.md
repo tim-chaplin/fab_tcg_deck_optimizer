@@ -73,7 +73,7 @@ The split keeps the unimplemented backlog honest: cards under `NotImplemented` a
 cards under `Unplayable` are closed. The directory split makes both lists visible at a
 glance — `ls internal/cards/notimplemented/` is the live todo, and the lint test
 `TestLayout_MarkersStayInSubpackages` enforces the layout so a stray marker can't silently
-re-introduce the old single-package layout.
+bypass the split.
 
 ## Standard rider wiring
 

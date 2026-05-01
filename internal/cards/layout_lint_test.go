@@ -10,11 +10,7 @@ import (
 	"testing"
 )
 
-// Tests that NotImplemented and Unplayable markers only appear in their dedicated subpackages
-// (internal/cards/notimplemented/ and internal/cards/unplayable/) and never in the top-level
-// cards/ package. The split keeps the unimplemented backlog and the closed-as-too-weak list
-// each visible at a glance; this lint enforces it AST-style so a stray marker doesn't silently
-// re-introduce the old layout.
+// Tests that NotImplemented and Unplayable markers appear only in their dedicated subpackages.
 func TestLayout_MarkersStayInSubpackages(t *testing.T) {
 	const (
 		notImplDir  = "notimplemented"
