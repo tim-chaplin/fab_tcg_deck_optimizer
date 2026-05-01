@@ -35,3 +35,13 @@ func (h Hero) Opt(cards []sim.Card) (top, bottom []sim.Card) {
 	}
 	return cards, nil
 }
+
+// SwapCurrentHero swaps sim.CurrentHero to h and returns a function that restores the prior
+// hero. Tests that exercise Opt-driven card behaviour route through this so the global
+// CurrentHero is never left dangling for the next test in the package. Use as
+// `defer testutils.SwapCurrentHero(testutils.Hero{})()`.
+func SwapCurrentHero(h sim.Hero) (restore func()) {
+	prev := sim.CurrentHero
+	sim.CurrentHero = h
+	return func() { sim.CurrentHero = prev }
+}

@@ -17,9 +17,7 @@ func TestFateForeseen_BlocksAndCallsOpt1(t *testing.T) {
 		{FateForeseenYellow{}, 3},
 		{FateForeseenBlue{}, 2},
 	}
-	prev := sim.CurrentHero
-	sim.CurrentHero = testutils.Hero{}
-	defer func() { sim.CurrentHero = prev }()
+	defer testutils.SwapCurrentHero(testutils.Hero{})()
 
 	for _, tc := range cases {
 		top := testutils.NewStubCard("top")

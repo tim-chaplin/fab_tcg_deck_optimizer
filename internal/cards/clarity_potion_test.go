@@ -10,9 +10,7 @@ import (
 // Tests that Clarity Potion's Play emits a LogPlay step and an Opt 2 log entry.
 func TestClarityPotion_PlayCallsOpt2(t *testing.T) {
 	a, b := testutils.NewStubCard("a"), testutils.NewStubCard("b")
-	prev := sim.CurrentHero
-	sim.CurrentHero = testutils.Hero{}
-	defer func() { sim.CurrentHero = prev }()
+	defer testutils.SwapCurrentHero(testutils.Hero{})()
 
 	c := ClarityPotionBlue{}
 	s := sim.NewTurnState([]sim.Card{a, b}, nil)

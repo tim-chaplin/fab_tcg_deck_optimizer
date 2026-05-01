@@ -17,9 +17,7 @@ var whisperOfTheOracleVariants = []sim.Card{
 func TestWhisperOfTheOracle_PlayCallsOpt4(t *testing.T) {
 	a, b, c, d := testutils.NewStubCard("a"), testutils.NewStubCard("b"),
 		testutils.NewStubCard("c"), testutils.NewStubCard("d")
-	prev := sim.CurrentHero
-	sim.CurrentHero = testutils.Hero{}
-	defer func() { sim.CurrentHero = prev }()
+	defer testutils.SwapCurrentHero(testutils.Hero{})()
 
 	for _, card := range whisperOfTheOracleVariants {
 		s := sim.NewTurnState([]sim.Card{a, b, c, d}, nil)
