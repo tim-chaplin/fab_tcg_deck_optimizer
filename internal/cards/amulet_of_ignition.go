@@ -25,6 +25,5 @@ func (AmuletOfIgnitionYellow) Defense() int            { return 0 }
 func (AmuletOfIgnitionYellow) Types() card.TypeSet     { return amuletOfIgnitionTypes }
 func (AmuletOfIgnitionYellow) GoAgain() bool           { return true }
 
-// not implemented: Instant 'next activated ability costs {r} less'
-func (AmuletOfIgnitionYellow) NotImplemented()                            {}
+func (AmuletOfIgnitionYellow) Unplayable()                                {}
 func (AmuletOfIgnitionYellow) Play(s *sim.TurnState, self *sim.CardState) { s.Log(self, 0) }

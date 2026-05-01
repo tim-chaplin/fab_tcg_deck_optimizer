@@ -25,7 +25,5 @@ func (AmuletOfAssertivenessYellow) Defense() int            { return 0 }
 func (AmuletOfAssertivenessYellow) Types() card.TypeSet     { return amuletOfAssertivenessTypes }
 func (AmuletOfAssertivenessYellow) GoAgain() bool           { return true }
 
-// not implemented: AR grant: target attack 'banish top of deck on hit'; gated on 4+ cards
-// in hand
-func (AmuletOfAssertivenessYellow) NotImplemented()                            {}
+func (AmuletOfAssertivenessYellow) Unplayable()                                {}
 func (AmuletOfAssertivenessYellow) Play(s *sim.TurnState, self *sim.CardState) { s.Log(self, 0) }

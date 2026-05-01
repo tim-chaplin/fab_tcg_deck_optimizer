@@ -25,6 +25,5 @@ func (AmuletOfHavencallBlue) Defense() int            { return 0 }
 func (AmuletOfHavencallBlue) Types() card.TypeSet     { return amuletOfHavencallTypes }
 func (AmuletOfHavencallBlue) GoAgain() bool           { return true }
 
-// not implemented: DR tutor for Rally the Rearguard; gated on empty hand
-func (AmuletOfHavencallBlue) NotImplemented()                            {}
+func (AmuletOfHavencallBlue) Unplayable()                                {}
 func (AmuletOfHavencallBlue) Play(s *sim.TurnState, self *sim.CardState) { s.Log(self, 0) }

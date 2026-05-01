@@ -56,6 +56,22 @@ later":
 Card docstrings should NOT restate this lifecycle. State only what's card-specific — the printed
 clause, `Count = N`, and whatever the handler returns.
 
+## NotImplemented vs Unplayable markers
+
+Both markers exclude a card from random / mutation pools, so the optimizer skips them. They
+mean different things:
+
+- `sim.NotImplemented` — placeholder. The card *would* be worth modelling, we just haven't
+  done it yet. Pair with a `// not implemented: <one-line description of the unmodelled
+  rider>` comment immediately above the `NotImplemented()` method so the next implementation
+  pass knows what's missing.
+- `sim.Unplayable` — verdict. The card's effect is too weak to want even if fully modelled,
+  so an implementation would be wasted work. The marker speaks for itself; **don't add a
+  per-card rationale to the docstring**.
+
+The split keeps the unimplemented backlog honest: cards under `NotImplemented` are todos,
+cards under `Unplayable` are closed.
+
 ## Standard rider wiring
 
 Card docstrings should call out the printed rider and any modelling fudge, then stop. The

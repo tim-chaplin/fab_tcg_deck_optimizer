@@ -1,10 +1,6 @@
 // Potion of Seeing — Generic Action - Item. Cost 0. Printed pitch variants: Blue 3.
 //
 // Text: "**Instant** - Destroy Potion of Seeing: Look at target hero's hand."
-//
-// Marked sim.Unplayable: a pitch-only Item with 0/0 stats and an opponent-info-only
-// activated effect — the optimizer would never pick it even with the reveal modelled, so
-// it's filtered from random / mutation pools.
 
 package cards
 
