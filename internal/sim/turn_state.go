@@ -561,7 +561,17 @@ func (s *TurnState) CreateRunechant() int {
 // handlers that fire before their parent (Viserai's hero ability, Malefic Incantation's
 // aura) call this in a single return statement.
 func (s *TurnState) CreateAndLogRunechants(selfName, sourceName string, n int) int {
-	return s.AddPreTriggerLogEntry(selfName+" "+runechantsCreatedPhrase(n), sourceName, s.CreateRunechants(n))
+	created := s.CreateRunechants(n)
+	// SkipLog discards the log entry; credit Value directly to skip the string concat and
+	// LogEntry build that AddPreTriggerLogEntry would otherwise pay for.
+	if s.SkipLog {
+		if created < 0 {
+			created = 0
+		}
+		s.Value += created
+		return created
+	}
+	return s.AddPreTriggerLogEntry(selfName+" "+runechantsCreatedPhrase(n), sourceName, created)
 }
 
 // CreateAndLogRunechantsOnHit is the post-trigger variant of CreateAndLogRunechants —
@@ -569,7 +579,17 @@ func (s *TurnState) CreateAndLogRunechants(selfName, sourceName string, n int) i
 // gate on the ephemeral attack trigger is visible in the printout. Same return contract
 // as CreateAndLogRunechants.
 func (s *TurnState) CreateAndLogRunechantsOnHit(selfName, sourceName string, n int) int {
-	return s.AddPostTriggerLogEntry(selfName+" "+runechantsCreatedPhrase(n)+" on hit", sourceName, s.CreateRunechants(n))
+	created := s.CreateRunechants(n)
+	// SkipLog discards the log entry; credit Value directly to skip the string concat and
+	// LogEntry build that AddPostTriggerLogEntry would otherwise pay for.
+	if s.SkipLog {
+		if created < 0 {
+			created = 0
+		}
+		s.Value += created
+		return created
+	}
+	return s.AddPostTriggerLogEntry(selfName+" "+runechantsCreatedPhrase(n)+" on hit", sourceName, created)
 }
 
 // CreateAndLogRunechantsOnPlay is the on-play self-rider variant: the chain step's own
