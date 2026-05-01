@@ -47,7 +47,8 @@ func (DemolitionCrewRed) PlayPrecondition(s *sim.TurnState, _ *sim.CardState) bo
 	return demolitionCrewPrecondition(s)
 }
 func (c DemolitionCrewRed) Play(s *sim.TurnState, self *sim.CardState) {
-	s.ApplyAndLogEffectiveAttack(self)
+	n := self.DealEffectiveAttack(s)
+	s.Log(self, n)
 }
 
 type DemolitionCrewYellow struct{}
@@ -65,7 +66,8 @@ func (DemolitionCrewYellow) PlayPrecondition(s *sim.TurnState, _ *sim.CardState)
 	return demolitionCrewPrecondition(s)
 }
 func (c DemolitionCrewYellow) Play(s *sim.TurnState, self *sim.CardState) {
-	s.ApplyAndLogEffectiveAttack(self)
+	n := self.DealEffectiveAttack(s)
+	s.Log(self, n)
 }
 
 type DemolitionCrewBlue struct{}
@@ -83,5 +85,6 @@ func (DemolitionCrewBlue) PlayPrecondition(s *sim.TurnState, _ *sim.CardState) b
 	return demolitionCrewPrecondition(s)
 }
 func (c DemolitionCrewBlue) Play(s *sim.TurnState, self *sim.CardState) {
-	s.ApplyAndLogEffectiveAttack(self)
+	n := self.DealEffectiveAttack(s)
+	s.Log(self, n)
 }

@@ -27,5 +27,6 @@ func (TongueTiedRed) GoAgain() bool           { return false }
 // not implemented: on-hit opponent-arsenal manipulation rider
 func (TongueTiedRed) NotImplemented() {}
 func (TongueTiedRed) Play(s *sim.TurnState, self *sim.CardState) {
-	s.ApplyAndLogEffectiveAttack(self)
+	n := self.DealEffectiveAttack(s)
+	s.Log(self, n)
 }

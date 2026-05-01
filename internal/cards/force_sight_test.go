@@ -63,9 +63,9 @@ func TestForceSight_HandPlaySkipsOpt(t *testing.T) {
 			t.Errorf("%s: Play() from hand Value = %d, want 0", c.Name(), s.Value)
 		}
 		// Just the LogPlay chain step, no Opt sub-entry.
-		if len(s.Log) != 1 {
+		if len(s.LogEntries()) != 1 {
 			t.Errorf("%s: Log len = %d, want 1 (LogPlay only — Opt arsenal-gated)",
-				c.Name(), len(s.Log))
+				c.Name(), len(s.LogEntries()))
 		}
 	}
 }
@@ -81,12 +81,12 @@ func TestForceSight_ArsenalPlayCallsOpt2(t *testing.T) {
 		if s.Value != 0 {
 			t.Errorf("%s: Play() from arsenal Value = %d, want 0", c.Name(), s.Value)
 		}
-		if len(s.Log) != 2 {
-			t.Errorf("%s: Log len = %d, want 2 (LogPlay + Opted ...)", c.Name(), len(s.Log))
+		if len(s.LogEntries()) != 2 {
+			t.Errorf("%s: Log len = %d, want 2 (LogPlay + Opted ...)", c.Name(), len(s.LogEntries()))
 			continue
 		}
 		want := "Opted [a, b], put [a, b] on top, put [] on bottom"
-		if got := s.Log[1].Text; got != want {
+		if got := s.LogEntries()[1].Text; got != want {
 			t.Errorf("%s: Opt log entry = %q, want %q", c.Name(), got, want)
 		}
 	}

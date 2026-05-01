@@ -27,7 +27,7 @@ func (StrategicPlanningRed) GoAgain() bool           { return true }
 
 // not implemented: graveyard recovery, end-phase draw
 func (StrategicPlanningRed) NotImplemented()                            {}
-func (StrategicPlanningRed) Play(s *sim.TurnState, self *sim.CardState) { s.LogPlay(self) }
+func (StrategicPlanningRed) Play(s *sim.TurnState, self *sim.CardState) { s.Log(self, 0) }
 
 type StrategicPlanningYellow struct{}
 
@@ -42,7 +42,7 @@ func (StrategicPlanningYellow) GoAgain() bool           { return true }
 
 // not implemented: graveyard recovery, end-phase draw
 func (StrategicPlanningYellow) NotImplemented()                            {}
-func (StrategicPlanningYellow) Play(s *sim.TurnState, self *sim.CardState) { s.LogPlay(self) }
+func (StrategicPlanningYellow) Play(s *sim.TurnState, self *sim.CardState) { s.Log(self, 0) }
 
 type StrategicPlanningBlue struct{}
 
@@ -57,4 +57,4 @@ func (StrategicPlanningBlue) GoAgain() bool           { return true }
 
 // not implemented: graveyard recovery, end-phase draw
 func (StrategicPlanningBlue) NotImplemented()                            {}
-func (StrategicPlanningBlue) Play(s *sim.TurnState, self *sim.CardState) { s.LogPlay(self) }
+func (StrategicPlanningBlue) Play(s *sim.TurnState, self *sim.CardState) { s.Log(self, 0) }

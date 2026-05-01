@@ -25,4 +25,4 @@ func (HealingPotionBlue) GoAgain() bool           { return false }
 
 // not implemented: activated 2{h} gain
 func (HealingPotionBlue) NotImplemented()                            {}
-func (HealingPotionBlue) Play(s *sim.TurnState, self *sim.CardState) { s.LogPlay(self) }
+func (HealingPotionBlue) Play(s *sim.TurnState, self *sim.CardState) { s.Log(self, 0) }

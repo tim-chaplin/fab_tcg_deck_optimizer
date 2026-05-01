@@ -34,8 +34,11 @@ func (c NebulaBlade) Play(s *sim.TurnState, self *sim.CardState) {
 	if s.NonAttackActionPlayed {
 		self.BonusAttack += 3
 	}
-	s.ApplyAndLogEffectiveAttack(self)
+	n := self.DealEffectiveAttack(s)
+	s.Log(self, n)
 	if sim.LikelyToHit(self) {
-		s.ApplyAndLogRiderOnPlay(self, "On-hit created a runechant", s.CreateRunechant())
+		created := s.CreateRunechant()
+		s.AddValue(created)
+		s.LogRider(self, created, "On-hit created a runechant")
 	}
 }

@@ -25,4 +25,4 @@ func (CalmingBreezeRed) GoAgain() bool           { return false }
 
 // not implemented: Instant 'prevent 1 of each of the next 3 damage events'
 func (CalmingBreezeRed) NotImplemented()                            {}
-func (CalmingBreezeRed) Play(s *sim.TurnState, self *sim.CardState) { s.LogPlay(self) }
+func (CalmingBreezeRed) Play(s *sim.TurnState, self *sim.CardState) { s.Log(self, 0) }

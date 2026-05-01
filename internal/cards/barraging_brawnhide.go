@@ -27,7 +27,8 @@ func (BarragingBrawnhideRed) GoAgain() bool           { return false }
 // not implemented: defended-by-<2-non-equipment +1{p} rider
 func (BarragingBrawnhideRed) NotImplemented() {}
 func (c BarragingBrawnhideRed) Play(s *sim.TurnState, self *sim.CardState) {
-	s.ApplyAndLogEffectiveAttack(self)
+	n := self.DealEffectiveAttack(s)
+	s.Log(self, n)
 }
 
 type BarragingBrawnhideYellow struct{}
@@ -44,7 +45,8 @@ func (BarragingBrawnhideYellow) GoAgain() bool           { return false }
 // not implemented: defended-by-<2-non-equipment +1{p} rider
 func (BarragingBrawnhideYellow) NotImplemented() {}
 func (c BarragingBrawnhideYellow) Play(s *sim.TurnState, self *sim.CardState) {
-	s.ApplyAndLogEffectiveAttack(self)
+	n := self.DealEffectiveAttack(s)
+	s.Log(self, n)
 }
 
 type BarragingBrawnhideBlue struct{}
@@ -61,5 +63,6 @@ func (BarragingBrawnhideBlue) GoAgain() bool           { return false }
 // not implemented: defended-by-<2-non-equipment +1{p} rider
 func (BarragingBrawnhideBlue) NotImplemented() {}
 func (c BarragingBrawnhideBlue) Play(s *sim.TurnState, self *sim.CardState) {
-	s.ApplyAndLogEffectiveAttack(self)
+	n := self.DealEffectiveAttack(s)
+	s.Log(self, n)
 }

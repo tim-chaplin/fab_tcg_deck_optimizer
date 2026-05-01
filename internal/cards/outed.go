@@ -25,5 +25,8 @@ func (OutedRed) Types() card.TypeSet     { return outedTypes }
 func (OutedRed) GoAgain() bool           { return true }
 
 // not implemented: marked-hero state not tracked; +1{p}-vs-marked-defender rider never fires
-func (OutedRed) NotImplemented()                              {}
-func (c OutedRed) Play(s *sim.TurnState, self *sim.CardState) { s.ApplyAndLogEffectiveAttack(self) }
+func (OutedRed) NotImplemented() {}
+func (c OutedRed) Play(s *sim.TurnState, self *sim.CardState) {
+	n := self.DealEffectiveAttack(s)
+	s.Log(self, n)
+}

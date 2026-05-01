@@ -19,7 +19,8 @@ var frontlineScoutTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, car
 
 func frontlineScoutPlay(s *sim.TurnState, self *sim.CardState) {
 	self.GrantGoAgainIfFromArsenal()
-	s.ApplyAndLogEffectiveAttack(self)
+	n := self.DealEffectiveAttack(s)
+	s.Log(self, n)
 }
 
 type FrontlineScoutRed struct{}

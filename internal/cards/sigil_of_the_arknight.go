@@ -33,7 +33,7 @@ func (SigilOfTheArknightBlue) GoAgain() bool           { return true }
 func (SigilOfTheArknightBlue) AddsFutureValue()        {}
 func (c SigilOfTheArknightBlue) Play(s *sim.TurnState, self *sim.CardState) {
 	s.RegisterStartOfTurn(c, 1, "", sigilOfTheArknightReveal)
-	s.LogPlay(self)
+	s.Log(self, 0)
 }
 
 // sigilOfTheArknightReveal implements the handler described in the file docstring. Logs
@@ -50,11 +50,11 @@ func sigilOfTheArknightReveal(s *sim.TurnState, _ *sim.AuraTrigger) int {
 	self := sim.DisplayName(SigilOfTheArknightBlue{})
 	if top.Types().IsAttackAction() {
 		s.Revealed = append(s.Revealed, top)
-		s.AddPostTriggerLogEntry(self+" drew "+sim.DisplayName(top)+" into hand", self, 0)
+		s.LogPostTriggerf(self, 0, "%s drew %s into hand", self, sim.DisplayName(top))
 		return 0
 	}
 	// Whiff — restore the deck top so non-attack reveals leave deck order untouched.
 	s.PrependToDeck(top)
-	s.AddPostTriggerLogEntry(self+" revealed "+sim.DisplayName(top)+" but didn't draw it", self, 0)
+	s.LogPostTriggerf(self, 0, "%s revealed %s but didn't draw it", self, sim.DisplayName(top))
 	return 0
 }

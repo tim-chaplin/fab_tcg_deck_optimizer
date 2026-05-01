@@ -39,7 +39,8 @@ func (ArcanicSpikeRed) Types() card.TypeSet     { return arcanicSpikeTypes }
 func (ArcanicSpikeRed) GoAgain() bool           { return false }
 func (ArcanicSpikeRed) Play(s *sim.TurnState, self *sim.CardState) {
 	self.BonusAttack += arcanicSpikeBonus(s)
-	s.ApplyAndLogEffectiveAttack(self)
+	n := self.DealEffectiveAttack(s)
+	s.Log(self, n)
 }
 
 type ArcanicSpikeYellow struct{}
@@ -54,7 +55,8 @@ func (ArcanicSpikeYellow) Types() card.TypeSet     { return arcanicSpikeTypes }
 func (ArcanicSpikeYellow) GoAgain() bool           { return false }
 func (ArcanicSpikeYellow) Play(s *sim.TurnState, self *sim.CardState) {
 	self.BonusAttack += arcanicSpikeBonus(s)
-	s.ApplyAndLogEffectiveAttack(self)
+	n := self.DealEffectiveAttack(s)
+	s.Log(self, n)
 }
 
 type ArcanicSpikeBlue struct{}
@@ -69,5 +71,6 @@ func (ArcanicSpikeBlue) Types() card.TypeSet     { return arcanicSpikeTypes }
 func (ArcanicSpikeBlue) GoAgain() bool           { return false }
 func (ArcanicSpikeBlue) Play(s *sim.TurnState, self *sim.CardState) {
 	self.BonusAttack += arcanicSpikeBonus(s)
-	s.ApplyAndLogEffectiveAttack(self)
+	n := self.DealEffectiveAttack(s)
+	s.Log(self, n)
 }

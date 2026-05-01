@@ -26,4 +26,4 @@ func (RelentlessPursuitBlue) GoAgain() bool           { return true }
 
 // not implemented: marked-target gate + 'attacked them this turn' chain rider
 func (RelentlessPursuitBlue) NotImplemented()                            {}
-func (RelentlessPursuitBlue) Play(s *sim.TurnState, self *sim.CardState) { s.LogPlay(self) }
+func (RelentlessPursuitBlue) Play(s *sim.TurnState, self *sim.CardState) { s.Log(self, 0) }

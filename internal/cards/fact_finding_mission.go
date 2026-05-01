@@ -28,7 +28,8 @@ func (FactFindingMissionRed) GoAgain() bool           { return false }
 // not implemented: on-hit opponent-arsenal/equipment peek
 func (FactFindingMissionRed) NotImplemented() {}
 func (FactFindingMissionRed) Play(s *sim.TurnState, self *sim.CardState) {
-	s.ApplyAndLogEffectiveAttack(self)
+	n := self.DealEffectiveAttack(s)
+	s.Log(self, n)
 }
 
 type FactFindingMissionYellow struct{}
@@ -45,7 +46,8 @@ func (FactFindingMissionYellow) GoAgain() bool           { return false }
 // not implemented: on-hit opponent-arsenal/equipment peek
 func (FactFindingMissionYellow) NotImplemented() {}
 func (FactFindingMissionYellow) Play(s *sim.TurnState, self *sim.CardState) {
-	s.ApplyAndLogEffectiveAttack(self)
+	n := self.DealEffectiveAttack(s)
+	s.Log(self, n)
 }
 
 type FactFindingMissionBlue struct{}
@@ -62,5 +64,6 @@ func (FactFindingMissionBlue) GoAgain() bool           { return false }
 // not implemented: on-hit opponent-arsenal/equipment peek
 func (FactFindingMissionBlue) NotImplemented() {}
 func (FactFindingMissionBlue) Play(s *sim.TurnState, self *sim.CardState) {
-	s.ApplyAndLogEffectiveAttack(self)
+	n := self.DealEffectiveAttack(s)
+	s.Log(self, n)
 }

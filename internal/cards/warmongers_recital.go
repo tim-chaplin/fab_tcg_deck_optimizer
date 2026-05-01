@@ -29,7 +29,8 @@ func (WarmongersRecitalRed) GoAgain() bool           { return true }
 func (WarmongersRecitalRed) NotImplemented() {}
 func (WarmongersRecitalRed) Play(s *sim.TurnState, self *sim.CardState) {
 	grantNextAttackActionBonus(s, 3)
-	s.ApplyAndLogEffectiveAttack(self)
+	n := self.DealEffectiveAttack(s)
+	s.Log(self, n)
 }
 
 type WarmongersRecitalYellow struct{}
@@ -47,7 +48,8 @@ func (WarmongersRecitalYellow) GoAgain() bool           { return true }
 func (WarmongersRecitalYellow) NotImplemented() {}
 func (WarmongersRecitalYellow) Play(s *sim.TurnState, self *sim.CardState) {
 	grantNextAttackActionBonus(s, 2)
-	s.ApplyAndLogEffectiveAttack(self)
+	n := self.DealEffectiveAttack(s)
+	s.Log(self, n)
 }
 
 type WarmongersRecitalBlue struct{}
@@ -65,5 +67,6 @@ func (WarmongersRecitalBlue) GoAgain() bool           { return true }
 func (WarmongersRecitalBlue) NotImplemented() {}
 func (WarmongersRecitalBlue) Play(s *sim.TurnState, self *sim.CardState) {
 	grantNextAttackActionBonus(s, 1)
-	s.ApplyAndLogEffectiveAttack(self)
+	n := self.DealEffectiveAttack(s)
+	s.Log(self, n)
 }

@@ -23,4 +23,4 @@ func (TitaniumBaubleBlue) GoAgain() bool           { return false }
 
 // not implemented: pitch-3 resource with 3{d}; no other effect
 func (TitaniumBaubleBlue) NotImplemented()                            {}
-func (TitaniumBaubleBlue) Play(s *sim.TurnState, self *sim.CardState) { s.LogPlay(self) }
+func (TitaniumBaubleBlue) Play(s *sim.TurnState, self *sim.CardState) { s.Log(self, 0) }

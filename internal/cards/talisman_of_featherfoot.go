@@ -27,4 +27,4 @@ func (TalismanOfFeatherfootYellow) GoAgain() bool           { return true }
 // not implemented: self-destroys when an attack gains exactly +1{p} in the reaction step →
 // grants go again
 func (TalismanOfFeatherfootYellow) NotImplemented()                            {}
-func (TalismanOfFeatherfootYellow) Play(s *sim.TurnState, self *sim.CardState) { s.LogPlay(self) }
+func (TalismanOfFeatherfootYellow) Play(s *sim.TurnState, self *sim.CardState) { s.Log(self, 0) }

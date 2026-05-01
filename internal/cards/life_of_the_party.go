@@ -30,7 +30,8 @@ func (LifeOfThePartyRed) GoAgain() bool           { return false }
 // default off
 func (LifeOfThePartyRed) NotImplemented() {}
 func (c LifeOfThePartyRed) Play(s *sim.TurnState, self *sim.CardState) {
-	s.ApplyAndLogEffectiveAttack(self)
+	n := self.DealEffectiveAttack(s)
+	s.Log(self, n)
 }
 
 type LifeOfThePartyYellow struct{}
@@ -48,7 +49,8 @@ func (LifeOfThePartyYellow) GoAgain() bool           { return false }
 // default off
 func (LifeOfThePartyYellow) NotImplemented() {}
 func (c LifeOfThePartyYellow) Play(s *sim.TurnState, self *sim.CardState) {
-	s.ApplyAndLogEffectiveAttack(self)
+	n := self.DealEffectiveAttack(s)
+	s.Log(self, n)
 }
 
 type LifeOfThePartyBlue struct{}
@@ -66,5 +68,6 @@ func (LifeOfThePartyBlue) GoAgain() bool           { return false }
 // default off
 func (LifeOfThePartyBlue) NotImplemented() {}
 func (c LifeOfThePartyBlue) Play(s *sim.TurnState, self *sim.CardState) {
-	s.ApplyAndLogEffectiveAttack(self)
+	n := self.DealEffectiveAttack(s)
+	s.Log(self, n)
 }

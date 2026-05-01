@@ -25,7 +25,7 @@ func (BrushOffRed) GoAgain() bool           { return false }
 
 // not implemented: Instant 'prevent next damage of N or less' (3 / 2 / 1 by colour)
 func (BrushOffRed) NotImplemented()                            {}
-func (BrushOffRed) Play(s *sim.TurnState, self *sim.CardState) { s.LogPlay(self) }
+func (BrushOffRed) Play(s *sim.TurnState, self *sim.CardState) { s.Log(self, 0) }
 
 type BrushOffYellow struct{}
 
@@ -40,7 +40,7 @@ func (BrushOffYellow) GoAgain() bool           { return false }
 
 // not implemented: Instant 'prevent next damage of N or less' (3 / 2 / 1 by colour)
 func (BrushOffYellow) NotImplemented()                            {}
-func (BrushOffYellow) Play(s *sim.TurnState, self *sim.CardState) { s.LogPlay(self) }
+func (BrushOffYellow) Play(s *sim.TurnState, self *sim.CardState) { s.Log(self, 0) }
 
 type BrushOffBlue struct{}
 
@@ -55,4 +55,4 @@ func (BrushOffBlue) GoAgain() bool           { return false }
 
 // not implemented: Instant 'prevent next damage of N or less' (3 / 2 / 1 by colour)
 func (BrushOffBlue) NotImplemented()                            {}
-func (BrushOffBlue) Play(s *sim.TurnState, self *sim.CardState) { s.LogPlay(self) }
+func (BrushOffBlue) Play(s *sim.TurnState, self *sim.CardState) { s.Log(self, 0) }

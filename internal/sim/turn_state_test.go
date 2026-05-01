@@ -115,10 +115,10 @@ func TestHasPlayedOrCreatedAura_FlagOrScan(t *testing.T) {
 	}
 }
 
-// TestRecordValue_ClampsNonPositive: the helper sums positive credits into Value and is a
+// TestAddValue_ClampsNonPositive: the helper sums positive credits into Value and is a
 // no-op for n <= 0. Negative grants (debuffs) and zero (no-effect Plays) must not subtract
 // from the running total.
-func TestRecordValue_ClampsNonPositive(t *testing.T) {
+func TestAddValue_ClampsNonPositive(t *testing.T) {
 	cases := []struct {
 		name string
 		bump int
@@ -131,7 +131,7 @@ func TestRecordValue_ClampsNonPositive(t *testing.T) {
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
 			var s TurnState
-			s.RecordValue(tc.bump)
+			s.AddValue(tc.bump)
 			if s.Value != tc.want {
 				t.Errorf("Value = %d, want %d", s.Value, tc.want)
 			}
@@ -139,10 +139,10 @@ func TestRecordValue_ClampsNonPositive(t *testing.T) {
 	}
 	// Mixed sequence: positives accumulate, non-positives pass through.
 	var s TurnState
-	s.RecordValue(2)
-	s.RecordValue(-10)
-	s.RecordValue(0)
-	s.RecordValue(5)
+	s.AddValue(2)
+	s.AddValue(-10)
+	s.AddValue(0)
+	s.AddValue(5)
 	if s.Value != 7 {
 		t.Errorf("after mixed sequence Value = %d, want 7 (2+5; -10/0 clamped)", s.Value)
 	}
@@ -237,44 +237,29 @@ func TestClashValue_WinTieLose(t *testing.T) {
 	}
 }
 
-// TestRegisterStartOfTurn_AutoLogsWithText: when text is non-empty and the handler returns
-// n > 0, the wrapper writes a post-trigger log entry "<DisplayName>: text (+n)" attributed
-// to self before returning. This is what processTriggersAtStartOfTurn captures as the
-// trigger's contribution Text so the rendered turn log names the effect instead of falling
-// back to "START OF ACTION PHASE (+N)".
-func TestRegisterStartOfTurn_AutoLogsWithText(t *testing.T) {
+// Tests that RegisterStartOfTurn stores the pre-built LogText on the trigger so the
+// framework's start-of-turn fire path can emit "<DisplayName>: text" without per-fire
+// formatting work.
+func TestRegisterStartOfTurn_BuildsLogText(t *testing.T) {
 	self := testutils.NewStubCard("Test Aura").WithTypes(card.NewTypeSet(card.TypeAura))
 	var s TurnState
 	s.RegisterStartOfTurn(self, 1, "Gained 1 health", func(*TurnState, *AuraTrigger) int { return 1 })
 	if len(s.AuraTriggers) != 1 {
 		t.Fatalf("AuraTriggers len = %d, want 1", len(s.AuraTriggers))
 	}
-
-	var fired TurnState
-	got := s.AuraTriggers[0].Handler(&fired, &s.AuraTriggers[0])
-	if got != 1 {
-		t.Errorf("handler return = %d, want 1 (passes through inner return)", got)
-	}
-	if len(fired.Log) != 1 {
-		t.Fatalf("Log len = %d, want 1 entry from auto-log", len(fired.Log))
-	}
-	if want := "Test Aura: Gained 1 health (+1)"; fired.Log[0].Text != want {
-		t.Errorf("auto-log text = %q, want %q", fired.Log[0].Text, want)
+	if want := "Test Aura: Gained 1 health"; s.AuraTriggers[0].LogText != want {
+		t.Errorf("LogText = %q, want %q", s.AuraTriggers[0].LogText, want)
 	}
 }
 
-// TestRegisterStartOfTurn_NoLogOnZero: text is set but the handler returned 0 — wrapper
-// skips the log entry so a no-op fire (e.g. Sigil of Silphidae's leave trigger when the
-// graveyard has no aura to banish) doesn't emit a misleading "Banished an aura" line.
-func TestRegisterStartOfTurn_NoLogOnZero(t *testing.T) {
+// Tests that an empty text leaves LogText empty so the framework defers to the handler's
+// own log line (Sigil of the Arknight's "drew X into hand" pattern).
+func TestRegisterStartOfTurn_EmptyTextLeavesLogTextEmpty(t *testing.T) {
 	self := testutils.NewStubCard("Test Aura").WithTypes(card.NewTypeSet(card.TypeAura))
 	var s TurnState
-	s.RegisterStartOfTurn(self, 1, "Did the thing", func(*TurnState, *AuraTrigger) int { return 0 })
-
-	var fired TurnState
-	s.AuraTriggers[0].Handler(&fired, &s.AuraTriggers[0])
-	if len(fired.Log) != 0 {
-		t.Errorf("Log = %v, want empty (handler returned 0)", fired.Log)
+	s.RegisterStartOfTurn(self, 1, "", func(*TurnState, *AuraTrigger) int { return 1 })
+	if got := s.AuraTriggers[0].LogText; got != "" {
+		t.Errorf("LogText = %q, want empty", got)
 	}
 }
 
@@ -286,17 +271,17 @@ func TestRegisterStartOfTurn_EmptyTextLeavesHandlerAlone(t *testing.T) {
 	self := testutils.NewStubCard("Test Aura").WithTypes(card.NewTypeSet(card.TypeAura))
 	var s TurnState
 	s.RegisterStartOfTurn(self, 1, "", func(s *TurnState, _ *AuraTrigger) int {
-		s.AddPostTriggerLogEntry("custom handler text", "Test Aura", 0)
+		s.LogPostTriggerf("Test Aura", 0, "custom handler text")
 		return 0
 	})
 
 	var fired TurnState
 	s.AuraTriggers[0].Handler(&fired, &s.AuraTriggers[0])
-	if len(fired.Log) != 1 {
-		t.Fatalf("Log len = %d, want exactly 1 (handler-authored only)", len(fired.Log))
+	if len(fired.LogEntries()) != 1 {
+		t.Fatalf("Log len = %d, want exactly 1 (handler-authored only)", len(fired.LogEntries()))
 	}
-	if fired.Log[0].Text != "custom handler text" {
-		t.Errorf("Log[0].Text = %q, want handler's own text", fired.Log[0].Text)
+	if fired.LogEntries()[0].Text != "custom handler text" {
+		t.Errorf("Log[0].Text = %q, want handler's own text", fired.LogEntries()[0].Text)
 	}
 }
 

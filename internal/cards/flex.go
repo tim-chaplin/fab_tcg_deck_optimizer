@@ -25,8 +25,11 @@ func (FlexRed) Types() card.TypeSet     { return flexTypes }
 func (FlexRed) GoAgain() bool           { return false }
 
 // not implemented: pay-{r}{r}-for-+2{p} attack/defence mode
-func (FlexRed) NotImplemented()                              {}
-func (c FlexRed) Play(s *sim.TurnState, self *sim.CardState) { s.ApplyAndLogEffectiveAttack(self) }
+func (FlexRed) NotImplemented() {}
+func (c FlexRed) Play(s *sim.TurnState, self *sim.CardState) {
+	n := self.DealEffectiveAttack(s)
+	s.Log(self, n)
+}
 
 type FlexYellow struct{}
 
@@ -40,8 +43,11 @@ func (FlexYellow) Types() card.TypeSet     { return flexTypes }
 func (FlexYellow) GoAgain() bool           { return false }
 
 // not implemented: pay-{r}{r}-for-+2{p} attack/defence mode
-func (FlexYellow) NotImplemented()                              {}
-func (c FlexYellow) Play(s *sim.TurnState, self *sim.CardState) { s.ApplyAndLogEffectiveAttack(self) }
+func (FlexYellow) NotImplemented() {}
+func (c FlexYellow) Play(s *sim.TurnState, self *sim.CardState) {
+	n := self.DealEffectiveAttack(s)
+	s.Log(self, n)
+}
 
 type FlexBlue struct{}
 
@@ -55,5 +61,8 @@ func (FlexBlue) Types() card.TypeSet     { return flexTypes }
 func (FlexBlue) GoAgain() bool           { return false }
 
 // not implemented: pay-{r}{r}-for-+2{p} attack/defence mode
-func (FlexBlue) NotImplemented()                              {}
-func (c FlexBlue) Play(s *sim.TurnState, self *sim.CardState) { s.ApplyAndLogEffectiveAttack(self) }
+func (FlexBlue) NotImplemented() {}
+func (c FlexBlue) Play(s *sim.TurnState, self *sim.CardState) {
+	n := self.DealEffectiveAttack(s)
+	s.Log(self, n)
+}

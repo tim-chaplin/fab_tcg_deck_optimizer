@@ -21,7 +21,8 @@ func (EvasiveLeapRed) Defense() int            { return 3 }
 func (EvasiveLeapRed) Types() card.TypeSet     { return defenseReactionTypes }
 func (EvasiveLeapRed) GoAgain() bool           { return false }
 func (EvasiveLeapRed) Play(s *sim.TurnState, self *sim.CardState) {
-	s.ApplyAndLogEffectiveDefense(self)
+	n := self.DealEffectiveDefense(s)
+	s.Log(self, n)
 }
 
 type EvasiveLeapYellow struct{}
@@ -35,7 +36,8 @@ func (EvasiveLeapYellow) Defense() int            { return 2 }
 func (EvasiveLeapYellow) Types() card.TypeSet     { return defenseReactionTypes }
 func (EvasiveLeapYellow) GoAgain() bool           { return false }
 func (EvasiveLeapYellow) Play(s *sim.TurnState, self *sim.CardState) {
-	s.ApplyAndLogEffectiveDefense(self)
+	n := self.DealEffectiveDefense(s)
+	s.Log(self, n)
 }
 
 type EvasiveLeapBlue struct{}
@@ -49,5 +51,6 @@ func (EvasiveLeapBlue) Defense() int            { return 1 }
 func (EvasiveLeapBlue) Types() card.TypeSet     { return defenseReactionTypes }
 func (EvasiveLeapBlue) GoAgain() bool           { return false }
 func (EvasiveLeapBlue) Play(s *sim.TurnState, self *sim.CardState) {
-	s.ApplyAndLogEffectiveDefense(self)
+	n := self.DealEffectiveDefense(s)
+	s.Log(self, n)
 }

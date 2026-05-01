@@ -30,7 +30,8 @@ func (SigilOfProtectionRed) GoAgain() bool           { return false }
 func (SigilOfProtectionRed) NotImplemented() {}
 func (SigilOfProtectionRed) Play(s *sim.TurnState, self *sim.CardState) {
 	setAuraCreated(s)
-	s.ApplyAndLogEffectiveAttack(self)
+	n := self.DealEffectiveAttack(s)
+	s.Log(self, n)
 }
 
 type SigilOfProtectionYellow struct{}
@@ -48,7 +49,8 @@ func (SigilOfProtectionYellow) GoAgain() bool           { return false }
 func (SigilOfProtectionYellow) NotImplemented() {}
 func (SigilOfProtectionYellow) Play(s *sim.TurnState, self *sim.CardState) {
 	setAuraCreated(s)
-	s.ApplyAndLogEffectiveAttack(self)
+	n := self.DealEffectiveAttack(s)
+	s.Log(self, n)
 }
 
 type SigilOfProtectionBlue struct{}
@@ -66,5 +68,6 @@ func (SigilOfProtectionBlue) GoAgain() bool           { return false }
 func (SigilOfProtectionBlue) NotImplemented() {}
 func (SigilOfProtectionBlue) Play(s *sim.TurnState, self *sim.CardState) {
 	setAuraCreated(s)
-	s.ApplyAndLogEffectiveAttack(self)
+	n := self.DealEffectiveAttack(s)
+	s.Log(self, n)
 }

@@ -22,5 +22,6 @@ func (MuscleMuttYellow) Defense() int            { return 2 }
 func (MuscleMuttYellow) Types() card.TypeSet     { return muscleMuttTypes }
 func (MuscleMuttYellow) GoAgain() bool           { return false }
 func (c MuscleMuttYellow) Play(s *sim.TurnState, self *sim.CardState) {
-	s.ApplyAndLogEffectiveAttack(self)
+	n := self.DealEffectiveAttack(s)
+	s.Log(self, n)
 }

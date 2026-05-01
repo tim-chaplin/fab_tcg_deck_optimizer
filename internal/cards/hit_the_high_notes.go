@@ -24,7 +24,8 @@ func (HitTheHighNotesRed) Types() card.TypeSet     { return hitTheHighNotesTypes
 func (HitTheHighNotesRed) GoAgain() bool           { return false }
 func (HitTheHighNotesRed) Play(s *sim.TurnState, self *sim.CardState) {
 	self.BonusAttack += hitTheHighNotesBonus(s)
-	s.ApplyAndLogEffectiveAttack(self)
+	n := self.DealEffectiveAttack(s)
+	s.Log(self, n)
 }
 
 type HitTheHighNotesYellow struct{}
@@ -39,7 +40,8 @@ func (HitTheHighNotesYellow) Types() card.TypeSet     { return hitTheHighNotesTy
 func (HitTheHighNotesYellow) GoAgain() bool           { return false }
 func (HitTheHighNotesYellow) Play(s *sim.TurnState, self *sim.CardState) {
 	self.BonusAttack += hitTheHighNotesBonus(s)
-	s.ApplyAndLogEffectiveAttack(self)
+	n := self.DealEffectiveAttack(s)
+	s.Log(self, n)
 }
 
 type HitTheHighNotesBlue struct{}
@@ -54,7 +56,8 @@ func (HitTheHighNotesBlue) Types() card.TypeSet     { return hitTheHighNotesType
 func (HitTheHighNotesBlue) GoAgain() bool           { return false }
 func (HitTheHighNotesBlue) Play(s *sim.TurnState, self *sim.CardState) {
 	self.BonusAttack += hitTheHighNotesBonus(s)
-	s.ApplyAndLogEffectiveAttack(self)
+	n := self.DealEffectiveAttack(s)
+	s.Log(self, n)
 }
 func hitTheHighNotesBonus(s *sim.TurnState) int {
 	if s.HasPlayedOrCreatedAura() {

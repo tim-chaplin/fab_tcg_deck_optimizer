@@ -26,7 +26,7 @@ func (SiftRed) GoAgain() bool           { return true }
 
 // not implemented: hand cycling
 func (SiftRed) NotImplemented()                            {}
-func (SiftRed) Play(s *sim.TurnState, self *sim.CardState) { s.LogPlay(self) }
+func (SiftRed) Play(s *sim.TurnState, self *sim.CardState) { s.Log(self, 0) }
 
 type SiftYellow struct{}
 
@@ -41,7 +41,7 @@ func (SiftYellow) GoAgain() bool           { return true }
 
 // not implemented: hand cycling
 func (SiftYellow) NotImplemented()                            {}
-func (SiftYellow) Play(s *sim.TurnState, self *sim.CardState) { s.LogPlay(self) }
+func (SiftYellow) Play(s *sim.TurnState, self *sim.CardState) { s.Log(self, 0) }
 
 type SiftBlue struct{}
 
@@ -56,4 +56,4 @@ func (SiftBlue) GoAgain() bool           { return true }
 
 // not implemented: hand cycling
 func (SiftBlue) NotImplemented()                            {}
-func (SiftBlue) Play(s *sim.TurnState, self *sim.CardState) { s.LogPlay(self) }
+func (SiftBlue) Play(s *sim.TurnState, self *sim.CardState) { s.Log(self, 0) }

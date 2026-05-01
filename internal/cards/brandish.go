@@ -27,7 +27,8 @@ func (BrandishRed) GoAgain() bool           { return true }
 // not implemented: next-weapon-attack +1{p} grant (weapon chain not scanned)
 func (BrandishRed) NotImplemented() {}
 func (c BrandishRed) Play(s *sim.TurnState, self *sim.CardState) {
-	s.ApplyAndLogEffectiveAttack(self)
+	n := self.DealEffectiveAttack(s)
+	s.Log(self, n)
 }
 
 type BrandishYellow struct{}
@@ -44,7 +45,8 @@ func (BrandishYellow) GoAgain() bool           { return true }
 // not implemented: next-weapon-attack +1{p} grant (weapon chain not scanned)
 func (BrandishYellow) NotImplemented() {}
 func (c BrandishYellow) Play(s *sim.TurnState, self *sim.CardState) {
-	s.ApplyAndLogEffectiveAttack(self)
+	n := self.DealEffectiveAttack(s)
+	s.Log(self, n)
 }
 
 type BrandishBlue struct{}
@@ -61,5 +63,6 @@ func (BrandishBlue) GoAgain() bool           { return true }
 // not implemented: next-weapon-attack +1{p} grant (weapon chain not scanned)
 func (BrandishBlue) NotImplemented() {}
 func (c BrandishBlue) Play(s *sim.TurnState, self *sim.CardState) {
-	s.ApplyAndLogEffectiveAttack(self)
+	n := self.DealEffectiveAttack(s)
+	s.Log(self, n)
 }

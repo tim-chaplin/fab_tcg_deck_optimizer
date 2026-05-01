@@ -35,8 +35,10 @@ func (c SigilOfSilphidaeBlue) Play(s *sim.TurnState, self *sim.CardState) {
 	s.RegisterStartOfTurn(c, 1, "Banished an aura, dealt 1 arcane damage", func(s *sim.TurnState, _ *sim.AuraTrigger) int {
 		return banishAuraFromGraveyard(s)
 	})
-	s.ApplyAndLogEffectiveAttack(self)
+	n := self.DealEffectiveAttack(s)
+	s.Log(self, n)
 	if enterDamage > 0 {
-		s.ApplyAndLogRiderOnPlay(self, "Banished an aura, dealt 1 arcane damage", enterDamage)
+		s.AddValue(enterDamage)
+		s.LogRider(self, enterDamage, "Banished an aura, dealt 1 arcane damage")
 	}
 }

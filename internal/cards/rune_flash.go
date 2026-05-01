@@ -28,17 +28,20 @@ func runeFlashCost(s *sim.TurnState) int {
 
 type RuneFlashRed struct{}
 
-func (RuneFlashRed) ID() ids.CardID                             { return ids.RuneFlashRed }
-func (RuneFlashRed) Name() string                               { return "Rune Flash" }
-func (RuneFlashRed) Cost(s *sim.TurnState) int                  { return runeFlashCost(s) }
-func (RuneFlashRed) MinCost() int                               { return 0 }
-func (RuneFlashRed) MaxCost() int                               { return runeFlashPrintedCost }
-func (RuneFlashRed) Pitch() int                                 { return 1 }
-func (RuneFlashRed) Attack() int                                { return 4 }
-func (RuneFlashRed) Defense() int                               { return 3 }
-func (RuneFlashRed) Types() card.TypeSet                        { return runeFlashTypes }
-func (RuneFlashRed) GoAgain() bool                              { return true }
-func (RuneFlashRed) Play(s *sim.TurnState, self *sim.CardState) { s.ApplyAndLogEffectiveAttack(self) }
+func (RuneFlashRed) ID() ids.CardID            { return ids.RuneFlashRed }
+func (RuneFlashRed) Name() string              { return "Rune Flash" }
+func (RuneFlashRed) Cost(s *sim.TurnState) int { return runeFlashCost(s) }
+func (RuneFlashRed) MinCost() int              { return 0 }
+func (RuneFlashRed) MaxCost() int              { return runeFlashPrintedCost }
+func (RuneFlashRed) Pitch() int                { return 1 }
+func (RuneFlashRed) Attack() int               { return 4 }
+func (RuneFlashRed) Defense() int              { return 3 }
+func (RuneFlashRed) Types() card.TypeSet       { return runeFlashTypes }
+func (RuneFlashRed) GoAgain() bool             { return true }
+func (RuneFlashRed) Play(s *sim.TurnState, self *sim.CardState) {
+	n := self.DealEffectiveAttack(s)
+	s.Log(self, n)
+}
 
 type RuneFlashYellow struct{}
 
@@ -53,7 +56,8 @@ func (RuneFlashYellow) Defense() int              { return 3 }
 func (RuneFlashYellow) Types() card.TypeSet       { return runeFlashTypes }
 func (RuneFlashYellow) GoAgain() bool             { return true }
 func (RuneFlashYellow) Play(s *sim.TurnState, self *sim.CardState) {
-	s.ApplyAndLogEffectiveAttack(self)
+	n := self.DealEffectiveAttack(s)
+	s.Log(self, n)
 }
 
 type RuneFlashBlue struct{}
@@ -69,5 +73,6 @@ func (RuneFlashBlue) Defense() int              { return 3 }
 func (RuneFlashBlue) Types() card.TypeSet       { return runeFlashTypes }
 func (RuneFlashBlue) GoAgain() bool             { return true }
 func (RuneFlashBlue) Play(s *sim.TurnState, self *sim.CardState) {
-	s.ApplyAndLogEffectiveAttack(self)
+	n := self.DealEffectiveAttack(s)
+	s.Log(self, n)
 }

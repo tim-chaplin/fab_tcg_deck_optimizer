@@ -25,5 +25,6 @@ func (LayLowYellow) GoAgain() bool           { return false }
 // attacker debuff is dropped
 func (LayLowYellow) NotImplemented() {}
 func (LayLowYellow) Play(s *sim.TurnState, self *sim.CardState) {
-	s.ApplyAndLogEffectiveDefense(self)
+	n := self.DealEffectiveDefense(s)
+	s.Log(self, n)
 }

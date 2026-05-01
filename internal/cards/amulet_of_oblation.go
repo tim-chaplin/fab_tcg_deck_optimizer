@@ -27,4 +27,4 @@ func (AmuletOfOblationBlue) GoAgain() bool           { return true }
 
 // not implemented: Instant 'graveyard → bottom of deck' replacement; gated on graveyard entry
 func (AmuletOfOblationBlue) NotImplemented()                            {}
-func (AmuletOfOblationBlue) Play(s *sim.TurnState, self *sim.CardState) { s.LogPlay(self) }
+func (AmuletOfOblationBlue) Play(s *sim.TurnState, self *sim.CardState) { s.Log(self, 0) }

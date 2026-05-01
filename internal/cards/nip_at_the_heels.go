@@ -25,4 +25,4 @@ func (NipAtTheHeelsBlue) GoAgain() bool           { return false }
 
 // not implemented: AR +1{p} buff to a target attack with ≤3 base {p}
 func (NipAtTheHeelsBlue) NotImplemented()                            {}
-func (NipAtTheHeelsBlue) Play(s *sim.TurnState, self *sim.CardState) { s.LogPlay(self) }
+func (NipAtTheHeelsBlue) Play(s *sim.TurnState, self *sim.CardState) { s.Log(self, 0) }

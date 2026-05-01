@@ -23,6 +23,7 @@ func (SpringboardSomersaultYellow) Defense() int            { return 2 }
 func (SpringboardSomersaultYellow) Types() card.TypeSet     { return defenseReactionTypes }
 func (SpringboardSomersaultYellow) GoAgain() bool           { return false }
 func (SpringboardSomersaultYellow) Play(s *sim.TurnState, self *sim.CardState) {
-	s.ApplyAndLogEffectiveDefense(self)
+	n := self.DealEffectiveDefense(s)
+	s.Log(self, n)
 }
 func (SpringboardSomersaultYellow) ArsenalDefenseBonus() int { return 2 }

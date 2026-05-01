@@ -25,4 +25,4 @@ func (FoolsGoldYellow) GoAgain() bool           { return false }
 
 // not implemented: discard trigger creates a Gold token
 func (FoolsGoldYellow) NotImplemented()                            {}
-func (FoolsGoldYellow) Play(s *sim.TurnState, self *sim.CardState) { s.LogPlay(self) }
+func (FoolsGoldYellow) Play(s *sim.TurnState, self *sim.CardState) { s.Log(self, 0) }

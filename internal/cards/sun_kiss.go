@@ -10,7 +10,6 @@
 package cards
 
 import (
-	"fmt"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
@@ -27,8 +26,9 @@ func sunKissPlay(heal int, s *sim.TurnState, self *sim.CardState) {
 		s.DrawOne()
 		self.GrantedGoAgain = true
 	}
-	s.LogPlay(self)
-	s.ApplyAndLogRiderOnPlay(self, fmt.Sprintf("Gained %d health", heal), heal)
+	s.Log(self, 0)
+	s.AddValue(heal)
+	s.LogRiderf(self, heal, "Gained %d health", heal)
 }
 
 // playedMoonWishThisTurn reports whether any prior card resolved this turn is a Moon Wish

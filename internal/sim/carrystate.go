@@ -29,7 +29,7 @@ func (c *CarryState) SnapshotFromTurn(s *TurnState) {
 	c.Banish = append(c.Banish[:0], s.Banish...)
 	c.Runechants = s.Runechants
 	c.AuraTriggers = append(c.AuraTriggers[:0], s.AuraTriggers...)
-	c.Log = append(c.Log[:0], s.Log...)
+	c.Log = append(c.Log[:0], s.turnLog...)
 }
 
 // CopyFrom copies every field of src into c, reusing c's slice backings. Used to

@@ -75,5 +75,5 @@ func (c BlessingOfOccultBlue) Play(s *sim.TurnState, self *sim.CardState) {
 // the trigger).
 func blessingOfOccultPlay(s *sim.TurnState, selfState *sim.CardState, selfCard sim.Card, n int) {
 	s.RegisterStartOfTurn(selfCard, 1, blessingOfOccultTriggerText[n], func(s *sim.TurnState, _ *sim.AuraTrigger) int { return s.CreateRunechants(n) })
-	s.LogPlay(selfState)
+	s.Log(selfState, 0)
 }

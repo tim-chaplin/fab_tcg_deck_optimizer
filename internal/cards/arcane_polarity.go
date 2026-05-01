@@ -25,7 +25,7 @@ func (ArcanePolarityRed) GoAgain() bool           { return false }
 
 // not implemented: 1{h} gain (4/3/2{h} if dealt arcane damage this turn)
 func (ArcanePolarityRed) NotImplemented()                            {}
-func (ArcanePolarityRed) Play(s *sim.TurnState, self *sim.CardState) { s.LogPlay(self) }
+func (ArcanePolarityRed) Play(s *sim.TurnState, self *sim.CardState) { s.Log(self, 0) }
 
 type ArcanePolarityYellow struct{}
 
@@ -40,7 +40,7 @@ func (ArcanePolarityYellow) GoAgain() bool           { return false }
 
 // not implemented: 1{h} gain (4/3/2{h} if dealt arcane damage this turn)
 func (ArcanePolarityYellow) NotImplemented()                            {}
-func (ArcanePolarityYellow) Play(s *sim.TurnState, self *sim.CardState) { s.LogPlay(self) }
+func (ArcanePolarityYellow) Play(s *sim.TurnState, self *sim.CardState) { s.Log(self, 0) }
 
 type ArcanePolarityBlue struct{}
 
@@ -55,4 +55,4 @@ func (ArcanePolarityBlue) GoAgain() bool           { return false }
 
 // not implemented: 1{h} gain (4/3/2{h} if dealt arcane damage this turn)
 func (ArcanePolarityBlue) NotImplemented()                            {}
-func (ArcanePolarityBlue) Play(s *sim.TurnState, self *sim.CardState) { s.LogPlay(self) }
+func (ArcanePolarityBlue) Play(s *sim.TurnState, self *sim.CardState) { s.Log(self, 0) }

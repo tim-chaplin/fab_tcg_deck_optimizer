@@ -40,7 +40,8 @@ func (NimblismRed) Types() card.TypeSet     { return nimblismTypes }
 func (NimblismRed) GoAgain() bool           { return true }
 func (NimblismRed) Play(s *sim.TurnState, self *sim.CardState) {
 	nimblismApplySideEffect(s, 3)
-	s.ApplyAndLogEffectiveAttack(self)
+	n := self.DealEffectiveAttack(s)
+	s.Log(self, n)
 }
 
 type NimblismYellow struct{}
@@ -55,7 +56,8 @@ func (NimblismYellow) Types() card.TypeSet     { return nimblismTypes }
 func (NimblismYellow) GoAgain() bool           { return true }
 func (NimblismYellow) Play(s *sim.TurnState, self *sim.CardState) {
 	nimblismApplySideEffect(s, 2)
-	s.ApplyAndLogEffectiveAttack(self)
+	n := self.DealEffectiveAttack(s)
+	s.Log(self, n)
 }
 
 type NimblismBlue struct{}
@@ -70,5 +72,6 @@ func (NimblismBlue) Types() card.TypeSet     { return nimblismTypes }
 func (NimblismBlue) GoAgain() bool           { return true }
 func (NimblismBlue) Play(s *sim.TurnState, self *sim.CardState) {
 	nimblismApplySideEffect(s, 1)
-	s.ApplyAndLogEffectiveAttack(self)
+	n := self.DealEffectiveAttack(s)
+	s.Log(self, n)
 }

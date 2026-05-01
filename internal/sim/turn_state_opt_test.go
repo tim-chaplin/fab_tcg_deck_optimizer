@@ -154,15 +154,15 @@ func TestTurnStateOpt_LogsOutcome(t *testing.T) {
 	}, func() {
 		s := NewTurnState([]Card{a, b, c}, nil)
 		s.Opt(2)
-		if len(s.Log) != 1 {
-			t.Fatalf("Log len = %d, want 1", len(s.Log))
+		if len(s.LogEntries()) != 1 {
+			t.Fatalf("Log len = %d, want 1", len(s.LogEntries()))
 		}
 		want := "Opted [a, b], put [b] on top, put [a] on bottom"
-		if got := s.Log[0].Text; got != want {
+		if got := s.LogEntries()[0].Text; got != want {
 			t.Errorf("log entry = %q, want %q", got, want)
 		}
-		if s.Log[0].N != 0 {
-			t.Errorf("log N = %d, want 0 (Opt is value-neutral; reshape effect surfaces in later turns)", s.Log[0].N)
+		if s.LogEntries()[0].N != 0 {
+			t.Errorf("log N = %d, want 0 (Opt is value-neutral; reshape effect surfaces in later turns)", s.LogEntries()[0].N)
 		}
 	})
 }
@@ -179,7 +179,7 @@ func TestTurnStateOpt_LogShowsEmptyListsAsBrackets(t *testing.T) {
 		s := NewTurnState([]Card{a, b}, nil)
 		s.Opt(2)
 		want := "Opted [a, b], put [a, b] on top, put [] on bottom"
-		if got := s.Log[0].Text; got != want {
+		if got := s.LogEntries()[0].Text; got != want {
 			t.Errorf("log entry = %q, want %q", got, want)
 		}
 	})
@@ -200,8 +200,8 @@ func TestTurnStateOpt_NoOpPathsSkipLog(t *testing.T) {
 		for _, tc := range cases {
 			s := NewTurnState(tc.deck, nil)
 			s.Opt(tc.n)
-			if len(s.Log) != 0 {
-				t.Errorf("%s: Log = %v, want empty", tc.name, s.Log)
+			if len(s.LogEntries()) != 0 {
+				t.Errorf("%s: Log = %v, want empty", tc.name, s.LogEntries())
 			}
 		}
 	})

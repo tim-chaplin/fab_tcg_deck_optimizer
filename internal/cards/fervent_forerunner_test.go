@@ -48,13 +48,13 @@ func TestFerventForerunner_OnHitOptFiresOnlyWhenInHitWindow(t *testing.T) {
 		if tc.hitOpt {
 			wantLogLen = 2
 		}
-		if len(s.Log) != wantLogLen {
-			t.Errorf("%s: Log len = %d, want %d", tc.c.Name(), len(s.Log), wantLogLen)
+		if len(s.LogEntries()) != wantLogLen {
+			t.Errorf("%s: Log len = %d, want %d", tc.c.Name(), len(s.LogEntries()), wantLogLen)
 			continue
 		}
 		if tc.hitOpt {
 			want := "Opted [a, b], put [a, b] on top, put [] on bottom"
-			if got := s.Log[1].Text; got != want {
+			if got := s.LogEntries()[1].Text; got != want {
 				t.Errorf("%s: Opt log entry = %q, want %q", tc.c.Name(), got, want)
 			}
 		}
@@ -74,11 +74,11 @@ func TestFerventForerunner_OnHitOptFiresWithBonusAttackInWindow(t *testing.T) {
 	if s.Value != want {
 		t.Errorf("Play() Value = %d, want %d (3 printed + 1 BonusAttack)", s.Value, want)
 	}
-	if len(s.Log) != 2 {
-		t.Fatalf("Log len = %d, want 2 (chain step + Opted ...)", len(s.Log))
+	if len(s.LogEntries()) != 2 {
+		t.Fatalf("Log len = %d, want 2 (chain step + Opted ...)", len(s.LogEntries()))
 	}
 	wantOpt := "Opted [a, b], put [a, b] on top, put [] on bottom"
-	if got := s.Log[1].Text; got != wantOpt {
+	if got := s.LogEntries()[1].Text; got != wantOpt {
 		t.Errorf("Opt log entry = %q, want %q", got, wantOpt)
 	}
 }

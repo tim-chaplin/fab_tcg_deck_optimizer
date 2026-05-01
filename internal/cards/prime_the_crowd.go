@@ -30,7 +30,8 @@ func (PrimeTheCrowdRed) GoAgain() bool           { return true }
 func (PrimeTheCrowdRed) NotImplemented() {}
 func (PrimeTheCrowdRed) Play(s *sim.TurnState, self *sim.CardState) {
 	grantNextAttackActionBonus(s, 4)
-	s.ApplyAndLogEffectiveAttack(self)
+	n := self.DealEffectiveAttack(s)
+	s.Log(self, n)
 }
 
 type PrimeTheCrowdYellow struct{}
@@ -48,7 +49,8 @@ func (PrimeTheCrowdYellow) GoAgain() bool           { return true }
 func (PrimeTheCrowdYellow) NotImplemented() {}
 func (PrimeTheCrowdYellow) Play(s *sim.TurnState, self *sim.CardState) {
 	grantNextAttackActionBonus(s, 3)
-	s.ApplyAndLogEffectiveAttack(self)
+	n := self.DealEffectiveAttack(s)
+	s.Log(self, n)
 }
 
 type PrimeTheCrowdBlue struct{}
@@ -66,5 +68,6 @@ func (PrimeTheCrowdBlue) GoAgain() bool           { return true }
 func (PrimeTheCrowdBlue) NotImplemented() {}
 func (PrimeTheCrowdBlue) Play(s *sim.TurnState, self *sim.CardState) {
 	grantNextAttackActionBonus(s, 2)
-	s.ApplyAndLogEffectiveAttack(self)
+	n := self.DealEffectiveAttack(s)
+	s.Log(self, n)
 }

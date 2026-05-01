@@ -28,7 +28,8 @@ func (NimbleStrikeRed) GoAgain() bool           { return false }
 // not implemented: graveyard-banish-Nimblism additional cost and the +1{p}/go-again bonus rider
 func (NimbleStrikeRed) NotImplemented() {}
 func (c NimbleStrikeRed) Play(s *sim.TurnState, self *sim.CardState) {
-	s.ApplyAndLogEffectiveAttack(self)
+	n := self.DealEffectiveAttack(s)
+	s.Log(self, n)
 }
 
 type NimbleStrikeYellow struct{}
@@ -45,7 +46,8 @@ func (NimbleStrikeYellow) GoAgain() bool           { return false }
 // not implemented: graveyard-banish-Nimblism additional cost and the +1{p}/go-again bonus rider
 func (NimbleStrikeYellow) NotImplemented() {}
 func (c NimbleStrikeYellow) Play(s *sim.TurnState, self *sim.CardState) {
-	s.ApplyAndLogEffectiveAttack(self)
+	n := self.DealEffectiveAttack(s)
+	s.Log(self, n)
 }
 
 type NimbleStrikeBlue struct{}
@@ -62,5 +64,6 @@ func (NimbleStrikeBlue) GoAgain() bool           { return false }
 // not implemented: graveyard-banish-Nimblism additional cost and the +1{p}/go-again bonus rider
 func (NimbleStrikeBlue) NotImplemented() {}
 func (c NimbleStrikeBlue) Play(s *sim.TurnState, self *sim.CardState) {
-	s.ApplyAndLogEffectiveAttack(self)
+	n := self.DealEffectiveAttack(s)
+	s.Log(self, n)
 }

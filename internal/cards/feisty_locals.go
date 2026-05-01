@@ -27,7 +27,8 @@ func (FeistyLocalsRed) GoAgain() bool           { return false }
 // not implemented: defended-by-action-card +2{p} rider
 func (FeistyLocalsRed) NotImplemented() {}
 func (c FeistyLocalsRed) Play(s *sim.TurnState, self *sim.CardState) {
-	s.ApplyAndLogEffectiveAttack(self)
+	n := self.DealEffectiveAttack(s)
+	s.Log(self, n)
 }
 
 type FeistyLocalsYellow struct{}
@@ -44,7 +45,8 @@ func (FeistyLocalsYellow) GoAgain() bool           { return false }
 // not implemented: defended-by-action-card +2{p} rider
 func (FeistyLocalsYellow) NotImplemented() {}
 func (c FeistyLocalsYellow) Play(s *sim.TurnState, self *sim.CardState) {
-	s.ApplyAndLogEffectiveAttack(self)
+	n := self.DealEffectiveAttack(s)
+	s.Log(self, n)
 }
 
 type FeistyLocalsBlue struct{}
@@ -61,5 +63,6 @@ func (FeistyLocalsBlue) GoAgain() bool           { return false }
 // not implemented: defended-by-action-card +2{p} rider
 func (FeistyLocalsBlue) NotImplemented() {}
 func (c FeistyLocalsBlue) Play(s *sim.TurnState, self *sim.CardState) {
-	s.ApplyAndLogEffectiveAttack(self)
+	n := self.DealEffectiveAttack(s)
+	s.Log(self, n)
 }

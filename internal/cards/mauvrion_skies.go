@@ -22,6 +22,8 @@
 package cards
 
 import (
+	"fmt"
+
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
@@ -37,9 +39,10 @@ func mauvrionTargetMatches(target *sim.CardState) bool {
 }
 
 // mauvrionSkiesPlay applies the go-again grant via look-ahead, registers the ephemeral
-// "if hits, create n Runechants" trigger for the same target's fully-resolved attack,
-// and emits the chain step (no value contribution; rider damage is credited via the
-// trigger handler).
+// "if hits, create n Runechants" trigger for the same target's fully-resolved attack, and
+// emits the chain step (no value contribution; rider damage is credited via the trigger
+// handler). LogText is pre-built once at registration so the per-fire path runs zero
+// string allocations.
 func mauvrionSkiesPlay(s *sim.TurnState, selfState *sim.CardState, source sim.Card, n int) {
 	// Go again is static — flip it on the first matching target so its chain-legality check
 	// sees the grant before the target's Play runs.
@@ -58,18 +61,44 @@ func mauvrionSkiesPlay(s *sim.TurnState, selfState *sim.CardState, source sim.Ca
 		Matches: mauvrionTargetMatches,
 		Handler: onHitRunechantHandler,
 		N:       n,
+		LogText: onHitRunechantText[source.ID()],
 	})
-	s.LogPlay(selfState)
+	s.Log(selfState, 0)
 }
 
+// onHitRunechantText is the precomputed rider line for each (source, n) combination of
+// Mauvrion Skies and Runic Reaping. Built once at init() so neither Play nor the per-fire
+// handler does any string formatting on the hot anneal path. The N=1 case prints
+// "1 runechants" — the minor grammar drift isn't worth a special case.
+var onHitRunechantText = func() map[ids.CardID]string {
+	out := make(map[ids.CardID]string, 6)
+	for _, p := range []struct {
+		c sim.Card
+		n int
+	}{
+		{MauvrionSkiesRed{}, 3},
+		{MauvrionSkiesYellow{}, 2},
+		{MauvrionSkiesBlue{}, 1},
+		{RunicReapingRed{}, 1},
+		{RunicReapingYellow{}, 2},
+		{RunicReapingBlue{}, 3},
+	} {
+		out[p.c.ID()] = fmt.Sprintf("%s created %d runechants on hit", sim.DisplayName(p.c), p.n)
+	}
+	return out
+}()
+
 // onHitRunechantHandler is the shared "if hits, create N runechants" handler used by
-// Mauvrion Skies and Runic Reaping. Reads N off the trigger and Source for log
-// attribution so the handler is a top-level function with no per-Play closure allocation.
+// Mauvrion Skies and Runic Reaping. Reads N off the trigger and t.LogText for log
+// attribution so the handler is a top-level function with zero per-fire allocations.
 func onHitRunechantHandler(s *sim.TurnState, t *sim.EphemeralAttackTrigger, target *sim.CardState) int {
 	if !sim.LikelyToHit(target) {
 		return 0
 	}
-	return s.CreateAndLogRunechantsOnHit(sim.DisplayName(t.Source), sim.DisplayName(target.Card), t.N)
+	created := s.CreateRunechants(t.N)
+	s.AddValue(created)
+	s.LogPostTrigger(sim.DisplayName(target.Card), t.LogText, created)
+	return created
 }
 
 type MauvrionSkiesRed struct{}

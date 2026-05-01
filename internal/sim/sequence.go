@@ -250,7 +250,7 @@ type sequenceContext struct {
 	// found; reusing the bufs-owned backing arrays makes that snapshot allocation-free
 	// after the first sizing.
 	carryWinner *CarryState
-	// skipLog propagates into TurnState.SkipLog on every permutation reset. When true,
+	// skipLog propagates into TurnState.skipLog on every permutation reset. When true,
 	// chains run with Log appends elided (Value still credited); the caller is replaying
 	// later with skipLog=false to materialise the printout.
 	skipLog bool
@@ -359,7 +359,7 @@ func (ctx *sequenceContext) resetStateForPermutation() {
 	s.ArcaneDamageDealt = false
 	s.AuraTriggers = append(bufs.auraTriggersBacking[:0], ctx.priorAuraTriggers...)
 	s.Value = 0
-	s.Log = bufs.logBacking[:0]
+	s.turnLog = bufs.logBacking[:0]
 	s.CardsPlayed = bufs.cardsPlayedBacking[:0]
 	s.AuraCreated = false
 	s.CardsRemaining = nil
@@ -371,7 +371,7 @@ func (ctx *sequenceContext) resetStateForPermutation() {
 	s.EphemeralAttackTriggers = bufs.ephemeralBacking[:0]
 	s.Revealed = nil
 	s.TriggeringCard = nil
-	s.SkipLog = ctx.skipLog
+	s.skipLog = ctx.skipLog
 	// Permutation seed starts cacheable; the first card-driven deck / graveyard read
 	// in this permutation flips it to false. Set explicitly because zero-value is false.
 	s.cacheable = true

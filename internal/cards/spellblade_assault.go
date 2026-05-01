@@ -23,8 +23,10 @@ func (SpellbladeAssaultRed) Defense() int            { return 3 }
 func (SpellbladeAssaultRed) Types() card.TypeSet     { return spellbladeAssaultTypes }
 func (SpellbladeAssaultRed) GoAgain() bool           { return false }
 func (SpellbladeAssaultRed) Play(s *sim.TurnState, self *sim.CardState) {
-	s.ApplyAndLogEffectiveAttack(self)
-	s.CreateAndLogRunechantsOnPlay(self, 2)
+	n := self.DealEffectiveAttack(s)
+	s.Log(self, n)
+	s.AddValue(s.CreateRunechants(2))
+	s.LogRider(self, 2, "Created 2 runechants")
 }
 
 type SpellbladeAssaultYellow struct{}
@@ -38,8 +40,10 @@ func (SpellbladeAssaultYellow) Defense() int            { return 3 }
 func (SpellbladeAssaultYellow) Types() card.TypeSet     { return spellbladeAssaultTypes }
 func (SpellbladeAssaultYellow) GoAgain() bool           { return false }
 func (SpellbladeAssaultYellow) Play(s *sim.TurnState, self *sim.CardState) {
-	s.ApplyAndLogEffectiveAttack(self)
-	s.CreateAndLogRunechantsOnPlay(self, 2)
+	n := self.DealEffectiveAttack(s)
+	s.Log(self, n)
+	s.AddValue(s.CreateRunechants(2))
+	s.LogRider(self, 2, "Created 2 runechants")
 }
 
 type SpellbladeAssaultBlue struct{}
@@ -53,6 +57,8 @@ func (SpellbladeAssaultBlue) Defense() int            { return 3 }
 func (SpellbladeAssaultBlue) Types() card.TypeSet     { return spellbladeAssaultTypes }
 func (SpellbladeAssaultBlue) GoAgain() bool           { return false }
 func (SpellbladeAssaultBlue) Play(s *sim.TurnState, self *sim.CardState) {
-	s.ApplyAndLogEffectiveAttack(self)
-	s.CreateAndLogRunechantsOnPlay(self, 2)
+	n := self.DealEffectiveAttack(s)
+	s.Log(self, n)
+	s.AddValue(s.CreateRunechants(2))
+	s.LogRider(self, 2, "Created 2 runechants")
 }

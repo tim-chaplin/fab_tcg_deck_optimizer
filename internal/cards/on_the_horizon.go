@@ -25,7 +25,8 @@ func (OnTheHorizonRed) Defense() int            { return 4 }
 func (OnTheHorizonRed) Types() card.TypeSet     { return defenseReactionTypes }
 func (OnTheHorizonRed) GoAgain() bool           { return false }
 func (OnTheHorizonRed) Play(s *sim.TurnState, self *sim.CardState) {
-	s.ApplyAndLogEffectiveDefense(self)
+	n := self.DealEffectiveDefense(s)
+	s.Log(self, n)
 }
 
 type OnTheHorizonYellow struct{}
@@ -39,7 +40,8 @@ func (OnTheHorizonYellow) Defense() int            { return 3 }
 func (OnTheHorizonYellow) Types() card.TypeSet     { return defenseReactionTypes }
 func (OnTheHorizonYellow) GoAgain() bool           { return false }
 func (OnTheHorizonYellow) Play(s *sim.TurnState, self *sim.CardState) {
-	s.ApplyAndLogEffectiveDefense(self)
+	n := self.DealEffectiveDefense(s)
+	s.Log(self, n)
 }
 
 type OnTheHorizonBlue struct{}
@@ -53,5 +55,6 @@ func (OnTheHorizonBlue) Defense() int            { return 2 }
 func (OnTheHorizonBlue) Types() card.TypeSet     { return defenseReactionTypes }
 func (OnTheHorizonBlue) GoAgain() bool           { return false }
 func (OnTheHorizonBlue) Play(s *sim.TurnState, self *sim.CardState) {
-	s.ApplyAndLogEffectiveDefense(self)
+	n := self.DealEffectiveDefense(s)
+	s.Log(self, n)
 }

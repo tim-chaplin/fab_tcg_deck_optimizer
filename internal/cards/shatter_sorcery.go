@@ -26,4 +26,4 @@ func (ShatterSorceryBlue) GoAgain() bool           { return false }
 
 // not implemented: Instant: destroy a Sigil aura, and/or prevent 1 arcane damage
 func (ShatterSorceryBlue) NotImplemented()                            {}
-func (ShatterSorceryBlue) Play(s *sim.TurnState, self *sim.CardState) { s.LogPlay(self) }
+func (ShatterSorceryBlue) Play(s *sim.TurnState, self *sim.CardState) { s.Log(self, 0) }

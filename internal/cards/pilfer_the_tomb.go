@@ -26,4 +26,4 @@ func (PilferTheTombBlue) GoAgain() bool           { return false }
 
 // not implemented: Instant banish from an opposing graveyard / aura
 func (PilferTheTombBlue) NotImplemented()                            {}
-func (PilferTheTombBlue) Play(s *sim.TurnState, self *sim.CardState) { s.LogPlay(self) }
+func (PilferTheTombBlue) Play(s *sim.TurnState, self *sim.CardState) { s.Log(self, 0) }

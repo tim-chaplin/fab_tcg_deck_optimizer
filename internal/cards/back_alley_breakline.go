@@ -28,7 +28,8 @@ func (BackAlleyBreaklineRed) GoAgain() bool           { return false }
 // not implemented: face-up-from-deck action point grant
 func (BackAlleyBreaklineRed) NotImplemented() {}
 func (c BackAlleyBreaklineRed) Play(s *sim.TurnState, self *sim.CardState) {
-	s.ApplyAndLogEffectiveAttack(self)
+	n := self.DealEffectiveAttack(s)
+	s.Log(self, n)
 }
 
 type BackAlleyBreaklineYellow struct{}
@@ -45,7 +46,8 @@ func (BackAlleyBreaklineYellow) GoAgain() bool           { return false }
 // not implemented: face-up-from-deck action point grant
 func (BackAlleyBreaklineYellow) NotImplemented() {}
 func (c BackAlleyBreaklineYellow) Play(s *sim.TurnState, self *sim.CardState) {
-	s.ApplyAndLogEffectiveAttack(self)
+	n := self.DealEffectiveAttack(s)
+	s.Log(self, n)
 }
 
 type BackAlleyBreaklineBlue struct{}
@@ -62,5 +64,6 @@ func (BackAlleyBreaklineBlue) GoAgain() bool           { return false }
 // not implemented: face-up-from-deck action point grant
 func (BackAlleyBreaklineBlue) NotImplemented() {}
 func (c BackAlleyBreaklineBlue) Play(s *sim.TurnState, self *sim.CardState) {
-	s.ApplyAndLogEffectiveAttack(self)
+	n := self.DealEffectiveAttack(s)
+	s.Log(self, n)
 }

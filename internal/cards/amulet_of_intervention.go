@@ -27,4 +27,4 @@ func (AmuletOfInterventionBlue) GoAgain() bool           { return true }
 
 // not implemented: Instant 1 damage prevention; gated on a lethal incoming source
 func (AmuletOfInterventionBlue) NotImplemented()                            {}
-func (AmuletOfInterventionBlue) Play(s *sim.TurnState, self *sim.CardState) { s.LogPlay(self) }
+func (AmuletOfInterventionBlue) Play(s *sim.TurnState, self *sim.CardState) { s.Log(self, 0) }

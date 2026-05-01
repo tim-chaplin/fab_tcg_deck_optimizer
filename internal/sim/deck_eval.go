@@ -496,8 +496,14 @@ func processTriggersAtStartOfTurn(queued []AuraTrigger, postDrawDeck []Card) (
 			continue
 		}
 		preReveal := len(ts.Revealed)
-		preLog := len(ts.Log)
+		preLog := len(ts.turnLog)
 		d := t.Handler(ts, t)
+		// Auto-emit the registered LogText sub-line when the handler credited damage. The
+		// closure that used to live inside RegisterStartOfTurn moved here so cards register a
+		// raw handler with no per-Play closure allocation.
+		if d > 0 && t.LogText != "" {
+			ts.LogPostTrigger(DisplayName(t.Self), t.LogText, d)
+		}
 		damage += d
 		// Attribute any newly-revealed card to this trigger so the best-turn printout can
 		// show what the handler drew (e.g. Sigil of the Arknight: "drew X into hand"). Taking
@@ -511,8 +517,8 @@ func processTriggersAtStartOfTurn(queued []AuraTrigger, postDrawDeck []Card) (
 		// over the inferred "drew X into hand" / "START OF ACTION PHASE" suffix at format
 		// time so cards can fully own their printout wording.
 		var text string
-		if len(ts.Log) > preLog {
-			text = ts.Log[preLog].Text
+		if len(ts.turnLog) > preLog {
+			text = ts.turnLog[preLog].Text
 		}
 		contribs = append(contribs, TriggerContribution{Card: t.Self, Damage: d, Revealed: revealed, Text: text})
 		t.Count--

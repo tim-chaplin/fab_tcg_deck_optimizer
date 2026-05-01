@@ -99,10 +99,10 @@ func (p *CardState) EffectiveAttack() int {
 	return n
 }
 
-// EffectiveDefense returns the card's printed Defense() plus any granted BonusDefense plus the
-// ArsenalDefenseBonus when this copy came from the arsenal slot, clamped at 0. Defense
-// Reactions feed this through ApplyAndLogEffectiveDefense so the chain step's (+N) reflects
-// the buffed block.
+// EffectiveDefense returns the card's printed Defense() plus any granted BonusDefense plus
+// the ArsenalDefenseBonus when this copy came from the arsenal slot, clamped at 0. Defense
+// Reactions feed this through DealEffectiveDefense so the chain step's (+N) reflects the
+// buffed block.
 func (p *CardState) EffectiveDefense() int {
 	n := p.Card.Defense() + p.BonusDefense
 	if p.FromArsenal {
@@ -111,6 +111,39 @@ func (p *CardState) EffectiveDefense() int {
 	if n < 0 {
 		return 0
 	}
+	return n
+}
+
+// DealEffectiveAttack credits self.EffectiveAttack() to s.Value (clamped at 0) and returns
+// the credited amount so callers can pair it with a Log call:
+//
+//	n := self.DealEffectiveAttack(s)
+//	s.Log(self, n)
+//
+// Splits the side-effect (Value mutation) from the log call so the line beginning with
+// s.Log(...) has no side effects.
+func (p *CardState) DealEffectiveAttack(s *TurnState) int {
+	n := p.EffectiveAttack()
+	s.AddValue(n)
+	return n
+}
+
+// DealEffectiveDefense is the Defense Reaction counterpart to DealEffectiveAttack: caps the
+// effective defense at the remaining s.IncomingDamage so an over-blocked DR doesn't credit
+// past what was actually prevented, decrements IncomingDamage by the credited amount,
+// credits that to s.Value, and returns the credited amount. Pair with s.Log(self, n) on the
+// next line. The cap-and-decrement bookkeeping is the bit intricate enough to keep on a
+// CardState method instead of inline at every DR.
+func (p *CardState) DealEffectiveDefense(s *TurnState) int {
+	n := p.EffectiveDefense()
+	if n > s.IncomingDamage {
+		n = s.IncomingDamage
+	}
+	if n < 0 {
+		n = 0
+	}
+	s.IncomingDamage -= n
+	s.Value += n
 	return n
 }
 

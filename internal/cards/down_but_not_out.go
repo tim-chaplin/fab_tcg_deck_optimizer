@@ -29,7 +29,8 @@ func (DownButNotOutRed) GoAgain() bool           { return false }
 // not implemented: health/equipment/token comparison, agility/might/vigor tokens, overpower
 func (DownButNotOutRed) NotImplemented() {}
 func (DownButNotOutRed) Play(s *sim.TurnState, self *sim.CardState) {
-	s.ApplyAndLogEffectiveAttack(self)
+	n := self.DealEffectiveAttack(s)
+	s.Log(self, n)
 }
 
 type DownButNotOutYellow struct{}
@@ -46,7 +47,8 @@ func (DownButNotOutYellow) GoAgain() bool           { return false }
 // not implemented: health/equipment/token comparison, agility/might/vigor tokens, overpower
 func (DownButNotOutYellow) NotImplemented() {}
 func (DownButNotOutYellow) Play(s *sim.TurnState, self *sim.CardState) {
-	s.ApplyAndLogEffectiveAttack(self)
+	n := self.DealEffectiveAttack(s)
+	s.Log(self, n)
 }
 
 type DownButNotOutBlue struct{}
@@ -63,5 +65,6 @@ func (DownButNotOutBlue) GoAgain() bool           { return false }
 // not implemented: health/equipment/token comparison, agility/might/vigor tokens, overpower
 func (DownButNotOutBlue) NotImplemented() {}
 func (DownButNotOutBlue) Play(s *sim.TurnState, self *sim.CardState) {
-	s.ApplyAndLogEffectiveAttack(self)
+	n := self.DealEffectiveAttack(s)
+	s.Log(self, n)
 }

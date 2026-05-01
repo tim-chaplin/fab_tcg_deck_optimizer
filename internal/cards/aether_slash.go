@@ -27,7 +27,8 @@ func (AetherSlashRed) Defense() int            { return 3 }
 func (AetherSlashRed) Types() card.TypeSet     { return aetherSlashTypes }
 func (AetherSlashRed) GoAgain() bool           { return false }
 func (AetherSlashRed) Play(s *sim.TurnState, self *sim.CardState) {
-	s.ApplyAndLogEffectiveAttack(self)
+	n := self.DealEffectiveAttack(s)
+	s.Log(self, n)
 	aetherSlashApplyRider(s, self)
 }
 
@@ -42,7 +43,8 @@ func (AetherSlashYellow) Defense() int            { return 3 }
 func (AetherSlashYellow) Types() card.TypeSet     { return aetherSlashTypes }
 func (AetherSlashYellow) GoAgain() bool           { return false }
 func (AetherSlashYellow) Play(s *sim.TurnState, self *sim.CardState) {
-	s.ApplyAndLogEffectiveAttack(self)
+	n := self.DealEffectiveAttack(s)
+	s.Log(self, n)
 	aetherSlashApplyRider(s, self)
 }
 
@@ -57,7 +59,8 @@ func (AetherSlashBlue) Defense() int            { return 3 }
 func (AetherSlashBlue) Types() card.TypeSet     { return aetherSlashTypes }
 func (AetherSlashBlue) GoAgain() bool           { return false }
 func (AetherSlashBlue) Play(s *sim.TurnState, self *sim.CardState) {
-	s.ApplyAndLogEffectiveAttack(self)
+	n := self.DealEffectiveAttack(s)
+	s.Log(self, n)
 	aetherSlashApplyRider(s, self)
 }
 
@@ -66,7 +69,8 @@ func (AetherSlashBlue) Play(s *sim.TurnState, self *sim.CardState) {
 func aetherSlashApplyRider(s *sim.TurnState, self *sim.CardState) {
 	for _, p := range self.PitchedToPlay {
 		if p.Types().IsNonAttackAction() {
-			s.DealAndLogArcaneDamage(self, 1)
+			s.AddValue(s.DealArcaneDamage(1))
+			s.LogRider(self, 1, "Dealt 1 arcane damage")
 			return
 		}
 	}

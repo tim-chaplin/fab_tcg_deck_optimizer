@@ -29,5 +29,6 @@ func (SoundTheAlarmRed) GoAgain() bool           { return false }
 // not implemented: opponent hand reveal, defense-reaction deck search
 func (SoundTheAlarmRed) NotImplemented() {}
 func (c SoundTheAlarmRed) Play(s *sim.TurnState, self *sim.CardState) {
-	s.ApplyAndLogEffectiveAttack(self)
+	n := self.DealEffectiveAttack(s)
+	s.Log(self, n)
 }

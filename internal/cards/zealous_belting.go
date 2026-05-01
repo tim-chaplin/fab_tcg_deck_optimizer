@@ -24,7 +24,8 @@ func zealousBeltingPlay(s *sim.TurnState, self *sim.CardState) {
 			break
 		}
 	}
-	s.ApplyAndLogEffectiveAttack(self)
+	n := self.DealEffectiveAttack(s)
+	s.Log(self, n)
 }
 
 type ZealousBeltingRed struct{}

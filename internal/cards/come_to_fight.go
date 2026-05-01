@@ -26,7 +26,8 @@ func (ComeToFightRed) Types() card.TypeSet     { return comeToFightTypes }
 func (ComeToFightRed) GoAgain() bool           { return true }
 func (ComeToFightRed) Play(s *sim.TurnState, self *sim.CardState) {
 	grantNextAttackActionBonus(s, 3)
-	s.ApplyAndLogEffectiveAttack(self)
+	n := self.DealEffectiveAttack(s)
+	s.Log(self, n)
 }
 
 type ComeToFightYellow struct{}
@@ -41,7 +42,8 @@ func (ComeToFightYellow) Types() card.TypeSet     { return comeToFightTypes }
 func (ComeToFightYellow) GoAgain() bool           { return true }
 func (ComeToFightYellow) Play(s *sim.TurnState, self *sim.CardState) {
 	grantNextAttackActionBonus(s, 2)
-	s.ApplyAndLogEffectiveAttack(self)
+	n := self.DealEffectiveAttack(s)
+	s.Log(self, n)
 }
 
 type ComeToFightBlue struct{}
@@ -56,5 +58,6 @@ func (ComeToFightBlue) Types() card.TypeSet     { return comeToFightTypes }
 func (ComeToFightBlue) GoAgain() bool           { return true }
 func (ComeToFightBlue) Play(s *sim.TurnState, self *sim.CardState) {
 	grantNextAttackActionBonus(s, 1)
-	s.ApplyAndLogEffectiveAttack(self)
+	n := self.DealEffectiveAttack(s)
+	s.Log(self, n)
 }

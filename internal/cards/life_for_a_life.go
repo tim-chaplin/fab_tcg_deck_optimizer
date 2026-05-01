@@ -33,8 +33,12 @@ func (LifeForALifeRed) Defense() int            { return 2 }
 func (LifeForALifeRed) Types() card.TypeSet     { return lifeForALifeTypes }
 func (LifeForALifeRed) GoAgain() bool           { return sim.HeroWantsLowerHealth() }
 func (LifeForALifeRed) Play(s *sim.TurnState, self *sim.CardState) {
-	s.ApplyAndLogEffectiveAttack(self)
-	s.ApplyAndLogRiderOnHit(self, "On-hit gained 1 health", lifeForALifeHealValue)
+	n := self.DealEffectiveAttack(s)
+	s.Log(self, n)
+	if sim.LikelyToHit(self) {
+		s.AddValue(lifeForALifeHealValue)
+		s.LogRider(self, lifeForALifeHealValue, "On-hit gained 1 health")
+	}
 }
 
 type LifeForALifeYellow struct{}
@@ -48,8 +52,12 @@ func (LifeForALifeYellow) Defense() int            { return 2 }
 func (LifeForALifeYellow) Types() card.TypeSet     { return lifeForALifeTypes }
 func (LifeForALifeYellow) GoAgain() bool           { return sim.HeroWantsLowerHealth() }
 func (LifeForALifeYellow) Play(s *sim.TurnState, self *sim.CardState) {
-	s.ApplyAndLogEffectiveAttack(self)
-	s.ApplyAndLogRiderOnHit(self, "On-hit gained 1 health", lifeForALifeHealValue)
+	n := self.DealEffectiveAttack(s)
+	s.Log(self, n)
+	if sim.LikelyToHit(self) {
+		s.AddValue(lifeForALifeHealValue)
+		s.LogRider(self, lifeForALifeHealValue, "On-hit gained 1 health")
+	}
 }
 
 type LifeForALifeBlue struct{}
@@ -63,6 +71,10 @@ func (LifeForALifeBlue) Defense() int            { return 2 }
 func (LifeForALifeBlue) Types() card.TypeSet     { return lifeForALifeTypes }
 func (LifeForALifeBlue) GoAgain() bool           { return sim.HeroWantsLowerHealth() }
 func (LifeForALifeBlue) Play(s *sim.TurnState, self *sim.CardState) {
-	s.ApplyAndLogEffectiveAttack(self)
-	s.ApplyAndLogRiderOnHit(self, "On-hit gained 1 health", lifeForALifeHealValue)
+	n := self.DealEffectiveAttack(s)
+	s.Log(self, n)
+	if sim.LikelyToHit(self) {
+		s.AddValue(lifeForALifeHealValue)
+		s.LogRider(self, lifeForALifeHealValue, "On-hit gained 1 health")
+	}
 }

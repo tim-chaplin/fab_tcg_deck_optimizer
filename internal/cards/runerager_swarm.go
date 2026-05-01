@@ -60,7 +60,8 @@ func runeragerSwarmPlay(s *sim.TurnState, self *sim.CardState) {
 	if s.HasPlayedOrCreatedAura() {
 		self.GrantedGoAgain = true
 	}
-	s.ApplyAndLogEffectiveAttack(self)
+	n := self.DealEffectiveAttack(s)
+	s.Log(self, n)
 }
 
 func (RuneragerSwarmRed) ConditionalGoAgain()    {}

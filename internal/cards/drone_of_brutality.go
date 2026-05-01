@@ -29,7 +29,8 @@ func (DroneOfBrutalityRed) NotSilverAgeLegal()      {}
 // not implemented: graveyard-replacement-to-deck trigger
 func (DroneOfBrutalityRed) NotImplemented() {}
 func (c DroneOfBrutalityRed) Play(s *sim.TurnState, self *sim.CardState) {
-	s.ApplyAndLogEffectiveAttack(self)
+	n := self.DealEffectiveAttack(s)
+	s.Log(self, n)
 }
 
 type DroneOfBrutalityYellow struct{}
@@ -47,7 +48,8 @@ func (DroneOfBrutalityYellow) NotSilverAgeLegal()      {}
 // not implemented: graveyard-replacement-to-deck trigger
 func (DroneOfBrutalityYellow) NotImplemented() {}
 func (c DroneOfBrutalityYellow) Play(s *sim.TurnState, self *sim.CardState) {
-	s.ApplyAndLogEffectiveAttack(self)
+	n := self.DealEffectiveAttack(s)
+	s.Log(self, n)
 }
 
 type DroneOfBrutalityBlue struct{}
@@ -65,5 +67,6 @@ func (DroneOfBrutalityBlue) NotSilverAgeLegal()      {}
 // not implemented: graveyard-replacement-to-deck trigger
 func (DroneOfBrutalityBlue) NotImplemented() {}
 func (c DroneOfBrutalityBlue) Play(s *sim.TurnState, self *sim.CardState) {
-	s.ApplyAndLogEffectiveAttack(self)
+	n := self.DealEffectiveAttack(s)
+	s.Log(self, n)
 }

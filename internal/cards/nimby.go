@@ -27,8 +27,11 @@ func (NimbyRed) GoAgain() bool           { return false }
 func (NimbyRed) NotSilverAgeLegal()      {}
 
 // not implemented: Nimblism deck-search tutor
-func (NimbyRed) NotImplemented()                              {}
-func (c NimbyRed) Play(s *sim.TurnState, self *sim.CardState) { s.ApplyAndLogEffectiveAttack(self) }
+func (NimbyRed) NotImplemented() {}
+func (c NimbyRed) Play(s *sim.TurnState, self *sim.CardState) {
+	n := self.DealEffectiveAttack(s)
+	s.Log(self, n)
+}
 
 type NimbyYellow struct{}
 
@@ -45,7 +48,8 @@ func (NimbyYellow) NotSilverAgeLegal()      {}
 // not implemented: Nimblism deck-search tutor
 func (NimbyYellow) NotImplemented() {}
 func (c NimbyYellow) Play(s *sim.TurnState, self *sim.CardState) {
-	s.ApplyAndLogEffectiveAttack(self)
+	n := self.DealEffectiveAttack(s)
+	s.Log(self, n)
 }
 
 type NimbyBlue struct{}
@@ -61,5 +65,8 @@ func (NimbyBlue) GoAgain() bool           { return false }
 func (NimbyBlue) NotSilverAgeLegal()      {}
 
 // not implemented: Nimblism deck-search tutor
-func (NimbyBlue) NotImplemented()                              {}
-func (c NimbyBlue) Play(s *sim.TurnState, self *sim.CardState) { s.ApplyAndLogEffectiveAttack(self) }
+func (NimbyBlue) NotImplemented() {}
+func (c NimbyBlue) Play(s *sim.TurnState, self *sim.CardState) {
+	n := self.DealEffectiveAttack(s)
+	s.Log(self, n)
+}

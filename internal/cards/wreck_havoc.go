@@ -28,7 +28,8 @@ func (WreckHavocRed) GoAgain() bool           { return false }
 // not implemented: defense-reaction lockout, on-hit arsenal banish
 func (WreckHavocRed) NotImplemented() {}
 func (WreckHavocRed) Play(s *sim.TurnState, self *sim.CardState) {
-	s.ApplyAndLogEffectiveAttack(self)
+	n := self.DealEffectiveAttack(s)
+	s.Log(self, n)
 }
 
 type WreckHavocYellow struct{}
@@ -45,7 +46,8 @@ func (WreckHavocYellow) GoAgain() bool           { return false }
 // not implemented: defense-reaction lockout, on-hit arsenal banish
 func (WreckHavocYellow) NotImplemented() {}
 func (WreckHavocYellow) Play(s *sim.TurnState, self *sim.CardState) {
-	s.ApplyAndLogEffectiveAttack(self)
+	n := self.DealEffectiveAttack(s)
+	s.Log(self, n)
 }
 
 type WreckHavocBlue struct{}
@@ -62,5 +64,6 @@ func (WreckHavocBlue) GoAgain() bool           { return false }
 // not implemented: defense-reaction lockout, on-hit arsenal banish
 func (WreckHavocBlue) NotImplemented() {}
 func (WreckHavocBlue) Play(s *sim.TurnState, self *sim.CardState) {
-	s.ApplyAndLogEffectiveAttack(self)
+	n := self.DealEffectiveAttack(s)
+	s.Log(self, n)
 }

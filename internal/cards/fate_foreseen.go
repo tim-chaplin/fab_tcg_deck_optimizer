@@ -12,7 +12,8 @@ import (
 )
 
 func fateForeseenPlay(s *sim.TurnState, self *sim.CardState) {
-	s.ApplyAndLogEffectiveDefense(self)
+	n := self.DealEffectiveDefense(s)
+	s.Log(self, n)
 	s.Opt(1)
 }
 

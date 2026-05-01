@@ -26,4 +26,4 @@ func (TalismanOfRecompenseYellow) GoAgain() bool           { return true }
 
 // not implemented: self-destroys on pitching a 1-resource card → gain {r}{r}{r} instead
 func (TalismanOfRecompenseYellow) NotImplemented()                            {}
-func (TalismanOfRecompenseYellow) Play(s *sim.TurnState, self *sim.CardState) { s.LogPlay(self) }
+func (TalismanOfRecompenseYellow) Play(s *sim.TurnState, self *sim.CardState) { s.Log(self, 0) }

@@ -25,8 +25,11 @@ func (TipOffRed) Types() card.TypeSet     { return tipOffTypes }
 func (TipOffRed) GoAgain() bool           { return false }
 
 // not implemented: instant discard-to-mark activation
-func (TipOffRed) NotImplemented()                              {}
-func (c TipOffRed) Play(s *sim.TurnState, self *sim.CardState) { s.ApplyAndLogEffectiveAttack(self) }
+func (TipOffRed) NotImplemented() {}
+func (c TipOffRed) Play(s *sim.TurnState, self *sim.CardState) {
+	n := self.DealEffectiveAttack(s)
+	s.Log(self, n)
+}
 
 type TipOffYellow struct{}
 
@@ -42,7 +45,8 @@ func (TipOffYellow) GoAgain() bool           { return false }
 // not implemented: instant discard-to-mark activation
 func (TipOffYellow) NotImplemented() {}
 func (c TipOffYellow) Play(s *sim.TurnState, self *sim.CardState) {
-	s.ApplyAndLogEffectiveAttack(self)
+	n := self.DealEffectiveAttack(s)
+	s.Log(self, n)
 }
 
 type TipOffBlue struct{}
@@ -57,5 +61,8 @@ func (TipOffBlue) Types() card.TypeSet     { return tipOffTypes }
 func (TipOffBlue) GoAgain() bool           { return false }
 
 // not implemented: instant discard-to-mark activation
-func (TipOffBlue) NotImplemented()                              {}
-func (c TipOffBlue) Play(s *sim.TurnState, self *sim.CardState) { s.ApplyAndLogEffectiveAttack(self) }
+func (TipOffBlue) NotImplemented() {}
+func (c TipOffBlue) Play(s *sim.TurnState, self *sim.CardState) {
+	n := self.DealEffectiveAttack(s)
+	s.Log(self, n)
+}

@@ -56,6 +56,12 @@ type AuraTrigger struct {
 	// trigger instead of closing over it, so the handler can be a top-level function with no
 	// per-Play closure allocation.
 	N int
+	// LogText is the optional pre-built rider-line text the handler emits via LogPostTrigger
+	// / LogPreTrigger. Card.Play computes it once at registration (typically
+	// `"<DisplayName> <verb phrase>"`); the handler reads t.LogText directly so the hot fire
+	// path runs zero string allocations even when the chain is materialising the log.
+	// Empty-string means the handler authors its own text dynamically.
+	LogText string
 }
 
 // OnEphemeralAttackTrigger is the business-logic callback attached to an
@@ -103,4 +109,6 @@ type EphemeralAttackTrigger struct {
 	// instead of closing over it, so the handler can be a top-level function with no per-Play
 	// closure allocation.
 	N int
+	// LogText is the optional pre-built rider-line text. See AuraTrigger.LogText.
+	LogText string
 }

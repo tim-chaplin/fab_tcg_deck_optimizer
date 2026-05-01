@@ -25,4 +25,4 @@ func (StartingStakeYellow) GoAgain() bool           { return false }
 
 // not implemented: gold tokens
 func (StartingStakeYellow) NotImplemented()                            {}
-func (StartingStakeYellow) Play(s *sim.TurnState, self *sim.CardState) { s.LogPlay(self) }
+func (StartingStakeYellow) Play(s *sim.TurnState, self *sim.CardState) { s.Log(self, 0) }

@@ -26,7 +26,7 @@ func (EirinasPrayerRed) GoAgain() bool           { return false }
 
 // not implemented: Instant prevent X arcane to your hero; X scaled by revealed top-card pitch
 func (EirinasPrayerRed) NotImplemented()                            {}
-func (EirinasPrayerRed) Play(s *sim.TurnState, self *sim.CardState) { s.LogPlay(self) }
+func (EirinasPrayerRed) Play(s *sim.TurnState, self *sim.CardState) { s.Log(self, 0) }
 
 type EirinasPrayerYellow struct{}
 
@@ -41,7 +41,7 @@ func (EirinasPrayerYellow) GoAgain() bool           { return false }
 
 // not implemented: Instant prevent X arcane to your hero; X scaled by revealed top-card pitch
 func (EirinasPrayerYellow) NotImplemented()                            {}
-func (EirinasPrayerYellow) Play(s *sim.TurnState, self *sim.CardState) { s.LogPlay(self) }
+func (EirinasPrayerYellow) Play(s *sim.TurnState, self *sim.CardState) { s.Log(self, 0) }
 
 type EirinasPrayerBlue struct{}
 
@@ -56,4 +56,4 @@ func (EirinasPrayerBlue) GoAgain() bool           { return false }
 
 // not implemented: Instant prevent X arcane to your hero; X scaled by revealed top-card pitch
 func (EirinasPrayerBlue) NotImplemented()                            {}
-func (EirinasPrayerBlue) Play(s *sim.TurnState, self *sim.CardState) { s.LogPlay(self) }
+func (EirinasPrayerBlue) Play(s *sim.TurnState, self *sim.CardState) { s.Log(self, 0) }

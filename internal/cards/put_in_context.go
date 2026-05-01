@@ -24,5 +24,6 @@ func (PutInContextBlue) GoAgain() bool           { return false }
 // attack
 func (PutInContextBlue) NotImplemented() {}
 func (PutInContextBlue) Play(s *sim.TurnState, self *sim.CardState) {
-	s.ApplyAndLogEffectiveDefense(self)
+	n := self.DealEffectiveDefense(s)
+	s.Log(self, n)
 }

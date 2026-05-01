@@ -19,8 +19,12 @@ var performanceBonusTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, c
 
 func performanceBonusPlay(s *sim.TurnState, self *sim.CardState) {
 	self.GrantGoAgainIfFromArsenal()
-	s.ApplyAndLogEffectiveAttack(self)
-	s.ApplyAndLogRiderOnHit(self, "On-hit created a gold token", sim.GoldTokenValue)
+	n := self.DealEffectiveAttack(s)
+	s.Log(self, n)
+	if sim.LikelyToHit(self) {
+		s.AddValue(sim.GoldTokenValue)
+		s.LogRider(self, sim.GoldTokenValue, "On-hit created a gold token")
+	}
 }
 
 type PerformanceBonusRed struct{}

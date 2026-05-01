@@ -28,7 +28,8 @@ func (FlockOfTheFeatherWalkersRed) GoAgain() bool           { return false }
 // not implemented: additional reveal cost, quicken tokens
 func (FlockOfTheFeatherWalkersRed) NotImplemented() {}
 func (c FlockOfTheFeatherWalkersRed) Play(s *sim.TurnState, self *sim.CardState) {
-	s.ApplyAndLogEffectiveAttack(self)
+	n := self.DealEffectiveAttack(s)
+	s.Log(self, n)
 }
 
 type FlockOfTheFeatherWalkersYellow struct{}
@@ -45,7 +46,8 @@ func (FlockOfTheFeatherWalkersYellow) GoAgain() bool           { return false }
 // not implemented: additional reveal cost, quicken tokens
 func (FlockOfTheFeatherWalkersYellow) NotImplemented() {}
 func (c FlockOfTheFeatherWalkersYellow) Play(s *sim.TurnState, self *sim.CardState) {
-	s.ApplyAndLogEffectiveAttack(self)
+	n := self.DealEffectiveAttack(s)
+	s.Log(self, n)
 }
 
 type FlockOfTheFeatherWalkersBlue struct{}
@@ -62,5 +64,6 @@ func (FlockOfTheFeatherWalkersBlue) GoAgain() bool           { return false }
 // not implemented: additional reveal cost, quicken tokens
 func (FlockOfTheFeatherWalkersBlue) NotImplemented() {}
 func (c FlockOfTheFeatherWalkersBlue) Play(s *sim.TurnState, self *sim.CardState) {
-	s.ApplyAndLogEffectiveAttack(self)
+	n := self.DealEffectiveAttack(s)
+	s.Log(self, n)
 }

@@ -29,5 +29,6 @@ func (Talishar) Hands() int              { return 2 }
 // not implemented: rust-counter activation cost and end-phase self-destruct at 3+ counters
 func (Talishar) NotImplemented() {}
 func (Talishar) Play(s *sim.TurnState, self *sim.CardState) {
-	s.ApplyAndLogEffectiveAttack(self)
+	n := self.DealEffectiveAttack(s)
+	s.Log(self, n)
 }

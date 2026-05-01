@@ -25,7 +25,7 @@ func (ReinforceTheLineRed) GoAgain() bool           { return false }
 
 // not implemented: Instant +N{d} grant to a defending attack action card
 func (ReinforceTheLineRed) NotImplemented()                            {}
-func (ReinforceTheLineRed) Play(s *sim.TurnState, self *sim.CardState) { s.LogPlay(self) }
+func (ReinforceTheLineRed) Play(s *sim.TurnState, self *sim.CardState) { s.Log(self, 0) }
 
 type ReinforceTheLineYellow struct{}
 
@@ -40,7 +40,7 @@ func (ReinforceTheLineYellow) GoAgain() bool           { return false }
 
 // not implemented: Instant +N{d} grant to a defending attack action card
 func (ReinforceTheLineYellow) NotImplemented()                            {}
-func (ReinforceTheLineYellow) Play(s *sim.TurnState, self *sim.CardState) { s.LogPlay(self) }
+func (ReinforceTheLineYellow) Play(s *sim.TurnState, self *sim.CardState) { s.Log(self, 0) }
 
 type ReinforceTheLineBlue struct{}
 
@@ -55,4 +55,4 @@ func (ReinforceTheLineBlue) GoAgain() bool           { return false }
 
 // not implemented: Instant +N{d} grant to a defending attack action card
 func (ReinforceTheLineBlue) NotImplemented()                            {}
-func (ReinforceTheLineBlue) Play(s *sim.TurnState, self *sim.CardState) { s.LogPlay(self) }
+func (ReinforceTheLineBlue) Play(s *sim.TurnState, self *sim.CardState) { s.Log(self, 0) }

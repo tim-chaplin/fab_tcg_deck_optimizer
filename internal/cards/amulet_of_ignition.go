@@ -27,4 +27,4 @@ func (AmuletOfIgnitionYellow) GoAgain() bool           { return true }
 
 // not implemented: Instant 'next activated ability costs {r} less'
 func (AmuletOfIgnitionYellow) NotImplemented()                            {}
-func (AmuletOfIgnitionYellow) Play(s *sim.TurnState, self *sim.CardState) { s.LogPlay(self) }
+func (AmuletOfIgnitionYellow) Play(s *sim.TurnState, self *sim.CardState) { s.Log(self, 0) }
