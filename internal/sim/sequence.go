@@ -344,26 +344,37 @@ func fireEphemeralAttackTriggers(state *TurnState, target *CardState) {
 func (ctx *sequenceContext) resetStateForPermutation() {
 	s := ctx.bufs.state
 	bufs := ctx.bufs
-	*s = TurnState{
-		Hand:                    append(bufs.handBacking[:0], ctx.handStart...),
-		deck:                    ctx.deck,
-		Arsenal:                 ctx.arsenalAtChainStart,
-		graveyard:               bufs.graveBacking[:0],
-		Banish:                  bufs.banishBacking[:0],
-		CardsPlayed:             bufs.cardsPlayedBacking[:0],
-		Log:                     bufs.logBacking[:0],
-		Pitched:                 ctx.pitched,
-		IncomingDamage:          ctx.incomingDamage,
-		BlockTotal:              ctx.blockTotal,
-		Runechants:              ctx.runechantCarryover,
-		ActionPoints:            1,
-		AuraTriggers:            append(bufs.auraTriggersBacking[:0], ctx.priorAuraTriggers...),
-		EphemeralAttackTriggers: bufs.ephemeralBacking[:0],
-		SkipLog:                 ctx.skipLog,
-		// Permutation seed starts cacheable; the first card-driven deck / graveyard read
-		// in this permutation flips it to false. Set explicitly because zero-value is false.
-		cacheable: true,
-	}
+	// Field-by-field assignment skips the implicit zero-fill the struct-literal form does
+	// over every TurnState slot before applying the listed fields. The few fields whose
+	// permutation-start value is zero (Value, AuraCreated, CardsRemaining, Overpower,
+	// NonAttackActionPlayed, ArcaneDamageDealt, Revealed, TriggeringCard) are assigned
+	// explicitly so any leftover state from a previous permutation gets cleared.
+	s.Hand = append(bufs.handBacking[:0], ctx.handStart...)
+	s.deck = ctx.deck
+	s.Arsenal = ctx.arsenalAtChainStart
+	s.graveyard = bufs.graveBacking[:0]
+	s.Banish = bufs.banishBacking[:0]
+	s.Runechants = ctx.runechantCarryover
+	s.ActionPoints = 1
+	s.ArcaneDamageDealt = false
+	s.AuraTriggers = append(bufs.auraTriggersBacking[:0], ctx.priorAuraTriggers...)
+	s.Value = 0
+	s.Log = bufs.logBacking[:0]
+	s.CardsPlayed = bufs.cardsPlayedBacking[:0]
+	s.AuraCreated = false
+	s.CardsRemaining = nil
+	s.Pitched = ctx.pitched
+	s.Overpower = false
+	s.NonAttackActionPlayed = false
+	s.IncomingDamage = ctx.incomingDamage
+	s.BlockTotal = ctx.blockTotal
+	s.EphemeralAttackTriggers = bufs.ephemeralBacking[:0]
+	s.Revealed = nil
+	s.TriggeringCard = nil
+	s.SkipLog = ctx.skipLog
+	// Permutation seed starts cacheable; the first card-driven deck / graveyard read
+	// in this permutation flips it to false. Set explicitly because zero-value is false.
+	s.cacheable = true
 }
 
 // bestSequence tries every ordering of attackers and returns the max total damage plus the
