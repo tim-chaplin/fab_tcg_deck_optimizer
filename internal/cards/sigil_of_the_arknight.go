@@ -33,7 +33,7 @@ func (SigilOfTheArknightBlue) GoAgain() bool           { return true }
 func (SigilOfTheArknightBlue) AddsFutureValue()        {}
 func (c SigilOfTheArknightBlue) Play(s *sim.TurnState, self *sim.CardState) {
 	s.RegisterStartOfTurn(c, 1, "", sigilOfTheArknightReveal)
-	s.LogChain(self, 0)
+	s.Log(self, 0)
 }
 
 // sigilOfTheArknightReveal implements the handler described in the file docstring. Logs

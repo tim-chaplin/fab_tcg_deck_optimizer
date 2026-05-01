@@ -26,4 +26,4 @@ func (CrackedBaubleYellow) GoAgain() bool           { return false }
 
 // not implemented: draft-format pitch resource; no other effect
 func (CrackedBaubleYellow) NotImplemented()                            {}
-func (CrackedBaubleYellow) Play(s *sim.TurnState, self *sim.CardState) { s.LogChain(self, 0) }
+func (CrackedBaubleYellow) Play(s *sim.TurnState, self *sim.CardState) { s.Log(self, 0) }

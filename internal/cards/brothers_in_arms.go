@@ -27,7 +27,8 @@ func (BrothersInArmsRed) GoAgain() bool           { return false }
 // not implemented: pay-{r}-for-+2{d} defence rider (defence-side costs aren't solved)
 func (BrothersInArmsRed) NotImplemented() {}
 func (c BrothersInArmsRed) Play(s *sim.TurnState, self *sim.CardState) {
-	s.LogChain(self, s.AddValue(self.EffectiveAttack()))
+	n := self.DealEffectiveAttack(s)
+	s.Log(self, n)
 }
 
 type BrothersInArmsYellow struct{}
@@ -44,7 +45,8 @@ func (BrothersInArmsYellow) GoAgain() bool           { return false }
 // not implemented: pay-{r}-for-+2{d} defence rider (defence-side costs aren't solved)
 func (BrothersInArmsYellow) NotImplemented() {}
 func (c BrothersInArmsYellow) Play(s *sim.TurnState, self *sim.CardState) {
-	s.LogChain(self, s.AddValue(self.EffectiveAttack()))
+	n := self.DealEffectiveAttack(s)
+	s.Log(self, n)
 }
 
 type BrothersInArmsBlue struct{}
@@ -61,5 +63,6 @@ func (BrothersInArmsBlue) GoAgain() bool           { return false }
 // not implemented: pay-{r}-for-+2{d} defence rider (defence-side costs aren't solved)
 func (BrothersInArmsBlue) NotImplemented() {}
 func (c BrothersInArmsBlue) Play(s *sim.TurnState, self *sim.CardState) {
-	s.LogChain(self, s.AddValue(self.EffectiveAttack()))
+	n := self.DealEffectiveAttack(s)
+	s.Log(self, n)
 }

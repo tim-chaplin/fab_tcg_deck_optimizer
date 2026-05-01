@@ -28,12 +28,12 @@ func TestFateForeseen_BlocksAndCallsOpt1(t *testing.T) {
 			t.Errorf("%s: Play(IncomingDamage=10) Value = %d, want %d (block only)",
 				tc.c.Name(), s.Value, tc.block)
 		}
-		if len(s.Log) != 2 {
-			t.Errorf("%s: Log len = %d, want 2 (defense + Opted ...)", tc.c.Name(), len(s.Log))
+		if len(s.LogEntries()) != 2 {
+			t.Errorf("%s: Log len = %d, want 2 (defense + Opted ...)", tc.c.Name(), len(s.LogEntries()))
 			continue
 		}
 		want := "Opted [top], put [top] on top, put [] on bottom"
-		if got := s.Log[1].Text; got != want {
+		if got := s.LogEntries()[1].Text; got != want {
 			t.Errorf("%s: Opt log entry = %q, want %q", tc.c.Name(), got, want)
 		}
 	}

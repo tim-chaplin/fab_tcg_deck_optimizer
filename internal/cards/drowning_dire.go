@@ -25,7 +25,8 @@ func drowningDirePlay(s *sim.TurnState, self *sim.CardState) {
 	if s.HasPlayedOrCreatedAura() {
 		self.GrantedDominate = true
 	}
-	s.LogChain(self, s.AddValue(self.EffectiveAttack()))
+	n := self.DealEffectiveAttack(s)
+	s.Log(self, n)
 }
 
 type DrowningDireRed struct{}

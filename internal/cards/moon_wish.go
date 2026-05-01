@@ -60,7 +60,8 @@ func moonWishPlay(c sim.Card, s *sim.TurnState, self *sim.CardState) {
 
 	// Moon Wish's own chain step lands first so subsequent alt-cost / tutor lines + Sun
 	// Kiss's chain step (when go-again fires) follow it in order.
-	s.LogChain(self, s.AddValue(self.EffectiveAttack()))
+	n := self.DealEffectiveAttack(s)
+	s.Log(self, n)
 
 	if returned != nil {
 		s.LogPostTriggerf(name, 0, "%s returned %s to top of deck", name, sim.DisplayName(returned))

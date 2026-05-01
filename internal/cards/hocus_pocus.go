@@ -23,7 +23,8 @@ func (HocusPocusRed) Defense() int            { return 3 }
 func (HocusPocusRed) Types() card.TypeSet     { return hocusPocusTypes }
 func (HocusPocusRed) GoAgain() bool           { return false }
 func (HocusPocusRed) Play(s *sim.TurnState, self *sim.CardState) {
-	s.LogChain(self, s.AddValue(self.EffectiveAttack()))
+	n := self.DealEffectiveAttack(s)
+	s.Log(self, n)
 	s.AddValue(s.CreateRunechants(1))
 	s.LogRider(self, 1, "Created a runechant")
 }
@@ -39,7 +40,8 @@ func (HocusPocusYellow) Defense() int            { return 3 }
 func (HocusPocusYellow) Types() card.TypeSet     { return hocusPocusTypes }
 func (HocusPocusYellow) GoAgain() bool           { return false }
 func (HocusPocusYellow) Play(s *sim.TurnState, self *sim.CardState) {
-	s.LogChain(self, s.AddValue(self.EffectiveAttack()))
+	n := self.DealEffectiveAttack(s)
+	s.Log(self, n)
 	s.AddValue(s.CreateRunechants(1))
 	s.LogRider(self, 1, "Created a runechant")
 }
@@ -55,7 +57,8 @@ func (HocusPocusBlue) Defense() int            { return 3 }
 func (HocusPocusBlue) Types() card.TypeSet     { return hocusPocusTypes }
 func (HocusPocusBlue) GoAgain() bool           { return false }
 func (HocusPocusBlue) Play(s *sim.TurnState, self *sim.CardState) {
-	s.LogChain(self, s.AddValue(self.EffectiveAttack()))
+	n := self.DealEffectiveAttack(s)
+	s.Log(self, n)
 	s.AddValue(s.CreateRunechants(1))
 	s.LogRider(self, 1, "Created a runechant")
 }

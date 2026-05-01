@@ -25,4 +25,4 @@ func (ThrustRed) GoAgain() bool           { return false }
 
 // not implemented: AR +3{p} buff to a target sword attack
 func (ThrustRed) NotImplemented()                            {}
-func (ThrustRed) Play(s *sim.TurnState, self *sim.CardState) { s.LogChain(self, 0) }
+func (ThrustRed) Play(s *sim.TurnState, self *sim.CardState) { s.Log(self, 0) }

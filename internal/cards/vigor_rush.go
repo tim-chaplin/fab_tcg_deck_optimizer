@@ -20,7 +20,8 @@ func vigorRushPlay(s *sim.TurnState, self *sim.CardState) {
 	if s.NonAttackActionPlayed {
 		self.GrantedGoAgain = true
 	}
-	s.LogChain(self, s.AddValue(self.EffectiveAttack()))
+	n := self.DealEffectiveAttack(s)
+	s.Log(self, n)
 }
 
 type VigorRushRed struct{}

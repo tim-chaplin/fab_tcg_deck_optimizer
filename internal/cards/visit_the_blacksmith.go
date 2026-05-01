@@ -25,4 +25,4 @@ func (VisitTheBlacksmithBlue) GoAgain() bool           { return true }
 
 // not implemented: next-sword-attack +1{p} grant (weapon chain not peeked)
 func (VisitTheBlacksmithBlue) NotImplemented()                            {}
-func (VisitTheBlacksmithBlue) Play(s *sim.TurnState, self *sim.CardState) { s.LogChain(self, 0) }
+func (VisitTheBlacksmithBlue) Play(s *sim.TurnState, self *sim.CardState) { s.Log(self, 0) }

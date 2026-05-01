@@ -25,4 +25,4 @@ func (EnergyPotionBlue) GoAgain() bool           { return false }
 
 // not implemented: activated 'gain {r}{r}'
 func (EnergyPotionBlue) NotImplemented()                            {}
-func (EnergyPotionBlue) Play(s *sim.TurnState, self *sim.CardState) { s.LogChain(self, 0) }
+func (EnergyPotionBlue) Play(s *sim.TurnState, self *sim.CardState) { s.Log(self, 0) }

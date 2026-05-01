@@ -14,12 +14,13 @@ import (
 // payoff as a sub-line under self when fragileAuraValue is non-zero. Auras have Attack=0,
 // so LogPlay carries the chain entry; the rider line carries the predicted value.
 func fragileAuraPlay(s *sim.TurnState, self *sim.CardState, n int, attackActionOnly bool) {
-	s.LogChain(self, 0)
+	s.Log(self, 0)
 	v := fragileAuraValue(s, n, attackActionOnly)
 	if v <= 0 {
 		return
 	}
-	s.LogRiderf(self, s.AddValue(v), "Aura expected to pay %d runechants", v)
+	s.AddValue(v)
+	s.LogRiderf(self, v, "Aura expected to pay %d runechants", v)
 }
 
 // fragileAuraValue returns n when the aura is expected to pay out, 0 otherwise. Two paths

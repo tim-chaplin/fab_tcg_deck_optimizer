@@ -27,4 +27,4 @@ func (RansackAndRazeBlue) GoAgain() bool           { return true }
 
 // not implemented: gold tokens, landmarks
 func (RansackAndRazeBlue) NotImplemented()                            {}
-func (RansackAndRazeBlue) Play(s *sim.TurnState, self *sim.CardState) { s.LogChain(self, 0) }
+func (RansackAndRazeBlue) Play(s *sim.TurnState, self *sim.CardState) { s.Log(self, 0) }

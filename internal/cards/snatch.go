@@ -21,7 +21,8 @@ func snatchPlay(s *sim.TurnState, self *sim.CardState) {
 	if sim.LikelyToHit(self) {
 		s.DrawOne()
 	}
-	s.LogChain(self, s.AddValue(self.EffectiveAttack()))
+	n := self.DealEffectiveAttack(s)
+	s.Log(self, n)
 }
 
 type SnatchRed struct{}

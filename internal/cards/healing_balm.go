@@ -20,8 +20,9 @@ var healingBalmTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction)
 // healingBalmPlay emits the chain step then writes the printed N{h} as a "Gained N health"
 // sub-line under self. Health is valued 1-to-1 with damage.
 func healingBalmPlay(s *sim.TurnState, self *sim.CardState, heal int) {
-	s.LogChain(self, 0)
-	s.LogRiderf(self, s.AddValue(heal), "Gained %d health", heal)
+	s.Log(self, 0)
+	s.AddValue(heal)
+	s.LogRiderf(self, heal, "Gained %d health", heal)
 }
 
 type HealingBalmRed struct{}

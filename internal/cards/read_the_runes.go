@@ -25,7 +25,8 @@ func (ReadTheRunesRed) Defense() int            { return 2 }
 func (ReadTheRunesRed) Types() card.TypeSet     { return readTheRunesTypes }
 func (ReadTheRunesRed) GoAgain() bool           { return false }
 func (ReadTheRunesRed) Play(s *sim.TurnState, self *sim.CardState) {
-	s.LogChain(self, s.AddValue(self.EffectiveAttack()))
+	n := self.DealEffectiveAttack(s)
+	s.Log(self, n)
 	s.AddValue(s.CreateRunechants(3))
 	s.LogRider(self, 3, "Created 3 runechants")
 }
@@ -41,7 +42,8 @@ func (ReadTheRunesYellow) Defense() int            { return 2 }
 func (ReadTheRunesYellow) Types() card.TypeSet     { return readTheRunesTypes }
 func (ReadTheRunesYellow) GoAgain() bool           { return false }
 func (ReadTheRunesYellow) Play(s *sim.TurnState, self *sim.CardState) {
-	s.LogChain(self, s.AddValue(self.EffectiveAttack()))
+	n := self.DealEffectiveAttack(s)
+	s.Log(self, n)
 	s.AddValue(s.CreateRunechants(2))
 	s.LogRider(self, 2, "Created 2 runechants")
 }
@@ -57,7 +59,8 @@ func (ReadTheRunesBlue) Defense() int            { return 2 }
 func (ReadTheRunesBlue) Types() card.TypeSet     { return readTheRunesTypes }
 func (ReadTheRunesBlue) GoAgain() bool           { return false }
 func (ReadTheRunesBlue) Play(s *sim.TurnState, self *sim.CardState) {
-	s.LogChain(self, s.AddValue(self.EffectiveAttack()))
+	n := self.DealEffectiveAttack(s)
+	s.Log(self, n)
 	s.AddValue(s.CreateRunechants(1))
 	s.LogRider(self, 1, "Created a runechant")
 }

@@ -359,7 +359,7 @@ func (ctx *sequenceContext) resetStateForPermutation() {
 	s.ArcaneDamageDealt = false
 	s.AuraTriggers = append(bufs.auraTriggersBacking[:0], ctx.priorAuraTriggers...)
 	s.Value = 0
-	s.Log = bufs.logBacking[:0]
+	s.turnLog = bufs.logBacking[:0]
 	s.CardsPlayed = bufs.cardsPlayedBacking[:0]
 	s.AuraCreated = false
 	s.CardsRemaining = nil

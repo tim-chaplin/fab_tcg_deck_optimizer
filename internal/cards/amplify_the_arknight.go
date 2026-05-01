@@ -39,7 +39,8 @@ func (AmplifyTheArknightRed) Defense() int              { return 3 }
 func (AmplifyTheArknightRed) Types() card.TypeSet       { return amplifyTheArknightTypes }
 func (AmplifyTheArknightRed) GoAgain() bool             { return false }
 func (AmplifyTheArknightRed) Play(s *sim.TurnState, self *sim.CardState) {
-	s.LogChain(self, s.AddValue(self.EffectiveAttack()))
+	n := self.DealEffectiveAttack(s)
+	s.Log(self, n)
 }
 
 type AmplifyTheArknightYellow struct{}
@@ -55,7 +56,8 @@ func (AmplifyTheArknightYellow) Defense() int              { return 3 }
 func (AmplifyTheArknightYellow) Types() card.TypeSet       { return amplifyTheArknightTypes }
 func (AmplifyTheArknightYellow) GoAgain() bool             { return false }
 func (AmplifyTheArknightYellow) Play(s *sim.TurnState, self *sim.CardState) {
-	s.LogChain(self, s.AddValue(self.EffectiveAttack()))
+	n := self.DealEffectiveAttack(s)
+	s.Log(self, n)
 }
 
 type AmplifyTheArknightBlue struct{}
@@ -71,5 +73,6 @@ func (AmplifyTheArknightBlue) Defense() int              { return 3 }
 func (AmplifyTheArknightBlue) Types() card.TypeSet       { return amplifyTheArknightTypes }
 func (AmplifyTheArknightBlue) GoAgain() bool             { return false }
 func (AmplifyTheArknightBlue) Play(s *sim.TurnState, self *sim.CardState) {
-	s.LogChain(self, s.AddValue(self.EffectiveAttack()))
+	n := self.DealEffectiveAttack(s)
+	s.Log(self, n)
 }

@@ -59,7 +59,7 @@ func mauvrionSkiesPlay(s *sim.TurnState, selfState *sim.CardState, source sim.Ca
 		Handler: onHitRunechantHandler,
 		N:       n,
 	})
-	s.LogChain(selfState, 0)
+	s.Log(selfState, 0)
 }
 
 // onHitRunechantHandler is the shared "if hits, create N runechants" handler used by

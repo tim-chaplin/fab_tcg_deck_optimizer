@@ -22,9 +22,11 @@ var runicFellingsongTypes = card.NewTypeSet(card.TypeRuneblade, card.TypeAction,
 // graveyard. banishAuraFromGraveyard flips ArcaneDamageDealt internally as part of its
 // arcane-damage payload.
 func runicFellingsongPlay(s *sim.TurnState, self *sim.CardState) {
-	s.LogChain(self, s.AddValue(self.EffectiveAttack()))
+	n := self.DealEffectiveAttack(s)
+	s.Log(self, n)
 	if n := banishAuraFromGraveyard(s); n > 0 {
-		s.LogRider(self, s.AddValue(n), "Banished an aura, dealt 1 arcane damage")
+		s.AddValue(n)
+		s.LogRider(self, n, "Banished an aura, dealt 1 arcane damage")
 	}
 }
 

@@ -27,7 +27,8 @@ func (FreewheelingRenegadesRed) GoAgain() bool           { return false }
 // not implemented: defended-by-action-card -2{p} rider
 func (FreewheelingRenegadesRed) NotImplemented() {}
 func (c FreewheelingRenegadesRed) Play(s *sim.TurnState, self *sim.CardState) {
-	s.LogChain(self, s.AddValue(self.EffectiveAttack()))
+	n := self.DealEffectiveAttack(s)
+	s.Log(self, n)
 }
 
 type FreewheelingRenegadesYellow struct{}
@@ -44,7 +45,8 @@ func (FreewheelingRenegadesYellow) GoAgain() bool           { return false }
 // not implemented: defended-by-action-card -2{p} rider
 func (FreewheelingRenegadesYellow) NotImplemented() {}
 func (c FreewheelingRenegadesYellow) Play(s *sim.TurnState, self *sim.CardState) {
-	s.LogChain(self, s.AddValue(self.EffectiveAttack()))
+	n := self.DealEffectiveAttack(s)
+	s.Log(self, n)
 }
 
 type FreewheelingRenegadesBlue struct{}
@@ -61,5 +63,6 @@ func (FreewheelingRenegadesBlue) GoAgain() bool           { return false }
 // not implemented: defended-by-action-card -2{p} rider
 func (FreewheelingRenegadesBlue) NotImplemented() {}
 func (c FreewheelingRenegadesBlue) Play(s *sim.TurnState, self *sim.CardState) {
-	s.LogChain(self, s.AddValue(self.EffectiveAttack()))
+	n := self.DealEffectiveAttack(s)
+	s.Log(self, n)
 }

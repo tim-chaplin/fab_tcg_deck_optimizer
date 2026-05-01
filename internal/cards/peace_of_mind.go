@@ -26,7 +26,7 @@ func (PeaceOfMindRed) GoAgain() bool           { return false }
 
 // not implemented: Instant 'prevent 4 of next {p}-damage hit'; creates a Ponder token
 func (PeaceOfMindRed) NotImplemented()                            {}
-func (PeaceOfMindRed) Play(s *sim.TurnState, self *sim.CardState) { s.LogChain(self, 0) }
+func (PeaceOfMindRed) Play(s *sim.TurnState, self *sim.CardState) { s.Log(self, 0) }
 
 type PeaceOfMindYellow struct{}
 
@@ -41,7 +41,7 @@ func (PeaceOfMindYellow) GoAgain() bool           { return false }
 
 // not implemented: Instant 'prevent 4 of next {p}-damage hit'; creates a Ponder token
 func (PeaceOfMindYellow) NotImplemented()                            {}
-func (PeaceOfMindYellow) Play(s *sim.TurnState, self *sim.CardState) { s.LogChain(self, 0) }
+func (PeaceOfMindYellow) Play(s *sim.TurnState, self *sim.CardState) { s.Log(self, 0) }
 
 type PeaceOfMindBlue struct{}
 
@@ -56,4 +56,4 @@ func (PeaceOfMindBlue) GoAgain() bool           { return false }
 
 // not implemented: Instant 'prevent 4 of next {p}-damage hit'; creates a Ponder token
 func (PeaceOfMindBlue) NotImplemented()                            {}
-func (PeaceOfMindBlue) Play(s *sim.TurnState, self *sim.CardState) { s.LogChain(self, 0) }
+func (PeaceOfMindBlue) Play(s *sim.TurnState, self *sim.CardState) { s.Log(self, 0) }

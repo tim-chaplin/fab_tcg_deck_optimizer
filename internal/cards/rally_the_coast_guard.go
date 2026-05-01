@@ -28,7 +28,8 @@ func (RallyTheCoastGuardRed) GoAgain() bool           { return false }
 // not implemented: defense-time instant activated ability
 func (RallyTheCoastGuardRed) NotImplemented() {}
 func (c RallyTheCoastGuardRed) Play(s *sim.TurnState, self *sim.CardState) {
-	s.LogChain(self, s.AddValue(self.EffectiveAttack()))
+	n := self.DealEffectiveAttack(s)
+	s.Log(self, n)
 }
 
 type RallyTheCoastGuardYellow struct{}
@@ -45,7 +46,8 @@ func (RallyTheCoastGuardYellow) GoAgain() bool           { return false }
 // not implemented: defense-time instant activated ability
 func (RallyTheCoastGuardYellow) NotImplemented() {}
 func (c RallyTheCoastGuardYellow) Play(s *sim.TurnState, self *sim.CardState) {
-	s.LogChain(self, s.AddValue(self.EffectiveAttack()))
+	n := self.DealEffectiveAttack(s)
+	s.Log(self, n)
 }
 
 type RallyTheCoastGuardBlue struct{}
@@ -62,5 +64,6 @@ func (RallyTheCoastGuardBlue) GoAgain() bool           { return false }
 // not implemented: defense-time instant activated ability
 func (RallyTheCoastGuardBlue) NotImplemented() {}
 func (c RallyTheCoastGuardBlue) Play(s *sim.TurnState, self *sim.CardState) {
-	s.LogChain(self, s.AddValue(self.EffectiveAttack()))
+	n := self.DealEffectiveAttack(s)
+	s.Log(self, n)
 }

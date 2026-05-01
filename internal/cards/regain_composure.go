@@ -27,5 +27,6 @@ func (RegainComposureBlue) GoAgain() bool           { return true }
 func (RegainComposureBlue) NotImplemented() {}
 func (RegainComposureBlue) Play(s *sim.TurnState, self *sim.CardState) {
 	grantNextAttackActionBonus(s, 1)
-	s.LogChain(self, s.AddValue(self.EffectiveAttack()))
+	n := self.DealEffectiveAttack(s)
+	s.Log(self, n)
 }

@@ -26,5 +26,6 @@ func (LookTuffRed) GoAgain() bool           { return false }
 // not implemented: pay {r} or lose 1{p} resolved as 'always pay'
 func (LookTuffRed) NotImplemented() {}
 func (c LookTuffRed) Play(s *sim.TurnState, self *sim.CardState) {
-	s.LogChain(self, s.AddValue(self.EffectiveAttack()))
+	n := self.DealEffectiveAttack(s)
+	s.Log(self, n)
 }

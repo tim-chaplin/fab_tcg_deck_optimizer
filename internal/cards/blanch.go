@@ -27,7 +27,8 @@ func (BlanchRed) GoAgain() bool           { return false }
 // not implemented: opponent 'lose all colors' debuff
 func (BlanchRed) NotImplemented() {}
 func (BlanchRed) Play(s *sim.TurnState, self *sim.CardState) {
-	s.LogChain(self, s.AddValue(self.EffectiveAttack()))
+	n := self.DealEffectiveAttack(s)
+	s.Log(self, n)
 }
 
 type BlanchYellow struct{}
@@ -44,7 +45,8 @@ func (BlanchYellow) GoAgain() bool           { return false }
 // not implemented: opponent 'lose all colors' debuff
 func (BlanchYellow) NotImplemented() {}
 func (BlanchYellow) Play(s *sim.TurnState, self *sim.CardState) {
-	s.LogChain(self, s.AddValue(self.EffectiveAttack()))
+	n := self.DealEffectiveAttack(s)
+	s.Log(self, n)
 }
 
 type BlanchBlue struct{}
@@ -61,5 +63,6 @@ func (BlanchBlue) GoAgain() bool           { return false }
 // not implemented: opponent 'lose all colors' debuff
 func (BlanchBlue) NotImplemented() {}
 func (BlanchBlue) Play(s *sim.TurnState, self *sim.CardState) {
-	s.LogChain(self, s.AddValue(self.EffectiveAttack()))
+	n := self.DealEffectiveAttack(s)
+	s.Log(self, n)
 }

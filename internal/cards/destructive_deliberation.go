@@ -27,7 +27,8 @@ func (DestructiveDeliberationRed) GoAgain() bool           { return false }
 // not implemented: ponder tokens
 func (DestructiveDeliberationRed) NotImplemented() {}
 func (DestructiveDeliberationRed) Play(s *sim.TurnState, self *sim.CardState) {
-	s.LogChain(self, s.AddValue(self.EffectiveAttack()))
+	n := self.DealEffectiveAttack(s)
+	s.Log(self, n)
 }
 
 type DestructiveDeliberationYellow struct{}
@@ -44,7 +45,8 @@ func (DestructiveDeliberationYellow) GoAgain() bool           { return false }
 // not implemented: ponder tokens
 func (DestructiveDeliberationYellow) NotImplemented() {}
 func (DestructiveDeliberationYellow) Play(s *sim.TurnState, self *sim.CardState) {
-	s.LogChain(self, s.AddValue(self.EffectiveAttack()))
+	n := self.DealEffectiveAttack(s)
+	s.Log(self, n)
 }
 
 type DestructiveDeliberationBlue struct{}
@@ -61,5 +63,6 @@ func (DestructiveDeliberationBlue) GoAgain() bool           { return false }
 // not implemented: ponder tokens
 func (DestructiveDeliberationBlue) NotImplemented() {}
 func (DestructiveDeliberationBlue) Play(s *sim.TurnState, self *sim.CardState) {
-	s.LogChain(self, s.AddValue(self.EffectiveAttack()))
+	n := self.DealEffectiveAttack(s)
+	s.Log(self, n)
 }

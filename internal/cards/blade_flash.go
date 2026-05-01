@@ -25,4 +25,4 @@ func (BladeFlashBlue) GoAgain() bool           { return false }
 
 // not implemented: AR 'target sword attack gains go again'
 func (BladeFlashBlue) NotImplemented()                            {}
-func (BladeFlashBlue) Play(s *sim.TurnState, self *sim.CardState) { s.LogChain(self, 0) }
+func (BladeFlashBlue) Play(s *sim.TurnState, self *sim.CardState) { s.Log(self, 0) }

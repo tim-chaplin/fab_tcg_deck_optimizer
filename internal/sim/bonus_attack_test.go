@@ -53,7 +53,7 @@ func (g grantBonusAttack) Play(s *TurnState, self *CardState) {
 			break
 		}
 	}
-	s.LogChain(self, 0)
+	s.Log(self, 0)
 }
 
 // grantBonusAttackWeapon scans CardsRemaining for the first weapon swing (card.TypeWeapon, no
@@ -78,7 +78,7 @@ func (g grantBonusAttackWeapon) Play(s *TurnState, self *CardState) {
 			break
 		}
 	}
-	s.LogChain(self, 0)
+	s.Log(self, 0)
 }
 
 // TestPlaySequence_BonusAttackAppliedToTargetDamage pins the core wiring: a granter scheduled

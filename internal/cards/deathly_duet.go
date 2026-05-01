@@ -81,7 +81,8 @@ func deathlyDuetApplyRiders(s *sim.TurnState, self *sim.CardState) {
 	if attackPitched {
 		self.BonusAttack += 2
 	}
-	s.LogChain(self, s.AddValue(self.EffectiveAttack()))
+	n := self.DealEffectiveAttack(s)
+	s.Log(self, n)
 	if nonAttackActionPitched {
 		s.AddValue(s.CreateRunechants(2))
 		s.LogRider(self, 2, "Created 2 runechants")

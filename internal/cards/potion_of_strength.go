@@ -25,4 +25,4 @@ func (PotionOfStrengthBlue) GoAgain() bool           { return false }
 
 // not implemented: activated +2{p} on next attack
 func (PotionOfStrengthBlue) NotImplemented()                            {}
-func (PotionOfStrengthBlue) Play(s *sim.TurnState, self *sim.CardState) { s.LogChain(self, 0) }
+func (PotionOfStrengthBlue) Play(s *sim.TurnState, self *sim.CardState) { s.Log(self, 0) }

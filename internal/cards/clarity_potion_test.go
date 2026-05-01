@@ -18,11 +18,11 @@ func TestClarityPotion_PlayCallsOpt2(t *testing.T) {
 	if s.Value != 0 {
 		t.Errorf("Play() Value = %d, want 0", s.Value)
 	}
-	if len(s.Log) != 2 {
-		t.Fatalf("Log len = %d, want 2 (LogPlay + Opted ...)", len(s.Log))
+	if len(s.LogEntries()) != 2 {
+		t.Fatalf("Log len = %d, want 2 (LogPlay + Opted ...)", len(s.LogEntries()))
 	}
 	want := "Opted [a, b], put [a, b] on top, put [] on bottom"
-	if got := s.Log[1].Text; got != want {
+	if got := s.LogEntries()[1].Text; got != want {
 		t.Errorf("Opt log entry = %q, want %q", got, want)
 	}
 }

@@ -19,5 +19,6 @@ func (ToughenUpBlue) Defense() int            { return 4 }
 func (ToughenUpBlue) Types() card.TypeSet     { return defenseReactionTypes }
 func (ToughenUpBlue) GoAgain() bool           { return false }
 func (ToughenUpBlue) Play(s *sim.TurnState, self *sim.CardState) {
-	s.LogChain(self, s.ApplyDefenseValue(self.EffectiveDefense()))
+	n := self.DealEffectiveDefense(s)
+	s.Log(self, n)
 }

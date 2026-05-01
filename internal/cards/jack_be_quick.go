@@ -29,5 +29,6 @@ func (JackBeQuickRed) GoAgain() bool           { return false }
 // not implemented: graveyard-banish cost + on-hit ally steal
 func (JackBeQuickRed) NotImplemented() {}
 func (JackBeQuickRed) Play(s *sim.TurnState, self *sim.CardState) {
-	s.LogChain(self, s.AddValue(self.EffectiveAttack()))
+	n := self.DealEffectiveAttack(s)
+	s.Log(self, n)
 }

@@ -27,7 +27,8 @@ func (WalkThePlankRed) GoAgain() bool           { return false }
 // not implemented: pirate-target freeze rider
 func (WalkThePlankRed) NotImplemented() {}
 func (WalkThePlankRed) Play(s *sim.TurnState, self *sim.CardState) {
-	s.LogChain(self, s.AddValue(self.EffectiveAttack()))
+	n := self.DealEffectiveAttack(s)
+	s.Log(self, n)
 }
 
 type WalkThePlankYellow struct{}
@@ -44,7 +45,8 @@ func (WalkThePlankYellow) GoAgain() bool           { return false }
 // not implemented: pirate-target freeze rider
 func (WalkThePlankYellow) NotImplemented() {}
 func (WalkThePlankYellow) Play(s *sim.TurnState, self *sim.CardState) {
-	s.LogChain(self, s.AddValue(self.EffectiveAttack()))
+	n := self.DealEffectiveAttack(s)
+	s.Log(self, n)
 }
 
 type WalkThePlankBlue struct{}
@@ -61,5 +63,6 @@ func (WalkThePlankBlue) GoAgain() bool           { return false }
 // not implemented: pirate-target freeze rider
 func (WalkThePlankBlue) NotImplemented() {}
 func (WalkThePlankBlue) Play(s *sim.TurnState, self *sim.CardState) {
-	s.LogChain(self, s.AddValue(self.EffectiveAttack()))
+	n := self.DealEffectiveAttack(s)
+	s.Log(self, n)
 }

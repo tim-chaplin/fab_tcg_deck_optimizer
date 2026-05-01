@@ -27,7 +27,8 @@ func (AetherSlashRed) Defense() int            { return 3 }
 func (AetherSlashRed) Types() card.TypeSet     { return aetherSlashTypes }
 func (AetherSlashRed) GoAgain() bool           { return false }
 func (AetherSlashRed) Play(s *sim.TurnState, self *sim.CardState) {
-	s.LogChain(self, s.AddValue(self.EffectiveAttack()))
+	n := self.DealEffectiveAttack(s)
+	s.Log(self, n)
 	aetherSlashApplyRider(s, self)
 }
 
@@ -42,7 +43,8 @@ func (AetherSlashYellow) Defense() int            { return 3 }
 func (AetherSlashYellow) Types() card.TypeSet     { return aetherSlashTypes }
 func (AetherSlashYellow) GoAgain() bool           { return false }
 func (AetherSlashYellow) Play(s *sim.TurnState, self *sim.CardState) {
-	s.LogChain(self, s.AddValue(self.EffectiveAttack()))
+	n := self.DealEffectiveAttack(s)
+	s.Log(self, n)
 	aetherSlashApplyRider(s, self)
 }
 
@@ -57,7 +59,8 @@ func (AetherSlashBlue) Defense() int            { return 3 }
 func (AetherSlashBlue) Types() card.TypeSet     { return aetherSlashTypes }
 func (AetherSlashBlue) GoAgain() bool           { return false }
 func (AetherSlashBlue) Play(s *sim.TurnState, self *sim.CardState) {
-	s.LogChain(self, s.AddValue(self.EffectiveAttack()))
+	n := self.DealEffectiveAttack(s)
+	s.Log(self, n)
 	aetherSlashApplyRider(s, self)
 }
 

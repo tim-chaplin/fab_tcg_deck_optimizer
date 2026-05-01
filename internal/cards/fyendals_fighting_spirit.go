@@ -19,7 +19,8 @@ func fyendalsFightingSpiritApplyRider(s *sim.TurnState, self *sim.CardState) {
 	if !sim.HeroWantsLowerHealth() {
 		return
 	}
-	s.LogRider(self, s.AddValue(1), "Gained 1 health (lower health than opposing hero)")
+	s.AddValue(1)
+	s.LogRider(self, 1, "Gained 1 health (lower health than opposing hero)")
 }
 
 type FyendalsFightingSpiritRed struct{}
@@ -33,7 +34,8 @@ func (FyendalsFightingSpiritRed) Defense() int            { return 2 }
 func (FyendalsFightingSpiritRed) Types() card.TypeSet     { return fyendalsFightingSpiritTypes }
 func (FyendalsFightingSpiritRed) GoAgain() bool           { return false }
 func (FyendalsFightingSpiritRed) Play(s *sim.TurnState, self *sim.CardState) {
-	s.LogChain(self, s.AddValue(self.EffectiveAttack()))
+	n := self.DealEffectiveAttack(s)
+	s.Log(self, n)
 	fyendalsFightingSpiritApplyRider(s, self)
 }
 
@@ -48,7 +50,8 @@ func (FyendalsFightingSpiritYellow) Defense() int            { return 2 }
 func (FyendalsFightingSpiritYellow) Types() card.TypeSet     { return fyendalsFightingSpiritTypes }
 func (FyendalsFightingSpiritYellow) GoAgain() bool           { return false }
 func (FyendalsFightingSpiritYellow) Play(s *sim.TurnState, self *sim.CardState) {
-	s.LogChain(self, s.AddValue(self.EffectiveAttack()))
+	n := self.DealEffectiveAttack(s)
+	s.Log(self, n)
 	fyendalsFightingSpiritApplyRider(s, self)
 }
 
@@ -63,6 +66,7 @@ func (FyendalsFightingSpiritBlue) Defense() int            { return 2 }
 func (FyendalsFightingSpiritBlue) Types() card.TypeSet     { return fyendalsFightingSpiritTypes }
 func (FyendalsFightingSpiritBlue) GoAgain() bool           { return false }
 func (FyendalsFightingSpiritBlue) Play(s *sim.TurnState, self *sim.CardState) {
-	s.LogChain(self, s.AddValue(self.EffectiveAttack()))
+	n := self.DealEffectiveAttack(s)
+	s.Log(self, n)
 	fyendalsFightingSpiritApplyRider(s, self)
 }

@@ -26,5 +26,6 @@ func (BlusterBuffRed) GoAgain() bool           { return false }
 // not implemented: pay {r} or lose 1{p} resolved as 'always pay'
 func (BlusterBuffRed) NotImplemented() {}
 func (c BlusterBuffRed) Play(s *sim.TurnState, self *sim.CardState) {
-	s.LogChain(self, s.AddValue(self.EffectiveAttack()))
+	n := self.DealEffectiveAttack(s)
+	s.Log(self, n)
 }

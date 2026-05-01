@@ -27,4 +27,4 @@ func (TalismanOfBalanceBlue) GoAgain() bool           { return true }
 
 // not implemented: end-phase arsenal-fill from top of deck if behind on arsenal count
 func (TalismanOfBalanceBlue) NotImplemented()                            {}
-func (TalismanOfBalanceBlue) Play(s *sim.TurnState, self *sim.CardState) { s.LogChain(self, 0) }
+func (TalismanOfBalanceBlue) Play(s *sim.TurnState, self *sim.CardState) { s.Log(self, 0) }

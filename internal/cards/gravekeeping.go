@@ -27,7 +27,8 @@ func (GravekeepingRed) GoAgain() bool           { return false }
 // not implemented: opponent-graveyard banish rider
 func (GravekeepingRed) NotImplemented() {}
 func (c GravekeepingRed) Play(s *sim.TurnState, self *sim.CardState) {
-	s.LogChain(self, s.AddValue(self.EffectiveAttack()))
+	n := self.DealEffectiveAttack(s)
+	s.Log(self, n)
 }
 
 type GravekeepingYellow struct{}
@@ -44,7 +45,8 @@ func (GravekeepingYellow) GoAgain() bool           { return false }
 // not implemented: opponent-graveyard banish rider
 func (GravekeepingYellow) NotImplemented() {}
 func (c GravekeepingYellow) Play(s *sim.TurnState, self *sim.CardState) {
-	s.LogChain(self, s.AddValue(self.EffectiveAttack()))
+	n := self.DealEffectiveAttack(s)
+	s.Log(self, n)
 }
 
 type GravekeepingBlue struct{}
@@ -61,5 +63,6 @@ func (GravekeepingBlue) GoAgain() bool           { return false }
 // not implemented: opponent-graveyard banish rider
 func (GravekeepingBlue) NotImplemented() {}
 func (c GravekeepingBlue) Play(s *sim.TurnState, self *sim.CardState) {
-	s.LogChain(self, s.AddValue(self.EffectiveAttack()))
+	n := self.DealEffectiveAttack(s)
+	s.Log(self, n)
 }

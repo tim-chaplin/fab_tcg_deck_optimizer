@@ -33,7 +33,8 @@ func (MoneyWhereYaMouthIsRed) GoAgain() bool           { return true }
 func (MoneyWhereYaMouthIsRed) NotImplemented() {}
 func (MoneyWhereYaMouthIsRed) Play(s *sim.TurnState, self *sim.CardState) {
 	grantNextAttackActionBonus(s, 3)
-	s.LogChain(self, s.AddValue(self.EffectiveAttack()))
+	n := self.DealEffectiveAttack(s)
+	s.Log(self, n)
 }
 
 type MoneyWhereYaMouthIsYellow struct{}
@@ -51,7 +52,8 @@ func (MoneyWhereYaMouthIsYellow) GoAgain() bool           { return true }
 func (MoneyWhereYaMouthIsYellow) NotImplemented() {}
 func (MoneyWhereYaMouthIsYellow) Play(s *sim.TurnState, self *sim.CardState) {
 	grantNextAttackActionBonus(s, 2)
-	s.LogChain(self, s.AddValue(self.EffectiveAttack()))
+	n := self.DealEffectiveAttack(s)
+	s.Log(self, n)
 }
 
 type MoneyWhereYaMouthIsBlue struct{}
@@ -69,5 +71,6 @@ func (MoneyWhereYaMouthIsBlue) GoAgain() bool           { return true }
 func (MoneyWhereYaMouthIsBlue) NotImplemented() {}
 func (MoneyWhereYaMouthIsBlue) Play(s *sim.TurnState, self *sim.CardState) {
 	grantNextAttackActionBonus(s, 1)
-	s.LogChain(self, s.AddValue(self.EffectiveAttack()))
+	n := self.DealEffectiveAttack(s)
+	s.Log(self, n)
 }

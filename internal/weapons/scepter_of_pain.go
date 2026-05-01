@@ -24,7 +24,8 @@ func (ScepterOfPain) Types() card.TypeSet     { return scepterOfPainTypes }
 func (ScepterOfPain) GoAgain() bool           { return false }
 func (ScepterOfPain) Hands() int              { return 1 }
 func (c ScepterOfPain) Play(s *sim.TurnState, self *sim.CardState) {
-	s.LogChain(self, s.AddValue(self.EffectiveAttack()))
+	n := self.DealEffectiveAttack(s)
+	s.Log(self, n)
 	s.AddValue(s.CreateRunechants(1))
 	s.LogRider(self, 1, "Created a runechant")
 }

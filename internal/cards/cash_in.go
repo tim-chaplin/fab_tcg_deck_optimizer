@@ -27,4 +27,4 @@ func (CashInYellow) NotSilverAgeLegal()      {}
 
 // not implemented: gold/silver/copper tokens, card draw
 func (CashInYellow) NotImplemented()                            {}
-func (CashInYellow) Play(s *sim.TurnState, self *sim.CardState) { s.LogChain(self, 0) }
+func (CashInYellow) Play(s *sim.TurnState, self *sim.CardState) { s.Log(self, 0) }

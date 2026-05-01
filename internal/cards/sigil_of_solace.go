@@ -26,7 +26,7 @@ func (SigilOfSolaceRed) NotSilverAgeLegal()      {}
 
 // not implemented: 3/2/1{h} gain (also banlisted)
 func (SigilOfSolaceRed) NotImplemented()                            {}
-func (SigilOfSolaceRed) Play(s *sim.TurnState, self *sim.CardState) { s.LogChain(self, 0) }
+func (SigilOfSolaceRed) Play(s *sim.TurnState, self *sim.CardState) { s.Log(self, 0) }
 
 type SigilOfSolaceYellow struct{}
 
@@ -42,7 +42,7 @@ func (SigilOfSolaceYellow) NotSilverAgeLegal()      {}
 
 // not implemented: 3/2/1{h} gain (also banlisted)
 func (SigilOfSolaceYellow) NotImplemented()                            {}
-func (SigilOfSolaceYellow) Play(s *sim.TurnState, self *sim.CardState) { s.LogChain(self, 0) }
+func (SigilOfSolaceYellow) Play(s *sim.TurnState, self *sim.CardState) { s.Log(self, 0) }
 
 type SigilOfSolaceBlue struct{}
 
@@ -58,4 +58,4 @@ func (SigilOfSolaceBlue) NotSilverAgeLegal()      {}
 
 // not implemented: 3/2/1{h} gain (also banlisted)
 func (SigilOfSolaceBlue) NotImplemented()                            {}
-func (SigilOfSolaceBlue) Play(s *sim.TurnState, self *sim.CardState) { s.LogChain(self, 0) }
+func (SigilOfSolaceBlue) Play(s *sim.TurnState, self *sim.CardState) { s.Log(self, 0) }

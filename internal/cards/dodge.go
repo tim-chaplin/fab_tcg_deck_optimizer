@@ -21,5 +21,6 @@ func (DodgeBlue) Defense() int            { return 2 }
 func (DodgeBlue) Types() card.TypeSet     { return defenseReactionTypes }
 func (DodgeBlue) GoAgain() bool           { return false }
 func (DodgeBlue) Play(s *sim.TurnState, self *sim.CardState) {
-	s.LogChain(self, s.ApplyDefenseValue(self.EffectiveDefense()))
+	n := self.DealEffectiveDefense(s)
+	s.Log(self, n)
 }

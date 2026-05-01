@@ -43,7 +43,8 @@ func (DrawnToTheDarkDimensionRed) Types() card.TypeSet       { return drawnToThe
 func (DrawnToTheDarkDimensionRed) GoAgain() bool             { return false }
 func (c DrawnToTheDarkDimensionRed) Play(s *sim.TurnState, self *sim.CardState) {
 	s.DrawOne()
-	s.LogChain(self, s.AddValue(self.EffectiveAttack()))
+	n := self.DealEffectiveAttack(s)
+	s.Log(self, n)
 }
 
 type DrawnToTheDarkDimensionYellow struct{}
@@ -62,7 +63,8 @@ func (DrawnToTheDarkDimensionYellow) Types() card.TypeSet { return drawnToTheDar
 func (DrawnToTheDarkDimensionYellow) GoAgain() bool       { return false }
 func (c DrawnToTheDarkDimensionYellow) Play(s *sim.TurnState, self *sim.CardState) {
 	s.DrawOne()
-	s.LogChain(self, s.AddValue(self.EffectiveAttack()))
+	n := self.DealEffectiveAttack(s)
+	s.Log(self, n)
 }
 
 type DrawnToTheDarkDimensionBlue struct{}
@@ -79,5 +81,6 @@ func (DrawnToTheDarkDimensionBlue) Types() card.TypeSet       { return drawnToTh
 func (DrawnToTheDarkDimensionBlue) GoAgain() bool             { return false }
 func (c DrawnToTheDarkDimensionBlue) Play(s *sim.TurnState, self *sim.CardState) {
 	s.DrawOne()
-	s.LogChain(self, s.AddValue(self.EffectiveAttack()))
+	n := self.DealEffectiveAttack(s)
+	s.Log(self, n)
 }

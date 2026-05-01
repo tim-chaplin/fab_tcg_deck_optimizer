@@ -27,7 +27,8 @@ func (TipOffRed) GoAgain() bool           { return false }
 // not implemented: instant discard-to-mark activation
 func (TipOffRed) NotImplemented() {}
 func (c TipOffRed) Play(s *sim.TurnState, self *sim.CardState) {
-	s.LogChain(self, s.AddValue(self.EffectiveAttack()))
+	n := self.DealEffectiveAttack(s)
+	s.Log(self, n)
 }
 
 type TipOffYellow struct{}
@@ -44,7 +45,8 @@ func (TipOffYellow) GoAgain() bool           { return false }
 // not implemented: instant discard-to-mark activation
 func (TipOffYellow) NotImplemented() {}
 func (c TipOffYellow) Play(s *sim.TurnState, self *sim.CardState) {
-	s.LogChain(self, s.AddValue(self.EffectiveAttack()))
+	n := self.DealEffectiveAttack(s)
+	s.Log(self, n)
 }
 
 type TipOffBlue struct{}
@@ -61,5 +63,6 @@ func (TipOffBlue) GoAgain() bool           { return false }
 // not implemented: instant discard-to-mark activation
 func (TipOffBlue) NotImplemented() {}
 func (c TipOffBlue) Play(s *sim.TurnState, self *sim.CardState) {
-	s.LogChain(self, s.AddValue(self.EffectiveAttack()))
+	n := self.DealEffectiveAttack(s)
+	s.Log(self, n)
 }

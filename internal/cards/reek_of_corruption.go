@@ -25,7 +25,8 @@ func reekOfCorruptionApplyRider(s *sim.TurnState, self *sim.CardState) {
 		return
 	}
 	if sim.LikelyToHit(self) {
-		s.LogRider(self, s.AddValue(sim.DiscardValue), "On-hit discarded a card")
+		s.AddValue(sim.DiscardValue)
+		s.LogRider(self, sim.DiscardValue, "On-hit discarded a card")
 	}
 }
 
@@ -40,7 +41,8 @@ func (ReekOfCorruptionRed) Defense() int            { return 3 }
 func (ReekOfCorruptionRed) Types() card.TypeSet     { return reekOfCorruptionTypes }
 func (ReekOfCorruptionRed) GoAgain() bool           { return false }
 func (ReekOfCorruptionRed) Play(s *sim.TurnState, self *sim.CardState) {
-	s.LogChain(self, s.AddValue(self.EffectiveAttack()))
+	n := self.DealEffectiveAttack(s)
+	s.Log(self, n)
 	reekOfCorruptionApplyRider(s, self)
 }
 
@@ -55,7 +57,8 @@ func (ReekOfCorruptionYellow) Defense() int            { return 3 }
 func (ReekOfCorruptionYellow) Types() card.TypeSet     { return reekOfCorruptionTypes }
 func (ReekOfCorruptionYellow) GoAgain() bool           { return false }
 func (ReekOfCorruptionYellow) Play(s *sim.TurnState, self *sim.CardState) {
-	s.LogChain(self, s.AddValue(self.EffectiveAttack()))
+	n := self.DealEffectiveAttack(s)
+	s.Log(self, n)
 	reekOfCorruptionApplyRider(s, self)
 }
 
@@ -70,6 +73,7 @@ func (ReekOfCorruptionBlue) Defense() int            { return 3 }
 func (ReekOfCorruptionBlue) Types() card.TypeSet     { return reekOfCorruptionTypes }
 func (ReekOfCorruptionBlue) GoAgain() bool           { return false }
 func (ReekOfCorruptionBlue) Play(s *sim.TurnState, self *sim.CardState) {
-	s.LogChain(self, s.AddValue(self.EffectiveAttack()))
+	n := self.DealEffectiveAttack(s)
+	s.Log(self, n)
 	reekOfCorruptionApplyRider(s, self)
 }

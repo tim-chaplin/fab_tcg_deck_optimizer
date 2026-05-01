@@ -22,7 +22,8 @@ func (RagingOnslaughtRed) Defense() int            { return 3 }
 func (RagingOnslaughtRed) Types() card.TypeSet     { return ragingOnslaughtTypes }
 func (RagingOnslaughtRed) GoAgain() bool           { return false }
 func (c RagingOnslaughtRed) Play(s *sim.TurnState, self *sim.CardState) {
-	s.LogChain(self, s.AddValue(self.EffectiveAttack()))
+	n := self.DealEffectiveAttack(s)
+	s.Log(self, n)
 }
 
 type RagingOnslaughtYellow struct{}
@@ -36,7 +37,8 @@ func (RagingOnslaughtYellow) Defense() int            { return 3 }
 func (RagingOnslaughtYellow) Types() card.TypeSet     { return ragingOnslaughtTypes }
 func (RagingOnslaughtYellow) GoAgain() bool           { return false }
 func (c RagingOnslaughtYellow) Play(s *sim.TurnState, self *sim.CardState) {
-	s.LogChain(self, s.AddValue(self.EffectiveAttack()))
+	n := self.DealEffectiveAttack(s)
+	s.Log(self, n)
 }
 
 type RagingOnslaughtBlue struct{}
@@ -50,5 +52,6 @@ func (RagingOnslaughtBlue) Defense() int            { return 3 }
 func (RagingOnslaughtBlue) Types() card.TypeSet     { return ragingOnslaughtTypes }
 func (RagingOnslaughtBlue) GoAgain() bool           { return false }
 func (c RagingOnslaughtBlue) Play(s *sim.TurnState, self *sim.CardState) {
-	s.LogChain(self, s.AddValue(self.EffectiveAttack()))
+	n := self.DealEffectiveAttack(s)
+	s.Log(self, n)
 }

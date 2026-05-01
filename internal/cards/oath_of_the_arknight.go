@@ -59,14 +59,15 @@ func (OathOfTheArknightBlue) Play(s *sim.TurnState, self *sim.CardState) {
 // buffed attack's EffectiveAttack folds the bonus into LikelyToHit and the chain credit
 // lands on the target's slot, not Oath's. Always creates a Runechant token, which IS
 // Oath's own contribution and lands as a sub-line under self's chain entry.
-func oathPlay(s *sim.TurnState, self *sim.CardState, n int) {
+func oathPlay(s *sim.TurnState, self *sim.CardState, bonus int) {
 	for _, pc := range s.CardsRemaining {
 		if pc.Card.Types().IsRunebladeAttack() {
-			pc.BonusAttack += n
+			pc.BonusAttack += bonus
 			break
 		}
 	}
-	s.LogChain(self, s.AddValue(self.EffectiveAttack()))
+	dmg := self.DealEffectiveAttack(s)
+	s.Log(self, dmg)
 	s.AddValue(s.CreateRunechants(1))
 	s.LogRider(self, 1, "Created a runechant")
 }

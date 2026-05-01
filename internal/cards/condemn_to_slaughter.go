@@ -30,7 +30,8 @@ func (CondemnToSlaughterRed) GoAgain() bool           { return true }
 func (CondemnToSlaughterRed) NotImplemented() {}
 func (CondemnToSlaughterRed) Play(s *sim.TurnState, self *sim.CardState) {
 	condemnToSlaughterApplySideEffect(s, 3)
-	s.LogChain(self, s.AddValue(self.EffectiveAttack()))
+	n := self.DealEffectiveAttack(s)
+	s.Log(self, n)
 }
 
 type CondemnToSlaughterYellow struct{}
@@ -49,7 +50,8 @@ func (CondemnToSlaughterYellow) GoAgain() bool           { return true }
 func (CondemnToSlaughterYellow) NotImplemented() {}
 func (CondemnToSlaughterYellow) Play(s *sim.TurnState, self *sim.CardState) {
 	condemnToSlaughterApplySideEffect(s, 2)
-	s.LogChain(self, s.AddValue(self.EffectiveAttack()))
+	n := self.DealEffectiveAttack(s)
+	s.Log(self, n)
 }
 
 type CondemnToSlaughterBlue struct{}
@@ -68,7 +70,8 @@ func (CondemnToSlaughterBlue) GoAgain() bool           { return true }
 func (CondemnToSlaughterBlue) NotImplemented() {}
 func (CondemnToSlaughterBlue) Play(s *sim.TurnState, self *sim.CardState) {
 	condemnToSlaughterApplySideEffect(s, 1)
-	s.LogChain(self, s.AddValue(self.EffectiveAttack()))
+	n := self.DealEffectiveAttack(s)
+	s.Log(self, n)
 }
 
 // condemnToSlaughterApplySideEffect grants +n to the first scheduled Runeblade attack (attack

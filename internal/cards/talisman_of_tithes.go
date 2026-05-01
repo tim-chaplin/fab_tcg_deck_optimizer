@@ -27,4 +27,4 @@ func (TalismanOfTithesBlue) GoAgain() bool           { return true }
 // not implemented: self-destroys on an opposing draw during your action phase → opponent draws
 // minus 1
 func (TalismanOfTithesBlue) NotImplemented()                            {}
-func (TalismanOfTithesBlue) Play(s *sim.TurnState, self *sim.CardState) { s.LogChain(self, 0) }
+func (TalismanOfTithesBlue) Play(s *sim.TurnState, self *sim.CardState) { s.Log(self, 0) }

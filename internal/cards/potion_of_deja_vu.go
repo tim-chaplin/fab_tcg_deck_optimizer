@@ -26,4 +26,4 @@ func (PotionOfDejaVuBlue) GoAgain() bool           { return false }
 
 // not implemented: activated 'put pitch zone on top of deck in any order'
 func (PotionOfDejaVuBlue) NotImplemented()                            {}
-func (PotionOfDejaVuBlue) Play(s *sim.TurnState, self *sim.CardState) { s.LogChain(self, 0) }
+func (PotionOfDejaVuBlue) Play(s *sim.TurnState, self *sim.CardState) { s.Log(self, 0) }

@@ -28,5 +28,6 @@ func (RestvineElixirRed) GoAgain() bool           { return true }
 func (RestvineElixirRed) NotImplemented() {}
 func (RestvineElixirRed) Play(s *sim.TurnState, self *sim.CardState) {
 	grantNextAttackActionBonus(s, 3)
-	s.LogChain(self, s.AddValue(self.EffectiveAttack()))
+	n := self.DealEffectiveAttack(s)
+	s.Log(self, n)
 }

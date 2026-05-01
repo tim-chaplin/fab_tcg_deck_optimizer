@@ -22,7 +22,8 @@ func (CriticalStrikeRed) Defense() int            { return 3 }
 func (CriticalStrikeRed) Types() card.TypeSet     { return criticalStrikeTypes }
 func (CriticalStrikeRed) GoAgain() bool           { return false }
 func (c CriticalStrikeRed) Play(s *sim.TurnState, self *sim.CardState) {
-	s.LogChain(self, s.AddValue(self.EffectiveAttack()))
+	n := self.DealEffectiveAttack(s)
+	s.Log(self, n)
 }
 
 type CriticalStrikeYellow struct{}
@@ -36,7 +37,8 @@ func (CriticalStrikeYellow) Defense() int            { return 3 }
 func (CriticalStrikeYellow) Types() card.TypeSet     { return criticalStrikeTypes }
 func (CriticalStrikeYellow) GoAgain() bool           { return false }
 func (c CriticalStrikeYellow) Play(s *sim.TurnState, self *sim.CardState) {
-	s.LogChain(self, s.AddValue(self.EffectiveAttack()))
+	n := self.DealEffectiveAttack(s)
+	s.Log(self, n)
 }
 
 type CriticalStrikeBlue struct{}
@@ -50,5 +52,6 @@ func (CriticalStrikeBlue) Defense() int            { return 3 }
 func (CriticalStrikeBlue) Types() card.TypeSet     { return criticalStrikeTypes }
 func (CriticalStrikeBlue) GoAgain() bool           { return false }
 func (c CriticalStrikeBlue) Play(s *sim.TurnState, self *sim.CardState) {
-	s.LogChain(self, s.AddValue(self.EffectiveAttack()))
+	n := self.DealEffectiveAttack(s)
+	s.Log(self, n)
 }

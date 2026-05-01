@@ -28,7 +28,8 @@ func (MoneyOrYourLifeRed) GoAgain() bool           { return false }
 // not implemented: gold tokens
 func (MoneyOrYourLifeRed) NotImplemented() {}
 func (MoneyOrYourLifeRed) Play(s *sim.TurnState, self *sim.CardState) {
-	s.LogChain(self, s.AddValue(self.EffectiveAttack()))
+	n := self.DealEffectiveAttack(s)
+	s.Log(self, n)
 }
 
 type MoneyOrYourLifeYellow struct{}
@@ -45,7 +46,8 @@ func (MoneyOrYourLifeYellow) GoAgain() bool           { return false }
 // not implemented: gold tokens
 func (MoneyOrYourLifeYellow) NotImplemented() {}
 func (MoneyOrYourLifeYellow) Play(s *sim.TurnState, self *sim.CardState) {
-	s.LogChain(self, s.AddValue(self.EffectiveAttack()))
+	n := self.DealEffectiveAttack(s)
+	s.Log(self, n)
 }
 
 type MoneyOrYourLifeBlue struct{}
@@ -62,5 +64,6 @@ func (MoneyOrYourLifeBlue) GoAgain() bool           { return false }
 // not implemented: gold tokens
 func (MoneyOrYourLifeBlue) NotImplemented() {}
 func (MoneyOrYourLifeBlue) Play(s *sim.TurnState, self *sim.CardState) {
-	s.LogChain(self, s.AddValue(self.EffectiveAttack()))
+	n := self.DealEffectiveAttack(s)
+	s.Log(self, n)
 }

@@ -26,4 +26,4 @@ func (AmuletOfEchoesBlue) GoAgain() bool           { return true }
 
 // not implemented: Instant 'opposing hero discards 2'; gated on a repeat-name play this turn
 func (AmuletOfEchoesBlue) NotImplemented()                            {}
-func (AmuletOfEchoesBlue) Play(s *sim.TurnState, self *sim.CardState) { s.LogChain(self, 0) }
+func (AmuletOfEchoesBlue) Play(s *sim.TurnState, self *sim.CardState) { s.Log(self, 0) }

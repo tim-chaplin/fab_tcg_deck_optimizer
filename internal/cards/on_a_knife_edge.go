@@ -25,4 +25,4 @@ func (OnAKnifeEdgeYellow) GoAgain() bool           { return true }
 
 // not implemented: next-sword-attack go-again grant (weapon chain not scanned)
 func (OnAKnifeEdgeYellow) NotImplemented()                            {}
-func (OnAKnifeEdgeYellow) Play(s *sim.TurnState, self *sim.CardState) { s.LogChain(self, 0) }
+func (OnAKnifeEdgeYellow) Play(s *sim.TurnState, self *sim.CardState) { s.Log(self, 0) }

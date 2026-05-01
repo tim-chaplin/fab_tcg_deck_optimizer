@@ -27,5 +27,6 @@ func (SmashUpRed) GoAgain() bool           { return false }
 // not implemented: on-hit opponent-arsenal manipulation rider
 func (SmashUpRed) NotImplemented() {}
 func (SmashUpRed) Play(s *sim.TurnState, self *sim.CardState) {
-	s.LogChain(self, s.AddValue(self.EffectiveAttack()))
+	n := self.DealEffectiveAttack(s)
+	s.Log(self, n)
 }

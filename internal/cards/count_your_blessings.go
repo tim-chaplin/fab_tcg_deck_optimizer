@@ -26,7 +26,7 @@ func (CountYourBlessingsRed) NotSilverAgeLegal()      {}
 
 // not implemented: graveyard-scaled X{h} gain (also banlisted)
 func (CountYourBlessingsRed) NotImplemented()                            {}
-func (CountYourBlessingsRed) Play(s *sim.TurnState, self *sim.CardState) { s.LogChain(self, 0) }
+func (CountYourBlessingsRed) Play(s *sim.TurnState, self *sim.CardState) { s.Log(self, 0) }
 
 type CountYourBlessingsYellow struct{}
 
@@ -42,7 +42,7 @@ func (CountYourBlessingsYellow) NotSilverAgeLegal()      {}
 
 // not implemented: graveyard-scaled X{h} gain (also banlisted)
 func (CountYourBlessingsYellow) NotImplemented()                            {}
-func (CountYourBlessingsYellow) Play(s *sim.TurnState, self *sim.CardState) { s.LogChain(self, 0) }
+func (CountYourBlessingsYellow) Play(s *sim.TurnState, self *sim.CardState) { s.Log(self, 0) }
 
 type CountYourBlessingsBlue struct{}
 
@@ -58,4 +58,4 @@ func (CountYourBlessingsBlue) NotSilverAgeLegal()      {}
 
 // not implemented: graveyard-scaled X{h} gain (also banlisted)
 func (CountYourBlessingsBlue) NotImplemented()                            {}
-func (CountYourBlessingsBlue) Play(s *sim.TurnState, self *sim.CardState) { s.LogChain(self, 0) }
+func (CountYourBlessingsBlue) Play(s *sim.TurnState, self *sim.CardState) { s.Log(self, 0) }

@@ -121,13 +121,13 @@ type TurnState struct {
 	// ephemeral) credit themselves the same way. The solver compares permutations on this
 	// field. Reset by the sim per permutation.
 	Value int
-	// Log is the per-event chain trace — one entry per chain step / hero / aura /
-	// ephemeral / weapon swing. Chain-step producers (the sim) call AddLogEntry; pre-
-	// trigger handlers (hero / aura attack-action) call AddPreTriggerLogEntry; post-
-	// trigger handlers (ephemeral attack) call AddPostTriggerLogEntry. The format layer
-	// uses the entry's Kind plus Source to cluster triggers under the right parent.
-	// Reset per permutation.
-	Log []LogEntry
+	// turnLog is the per-event chain trace — one entry per chain step / hero / aura /
+	// ephemeral / weapon swing. Cards reach it through the Log / LogRider / LogPreTrigger
+	// / LogPostTrigger family below; external readers (tests, format layer entry points)
+	// use the LogEntries accessor. The format layer uses each entry's Kind plus Source to
+	// cluster triggers under the right parent. Reset per permutation. Lowercase so callers
+	// can't bypass the skipLog gate by appending directly.
+	turnLog []LogEntry
 	// CardsPlayed is the sequence of cards played (as attacks) this turn, in order.
 	// Populated by the sim after each Play returns so later cards this turn see what was
 	// played before them.
@@ -280,7 +280,7 @@ func (s *TurnState) Opt(n int) {
 	if s.skipLog {
 		return
 	}
-	s.LogChainf(0, "Opted %s, put %s on top, put %s on bottom",
+	s.Logf(0, "Opted %s, put %s on top, put %s on bottom",
 		formatCardList(cards), formatCardList(top), formatCardList(bottom))
 }
 
@@ -384,39 +384,26 @@ func NewTurnState(deck, graveyard []Card) *TurnState {
 	return &TurnState{deck: deck, graveyard: graveyard, cacheable: true}
 }
 
-// AddValue credits n to s.Value, clamped at 0. Pair with the Log* helpers when you also want
-// a log line; call alone for silent value (an aura that pays out without surfacing in the
-// printout, etc.). Negative n is a no-op (FaB damage / prevention can't drive the running
-// total negative). Returns the clamped n so callers can fold the helper into a Log* call.
-func (s *TurnState) AddValue(n int) int {
-	if n <= 0 {
-		return 0
+// AddValue credits n to s.Value, clamped at 0. Pair with a Log helper when you also want a
+// log line; call alone for silent value (an aura that pays out without surfacing in the
+// printout). Negative n is a no-op (FaB damage / prevention can't drive the running total
+// negative). The convention is to put AddValue on its own line, separate from any Log call,
+// so a line beginning with Log( has no side effects.
+func (s *TurnState) AddValue(n int) {
+	if n > 0 {
+		s.Value += n
 	}
-	s.Value += n
-	return n
 }
 
-// ApplyDefenseValue caps n at the remaining IncomingDamage, clamps at 0, decrements
-// IncomingDamage by the credited amount, credits that to s.Value, and returns the credited
-// amount so callers can pass it to LogChain. The cap-and-decrement bookkeeping is the bit
-// that's intricate enough to keep encapsulated; the LogChain call follows on the next line.
-func (s *TurnState) ApplyDefenseValue(n int) int {
-	if n > s.IncomingDamage {
-		n = s.IncomingDamage
-	}
-	if n < 0 {
-		n = 0
-	}
-	s.IncomingDamage -= n
-	s.Value += n
-	return n
-}
+// LogEntries returns the per-event chain trace accumulated by the Log family. External
+// readers (tests, format layer) use this; package-internal code reads the underlying field.
+func (s *TurnState) LogEntries() []LogEntry { return s.turnLog }
 
 // log is the single skipLog gate. When not running silent, appends a LogEntry of the given
-// kind, source, and pre-built text. Every public Log* helper funnels through here or its
-// variadic sibling logf, so the gate lives in exactly one place and cards never have to
-// check skipLog themselves. log does NOT credit s.Value — pair the Log* helper with
-// AddValue when you also want to record damage.
+// kind, source, and pre-built text. Every public Log helper funnels through here or its
+// variadic sibling logf, so the gate lives in exactly one place and cards never check
+// skipLog themselves. log does NOT credit s.Value — pair the Log helper with AddValue when
+// you also want to record damage.
 func (s *TurnState) log(kind LogEntryKind, source, text string, n int) {
 	if s.skipLog {
 		return
@@ -424,7 +411,7 @@ func (s *TurnState) log(kind LogEntryKind, source, text string, n int) {
 	if n < 0 {
 		n = 0
 	}
-	s.Log = append(s.Log, LogEntry{
+	s.turnLog = append(s.turnLog, LogEntry{
 		Kind:   kind,
 		Text:   text,
 		Source: source,
@@ -434,7 +421,7 @@ func (s *TurnState) log(kind LogEntryKind, source, text string, n int) {
 
 // logf is the format variant: same gate as log, but fmt.Sprintf only runs on the !skipLog
 // branch. Callers pay variadic-arg boxing at the call site regardless, so prefer the
-// non-format Log* helpers when text is constant or pre-built.
+// non-format Log helpers when text is constant or pre-built.
 func (s *TurnState) logf(kind LogEntryKind, source string, n int, format string, args ...any) {
 	if s.skipLog {
 		return
@@ -442,7 +429,7 @@ func (s *TurnState) logf(kind LogEntryKind, source string, n int, format string,
 	if n < 0 {
 		n = 0
 	}
-	s.Log = append(s.Log, LogEntry{
+	s.turnLog = append(s.turnLog, LogEntry{
 		Kind:   kind,
 		Text:   fmt.Sprintf(format, args...),
 		Source: source,
@@ -450,33 +437,34 @@ func (s *TurnState) logf(kind LogEntryKind, source string, n int, format string,
 	})
 }
 
-// LogChain appends the canonical "<DisplayName>: <VERB>[ from arsenal]" main-line chain-step
-// entry for self, with display suffix "(+n)". Use for both attacks (n = effective attack) and
-// non-attack chain steps (n = 0). Pair with AddValue if n > 0 so s.Value reflects the
-// contribution. ChainStepText is deferred into the !skipLog branch.
-func (s *TurnState) LogChain(self *CardState, n int) {
+// Log appends the canonical "<DisplayName>: <VERB>[ from arsenal]" main-line chain-step
+// entry for self, with display suffix "(+n)". Use for both attacks (n = effective attack)
+// and non-attack chain steps (n = 0). Pair with AddValue or self.DealEffectiveAttack /
+// self.DealEffectiveDefense on a separate line so the Log call itself has no side effects.
+// ChainStepText is deferred into the !skipLog branch.
+func (s *TurnState) Log(self *CardState, n int) {
 	if s.skipLog {
 		return
 	}
 	if n < 0 {
 		n = 0
 	}
-	s.Log = append(s.Log, LogEntry{
+	s.turnLog = append(s.turnLog, LogEntry{
 		Kind: LogEntryChainStep,
 		Text: ChainStepText(self),
 		N:    n,
 	})
 }
 
-// LogChainf appends a free-form main-line chain-step entry with formatted text. Use when no
+// Logf appends a free-form main-line chain-step entry with formatted text. Use when no
 // CardState applies (Opt's "Opted X, put Y on top, put Z on bottom").
-func (s *TurnState) LogChainf(n int, format string, args ...any) {
+func (s *TurnState) Logf(n int, format string, args ...any) {
 	s.logf(LogEntryChainStep, "", n, format, args...)
 }
 
 // LogRider appends an indented post-trigger sub-line under self's chain entry. Use for
 // "Created a runechant", "Gained 3 health (graveyard trigger)", "On-hit discarded a card",
-// etc. Pair with AddValue when n > 0.
+// etc. Pair with AddValue on a separate preceding line when n > 0.
 func (s *TurnState) LogRider(self *CardState, n int, text string) {
 	if s.skipLog {
 		return

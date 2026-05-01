@@ -26,8 +26,9 @@ func sunKissPlay(heal int, s *sim.TurnState, self *sim.CardState) {
 		s.DrawOne()
 		self.GrantedGoAgain = true
 	}
-	s.LogChain(self, 0)
-	s.LogRiderf(self, s.AddValue(heal), "Gained %d health", heal)
+	s.Log(self, 0)
+	s.AddValue(heal)
+	s.LogRiderf(self, heal, "Gained %d health", heal)
 }
 
 // playedMoonWishThisTurn reports whether any prior card resolved this turn is a Moon Wish

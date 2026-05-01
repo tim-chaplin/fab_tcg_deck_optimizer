@@ -22,7 +22,8 @@ func (BrutalAssaultRed) Defense() int            { return 3 }
 func (BrutalAssaultRed) Types() card.TypeSet     { return brutalAssaultTypes }
 func (BrutalAssaultRed) GoAgain() bool           { return false }
 func (c BrutalAssaultRed) Play(s *sim.TurnState, self *sim.CardState) {
-	s.LogChain(self, s.AddValue(self.EffectiveAttack()))
+	n := self.DealEffectiveAttack(s)
+	s.Log(self, n)
 }
 
 type BrutalAssaultYellow struct{}
@@ -36,7 +37,8 @@ func (BrutalAssaultYellow) Defense() int            { return 3 }
 func (BrutalAssaultYellow) Types() card.TypeSet     { return brutalAssaultTypes }
 func (BrutalAssaultYellow) GoAgain() bool           { return false }
 func (c BrutalAssaultYellow) Play(s *sim.TurnState, self *sim.CardState) {
-	s.LogChain(self, s.AddValue(self.EffectiveAttack()))
+	n := self.DealEffectiveAttack(s)
+	s.Log(self, n)
 }
 
 type BrutalAssaultBlue struct{}
@@ -50,5 +52,6 @@ func (BrutalAssaultBlue) Defense() int            { return 3 }
 func (BrutalAssaultBlue) Types() card.TypeSet     { return brutalAssaultTypes }
 func (BrutalAssaultBlue) GoAgain() bool           { return false }
 func (c BrutalAssaultBlue) Play(s *sim.TurnState, self *sim.CardState) {
-	s.LogChain(self, s.AddValue(self.EffectiveAttack()))
+	n := self.DealEffectiveAttack(s)
+	s.Log(self, n)
 }

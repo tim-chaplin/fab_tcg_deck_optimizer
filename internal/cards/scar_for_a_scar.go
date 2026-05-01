@@ -24,7 +24,8 @@ func (ScarForAScarRed) Defense() int            { return 2 }
 func (ScarForAScarRed) Types() card.TypeSet     { return scarForAScarTypes }
 func (ScarForAScarRed) GoAgain() bool           { return sim.HeroWantsLowerHealth() }
 func (c ScarForAScarRed) Play(s *sim.TurnState, self *sim.CardState) {
-	s.LogChain(self, s.AddValue(self.EffectiveAttack()))
+	n := self.DealEffectiveAttack(s)
+	s.Log(self, n)
 }
 
 type ScarForAScarYellow struct{}
@@ -38,7 +39,8 @@ func (ScarForAScarYellow) Defense() int            { return 2 }
 func (ScarForAScarYellow) Types() card.TypeSet     { return scarForAScarTypes }
 func (ScarForAScarYellow) GoAgain() bool           { return sim.HeroWantsLowerHealth() }
 func (c ScarForAScarYellow) Play(s *sim.TurnState, self *sim.CardState) {
-	s.LogChain(self, s.AddValue(self.EffectiveAttack()))
+	n := self.DealEffectiveAttack(s)
+	s.Log(self, n)
 }
 
 type ScarForAScarBlue struct{}
@@ -52,5 +54,6 @@ func (ScarForAScarBlue) Defense() int            { return 2 }
 func (ScarForAScarBlue) Types() card.TypeSet     { return scarForAScarTypes }
 func (ScarForAScarBlue) GoAgain() bool           { return sim.HeroWantsLowerHealth() }
 func (c ScarForAScarBlue) Play(s *sim.TurnState, self *sim.CardState) {
-	s.LogChain(self, s.AddValue(self.EffectiveAttack()))
+	n := self.DealEffectiveAttack(s)
+	s.Log(self, n)
 }

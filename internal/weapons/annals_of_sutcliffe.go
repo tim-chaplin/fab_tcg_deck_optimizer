@@ -29,5 +29,6 @@ func (AnnalsOfSutcliffe) Hands() int              { return 2 }
 // for zero modelled value, so the optimizer naturally avoids equipping it
 func (AnnalsOfSutcliffe) NotImplemented() {}
 func (AnnalsOfSutcliffe) Play(s *sim.TurnState, self *sim.CardState) {
-	s.LogChain(self, s.AddValue(self.EffectiveAttack()))
+	n := self.DealEffectiveAttack(s)
+	s.Log(self, n)
 }

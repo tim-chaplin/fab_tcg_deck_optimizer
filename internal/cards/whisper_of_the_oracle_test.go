@@ -25,12 +25,12 @@ func TestWhisperOfTheOracle_PlayCallsOpt4(t *testing.T) {
 		if s.Value != 0 {
 			t.Errorf("%s: Play() Value = %d, want 0", card.Name(), s.Value)
 		}
-		if len(s.Log) != 2 {
-			t.Errorf("%s: Log len = %d, want 2 (LogPlay + Opted ...)", card.Name(), len(s.Log))
+		if len(s.LogEntries()) != 2 {
+			t.Errorf("%s: Log len = %d, want 2 (LogPlay + Opted ...)", card.Name(), len(s.LogEntries()))
 			continue
 		}
 		want := "Opted [a, b, c, d], put [a, b, c, d] on top, put [] on bottom"
-		if got := s.Log[1].Text; got != want {
+		if got := s.LogEntries()[1].Text; got != want {
 			t.Errorf("%s: Opt log entry = %q, want %q", card.Name(), got, want)
 		}
 	}

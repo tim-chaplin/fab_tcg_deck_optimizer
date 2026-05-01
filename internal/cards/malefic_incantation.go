@@ -76,7 +76,7 @@ func maleficPlay(s *sim.TurnState, selfState *sim.CardState, selfCard sim.Card, 
 		OncePerTurn: true,
 		Handler:     maleficAuraHandler,
 	})
-	s.LogChain(selfState, 0)
+	s.Log(selfState, 0)
 }
 
 // maleficAuraHandler is the once-per-turn attack-action trigger handler shared across

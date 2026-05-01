@@ -28,7 +28,8 @@ func (CadaverousContrabandRed) GoAgain() bool           { return false }
 // not implemented: on-hit graveyard → top-of-deck rider
 func (CadaverousContrabandRed) NotImplemented() {}
 func (c CadaverousContrabandRed) Play(s *sim.TurnState, self *sim.CardState) {
-	s.LogChain(self, s.AddValue(self.EffectiveAttack()))
+	n := self.DealEffectiveAttack(s)
+	s.Log(self, n)
 }
 
 type CadaverousContrabandYellow struct{}
@@ -45,7 +46,8 @@ func (CadaverousContrabandYellow) GoAgain() bool           { return false }
 // not implemented: on-hit graveyard → top-of-deck rider
 func (CadaverousContrabandYellow) NotImplemented() {}
 func (c CadaverousContrabandYellow) Play(s *sim.TurnState, self *sim.CardState) {
-	s.LogChain(self, s.AddValue(self.EffectiveAttack()))
+	n := self.DealEffectiveAttack(s)
+	s.Log(self, n)
 }
 
 type CadaverousContrabandBlue struct{}
@@ -62,5 +64,6 @@ func (CadaverousContrabandBlue) GoAgain() bool           { return false }
 // not implemented: on-hit graveyard → top-of-deck rider
 func (CadaverousContrabandBlue) NotImplemented() {}
 func (c CadaverousContrabandBlue) Play(s *sim.TurnState, self *sim.CardState) {
-	s.LogChain(self, s.AddValue(self.EffectiveAttack()))
+	n := self.DealEffectiveAttack(s)
+	s.Log(self, n)
 }

@@ -27,7 +27,8 @@ func (PushThePointRed) GoAgain() bool           { return false }
 // not implemented: chain-history +2{p} rider (in-chain history not readable from Play)
 func (PushThePointRed) NotImplemented() {}
 func (c PushThePointRed) Play(s *sim.TurnState, self *sim.CardState) {
-	s.LogChain(self, s.AddValue(self.EffectiveAttack()))
+	n := self.DealEffectiveAttack(s)
+	s.Log(self, n)
 }
 
 type PushThePointYellow struct{}
@@ -44,7 +45,8 @@ func (PushThePointYellow) GoAgain() bool           { return false }
 // not implemented: chain-history +2{p} rider (in-chain history not readable from Play)
 func (PushThePointYellow) NotImplemented() {}
 func (c PushThePointYellow) Play(s *sim.TurnState, self *sim.CardState) {
-	s.LogChain(self, s.AddValue(self.EffectiveAttack()))
+	n := self.DealEffectiveAttack(s)
+	s.Log(self, n)
 }
 
 type PushThePointBlue struct{}
@@ -61,5 +63,6 @@ func (PushThePointBlue) GoAgain() bool           { return false }
 // not implemented: chain-history +2{p} rider (in-chain history not readable from Play)
 func (PushThePointBlue) NotImplemented() {}
 func (c PushThePointBlue) Play(s *sim.TurnState, self *sim.CardState) {
-	s.LogChain(self, s.AddValue(self.EffectiveAttack()))
+	n := self.DealEffectiveAttack(s)
+	s.Log(self, n)
 }

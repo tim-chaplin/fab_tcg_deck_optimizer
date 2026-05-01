@@ -28,7 +28,8 @@ func (TradeInRed) GoAgain() bool           { return false }
 // not implemented: discard-to-draw rider, arsenal-conditional go again
 func (TradeInRed) NotImplemented() {}
 func (c TradeInRed) Play(s *sim.TurnState, self *sim.CardState) {
-	s.LogChain(self, s.AddValue(self.EffectiveAttack()))
+	n := self.DealEffectiveAttack(s)
+	s.Log(self, n)
 }
 
 type TradeInYellow struct{}
@@ -45,7 +46,8 @@ func (TradeInYellow) GoAgain() bool           { return false }
 // not implemented: discard-to-draw rider, arsenal-conditional go again
 func (TradeInYellow) NotImplemented() {}
 func (c TradeInYellow) Play(s *sim.TurnState, self *sim.CardState) {
-	s.LogChain(self, s.AddValue(self.EffectiveAttack()))
+	n := self.DealEffectiveAttack(s)
+	s.Log(self, n)
 }
 
 type TradeInBlue struct{}
@@ -62,5 +64,6 @@ func (TradeInBlue) GoAgain() bool           { return false }
 // not implemented: discard-to-draw rider, arsenal-conditional go again
 func (TradeInBlue) NotImplemented() {}
 func (c TradeInBlue) Play(s *sim.TurnState, self *sim.CardState) {
-	s.LogChain(self, s.AddValue(self.EffectiveAttack()))
+	n := self.DealEffectiveAttack(s)
+	s.Log(self, n)
 }

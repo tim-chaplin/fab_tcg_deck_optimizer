@@ -46,7 +46,8 @@ func (ScoutThePeripheryRed) Types() card.TypeSet     { return scoutThePeripheryT
 func (ScoutThePeripheryRed) GoAgain() bool           { return true }
 func (ScoutThePeripheryRed) Play(s *sim.TurnState, self *sim.CardState) {
 	grantNextArsenalAttackActionBonus(s, 3)
-	s.LogChain(self, s.AddValue(self.EffectiveAttack()))
+	n := self.DealEffectiveAttack(s)
+	s.Log(self, n)
 }
 
 type ScoutThePeripheryYellow struct{}
@@ -61,7 +62,8 @@ func (ScoutThePeripheryYellow) Types() card.TypeSet     { return scoutThePeriphe
 func (ScoutThePeripheryYellow) GoAgain() bool           { return true }
 func (ScoutThePeripheryYellow) Play(s *sim.TurnState, self *sim.CardState) {
 	grantNextArsenalAttackActionBonus(s, 2)
-	s.LogChain(self, s.AddValue(self.EffectiveAttack()))
+	n := self.DealEffectiveAttack(s)
+	s.Log(self, n)
 }
 
 type ScoutThePeripheryBlue struct{}
@@ -76,5 +78,6 @@ func (ScoutThePeripheryBlue) Types() card.TypeSet     { return scoutThePeriphery
 func (ScoutThePeripheryBlue) GoAgain() bool           { return true }
 func (ScoutThePeripheryBlue) Play(s *sim.TurnState, self *sim.CardState) {
 	grantNextArsenalAttackActionBonus(s, 1)
-	s.LogChain(self, s.AddValue(self.EffectiveAttack()))
+	n := self.DealEffectiveAttack(s)
+	s.Log(self, n)
 }

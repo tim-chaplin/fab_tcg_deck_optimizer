@@ -255,11 +255,11 @@ func TestRegisterStartOfTurn_AutoLogsWithText(t *testing.T) {
 	if got != 1 {
 		t.Errorf("handler return = %d, want 1 (passes through inner return)", got)
 	}
-	if len(fired.Log) != 1 {
-		t.Fatalf("Log len = %d, want 1 entry from auto-log", len(fired.Log))
+	if len(fired.LogEntries()) != 1 {
+		t.Fatalf("Log len = %d, want 1 entry from auto-log", len(fired.LogEntries()))
 	}
-	if want := "Test Aura: Gained 1 health (+1)"; fired.Log[0].Text != want {
-		t.Errorf("auto-log text = %q, want %q", fired.Log[0].Text, want)
+	if want := "Test Aura: Gained 1 health (+1)"; fired.LogEntries()[0].Text != want {
+		t.Errorf("auto-log text = %q, want %q", fired.LogEntries()[0].Text, want)
 	}
 }
 
@@ -273,8 +273,8 @@ func TestRegisterStartOfTurn_NoLogOnZero(t *testing.T) {
 
 	var fired TurnState
 	s.AuraTriggers[0].Handler(&fired, &s.AuraTriggers[0])
-	if len(fired.Log) != 0 {
-		t.Errorf("Log = %v, want empty (handler returned 0)", fired.Log)
+	if len(fired.LogEntries()) != 0 {
+		t.Errorf("Log = %v, want empty (handler returned 0)", fired.LogEntries())
 	}
 }
 
@@ -292,11 +292,11 @@ func TestRegisterStartOfTurn_EmptyTextLeavesHandlerAlone(t *testing.T) {
 
 	var fired TurnState
 	s.AuraTriggers[0].Handler(&fired, &s.AuraTriggers[0])
-	if len(fired.Log) != 1 {
-		t.Fatalf("Log len = %d, want exactly 1 (handler-authored only)", len(fired.Log))
+	if len(fired.LogEntries()) != 1 {
+		t.Fatalf("Log len = %d, want exactly 1 (handler-authored only)", len(fired.LogEntries()))
 	}
-	if fired.Log[0].Text != "custom handler text" {
-		t.Errorf("Log[0].Text = %q, want handler's own text", fired.Log[0].Text)
+	if fired.LogEntries()[0].Text != "custom handler text" {
+		t.Errorf("Log[0].Text = %q, want handler's own text", fired.LogEntries()[0].Text)
 	}
 }
 

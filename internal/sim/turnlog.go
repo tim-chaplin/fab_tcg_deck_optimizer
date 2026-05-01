@@ -165,7 +165,7 @@ func appendDefenseReactionLines(out []string, a CardAssignment, defenders []Card
 	state.IncomingDamage = remaining
 	cs := CardState{Card: a.Card, FromArsenal: a.FromArsenal}
 	a.Card.Play(state, &cs)
-	return appendGroupedChainEntries(out, state.Log), state.IncomingDamage
+	return appendGroupedChainEntries(out, state.turnLog), state.IncomingDamage
 }
 
 // defendersFromParts collects every card committed to defense — Defense Reactions and plain

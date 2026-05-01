@@ -27,4 +27,4 @@ func (PotionOfSeeingBlue) Defense() int                               { return 0
 func (PotionOfSeeingBlue) Types() card.TypeSet                        { return potionOfSeeingTypes }
 func (PotionOfSeeingBlue) GoAgain() bool                              { return false }
 func (PotionOfSeeingBlue) Unplayable()                                {}
-func (PotionOfSeeingBlue) Play(s *sim.TurnState, self *sim.CardState) { s.LogChain(self, 0) }
+func (PotionOfSeeingBlue) Play(s *sim.TurnState, self *sim.CardState) { s.Log(self, 0) }

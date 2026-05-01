@@ -26,7 +26,8 @@ func (SinkBelowRed) NotSilverAgeLegal()      {}
 // not implemented: discard-to-cycle rider (hand cycling not modelled)
 func (SinkBelowRed) NotImplemented() {}
 func (SinkBelowRed) Play(s *sim.TurnState, self *sim.CardState) {
-	s.LogChain(self, s.ApplyDefenseValue(self.EffectiveDefense()))
+	n := self.DealEffectiveDefense(s)
+	s.Log(self, n)
 }
 
 type SinkBelowYellow struct{}
@@ -44,7 +45,8 @@ func (SinkBelowYellow) NotSilverAgeLegal()      {}
 // not implemented: discard-to-cycle rider (hand cycling not modelled)
 func (SinkBelowYellow) NotImplemented() {}
 func (SinkBelowYellow) Play(s *sim.TurnState, self *sim.CardState) {
-	s.LogChain(self, s.ApplyDefenseValue(self.EffectiveDefense()))
+	n := self.DealEffectiveDefense(s)
+	s.Log(self, n)
 }
 
 type SinkBelowBlue struct{}
@@ -62,5 +64,6 @@ func (SinkBelowBlue) NotSilverAgeLegal()      {}
 // not implemented: discard-to-cycle rider (hand cycling not modelled)
 func (SinkBelowBlue) NotImplemented() {}
 func (SinkBelowBlue) Play(s *sim.TurnState, self *sim.CardState) {
-	s.LogChain(self, s.ApplyDefenseValue(self.EffectiveDefense()))
+	n := self.DealEffectiveDefense(s)
+	s.Log(self, n)
 }

@@ -42,7 +42,8 @@ func (ReduceToRunechantRed) Defense() int              { return 4 }
 func (ReduceToRunechantRed) Types() card.TypeSet       { return reduceToRunechantTypes }
 func (ReduceToRunechantRed) GoAgain() bool             { return false }
 func (ReduceToRunechantRed) Play(s *sim.TurnState, self *sim.CardState) {
-	s.LogChain(self, s.ApplyDefenseValue(self.EffectiveDefense()))
+	n := self.DealEffectiveDefense(s)
+	s.Log(self, n)
 	s.AddValue(s.CreateRunechants(1))
 	s.LogRider(self, 1, "Created a runechant")
 }
@@ -60,7 +61,8 @@ func (ReduceToRunechantYellow) Defense() int              { return 3 }
 func (ReduceToRunechantYellow) Types() card.TypeSet       { return reduceToRunechantTypes }
 func (ReduceToRunechantYellow) GoAgain() bool             { return false }
 func (ReduceToRunechantYellow) Play(s *sim.TurnState, self *sim.CardState) {
-	s.LogChain(self, s.ApplyDefenseValue(self.EffectiveDefense()))
+	n := self.DealEffectiveDefense(s)
+	s.Log(self, n)
 	s.AddValue(s.CreateRunechants(1))
 	s.LogRider(self, 1, "Created a runechant")
 }
@@ -78,7 +80,8 @@ func (ReduceToRunechantBlue) Defense() int              { return 2 }
 func (ReduceToRunechantBlue) Types() card.TypeSet       { return reduceToRunechantTypes }
 func (ReduceToRunechantBlue) GoAgain() bool             { return false }
 func (ReduceToRunechantBlue) Play(s *sim.TurnState, self *sim.CardState) {
-	s.LogChain(self, s.ApplyDefenseValue(self.EffectiveDefense()))
+	n := self.DealEffectiveDefense(s)
+	s.Log(self, n)
 	s.AddValue(s.CreateRunechants(1))
 	s.LogRider(self, 1, "Created a runechant")
 }

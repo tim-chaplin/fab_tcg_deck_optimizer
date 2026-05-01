@@ -25,4 +25,4 @@ func (TalismanOfDousingYellow) GoAgain() bool           { return true }
 
 // not implemented: passive Spellvoid 1
 func (TalismanOfDousingYellow) NotImplemented()                            {}
-func (TalismanOfDousingYellow) Play(s *sim.TurnState, self *sim.CardState) { s.LogChain(self, 0) }
+func (TalismanOfDousingYellow) Play(s *sim.TurnState, self *sim.CardState) { s.Log(self, 0) }

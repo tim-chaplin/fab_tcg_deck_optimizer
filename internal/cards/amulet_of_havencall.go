@@ -27,4 +27,4 @@ func (AmuletOfHavencallBlue) GoAgain() bool           { return true }
 
 // not implemented: DR tutor for Rally the Rearguard; gated on empty hand
 func (AmuletOfHavencallBlue) NotImplemented()                            {}
-func (AmuletOfHavencallBlue) Play(s *sim.TurnState, self *sim.CardState) { s.LogChain(self, 0) }
+func (AmuletOfHavencallBlue) Play(s *sim.TurnState, self *sim.CardState) { s.Log(self, 0) }

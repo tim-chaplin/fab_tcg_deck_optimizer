@@ -24,7 +24,8 @@ func sigilOfSufferingPlay(s *sim.TurnState, self *sim.CardState) {
 	if s.ArcaneDamageDealt || sim.LikelyDamageHits(1, false) {
 		self.BonusDefense++
 	}
-	s.LogChain(self, s.ApplyDefenseValue(self.EffectiveDefense()))
+	n := self.DealEffectiveDefense(s)
+	s.Log(self, n)
 	s.AddValue(s.DealArcaneDamage(1))
 	s.LogRider(self, 1, "Dealt 1 arcane damage")
 }

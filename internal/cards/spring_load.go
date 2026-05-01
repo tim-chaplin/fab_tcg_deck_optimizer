@@ -18,7 +18,8 @@ func springLoadPlay(s *sim.TurnState, self *sim.CardState) {
 	if len(s.Hand) == 0 {
 		self.BonusAttack += 3
 	}
-	s.LogChain(self, s.AddValue(self.EffectiveAttack()))
+	n := self.DealEffectiveAttack(s)
+	s.Log(self, n)
 }
 
 type SpringLoadRed struct{}

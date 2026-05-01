@@ -26,4 +26,4 @@ func (PotionOfIronhideBlue) GoAgain() bool           { return false }
 
 // not implemented: activated +1{d} buff on all your attack actions this turn
 func (PotionOfIronhideBlue) NotImplemented()                            {}
-func (PotionOfIronhideBlue) Play(s *sim.TurnState, self *sim.CardState) { s.LogChain(self, 0) }
+func (PotionOfIronhideBlue) Play(s *sim.TurnState, self *sim.CardState) { s.Log(self, 0) }
