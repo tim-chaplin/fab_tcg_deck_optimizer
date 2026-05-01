@@ -46,7 +46,7 @@ func (WaterTheSeedsRed) Types() card.TypeSet     { return waterTheSeedsTypes }
 func (WaterTheSeedsRed) GoAgain() bool           { return true }
 func (WaterTheSeedsRed) Play(s *sim.TurnState, self *sim.CardState) {
 	grantWaterTheSeedsBonus(s)
-	s.ApplyAndLogEffectiveAttack(self)
+	s.LogChain(self, s.AddValue(self.EffectiveAttack()))
 }
 
 type WaterTheSeedsYellow struct{}
@@ -61,7 +61,7 @@ func (WaterTheSeedsYellow) Types() card.TypeSet     { return waterTheSeedsTypes 
 func (WaterTheSeedsYellow) GoAgain() bool           { return true }
 func (WaterTheSeedsYellow) Play(s *sim.TurnState, self *sim.CardState) {
 	grantWaterTheSeedsBonus(s)
-	s.ApplyAndLogEffectiveAttack(self)
+	s.LogChain(self, s.AddValue(self.EffectiveAttack()))
 }
 
 type WaterTheSeedsBlue struct{}
@@ -76,5 +76,5 @@ func (WaterTheSeedsBlue) Types() card.TypeSet     { return waterTheSeedsTypes }
 func (WaterTheSeedsBlue) GoAgain() bool           { return true }
 func (WaterTheSeedsBlue) Play(s *sim.TurnState, self *sim.CardState) {
 	grantWaterTheSeedsBonus(s)
-	s.ApplyAndLogEffectiveAttack(self)
+	s.LogChain(self, s.AddValue(self.EffectiveAttack()))
 }

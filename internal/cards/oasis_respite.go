@@ -26,7 +26,7 @@ func (OasisRespiteRed) GoAgain() bool           { return false }
 
 // not implemented: Instant 'prevent N damage from chosen source to target hero'; conditional 1{h}
 func (OasisRespiteRed) NotImplemented()                            {}
-func (OasisRespiteRed) Play(s *sim.TurnState, self *sim.CardState) { s.LogPlay(self) }
+func (OasisRespiteRed) Play(s *sim.TurnState, self *sim.CardState) { s.LogChain(self, 0) }
 
 type OasisRespiteYellow struct{}
 
@@ -41,7 +41,7 @@ func (OasisRespiteYellow) GoAgain() bool           { return false }
 
 // not implemented: Instant 'prevent N damage from chosen source to target hero'; conditional 1{h}
 func (OasisRespiteYellow) NotImplemented()                            {}
-func (OasisRespiteYellow) Play(s *sim.TurnState, self *sim.CardState) { s.LogPlay(self) }
+func (OasisRespiteYellow) Play(s *sim.TurnState, self *sim.CardState) { s.LogChain(self, 0) }
 
 type OasisRespiteBlue struct{}
 
@@ -56,4 +56,4 @@ func (OasisRespiteBlue) GoAgain() bool           { return false }
 
 // not implemented: Instant 'prevent N damage from chosen source to target hero'; conditional 1{h}
 func (OasisRespiteBlue) NotImplemented()                            {}
-func (OasisRespiteBlue) Play(s *sim.TurnState, self *sim.CardState) { s.LogPlay(self) }
+func (OasisRespiteBlue) Play(s *sim.TurnState, self *sim.CardState) { s.LogChain(self, 0) }

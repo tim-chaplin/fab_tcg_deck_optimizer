@@ -76,12 +76,16 @@ func maleficPlay(s *sim.TurnState, selfState *sim.CardState, selfCard sim.Card, 
 		OncePerTurn: true,
 		Handler:     maleficAuraHandler,
 	})
-	s.LogPlay(selfState)
+	s.LogChain(selfState, 0)
 }
 
 // maleficAuraHandler is the once-per-turn attack-action trigger handler shared across
 // Malefic Incantation variants. Reads t.Self for log attribution so the handler is a
 // top-level function with no per-Play closure allocation.
 func maleficAuraHandler(s *sim.TurnState, t *sim.AuraTrigger) int {
-	return s.CreateAndLogRunechantsAfterAttack(t.Self, s.TriggeringCard, 1)
+	created := s.CreateRunechants(1)
+	s.AddValue(created)
+	s.LogPostTriggerf(sim.DisplayName(s.TriggeringCard), created,
+		"%s created a runechant", sim.DisplayName(t.Self))
+	return created
 }

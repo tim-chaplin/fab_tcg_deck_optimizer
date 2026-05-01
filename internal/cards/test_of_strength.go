@@ -24,6 +24,6 @@ func (TestOfStrengthRed) GoAgain() bool           { return false }
 // not implemented: gold tokens
 func (TestOfStrengthRed) NotImplemented() {}
 func (TestOfStrengthRed) Play(s *sim.TurnState, self *sim.CardState) {
-	s.ApplyAndLogEffectiveDefense(self)
+	s.LogChain(self, s.ApplyDefenseValue(self.EffectiveDefense()))
 	s.ClashValue(sim.GoldTokenValue)
 }

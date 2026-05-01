@@ -19,7 +19,7 @@ var ferventForerunnerTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, 
 
 func ferventForerunnerPlay(s *sim.TurnState, self *sim.CardState) {
 	self.GrantGoAgainIfFromArsenal()
-	s.ApplyAndLogEffectiveAttack(self)
+	s.LogChain(self, s.AddValue(self.EffectiveAttack()))
 	if sim.LikelyToHit(self) {
 		s.Opt(2)
 	}

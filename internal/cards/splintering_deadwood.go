@@ -28,7 +28,7 @@ func (SplinteringDeadwoodRed) GoAgain() bool           { return false }
 // for a Runechant
 func (SplinteringDeadwoodRed) NotImplemented() {}
 func (SplinteringDeadwoodRed) Play(s *sim.TurnState, self *sim.CardState) {
-	s.ApplyAndLogEffectiveAttack(self)
+	s.LogChain(self, s.AddValue(self.EffectiveAttack()))
 }
 
 type SplinteringDeadwoodYellow struct{}
@@ -46,7 +46,7 @@ func (SplinteringDeadwoodYellow) GoAgain() bool           { return false }
 // for a Runechant
 func (SplinteringDeadwoodYellow) NotImplemented() {}
 func (SplinteringDeadwoodYellow) Play(s *sim.TurnState, self *sim.CardState) {
-	s.ApplyAndLogEffectiveAttack(self)
+	s.LogChain(self, s.AddValue(self.EffectiveAttack()))
 }
 
 type SplinteringDeadwoodBlue struct{}
@@ -64,5 +64,5 @@ func (SplinteringDeadwoodBlue) GoAgain() bool           { return false }
 // for a Runechant
 func (SplinteringDeadwoodBlue) NotImplemented() {}
 func (SplinteringDeadwoodBlue) Play(s *sim.TurnState, self *sim.CardState) {
-	s.ApplyAndLogEffectiveAttack(self)
+	s.LogChain(self, s.AddValue(self.EffectiveAttack()))
 }

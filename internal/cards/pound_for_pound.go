@@ -25,7 +25,7 @@ func poundForPoundPlay(s *sim.TurnState, self *sim.CardState) {
 	if sim.HeroWantsLowerHealth() {
 		self.GrantedDominate = true
 	}
-	s.ApplyAndLogEffectiveAttack(self)
+	s.LogChain(self, s.AddValue(self.EffectiveAttack()))
 }
 
 type PoundForPoundRed struct{}

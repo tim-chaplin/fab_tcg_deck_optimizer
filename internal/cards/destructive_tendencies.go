@@ -26,4 +26,4 @@ func (DestructiveTendenciesBlue) GoAgain() bool           { return false }
 
 // not implemented: Instant 'remove counters from target item / aura token'
 func (DestructiveTendenciesBlue) NotImplemented()                            {}
-func (DestructiveTendenciesBlue) Play(s *sim.TurnState, self *sim.CardState) { s.LogPlay(self) }
+func (DestructiveTendenciesBlue) Play(s *sim.TurnState, self *sim.CardState) { s.LogChain(self, 0) }

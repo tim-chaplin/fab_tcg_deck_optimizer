@@ -20,7 +20,7 @@ var promiseOfPlentyTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, ca
 
 func promiseOfPlentyPlay(s *sim.TurnState, self *sim.CardState) {
 	self.GrantGoAgainIfFromArsenal()
-	s.ApplyAndLogEffectiveAttack(self)
+	s.LogChain(self, s.AddValue(self.EffectiveAttack()))
 }
 
 type PromiseOfPlentyRed struct{}

@@ -26,7 +26,7 @@ func (MemorialGroundRed) GoAgain() bool           { return false }
 
 // not implemented: Instant 'graveyard → top of deck' for low-cost attack action card
 func (MemorialGroundRed) NotImplemented()                            {}
-func (MemorialGroundRed) Play(s *sim.TurnState, self *sim.CardState) { s.LogPlay(self) }
+func (MemorialGroundRed) Play(s *sim.TurnState, self *sim.CardState) { s.LogChain(self, 0) }
 
 type MemorialGroundYellow struct{}
 
@@ -41,7 +41,7 @@ func (MemorialGroundYellow) GoAgain() bool           { return false }
 
 // not implemented: Instant 'graveyard → top of deck' for low-cost attack action card
 func (MemorialGroundYellow) NotImplemented()                            {}
-func (MemorialGroundYellow) Play(s *sim.TurnState, self *sim.CardState) { s.LogPlay(self) }
+func (MemorialGroundYellow) Play(s *sim.TurnState, self *sim.CardState) { s.LogChain(self, 0) }
 
 type MemorialGroundBlue struct{}
 
@@ -56,4 +56,4 @@ func (MemorialGroundBlue) GoAgain() bool           { return false }
 
 // not implemented: Instant 'graveyard → top of deck' for low-cost attack action card
 func (MemorialGroundBlue) NotImplemented()                            {}
-func (MemorialGroundBlue) Play(s *sim.TurnState, self *sim.CardState) { s.LogPlay(self) }
+func (MemorialGroundBlue) Play(s *sim.TurnState, self *sim.CardState) { s.LogChain(self, 0) }

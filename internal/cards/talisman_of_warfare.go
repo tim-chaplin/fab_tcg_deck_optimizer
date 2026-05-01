@@ -26,4 +26,4 @@ func (TalismanOfWarfareYellow) GoAgain() bool           { return true }
 
 // not implemented: self-destroys + wipes all arsenals on a 2-damage hit
 func (TalismanOfWarfareYellow) NotImplemented()                            {}
-func (TalismanOfWarfareYellow) Play(s *sim.TurnState, self *sim.CardState) { s.LogPlay(self) }
+func (TalismanOfWarfareYellow) Play(s *sim.TurnState, self *sim.CardState) { s.LogChain(self, 0) }

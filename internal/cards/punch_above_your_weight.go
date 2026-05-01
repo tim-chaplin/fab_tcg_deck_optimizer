@@ -27,7 +27,7 @@ func (PunchAboveYourWeightRed) GoAgain() bool           { return false }
 // not implemented: pay-{r}{r}{r}-for-+5{p} mode
 func (PunchAboveYourWeightRed) NotImplemented() {}
 func (c PunchAboveYourWeightRed) Play(s *sim.TurnState, self *sim.CardState) {
-	s.ApplyAndLogEffectiveAttack(self)
+	s.LogChain(self, s.AddValue(self.EffectiveAttack()))
 }
 
 type PunchAboveYourWeightYellow struct{}
@@ -44,7 +44,7 @@ func (PunchAboveYourWeightYellow) GoAgain() bool           { return false }
 // not implemented: pay-{r}{r}{r}-for-+5{p} mode
 func (PunchAboveYourWeightYellow) NotImplemented() {}
 func (c PunchAboveYourWeightYellow) Play(s *sim.TurnState, self *sim.CardState) {
-	s.ApplyAndLogEffectiveAttack(self)
+	s.LogChain(self, s.AddValue(self.EffectiveAttack()))
 }
 
 type PunchAboveYourWeightBlue struct{}
@@ -61,5 +61,5 @@ func (PunchAboveYourWeightBlue) GoAgain() bool           { return false }
 // not implemented: pay-{r}{r}{r}-for-+5{p} mode
 func (PunchAboveYourWeightBlue) NotImplemented() {}
 func (c PunchAboveYourWeightBlue) Play(s *sim.TurnState, self *sim.CardState) {
-	s.ApplyAndLogEffectiveAttack(self)
+	s.LogChain(self, s.AddValue(self.EffectiveAttack()))
 }

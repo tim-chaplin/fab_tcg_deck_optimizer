@@ -65,5 +65,5 @@ func (c RunebloodIncantationBlue) Play(s *sim.TurnState, self *sim.CardState) {
 // chain step (no value contribution; every rune is credited at its future-turn fire).
 func runebloodPlay(s *sim.TurnState, selfState *sim.CardState, selfCard sim.Card, n int) {
 	s.RegisterStartOfTurn(selfCard, n, "Created a runechant (verse counter)", func(s *sim.TurnState, _ *sim.AuraTrigger) int { return s.CreateRunechants(1) })
-	s.LogPlay(selfState)
+	s.LogChain(selfState, 0)
 }

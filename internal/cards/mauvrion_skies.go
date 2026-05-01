@@ -59,7 +59,7 @@ func mauvrionSkiesPlay(s *sim.TurnState, selfState *sim.CardState, source sim.Ca
 		Handler: onHitRunechantHandler,
 		N:       n,
 	})
-	s.LogPlay(selfState)
+	s.LogChain(selfState, 0)
 }
 
 // onHitRunechantHandler is the shared "if hits, create N runechants" handler used by
@@ -69,7 +69,16 @@ func onHitRunechantHandler(s *sim.TurnState, t *sim.EphemeralAttackTrigger, targ
 	if !sim.LikelyToHit(target) {
 		return 0
 	}
-	return s.CreateAndLogRunechantsOnHit(t.Source, target.Card, t.N)
+	created := s.CreateRunechants(t.N)
+	s.AddValue(created)
+	if t.N == 1 {
+		s.LogPostTriggerf(sim.DisplayName(target.Card), created,
+			"%s created a runechant on hit", sim.DisplayName(t.Source))
+	} else {
+		s.LogPostTriggerf(sim.DisplayName(target.Card), created,
+			"%s created %d runechants on hit", sim.DisplayName(t.Source), t.N)
+	}
+	return created
 }
 
 type MauvrionSkiesRed struct{}

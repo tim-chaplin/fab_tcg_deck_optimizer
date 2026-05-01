@@ -27,7 +27,7 @@ func (WageGoldRed) GoAgain() bool           { return false }
 // not implemented: gold tokens, universal keyword
 func (WageGoldRed) NotImplemented() {}
 func (c WageGoldRed) Play(s *sim.TurnState, self *sim.CardState) {
-	s.ApplyAndLogEffectiveAttack(self)
+	s.LogChain(self, s.AddValue(self.EffectiveAttack()))
 }
 
 type WageGoldYellow struct{}
@@ -44,7 +44,7 @@ func (WageGoldYellow) GoAgain() bool           { return false }
 // not implemented: gold tokens, universal keyword
 func (WageGoldYellow) NotImplemented() {}
 func (c WageGoldYellow) Play(s *sim.TurnState, self *sim.CardState) {
-	s.ApplyAndLogEffectiveAttack(self)
+	s.LogChain(self, s.AddValue(self.EffectiveAttack()))
 }
 
 type WageGoldBlue struct{}
@@ -61,5 +61,5 @@ func (WageGoldBlue) GoAgain() bool           { return false }
 // not implemented: gold tokens, universal keyword
 func (WageGoldBlue) NotImplemented() {}
 func (c WageGoldBlue) Play(s *sim.TurnState, self *sim.CardState) {
-	s.ApplyAndLogEffectiveAttack(self)
+	s.LogChain(self, s.AddValue(self.EffectiveAttack()))
 }

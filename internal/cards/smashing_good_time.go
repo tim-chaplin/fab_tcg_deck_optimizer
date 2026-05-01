@@ -35,7 +35,7 @@ func (SmashingGoodTimeRed) Play(s *sim.TurnState, self *sim.CardState) {
 	if self.FromArsenal {
 		grantNextAttackActionBonus(s, 3)
 	}
-	s.LogPlay(self)
+	s.LogChain(self, 0)
 }
 
 type SmashingGoodTimeYellow struct{}
@@ -55,7 +55,7 @@ func (SmashingGoodTimeYellow) Play(s *sim.TurnState, self *sim.CardState) {
 	if self.FromArsenal {
 		grantNextAttackActionBonus(s, 2)
 	}
-	s.LogPlay(self)
+	s.LogChain(self, 0)
 }
 
 type SmashingGoodTimeBlue struct{}
@@ -75,5 +75,5 @@ func (SmashingGoodTimeBlue) Play(s *sim.TurnState, self *sim.CardState) {
 	if self.FromArsenal {
 		grantNextAttackActionBonus(s, 1)
 	}
-	s.LogPlay(self)
+	s.LogChain(self, 0)
 }

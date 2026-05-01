@@ -29,7 +29,7 @@ func (PublicBountyRed) GoAgain() bool           { return true }
 func (PublicBountyRed) NotImplemented() {}
 func (PublicBountyRed) Play(s *sim.TurnState, self *sim.CardState) {
 	grantNextAttackActionBonus(s, 3)
-	s.ApplyAndLogEffectiveAttack(self)
+	s.LogChain(self, s.AddValue(self.EffectiveAttack()))
 }
 
 type PublicBountyYellow struct{}
@@ -47,7 +47,7 @@ func (PublicBountyYellow) GoAgain() bool           { return true }
 func (PublicBountyYellow) NotImplemented() {}
 func (PublicBountyYellow) Play(s *sim.TurnState, self *sim.CardState) {
 	grantNextAttackActionBonus(s, 2)
-	s.ApplyAndLogEffectiveAttack(self)
+	s.LogChain(self, s.AddValue(self.EffectiveAttack()))
 }
 
 type PublicBountyBlue struct{}
@@ -65,5 +65,5 @@ func (PublicBountyBlue) GoAgain() bool           { return true }
 func (PublicBountyBlue) NotImplemented() {}
 func (PublicBountyBlue) Play(s *sim.TurnState, self *sim.CardState) {
 	grantNextAttackActionBonus(s, 1)
-	s.ApplyAndLogEffectiveAttack(self)
+	s.LogChain(self, s.AddValue(self.EffectiveAttack()))
 }

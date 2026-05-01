@@ -27,7 +27,7 @@ func (StonyWoottonhogRed) GoAgain() bool           { return false }
 // not implemented: defended-by-<2-non-equipment +1{p} rider
 func (StonyWoottonhogRed) NotImplemented() {}
 func (c StonyWoottonhogRed) Play(s *sim.TurnState, self *sim.CardState) {
-	s.ApplyAndLogEffectiveAttack(self)
+	s.LogChain(self, s.AddValue(self.EffectiveAttack()))
 }
 
 type StonyWoottonhogYellow struct{}
@@ -44,7 +44,7 @@ func (StonyWoottonhogYellow) GoAgain() bool           { return false }
 // not implemented: defended-by-<2-non-equipment +1{p} rider
 func (StonyWoottonhogYellow) NotImplemented() {}
 func (c StonyWoottonhogYellow) Play(s *sim.TurnState, self *sim.CardState) {
-	s.ApplyAndLogEffectiveAttack(self)
+	s.LogChain(self, s.AddValue(self.EffectiveAttack()))
 }
 
 type StonyWoottonhogBlue struct{}
@@ -61,5 +61,5 @@ func (StonyWoottonhogBlue) GoAgain() bool           { return false }
 // not implemented: defended-by-<2-non-equipment +1{p} rider
 func (StonyWoottonhogBlue) NotImplemented() {}
 func (c StonyWoottonhogBlue) Play(s *sim.TurnState, self *sim.CardState) {
-	s.ApplyAndLogEffectiveAttack(self)
+	s.LogChain(self, s.AddValue(self.EffectiveAttack()))
 }

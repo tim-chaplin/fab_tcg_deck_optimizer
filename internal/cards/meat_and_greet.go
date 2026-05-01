@@ -24,9 +24,9 @@ func meatAndGreetPlay(s *sim.TurnState, self *sim.CardState) {
 	if s.ArcaneDamageDealt {
 		self.GrantedGoAgain = true
 	}
-	s.ApplyAndLogEffectiveAttack(self)
+	s.LogChain(self, s.AddValue(self.EffectiveAttack()))
 	if sim.LikelyToHit(self) {
-		s.ApplyAndLogRiderOnPlay(self, s.CreateRunechant(), "On-hit created a runechant")
+		s.LogRider(self, s.AddValue(s.CreateRunechant()), "On-hit created a runechant")
 	}
 }
 

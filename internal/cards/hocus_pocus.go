@@ -23,8 +23,9 @@ func (HocusPocusRed) Defense() int            { return 3 }
 func (HocusPocusRed) Types() card.TypeSet     { return hocusPocusTypes }
 func (HocusPocusRed) GoAgain() bool           { return false }
 func (HocusPocusRed) Play(s *sim.TurnState, self *sim.CardState) {
-	s.ApplyAndLogEffectiveAttack(self)
-	s.CreateAndLogRunechantsOnPlay(self, 1)
+	s.LogChain(self, s.AddValue(self.EffectiveAttack()))
+	s.AddValue(s.CreateRunechants(1))
+	s.LogRider(self, 1, "Created a runechant")
 }
 
 type HocusPocusYellow struct{}
@@ -38,8 +39,9 @@ func (HocusPocusYellow) Defense() int            { return 3 }
 func (HocusPocusYellow) Types() card.TypeSet     { return hocusPocusTypes }
 func (HocusPocusYellow) GoAgain() bool           { return false }
 func (HocusPocusYellow) Play(s *sim.TurnState, self *sim.CardState) {
-	s.ApplyAndLogEffectiveAttack(self)
-	s.CreateAndLogRunechantsOnPlay(self, 1)
+	s.LogChain(self, s.AddValue(self.EffectiveAttack()))
+	s.AddValue(s.CreateRunechants(1))
+	s.LogRider(self, 1, "Created a runechant")
 }
 
 type HocusPocusBlue struct{}
@@ -53,6 +55,7 @@ func (HocusPocusBlue) Defense() int            { return 3 }
 func (HocusPocusBlue) Types() card.TypeSet     { return hocusPocusTypes }
 func (HocusPocusBlue) GoAgain() bool           { return false }
 func (HocusPocusBlue) Play(s *sim.TurnState, self *sim.CardState) {
-	s.ApplyAndLogEffectiveAttack(self)
-	s.CreateAndLogRunechantsOnPlay(self, 1)
+	s.LogChain(self, s.AddValue(self.EffectiveAttack()))
+	s.AddValue(s.CreateRunechants(1))
+	s.LogRider(self, 1, "Created a runechant")
 }

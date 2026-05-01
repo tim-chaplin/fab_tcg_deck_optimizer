@@ -26,4 +26,4 @@ func (PotionOfLuckBlue) GoAgain() bool           { return false }
 
 // not implemented: activated 'shuffle hand+arsenal into deck, draw that many'
 func (PotionOfLuckBlue) NotImplemented()                            {}
-func (PotionOfLuckBlue) Play(s *sim.TurnState, self *sim.CardState) { s.LogPlay(self) }
+func (PotionOfLuckBlue) Play(s *sim.TurnState, self *sim.CardState) { s.LogChain(self, 0) }

@@ -39,5 +39,5 @@ func (TrotAlongBlue) Types() card.TypeSet     { return trotAlongTypes }
 func (TrotAlongBlue) GoAgain() bool           { return true }
 func (TrotAlongBlue) Play(s *sim.TurnState, self *sim.CardState) {
 	trotAlongApplySideEffect(s)
-	s.ApplyAndLogEffectiveAttack(self)
+	s.LogChain(self, s.AddValue(self.EffectiveAttack()))
 }

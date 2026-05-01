@@ -27,7 +27,7 @@ func (SurgingMilitiaRed) GoAgain() bool           { return false }
 // not implemented: defended-by +N{p} rider (defender's hand contents not exposed)
 func (SurgingMilitiaRed) NotImplemented() {}
 func (c SurgingMilitiaRed) Play(s *sim.TurnState, self *sim.CardState) {
-	s.ApplyAndLogEffectiveAttack(self)
+	s.LogChain(self, s.AddValue(self.EffectiveAttack()))
 }
 
 type SurgingMilitiaYellow struct{}
@@ -44,7 +44,7 @@ func (SurgingMilitiaYellow) GoAgain() bool           { return false }
 // not implemented: defended-by +N{p} rider (defender's hand contents not exposed)
 func (SurgingMilitiaYellow) NotImplemented() {}
 func (c SurgingMilitiaYellow) Play(s *sim.TurnState, self *sim.CardState) {
-	s.ApplyAndLogEffectiveAttack(self)
+	s.LogChain(self, s.AddValue(self.EffectiveAttack()))
 }
 
 type SurgingMilitiaBlue struct{}
@@ -61,5 +61,5 @@ func (SurgingMilitiaBlue) GoAgain() bool           { return false }
 // not implemented: defended-by +N{p} rider (defender's hand contents not exposed)
 func (SurgingMilitiaBlue) NotImplemented() {}
 func (c SurgingMilitiaBlue) Play(s *sim.TurnState, self *sim.CardState) {
-	s.ApplyAndLogEffectiveAttack(self)
+	s.LogChain(self, s.AddValue(self.EffectiveAttack()))
 }

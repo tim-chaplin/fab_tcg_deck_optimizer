@@ -25,7 +25,7 @@ func (DragDownRed) GoAgain() bool           { return false }
 // not implemented: -3{p} attacker debuff (defender-side power reduction not exposed)
 func (DragDownRed) NotImplemented() {}
 func (DragDownRed) Play(s *sim.TurnState, self *sim.CardState) {
-	s.ApplyAndLogEffectiveDefense(self)
+	s.LogChain(self, s.ApplyDefenseValue(self.EffectiveDefense()))
 }
 
 type DragDownYellow struct{}
@@ -42,7 +42,7 @@ func (DragDownYellow) GoAgain() bool           { return false }
 // not implemented: -3{p} attacker debuff (defender-side power reduction not exposed)
 func (DragDownYellow) NotImplemented() {}
 func (DragDownYellow) Play(s *sim.TurnState, self *sim.CardState) {
-	s.ApplyAndLogEffectiveDefense(self)
+	s.LogChain(self, s.ApplyDefenseValue(self.EffectiveDefense()))
 }
 
 type DragDownBlue struct{}
@@ -59,5 +59,5 @@ func (DragDownBlue) GoAgain() bool           { return false }
 // not implemented: -3{p} attacker debuff (defender-side power reduction not exposed)
 func (DragDownBlue) NotImplemented() {}
 func (DragDownBlue) Play(s *sim.TurnState, self *sim.CardState) {
-	s.ApplyAndLogEffectiveDefense(self)
+	s.LogChain(self, s.ApplyDefenseValue(self.EffectiveDefense()))
 }

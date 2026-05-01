@@ -29,7 +29,7 @@ func (CrashDownTheGatesRed) GoAgain() bool           { return false }
 // not implemented: deck-reveal comparison + on-hit deck-top destruction
 func (CrashDownTheGatesRed) NotImplemented() {}
 func (CrashDownTheGatesRed) Play(s *sim.TurnState, self *sim.CardState) {
-	s.ApplyAndLogEffectiveAttack(self)
+	s.LogChain(self, s.AddValue(self.EffectiveAttack()))
 }
 
 type CrashDownTheGatesYellow struct{}
@@ -46,7 +46,7 @@ func (CrashDownTheGatesYellow) GoAgain() bool           { return false }
 // not implemented: deck-reveal comparison + on-hit deck-top destruction
 func (CrashDownTheGatesYellow) NotImplemented() {}
 func (CrashDownTheGatesYellow) Play(s *sim.TurnState, self *sim.CardState) {
-	s.ApplyAndLogEffectiveAttack(self)
+	s.LogChain(self, s.AddValue(self.EffectiveAttack()))
 }
 
 type CrashDownTheGatesBlue struct{}
@@ -63,5 +63,5 @@ func (CrashDownTheGatesBlue) GoAgain() bool           { return false }
 // not implemented: deck-reveal comparison + on-hit deck-top destruction
 func (CrashDownTheGatesBlue) NotImplemented() {}
 func (CrashDownTheGatesBlue) Play(s *sim.TurnState, self *sim.CardState) {
-	s.ApplyAndLogEffectiveAttack(self)
+	s.LogChain(self, s.AddValue(self.EffectiveAttack()))
 }

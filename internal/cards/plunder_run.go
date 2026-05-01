@@ -34,7 +34,7 @@ func (PlunderRunRed) Play(s *sim.TurnState, self *sim.CardState) {
 	if self.FromArsenal {
 		grantNextAttackActionBonus(s, 3)
 	}
-	s.LogPlay(self)
+	s.LogChain(self, 0)
 }
 
 type PlunderRunYellow struct{}
@@ -55,7 +55,7 @@ func (PlunderRunYellow) Play(s *sim.TurnState, self *sim.CardState) {
 	if self.FromArsenal {
 		grantNextAttackActionBonus(s, 2)
 	}
-	s.LogPlay(self)
+	s.LogChain(self, 0)
 }
 
 type PlunderRunBlue struct{}
@@ -76,5 +76,5 @@ func (PlunderRunBlue) Play(s *sim.TurnState, self *sim.CardState) {
 	if self.FromArsenal {
 		grantNextAttackActionBonus(s, 1)
 	}
-	s.LogPlay(self)
+	s.LogChain(self, 0)
 }

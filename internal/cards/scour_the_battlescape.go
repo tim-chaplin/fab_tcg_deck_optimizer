@@ -19,7 +19,7 @@ var scourTheBattlescapeTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction
 
 func scourTheBattlescapePlay(s *sim.TurnState, self *sim.CardState) {
 	self.GrantGoAgainIfFromArsenal()
-	s.ApplyAndLogEffectiveAttack(self)
+	s.LogChain(self, s.AddValue(self.EffectiveAttack()))
 }
 
 type ScourTheBattlescapeRed struct{}

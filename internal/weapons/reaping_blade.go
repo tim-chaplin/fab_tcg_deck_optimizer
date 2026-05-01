@@ -27,5 +27,5 @@ func (ReapingBlade) Types() card.TypeSet     { return reapingBladeTypes }
 func (ReapingBlade) GoAgain() bool           { return false }
 func (ReapingBlade) Hands() int              { return 2 }
 func (ReapingBlade) Play(s *sim.TurnState, self *sim.CardState) {
-	s.ApplyAndLogEffectiveAttack(self)
+	s.LogChain(self, s.AddValue(self.EffectiveAttack()))
 }

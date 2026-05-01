@@ -20,7 +20,7 @@ var forceSightTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction)
 // Opt 2.
 func forceSightPlay(s *sim.TurnState, self *sim.CardState, bonus int) {
 	grantNextAttackActionBonus(s, bonus)
-	s.LogPlay(self)
+	s.LogChain(self, 0)
 	if self.FromArsenal {
 		s.Opt(2)
 	}

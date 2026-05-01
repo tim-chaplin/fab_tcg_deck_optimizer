@@ -25,4 +25,4 @@ func (TitForTatBlue) GoAgain() bool           { return true }
 
 // not implemented: freeze/unfreeze
 func (TitForTatBlue) NotImplemented()                            {}
-func (TitForTatBlue) Play(s *sim.TurnState, self *sim.CardState) { s.LogPlay(self) }
+func (TitForTatBlue) Play(s *sim.TurnState, self *sim.CardState) { s.LogChain(self, 0) }

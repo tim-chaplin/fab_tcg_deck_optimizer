@@ -28,7 +28,7 @@ func (OverloadRed) Dominate()               {}
 // not implemented: on-hit go-again rider
 func (OverloadRed) NotImplemented() {}
 func (c OverloadRed) Play(s *sim.TurnState, self *sim.CardState) {
-	s.ApplyAndLogEffectiveAttack(self)
+	s.LogChain(self, s.AddValue(self.EffectiveAttack()))
 }
 
 type OverloadYellow struct{}
@@ -46,7 +46,7 @@ func (OverloadYellow) Dominate()               {}
 // not implemented: on-hit go-again rider
 func (OverloadYellow) NotImplemented() {}
 func (c OverloadYellow) Play(s *sim.TurnState, self *sim.CardState) {
-	s.ApplyAndLogEffectiveAttack(self)
+	s.LogChain(self, s.AddValue(self.EffectiveAttack()))
 }
 
 type OverloadBlue struct{}
@@ -64,5 +64,5 @@ func (OverloadBlue) Dominate()               {}
 // not implemented: on-hit go-again rider
 func (OverloadBlue) NotImplemented() {}
 func (c OverloadBlue) Play(s *sim.TurnState, self *sim.CardState) {
-	s.ApplyAndLogEffectiveAttack(self)
+	s.LogChain(self, s.AddValue(self.EffectiveAttack()))
 }

@@ -27,7 +27,7 @@ func (CutDownToSizeRed) GoAgain() bool           { return false }
 // not implemented: on-hit opponent discard (conditional on hand size)
 func (CutDownToSizeRed) NotImplemented() {}
 func (CutDownToSizeRed) Play(s *sim.TurnState, self *sim.CardState) {
-	s.ApplyAndLogEffectiveAttack(self)
+	s.LogChain(self, s.AddValue(self.EffectiveAttack()))
 }
 
 type CutDownToSizeYellow struct{}
@@ -44,7 +44,7 @@ func (CutDownToSizeYellow) GoAgain() bool           { return false }
 // not implemented: on-hit opponent discard (conditional on hand size)
 func (CutDownToSizeYellow) NotImplemented() {}
 func (CutDownToSizeYellow) Play(s *sim.TurnState, self *sim.CardState) {
-	s.ApplyAndLogEffectiveAttack(self)
+	s.LogChain(self, s.AddValue(self.EffectiveAttack()))
 }
 
 type CutDownToSizeBlue struct{}
@@ -61,5 +61,5 @@ func (CutDownToSizeBlue) GoAgain() bool           { return false }
 // not implemented: on-hit opponent discard (conditional on hand size)
 func (CutDownToSizeBlue) NotImplemented() {}
 func (CutDownToSizeBlue) Play(s *sim.TurnState, self *sim.CardState) {
-	s.ApplyAndLogEffectiveAttack(self)
+	s.LogChain(self, s.AddValue(self.EffectiveAttack()))
 }

@@ -27,7 +27,7 @@ func (OutMuscleRed) GoAgain() bool           { return false }
 // not implemented: defended-by-equal-or-greater-power go-again gate
 func (OutMuscleRed) NotImplemented() {}
 func (c OutMuscleRed) Play(s *sim.TurnState, self *sim.CardState) {
-	s.ApplyAndLogEffectiveAttack(self)
+	s.LogChain(self, s.AddValue(self.EffectiveAttack()))
 }
 
 type OutMuscleYellow struct{}
@@ -44,7 +44,7 @@ func (OutMuscleYellow) GoAgain() bool           { return false }
 // not implemented: defended-by-equal-or-greater-power go-again gate
 func (OutMuscleYellow) NotImplemented() {}
 func (c OutMuscleYellow) Play(s *sim.TurnState, self *sim.CardState) {
-	s.ApplyAndLogEffectiveAttack(self)
+	s.LogChain(self, s.AddValue(self.EffectiveAttack()))
 }
 
 type OutMuscleBlue struct{}
@@ -61,5 +61,5 @@ func (OutMuscleBlue) GoAgain() bool           { return false }
 // not implemented: defended-by-equal-or-greater-power go-again gate
 func (OutMuscleBlue) NotImplemented() {}
 func (c OutMuscleBlue) Play(s *sim.TurnState, self *sim.CardState) {
-	s.ApplyAndLogEffectiveAttack(self)
+	s.LogChain(self, s.AddValue(self.EffectiveAttack()))
 }

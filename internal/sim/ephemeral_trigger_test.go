@@ -21,7 +21,9 @@ func TestFireEphemeralAttackTriggers_SingleFireDropsFromList(t *testing.T) {
 		Source: testutils.RedAttack{},
 		Handler: func(s *TurnState, _ *EphemeralAttackTrigger, target *CardState) int {
 			calls++
-			return s.LogPostTriggerf(DisplayName(target.Card), 1, "test ephemeral fired")
+			s.AddValue(1)
+			s.LogPostTriggerf(DisplayName(target.Card), 1, "test ephemeral fired")
+			return 1
 		},
 	}}}
 	target1 := &CardState{Card: testutils.RedAttack{}}
@@ -83,7 +85,9 @@ func TestFireEphemeralAttackTriggers_NilMatchesAcceptsAnyTarget(t *testing.T) {
 	state := &TurnState{EphemeralAttackTriggers: []EphemeralAttackTrigger{{
 		Source: testutils.RedAttack{},
 		Handler: func(s *TurnState, _ *EphemeralAttackTrigger, target *CardState) int {
-			return s.LogPostTriggerf(DisplayName(target.Card), 2, "test ephemeral fired")
+			s.AddValue(2)
+			s.LogPostTriggerf(DisplayName(target.Card), 2, "test ephemeral fired")
+			return 2
 		},
 	}}}
 	target := &CardState{Card: testutils.YellowAttack{}} // Generic, but Matches=nil accepts all

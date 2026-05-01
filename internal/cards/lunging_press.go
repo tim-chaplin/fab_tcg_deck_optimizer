@@ -25,4 +25,4 @@ func (LungingPressBlue) GoAgain() bool           { return false }
 
 // not implemented: AR +1{p} buff to a target attack action card
 func (LungingPressBlue) NotImplemented()                            {}
-func (LungingPressBlue) Play(s *sim.TurnState, self *sim.CardState) { s.LogPlay(self) }
+func (LungingPressBlue) Play(s *sim.TurnState, self *sim.CardState) { s.LogChain(self, 0) }

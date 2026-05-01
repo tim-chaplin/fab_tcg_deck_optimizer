@@ -20,12 +20,13 @@ var skyFireLanternsTypes = card.NewTypeSet(card.TypeRuneblade, card.TypeAction)
 // self when the deck-top card matches this variant's pitch (color). Reads the deck top via
 // s.Deck() so the cacheable bit flips — whether the rider fires depends on shuffle order.
 func skyFireLanternsPlay(s *sim.TurnState, self *sim.CardState, selfPitch int) {
-	s.ApplyAndLogEffectiveAttack(self)
+	s.LogChain(self, s.AddValue(self.EffectiveAttack()))
 	deck := s.Deck()
 	if len(deck) == 0 || deck[0].Pitch() != selfPitch {
 		return
 	}
-	s.CreateAndLogRunechantsOnPlay(self, 1)
+	s.AddValue(s.CreateRunechants(1))
+	s.LogRider(self, 1, "Created a runechant")
 }
 
 type SkyFireLanternsRed struct{}

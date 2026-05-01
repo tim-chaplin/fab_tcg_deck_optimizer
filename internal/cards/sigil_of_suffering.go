@@ -24,8 +24,9 @@ func sigilOfSufferingPlay(s *sim.TurnState, self *sim.CardState) {
 	if s.ArcaneDamageDealt || sim.LikelyDamageHits(1, false) {
 		self.BonusDefense++
 	}
-	s.ApplyAndLogEffectiveDefense(self)
-	s.DealAndLogArcaneDamage(self, 1)
+	s.LogChain(self, s.ApplyDefenseValue(self.EffectiveDefense()))
+	s.AddValue(s.DealArcaneDamage(1))
+	s.LogRider(self, 1, "Dealt 1 arcane damage")
 }
 
 type SigilOfSufferingRed struct{}

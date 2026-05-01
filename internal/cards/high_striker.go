@@ -26,7 +26,7 @@ func (HighStrikerRed) GoAgain() bool           { return true }
 
 // not implemented: copper tokens
 func (HighStrikerRed) NotImplemented()                            {}
-func (HighStrikerRed) Play(s *sim.TurnState, self *sim.CardState) { s.LogPlay(self) }
+func (HighStrikerRed) Play(s *sim.TurnState, self *sim.CardState) { s.LogChain(self, 0) }
 
 type HighStrikerYellow struct{}
 
@@ -41,7 +41,7 @@ func (HighStrikerYellow) GoAgain() bool           { return true }
 
 // not implemented: copper tokens
 func (HighStrikerYellow) NotImplemented()                            {}
-func (HighStrikerYellow) Play(s *sim.TurnState, self *sim.CardState) { s.LogPlay(self) }
+func (HighStrikerYellow) Play(s *sim.TurnState, self *sim.CardState) { s.LogChain(self, 0) }
 
 type HighStrikerBlue struct{}
 
@@ -56,4 +56,4 @@ func (HighStrikerBlue) GoAgain() bool           { return true }
 
 // not implemented: copper tokens
 func (HighStrikerBlue) NotImplemented()                            {}
-func (HighStrikerBlue) Play(s *sim.TurnState, self *sim.CardState) { s.LogPlay(self) }
+func (HighStrikerBlue) Play(s *sim.TurnState, self *sim.CardState) { s.LogChain(self, 0) }

@@ -44,7 +44,7 @@ func (FlyingHighRed) Types() card.TypeSet     { return flyingHighTypes }
 func (FlyingHighRed) GoAgain() bool           { return true }
 func (FlyingHighRed) Play(s *sim.TurnState, self *sim.CardState) {
 	flyingHighApplySideEffect(s, 1)
-	s.ApplyAndLogEffectiveAttack(self)
+	s.LogChain(self, s.AddValue(self.EffectiveAttack()))
 }
 
 type FlyingHighYellow struct{}
@@ -59,7 +59,7 @@ func (FlyingHighYellow) Types() card.TypeSet     { return flyingHighTypes }
 func (FlyingHighYellow) GoAgain() bool           { return true }
 func (FlyingHighYellow) Play(s *sim.TurnState, self *sim.CardState) {
 	flyingHighApplySideEffect(s, 2)
-	s.ApplyAndLogEffectiveAttack(self)
+	s.LogChain(self, s.AddValue(self.EffectiveAttack()))
 }
 
 type FlyingHighBlue struct{}
@@ -74,5 +74,5 @@ func (FlyingHighBlue) Types() card.TypeSet     { return flyingHighTypes }
 func (FlyingHighBlue) GoAgain() bool           { return true }
 func (FlyingHighBlue) Play(s *sim.TurnState, self *sim.CardState) {
 	flyingHighApplySideEffect(s, 3)
-	s.ApplyAndLogEffectiveAttack(self)
+	s.LogChain(self, s.AddValue(self.EffectiveAttack()))
 }

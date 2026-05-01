@@ -191,46 +191,52 @@ func (BluePitch) Types() card.TypeSet {
 	return card.NewTypeSet(card.TypeGeneric, card.TypeAction)
 }
 func (BluePitch) GoAgain() bool                              { return false }
-func (BluePitch) Play(s *sim.TurnState, self *sim.CardState) { s.LogPlay(self) }
+func (BluePitch) Play(s *sim.TurnState, self *sim.CardState) { s.LogChain(self, 0) }
 
 // BlueAttack is a generic blue attack action: pitches 3, defends 3, attacks 1, costs 1.
 type BlueAttack struct{}
 
-func (BlueAttack) ID() ids.CardID                             { return FakeBlueAttack }
-func (BlueAttack) Name() string                               { return "cardtest.BlueAttack" }
-func (BlueAttack) Cost(*sim.TurnState) int                    { return 1 }
-func (BlueAttack) Pitch() int                                 { return 3 }
-func (BlueAttack) Attack() int                                { return 1 }
-func (BlueAttack) Defense() int                               { return 3 }
-func (BlueAttack) Types() card.TypeSet                        { return genericAttackTypes }
-func (BlueAttack) GoAgain() bool                              { return true }
-func (BlueAttack) Play(s *sim.TurnState, self *sim.CardState) { s.ApplyAndLogEffectiveAttack(self) }
+func (BlueAttack) ID() ids.CardID          { return FakeBlueAttack }
+func (BlueAttack) Name() string            { return "cardtest.BlueAttack" }
+func (BlueAttack) Cost(*sim.TurnState) int { return 1 }
+func (BlueAttack) Pitch() int              { return 3 }
+func (BlueAttack) Attack() int             { return 1 }
+func (BlueAttack) Defense() int            { return 3 }
+func (BlueAttack) Types() card.TypeSet     { return genericAttackTypes }
+func (BlueAttack) GoAgain() bool           { return true }
+func (BlueAttack) Play(s *sim.TurnState, self *sim.CardState) {
+	s.LogChain(self, s.AddValue(self.EffectiveAttack()))
+}
 
 // RedAttack is a generic red attack action: pitches 1, defends 1, attacks 3, costs 1.
 type RedAttack struct{}
 
-func (RedAttack) ID() ids.CardID                             { return FakeRedAttack }
-func (RedAttack) Name() string                               { return "cardtest.RedAttack" }
-func (RedAttack) Cost(*sim.TurnState) int                    { return 1 }
-func (RedAttack) Pitch() int                                 { return 1 }
-func (RedAttack) Attack() int                                { return 3 }
-func (RedAttack) Defense() int                               { return 1 }
-func (RedAttack) Types() card.TypeSet                        { return genericAttackTypes }
-func (RedAttack) GoAgain() bool                              { return true }
-func (RedAttack) Play(s *sim.TurnState, self *sim.CardState) { s.ApplyAndLogEffectiveAttack(self) }
+func (RedAttack) ID() ids.CardID          { return FakeRedAttack }
+func (RedAttack) Name() string            { return "cardtest.RedAttack" }
+func (RedAttack) Cost(*sim.TurnState) int { return 1 }
+func (RedAttack) Pitch() int              { return 1 }
+func (RedAttack) Attack() int             { return 3 }
+func (RedAttack) Defense() int            { return 1 }
+func (RedAttack) Types() card.TypeSet     { return genericAttackTypes }
+func (RedAttack) GoAgain() bool           { return true }
+func (RedAttack) Play(s *sim.TurnState, self *sim.CardState) {
+	s.LogChain(self, s.AddValue(self.EffectiveAttack()))
+}
 
 // YellowAttack is a generic yellow attack action: pitches 2, defends 2, attacks 2, costs 1.
 type YellowAttack struct{}
 
-func (YellowAttack) ID() ids.CardID                             { return FakeYellowAttack }
-func (YellowAttack) Name() string                               { return "cardtest.YellowAttack" }
-func (YellowAttack) Cost(*sim.TurnState) int                    { return 1 }
-func (YellowAttack) Pitch() int                                 { return 2 }
-func (YellowAttack) Attack() int                                { return 2 }
-func (YellowAttack) Defense() int                               { return 2 }
-func (YellowAttack) Types() card.TypeSet                        { return genericAttackTypes }
-func (YellowAttack) GoAgain() bool                              { return true }
-func (YellowAttack) Play(s *sim.TurnState, self *sim.CardState) { s.ApplyAndLogEffectiveAttack(self) }
+func (YellowAttack) ID() ids.CardID          { return FakeYellowAttack }
+func (YellowAttack) Name() string            { return "cardtest.YellowAttack" }
+func (YellowAttack) Cost(*sim.TurnState) int { return 1 }
+func (YellowAttack) Pitch() int              { return 2 }
+func (YellowAttack) Attack() int             { return 2 }
+func (YellowAttack) Defense() int            { return 2 }
+func (YellowAttack) Types() card.TypeSet     { return genericAttackTypes }
+func (YellowAttack) GoAgain() bool           { return true }
+func (YellowAttack) Play(s *sim.TurnState, self *sim.CardState) {
+	s.LogChain(self, s.AddValue(self.EffectiveAttack()))
+}
 
 // genericActionTypes is a plain non-attack action (no Attack subtype). Used by CostlyDraw — a
 // draw-a-card action card. It isn't a Defense Reaction so it can't be played on the opponent's
@@ -252,22 +258,24 @@ func (CostlyDraw) Types() card.TypeSet     { return genericActionTypes }
 func (CostlyDraw) GoAgain() bool           { return true }
 func (CostlyDraw) Play(s *sim.TurnState, self *sim.CardState) {
 	s.DrawOne()
-	s.LogPlay(self)
+	s.LogChain(self, 0)
 }
 
 // CostlyAttack is a 1-cost, pitch-1, 3-damage attack action — the "deal 3 damage" alternative
 // the mid-turn-draw determinism test weighs against CostlyDraw.
 type CostlyAttack struct{}
 
-func (CostlyAttack) ID() ids.CardID                             { return FakeCostlyAttack }
-func (CostlyAttack) Name() string                               { return "cardtest.CostlyAttack" }
-func (CostlyAttack) Cost(*sim.TurnState) int                    { return 1 }
-func (CostlyAttack) Pitch() int                                 { return 1 }
-func (CostlyAttack) Attack() int                                { return 3 }
-func (CostlyAttack) Defense() int                               { return 0 }
-func (CostlyAttack) Types() card.TypeSet                        { return genericAttackTypes }
-func (CostlyAttack) GoAgain() bool                              { return false }
-func (CostlyAttack) Play(s *sim.TurnState, self *sim.CardState) { s.ApplyAndLogEffectiveAttack(self) }
+func (CostlyAttack) ID() ids.CardID          { return FakeCostlyAttack }
+func (CostlyAttack) Name() string            { return "cardtest.CostlyAttack" }
+func (CostlyAttack) Cost(*sim.TurnState) int { return 1 }
+func (CostlyAttack) Pitch() int              { return 1 }
+func (CostlyAttack) Attack() int             { return 3 }
+func (CostlyAttack) Defense() int            { return 0 }
+func (CostlyAttack) Types() card.TypeSet     { return genericAttackTypes }
+func (CostlyAttack) GoAgain() bool           { return false }
+func (CostlyAttack) Play(s *sim.TurnState, self *sim.CardState) {
+	s.LogChain(self, s.AddValue(self.EffectiveAttack()))
+}
 
 var genericDefenseReactionTypes = card.NewTypeSet(card.TypeGeneric, card.TypeDefenseReaction)
 
@@ -284,7 +292,7 @@ func (PitchOneDR) Defense() int            { return 3 }
 func (PitchOneDR) Types() card.TypeSet     { return genericDefenseReactionTypes }
 func (PitchOneDR) GoAgain() bool           { return false }
 func (PitchOneDR) Play(s *sim.TurnState, self *sim.CardState) {
-	s.ApplyAndLogEffectiveDefense(self)
+	s.LogChain(self, s.ApplyDefenseValue(self.EffectiveDefense()))
 }
 
 // HugeAttack is a 0-cost "do one million damage" attack. Outrageous on purpose: as the top of
@@ -295,15 +303,17 @@ type HugeAttack struct{}
 
 const hugeAttackDamage = 1_000_000
 
-func (HugeAttack) ID() ids.CardID                             { return FakeHugeAttack }
-func (HugeAttack) Name() string                               { return "cardtest.HugeAttack" }
-func (HugeAttack) Cost(*sim.TurnState) int                    { return 0 }
-func (HugeAttack) Pitch() int                                 { return 1 }
-func (HugeAttack) Attack() int                                { return hugeAttackDamage }
-func (HugeAttack) Defense() int                               { return 0 }
-func (HugeAttack) Types() card.TypeSet                        { return genericAttackTypes }
-func (HugeAttack) GoAgain() bool                              { return false }
-func (HugeAttack) Play(s *sim.TurnState, self *sim.CardState) { s.ApplyAndLogEffectiveAttack(self) }
+func (HugeAttack) ID() ids.CardID          { return FakeHugeAttack }
+func (HugeAttack) Name() string            { return "cardtest.HugeAttack" }
+func (HugeAttack) Cost(*sim.TurnState) int { return 0 }
+func (HugeAttack) Pitch() int              { return 1 }
+func (HugeAttack) Attack() int             { return hugeAttackDamage }
+func (HugeAttack) Defense() int            { return 0 }
+func (HugeAttack) Types() card.TypeSet     { return genericAttackTypes }
+func (HugeAttack) GoAgain() bool           { return false }
+func (HugeAttack) Play(s *sim.TurnState, self *sim.CardState) {
+	s.LogChain(self, s.AddValue(self.EffectiveAttack()))
+}
 
 // StubCard is a minimal sim.Card. Tests construct it via NewStubCard plus the With…
 // builder methods so call sites only set the fields they care about — every other field
@@ -385,7 +395,7 @@ func (InstantStub) Types() card.TypeSet {
 	return card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeInstant)
 }
 func (InstantStub) GoAgain() bool                              { return false }
-func (InstantStub) Play(s *sim.TurnState, self *sim.CardState) { s.LogPlay(self) }
+func (InstantStub) Play(s *sim.TurnState, self *sim.CardState) { s.LogChain(self, 0) }
 
 // NoGoAgainAttackStub is a 0-cost, 1-power Generic Action - Attack card with no Go again.
 // Tests chain-runner behaviour after the AP pool runs out: a non-Instant follow-up
@@ -401,7 +411,7 @@ func (NoGoAgainAttackStub) Defense() int            { return 0 }
 func (NoGoAgainAttackStub) Types() card.TypeSet     { return genericAttackTypes }
 func (NoGoAgainAttackStub) GoAgain() bool           { return false }
 func (NoGoAgainAttackStub) Play(s *sim.TurnState, self *sim.CardState) {
-	s.ApplyAndLogEffectiveAttack(self)
+	s.LogChain(self, s.AddValue(self.EffectiveAttack()))
 }
 
 // GrantAll is a Runeblade attack-action card that flips GrantedGoAgain=true on every
@@ -424,7 +434,7 @@ func (GrantAll) Play(s *sim.TurnState, self *sim.CardState) {
 	for _, pc := range s.CardsRemaining {
 		pc.GrantedGoAgain = true
 	}
-	s.LogPlay(self)
+	s.LogChain(self, 0)
 }
 
 // GrantSpy is a Runeblade attack-action card. When it plays first in a permutation it
@@ -445,7 +455,7 @@ func (GrantSpy) Types() card.TypeSet {
 }
 func (GrantSpy) GoAgain() bool { return true }
 func (g GrantSpy) Play(s *sim.TurnState, self *sim.CardState) {
-	defer s.LogPlay(self)
+	defer s.LogChain(self, 0)
 	if len(s.CardsPlayed) != 0 {
 		return
 	}

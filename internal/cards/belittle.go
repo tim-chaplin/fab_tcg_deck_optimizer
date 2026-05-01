@@ -30,7 +30,7 @@ func (BelittleRed) NotSilverAgeLegal()      {}
 // not implemented: Minnowism deck-search tutor (additional-cost reveal)
 func (BelittleRed) NotImplemented() {}
 func (c BelittleRed) Play(s *sim.TurnState, self *sim.CardState) {
-	s.ApplyAndLogEffectiveAttack(self)
+	s.LogChain(self, s.AddValue(self.EffectiveAttack()))
 }
 
 type BelittleYellow struct{}
@@ -48,7 +48,7 @@ func (BelittleYellow) NotSilverAgeLegal()      {}
 // not implemented: Minnowism deck-search tutor (additional-cost reveal)
 func (BelittleYellow) NotImplemented() {}
 func (c BelittleYellow) Play(s *sim.TurnState, self *sim.CardState) {
-	s.ApplyAndLogEffectiveAttack(self)
+	s.LogChain(self, s.AddValue(self.EffectiveAttack()))
 }
 
 type BelittleBlue struct{}
@@ -66,5 +66,5 @@ func (BelittleBlue) NotSilverAgeLegal()      {}
 // not implemented: Minnowism deck-search tutor (additional-cost reveal)
 func (BelittleBlue) NotImplemented() {}
 func (c BelittleBlue) Play(s *sim.TurnState, self *sim.CardState) {
-	s.ApplyAndLogEffectiveAttack(self)
+	s.LogChain(self, s.AddValue(self.EffectiveAttack()))
 }

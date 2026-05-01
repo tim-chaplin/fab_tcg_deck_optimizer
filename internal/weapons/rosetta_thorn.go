@@ -32,5 +32,5 @@ func (RosettaThorn) NotSilverAgeLegal()      {}
 // a non-attack action this turn
 func (RosettaThorn) NotImplemented() {}
 func (RosettaThorn) Play(s *sim.TurnState, self *sim.CardState) {
-	s.ApplyAndLogEffectiveAttack(self)
+	s.LogChain(self, s.AddValue(self.EffectiveAttack()))
 }

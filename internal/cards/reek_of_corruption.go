@@ -24,7 +24,9 @@ func reekOfCorruptionApplyRider(s *sim.TurnState, self *sim.CardState) {
 	if !s.HasPlayedOrCreatedAura() {
 		return
 	}
-	s.ApplyAndLogRiderOnHit(self, sim.DiscardValue, "On-hit discarded a card")
+	if sim.LikelyToHit(self) {
+		s.LogRider(self, s.AddValue(sim.DiscardValue), "On-hit discarded a card")
+	}
 }
 
 type ReekOfCorruptionRed struct{}
@@ -38,7 +40,7 @@ func (ReekOfCorruptionRed) Defense() int            { return 3 }
 func (ReekOfCorruptionRed) Types() card.TypeSet     { return reekOfCorruptionTypes }
 func (ReekOfCorruptionRed) GoAgain() bool           { return false }
 func (ReekOfCorruptionRed) Play(s *sim.TurnState, self *sim.CardState) {
-	s.ApplyAndLogEffectiveAttack(self)
+	s.LogChain(self, s.AddValue(self.EffectiveAttack()))
 	reekOfCorruptionApplyRider(s, self)
 }
 
@@ -53,7 +55,7 @@ func (ReekOfCorruptionYellow) Defense() int            { return 3 }
 func (ReekOfCorruptionYellow) Types() card.TypeSet     { return reekOfCorruptionTypes }
 func (ReekOfCorruptionYellow) GoAgain() bool           { return false }
 func (ReekOfCorruptionYellow) Play(s *sim.TurnState, self *sim.CardState) {
-	s.ApplyAndLogEffectiveAttack(self)
+	s.LogChain(self, s.AddValue(self.EffectiveAttack()))
 	reekOfCorruptionApplyRider(s, self)
 }
 
@@ -68,6 +70,6 @@ func (ReekOfCorruptionBlue) Defense() int            { return 3 }
 func (ReekOfCorruptionBlue) Types() card.TypeSet     { return reekOfCorruptionTypes }
 func (ReekOfCorruptionBlue) GoAgain() bool           { return false }
 func (ReekOfCorruptionBlue) Play(s *sim.TurnState, self *sim.CardState) {
-	s.ApplyAndLogEffectiveAttack(self)
+	s.LogChain(self, s.AddValue(self.EffectiveAttack()))
 	reekOfCorruptionApplyRider(s, self)
 }

@@ -40,7 +40,7 @@ func (SloggismRed) Types() card.TypeSet     { return sloggismTypes }
 func (SloggismRed) GoAgain() bool           { return true }
 func (SloggismRed) Play(s *sim.TurnState, self *sim.CardState) {
 	sloggismApplySideEffect(s, 6)
-	s.ApplyAndLogEffectiveAttack(self)
+	s.LogChain(self, s.AddValue(self.EffectiveAttack()))
 }
 
 type SloggismYellow struct{}
@@ -55,7 +55,7 @@ func (SloggismYellow) Types() card.TypeSet     { return sloggismTypes }
 func (SloggismYellow) GoAgain() bool           { return true }
 func (SloggismYellow) Play(s *sim.TurnState, self *sim.CardState) {
 	sloggismApplySideEffect(s, 5)
-	s.ApplyAndLogEffectiveAttack(self)
+	s.LogChain(self, s.AddValue(self.EffectiveAttack()))
 }
 
 type SloggismBlue struct{}
@@ -70,5 +70,5 @@ func (SloggismBlue) Types() card.TypeSet     { return sloggismTypes }
 func (SloggismBlue) GoAgain() bool           { return true }
 func (SloggismBlue) Play(s *sim.TurnState, self *sim.CardState) {
 	sloggismApplySideEffect(s, 4)
-	s.ApplyAndLogEffectiveAttack(self)
+	s.LogChain(self, s.AddValue(self.EffectiveAttack()))
 }

@@ -29,7 +29,7 @@ func (VantagePointRed) GoAgain() bool           { return false }
 func (VantagePointRed) NotImplemented() {}
 func (VantagePointRed) Play(s *sim.TurnState, self *sim.CardState) {
 	vantagePointApplySideEffect(s)
-	s.ApplyAndLogEffectiveAttack(self)
+	s.LogChain(self, s.AddValue(self.EffectiveAttack()))
 }
 
 type VantagePointYellow struct{}
@@ -47,7 +47,7 @@ func (VantagePointYellow) GoAgain() bool           { return false }
 func (VantagePointYellow) NotImplemented() {}
 func (VantagePointYellow) Play(s *sim.TurnState, self *sim.CardState) {
 	vantagePointApplySideEffect(s)
-	s.ApplyAndLogEffectiveAttack(self)
+	s.LogChain(self, s.AddValue(self.EffectiveAttack()))
 }
 
 type VantagePointBlue struct{}
@@ -65,7 +65,7 @@ func (VantagePointBlue) GoAgain() bool           { return false }
 func (VantagePointBlue) NotImplemented() {}
 func (VantagePointBlue) Play(s *sim.TurnState, self *sim.CardState) {
 	vantagePointApplySideEffect(s)
-	s.ApplyAndLogEffectiveAttack(self)
+	s.LogChain(self, s.AddValue(self.EffectiveAttack()))
 }
 
 // vantagePointApplySideEffect flips s.Overpower when an aura entry has been seen this turn,

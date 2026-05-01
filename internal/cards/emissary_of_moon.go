@@ -28,5 +28,5 @@ func (EmissaryOfMoonRed) GoAgain() bool           { return false }
 // not implemented: hand-cycle draw rider
 func (EmissaryOfMoonRed) NotImplemented() {}
 func (c EmissaryOfMoonRed) Play(s *sim.TurnState, self *sim.CardState) {
-	s.ApplyAndLogEffectiveAttack(self)
+	s.LogChain(self, s.AddValue(self.EffectiveAttack()))
 }

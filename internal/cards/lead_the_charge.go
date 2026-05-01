@@ -27,7 +27,7 @@ func (LeadTheChargeRed) GoAgain() bool           { return true }
 
 // not implemented: action point grant
 func (LeadTheChargeRed) NotImplemented()                            {}
-func (LeadTheChargeRed) Play(s *sim.TurnState, self *sim.CardState) { s.LogPlay(self) }
+func (LeadTheChargeRed) Play(s *sim.TurnState, self *sim.CardState) { s.LogChain(self, 0) }
 
 type LeadTheChargeYellow struct{}
 
@@ -42,7 +42,7 @@ func (LeadTheChargeYellow) GoAgain() bool           { return true }
 
 // not implemented: action point grant
 func (LeadTheChargeYellow) NotImplemented()                            {}
-func (LeadTheChargeYellow) Play(s *sim.TurnState, self *sim.CardState) { s.LogPlay(self) }
+func (LeadTheChargeYellow) Play(s *sim.TurnState, self *sim.CardState) { s.LogChain(self, 0) }
 
 type LeadTheChargeBlue struct{}
 
@@ -57,4 +57,4 @@ func (LeadTheChargeBlue) GoAgain() bool           { return true }
 
 // not implemented: action point grant
 func (LeadTheChargeBlue) NotImplemented()                            {}
-func (LeadTheChargeBlue) Play(s *sim.TurnState, self *sim.CardState) { s.LogPlay(self) }
+func (LeadTheChargeBlue) Play(s *sim.TurnState, self *sim.CardState) { s.LogChain(self, 0) }

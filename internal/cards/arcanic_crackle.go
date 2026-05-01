@@ -27,8 +27,9 @@ func (ArcanicCrackleRed) Defense() int            { return 3 }
 func (ArcanicCrackleRed) Types() card.TypeSet     { return arcanicCrackleTypes }
 func (ArcanicCrackleRed) GoAgain() bool           { return false }
 func (ArcanicCrackleRed) Play(s *sim.TurnState, self *sim.CardState) {
-	s.ApplyAndLogEffectiveAttack(self)
-	s.DealAndLogArcaneDamage(self, 1)
+	s.LogChain(self, s.AddValue(self.EffectiveAttack()))
+	s.AddValue(s.DealArcaneDamage(1))
+	s.LogRider(self, 1, "Dealt 1 arcane damage")
 }
 
 type ArcanicCrackleYellow struct{}
@@ -42,8 +43,9 @@ func (ArcanicCrackleYellow) Defense() int            { return 3 }
 func (ArcanicCrackleYellow) Types() card.TypeSet     { return arcanicCrackleTypes }
 func (ArcanicCrackleYellow) GoAgain() bool           { return false }
 func (ArcanicCrackleYellow) Play(s *sim.TurnState, self *sim.CardState) {
-	s.ApplyAndLogEffectiveAttack(self)
-	s.DealAndLogArcaneDamage(self, 1)
+	s.LogChain(self, s.AddValue(self.EffectiveAttack()))
+	s.AddValue(s.DealArcaneDamage(1))
+	s.LogRider(self, 1, "Dealt 1 arcane damage")
 }
 
 type ArcanicCrackleBlue struct{}
@@ -57,6 +59,7 @@ func (ArcanicCrackleBlue) Defense() int            { return 3 }
 func (ArcanicCrackleBlue) Types() card.TypeSet     { return arcanicCrackleTypes }
 func (ArcanicCrackleBlue) GoAgain() bool           { return false }
 func (ArcanicCrackleBlue) Play(s *sim.TurnState, self *sim.CardState) {
-	s.ApplyAndLogEffectiveAttack(self)
-	s.DealAndLogArcaneDamage(self, 1)
+	s.LogChain(self, s.AddValue(self.EffectiveAttack()))
+	s.AddValue(s.DealArcaneDamage(1))
+	s.LogRider(self, 1, "Dealt 1 arcane damage")
 }

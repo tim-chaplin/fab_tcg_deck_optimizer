@@ -28,7 +28,7 @@ func (LookingForAScrapRed) GoAgain() bool           { return false }
 // not implemented: graveyard-banish additional cost and the +1{p}/go-again bonus rider
 func (LookingForAScrapRed) NotImplemented() {}
 func (c LookingForAScrapRed) Play(s *sim.TurnState, self *sim.CardState) {
-	s.ApplyAndLogEffectiveAttack(self)
+	s.LogChain(self, s.AddValue(self.EffectiveAttack()))
 }
 
 type LookingForAScrapYellow struct{}
@@ -45,7 +45,7 @@ func (LookingForAScrapYellow) GoAgain() bool           { return false }
 // not implemented: graveyard-banish additional cost and the +1{p}/go-again bonus rider
 func (LookingForAScrapYellow) NotImplemented() {}
 func (c LookingForAScrapYellow) Play(s *sim.TurnState, self *sim.CardState) {
-	s.ApplyAndLogEffectiveAttack(self)
+	s.LogChain(self, s.AddValue(self.EffectiveAttack()))
 }
 
 type LookingForAScrapBlue struct{}
@@ -62,5 +62,5 @@ func (LookingForAScrapBlue) GoAgain() bool           { return false }
 // not implemented: graveyard-banish additional cost and the +1{p}/go-again bonus rider
 func (LookingForAScrapBlue) NotImplemented() {}
 func (c LookingForAScrapBlue) Play(s *sim.TurnState, self *sim.CardState) {
-	s.ApplyAndLogEffectiveAttack(self)
+	s.LogChain(self, s.AddValue(self.EffectiveAttack()))
 }

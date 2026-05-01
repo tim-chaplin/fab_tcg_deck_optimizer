@@ -90,7 +90,7 @@ func runicReapingPlay(s *sim.TurnState, selfState *sim.CardState, source sim.Car
 		}
 	}
 	if target == nil {
-		s.LogPlay(selfState)
+		s.LogChain(selfState, 0)
 		return
 	}
 	for _, p := range selfState.PitchedToPlay {
@@ -105,5 +105,5 @@ func runicReapingPlay(s *sim.TurnState, selfState *sim.CardState, source sim.Car
 		Handler: onHitRunechantHandler,
 		N:       n,
 	})
-	s.LogPlay(selfState)
+	s.LogChain(selfState, 0)
 }

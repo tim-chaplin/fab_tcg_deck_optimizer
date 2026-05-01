@@ -22,7 +22,7 @@ var sutcliffesResearchNotesTypes = card.NewTypeSet(card.TypeRuneblade, card.Type
 // when any are created. Reads the deck via s.Deck() so the cacheable bit flips — the
 // runechant count produced depends on shuffle order.
 func sutcliffesResearchNotesPlay(s *sim.TurnState, self *sim.CardState, revealCount int) {
-	s.ApplyAndLogEffectiveAttack(self)
+	s.LogChain(self, s.AddValue(self.EffectiveAttack()))
 	deck := s.Deck()
 	n := revealCount
 	if n > len(deck) {
@@ -35,7 +35,9 @@ func sutcliffesResearchNotesPlay(s *sim.TurnState, self *sim.CardState, revealCo
 			count++
 		}
 	}
-	s.CreateAndLogRunechantsOnPlay(self, count)
+	__created := s.CreateRunechants(count)
+	s.AddValue(__created)
+	s.LogRiderf(self, __created, "Created %d runechants", count)
 }
 
 type SutcliffesResearchNotesRed struct{}

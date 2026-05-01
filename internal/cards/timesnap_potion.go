@@ -25,4 +25,4 @@ func (TimesnapPotionBlue) GoAgain() bool           { return false }
 
 // not implemented: activated 'gain 2 action points'
 func (TimesnapPotionBlue) NotImplemented()                            {}
-func (TimesnapPotionBlue) Play(s *sim.TurnState, self *sim.CardState) { s.LogPlay(self) }
+func (TimesnapPotionBlue) Play(s *sim.TurnState, self *sim.CardState) { s.LogChain(self, 0) }

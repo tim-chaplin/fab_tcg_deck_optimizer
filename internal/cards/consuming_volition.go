@@ -27,7 +27,9 @@ func consumingVolitionApplyRider(s *sim.TurnState, self *sim.CardState) {
 	if !s.ArcaneDamageDealt {
 		return
 	}
-	s.ApplyAndLogRiderOnHit(self, sim.DiscardValue, "On-hit discarded a card")
+	if sim.LikelyToHit(self) {
+		s.LogRider(self, s.AddValue(sim.DiscardValue), "On-hit discarded a card")
+	}
 }
 
 type ConsumingVolitionRed struct{}
@@ -41,7 +43,7 @@ func (ConsumingVolitionRed) Defense() int            { return 3 }
 func (ConsumingVolitionRed) Types() card.TypeSet     { return consumingVolitionTypes }
 func (ConsumingVolitionRed) GoAgain() bool           { return false }
 func (ConsumingVolitionRed) Play(s *sim.TurnState, self *sim.CardState) {
-	s.ApplyAndLogEffectiveAttack(self)
+	s.LogChain(self, s.AddValue(self.EffectiveAttack()))
 	consumingVolitionApplyRider(s, self)
 }
 
@@ -56,7 +58,7 @@ func (ConsumingVolitionYellow) Defense() int            { return 3 }
 func (ConsumingVolitionYellow) Types() card.TypeSet     { return consumingVolitionTypes }
 func (ConsumingVolitionYellow) GoAgain() bool           { return false }
 func (ConsumingVolitionYellow) Play(s *sim.TurnState, self *sim.CardState) {
-	s.ApplyAndLogEffectiveAttack(self)
+	s.LogChain(self, s.AddValue(self.EffectiveAttack()))
 	consumingVolitionApplyRider(s, self)
 }
 
@@ -71,6 +73,6 @@ func (ConsumingVolitionBlue) Defense() int            { return 3 }
 func (ConsumingVolitionBlue) Types() card.TypeSet     { return consumingVolitionTypes }
 func (ConsumingVolitionBlue) GoAgain() bool           { return false }
 func (ConsumingVolitionBlue) Play(s *sim.TurnState, self *sim.CardState) {
-	s.ApplyAndLogEffectiveAttack(self)
+	s.LogChain(self, s.AddValue(self.EffectiveAttack()))
 	consumingVolitionApplyRider(s, self)
 }

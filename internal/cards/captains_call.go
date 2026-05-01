@@ -46,7 +46,7 @@ func (CaptainsCallRed) GoAgain() bool           { return true }
 func (CaptainsCallRed) NotImplemented() {}
 func (CaptainsCallRed) Play(s *sim.TurnState, self *sim.CardState) {
 	captainsCallApplySideEffect(s, 2)
-	s.ApplyAndLogEffectiveAttack(self)
+	s.LogChain(self, s.AddValue(self.EffectiveAttack()))
 }
 
 type CaptainsCallYellow struct{}
@@ -64,7 +64,7 @@ func (CaptainsCallYellow) GoAgain() bool           { return true }
 func (CaptainsCallYellow) NotImplemented() {}
 func (CaptainsCallYellow) Play(s *sim.TurnState, self *sim.CardState) {
 	captainsCallApplySideEffect(s, 1)
-	s.ApplyAndLogEffectiveAttack(self)
+	s.LogChain(self, s.AddValue(self.EffectiveAttack()))
 }
 
 type CaptainsCallBlue struct{}
@@ -82,5 +82,5 @@ func (CaptainsCallBlue) GoAgain() bool           { return true }
 func (CaptainsCallBlue) NotImplemented() {}
 func (CaptainsCallBlue) Play(s *sim.TurnState, self *sim.CardState) {
 	captainsCallApplySideEffect(s, 0)
-	s.ApplyAndLogEffectiveAttack(self)
+	s.LogChain(self, s.AddValue(self.EffectiveAttack()))
 }

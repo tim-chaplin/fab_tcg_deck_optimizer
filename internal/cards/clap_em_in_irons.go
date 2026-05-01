@@ -26,4 +26,4 @@ func (ClapEmInIronsBlue) GoAgain() bool           { return true }
 
 // not implemented: passive tap-target Pirate; can't unfreeze; self-destroys at start of turn
 func (ClapEmInIronsBlue) NotImplemented()                            {}
-func (ClapEmInIronsBlue) Play(s *sim.TurnState, self *sim.CardState) { s.LogPlay(self) }
+func (ClapEmInIronsBlue) Play(s *sim.TurnState, self *sim.CardState) { s.LogChain(self, 0) }

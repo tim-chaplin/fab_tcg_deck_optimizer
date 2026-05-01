@@ -32,7 +32,7 @@ func (EnchantingMelodyRed) GoAgain() bool           { return true }
 func (EnchantingMelodyRed) NotImplemented() {}
 func (EnchantingMelodyRed) Play(s *sim.TurnState, self *sim.CardState) {
 	setAuraCreated(s)
-	s.ApplyAndLogEffectiveAttack(self)
+	s.LogChain(self, s.AddValue(self.EffectiveAttack()))
 }
 
 type EnchantingMelodyYellow struct{}
@@ -50,7 +50,7 @@ func (EnchantingMelodyYellow) GoAgain() bool           { return true }
 func (EnchantingMelodyYellow) NotImplemented() {}
 func (EnchantingMelodyYellow) Play(s *sim.TurnState, self *sim.CardState) {
 	setAuraCreated(s)
-	s.ApplyAndLogEffectiveAttack(self)
+	s.LogChain(self, s.AddValue(self.EffectiveAttack()))
 }
 
 type EnchantingMelodyBlue struct{}
@@ -68,5 +68,5 @@ func (EnchantingMelodyBlue) GoAgain() bool           { return true }
 func (EnchantingMelodyBlue) NotImplemented() {}
 func (EnchantingMelodyBlue) Play(s *sim.TurnState, self *sim.CardState) {
 	setAuraCreated(s)
-	s.ApplyAndLogEffectiveAttack(self)
+	s.LogChain(self, s.AddValue(self.EffectiveAttack()))
 }

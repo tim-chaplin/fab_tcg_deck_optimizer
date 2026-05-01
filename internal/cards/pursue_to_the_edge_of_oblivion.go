@@ -27,5 +27,5 @@ func (PursueToTheEdgeOfOblivionRed) GoAgain() bool           { return false }
 // not implemented: on-hit mark
 func (PursueToTheEdgeOfOblivionRed) NotImplemented() {}
 func (PursueToTheEdgeOfOblivionRed) Play(s *sim.TurnState, self *sim.CardState) {
-	s.ApplyAndLogEffectiveAttack(self)
+	s.LogChain(self, s.AddValue(self.EffectiveAttack()))
 }

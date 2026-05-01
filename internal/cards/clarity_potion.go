@@ -29,6 +29,6 @@ func (ClarityPotionBlue) Defense() int            { return 0 }
 func (ClarityPotionBlue) Types() card.TypeSet     { return clarityPotionTypes }
 func (ClarityPotionBlue) GoAgain() bool           { return false }
 func (ClarityPotionBlue) Play(s *sim.TurnState, self *sim.CardState) {
-	s.LogPlay(self)
+	s.LogChain(self, 0)
 	s.Opt(2)
 }

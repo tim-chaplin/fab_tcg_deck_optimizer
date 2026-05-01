@@ -28,7 +28,7 @@ func (InfectiousHostRed) GoAgain() bool           { return false }
 // not implemented: frailty/inertia/bloodrot pox tokens
 func (InfectiousHostRed) NotImplemented() {}
 func (c InfectiousHostRed) Play(s *sim.TurnState, self *sim.CardState) {
-	s.ApplyAndLogEffectiveAttack(self)
+	s.LogChain(self, s.AddValue(self.EffectiveAttack()))
 }
 
 type InfectiousHostYellow struct{}
@@ -45,7 +45,7 @@ func (InfectiousHostYellow) GoAgain() bool           { return false }
 // not implemented: frailty/inertia/bloodrot pox tokens
 func (InfectiousHostYellow) NotImplemented() {}
 func (c InfectiousHostYellow) Play(s *sim.TurnState, self *sim.CardState) {
-	s.ApplyAndLogEffectiveAttack(self)
+	s.LogChain(self, s.AddValue(self.EffectiveAttack()))
 }
 
 type InfectiousHostBlue struct{}
@@ -62,5 +62,5 @@ func (InfectiousHostBlue) GoAgain() bool           { return false }
 // not implemented: frailty/inertia/bloodrot pox tokens
 func (InfectiousHostBlue) NotImplemented() {}
 func (c InfectiousHostBlue) Play(s *sim.TurnState, self *sim.CardState) {
-	s.ApplyAndLogEffectiveAttack(self)
+	s.LogChain(self, s.AddValue(self.EffectiveAttack()))
 }

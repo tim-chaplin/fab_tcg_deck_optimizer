@@ -40,7 +40,7 @@ func (MinnowismRed) Types() card.TypeSet     { return minnowismTypes }
 func (MinnowismRed) GoAgain() bool           { return true }
 func (MinnowismRed) Play(s *sim.TurnState, self *sim.CardState) {
 	minnowismApplySideEffect(s, 3)
-	s.ApplyAndLogEffectiveAttack(self)
+	s.LogChain(self, s.AddValue(self.EffectiveAttack()))
 }
 
 type MinnowismYellow struct{}
@@ -55,7 +55,7 @@ func (MinnowismYellow) Types() card.TypeSet     { return minnowismTypes }
 func (MinnowismYellow) GoAgain() bool           { return true }
 func (MinnowismYellow) Play(s *sim.TurnState, self *sim.CardState) {
 	minnowismApplySideEffect(s, 2)
-	s.ApplyAndLogEffectiveAttack(self)
+	s.LogChain(self, s.AddValue(self.EffectiveAttack()))
 }
 
 type MinnowismBlue struct{}
@@ -70,5 +70,5 @@ func (MinnowismBlue) Types() card.TypeSet     { return minnowismTypes }
 func (MinnowismBlue) GoAgain() bool           { return true }
 func (MinnowismBlue) Play(s *sim.TurnState, self *sim.CardState) {
 	minnowismApplySideEffect(s, 1)
-	s.ApplyAndLogEffectiveAttack(self)
+	s.LogChain(self, s.AddValue(self.EffectiveAttack()))
 }

@@ -115,10 +115,10 @@ func TestHasPlayedOrCreatedAura_FlagOrScan(t *testing.T) {
 	}
 }
 
-// TestRecordValue_ClampsNonPositive: the helper sums positive credits into Value and is a
+// TestAddValue_ClampsNonPositive: the helper sums positive credits into Value and is a
 // no-op for n <= 0. Negative grants (debuffs) and zero (no-effect Plays) must not subtract
 // from the running total.
-func TestRecordValue_ClampsNonPositive(t *testing.T) {
+func TestAddValue_ClampsNonPositive(t *testing.T) {
 	cases := []struct {
 		name string
 		bump int
@@ -131,7 +131,7 @@ func TestRecordValue_ClampsNonPositive(t *testing.T) {
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
 			var s TurnState
-			s.RecordValue(tc.bump)
+			s.AddValue(tc.bump)
 			if s.Value != tc.want {
 				t.Errorf("Value = %d, want %d", s.Value, tc.want)
 			}
@@ -139,10 +139,10 @@ func TestRecordValue_ClampsNonPositive(t *testing.T) {
 	}
 	// Mixed sequence: positives accumulate, non-positives pass through.
 	var s TurnState
-	s.RecordValue(2)
-	s.RecordValue(-10)
-	s.RecordValue(0)
-	s.RecordValue(5)
+	s.AddValue(2)
+	s.AddValue(-10)
+	s.AddValue(0)
+	s.AddValue(5)
 	if s.Value != 7 {
 		t.Errorf("after mixed sequence Value = %d, want 7 (2+5; -10/0 clamped)", s.Value)
 	}

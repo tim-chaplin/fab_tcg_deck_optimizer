@@ -26,7 +26,7 @@ func (RiseAboveRed) GoAgain() bool           { return false }
 // not implemented: hand-as-cost alt cost not modelled; card fails when printed cost can't be paid
 func (RiseAboveRed) NotImplemented() {}
 func (RiseAboveRed) Play(s *sim.TurnState, self *sim.CardState) {
-	s.ApplyAndLogEffectiveDefense(self)
+	s.LogChain(self, s.ApplyDefenseValue(self.EffectiveDefense()))
 }
 
 type RiseAboveYellow struct{}
@@ -43,7 +43,7 @@ func (RiseAboveYellow) GoAgain() bool           { return false }
 // not implemented: hand-as-cost alt cost not modelled; card fails when printed cost can't be paid
 func (RiseAboveYellow) NotImplemented() {}
 func (RiseAboveYellow) Play(s *sim.TurnState, self *sim.CardState) {
-	s.ApplyAndLogEffectiveDefense(self)
+	s.LogChain(self, s.ApplyDefenseValue(self.EffectiveDefense()))
 }
 
 type RiseAboveBlue struct{}
@@ -60,5 +60,5 @@ func (RiseAboveBlue) GoAgain() bool           { return false }
 // not implemented: hand-as-cost alt cost not modelled; card fails when printed cost can't be paid
 func (RiseAboveBlue) NotImplemented() {}
 func (RiseAboveBlue) Play(s *sim.TurnState, self *sim.CardState) {
-	s.ApplyAndLogEffectiveDefense(self)
+	s.LogChain(self, s.ApplyDefenseValue(self.EffectiveDefense()))
 }

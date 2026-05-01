@@ -34,7 +34,7 @@ func (AdrenalineRushRed) Types() card.TypeSet     { return adrenalineRushTypes }
 func (AdrenalineRushRed) GoAgain() bool           { return false }
 func (AdrenalineRushRed) Play(s *sim.TurnState, self *sim.CardState) {
 	self.BonusAttack += adrenalineRushBonus()
-	s.ApplyAndLogEffectiveAttack(self)
+	s.LogChain(self, s.AddValue(self.EffectiveAttack()))
 }
 
 type AdrenalineRushYellow struct{}
@@ -49,7 +49,7 @@ func (AdrenalineRushYellow) Types() card.TypeSet     { return adrenalineRushType
 func (AdrenalineRushYellow) GoAgain() bool           { return false }
 func (AdrenalineRushYellow) Play(s *sim.TurnState, self *sim.CardState) {
 	self.BonusAttack += adrenalineRushBonus()
-	s.ApplyAndLogEffectiveAttack(self)
+	s.LogChain(self, s.AddValue(self.EffectiveAttack()))
 }
 
 type AdrenalineRushBlue struct{}
@@ -64,5 +64,5 @@ func (AdrenalineRushBlue) Types() card.TypeSet     { return adrenalineRushTypes 
 func (AdrenalineRushBlue) GoAgain() bool           { return false }
 func (AdrenalineRushBlue) Play(s *sim.TurnState, self *sim.CardState) {
 	self.BonusAttack += adrenalineRushBonus()
-	s.ApplyAndLogEffectiveAttack(self)
+	s.LogChain(self, s.AddValue(self.EffectiveAttack()))
 }

@@ -27,7 +27,7 @@ func (BattlefrontBastionRed) GoAgain() bool           { return false }
 // not implemented: defend-alone damage prevention rider
 func (BattlefrontBastionRed) NotImplemented() {}
 func (c BattlefrontBastionRed) Play(s *sim.TurnState, self *sim.CardState) {
-	s.ApplyAndLogEffectiveAttack(self)
+	s.LogChain(self, s.AddValue(self.EffectiveAttack()))
 }
 
 type BattlefrontBastionYellow struct{}
@@ -44,7 +44,7 @@ func (BattlefrontBastionYellow) GoAgain() bool           { return false }
 // not implemented: defend-alone damage prevention rider
 func (BattlefrontBastionYellow) NotImplemented() {}
 func (c BattlefrontBastionYellow) Play(s *sim.TurnState, self *sim.CardState) {
-	s.ApplyAndLogEffectiveAttack(self)
+	s.LogChain(self, s.AddValue(self.EffectiveAttack()))
 }
 
 type BattlefrontBastionBlue struct{}
@@ -61,5 +61,5 @@ func (BattlefrontBastionBlue) GoAgain() bool           { return false }
 // not implemented: defend-alone damage prevention rider
 func (BattlefrontBastionBlue) NotImplemented() {}
 func (c BattlefrontBastionBlue) Play(s *sim.TurnState, self *sim.CardState) {
-	s.ApplyAndLogEffectiveAttack(self)
+	s.LogChain(self, s.AddValue(self.EffectiveAttack()))
 }

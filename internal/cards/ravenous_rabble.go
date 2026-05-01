@@ -41,7 +41,7 @@ func (RavenousRabbleRed) Types() card.TypeSet     { return ravenousRabbleTypes }
 func (RavenousRabbleRed) GoAgain() bool           { return true }
 func (RavenousRabbleRed) Play(s *sim.TurnState, self *sim.CardState) {
 	ravenousRabbleApplyDebuff(s, self)
-	s.ApplyAndLogEffectiveAttack(self)
+	s.LogChain(self, s.AddValue(self.EffectiveAttack()))
 }
 
 type RavenousRabbleYellow struct{}
@@ -56,7 +56,7 @@ func (RavenousRabbleYellow) Types() card.TypeSet     { return ravenousRabbleType
 func (RavenousRabbleYellow) GoAgain() bool           { return true }
 func (RavenousRabbleYellow) Play(s *sim.TurnState, self *sim.CardState) {
 	ravenousRabbleApplyDebuff(s, self)
-	s.ApplyAndLogEffectiveAttack(self)
+	s.LogChain(self, s.AddValue(self.EffectiveAttack()))
 }
 
 type RavenousRabbleBlue struct{}
@@ -71,5 +71,5 @@ func (RavenousRabbleBlue) Types() card.TypeSet     { return ravenousRabbleTypes 
 func (RavenousRabbleBlue) GoAgain() bool           { return true }
 func (RavenousRabbleBlue) Play(s *sim.TurnState, self *sim.CardState) {
 	ravenousRabbleApplyDebuff(s, self)
-	s.ApplyAndLogEffectiveAttack(self)
+	s.LogChain(self, s.AddValue(self.EffectiveAttack()))
 }

@@ -33,7 +33,7 @@ func (RegurgitatingSlogRed) GoAgain() bool           { return false }
 // so the grant never fires)
 func (RegurgitatingSlogRed) NotImplemented() {}
 func (c RegurgitatingSlogRed) Play(s *sim.TurnState, self *sim.CardState) {
-	s.ApplyAndLogEffectiveAttack(self)
+	s.LogChain(self, s.AddValue(self.EffectiveAttack()))
 }
 
 type RegurgitatingSlogYellow struct{}
@@ -51,7 +51,7 @@ func (RegurgitatingSlogYellow) GoAgain() bool           { return false }
 // so the grant never fires)
 func (RegurgitatingSlogYellow) NotImplemented() {}
 func (c RegurgitatingSlogYellow) Play(s *sim.TurnState, self *sim.CardState) {
-	s.ApplyAndLogEffectiveAttack(self)
+	s.LogChain(self, s.AddValue(self.EffectiveAttack()))
 }
 
 type RegurgitatingSlogBlue struct{}
@@ -69,5 +69,5 @@ func (RegurgitatingSlogBlue) GoAgain() bool           { return false }
 // so the grant never fires)
 func (RegurgitatingSlogBlue) NotImplemented() {}
 func (c RegurgitatingSlogBlue) Play(s *sim.TurnState, self *sim.CardState) {
-	s.ApplyAndLogEffectiveAttack(self)
+	s.LogChain(self, s.AddValue(self.EffectiveAttack()))
 }

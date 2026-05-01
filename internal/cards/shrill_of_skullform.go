@@ -61,5 +61,5 @@ func shrillPlay(s *sim.TurnState, self *sim.CardState) {
 	if s.HasPlayedOrCreatedAura() {
 		self.BonusAttack += 3
 	}
-	s.ApplyAndLogEffectiveAttack(self)
+	s.LogChain(self, s.AddValue(self.EffectiveAttack()))
 }

@@ -26,8 +26,9 @@ func (SingeingSteelbladeRed) Defense() int            { return 3 }
 func (SingeingSteelbladeRed) Types() card.TypeSet     { return singeingSteelbladeTypes }
 func (SingeingSteelbladeRed) GoAgain() bool           { return false }
 func (SingeingSteelbladeRed) Play(s *sim.TurnState, self *sim.CardState) {
-	s.ApplyAndLogEffectiveAttack(self)
-	s.DealAndLogArcaneDamage(self, 1)
+	s.LogChain(self, s.AddValue(self.EffectiveAttack()))
+	s.AddValue(s.DealArcaneDamage(1))
+	s.LogRider(self, 1, "Dealt 1 arcane damage")
 }
 
 type SingeingSteelbladeYellow struct{}
@@ -41,8 +42,9 @@ func (SingeingSteelbladeYellow) Defense() int            { return 3 }
 func (SingeingSteelbladeYellow) Types() card.TypeSet     { return singeingSteelbladeTypes }
 func (SingeingSteelbladeYellow) GoAgain() bool           { return false }
 func (SingeingSteelbladeYellow) Play(s *sim.TurnState, self *sim.CardState) {
-	s.ApplyAndLogEffectiveAttack(self)
-	s.DealAndLogArcaneDamage(self, 1)
+	s.LogChain(self, s.AddValue(self.EffectiveAttack()))
+	s.AddValue(s.DealArcaneDamage(1))
+	s.LogRider(self, 1, "Dealt 1 arcane damage")
 }
 
 type SingeingSteelbladeBlue struct{}
@@ -56,6 +58,7 @@ func (SingeingSteelbladeBlue) Defense() int            { return 3 }
 func (SingeingSteelbladeBlue) Types() card.TypeSet     { return singeingSteelbladeTypes }
 func (SingeingSteelbladeBlue) GoAgain() bool           { return false }
 func (SingeingSteelbladeBlue) Play(s *sim.TurnState, self *sim.CardState) {
-	s.ApplyAndLogEffectiveAttack(self)
-	s.DealAndLogArcaneDamage(self, 1)
+	s.LogChain(self, s.AddValue(self.EffectiveAttack()))
+	s.AddValue(s.DealArcaneDamage(1))
+	s.LogRider(self, 1, "Dealt 1 arcane damage")
 }

@@ -28,7 +28,7 @@ func (TremorOfIArathaelRed) GoAgain() bool           { return false }
 // not implemented: banished-zone +2{p} rider (banished-zone count not tracked)
 func (TremorOfIArathaelRed) NotImplemented() {}
 func (c TremorOfIArathaelRed) Play(s *sim.TurnState, self *sim.CardState) {
-	s.ApplyAndLogEffectiveAttack(self)
+	s.LogChain(self, s.AddValue(self.EffectiveAttack()))
 }
 
 type TremorOfIArathaelYellow struct{}
@@ -45,7 +45,7 @@ func (TremorOfIArathaelYellow) GoAgain() bool           { return false }
 // not implemented: banished-zone +2{p} rider (banished-zone count not tracked)
 func (TremorOfIArathaelYellow) NotImplemented() {}
 func (c TremorOfIArathaelYellow) Play(s *sim.TurnState, self *sim.CardState) {
-	s.ApplyAndLogEffectiveAttack(self)
+	s.LogChain(self, s.AddValue(self.EffectiveAttack()))
 }
 
 type TremorOfIArathaelBlue struct{}
@@ -62,5 +62,5 @@ func (TremorOfIArathaelBlue) GoAgain() bool           { return false }
 // not implemented: banished-zone +2{p} rider (banished-zone count not tracked)
 func (TremorOfIArathaelBlue) NotImplemented() {}
 func (c TremorOfIArathaelBlue) Play(s *sim.TurnState, self *sim.CardState) {
-	s.ApplyAndLogEffectiveAttack(self)
+	s.LogChain(self, s.AddValue(self.EffectiveAttack()))
 }

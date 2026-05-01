@@ -27,4 +27,4 @@ func (TalismanOfCremationBlue) GoAgain() bool           { return true }
 // not implemented: self-destroys on play-from-banished → banish a named card from opposing
 // graveyards
 func (TalismanOfCremationBlue) NotImplemented()                            {}
-func (TalismanOfCremationBlue) Play(s *sim.TurnState, self *sim.CardState) { s.LogPlay(self) }
+func (TalismanOfCremationBlue) Play(s *sim.TurnState, self *sim.CardState) { s.LogChain(self, 0) }

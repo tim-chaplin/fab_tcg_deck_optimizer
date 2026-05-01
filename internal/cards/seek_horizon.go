@@ -28,7 +28,7 @@ func (SeekHorizonRed) GoAgain() bool           { return false }
 // not implemented: hand-on-top alt cost and conditional go-again rider
 func (SeekHorizonRed) NotImplemented() {}
 func (c SeekHorizonRed) Play(s *sim.TurnState, self *sim.CardState) {
-	s.ApplyAndLogEffectiveAttack(self)
+	s.LogChain(self, s.AddValue(self.EffectiveAttack()))
 }
 
 type SeekHorizonYellow struct{}
@@ -45,7 +45,7 @@ func (SeekHorizonYellow) GoAgain() bool           { return false }
 // not implemented: hand-on-top alt cost and conditional go-again rider
 func (SeekHorizonYellow) NotImplemented() {}
 func (c SeekHorizonYellow) Play(s *sim.TurnState, self *sim.CardState) {
-	s.ApplyAndLogEffectiveAttack(self)
+	s.LogChain(self, s.AddValue(self.EffectiveAttack()))
 }
 
 type SeekHorizonBlue struct{}
@@ -62,5 +62,5 @@ func (SeekHorizonBlue) GoAgain() bool           { return false }
 // not implemented: hand-on-top alt cost and conditional go-again rider
 func (SeekHorizonBlue) NotImplemented() {}
 func (c SeekHorizonBlue) Play(s *sim.TurnState, self *sim.CardState) {
-	s.ApplyAndLogEffectiveAttack(self)
+	s.LogChain(self, s.AddValue(self.EffectiveAttack()))
 }

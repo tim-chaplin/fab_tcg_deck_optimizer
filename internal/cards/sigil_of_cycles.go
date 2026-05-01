@@ -30,5 +30,5 @@ func (SigilOfCyclesBlue) GoAgain() bool           { return true }
 func (SigilOfCyclesBlue) NotImplemented() {}
 func (SigilOfCyclesBlue) Play(s *sim.TurnState, self *sim.CardState) {
 	setAuraCreated(s)
-	s.ApplyAndLogEffectiveAttack(self)
+	s.LogChain(self, s.AddValue(self.EffectiveAttack()))
 }

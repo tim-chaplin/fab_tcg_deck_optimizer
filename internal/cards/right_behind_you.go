@@ -28,7 +28,7 @@ func (RightBehindYouRed) GoAgain() bool           { return false }
 // not implemented: defend-together +1{d} buff and deck-bottom peek rider
 func (RightBehindYouRed) NotImplemented() {}
 func (c RightBehindYouRed) Play(s *sim.TurnState, self *sim.CardState) {
-	s.ApplyAndLogEffectiveAttack(self)
+	s.LogChain(self, s.AddValue(self.EffectiveAttack()))
 }
 
 type RightBehindYouYellow struct{}
@@ -45,7 +45,7 @@ func (RightBehindYouYellow) GoAgain() bool           { return false }
 // not implemented: defend-together +1{d} buff and deck-bottom peek rider
 func (RightBehindYouYellow) NotImplemented() {}
 func (c RightBehindYouYellow) Play(s *sim.TurnState, self *sim.CardState) {
-	s.ApplyAndLogEffectiveAttack(self)
+	s.LogChain(self, s.AddValue(self.EffectiveAttack()))
 }
 
 type RightBehindYouBlue struct{}
@@ -62,5 +62,5 @@ func (RightBehindYouBlue) GoAgain() bool           { return false }
 // not implemented: defend-together +1{d} buff and deck-bottom peek rider
 func (RightBehindYouBlue) NotImplemented() {}
 func (c RightBehindYouBlue) Play(s *sim.TurnState, self *sim.CardState) {
-	s.ApplyAndLogEffectiveAttack(self)
+	s.LogChain(self, s.AddValue(self.EffectiveAttack()))
 }

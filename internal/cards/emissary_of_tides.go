@@ -28,5 +28,5 @@ func (EmissaryOfTidesRed) GoAgain() bool           { return false }
 // not implemented: hand-cycle-for-+2{p} rider
 func (EmissaryOfTidesRed) NotImplemented() {}
 func (c EmissaryOfTidesRed) Play(s *sim.TurnState, self *sim.CardState) {
-	s.ApplyAndLogEffectiveAttack(self)
+	s.LogChain(self, s.AddValue(self.EffectiveAttack()))
 }

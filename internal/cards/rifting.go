@@ -26,8 +26,10 @@ func (RiftingRed) Types() card.TypeSet     { return riftingTypes }
 func (RiftingRed) GoAgain() bool           { return false }
 
 // not implemented: on-hit instant-casting grant
-func (RiftingRed) NotImplemented()                              {}
-func (c RiftingRed) Play(s *sim.TurnState, self *sim.CardState) { s.ApplyAndLogEffectiveAttack(self) }
+func (RiftingRed) NotImplemented() {}
+func (c RiftingRed) Play(s *sim.TurnState, self *sim.CardState) {
+	s.LogChain(self, s.AddValue(self.EffectiveAttack()))
+}
 
 type RiftingYellow struct{}
 
@@ -43,7 +45,7 @@ func (RiftingYellow) GoAgain() bool           { return false }
 // not implemented: on-hit instant-casting grant
 func (RiftingYellow) NotImplemented() {}
 func (c RiftingYellow) Play(s *sim.TurnState, self *sim.CardState) {
-	s.ApplyAndLogEffectiveAttack(self)
+	s.LogChain(self, s.AddValue(self.EffectiveAttack()))
 }
 
 type RiftingBlue struct{}
@@ -60,5 +62,5 @@ func (RiftingBlue) GoAgain() bool           { return false }
 // not implemented: on-hit instant-casting grant
 func (RiftingBlue) NotImplemented() {}
 func (c RiftingBlue) Play(s *sim.TurnState, self *sim.CardState) {
-	s.ApplyAndLogEffectiveAttack(self)
+	s.LogChain(self, s.AddValue(self.EffectiveAttack()))
 }

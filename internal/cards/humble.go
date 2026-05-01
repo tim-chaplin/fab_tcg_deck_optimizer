@@ -28,7 +28,7 @@ func (HumbleRed) GoAgain() bool           { return false }
 // not implemented: hero-ability suppression rider
 func (HumbleRed) NotImplemented() {}
 func (HumbleRed) Play(s *sim.TurnState, self *sim.CardState) {
-	s.ApplyAndLogEffectiveAttack(self)
+	s.LogChain(self, s.AddValue(self.EffectiveAttack()))
 }
 
 type HumbleYellow struct{}
@@ -45,7 +45,7 @@ func (HumbleYellow) GoAgain() bool           { return false }
 // not implemented: hero-ability suppression rider
 func (HumbleYellow) NotImplemented() {}
 func (HumbleYellow) Play(s *sim.TurnState, self *sim.CardState) {
-	s.ApplyAndLogEffectiveAttack(self)
+	s.LogChain(self, s.AddValue(self.EffectiveAttack()))
 }
 
 type HumbleBlue struct{}
@@ -62,5 +62,5 @@ func (HumbleBlue) GoAgain() bool           { return false }
 // not implemented: hero-ability suppression rider
 func (HumbleBlue) NotImplemented() {}
 func (HumbleBlue) Play(s *sim.TurnState, self *sim.CardState) {
-	s.ApplyAndLogEffectiveAttack(self)
+	s.LogChain(self, s.AddValue(self.EffectiveAttack()))
 }

@@ -20,8 +20,8 @@ import (
 // fiddlersGreenPlay emits the chain step then writes the printed N{h} as a "Gained N
 // health (graveyard trigger)" sub-line under self. Health is valued 1-to-1 with damage.
 func fiddlersGreenPlay(s *sim.TurnState, self *sim.CardState, heal int) {
-	s.ApplyAndLogEffectiveDefense(self)
-	s.ApplyAndLogRiderOnPlayf(self, heal, "Gained %d health (graveyard trigger)", heal)
+	s.LogChain(self, s.ApplyDefenseValue(self.EffectiveDefense()))
+	s.LogRiderf(self, s.AddValue(heal), "Gained %d health (graveyard trigger)", heal)
 }
 
 type FiddlersGreenRed struct{}

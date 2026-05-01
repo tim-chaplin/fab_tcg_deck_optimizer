@@ -34,7 +34,7 @@ func (WoundedBullRed) Types() card.TypeSet     { return woundedBullTypes }
 func (WoundedBullRed) GoAgain() bool           { return false }
 func (WoundedBullRed) Play(s *sim.TurnState, self *sim.CardState) {
 	self.BonusAttack += woundedBullBonus()
-	s.ApplyAndLogEffectiveAttack(self)
+	s.LogChain(self, s.AddValue(self.EffectiveAttack()))
 }
 
 type WoundedBullYellow struct{}
@@ -49,7 +49,7 @@ func (WoundedBullYellow) Types() card.TypeSet     { return woundedBullTypes }
 func (WoundedBullYellow) GoAgain() bool           { return false }
 func (WoundedBullYellow) Play(s *sim.TurnState, self *sim.CardState) {
 	self.BonusAttack += woundedBullBonus()
-	s.ApplyAndLogEffectiveAttack(self)
+	s.LogChain(self, s.AddValue(self.EffectiveAttack()))
 }
 
 type WoundedBullBlue struct{}
@@ -64,5 +64,5 @@ func (WoundedBullBlue) Types() card.TypeSet     { return woundedBullTypes }
 func (WoundedBullBlue) GoAgain() bool           { return false }
 func (WoundedBullBlue) Play(s *sim.TurnState, self *sim.CardState) {
 	self.BonusAttack += woundedBullBonus()
-	s.ApplyAndLogEffectiveAttack(self)
+	s.LogChain(self, s.AddValue(self.EffectiveAttack()))
 }

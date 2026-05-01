@@ -39,7 +39,7 @@ func (YintiYantiRed) GoAgain() bool           { return false }
 func (YintiYantiRed) NotImplemented() {}
 func (YintiYantiRed) Play(s *sim.TurnState, self *sim.CardState) {
 	self.BonusAttack += yintiYantiBonus(s)
-	s.ApplyAndLogEffectiveAttack(self)
+	s.LogChain(self, s.AddValue(self.EffectiveAttack()))
 }
 
 type YintiYantiYellow struct{}
@@ -58,7 +58,7 @@ func (YintiYantiYellow) GoAgain() bool           { return false }
 func (YintiYantiYellow) NotImplemented() {}
 func (YintiYantiYellow) Play(s *sim.TurnState, self *sim.CardState) {
 	self.BonusAttack += yintiYantiBonus(s)
-	s.ApplyAndLogEffectiveAttack(self)
+	s.LogChain(self, s.AddValue(self.EffectiveAttack()))
 }
 
 type YintiYantiBlue struct{}
@@ -77,5 +77,5 @@ func (YintiYantiBlue) GoAgain() bool           { return false }
 func (YintiYantiBlue) NotImplemented() {}
 func (YintiYantiBlue) Play(s *sim.TurnState, self *sim.CardState) {
 	self.BonusAttack += yintiYantiBonus(s)
-	s.ApplyAndLogEffectiveAttack(self)
+	s.LogChain(self, s.AddValue(self.EffectiveAttack()))
 }

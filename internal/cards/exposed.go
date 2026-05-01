@@ -26,4 +26,4 @@ func (ExposedBlue) GoAgain() bool           { return false }
 
 // not implemented: AR +1{p}; gated on attacker not being marked
 func (ExposedBlue) NotImplemented()                            {}
-func (ExposedBlue) Play(s *sim.TurnState, self *sim.CardState) { s.LogPlay(self) }
+func (ExposedBlue) Play(s *sim.TurnState, self *sim.CardState) { s.LogChain(self, 0) }

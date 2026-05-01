@@ -27,4 +27,4 @@ func (ImperialSealOfCommandRed) GoAgain() bool           { return false }
 
 // not implemented: activated 'no DR this turn' + Royal-only arsenal-wipe on hit
 func (ImperialSealOfCommandRed) NotImplemented()                            {}
-func (ImperialSealOfCommandRed) Play(s *sim.TurnState, self *sim.CardState) { s.LogPlay(self) }
+func (ImperialSealOfCommandRed) Play(s *sim.TurnState, self *sim.CardState) { s.LogChain(self, 0) }
