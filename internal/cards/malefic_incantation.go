@@ -64,26 +64,34 @@ func (c MaleficIncantationBlue) Play(s *sim.TurnState, self *sim.CardState) {
 
 // maleficPlay registers the attack-action once-per-turn trigger and emits the same-turn
 // chain step. Each trigger fire creates one Runechant — the trigger handler authors a
-// post-trigger log line so it groups beneath the triggering attack-action chain step.
+// post-trigger log line so it groups beneath the triggering attack-action chain step. n
+// is the printed counter count carried on the trigger so the handler can stay a top-level
+// function (the Count field on the trigger drains as fires consume verse counters; the
+// payload N field stays the printed value for log attribution if ever needed).
 func maleficPlay(s *sim.TurnState, selfState *sim.CardState, selfCard sim.Card, n int) {
 	s.AddAuraTrigger(sim.AuraTrigger{
 		Self:        selfCard,
 		Type:        sim.TriggerAttackAction,
 		Count:       n,
 		OncePerTurn: true,
-		Handler: func(s *sim.TurnState) int {
-			created := s.CreateRunechants(1)
-			// SkipLog discards both the post-trigger entry and its damage credit's text;
-			// avoid the two DisplayName lookups + string concat when nothing will read them.
-			if s.SkipLog {
-				return created
-			}
-			return s.AddPostTriggerLogEntry(
-				sim.DisplayName(selfCard)+" created a runechant",
-				sim.DisplayName(s.TriggeringCard),
-				created,
-			)
-		},
+		Handler:     maleficAuraHandler,
 	})
 	s.LogPlay(selfState)
+}
+
+// maleficAuraHandler is the once-per-turn attack-action trigger handler shared across
+// Malefic Incantation variants. Reads t.Self for log attribution so the handler is a
+// top-level function with no per-Play closure allocation.
+func maleficAuraHandler(s *sim.TurnState, t *sim.AuraTrigger) int {
+	created := s.CreateRunechants(1)
+	// SkipLog discards both the post-trigger entry and its damage credit's text; avoid
+	// the two DisplayName lookups + string concat when nothing will read them.
+	if s.SkipLog {
+		return created
+	}
+	return s.AddPostTriggerLogEntry(
+		sim.DisplayName(t.Self)+" created a runechant",
+		sim.DisplayName(s.TriggeringCard),
+		created,
+	)
 }

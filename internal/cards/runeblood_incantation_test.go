@@ -51,7 +51,7 @@ func TestRunebloodIncantation_HandlerCreatesOneRunechantPerFire(t *testing.T) {
 		var play sim.TurnState
 		c.Play(&play, &sim.CardState{Card: c})
 		var fire sim.TurnState
-		got := play.AuraTriggers[0].Handler(&fire)
+		got := play.AuraTriggers[0].Handler(&fire, &play.AuraTriggers[0])
 		if got != 1 {
 			t.Errorf("%s: handler damage = %d, want 1", c.Name(), got)
 		}

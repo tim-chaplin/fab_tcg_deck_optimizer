@@ -19,7 +19,7 @@ func TestFireEphemeralAttackTriggers_SingleFireDropsFromList(t *testing.T) {
 	calls := 0
 	state := &TurnState{EphemeralAttackTriggers: []EphemeralAttackTrigger{{
 		Source: testutils.RedAttack{},
-		Handler: func(s *TurnState, target *CardState) int {
+		Handler: func(s *TurnState, _ *EphemeralAttackTrigger, target *CardState) int {
 			calls++
 			return s.AddPostTriggerLogEntry("test ephemeral fired", DisplayName(target.Card), 1)
 		},
@@ -57,7 +57,7 @@ func TestFireEphemeralAttackTriggers_NonMatchingTargetLeavesTriggerInPlace(t *te
 		Matches: func(target *CardState) bool {
 			return target.Card.Types().Has(card.TypeRuneblade)
 		},
-		Handler: func(*TurnState, *CardState) int {
+		Handler: func(*TurnState, *EphemeralAttackTrigger, *CardState) int {
 			calls++
 			return 5
 		},
@@ -82,7 +82,7 @@ func TestFireEphemeralAttackTriggers_NonMatchingTargetLeavesTriggerInPlace(t *te
 func TestFireEphemeralAttackTriggers_NilMatchesAcceptsAnyTarget(t *testing.T) {
 	state := &TurnState{EphemeralAttackTriggers: []EphemeralAttackTrigger{{
 		Source: testutils.RedAttack{},
-		Handler: func(s *TurnState, target *CardState) int {
+		Handler: func(s *TurnState, _ *EphemeralAttackTrigger, target *CardState) int {
 			return s.AddPostTriggerLogEntry("test ephemeral fired", DisplayName(target.Card), 2)
 		},
 	}}}

@@ -102,12 +102,8 @@ func runicReapingPlay(s *sim.TurnState, selfState *sim.CardState, source sim.Car
 	s.AddEphemeralAttackTrigger(sim.EphemeralAttackTrigger{
 		Source:  source,
 		Matches: runicReapingTargetMatches,
-		Handler: func(s *sim.TurnState, target *sim.CardState) int {
-			if !sim.LikelyToHit(target) {
-				return 0
-			}
-			return s.CreateAndLogRunechantsOnHit(sim.DisplayName(source), sim.DisplayName(target.Card), n)
-		},
+		Handler: onHitRunechantHandler,
+		N:       n,
 	})
 	s.LogPlay(selfState)
 }

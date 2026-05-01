@@ -245,13 +245,13 @@ func TestClashValue_WinTieLose(t *testing.T) {
 func TestRegisterStartOfTurn_AutoLogsWithText(t *testing.T) {
 	self := testutils.NewStubCard("Test Aura").WithTypes(card.NewTypeSet(card.TypeAura))
 	var s TurnState
-	s.RegisterStartOfTurn(self, 1, "Gained 1 health", func(*TurnState) int { return 1 })
+	s.RegisterStartOfTurn(self, 1, "Gained 1 health", func(*TurnState, *AuraTrigger) int { return 1 })
 	if len(s.AuraTriggers) != 1 {
 		t.Fatalf("AuraTriggers len = %d, want 1", len(s.AuraTriggers))
 	}
 
 	var fired TurnState
-	got := s.AuraTriggers[0].Handler(&fired)
+	got := s.AuraTriggers[0].Handler(&fired, &s.AuraTriggers[0])
 	if got != 1 {
 		t.Errorf("handler return = %d, want 1 (passes through inner return)", got)
 	}
@@ -269,10 +269,10 @@ func TestRegisterStartOfTurn_AutoLogsWithText(t *testing.T) {
 func TestRegisterStartOfTurn_NoLogOnZero(t *testing.T) {
 	self := testutils.NewStubCard("Test Aura").WithTypes(card.NewTypeSet(card.TypeAura))
 	var s TurnState
-	s.RegisterStartOfTurn(self, 1, "Did the thing", func(*TurnState) int { return 0 })
+	s.RegisterStartOfTurn(self, 1, "Did the thing", func(*TurnState, *AuraTrigger) int { return 0 })
 
 	var fired TurnState
-	s.AuraTriggers[0].Handler(&fired)
+	s.AuraTriggers[0].Handler(&fired, &s.AuraTriggers[0])
 	if len(fired.Log) != 0 {
 		t.Errorf("Log = %v, want empty (handler returned 0)", fired.Log)
 	}
@@ -285,13 +285,13 @@ func TestRegisterStartOfTurn_NoLogOnZero(t *testing.T) {
 func TestRegisterStartOfTurn_EmptyTextLeavesHandlerAlone(t *testing.T) {
 	self := testutils.NewStubCard("Test Aura").WithTypes(card.NewTypeSet(card.TypeAura))
 	var s TurnState
-	s.RegisterStartOfTurn(self, 1, "", func(s *TurnState) int {
+	s.RegisterStartOfTurn(self, 1, "", func(s *TurnState, _ *AuraTrigger) int {
 		s.AddPostTriggerLogEntry("custom handler text", "Test Aura", 0)
 		return 0
 	})
 
 	var fired TurnState
-	s.AuraTriggers[0].Handler(&fired)
+	s.AuraTriggers[0].Handler(&fired, &s.AuraTriggers[0])
 	if len(fired.Log) != 1 {
 		t.Fatalf("Log len = %d, want exactly 1 (handler-authored only)", len(fired.Log))
 	}

@@ -722,8 +722,8 @@ func (s *TurnState) RegisterStartOfTurn(self Card, count int, text string, handl
 		// Capture self/text only; defer DisplayName + prefix concat + Sprintf into the
 		// trigger body so the closure pays just three pointer-sized captures up front and the
 		// SkipLog-suppressed firing path costs no string allocs at all.
-		finalHandler = func(s *TurnState) int {
-			n := handler(s)
+		finalHandler = func(s *TurnState, t *AuraTrigger) int {
+			n := handler(s, t)
 			if n > 0 && !s.SkipLog {
 				source := DisplayName(self)
 				s.AddPostTriggerLogEntry(fmt.Sprintf("%s: %s (+%d)", source, text, n), source, n)

@@ -42,7 +42,7 @@ func (c SigilOfTheArknightBlue) Play(s *sim.TurnState, self *sim.CardState) {
 // is the silent edge case (no card to name). Pops the top via PopDeckTop on a hit; on a
 // whiff puts the card back via PrependToDeck so the deck order is preserved (both verbs
 // flip the cacheable bit, which is what we want — the reveal outcome depends on shuffle).
-func sigilOfTheArknightReveal(s *sim.TurnState) int {
+func sigilOfTheArknightReveal(s *sim.TurnState, _ *sim.AuraTrigger) int {
 	top, ok := s.PopDeckTop()
 	if !ok {
 		return 0

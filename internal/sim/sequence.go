@@ -277,13 +277,13 @@ func fireAttackActionTriggers(state *TurnState, triggeringCard Card) {
 	triggers := state.AuraTriggers
 	dst := triggers[:0]
 	for i := range triggers {
-		t := triggers[i]
+		t := &triggers[i]
 		if t.Type != TriggerAttackAction || (t.OncePerTurn && t.FiredThisTurn) {
-			dst = append(dst, t)
+			dst = append(dst, *t)
 			continue
 		}
 		state.TriggeringCard = triggeringCard
-		t.Handler(state)
+		t.Handler(state, t)
 		state.TriggeringCard = nil
 		t.FiredThisTurn = true
 		t.Count--
@@ -294,7 +294,7 @@ func fireAttackActionTriggers(state *TurnState, triggeringCard Card) {
 			state.graveyard = append(state.graveyard, t.Self)
 			continue
 		}
-		dst = append(dst, t)
+		dst = append(dst, *t)
 	}
 	state.AuraTriggers = dst
 }
@@ -313,12 +313,12 @@ func fireEphemeralAttackTriggers(state *TurnState, target *CardState) {
 	triggers := state.EphemeralAttackTriggers
 	dst := triggers[:0]
 	for i := range triggers {
-		t := triggers[i]
+		t := &triggers[i]
 		if t.Matches != nil && !t.Matches(target) {
-			dst = append(dst, t)
+			dst = append(dst, *t)
 			continue
 		}
-		t.Handler(state, target)
+		t.Handler(state, t, target)
 	}
 	state.EphemeralAttackTriggers = dst
 }

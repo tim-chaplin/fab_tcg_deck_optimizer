@@ -27,7 +27,7 @@ const (
 // (e.g. s.CreateRunechants, s.AddToGraveyard) and return the damage-equivalent that folds
 // 1-to-1 into Value. The sim handles the counter bookkeeping (decrementing Count,
 // graveyarding the aura when Count hits zero); the handler does not.
-type OnAuraTrigger func(s *TurnState) int
+type OnAuraTrigger func(s *TurnState, t *AuraTrigger) int
 
 // AuraTrigger is a counter-tracked handler attached to an aura in play. Each time Type's
 // condition fires — and, when OncePerTurn is set, at most once per turn — the sim calls
@@ -51,14 +51,22 @@ type AuraTrigger struct {
 	OncePerTurn bool
 	// FiredThisTurn is sim-managed bookkeeping for OncePerTurn. Cards must not set it.
 	FiredThisTurn bool
+	// N is an optional small-integer payload available to Handler. Lets per-variant trigger
+	// handlers (e.g. Malefic Incantation's per-color counter count) read their N off the
+	// trigger instead of closing over it, so the handler can be a top-level function with no
+	// per-Play closure allocation.
+	N int
 }
 
 // OnEphemeralAttackTrigger is the business-logic callback attached to an
-// EphemeralAttackTrigger. target is the CardState of the attacker whose resolution triggered
-// the fire; the handler may read target.Card.Attack(), target.EffectiveDominate(), etc. to
-// decide whether a rider effect fires and what damage-equivalent to credit. Handlers mutate
-// the passed TurnState directly (e.g. s.CreateRunechants) and return the damage-equivalent.
-type OnEphemeralAttackTrigger func(s *TurnState, target *CardState) int
+// EphemeralAttackTrigger. t is the trigger struct that owns the handler, exposing Source
+// and the optional N payload to top-level handler implementations so cards don't need to
+// allocate a closure per registration. target is the CardState of the attacker whose
+// resolution triggered the fire; the handler may read target.Card.Attack(),
+// target.EffectiveDominate(), etc. to decide whether a rider effect fires and what
+// damage-equivalent to credit. Handlers mutate the passed TurnState directly
+// (e.g. s.CreateRunechants) and return the damage-equivalent.
+type OnEphemeralAttackTrigger func(s *TurnState, t *EphemeralAttackTrigger, target *CardState) int
 
 // EphemeralAttackTrigger is a same-turn, fire-once "next attack" trigger registered by a
 // card's Play (via TurnState.AddEphemeralAttackTrigger). Fires on the next attack action
@@ -90,4 +98,9 @@ type EphemeralAttackTrigger struct {
 	// permutation, used to route Handler's damage back to Source's perCardOut slot. Cards
 	// must not set it — the solver stamps it on registration.
 	SourceIndex int
+	// N is an optional small-integer payload available to Handler. Lets per-variant trigger
+	// handlers (Mauvrion Skies's "create N runechants on hit") read their N off the trigger
+	// instead of closing over it, so the handler can be a top-level function with no per-Play
+	// closure allocation.
+	N int
 }
