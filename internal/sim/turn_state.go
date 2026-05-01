@@ -277,6 +277,11 @@ func (s *TurnState) Opt(n int) {
 	newDeck = append(newDeck, bottom...)
 	s.deck = newDeck
 
+	// SkipLog discards the entry; skip the descriptive Sprintf + three formatCardList allocs
+	// when the caller doesn't intend to display the log.
+	if s.SkipLog {
+		return
+	}
 	s.AddLogEntry(fmt.Sprintf("Opted %s, put %s on top, put %s on bottom",
 		formatCardList(cards), formatCardList(top), formatCardList(bottom)), 0)
 }
