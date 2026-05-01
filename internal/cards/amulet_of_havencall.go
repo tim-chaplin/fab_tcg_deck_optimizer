@@ -3,6 +3,11 @@
 // Text: "**Go again** **Defense Reaction** - Destroy Amulet of Havencall: Search your deck for a
 // card named Rally the Rearguard, add it to this chain link as a defending card, then shuffle.
 // Activate this ability only if you have no cards in hand."
+//
+// Marked sim.Unplayable: a 0/0 Item whose only output is a deck-tutor of a single named card
+// into the defense slot — gated on empty hand and dependent on Rally the Rearguard being in
+// the deck and on the chain-link plumbing for late-added defenders. Not worth modelling, so
+// it's filtered from random / mutation pools.
 
 package cards
 
@@ -25,6 +30,5 @@ func (AmuletOfHavencallBlue) Defense() int            { return 0 }
 func (AmuletOfHavencallBlue) Types() card.TypeSet     { return amuletOfHavencallTypes }
 func (AmuletOfHavencallBlue) GoAgain() bool           { return true }
 
-// not implemented: DR tutor for Rally the Rearguard; gated on empty hand
-func (AmuletOfHavencallBlue) NotImplemented()                            {}
+func (AmuletOfHavencallBlue) Unplayable()                                {}
 func (AmuletOfHavencallBlue) Play(s *sim.TurnState, self *sim.CardState) { s.Log(self, 0) }

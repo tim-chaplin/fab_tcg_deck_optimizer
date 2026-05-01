@@ -3,6 +3,11 @@
 // Text: "**Go again** **Instant** - Destroy Amulet of Ignition: The next ability you activate this
 // turn costs {r} less. Activate this ability only if you haven't played a card or activated an
 // ability this turn."
+//
+// Marked sim.Unplayable: a 0/0 Item whose only output is a 1{r} discount on the next activated
+// ability — gated on no card played and no ability activated yet, and the sim doesn't track
+// activated-ability cost as a search dimension. The optimizer would never pick it, so it's
+// filtered from random / mutation pools.
 
 package cards
 
@@ -25,6 +30,5 @@ func (AmuletOfIgnitionYellow) Defense() int            { return 0 }
 func (AmuletOfIgnitionYellow) Types() card.TypeSet     { return amuletOfIgnitionTypes }
 func (AmuletOfIgnitionYellow) GoAgain() bool           { return true }
 
-// not implemented: Instant 'next activated ability costs {r} less'
-func (AmuletOfIgnitionYellow) NotImplemented()                            {}
+func (AmuletOfIgnitionYellow) Unplayable()                                {}
 func (AmuletOfIgnitionYellow) Play(s *sim.TurnState, self *sim.CardState) { s.Log(self, 0) }

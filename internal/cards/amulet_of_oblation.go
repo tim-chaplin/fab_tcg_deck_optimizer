@@ -3,6 +3,11 @@
 // Text: "**Go again** **Instant** - Destroy Amulet of Oblation: Until end of turn, target attack
 // action gains "If this would be put into a graveyard, instead put it on the bottom of its owner's
 // deck." Activate this ability only if a card has entered a graveyard this turn."
+//
+// Marked sim.Unplayable: a 0/0 Item whose only output is a graveyard→deck-bottom replacement
+// effect for one attack action — payoff is realised on a future turn (deck composition change),
+// which the sim's per-turn evaluation doesn't credit. The optimizer would never pick it, so
+// it's filtered from random / mutation pools.
 
 package cards
 
@@ -25,6 +30,5 @@ func (AmuletOfOblationBlue) Defense() int            { return 0 }
 func (AmuletOfOblationBlue) Types() card.TypeSet     { return amuletOfOblationTypes }
 func (AmuletOfOblationBlue) GoAgain() bool           { return true }
 
-// not implemented: Instant 'graveyard → bottom of deck' replacement; gated on graveyard entry
-func (AmuletOfOblationBlue) NotImplemented()                            {}
+func (AmuletOfOblationBlue) Unplayable()                                {}
 func (AmuletOfOblationBlue) Play(s *sim.TurnState, self *sim.CardState) { s.Log(self, 0) }
