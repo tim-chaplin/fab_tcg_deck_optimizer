@@ -48,7 +48,7 @@ func TestProcessTriggersAtStartOfTurn_FiresEachQueuedTriggerOnce(t *testing.T) {
 	}
 }
 
-// TestProcessTriggersAtStartOfTurn_EmptyQueue short-circuits: no contribs, no allocation, zero total.
+// TestProcessTriggersAtStartOfTurn_EmptyQueue short-circuits: no contribs, no alloc, zero total.
 func TestProcessTriggersAtStartOfTurn_EmptyQueue(t *testing.T) {
 	survivors, contribs, total, runes, _, _ := ProcessTriggersAtStartOfTurn(nil, nil)
 	if total != 0 || runes != 0 {

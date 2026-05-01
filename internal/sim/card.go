@@ -3,8 +3,8 @@
 // The per-card CardState wrapper, the Card interface itself, and the optional markers cards
 // opt into (VariableCost, Dominator, AddsFutureValue, ArsenalDefenseBonus, …) live in this
 // file. Cohesive concern groups are split across sibling files in this package:
-// types.go (card.CardType + card.TypeSet bitfield), turn_state.go (TurnState and its mutation helpers),
-// triggers.go (AuraTrigger + EphemeralAttackTrigger).
+// types.go (card.CardType + card.TypeSet bitfield), turn_state.go (TurnState and its mutation
+// helpers), triggers.go (AuraTrigger + EphemeralAttackTrigger).
 package sim
 
 import (

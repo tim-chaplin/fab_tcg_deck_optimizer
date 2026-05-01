@@ -28,7 +28,7 @@ func TestVigorRush_NoNonAttackActionNoGoAgain(t *testing.T) {
 	cases := []sim.Card{VigorRushRed{}, VigorRushYellow{}, VigorRushBlue{}}
 	for _, c := range cases {
 		s := sim.TurnState{
-			CardsPlayed:           []sim.Card{testutils.GenericAttack(0, 0)}, // attack action, not non-attack
+			CardsPlayed:           []sim.Card{testutils.GenericAttack(0, 0)}, // attack, not non-attack
 			NonAttackActionPlayed: false,
 		}
 		self := &sim.CardState{Card: c}

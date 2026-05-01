@@ -9,7 +9,9 @@ package sim
 // Production code always pulls the providing package in transitively (the registry is
 // imported by every entry point), so the defaults are only seen in narrowly-scoped tests.
 //
-// Keeping these in one file makes the cycle-breaking surface easy to audit — `grep -r '\bsim\.\(GetCard\|DeckableCards\|AllWeapons\|DisplayName\|ChainStepText\)\b'` lights up every consumer.
+// Keeping these in one file makes the cycle-breaking surface easy to audit:
+// `grep -r '\bsim\.\(GetCard\|DeckableCards\|AllWeapons\|DisplayName\|ChainStepText\)\b'` lights
+// up every consumer.
 
 import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"

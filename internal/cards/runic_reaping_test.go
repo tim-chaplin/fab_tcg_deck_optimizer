@@ -41,7 +41,8 @@ func TestRunicReaping_WeaponNextDoesNotQualify(t *testing.T) {
 	}
 }
 
-// Tests that an attack-action target with attack-attributed funding gets +1{p} and registers the on-hit trigger.
+// Tests that an attack-action target with attack-attributed funding gets +1{p} and registers the
+// on-hit trigger.
 func TestRunicReaping_RegistersTriggerAndGrantsPitchedAttackBonus(t *testing.T) {
 	target := &sim.CardState{Card: testutils.AttackWithPower{Power: 3}}
 	s := sim.TurnState{CardsRemaining: []*sim.CardState{target}}
@@ -60,7 +61,8 @@ func TestRunicReaping_RegistersTriggerAndGrantsPitchedAttackBonus(t *testing.T) 
 	}
 }
 
-// Tests that without an attack attributed, the +1{p} rider skips but the on-hit Runechant trigger still registers.
+// Tests that without an attack attributed, the +1{p} rider skips but the on-hit Runechant trigger
+// still registers.
 func TestRunicReaping_NoPitchedAttackSkipsBonusButRegistersTrigger(t *testing.T) {
 	target := &sim.CardState{Card: testutils.AttackWithPower{Power: 4}}
 	s := sim.TurnState{CardsRemaining: []*sim.CardState{target}}

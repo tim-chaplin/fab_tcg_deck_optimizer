@@ -30,8 +30,8 @@ func TestAuraTriggerCreatorsOptInToAddsFutureValue(t *testing.T) {
 }
 
 func TestAllIDsResolve(t *testing.T) {
-	// Every CardID returned by AllCards() must map to a non-nil card. Catches gaps in the byID slice (an
-	// undeclared const would leave a nil hole).
+	// Every CardID returned by AllCards() must map to a non-nil card. Catches gaps in the byID
+	// slice (an undeclared const would leave a nil hole).
 	for _, id := range AllCards() {
 		if GetCard(id) == nil {
 			t.Errorf("CardID %d resolves to nil", id)

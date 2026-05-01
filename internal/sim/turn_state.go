@@ -632,9 +632,9 @@ func (s *TurnState) ApplyAndLogRiderOnPlay(self *CardState, text string, n int) 
 	return s.AddPostTriggerLogEntry(text, DisplayName(self.Card), n)
 }
 
-// ApplyAndLogRiderOnHit is the on-hit-gated variant of ApplyAndLogRiderOnPlay: writes the rider sub-line
-// only when self's effective attack is likely to land (per LikelyToHit), otherwise no log
-// entry is written and no value is credited. Use this for "When this hits, …" riders whose
+// ApplyAndLogRiderOnHit is the on-hit-gated variant of ApplyAndLogRiderOnPlay: writes the rider
+// sub-line only when self's effective attack is likely to land (per LikelyToHit), otherwise no
+// log entry is written and no value is credited. Use this for "When this hits, …" riders whose
 // only gate is the hit check; riders with extra preconditions (ArcaneDamageDealt,
 // HasPlayedOrCreatedAura, …) should test the precondition first and call this for the hit gate.
 // Don't use this when n is computed via a side-effecting expression that must fire only on
