@@ -95,13 +95,8 @@ func evaluateAndPersist(outPath string, shuffles, incoming, maxCopies int, seed 
 	// sharing the cache via the RWMutex-protected lookup path. fabsim eval is the
 	// flagship single-deck workload — getting from 1.8s to ~0.5s on 8 workers cuts
 	// re-score wall-clock noticeably.
-	ev := sim.NewEvaluatorParallel(sim.DefaultWorkers())
 	start := time.Now()
-	if shuffles < 0 {
-		d.EvaluateAdaptiveWith(incoming, rng, ev)
-	} else {
-		d.EvaluateWith(shuffles, incoming, rng, ev)
-	}
+	_, ev := evaluateParallel(d, shuffles, incoming, rng)
 	elapsed := time.Since(start)
 	fmt.Fprintf(os.Stderr, "eval: avg %.3f → %.3f (delta %+.3f) in %s (%s shuffles); rewriting %s\n",
 		savedAvg, d.Stats.Mean(), d.Stats.Mean()-savedAvg, elapsed.Round(time.Millisecond), commaInt(d.Stats.Runs), outPath)

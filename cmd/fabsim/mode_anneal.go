@@ -319,16 +319,15 @@ func coolDown(temperature, decay, minTemp float64) float64 {
 // return the same Stats shape; Stats.Runs reflects the actual shuffle count so the next
 // prepareBaseline call's "already evaluated" check still works (an adaptive run may finish
 // below the cap and prompt a re-evaluation next session, which is fine — adaptive runs
-// are cheap).
+// are cheap). Routes through evaluateParallel so the once-per-session baseline benefits
+// from the same DefaultWorkers fan-out as iterate's per-mutation evals.
 func baselineEvaluate(d *sim.Deck, cfg annealConfig, rng *rand.Rand) sim.Stats {
-	// Use a parallel-shuffle Evaluator so the baseline benefits from the same worker-pool
-	// speedup as iterate-mode's per-mutation evals. Otherwise the once-per-session
-	// baseline computation on a fresh deck would be the long pole on the first round.
-	ev := sim.NewEvaluatorParallel(sim.DefaultWorkers())
+	shuffles := cfg.shuffles
 	if cfg.adaptive {
-		return d.EvaluateAdaptiveWith(cfg.incoming, rng, ev)
+		shuffles = -1
 	}
-	return d.EvaluateWith(cfg.shuffles, cfg.incoming, rng, ev)
+	stats, _ := evaluateParallel(d, shuffles, cfg.incoming, rng)
+	return stats
 }
 
 // prepareBaseline returns the starting deck for the hill climb with its baseline avg.
