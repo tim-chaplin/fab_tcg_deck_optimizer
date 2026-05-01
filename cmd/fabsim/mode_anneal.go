@@ -371,44 +371,52 @@ func prepareBaseline(cfg annealConfig, rng *rand.Rand) (*sim.Deck, float64) {
 	// at, which carries no precision guarantee for the new run's target.
 	needReeval := cfg.adaptive || cfg.reevaluate || best.Stats.Runs < cfg.shuffles
 	if needReeval {
-		reason := fmt.Sprintf("from %d shuffles", best.Stats.Runs)
-		if cfg.reevaluate && best.Stats.Runs >= cfg.shuffles {
-			reason = "-reevaluate forced"
-		}
-		if len(sanitized) > 0 {
-			reason = fmt.Sprintf("%d NotImplemented card(s) replaced", len(sanitized))
-		}
-		// Label the loaded number "saved avg" so it can't be mistaken for the re-evaluated
-		// score. Decks scored under older simulation logic can have saved avgs that diverge
-		// substantially from what today's simulator produces.
-		budgetLabel := fmt.Sprintf("%d shuffles", cfg.shuffles)
-		if cfg.adaptive {
-			budgetLabel = "adaptive shuffles"
-		}
-		fmt.Printf("Loaded best deck (saved avg %.3f, %s); re-evaluating at %s for an apples-to-apples baseline\n",
-			bestAvg, reason, budgetLabel)
-		savedAvg := bestAvg
-		// Sideboard and Equipment are user-managed and don't feed the sim — preserve
-		// them across the stats reset so the re-evaluated deck writes back unchanged.
-		sideboard := best.Sideboard
-		equipment := best.Equipment
-		best = sim.New(best.Hero, best.Weapons, best.Cards)
-		best.Sideboard = sideboard
-		best.Equipment = equipment
-		bestAvg = baselineEvaluate(best, cfg, rng).Mean()
-		if err := writeDeck(best, cfg.outPath); err != nil {
-			die("%v", err)
-		}
-		// Show saved→current so the delta from any simulation-logic drift is visible at a
-		// glance, instead of the user guessing which of the two printed numbers is the fresh
-		// one.
-		fmt.Printf("Re-evaluated baseline: %.3f → %.3f, saved to %s\n", savedAvg, bestAvg, cfg.outPath)
+		best, bestAvg = reevaluateBaseline(cfg, rng, best, bestAvg, sanitized)
 		maybePrintBaselineCards(cfg, best)
 		return best, bestAvg
 	}
 	fmt.Printf("Loaded best deck (avg %.3f) from %s\n", bestAvg, cfg.outPath)
 	maybePrintBaselineCards(cfg, best)
 	return best, bestAvg
+}
+
+// reevaluateBaseline rebuilds the loaded deck against the current shuffle budget and writes
+// the refreshed Stats back to disk. Picks an explanatory reason label (sanitized cards
+// replaced, -reevaluate forced, or stale shuffle count), reconstructs the deck so any saved
+// Stats are dropped (Sideboard and Equipment are preserved), runs baselineEvaluate, and
+// persists the result. Returns the rebuilt deck and its fresh avg.
+func reevaluateBaseline(cfg annealConfig, rng *rand.Rand, loaded *sim.Deck, savedAvg float64, sanitized []sim.NotImplementedReplacement) (*sim.Deck, float64) {
+	reason := fmt.Sprintf("from %d shuffles", loaded.Stats.Runs)
+	if cfg.reevaluate && loaded.Stats.Runs >= cfg.shuffles {
+		reason = "-reevaluate forced"
+	}
+	if len(sanitized) > 0 {
+		reason = fmt.Sprintf("%d NotImplemented card(s) replaced", len(sanitized))
+	}
+	// Label the loaded number "saved avg" so it can't be mistaken for the re-evaluated
+	// score. Decks scored under older simulation logic can have saved avgs that diverge
+	// substantially from what today's simulator produces.
+	budgetLabel := fmt.Sprintf("%d shuffles", cfg.shuffles)
+	if cfg.adaptive {
+		budgetLabel = "adaptive shuffles"
+	}
+	fmt.Printf("Loaded best deck (saved avg %.3f, %s); re-evaluating at %s for an apples-to-apples baseline\n",
+		savedAvg, reason, budgetLabel)
+	// Sideboard and Equipment are user-managed and don't feed the sim — preserve them across
+	// the stats reset so the re-evaluated deck writes back unchanged.
+	sideboard := loaded.Sideboard
+	equipment := loaded.Equipment
+	rebuilt := sim.New(loaded.Hero, loaded.Weapons, loaded.Cards)
+	rebuilt.Sideboard = sideboard
+	rebuilt.Equipment = equipment
+	freshAvg := baselineEvaluate(rebuilt, cfg, rng).Mean()
+	if err := writeDeck(rebuilt, cfg.outPath); err != nil {
+		die("%v", err)
+	}
+	// Show saved→current so the delta from any simulation-logic drift is visible at a glance,
+	// instead of the user guessing which of the two printed numbers is the fresh one.
+	fmt.Printf("Re-evaluated baseline: %.3f → %.3f, saved to %s\n", savedAvg, freshAvg, cfg.outPath)
+	return rebuilt, freshAvg
 }
 
 // maybePrintBaselineCards emits the startup card-list dump unless -quiet-load suppressed it. The

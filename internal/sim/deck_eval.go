@@ -646,23 +646,9 @@ func (d *Deck) EvalOneTurnForTesting(incomingDamage int, arsenalIn Card, initial
 		return TurnStartState{}
 	}
 
-	// Resolve turn 1's hand and the head offset. No caller-supplied hand: d.Cards[:handSize]
-	// is the hand (default layout). Caller-supplied: d.Cards is the deck entirely, and the
-	// hand is exactly what the caller handed in.
-	var turn1Hand []Card
-	var head int
-	if initialHand == nil {
-		if len(d.Cards) < handSize {
-			return TurnStartState{}
-		}
-		turn1Hand = d.Cards[:handSize]
-		head = handSize
-	} else {
-		if len(initialHand) == 0 || len(initialHand) > handSize {
-			return TurnStartState{}
-		}
-		turn1Hand = initialHand
-		head = 0
+	turn1Hand, head, ok := resolveTurn1Hand(d.Cards, initialHand, handSize)
+	if !ok {
+		return TurnStartState{}
 	}
 
 	deckSize := len(d.Cards)
@@ -717,6 +703,25 @@ func (d *Deck) EvalOneTurnForTesting(incomingDamage int, arsenalIn Card, initial
 		StartOfTurnTriggerDamage: trigDamage,
 		StartOfTurnGraveyard:     trigGraveyarded,
 	}
+}
+
+// resolveTurn1Hand picks turn 1's starting hand and the head offset into deckCards. With
+// initialHand nil the default layout takes deckCards[:handSize] as the hand and points
+// head past it; with a caller-supplied hand the deck stays untouched and the supplied
+// slice is used verbatim (head=0). ok=false signals the caller's inputs can't yield a
+// playable opening hand: deck shorter than handSize in default mode, or a supplied hand
+// that's empty or longer than handSize.
+func resolveTurn1Hand(deckCards, initialHand []Card, handSize int) (hand []Card, head int, ok bool) {
+	if initialHand == nil {
+		if len(deckCards) < handSize {
+			return nil, 0, false
+		}
+		return deckCards[:handSize], handSize, true
+	}
+	if len(initialHand) == 0 || len(initialHand) > handSize {
+		return nil, 0, false
+	}
+	return initialHand, 0, true
 }
 
 // recordBestTurn clones the winning turn's slices into fresh storage and stamps stats.Best
