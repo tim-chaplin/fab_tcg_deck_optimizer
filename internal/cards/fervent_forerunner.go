@@ -3,6 +3,9 @@
 //
 // Text: "If Fervent Forerunner hits, **opt 2**. If Fervent Forerunner is played from arsenal, it
 // gains **go again**."
+//
+// Standard played-from-arsenal go-again (docs/dev-standards.md). On-hit Opt 2 gates on
+// LikelyToHit.
 
 package cards
 
@@ -14,8 +17,6 @@ import (
 
 var ferventForerunnerTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeAttack)
 
-// ferventForerunnerPlay grants self Go again when this copy was played from arsenal,
-// emits the chain step, and resolves the on-hit Opt 2 (gated on LikelyToHit).
 func ferventForerunnerPlay(s *sim.TurnState, self *sim.CardState) {
 	if self.FromArsenal {
 		self.GrantedGoAgain = true

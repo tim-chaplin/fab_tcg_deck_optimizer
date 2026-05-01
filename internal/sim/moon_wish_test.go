@@ -29,8 +29,8 @@ import (
 //   - turn-1 Value = 4 (Moon Wish base only; Sun Kiss tutored, not played).
 //   - Sun Kiss appears in NO turn-2 surface (Hand / Deck / Arsenal) directly — but is
 //     promoted to Arsenal as the only Held candidate after alt cost consumed the DR.
-//   - Weeping Battleground exists exactly once across turn-2 surfaces — the alt-cost
-//     mechanism didn't drop the card on the floor (a pre-fix run lost it entirely).
+//   - Weeping Battleground exists exactly once across turn-2 surfaces — the alt-cost path
+//     must not drop the card on the floor.
 func TestEvalOneTurn_MoonWishAltCostTutorsSunKissAndConsumesDeck(t *testing.T) {
 	deckCards := []Card{
 		cards.SunKissRed{},
@@ -97,9 +97,9 @@ func TestEvalOneTurn_MoonWishAltCostTutorFizzlesWithoutSunKiss(t *testing.T) {
 // alt-costs the Held DR, hits, tutors Sun Kiss, sees self.EffectiveGoAgain() = true, and
 // plays Sun Kiss immediately. Sun Kiss heads to the graveyard.
 //
-// Sun Kiss sits at deck position 2 (not the top) so the buf-mutation fix is actually
-// exercised: a pre-fix head advance would silently consume buf[0] instead of patching out
-// the specific Sun Kiss slot, leaving Sun Kiss to surface in turn-2 Hand or Deck.
+// Sun Kiss sits at deck position 2 (not the top) so the buf-mutation path is exercised: a
+// blind head-advance would consume buf[0] instead of patching out the specific Sun Kiss
+// slot, leaving Sun Kiss to surface in turn-2 Hand or Deck.
 //
 // Cross-turn assertions:
 //   - turn-1 Value = 7 (Moon Wish 4 + Sun Kiss 3) — confirms Sun Kiss actually played.
@@ -108,8 +108,8 @@ func TestEvalOneTurn_MoonWishAltCostTutorFizzlesWithoutSunKiss(t *testing.T) {
 //   - ArsenalCard is non-nil — Sun Kiss's DrawOne pulled some card off the (per printed
 //     rules, shuffled) deck top; the specific identity is random so we don't pin it.
 func TestEvalOneTurn_MoonWishWithFlyingHighPlaysTutoredSunKiss(t *testing.T) {
-	// Sun Kiss at index 2 (not 0) so a pre-fix head++ wouldn't accidentally consume its
-	// slot; verifying buf-removal logic actually patches the specific tutored card out.
+	// Sun Kiss at index 2 (not 0) so a blind head++ would consume the wrong slot; verifies
+	// the buf-removal logic patches out the specific tutored card.
 	deckCards := []Card{
 		testutils.RedAttack{}, testutils.RedAttack{},
 		cards.SunKissRed{},

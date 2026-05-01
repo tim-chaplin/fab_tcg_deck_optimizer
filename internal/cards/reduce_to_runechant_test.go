@@ -6,8 +6,7 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 )
 
-// Compile-time: all three Reduce variants must implement sim.VariableCost so the solver can
-// pre-screen with MinCost / MaxCost bounds before running chain permutations.
+// Compile-time: all three Reduce variants must implement sim.VariableCost.
 var (
 	_ sim.VariableCost = ReduceToRunechantRed{}
 	_ sim.VariableCost = ReduceToRunechantYellow{}

@@ -70,9 +70,9 @@ func TestBest_MauvrionLikelyHitRunebladeAttackCreditsRider(t *testing.T) {
 	}
 	got := Best(testutils.Hero{Intel: 4}, nil, h, 0, nil, 0, nil)
 	// Pitch YellowAttack (2 res) → Mauvrion (cost 0, go again, grants go-again to Shrill +
-	// registers trigger) → Shrill (cost 2, power 4). No aura exists when Shrill's Play
-	// runs (testutils.Hero{Intel: 4} has no trigger and Mauvrion's trigger hasn't fired yet), so Shrill's
-	// own +3 "aura played" bonus stays off. After Shrill, Mauvrion's ephemeral fires:
+	// registers trigger) → Shrill (cost 2, power 4). No aura exists when Shrill's Play runs
+	// (testutils.Hero{Intel: 4} has no trigger and Mauvrion's trigger hasn't fired yet), so
+	// Shrill's own +3 "aura played" bonus stays off. After Shrill, Mauvrion's ephemeral fires:
 	// LikelyToHit(4) is true, so it creates 3 Runechants (+3 damage, credited to Mauvrion).
 	// Total: 4 (Shrill) + 3 (Mauvrion's rider) = 7.
 	if got.Value != 7 {

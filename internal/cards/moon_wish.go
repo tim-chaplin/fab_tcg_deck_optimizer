@@ -24,8 +24,7 @@ import (
 
 var moonWishTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeAttack)
 
-// moonWishPrintedCost is the un-discounted resource cost — also the MaxCost bound for the
-// VariableCost solver pre-screens.
+// moonWishPrintedCost is the un-discounted resource cost (also the VariableCost MaxCost bound).
 const moonWishPrintedCost = 2
 
 // moonWishCost returns 0 when there's any card left in hand to spend on the alt cost,

@@ -131,11 +131,8 @@ func TestLoadExisting_CorruptReturnsError(t *testing.T) {
 	}
 }
 
-// TestLoadExisting_TruncatedReturnsError: simulates the exact failure mode that motivated
-// this fix — a writeDeck interrupted between O_TRUNC and the data write would have left an
-// empty file. With the atomic-write fix that can't happen anymore, but loadExisting must
-// still treat an empty file as corrupt so a manually-cleared file doesn't silently get
-// replaced either.
+// TestLoadExisting_TruncatedReturnsError: an empty file (e.g. manually cleared) must be
+// treated as corrupt so loadExisting doesn't silently let a random deck overwrite it.
 func TestLoadExisting_TruncatedReturnsError(t *testing.T) {
 	path := filepath.Join(t.TempDir(), "empty.json")
 	if err := os.WriteFile(path, nil, 0o644); err != nil {

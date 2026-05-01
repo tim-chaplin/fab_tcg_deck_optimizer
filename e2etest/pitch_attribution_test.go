@@ -29,7 +29,7 @@ func TestPitchAttribution_AetherSlashAttackPitchDoesNotFireRider(t *testing.T) {
 	}
 }
 
-// Tests that Deathly Duet fires both riders when its cost is funded by an attack and a non-attack action.
+// Tests that Deathly Duet fires both riders when funded by one attack and one non-attack action.
 func TestPitchAttribution_DeathlyDuetBothRidersFireFromMixedFunding(t *testing.T) {
 	d := sim.New(heroes.Viserai{}, nil, fillerDeck())
 	hand := []sim.Card{

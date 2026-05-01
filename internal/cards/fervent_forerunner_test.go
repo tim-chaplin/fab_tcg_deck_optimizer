@@ -13,10 +13,8 @@ var ferventForerunnerVariants = []sim.Card{
 	FerventForerunnerBlue{},
 }
 
-// TestFerventForerunner_BaseGoAgainFalse pins the simplification: the only go-again trigger is
-// "played from arsenal", which is gated on self.FromArsenal — printed GoAgain() must return
-// false. Returning true would over-credit every sequence where it wasn't actually played from
-// arsenal.
+// TestFerventForerunner_BaseGoAgainFalse pins printed GoAgain() = false; the only grant is the
+// arsenal-gated rider on self.FromArsenal.
 func TestFerventForerunner_BaseGoAgainFalse(t *testing.T) {
 	for _, c := range ferventForerunnerVariants {
 		if c.GoAgain() {

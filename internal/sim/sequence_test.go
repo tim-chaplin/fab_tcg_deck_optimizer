@@ -181,7 +181,7 @@ func TestIsLegalOrder_MauvrionCantSaveShrillWhenRuneragerIsAhead(t *testing.T) {
 }
 
 func TestBest_ViseraiMauvrionChainsShrillIntoRuneragerIntoWeapon(t *testing.T) {
-	// Pitch Blue Hocus → Mauvrion → Shrill → Runerager → Reaping Blade. Value = 3 + 7 + 3 + 3 + 2
+	// Pitch Blue Hocus → Mauvrion → Shrill → Runerager → Reaping Blade. Value = 3+7+3+3+2 +
 	// Viserai runechants = 18.
 	h := []Card{
 		cards.HocusPocusBlue{},

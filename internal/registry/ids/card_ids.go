@@ -12,8 +12,8 @@ type CardID uint16
 // Invalid is the sentinel zero value. Valid IDs start at 1.
 const InvalidCard CardID = 0
 
-// Runeblade card IDs. Ordered alphabetically by card name, Red → Yellow → Blue within each family.
-// Sigil of Deadwood only has a Blue variant (no R/Y printings).
+// Runeblade card IDs. Ordered alphabetically by card name, Red → Yellow → Blue within each
+// family. Sigil of Deadwood only has a Blue variant (no R/Y printings).
 const (
 	AetherSlashRed CardID = iota + 1
 	AetherSlashYellow
@@ -130,7 +130,7 @@ const (
 	WeepingBattlegroundYellow
 	WeepingBattlegroundBlue
 
-	// Generic card IDs. Ordered alphabetically by card name, Red → Yellow → Blue within each family.
+	// Generic card IDs. Ordered alphabetically by card name, Red → Yellow → Blue within family.
 	AdrenalineRushRed
 	AdrenalineRushYellow
 	AdrenalineRushBlue

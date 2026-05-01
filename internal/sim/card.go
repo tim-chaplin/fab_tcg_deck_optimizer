@@ -3,8 +3,8 @@
 // The per-card CardState wrapper, the Card interface itself, and the optional markers cards
 // opt into (VariableCost, Dominator, AddsFutureValue, ArsenalDefenseBonus, …) live in this
 // file. Cohesive concern groups are split across sibling files in this package:
-// types.go (card.CardType + card.TypeSet bitfield), turn_state.go (TurnState and its mutation helpers),
-// triggers.go (AuraTrigger + EphemeralAttackTrigger).
+// types.go (card.CardType + card.TypeSet bitfield), turn_state.go (TurnState and its mutation
+// helpers), triggers.go (AuraTrigger + EphemeralAttackTrigger).
 package sim
 
 import (
@@ -183,8 +183,8 @@ type Unplayable interface {
 // self.GrantedGoAgain — i.e., cards that grant themselves Go again under a runtime
 // condition (FromArsenal, an aura already in play, ArcaneDamageDealt, …) rather than as a
 // printed keyword. Hand-shaping heuristics opt into the marker via type assertion so
-// cards like Runerager Swarm (printed GoAgain() == false but conditionally granted at
-// play time) aren't bottomed as one-per-hand finishers. The lint test in
+// conditionally-granted cards (printed GoAgain() == false but reliably granted at play
+// time) aren't bottomed as one-per-hand finishers. The lint test in
 // conditional_go_again_test.go probes every registered card against a maximally-permissive
 // TurnState and fails if any unmarked card flips GrantedGoAgain, so a new conditional-
 // grant card has to declare itself.

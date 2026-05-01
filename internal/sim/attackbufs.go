@@ -206,8 +206,8 @@ func newAttackBufs(handSize, weaponCount int, weapons []Weapon) *attackBufs {
 			cardsPlayedBacking:  make([]Card, 0, maxAttackers),
 			logBacking:          make([]LogEntry, 0, logBackingCap),
 			auraTriggersBacking: make([]AuraTrigger, 0, handSize+1),
-			// Ephemeral attack triggers (Mauvrion Skies, Runic Reaping) typically register one per
-			// applicable card — pre-sized cap avoids the per-Play slice grow.
+			// Ephemeral attack triggers typically register one per applicable card — pre-sized cap
+			// avoids the per-Play slice grow.
 			ephemeralBacking: make([]EphemeralAttackTrigger, 0, handSize+1),
 		},
 		// carryWinnerBufs starts zero-valued — the slice backings grow on first use.
@@ -264,9 +264,8 @@ func fillPartitionPerCardBufs(hand []Card, n, totalN int, arsenalCardIn Card, pv
 		pvals[i] = c.Pitch()
 		dvals[i] = c.Defense()
 		// Arsenal slot (i == n) lives at the end. Defense Reactions whose +N{d} rider only fires
-		// when played from arsenal (Unmovable, Springboard Somersault) opt in via
-		// ArsenalDefenseBonus; bump the static Defense() up here so the partition / capping
-		// pipeline sees the effective value.
+		// when played from arsenal opt in via ArsenalDefenseBonus; bump the static Defense() up
+		// here so the partition / capping pipeline sees the effective value.
 		if i == n {
 			if ab, ok := c.(ArsenalDefenseBonus); ok {
 				dvals[i] += ab.ArsenalDefenseBonus()

@@ -7,11 +7,8 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
 )
 
-// TestVigorRush_BaseGoAgainFalse pins the correctness of GoAgain() — it must be false so
-// EffectiveGoAgain (baseGoAgain || self.GrantedGoAgain) can short-circuit chain-legality when
-// the non-attack-action condition hasn't fired. Returning true made the chain-legality check
-// always pass, over-crediting sequences where no non-attack action was played earlier in the
-// turn.
+// TestVigorRush_BaseGoAgainFalse pins GoAgain() = false so EffectiveGoAgain short-circuits
+// chain-legality when the non-attack-action condition hasn't fired.
 func TestVigorRush_BaseGoAgainFalse(t *testing.T) {
 	for _, c := range []sim.Card{VigorRushRed{}, VigorRushYellow{}, VigorRushBlue{}} {
 		if c.GoAgain() {
@@ -20,15 +17,13 @@ func TestVigorRush_BaseGoAgainFalse(t *testing.T) {
 	}
 }
 
-// TestVigorRush_NoNonAttackActionNoGoAgain covers the miss branch: if only attack-action cards
-// (or nothing) have been played this turn, the conditional go-again rider doesn't fire. The sim
-// maintains NonAttackActionPlayed alongside CardsPlayed as it walks the chain, so Play reads the
-// flag rather than re-scanning.
+// TestVigorRush_NoNonAttackActionNoGoAgain covers the miss branch: with only attack-action
+// cards (or nothing) played this turn, the conditional go-again rider doesn't fire.
 func TestVigorRush_NoNonAttackActionNoGoAgain(t *testing.T) {
 	cases := []sim.Card{VigorRushRed{}, VigorRushYellow{}, VigorRushBlue{}}
 	for _, c := range cases {
 		s := sim.TurnState{
-			CardsPlayed:           []sim.Card{testutils.GenericAttack(0, 0)}, // attack action, not non-attack
+			CardsPlayed:           []sim.Card{testutils.GenericAttack(0, 0)}, // attack, not non-attack
 			NonAttackActionPlayed: false,
 		}
 		self := &sim.CardState{Card: c}

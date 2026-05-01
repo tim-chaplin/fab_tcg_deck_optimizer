@@ -17,8 +17,7 @@ import (
 
 // captureStdout drains os.Stdout into a buffer for the duration of f and restores it after.
 // Used by the compare-mode tests where the assertion is on the printed text rather than on
-// any return value. Mirrors captureEvalOutput in mode_eval_test.go but only handles stdout
-// since the compare-mode print helpers don't write to stderr.
+// any return value. Stdout-only because the compare-mode print helpers don't write to stderr.
 func captureStdout(t *testing.T, f func()) string {
 	t.Helper()
 	orig := os.Stdout

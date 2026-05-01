@@ -10,8 +10,8 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 )
 
-// TestMarshalUnmarshalRoundTrip exercises a random deck through Marshal → Unmarshal and checks that
-// weapons, cards, and hero all come back intact (stats are intentionally not round-tripped).
+// TestMarshalUnmarshalRoundTrip exercises a random deck through Marshal → Unmarshal and checks
+// that weapons, cards, and hero all come back intact (stats are intentionally not round-tripped).
 func TestMarshalUnmarshalRoundTrip(t *testing.T) {
 	rng := rand.New(rand.NewSource(1))
 	d := sim.Random(heroes.Viserai{}, 40, 2, rng, nil)

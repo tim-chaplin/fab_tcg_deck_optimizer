@@ -58,8 +58,8 @@ func TestIsExcludedFromPool_BothMarkers(t *testing.T) {
 	}
 }
 
-// TestCardState_EffectiveGoAgain: printed GoAgain OR a mid-chain grant (Mauvrion Skies et al)
-// each qualifies the card for Go again. Neither printed nor granted → false.
+// TestCardState_EffectiveGoAgain: printed GoAgain OR a mid-chain grant qualifies the card
+// for Go again. Neither printed nor granted → false.
 func TestCardState_EffectiveGoAgain(t *testing.T) {
 	cases := []struct {
 		name    string
