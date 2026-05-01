@@ -17,9 +17,17 @@ import (
 // so LogPlay carries the chain entry; the rider line carries the predicted value.
 func fragileAuraPlay(s *sim.TurnState, self *sim.CardState, n int, attackActionOnly bool) {
 	s.LogPlay(self)
-	if v := fragileAuraValue(s, n, attackActionOnly); v > 0 {
-		s.ApplyAndLogRiderOnPlay(self, fmt.Sprintf("Aura expected to pay %d runechants", v), v)
+	v := fragileAuraValue(s, n, attackActionOnly)
+	if v <= 0 {
+		return
 	}
+	// SkipLog discards the rider entry; credit Value directly to skip the Sprintf and the
+	// DisplayName lookup ApplyAndLogRiderOnPlay would otherwise pay for.
+	if s.SkipLog {
+		s.Value += v
+		return
+	}
+	s.ApplyAndLogRiderOnPlay(self, fmt.Sprintf("Aura expected to pay %d runechants", v), v)
 }
 
 // fragileAuraValue returns n when the aura is expected to pay out, 0 otherwise. Two paths
