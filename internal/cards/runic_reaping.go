@@ -104,6 +104,7 @@ func runicReapingPlay(s *sim.TurnState, selfState *sim.CardState, source sim.Car
 		Matches: runicReapingTargetMatches,
 		Handler: onHitRunechantHandler,
 		N:       n,
+		LogText: onHitRunechantText[source.ID()],
 	})
 	s.Log(selfState, 0)
 }

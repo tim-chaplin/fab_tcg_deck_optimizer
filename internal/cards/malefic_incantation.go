@@ -62,12 +62,26 @@ func (c MaleficIncantationBlue) Play(s *sim.TurnState, self *sim.CardState) {
 	maleficPlay(s, self, c, 1)
 }
 
+// maleficCreatedRunechantText is the precomputed rider line for each Malefic Incantation
+// variant. Built once at init() so neither Play nor the per-fire handler does any string
+// formatting on the hot anneal path.
+var maleficCreatedRunechantText = func() map[ids.CardID]string {
+	out := make(map[ids.CardID]string, 3)
+	for _, c := range []sim.Card{
+		MaleficIncantationRed{},
+		MaleficIncantationYellow{},
+		MaleficIncantationBlue{},
+	} {
+		out[c.ID()] = sim.DisplayName(c) + " created a runechant"
+	}
+	return out
+}()
+
 // maleficPlay registers the attack-action once-per-turn trigger and emits the same-turn
 // chain step. Each trigger fire creates one Runechant — the trigger handler authors a
 // post-trigger log line so it groups beneath the triggering attack-action chain step. n
 // is the printed counter count carried on the trigger so the handler can stay a top-level
-// function (the Count field on the trigger drains as fires consume verse counters; the
-// payload N field stays the printed value for log attribution if ever needed).
+// function.
 func maleficPlay(s *sim.TurnState, selfState *sim.CardState, selfCard sim.Card, n int) {
 	s.AddAuraTrigger(sim.AuraTrigger{
 		Self:        selfCard,
@@ -75,17 +89,17 @@ func maleficPlay(s *sim.TurnState, selfState *sim.CardState, selfCard sim.Card, 
 		Count:       n,
 		OncePerTurn: true,
 		Handler:     maleficAuraHandler,
+		LogText:     maleficCreatedRunechantText[selfCard.ID()],
 	})
 	s.Log(selfState, 0)
 }
 
 // maleficAuraHandler is the once-per-turn attack-action trigger handler shared across
-// Malefic Incantation variants. Reads t.Self for log attribution so the handler is a
-// top-level function with no per-Play closure allocation.
+// Malefic Incantation variants. Reads t.LogText for the rider line so the hot fire path
+// runs zero string allocations.
 func maleficAuraHandler(s *sim.TurnState, t *sim.AuraTrigger) int {
 	created := s.CreateRunechants(1)
 	s.AddValue(created)
-	s.LogPostTriggerf(sim.DisplayName(s.TriggeringCard), created,
-		"%s created a runechant", sim.DisplayName(t.Self))
+	s.LogPostTrigger(sim.DisplayName(s.TriggeringCard), t.LogText, created)
 	return created
 }

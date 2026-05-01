@@ -605,42 +605,32 @@ func (s *TurnState) AddAuraTrigger(t AuraTrigger) {
 	s.AuraTriggers = append(s.AuraTriggers, t)
 }
 
-// RegisterStartOfTurn registers a TriggerStartOfTurn AuraTrigger as the canonical shape
-// for "at the beginning of your action phase ..." aura clauses. self is the aura card
-// (used by the sim to graveyard the source after the final fire); count is how many
-// start-of-turn fires the aura survives before the sim destroys it (1 for one-shot
-// destroy-on-fire auras, N for verse-counter / charge-counter auras); text is the
-// per-fire effect description ("Gained 1 health", "Created a runechant", …) auto-logged
-// alongside the trigger so the printout names what happened — pass "" when the handler
-// authors its own log line (dynamic wording, e.g. Sigil of the Arknight's "drew X into
-// hand"); handler runs each fire and returns the damage-equivalent the trigger credits.
+// RegisterStartOfTurn registers a TriggerStartOfTurn AuraTrigger as the canonical shape for
+// "at the beginning of your action phase ..." aura clauses. self is the aura card (used by
+// the sim to graveyard the source after the final fire); count is how many start-of-turn
+// fires the aura survives before the sim destroys it (1 for one-shot destroy-on-fire auras,
+// N for verse-counter / charge-counter auras); text is the per-fire effect description
+// ("Gained 1 health", "Created a runechant", …) auto-logged alongside the trigger so the
+// printout names what happened — pass "" when the handler authors its own log line (dynamic
+// wording, e.g. Sigil of the Arknight's "drew X into hand"); handler runs each fire and
+// returns the damage-equivalent the trigger credits.
 //
-// When text is non-empty and the handler returns n > 0, the wrapper writes a post-trigger
-// log entry "<DisplayName>: text (+n)" attributed to self so the sim's per-trigger
-// contribution renders as a descriptive line instead of the generic "<DisplayName>:
-// START OF ACTION PHASE (+N)" fallback. n == 0 fires log nothing (matches the no-banish
-// edge case of Sigil of Silphidae's leave trigger). The damage accumulator in
-// processTriggersAtStartOfTurn still folds n into the turn's value via the handler's
-// return; the log entry's N is purely cosmetic for the rendered line.
+// When text is non-empty, the framework's start-of-turn fire path writes a post-trigger
+// log entry "<DisplayName>: text" attributed to self after handler returns and only when
+// the handler returned n > 0. The pre-built LogText is stored on the AuraTrigger so the
+// per-fire path runs zero string allocations (no per-Play closure either — handler stays a
+// top-level function).
 func (s *TurnState) RegisterStartOfTurn(self Card, count int, text string, handler OnAuraTrigger) {
-	finalHandler := handler
+	var logText string
 	if text != "" {
-		// Capture self/text only; defer the DisplayName + Sprintf + LogPostTriggerf args
-		// boxing into the !skipLog branch so the silent firing path stays alloc-free.
-		finalHandler = func(s *TurnState, t *AuraTrigger) int {
-			n := handler(s, t)
-			if n > 0 && !s.skipLog {
-				source := DisplayName(self)
-				s.LogPostTriggerf(source, n, "%s: %s (+%d)", source, text, n)
-			}
-			return n
-		}
+		logText = DisplayName(self) + ": " + text
 	}
 	s.AddAuraTrigger(AuraTrigger{
 		Self:    self,
 		Type:    TriggerStartOfTurn,
 		Count:   count,
-		Handler: finalHandler,
+		Handler: handler,
+		LogText: logText,
 	})
 }
 
