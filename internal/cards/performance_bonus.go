@@ -17,9 +17,6 @@ import (
 
 var performanceBonusTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeAttack)
 
-// performanceBonusPlay grants self Go again when this copy was played from arsenal, emits
-// the chain step, then writes the on-hit Gold-token rider as a sub-line when LikelyToHit
-// fires.
 func performanceBonusPlay(s *sim.TurnState, self *sim.CardState) {
 	if self.FromArsenal {
 		self.GrantedGoAgain = true

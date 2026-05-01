@@ -17,8 +17,6 @@ import (
 
 var frontlineScoutTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeAttack)
 
-// frontlineScoutPlay grants self Go again when this copy was played from arsenal, then
-// emits the chain step.
 func frontlineScoutPlay(s *sim.TurnState, self *sim.CardState) {
 	if self.FromArsenal {
 		self.GrantedGoAgain = true

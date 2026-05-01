@@ -1,15 +1,11 @@
 package e2etest
 
-// These tests pin the intended semantics of TurnState.Hand at chain-step Play time:
-// Hand should reflect the cards in hand AT THIS MOMENT — committed-to-the-turn cards
-// (pitched, used to block, already played, the playing card itself) are out, but cards
-// that are going to be Held OR played later in the chain OR drawn earlier in the chain
-// stay in. Spring Load Red's "+3{p} if you have no cards in hand" rider is the canary —
-// the only currently-implemented card whose firing depends on a precise-at-this-moment
-// snapshot.
-//
-// Tests are expected to FAIL on main today: TurnState.Hand currently starts as the
-// Held-role cards only, so upcoming chain steps and mid-chain draws aren't reflected.
+// These tests pin the semantics of TurnState.Hand at chain-step Play time: Hand reflects
+// the cards in hand AT THIS MOMENT — committed-to-the-turn cards (pitched, used to block,
+// already played, the playing card itself) are out, but cards going to be Held, played later
+// in the chain, or drawn earlier in the chain stay in. Spring Load Red's "+3{p} if you have
+// no cards in hand" rider is the canary — the only implemented card whose firing depends on
+// a precise-at-this-moment snapshot.
 
 import (
 	"testing"
