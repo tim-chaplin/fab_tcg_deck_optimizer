@@ -21,9 +21,17 @@ package sim
 // state.* slices alias attackBufs scratch storage and the next permutation will
 // overwrite them. Reads s.deck / s.graveyard directly so the snapshot itself doesn't
 // poison cacheable.
+//
+// Deck aliases s.deck without copying. s.deck always points to the leaf's stable
+// ctx.deck (or to a fresh slice from a card mutation like PrependToDeck / Opt /
+// TutorFromDeck — those allocate a new backing and don't write into ctx.deck), so the
+// alias remains valid across the next permutation reset (which only re-binds s.deck
+// back to ctx.deck) and across CopyFrom propagation up the carry-scratch chain. The
+// final consumer (findBestCarryScratch.Clone in runningCarry.Finalize) deep-copies
+// the deck so the returned TurnSummary still owns independent backing.
 func (c *CarryState) SnapshotFromTurn(s *TurnState) {
 	c.Hand = append(c.Hand[:0], s.Hand...)
-	c.Deck = append(c.Deck[:0], s.deck...)
+	c.Deck = s.deck
 	c.Arsenal = s.Arsenal
 	c.Graveyard = append(c.Graveyard[:0], s.graveyard...)
 	c.Banish = append(c.Banish[:0], s.Banish...)
@@ -36,9 +44,14 @@ func (c *CarryState) SnapshotFromTurn(s *TurnState) {
 // promote one already-built CarryState into a different scratch (e.g.
 // bestCarryScratch → findBestCarryScratch when a leaf wins) without paying a fresh
 // allocation per promotion.
+//
+// Deck aliases src.Deck without copying — same safety story as SnapshotFromTurn:
+// every CarryState in the propagation chain points at the leaf's stable ctx.deck (or
+// a card-allocated fresh slice), and the eventual Clone consumer is the only place a
+// caller-owned independent copy is needed.
 func (c *CarryState) CopyFrom(src *CarryState) {
 	c.Hand = append(c.Hand[:0], src.Hand...)
-	c.Deck = append(c.Deck[:0], src.Deck...)
+	c.Deck = src.Deck
 	c.Arsenal = src.Arsenal
 	c.Graveyard = append(c.Graveyard[:0], src.Graveyard...)
 	c.Banish = append(c.Banish[:0], src.Banish...)
