@@ -4,10 +4,11 @@
 // card named Rally the Rearguard, add it to this chain link as a defending card, then shuffle.
 // Activate this ability only if you have no cards in hand."
 //
-// Marked sim.Unplayable: a 0/0 Item whose only output is a deck-tutor of a single named card
-// into the defense slot — gated on empty hand and dependent on Rally the Rearguard being in
-// the deck and on the chain-link plumbing for late-added defenders. Not worth modelling, so
-// it's filtered from random / mutation pools.
+// Marked sim.Unplayable: the card itself is too weak to want in a deck. Best-case output is a
+// tutored Rally the Rearguard added as a defender (~3 block), gated on empty hand and on the
+// deck actually containing Rally — niche even in dedicated builds. Even fully modelled, the
+// EV doesn't beat just running Rally directly; the chain-link defender plumbing is a
+// secondary modelling cost but not the deciding factor.
 
 package cards
 

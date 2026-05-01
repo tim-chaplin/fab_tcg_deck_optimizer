@@ -4,10 +4,11 @@
 // action gains "If this would be put into a graveyard, instead put it on the bottom of its owner's
 // deck." Activate this ability only if a card has entered a graveyard this turn."
 //
-// Marked sim.Unplayable: a 0/0 Item whose only output is a graveyard→deck-bottom replacement
-// effect for one attack action — payoff is realised on a future turn (deck composition change),
-// which the sim's per-turn evaluation doesn't credit. The optimizer would never pick it, so
-// it's filtered from random / mutation pools.
+// Marked sim.Unplayable: the card itself is too weak to want in a deck. Best-case output is
+// recycling one attack action back to the bottom of the deck — saves the card from the
+// graveyard, but a deck-bottom recycle is worth ~1-2 future-turn value at most, and you've
+// spent a card slot to get it. Even fully modelled the EV doesn't beat the slot cost; the
+// per-turn evaluation caveat is a secondary modelling concern but not the deciding factor.
 
 package cards
 

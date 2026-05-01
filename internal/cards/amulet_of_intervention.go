@@ -4,10 +4,11 @@
 // would be dealt to your hero this turn. Activate this ability only while your hero is the target
 // of a source that would deal damage equal to or greater than your hero's {h}."
 //
-// Marked sim.Unplayable: a 0/0 Item whose only output is preventing 1 damage, gated on a
-// lethal-equivalent incoming source — neither the gate nor the prevention payoff is worth
-// modelling against the sim's flat-IncomingDamage abstraction. The optimizer would never pick
-// it, so it's filtered from random / mutation pools.
+// Marked sim.Unplayable: the card itself is too weak to want in a deck. Best-case output is
+// preventing 1 damage when facing lethal — a card slot for 1 point of damage prevention,
+// only when you're already losing. Even fully modelled the EV is far below the cost of the
+// slot; the IncomingDamage modelling caveat is a secondary concern but not the deciding
+// factor.
 
 package cards
 

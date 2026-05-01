@@ -3,9 +3,11 @@
 // Text: "**Go again** **Instant** - Destroy Amulet of Echoes: Target hero discards 2 cards.
 // Activate this ability only if they have played 2 or more cards with the same name this turn."
 //
-// Marked sim.Unplayable: a 0/0 Item whose only output is opponent-state discard, gated on the
-// opponent's hand history — neither side is modelled by the sim. The optimizer would never
-// pick it, so it's filtered from random / mutation pools.
+// Marked sim.Unplayable: the card itself is too narrow to want in a deck. Best-case output is
+// a 2-card discard on the opponent (~6 value), but only when they play 2+ same-named cards in
+// a single turn — a configuration most decks rarely reach. Even fully modelled the EV is too
+// streaky to displace any reliable card slot; the opponent-state dependency is a secondary
+// reason but not the deciding one.
 
 package cards
 
