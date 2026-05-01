@@ -148,9 +148,7 @@ func startOfTurnTriggerLine(d TriggerContribution) string {
 func formatBlockLine(a CardAssignment) string {
 	def := a.Card.Defense()
 	if a.FromArsenal {
-		if ab, ok := a.Card.(ArsenalDefenseBonus); ok {
-			def += ab.ArsenalDefenseBonus()
-		}
+		def += arsenalDefenseBonusOf(a.Card)
 	}
 	return fmt.Sprintf("%s: %s (+%d)", DisplayName(a.Card), roleLabelWithArsenal(a, "BLOCK"), def)
 }

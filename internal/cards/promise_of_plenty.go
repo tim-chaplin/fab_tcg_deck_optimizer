@@ -19,9 +19,7 @@ import (
 var promiseOfPlentyTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeAttack)
 
 func promiseOfPlentyPlay(s *sim.TurnState, self *sim.CardState) {
-	if self.FromArsenal {
-		self.GrantedGoAgain = true
-	}
+	self.GrantGoAgainIfFromArsenal()
 	s.ApplyAndLogEffectiveAttack(self)
 }
 

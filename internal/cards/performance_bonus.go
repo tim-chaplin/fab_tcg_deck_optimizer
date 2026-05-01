@@ -18,9 +18,7 @@ import (
 var performanceBonusTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeAttack)
 
 func performanceBonusPlay(s *sim.TurnState, self *sim.CardState) {
-	if self.FromArsenal {
-		self.GrantedGoAgain = true
-	}
+	self.GrantGoAgainIfFromArsenal()
 	s.ApplyAndLogEffectiveAttack(self)
 	s.ApplyAndLogRiderOnHit(self, "On-hit created a gold token", sim.GoldTokenValue)
 }

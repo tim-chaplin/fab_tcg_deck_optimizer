@@ -62,9 +62,10 @@ Card docstrings should call out the printed rider and any modelling fudge, then 
 following plumbing is uniform and lives once in `internal/card/card.go`:
 
 - **Played-from-arsenal go-again** (Fervent Forerunner, Frontline Scout, Performance Bonus,
-  Promise of Plenty, Scour the Battlescape, …): cards set `self.GrantedGoAgain = true` when
-  `self.FromArsenal` is true. Don't repeat the wiring per file — note that the rider only fires
-  when this copy came from the arsenal slot.
+  Promise of Plenty, Scour the Battlescape, …): cards call `self.GrantGoAgainIfFromArsenal()`
+  at the top of `Play`; the helper flips `GrantedGoAgain` only when this copy came from the
+  arsenal slot. Don't repeat the wiring per file — note that the rider only fires when this
+  copy came from the arsenal slot.
 - **+N{d} on arsenal-played defense reactions** (Springboard Somersault, Unmovable, …): cards
   implement `card.ArsenalDefenseBonus` and return `N`; `CardState.EffectiveDefense` folds the
   bonus in for the arsenal-in copy. Don't restate the wiring; just say "+N{d} when played from

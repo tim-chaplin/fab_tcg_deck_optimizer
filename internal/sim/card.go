@@ -66,6 +66,18 @@ func (p *CardState) EffectiveGoAgain() bool {
 	return p.Card.GoAgain() || p.GrantedGoAgain
 }
 
+// GrantGoAgainIfFromArsenal flips p.GrantedGoAgain when this copy came from the arsenal
+// slot (p.FromArsenal). Names the standard "played-from-arsenal go again" rider — see the
+// docs/dev-standards.md "Played-from-arsenal go-again" entry — so card Play bodies don't
+// need to spell out the three-line if. No-op when FromArsenal is false; safe to call
+// unconditionally at the top of any Play whose printed text reads "If <Self> is played
+// from arsenal, it gains go again."
+func (p *CardState) GrantGoAgainIfFromArsenal() {
+	if p.FromArsenal {
+		p.GrantedGoAgain = true
+	}
+}
+
 // EffectiveDominate reports whether this card attacks with Dominate this turn — from its
 // printed Dominator marker or a grant flipping GrantedDominate (either by a prior card or by
 // this card's own Play when a conditional "gains dominate" clause fires).
@@ -94,9 +106,7 @@ func (p *CardState) EffectiveAttack() int {
 func (p *CardState) EffectiveDefense() int {
 	n := p.Card.Defense() + p.BonusDefense
 	if p.FromArsenal {
-		if ab, ok := p.Card.(ArsenalDefenseBonus); ok {
-			n += ab.ArsenalDefenseBonus()
-		}
+		n += arsenalDefenseBonusOf(p.Card)
 	}
 	if n < 0 {
 		return 0
@@ -272,4 +282,17 @@ type AddsFutureValue interface {
 // of turn. Defense() itself stays the printed value so the hand-played path is unaffected.
 type ArsenalDefenseBonus interface {
 	ArsenalDefenseBonus() int
+}
+
+// arsenalDefenseBonusOf returns c's ArsenalDefenseBonus contribution, or 0 when c doesn't
+// implement the marker. Centralises the type assertion behind a single named call so every
+// "if this came from arsenal, fold in the rider" site reads as one arithmetic line. Callers
+// gate on their own from-arsenal predicate (CardState.FromArsenal, partition arsenal-slot
+// index, BestLine.FromArsenal) before invoking — the helper does NOT decide whether the bonus
+// applies, only how to extract it.
+func arsenalDefenseBonusOf(c Card) int {
+	if ab, ok := c.(ArsenalDefenseBonus); ok {
+		return ab.ArsenalDefenseBonus()
+	}
+	return 0
 }
