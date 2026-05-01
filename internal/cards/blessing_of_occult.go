@@ -74,6 +74,6 @@ func (c BlessingOfOccultBlue) Play(s *sim.TurnState, self *sim.CardState) {
 // and emits the same-turn chain step (no value contribution; all credit is deferred to
 // the trigger).
 func blessingOfOccultPlay(s *sim.TurnState, selfState *sim.CardState, selfCard sim.Card, n int) {
-	s.RegisterStartOfTurn(selfCard, 1, blessingOfOccultTriggerText[n], func(s *sim.TurnState) int { return s.CreateRunechants(n) })
+	s.RegisterStartOfTurn(selfCard, 1, blessingOfOccultTriggerText[n], func(s *sim.TurnState, _ *sim.AuraTrigger) int { return s.CreateRunechants(n) })
 	s.LogPlay(selfState)
 }

@@ -56,14 +56,20 @@ func mauvrionSkiesPlay(s *sim.TurnState, selfState *sim.CardState, source sim.Ca
 	s.AddEphemeralAttackTrigger(sim.EphemeralAttackTrigger{
 		Source:  source,
 		Matches: mauvrionTargetMatches,
-		Handler: func(s *sim.TurnState, target *sim.CardState) int {
-			if !sim.LikelyToHit(target) {
-				return 0
-			}
-			return s.CreateAndLogRunechantsOnHit(sim.DisplayName(source), sim.DisplayName(target.Card), n)
-		},
+		Handler: onHitRunechantHandler,
+		N:       n,
 	})
 	s.LogPlay(selfState)
+}
+
+// onHitRunechantHandler is the shared "if hits, create N runechants" handler used by
+// Mauvrion Skies and Runic Reaping. Reads N off the trigger and Source for log
+// attribution so the handler is a top-level function with no per-Play closure allocation.
+func onHitRunechantHandler(s *sim.TurnState, t *sim.EphemeralAttackTrigger, target *sim.CardState) int {
+	if !sim.LikelyToHit(target) {
+		return 0
+	}
+	return s.CreateAndLogRunechantsOnHit(sim.DisplayName(t.Source), sim.DisplayName(target.Card), t.N)
 }
 
 type MauvrionSkiesRed struct{}

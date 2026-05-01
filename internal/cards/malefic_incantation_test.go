@@ -56,7 +56,7 @@ func TestMaleficIncantation_HandlerCreatesOneRunechantPerFire(t *testing.T) {
 		var s sim.TurnState
 		c.Play(&s, &sim.CardState{Card: c})
 		chain := sim.TurnState{TriggeringCard: c}
-		got := s.AuraTriggers[0].Handler(&chain)
+		got := s.AuraTriggers[0].Handler(&chain, &s.AuraTriggers[0])
 		if got != 1 {
 			t.Errorf("%s: handler damage = %d, want 1", c.Name(), got)
 		}

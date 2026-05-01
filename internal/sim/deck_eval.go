@@ -486,17 +486,18 @@ func processTriggersAtStartOfTurn(queued []AuraTrigger, postDrawDeck []Card) (
 	// semantics consistent with the rest of the framework.
 	ts := NewTurnState(postDrawDeck, nil)
 	survivors = queued[:0]
-	for _, t := range queued {
+	for i := range queued {
+		t := &queued[i]
 		// Re-arm the OncePerTurn gate before the start-of-turn fire so handlers that read
 		// FiredThisTurn see the cleared state.
 		t.FiredThisTurn = false
 		if t.Type != TriggerStartOfTurn {
-			survivors = append(survivors, t)
+			survivors = append(survivors, *t)
 			continue
 		}
 		preReveal := len(ts.Revealed)
 		preLog := len(ts.Log)
-		d := t.Handler(ts)
+		d := t.Handler(ts, t)
 		damage += d
 		// Attribute any newly-revealed card to this trigger so the best-turn printout can
 		// show what the handler drew (e.g. Sigil of the Arknight: "drew X into hand"). Taking
@@ -516,7 +517,7 @@ func processTriggersAtStartOfTurn(queued []AuraTrigger, postDrawDeck []Card) (
 		contribs = append(contribs, TriggerContribution{Card: t.Self, Damage: d, Revealed: revealed, Text: text})
 		t.Count--
 		if t.Count > 0 {
-			survivors = append(survivors, t)
+			survivors = append(survivors, *t)
 			continue
 		}
 		// Aura destroyed — Self joins the start-of-turn graveyard so subsequent handlers see

@@ -64,6 +64,6 @@ func (c RunebloodIncantationBlue) Play(s *sim.TurnState, self *sim.CardState) {
 // runebloodPlay registers a start-of-turn trigger with Count=n and emits the same-turn
 // chain step (no value contribution; every rune is credited at its future-turn fire).
 func runebloodPlay(s *sim.TurnState, selfState *sim.CardState, selfCard sim.Card, n int) {
-	s.RegisterStartOfTurn(selfCard, n, "Created a runechant (verse counter)", func(s *sim.TurnState) int { return s.CreateRunechants(1) })
+	s.RegisterStartOfTurn(selfCard, n, "Created a runechant (verse counter)", func(s *sim.TurnState, _ *sim.AuraTrigger) int { return s.CreateRunechants(1) })
 	s.LogPlay(selfState)
 }
