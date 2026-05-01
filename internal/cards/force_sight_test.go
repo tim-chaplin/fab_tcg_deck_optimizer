@@ -53,9 +53,7 @@ func TestForceSight_NextAttackReturnsBonus(t *testing.T) {
 
 // Tests that Force Sight played from hand skips the arsenal-gated Opt.
 func TestForceSight_HandPlaySkipsOpt(t *testing.T) {
-	prev := sim.CurrentHero
-	sim.CurrentHero = testutils.Hero{}
-	defer func() { sim.CurrentHero = prev }()
+	defer testutils.SwapCurrentHero(testutils.Hero{})()
 
 	a, b := testutils.NewStubCard("a"), testutils.NewStubCard("b")
 	for _, c := range []sim.Card{ForceSightRed{}, ForceSightYellow{}, ForceSightBlue{}} {
@@ -74,9 +72,7 @@ func TestForceSight_HandPlaySkipsOpt(t *testing.T) {
 
 // Tests that Force Sight played from arsenal emits an Opt 2 log entry after LogPlay.
 func TestForceSight_ArsenalPlayCallsOpt2(t *testing.T) {
-	prev := sim.CurrentHero
-	sim.CurrentHero = testutils.Hero{}
-	defer func() { sim.CurrentHero = prev }()
+	defer testutils.SwapCurrentHero(testutils.Hero{})()
 
 	a, b := testutils.NewStubCard("a"), testutils.NewStubCard("b")
 	for _, c := range []sim.Card{ForceSightRed{}, ForceSightYellow{}, ForceSightBlue{}} {

@@ -27,9 +27,7 @@ func TestFerventForerunner_BaseGoAgainFalse(t *testing.T) {
 
 // Tests that the on-hit Opt 2 fires only when EffectiveAttack lands in the 1/4/7 window.
 func TestFerventForerunner_OnHitOptFiresOnlyWhenInHitWindow(t *testing.T) {
-	prev := sim.CurrentHero
-	sim.CurrentHero = testutils.Hero{}
-	defer func() { sim.CurrentHero = prev }()
+	defer testutils.SwapCurrentHero(testutils.Hero{})()
 
 	a, b := testutils.NewStubCard("a"), testutils.NewStubCard("b")
 	cases := []struct {
@@ -68,9 +66,7 @@ func TestFerventForerunner_OnHitOptFiresOnlyWhenInHitWindow(t *testing.T) {
 // Tests that a +1{p} grant bumps Red's effective power into the 1/4/7 hit window, firing
 // the on-hit Opt 2.
 func TestFerventForerunner_OnHitOptFiresWithBonusAttackInWindow(t *testing.T) {
-	prev := sim.CurrentHero
-	sim.CurrentHero = testutils.Hero{}
-	defer func() { sim.CurrentHero = prev }()
+	defer testutils.SwapCurrentHero(testutils.Hero{})()
 
 	a, b := testutils.NewStubCard("a"), testutils.NewStubCard("b")
 	c := FerventForerunnerRed{}
