@@ -185,8 +185,11 @@ func runAnneal(cfg annealConfig) annealResult {
 				round, len(mutations), currentAvg, tempLabel, bestEverAvg)
 		}
 
+		// Round-scoped start so the ticker's elapsed/ETA reflect this round's progress
+		// rather than the cumulative session.
 		var completed atomic.Int64
-		stopTicker := startRoundTicker(round, len(mutations), start, &completed,
+		roundStart := time.Now()
+		stopTicker := startRoundTicker(round, len(mutations), roundStart, &completed,
 			temperature, currentAvg, bestEverAvg)
 		d, avg, idx, found := sim.IterateParallel(
 			ctx, mutations, currentAvg, temperature, cfg.minImprovement,
@@ -437,9 +440,12 @@ func watchStdinForAbort(cancel context.CancelFunc) {
 // state (T, current avg, best-ever) to a \r-terminated stderr line. Runs in both classical
 // and annealing modes: in annealing mode it's effectively the only ongoing progress indicator
 // (the per-round / per-mutation logs are suppressed without -debug), so keeping the snapshot
-// rich enough to track the walk is what makes silent mode bearable. Returns a stop function
-// the caller must call when the round finishes.
-func startRoundTicker(round, total int, start time.Time, completed *atomic.Int64, temperature, currentAvg, bestEverAvg float64) func() {
+// rich enough to track the walk is what makes silent mode bearable. ETA is the per-round
+// time-to-finish projection assuming all `total` mutations are evaluated at the current
+// rate; it under-estimates by the fraction of mutations cut short by an early acceptance,
+// but over-estimates dominate in long converged-tail runs. Returns a stop function the
+// caller must call when the round finishes.
+func startRoundTicker(round, total int, roundStart time.Time, completed *atomic.Int64, temperature, currentAvg, bestEverAvg float64) func() {
 	done := make(chan struct{})
 	go func() {
 		t := time.NewTicker(500 * time.Millisecond)
@@ -453,11 +459,24 @@ func startRoundTicker(round, total int, start time.Time, completed *atomic.Int64
 				if temperature > 0 {
 					tempLabel = fmt.Sprintf("  T=%.4f", temperature)
 				}
-				fmt.Fprintf(os.Stderr, "\r[round %d] tested %d/%d  cur %.3f  best %.3f%s  %s elapsed        ",
+				elapsed := time.Since(roundStart)
+				fmt.Fprintf(os.Stderr, "\r[round %d] tested %d/%d  cur %.3f  best %.3f%s  %s elapsed%s        ",
 					round, completed.Load(), total, currentAvg, bestEverAvg, tempLabel,
-					time.Since(start).Truncate(time.Second))
+					elapsed.Truncate(time.Second), formatETA(elapsed, completed.Load(), int64(total)))
 			}
 		}
 	}()
 	return func() { close(done) }
+}
+
+// formatETA returns the " ETA <duration>" suffix for a progress line, or "" when no
+// estimate is yet meaningful (no work done, or work already complete). Duration is the
+// projected time remaining at the current rate, truncated to seconds.
+func formatETA(elapsed time.Duration, done, total int64) string {
+	if done <= 0 || done >= total {
+		return ""
+	}
+	remaining := total - done
+	eta := time.Duration(int64(elapsed) * remaining / done)
+	return "  ETA " + eta.Truncate(time.Second).String()
 }
