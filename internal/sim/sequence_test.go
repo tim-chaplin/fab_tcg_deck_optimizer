@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/cards"
+	notimpl "github.com/tim-chaplin/fab-deck-optimizer/internal/cards/notimplemented"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/heroes"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/weapons"
@@ -152,7 +153,7 @@ func TestBest_ViseraiMauvrionGrantsGoAgainToShrill(t *testing.T) {
 func TestBest_ViseraiMauvrionPredictsDrowningDireDominate(t *testing.T) {
 	h := []Card{
 		cards.MauvrionSkiesRed{},
-		cards.DrowningDireRed{},
+		notimpl.DrowningDireRed{},
 		testutils.YellowAttack{},
 	}
 	got := Best(heroes.Viserai{}, nil, h, 0, nil, 0, nil)

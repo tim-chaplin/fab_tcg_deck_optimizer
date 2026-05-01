@@ -16,7 +16,7 @@ func (ToughenUpBlue) Cost(*sim.TurnState) int { return 2 }
 func (ToughenUpBlue) Pitch() int              { return 3 }
 func (ToughenUpBlue) Attack() int             { return 0 }
 func (ToughenUpBlue) Defense() int            { return 4 }
-func (ToughenUpBlue) Types() card.TypeSet     { return defenseReactionTypes }
+func (ToughenUpBlue) Types() card.TypeSet     { return DefenseReactionTypes }
 func (ToughenUpBlue) GoAgain() bool           { return false }
 func (ToughenUpBlue) Play(s *sim.TurnState, self *sim.CardState) {
 	n := self.DealEffectiveDefense(s)

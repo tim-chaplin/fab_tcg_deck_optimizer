@@ -166,10 +166,23 @@ See the full deck @ https://fabrary.net/decks/01KP1AZ5SAS425YN30WB779M41
 	if len(d.Cards) == 0 {
 		t.Fatalf("expected deck cards, got none")
 	}
-	// Every card in this sample is now in the registry (some as NotImplemented stubs); the
-	// unknown-card skip path is covered by TestUnmarshalUnknownCardSkipped instead.
-	if len(skipped) != 0 {
-		t.Errorf("expected no skipped cards on this sample; got %v", skipped)
+	// NotImplemented cards live in internal/cards/notimplemented/ and aren't imported by the
+	// registry, so they're reported as skipped just like genuinely-unknown cards. The sample
+	// has three: Arcane Polarity, Condemn to Slaughter, Drowning Dire.
+	wantSkipped := map[string]int{
+		"Arcane Polarity [R]":      2,
+		"Condemn to Slaughter [R]": 2,
+		"Drowning Dire [R]":        2,
+	}
+	for name, count := range wantSkipped {
+		if skipped[name] != count {
+			t.Errorf("skipped[%q] = %d, want %d", name, skipped[name], count)
+		}
+	}
+	for got := range skipped {
+		if _, ok := wantSkipped[got]; !ok {
+			t.Errorf("unexpected skipped card: %q", got)
+		}
 	}
 }
 

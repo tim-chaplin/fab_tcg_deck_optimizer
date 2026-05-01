@@ -248,15 +248,19 @@ func TestAllMutations_ExcludesNotImplementedWeaponLoadouts(t *testing.T) {
 // swap-in candidates. A banned card already in the deck IS still a valid removal target — the
 // hill climb must be able to swap it out — so we assert that the starting deck's banned card is
 // never in the post-mutation card list either (which would require it to have been added back).
+//
+// Critical Strike [R] is the chosen sentinel: it's registered (so the test can put two copies in
+// the starting deck) and the legal predicate bans it — exercising the "banned but already in
+// deck" branch of the mutation generator.
 func TestAllMutations_FilterExcludesRejectedAdditions(t *testing.T) {
 	bannedIDs := map[ids.CardID]bool{
-		ids.PlunderRunRed: true,
+		ids.CriticalStrikeRed: true,
 	}
 	legal := func(c Card) bool { return !bannedIDs[c.ID()] }
 
-	pr := GetCard(ids.PlunderRunRed)
+	cs := GetCard(ids.CriticalStrikeRed)
 	other := GetCard(ids.AetherSlashRed)
-	d := New(heroes.Viserai{}, []Weapon{weapons.NebulaBlade{}}, []Card{pr, pr, other, other})
+	d := New(heroes.Viserai{}, []Weapon{weapons.NebulaBlade{}}, []Card{cs, cs, other, other})
 
 	for i, m := range AllMutations(d, 2, legal) {
 		bannedIn := 0
@@ -265,9 +269,9 @@ func TestAllMutations_FilterExcludesRejectedAdditions(t *testing.T) {
 				bannedIn++
 			}
 		}
-		// The starting deck has 2 copies of Plunder Run [R]. A mutation that removes one leaves
-		// 1; a mutation that removes the other leaves 1; a weapon-only mutation leaves all 2. No
-		// mutation should ADD another copy.
+		// The starting deck has 2 copies of Critical Strike [R]. A mutation that removes one
+		// leaves 1; a mutation that removes the other leaves 1; a weapon-only mutation leaves
+		// all 2. No mutation should ADD another copy.
 		if bannedIn > 2 {
 			t.Errorf("mutation %d (%s): has %d banned copies, want <=2 (no additions allowed)",
 				i, m.Description, bannedIn)

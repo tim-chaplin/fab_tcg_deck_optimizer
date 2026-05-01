@@ -64,13 +64,16 @@ mean different things:
 - `sim.NotImplemented` — placeholder. The card *would* be worth modelling, we just haven't
   done it yet. Pair with a `// not implemented: <one-line description of the unmodelled
   rider>` comment immediately above the `NotImplemented()` method so the next implementation
-  pass knows what's missing.
+  pass knows what's missing. Card files live in `internal/cards/notimplemented/`.
 - `sim.Unplayable` — verdict. The card's effect is too weak to want even if fully modelled,
   so an implementation would be wasted work. The marker speaks for itself; **don't add a
-  per-card rationale to the docstring**.
+  per-card rationale to the docstring**. Card files live in `internal/cards/unplayable/`.
 
 The split keeps the unimplemented backlog honest: cards under `NotImplemented` are todos,
-cards under `Unplayable` are closed.
+cards under `Unplayable` are closed. The directory split makes both lists visible at a
+glance — `ls internal/cards/notimplemented/` is the live todo, and the lint test
+`TestLayout_MarkersStayInSubpackages` enforces the layout so a stray marker can't silently
+bypass the split.
 
 ## Standard rider wiring
 

@@ -21,7 +21,7 @@ func (UnmovableRed) Cost(*sim.TurnState) int { return 3 }
 func (UnmovableRed) Pitch() int              { return 1 }
 func (UnmovableRed) Attack() int             { return 0 }
 func (UnmovableRed) Defense() int            { return 7 }
-func (UnmovableRed) Types() card.TypeSet     { return defenseReactionTypes }
+func (UnmovableRed) Types() card.TypeSet     { return DefenseReactionTypes }
 func (UnmovableRed) GoAgain() bool           { return false }
 func (UnmovableRed) Play(s *sim.TurnState, self *sim.CardState) {
 	n := self.DealEffectiveDefense(s)
@@ -37,7 +37,7 @@ func (UnmovableYellow) Cost(*sim.TurnState) int { return 3 }
 func (UnmovableYellow) Pitch() int              { return 2 }
 func (UnmovableYellow) Attack() int             { return 0 }
 func (UnmovableYellow) Defense() int            { return 6 }
-func (UnmovableYellow) Types() card.TypeSet     { return defenseReactionTypes }
+func (UnmovableYellow) Types() card.TypeSet     { return DefenseReactionTypes }
 func (UnmovableYellow) GoAgain() bool           { return false }
 func (UnmovableYellow) Play(s *sim.TurnState, self *sim.CardState) {
 	n := self.DealEffectiveDefense(s)
@@ -53,7 +53,7 @@ func (UnmovableBlue) Cost(*sim.TurnState) int { return 3 }
 func (UnmovableBlue) Pitch() int              { return 3 }
 func (UnmovableBlue) Attack() int             { return 0 }
 func (UnmovableBlue) Defense() int            { return 5 }
-func (UnmovableBlue) Types() card.TypeSet     { return defenseReactionTypes }
+func (UnmovableBlue) Types() card.TypeSet     { return DefenseReactionTypes }
 func (UnmovableBlue) GoAgain() bool           { return false }
 func (UnmovableBlue) Play(s *sim.TurnState, self *sim.CardState) {
 	n := self.DealEffectiveDefense(s)

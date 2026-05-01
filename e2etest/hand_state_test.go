@@ -11,6 +11,7 @@ import (
 	"testing"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/cards"
+	notimpl "github.com/tim-chaplin/fab-deck-optimizer/internal/cards/notimplemented"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/heroes"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
@@ -106,8 +107,8 @@ func TestHandState_DemolitionCrewSeesUncommittedPitchInHand(t *testing.T) {
 	hand := []sim.Card{
 		cards.DemolitionCrewRed{},
 		cards.ToughenUpBlue{},
-		cards.DragDownYellow{},
-		cards.BrandishRed{},
+		notimpl.DragDownYellow{},
+		notimpl.BrandishRed{},
 	}
 	if got := d.EvalOneTurnForTesting(0, cards.FlyingHighRed{}, hand).PrevTurnValue; got != 10 {
 		t.Fatalf("PrevTurnValue = %d, want 10 (FH 0 + DC 7 + Brandish 3 — DC reveal sees pitched Toughen Up)", got)

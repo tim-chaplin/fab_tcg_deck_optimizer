@@ -159,11 +159,13 @@ func pairSwapMutations(d *Deck, legal func(Card) bool) []Mutation {
 	return out
 }
 
-// pairAddAllowed reports whether c is eligible as a pair-mutation add target. Rejects
-// anything carrying a pool-exclusion marker (NotImplemented or Unplayable) and applies the
-// caller's legal filter when present. legal=nil keeps every pool-eligible card eligible.
+// pairAddAllowed reports whether c is eligible as a pair-mutation add target. Rejects nil
+// (the registry returns nil for unregistered IDs — i.e. NotImplemented / Unplayable cards
+// whose subpackages the registry doesn't import) and anything carrying a pool-exclusion
+// marker, then applies the caller's legal filter when present. legal=nil keeps every
+// pool-eligible card eligible.
 func pairAddAllowed(c Card, legal func(Card) bool) bool {
-	if isExcludedFromPool(c) {
+	if c == nil || isExcludedFromPool(c) {
 		return false
 	}
 	if legal != nil && !legal(c) {

@@ -20,7 +20,7 @@ func (SpringboardSomersaultYellow) Cost(*sim.TurnState) int { return 0 }
 func (SpringboardSomersaultYellow) Pitch() int              { return 2 }
 func (SpringboardSomersaultYellow) Attack() int             { return 0 }
 func (SpringboardSomersaultYellow) Defense() int            { return 2 }
-func (SpringboardSomersaultYellow) Types() card.TypeSet     { return defenseReactionTypes }
+func (SpringboardSomersaultYellow) Types() card.TypeSet     { return DefenseReactionTypes }
 func (SpringboardSomersaultYellow) GoAgain() bool           { return false }
 func (SpringboardSomersaultYellow) Play(s *sim.TurnState, self *sim.CardState) {
 	n := self.DealEffectiveDefense(s)

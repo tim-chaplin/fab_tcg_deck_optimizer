@@ -54,10 +54,10 @@ func TestCardPairMutations_EnumeratesAllVariantCrossProducts(t *testing.T) {
 }
 
 // countImplementedPairCombos returns the total number of (firstVariant, secondVariant)
-// cross-product entries across CardPairs where both halves are free of NotImplemented
-// — exactly the combos PairAddAllowed lets through. Tests that compute expected mutation
-// counts use this so a future "drop NotImplemented from card X" change doesn't silently
-// make the assertion stale.
+// cross-product entries across CardPairs whose both halves are pool-eligible — exactly
+// the combos PairAddAllowed lets through. Tests that compute expected mutation counts
+// use this so future churn (a card dropping its NotImplemented marker, a card moving
+// between subpackages) doesn't silently make the assertion stale.
 func countImplementedPairCombos() int {
 	n := 0
 	for _, p := range CardPairs {
@@ -66,11 +66,18 @@ func countImplementedPairCombos() int {
 	return n
 }
 
-// countImplementedInGroup returns how many variants in g are free of NotImplemented.
+// countImplementedInGroup returns how many variants in g are pool-eligible: registered
+// (GetCard returns non-nil) and free of the NotImplemented marker. Unregistered IDs
+// belong to cards in internal/cards/notimplemented/ or internal/cards/unplayable/, both
+// of which PairAddAllowed rejects, so they don't count.
 func countImplementedInGroup(g CardGroup) int {
 	n := 0
 	for _, id := range g {
-		if _, unimplemented := GetCard(id).(NotImplemented); !unimplemented {
+		c := GetCard(id)
+		if c == nil {
+			continue
+		}
+		if _, unimplemented := c.(NotImplemented); !unimplemented {
 			n++
 		}
 	}

@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/cards"
+	notimpl "github.com/tim-chaplin/fab-deck-optimizer/internal/cards/notimplemented"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 )
@@ -93,7 +94,7 @@ func normalizeName(s string) string {
 // TestIsLegal uses one card with NotSilverAgeLegal and one without to confirm Silver Age
 // rejects the banned one and accepts the other.
 func TestIsLegal(t *testing.T) {
-	banned := cards.PlunderRunRed{}
+	banned := notimpl.PlunderRunRed{}
 	legal := cards.NimblismRed{}
 
 	// Sanity: the marker is present on the banned card and absent on the legal one. Guards

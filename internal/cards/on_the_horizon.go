@@ -22,7 +22,7 @@ func (OnTheHorizonRed) Cost(*sim.TurnState) int { return 0 }
 func (OnTheHorizonRed) Pitch() int              { return 1 }
 func (OnTheHorizonRed) Attack() int             { return 0 }
 func (OnTheHorizonRed) Defense() int            { return 4 }
-func (OnTheHorizonRed) Types() card.TypeSet     { return defenseReactionTypes }
+func (OnTheHorizonRed) Types() card.TypeSet     { return DefenseReactionTypes }
 func (OnTheHorizonRed) GoAgain() bool           { return false }
 func (OnTheHorizonRed) Play(s *sim.TurnState, self *sim.CardState) {
 	n := self.DealEffectiveDefense(s)
@@ -37,7 +37,7 @@ func (OnTheHorizonYellow) Cost(*sim.TurnState) int { return 0 }
 func (OnTheHorizonYellow) Pitch() int              { return 2 }
 func (OnTheHorizonYellow) Attack() int             { return 0 }
 func (OnTheHorizonYellow) Defense() int            { return 3 }
-func (OnTheHorizonYellow) Types() card.TypeSet     { return defenseReactionTypes }
+func (OnTheHorizonYellow) Types() card.TypeSet     { return DefenseReactionTypes }
 func (OnTheHorizonYellow) GoAgain() bool           { return false }
 func (OnTheHorizonYellow) Play(s *sim.TurnState, self *sim.CardState) {
 	n := self.DealEffectiveDefense(s)
@@ -52,7 +52,7 @@ func (OnTheHorizonBlue) Cost(*sim.TurnState) int { return 0 }
 func (OnTheHorizonBlue) Pitch() int              { return 3 }
 func (OnTheHorizonBlue) Attack() int             { return 0 }
 func (OnTheHorizonBlue) Defense() int            { return 2 }
-func (OnTheHorizonBlue) Types() card.TypeSet     { return defenseReactionTypes }
+func (OnTheHorizonBlue) Types() card.TypeSet     { return DefenseReactionTypes }
 func (OnTheHorizonBlue) GoAgain() bool           { return false }
 func (OnTheHorizonBlue) Play(s *sim.TurnState, self *sim.CardState) {
 	n := self.DealEffectiveDefense(s)

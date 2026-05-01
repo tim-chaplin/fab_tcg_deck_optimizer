@@ -19,7 +19,7 @@ var forceSightTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction)
 // Sight is a non-attack action — no Attack() to apply), and resolves the arsenal-gated
 // Opt 2.
 func forceSightPlay(s *sim.TurnState, self *sim.CardState, bonus int) {
-	grantNextAttackActionBonus(s, bonus)
+	GrantNextAttackActionBonus(s, bonus)
 	s.Log(self, 0)
 	if self.FromArsenal {
 		s.Opt(2)

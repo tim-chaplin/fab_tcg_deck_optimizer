@@ -7,12 +7,12 @@ package cards
 
 import "github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 
-// grantNextAttackActionBonus adds n to the first scheduled attack action's BonusAttack and
+// GrantNextAttackActionBonus adds n to the first scheduled attack action's BonusAttack and
 // returns 0 — the granter's own contribution is zero; the +N rides on the target. If no
 // attack action follows in CardsRemaining, the grant fizzles silently (no card to land on).
 // Callers with extra gating (cost/power caps, pitch-color matching) should scan
 // CardsRemaining themselves rather than trying to parameterise this helper further.
-func grantNextAttackActionBonus(s *sim.TurnState, n int) int {
+func GrantNextAttackActionBonus(s *sim.TurnState, n int) int {
 	for _, pc := range s.CardsRemaining {
 		if pc.Card.Types().IsAttackAction() {
 			pc.BonusAttack += n
