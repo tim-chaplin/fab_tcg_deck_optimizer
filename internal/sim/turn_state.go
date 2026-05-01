@@ -581,13 +581,20 @@ func (s *TurnState) CreateAndLogRunechantsOnPlay(self *CardState, n int) int {
 	if n <= 0 {
 		return 0
 	}
+	created := s.CreateRunechants(n)
+	// SkipLog discards the sub-line; credit Value directly to skip both the Sprintf and the
+	// DisplayName lookup AddPostTriggerLogEntry would otherwise pay for.
+	if s.SkipLog {
+		s.Value += created
+		return created
+	}
 	var text string
 	if n == 1 {
 		text = "Created a runechant"
 	} else {
 		text = fmt.Sprintf("Created %d runechants", n)
 	}
-	return s.AddPostTriggerLogEntry(text, DisplayName(self.Card), s.CreateRunechants(n))
+	return s.AddPostTriggerLogEntry(text, DisplayName(self.Card), created)
 }
 
 // runechantsCreatedPhrase returns "created a runechant" / "created N runechants" — the
