@@ -277,6 +277,11 @@ func (s *TurnState) Opt(n int) {
 	newDeck = append(newDeck, bottom...)
 	s.deck = newDeck
 
+	// SkipLog discards the entry; skip the descriptive Sprintf + three formatCardList allocs
+	// when the caller doesn't intend to display the log.
+	if s.SkipLog {
+		return
+	}
 	s.AddLogEntry(fmt.Sprintf("Opted %s, put %s on top, put %s on bottom",
 		formatCardList(cards), formatCardList(top), formatCardList(bottom)), 0)
 }
@@ -576,13 +581,20 @@ func (s *TurnState) CreateAndLogRunechantsOnPlay(self *CardState, n int) int {
 	if n <= 0 {
 		return 0
 	}
+	created := s.CreateRunechants(n)
+	// SkipLog discards the sub-line; credit Value directly to skip both the Sprintf and the
+	// DisplayName lookup AddPostTriggerLogEntry would otherwise pay for.
+	if s.SkipLog {
+		s.Value += created
+		return created
+	}
 	var text string
 	if n == 1 {
 		text = "Created a runechant"
 	} else {
 		text = fmt.Sprintf("Created %d runechants", n)
 	}
-	return s.AddPostTriggerLogEntry(text, DisplayName(self.Card), s.CreateRunechants(n))
+	return s.AddPostTriggerLogEntry(text, DisplayName(self.Card), created)
 }
 
 // runechantsCreatedPhrase returns "created a runechant" / "created N runechants" — the
@@ -687,12 +699,14 @@ func (s *TurnState) AddAuraTrigger(t AuraTrigger) {
 func (s *TurnState) RegisterStartOfTurn(self Card, count int, text string, handler OnAuraTrigger) {
 	finalHandler := handler
 	if text != "" {
-		source := DisplayName(self)
-		prefix := source + ": " + text
+		// Capture self/text only; defer DisplayName + prefix concat + Sprintf into the
+		// trigger body so the closure pays just three pointer-sized captures up front and the
+		// SkipLog-suppressed firing path costs no string allocs at all.
 		finalHandler = func(s *TurnState) int {
 			n := handler(s)
-			if n > 0 {
-				s.AddPostTriggerLogEntry(fmt.Sprintf("%s (+%d)", prefix, n), source, n)
+			if n > 0 && !s.SkipLog {
+				source := DisplayName(self)
+				s.AddPostTriggerLogEntry(fmt.Sprintf("%s: %s (+%d)", source, text, n), source, n)
 			}
 			return n
 		}

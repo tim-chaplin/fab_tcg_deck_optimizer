@@ -8,7 +8,6 @@
 package cards
 
 import (
-	"fmt"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
@@ -16,6 +15,15 @@ import (
 )
 
 var blessingOfOccultTypes = card.NewTypeSet(card.TypeRuneblade, card.TypeAction, card.TypeAura)
+
+// blessingOfOccultTriggerText pre-formats the trigger log text for each Runechant count
+// (1 = Blue, 2 = Yellow, 3 = Red). The text is captured into a per-play closure on every
+// cast, so a constant lookup avoids a Sprintf alloc per cast.
+var blessingOfOccultTriggerText = [...]string{
+	1: "Created a runechant",
+	2: "Created 2 runechants",
+	3: "Created 3 runechants",
+}
 
 type BlessingOfOccultRed struct{}
 
@@ -66,10 +74,6 @@ func (c BlessingOfOccultBlue) Play(s *sim.TurnState, self *sim.CardState) {
 // and emits the same-turn chain step (no value contribution; all credit is deferred to
 // the trigger).
 func blessingOfOccultPlay(s *sim.TurnState, selfState *sim.CardState, selfCard sim.Card, n int) {
-	text := "Created a runechant"
-	if n > 1 {
-		text = fmt.Sprintf("Created %d runechants", n)
-	}
-	s.RegisterStartOfTurn(selfCard, 1, text, func(s *sim.TurnState) int { return s.CreateRunechants(n) })
+	s.RegisterStartOfTurn(selfCard, 1, blessingOfOccultTriggerText[n], func(s *sim.TurnState) int { return s.CreateRunechants(n) })
 	s.LogPlay(selfState)
 }

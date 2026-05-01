@@ -72,10 +72,16 @@ func maleficPlay(s *sim.TurnState, selfState *sim.CardState, selfCard sim.Card, 
 		Count:       n,
 		OncePerTurn: true,
 		Handler: func(s *sim.TurnState) int {
+			created := s.CreateRunechants(1)
+			// SkipLog discards both the post-trigger entry and its damage credit's text;
+			// avoid the two DisplayName lookups + string concat when nothing will read them.
+			if s.SkipLog {
+				return created
+			}
 			return s.AddPostTriggerLogEntry(
 				sim.DisplayName(selfCard)+" created a runechant",
 				sim.DisplayName(s.TriggeringCard),
-				s.CreateRunechants(1),
+				created,
 			)
 		},
 	})
