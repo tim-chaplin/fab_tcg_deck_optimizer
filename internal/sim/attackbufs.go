@@ -268,9 +268,7 @@ func fillPartitionPerCardBufs(hand []Card, n, totalN int, arsenalCardIn Card, pv
 		// ArsenalDefenseBonus; bump the static Defense() up here so the partition / capping
 		// pipeline sees the effective value.
 		if i == n {
-			if ab, ok := c.(ArsenalDefenseBonus); ok {
-				dvals[i] += ab.ArsenalDefenseBonus()
-			}
+			dvals[i] += arsenalDefenseBonusOf(c)
 		}
 		isDR[i] = c.Types().IsDefenseReaction()
 		_, addsFutureValue[i] = c.(AddsFutureValue)

@@ -94,9 +94,7 @@ func (p *CardState) EffectiveAttack() int {
 func (p *CardState) EffectiveDefense() int {
 	n := p.Card.Defense() + p.BonusDefense
 	if p.FromArsenal {
-		if ab, ok := p.Card.(ArsenalDefenseBonus); ok {
-			n += ab.ArsenalDefenseBonus()
-		}
+		n += arsenalDefenseBonusOf(p.Card)
 	}
 	if n < 0 {
 		return 0
@@ -272,4 +270,17 @@ type AddsFutureValue interface {
 // of turn. Defense() itself stays the printed value so the hand-played path is unaffected.
 type ArsenalDefenseBonus interface {
 	ArsenalDefenseBonus() int
+}
+
+// arsenalDefenseBonusOf returns c's ArsenalDefenseBonus contribution, or 0 when c doesn't
+// implement the marker. Centralises the type assertion behind a single named call so every
+// "if this came from arsenal, fold in the rider" site reads as one arithmetic line. Callers
+// gate on their own from-arsenal predicate (CardState.FromArsenal, partition arsenal-slot
+// index, BestLine.FromArsenal) before invoking — the helper does NOT decide whether the bonus
+// applies, only how to extract it.
+func arsenalDefenseBonusOf(c Card) int {
+	if ab, ok := c.(ArsenalDefenseBonus); ok {
+		return ab.ArsenalDefenseBonus()
+	}
+	return 0
 }

@@ -120,10 +120,7 @@ func defenseSumFromRoles(hand []Card, arsenalCardIn Card, rolesBuf []Role, n int
 		}
 	}
 	if arsenalCardIn != nil && rolesBuf[n] == Defend {
-		sum += arsenalCardIn.Defense()
-		if ab, ok := arsenalCardIn.(ArsenalDefenseBonus); ok {
-			sum += ab.ArsenalDefenseBonus()
-		}
+		sum += arsenalCardIn.Defense() + arsenalDefenseBonusOf(arsenalCardIn)
 	}
 	return sum
 }
@@ -188,4 +185,3 @@ func mapCachedRolesToHand(cachedLine []CardAssignment, hand []Card, arsenalCardI
 	}
 	return true
 }
-
