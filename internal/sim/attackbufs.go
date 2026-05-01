@@ -264,9 +264,8 @@ func fillPartitionPerCardBufs(hand []Card, n, totalN int, arsenalCardIn Card, pv
 		pvals[i] = c.Pitch()
 		dvals[i] = c.Defense()
 		// Arsenal slot (i == n) lives at the end. Defense Reactions whose +N{d} rider only fires
-		// when played from arsenal (Unmovable, Springboard Somersault) opt in via
-		// ArsenalDefenseBonus; bump the static Defense() up here so the partition / capping
-		// pipeline sees the effective value.
+		// when played from arsenal opt in via ArsenalDefenseBonus; bump the static Defense() up
+		// here so the partition / capping pipeline sees the effective value.
 		if i == n {
 			if ab, ok := c.(ArsenalDefenseBonus); ok {
 				dvals[i] += ab.ArsenalDefenseBonus()

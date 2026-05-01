@@ -9,7 +9,7 @@ import (
 )
 
 // withOptHero swaps CurrentHero to the supplied testutils.Hero for the test's lifetime
-// and restores nil afterwards. Mirrors the pattern in lower_health_wanter_test.go.
+// and restores nil afterwards.
 func withOptHero(t *testing.T, h testutils.Hero, fn func()) {
 	t.Helper()
 	prev := CurrentHero

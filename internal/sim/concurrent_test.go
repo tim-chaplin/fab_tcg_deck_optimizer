@@ -139,14 +139,10 @@ func TestIterateParallel_AbortsOnContextCancel(t *testing.T) {
 	}
 }
 
-// TestIterateParallel_TerminatesWithNoImprovement is the regression guard for a bug where, with
-// a noisy shallow screen and a near-optimal baseline, iterate would spend minutes serially deep-
-// confirming shallow passes on the main goroutine — looking hung to the user. With the deep
-// pass parallelised across workers, a round with no confirmed improvement returns promptly:
-// workers drain the shared queue and there's no serial deep-confirm bottleneck.
-//
-// Uses an artificially high bestAvg so every mutation fails the shallow screen cleanly AND any
-// noise-driven shallow passer would fail deep confirmation too — the test reliably hits the
+// TestIterateParallel_TerminatesWithNoImprovement pins prompt return when no mutation
+// confirms: workers drain the shared queue with no serial deep-confirm bottleneck. Uses an
+// artificially high bestAvg so every mutation fails the shallow screen cleanly AND any
+// noise-driven shallow passer fails deep confirmation too — reliably hits the
 // "drain-queue-no-improvement-found" path.
 func TestIterateParallel_TerminatesWithNoImprovement(t *testing.T) {
 	rng := rand.New(rand.NewSource(42))

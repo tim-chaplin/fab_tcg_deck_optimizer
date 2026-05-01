@@ -3,9 +3,8 @@
 //
 // Text: "If you have played a 'non-attack' action card this turn, Vigor Rush gains **go again**."
 //
-// Go again is conditional on a prior non-attack action, so GoAgain() returns false and
-// vigorRushPlay sets self.GrantedGoAgain when the condition fires. Returning true from
-// GoAgain() unconditionally would over-credit sequences with no non-attack action played.
+// Conditional go-again gated on s.NonAttackActionPlayed (an O(1) flag the sim maintains as it
+// walks the chain).
 
 package cards
 
@@ -17,9 +16,6 @@ import (
 
 var vigorRushTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeAttack)
 
-// vigorRushPlay grants go again when any non-attack Action has been played earlier this turn.
-// The solver maintains s.NonAttackActionPlayed as it walks the chain, so this is an O(1) flag
-// read rather than a scan of CardsPlayed. Emits the chain step.
 func vigorRushPlay(s *sim.TurnState, self *sim.CardState) {
 	if s.NonAttackActionPlayed {
 		self.GrantedGoAgain = true
