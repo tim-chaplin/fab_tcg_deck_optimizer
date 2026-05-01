@@ -80,7 +80,6 @@ type shapeBufs struct {
 // never reallocates: only mid-chain growth past the pre-sized cap forces a new backing
 // array.
 type permBufs struct {
-	deckBacking         []Card
 	handBacking         []Card
 	graveBacking        []Card
 	banishBacking       []Card
@@ -167,13 +166,9 @@ func newAttackBufs(handSize, weaponCount int, weapons []Weapon) *attackBufs {
 	for i := range pcBuf {
 		ptrBuf[i] = &pcBuf[i]
 	}
-	// Per-permutation backing capacities. Decks run ~40 cards but mid-turn draws and tutors can
-	// grow them, so size to a safe headroom. Log accumulates one entry per chain step + every
-	// rider/trigger (typically 2-6 per step) so 64 covers the long tail.
-	const (
-		deckBackingCap = 64
-		logBackingCap  = 64
-	)
+	// Per-permutation backing capacity for the Log slice. Log accumulates one entry per
+	// chain step + every rider/trigger (typically 2-6 per step) so 64 covers the long tail.
+	const logBackingCap = 64
 	return &attackBufs{
 		shapeBufs: shapeBufs{
 			pcBuf:              pcBuf,
@@ -199,7 +194,6 @@ func newAttackBufs(handSize, weaponCount int, weapons []Weapon) *attackBufs {
 			defenseGravScratch: make([]Card, 0, handSize+1),
 		},
 		permBufs: permBufs{
-			deckBacking:         make([]Card, 0, deckBackingCap),
 			handBacking:         make([]Card, 0, maxAttackers),
 			graveBacking:        make([]Card, 0, maxAttackers),
 			banishBacking:       make([]Card, 0, handSize+1),
