@@ -11,7 +11,6 @@
 package cards
 
 import (
-	"fmt"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
@@ -22,7 +21,7 @@ import (
 // health (graveyard trigger)" sub-line under self. Health is valued 1-to-1 with damage.
 func fiddlersGreenPlay(s *sim.TurnState, self *sim.CardState, heal int) {
 	s.ApplyAndLogEffectiveDefense(self)
-	s.ApplyAndLogRiderOnPlay(self, fmt.Sprintf("Gained %d health (graveyard trigger)", heal), heal)
+	s.ApplyAndLogRiderOnPlayf(self, heal, "Gained %d health (graveyard trigger)", heal)
 }
 
 type FiddlersGreenRed struct{}

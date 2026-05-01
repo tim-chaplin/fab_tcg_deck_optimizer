@@ -69,7 +69,7 @@ func onHitRunechantHandler(s *sim.TurnState, t *sim.EphemeralAttackTrigger, targ
 	if !sim.LikelyToHit(target) {
 		return 0
 	}
-	return s.CreateAndLogRunechantsOnHit(sim.DisplayName(t.Source), sim.DisplayName(target.Card), t.N)
+	return s.CreateAndLogRunechantsOnHit(t.Source, target.Card, t.N)
 }
 
 type MauvrionSkiesRed struct{}

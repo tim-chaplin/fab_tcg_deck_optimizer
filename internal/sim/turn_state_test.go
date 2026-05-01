@@ -286,7 +286,7 @@ func TestRegisterStartOfTurn_EmptyTextLeavesHandlerAlone(t *testing.T) {
 	self := testutils.NewStubCard("Test Aura").WithTypes(card.NewTypeSet(card.TypeAura))
 	var s TurnState
 	s.RegisterStartOfTurn(self, 1, "", func(s *TurnState, _ *AuraTrigger) int {
-		s.AddPostTriggerLogEntry("custom handler text", "Test Aura", 0)
+		s.LogPostTriggerf("Test Aura", 0, "custom handler text")
 		return 0
 	})
 

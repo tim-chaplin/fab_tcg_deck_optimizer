@@ -83,15 +83,5 @@ func maleficPlay(s *sim.TurnState, selfState *sim.CardState, selfCard sim.Card, 
 // Malefic Incantation variants. Reads t.Self for log attribution so the handler is a
 // top-level function with no per-Play closure allocation.
 func maleficAuraHandler(s *sim.TurnState, t *sim.AuraTrigger) int {
-	created := s.CreateRunechants(1)
-	// SkipLog discards both the post-trigger entry and its damage credit's text; avoid
-	// the two DisplayName lookups + string concat when nothing will read them.
-	if s.SkipLog {
-		return created
-	}
-	return s.AddPostTriggerLogEntry(
-		sim.DisplayName(t.Self)+" created a runechant",
-		sim.DisplayName(s.TriggeringCard),
-		created,
-	)
+	return s.CreateAndLogRunechantsAfterAttack(t.Self, s.TriggeringCard, 1)
 }

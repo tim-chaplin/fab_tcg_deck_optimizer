@@ -24,7 +24,7 @@ func reekOfCorruptionApplyRider(s *sim.TurnState, self *sim.CardState) {
 	if !s.HasPlayedOrCreatedAura() {
 		return
 	}
-	s.ApplyAndLogRiderOnHit(self, "On-hit discarded a card", sim.DiscardValue)
+	s.ApplyAndLogRiderOnHit(self, sim.DiscardValue, "On-hit discarded a card")
 }
 
 type ReekOfCorruptionRed struct{}

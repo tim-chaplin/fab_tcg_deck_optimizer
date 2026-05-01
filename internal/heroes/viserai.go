@@ -31,7 +31,7 @@ func (Viserai) OnCardPlayed(played sim.Card, s *sim.TurnState) int {
 		return 0
 	}
 	if s.NonAttackActionPlayed {
-		return s.CreateAndLogRunechants("Viserai", sim.DisplayName(played), 1)
+		return s.CreateAndLogRunechants("Viserai", played, 1)
 	}
 	return 0
 }

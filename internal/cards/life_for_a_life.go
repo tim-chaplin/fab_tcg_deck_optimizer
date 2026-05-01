@@ -34,7 +34,7 @@ func (LifeForALifeRed) Types() card.TypeSet     { return lifeForALifeTypes }
 func (LifeForALifeRed) GoAgain() bool           { return sim.HeroWantsLowerHealth() }
 func (LifeForALifeRed) Play(s *sim.TurnState, self *sim.CardState) {
 	s.ApplyAndLogEffectiveAttack(self)
-	s.ApplyAndLogRiderOnHit(self, "On-hit gained 1 health", lifeForALifeHealValue)
+	s.ApplyAndLogRiderOnHit(self, lifeForALifeHealValue, "On-hit gained 1 health")
 }
 
 type LifeForALifeYellow struct{}
@@ -49,7 +49,7 @@ func (LifeForALifeYellow) Types() card.TypeSet     { return lifeForALifeTypes }
 func (LifeForALifeYellow) GoAgain() bool           { return sim.HeroWantsLowerHealth() }
 func (LifeForALifeYellow) Play(s *sim.TurnState, self *sim.CardState) {
 	s.ApplyAndLogEffectiveAttack(self)
-	s.ApplyAndLogRiderOnHit(self, "On-hit gained 1 health", lifeForALifeHealValue)
+	s.ApplyAndLogRiderOnHit(self, lifeForALifeHealValue, "On-hit gained 1 health")
 }
 
 type LifeForALifeBlue struct{}
@@ -64,5 +64,5 @@ func (LifeForALifeBlue) Types() card.TypeSet     { return lifeForALifeTypes }
 func (LifeForALifeBlue) GoAgain() bool           { return sim.HeroWantsLowerHealth() }
 func (LifeForALifeBlue) Play(s *sim.TurnState, self *sim.CardState) {
 	s.ApplyAndLogEffectiveAttack(self)
-	s.ApplyAndLogRiderOnHit(self, "On-hit gained 1 health", lifeForALifeHealValue)
+	s.ApplyAndLogRiderOnHit(self, lifeForALifeHealValue, "On-hit gained 1 health")
 }

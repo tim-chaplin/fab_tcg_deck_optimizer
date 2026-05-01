@@ -19,7 +19,7 @@ func fyendalsFightingSpiritApplyRider(s *sim.TurnState, self *sim.CardState) {
 	if !sim.HeroWantsLowerHealth() {
 		return
 	}
-	s.ApplyAndLogRiderOnPlay(self, "Gained 1 health (lower health than opposing hero)", 1)
+	s.ApplyAndLogRiderOnPlay(self, 1, "Gained 1 health (lower health than opposing hero)")
 }
 
 type FyendalsFightingSpiritRed struct{}

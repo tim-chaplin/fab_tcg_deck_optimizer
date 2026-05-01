@@ -21,7 +21,7 @@ func TestFireAttackActionTriggers_FiresOnceWhenGated(t *testing.T) {
 		OncePerTurn: true,
 		Handler: func(s *TurnState, _ *AuraTrigger) int {
 			calls++
-			return s.AddPreTriggerLogEntry("test trigger fired", "TestCard", 1)
+			return s.LogPreTriggerf("TestCard", 1, "test trigger fired")
 		},
 	}}}
 	trigger := testutils.RedAttack{}

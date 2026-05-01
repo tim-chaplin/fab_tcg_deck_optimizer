@@ -28,7 +28,7 @@ func (StrikeGoldRed) GoAgain() bool           { return false }
 func (StrikeGoldRed) NotImplemented() {}
 func (StrikeGoldRed) Play(s *sim.TurnState, self *sim.CardState) {
 	s.ApplyAndLogEffectiveAttack(self)
-	s.ApplyAndLogRiderOnHit(self, "On-hit created a gold token", sim.GoldTokenValue)
+	s.ApplyAndLogRiderOnHit(self, sim.GoldTokenValue, "On-hit created a gold token")
 }
 
 type StrikeGoldYellow struct{}
@@ -46,7 +46,7 @@ func (StrikeGoldYellow) GoAgain() bool           { return false }
 func (StrikeGoldYellow) NotImplemented() {}
 func (StrikeGoldYellow) Play(s *sim.TurnState, self *sim.CardState) {
 	s.ApplyAndLogEffectiveAttack(self)
-	s.ApplyAndLogRiderOnHit(self, "On-hit created a gold token", sim.GoldTokenValue)
+	s.ApplyAndLogRiderOnHit(self, sim.GoldTokenValue, "On-hit created a gold token")
 }
 
 type StrikeGoldBlue struct{}
@@ -64,5 +64,5 @@ func (StrikeGoldBlue) GoAgain() bool           { return false }
 func (StrikeGoldBlue) NotImplemented() {}
 func (StrikeGoldBlue) Play(s *sim.TurnState, self *sim.CardState) {
 	s.ApplyAndLogEffectiveAttack(self)
-	s.ApplyAndLogRiderOnHit(self, "On-hit created a gold token", sim.GoldTokenValue)
+	s.ApplyAndLogRiderOnHit(self, sim.GoldTokenValue, "On-hit created a gold token")
 }

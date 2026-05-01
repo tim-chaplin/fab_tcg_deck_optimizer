@@ -173,14 +173,14 @@ type TurnState struct {
 	// and ephemeral handlers receive the triggering card as a direct arg already and don't
 	// need this field. Nil during direct chain-step resolution and start-of-turn fires.
 	TriggeringCard Card
-	// SkipLog short-circuits Log appends for chains the caller doesn't intend to display.
-	// Value is still credited (the sim's running damage tally is correct) and triggers fire
-	// normally (their Value contributions still flow through), but appendLog skips the slice
-	// append so most chains pay zero Log cost. The eval loop runs every turn with SkipLog=true;
-	// only the rare new-deck-best turn re-runs with SkipLog=false to materialise the Log for
-	// the printout. Per-shuffle Log churn was the dominant allocation source — snapshotCarry's
-	// Log slice copy was the biggest single field by bytes.
-	SkipLog bool
+	// skipLog short-circuits Log appends and the per-entry text formatting for chains the
+	// caller doesn't intend to display. The Log* helpers below own the gate end-to-end —
+	// Value is still credited (so the sim's running damage tally stays correct) but the
+	// helpers skip every fmt.Sprintf, DisplayName lookup, and slice append underneath. The
+	// eval loop runs every turn silent; only the rare new-deck-best turn replays with
+	// skipLog=false to materialise its Log for the printout. Cards must never read this
+	// field — the helpers handle it. The lowercase name is the language-level enforcement.
+	skipLog bool
 
 	// cacheable is true while the chain hasn't read or mutated deck / graveyard through any
 	// public accessor (Deck / Graveyard / PopDeckTop / PrependToDeck / TutorFromDeck /
@@ -277,18 +277,16 @@ func (s *TurnState) Opt(n int) {
 	newDeck = append(newDeck, bottom...)
 	s.deck = newDeck
 
-	// SkipLog discards the entry; skip the descriptive Sprintf + three formatCardList allocs
-	// when the caller doesn't intend to display the log.
-	if s.SkipLog {
+	if s.skipLog {
 		return
 	}
-	s.AddLogEntry(fmt.Sprintf("Opted %s, put %s on top, put %s on bottom",
+	s.LogChain(fmt.Sprintf("Opted %s, put %s on top, put %s on bottom",
 		formatCardList(cards), formatCardList(top), formatCardList(bottom)), 0)
 }
 
 // formatCardList renders cs as "[name1, name2, ...]" using DisplayName for each entry, or
-// "[]" when cs is empty. Used by the Opt log entry so an empty top / bottom list shows up
-// as a clear no-cards token rather than blank.
+// "[]" when cs is empty. Used by the Opt log entry; the caller gates the call on s.skipLog
+// so this only runs when the chain materialises its log.
 func formatCardList(cs []Card) string {
 	if len(cs) == 0 {
 		return "[]"
@@ -386,48 +384,104 @@ func NewTurnState(deck, graveyard []Card) *TurnState {
 	return &TurnState{deck: deck, graveyard: graveyard, cacheable: true}
 }
 
-// AddLogEntry appends a freeform chain-step log line and credits n damage-equivalent to
-// s.Value. text is the rendered display string. Returns the clamped n so callers can fold
-// the call into a Play return. Trigger handlers call AddPreTriggerLogEntry or
-// AddPostTriggerLogEntry instead so the format layer can group them under their parent.
-func (s *TurnState) AddLogEntry(text string, n int) int {
-	return s.appendLog(LogEntry{Text: text, Kind: LogEntryChainStep, N: n})
-}
-
-// AddPreTriggerLogEntry appends a pre-trigger log line — a hero or aura-attack-action
-// trigger that fires before its parent chain entry. text is the rendered display string
-// ("Viserai created a runechant"); source is the DisplayName of the card whose play
-// caused the trigger to fire. The format layer attaches this entry to the next chain
-// entry whose name matches source. Returns the clamped n so handlers can fold the call
-// into a single return:
-//
-//	return s.AddPreTriggerLogEntry("Viserai created a runechant",
-//	    DisplayName(played), s.CreateRunechant())
-func (s *TurnState) AddPreTriggerLogEntry(text, source string, n int) int {
-	return s.appendLog(LogEntry{Text: text, Source: source, Kind: LogEntryPreTrigger, N: n})
-}
-
-// AddPostTriggerLogEntry appends a post-trigger log line — an ephemeral attack trigger
-// that fires after its parent chain entry resolves. The format layer attaches this entry
-// to the previous chain entry whose name matches source. Same return contract as
-// AddPreTriggerLogEntry.
-func (s *TurnState) AddPostTriggerLogEntry(text, source string, n int) int {
-	return s.appendLog(LogEntry{Text: text, Source: source, Kind: LogEntryPostTrigger, N: n})
-}
-
-// appendLog credits the entry's N to s.Value (clamped at 0) and, when SkipLog is false,
-// appends it to s.Log. SkipLog=true keeps the Value tally accurate but elides every Log
-// append in the chain — used for chains that won't be displayed (every turn except the
-// rare new-deck-best, which is replayed with SkipLog=false to materialise its Log).
-func (s *TurnState) appendLog(e LogEntry) int {
-	if e.N < 0 {
-		e.N = 0
+// log is the single skipLog gate. It credits n (clamped at 0) to s.Value, then — only when
+// not running silent — appends a LogEntry of the given kind, source, and pre-built text.
+// Every public Log / Logf helper funnels through here or its variadic sibling logf, so the
+// gate lives in exactly one place and cards never have to check skipLog themselves. Returns
+// the clamped n so callers can fold the call into a single return.
+func (s *TurnState) log(kind LogEntryKind, source, text string, n int) int {
+	if n < 0 {
+		n = 0
 	}
-	s.Value += e.N
-	if !s.SkipLog {
-		s.Log = append(s.Log, e)
+	s.Value += n
+	if s.skipLog {
+		return n
 	}
-	return e.N
+	s.Log = append(s.Log, LogEntry{
+		Kind:   kind,
+		Text:   text,
+		Source: source,
+		N:      n,
+	})
+	return n
+}
+
+// logf is the format variant: same gate as log, but the fmt.Sprintf only runs on the
+// !skipLog branch. Callers pay variadic-arg boxing at the call site regardless (Go evaluates
+// args before the call), so prefer the non-format Log* helpers when text is constant or
+// pre-built. Reserved for callers whose text genuinely needs formatting.
+func (s *TurnState) logf(kind LogEntryKind, source string, n int, format string, args ...any) int {
+	if n < 0 {
+		n = 0
+	}
+	s.Value += n
+	if s.skipLog {
+		return n
+	}
+	s.Log = append(s.Log, LogEntry{
+		Kind:   kind,
+		Text:   fmt.Sprintf(format, args...),
+		Source: source,
+		N:      n,
+	})
+	return n
+}
+
+// LogChain appends a top-level chain-step entry with pre-built text and credits n to s.Value.
+// Use for free-form chain-step lines whose text is a constant or has been pre-formatted; for
+// cards with a CardState, use ApplyAndLogEffectiveAttack / LogPlay / ApplyAndLogEffectiveDefense
+// so source attribution comes from the card.
+func (s *TurnState) LogChain(text string, n int) int {
+	return s.log(LogEntryChainStep, "", text, n)
+}
+
+// LogChainf is the format variant of LogChain; pays variadic-arg cost at the call site but
+// defers fmt.Sprintf into the !skipLog branch.
+func (s *TurnState) LogChainf(n int, format string, args ...any) int {
+	return s.logf(LogEntryChainStep, "", n, format, args...)
+}
+
+// LogPreTrigger appends a pre-trigger child line — a hero or aura-attack-action trigger that
+// fires before its parent chain entry. source is the DisplayName of the card whose play
+// caused the trigger; the format layer attaches this entry to the next chain entry whose
+// name matches source.
+func (s *TurnState) LogPreTrigger(source, text string, n int) int {
+	return s.log(LogEntryPreTrigger, source, text, n)
+}
+
+// LogPreTriggerf is the format variant of LogPreTrigger.
+func (s *TurnState) LogPreTriggerf(source string, n int, format string, args ...any) int {
+	return s.logf(LogEntryPreTrigger, source, n, format, args...)
+}
+
+// LogPostTrigger appends a post-trigger child line — an ephemeral attack trigger or on-play
+// rider that fires after its parent chain entry resolves.
+func (s *TurnState) LogPostTrigger(source, text string, n int) int {
+	return s.log(LogEntryPostTrigger, source, text, n)
+}
+
+// LogPostTriggerf is the format variant of LogPostTrigger.
+func (s *TurnState) LogPostTriggerf(source string, n int, format string, args ...any) int {
+	return s.logf(LogEntryPostTrigger, source, n, format, args...)
+}
+
+// logChainStep is the chain-step appender every Card.Play funnels through. It defers
+// ChainStepText(self) into the !skipLog branch, so the per-(CardID, FromArsenal) cache
+// lookup the optimizations package memoises only runs on the display path. n is clamped
+// at 0 and credited to s.Value.
+func (s *TurnState) logChainStep(self *CardState, n int) {
+	if n < 0 {
+		n = 0
+	}
+	s.Value += n
+	if s.skipLog {
+		return
+	}
+	s.Log = append(s.Log, LogEntry{
+		Kind: LogEntryChainStep,
+		Text: ChainStepText(self),
+		N:    n,
+	})
 }
 
 // DrawOne models a mid-turn draw: pop the top of the deck and append it to Hand. No-op on
@@ -501,19 +555,15 @@ func (s *TurnState) RecordValue(n int) {
 // CreateAndLogRunechantsOnPlay / DealAndLogArcaneDamage so the rider's contribution is
 // visible in the printout instead of bundled into the chain step's (+N).
 func (s *TurnState) ApplyAndLogEffectiveAttack(self *CardState) {
-	n := self.EffectiveAttack()
-	if n < 0 {
-		n = 0
-	}
-	s.AddLogEntry(ChainStepText(self), n)
+	s.logChainStep(self, self.EffectiveAttack())
 }
 
 // LogPlay is the chain-step finisher for non-attack cards (auras, non-attack actions, items)
 // — emits "<DisplayName>: PLAY[ from arsenal]" with no value contribution. The "(+0)" suffix
 // is dropped because these cards never deal printed damage; any value they contribute lands
-// via separate AddPostTriggerLogEntry / aura trigger paths.
+// via separate trigger paths.
 func (s *TurnState) LogPlay(self *CardState) {
-	s.AddLogEntry(ChainStepText(self), 0)
+	s.logChainStep(self, 0)
 }
 
 // ApplyAndLogEffectiveDefense is the Defense Reaction counterpart to ApplyAndLogEffectiveAttack:
@@ -521,11 +571,9 @@ func (s *TurnState) LogPlay(self *CardState) {
 // effective Defense (printed Defense + BonusDefense + ArsenalDefenseBonus when from arsenal)
 // to s.Value, clamped at the remaining IncomingDamage so an over-blocked DR doesn't credit
 // past what was actually prevented. The credited amount is decremented from s.IncomingDamage
-// so a later defender sees the reduced pool. Cards with separable rider effects (arcane
-// pings, runechant creation, on-hit credits) emit each rider as its own post-trigger child
-// line via DealAndLogArcaneDamage / CreateAndLogRunechantsOnPlay / ApplyAndLogRiderOnPlay after the
-// chain step; conditional "+N{d}" bonuses fold into BonusDefense before the chain step so
-// they roll into the same (+N), mirroring how BonusAttack feeds ApplyAndLogEffectiveAttack.
+// so a later defender sees the reduced pool. Conditional "+N{d}" bonuses fold into
+// BonusDefense before the chain step so they roll into the same (+N), mirroring how
+// BonusAttack feeds ApplyAndLogEffectiveAttack.
 func (s *TurnState) ApplyAndLogEffectiveDefense(self *CardState) {
 	n := self.EffectiveDefense()
 	if n > s.IncomingDamage {
@@ -535,7 +583,7 @@ func (s *TurnState) ApplyAndLogEffectiveDefense(self *CardState) {
 		n = 0
 	}
 	s.IncomingDamage -= n
-	s.AddLogEntry(ChainStepText(self), n)
+	s.logChainStep(self, n)
 }
 
 // CreateRunechants adds n Runechant token auras to the count, sets AuraCreated so effects
@@ -557,73 +605,71 @@ func (s *TurnState) CreateRunechant() int {
 
 // CreateAndLogRunechants creates n Runechant tokens, writes the canonical pre-trigger log
 // line ("<selfName> created a runechant" for n==1, "<selfName> created N runechants" for
-// n>1) sourced under sourceName, and returns the damage-equivalent credited. Trigger
-// handlers that fire before their parent (Viserai's hero ability, Malefic Incantation's
-// aura) call this in a single return statement.
-func (s *TurnState) CreateAndLogRunechants(selfName, sourceName string, n int) int {
+// n>1) sourced under source, and returns the damage-equivalent credited. Trigger handlers
+// that fire before their parent (Viserai's hero ability, Malefic Incantation's aura) call
+// this in a single return statement. selfName is the aura's display name; source is the
+// triggering Card whose DisplayName the helper resolves only on the !skipLog branch.
+func (s *TurnState) CreateAndLogRunechants(selfName string, source Card, n int) int {
 	created := s.CreateRunechants(n)
-	// SkipLog discards the log entry; credit Value directly to skip the string concat and
-	// LogEntry build that AddPreTriggerLogEntry would otherwise pay for.
-	if s.SkipLog {
-		if created < 0 {
-			created = 0
-		}
-		s.Value += created
+	if s.skipLog {
 		return created
 	}
-	return s.AddPreTriggerLogEntry(selfName+" "+runechantsCreatedPhrase(n), sourceName, created)
+	if n == 1 {
+		return s.LogPreTrigger(DisplayName(source), selfName+" created a runechant", created)
+	}
+	return s.LogPreTriggerf(DisplayName(source), created, "%s created %d runechants", selfName, n)
 }
 
-// CreateAndLogRunechantsOnHit is the post-trigger variant of CreateAndLogRunechants —
-// the trigger log line reads "<selfName> created N runechants on hit" so the conditional
-// gate on the ephemeral attack trigger is visible in the printout. Same return contract
-// as CreateAndLogRunechants.
-func (s *TurnState) CreateAndLogRunechantsOnHit(selfName, sourceName string, n int) int {
+// CreateAndLogRunechantsOnHit is the post-trigger variant for hit-gated aura riders
+// (Mauvrion Skies, Runic Reaping). The trigger log line reads "<auraName> created N
+// runechants on hit" so the conditional gate on the ephemeral attack trigger is visible
+// in the printout. aura is the source card whose DisplayName carries the trigger
+// attribution; source is the triggering (attacker / target) Card whose DisplayName
+// roots the post-trigger line in the printout.
+func (s *TurnState) CreateAndLogRunechantsOnHit(aura, source Card, n int) int {
 	created := s.CreateRunechants(n)
-	// SkipLog discards the log entry; credit Value directly to skip the string concat and
-	// LogEntry build that AddPostTriggerLogEntry would otherwise pay for.
-	if s.SkipLog {
-		if created < 0 {
-			created = 0
-		}
-		s.Value += created
+	if s.skipLog {
 		return created
 	}
-	return s.AddPostTriggerLogEntry(selfName+" "+runechantsCreatedPhrase(n)+" on hit", sourceName, created)
+	auraName := DisplayName(aura)
+	sourceName := DisplayName(source)
+	if n == 1 {
+		return s.LogPostTrigger(sourceName, auraName+" created a runechant on hit", created)
+	}
+	return s.LogPostTriggerf(sourceName, created, "%s created %d runechants on hit", auraName, n)
+}
+
+// CreateAndLogRunechantsAfterAttack is the post-trigger variant for non-hit-gated aura
+// riders that fire on attack-action play (Malefic Incantation). Same shape as
+// CreateAndLogRunechantsOnHit but without the "on hit" suffix in the printout.
+func (s *TurnState) CreateAndLogRunechantsAfterAttack(aura, source Card, n int) int {
+	created := s.CreateRunechants(n)
+	if s.skipLog {
+		return created
+	}
+	auraName := DisplayName(aura)
+	sourceName := DisplayName(source)
+	if n == 1 {
+		return s.LogPostTrigger(sourceName, auraName+" created a runechant", created)
+	}
+	return s.LogPostTriggerf(sourceName, created, "%s created %d runechants", auraName, n)
 }
 
 // CreateAndLogRunechantsOnPlay is the on-play self-rider variant: the chain step's own
 // "Created N runechants" sub-line, sourced under self so the format layer attaches it as
-// a child of self's chain entry. The line uses indentation to convey source (no card-name
-// prefix, sentence-cap leading verb) since the format layer renders it indented under
-// self's chain entry. n>0 only — n=0 returns 0 without writing a line.
+// a child of self's chain entry. n>0 only — n=0 returns 0 without writing a line.
 func (s *TurnState) CreateAndLogRunechantsOnPlay(self *CardState, n int) int {
 	if n <= 0 {
 		return 0
 	}
 	created := s.CreateRunechants(n)
-	// SkipLog discards the sub-line; credit Value directly to skip both the Sprintf and the
-	// DisplayName lookup AddPostTriggerLogEntry would otherwise pay for.
-	if s.SkipLog {
-		s.Value += created
+	if s.skipLog {
 		return created
 	}
-	var text string
 	if n == 1 {
-		text = "Created a runechant"
-	} else {
-		text = fmt.Sprintf("Created %d runechants", n)
+		return s.LogPostTrigger(DisplayName(self.Card), "Created a runechant", created)
 	}
-	return s.AddPostTriggerLogEntry(text, DisplayName(self.Card), created)
-}
-
-// runechantsCreatedPhrase returns "created a runechant" / "created N runechants" — the
-// canonical verb phrase for runechant-creation log lines.
-func runechantsCreatedPhrase(n int) string {
-	if n == 1 {
-		return "created a runechant"
-	}
-	return fmt.Sprintf("created %d runechants", n)
+	return s.LogPostTriggerf(DisplayName(self.Card), created, "Created %d runechants", n)
 }
 
 // DealArcaneDamage credits n arcane damage and, when LikelyDamageHits(n, false) approves,
@@ -646,37 +692,68 @@ func (s *TurnState) DealAndLogArcaneDamage(self *CardState, n int) int {
 	if n <= 0 {
 		return 0
 	}
-	var text string
-	if n == 1 {
-		text = "Dealt 1 arcane damage"
-	} else {
-		text = fmt.Sprintf("Dealt %d arcane damage", n)
+	dealt := s.DealArcaneDamage(n)
+	if s.skipLog {
+		return dealt
 	}
-	return s.AddPostTriggerLogEntry(text, DisplayName(self.Card), s.DealArcaneDamage(n))
+	if n == 1 {
+		return s.LogPostTrigger(DisplayName(self.Card), "Dealt 1 arcane damage", dealt)
+	}
+	return s.LogPostTriggerf(DisplayName(self.Card), dealt, "Dealt %d arcane damage", n)
 }
 
-// ApplyAndLogRiderOnPlay writes a freeform rider sub-line under self's chain entry. text is a
-// terse description of what the rider did (e.g. "On-hit discarded a card", "Gained 3
-// health"); the format layer renders it indented under self's chain step, so the line
-// should read as a complete utterance without a card-name prefix. n is the damage-
-// equivalent credit. Returns the credited n (clamped at 0 by the underlying log helper).
-func (s *TurnState) ApplyAndLogRiderOnPlay(self *CardState, text string, n int) int {
-	return s.AddPostTriggerLogEntry(text, DisplayName(self.Card), n)
+// ApplyAndLogRiderOnPlay writes a freeform rider sub-line under self's chain entry — a
+// post-trigger child line whose source attribution comes from self.Card. text is the
+// rendered display string ("On-hit discarded a card", "Gained 3 health"); the format layer
+// renders it indented under self's chain step, so the line should read as a complete
+// utterance without a card-name prefix. Use ApplyAndLogRiderOnPlayf when text needs
+// formatting. n is the damage-equivalent credit. Returns the credited n.
+func (s *TurnState) ApplyAndLogRiderOnPlay(self *CardState, n int, text string) int {
+	if s.skipLog {
+		if n < 0 {
+			n = 0
+		}
+		s.Value += n
+		return n
+	}
+	return s.LogPostTrigger(DisplayName(self.Card), text, n)
+}
+
+// ApplyAndLogRiderOnPlayf is the format variant — pays variadic-arg boxing at the call site
+// but defers fmt.Sprintf and DisplayName into the !skipLog branch. Prefer
+// ApplyAndLogRiderOnPlay when text is a constant.
+func (s *TurnState) ApplyAndLogRiderOnPlayf(self *CardState, n int, format string, args ...any) int {
+	if s.skipLog {
+		if n < 0 {
+			n = 0
+		}
+		s.Value += n
+		return n
+	}
+	return s.LogPostTriggerf(DisplayName(self.Card), n, format, args...)
 }
 
 // ApplyAndLogRiderOnHit is the on-hit-gated variant of ApplyAndLogRiderOnPlay: writes the rider
 // sub-line only when self's effective attack is likely to land (per LikelyToHit), otherwise no
-// log entry is written and no value is credited. Use this for "When this hits, …" riders whose
-// only gate is the hit check; riders with extra preconditions (ArcaneDamageDealt,
-// HasPlayedOrCreatedAura, …) should test the precondition first and call this for the hit gate.
-// Don't use this when n is computed via a side-effecting expression that must fire only on
-// hit (e.g. s.CreateRunechant()) — Go evaluates the argument before the call, so the side
-// effect would always fire. Returns 0 on miss, the credited n on hit.
-func (s *TurnState) ApplyAndLogRiderOnHit(self *CardState, text string, n int) int {
+// log entry is written and no value is credited. Use for "When this hits, …" riders whose only
+// gate is the hit check; riders with extra preconditions should test the precondition first
+// and call this for the hit gate. Don't use this when n is computed via a side-effecting
+// expression that must fire only on hit (e.g. s.CreateRunechant()) — Go evaluates the
+// argument before the call, so the side effect would always fire. Returns 0 on miss, the
+// credited n on hit.
+func (s *TurnState) ApplyAndLogRiderOnHit(self *CardState, n int, text string) int {
 	if !LikelyToHit(self) {
 		return 0
 	}
-	return s.ApplyAndLogRiderOnPlay(self, text, n)
+	return s.ApplyAndLogRiderOnPlay(self, n, text)
+}
+
+// ApplyAndLogRiderOnHitf is the format variant of ApplyAndLogRiderOnHit.
+func (s *TurnState) ApplyAndLogRiderOnHitf(self *CardState, n int, format string, args ...any) int {
+	if !LikelyToHit(self) {
+		return 0
+	}
+	return s.ApplyAndLogRiderOnPlayf(self, n, format, args...)
 }
 
 // AddToGraveyard appends c to graveyard so later-resolving cards see it. Used by cards
@@ -719,14 +796,13 @@ func (s *TurnState) AddAuraTrigger(t AuraTrigger) {
 func (s *TurnState) RegisterStartOfTurn(self Card, count int, text string, handler OnAuraTrigger) {
 	finalHandler := handler
 	if text != "" {
-		// Capture self/text only; defer DisplayName + prefix concat + Sprintf into the
-		// trigger body so the closure pays just three pointer-sized captures up front and the
-		// SkipLog-suppressed firing path costs no string allocs at all.
+		// Capture self/text only; defer the DisplayName + Sprintf + LogPostTriggerf args
+		// boxing into the !skipLog branch so the silent firing path stays alloc-free.
 		finalHandler = func(s *TurnState, t *AuraTrigger) int {
 			n := handler(s, t)
-			if n > 0 && !s.SkipLog {
+			if n > 0 && !s.skipLog {
 				source := DisplayName(self)
-				s.AddPostTriggerLogEntry(fmt.Sprintf("%s: %s (+%d)", source, text, n), source, n)
+				s.LogPostTriggerf(source, n, "%s: %s (+%d)", source, text, n)
 			}
 			return n
 		}

@@ -37,6 +37,6 @@ func (c SigilOfSilphidaeBlue) Play(s *sim.TurnState, self *sim.CardState) {
 	})
 	s.ApplyAndLogEffectiveAttack(self)
 	if enterDamage > 0 {
-		s.ApplyAndLogRiderOnPlay(self, "Banished an aura, dealt 1 arcane damage", enterDamage)
+		s.ApplyAndLogRiderOnPlay(self, enterDamage, "Banished an aura, dealt 1 arcane damage")
 	}
 }

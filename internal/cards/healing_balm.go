@@ -9,7 +9,6 @@
 package cards
 
 import (
-	"fmt"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
@@ -22,7 +21,7 @@ var healingBalmTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction)
 // sub-line under self. Health is valued 1-to-1 with damage.
 func healingBalmPlay(s *sim.TurnState, self *sim.CardState, heal int) {
 	s.LogPlay(self)
-	s.ApplyAndLogRiderOnPlay(self, fmt.Sprintf("Gained %d health", heal), heal)
+	s.ApplyAndLogRiderOnPlayf(self, heal, "Gained %d health", heal)
 }
 
 type HealingBalmRed struct{}

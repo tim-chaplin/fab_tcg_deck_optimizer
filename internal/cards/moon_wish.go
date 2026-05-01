@@ -63,7 +63,7 @@ func moonWishPlay(c sim.Card, s *sim.TurnState, self *sim.CardState) {
 	s.ApplyAndLogEffectiveAttack(self)
 
 	if returned != nil {
-		s.AddPostTriggerLogEntry(name+" returned "+sim.DisplayName(returned)+" to top of deck", name, 0)
+		s.LogPostTriggerf(name, 0, "%s returned %s to top of deck", name, sim.DisplayName(returned))
 	}
 
 	if !sim.LikelyToHit(self) {
@@ -71,7 +71,7 @@ func moonWishPlay(c sim.Card, s *sim.TurnState, self *sim.CardState) {
 	}
 	sk, ok := s.TutorFromDeck(sunKissTutorPriority)
 	if !ok {
-		s.AddPostTriggerLogEntry(name+" found no Sun Kiss to tutor", name, 0)
+		s.LogPostTriggerf(name, 0, "%s found no Sun Kiss to tutor", name)
 		return
 	}
 
@@ -79,7 +79,7 @@ func moonWishPlay(c sim.Card, s *sim.TurnState, self *sim.CardState) {
 		// Tutor lands the card in hand; carries to next turn via the sim's end-of-turn
 		// copy of s.Hand.
 		s.Hand = append(s.Hand, sk)
-		s.AddPostTriggerLogEntry(name+" tutored "+sim.DisplayName(sk), name, 0)
+		s.LogPostTriggerf(name, 0, "%s tutored %s", name, sim.DisplayName(sk))
 		return
 	}
 	// Go-again means Moon Wish gets a chain extension this turn. Pre-append Moon Wish to
@@ -87,7 +87,7 @@ func moonWishPlay(c sim.Card, s *sim.TurnState, self *sim.CardState) {
 	// the sim's normal post-Play append doesn't double-add. Sun Kiss authors its own
 	// chain step inside its Play call — it appears as a separate top-level entry following
 	// Moon Wish's tutor narration.
-	s.AddPostTriggerLogEntry(name+" tutored "+sim.DisplayName(sk)+" and played it", name, 0)
+	s.LogPostTriggerf(name, 0, "%s tutored %s and played it", name, sim.DisplayName(sk))
 	s.CardsPlayed = append(s.CardsPlayed, c)
 	skSelf := &sim.CardState{Card: sk}
 	sk.Play(s, skSelf)

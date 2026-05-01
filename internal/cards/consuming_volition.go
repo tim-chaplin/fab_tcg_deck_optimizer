@@ -27,7 +27,7 @@ func consumingVolitionApplyRider(s *sim.TurnState, self *sim.CardState) {
 	if !s.ArcaneDamageDealt {
 		return
 	}
-	s.ApplyAndLogRiderOnHit(self, "On-hit discarded a card", sim.DiscardValue)
+	s.ApplyAndLogRiderOnHit(self, sim.DiscardValue, "On-hit discarded a card")
 }
 
 type ConsumingVolitionRed struct{}
