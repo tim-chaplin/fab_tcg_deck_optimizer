@@ -18,7 +18,7 @@ func (EvasiveLeapRed) Cost(*sim.TurnState) int { return 0 }
 func (EvasiveLeapRed) Pitch() int              { return 1 }
 func (EvasiveLeapRed) Attack() int             { return 0 }
 func (EvasiveLeapRed) Defense() int            { return 3 }
-func (EvasiveLeapRed) Types() card.TypeSet     { return defenseReactionTypes }
+func (EvasiveLeapRed) Types() card.TypeSet     { return DefenseReactionTypes }
 func (EvasiveLeapRed) GoAgain() bool           { return false }
 func (EvasiveLeapRed) Play(s *sim.TurnState, self *sim.CardState) {
 	n := self.DealEffectiveDefense(s)
@@ -33,7 +33,7 @@ func (EvasiveLeapYellow) Cost(*sim.TurnState) int { return 0 }
 func (EvasiveLeapYellow) Pitch() int              { return 2 }
 func (EvasiveLeapYellow) Attack() int             { return 0 }
 func (EvasiveLeapYellow) Defense() int            { return 2 }
-func (EvasiveLeapYellow) Types() card.TypeSet     { return defenseReactionTypes }
+func (EvasiveLeapYellow) Types() card.TypeSet     { return DefenseReactionTypes }
 func (EvasiveLeapYellow) GoAgain() bool           { return false }
 func (EvasiveLeapYellow) Play(s *sim.TurnState, self *sim.CardState) {
 	n := self.DealEffectiveDefense(s)
@@ -48,7 +48,7 @@ func (EvasiveLeapBlue) Cost(*sim.TurnState) int { return 0 }
 func (EvasiveLeapBlue) Pitch() int              { return 3 }
 func (EvasiveLeapBlue) Attack() int             { return 0 }
 func (EvasiveLeapBlue) Defense() int            { return 1 }
-func (EvasiveLeapBlue) Types() card.TypeSet     { return defenseReactionTypes }
+func (EvasiveLeapBlue) Types() card.TypeSet     { return DefenseReactionTypes }
 func (EvasiveLeapBlue) GoAgain() bool           { return false }
 func (EvasiveLeapBlue) Play(s *sim.TurnState, self *sim.CardState) {
 	n := self.DealEffectiveDefense(s)

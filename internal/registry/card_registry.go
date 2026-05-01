@@ -9,6 +9,8 @@ package registry
 
 import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/cards"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/cards/notimplemented"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/cards/unplayable"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/optimizations"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
@@ -49,9 +51,9 @@ var cardsByID = []sim.Card{
 	ids.BloodspillInvocationYellow: cards.BloodspillInvocationYellow{},
 	ids.BloodspillInvocationBlue:   cards.BloodspillInvocationBlue{},
 
-	ids.CondemnToSlaughterRed:    cards.CondemnToSlaughterRed{},
-	ids.CondemnToSlaughterYellow: cards.CondemnToSlaughterYellow{},
-	ids.CondemnToSlaughterBlue:   cards.CondemnToSlaughterBlue{},
+	ids.CondemnToSlaughterRed:    notimplemented.CondemnToSlaughterRed{},
+	ids.CondemnToSlaughterYellow: notimplemented.CondemnToSlaughterYellow{},
+	ids.CondemnToSlaughterBlue:   notimplemented.CondemnToSlaughterBlue{},
 
 	ids.ConsumingVolitionRed:    cards.ConsumingVolitionRed{},
 	ids.ConsumingVolitionYellow: cards.ConsumingVolitionYellow{},
@@ -65,9 +67,9 @@ var cardsByID = []sim.Card{
 	ids.DrawnToTheDarkDimensionYellow: cards.DrawnToTheDarkDimensionYellow{},
 	ids.DrawnToTheDarkDimensionBlue:   cards.DrawnToTheDarkDimensionBlue{},
 
-	ids.DrowningDireRed:    cards.DrowningDireRed{},
-	ids.DrowningDireYellow: cards.DrowningDireYellow{},
-	ids.DrowningDireBlue:   cards.DrowningDireBlue{},
+	ids.DrowningDireRed:    notimplemented.DrowningDireRed{},
+	ids.DrowningDireYellow: notimplemented.DrowningDireYellow{},
+	ids.DrowningDireBlue:   notimplemented.DrowningDireBlue{},
 
 	ids.HitTheHighNotesRed:    cards.HitTheHighNotesRed{},
 	ids.HitTheHighNotesYellow: cards.HitTheHighNotesYellow{},
@@ -155,17 +157,17 @@ var cardsByID = []sim.Card{
 	ids.SpellbladeStrikeYellow: cards.SpellbladeStrikeYellow{},
 	ids.SpellbladeStrikeBlue:   cards.SpellbladeStrikeBlue{},
 
-	ids.SplinteringDeadwoodRed:    cards.SplinteringDeadwoodRed{},
-	ids.SplinteringDeadwoodYellow: cards.SplinteringDeadwoodYellow{},
-	ids.SplinteringDeadwoodBlue:   cards.SplinteringDeadwoodBlue{},
+	ids.SplinteringDeadwoodRed:    notimplemented.SplinteringDeadwoodRed{},
+	ids.SplinteringDeadwoodYellow: notimplemented.SplinteringDeadwoodYellow{},
+	ids.SplinteringDeadwoodBlue:   notimplemented.SplinteringDeadwoodBlue{},
 
 	ids.SutcliffesResearchNotesRed:    cards.SutcliffesResearchNotesRed{},
 	ids.SutcliffesResearchNotesYellow: cards.SutcliffesResearchNotesYellow{},
 	ids.SutcliffesResearchNotesBlue:   cards.SutcliffesResearchNotesBlue{},
 
-	ids.VantagePointRed:    cards.VantagePointRed{},
-	ids.VantagePointYellow: cards.VantagePointYellow{},
-	ids.VantagePointBlue:   cards.VantagePointBlue{},
+	ids.VantagePointRed:    notimplemented.VantagePointRed{},
+	ids.VantagePointYellow: notimplemented.VantagePointYellow{},
+	ids.VantagePointBlue:   notimplemented.VantagePointBlue{},
 
 	ids.VexingMaliceRed:    cards.VexingMaliceRed{},
 	ids.VexingMaliceYellow: cards.VexingMaliceYellow{},
@@ -179,167 +181,167 @@ var cardsByID = []sim.Card{
 	ids.AdrenalineRushYellow: cards.AdrenalineRushYellow{},
 	ids.AdrenalineRushBlue:   cards.AdrenalineRushBlue{},
 
-	ids.AmuletOfAssertivenessYellow: cards.AmuletOfAssertivenessYellow{},
+	ids.AmuletOfAssertivenessYellow: unplayable.AmuletOfAssertivenessYellow{},
 
-	ids.AmuletOfEchoesBlue: cards.AmuletOfEchoesBlue{},
+	ids.AmuletOfEchoesBlue: unplayable.AmuletOfEchoesBlue{},
 
-	ids.AmuletOfHavencallBlue: cards.AmuletOfHavencallBlue{},
+	ids.AmuletOfHavencallBlue: unplayable.AmuletOfHavencallBlue{},
 
-	ids.AmuletOfIgnitionYellow: cards.AmuletOfIgnitionYellow{},
+	ids.AmuletOfIgnitionYellow: unplayable.AmuletOfIgnitionYellow{},
 
-	ids.AmuletOfInterventionBlue: cards.AmuletOfInterventionBlue{},
+	ids.AmuletOfInterventionBlue: unplayable.AmuletOfInterventionBlue{},
 
-	ids.AmuletOfOblationBlue: cards.AmuletOfOblationBlue{},
+	ids.AmuletOfOblationBlue: unplayable.AmuletOfOblationBlue{},
 
-	ids.ArcanePolarityRed:    cards.ArcanePolarityRed{},
-	ids.ArcanePolarityYellow: cards.ArcanePolarityYellow{},
-	ids.ArcanePolarityBlue:   cards.ArcanePolarityBlue{},
+	ids.ArcanePolarityRed:    notimplemented.ArcanePolarityRed{},
+	ids.ArcanePolarityYellow: notimplemented.ArcanePolarityYellow{},
+	ids.ArcanePolarityBlue:   notimplemented.ArcanePolarityBlue{},
 
-	ids.BackAlleyBreaklineRed:    cards.BackAlleyBreaklineRed{},
-	ids.BackAlleyBreaklineYellow: cards.BackAlleyBreaklineYellow{},
-	ids.BackAlleyBreaklineBlue:   cards.BackAlleyBreaklineBlue{},
+	ids.BackAlleyBreaklineRed:    notimplemented.BackAlleyBreaklineRed{},
+	ids.BackAlleyBreaklineYellow: notimplemented.BackAlleyBreaklineYellow{},
+	ids.BackAlleyBreaklineBlue:   notimplemented.BackAlleyBreaklineBlue{},
 
-	ids.BarragingBrawnhideRed:    cards.BarragingBrawnhideRed{},
-	ids.BarragingBrawnhideYellow: cards.BarragingBrawnhideYellow{},
-	ids.BarragingBrawnhideBlue:   cards.BarragingBrawnhideBlue{},
+	ids.BarragingBrawnhideRed:    notimplemented.BarragingBrawnhideRed{},
+	ids.BarragingBrawnhideYellow: notimplemented.BarragingBrawnhideYellow{},
+	ids.BarragingBrawnhideBlue:   notimplemented.BarragingBrawnhideBlue{},
 
-	ids.BattlefrontBastionRed:    cards.BattlefrontBastionRed{},
-	ids.BattlefrontBastionYellow: cards.BattlefrontBastionYellow{},
-	ids.BattlefrontBastionBlue:   cards.BattlefrontBastionBlue{},
+	ids.BattlefrontBastionRed:    notimplemented.BattlefrontBastionRed{},
+	ids.BattlefrontBastionYellow: notimplemented.BattlefrontBastionYellow{},
+	ids.BattlefrontBastionBlue:   notimplemented.BattlefrontBastionBlue{},
 
-	ids.BelittleRed:    cards.BelittleRed{},
-	ids.BelittleYellow: cards.BelittleYellow{},
-	ids.BelittleBlue:   cards.BelittleBlue{},
+	ids.BelittleRed:    notimplemented.BelittleRed{},
+	ids.BelittleYellow: notimplemented.BelittleYellow{},
+	ids.BelittleBlue:   notimplemented.BelittleBlue{},
 
-	ids.BladeFlashBlue: cards.BladeFlashBlue{},
+	ids.BladeFlashBlue: notimplemented.BladeFlashBlue{},
 
-	ids.BlanchRed:    cards.BlanchRed{},
-	ids.BlanchYellow: cards.BlanchYellow{},
-	ids.BlanchBlue:   cards.BlanchBlue{},
+	ids.BlanchRed:    notimplemented.BlanchRed{},
+	ids.BlanchYellow: notimplemented.BlanchYellow{},
+	ids.BlanchBlue:   notimplemented.BlanchBlue{},
 
 	ids.BlowForABlowRed: cards.BlowForABlowRed{},
 
-	ids.BlusterBuffRed: cards.BlusterBuffRed{},
+	ids.BlusterBuffRed: notimplemented.BlusterBuffRed{},
 
-	ids.BrandishRed:    cards.BrandishRed{},
-	ids.BrandishYellow: cards.BrandishYellow{},
-	ids.BrandishBlue:   cards.BrandishBlue{},
+	ids.BrandishRed:    notimplemented.BrandishRed{},
+	ids.BrandishYellow: notimplemented.BrandishYellow{},
+	ids.BrandishBlue:   notimplemented.BrandishBlue{},
 
-	ids.BrothersInArmsRed:    cards.BrothersInArmsRed{},
-	ids.BrothersInArmsYellow: cards.BrothersInArmsYellow{},
-	ids.BrothersInArmsBlue:   cards.BrothersInArmsBlue{},
+	ids.BrothersInArmsRed:    notimplemented.BrothersInArmsRed{},
+	ids.BrothersInArmsYellow: notimplemented.BrothersInArmsYellow{},
+	ids.BrothersInArmsBlue:   notimplemented.BrothersInArmsBlue{},
 
-	ids.BrushOffRed:    cards.BrushOffRed{},
-	ids.BrushOffYellow: cards.BrushOffYellow{},
-	ids.BrushOffBlue:   cards.BrushOffBlue{},
+	ids.BrushOffRed:    notimplemented.BrushOffRed{},
+	ids.BrushOffYellow: notimplemented.BrushOffYellow{},
+	ids.BrushOffBlue:   notimplemented.BrushOffBlue{},
 
 	ids.BrutalAssaultRed:    cards.BrutalAssaultRed{},
 	ids.BrutalAssaultYellow: cards.BrutalAssaultYellow{},
 	ids.BrutalAssaultBlue:   cards.BrutalAssaultBlue{},
 
-	ids.CadaverousContrabandRed:    cards.CadaverousContrabandRed{},
-	ids.CadaverousContrabandYellow: cards.CadaverousContrabandYellow{},
-	ids.CadaverousContrabandBlue:   cards.CadaverousContrabandBlue{},
+	ids.CadaverousContrabandRed:    notimplemented.CadaverousContrabandRed{},
+	ids.CadaverousContrabandYellow: notimplemented.CadaverousContrabandYellow{},
+	ids.CadaverousContrabandBlue:   notimplemented.CadaverousContrabandBlue{},
 
-	ids.CalmingBreezeRed: cards.CalmingBreezeRed{},
+	ids.CalmingBreezeRed: notimplemented.CalmingBreezeRed{},
 
-	ids.CaptainsCallRed:    cards.CaptainsCallRed{},
-	ids.CaptainsCallYellow: cards.CaptainsCallYellow{},
-	ids.CaptainsCallBlue:   cards.CaptainsCallBlue{},
+	ids.CaptainsCallRed:    notimplemented.CaptainsCallRed{},
+	ids.CaptainsCallYellow: notimplemented.CaptainsCallYellow{},
+	ids.CaptainsCallBlue:   notimplemented.CaptainsCallBlue{},
 
-	ids.CashInYellow: cards.CashInYellow{},
+	ids.CashInYellow: notimplemented.CashInYellow{},
 
-	ids.ChestPuffRed: cards.ChestPuffRed{},
+	ids.ChestPuffRed: notimplemented.ChestPuffRed{},
 
-	ids.ClapEmInIronsBlue: cards.ClapEmInIronsBlue{},
+	ids.ClapEmInIronsBlue: notimplemented.ClapEmInIronsBlue{},
 
 	ids.ClarityPotionBlue: cards.ClarityPotionBlue{},
 
-	ids.ClearwaterElixirRed: cards.ClearwaterElixirRed{},
+	ids.ClearwaterElixirRed: notimplemented.ClearwaterElixirRed{},
 
 	ids.ComeToFightRed:    cards.ComeToFightRed{},
 	ids.ComeToFightYellow: cards.ComeToFightYellow{},
 	ids.ComeToFightBlue:   cards.ComeToFightBlue{},
 
-	ids.CountYourBlessingsRed:    cards.CountYourBlessingsRed{},
-	ids.CountYourBlessingsYellow: cards.CountYourBlessingsYellow{},
-	ids.CountYourBlessingsBlue:   cards.CountYourBlessingsBlue{},
+	ids.CountYourBlessingsRed:    notimplemented.CountYourBlessingsRed{},
+	ids.CountYourBlessingsYellow: notimplemented.CountYourBlessingsYellow{},
+	ids.CountYourBlessingsBlue:   notimplemented.CountYourBlessingsBlue{},
 
-	ids.CrackedBaubleYellow: cards.CrackedBaubleYellow{},
+	ids.CrackedBaubleYellow: notimplemented.CrackedBaubleYellow{},
 
-	ids.CrashDownTheGatesRed:    cards.CrashDownTheGatesRed{},
-	ids.CrashDownTheGatesYellow: cards.CrashDownTheGatesYellow{},
-	ids.CrashDownTheGatesBlue:   cards.CrashDownTheGatesBlue{},
+	ids.CrashDownTheGatesRed:    notimplemented.CrashDownTheGatesRed{},
+	ids.CrashDownTheGatesYellow: notimplemented.CrashDownTheGatesYellow{},
+	ids.CrashDownTheGatesBlue:   notimplemented.CrashDownTheGatesBlue{},
 
 	ids.CriticalStrikeRed:    cards.CriticalStrikeRed{},
 	ids.CriticalStrikeYellow: cards.CriticalStrikeYellow{},
 	ids.CriticalStrikeBlue:   cards.CriticalStrikeBlue{},
 
-	ids.CutDownToSizeRed:    cards.CutDownToSizeRed{},
-	ids.CutDownToSizeYellow: cards.CutDownToSizeYellow{},
-	ids.CutDownToSizeBlue:   cards.CutDownToSizeBlue{},
+	ids.CutDownToSizeRed:    notimplemented.CutDownToSizeRed{},
+	ids.CutDownToSizeYellow: notimplemented.CutDownToSizeYellow{},
+	ids.CutDownToSizeBlue:   notimplemented.CutDownToSizeBlue{},
 
 	ids.DemolitionCrewRed:    cards.DemolitionCrewRed{},
 	ids.DemolitionCrewYellow: cards.DemolitionCrewYellow{},
 	ids.DemolitionCrewBlue:   cards.DemolitionCrewBlue{},
 
-	ids.DestructiveDeliberationRed:    cards.DestructiveDeliberationRed{},
-	ids.DestructiveDeliberationYellow: cards.DestructiveDeliberationYellow{},
-	ids.DestructiveDeliberationBlue:   cards.DestructiveDeliberationBlue{},
+	ids.DestructiveDeliberationRed:    notimplemented.DestructiveDeliberationRed{},
+	ids.DestructiveDeliberationYellow: notimplemented.DestructiveDeliberationYellow{},
+	ids.DestructiveDeliberationBlue:   notimplemented.DestructiveDeliberationBlue{},
 
-	ids.DestructiveTendenciesBlue: cards.DestructiveTendenciesBlue{},
+	ids.DestructiveTendenciesBlue: notimplemented.DestructiveTendenciesBlue{},
 
 	ids.DodgeBlue: cards.DodgeBlue{},
 
-	ids.DownButNotOutRed:    cards.DownButNotOutRed{},
-	ids.DownButNotOutYellow: cards.DownButNotOutYellow{},
-	ids.DownButNotOutBlue:   cards.DownButNotOutBlue{},
+	ids.DownButNotOutRed:    notimplemented.DownButNotOutRed{},
+	ids.DownButNotOutYellow: notimplemented.DownButNotOutYellow{},
+	ids.DownButNotOutBlue:   notimplemented.DownButNotOutBlue{},
 
-	ids.DragDownRed:    cards.DragDownRed{},
-	ids.DragDownYellow: cards.DragDownYellow{},
-	ids.DragDownBlue:   cards.DragDownBlue{},
+	ids.DragDownRed:    notimplemented.DragDownRed{},
+	ids.DragDownYellow: notimplemented.DragDownYellow{},
+	ids.DragDownBlue:   notimplemented.DragDownBlue{},
 
-	ids.DroneOfBrutalityRed:    cards.DroneOfBrutalityRed{},
-	ids.DroneOfBrutalityYellow: cards.DroneOfBrutalityYellow{},
-	ids.DroneOfBrutalityBlue:   cards.DroneOfBrutalityBlue{},
+	ids.DroneOfBrutalityRed:    notimplemented.DroneOfBrutalityRed{},
+	ids.DroneOfBrutalityYellow: notimplemented.DroneOfBrutalityYellow{},
+	ids.DroneOfBrutalityBlue:   notimplemented.DroneOfBrutalityBlue{},
 
-	ids.EirinasPrayerRed:    cards.EirinasPrayerRed{},
-	ids.EirinasPrayerYellow: cards.EirinasPrayerYellow{},
-	ids.EirinasPrayerBlue:   cards.EirinasPrayerBlue{},
+	ids.EirinasPrayerRed:    notimplemented.EirinasPrayerRed{},
+	ids.EirinasPrayerYellow: notimplemented.EirinasPrayerYellow{},
+	ids.EirinasPrayerBlue:   notimplemented.EirinasPrayerBlue{},
 
-	ids.EmissaryOfMoonRed: cards.EmissaryOfMoonRed{},
+	ids.EmissaryOfMoonRed: notimplemented.EmissaryOfMoonRed{},
 
-	ids.EmissaryOfTidesRed: cards.EmissaryOfTidesRed{},
+	ids.EmissaryOfTidesRed: notimplemented.EmissaryOfTidesRed{},
 
-	ids.EmissaryOfWindRed: cards.EmissaryOfWindRed{},
+	ids.EmissaryOfWindRed: notimplemented.EmissaryOfWindRed{},
 
-	ids.EnchantingMelodyRed:    cards.EnchantingMelodyRed{},
-	ids.EnchantingMelodyYellow: cards.EnchantingMelodyYellow{},
-	ids.EnchantingMelodyBlue:   cards.EnchantingMelodyBlue{},
+	ids.EnchantingMelodyRed:    notimplemented.EnchantingMelodyRed{},
+	ids.EnchantingMelodyYellow: notimplemented.EnchantingMelodyYellow{},
+	ids.EnchantingMelodyBlue:   notimplemented.EnchantingMelodyBlue{},
 
-	ids.EnergyPotionBlue: cards.EnergyPotionBlue{},
+	ids.EnergyPotionBlue: notimplemented.EnergyPotionBlue{},
 
 	ids.EvasiveLeapRed:    cards.EvasiveLeapRed{},
 	ids.EvasiveLeapYellow: cards.EvasiveLeapYellow{},
 	ids.EvasiveLeapBlue:   cards.EvasiveLeapBlue{},
 
-	ids.EvenBiggerThanThatRed:    cards.EvenBiggerThanThatRed{},
-	ids.EvenBiggerThanThatYellow: cards.EvenBiggerThanThatYellow{},
-	ids.EvenBiggerThanThatBlue:   cards.EvenBiggerThanThatBlue{},
+	ids.EvenBiggerThanThatRed:    notimplemented.EvenBiggerThanThatRed{},
+	ids.EvenBiggerThanThatYellow: notimplemented.EvenBiggerThanThatYellow{},
+	ids.EvenBiggerThanThatBlue:   notimplemented.EvenBiggerThanThatBlue{},
 
-	ids.ExposedBlue: cards.ExposedBlue{},
+	ids.ExposedBlue: notimplemented.ExposedBlue{},
 
-	ids.FactFindingMissionRed:    cards.FactFindingMissionRed{},
-	ids.FactFindingMissionYellow: cards.FactFindingMissionYellow{},
-	ids.FactFindingMissionBlue:   cards.FactFindingMissionBlue{},
+	ids.FactFindingMissionRed:    notimplemented.FactFindingMissionRed{},
+	ids.FactFindingMissionYellow: notimplemented.FactFindingMissionYellow{},
+	ids.FactFindingMissionBlue:   notimplemented.FactFindingMissionBlue{},
 
 	ids.FateForeseenRed:    cards.FateForeseenRed{},
 	ids.FateForeseenYellow: cards.FateForeseenYellow{},
 	ids.FateForeseenBlue:   cards.FateForeseenBlue{},
 
-	ids.FeistyLocalsRed:    cards.FeistyLocalsRed{},
-	ids.FeistyLocalsYellow: cards.FeistyLocalsYellow{},
-	ids.FeistyLocalsBlue:   cards.FeistyLocalsBlue{},
+	ids.FeistyLocalsRed:    notimplemented.FeistyLocalsRed{},
+	ids.FeistyLocalsYellow: notimplemented.FeistyLocalsYellow{},
+	ids.FeistyLocalsBlue:   notimplemented.FeistyLocalsBlue{},
 
 	ids.FerventForerunnerRed:    cards.FerventForerunnerRed{},
 	ids.FerventForerunnerYellow: cards.FerventForerunnerYellow{},
@@ -349,103 +351,103 @@ var cardsByID = []sim.Card{
 	ids.FiddlersGreenYellow: cards.FiddlersGreenYellow{},
 	ids.FiddlersGreenBlue:   cards.FiddlersGreenBlue{},
 
-	ids.FlexRed:    cards.FlexRed{},
-	ids.FlexYellow: cards.FlexYellow{},
-	ids.FlexBlue:   cards.FlexBlue{},
+	ids.FlexRed:    notimplemented.FlexRed{},
+	ids.FlexYellow: notimplemented.FlexYellow{},
+	ids.FlexBlue:   notimplemented.FlexBlue{},
 
-	ids.FlockOfTheFeatherWalkersRed:    cards.FlockOfTheFeatherWalkersRed{},
-	ids.FlockOfTheFeatherWalkersYellow: cards.FlockOfTheFeatherWalkersYellow{},
-	ids.FlockOfTheFeatherWalkersBlue:   cards.FlockOfTheFeatherWalkersBlue{},
+	ids.FlockOfTheFeatherWalkersRed:    notimplemented.FlockOfTheFeatherWalkersRed{},
+	ids.FlockOfTheFeatherWalkersYellow: notimplemented.FlockOfTheFeatherWalkersYellow{},
+	ids.FlockOfTheFeatherWalkersBlue:   notimplemented.FlockOfTheFeatherWalkersBlue{},
 
 	ids.FlyingHighRed:    cards.FlyingHighRed{},
 	ids.FlyingHighYellow: cards.FlyingHighYellow{},
 	ids.FlyingHighBlue:   cards.FlyingHighBlue{},
 
-	ids.FoolsGoldYellow: cards.FoolsGoldYellow{},
+	ids.FoolsGoldYellow: notimplemented.FoolsGoldYellow{},
 
 	ids.ForceSightRed:    cards.ForceSightRed{},
 	ids.ForceSightYellow: cards.ForceSightYellow{},
 	ids.ForceSightBlue:   cards.ForceSightBlue{},
 
-	ids.FreewheelingRenegadesRed:    cards.FreewheelingRenegadesRed{},
-	ids.FreewheelingRenegadesYellow: cards.FreewheelingRenegadesYellow{},
-	ids.FreewheelingRenegadesBlue:   cards.FreewheelingRenegadesBlue{},
+	ids.FreewheelingRenegadesRed:    notimplemented.FreewheelingRenegadesRed{},
+	ids.FreewheelingRenegadesYellow: notimplemented.FreewheelingRenegadesYellow{},
+	ids.FreewheelingRenegadesBlue:   notimplemented.FreewheelingRenegadesBlue{},
 
-	ids.FrontlineScoutRed:    cards.FrontlineScoutRed{},
-	ids.FrontlineScoutYellow: cards.FrontlineScoutYellow{},
-	ids.FrontlineScoutBlue:   cards.FrontlineScoutBlue{},
+	ids.FrontlineScoutRed:    notimplemented.FrontlineScoutRed{},
+	ids.FrontlineScoutYellow: notimplemented.FrontlineScoutYellow{},
+	ids.FrontlineScoutBlue:   notimplemented.FrontlineScoutBlue{},
 
 	ids.FyendalsFightingSpiritRed:    cards.FyendalsFightingSpiritRed{},
 	ids.FyendalsFightingSpiritYellow: cards.FyendalsFightingSpiritYellow{},
 	ids.FyendalsFightingSpiritBlue:   cards.FyendalsFightingSpiritBlue{},
 
-	ids.GravekeepingRed:    cards.GravekeepingRed{},
-	ids.GravekeepingYellow: cards.GravekeepingYellow{},
-	ids.GravekeepingBlue:   cards.GravekeepingBlue{},
+	ids.GravekeepingRed:    notimplemented.GravekeepingRed{},
+	ids.GravekeepingYellow: notimplemented.GravekeepingYellow{},
+	ids.GravekeepingBlue:   notimplemented.GravekeepingBlue{},
 
-	ids.HandBehindThePenRed: cards.HandBehindThePenRed{},
+	ids.HandBehindThePenRed: notimplemented.HandBehindThePenRed{},
 
 	ids.HealingBalmRed:    cards.HealingBalmRed{},
 	ids.HealingBalmYellow: cards.HealingBalmYellow{},
 	ids.HealingBalmBlue:   cards.HealingBalmBlue{},
 
-	ids.HealingPotionBlue: cards.HealingPotionBlue{},
+	ids.HealingPotionBlue: notimplemented.HealingPotionBlue{},
 
-	ids.HighStrikerRed:    cards.HighStrikerRed{},
-	ids.HighStrikerYellow: cards.HighStrikerYellow{},
-	ids.HighStrikerBlue:   cards.HighStrikerBlue{},
+	ids.HighStrikerRed:    notimplemented.HighStrikerRed{},
+	ids.HighStrikerYellow: notimplemented.HighStrikerYellow{},
+	ids.HighStrikerBlue:   notimplemented.HighStrikerBlue{},
 
-	ids.HumbleRed:    cards.HumbleRed{},
-	ids.HumbleYellow: cards.HumbleYellow{},
-	ids.HumbleBlue:   cards.HumbleBlue{},
+	ids.HumbleRed:    notimplemented.HumbleRed{},
+	ids.HumbleYellow: notimplemented.HumbleYellow{},
+	ids.HumbleBlue:   notimplemented.HumbleBlue{},
 
-	ids.ImperialSealOfCommandRed: cards.ImperialSealOfCommandRed{},
+	ids.ImperialSealOfCommandRed: notimplemented.ImperialSealOfCommandRed{},
 
-	ids.InfectiousHostRed:    cards.InfectiousHostRed{},
-	ids.InfectiousHostYellow: cards.InfectiousHostYellow{},
-	ids.InfectiousHostBlue:   cards.InfectiousHostBlue{},
+	ids.InfectiousHostRed:    notimplemented.InfectiousHostRed{},
+	ids.InfectiousHostYellow: notimplemented.InfectiousHostYellow{},
+	ids.InfectiousHostBlue:   notimplemented.InfectiousHostBlue{},
 
-	ids.JackBeNimbleRed: cards.JackBeNimbleRed{},
+	ids.JackBeNimbleRed: notimplemented.JackBeNimbleRed{},
 
-	ids.JackBeQuickRed: cards.JackBeQuickRed{},
+	ids.JackBeQuickRed: notimplemented.JackBeQuickRed{},
 
-	ids.LayLowYellow: cards.LayLowYellow{},
+	ids.LayLowYellow: notimplemented.LayLowYellow{},
 
-	ids.LeadTheChargeRed:    cards.LeadTheChargeRed{},
-	ids.LeadTheChargeYellow: cards.LeadTheChargeYellow{},
-	ids.LeadTheChargeBlue:   cards.LeadTheChargeBlue{},
+	ids.LeadTheChargeRed:    notimplemented.LeadTheChargeRed{},
+	ids.LeadTheChargeYellow: notimplemented.LeadTheChargeYellow{},
+	ids.LeadTheChargeBlue:   notimplemented.LeadTheChargeBlue{},
 
 	ids.LifeForALifeRed:    cards.LifeForALifeRed{},
 	ids.LifeForALifeYellow: cards.LifeForALifeYellow{},
 	ids.LifeForALifeBlue:   cards.LifeForALifeBlue{},
 
-	ids.LifeOfThePartyRed:    cards.LifeOfThePartyRed{},
-	ids.LifeOfThePartyYellow: cards.LifeOfThePartyYellow{},
-	ids.LifeOfThePartyBlue:   cards.LifeOfThePartyBlue{},
+	ids.LifeOfThePartyRed:    notimplemented.LifeOfThePartyRed{},
+	ids.LifeOfThePartyYellow: notimplemented.LifeOfThePartyYellow{},
+	ids.LifeOfThePartyBlue:   notimplemented.LifeOfThePartyBlue{},
 
-	ids.LookingForAScrapRed:    cards.LookingForAScrapRed{},
-	ids.LookingForAScrapYellow: cards.LookingForAScrapYellow{},
-	ids.LookingForAScrapBlue:   cards.LookingForAScrapBlue{},
+	ids.LookingForAScrapRed:    notimplemented.LookingForAScrapRed{},
+	ids.LookingForAScrapYellow: notimplemented.LookingForAScrapYellow{},
+	ids.LookingForAScrapBlue:   notimplemented.LookingForAScrapBlue{},
 
-	ids.LookTuffRed: cards.LookTuffRed{},
+	ids.LookTuffRed: notimplemented.LookTuffRed{},
 
-	ids.LungingPressBlue: cards.LungingPressBlue{},
+	ids.LungingPressBlue: notimplemented.LungingPressBlue{},
 
-	ids.MemorialGroundRed:    cards.MemorialGroundRed{},
-	ids.MemorialGroundYellow: cards.MemorialGroundYellow{},
-	ids.MemorialGroundBlue:   cards.MemorialGroundBlue{},
+	ids.MemorialGroundRed:    notimplemented.MemorialGroundRed{},
+	ids.MemorialGroundYellow: notimplemented.MemorialGroundYellow{},
+	ids.MemorialGroundBlue:   notimplemented.MemorialGroundBlue{},
 
 	ids.MinnowismRed:    cards.MinnowismRed{},
 	ids.MinnowismYellow: cards.MinnowismYellow{},
 	ids.MinnowismBlue:   cards.MinnowismBlue{},
 
-	ids.MoneyOrYourLifeRed:    cards.MoneyOrYourLifeRed{},
-	ids.MoneyOrYourLifeYellow: cards.MoneyOrYourLifeYellow{},
-	ids.MoneyOrYourLifeBlue:   cards.MoneyOrYourLifeBlue{},
+	ids.MoneyOrYourLifeRed:    notimplemented.MoneyOrYourLifeRed{},
+	ids.MoneyOrYourLifeYellow: notimplemented.MoneyOrYourLifeYellow{},
+	ids.MoneyOrYourLifeBlue:   notimplemented.MoneyOrYourLifeBlue{},
 
-	ids.MoneyWhereYaMouthIsRed:    cards.MoneyWhereYaMouthIsRed{},
-	ids.MoneyWhereYaMouthIsYellow: cards.MoneyWhereYaMouthIsYellow{},
-	ids.MoneyWhereYaMouthIsBlue:   cards.MoneyWhereYaMouthIsBlue{},
+	ids.MoneyWhereYaMouthIsRed:    notimplemented.MoneyWhereYaMouthIsRed{},
+	ids.MoneyWhereYaMouthIsYellow: notimplemented.MoneyWhereYaMouthIsYellow{},
+	ids.MoneyWhereYaMouthIsBlue:   notimplemented.MoneyWhereYaMouthIsBlue{},
 
 	ids.MoonWishRed:    cards.MoonWishRed{},
 	ids.MoonWishYellow: cards.MoonWishYellow{},
@@ -453,189 +455,189 @@ var cardsByID = []sim.Card{
 
 	ids.MuscleMuttYellow: cards.MuscleMuttYellow{},
 
-	ids.NimbleStrikeRed:    cards.NimbleStrikeRed{},
-	ids.NimbleStrikeYellow: cards.NimbleStrikeYellow{},
-	ids.NimbleStrikeBlue:   cards.NimbleStrikeBlue{},
+	ids.NimbleStrikeRed:    notimplemented.NimbleStrikeRed{},
+	ids.NimbleStrikeYellow: notimplemented.NimbleStrikeYellow{},
+	ids.NimbleStrikeBlue:   notimplemented.NimbleStrikeBlue{},
 
 	ids.NimblismRed:    cards.NimblismRed{},
 	ids.NimblismYellow: cards.NimblismYellow{},
 	ids.NimblismBlue:   cards.NimblismBlue{},
 
-	ids.NimbyRed:    cards.NimbyRed{},
-	ids.NimbyYellow: cards.NimbyYellow{},
-	ids.NimbyBlue:   cards.NimbyBlue{},
+	ids.NimbyRed:    notimplemented.NimbyRed{},
+	ids.NimbyYellow: notimplemented.NimbyYellow{},
+	ids.NimbyBlue:   notimplemented.NimbyBlue{},
 
-	ids.NipAtTheHeelsBlue: cards.NipAtTheHeelsBlue{},
+	ids.NipAtTheHeelsBlue: notimplemented.NipAtTheHeelsBlue{},
 
-	ids.OasisRespiteRed:    cards.OasisRespiteRed{},
-	ids.OasisRespiteYellow: cards.OasisRespiteYellow{},
-	ids.OasisRespiteBlue:   cards.OasisRespiteBlue{},
+	ids.OasisRespiteRed:    notimplemented.OasisRespiteRed{},
+	ids.OasisRespiteYellow: notimplemented.OasisRespiteYellow{},
+	ids.OasisRespiteBlue:   notimplemented.OasisRespiteBlue{},
 
-	ids.OnAKnifeEdgeYellow: cards.OnAKnifeEdgeYellow{},
+	ids.OnAKnifeEdgeYellow: notimplemented.OnAKnifeEdgeYellow{},
 
 	ids.OnTheHorizonRed:    cards.OnTheHorizonRed{},
 	ids.OnTheHorizonYellow: cards.OnTheHorizonYellow{},
 	ids.OnTheHorizonBlue:   cards.OnTheHorizonBlue{},
 
-	ids.OutedRed: cards.OutedRed{},
+	ids.OutedRed: notimplemented.OutedRed{},
 
-	ids.OutMuscleRed:    cards.OutMuscleRed{},
-	ids.OutMuscleYellow: cards.OutMuscleYellow{},
-	ids.OutMuscleBlue:   cards.OutMuscleBlue{},
+	ids.OutMuscleRed:    notimplemented.OutMuscleRed{},
+	ids.OutMuscleYellow: notimplemented.OutMuscleYellow{},
+	ids.OutMuscleBlue:   notimplemented.OutMuscleBlue{},
 
-	ids.OverloadRed:    cards.OverloadRed{},
-	ids.OverloadYellow: cards.OverloadYellow{},
-	ids.OverloadBlue:   cards.OverloadBlue{},
+	ids.OverloadRed:    notimplemented.OverloadRed{},
+	ids.OverloadYellow: notimplemented.OverloadYellow{},
+	ids.OverloadBlue:   notimplemented.OverloadBlue{},
 
-	ids.PeaceOfMindRed:    cards.PeaceOfMindRed{},
-	ids.PeaceOfMindYellow: cards.PeaceOfMindYellow{},
-	ids.PeaceOfMindBlue:   cards.PeaceOfMindBlue{},
+	ids.PeaceOfMindRed:    notimplemented.PeaceOfMindRed{},
+	ids.PeaceOfMindYellow: notimplemented.PeaceOfMindYellow{},
+	ids.PeaceOfMindBlue:   notimplemented.PeaceOfMindBlue{},
 
-	ids.PerformanceBonusRed:    cards.PerformanceBonusRed{},
-	ids.PerformanceBonusYellow: cards.PerformanceBonusYellow{},
-	ids.PerformanceBonusBlue:   cards.PerformanceBonusBlue{},
+	ids.PerformanceBonusRed:    notimplemented.PerformanceBonusRed{},
+	ids.PerformanceBonusYellow: notimplemented.PerformanceBonusYellow{},
+	ids.PerformanceBonusBlue:   notimplemented.PerformanceBonusBlue{},
 
-	ids.PickACardAnyCardRed:    cards.PickACardAnyCardRed{},
-	ids.PickACardAnyCardYellow: cards.PickACardAnyCardYellow{},
-	ids.PickACardAnyCardBlue:   cards.PickACardAnyCardBlue{},
+	ids.PickACardAnyCardRed:    notimplemented.PickACardAnyCardRed{},
+	ids.PickACardAnyCardYellow: notimplemented.PickACardAnyCardYellow{},
+	ids.PickACardAnyCardBlue:   notimplemented.PickACardAnyCardBlue{},
 
-	ids.PilferTheTombBlue: cards.PilferTheTombBlue{},
+	ids.PilferTheTombBlue: notimplemented.PilferTheTombBlue{},
 
-	ids.PlunderRunRed:    cards.PlunderRunRed{},
-	ids.PlunderRunYellow: cards.PlunderRunYellow{},
-	ids.PlunderRunBlue:   cards.PlunderRunBlue{},
+	ids.PlunderRunRed:    notimplemented.PlunderRunRed{},
+	ids.PlunderRunYellow: notimplemented.PlunderRunYellow{},
+	ids.PlunderRunBlue:   notimplemented.PlunderRunBlue{},
 
-	ids.PotionOfDejaVuBlue: cards.PotionOfDejaVuBlue{},
+	ids.PotionOfDejaVuBlue: notimplemented.PotionOfDejaVuBlue{},
 
-	ids.PotionOfIronhideBlue: cards.PotionOfIronhideBlue{},
+	ids.PotionOfIronhideBlue: notimplemented.PotionOfIronhideBlue{},
 
-	ids.PotionOfLuckBlue: cards.PotionOfLuckBlue{},
+	ids.PotionOfLuckBlue: notimplemented.PotionOfLuckBlue{},
 
-	ids.PotionOfSeeingBlue: cards.PotionOfSeeingBlue{},
+	ids.PotionOfSeeingBlue: unplayable.PotionOfSeeingBlue{},
 
-	ids.PotionOfStrengthBlue: cards.PotionOfStrengthBlue{},
+	ids.PotionOfStrengthBlue: notimplemented.PotionOfStrengthBlue{},
 
 	ids.PoundForPoundRed:    cards.PoundForPoundRed{},
 	ids.PoundForPoundYellow: cards.PoundForPoundYellow{},
 	ids.PoundForPoundBlue:   cards.PoundForPoundBlue{},
 
-	ids.PrimeTheCrowdRed:    cards.PrimeTheCrowdRed{},
-	ids.PrimeTheCrowdYellow: cards.PrimeTheCrowdYellow{},
-	ids.PrimeTheCrowdBlue:   cards.PrimeTheCrowdBlue{},
+	ids.PrimeTheCrowdRed:    notimplemented.PrimeTheCrowdRed{},
+	ids.PrimeTheCrowdYellow: notimplemented.PrimeTheCrowdYellow{},
+	ids.PrimeTheCrowdBlue:   notimplemented.PrimeTheCrowdBlue{},
 
-	ids.PromiseOfPlentyRed:    cards.PromiseOfPlentyRed{},
-	ids.PromiseOfPlentyYellow: cards.PromiseOfPlentyYellow{},
-	ids.PromiseOfPlentyBlue:   cards.PromiseOfPlentyBlue{},
+	ids.PromiseOfPlentyRed:    notimplemented.PromiseOfPlentyRed{},
+	ids.PromiseOfPlentyYellow: notimplemented.PromiseOfPlentyYellow{},
+	ids.PromiseOfPlentyBlue:   notimplemented.PromiseOfPlentyBlue{},
 
-	ids.PublicBountyRed:    cards.PublicBountyRed{},
-	ids.PublicBountyYellow: cards.PublicBountyYellow{},
-	ids.PublicBountyBlue:   cards.PublicBountyBlue{},
+	ids.PublicBountyRed:    notimplemented.PublicBountyRed{},
+	ids.PublicBountyYellow: notimplemented.PublicBountyYellow{},
+	ids.PublicBountyBlue:   notimplemented.PublicBountyBlue{},
 
-	ids.PummelRed:    cards.PummelRed{},
-	ids.PummelYellow: cards.PummelYellow{},
-	ids.PummelBlue:   cards.PummelBlue{},
+	ids.PummelRed:    notimplemented.PummelRed{},
+	ids.PummelYellow: notimplemented.PummelYellow{},
+	ids.PummelBlue:   notimplemented.PummelBlue{},
 
-	ids.PunchAboveYourWeightRed:    cards.PunchAboveYourWeightRed{},
-	ids.PunchAboveYourWeightYellow: cards.PunchAboveYourWeightYellow{},
-	ids.PunchAboveYourWeightBlue:   cards.PunchAboveYourWeightBlue{},
+	ids.PunchAboveYourWeightRed:    notimplemented.PunchAboveYourWeightRed{},
+	ids.PunchAboveYourWeightYellow: notimplemented.PunchAboveYourWeightYellow{},
+	ids.PunchAboveYourWeightBlue:   notimplemented.PunchAboveYourWeightBlue{},
 
-	ids.PursueToTheEdgeOfOblivionRed: cards.PursueToTheEdgeOfOblivionRed{},
+	ids.PursueToTheEdgeOfOblivionRed: notimplemented.PursueToTheEdgeOfOblivionRed{},
 
-	ids.PursueToThePitsOfDespairRed: cards.PursueToThePitsOfDespairRed{},
+	ids.PursueToThePitsOfDespairRed: notimplemented.PursueToThePitsOfDespairRed{},
 
-	ids.PushThePointRed:    cards.PushThePointRed{},
-	ids.PushThePointYellow: cards.PushThePointYellow{},
-	ids.PushThePointBlue:   cards.PushThePointBlue{},
+	ids.PushThePointRed:    notimplemented.PushThePointRed{},
+	ids.PushThePointYellow: notimplemented.PushThePointYellow{},
+	ids.PushThePointBlue:   notimplemented.PushThePointBlue{},
 
-	ids.PutInContextBlue: cards.PutInContextBlue{},
+	ids.PutInContextBlue: notimplemented.PutInContextBlue{},
 
 	ids.RagingOnslaughtRed:    cards.RagingOnslaughtRed{},
 	ids.RagingOnslaughtYellow: cards.RagingOnslaughtYellow{},
 	ids.RagingOnslaughtBlue:   cards.RagingOnslaughtBlue{},
 
-	ids.RallyTheCoastGuardRed:    cards.RallyTheCoastGuardRed{},
-	ids.RallyTheCoastGuardYellow: cards.RallyTheCoastGuardYellow{},
-	ids.RallyTheCoastGuardBlue:   cards.RallyTheCoastGuardBlue{},
+	ids.RallyTheCoastGuardRed:    notimplemented.RallyTheCoastGuardRed{},
+	ids.RallyTheCoastGuardYellow: notimplemented.RallyTheCoastGuardYellow{},
+	ids.RallyTheCoastGuardBlue:   notimplemented.RallyTheCoastGuardBlue{},
 
-	ids.RallyTheRearguardRed:    cards.RallyTheRearguardRed{},
-	ids.RallyTheRearguardYellow: cards.RallyTheRearguardYellow{},
-	ids.RallyTheRearguardBlue:   cards.RallyTheRearguardBlue{},
+	ids.RallyTheRearguardRed:    notimplemented.RallyTheRearguardRed{},
+	ids.RallyTheRearguardYellow: notimplemented.RallyTheRearguardYellow{},
+	ids.RallyTheRearguardBlue:   notimplemented.RallyTheRearguardBlue{},
 
-	ids.RansackAndRazeBlue: cards.RansackAndRazeBlue{},
+	ids.RansackAndRazeBlue: notimplemented.RansackAndRazeBlue{},
 
 	ids.RavenousRabbleRed:    cards.RavenousRabbleRed{},
 	ids.RavenousRabbleYellow: cards.RavenousRabbleYellow{},
 	ids.RavenousRabbleBlue:   cards.RavenousRabbleBlue{},
 
-	ids.RazorReflexRed:    cards.RazorReflexRed{},
-	ids.RazorReflexYellow: cards.RazorReflexYellow{},
-	ids.RazorReflexBlue:   cards.RazorReflexBlue{},
+	ids.RazorReflexRed:    notimplemented.RazorReflexRed{},
+	ids.RazorReflexYellow: notimplemented.RazorReflexYellow{},
+	ids.RazorReflexBlue:   notimplemented.RazorReflexBlue{},
 
-	ids.RegainComposureBlue: cards.RegainComposureBlue{},
+	ids.RegainComposureBlue: notimplemented.RegainComposureBlue{},
 
-	ids.RegurgitatingSlogRed:    cards.RegurgitatingSlogRed{},
-	ids.RegurgitatingSlogYellow: cards.RegurgitatingSlogYellow{},
-	ids.RegurgitatingSlogBlue:   cards.RegurgitatingSlogBlue{},
+	ids.RegurgitatingSlogRed:    notimplemented.RegurgitatingSlogRed{},
+	ids.RegurgitatingSlogYellow: notimplemented.RegurgitatingSlogYellow{},
+	ids.RegurgitatingSlogBlue:   notimplemented.RegurgitatingSlogBlue{},
 
-	ids.ReinforceTheLineRed:    cards.ReinforceTheLineRed{},
-	ids.ReinforceTheLineYellow: cards.ReinforceTheLineYellow{},
-	ids.ReinforceTheLineBlue:   cards.ReinforceTheLineBlue{},
+	ids.ReinforceTheLineRed:    notimplemented.ReinforceTheLineRed{},
+	ids.ReinforceTheLineYellow: notimplemented.ReinforceTheLineYellow{},
+	ids.ReinforceTheLineBlue:   notimplemented.ReinforceTheLineBlue{},
 
-	ids.RelentlessPursuitBlue: cards.RelentlessPursuitBlue{},
+	ids.RelentlessPursuitBlue: notimplemented.RelentlessPursuitBlue{},
 
-	ids.RestvineElixirRed: cards.RestvineElixirRed{},
+	ids.RestvineElixirRed: notimplemented.RestvineElixirRed{},
 
-	ids.RiftingRed:    cards.RiftingRed{},
-	ids.RiftingYellow: cards.RiftingYellow{},
-	ids.RiftingBlue:   cards.RiftingBlue{},
+	ids.RiftingRed:    notimplemented.RiftingRed{},
+	ids.RiftingYellow: notimplemented.RiftingYellow{},
+	ids.RiftingBlue:   notimplemented.RiftingBlue{},
 
-	ids.RightBehindYouRed:    cards.RightBehindYouRed{},
-	ids.RightBehindYouYellow: cards.RightBehindYouYellow{},
-	ids.RightBehindYouBlue:   cards.RightBehindYouBlue{},
+	ids.RightBehindYouRed:    notimplemented.RightBehindYouRed{},
+	ids.RightBehindYouYellow: notimplemented.RightBehindYouYellow{},
+	ids.RightBehindYouBlue:   notimplemented.RightBehindYouBlue{},
 
-	ids.RiseAboveRed:    cards.RiseAboveRed{},
-	ids.RiseAboveYellow: cards.RiseAboveYellow{},
-	ids.RiseAboveBlue:   cards.RiseAboveBlue{},
+	ids.RiseAboveRed:    notimplemented.RiseAboveRed{},
+	ids.RiseAboveYellow: notimplemented.RiseAboveYellow{},
+	ids.RiseAboveBlue:   notimplemented.RiseAboveBlue{},
 
-	ids.SapwoodElixirRed: cards.SapwoodElixirRed{},
+	ids.SapwoodElixirRed: notimplemented.SapwoodElixirRed{},
 
 	ids.ScarForAScarRed:    cards.ScarForAScarRed{},
 	ids.ScarForAScarYellow: cards.ScarForAScarYellow{},
 	ids.ScarForAScarBlue:   cards.ScarForAScarBlue{},
 
-	ids.ScourTheBattlescapeRed:    cards.ScourTheBattlescapeRed{},
-	ids.ScourTheBattlescapeYellow: cards.ScourTheBattlescapeYellow{},
-	ids.ScourTheBattlescapeBlue:   cards.ScourTheBattlescapeBlue{},
+	ids.ScourTheBattlescapeRed:    notimplemented.ScourTheBattlescapeRed{},
+	ids.ScourTheBattlescapeYellow: notimplemented.ScourTheBattlescapeYellow{},
+	ids.ScourTheBattlescapeBlue:   notimplemented.ScourTheBattlescapeBlue{},
 
 	ids.ScoutThePeripheryRed:    cards.ScoutThePeripheryRed{},
 	ids.ScoutThePeripheryYellow: cards.ScoutThePeripheryYellow{},
 	ids.ScoutThePeripheryBlue:   cards.ScoutThePeripheryBlue{},
 
-	ids.SeekHorizonRed:    cards.SeekHorizonRed{},
-	ids.SeekHorizonYellow: cards.SeekHorizonYellow{},
-	ids.SeekHorizonBlue:   cards.SeekHorizonBlue{},
+	ids.SeekHorizonRed:    notimplemented.SeekHorizonRed{},
+	ids.SeekHorizonYellow: notimplemented.SeekHorizonYellow{},
+	ids.SeekHorizonBlue:   notimplemented.SeekHorizonBlue{},
 
-	ids.ShatterSorceryBlue: cards.ShatterSorceryBlue{},
+	ids.ShatterSorceryBlue: notimplemented.ShatterSorceryBlue{},
 
-	ids.SiftRed:    cards.SiftRed{},
-	ids.SiftYellow: cards.SiftYellow{},
-	ids.SiftBlue:   cards.SiftBlue{},
+	ids.SiftRed:    notimplemented.SiftRed{},
+	ids.SiftYellow: notimplemented.SiftYellow{},
+	ids.SiftBlue:   notimplemented.SiftBlue{},
 
-	ids.SigilOfCyclesBlue: cards.SigilOfCyclesBlue{},
+	ids.SigilOfCyclesBlue: notimplemented.SigilOfCyclesBlue{},
 
 	ids.SigilOfFyendalBlue: cards.SigilOfFyendalBlue{},
 
-	ids.SigilOfProtectionRed:    cards.SigilOfProtectionRed{},
-	ids.SigilOfProtectionYellow: cards.SigilOfProtectionYellow{},
-	ids.SigilOfProtectionBlue:   cards.SigilOfProtectionBlue{},
+	ids.SigilOfProtectionRed:    notimplemented.SigilOfProtectionRed{},
+	ids.SigilOfProtectionYellow: notimplemented.SigilOfProtectionYellow{},
+	ids.SigilOfProtectionBlue:   notimplemented.SigilOfProtectionBlue{},
 
-	ids.SigilOfSolaceRed:    cards.SigilOfSolaceRed{},
-	ids.SigilOfSolaceYellow: cards.SigilOfSolaceYellow{},
-	ids.SigilOfSolaceBlue:   cards.SigilOfSolaceBlue{},
+	ids.SigilOfSolaceRed:    notimplemented.SigilOfSolaceRed{},
+	ids.SigilOfSolaceYellow: notimplemented.SigilOfSolaceYellow{},
+	ids.SigilOfSolaceBlue:   notimplemented.SigilOfSolaceBlue{},
 
-	ids.SinkBelowRed:    cards.SinkBelowRed{},
-	ids.SinkBelowYellow: cards.SinkBelowYellow{},
-	ids.SinkBelowBlue:   cards.SinkBelowBlue{},
+	ids.SinkBelowRed:    notimplemented.SinkBelowRed{},
+	ids.SinkBelowYellow: notimplemented.SinkBelowYellow{},
+	ids.SinkBelowBlue:   notimplemented.SinkBelowBlue{},
 
 	ids.SirensOfSafeHarborRed:    cards.SirensOfSafeHarborRed{},
 	ids.SirensOfSafeHarborYellow: cards.SirensOfSafeHarborYellow{},
@@ -645,17 +647,17 @@ var cardsByID = []sim.Card{
 	ids.SloggismYellow: cards.SloggismYellow{},
 	ids.SloggismBlue:   cards.SloggismBlue{},
 
-	ids.SmashingGoodTimeRed:    cards.SmashingGoodTimeRed{},
-	ids.SmashingGoodTimeYellow: cards.SmashingGoodTimeYellow{},
-	ids.SmashingGoodTimeBlue:   cards.SmashingGoodTimeBlue{},
+	ids.SmashingGoodTimeRed:    notimplemented.SmashingGoodTimeRed{},
+	ids.SmashingGoodTimeYellow: notimplemented.SmashingGoodTimeYellow{},
+	ids.SmashingGoodTimeBlue:   notimplemented.SmashingGoodTimeBlue{},
 
-	ids.SmashUpRed: cards.SmashUpRed{},
+	ids.SmashUpRed: notimplemented.SmashUpRed{},
 
 	ids.SnatchRed:    cards.SnatchRed{},
 	ids.SnatchYellow: cards.SnatchYellow{},
 	ids.SnatchBlue:   cards.SnatchBlue{},
 
-	ids.SoundTheAlarmRed: cards.SoundTheAlarmRed{},
+	ids.SoundTheAlarmRed: notimplemented.SoundTheAlarmRed{},
 
 	ids.SpringboardSomersaultYellow: cards.SpringboardSomersaultYellow{},
 
@@ -663,67 +665,67 @@ var cardsByID = []sim.Card{
 	ids.SpringLoadYellow: cards.SpringLoadYellow{},
 	ids.SpringLoadBlue:   cards.SpringLoadBlue{},
 
-	ids.StartingStakeYellow: cards.StartingStakeYellow{},
+	ids.StartingStakeYellow: notimplemented.StartingStakeYellow{},
 
-	ids.StonyWoottonhogRed:    cards.StonyWoottonhogRed{},
-	ids.StonyWoottonhogYellow: cards.StonyWoottonhogYellow{},
-	ids.StonyWoottonhogBlue:   cards.StonyWoottonhogBlue{},
+	ids.StonyWoottonhogRed:    notimplemented.StonyWoottonhogRed{},
+	ids.StonyWoottonhogYellow: notimplemented.StonyWoottonhogYellow{},
+	ids.StonyWoottonhogBlue:   notimplemented.StonyWoottonhogBlue{},
 
-	ids.StrategicPlanningRed:    cards.StrategicPlanningRed{},
-	ids.StrategicPlanningYellow: cards.StrategicPlanningYellow{},
-	ids.StrategicPlanningBlue:   cards.StrategicPlanningBlue{},
+	ids.StrategicPlanningRed:    notimplemented.StrategicPlanningRed{},
+	ids.StrategicPlanningYellow: notimplemented.StrategicPlanningYellow{},
+	ids.StrategicPlanningBlue:   notimplemented.StrategicPlanningBlue{},
 
-	ids.StrikeGoldRed:    cards.StrikeGoldRed{},
-	ids.StrikeGoldYellow: cards.StrikeGoldYellow{},
-	ids.StrikeGoldBlue:   cards.StrikeGoldBlue{},
+	ids.StrikeGoldRed:    notimplemented.StrikeGoldRed{},
+	ids.StrikeGoldYellow: notimplemented.StrikeGoldYellow{},
+	ids.StrikeGoldBlue:   notimplemented.StrikeGoldBlue{},
 
 	ids.SunKissRed:    cards.SunKissRed{},
 	ids.SunKissYellow: cards.SunKissYellow{},
 	ids.SunKissBlue:   cards.SunKissBlue{},
 
-	ids.SurgingMilitiaRed:    cards.SurgingMilitiaRed{},
-	ids.SurgingMilitiaYellow: cards.SurgingMilitiaYellow{},
-	ids.SurgingMilitiaBlue:   cards.SurgingMilitiaBlue{},
+	ids.SurgingMilitiaRed:    notimplemented.SurgingMilitiaRed{},
+	ids.SurgingMilitiaYellow: notimplemented.SurgingMilitiaYellow{},
+	ids.SurgingMilitiaBlue:   notimplemented.SurgingMilitiaBlue{},
 
-	ids.TalismanOfBalanceBlue: cards.TalismanOfBalanceBlue{},
+	ids.TalismanOfBalanceBlue: notimplemented.TalismanOfBalanceBlue{},
 
-	ids.TalismanOfCremationBlue: cards.TalismanOfCremationBlue{},
+	ids.TalismanOfCremationBlue: notimplemented.TalismanOfCremationBlue{},
 
-	ids.TalismanOfDousingYellow: cards.TalismanOfDousingYellow{},
+	ids.TalismanOfDousingYellow: notimplemented.TalismanOfDousingYellow{},
 
-	ids.TalismanOfFeatherfootYellow: cards.TalismanOfFeatherfootYellow{},
+	ids.TalismanOfFeatherfootYellow: notimplemented.TalismanOfFeatherfootYellow{},
 
-	ids.TalismanOfRecompenseYellow: cards.TalismanOfRecompenseYellow{},
+	ids.TalismanOfRecompenseYellow: notimplemented.TalismanOfRecompenseYellow{},
 
-	ids.TalismanOfTithesBlue: cards.TalismanOfTithesBlue{},
+	ids.TalismanOfTithesBlue: notimplemented.TalismanOfTithesBlue{},
 
-	ids.TalismanOfWarfareYellow: cards.TalismanOfWarfareYellow{},
+	ids.TalismanOfWarfareYellow: notimplemented.TalismanOfWarfareYellow{},
 
-	ids.TestOfStrengthRed: cards.TestOfStrengthRed{},
+	ids.TestOfStrengthRed: notimplemented.TestOfStrengthRed{},
 
-	ids.ThrustRed: cards.ThrustRed{},
+	ids.ThrustRed: notimplemented.ThrustRed{},
 
-	ids.TimesnapPotionBlue: cards.TimesnapPotionBlue{},
+	ids.TimesnapPotionBlue: notimplemented.TimesnapPotionBlue{},
 
-	ids.TipOffRed:    cards.TipOffRed{},
-	ids.TipOffYellow: cards.TipOffYellow{},
-	ids.TipOffBlue:   cards.TipOffBlue{},
+	ids.TipOffRed:    notimplemented.TipOffRed{},
+	ids.TipOffYellow: notimplemented.TipOffYellow{},
+	ids.TipOffBlue:   notimplemented.TipOffBlue{},
 
-	ids.TitaniumBaubleBlue: cards.TitaniumBaubleBlue{},
+	ids.TitaniumBaubleBlue: notimplemented.TitaniumBaubleBlue{},
 
-	ids.TitForTatBlue: cards.TitForTatBlue{},
+	ids.TitForTatBlue: notimplemented.TitForTatBlue{},
 
-	ids.TongueTiedRed: cards.TongueTiedRed{},
+	ids.TongueTiedRed: notimplemented.TongueTiedRed{},
 
 	ids.ToughenUpBlue: cards.ToughenUpBlue{},
 
-	ids.TradeInRed:    cards.TradeInRed{},
-	ids.TradeInYellow: cards.TradeInYellow{},
-	ids.TradeInBlue:   cards.TradeInBlue{},
+	ids.TradeInRed:    notimplemented.TradeInRed{},
+	ids.TradeInYellow: notimplemented.TradeInYellow{},
+	ids.TradeInBlue:   notimplemented.TradeInBlue{},
 
-	ids.TremorOfIArathaelRed:    cards.TremorOfIArathaelRed{},
-	ids.TremorOfIArathaelYellow: cards.TremorOfIArathaelYellow{},
-	ids.TremorOfIArathaelBlue:   cards.TremorOfIArathaelBlue{},
+	ids.TremorOfIArathaelRed:    notimplemented.TremorOfIArathaelRed{},
+	ids.TremorOfIArathaelYellow: notimplemented.TremorOfIArathaelYellow{},
+	ids.TremorOfIArathaelBlue:   notimplemented.TremorOfIArathaelBlue{},
 
 	ids.TrotAlongBlue: cards.TrotAlongBlue{},
 
@@ -735,19 +737,19 @@ var cardsByID = []sim.Card{
 	ids.VigorRushYellow: cards.VigorRushYellow{},
 	ids.VigorRushBlue:   cards.VigorRushBlue{},
 
-	ids.VisitTheBlacksmithBlue: cards.VisitTheBlacksmithBlue{},
+	ids.VisitTheBlacksmithBlue: notimplemented.VisitTheBlacksmithBlue{},
 
-	ids.WageGoldRed:    cards.WageGoldRed{},
-	ids.WageGoldYellow: cards.WageGoldYellow{},
-	ids.WageGoldBlue:   cards.WageGoldBlue{},
+	ids.WageGoldRed:    notimplemented.WageGoldRed{},
+	ids.WageGoldYellow: notimplemented.WageGoldYellow{},
+	ids.WageGoldBlue:   notimplemented.WageGoldBlue{},
 
-	ids.WalkThePlankRed:    cards.WalkThePlankRed{},
-	ids.WalkThePlankYellow: cards.WalkThePlankYellow{},
-	ids.WalkThePlankBlue:   cards.WalkThePlankBlue{},
+	ids.WalkThePlankRed:    notimplemented.WalkThePlankRed{},
+	ids.WalkThePlankYellow: notimplemented.WalkThePlankYellow{},
+	ids.WalkThePlankBlue:   notimplemented.WalkThePlankBlue{},
 
-	ids.WarmongersRecitalRed:    cards.WarmongersRecitalRed{},
-	ids.WarmongersRecitalYellow: cards.WarmongersRecitalYellow{},
-	ids.WarmongersRecitalBlue:   cards.WarmongersRecitalBlue{},
+	ids.WarmongersRecitalRed:    notimplemented.WarmongersRecitalRed{},
+	ids.WarmongersRecitalYellow: notimplemented.WarmongersRecitalYellow{},
+	ids.WarmongersRecitalBlue:   notimplemented.WarmongersRecitalBlue{},
 
 	ids.WaterTheSeedsRed:    cards.WaterTheSeedsRed{},
 	ids.WaterTheSeedsYellow: cards.WaterTheSeedsYellow{},
@@ -765,13 +767,13 @@ var cardsByID = []sim.Card{
 	ids.WoundingBlowYellow: cards.WoundingBlowYellow{},
 	ids.WoundingBlowBlue:   cards.WoundingBlowBlue{},
 
-	ids.WreckHavocRed:    cards.WreckHavocRed{},
-	ids.WreckHavocYellow: cards.WreckHavocYellow{},
-	ids.WreckHavocBlue:   cards.WreckHavocBlue{},
+	ids.WreckHavocRed:    notimplemented.WreckHavocRed{},
+	ids.WreckHavocYellow: notimplemented.WreckHavocYellow{},
+	ids.WreckHavocBlue:   notimplemented.WreckHavocBlue{},
 
-	ids.YintiYantiRed:    cards.YintiYantiRed{},
-	ids.YintiYantiYellow: cards.YintiYantiYellow{},
-	ids.YintiYantiBlue:   cards.YintiYantiBlue{},
+	ids.YintiYantiRed:    notimplemented.YintiYantiRed{},
+	ids.YintiYantiYellow: notimplemented.YintiYantiYellow{},
+	ids.YintiYantiBlue:   notimplemented.YintiYantiBlue{},
 
 	ids.ZealousBeltingRed:    cards.ZealousBeltingRed{},
 	ids.ZealousBeltingYellow: cards.ZealousBeltingYellow{},

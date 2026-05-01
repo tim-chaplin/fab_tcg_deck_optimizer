@@ -1,8 +1,10 @@
-package cards
+package cards_test
 
 import (
 	"testing"
 
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/cards"
+	notimpl "github.com/tim-chaplin/fab-deck-optimizer/internal/cards/notimplemented"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 )
 
@@ -10,11 +12,11 @@ import (
 // self.FromArsenal is true.
 func TestFromArsenalGoAgain_GrantsOnArsenalCopyOnly(t *testing.T) {
 	cards := []sim.Card{
-		FerventForerunnerRed{}, FerventForerunnerYellow{}, FerventForerunnerBlue{},
-		FrontlineScoutRed{}, FrontlineScoutYellow{}, FrontlineScoutBlue{},
-		PerformanceBonusRed{}, PerformanceBonusYellow{}, PerformanceBonusBlue{},
-		PromiseOfPlentyRed{}, PromiseOfPlentyYellow{}, PromiseOfPlentyBlue{},
-		ScourTheBattlescapeRed{}, ScourTheBattlescapeYellow{}, ScourTheBattlescapeBlue{},
+		cards.FerventForerunnerRed{}, cards.FerventForerunnerYellow{}, cards.FerventForerunnerBlue{},
+		notimpl.FrontlineScoutRed{}, notimpl.FrontlineScoutYellow{}, notimpl.FrontlineScoutBlue{},
+		notimpl.PerformanceBonusRed{}, notimpl.PerformanceBonusYellow{}, notimpl.PerformanceBonusBlue{},
+		notimpl.PromiseOfPlentyRed{}, notimpl.PromiseOfPlentyYellow{}, notimpl.PromiseOfPlentyBlue{},
+		notimpl.ScourTheBattlescapeRed{}, notimpl.ScourTheBattlescapeYellow{}, notimpl.ScourTheBattlescapeBlue{},
 	}
 	for _, c := range cards {
 		hand := &sim.CardState{Card: c}

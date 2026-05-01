@@ -34,7 +34,7 @@ func (FiddlersGreenRed) Cost(*sim.TurnState) int { return 0 }
 func (FiddlersGreenRed) Pitch() int              { return 1 }
 func (FiddlersGreenRed) Attack() int             { return 0 }
 func (FiddlersGreenRed) Defense() int            { return 1 }
-func (FiddlersGreenRed) Types() card.TypeSet     { return defenseReactionTypes }
+func (FiddlersGreenRed) Types() card.TypeSet     { return DefenseReactionTypes }
 func (FiddlersGreenRed) GoAgain() bool           { return false }
 func (FiddlersGreenRed) NotSilverAgeLegal()      {}
 func (FiddlersGreenRed) Play(s *sim.TurnState, self *sim.CardState) {
@@ -49,7 +49,7 @@ func (FiddlersGreenYellow) Cost(*sim.TurnState) int { return 0 }
 func (FiddlersGreenYellow) Pitch() int              { return 2 }
 func (FiddlersGreenYellow) Attack() int             { return 0 }
 func (FiddlersGreenYellow) Defense() int            { return 1 }
-func (FiddlersGreenYellow) Types() card.TypeSet     { return defenseReactionTypes }
+func (FiddlersGreenYellow) Types() card.TypeSet     { return DefenseReactionTypes }
 func (FiddlersGreenYellow) GoAgain() bool           { return false }
 func (FiddlersGreenYellow) NotSilverAgeLegal()      {}
 func (FiddlersGreenYellow) Play(s *sim.TurnState, self *sim.CardState) {
@@ -64,7 +64,7 @@ func (FiddlersGreenBlue) Cost(*sim.TurnState) int { return 0 }
 func (FiddlersGreenBlue) Pitch() int              { return 3 }
 func (FiddlersGreenBlue) Attack() int             { return 0 }
 func (FiddlersGreenBlue) Defense() int            { return 1 }
-func (FiddlersGreenBlue) Types() card.TypeSet     { return defenseReactionTypes }
+func (FiddlersGreenBlue) Types() card.TypeSet     { return DefenseReactionTypes }
 func (FiddlersGreenBlue) GoAgain() bool           { return false }
 func (FiddlersGreenBlue) NotSilverAgeLegal()      {}
 func (FiddlersGreenBlue) Play(s *sim.TurnState, self *sim.CardState) {

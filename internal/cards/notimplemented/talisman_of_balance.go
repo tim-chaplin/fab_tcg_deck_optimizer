@@ -1,0 +1,30 @@
+// Talisman of Balance — Generic Action - Item. Cost 0. Printed pitch variants: Blue 3.
+//
+// Text: "**Go again** At the beginning of your end phase, if you have less cards in arsenal than an
+// opposing hero, destroy Talisman of Balance and put the top card of your deck into an empty
+// arsenal zone you control."
+
+package notimplemented
+
+import (
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+)
+
+var talismanOfBalanceTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeItem)
+
+type TalismanOfBalanceBlue struct{}
+
+func (TalismanOfBalanceBlue) ID() ids.CardID          { return ids.TalismanOfBalanceBlue }
+func (TalismanOfBalanceBlue) Name() string            { return "Talisman of Balance" }
+func (TalismanOfBalanceBlue) Cost(*sim.TurnState) int { return 0 }
+func (TalismanOfBalanceBlue) Pitch() int              { return 3 }
+func (TalismanOfBalanceBlue) Attack() int             { return 0 }
+func (TalismanOfBalanceBlue) Defense() int            { return 0 }
+func (TalismanOfBalanceBlue) Types() card.TypeSet     { return talismanOfBalanceTypes }
+func (TalismanOfBalanceBlue) GoAgain() bool           { return true }
+
+// not implemented: end-phase arsenal-fill from top of deck if behind on arsenal count
+func (TalismanOfBalanceBlue) NotImplemented()                            {}
+func (TalismanOfBalanceBlue) Play(s *sim.TurnState, self *sim.CardState) { s.Log(self, 0) }

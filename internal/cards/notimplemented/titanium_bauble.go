@@ -1,0 +1,26 @@
+// Titanium Bauble — Generic Resource. Cost 0. Printed pitch variants: Blue 3. Defense 3.
+
+package notimplemented
+
+import (
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+)
+
+var titaniumBaubleTypes = card.NewTypeSet(card.TypeGeneric)
+
+type TitaniumBaubleBlue struct{}
+
+func (TitaniumBaubleBlue) ID() ids.CardID          { return ids.TitaniumBaubleBlue }
+func (TitaniumBaubleBlue) Name() string            { return "Titanium Bauble" }
+func (TitaniumBaubleBlue) Cost(*sim.TurnState) int { return 0 }
+func (TitaniumBaubleBlue) Pitch() int              { return 3 }
+func (TitaniumBaubleBlue) Attack() int             { return 0 }
+func (TitaniumBaubleBlue) Defense() int            { return 3 }
+func (TitaniumBaubleBlue) Types() card.TypeSet     { return titaniumBaubleTypes }
+func (TitaniumBaubleBlue) GoAgain() bool           { return false }
+
+// not implemented: pitch-3 resource with 3{d}; no other effect
+func (TitaniumBaubleBlue) NotImplemented()                            {}
+func (TitaniumBaubleBlue) Play(s *sim.TurnState, self *sim.CardState) { s.Log(self, 0) }

@@ -8,7 +8,7 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 )
 
-var defenseReactionTypes = card.NewTypeSet(card.TypeGeneric, card.TypeDefenseReaction)
+var DefenseReactionTypes = card.NewTypeSet(card.TypeGeneric, card.TypeDefenseReaction)
 
 type DodgeBlue struct{}
 
@@ -18,7 +18,7 @@ func (DodgeBlue) Cost(*sim.TurnState) int { return 0 }
 func (DodgeBlue) Pitch() int              { return 3 }
 func (DodgeBlue) Attack() int             { return 0 }
 func (DodgeBlue) Defense() int            { return 2 }
-func (DodgeBlue) Types() card.TypeSet     { return defenseReactionTypes }
+func (DodgeBlue) Types() card.TypeSet     { return DefenseReactionTypes }
 func (DodgeBlue) GoAgain() bool           { return false }
 func (DodgeBlue) Play(s *sim.TurnState, self *sim.CardState) {
 	n := self.DealEffectiveDefense(s)
