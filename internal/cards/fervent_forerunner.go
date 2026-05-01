@@ -15,13 +15,15 @@ import (
 var ferventForerunnerTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeAttack)
 
 // ferventForerunnerPlay grants self Go again when this copy was played from arsenal,
-// emits the chain step, and credits the on-hit Opt 2 rider as a sub-line.
+// emits the chain step, and resolves the on-hit Opt 2 (gated on LikelyToHit).
 func ferventForerunnerPlay(s *sim.TurnState, self *sim.CardState) {
 	if self.FromArsenal {
 		self.GrantedGoAgain = true
 	}
 	s.ApplyAndLogEffectiveAttack(self)
-	s.ApplyAndLogRiderOnHit(self, "On-hit Opt 2", 2*sim.OptValue)
+	if sim.LikelyToHit(self) {
+		s.Opt(2)
+	}
 }
 
 type FerventForerunnerRed struct{}
@@ -34,6 +36,7 @@ func (FerventForerunnerRed) Attack() int             { return 3 }
 func (FerventForerunnerRed) Defense() int            { return 2 }
 func (FerventForerunnerRed) Types() card.TypeSet     { return ferventForerunnerTypes }
 func (FerventForerunnerRed) GoAgain() bool           { return false }
+func (FerventForerunnerRed) ConditionalGoAgain()     {}
 func (FerventForerunnerRed) Play(s *sim.TurnState, self *sim.CardState) {
 	ferventForerunnerPlay(s, self)
 }
@@ -48,6 +51,7 @@ func (FerventForerunnerYellow) Attack() int             { return 2 }
 func (FerventForerunnerYellow) Defense() int            { return 2 }
 func (FerventForerunnerYellow) Types() card.TypeSet     { return ferventForerunnerTypes }
 func (FerventForerunnerYellow) GoAgain() bool           { return false }
+func (FerventForerunnerYellow) ConditionalGoAgain()     {}
 func (FerventForerunnerYellow) Play(s *sim.TurnState, self *sim.CardState) {
 	ferventForerunnerPlay(s, self)
 }
@@ -62,6 +66,7 @@ func (FerventForerunnerBlue) Attack() int             { return 1 }
 func (FerventForerunnerBlue) Defense() int            { return 2 }
 func (FerventForerunnerBlue) Types() card.TypeSet     { return ferventForerunnerTypes }
 func (FerventForerunnerBlue) GoAgain() bool           { return false }
+func (FerventForerunnerBlue) ConditionalGoAgain()     {}
 func (FerventForerunnerBlue) Play(s *sim.TurnState, self *sim.CardState) {
 	ferventForerunnerPlay(s, self)
 }

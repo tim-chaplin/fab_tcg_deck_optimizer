@@ -30,5 +30,5 @@ func (ClarityPotionBlue) Types() card.TypeSet     { return clarityPotionTypes }
 func (ClarityPotionBlue) GoAgain() bool           { return false }
 func (ClarityPotionBlue) Play(s *sim.TurnState, self *sim.CardState) {
 	s.LogPlay(self)
-	s.ApplyAndLogRiderOnPlay(self, "Opt 2", 2*sim.OptValue)
+	s.Opt(2)
 }

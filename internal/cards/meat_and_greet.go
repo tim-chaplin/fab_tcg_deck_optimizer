@@ -71,3 +71,7 @@ func (MeatAndGreetBlue) GoAgain() bool           { return false }
 func (MeatAndGreetBlue) Play(s *sim.TurnState, self *sim.CardState) {
 	meatAndGreetPlay(s, self)
 }
+
+func (MeatAndGreetRed) ConditionalGoAgain()    {}
+func (MeatAndGreetYellow) ConditionalGoAgain() {}
+func (MeatAndGreetBlue) ConditionalGoAgain()   {}

@@ -17,10 +17,6 @@ const DiscardValue = 3
 // token is is one future card draw, at the expense of two resource.
 const GoldTokenValue = 0
 
-// OptValue is the damage-equivalent credited per card opted; callers multiply by N. Pure
-// deck-peek (look but don't reorder) is information-only and not covered by this constant.
-const OptValue = 1
-
 // LikelyToHit reports whether self's attack is likely to land past the opponent's blocks.
 // Folds self.EffectiveAttack() (printed Card.Attack() + any granted BonusAttack, clamped at
 // 0) and self.EffectiveDominate() (printed Dominator marker OR a granted Dominate flag) into

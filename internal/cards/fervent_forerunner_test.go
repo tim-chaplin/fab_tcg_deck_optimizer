@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
 )
 
 var ferventForerunnerVariants = []sim.Card{
@@ -24,9 +25,13 @@ func TestFerventForerunner_BaseGoAgainFalse(t *testing.T) {
 	}
 }
 
-// Tests that the on-hit Opt 2 rider fires only when EffectiveAttack lands in the LikelyToHit
-// window (1/4/7). Blue (printed power 1) hits, Red (3) and Yellow (2) miss.
-func TestFerventForerunner_OnHitOptCreditsOnlyWhenInHitWindow(t *testing.T) {
+// Tests that the on-hit Opt 2 fires only when EffectiveAttack lands in the 1/4/7 window.
+func TestFerventForerunner_OnHitOptFiresOnlyWhenInHitWindow(t *testing.T) {
+	prev := sim.CurrentHero
+	sim.CurrentHero = testutils.Hero{}
+	defer func() { sim.CurrentHero = prev }()
+
+	a, b := testutils.NewStubCard("a"), testutils.NewStubCard("b")
 	cases := []struct {
 		c       sim.Card
 		hitOpt  bool
@@ -37,29 +42,49 @@ func TestFerventForerunner_OnHitOptCreditsOnlyWhenInHitWindow(t *testing.T) {
 		{FerventForerunnerBlue{}, true, 1},
 	}
 	for _, tc := range cases {
-		var s sim.TurnState
-		tc.c.Play(&s, &sim.CardState{Card: tc.c})
-		want := tc.printed
-		note := "no Opt — printed power outside 1/4/7"
-		if tc.hitOpt {
-			want += 2 * sim.OptValue
-			note = "on-hit Opt 2"
+		s := sim.NewTurnState([]sim.Card{a, b}, nil)
+		tc.c.Play(s, &sim.CardState{Card: tc.c})
+		if s.Value != tc.printed {
+			t.Errorf("%s: Play() Value = %d, want %d (printed power)",
+				tc.c.Name(), s.Value, tc.printed)
 		}
-		if s.Value != want {
-			t.Errorf("%s: Play() Value = %d, want %d (printed %d + %s)",
-				tc.c.Name(), s.Value, want, tc.printed, note)
+		wantLogLen := 1
+		if tc.hitOpt {
+			wantLogLen = 2
+		}
+		if len(s.Log) != wantLogLen {
+			t.Errorf("%s: Log len = %d, want %d", tc.c.Name(), len(s.Log), wantLogLen)
+			continue
+		}
+		if tc.hitOpt {
+			want := "Opted [a, b], put [a, b] on top, put [] on bottom"
+			if got := s.Log[1].Text; got != want {
+				t.Errorf("%s: Opt log entry = %q, want %q", tc.c.Name(), got, want)
+			}
 		}
 	}
 }
 
-// Tests that a +1{p} grant (e.g. from a prior Force Sight) bumps Red's effective power into
-// the 1/4/7 hit window, firing the on-hit Opt 2 rider.
+// Tests that a +1{p} grant bumps Red's effective power into the 1/4/7 hit window, firing
+// the on-hit Opt 2.
 func TestFerventForerunner_OnHitOptFiresWithBonusAttackInWindow(t *testing.T) {
+	prev := sim.CurrentHero
+	sim.CurrentHero = testutils.Hero{}
+	defer func() { sim.CurrentHero = prev }()
+
+	a, b := testutils.NewStubCard("a"), testutils.NewStubCard("b")
 	c := FerventForerunnerRed{}
-	var s sim.TurnState
-	c.Play(&s, &sim.CardState{Card: c, BonusAttack: 1})
-	want := 3 + 1 + 2*sim.OptValue
+	s := sim.NewTurnState([]sim.Card{a, b}, nil)
+	c.Play(s, &sim.CardState{Card: c, BonusAttack: 1})
+	want := 3 + 1
 	if s.Value != want {
-		t.Errorf("Play() Value = %d, want %d (3 printed + 1 BonusAttack + Opt 2 on hit)", s.Value, want)
+		t.Errorf("Play() Value = %d, want %d (3 printed + 1 BonusAttack)", s.Value, want)
+	}
+	if len(s.Log) != 2 {
+		t.Fatalf("Log len = %d, want 2 (chain step + Opted ...)", len(s.Log))
+	}
+	wantOpt := "Opted [a, b], put [a, b] on top, put [] on bottom"
+	if got := s.Log[1].Text; got != wantOpt {
+		t.Errorf("Opt log entry = %q, want %q", got, wantOpt)
 	}
 }

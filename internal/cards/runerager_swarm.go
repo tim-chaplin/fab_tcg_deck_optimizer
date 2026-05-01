@@ -62,3 +62,7 @@ func runeragerSwarmPlay(s *sim.TurnState, self *sim.CardState) {
 	}
 	s.ApplyAndLogEffectiveAttack(self)
 }
+
+func (RuneragerSwarmRed) ConditionalGoAgain()    {}
+func (RuneragerSwarmYellow) ConditionalGoAgain() {}
+func (RuneragerSwarmBlue) ConditionalGoAgain()   {}

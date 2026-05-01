@@ -333,6 +333,8 @@ type StubCard struct {
 	name    string
 	types   card.TypeSet
 	attack  int
+	pitch   int
+	defense int
 	goAgain bool
 }
 
@@ -349,15 +351,21 @@ func (c StubCard) WithTypes(t card.TypeSet) StubCard { c.types = t; return c }
 // WithAttack returns a copy of c with the printed attack value set.
 func (c StubCard) WithAttack(a int) StubCard { c.attack = a; return c }
 
+// WithPitch returns a copy of c with the printed pitch value set (1=red, 2=yellow, 3=blue).
+func (c StubCard) WithPitch(p int) StubCard { c.pitch = p; return c }
+
+// WithDefense returns a copy of c with the printed defense value set.
+func (c StubCard) WithDefense(d int) StubCard { c.defense = d; return c }
+
 // WithGoAgain returns a copy of c with goAgain=true.
 func (c StubCard) WithGoAgain() StubCard { c.goAgain = true; return c }
 
 func (c StubCard) ID() ids.CardID                    { return c.id }
 func (c StubCard) Name() string                      { return c.name }
 func (StubCard) Cost(*sim.TurnState) int             { return 0 }
-func (StubCard) Pitch() int                          { return 0 }
+func (c StubCard) Pitch() int                        { return c.pitch }
 func (c StubCard) Attack() int                       { return c.attack }
-func (StubCard) Defense() int                        { return 0 }
+func (c StubCard) Defense() int                      { return c.defense }
 func (c StubCard) Types() card.TypeSet               { return c.types }
 func (c StubCard) GoAgain() bool                     { return c.goAgain }
 func (StubCard) Play(*sim.TurnState, *sim.CardState) {}

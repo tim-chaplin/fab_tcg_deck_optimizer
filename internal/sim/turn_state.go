@@ -2,6 +2,8 @@ package sim
 
 import (
 	"fmt"
+	"strings"
+
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 )
 
@@ -234,6 +236,96 @@ func (s *TurnState) PrependToDeck(c Card) {
 	newDeck = append(newDeck, c)
 	newDeck = append(newDeck, s.deck...)
 	s.deck = newDeck
+}
+
+// Opt resolves the FaB "Opt N" keyword: pops up to n cards from the top of the deck and
+// hands them to the current hero's Opt heuristic. The handler returns a (top, bottom)
+// split; the top list is placed back on top of the deck (in returned order) and the
+// bottom list appends to the bottom of the deck (in returned order). n is clamped to the
+// current deck length, so an Opt N call against a shorter deck reshapes whatever's there
+// without error. Always flips IsCacheable to false — Opt always reads the deck, so the
+// chain becomes uncacheable regardless of whether n is positive or whether any cards
+// were available.
+//
+// Emits a log entry "Opted X, put Y on top, put Z on bottom" naming the revealed cards
+// and the chosen split when the handler ran (no-op paths skip the log to keep the trace
+// quiet on degenerate cases).
+//
+// Panics if the handler's combined output isn't exactly the input multiset. The contract
+// is that Opt only re-orders cards; adding, dropping, or substituting any card is a bug.
+//
+// Allocates a fresh deck backing slice so the per-leaf deck reference shared across
+// permutations stays untouched (same convention as PrependToDeck / TutorFromDeck).
+func (s *TurnState) Opt(n int) {
+	s.cacheable = false
+	if n <= 0 || len(s.deck) == 0 {
+		return
+	}
+	if n > len(s.deck) {
+		n = len(s.deck)
+	}
+	// Copy off the popped slice so the handler can't mutate s.deck through aliasing.
+	cards := append([]Card(nil), s.deck[:n]...)
+	rest := s.deck[n:]
+
+	top, bottom := CurrentHero.Opt(cards)
+	panicIfOptViolatesMultiset(cards, top, bottom)
+
+	newDeck := make([]Card, 0, len(top)+len(rest)+len(bottom))
+	newDeck = append(newDeck, top...)
+	newDeck = append(newDeck, rest...)
+	newDeck = append(newDeck, bottom...)
+	s.deck = newDeck
+
+	s.AddLogEntry(fmt.Sprintf("Opted %s, put %s on top, put %s on bottom",
+		formatCardList(cards), formatCardList(top), formatCardList(bottom)), 0)
+}
+
+// formatCardList renders cs as "[name1, name2, ...]" using DisplayName for each entry, or
+// "[]" when cs is empty. Used by the Opt log entry so an empty top / bottom list shows up
+// as a clear no-cards token rather than blank.
+func formatCardList(cs []Card) string {
+	if len(cs) == 0 {
+		return "[]"
+	}
+	parts := make([]string, len(cs))
+	for i, c := range cs {
+		parts[i] = DisplayName(c)
+	}
+	return "[" + strings.Join(parts, ", ") + "]"
+}
+
+// panicIfOptViolatesMultiset enforces TurnState.Opt's contract that the hero handler's
+// combined (top, bottom) output is exactly the input multiset — a permutation of the
+// input cards, no additions or removals. Panics with a descriptive message naming the
+// failure mode (size mismatch, foreign card, or dropped card). Cards are zero-sized
+// structs in production and small POD structs in tests; both flavours are usable as
+// map keys for the multiset count.
+func panicIfOptViolatesMultiset(in, top, bottom []Card) {
+	if len(top)+len(bottom) != len(in) {
+		panic(fmt.Sprintf("Opt: handler returned %d+%d cards, want %d (input multiset)",
+			len(top), len(bottom), len(in)))
+	}
+	counts := make(map[Card]int, len(in))
+	for _, c := range in {
+		counts[c]++
+	}
+	check := func(out []Card, label string) {
+		for _, c := range out {
+			counts[c]--
+			if counts[c] < 0 {
+				panic(fmt.Sprintf("Opt: %s list returned card %s not in input",
+					label, DisplayName(c)))
+			}
+		}
+	}
+	check(top, "top")
+	check(bottom, "bottom")
+	for c, n := range counts {
+		if n != 0 {
+			panic(fmt.Sprintf("Opt: handler dropped %d copy of %s from input", n, DisplayName(c)))
+		}
+	}
 }
 
 // TutorFromDeck removes and returns the highest-scoring card per score. Returns (nil,

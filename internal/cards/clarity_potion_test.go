@@ -4,15 +4,27 @@ import (
 	"testing"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
 )
 
-// Tests that Clarity Potion's Play credits Opt 2 (treating the activated ability as
-// always activated on the same turn).
-func TestClarityPotion_PlayCreditsOpt2(t *testing.T) {
+// Tests that Clarity Potion's Play emits a LogPlay step and an Opt 2 log entry.
+func TestClarityPotion_PlayCallsOpt2(t *testing.T) {
+	a, b := testutils.NewStubCard("a"), testutils.NewStubCard("b")
+	prev := sim.CurrentHero
+	sim.CurrentHero = testutils.Hero{}
+	defer func() { sim.CurrentHero = prev }()
+
 	c := ClarityPotionBlue{}
-	var s sim.TurnState
-	c.Play(&s, &sim.CardState{Card: c})
-	if want := 2 * sim.OptValue; s.Value != want {
-		t.Errorf("Play() Value = %d, want %d", s.Value, want)
+	s := sim.NewTurnState([]sim.Card{a, b}, nil)
+	c.Play(s, &sim.CardState{Card: c})
+	if s.Value != 0 {
+		t.Errorf("Play() Value = %d, want 0", s.Value)
+	}
+	if len(s.Log) != 2 {
+		t.Fatalf("Log len = %d, want 2 (LogPlay + Opted ...)", len(s.Log))
+	}
+	want := "Opted [a, b], put [a, b] on top, put [] on bottom"
+	if got := s.Log[1].Text; got != want {
+		t.Errorf("Opt log entry = %q, want %q", got, want)
 	}
 }

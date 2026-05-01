@@ -51,24 +51,47 @@ func TestForceSight_NextAttackReturnsBonus(t *testing.T) {
 	}
 }
 
-// Tests that Force Sight from hand doesn't fire the Opt 2 rider (arsenal gate fails).
-func TestForceSight_HandPlayDropsOpt(t *testing.T) {
+// Tests that Force Sight played from hand skips the arsenal-gated Opt.
+func TestForceSight_HandPlaySkipsOpt(t *testing.T) {
+	prev := sim.CurrentHero
+	sim.CurrentHero = testutils.Hero{}
+	defer func() { sim.CurrentHero = prev }()
+
+	a, b := testutils.NewStubCard("a"), testutils.NewStubCard("b")
 	for _, c := range []sim.Card{ForceSightRed{}, ForceSightYellow{}, ForceSightBlue{}} {
-		var s sim.TurnState
-		c.Play(&s, &sim.CardState{Card: c})
+		s := sim.NewTurnState([]sim.Card{a, b}, nil)
+		c.Play(s, &sim.CardState{Card: c})
 		if s.Value != 0 {
-			t.Errorf("%s: Play() from hand Value = %d, want 0 (Opt gated on arsenal)", c.Name(), s.Value)
+			t.Errorf("%s: Play() from hand Value = %d, want 0", c.Name(), s.Value)
+		}
+		// Just the LogPlay chain step, no Opt sub-entry.
+		if len(s.Log) != 1 {
+			t.Errorf("%s: Log len = %d, want 1 (LogPlay only — Opt arsenal-gated)",
+				c.Name(), len(s.Log))
 		}
 	}
 }
 
-// Tests that Force Sight played from arsenal credits the Opt 2 rider on every variant.
-func TestForceSight_ArsenalPlayCreditsOpt2(t *testing.T) {
+// Tests that Force Sight played from arsenal emits an Opt 2 log entry after LogPlay.
+func TestForceSight_ArsenalPlayCallsOpt2(t *testing.T) {
+	prev := sim.CurrentHero
+	sim.CurrentHero = testutils.Hero{}
+	defer func() { sim.CurrentHero = prev }()
+
+	a, b := testutils.NewStubCard("a"), testutils.NewStubCard("b")
 	for _, c := range []sim.Card{ForceSightRed{}, ForceSightYellow{}, ForceSightBlue{}} {
-		var s sim.TurnState
-		c.Play(&s, &sim.CardState{Card: c, FromArsenal: true})
-		if want := 2 * sim.OptValue; s.Value != want {
-			t.Errorf("%s: Play() from arsenal Value = %d, want %d", c.Name(), s.Value, want)
+		s := sim.NewTurnState([]sim.Card{a, b}, nil)
+		c.Play(s, &sim.CardState{Card: c, FromArsenal: true})
+		if s.Value != 0 {
+			t.Errorf("%s: Play() from arsenal Value = %d, want 0", c.Name(), s.Value)
+		}
+		if len(s.Log) != 2 {
+			t.Errorf("%s: Log len = %d, want 2 (LogPlay + Opted ...)", c.Name(), len(s.Log))
+			continue
+		}
+		want := "Opted [a, b], put [a, b] on top, put [] on bottom"
+		if got := s.Log[1].Text; got != want {
+			t.Errorf("%s: Opt log entry = %q, want %q", c.Name(), got, want)
 		}
 	}
 }

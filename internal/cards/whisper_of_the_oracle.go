@@ -15,7 +15,7 @@ var whisperOfTheOracleTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction)
 
 func whisperOfTheOraclePlay(s *sim.TurnState, self *sim.CardState) {
 	s.LogPlay(self)
-	s.ApplyAndLogRiderOnPlay(self, "Opt 4", 4*sim.OptValue)
+	s.Opt(4)
 }
 
 type WhisperOfTheOracleRed struct{}
