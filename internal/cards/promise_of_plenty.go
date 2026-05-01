@@ -21,9 +21,7 @@ var promiseOfPlentyTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, ca
 // promiseOfPlentyPlay grants self Go again when this copy was played from arsenal, then
 // emits the chain step.
 func promiseOfPlentyPlay(s *sim.TurnState, self *sim.CardState) {
-	if self.FromArsenal {
-		self.GrantedGoAgain = true
-	}
+	self.GrantGoAgainIfFromArsenal()
 	s.ApplyAndLogEffectiveAttack(self)
 }
 

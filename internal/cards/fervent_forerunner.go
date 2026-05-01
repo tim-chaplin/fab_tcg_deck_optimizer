@@ -17,9 +17,7 @@ var ferventForerunnerTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, 
 // ferventForerunnerPlay grants self Go again when this copy was played from arsenal,
 // emits the chain step, and resolves the on-hit Opt 2 (gated on LikelyToHit).
 func ferventForerunnerPlay(s *sim.TurnState, self *sim.CardState) {
-	if self.FromArsenal {
-		self.GrantedGoAgain = true
-	}
+	self.GrantGoAgainIfFromArsenal()
 	s.ApplyAndLogEffectiveAttack(self)
 	if sim.LikelyToHit(self) {
 		s.Opt(2)

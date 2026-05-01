@@ -66,6 +66,18 @@ func (p *CardState) EffectiveGoAgain() bool {
 	return p.Card.GoAgain() || p.GrantedGoAgain
 }
 
+// GrantGoAgainIfFromArsenal flips p.GrantedGoAgain when this copy came from the arsenal
+// slot (p.FromArsenal). Names the standard "played-from-arsenal go again" rider — see the
+// docs/dev-standards.md "Played-from-arsenal go-again" entry — so card Play bodies don't
+// need to spell out the three-line if. No-op when FromArsenal is false; safe to call
+// unconditionally at the top of any Play whose printed text reads "If <Self> is played
+// from arsenal, it gains go again."
+func (p *CardState) GrantGoAgainIfFromArsenal() {
+	if p.FromArsenal {
+		p.GrantedGoAgain = true
+	}
+}
+
 // EffectiveDominate reports whether this card attacks with Dominate this turn — from its
 // printed Dominator marker or a grant flipping GrantedDominate (either by a prior card or by
 // this card's own Play when a conditional "gains dominate" clause fires).

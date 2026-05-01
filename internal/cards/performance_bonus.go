@@ -21,9 +21,7 @@ var performanceBonusTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, c
 // the chain step, then writes the on-hit Gold-token rider as a sub-line when LikelyToHit
 // fires.
 func performanceBonusPlay(s *sim.TurnState, self *sim.CardState) {
-	if self.FromArsenal {
-		self.GrantedGoAgain = true
-	}
+	self.GrantGoAgainIfFromArsenal()
 	s.ApplyAndLogEffectiveAttack(self)
 	s.ApplyAndLogRiderOnHit(self, "On-hit created a gold token", sim.GoldTokenValue)
 }
