@@ -123,10 +123,9 @@ func (s *SequenceContextForTest) Bufs() *AttackBufs { return s.ctx.bufs }
 
 // State / DefenseGravScratch / DRCardStateScratch expose the unexported attackBufs fields
 // the sim_test files probe for chain-state assertions.
-func (b *attackBufs) State() *TurnState                    { return b.state }
-func (b *attackBufs) DefenseGravScratch() []Card           { return b.defenseGravScratch }
-func (b *attackBufs) SetDefenseGravScratch(scratch []Card) { b.defenseGravScratch = scratch }
-func (b *attackBufs) DRCardStateScratch() *CardState       { return &b.drCardStateScratch }
+func (b *attackBufs) State() *TurnState              { return b.state }
+func (b *attackBufs) DefenseGravScratch() []Card     { return b.defenseGravScratch }
+func (b *attackBufs) DRCardStateScratch() *CardState { return &b.drCardStateScratch }
 
 // LegalPool re-exports legalPool for sim_test consumers.
 func LegalPool(legal func(Card) bool) []ids.CardID { return legalPool(legal) }

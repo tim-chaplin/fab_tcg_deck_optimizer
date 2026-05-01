@@ -2,7 +2,7 @@
 // multiple packages (card, cards, deck, hand, sim). The configurable Card stub framework
 // (Card, GenericAttack, RunebladeAttack, …) builds CardsRemaining / CardsPlayed / Pitched
 // lists with specific type, cost, power, and pitch shapes so predicate / lookahead tests
-// have predictable inputs. The fixed-stat-line fakes (RedAttack, BlueAttack, DrawCantrip,
+// have predictable inputs. The fixed-stat-line fakes (RedAttack, BlueAttack, YellowAttack,
 // …) are deliberately simple attack actions tests use as deck contents when partition /
 // ordering assertions need known optimal values.
 package testutils
@@ -231,24 +231,6 @@ func (YellowAttack) Defense() int                               { return 2 }
 func (YellowAttack) Types() card.TypeSet                        { return genericAttackTypes }
 func (YellowAttack) GoAgain() bool                              { return true }
 func (YellowAttack) Play(s *sim.TurnState, self *sim.CardState) { s.ApplyAndLogEffectiveAttack(self) }
-
-// DrawCantrip is a generic free-cycling attack: cost 0, pitches 1, attacks 1, go again, and
-// fires DrawOne on play. Used by tests to exercise mid-turn-draw chains that extend themselves
-// (each cantrip plays, draws the next one, which plays, etc.).
-type DrawCantrip struct{}
-
-func (DrawCantrip) ID() ids.CardID          { return FakeDrawCantrip }
-func (DrawCantrip) Name() string            { return "cardtest.DrawCantrip" }
-func (DrawCantrip) Cost(*sim.TurnState) int { return 0 }
-func (DrawCantrip) Pitch() int              { return 1 }
-func (DrawCantrip) Attack() int             { return 1 }
-func (DrawCantrip) Defense() int            { return 0 }
-func (DrawCantrip) Types() card.TypeSet     { return genericAttackTypes }
-func (DrawCantrip) GoAgain() bool           { return true }
-func (c DrawCantrip) Play(s *sim.TurnState, self *sim.CardState) {
-	s.DrawOne()
-	s.ApplyAndLogEffectiveAttack(self)
-}
 
 // genericActionTypes is a plain non-attack action (no Attack subtype). Used by CostlyDraw — a
 // draw-a-card action card. It isn't a Defense Reaction so it can't be played on the opponent's

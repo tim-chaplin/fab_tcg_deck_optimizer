@@ -55,10 +55,3 @@ func TestAdaptive_RoundsToConverge(t *testing.T) {
 		t.Logf("viserai_v4 (annealed): Runs=%d, mean=%.4f", stats.Runs, stats.Mean())
 	}
 }
-
-func plural(n int) string {
-	if n == 1 {
-		return ""
-	}
-	return "s"
-}
