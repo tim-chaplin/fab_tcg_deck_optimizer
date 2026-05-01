@@ -70,39 +70,11 @@ func Unmarshal(text string) (*sim.Deck, map[string]int, error) {
 		}
 		switch section {
 		case "arena":
-			if w, ok := registry.WeaponByName(name); ok {
-				for i := 0; i < qty; i++ {
-					weapons = append(weapons, w)
-				}
-				continue
-			}
-			// Non-weapon arena lines are equipment (head, chest, arms, legs) — stored as raw
-			// names since the optimizer doesn't model them. The fabrary-case suffix isn't
-			// stripped: equipment items don't carry pitch colors.
-			for i := 0; i < qty; i++ {
-				equipment = append(equipment, name)
-			}
+			weapons, equipment = appendArenaEntry(weapons, equipment, name, qty)
 		case "deck":
-			canon := fromFabraryCardName(name)
-			id, ok := registry.CardByName(canon)
-			if !ok {
-				skipped[canon] += qty
-				continue
-			}
-			c := registry.GetCard(id)
-			for i := 0; i < qty; i++ {
-				cardList = append(cardList, c)
-			}
+			cardList = appendDeckEntry(cardList, skipped, name, qty)
 		case "sideboard":
-			// Sideboard is a name-only list the sim doesn't touch, so there's no registry
-			// lookup — any card or equipment piece the user lists comes back verbatim.
-			// fromFabraryCardName maps the lowercase pitch suffix back to the canonical
-			// "[R]" form; names without a recognized suffix (e.g. equipment pieces like
-			// "Crown of Dichotomy") pass through unchanged.
-			canon := fromFabraryCardName(name)
-			for i := 0; i < qty; i++ {
-				sideboard = append(sideboard, canon)
-			}
+			sideboard = appendSideboardEntry(sideboard, name, qty)
 		}
 	}
 	if err := sc.Err(); err != nil {
@@ -145,4 +117,53 @@ func trimHeader(line, prefix string) (string, bool) {
 // lines so pastes with the footer still round-trip cleanly.
 func isFooter(line string) bool {
 	return strings.HasPrefix(line, "Made with") || strings.HasPrefix(line, "See the full deck")
+}
+
+// appendArenaEntry routes one arena-section line. Weapons land in the weapons slice; everything
+// else lands in the equipment slice as a raw name (the optimizer doesn't model head / chest /
+// arms / legs gear). Returns the (possibly grown) weapons and equipment slices.
+func appendArenaEntry(weapons []sim.Weapon, equipment []string, name string, qty int) ([]sim.Weapon, []string) {
+	if w, ok := registry.WeaponByName(name); ok {
+		for i := 0; i < qty; i++ {
+			weapons = append(weapons, w)
+		}
+		return weapons, equipment
+	}
+	// Non-weapon arena lines are equipment (head, chest, arms, legs) — stored as raw names
+	// since the optimizer doesn't model them. The fabrary-case suffix isn't stripped:
+	// equipment items don't carry pitch colors.
+	for i := 0; i < qty; i++ {
+		equipment = append(equipment, name)
+	}
+	return weapons, equipment
+}
+
+// appendDeckEntry routes one deck-section line. Names canonicalised through
+// fromFabraryCardName; unknown names accumulate into the skipped map (mutated in place) so
+// the caller can surface them. Returns the (possibly grown) cardList slice.
+func appendDeckEntry(cardList []sim.Card, skipped map[string]int, name string, qty int) []sim.Card {
+	canon := fromFabraryCardName(name)
+	id, ok := registry.CardByName(canon)
+	if !ok {
+		skipped[canon] += qty
+		return cardList
+	}
+	c := registry.GetCard(id)
+	for i := 0; i < qty; i++ {
+		cardList = append(cardList, c)
+	}
+	return cardList
+}
+
+// appendSideboardEntry routes one sideboard line. Sideboard is a name-only list the sim
+// doesn't touch, so there's no registry lookup — any card or equipment piece the user lists
+// comes back verbatim. fromFabraryCardName maps the lowercase pitch suffix back to the
+// canonical "[R]" form; names without a recognized suffix (e.g. equipment pieces like
+// "Crown of Dichotomy") pass through unchanged.
+func appendSideboardEntry(sideboard []string, name string, qty int) []string {
+	canon := fromFabraryCardName(name)
+	for i := 0; i < qty; i++ {
+		sideboard = append(sideboard, canon)
+	}
+	return sideboard
 }
