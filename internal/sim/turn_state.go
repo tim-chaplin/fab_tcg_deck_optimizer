@@ -298,6 +298,10 @@ func (s *TurnState) Opt(n int) {
 	newDeck = append(newDeck, bottom...)
 	s.deck = newDeck
 
+	if OptDebug {
+		fmt.Printf("Opt(%d): cards=%s -> top=%s bottom=%s\n",
+			n, formatCardList(cards), formatCardList(top), formatCardList(bottom))
+	}
 	if s.skipLog {
 		return
 	}

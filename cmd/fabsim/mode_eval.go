@@ -29,7 +29,7 @@ func runEvalCmd(args []string) {
 	maxCopies := fs.Int("max-copies", defaultMaxCopies, "maximum copies of any single card printing per deck, applied when replacing NotImplemented cards in the loaded deck")
 	printOnly := fs.Bool("print-only", false, "load the deck and print the stats from the last run without simulating or rewriting the on-disk .json / .txt")
 	brief := fs.Bool("brief", false, "print only the score summary (no card list, per-card stats, or best turn)")
-	debug := fs.Bool("debug", false, "print extra telemetry to stderr after the run — currently the hand-eval cache hit rate")
+	debug := fs.Bool("debug", false, "print extra telemetry: hand-eval cache hit rate to stderr after the run, plus every Opt() outcome to stdout as it fires")
 	_ = parseFlagsAnywhere(fs, args)
 	if fs.NArg() != 1 {
 		die("eval: need exactly one positional <deck> (got %d); try `fabsim eval <deck>`", fs.NArg())
@@ -41,6 +41,7 @@ func runEvalCmd(args []string) {
 	if err != nil {
 		die("%v", err)
 	}
+	sim.OptDebug = *debug
 	runEval(resolveDeckPath(fs.Arg(0)), *shuffles, sim.Matchup{IncomingDamage: *incoming, ArcaneIncomingDamage: *arcaneIncoming}, *maxCopies, *seed, fmtValue, *printOnly, *brief, *debug)
 }
 
