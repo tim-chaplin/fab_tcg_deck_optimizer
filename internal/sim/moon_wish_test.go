@@ -9,12 +9,10 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
 )
 
-// Moon Wish's printed text shuffles the deck after the on-hit Sun Kiss tutor; assertions
-// here therefore avoid pinning specific deck positions or which card lands in arsenal off a
-// post-tutor DrawOne (those are random per the printed shuffle even though our model
-// currently skips it). The valid checks are: Value, the surviving copy count of each card
-// across the start-of-next-turn surfaces (Hand + Deck + Arsenal), and which BestLine roles
-// got assigned.
+// Moon Wish's printed text shuffles the deck after the on-hit Sun Kiss tutor, so assertions
+// here avoid pinning specific deck positions or which card lands in arsenal off a post-tutor
+// DrawOne. Valid checks: Value, total copies of each card across next-turn Hand/Deck/Arsenal,
+// and which BestLine roles got assigned.
 
 // TestEvalOneTurn_MoonWishAltCostTutorsSunKissAndConsumesDeck is the canonical
 // no-go-again scenario for Moon Wish run end-to-end through one turn:
@@ -148,10 +146,8 @@ func TestEvalOneTurn_MoonWishWithFlyingHighPlaysTutoredSunKiss(t *testing.T) {
 	}
 }
 
-// countAcrossSurfaces totals the occurrences of id across the start-of-next-turn Hand,
-// Deck, and Arsenal — the surfaces TurnStartState exposes. Used by tests that need to assert
-// "this card exists / doesn't exist" without pinning a specific position (positions are
-// randomised by Moon Wish's printed-shuffle, even when our current model skips it).
+// countAcrossSurfaces totals occurrences of id across the start-of-next-turn Hand, Deck, and
+// Arsenal. Asserts "exists / doesn't exist" without pinning a specific position.
 func countAcrossSurfaces(state TurnStartState, id ids.CardID) int {
 	n := 0
 	for _, c := range state.StartOfNextTurnHand {

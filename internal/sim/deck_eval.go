@@ -605,51 +605,40 @@ func dealNextHand(buf, handBuf, heldBuf []Card, head, tail *int, handSize int) (
 	return h, drawCount, true
 }
 
-// TurnStartState bundles the result of EvalOneTurnForTesting: a description of what happened
-// during the turn under test (Value, BestLine, Graveyard) plus the game state at the start of
-// the next turn (StartOfNextTurn*) so cross-turn effects like AuraTrigger handoff can be
-// asserted without running a second turn to completion.
+// TurnStartState is the result of EvalOneTurnForTesting: the tested turn's outcome (Value,
+// BestLine, Graveyard) plus the start-of-next-turn state (StartOfNextTurn*) so cross-turn
+// effects can be asserted without simulating the next turn.
 type TurnStartState struct {
-	// Value is the total Value (damage dealt + damage prevented) the tested turn produced —
-	// the same number Best reports as TurnSummary.Value for that turn.
+	// Value is the tested turn's TurnSummary.Value (damage dealt + damage prevented).
 	Value int
-	// BestLine is the winning role assignment from the tested turn, so tests can assert which
-	// card took which role.
+	// BestLine is the winning role assignment from the tested turn.
 	BestLine []CardAssignment
-	// Graveyard is the cards that ended up in the graveyard at the end of the tested turn, in
-	// the order they landed there. Sourced from TurnSummary.Graveyard so tests can
-	// distinguish "this card is in the graveyard" from "this card is just absent from the
-	// next-turn surfaces."
+	// Graveyard is the cards in the graveyard at end of the tested turn, in landing order.
+	// Distinguishes "in graveyard" from "absent from next-turn surfaces".
 	Graveyard []Card
-	// StartOfNextTurnHand is the hand just dealt for the turn after the tested turn.
+	// StartOfNextTurnHand is the hand dealt for the turn after the tested turn.
 	StartOfNextTurnHand []Card
 	// StartOfNextTurnArsenal is the card in the arsenal slot at the start of the next turn.
 	StartOfNextTurnArsenal Card
-	// StartOfNextTurnDeck is the cards still to be drawn at the start of the next turn,
-	// top-to-bottom.
+	// StartOfNextTurnDeck is the remaining deck at the start of the next turn, top-to-bottom.
 	StartOfNextTurnDeck []Card
-	// StartOfNextTurnRunechants is the live Runechant count at the start of the next turn —
-	// leftover from the tested turn's attack chain plus any tokens freshly created by
-	// start-of-next-turn AuraTrigger handlers.
+	// StartOfNextTurnRunechants is the live Runechant count at the start of the next turn:
+	// chain leftover plus tokens created by next-turn start-of-turn AuraTrigger handlers.
 	StartOfNextTurnRunechants int
-	// StartOfNextTurnTriggerDamage is the damage-equivalent credited by the next turn's
-	// start-of-turn AuraTrigger handlers — triggers registered during the tested turn that
-	// fired at the top of the next turn. Zero when no trigger survived into the pass.
-	// Production callers fold this into the next turn's Value; exposed here so tests can
-	// assert the cross-turn credit without running the next turn to completion.
+	// StartOfNextTurnTriggerDamage is the damage credited by the next turn's start-of-turn
+	// AuraTrigger handlers (triggers registered this turn that fired at the top of next).
+	// Zero when no trigger survived. Production folds this into next turn's Value.
 	StartOfNextTurnTriggerDamage int
 	// StartOfNextTurnGraveyard is the auras destroyed during the next turn's start-of-turn
 	// AuraTrigger pass, in destroy order.
 	StartOfNextTurnGraveyard []Card
 }
 
-// EvalOneTurnForTesting runs one turn against d.Cards in source order (no shuffle) and
-// returns a description of that turn (Value, BestLine, Graveyard) plus the start-of-next-
-// turn state (StartOfNextTurnHand, StartOfNextTurnArsenal, StartOfNextTurnDeck, etc.).
-// arsenalIn seeds turn 1's arsenal slot (nil for empty). initialHand sets turn 1's starting
-// hand; nil takes d.Cards[:handSize] as the hand and treats the rest as the deck, non-nil
-// uses the slice directly (may be shorter than handSize) and treats d.Cards as the deck
-// entirely. Test-only — production callers use Evaluate, which shuffles and loops.
+// EvalOneTurnForTesting runs one turn against d.Cards in source order (no shuffle) and returns
+// the tested turn's outcome plus the start-of-next-turn state. arsenalIn seeds turn 1's arsenal
+// slot (nil for empty). initialHand sets turn 1's starting hand; nil takes d.Cards[:handSize] as
+// the hand and treats the rest as the deck, non-nil uses the slice directly (may be shorter than
+// handSize) and treats d.Cards as the deck entirely. Test-only — production callers use Evaluate.
 func (d *Deck) EvalOneTurnForTesting(incomingDamage int, arsenalIn Card, initialHand []Card) TurnStartState {
 	CurrentHero = d.Hero
 	handSize := d.Hero.Intelligence()
