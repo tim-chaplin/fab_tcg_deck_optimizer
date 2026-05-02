@@ -78,7 +78,7 @@ func runAnnealCmd(args []string) {
 	maxCopies := fs.Int("max-copies", defaultMaxCopies, "maximum copies of any single card printing per deck")
 	seed := fs.Int64("seed", time.Now().UnixNano(), "RNG seed")
 	formatFlag := fs.String("format", string(deckformat.SilverAge), "constructed format whose banlist restricts the card pool during search (only \"silver_age\" is supported today)")
-	debug := fs.Bool("debug", false, "force per-round logs even when annealing is on (T>0 normally hides them); also prints every Opt() outcome to stdout as it fires")
+	debug := fs.Bool("debug", false, "print additional debug info to stdout / stderr")
 	reevaluate := fs.Bool("reevaluate", false, "force re-evaluation of the loaded deck's baseline avg, even if its prior run count already matches the current -shuffles budget. Use after adjusting modelling assumptions or fixing bugs that may have shifted the deck's true score.")
 	finalize := fs.Bool("finalize", false, "high-precision pass — sets -shuffles to 100000 (fixed) and tightens -min-improvement to 0.01. Use on a deck that's already converged to squeeze out the remaining sub-percent improvements.")
 	startTemp := fs.Float64("start-temp", 0, "simulated-annealing starting temperature. 0 (default) runs a pure hill climb. Higher values probabilistically accept worse mutations early; acceptance probability is exp((avg - baseline) / T). Good starting range is ~0.05–0.5 given typical Value units.")
