@@ -16,9 +16,13 @@ var snatchTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeAt
 func snatchPlay(s *sim.TurnState, self *sim.CardState) {
 	n := self.DealEffectiveAttack(s)
 	s.Log(self, n)
-	self.OnHit = append(self.OnHit, func(state *sim.TurnState) {
-		state.DrawOne()
-	})
+	self.OnHit = append(self.OnHit, sim.OnHitHandler{Fire: snatchOnHit})
+}
+
+// snatchOnHit fires the printed "When this hits, draw a card" rider. Top-level so
+// registration stays alloc-free.
+func snatchOnHit(s *sim.TurnState, _ *sim.CardState, _ *sim.OnHitHandler) {
+	s.DrawOne()
 }
 
 type SnatchRed struct{}

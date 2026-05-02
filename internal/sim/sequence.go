@@ -383,7 +383,18 @@ func (ctx *sequenceContext) bestSequence(attackers []Card) (int, int, bool) {
 	permMeta := ctx.bufs.permMeta[:n]
 	for idx, c := range attackers {
 		permMeta[idx] = attackerMetaPtrFor(c)
-		pcBuf[idx] = CardState{Card: c, FromArsenal: idx == ctx.arsenalInIdx}
+		// Field-by-field assignment preserves pcBuf[idx].OnHit's backing array across
+		// Best calls — a struct-literal assignment would drop it and force every Play
+		// that registers an OnHit to allocate a fresh slice on the hot anneal path.
+		// Other sliced fields (PitchedToPlay) get reset by playSequenceWithMeta.
+		pcBuf[idx].Card = c
+		pcBuf[idx].FromArsenal = idx == ctx.arsenalInIdx
+		pcBuf[idx].GrantedGoAgain = false
+		pcBuf[idx].GrantedDominate = false
+		pcBuf[idx].BonusAttack = 0
+		pcBuf[idx].BonusDefense = 0
+		pcBuf[idx].PitchedToPlay = nil
+		pcBuf[idx].OnHit = pcBuf[idx].OnHit[:0]
 	}
 
 	best := 0
@@ -489,7 +500,15 @@ func (ctx *sequenceContext) playSequence(order []Card) (damage int, leftoverRune
 	meta := ctx.bufs.permMeta[:n]
 	for i, c := range order {
 		meta[i] = attackerMetaPtrFor(c)
-		pcBuf[i] = CardState{Card: c, FromArsenal: i == ctx.arsenalInIdx}
+		// Field-by-field — preserve pcBuf[i].OnHit backing across calls (see bestSequence).
+		pcBuf[i].Card = c
+		pcBuf[i].FromArsenal = i == ctx.arsenalInIdx
+		pcBuf[i].GrantedGoAgain = false
+		pcBuf[i].GrantedDominate = false
+		pcBuf[i].BonusAttack = 0
+		pcBuf[i].BonusDefense = 0
+		pcBuf[i].PitchedToPlay = nil
+		pcBuf[i].OnHit = pcBuf[i].OnHit[:0]
 	}
 	return ctx.playSequenceWithMeta(n)
 }
@@ -520,7 +539,7 @@ func (ctx *sequenceContext) playSequenceWithMeta(n int) (damage int, leftoverRun
 		pcBuf[i].GrantedGoAgain = false
 		pcBuf[i].BonusAttack = 0
 		pcBuf[i].PitchedToPlay = nil
-		pcBuf[i].OnHit = nil
+		pcBuf[i].OnHit = pcBuf[i].OnHit[:0]
 	}
 	played := ptrBuf[:n]
 	// Per-permutation reset: full-state rewrite. Hand and Deck are deep-copied so cards can
@@ -559,8 +578,9 @@ func (ctx *sequenceContext) playSequenceWithMeta(n int) (damage int, leftoverRun
 			return
 		}
 		if LikelyToHit(activeAttack) {
-			for _, fn := range activeAttack.OnHit {
-				fn(state)
+			for i := range activeAttack.OnHit {
+				h := &activeAttack.OnHit[i]
+				h.Fire(state, activeAttack, h)
 			}
 		}
 		activeAttack = nil

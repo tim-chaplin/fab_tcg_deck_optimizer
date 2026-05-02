@@ -482,14 +482,15 @@ func CardNames(cs []sim.Card) []string {
 	return out
 }
 
-// FireOnHitIfLikely runs every closure in self.OnHit when LikelyToHit(self) — what the
+// FireOnHitIfLikely fires every OnHit handler on self when LikelyToHit(self) — what the
 // chain runner does at finalize-active-attack time. Unit tests that call Card.Play
 // directly use this to exercise on-hit riders without driving the full chain runner.
 func FireOnHitIfLikely(s *sim.TurnState, self *sim.CardState) {
 	if !sim.LikelyToHit(self) {
 		return
 	}
-	for _, fn := range self.OnHit {
-		fn(s)
+	for i := range self.OnHit {
+		h := &self.OnHit[i]
+		h.Fire(s, self, h)
 	}
 }

@@ -86,10 +86,11 @@ func runicReapingPlay(s *sim.TurnState, selfState *sim.CardState, source sim.Car
 		}
 	}
 	text := onHitRunechantText[source.ID()]
-	target.OnHit = append(target.OnHit, func(state *sim.TurnState) {
-		created := state.CreateRunechants(n)
-		state.AddValue(created)
-		state.LogPostTrigger(sim.DisplayName(target.Card), text, created)
+	target.OnHit = append(target.OnHit, sim.OnHitHandler{
+		Fire:    onHitCreateRunechants,
+		Source:  source,
+		LogText: text,
+		N:       n,
 	})
 	s.Log(selfState, 0)
 }

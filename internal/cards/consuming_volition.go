@@ -22,10 +22,14 @@ func consumingVolitionApplyRider(s *sim.TurnState, self *sim.CardState) {
 	if !s.ArcaneDamageDealt {
 		return
 	}
-	self.OnHit = append(self.OnHit, func(state *sim.TurnState) {
-		state.AddValue(sim.DiscardValue)
-		state.LogRider(self, sim.DiscardValue, "On-hit discarded a card")
-	})
+	self.OnHit = append(self.OnHit, sim.OnHitHandler{Fire: consumingVolitionOnHit})
+}
+
+// consumingVolitionOnHit fires the conditional "When this hits a hero, they discard a card"
+// rider. Top-level so registration stays alloc-free.
+func consumingVolitionOnHit(s *sim.TurnState, self *sim.CardState, _ *sim.OnHitHandler) {
+	s.AddValue(sim.DiscardValue)
+	s.LogRider(self, sim.DiscardValue, "On-hit discarded a card")
 }
 
 type ConsumingVolitionRed struct{}

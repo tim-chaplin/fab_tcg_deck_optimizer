@@ -58,29 +58,37 @@ func moonWishPlay(c sim.Card, s *sim.TurnState, self *sim.CardState) {
 		s.LogPostTriggerf(name, 0, "%s returned %s to top of deck", name, sim.DisplayName(returned))
 	}
 
-	self.OnHit = append(self.OnHit, func(state *sim.TurnState) {
-		sk, ok := state.TutorFromDeck(sunKissTutorPriority)
-		if !ok {
-			state.LogPostTriggerf(name, 0, "%s found no Sun Kiss to tutor", name)
-			return
-		}
+	self.OnHit = append(self.OnHit, sim.OnHitHandler{Fire: moonWishOnHit})
+}
 
-		if !self.EffectiveGoAgain() {
-			// Tutor lands the card in hand for next turn.
-			state.Hand = append(state.Hand, sk)
-			state.LogPostTriggerf(name, 0, "%s tutored %s", name, sim.DisplayName(sk))
-			return
-		}
-		// Go-again: Sun Kiss plays immediately. Pre-append Moon Wish to CardsPlayed so Sun
-		// Kiss's "if you've played Moon Wish" synergy fires; pop after so the sim's normal
-		// post-Play append doesn't double-add.
-		state.LogPostTriggerf(name, 0, "%s tutored %s and played it", name, sim.DisplayName(sk))
-		state.CardsPlayed = append(state.CardsPlayed, c)
-		skSelf := &sim.CardState{Card: sk}
-		sk.Play(state, skSelf)
-		state.CardsPlayed = state.CardsPlayed[:len(state.CardsPlayed)-1]
-		state.AddToGraveyard(sk)
-	})
+// moonWishOnHit fires the printed "If this hits, search for Sun Kiss" rider. Top-level so
+// registration stays alloc-free; reads the Moon Wish printing off self.Card so we don't
+// need a captured copy or a Source-field detour (self IS the Moon Wish that registered
+// the handler).
+func moonWishOnHit(s *sim.TurnState, self *sim.CardState, _ *sim.OnHitHandler) {
+	c := self.Card
+	name := sim.DisplayName(c)
+	sk, ok := s.TutorFromDeck(sunKissTutorPriority)
+	if !ok {
+		s.LogPostTriggerf(name, 0, "%s found no Sun Kiss to tutor", name)
+		return
+	}
+
+	if !self.EffectiveGoAgain() {
+		// Tutor lands the card in hand for next turn.
+		s.Hand = append(s.Hand, sk)
+		s.LogPostTriggerf(name, 0, "%s tutored %s", name, sim.DisplayName(sk))
+		return
+	}
+	// Go-again: Sun Kiss plays immediately. Pre-append Moon Wish to CardsPlayed so Sun
+	// Kiss's "if you've played Moon Wish" synergy fires; pop after so the sim's normal
+	// post-Play append doesn't double-add.
+	s.LogPostTriggerf(name, 0, "%s tutored %s and played it", name, sim.DisplayName(sk))
+	s.CardsPlayed = append(s.CardsPlayed, c)
+	skSelf := &sim.CardState{Card: sk}
+	sk.Play(s, skSelf)
+	s.CardsPlayed = s.CardsPlayed[:len(s.CardsPlayed)-1]
+	s.AddToGraveyard(sk)
 }
 
 // sunKissTutorPriority picks the highest-priority Sun Kiss printing in the deck. Red >

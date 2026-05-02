@@ -21,10 +21,14 @@ func performanceBonusPlay(s *sim.TurnState, self *sim.CardState) {
 	self.GrantGoAgainIfFromArsenal()
 	n := self.DealEffectiveAttack(s)
 	s.Log(self, n)
-	self.OnHit = append(self.OnHit, func(state *sim.TurnState) {
-		state.AddValue(sim.GoldTokenValue)
-		state.LogRider(self, sim.GoldTokenValue, "On-hit created a gold token")
-	})
+	self.OnHit = append(self.OnHit, sim.OnHitHandler{Fire: performanceBonusOnHit})
+}
+
+// performanceBonusOnHit fires the printed "When this hits, create a Gold token" rider.
+// Top-level so registration stays alloc-free.
+func performanceBonusOnHit(s *sim.TurnState, self *sim.CardState, _ *sim.OnHitHandler) {
+	s.AddValue(sim.GoldTokenValue)
+	s.LogRider(self, sim.GoldTokenValue, "On-hit created a gold token")
 }
 
 type PerformanceBonusRed struct{}

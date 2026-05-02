@@ -58,9 +58,23 @@ type CardState struct {
 	// TurnState for cards that read it as a multiset. Empty for cards whose cost was fully
 	// paid by carry from a prior pitch.
 	PitchedToPlay []Card
-	// OnHit holds "if this hits" handlers registered during Play. See docs/dev-standards.md
-	// "OnHit registrations" for the wiring contract.
-	OnHit []func(*TurnState)
+	// OnHit holds "if this hits" handlers registered during Play. Stored as struct values
+	// (function pointer + small data payload) rather than closures so the hot anneal path
+	// doesn't allocate per registration. See docs/dev-standards.md "OnHit registrations"
+	// for the wiring contract.
+	OnHit []OnHitHandler
+}
+
+// OnHitHandler is one registered on-hit rider on a CardState. The chain runner fires Fire
+// at finalize-active-attack time when LikelyToHit(self) is true; self is the buffed
+// attack's CardState. Source names the card that registered the handler so log attribution
+// stays correct when the handler was added to a different card's OnHit (Mauvrion Skies,
+// Runic Reaping). N and LogText are optional small payloads cards use to avoid closures.
+type OnHitHandler struct {
+	Fire    func(s *TurnState, self *CardState, h *OnHitHandler)
+	Source  Card
+	LogText string
+	N       int
 }
 
 // EffectiveGoAgain reports whether this card has Go again this turn — from printed text or a

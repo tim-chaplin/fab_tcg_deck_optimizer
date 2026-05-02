@@ -30,9 +30,13 @@ func (c NebulaBlade) Play(s *sim.TurnState, self *sim.CardState) {
 	}
 	n := self.DealEffectiveAttack(s)
 	s.Log(self, n)
-	self.OnHit = append(self.OnHit, func(state *sim.TurnState) {
-		created := state.CreateRunechant()
-		state.AddValue(created)
-		state.LogRider(self, created, "On-hit created a runechant")
-	})
+	self.OnHit = append(self.OnHit, sim.OnHitHandler{Fire: nebulaBladeOnHit})
+}
+
+// nebulaBladeOnHit fires the printed "If Nebula Blade hits, create a Runechant token"
+// rider. Top-level so registration stays alloc-free.
+func nebulaBladeOnHit(s *sim.TurnState, self *sim.CardState, _ *sim.OnHitHandler) {
+	created := s.CreateRunechant()
+	s.AddValue(created)
+	s.LogRider(self, created, "On-hit created a runechant")
 }

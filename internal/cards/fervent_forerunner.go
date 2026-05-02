@@ -18,9 +18,13 @@ func ferventForerunnerPlay(s *sim.TurnState, self *sim.CardState) {
 	self.GrantGoAgainIfFromArsenal()
 	n := self.DealEffectiveAttack(s)
 	s.Log(self, n)
-	self.OnHit = append(self.OnHit, func(state *sim.TurnState) {
-		state.Opt(2)
-	})
+	self.OnHit = append(self.OnHit, sim.OnHitHandler{Fire: ferventForerunnerOnHit})
+}
+
+// ferventForerunnerOnHit fires the printed "If this hits, opt 2" rider. Top-level so
+// registration stays alloc-free.
+func ferventForerunnerOnHit(s *sim.TurnState, _ *sim.CardState, _ *sim.OnHitHandler) {
+	s.Opt(2)
 }
 
 type FerventForerunnerRed struct{}

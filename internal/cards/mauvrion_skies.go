@@ -31,16 +31,26 @@ func mauvrionSkiesPlay(s *sim.TurnState, selfState *sim.CardState, source sim.Ca
 		if mauvrionTargetMatches(pc) {
 			pc.GrantedGoAgain = true
 			text := onHitRunechantText[source.ID()]
-			target := pc
-			pc.OnHit = append(pc.OnHit, func(state *sim.TurnState) {
-				created := state.CreateRunechants(n)
-				state.AddValue(created)
-				state.LogPostTrigger(sim.DisplayName(target.Card), text, created)
+			pc.OnHit = append(pc.OnHit, sim.OnHitHandler{
+				Fire:    onHitCreateRunechants,
+				Source:  source,
+				LogText: text,
+				N:       n,
 			})
 			break
 		}
 	}
 	s.Log(selfState, 0)
+}
+
+// onHitCreateRunechants fires the on-hit "create N runechants" rider attached to the
+// targeted attack by Mauvrion Skies / Runic Reaping. Reads N and the precomputed log
+// line off the handler so registration stays alloc-free; self is the targeted attack
+// (whose name credits the trigger line).
+func onHitCreateRunechants(s *sim.TurnState, self *sim.CardState, h *sim.OnHitHandler) {
+	created := s.CreateRunechants(h.N)
+	s.AddValue(created)
+	s.LogPostTrigger(sim.DisplayName(self.Card), h.LogText, created)
 }
 
 // onHitRunechantText is the precomputed rider line for each Mauvrion Skies / Runic Reaping

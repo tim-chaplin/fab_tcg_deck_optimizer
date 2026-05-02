@@ -33,8 +33,12 @@ func (BlowForABlowRed) GoAgain() bool           { return sim.HeroWantsLowerHealt
 func (BlowForABlowRed) Play(s *sim.TurnState, self *sim.CardState) {
 	n := self.DealEffectiveAttack(s)
 	s.Log(self, n)
-	self.OnHit = append(self.OnHit, func(state *sim.TurnState) {
-		state.AddValue(blowForABlowPingValue)
-		state.LogRider(self, blowForABlowPingValue, "On-hit dealt 1 damage")
-	})
+	self.OnHit = append(self.OnHit, sim.OnHitHandler{Fire: blowForABlowOnHit})
+}
+
+// blowForABlowOnHit fires the printed "When this hits, deal 1 damage" rider. Top-level so
+// registration doesn't allocate a closure on the hot anneal path.
+func blowForABlowOnHit(s *sim.TurnState, self *sim.CardState, _ *sim.OnHitHandler) {
+	s.AddValue(blowForABlowPingValue)
+	s.LogRider(self, blowForABlowPingValue, "On-hit dealt 1 damage")
 }
