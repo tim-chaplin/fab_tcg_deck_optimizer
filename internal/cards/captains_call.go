@@ -1,11 +1,13 @@
-// Captain's Call — Generic Action. Cost 0. Printed pitch variants: Red 1, Yellow 2, Blue 3. Defense
-// 2.
+// Captain's Call — Generic Action. Cost 0. Printed pitch variants: Red 1, Yellow 2, Blue 3.
+// Defense 2. Go again.
 //
-// Text: "Choose 1; The next attack action card with cost N or less you play this turn gains +2{p}.
-// The next attack action card with cost N or less you play this turn gains **go again**. **Go
-// again**" (Red N=2, Yellow N=1, Blue N=0.)
+// Text: "Choose 1; The next attack action card with cost N or less you play this turn gains
+// +2{p}. The next attack action card with cost N or less you play this turn gains **go
+// again**. **Go again**" (Red N=2, Yellow N=1, Blue N=0.)
+//
+// Mode 0 buffs the next cost-≤N attack action card +2{p}; mode 1 grants it go again.
 
-package notimplemented
+package cards
 
 import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
@@ -15,20 +17,25 @@ import (
 
 var captainsCallTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction)
 
-// captainsCallApplySideEffect grants +2 to the first scheduled attack action card whose cost is
-// at most maxCost, by adding to its BonusAttack. The +2 attributes to the buffed attack (so
-// EffectiveAttack picks it up in LikelyToHit) rather than to Captain's Call itself. The
-// alternative "go again" mode is dropped (advertised on each variant's NotImplemented marker).
-func captainsCallApplySideEffect(s *sim.TurnState, maxCost int) {
+// captainsCallPlay applies the modal grant to the next cost-≤maxCost attack action card in
+// CardsRemaining. Fizzles silently if no follow-up attack action matches.
+func captainsCallPlay(s *sim.TurnState, self *sim.CardState, maxCost int) {
 	for _, pc := range s.CardsRemaining {
 		if !pc.Card.Types().IsAttackAction() {
 			continue
 		}
-		if pc.Card.Cost(s) <= maxCost {
-			pc.BonusAttack += 2
-			return
+		if pc.Card.Cost(s) > maxCost {
+			continue
 		}
+		switch self.Mode {
+		case 0:
+			pc.BonusAttack += 2
+		case 1:
+			pc.GrantedGoAgain = true
+		}
+		break
 	}
+	s.Log(self, 0)
 }
 
 type CaptainsCallRed struct{}
@@ -41,13 +48,9 @@ func (CaptainsCallRed) Attack() int             { return 0 }
 func (CaptainsCallRed) Defense() int            { return 2 }
 func (CaptainsCallRed) Types() card.TypeSet     { return captainsCallTypes }
 func (CaptainsCallRed) GoAgain() bool           { return true }
-
-// not implemented: modal pick hard-coded to +2{p}; 'go again' mode is dropped
-func (CaptainsCallRed) NotImplemented() {}
+func (CaptainsCallRed) Modes() int              { return 2 }
 func (CaptainsCallRed) Play(s *sim.TurnState, self *sim.CardState) {
-	captainsCallApplySideEffect(s, 2)
-	n := self.DealEffectiveAttack(s)
-	s.Log(self, n)
+	captainsCallPlay(s, self, 2)
 }
 
 type CaptainsCallYellow struct{}
@@ -60,13 +63,9 @@ func (CaptainsCallYellow) Attack() int             { return 0 }
 func (CaptainsCallYellow) Defense() int            { return 2 }
 func (CaptainsCallYellow) Types() card.TypeSet     { return captainsCallTypes }
 func (CaptainsCallYellow) GoAgain() bool           { return true }
-
-// not implemented: modal pick hard-coded to +2{p}; 'go again' mode is dropped
-func (CaptainsCallYellow) NotImplemented() {}
+func (CaptainsCallYellow) Modes() int              { return 2 }
 func (CaptainsCallYellow) Play(s *sim.TurnState, self *sim.CardState) {
-	captainsCallApplySideEffect(s, 1)
-	n := self.DealEffectiveAttack(s)
-	s.Log(self, n)
+	captainsCallPlay(s, self, 1)
 }
 
 type CaptainsCallBlue struct{}
@@ -79,11 +78,7 @@ func (CaptainsCallBlue) Attack() int             { return 0 }
 func (CaptainsCallBlue) Defense() int            { return 2 }
 func (CaptainsCallBlue) Types() card.TypeSet     { return captainsCallTypes }
 func (CaptainsCallBlue) GoAgain() bool           { return true }
-
-// not implemented: modal pick hard-coded to +2{p}; 'go again' mode is dropped
-func (CaptainsCallBlue) NotImplemented() {}
+func (CaptainsCallBlue) Modes() int              { return 2 }
 func (CaptainsCallBlue) Play(s *sim.TurnState, self *sim.CardState) {
-	captainsCallApplySideEffect(s, 0)
-	n := self.DealEffectiveAttack(s)
-	s.Log(self, n)
+	captainsCallPlay(s, self, 0)
 }

@@ -1,0 +1,38 @@
+package e2etest
+
+import (
+	"testing"
+
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/cards"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/heroes"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+)
+
+// Tests that Captain's Call picks the go-again mode when a follow-up attack can extend the
+// chain into more total damage than the +2{p} buff alone.
+func TestModal_CaptainsCallPicksGoAgainOverBuffWhenChainExtends(t *testing.T) {
+	d := sim.New(heroes.Viserai{}, nil, fillerDeck())
+	hand := []sim.Card{
+		cards.CaptainsCallRed{},
+		cards.SnatchRed{},
+		cards.SnatchRed{},
+	}
+	got := d.EvalOneTurnForTesting(sim.Matchup{IncomingDamage: 0}, nil, hand).Value
+	if got != 8 {
+		t.Fatalf("Value = %d, want 8 (mode 1 grants go-again so both Snatches chain)", got)
+	}
+}
+
+// Tests that Captain's Call picks the +2{p} mode when no follow-up attack can use a granted
+// go-again.
+func TestModal_CaptainsCallPicksBuffWhenChainCantExtend(t *testing.T) {
+	d := sim.New(heroes.Viserai{}, nil, fillerDeck())
+	hand := []sim.Card{
+		cards.CaptainsCallRed{},
+		cards.SnatchRed{},
+	}
+	got := d.EvalOneTurnForTesting(sim.Matchup{IncomingDamage: 0}, nil, hand).Value
+	if got != 6 {
+		t.Fatalf("Value = %d, want 6 (mode 0 +2{p} since no second attack to extend into)", got)
+	}
+}

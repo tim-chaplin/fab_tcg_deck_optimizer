@@ -396,6 +396,7 @@ func (ctx *sequenceContext) bestSequence(attackers []Card) (int, int, bool) {
 		pcBuf[idx].BonusDefense = 0
 		pcBuf[idx].PitchedToPlay = nil
 		pcBuf[idx].OnHit = pcBuf[idx].OnHit[:0]
+		pcBuf[idx].Mode = 0
 	}
 
 	best := 0
@@ -412,17 +413,32 @@ func (ctx *sequenceContext) bestSequence(attackers []Card) (int, int, bool) {
 	pn := len(pitchPerm)
 	// tryPitchOrdering plays the chain against the current attack-permutation × pitch-
 	// permutation pair, threads cacheable, and folds a legal result into the running best.
+	// Enumerates the cartesian product of ModalCard mode indices via a mixed-radix decode of
+	// `tuple` over permMeta[i].modes; non-modal chains collapse to tupleCount==1 — one int
+	// multiply per chain step on the fast path.
 	tryPitchOrdering := func() {
-		dmg, leftoverRunechants, _, legal := ctx.playSequenceWithMeta(n)
-		if ctx.cacheable && !state.IsCacheable() {
-			ctx.cacheable = false
+		tupleCount := 1
+		for i := 0; i < n; i++ {
+			tupleCount *= permMeta[i].modes
 		}
-		if legal && (!foundLegal || dmg > best ||
-			(dmg == best && leftoverRunechants > bestLeftoverRunechants)) {
-			best = dmg
-			bestLeftoverRunechants = leftoverRunechants
-			foundLegal = true
-			ctx.carryWinner.SnapshotFromTurn(state)
+		for tuple := 0; tuple < tupleCount; tuple++ {
+			rem := tuple
+			for i := 0; i < n; i++ {
+				modes := permMeta[i].modes
+				pcBuf[i].Mode = rem % modes
+				rem /= modes
+			}
+			dmg, leftoverRunechants, _, legal := ctx.playSequenceWithMeta(n)
+			if ctx.cacheable && !state.IsCacheable() {
+				ctx.cacheable = false
+			}
+			if legal && (!foundLegal || dmg > best ||
+				(dmg == best && leftoverRunechants > bestLeftoverRunechants)) {
+				best = dmg
+				bestLeftoverRunechants = leftoverRunechants
+				foundLegal = true
+				ctx.carryWinner.SnapshotFromTurn(state)
+			}
 		}
 	}
 	// eval runs the active attack permutation against every pitch ordering — initial
@@ -510,6 +526,7 @@ func (ctx *sequenceContext) playSequence(order []Card) (damage int, leftoverRune
 		pcBuf[i].BonusDefense = 0
 		pcBuf[i].PitchedToPlay = nil
 		pcBuf[i].OnHit = pcBuf[i].OnHit[:0]
+		pcBuf[i].Mode = 0
 	}
 	return ctx.playSequenceWithMeta(n)
 }

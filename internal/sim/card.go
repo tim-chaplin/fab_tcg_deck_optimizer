@@ -63,6 +63,9 @@ type CardState struct {
 	// doesn't allocate per registration. See docs/dev-standards.md "OnHit registrations"
 	// for the wiring contract.
 	OnHit []OnHitHandler
+	// Mode is the chosen mode for a ModalCard ("Choose 1" cards), set by the chain runner
+	// before Play. Always 0 for non-modal cards.
+	Mode int
 }
 
 // OnHitHandler is one registered on-hit rider on a CardState. The chain runner fires Fire
@@ -237,6 +240,15 @@ type NotImplemented interface {
 // filters them out.
 type Unplayable interface {
 	Unplayable()
+}
+
+// ModalCard is an optional marker for "Choose 1" cards. Modes returns the number of
+// exclusive modes (typically 2); the chain runner enumerates 0..Modes()-1 per ordering and
+// cards dispatch on self.Mode inside Play. Modes that are no-ops for the current state
+// should resolve as zero-Value no-ops so the runner picks a sibling mode that contributes
+// more. See docs/dev-standards.md `Modal "Choose 1" cards` for the wiring contract.
+type ModalCard interface {
+	Modes() int
 }
 
 // ConditionalGoAgain is an optional marker for cards whose Play sometimes flips

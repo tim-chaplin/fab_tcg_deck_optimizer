@@ -112,6 +112,12 @@ following plumbing is uniform and lives once in `internal/card/card.go`:
   add an on-hit rider to a DIFFERENT card (Mauvrion Skies, Runic Reaping) append to the
   target's `OnHit`. Cards must NOT call `LikelyToHit` directly from `Play` — the chain
   runner owns the gate so AR buffs propagate.
+- **Modal "Choose 1" cards** (Captain's Call, …): cards implement `sim.ModalCard.Modes()
+  int` returning the mode count and dispatch on `self.Mode` inside `Play`. The chain
+  runner enumerates the cartesian product of mode indices across all modal cards in a
+  permutation and picks the highest-Value tuple. Modes that are no-ops for the current
+  state should resolve as zero-Value no-ops; the runner will pick a sibling mode that
+  contributes more. Card docstrings call out each mode's effect — not the wiring.
 
 ## Logging idioms
 
