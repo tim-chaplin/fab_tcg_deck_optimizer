@@ -620,9 +620,9 @@ func (ctx *sequenceContext) playSequenceWithMeta(n int) (damage int, leftoverRun
 				h := &activeAttack.OnHit[i]
 				h.Fire(state, activeAttack, h)
 			}
-			// Drain "next time an attack action hits" triggers when the active attack is an
-			// attack action card (weapon swings don't satisfy the printed wording). The whole
-			// queue fires together — every pending listener sees this hit as "the next time".
+			// Drain pending triggers only when the active attack is an attack action card
+			// (weapon swings don't satisfy the printed wording). All queued listeners fire
+			// together — every one sees this hit as "the next time".
 			if len(state.pendingNextAttackActionHit) > 0 && activeAttack.Card.Types().IsAttackAction() {
 				for i := range state.pendingNextAttackActionHit {
 					t := &state.pendingNextAttackActionHit[i]

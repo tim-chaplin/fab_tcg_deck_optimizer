@@ -2,10 +2,6 @@
 // pitch variants: Red 1, Yellow 2, Blue 3. Defense 2.
 //
 // Text: "**Dominate** If Overload hits, it gains **go again**."
-//
-// On-hit go-again is modelled eagerly: when sim.LikelyToHit(self) returns true, Play flips
-// self.GrantedGoAgain so the chain runner's post-Play AP grant fires for the next step's
-// legality gate. Same pattern as Razor Reflex mode 1.
 
 package cards
 

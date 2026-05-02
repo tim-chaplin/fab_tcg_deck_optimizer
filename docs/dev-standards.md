@@ -117,15 +117,14 @@ following plumbing is uniform and lives once in `internal/card/card.go`:
   next time an attack action card you control hits this turn, do X" register a
   `sim.NextAttackActionHitTrigger` via `s.RegisterNextAttackActionHit(...)` inside `Play`.
   The chain runner drains the queue inside `finalizeActiveAttack` on the first attack
-  action that lands (`IsAttackAction` + `LikelyToHit`); every pending listener fires
-  together on that hit (the "next time" event resolves all listeners simultaneously) and
-  the queue empties. Use this — not `OnHit` on a specific `CardState` — when the rider
-  must wait across misses for the FIRST attack action that actually hits.
+  action that lands (`IsAttackAction` + `LikelyToHit`); all pending listeners fire together
+  on that hit. Use this — not `OnHit` on a specific `CardState` — when the rider must wait
+  across misses for the FIRST attack action that actually hits.
 - **Self-granting on-hit go-again** (Overload, Razor Reflex mode 1): cards with a printed
   "if this hits, it gains go again" clause flip `self.GrantedGoAgain = true` inside `Play`
-  when `sim.LikelyToHit(self)` returns true. The chain runner's post-Play AP grant fires
-  for the next step's legality gate. Carry the `sim.ConditionalGoAgain` marker so the
-  static lint test in `conditional_go_again_test.go` passes.
+  when `sim.LikelyToHit(self)` returns true; `EffectiveGoAgain` honours the flag for the
+  next chain step. Carry the `sim.ConditionalGoAgain` marker so the static lint test in
+  `conditional_go_again_test.go` passes.
 - **Modal "Choose 1" cards** (Captain's Call, …): cards implement `sim.ModalCard.Modes()
   int` returning the mode count and dispatch on `self.Mode` inside `Play`. The chain
   runner enumerates the cartesian product of mode indices across all modal cards in a

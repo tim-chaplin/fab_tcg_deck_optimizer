@@ -6,10 +6,8 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 )
 
-// Overload's on-hit go-again rider is modelled eagerly via sim.LikelyToHit.
-// LikelyDamageHits is true at 1/4/7 power or at 5+ with dominate. Printed
-// powers are Red 3, Yellow 2, Blue 1 — only Blue (n==1) lands in the window
-// without help, so only Blue flips GrantedGoAgain on a clean Play.
+// LikelyDamageHits is true at 1/4/7 or 5+ with dominate. Of printed powers (Red 3, Yellow 2,
+// Blue 1) only Blue lands in the window unassisted, so only Blue flips GrantedGoAgain.
 func TestOverload_OnHitGoAgainEagerByLikelyToHit(t *testing.T) {
 	cases := []struct {
 		c       sim.Card
@@ -36,9 +34,8 @@ func TestOverload_OnHitGoAgainEagerByLikelyToHit(t *testing.T) {
 	}
 }
 
-// A +2{p} BonusAttack on Red Overload bumps it from 3 → 5 (dominate window),
-// flipping GrantedGoAgain. A +1 bonus stops at 4 — also a hit window — so
-// likewise. Cover both the dominate-5+ and the 1/4/7 paths.
+// BonusAttack pushes Red 3 into the hit window: +1 → 4 (1/4/7 path), +2 → 5 (dominate path).
+// Both flip GrantedGoAgain.
 func TestOverload_BonusAttackPushesIntoHitWindow(t *testing.T) {
 	cases := []struct {
 		bonus int
