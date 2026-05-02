@@ -7,6 +7,12 @@ package sim
 // effects read profile info like Intelligence without plumbing it through TurnState.
 var CurrentHero Hero
 
+// OptDebug, when true, makes TurnState.Opt print every Opt outcome to stdout
+// (input cards, top split, bottom split). Set by fabsim's -debug flag at the top of a
+// run. Off in production. Not synchronised — runs that flip it during a parallel section
+// can interleave; today the sim is single-goroutine, so a plain bool is fine.
+var OptDebug bool
+
 // HeroWantsLowerHealth reports whether the current hero opts into the LowerHealthWanter
 // marker — the proxy for "this hero's strategy keeps them at lower {h} than the opponent". Cards
 // with a "less {h} than an opposing hero" rider credit the rider when this returns true. Returns
