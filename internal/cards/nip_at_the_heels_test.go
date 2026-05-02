@@ -7,7 +7,7 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
 )
 
-// Tests that Nip at the Heels accepts a base-≤3 attack action and buffs it +1{p}.
+// Tests that Nip at the Heels buffs a base-3 attack action by +1{p}.
 func TestNipAtTheHeels_BuffsLowPowerAttack(t *testing.T) {
 	target := &sim.CardState{Card: testutils.GenericAttack(0, 3)}
 	s := sim.TurnState{CardsRemaining: []*sim.CardState{target}}
@@ -17,8 +17,7 @@ func TestNipAtTheHeels_BuffsLowPowerAttack(t *testing.T) {
 	}
 }
 
-// Tests that the base-power gate reads printed Attack(): a 4-power attack is rejected
-// even though +1{p} would still be a damage win.
+// Tests that a 4-power attack is rejected (base-power gate reads printed Attack()).
 func TestNipAtTheHeels_RejectsHighPowerAttack(t *testing.T) {
 	target := &sim.CardState{Card: testutils.GenericAttack(0, 4)}
 	s := sim.TurnState{CardsRemaining: []*sim.CardState{target}}
@@ -28,8 +27,7 @@ func TestNipAtTheHeels_RejectsHighPowerAttack(t *testing.T) {
 	}
 }
 
-// Tests that the predicate accepts low-power weapons too — "target attack" includes
-// weapons.
+// Tests that the predicate accepts a low-power weapon.
 func TestNipAtTheHeels_AcceptsLowPowerWeapon(t *testing.T) {
 	weapon := testutils.RunebladeWeapon{}
 	if !(NipAtTheHeelsBlue{}).ARTargetAllowed(weapon) {

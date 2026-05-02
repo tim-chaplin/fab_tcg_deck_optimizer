@@ -7,9 +7,7 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
 )
 
-// Tests that Lunging Press fizzles silently when no attack action card follows it in the
-// chain — orderings the partition validator already let through but where the AR happens
-// to play after every legal target.
+// Tests that Lunging Press fizzles silently when no target follows it in the chain.
 func TestLungingPress_NoTargetFizzles(t *testing.T) {
 	s := sim.TurnState{}
 	(LungingPressBlue{}).Play(&s, &sim.CardState{Card: LungingPressBlue{}})
@@ -18,8 +16,7 @@ func TestLungingPress_NoTargetFizzles(t *testing.T) {
 	}
 }
 
-// Tests that Lunging Press lands its +1{p} on the first attack action card in
-// CardsRemaining — the canonical "AR buffs the next target" path.
+// Tests that Lunging Press lands +1{p} on the first attack action card in CardsRemaining.
 func TestLungingPress_BuffsNextAttackAction(t *testing.T) {
 	target := &sim.CardState{Card: testutils.GenericAttack(0, 0)}
 	s := sim.TurnState{CardsRemaining: []*sim.CardState{target}}
@@ -32,8 +29,7 @@ func TestLungingPress_BuffsNextAttackAction(t *testing.T) {
 	}
 }
 
-// Tests that a non-attack action card in CardsRemaining gets skipped — Lunging Press's
-// printed predicate says "attack action card", so a plain Action doesn't qualify.
+// Tests that a plain non-attack Action is skipped (predicate requires Action+Attack).
 func TestLungingPress_SkipsNonAttackAction(t *testing.T) {
 	target := &sim.CardState{Card: testutils.GenericAction()}
 	s := sim.TurnState{CardsRemaining: []*sim.CardState{target}}
@@ -43,8 +39,7 @@ func TestLungingPress_SkipsNonAttackAction(t *testing.T) {
 	}
 }
 
-// Tests that a weapon swing doesn't qualify as a target — Lunging Press says "attack action
-// card", which excludes weapons even though they're attacks.
+// Tests that a weapon is skipped (predicate requires "attack action card", not "attack").
 func TestLungingPress_SkipsWeapons(t *testing.T) {
 	target := &sim.CardState{Card: testutils.RunebladeWeapon{}}
 	s := sim.TurnState{CardsRemaining: []*sim.CardState{target}}

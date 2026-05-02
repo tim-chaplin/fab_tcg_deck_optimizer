@@ -95,16 +95,14 @@ following plumbing is uniform and lives once in `internal/card/card.go`:
 - **`card.VariableCost` markers** (Amplify the Arknight, Rune Flash, …): `Cost(s)` reads
   TurnState; the marker exposes `MinCost` / `MaxCost` for the solver's pre-screen. Don't
   re-document the dispatch — note the printed cost formula.
-- **Attack Reactions** (Lunging Press, Thrust, Nip at the Heels, …): cards
-  implement `sim.AttackReaction.ARTargetAllowed(c) bool` returning true for any card in
-  the chain that matches the printed target wording, and call
-  `sim.GrantAttackReactionBuff(s, predicate, n)` from `Play` to add `+n{p}` to the first
-  matching `CardsRemaining` entry. The partition validator (`partitionHasValidARTargets`)
-  rejects attack-role assignments where no chain card satisfies the predicate, so an AR
-  with no legal target is unplayable rather than silently-wasted. ARs cost 0 AP per FaB
-  rules; the chain runner's free-step gate handles that automatically. Card docstrings
-  call out the printed predicate (esp. when the wording distinguishes "attack" from
-  "attack action card") and any modelling fudge — not the wiring.
+- **Attack Reactions**: cards implement `sim.AttackReaction.ARTargetAllowed(c) bool`
+  matching the printed target wording, and call `sim.GrantAttackReactionBuff(s, predicate,
+  n)` from `Play` to add `+n{p}` to the first matching `CardsRemaining` entry. The partition
+  validator rejects attack-role assignments where no chain card satisfies the predicate, so
+  an AR with no legal target is unplayable rather than silently wasted. ARs cost 0 AP; the
+  chain runner's free-step gate handles that automatically. Card docstrings call out the
+  printed predicate (esp. when the wording distinguishes "attack" from "attack action card")
+  and any modelling fudge — not the wiring.
 
 ## Logging idioms
 

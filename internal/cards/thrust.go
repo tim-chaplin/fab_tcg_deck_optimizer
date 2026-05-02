@@ -2,8 +2,7 @@
 //
 // Text: "Target sword attack gains +3{p}."
 //
-// "Sword attack" includes both Sword weapons and Sword attack action cards — the printed
-// "attack" word doesn't restrict to action cards.
+// Predicate is "sword attack" (no "action card" qualifier), so Sword weapons qualify too.
 
 package cards
 

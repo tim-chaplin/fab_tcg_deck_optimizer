@@ -2,8 +2,7 @@
 //
 // Text: "Target attack action card gains +1{p}."
 //
-// Targets exclude weapon attacks: the printed text says "attack action card", not "attack",
-// so a chain whose only attack candidate is a weapon swing can't legally play this AR.
+// Predicate is "attack action card" (not "attack"), so weapon swings are excluded.
 
 package cards
 

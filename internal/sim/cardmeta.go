@@ -33,10 +33,9 @@ type attackerMeta struct {
 	// card.TypeAttack but aren't attack action CARDS; only the Action+Attack bitmask matches the
 	// printed trigger text on cards like Malefic Incantation.
 	isAttackAction bool
-	// isFreeChainStep flags cards that resolve in the chain without paying an Action Point —
-	// Instants and Attack Reactions. Both cost 0 AP per FaB rules and can resolve mid-chain
-	// without requiring Go again on the prior step. Action cards (attack and non-attack) and
-	// weapon swings all cost 1 AP and so don't set this.
+	// isFreeChainStep is set on cards that resolve in the chain without paying an Action
+	// Point — Instants and Attack Reactions (both 0 AP per FaB rules). Action cards and
+	// weapon swings cost 1 AP and don't set this.
 	isFreeChainStep bool
 }
 

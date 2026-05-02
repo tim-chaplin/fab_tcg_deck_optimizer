@@ -8,7 +8,7 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
 )
 
-// Tests that Thrust's +3{p} buff lands on a sword attack action card.
+// Tests that Thrust lands +3{p} on a sword attack action card.
 func TestThrust_BuffsSwordAttackAction(t *testing.T) {
 	swordAction := testutils.NewStubCard("SwordAction").
 		WithTypes(card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeAttack, card.TypeSword))
@@ -20,8 +20,7 @@ func TestThrust_BuffsSwordAttackAction(t *testing.T) {
 	}
 }
 
-// Tests that Thrust's predicate accepts sword weapons (per the printed "sword attack"
-// wording — no "action card" qualifier).
+// Tests that Thrust's predicate accepts a Sword weapon.
 func TestThrust_AcceptsSwordWeapon(t *testing.T) {
 	swordWeapon := testutils.NewStubCard("SwordWeapon").
 		WithTypes(card.NewTypeSet(card.TypeGeneric, card.TypeWeapon, card.TypeSword))
@@ -30,8 +29,7 @@ func TestThrust_AcceptsSwordWeapon(t *testing.T) {
 	}
 }
 
-// Tests that a non-sword attack (e.g. plain Generic Action - Attack) is rejected — the
-// Sword subtype is required.
+// Tests that a non-Sword attack is rejected.
 func TestThrust_RejectsNonSwordAttack(t *testing.T) {
 	target := &sim.CardState{Card: testutils.GenericAttack(0, 0)}
 	s := sim.TurnState{CardsRemaining: []*sim.CardState{target}}

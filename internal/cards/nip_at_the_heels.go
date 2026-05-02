@@ -3,9 +3,8 @@
 //
 // Text: "Target attack with 3 or less base {p} gets +1{p}."
 //
-// "Target attack" includes weapon attacks; the base-power gate (≤ 3) reads the printed
-// Attack() value, not the post-buff total. The predicate accepts both attack action cards
-// and weapons whose printed power is ≤ 3.
+// Predicate accepts attack action cards and weapons (just "attack"); the ≤ 3 gate reads
+// printed Attack(), not the post-buff total.
 
 package cards
 

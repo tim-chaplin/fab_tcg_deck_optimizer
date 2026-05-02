@@ -138,10 +138,9 @@ func bestAttackWithWeapons(hero Hero, weapons []Weapon, attackers, defenders, pi
 					allAttackers = append(allAttackers, w)
 				}
 			}
-			// Attack Reactions are illegal to play without a legal target in the chain.
-			// allAttackers is the full attack-step lineup for this (pmask, wmask) — partition
-			// attackers plus the weapons the wmask selected to swing — so an AR whose target
-			// rides on a swinging weapon (Thrust → sword weapon) sees the weapon here.
+			// Reject AR-bearing chains with no legal AR target. allAttackers is the full
+			// attack-step lineup (partition attackers + wmask-selected weapons), so an AR
+			// whose target rides on a swinging weapon (Thrust → sword weapon) sees it here.
 			if !partitionHasValidARTargets(allAttackers) {
 				continue
 			}
@@ -581,11 +580,9 @@ func (ctx *sequenceContext) playSequenceWithMeta(n int) (damage int, leftoverRun
 	}
 	for i, pc := range played {
 		m := meta[i]
-		// Action Point gate: every chain step that isn't free (Instants and Attack Reactions
-		// pay 0 AP per FaB rules) costs 1 AP. A paying card that would resolve with no AP
-		// available rejects the permutation — the chain ran out of action points before the
-		// next card could be played, which is illegal in FaB rules. Subsequent steps (Go
-		// again post-Play, AP grants from future card-driven effects) restock the pool.
+		// Action Point gate: paying chain steps cost 1 AP; free steps (Instants, Attack
+		// Reactions) cost 0. A paying card resolving with no AP available rejects the
+		// permutation. Go again and AP-grant effects restock the pool for later steps.
 		if !m.isFreeChainStep {
 			if state.ActionPoints <= 0 {
 				return 0, 0, 0, false

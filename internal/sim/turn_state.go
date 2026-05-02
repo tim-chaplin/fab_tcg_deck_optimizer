@@ -95,12 +95,10 @@ type TurnState struct {
 	// CreateRunechants increments it; the attack pipeline consumes the running total on each
 	// attack / weapon swing.
 	Runechants int
-	// ActionPoints is the chain runner's running Action Point pool. Seeded to 1 at the start
-	// of each permutation, decremented by 1 before each chain-step card that isn't free, and
-	// incremented by 1 after a card with Go again (printed or granted) resolves. Free chain
-	// steps — Instants and Attack Reactions — cost 0 AP per FaB rules; everything else
-	// (Action cards, Weapon swings) costs 1. The chain is illegal when a paying card would
-	// resolve with no AP available.
+	// ActionPoints is the chain runner's running AP pool. Seeded to 1 per permutation,
+	// decremented before each paying chain step, incremented after a Go-again card resolves.
+	// Free chain steps (Instants, Attack Reactions) cost 0; Action cards and weapon swings
+	// cost 1. A paying card resolving with no AP available makes the chain illegal.
 	ActionPoints int
 	// ArcaneDamageDealt sticks true once any source of arcane damage fires this turn:
 	// a Runechant token consuming itself on an attack / weapon swing, or a card whose Play

@@ -7,8 +7,8 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
 )
 
-// stubAR is a minimal AttackReaction stub for partition-validator tests. It implements both
-// sim.Card and sim.AttackReaction; allow controls which targets the predicate accepts.
+// stubAR is a minimal Card + AttackReaction stub. allow controls which targets the
+// predicate accepts.
 type stubAR struct {
 	id    ids.CardID
 	name  string
@@ -28,7 +28,7 @@ func (stubAR) GoAgain() bool                 { return false }
 func (s stubAR) ARTargetAllowed(c Card) bool { return s.allow(c) }
 func (stubAR) Play(*TurnState, *CardState)   {}
 
-// stubAttack is a Generic Action - Attack stub used as a target candidate.
+// stubAttack is a Generic Action - Attack target candidate.
 type stubAttack struct{}
 
 func (stubAttack) ID() ids.CardID      { return ids.InvalidCard }
@@ -43,8 +43,7 @@ func (stubAttack) Types() card.TypeSet {
 func (stubAttack) GoAgain() bool               { return true }
 func (stubAttack) Play(*TurnState, *CardState) {}
 
-// Tests that a chain with no Attack Reactions is vacuously valid — the validator only
-// gates ARs.
+// Tests that a chain with no Attack Reactions is vacuously valid.
 func TestPartitionHasValidARTargets_NoARsAlwaysValid(t *testing.T) {
 	chain := []Card{stubAttack{}, stubAttack{}}
 	if !partitionHasValidARTargets(chain) {
@@ -64,27 +63,22 @@ func TestPartitionHasValidARTargets_ARWithTargetValidates(t *testing.T) {
 // Tests that an AR with no matching target invalidates the chain.
 func TestPartitionHasValidARTargets_ARWithoutTargetInvalid(t *testing.T) {
 	ar := stubAR{name: "AR", allow: func(c Card) bool { return c.Types().IsAttackAction() }}
-	chain := []Card{ar} // AR alone, nothing else to react to
+	chain := []Card{ar}
 	if partitionHasValidARTargets(chain) {
 		t.Error("AR alone should fail validation (no target)")
 	}
 }
 
 // Tests that an AR can't satisfy its own target requirement — self-targeting is excluded.
-// Even if the predicate accepts the AR's own type set (Attack Reaction is not an attack
-// action card, so this is mostly defensive), the validator skips self.
 func TestPartitionHasValidARTargets_SelfTargetExcluded(t *testing.T) {
-	// Predicate matches everything — including the AR itself.
 	ar := stubAR{name: "AR", allow: func(c Card) bool { return true }}
-	chain := []Card{ar} // Only the AR; if self-targeting were allowed it'd validate.
+	chain := []Card{ar}
 	if partitionHasValidARTargets(chain) {
 		t.Error("AR matching only itself should fail validation (no distinct target)")
 	}
 }
 
-// Tests that two ARs in a chain both need their own valid target — the validator scans
-// every AR independently. Here AR1 wants attack actions (matches stubAttack), AR2 wants
-// nothing in the chain.
+// Tests that every AR in a chain needs its own valid target.
 func TestPartitionHasValidARTargets_AllARsMustHaveTarget(t *testing.T) {
 	ar1 := stubAR{name: "AR1", allow: func(c Card) bool { return c.Types().IsAttackAction() }}
 	ar2 := stubAR{name: "AR2", allow: func(c Card) bool { return false }}
@@ -94,8 +88,8 @@ func TestPartitionHasValidARTargets_AllARsMustHaveTarget(t *testing.T) {
 	}
 }
 
-// Tests that GrantAttackReactionBuff lands +n on the first matching CardState in
-// CardsRemaining and leaves non-matching entries untouched.
+// Tests that GrantAttackReactionBuff lands +n on the first matching CardState and leaves
+// non-matching entries untouched.
 func TestGrantAttackReactionBuff_LandsOnFirstMatch(t *testing.T) {
 	target := &CardState{Card: stubAttack{}}
 	skipped := &CardState{Card: stubAR{name: "skipMe", allow: func(Card) bool { return false }}}
@@ -109,8 +103,7 @@ func TestGrantAttackReactionBuff_LandsOnFirstMatch(t *testing.T) {
 	}
 }
 
-// Tests that GrantAttackReactionBuff fizzles silently when no CardState matches — orderings
-// where the AR plays after every target.
+// Tests that GrantAttackReactionBuff fizzles silently when no CardState matches.
 func TestGrantAttackReactionBuff_NoMatchFizzles(t *testing.T) {
 	skipped := &CardState{Card: stubAR{name: "skipMe", allow: func(Card) bool { return false }}}
 	s := TurnState{CardsRemaining: []*CardState{skipped}}
