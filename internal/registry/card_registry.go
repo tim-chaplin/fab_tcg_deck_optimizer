@@ -251,6 +251,10 @@ var cardsByID = []sim.Card{
 	ids.PoundForPoundYellow: cards.PoundForPoundYellow{},
 	ids.PoundForPoundBlue:   cards.PoundForPoundBlue{},
 
+	ids.PummelRed:    cards.PummelRed{},
+	ids.PummelYellow: cards.PummelYellow{},
+	ids.PummelBlue:   cards.PummelBlue{},
+
 	ids.RagingOnslaughtRed:    cards.RagingOnslaughtRed{},
 	ids.RagingOnslaughtYellow: cards.RagingOnslaughtYellow{},
 	ids.RagingOnslaughtBlue:   cards.RagingOnslaughtBlue{},
@@ -258,6 +262,10 @@ var cardsByID = []sim.Card{
 	ids.RavenousRabbleRed:    cards.RavenousRabbleRed{},
 	ids.RavenousRabbleYellow: cards.RavenousRabbleYellow{},
 	ids.RavenousRabbleBlue:   cards.RavenousRabbleBlue{},
+
+	ids.RazorReflexRed:    cards.RazorReflexRed{},
+	ids.RazorReflexYellow: cards.RazorReflexYellow{},
+	ids.RazorReflexBlue:   cards.RazorReflexBlue{},
 
 	ids.ScarForAScarRed:    cards.ScarForAScarRed{},
 	ids.ScarForAScarYellow: cards.ScarForAScarYellow{},
