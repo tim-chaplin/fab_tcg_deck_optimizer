@@ -2,7 +2,7 @@
 //
 // Text: "When this attacks, it gets -1{p} unless you pay {r}."
 
-package notimplemented
+package unplayable
 
 import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
@@ -22,9 +22,7 @@ func (BlusterBuffRed) Attack() int             { return 6 }
 func (BlusterBuffRed) Defense() int            { return 3 }
 func (BlusterBuffRed) Types() card.TypeSet     { return blusterBuffTypes }
 func (BlusterBuffRed) GoAgain() bool           { return false }
-
-// not implemented: pay {r} or lose 1{p} resolved as 'always pay'
-func (BlusterBuffRed) NotImplemented() {}
+func (BlusterBuffRed) Unplayable()             {}
 func (c BlusterBuffRed) Play(s *sim.TurnState, self *sim.CardState) {
 	n := self.DealEffectiveAttack(s)
 	s.Log(self, n)
