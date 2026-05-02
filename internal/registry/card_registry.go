@@ -187,8 +187,6 @@ var cardsByID = []sim.Card{
 	ids.EvasiveLeapYellow: cards.EvasiveLeapYellow{},
 	ids.EvasiveLeapBlue:   cards.EvasiveLeapBlue{},
 
-	ids.ExposedBlue: cards.ExposedBlue{},
-
 	ids.FateForeseenRed:    cards.FateForeseenRed{},
 	ids.FateForeseenYellow: cards.FateForeseenYellow{},
 	ids.FateForeseenBlue:   cards.FateForeseenBlue{},

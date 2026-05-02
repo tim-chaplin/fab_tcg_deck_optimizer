@@ -95,7 +95,7 @@ following plumbing is uniform and lives once in `internal/card/card.go`:
 - **`card.VariableCost` markers** (Amplify the Arknight, Rune Flash, …): `Cost(s)` reads
   TurnState; the marker exposes `MinCost` / `MaxCost` for the solver's pre-screen. Don't
   re-document the dispatch — note the printed cost formula.
-- **Attack Reactions** (Lunging Press, Thrust, Exposed, Nip at the Heels, …): cards
+- **Attack Reactions** (Lunging Press, Thrust, Nip at the Heels, …): cards
   implement `sim.AttackReaction.ARTargetAllowed(c) bool` returning true for any card in
   the chain that matches the printed target wording, and call
   `sim.GrantAttackReactionBuff(s, predicate, n)` from `Play` to add `+n{p}` to the first
