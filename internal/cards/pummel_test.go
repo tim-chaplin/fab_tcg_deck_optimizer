@@ -26,3 +26,13 @@ func TestPummel_PredicateRejectsNonAttackAction(t *testing.T) {
 		t.Error("non-attack action shouldn't match")
 	}
 }
+
+// Tests that the predicate accepts Club and Hammer weapon attacks (mode-0 leg).
+func TestPummel_PredicateAcceptsClubAndHammerWeapons(t *testing.T) {
+	if !(PummelRed{}).ARTargetAllowed(testutils.ClubWeapon{}) {
+		t.Error("Club weapon should pass mode-0 leg of predicate")
+	}
+	if !(PummelRed{}).ARTargetAllowed(testutils.HammerWeapon{}) {
+		t.Error("Hammer weapon should pass mode-0 leg of predicate")
+	}
+}

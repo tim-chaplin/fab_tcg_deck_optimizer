@@ -5,9 +5,10 @@
 // card with cost 1 or less gets +N{p} and 'When this hits, it gets **go again**.'"
 // (Red N=3, Yellow N=2, Blue N=1.)
 //
-// Modelling fudge: mode 1's on-hit go-again rider is dropped — the chain runner's AP gate
-// runs at chain-step resolution, before OnHit fires, so a post-hit GrantedGoAgain flip
-// can't propagate to AP for the next chain step.
+// Mode 1's on-hit go-again rider is modelled eagerly: when sim.LikelyToHit on the post-buff
+// target returns true, the AR grants 1 AP at Play time. That mirrors the chain runner's
+// existing LikelyToHit-based on-hit gate (used by Runechant arcane and OnHit handlers) and
+// makes the AP available for the next chain step's gate.
 
 package cards
 
@@ -55,6 +56,9 @@ func razorReflexPlay(s *sim.TurnState, self *sim.CardState, n int) {
 	case 1:
 		if razorReflexMode1Allowed(target.Card) {
 			sim.GrantAttackReactionBuff(s, self, n)
+			if sim.LikelyToHit(target) {
+				s.ActionPoints++
+			}
 		}
 	}
 }

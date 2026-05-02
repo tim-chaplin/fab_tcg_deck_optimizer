@@ -5,9 +5,8 @@
 // card with cost 2 or more gets +N{p} and 'When this hits a hero, they discard a card.'"
 // (Red N=4, Yellow N=3, Blue N=2.)
 //
-// Mode 1 targets cost-≥2 attack actions, grants +N{p}, and registers an OnHit hero-discard
-// rider crediting sim.DiscardValue. Mode 0's club/hammer weapon-attack leg has no targets in
-// the current pool (no Club or Hammer types) and resolves zero-Value.
+// Mode 0 grants +N{p} to a club/hammer weapon attack. Mode 1 grants +N{p} to a cost-≥2
+// attack action card and registers an OnHit hero-discard rider crediting sim.DiscardValue.
 
 package cards
 
@@ -19,9 +18,19 @@ import (
 
 var pummelTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAttackReaction)
 
-// pummelAccepts gates mode 1: cost-≥2 attack action card. Reads Cost against an empty
-// TurnState — variable-cost cards aren't expected in this gate's range.
+// pummelAccepts is the union of mode 0 (club/hammer weapon attack) and mode 1 (cost-≥2
+// attack action) target predicates. Reads Cost against an empty TurnState — variable-cost
+// cards aren't expected in mode 1's gate range.
 func pummelAccepts(c sim.Card) bool {
+	t := c.Types()
+	if (t.Has(card.TypeClub) || t.Has(card.TypeHammer)) && t.IsAttack() {
+		return true
+	}
+	return pummelMode1Allowed(c)
+}
+
+// pummelMode1Allowed gates mode 1: cost-≥2 attack action card.
+func pummelMode1Allowed(c sim.Card) bool {
 	if !c.Types().IsAttackAction() {
 		return false
 	}
@@ -35,21 +44,29 @@ func pummelOnHitDiscard(s *sim.TurnState, self *sim.CardState, h *sim.OnHitHandl
 		"%s forced opponent to discard 1", sim.DisplayName(h.Source))
 }
 
-// pummelPlay applies mode 1: +N{p} buff plus the on-hit discard rider on the target. Mode 0
-// has no live targets in the pool and resolves zero-Value.
+// pummelPlay applies the chosen mode's effect. Mode 0 grants +N{p} to a club/hammer weapon
+// attack. Mode 1 grants +N{p} to a cost-≥2 attack action and registers the on-hit discard
+// rider. Mismatched target × mode resolves as a zero-Value no-op.
 func pummelPlay(s *sim.TurnState, self *sim.CardState, n int) {
 	target := s.AttackReactionTarget()
 	if target == nil {
 		return
 	}
-	if self.Mode != 1 {
-		return
+	switch self.Mode {
+	case 0:
+		t := target.Card.Types()
+		if (t.Has(card.TypeClub) || t.Has(card.TypeHammer)) && t.IsAttack() {
+			sim.GrantAttackReactionBuff(s, self, n)
+		}
+	case 1:
+		if pummelMode1Allowed(target.Card) {
+			sim.GrantAttackReactionBuff(s, self, n)
+			target.OnHit = append(target.OnHit, sim.OnHitHandler{
+				Fire:   pummelOnHitDiscard,
+				Source: self.Card,
+			})
+		}
 	}
-	sim.GrantAttackReactionBuff(s, self, n)
-	target.OnHit = append(target.OnHit, sim.OnHitHandler{
-		Fire:   pummelOnHitDiscard,
-		Source: self.Card,
-	})
 }
 
 type PummelRed struct{}
