@@ -605,47 +605,40 @@ func dealNextHand(buf, handBuf, heldBuf []Card, head, tail *int, handSize int) (
 	return h, drawCount, true
 }
 
-// TurnStartState captures the game state at the start of a turn: the hand just dealt, the card
-// in the arsenal slot, the deck cards still to be drawn (top-to-bottom), the live Runechant
-// count at the start of this turn, and the Value dealt by the previous turn (damage +
-// prevention). Returned by EvalOneTurnForTesting.
+// TurnStartState is the result of EvalOneTurnForTesting: the tested turn's outcome (Value,
+// BestLine, Graveyard) plus the start-of-next-turn state (StartOfNextTurn*) so cross-turn
+// effects can be asserted without simulating the next turn.
 type TurnStartState struct {
-	Hand        []Card
-	ArsenalCard Card
-	Deck        []Card
-	// Runechants is the live Runechant count at the start of this turn — leftover from the
-	// previous turn's attack chain plus any tokens freshly created by start-of-turn
-	// AuraTrigger handlers.
-	Runechants int
-	// PrevTurnValue is the total Value (damage dealt + damage prevented) the previous turn
-	// produced — the same number Best reports as TurnSummary.Value for that turn.
-	PrevTurnValue int
-	// PrevTurnBestLine is the winning role assignment from turn 1, so tests can assert which
-	// card took which role.
-	PrevTurnBestLine []CardAssignment
-	// PrevTurnGraveyard is the cards that ended up in the graveyard at the end of turn 1, in
-	// the order they landed there. Sourced from TurnSummary.Graveyard so tests can
-	// distinguish "this card is in the graveyard" from "this card is just absent from the
-	// next-turn surfaces."
-	PrevTurnGraveyard []Card
-	// StartOfTurnTriggerDamage is the damage-equivalent credited by turn-2's start-of-turn
-	// AuraTrigger handlers — triggers registered during turn 1 that fired at the top of
-	// turn 2. Zero when no trigger survived into the pass. Production callers fold this
-	// into turn 2's Value; exposed here so tests can assert the cross-turn credit without
-	// running turn 2 to completion.
-	StartOfTurnTriggerDamage int
-	// StartOfTurnGraveyard is the auras destroyed during turn-2's start-of-turn AuraTrigger
-	// pass, in destroy order.
-	StartOfTurnGraveyard []Card
+	// Value is the tested turn's TurnSummary.Value (damage dealt + damage prevented).
+	Value int
+	// BestLine is the winning role assignment from the tested turn.
+	BestLine []CardAssignment
+	// Graveyard is the cards in the graveyard at end of the tested turn, in landing order.
+	// Distinguishes "in graveyard" from "absent from next-turn surfaces".
+	Graveyard []Card
+	// StartOfNextTurnHand is the hand dealt for the turn after the tested turn.
+	StartOfNextTurnHand []Card
+	// StartOfNextTurnArsenal is the card in the arsenal slot at the start of the next turn.
+	StartOfNextTurnArsenal Card
+	// StartOfNextTurnDeck is the remaining deck at the start of the next turn, top-to-bottom.
+	StartOfNextTurnDeck []Card
+	// StartOfNextTurnRunechants is the live Runechant count at the start of the next turn:
+	// chain leftover plus tokens created by next-turn start-of-turn AuraTrigger handlers.
+	StartOfNextTurnRunechants int
+	// StartOfNextTurnTriggerDamage is the damage credited by the next turn's start-of-turn
+	// AuraTrigger handlers (triggers registered this turn that fired at the top of next).
+	// Zero when no trigger survived. Production folds this into next turn's Value.
+	StartOfNextTurnTriggerDamage int
+	// StartOfNextTurnGraveyard is the auras destroyed during the next turn's start-of-turn
+	// AuraTrigger pass, in destroy order.
+	StartOfNextTurnGraveyard []Card
 }
 
-// EvalOneTurnForTesting runs one turn against d.Cards in source order (no shuffle) and
-// returns the turn-2 start state: the hand just dealt, the arsenal slot, the remaining
-// deck, and the runechant carryover. arsenalIn seeds turn 1's arsenal slot (nil for empty).
-// initialHand sets turn 1's starting hand; nil takes d.Cards[:handSize] as the hand and
-// treats the rest as the deck, non-nil uses the slice directly (may be shorter than
-// handSize) and treats d.Cards as the deck entirely. Test-only — production callers use
-// Evaluate, which shuffles and loops.
+// EvalOneTurnForTesting runs one turn against d.Cards in source order (no shuffle) and returns
+// the tested turn's outcome plus the start-of-next-turn state. arsenalIn seeds turn 1's arsenal
+// slot (nil for empty). initialHand sets turn 1's starting hand; nil takes d.Cards[:handSize] as
+// the hand and treats the rest as the deck, non-nil uses the slice directly (may be shorter than
+// handSize) and treats d.Cards as the deck entirely. Test-only — production callers use Evaluate.
 func (d *Deck) EvalOneTurnForTesting(incomingDamage int, arsenalIn Card, initialHand []Card) TurnStartState {
 	CurrentHero = d.Hero
 	handSize := d.Hero.Intelligence()
@@ -680,10 +673,10 @@ func (d *Deck) EvalOneTurnForTesting(incomingDamage int, arsenalIn Card, initial
 	turn2Hand, drawCount2, ok := dealNextHand(buf, handBuf, nextHeld, &head, &tail, handSize)
 	if !ok {
 		return TurnStartState{
-			ArsenalCard:       play.State.Arsenal,
-			Runechants:        play.State.Runechants,
-			PrevTurnValue:     play.Value,
-			PrevTurnGraveyard: append([]Card(nil), play.State.Graveyard...),
+			Value:                     play.Value,
+			Graveyard:                 append([]Card(nil), play.State.Graveyard...),
+			StartOfNextTurnArsenal:    play.State.Arsenal,
+			StartOfNextTurnRunechants: play.State.Runechants,
 		}
 	}
 	// Process turn-1 AuraTriggers at the turn-2 boundary the same way Evaluate does:
@@ -700,15 +693,15 @@ func (d *Deck) EvalOneTurnForTesting(incomingDamage int, arsenalIn Card, initial
 	lineCopy := append([]CardAssignment(nil), play.BestLine...)
 
 	return TurnStartState{
-		Hand:                     handCopy,
-		ArsenalCard:              play.State.Arsenal,
-		Deck:                     deckLeft,
-		Runechants:               play.State.Runechants + trigRunes,
-		PrevTurnValue:            play.Value,
-		PrevTurnBestLine:         lineCopy,
-		PrevTurnGraveyard:        append([]Card(nil), play.State.Graveyard...),
-		StartOfTurnTriggerDamage: trigDamage,
-		StartOfTurnGraveyard:     trigGraveyarded,
+		Value:                        play.Value,
+		BestLine:                     lineCopy,
+		Graveyard:                    append([]Card(nil), play.State.Graveyard...),
+		StartOfNextTurnHand:          handCopy,
+		StartOfNextTurnArsenal:       play.State.Arsenal,
+		StartOfNextTurnDeck:          deckLeft,
+		StartOfNextTurnRunechants:    play.State.Runechants + trigRunes,
+		StartOfNextTurnTriggerDamage: trigDamage,
+		StartOfNextTurnGraveyard:     trigGraveyarded,
 	}
 }
 
