@@ -411,21 +411,40 @@ func (ctx *sequenceContext) bestSequence(attackers []Card) (int, int, bool) {
 	pitchPerm := ctx.attackPitchPerm
 	pitchVals := ctx.attackPitchVals
 	pn := len(pitchPerm)
+	// tupleCount is the cartesian product of permMeta[i].modes across the chain. The product
+	// is permutation-invariant (multiplication commutes), so it's computed once here and
+	// reused across every (attack, pitch) ordering. hasModal short-circuits the per-tuple
+	// mode decode for chains with no ModalCards — pcBuf[i].Mode is already 0 from the per-
+	// permutation reset, so the fast path skips the mixed-radix decode entirely.
+	tupleCount := 1
+	for i := 0; i < n; i++ {
+		tupleCount *= int(permMeta[i].modes)
+	}
+	hasModal := tupleCount > 1
 	// tryPitchOrdering plays the chain against the current attack-permutation × pitch-
 	// permutation pair, threads cacheable, and folds a legal result into the running best.
-	// Enumerates the cartesian product of ModalCard mode indices via a mixed-radix decode of
-	// `tuple` over permMeta[i].modes; non-modal chains collapse to tupleCount==1 — one int
-	// multiply per chain step on the fast path.
+	// Modal chains additionally enumerate the cartesian product of ModalCard mode indices
+	// via a mixed-radix decode of `tuple` over permMeta[i].modes.
 	tryPitchOrdering := func() {
-		tupleCount := 1
-		for i := 0; i < n; i++ {
-			tupleCount *= permMeta[i].modes
+		if !hasModal {
+			dmg, leftoverRunechants, _, legal := ctx.playSequenceWithMeta(n)
+			if ctx.cacheable && !state.IsCacheable() {
+				ctx.cacheable = false
+			}
+			if legal && (!foundLegal || dmg > best ||
+				(dmg == best && leftoverRunechants > bestLeftoverRunechants)) {
+				best = dmg
+				bestLeftoverRunechants = leftoverRunechants
+				foundLegal = true
+				ctx.carryWinner.SnapshotFromTurn(state)
+			}
+			return
 		}
 		for tuple := 0; tuple < tupleCount; tuple++ {
 			rem := tuple
 			for i := 0; i < n; i++ {
-				modes := permMeta[i].modes
-				pcBuf[i].Mode = rem % modes
+				modes := int(permMeta[i].modes)
+				pcBuf[i].Mode = int8(rem % modes)
 				rem /= modes
 			}
 			dmg, leftoverRunechants, _, legal := ctx.playSequenceWithMeta(n)

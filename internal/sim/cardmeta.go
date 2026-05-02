@@ -37,9 +37,11 @@ type attackerMeta struct {
 	// Point — Instants and Attack Reactions (both 0 AP per FaB rules). Action cards and
 	// weapon swings cost 1 AP and don't set this.
 	isFreeChainStep bool
-	// modes is the mode count for a ModalCard, 1 for non-modal cards. Cached so the per-
-	// permutation mode-tuple loop avoids an interface assertion.
-	modes int
+	// modes is the mode count for a ModalCard, 1 for non-modal cards. Sized int8 so it
+	// packs into the bool block's padding without growing attackerMeta — every chain step
+	// reads permMeta[i] in the inner loop, and every extra cache line through that table
+	// shows up in the anneal bench.
+	modes int8
 }
 
 // costAt returns the card's effective cost given the current TurnState. Static cards return the
@@ -103,7 +105,7 @@ func cardMetaSlowPath(c Card, id ids.CardID) attackerMeta {
 		if n < 2 {
 			panic(fmt.Sprintf("ModalCard %s: Modes() = %d, want >= 2", c.Name(), n))
 		}
-		m.modes = n
+		m.modes = int8(n)
 	}
 	if vc, ok := c.(VariableCost); ok {
 		m.minCost = vc.MinCost()
