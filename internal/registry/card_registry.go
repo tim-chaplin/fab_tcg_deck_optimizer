@@ -247,6 +247,10 @@ var cardsByID = []sim.Card{
 	ids.OnTheHorizonYellow: cards.OnTheHorizonYellow{},
 	ids.OnTheHorizonBlue:   cards.OnTheHorizonBlue{},
 
+	ids.OverloadRed:    cards.OverloadRed{},
+	ids.OverloadYellow: cards.OverloadYellow{},
+	ids.OverloadBlue:   cards.OverloadBlue{},
+
 	ids.PoundForPoundRed:    cards.PoundForPoundRed{},
 	ids.PoundForPoundYellow: cards.PoundForPoundYellow{},
 	ids.PoundForPoundBlue:   cards.PoundForPoundBlue{},

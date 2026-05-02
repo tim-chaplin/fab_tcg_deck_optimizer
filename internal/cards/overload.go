@@ -1,9 +1,13 @@
-// Overload — Generic Action - Attack. Cost 0. Printed power: Red 3, Yellow 2, Blue 1. Printed pitch
-// variants: Red 1, Yellow 2, Blue 3. Defense 2.
+// Overload — Generic Action - Attack. Cost 0. Printed power: Red 3, Yellow 2, Blue 1. Printed
+// pitch variants: Red 1, Yellow 2, Blue 3. Defense 2.
 //
 // Text: "**Dominate** If Overload hits, it gains **go again**."
+//
+// On-hit go-again is modelled eagerly: when sim.LikelyToHit(self) returns true, Play flips
+// self.GrantedGoAgain so the chain runner's post-Play AP grant fires for the next step's
+// legality gate. Same pattern as Razor Reflex mode 1.
 
-package notimplemented
+package cards
 
 import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
@@ -12,6 +16,14 @@ import (
 )
 
 var overloadTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeAttack)
+
+func overloadPlay(s *sim.TurnState, self *sim.CardState) {
+	n := self.DealEffectiveAttack(s)
+	s.Log(self, n)
+	if sim.LikelyToHit(self) {
+		self.GrantedGoAgain = true
+	}
+}
 
 type OverloadRed struct{}
 
@@ -24,12 +36,8 @@ func (OverloadRed) Defense() int            { return 2 }
 func (OverloadRed) Types() card.TypeSet     { return overloadTypes }
 func (OverloadRed) GoAgain() bool           { return false }
 func (OverloadRed) Dominate()               {}
-
-// not implemented: on-hit go-again rider
-func (OverloadRed) NotImplemented() {}
-func (c OverloadRed) Play(s *sim.TurnState, self *sim.CardState) {
-	n := self.DealEffectiveAttack(s)
-	s.Log(self, n)
+func (OverloadRed) Play(s *sim.TurnState, self *sim.CardState) {
+	overloadPlay(s, self)
 }
 
 type OverloadYellow struct{}
@@ -43,12 +51,8 @@ func (OverloadYellow) Defense() int            { return 2 }
 func (OverloadYellow) Types() card.TypeSet     { return overloadTypes }
 func (OverloadYellow) GoAgain() bool           { return false }
 func (OverloadYellow) Dominate()               {}
-
-// not implemented: on-hit go-again rider
-func (OverloadYellow) NotImplemented() {}
-func (c OverloadYellow) Play(s *sim.TurnState, self *sim.CardState) {
-	n := self.DealEffectiveAttack(s)
-	s.Log(self, n)
+func (OverloadYellow) Play(s *sim.TurnState, self *sim.CardState) {
+	overloadPlay(s, self)
 }
 
 type OverloadBlue struct{}
@@ -62,10 +66,10 @@ func (OverloadBlue) Defense() int            { return 2 }
 func (OverloadBlue) Types() card.TypeSet     { return overloadTypes }
 func (OverloadBlue) GoAgain() bool           { return false }
 func (OverloadBlue) Dominate()               {}
-
-// not implemented: on-hit go-again rider
-func (OverloadBlue) NotImplemented() {}
-func (c OverloadBlue) Play(s *sim.TurnState, self *sim.CardState) {
-	n := self.DealEffectiveAttack(s)
-	s.Log(self, n)
+func (OverloadBlue) Play(s *sim.TurnState, self *sim.CardState) {
+	overloadPlay(s, self)
 }
+
+func (OverloadRed) ConditionalGoAgain()    {}
+func (OverloadYellow) ConditionalGoAgain() {}
+func (OverloadBlue) ConditionalGoAgain()   {}
