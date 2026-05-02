@@ -7,8 +7,7 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
 )
 
-// TestReekOfCorruption_NoAuraReturnsBaseAttack: without an aura played or created this turn the
-// discard rider can't fire, regardless of hit likelihood.
+// Tests that the discard rider stays dormant without an aura played or created.
 func TestReekOfCorruption_NoAuraReturnsBaseAttack(t *testing.T) {
 	cases := []struct {
 		c    sim.Card
@@ -20,37 +19,40 @@ func TestReekOfCorruption_NoAuraReturnsBaseAttack(t *testing.T) {
 	}
 	for _, tc := range cases {
 		s := sim.TurnState{}
-		tc.c.Play(&s, &sim.CardState{Card: tc.c})
+		cs := &sim.CardState{Card: tc.c}
+		tc.c.Play(&s, cs)
+		testutils.FireOnHitIfLikely(&s, cs)
 		if got := s.Value; got != tc.want {
 			t.Errorf("%s: Play() = %d, want %d (base attack, no aura)", tc.c.Name(), got, tc.want)
 		}
 	}
 }
 
-// TestReekOfCorruption_LikelyToHitWithAuraCreatedTriggersDiscard: Red (attack 4) is the only
-// variant whose printed attack lands in the likely set. With AuraCreated set the rider fires.
+// Tests that the discard rider fires with AuraCreated set on a likely-hit attack.
 func TestReekOfCorruption_LikelyToHitWithAuraCreatedTriggersDiscard(t *testing.T) {
 	s := sim.TurnState{AuraCreated: true}
 	c := ReekOfCorruptionRed{}
-	c.Play(&s, &sim.CardState{Card: c})
+	cs := &sim.CardState{Card: c}
+	c.Play(&s, cs)
+	testutils.FireOnHitIfLikely(&s, cs)
 	if got := s.Value; got != 4+3 {
 		t.Errorf("Red with AuraCreated: Play() = %d, want 7 (base 4 likely to hit + 3 discard)", got)
 	}
 }
 
-// TestReekOfCorruption_AuraPlayedTriggersDiscard: the HasPlayedType(TypeAura) branch satisfies
-// the rider the same as AuraCreated.
+// Tests that an aura earlier in CardsPlayed satisfies the rider precondition.
 func TestReekOfCorruption_AuraPlayedTriggersDiscard(t *testing.T) {
 	s := sim.TurnState{CardsPlayed: []sim.Card{testutils.Aura{}}}
 	c := ReekOfCorruptionRed{}
-	c.Play(&s, &sim.CardState{Card: c})
+	cs := &sim.CardState{Card: c}
+	c.Play(&s, cs)
+	testutils.FireOnHitIfLikely(&s, cs)
 	if got := s.Value; got != 4+3 {
 		t.Errorf("Play() = %d, want %d (aura earlier in chain triggers rider)", got, 4+3)
 	}
 }
 
-// TestReekOfCorruption_BlockableBaseSuppressesDiscard: Yellow (3) and Blue (2) are blockable
-// totals the opponent won't let through, so the on-hit rider doesn't fire.
+// Tests that the discard rider doesn't fire on blockable variants even with AuraCreated.
 func TestReekOfCorruption_BlockableBaseSuppressesDiscard(t *testing.T) {
 	cases := []struct {
 		c    sim.Card
@@ -68,9 +70,8 @@ func TestReekOfCorruption_BlockableBaseSuppressesDiscard(t *testing.T) {
 	}
 }
 
-// TestReekOfCorruption_RunechantsDontRescue: "When this hits" is strictly about this card's own
-// damage reaching the hero. Runechants firing alongside are separate arcane damage and don't
-// count toward "this" card hitting.
+// Tests that co-firing runechants don't rescue a blockable variant — "this hits" reads only
+// this card's own damage.
 func TestReekOfCorruption_RunechantsDontRescue(t *testing.T) {
 	s := sim.TurnState{AuraCreated: true, Runechants: 1}
 	c := ReekOfCorruptionYellow{}

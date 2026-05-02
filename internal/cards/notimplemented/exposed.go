@@ -24,6 +24,7 @@ func (ExposedBlue) Defense() int            { return 0 }
 func (ExposedBlue) Types() card.TypeSet     { return exposedTypes }
 func (ExposedBlue) GoAgain() bool           { return false }
 
-// not implemented: AR +1{p}; gated on attacker not being marked
+// not implemented: AR +1{p} target attack (Mark plumbing not modelled — both the
+// "if you are marked" play gate and the "Mark the defending hero" rider drop out)
 func (ExposedBlue) NotImplemented()                            {}
 func (ExposedBlue) Play(s *sim.TurnState, self *sim.CardState) { s.Log(self, 0) }

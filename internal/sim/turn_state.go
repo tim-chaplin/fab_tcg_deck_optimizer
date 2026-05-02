@@ -40,8 +40,8 @@ const (
 	// chain entry whose name matches Source.
 	LogEntryPreTrigger
 	// LogEntryPostTrigger is a trigger that fires after its parent chain entry resolves
-	// (ephemeral attack triggers). The format layer attaches it to the previous chain
-	// entry whose name matches Source.
+	// (OnHit riders, AR buffs). The format layer attaches it to the previous chain entry
+	// whose name matches Source.
 	LogEntryPostTrigger
 )
 
@@ -95,12 +95,10 @@ type TurnState struct {
 	// CreateRunechants increments it; the attack pipeline consumes the running total on each
 	// attack / weapon swing.
 	Runechants int
-	// ActionPoints is the chain runner's running Action Point pool. Seeded to 1 at the start
-	// of each permutation, decremented by 1 before each non-Instant card resolves, and
-	// incremented by 1 after a card with Go again (printed or granted) resolves. Action
-	// cards (attack and non-attack) and weapon swings all cost 1 AP; only Instants
-	// (card.TypeInstant) cost 0 AP. The chain is illegal when a non-Instant card would
-	// resolve with no AP available.
+	// ActionPoints is the chain runner's running AP pool. Seeded to 1 per permutation,
+	// decremented before each paying chain step, incremented after a Go-again card resolves.
+	// Free chain steps (Instants, Attack Reactions) cost 0; Action cards and weapon swings
+	// cost 1. A paying card resolving with no AP available makes the chain illegal.
 	ActionPoints int
 	// ArcaneDamageDealt sticks true once any source of arcane damage fires this turn:
 	// a Runechant token consuming itself on an attack / weapon swing, or a card whose Play
@@ -118,12 +116,12 @@ type TurnState struct {
 	// Value is the running damage-equivalent total for this chain — damage dealt + damage
 	// prevented + every aura-token / hero-trigger credit. The dispatcher records the chain
 	// step's Play+BonusAttack contribution via AddLogEntry; trigger handlers (hero, aura,
-	// ephemeral) credit themselves the same way. The solver compares permutations on this
+	// OnHit) credit themselves the same way. The solver compares permutations on this
 	// field. Reset by the sim per permutation.
 	Value int
 	// turnLog is the per-event chain trace — one entry per chain step / hero / aura /
-	// ephemeral / weapon swing. Cards reach it through the Log / LogRider / LogPreTrigger
-	// / LogPostTrigger family below; external readers (tests, format layer entry points)
+	// OnHit / weapon swing. Cards reach it through the Log / LogRider / LogPreTrigger /
+	// LogPostTrigger family below; external readers (tests, format layer entry points)
 	// use the LogEntries accessor. The format layer uses each entry's Kind plus Source to
 	// cluster triggers under the right parent. Reset per permutation. Lowercase so callers
 	// can't bypass the skipLog gate by appending directly.
@@ -160,17 +158,16 @@ type TurnState struct {
 	// partition. Uncapped: if the partition over-blocks, BlockTotal is the full sum, not
 	// clamped to IncomingDamage.
 	BlockTotal int
-	// EphemeralAttackTriggers are same-turn, single-fire "next attack" triggers registered
-	// by a card's Play (e.g. Mauvrion Skies's "if this hits, create Runechants" rider).
-	// Don't carry across turns; reset per chain.
-	EphemeralAttackTriggers []EphemeralAttackTrigger
+	// attackReactionTarget is the buff target for the currently-resolving Attack Reaction.
+	// Set by the chain runner around AR.Play; ARs read it via AttackReactionTarget().
+	attackReactionTarget *CardState
 	// Revealed is the side channel start-of-turn AuraTrigger handlers use to move a card
 	// from the top of the post-draw deck into the hand (Sigil of the Arknight's reveal).
 	Revealed []Card
 	// TriggeringCard is the card whose play caused the active aura attack-action trigger
 	// to fire. The sim sets it before each AuraTrigger handler runs and clears it after;
 	// the handler reads it to attribute its log line back to the triggering card. Hero
-	// and ephemeral handlers receive the triggering card as a direct arg already and don't
+	// and OnHit handlers receive the triggering card as a direct arg already and don't
 	// need this field. Nil during direct chain-step resolution and start-of-turn fires.
 	TriggeringCard Card
 	// skipLog short-circuits Log appends and the per-entry text formatting for chains the
@@ -197,6 +194,25 @@ type TurnState struct {
 // card in this chain has read or mutated deck / graveyard via an accessor. A future
 // hand-eval cache stores results only when this is true at chain end.
 func (s *TurnState) IsCacheable() bool { return s.cacheable }
+
+// AttackReactionTarget returns the buff target for the currently-resolving AR, or nil when
+// no AR is resolving.
+func (s *TurnState) AttackReactionTarget() *CardState { return s.attackReactionTarget }
+
+// AmendLastChainStepN adds n to the most recent ChainStep entry's N field. ARs use this to
+// fold their +{p} buff into the buffed attack's display delta. No-op when skipLog elided
+// log entries.
+func (s *TurnState) AmendLastChainStepN(n int) {
+	if s.skipLog || n == 0 {
+		return
+	}
+	for i := len(s.turnLog) - 1; i >= 0; i-- {
+		if s.turnLog[i].Kind == LogEntryChainStep {
+			s.turnLog[i].N += n
+			return
+		}
+	}
+}
 
 // Deck returns the live deck top-to-bottom and flips IsCacheable to false. Cards must not
 // mutate the returned slice; use PopDeckTop / PrependToDeck / TutorFromDeck for mutations.
@@ -493,10 +509,9 @@ func (s *TurnState) LogPreTriggerf(source string, n int, format string, args ...
 	s.logf(LogEntryPreTrigger, source, n, format, args...)
 }
 
-// LogPostTrigger appends an indented post-trigger sub-line attributed to source — an
-// ephemeral attack trigger fired by a different card than self (the rider's source vs the
-// trigger's host). Use LogRider when the host card has a CardState and the rider line just
-// goes under self.
+// LogPostTrigger appends an indented post-trigger sub-line attributed to source — for
+// rider lines whose host differs from self (e.g. an OnHit attached to a target card). Use
+// LogRider when self's CardState is the host.
 func (s *TurnState) LogPostTrigger(source, text string, n int) {
 	s.log(LogEntryPostTrigger, source, text, n)
 }
@@ -632,11 +647,4 @@ func (s *TurnState) RegisterStartOfTurn(self Card, count int, text string, handl
 		Handler: handler,
 		LogText: logText,
 	})
-}
-
-// AddEphemeralAttackTrigger registers a same-turn, fire-once "next attack" trigger. The sim
-// stamps t.SourceIndex after the registering card's Play returns. Fires on the next
-// matching attack action's resolution; fizzles silently at end of turn if no match.
-func (s *TurnState) AddEphemeralAttackTrigger(t EphemeralAttackTrigger) {
-	s.EphemeralAttackTriggers = append(s.EphemeralAttackTriggers, t)
 }

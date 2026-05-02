@@ -91,10 +91,10 @@ func TestBest_ViseraiOathBlueHocusRedMalefic(t *testing.T) {
 func TestBest_RunicReapingPrefersAttackPitch(t *testing.T) {
 	// Pitching the Blue Hocus Pocus (attack-typed, pitch 3) pays for Runic Reaping + Shrill
 	// AND satisfies Runic Reaping's pitched-attack rider, granting +1 to Shrill via
-	// BonusAttack. Runic Reaping's "if this hits, create N Runechants" clause is registered
-	// as an EphemeralAttackTrigger (same shape as Mauvrion Skies) and fires after Shrill's
-	// full resolution: target.EffectiveAttack = printed 4 + BonusAttack 1 = 5, which falls
-	// OUT of the {1,4,7} LikelyToHit window, so the runechant rider drops. The only damage
+	// BonusAttack. Runic Reaping's "if this hits, create N Runechants" clause is appended
+	// to Shrill's OnHit (same shape as Mauvrion Skies) and fires post-buff:
+	// target.EffectiveAttack = printed 4 + BonusAttack 1 = 5, which falls OUT of the {1,4,7}
+	// LikelyToHit window, so the runechant rider drops. The only damage
 	// on Runic Reaping's slot is Viserai's runechant for the prior non-attack action.
 	// Blue Malefic (1 arcane + 1 Viserai runechant = 2) → Runic Reaping (0 own damage + 1
 	// Viserai runechant = 1) → Shrill (4 base + 3 aura-created bonus + 1 BonusAttack = 8).
@@ -142,7 +142,7 @@ func TestBest_ViseraiMauvrionGrantsGoAgainToShrill(t *testing.T) {
 //	    credits its Runechant rider iff the attack is now likely to hit.
 //
 // Requires hero.OnCardPlayed running before Play (so DD's aura check sees Viserai's
-// Runechant), DD's conditional Dominate grant, and Mauvrion's ephemeral trigger reading
+// Runechant), DD's conditional Dominate grant, and Mauvrion's OnHit reading
 // target.EffectiveDominate() at fire time. If any of those regresses, this test drops to 6
 // (no Mauvrion rider) or less.
 //

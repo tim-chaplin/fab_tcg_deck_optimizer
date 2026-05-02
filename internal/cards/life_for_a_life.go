@@ -4,10 +4,8 @@
 // Text: "When this is played, if you have less {h} than an opposing hero, it gets **go again**.
 // When this hits, gain 1{h}."
 //
-// The on-hit 1{h} gain is modelled as +1 damage-equivalent (1 health saved ≈ 1 damage), gated
-// on sim.LikelyToHit. The "less {h} than an opposing hero" clause is modelled as a hero
-// attribute — go again fires for heroes that implement sim.LowerHealthWanter and never fires
-// otherwise.
+// 1{h} gain is modelled as +1 damage-equivalent. The "less {h}" go-again clause routes
+// through sim.HeroWantsLowerHealth — fires for heroes implementing sim.LowerHealthWanter.
 
 package cards
 
@@ -22,6 +20,13 @@ var lifeForALifeTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.
 // lifeForALifeHealValue is the damage-equivalent credited when the on-hit 1{h} gain fires.
 const lifeForALifeHealValue = 1
 
+// lifeForALifeOnHit fires the printed "When this hits, gain 1{h}" rider. Top-level so
+// registration stays alloc-free.
+func lifeForALifeOnHit(s *sim.TurnState, self *sim.CardState, _ *sim.OnHitHandler) {
+	s.AddValue(lifeForALifeHealValue)
+	s.LogRider(self, lifeForALifeHealValue, "On-hit gained 1 health")
+}
+
 type LifeForALifeRed struct{}
 
 func (LifeForALifeRed) ID() ids.CardID          { return ids.LifeForALifeRed }
@@ -35,10 +40,7 @@ func (LifeForALifeRed) GoAgain() bool           { return sim.HeroWantsLowerHealt
 func (LifeForALifeRed) Play(s *sim.TurnState, self *sim.CardState) {
 	n := self.DealEffectiveAttack(s)
 	s.Log(self, n)
-	if sim.LikelyToHit(self) {
-		s.AddValue(lifeForALifeHealValue)
-		s.LogRider(self, lifeForALifeHealValue, "On-hit gained 1 health")
-	}
+	self.OnHit = append(self.OnHit, sim.OnHitHandler{Fire: lifeForALifeOnHit})
 }
 
 type LifeForALifeYellow struct{}
@@ -54,10 +56,7 @@ func (LifeForALifeYellow) GoAgain() bool           { return sim.HeroWantsLowerHe
 func (LifeForALifeYellow) Play(s *sim.TurnState, self *sim.CardState) {
 	n := self.DealEffectiveAttack(s)
 	s.Log(self, n)
-	if sim.LikelyToHit(self) {
-		s.AddValue(lifeForALifeHealValue)
-		s.LogRider(self, lifeForALifeHealValue, "On-hit gained 1 health")
-	}
+	self.OnHit = append(self.OnHit, sim.OnHitHandler{Fire: lifeForALifeOnHit})
 }
 
 type LifeForALifeBlue struct{}
@@ -73,8 +72,5 @@ func (LifeForALifeBlue) GoAgain() bool           { return sim.HeroWantsLowerHeal
 func (LifeForALifeBlue) Play(s *sim.TurnState, self *sim.CardState) {
 	n := self.DealEffectiveAttack(s)
 	s.Log(self, n)
-	if sim.LikelyToHit(self) {
-		s.AddValue(lifeForALifeHealValue)
-		s.LogRider(self, lifeForALifeHealValue, "On-hit gained 1 health")
-	}
+	self.OnHit = append(self.OnHit, sim.OnHitHandler{Fire: lifeForALifeOnHit})
 }

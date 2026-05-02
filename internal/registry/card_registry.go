@@ -218,6 +218,7 @@ var cardsByID = []sim.Card{
 	ids.LifeForALifeRed:    cards.LifeForALifeRed{},
 	ids.LifeForALifeYellow: cards.LifeForALifeYellow{},
 	ids.LifeForALifeBlue:   cards.LifeForALifeBlue{},
+	ids.LungingPressBlue:   cards.LungingPressBlue{},
 
 	ids.MinnowismRed:    cards.MinnowismRed{},
 	ids.MinnowismYellow: cards.MinnowismYellow{},
@@ -229,9 +230,10 @@ var cardsByID = []sim.Card{
 
 	ids.MuscleMuttYellow: cards.MuscleMuttYellow{},
 
-	ids.NimblismRed:    cards.NimblismRed{},
-	ids.NimblismYellow: cards.NimblismYellow{},
-	ids.NimblismBlue:   cards.NimblismBlue{},
+	ids.NimblismRed:       cards.NimblismRed{},
+	ids.NimblismYellow:    cards.NimblismYellow{},
+	ids.NimblismBlue:      cards.NimblismBlue{},
+	ids.NipAtTheHeelsBlue: cards.NipAtTheHeelsBlue{},
 
 	ids.OnTheHorizonRed:    cards.OnTheHorizonRed{},
 	ids.OnTheHorizonYellow: cards.OnTheHorizonYellow{},
@@ -281,6 +283,7 @@ var cardsByID = []sim.Card{
 	ids.SunKissYellow: cards.SunKissYellow{},
 	ids.SunKissBlue:   cards.SunKissBlue{},
 
+	ids.ThrustRed:     cards.ThrustRed{},
 	ids.ToughenUpBlue: cards.ToughenUpBlue{},
 
 	ids.TrotAlongBlue: cards.TrotAlongBlue{},

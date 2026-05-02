@@ -7,14 +7,15 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
 )
 
-// TestSnatch_LikelyHitFiresDrawOne: Red (attack 4) is the only variant whose printed attack
-// lands in the likely-to-hit set. The rider fires state.DrawOne, popping the deck top and
-// appending it to s.Hand. Play returns just the attack.
+// Tests that the on-hit DrawOne fires on a likely-hit attack, popping the deck top into
+// hand.
 func TestSnatch_LikelyHitFiresDrawOne(t *testing.T) {
 	top := testutils.GenericAttack(0, 3)
 	s := sim.NewTurnState([]sim.Card{top}, nil)
 	c := SnatchRed{}
-	c.Play(s, &sim.CardState{Card: c})
+	cs := &sim.CardState{Card: c}
+	c.Play(s, cs)
+	testutils.FireOnHitIfLikely(s, cs)
 	if got := s.Value; got != 4 {
 		t.Errorf("Red: Play() = %d, want 4", got)
 	}
@@ -26,8 +27,7 @@ func TestSnatch_LikelyHitFiresDrawOne(t *testing.T) {
 	}
 }
 
-// TestSnatch_BlockableSuppressesDraw: Yellow (3) and Blue (2) are blockable; the on-hit rider
-// doesn't fire, so the deck is untouched and Hand stays empty.
+// Tests that the on-hit DrawOne doesn't fire on blockable variants.
 func TestSnatch_BlockableSuppressesDraw(t *testing.T) {
 	cases := []struct {
 		c    sim.Card

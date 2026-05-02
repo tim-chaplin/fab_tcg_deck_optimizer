@@ -4,10 +4,7 @@
 // Text: "If you've dealt arcane damage this turn, this gets 'When this hits a hero, they discard
 // a card.'"
 //
-// Rider reads TurnState.ArcaneDamageDealt. When set, the "when this hits a hero" discard rider
-// fires only if this card's own printed attack is likely to land (1/4/7 per sim.LikelyToHit).
-// Runechants firing alongside don't count — "this hits" is strictly about this card's damage
-// reaching the hero, not separate arcane tokens.
+// "This hits" reads only this card's own damage; co-firing runechants don't satisfy it.
 
 package cards
 
@@ -19,18 +16,20 @@ import (
 
 var consumingVolitionTypes = card.NewTypeSet(card.TypeRuneblade, card.TypeAction, card.TypeAttack)
 
-// consumingVolitionApplyRider emits the on-hit discard rider as a sub-line under self's
-// chain step when ArcaneDamageDealt is set AND this card's printed attack is likely to
-// land on its own. The credit is sim.DiscardValue; the line reads "On-hit discarded a
-// card (+N)" indented under the parent.
+// consumingVolitionApplyRider registers the on-hit discard rider when ArcaneDamageDealt is
+// set.
 func consumingVolitionApplyRider(s *sim.TurnState, self *sim.CardState) {
 	if !s.ArcaneDamageDealt {
 		return
 	}
-	if sim.LikelyToHit(self) {
-		s.AddValue(sim.DiscardValue)
-		s.LogRider(self, sim.DiscardValue, "On-hit discarded a card")
-	}
+	self.OnHit = append(self.OnHit, sim.OnHitHandler{Fire: consumingVolitionOnHit})
+}
+
+// consumingVolitionOnHit fires the conditional "When this hits a hero, they discard a card"
+// rider. Top-level so registration stays alloc-free.
+func consumingVolitionOnHit(s *sim.TurnState, self *sim.CardState, _ *sim.OnHitHandler) {
+	s.AddValue(sim.DiscardValue)
+	s.LogRider(self, sim.DiscardValue, "On-hit discarded a card")
 }
 
 type ConsumingVolitionRed struct{}

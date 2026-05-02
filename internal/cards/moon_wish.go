@@ -37,20 +37,12 @@ func moonWishCost(s *sim.TurnState) int {
 	return moonWishPrintedCost
 }
 
-// moonWishPlay applies the alt cost mutation (when a hand card is available), emits Moon
-// Wish's chain step, and on a likely hit tutors a Sun Kiss from the deck. Sun Kiss plays
-// immediately when self has go-again granted by a prior chain card (its own chain step
-// emits with its printed heal as a post-Moon Wish entry); otherwise it carries to the
-// next hand via s.Hand. Alt-cost fires get a "returned X to top of deck" line; tutor
-// outcomes get a "tutored Sun Kiss" / "tutored Sun Kiss and played it" / "found no Sun
-// Kiss to tutor" post-trigger child line beneath Moon Wish's chain step.
+// moonWishPlay pays the alt cost (when a hand card is available), emits the chain step,
+// and registers an OnHit that tutors Sun Kiss. Tutored Sun Kiss plays immediately when
+// self has go-again granted; otherwise it lands in hand for next turn.
 func moonWishPlay(c sim.Card, s *sim.TurnState, self *sim.CardState) {
 	name := sim.DisplayName(c)
-	// Alt cost: pop a hand card and prepend to deck. Same-turn deck-top readers (the Sun
-	// Kiss tutor's post-resolution DrawOne) see it; the next turn's deal sees it too via
-	// the sim's end-of-turn deck snapshot. Routes the prepend through PrependToDeck so the
-	// cacheable bit flips — modifying deck order makes the chain depend on hidden state
-	// (and downstream cards reading the new top will themselves flip).
+	// Alt cost: pop a hand card and prepend it to the deck (PrependToDeck flips cacheable).
 	var returned sim.Card
 	if len(s.Hand) > 0 {
 		returned = s.Hand[0]
@@ -58,8 +50,7 @@ func moonWishPlay(c sim.Card, s *sim.TurnState, self *sim.CardState) {
 		s.PrependToDeck(returned)
 	}
 
-	// Moon Wish's own chain step lands first so subsequent alt-cost / tutor lines + Sun
-	// Kiss's chain step (when go-again fires) follow it in order.
+	// Emit Moon Wish's chain step first so the alt-cost / tutor lines follow it in order.
 	n := self.DealEffectiveAttack(s)
 	s.Log(self, n)
 
@@ -67,9 +58,16 @@ func moonWishPlay(c sim.Card, s *sim.TurnState, self *sim.CardState) {
 		s.LogPostTriggerf(name, 0, "%s returned %s to top of deck", name, sim.DisplayName(returned))
 	}
 
-	if !sim.LikelyToHit(self) {
-		return
-	}
+	self.OnHit = append(self.OnHit, sim.OnHitHandler{Fire: moonWishOnHit})
+}
+
+// moonWishOnHit fires the printed "If this hits, search for Sun Kiss" rider. Top-level so
+// registration stays alloc-free; reads the Moon Wish printing off self.Card so we don't
+// need a captured copy or a Source-field detour (self IS the Moon Wish that registered
+// the handler).
+func moonWishOnHit(s *sim.TurnState, self *sim.CardState, _ *sim.OnHitHandler) {
+	c := self.Card
+	name := sim.DisplayName(c)
 	sk, ok := s.TutorFromDeck(sunKissTutorPriority)
 	if !ok {
 		s.LogPostTriggerf(name, 0, "%s found no Sun Kiss to tutor", name)
@@ -77,17 +75,14 @@ func moonWishPlay(c sim.Card, s *sim.TurnState, self *sim.CardState) {
 	}
 
 	if !self.EffectiveGoAgain() {
-		// Tutor lands the card in hand; carries to next turn via the sim's end-of-turn
-		// copy of s.Hand.
+		// Tutor lands the card in hand for next turn.
 		s.Hand = append(s.Hand, sk)
 		s.LogPostTriggerf(name, 0, "%s tutored %s", name, sim.DisplayName(sk))
 		return
 	}
-	// Go-again means Moon Wish gets a chain extension this turn. Pre-append Moon Wish to
-	// CardsPlayed so Sun Kiss's "if you've played Moon Wish" synergy fires; pop after so
-	// the sim's normal post-Play append doesn't double-add. Sun Kiss authors its own
-	// chain step inside its Play call — it appears as a separate top-level entry following
-	// Moon Wish's tutor narration.
+	// Go-again: Sun Kiss plays immediately. Pre-append Moon Wish to CardsPlayed so Sun
+	// Kiss's "if you've played Moon Wish" synergy fires; pop after so the sim's normal
+	// post-Play append doesn't double-add.
 	s.LogPostTriggerf(name, 0, "%s tutored %s and played it", name, sim.DisplayName(sk))
 	s.CardsPlayed = append(s.CardsPlayed, c)
 	skSelf := &sim.CardState{Card: sk}
@@ -96,10 +91,8 @@ func moonWishPlay(c sim.Card, s *sim.TurnState, self *sim.CardState) {
 	s.AddToGraveyard(sk)
 }
 
-// sunKissTutorPriority is the score function passed to TurnState.TutorFromDeck — picks the
-// highest-priority Sun Kiss printing present in the deck. Priority order is Red > Yellow >
-// Blue: Red heals the most ({3,2,1}{h} by colour), so the highest-power variant present
-// wins. A score of 0 (non-Sun-Kiss card) tells TutorFromDeck to skip the entry.
+// sunKissTutorPriority picks the highest-priority Sun Kiss printing in the deck. Red >
+// Yellow > Blue (Red heals the most: {3,2,1}{h} by colour).
 func sunKissTutorPriority(c sim.Card) int {
 	switch c.ID() {
 	case ids.SunKissRed:

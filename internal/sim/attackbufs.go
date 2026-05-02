@@ -86,7 +86,6 @@ type permBufs struct {
 	cardsPlayedBacking  []Card
 	logBacking          []LogEntry
 	auraTriggersBacking []AuraTrigger
-	ephemeralBacking    []EphemeralAttackTrigger
 }
 
 // carryWinnerBufs holds the running-winner CarryState scratches — one per nesting level
@@ -200,9 +199,6 @@ func newAttackBufs(handSize, weaponCount int, weapons []Weapon) *attackBufs {
 			cardsPlayedBacking:  make([]Card, 0, maxAttackers),
 			logBacking:          make([]LogEntry, 0, logBackingCap),
 			auraTriggersBacking: make([]AuraTrigger, 0, handSize+1),
-			// Ephemeral attack triggers typically register one per applicable card — pre-sized cap
-			// avoids the per-Play slice grow.
-			ephemeralBacking: make([]EphemeralAttackTrigger, 0, handSize+1),
 		},
 		// carryWinnerBufs starts zero-valued — the slice backings grow on first use.
 	}

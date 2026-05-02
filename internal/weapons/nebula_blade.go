@@ -2,12 +2,6 @@
 // Text: "Once per Turn Action - {r}{r}: Attack. If Nebula Blade hits, create a Runechant token. If
 // you have played a 'non-attack' action card this turn, Nebula Blade gains +3{p} until end of
 // turn."
-//
-// Modelling: the +3 power rider routes through self.BonusAttack so EffectiveAttack picks it up
-// in sim.LikelyToHit and the solver folds it into chain damage. The Runechant rider gates on
-// LikelyToHit — today's heuristic lets both the base-1 and buffed-4 swings qualify, so behavior
-// matches "always create a rune", but gating explicitly tracks any future retune of LikelyToHit
-// without a follow-up patch.
 
 package weapons
 
@@ -36,9 +30,13 @@ func (c NebulaBlade) Play(s *sim.TurnState, self *sim.CardState) {
 	}
 	n := self.DealEffectiveAttack(s)
 	s.Log(self, n)
-	if sim.LikelyToHit(self) {
-		created := s.CreateRunechant()
-		s.AddValue(created)
-		s.LogRider(self, created, "On-hit created a runechant")
-	}
+	self.OnHit = append(self.OnHit, sim.OnHitHandler{Fire: nebulaBladeOnHit})
+}
+
+// nebulaBladeOnHit fires the printed "If Nebula Blade hits, create a Runechant token"
+// rider. Top-level so registration stays alloc-free.
+func nebulaBladeOnHit(s *sim.TurnState, self *sim.CardState, _ *sim.OnHitHandler) {
+	created := s.CreateRunechant()
+	s.AddValue(created)
+	s.LogRider(self, created, "On-hit created a runechant")
 }

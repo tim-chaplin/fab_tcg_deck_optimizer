@@ -4,9 +4,8 @@
 // Text: "When this is played, if you have less {h} than an opposing hero, it gets **go again**.
 // When this hits, deal 1 damage to any target."
 //
-// The on-hit 1 damage is modelled as +1 damage-equivalent, gated on sim.LikelyToHit. The
-// "less {h} than an opposing hero" clause is modelled as a hero attribute — go again fires for
-// heroes that implement sim.LowerHealthWanter and never fires otherwise.
+// On-hit 1 damage is modelled as +1 damage-equivalent. The "less {h}" go-again clause routes
+// through sim.HeroWantsLowerHealth — fires for heroes implementing sim.LowerHealthWanter.
 
 package cards
 
@@ -34,8 +33,12 @@ func (BlowForABlowRed) GoAgain() bool           { return sim.HeroWantsLowerHealt
 func (BlowForABlowRed) Play(s *sim.TurnState, self *sim.CardState) {
 	n := self.DealEffectiveAttack(s)
 	s.Log(self, n)
-	if sim.LikelyToHit(self) {
-		s.AddValue(blowForABlowPingValue)
-		s.LogRider(self, blowForABlowPingValue, "On-hit dealt 1 damage")
-	}
+	self.OnHit = append(self.OnHit, sim.OnHitHandler{Fire: blowForABlowOnHit})
+}
+
+// blowForABlowOnHit fires the printed "When this hits, deal 1 damage" rider. Top-level so
+// registration doesn't allocate a closure on the hot anneal path.
+func blowForABlowOnHit(s *sim.TurnState, self *sim.CardState, _ *sim.OnHitHandler) {
+	s.AddValue(blowForABlowPingValue)
+	s.LogRider(self, blowForABlowPingValue, "On-hit dealt 1 damage")
 }

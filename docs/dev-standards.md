@@ -95,6 +95,23 @@ following plumbing is uniform and lives once in `internal/card/card.go`:
 - **`card.VariableCost` markers** (Amplify the Arknight, Rune Flash, …): `Cost(s)` reads
   TurnState; the marker exposes `MinCost` / `MaxCost` for the solver's pre-screen. Don't
   re-document the dispatch — note the printed cost formula.
+- **Attack Reactions**: cards implement `sim.AttackReaction.ARTargetAllowed(c) bool`
+  matching the printed target wording. The chain runner validates that an AR's preceding
+  active attack matches the predicate; failures abort the permutation as illegal. The AR's
+  `Play` calls `sim.GrantAttackReactionBuff(s, self, n)` — the helper reads
+  `s.AttackReactionTarget()` (set by the runner before invoking `Play`), adds `n` to the
+  target's `BonusAttack`, credits `n` to `s.Value`, amends the buffed attack's chain-step
+  display delta, and emits the rider log line. ARs cost 0 AP; the chain runner's free-step
+  gate handles that automatically. Card docstrings call out the printed predicate (esp.
+  when the wording distinguishes "attack" from "attack action card") and any modelling
+  fudge — not the wiring.
+- **`OnHit` registrations**: attack cards with "if this hits, do X" riders append a
+  `func(*sim.TurnState)` to `self.OnHit` inside `Play` instead of firing the rider inline.
+  The chain runner finalizes each attack post-AR-buff: when `LikelyToHit(self)` evaluates
+  true on the post-buff `EffectiveAttack`, every closure in `self.OnHit` runs. Cards that
+  add an on-hit rider to a DIFFERENT card (Mauvrion Skies, Runic Reaping) append to the
+  target's `OnHit`. Cards must NOT call `LikelyToHit` directly from `Play` — the chain
+  runner owns the gate so AR buffs propagate.
 
 ## Logging idioms
 

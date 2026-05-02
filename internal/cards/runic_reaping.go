@@ -6,17 +6,6 @@
 // (Red N=3, Yellow N=2, Blue N=1.)
 //
 // Both riders target Runeblade attack action cards only — weapon swings don't qualify.
-//
-// Modelling splits the two riders by when they need to resolve:
-//   - The +1{p} pitched-attack rider is a static buff on the target's printed power, so it's
-//     applied via pc.BonusAttack on the look-ahead pass before the target plays. EffectiveAttack
-//     folds it in and a card playing between Runic Reaping and the target sees the buff if it
-//     scans target.BonusAttack.
-//   - The "if this hits, create N Runechants" rider depends on the target's fully-resolved
-//     attack state. A card that plays between Runic Reaping and the target may grant more
-//     BonusAttack (or Dominate, etc.), and LikelyToHit needs to see those grants. Play
-//     registers an EphemeralAttackTrigger; the handler runs after the target's Play and
-//     reads target.EffectiveAttack / target.EffectiveDominate.
 
 package cards
 
@@ -28,8 +17,7 @@ import (
 
 var runicReapingTypes = card.NewTypeSet(card.TypeRuneblade, card.TypeAction)
 
-// runicReapingTargetMatches is the shared predicate for Runic Reaping's two riders: the next
-// Runeblade attack action card (weapons don't qualify).
+// runicReapingTargetMatches accepts Runeblade attack action cards (weapons don't qualify).
 func runicReapingTargetMatches(target *sim.CardState) bool {
 	t := target.Card.Types()
 	return t.Has(card.TypeRuneblade) && t.IsAttackAction()
@@ -77,10 +65,8 @@ func (c RunicReapingBlue) Play(s *sim.TurnState, self *sim.CardState) {
 	runicReapingPlay(s, self, c, 1)
 }
 
-// runicReapingPlay applies the pitched-attack +1{p} grant via the target's BonusAttack,
-// registers the on-hit Runechant trigger, and emits Runic Reaping's chain step (no
-// value contribution — Runic Reaping itself doesn't deal damage; the trigger handler
-// credits whatever runechants get created after the target resolves).
+// runicReapingPlay buffs the next matching attack +1{p} when an attack card was pitched
+// and appends an on-hit n-runechant rider.
 func runicReapingPlay(s *sim.TurnState, selfState *sim.CardState, source sim.Card, n int) {
 	var target *sim.CardState
 	for _, pc := range s.CardsRemaining {
@@ -99,12 +85,12 @@ func runicReapingPlay(s *sim.TurnState, selfState *sim.CardState, source sim.Car
 			break
 		}
 	}
-	s.AddEphemeralAttackTrigger(sim.EphemeralAttackTrigger{
+	text := onHitRunechantText[source.ID()]
+	target.OnHit = append(target.OnHit, sim.OnHitHandler{
+		Fire:    onHitCreateRunechants,
 		Source:  source,
-		Matches: runicReapingTargetMatches,
-		Handler: onHitRunechantHandler,
+		LogText: text,
 		N:       n,
-		LogText: onHitRunechantText[source.ID()],
 	})
 	s.Log(selfState, 0)
 }

@@ -2,8 +2,8 @@ package sim
 
 // Attack-chain search: bestAttackWithWeapons evaluates one partition leaf across all phase /
 // weapon masks, bestSequence picks the best ordering of attackers via Heap's algorithm, and
-// playSequence* replay a single permutation through TurnState while firing hero triggers and
-// AuraTrigger / EphemeralAttackTrigger handlers.
+// playSequence* replay a single permutation through TurnState while firing hero triggers,
+// AuraTrigger handlers, and per-attack OnHit closures.
 
 import (
 	"fmt"
@@ -299,30 +299,6 @@ func fireAttackActionTriggers(state *TurnState, triggeringCard Card) {
 	state.AuraTriggers = dst
 }
 
-// fireEphemeralAttackTriggers walks state.EphemeralAttackTriggers after an attack action
-// card resolves and invokes every entry whose Matches predicate accepts the attacker. Each
-// fire consumes the trigger (fire-once semantics). Handlers receive target as a direct
-// arg and call s.AddPostTriggerLogEntry themselves to log their damage-equivalent. Non-matching
-// entries stay in the slice for a later attack action; anything still in the list at end
-// of chain fizzles silently (no graveyard bookkeeping — the source was already graveyarded
-// when its own Play resolved).
-//
-// Slice mutation parallels fireAttackActionTriggers: a survivors prefix is built in place
-// over the existing slice, with fired entries skipped.
-func fireEphemeralAttackTriggers(state *TurnState, target *CardState) {
-	triggers := state.EphemeralAttackTriggers
-	dst := triggers[:0]
-	for i := range triggers {
-		t := &triggers[i]
-		if t.Matches != nil && !t.Matches(target) {
-			dst = append(dst, *t)
-			continue
-		}
-		t.Handler(state, t, target)
-	}
-	state.EphemeralAttackTriggers = dst
-}
-
 // resetStateForPermutation rewrites every TurnState field to its per-permutation starting
 // value. Hand is deep-copied so card-driven mutations (DrawOne, alt-cost prepends) don't
 // leak to the next permutation. The leaf-stable read-only fields (Pitched, IncomingDamage,
@@ -368,7 +344,7 @@ func (ctx *sequenceContext) resetStateForPermutation() {
 	s.NonAttackActionPlayed = false
 	s.IncomingDamage = ctx.incomingDamage
 	s.BlockTotal = ctx.blockTotal
-	s.EphemeralAttackTriggers = bufs.ephemeralBacking[:0]
+	s.attackReactionTarget = nil
 	s.Revealed = nil
 	s.TriggeringCard = nil
 	s.skipLog = ctx.skipLog
@@ -407,7 +383,18 @@ func (ctx *sequenceContext) bestSequence(attackers []Card) (int, int, bool) {
 	permMeta := ctx.bufs.permMeta[:n]
 	for idx, c := range attackers {
 		permMeta[idx] = attackerMetaPtrFor(c)
-		pcBuf[idx] = CardState{Card: c, FromArsenal: idx == ctx.arsenalInIdx}
+		// Field-by-field assignment preserves pcBuf[idx].OnHit's backing array across
+		// Best calls — a struct-literal assignment would drop it and force every Play
+		// that registers an OnHit to allocate a fresh slice on the hot anneal path.
+		// Other sliced fields (PitchedToPlay) get reset by playSequenceWithMeta.
+		pcBuf[idx].Card = c
+		pcBuf[idx].FromArsenal = idx == ctx.arsenalInIdx
+		pcBuf[idx].GrantedGoAgain = false
+		pcBuf[idx].GrantedDominate = false
+		pcBuf[idx].BonusAttack = 0
+		pcBuf[idx].BonusDefense = 0
+		pcBuf[idx].PitchedToPlay = nil
+		pcBuf[idx].OnHit = pcBuf[idx].OnHit[:0]
 	}
 
 	best := 0
@@ -513,7 +500,15 @@ func (ctx *sequenceContext) playSequence(order []Card) (damage int, leftoverRune
 	meta := ctx.bufs.permMeta[:n]
 	for i, c := range order {
 		meta[i] = attackerMetaPtrFor(c)
-		pcBuf[i] = CardState{Card: c, FromArsenal: i == ctx.arsenalInIdx}
+		// Field-by-field — preserve pcBuf[i].OnHit backing across calls (see bestSequence).
+		pcBuf[i].Card = c
+		pcBuf[i].FromArsenal = i == ctx.arsenalInIdx
+		pcBuf[i].GrantedGoAgain = false
+		pcBuf[i].GrantedDominate = false
+		pcBuf[i].BonusAttack = 0
+		pcBuf[i].BonusDefense = 0
+		pcBuf[i].PitchedToPlay = nil
+		pcBuf[i].OnHit = pcBuf[i].OnHit[:0]
 	}
 	return ctx.playSequenceWithMeta(n)
 }
@@ -533,8 +528,9 @@ func (ctx *sequenceContext) playSequence(order []Card) (damage int, leftoverRune
 //
 // Damage flows through state.Value: the dispatcher records the chain step's
 // Play+BonusAttack contribution via state.AddLogEntry; pre-trigger handlers (hero, aura)
-// credit themselves through AddPreTriggerLogEntry, post-trigger handlers (ephemeral)
-// through AddPostTriggerLogEntry. The returned damage is just state.Value at end of chain.
+// credit themselves through AddPreTriggerLogEntry, post-trigger handlers (OnHit, AR
+// buffs) through AddPostTriggerLogEntry. The returned damage is just state.Value at end
+// of chain.
 func (ctx *sequenceContext) playSequenceWithMeta(n int) (damage int, leftoverRunechants int, residualBudget int, legal bool) {
 	pcBuf := ctx.bufs.pcBuf
 	ptrBuf := ctx.bufs.ptrBuf
@@ -543,6 +539,7 @@ func (ctx *sequenceContext) playSequenceWithMeta(n int) (damage int, leftoverRun
 		pcBuf[i].GrantedGoAgain = false
 		pcBuf[i].BonusAttack = 0
 		pcBuf[i].PitchedToPlay = nil
+		pcBuf[i].OnHit = pcBuf[i].OnHit[:0]
 	}
 	played := ptrBuf[:n]
 	// Per-permutation reset: full-state rewrite. Hand and Deck are deep-copied so cards can
@@ -572,14 +569,28 @@ func (ctx *sequenceContext) playSequenceWithMeta(n int) (damage int, leftoverRun
 		remaining: ctx.resourceBudget,
 		attr:      ctx.bufs.pitchAttrBuf[:0],
 	}
+	// activeAttack is the most recent attack/weapon CardState awaiting OnHit firing. ARs
+	// played later buff it; finalizeActiveAttack flushes it (fires OnHit when LikelyToHit
+	// is true on the post-buff EffectiveAttack) on the next non-AR card or at end of chain.
+	var activeAttack *CardState
+	finalizeActiveAttack := func() {
+		if activeAttack == nil {
+			return
+		}
+		if LikelyToHit(activeAttack) {
+			for i := range activeAttack.OnHit {
+				h := &activeAttack.OnHit[i]
+				h.Fire(state, activeAttack, h)
+			}
+		}
+		activeAttack = nil
+	}
 	for i, pc := range played {
 		m := meta[i]
-		// Action Point gate: every non-Instant card costs 1 AP. Instants cost 0 AP and skip
-		// the debit. A non-Instant card that would resolve with no AP available rejects the
-		// permutation — the chain ran out of action points before the next card could be
-		// played, which is illegal in FaB rules. Subsequent steps (Go again post-Play, AP
-		// grants from future card-driven effects) restock the pool.
-		if !m.isInstant {
+		// Action Point gate: paying chain steps cost 1 AP; free steps (Instants, Attack
+		// Reactions) cost 0. A paying card resolving with no AP available rejects the
+		// permutation. Go again and AP-grant effects restock the pool for later steps.
+		if !m.isFreeChainStep {
 			if state.ActionPoints <= 0 {
 				return 0, 0, 0, false
 			}
@@ -624,6 +635,31 @@ func (ctx *sequenceContext) playSequenceWithMeta(n int) (damage int, leftoverRun
 			}
 		}
 
+		// Attack Reactions target the most recent active attack. Reject the permutation
+		// if no preceding active attack matches the AR's predicate; the search naturally
+		// finds the legal ordering on another permutation.
+		if m.types.IsAttackReaction() {
+			ar, ok := pc.Card.(AttackReaction)
+			if !ok || activeAttack == nil || !ar.ARTargetAllowed(activeAttack.Card) {
+				return 0, 0, 0, false
+			}
+			ctx.hero.OnCardPlayed(pc.Card, state)
+			state.attackReactionTarget = activeAttack
+			pc.Card.Play(state, pc)
+			state.attackReactionTarget = nil
+			state.CardsPlayed = append(state.CardsPlayed, pc.Card)
+			state.graveyard = append(state.graveyard, pc.Card)
+			// Go again is not printed on ARs but honour the flag if granted.
+			if pc.EffectiveGoAgain() {
+				state.ActionPoints++
+			}
+			continue
+		}
+
+		// Non-AR card: flush any pending OnHit (uses the previous attack's post-buff
+		// EffectiveAttack) before the new card resolves.
+		finalizeActiveAttack()
+
 		state.CardsRemaining = played[i+1:]
 
 		// If this card is an attack or weapon and any Runechant is live, those tokens fire on
@@ -645,29 +681,14 @@ func (ctx *sequenceContext) playSequenceWithMeta(n int) (damage int, leftoverRun
 		// handler logs its own contribution via state.AddPreTriggerLogEntry; its int return
 		// is unused.
 		ctx.hero.OnCardPlayed(pc.Card, state)
-		ephemeralsBefore := len(state.EphemeralAttackTriggers)
-		// Card.Play owns its chain-step log line and value contribution: it calls
-		// state.ApplyAndLogEffectiveAttack / LogPlay before returning. The dispatcher
-		// just sequences the surrounding triggers.
+		// Card.Play owns its chain-step log line and pre-buff damage contribution. ARs top
+		// up the parent chain step's delta; OnHit funcs fire later via finalizeActiveAttack.
 		pc.Card.Play(state, pc)
-		// Stamp SourceIndex on any EphemeralAttackTriggers the card registered during Play
-		// so fireEphemeralAttackTriggers can attribute the fire back to this card.
-		for k := ephemeralsBefore; k < len(state.EphemeralAttackTriggers); k++ {
-			state.EphemeralAttackTriggers[k].SourceIndex = i
-		}
-		// Log order matches FaB's stack-resolution order, not the dispatcher's call order:
-		// hero / aura triggers fire when the card is played (LL1), go on top of the stack,
-		// and resolve before the card itself. Ephemeral "if hits" triggers fire after the
-		// attack lands and log below. Each trigger handler authors its own log line via
-		// AddPreTriggerLogEntry / AddPostTriggerLogEntry, with LogEntry.Source naming the
-		// triggering card so appendGroupedChainEntries clusters the trigger underneath the
-		// chain entry that names that card.
 		if m.isAttackAction {
 			fireAttackActionTriggers(state, pc.Card)
-			// Fire ephemeral triggers AFTER hero and aura triggers so the handler sees the
-			// fully-resolved attacker state (Dominate grants, hero-created auras, fresh
-			// Runechants from aura triggers).
-			fireEphemeralAttackTriggers(state, pc)
+		}
+		if isAttackOrWeapon {
+			activeAttack = pc
 		}
 		state.CardsPlayed = append(state.CardsPlayed, pc.Card)
 		if m.types.IsNonAttackAction() {
@@ -695,6 +716,8 @@ func (ctx *sequenceContext) playSequenceWithMeta(n int) (damage int, leftoverRun
 			state.ActionPoints++
 		}
 	}
+	// Flush any attack still pending OnHit at end of chain.
+	finalizeActiveAttack()
 
 	// Pitch-timing rule: every Pitch-role card must have paid for something on the stack. If
 	// the chain finished with pitches still queued, one of them was held back without funding

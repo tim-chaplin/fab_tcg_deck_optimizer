@@ -86,3 +86,8 @@ func (s TypeSet) IsRunebladeAttack() bool {
 func (s TypeSet) IsDefenseReaction() bool {
 	return s&TypeSet(TypeDefenseReaction) != 0
 }
+
+// IsAttackReaction reports whether s has the Attack Reaction subtype.
+func (s TypeSet) IsAttackReaction() bool {
+	return s&TypeSet(TypeAttackReaction) != 0
+}

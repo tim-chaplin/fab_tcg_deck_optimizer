@@ -4,9 +4,7 @@
 // Text: "If you have played or created an aura this turn, Reek of Corruption gains 'When this
 // hits a hero, they discard a card.'"
 //
-// Aura condition checked via s.HasPlayedOrCreatedAura(). The on-hit discard rider's hit gate
-// is owned by ApplyAndLogRiderOnHit. Runechants alongside don't count — "this hits" is strictly
-// about this card's damage reaching the hero. On-hit discard credits +3.
+// "This hits" reads only this card's own damage; co-firing runechants don't satisfy it.
 
 package cards
 
@@ -18,16 +16,20 @@ import (
 
 var reekOfCorruptionTypes = card.NewTypeSet(card.TypeRuneblade, card.TypeAction, card.TypeAttack)
 
-// reekOfCorruptionApplyRider emits the on-hit discard rider as a sub-line under self's
-// chain step when the aura precondition is satisfied.
+// reekOfCorruptionApplyRider registers the on-hit discard rider when the aura
+// precondition is satisfied.
 func reekOfCorruptionApplyRider(s *sim.TurnState, self *sim.CardState) {
 	if !s.HasPlayedOrCreatedAura() {
 		return
 	}
-	if sim.LikelyToHit(self) {
-		s.AddValue(sim.DiscardValue)
-		s.LogRider(self, sim.DiscardValue, "On-hit discarded a card")
-	}
+	self.OnHit = append(self.OnHit, sim.OnHitHandler{Fire: reekOfCorruptionOnHit})
+}
+
+// reekOfCorruptionOnHit fires the conditional "When this hits a hero, they discard a card"
+// rider. Top-level so registration stays alloc-free.
+func reekOfCorruptionOnHit(s *sim.TurnState, self *sim.CardState, _ *sim.OnHitHandler) {
+	s.AddValue(sim.DiscardValue)
+	s.LogRider(self, sim.DiscardValue, "On-hit discarded a card")
 }
 
 type ReekOfCorruptionRed struct{}

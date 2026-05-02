@@ -53,7 +53,7 @@ type CarryState struct {
 	// AuraTriggers is the surviving AuraTrigger set at end of chain. Carries across.
 	AuraTriggers []AuraTrigger
 	// Log is the per-event chain trace of the winning permutation — one entry per Play, hero
-	// trigger, aura trigger, ephemeral trigger, weapon swing. Stored as raw LogEntry
+	// trigger, aura trigger, OnHit, weapon swing. Stored as raw LogEntry
 	// structs to defer fmt.Sprintf cost until BuildTurnLog runs at end of EvaluateWith,
 	// keeping the snapshot path allocation-light (only the winning permutation's log gets
 	// formatted, and only when the deck-level Best actually changes). Doesn't carry across
@@ -132,8 +132,8 @@ type TurnLog struct {
 	StartOfTurn []string `json:"start_of_turn,omitempty"`
 	// MyTurn is the numbered entries for the "My turn:" section: any carryover AuraTrigger
 	// fires (Sigil reveals, +N damage credits) at the top of the action phase, then
-	// attack-phase pitches, then the chain (Play / hero trigger / aura trigger / ephemeral
-	// trigger / weapon swing lines, in resolution order).
+	// attack-phase pitches, then the chain (Play / hero trigger / aura trigger / OnHit /
+	// weapon swing lines, in resolution order).
 	MyTurn []string `json:"my_turn,omitempty"`
 	// OpponentTurn is the numbered entries for the "Opponent's turn:" section: defense-phase
 	// pitches, plain blocks, and Defense Reactions, in that order.
