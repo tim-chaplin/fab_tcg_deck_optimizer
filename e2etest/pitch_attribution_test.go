@@ -13,7 +13,7 @@ import (
 func TestPitchAttribution_AetherSlashSingleNonAttackPitchFiresRider(t *testing.T) {
 	hand := []sim.Card{cards.AetherSlashRed{}, cards.MaleficIncantationBlue{}}
 	d := sim.New(heroes.Viserai{}, nil, fillerDeck())
-	state := d.EvalOneTurnForTesting(0, nil, hand)
+	state := d.EvalOneTurnForTesting(sim.Matchup{IncomingDamage: 0}, nil, hand)
 	if state.Value != 5 {
 		t.Fatalf("Value = %d, want 5 (Aether Slash 4 + rider 1)", state.Value)
 	}
@@ -23,7 +23,7 @@ func TestPitchAttribution_AetherSlashSingleNonAttackPitchFiresRider(t *testing.T
 func TestPitchAttribution_AetherSlashAttackPitchDoesNotFireRider(t *testing.T) {
 	hand := []sim.Card{cards.AetherSlashRed{}, testutils.YellowAttack{}}
 	d := sim.New(heroes.Viserai{}, nil, fillerDeck())
-	state := d.EvalOneTurnForTesting(0, nil, hand)
+	state := d.EvalOneTurnForTesting(sim.Matchup{IncomingDamage: 0}, nil, hand)
 	if state.Value != 4 {
 		t.Fatalf("Value = %d, want 4 (Aether Slash base power, no rider)", state.Value)
 	}
@@ -37,7 +37,7 @@ func TestPitchAttribution_DeathlyDuetBothRidersFireFromMixedFunding(t *testing.T
 		cards.AetherSlashRed{},
 		cards.MaleficIncantationBlue{},
 	}
-	if got := d.EvalOneTurnForTesting(0, nil, hand).Value; got != 8 {
+	if got := d.EvalOneTurnForTesting(sim.Matchup{IncomingDamage: 0}, nil, hand).Value; got != 8 {
 		t.Fatalf("Value = %d, want 8 (Deathly Duet 4 + attack rider 2 + 2 runechants)", got)
 	}
 }
@@ -51,7 +51,7 @@ func TestPitchAttribution_OneNonAttackPitchFundsMultipleAetherSlashes(t *testing
 		cards.AetherSlashRed{}, cards.AetherSlashRed{},
 		cards.MaleficIncantationBlue{},
 	}
-	if got := d.EvalOneTurnForTesting(0, nil, withNonAttack).Value; got != 15 {
+	if got := d.EvalOneTurnForTesting(sim.Matchup{IncomingDamage: 0}, nil, withNonAttack).Value; got != 15 {
 		t.Errorf("non-attack pitch: Value = %d, want 15", got)
 	}
 
@@ -60,7 +60,7 @@ func TestPitchAttribution_OneNonAttackPitchFundsMultipleAetherSlashes(t *testing
 		cards.AetherSlashRed{}, cards.AetherSlashRed{},
 		testutils.BlueAttack{},
 	}
-	if got := d.EvalOneTurnForTesting(0, nil, withAttack).Value; got != 13 {
+	if got := d.EvalOneTurnForTesting(sim.Matchup{IncomingDamage: 0}, nil, withAttack).Value; got != 13 {
 		t.Errorf("attack pitch: Value = %d, want 13", got)
 	}
 }

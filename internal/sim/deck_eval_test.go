@@ -24,7 +24,7 @@ func TestEvaluate_BestTurnStartingRunechantsIsPreHandCarryover(t *testing.T) {
 	d := New(heroes.Viserai{}, nil, []Card{read, read, read, read})
 
 	// Seed doesn't matter (all cards identical), but fix it for determinism.
-	d.Evaluate(1, 0, rand.New(rand.NewSource(1)))
+	d.Evaluate(1, Matchup{}, rand.New(rand.NewSource(1)))
 
 	if len(d.Stats.Best.Summary.BestLine) == 0 {
 		t.Fatalf("expected Best to be populated after Evaluate")
@@ -50,7 +50,7 @@ func TestEvaluate_BestTurnStartingRunechantsIsPreHandCarryover(t *testing.T) {
 func TestEvaluate_BestTurnSnapshotsState(t *testing.T) {
 	snatch := GetCard(ids.SnatchRed)
 	d := New(heroes.Viserai{}, nil, []Card{snatch, snatch, snatch, snatch, snatch, snatch, snatch, snatch})
-	d.Evaluate(1, 0, rand.New(rand.NewSource(1)))
+	d.Evaluate(1, Matchup{}, rand.New(rand.NewSource(1)))
 
 	if len(d.Stats.Best.Summary.BestLine) == 0 {
 		t.Fatalf("expected Best to be populated after Evaluate")
@@ -88,7 +88,7 @@ func TestEvaluate_PerCardMarginalCoversEveryHand(t *testing.T) {
 	// 4 of each so Snatch isn't pinned to a single hand and the absent bucket gets exercised.
 	deckCards := []Card{read, read, read, read, snatch, snatch, snatch, snatch}
 	d := New(heroes.Viserai{}, nil, deckCards)
-	d.Evaluate(20, 0, rand.New(rand.NewSource(1)))
+	d.Evaluate(20, Matchup{}, rand.New(rand.NewSource(1)))
 
 	if d.Stats.PerCardMarginal == nil {
 		t.Fatalf("PerCardMarginal should be initialised after Evaluate")
@@ -117,7 +117,7 @@ func TestEvaluate_PerCardMarginalCoversEveryHand(t *testing.T) {
 func TestEvaluate_PerCardMarginalAlwaysPresent(t *testing.T) {
 	read := GetCard(ids.ReadTheRunesRed)
 	d := New(heroes.Viserai{}, nil, []Card{read, read, read, read, read, read, read, read})
-	d.Evaluate(5, 0, rand.New(rand.NewSource(1)))
+	d.Evaluate(5, Matchup{}, rand.New(rand.NewSource(1)))
 
 	m := d.Stats.PerCardMarginal[ids.ReadTheRunesRed]
 	if m.AbsentHands != 0 {
@@ -146,7 +146,7 @@ func TestEvaluate_HeldCardDefersDrawToNextTurn(t *testing.T) {
 		deckCards[i] = cards.ToughenUpBlue{}
 	}
 	d := New(testutils.Hero{Intel: 1}, nil, deckCards)
-	d.Evaluate(1, 0, rand.New(rand.NewSource(1)))
+	d.Evaluate(1, Matchup{}, rand.New(rand.NewSource(1)))
 
 	if d.Stats.Hands != 2 {
 		t.Errorf("Stats.Hands = %d, want 2 (turn 1 arsenals the card, turn 2 holds its successor, turn 3 can't draw)", d.Stats.Hands)
@@ -170,7 +170,7 @@ func TestEvaluate_HeldCardDefersDrawToNextTurn(t *testing.T) {
 // empty and nothing new can be drawn.
 func TestEvaluate_ArsenalPersistsAcrossTurns(t *testing.T) {
 	d := New(testutils.Hero{Intel: 1}, nil, []Card{cards.ToughenUpBlue{}, cards.ToughenUpBlue{}})
-	d.Evaluate(1, 4, rand.New(rand.NewSource(1)))
+	d.Evaluate(1, Matchup{IncomingDamage: 4}, rand.New(rand.NewSource(1)))
 
 	// Best captures turn 2 — only turn with Value > 0 (arsenal DR fires).
 	if d.Stats.Best.Summary.Value != 4 {
@@ -196,7 +196,7 @@ func TestEvaluate_TerminatesAfterTwoCycles(t *testing.T) {
 	d := New(heroes.Viserai{}, []Weapon{weapons.ReapingBlade{}}, deckCards)
 	done := make(chan struct{})
 	go func() {
-		d.Evaluate(1, 0, rand.New(rand.NewSource(1)))
+		d.Evaluate(1, Matchup{}, rand.New(rand.NewSource(1)))
 		close(done)
 	}()
 	select {
@@ -225,7 +225,7 @@ func TestEvaluateAdaptive_StopsBeforeMaxRunsWhenSEMet(t *testing.T) {
 		deckCards = append(deckCards, GetCard(ids.ReadTheRunesBlue))
 	}
 	d := New(heroes.Viserai{}, []Weapon{weapons.ReapingBlade{}}, deckCards)
-	stats := d.EvaluateAdaptive(0, rand.New(rand.NewSource(42)))
+	stats := d.EvaluateAdaptive(Matchup{}, rand.New(rand.NewSource(42)))
 	if stats.Runs >= AdaptiveShufflesCap {
 		t.Errorf("Runs = %d; expected adaptive stop well before cap=%d", stats.Runs, AdaptiveShufflesCap)
 	}
@@ -250,7 +250,7 @@ func TestEvaluateAdaptive_RespectsMaxRunsCapWhenSEUnreachable(t *testing.T) {
 	// Negative targetSE is structurally unreachable — MeanStandardError is always >= 0, so
 	// the `<= targetSE` predicate never fires. Loop should exhaust at maxRuns regardless of
 	// the deck's actual variance (which can be zero for trivially-identical-card decks).
-	stats := d.EvaluateImplForTest(1000, 0, rand.New(rand.NewSource(42)), nil, MakeAdaptiveStop(-1))
+	stats := d.EvaluateImplForTest(1000, Matchup{}, rand.New(rand.NewSource(42)), nil, MakeAdaptiveStop(-1))
 	if stats.Runs != 1000 {
 		t.Errorf("Runs = %d; expected exactly maxRuns=1000 when SE target is unreachable", stats.Runs)
 	}

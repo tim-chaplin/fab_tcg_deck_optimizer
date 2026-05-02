@@ -14,7 +14,7 @@ import (
 func TestMarshalUnmarshalRoundTrip(t *testing.T) {
 	rng := rand.New(rand.NewSource(1))
 	d := sim.Random(heroes.Viserai{}, 40, 2, rng, nil)
-	d.Evaluate(50, 4, rng)
+	d.Evaluate(50, sim.Matchup{IncomingDamage: 4}, rng)
 
 	data, err := Marshal(d)
 	if err != nil {
@@ -60,7 +60,7 @@ func TestMarshalUnmarshalRoundTrip(t *testing.T) {
 func TestRoundTrip_PreservesPerCardMarginal(t *testing.T) {
 	rng := rand.New(rand.NewSource(13))
 	d := sim.Random(heroes.Viserai{}, 40, 2, rng, nil)
-	d.Evaluate(50, 4, rng)
+	d.Evaluate(50, sim.Matchup{IncomingDamage: 4}, rng)
 	if len(d.Stats.PerCardMarginal) == 0 {
 		t.Fatalf("baseline deck produced no PerCardMarginal entries; test can't differentiate good from bad")
 	}

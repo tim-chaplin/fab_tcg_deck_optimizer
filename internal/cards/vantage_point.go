@@ -1,10 +1,11 @@
-// Vantage Point — Runeblade Action - Attack. Cost 3, Defense 3.
-// Printed power: Red 7, Yellow 6, Blue 5.
+// Vantage Point — Runeblade Action - Attack.
+//
 // Text: "If you've played or created an aura this turn, this gets **overpower**."
 //
-// Sets TurnState.Overpower when the aura condition is met.
+// Credits sim.OverpowerValue (0) for the granted Overpower; flag still flips on s.Overpower
+// for any future consumer.
 
-package notimplemented
+package cards
 
 import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
@@ -13,6 +14,17 @@ import (
 )
 
 var vantagePointTypes = card.NewTypeSet(card.TypeRuneblade, card.TypeAction, card.TypeAttack)
+
+// vantagePointPlay flips s.Overpower when an aura has been played or created this turn, then
+// emits the chain step.
+func vantagePointPlay(s *sim.TurnState, self *sim.CardState) {
+	if s.HasPlayedOrCreatedAura() {
+		s.Overpower = true
+		s.AddValue(sim.OverpowerValue)
+	}
+	n := self.DealEffectiveAttack(s)
+	s.Log(self, n)
+}
 
 type VantagePointRed struct{}
 
@@ -24,13 +36,8 @@ func (VantagePointRed) Attack() int             { return 7 }
 func (VantagePointRed) Defense() int            { return 3 }
 func (VantagePointRed) Types() card.TypeSet     { return vantagePointTypes }
 func (VantagePointRed) GoAgain() bool           { return false }
-
-// not implemented: Overpower flag is set on the aura condition but never consumed by the solver
-func (VantagePointRed) NotImplemented() {}
 func (VantagePointRed) Play(s *sim.TurnState, self *sim.CardState) {
-	vantagePointApplySideEffect(s)
-	n := self.DealEffectiveAttack(s)
-	s.Log(self, n)
+	vantagePointPlay(s, self)
 }
 
 type VantagePointYellow struct{}
@@ -43,13 +50,8 @@ func (VantagePointYellow) Attack() int             { return 6 }
 func (VantagePointYellow) Defense() int            { return 3 }
 func (VantagePointYellow) Types() card.TypeSet     { return vantagePointTypes }
 func (VantagePointYellow) GoAgain() bool           { return false }
-
-// not implemented: Overpower flag is set on the aura condition but never consumed by the solver
-func (VantagePointYellow) NotImplemented() {}
 func (VantagePointYellow) Play(s *sim.TurnState, self *sim.CardState) {
-	vantagePointApplySideEffect(s)
-	n := self.DealEffectiveAttack(s)
-	s.Log(self, n)
+	vantagePointPlay(s, self)
 }
 
 type VantagePointBlue struct{}
@@ -62,20 +64,6 @@ func (VantagePointBlue) Attack() int             { return 5 }
 func (VantagePointBlue) Defense() int            { return 3 }
 func (VantagePointBlue) Types() card.TypeSet     { return vantagePointTypes }
 func (VantagePointBlue) GoAgain() bool           { return false }
-
-// not implemented: Overpower flag is set on the aura condition but never consumed by the solver
-func (VantagePointBlue) NotImplemented() {}
 func (VantagePointBlue) Play(s *sim.TurnState, self *sim.CardState) {
-	vantagePointApplySideEffect(s)
-	n := self.DealEffectiveAttack(s)
-	s.Log(self, n)
-}
-
-// vantagePointApplySideEffect flips s.Overpower when an aura entry has been seen this turn,
-// so the next attack picks up Overpower for any breakthrough-aware solver pass. Vantage Point
-// itself contributes zero to its own chain step.
-func vantagePointApplySideEffect(s *sim.TurnState) {
-	if s.HasPlayedOrCreatedAura() {
-		s.Overpower = true
-	}
+	vantagePointPlay(s, self)
 }

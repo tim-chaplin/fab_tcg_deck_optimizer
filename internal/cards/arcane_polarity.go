@@ -1,8 +1,12 @@
-// Arcane Polarity — Generic Instant. Cost 0. Printed pitch variants: Red 1, Yellow 2, Blue 3.
+// Arcane Polarity — Generic Instant.
 //
-// Text: "Gain 1{h} If you've been dealt arcane damage this turn, instead gain 4{h}."
+// Text: "Gain 1{h} If you've been dealt arcane damage this turn, instead gain N{h}."
+// (Red N=4, Yellow N=3, Blue N=2.)
+//
+// Gates the alternate gain on s.ArcaneIncomingDamage > 0 (seeded from the matchup's
+// -arcane-incoming). Life gain is credited 1-to-1 with damage.
 
-package notimplemented
+package cards
 
 import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
@@ -11,6 +15,16 @@ import (
 )
 
 var arcanePolarityTypes = card.NewTypeSet(card.TypeGeneric, card.TypeInstant)
+
+// arcanePolarityPlay credits the conditional life gain as the chain step.
+func arcanePolarityPlay(s *sim.TurnState, self *sim.CardState, arcaneGain int) {
+	gain := 1
+	if s.ArcaneIncomingDamage > 0 {
+		gain = arcaneGain
+	}
+	s.AddValue(gain)
+	s.Log(self, gain)
+}
 
 type ArcanePolarityRed struct{}
 
@@ -22,10 +36,9 @@ func (ArcanePolarityRed) Attack() int             { return 0 }
 func (ArcanePolarityRed) Defense() int            { return 0 }
 func (ArcanePolarityRed) Types() card.TypeSet     { return arcanePolarityTypes }
 func (ArcanePolarityRed) GoAgain() bool           { return false }
-
-// not implemented: 1{h} gain (4/3/2{h} if dealt arcane damage this turn)
-func (ArcanePolarityRed) NotImplemented()                            {}
-func (ArcanePolarityRed) Play(s *sim.TurnState, self *sim.CardState) { s.Log(self, 0) }
+func (ArcanePolarityRed) Play(s *sim.TurnState, self *sim.CardState) {
+	arcanePolarityPlay(s, self, 4)
+}
 
 type ArcanePolarityYellow struct{}
 
@@ -37,10 +50,9 @@ func (ArcanePolarityYellow) Attack() int             { return 0 }
 func (ArcanePolarityYellow) Defense() int            { return 0 }
 func (ArcanePolarityYellow) Types() card.TypeSet     { return arcanePolarityTypes }
 func (ArcanePolarityYellow) GoAgain() bool           { return false }
-
-// not implemented: 1{h} gain (4/3/2{h} if dealt arcane damage this turn)
-func (ArcanePolarityYellow) NotImplemented()                            {}
-func (ArcanePolarityYellow) Play(s *sim.TurnState, self *sim.CardState) { s.Log(self, 0) }
+func (ArcanePolarityYellow) Play(s *sim.TurnState, self *sim.CardState) {
+	arcanePolarityPlay(s, self, 3)
+}
 
 type ArcanePolarityBlue struct{}
 
@@ -52,7 +64,6 @@ func (ArcanePolarityBlue) Attack() int             { return 0 }
 func (ArcanePolarityBlue) Defense() int            { return 0 }
 func (ArcanePolarityBlue) Types() card.TypeSet     { return arcanePolarityTypes }
 func (ArcanePolarityBlue) GoAgain() bool           { return false }
-
-// not implemented: 1{h} gain (4/3/2{h} if dealt arcane damage this turn)
-func (ArcanePolarityBlue) NotImplemented()                            {}
-func (ArcanePolarityBlue) Play(s *sim.TurnState, self *sim.CardState) { s.Log(self, 0) }
+func (ArcanePolarityBlue) Play(s *sim.TurnState, self *sim.CardState) {
+	arcanePolarityPlay(s, self, 2)
+}

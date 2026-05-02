@@ -11,7 +11,7 @@ package sim
 
 import ()
 
-func (e *Evaluator) findBest(hero Hero, weapons []Weapon, hand []Card, incomingDamage int, deck []Card, runechantCarryover int, arsenalCardIn Card, priorAuraTriggers []AuraTrigger, skipLog bool) TurnSummary {
+func (e *Evaluator) findBest(hero Hero, weapons []Weapon, hand []Card, mp Matchup, deck []Card, runechantCarryover int, arsenalCardIn Card, priorAuraTriggers []AuraTrigger, skipLog bool) TurnSummary {
 	// Cache fast-path. The cache is bypassed when disabled (e.cache nil) or when any of
 	// the inputs (hand, weapons, auras) overflows its fixed-size slot in the cache key.
 	// Overflow is rare in practice — adult hand sizes top out around 7, weapons at 2,
@@ -29,7 +29,7 @@ func (e *Evaluator) findBest(hero Hero, weapons []Weapon, hand []Card, incomingD
 	if cacheUsable {
 		if entry, ok := e.cache.lookup(cacheKey); ok {
 			e.cache.hits.Add(1)
-			return e.replayBest(entry, hero, weapons, hand, incomingDamage, deck, runechantCarryover, arsenalCardIn, priorAuraTriggers, skipLog)
+			return e.replayBest(entry, hero, weapons, hand, mp, deck, runechantCarryover, arsenalCardIn, priorAuraTriggers, skipLog)
 		}
 		e.cache.misses.Add(1)
 	}
@@ -52,7 +52,7 @@ func (e *Evaluator) findBest(hero Hero, weapons []Weapon, hand []Card, incomingD
 	// running sticky and the final value stamps best.Cacheable.
 	best := TurnSummary{
 		BestLine:       make([]CardAssignment, totalN),
-		IncomingDamage: incomingDamage,
+		IncomingDamage: mp.IncomingDamage,
 		Cacheable:      true,
 		State: CarryState{
 			Hand:         append([]Card(nil), hand...),
@@ -102,7 +102,7 @@ func (e *Evaluator) findBest(hero Hero, weapons []Weapon, hand []Card, incomingD
 			attackDealt, defenseDealt, leftoverRunechants, swung, carry, ok, leafCacheable, arsenalAtChainStart := e.evaluatePartition(
 				hero, weapons, hand, deck, arsenalCardIn,
 				rolesBuf, n, bufs,
-				runechantCarryover, incomingDamage, defenseSum,
+				runechantCarryover, mp, defenseSum,
 				priorAuraTriggers, skipLog,
 			)
 			// Aggregate per leaf — an infeasible attack chain still surfaces its DR-side
@@ -162,7 +162,7 @@ func (e *Evaluator) findBest(hero Hero, weapons []Weapon, hand []Card, incomingD
 			// of an attack chain. With 0 incoming there is no defend step, so the Defend role
 			// is illegal for every card type — DR or otherwise. Skipping it here also avoids
 			// no-op DR Plays leaving an empty hand to a downstream len(s.Hand)==0 gate.
-			if r == Defend && incomingDamage == 0 {
+			if r == Defend && mp.IncomingDamage == 0 {
 				continue
 			}
 			rolesBuf[i] = r

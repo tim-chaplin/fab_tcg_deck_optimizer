@@ -48,7 +48,7 @@ type iterateWorkerConfig struct {
 	temperature    float64
 	minImprovement float64
 	shuffles       int
-	incoming       int
+	matchup        Matchup
 	shuffleWorkers int
 	seed           int64
 	completed      *atomic.Int64
@@ -106,7 +106,8 @@ func IterateParallel(
 	bestAvg float64,
 	temperature float64,
 	minImprovement float64,
-	shuffles, incoming int,
+	shuffles int,
+	mp Matchup,
 	mutationWorkers, shuffleWorkers int,
 	seed int64,
 	completed *atomic.Int64,
@@ -145,7 +146,7 @@ func IterateParallel(
 		temperature:    temperature,
 		minImprovement: minImprovement,
 		shuffles:       shuffles,
-		incoming:       incoming,
+		matchup:        mp,
 		shuffleWorkers: shuffleWorkers,
 		seed:           seed,
 		completed:      completed,
@@ -210,9 +211,9 @@ func runIterateWorker(
 		d := New(mut.Deck.Hero, mut.Deck.Weapons, mut.Deck.Cards)
 		var avg float64
 		if cfg.adaptive {
-			avg = d.EvaluateAdaptiveWith(cfg.incoming, rng, ev).Mean()
+			avg = d.EvaluateAdaptiveWith(cfg.matchup, rng, ev).Mean()
 		} else {
-			avg = d.EvaluateWith(cfg.shuffles, cfg.incoming, rng, ev).Mean()
+			avg = d.EvaluateWith(cfg.shuffles, cfg.matchup, rng, ev).Mean()
 		}
 		if cfg.completed != nil {
 			cfg.completed.Add(1)

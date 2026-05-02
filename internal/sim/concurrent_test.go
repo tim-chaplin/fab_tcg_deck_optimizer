@@ -39,7 +39,7 @@ func TestEvaluateWith_ConcurrentNoMapPanic(t *testing.T) {
 				// Small shuffle count per iteration keeps the test fast while still exercising
 				// many Best calls per goroutine: 10 shuffles × handsPerCycle * 2 hands each =
 				// ~200 Best invocations per goroutine, per iteration.
-				stats := d.EvaluateWith(10, 0, rng, ev)
+				stats := d.EvaluateWith(10, Matchup{}, rng, ev)
 				if stats.Hands == 0 {
 					t.Errorf("worker %d iter %d: Evaluate returned zero hands", id, i)
 					return
@@ -57,7 +57,7 @@ func TestEvaluateWith_ConcurrentNoMapPanic(t *testing.T) {
 func TestIterateParallel_RunsWithoutPanic(t *testing.T) {
 	rng := rand.New(rand.NewSource(42))
 	baseline := Random(heroes.Viserai{}, 40, 2, rng, nil)
-	baseAvg := baseline.Evaluate(10, 0, rng).Mean()
+	baseAvg := baseline.Evaluate(10, Matchup{}, rng).Mean()
 	mutations := AllMutations(baseline, 2, nil)
 	// Cap mutations so the test stays under a second; full list is thousands of entries.
 	if len(mutations) > 40 {
@@ -66,7 +66,7 @@ func TestIterateParallel_RunsWithoutPanic(t *testing.T) {
 
 	d, avg, idx, found := IterateParallel(
 		context.Background(), mutations, baseAvg, 0, 0,
-		30, 0, 0, 0,
+		30, Matchup{}, 0, 0,
 		rng.Int63(), nil, false,
 	)
 
@@ -104,7 +104,7 @@ func TestIterateParallel_RunsWithoutPanic(t *testing.T) {
 func TestIterateParallel_AbortsOnContextCancel(t *testing.T) {
 	rng := rand.New(rand.NewSource(42))
 	baseline := Random(heroes.Viserai{}, 40, 2, rng, nil)
-	baseAvg := baseline.Evaluate(10, 0, rng).Mean()
+	baseAvg := baseline.Evaluate(10, Matchup{}, rng).Mean()
 	mutations := AllMutations(baseline, 2, nil)
 
 	ctx, cancel := context.WithCancel(context.Background())
@@ -114,7 +114,7 @@ func TestIterateParallel_AbortsOnContextCancel(t *testing.T) {
 	start := time.Now()
 	d, avg, idx, found := IterateParallel(
 		ctx, mutations, baseAvg, 0, 0,
-		1000, 0, 0, 0,
+		1000, Matchup{}, 0, 0,
 		rng.Int63(), &tested, false,
 	)
 	elapsed := time.Since(start)
@@ -157,7 +157,7 @@ func TestIterateParallel_TerminatesWithNoImprovement(t *testing.T) {
 	start := time.Now()
 	d, avg, idx, found := IterateParallel(
 		context.Background(), mutations, 1_000_000.0, 0, 0, // unreachable baseline, T=0
-		100, 0, 0, 0,
+		100, Matchup{}, 0, 0,
 		rng.Int63(), nil, false,
 	)
 	elapsed := time.Since(start)

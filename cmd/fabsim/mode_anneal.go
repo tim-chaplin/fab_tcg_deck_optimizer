@@ -25,7 +25,7 @@ type annealConfig struct {
 	// adaptive path uses its own SE target and cap.
 	shuffles   int
 	adaptive   bool
-	incoming   int
+	matchup    sim.Matchup
 	deckSize   int
 	maxCopies  int
 	seed       int64
@@ -73,6 +73,7 @@ func runAnnealCmd(args []string) {
 	deckName := fs.String("deck", "", "deck name; resolved to mydecks/<name>.json (\".json\" suffix optional). Defaults to <hero>_<format>_<incoming>_incoming so different (hero, format, -incoming) regimes keep separate deck files. When the named deck exists, anneal resumes from it as a checkpoint.")
 	shuffles := fs.Int("shuffles", -1, "per-eval shuffle budget. -1 (default) runs adaptively, stopping once the per-turn mean's standard error drops below the built-in target. Any non-negative value runs exactly that many shuffles for apples-to-apples acceptance / repro flows.")
 	incoming := fs.Int("incoming", 0, "opponent damage per turn (required — different values produce different optimal decks, so this is explicit rather than defaulted)")
+	arcaneIncoming := fs.Int("arcane-incoming", 0, "opponent arcane damage per turn (defaults to 0 — the non-arcane matchup; raise it to score cards that gate on incoming arcane)")
 	deckSize := fs.Int("deck-size", 40, "number of cards per deck")
 	maxCopies := fs.Int("max-copies", defaultMaxCopies, "maximum copies of any single card printing per deck")
 	seed := fs.Int64("seed", time.Now().UnixNano(), "RNG seed")
@@ -119,7 +120,7 @@ func runAnnealCmd(args []string) {
 	cfg := annealConfig{
 		shuffles:       *shuffles,
 		adaptive:       *shuffles < 0,
-		incoming:       *incoming,
+		matchup:        sim.Matchup{IncomingDamage: *incoming, ArcaneIncomingDamage: *arcaneIncoming},
 		deckSize:       *deckSize,
 		maxCopies:      *maxCopies,
 		seed:           *seed,
@@ -240,7 +241,7 @@ func runAnneal(cfg annealConfig) annealResult {
 			temperature, currentAvg, bestEverAvg)
 		d, avg, idx, found := sim.IterateParallel(
 			ctx, mutations, currentAvg, temperature, cfg.minImprovement,
-			cfg.shuffles, cfg.incoming, 0, 0,
+			cfg.shuffles, cfg.matchup, 0, 0,
 			rng.Int63(), &completed, cfg.adaptive,
 		)
 		stopTicker()
@@ -373,7 +374,7 @@ func baselineEvaluate(d *sim.Deck, cfg annealConfig, rng *rand.Rand) sim.Stats {
 	if cfg.adaptive {
 		shuffles = -1
 	}
-	stats, _ := evaluateParallel(d, shuffles, cfg.incoming, rng)
+	stats, _ := evaluateParallel(d, shuffles, cfg.matchup, rng)
 	return stats
 }
 
