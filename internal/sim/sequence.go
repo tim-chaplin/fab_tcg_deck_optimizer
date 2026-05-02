@@ -33,22 +33,21 @@ func FormatLogEntry(e LogEntry) string {
 // arsenalAtChainStart is the card sitting in the arsenal slot at the start of the chain — set
 // when the partition assigned arsenalCardIn the Arsenal role (it's staying), nil otherwise
 // (no arsenal-in, or arsenal-in is playing as Attack/Defend).
-func bestAttackWithWeapons(hero Hero, weapons []Weapon, attackers, defenders, pitched, held, deck []Card, bufs *attackBufs, runechantCarryover, incomingDamage, arcaneIncomingDamage, blockTotal, arsenalInIdx, arsenalDefenderIdx int, arsenalAtChainStart Card, priorAuraTriggers []AuraTrigger, skipLog bool) (int, int, int, chainBudget, []string, CarryState, bool, bool) {
+func bestAttackWithWeapons(hero Hero, weapons []Weapon, attackers, defenders, pitched, held, deck []Card, bufs *attackBufs, runechantCarryover int, mp Matchup, blockTotal, arsenalInIdx, arsenalDefenderIdx int, arsenalAtChainStart Card, priorAuraTriggers []AuraTrigger, skipLog bool) (int, int, int, chainBudget, []string, CarryState, bool, bool) {
 	ctx := &sequenceContext{
-		hero:                 hero,
-		pitched:              pitched,
-		deck:                 deck,
-		handStart:            held,
-		arsenalAtChainStart:  arsenalAtChainStart,
-		bufs:                 bufs,
-		runechantCarryover:   runechantCarryover,
-		incomingDamage:       incomingDamage,
-		arcaneIncomingDamage: arcaneIncomingDamage,
-		blockTotal:           blockTotal,
-		arsenalInIdx:         arsenalInIdx,
-		priorAuraTriggers:    priorAuraTriggers,
-		skipLog:              skipLog,
-		cacheable:            true,
+		hero:                hero,
+		pitched:             pitched,
+		deck:                deck,
+		handStart:           held,
+		arsenalAtChainStart: arsenalAtChainStart,
+		bufs:                bufs,
+		runechantCarryover:  runechantCarryover,
+		matchup:             mp,
+		blockTotal:          blockTotal,
+		arsenalInIdx:        arsenalInIdx,
+		priorAuraTriggers:   priorAuraTriggers,
+		skipLog:             skipLog,
+		cacheable:           true,
 		// Point carryWinner at the bufs-persistent scratch so SnapshotFromTurn reuses
 		// backing arrays across leaves and Best calls (bufs is Evaluator-cached).
 		carryWinner: &bufs.carryWinnerScratch,
@@ -64,7 +63,7 @@ func bestAttackWithWeapons(hero Hero, weapons []Weapon, attackers, defenders, pi
 	// so nothing in the defense phase reads hidden state.
 	defenseCacheable := true
 	if len(defenders) > 0 {
-		defenseDealt, bufs.defenseGravScratch, defenseCacheable = defendersDamage(defenders, pitched, deck, bufs.state, bufs.defenseGravScratch, &bufs.drCardStateScratch, incomingDamage, arsenalDefenderIdx)
+		defenseDealt, bufs.defenseGravScratch, defenseCacheable = defendersDamage(defenders, pitched, deck, bufs.state, bufs.defenseGravScratch, &bufs.drCardStateScratch, mp.IncomingDamage, arsenalDefenderIdx)
 	}
 
 	pitchedVals := bufs.pitchedValsScratch[:0]
@@ -229,12 +228,11 @@ type sequenceContext struct {
 	// attackPitchVals parallels attackPitchPerm: attackPitchVals[i] is the cached Pitch()
 	// of attackPitchPerm[i]. Permuted in lockstep with attackPitchPerm so the per-pop
 	// resource math reads ints instead of going through the Card.Pitch() interface call.
-	attackPitchVals      []int
-	resourceBudget       int
-	runechantCarryover   int
-	incomingDamage       int
-	arcaneIncomingDamage int
-	blockTotal           int
+	attackPitchVals    []int
+	resourceBudget     int
+	runechantCarryover int
+	matchup            Matchup
+	blockTotal         int
 	// arsenalInIdx is the index in the attackers slice (the slice passed to bestSequence) of
 	// the card that came from the arsenal slot at start of turn, or -1 when no arsenal-in card
 	// is in the chain. Lets bestSequence flag the matching pcBuf entry's FromArsenal as the
@@ -344,8 +342,8 @@ func (ctx *sequenceContext) resetStateForPermutation() {
 	s.Pitched = ctx.pitched
 	s.Overpower = false
 	s.NonAttackActionPlayed = false
-	s.IncomingDamage = ctx.incomingDamage
-	s.ArcaneIncomingDamage = ctx.arcaneIncomingDamage
+	s.IncomingDamage = ctx.matchup.IncomingDamage
+	s.ArcaneIncomingDamage = ctx.matchup.ArcaneIncomingDamage
 	s.BlockTotal = ctx.blockTotal
 	s.attackReactionTarget = nil
 	s.Revealed = nil

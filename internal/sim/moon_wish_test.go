@@ -37,7 +37,7 @@ func TestEvalOneTurn_MoonWishAltCostTutorsSunKissAndConsumesDeck(t *testing.T) {
 		testutils.RedAttack{}, testutils.RedAttack{},
 	}
 	d := New(testutils.Hero{Intel: 4}, nil, deckCards)
-	state := d.EvalOneTurnForTesting(0, nil, []Card{
+	state := d.EvalOneTurnForTesting(Matchup{IncomingDamage: 0}, nil, []Card{
 		cards.MoonWishYellow{},
 		cards.WeepingBattlegroundRed{},
 	})
@@ -71,7 +71,7 @@ func TestEvalOneTurn_MoonWishAltCostTutorFizzlesWithoutSunKiss(t *testing.T) {
 		testutils.RedAttack{}, testutils.RedAttack{}, testutils.RedAttack{},
 	}
 	d := New(testutils.Hero{Intel: 4}, nil, deckCards)
-	state := d.EvalOneTurnForTesting(0, nil, []Card{
+	state := d.EvalOneTurnForTesting(Matchup{IncomingDamage: 0}, nil, []Card{
 		cards.MoonWishYellow{},
 		cards.WeepingBattlegroundRed{},
 	})
@@ -115,7 +115,7 @@ func TestEvalOneTurn_MoonWishWithFlyingHighPlaysTutoredSunKiss(t *testing.T) {
 		testutils.RedAttack{}, testutils.RedAttack{}, testutils.RedAttack{}, testutils.RedAttack{},
 	}
 	d := New(testutils.Hero{Intel: 4}, nil, deckCards)
-	state := d.EvalOneTurnForTesting(0, nil, []Card{
+	state := d.EvalOneTurnForTesting(Matchup{IncomingDamage: 0}, nil, []Card{
 		cards.FlyingHighRed{},
 		cards.MoonWishYellow{},
 		cards.WeepingBattlegroundRed{},
