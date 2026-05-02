@@ -1,0 +1,27 @@
+// Potion of Déjà Vu — Generic Action - Item. Cost 0. Printed pitch variants: Blue 3.
+//
+// Text: "**Instant** - Destroy Potion of Déjà Vu: Put all cards from your pitch zone on top of your
+// deck in any order."
+
+package unplayable
+
+import (
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+)
+
+var potionOfDejaVuTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeItem)
+
+type PotionOfDejaVuBlue struct{}
+
+func (PotionOfDejaVuBlue) ID() ids.CardID                             { return ids.PotionOfDejaVuBlue }
+func (PotionOfDejaVuBlue) Name() string                               { return "Potion of Déjà Vu" }
+func (PotionOfDejaVuBlue) Cost(*sim.TurnState) int                    { return 0 }
+func (PotionOfDejaVuBlue) Pitch() int                                 { return 3 }
+func (PotionOfDejaVuBlue) Attack() int                                { return 0 }
+func (PotionOfDejaVuBlue) Defense() int                               { return 0 }
+func (PotionOfDejaVuBlue) Types() card.TypeSet                        { return potionOfDejaVuTypes }
+func (PotionOfDejaVuBlue) GoAgain() bool                              { return false }
+func (PotionOfDejaVuBlue) Unplayable()                                {}
+func (PotionOfDejaVuBlue) Play(s *sim.TurnState, self *sim.CardState) { s.Log(self, 0) }
