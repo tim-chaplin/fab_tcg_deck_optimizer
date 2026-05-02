@@ -8,6 +8,7 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/cards"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/heroes"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/weapons"
 )
 
@@ -34,6 +35,22 @@ func TestAttackReaction_NoTargetAtAllNothingHappens(t *testing.T) {
 	got := d.EvalOneTurnForTesting(0, nil, hand).PrevTurnValue
 	if got != 0 {
 		t.Fatalf("PrevTurnValue = %d, want 0 (no target, AR can't play)", got)
+	}
+}
+
+// Tests that an AR can only target an attack that is actually played, not one that's been
+// pitched. With Lunging Press (AR, pitch 3) + a cost-1 attack action, the only feasible
+// chain pitches LP and plays the attack alone — LP isn't in the chain to buff anything,
+// and the partition that puts LP in Attack has no target so the validator rejects it.
+func TestAttackReaction_PitchedAttackIsNotATarget(t *testing.T) {
+	d := sim.New(heroes.Viserai{}, nil, fillerDeck())
+	hand := []sim.Card{
+		cards.LungingPressBlue{},
+		testutils.GenericAttack(1, 0),
+	}
+	got := d.EvalOneTurnForTesting(0, nil, hand).PrevTurnValue
+	if got != 0 {
+		t.Fatalf("PrevTurnValue = %d, want 0 (attack pitched ⇒ AR has nothing to buff)", got)
 	}
 }
 
