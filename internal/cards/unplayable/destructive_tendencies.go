@@ -1,9 +1,9 @@
 // Destructive Tendencies — Generic Instant. Cost 0. Printed pitch variants: Blue 3.
 //
-// Text: "Choose 1 or both; - Remove all counters from target item token. - Remove all counters from
-// target aura token."
+// Text: "Choose 1 or both; - Remove all counters from target item token. - Remove all
+// counters from target aura token."
 
-package notimplemented
+package unplayable
 
 import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
@@ -23,7 +23,7 @@ func (DestructiveTendenciesBlue) Attack() int             { return 0 }
 func (DestructiveTendenciesBlue) Defense() int            { return 0 }
 func (DestructiveTendenciesBlue) Types() card.TypeSet     { return destructiveTendenciesTypes }
 func (DestructiveTendenciesBlue) GoAgain() bool           { return false }
-
-// not implemented: Instant 'remove counters from target item / aura token'
-func (DestructiveTendenciesBlue) NotImplemented()                            {}
-func (DestructiveTendenciesBlue) Play(s *sim.TurnState, self *sim.CardState) { s.Log(self, 0) }
+func (DestructiveTendenciesBlue) Unplayable()             {}
+func (DestructiveTendenciesBlue) Play(s *sim.TurnState, self *sim.CardState) {
+	s.Log(self, 0)
+}
