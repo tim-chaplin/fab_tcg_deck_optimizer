@@ -43,8 +43,8 @@ func TestAttackReaction_CantTargetAnotherAR(t *testing.T) {
 	}
 }
 
-// Tests that an Attack Reaction is not a "non-attack action card" for Viserai's hero
-// trigger.
+// Tests that Attack Reactions can't play before the attack they target (and thereby trigger
+// Viserai's hero ability).
 func TestAttackReaction_DoesNotTriggerViseraiAsNonAttackAction(t *testing.T) {
 	d := sim.New(heroes.Viserai{}, nil, fillerDeck())
 	hand := []sim.Card{cards.LungingPressBlue{}, cards.HocusPocusRed{}}
