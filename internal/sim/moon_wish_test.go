@@ -13,7 +13,8 @@ import (
 // here therefore avoid pinning specific deck positions or which card lands in arsenal off a
 // post-tutor DrawOne (those are random per the printed shuffle even though our model
 // currently skips it). The valid checks are: Value, the surviving copy count of each card
-// across turn-2 surfaces (Hand + Deck + Arsenal), and which BestLine roles got assigned.
+// across the start-of-next-turn surfaces (Hand + Deck + Arsenal), and which BestLine roles
+// got assigned.
 
 // TestEvalOneTurn_MoonWishAltCostTutorsSunKissAndConsumesDeck is the canonical
 // no-go-again scenario for Moon Wish run end-to-end through one turn:
@@ -43,13 +44,13 @@ func TestEvalOneTurn_MoonWishAltCostTutorsSunKissAndConsumesDeck(t *testing.T) {
 		cards.WeepingBattlegroundRed{},
 	})
 
-	if state.PrevTurnValue != 4 {
+	if state.Value != 4 {
 		t.Errorf("turn-1 Value = %d, want 4 (Moon Wish base attack; Sun Kiss tutored, not played)",
-			state.PrevTurnValue)
+			state.Value)
 	}
-	if state.ArsenalCard == nil || state.ArsenalCard.ID() != ids.SunKissRed {
-		t.Errorf("ArsenalCard = %v, want Sun Kiss [R] (post-hoc promoted from State.Hand)",
-			state.ArsenalCard)
+	if state.StartOfNextTurnArsenal == nil || state.StartOfNextTurnArsenal.ID() != ids.SunKissRed {
+		t.Errorf("StartOfNextTurnArsenal = %v, want Sun Kiss [R] (post-hoc promoted from State.Hand)",
+			state.StartOfNextTurnArsenal)
 	}
 	if got := countAcrossSurfaces(state, ids.SunKissRed); got != 1 {
 		t.Errorf("Sun Kiss [R] total across turn-2 Hand/Deck/Arsenal = %d, want 1 (in Arsenal)",
@@ -77,13 +78,13 @@ func TestEvalOneTurn_MoonWishAltCostTutorFizzlesWithoutSunKiss(t *testing.T) {
 		cards.WeepingBattlegroundRed{},
 	})
 
-	if state.PrevTurnValue != 4 {
+	if state.Value != 4 {
 		t.Errorf("turn-1 Value = %d, want 4 (Moon Wish base attack; tutor fizzles)",
-			state.PrevTurnValue)
+			state.Value)
 	}
-	if state.ArsenalCard != nil {
-		t.Errorf("ArsenalCard = %v, want nil (DR was the only Held; alt cost consumed it)",
-			state.ArsenalCard)
+	if state.StartOfNextTurnArsenal != nil {
+		t.Errorf("StartOfNextTurnArsenal = %v, want nil (DR was the only Held; alt cost consumed it)",
+			state.StartOfNextTurnArsenal)
 	}
 	if got := countAcrossSurfaces(state, ids.WeepingBattlegroundRed); got != 1 {
 		t.Errorf("Weeping Battleground [R] total across turn-2 surfaces = %d, want 1 "+
@@ -103,10 +104,10 @@ func TestEvalOneTurn_MoonWishAltCostTutorFizzlesWithoutSunKiss(t *testing.T) {
 //
 // Cross-turn assertions:
 //   - turn-1 Value = 7 (Moon Wish 4 + Sun Kiss 3) — confirms Sun Kiss actually played.
-//   - PrevTurnGraveyard contains Sun Kiss — proves it was both tutored AND played, not
-//     stuck in the deck or some intermediate state.
-//   - ArsenalCard is non-nil — Sun Kiss's DrawOne pulled some card off the (per printed
-//     rules, shuffled) deck top; the specific identity is random so we don't pin it.
+//   - Graveyard contains Sun Kiss — proves it was both tutored AND played, not stuck in the
+//     deck or some intermediate state.
+//   - StartOfNextTurnArsenal is non-nil — Sun Kiss's DrawOne pulled some card off the (per
+//     printed rules, shuffled) deck top; the specific identity is random so we don't pin it.
 func TestEvalOneTurn_MoonWishWithFlyingHighPlaysTutoredSunKiss(t *testing.T) {
 	// Sun Kiss at index 2 (not 0) so a blind head++ would consume the wrong slot; verifies
 	// the buf-removal logic patches out the specific tutored card.
@@ -122,12 +123,12 @@ func TestEvalOneTurn_MoonWishWithFlyingHighPlaysTutoredSunKiss(t *testing.T) {
 		cards.WeepingBattlegroundRed{},
 	})
 
-	if state.PrevTurnValue != 7 {
+	if state.Value != 7 {
 		t.Errorf("turn-1 Value = %d, want 7 (Moon Wish 4 + Sun Kiss 3 via Flying High go-again)",
-			state.PrevTurnValue)
+			state.Value)
 	}
 	skInGraveyard := false
-	for _, c := range state.PrevTurnGraveyard {
+	for _, c := range state.Graveyard {
 		if c.ID() == ids.SunKissRed {
 			skInGraveyard = true
 			break
@@ -135,35 +136,35 @@ func TestEvalOneTurn_MoonWishWithFlyingHighPlaysTutoredSunKiss(t *testing.T) {
 	}
 	if !skInGraveyard {
 		t.Errorf("Sun Kiss [R] not in turn-1 Graveyard %v; want it there (tutored and played)",
-			testutils.CardNames(state.PrevTurnGraveyard))
+			testutils.CardNames(state.Graveyard))
 	}
 	if got := countAcrossSurfaces(state, ids.SunKissRed); got != 0 {
 		t.Errorf("Sun Kiss [R] total across turn-2 surfaces = %d, want 0 (it's in the graveyard)",
 			got)
 	}
-	if state.ArsenalCard == nil {
-		t.Error("ArsenalCard = nil; want any card (Sun Kiss's DrawOne pulled one card into " +
+	if state.StartOfNextTurnArsenal == nil {
+		t.Error("StartOfNextTurnArsenal = nil; want any card (Sun Kiss's DrawOne pulled one card into " +
 			"State.Hand → Arsenal promotion is the only candidate)")
 	}
 }
 
-// countAcrossSurfaces totals the occurrences of id across turn-2 Hand, Deck, and Arsenal —
-// the surfaces TurnStartState exposes. Used by tests that need to assert "this card exists /
-// doesn't exist" without pinning a specific position (positions are randomised by Moon
-// Wish's printed-shuffle, even when our current model skips it).
+// countAcrossSurfaces totals the occurrences of id across the start-of-next-turn Hand,
+// Deck, and Arsenal — the surfaces TurnStartState exposes. Used by tests that need to assert
+// "this card exists / doesn't exist" without pinning a specific position (positions are
+// randomised by Moon Wish's printed-shuffle, even when our current model skips it).
 func countAcrossSurfaces(state TurnStartState, id ids.CardID) int {
 	n := 0
-	for _, c := range state.Hand {
+	for _, c := range state.StartOfNextTurnHand {
 		if c.ID() == id {
 			n++
 		}
 	}
-	for _, c := range state.Deck {
+	for _, c := range state.StartOfNextTurnDeck {
 		if c.ID() == id {
 			n++
 		}
 	}
-	if state.ArsenalCard != nil && state.ArsenalCard.ID() == id {
+	if state.StartOfNextTurnArsenal != nil && state.StartOfNextTurnArsenal.ID() == id {
 		n++
 	}
 	return n

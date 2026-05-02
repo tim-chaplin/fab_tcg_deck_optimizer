@@ -105,22 +105,22 @@ func TestEvalOneTurn_SigilOfFyendalQueuesTrigger(t *testing.T) {
 	state := d.EvalOneTurnForTesting(0, nil, []Card{sigil})
 
 	sigilPlayed := false
-	for _, a := range state.PrevTurnBestLine {
+	for _, a := range state.BestLine {
 		if a.Card.ID() == ids.SigilOfFyendalBlue && a.Role == Attack {
 			sigilPlayed = true
 			break
 		}
 	}
 	if !sigilPlayed {
-		t.Errorf("turn 1 BestLine didn't play Sigil of Fyendal as Role=Attack: %+v", state.PrevTurnBestLine)
+		t.Errorf("turn 1 BestLine didn't play Sigil of Fyendal as Role=Attack: %+v", state.BestLine)
 	}
-	if state.StartOfTurnTriggerDamage != 1 {
-		t.Errorf("StartOfTurnTriggerDamage = %d, want 1 (Fyendal's 1{h} gain fires at start of turn 2)",
-			state.StartOfTurnTriggerDamage)
+	if state.StartOfNextTurnTriggerDamage != 1 {
+		t.Errorf("StartOfNextTurnTriggerDamage = %d, want 1 (Fyendal's 1{h} gain fires at start of turn 2)",
+			state.StartOfNextTurnTriggerDamage)
 	}
-	if len(state.StartOfTurnGraveyard) != 1 || state.StartOfTurnGraveyard[0].ID() != ids.SigilOfFyendalBlue {
-		t.Errorf("StartOfTurnGraveyard = %v, want [Sigil of Fyendal] (Count hit zero after firing)",
-			state.StartOfTurnGraveyard)
+	if len(state.StartOfNextTurnGraveyard) != 1 || state.StartOfNextTurnGraveyard[0].ID() != ids.SigilOfFyendalBlue {
+		t.Errorf("StartOfNextTurnGraveyard = %v, want [Sigil of Fyendal] (Count hit zero after firing)",
+			state.StartOfNextTurnGraveyard)
 	}
 }
 
@@ -253,14 +253,14 @@ func TestEvalOneTurn_SigilOfTheArknightRevealsIntoHand(t *testing.T) {
 	state := d.EvalOneTurnForTesting(0, nil, []Card{sigil})
 
 	sigilPlayed := false
-	for _, a := range state.PrevTurnBestLine {
+	for _, a := range state.BestLine {
 		if a.Card.ID() == ids.SigilOfTheArknightBlue && a.Role == Attack {
 			sigilPlayed = true
 			break
 		}
 	}
 	if !sigilPlayed {
-		t.Errorf("turn 1 BestLine didn't play the sigil as Role=Attack: %+v", state.PrevTurnBestLine)
+		t.Errorf("turn 1 BestLine didn't play the sigil as Role=Attack: %+v", state.BestLine)
 	}
 
 	// Turn 2: 4 normal draws + 1 revealed = 5 cards. deckCards[0..3] refill turn 2's hand;
@@ -272,16 +272,16 @@ func TestEvalOneTurn_SigilOfTheArknightRevealsIntoHand(t *testing.T) {
 		testutils.BlueAttack{},
 		reveal,
 	}
-	if len(state.Hand) != len(wantHand) {
-		t.Fatalf("turn 2 hand size = %d, want %d (4 normal draws + 1 revealed)", len(state.Hand), len(wantHand))
+	if len(state.StartOfNextTurnHand) != len(wantHand) {
+		t.Fatalf("turn 2 hand size = %d, want %d (4 normal draws + 1 revealed)", len(state.StartOfNextTurnHand), len(wantHand))
 	}
 	for i, want := range wantHand {
-		if state.Hand[i] != want {
-			t.Errorf("turn 2 hand[%d] = %v, want %v", i, state.Hand[i], want)
+		if state.StartOfNextTurnHand[i] != want {
+			t.Errorf("turn 2 hand[%d] = %v, want %v", i, state.StartOfNextTurnHand[i], want)
 		}
 	}
-	if len(state.StartOfTurnGraveyard) != 1 || state.StartOfTurnGraveyard[0].ID() != ids.SigilOfTheArknightBlue {
-		t.Errorf("StartOfTurnGraveyard = %v, want [Sigil of the Arknight]", state.StartOfTurnGraveyard)
+	if len(state.StartOfNextTurnGraveyard) != 1 || state.StartOfNextTurnGraveyard[0].ID() != ids.SigilOfTheArknightBlue {
+		t.Errorf("StartOfNextTurnGraveyard = %v, want [Sigil of the Arknight]", state.StartOfNextTurnGraveyard)
 	}
 }
 
@@ -302,28 +302,28 @@ func TestEvalOneTurn_BlessingOfOccultCreatesRunesAtStartOfNextTurn(t *testing.T)
 	d := New(heroes.Viserai{}, nil, deckCards)
 	state := d.EvalOneTurnForTesting(0, nil, []Card{blessing, pitch})
 
-	if state.PrevTurnValue != 0 {
-		t.Errorf("PrevTurnValue = %d, want 0 (Blessing's rune credit is deferred)", state.PrevTurnValue)
+	if state.Value != 0 {
+		t.Errorf("Value = %d, want 0 (Blessing's rune credit is deferred)", state.Value)
 	}
 	blessingPlayed := false
-	for _, a := range state.PrevTurnBestLine {
+	for _, a := range state.BestLine {
 		if a.Card.ID() == ids.BlessingOfOccultRed && a.Role == Attack {
 			blessingPlayed = true
 			break
 		}
 	}
 	if !blessingPlayed {
-		t.Errorf("turn 1 BestLine didn't play Blessing as Role=Attack: %+v", state.PrevTurnBestLine)
+		t.Errorf("turn 1 BestLine didn't play Blessing as Role=Attack: %+v", state.BestLine)
 	}
-	if state.Runechants != 3 {
-		t.Errorf("Runechants = %d, want 3 (Blessing's start-of-turn trigger creates 3 tokens)",
-			state.Runechants)
+	if state.StartOfNextTurnRunechants != 3 {
+		t.Errorf("StartOfNextTurnRunechants = %d, want 3 (Blessing's start-of-turn trigger creates 3 tokens)",
+			state.StartOfNextTurnRunechants)
 	}
-	if state.StartOfTurnTriggerDamage != 3 {
-		t.Errorf("StartOfTurnTriggerDamage = %d, want 3", state.StartOfTurnTriggerDamage)
+	if state.StartOfNextTurnTriggerDamage != 3 {
+		t.Errorf("StartOfNextTurnTriggerDamage = %d, want 3", state.StartOfNextTurnTriggerDamage)
 	}
-	if len(state.StartOfTurnGraveyard) != 1 || state.StartOfTurnGraveyard[0].ID() != ids.BlessingOfOccultRed {
-		t.Errorf("StartOfTurnGraveyard = %v, want [Blessing [R]]", state.StartOfTurnGraveyard)
+	if len(state.StartOfNextTurnGraveyard) != 1 || state.StartOfNextTurnGraveyard[0].ID() != ids.BlessingOfOccultRed {
+		t.Errorf("StartOfNextTurnGraveyard = %v, want [Blessing [R]]", state.StartOfNextTurnGraveyard)
 	}
 }
 
@@ -424,7 +424,7 @@ func TestEvalOneTurn_MaleficIncantationOncePerTurnLimitsToOneRune(t *testing.T) 
 	state := d.EvalOneTurnForTesting(0, nil, []Card{malefic, hocus})
 
 	maleficPlayed, hocusPlayed := false, false
-	for _, a := range state.PrevTurnBestLine {
+	for _, a := range state.BestLine {
 		if a.Card.ID() == ids.MaleficIncantationRed && a.Role == Attack {
 			maleficPlayed = true
 		}
@@ -433,24 +433,24 @@ func TestEvalOneTurn_MaleficIncantationOncePerTurnLimitsToOneRune(t *testing.T) 
 		}
 	}
 	if !maleficPlayed {
-		t.Errorf("turn 1 BestLine didn't play Malefic as Role=Attack: %+v", state.PrevTurnBestLine)
+		t.Errorf("turn 1 BestLine didn't play Malefic as Role=Attack: %+v", state.BestLine)
 	}
 	if !hocusPlayed {
-		t.Errorf("turn 1 BestLine didn't play Hocus Pocus as Role=Attack: %+v", state.PrevTurnBestLine)
+		t.Errorf("turn 1 BestLine didn't play Hocus Pocus as Role=Attack: %+v", state.BestLine)
 	}
-	if state.PrevTurnValue != 6 {
-		t.Errorf("PrevTurnValue = %d, want 6 (3 Hocus + 1 Hocus rune + 1 Viserai trigger + 1 Malefic trigger)",
-			state.PrevTurnValue)
+	if state.Value != 6 {
+		t.Errorf("Value = %d, want 6 (3 Hocus + 1 Hocus rune + 1 Viserai trigger + 1 Malefic trigger)",
+			state.Value)
 	}
 	// Malefic's AttackAction trigger doesn't fire at start of turn — it only ticks on
 	// attack actions during the chain. Carry-only at the turn boundary.
-	if state.StartOfTurnTriggerDamage != 0 {
-		t.Errorf("StartOfTurnTriggerDamage = %d, want 0 (Malefic only fires on attack actions)",
-			state.StartOfTurnTriggerDamage)
+	if state.StartOfNextTurnTriggerDamage != 0 {
+		t.Errorf("StartOfNextTurnTriggerDamage = %d, want 0 (Malefic only fires on attack actions)",
+			state.StartOfNextTurnTriggerDamage)
 	}
-	if len(state.StartOfTurnGraveyard) != 0 {
-		t.Errorf("StartOfTurnGraveyard = %v, want empty (Malefic still has Count>0)",
-			state.StartOfTurnGraveyard)
+	if len(state.StartOfNextTurnGraveyard) != 0 {
+		t.Errorf("StartOfNextTurnGraveyard = %v, want empty (Malefic still has Count>0)",
+			state.StartOfNextTurnGraveyard)
 	}
 }
 
@@ -472,27 +472,27 @@ func TestEvalOneTurn_RunebloodIncantationTicksAcrossTurns(t *testing.T) {
 	state := d.EvalOneTurnForTesting(0, nil, []Card{runeblood, pitch})
 
 	runebloodPlayed := false
-	for _, a := range state.PrevTurnBestLine {
+	for _, a := range state.BestLine {
 		if a.Card.ID() == ids.RunebloodIncantationRed && a.Role == Attack {
 			runebloodPlayed = true
 			break
 		}
 	}
 	if !runebloodPlayed {
-		t.Errorf("turn 1 BestLine didn't play Runeblood as Role=Attack: %+v", state.PrevTurnBestLine)
+		t.Errorf("turn 1 BestLine didn't play Runeblood as Role=Attack: %+v", state.BestLine)
 	}
-	if state.PrevTurnValue != 0 {
-		t.Errorf("PrevTurnValue = %d, want 0 (every Runeblood rune is deferred to a future fire)",
-			state.PrevTurnValue)
+	if state.Value != 0 {
+		t.Errorf("Value = %d, want 0 (every Runeblood rune is deferred to a future fire)",
+			state.Value)
 	}
-	if state.StartOfTurnTriggerDamage != 1 {
-		t.Errorf("StartOfTurnTriggerDamage = %d, want 1 (one tick per turn)", state.StartOfTurnTriggerDamage)
+	if state.StartOfNextTurnTriggerDamage != 1 {
+		t.Errorf("StartOfNextTurnTriggerDamage = %d, want 1 (one tick per turn)", state.StartOfNextTurnTriggerDamage)
 	}
-	if state.Runechants != 1 {
-		t.Errorf("Runechants = %d, want 1 (one rune per fire)", state.Runechants)
+	if state.StartOfNextTurnRunechants != 1 {
+		t.Errorf("StartOfNextTurnRunechants = %d, want 1 (one rune per fire)", state.StartOfNextTurnRunechants)
 	}
-	if len(state.StartOfTurnGraveyard) != 0 {
-		t.Errorf("StartOfTurnGraveyard = %v, want empty (Red has Count=3, only one tick fired)",
-			state.StartOfTurnGraveyard)
+	if len(state.StartOfNextTurnGraveyard) != 0 {
+		t.Errorf("StartOfNextTurnGraveyard = %v, want empty (Red has Count=3, only one tick fired)",
+			state.StartOfNextTurnGraveyard)
 	}
 }

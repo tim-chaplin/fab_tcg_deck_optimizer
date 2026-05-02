@@ -47,12 +47,12 @@ func TestEvalOneTurn_MidTurnDrawArsenalsWhenSlotEmpty(t *testing.T) {
 		testutils.BlueAttack{},
 		testutils.YellowAttack{},
 	}
-	if !reflect.DeepEqual(state.Hand, wantHand) {
-		t.Errorf("turn 2 hand = %v, want %v (full 4-card refill from positions 5..8; Yellow at slot 3 proves drawn card arsenaled rather than held)", state.Hand, wantHand)
+	if !reflect.DeepEqual(state.StartOfNextTurnHand, wantHand) {
+		t.Errorf("turn 2 hand = %v, want %v (full 4-card refill from positions 5..8; Yellow at slot 3 proves drawn card arsenaled rather than held)", state.StartOfNextTurnHand, wantHand)
 	}
 
-	if state.ArsenalCard != beacon {
-		t.Errorf("turn 2 arsenal = %v, want %v (drawn card should take the empty arsenal slot)", state.ArsenalCard, beacon)
+	if state.StartOfNextTurnArsenal != beacon {
+		t.Errorf("turn 2 arsenal = %v, want %v (drawn card should take the empty arsenal slot)", state.StartOfNextTurnArsenal, beacon)
 	}
 
 	// Remaining deck: one untouched Yellow from source position 9, then the pitched Blue
@@ -61,12 +61,12 @@ func TestEvalOneTurn_MidTurnDrawArsenalsWhenSlotEmpty(t *testing.T) {
 		testutils.YellowAttack{},
 		testutils.BlueAttack{},
 	}
-	if !reflect.DeepEqual(state.Deck, wantDeck) {
-		t.Errorf("turn 2 deck = %v, want %v", state.Deck, wantDeck)
+	if !reflect.DeepEqual(state.StartOfNextTurnDeck, wantDeck) {
+		t.Errorf("turn 2 deck = %v, want %v", state.StartOfNextTurnDeck, wantDeck)
 	}
 
-	if state.Runechants != 0 {
-		t.Errorf("turn 2 runechants = %d, want 0 (nothing on turn 1 creates runechants)", state.Runechants)
+	if state.StartOfNextTurnRunechants != 0 {
+		t.Errorf("turn 2 runechants = %d, want 0 (nothing on turn 1 creates runechants)", state.StartOfNextTurnRunechants)
 	}
 }
 
@@ -111,12 +111,12 @@ func TestEvalOneTurn_TwoMidTurnDraws_OneArsenalsOneHeld(t *testing.T) {
 		testutils.BlueAttack{},
 		testutils.BlueAttack{},
 	}
-	if !reflect.DeepEqual(state.Hand, wantHand) {
-		t.Errorf("turn 2 hand = %v, want %v (one beacon held + 3 fresh Blues; two beacons here would mean neither got arsenaled, a Yellow would mean the sim over-drew)", state.Hand, wantHand)
+	if !reflect.DeepEqual(state.StartOfNextTurnHand, wantHand) {
+		t.Errorf("turn 2 hand = %v, want %v (one beacon held + 3 fresh Blues; two beacons here would mean neither got arsenaled, a Yellow would mean the sim over-drew)", state.StartOfNextTurnHand, wantHand)
 	}
 
-	if state.ArsenalCard != beacon {
-		t.Errorf("turn 2 arsenal = %v, want %v (one of the two drawn beacons should fill the empty slot)", state.ArsenalCard, beacon)
+	if state.StartOfNextTurnArsenal != beacon {
+		t.Errorf("turn 2 arsenal = %v, want %v (one of the two drawn beacons should fill the empty slot)", state.StartOfNextTurnArsenal, beacon)
 	}
 
 	// Remaining deck: only the Yellow tripwire at source position 9. Turn 1 had no pitches
@@ -124,12 +124,12 @@ func TestEvalOneTurn_TwoMidTurnDraws_OneArsenalsOneHeld(t *testing.T) {
 	wantDeck := []Card{
 		testutils.YellowAttack{},
 	}
-	if !reflect.DeepEqual(state.Deck, wantDeck) {
-		t.Errorf("turn 2 deck = %v, want %v", state.Deck, wantDeck)
+	if !reflect.DeepEqual(state.StartOfNextTurnDeck, wantDeck) {
+		t.Errorf("turn 2 deck = %v, want %v", state.StartOfNextTurnDeck, wantDeck)
 	}
 
-	if state.Runechants != 0 {
-		t.Errorf("turn 2 runechants = %d, want 0 (nothing on turn 1 creates runechants)", state.Runechants)
+	if state.StartOfNextTurnRunechants != 0 {
+		t.Errorf("turn 2 runechants = %d, want 0 (nothing on turn 1 creates runechants)", state.StartOfNextTurnRunechants)
 	}
 }
 
@@ -172,24 +172,24 @@ func TestEvalOneTurn_ThreeMidTurnDraws_ArsenalFromDrawnPool(t *testing.T) {
 		testutils.BlueAttack{},
 		testutils.BlueAttack{},
 	}
-	if !reflect.DeepEqual(state.Hand, wantHand) {
-		t.Errorf("turn 2 hand = %v, want %v (two beacons held + 2 fresh Blues; a Yellow here would indicate the sim pulled more than 2 refill cards)", state.Hand, wantHand)
+	if !reflect.DeepEqual(state.StartOfNextTurnHand, wantHand) {
+		t.Errorf("turn 2 hand = %v, want %v (two beacons held + 2 fresh Blues; a Yellow here would indicate the sim pulled more than 2 refill cards)", state.StartOfNextTurnHand, wantHand)
 	}
 
-	if state.ArsenalCard != beacon {
-		t.Errorf("turn 2 arsenal = %v, want %v (one of the three drawn beacons should fill the slot vacated by arsenal-in Snatch)", state.ArsenalCard, beacon)
+	if state.StartOfNextTurnArsenal != beacon {
+		t.Errorf("turn 2 arsenal = %v, want %v (one of the three drawn beacons should fill the slot vacated by arsenal-in Snatch)", state.StartOfNextTurnArsenal, beacon)
 	}
 
 	// Remaining deck: only the Yellow tripwire. Turn 1 had no pitches.
 	wantDeck := []Card{
 		testutils.YellowAttack{},
 	}
-	if !reflect.DeepEqual(state.Deck, wantDeck) {
-		t.Errorf("turn 2 deck = %v, want %v", state.Deck, wantDeck)
+	if !reflect.DeepEqual(state.StartOfNextTurnDeck, wantDeck) {
+		t.Errorf("turn 2 deck = %v, want %v", state.StartOfNextTurnDeck, wantDeck)
 	}
 
-	if state.Runechants != 0 {
-		t.Errorf("turn 2 runechants = %d, want 0 (nothing on turn 1 creates runechants)", state.Runechants)
+	if state.StartOfNextTurnRunechants != 0 {
+		t.Errorf("turn 2 runechants = %d, want 0 (nothing on turn 1 creates runechants)", state.StartOfNextTurnRunechants)
 	}
 }
 
@@ -229,12 +229,12 @@ func TestEvalOneTurn_MidTurnDrawHeldWhenArsenalFull(t *testing.T) {
 		testutils.BlueAttack{},
 		testutils.BlueAttack{},
 	}
-	if !reflect.DeepEqual(state.Hand, wantHand) {
-		t.Errorf("turn 2 hand = %v, want %v (beacon held + 3 fresh Blues; a Yellow here means the sim over-drew past the 3-card budget)", state.Hand, wantHand)
+	if !reflect.DeepEqual(state.StartOfNextTurnHand, wantHand) {
+		t.Errorf("turn 2 hand = %v, want %v (beacon held + 3 fresh Blues; a Yellow here means the sim over-drew past the 3-card budget)", state.StartOfNextTurnHand, wantHand)
 	}
 
-	if state.ArsenalCard != arsenalIn {
-		t.Errorf("turn 2 arsenal = %v, want %v (arsenal-in should remain untouched when no better candidate beats it)", state.ArsenalCard, arsenalIn)
+	if state.StartOfNextTurnArsenal != arsenalIn {
+		t.Errorf("turn 2 arsenal = %v, want %v (arsenal-in should remain untouched when no better candidate beats it)", state.StartOfNextTurnArsenal, arsenalIn)
 	}
 
 	// Remaining deck: two untouched Yellows from positions 8..9, then the pitched Blue
@@ -244,12 +244,12 @@ func TestEvalOneTurn_MidTurnDrawHeldWhenArsenalFull(t *testing.T) {
 		testutils.YellowAttack{},
 		testutils.BlueAttack{},
 	}
-	if !reflect.DeepEqual(state.Deck, wantDeck) {
-		t.Errorf("turn 2 deck = %v, want %v", state.Deck, wantDeck)
+	if !reflect.DeepEqual(state.StartOfNextTurnDeck, wantDeck) {
+		t.Errorf("turn 2 deck = %v, want %v", state.StartOfNextTurnDeck, wantDeck)
 	}
 
-	if state.Runechants != 0 {
-		t.Errorf("turn 2 runechants = %d, want 0 (nothing on turn 1 creates runechants)", state.Runechants)
+	if state.StartOfNextTurnRunechants != 0 {
+		t.Errorf("turn 2 runechants = %d, want 0 (nothing on turn 1 creates runechants)", state.StartOfNextTurnRunechants)
 	}
 }
 
@@ -277,18 +277,18 @@ func TestEvalOneTurn_MidTurnDrawSansGoAgainStaysHeld(t *testing.T) {
 
 	// Turn 1 damage: Snatch alone for 4 (no chain extension, no Viserai trigger — Snatch isn't
 	// Runeblade and nothing else was played).
-	if state.PrevTurnValue != 4 {
-		t.Errorf("turn 1 Value = %d, want 4 (Snatch alone; chain couldn't extend)", state.PrevTurnValue)
+	if state.Value != 4 {
+		t.Errorf("turn 1 Value = %d, want 4 (Snatch alone; chain couldn't extend)", state.Value)
 	}
 
 	// One of {Toughen Up, Aether Slash} lands in arsenal; the other anchors turn 2's hand.
-	if state.ArsenalCard == nil {
+	if state.StartOfNextTurnArsenal == nil {
 		t.Fatalf("turn 2 arsenal is nil; want one of {Toughen Up, Aether Slash}")
 	}
-	arsenalIsTU := state.ArsenalCard.ID() == ids.ToughenUpBlue
-	arsenalIsSlash := state.ArsenalCard.ID() == ids.AetherSlashRed
+	arsenalIsTU := state.StartOfNextTurnArsenal.ID() == ids.ToughenUpBlue
+	arsenalIsSlash := state.StartOfNextTurnArsenal.ID() == ids.AetherSlashRed
 	if !arsenalIsTU && !arsenalIsSlash {
-		t.Errorf("turn 2 arsenal = %v, want Toughen Up Blue or Aether Slash Red", state.ArsenalCard)
+		t.Errorf("turn 2 arsenal = %v, want Toughen Up Blue or Aether Slash Red", state.StartOfNextTurnArsenal)
 	}
 
 	// Turn 2 hand: the non-promoted of the two anchors the held prefix, then three fresh Blues
@@ -303,18 +303,18 @@ func TestEvalOneTurn_MidTurnDrawSansGoAgainStaysHeld(t *testing.T) {
 		testutils.BlueAttack{},
 		testutils.BlueAttack{},
 	}
-	if !reflect.DeepEqual(state.Hand, wantHand) {
-		t.Errorf("turn 2 hand = %v, want %v", state.Hand, wantHand)
+	if !reflect.DeepEqual(state.StartOfNextTurnHand, wantHand) {
+		t.Errorf("turn 2 hand = %v, want %v", state.StartOfNextTurnHand, wantHand)
 	}
 
 	// Deck is fully consumed: 4 deck cards minus 1 Slash drawn mid-turn = 3 Blues, all in the
 	// turn 2 refill alongside the held anchor.
-	if len(state.Deck) != 0 {
-		t.Errorf("turn 2 deck = %v, want empty", state.Deck)
+	if len(state.StartOfNextTurnDeck) != 0 {
+		t.Errorf("turn 2 deck = %v, want empty", state.StartOfNextTurnDeck)
 	}
 
-	if state.Runechants != 0 {
-		t.Errorf("turn 2 runechants = %d, want 0", state.Runechants)
+	if state.StartOfNextTurnRunechants != 0 {
+		t.Errorf("turn 2 runechants = %d, want 0", state.StartOfNextTurnRunechants)
 	}
 }
 
@@ -328,19 +328,19 @@ func TestEvalOneTurn_DrawOneOnEmptyDeckIsNoop(t *testing.T) {
 	d := New(heroes.Viserai{}, nil, nil)
 	state := d.EvalOneTurnForTesting(0, nil, initialHand)
 
-	if state.PrevTurnValue != 4 {
-		t.Errorf("turn 1 Value = %d, want 4 (Snatch damage; DrawOne is a no-op on empty deck)", state.PrevTurnValue)
+	if state.Value != 4 {
+		t.Errorf("turn 1 Value = %d, want 4 (Snatch damage; DrawOne is a no-op on empty deck)", state.Value)
 	}
-	if len(state.Hand) != 0 {
-		t.Errorf("turn 2 hand = %v, want empty (deck was empty, can't refill)", state.Hand)
+	if len(state.StartOfNextTurnHand) != 0 {
+		t.Errorf("turn 2 hand = %v, want empty (deck was empty, can't refill)", state.StartOfNextTurnHand)
 	}
-	if len(state.Deck) != 0 {
-		t.Errorf("turn 2 deck = %v, want empty", state.Deck)
+	if len(state.StartOfNextTurnDeck) != 0 {
+		t.Errorf("turn 2 deck = %v, want empty", state.StartOfNextTurnDeck)
 	}
-	if state.ArsenalCard != nil {
-		t.Errorf("turn 2 arsenal = %v, want nil (nothing Held to promote)", state.ArsenalCard)
+	if state.StartOfNextTurnArsenal != nil {
+		t.Errorf("turn 2 arsenal = %v, want nil (nothing Held to promote)", state.StartOfNextTurnArsenal)
 	}
-	if state.Runechants != 0 {
-		t.Errorf("turn 2 runechants = %d, want 0", state.Runechants)
+	if state.StartOfNextTurnRunechants != 0 {
+		t.Errorf("turn 2 runechants = %d, want 0", state.StartOfNextTurnRunechants)
 	}
 }
