@@ -1,4 +1,4 @@
-package notimplemented
+package cards
 
 import (
 	"testing"
@@ -7,8 +7,8 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
 )
 
+// Tests that with no aura played or created the printed power is credited and Overpower stays false.
 func TestVantagePoint_BaseDamageNoAura(t *testing.T) {
-	// No aura → just printed power, Overpower stays false.
 	cases := []struct {
 		c    sim.Card
 		base int
@@ -29,9 +29,8 @@ func TestVantagePoint_BaseDamageNoAura(t *testing.T) {
 	}
 }
 
+// Tests that an aura already played this turn flips s.Overpower.
 func TestVantagePoint_AuraPlayedSetsOverpower(t *testing.T) {
-	// Aura in CardsPlayed → Overpower flag set; damage unchanged since Overpower isn't consumed
-	// by the solver (incoming damage is a flat opponent profile, not blocked).
 	s := sim.TurnState{CardsPlayed: []sim.Card{testutils.Aura{}}}
 	(VantagePointRed{}).Play(&s, &sim.CardState{Card: VantagePointRed{}})
 	if got := s.Value; got != 7 {
@@ -42,8 +41,8 @@ func TestVantagePoint_AuraPlayedSetsOverpower(t *testing.T) {
 	}
 }
 
+// Tests that the AuraCreated flag also flips s.Overpower.
 func TestVantagePoint_AuraCreatedSetsOverpower(t *testing.T) {
-	// AuraCreated flag (e.g. from an earlier Runechant-creating card) also triggers Overpower.
 	s := sim.TurnState{AuraCreated: true}
 	(VantagePointRed{}).Play(&s, &sim.CardState{Card: VantagePointRed{}})
 	if got := s.Value; got != 7 {

@@ -11,7 +11,7 @@ package sim
 
 import ()
 
-func (e *Evaluator) findBest(hero Hero, weapons []Weapon, hand []Card, incomingDamage int, deck []Card, runechantCarryover int, arsenalCardIn Card, priorAuraTriggers []AuraTrigger, skipLog bool) TurnSummary {
+func (e *Evaluator) findBest(hero Hero, weapons []Weapon, hand []Card, incomingDamage, arcaneIncomingDamage int, deck []Card, runechantCarryover int, arsenalCardIn Card, priorAuraTriggers []AuraTrigger, skipLog bool) TurnSummary {
 	// Cache fast-path. The cache is bypassed when disabled (e.cache nil) or when any of
 	// the inputs (hand, weapons, auras) overflows its fixed-size slot in the cache key.
 	// Overflow is rare in practice — adult hand sizes top out around 7, weapons at 2,
@@ -29,7 +29,7 @@ func (e *Evaluator) findBest(hero Hero, weapons []Weapon, hand []Card, incomingD
 	if cacheUsable {
 		if entry, ok := e.cache.lookup(cacheKey); ok {
 			e.cache.hits.Add(1)
-			return e.replayBest(entry, hero, weapons, hand, incomingDamage, deck, runechantCarryover, arsenalCardIn, priorAuraTriggers, skipLog)
+			return e.replayBest(entry, hero, weapons, hand, incomingDamage, arcaneIncomingDamage, deck, runechantCarryover, arsenalCardIn, priorAuraTriggers, skipLog)
 		}
 		e.cache.misses.Add(1)
 	}
@@ -102,7 +102,7 @@ func (e *Evaluator) findBest(hero Hero, weapons []Weapon, hand []Card, incomingD
 			attackDealt, defenseDealt, leftoverRunechants, swung, carry, ok, leafCacheable, arsenalAtChainStart := e.evaluatePartition(
 				hero, weapons, hand, deck, arsenalCardIn,
 				rolesBuf, n, bufs,
-				runechantCarryover, incomingDamage, defenseSum,
+				runechantCarryover, incomingDamage, arcaneIncomingDamage, defenseSum,
 				priorAuraTriggers, skipLog,
 			)
 			// Aggregate per leaf — an infeasible attack chain still surfaces its DR-side

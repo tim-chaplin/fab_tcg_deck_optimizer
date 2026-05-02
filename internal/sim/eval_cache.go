@@ -73,13 +73,13 @@ type auraCacheKey struct {
 // auras[..auraLen] is the sorted multiset of (SelfID, Count) tuples for the priorAura-
 // Triggers passed in — same fixed-size-array trick.
 //
-// incomingDamage is intentionally NOT in the key. An Evaluator's lifetime spans calls at
-// a constant incomingDamage in production (the iterate-mode worker pool, fabsim eval, and
-// fabsim compare each fix incoming up front and reuse one Evaluator across many decks).
-// Adding it would just bloat the key for no real-world hit-rate gain. Tests that mix
-// incoming values across calls must use NewEvaluatorWithoutCache (sharedEvaluator already
-// does for that reason) — otherwise a cached entry from incoming=A would silently apply
-// to a query at incoming=B.
+// incomingDamage and arcaneIncomingDamage are intentionally NOT in the key. An Evaluator's
+// lifetime spans calls at constant matchup parameters in production (the iterate-mode worker
+// pool, fabsim eval, and fabsim compare each fix incoming up front and reuse one Evaluator
+// across many decks). Adding either would just bloat the key for no real-world hit-rate gain.
+// Tests that mix matchup values across calls must use NewEvaluatorWithoutCache (sharedEvaluator
+// already does for that reason) — otherwise a cached entry from one matchup would silently
+// apply to a query under another.
 type evalCacheKey struct {
 	handIDs            [maxCachedHandSize]ids.CardID
 	weaponIDs          [maxCachedWeapons]ids.WeaponID
@@ -155,8 +155,8 @@ func newEvalCache() *evalCache {
 // stable across calls (same loadout, same slice header) and bestAttackWithWeapons
 // enumerates weapon masks in slice order; reordering would still produce the same Value
 // but the cached BestLine's swung-weapon names would drift, so we just preserve the
-// input order. incomingDamage is omitted from the key by the Evaluator-lifetime-constant
-// assumption (see evalCacheKey doc).
+// input order. incomingDamage and arcaneIncomingDamage are omitted from the key by the
+// Evaluator-lifetime-constant assumption (see evalCacheKey doc).
 func makeCacheKey(
 	hero Hero, weapons []Weapon, hand []Card,
 	runechantCarryover int, arsenalCardIn Card,

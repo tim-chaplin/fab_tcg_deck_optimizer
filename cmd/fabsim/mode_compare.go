@@ -25,6 +25,7 @@ func runCompareCmd(args []string) {
 	}
 	shuffles := fs.Int("shuffles", 10000, "shuffles per deck used to re-score each deck before comparing (compare always uses fixed shuffles so the two decks are scored under matched conditions)")
 	incoming := fs.Int("incoming", 0, "opponent damage per turn (required — both decks are re-scored against this value)")
+	arcaneIncoming := fs.Int("arcane-incoming", 0, "opponent arcane damage per turn (defaults to 0 — the non-arcane matchup; raise it to score cards that gate on incoming arcane)")
 	seed := fs.Int64("seed", time.Now().UnixNano(), "RNG seed (each deck builds an independent RNG from this seed)")
 	formatFlag := fs.String("format", string(deckformat.SilverAge), "constructed format predicate applied to replacement picks when a loaded deck contains NotImplemented cards")
 	maxCopies := fs.Int("max-copies", defaultMaxCopies, "maximum copies of any single card printing per deck, applied when replacing NotImplemented cards in a loaded deck")
@@ -37,7 +38,7 @@ func runCompareCmd(args []string) {
 	if err != nil {
 		die("%v", err)
 	}
-	runCompare(fs.Arg(0), fs.Arg(1), *shuffles, *incoming, *maxCopies, *seed, fmtValue)
+	runCompare(fs.Arg(0), fs.Arg(1), *shuffles, *incoming, *arcaneIncoming, *maxCopies, *seed, fmtValue)
 }
 
 // runCompare re-evaluates both decks under identical (shuffles, incoming) settings so the
@@ -46,15 +47,15 @@ func runCompareCmd(args []string) {
 // hand value, per-cycle means, the hand-value histograms, and finally the per-card count
 // delta. The header line at the top of the output records the (shuffles, incoming)
 // settings so the per-section rows don't have to repeat them.
-func runCompare(name1, name2 string, shuffles, incoming, maxCopies int, seed int64, fmtValue deckformat.Format) {
+func runCompare(name1, name2 string, shuffles, incoming, arcaneIncoming, maxCopies int, seed int64, fmtValue deckformat.Format) {
 	// compare always uses a fixed -shuffles count so the two decks are scored under matched
 	// conditions. Adaptive stop would let one deck terminate at a different shuffle count
 	// than the other, breaking the apples-to-apples invariant the per-stat comparison rests on.
-	d1 := evaluateAndPersist(resolveDeckPath(name1), shuffles, incoming, maxCopies, seed, fmtValue, false)
-	d2 := evaluateAndPersist(resolveDeckPath(name2), shuffles, incoming, maxCopies, seed, fmtValue, false)
+	d1 := evaluateAndPersist(resolveDeckPath(name1), shuffles, incoming, arcaneIncoming, maxCopies, seed, fmtValue, false)
+	d2 := evaluateAndPersist(resolveDeckPath(name2), shuffles, incoming, arcaneIncoming, maxCopies, seed, fmtValue, false)
 	s1, s2 := d1.Stats, d2.Stats
 
-	fmt.Printf("compare: -shuffles=%s -incoming=%d\n", commaInt(shuffles), incoming)
+	fmt.Printf("compare: -shuffles=%s -incoming=%d -arcane-incoming=%d\n", commaInt(shuffles), incoming, arcaneIncoming)
 	fmt.Println()
 
 	printSideBySideStats(name1, name2, []statSection{

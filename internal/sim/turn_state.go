@@ -154,6 +154,11 @@ type TurnState struct {
 	// Cards reading "did we block all incoming?" against the static partition aggregate use
 	// BlockTotal instead.
 	IncomingDamage int
+	// ArcaneIncomingDamage is the opponent's arcane damage this turn, seeded from the
+	// -arcane-incoming flag. Cards whose riders gate on "if you've been dealt arcane damage
+	// this turn" read this directly; not decremented during the chain (defending arcane isn't
+	// modelled).
+	ArcaneIncomingDamage int
 	// BlockTotal is the sum of Defense() across every Defend-role card in the current
 	// partition. Uncapped: if the partition over-blocks, BlockTotal is the full sum, not
 	// clamped to IncomingDamage.

@@ -26,34 +26,35 @@ import ()
 // loop). Calling Best directly is reserved for Best's own unit tests and for production
 // plumbing inside this package.
 func Best(hero Hero, weapons []Weapon, hand []Card, incomingDamage int, deck []Card, runechantCarryover int, arsenalCardIn Card) TurnSummary {
-	return sharedEvaluator.BestWithTriggers(hero, weapons, hand, incomingDamage, deck, runechantCarryover, arsenalCardIn, nil)
+	return sharedEvaluator.BestWithTriggers(hero, weapons, hand, incomingDamage, 0, deck, runechantCarryover, arsenalCardIn, nil)
 }
 
 // BestWithTriggers is Best plus an explicit priorAuraTriggers input — the AuraTriggers
 // carrying in from the previous turn. Mid-chain triggers (Malefic Incantation's
 // TriggerAttackAction rune, etc.) may fire and contribute damage to this turn's Value.
+// arcaneIncomingDamage seeds TurnState.ArcaneIncomingDamage; pass 0 for the no-arcane matchup.
 // Same test convention as Best: e2e tests should go through (*Deck).EvalOneTurnForTesting.
-func BestWithTriggers(hero Hero, weapons []Weapon, hand []Card, incomingDamage int, deck []Card, runechantCarryover int, arsenalCardIn Card, priorAuraTriggers []AuraTrigger) TurnSummary {
-	return sharedEvaluator.BestWithTriggers(hero, weapons, hand, incomingDamage, deck, runechantCarryover, arsenalCardIn, priorAuraTriggers)
+func BestWithTriggers(hero Hero, weapons []Weapon, hand []Card, incomingDamage, arcaneIncomingDamage int, deck []Card, runechantCarryover int, arsenalCardIn Card, priorAuraTriggers []AuraTrigger) TurnSummary {
+	return sharedEvaluator.BestWithTriggers(hero, weapons, hand, incomingDamage, arcaneIncomingDamage, deck, runechantCarryover, arsenalCardIn, priorAuraTriggers)
 }
 
 // Best is the method form of the package-level Best.
 func (e *Evaluator) Best(hero Hero, weapons []Weapon, hand []Card, incomingDamage int, deck []Card, runechantCarryover int, arsenalCardIn Card) TurnSummary {
-	return e.BestWithTriggers(hero, weapons, hand, incomingDamage, deck, runechantCarryover, arsenalCardIn, nil)
+	return e.BestWithTriggers(hero, weapons, hand, incomingDamage, 0, deck, runechantCarryover, arsenalCardIn, nil)
 }
 
 // BestWithTriggers is the method form of the package-level BestWithTriggers. Returns a
 // TurnSummary with State.Log fully populated.
-func (e *Evaluator) BestWithTriggers(hero Hero, weapons []Weapon, hand []Card, incomingDamage int, deck []Card, runechantCarryover int, arsenalCardIn Card, priorAuraTriggers []AuraTrigger) TurnSummary {
-	return e.findBest(hero, weapons, hand, incomingDamage, deck, runechantCarryover, arsenalCardIn, priorAuraTriggers, false)
+func (e *Evaluator) BestWithTriggers(hero Hero, weapons []Weapon, hand []Card, incomingDamage, arcaneIncomingDamage int, deck []Card, runechantCarryover int, arsenalCardIn Card, priorAuraTriggers []AuraTrigger) TurnSummary {
+	return e.findBest(hero, weapons, hand, incomingDamage, arcaneIncomingDamage, deck, runechantCarryover, arsenalCardIn, priorAuraTriggers, false)
 }
 
 // BestWithTriggersSkipLog is BestWithTriggers without populating State.Log. Same Value and
 // non-Log carry-state fields; State.Log comes back empty. The deck-eval loop uses this for
 // every turn to skip the per-chain Log slice copy that dominates allocation bytes; only
 // turns that become the new deck-best are replayed via BestWithTriggers to recover Log.
-func (e *Evaluator) BestWithTriggersSkipLog(hero Hero, weapons []Weapon, hand []Card, incomingDamage int, deck []Card, runechantCarryover int, arsenalCardIn Card, priorAuraTriggers []AuraTrigger) TurnSummary {
-	return e.findBest(hero, weapons, hand, incomingDamage, deck, runechantCarryover, arsenalCardIn, priorAuraTriggers, true)
+func (e *Evaluator) BestWithTriggersSkipLog(hero Hero, weapons []Weapon, hand []Card, incomingDamage, arcaneIncomingDamage int, deck []Card, runechantCarryover int, arsenalCardIn Card, priorAuraTriggers []AuraTrigger) TurnSummary {
+	return e.findBest(hero, weapons, hand, incomingDamage, arcaneIncomingDamage, deck, runechantCarryover, arsenalCardIn, priorAuraTriggers, true)
 }
 
 // Evaluator caches per-goroutine scratch state across Best calls. The first call allocates
@@ -157,10 +158,10 @@ func (e *Evaluator) CacheStats() CacheStats {
 }
 
 // sharedEvaluator backs the package-level Best — single-threaded callers don't need to
-// construct their own. Caching is OFF here: the cache key omits incomingDamage on the
-// premise that an Evaluator's lifetime spans calls at constant incomingDamage, which is
-// true for production callers (each constructs their own Evaluator at a fixed incoming)
-// but NOT for the test suite, which exercises Best at many different incoming values
-// against the same package-level entry point. Tests that want cache behaviour construct
-// their own Evaluator via NewEvaluator.
+// construct their own. Caching is OFF here: the cache key omits incomingDamage and
+// arcaneIncomingDamage on the premise that an Evaluator's lifetime spans calls at constant
+// matchup parameters, which is true for production callers (each constructs their own
+// Evaluator at fixed values) but NOT for the test suite, which exercises Best at many
+// different matchup values against the same package-level entry point. Tests that want
+// cache behaviour construct their own Evaluator via NewEvaluator.
 var sharedEvaluator = NewEvaluatorWithoutCache()

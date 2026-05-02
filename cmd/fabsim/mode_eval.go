@@ -23,6 +23,7 @@ func runEvalCmd(args []string) {
 	}
 	shuffles := fs.Int("shuffles", -1, "per-eval shuffle budget. -1 (default) runs adaptively, stopping once the per-turn mean's standard error drops below the built-in target. Any non-negative value runs exactly that many shuffles (apples-to-apples re-scores, repro flows).")
 	incoming := fs.Int("incoming", 0, "opponent damage per turn (required unless -print-only is set — must match the value the deck was annealed at for comparable numbers)")
+	arcaneIncoming := fs.Int("arcane-incoming", 0, "opponent arcane damage per turn (defaults to 0 — the non-arcane matchup; raise it to score cards that gate on incoming arcane)")
 	seed := fs.Int64("seed", time.Now().UnixNano(), "RNG seed")
 	formatFlag := fs.String("format", string(deckformat.SilverAge), "constructed format predicate applied to replacement picks when the loaded deck contains NotImplemented cards")
 	maxCopies := fs.Int("max-copies", defaultMaxCopies, "maximum copies of any single card printing per deck, applied when replacing NotImplemented cards in the loaded deck")
@@ -40,7 +41,7 @@ func runEvalCmd(args []string) {
 	if err != nil {
 		die("%v", err)
 	}
-	runEval(resolveDeckPath(fs.Arg(0)), *shuffles, *incoming, *maxCopies, *seed, fmtValue, *printOnly, *brief, *debug)
+	runEval(resolveDeckPath(fs.Arg(0)), *shuffles, *incoming, *arcaneIncoming, *maxCopies, *seed, fmtValue, *printOnly, *brief, *debug)
 }
 
 // runEval loads the deck at outPath and prints its stats. Default behaviour (printOnly=false)
@@ -60,9 +61,9 @@ func runEvalCmd(args []string) {
 // debug=true prints extra telemetry to stderr after the run — currently the hand-eval
 // cache hit rate. Only meaningful when a fresh simulation actually ran (printOnly=false);
 // otherwise the Evaluator never spun up.
-func runEval(outPath string, shuffles, incoming, maxCopies int, seed int64, fmtValue deckformat.Format, printOnly, brief, debug bool) {
+func runEval(outPath string, shuffles, incoming, arcaneIncoming, maxCopies int, seed int64, fmtValue deckformat.Format, printOnly, brief, debug bool) {
 	if !printOnly {
-		evaluateAndPersist(outPath, shuffles, incoming, maxCopies, seed, fmtValue, debug)
+		evaluateAndPersist(outPath, shuffles, incoming, arcaneIncoming, maxCopies, seed, fmtValue, debug)
 	}
 	printLoadedDeck(mustLoadDeck(outPath), brief)
 }
@@ -79,7 +80,7 @@ func runEval(outPath string, shuffles, incoming, maxCopies int, seed int64, fmtV
 // per-Evaluator cache stats are always available. debug=true prints them after the run;
 // otherwise they're computed-but-discarded — the cache itself runs unconditionally because
 // it speeds up the eval regardless of whether the operator wants the telemetry.
-func evaluateAndPersist(outPath string, shuffles, incoming, maxCopies int, seed int64, fmtValue deckformat.Format, debug bool) *sim.Deck {
+func evaluateAndPersist(outPath string, shuffles, incoming, arcaneIncoming, maxCopies int, seed int64, fmtValue deckformat.Format, debug bool) *sim.Deck {
 	loaded := mustLoadDeck(outPath)
 	// Wrap the loaded hero/weapons/cards in a fresh Deck so the eval's stats start from zero
 	// instead of accumulating on top of the persisted Stats. Sideboard and Equipment carry
@@ -96,7 +97,7 @@ func evaluateAndPersist(outPath string, shuffles, incoming, maxCopies int, seed 
 	// flagship single-deck workload — getting from 1.8s to ~0.5s on 8 workers cuts
 	// re-score wall-clock noticeably.
 	start := time.Now()
-	_, ev := evaluateParallel(d, shuffles, incoming, rng)
+	_, ev := evaluateParallel(d, shuffles, incoming, arcaneIncoming, rng)
 	elapsed := time.Since(start)
 	fmt.Fprintf(os.Stderr, "eval: avg %.3f → %.3f (delta %+.3f) in %s (%s shuffles); rewriting %s\n",
 		savedAvg, d.Stats.Mean(), d.Stats.Mean()-savedAvg, elapsed.Round(time.Millisecond), commaInt(d.Stats.Runs), outPath)

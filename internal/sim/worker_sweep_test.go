@@ -56,7 +56,7 @@ func BenchmarkEvalWorkerSweep(b *testing.B) {
 				rng := rand.New(rand.NewSource(42))
 				d := New(loaded.Hero, loaded.Weapons, loaded.Cards)
 				b.StartTimer()
-				d.EvaluateWith(shuffles, incoming, rng, ev)
+				d.EvaluateWith(shuffles, incoming, 0, rng, ev)
 			}
 		})
 	}
@@ -136,7 +136,7 @@ func BenchmarkAnnealWorkerSweep(b *testing.B) {
 				b.StartTimer()
 				_, _, _, found := IterateParallel(
 					context.Background(), mutations, unreachableBaseline, 0, 0,
-					0, incoming, c.mut, c.shuf,
+					0, incoming, 0, c.mut, c.shuf,
 					iterRNG.Int63(), nil, true,
 				)
 				if found {

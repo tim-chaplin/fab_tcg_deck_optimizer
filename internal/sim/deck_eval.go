@@ -17,9 +17,10 @@ import (
 
 // Evaluate simulates runs shuffles of the deck. For each run it assembles successive hands of
 // d.Hero.Intelligence() cards (Held cards from last turn plus fresh top-of-deck draws), computes
-// the optimal play against an opponent attacking for incomingDamage, and recycles Pitched cards
-// to the bottom of the deck in hand order. Played and defended cards are spent; Held cards carry
-// into the next hand. A run ends when the deck can't fill the next hand.
+// the optimal play against an opponent attacking for incomingDamage (plus arcaneIncomingDamage
+// arcane damage), and recycles Pitched cards to the bottom of the deck in hand order. Played
+// and defended cards are spent; Held cards carry into the next hand. A run ends when the deck
+// can't fill the next hand.
 //
 // A "cycle" is one pass through the original deck size: hands 0..(deckSize/handSize - 1) are
 // cycle 1, the next deckSize/handSize are cycle 2.
@@ -28,14 +29,14 @@ import (
 //
 // Uses the package-level shared Evaluator. Concurrent callers must use EvaluateWith with a
 // goroutine-local Evaluator — the shared buffers have no internal synchronisation.
-func (d *Deck) Evaluate(runs int, incomingDamage int, rng *rand.Rand) Stats {
-	return d.EvaluateWith(runs, incomingDamage, rng, nil)
+func (d *Deck) Evaluate(runs, incomingDamage, arcaneIncomingDamage int, rng *rand.Rand) Stats {
+	return d.EvaluateWith(runs, incomingDamage, arcaneIncomingDamage, rng, nil)
 }
 
 // EvaluateWith is Evaluate using the given Evaluator. Pass a dedicated Evaluator per
 // goroutine for parallel runs; nil reuses the package-level shared Evaluator.
-func (d *Deck) EvaluateWith(runs int, incomingDamage int, rng *rand.Rand, ev *Evaluator) Stats {
-	return d.evaluateImpl(runs, incomingDamage, rng, ev, nil)
+func (d *Deck) EvaluateWith(runs, incomingDamage, arcaneIncomingDamage int, rng *rand.Rand, ev *Evaluator) Stats {
+	return d.evaluateImpl(runs, incomingDamage, arcaneIncomingDamage, rng, ev, nil)
 }
 
 // EvaluateAdaptive runs shuffles until the standard error of the per-turn mean Value drops
@@ -47,13 +48,13 @@ func (d *Deck) EvaluateWith(runs int, incomingDamage int, rng *rand.Rand, ev *Ev
 // Use when "knowing the mean to ±adaptiveTargetSE" is enough — e.g. fabsim eval / anneal
 // default runs. Modes that need apples-to-apples shuffle counts across runs (compare,
 // explicit -shuffles) should keep using EvaluateWith with a fixed runs count.
-func (d *Deck) EvaluateAdaptive(incomingDamage int, rng *rand.Rand) Stats {
-	return d.EvaluateAdaptiveWith(incomingDamage, rng, nil)
+func (d *Deck) EvaluateAdaptive(incomingDamage, arcaneIncomingDamage int, rng *rand.Rand) Stats {
+	return d.EvaluateAdaptiveWith(incomingDamage, arcaneIncomingDamage, rng, nil)
 }
 
 // EvaluateAdaptiveWith is EvaluateAdaptive using the given Evaluator.
-func (d *Deck) EvaluateAdaptiveWith(incomingDamage int, rng *rand.Rand, ev *Evaluator) Stats {
-	return d.evaluateImpl(adaptiveShufflesCap, incomingDamage, rng, ev, makeAdaptiveStop(adaptiveTargetSE))
+func (d *Deck) EvaluateAdaptiveWith(incomingDamage, arcaneIncomingDamage int, rng *rand.Rand, ev *Evaluator) Stats {
+	return d.evaluateImpl(adaptiveShufflesCap, incomingDamage, arcaneIncomingDamage, rng, ev, makeAdaptiveStop(adaptiveTargetSE))
 }
 
 // shuffleStopper is the early-stop policy for the eval shuffle loop. Called once after each
@@ -113,7 +114,7 @@ func meanStandardError(stats *Stats) float64 {
 	return math.Sqrt(variance / n)
 }
 
-func (d *Deck) evaluateImpl(maxRuns int, incomingDamage int, rng *rand.Rand, ev *Evaluator, stop shuffleStopper) Stats {
+func (d *Deck) evaluateImpl(maxRuns, incomingDamage, arcaneIncomingDamage int, rng *rand.Rand, ev *Evaluator, stop shuffleStopper) Stats {
 	CurrentHero = d.Hero
 	handSize := d.Hero.Intelligence()
 	deckSize := len(d.Cards)
@@ -121,21 +122,21 @@ func (d *Deck) evaluateImpl(maxRuns int, incomingDamage int, rng *rand.Rand, ev 
 		return d.Stats
 	}
 	if ev != nil && ev.numWorkers > 1 {
-		return d.evaluateParallelImpl(maxRuns, incomingDamage, rng, ev, stop, handSize, deckSize)
+		return d.evaluateParallelImpl(maxRuns, incomingDamage, arcaneIncomingDamage, rng, ev, stop, handSize, deckSize)
 	}
-	return d.evaluateSequentialImpl(maxRuns, incomingDamage, rng, ev, stop, handSize, deckSize)
+	return d.evaluateSequentialImpl(maxRuns, incomingDamage, arcaneIncomingDamage, rng, ev, stop, handSize, deckSize)
 }
 
 // evaluateSequentialImpl runs the shuffle loop in the calling goroutine, using ev's
 // cachedBufs scratch directly. This is the deterministic-RNG path tests rely on.
-func (d *Deck) evaluateSequentialImpl(maxRuns int, incomingDamage int, rng *rand.Rand, ev *Evaluator, stop shuffleStopper, handSize, deckSize int) Stats {
+func (d *Deck) evaluateSequentialImpl(maxRuns, incomingDamage, arcaneIncomingDamage int, rng *rand.Rand, ev *Evaluator, stop shuffleStopper, handSize, deckSize int) Stats {
 	handsPerCycle := deckSize / handSize
 	uniqueIDs, idIndex := uniqueDeckIDs(d.Cards)
 	scratch := newShuffleScratch(deckSize, handSize, len(uniqueIDs))
 
 	actualRuns := 0
 	for r := 0; r < maxRuns; r++ {
-		runOneShuffle(d, &d.Stats, scratch, idIndex, ev, rng, incomingDamage, handsPerCycle, deckSize, handSize)
+		runOneShuffle(d, &d.Stats, scratch, idIndex, ev, rng, incomingDamage, arcaneIncomingDamage, handsPerCycle, deckSize, handSize)
 		actualRuns = r + 1
 		if stop != nil && stop(&d.Stats, actualRuns) {
 			break
@@ -153,7 +154,7 @@ func (d *Deck) evaluateSequentialImpl(maxRuns int, incomingDamage int, rng *rand
 // goroutine merges every worker's local Stats into d.Stats and runs the adaptive stop
 // check. Per-worker RNG seeds are derived from rng.Int63() so the chunk distribution is
 // deterministic given the input rng.
-func (d *Deck) evaluateParallelImpl(maxRuns int, incomingDamage int, rng *rand.Rand, ev *Evaluator, stop shuffleStopper, handSize, deckSize int) Stats {
+func (d *Deck) evaluateParallelImpl(maxRuns, incomingDamage, arcaneIncomingDamage int, rng *rand.Rand, ev *Evaluator, stop shuffleStopper, handSize, deckSize int) Stats {
 	numWorkers := ev.numWorkers
 	handsPerCycle := deckSize / handSize
 	uniqueIDs, idIndex := uniqueDeckIDs(d.Cards)
@@ -197,7 +198,7 @@ func (d *Deck) evaluateParallelImpl(maxRuns int, incomingDamage int, rng *rand.R
 				scratch := newShuffleScratch(deckSize, handSize, len(uniqueIDs))
 				var local Stats
 				for r := 0; r < runs; r++ {
-					runOneShuffle(d, &local, scratch, idIndex, workerEv, workerRNG, incomingDamage, handsPerCycle, deckSize, handSize)
+					runOneShuffle(d, &local, scratch, idIndex, workerEv, workerRNG, incomingDamage, arcaneIncomingDamage, handsPerCycle, deckSize, handSize)
 				}
 				results <- partial{stats: local, marginal: scratch.marginalBuf}
 			}(mySeed, myRuns)
@@ -259,7 +260,7 @@ func newShuffleScratch(deckSize, handSize, numUniqueIDs int) *shuffleScratch {
 // "winning so far" tracking inside recordTurnStats / recordBestTurn observes the local
 // Stats only — the parallel path's chunk-merge merges per-worker bests into d.Stats
 // after every chunk.
-func runOneShuffle(d *Deck, stats *Stats, scratch *shuffleScratch, idIndex map[ids.CardID]int, ev *Evaluator, rng *rand.Rand, incomingDamage, handsPerCycle, deckSize, handSize int) {
+func runOneShuffle(d *Deck, stats *Stats, scratch *shuffleScratch, idIndex map[ids.CardID]int, ev *Evaluator, rng *rand.Rand, incomingDamage, arcaneIncomingDamage, handsPerCycle, deckSize, handSize int) {
 	buf := scratch.buf
 	copy(buf, d.Cards)
 	// Inline Fisher-Yates: rng.Shuffle would heap-allocate a closure over buf every run.
@@ -296,7 +297,7 @@ func runOneShuffle(d *Deck, stats *Stats, scratch *shuffleScratch, idIndex map[i
 		}
 		runechantCarryover += trigRunes
 		arsenalIn := arsenalCard
-		play := runBestForTurn(d.Hero, d.Weapons, h, incomingDamage, buf[head+drawCount:tail], runechantCarryover, arsenalCard, auraTriggerBuf, ev)
+		play := runBestForTurn(d.Hero, d.Weapons, h, incomingDamage, arcaneIncomingDamage, buf[head+drawCount:tail], runechantCarryover, arsenalCard, auraTriggerBuf, ev)
 		runechantCarryover = play.State.Runechants
 		arsenalCard = play.State.Arsenal
 		play.Value += trigDamage
@@ -305,7 +306,7 @@ func runOneShuffle(d *Deck, stats *Stats, scratch *shuffleScratch, idIndex map[i
 		play.DealtHand = dealtHand
 
 		if recordTurnStats(stats, play, handIdx, handsPerCycle) {
-			replay := replayBestForTurnWithLog(d.Hero, d.Weapons, h, incomingDamage, buf[head+drawCount:tail], startingRunechants, arsenalIn, auraTriggerBuf, ev)
+			replay := replayBestForTurnWithLog(d.Hero, d.Weapons, h, incomingDamage, arcaneIncomingDamage, buf[head+drawCount:tail], startingRunechants, arsenalIn, auraTriggerBuf, ev)
 			replay.Value = play.Value
 			replay.TriggersFromLastTurn = trigContribs
 			replay.StartOfTurnAuras = startOfTurnAuras
@@ -380,7 +381,7 @@ func runBestForTurn(
 	hero Hero,
 	weapons []Weapon,
 	h []Card,
-	incomingDamage int,
+	incomingDamage, arcaneIncomingDamage int,
 	deck []Card,
 	runechantCarryover int,
 	arsenalCard Card,
@@ -388,11 +389,11 @@ func runBestForTurn(
 	ev *Evaluator,
 ) TurnSummary {
 	if ev != nil {
-		return ev.BestWithTriggersSkipLog(hero, weapons, h, incomingDamage, deck, runechantCarryover, arsenalCard, priorAuraTriggers)
+		return ev.BestWithTriggersSkipLog(hero, weapons, h, incomingDamage, arcaneIncomingDamage, deck, runechantCarryover, arsenalCard, priorAuraTriggers)
 	}
 	// No-evaluator path retains the populated-Log behaviour for direct callers (tests, ad-hoc
 	// tools) that don't have a deck-eval loop to drive the replay step.
-	return BestWithTriggers(hero, weapons, h, incomingDamage, deck, runechantCarryover, arsenalCard, priorAuraTriggers)
+	return BestWithTriggers(hero, weapons, h, incomingDamage, arcaneIncomingDamage, deck, runechantCarryover, arsenalCard, priorAuraTriggers)
 }
 
 // replayBestForTurnWithLog re-runs the Best search with full Log materialisation. Same
@@ -404,7 +405,7 @@ func replayBestForTurnWithLog(
 	hero Hero,
 	weapons []Weapon,
 	h []Card,
-	incomingDamage int,
+	incomingDamage, arcaneIncomingDamage int,
 	deck []Card,
 	runechantCarryover int,
 	arsenalCard Card,
@@ -412,9 +413,9 @@ func replayBestForTurnWithLog(
 	ev *Evaluator,
 ) TurnSummary {
 	if ev != nil {
-		return ev.BestWithTriggers(hero, weapons, h, incomingDamage, deck, runechantCarryover, arsenalCard, priorAuraTriggers)
+		return ev.BestWithTriggers(hero, weapons, h, incomingDamage, arcaneIncomingDamage, deck, runechantCarryover, arsenalCard, priorAuraTriggers)
 	}
-	return BestWithTriggers(hero, weapons, h, incomingDamage, deck, runechantCarryover, arsenalCard, priorAuraTriggers)
+	return BestWithTriggers(hero, weapons, h, incomingDamage, arcaneIncomingDamage, deck, runechantCarryover, arsenalCard, priorAuraTriggers)
 }
 
 // recordTurnStats folds one resolved turn's accumulators into stats: bumps Hands /

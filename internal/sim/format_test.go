@@ -107,7 +107,7 @@ func TestFormatBestTurn_LogAttributesEachTriggerSeparately(t *testing.T) {
 	var bootstrap TurnState
 	cards.MaleficIncantationRed{}.Play(&bootstrap, &CardState{Card: cards.MaleficIncantationRed{}})
 	prior := bootstrap.AuraTriggers
-	got := BestWithTriggers(heroes.Viserai{}, nil, h, 0, nil, 0, nil, prior)
+	got := BestWithTriggers(heroes.Viserai{}, nil, h, 0, 0, nil, 0, nil, prior)
 	out := FormatBestTurn(got, 0)
 	// Trigger lines render indented (9 spaces) with no "(from <source>)" suffix — the
 	// indentation under the parent chain entry conveys attribution. Each line carries

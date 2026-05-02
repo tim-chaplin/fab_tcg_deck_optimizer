@@ -33,6 +33,10 @@ var cardsByID = []sim.Card{
 	ids.ArcaneCussingYellow: cards.ArcaneCussingYellow{},
 	ids.ArcaneCussingBlue:   cards.ArcaneCussingBlue{},
 
+	ids.ArcanePolarityRed:    cards.ArcanePolarityRed{},
+	ids.ArcanePolarityYellow: cards.ArcanePolarityYellow{},
+	ids.ArcanePolarityBlue:   cards.ArcanePolarityBlue{},
+
 	ids.ArcanicCrackleRed:    cards.ArcanicCrackleRed{},
 	ids.ArcanicCrackleYellow: cards.ArcanicCrackleYellow{},
 	ids.ArcanicCrackleBlue:   cards.ArcanicCrackleBlue{},
@@ -291,6 +295,10 @@ var cardsByID = []sim.Card{
 	ids.UnmovableRed:    cards.UnmovableRed{},
 	ids.UnmovableYellow: cards.UnmovableYellow{},
 	ids.UnmovableBlue:   cards.UnmovableBlue{},
+
+	ids.VantagePointRed:    cards.VantagePointRed{},
+	ids.VantagePointYellow: cards.VantagePointYellow{},
+	ids.VantagePointBlue:   cards.VantagePointBlue{},
 
 	ids.VigorRushRed:    cards.VigorRushRed{},
 	ids.VigorRushYellow: cards.VigorRushYellow{},

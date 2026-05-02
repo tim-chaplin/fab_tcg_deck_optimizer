@@ -23,7 +23,7 @@ import "fmt"
 func (e *Evaluator) replayBest(
 	entry evalCacheEntry,
 	hero Hero, weapons []Weapon, hand []Card,
-	incomingDamage int, deck []Card, runechantCarryover int,
+	incomingDamage, arcaneIncomingDamage int, deck []Card, runechantCarryover int,
 	arsenalCardIn Card, priorAuraTriggers []AuraTrigger, skipLog bool,
 ) TurnSummary {
 	n := len(hand)
@@ -63,7 +63,7 @@ func (e *Evaluator) replayBest(
 	attackDealt, defenseDealt, _, swung, carry, ok, _, arsenalAtChainStart := e.evaluatePartition(
 		hero, weapons, hand, deck, arsenalCardIn,
 		rolesBuf, n, bufs,
-		runechantCarryover, incomingDamage, defenseSum,
+		runechantCarryover, incomingDamage, arcaneIncomingDamage, defenseSum,
 		priorAuraTriggers, skipLog,
 	)
 	if !ok {

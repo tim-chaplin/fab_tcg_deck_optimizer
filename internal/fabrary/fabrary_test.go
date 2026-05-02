@@ -168,9 +168,9 @@ See the full deck @ https://fabrary.net/decks/01KP1AZ5SAS425YN30WB779M41
 	}
 	// NotImplemented cards live in internal/cards/notimplemented/ and aren't imported by the
 	// registry, so they're reported as skipped just like genuinely-unknown cards. The sample
-	// has three: Arcane Polarity, Condemn to Slaughter, Drowning Dire.
+	// retains two such names (Condemn to Slaughter, Drowning Dire); Arcane Polarity has since
+	// been promoted to a fully-modelled card.
 	wantSkipped := map[string]int{
-		"Arcane Polarity [R]":      2,
 		"Condemn to Slaughter [R]": 2,
 		"Drowning Dire [R]":        2,
 	}
