@@ -1,8 +1,11 @@
 // Thrust — Generic Attack Reaction. Cost 1. Printed pitch variants: Red 1. Defense 2.
 //
 // Text: "Target sword attack gains +3{p}."
+//
+// "Sword attack" includes both Sword weapons and Sword attack action cards — the printed
+// "attack" word doesn't restrict to action cards.
 
-package notimplemented
+package cards
 
 import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
@@ -22,7 +25,11 @@ func (ThrustRed) Attack() int             { return 0 }
 func (ThrustRed) Defense() int            { return 2 }
 func (ThrustRed) Types() card.TypeSet     { return thrustTypes }
 func (ThrustRed) GoAgain() bool           { return false }
-
-// not implemented: AR +3{p} buff to a target sword attack
-func (ThrustRed) NotImplemented()                            {}
-func (ThrustRed) Play(s *sim.TurnState, self *sim.CardState) { s.Log(self, 0) }
+func (ThrustRed) ARTargetAllowed(c sim.Card) bool {
+	t := c.Types()
+	return t.Has(card.TypeSword) && t.IsAttack()
+}
+func (ThrustRed) Play(s *sim.TurnState, self *sim.CardState) {
+	sim.GrantAttackReactionBuff(s, ThrustRed{}.ARTargetAllowed, 3)
+	s.Log(self, 0)
+}

@@ -1,8 +1,11 @@
 // Lunging Press — Generic Attack Reaction. Cost 0. Printed pitch variants: Blue 3. Defense 2.
 //
 // Text: "Target attack action card gains +1{p}."
+//
+// Targets exclude weapon attacks: the printed text says "attack action card", not "attack",
+// so a chain whose only attack candidate is a weapon swing can't legally play this AR.
 
-package notimplemented
+package cards
 
 import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
@@ -22,7 +25,10 @@ func (LungingPressBlue) Attack() int             { return 0 }
 func (LungingPressBlue) Defense() int            { return 2 }
 func (LungingPressBlue) Types() card.TypeSet     { return lungingPressTypes }
 func (LungingPressBlue) GoAgain() bool           { return false }
-
-// not implemented: AR +1{p} buff to a target attack action card
-func (LungingPressBlue) NotImplemented()                            {}
-func (LungingPressBlue) Play(s *sim.TurnState, self *sim.CardState) { s.Log(self, 0) }
+func (LungingPressBlue) ARTargetAllowed(c sim.Card) bool {
+	return c.Types().IsAttackAction()
+}
+func (LungingPressBlue) Play(s *sim.TurnState, self *sim.CardState) {
+	sim.GrantAttackReactionBuff(s, LungingPressBlue{}.ARTargetAllowed, 1)
+	s.Log(self, 0)
+}

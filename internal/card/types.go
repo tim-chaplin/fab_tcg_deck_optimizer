@@ -86,3 +86,11 @@ func (s TypeSet) IsRunebladeAttack() bool {
 func (s TypeSet) IsDefenseReaction() bool {
 	return s&TypeSet(TypeDefenseReaction) != 0
 }
+
+// IsAttackReaction reports whether s has the Attack Reaction subtype. The partition
+// validator uses this to enforce that an AR in the attack-role bag has at least one valid
+// chain target (an attack action card or a swinging weapon, depending on the AR's
+// printed predicate).
+func (s TypeSet) IsAttackReaction() bool {
+	return s&TypeSet(TypeAttackReaction) != 0
+}

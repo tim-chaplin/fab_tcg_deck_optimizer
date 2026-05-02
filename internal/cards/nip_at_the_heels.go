@@ -1,8 +1,13 @@
-// Nip at the Heels — Generic Attack Reaction. Cost 0. Printed pitch variants: Blue 3. Defense 3.
+// Nip at the Heels — Generic Attack Reaction. Cost 0. Printed pitch variants: Blue 3.
+// Defense 3.
 //
 // Text: "Target attack with 3 or less base {p} gets +1{p}."
+//
+// "Target attack" includes weapon attacks; the base-power gate (≤ 3) reads the printed
+// Attack() value, not the post-buff total. The predicate accepts both attack action cards
+// and weapons whose printed power is ≤ 3.
 
-package notimplemented
+package cards
 
 import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
@@ -22,7 +27,10 @@ func (NipAtTheHeelsBlue) Attack() int             { return 0 }
 func (NipAtTheHeelsBlue) Defense() int            { return 3 }
 func (NipAtTheHeelsBlue) Types() card.TypeSet     { return nipAtTheHeelsTypes }
 func (NipAtTheHeelsBlue) GoAgain() bool           { return false }
-
-// not implemented: AR +1{p} buff to a target attack with ≤3 base {p}
-func (NipAtTheHeelsBlue) NotImplemented()                            {}
-func (NipAtTheHeelsBlue) Play(s *sim.TurnState, self *sim.CardState) { s.Log(self, 0) }
+func (NipAtTheHeelsBlue) ARTargetAllowed(c sim.Card) bool {
+	return c.Types().IsAttack() && c.Attack() <= 3
+}
+func (NipAtTheHeelsBlue) Play(s *sim.TurnState, self *sim.CardState) {
+	sim.GrantAttackReactionBuff(s, NipAtTheHeelsBlue{}.ARTargetAllowed, 1)
+	s.Log(self, 0)
+}

@@ -187,6 +187,8 @@ var cardsByID = []sim.Card{
 	ids.EvasiveLeapYellow: cards.EvasiveLeapYellow{},
 	ids.EvasiveLeapBlue:   cards.EvasiveLeapBlue{},
 
+	ids.ExposedBlue: cards.ExposedBlue{},
+
 	ids.FateForeseenRed:    cards.FateForeseenRed{},
 	ids.FateForeseenYellow: cards.FateForeseenYellow{},
 	ids.FateForeseenBlue:   cards.FateForeseenBlue{},
@@ -219,6 +221,8 @@ var cardsByID = []sim.Card{
 	ids.LifeForALifeYellow: cards.LifeForALifeYellow{},
 	ids.LifeForALifeBlue:   cards.LifeForALifeBlue{},
 
+	ids.LungingPressBlue: cards.LungingPressBlue{},
+
 	ids.MinnowismRed:    cards.MinnowismRed{},
 	ids.MinnowismYellow: cards.MinnowismYellow{},
 	ids.MinnowismBlue:   cards.MinnowismBlue{},
@@ -232,6 +236,8 @@ var cardsByID = []sim.Card{
 	ids.NimblismRed:    cards.NimblismRed{},
 	ids.NimblismYellow: cards.NimblismYellow{},
 	ids.NimblismBlue:   cards.NimblismBlue{},
+
+	ids.NipAtTheHeelsBlue: cards.NipAtTheHeelsBlue{},
 
 	ids.OnTheHorizonRed:    cards.OnTheHorizonRed{},
 	ids.OnTheHorizonYellow: cards.OnTheHorizonYellow{},
@@ -280,6 +286,8 @@ var cardsByID = []sim.Card{
 	ids.SunKissRed:    cards.SunKissRed{},
 	ids.SunKissYellow: cards.SunKissYellow{},
 	ids.SunKissBlue:   cards.SunKissBlue{},
+
+	ids.ThrustRed: cards.ThrustRed{},
 
 	ids.ToughenUpBlue: cards.ToughenUpBlue{},
 
