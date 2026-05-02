@@ -23,17 +23,16 @@ type annealConfig struct {
 	// shuffles is the per-eval shuffle budget when adaptive is false (apples-to-apples
 	// acceptance, repro flows). Ignored when adaptive is true — the deck package's
 	// adaptive path uses its own SE target and cap.
-	shuffles       int
-	adaptive       bool
-	incoming       int
-	arcaneIncoming int
-	deckSize       int
-	maxCopies      int
-	seed           int64
-	outPath        string
-	format         deckformat.Format
-	debug          bool
-	reevaluate     bool
+	shuffles   int
+	adaptive   bool
+	matchup    sim.Matchup
+	deckSize   int
+	maxCopies  int
+	seed       int64
+	outPath    string
+	format     deckformat.Format
+	debug      bool
+	reevaluate bool
 	// startTemp / tempDecay / minTemp are the simulated-annealing knobs. startTemp of 0
 	// degenerates to the classical hill-climb (strict > baseline acceptance).
 	startTemp float64
@@ -121,8 +120,7 @@ func runAnnealCmd(args []string) {
 	cfg := annealConfig{
 		shuffles:       *shuffles,
 		adaptive:       *shuffles < 0,
-		incoming:       *incoming,
-		arcaneIncoming: *arcaneIncoming,
+		matchup:        sim.Matchup{IncomingDamage: *incoming, ArcaneIncomingDamage: *arcaneIncoming},
 		deckSize:       *deckSize,
 		maxCopies:      *maxCopies,
 		seed:           *seed,
@@ -243,7 +241,7 @@ func runAnneal(cfg annealConfig) annealResult {
 			temperature, currentAvg, bestEverAvg)
 		d, avg, idx, found := sim.IterateParallel(
 			ctx, mutations, currentAvg, temperature, cfg.minImprovement,
-			cfg.shuffles, cfg.incoming, cfg.arcaneIncoming, 0, 0,
+			cfg.shuffles, cfg.matchup, 0, 0,
 			rng.Int63(), &completed, cfg.adaptive,
 		)
 		stopTicker()
@@ -376,7 +374,7 @@ func baselineEvaluate(d *sim.Deck, cfg annealConfig, rng *rand.Rand) sim.Stats {
 	if cfg.adaptive {
 		shuffles = -1
 	}
-	stats, _ := evaluateParallel(d, shuffles, cfg.incoming, cfg.arcaneIncoming, rng)
+	stats, _ := evaluateParallel(d, shuffles, cfg.matchup, rng)
 	return stats
 }
 

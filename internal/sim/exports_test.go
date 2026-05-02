@@ -146,8 +146,8 @@ func PairAddAllowed(c Card, legal func(Card) bool) bool { return pairAddAllowed(
 
 // EvaluateImplForTest re-exports the unexported (*Deck).evaluateImpl as an exported method
 // for sim_test consumers exercising the eval-with-stop-condition path directly.
-func (d *Deck) EvaluateImplForTest(maxRuns, incomingDamage, arcaneIncomingDamage int, rng *rand.Rand, ev *Evaluator, stop func(stats *Stats, runs int) bool) Stats {
-	return d.evaluateImpl(maxRuns, incomingDamage, arcaneIncomingDamage, rng, ev, stop)
+func (d *Deck) EvaluateImplForTest(maxRuns int, mp Matchup, rng *rand.Rand, ev *Evaluator, stop func(stats *Stats, runs int) bool) Stats {
+	return d.evaluateImpl(maxRuns, mp, rng, ev, stop)
 }
 
 // DefaultEquipment re-exports defaultEquipment for sim_test consumers.

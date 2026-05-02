@@ -241,7 +241,7 @@ func TestBest_NimblismGrantsConsumingVolitionDiscardRider(t *testing.T) {
 		cards.NimblismBlue{},
 		pitchOnlyRed{},
 	}
-	got := Best(testutils.Hero{Intel: 4}, nil, h, 0, nil, 1, nil)
+	got := Best(testutils.Hero{Intel: 4}, nil, h, Matchup{IncomingDamage: 0}, nil, 1, nil)
 	if got.Value != 7 {
 		t.Fatalf("Value = %d, want 7 (Volition 3 base + Nimblism +1 BonusAttack + discard rider 3 from runechant-driven ArcaneDamageDealt × LikelyToHit on buffed 4-power attack); line=[%s]",
 			got.Value, FormatBestLine(got.BestLine))

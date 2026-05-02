@@ -58,7 +58,7 @@ func BenchmarkAnnealRoundOnViseraiV4(b *testing.B) {
 		b.StartTimer()
 		_, _, _, found := sim.IterateParallel(
 			context.Background(), mutations, unreachableBaseline, 0, 0,
-			0, incoming, 0, 0, 0,
+			0, sim.Matchup{IncomingDamage: incoming}, 0, 0,
 			iterRNG.Int63(), nil, true,
 		)
 		if found {

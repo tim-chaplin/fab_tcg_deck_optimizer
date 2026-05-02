@@ -17,7 +17,7 @@ import (
 // slot is empty so the DR becomes Arsenal and rides into next turn as got.State.Arsenal.
 func TestBest_EmptyArsenalClaimsHeldCard(t *testing.T) {
 	h := []Card{cards.ToughenUpBlue{}}
-	got := Best(testutils.Hero{Intel: 4}, nil, h, 4, nil, 0, nil)
+	got := Best(testutils.Hero{Intel: 4}, nil, h, Matchup{IncomingDamage: 4}, nil, 0, nil)
 	if got.BestLine[0].Role != Arsenal {
 		t.Errorf("Roles[0] = %s, want ARSENAL", got.BestLine[0].Role)
 	}
@@ -32,7 +32,7 @@ func TestBest_EmptyArsenalClaimsHeldCard(t *testing.T) {
 // got.State.Arsenal is nil because the slot was vacated and no hand card ends up Held.
 func TestBest_ArsenalInPlayDR(t *testing.T) {
 	h := []Card{cards.MaleficIncantationBlue{}}
-	got := Best(testutils.Hero{Intel: 4}, nil, h, 4, nil, 0, cards.ToughenUpBlue{})
+	got := Best(testutils.Hero{Intel: 4}, nil, h, Matchup{IncomingDamage: 4}, nil, 0, cards.ToughenUpBlue{})
 	if got.Value != 4 {
 		t.Fatalf("Value = %d, want 4 (Malefic pitches to pay arsenal DR, prevents 4). Roles=[%s]",
 			got.Value, FormatBestLine(got.BestLine))
@@ -58,7 +58,7 @@ func TestBest_ArsenalInPlayDR(t *testing.T) {
 // can't fund a DR anyway); post-hoc the slot is occupied so no promotion happens.
 func TestBest_ArsenalInStayBlocksNewArsenal(t *testing.T) {
 	h := []Card{cards.ToughenUpBlue{}}
-	got := Best(testutils.Hero{Intel: 4}, nil, h, 0, nil, 0, cards.ToughenUpBlue{})
+	got := Best(testutils.Hero{Intel: 4}, nil, h, Matchup{IncomingDamage: 0}, nil, 0, cards.ToughenUpBlue{})
 	if got.BestLine[0].Role != Held {
 		t.Errorf("Roles[0] = %s, want HELD (slot occupied by arsenal-in, can't promote)", got.BestLine[0].Role)
 	}
@@ -75,7 +75,7 @@ func TestBest_ArsenalInStayBlocksNewArsenal(t *testing.T) {
 // arsenal slot now empty and no Held cards, ArsenalCard is nil.
 func TestBest_ArsenalInPlayAttack(t *testing.T) {
 	h := []Card{testutils.RedAttack{}}
-	got := Best(testutils.Hero{Intel: 4}, nil, h, 0, nil, 0, testutils.RedAttack{})
+	got := Best(testutils.Hero{Intel: 4}, nil, h, Matchup{IncomingDamage: 0}, nil, 0, testutils.RedAttack{})
 	if got.Value != 3 {
 		t.Fatalf("Value = %d, want 3 (arsenal Red played, hand Red pitched to fund it). Roles=[%s]",
 			got.Value, FormatBestLine(got.BestLine))
@@ -93,7 +93,7 @@ func TestBest_ArsenalInPlayAttack(t *testing.T) {
 // Cussing from arsenal for a flat 3.
 func TestBest_ArsenalInNonAttackActionPlays(t *testing.T) {
 	h := []Card{cards.MaleficIncantationBlue{}}
-	got := Best(testutils.Hero{Intel: 4}, nil, h, 0, nil, 0, cards.ArcaneCussingRed{})
+	got := Best(testutils.Hero{Intel: 4}, nil, h, Matchup{IncomingDamage: 0}, nil, 0, cards.ArcaneCussingRed{})
 	if got.Value != 3 {
 		t.Fatalf("Value = %d, want 3 (Malefic pitched, arsenal Cussing played for 3). Roles=[%s]",
 			got.Value, FormatBestLine(got.BestLine))
@@ -110,7 +110,7 @@ func TestBest_ArsenalInNonAttackActionPlays(t *testing.T) {
 // If the rider didn't fire, prevented would cap at 7.
 func TestBest_ArsenalInUnmovableGrantsDefenseBonus(t *testing.T) {
 	h := []Card{cards.MaleficIncantationBlue{}}
-	got := Best(testutils.Hero{Intel: 4}, nil, h, 8, nil, 0, cards.UnmovableRed{})
+	got := Best(testutils.Hero{Intel: 4}, nil, h, Matchup{IncomingDamage: 8}, nil, 0, cards.UnmovableRed{})
 	if got.Value != 8 {
 		t.Fatalf("Value = %d, want 8 (Unmovable from arsenal blocks 7+1). Roles=[%s]",
 			got.Value, FormatBestLine(got.BestLine))
@@ -123,7 +123,7 @@ func TestBest_ArsenalInUnmovableGrantsDefenseBonus(t *testing.T) {
 // If the rider mistakenly fired from hand, prevented would be 8.
 func TestBest_HandUnmovableNoDefenseBonus(t *testing.T) {
 	h := []Card{cards.MaleficIncantationBlue{}, cards.UnmovableRed{}}
-	got := Best(testutils.Hero{Intel: 4}, nil, h, 8, nil, 0, nil)
+	got := Best(testutils.Hero{Intel: 4}, nil, h, Matchup{IncomingDamage: 8}, nil, 0, nil)
 	if got.Value != 7 {
 		t.Fatalf("Value = %d, want 7 (hand-played Unmovable: no rider). Roles=[%s]",
 			got.Value, FormatBestLine(got.BestLine))
@@ -144,7 +144,7 @@ func TestBest_ArsenalInSmashingGoodTimeGatesOnlyArsenalCopy(t *testing.T) {
 		notimpl.SmashingGoodTimeRed{},
 		cards.HocusPocusRed{},
 	}
-	got := Best(heroes.Viserai{}, nil, h, 0, nil, 0, notimpl.SmashingGoodTimeRed{})
+	got := Best(heroes.Viserai{}, nil, h, Matchup{IncomingDamage: 0}, nil, 0, notimpl.SmashingGoodTimeRed{})
 	if got.Value != 8 {
 		t.Fatalf("Value = %d, want 8 (only arsenal SGT grants +3). Roles=[%s]",
 			got.Value, FormatBestLine(got.BestLine))

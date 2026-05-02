@@ -44,7 +44,7 @@ func BenchmarkEvalRealDeck(b *testing.B) {
 		d := sim.New(loaded.Hero, loaded.Weapons, loaded.Cards)
 		evalRNG := rand.New(rand.NewSource(42))
 		b.StartTimer()
-		d.EvaluateWith(shuffles, incoming, 0, evalRNG, ev)
+		d.EvaluateWith(shuffles, sim.Matchup{IncomingDamage: incoming}, evalRNG, ev)
 	}
 }
 

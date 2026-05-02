@@ -12,7 +12,7 @@ import (
 func TestBest_AllRedHand(t *testing.T) {
 	// Best: pitch 2 reds (2 res) to attack with the other 2 (cost 2, dealt 6). Value = 6.
 	h := []Card{testutils.RedAttack{}, testutils.RedAttack{}, testutils.RedAttack{}, testutils.RedAttack{}}
-	got := Best(testutils.Hero{Intel: 4}, nil, h, 4, nil, 0, nil)
+	got := Best(testutils.Hero{Intel: 4}, nil, h, Matchup{IncomingDamage: 4}, nil, 0, nil)
 	if got.Value != 6 {
 		t.Fatalf("want value 6, got %d", got.Value)
 	}
@@ -22,7 +22,7 @@ func TestBest_AllBlueHand(t *testing.T) {
 	// Best: pitch 1 blue (3 res), attack with 2 blues (cost 2, dealt 2), defend with 1 blue (prevented
 	// 3). Value = 5.
 	h := []Card{testutils.BlueAttack{}, testutils.BlueAttack{}, testutils.BlueAttack{}, testutils.BlueAttack{}}
-	got := Best(testutils.Hero{Intel: 4}, nil, h, 4, nil, 0, nil)
+	got := Best(testutils.Hero{Intel: 4}, nil, h, Matchup{IncomingDamage: 4}, nil, 0, nil)
 	if got.Value != 5 {
 		t.Fatalf("want value 5, got %d", got.Value)
 	}
@@ -32,7 +32,7 @@ func TestBest_MixedHand(t *testing.T) {
 	// Best: pitch 1 blue (3 res), attack with 2 reds (cost 2, dealt 6), defend with 1 blue (prevented
 	// 3). Value = 9.
 	h := []Card{testutils.BlueAttack{}, testutils.BlueAttack{}, testutils.RedAttack{}, testutils.RedAttack{}}
-	got := Best(testutils.Hero{Intel: 4}, nil, h, 4, nil, 0, nil)
+	got := Best(testutils.Hero{Intel: 4}, nil, h, Matchup{IncomingDamage: 4}, nil, 0, nil)
 	if got.Value != 9 {
 		t.Fatalf("want value 9, got %d", got.Value)
 	}
@@ -42,7 +42,7 @@ func TestBest_DefenseCappedAtIncoming(t *testing.T) {
 	// Best: pitch 1 blue, attack with 2 blues (dealt 2), defend with 1 blue (prevented capped at
 	// incoming=2). Value = 4.
 	h := []Card{testutils.BlueAttack{}, testutils.BlueAttack{}, testutils.BlueAttack{}, testutils.BlueAttack{}}
-	got := Best(testutils.Hero{Intel: 4}, nil, h, 2, nil, 0, nil)
+	got := Best(testutils.Hero{Intel: 4}, nil, h, Matchup{IncomingDamage: 2}, nil, 0, nil)
 	if got.Value != 4 {
 		t.Fatalf("want value 4, got %d", got.Value)
 	}
@@ -53,7 +53,7 @@ func TestBest_DefenseReactionRequiresCostPaid(t *testing.T) {
 	// 2-resource cost to play as a Defense Reaction (there's nothing else to pitch). The only
 	// legal lines are to pitch it (0 damage prevented) or do nothing — Value must be 0.
 	h := []Card{cards.ToughenUpBlue{}}
-	got := Best(testutils.Hero{Intel: 4}, nil, h, 4, nil, 0, nil)
+	got := Best(testutils.Hero{Intel: 4}, nil, h, Matchup{IncomingDamage: 4}, nil, 0, nil)
 	if got.Value != 0 {
 		t.Fatalf("want value 0 (cost unpaid), got %d", got.Value)
 	}
@@ -63,7 +63,7 @@ func TestBest_DefenseReactionAffordableResolves(t *testing.T) {
 	// Pitch 1 Blue Malefic (3 res), pay Toughen Up [B]'s cost 2, prevent 4 damage (capped at
 	// incoming=4). Value = 4.
 	h := []Card{cards.MaleficIncantationBlue{}, cards.ToughenUpBlue{}}
-	got := Best(testutils.Hero{Intel: 4}, nil, h, 4, nil, 0, nil)
+	got := Best(testutils.Hero{Intel: 4}, nil, h, Matchup{IncomingDamage: 4}, nil, 0, nil)
 	if got.Value != 4 {
 		t.Fatalf("want value 4 (cost paid, full block), got %d", got.Value)
 	}
@@ -73,7 +73,7 @@ func TestBest_PlainBlockStillFree(t *testing.T) {
 	// Attack cards have no Defense-Reaction type, so using them as blockers costs nothing. One
 	// Red attacker (Defense 1) alone, used as a blocker against 1 incoming, prevents 1. Value = 1.
 	h := []Card{testutils.RedAttack{}}
-	got := Best(testutils.Hero{Intel: 4}, nil, h, 1, nil, 0, nil)
+	got := Best(testutils.Hero{Intel: 4}, nil, h, Matchup{IncomingDamage: 1}, nil, 0, nil)
 	if got.Value != 1 {
 		t.Fatalf("want value 1 (free plain block), got %d", got.Value)
 	}
@@ -83,7 +83,7 @@ func TestBest_RespectsResourceConstraint(t *testing.T) {
 	// Best: pitch 2 reds (2 res) to attack with 2 reds (cost 2, dealt 6). Value = 6. Resources must
 	// cover costs.
 	h := []Card{testutils.RedAttack{}, testutils.RedAttack{}, testutils.RedAttack{}, testutils.RedAttack{}}
-	got := Best(testutils.Hero{Intel: 4}, nil, h, 0, nil, 0, nil)
+	got := Best(testutils.Hero{Intel: 4}, nil, h, Matchup{IncomingDamage: 0}, nil, 0, nil)
 	if got.Value != 6 {
 		t.Fatalf("want value 6, got %d", got.Value)
 	}
@@ -107,7 +107,7 @@ func TestBest_RespectsResourceConstraint(t *testing.T) {
 // and got.State.Arsenal records the card for next turn's carryover.
 func TestBest_AllHeldWhenNoLegalPlay(t *testing.T) {
 	h := []Card{cards.ToughenUpBlue{}}
-	got := Best(testutils.Hero{Intel: 4}, nil, h, 4, nil, 0, nil)
+	got := Best(testutils.Hero{Intel: 4}, nil, h, Matchup{IncomingDamage: 4}, nil, 0, nil)
 	if got.Value != 0 {
 		t.Fatalf("Value = %d, want 0", got.Value)
 	}
@@ -129,7 +129,7 @@ func TestBest_AllHeldWhenNoLegalPlay(t *testing.T) {
 // fallback would score 7 by funding both phases from one pitch — illegal, locked out here.
 func TestBest_AttackPitchCantCoverDefense(t *testing.T) {
 	h := []Card{cards.MaleficIncantationBlue{}, cards.ToughenUpBlue{}, testutils.RedAttack{}}
-	got := Best(testutils.Hero{Intel: 4}, nil, h, 4, nil, 0, nil)
+	got := Best(testutils.Hero{Intel: 4}, nil, h, Matchup{IncomingDamage: 4}, nil, 0, nil)
 	if got.Value != 5 {
 		t.Fatalf("Value = %d, want 5 (attack and defense pitches are separate pools; Roles=[%s])",
 			got.Value, FormatBestLine(got.BestLine))
@@ -147,7 +147,7 @@ func TestBest_DRPitchNeedsSecondPitchedCard(t *testing.T) {
 		cards.ToughenUpBlue{},
 		testutils.RedAttack{},
 	}
-	got := Best(testutils.Hero{Intel: 4}, nil, h, 4, nil, 0, nil)
+	got := Best(testutils.Hero{Intel: 4}, nil, h, Matchup{IncomingDamage: 4}, nil, 0, nil)
 	if got.Value != 7 {
 		t.Fatalf("Value = %d, want 7 (two pitched cards let attack + defense phases both pay; Roles=[%s])",
 			got.Value, FormatBestLine(got.BestLine))
@@ -165,7 +165,7 @@ func TestBest_AllAttackHandPlusArsenalNoWeapons(t *testing.T) {
 		cards.WoundingBlowRed{}, cards.WoundingBlowRed{},
 		cards.WoundingBlowRed{}, cards.WoundingBlowRed{},
 	}
-	got := Best(testutils.Hero{Intel: 4}, nil, h, 0, nil, 0, cards.WoundingBlowRed{})
+	got := Best(testutils.Hero{Intel: 4}, nil, h, Matchup{IncomingDamage: 0}, nil, 0, cards.WoundingBlowRed{})
 	if got.Value != 4 {
 		t.Fatalf("Value = %d, want 4 (one Wounding Blow Red lands; rest can't chain without GoAgain). Roles=[%s]",
 			got.Value, FormatBestLine(got.BestLine))
