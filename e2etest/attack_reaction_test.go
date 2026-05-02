@@ -38,6 +38,18 @@ func TestAttackReaction_NoTargetAtAllNothingHappens(t *testing.T) {
 	}
 }
 
+// Tests that an Attack Reaction can't target another Attack Reaction. A hand of 2× Lunging
+// Press has no attack-action target for either copy — the validator rejects every chain
+// that includes an LP, so PrevTurnValue is 0.
+func TestAttackReaction_CantTargetAnotherAR(t *testing.T) {
+	d := sim.New(heroes.Viserai{}, nil, fillerDeck())
+	hand := []sim.Card{cards.LungingPressBlue{}, cards.LungingPressBlue{}}
+	got := d.EvalOneTurnForTesting(0, nil, hand).PrevTurnValue
+	if got != 0 {
+		t.Fatalf("PrevTurnValue = %d, want 0 (ARs can't target each other)", got)
+	}
+}
+
 // Tests that an AR can only target an attack that is actually played, not one that's been
 // pitched. With Lunging Press (AR, pitch 3) + a cost-1 attack action, the only feasible
 // chain pitches LP and plays the attack alone — LP isn't in the chain to buff anything,
