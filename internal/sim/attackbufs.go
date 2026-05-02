@@ -86,6 +86,9 @@ type permBufs struct {
 	cardsPlayedBacking  []Card
 	logBacking          []LogEntry
 	auraTriggersBacking []AuraTrigger
+	// nextAtkActionHitBacking backs TurnState.pendingNextAttackActionHit. Sized small —
+	// having more than a couple of these riders queued at once is exotic.
+	nextAtkActionHitBacking []NextAttackActionHitTrigger
 }
 
 // carryWinnerBufs holds the running-winner CarryState scratches — one per nesting level
@@ -193,12 +196,13 @@ func newAttackBufs(handSize, weaponCount int, weapons []Weapon) *attackBufs {
 			defenseGravScratch: make([]Card, 0, handSize+1),
 		},
 		permBufs: permBufs{
-			handBacking:         make([]Card, 0, maxAttackers),
-			graveBacking:        make([]Card, 0, maxAttackers),
-			banishBacking:       make([]Card, 0, handSize+1),
-			cardsPlayedBacking:  make([]Card, 0, maxAttackers),
-			logBacking:          make([]LogEntry, 0, logBackingCap),
-			auraTriggersBacking: make([]AuraTrigger, 0, handSize+1),
+			handBacking:             make([]Card, 0, maxAttackers),
+			graveBacking:            make([]Card, 0, maxAttackers),
+			banishBacking:           make([]Card, 0, handSize+1),
+			cardsPlayedBacking:      make([]Card, 0, maxAttackers),
+			logBacking:              make([]LogEntry, 0, logBackingCap),
+			auraTriggersBacking:     make([]AuraTrigger, 0, handSize+1),
+			nextAtkActionHitBacking: make([]NextAttackActionHitTrigger, 0, 4),
 		},
 		// carryWinnerBufs starts zero-valued — the slice backings grow on first use.
 	}

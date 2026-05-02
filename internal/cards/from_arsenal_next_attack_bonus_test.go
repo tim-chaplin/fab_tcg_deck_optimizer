@@ -3,6 +3,7 @@ package cards_test
 import (
 	"testing"
 
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/cards"
 	notimpl "github.com/tim-chaplin/fab-deck-optimizer/internal/cards/notimplemented"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
@@ -15,9 +16,9 @@ func TestFromArsenalNextAttackBonus_GrantsOnArsenalCopyOnly(t *testing.T) {
 		c sim.Card
 		n int
 	}{
-		{notimpl.PlunderRunRed{}, 3},
-		{notimpl.PlunderRunYellow{}, 2},
-		{notimpl.PlunderRunBlue{}, 1},
+		{cards.PlunderRunRed{}, 3},
+		{cards.PlunderRunYellow{}, 2},
+		{cards.PlunderRunBlue{}, 1},
 		{notimpl.SmashingGoodTimeRed{}, 3},
 		{notimpl.SmashingGoodTimeYellow{}, 2},
 		{notimpl.SmashingGoodTimeBlue{}, 1},

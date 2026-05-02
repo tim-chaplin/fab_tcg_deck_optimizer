@@ -185,6 +185,10 @@ var cardsByID = []sim.Card{
 	ids.CriticalStrikeYellow: cards.CriticalStrikeYellow{},
 	ids.CriticalStrikeBlue:   cards.CriticalStrikeBlue{},
 
+	ids.CutDownToSizeRed:    cards.CutDownToSizeRed{},
+	ids.CutDownToSizeYellow: cards.CutDownToSizeYellow{},
+	ids.CutDownToSizeBlue:   cards.CutDownToSizeBlue{},
+
 	ids.DemolitionCrewRed:    cards.DemolitionCrewRed{},
 	ids.DemolitionCrewYellow: cards.DemolitionCrewYellow{},
 	ids.DemolitionCrewBlue:   cards.DemolitionCrewBlue{},
@@ -246,6 +250,14 @@ var cardsByID = []sim.Card{
 	ids.OnTheHorizonRed:    cards.OnTheHorizonRed{},
 	ids.OnTheHorizonYellow: cards.OnTheHorizonYellow{},
 	ids.OnTheHorizonBlue:   cards.OnTheHorizonBlue{},
+
+	ids.OverloadRed:    cards.OverloadRed{},
+	ids.OverloadYellow: cards.OverloadYellow{},
+	ids.OverloadBlue:   cards.OverloadBlue{},
+
+	ids.PlunderRunRed:    cards.PlunderRunRed{},
+	ids.PlunderRunYellow: cards.PlunderRunYellow{},
+	ids.PlunderRunBlue:   cards.PlunderRunBlue{},
 
 	ids.PoundForPoundRed:    cards.PoundForPoundRed{},
 	ids.PoundForPoundYellow: cards.PoundForPoundYellow{},
