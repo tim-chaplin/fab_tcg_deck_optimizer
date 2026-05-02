@@ -185,6 +185,10 @@ var cardsByID = []sim.Card{
 	ids.CriticalStrikeYellow: cards.CriticalStrikeYellow{},
 	ids.CriticalStrikeBlue:   cards.CriticalStrikeBlue{},
 
+	ids.CutDownToSizeRed:    cards.CutDownToSizeRed{},
+	ids.CutDownToSizeYellow: cards.CutDownToSizeYellow{},
+	ids.CutDownToSizeBlue:   cards.CutDownToSizeBlue{},
+
 	ids.DemolitionCrewRed:    cards.DemolitionCrewRed{},
 	ids.DemolitionCrewYellow: cards.DemolitionCrewYellow{},
 	ids.DemolitionCrewBlue:   cards.DemolitionCrewBlue{},
