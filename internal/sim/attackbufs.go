@@ -87,8 +87,7 @@ type permBufs struct {
 	logBacking          []LogEntry
 	auraTriggersBacking []AuraTrigger
 	// nextAtkActionHitBacking backs TurnState.pendingNextAttackActionHit. Sized small —
-	// having more than a couple of "next time an attack action hits" riders queued at once
-	// is exotic; mid-chain growth past cap is the only allocating path.
+	// having more than a couple of these riders queued at once is exotic.
 	nextAtkActionHitBacking []NextAttackActionHitTrigger
 }
 

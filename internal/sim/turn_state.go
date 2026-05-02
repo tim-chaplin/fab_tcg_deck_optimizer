@@ -64,13 +64,10 @@ type LogEntry struct {
 // "the next time an attack action card you control hits this turn, do X". The chain runner
 // drains the queue inside finalizeActiveAttack on the first attack action that lands
 // (IsAttackAction + LikelyToHit); every pending trigger fires together on that hit (the
-// "next time" event resolves all listeners simultaneously) and the queue empties. Stored
-// as struct values (Fire fn + small payload) to mirror OnHitHandler's alloc-free pattern.
+// "next time" event resolves all listeners simultaneously) and the queue empties.
 type NextAttackActionHitTrigger struct {
-	Fire    func(s *TurnState, target *CardState, t *NextAttackActionHitTrigger)
-	Source  Card
-	LogText string
-	N       int
+	Fire   func(s *TurnState, target *CardState, t *NextAttackActionHitTrigger)
+	Source Card
 }
 
 // TurnState is the shared turn-level context passed to Card.Play alongside the per-card
@@ -123,10 +120,8 @@ type TurnState struct {
 	// condition, decrements Count in place, and drops entries whose Count hits zero after
 	// sending Self to the graveyard. Carries across turns.
 	AuraTriggers []AuraTrigger
-	// pendingNextAttackActionHit holds "next time an attack action card you control hits"
-	// triggers. The chain runner drains it in finalizeActiveAttack on the first attack
-	// action that lands; reset per permutation. Lowercase so cards register through
-	// RegisterNextAttackActionHit instead of appending directly.
+	// pendingNextAttackActionHit queues NextAttackActionHitTriggers; reset per permutation.
+	// Lowercase so cards register through RegisterNextAttackActionHit instead of appending.
 	pendingNextAttackActionHit []NextAttackActionHitTrigger
 
 	// --- Transient: reset by the sim per turn / chain step ---
@@ -222,17 +217,12 @@ func (s *TurnState) IsCacheable() bool { return s.cacheable }
 // no AR is resolving.
 func (s *TurnState) AttackReactionTarget() *CardState { return s.attackReactionTarget }
 
-// RegisterNextAttackActionHit appends t to the pending-on-attack-action-hit queue. Cards
-// with a "the next time an attack action card you control hits this turn, do X" rider call
-// this from inside Play. The chain runner fires every queued trigger together on the first
-// attack action that lands (IsAttackAction + LikelyToHit) and clears the queue.
+// RegisterNextAttackActionHit queues t. See NextAttackActionHitTrigger for resolution.
 func (s *TurnState) RegisterNextAttackActionHit(t NextAttackActionHitTrigger) {
 	s.pendingNextAttackActionHit = append(s.pendingNextAttackActionHit, t)
 }
 
-// PendingNextAttackActionHits returns the number of "next time an attack action hits"
-// triggers currently queued. Primarily for tests probing trigger registration; the chain
-// runner reaches the slice directly via the package boundary.
+// PendingNextAttackActionHits returns the number of currently queued triggers. For tests.
 func (s *TurnState) PendingNextAttackActionHits() int {
 	return len(s.pendingNextAttackActionHit)
 }

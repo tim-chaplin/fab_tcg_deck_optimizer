@@ -3,11 +3,9 @@
 //
 // Text: "When this hits a hero, if they have 4 or more cards in hand, they discard a card."
 //
-// On-hit rider is intentionally not modelled: the "4+ cards in hand" gate plus the discard
-// being the rider's whole effect means an optimal defender always blocks with at least one
-// card to drop below the threshold and dodge the discard. Crediting the rider would
-// double-count — the defender pays one block to neutralise it, which is already reflected in
-// IncomingDamage / BlockTotal accounting. Plain attack body stands in for the printed power.
+// On-hit rider intentionally not modelled: an optimal defender drops one card to block,
+// falls under the 4+ threshold, and dodges the discard — crediting the rider would
+// double-count the block already captured by IncomingDamage / BlockTotal.
 
 package cards
 

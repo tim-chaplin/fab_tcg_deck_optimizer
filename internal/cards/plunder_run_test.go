@@ -21,8 +21,8 @@ func TestPlunderRun_FromHandQueuesTriggerNoBonus(t *testing.T) {
 	}
 }
 
-// Plunder Run played from arsenal registers the trigger AND adds +N{p} to the next attack
-// action card in CardsRemaining. Covers all three printings.
+// From arsenal: registers the trigger and adds +N{p} to the next attack action in
+// CardsRemaining. Each printing carries its own N.
 func TestPlunderRun_FromArsenalAddsBonusAttack(t *testing.T) {
 	cases := []struct {
 		c        sim.Card
@@ -46,8 +46,7 @@ func TestPlunderRun_FromArsenalAddsBonusAttack(t *testing.T) {
 	}
 }
 
-// Multiple Plunder Runs queue independent triggers; the chain runner fires them all on
-// the same hit. Validate registration count.
+// Multiple Plunder Runs queue independent triggers — they all fire on the same hit.
 func TestPlunderRun_TriggersStack(t *testing.T) {
 	s := sim.TurnState{}
 	(PlunderRunRed{}).Play(&s, &sim.CardState{Card: PlunderRunRed{}})

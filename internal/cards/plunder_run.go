@@ -5,14 +5,8 @@
 // Plunder Run is played from arsenal, the next attack action card you play this turn gains
 // +N{p}. **Go again**" (Red N=3, Yellow N=2, Blue N=1.)
 //
-// Two riders, both routed through existing primitives:
-//   - "Next time an attack action hits" — registers a NextAttackActionHitTrigger on
-//     TurnState; the chain runner drains the queue inside finalizeActiveAttack on the first
-//     attack action that lands. Multiple Plunder Runs queue independent draws and all fire
-//     on the same hit.
-//   - "From-arsenal +N{p}" — only fires when self.FromArsenal; uses the shared
-//     GrantNextAttackActionBonus helper to attach the buff to the next attack action in
-//     CardsRemaining.
+// The from-arsenal +N{p} grant gates on self.FromArsenal; played from hand, only the
+// on-hit-draw trigger registers.
 
 package cards
 
@@ -24,9 +18,6 @@ import (
 
 var plunderRunTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction)
 
-// plunderRunOnHitDraw fires the printed "the next time an attack action card you control
-// hits this turn, draw a card" rider. target is the attack action that landed; Source on
-// the trigger names the Plunder Run printing for log attribution.
 func plunderRunOnHitDraw(s *sim.TurnState, target *sim.CardState, t *sim.NextAttackActionHitTrigger) {
 	s.DrawOne()
 	s.LogPostTriggerf(sim.DisplayName(target.Card), 0,
