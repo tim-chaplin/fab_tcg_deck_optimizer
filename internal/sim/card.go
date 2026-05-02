@@ -4,7 +4,7 @@
 // opt into (VariableCost, Dominator, AddsFutureValue, ArsenalDefenseBonus, …) live in this
 // file. Cohesive concern groups are split across sibling files in this package:
 // types.go (card.CardType + card.TypeSet bitfield), turn_state.go (TurnState and its mutation
-// helpers), triggers.go (AuraTrigger + EphemeralAttackTrigger).
+// helpers), triggers.go (AuraTrigger).
 package sim
 
 import (
@@ -58,6 +58,9 @@ type CardState struct {
 	// TurnState for cards that read it as a multiset. Empty for cards whose cost was fully
 	// paid by carry from a prior pitch.
 	PitchedToPlay []Card
+	// OnHit holds "if this hits" handlers registered during Play. See docs/dev-standards.md
+	// "OnHit registrations" for the wiring contract.
+	OnHit []func(*TurnState)
 }
 
 // EffectiveGoAgain reports whether this card has Go again this turn — from printed text or a

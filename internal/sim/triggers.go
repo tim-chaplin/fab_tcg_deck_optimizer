@@ -1,8 +1,7 @@
 package sim
 
-// Trigger types registered on a TurnState: AuraTrigger is the counter-tracked, cross-turn-
-// capable hook firing on start-of-turn or attack-action events, and EphemeralAttackTrigger is
-// the same-turn, fire-once "next attack" hook a card's Play can register.
+// Trigger types registered on a TurnState. AuraTrigger is the counter-tracked, cross-turn-
+// capable hook firing on start-of-turn or attack-action events.
 
 // AuraTriggerType categorizes when an AuraTrigger's Handler fires. The sim walks the
 // TurnState's AuraTriggers list on each matching condition and invokes every applicable
@@ -61,54 +60,5 @@ type AuraTrigger struct {
 	// `"<DisplayName> <verb phrase>"`); the handler reads t.LogText directly so the hot fire
 	// path runs zero string allocations even when the chain is materialising the log.
 	// Empty-string means the handler authors its own text dynamically.
-	LogText string
-}
-
-// OnEphemeralAttackTrigger is the business-logic callback attached to an
-// EphemeralAttackTrigger. t is the trigger struct that owns the handler, exposing Source
-// and the optional N payload to top-level handler implementations so cards don't need to
-// allocate a closure per registration. target is the CardState of the attacker whose
-// resolution triggered the fire; the handler may read target.Card.Attack(),
-// target.EffectiveDominate(), etc. to decide whether a rider effect fires and what
-// damage-equivalent to credit. Handlers mutate the passed TurnState directly
-// (e.g. s.CreateRunechants) and return the damage-equivalent.
-type OnEphemeralAttackTrigger func(s *TurnState, t *EphemeralAttackTrigger, target *CardState) int
-
-// EphemeralAttackTrigger is a same-turn, fire-once "next attack" trigger registered by a
-// card's Play (via TurnState.AddEphemeralAttackTrigger). Fires on the next attack action
-// whose resolution matches its Matches predicate, AFTER the attacker's Play, hero
-// OnCardPlayed, and AuraTriggers have all settled — so the Handler sees the fully-resolved
-// attacker state (incl. any Dominate grants and hero-created auras).
-//
-// Distinct from AuraTrigger on three axes:
-//   - Fire-once. No Count / OncePerTurn bookkeeping; the trigger resolves and drops out.
-//   - Doesn't graveyard a source when it fires or fizzles — the registering card was
-//     already graveyarded on its own resolution; only the trigger effect "stays in play."
-//   - Doesn't persist across turns. Non-matching attack actions leave the trigger in place
-//     for a later match, but anything unresolved at end of turn fizzles silently.
-//
-// The Source card keeps damage attribution clean: Handler's return is credited to Source's
-// position in the chain (via SourceIndex), so a trigger fired by Mauvrion Skies during
-// Drowning Dire's attack surfaces as damage on Mauvrion's BestLine entry rather than DD's.
-type EphemeralAttackTrigger struct {
-	// Source is the card that registered the trigger. Damage the handler returns accrues to
-	// Source's per-card attribution; also surfaces in per-turn debug output.
-	Source Card
-	// Matches decides whether the trigger fires on a given attack action card's
-	// resolution. Nil matches any attack action — non-matching resolutions leave the
-	// trigger in place for a later attack.
-	Matches func(target *CardState) bool
-	// Handler runs when the trigger fires. Returns damage-equivalent credited to Source.
-	Handler OnEphemeralAttackTrigger
-	// SourceIndex is sim-managed bookkeeping: the position of Source in the played-chain
-	// permutation, used to route Handler's damage back to Source's perCardOut slot. Cards
-	// must not set it — the solver stamps it on registration.
-	SourceIndex int
-	// N is an optional small-integer payload available to Handler. Lets per-variant trigger
-	// handlers (Mauvrion Skies's "create N runechants on hit") read their N off the trigger
-	// instead of closing over it, so the handler can be a top-level function with no per-Play
-	// closure allocation.
-	N int
-	// LogText is the optional pre-built rider-line text. See AuraTrigger.LogText.
 	LogText string
 }

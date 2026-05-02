@@ -4,11 +4,10 @@ import (
 	"testing"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
 )
 
-// TestMeatAndGreet_OnHitRunechantGatedByLikelyToHit: the Runechant rider fires only when the
-// variant's printed power satisfies sim.LikelyToHit. Red (4) qualifies and gets +1 for the
-// token; Yellow (3) and Blue (2) are blockable and drop the rider.
+// Tests that the on-hit Runechant rider fires only on likely-hit variants.
 func TestMeatAndGreet_OnHitRunechantGatedByLikelyToHit(t *testing.T) {
 	cases := []struct {
 		c       sim.Card
@@ -22,6 +21,7 @@ func TestMeatAndGreet_OnHitRunechantGatedByLikelyToHit(t *testing.T) {
 		s := sim.TurnState{}
 		self := &sim.CardState{Card: tc.c}
 		tc.c.Play(&s, self)
+		testutils.FireOnHitIfLikely(&s, self)
 		if got := s.Value; got != tc.wantDmg {
 			t.Errorf("%s: Play() = %d, want %d", tc.c.Name(), got, tc.wantDmg)
 		}
@@ -35,9 +35,7 @@ func TestMeatAndGreet_OnHitRunechantGatedByLikelyToHit(t *testing.T) {
 	}
 }
 
-// TestMeatAndGreet_ArcaneDamageDealtGrantsGoAgain exercises the satisfied branch: when
-// ArcaneDamageDealt is set at the start of Play, arcane damage has already been (or is about to
-// be) dealt this turn, so the conditional go again fires via self.GrantedGoAgain.
+// Tests that ArcaneDamageDealt at Play time grants conditional go again.
 func TestMeatAndGreet_ArcaneDamageDealtGrantsGoAgain(t *testing.T) {
 	cases := []sim.Card{
 		MeatAndGreetRed{},

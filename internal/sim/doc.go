@@ -10,9 +10,9 @@
 //     bestAttackWithWeapons.
 //   - Attack-chain search (sequence.go) enumerates phase / weapon masks and permutes the
 //     resulting attackers via playSequenceWithMeta, which replays one ordering through a
-//     pooled TurnState while firing hero triggers and AuraTrigger / EphemeralAttackTrigger
-//     handlers. Per-card damage / block / pitch attribution is read off the chain's LogEntry
-//     stream.
+//     pooled TurnState while firing hero triggers, AuraTrigger handlers, and the OnHit
+//     closures registered on each attack's CardState. Per-card damage / block / pitch
+//     attribution is read off the chain's LogEntry stream.
 //
 // The Evaluator type owns per-goroutine scratch buffers (attackbufs.go) so concurrent callers
 // each get their own alloc-free state. Per-card metadata (cardmeta.go) is cached lazily into a

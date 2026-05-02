@@ -88,18 +88,17 @@ func TestFormatBestTurn_NonAttackCardUsesPlayLabel(t *testing.T) {
 	}
 }
 
-// TestFormatBestTurn_LogAttributesEachTriggerSeparately pins phase-2 logging: each event in
-// the chain (card Play, hero trigger, mid-chain aura trigger, ephemeral attack trigger) gets
-// its own attributed line, grouped under the chain entry of the card that triggered it.
-// Hand: Nimblism (Generic non-attack action, sets NonAttackActionPlayed) + Mauvrion
-// (Runeblade non-attack action, registers an ephemeral "if hits, +3" trigger) + Consuming
-// Volition (Runeblade attack action). Prior aura: a Malefic Incantation TriggerAttackAction.
-// The chain log should hit:
+// Tests phase-2 log attribution: each chain event (card Play, hero trigger, aura trigger,
+// OnHit) gets its own line grouped under the triggering card's chain entry.
+//
+// Hand: Nimblism (Generic non-attack action) + Mauvrion (registers an "if hits, +3"
+// OnHit) + Consuming Volition (Runeblade attack action). Prior aura: a Malefic
+// Incantation TriggerAttackAction. The chain log should hit:
 //   - Mauvrion: PLAY (+0)             — non-attack action, no own damage
 //   - Consuming Volition: ATTACK (+N) — printed power, with the three triggers it fires
-//     attached underneath as indented children. Each trigger handler authors its own log
-//     line (Viserai / Malefic / Mauvrion all create runechants). The "(from Consuming
-//     Volition)" suffix is dropped because the visual grouping makes the source obvious.
+//     attached as indented children. Each handler authors its own line (Viserai /
+//     Malefic / Mauvrion all create runechants); the "(from ...)" suffix is dropped
+//     since indentation conveys attribution.
 func TestFormatBestTurn_LogAttributesEachTriggerSeparately(t *testing.T) {
 	h := []Card{cards.NimblismRed{}, cards.MauvrionSkiesRed{}, cards.ConsumingVolitionRed{}}
 	// Use the real Malefic Incantation card's Play to register the prior trigger so the
@@ -145,7 +144,7 @@ func TestFormatBestTurn_LogAttributesEachTriggerSeparately(t *testing.T) {
 // credited damage.
 func TestFormatBestTurn_LogSuppressesZeroTriggers(t *testing.T) {
 	// Hand: a single Red attack with no go-again. Viserai's OnCardPlayed contributes nothing
-	// (the gate needs another non-attack action played first), no priors, no ephemerals — so
+	// (the gate needs another non-attack action played first), no priors, no OnHit — so
 	// the chain log should be exactly one card-Play line, no trigger spam.
 	h := []Card{testutils.RedAttack{}}
 	got := Best(heroes.Viserai{}, nil, h, 0, nil, 0, nil)
@@ -476,7 +475,7 @@ func TestAppendGroupedChainEntries_ClustersTriggersUnderTheirParent(t *testing.T
 		{Text: "Viserai created a runechant", Source: "Card A", Kind: LogEntryPreTrigger, N: 1},
 		// Card A resolves.
 		{Text: "Card A: ATTACK", N: 5},
-		// Card A's ephemeral attack trigger fires after the hit.
+		// Card A's OnHit fires after the hit.
 		{Text: "Aura created 3 runechants on hit", Source: "Card A", Kind: LogEntryPostTrigger, N: 3},
 		// Card B's pre-trigger queues for B.
 		{Text: "Viserai created a runechant", Source: "Card B", Kind: LogEntryPreTrigger, N: 1},

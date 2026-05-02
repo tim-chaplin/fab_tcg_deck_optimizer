@@ -17,9 +17,6 @@ func TestRunicReaping_NoNextAttackReturnsZero(t *testing.T) {
 	if got := s.Value; got != 0 {
 		t.Fatalf("Play() = %d, want 0", got)
 	}
-	if len(s.EphemeralAttackTriggers) != 0 {
-		t.Fatalf("EphemeralAttackTriggers = %d, want 0 when no target matches", len(s.EphemeralAttackTriggers))
-	}
 	if s.AuraCreated {
 		t.Fatalf("AuraCreated should stay false when no rider fires")
 	}
@@ -36,8 +33,8 @@ func TestRunicReaping_WeaponNextDoesNotQualify(t *testing.T) {
 	if target.BonusAttack != 0 {
 		t.Errorf("weapon target BonusAttack = %d, want 0 (weapons don't qualify)", target.BonusAttack)
 	}
-	if len(s.EphemeralAttackTriggers) != 0 {
-		t.Errorf("EphemeralAttackTriggers = %d, want 0 (weapons don't qualify)", len(s.EphemeralAttackTriggers))
+	if len(target.OnHit) != 0 {
+		t.Errorf("target.OnHit = %d, want 0 (weapons don't qualify)", len(target.OnHit))
 	}
 }
 
@@ -51,13 +48,13 @@ func TestRunicReaping_RegistersTriggerAndGrantsPitchedAttackBonus(t *testing.T) 
 		PitchedToPlay: []sim.Card{testutils.RunebladeAttack{}},
 	})
 	if got := s.Value; got != 0 {
-		t.Fatalf("Play() = %d, want 0 (rider fires through ephemeral trigger after target's resolution)", got)
+		t.Fatalf("Play() = %d, want 0 (Runechant rider deferred to target's OnHit)", got)
 	}
 	if target.BonusAttack != 1 {
 		t.Errorf("target BonusAttack = %d, want 1 (pitched-attack +1{p} rider)", target.BonusAttack)
 	}
-	if len(s.EphemeralAttackTriggers) != 1 {
-		t.Fatalf("EphemeralAttackTriggers = %d, want 1 (on-hit Runechant rider deferred)", len(s.EphemeralAttackTriggers))
+	if len(target.OnHit) != 1 {
+		t.Fatalf("target.OnHit = %d, want 1 (on-hit Runechant rider deferred)", len(target.OnHit))
 	}
 }
 
@@ -76,7 +73,7 @@ func TestRunicReaping_NoPitchedAttackSkipsBonusButRegistersTrigger(t *testing.T)
 	if target.BonusAttack != 0 {
 		t.Errorf("target BonusAttack = %d, want 0 (no attack-typed card pitched)", target.BonusAttack)
 	}
-	if len(s.EphemeralAttackTriggers) != 1 {
-		t.Fatalf("EphemeralAttackTriggers = %d, want 1", len(s.EphemeralAttackTriggers))
+	if len(target.OnHit) != 1 {
+		t.Fatalf("target.OnHit = %d, want 1", len(target.OnHit))
 	}
 }

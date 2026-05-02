@@ -28,6 +28,5 @@ func (LungingPressBlue) ARTargetAllowed(c sim.Card) bool {
 	return c.Types().IsAttackAction()
 }
 func (LungingPressBlue) Play(s *sim.TurnState, self *sim.CardState) {
-	sim.GrantAttackReactionBuff(s, LungingPressBlue{}.ARTargetAllowed, 1)
-	s.Log(self, 0)
+	sim.GrantAttackReactionBuff(s, self, 1)
 }

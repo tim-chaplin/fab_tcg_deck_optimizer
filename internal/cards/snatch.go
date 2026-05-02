@@ -2,8 +2,6 @@
 // variants: Red 1, Yellow 2, Blue 3. Defense 2.
 //
 // Text: "When this hits, draw a card."
-//
-// The on-hit draw fires when sim.LikelyToHit approves the printed attack.
 
 package cards
 
@@ -15,14 +13,12 @@ import (
 
 var snatchTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeAttack)
 
-// snatchPlay fires the on-hit draw when the attack is likely to land and emits the chain
-// step.
 func snatchPlay(s *sim.TurnState, self *sim.CardState) {
-	if sim.LikelyToHit(self) {
-		s.DrawOne()
-	}
 	n := self.DealEffectiveAttack(s)
 	s.Log(self, n)
+	self.OnHit = append(self.OnHit, func(state *sim.TurnState) {
+		state.DrawOne()
+	})
 }
 
 type SnatchRed struct{}

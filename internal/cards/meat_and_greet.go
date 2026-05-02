@@ -4,9 +4,7 @@
 // Text: "When this hits, create a Runechant token. If you've dealt arcane damage to an opposing
 // hero this turn, this gets go again."
 //
-// On-hit Runechant fires only when the attack's printed power satisfies sim.LikelyToHit;
-// blockable variants drop the rider. Go-again is conditional on TurnState.ArcaneDamageDealt.
-// The card's own Runechant fires on a future turn, so it can't satisfy its own rider.
+// The on-hit Runechant fires next turn, so it can't satisfy this card's own go-again clause.
 
 package cards
 
@@ -18,19 +16,17 @@ import (
 
 var meatAndGreetTypes = card.NewTypeSet(card.TypeRuneblade, card.TypeAction, card.TypeAttack)
 
-// meatAndGreetPlay is the shared Play implementation. See the file docstring for rider
-// modelling.
 func meatAndGreetPlay(s *sim.TurnState, self *sim.CardState) {
 	if s.ArcaneDamageDealt {
 		self.GrantedGoAgain = true
 	}
 	n := self.DealEffectiveAttack(s)
 	s.Log(self, n)
-	if sim.LikelyToHit(self) {
-		created := s.CreateRunechant()
-		s.AddValue(created)
-		s.LogRider(self, created, "On-hit created a runechant")
-	}
+	self.OnHit = append(self.OnHit, func(state *sim.TurnState) {
+		created := state.CreateRunechant()
+		state.AddValue(created)
+		state.LogRider(self, created, "On-hit created a runechant")
+	})
 }
 
 type MeatAndGreetRed struct{}

@@ -13,8 +13,7 @@ var ferventForerunnerVariants = []sim.Card{
 	FerventForerunnerBlue{},
 }
 
-// TestFerventForerunner_BaseGoAgainFalse pins printed GoAgain() = false; the only grant is the
-// arsenal-gated rider on self.FromArsenal.
+// Tests that printed GoAgain() is false; the only grant is the arsenal-gated rider.
 func TestFerventForerunner_BaseGoAgainFalse(t *testing.T) {
 	for _, c := range ferventForerunnerVariants {
 		if c.GoAgain() {
@@ -39,7 +38,9 @@ func TestFerventForerunner_OnHitOptFiresOnlyWhenInHitWindow(t *testing.T) {
 	}
 	for _, tc := range cases {
 		s := sim.NewTurnState([]sim.Card{a, b}, nil)
-		tc.c.Play(s, &sim.CardState{Card: tc.c})
+		cs := &sim.CardState{Card: tc.c}
+		tc.c.Play(s, cs)
+		testutils.FireOnHitIfLikely(s, cs)
 		if s.Value != tc.printed {
 			t.Errorf("%s: Play() Value = %d, want %d (printed power)",
 				tc.c.Name(), s.Value, tc.printed)
@@ -69,7 +70,9 @@ func TestFerventForerunner_OnHitOptFiresWithBonusAttackInWindow(t *testing.T) {
 	a, b := testutils.NewStubCard("a"), testutils.NewStubCard("b")
 	c := FerventForerunnerRed{}
 	s := sim.NewTurnState([]sim.Card{a, b}, nil)
-	c.Play(s, &sim.CardState{Card: c, BonusAttack: 1})
+	cs := &sim.CardState{Card: c, BonusAttack: 1}
+	c.Play(s, cs)
+	testutils.FireOnHitIfLikely(s, cs)
 	want := 3 + 1
 	if s.Value != want {
 		t.Errorf("Play() Value = %d, want %d (3 printed + 1 BonusAttack)", s.Value, want)

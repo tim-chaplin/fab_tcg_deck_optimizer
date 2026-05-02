@@ -30,6 +30,5 @@ func (NipAtTheHeelsBlue) ARTargetAllowed(c sim.Card) bool {
 	return c.Types().IsAttack() && c.Attack() <= 3
 }
 func (NipAtTheHeelsBlue) Play(s *sim.TurnState, self *sim.CardState) {
-	sim.GrantAttackReactionBuff(s, NipAtTheHeelsBlue{}.ARTargetAllowed, 1)
-	s.Log(self, 0)
+	sim.GrantAttackReactionBuff(s, self, 1)
 }

@@ -21,10 +21,10 @@ func performanceBonusPlay(s *sim.TurnState, self *sim.CardState) {
 	self.GrantGoAgainIfFromArsenal()
 	n := self.DealEffectiveAttack(s)
 	s.Log(self, n)
-	if sim.LikelyToHit(self) {
-		s.AddValue(sim.GoldTokenValue)
-		s.LogRider(self, sim.GoldTokenValue, "On-hit created a gold token")
-	}
+	self.OnHit = append(self.OnHit, func(state *sim.TurnState) {
+		state.AddValue(sim.GoldTokenValue)
+		state.LogRider(self, sim.GoldTokenValue, "On-hit created a gold token")
+	})
 }
 
 type PerformanceBonusRed struct{}

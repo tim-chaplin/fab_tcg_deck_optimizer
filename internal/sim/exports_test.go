@@ -43,11 +43,6 @@ func FireAttackActionTriggers(state *TurnState, triggeringCard Card) {
 	fireAttackActionTriggers(state, triggeringCard)
 }
 
-// FireEphemeralAttackTriggers re-exports fireEphemeralAttackTriggers for sim_test consumers.
-func FireEphemeralAttackTriggers(state *TurnState, target *CardState) {
-	fireEphemeralAttackTriggers(state, target)
-}
-
 // PromoteRandomHandCardToArsenal re-exports promoteRandomHandCardToArsenal for sim_test
 // consumers exercising the post-hoc arsenal-promotion path in isolation.
 func PromoteRandomHandCardToArsenal(best *TurnSummary, startingHand []Card, arsenalCardIn Card) {

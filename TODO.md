@@ -110,8 +110,9 @@ lines across `card/`, `weapon/`, `hand/` plus every weapon impl.
   rather than returning the bonus from their own `Play` — the +N attributes to the buffed
   attack's chain slot, and any "if this hits" rider on the target reads the buffed value.
 - For grants whose "if this hits" rider needs to see the target's *fully-resolved* attack
-  state (post-grants from later cards in the chain), use `AddEphemeralAttackTrigger` —
-  Mauvrion Skies and Runic Reaping route their on-hit Runechant clauses this way.
+  state (post-grants from later cards in the chain), append the rider closure to the
+  target's `CardState.OnHit` — Mauvrion Skies and Runic Reaping route their on-hit
+  Runechant clauses this way. The chain runner fires `OnHit` post-AR-buff.
 
 ### Tech debt
 
