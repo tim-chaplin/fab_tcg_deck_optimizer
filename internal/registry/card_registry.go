@@ -255,6 +255,10 @@ var cardsByID = []sim.Card{
 	ids.OverloadYellow: cards.OverloadYellow{},
 	ids.OverloadBlue:   cards.OverloadBlue{},
 
+	ids.PlunderRunRed:    cards.PlunderRunRed{},
+	ids.PlunderRunYellow: cards.PlunderRunYellow{},
+	ids.PlunderRunBlue:   cards.PlunderRunBlue{},
+
 	ids.PoundForPoundRed:    cards.PoundForPoundRed{},
 	ids.PoundForPoundYellow: cards.PoundForPoundYellow{},
 	ids.PoundForPoundBlue:   cards.PoundForPoundBlue{},
