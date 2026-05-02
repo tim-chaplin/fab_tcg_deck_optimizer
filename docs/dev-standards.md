@@ -95,16 +95,20 @@ following plumbing is uniform and lives once in `internal/card/card.go`:
 - **`card.VariableCost` markers** (Amplify the Arknight, Rune Flash, …): `Cost(s)` reads
   TurnState; the marker exposes `MinCost` / `MaxCost` for the solver's pre-screen. Don't
   re-document the dispatch — note the printed cost formula.
-- **Attack Reactions**: cards implement `sim.AttackReaction.ARTargetAllowed(c) bool`
-  matching the printed target wording. The chain runner validates that an AR's preceding
-  active attack matches the predicate; failures abort the permutation as illegal. The AR's
+- **Attack Reactions**: cards implement `sim.AttackReaction.ARTargetAllowed(c, mode) bool`
+  matching the printed target wording. The chain runner validates that the AR's chosen
+  Mode accepts the active attack; failures abort the permutation as illegal. The AR's
   `Play` calls `sim.GrantAttackReactionBuff(s, self, n)` — the helper reads
   `s.AttackReactionTarget()` (set by the runner before invoking `Play`), adds `n` to the
   target's `BonusAttack`, credits `n` to `s.Value`, amends the buffed attack's chain-step
   display delta, and emits the rider log line. ARs cost 0 AP; the chain runner's free-step
-  gate handles that automatically. Card docstrings call out the printed predicate (esp.
-  when the wording distinguishes "attack" from "attack action card") and any modelling
-  fudge — not the wiring.
+  gate handles that automatically. Modal ARs combine this with `sim.ModalCard.Modes()` —
+  the predicate dispatches per mode and `Play` applies the buff unconditionally because
+  the runner already validated. Non-modal ARs ignore the `mode` parameter (always 0).
+  Card docstrings call out the printed predicate (esp. when the wording distinguishes
+  "attack" / "attack action card" / "weapon attack" — the corresponding TypeSet helpers
+  are `IsAttack` / `IsAttackAction` / `IsWeaponAttack`) and any modelling fudge — not the
+  wiring.
 - **`OnHit` registrations**: attack cards with "if this hits, do X" riders append a
   `func(*sim.TurnState)` to `self.OnHit` inside `Play` instead of firing the rider inline.
   The chain runner finalizes each attack post-AR-buff: when `LikelyToHit(self)` evaluates

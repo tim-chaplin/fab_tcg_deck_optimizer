@@ -20,9 +20,9 @@ func (stubAR) Defense() int        { return 0 }
 func (stubAR) Types() card.TypeSet {
 	return card.NewTypeSet(card.TypeGeneric, card.TypeAttackReaction)
 }
-func (stubAR) GoAgain() bool               { return false }
-func (stubAR) ARTargetAllowed(c Card) bool { return true }
-func (stubAR) Play(*TurnState, *CardState) {}
+func (stubAR) GoAgain() bool                       { return false }
+func (stubAR) ARTargetAllowed(c Card, _ int8) bool { return true }
+func (stubAR) Play(*TurnState, *CardState)         {}
 
 // stubAttack is a Generic Action - Attack target candidate.
 type stubAttack struct{}

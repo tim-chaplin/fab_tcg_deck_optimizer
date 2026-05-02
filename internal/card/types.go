@@ -15,8 +15,10 @@ const (
 	TypeAura                                 // "Aura"
 	TypeBlock                                // "Block"
 	TypeBook                                 // "Book"
+	TypeClub                                 // "Club"
 	TypeDefenseReaction                      // "Defense Reaction"
 	TypeGeneric                              // "Generic"
+	TypeHammer                               // "Hammer"
 	TypeHero                                 // "Hero"
 	TypeInstant                              // "Instant"
 	TypeItem                                 // "Item"
@@ -74,6 +76,14 @@ func (s TypeSet) IsAttackAction() bool {
 // qualifier; weapons are eligible alongside attack action cards in that wording.
 func (s TypeSet) IsAttack() bool {
 	return s&(TypeSet(TypeAttack)|TypeSet(TypeWeapon)) != 0
+}
+
+// IsWeaponAttack reports whether s represents a weapon attack — a card with the Weapon
+// type. Used by riders whose printed text says "weapon attack" (e.g. Pummel's "club or
+// hammer weapon attack"), which gates a weapon swing only and excludes attack action
+// cards that happen to share the weapon's type subtag.
+func (s TypeSet) IsWeaponAttack() bool {
+	return s&TypeSet(TypeWeapon) != 0
 }
 
 // IsRunebladeAttack reports whether s is a Runeblade attack — an attack action card OR a

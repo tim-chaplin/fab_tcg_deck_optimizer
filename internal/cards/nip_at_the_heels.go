@@ -26,7 +26,7 @@ func (NipAtTheHeelsBlue) Attack() int             { return 0 }
 func (NipAtTheHeelsBlue) Defense() int            { return 3 }
 func (NipAtTheHeelsBlue) Types() card.TypeSet     { return nipAtTheHeelsTypes }
 func (NipAtTheHeelsBlue) GoAgain() bool           { return false }
-func (NipAtTheHeelsBlue) ARTargetAllowed(c sim.Card) bool {
+func (NipAtTheHeelsBlue) ARTargetAllowed(c sim.Card, _ int8) bool {
 	return c.Types().IsAttack() && c.Attack() <= 3
 }
 func (NipAtTheHeelsBlue) Play(s *sim.TurnState, self *sim.CardState) {

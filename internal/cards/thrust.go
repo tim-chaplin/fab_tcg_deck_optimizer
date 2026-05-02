@@ -24,7 +24,7 @@ func (ThrustRed) Attack() int             { return 0 }
 func (ThrustRed) Defense() int            { return 2 }
 func (ThrustRed) Types() card.TypeSet     { return thrustTypes }
 func (ThrustRed) GoAgain() bool           { return false }
-func (ThrustRed) ARTargetAllowed(c sim.Card) bool {
+func (ThrustRed) ARTargetAllowed(c sim.Card, _ int8) bool {
 	t := c.Types()
 	return t.Has(card.TypeSword) && t.IsAttack()
 }

@@ -677,7 +677,7 @@ func (ctx *sequenceContext) playSequenceWithMeta(n int) (damage int, leftoverRun
 		// finds the legal ordering on another permutation.
 		if m.types.IsAttackReaction() {
 			ar, ok := pc.Card.(AttackReaction)
-			if !ok || activeAttack == nil || !ar.ARTargetAllowed(activeAttack.Card) {
+			if !ok || activeAttack == nil || !ar.ARTargetAllowed(activeAttack.Card, pc.Mode) {
 				return 0, 0, 0, false
 			}
 			ctx.hero.OnCardPlayed(pc.Card, state)
