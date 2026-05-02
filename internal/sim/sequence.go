@@ -396,6 +396,7 @@ func (ctx *sequenceContext) bestSequence(attackers []Card) (int, int, bool) {
 		pcBuf[idx].BonusDefense = 0
 		pcBuf[idx].PitchedToPlay = nil
 		pcBuf[idx].OnHit = pcBuf[idx].OnHit[:0]
+		pcBuf[idx].Mode = 0
 	}
 
 	best := 0
@@ -410,19 +411,53 @@ func (ctx *sequenceContext) bestSequence(attackers []Card) (int, int, bool) {
 	pitchPerm := ctx.attackPitchPerm
 	pitchVals := ctx.attackPitchVals
 	pn := len(pitchPerm)
+	// tupleCount is the cartesian product of permMeta[i].modes across the chain. The product
+	// is permutation-invariant (multiplication commutes), so it's computed once here and
+	// reused across every (attack, pitch) ordering. hasModal short-circuits the per-tuple
+	// mode decode for chains with no ModalCards — pcBuf[i].Mode is already 0 from the per-
+	// permutation reset, so the fast path skips the mixed-radix decode entirely.
+	tupleCount := 1
+	for i := 0; i < n; i++ {
+		tupleCount *= int(permMeta[i].modes)
+	}
+	hasModal := tupleCount > 1
 	// tryPitchOrdering plays the chain against the current attack-permutation × pitch-
 	// permutation pair, threads cacheable, and folds a legal result into the running best.
+	// Modal chains additionally enumerate the cartesian product of ModalCard mode indices
+	// via a mixed-radix decode of `tuple` over permMeta[i].modes.
 	tryPitchOrdering := func() {
-		dmg, leftoverRunechants, _, legal := ctx.playSequenceWithMeta(n)
-		if ctx.cacheable && !state.IsCacheable() {
-			ctx.cacheable = false
+		if !hasModal {
+			dmg, leftoverRunechants, _, legal := ctx.playSequenceWithMeta(n)
+			if ctx.cacheable && !state.IsCacheable() {
+				ctx.cacheable = false
+			}
+			if legal && (!foundLegal || dmg > best ||
+				(dmg == best && leftoverRunechants > bestLeftoverRunechants)) {
+				best = dmg
+				bestLeftoverRunechants = leftoverRunechants
+				foundLegal = true
+				ctx.carryWinner.SnapshotFromTurn(state)
+			}
+			return
 		}
-		if legal && (!foundLegal || dmg > best ||
-			(dmg == best && leftoverRunechants > bestLeftoverRunechants)) {
-			best = dmg
-			bestLeftoverRunechants = leftoverRunechants
-			foundLegal = true
-			ctx.carryWinner.SnapshotFromTurn(state)
+		for tuple := 0; tuple < tupleCount; tuple++ {
+			rem := tuple
+			for i := 0; i < n; i++ {
+				modes := int(permMeta[i].modes)
+				pcBuf[i].Mode = int8(rem % modes)
+				rem /= modes
+			}
+			dmg, leftoverRunechants, _, legal := ctx.playSequenceWithMeta(n)
+			if ctx.cacheable && !state.IsCacheable() {
+				ctx.cacheable = false
+			}
+			if legal && (!foundLegal || dmg > best ||
+				(dmg == best && leftoverRunechants > bestLeftoverRunechants)) {
+				best = dmg
+				bestLeftoverRunechants = leftoverRunechants
+				foundLegal = true
+				ctx.carryWinner.SnapshotFromTurn(state)
+			}
 		}
 	}
 	// eval runs the active attack permutation against every pitch ordering — initial
@@ -510,6 +545,7 @@ func (ctx *sequenceContext) playSequence(order []Card) (damage int, leftoverRune
 		pcBuf[i].BonusDefense = 0
 		pcBuf[i].PitchedToPlay = nil
 		pcBuf[i].OnHit = pcBuf[i].OnHit[:0]
+		pcBuf[i].Mode = 0
 	}
 	return ctx.playSequenceWithMeta(n)
 }

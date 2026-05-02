@@ -33,6 +33,11 @@ type CardState struct {
 	// extensions stay false. Cards gate "if this is played from arsenal" riders on
 	// self.FromArsenal.
 	FromArsenal bool
+	// Mode is the chosen mode for a ModalCard ("Choose 1" cards), set by the chain runner
+	// before Play. Always 0 for non-modal cards. Sized int8 so it packs into the bool block's
+	// padding without growing the CardState — every chain step reads pcBuf[i], so a wider
+	// Mode would push more cache lines through the inner loop.
+	Mode int8
 	// BonusAttack is the +{p} this card has accumulated from prior cards' "next attack +N{p}"
 	// riders. Granters set pc.BonusAttack += N on the matching CardState in CardsRemaining so
 	// the damage is attributed to the attack receiving the buff, and EffectiveAttack folds it
@@ -237,6 +242,15 @@ type NotImplemented interface {
 // filters them out.
 type Unplayable interface {
 	Unplayable()
+}
+
+// ModalCard is an optional marker for "Choose 1" cards. Modes returns the number of
+// exclusive modes (typically 2); the chain runner enumerates 0..Modes()-1 per ordering and
+// cards dispatch on self.Mode inside Play. Modes that are no-ops for the current state
+// should resolve as zero-Value no-ops so the runner picks a sibling mode that contributes
+// more. See docs/dev-standards.md `Modal "Choose 1" cards` for the wiring contract.
+type ModalCard interface {
+	Modes() int
 }
 
 // ConditionalGoAgain is an optional marker for cards whose Play sometimes flips

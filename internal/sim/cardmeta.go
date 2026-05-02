@@ -5,11 +5,11 @@ package sim
 // via a lazily-populated table sized for the full card-ID space.
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
-
+	"fmt"
 	"sync"
 	"sync/atomic"
 
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
 )
 
@@ -37,6 +37,11 @@ type attackerMeta struct {
 	// Point — Instants and Attack Reactions (both 0 AP per FaB rules). Action cards and
 	// weapon swings cost 1 AP and don't set this.
 	isFreeChainStep bool
+	// modes is the mode count for a ModalCard, 1 for non-modal cards. Sized int8 so it
+	// packs into the bool block's padding without growing attackerMeta — every chain step
+	// reads permMeta[i] in the inner loop, and every extra cache line through that table
+	// shows up in the anneal bench.
+	modes int8
 }
 
 // costAt returns the card's effective cost given the current TurnState. Static cards return the
@@ -89,6 +94,18 @@ func cardMetaSlowPath(c Card, id ids.CardID) attackerMeta {
 		isAttackOrWeapon: t.Has(card.TypeAttack) || t.Has(card.TypeWeapon),
 		isAttackAction:   t.IsAttackAction(),
 		isFreeChainStep:  t.Has(card.TypeInstant) || t.IsAttackReaction(),
+		modes:            1,
+	}
+	if mc, ok := c.(ModalCard); ok {
+		// A ModalCard must expose at least two modes — the marker exists to enumerate
+		// across them. Returning 0 would silently zero the chain (outer loop runs zero
+		// iterations); returning 1 makes the marker pointless. Panic so the bug surfaces
+		// at first encounter rather than corrupting solver output.
+		n := mc.Modes()
+		if n < 2 {
+			panic(fmt.Sprintf("ModalCard %s: Modes() = %d, want >= 2", c.Name(), n))
+		}
+		m.modes = int8(n)
 	}
 	if vc, ok := c.(VariableCost); ok {
 		m.minCost = vc.MinCost()
