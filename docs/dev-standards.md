@@ -33,14 +33,11 @@ the upstream repo is the authority for every card file in the project.
   hit-likelihood heuristic; if a card carries `card.Dominator`, it shouldn't re-explain how
   Dominate interacts with `LikelyToHit`; if a card has a `NotImplemented` marker plus a
   `// not implemented: <quirk>` line, the docstring shouldn't repeat the same "rider isn't
-  modelled" sentence in prose. Examples:
+  modelled" sentence in prose. Example:
   - **Demolition Crew** (Generic Action - Attack with Dominate + an additional reveal cost) —
     no "Modelling: Dominate is advertised via the `card.Dominator` marker..." block. The
     `Dominator` interface implementation makes that link by itself; the additional reveal cost
     is documented by the `// not implemented:` comment above its `NotImplemented` method.
-  - **Plunder Run** (a `// not implemented: on-hit draw rider...` line + a from-arsenal gate
-    inside `Play`) — the docstring needs to call out the from-arsenal gate (card-specific
-    quirk) but not the dropped on-hit draw (already on the marker).
 
 ## AuraTrigger lifecycle
 
@@ -116,6 +113,19 @@ following plumbing is uniform and lives once in `internal/card/card.go`:
   add an on-hit rider to a DIFFERENT card (Mauvrion Skies, Runic Reaping) append to the
   target's `OnHit`. Cards must NOT call `LikelyToHit` directly from `Play` — the chain
   runner owns the gate so AR buffs propagate.
+- **`NextAttackActionHit` triggers** (Plunder Run, …): cards whose printed text reads "the
+  next time an attack action card you control hits this turn, do X" register a
+  `sim.NextAttackActionHitTrigger` via `s.RegisterNextAttackActionHit(...)` inside `Play`.
+  The chain runner drains the queue inside `finalizeActiveAttack` on the first attack
+  action that lands (`IsAttackAction` + `LikelyToHit`); every pending listener fires
+  together on that hit (the "next time" event resolves all listeners simultaneously) and
+  the queue empties. Use this — not `OnHit` on a specific `CardState` — when the rider
+  must wait across misses for the FIRST attack action that actually hits.
+- **Self-granting on-hit go-again** (Overload, Razor Reflex mode 1): cards with a printed
+  "if this hits, it gains go again" clause flip `self.GrantedGoAgain = true` inside `Play`
+  when `sim.LikelyToHit(self)` returns true. The chain runner's post-Play AP grant fires
+  for the next step's legality gate. Carry the `sim.ConditionalGoAgain` marker so the
+  static lint test in `conditional_go_again_test.go` passes.
 - **Modal "Choose 1" cards** (Captain's Call, …): cards implement `sim.ModalCard.Modes()
   int` returning the mode count and dispatch on `self.Mode` inside `Play`. The chain
   runner enumerates the cartesian product of mode indices across all modal cards in a
