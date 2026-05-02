@@ -29,7 +29,7 @@ func pummelAccepts(c sim.Card, mode int8) bool {
 	t := c.Types()
 	switch mode {
 	case 0:
-		return (t.Has(card.TypeClub) || t.Has(card.TypeHammer)) && t.IsAttack()
+		return (t.Has(card.TypeClub) || t.Has(card.TypeHammer)) && t.IsWeaponAttack()
 	case 1:
 		return t.IsAttackAction() && c.Cost(&sim.TurnState{}) >= 2
 	}

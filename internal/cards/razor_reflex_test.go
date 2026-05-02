@@ -23,6 +23,16 @@ func TestRazorReflex_Mode0RejectsNonSword(t *testing.T) {
 	}
 }
 
+// Tests that mode 0 rejects a sword-typed attack action card — the printed text says
+// "weapon attack", so an action card sharing the Sword subtype shouldn't qualify.
+func TestRazorReflex_Mode0RejectsSwordAttackActionCard(t *testing.T) {
+	swordAction := testutils.NewStubCard("sword action").
+		WithTypes(card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeAttack, card.TypeSword))
+	if (RazorReflexRed{}).ARTargetAllowed(swordAction, 0) {
+		t.Error("mode 0 should reject a sword attack action card (only weapon attacks qualify)")
+	}
+}
+
 // Tests that mode 1 accepts a cost-≤1 attack action.
 func TestRazorReflex_Mode1AcceptsCostOneAttackAction(t *testing.T) {
 	if !(RazorReflexRed{}).ARTargetAllowed(testutils.GenericAttack(1, 4), 1) {

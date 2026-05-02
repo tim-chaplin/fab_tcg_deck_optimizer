@@ -31,7 +31,7 @@ func razorReflexAccepts(c sim.Card, mode int8) bool {
 	t := c.Types()
 	switch mode {
 	case 0:
-		return t.Has(card.TypeSword) && t.IsAttack()
+		return t.Has(card.TypeSword) && t.IsWeaponAttack()
 	case 1:
 		return t.IsAttackAction() && c.Cost(&sim.TurnState{}) <= 1
 	}
