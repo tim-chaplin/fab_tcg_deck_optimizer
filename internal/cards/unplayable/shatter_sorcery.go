@@ -1,9 +1,9 @@
 // Shatter Sorcery — Generic Instant. Cost 0. Printed pitch variants: Blue 3.
 //
-// Text: "Choose 1 or both; - Destroy target aura permanent with Sigil in its name. - Prevent the
-// next 1 arcane damage that would be dealt to target hero this turn."
+// Text: "Choose 1 or both; - Destroy target aura permanent with Sigil in its name.
+// - Prevent the next 1 arcane damage that would be dealt to target hero this turn."
 
-package notimplemented
+package unplayable
 
 import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
@@ -23,7 +23,7 @@ func (ShatterSorceryBlue) Attack() int             { return 0 }
 func (ShatterSorceryBlue) Defense() int            { return 0 }
 func (ShatterSorceryBlue) Types() card.TypeSet     { return shatterSorceryTypes }
 func (ShatterSorceryBlue) GoAgain() bool           { return false }
-
-// not implemented: Instant: destroy a Sigil aura, and/or prevent 1 arcane damage
-func (ShatterSorceryBlue) NotImplemented()                            {}
-func (ShatterSorceryBlue) Play(s *sim.TurnState, self *sim.CardState) { s.Log(self, 0) }
+func (ShatterSorceryBlue) Unplayable()             {}
+func (ShatterSorceryBlue) Play(s *sim.TurnState, self *sim.CardState) {
+	s.Log(self, 0)
+}

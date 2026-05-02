@@ -1,9 +1,9 @@
 // Pilfer the Tomb — Generic Instant. Cost 0. Printed pitch variants: Blue 3.
 //
-// Text: "Choose 1 or both; - Banish target instant from an opposing hero's graveyard. - Banish
-// target yellow card from an opposing hero's graveyard."
+// Text: "Choose 1 or both; - Banish target instant from an opposing hero's graveyard.
+// - Banish target yellow card from an opposing hero's graveyard."
 
-package notimplemented
+package unplayable
 
 import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
@@ -23,7 +23,7 @@ func (PilferTheTombBlue) Attack() int             { return 0 }
 func (PilferTheTombBlue) Defense() int            { return 0 }
 func (PilferTheTombBlue) Types() card.TypeSet     { return pilferTheTombTypes }
 func (PilferTheTombBlue) GoAgain() bool           { return false }
-
-// not implemented: Instant banish from an opposing graveyard / aura
-func (PilferTheTombBlue) NotImplemented()                            {}
-func (PilferTheTombBlue) Play(s *sim.TurnState, self *sim.CardState) { s.Log(self, 0) }
+func (PilferTheTombBlue) Unplayable()             {}
+func (PilferTheTombBlue) Play(s *sim.TurnState, self *sim.CardState) {
+	s.Log(self, 0)
+}
