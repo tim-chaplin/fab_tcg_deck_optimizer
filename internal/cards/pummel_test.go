@@ -6,33 +6,36 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
 )
 
-// Tests that the predicate accepts a cost-≥2 attack action.
-func TestPummel_PredicateAcceptsCostTwoAttackAction(t *testing.T) {
-	if !(PummelRed{}).ARTargetAllowed(testutils.GenericAttack(2, 4)) {
-		t.Error("cost-2 attack action should be a legal target")
+// Tests that mode 0 accepts Club and Hammer weapon attacks.
+func TestPummel_Mode0AcceptsClubAndHammer(t *testing.T) {
+	if !(PummelRed{}).ARTargetAllowed(testutils.ClubWeapon{}, 0) {
+		t.Error("mode 0 should accept a Club weapon")
+	}
+	if !(PummelRed{}).ARTargetAllowed(testutils.HammerWeapon{}, 0) {
+		t.Error("mode 0 should accept a Hammer weapon")
 	}
 }
 
-// Tests that the predicate rejects a cost-1 attack action.
-func TestPummel_PredicateRejectsCostOneAttack(t *testing.T) {
-	if (PummelRed{}).ARTargetAllowed(testutils.GenericAttack(1, 4)) {
-		t.Error("cost-1 attack action shouldn't match the cost-≥2 gate")
+// Tests that mode 0 rejects a non-club/hammer target.
+func TestPummel_Mode0RejectsOtherTargets(t *testing.T) {
+	if (PummelRed{}).ARTargetAllowed(testutils.GenericAttack(2, 4), 0) {
+		t.Error("mode 0 should reject a non-club/hammer attack")
 	}
 }
 
-// Tests that the predicate rejects a non-attack action.
-func TestPummel_PredicateRejectsNonAttackAction(t *testing.T) {
-	if (PummelRed{}).ARTargetAllowed(testutils.GenericAction()) {
-		t.Error("non-attack action shouldn't match")
+// Tests that mode 1 accepts a cost-≥2 attack action.
+func TestPummel_Mode1AcceptsCostTwoAttackAction(t *testing.T) {
+	if !(PummelRed{}).ARTargetAllowed(testutils.GenericAttack(2, 4), 1) {
+		t.Error("mode 1 should accept a cost-2 attack action")
 	}
 }
 
-// Tests that the predicate accepts Club and Hammer weapon attacks (mode-0 leg).
-func TestPummel_PredicateAcceptsClubAndHammerWeapons(t *testing.T) {
-	if !(PummelRed{}).ARTargetAllowed(testutils.ClubWeapon{}) {
-		t.Error("Club weapon should pass mode-0 leg of predicate")
+// Tests that mode 1 rejects cost-1 attack actions and non-attacks.
+func TestPummel_Mode1RejectsCostOneAndNonAttacks(t *testing.T) {
+	if (PummelRed{}).ARTargetAllowed(testutils.GenericAttack(1, 4), 1) {
+		t.Error("mode 1 should reject a cost-1 attack action")
 	}
-	if !(PummelRed{}).ARTargetAllowed(testutils.HammerWeapon{}) {
-		t.Error("Hammer weapon should pass mode-0 leg of predicate")
+	if (PummelRed{}).ARTargetAllowed(testutils.GenericAction(), 1) {
+		t.Error("mode 1 should reject a non-attack action")
 	}
 }

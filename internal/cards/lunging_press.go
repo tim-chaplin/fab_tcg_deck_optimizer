@@ -24,7 +24,7 @@ func (LungingPressBlue) Attack() int             { return 0 }
 func (LungingPressBlue) Defense() int            { return 2 }
 func (LungingPressBlue) Types() card.TypeSet     { return lungingPressTypes }
 func (LungingPressBlue) GoAgain() bool           { return false }
-func (LungingPressBlue) ARTargetAllowed(c sim.Card) bool {
+func (LungingPressBlue) ARTargetAllowed(c sim.Card, _ int8) bool {
 	return c.Types().IsAttackAction()
 }
 func (LungingPressBlue) Play(s *sim.TurnState, self *sim.CardState) {

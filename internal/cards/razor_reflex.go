@@ -20,93 +20,88 @@ import (
 
 var razorReflexTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAttackReaction)
 
-// razorReflexAccepts is the union of mode 0 (sword weapon attack) and mode 1 (cost-≤1 attack
-// action) target predicates.
-func razorReflexAccepts(c sim.Card) bool {
+// razorReflexAccepts is the per-mode target predicate. Mode 0 gates on sword weapon
+// attack; mode 1 gates on cost-≤1 attack action. The chain runner runs this for the
+// chosen Mode and rejects the permutation when it returns false, so razorReflexPlay can
+// apply the buff unconditionally.
+//
+// Reads Cost against an empty TurnState; no variable-cost cost-≤1 attack actions exist
+// in the pool.
+func razorReflexAccepts(c sim.Card, mode int8) bool {
 	t := c.Types()
-	if t.Has(card.TypeSword) && t.IsAttack() {
-		return true
+	switch mode {
+	case 0:
+		return t.Has(card.TypeSword) && t.IsAttack()
+	case 1:
+		return t.IsAttackAction() && c.Cost(&sim.TurnState{}) <= 1
 	}
-	return razorReflexMode1Allowed(c)
+	return false
 }
 
-// razorReflexMode1Allowed gates mode 1: cost-≤1 attack action card. Reads Cost against an
-// empty TurnState; no variable-cost cost-≤1 attack actions exist in the pool.
-func razorReflexMode1Allowed(c sim.Card) bool {
-	if !c.Types().IsAttackAction() {
-		return false
-	}
-	return c.Cost(&sim.TurnState{}) <= 1
-}
-
-// razorReflexPlay applies the chosen mode's +N{p} buff. Mode 0 fires on sword weapon attacks;
-// mode 1 fires on cost-≤1 attack actions. Mismatched target × mode resolves as a zero-Value
-// no-op.
+// razorReflexPlay applies the chosen mode's effect. The chain runner already validated
+// the target via razorReflexAccepts, so the buff lands directly. Mode 1 additionally
+// fires the on-hit go-again rider eagerly when the post-buff target is likely to hit.
 func razorReflexPlay(s *sim.TurnState, self *sim.CardState, n int) {
 	target := s.AttackReactionTarget()
 	if target == nil {
 		return
 	}
-	switch self.Mode {
-	case 0:
-		t := target.Card.Types()
-		if t.Has(card.TypeSword) && t.IsAttack() {
-			sim.GrantAttackReactionBuff(s, self, n)
-		}
-	case 1:
-		if razorReflexMode1Allowed(target.Card) {
-			sim.GrantAttackReactionBuff(s, self, n)
-			if sim.LikelyToHit(target) {
-				s.ActionPoints++
-			}
-		}
+	sim.GrantAttackReactionBuff(s, self, n)
+	if self.Mode == 1 && sim.LikelyToHit(target) {
+		s.ActionPoints++
 	}
 }
 
 type RazorReflexRed struct{}
 
-func (RazorReflexRed) ID() ids.CardID                  { return ids.RazorReflexRed }
-func (RazorReflexRed) Name() string                    { return "Razor Reflex" }
-func (RazorReflexRed) Cost(*sim.TurnState) int         { return 1 }
-func (RazorReflexRed) Pitch() int                      { return 1 }
-func (RazorReflexRed) Attack() int                     { return 0 }
-func (RazorReflexRed) Defense() int                    { return 2 }
-func (RazorReflexRed) Types() card.TypeSet             { return razorReflexTypes }
-func (RazorReflexRed) GoAgain() bool                   { return false }
-func (RazorReflexRed) Modes() int                      { return 2 }
-func (RazorReflexRed) ARTargetAllowed(c sim.Card) bool { return razorReflexAccepts(c) }
+func (RazorReflexRed) ID() ids.CardID          { return ids.RazorReflexRed }
+func (RazorReflexRed) Name() string            { return "Razor Reflex" }
+func (RazorReflexRed) Cost(*sim.TurnState) int { return 1 }
+func (RazorReflexRed) Pitch() int              { return 1 }
+func (RazorReflexRed) Attack() int             { return 0 }
+func (RazorReflexRed) Defense() int            { return 2 }
+func (RazorReflexRed) Types() card.TypeSet     { return razorReflexTypes }
+func (RazorReflexRed) GoAgain() bool           { return false }
+func (RazorReflexRed) Modes() int              { return 2 }
+func (RazorReflexRed) ARTargetAllowed(c sim.Card, mode int8) bool {
+	return razorReflexAccepts(c, mode)
+}
 func (RazorReflexRed) Play(s *sim.TurnState, self *sim.CardState) {
 	razorReflexPlay(s, self, 3)
 }
 
 type RazorReflexYellow struct{}
 
-func (RazorReflexYellow) ID() ids.CardID                  { return ids.RazorReflexYellow }
-func (RazorReflexYellow) Name() string                    { return "Razor Reflex" }
-func (RazorReflexYellow) Cost(*sim.TurnState) int         { return 1 }
-func (RazorReflexYellow) Pitch() int                      { return 2 }
-func (RazorReflexYellow) Attack() int                     { return 0 }
-func (RazorReflexYellow) Defense() int                    { return 2 }
-func (RazorReflexYellow) Types() card.TypeSet             { return razorReflexTypes }
-func (RazorReflexYellow) GoAgain() bool                   { return false }
-func (RazorReflexYellow) Modes() int                      { return 2 }
-func (RazorReflexYellow) ARTargetAllowed(c sim.Card) bool { return razorReflexAccepts(c) }
+func (RazorReflexYellow) ID() ids.CardID          { return ids.RazorReflexYellow }
+func (RazorReflexYellow) Name() string            { return "Razor Reflex" }
+func (RazorReflexYellow) Cost(*sim.TurnState) int { return 1 }
+func (RazorReflexYellow) Pitch() int              { return 2 }
+func (RazorReflexYellow) Attack() int             { return 0 }
+func (RazorReflexYellow) Defense() int            { return 2 }
+func (RazorReflexYellow) Types() card.TypeSet     { return razorReflexTypes }
+func (RazorReflexYellow) GoAgain() bool           { return false }
+func (RazorReflexYellow) Modes() int              { return 2 }
+func (RazorReflexYellow) ARTargetAllowed(c sim.Card, mode int8) bool {
+	return razorReflexAccepts(c, mode)
+}
 func (RazorReflexYellow) Play(s *sim.TurnState, self *sim.CardState) {
 	razorReflexPlay(s, self, 2)
 }
 
 type RazorReflexBlue struct{}
 
-func (RazorReflexBlue) ID() ids.CardID                  { return ids.RazorReflexBlue }
-func (RazorReflexBlue) Name() string                    { return "Razor Reflex" }
-func (RazorReflexBlue) Cost(*sim.TurnState) int         { return 1 }
-func (RazorReflexBlue) Pitch() int                      { return 3 }
-func (RazorReflexBlue) Attack() int                     { return 0 }
-func (RazorReflexBlue) Defense() int                    { return 2 }
-func (RazorReflexBlue) Types() card.TypeSet             { return razorReflexTypes }
-func (RazorReflexBlue) GoAgain() bool                   { return false }
-func (RazorReflexBlue) Modes() int                      { return 2 }
-func (RazorReflexBlue) ARTargetAllowed(c sim.Card) bool { return razorReflexAccepts(c) }
+func (RazorReflexBlue) ID() ids.CardID          { return ids.RazorReflexBlue }
+func (RazorReflexBlue) Name() string            { return "Razor Reflex" }
+func (RazorReflexBlue) Cost(*sim.TurnState) int { return 1 }
+func (RazorReflexBlue) Pitch() int              { return 3 }
+func (RazorReflexBlue) Attack() int             { return 0 }
+func (RazorReflexBlue) Defense() int            { return 2 }
+func (RazorReflexBlue) Types() card.TypeSet     { return razorReflexTypes }
+func (RazorReflexBlue) GoAgain() bool           { return false }
+func (RazorReflexBlue) Modes() int              { return 2 }
+func (RazorReflexBlue) ARTargetAllowed(c sim.Card, mode int8) bool {
+	return razorReflexAccepts(c, mode)
+}
 func (RazorReflexBlue) Play(s *sim.TurnState, self *sim.CardState) {
 	razorReflexPlay(s, self, 1)
 }
