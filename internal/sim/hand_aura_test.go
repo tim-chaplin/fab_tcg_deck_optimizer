@@ -8,9 +8,9 @@ import (
 )
 
 // TestFireAttackActionAuras_FiresOnceWhenGated: a single OncePerTurn AttackAction
-// trigger fires on the first call and is gated on the second within the same turn — its
-// Count ticks only once, FiredThisTurn latches. Aura attack-action triggers are
-// pre-triggers, so handlers credit Value through AddPreTriggerLogEntry.
+// trigger fires on the first call and is gated on the second within the same turn —
+// FiredThisTurn latches. Count is opaque to the sim, so a handler that doesn't decrement
+// keeps it at its registered value.
 func TestFireAttackActionAuras_FiresOnceWhenGated(t *testing.T) {
 	aura := testutils.RedAttack{}
 	calls := 0
@@ -38,27 +38,30 @@ func TestFireAttackActionAuras_FiresOnceWhenGated(t *testing.T) {
 	if calls != 1 {
 		t.Errorf("handler call count = %d, want 1 (gate prevented second call)", calls)
 	}
-	if len(state.Auras) != 1 || state.Auras[0].Count != 2 {
-		t.Errorf("trigger state = %+v, want one entry with Count=2", state.Auras)
+	if len(state.Auras) != 1 || state.Auras[0].Count != 3 {
+		t.Errorf("trigger state = %+v, want one entry with Count=3 (sim never mutates Count)", state.Auras)
 	}
 	if !state.Auras[0].FiredThisTurn {
 		t.Errorf("FiredThisTurn = false, want true (single fire latched)")
 	}
 }
 
-// TestFireAttackActionAuras_GraveyardsExhaustedAura: a Count=1 trigger fires once, hits
-// Count=0, and the sim drops it from Auras and graveyards Self.
+// TestFireAttackActionAuras_GraveyardsExhaustedAura: a handler that calls DestroyAura
+// drops the entry from Auras and lands Self in the graveyard.
 func TestFireAttackActionAuras_GraveyardsExhaustedAura(t *testing.T) {
 	aura := testutils.RedAttack{}
 	state := &TurnState{Auras: []Aura{{
 		Self:        aura,
 		TriggerType: TriggerAttackAction,
 		Count:       1,
-		Handler:     func(*TurnState, *Aura) int { return 1 },
+		Handler: func(s *TurnState, t *Aura) int {
+			s.DestroyAura(t)
+			return 1
+		},
 	}}}
 	FireAttackActionAuras(state, testutils.RedAttack{})
 	if len(state.Auras) != 0 {
-		t.Errorf("Auras = %+v, want empty (Count hit zero)", state.Auras)
+		t.Errorf("Auras = %+v, want empty (handler called DestroyAura)", state.Auras)
 	}
 	g := state.Graveyard()
 	if len(g) != 1 || g[0] != aura {

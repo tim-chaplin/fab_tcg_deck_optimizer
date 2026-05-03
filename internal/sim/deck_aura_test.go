@@ -11,7 +11,7 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
 )
 
-// damageTrigger returns a StartOfTurn Aura crediting the given damage and exhausting
+// damageTrigger returns a StartOfTurn Aura crediting the given damage and destroying
 // itself on the first fire. calls is bumped each time the handler runs so tests can assert
 // firing counts.
 func damageTrigger(self Card, damage int, calls *int) Aura {
@@ -19,8 +19,9 @@ func damageTrigger(self Card, damage int, calls *int) Aura {
 		Self:        self,
 		TriggerType: TriggerStartOfTurn,
 		Count:       1,
-		Handler: func(*TurnState, *Aura) int {
+		Handler: func(s *TurnState, t *Aura) int {
 			*calls++
+			s.DestroyAura(t)
 			return damage
 		},
 	}
@@ -60,10 +61,9 @@ func TestProcessAurasAtStartOfTurn_EmptyQueue(t *testing.T) {
 	}
 }
 
-// TestProcessAurasAtStartOfTurn_GraveyardsExhaustedAura: when a trigger's Count hits zero after
-// firing, the sim moves Self into the turn-state graveyard so subsequent handlers (e.g. an
-// aura with a graveyard-banish rider) see it. Asserts the contract without relying on any
-// specific card to model the "look at graveyard" side.
+// TestProcessAurasAtStartOfTurn_GraveyardsExhaustedAura: a handler that calls DestroyAura
+// lands Self in the turn-state graveyard before subsequent handlers run, so a follow-up
+// aura with a graveyard-banish rider sees it.
 func TestProcessAurasAtStartOfTurn_GraveyardsExhaustedAura(t *testing.T) {
 	aura := testutils.RedAttack{}
 	var seen []Card
@@ -79,7 +79,10 @@ func TestProcessAurasAtStartOfTurn_GraveyardsExhaustedAura(t *testing.T) {
 		},
 	}
 	_, _, _, _, _, _ = ProcessAurasAtStartOfTurn([]Aura{
-		{Self: aura, TriggerType: TriggerStartOfTurn, Count: 1, Handler: func(*TurnState, *Aura) int { return 0 }},
+		{Self: aura, TriggerType: TriggerStartOfTurn, Count: 1, Handler: func(s *TurnState, t *Aura) int {
+			s.DestroyAura(t)
+			return 0
+		}},
 		watcher,
 	}, nil)
 	if len(seen) != 1 || seen[0] != aura {

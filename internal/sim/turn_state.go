@@ -94,8 +94,7 @@ type TurnState struct {
 	// bottom). Unexported for the same reason as deck: cards reach it only via Graveyard()
 	// / BanishFromGraveyard / AddToGraveyard, all of which clear cacheable. Framework
 	// code in this package writes graveyard directly (the dispatcher's "card resolved →
-	// non-persistent goes to graveyard" rule, fireAttackActionAuras's aura-destroy on
-	// count zero, processAurasAtStartOfTurn's start-of-turn trigger destroy) so the
+	// non-persistent goes to graveyard" rule, DestroyAura's aura-card append) so the
 	// non-card-driven append doesn't poison cacheable.
 	graveyard []Card
 	// Banish holds cards moved into the banished zone this turn (e.g. an aura-banish-for-
@@ -115,10 +114,10 @@ type TurnState struct {
 	// deals arcane directly. Effects that read "if you've dealt arcane damage this turn"
 	// consult this flag rather than Runechants. Reset at turn boundary.
 	ArcaneDamageDealt bool
-	// Auras is the list of triggers from auras currently in play. Cards add entries
-	// during Play via AddAura; the sim fires matching entries on each trigger-Type
-	// condition, decrements Count in place, and drops entries whose Count hits zero after
-	// sending Self to the graveyard. Carries across turns.
+	// Auras is the list of auras currently in play. Cards add entries during Play via
+	// AddAura; the sim fires matching entries on each TriggerType condition and drops
+	// entries whose handler flipped Destroyed (typically via s.DestroyAura). Carries
+	// across turns.
 	Auras []Aura
 	// pendingNextAttackActionHit queues NextAttackActionHitTriggers; reset per permutation.
 	// Lowercase so cards register through RegisterNextAttackActionHit instead of appending.
@@ -651,37 +650,20 @@ func (s *TurnState) AddToGraveyard(c Card) {
 
 // AddAura is the Play-side combo every Action - Aura card reaches for: flip
 // AuraCreated so same-turn "if you've played or created an aura" riders see the entry, and
-// append t to s.Auras so the sim fires it on its matching Type condition.
+// append t to s.Auras so the sim fires it on its matching TriggerType condition.
 func (s *TurnState) AddAura(t Aura) {
 	s.AuraCreated = true
 	s.Auras = append(s.Auras, t)
 }
 
-// RegisterStartOfTurn registers a TriggerStartOfTurn Aura as the canonical shape for
-// "at the beginning of your action phase ..." aura clauses. self is the aura card (used by
-// the sim to graveyard the source after the final fire); count is how many start-of-turn
-// fires the aura survives before the sim destroys it (1 for one-shot destroy-on-fire auras,
-// N for verse-counter / charge-counter auras); text is the per-fire effect description
-// ("Gained 1 health", "Created a runechant", …) auto-logged alongside the trigger so the
-// printout names what happened — pass "" when the handler authors its own log line (dynamic
-// wording, e.g. Sigil of the Arknight's "drew X into hand"); handler runs each fire and
-// returns the damage-equivalent the trigger credits.
+// DestroyAura is the handler-side combo for "this aura's job is done": send Self to the
+// graveyard and flip t.Destroyed so the sim drops the entry from s.Auras after the current
+// pass. Cards whose Handler shouldn't graveyard Self (rare) flip t.Destroyed directly.
 //
-// When text is non-empty, the framework's start-of-turn fire path writes a post-trigger
-// log entry "<DisplayName>: text" attributed to self after handler returns and only when
-// the handler returned n > 0. The pre-built LogText is stored on the Aura so the
-// per-fire path runs zero string allocations (no per-Play closure either — handler stays a
-// top-level function).
-func (s *TurnState) RegisterStartOfTurn(self Card, count int, text string, handler AuraHandler) {
-	var logText string
-	if text != "" {
-		logText = DisplayName(self) + ": " + text
-	}
-	s.AddAura(Aura{
-		Self:        self,
-		TriggerType: TriggerStartOfTurn,
-		Count:       count,
-		Handler:     handler,
-		LogText:     logText,
-	})
+// Direct graveyard append (no cacheable flip): the destruction is deterministic from the
+// triggering event the sim already accounts for, not from hidden state — equivalent to
+// the old sim-managed graveyard path.
+func (s *TurnState) DestroyAura(t *Aura) {
+	s.graveyard = append(s.graveyard, t.Self)
+	t.Destroyed = true
 }

@@ -237,54 +237,6 @@ func TestClashValue_WinTieLose(t *testing.T) {
 	}
 }
 
-// Tests that RegisterStartOfTurn stores the pre-built LogText on the trigger so the
-// framework's start-of-turn fire path can emit "<DisplayName>: text" without per-fire
-// formatting work.
-func TestRegisterStartOfTurn_BuildsLogText(t *testing.T) {
-	self := testutils.NewStubCard("Test Aura").WithTypes(card.NewTypeSet(card.TypeAura))
-	var s TurnState
-	s.RegisterStartOfTurn(self, 1, "Gained 1 health", func(*TurnState, *Aura) int { return 1 })
-	if len(s.Auras) != 1 {
-		t.Fatalf("Auras len = %d, want 1", len(s.Auras))
-	}
-	if want := "Test Aura: Gained 1 health"; s.Auras[0].LogText != want {
-		t.Errorf("LogText = %q, want %q", s.Auras[0].LogText, want)
-	}
-}
-
-// Tests that an empty text leaves LogText empty so the framework defers to the handler's
-// own log line (Sigil of the Arknight's "drew X into hand" pattern).
-func TestRegisterStartOfTurn_EmptyTextLeavesLogTextEmpty(t *testing.T) {
-	self := testutils.NewStubCard("Test Aura").WithTypes(card.NewTypeSet(card.TypeAura))
-	var s TurnState
-	s.RegisterStartOfTurn(self, 1, "", func(*TurnState, *Aura) int { return 1 })
-	if got := s.Auras[0].LogText; got != "" {
-		t.Errorf("LogText = %q, want empty", got)
-	}
-}
-
-// TestRegisterStartOfTurn_EmptyTextLeavesHandlerAlone: text == "" means the card authors its
-// own log line inside the handler (Sigil of the Arknight's "drew X into hand", Silphidae's
-// conditional banish line). The wrapper must not append any extra entries — handler logs are
-// the only entries written.
-func TestRegisterStartOfTurn_EmptyTextLeavesHandlerAlone(t *testing.T) {
-	self := testutils.NewStubCard("Test Aura").WithTypes(card.NewTypeSet(card.TypeAura))
-	var s TurnState
-	s.RegisterStartOfTurn(self, 1, "", func(s *TurnState, _ *Aura) int {
-		s.LogPostTriggerf("Test Aura", 0, "custom handler text")
-		return 0
-	})
-
-	var fired TurnState
-	s.Auras[0].Handler(&fired, &s.Auras[0])
-	if len(fired.LogEntries()) != 1 {
-		t.Fatalf("Log len = %d, want exactly 1 (handler-authored only)", len(fired.LogEntries()))
-	}
-	if fired.LogEntries()[0].Text != "custom handler text" {
-		t.Errorf("Log[0].Text = %q, want handler's own text", fired.LogEntries()[0].Text)
-	}
-}
-
 // TestIsCacheable_NewTurnStateSeedsCacheable: NewTurnState explicitly seeds cacheable=true
 // so a fresh state starts cacheable. A bare `var s TurnState` zero-values to cacheable=false
 // (the conservative default) — production framework paths that want a cacheable seed

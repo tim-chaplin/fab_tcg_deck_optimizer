@@ -499,9 +499,8 @@ func processAurasAtStartOfTurn(queued []Aura, postDrawDeck []Card) (
 		preReveal := len(ts.Revealed)
 		preLog := len(ts.turnLog)
 		d := t.Handler(ts, t)
-		// Auto-emit the registered LogText sub-line when the handler credited damage. The
-		// closure that used to live inside RegisterStartOfTurn moved here so cards register a
-		// raw handler with no per-Play closure allocation.
+		// Auto-emit the registered LogText sub-line when the handler credited damage. Cards
+		// that author their own log line inside the handler set LogText to "" and skip this.
 		if d > 0 && t.LogText != "" {
 			ts.LogPostTrigger(DisplayName(t.Self), t.LogText, d)
 		}
@@ -522,16 +521,9 @@ func processAurasAtStartOfTurn(queued []Aura, postDrawDeck []Card) (
 			text = ts.turnLog[preLog].Text
 		}
 		contribs = append(contribs, TriggerContribution{Card: t.Self, Damage: d, Revealed: revealed, Text: text})
-		t.Count--
-		if t.Count > 0 {
+		if !t.Destroyed {
 			survivors = append(survivors, *t)
-			continue
 		}
-		// Aura destroyed — Self joins the start-of-turn graveyard so subsequent handlers see
-		// it via Graveyard(). Direct field write because this is framework-internal
-		// trigger bookkeeping, not card-driven, so the cacheable bit doesn't move; the
-		// trigger handler's own reads (if any) flipped it already.
-		ts.graveyard = append(ts.graveyard, t.Self)
 	}
 	return survivors, contribs, damage, ts.Runechants, ts.Revealed, ts.graveyard
 }
