@@ -1,22 +1,39 @@
-// Plunder Run — Generic Action. Cost 0. Printed pitch variants: Red 1, Yellow 2, Blue 3. Defense 2.
+// Plunder Run — Generic Action. Cost 0. Printed pitch variants: Red 1, Yellow 2, Blue 3.
+// Defense 2.
 //
-// Text: "The next time an attack action card you control hits this turn, draw a card. If Plunder
-// Run is played from arsenal, the next attack action card you play this turn gains +N{p}. **Go
-// again**" (Red N=3, Yellow N=2, Blue N=1.)
+// Text: "The next time an attack action card you control hits this turn, draw a card. If
+// Plunder Run is played from arsenal, the next attack action card you play this turn gains
+// +N{p}. **Go again**" (Red N=3, Yellow N=2, Blue N=1.)
 //
-// The +N{p} grant only fires when this copy was played from arsenal (self.FromArsenal).
+// The from-arsenal +N{p} grant gates on self.FromArsenal; played from hand, only the
+// on-hit-draw trigger registers.
 
-package notimplemented
+package cards
 
 import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
-
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/cards"
 )
 
 var plunderRunTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction)
+
+func plunderRunOnHitDraw(s *sim.TurnState, target *sim.CardState, t *sim.NextAttackActionHitTrigger) {
+	s.DrawOne()
+	s.LogPostTriggerf(sim.DisplayName(target.Card), 0,
+		"%s drew a card on attack-action hit", sim.DisplayName(t.Source))
+}
+
+func plunderRunPlay(s *sim.TurnState, self *sim.CardState, source sim.Card, n int) {
+	s.RegisterNextAttackActionHit(sim.NextAttackActionHitTrigger{
+		Fire:   plunderRunOnHitDraw,
+		Source: source,
+	})
+	if self.FromArsenal {
+		GrantNextAttackActionBonus(s, n)
+	}
+	s.Log(self, 0)
+}
 
 type PlunderRunRed struct{}
 
@@ -29,14 +46,8 @@ func (PlunderRunRed) Defense() int            { return 2 }
 func (PlunderRunRed) Types() card.TypeSet     { return plunderRunTypes }
 func (PlunderRunRed) GoAgain() bool           { return true }
 func (PlunderRunRed) NotSilverAgeLegal()      {}
-
-// not implemented: on-hit draw rider for the next attack action card to hit this turn
-func (PlunderRunRed) NotImplemented() {}
-func (PlunderRunRed) Play(s *sim.TurnState, self *sim.CardState) {
-	if self.FromArsenal {
-		cards.GrantNextAttackActionBonus(s, 3)
-	}
-	s.Log(self, 0)
+func (c PlunderRunRed) Play(s *sim.TurnState, self *sim.CardState) {
+	plunderRunPlay(s, self, c, 3)
 }
 
 type PlunderRunYellow struct{}
@@ -50,14 +61,8 @@ func (PlunderRunYellow) Defense() int            { return 2 }
 func (PlunderRunYellow) Types() card.TypeSet     { return plunderRunTypes }
 func (PlunderRunYellow) GoAgain() bool           { return true }
 func (PlunderRunYellow) NotSilverAgeLegal()      {}
-
-// not implemented: on-hit draw rider for the next attack action card to hit this turn
-func (PlunderRunYellow) NotImplemented() {}
-func (PlunderRunYellow) Play(s *sim.TurnState, self *sim.CardState) {
-	if self.FromArsenal {
-		cards.GrantNextAttackActionBonus(s, 2)
-	}
-	s.Log(self, 0)
+func (c PlunderRunYellow) Play(s *sim.TurnState, self *sim.CardState) {
+	plunderRunPlay(s, self, c, 2)
 }
 
 type PlunderRunBlue struct{}
@@ -71,12 +76,6 @@ func (PlunderRunBlue) Defense() int            { return 2 }
 func (PlunderRunBlue) Types() card.TypeSet     { return plunderRunTypes }
 func (PlunderRunBlue) GoAgain() bool           { return true }
 func (PlunderRunBlue) NotSilverAgeLegal()      {}
-
-// not implemented: on-hit draw rider for the next attack action card to hit this turn
-func (PlunderRunBlue) NotImplemented() {}
-func (PlunderRunBlue) Play(s *sim.TurnState, self *sim.CardState) {
-	if self.FromArsenal {
-		cards.GrantNextAttackActionBonus(s, 1)
-	}
-	s.Log(self, 0)
+func (c PlunderRunBlue) Play(s *sim.TurnState, self *sim.CardState) {
+	plunderRunPlay(s, self, c, 1)
 }

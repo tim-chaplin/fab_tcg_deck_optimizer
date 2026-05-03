@@ -334,6 +334,7 @@ func (ctx *sequenceContext) resetStateForPermutation() {
 	s.ActionPoints = 1
 	s.ArcaneDamageDealt = false
 	s.AuraTriggers = append(bufs.auraTriggersBacking[:0], ctx.priorAuraTriggers...)
+	s.pendingNextAttackActionHit = bufs.nextAtkActionHitBacking[:0]
 	s.Value = 0
 	s.turnLog = bufs.logBacking[:0]
 	s.CardsPlayed = bufs.cardsPlayedBacking[:0]
@@ -618,6 +619,16 @@ func (ctx *sequenceContext) playSequenceWithMeta(n int) (damage int, leftoverRun
 			for i := range activeAttack.OnHit {
 				h := &activeAttack.OnHit[i]
 				h.Fire(state, activeAttack, h)
+			}
+			// Drain pending triggers only when the active attack is an attack action card
+			// (weapon swings don't satisfy the printed wording). All queued listeners fire
+			// together — every one sees this hit as "the next time".
+			if len(state.pendingNextAttackActionHit) > 0 && activeAttack.Card.Types().IsAttackAction() {
+				for i := range state.pendingNextAttackActionHit {
+					t := &state.pendingNextAttackActionHit[i]
+					t.Fire(state, activeAttack, t)
+				}
+				state.pendingNextAttackActionHit = state.pendingNextAttackActionHit[:0]
 			}
 		}
 		activeAttack = nil

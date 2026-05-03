@@ -94,13 +94,13 @@ func normalizeName(s string) string {
 // TestIsLegal uses one card with NotSilverAgeLegal and one without to confirm Silver Age
 // rejects the banned one and accepts the other.
 func TestIsLegal(t *testing.T) {
-	banned := notimpl.PlunderRunRed{}
+	banned := notimpl.BelittleRed{}
 	legal := cards.NimblismRed{}
 
 	// Sanity: the marker is present on the banned card and absent on the legal one. Guards
 	// against accidentally dropping the tag.
 	if _, ok := sim.Card(banned).(sim.NotSilverAgeLegal); !ok {
-		t.Fatal("PlunderRunRed: missing NotSilverAgeLegal marker")
+		t.Fatal("BelittleRed: missing NotSilverAgeLegal marker")
 	}
 	if _, ok := sim.Card(legal).(sim.NotSilverAgeLegal); ok {
 		t.Fatal("NimblismRed: has NotSilverAgeLegal marker but shouldn't")

@@ -2,8 +2,12 @@
 // Printed pitch variants: Red 1, Yellow 2, Blue 3. Defense 2.
 //
 // Text: "When this hits a hero, if they have 4 or more cards in hand, they discard a card."
+//
+// On-hit rider intentionally not modelled: an optimal defender drops one card to block,
+// falls under the 4+ threshold, and dodges the discard — crediting the rider would
+// double-count the block already captured by IncomingDamage / BlockTotal.
 
-package notimplemented
+package cards
 
 import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
@@ -12,6 +16,11 @@ import (
 )
 
 var cutDownToSizeTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeAttack)
+
+func cutDownToSizePlay(s *sim.TurnState, self *sim.CardState) {
+	n := self.DealEffectiveAttack(s)
+	s.Log(self, n)
+}
 
 type CutDownToSizeRed struct{}
 
@@ -23,12 +32,8 @@ func (CutDownToSizeRed) Attack() int             { return 6 }
 func (CutDownToSizeRed) Defense() int            { return 2 }
 func (CutDownToSizeRed) Types() card.TypeSet     { return cutDownToSizeTypes }
 func (CutDownToSizeRed) GoAgain() bool           { return false }
-
-// not implemented: on-hit opponent discard (conditional on hand size)
-func (CutDownToSizeRed) NotImplemented() {}
 func (CutDownToSizeRed) Play(s *sim.TurnState, self *sim.CardState) {
-	n := self.DealEffectiveAttack(s)
-	s.Log(self, n)
+	cutDownToSizePlay(s, self)
 }
 
 type CutDownToSizeYellow struct{}
@@ -41,12 +46,8 @@ func (CutDownToSizeYellow) Attack() int             { return 5 }
 func (CutDownToSizeYellow) Defense() int            { return 2 }
 func (CutDownToSizeYellow) Types() card.TypeSet     { return cutDownToSizeTypes }
 func (CutDownToSizeYellow) GoAgain() bool           { return false }
-
-// not implemented: on-hit opponent discard (conditional on hand size)
-func (CutDownToSizeYellow) NotImplemented() {}
 func (CutDownToSizeYellow) Play(s *sim.TurnState, self *sim.CardState) {
-	n := self.DealEffectiveAttack(s)
-	s.Log(self, n)
+	cutDownToSizePlay(s, self)
 }
 
 type CutDownToSizeBlue struct{}
@@ -59,10 +60,6 @@ func (CutDownToSizeBlue) Attack() int             { return 4 }
 func (CutDownToSizeBlue) Defense() int            { return 2 }
 func (CutDownToSizeBlue) Types() card.TypeSet     { return cutDownToSizeTypes }
 func (CutDownToSizeBlue) GoAgain() bool           { return false }
-
-// not implemented: on-hit opponent discard (conditional on hand size)
-func (CutDownToSizeBlue) NotImplemented() {}
 func (CutDownToSizeBlue) Play(s *sim.TurnState, self *sim.CardState) {
-	n := self.DealEffectiveAttack(s)
-	s.Log(self, n)
+	cutDownToSizePlay(s, self)
 }
