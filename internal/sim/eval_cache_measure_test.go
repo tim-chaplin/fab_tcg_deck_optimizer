@@ -200,16 +200,12 @@ func TestEvalCache_PerHandEquivalence(t *testing.T) {
 
 // TestEvalCache_EquivalenceWithUncached pins that the cache-replay path produces summary
 // numbers WITHIN A SMALL TOLERANCE of a from-scratch search. The cache stores the winning
-// partition's role multiset; replay applies that multiset to the new call. When multiple
-// optimal partitions tie on Value/leftoverRunechants/futureValuePlayed/willOccupy, the
-// from-scratch search picks the FIRST in iteration order (which depends on input hand
-// order). Replay reproduces the cached multiset, which may differ from what fresh search
-// would pick on a same-multiset hand in a different positional order. Both are valid
-// optima — same Value for that turn — but the BestLine multiset can differ, which
-// cascades through the deck-eval loop (different held / arsenal cards into the next turn,
-// different next-hand multiset, different next-turn Value). Empirically the drift is
-// tiny — order-of-1-Value over 100 shuffles on a Viserai deck — so we tolerate a small
-// percentage gap.
+// partition's role multiset; replay applies that multiset to the new call. The deck-eval
+// pipeline sorts each drawn hand by Card.ID() before search (sortHandByID), so fresh
+// search and replay both enumerate against the same canonical hand order — Hands and
+// per-turn Values match exactly under normal conditions. driftTolerance is kept as a
+// safety net for any future tie-breaker that depends on transient state the cache key
+// doesn't capture.
 func TestEvalCache_EquivalenceWithUncached(t *testing.T) {
 	const (
 		deckSize  = 40
@@ -230,16 +226,8 @@ func TestEvalCache_EquivalenceWithUncached(t *testing.T) {
 	uncached := New(baseline.Hero, baseline.Weapons, baseline.Cards)
 	uncached.EvaluateWith(shuffles, Matchup{IncomingDamage: incoming}, rand.New(rand.NewSource(99)), NewEvaluatorWithoutCache())
 
-	// Hands count drift tolerates a single-turn cascade — a tie-broken role assignment in
-	// one shuffle can carry one more (or fewer) turn into the next reshuffle window before
-	// the deck terminates. The mean-Value check below is the load-bearing correctness
-	// guard; Hands within ±1 over 100 shuffles is the same noise floor described in the
-	// docstring above.
-	const handsDriftTolerance = 1
-	handsDrift := cached.Stats.Hands - uncached.Stats.Hands
-	if handsDrift < -handsDriftTolerance || handsDrift > handsDriftTolerance {
-		t.Errorf("Hands drift %d exceeds tolerance %d (cached=%d uncached=%d)",
-			handsDrift, handsDriftTolerance, cached.Stats.Hands, uncached.Stats.Hands)
+	if cached.Stats.Hands != uncached.Stats.Hands {
+		t.Errorf("Hands: cached=%d uncached=%d", cached.Stats.Hands, uncached.Stats.Hands)
 	}
 	drift := cached.Stats.Mean() - uncached.Stats.Mean()
 	if drift < -driftTolerance || drift > driftTolerance {
