@@ -8,7 +8,7 @@ import (
 
 // TestSigilOfSilphidae_PlayFizzlesWithoutAura: no aura in s.Graveyard means the enter trigger
 // can't banish anything and Play returns 0. AuraCreated still fires (Silphidae IS an aura)
-// and a start-of-turn AuraTrigger is registered for the "destroy this" clause.
+// and a start-of-turn Aura is registered for the "destroy this" clause.
 func TestSigilOfSilphidae_PlayFizzlesWithoutAura(t *testing.T) {
 	var s sim.TurnState
 	(SigilOfSilphidaeBlue{}).Play(&s, &sim.CardState{Card: SigilOfSilphidaeBlue{}})
@@ -21,8 +21,8 @@ func TestSigilOfSilphidae_PlayFizzlesWithoutAura(t *testing.T) {
 	if s.ArcaneDamageDealt {
 		t.Errorf("ArcaneDamageDealt should stay false when banish fizzles")
 	}
-	if len(s.AuraTriggers) != 1 || s.AuraTriggers[0].Type != sim.TriggerStartOfTurn {
-		t.Errorf("AuraTriggers = %+v, want one TriggerStartOfTurn entry", s.AuraTriggers)
+	if len(s.Auras) != 1 || s.Auras[0].Type != sim.TriggerStartOfTurn {
+		t.Errorf("Auras = %+v, want one TriggerStartOfTurn entry", s.Auras)
 	}
 }
 
@@ -50,7 +50,7 @@ func TestSigilOfSilphidae_StartOfTurnHandlerFizzlesWithoutAnotherAura(t *testing
 	var play sim.TurnState
 	(SigilOfSilphidaeBlue{}).Play(&play, &sim.CardState{Card: SigilOfSilphidaeBlue{}})
 	var next sim.TurnState
-	got := play.AuraTriggers[0].Handler(&next, &play.AuraTriggers[0])
+	got := play.Auras[0].Handler(&next, &play.Auras[0])
 	if got != 0 {
 		t.Errorf("handler damage = %d, want 0 (no other aura to banish)", got)
 	}
@@ -65,7 +65,7 @@ func TestSigilOfSilphidae_StartOfTurnHandlerBanishesAnotherAura(t *testing.T) {
 	(SigilOfSilphidaeBlue{}).Play(&play, &sim.CardState{Card: SigilOfSilphidaeBlue{}})
 	other := BlessingOfOccultRed{}
 	next := sim.NewTurnState(nil, []sim.Card{other})
-	got := play.AuraTriggers[0].Handler(next, &play.AuraTriggers[0])
+	got := play.Auras[0].Handler(next, &play.Auras[0])
 	if got != 1 {
 		t.Errorf("handler damage = %d, want 1 (banished another aura)", got)
 	}

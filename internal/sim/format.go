@@ -53,7 +53,7 @@ func roleLabelWithArsenal(a CardAssignment, label string) string {
 	return label
 }
 
-// formatTriggerEffect renders the effect suffix for a cross-turn AuraTrigger line — the
+// formatTriggerEffect renders the effect suffix for a cross-turn Aura line — the
 // portion after the aura name. Damage > 0 surfaces as "START OF ACTION PHASE (+N)"; a
 // non-nil Revealed card surfaces as "drew X into hand". No current card both damages and
 // reveals; the comma-join handles it generically in case one is added. Returns "" when the

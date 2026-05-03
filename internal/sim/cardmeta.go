@@ -29,7 +29,7 @@ type attackerMeta struct {
 	isVariable       bool
 	isAttackOrWeapon bool
 	// isAttackAction is the "attack action card" test (Action+Attack, no Weapon) the sim uses
-	// to pick which Play resolutions fire TriggerAttackAction AuraTriggers. Weapons carry
+	// to pick which Play resolutions fire TriggerAttackAction Auras. Weapons carry
 	// card.TypeAttack but aren't attack action CARDS; only the Action+Attack bitmask matches the
 	// printed trigger text on cards like Malefic Incantation.
 	isAttackAction bool

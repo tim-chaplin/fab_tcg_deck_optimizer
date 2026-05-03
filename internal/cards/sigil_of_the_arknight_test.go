@@ -19,8 +19,8 @@ func TestSigilOfTheArknight_PlayOnlySetsAuraCreated(t *testing.T) {
 	if !s.AuraCreated {
 		t.Error("AuraCreated = false, want true")
 	}
-	if len(s.AuraTriggers) != 1 || s.AuraTriggers[0].Type != sim.TriggerStartOfTurn {
-		t.Errorf("AuraTriggers = %+v, want one TriggerStartOfTurn entry", s.AuraTriggers)
+	if len(s.Auras) != 1 || s.Auras[0].Type != sim.TriggerStartOfTurn {
+		t.Errorf("Auras = %+v, want one TriggerStartOfTurn entry", s.Auras)
 	}
 }
 
@@ -33,7 +33,7 @@ func TestSigilOfTheArknight_TriggerRevealsAttackActionIntoHand(t *testing.T) {
 	(SigilOfTheArknightBlue{}).Play(&play, &sim.CardState{Card: SigilOfTheArknightBlue{}})
 	top := testutils.RunebladeAttack{}
 	next := sim.NewTurnState([]sim.Card{top, testutils.NonAttack{}}, nil)
-	if got := play.AuraTriggers[0].Handler(next, &play.AuraTriggers[0]); got != 0 {
+	if got := play.Auras[0].Handler(next, &play.Auras[0]); got != 0 {
 		t.Errorf("handler damage = %d, want 0 (tempo credited via Revealed, not damage)", got)
 	}
 	if len(next.Revealed) != 1 || next.Revealed[0] != top {
@@ -50,7 +50,7 @@ func TestSigilOfTheArknight_TriggerRevealsNonAttack(t *testing.T) {
 	var play sim.TurnState
 	(SigilOfTheArknightBlue{}).Play(&play, &sim.CardState{Card: SigilOfTheArknightBlue{}})
 	next := sim.NewTurnState([]sim.Card{testutils.Aura{}, testutils.RunebladeAttack{}}, nil)
-	if got := play.AuraTriggers[0].Handler(next, &play.AuraTriggers[0]); got != 0 {
+	if got := play.Auras[0].Handler(next, &play.Auras[0]); got != 0 {
 		t.Errorf("handler damage = %d, want 0", got)
 	}
 	if next.Revealed != nil {
@@ -66,7 +66,7 @@ func TestSigilOfTheArknight_TriggerEmptyDeck(t *testing.T) {
 	var play sim.TurnState
 	(SigilOfTheArknightBlue{}).Play(&play, &sim.CardState{Card: SigilOfTheArknightBlue{}})
 	var next sim.TurnState
-	if got := play.AuraTriggers[0].Handler(&next, &play.AuraTriggers[0]); got != 0 {
+	if got := play.Auras[0].Handler(&next, &play.Auras[0]); got != 0 {
 		t.Errorf("handler damage = %d, want 0", got)
 	}
 	if next.Revealed != nil {

@@ -3,7 +3,7 @@ package sim
 // Attack-chain search: bestAttackWithWeapons evaluates one partition leaf across all phase /
 // weapon masks, bestSequence picks the best ordering of attackers via Heap's algorithm, and
 // playSequence* replay a single permutation through TurnState while firing hero triggers,
-// AuraTrigger handlers, and per-attack OnHit closures.
+// Aura handlers, and per-attack OnHit closures.
 
 import (
 	"fmt"
@@ -33,7 +33,7 @@ func FormatLogEntry(e LogEntry) string {
 // arsenalAtChainStart is the card sitting in the arsenal slot at the start of the chain — set
 // when the partition assigned arsenalCardIn the Arsenal role (it's staying), nil otherwise
 // (no arsenal-in, or arsenal-in is playing as Attack/Defend).
-func bestAttackWithWeapons(hero Hero, weapons []Weapon, attackers, defenders, pitched, held, deck []Card, bufs *attackBufs, runechantCarryover int, mp Matchup, blockTotal, arsenalInIdx, arsenalDefenderIdx int, arsenalAtChainStart Card, priorAuraTriggers []AuraTrigger, skipLog bool) (int, int, int, chainBudget, []string, CarryState, bool, bool) {
+func bestAttackWithWeapons(hero Hero, weapons []Weapon, attackers, defenders, pitched, held, deck []Card, bufs *attackBufs, runechantCarryover int, mp Matchup, blockTotal, arsenalInIdx, arsenalDefenderIdx int, arsenalAtChainStart Card, priorAuras []Aura, skipLog bool) (int, int, int, chainBudget, []string, CarryState, bool, bool) {
 	ctx := &sequenceContext{
 		hero:                hero,
 		pitched:             pitched,
@@ -45,7 +45,7 @@ func bestAttackWithWeapons(hero Hero, weapons []Weapon, attackers, defenders, pi
 		matchup:             mp,
 		blockTotal:          blockTotal,
 		arsenalInIdx:        arsenalInIdx,
-		priorAuraTriggers:   priorAuraTriggers,
+		priorAuras:          priorAuras,
 		skipLog:             skipLog,
 		cacheable:           true,
 		// Point carryWinner at the bufs-persistent scratch so SnapshotFromTurn reuses
@@ -248,11 +248,11 @@ type sequenceContext struct {
 	// is in the chain. Lets bestSequence flag the matching pcBuf entry's FromArsenal as the
 	// permutation moves it around.
 	arsenalInIdx int
-	// priorAuraTriggers are the AuraTriggers carried in from the previous turn (e.g. an
+	// priorAuras are the Auras carried in from the previous turn (e.g. an
 	// AttackAction trigger from a Malefic Incantation played a turn ago). Each permutation
-	// seeds state.AuraTriggers with a fresh copy of this slice so mid-chain firing can
+	// seeds state.Auras with a fresh copy of this slice so mid-chain firing can
 	// decrement Count / set FiredThisTurn without leaking those mutations across permutations.
-	priorAuraTriggers []AuraTrigger
+	priorAuras []Aura
 	// carryWinner is a slice header POINTING into bufs.carryWinnerScratch — the persistent
 	// snapshot buffer that survives across Best calls via the Evaluator's cached attackBufs.
 	// Heap's algorithm keeps iterating past the winner and the shared state.* fields reflect
@@ -273,7 +273,7 @@ type sequenceContext struct {
 	cacheable bool
 }
 
-// fireAttackActionTriggers walks state.AuraTriggers after an attack action card resolves
+// fireAttackActionAuras walks state.Auras after an attack action card resolves
 // and invokes every TriggerAttackAction entry whose OncePerTurn gate is open. Each fire
 // decrements the trigger's Count; when Count hits zero the aura drops out of the list and
 // Self lands in the graveyard so downstream same-turn effects see the destroy. The sim
@@ -283,8 +283,8 @@ type sequenceContext struct {
 //
 // Slice mutation: a survivors prefix is built in place over the existing slice; entries
 // kept after firing are written back at increasing indices, exhausted ones are skipped.
-func fireAttackActionTriggers(state *TurnState, triggeringCard Card) {
-	triggers := state.AuraTriggers
+func fireAttackActionAuras(state *TurnState, triggeringCard Card) {
+	triggers := state.Auras
 	dst := triggers[:0]
 	for i := range triggers {
 		t := &triggers[i]
@@ -306,17 +306,17 @@ func fireAttackActionTriggers(state *TurnState, triggeringCard Card) {
 		}
 		dst = append(dst, *t)
 	}
-	state.AuraTriggers = dst
+	state.Auras = dst
 }
 
 // resetStateForPermutation rewrites every TurnState field to its per-permutation starting
 // value. Hand is deep-copied so card-driven mutations (DrawOne, alt-cost prepends) don't
 // leak to the next permutation. The leaf-stable read-only fields (Pitched, IncomingDamage,
-// BlockTotal) come from ctx; AuraTriggers gets a fresh copy of priorAuraTriggers so
+// BlockTotal) come from ctx; Auras gets a fresh copy of priorAuras so
 // mid-chain firing's Count / FiredThisTurn mutations stay scoped. Value resets to 0 so the
 // dispatcher can use it as the permutation's running damage total.
 //
-// The transient slices (Hand, Graveyard, Banish, CardsPlayed, Log, AuraTriggers) all
+// The transient slices (Hand, Graveyard, Banish, CardsPlayed, Log, Auras) all
 // borrow pre-allocated backing arrays from attackBufs via append([:0], src...) so unchanged
 // permutations don't allocate fresh slices. snapshotCarry clones the winning permutation's
 // slices before the next permutation overwrites these buffers; mid-chain growth past the
@@ -343,7 +343,7 @@ func (ctx *sequenceContext) resetStateForPermutation() {
 	s.Runechants = ctx.runechantCarryover
 	s.ActionPoints = 1
 	s.ArcaneDamageDealt = false
-	s.AuraTriggers = append(bufs.auraTriggersBacking[:0], ctx.priorAuraTriggers...)
+	s.Auras = append(bufs.auraTriggersBacking[:0], ctx.priorAuras...)
 	s.pendingNextAttackActionHit = bufs.nextAtkActionHitBacking[:0]
 	s.Value = 0
 	s.turnLog = bufs.logBacking[:0]
@@ -743,7 +743,7 @@ func (ctx *sequenceContext) playSequenceWithMeta(n int) (damage int, leftoverRun
 		// up the parent chain step's delta; OnHit funcs fire later via finalizeActiveAttack.
 		pc.Card.Play(state, pc)
 		if m.isAttackAction {
-			fireAttackActionTriggers(state, pc.Card)
+			fireAttackActionAuras(state, pc.Card)
 		}
 		if isAttackOrWeapon {
 			activeAttack = pc

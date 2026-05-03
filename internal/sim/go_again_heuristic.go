@@ -9,7 +9,7 @@ package sim
 // gate on (AuraCreated, ArcaneDamageDealt, NonAttackActionPlayed, a positive runechant
 // count). If the card flips self.GrantedGoAgain under those conditions, it has
 // conditional Go again. The probe state is local — every side effect (log entries,
-// runechant bumps, AuraTrigger registrations, deck reads) lands on the discarded
+// runechant bumps, Aura registrations, deck reads) lands on the discarded
 // TurnState, so the caller sees nothing.
 //
 // Caveats:

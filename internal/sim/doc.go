@@ -10,7 +10,7 @@
 //     bestAttackWithWeapons.
 //   - Attack-chain search (sequence.go) enumerates phase / weapon masks and permutes the
 //     resulting attackers via playSequenceWithMeta, which replays one ordering through a
-//     pooled TurnState while firing hero triggers, AuraTrigger handlers, and the OnHit
+//     pooled TurnState while firing hero triggers, Aura handlers, and the OnHit
 //     closures registered on each attack's CardState. Per-card damage / block / pitch
 //     attribution is read off the chain's LogEntry stream.
 //

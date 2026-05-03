@@ -44,30 +44,30 @@ func TestDrawOne_EmptyDeckIsNoOp(t *testing.T) {
 	}
 }
 
-// TestAddAuraTrigger_FlipsAuraCreatedAndAppends: AddAuraTrigger MUST flip AuraCreated (so
+// TestAddAura_FlipsAuraCreatedAndAppends: AddAura MUST flip AuraCreated (so
 // same-turn "if you've played or created an aura" riders see the entry) AND push each
-// trigger onto s.AuraTriggers in call order. Pairing both in one method is what stops a
+// trigger onto s.Auras in call order. Pairing both in one method is what stops a
 // card from registering a trigger without advertising the aura (or vice versa).
-func TestAddAuraTrigger_FlipsAuraCreatedAndAppends(t *testing.T) {
+func TestAddAura_FlipsAuraCreatedAndAppends(t *testing.T) {
 	self := testutils.NewStubCard("self")
 	s := &TurnState{}
 	if s.AuraCreated {
 		t.Fatal("pre: AuraCreated should be false")
 	}
-	s.AddAuraTrigger(AuraTrigger{Self: self, Type: TriggerStartOfTurn, Count: 2})
-	s.AddAuraTrigger(AuraTrigger{Self: self, Type: TriggerStartOfTurn, Count: 1})
+	s.AddAura(Aura{Self: self, Type: TriggerStartOfTurn, Count: 2})
+	s.AddAura(Aura{Self: self, Type: TriggerStartOfTurn, Count: 1})
 	if !s.AuraCreated {
 		t.Error("AuraCreated = false, want true")
 	}
-	if len(s.AuraTriggers) != 2 {
-		t.Fatalf("AuraTriggers len = %d, want 2", len(s.AuraTriggers))
+	if len(s.Auras) != 2 {
+		t.Fatalf("Auras len = %d, want 2", len(s.Auras))
 	}
-	if s.AuraTriggers[0].Count != 2 || s.AuraTriggers[1].Count != 1 {
+	if s.Auras[0].Count != 2 || s.Auras[1].Count != 1 {
 		t.Errorf("order broke: got Counts %d,%d want 2,1",
-			s.AuraTriggers[0].Count, s.AuraTriggers[1].Count)
+			s.Auras[0].Count, s.Auras[1].Count)
 	}
-	if s.AuraTriggers[0].Self != self {
-		t.Errorf("Self = %v, want %v", s.AuraTriggers[0].Self, self)
+	if s.Auras[0].Self != self {
+		t.Errorf("Self = %v, want %v", s.Auras[0].Self, self)
 	}
 }
 
@@ -243,12 +243,12 @@ func TestClashValue_WinTieLose(t *testing.T) {
 func TestRegisterStartOfTurn_BuildsLogText(t *testing.T) {
 	self := testutils.NewStubCard("Test Aura").WithTypes(card.NewTypeSet(card.TypeAura))
 	var s TurnState
-	s.RegisterStartOfTurn(self, 1, "Gained 1 health", func(*TurnState, *AuraTrigger) int { return 1 })
-	if len(s.AuraTriggers) != 1 {
-		t.Fatalf("AuraTriggers len = %d, want 1", len(s.AuraTriggers))
+	s.RegisterStartOfTurn(self, 1, "Gained 1 health", func(*TurnState, *Aura) int { return 1 })
+	if len(s.Auras) != 1 {
+		t.Fatalf("Auras len = %d, want 1", len(s.Auras))
 	}
-	if want := "Test Aura: Gained 1 health"; s.AuraTriggers[0].LogText != want {
-		t.Errorf("LogText = %q, want %q", s.AuraTriggers[0].LogText, want)
+	if want := "Test Aura: Gained 1 health"; s.Auras[0].LogText != want {
+		t.Errorf("LogText = %q, want %q", s.Auras[0].LogText, want)
 	}
 }
 
@@ -257,8 +257,8 @@ func TestRegisterStartOfTurn_BuildsLogText(t *testing.T) {
 func TestRegisterStartOfTurn_EmptyTextLeavesLogTextEmpty(t *testing.T) {
 	self := testutils.NewStubCard("Test Aura").WithTypes(card.NewTypeSet(card.TypeAura))
 	var s TurnState
-	s.RegisterStartOfTurn(self, 1, "", func(*TurnState, *AuraTrigger) int { return 1 })
-	if got := s.AuraTriggers[0].LogText; got != "" {
+	s.RegisterStartOfTurn(self, 1, "", func(*TurnState, *Aura) int { return 1 })
+	if got := s.Auras[0].LogText; got != "" {
 		t.Errorf("LogText = %q, want empty", got)
 	}
 }
@@ -270,13 +270,13 @@ func TestRegisterStartOfTurn_EmptyTextLeavesLogTextEmpty(t *testing.T) {
 func TestRegisterStartOfTurn_EmptyTextLeavesHandlerAlone(t *testing.T) {
 	self := testutils.NewStubCard("Test Aura").WithTypes(card.NewTypeSet(card.TypeAura))
 	var s TurnState
-	s.RegisterStartOfTurn(self, 1, "", func(s *TurnState, _ *AuraTrigger) int {
+	s.RegisterStartOfTurn(self, 1, "", func(s *TurnState, _ *Aura) int {
 		s.LogPostTriggerf("Test Aura", 0, "custom handler text")
 		return 0
 	})
 
 	var fired TurnState
-	s.AuraTriggers[0].Handler(&fired, &s.AuraTriggers[0])
+	s.Auras[0].Handler(&fired, &s.Auras[0])
 	if len(fired.LogEntries()) != 1 {
 		t.Fatalf("Log len = %d, want exactly 1 (handler-authored only)", len(fired.LogEntries()))
 	}

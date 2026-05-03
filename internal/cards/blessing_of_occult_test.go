@@ -23,14 +23,14 @@ func TestBlessingOfOccult_PlayCreatesAuraNoThisTurnRunes(t *testing.T) {
 		if s.Runechants != 0 {
 			t.Errorf("%s: Runechants = %d, want 0 (tokens are next-turn)", c.Name(), s.Runechants)
 		}
-		if len(s.AuraTriggers) != 1 {
-			t.Fatalf("%s: AuraTriggers len = %d, want 1", c.Name(), len(s.AuraTriggers))
+		if len(s.Auras) != 1 {
+			t.Fatalf("%s: Auras len = %d, want 1", c.Name(), len(s.Auras))
 		}
-		if s.AuraTriggers[0].Type != sim.TriggerStartOfTurn {
-			t.Errorf("%s: trigger Type = %d, want TriggerStartOfTurn", c.Name(), s.AuraTriggers[0].Type)
+		if s.Auras[0].Type != sim.TriggerStartOfTurn {
+			t.Errorf("%s: trigger Type = %d, want TriggerStartOfTurn", c.Name(), s.Auras[0].Type)
 		}
-		if s.AuraTriggers[0].Count != 1 {
-			t.Errorf("%s: Count = %d, want 1", c.Name(), s.AuraTriggers[0].Count)
+		if s.Auras[0].Count != 1 {
+			t.Errorf("%s: Count = %d, want 1", c.Name(), s.Auras[0].Count)
 		}
 	}
 }
@@ -50,7 +50,7 @@ func TestBlessingOfOccult_TriggerHandlerCreatesNRunes(t *testing.T) {
 		var play sim.TurnState
 		tc.c.Play(&play, &sim.CardState{Card: tc.c})
 		var next sim.TurnState
-		got := play.AuraTriggers[0].Handler(&next, &play.AuraTriggers[0])
+		got := play.Auras[0].Handler(&next, &play.Auras[0])
 		if got != tc.n {
 			t.Errorf("%s: handler damage = %d, want %d", tc.c.Name(), got, tc.n)
 		}

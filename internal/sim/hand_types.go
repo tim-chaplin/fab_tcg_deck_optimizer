@@ -44,14 +44,14 @@ type CarryState struct {
 	// or filled post-hoc by promoting a Hand card when the slot is empty.
 	Arsenal Card
 	// Graveyard is every card that landed in the graveyard this turn — played hand cards,
-	// tutored-and-played cards, AuraTriggers that destroyed themselves.
+	// tutored-and-played cards, Auras that destroyed themselves.
 	Graveyard []Card
 	// Banish is cards moved into the banished zone this turn.
 	Banish []Card
 	// Runechants is the live token count at end of chain. Carries across.
 	Runechants int
-	// AuraTriggers is the surviving AuraTrigger set at end of chain. Carries across.
-	AuraTriggers []AuraTrigger
+	// Auras is the surviving Aura set at end of chain. Carries across.
+	Auras []Aura
 	// Log is the per-event chain trace of the winning permutation — one entry per Play, hero
 	// trigger, aura trigger, OnHit, weapon swing. Stored as raw LogEntry
 	// structs to defer fmt.Sprintf cost until BuildTurnLog runs at end of EvaluateWith,
@@ -78,14 +78,14 @@ type TurnSummary struct {
 	// State is the winning permutation's end-of-chain CarryState. The deck loop copies
 	// every field into next turn's seed.
 	State CarryState
-	// TriggersFromLastTurn records the AuraTriggers whose start-of-turn handlers fired at
+	// TriggersFromLastTurn records the Auras whose start-of-turn handlers fired at
 	// the top of this turn, each with the damage-equivalent it credited.
 	TriggersFromLastTurn []TriggerContribution
 	// StartOfTurnAuras lists the aura cards that were in play at the top of this turn — one
-	// entry per AuraTrigger carried in from the previous turn.
+	// entry per Aura carried in from the previous turn.
 	StartOfTurnAuras []Card
 	// DealtHand is the hand the deck loop snapshotted right after the draw step, before
-	// processTriggersAtStartOfTurn appended any reveal-handler outputs (Sigil of the
+	// processAurasAtStartOfTurn appended any reveal-handler outputs (Sigil of the
 	// Arknight). Solver-internal call paths leave this nil; the deck loop populates it so
 	// the printout's "Start of turn → Hand:" line reflects the dealt cards only, with
 	// reveals showing up under MyTurn where they actually resolve.
@@ -106,12 +106,12 @@ type TurnSummary struct {
 	Cacheable bool
 }
 
-// TriggerContribution is one start-of-turn AuraTrigger fire: the aura that fired plus the
+// TriggerContribution is one start-of-turn Aura fire: the aura that fired plus the
 // Damage it credited (folded into Value) and the card (if any) the handler revealed onto
 // the hand. Text is the card-authored display line — when set, the format layer renders
 // it verbatim and skips the inferred "drew X into hand" / "START OF ACTION PHASE (+N)"
 // suffix synthesis. Handlers populate Text by calling state.AddPostTriggerLogEntry on
-// the trigger's TurnState, which processTriggersAtStartOfTurn captures.
+// the trigger's TurnState, which processAurasAtStartOfTurn captures.
 type TriggerContribution struct {
 	Card     Card
 	Damage   int
@@ -127,10 +127,10 @@ type TriggerContribution struct {
 type TurnLog struct {
 	// StartOfTurn captures the turn's starting state: dealt hand, arsenal-in card, auras /
 	// runechants in play. Informational only ("Hand: A, B, C, D", "Auras: X, 1 Runechant");
-	// the formatter renders entries unnumbered. Carryover AuraTrigger fires belong to
+	// the formatter renders entries unnumbered. Carryover Aura fires belong to
 	// MyTurn — they're top-of-action-phase actions, not pre-existing state.
 	StartOfTurn []string `json:"start_of_turn,omitempty"`
-	// MyTurn is the numbered entries for the "My turn:" section: any carryover AuraTrigger
+	// MyTurn is the numbered entries for the "My turn:" section: any carryover Aura
 	// fires (Sigil reveals, +N damage credits) at the top of the action phase, then
 	// attack-phase pitches, then the chain (Play / hero trigger / aura trigger / OnHit /
 	// weapon swing lines, in resolution order).

@@ -2,7 +2,7 @@ package sim
 
 // Hand-by-hand simulation of a Deck: Evaluate / EvaluateWith shuffle, walk two cycles of hands
 // per run, and fold each turn's outcome into Stats. All cross-turn bookkeeping (held cards,
-// arsenal, runechant carryover, start-of-turn AuraTrigger handling) lives here. The single-turn
+// arsenal, runechant carryover, start-of-turn Aura handling) lives here. The single-turn
 // assertion-style entry point EvalOneTurnForTesting lives in eval_one_turn_for_testing.go.
 
 import (
@@ -232,7 +232,7 @@ type shuffleScratch struct {
 	buf                             []Card
 	handBuf                         []Card
 	heldBuf, nextHeld               []Card
-	auraTriggerBuf, nextAuraTrigger []AuraTrigger
+	auraTriggerBuf, nextAuraTrigger []Aura
 	presentBuf                      []bool
 	marginalBuf                     []CardMarginalStats
 }
@@ -246,8 +246,8 @@ func newShuffleScratch(deckSize, handSize, numUniqueIDs int) *shuffleScratch {
 		handBuf:         make([]Card, handSize, handSize+startOfTurnRevealRoom),
 		heldBuf:         make([]Card, 0, handSize),
 		nextHeld:        make([]Card, 0, handSize),
-		auraTriggerBuf:  make([]AuraTrigger, 0, handSize),
-		nextAuraTrigger: make([]AuraTrigger, 0, handSize),
+		auraTriggerBuf:  make([]Aura, 0, handSize),
+		nextAuraTrigger: make([]Aura, 0, handSize),
 		presentBuf:      make([]bool, numUniqueIDs),
 		marginalBuf:     make([]CardMarginalStats, numUniqueIDs),
 	}
@@ -289,7 +289,7 @@ func runOneShuffle(d *Deck, stats *Stats, scratch *shuffleScratch, idIndex map[i
 		var trigContribs []TriggerContribution
 		var trigDamage, trigRunes int
 		var trigRevealed []Card
-		auraTriggerBuf, trigContribs, trigDamage, trigRunes, trigRevealed, _ = processTriggersAtStartOfTurn(auraTriggerBuf, buf[head+drawCount:tail])
+		auraTriggerBuf, trigContribs, trigDamage, trigRunes, trigRevealed, _ = processAurasAtStartOfTurn(auraTriggerBuf, buf[head+drawCount:tail])
 		for range trigRevealed {
 			h = append(h, buf[head+drawCount])
 			drawCount++
@@ -315,7 +315,7 @@ func runOneShuffle(d *Deck, stats *Stats, scratch *shuffleScratch, idIndex map[i
 		}
 		tallyMarginalPresence(scratch.marginalBuf, idIndex, scratch.presentBuf, h, arsenalIn, float64(play.Value))
 		nextHeld = applyTurnResult(play, buf, &head, &tail, nextHeld[:0])
-		nextAuraTrigger = append(nextAuraTrigger[:0], play.State.AuraTriggers...)
+		nextAuraTrigger = append(nextAuraTrigger[:0], play.State.Auras...)
 		handIdx++
 		heldBuf, nextHeld = nextHeld, heldBuf
 		auraTriggerBuf, nextAuraTrigger = nextAuraTrigger, auraTriggerBuf
@@ -358,10 +358,10 @@ func finalizeBestTurnLog(stats *Stats) {
 }
 
 // snapshotStartOfTurnAuras returns a fresh slice of the Self cards backing every queued
-// AuraTrigger at the top of the turn — i.e. the auras in play before
-// processTriggersAtStartOfTurn fires and potentially destroys any. Returns nil when the
+// Aura at the top of the turn — i.e. the auras in play before
+// processAurasAtStartOfTurn fires and potentially destroys any. Returns nil when the
 // queue is empty so the snapshot allocates only when there is something to capture.
-func snapshotStartOfTurnAuras(queued []AuraTrigger) []Card {
+func snapshotStartOfTurnAuras(queued []Aura) []Card {
 	if len(queued) == 0 {
 		return nil
 	}
@@ -385,15 +385,15 @@ func runBestForTurn(
 	deck []Card,
 	runechantCarryover int,
 	arsenalCard Card,
-	priorAuraTriggers []AuraTrigger,
+	priorAuras []Aura,
 	ev *Evaluator,
 ) TurnSummary {
 	if ev != nil {
-		return ev.BestWithTriggersSkipLog(hero, weapons, h, mp, deck, runechantCarryover, arsenalCard, priorAuraTriggers)
+		return ev.BestWithTriggersSkipLog(hero, weapons, h, mp, deck, runechantCarryover, arsenalCard, priorAuras)
 	}
 	// No-evaluator path retains the populated-Log behaviour for direct callers (tests, ad-hoc
 	// tools) that don't have a deck-eval loop to drive the replay step.
-	return BestWithTriggers(hero, weapons, h, mp, deck, runechantCarryover, arsenalCard, priorAuraTriggers)
+	return BestWithTriggers(hero, weapons, h, mp, deck, runechantCarryover, arsenalCard, priorAuras)
 }
 
 // replayBestForTurnWithLog re-runs the Best search with full Log materialisation. Same
@@ -409,13 +409,13 @@ func replayBestForTurnWithLog(
 	deck []Card,
 	runechantCarryover int,
 	arsenalCard Card,
-	priorAuraTriggers []AuraTrigger,
+	priorAuras []Aura,
 	ev *Evaluator,
 ) TurnSummary {
 	if ev != nil {
-		return ev.BestWithTriggers(hero, weapons, h, mp, deck, runechantCarryover, arsenalCard, priorAuraTriggers)
+		return ev.BestWithTriggers(hero, weapons, h, mp, deck, runechantCarryover, arsenalCard, priorAuras)
 	}
-	return BestWithTriggers(hero, weapons, h, mp, deck, runechantCarryover, arsenalCard, priorAuraTriggers)
+	return BestWithTriggers(hero, weapons, h, mp, deck, runechantCarryover, arsenalCard, priorAuras)
 }
 
 // recordTurnStats folds one resolved turn's accumulators into stats: bumps Hands /
@@ -447,12 +447,12 @@ func recordTurnStats(stats *Stats, play TurnSummary, handIdx, handsPerCycle int)
 	return newBest
 }
 
-// startOfTurnRevealRoom caps how many cards a start-of-turn AuraTrigger reveal can append
+// startOfTurnRevealRoom caps how many cards a start-of-turn Aura reveal can append
 // to a turn's dealt hand. Set larger than any plausible number of queued reveal-capable
 // triggers so the per-turn handBuf never reallocates.
 const startOfTurnRevealRoom = 8
 
-// processTriggersAtStartOfTurn walks every AuraTrigger queued from last turn and does all
+// processAurasAtStartOfTurn walks every Aura queued from last turn and does all
 // the bookkeeping a turn boundary requires:
 //
 //   - Clears FiredThisTurn on every trigger regardless of Type, re-arming OncePerTurn gates.
@@ -470,8 +470,8 @@ const startOfTurnRevealRoom = 8
 //
 // Cascading reveals: a handler that pops s.Deck shrinks the view for the next handler, so
 // two reveal-capable auras see distinct tops.
-func processTriggersAtStartOfTurn(queued []AuraTrigger, postDrawDeck []Card) (
-	survivors []AuraTrigger,
+func processAurasAtStartOfTurn(queued []Aura, postDrawDeck []Card) (
+	survivors []Aura,
 	contribs []TriggerContribution,
 	damage int,
 	runes int,

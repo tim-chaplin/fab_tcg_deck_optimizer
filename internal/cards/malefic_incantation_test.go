@@ -31,10 +31,10 @@ func TestMaleficIncantation_PlayRegistersAttackActionTrigger(t *testing.T) {
 		if s.Runechants != 0 {
 			t.Errorf("%s: Runechants = %d, want 0 (trigger not yet fired)", tc.c.Name(), s.Runechants)
 		}
-		if len(s.AuraTriggers) != 1 {
-			t.Fatalf("%s: AuraTriggers len = %d, want 1", tc.c.Name(), len(s.AuraTriggers))
+		if len(s.Auras) != 1 {
+			t.Fatalf("%s: Auras len = %d, want 1", tc.c.Name(), len(s.Auras))
 		}
-		tr := s.AuraTriggers[0]
+		tr := s.Auras[0]
 		if tr.Type != sim.TriggerAttackAction {
 			t.Errorf("%s: trigger Type = %d, want TriggerAttackAction", tc.c.Name(), tr.Type)
 		}
@@ -56,7 +56,7 @@ func TestMaleficIncantation_HandlerCreatesOneRunechantPerFire(t *testing.T) {
 		var s sim.TurnState
 		c.Play(&s, &sim.CardState{Card: c})
 		chain := sim.TurnState{TriggeringCard: c}
-		got := s.AuraTriggers[0].Handler(&chain, &s.AuraTriggers[0])
+		got := s.Auras[0].Handler(&chain, &s.Auras[0])
 		if got != 1 {
 			t.Errorf("%s: handler damage = %d, want 1", c.Name(), got)
 		}

@@ -83,7 +83,7 @@ var maleficCreatedRunechantText = func() map[ids.CardID]string {
 // is the printed counter count carried on the trigger so the handler can stay a top-level
 // function.
 func maleficPlay(s *sim.TurnState, selfState *sim.CardState, selfCard sim.Card, n int) {
-	s.AddAuraTrigger(sim.AuraTrigger{
+	s.AddAura(sim.Aura{
 		Self:        selfCard,
 		Type:        sim.TriggerAttackAction,
 		Count:       n,
@@ -97,7 +97,7 @@ func maleficPlay(s *sim.TurnState, selfState *sim.CardState, selfCard sim.Card, 
 // maleficAuraHandler is the once-per-turn attack-action trigger handler shared across
 // Malefic Incantation variants. Reads t.LogText for the rider line so the hot fire path
 // runs zero string allocations.
-func maleficAuraHandler(s *sim.TurnState, t *sim.AuraTrigger) int {
+func maleficAuraHandler(s *sim.TurnState, t *sim.Aura) int {
 	created := s.CreateRunechants(1)
 	s.AddValue(created)
 	s.LogPostTrigger(sim.DisplayName(s.TriggeringCard), t.LogText, created)

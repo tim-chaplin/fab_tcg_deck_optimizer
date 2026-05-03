@@ -12,14 +12,14 @@ import (
 // is the Runechant carryover entering this turn — surfaced in the StartOfTurn auras line
 // alongside any sigils / incantations in play. The chain content for MyTurn comes from
 // t.State.Log (the dispatcher's per-event trace); pitches and defense lines come from
-// BestLine; ending zone state comes from t.State.{Hand, Arsenal, AuraTriggers, Runechants}.
+// BestLine; ending zone state comes from t.State.{Hand, Arsenal, Auras, Runechants}.
 func BuildTurnLog(t TurnSummary, startingRunechants int) TurnLog {
 	var log TurnLog
 	parts := partitionBestLineForDisplay(t.BestLine)
 	defensePitches, attackPitches := splitPitchesByPhase(parts.pitched, parts.drCost)
 
 	// Start of turn: dealt hand, arsenal-in card, auras / runechants in play. Carryover
-	// AuraTrigger fires (Sigil reveals, +N damage credits) belong to MyTurn — they're
+	// Aura fires (Sigil reveals, +N damage credits) belong to MyTurn — they're
 	// actions resolving at the top of the action phase, not pre-existing state.
 	if line := startingHandLine(t.DealtHand); line != "" {
 		log.StartOfTurn = append(log.StartOfTurn, line)
@@ -68,7 +68,7 @@ func BuildTurnLog(t TurnSummary, startingRunechants int) TurnLog {
 	if line := endingArsenalLine(parts.arsenal); line != "" {
 		log.EndOfTurn = append(log.EndOfTurn, line)
 	}
-	if line := endingAurasLine(t.State.AuraTriggers, t.State.Runechants); line != "" {
+	if line := endingAurasLine(t.State.Auras, t.State.Runechants); line != "" {
 		log.EndOfTurn = append(log.EndOfTurn, line)
 	}
 
@@ -78,7 +78,7 @@ func BuildTurnLog(t TurnSummary, startingRunechants int) TurnLog {
 // startingHandLine builds "Hand: A, B, C, D" from the turn's dealt hand — the cards drawn
 // at end of last turn, before any start-of-action-phase reveals (Sigil of the Arknight) or
 // mid-chain draws bulked the hand. The deck loop captures this snapshot in TurnSummary
-// before processTriggersAtStartOfTurn modifies the working hand slice, so reveals show up
+// before processAurasAtStartOfTurn modifies the working hand slice, so reveals show up
 // only in MyTurn (where they actually resolve), not in this informational starting-state
 // line. Names render in deal order. Returns "" when the dealt hand was empty.
 func startingHandLine(dealtHand []Card) string {
@@ -125,7 +125,7 @@ func startingAurasLine(auras []Card, startingRunechants int) string {
 	return "Auras: " + strings.Join(items, ", ")
 }
 
-// startOfTurnTriggerLine renders one carryover AuraTrigger fire as a content line at the
+// startOfTurnTriggerLine renders one carryover Aura fire as a content line at the
 // top of the MyTurn section. When d.Text is set the card owns the wording and renders
 // verbatim; otherwise we synthesise "Aura Name: drew X into hand" / "Aura Name: START
 // OF ACTION PHASE (+N)" from Damage and Revealed. Returns "" for zero-effect fires so
@@ -217,11 +217,11 @@ func endingArsenalLine(arsenal []CardAssignment) string {
 	return "Arsenal: " + strings.Join(parts, ", ")
 }
 
-// endingAurasLine builds "Auras: A, B, 2 Runechants" from the AuraTriggers surviving into
+// endingAurasLine builds "Auras: A, B, 2 Runechants" from the Auras surviving into
 // the next turn plus the live Runechant count. Aura names sort alphabetically (one entry
 // per trigger source — duplicates collapse via the trigger list's natural counts).
 // Returns "" when no auras survived and the runechant count is zero.
-func endingAurasLine(triggers []AuraTrigger, runechants int) string {
+func endingAurasLine(triggers []Aura, runechants int) string {
 	if len(triggers) == 0 && runechants == 0 {
 		return ""
 	}

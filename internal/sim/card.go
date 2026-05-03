@@ -4,7 +4,7 @@
 // opt into (VariableCost, Dominator, AddsFutureValue, ArsenalDefenseBonus, …) live in this
 // file. Cohesive concern groups are split across sibling files in this package:
 // types.go (card.CardType + card.TypeSet bitfield), turn_state.go (TurnState and its mutation
-// helpers), triggers.go (AuraTrigger).
+// helpers), triggers.go (Aura).
 package sim
 
 import (
@@ -344,7 +344,7 @@ type LowerHealthWanter interface {
 // bias, a lone future-value aura loses to Held → arsenal promotion on the arsenal-occupancy
 // tiebreak.
 //
-// The marker is intentionally decoupled from AuraTrigger so future hidden-value mechanisms
+// The marker is intentionally decoupled from Aura so future hidden-value mechanisms
 // can opt in without piggybacking on the trigger system.
 type AddsFutureValue interface {
 	AddsFutureValue()

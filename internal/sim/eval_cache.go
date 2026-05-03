@@ -18,7 +18,7 @@ package sim
 // remapped onto the new hand's ordering so downstream consumers (deck-eval loop, printout)
 // see roles attached to the right slice positions.
 //
-// Aura entries (priorAuraTriggers carrying in from the previous turn) feed into the key
+// Aura entries (priorAuras carrying in from the previous turn) feed into the key
 // as a sorted multiset of (SelfID, Count) pairs — the trigger Handler closures aren't
 // hashable, but Handler behaviour is fully determined by SelfID (each card type's Play
 // always registers the same handler logic), so SelfID + Count captures everything that
@@ -159,11 +159,11 @@ func newEvalCache() *evalCache {
 func makeCacheKey(
 	hero Hero, weapons []Weapon, hand []Card,
 	runechantCarryover int, arsenalCardIn Card,
-	priorAuraTriggers []AuraTrigger,
+	priorAuras []Aura,
 ) (evalCacheKey, bool) {
 	if len(hand) > maxCachedHandSize ||
 		len(weapons) > maxCachedWeapons ||
-		len(priorAuraTriggers) > maxCachedAuras {
+		len(priorAuras) > maxCachedAuras {
 		return evalCacheKey{}, false
 	}
 	var key evalCacheKey
@@ -178,8 +178,8 @@ func makeCacheKey(
 	// Aura entries: insertion-sort by (SelfID, Count) so the key is multiset-invariant
 	// across trigger registration order. The aura set is small (typically 0-3) so the
 	// O(n^2) cost is negligible.
-	key.auraLen = len(priorAuraTriggers)
-	for i, t := range priorAuraTriggers {
+	key.auraLen = len(priorAuras)
+	for i, t := range priorAuras {
 		entry := auraCacheKey{SelfID: t.Self.ID(), Count: t.Count}
 		j := i
 		for j > 0 && auraEntryLess(entry, key.auras[j-1]) {

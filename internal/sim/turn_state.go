@@ -13,7 +13,7 @@ import (
 // no diff-signal indirection: a card that wants to draw appends to s.Hand and pops via
 // PopDeckTop, full stop.
 //
-// Persistent fields (Hand, deck, Arsenal, graveyard, Banish, Runechants, AuraTriggers)
+// Persistent fields (Hand, deck, Arsenal, graveyard, Banish, Runechants, Auras)
 // carry across turns when the sim adopts the winner's snapshot. Transient fields
 // (CardsPlayed, Pitched, IncomingDamage, etc.) are seeded by the sim per chain-step and
 // reset at the turn boundary.
@@ -94,8 +94,8 @@ type TurnState struct {
 	// bottom). Unexported for the same reason as deck: cards reach it only via Graveyard()
 	// / BanishFromGraveyard / AddToGraveyard, all of which clear cacheable. Framework
 	// code in this package writes graveyard directly (the dispatcher's "card resolved →
-	// non-persistent goes to graveyard" rule, fireAttackActionTriggers's aura-destroy on
-	// count zero, processTriggersAtStartOfTurn's start-of-turn trigger destroy) so the
+	// non-persistent goes to graveyard" rule, fireAttackActionAuras's aura-destroy on
+	// count zero, processAurasAtStartOfTurn's start-of-turn trigger destroy) so the
 	// non-card-driven append doesn't poison cacheable.
 	graveyard []Card
 	// Banish holds cards moved into the banished zone this turn (e.g. an aura-banish-for-
@@ -115,11 +115,11 @@ type TurnState struct {
 	// deals arcane directly. Effects that read "if you've dealt arcane damage this turn"
 	// consult this flag rather than Runechants. Reset at turn boundary.
 	ArcaneDamageDealt bool
-	// AuraTriggers is the list of triggers from auras currently in play. Cards add entries
-	// during Play via AddAuraTrigger; the sim fires matching entries on each trigger-Type
+	// Auras is the list of triggers from auras currently in play. Cards add entries
+	// during Play via AddAura; the sim fires matching entries on each trigger-Type
 	// condition, decrements Count in place, and drops entries whose Count hits zero after
 	// sending Self to the graveyard. Carries across turns.
-	AuraTriggers []AuraTrigger
+	Auras []Aura
 	// pendingNextAttackActionHit queues NextAttackActionHitTriggers; reset per permutation.
 	// Lowercase so cards register through RegisterNextAttackActionHit instead of appending.
 	pendingNextAttackActionHit []NextAttackActionHitTrigger
@@ -184,11 +184,11 @@ type TurnState struct {
 	// attackReactionTarget is the buff target for the currently-resolving Attack Reaction.
 	// Set by the chain runner around AR.Play; ARs read it via AttackReactionTarget().
 	attackReactionTarget *CardState
-	// Revealed is the side channel start-of-turn AuraTrigger handlers use to move a card
+	// Revealed is the side channel start-of-turn Aura handlers use to move a card
 	// from the top of the post-draw deck into the hand (Sigil of the Arknight's reveal).
 	Revealed []Card
 	// TriggeringCard is the card whose play caused the active aura attack-action trigger
-	// to fire. The sim sets it before each AuraTrigger handler runs and clears it after;
+	// to fire. The sim sets it before each Aura handler runs and clears it after;
 	// the handler reads it to attribute its log line back to the triggering card. Hero
 	// and OnHit handlers receive the triggering card as a direct arg already and don't
 	// need this field. Nil during direct chain-step resolution and start-of-turn fires.
@@ -649,15 +649,15 @@ func (s *TurnState) AddToGraveyard(c Card) {
 	s.graveyard = append(s.graveyard, c)
 }
 
-// AddAuraTrigger is the Play-side combo every Action - Aura card reaches for: flip
+// AddAura is the Play-side combo every Action - Aura card reaches for: flip
 // AuraCreated so same-turn "if you've played or created an aura" riders see the entry, and
-// append t to s.AuraTriggers so the sim fires it on its matching Type condition.
-func (s *TurnState) AddAuraTrigger(t AuraTrigger) {
+// append t to s.Auras so the sim fires it on its matching Type condition.
+func (s *TurnState) AddAura(t Aura) {
 	s.AuraCreated = true
-	s.AuraTriggers = append(s.AuraTriggers, t)
+	s.Auras = append(s.Auras, t)
 }
 
-// RegisterStartOfTurn registers a TriggerStartOfTurn AuraTrigger as the canonical shape for
+// RegisterStartOfTurn registers a TriggerStartOfTurn Aura as the canonical shape for
 // "at the beginning of your action phase ..." aura clauses. self is the aura card (used by
 // the sim to graveyard the source after the final fire); count is how many start-of-turn
 // fires the aura survives before the sim destroys it (1 for one-shot destroy-on-fire auras,
@@ -669,15 +669,15 @@ func (s *TurnState) AddAuraTrigger(t AuraTrigger) {
 //
 // When text is non-empty, the framework's start-of-turn fire path writes a post-trigger
 // log entry "<DisplayName>: text" attributed to self after handler returns and only when
-// the handler returned n > 0. The pre-built LogText is stored on the AuraTrigger so the
+// the handler returned n > 0. The pre-built LogText is stored on the Aura so the
 // per-fire path runs zero string allocations (no per-Play closure either — handler stays a
 // top-level function).
-func (s *TurnState) RegisterStartOfTurn(self Card, count int, text string, handler OnAuraTrigger) {
+func (s *TurnState) RegisterStartOfTurn(self Card, count int, text string, handler AuraHandler) {
 	var logText string
 	if text != "" {
 		logText = DisplayName(self) + ": " + text
 	}
-	s.AddAuraTrigger(AuraTrigger{
+	s.AddAura(Aura{
 		Self:    self,
 		Type:    TriggerStartOfTurn,
 		Count:   count,

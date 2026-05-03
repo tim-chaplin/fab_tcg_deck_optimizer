@@ -7,7 +7,7 @@ import (
 )
 
 // TestRunebloodIncantation_PlayRegistersStartOfTurnTriggerWithCountN: Play flips AuraCreated
-// and registers a TriggerStartOfTurn AuraTrigger with Count=N (Red 3, Yellow 2, Blue 1). No
+// and registers a TriggerStartOfTurn Aura with Count=N (Red 3, Yellow 2, Blue 1). No
 // same-turn damage credit — every Runechant lands on a real future-turn fire.
 func TestRunebloodIncantation_PlayRegistersStartOfTurnTriggerWithCountN(t *testing.T) {
 	cases := []struct {
@@ -30,10 +30,10 @@ func TestRunebloodIncantation_PlayRegistersStartOfTurnTriggerWithCountN(t *testi
 		if s.Runechants != 0 {
 			t.Errorf("%s: Runechants = %d, want 0 (no same-turn rune)", tc.c.Name(), s.Runechants)
 		}
-		if len(s.AuraTriggers) != 1 {
-			t.Fatalf("%s: AuraTriggers len = %d, want 1", tc.c.Name(), len(s.AuraTriggers))
+		if len(s.Auras) != 1 {
+			t.Fatalf("%s: Auras len = %d, want 1", tc.c.Name(), len(s.Auras))
 		}
-		tr := s.AuraTriggers[0]
+		tr := s.Auras[0]
 		if tr.Type != sim.TriggerStartOfTurn {
 			t.Errorf("%s: trigger Type = %d, want TriggerStartOfTurn", tc.c.Name(), tr.Type)
 		}
@@ -51,7 +51,7 @@ func TestRunebloodIncantation_HandlerCreatesOneRunechantPerFire(t *testing.T) {
 		var play sim.TurnState
 		c.Play(&play, &sim.CardState{Card: c})
 		var fire sim.TurnState
-		got := play.AuraTriggers[0].Handler(&fire, &play.AuraTriggers[0])
+		got := play.Auras[0].Handler(&fire, &play.Auras[0])
 		if got != 1 {
 			t.Errorf("%s: handler damage = %d, want 1", c.Name(), got)
 		}
