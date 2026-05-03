@@ -52,19 +52,22 @@ func bestAttackWithWeapons(hero Hero, weapons []Weapon, attackers, defenders, pi
 		// backing arrays across leaves and Best calls (bufs is Evaluator-cached).
 		carryWinner: &bufs.carryWinnerScratch,
 	}
-	// Defenders fire independently of ordering and attack chain — DRs through Play, plain
-	// blocks as raw block credit — so their total Value contribution is constant across phase
-	// / weapon masks. Compute it once. Includes DR blocks + arcane / runechant riders + plain-
-	// block residual against the partition's incoming damage; over-blocked excess is discarded
-	// by the per-card cap.
+	// Non-modal defender contribution is constant across phase / weapon masks — DRs through
+	// Play, plain blocks as raw block credit — so we compute it once at the top. Modal
+	// blockers (Blocker + ModalCard + BlockCost) need a per-pmask budget to pick their
+	// mode, so partitions with any modal blocker recompute defendersDamage per (pmask,
+	// wmask) below; the once-per-leaf shortcut applies to the common no-modal-blocker case.
 	hasDRs := containsDefenseReaction(defenders)
-	var defenseDealt int
+	hasModalBlocker := containsModalBlocker(defenders)
+	var defenseDealtConst int
 	// defenseCacheable defaults to true — a partition with no defenders runs no DR Plays,
 	// so nothing in the defense phase reads hidden state.
-	defenseCacheable := true
-	if len(defenders) > 0 {
-		defenseDealt, bufs.defenseGravScratch, defenseCacheable = defendersDamage(defenders, pitched, deck, bufs.state, bufs.defenseGravScratch, &bufs.drCardStateScratch, mp.IncomingDamage, arsenalDefenderIdx)
+	defenseCacheableConst := true
+	if !hasModalBlocker && len(defenders) > 0 {
+		defenseDealtConst, bufs.defenseGravScratch, defenseCacheableConst = defendersDamage(defenders, pitched, deck, bufs.state, bufs.defenseGravScratch, &bufs.drCardStateScratch, mp.IncomingDamage, noBlockBudgetCap, arsenalDefenderIdx)
 	}
+	defenseDealt := defenseDealtConst
+	defenseCacheable := defenseCacheableConst
 
 	pitchedVals := bufs.pitchedValsScratch[:0]
 	for _, c := range pitched {
@@ -157,6 +160,13 @@ func bestAttackWithWeapons(hero Hero, weapons []Weapon, attackers, defenders, pi
 			}
 			if drCost > phase.defendBudget {
 				continue
+			}
+			// Modal blockers (Brothers in Arms, …) draw from the same defense pitch supply
+			// the DRs do; recompute defendersDamage per (pmask, wmask) here so each partition
+			// candidate sees the right spare budget. Non-modal-blocker partitions stick with
+			// the once-per-leaf defenseDealtConst computed above.
+			if hasModalBlocker {
+				defenseDealt, bufs.defenseGravScratch, defenseCacheable = defendersDamage(defenders, pitched, deck, bufs.state, bufs.defenseGravScratch, &bufs.drCardStateScratch, mp.IncomingDamage, phase.defendBudget-drCost, arsenalDefenderIdx)
 			}
 			if phase.hasDefendPitches && phase.defendBudget-drCost >= phase.maxDefendPitch {
 				continue

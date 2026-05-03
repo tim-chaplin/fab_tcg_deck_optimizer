@@ -40,6 +40,10 @@ type attackerMeta struct {
 	// isModalCost is set when the card implements ModalCost — costAt dispatches on self.Mode
 	// instead of the static maxCost / Cost(s) paths.
 	isModalCost bool
+	// isModalBlocker is set when the card has a per-mode block-time cost (Blocker +
+	// ModalCard + BlockCost). Cached so containsModalBlocker / defendersDamage's mode-pick
+	// fast paths avoid per-leaf type assertions.
+	isModalBlocker bool
 	// modes is the mode count for a ModalCard, 1 for non-modal cards. Sized int8 so it
 	// packs into the bool block's padding without growing attackerMeta — every chain step
 	// reads permMeta[i] in the inner loop, and every extra cache line through that table
@@ -113,6 +117,13 @@ func cardMetaSlowPath(c Card, id ids.CardID) attackerMeta {
 			panic(fmt.Sprintf("ModalCard %s: Modes() = %d, want >= 2", c.Name(), n))
 		}
 		m.modes = int8(n)
+		// Modal blockers (also Blocker + BlockCost) get a flag for the defendersDamage
+		// fast path — it scans defenders per leaf and the type assertions add up.
+		if _, ok := c.(Blocker); ok {
+			if _, ok := c.(BlockCost); ok {
+				m.isModalBlocker = true
+			}
+		}
 	}
 	if mc, ok := c.(ModalCost); ok {
 		// ModalCost overrides VariableCost / static Cost in costAt — folds the per-mode

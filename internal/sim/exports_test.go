@@ -92,10 +92,18 @@ func AppendGroupedChainEntries(out []string, log []LogEntry) []string {
 	return appendGroupedChainEntries(out, log)
 }
 
-// DefendersDamage re-exports defendersDamage for sim_test consumers. Drops the trailing
-// cacheable bool so call sites that don't care about cacheable propagation stay terse.
+// DefendersDamage re-exports defendersDamage for sim_test consumers with an unbounded
+// block budget (no modal-blocker pressure). Drops the trailing cacheable bool so call
+// sites that don't care about cacheable propagation stay terse.
 func DefendersDamage(defenders, pitched, deck []Card, state *TurnState, gravBuf []Card, cs *CardState, incomingDamage, arsenalDefenderIdx int) (int, []Card) {
-	total, gravBuf, _ := defendersDamage(defenders, pitched, deck, state, gravBuf, cs, incomingDamage, arsenalDefenderIdx)
+	total, gravBuf, _ := defendersDamage(defenders, pitched, deck, state, gravBuf, cs, incomingDamage, noBlockBudgetCap, arsenalDefenderIdx)
+	return total, gravBuf
+}
+
+// DefendersDamageWithBudget is the budget-aware export — sim_test consumers exercising
+// modal blockers (Brothers in Arms, …) pass blockBudget directly to gate the mode pick.
+func DefendersDamageWithBudget(defenders, pitched, deck []Card, state *TurnState, gravBuf []Card, cs *CardState, incomingDamage, blockBudget, arsenalDefenderIdx int) (int, []Card) {
+	total, gravBuf, _ := defendersDamage(defenders, pitched, deck, state, gravBuf, cs, incomingDamage, blockBudget, arsenalDefenderIdx)
 	return total, gravBuf
 }
 

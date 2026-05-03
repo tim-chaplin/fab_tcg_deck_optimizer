@@ -381,3 +381,13 @@ func arsenalDefenseBonusOf(c Card) int {
 type Blocker interface {
 	Block(s *TurnState, self *CardState)
 }
+
+// BlockCost is an optional add-on for ModalCard Blockers whose block-time bonus comes
+// with a per-mode resource cost (Brothers in Arms: "may pay {r} for +2{d}"). The chain
+// runner enumerates each modal blocker's modes whose cost fits the partition's spare
+// defense budget (defendBudget − drCost) and picks the one that yields the highest
+// effective defense. Mode-0 cost is conventionally 0 — the printed "default" branch with
+// no extra resources spent.
+type BlockCost interface {
+	BlockCost(mode int8) int
+}
