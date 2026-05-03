@@ -5,9 +5,7 @@
 // this."
 //
 // Play resolves the enter trigger directly via banishAuraFromGraveyard. The start-of-turn
-// handler runs the leave trigger and DestroyAuras so Self lands in the graveyard after the
-// scan — the scan runs before the destroy, so the "another aura" reading is satisfied
-// without an explicit skip.
+// handler runs the leave trigger.
 
 package cards
 
@@ -46,9 +44,8 @@ func (c SigilOfSilphidaeBlue) Play(s *sim.TurnState, self *sim.CardState) {
 	}
 }
 
-// sigilOfSilphidaeAuraHandler runs the leave trigger on the next turn: scans graveyard
-// for an aura to banish (other than Self — the destroy below puts Self in the graveyard
-// AFTER the scan), credits 1 arcane damage on a hit, and destroys the aura.
+// sigilOfSilphidaeAuraHandler runs the leave trigger on the next turn: scans the graveyard
+// for an aura to banish, credits 1 arcane damage on a hit, then destroys the aura.
 func sigilOfSilphidaeAuraHandler(s *sim.TurnState, t *sim.Aura) {
 	n := banishAuraFromGraveyard(s)
 	if n > 0 {

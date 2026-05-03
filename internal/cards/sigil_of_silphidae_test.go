@@ -57,9 +57,7 @@ func TestSigilOfSilphidae_StartOfTurnHandlerFizzlesWithoutAnotherAura(t *testing
 }
 
 // TestSigilOfSilphidae_StartOfTurnHandlerBanishesAnotherAura: with another aura already in
-// the start-of-turn graveyard, the leave trigger banishes it for 1 arcane. The sim
-// graveyards Self only AFTER this handler returns, so the scan can't pick up Silphidae
-// itself — the printed "another aura" restriction is satisfied naturally.
+// the start-of-turn graveyard, the leave trigger banishes it for 1 arcane.
 func TestSigilOfSilphidae_StartOfTurnHandlerBanishesAnotherAura(t *testing.T) {
 	var play sim.TurnState
 	(SigilOfSilphidaeBlue{}).Play(&play, &sim.CardState{Card: SigilOfSilphidaeBlue{}})
