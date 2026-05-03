@@ -104,3 +104,22 @@ func (d *Deck) EvalOneTurnForTesting(mp Matchup, arsenalIn Card, initialHand []C
 		StartOfNextTurnGraveyard:     trigGraveyarded,
 	}
 }
+
+// resolveTurn1Hand picks turn 1's starting hand and the head offset into deckCards. With
+// initialHand nil the default layout takes deckCards[:handSize] as the hand and points
+// head past it; with a caller-supplied hand the deck stays untouched and the supplied
+// slice is used verbatim (head=0). ok=false signals the caller's inputs can't yield a
+// playable opening hand: deck shorter than handSize in default mode, or a supplied hand
+// that's empty or longer than handSize.
+func resolveTurn1Hand(deckCards, initialHand []Card, handSize int) (hand []Card, head int, ok bool) {
+	if initialHand == nil {
+		if len(deckCards) < handSize {
+			return nil, 0, false
+		}
+		return deckCards[:handSize], handSize, true
+	}
+	if len(initialHand) == 0 || len(initialHand) > handSize {
+		return nil, 0, false
+	}
+	return initialHand, 0, true
+}

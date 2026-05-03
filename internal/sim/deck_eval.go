@@ -626,25 +626,6 @@ func dealNextHand(buf, handBuf, heldBuf []Card, head, tail *int, handSize int) (
 	return h, drawCount, true
 }
 
-// resolveTurn1Hand picks turn 1's starting hand and the head offset into deckCards. With
-// initialHand nil the default layout takes deckCards[:handSize] as the hand and points
-// head past it; with a caller-supplied hand the deck stays untouched and the supplied
-// slice is used verbatim (head=0). ok=false signals the caller's inputs can't yield a
-// playable opening hand: deck shorter than handSize in default mode, or a supplied hand
-// that's empty or longer than handSize.
-func resolveTurn1Hand(deckCards, initialHand []Card, handSize int) (hand []Card, head int, ok bool) {
-	if initialHand == nil {
-		if len(deckCards) < handSize {
-			return nil, 0, false
-		}
-		return deckCards[:handSize], handSize, true
-	}
-	if len(initialHand) == 0 || len(initialHand) > handSize {
-		return nil, 0, false
-	}
-	return initialHand, 0, true
-}
-
 // recordBestTurn clones the winning turn's slices into fresh storage and stamps stats.Best
 // with the resulting BestTurn. Every slice in play (BestLine, SwungWeapons,
 // TriggersFromLastTurn, StartOfTurnAuras, State.*) aliases scratch Best may rewrite on
