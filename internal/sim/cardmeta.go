@@ -23,7 +23,7 @@ import (
 // and the cached value is used directly (no interface call per play).
 type attackerMeta struct {
 	types            card.TypeSet
-	card             Card // held for variable-cost chain-time Cost(state) calls
+	card             Card // held for variable-cost / modal-cost chain-time Cost calls
 	minCost          int
 	maxCost          int
 	isVariable       bool
@@ -37,6 +37,13 @@ type attackerMeta struct {
 	// Point — Instants and Attack Reactions (both 0 AP per FaB rules). Action cards and
 	// weapon swings cost 1 AP and don't set this.
 	isFreeChainStep bool
+	// isModalCost is set when the card implements ModalCost — costAt dispatches on self.Mode
+	// instead of the static maxCost / Cost(s) paths.
+	isModalCost bool
+	// isModalBlocker is set when the card has a per-mode block-time cost (Blocker +
+	// ModalCard + BlockCost). Cached so containsModalBlocker / defendersDamage's mode-pick
+	// fast paths avoid per-leaf type assertions.
+	isModalBlocker bool
 	// modes is the mode count for a ModalCard, 1 for non-modal cards. Sized int8 so it
 	// packs into the bool block's padding without growing attackerMeta — every chain step
 	// reads permMeta[i] in the inner loop, and every extra cache line through that table
@@ -44,10 +51,14 @@ type attackerMeta struct {
 	modes int8
 }
 
-// costAt returns the card's effective cost given the current TurnState. Static cards return the
-// cached value directly; variable-cost cards defer to Cost(s) so every game-state-dependent
-// costing rule lives inside the card, not the solver.
-func (m *attackerMeta) costAt(s *TurnState) int {
+// costAt returns the card's effective cost given the current TurnState and chosen mode.
+// ModalCost cards dispatch on the mode index; static cards return the cached value
+// directly; VariableCost cards defer to Cost(s) so every game-state-dependent costing rule
+// lives inside the card, not the solver.
+func (m *attackerMeta) costAt(s *TurnState, mode int8) int {
+	if m.isModalCost {
+		return m.card.(ModalCost).ModalCost(mode)
+	}
 	if m.isVariable {
 		return m.card.Cost(s)
 	}
@@ -106,8 +117,32 @@ func cardMetaSlowPath(c Card, id ids.CardID) attackerMeta {
 			panic(fmt.Sprintf("ModalCard %s: Modes() = %d, want >= 2", c.Name(), n))
 		}
 		m.modes = int8(n)
+		// Modal blockers (also Blocker + BlockCost) get a flag for the defendersDamage
+		// fast path — it scans defenders per leaf and the type assertions add up.
+		if _, ok := c.(Blocker); ok {
+			if _, ok := c.(BlockCost); ok {
+				m.isModalBlocker = true
+			}
+		}
 	}
-	if vc, ok := c.(VariableCost); ok {
+	if mc, ok := c.(ModalCost); ok {
+		// ModalCost overrides VariableCost / static Cost in costAt — folds the per-mode
+		// costs into the partition pre-screen so MinCost / MaxCost still bound the search.
+		m.isModalCost = true
+		minC, maxC := mc.ModalCost(0), mc.ModalCost(0)
+		for i := int8(1); i < m.modes; i++ {
+			c := mc.ModalCost(i)
+			if c < minC {
+				minC = c
+			}
+			if c > maxC {
+				maxC = c
+			}
+		}
+		m.minCost = minC
+		m.maxCost = maxC
+		m.isVariable = minC != maxC
+	} else if vc, ok := c.(VariableCost); ok {
 		m.minCost = vc.MinCost()
 		m.maxCost = vc.MaxCost()
 		m.isVariable = m.minCost != m.maxCost

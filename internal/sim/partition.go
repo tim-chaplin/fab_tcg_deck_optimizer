@@ -332,6 +332,12 @@ func roleAllowed(r Role, isArsenalSlot, isDefenseReaction, canAttack bool) bool 
 // attack ordering; per-DR TurnState carries Pitched / deck plus a fresh copy of the defenders
 // list in graveyard so DRs that scan for banish targets see the same shape across iterations.
 //
+// blockBudget is the remaining defense-phase pitch supply after the caller has subtracted DR
+// costs. Modal blockers (Blocker + ModalCard + BlockCost) enumerate their modes within
+// blockBudget and pick the one yielding the highest BonusDefense; non-modal Blockers run
+// their hook unchanged. Pass MaxInt to disable the budget check entirely (no modal blockers
+// in the partition).
+//
 // arsenalDefenderIdx is the position of the arsenal-in card in defenders when it took the
 // Defend role (-1 otherwise) — used to flag the matching CardState.FromArsenal so
 // EffectiveDefense picks up the ArsenalDefenseBonus rider.
@@ -345,7 +351,7 @@ func roleAllowed(r Role, isArsenalSlot, isDefenseReaction, canAttack bool) bool 
 // Returns the per-DR cacheable status as a sticky bit — once a DR reads deck or graveyard
 // via the accessors, the partition's defense-phase output isn't safe to cache; aggregated up
 // through bestAttackWithWeapons.
-func defendersDamage(defenders, pitched, deck []Card, state *TurnState, gravBuf []Card, cs *CardState, incomingDamage, arsenalDefenderIdx int) (int, []Card, bool) {
+func defendersDamage(defenders, pitched, deck []Card, state *TurnState, gravBuf []Card, cs *CardState, incomingDamage, blockBudget, arsenalDefenderIdx int) (int, []Card, bool) {
 	total := 0
 	remaining := incomingDamage
 	cacheable := true
@@ -366,17 +372,19 @@ func defendersDamage(defenders, pitched, deck []Card, state *TurnState, gravBuf 
 		}
 	}
 	// Plain blocks contribute their printed Defense plus any BonusDefense the optional
-	// Blocker hook flipped after scanning state.Defenders. Cards without block-time logic
-	// skip the hook and pay only one type assertion. Reuse the caller-provided cs scratch
-	// for the Blocker target so the interface call doesn't escape a fresh CardState per
-	// plain blocker.
+	// Blocker hook flipped after scanning state.Defenders. Modal blockers with BlockCost
+	// pick the highest-bonus mode that fits the remaining budget; non-modal Blockers run
+	// their hook unchanged. Reuse the caller-provided cs scratch so the interface call
+	// doesn't escape a fresh CardState per plain blocker.
+	state.Defenders = defenders
 	for _, d := range defenders {
 		if d.Types().IsDefenseReaction() {
 			continue
 		}
-		*cs = CardState{Card: d}
+		bestMode, bestCost := pickBlockerMode(d, state, cs, blockBudget)
+		blockBudget -= bestCost
+		*cs = CardState{Card: d, Mode: bestMode}
 		if b, ok := d.(Blocker); ok {
-			state.Defenders = defenders
 			b.Block(state, cs)
 		}
 		block := cs.EffectiveDefense()
@@ -389,6 +397,43 @@ func defendersDamage(defenders, pitched, deck []Card, state *TurnState, gravBuf 
 		}
 	}
 	return total, gravBuf, cacheable
+}
+
+// pickBlockerMode returns the mode index and resource cost yielding the highest BonusDefense
+// for d within blockBudget. Non-modal blockers and blockers without BlockCost return (0, 0)
+// — the chain runner runs Block once at mode 0. Modal+BlockCost cards probe each mode by
+// running Block on the cs scratch with the candidate mode, observing the resulting
+// BonusDefense; the caller re-runs Block with the chosen mode for the actual contribution.
+func pickBlockerMode(d Card, state *TurnState, cs *CardState, blockBudget int) (int8, int) {
+	mc, ok := d.(ModalCard)
+	if !ok {
+		return 0, 0
+	}
+	bc, ok := d.(BlockCost)
+	if !ok {
+		return 0, 0
+	}
+	b, ok := d.(Blocker)
+	if !ok {
+		return 0, 0
+	}
+	bestBonus := -1
+	bestMode := int8(0)
+	bestCost := 0
+	for mode := int8(0); mode < int8(mc.Modes()); mode++ {
+		cost := bc.BlockCost(mode)
+		if cost > blockBudget {
+			continue
+		}
+		*cs = CardState{Card: d, Mode: mode}
+		b.Block(state, cs)
+		if cs.BonusDefense > bestBonus {
+			bestBonus = cs.BonusDefense
+			bestMode = mode
+			bestCost = cost
+		}
+	}
+	return bestMode, bestCost
 }
 
 // chainBudget captures the winning phase-split's attack-chain resource state.
@@ -444,3 +489,30 @@ func containsDefenseReaction(cards []Card) bool {
 	}
 	return false
 }
+
+// containsModalBlocker reports whether any card in cards is a modal blocker — Blocker
+// implementations whose mode count varies via ModalCard and whose mode cost varies via
+// BlockCost. Partitions with at least one modal blocker recompute defendersDamage per
+// (pmask, wmask) so each candidate's spare defense budget gates the mode pick; partitions
+// without one keep the once-per-leaf defendersDamage shortcut. Defenders are short
+// (≤ 4 cards in practice), so the inline type-assertion chain stays cheap and fast-fails
+// on the BlockCost gate for the common no-modal-blocker case.
+func containsModalBlocker(cards []Card) bool {
+	for _, c := range cards {
+		if _, ok := c.(BlockCost); !ok {
+			continue
+		}
+		if mc, ok := c.(ModalCard); ok && mc.Modes() > 1 {
+			if _, ok := c.(Blocker); ok {
+				return true
+			}
+		}
+	}
+	return false
+}
+
+// noBlockBudgetCap is the sentinel passed to defendersDamage when the partition has no
+// modal blockers — the per-mode cost path is unused, so any large value works. Picked to
+// be obviously beyond any real defense budget without depending on math.MaxInt overflow
+// arithmetic the budget arithmetic might do.
+const noBlockBudgetCap = 1 << 30

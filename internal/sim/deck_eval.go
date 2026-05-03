@@ -296,6 +296,7 @@ func runOneShuffle(d *Deck, stats *Stats, scratch *shuffleScratch, idIndex map[i
 		}
 		runechantCarryover += trigRunes
 		arsenalIn := arsenalCard
+		sortHandByID(h)
 		play := runBestForTurn(d.Hero, d.Weapons, h, mp, buf[head+drawCount:tail], runechantCarryover, arsenalCard, auraTriggerBuf, ev)
 		runechantCarryover = play.State.Runechants
 		arsenalCard = play.State.Arsenal
@@ -582,6 +583,26 @@ func pitchedFromBestLine(line []CardAssignment) []Card {
 	return out
 }
 
+// sortHandByID sorts hand in place by Card.ID(). Called right before each turn's Best /
+// runBestForTurn so the partition recurse always enumerates against the same canonical hand
+// order — that drops a positional-tie-break source from findBest's leaf comparator and makes
+// the cache-off and cache-on paths produce byte-identical results for matching multisets.
+// Insertion sort instead of sort.SliceStable: hand sizes top out around 7 and the standard
+// library's reflection-based interface comparator is ~30% of the bench's wall-clock at
+// these sizes; insertion sort is stable and beats it handily for small N.
+func sortHandByID(hand []Card) {
+	for i := 1; i < len(hand); i++ {
+		c := hand[i]
+		id := c.ID()
+		j := i - 1
+		for j >= 0 && hand[j].ID() > id {
+			hand[j+1] = hand[j]
+			j--
+		}
+		hand[j+1] = c
+	}
+}
+
 // dealNextHand fills handBuf with this turn's dealt hand: the held prefix from heldBuf followed
 // by fresh top-of-deck draws, totaling handSize cards. Compacts buf[head:tail] down to buf[0:]
 // when the tail doesn't have room for a full hand of pitched cards on the upcoming recycle.
@@ -663,6 +684,7 @@ func (d *Deck) EvalOneTurnForTesting(mp Matchup, arsenalIn Card, initialHand []C
 
 	h := handBuf[:len(turn1Hand)]
 	copy(h, turn1Hand)
+	sortHandByID(h)
 	play := Best(d.Hero, d.Weapons, h, mp, buf[head:tail], 0, arsenalIn)
 	// drawCount=0: head already points past the starting hand, so applyTurnResult only needs
 	// to advance past mid-turn draws.

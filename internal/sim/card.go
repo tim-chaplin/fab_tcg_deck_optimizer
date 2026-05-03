@@ -253,6 +253,16 @@ type ModalCard interface {
 	Modes() int
 }
 
+// ModalCost is an optional add-on to ModalCard for cards whose resource cost varies by
+// mode (Bluster Buff: "this gets -1{p} unless you pay {r}" — mode 0 is the printed cost,
+// mode 1 spends one more {r}). Implementers return the cost paid when self.Mode equals
+// the given mode index. The chain runner reads ModalCost in place of Card.Cost(s) when
+// the card declares both ModalCard and ModalCost, and folds min/max of the per-mode
+// costs into the partition pre-screen via VariableCost.
+type ModalCost interface {
+	ModalCost(mode int8) int
+}
+
 // ConditionalGoAgain is an optional marker for cards whose Play sometimes flips
 // self.GrantedGoAgain — i.e., cards that grant themselves Go again under a runtime
 // condition (FromArsenal, an aura already in play, ArcaneDamageDealt, …) rather than as a
@@ -370,4 +380,14 @@ func arsenalDefenseBonusOf(c Card) int {
 // to implement Blocker; their plain-block contribution stays at the printed Defense().
 type Blocker interface {
 	Block(s *TurnState, self *CardState)
+}
+
+// BlockCost is an optional add-on for ModalCard Blockers whose block-time bonus comes
+// with a per-mode resource cost (Brothers in Arms: "may pay {r} for +2{d}"). The chain
+// runner enumerates each modal blocker's modes whose cost fits the partition's spare
+// defense budget (defendBudget − drCost) and picks the one that yields the highest
+// effective defense. Mode-0 cost is conventionally 0 — the printed "default" branch with
+// no extra resources spent.
+type BlockCost interface {
+	BlockCost(mode int8) int
 }

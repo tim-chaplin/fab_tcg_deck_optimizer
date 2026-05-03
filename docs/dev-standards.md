@@ -139,6 +139,18 @@ following plumbing is uniform and lives once in `internal/card/card.go`:
   permutation and picks the highest-Value tuple. Modes that are no-ops for the current
   state should resolve as zero-Value no-ops; the runner will pick a sibling mode that
   contributes more. Card docstrings call out each mode's effect — not the wiring.
+- **Modal cost** (Bluster Buff / Chest Puff / Look Tuff cycle): ModalCards whose resource
+  cost varies by mode implement `sim.ModalCost.ModalCost(mode int8) int`. The attacker
+  meta cache folds the per-mode min/max into the partition pre-screen, and the chain
+  runner reads the mode's cost via `costAt(state, self.Mode)` instead of the static /
+  VariableCost path. Card docstrings call out the per-mode (cost, effect) pair.
+- **Modal blockers** (Brothers in Arms, …): plain-block cards with mode-dependent
+  block-time costs implement `sim.ModalCard.Modes()` + `sim.Blocker.Block(s, self)` +
+  `sim.BlockCost(mode int8) int`. `defendersDamage` enumerates each modal blocker's
+  modes within the partition's spare defense budget (`phase.defendBudget − drCost`) and
+  picks the highest-BonusDefense mode that fits. Mode 0 is conventionally the printed
+  default (cost 0, no extra effect). Card docstrings call out each mode's (cost, effect)
+  pair — not the wiring.
 
 ## Logging idioms
 
