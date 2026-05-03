@@ -268,8 +268,9 @@ func fillPartitionPerCardBufs(hand []Card, n, totalN int, arsenalCardIn Card, pv
 		if i == n {
 			dvals[i] += arsenalDefenseBonusOf(c)
 		}
-		ts := c.Types()
-		isDR[i] = ts.IsDefenseReaction()
+		m := attackerMetaPtrFor(c)
+		ts := m.types
+		isDR[i] = m.actsAsDR
 		// Attack role covers everything that resolves during the action chain — Action
 		// subtypes (attack actions, non-attack actions, Auras, Instants), Weapons, and
 		// Attack Reactions (free chain steps). Block-typed cards and Defense Reactions

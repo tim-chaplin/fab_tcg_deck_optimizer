@@ -153,7 +153,7 @@ func bestAttackWithWeapons(hero Hero, weapons []Weapon, attackers, defenders, pi
 			bufs.drScratch = TurnState{Runechants: leftoverRunechants}
 			drCost := 0
 			for _, d := range defenders {
-				if !d.Types().IsDefenseReaction() {
+				if !attackerMetaPtrFor(d).actsAsDR {
 					continue
 				}
 				drCost += d.Cost(&bufs.drScratch)

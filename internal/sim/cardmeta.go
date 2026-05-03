@@ -44,6 +44,10 @@ type attackerMeta struct {
 	// ModalCard + BlockCost). Cached so containsModalBlocker / defendersDamage's mode-pick
 	// fast paths avoid per-leaf type assertions.
 	isModalBlocker bool
+	// actsAsDR is true for printed Defense Reactions and DefensiveInstant-marked Instants.
+	// Cached so per-leaf hot-path defender checks fold the type-assertion into the
+	// once-per-ID slow path.
+	actsAsDR bool
 	// modes is the mode count for a ModalCard, 1 for non-modal cards. Sized int8 so it
 	// packs into the bool block's padding without growing attackerMeta — every chain step
 	// reads permMeta[i] in the inner loop, and every extra cache line through that table
@@ -81,8 +85,15 @@ var (
 // a full attackerMeta struct. The target is read-only after initialisation. Safe from multiple
 // goroutines: the first writer per ID holds the mutex, later readers see the ready flag set with
 // a release barrier and read the immutable meta entry directly.
+//
+// Test-only cards sharing ids.InvalidCard collide on cache slot 0; the InvalidCard branch
+// builds a fresh meta inline so each gets its own. Production never sees InvalidCard.
 func attackerMetaPtrFor(c Card) *attackerMeta {
 	id := c.ID()
+	if id == ids.InvalidCard {
+		m := buildAttackerMeta(c)
+		return &m
+	}
 	if atomic.LoadUint32(&cardMetaReady[id]) == 1 {
 		return &cardMetaCache[id]
 	}
@@ -98,13 +109,24 @@ func cardMetaSlowPath(c Card, id ids.CardID) attackerMeta {
 	if atomic.LoadUint32(&cardMetaReady[id]) == 1 {
 		return cardMetaCache[id]
 	}
+	m := buildAttackerMeta(c)
+	cardMetaCache[id] = m
+	atomic.StoreUint32(&cardMetaReady[id], 1)
+	return m
+}
+
+// buildAttackerMeta computes a fresh attackerMeta from c. Shared by the cache slow path
+// and the InvalidCard bypass in attackerMetaPtrFor.
+func buildAttackerMeta(c Card) attackerMeta {
 	t := c.Types()
+	_, isDefensiveInstant := c.(DefensiveInstant)
 	m := attackerMeta{
 		types:            t,
 		card:             c,
 		isAttackOrWeapon: t.Has(card.TypeAttack) || t.Has(card.TypeWeapon),
 		isAttackAction:   t.IsAttackAction(),
 		isFreeChainStep:  t.Has(card.TypeInstant) || t.IsAttackReaction(),
+		actsAsDR:         t.IsDefenseReaction() || isDefensiveInstant,
 		modes:            1,
 	}
 	if mc, ok := c.(ModalCard); ok {
@@ -147,12 +169,10 @@ func cardMetaSlowPath(c Card, id ids.CardID) attackerMeta {
 		m.maxCost = vc.MaxCost()
 		m.isVariable = m.minCost != m.maxCost
 	} else {
-		// Static cost: any TurnState probe returns the same value. Cache once.
+		// Static cost: any TurnState probe returns the same value.
 		fixed := c.Cost(&TurnState{})
 		m.minCost = fixed
 		m.maxCost = fixed
 	}
-	cardMetaCache[id] = m
-	atomic.StoreUint32(&cardMetaReady[id], 1)
 	return m
 }

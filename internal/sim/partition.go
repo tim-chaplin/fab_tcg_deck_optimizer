@@ -356,7 +356,7 @@ func defendersDamage(defenders, pitched, deck []Card, state *TurnState, gravBuf 
 	remaining := incomingDamage
 	cacheable := true
 	for i, d := range defenders {
-		if !d.Types().IsDefenseReaction() {
+		if !attackerMetaPtrFor(d).actsAsDR {
 			continue
 		}
 		gravBuf = append(gravBuf[:0], defenders...)
@@ -378,7 +378,7 @@ func defendersDamage(defenders, pitched, deck []Card, state *TurnState, gravBuf 
 	// doesn't escape a fresh CardState per plain blocker.
 	state.Defenders = defenders
 	for _, d := range defenders {
-		if d.Types().IsDefenseReaction() {
+		if attackerMetaPtrFor(d).actsAsDR {
 			continue
 		}
 		bestMode, bestCost := pickBlockerMode(d, state, cs, blockBudget)
@@ -478,12 +478,14 @@ func splitPitchesAcrossPhases(pitchedVals []int, pmask, phaseCount int) phaseBud
 	return p
 }
 
-// containsDefenseReaction reports whether any card in cards is a Defense Reaction. The
-// partition-leaf precompute uses this to decide whether the defense-phase pitch enumeration
-// needs to split budgets at all (no DRs means every pitch funds the attack phase).
+// containsDefenseReaction reports whether any card in cards participates in the defense
+// phase via the Play hook (printed Defense Reactions or DefensiveInstant-marked Instants).
+// The partition-leaf precompute uses this to decide whether the defense-phase pitch
+// enumeration needs to split budgets at all — no such cards means every pitch funds the
+// attack phase.
 func containsDefenseReaction(cards []Card) bool {
 	for _, c := range cards {
-		if c.Types().IsDefenseReaction() {
+		if attackerMetaPtrFor(c).actsAsDR {
 			return true
 		}
 	}

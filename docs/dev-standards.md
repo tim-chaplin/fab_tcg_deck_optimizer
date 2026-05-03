@@ -151,6 +151,16 @@ following plumbing is uniform and lives once in `internal/card/card.go`:
   picks the highest-BonusDefense mode that fits. Mode 0 is conventionally the printed
   default (cost 0, no extra effect). Card docstrings call out each mode's (cost, effect)
   pair — not the wiring.
+- **`DefensiveInstant` markers** (Brush Off, Calming Breeze, Oasis Respite, Peace of
+  Mind, …): `TypeInstant` cards whose printed effect prevents damage during the defense
+  phase opt in via the `sim.DefensiveInstant` marker. The partition treats them as
+  defenders, their `Cost()` is summed against the defense budget, and `Play` calls
+  `self.DealEffectiveDefense(s)` so prevention is `min(Defense(), IncomingDamage)`.
+  Damage prevention is collapsed against the sim's single `IncomingDamage` bucket: "the
+  next N damage" and "the next K times … prevent 1 each" both reduce to a single
+  `Defense() = N` bucket; "next damage of M or less" credits `min(M, IncomingDamage)`.
+  Card docstrings note the printed prevention amount and any rider that's dropped — not
+  the wiring or the bucketing rationale.
 
 ## Logging idioms
 

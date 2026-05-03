@@ -391,3 +391,14 @@ type Blocker interface {
 type BlockCost interface {
 	BlockCost(mode int8) int
 }
+
+// DefensiveInstant marks a TypeInstant card whose printed effect prevents damage during
+// the defense phase. Opting in routes the card through the Defense-Reaction partition
+// slot, cost summing, and chain-step Play; the type stays TypeInstant. Play should call
+// self.DealEffectiveDefense(s) so prevention = min(Defense(), IncomingDamage). Cards
+// whose prevention is gated by hidden state (arcane-only, multi-source rationing) must
+// not opt in — the marker promises a full single-bucket prevention. See
+// docs/dev-standards.md: DefensiveInstant markers.
+type DefensiveInstant interface {
+	DefensiveInstant()
+}
