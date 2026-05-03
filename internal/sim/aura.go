@@ -1,14 +1,12 @@
 package sim
 
-// The Aura framework: a persistent, counter-tracked hook attached to a card in play.
-// Each Aura fires its Handler when the matching Trigger condition occurs and decrements
-// Count; when Count hits zero the owning card heads to the graveyard. Used today for
+// An Aura is a persistent hook attached to a card in play. The sim walks each TurnState's
+// Auras list on every Trigger condition and fires the matching handlers. Used today for
 // start-of-turn upkeep auras (Sigil of Deadwood, Sigil of Fyendal, Blessing of Occult,
-// Runeblood Incantation, Sigil of the Arknight, Sigil of Silphidae) and per-attack-
-// action triggers (Malefic Incantation).
+// Runeblood Incantation, Sigil of the Arknight, Sigil of Silphidae) and per-attack-action
+// triggers (Malefic Incantation).
 
-// TriggerType categorises when an Aura's Handler fires. The sim walks the TurnState's
-// Auras list on each matching condition and invokes every applicable handler.
+// TriggerType categorises when an Aura's Handler fires.
 type TriggerType int
 
 const (
@@ -27,25 +25,25 @@ const (
 // Type condition fires — it's where the printed "create a runechant", "gain 1{h}",
 // "reveal top of deck" effect lives. Handlers mutate the passed TurnState directly
 // (e.g. s.CreateRunechants, s.AddToGraveyard) and return the damage-equivalent that folds
-// 1-to-1 into Value. The sim handles the counter bookkeeping (decrementing Count,
-// graveyarding the aura when Count hits zero); the handler does not.
+// 1-to-1 into Value.
 type AuraHandler func(s *TurnState, t *Aura) int
 
-// Aura is a persistent hook attached to a card in play. Each time Type's condition fires
-// — and, when OncePerTurn is set, at most once per turn — the sim calls Handler and
-// decrements Count. When Count reaches zero the sim sends Self to the graveyard and drops
-// the Aura from TurnState.Auras. Self is the originating card so the sim can graveyard it
-// without needing a back-reference.
+// Aura is one persistent hook attached to a card in play. Each time Type's condition fires
+// — and, when OncePerTurn is set, at most once per turn — the sim calls Handler. Self is
+// the originating card; the sim references it for graveyarding and per-turn summaries.
 type Aura struct {
-	// Self is the card this Aura belongs to. Used by the sim to graveyard the card when
-	// Count reaches zero; also surfaced in per-turn summaries (e.g. the "(from previous
-	// turn)" formatter line naming the Aura that fired).
+	// Self is the card this Aura belongs to. Surfaced in per-turn summaries (e.g. the
+	// "(from previous turn)" formatter line naming the Aura that fired) and used by the
+	// sim when destruction lands the card in the graveyard.
 	Self Card
 	// Type is the trigger condition that fires this Aura's Handler.
 	Type TriggerType
-	// Count is how many fires remain before the Aura is destroyed. Card-specific meaning:
-	// for Malefic Incantation it's the verse counter; for runechant-creating sigils it's
-	// always 1 (re-armed each turn).
+	// Count is a per-Aura counter. Its meaning is card-specific: Malefic Incantation reads
+	// it as fires remaining; one-shot start-of-turn sigils set it to 1; future Auras may
+	// use it for other things (e.g. tokens in play). Today the start-of-turn / attack-
+	// action passes decrement Count by 1 after each fire and graveyard Self when it
+	// reaches zero — Auras that need different lifecycle can rewrite Count inside their
+	// handler before that decrement runs.
 	Count int
 	// Handler runs when Type fires.
 	Handler AuraHandler
