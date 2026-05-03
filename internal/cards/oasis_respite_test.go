@@ -6,22 +6,31 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 )
 
-// Tests that each printing prevents its full Defense() amount (4/3/2).
-func TestOasisRespite_PreventsByPrinting(t *testing.T) {
+// Tests that each printing prevents its full Defense() amount (4/3/2) and that the
+// "may gain 1{h}" rider adds +1 iff the current hero opts into LowerHealthWanter.
+func TestOasisRespite_PreventsAndLifeRider(t *testing.T) {
 	cases := []struct {
-		card sim.Card
-		want int
+		card            sim.Card
+		wantOff, wantOn int
 	}{
-		{OasisRespiteRed{}, 4},
-		{OasisRespiteYellow{}, 3},
-		{OasisRespiteBlue{}, 2},
+		{OasisRespiteRed{}, 4, 5},
+		{OasisRespiteYellow{}, 3, 4},
+		{OasisRespiteBlue{}, 2, 3},
 	}
+	saved := sim.CurrentHero
+	defer func() { sim.CurrentHero = saved }()
 	for _, tc := range cases {
-		s := sim.TurnState{IncomingDamage: 10}
-		self := &sim.CardState{Card: tc.card}
-		tc.card.Play(&s, self)
-		if s.Value != tc.want {
-			t.Errorf("%s: Value = %d, want %d", tc.card.Name(), s.Value, tc.want)
+		sim.CurrentHero = stubLowHeroOff{}
+		sOff := sim.TurnState{IncomingDamage: 10}
+		tc.card.Play(&sOff, &sim.CardState{Card: tc.card})
+		if sOff.Value != tc.wantOff {
+			t.Errorf("%s: hero off Value = %d, want %d", tc.card.Name(), sOff.Value, tc.wantOff)
+		}
+		sim.CurrentHero = stubLowHeroOn{}
+		sOn := sim.TurnState{IncomingDamage: 10}
+		tc.card.Play(&sOn, &sim.CardState{Card: tc.card})
+		if sOn.Value != tc.wantOn {
+			t.Errorf("%s: hero on Value = %d, want %d", tc.card.Name(), sOn.Value, tc.wantOn)
 		}
 	}
 }

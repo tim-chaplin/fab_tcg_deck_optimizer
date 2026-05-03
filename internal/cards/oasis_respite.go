@@ -2,8 +2,9 @@
 //
 // Text (Red): "Prevent the next 4 damage that would be dealt to target hero this turn by
 // a source of your choice. If they have less life than each other hero, they may gain
-// 1{h}." Yellow caps at 3, Blue at 2. The conditional 1{h} life-gain rider is dropped —
-// it depends on opponent life totals the sim doesn't track.
+// 1{h}." Yellow caps at 3, Blue at 2. The 1{h} life-gain rider fires for heroes opting
+// into sim.LowerHealthWanter via sim.HeroWantsLowerHealth — life gain is credited to
+// Value the same as damage prevention, so the rider lands on top of DealEffectiveDefense.
 
 package cards
 
@@ -17,6 +18,10 @@ var oasisRespiteTypes = card.NewTypeSet(card.TypeGeneric, card.TypeInstant)
 
 func oasisRespitePlay(s *sim.TurnState, self *sim.CardState) {
 	n := self.DealEffectiveDefense(s)
+	if sim.HeroWantsLowerHealth() {
+		s.AddValue(1)
+		n++
+	}
 	s.Log(self, n)
 }
 
