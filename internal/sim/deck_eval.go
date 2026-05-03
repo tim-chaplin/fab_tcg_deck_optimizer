@@ -501,9 +501,11 @@ func processAurasAtStartOfTurn(queued []Aura, postDrawDeck []Card) (
 		preReveal := len(ts.Revealed)
 		preLog := len(ts.turnLog)
 		preLen := len(ts.Auras)
+		preValue := ts.Value
 		ts.currentAuraIdx = i
-		d := t.Handler(ts, t)
+		t.Handler(ts, t)
 		ts.currentAuraIdx = -1
+		d := ts.Value - preValue
 		damage += d
 		// Attribute any newly-revealed card to this trigger so the best-turn printout can
 		// show what the handler drew (e.g. Sigil of the Arknight: "drew X into hand"). Taking

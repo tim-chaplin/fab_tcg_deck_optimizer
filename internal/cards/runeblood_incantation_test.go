@@ -51,9 +51,9 @@ func TestRunebloodIncantation_HandlerCreatesOneRunechantPerFire(t *testing.T) {
 		var play sim.TurnState
 		c.Play(&play, &sim.CardState{Card: c})
 		var fire sim.TurnState
-		got := play.Auras[0].Handler(&fire, &play.Auras[0])
-		if got != 1 {
-			t.Errorf("%s: handler damage = %d, want 1", c.Name(), got)
+		play.Auras[0].Handler(&fire, &play.Auras[0])
+		if fire.Value != 1 {
+			t.Errorf("%s: handler Value = %d, want 1", c.Name(), fire.Value)
 		}
 		if fire.Runechants != 1 {
 			t.Errorf("%s: Runechants = %d, want 1 (one rune per fire)", c.Name(), fire.Runechants)

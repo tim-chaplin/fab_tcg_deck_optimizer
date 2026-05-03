@@ -39,19 +39,44 @@ the upstream repo is the authority for every card file in the project.
     `Dominator` interface implementation makes that link by itself; the additional reveal cost
     is documented by the `// not implemented:` comment above its `NotImplemented` method.
 
-## AuraTrigger lifecycle
+## Aura lifecycle
 
-Defined in `internal/card/card.go`. Standard shape for cards that "create an aura that fires
+Defined in `internal/sim/aura.go`. Standard shape for cards that "create an aura that fires
 later":
 
-- `Play` sets `s.AuraCreated = true` (so same-turn aura-readers see the aura) and calls
-  `s.AddAuraTrigger(card.AuraTrigger{...})` with `Self`, `Type`, `Count`, and `Handler`.
-- The sim walks `s.AuraTriggers` on each matching condition, invokes every matching `Handler`,
-  decrements `Count`, and graveyards `Self` when `Count` hits zero.
-- `OncePerTurn` caps an `AuraTrigger` at a single fire per turn.
+- `Play` calls `s.AddAura(sim.Aura{...})` with `Self`, `TriggerType`, `Count`, and `Handler`.
+  `AddAura` sets `s.AuraCreated = true` for same-turn aura-readers.
+- The sim walks `s.Auras` on each matching `TriggerType` condition and invokes every matching
+  `Handler`. `OncePerTurn` caps an Aura at a single fire per turn.
+- **Lifecycle is the handler's job, not the sim's.** A handler that's done calls
+  `s.DestroyAura(t, addToGraveyard)` to splice itself out of `s.Auras` and (when
+  `addToGraveyard`) land `Self` in the graveyard. Counter-based auras decrement `t.Count` and
+  call `DestroyAura` when it hits zero. The sim never mutates `Count` or graveyards on its own.
+- Aura handlers parallel `Card.Play` — `func(s *sim.TurnState, t *sim.Aura)` with no return.
+  Credit damage / life gain via `s.AddValue(n)`; emit log lines via `s.LogPostTrigger`.
+
+**Handlers must be top-level functions, not inline closures inside `Play`.** Even closures that
+capture nothing escape to the heap when assigned to `Aura.Handler` (`go build -gcflags='-m'`
+confirms `func literal escapes to heap`), allocating one closure per Play. A top-level handler
+is a static function pointer — zero alloc per registration. Pattern:
+
+```go
+func mySigilAuraHandler(s *sim.TurnState, t *sim.Aura) {
+    s.AddValue(1)
+    s.DestroyAura(t, true)
+}
+
+func (c MySigil) Play(s *sim.TurnState, self *sim.CardState) {
+    s.AddAura(sim.Aura{Self: c, TriggerType: sim.TriggerStartOfTurn, Count: 1, Handler: mySigilAuraHandler})
+    s.Log(self, 0)
+}
+```
+
+Per-variant payloads (e.g. R/Y/B versions creating different rune counts) thread through
+`Aura.Count` so the handler stays shared across variants.
 
 Card docstrings should NOT restate this lifecycle. State only what's card-specific — the printed
-clause, `Count = N`, and whatever the handler returns.
+clause and any rider the handler drops.
 
 ## NotImplemented vs Unplayable markers
 

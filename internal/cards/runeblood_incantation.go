@@ -63,14 +63,14 @@ func (c RunebloodIncantationBlue) Play(s *sim.TurnState, self *sim.CardState) {
 
 // runebloodAuraHandler creates 1 runechant per fire and decrements the verse counter.
 // When the last verse fires, destroys the aura and graveyards the card.
-func runebloodAuraHandler(s *sim.TurnState, t *sim.Aura) int {
+func runebloodAuraHandler(s *sim.TurnState, t *sim.Aura) {
 	created := s.CreateRunechants(1)
+	s.AddValue(created)
 	s.LogPostTrigger(sim.DisplayName(t.Self), "Created a runechant (verse counter)", created)
 	t.Count--
 	if t.Count <= 0 {
 		s.DestroyAura(t, true)
 	}
-	return created
 }
 
 // runebloodPlay registers a start-of-turn trigger with Count=n and emits the same-turn

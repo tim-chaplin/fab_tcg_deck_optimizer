@@ -19,11 +19,10 @@ func TestFireAttackActionAuras_FiresOnceWhenGated(t *testing.T) {
 		TriggerType: TriggerAttackAction,
 		Count:       3,
 		OncePerTurn: true,
-		Handler: func(s *TurnState, _ *Aura) int {
+		Handler: func(s *TurnState, _ *Aura) {
 			calls++
 			s.AddValue(1)
 			s.LogPreTriggerf("TestCard", 1, "test trigger fired")
-			return 1
 		},
 	}}}
 	trigger := testutils.RedAttack{}
@@ -54,9 +53,9 @@ func TestFireAttackActionAuras_GraveyardsExhaustedAura(t *testing.T) {
 		Self:        aura,
 		TriggerType: TriggerAttackAction,
 		Count:       1,
-		Handler: func(s *TurnState, t *Aura) int {
+		Handler: func(s *TurnState, t *Aura) {
+			s.AddValue(1)
 			s.DestroyAura(t, true)
-			return 1
 		},
 	}}}
 	FireAttackActionAuras(state, testutils.RedAttack{})
@@ -79,7 +78,7 @@ func TestFireAttackActionAuras_PassesThroughNonAttackActionTriggers(t *testing.T
 		Self:        aura,
 		TriggerType: TriggerStartOfTurn,
 		Count:       1,
-		Handler:     func(*TurnState, *Aura) int { calls++; return 5 },
+		Handler:     func(*TurnState, *Aura) { calls++ },
 	}}}
 	FireAttackActionAuras(state, testutils.RedAttack{})
 	if state.Value != 0 {

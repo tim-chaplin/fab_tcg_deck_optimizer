@@ -58,9 +58,9 @@ func TestBlessingOfOccult_TriggerHandlerCreatesNRunes(t *testing.T) {
 		var play sim.TurnState
 		tc.c.Play(&play, &sim.CardState{Card: tc.c})
 		var next sim.TurnState
-		got := play.Auras[0].Handler(&next, &play.Auras[0])
-		if got != tc.n {
-			t.Errorf("%s: handler damage = %d, want %d", tc.c.Name(), got, tc.n)
+		play.Auras[0].Handler(&next, &play.Auras[0])
+		if next.Value != tc.n {
+			t.Errorf("%s: handler Value = %d, want %d", tc.c.Name(), next.Value, tc.n)
 		}
 		if next.Runechants != tc.n {
 			t.Errorf("%s: Runechants = %d, want %d (live tokens on next turn)",

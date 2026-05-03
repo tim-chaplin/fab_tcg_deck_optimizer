@@ -19,10 +19,10 @@ func damageTrigger(self Card, damage int, calls *int) Aura {
 		Self:        self,
 		TriggerType: TriggerStartOfTurn,
 		Count:       1,
-		Handler: func(s *TurnState, t *Aura) int {
+		Handler: func(s *TurnState, t *Aura) {
 			*calls++
+			s.AddValue(damage)
 			s.DestroyAura(t, true)
-			return damage
 		},
 	}
 }
@@ -73,15 +73,13 @@ func TestProcessAurasAtStartOfTurn_GraveyardsExhaustedAura(t *testing.T) {
 		Self:        testutils.YellowAttack{},
 		TriggerType: TriggerStartOfTurn,
 		Count:       1,
-		Handler: func(s *TurnState, _ *Aura) int {
+		Handler: func(s *TurnState, _ *Aura) {
 			seen = append([]Card(nil), s.Graveyard()...)
-			return 0
 		},
 	}
 	_, _, _, _, _, _ = ProcessAurasAtStartOfTurn([]Aura{
-		{Self: aura, TriggerType: TriggerStartOfTurn, Count: 1, Handler: func(s *TurnState, t *Aura) int {
+		{Self: aura, TriggerType: TriggerStartOfTurn, Count: 1, Handler: func(s *TurnState, t *Aura) {
 			s.DestroyAura(t, true)
-			return 0
 		}},
 		watcher,
 	}, nil)
@@ -384,7 +382,7 @@ func TestProcessAurasAtStartOfTurn_ReArmsOncePerTurnGate(t *testing.T) {
 		Count:         2,
 		OncePerTurn:   true,
 		FiredThisTurn: true,
-		Handler:       func(*TurnState, *Aura) int { return 1 },
+		Handler:       func(*TurnState, *Aura) {},
 	}
 	survivors, _, _, _, _, _ := ProcessAurasAtStartOfTurn([]Aura{exhausted}, nil)
 	if len(survivors) != 1 {

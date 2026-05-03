@@ -56,9 +56,9 @@ func TestMaleficIncantation_HandlerCreatesOneRunechantPerFire(t *testing.T) {
 		var s sim.TurnState
 		c.Play(&s, &sim.CardState{Card: c})
 		chain := sim.TurnState{TriggeringCard: c}
-		got := s.Auras[0].Handler(&chain, &s.Auras[0])
-		if got != 1 {
-			t.Errorf("%s: handler damage = %d, want 1", c.Name(), got)
+		s.Auras[0].Handler(&chain, &s.Auras[0])
+		if chain.Value != 1 {
+			t.Errorf("%s: handler Value = %d, want 1", c.Name(), chain.Value)
 		}
 		if chain.Runechants != 1 {
 			t.Errorf("%s: Runechants = %d, want 1 (handler creates one live rune)", c.Name(), chain.Runechants)

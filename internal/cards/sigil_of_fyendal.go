@@ -31,11 +31,15 @@ func (c SigilOfFyendalBlue) Play(s *sim.TurnState, self *sim.CardState) {
 		Self:        c,
 		TriggerType: sim.TriggerStartOfTurn,
 		Count:       1,
-		Handler: func(s *sim.TurnState, t *sim.Aura) int {
-			s.LogPostTrigger(sim.DisplayName(t.Self), "Gained 1 health", 1)
-			s.DestroyAura(t, true)
-			return 1
-		},
+		Handler:     sigilOfFyendalAuraHandler,
 	})
 	s.Log(self, 0)
+}
+
+// sigilOfFyendalAuraHandler credits the +1 health (valued 1-to-1 with damage) next turn
+// and destroys the aura. Top-level so Aura.Handler doesn't allocate a closure.
+func sigilOfFyendalAuraHandler(s *sim.TurnState, t *sim.Aura) {
+	s.AddValue(1)
+	s.LogPostTrigger(sim.DisplayName(t.Self), "Gained 1 health", 1)
+	s.DestroyAura(t, true)
 }

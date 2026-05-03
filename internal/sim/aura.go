@@ -25,12 +25,12 @@ const (
 
 // AuraHandler is the business-logic callback attached to an Aura. Called when the Aura's
 // TriggerType condition fires — it's where the printed "create a runechant", "gain 1{h}",
-// "reveal top of deck" effect lives. Handlers mutate the passed TurnState directly
-// (e.g. s.CreateRunechants, s.AddToGraveyard) and return the damage-equivalent that folds
-// 1-to-1 into Value. Lifecycle is the handler's responsibility: a one-shot aura calls
-// s.DestroyAura(t, addToGraveyard) at the end of its body; a counter-based aura decrements
-// t.Count and calls s.DestroyAura when the count expires.
-type AuraHandler func(s *TurnState, t *Aura) int
+// "reveal top of deck" effect lives. Handlers mutate the passed TurnState directly,
+// crediting damage / life gain via s.AddValue. Same shape as Card.Play — no return.
+// Lifecycle is the handler's responsibility: a one-shot aura calls s.DestroyAura(t,
+// addToGraveyard) at the end of its body; a counter-based aura decrements t.Count and
+// calls s.DestroyAura when the count expires.
+type AuraHandler func(s *TurnState, t *Aura)
 
 // Aura is one persistent hook attached to a card in play. Each time TriggerType's
 // condition fires — and, when OncePerTurn is set, at most once per turn — the sim calls

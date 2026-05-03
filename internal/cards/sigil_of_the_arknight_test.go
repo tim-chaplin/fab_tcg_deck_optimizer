@@ -33,8 +33,9 @@ func TestSigilOfTheArknight_TriggerRevealsAttackActionIntoHand(t *testing.T) {
 	(SigilOfTheArknightBlue{}).Play(&play, &sim.CardState{Card: SigilOfTheArknightBlue{}})
 	top := testutils.RunebladeAttack{}
 	next := sim.NewTurnState([]sim.Card{top, testutils.NonAttack{}}, nil)
-	if got := play.Auras[0].Handler(next, &play.Auras[0]); got != 0 {
-		t.Errorf("handler damage = %d, want 0 (tempo credited via Revealed, not damage)", got)
+	play.Auras[0].Handler(next, &play.Auras[0])
+	if next.Value != 0 {
+		t.Errorf("handler Value = %d, want 0 (tempo credited via Revealed, not damage)", next.Value)
 	}
 	if len(next.Revealed) != 1 || next.Revealed[0] != top {
 		t.Errorf("Revealed = %v, want [%v] (top of post-draw deck)", next.Revealed, top)
@@ -50,8 +51,9 @@ func TestSigilOfTheArknight_TriggerRevealsNonAttack(t *testing.T) {
 	var play sim.TurnState
 	(SigilOfTheArknightBlue{}).Play(&play, &sim.CardState{Card: SigilOfTheArknightBlue{}})
 	next := sim.NewTurnState([]sim.Card{testutils.Aura{}, testutils.RunebladeAttack{}}, nil)
-	if got := play.Auras[0].Handler(next, &play.Auras[0]); got != 0 {
-		t.Errorf("handler damage = %d, want 0", got)
+	play.Auras[0].Handler(next, &play.Auras[0])
+	if next.Value != 0 {
+		t.Errorf("handler Value = %d, want 0", next.Value)
 	}
 	if next.Revealed != nil {
 		t.Errorf("Revealed = %v, want nil (non-attack top, no reveal)", next.Revealed)
@@ -66,8 +68,9 @@ func TestSigilOfTheArknight_TriggerEmptyDeck(t *testing.T) {
 	var play sim.TurnState
 	(SigilOfTheArknightBlue{}).Play(&play, &sim.CardState{Card: SigilOfTheArknightBlue{}})
 	var next sim.TurnState
-	if got := play.Auras[0].Handler(&next, &play.Auras[0]); got != 0 {
-		t.Errorf("handler damage = %d, want 0", got)
+	play.Auras[0].Handler(&next, &play.Auras[0])
+	if next.Value != 0 {
+		t.Errorf("handler Value = %d, want 0", next.Value)
 	}
 	if next.Revealed != nil {
 		t.Errorf("Revealed = %v, want nil (empty deck)", next.Revealed)

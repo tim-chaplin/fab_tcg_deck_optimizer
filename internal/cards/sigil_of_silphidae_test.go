@@ -50,9 +50,9 @@ func TestSigilOfSilphidae_StartOfTurnHandlerFizzlesWithoutAnotherAura(t *testing
 	var play sim.TurnState
 	(SigilOfSilphidaeBlue{}).Play(&play, &sim.CardState{Card: SigilOfSilphidaeBlue{}})
 	var next sim.TurnState
-	got := play.Auras[0].Handler(&next, &play.Auras[0])
-	if got != 0 {
-		t.Errorf("handler damage = %d, want 0 (no other aura to banish)", got)
+	play.Auras[0].Handler(&next, &play.Auras[0])
+	if next.Value != 0 {
+		t.Errorf("handler Value = %d, want 0 (no other aura to banish)", next.Value)
 	}
 }
 
@@ -65,9 +65,9 @@ func TestSigilOfSilphidae_StartOfTurnHandlerBanishesAnotherAura(t *testing.T) {
 	(SigilOfSilphidaeBlue{}).Play(&play, &sim.CardState{Card: SigilOfSilphidaeBlue{}})
 	other := BlessingOfOccultRed{}
 	next := sim.NewTurnState(nil, []sim.Card{other})
-	got := play.Auras[0].Handler(next, &play.Auras[0])
-	if got != 1 {
-		t.Errorf("handler damage = %d, want 1 (banished another aura)", got)
+	play.Auras[0].Handler(next, &play.Auras[0])
+	if next.Value != 1 {
+		t.Errorf("handler Value = %d, want 1 (banished another aura)", next.Value)
 	}
 	if len(next.Banish) != 1 || next.Banish[0].ID() != other.ID() {
 		t.Errorf("Banish = %v, want [Blessing]", next.Banish)
