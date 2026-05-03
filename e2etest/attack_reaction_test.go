@@ -80,3 +80,30 @@ func TestAttackReaction_ThrustBuffsSwingingSwordWeapon(t *testing.T) {
 		t.Fatalf("Value = %d, want 5 (Nebula Blade 1 + Thrust +3 buff + runechant 1)", got)
 	}
 }
+
+// Tests that Blade Flash on Nebula Blade's swing chains a follow-up no-go-again attack action.
+func TestAttackReaction_BladeFlashGoAgainExtendsChain(t *testing.T) {
+	d := sim.New(heroes.Viserai{}, []sim.Weapon{weapons.NebulaBlade{}}, fillerDeck())
+	hand := []sim.Card{
+		cards.BladeFlashBlue{},
+		cards.ToughenUpBlue{},
+		testutils.NoGoAgainAttackStub{},
+	}
+	got := d.EvalOneTurnForTesting(sim.Matchup{IncomingDamage: 0}, nil, hand).Value
+	if got != 3 {
+		t.Fatalf("Value = %d, want 3 (Nebula 1 + runechant 1 + chained 1-power attack)", got)
+	}
+}
+
+// Tests that without Blade Flash the same hand can't chain past Nebula Blade's swing.
+func TestAttackReaction_NebulaSwingWithoutBladeFlashCantChain(t *testing.T) {
+	d := sim.New(heroes.Viserai{}, []sim.Weapon{weapons.NebulaBlade{}}, fillerDeck())
+	hand := []sim.Card{
+		cards.ToughenUpBlue{},
+		testutils.NoGoAgainAttackStub{},
+	}
+	got := d.EvalOneTurnForTesting(sim.Matchup{IncomingDamage: 0}, nil, hand).Value
+	if got != 2 {
+		t.Fatalf("Value = %d, want 2 (Nebula 1 + runechant 1; no AP for the follow-up)", got)
+	}
+}

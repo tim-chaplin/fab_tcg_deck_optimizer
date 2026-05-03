@@ -167,6 +167,8 @@ var cardsByID = []sim.Card{
 	ids.AdrenalineRushYellow: cards.AdrenalineRushYellow{},
 	ids.AdrenalineRushBlue:   cards.AdrenalineRushBlue{},
 
+	ids.BladeFlashBlue: cards.BladeFlashBlue{},
+
 	ids.BlowForABlowRed: cards.BlowForABlowRed{},
 
 	ids.BrutalAssaultRed:    cards.BrutalAssaultRed{},

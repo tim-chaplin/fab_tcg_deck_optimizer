@@ -1,8 +1,11 @@
 // Blade Flash — Generic Attack Reaction. Cost 1. Printed pitch variants: Blue 3. Defense 2.
 //
 // Text: "Target sword attack gains **go again**."
+//
+// Predicate is "sword attack" (no "action card" qualifier), so Sword weapons qualify too.
+// The go-again grant is modelled by bumping ActionPoints eagerly at Play time.
 
-package notimplemented
+package cards
 
 import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
@@ -22,7 +25,13 @@ func (BladeFlashBlue) Attack() int             { return 0 }
 func (BladeFlashBlue) Defense() int            { return 2 }
 func (BladeFlashBlue) Types() card.TypeSet     { return bladeFlashTypes }
 func (BladeFlashBlue) GoAgain() bool           { return false }
-
-// not implemented: AR 'target sword attack gains go again'
-func (BladeFlashBlue) NotImplemented()                            {}
-func (BladeFlashBlue) Play(s *sim.TurnState, self *sim.CardState) { s.Log(self, 0) }
+func (BladeFlashBlue) ARTargetAllowed(c sim.Card, _ int8) bool {
+	t := c.Types()
+	return t.Has(card.TypeSword) && t.IsAttack()
+}
+func (BladeFlashBlue) Play(s *sim.TurnState, _ *sim.CardState) {
+	if s.AttackReactionTarget() == nil {
+		return
+	}
+	s.ActionPoints++
+}
