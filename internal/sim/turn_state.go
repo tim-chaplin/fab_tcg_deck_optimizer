@@ -176,6 +176,11 @@ type TurnState struct {
 	// partition. Uncapped: if the partition over-blocks, BlockTotal is the full sum, not
 	// clamped to IncomingDamage.
 	BlockTotal int
+	// Defenders is the partition's defender slice (DRs + plain blocks together) populated
+	// by the chain runner before invoking each defender's Play / Block hook. Cards reading
+	// "how many other plain blockers / DRs are defending alongside" iterate this list — the
+	// defender-side counterpart to CardsRemaining for attackers.
+	Defenders []Card
 	// attackReactionTarget is the buff target for the currently-resolving Attack Reaction.
 	// Set by the chain runner around AR.Play; ARs read it via AttackReactionTarget().
 	attackReactionTarget *CardState

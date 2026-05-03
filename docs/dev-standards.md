@@ -87,12 +87,13 @@ following plumbing is uniform and lives once in `internal/card/card.go`:
   bonus in for the arsenal-in copy. Don't restate the wiring; just say "+N{d} when played from
   arsenal."
 - **Plain-block bonuses** (Battlefront Bastion, Right Behind You, …): cards implement
-  `sim.DefendsAloneBonus` (fires when this card is the only plain blocker) or
-  `sim.DefendsTogetherBonus` (fires when at least one other plain block sits in defenders).
-  Defense Reactions blocking alongside don't count as another plain block — they neither
-  cancel an alone-bonus nor satisfy a together-bonus. `defendersDamage` folds the bonus
-  into the card's block contribution; the printed Defense plus bonus is capped by
-  remaining incoming damage.
+  `sim.Blocker.Block(s, self)`. The chain runner calls Block on every plain blocker that
+  opts in, with `s.Defenders` populated with the partition's full defender slice (DRs +
+  plain blocks). Implementations scan Defenders and flip `self.BonusDefense` to credit
+  conditional buffs ("+1{d} when defending alone", "+1{d} when defending together with
+  another card", etc.); `defendersDamage` folds the printed Defense plus `BonusDefense`
+  into the block, capped by remaining incoming damage. Cards without block-time logic
+  don't implement Blocker; their plain-block contribution stays at the printed Defense.
 - **Conditional go-again / dominate grants** flip `self.GrantedGoAgain` /
   `self.GrantedDominate`; `EffectiveGoAgain` / `EffectiveDominate` honour the flag. Card
   docstrings call out the *condition*, not the flag.

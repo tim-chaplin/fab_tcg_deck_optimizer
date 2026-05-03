@@ -2,6 +2,9 @@
 // Printed pitch variants: Red 1, Yellow 2, Blue 3. Defense 2.
 //
 // Text: "When this defends alone, prevent the next 1 damage that would be dealt to you this turn."
+//
+// Block scans s.Defenders for a second plain blocker; if none is present (DRs alongside
+// don't count), the +1 prevention fires by bumping self.BonusDefense.
 
 package cards
 
@@ -18,6 +21,23 @@ func battlefrontBastionPlay(s *sim.TurnState, self *sim.CardState) {
 	s.Log(self, n)
 }
 
+// battlefrontBastionBlock fires the +1 alone-bonus when this is the only plain blocker.
+// Iterates Defenders and short-circuits on the second non-DR sighting so the typical
+// partition pays at most a few comparisons.
+func battlefrontBastionBlock(s *sim.TurnState, self *sim.CardState) {
+	plainCount := 0
+	for _, d := range s.Defenders {
+		if d.Types().IsDefenseReaction() {
+			continue
+		}
+		plainCount++
+		if plainCount > 1 {
+			return
+		}
+	}
+	self.BonusDefense += 1
+}
+
 type BattlefrontBastionRed struct{}
 
 func (BattlefrontBastionRed) ID() ids.CardID          { return ids.BattlefrontBastionRed }
@@ -28,7 +48,9 @@ func (BattlefrontBastionRed) Attack() int             { return 7 }
 func (BattlefrontBastionRed) Defense() int            { return 2 }
 func (BattlefrontBastionRed) Types() card.TypeSet     { return battlefrontBastionTypes }
 func (BattlefrontBastionRed) GoAgain() bool           { return false }
-func (BattlefrontBastionRed) DefendsAloneBonus() int  { return 1 }
+func (BattlefrontBastionRed) Block(s *sim.TurnState, self *sim.CardState) {
+	battlefrontBastionBlock(s, self)
+}
 func (BattlefrontBastionRed) Play(s *sim.TurnState, self *sim.CardState) {
 	battlefrontBastionPlay(s, self)
 }
@@ -43,7 +65,9 @@ func (BattlefrontBastionYellow) Attack() int             { return 6 }
 func (BattlefrontBastionYellow) Defense() int            { return 2 }
 func (BattlefrontBastionYellow) Types() card.TypeSet     { return battlefrontBastionTypes }
 func (BattlefrontBastionYellow) GoAgain() bool           { return false }
-func (BattlefrontBastionYellow) DefendsAloneBonus() int  { return 1 }
+func (BattlefrontBastionYellow) Block(s *sim.TurnState, self *sim.CardState) {
+	battlefrontBastionBlock(s, self)
+}
 func (BattlefrontBastionYellow) Play(s *sim.TurnState, self *sim.CardState) {
 	battlefrontBastionPlay(s, self)
 }
@@ -58,7 +82,9 @@ func (BattlefrontBastionBlue) Attack() int             { return 5 }
 func (BattlefrontBastionBlue) Defense() int            { return 2 }
 func (BattlefrontBastionBlue) Types() card.TypeSet     { return battlefrontBastionTypes }
 func (BattlefrontBastionBlue) GoAgain() bool           { return false }
-func (BattlefrontBastionBlue) DefendsAloneBonus() int  { return 1 }
+func (BattlefrontBastionBlue) Block(s *sim.TurnState, self *sim.CardState) {
+	battlefrontBastionBlock(s, self)
+}
 func (BattlefrontBastionBlue) Play(s *sim.TurnState, self *sim.CardState) {
 	battlefrontBastionPlay(s, self)
 }

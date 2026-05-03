@@ -361,34 +361,13 @@ func arsenalDefenseBonusOf(c Card) int {
 	return 0
 }
 
-// DefendsAloneBonus is an optional marker for plain-block cards that grant extra damage
-// prevention when they are the lone plain blocker. Implementers return the bonus added on
-// top of Defense(). See docs/dev-standards.md "Plain-block bonuses" for wiring.
-type DefendsAloneBonus interface {
-	DefendsAloneBonus() int
-}
-
-// defendsAloneBonusOf returns c's DefendsAloneBonus contribution, or 0 when c doesn't
-// implement the marker. Callers gate on plain-blocker count == 1 before invoking.
-func defendsAloneBonusOf(c Card) int {
-	if ab, ok := c.(DefendsAloneBonus); ok {
-		return ab.DefendsAloneBonus()
-	}
-	return 0
-}
-
-// DefendsTogetherBonus is an optional marker for plain-block cards that grant extra damage
-// prevention when at least one other plain block sits alongside. Implementers return the
-// bonus added on top of Defense(). See docs/dev-standards.md "Plain-block bonuses" for wiring.
-type DefendsTogetherBonus interface {
-	DefendsTogetherBonus() int
-}
-
-// defendsTogetherBonusOf returns c's DefendsTogetherBonus contribution, or 0 when c
-// doesn't implement the marker. Callers gate on plain-blocker count >= 2 before invoking.
-func defendsTogetherBonusOf(c Card) int {
-	if ab, ok := c.(DefendsTogetherBonus); ok {
-		return ab.DefendsTogetherBonus()
-	}
-	return 0
+// Blocker is an optional interface for plain-block cards that need to react to other
+// defenders before contributing their block. The chain runner calls Block on every plain
+// blocker that implements it, with TurnState.Defenders populated with the partition's
+// full defender slice (DRs + plain blocks). Implementations typically scan Defenders and
+// flip self.BonusDefense for "+N{d} when defending alone" / "+N{d} when defending with
+// another card" / similar conditional buffs. Cards without block-time logic don't need
+// to implement Blocker; their plain-block contribution stays at the printed Defense().
+type Blocker interface {
+	Block(s *TurnState, self *CardState)
 }

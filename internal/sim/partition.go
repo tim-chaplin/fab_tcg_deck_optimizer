@@ -347,16 +347,14 @@ func defendersDamage(defenders, pitched, deck []Card, state *TurnState, gravBuf 
 	total := 0
 	remaining := incomingDamage
 	cacheable := true
-	plainCount := 0
 	for i, d := range defenders {
 		if !d.Types().IsDefenseReaction() {
-			plainCount++
 			continue
 		}
 		gravBuf = append(gravBuf[:0], defenders...)
 		// Per-DR seed starts cacheable; the DR's Play flips it via accessors if it reads
 		// deck or graveyard. Set explicitly because TurnState's zero-value is uncacheable.
-		*state = TurnState{Pitched: pitched, deck: deck, graveyard: gravBuf, IncomingDamage: remaining, cacheable: true}
+		*state = TurnState{Pitched: pitched, deck: deck, graveyard: gravBuf, IncomingDamage: remaining, cacheable: true, Defenders: defenders}
 		*cs = CardState{Card: d, FromArsenal: i == arsenalDefenderIdx}
 		d.Play(state, cs)
 		total += state.Value
@@ -365,26 +363,21 @@ func defendersDamage(defenders, pitched, deck []Card, state *TurnState, gravBuf 
 			cacheable = false
 		}
 	}
-	// Hoist the alone-bonus lookup out of the inner loop — at most one defender qualifies
-	// (plainCount==1) and the type assertion is the costly part.
-	aloneBonus := 0
-	applyTogether := plainCount >= 2
-	if plainCount == 1 {
-		for _, d := range defenders {
-			if !d.Types().IsDefenseReaction() {
-				aloneBonus = defendsAloneBonusOf(d)
-				break
-			}
-		}
-	}
+	// Plain blocks contribute their printed Defense plus any BonusDefense the optional
+	// Blocker hook flipped after scanning state.Defenders. Cards without block-time logic
+	// skip the hook and pay only one type assertion. Reuse the caller-provided cs scratch
+	// for the Blocker target so the interface call doesn't escape a fresh CardState per
+	// plain blocker.
 	for _, d := range defenders {
 		if d.Types().IsDefenseReaction() {
 			continue
 		}
-		block := d.Defense() + aloneBonus
-		if applyTogether {
-			block += defendsTogetherBonusOf(d)
+		*cs = CardState{Card: d}
+		if b, ok := d.(Blocker); ok {
+			state.Defenders = defenders
+			b.Block(state, cs)
 		}
+		block := cs.EffectiveDefense()
 		if block > remaining {
 			block = remaining
 		}
