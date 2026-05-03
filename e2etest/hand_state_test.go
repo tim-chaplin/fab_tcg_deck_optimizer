@@ -107,7 +107,7 @@ func TestHandState_DemolitionCrewSeesUncommittedPitchInHand(t *testing.T) {
 	hand := []sim.Card{
 		cards.DemolitionCrewRed{},
 		cards.ToughenUpBlue{},
-		notimpl.DragDownYellow{},
+		cards.DragDownYellow{},
 		notimpl.BrandishRed{},
 	}
 	if got := d.EvalOneTurnForTesting(sim.Matchup{IncomingDamage: 0}, cards.FlyingHighRed{}, hand).Value; got != 10 {

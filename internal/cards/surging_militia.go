@@ -2,8 +2,11 @@
 // Printed pitch variants: Red 1, Yellow 2, Blue 3. Defense 2.
 //
 // Text: "Surging Militia has +1{p} for each non-equipment card defending it."
+//
+// Conservative model: the +N{p} per-defender bonus is dropped — assume the defender uses
+// zero non-equipment cards to block.
 
-package notimplemented
+package cards
 
 import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
@@ -12,6 +15,11 @@ import (
 )
 
 var surgingMilitiaTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeAttack)
+
+func surgingMilitiaPlay(s *sim.TurnState, self *sim.CardState) {
+	n := self.DealEffectiveAttack(s)
+	s.Log(self, n)
+}
 
 type SurgingMilitiaRed struct{}
 
@@ -23,12 +31,8 @@ func (SurgingMilitiaRed) Attack() int             { return 5 }
 func (SurgingMilitiaRed) Defense() int            { return 2 }
 func (SurgingMilitiaRed) Types() card.TypeSet     { return surgingMilitiaTypes }
 func (SurgingMilitiaRed) GoAgain() bool           { return false }
-
-// not implemented: defended-by +N{p} rider (defender's hand contents not exposed)
-func (SurgingMilitiaRed) NotImplemented() {}
-func (c SurgingMilitiaRed) Play(s *sim.TurnState, self *sim.CardState) {
-	n := self.DealEffectiveAttack(s)
-	s.Log(self, n)
+func (SurgingMilitiaRed) Play(s *sim.TurnState, self *sim.CardState) {
+	surgingMilitiaPlay(s, self)
 }
 
 type SurgingMilitiaYellow struct{}
@@ -41,12 +45,8 @@ func (SurgingMilitiaYellow) Attack() int             { return 4 }
 func (SurgingMilitiaYellow) Defense() int            { return 2 }
 func (SurgingMilitiaYellow) Types() card.TypeSet     { return surgingMilitiaTypes }
 func (SurgingMilitiaYellow) GoAgain() bool           { return false }
-
-// not implemented: defended-by +N{p} rider (defender's hand contents not exposed)
-func (SurgingMilitiaYellow) NotImplemented() {}
-func (c SurgingMilitiaYellow) Play(s *sim.TurnState, self *sim.CardState) {
-	n := self.DealEffectiveAttack(s)
-	s.Log(self, n)
+func (SurgingMilitiaYellow) Play(s *sim.TurnState, self *sim.CardState) {
+	surgingMilitiaPlay(s, self)
 }
 
 type SurgingMilitiaBlue struct{}
@@ -59,10 +59,6 @@ func (SurgingMilitiaBlue) Attack() int             { return 3 }
 func (SurgingMilitiaBlue) Defense() int            { return 2 }
 func (SurgingMilitiaBlue) Types() card.TypeSet     { return surgingMilitiaTypes }
 func (SurgingMilitiaBlue) GoAgain() bool           { return false }
-
-// not implemented: defended-by +N{p} rider (defender's hand contents not exposed)
-func (SurgingMilitiaBlue) NotImplemented() {}
-func (c SurgingMilitiaBlue) Play(s *sim.TurnState, self *sim.CardState) {
-	n := self.DealEffectiveAttack(s)
-	s.Log(self, n)
+func (SurgingMilitiaBlue) Play(s *sim.TurnState, self *sim.CardState) {
+	surgingMilitiaPlay(s, self)
 }
