@@ -147,14 +147,15 @@ func newEvalCache() *evalCache {
 // makeCacheKey builds the comparable cache key from the inputs to Best. Returns ok=false
 // when the hand exceeds maxCachedHandSize, the weapon slot count exceeds maxCachedWeapons,
 // or the carryover-aura count exceeds maxCachedAuras; callers treat that as "skip caching
-// for this call." The hand IDs are sorted ascending so the key is multiset-invariant —
-// same hand in any draw order hits the same entry. Aura entries are sorted the same way
-// (by SelfID then Count) so equivalent aura sets produce the same key regardless of
-// trigger registration order. Weapon IDs are NOT sorted because the weapon order is
-// stable across calls (same loadout, same slice header) and bestAttackWithWeapons
-// enumerates weapon masks in slice order; reordering would still produce the same Value
-// but the cached BestLine's swung-weapon names would drift, so we just preserve the
-// input order. Matchup is omitted — see evalCacheKey doc.
+// for this call." Hands arrive pre-sorted by Card.ID() — the deck-eval pipeline calls
+// sortHandByID before each Best so the key is multiset-invariant by construction; we
+// just copy the IDs into the fixed-size array. Aura entries are sorted by (SelfID,
+// Count) so equivalent aura sets produce the same key regardless of trigger registration
+// order. Weapon IDs are NOT sorted because the weapon order is stable across calls (same
+// loadout, same slice header) and bestAttackWithWeapons enumerates weapon masks in slice
+// order; reordering would still produce the same Value but the cached BestLine's
+// swung-weapon names would drift, so we just preserve the input order. Matchup is
+// omitted — see evalCacheKey doc.
 func makeCacheKey(
 	hero Hero, weapons []Weapon, hand []Card,
 	runechantCarryover int, arsenalCardIn Card,
@@ -167,17 +168,8 @@ func makeCacheKey(
 	}
 	var key evalCacheKey
 	key.handLen = len(hand)
-	// Insertion sort — hand size is small (typical 4-7) so the O(n^2) bound is faster than
-	// sort.Slice's reflection-based path, and the loop stays inline-friendly without the
-	// closure / interface dispatch sort.Slice introduces.
 	for i, c := range hand {
-		v := c.ID()
-		j := i
-		for j > 0 && key.handIDs[j-1] > v {
-			key.handIDs[j] = key.handIDs[j-1]
-			j--
-		}
-		key.handIDs[j] = v
+		key.handIDs[i] = c.ID()
 	}
 	key.weaponLen = len(weapons)
 	for i, w := range weapons {
