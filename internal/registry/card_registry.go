@@ -185,9 +185,15 @@ var cardsByID = []sim.Card{
 	ids.BrothersInArmsYellow: cards.BrothersInArmsYellow{},
 	ids.BrothersInArmsBlue:   cards.BrothersInArmsBlue{},
 
+	ids.BrushOffRed:    cards.BrushOffRed{},
+	ids.BrushOffYellow: cards.BrushOffYellow{},
+	ids.BrushOffBlue:   cards.BrushOffBlue{},
+
 	ids.BrutalAssaultRed:    cards.BrutalAssaultRed{},
 	ids.BrutalAssaultYellow: cards.BrutalAssaultYellow{},
 	ids.BrutalAssaultBlue:   cards.BrutalAssaultBlue{},
+
+	ids.CalmingBreezeRed: cards.CalmingBreezeRed{},
 
 	ids.CaptainsCallRed:    cards.CaptainsCallRed{},
 	ids.CaptainsCallYellow: cards.CaptainsCallYellow{},
@@ -280,6 +286,10 @@ var cardsByID = []sim.Card{
 	ids.NimblismBlue:      cards.NimblismBlue{},
 	ids.NipAtTheHeelsBlue: cards.NipAtTheHeelsBlue{},
 
+	ids.OasisRespiteRed:    cards.OasisRespiteRed{},
+	ids.OasisRespiteYellow: cards.OasisRespiteYellow{},
+	ids.OasisRespiteBlue:   cards.OasisRespiteBlue{},
+
 	ids.OnTheHorizonRed:    cards.OnTheHorizonRed{},
 	ids.OnTheHorizonYellow: cards.OnTheHorizonYellow{},
 	ids.OnTheHorizonBlue:   cards.OnTheHorizonBlue{},
@@ -291,6 +301,10 @@ var cardsByID = []sim.Card{
 	ids.OverloadRed:    cards.OverloadRed{},
 	ids.OverloadYellow: cards.OverloadYellow{},
 	ids.OverloadBlue:   cards.OverloadBlue{},
+
+	ids.PeaceOfMindRed:    cards.PeaceOfMindRed{},
+	ids.PeaceOfMindYellow: cards.PeaceOfMindYellow{},
+	ids.PeaceOfMindBlue:   cards.PeaceOfMindBlue{},
 
 	ids.PlunderRunRed:    cards.PlunderRunRed{},
 	ids.PlunderRunYellow: cards.PlunderRunYellow{},
