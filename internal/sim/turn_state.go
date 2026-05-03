@@ -678,10 +678,10 @@ func (s *TurnState) RegisterStartOfTurn(self Card, count int, text string, handl
 		logText = DisplayName(self) + ": " + text
 	}
 	s.AddAura(Aura{
-		Self:    self,
-		Type:    TriggerStartOfTurn,
-		Count:   count,
-		Handler: handler,
-		LogText: logText,
+		Self:        self,
+		TriggerType: TriggerStartOfTurn,
+		Count:       count,
+		Handler:     handler,
+		LogText:     logText,
 	})
 }

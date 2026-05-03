@@ -28,16 +28,17 @@ const (
 // 1-to-1 into Value.
 type AuraHandler func(s *TurnState, t *Aura) int
 
-// Aura is one persistent hook attached to a card in play. Each time Type's condition fires
-// — and, when OncePerTurn is set, at most once per turn — the sim calls Handler. Self is
-// the originating card; the sim references it for graveyarding and per-turn summaries.
+// Aura is one persistent hook attached to a card in play. Each time TriggerType's
+// condition fires — and, when OncePerTurn is set, at most once per turn — the sim calls
+// Handler. Self is the originating card; the sim references it for graveyarding and
+// per-turn summaries.
 type Aura struct {
 	// Self is the card this Aura belongs to. Surfaced in per-turn summaries (e.g. the
 	// "(from previous turn)" formatter line naming the Aura that fired) and used by the
 	// sim when destruction lands the card in the graveyard.
 	Self Card
-	// Type is the trigger condition that fires this Aura's Handler.
-	Type TriggerType
+	// TriggerType is the trigger condition that fires this Aura's Handler.
+	TriggerType TriggerType
 	// Count is a per-Aura counter. Its meaning is card-specific: Malefic Incantation reads
 	// it as fires remaining; one-shot start-of-turn sigils set it to 1; future Auras may
 	// use it for other things (e.g. tokens in play). Today the start-of-turn / attack-

@@ -19,7 +19,7 @@ func TestSigilOfTheArknight_PlayOnlySetsAuraCreated(t *testing.T) {
 	if !s.AuraCreated {
 		t.Error("AuraCreated = false, want true")
 	}
-	if len(s.Auras) != 1 || s.Auras[0].Type != sim.TriggerStartOfTurn {
+	if len(s.Auras) != 1 || s.Auras[0].TriggerType != sim.TriggerStartOfTurn {
 		t.Errorf("Auras = %+v, want one TriggerStartOfTurn entry", s.Auras)
 	}
 }

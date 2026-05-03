@@ -35,8 +35,8 @@ func TestMaleficIncantation_PlayRegistersAttackActionTrigger(t *testing.T) {
 			t.Fatalf("%s: Auras len = %d, want 1", tc.c.Name(), len(s.Auras))
 		}
 		tr := s.Auras[0]
-		if tr.Type != sim.TriggerAttackAction {
-			t.Errorf("%s: trigger Type = %d, want TriggerAttackAction", tc.c.Name(), tr.Type)
+		if tr.TriggerType != sim.TriggerAttackAction {
+			t.Errorf("%s: trigger Type = %d, want TriggerAttackAction", tc.c.Name(), tr.TriggerType)
 		}
 		if !tr.OncePerTurn {
 			t.Errorf("%s: OncePerTurn = false, want true", tc.c.Name())

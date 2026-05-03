@@ -26,8 +26,8 @@ func TestBlessingOfOccult_PlayCreatesAuraNoThisTurnRunes(t *testing.T) {
 		if len(s.Auras) != 1 {
 			t.Fatalf("%s: Auras len = %d, want 1", c.Name(), len(s.Auras))
 		}
-		if s.Auras[0].Type != sim.TriggerStartOfTurn {
-			t.Errorf("%s: trigger Type = %d, want TriggerStartOfTurn", c.Name(), s.Auras[0].Type)
+		if s.Auras[0].TriggerType != sim.TriggerStartOfTurn {
+			t.Errorf("%s: trigger Type = %d, want TriggerStartOfTurn", c.Name(), s.Auras[0].TriggerType)
 		}
 		if s.Auras[0].Count != 1 {
 			t.Errorf("%s: Count = %d, want 1", c.Name(), s.Auras[0].Count)

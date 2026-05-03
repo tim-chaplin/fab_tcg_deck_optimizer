@@ -34,8 +34,8 @@ func TestRunebloodIncantation_PlayRegistersStartOfTurnTriggerWithCountN(t *testi
 			t.Fatalf("%s: Auras len = %d, want 1", tc.c.Name(), len(s.Auras))
 		}
 		tr := s.Auras[0]
-		if tr.Type != sim.TriggerStartOfTurn {
-			t.Errorf("%s: trigger Type = %d, want TriggerStartOfTurn", tc.c.Name(), tr.Type)
+		if tr.TriggerType != sim.TriggerStartOfTurn {
+			t.Errorf("%s: trigger Type = %d, want TriggerStartOfTurn", tc.c.Name(), tr.TriggerType)
 		}
 		if tr.Count != tc.n {
 			t.Errorf("%s: Count = %d, want %d (one per verse counter)", tc.c.Name(), tr.Count, tc.n)

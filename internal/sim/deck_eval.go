@@ -492,7 +492,7 @@ func processAurasAtStartOfTurn(queued []Aura, postDrawDeck []Card) (
 		// Re-arm the OncePerTurn gate before the start-of-turn fire so handlers that read
 		// FiredThisTurn see the cleared state.
 		t.FiredThisTurn = false
-		if t.Type != TriggerStartOfTurn {
+		if t.TriggerType != TriggerStartOfTurn {
 			survivors = append(survivors, *t)
 			continue
 		}

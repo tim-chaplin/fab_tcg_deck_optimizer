@@ -85,7 +85,7 @@ var maleficCreatedRunechantText = func() map[ids.CardID]string {
 func maleficPlay(s *sim.TurnState, selfState *sim.CardState, selfCard sim.Card, n int) {
 	s.AddAura(sim.Aura{
 		Self:        selfCard,
-		Type:        sim.TriggerAttackAction,
+		TriggerType: sim.TriggerAttackAction,
 		Count:       n,
 		OncePerTurn: true,
 		Handler:     maleficAuraHandler,

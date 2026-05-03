@@ -21,7 +21,7 @@ func TestSigilOfSilphidae_PlayFizzlesWithoutAura(t *testing.T) {
 	if s.ArcaneDamageDealt {
 		t.Errorf("ArcaneDamageDealt should stay false when banish fizzles")
 	}
-	if len(s.Auras) != 1 || s.Auras[0].Type != sim.TriggerStartOfTurn {
+	if len(s.Auras) != 1 || s.Auras[0].TriggerType != sim.TriggerStartOfTurn {
 		t.Errorf("Auras = %+v, want one TriggerStartOfTurn entry", s.Auras)
 	}
 }

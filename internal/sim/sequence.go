@@ -288,7 +288,7 @@ func fireAttackActionAuras(state *TurnState, triggeringCard Card) {
 	dst := triggers[:0]
 	for i := range triggers {
 		t := &triggers[i]
-		if t.Type != TriggerAttackAction || (t.OncePerTurn && t.FiredThisTurn) {
+		if t.TriggerType != TriggerAttackAction || (t.OncePerTurn && t.FiredThisTurn) {
 			dst = append(dst, *t)
 			continue
 		}
