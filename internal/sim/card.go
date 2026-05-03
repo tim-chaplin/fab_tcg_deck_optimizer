@@ -253,6 +253,16 @@ type ModalCard interface {
 	Modes() int
 }
 
+// ModalCost is an optional add-on to ModalCard for cards whose resource cost varies by
+// mode (Bluster Buff: "this gets -1{p} unless you pay {r}" — mode 0 is the printed cost,
+// mode 1 spends one more {r}). Implementers return the cost paid when self.Mode equals
+// the given mode index. The chain runner reads ModalCost in place of Card.Cost(s) when
+// the card declares both ModalCard and ModalCost, and folds min/max of the per-mode
+// costs into the partition pre-screen via VariableCost.
+type ModalCost interface {
+	ModalCost(mode int8) int
+}
+
 // ConditionalGoAgain is an optional marker for cards whose Play sometimes flips
 // self.GrantedGoAgain — i.e., cards that grant themselves Go again under a runtime
 // condition (FromArsenal, an aura already in play, ArcaneDamageDealt, …) rather than as a

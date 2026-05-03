@@ -655,7 +655,7 @@ func (ctx *sequenceContext) playSequenceWithMeta(n int) (damage int, leftoverRun
 			}
 		}
 		prevPitchIdx := pool.idx
-		contrib, ok := pool.pay(m.costAt(state))
+		contrib, ok := pool.pay(m.costAt(state, pc.Mode))
 		if !ok {
 			return 0, 0, 0, false
 		}

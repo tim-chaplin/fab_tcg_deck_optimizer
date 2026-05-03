@@ -175,6 +175,8 @@ var cardsByID = []sim.Card{
 
 	ids.BlowForABlowRed: cards.BlowForABlowRed{},
 
+	ids.BlusterBuffRed: cards.BlusterBuffRed{},
+
 	ids.BrutalAssaultRed:    cards.BrutalAssaultRed{},
 	ids.BrutalAssaultYellow: cards.BrutalAssaultYellow{},
 	ids.BrutalAssaultBlue:   cards.BrutalAssaultBlue{},
@@ -182,6 +184,8 @@ var cardsByID = []sim.Card{
 	ids.CaptainsCallRed:    cards.CaptainsCallRed{},
 	ids.CaptainsCallYellow: cards.CaptainsCallYellow{},
 	ids.CaptainsCallBlue:   cards.CaptainsCallBlue{},
+
+	ids.ChestPuffRed: cards.ChestPuffRed{},
 
 	ids.ComeToFightRed:    cards.ComeToFightRed{},
 	ids.ComeToFightYellow: cards.ComeToFightYellow{},
@@ -236,7 +240,10 @@ var cardsByID = []sim.Card{
 	ids.LifeForALifeRed:    cards.LifeForALifeRed{},
 	ids.LifeForALifeYellow: cards.LifeForALifeYellow{},
 	ids.LifeForALifeBlue:   cards.LifeForALifeBlue{},
-	ids.LungingPressBlue:   cards.LungingPressBlue{},
+
+	ids.LookTuffRed: cards.LookTuffRed{},
+
+	ids.LungingPressBlue: cards.LungingPressBlue{},
 
 	ids.MinnowismRed:    cards.MinnowismRed{},
 	ids.MinnowismYellow: cards.MinnowismYellow{},
