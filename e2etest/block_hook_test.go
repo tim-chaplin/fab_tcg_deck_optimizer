@@ -6,6 +6,7 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/cards"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/heroes"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
 )
 
 // Tests that Battlefront Bastion's +1 alone-bonus fires when it's the only plain blocker.
@@ -18,14 +19,31 @@ func TestBlock_BattlefrontBastionAloneFiresBonus(t *testing.T) {
 	}
 }
 
-// Tests that a Defense Reaction (On the Horizon) blocking alongside doesn't cancel
+// Tests that a Defense Reaction (Toughen Up) blocking alongside doesn't cancel
 // Battlefront Bastion's alone-bonus — only a simultaneous additional plain block does.
+// Toughen Up's cost 2 plus BB's cost 3 sums above the hand's pitch supply, so neither
+// can attack and the optimizer commits both to defense.
 func TestBlock_BattlefrontBastionAloneFiresBesideDR(t *testing.T) {
+	d := sim.New(heroes.Viserai{}, nil, fillerDeck())
+	hand := []sim.Card{
+		cards.BattlefrontBastionRed{},
+		cards.ToughenUpBlue{},
+		testutils.BluePitch{},
+	}
+	got := d.EvalOneTurnForTesting(sim.Matchup{IncomingDamage: 10}, nil, hand).Value
+	if got != 7 {
+		t.Fatalf("Value = %d, want 7 (Toughen Up DR 4 + BB 2 + alone bonus 1)", got)
+	}
+}
+
+// Tests that another Block-typed card (On the Horizon) alongside Battlefront Bastion
+// counts as a second plain blocker — so BB's alone-bonus does NOT fire.
+func TestBlock_BattlefrontBastionAloneCancelledByBlockCard(t *testing.T) {
 	d := sim.New(heroes.Viserai{}, nil, fillerDeck())
 	hand := []sim.Card{cards.BattlefrontBastionRed{}, cards.OnTheHorizonRed{}}
 	got := d.EvalOneTurnForTesting(sim.Matchup{IncomingDamage: 10}, nil, hand).Value
-	if got != 7 {
-		t.Fatalf("Value = %d, want 7 (OTH 4 + BB 2 + alone bonus 1)", got)
+	if got != 6 {
+		t.Fatalf("Value = %d, want 6 (OTH 4 + BB 2; no alone bonus, OTH is a plain blocker)", got)
 	}
 }
 

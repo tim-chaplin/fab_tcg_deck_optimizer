@@ -1,5 +1,7 @@
 package sim
 
+import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+
 // Pre-allocated scratch buffers threaded through the attack-evaluation pipeline (findBest
 // partition loop, bestAttackWithWeapons phase/weapon masks, bestSequence permutation search).
 // Pooled on the Evaluator so one sizing amortises across every hand a long-running iterate pass
@@ -40,13 +42,15 @@ type shapeBufs struct {
 	weaponNames [][]string
 	// Partition-loop buffers, consumed by findBest. Sized handSize+1 to cover the optional
 	// arsenal-in slot the enumerator treats as index n. isDRBuf caches card.TypeDefenseReaction
-	// membership to skip Types().Has calls; addsFutureValueBuf caches AddsFutureValue
+	// membership; canAttackBuf caches "this card can take Attack role" (Action or Weapon
+	// subtype — Block-typed cards lack both); addsFutureValueBuf caches AddsFutureValue
 	// implementation so the runningCarry tiebreaker can count how many hidden-future-value
 	// cards a partition queues.
 	rolesBuf           []Role
 	pitchVals          []int
 	defenseVals        []int
 	isDRBuf            []bool
+	canAttackBuf       []bool
 	addsFutureValueBuf []bool
 	// pitchedValsScratch backs the per-leaf "pitched values" slice consumed by phase-mask
 	// enumeration. Re-sliced to [:0] at the start of every leaf to eliminate a per-leaf alloc.
@@ -184,6 +188,7 @@ func newAttackBufs(handSize, weaponCount int, weapons []Weapon) *attackBufs {
 			pitchVals:          make([]int, handSize+1),
 			defenseVals:        make([]int, handSize+1),
 			isDRBuf:            make([]bool, handSize+1),
+			canAttackBuf:       make([]bool, handSize+1),
 			addsFutureValueBuf: make([]bool, handSize+1),
 			pitchedValsScratch: make([]int, 0, handSize+1),
 			pitchedBuf:         make([]Card, 0, handSize+1),
@@ -242,12 +247,12 @@ func sameWeapons(a, b []Weapon) bool {
 }
 
 // fillPartitionPerCardBufs writes the per-card values the partition recurse reads at each leaf:
-// Pitch / Defense magnitudes, Defense-Reaction membership, and AddsFutureValue interface
-// satisfaction. Computing them up front keeps the recurse's inner body free of card-method /
-// type-assert calls, which would otherwise repeat on every leaf. totalN covers the optional
-// arsenal-in slot at index n; when present, its Defense picks up ArsenalDefenseBonus so the
-// partition / capping pipeline sees the effective value.
-func fillPartitionPerCardBufs(hand []Card, n, totalN int, arsenalCardIn Card, pvals, dvals []int, isDR, addsFutureValue []bool) {
+// Pitch / Defense magnitudes, Defense-Reaction membership, Attack-role eligibility, and
+// AddsFutureValue interface satisfaction. Computing them up front keeps the recurse's inner
+// body free of card-method / type-assert calls, which would otherwise repeat on every leaf.
+// totalN covers the optional arsenal-in slot at index n; when present, its Defense picks up
+// ArsenalDefenseBonus so the partition / capping pipeline sees the effective value.
+func fillPartitionPerCardBufs(hand []Card, n, totalN int, arsenalCardIn Card, pvals, dvals []int, isDR, canAttack, addsFutureValue []bool) {
 	for i := 0; i < totalN; i++ {
 		var c Card
 		if i < n {
@@ -263,7 +268,13 @@ func fillPartitionPerCardBufs(hand []Card, n, totalN int, arsenalCardIn Card, pv
 		if i == n {
 			dvals[i] += arsenalDefenseBonusOf(c)
 		}
-		isDR[i] = c.Types().IsDefenseReaction()
+		ts := c.Types()
+		isDR[i] = ts.IsDefenseReaction()
+		// Attack role covers everything that resolves during the action chain — Action
+		// subtypes (attack actions, non-attack actions, Auras, Instants), Weapons, and
+		// Attack Reactions (free chain steps). Block-typed cards and Defense Reactions
+		// have none of these subtypes and can only pitch / block.
+		canAttack[i] = ts.Has(card.TypeAction) || ts.Has(card.TypeWeapon) || ts.Has(card.TypeAttackReaction)
 		_, addsFutureValue[i] = c.(AddsFutureValue)
 	}
 }
