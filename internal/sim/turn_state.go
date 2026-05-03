@@ -116,9 +116,14 @@ type TurnState struct {
 	ArcaneDamageDealt bool
 	// Auras is the list of auras currently in play. Cards add entries during Play via
 	// AddAura; the sim fires matching entries on each TriggerType condition and drops
-	// entries whose handler flipped Destroyed (typically via s.DestroyAura). Carries
-	// across turns.
+	// entries whose handler called s.DestroyAura. Carries across turns.
 	Auras []Aura
+	// currentAuraIdx is the index in Auras of the handler currently running, set by the
+	// sim's start-of-turn / attack-action loops before each handler call. DestroyAura uses
+	// it as a fast-path hint to skip the linear scan in the common "handler destroys its
+	// own aura" case. Pointer-checked against &Auras[currentAuraIdx] before splicing, so a
+	// stale value safely falls through to the scan.
+	currentAuraIdx int
 	// pendingNextAttackActionHit queues NextAttackActionHitTriggers; reset per permutation.
 	// Lowercase so cards register through RegisterNextAttackActionHit instead of appending.
 	pendingNextAttackActionHit []NextAttackActionHitTrigger
@@ -433,7 +438,7 @@ func (s *TurnState) BanishFromGraveyard(pred func(Card) bool) (Card, bool) {
 // methods after construction). The returned state has IsCacheable()==true; cacheable
 // has to be set explicitly because the field's zero value is false (see the field doc).
 func NewTurnState(deck, graveyard []Card) *TurnState {
-	return &TurnState{deck: deck, graveyard: graveyard, cacheable: true}
+	return &TurnState{deck: deck, graveyard: graveyard, cacheable: true, currentAuraIdx: -1}
 }
 
 // AddValue credits n to s.Value, clamped at 0. Pair with a Log helper when you also want a
@@ -658,15 +663,23 @@ func (s *TurnState) AddAura(t Aura) {
 
 // DestroyAura is the handler-side "this aura is gone" call: splice t out of s.Auras
 // immediately and, when addToGraveyard, append t.Self to s.graveyard. Token-style auras
-// that just disappear (no card to send to the graveyard) pass false. Looks t up by
-// pointer match against s.Auras — the iterating loop must therefore have set s.Auras to
-// the live list before calling each handler.
+// that just disappear (no card to send to the graveyard) pass false.
 //
 // Direct graveyard append (no cacheable flip): the destruction is deterministic from the
 // triggering event the sim already accounts for, not from hidden state.
+//
+// Fast path uses currentAuraIdx — the cursor index the sim publishes before each handler
+// call — to splice without a linear scan. Pointer check against &s.Auras[i] guards
+// against stale hints; the slow path scans s.Auras for the match and is only reached
+// when a handler destroys an aura other than its own (e.g. a future card that banishes a
+// sibling).
 func (s *TurnState) DestroyAura(t *Aura, addToGraveyard bool) {
 	if addToGraveyard {
 		s.graveyard = append(s.graveyard, t.Self)
+	}
+	if i := s.currentAuraIdx; i >= 0 && i < len(s.Auras) && &s.Auras[i] == t {
+		s.Auras = append(s.Auras[:i], s.Auras[i+1:]...)
+		return
 	}
 	for i := range s.Auras {
 		if &s.Auras[i] == t {

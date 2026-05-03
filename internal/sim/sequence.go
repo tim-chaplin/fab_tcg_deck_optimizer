@@ -293,7 +293,9 @@ func fireAttackActionAuras(state *TurnState, triggeringCard Card) {
 		}
 		preLen := len(state.Auras)
 		state.TriggeringCard = triggeringCard
+		state.currentAuraIdx = i
 		t.Handler(state, t)
+		state.currentAuraIdx = -1
 		state.TriggeringCard = nil
 		if len(state.Auras) == preLen {
 			t.FiredThisTurn = true
@@ -338,6 +340,7 @@ func (ctx *sequenceContext) resetStateForPermutation() {
 	s.ActionPoints = 1
 	s.ArcaneDamageDealt = false
 	s.Auras = append(bufs.auraTriggersBacking[:0], ctx.priorAuras...)
+	s.currentAuraIdx = -1
 	s.pendingNextAttackActionHit = bufs.nextAtkActionHitBacking[:0]
 	s.Value = 0
 	s.turnLog = bufs.logBacking[:0]
