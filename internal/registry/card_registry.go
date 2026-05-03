@@ -167,6 +167,10 @@ var cardsByID = []sim.Card{
 	ids.AdrenalineRushYellow: cards.AdrenalineRushYellow{},
 	ids.AdrenalineRushBlue:   cards.AdrenalineRushBlue{},
 
+	ids.BarragingBrawnhideRed:    cards.BarragingBrawnhideRed{},
+	ids.BarragingBrawnhideYellow: cards.BarragingBrawnhideYellow{},
+	ids.BarragingBrawnhideBlue:   cards.BarragingBrawnhideBlue{},
+
 	ids.BattlefrontBastionRed:    cards.BattlefrontBastionRed{},
 	ids.BattlefrontBastionYellow: cards.BattlefrontBastionYellow{},
 	ids.BattlefrontBastionBlue:   cards.BattlefrontBastionBlue{},
@@ -209,6 +213,10 @@ var cardsByID = []sim.Card{
 
 	ids.DodgeBlue: cards.DodgeBlue{},
 
+	ids.DragDownRed:    cards.DragDownRed{},
+	ids.DragDownYellow: cards.DragDownYellow{},
+	ids.DragDownBlue:   cards.DragDownBlue{},
+
 	ids.EvasiveLeapRed:    cards.EvasiveLeapRed{},
 	ids.EvasiveLeapYellow: cards.EvasiveLeapYellow{},
 	ids.EvasiveLeapBlue:   cards.EvasiveLeapBlue{},
@@ -216,6 +224,10 @@ var cardsByID = []sim.Card{
 	ids.FateForeseenRed:    cards.FateForeseenRed{},
 	ids.FateForeseenYellow: cards.FateForeseenYellow{},
 	ids.FateForeseenBlue:   cards.FateForeseenBlue{},
+
+	ids.FeistyLocalsRed:    cards.FeistyLocalsRed{},
+	ids.FeistyLocalsYellow: cards.FeistyLocalsYellow{},
+	ids.FeistyLocalsBlue:   cards.FeistyLocalsBlue{},
 
 	ids.FerventForerunnerRed:    cards.FerventForerunnerRed{},
 	ids.FerventForerunnerYellow: cards.FerventForerunnerYellow{},
@@ -232,6 +244,10 @@ var cardsByID = []sim.Card{
 	ids.ForceSightRed:    cards.ForceSightRed{},
 	ids.ForceSightYellow: cards.ForceSightYellow{},
 	ids.ForceSightBlue:   cards.ForceSightBlue{},
+
+	ids.FreewheelingRenegadesRed:    cards.FreewheelingRenegadesRed{},
+	ids.FreewheelingRenegadesYellow: cards.FreewheelingRenegadesYellow{},
+	ids.FreewheelingRenegadesBlue:   cards.FreewheelingRenegadesBlue{},
 
 	ids.FyendalsFightingSpiritRed:    cards.FyendalsFightingSpiritRed{},
 	ids.FyendalsFightingSpiritYellow: cards.FyendalsFightingSpiritYellow{},
@@ -267,6 +283,10 @@ var cardsByID = []sim.Card{
 	ids.OnTheHorizonRed:    cards.OnTheHorizonRed{},
 	ids.OnTheHorizonYellow: cards.OnTheHorizonYellow{},
 	ids.OnTheHorizonBlue:   cards.OnTheHorizonBlue{},
+
+	ids.OutMuscleRed:    cards.OutMuscleRed{},
+	ids.OutMuscleYellow: cards.OutMuscleYellow{},
+	ids.OutMuscleBlue:   cards.OutMuscleBlue{},
 
 	ids.OverloadRed:    cards.OverloadRed{},
 	ids.OverloadYellow: cards.OverloadYellow{},
@@ -328,9 +348,17 @@ var cardsByID = []sim.Card{
 	ids.SpringLoadYellow: cards.SpringLoadYellow{},
 	ids.SpringLoadBlue:   cards.SpringLoadBlue{},
 
+	ids.StonyWoottonhogRed:    cards.StonyWoottonhogRed{},
+	ids.StonyWoottonhogYellow: cards.StonyWoottonhogYellow{},
+	ids.StonyWoottonhogBlue:   cards.StonyWoottonhogBlue{},
+
 	ids.SunKissRed:    cards.SunKissRed{},
 	ids.SunKissYellow: cards.SunKissYellow{},
 	ids.SunKissBlue:   cards.SunKissBlue{},
+
+	ids.SurgingMilitiaRed:    cards.SurgingMilitiaRed{},
+	ids.SurgingMilitiaYellow: cards.SurgingMilitiaYellow{},
+	ids.SurgingMilitiaBlue:   cards.SurgingMilitiaBlue{},
 
 	ids.ThrustRed:     cards.ThrustRed{},
 	ids.ToughenUpBlue: cards.ToughenUpBlue{},

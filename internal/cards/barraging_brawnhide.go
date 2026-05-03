@@ -2,8 +2,11 @@
 // Printed pitch variants: Red 1, Yellow 2, Blue 3. Defense 2.
 //
 // Text: "While Barraging Brawnhide is defended by less than 2 non-equipment cards, it has +1{p}."
+//
+// Conservative model: the +1{p} bonus is dropped — assume the defender always blocks with
+// 2+ non-equipment cards.
 
-package notimplemented
+package cards
 
 import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
@@ -12,6 +15,11 @@ import (
 )
 
 var barragingBrawnhideTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeAttack)
+
+func barragingBrawnhidePlay(s *sim.TurnState, self *sim.CardState) {
+	n := self.DealEffectiveAttack(s)
+	s.Log(self, n)
+}
 
 type BarragingBrawnhideRed struct{}
 
@@ -23,12 +31,8 @@ func (BarragingBrawnhideRed) Attack() int             { return 7 }
 func (BarragingBrawnhideRed) Defense() int            { return 2 }
 func (BarragingBrawnhideRed) Types() card.TypeSet     { return barragingBrawnhideTypes }
 func (BarragingBrawnhideRed) GoAgain() bool           { return false }
-
-// not implemented: defended-by-<2-non-equipment +1{p} rider
-func (BarragingBrawnhideRed) NotImplemented() {}
-func (c BarragingBrawnhideRed) Play(s *sim.TurnState, self *sim.CardState) {
-	n := self.DealEffectiveAttack(s)
-	s.Log(self, n)
+func (BarragingBrawnhideRed) Play(s *sim.TurnState, self *sim.CardState) {
+	barragingBrawnhidePlay(s, self)
 }
 
 type BarragingBrawnhideYellow struct{}
@@ -41,12 +45,8 @@ func (BarragingBrawnhideYellow) Attack() int             { return 6 }
 func (BarragingBrawnhideYellow) Defense() int            { return 2 }
 func (BarragingBrawnhideYellow) Types() card.TypeSet     { return barragingBrawnhideTypes }
 func (BarragingBrawnhideYellow) GoAgain() bool           { return false }
-
-// not implemented: defended-by-<2-non-equipment +1{p} rider
-func (BarragingBrawnhideYellow) NotImplemented() {}
-func (c BarragingBrawnhideYellow) Play(s *sim.TurnState, self *sim.CardState) {
-	n := self.DealEffectiveAttack(s)
-	s.Log(self, n)
+func (BarragingBrawnhideYellow) Play(s *sim.TurnState, self *sim.CardState) {
+	barragingBrawnhidePlay(s, self)
 }
 
 type BarragingBrawnhideBlue struct{}
@@ -59,10 +59,6 @@ func (BarragingBrawnhideBlue) Attack() int             { return 5 }
 func (BarragingBrawnhideBlue) Defense() int            { return 2 }
 func (BarragingBrawnhideBlue) Types() card.TypeSet     { return barragingBrawnhideTypes }
 func (BarragingBrawnhideBlue) GoAgain() bool           { return false }
-
-// not implemented: defended-by-<2-non-equipment +1{p} rider
-func (BarragingBrawnhideBlue) NotImplemented() {}
-func (c BarragingBrawnhideBlue) Play(s *sim.TurnState, self *sim.CardState) {
-	n := self.DealEffectiveAttack(s)
-	s.Log(self, n)
+func (BarragingBrawnhideBlue) Play(s *sim.TurnState, self *sim.CardState) {
+	barragingBrawnhidePlay(s, self)
 }
