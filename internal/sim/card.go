@@ -360,3 +360,14 @@ func arsenalDefenseBonusOf(c Card) int {
 	}
 	return 0
 }
+
+// Blocker is an optional interface for plain-block cards that need to react to other
+// defenders before contributing their block. The chain runner calls Block on every plain
+// blocker that implements it, with TurnState.Defenders populated with the partition's
+// full defender slice (DRs + plain blocks). Implementations typically scan Defenders and
+// flip self.BonusDefense for "+N{d} when defending alone" / "+N{d} when defending with
+// another card" / similar conditional buffs. Cards without block-time logic don't need
+// to implement Blocker; their plain-block contribution stays at the printed Defense().
+type Blocker interface {
+	Block(s *TurnState, self *CardState)
+}

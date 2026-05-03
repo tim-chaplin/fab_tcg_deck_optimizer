@@ -167,6 +167,10 @@ var cardsByID = []sim.Card{
 	ids.AdrenalineRushYellow: cards.AdrenalineRushYellow{},
 	ids.AdrenalineRushBlue:   cards.AdrenalineRushBlue{},
 
+	ids.BattlefrontBastionRed:    cards.BattlefrontBastionRed{},
+	ids.BattlefrontBastionYellow: cards.BattlefrontBastionYellow{},
+	ids.BattlefrontBastionBlue:   cards.BattlefrontBastionBlue{},
+
 	ids.BladeFlashBlue: cards.BladeFlashBlue{},
 
 	ids.BlowForABlowRed: cards.BlowForABlowRed{},
@@ -280,6 +284,10 @@ var cardsByID = []sim.Card{
 	ids.RazorReflexRed:    cards.RazorReflexRed{},
 	ids.RazorReflexYellow: cards.RazorReflexYellow{},
 	ids.RazorReflexBlue:   cards.RazorReflexBlue{},
+
+	ids.RightBehindYouRed:    cards.RightBehindYouRed{},
+	ids.RightBehindYouYellow: cards.RightBehindYouYellow{},
+	ids.RightBehindYouBlue:   cards.RightBehindYouBlue{},
 
 	ids.ScarForAScarRed:    cards.ScarForAScarRed{},
 	ids.ScarForAScarYellow: cards.ScarForAScarYellow{},

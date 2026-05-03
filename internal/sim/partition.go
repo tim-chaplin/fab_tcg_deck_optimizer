@@ -92,9 +92,10 @@ func (e *Evaluator) findBest(hero Hero, weapons []Weapon, hand []Card, mp Matchu
 	pvals := bufs.pitchVals[:totalN]
 	dvals := bufs.defenseVals[:totalN]
 	isDR := bufs.isDRBuf[:totalN]
+	canAttack := bufs.canAttackBuf[:totalN]
 	addsFutureValue := bufs.addsFutureValueBuf[:totalN]
 
-	fillPartitionPerCardBufs(hand, n, totalN, arsenalCardIn, pvals, dvals, isDR, addsFutureValue)
+	fillPartitionPerCardBufs(hand, n, totalN, arsenalCardIn, pvals, dvals, isDR, canAttack, addsFutureValue)
 
 	var recurse func(i, pitchSum, defenseSum int)
 	recurse = func(i, pitchSum, defenseSum int) {
@@ -155,7 +156,7 @@ func (e *Evaluator) findBest(hero Hero, weapons []Weapon, hand []Card, mp Matchu
 			maxRole = Arsenal
 		}
 		for r := Role(0); r <= maxRole; r++ {
-			if !roleAllowed(r, isArsenalSlot, isDR[i]) {
+			if !roleAllowed(r, isArsenalSlot, isDR[i], canAttack[i]) {
 				continue
 			}
 			// FaB rule: defense reactions and plain blocks only happen during the defend step
@@ -303,24 +304,25 @@ func findArsenalCard(rolesBuf []Role, arsenalCardIn Card, n int) Card {
 }
 
 // roleAllowed decides whether the partition enumerator may assign role r to the current card.
-// The arsenal-in slot may only take Arsenal (stay), Attack (any non-DR card — non-attack actions
-// play fine from arsenal on your turn), or Defend (Defense Reactions only — plain-blocking from
-// arsenal isn't legal). Hand cards take any role except Attack for Defense Reactions (DRs only
-// fire on the opponent's turn); their role loop caps at Held, so the "which Held card gets
-// arsenaled" choice happens post-hoc and doesn't bias toward low-ID slots.
-func roleAllowed(r Role, isArsenalSlot, isDefenseReaction bool) bool {
+// The arsenal-in slot may only take Arsenal (stay), Attack (an Action / Weapon — non-attack
+// actions play fine from arsenal on your turn), or Defend (Defense Reactions only — plain-
+// blocking from arsenal isn't legal). Hand cards take any role except Attack for cards that
+// can't take Attack role at all (DRs and Block-typed cards lack the Action / Weapon subtype);
+// their role loop caps at Held, so the "which Held card gets arsenaled" choice happens
+// post-hoc and doesn't bias toward low-ID slots.
+func roleAllowed(r Role, isArsenalSlot, isDefenseReaction, canAttack bool) bool {
 	if isArsenalSlot {
 		switch r {
 		case Pitch, Held:
 			return false
 		case Attack:
-			return !isDefenseReaction
+			return canAttack
 		case Defend:
 			return isDefenseReaction
 		}
 		return true // Arsenal is always allowed on the arsenal-in slot.
 	}
-	return !(r == Attack && isDefenseReaction)
+	return r != Attack || canAttack
 }
 
 // defendersDamage tallies the total Value contribution of the partition's defense phase. DRs
@@ -354,7 +356,7 @@ func defendersDamage(defenders, pitched, deck []Card, state *TurnState, gravBuf 
 		gravBuf = append(gravBuf[:0], defenders...)
 		// Per-DR seed starts cacheable; the DR's Play flips it via accessors if it reads
 		// deck or graveyard. Set explicitly because TurnState's zero-value is uncacheable.
-		*state = TurnState{Pitched: pitched, deck: deck, graveyard: gravBuf, IncomingDamage: remaining, cacheable: true}
+		*state = TurnState{Pitched: pitched, deck: deck, graveyard: gravBuf, IncomingDamage: remaining, cacheable: true, Defenders: defenders}
 		*cs = CardState{Card: d, FromArsenal: i == arsenalDefenderIdx}
 		d.Play(state, cs)
 		total += state.Value
@@ -363,11 +365,21 @@ func defendersDamage(defenders, pitched, deck []Card, state *TurnState, gravBuf 
 			cacheable = false
 		}
 	}
+	// Plain blocks contribute their printed Defense plus any BonusDefense the optional
+	// Blocker hook flipped after scanning state.Defenders. Cards without block-time logic
+	// skip the hook and pay only one type assertion. Reuse the caller-provided cs scratch
+	// for the Blocker target so the interface call doesn't escape a fresh CardState per
+	// plain blocker.
 	for _, d := range defenders {
 		if d.Types().IsDefenseReaction() {
 			continue
 		}
-		block := d.Defense()
+		*cs = CardState{Card: d}
+		if b, ok := d.(Blocker); ok {
+			state.Defenders = defenders
+			b.Block(state, cs)
+		}
+		block := cs.EffectiveDefense()
 		if block > remaining {
 			block = remaining
 		}
