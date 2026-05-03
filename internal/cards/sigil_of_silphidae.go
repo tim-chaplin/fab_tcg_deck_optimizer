@@ -38,10 +38,12 @@ func (c SigilOfSilphidaeBlue) Play(s *sim.TurnState, self *sim.CardState) {
 		Count:       1,
 		Handler: func(s *sim.TurnState, t *sim.Aura) int {
 			n := banishAuraFromGraveyard(s)
-			s.DestroyAura(t)
+			if n > 0 {
+				s.LogPostTrigger(sim.DisplayName(t.Self), "Banished an aura, dealt 1 arcane damage", n)
+			}
+			s.DestroyAura(t, true)
 			return n
 		},
-		LogText: sim.DisplayName(c) + ": Banished an aura, dealt 1 arcane damage",
 	})
 	n := self.DealEffectiveAttack(s)
 	s.Log(self, n)

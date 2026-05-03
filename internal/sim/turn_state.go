@@ -656,14 +656,22 @@ func (s *TurnState) AddAura(t Aura) {
 	s.Auras = append(s.Auras, t)
 }
 
-// DestroyAura is the handler-side combo for "this aura's job is done": send Self to the
-// graveyard and flip t.Destroyed so the sim drops the entry from s.Auras after the current
-// pass. Cards whose Handler shouldn't graveyard Self (rare) flip t.Destroyed directly.
+// DestroyAura is the handler-side "this aura is gone" call: splice t out of s.Auras
+// immediately and, when addToGraveyard, append t.Self to s.graveyard. Token-style auras
+// that just disappear (no card to send to the graveyard) pass false. Looks t up by
+// pointer match against s.Auras — the iterating loop must therefore have set s.Auras to
+// the live list before calling each handler.
 //
 // Direct graveyard append (no cacheable flip): the destruction is deterministic from the
-// triggering event the sim already accounts for, not from hidden state — equivalent to
-// the old sim-managed graveyard path.
-func (s *TurnState) DestroyAura(t *Aura) {
-	s.graveyard = append(s.graveyard, t.Self)
-	t.Destroyed = true
+// triggering event the sim already accounts for, not from hidden state.
+func (s *TurnState) DestroyAura(t *Aura, addToGraveyard bool) {
+	if addToGraveyard {
+		s.graveyard = append(s.graveyard, t.Self)
+	}
+	for i := range s.Auras {
+		if &s.Auras[i] == t {
+			s.Auras = append(s.Auras[:i], s.Auras[i+1:]...)
+			return
+		}
+	}
 }

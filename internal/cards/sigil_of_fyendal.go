@@ -32,10 +32,10 @@ func (c SigilOfFyendalBlue) Play(s *sim.TurnState, self *sim.CardState) {
 		TriggerType: sim.TriggerStartOfTurn,
 		Count:       1,
 		Handler: func(s *sim.TurnState, t *sim.Aura) int {
-			s.DestroyAura(t)
+			s.LogPostTrigger(sim.DisplayName(t.Self), "Gained 1 health", 1)
+			s.DestroyAura(t, true)
 			return 1
 		},
-		LogText: sim.DisplayName(c) + ": Gained 1 health",
 	})
 	s.Log(self, 0)
 }

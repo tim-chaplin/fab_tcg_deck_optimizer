@@ -281,27 +281,26 @@ type sequenceContext struct {
 // clears it after; handlers read it through s.AddPreTriggerLogEntry to attribute their
 // log line back to the triggering card.
 //
-// Slice mutation: a survivors prefix is built in place over the existing slice; entries
-// kept after firing are written back at increasing indices, exhausted ones are skipped.
+// Iterates state.Auras with a cursor that handles handler-side splicing: a handler
+// calling s.DestroyAura mutates state.Auras in place (shifting the next entry down to
+// the cursor's index), so the loop only advances when the slice length didn't change.
 func fireAttackActionAuras(state *TurnState, triggeringCard Card) {
-	triggers := state.Auras
-	dst := triggers[:0]
-	for i := range triggers {
-		t := &triggers[i]
+	for i := 0; i < len(state.Auras); {
+		t := &state.Auras[i]
 		if t.TriggerType != TriggerAttackAction || (t.OncePerTurn && t.FiredThisTurn) {
-			dst = append(dst, *t)
+			i++
 			continue
 		}
+		preLen := len(state.Auras)
 		state.TriggeringCard = triggeringCard
 		t.Handler(state, t)
 		state.TriggeringCard = nil
-		t.FiredThisTurn = true
-		if t.Destroyed {
-			continue
+		if len(state.Auras) == preLen {
+			t.FiredThisTurn = true
+			i++
 		}
-		dst = append(dst, *t)
+		// else: handler called DestroyAura; t is gone, leave the cursor where it is.
 	}
-	state.Auras = dst
 }
 
 // resetStateForPermutation rewrites every TurnState field to its per-permutation starting

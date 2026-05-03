@@ -89,22 +89,21 @@ func maleficPlay(s *sim.TurnState, selfState *sim.CardState, selfCard sim.Card, 
 		Count:       n,
 		OncePerTurn: true,
 		Handler:     maleficAuraHandler,
-		LogText:     maleficCreatedRunechantText[selfCard.ID()],
 	})
 	s.Log(selfState, 0)
 }
 
 // maleficAuraHandler is the once-per-turn attack-action trigger handler shared across
-// Malefic Incantation variants. Reads t.LogText for the rider line so the hot fire path
-// runs zero string allocations. Decrements t.Count (the verse counter) and destroys the
-// aura when the last verse fires.
+// Malefic Incantation variants. Per-variant rider text is read off the table by
+// t.Self.ID() so the hot fire path runs zero string allocations. Decrements t.Count (the
+// verse counter) and destroys the aura when the last verse fires.
 func maleficAuraHandler(s *sim.TurnState, t *sim.Aura) int {
 	created := s.CreateRunechants(1)
 	s.AddValue(created)
-	s.LogPostTrigger(sim.DisplayName(s.TriggeringCard), t.LogText, created)
+	s.LogPostTrigger(sim.DisplayName(s.TriggeringCard), maleficCreatedRunechantText[t.Self.ID()], created)
 	t.Count--
 	if t.Count <= 0 {
-		s.DestroyAura(t)
+		s.DestroyAura(t, true)
 	}
 	return created
 }

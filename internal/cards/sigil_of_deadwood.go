@@ -33,10 +33,10 @@ func (c SigilOfDeadwoodBlue) Play(s *sim.TurnState, self *sim.CardState) {
 		Count:       1,
 		Handler: func(s *sim.TurnState, t *sim.Aura) int {
 			n := s.CreateRunechants(1)
-			s.DestroyAura(t)
+			s.LogPostTrigger(sim.DisplayName(t.Self), "Created a runechant", n)
+			s.DestroyAura(t, true)
 			return n
 		},
-		LogText: sim.DisplayName(c) + ": Created a runechant",
 	})
 	s.Log(self, 0)
 }

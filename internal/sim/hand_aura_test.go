@@ -55,7 +55,7 @@ func TestFireAttackActionAuras_GraveyardsExhaustedAura(t *testing.T) {
 		TriggerType: TriggerAttackAction,
 		Count:       1,
 		Handler: func(s *TurnState, t *Aura) int {
-			s.DestroyAura(t)
+			s.DestroyAura(t, true)
 			return 1
 		},
 	}}}

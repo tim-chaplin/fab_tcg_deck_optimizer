@@ -28,19 +28,17 @@ const (
 // "reveal top of deck" effect lives. Handlers mutate the passed TurnState directly
 // (e.g. s.CreateRunechants, s.AddToGraveyard) and return the damage-equivalent that folds
 // 1-to-1 into Value. Lifecycle is the handler's responsibility: a one-shot aura calls
-// s.DestroyAura(t) at the end of its body; a counter-based aura decrements t.Count and
-// calls s.DestroyAura(t) when the count expires.
+// s.DestroyAura(t, addToGraveyard) at the end of its body; a counter-based aura decrements
+// t.Count and calls s.DestroyAura when the count expires.
 type AuraHandler func(s *TurnState, t *Aura) int
 
 // Aura is one persistent hook attached to a card in play. Each time TriggerType's
 // condition fires — and, when OncePerTurn is set, at most once per turn — the sim calls
-// Handler. The Aura survives until its handler flips Destroyed; Self is the originating
-// card.
+// Handler. The Aura survives until its handler calls s.DestroyAura.
 type Aura struct {
 	// Self is the card this Aura belongs to. Surfaced in per-turn summaries (e.g. the
 	// "(from previous turn)" formatter line naming the Aura that fired). Handlers that
-	// want the underlying card to land in the graveyard call s.DestroyAura(t), which
-	// adds Self to the graveyard and flips Destroyed in one shot.
+	// want the underlying card to land in the graveyard call s.DestroyAura(t, true).
 	Self Card
 	// TriggerType is the trigger condition that fires this Aura's Handler.
 	TriggerType TriggerType
@@ -57,19 +55,9 @@ type Aura struct {
 	OncePerTurn bool
 	// FiredThisTurn is sim-managed bookkeeping for OncePerTurn. Cards must not set it.
 	FiredThisTurn bool
-	// Destroyed is the deregister flag the handler flips (typically via s.DestroyAura) to
-	// tell the sim to drop this Aura from TurnState.Auras after the current pass. Handlers
-	// that don't flip Destroyed leave the Aura live for the next matching trigger.
-	Destroyed bool
 	// N is an optional small-integer payload available to Handler. Lets per-variant Auras
 	// (e.g. Malefic Incantation's per-color counter count) read their N off the Aura
 	// instead of closing over it, so the handler can be a top-level function with no
 	// per-Play closure allocation.
 	N int
-	// LogText is the optional pre-built rider-line text the handler emits via LogPostTrigger
-	// / LogPreTrigger. Card.Play computes it once at registration (typically
-	// `"<DisplayName> <verb phrase>"`); the handler reads t.LogText directly so the hot fire
-	// path runs zero string allocations even when the chain is materialising the log.
-	// Empty-string means the handler authors its own text dynamically.
-	LogText string
 }

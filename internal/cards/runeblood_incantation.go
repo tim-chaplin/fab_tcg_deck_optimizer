@@ -70,13 +70,13 @@ func runebloodPlay(s *sim.TurnState, selfState *sim.CardState, selfCard sim.Card
 		Count:       n,
 		Handler: func(s *sim.TurnState, t *sim.Aura) int {
 			created := s.CreateRunechants(1)
+			s.LogPostTrigger(sim.DisplayName(t.Self), "Created a runechant (verse counter)", created)
 			t.Count--
 			if t.Count <= 0 {
-				s.DestroyAura(t)
+				s.DestroyAura(t, true)
 			}
 			return created
 		},
-		LogText: sim.DisplayName(selfCard) + ": Created a runechant (verse counter)",
 	})
 	s.Log(selfState, 0)
 }

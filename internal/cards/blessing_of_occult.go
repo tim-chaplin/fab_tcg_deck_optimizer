@@ -78,12 +78,13 @@ func blessingOfOccultPlay(s *sim.TurnState, selfState *sim.CardState, selfCard s
 		Self:        selfCard,
 		TriggerType: sim.TriggerStartOfTurn,
 		Count:       1,
+		N:           n,
 		Handler: func(s *sim.TurnState, t *sim.Aura) int {
-			created := s.CreateRunechants(n)
-			s.DestroyAura(t)
+			created := s.CreateRunechants(t.N)
+			s.LogPostTrigger(sim.DisplayName(t.Self), blessingOfOccultTriggerText[t.N], created)
+			s.DestroyAura(t, true)
 			return created
 		},
-		LogText: sim.DisplayName(selfCard) + ": " + blessingOfOccultTriggerText[n],
 	})
 	s.Log(selfState, 0)
 }

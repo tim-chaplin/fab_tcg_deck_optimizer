@@ -452,16 +452,16 @@ func recordTurnStats(stats *Stats, play TurnSummary, handIdx, handsPerCycle int)
 // triggers so the per-turn handBuf never reallocates.
 const startOfTurnRevealRoom = 8
 
-// processAurasAtStartOfTurn walks every Aura queued from last turn and does all
-// the bookkeeping a turn boundary requires:
+// processAurasAtStartOfTurn walks every Aura queued from last turn and does all the
+// bookkeeping a turn boundary requires:
 //
-//   - Clears FiredThisTurn on every trigger regardless of Type, re-arming OncePerTurn gates.
+//   - Clears FiredThisTurn on every trigger regardless of TriggerType, re-arming
+//     OncePerTurn gates.
 //   - Fires every TriggerStartOfTurn handler against a shared TurnState seeded with the
 //     post-draw deck, so handlers that peek the top read the card about to be revealed.
-//   - Decrements Count on each fired trigger, drops the entry when Count hits zero, and
-//     adds the destroyed aura to the start-of-turn graveyard so subsequent handlers see
-//     it in state.Graveyard.
-//   - Passes non-start-of-turn triggers through unchanged so they can fire mid-chain.
+//     Handlers that destroy themselves call s.DestroyAura, which splices ts.Auras
+//     immediately and (when addToGraveyard) appends Self to the start-of-turn graveyard.
+//   - Leaves non-start-of-turn auras in place so they can fire mid-chain.
 //
 // Returns the survivor list, per-aura contributions for FormatBestTurn, the summed damage
 // to fold into Value, Runechants created during the handlers (fed into next turn's
@@ -484,34 +484,32 @@ func processAurasAtStartOfTurn(queued []Aura, postDrawDeck []Card) (
 	// Start-of-turn trigger seed starts cacheable; reveal handlers like Sigil of the
 	// Arknight will flip it via PopDeckTop. The result isn't currently consumed (callers
 	// don't read ts.IsCacheable) but routing through NewTurnState keeps the per-state
-	// semantics consistent with the rest of the framework.
+	// semantics consistent with the rest of the framework. Adopting queued onto ts.Auras
+	// lets handlers' s.DestroyAura splice the live list directly.
 	ts := NewTurnState(postDrawDeck, nil)
-	survivors = queued[:0]
-	for i := range queued {
-		t := &queued[i]
+	ts.Auras = queued
+	for i := 0; i < len(ts.Auras); {
+		t := &ts.Auras[i]
 		// Re-arm the OncePerTurn gate before the start-of-turn fire so handlers that read
 		// FiredThisTurn see the cleared state.
 		t.FiredThisTurn = false
 		if t.TriggerType != TriggerStartOfTurn {
-			survivors = append(survivors, *t)
+			i++
 			continue
 		}
+		self := t.Self
 		preReveal := len(ts.Revealed)
 		preLog := len(ts.turnLog)
+		preLen := len(ts.Auras)
 		d := t.Handler(ts, t)
-		// Auto-emit the registered LogText sub-line when the handler credited damage. Cards
-		// that author their own log line inside the handler set LogText to "" and skip this.
-		if d > 0 && t.LogText != "" {
-			ts.LogPostTrigger(DisplayName(t.Self), t.LogText, d)
-		}
 		damage += d
 		// Attribute any newly-revealed card to this trigger so the best-turn printout can
 		// show what the handler drew (e.g. Sigil of the Arknight: "drew X into hand"). Taking
 		// ts.Revealed[preReveal] instead of counting from the end handles cascading reveals
 		// where a later handler also appends — each trigger sees its own first-appended card.
-		var revealed Card
+		var rev Card
 		if len(ts.Revealed) > preReveal {
-			revealed = ts.Revealed[preReveal]
+			rev = ts.Revealed[preReveal]
 		}
 		// Capture the handler's first authored log line, if any — Text takes precedence
 		// over the inferred "drew X into hand" / "START OF ACTION PHASE" suffix at format
@@ -520,12 +518,14 @@ func processAurasAtStartOfTurn(queued []Aura, postDrawDeck []Card) (
 		if len(ts.turnLog) > preLog {
 			text = ts.turnLog[preLog].Text
 		}
-		contribs = append(contribs, TriggerContribution{Card: t.Self, Damage: d, Revealed: revealed, Text: text})
-		if !t.Destroyed {
-			survivors = append(survivors, *t)
+		contribs = append(contribs, TriggerContribution{Card: self, Damage: d, Revealed: rev, Text: text})
+		if len(ts.Auras) == preLen {
+			i++ // not spliced — advance cursor past this entry
 		}
+		// else: handler called DestroyAura, ts.Auras shrunk; current i now points to the
+		// next entry, leave the cursor where it is.
 	}
-	return survivors, contribs, damage, ts.Runechants, ts.Revealed, ts.graveyard
+	return ts.Auras, contribs, damage, ts.Runechants, ts.Revealed, ts.graveyard
 }
 
 // applyTurnResult folds a completed turn's outcome into cross-turn state. The deck loop

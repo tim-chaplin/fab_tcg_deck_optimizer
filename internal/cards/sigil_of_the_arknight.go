@@ -48,7 +48,7 @@ func (c SigilOfTheArknightBlue) Play(s *sim.TurnState, self *sim.CardState) {
 // whiff puts the card back via PrependToDeck so the deck order is preserved (both verbs
 // flip the cacheable bit, which is what we want — the reveal outcome depends on shuffle).
 func sigilOfTheArknightReveal(s *sim.TurnState, t *sim.Aura) int {
-	s.DestroyAura(t)
+	s.DestroyAura(t, true)
 	top, ok := s.PopDeckTop()
 	if !ok {
 		return 0
