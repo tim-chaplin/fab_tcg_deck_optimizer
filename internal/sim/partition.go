@@ -347,8 +347,10 @@ func defendersDamage(defenders, pitched, deck []Card, state *TurnState, gravBuf 
 	total := 0
 	remaining := incomingDamage
 	cacheable := true
+	plainCount := 0
 	for i, d := range defenders {
 		if !d.Types().IsDefenseReaction() {
+			plainCount++
 			continue
 		}
 		gravBuf = append(gravBuf[:0], defenders...)
@@ -363,11 +365,26 @@ func defendersDamage(defenders, pitched, deck []Card, state *TurnState, gravBuf 
 			cacheable = false
 		}
 	}
+	// Hoist the alone-bonus lookup out of the inner loop — at most one defender qualifies
+	// (plainCount==1) and the type assertion is the costly part.
+	aloneBonus := 0
+	applyTogether := plainCount >= 2
+	if plainCount == 1 {
+		for _, d := range defenders {
+			if !d.Types().IsDefenseReaction() {
+				aloneBonus = defendsAloneBonusOf(d)
+				break
+			}
+		}
+	}
 	for _, d := range defenders {
 		if d.Types().IsDefenseReaction() {
 			continue
 		}
-		block := d.Defense()
+		block := d.Defense() + aloneBonus
+		if applyTogether {
+			block += defendsTogetherBonusOf(d)
+		}
 		if block > remaining {
 			block = remaining
 		}

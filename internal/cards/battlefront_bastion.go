@@ -3,7 +3,7 @@
 //
 // Text: "When this defends alone, prevent the next 1 damage that would be dealt to you this turn."
 
-package notimplemented
+package cards
 
 import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
@@ -12,6 +12,11 @@ import (
 )
 
 var battlefrontBastionTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeAttack)
+
+func battlefrontBastionPlay(s *sim.TurnState, self *sim.CardState) {
+	n := self.DealEffectiveAttack(s)
+	s.Log(self, n)
+}
 
 type BattlefrontBastionRed struct{}
 
@@ -23,12 +28,9 @@ func (BattlefrontBastionRed) Attack() int             { return 7 }
 func (BattlefrontBastionRed) Defense() int            { return 2 }
 func (BattlefrontBastionRed) Types() card.TypeSet     { return battlefrontBastionTypes }
 func (BattlefrontBastionRed) GoAgain() bool           { return false }
-
-// not implemented: defend-alone damage prevention rider
-func (BattlefrontBastionRed) NotImplemented() {}
-func (c BattlefrontBastionRed) Play(s *sim.TurnState, self *sim.CardState) {
-	n := self.DealEffectiveAttack(s)
-	s.Log(self, n)
+func (BattlefrontBastionRed) DefendsAloneBonus() int  { return 1 }
+func (BattlefrontBastionRed) Play(s *sim.TurnState, self *sim.CardState) {
+	battlefrontBastionPlay(s, self)
 }
 
 type BattlefrontBastionYellow struct{}
@@ -41,12 +43,9 @@ func (BattlefrontBastionYellow) Attack() int             { return 6 }
 func (BattlefrontBastionYellow) Defense() int            { return 2 }
 func (BattlefrontBastionYellow) Types() card.TypeSet     { return battlefrontBastionTypes }
 func (BattlefrontBastionYellow) GoAgain() bool           { return false }
-
-// not implemented: defend-alone damage prevention rider
-func (BattlefrontBastionYellow) NotImplemented() {}
-func (c BattlefrontBastionYellow) Play(s *sim.TurnState, self *sim.CardState) {
-	n := self.DealEffectiveAttack(s)
-	s.Log(self, n)
+func (BattlefrontBastionYellow) DefendsAloneBonus() int  { return 1 }
+func (BattlefrontBastionYellow) Play(s *sim.TurnState, self *sim.CardState) {
+	battlefrontBastionPlay(s, self)
 }
 
 type BattlefrontBastionBlue struct{}
@@ -59,10 +58,7 @@ func (BattlefrontBastionBlue) Attack() int             { return 5 }
 func (BattlefrontBastionBlue) Defense() int            { return 2 }
 func (BattlefrontBastionBlue) Types() card.TypeSet     { return battlefrontBastionTypes }
 func (BattlefrontBastionBlue) GoAgain() bool           { return false }
-
-// not implemented: defend-alone damage prevention rider
-func (BattlefrontBastionBlue) NotImplemented() {}
-func (c BattlefrontBastionBlue) Play(s *sim.TurnState, self *sim.CardState) {
-	n := self.DealEffectiveAttack(s)
-	s.Log(self, n)
+func (BattlefrontBastionBlue) DefendsAloneBonus() int  { return 1 }
+func (BattlefrontBastionBlue) Play(s *sim.TurnState, self *sim.CardState) {
+	battlefrontBastionPlay(s, self)
 }
