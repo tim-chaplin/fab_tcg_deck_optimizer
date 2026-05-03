@@ -8,29 +8,37 @@ import (
 
 // TestBlessingOfOccult_PlayCreatesAuraNoThisTurnRunes: Play flips AuraCreated so same-turn
 // readers see an aura was created; no runes are made this turn (deferred to the trigger).
-// The registered trigger is TriggerStartOfTurn with Count=1.
+// Aura.Count carries the per-variant rune count (R=3 / Y=2 / B=1) — the handler reads it
+// to size the next-turn CreateRunechants call.
 func TestBlessingOfOccult_PlayCreatesAuraNoThisTurnRunes(t *testing.T) {
-	cases := []sim.Card{BlessingOfOccultRed{}, BlessingOfOccultYellow{}, BlessingOfOccultBlue{}}
-	for _, c := range cases {
+	cases := []struct {
+		c         sim.Card
+		wantCount int
+	}{
+		{BlessingOfOccultRed{}, 3},
+		{BlessingOfOccultYellow{}, 2},
+		{BlessingOfOccultBlue{}, 1},
+	}
+	for _, tc := range cases {
 		var s sim.TurnState
-		c.Play(&s, &sim.CardState{Card: c})
+		tc.c.Play(&s, &sim.CardState{Card: tc.c})
 		if got := s.Value; got != 0 {
-			t.Errorf("%s: Play() = %d, want 0 (rune creation deferred to trigger)", c.Name(), got)
+			t.Errorf("%s: Play() = %d, want 0 (rune creation deferred to trigger)", tc.c.Name(), got)
 		}
 		if !s.AuraCreated {
-			t.Errorf("%s: AuraCreated should be set", c.Name())
+			t.Errorf("%s: AuraCreated should be set", tc.c.Name())
 		}
 		if s.Runechants != 0 {
-			t.Errorf("%s: Runechants = %d, want 0 (tokens are next-turn)", c.Name(), s.Runechants)
+			t.Errorf("%s: Runechants = %d, want 0 (tokens are next-turn)", tc.c.Name(), s.Runechants)
 		}
 		if len(s.Auras) != 1 {
-			t.Fatalf("%s: Auras len = %d, want 1", c.Name(), len(s.Auras))
+			t.Fatalf("%s: Auras len = %d, want 1", tc.c.Name(), len(s.Auras))
 		}
 		if s.Auras[0].TriggerType != sim.TriggerStartOfTurn {
-			t.Errorf("%s: trigger Type = %d, want TriggerStartOfTurn", c.Name(), s.Auras[0].TriggerType)
+			t.Errorf("%s: trigger Type = %d, want TriggerStartOfTurn", tc.c.Name(), s.Auras[0].TriggerType)
 		}
-		if s.Auras[0].Count != 1 {
-			t.Errorf("%s: Count = %d, want 1", c.Name(), s.Auras[0].Count)
+		if s.Auras[0].Count != tc.wantCount {
+			t.Errorf("%s: Count = %d, want %d", tc.c.Name(), s.Auras[0].Count, tc.wantCount)
 		}
 	}
 }

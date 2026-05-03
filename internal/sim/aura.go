@@ -55,9 +55,4 @@ type Aura struct {
 	OncePerTurn bool
 	// FiredThisTurn is sim-managed bookkeeping for OncePerTurn. Cards must not set it.
 	FiredThisTurn bool
-	// N is an optional small-integer payload available to Handler. Lets per-variant Auras
-	// (e.g. Malefic Incantation's per-color counter count) read their N off the Aura
-	// instead of closing over it, so the handler can be a top-level function with no
-	// per-Play closure allocation.
-	N int
 }

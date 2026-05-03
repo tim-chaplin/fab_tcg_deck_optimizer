@@ -73,18 +73,23 @@ func (c BlessingOfOccultBlue) Play(s *sim.TurnState, self *sim.CardState) {
 // blessingOfOccultPlay registers the shared next-turn trigger that creates n Runechants
 // and emits the same-turn chain step (no value contribution; all credit is deferred to
 // the trigger).
+// blessingOfOccultHandler creates t.Count runechants and destroys the aura. Count
+// carries the per-variant rune count (R=3 / Y=2 / B=1) — the handler is one-shot, so
+// Count's "fires remaining" interpretation collapses to "runechants to create on the
+// only fire".
+func blessingOfOccultHandler(s *sim.TurnState, t *sim.Aura) int {
+	created := s.CreateRunechants(t.Count)
+	s.LogPostTrigger(sim.DisplayName(t.Self), blessingOfOccultTriggerText[t.Count], created)
+	s.DestroyAura(t, true)
+	return created
+}
+
 func blessingOfOccultPlay(s *sim.TurnState, selfState *sim.CardState, selfCard sim.Card, n int) {
 	s.AddAura(sim.Aura{
 		Self:        selfCard,
 		TriggerType: sim.TriggerStartOfTurn,
-		Count:       1,
-		N:           n,
-		Handler: func(s *sim.TurnState, t *sim.Aura) int {
-			created := s.CreateRunechants(t.N)
-			s.LogPostTrigger(sim.DisplayName(t.Self), blessingOfOccultTriggerText[t.N], created)
-			s.DestroyAura(t, true)
-			return created
-		},
+		Count:       n,
+		Handler:     blessingOfOccultHandler,
 	})
 	s.Log(selfState, 0)
 }
