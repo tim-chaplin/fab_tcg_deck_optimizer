@@ -67,6 +67,9 @@ func TestGoldAbility_SpendsToFillArsenalAndSwings(t *testing.T) {
 	if got.State.Gold() != 0 {
 		t.Fatalf("Gold after turn = %d, want 0 (the only token spent)", got.State.Gold())
 	}
+	if got.State.CardsDrawn != 1 {
+		t.Fatalf("CardsDrawn = %d, want 1 (Gold ability draws one card)", got.State.CardsDrawn)
+	}
 	if got.State.Arsenal == nil {
 		t.Fatalf("Arsenal = nil, want the drawn card promoted into the slot")
 	}

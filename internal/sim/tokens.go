@@ -30,6 +30,12 @@ const (
 	// TokenTypeGold is the Gold item token. Activated ability: pay {2}, destroy this
 	// token, draw a card (see GoldTokenAbility).
 	TokenTypeGold
+	// TokenTypeSilver is the Silver item token. Same activation shape as Gold, but
+	// costs {3} (see SilverTokenAbility).
+	TokenTypeSilver
+	// TokenTypeCopper is the Copper item token. Same activation shape as Gold, but
+	// costs {4} (see CopperTokenAbility).
+	TokenTypeCopper
 )
 
 // tokenDisplayName returns the printed name shown in logs and "(from previous turn)"
@@ -42,6 +48,10 @@ func tokenDisplayName(t TokenType) string {
 		return "Ponder"
 	case TokenTypeGold:
 		return "Gold"
+	case TokenTypeSilver:
+		return "Silver"
+	case TokenTypeCopper:
+		return "Copper"
 	}
 	return ""
 }
@@ -144,5 +154,81 @@ func NewGoldItem(n int) Item {
 		Self:    CardOrTokenType{TokenType: TokenTypeGold},
 		Count:   n,
 		Ability: GoldTokenAbility{},
+	}
+}
+
+var silverTokenAbilityTypes = card.NewTypeSet(card.TypeGeneric, card.TypeItem)
+
+// SilverTokenAbility is the activated ability of a Silver token: pay {3}, destroy one
+// Silver token, draw a card. Same shape as GoldTokenAbility — token items don't head
+// to the graveyard on destroy.
+type SilverTokenAbility struct{}
+
+func (SilverTokenAbility) ID() ids.CardID      { return ids.SilverTokenAbilityID }
+func (SilverTokenAbility) Name() string        { return "Silver" }
+func (SilverTokenAbility) Cost(*TurnState) int { return 3 }
+func (SilverTokenAbility) Pitch() int          { return 0 }
+func (SilverTokenAbility) Attack() int         { return 0 }
+func (SilverTokenAbility) Defense() int        { return 0 }
+func (SilverTokenAbility) Types() card.TypeSet { return silverTokenAbilityTypes }
+func (SilverTokenAbility) GoAgain() bool       { return true }
+
+// PlayPrecondition gates the activated ability on having a Silver token to spend.
+func (SilverTokenAbility) PlayPrecondition(s *TurnState, self *CardState) bool {
+	return s.Silver() > 0
+}
+
+func (SilverTokenAbility) Play(s *TurnState, self *CardState) {
+	s.ConsumeItem(TokenTypeSilver, 1)
+	s.DrawOne()
+	s.Log(self, 0)
+	s.LogRider(self, 0, "Spent 1 silver to draw a card")
+}
+
+// NewSilverItem returns a fresh Silver token Item with the given count. Production code
+// calls s.CreateSilver instead — it bumps an existing entry. Test seeding only.
+func NewSilverItem(n int) Item {
+	return Item{
+		Self:    CardOrTokenType{TokenType: TokenTypeSilver},
+		Count:   n,
+		Ability: SilverTokenAbility{},
+	}
+}
+
+var copperTokenAbilityTypes = card.NewTypeSet(card.TypeGeneric, card.TypeItem)
+
+// CopperTokenAbility is the activated ability of a Copper token: pay {4}, destroy one
+// Copper token, draw a card. Same shape as GoldTokenAbility — token items don't head
+// to the graveyard on destroy.
+type CopperTokenAbility struct{}
+
+func (CopperTokenAbility) ID() ids.CardID      { return ids.CopperTokenAbilityID }
+func (CopperTokenAbility) Name() string        { return "Copper" }
+func (CopperTokenAbility) Cost(*TurnState) int { return 4 }
+func (CopperTokenAbility) Pitch() int          { return 0 }
+func (CopperTokenAbility) Attack() int         { return 0 }
+func (CopperTokenAbility) Defense() int        { return 0 }
+func (CopperTokenAbility) Types() card.TypeSet { return copperTokenAbilityTypes }
+func (CopperTokenAbility) GoAgain() bool       { return true }
+
+// PlayPrecondition gates the activated ability on having a Copper token to spend.
+func (CopperTokenAbility) PlayPrecondition(s *TurnState, self *CardState) bool {
+	return s.Copper() > 0
+}
+
+func (CopperTokenAbility) Play(s *TurnState, self *CardState) {
+	s.ConsumeItem(TokenTypeCopper, 1)
+	s.DrawOne()
+	s.Log(self, 0)
+	s.LogRider(self, 0, "Spent 1 copper to draw a card")
+}
+
+// NewCopperItem returns a fresh Copper token Item with the given count. Production code
+// calls s.CreateCopper instead — it bumps an existing entry. Test seeding only.
+func NewCopperItem(n int) Item {
+	return Item{
+		Self:    CardOrTokenType{TokenType: TokenTypeCopper},
+		Count:   n,
+		Ability: CopperTokenAbility{},
 	}
 }

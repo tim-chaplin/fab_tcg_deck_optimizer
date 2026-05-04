@@ -56,6 +56,16 @@ func (t TurnStartState) Gold() int {
 	return itemCountIn(t.StartOfNextTurnItems, TokenTypeGold)
 }
 
+// Silver returns the live Silver token count at the start of the next turn.
+func (t TurnStartState) Silver() int {
+	return itemCountIn(t.StartOfNextTurnItems, TokenTypeSilver)
+}
+
+// Copper returns the live Copper token count at the start of the next turn.
+func (t TurnStartState) Copper() int {
+	return itemCountIn(t.StartOfNextTurnItems, TokenTypeCopper)
+}
+
 // EvalOneTurnForTesting runs one turn against d.Cards in source order (no shuffle) and returns
 // the tested turn's outcome plus the start-of-next-turn state. arsenalIn seeds turn 1's arsenal
 // slot (nil for empty). initialHand sets turn 1's starting hand; nil takes d.Cards[:handSize] as

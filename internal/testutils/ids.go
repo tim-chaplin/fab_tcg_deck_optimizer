@@ -12,7 +12,7 @@ import "github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
 // Anchored past the last token-ability ID so fakes don't collide with any production
 // printing.
 const (
-	FakeRedAttack ids.CardID = ids.GoldTokenAbilityID + iota + 1
+	FakeRedAttack ids.CardID = ids.CopperTokenAbilityID + iota + 1
 	FakeBlueAttack
 	FakeYellowAttack
 	FakeCostlyDraw
