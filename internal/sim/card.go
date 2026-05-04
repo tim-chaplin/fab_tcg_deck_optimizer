@@ -263,19 +263,6 @@ type ModalCost interface {
 	ModalCost(mode int8) int
 }
 
-// ConditionalGoAgain is an optional marker for cards whose Play sometimes flips
-// self.GrantedGoAgain — i.e., cards that grant themselves Go again under a runtime
-// condition (FromArsenal, an aura already in play, ArcaneDamageDealt, …) rather than as a
-// printed keyword. Hand-shaping heuristics opt into the marker via type assertion so
-// conditionally-granted cards (printed GoAgain() == false but reliably granted at play
-// time) aren't bottomed as one-per-hand finishers. The lint test in
-// conditional_go_again_test.go probes every registered card against a maximally-permissive
-// TurnState and fails if any unmarked card flips GrantedGoAgain, so a new conditional-
-// grant card has to declare itself.
-type ConditionalGoAgain interface {
-	ConditionalGoAgain()
-}
-
 // isExcludedFromPool reports whether c carries either pool-exclusion marker (NotImplemented
 // or Unplayable). The two have identical effect on pool membership; this helper centralises
 // the OR so the deck-construction pipeline reads cleanly and future markers can join the set

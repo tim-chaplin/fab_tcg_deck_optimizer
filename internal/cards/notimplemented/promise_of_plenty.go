@@ -74,7 +74,3 @@ func (PromiseOfPlentyBlue) NotImplemented() {}
 func (PromiseOfPlentyBlue) Play(s *sim.TurnState, self *sim.CardState) {
 	promiseOfPlentyPlay(s, self)
 }
-
-func (PromiseOfPlentyRed) ConditionalGoAgain()    {}
-func (PromiseOfPlentyYellow) ConditionalGoAgain() {}
-func (PromiseOfPlentyBlue) ConditionalGoAgain()   {}
