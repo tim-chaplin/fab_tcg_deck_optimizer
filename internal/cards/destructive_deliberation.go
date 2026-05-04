@@ -1,7 +1,4 @@
-// Destructive Deliberation — Generic Action - Attack. Defense 2.
-// Printed pitch variants: Red 1, Yellow 2, Blue 3.
-// Printed cost: Red 1, Yellow 2, Blue 3. Printed power: Red 5, Yellow 4, Blue 3.
-// Text: "When this hits a hero, create a Ponder token."
+// Destructive Deliberation — "When this hits a hero, create a Ponder token."
 
 package cards
 
@@ -19,10 +16,6 @@ func destructiveDeliberationPlay(s *sim.TurnState, self *sim.CardState) {
 	self.OnHit = append(self.OnHit, sim.OnHitHandler{Fire: destructiveDeliberationOnHit})
 }
 
-// destructiveDeliberationOnHit fires the printed "When this hits a hero, create a Ponder
-// token" rider. Top-level so registration stays alloc-free. The Ponder destroys itself
-// at end of turn (see ponderAuraHandler) so it doesn't carry damage credit at creation
-// — the LogRider entry is informational only.
 func destructiveDeliberationOnHit(s *sim.TurnState, self *sim.CardState, _ *sim.OnHitHandler) {
 	s.CreatePonder(1)
 	s.LogRider(self, 0, "On-hit created a ponder")

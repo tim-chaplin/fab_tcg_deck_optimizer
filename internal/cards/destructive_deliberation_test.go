@@ -6,7 +6,6 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 )
 
-// Tests that Play credits the printed attack and registers the OnHit Ponder rider.
 func TestDestructiveDeliberation_PlayCreditsAttack(t *testing.T) {
 	cases := []struct {
 		c    sim.Card
@@ -29,7 +28,6 @@ func TestDestructiveDeliberation_PlayCreditsAttack(t *testing.T) {
 	}
 }
 
-// Tests that the OnHit rider creates one Ponder token when fired.
 func TestDestructiveDeliberation_OnHitCreatesPonder(t *testing.T) {
 	for _, c := range []sim.Card{
 		DestructiveDeliberationRed{},
@@ -39,8 +37,6 @@ func TestDestructiveDeliberation_OnHitCreatesPonder(t *testing.T) {
 		s := sim.TurnState{}
 		self := &sim.CardState{Card: c}
 		c.Play(&s, self)
-		// Fire the OnHit handler directly — production fires it via finalizeActiveAttack
-		// when LikelyToHit is true.
 		self.OnHit[0].Fire(&s, self, &self.OnHit[0])
 		if got := s.Ponders(); got != 1 {
 			t.Errorf("%s: Ponders = %d, want 1", c.Name(), got)
