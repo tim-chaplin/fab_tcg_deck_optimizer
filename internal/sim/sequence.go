@@ -143,7 +143,7 @@ func bestAttackWithWeapons(hero Hero, weapons []Weapon, attackers, defenders, pi
 			// Append each selected weapon's ability — the weapon stays in play.
 			for i := range weapons {
 				if wmask&(1<<i) != 0 {
-					allAttackers = append(allAttackers, bufs.weaponAbilities[i])
+					allAttackers = append(allAttackers, bufs.activatedAbilities[i])
 				}
 			}
 			dealt, leftoverRunechants, legal := ctx.bestSequence(allAttackers)

@@ -41,9 +41,13 @@ type shapeBufs struct {
 	// pre-built []string of weapon names for SwungWeapons display.
 	weaponCosts []int
 	weaponNames [][]string
-	// weaponAbilities[i] is weapons[i].Ability() materialised once at construction — the
-	// chain assembly indexes it directly when appending swung abilities to attackerBuf.
-	weaponAbilities []Card
+	// activatedAbilities is the per-permanent ability Card cache, materialised once at
+	// construction by walking each in-play source (weapons today; items when they land)
+	// and calling Ability(). Indexed in lockstep with the wmask: bit i selects
+	// activatedAbilities[i] for the chain. One slice keeps the wmask uniform across
+	// permanent kinds so item abilities slot in alongside weapon abilities without a
+	// parallel buffer.
+	activatedAbilities []Card
 	// Partition-loop buffers, consumed by findBest. Sized handSize+1 to cover the optional
 	// arsenal-in slot the enumerator treats as index n. isDRBuf caches card.TypeDefenseReaction
 	// membership; canAttackBuf caches "this card can take Attack role" (Action or Weapon
@@ -161,9 +165,9 @@ func newAttackBufs(handSize, weaponCount int, weapons []Weapon) *attackBufs {
 	// card) can extend a chain well past the starting hand size.
 	const maxDrawnExtensions = 32
 	maxAttackers := handSize + weaponCount + 1 + maxDrawnExtensions
-	weaponAbilities := make([]Card, len(weapons))
+	activatedAbilities := make([]Card, len(weapons))
 	for i, w := range weapons {
-		weaponAbilities[i] = w.Ability()
+		activatedAbilities[i] = w.Ability()
 	}
 	numMasks := 1 << weaponCount
 	weaponCosts := make([]int, numMasks)
@@ -173,7 +177,7 @@ func newAttackBufs(handSize, weaponCount int, weapons []Weapon) *attackBufs {
 		var names []string
 		for i, w := range weapons {
 			if mask&(1<<i) != 0 {
-				cost += weaponAbilities[i].Cost(&TurnState{})
+				cost += activatedAbilities[i].Cost(&TurnState{})
 				names = append(names, w.Name())
 			}
 		}
@@ -199,7 +203,7 @@ func newAttackBufs(handSize, weaponCount int, weapons []Weapon) *attackBufs {
 			attackerBuf:        make([]Card, maxAttackers),
 			weaponCosts:        weaponCosts,
 			weaponNames:        weaponNames,
-			weaponAbilities:    weaponAbilities,
+			activatedAbilities: activatedAbilities,
 			rolesBuf:           make([]Role, handSize+1),
 			pitchVals:          make([]int, handSize+1),
 			defenseVals:        make([]int, handSize+1),
