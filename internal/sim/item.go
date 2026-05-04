@@ -53,6 +53,10 @@ func tokenItemAbilityFor(t TokenType) Card {
 	switch t {
 	case TokenTypeGold:
 		return GoldTokenAbility{}
+	case TokenTypeSilver:
+		return SilverTokenAbility{}
+	case TokenTypeCopper:
+		return CopperTokenAbility{}
 	}
 	return nil
 }

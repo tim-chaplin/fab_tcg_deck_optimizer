@@ -36,6 +36,55 @@ func TestGoldAbility_PlayDecrementsCountWhenMultiple(t *testing.T) {
 	}
 }
 
+// Tests SilverTokenAbility.Play decrement + draw behaviour, mirroring the Gold case.
+func TestSilverAbility_PlaysDecrementsAndDestroys(t *testing.T) {
+	s := NewTurnState([]Card{testutils.RedAttack{}}, nil)
+	s.Items = []Item{NewSilverItem(1)}
+	(SilverTokenAbility{}).Play(s, &CardState{Card: SilverTokenAbility{}})
+	if s.Silver() != 0 {
+		t.Fatalf("Silver = %d after spending the only token, want 0", s.Silver())
+	}
+	if len(s.Items) != 0 {
+		t.Fatalf("Items still has %d entries after destroy, want 0", len(s.Items))
+	}
+	if len(s.Hand) != 1 {
+		t.Fatalf("Hand size = %d, want 1 (drew one card)", len(s.Hand))
+	}
+}
+
+// Tests CopperTokenAbility.Play decrement + draw behaviour, mirroring the Gold case.
+func TestCopperAbility_PlaysDecrementsAndDestroys(t *testing.T) {
+	s := NewTurnState([]Card{testutils.RedAttack{}}, nil)
+	s.Items = []Item{NewCopperItem(1)}
+	(CopperTokenAbility{}).Play(s, &CardState{Card: CopperTokenAbility{}})
+	if s.Copper() != 0 {
+		t.Fatalf("Copper = %d after spending the only token, want 0", s.Copper())
+	}
+	if len(s.Items) != 0 {
+		t.Fatalf("Items still has %d entries after destroy, want 0", len(s.Items))
+	}
+	if len(s.Hand) != 1 {
+		t.Fatalf("Hand size = %d, want 1 (drew one card)", len(s.Hand))
+	}
+}
+
+// Tests CreateSilver and CreateCopper consolidate by token type.
+func TestCreateSilverCopper_BumpsExistingEntry(t *testing.T) {
+	s := NewTurnState(nil, nil)
+	s.CreateSilver(2)
+	s.CreateSilver(1)
+	s.CreateCopper(1)
+	if s.Silver() != 3 {
+		t.Errorf("Silver = %d, want 3 (2 + 1 consolidated)", s.Silver())
+	}
+	if s.Copper() != 1 {
+		t.Errorf("Copper = %d, want 1", s.Copper())
+	}
+	if got := len(s.Items); got != 2 {
+		t.Errorf("Items entries = %d, want 2 (one Silver + one Copper)", got)
+	}
+}
+
 // Tests that the eval cache fingerprints priorItems so calls with different gold
 // counts don't collide.
 func TestEvalCache_PriorItemsKeyedDistinctly(t *testing.T) {

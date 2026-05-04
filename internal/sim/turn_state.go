@@ -691,6 +691,40 @@ func (s *TurnState) CreateGold(n int) {
 // Gold returns the current Gold token count, or zero when none are in play.
 func (s *TurnState) Gold() int { return itemCountIn(s.Items, TokenTypeGold) }
 
+// CreateSilver creates n Silver tokens, same shape as CreateGold.
+func (s *TurnState) CreateSilver(n int) {
+	if n <= 0 {
+		return
+	}
+	for i := range s.Items {
+		if s.Items[i].Self.TokenType == TokenTypeSilver {
+			s.Items[i].Count += n
+			return
+		}
+	}
+	s.Items = append(s.Items, NewSilverItem(n))
+}
+
+// Silver returns the current Silver token count, or zero when none are in play.
+func (s *TurnState) Silver() int { return itemCountIn(s.Items, TokenTypeSilver) }
+
+// CreateCopper creates n Copper tokens, same shape as CreateGold.
+func (s *TurnState) CreateCopper(n int) {
+	if n <= 0 {
+		return
+	}
+	for i := range s.Items {
+		if s.Items[i].Self.TokenType == TokenTypeCopper {
+			s.Items[i].Count += n
+			return
+		}
+	}
+	s.Items = append(s.Items, NewCopperItem(n))
+}
+
+// Copper returns the current Copper token count, or zero when none are in play.
+func (s *TurnState) Copper() int { return itemCountIn(s.Items, TokenTypeCopper) }
+
 // ConsumeItem decrements the matching item's Count by n and removes the entry when
 // Count reaches zero. Token items don't head to the graveyard on destroy. No-op when
 // no item matches t.

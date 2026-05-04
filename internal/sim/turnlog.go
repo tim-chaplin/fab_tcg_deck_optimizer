@@ -20,6 +20,8 @@ func BuildTurnLog(t TurnSummary, startingAuras []Aura, startingItems []Item) Tur
 	startingRunechants := tokenCountIn(startingAuras, TokenTypeRunechant)
 	startingPonders := tokenCountIn(startingAuras, TokenTypePonder)
 	startingGold := itemCountIn(startingItems, TokenTypeGold)
+	startingSilver := itemCountIn(startingItems, TokenTypeSilver)
+	startingCopper := itemCountIn(startingItems, TokenTypeCopper)
 
 	// Start of turn: dealt hand, arsenal-in card, auras / tokens in play. Carryover
 	// Aura fires (Sigil reveals, +N damage credits) belong to MyTurn — they're
@@ -33,7 +35,7 @@ func BuildTurnLog(t TurnSummary, startingAuras []Aura, startingItems []Item) Tur
 	if line := startingAurasLine(t.StartOfTurnAuras, startingRunechants, startingPonders); line != "" {
 		log.StartOfTurn = append(log.StartOfTurn, line)
 	}
-	if line := itemsLine(startingGold); line != "" {
+	if line := itemsLine(startingGold, startingSilver, startingCopper); line != "" {
 		log.StartOfTurn = append(log.StartOfTurn, line)
 	}
 
@@ -77,7 +79,7 @@ func BuildTurnLog(t TurnSummary, startingAuras []Aura, startingItems []Item) Tur
 	if line := endingAurasLine(t.State.Auras, t.State.Runechants(), t.State.Ponders()); line != "" {
 		log.EndOfTurn = append(log.EndOfTurn, line)
 	}
-	if line := itemsLine(t.State.Gold()); line != "" {
+	if line := itemsLine(t.State.Gold(), t.State.Silver(), t.State.Copper()); line != "" {
 		log.EndOfTurn = append(log.EndOfTurn, line)
 	}
 
@@ -278,12 +280,28 @@ func goldPhrase(n int) string {
 	return fmt.Sprintf("%d Gold", n)
 }
 
+// silverPhrase mirrors goldPhrase for Silver tokens.
+func silverPhrase(n int) string {
+	return fmt.Sprintf("%d Silver", n)
+}
+
+// copperPhrase mirrors goldPhrase for Copper tokens.
+func copperPhrase(n int) string {
+	return fmt.Sprintf("%d Copper", n)
+}
+
 // itemsLine builds the "Items: ..." printout line from the per-token-type counts. Returns
 // "" when no item is in play so the caller skips the line.
-func itemsLine(gold int) string {
+func itemsLine(gold, silver, copper int) string {
 	var items []string
 	if gold > 0 {
 		items = append(items, goldPhrase(gold))
+	}
+	if silver > 0 {
+		items = append(items, silverPhrase(silver))
+	}
+	if copper > 0 {
+		items = append(items, copperPhrase(copper))
 	}
 	if len(items) == 0 {
 		return ""

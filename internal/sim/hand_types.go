@@ -76,6 +76,12 @@ func (c *CarryState) Ponders() int { return tokenCountIn(c.Auras, TokenTypePonde
 // Gold returns the carried Gold token count, or zero when none are in play.
 func (c *CarryState) Gold() int { return itemCountIn(c.Items, TokenTypeGold) }
 
+// Silver returns the carried Silver token count, or zero when none are in play.
+func (c *CarryState) Silver() int { return itemCountIn(c.Items, TokenTypeSilver) }
+
+// Copper returns the carried Copper token count, or zero when none are in play.
+func (c *CarryState) Copper() int { return itemCountIn(c.Items, TokenTypeCopper) }
+
 // TurnSummary is the result of running Best on a hand: the winning card-role assignments
 // plus the CarryState snapshot the next turn inherits.
 type TurnSummary struct {
