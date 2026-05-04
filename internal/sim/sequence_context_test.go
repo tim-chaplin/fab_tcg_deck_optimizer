@@ -6,8 +6,16 @@ import "github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
 // the given chain length. Tests use this instead of hand-rolling the context fields so the
 // common shape is centralised. Lives in a sim test file (rather than sim_test) so
 // exports_test.go's NewSequenceContextForTest wrapper can reach it.
+//
+// runechantCarryover is converted to a priorAuras slice carrying a Runechant token aura so
+// the chain runner sees the same starting state production code produces from a real
+// previous-turn carryover.
 func newSequenceContextForTest(h Hero, pitched, deck []Card, resourceBudget, runechantCarryover, chainLen int) *sequenceContext {
 	bufs := newAttackBufs(chainLen, 0, nil)
+	var priorAuras []Aura
+	if runechantCarryover > 0 {
+		priorAuras = []Aura{NewRunechantAura(runechantCarryover)}
+	}
 	return &sequenceContext{
 		hero:               h,
 		pitched:            pitched,
@@ -15,6 +23,7 @@ func newSequenceContextForTest(h Hero, pitched, deck []Card, resourceBudget, run
 		bufs:               bufs,
 		resourceBudget:     resourceBudget,
 		runechantCarryover: runechantCarryover,
+		priorAuras:         priorAuras,
 		carryWinner:        &bufs.carryWinnerScratch,
 	}
 }

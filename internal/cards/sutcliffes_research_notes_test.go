@@ -26,8 +26,8 @@ func TestSutcliffesResearchNotes_CountsRunebladeAttackActions(t *testing.T) {
 	if got := s.Value; got != 2 {
 		t.Errorf("Red (reveal 3): Play() = %d, want 2 (2 of 3 are Runeblade attack actions)", got)
 	}
-	if s.Runechants != 2 {
-		t.Errorf("Runechants = %d, want 2", s.Runechants)
+	if s.Runechants() != 2 {
+		t.Errorf("Runechants = %d, want 2", s.Runechants())
 	}
 }
 

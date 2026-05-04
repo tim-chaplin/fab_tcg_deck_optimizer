@@ -27,7 +27,6 @@ func (c *CarryState) SnapshotFromTurn(s *TurnState) {
 	c.Arsenal = s.Arsenal
 	c.Graveyard = append(c.Graveyard[:0], s.graveyard...)
 	c.Banish = append(c.Banish[:0], s.Banish...)
-	c.Runechants = s.Runechants
 	c.Auras = append(c.Auras[:0], s.Auras...)
 	c.Log = append(c.Log[:0], s.turnLog...)
 }
@@ -42,7 +41,6 @@ func (c *CarryState) CopyFrom(src *CarryState) {
 	c.Arsenal = src.Arsenal
 	c.Graveyard = append(c.Graveyard[:0], src.Graveyard...)
 	c.Banish = append(c.Banish[:0], src.Banish...)
-	c.Runechants = src.Runechants
 	c.Auras = append(c.Auras[:0], src.Auras...)
 	c.Log = append(c.Log[:0], src.Log...)
 }
@@ -57,7 +55,6 @@ func (c *CarryState) Reset() {
 	c.Arsenal = nil
 	c.Graveyard = c.Graveyard[:0]
 	c.Banish = c.Banish[:0]
-	c.Runechants = 0
 	c.Auras = c.Auras[:0]
 	c.Log = c.Log[:0]
 }
@@ -68,8 +65,7 @@ func (c *CarryState) Reset() {
 // trivial CarryStates allocation-free.
 func (c CarryState) Clone() CarryState {
 	out := CarryState{
-		Arsenal:    c.Arsenal,
-		Runechants: c.Runechants,
+		Arsenal: c.Arsenal,
 	}
 	if len(c.Hand) > 0 {
 		out.Hand = append([]Card(nil), c.Hand...)

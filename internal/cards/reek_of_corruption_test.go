@@ -73,7 +73,7 @@ func TestReekOfCorruption_BlockableBaseSuppressesDiscard(t *testing.T) {
 // Tests that co-firing runechants don't rescue a blockable variant — "this hits" reads only
 // this card's own damage.
 func TestReekOfCorruption_RunechantsDontRescue(t *testing.T) {
-	s := sim.TurnState{AuraCreated: true, Runechants: 1}
+	s := sim.TurnState{AuraCreated: true, Auras: []sim.Aura{sim.NewRunechantAura(1)}}
 	c := ReekOfCorruptionYellow{}
 	c.Play(&s, &sim.CardState{Card: c})
 	if got := s.Value; got != 3 {

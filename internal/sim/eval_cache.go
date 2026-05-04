@@ -52,16 +52,21 @@ const maxCachedAuras = 8
 // auraCacheKey is one fingerprinted entry in the evalCacheKey.auras array. SelfID is the
 // CardID of the aura the trigger belongs to — Handler closures aren't comparable, but
 // each card type's Play always registers the same handler logic, so SelfID determines
-// the per-fire behaviour. Count is the remaining-fires counter.
+// the per-fire behaviour. Count is the per-Aura counter (fires remaining for card auras,
+// token copy count for token auras).
 //
-// Caveats this minimal shape doesn't capture today: Type (TriggerStartOfTurn vs
-// TriggerAttackAction), OncePerTurn / FiredThisTurn flags. No production card registers
-// multiple triggers from the same Self with different types or gates, so the simpler
-// (SelfID, Count) tuple is enough — but if a future card needs to disambiguate, this is
-// the place to extend the key.
+// Token auras (Runechant, …) carry SelfID = ids.InvalidCard and identify themselves via
+// TokenType — the per-token Handler is keyed off TokenType too, so (TokenType, Count) is
+// the full fingerprint for a token aura. Card auras carry TokenType = TokenTypeNone.
+//
+// Caveats this minimal shape doesn't capture today: TriggerType, OncePerTurn /
+// FiredThisTurn flags. No production card registers multiple triggers from the same Self
+// with different types or gates, so the simpler tuple is enough — but if a future card
+// needs to disambiguate, this is the place to extend the key.
 type auraCacheKey struct {
-	SelfID ids.CardID
-	Count  int
+	SelfID    ids.CardID
+	TokenType TokenType
+	Count     int
 }
 
 // evalCacheKey is the comparable map key for the hand-eval cache. handIDs is the sorted
@@ -80,15 +85,14 @@ type auraCacheKey struct {
 // must use NewEvaluatorWithoutCache (sharedEvaluator already does for that reason) —
 // otherwise a cached entry from one matchup would silently apply to a query under another.
 type evalCacheKey struct {
-	handIDs            [maxCachedHandSize]ids.CardID
-	weaponIDs          [maxCachedWeapons]ids.WeaponID
-	auras              [maxCachedAuras]auraCacheKey
-	handLen            int
-	weaponLen          int
-	auraLen            int
-	runechantCarryover int
-	heroID             ids.HeroID
-	arsenalID          ids.CardID
+	handIDs   [maxCachedHandSize]ids.CardID
+	weaponIDs [maxCachedWeapons]ids.WeaponID
+	auras     [maxCachedAuras]auraCacheKey
+	handLen   int
+	weaponLen int
+	auraLen   int
+	heroID    ids.HeroID
+	arsenalID ids.CardID
 }
 
 // evalCacheEntry is the cached winning-partition shape. Stores only what's needed to
@@ -158,7 +162,7 @@ func newEvalCache() *evalCache {
 // omitted — see evalCacheKey doc.
 func makeCacheKey(
 	hero Hero, weapons []Weapon, hand []Card,
-	runechantCarryover int, arsenalCardIn Card,
+	arsenalCardIn Card,
 	priorAuras []Aura,
 ) (evalCacheKey, bool) {
 	if len(hand) > maxCachedHandSize ||
@@ -180,7 +184,7 @@ func makeCacheKey(
 	// O(n^2) cost is negligible.
 	key.auraLen = len(priorAuras)
 	for i, t := range priorAuras {
-		entry := auraCacheKey{SelfID: t.Self.ID(), Count: t.Count}
+		entry := auraCacheKey{SelfID: t.Self.CardID(), TokenType: t.Self.TokenType, Count: t.Count}
 		j := i
 		for j > 0 && auraEntryLess(entry, key.auras[j-1]) {
 			key.auras[j] = key.auras[j-1]
@@ -188,7 +192,6 @@ func makeCacheKey(
 		}
 		key.auras[j] = entry
 	}
-	key.runechantCarryover = runechantCarryover
 	if hero != nil {
 		key.heroID = hero.ID()
 	}
@@ -198,11 +201,14 @@ func makeCacheKey(
 	return key, true
 }
 
-// auraEntryLess orders auraCacheKey entries by SelfID first, then Count. Used by
-// makeCacheKey's insertion sort so the auras[..auraLen] prefix is canonically ordered.
+// auraEntryLess orders auraCacheKey entries by SelfID, then TokenType, then Count. Used
+// by makeCacheKey's insertion sort so the auras[..auraLen] prefix is canonically ordered.
 func auraEntryLess(a, b auraCacheKey) bool {
 	if a.SelfID != b.SelfID {
 		return a.SelfID < b.SelfID
+	}
+	if a.TokenType != b.TokenType {
+		return a.TokenType < b.TokenType
 	}
 	return a.Count < b.Count
 }

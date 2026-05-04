@@ -26,6 +26,6 @@ func (ScepterOfPain) Hands() int              { return 1 }
 func (c ScepterOfPain) Play(s *sim.TurnState, self *sim.CardState) {
 	n := self.DealEffectiveAttack(s)
 	s.Log(self, n)
-	s.AddValue(s.CreateRunechants(1))
+	s.CreateRunechants(1)
 	s.LogRider(self, 1, "Created a runechant")
 }

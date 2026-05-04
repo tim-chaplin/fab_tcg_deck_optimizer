@@ -3,7 +3,7 @@
 // Printed power: Red 6, Yellow 5, Blue 4.
 // Text: "Amplify the Arknight costs {r} less to play for each Runechant you control."
 //
-// Variable cost: Cost reads s.Runechants to return max(0, printed - Runechants).
+// Variable cost: Cost reads s.Runechants() to return max(0, printed - Runechants).
 // Standard sim.VariableCost wiring (docs/dev-standards.md).
 
 package cards
@@ -19,7 +19,7 @@ var amplifyTheArknightTypes = card.NewTypeSet(card.TypeRuneblade, card.TypeActio
 const amplifyTheArknightPrintedCost = 3
 
 func amplifyTheArknightCost(s *sim.TurnState) int {
-	eff := amplifyTheArknightPrintedCost - s.Runechants
+	eff := amplifyTheArknightPrintedCost - s.Runechants()
 	if eff < 0 {
 		return 0
 	}

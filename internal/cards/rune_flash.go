@@ -3,7 +3,7 @@
 // Printed power: Red 4, Yellow 3, Blue 2.
 // Text: "Rune Flash costs {r} less to play for each Runechant you control."
 //
-// Variable cost: Cost reads s.Runechants to return max(0, printed - Runechants).
+// Variable cost: Cost reads s.Runechants() to return max(0, printed - Runechants).
 // Standard sim.VariableCost wiring (docs/dev-standards.md).
 
 package cards
@@ -19,7 +19,7 @@ var runeFlashTypes = card.NewTypeSet(card.TypeRuneblade, card.TypeAction, card.T
 const runeFlashPrintedCost = 3
 
 func runeFlashCost(s *sim.TurnState) int {
-	eff := runeFlashPrintedCost - s.Runechants
+	eff := runeFlashPrintedCost - s.Runechants()
 	if eff < 0 {
 		return 0
 	}

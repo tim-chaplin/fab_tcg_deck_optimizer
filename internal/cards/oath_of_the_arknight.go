@@ -68,6 +68,6 @@ func oathPlay(s *sim.TurnState, self *sim.CardState, bonus int) {
 	}
 	dmg := self.DealEffectiveAttack(s)
 	s.Log(self, dmg)
-	s.AddValue(s.CreateRunechants(1))
+	s.CreateRunechants(1)
 	s.LogRider(self, 1, "Created a runechant")
 }

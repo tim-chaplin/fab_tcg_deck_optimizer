@@ -100,10 +100,6 @@ type TurnState struct {
 	// Banish holds cards moved into the banished zone this turn (e.g. an aura-banish-for-
 	// arcane rider).
 	Banish []Card
-	// Runechants is the live count of Runechant aura tokens in play. Carries across turns.
-	// CreateRunechants increments it; the attack pipeline consumes the running total on each
-	// attack / weapon swing.
-	Runechants int
 	// ActionPoints is the chain runner's running AP pool. Seeded to 1 per permutation,
 	// decremented before each paying chain step, incremented after a Go-again card resolves.
 	// Free chain steps (Instants, Attack Reactions) cost 0; Action cards and weapon swings
@@ -121,9 +117,14 @@ type TurnState struct {
 	// currentAuraIdx is the index in Auras of the handler currently running, set by the
 	// sim's start-of-turn / attack-action loops before each handler call. DestroyAura uses
 	// it as a fast-path hint to skip the linear scan in the common "handler destroys its
-	// own aura" case. Pointer-checked against &Auras[currentAuraIdx] before splicing, so a
-	// stale value safely falls through to the scan.
+	// own aura" case. Self comparison against Auras[currentAuraIdx] guards against stale
+	// hints; the slow path scans s.Auras for the match.
 	currentAuraIdx int
+	// currentAuraDestroyed is set by DestroyAura when it splices the entry at
+	// currentAuraIdx — i.e., the handler destroyed its own aura. The aura-loop reads it to
+	// decide whether to advance the cursor (false) or stay (true — the next entry shifted
+	// into position so the cursor needs to re-process index i).
+	currentAuraDestroyed bool
 	// pendingNextAttackActionHit queues NextAttackActionHitTriggers; reset per permutation.
 	// Lowercase so cards register through RegisterNextAttackActionHit instead of appending.
 	pendingNextAttackActionHit []NextAttackActionHitTrigger
@@ -621,21 +622,45 @@ func (s *TurnState) ClashValue(bonus int) int {
 	}
 }
 
-// CreateRunechants adds n Runechant token auras to the count, sets AuraCreated so effects
-// that key on "aura created this turn" see it, and returns n — each token is credited as
-// +1 damage at creation time when callers pair this with AddValue. Tokens that never fire
-// (end-of-sim leftovers) are slightly over-credited — accepted.
-func (s *TurnState) CreateRunechants(n int) int {
-	if n > 0 {
-		s.AuraCreated = true
-		s.Runechants += n
+// CreateRunechants creates n Runechant tokens and credits +n damage at creation time.
+// Tokens are stored as a single Aura entry — find the existing Runechant aura and bump
+// its Count, or add a new one when none exists. Sets AuraCreated so same-turn "aura
+// created this turn" effects see it. Tokens that never fire (end-of-sim leftovers) are
+// slightly over-credited because creation-time crediting is optimistic — accepted.
+func (s *TurnState) CreateRunechants(n int) {
+	if n <= 0 {
+		return
 	}
-	return n
+	s.AuraCreated = true
+	s.AddValue(n)
+	for i := range s.Auras {
+		if s.Auras[i].Self.TokenType == TokenTypeRunechant {
+			s.Auras[i].Count += n
+			return
+		}
+	}
+	s.AddAura(Aura{
+		Self:        CardOrTokenType{TokenType: TokenTypeRunechant},
+		TriggerType: TriggerAttack,
+		Count:       n,
+		Handler:     runechantAuraHandler,
+	})
 }
 
 // CreateRunechant is shorthand for CreateRunechants(1).
-func (s *TurnState) CreateRunechant() int {
-	return s.CreateRunechants(1)
+func (s *TurnState) CreateRunechant() {
+	s.CreateRunechants(1)
+}
+
+// Runechants returns the current Runechant token count by scanning s.Auras for the
+// runechant token aura. Zero when no runechants are in play.
+func (s *TurnState) Runechants() int {
+	for i := range s.Auras {
+		if s.Auras[i].Self.TokenType == TokenTypeRunechant {
+			return s.Auras[i].Count
+		}
+	}
+	return 0
 }
 
 // DealArcaneDamage credits n arcane damage and, when LikelyDamageHits(n, false) approves,
@@ -670,27 +695,29 @@ func (s *TurnState) AddAura(t Aura) {
 }
 
 // DestroyAura is the handler-side "this aura is gone" call: splice t out of s.Auras
-// immediately and, when addToGraveyard, append t.Self to s.graveyard. Token-style auras
-// that just disappear (no card to send to the graveyard) pass false.
+// immediately and, when addToGraveyard, append t.Self.Card to s.graveyard. Token-style
+// auras (Card == nil) skip the graveyard append unconditionally.
 //
 // Direct graveyard append (no cacheable flip): the destruction is deterministic from the
 // triggering event the sim already accounts for, not from hidden state.
 //
-// Fast path uses currentAuraIdx — the cursor index the sim publishes before each handler
-// call — to splice without a linear scan. Pointer check against &s.Auras[i] guards
-// against stale hints; the slow path scans s.Auras for the match and is only reached
-// when a handler destroys an aura other than its own (e.g. a future card that banishes a
-// sibling).
+// Match-by-Self semantics: t may have been invalidated by mid-handler appends to s.Auras
+// (CreateRunechants → AddAura → append → realloc) so a pointer comparison against
+// &s.Auras[i] can fail. Match on the Self struct value instead, which stays stable across
+// realloc. The currentAuraIdx fast-path checks the cursor's entry first; the loop scans
+// s.Auras when a handler destroys a sibling aura or the current entry shifted.
 func (s *TurnState) DestroyAura(t *Aura, addToGraveyard bool) {
-	if addToGraveyard {
-		s.graveyard = append(s.graveyard, t.Self)
+	if addToGraveyard && t.Self.Card != nil {
+		s.graveyard = append(s.graveyard, t.Self.Card)
 	}
-	if i := s.currentAuraIdx; i >= 0 && i < len(s.Auras) && &s.Auras[i] == t {
+	target := t.Self
+	if i := s.currentAuraIdx; i >= 0 && i < len(s.Auras) && s.Auras[i].Self == target {
 		s.Auras = append(s.Auras[:i], s.Auras[i+1:]...)
+		s.currentAuraDestroyed = true
 		return
 	}
 	for i := range s.Auras {
-		if &s.Auras[i] == t {
+		if s.Auras[i].Self == target {
 			s.Auras = append(s.Auras[:i], s.Auras[i+1:]...)
 			return
 		}

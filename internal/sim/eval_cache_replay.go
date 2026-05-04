@@ -23,7 +23,7 @@ import "fmt"
 func (e *Evaluator) replayBest(
 	entry evalCacheEntry,
 	hero Hero, weapons []Weapon, hand []Card,
-	mp Matchup, deck []Card, runechantCarryover int,
+	mp Matchup, deck []Card,
 	arsenalCardIn Card, priorAuras []Aura, skipLog bool,
 ) TurnSummary {
 	n := len(hand)
@@ -63,7 +63,7 @@ func (e *Evaluator) replayBest(
 	attackDealt, defenseDealt, _, swung, carry, ok, _, arsenalAtChainStart := e.evaluatePartition(
 		hero, weapons, hand, deck, arsenalCardIn,
 		rolesBuf, n, bufs,
-		runechantCarryover, mp, defenseSum,
+		mp, defenseSum,
 		priorAuras, skipLog,
 	)
 	if !ok {
@@ -72,8 +72,8 @@ func (e *Evaluator) replayBest(
 		// Reaching here means either the cache stored an infeasible result (bug) or some
 		// "should be deterministic" input drifted. Panic so the operator notices rather
 		// than silently re-searching and hiding a real correctness bug.
-		panic(fmt.Sprintf("replayBest: cached partition is infeasible — cache invariant violated (hand=%d, runechantCarryover=%d, matchup=%+v)",
-			len(hand), runechantCarryover, mp))
+		panic(fmt.Sprintf("replayBest: cached partition is infeasible — cache invariant violated (hand=%d, matchup=%+v)",
+			len(hand), mp))
 	}
 
 	// Re-stamp the post-hoc-promoted entry's Arsenal role so the BestLine matches the

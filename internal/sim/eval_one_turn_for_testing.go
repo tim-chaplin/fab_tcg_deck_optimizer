@@ -63,7 +63,7 @@ func (d *Deck) EvalOneTurnForTesting(mp Matchup, arsenalIn Card, initialHand []C
 	h := handBuf[:len(turn1Hand)]
 	copy(h, turn1Hand)
 	sortHandByID(h)
-	play := Best(d.Hero, d.Weapons, h, mp, buf[head:tail], 0, arsenalIn)
+	play := Best(d.Hero, d.Weapons, h, mp, buf[head:tail], arsenalIn)
 	// drawCount=0: head already points past the starting hand, so applyTurnResult only needs
 	// to advance past mid-turn draws.
 	nextHeld := applyTurnResult(play, buf, &head, &tail, nil)
@@ -76,14 +76,14 @@ func (d *Deck) EvalOneTurnForTesting(mp Matchup, arsenalIn Card, initialHand []C
 			Value:                     play.Value,
 			Graveyard:                 append([]Card(nil), play.State.Graveyard...),
 			StartOfNextTurnArsenal:    play.State.Arsenal,
-			StartOfNextTurnRunechants: play.State.Runechants,
+			StartOfNextTurnRunechants: play.State.Runechants(),
 		}
 	}
 	// Process turn-1 Auras at the turn-2 boundary the same way Evaluate does:
 	// fire start-of-turn handlers, re-arm OncePerTurn gates, drop exhausted entries.
 	// Reveals into the hand are consumed here so the returned turn-2 Hand matches what
 	// Best would see.
-	_, _, trigDamage, trigRunes, trigRevealed, trigGraveyarded := processAurasAtStartOfTurn(auraQueue, buf[head+drawCount2:tail])
+	survivors, _, trigDamage, _, trigRevealed, trigGraveyarded := processAurasAtStartOfTurn(auraQueue, buf[head+drawCount2:tail])
 	for range trigRevealed {
 		turn2Hand = append(turn2Hand, buf[head+drawCount2])
 		drawCount2++
@@ -99,7 +99,7 @@ func (d *Deck) EvalOneTurnForTesting(mp Matchup, arsenalIn Card, initialHand []C
 		StartOfNextTurnHand:          handCopy,
 		StartOfNextTurnArsenal:       play.State.Arsenal,
 		StartOfNextTurnDeck:          deckLeft,
-		StartOfNextTurnRunechants:    play.State.Runechants + trigRunes,
+		StartOfNextTurnRunechants:    priorRunechantCount(survivors),
 		StartOfNextTurnTriggerDamage: trigDamage,
 		StartOfNextTurnGraveyard:     trigGraveyarded,
 	}

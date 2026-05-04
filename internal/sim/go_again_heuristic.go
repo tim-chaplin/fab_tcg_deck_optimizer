@@ -36,7 +36,12 @@ func HasGoAgainHeuristic(c Card) bool {
 		AuraCreated:           true,
 		ArcaneDamageDealt:     true,
 		NonAttackActionPlayed: true,
-		Runechants:            1,
+		Auras: []Aura{{
+			Self:        CardOrTokenType{TokenType: TokenTypeRunechant},
+			TriggerType: TriggerAttack,
+			Count:       1,
+			Handler:     runechantAuraHandler,
+		}},
 	}
 	self := &CardState{Card: c}
 	c.Play(s, self)

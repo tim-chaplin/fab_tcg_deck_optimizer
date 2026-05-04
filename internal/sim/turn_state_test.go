@@ -54,8 +54,8 @@ func TestAddAura_FlipsAuraCreatedAndAppends(t *testing.T) {
 	if s.AuraCreated {
 		t.Fatal("pre: AuraCreated should be false")
 	}
-	s.AddAura(Aura{Self: self, TriggerType: TriggerStartOfTurn, Count: 2})
-	s.AddAura(Aura{Self: self, TriggerType: TriggerStartOfTurn, Count: 1})
+	s.AddAura(Aura{Self: CardOrTokenType{Card: self}, TriggerType: TriggerStartOfTurn, Count: 2})
+	s.AddAura(Aura{Self: CardOrTokenType{Card: self}, TriggerType: TriggerStartOfTurn, Count: 1})
 	if !s.AuraCreated {
 		t.Error("AuraCreated = false, want true")
 	}
@@ -66,8 +66,8 @@ func TestAddAura_FlipsAuraCreatedAndAppends(t *testing.T) {
 		t.Errorf("order broke: got Counts %d,%d want 2,1",
 			s.Auras[0].Count, s.Auras[1].Count)
 	}
-	if s.Auras[0].Self != self {
-		t.Errorf("Self = %v, want %v", s.Auras[0].Self, self)
+	if s.Auras[0].Self.Card != self {
+		t.Errorf("Self.Card = %v, want %v", s.Auras[0].Self.Card, self)
 	}
 }
 
@@ -148,48 +148,54 @@ func TestAddValue_ClampsNonPositive(t *testing.T) {
 	}
 }
 
-// TestCreateRunechants_CountAndFlag: bumps Runechants by n, flips AuraCreated, and returns n
-// as the damage-equivalent credit. n=0 is a no-op (no credit, no flag flip).
+// TestCreateRunechants_CountAndFlag: bumps the runechant aura by n, flips AuraCreated,
+// and credits +n damage to Value. n=0 is a no-op (no aura, no flag flip, no credit).
 func TestCreateRunechants_CountAndFlag(t *testing.T) {
 	var s TurnState
-	if got := s.CreateRunechants(0); got != 0 {
-		t.Errorf("CreateRunechants(0) = %d, want 0", got)
-	}
+	s.CreateRunechants(0)
 	if s.AuraCreated {
 		t.Error("AuraCreated should stay false for n=0")
 	}
-	if s.Runechants != 0 {
-		t.Errorf("Runechants = %d, want 0", s.Runechants)
+	if s.Runechants() != 0 {
+		t.Errorf("Runechants = %d, want 0", s.Runechants())
+	}
+	if s.Value != 0 {
+		t.Errorf("Value = %d, want 0 (n=0 credits nothing)", s.Value)
 	}
 
-	if got := s.CreateRunechants(3); got != 3 {
-		t.Errorf("CreateRunechants(3) = %d, want 3", got)
-	}
+	s.CreateRunechants(3)
 	if !s.AuraCreated {
 		t.Error("AuraCreated should flip to true")
 	}
-	if s.Runechants != 3 {
-		t.Errorf("Runechants = %d, want 3", s.Runechants)
+	if s.Runechants() != 3 {
+		t.Errorf("Runechants = %d, want 3", s.Runechants())
+	}
+	if s.Value != 3 {
+		t.Errorf("Value = %d, want 3 (creator credits +n)", s.Value)
 	}
 
 	// Second call accumulates rather than replacing.
 	s.CreateRunechants(2)
-	if s.Runechants != 5 {
-		t.Errorf("Runechants after second call = %d, want 5", s.Runechants)
+	if s.Runechants() != 5 {
+		t.Errorf("Runechants after second call = %d, want 5", s.Runechants())
+	}
+	if s.Value != 5 {
+		t.Errorf("Value after second call = %d, want 5", s.Value)
 	}
 }
 
 // TestCreateRunechant_IsSingleTokenShorthand: one call = one Runechant + 1 credit.
 func TestCreateRunechant_IsSingleTokenShorthand(t *testing.T) {
 	var s TurnState
-	if got := s.CreateRunechant(); got != 1 {
-		t.Errorf("CreateRunechant() = %d, want 1", got)
-	}
-	if s.Runechants != 1 {
-		t.Errorf("Runechants = %d, want 1", s.Runechants)
+	s.CreateRunechant()
+	if s.Runechants() != 1 {
+		t.Errorf("Runechants = %d, want 1", s.Runechants())
 	}
 	if !s.AuraCreated {
 		t.Error("AuraCreated should be true after CreateRunechant")
+	}
+	if s.Value != 1 {
+		t.Errorf("Value = %d, want 1", s.Value)
 	}
 }
 

@@ -16,43 +16,43 @@ import ()
 // phases since resources don't carry between turns.
 //
 // arsenalCardIn is the card sitting in the arsenal slot at start of turn (nil if empty).
-// runechantCarryover is the Runechant token count carrying in from the previous turn.
-// TurnSummary.State.Runechants is the count at end of the chosen chain; feed it back as
-// the next turn's carryover.
+// Runechants carry across turns via priorAuras (BestWithTriggers): the runechant token
+// aura is one entry in that slice when carryover is non-zero. TurnSummary.State.Auras
+// surfaces the surviving auras from this turn for next turn's carryover.
 //
 // Test convention: end-to-end tests should drive the chain runner through
 // (*Deck).EvalOneTurnForTesting (deck-level entry point, mirrors production's per-turn
 // loop). Calling Best directly is reserved for Best's own unit tests and for production
 // plumbing inside this package.
-func Best(hero Hero, weapons []Weapon, hand []Card, mp Matchup, deck []Card, runechantCarryover int, arsenalCardIn Card) TurnSummary {
-	return sharedEvaluator.BestWithTriggers(hero, weapons, hand, mp, deck, runechantCarryover, arsenalCardIn, nil)
+func Best(hero Hero, weapons []Weapon, hand []Card, mp Matchup, deck []Card, arsenalCardIn Card) TurnSummary {
+	return sharedEvaluator.BestWithTriggers(hero, weapons, hand, mp, deck, arsenalCardIn, nil)
 }
 
-// BestWithTriggers is Best plus an explicit priorAuras input — the Auras
-// carrying in from the previous turn. Mid-chain triggers (Malefic Incantation's
-// TriggerAttackAction rune, etc.) may fire and contribute damage to this turn's Value.
-// Same test convention as Best: e2e tests should go through (*Deck).EvalOneTurnForTesting.
-func BestWithTriggers(hero Hero, weapons []Weapon, hand []Card, mp Matchup, deck []Card, runechantCarryover int, arsenalCardIn Card, priorAuras []Aura) TurnSummary {
-	return sharedEvaluator.BestWithTriggers(hero, weapons, hand, mp, deck, runechantCarryover, arsenalCardIn, priorAuras)
+// BestWithTriggers is Best plus an explicit priorAuras input — the Auras (card auras +
+// the runechant token aura when one is live) carrying in from the previous turn.
+// Mid-chain triggers (Malefic Incantation's TriggerAttackAction rune, runechant tokens'
+// TriggerAttack, …) may fire and contribute damage to this turn's Value.
+func BestWithTriggers(hero Hero, weapons []Weapon, hand []Card, mp Matchup, deck []Card, arsenalCardIn Card, priorAuras []Aura) TurnSummary {
+	return sharedEvaluator.BestWithTriggers(hero, weapons, hand, mp, deck, arsenalCardIn, priorAuras)
 }
 
 // Best is the method form of the package-level Best.
-func (e *Evaluator) Best(hero Hero, weapons []Weapon, hand []Card, mp Matchup, deck []Card, runechantCarryover int, arsenalCardIn Card) TurnSummary {
-	return e.BestWithTriggers(hero, weapons, hand, mp, deck, runechantCarryover, arsenalCardIn, nil)
+func (e *Evaluator) Best(hero Hero, weapons []Weapon, hand []Card, mp Matchup, deck []Card, arsenalCardIn Card) TurnSummary {
+	return e.BestWithTriggers(hero, weapons, hand, mp, deck, arsenalCardIn, nil)
 }
 
 // BestWithTriggers is the method form of the package-level BestWithTriggers. Returns a
 // TurnSummary with State.Log fully populated.
-func (e *Evaluator) BestWithTriggers(hero Hero, weapons []Weapon, hand []Card, mp Matchup, deck []Card, runechantCarryover int, arsenalCardIn Card, priorAuras []Aura) TurnSummary {
-	return e.findBest(hero, weapons, hand, mp, deck, runechantCarryover, arsenalCardIn, priorAuras, false)
+func (e *Evaluator) BestWithTriggers(hero Hero, weapons []Weapon, hand []Card, mp Matchup, deck []Card, arsenalCardIn Card, priorAuras []Aura) TurnSummary {
+	return e.findBest(hero, weapons, hand, mp, deck, arsenalCardIn, priorAuras, false)
 }
 
 // BestWithTriggersSkipLog is BestWithTriggers without populating State.Log. Same Value and
 // non-Log carry-state fields; State.Log comes back empty. The deck-eval loop uses this for
 // every turn to skip the per-chain Log slice copy that dominates allocation bytes; only
 // turns that become the new deck-best are replayed via BestWithTriggers to recover Log.
-func (e *Evaluator) BestWithTriggersSkipLog(hero Hero, weapons []Weapon, hand []Card, mp Matchup, deck []Card, runechantCarryover int, arsenalCardIn Card, priorAuras []Aura) TurnSummary {
-	return e.findBest(hero, weapons, hand, mp, deck, runechantCarryover, arsenalCardIn, priorAuras, true)
+func (e *Evaluator) BestWithTriggersSkipLog(hero Hero, weapons []Weapon, hand []Card, mp Matchup, deck []Card, arsenalCardIn Card, priorAuras []Aura) TurnSummary {
+	return e.findBest(hero, weapons, hand, mp, deck, arsenalCardIn, priorAuras, true)
 }
 
 // Evaluator caches per-goroutine scratch state across Best calls. The first call allocates

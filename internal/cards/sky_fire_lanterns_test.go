@@ -21,8 +21,8 @@ func TestSkyFireLanterns_MatchingTopCard(t *testing.T) {
 	if got := s.Value; got != 1 {
 		t.Errorf("Red with Red top: Play() = %d, want 1 (pitch match → create Runechant)", got)
 	}
-	if s.Runechants != 1 {
-		t.Errorf("Runechants = %d, want 1", s.Runechants)
+	if s.Runechants() != 1 {
+		t.Errorf("Runechants = %d, want 1", s.Runechants())
 	}
 }
 

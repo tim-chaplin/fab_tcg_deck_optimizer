@@ -1,12 +1,13 @@
 package sim
 
-// An Aura is a persistent hook attached to a card in play. The sim walks each TurnState's
-// Auras list on every Trigger condition and fires the matching handlers; lifecycle (when
-// to decrement Count, when to send Self to the graveyard, when to deregister) belongs to
-// the handler — sim only keeps Auras alive between fires and drops them once the handler
-// flips Destroyed. Used today for start-of-turn upkeep auras (Sigil of Deadwood, Sigil
-// of Fyendal, Blessing of Occult, Runeblood Incantation, Sigil of the Arknight, Sigil
-// of Silphidae) and per-attack-action triggers (Malefic Incantation).
+// An Aura is a persistent hook attached to a card or a token in play. The sim walks each
+// TurnState's Auras list on every Trigger condition and fires the matching handlers;
+// lifecycle (when to decrement Count, when to send Self to the graveyard, when to
+// deregister) belongs to the handler. Used for start-of-turn upkeep auras (sigils,
+// Blessing of Occult, Runeblood Incantation), per-attack-action triggers (Malefic
+// Incantation), and aura tokens (Runechants — see tokens.go).
+
+import "github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
 
 // TriggerType categorises when an Aura's Handler fires.
 type TriggerType int
@@ -21,31 +22,65 @@ const (
 	// how many attack actions resolve ("once per turn, when you play an attack action card
 	// …" clauses).
 	TriggerAttackAction
+	// TriggerAttack fires when ANY attack resolves — attack action card or weapon swing.
+	// The runechant aura uses this so each attack consumes the runechants in play.
+	TriggerAttack
 )
 
+// CardOrTokenType identifies what an Aura belongs to: a specific card in play, or a
+// generic aura token (Runechant, Ponder, etc.). Exactly one of Card / TokenType is set;
+// the other carries its zero value.
+type CardOrTokenType struct {
+	// Card is the originating card for non-token auras (sigils, incantations, …). nil for
+	// token auras.
+	Card Card
+	// TokenType identifies the token kind for token auras. TokenTypeNone for card auras.
+	TokenType TokenType
+}
+
+// IsToken reports whether this Aura belongs to a token (no originating card).
+func (c CardOrTokenType) IsToken() bool { return c.TokenType != TokenTypeNone }
+
+// CardID returns the originating card's ID when this is a card aura, or ids.InvalidCard
+// for tokens. Tokens are distinguished in cache keys by their TokenType, not by CardID.
+func (c CardOrTokenType) CardID() ids.CardID {
+	if c.Card != nil {
+		return c.Card.ID()
+	}
+	return ids.InvalidCard
+}
+
+// DisplayName returns the human-readable name — the card's DisplayName for card auras,
+// or the token's printed name (e.g. "Runechant") for token auras.
+func (c CardOrTokenType) DisplayName() string {
+	if c.Card != nil {
+		return DisplayName(c.Card)
+	}
+	return tokenDisplayName(c.TokenType)
+}
+
 // AuraHandler is the business-logic callback attached to an Aura. Called when the Aura's
-// TriggerType condition fires — it's where the printed "create a runechant", "gain 1{h}",
-// "reveal top of deck" effect lives. Handlers mutate the passed TurnState directly,
-// crediting damage / life gain via s.AddValue. Same shape as Card.Play — no return.
-// Lifecycle is the handler's responsibility: a one-shot aura calls s.DestroyAura(t,
-// addToGraveyard) at the end of its body; a counter-based aura decrements t.Count and
-// calls s.DestroyAura when the count expires.
+// TriggerType condition fires — it's where the printed effect lives. Handlers mutate the
+// passed TurnState directly, crediting damage / life gain via s.AddValue. Same shape as
+// Card.Play — no return. Lifecycle is the handler's responsibility: call
+// s.DestroyAura(t, addToGraveyard) when done. Token-style auras pass false for
+// addToGraveyard since the underlying token isn't a card and just disappears.
 type AuraHandler func(s *TurnState, t *Aura)
 
-// Aura is one persistent hook attached to a card in play. Each time TriggerType's
-// condition fires — and, when OncePerTurn is set, at most once per turn — the sim calls
-// Handler. The Aura survives until its handler calls s.DestroyAura.
+// Aura is one persistent hook attached to a card or a token in play. Each time
+// TriggerType's condition fires — and, when OncePerTurn is set, at most once per turn —
+// the sim calls Handler. The Aura survives until its handler calls s.DestroyAura.
 type Aura struct {
-	// Self is the card this Aura belongs to. Surfaced in per-turn summaries (e.g. the
-	// "(from previous turn)" formatter line naming the Aura that fired). Handlers that
-	// want the underlying card to land in the graveyard call s.DestroyAura(t, true).
-	Self Card
+	// Self identifies what this Aura belongs to — a card (Sigil of Deadwood, Malefic
+	// Incantation, …) or a token type (Runechant, …). Surfaced in per-turn summaries via
+	// CardOrTokenType.DisplayName.
+	Self CardOrTokenType
 	// TriggerType is the trigger condition that fires this Aura's Handler.
 	TriggerType TriggerType
 	// Count is a per-Aura counter. Its meaning is card-specific: Malefic Incantation and
 	// Runeblood Incantation read it as fires remaining and decrement themselves; one-shot
-	// sigils ignore it; future Auras may use it for other things (e.g. tokens in play).
-	// The sim treats Count as opaque storage and never mutates it.
+	// sigils ignore it; token auras (Runechant) use it as a copy count. The sim treats
+	// Count as opaque storage and never mutates it.
 	Count int
 	// Handler runs when TriggerType fires.
 	Handler AuraHandler

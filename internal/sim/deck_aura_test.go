@@ -16,7 +16,7 @@ import (
 // firing counts.
 func damageTrigger(self Card, damage int, calls *int) Aura {
 	return Aura{
-		Self:        self,
+		Self:        CardOrTokenType{Card: self},
 		TriggerType: TriggerStartOfTurn,
 		Count:       1,
 		Handler: func(s *TurnState, t *Aura) {
@@ -70,7 +70,7 @@ func TestProcessAurasAtStartOfTurn_GraveyardsExhaustedAura(t *testing.T) {
 	// Second trigger's handler records what's currently in the graveyard so we can check the
 	// first trigger's destroy happened BEFORE the second fires.
 	watcher := Aura{
-		Self:        testutils.YellowAttack{},
+		Self:        CardOrTokenType{Card: testutils.YellowAttack{}},
 		TriggerType: TriggerStartOfTurn,
 		Count:       1,
 		Handler: func(s *TurnState, _ *Aura) {
@@ -78,7 +78,7 @@ func TestProcessAurasAtStartOfTurn_GraveyardsExhaustedAura(t *testing.T) {
 		},
 	}
 	_, _, _, _, _, _ = ProcessAurasAtStartOfTurn([]Aura{
-		{Self: aura, TriggerType: TriggerStartOfTurn, Count: 1, Handler: func(s *TurnState, t *Aura) {
+		{Self: CardOrTokenType{Card: aura}, TriggerType: TriggerStartOfTurn, Count: 1, Handler: func(s *TurnState, t *Aura) {
 			s.DestroyAura(t, true)
 		}},
 		watcher,
@@ -377,7 +377,7 @@ func TestEvaluate_TriggersFromLastTurnSurfacesInBest(t *testing.T) {
 func TestProcessAurasAtStartOfTurn_ReArmsOncePerTurnGate(t *testing.T) {
 	aura := testutils.RedAttack{}
 	exhausted := Aura{
-		Self:          aura,
+		Self:          CardOrTokenType{Card: aura},
 		TriggerType:   TriggerAttackAction,
 		Count:         2,
 		OncePerTurn:   true,

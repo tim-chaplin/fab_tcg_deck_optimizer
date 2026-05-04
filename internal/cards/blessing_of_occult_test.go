@@ -28,8 +28,8 @@ func TestBlessingOfOccult_PlayCreatesAuraNoThisTurnRunes(t *testing.T) {
 		if !s.AuraCreated {
 			t.Errorf("%s: AuraCreated should be set", tc.c.Name())
 		}
-		if s.Runechants != 0 {
-			t.Errorf("%s: Runechants = %d, want 0 (tokens are next-turn)", tc.c.Name(), s.Runechants)
+		if s.Runechants() != 0 {
+			t.Errorf("%s: Runechants = %d, want 0 (tokens are next-turn)", tc.c.Name(), s.Runechants())
 		}
 		if len(s.Auras) != 1 {
 			t.Fatalf("%s: Auras len = %d, want 1", tc.c.Name(), len(s.Auras))
@@ -62,9 +62,9 @@ func TestBlessingOfOccult_TriggerHandlerCreatesNRunes(t *testing.T) {
 		if next.Value != tc.n {
 			t.Errorf("%s: handler Value = %d, want %d", tc.c.Name(), next.Value, tc.n)
 		}
-		if next.Runechants != tc.n {
+		if next.Runechants() != tc.n {
 			t.Errorf("%s: Runechants = %d, want %d (live tokens on next turn)",
-				tc.c.Name(), next.Runechants, tc.n)
+				tc.c.Name(), next.Runechants(), tc.n)
 		}
 	}
 }

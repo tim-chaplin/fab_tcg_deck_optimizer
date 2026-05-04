@@ -270,7 +270,6 @@ func runOneShuffle(d *Deck, stats *Stats, scratch *shuffleScratch, idIndex map[i
 
 	head, tail := 0, deckSize
 	handIdx := 0
-	runechantCarryover := 0
 	var arsenalCard Card
 	heldBuf := scratch.heldBuf[:0]
 	auraTriggerBuf := scratch.auraTriggerBuf[:0]
@@ -283,22 +282,20 @@ func runOneShuffle(d *Deck, stats *Stats, scratch *shuffleScratch, idIndex map[i
 		if !ok {
 			break
 		}
-		startingRunechants := runechantCarryover
+		startingRunechants := priorRunechantCount(auraTriggerBuf)
 		startOfTurnAuras := snapshotStartOfTurnAuras(auraTriggerBuf)
 		dealtHand := append([]Card(nil), h...)
 		var trigContribs []TriggerContribution
-		var trigDamage, trigRunes int
+		var trigDamage int
 		var trigRevealed []Card
-		auraTriggerBuf, trigContribs, trigDamage, trigRunes, trigRevealed, _ = processAurasAtStartOfTurn(auraTriggerBuf, buf[head+drawCount:tail])
+		auraTriggerBuf, trigContribs, trigDamage, _, trigRevealed, _ = processAurasAtStartOfTurn(auraTriggerBuf, buf[head+drawCount:tail])
 		for range trigRevealed {
 			h = append(h, buf[head+drawCount])
 			drawCount++
 		}
-		runechantCarryover += trigRunes
 		arsenalIn := arsenalCard
 		sortHandByID(h)
-		play := runBestForTurn(d.Hero, d.Weapons, h, mp, buf[head+drawCount:tail], runechantCarryover, arsenalCard, auraTriggerBuf, ev)
-		runechantCarryover = play.State.Runechants
+		play := runBestForTurn(d.Hero, d.Weapons, h, mp, buf[head+drawCount:tail], arsenalCard, auraTriggerBuf, ev)
 		arsenalCard = play.State.Arsenal
 		play.Value += trigDamage
 		play.TriggersFromLastTurn = trigContribs
@@ -306,7 +303,7 @@ func runOneShuffle(d *Deck, stats *Stats, scratch *shuffleScratch, idIndex map[i
 		play.DealtHand = dealtHand
 
 		if recordTurnStats(stats, play, handIdx, handsPerCycle) {
-			replay := replayBestForTurnWithLog(d.Hero, d.Weapons, h, mp, buf[head+drawCount:tail], startingRunechants, arsenalIn, auraTriggerBuf, ev)
+			replay := replayBestForTurnWithLog(d.Hero, d.Weapons, h, mp, buf[head+drawCount:tail], arsenalIn, auraTriggerBuf, ev)
 			replay.Value = play.Value
 			replay.TriggersFromLastTurn = trigContribs
 			replay.StartOfTurnAuras = startOfTurnAuras
@@ -358,16 +355,19 @@ func finalizeBestTurnLog(stats *Stats) {
 }
 
 // snapshotStartOfTurnAuras returns a fresh slice of the Self cards backing every queued
-// Aura at the top of the turn — i.e. the auras in play before
-// processAurasAtStartOfTurn fires and potentially destroys any. Returns nil when the
-// queue is empty so the snapshot allocates only when there is something to capture.
+// card-style Aura at the top of the turn — i.e. the card auras in play before
+// processAurasAtStartOfTurn fires and potentially destroys any. Token-style auras
+// (Runechants, …) are skipped: the formatter renders them separately. Returns nil when
+// the queue holds no card auras.
 func snapshotStartOfTurnAuras(queued []Aura) []Card {
 	if len(queued) == 0 {
 		return nil
 	}
-	out := make([]Card, len(queued))
-	for i, t := range queued {
-		out[i] = t.Self
+	var out []Card
+	for _, t := range queued {
+		if t.Self.Card != nil {
+			out = append(out, t.Self.Card)
+		}
 	}
 	return out
 }
@@ -383,17 +383,16 @@ func runBestForTurn(
 	h []Card,
 	mp Matchup,
 	deck []Card,
-	runechantCarryover int,
 	arsenalCard Card,
 	priorAuras []Aura,
 	ev *Evaluator,
 ) TurnSummary {
 	if ev != nil {
-		return ev.BestWithTriggersSkipLog(hero, weapons, h, mp, deck, runechantCarryover, arsenalCard, priorAuras)
+		return ev.BestWithTriggersSkipLog(hero, weapons, h, mp, deck, arsenalCard, priorAuras)
 	}
 	// No-evaluator path retains the populated-Log behaviour for direct callers (tests, ad-hoc
 	// tools) that don't have a deck-eval loop to drive the replay step.
-	return BestWithTriggers(hero, weapons, h, mp, deck, runechantCarryover, arsenalCard, priorAuras)
+	return BestWithTriggers(hero, weapons, h, mp, deck, arsenalCard, priorAuras)
 }
 
 // replayBestForTurnWithLog re-runs the Best search with full Log materialisation. Same
@@ -407,15 +406,14 @@ func replayBestForTurnWithLog(
 	h []Card,
 	mp Matchup,
 	deck []Card,
-	runechantCarryover int,
 	arsenalCard Card,
 	priorAuras []Aura,
 	ev *Evaluator,
 ) TurnSummary {
 	if ev != nil {
-		return ev.BestWithTriggers(hero, weapons, h, mp, deck, runechantCarryover, arsenalCard, priorAuras)
+		return ev.BestWithTriggers(hero, weapons, h, mp, deck, arsenalCard, priorAuras)
 	}
-	return BestWithTriggers(hero, weapons, h, mp, deck, runechantCarryover, arsenalCard, priorAuras)
+	return BestWithTriggers(hero, weapons, h, mp, deck, arsenalCard, priorAuras)
 }
 
 // recordTurnStats folds one resolved turn's accumulators into stats: bumps Hands /
@@ -497,12 +495,12 @@ func processAurasAtStartOfTurn(queued []Aura, postDrawDeck []Card) (
 			i++
 			continue
 		}
-		self := t.Self
+		self := t.Self.Card
 		preHand := len(ts.Hand)
 		preLog := len(ts.turnLog)
-		preLen := len(ts.Auras)
 		preValue := ts.Value
 		ts.currentAuraIdx = i
+		ts.currentAuraDestroyed = false
 		t.Handler(ts, t)
 		ts.currentAuraIdx = -1
 		d := ts.Value - preValue
@@ -523,13 +521,13 @@ func processAurasAtStartOfTurn(queued []Aura, postDrawDeck []Card) (
 			text = ts.turnLog[preLog].Text
 		}
 		contribs = append(contribs, TriggerContribution{Card: self, Damage: d, Revealed: rev, Text: text})
-		if len(ts.Auras) == preLen {
-			i++ // not spliced — advance cursor past this entry
+		// Advance the cursor unless the handler destroyed its own aura. When it did, the
+		// next entry shifted into position i, so the cursor stays put.
+		if !ts.currentAuraDestroyed {
+			i++
 		}
-		// else: handler called DestroyAura, ts.Auras shrunk; current i now points to the
-		// next entry, leave the cursor where it is.
 	}
-	return ts.Auras, contribs, damage, ts.Runechants, ts.Hand, ts.graveyard
+	return ts.Auras, contribs, damage, ts.Runechants(), ts.Hand, ts.graveyard
 }
 
 // applyTurnResult folds a completed turn's outcome into cross-turn state. The deck loop

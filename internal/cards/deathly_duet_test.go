@@ -52,8 +52,8 @@ func TestDeathlyDuet_NonAttackActionAttributedCreatesRunechants(t *testing.T) {
 	if got := s.Value; got != 6 {
 		t.Errorf("Deathly Duet Red with non-attack attributed: Play() = %d, want 6 (base 4 + 2 token credits)", got)
 	}
-	if s.Runechants != 2 {
-		t.Errorf("Runechants = %d, want 2", s.Runechants)
+	if s.Runechants() != 2 {
+		t.Errorf("Runechants = %d, want 2", s.Runechants())
 	}
 	if !s.AuraCreated {
 		t.Errorf("AuraCreated should be set when Runechants are created")
@@ -72,7 +72,7 @@ func TestDeathlyDuet_BothBranchesFire(t *testing.T) {
 	if got := s.Value; got != 8 {
 		t.Errorf("Deathly Duet Red with both attributed: Play() = %d, want 8 (base 4 + 2 power + 2 token credits)", got)
 	}
-	if s.Runechants != 2 {
-		t.Errorf("Runechants = %d, want 2", s.Runechants)
+	if s.Runechants() != 2 {
+		t.Errorf("Runechants = %d, want 2", s.Runechants())
 	}
 }

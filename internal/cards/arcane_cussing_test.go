@@ -77,7 +77,7 @@ func TestArcaneCussing_SameTurnPopByWeaponSwing(t *testing.T) {
 	s := sim.TurnState{
 		IncomingDamage: 3,
 		BlockTotal:     0,
-		Runechants:     1,
+		Auras:          []sim.Aura{sim.NewRunechantAura(1)},
 		CardsRemaining: []*sim.CardState{{Card: testutils.RunebladeWeapon{}}},
 	}
 	(ArcaneCussingRed{}).Play(&s, &sim.CardState{Card: ArcaneCussingRed{}})
@@ -92,7 +92,7 @@ func TestArcaneCussing_SameTurnPopByRunechantAlone(t *testing.T) {
 	s := sim.TurnState{
 		IncomingDamage: 3,
 		BlockTotal:     0,
-		Runechants:     1,
+		Auras:          []sim.Aura{sim.NewRunechantAura(1)},
 		CardsRemaining: []*sim.CardState{{Card: testutils.AttackWithPower{Power: 6}}},
 	}
 	(ArcaneCussingRed{}).Play(&s, &sim.CardState{Card: ArcaneCussingRed{}})

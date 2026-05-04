@@ -31,7 +31,7 @@ func (SigilOfSilphidaeBlue) AddsFutureValue()        {}
 func (c SigilOfSilphidaeBlue) Play(s *sim.TurnState, self *sim.CardState) {
 	enterDamage := banishAuraFromGraveyard(s)
 	s.AddAura(sim.Aura{
-		Self:        c,
+		Self:        sim.CardOrTokenType{Card: c},
 		TriggerType: sim.TriggerStartOfTurn,
 		Count:       1,
 		Handler:     sigilOfSilphidaeAuraHandler,
@@ -50,7 +50,7 @@ func sigilOfSilphidaeAuraHandler(s *sim.TurnState, t *sim.Aura) {
 	n := banishAuraFromGraveyard(s)
 	if n > 0 {
 		s.AddValue(n)
-		s.LogPostTrigger(sim.DisplayName(t.Self), "Banished an aura, dealt 1 arcane damage", n)
+		s.LogPostTrigger(t.Self.DisplayName(), "Banished an aura, dealt 1 arcane damage", n)
 	}
 	s.DestroyAura(t, true)
 }

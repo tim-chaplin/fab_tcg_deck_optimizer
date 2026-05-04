@@ -28,7 +28,7 @@ func (SigilOfDeadwoodBlue) GoAgain() bool           { return true }
 func (SigilOfDeadwoodBlue) AddsFutureValue()        {}
 func (c SigilOfDeadwoodBlue) Play(s *sim.TurnState, self *sim.CardState) {
 	s.AddAura(sim.Aura{
-		Self:        c,
+		Self:        sim.CardOrTokenType{Card: c},
 		TriggerType: sim.TriggerStartOfTurn,
 		Count:       1,
 		Handler:     sigilOfDeadwoodAuraHandler,
@@ -39,8 +39,7 @@ func (c SigilOfDeadwoodBlue) Play(s *sim.TurnState, self *sim.CardState) {
 // sigilOfDeadwoodAuraHandler creates 1 runechant on the next-turn fire and destroys the
 // aura. Top-level so the Aura.Handler assignment doesn't allocate a closure.
 func sigilOfDeadwoodAuraHandler(s *sim.TurnState, t *sim.Aura) {
-	n := s.CreateRunechants(1)
-	s.AddValue(n)
-	s.LogPostTrigger(sim.DisplayName(t.Self), "Created a runechant", n)
+	s.CreateRunechants(1)
+	s.LogPostTrigger(t.Self.DisplayName(), "Created a runechant", 1)
 	s.DestroyAura(t, true)
 }

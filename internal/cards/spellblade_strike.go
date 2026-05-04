@@ -25,7 +25,7 @@ func (SpellbladeStrikeRed) GoAgain() bool           { return false }
 func (SpellbladeStrikeRed) Play(s *sim.TurnState, self *sim.CardState) {
 	n := self.DealEffectiveAttack(s)
 	s.Log(self, n)
-	s.AddValue(s.CreateRunechants(1))
+	s.CreateRunechants(1)
 	s.LogRider(self, 1, "Created a runechant")
 }
 
@@ -42,7 +42,7 @@ func (SpellbladeStrikeYellow) GoAgain() bool           { return false }
 func (SpellbladeStrikeYellow) Play(s *sim.TurnState, self *sim.CardState) {
 	n := self.DealEffectiveAttack(s)
 	s.Log(self, n)
-	s.AddValue(s.CreateRunechants(1))
+	s.CreateRunechants(1)
 	s.LogRider(self, 1, "Created a runechant")
 }
 
@@ -59,6 +59,6 @@ func (SpellbladeStrikeBlue) GoAgain() bool           { return false }
 func (SpellbladeStrikeBlue) Play(s *sim.TurnState, self *sim.CardState) {
 	n := self.DealEffectiveAttack(s)
 	s.Log(self, n)
-	s.AddValue(s.CreateRunechants(1))
+	s.CreateRunechants(1)
 	s.LogRider(self, 1, "Created a runechant")
 }

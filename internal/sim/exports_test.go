@@ -61,7 +61,7 @@ func BeatsBest(v, leftoverRunechants, futureValuePlayed int, willOccupyArsenal b
 	r := runningCarry{
 		seen:               true,
 		value:              best.Value,
-		leftoverRunechants: best.State.Runechants,
+		leftoverRunechants: best.State.Runechants(),
 		futureValuePlayed:  bestFutureValuePlayed,
 		hasHeld:            bestWillOccupyArsenal,
 	}
