@@ -40,18 +40,20 @@ type shapeBufs struct {
 	// weapon-prefix bits of the wmask, used for SwungWeapons display. Items don't
 	// contribute to swung weapons so this stays weapon-only.
 	weaponNames [][]string
-	// weaponAbilities / weaponAbilityCosts cache the weapon prefix of the unified
-	// activated-ability list — w.Ability() and ab.Cost() called once per weapon at
-	// construction so the per-Best assembly skips per-call interface boxing on the
-	// hot anneal path. Items contribute additional entries below at per-Best time.
-	weaponAbilities    []Card
-	weaponAbilityCosts []int
-	// activatedAbilitiesScratch backs the per-Best unified activated-ability list —
-	// bestAttackWithWeapons re-seeds it from the weaponAbilities prefix and appends
-	// item ability instances. Weapons and items share one wmask path. Reused across
-	// calls via [:0] re-slice; backing grows on first sizing only.
-	activatedAbilitiesScratch    []Card
-	activatedAbilityCostsScratch []int
+	// activatedAbilities is the unified activated-ability list — weapons (positions
+	// 0..len(weapons)-1) materialised at construction; items appended per Best call
+	// from priorItems and ItemCreator declarations. The wmask iterates over the whole
+	// slice; index j's bit selects activatedAbilities[j]. An "activated ability" is
+	// the same chain step whether it came from a weapon or an item, so they share one
+	// list and one path. Per-Best assembly re-slices back to the weapon prefix length
+	// before appending items, leaving the cached weapon entries reusable across calls.
+	activatedAbilities    []Card
+	activatedAbilityCosts []int
+	// weaponAbilityCount is len(weapons) at construction — the size of the cached
+	// weapon prefix in activatedAbilities. Per-Best assembly re-slices both
+	// activatedAbilities and activatedAbilityCosts back to this length before
+	// appending items.
+	weaponAbilityCount int
 	// Partition-loop buffers, consumed by findBest. Sized handSize+1 to cover the optional
 	// arsenal-in slot the enumerator treats as index n. isDRBuf caches card.TypeDefenseReaction
 	// membership; canAttackBuf caches "this card can take Attack role" (Action or Weapon
@@ -172,15 +174,16 @@ func newAttackBufs(handSize, weaponCount int, weapons []Weapon) *attackBufs {
 	// card) can extend a chain well past the starting hand size.
 	const maxDrawnExtensions = 32
 	maxAttackers := handSize + weaponCount + 1 + maxDrawnExtensions
-	// Cache the weapon prefix of the unified activated-ability list — Ability() and
-	// Cost() each get one call per weapon at construction. The per-Best assembly seeds
-	// activatedAbilitiesScratch from these slices via copy, skipping per-call interface
-	// boxing on the hot anneal path.
-	weaponAbilities := make([]Card, len(weapons))
-	weaponAbilityCosts := make([]int, len(weapons))
+	// Materialise the weapon prefix of activatedAbilities once: w.Ability() returns the
+	// stable package-cached interface value (per dev-standards), and its cost flows
+	// through attackerMetaPtrFor's global cache. Per-Best assembly re-slices back to
+	// this prefix length before appending items.
+	activatedAbilities := make([]Card, len(weapons))
+	activatedAbilityCosts := make([]int, len(weapons))
 	for i, w := range weapons {
-		weaponAbilities[i] = w.Ability()
-		weaponAbilityCosts[i] = weaponAbilities[i].Cost(&TurnState{})
+		ab := w.Ability()
+		activatedAbilities[i] = ab
+		activatedAbilityCosts[i] = attackerMetaPtrFor(ab).maxCost
 	}
 	// weaponNames stays shape-stable since it's purely a function of the weapons loadout
 	// — the SwungWeapons display reads it per-mask without rebuilding.
@@ -207,29 +210,30 @@ func newAttackBufs(handSize, weaponCount int, weapons []Weapon) *attackBufs {
 	const logBackingCap = 64
 	return &attackBufs{
 		shapeBufs: shapeBufs{
-			pcBuf:              pcBuf,
-			ptrBuf:             ptrBuf,
-			state:              &TurnState{},
-			permMeta:           make([]*attackerMeta, maxAttackers),
-			attackerBuf:        make([]Card, maxAttackers),
-			weaponNames:        weaponNames,
-			weaponAbilities:    weaponAbilities,
-			weaponAbilityCosts: weaponAbilityCosts,
-			rolesBuf:           make([]Role, handSize+1),
-			pitchVals:          make([]int, handSize+1),
-			defenseVals:        make([]int, handSize+1),
-			isDRBuf:            make([]bool, handSize+1),
-			canAttackBuf:       make([]bool, handSize+1),
-			addsFutureValueBuf: make([]bool, handSize+1),
-			pitchedValsScratch: make([]int, 0, handSize+1),
-			pitchedBuf:         make([]Card, 0, handSize+1),
-			pitchPermBuf:       make([]Card, 0, handSize+1),
-			pitchPermValsBuf:   make([]int, 0, handSize+1),
-			pitchAttrBuf:       make([]Card, 0, handSize+1),
-			attackersBuf:       make([]Card, 0, handSize+1),
-			defendersBuf:       make([]Card, 0, handSize+1),
-			heldBuf:            make([]Card, 0, handSize+1),
-			defenseGravScratch: make([]Card, 0, handSize+1),
+			pcBuf:                 pcBuf,
+			ptrBuf:                ptrBuf,
+			state:                 &TurnState{},
+			permMeta:              make([]*attackerMeta, maxAttackers),
+			attackerBuf:           make([]Card, maxAttackers),
+			weaponNames:           weaponNames,
+			activatedAbilities:    activatedAbilities,
+			activatedAbilityCosts: activatedAbilityCosts,
+			weaponAbilityCount:    len(weapons),
+			rolesBuf:              make([]Role, handSize+1),
+			pitchVals:             make([]int, handSize+1),
+			defenseVals:           make([]int, handSize+1),
+			isDRBuf:               make([]bool, handSize+1),
+			canAttackBuf:          make([]bool, handSize+1),
+			addsFutureValueBuf:    make([]bool, handSize+1),
+			pitchedValsScratch:    make([]int, 0, handSize+1),
+			pitchedBuf:            make([]Card, 0, handSize+1),
+			pitchPermBuf:          make([]Card, 0, handSize+1),
+			pitchPermValsBuf:      make([]int, 0, handSize+1),
+			pitchAttrBuf:          make([]Card, 0, handSize+1),
+			attackersBuf:          make([]Card, 0, handSize+1),
+			defendersBuf:          make([]Card, 0, handSize+1),
+			heldBuf:               make([]Card, 0, handSize+1),
+			defenseGravScratch:    make([]Card, 0, handSize+1),
 		},
 		permBufs: permBufs{
 			handBacking:             make([]Card, 0, maxAttackers),

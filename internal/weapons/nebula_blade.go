@@ -19,7 +19,12 @@ func (NebulaBlade) ID() ids.WeaponID    { return ids.NebulaBladeID }
 func (NebulaBlade) Name() string        { return "Nebula Blade" }
 func (NebulaBlade) Types() card.TypeSet { return nebulaBladeTypes }
 func (NebulaBlade) Hands() int          { return 2 }
-func (NebulaBlade) Ability() sim.Card   { return NebulaBladeAbility{} }
+func (NebulaBlade) Ability() sim.Card   { return nebulaBladeAbility }
+
+// nebulaBladeAbility caches the Ability() return as a package-level sim.Card so the
+// chain runner's per-Best-call w.Ability() lookup doesn't re-box the zero-size struct
+// in a fresh interface header on every call (would be 5x allocs per anneal otherwise).
+var nebulaBladeAbility sim.Card = NebulaBladeAbility{}
 
 var nebulaBladeAbilityTypes = card.NewTypeSet(card.TypeRuneblade, card.TypeWeapon, card.TypeSword, card.TypeTwoHand, card.TypeAttack)
 

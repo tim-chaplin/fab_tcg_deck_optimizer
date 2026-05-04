@@ -63,16 +63,18 @@ func bestAttackWithWeapons(hero Hero, weapons []Weapon, attackers, defenders, pi
 		// backing arrays across leaves and Best calls (bufs is Evaluator-cached).
 		carryWinner: &bufs.carryWinnerScratch,
 	}
-	// Build the unified activated-ability list: weapons' abilities first (low wmask
-	// bits), then item abilities (high wmask bits). Weapons and items share one wmask
-	// path — the only weapon-specific bit is the SwungWeapons name lookup, which keys
-	// off bufs.weaponNames[wmask & weaponBitsMask] downstream.
+	// Extend bufs.activatedAbilities with item ability instances for this Best call —
+	// the weapon prefix (positions 0..weaponAbilityCount-1) is materialised once at
+	// attackBufs construction; items append on top. The unified slice drives both the
+	// wmask cost summing and the chain assembly downstream — an activated ability is
+	// the same chain step whether it came from a weapon or an item, so they share one
+	// list and one path. The only weapon-specific bit is the SwungWeapons name lookup,
+	// which keys off bufs.weaponNames[wmask & weaponBitsMask].
 	//
-	// activatedAbilityCosts parallels activatedAbilities with each instance's static
-	// cost so the per-wmask budget check reads ints — variable-cost abilities still
-	// route through Card.Cost at materialisation time so the cache stays accurate.
-	abilities := append(bufs.activatedAbilitiesScratch[:0], bufs.weaponAbilities...)
-	abilityCosts := append(bufs.activatedAbilityCostsScratch[:0], bufs.weaponAbilityCosts...)
+	// Per-instance ability costs come from attackerMetaPtrFor's global cardMetaCache
+	// so the per-Best assembly stays alloc-free.
+	abilities := bufs.activatedAbilities[:bufs.weaponAbilityCount]
+	abilityCosts := bufs.activatedAbilityCosts[:bufs.weaponAbilityCount]
 	// In-play items contribute min(Count, perItemAbilityCap) ability instances each so
 	// the wmask can pick "play it 0..N times this turn".
 	for _, it := range priorItems {
@@ -80,7 +82,7 @@ func bestAttackWithWeapons(hero Hero, weapons []Weapon, attackers, defenders, pi
 		if copies > perItemAbilityCap {
 			copies = perItemAbilityCap
 		}
-		cost := it.Ability.Cost(&TurnState{})
+		cost := attackerMetaPtrFor(it.Ability).maxCost
 		for i := 0; i < copies; i++ {
 			abilities = append(abilities, it.Ability)
 			abilityCosts = append(abilityCosts, cost)
@@ -105,10 +107,10 @@ func bestAttackWithWeapons(hero Hero, weapons []Weapon, attackers, defenders, pi
 			continue
 		}
 		abilities = append(abilities, ability)
-		abilityCosts = append(abilityCosts, ability.Cost(&TurnState{}))
+		abilityCosts = append(abilityCosts, attackerMetaPtrFor(ability).maxCost)
 	}
-	bufs.activatedAbilitiesScratch = abilities
-	bufs.activatedAbilityCostsScratch = abilityCosts
+	bufs.activatedAbilities = abilities
+	bufs.activatedAbilityCosts = abilityCosts
 	ctx.activatedAbilities = abilities
 	ctx.activatedAbilityCosts = abilityCosts
 	// Non-modal defender contribution is constant across phase / weapon masks — DRs through

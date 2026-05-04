@@ -112,7 +112,7 @@ Weapons live in `internal/weapons/` as two paired Go types:
 - A `sim.Weapon` permanent (`ID`, `Name`, `Types`, `Hands`, `Ability`) — the equipped permanent that sits in the arena and never enters the chain.
 - A `sim.Card` activated ability (`<Weapon>Ability`) — what the chain runner enqueues when the player swings. Carries the printed Cost / Pitch / Attack / Defense / GoAgain / Play and the parent's `card.TypeSet` plus `card.TypeAttack` (so `IsAttack`, `IsWeaponAttack`, and — for Runeblade weapons — `IsRunebladeAttack` all fire).
 
-`Ability()` may return a fresh value or a singleton; every implemented ability is a zero-size struct, so the choice is allocation-free. The ability `Name()` matches the weapon's so chain logs read `<Weapon>: WEAPON ATTACK`.
+`Ability()` returns a package-level cached `sim.Card` (each weapon file declares `var <weapon>Ability sim.Card = <Weapon>Ability{}` and returns it). The chain runner only calls `Ability()` once per weapon at attackBufs construction today, but the cache keeps any future hot-loop caller alloc-free since Go's interface boxing of zero-size structs allocates per call when the result escapes. The ability `Name()` matches the weapon's so chain logs read `<Weapon>: WEAPON ATTACK`.
 
 IDs: weapon permanents take `WeaponID`; abilities take `CardID` and anchor in `internal/registry/ids/weapon_ids.go` past the last weapon-permanent ID. Token activated abilities (e.g. `GoldTokenAbilityID`) anchor past the last weapon-ability ID in the same file. Test fakes anchor past the last token-ability ID.
 
