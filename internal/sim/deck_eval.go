@@ -465,8 +465,8 @@ const startOfTurnRevealRoom = 8
 //
 // Returns the survivor list, per-aura contributions for FormatBestTurn, the summed damage
 // to fold into Value, Runechants created during the handlers (fed into next turn's
-// carryover), cards the handlers moved from the deck top into the hand (ts.Revealed) in
-// reveal order, and auras destroyed this pass in destroy order.
+// carryover), cards the handlers drew into the hand (ts.Hand) in draw order, and auras
+// destroyed this pass in destroy order.
 //
 // Cascading reveals: a handler that pops s.Deck shrinks the view for the next handler, so
 // two reveal-capable auras see distinct tops.
@@ -498,7 +498,7 @@ func processAurasAtStartOfTurn(queued []Aura, postDrawDeck []Card) (
 			continue
 		}
 		self := t.Self
-		preReveal := len(ts.Revealed)
+		preHand := len(ts.Hand)
 		preLog := len(ts.turnLog)
 		preLen := len(ts.Auras)
 		preValue := ts.Value
@@ -507,13 +507,13 @@ func processAurasAtStartOfTurn(queued []Aura, postDrawDeck []Card) (
 		ts.currentAuraIdx = -1
 		d := ts.Value - preValue
 		damage += d
-		// Attribute any newly-revealed card to this trigger so the best-turn printout can
+		// Attribute any newly-drawn card to this trigger so the best-turn printout can
 		// show what the handler drew (e.g. Sigil of the Arknight: "drew X into hand"). Taking
-		// ts.Revealed[preReveal] instead of counting from the end handles cascading reveals
-		// where a later handler also appends — each trigger sees its own first-appended card.
+		// ts.Hand[preHand] instead of counting from the end handles cascading draws where
+		// a later handler also draws — each trigger sees its own first-drawn card.
 		var rev Card
-		if len(ts.Revealed) > preReveal {
-			rev = ts.Revealed[preReveal]
+		if len(ts.Hand) > preHand {
+			rev = ts.Hand[preHand]
 		}
 		// Capture the handler's first authored log line, if any — Text takes precedence
 		// over the inferred "drew X into hand" / "START OF ACTION PHASE" suffix at format
@@ -529,7 +529,7 @@ func processAurasAtStartOfTurn(queued []Aura, postDrawDeck []Card) (
 		// else: handler called DestroyAura, ts.Auras shrunk; current i now points to the
 		// next entry, leave the cursor where it is.
 	}
-	return ts.Auras, contribs, damage, ts.Runechants, ts.Revealed, ts.graveyard
+	return ts.Auras, contribs, damage, ts.Runechants, ts.Hand, ts.graveyard
 }
 
 // applyTurnResult folds a completed turn's outcome into cross-turn state. The deck loop

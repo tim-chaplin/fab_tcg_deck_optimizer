@@ -188,9 +188,6 @@ type TurnState struct {
 	// attackReactionTarget is the buff target for the currently-resolving Attack Reaction.
 	// Set by the chain runner around AR.Play; ARs read it via AttackReactionTarget().
 	attackReactionTarget *CardState
-	// Revealed is the side channel start-of-turn Aura handlers use to move a card
-	// from the top of the post-draw deck into the hand (Sigil of the Arknight's reveal).
-	Revealed []Card
 	// TriggeringCard is the card whose play caused the active aura attack-action trigger
 	// to fire. The sim sets it before each Aura handler runs and clears it after;
 	// the handler reads it to attribute its log line back to the triggering card. Hero

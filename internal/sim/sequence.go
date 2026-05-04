@@ -354,7 +354,6 @@ func (ctx *sequenceContext) resetStateForPermutation() {
 	s.ArcaneIncomingDamage = ctx.matchup.ArcaneIncomingDamage
 	s.BlockTotal = ctx.blockTotal
 	s.attackReactionTarget = nil
-	s.Revealed = nil
 	s.TriggeringCard = nil
 	s.skipLog = ctx.skipLog
 	// Permutation seed starts cacheable; the first card-driven deck / graveyard read

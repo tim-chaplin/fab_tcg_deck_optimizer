@@ -5,10 +5,9 @@
 // reveal the top card of your deck. If it's an attack action card, put it into your hand."
 //
 // Handler fires next turn on the post-draw deck: peek the top, and on an attack-action
-// hit pop it into s.Revealed (the deck loop moves revealed cards into the hand). Whiffs
-// leave the deck untouched. Damage is 0 either way — the tempo is the extra card, not a
-// flat credit. The handler always logs (hit or whiff) so the printout names the card
-// revealed in both cases.
+// hit draw it into the hand. Whiffs leave the deck untouched. Damage is 0 either way —
+// the tempo is the extra card, not a flat credit. The handler always logs (hit or whiff)
+// so the printout names the card revealed in both cases.
 
 package cards
 
@@ -54,8 +53,7 @@ func sigilOfTheArknightReveal(s *sim.TurnState, t *sim.Aura) {
 	}
 	self := sim.DisplayName(SigilOfTheArknightBlue{})
 	if top.Types().IsAttackAction() {
-		s.PopDeckTop()
-		s.Revealed = append(s.Revealed, top)
+		s.DrawOne()
 		s.LogPostTriggerf(self, 0, "%s drew %s into hand", self, sim.DisplayName(top))
 		return
 	}
