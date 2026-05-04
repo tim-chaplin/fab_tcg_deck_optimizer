@@ -9,9 +9,7 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
 )
 
-// Pins High Striker's "next time an attack you control hits" rider firing on a weapon
-// swing — High Striker plays go-again, the 1-power Club swing then lands inside the
-// LikelyToHit window and the trigger creates the per-pitch Copper count.
+// Tests that High Striker's "next attack hits" rider fires on a follow-up weapon swing.
 func TestHighStriker_WeaponHitCreatesCopper(t *testing.T) {
 	d := sim.New(heroes.Viserai{}, []sim.Weapon{testutils.ClubWeapon{}}, fillerDeck())
 	hand := []sim.Card{

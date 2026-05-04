@@ -2,9 +2,9 @@
 // Text: "Your next attack this turn gets +N{p} and "When this attacks a hero, you may
 // **wager** a Gold token with them."" (Red N=3, Yellow N=2, Blue N=1.)
 //
-// Filter: "your next attack" includes weapon swings, so IsAttack — not IsAttackAction. The
-// granted wager is "may", so we assume opt-in only when the attack is likely to hit; the
-// win (a Gold token) resolves on hit, mirroring Wage Gold.
+// "Your next attack" includes weapon swings, so the filter is IsAttack. The granted "may"
+// wager opts in only when the buffed attack is likely to hit; the win (a Gold token)
+// resolves on hit.
 
 package cards
 
@@ -16,26 +16,27 @@ import (
 
 var moneyWhereYaMouthIsTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction)
 
-func moneyWhereYaMouthIsWagerOnHit(s *sim.TurnState, target *sim.CardState, _ *sim.OnHitHandler) {
+func moneyWhereYaMouthIsWagerOnHit(s *sim.TurnState, target *sim.CardState, h *sim.OnHitHandler) {
 	s.CreateGold(1)
-	s.LogPostTriggerf(sim.DisplayName(target.Card), 0, "Money Where Ya Mouth Is won wager")
+	s.LogPostTriggerf(sim.DisplayName(target.Card), 0, "%s won wager", sim.DisplayName(h.Source))
 }
 
-func moneyWhereYaMouthIsPlay(s *sim.TurnState, self *sim.CardState, n int) {
+func moneyWhereYaMouthIsPlay(s *sim.TurnState, self *sim.CardState, source sim.Card, n int) {
 	GrantNextCardBonusAttack(s, n, card.TypeSet.IsAttack)
 	for _, pc := range s.CardsRemaining {
 		if pc.Card.Types().IsAttack() {
-			pc.OnHit = append(pc.OnHit, sim.OnHitHandler{Fire: moneyWhereYaMouthIsWagerOnHit})
+			pc.OnHit = append(pc.OnHit, sim.OnHitHandler{
+				Fire:   moneyWhereYaMouthIsWagerOnHit,
+				Source: source,
+			})
 			break
 		}
 	}
 	s.Log(self, 0)
 }
 
-func (MoneyWhereYaMouthIsRed) CreatesItem() sim.TokenType    { return sim.TokenTypeGold }
-func (MoneyWhereYaMouthIsYellow) CreatesItem() sim.TokenType { return sim.TokenTypeGold }
-func (MoneyWhereYaMouthIsBlue) CreatesItem() sim.TokenType   { return sim.TokenTypeGold }
-
+// AddsFutureValue (no CreatesItem) — the Gold creator is whichever downstream attack the
+// wager rider grafts onto, so the wmask slot belongs to that attack's marker, not ours.
 func (MoneyWhereYaMouthIsRed) AddsFutureValue()    {}
 func (MoneyWhereYaMouthIsYellow) AddsFutureValue() {}
 func (MoneyWhereYaMouthIsBlue) AddsFutureValue()   {}
@@ -50,8 +51,8 @@ func (MoneyWhereYaMouthIsRed) Attack() int             { return 0 }
 func (MoneyWhereYaMouthIsRed) Defense() int            { return 2 }
 func (MoneyWhereYaMouthIsRed) Types() card.TypeSet     { return moneyWhereYaMouthIsTypes }
 func (MoneyWhereYaMouthIsRed) GoAgain() bool           { return true }
-func (MoneyWhereYaMouthIsRed) Play(s *sim.TurnState, self *sim.CardState) {
-	moneyWhereYaMouthIsPlay(s, self, 3)
+func (c MoneyWhereYaMouthIsRed) Play(s *sim.TurnState, self *sim.CardState) {
+	moneyWhereYaMouthIsPlay(s, self, c, 3)
 }
 
 type MoneyWhereYaMouthIsYellow struct{}
@@ -64,8 +65,8 @@ func (MoneyWhereYaMouthIsYellow) Attack() int             { return 0 }
 func (MoneyWhereYaMouthIsYellow) Defense() int            { return 2 }
 func (MoneyWhereYaMouthIsYellow) Types() card.TypeSet     { return moneyWhereYaMouthIsTypes }
 func (MoneyWhereYaMouthIsYellow) GoAgain() bool           { return true }
-func (MoneyWhereYaMouthIsYellow) Play(s *sim.TurnState, self *sim.CardState) {
-	moneyWhereYaMouthIsPlay(s, self, 2)
+func (c MoneyWhereYaMouthIsYellow) Play(s *sim.TurnState, self *sim.CardState) {
+	moneyWhereYaMouthIsPlay(s, self, c, 2)
 }
 
 type MoneyWhereYaMouthIsBlue struct{}
@@ -78,6 +79,6 @@ func (MoneyWhereYaMouthIsBlue) Attack() int             { return 0 }
 func (MoneyWhereYaMouthIsBlue) Defense() int            { return 2 }
 func (MoneyWhereYaMouthIsBlue) Types() card.TypeSet     { return moneyWhereYaMouthIsTypes }
 func (MoneyWhereYaMouthIsBlue) GoAgain() bool           { return true }
-func (MoneyWhereYaMouthIsBlue) Play(s *sim.TurnState, self *sim.CardState) {
-	moneyWhereYaMouthIsPlay(s, self, 1)
+func (c MoneyWhereYaMouthIsBlue) Play(s *sim.TurnState, self *sim.CardState) {
+	moneyWhereYaMouthIsPlay(s, self, c, 1)
 }

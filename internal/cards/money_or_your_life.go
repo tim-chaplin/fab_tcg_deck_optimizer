@@ -22,7 +22,7 @@ func moneyOrYourLifeOnHit(s *sim.TurnState, self *sim.CardState, _ *sim.OnHitHan
 		n = 4
 	}
 	s.AddValue(n)
-	s.LogRider(self, n, "On-hit dealt damage (opponent surrendered no Gold)")
+	s.LogRiderf(self, n, "On-hit dealt %d (opponent surrendered no Gold)", n)
 }
 
 func moneyOrYourLifePlay(s *sim.TurnState, self *sim.CardState) {

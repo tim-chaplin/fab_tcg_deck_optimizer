@@ -9,11 +9,7 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
 )
 
-// Pins Wage Gold's Universal keyword: when Viserai (Runeblade) plays a non-attack action
-// followed by Wage Gold, the Universal fold makes Wage Gold count as Runeblade and
-// Viserai's hero ability fires. The runechant credits +1 Value at creation and is then
-// consumed by Wage Gold's own attack — so we assert the +1 in Value rather than a surviving
-// token (it's gone by next-turn start).
+// Tests that Wage Gold's Universal keyword triggers Viserai's Runeblade hero ability.
 func TestWageGold_UniversalTriggersViseraiOnPlay(t *testing.T) {
 	d := sim.New(heroes.Viserai{}, nil, fillerDeck())
 	hand := []sim.Card{

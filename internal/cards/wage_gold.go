@@ -1,9 +1,8 @@
 // Wage Gold — Generic Action - Attack. Cost 3.
 // Text: "**Universal** When this attacks a hero, you may **wager** a Gold token with them."
 //
-// Universal folds the current hero's class into Types() so class-gated triggers fire (e.g.
-// Viserai's "Runeblade card" hero ability). The wager is "may", so opt-in is assumed only
-// when likely-to-hit; the win (a Gold token) resolves on hit.
+// Types() ORs in sim.Universal() so the keyword applies. The "may" wager opts in only when
+// likely-to-hit; the win (a Gold token) resolves on hit.
 
 package cards
 
