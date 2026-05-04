@@ -66,9 +66,7 @@ func bestAttackWithWeapons(hero Hero, weapons []Weapon, attackers, defenders, pi
 	defenseCacheableConst := true
 	if !hasModalBlocker && len(defenders) > 0 {
 		defenseDealtConst, bufs.defenseGravScratch, defenseCacheableConst = defendersDamage(defenders, pitched, deck, bufs.state, bufs.defenseGravScratch, &bufs.drCardStateScratch, mp.IncomingDamage, noBlockBudgetCap, arsenalDefenderIdx)
-		// Capture DR-created auras (e.g. Peace of Mind's Ponder) so the chain runner's
-		// per-permutation reset can seed them into state.Auras for the end-of-turn fire.
-		ctx.defenderAuras = append(ctx.defenderAuras[:0], bufs.state.Auras...)
+		ctx.defenderAuras = filterEndOfTurnAuras(ctx.defenderAuras[:0], bufs.state.Auras)
 	}
 	defenseDealt := defenseDealtConst
 	defenseCacheable := defenseCacheableConst
@@ -181,7 +179,7 @@ func bestAttackWithWeapons(hero Hero, weapons []Weapon, attackers, defenders, pi
 			// the once-per-leaf defenseDealtConst computed above.
 			if hasModalBlocker {
 				defenseDealt, bufs.defenseGravScratch, defenseCacheable = defendersDamage(defenders, pitched, deck, bufs.state, bufs.defenseGravScratch, &bufs.drCardStateScratch, mp.IncomingDamage, phase.defendBudget-drCost, arsenalDefenderIdx)
-				ctx.defenderAuras = append(ctx.defenderAuras[:0], bufs.state.Auras...)
+				ctx.defenderAuras = filterEndOfTurnAuras(ctx.defenderAuras[:0], bufs.state.Auras)
 			}
 			if phase.hasDefendPitches && phase.defendBudget-drCost >= phase.maxDefendPitch {
 				continue
@@ -324,6 +322,31 @@ func fireAttackActionAuras(state *TurnState, triggeringCard Card) {
 	}
 }
 
+// filterEndOfTurnAuras appends every TriggerEndOfTurn entry in src to out and returns
+// the result. Used to thread defender-created end-of-turn auras (Ponder) into the
+// chain's per-permutation reset; non-end-of-turn DR-created auras (e.g. Runechant
+// from Reduce to Runechant) drop here, matching pre-Ponder discard behaviour.
+func filterEndOfTurnAuras(out, src []Aura) []Aura {
+	for _, a := range src {
+		if a.TriggerType == TriggerEndOfTurn {
+			out = append(out, a)
+		}
+	}
+	return out
+}
+
+// hasEndOfTurnAura reports whether any aura in the slice is a TriggerEndOfTurn entry.
+// Used by the chain runner to skip the end-of-turn fire when nothing in state.Auras
+// would actually trigger.
+func hasEndOfTurnAura(auras []Aura) bool {
+	for _, a := range auras {
+		if a.TriggerType == TriggerEndOfTurn {
+			return true
+		}
+	}
+	return false
+}
+
 // fireEndOfTurnAuras runs after the chain has finished resolving (and the legality
 // gates have passed) but before snapshotCarry captures the next-turn state. Ponder
 // uses this to draw a card into the held pile, so the post-hoc arsenal-promotion step
@@ -451,10 +474,14 @@ func (ctx *sequenceContext) bestSequence(attackers []Card) (int, int, bool) {
 		ctx.resetStateForPermutation()
 		// Capture leftover runechants pre-defender-aura-fold for DR-cost honesty (see
 		// playSequenceWithMeta), then fire end-of-turn so defender Ponders draw their
-		// card before snapshot.
+		// card before snapshot. Same fast-path skip as the non-empty-chain case.
 		leftover := ctx.bufs.state.Runechants()
-		ctx.bufs.state.Auras = append(ctx.bufs.state.Auras, ctx.defenderAuras...)
-		fireEndOfTurnAuras(ctx.bufs.state)
+		if len(ctx.defenderAuras) > 0 {
+			ctx.bufs.state.Auras = append(ctx.bufs.state.Auras, ctx.defenderAuras...)
+			fireEndOfTurnAuras(ctx.bufs.state)
+		} else if hasEndOfTurnAura(ctx.bufs.state.Auras) {
+			fireEndOfTurnAuras(ctx.bufs.state)
+		}
 		ctx.carryWinner.SnapshotFromTurn(ctx.bufs.state)
 		return 0, leftover, true
 	}
@@ -845,7 +872,13 @@ func (ctx *sequenceContext) playSequenceWithMeta(n int) (damage int, leftoverRun
 	leftover := state.Runechants()
 	// Fold defender auras into state.Auras for end-of-turn fires (Ponder draws). They
 	// were kept out during the chain so the chain's runechant view stayed honest.
-	state.Auras = append(state.Auras, ctx.defenderAuras...)
-	fireEndOfTurnAuras(state)
+	// Common case is no defender end-of-turn auras AND no chain-created end-of-turn
+	// aura — the cheap pre-check skips the fire's per-aura walk entirely.
+	if len(ctx.defenderAuras) > 0 {
+		state.Auras = append(state.Auras, ctx.defenderAuras...)
+		fireEndOfTurnAuras(state)
+	} else if hasEndOfTurnAura(state.Auras) {
+		fireEndOfTurnAuras(state)
+	}
 	return state.Value, leftover, pool.remaining, true
 }
