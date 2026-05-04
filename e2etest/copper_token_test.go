@@ -46,6 +46,9 @@ func TestCopperAbility_SpendsAndSwings(t *testing.T) {
 	if got.State.Copper() != 0 {
 		t.Fatalf("Copper after turn = %d, want 0 (the only token spent)", got.State.Copper())
 	}
+	if got.State.CardsDrawn != 1 {
+		t.Fatalf("CardsDrawn = %d, want 1 (Copper ability draws one card)", got.State.CardsDrawn)
+	}
 	if got.State.Arsenal == nil {
 		t.Fatalf("Arsenal = nil, want the drawn card promoted into the slot")
 	}

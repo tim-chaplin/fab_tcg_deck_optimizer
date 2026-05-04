@@ -29,6 +29,9 @@ func TestSilverAbility_SpendsToFillArsenal(t *testing.T) {
 	if got.State.Silver() != 0 {
 		t.Fatalf("Silver after turn = %d, want 0 (the only token spent)", got.State.Silver())
 	}
+	if got.State.CardsDrawn != 1 {
+		t.Fatalf("CardsDrawn = %d, want 1 (Silver ability draws one card)", got.State.CardsDrawn)
+	}
 	if got.State.Arsenal == nil {
 		t.Fatalf("Arsenal = nil, want the drawn card promoted into the slot")
 	}
@@ -56,6 +59,9 @@ func TestSilverAbility_SpendsAndSwings(t *testing.T) {
 	}
 	if got.State.Silver() != 0 {
 		t.Fatalf("Silver after turn = %d, want 0 (the only token spent)", got.State.Silver())
+	}
+	if got.State.CardsDrawn != 1 {
+		t.Fatalf("CardsDrawn = %d, want 1 (Silver ability draws one card)", got.State.CardsDrawn)
 	}
 	if got.State.Arsenal == nil {
 		t.Fatalf("Arsenal = nil, want the drawn card promoted into the slot")
