@@ -288,7 +288,7 @@ func runOneShuffle(d *Deck, stats *Stats, scratch *shuffleScratch, idIndex map[i
 		var trigContribs []TriggerContribution
 		var trigDamage int
 		var trigRevealed []Card
-		auraTriggerBuf, trigContribs, trigDamage, _, trigRevealed, _ = processAurasAtStartOfTurn(auraTriggerBuf, buf[head+drawCount:tail])
+		auraTriggerBuf, trigContribs, trigDamage, trigRevealed, _ = processAurasAtStartOfTurn(auraTriggerBuf, buf[head+drawCount:tail])
 		for range trigRevealed {
 			h = append(h, buf[head+drawCount])
 			drawCount++
@@ -462,9 +462,8 @@ const startOfTurnRevealRoom = 8
 //   - Leaves non-start-of-turn auras in place so they can fire mid-chain.
 //
 // Returns the survivor list, per-aura contributions for FormatBestTurn, the summed damage
-// to fold into Value, Runechants created during the handlers (fed into next turn's
-// carryover), cards the handlers drew into the hand (ts.Hand) in draw order, and auras
-// destroyed this pass in destroy order.
+// to fold into Value, cards the handlers drew into the hand (ts.Hand) in draw order, and
+// auras destroyed this pass in destroy order.
 //
 // Cascading reveals: a handler that pops s.Deck shrinks the view for the next handler, so
 // two reveal-capable auras see distinct tops.
@@ -472,12 +471,11 @@ func processAurasAtStartOfTurn(queued []Aura, postDrawDeck []Card) (
 	survivors []Aura,
 	contribs []TriggerContribution,
 	damage int,
-	runes int,
 	revealed []Card,
 	graveyarded []Card,
 ) {
 	if len(queued) == 0 {
-		return queued[:0], nil, 0, 0, nil, nil
+		return queued[:0], nil, 0, nil, nil
 	}
 	// Start-of-turn trigger seed starts cacheable; reveal handlers like Sigil of the
 	// Arknight will flip it via PopDeckTop. The result isn't currently consumed (callers
@@ -527,7 +525,7 @@ func processAurasAtStartOfTurn(queued []Aura, postDrawDeck []Card) (
 			i++
 		}
 	}
-	return ts.Auras, contribs, damage, ts.Runechants(), ts.Hand, ts.graveyard
+	return ts.Auras, contribs, damage, ts.Hand, ts.graveyard
 }
 
 // applyTurnResult folds a completed turn's outcome into cross-turn state. The deck loop

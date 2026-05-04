@@ -181,7 +181,6 @@ func ProcessAurasAtStartOfTurn(queued []Aura, postDrawDeck []Card) (
 	survivors []Aura,
 	contribs []TriggerContribution,
 	damage int,
-	runes int,
 	revealed []Card,
 	graveyarded []Card,
 ) {

@@ -83,7 +83,7 @@ func (d *Deck) EvalOneTurnForTesting(mp Matchup, arsenalIn Card, initialHand []C
 	// fire start-of-turn handlers, re-arm OncePerTurn gates, drop exhausted entries.
 	// Reveals into the hand are consumed here so the returned turn-2 Hand matches what
 	// Best would see.
-	survivors, _, trigDamage, _, trigRevealed, trigGraveyarded := processAurasAtStartOfTurn(auraQueue, buf[head+drawCount2:tail])
+	survivors, _, trigDamage, trigRevealed, trigGraveyarded := processAurasAtStartOfTurn(auraQueue, buf[head+drawCount2:tail])
 	for range trigRevealed {
 		turn2Hand = append(turn2Hand, buf[head+drawCount2])
 		drawCount2++

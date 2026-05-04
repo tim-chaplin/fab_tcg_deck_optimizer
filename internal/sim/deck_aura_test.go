@@ -34,7 +34,7 @@ func TestProcessAurasAtStartOfTurn_FiresEachQueuedTriggerOnce(t *testing.T) {
 	aura := testutils.RedAttack{}
 	var callsA, callsB int
 	queue := []Aura{damageTrigger(aura, 2, &callsA), damageTrigger(aura, 3, &callsB)}
-	survivors, contribs, total, _, _, _ := ProcessAurasAtStartOfTurn(queue, nil)
+	survivors, contribs, total, _, _ := ProcessAurasAtStartOfTurn(queue, nil)
 	if total != 5 {
 		t.Errorf("total = %d, want 5 (2+3)", total)
 	}
@@ -51,9 +51,9 @@ func TestProcessAurasAtStartOfTurn_FiresEachQueuedTriggerOnce(t *testing.T) {
 
 // TestProcessAurasAtStartOfTurn_EmptyQueue short-circuits: no contribs, no alloc, zero total.
 func TestProcessAurasAtStartOfTurn_EmptyQueue(t *testing.T) {
-	survivors, contribs, total, runes, _, _ := ProcessAurasAtStartOfTurn(nil, nil)
-	if total != 0 || runes != 0 {
-		t.Errorf("total/runes = %d/%d, want 0/0", total, runes)
+	survivors, contribs, total, _, _ := ProcessAurasAtStartOfTurn(nil, nil)
+	if total != 0 {
+		t.Errorf("total = %d, want 0", total)
 	}
 	if contribs != nil || len(survivors) != 0 {
 		t.Errorf("non-empty outputs on empty input: contribs=%v survivors=%v",
@@ -77,7 +77,7 @@ func TestProcessAurasAtStartOfTurn_GraveyardsExhaustedAura(t *testing.T) {
 			seen = append([]Card(nil), s.Graveyard()...)
 		},
 	}
-	_, _, _, _, _, _ = ProcessAurasAtStartOfTurn([]Aura{
+	_, _, _, _, _ = ProcessAurasAtStartOfTurn([]Aura{
 		{Self: CardOrTokenType{Card: aura}, TriggerType: TriggerStartOfTurn, Count: 1, Handler: func(s *TurnState, t *Aura) {
 			s.DestroyAura(t, true)
 		}},
@@ -133,7 +133,7 @@ func TestProcessAurasAtStartOfTurn_RevealsAttackActionIntoHand(t *testing.T) {
 	var play TurnState
 	(cards.SigilOfTheArknightBlue{}).Play(&play, &CardState{Card: cards.SigilOfTheArknightBlue{}})
 	slash := cards.AetherSlashRed{}
-	_, contribs, total, _, revealed, _ := ProcessAurasAtStartOfTurn(play.Auras, []Card{slash})
+	_, contribs, total, revealed, _ := ProcessAurasAtStartOfTurn(play.Auras, []Card{slash})
 	if total != 0 {
 		t.Errorf("total = %d, want 0 (reveal contributes via hand, not damage)", total)
 	}
@@ -153,7 +153,7 @@ func TestProcessAurasAtStartOfTurn_AttributesRevealedToContribution(t *testing.T
 	var play TurnState
 	(cards.SigilOfTheArknightBlue{}).Play(&play, &CardState{Card: cards.SigilOfTheArknightBlue{}})
 	slash := cards.AetherSlashRed{}
-	_, contribs, _, _, _, _ := ProcessAurasAtStartOfTurn(play.Auras, []Card{slash})
+	_, contribs, _, _, _ := ProcessAurasAtStartOfTurn(play.Auras, []Card{slash})
 	if len(contribs) != 1 {
 		t.Fatalf("contribs = %+v, want one entry", contribs)
 	}
@@ -170,7 +170,7 @@ func TestProcessAurasAtStartOfTurn_CascadingReveals(t *testing.T) {
 	(cards.SigilOfTheArknightBlue{}).Play(&play, &CardState{Card: cards.SigilOfTheArknightBlue{}})
 	first := cards.AetherSlashRed{}
 	second := cards.ConsumingVolitionRed{}
-	_, _, _, _, revealed, _ := ProcessAurasAtStartOfTurn(play.Auras, []Card{first, second})
+	_, _, _, revealed, _ := ProcessAurasAtStartOfTurn(play.Auras, []Card{first, second})
 	if len(revealed) != 2 {
 		t.Fatalf("len(revealed) = %d, want 2 (two cascading reveals)", len(revealed))
 	}
@@ -186,7 +186,7 @@ func TestProcessAurasAtStartOfTurn_NonAttackActionTopSkipsReveal(t *testing.T) {
 	sigil := cards.SigilOfTheArknightBlue{}
 	sigil.Play(&play, &CardState{Card: sigil})
 	// Sigil itself is an Aura (non-attack action) — use it as a convenient non-attack top.
-	_, _, total, _, revealed, _ := ProcessAurasAtStartOfTurn(play.Auras, []Card{sigil})
+	_, _, total, revealed, _ := ProcessAurasAtStartOfTurn(play.Auras, []Card{sigil})
 	if total != 0 {
 		t.Errorf("total = %d, want 0 (non-attack top, no credit)", total)
 	}
@@ -202,7 +202,7 @@ func TestProcessAurasAtStartOfTurn_SigilHitAuthorsLogText(t *testing.T) {
 	var play TurnState
 	sigil := cards.SigilOfTheArknightBlue{}
 	sigil.Play(&play, &CardState{Card: sigil})
-	_, contribs, _, _, _, _ := ProcessAurasAtStartOfTurn(play.Auras, []Card{cards.AetherSlashRed{}})
+	_, contribs, _, _, _ := ProcessAurasAtStartOfTurn(play.Auras, []Card{cards.AetherSlashRed{}})
 	if len(contribs) != 1 {
 		t.Fatalf("contribs = %+v, want one entry", contribs)
 	}
@@ -220,7 +220,7 @@ func TestProcessAurasAtStartOfTurn_SigilWhiffStillLogs(t *testing.T) {
 	sigil := cards.SigilOfTheArknightBlue{}
 	sigil.Play(&play, &CardState{Card: sigil})
 	// Sigil itself is a non-attack action — convenient whiff top.
-	_, contribs, _, _, _, _ := ProcessAurasAtStartOfTurn(play.Auras, []Card{sigil})
+	_, contribs, _, _, _ := ProcessAurasAtStartOfTurn(play.Auras, []Card{sigil})
 	if len(contribs) != 1 {
 		t.Fatalf("contribs = %+v, want one entry", contribs)
 	}
@@ -384,7 +384,7 @@ func TestProcessAurasAtStartOfTurn_ReArmsOncePerTurnGate(t *testing.T) {
 		FiredThisTurn: true,
 		Handler:       func(*TurnState, *Aura) {},
 	}
-	survivors, _, _, _, _, _ := ProcessAurasAtStartOfTurn([]Aura{exhausted}, nil)
+	survivors, _, _, _, _ := ProcessAurasAtStartOfTurn([]Aura{exhausted}, nil)
 	if len(survivors) != 1 {
 		t.Fatalf("survivors len = %d, want 1 (AttackAction trigger passes through)", len(survivors))
 	}
