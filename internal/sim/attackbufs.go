@@ -90,10 +90,8 @@ type permBufs struct {
 	cardsPlayedBacking  []Card
 	logBacking          []LogEntry
 	auraTriggersBacking []Aura
-	// defenderAurasBacking is the per-partition scratch for the post-defense aura set
-	// (priorAuras consolidated with DR-created auras). Re-used across partitions to
-	// avoid the per-bestAttackWithWeapons alloc; sequenceContext.defenderAuras aliases
-	// this backing.
+	// defenderAurasBacking is the per-partition scratch for the post-defense aura set,
+	// aliased by sequenceContext.defenderAuras.
 	defenderAurasBacking []Aura
 	// nextAtkActionHitBacking backs TurnState.pendingNextAttackActionHit. Sized small —
 	// having more than a couple of these riders queued at once is exotic.

@@ -1,14 +1,6 @@
-// Yinti Yanti — Generic Action - Attack. Cost 0. Printed power: Red 3, Yellow 2, Blue 1.
-// Printed pitch variants: Red 1, Yellow 2, Blue 3. Defense 2.
-//
-// Text: "While Yinti Yanti is attacking and you control an aura, it has +1{p}. While Yinti
-// Yanti is defending and you control an aura, it has +1{d}."
-//
-// Both bonuses gate on len(s.Auras) > 0 — any aura in play (sigil, incantation, runechant,
-// ponder, …) qualifies. Per the FaB-correct turn order (defense → action), DR-created
-// auras on the same turn are visible to Yinti Yanti during action; per-DR aura
-// accumulation in defendersDamage means plain-block Yinti Yanti also sees auras from
-// earlier defenders.
+// Yinti Yanti: "While Yinti Yanti is attacking and you control an aura, it has +1{p}.
+// While Yinti Yanti is defending and you control an aura, it has +1{d}." Both bonuses
+// gate on len(s.Auras) > 0 — any aura type qualifies.
 
 package cards
 
@@ -20,10 +12,9 @@ import (
 
 var yintiYantiTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeAttack)
 
-// yintiYantiBonus returns +1 when any aura is in play, else 0. Used by both Play (attack
-// side) and Block (defense side) so the gate stays in one place.
+// yintiYantiBonus returns +1 when any aura is in play, else 0.
 func yintiYantiBonus(s *sim.TurnState) int {
-	if s != nil && len(s.Auras) > 0 {
+	if len(s.Auras) > 0 {
 		return 1
 	}
 	return 0

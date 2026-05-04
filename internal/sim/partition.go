@@ -354,10 +354,9 @@ func defendersDamage(defenders, pitched, deck []Card, state *TurnState, gravBuf 
 	total := 0
 	remaining := incomingDamage
 	cacheable := true
-	// state.Auras is caller-seeded with priorAuras so DR Plays' CreateRunechants /
-	// CreatePonder / etc. consolidate against the existing carryover entries via
-	// the single-aura-per-token-type invariant. The per-DR reset below preserves
-	// the running list across iterations.
+	// state.Auras is caller-seeded with priorAuras so DR Plays consolidate created
+	// auras against the carryover entries. The per-DR reset below preserves the
+	// running list across iterations.
 	for i, d := range defenders {
 		if !attackerMetaPtrFor(d).actsAsDR {
 			continue
