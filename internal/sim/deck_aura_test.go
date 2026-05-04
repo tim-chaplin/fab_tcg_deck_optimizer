@@ -316,9 +316,9 @@ func TestEvalOneTurn_BlessingOfOccultCreatesRunesAtStartOfNextTurn(t *testing.T)
 	if !blessingPlayed {
 		t.Errorf("turn 1 BestLine didn't play Blessing as Role=Attack: %+v", state.BestLine)
 	}
-	if state.StartOfNextTurnRunechants != 3 {
-		t.Errorf("StartOfNextTurnRunechants = %d, want 3 (Blessing's start-of-turn trigger creates 3 tokens)",
-			state.StartOfNextTurnRunechants)
+	if state.Runechants() != 3 {
+		t.Errorf("Runechants = %d, want 3 (Blessing's start-of-turn trigger creates 3 tokens)",
+			state.Runechants())
 	}
 	if state.StartOfNextTurnTriggerDamage != 3 {
 		t.Errorf("StartOfNextTurnTriggerDamage = %d, want 3", state.StartOfNextTurnTriggerDamage)
@@ -489,8 +489,8 @@ func TestEvalOneTurn_RunebloodIncantationTicksAcrossTurns(t *testing.T) {
 	if state.StartOfNextTurnTriggerDamage != 1 {
 		t.Errorf("StartOfNextTurnTriggerDamage = %d, want 1 (one tick per turn)", state.StartOfNextTurnTriggerDamage)
 	}
-	if state.StartOfNextTurnRunechants != 1 {
-		t.Errorf("StartOfNextTurnRunechants = %d, want 1 (one rune per fire)", state.StartOfNextTurnRunechants)
+	if state.Runechants() != 1 {
+		t.Errorf("Runechants = %d, want 1 (one rune per fire)", state.Runechants())
 	}
 	if len(state.StartOfNextTurnGraveyard) != 0 {
 		t.Errorf("StartOfNextTurnGraveyard = %v, want empty (Red has Count=3, only one tick fired)",
