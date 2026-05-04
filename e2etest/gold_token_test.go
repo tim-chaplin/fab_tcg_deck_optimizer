@@ -40,6 +40,9 @@ func TestGoldAbility_PopsItemCreatedSameTurn(t *testing.T) {
 	if state.Gold() != 0 {
 		t.Fatalf("Gold at start of next turn = %d, want 0 (popped same-turn)", state.Gold())
 	}
+	if state.CardsDrawn != 1 {
+		t.Fatalf("CardsDrawn = %d, want 1 (Gold ability draws one card)", state.CardsDrawn)
+	}
 	if state.StartOfNextTurnArsenal == nil {
 		t.Fatalf("StartOfNextTurnArsenal = nil, want the drawn card promoted")
 	}

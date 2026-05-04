@@ -28,6 +28,10 @@ type TurnStartState struct {
 	// StartOfNextTurnItems is the live item set at the start of the next turn — items
 	// carried over from this turn's chain.
 	StartOfNextTurnItems []Item
+	// CardsDrawn is the count of mid-chain card draws that resolved during the tested
+	// turn (DrawOne calls). Surfaced for tests that want to assert on draw behaviour
+	// directly without inferring it from arsenal / hand carryover.
+	CardsDrawn int
 	// StartOfNextTurnTriggerDamage is the damage credited by the next turn's start-of-turn
 	// Aura handlers (triggers registered this turn that fired at the top of next).
 	// Zero when no trigger survived. Production folds this into next turn's Value.
@@ -98,6 +102,7 @@ func (d *Deck) EvalOneTurnForTesting(mp Matchup, arsenalIn Card, initialHand []C
 			StartOfNextTurnArsenal: play.State.Arsenal,
 			StartOfNextTurnAuras:   append([]Aura(nil), play.State.Auras...),
 			StartOfNextTurnItems:   append([]Item(nil), play.State.Items...),
+			CardsDrawn:             play.State.CardsDrawn,
 		}
 	}
 	// Process turn-1 Auras at the turn-2 boundary the same way Evaluate does:
@@ -122,6 +127,7 @@ func (d *Deck) EvalOneTurnForTesting(mp Matchup, arsenalIn Card, initialHand []C
 		StartOfNextTurnDeck:          deckLeft,
 		StartOfNextTurnAuras:         append([]Aura(nil), survivors...),
 		StartOfNextTurnItems:         append([]Item(nil), itemQueue...),
+		CardsDrawn:                   play.State.CardsDrawn,
 		StartOfNextTurnTriggerDamage: trigDamage,
 		StartOfNextTurnGraveyard:     trigGraveyarded,
 	}
