@@ -37,9 +37,17 @@ type shapeBufs struct {
 	// bestSequence. Sized at construction; the slice header re-slices to [:n] per call.
 	attackerBuf []Card
 	// Pre-computed per-mask weapon data. Indexed by bitmask (0 to 2^len(weapons)-1):
-	// weaponCosts[mask] is total Cost; weaponNames[mask] is the pre-built []string of names.
+	// weaponCosts[mask] sums each selected ability's Cost; weaponNames[mask] is the
+	// pre-built []string of weapon names for SwungWeapons display.
 	weaponCosts []int
 	weaponNames [][]string
+	// activatedAbilities is the per-permanent ability Card cache, materialised once at
+	// construction by walking each in-play source (weapons today; items when they land)
+	// and calling Ability(). Indexed in lockstep with the wmask: bit i selects
+	// activatedAbilities[i] for the chain. One slice keeps the wmask uniform across
+	// permanent kinds so item abilities slot in alongside weapon abilities without a
+	// parallel buffer.
+	activatedAbilities []Card
 	// Partition-loop buffers, consumed by findBest. Sized handSize+1 to cover the optional
 	// arsenal-in slot the enumerator treats as index n. isDRBuf caches card.TypeDefenseReaction
 	// membership; canAttackBuf caches "this card can take Attack role" (Action or Weapon
@@ -157,6 +165,10 @@ func newAttackBufs(handSize, weaponCount int, weapons []Weapon) *attackBufs {
 	// card) can extend a chain well past the starting hand size.
 	const maxDrawnExtensions = 32
 	maxAttackers := handSize + weaponCount + 1 + maxDrawnExtensions
+	activatedAbilities := make([]Card, len(weapons))
+	for i, w := range weapons {
+		activatedAbilities[i] = w.Ability()
+	}
 	numMasks := 1 << weaponCount
 	weaponCosts := make([]int, numMasks)
 	weaponNames := make([][]string, numMasks)
@@ -165,7 +177,7 @@ func newAttackBufs(handSize, weaponCount int, weapons []Weapon) *attackBufs {
 		var names []string
 		for i, w := range weapons {
 			if mask&(1<<i) != 0 {
-				cost += w.Cost(&TurnState{})
+				cost += activatedAbilities[i].Cost(&TurnState{})
 				names = append(names, w.Name())
 			}
 		}
@@ -191,6 +203,7 @@ func newAttackBufs(handSize, weaponCount int, weapons []Weapon) *attackBufs {
 			attackerBuf:        make([]Card, maxAttackers),
 			weaponCosts:        weaponCosts,
 			weaponNames:        weaponNames,
+			activatedAbilities: activatedAbilities,
 			rolesBuf:           make([]Role, handSize+1),
 			pitchVals:          make([]int, handSize+1),
 			defenseVals:        make([]int, handSize+1),
@@ -279,11 +292,12 @@ func fillPartitionPerCardBufs(hand []Card, n, totalN int, arsenalCardIn Card, pv
 		m := attackerMetaPtrFor(c)
 		ts := m.types
 		isDR[i] = m.actsAsDR
-		// Attack role covers everything that resolves during the action chain — Action
-		// subtypes (attack actions, non-attack actions, Auras, Instants), Weapons, and
-		// Attack Reactions (free chain steps). Block-typed cards and Defense Reactions
-		// have none of these subtypes and can only pitch / block.
-		canAttack[i] = ts.Has(card.TypeAction) || ts.Has(card.TypeWeapon) || ts.Has(card.TypeAttackReaction)
+		// Attack role covers every hand card that can resolve during the action chain —
+		// Action subtypes (attack actions, non-attack actions, Auras, Instants) and Attack
+		// Reactions (free chain steps). Block-typed cards and Defense Reactions have neither
+		// subtype and can only pitch / block. Weapons never appear in hand — equipped
+		// weapons stream their Ability() in via the wmask path, not the partition.
+		canAttack[i] = ts.Has(card.TypeAction) || ts.Has(card.TypeAttackReaction)
 		_, addsFutureValue[i] = c.(AddsFutureValue)
 	}
 }

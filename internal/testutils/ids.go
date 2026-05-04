@@ -8,11 +8,11 @@ package testutils
 import "github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
 
 // FakeRedAttack and friends are the Fake-prefix synthetic IDs the StubCard, GenericAttack,
-// and named-fixture fakes (BluePitch, BlueAttack, RedAttack, …) hand back from ID(). The
-// anchor sits past TalisharID — the last weapon ID in the registry — so weapons stay
-// in their own contiguous range and the fakes don't collide with any production printing.
+// and named-fixture fakes (BluePitch, BlueAttack, RedAttack, …) hand back from ID().
+// Anchored past the last weapon-ability ID so fakes don't collide with any production
+// printing.
 const (
-	FakeRedAttack ids.CardID = ids.TalisharID + iota + 1
+	FakeRedAttack ids.CardID = ids.TalisharAbilityID + iota + 1
 	FakeBlueAttack
 	FakeYellowAttack
 	FakeCostlyDraw
@@ -25,4 +25,6 @@ const (
 	FakeClubWeapon
 	FakeHammerWeapon
 	FakeRedPitch
+	FakeClubWeaponAbility
+	FakeHammerWeaponAbility
 )

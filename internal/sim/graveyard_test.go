@@ -29,12 +29,12 @@ func TestGraveyard_AttackChainAppends(t *testing.T) {
 	}
 }
 
-// TestGraveyard_WeaponSwingDoesNotEnterGraveyard: weapon swings resolve in the attack chain but
-// don't hit the graveyard — they stay equipped. The action-attack sitting next to them still
-// lands in the graveyard.
+// TestGraveyard_WeaponSwingDoesNotEnterGraveyard: a weapon ability resolves in the attack
+// chain but stays equipped (PersistsInPlay via TypeWeapon); the adjacent action-attack
+// still lands in the graveyard.
 func TestGraveyard_WeaponSwingDoesNotEnterGraveyard(t *testing.T) {
 	attack := testutils.RedAttack{}
-	swing := weapons.ReapingBlade{}
+	swing := weapons.ReapingBlade{}.Ability()
 	order := []Card{attack, swing}
 	ctx := NewSequenceContextForTest(testutils.Hero{Intel: 4}, nil, nil, 1_000_000, 0, len(order))
 	if _, _, _, legal := ctx.PlaySequence(order); !legal {

@@ -95,9 +95,8 @@ func TestTypeSet_IsAttackAction(t *testing.T) {
 	}
 }
 
-// TestTypeSet_IsRunebladeAttack: every "next Runeblade attack this turn" rider keys on this
-// helper. Requires both TypeRuneblade AND (TypeAttack | TypeWeapon). Plain Runeblade auras
-// (no attack / weapon) don't qualify.
+// TestTypeSet_IsRunebladeAttack pins the helper "next Runeblade attack this turn" riders
+// key on. Requires both TypeRuneblade and TypeAttack; plain Runeblade auras don't qualify.
 func TestTypeSet_IsRunebladeAttack(t *testing.T) {
 	cases := []struct {
 		name string
@@ -105,7 +104,8 @@ func TestTypeSet_IsRunebladeAttack(t *testing.T) {
 		want bool
 	}{
 		{"runeblade attack action", NewTypeSet(TypeRuneblade, TypeAttack, TypeAction), true},
-		{"runeblade weapon", NewTypeSet(TypeRuneblade, TypeWeapon), true},
+		{"runeblade weapon ability", NewTypeSet(TypeRuneblade, TypeWeapon, TypeAttack), true},
+		{"runeblade weapon (no ability)", NewTypeSet(TypeRuneblade, TypeWeapon), false},
 		{"runeblade aura", NewTypeSet(TypeRuneblade, TypeAction, TypeAura), false},
 		{"generic attack", NewTypeSet(TypeGeneric, TypeAttack, TypeAction), false},
 		{"weapon alone", NewTypeSet(TypeWeapon), false},
@@ -114,6 +114,52 @@ func TestTypeSet_IsRunebladeAttack(t *testing.T) {
 	for _, tc := range cases {
 		if got := tc.set.IsRunebladeAttack(); got != tc.want {
 			t.Errorf("%s.IsRunebladeAttack() = %v, want %v", tc.name, got, tc.want)
+		}
+	}
+}
+
+// TestTypeSet_IsAttack pins the "your next attack" predicate (no "action card" qualifier).
+// Fires on any set carrying TypeAttack — attack action cards and weapon abilities both.
+func TestTypeSet_IsAttack(t *testing.T) {
+	cases := []struct {
+		name string
+		set  TypeSet
+		want bool
+	}{
+		{"attack action", NewTypeSet(TypeAction, TypeAttack), true},
+		{"weapon ability", NewTypeSet(TypeWeapon, TypeAttack), true},
+		{"weapon ability (sword)", NewTypeSet(TypeRuneblade, TypeWeapon, TypeSword, TypeAttack), true},
+		{"weapon (no ability)", NewTypeSet(TypeWeapon), false},
+		{"plain action", NewTypeSet(TypeAction), false},
+		{"aura only", NewTypeSet(TypeAura), false},
+		{"empty", 0, false},
+	}
+	for _, tc := range cases {
+		if got := tc.set.IsAttack(); got != tc.want {
+			t.Errorf("%s.IsAttack() = %v, want %v", tc.name, got, tc.want)
+		}
+	}
+}
+
+// TestTypeSet_IsWeaponAttack pins the "weapon attack" predicate (Pummel, Razor Reflex's
+// sword gate). Requires both TypeWeapon and TypeAttack; bare weapon permanents and
+// attack-action cards sharing a weapon subtype both miss.
+func TestTypeSet_IsWeaponAttack(t *testing.T) {
+	cases := []struct {
+		name string
+		set  TypeSet
+		want bool
+	}{
+		{"weapon ability", NewTypeSet(TypeWeapon, TypeAttack), true},
+		{"weapon ability (club)", NewTypeSet(TypeGeneric, TypeWeapon, TypeClub, TypeAttack), true},
+		{"weapon (no ability)", NewTypeSet(TypeWeapon), false},
+		{"attack action with sword subtype", NewTypeSet(TypeAction, TypeAttack, TypeSword), false},
+		{"plain attack", NewTypeSet(TypeAttack), false},
+		{"empty", 0, false},
+	}
+	for _, tc := range cases {
+		if got := tc.set.IsWeaponAttack(); got != tc.want {
+			t.Errorf("%s.IsWeaponAttack() = %v, want %v", tc.name, got, tc.want)
 		}
 	}
 }

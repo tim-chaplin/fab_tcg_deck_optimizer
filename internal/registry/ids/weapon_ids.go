@@ -17,7 +17,7 @@ const InvalidWeapon WeaponID = 0
 
 // Weapon IDs. Anchored after the last real card so weapons don't share cache slots with
 // cards in the shared CardID space. Test-fake card IDs (testutils.FakeRedAttack, …) anchor
-// past the last weapon ID so they don't collide either.
+// past the last weapon ability ID so they don't collide either.
 const (
 	AnnalsOfSutcliffeID WeaponID = ZealousBeltingBlue + iota + 1
 	NebulaBladeID
@@ -25,4 +25,15 @@ const (
 	RosettaThornID
 	ScepterOfPainID
 	TalisharID
+)
+
+// Weapon ability IDs. Anchored after the weapon-permanent IDs in the shared CardID space;
+// cardMetaCache keys off the ability ID since the chain runner enqueues the ability.
+const (
+	AnnalsOfSutcliffeAbilityID CardID = TalisharID + iota + 1
+	NebulaBladeAbilityID
+	ReapingBladeAbilityID
+	RosettaThornAbilityID
+	ScepterOfPainAbilityID
+	TalisharAbilityID
 )

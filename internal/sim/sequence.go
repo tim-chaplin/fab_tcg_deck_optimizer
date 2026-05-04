@@ -140,9 +140,10 @@ func bestAttackWithWeapons(hero Hero, weapons []Weapon, attackers, defenders, pi
 				continue
 			}
 			allAttackers := bufs.attackerBuf[:len(attackers)]
-			for i, w := range weapons {
+			// Append each selected weapon's ability — the weapon stays in play.
+			for i := range weapons {
 				if wmask&(1<<i) != 0 {
-					allAttackers = append(allAttackers, w)
+					allAttackers = append(allAttackers, bufs.activatedAbilities[i])
 				}
 			}
 			dealt, leftoverRunechants, legal := ctx.bestSequence(allAttackers)
@@ -821,14 +822,13 @@ func (ctx *sequenceContext) playSequenceWithMeta(n int) (damage int, leftoverRun
 		// modifiers (Yinti Yanti +1{p}) see live token auras before TriggerAttack
 		// handlers consume them.
 		pc.Card.Play(state, pc)
-		isAttackOrWeapon := m.isAttackOrWeapon
-		if isAttackOrWeapon {
+		if m.isAttack {
 			fireAttackAuras(state, pc.Card)
 		}
 		if m.isAttackAction {
 			fireAttackActionAuras(state, pc.Card)
 		}
-		if isAttackOrWeapon {
+		if m.isAttack {
 			activeAttack = pc
 		}
 		state.CardsPlayed = append(state.CardsPlayed, pc.Card)

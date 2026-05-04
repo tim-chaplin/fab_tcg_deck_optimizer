@@ -14,16 +14,25 @@ var scepterOfPainTypes = card.NewTypeSet(card.TypeRuneblade, card.TypeWeapon, ca
 
 type ScepterOfPain struct{}
 
-func (ScepterOfPain) ID() ids.WeaponID        { return ids.ScepterOfPainID }
-func (ScepterOfPain) Name() string            { return "Scepter of Pain" }
-func (ScepterOfPain) Cost(*sim.TurnState) int { return 2 }
-func (ScepterOfPain) Pitch() int              { return 0 }
-func (ScepterOfPain) Attack() int             { return 1 }
-func (ScepterOfPain) Defense() int            { return 0 }
-func (ScepterOfPain) Types() card.TypeSet     { return scepterOfPainTypes }
-func (ScepterOfPain) GoAgain() bool           { return false }
-func (ScepterOfPain) Hands() int              { return 1 }
-func (c ScepterOfPain) Play(s *sim.TurnState, self *sim.CardState) {
+func (ScepterOfPain) ID() ids.WeaponID    { return ids.ScepterOfPainID }
+func (ScepterOfPain) Name() string        { return "Scepter of Pain" }
+func (ScepterOfPain) Types() card.TypeSet { return scepterOfPainTypes }
+func (ScepterOfPain) Hands() int          { return 1 }
+func (ScepterOfPain) Ability() sim.Card   { return ScepterOfPainAbility{} }
+
+var scepterOfPainAbilityTypes = card.NewTypeSet(card.TypeRuneblade, card.TypeWeapon, card.TypeScepter, card.TypeOneHand, card.TypeAttack)
+
+type ScepterOfPainAbility struct{}
+
+func (ScepterOfPainAbility) ID() ids.CardID          { return ids.ScepterOfPainAbilityID }
+func (ScepterOfPainAbility) Name() string            { return "Scepter of Pain" }
+func (ScepterOfPainAbility) Cost(*sim.TurnState) int { return 2 }
+func (ScepterOfPainAbility) Pitch() int              { return 0 }
+func (ScepterOfPainAbility) Attack() int             { return 1 }
+func (ScepterOfPainAbility) Defense() int            { return 0 }
+func (ScepterOfPainAbility) Types() card.TypeSet     { return scepterOfPainAbilityTypes }
+func (ScepterOfPainAbility) GoAgain() bool           { return false }
+func (ScepterOfPainAbility) Play(s *sim.TurnState, self *sim.CardState) {
 	n := self.DealEffectiveAttack(s)
 	s.Log(self, n)
 	s.CreateRunechants(1)

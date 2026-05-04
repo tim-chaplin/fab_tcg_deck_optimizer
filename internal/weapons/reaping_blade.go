@@ -17,16 +17,25 @@ var reapingBladeTypes = card.NewTypeSet(card.TypeRuneblade, card.TypeWeapon, car
 
 type ReapingBlade struct{}
 
-func (ReapingBlade) ID() ids.WeaponID        { return ids.ReapingBladeID }
-func (ReapingBlade) Name() string            { return "Reaping Blade" }
-func (ReapingBlade) Cost(*sim.TurnState) int { return 1 }
-func (ReapingBlade) Pitch() int              { return 0 }
-func (ReapingBlade) Attack() int             { return 3 }
-func (ReapingBlade) Defense() int            { return 0 }
-func (ReapingBlade) Types() card.TypeSet     { return reapingBladeTypes }
-func (ReapingBlade) GoAgain() bool           { return false }
-func (ReapingBlade) Hands() int              { return 2 }
-func (ReapingBlade) Play(s *sim.TurnState, self *sim.CardState) {
+func (ReapingBlade) ID() ids.WeaponID    { return ids.ReapingBladeID }
+func (ReapingBlade) Name() string        { return "Reaping Blade" }
+func (ReapingBlade) Types() card.TypeSet { return reapingBladeTypes }
+func (ReapingBlade) Hands() int          { return 2 }
+func (ReapingBlade) Ability() sim.Card   { return ReapingBladeAbility{} }
+
+var reapingBladeAbilityTypes = card.NewTypeSet(card.TypeRuneblade, card.TypeWeapon, card.TypeSword, card.TypeTwoHand, card.TypeAttack)
+
+type ReapingBladeAbility struct{}
+
+func (ReapingBladeAbility) ID() ids.CardID          { return ids.ReapingBladeAbilityID }
+func (ReapingBladeAbility) Name() string            { return "Reaping Blade" }
+func (ReapingBladeAbility) Cost(*sim.TurnState) int { return 1 }
+func (ReapingBladeAbility) Pitch() int              { return 0 }
+func (ReapingBladeAbility) Attack() int             { return 3 }
+func (ReapingBladeAbility) Defense() int            { return 0 }
+func (ReapingBladeAbility) Types() card.TypeSet     { return reapingBladeAbilityTypes }
+func (ReapingBladeAbility) GoAgain() bool           { return false }
+func (ReapingBladeAbility) Play(s *sim.TurnState, self *sim.CardState) {
 	n := self.DealEffectiveAttack(s)
 	s.Log(self, n)
 }

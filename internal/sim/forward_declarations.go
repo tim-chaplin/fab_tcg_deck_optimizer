@@ -14,7 +14,6 @@ package sim
 // up every consumer.
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
 )
 
@@ -36,9 +35,10 @@ var DisplayName = func(c Card) string {
 }
 
 // ChainStepText returns the "<DisplayName>: <VERB>[ from arsenal]" prefix the chain-step
-// log line is built from. VERB picks WEAPON ATTACK for weapon-typed cards, ATTACK for
-// attack-action cards, DEFENSE REACTION for Defense Reactions, and PLAY for everything
-// else; the "from arsenal" suffix tags entries played out of the arsenal slot.
+// log line is built from. VERB picks WEAPON ATTACK for weapon activated-ability cards
+// (Weapon + Attack), ATTACK for attack-action cards, DEFENSE REACTION for Defense
+// Reactions, and PLAY for everything else; the "from arsenal" suffix tags entries played
+// out of the arsenal slot.
 //
 // optimizations.init swaps in a memoised version that hits a per-(CardID, FromArsenal)
 // cache.
@@ -46,7 +46,7 @@ var ChainStepText = func(self *CardState) string {
 	types := self.Card.Types()
 	var verb string
 	switch {
-	case types.Has(card.TypeWeapon):
+	case types.IsWeaponAttack():
 		verb = "WEAPON ATTACK"
 	case types.IsAttackAction():
 		verb = "ATTACK"

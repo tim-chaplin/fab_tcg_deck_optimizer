@@ -22,16 +22,17 @@ import (
 // the chain inner loop. For non-VariableCost cards, minCost == maxCost == Cost(&TurnState{})
 // and the cached value is used directly (no interface call per play).
 type attackerMeta struct {
-	types            card.TypeSet
-	card             Card // held for variable-cost / modal-cost chain-time Cost calls
-	minCost          int
-	maxCost          int
-	isVariable       bool
-	isAttackOrWeapon bool
-	// isAttackAction is the "attack action card" test (Action+Attack, no Weapon) the sim uses
-	// to pick which Play resolutions fire TriggerAttackAction Auras. Weapons carry
-	// card.TypeAttack but aren't attack action CARDS; only the Action+Attack bitmask matches the
-	// printed trigger text on cards like Malefic Incantation.
+	types      card.TypeSet
+	card       Card // held for variable-cost / modal-cost chain-time Cost calls
+	minCost    int
+	maxCost    int
+	isVariable bool
+	// isAttack is the "this chain step is an attack" test driving fireAttackAuras — true on
+	// any card carrying TypeAttack (attack action cards and weapon abilities both).
+	isAttack bool
+	// isAttackAction is the "attack action card" test (Action+Attack, no Weapon) gating
+	// TriggerAttackAction Auras like Malefic Incantation. Weapon abilities carry TypeAttack
+	// but aren't attack action CARDS, so they miss this gate.
 	isAttackAction bool
 	// isFreeChainStep is set on cards that resolve in the chain without paying an Action
 	// Point — Instants and Attack Reactions (both 0 AP per FaB rules). Action cards and
@@ -121,13 +122,13 @@ func buildAttackerMeta(c Card) attackerMeta {
 	t := c.Types()
 	_, isDefensiveInstant := c.(DefensiveInstant)
 	m := attackerMeta{
-		types:            t,
-		card:             c,
-		isAttackOrWeapon: t.Has(card.TypeAttack) || t.Has(card.TypeWeapon),
-		isAttackAction:   t.IsAttackAction(),
-		isFreeChainStep:  t.Has(card.TypeInstant) || t.IsAttackReaction(),
-		actsAsDR:         t.IsDefenseReaction() || isDefensiveInstant,
-		modes:            1,
+		types:           t,
+		card:            c,
+		isAttack:        t.Has(card.TypeAttack),
+		isAttackAction:  t.IsAttackAction(),
+		isFreeChainStep: t.Has(card.TypeInstant) || t.IsAttackReaction(),
+		actsAsDR:        t.IsDefenseReaction() || isDefensiveInstant,
+		modes:           1,
 	}
 	if mc, ok := c.(ModalCard); ok {
 		// A ModalCard must expose at least two modes — the marker exists to enumerate

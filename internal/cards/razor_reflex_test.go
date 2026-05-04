@@ -9,10 +9,10 @@ import (
 
 // Tests that mode 0 accepts a sword weapon attack.
 func TestRazorReflex_Mode0AcceptsSwordWeapon(t *testing.T) {
-	swordWeapon := testutils.NewStubCard("sword").
-		WithTypes(card.NewTypeSet(card.TypeGeneric, card.TypeWeapon, card.TypeSword))
-	if !(RazorReflexRed{}).ARTargetAllowed(swordWeapon, 0) {
-		t.Error("mode 0 should accept a sword weapon")
+	swordSwing := testutils.NewStubCard("swordSwing").
+		WithTypes(card.NewTypeSet(card.TypeGeneric, card.TypeWeapon, card.TypeSword, card.TypeAttack))
+	if !(RazorReflexRed{}).ARTargetAllowed(swordSwing, 0) {
+		t.Error("mode 0 should accept a sword weapon swing")
 	}
 }
 

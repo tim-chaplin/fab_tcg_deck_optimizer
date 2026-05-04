@@ -78,7 +78,7 @@ func TestBuildChainStepText_VerbSelection(t *testing.T) {
 		fromArsenal bool
 		want        string
 	}{
-		{"weapon", card.NewTypeSet(card.TypeWeapon), false, "X: WEAPON ATTACK"},
+		{"weapon ability", card.NewTypeSet(card.TypeWeapon, card.TypeAttack), false, "X: WEAPON ATTACK"},
 		{"attack action", card.NewTypeSet(card.TypeAttack, card.TypeAction), false, "X: ATTACK"},
 		{"defense reaction", card.NewTypeSet(card.TypeDefenseReaction), false, "X: DEFENSE REACTION"},
 		{"non-attack action", card.NewTypeSet(card.TypeAction), false, "X: PLAY"},

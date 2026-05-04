@@ -105,6 +105,19 @@ s.Log(self, n)
 s.Log(self, 0)
 ```
 
+## Weapon activated abilities
+
+Weapons live in `internal/weapons/` as two paired Go types:
+
+- A `sim.Weapon` permanent (`ID`, `Name`, `Types`, `Hands`, `Ability`) — the equipped permanent that sits in the arena and never enters the chain.
+- A `sim.Card` activated ability (`<Weapon>Ability`) — what the chain runner enqueues when the player swings. Carries the printed Cost / Pitch / Attack / Defense / GoAgain / Play and the parent's `card.TypeSet` plus `card.TypeAttack` (so `IsAttack`, `IsWeaponAttack`, and — for Runeblade weapons — `IsRunebladeAttack` all fire).
+
+`Ability()` may return a fresh value or a singleton; every implemented ability is a zero-size struct, so the choice is allocation-free. The ability `Name()` matches the weapon's so chain logs read `<Weapon>: WEAPON ATTACK`.
+
+IDs: weapon permanents take `WeaponID`; abilities take `CardID` and anchor in `internal/registry/ids/weapon_ids.go` past the last weapon-permanent ID. Test fakes anchor past the last ability ID.
+
+Card-attack predicates (`internal/card/types.go`) gate purely on `TypeAttack` (and `TypeWeapon` / `TypeRuneblade` where the rider needs the subtype). A bare weapon permanent — types only, no `TypeAttack` — never matches.
+
 ## Cross-file references
 
 If a comment's rationale would otherwise cite "matches the pattern in foo.go, bar.go, baz.go", factor the shared rule into this file and cite only the local behaviour at the call site.

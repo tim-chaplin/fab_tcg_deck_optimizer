@@ -98,7 +98,7 @@ func (stubRuneWeapon) Pitch() int              { return 0 }
 func (stubRuneWeapon) Attack() int             { return 0 }
 func (stubRuneWeapon) Defense() int            { return 0 }
 func (stubRuneWeapon) Types() card.TypeSet {
-	return card.NewTypeSet(card.TypeRuneblade, card.TypeWeapon)
+	return card.NewTypeSet(card.TypeRuneblade, card.TypeWeapon, card.TypeAttack)
 }
 func (stubRuneWeapon) GoAgain() bool                       { return true }
 func (stubRuneWeapon) Play(*sim.TurnState, *sim.CardState) {}

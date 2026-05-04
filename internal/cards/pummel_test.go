@@ -7,13 +7,14 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
 )
 
-// Tests that mode 0 accepts Club and Hammer weapon attacks.
+// Tests that mode 0 accepts Club and Hammer weapon attacks (probed via the activated-
+// ability Cards the chain runner enqueues for the swing).
 func TestPummel_Mode0AcceptsClubAndHammer(t *testing.T) {
-	if !(PummelRed{}).ARTargetAllowed(testutils.ClubWeapon{}, 0) {
-		t.Error("mode 0 should accept a Club weapon")
+	if !(PummelRed{}).ARTargetAllowed(testutils.ClubWeaponAbility{}, 0) {
+		t.Error("mode 0 should accept a Club weapon ability")
 	}
-	if !(PummelRed{}).ARTargetAllowed(testutils.HammerWeapon{}, 0) {
-		t.Error("mode 0 should accept a Hammer weapon")
+	if !(PummelRed{}).ARTargetAllowed(testutils.HammerWeaponAbility{}, 0) {
+		t.Error("mode 0 should accept a Hammer weapon ability")
 	}
 }
 
