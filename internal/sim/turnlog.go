@@ -225,10 +225,10 @@ func endingArsenalLine(arsenal []CardAssignment) string {
 }
 
 // endingAurasLine builds "Auras: A, B, 2 Runechants, 1 Ponder" from the Auras surviving
-// into the next turn plus the live token counts. Token entries are filtered out and
-// re-rendered as count phrases (so pluralisation lives in one place rather than being
-// inferred from the alpha sort). Card-aura names sort alphabetically; tokens append
-// last in declaration order. Returns "" when nothing survived.
+// into the next turn plus the live token counts. Token auras are filtered out and
+// re-rendered as count phrases so pluralisation lives in one place. Card-aura names
+// sort alphabetically; token phrases append last in declaration order. Returns "" when
+// nothing survived.
 func endingAurasLine(triggers []Aura, runechants, ponders int) string {
 	var items []string
 	for _, t := range triggers {

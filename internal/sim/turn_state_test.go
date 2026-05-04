@@ -199,9 +199,8 @@ func TestCreateRunechants_OneToken(t *testing.T) {
 	}
 }
 
-// TestCreatePonder_BumpsCountAndFlag: bumps Ponders by n, flips AuraCreated, and
-// credits NO Value (Ponder's draw nets zero card advantage in our turn model). n=0 is
-// a no-op (no flag flip, no aura entry). Second call accumulates onto the same aura.
+// TestCreatePonder_BumpsCountAndFlag: bumps Ponders by n, flips AuraCreated, credits
+// no Value, and accumulates on repeat calls. n=0 is a no-op.
 func TestCreatePonder_BumpsCountAndFlag(t *testing.T) {
 	var s TurnState
 	s.CreatePonder(0)

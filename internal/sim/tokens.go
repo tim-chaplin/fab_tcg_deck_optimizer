@@ -19,10 +19,7 @@ const (
 	// weapon swing the controller resolves (see runechantAuraHandler).
 	TokenTypeRunechant
 	// TokenTypePonder is the ponder aura token. Destroys itself at the start of the
-	// owner's next turn; the printed "draw a card" effect is a no-op in our turn model
-	// because the next-turn fill step already draws back to hand size (see
-	// ponderAuraHandler). Token presence is still tracked so cards reading s.Ponders()
-	// see the right count.
+	// owner's next turn (see ponderAuraHandler).
 	TokenTypePonder
 )
 
@@ -62,17 +59,15 @@ func NewRunechantAura(n int) Aura {
 }
 
 // ponderAuraHandler is the TriggerStartOfTurn handler shared by every Ponder aura.
-// FaB's "destroy this and draw a card" reduces to a bare destroy here: the next-turn
-// fill step draws back to hand size, so Ponder's draw is absorbed and yields zero net
-// card advantage. The aura still exists so same-turn cards reading "if you control a
-// Ponder" see it before the boundary destruction fires.
+// Reduces FaB's "destroy this and draw a card" to a bare destroy: the next-turn fill
+// step draws back to hand size, so the printed draw is absorbed and yields zero net
+// card advantage.
 func ponderAuraHandler(s *TurnState, t *Aura) {
 	s.DestroyAura(t, false)
 }
 
 // NewPonderAura returns a ponder token aura at count n. Production code calls
-// s.CreatePonder instead. Mirrors NewRunechantAura for tests that need to seed the
-// aura directly.
+// s.CreatePonder instead; this factory is for tests that need to seed the aura directly.
 func NewPonderAura(n int) Aura {
 	return Aura{
 		Self:        CardOrTokenType{TokenType: TokenTypePonder},
@@ -83,9 +78,7 @@ func NewPonderAura(n int) Aura {
 }
 
 // tokenCountIn scans an aura slice for a token aura of the given type and returns its
-// count. Backs the per-state TurnState.Runechants / Ponders accessors and the chain
-// runner's priorAuras lookups so the single-aura-per-token-type invariant has one read
-// site per token kind.
+// count. Single read site for the at-most-one-aura-per-token-type invariant.
 func tokenCountIn(auras []Aura, t TokenType) int {
 	for i := range auras {
 		if auras[i].Self.TokenType == t {

@@ -638,10 +638,8 @@ func (s *TurnState) CreateRunechants(n int) {
 	s.AddAura(NewRunechantAura(n))
 }
 
-// CreatePonder creates n Ponder tokens. Tokens are stored as a single Aura entry —
-// bump an existing entry's Count or add a new one. Sets AuraCreated so same-turn "aura
-// created this turn" effects see it. No value credit: the printed "draw a card" effect
-// is absorbed by the next-turn fill step (net-zero card advantage).
+// CreatePonder creates n Ponder tokens, bumping the existing aura entry's Count or
+// adding a new one, and flips AuraCreated. No Value credit — see ponderAuraHandler.
 func (s *TurnState) CreatePonder(n int) {
 	if n <= 0 {
 		return

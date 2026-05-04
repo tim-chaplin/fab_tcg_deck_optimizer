@@ -29,9 +29,8 @@ implemented` riders across the card roster.
   totals would let conditional grants fire correctly per-turn instead of per-hero.
 - **Gold / Silver / Copper / Quicken / Frailty / Inertia / Bloodrot Pox token economies.**
   None are tracked. Cards that mint or consume these tokens collapse to base stats or a
-  flat damage-equivalent. The Aura framework's `TokenType` slot now hosts Runechants and
-  Ponders (see `internal/sim/tokens.go`); each new token kind needs the same treatment —
-  a `TokenType` enum entry, a handler describing the destroy condition, and a `s.CreateX`
+  flat damage-equivalent. Each new token kind needs a `TokenType` enum entry in
+  `internal/sim/tokens.go`, a handler describing the destroy condition, and a `s.CreateX`
   helper paired with the relevant card-mint sites.
 - **Action-point tracking.** The sim doesn't track action points; cards that grant them
   drop the tempo payoff entirely.

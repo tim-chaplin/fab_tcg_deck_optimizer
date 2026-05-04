@@ -89,9 +89,8 @@ func TestProcessAurasAtStartOfTurn_GraveyardsExhaustedAura(t *testing.T) {
 	}
 }
 
-// TestProcessAurasAtStartOfTurn_DestroysCarriedPonder: a Ponder token aura carried in from
-// the previous turn fires on TriggerStartOfTurn and self-destructs, leaving no survivor.
-// Token tokens never go to graveyard, so the destroyed-pass slice stays empty.
+// TestProcessAurasAtStartOfTurn_DestroysCarriedPonder: a carried-in Ponder fires on
+// TriggerStartOfTurn and self-destructs, leaving no survivor.
 func TestProcessAurasAtStartOfTurn_DestroysCarriedPonder(t *testing.T) {
 	survivors, _, _, _, graveyarded := ProcessAurasAtStartOfTurn([]Aura{NewPonderAura(2)}, nil)
 	if len(survivors) != 0 {

@@ -6,9 +6,7 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 )
 
-// TestPeaceOfMind_PreventsByPrinting pins each printing's prevention amount: the rider
-// converts the printed Defense via DealEffectiveDefense, so playing into 10 incoming
-// damage credits 4/3/2 prevented for Red/Yellow/Blue.
+// Tests that each printing prevents its full Defense() amount (4/3/2).
 func TestPeaceOfMind_PreventsByPrinting(t *testing.T) {
 	cases := []struct {
 		card sim.Card
@@ -28,9 +26,7 @@ func TestPeaceOfMind_PreventsByPrinting(t *testing.T) {
 	}
 }
 
-// TestPeaceOfMind_CreatesPonder pins the on-play Ponder rider: every printing creates
-// exactly one Ponder token regardless of the prevention amount, and the AuraCreated
-// flag flips so same-turn "if you've created an aura" effects see it.
+// Tests that each printing creates one Ponder token on play.
 func TestPeaceOfMind_CreatesPonder(t *testing.T) {
 	for _, c := range []sim.Card{PeaceOfMindRed{}, PeaceOfMindYellow{}, PeaceOfMindBlue{}} {
 		s := sim.TurnState{IncomingDamage: 10}

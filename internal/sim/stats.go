@@ -48,9 +48,7 @@ type Stats struct {
 type BestTurn struct {
 	Summary TurnSummary
 	// StartingAuras is the carryover aura set entering this turn — sigils, incantations,
-	// and token auras (Runechants, Ponders, …) in play when the hand was dealt. The
-	// formatter pulls token counts from this slice to render the StartOfTurn "Auras: ..."
-	// line; tests assert specific carryover by querying via tokenCountIn or DisplayName.
+	// and token auras in play when the hand was dealt.
 	StartingAuras []Aura
 	// Log is the four-section structured record (StartOfTurn / MyTurn / OpponentTurn /
 	// EndOfTurn) of the best turn's printout. Each entry is content-only; the formatter

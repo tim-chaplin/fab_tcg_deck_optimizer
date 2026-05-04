@@ -1,10 +1,7 @@
 // Peace of Mind — Generic Instant. Cost 2. Printed pitch variants: Red 1, Yellow 2, Blue 3.
 //
 // Text (Red): "The next time you would be dealt {p} damage, prevent 4 of that damage.
-// Create a Ponder token." Yellow caps prevention at 3, Blue at 2. The Ponder is created
-// for tracking only — Ponder's "destroy and draw a card" trigger nets zero card
-// advantage in our turn model (next-turn fill compensates for the draw), so it carries
-// no Value credit.
+// Create a Ponder token." Yellow caps prevention at 3, Blue at 2.
 
 package cards
 
