@@ -28,7 +28,7 @@ func meatAndGreetPlay(s *sim.TurnState, self *sim.CardState) {
 // meatAndGreetOnHit fires the printed "When this hits, create a Runechant token" rider.
 // Top-level so registration stays alloc-free.
 func meatAndGreetOnHit(s *sim.TurnState, self *sim.CardState, _ *sim.OnHitHandler) {
-	s.CreateRunechant()
+	s.CreateRunechants(1)
 	s.LogRider(self, 1, "On-hit created a runechant")
 }
 

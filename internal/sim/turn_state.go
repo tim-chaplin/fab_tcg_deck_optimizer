@@ -643,11 +643,6 @@ func (s *TurnState) CreateRunechants(n int) {
 	})
 }
 
-// CreateRunechant is shorthand for CreateRunechants(1).
-func (s *TurnState) CreateRunechant() {
-	s.CreateRunechants(1)
-}
-
 // Runechants returns the current Runechant token count, or zero when none are in play.
 func (s *TurnState) Runechants() int { return runechantCountIn(s.Auras) }
 

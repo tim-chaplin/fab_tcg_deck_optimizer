@@ -184,15 +184,15 @@ func TestCreateRunechants_CountAndFlag(t *testing.T) {
 	}
 }
 
-// TestCreateRunechant_IsSingleTokenShorthand: one call = one Runechant + 1 credit.
-func TestCreateRunechant_IsSingleTokenShorthand(t *testing.T) {
+// TestCreateRunechants_OneToken: one call = one Runechant + 1 credit.
+func TestCreateRunechants_OneToken(t *testing.T) {
 	var s TurnState
-	s.CreateRunechant()
+	s.CreateRunechants(1)
 	if s.Runechants() != 1 {
 		t.Errorf("Runechants = %d, want 1", s.Runechants())
 	}
 	if !s.AuraCreated {
-		t.Error("AuraCreated should be true after CreateRunechant")
+		t.Error("AuraCreated should be true after CreateRunechants(1)")
 	}
 	if s.Value != 1 {
 		t.Errorf("Value = %d, want 1", s.Value)
