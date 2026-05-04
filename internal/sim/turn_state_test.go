@@ -44,30 +44,30 @@ func TestDrawOne_EmptyDeckIsNoOp(t *testing.T) {
 	}
 }
 
-// TestAddAuraTrigger_FlipsAuraCreatedAndAppends: AddAuraTrigger MUST flip AuraCreated (so
+// TestAddAura_FlipsAuraCreatedAndAppends: AddAura MUST flip AuraCreated (so
 // same-turn "if you've played or created an aura" riders see the entry) AND push each
-// trigger onto s.AuraTriggers in call order. Pairing both in one method is what stops a
+// trigger onto s.Auras in call order. Pairing both in one method is what stops a
 // card from registering a trigger without advertising the aura (or vice versa).
-func TestAddAuraTrigger_FlipsAuraCreatedAndAppends(t *testing.T) {
+func TestAddAura_FlipsAuraCreatedAndAppends(t *testing.T) {
 	self := testutils.NewStubCard("self")
 	s := &TurnState{}
 	if s.AuraCreated {
 		t.Fatal("pre: AuraCreated should be false")
 	}
-	s.AddAuraTrigger(AuraTrigger{Self: self, Type: TriggerStartOfTurn, Count: 2})
-	s.AddAuraTrigger(AuraTrigger{Self: self, Type: TriggerStartOfTurn, Count: 1})
+	s.AddAura(Aura{Self: self, TriggerType: TriggerStartOfTurn, Count: 2})
+	s.AddAura(Aura{Self: self, TriggerType: TriggerStartOfTurn, Count: 1})
 	if !s.AuraCreated {
 		t.Error("AuraCreated = false, want true")
 	}
-	if len(s.AuraTriggers) != 2 {
-		t.Fatalf("AuraTriggers len = %d, want 2", len(s.AuraTriggers))
+	if len(s.Auras) != 2 {
+		t.Fatalf("Auras len = %d, want 2", len(s.Auras))
 	}
-	if s.AuraTriggers[0].Count != 2 || s.AuraTriggers[1].Count != 1 {
+	if s.Auras[0].Count != 2 || s.Auras[1].Count != 1 {
 		t.Errorf("order broke: got Counts %d,%d want 2,1",
-			s.AuraTriggers[0].Count, s.AuraTriggers[1].Count)
+			s.Auras[0].Count, s.Auras[1].Count)
 	}
-	if s.AuraTriggers[0].Self != self {
-		t.Errorf("Self = %v, want %v", s.AuraTriggers[0].Self, self)
+	if s.Auras[0].Self != self {
+		t.Errorf("Self = %v, want %v", s.Auras[0].Self, self)
 	}
 }
 
@@ -234,54 +234,6 @@ func TestClashValue_WinTieLose(t *testing.T) {
 		if got := s.ClashValue(tc.bonus); got != tc.want {
 			t.Errorf("%s: ClashValue = %d, want %d", tc.name, got, tc.want)
 		}
-	}
-}
-
-// Tests that RegisterStartOfTurn stores the pre-built LogText on the trigger so the
-// framework's start-of-turn fire path can emit "<DisplayName>: text" without per-fire
-// formatting work.
-func TestRegisterStartOfTurn_BuildsLogText(t *testing.T) {
-	self := testutils.NewStubCard("Test Aura").WithTypes(card.NewTypeSet(card.TypeAura))
-	var s TurnState
-	s.RegisterStartOfTurn(self, 1, "Gained 1 health", func(*TurnState, *AuraTrigger) int { return 1 })
-	if len(s.AuraTriggers) != 1 {
-		t.Fatalf("AuraTriggers len = %d, want 1", len(s.AuraTriggers))
-	}
-	if want := "Test Aura: Gained 1 health"; s.AuraTriggers[0].LogText != want {
-		t.Errorf("LogText = %q, want %q", s.AuraTriggers[0].LogText, want)
-	}
-}
-
-// Tests that an empty text leaves LogText empty so the framework defers to the handler's
-// own log line (Sigil of the Arknight's "drew X into hand" pattern).
-func TestRegisterStartOfTurn_EmptyTextLeavesLogTextEmpty(t *testing.T) {
-	self := testutils.NewStubCard("Test Aura").WithTypes(card.NewTypeSet(card.TypeAura))
-	var s TurnState
-	s.RegisterStartOfTurn(self, 1, "", func(*TurnState, *AuraTrigger) int { return 1 })
-	if got := s.AuraTriggers[0].LogText; got != "" {
-		t.Errorf("LogText = %q, want empty", got)
-	}
-}
-
-// TestRegisterStartOfTurn_EmptyTextLeavesHandlerAlone: text == "" means the card authors its
-// own log line inside the handler (Sigil of the Arknight's "drew X into hand", Silphidae's
-// conditional banish line). The wrapper must not append any extra entries — handler logs are
-// the only entries written.
-func TestRegisterStartOfTurn_EmptyTextLeavesHandlerAlone(t *testing.T) {
-	self := testutils.NewStubCard("Test Aura").WithTypes(card.NewTypeSet(card.TypeAura))
-	var s TurnState
-	s.RegisterStartOfTurn(self, 1, "", func(s *TurnState, _ *AuraTrigger) int {
-		s.LogPostTriggerf("Test Aura", 0, "custom handler text")
-		return 0
-	})
-
-	var fired TurnState
-	s.AuraTriggers[0].Handler(&fired, &s.AuraTriggers[0])
-	if len(fired.LogEntries()) != 1 {
-		t.Fatalf("Log len = %d, want exactly 1 (handler-authored only)", len(fired.LogEntries()))
-	}
-	if fired.LogEntries()[0].Text != "custom handler text" {
-		t.Errorf("Log[0].Text = %q, want handler's own text", fired.LogEntries()[0].Text)
 	}
 }
 

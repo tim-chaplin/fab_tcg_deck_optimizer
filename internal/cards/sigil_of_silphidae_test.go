@@ -8,7 +8,7 @@ import (
 
 // TestSigilOfSilphidae_PlayFizzlesWithoutAura: no aura in s.Graveyard means the enter trigger
 // can't banish anything and Play returns 0. AuraCreated still fires (Silphidae IS an aura)
-// and a start-of-turn AuraTrigger is registered for the "destroy this" clause.
+// and a start-of-turn Aura is registered for the "destroy this" clause.
 func TestSigilOfSilphidae_PlayFizzlesWithoutAura(t *testing.T) {
 	var s sim.TurnState
 	(SigilOfSilphidaeBlue{}).Play(&s, &sim.CardState{Card: SigilOfSilphidaeBlue{}})
@@ -21,8 +21,8 @@ func TestSigilOfSilphidae_PlayFizzlesWithoutAura(t *testing.T) {
 	if s.ArcaneDamageDealt {
 		t.Errorf("ArcaneDamageDealt should stay false when banish fizzles")
 	}
-	if len(s.AuraTriggers) != 1 || s.AuraTriggers[0].Type != sim.TriggerStartOfTurn {
-		t.Errorf("AuraTriggers = %+v, want one TriggerStartOfTurn entry", s.AuraTriggers)
+	if len(s.Auras) != 1 || s.Auras[0].TriggerType != sim.TriggerStartOfTurn {
+		t.Errorf("Auras = %+v, want one TriggerStartOfTurn entry", s.Auras)
 	}
 }
 
@@ -50,24 +50,22 @@ func TestSigilOfSilphidae_StartOfTurnHandlerFizzlesWithoutAnotherAura(t *testing
 	var play sim.TurnState
 	(SigilOfSilphidaeBlue{}).Play(&play, &sim.CardState{Card: SigilOfSilphidaeBlue{}})
 	var next sim.TurnState
-	got := play.AuraTriggers[0].Handler(&next, &play.AuraTriggers[0])
-	if got != 0 {
-		t.Errorf("handler damage = %d, want 0 (no other aura to banish)", got)
+	play.Auras[0].Handler(&next, &play.Auras[0])
+	if next.Value != 0 {
+		t.Errorf("handler Value = %d, want 0 (no other aura to banish)", next.Value)
 	}
 }
 
 // TestSigilOfSilphidae_StartOfTurnHandlerBanishesAnotherAura: with another aura already in
-// the start-of-turn graveyard, the leave trigger banishes it for 1 arcane. The sim
-// graveyards Self only AFTER this handler returns, so the scan can't pick up Silphidae
-// itself — the printed "another aura" restriction is satisfied naturally.
+// the start-of-turn graveyard, the leave trigger banishes it for 1 arcane.
 func TestSigilOfSilphidae_StartOfTurnHandlerBanishesAnotherAura(t *testing.T) {
 	var play sim.TurnState
 	(SigilOfSilphidaeBlue{}).Play(&play, &sim.CardState{Card: SigilOfSilphidaeBlue{}})
 	other := BlessingOfOccultRed{}
 	next := sim.NewTurnState(nil, []sim.Card{other})
-	got := play.AuraTriggers[0].Handler(next, &play.AuraTriggers[0])
-	if got != 1 {
-		t.Errorf("handler damage = %d, want 1 (banished another aura)", got)
+	play.Auras[0].Handler(next, &play.Auras[0])
+	if next.Value != 1 {
+		t.Errorf("handler Value = %d, want 1 (banished another aura)", next.Value)
 	}
 	if len(next.Banish) != 1 || next.Banish[0].ID() != other.ID() {
 		t.Errorf("Banish = %v, want [Blessing]", next.Banish)

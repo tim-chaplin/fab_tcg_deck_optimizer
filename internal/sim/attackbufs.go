@@ -89,7 +89,7 @@ type permBufs struct {
 	banishBacking       []Card
 	cardsPlayedBacking  []Card
 	logBacking          []LogEntry
-	auraTriggersBacking []AuraTrigger
+	auraTriggersBacking []Aura
 	// nextAtkActionHitBacking backs TurnState.pendingNextAttackActionHit. Sized small —
 	// having more than a couple of these riders queued at once is exotic.
 	nextAtkActionHitBacking []NextAttackActionHitTrigger
@@ -206,7 +206,7 @@ func newAttackBufs(handSize, weaponCount int, weapons []Weapon) *attackBufs {
 			banishBacking:           make([]Card, 0, handSize+1),
 			cardsPlayedBacking:      make([]Card, 0, maxAttackers),
 			logBacking:              make([]LogEntry, 0, logBackingCap),
-			auraTriggersBacking:     make([]AuraTrigger, 0, handSize+1),
+			auraTriggersBacking:     make([]Aura, 0, handSize+1),
 			nextAtkActionHitBacking: make([]NextAttackActionHitTrigger, 0, 4),
 		},
 		// carryWinnerBufs starts zero-valued — the slice backings grow on first use.

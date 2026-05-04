@@ -7,7 +7,7 @@ import (
 )
 
 // TestSigilOfFyendal_PlayRegistersStartOfTurnTrigger: Play flips AuraCreated and appends a
-// start-of-turn AuraTrigger with Count=1 — no same-turn damage, the 1{h} gain is credited
+// start-of-turn Aura with Count=1 — no same-turn damage, the 1{h} gain is credited
 // when the sim fires the trigger next turn.
 func TestSigilOfFyendal_PlayRegistersStartOfTurnTrigger(t *testing.T) {
 	var s sim.TurnState
@@ -18,11 +18,11 @@ func TestSigilOfFyendal_PlayRegistersStartOfTurnTrigger(t *testing.T) {
 	if !s.AuraCreated {
 		t.Error("AuraCreated = false, want true")
 	}
-	if len(s.AuraTriggers) != 1 || s.AuraTriggers[0].Type != sim.TriggerStartOfTurn {
-		t.Errorf("AuraTriggers = %+v, want one TriggerStartOfTurn entry", s.AuraTriggers)
+	if len(s.Auras) != 1 || s.Auras[0].TriggerType != sim.TriggerStartOfTurn {
+		t.Errorf("Auras = %+v, want one TriggerStartOfTurn entry", s.Auras)
 	}
-	if s.AuraTriggers[0].Count != 1 {
-		t.Errorf("Count = %d, want 1", s.AuraTriggers[0].Count)
+	if s.Auras[0].Count != 1 {
+		t.Errorf("Count = %d, want 1", s.Auras[0].Count)
 	}
 }
 
@@ -31,8 +31,10 @@ func TestSigilOfFyendal_PlayRegistersStartOfTurnTrigger(t *testing.T) {
 func TestSigilOfFyendal_TriggerHandlerCredits1Damage(t *testing.T) {
 	var s sim.TurnState
 	(SigilOfFyendalBlue{}).Play(&s, &sim.CardState{Card: SigilOfFyendalBlue{}})
-	if got := s.AuraTriggers[0].Handler(&sim.TurnState{}, &s.AuraTriggers[0]); got != 1 {
-		t.Errorf("Handler damage = %d, want 1", got)
+	var fire sim.TurnState
+	s.Auras[0].Handler(&fire, &s.Auras[0])
+	if fire.Value != 1 {
+		t.Errorf("Handler Value = %d, want 1", fire.Value)
 	}
 }
 

@@ -28,7 +28,7 @@ func (c *CarryState) SnapshotFromTurn(s *TurnState) {
 	c.Graveyard = append(c.Graveyard[:0], s.graveyard...)
 	c.Banish = append(c.Banish[:0], s.Banish...)
 	c.Runechants = s.Runechants
-	c.AuraTriggers = append(c.AuraTriggers[:0], s.AuraTriggers...)
+	c.Auras = append(c.Auras[:0], s.Auras...)
 	c.Log = append(c.Log[:0], s.turnLog...)
 }
 
@@ -43,7 +43,7 @@ func (c *CarryState) CopyFrom(src *CarryState) {
 	c.Graveyard = append(c.Graveyard[:0], src.Graveyard...)
 	c.Banish = append(c.Banish[:0], src.Banish...)
 	c.Runechants = src.Runechants
-	c.AuraTriggers = append(c.AuraTriggers[:0], src.AuraTriggers...)
+	c.Auras = append(c.Auras[:0], src.Auras...)
 	c.Log = append(c.Log[:0], src.Log...)
 }
 
@@ -58,7 +58,7 @@ func (c *CarryState) Reset() {
 	c.Graveyard = c.Graveyard[:0]
 	c.Banish = c.Banish[:0]
 	c.Runechants = 0
-	c.AuraTriggers = c.AuraTriggers[:0]
+	c.Auras = c.Auras[:0]
 	c.Log = c.Log[:0]
 }
 
@@ -83,8 +83,8 @@ func (c CarryState) Clone() CarryState {
 	if len(c.Banish) > 0 {
 		out.Banish = append([]Card(nil), c.Banish...)
 	}
-	if len(c.AuraTriggers) > 0 {
-		out.AuraTriggers = append([]AuraTrigger(nil), c.AuraTriggers...)
+	if len(c.Auras) > 0 {
+		out.Auras = append([]Aura(nil), c.Auras...)
 	}
 	if len(c.Log) > 0 {
 		out.Log = append([]LogEntry(nil), c.Log...)

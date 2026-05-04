@@ -22,14 +22,14 @@ type TurnStartState struct {
 	// StartOfNextTurnDeck is the remaining deck at the start of the next turn, top-to-bottom.
 	StartOfNextTurnDeck []Card
 	// StartOfNextTurnRunechants is the live Runechant count at the start of the next turn:
-	// chain leftover plus tokens created by next-turn start-of-turn AuraTrigger handlers.
+	// chain leftover plus tokens created by next-turn start-of-turn Aura handlers.
 	StartOfNextTurnRunechants int
 	// StartOfNextTurnTriggerDamage is the damage credited by the next turn's start-of-turn
-	// AuraTrigger handlers (triggers registered this turn that fired at the top of next).
+	// Aura handlers (triggers registered this turn that fired at the top of next).
 	// Zero when no trigger survived. Production folds this into next turn's Value.
 	StartOfNextTurnTriggerDamage int
 	// StartOfNextTurnGraveyard is the auras destroyed during the next turn's start-of-turn
-	// AuraTrigger pass, in destroy order.
+	// Aura pass, in destroy order.
 	StartOfNextTurnGraveyard []Card
 }
 
@@ -55,7 +55,7 @@ func (d *Deck) EvalOneTurnForTesting(mp Matchup, arsenalIn Card, initialHand []C
 	// decks still have room for mid-turn pitches (hand + drawn) without overflowing tail.
 	buf := make([]Card, deckSize*2+handSize*2)
 	copy(buf, d.Cards)
-	// handBuf capacity matches Evaluate's so start-of-turn AuraTrigger reveals can append
+	// handBuf capacity matches Evaluate's so start-of-turn Aura reveals can append
 	// without realloc.
 	handBuf := make([]Card, handSize, handSize+startOfTurnRevealRoom)
 	tail := deckSize
@@ -67,7 +67,7 @@ func (d *Deck) EvalOneTurnForTesting(mp Matchup, arsenalIn Card, initialHand []C
 	// drawCount=0: head already points past the starting hand, so applyTurnResult only needs
 	// to advance past mid-turn draws.
 	nextHeld := applyTurnResult(play, buf, &head, &tail, nil)
-	triggerQueue := append([]AuraTrigger(nil), play.State.AuraTriggers...)
+	auraQueue := append([]Aura(nil), play.State.Auras...)
 
 	// Deal turn 2's hand but stop short of running Best — the caller wants the pre-Best state.
 	turn2Hand, drawCount2, ok := dealNextHand(buf, handBuf, nextHeld, &head, &tail, handSize)
@@ -79,11 +79,11 @@ func (d *Deck) EvalOneTurnForTesting(mp Matchup, arsenalIn Card, initialHand []C
 			StartOfNextTurnRunechants: play.State.Runechants,
 		}
 	}
-	// Process turn-1 AuraTriggers at the turn-2 boundary the same way Evaluate does:
+	// Process turn-1 Auras at the turn-2 boundary the same way Evaluate does:
 	// fire start-of-turn handlers, re-arm OncePerTurn gates, drop exhausted entries.
 	// Reveals into the hand are consumed here so the returned turn-2 Hand matches what
 	// Best would see.
-	_, _, trigDamage, trigRunes, trigRevealed, trigGraveyarded := processTriggersAtStartOfTurn(triggerQueue, buf[head+drawCount2:tail])
+	_, _, trigDamage, trigRunes, trigRevealed, trigGraveyarded := processAurasAtStartOfTurn(auraQueue, buf[head+drawCount2:tail])
 	for range trigRevealed {
 		turn2Hand = append(turn2Hand, buf[head+drawCount2])
 		drawCount2++

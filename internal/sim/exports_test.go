@@ -38,9 +38,9 @@ func (s *SequenceContextForTest) BestSequence(attackers []Card) (int, int, bool)
 	return s.ctx.bestSequence(attackers)
 }
 
-// FireAttackActionTriggers re-exports fireAttackActionTriggers for sim_test consumers.
-func FireAttackActionTriggers(state *TurnState, triggeringCard Card) {
-	fireAttackActionTriggers(state, triggeringCard)
+// FireAttackActionAuras re-exports fireAttackActionAuras for sim_test consumers.
+func FireAttackActionAuras(state *TurnState, triggeringCard Card) {
+	fireAttackActionAuras(state, triggeringCard)
 }
 
 // PromoteRandomHandCardToArsenal re-exports promoteRandomHandCardToArsenal for sim_test
@@ -175,15 +175,15 @@ func MakeAdaptiveStop(targetSE float64) func(stats *Stats, runs int) bool {
 // MeanStandardError re-exports meanStandardError for sim_test consumers.
 func MeanStandardError(stats *Stats) float64 { return meanStandardError(stats) }
 
-// ProcessTriggersAtStartOfTurn re-exports processTriggersAtStartOfTurn for sim_test
+// ProcessAurasAtStartOfTurn re-exports processAurasAtStartOfTurn for sim_test
 // consumers exercising the start-of-turn aura-trigger pipeline in isolation.
-func ProcessTriggersAtStartOfTurn(queued []AuraTrigger, postDrawDeck []Card) (
-	survivors []AuraTrigger,
+func ProcessAurasAtStartOfTurn(queued []Aura, postDrawDeck []Card) (
+	survivors []Aura,
 	contribs []TriggerContribution,
 	damage int,
 	runes int,
 	revealed []Card,
 	graveyarded []Card,
 ) {
-	return processTriggersAtStartOfTurn(queued, postDrawDeck)
+	return processAurasAtStartOfTurn(queued, postDrawDeck)
 }

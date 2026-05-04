@@ -5,9 +5,7 @@
 // this."
 //
 // Play resolves the enter trigger directly via banishAuraFromGraveyard. The start-of-turn
-// handler runs the leave trigger — because the sim graveyards Self only after Count hits zero,
-// the scan naturally can't pick up Silphidae itself, satisfying "another aura" without an
-// explicit skip.
+// handler runs the leave trigger.
 
 package cards
 
@@ -32,8 +30,11 @@ func (SigilOfSilphidaeBlue) GoAgain() bool           { return true }
 func (SigilOfSilphidaeBlue) AddsFutureValue()        {}
 func (c SigilOfSilphidaeBlue) Play(s *sim.TurnState, self *sim.CardState) {
 	enterDamage := banishAuraFromGraveyard(s)
-	s.RegisterStartOfTurn(c, 1, "Banished an aura, dealt 1 arcane damage", func(s *sim.TurnState, _ *sim.AuraTrigger) int {
-		return banishAuraFromGraveyard(s)
+	s.AddAura(sim.Aura{
+		Self:        c,
+		TriggerType: sim.TriggerStartOfTurn,
+		Count:       1,
+		Handler:     sigilOfSilphidaeAuraHandler,
 	})
 	n := self.DealEffectiveAttack(s)
 	s.Log(self, n)
@@ -41,4 +42,15 @@ func (c SigilOfSilphidaeBlue) Play(s *sim.TurnState, self *sim.CardState) {
 		s.AddValue(enterDamage)
 		s.LogRider(self, enterDamage, "Banished an aura, dealt 1 arcane damage")
 	}
+}
+
+// sigilOfSilphidaeAuraHandler runs the leave trigger on the next turn: scans the graveyard
+// for an aura to banish, credits 1 arcane damage on a hit, then destroys the aura.
+func sigilOfSilphidaeAuraHandler(s *sim.TurnState, t *sim.Aura) {
+	n := banishAuraFromGraveyard(s)
+	if n > 0 {
+		s.AddValue(n)
+		s.LogPostTrigger(sim.DisplayName(t.Self), "Banished an aura, dealt 1 arcane damage", n)
+	}
+	s.DestroyAura(t, true)
 }

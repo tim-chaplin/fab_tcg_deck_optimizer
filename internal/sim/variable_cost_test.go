@@ -149,7 +149,7 @@ func TestBest_AetherSlashAloneConsumesCarryover(t *testing.T) {
 }
 
 // TestBest_BlessingOfOccultTokensDoNotAffectSameTurnChain: Blessing's runes materialise on
-// next turn via its TriggerStartOfTurn AuraTrigger, so Play returns 0 and nothing lands in
+// next turn via its TriggerStartOfTurn Aura, so Play returns 0 and nothing lands in
 // this turn's live Runechants. Hand: Red Malefic + Red Blessing. With no attack action
 // played this turn, Malefic's AttackAction trigger never fires either — same-turn Value is
 // 0. Both auras carry forward as triggers for future turns to consume.

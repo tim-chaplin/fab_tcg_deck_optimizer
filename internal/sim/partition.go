@@ -11,7 +11,7 @@ package sim
 
 import ()
 
-func (e *Evaluator) findBest(hero Hero, weapons []Weapon, hand []Card, mp Matchup, deck []Card, runechantCarryover int, arsenalCardIn Card, priorAuraTriggers []AuraTrigger, skipLog bool) TurnSummary {
+func (e *Evaluator) findBest(hero Hero, weapons []Weapon, hand []Card, mp Matchup, deck []Card, runechantCarryover int, arsenalCardIn Card, priorAuras []Aura, skipLog bool) TurnSummary {
 	// Cache fast-path. The cache is bypassed when disabled (e.cache nil) or when any of
 	// the inputs (hand, weapons, auras) overflows its fixed-size slot in the cache key.
 	// Overflow is rare in practice — adult hand sizes top out around 7, weapons at 2,
@@ -21,7 +21,7 @@ func (e *Evaluator) findBest(hero Hero, weapons []Weapon, hand []Card, mp Matchu
 	cacheUsable := e.cache != nil
 	if cacheUsable {
 		var keyOK bool
-		cacheKey, keyOK = makeCacheKey(hero, weapons, hand, runechantCarryover, arsenalCardIn, priorAuraTriggers)
+		cacheKey, keyOK = makeCacheKey(hero, weapons, hand, runechantCarryover, arsenalCardIn, priorAuras)
 		if !keyOK {
 			cacheUsable = false
 		}
@@ -29,7 +29,7 @@ func (e *Evaluator) findBest(hero Hero, weapons []Weapon, hand []Card, mp Matchu
 	if cacheUsable {
 		if entry, ok := e.cache.lookup(cacheKey); ok {
 			e.cache.hits.Add(1)
-			return e.replayBest(entry, hero, weapons, hand, mp, deck, runechantCarryover, arsenalCardIn, priorAuraTriggers, skipLog)
+			return e.replayBest(entry, hero, weapons, hand, mp, deck, runechantCarryover, arsenalCardIn, priorAuras, skipLog)
 		}
 		e.cache.misses.Add(1)
 	}
@@ -55,11 +55,11 @@ func (e *Evaluator) findBest(hero Hero, weapons []Weapon, hand []Card, mp Matchu
 		IncomingDamage: mp.IncomingDamage,
 		Cacheable:      true,
 		State: CarryState{
-			Hand:         append([]Card(nil), hand...),
-			Deck:         append([]Card(nil), deck...),
-			Arsenal:      arsenalCardIn,
-			Runechants:   runechantCarryover,
-			AuraTriggers: append([]AuraTrigger(nil), priorAuraTriggers...),
+			Hand:       append([]Card(nil), hand...),
+			Deck:       append([]Card(nil), deck...),
+			Arsenal:    arsenalCardIn,
+			Runechants: runechantCarryover,
+			Auras:      append([]Aura(nil), priorAuras...),
 		},
 	}
 	cacheable := true
@@ -104,7 +104,7 @@ func (e *Evaluator) findBest(hero Hero, weapons []Weapon, hand []Card, mp Matchu
 				hero, weapons, hand, deck, arsenalCardIn,
 				rolesBuf, n, bufs,
 				runechantCarryover, mp, defenseSum,
-				priorAuraTriggers, skipLog,
+				priorAuras, skipLog,
 			)
 			// Aggregate per leaf — an infeasible attack chain still surfaces its DR-side
 			// reads (defendersDamage runs before the feasibility gate inside

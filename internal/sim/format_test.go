@@ -106,7 +106,7 @@ func TestFormatBestTurn_LogAttributesEachTriggerSeparately(t *testing.T) {
 	// state.TriggeringCard).
 	var bootstrap TurnState
 	cards.MaleficIncantationRed{}.Play(&bootstrap, &CardState{Card: cards.MaleficIncantationRed{}})
-	prior := bootstrap.AuraTriggers
+	prior := bootstrap.Auras
 	got := BestWithTriggers(heroes.Viserai{}, nil, h, Matchup{}, nil, 0, nil, prior)
 	out := FormatBestTurn(got, 0)
 	// Trigger lines render indented (9 spaces) with no "(from <source>)" suffix — the
@@ -350,7 +350,7 @@ func TestFormatBestTurn_EmptyBestLine(t *testing.T) {
 	}
 }
 
-// TestFormatBestTurn_TriggersFromLastTurnLine surfaces cross-turn AuraTrigger contributions
+// TestFormatBestTurn_TriggersFromLastTurnLine surfaces cross-turn Aura contributions
 // at the top of the "My turn:" section as numbered entries — the reveal / damage fires at
 // the top of the action phase before the chain runs, but it's an action, not pre-existing
 // state, so it belongs to the action-phase numbering rather than the unnumbered Start of
@@ -377,7 +377,7 @@ func TestFormatBestTurn_TriggersFromLastTurnLine(t *testing.T) {
 // TestFormatBestTurn_StartOfTurnHandReadsDealtHand: the printout's "Start of turn → Hand:"
 // line must reflect the cards dealt at end of last turn — NOT the augmented hand a Sigil
 // reveal produces by appending its drawn card. The deck loop snapshots TurnSummary.DealtHand
-// before processTriggersAtStartOfTurn modifies the working hand, and the formatter reads
+// before processAurasAtStartOfTurn modifies the working hand, and the formatter reads
 // only that snapshot. The Sigil-revealed card appears under MyTurn (where it actually
 // resolves), never in the start-of-turn hand line.
 func TestFormatBestTurn_StartOfTurnHandReadsDealtHand(t *testing.T) {
@@ -637,12 +637,12 @@ func TestFormatBestTurn_EndOfTurnHandLine(t *testing.T) {
 }
 
 // TestFormatBestTurn_EndOfTurnAurasWithRunechants pins the End of turn "Auras: ..." entry —
-// surviving AuraTriggers + the live Runechant count render as one comma-separated line,
+// surviving Auras + the live Runechant count render as one comma-separated line,
 // mirroring the start-of-turn formatting.
 func TestFormatBestTurn_EndOfTurnAurasWithRunechants(t *testing.T) {
 	summary := TurnSummary{
 		State: CarryState{
-			AuraTriggers: []AuraTrigger{
+			Auras: []Aura{
 				{Self: cards.MaleficIncantationRed{}},
 			},
 			Runechants: 2,

@@ -13,7 +13,7 @@ import (
 // no diff-signal indirection: a card that wants to draw appends to s.Hand and pops via
 // PopDeckTop, full stop.
 //
-// Persistent fields (Hand, deck, Arsenal, graveyard, Banish, Runechants, AuraTriggers)
+// Persistent fields (Hand, deck, Arsenal, graveyard, Banish, Runechants, Auras)
 // carry across turns when the sim adopts the winner's snapshot. Transient fields
 // (CardsPlayed, Pitched, IncomingDamage, etc.) are seeded by the sim per chain-step and
 // reset at the turn boundary.
@@ -94,8 +94,7 @@ type TurnState struct {
 	// bottom). Unexported for the same reason as deck: cards reach it only via Graveyard()
 	// / BanishFromGraveyard / AddToGraveyard, all of which clear cacheable. Framework
 	// code in this package writes graveyard directly (the dispatcher's "card resolved →
-	// non-persistent goes to graveyard" rule, fireAttackActionTriggers's aura-destroy on
-	// count zero, processTriggersAtStartOfTurn's start-of-turn trigger destroy) so the
+	// non-persistent goes to graveyard" rule, DestroyAura's aura-card append) so the
 	// non-card-driven append doesn't poison cacheable.
 	graveyard []Card
 	// Banish holds cards moved into the banished zone this turn (e.g. an aura-banish-for-
@@ -115,11 +114,16 @@ type TurnState struct {
 	// deals arcane directly. Effects that read "if you've dealt arcane damage this turn"
 	// consult this flag rather than Runechants. Reset at turn boundary.
 	ArcaneDamageDealt bool
-	// AuraTriggers is the list of triggers from auras currently in play. Cards add entries
-	// during Play via AddAuraTrigger; the sim fires matching entries on each trigger-Type
-	// condition, decrements Count in place, and drops entries whose Count hits zero after
-	// sending Self to the graveyard. Carries across turns.
-	AuraTriggers []AuraTrigger
+	// Auras is the list of auras currently in play. Cards add entries during Play via
+	// AddAura; the sim fires matching entries on each TriggerType condition and drops
+	// entries whose handler called s.DestroyAura. Carries across turns.
+	Auras []Aura
+	// currentAuraIdx is the index in Auras of the handler currently running, set by the
+	// sim's start-of-turn / attack-action loops before each handler call. DestroyAura uses
+	// it as a fast-path hint to skip the linear scan in the common "handler destroys its
+	// own aura" case. Pointer-checked against &Auras[currentAuraIdx] before splicing, so a
+	// stale value safely falls through to the scan.
+	currentAuraIdx int
 	// pendingNextAttackActionHit queues NextAttackActionHitTriggers; reset per permutation.
 	// Lowercase so cards register through RegisterNextAttackActionHit instead of appending.
 	pendingNextAttackActionHit []NextAttackActionHitTrigger
@@ -184,11 +188,8 @@ type TurnState struct {
 	// attackReactionTarget is the buff target for the currently-resolving Attack Reaction.
 	// Set by the chain runner around AR.Play; ARs read it via AttackReactionTarget().
 	attackReactionTarget *CardState
-	// Revealed is the side channel start-of-turn AuraTrigger handlers use to move a card
-	// from the top of the post-draw deck into the hand (Sigil of the Arknight's reveal).
-	Revealed []Card
 	// TriggeringCard is the card whose play caused the active aura attack-action trigger
-	// to fire. The sim sets it before each AuraTrigger handler runs and clears it after;
+	// to fire. The sim sets it before each Aura handler runs and clears it after;
 	// the handler reads it to attribute its log line back to the triggering card. Hero
 	// and OnHit handlers receive the triggering card as a direct arg already and don't
 	// need this field. Nil during direct chain-step resolution and start-of-turn fires.
@@ -274,6 +275,17 @@ func (s *TurnState) PopDeckTop() (Card, bool) {
 	top := s.deck[0]
 	s.deck = s.deck[1:]
 	return top, true
+}
+
+// PeekDeck returns the top card of the deck without removing it. Returns (nil, false) on
+// an empty deck. Flips IsCacheable to false — observing the deck top makes the chain's
+// output depend on hidden shuffle order, same as PopDeckTop.
+func (s *TurnState) PeekDeck() (Card, bool) {
+	s.cacheable = false
+	if len(s.deck) == 0 {
+		return nil, false
+	}
+	return s.deck[0], true
 }
 
 // PrependToDeck inserts c at the top of the deck. Flips IsCacheable to false. Allocates a
@@ -434,7 +446,7 @@ func (s *TurnState) BanishFromGraveyard(pred func(Card) bool) (Card, bool) {
 // methods after construction). The returned state has IsCacheable()==true; cacheable
 // has to be set explicitly because the field's zero value is false (see the field doc).
 func NewTurnState(deck, graveyard []Card) *TurnState {
-	return &TurnState{deck: deck, graveyard: graveyard, cacheable: true}
+	return &TurnState{deck: deck, graveyard: graveyard, cacheable: true, currentAuraIdx: -1}
 }
 
 // AddValue credits n to s.Value, clamped at 0. Pair with a Log helper when you also want a
@@ -649,39 +661,38 @@ func (s *TurnState) AddToGraveyard(c Card) {
 	s.graveyard = append(s.graveyard, c)
 }
 
-// AddAuraTrigger is the Play-side combo every Action - Aura card reaches for: flip
+// AddAura is the Play-side combo every Action - Aura card reaches for: flip
 // AuraCreated so same-turn "if you've played or created an aura" riders see the entry, and
-// append t to s.AuraTriggers so the sim fires it on its matching Type condition.
-func (s *TurnState) AddAuraTrigger(t AuraTrigger) {
+// append t to s.Auras so the sim fires it on its matching TriggerType condition.
+func (s *TurnState) AddAura(t Aura) {
 	s.AuraCreated = true
-	s.AuraTriggers = append(s.AuraTriggers, t)
+	s.Auras = append(s.Auras, t)
 }
 
-// RegisterStartOfTurn registers a TriggerStartOfTurn AuraTrigger as the canonical shape for
-// "at the beginning of your action phase ..." aura clauses. self is the aura card (used by
-// the sim to graveyard the source after the final fire); count is how many start-of-turn
-// fires the aura survives before the sim destroys it (1 for one-shot destroy-on-fire auras,
-// N for verse-counter / charge-counter auras); text is the per-fire effect description
-// ("Gained 1 health", "Created a runechant", …) auto-logged alongside the trigger so the
-// printout names what happened — pass "" when the handler authors its own log line (dynamic
-// wording, e.g. Sigil of the Arknight's "drew X into hand"); handler runs each fire and
-// returns the damage-equivalent the trigger credits.
+// DestroyAura is the handler-side "this aura is gone" call: splice t out of s.Auras
+// immediately and, when addToGraveyard, append t.Self to s.graveyard. Token-style auras
+// that just disappear (no card to send to the graveyard) pass false.
 //
-// When text is non-empty, the framework's start-of-turn fire path writes a post-trigger
-// log entry "<DisplayName>: text" attributed to self after handler returns and only when
-// the handler returned n > 0. The pre-built LogText is stored on the AuraTrigger so the
-// per-fire path runs zero string allocations (no per-Play closure either — handler stays a
-// top-level function).
-func (s *TurnState) RegisterStartOfTurn(self Card, count int, text string, handler OnAuraTrigger) {
-	var logText string
-	if text != "" {
-		logText = DisplayName(self) + ": " + text
+// Direct graveyard append (no cacheable flip): the destruction is deterministic from the
+// triggering event the sim already accounts for, not from hidden state.
+//
+// Fast path uses currentAuraIdx — the cursor index the sim publishes before each handler
+// call — to splice without a linear scan. Pointer check against &s.Auras[i] guards
+// against stale hints; the slow path scans s.Auras for the match and is only reached
+// when a handler destroys an aura other than its own (e.g. a future card that banishes a
+// sibling).
+func (s *TurnState) DestroyAura(t *Aura, addToGraveyard bool) {
+	if addToGraveyard {
+		s.graveyard = append(s.graveyard, t.Self)
 	}
-	s.AddAuraTrigger(AuraTrigger{
-		Self:    self,
-		Type:    TriggerStartOfTurn,
-		Count:   count,
-		Handler: handler,
-		LogText: logText,
-	})
+	if i := s.currentAuraIdx; i >= 0 && i < len(s.Auras) && &s.Auras[i] == t {
+		s.Auras = append(s.Auras[:i], s.Auras[i+1:]...)
+		return
+	}
+	for i := range s.Auras {
+		if &s.Auras[i] == t {
+			s.Auras = append(s.Auras[:i], s.Auras[i+1:]...)
+			return
+		}
+	}
 }
