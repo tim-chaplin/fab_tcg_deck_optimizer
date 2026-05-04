@@ -10,13 +10,16 @@ import (
 
 // Hero is a FaB hero card. Intelligence is the hand size drawn per turn; Health is starting
 // life total; Types is the hero's class/talent/age set (e.g. Runeblade, Hero, Young) for O(1)
-// lookup. ID is the stable uint16 identifier.
+// lookup. Class is the hero's printed class (Runeblade, Brute, Thief, …) — folded into a
+// Universal card's Types() so class-gated triggers (e.g. Viserai's "Runeblade card" rider)
+// fire on Universal cards too. ID is the stable uint16 identifier.
 type Hero interface {
 	ID() ids.HeroID
 	Name() string
 	Health() int
 	Intelligence() int
 	Types() card.TypeSet
+	Class() card.CardType
 	// OnCardPlayed is called by the hand evaluator before each card's Play() resolves so the
 	// hero's printed ability fires ahead of the card itself (matching FaB stack order). Heroes
 	// that contribute damage-equivalent (e.g. a Runechant token) credit it through

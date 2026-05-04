@@ -11,25 +11,24 @@ import (
 
 var strikeGoldTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeAttack)
 
-// strikeGoldOnHit fires the printed "When this hits, create a Gold token" rider.
 func strikeGoldOnHit(s *sim.TurnState, self *sim.CardState, _ *sim.OnHitHandler) {
 	s.CreateGold(1)
 	s.LogRider(self, 0, "On-hit created a gold token")
 }
 
-// strikeGoldPlay is the shared body — every printing's Play resolves to the same
-// "deal effective attack, register on-hit gold-create" sequence.
 func strikeGoldPlay(s *sim.TurnState, self *sim.CardState) {
 	n := self.DealEffectiveAttack(s)
 	s.Log(self, n)
 	self.OnHit = append(self.OnHit, sim.OnHitHandler{Fire: strikeGoldOnHit})
 }
 
-// CreatesItem reserves a Gold ability slot in the chain runner's wmask so the
-// optimizer can enumerate "spend the on-hit Gold token in this same chain."
 func (StrikeGoldRed) CreatesItem() sim.TokenType    { return sim.TokenTypeGold }
 func (StrikeGoldYellow) CreatesItem() sim.TokenType { return sim.TokenTypeGold }
 func (StrikeGoldBlue) CreatesItem() sim.TokenType   { return sim.TokenTypeGold }
+
+func (StrikeGoldRed) AddsFutureValue()    {}
+func (StrikeGoldYellow) AddsFutureValue() {}
+func (StrikeGoldBlue) AddsFutureValue()   {}
 
 type StrikeGoldRed struct{}
 

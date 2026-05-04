@@ -16,6 +16,7 @@ func (stubLowHeroOn) Name() string                                  { return "st
 func (stubLowHeroOn) Health() int                                   { return 20 }
 func (stubLowHeroOn) Intelligence() int                             { return 4 }
 func (stubLowHeroOn) Types() card.TypeSet                           { return 0 }
+func (stubLowHeroOn) Class() card.CardType                          { return 0 }
 func (stubLowHeroOn) OnCardPlayed(sim.Card, *sim.TurnState) int     { return 0 }
 func (stubLowHeroOn) Opt(cards []sim.Card) (top, bottom []sim.Card) { return cards, nil }
 func (stubLowHeroOn) WantsLowerHealth()                             {}
@@ -28,6 +29,7 @@ func (stubLowHeroOff) Name() string                                  { return "s
 func (stubLowHeroOff) Health() int                                   { return 20 }
 func (stubLowHeroOff) Intelligence() int                             { return 4 }
 func (stubLowHeroOff) Types() card.TypeSet                           { return 0 }
+func (stubLowHeroOff) Class() card.CardType                          { return 0 }
 func (stubLowHeroOff) OnCardPlayed(sim.Card, *sim.TurnState) int     { return 0 }
 func (stubLowHeroOff) Opt(cards []sim.Card) (top, bottom []sim.Card) { return cards, nil }
 

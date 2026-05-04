@@ -1,24 +1,45 @@
-// Money Where Ya Mouth Is — Generic Action. Cost 1. Printed pitch variants: Red 1, Yellow 2, Blue
-// 3. Defense 2.
+// Money Where Ya Mouth Is — Generic Action. Cost 1.
+// Text: "Your next attack this turn gets +N{p} and "When this attacks a hero, you may
+// **wager** a Gold token with them."" (Red N=3, Yellow N=2, Blue N=1.)
 //
-// Text: "Your next attack this turn gets +N{p} and "When this attacks a hero, you may **wager** a
-// Gold token with them."" (Red N=3, Yellow N=2, Blue N=1.)
-//
-// Scans TurnState.CardsRemaining for the first matching attack action card and credits the
-// +N{p} bonus assuming it will be played; if none is scheduled after this card, the bonus
-// fizzles.
+// "Your next attack" includes weapon swings, so the filter is IsAttack. The granted "may"
+// wager opts in only when the buffed attack is likely to hit; the win (a Gold token)
+// resolves on hit.
 
-package notimplemented
+package cards
 
 import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
-
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/cards"
 )
 
 var moneyWhereYaMouthIsTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction)
+
+func moneyWhereYaMouthIsWagerOnHit(s *sim.TurnState, target *sim.CardState, h *sim.OnHitHandler) {
+	s.CreateGold(1)
+	s.LogPostTriggerf(sim.DisplayName(target.Card), 0, "%s won wager", sim.DisplayName(h.Source))
+}
+
+func moneyWhereYaMouthIsPlay(s *sim.TurnState, self *sim.CardState, source sim.Card, n int) {
+	GrantNextCardBonusAttack(s, n, card.TypeSet.IsAttack)
+	for _, pc := range s.CardsRemaining {
+		if pc.Card.Types().IsAttack() {
+			pc.OnHit = append(pc.OnHit, sim.OnHitHandler{
+				Fire:   moneyWhereYaMouthIsWagerOnHit,
+				Source: source,
+			})
+			break
+		}
+	}
+	s.Log(self, 0)
+}
+
+// AddsFutureValue (no CreatesItem) — the Gold creator is whichever downstream attack the
+// wager rider grafts onto, so the wmask slot belongs to that attack's marker, not ours.
+func (MoneyWhereYaMouthIsRed) AddsFutureValue()    {}
+func (MoneyWhereYaMouthIsYellow) AddsFutureValue() {}
+func (MoneyWhereYaMouthIsBlue) AddsFutureValue()   {}
 
 type MoneyWhereYaMouthIsRed struct{}
 
@@ -30,13 +51,8 @@ func (MoneyWhereYaMouthIsRed) Attack() int             { return 0 }
 func (MoneyWhereYaMouthIsRed) Defense() int            { return 2 }
 func (MoneyWhereYaMouthIsRed) Types() card.TypeSet     { return moneyWhereYaMouthIsTypes }
 func (MoneyWhereYaMouthIsRed) GoAgain() bool           { return true }
-
-// not implemented: gold tokens
-func (MoneyWhereYaMouthIsRed) NotImplemented() {}
-func (MoneyWhereYaMouthIsRed) Play(s *sim.TurnState, self *sim.CardState) {
-	cards.GrantNextAttackActionBonus(s, 3)
-	n := self.DealEffectiveAttack(s)
-	s.Log(self, n)
+func (c MoneyWhereYaMouthIsRed) Play(s *sim.TurnState, self *sim.CardState) {
+	moneyWhereYaMouthIsPlay(s, self, c, 3)
 }
 
 type MoneyWhereYaMouthIsYellow struct{}
@@ -49,13 +65,8 @@ func (MoneyWhereYaMouthIsYellow) Attack() int             { return 0 }
 func (MoneyWhereYaMouthIsYellow) Defense() int            { return 2 }
 func (MoneyWhereYaMouthIsYellow) Types() card.TypeSet     { return moneyWhereYaMouthIsTypes }
 func (MoneyWhereYaMouthIsYellow) GoAgain() bool           { return true }
-
-// not implemented: gold tokens
-func (MoneyWhereYaMouthIsYellow) NotImplemented() {}
-func (MoneyWhereYaMouthIsYellow) Play(s *sim.TurnState, self *sim.CardState) {
-	cards.GrantNextAttackActionBonus(s, 2)
-	n := self.DealEffectiveAttack(s)
-	s.Log(self, n)
+func (c MoneyWhereYaMouthIsYellow) Play(s *sim.TurnState, self *sim.CardState) {
+	moneyWhereYaMouthIsPlay(s, self, c, 2)
 }
 
 type MoneyWhereYaMouthIsBlue struct{}
@@ -68,11 +79,6 @@ func (MoneyWhereYaMouthIsBlue) Attack() int             { return 0 }
 func (MoneyWhereYaMouthIsBlue) Defense() int            { return 2 }
 func (MoneyWhereYaMouthIsBlue) Types() card.TypeSet     { return moneyWhereYaMouthIsTypes }
 func (MoneyWhereYaMouthIsBlue) GoAgain() bool           { return true }
-
-// not implemented: gold tokens
-func (MoneyWhereYaMouthIsBlue) NotImplemented() {}
-func (MoneyWhereYaMouthIsBlue) Play(s *sim.TurnState, self *sim.CardState) {
-	cards.GrantNextAttackActionBonus(s, 1)
-	n := self.DealEffectiveAttack(s)
-	s.Log(self, n)
+func (c MoneyWhereYaMouthIsBlue) Play(s *sim.TurnState, self *sim.CardState) {
+	moneyWhereYaMouthIsPlay(s, self, c, 1)
 }

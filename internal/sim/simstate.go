@@ -3,6 +3,8 @@
 // through the hand/deck/cards stack.
 package sim
 
+import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+
 // CurrentHero is the hero playing the current simulation. Set once at the start of a run; card
 // effects read profile info like Intelligence without plumbing it through TurnState.
 var CurrentHero Hero
@@ -20,4 +22,14 @@ var OptDebug bool
 func HeroWantsLowerHealth() bool {
 	_, ok := CurrentHero.(LowerHealthWanter)
 	return ok
+}
+
+// Universal returns the current hero's class as a TypeSet — the bit a Universal card folds
+// into its Types() so class-gated triggers (e.g. Viserai's "Runeblade card" rider) fire on
+// Universal cards. Zero when no hero is set.
+func Universal() card.TypeSet {
+	if CurrentHero == nil {
+		return 0
+	}
+	return card.NewTypeSet(CurrentHero.Class())
 }

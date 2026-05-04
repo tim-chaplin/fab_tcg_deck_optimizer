@@ -3,6 +3,9 @@
 //
 // Text: "**Mark** target opposing hero. The next time you attack a **marked** hero this turn, the
 // attack gets +N{p}. **Go again**" (Red N=3, Yellow N=2, Blue N=1.)
+//
+// Mark isn't tracked, so the +N{p} grant lands unconditionally on the next attack
+// (IsAttack — "you attack a marked hero" includes weapon swings).
 
 package notimplemented
 
@@ -30,7 +33,7 @@ func (PublicBountyRed) GoAgain() bool           { return true }
 // not implemented: mark not tracked; +3{p} 'marked defender' rider fires unconditionally
 func (PublicBountyRed) NotImplemented() {}
 func (PublicBountyRed) Play(s *sim.TurnState, self *sim.CardState) {
-	cards.GrantNextAttackActionBonus(s, 3)
+	cards.GrantNextCardBonusAttack(s, 3, card.TypeSet.IsAttack)
 	n := self.DealEffectiveAttack(s)
 	s.Log(self, n)
 }
@@ -49,7 +52,7 @@ func (PublicBountyYellow) GoAgain() bool           { return true }
 // not implemented: mark not tracked; +3{p} 'marked defender' rider fires unconditionally
 func (PublicBountyYellow) NotImplemented() {}
 func (PublicBountyYellow) Play(s *sim.TurnState, self *sim.CardState) {
-	cards.GrantNextAttackActionBonus(s, 2)
+	cards.GrantNextCardBonusAttack(s, 2, card.TypeSet.IsAttack)
 	n := self.DealEffectiveAttack(s)
 	s.Log(self, n)
 }
@@ -68,7 +71,7 @@ func (PublicBountyBlue) GoAgain() bool           { return true }
 // not implemented: mark not tracked; +3{p} 'marked defender' rider fires unconditionally
 func (PublicBountyBlue) NotImplemented() {}
 func (PublicBountyBlue) Play(s *sim.TurnState, self *sim.CardState) {
-	cards.GrantNextAttackActionBonus(s, 1)
+	cards.GrantNextCardBonusAttack(s, 1, card.TypeSet.IsAttack)
 	n := self.DealEffectiveAttack(s)
 	s.Log(self, n)
 }

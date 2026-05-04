@@ -267,6 +267,10 @@ var cardsByID = []sim.Card{
 	ids.HealingBalmYellow: cards.HealingBalmYellow{},
 	ids.HealingBalmBlue:   cards.HealingBalmBlue{},
 
+	ids.HighStrikerRed:    cards.HighStrikerRed{},
+	ids.HighStrikerYellow: cards.HighStrikerYellow{},
+	ids.HighStrikerBlue:   cards.HighStrikerBlue{},
+
 	ids.LifeForALifeRed:    cards.LifeForALifeRed{},
 	ids.LifeForALifeYellow: cards.LifeForALifeYellow{},
 	ids.LifeForALifeBlue:   cards.LifeForALifeBlue{},
@@ -278,6 +282,14 @@ var cardsByID = []sim.Card{
 	ids.MinnowismRed:    cards.MinnowismRed{},
 	ids.MinnowismYellow: cards.MinnowismYellow{},
 	ids.MinnowismBlue:   cards.MinnowismBlue{},
+
+	ids.MoneyOrYourLifeRed:    cards.MoneyOrYourLifeRed{},
+	ids.MoneyOrYourLifeYellow: cards.MoneyOrYourLifeYellow{},
+	ids.MoneyOrYourLifeBlue:   cards.MoneyOrYourLifeBlue{},
+
+	ids.MoneyWhereYaMouthIsRed:    cards.MoneyWhereYaMouthIsRed{},
+	ids.MoneyWhereYaMouthIsYellow: cards.MoneyWhereYaMouthIsYellow{},
+	ids.MoneyWhereYaMouthIsBlue:   cards.MoneyWhereYaMouthIsBlue{},
 
 	ids.MoonWishRed:    cards.MoonWishRed{},
 	ids.MoonWishYellow: cards.MoonWishYellow{},
@@ -309,6 +321,10 @@ var cardsByID = []sim.Card{
 	ids.PeaceOfMindRed:    cards.PeaceOfMindRed{},
 	ids.PeaceOfMindYellow: cards.PeaceOfMindYellow{},
 	ids.PeaceOfMindBlue:   cards.PeaceOfMindBlue{},
+
+	ids.PerformanceBonusRed:    cards.PerformanceBonusRed{},
+	ids.PerformanceBonusYellow: cards.PerformanceBonusYellow{},
+	ids.PerformanceBonusBlue:   cards.PerformanceBonusBlue{},
 
 	ids.PlunderRunRed:    cards.PlunderRunRed{},
 	ids.PlunderRunYellow: cards.PlunderRunYellow{},
@@ -366,6 +382,8 @@ var cardsByID = []sim.Card{
 	ids.SpringLoadYellow: cards.SpringLoadYellow{},
 	ids.SpringLoadBlue:   cards.SpringLoadBlue{},
 
+	ids.StartingStakeYellow: cards.StartingStakeYellow{},
+
 	ids.StonyWoottonhogRed:    cards.StonyWoottonhogRed{},
 	ids.StonyWoottonhogYellow: cards.StonyWoottonhogYellow{},
 	ids.StonyWoottonhogBlue:   cards.StonyWoottonhogBlue{},
@@ -381,6 +399,8 @@ var cardsByID = []sim.Card{
 	ids.SurgingMilitiaRed:    cards.SurgingMilitiaRed{},
 	ids.SurgingMilitiaYellow: cards.SurgingMilitiaYellow{},
 	ids.SurgingMilitiaBlue:   cards.SurgingMilitiaBlue{},
+
+	ids.TestOfStrengthRed: cards.TestOfStrengthRed{},
 
 	ids.ThrustRed:     cards.ThrustRed{},
 	ids.ToughenUpBlue: cards.ToughenUpBlue{},
@@ -398,6 +418,10 @@ var cardsByID = []sim.Card{
 	ids.VigorRushRed:    cards.VigorRushRed{},
 	ids.VigorRushYellow: cards.VigorRushYellow{},
 	ids.VigorRushBlue:   cards.VigorRushBlue{},
+
+	ids.WageGoldRed:    cards.WageGoldRed{},
+	ids.WageGoldYellow: cards.WageGoldYellow{},
+	ids.WageGoldBlue:   cards.WageGoldBlue{},
 
 	ids.WaterTheSeedsRed:    cards.WaterTheSeedsRed{},
 	ids.WaterTheSeedsYellow: cards.WaterTheSeedsYellow{},

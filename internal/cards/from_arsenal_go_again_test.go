@@ -14,7 +14,7 @@ func TestFromArsenalGoAgain_GrantsOnArsenalCopyOnly(t *testing.T) {
 	cards := []sim.Card{
 		cards.FerventForerunnerRed{}, cards.FerventForerunnerYellow{}, cards.FerventForerunnerBlue{},
 		notimpl.FrontlineScoutRed{}, notimpl.FrontlineScoutYellow{}, notimpl.FrontlineScoutBlue{},
-		notimpl.PerformanceBonusRed{}, notimpl.PerformanceBonusYellow{}, notimpl.PerformanceBonusBlue{},
+		cards.PerformanceBonusRed{}, cards.PerformanceBonusYellow{}, cards.PerformanceBonusBlue{},
 		notimpl.PromiseOfPlentyRed{}, notimpl.PromiseOfPlentyYellow{}, notimpl.PromiseOfPlentyBlue{},
 		notimpl.ScourTheBattlescapeRed{}, notimpl.ScourTheBattlescapeYellow{}, notimpl.ScourTheBattlescapeBlue{},
 	}

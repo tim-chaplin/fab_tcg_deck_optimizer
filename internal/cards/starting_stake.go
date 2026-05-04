@@ -1,8 +1,7 @@
-// Starting Stake — Generic Action. Cost 0, Pitch 2, Defense 3. Only printed in Yellow.
-//
+// Starting Stake — Generic Action. Cost 0, Pitch 2, Defense 3. Yellow only.
 // Text: "If you control no Gold tokens, create a Gold token."
 
-package notimplemented
+package cards
 
 import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
@@ -23,6 +22,13 @@ func (StartingStakeYellow) Defense() int            { return 3 }
 func (StartingStakeYellow) Types() card.TypeSet     { return startingStakeTypes }
 func (StartingStakeYellow) GoAgain() bool           { return false }
 
-// not implemented: gold tokens
-func (StartingStakeYellow) NotImplemented()                            {}
-func (StartingStakeYellow) Play(s *sim.TurnState, self *sim.CardState) { s.Log(self, 0) }
+func (StartingStakeYellow) CreatesItem() sim.TokenType { return sim.TokenTypeGold }
+func (StartingStakeYellow) AddsFutureValue()           {}
+
+func (StartingStakeYellow) Play(s *sim.TurnState, self *sim.CardState) {
+	if s.Gold() == 0 {
+		s.CreateGold(1)
+		s.LogRider(self, 0, "Created a gold token")
+	}
+	s.Log(self, 0)
+}

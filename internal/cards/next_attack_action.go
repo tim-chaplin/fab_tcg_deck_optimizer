@@ -1,23 +1,19 @@
-// Shared helper for Generic Action cards whose rider is "the next attack action card you play
-// this turn gets +N{p}". Peeks TurnState.CardsRemaining; if any follow-up is an attack action,
-// the bonus is added to that card's BonusAttack so the +N is attributed to the buffed attack
-// (not the granter) and EffectiveAttack picks it up in hit-likelihood checks.
-
 package cards
 
-import "github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+import (
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+)
 
-// GrantNextAttackActionBonus adds n to the first scheduled attack action's BonusAttack and
-// returns 0 — the granter's own contribution is zero; the +N rides on the target. If no
-// attack action follows in CardsRemaining, the grant fizzles silently (no card to land on).
-// Callers with extra gating (cost/power caps, pitch-color matching) should scan
-// CardsRemaining themselves rather than trying to parameterise this helper further.
-func GrantNextAttackActionBonus(s *sim.TurnState, n int) int {
+// GrantNextCardBonusAttack adds n to the first scheduled card in CardsRemaining whose
+// TypeSet matches filter. Caller passes the predicate matching the printed wording
+// (card.TypeSet.IsAttack for "your next attack", card.TypeSet.IsAttackAction for "the next
+// attack action card") so the wording stays at the call site.
+func GrantNextCardBonusAttack(s *sim.TurnState, n int, filter func(card.TypeSet) bool) {
 	for _, pc := range s.CardsRemaining {
-		if pc.Card.Types().IsAttackAction() {
+		if filter(pc.Card.Types()) {
 			pc.BonusAttack += n
-			return 0
+			return
 		}
 	}
-	return 0
 }

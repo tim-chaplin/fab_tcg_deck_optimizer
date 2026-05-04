@@ -31,7 +31,7 @@ func (PrimeTheCrowdRed) GoAgain() bool           { return true }
 // not implemented: Crowd cheers / Crowd boos keywords dropped
 func (PrimeTheCrowdRed) NotImplemented() {}
 func (PrimeTheCrowdRed) Play(s *sim.TurnState, self *sim.CardState) {
-	cards.GrantNextAttackActionBonus(s, 4)
+	cards.GrantNextCardBonusAttack(s, 4, card.TypeSet.IsAttackAction)
 	n := self.DealEffectiveAttack(s)
 	s.Log(self, n)
 }
@@ -50,7 +50,7 @@ func (PrimeTheCrowdYellow) GoAgain() bool           { return true }
 // not implemented: Crowd cheers / Crowd boos keywords dropped
 func (PrimeTheCrowdYellow) NotImplemented() {}
 func (PrimeTheCrowdYellow) Play(s *sim.TurnState, self *sim.CardState) {
-	cards.GrantNextAttackActionBonus(s, 3)
+	cards.GrantNextCardBonusAttack(s, 3, card.TypeSet.IsAttackAction)
 	n := self.DealEffectiveAttack(s)
 	s.Log(self, n)
 }
@@ -69,7 +69,7 @@ func (PrimeTheCrowdBlue) GoAgain() bool           { return true }
 // not implemented: Crowd cheers / Crowd boos keywords dropped
 func (PrimeTheCrowdBlue) NotImplemented() {}
 func (PrimeTheCrowdBlue) Play(s *sim.TurnState, self *sim.CardState) {
-	cards.GrantNextAttackActionBonus(s, 2)
+	cards.GrantNextCardBonusAttack(s, 2, card.TypeSet.IsAttackAction)
 	n := self.DealEffectiveAttack(s)
 	s.Log(self, n)
 }

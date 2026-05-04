@@ -25,6 +25,7 @@ func (Hero) Name() string                              { return "testutils.Hero"
 func (Hero) Health() int                               { return 20 }
 func (h Hero) Intelligence() int                       { return h.Intel }
 func (Hero) Types() card.TypeSet                       { return 0 }
+func (Hero) Class() card.CardType                      { return 0 }
 func (Hero) OnCardPlayed(sim.Card, *sim.TurnState) int { return 0 }
 
 // Opt dispatches to OptStrategy when set; otherwise keeps every revealed card on top of

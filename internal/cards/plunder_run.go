@@ -18,19 +18,20 @@ import (
 
 var plunderRunTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction)
 
-func plunderRunOnHitDraw(s *sim.TurnState, target *sim.CardState, t *sim.NextAttackActionHitTrigger) {
+func plunderRunOnHitDraw(s *sim.TurnState, target *sim.CardState, t *sim.NextHitTrigger) {
 	s.DrawOne()
 	s.LogPostTriggerf(sim.DisplayName(target.Card), 0,
 		"%s drew a card on attack-action hit", sim.DisplayName(t.Source))
 }
 
 func plunderRunPlay(s *sim.TurnState, self *sim.CardState, source sim.Card, n int) {
-	s.RegisterNextAttackActionHit(sim.NextAttackActionHitTrigger{
-		Fire:   plunderRunOnHitDraw,
-		Source: source,
+	s.RegisterNextHit(sim.NextHitTrigger{
+		Fire:       plunderRunOnHitDraw,
+		TypeFilter: card.TypeSet.IsAttackAction,
+		Source:     source,
 	})
 	if self.FromArsenal {
-		GrantNextAttackActionBonus(s, n)
+		GrantNextCardBonusAttack(s, n, card.TypeSet.IsAttackAction)
 	}
 	s.Log(self, 0)
 }
