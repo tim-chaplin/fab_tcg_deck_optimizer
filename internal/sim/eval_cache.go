@@ -53,25 +53,17 @@ const maxCachedAuras = 8
 // archetype that stacks multiple token types alongside any card-based items.
 const maxCachedItems = 8
 
-// auraCacheKey is one fingerprinted entry in the evalCacheKey.auras array. Card auras
-// fingerprint via SelfID (Handler closures aren't comparable, but each card type
-// registers the same handler logic). Token auras carry SelfID = ids.InvalidCard and
-// identify via TokenType. Count is the per-Aura counter.
+// persistentCacheKey is one fingerprinted entry for a persistent-in-play permanent —
+// shared by both Aura and Item entries since they have the same identifying surface.
+// Card-based entries fingerprint via SelfID (Handler / Ability behaviour is fully
+// determined by the originating card type, since Go-closure values aren't comparable).
+// Token entries carry SelfID = ids.InvalidCard and identify via TokenType. Count is
+// the per-entry counter (token copies, charges, fires remaining).
 //
-// TriggerType, OncePerTurn, and FiredThisTurn aren't captured: no production card
+// Aura's TriggerType / OncePerTurn / FiredThisTurn aren't captured: no production card
 // registers multiple triggers from the same Self with different types or gates. Extend
 // the key here if a future card needs to disambiguate.
-type auraCacheKey struct {
-	SelfID    ids.CardID
-	TokenType TokenType
-	Count     int
-}
-
-// itemCacheKey is one fingerprinted entry in the evalCacheKey.items array. Same shape
-// as auraCacheKey: card items fingerprint via SelfID (when card-based items land);
-// token items carry SelfID = ids.InvalidCard and identify via TokenType. Count is the
-// number of charges / copies in play.
-type itemCacheKey struct {
+type persistentCacheKey struct {
 	SelfID    ids.CardID
 	TokenType TokenType
 	Count     int
@@ -95,8 +87,8 @@ type itemCacheKey struct {
 type evalCacheKey struct {
 	handIDs   [maxCachedHandSize]ids.CardID
 	weaponIDs [maxCachedWeapons]ids.WeaponID
-	auras     [maxCachedAuras]auraCacheKey
-	items     [maxCachedItems]itemCacheKey
+	auras     [maxCachedAuras]persistentCacheKey
+	items     [maxCachedItems]persistentCacheKey
 	handLen   int
 	weaponLen int
 	auraLen   int
@@ -190,30 +182,21 @@ func makeCacheKey(
 	for i, w := range weapons {
 		key.weaponIDs[i] = w.ID()
 	}
-	// Aura entries: insertion-sort by (SelfID, Count) so the key is multiset-invariant
-	// across trigger registration order. The aura set is small (typically 0-3) so the
-	// O(n^2) cost is negligible.
+	// Persistent-in-play entries get insertion-sorted by (SelfID, TokenType, Count)
+	// into the fixed-size key arrays so the cache key stays multiset-invariant across
+	// registration order. Both aura and item sets are small in practice (typically 0-3
+	// each) so the O(n²) cost is negligible.
 	key.auraLen = len(priorAuras)
 	for i, t := range priorAuras {
-		entry := auraCacheKey{SelfID: t.Self.CardID(), TokenType: t.Self.TokenType, Count: t.Count}
-		j := i
-		for j > 0 && auraEntryLess(entry, key.auras[j-1]) {
-			key.auras[j] = key.auras[j-1]
-			j--
-		}
-		key.auras[j] = entry
+		insertPersistentEntry(key.auras[:i+1], persistentCacheKey{
+			SelfID: t.Self.CardID(), TokenType: t.Self.TokenType, Count: t.Count,
+		})
 	}
-	// Item entries: same insertion-sort shape as auras for the same multiset-invariance
-	// reason. Item set is also small in practice (one Gold entry plus future card items).
 	key.itemLen = len(priorItems)
 	for i, it := range priorItems {
-		entry := itemCacheKey{SelfID: it.Self.CardID(), TokenType: it.Self.TokenType, Count: it.Count}
-		j := i
-		for j > 0 && itemEntryLess(entry, key.items[j-1]) {
-			key.items[j] = key.items[j-1]
-			j--
-		}
-		key.items[j] = entry
+		insertPersistentEntry(key.items[:i+1], persistentCacheKey{
+			SelfID: it.Self.CardID(), TokenType: it.Self.TokenType, Count: it.Count,
+		})
 	}
 	if hero != nil {
 		key.heroID = hero.ID()
@@ -224,20 +207,23 @@ func makeCacheKey(
 	return key, true
 }
 
-// auraEntryLess orders auraCacheKey entries by SelfID, then TokenType, then Count. Used
-// by makeCacheKey's insertion sort so the auras[..auraLen] prefix is canonically ordered.
-func auraEntryLess(a, b auraCacheKey) bool {
-	if a.SelfID != b.SelfID {
-		return a.SelfID < b.SelfID
+// insertPersistentEntry places entry into dst in sorted order, shifting any greater
+// elements right by one. dst is a slice over the key array's first (n+1) slots; the
+// caller calls this once per source entry with i+1 as the slice length, so the prefix
+// dst[:n] is already sorted and dst[n] is the new write position. Sort key:
+// (SelfID, TokenType, Count) ascending.
+func insertPersistentEntry(dst []persistentCacheKey, entry persistentCacheKey) {
+	j := len(dst) - 1
+	for j > 0 && persistentEntryLess(entry, dst[j-1]) {
+		dst[j] = dst[j-1]
+		j--
 	}
-	if a.TokenType != b.TokenType {
-		return a.TokenType < b.TokenType
-	}
-	return a.Count < b.Count
+	dst[j] = entry
 }
 
-// itemEntryLess mirrors auraEntryLess for item entries.
-func itemEntryLess(a, b itemCacheKey) bool {
+// persistentEntryLess orders persistentCacheKey entries by SelfID, then TokenType, then
+// Count. Used by makeCacheKey's insertion sort.
+func persistentEntryLess(a, b persistentCacheKey) bool {
 	if a.SelfID != b.SelfID {
 		return a.SelfID < b.SelfID
 	}
