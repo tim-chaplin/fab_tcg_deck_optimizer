@@ -21,7 +21,7 @@ func (e *Evaluator) evaluatePartition(
 	deck []Card, arsenalCardIn Card,
 	rolesBuf []Role, n int, bufs *attackBufs,
 	mp Matchup, defenseSum int,
-	priorAuras []Aura, skipLog bool,
+	priorAuras []Aura, priorItems []Item, skipLog bool,
 ) (
 	attackDealt, defenseDealt, leftoverRunechants int,
 	swung []string, carry CarryState,
@@ -65,7 +65,7 @@ func (e *Evaluator) evaluatePartition(
 		hero, weapons, a, d, p, h, deck, bufs,
 		mp, defenseSum,
 		arsenalInIdx, arsenalDefenderIdx, arsenalAtChainStart,
-		priorAuras, skipLog,
+		priorAuras, priorItems, skipLog,
 	)
 	return
 }

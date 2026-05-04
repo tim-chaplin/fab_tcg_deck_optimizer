@@ -9,6 +9,12 @@ import (
 	"fmt"
 )
 
+// perItemAbilityCap caps how many instances of one item's activated ability the chain
+// runner enumerates per turn, bounding the wmask 2^k explosion when an item's Count gets
+// large. Realistic Gold counts in play tend to 1-3; 4 leaves headroom without letting a
+// pathological hand blow up the per-leaf mask loop.
+const perItemAbilityCap = 4
+
 // FormatLogEntry renders a LogEntry into its display string. Chain entries with N=0 drop
 // the "(+0)" suffix; trigger entries carry a "(from <source>)" tail. The grouped MyTurn
 // renderer prefers formatTextWithDelta for trigger entries that get clustered under their
@@ -33,7 +39,7 @@ func FormatLogEntry(e LogEntry) string {
 // arsenalAtChainStart is the card sitting in the arsenal slot at the start of the chain — set
 // when the partition assigned arsenalCardIn the Arsenal role (it's staying), nil otherwise
 // (no arsenal-in, or arsenal-in is playing as Attack/Defend).
-func bestAttackWithWeapons(hero Hero, weapons []Weapon, attackers, defenders, pitched, held, deck []Card, bufs *attackBufs, mp Matchup, blockTotal, arsenalInIdx, arsenalDefenderIdx int, arsenalAtChainStart Card, priorAuras []Aura, skipLog bool) (int, int, int, chainBudget, []string, CarryState, bool, bool) {
+func bestAttackWithWeapons(hero Hero, weapons []Weapon, attackers, defenders, pitched, held, deck []Card, bufs *attackBufs, mp Matchup, blockTotal, arsenalInIdx, arsenalDefenderIdx int, arsenalAtChainStart Card, priorAuras []Aura, priorItems []Item, skipLog bool) (int, int, int, chainBudget, []string, CarryState, bool, bool) {
 	runechantCarryover := tokenCountIn(priorAuras, TokenTypeRunechant)
 	ctx := &sequenceContext{
 		hero:                hero,
@@ -47,6 +53,7 @@ func bestAttackWithWeapons(hero Hero, weapons []Weapon, attackers, defenders, pi
 		blockTotal:          blockTotal,
 		arsenalInIdx:        arsenalInIdx,
 		priorAuras:          priorAuras,
+		priorItems:          priorItems,
 		// defenderAuras shares backing with bufs.defenderAurasBacking so the per-partition
 		// capture is alloc-free across Best calls.
 		defenderAuras: bufs.defenderAurasBacking[:0],
@@ -56,6 +63,56 @@ func bestAttackWithWeapons(hero Hero, weapons []Weapon, attackers, defenders, pi
 		// backing arrays across leaves and Best calls (bufs is Evaluator-cached).
 		carryWinner: &bufs.carryWinnerScratch,
 	}
+	// Extend bufs.activatedAbilities with item ability instances for this Best call —
+	// the weapon prefix (positions 0..weaponAbilityCount-1) is materialised once at
+	// attackBufs construction; items append on top. The unified slice drives both the
+	// wmask cost summing and the chain assembly downstream — an activated ability is
+	// the same chain step whether it came from a weapon or an item, so they share one
+	// list and one path. The only weapon-specific bit is the SwungWeapons name lookup,
+	// which keys off bufs.weaponNames[wmask & weaponBitsMask].
+	//
+	// Per-instance ability costs come from attackerMetaPtrFor's global cardMetaCache
+	// so the per-Best assembly stays alloc-free.
+	abilities := bufs.activatedAbilities[:bufs.weaponAbilityCount]
+	abilityCosts := bufs.activatedAbilityCosts[:bufs.weaponAbilityCount]
+	// In-play items contribute min(Count, perItemAbilityCap) ability instances each so
+	// the wmask can pick "play it 0..N times this turn".
+	for _, it := range priorItems {
+		copies := it.Count
+		if copies > perItemAbilityCap {
+			copies = perItemAbilityCap
+		}
+		cost := attackerMetaPtrFor(it.Ability).maxCost
+		for i := 0; i < copies; i++ {
+			abilities = append(abilities, it.Ability)
+			abilityCosts = append(abilityCosts, cost)
+		}
+	}
+	// Add one ability instance per attacker-declared ItemCreator type that priorItems
+	// doesn't already cover. This lets the wmask enumerate spending a token created
+	// mid-chain (Strike Gold's on-hit Gold popped same turn); GoldTokenAbility's
+	// PlayPrecondition rejects any permutation where the ability fires before the token
+	// exists, so the chain runner's Heap permutation loop finds the legal order.
+	for _, a := range attackers {
+		creator, ok := a.(ItemCreator)
+		if !ok {
+			continue
+		}
+		t := creator.CreatesItem()
+		if t == TokenTypeNone || itemCountIn(priorItems, t) > 0 {
+			continue
+		}
+		ability := tokenItemAbilityFor(t)
+		if ability == nil {
+			continue
+		}
+		abilities = append(abilities, ability)
+		abilityCosts = append(abilityCosts, attackerMetaPtrFor(ability).maxCost)
+	}
+	bufs.activatedAbilities = abilities
+	bufs.activatedAbilityCosts = abilityCosts
+	ctx.activatedAbilities = abilities
+	ctx.activatedAbilityCosts = abilityCosts
 	// Non-modal defender contribution is constant across phase / weapon masks — DRs through
 	// Play, plain blocks as raw block credit — so we compute it once at the top. Modal
 	// blockers (Blocker + ModalCard + BlockCost) need a per-pmask budget to pick their
@@ -128,22 +185,34 @@ func bestAttackWithWeapons(hero Hero, weapons []Weapon, attackers, defenders, pi
 		ctx.attackPitchPerm = attackPitchPerm
 		ctx.attackPitchVals = attackPitchVals
 
-		for wmask := 0; wmask < 1<<len(weapons); wmask++ {
-			weaponCost := bufs.weaponCosts[wmask] // weapons are static-cost
-			// Lower bound on total chain cost (sum of MinCost across attackers + weapons). If the
-			// attack budget can't cover even this floor, no permutation is feasible. Mid-turn
-			// draws can pitch on top of the committed hand pitch ("hopeful" partitions) but
-			// can't reduce the base cost, so this MinCost prune is safe. No matching pitch-timing
-			// pre-screen here: drawn cards play as chain extensions and consume the residual, so
-			// playSequenceWithMeta enforces pitch-timing post-extension instead.
-			if attackersMinCost+weaponCost > phase.attackBudget {
+		// wmask enumerates the subset of activated abilities to play this turn — the
+		// low len(weapons) bits select weapon abilities, higher bits select item
+		// abilities. Both kinds live in ctx.activatedAbilities, so a single bit-by-bit
+		// loop drives both cost summing and chain assembly. weaponBitsMask isolates
+		// the weapon prefix for the SwungWeapons name lookup downstream.
+		weaponBitsMask := (1 << len(weapons)) - 1
+		totalAbilityMasks := 1 << len(ctx.activatedAbilities)
+		for wmask := 0; wmask < totalAbilityMasks; wmask++ {
+			abilityCost := 0
+			for j := range ctx.activatedAbilities {
+				if wmask&(1<<j) != 0 {
+					abilityCost += ctx.activatedAbilityCosts[j]
+				}
+			}
+			// Lower bound on total chain cost (sum of MinCost across attackers + selected
+			// abilities). If the attack budget can't cover even this floor, no permutation is
+			// feasible. Mid-turn draws can pitch on top of the committed hand pitch ("hopeful"
+			// partitions) but can't reduce the base cost, so this MinCost prune is safe. No
+			// matching pitch-timing pre-screen here: drawn cards play as chain extensions and
+			// consume the residual, so playSequenceWithMeta enforces pitch-timing post-extension
+			// instead.
+			if attackersMinCost+abilityCost > phase.attackBudget {
 				continue
 			}
 			allAttackers := bufs.attackerBuf[:len(attackers)]
-			// Append each selected weapon's ability — the weapon stays in play.
-			for i := range weapons {
-				if wmask&(1<<i) != 0 {
-					allAttackers = append(allAttackers, bufs.activatedAbilities[i])
+			for j, ab := range ctx.activatedAbilities {
+				if wmask&(1<<j) != 0 {
+					allAttackers = append(allAttackers, ab)
 				}
 			}
 			dealt, leftoverRunechants, legal := ctx.bestSequence(allAttackers)
@@ -180,11 +249,19 @@ func bestAttackWithWeapons(hero Hero, weapons []Weapon, attackers, defenders, pi
 			if phase.hasDefendPitches && phase.defendBudget-drCost >= phase.maxDefendPitch {
 				continue
 			}
+			// Tertiary tiebreaker: chain whose end-of-chain hand has more cards wins
+			// equal Value+leftoverRunechants ties — captures "spend a Gold token to draw"
+			// preferring spending over hoarding when neither chain credits damage. The
+			// drawn card lands in state.Hand and post-hoc-promotes into arsenal, so a
+			// chain that drew strictly outranks one that didn't on next-turn tempo.
+			candidateHand := len(ctx.carryWinner.Hand)
+			bestHand := len(bufs.bestCarryScratch.Hand)
 			if !foundFeasible || dealt > bestDealt ||
-				(dealt == bestDealt && leftoverRunechants > bestLeftoverRunechants) {
+				(dealt == bestDealt && leftoverRunechants > bestLeftoverRunechants) ||
+				(dealt == bestDealt && leftoverRunechants == bestLeftoverRunechants && candidateHand > bestHand) {
 				bestDealt = dealt
 				bestLeftoverRunechants = leftoverRunechants
-				bestSwung = bufs.weaponNames[wmask]
+				bestSwung = bufs.weaponNames[wmask&weaponBitsMask]
 				bestBudget = chainBudget{resource: phase.attackBudget, maxPitch: phase.maxAttackPitch, hasAttackPitches: phase.hasAttackPitches}
 				// Reuse bufs.bestCarryScratch's backing arrays so the per-mask-combo
 				// update is allocation-free. The mask-combo loop runs to completion
@@ -262,6 +339,18 @@ type sequenceContext struct {
 	// seeds state.Auras with a fresh copy of this slice so mid-chain firing can
 	// decrement Count / set FiredThisTurn without leaking those mutations across permutations.
 	priorAuras []Aura
+	// priorItems are the Items carried in from the previous turn. Each permutation seeds
+	// state.Items with a fresh copy so mid-chain ability plays (decrementing Count,
+	// destroying items) don't leak across permutations.
+	priorItems []Item
+	// activatedAbilities is the unified weapon + item ability list materialised at the
+	// top of bestAttackWithWeapons — weapons' Ability() Cards followed by item ability
+	// instances (priorItems × Count plus one per attacker-declared ItemCreator type).
+	// The wmask iterates over this slice; index j's bit selects activatedAbilities[j].
+	activatedAbilities []Card
+	// activatedAbilityCosts parallels activatedAbilities — cached cost for each entry
+	// so the per-wmask budget check reads ints rather than re-entering Card.Cost.
+	activatedAbilityCosts []int
 	// defenderAuras is the post-defense aura set: priorAuras consolidated with the
 	// auras DR / plain-block Plays create during defendersDamage. resetStateForPermutation
 	// seeds state.Auras from this so chain cards see auras created during defense.
@@ -431,6 +520,8 @@ func (ctx *sequenceContext) resetStateForPermutation() {
 		auraSeed = ctx.defenderAuras
 	}
 	s.Auras = append(bufs.auraTriggersBacking[:0], auraSeed...)
+	s.Items = append(bufs.itemsBacking[:0], ctx.priorItems...)
+	s.CardsDrawn = 0
 	s.currentAuraIdx = -1
 	s.pendingNextAttackActionHit = bufs.nextAtkActionHitBacking[:0]
 	s.Value = 0
@@ -771,21 +862,18 @@ func (ctx *sequenceContext) playSequenceWithMeta(n int) (damage int, leftoverRun
 				}
 			}
 		}
-		// Cards with non-resource additional costs (PlayPrecondition opt-in) get one more
-		// gate: a false return means the additional cost can't be paid AT THIS HAND, so
-		// the play is illegal in FaB rules and the permutation is rejected. The check
-		// runs after pitch popping so the precondition reads only cards genuinely still
-		// in hand — a pitch source can't double as a reveal target.
-		if pre, ok := pc.Card.(PlayPrecondition); ok {
-			if !pre.PlayPrecondition(state, pc) {
-				return 0, 0, 0, false
-			}
-		}
-
-		// Attack Reactions target the most recent active attack. Reject the permutation
-		// if no preceding active attack matches the AR's predicate; the search naturally
-		// finds the legal ordering on another permutation.
+		// PlayPrecondition for ARs: ARs don't trigger finalizeActiveAttack (the AR needs
+		// the active attack alive), so any AR precondition runs against the pre-OnHit
+		// state — the AR's own predicate (ARTargetAllowed) handles target-shape gates.
+		// Non-AR preconditions wait until after finalizeActiveAttack fires below so the
+		// check reads OnHit-mutated state (e.g. an Item created by the previous attack's
+		// hit).
 		if m.types.IsAttackReaction() {
+			if pre, ok := pc.Card.(PlayPrecondition); ok {
+				if !pre.PlayPrecondition(state, pc) {
+					return 0, 0, 0, false
+				}
+			}
 			ar, ok := pc.Card.(AttackReaction)
 			if !ok || activeAttack == nil || !ar.ARTargetAllowed(activeAttack.Card, pc.Mode) {
 				return 0, 0, 0, false
@@ -804,8 +892,15 @@ func (ctx *sequenceContext) playSequenceWithMeta(n int) (damage int, leftoverRun
 		}
 
 		// Non-AR card: flush any pending OnHit (uses the previous attack's post-buff
-		// EffectiveAttack) before the new card resolves.
+		// EffectiveAttack) before the new card's precondition runs — so a precondition
+		// gating on Items / Auras created by the previous attack's OnHit (Gold ability
+		// after Strike Gold) reads the post-OnHit state.
 		finalizeActiveAttack()
+		if pre, ok := pc.Card.(PlayPrecondition); ok {
+			if !pre.PlayPrecondition(state, pc) {
+				return 0, 0, 0, false
+			}
+		}
 
 		state.CardsRemaining = played[i+1:]
 

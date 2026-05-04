@@ -24,7 +24,7 @@ func (e *Evaluator) replayBest(
 	entry evalCacheEntry,
 	hero Hero, weapons []Weapon, hand []Card,
 	mp Matchup, deck []Card,
-	arsenalCardIn Card, priorAuras []Aura, skipLog bool,
+	arsenalCardIn Card, priorAuras []Aura, priorItems []Item, skipLog bool,
 ) TurnSummary {
 	n := len(hand)
 	totalN := n
@@ -64,7 +64,7 @@ func (e *Evaluator) replayBest(
 		hero, weapons, hand, deck, arsenalCardIn,
 		rolesBuf, n, bufs,
 		mp, defenseSum,
-		priorAuras, skipLog,
+		priorAuras, priorItems, skipLog,
 	)
 	if !ok {
 		// Infeasible-partition replay can't happen by construction — the cached entry

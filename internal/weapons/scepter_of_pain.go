@@ -18,7 +18,10 @@ func (ScepterOfPain) ID() ids.WeaponID    { return ids.ScepterOfPainID }
 func (ScepterOfPain) Name() string        { return "Scepter of Pain" }
 func (ScepterOfPain) Types() card.TypeSet { return scepterOfPainTypes }
 func (ScepterOfPain) Hands() int          { return 1 }
-func (ScepterOfPain) Ability() sim.Card   { return ScepterOfPainAbility{} }
+func (ScepterOfPain) Ability() sim.Card   { return scepterOfPainAbility }
+
+// Cached at package init — see nebula_blade.go for the alloc-free rationale.
+var scepterOfPainAbility sim.Card = ScepterOfPainAbility{}
 
 var scepterOfPainAbilityTypes = card.NewTypeSet(card.TypeRuneblade, card.TypeWeapon, card.TypeScepter, card.TypeOneHand, card.TypeAttack)
 

@@ -19,7 +19,10 @@ func (AnnalsOfSutcliffe) ID() ids.WeaponID    { return ids.AnnalsOfSutcliffeID }
 func (AnnalsOfSutcliffe) Name() string        { return "Annals of Sutcliffe" }
 func (AnnalsOfSutcliffe) Types() card.TypeSet { return annalsOfSutcliffeTypes }
 func (AnnalsOfSutcliffe) Hands() int          { return 2 }
-func (AnnalsOfSutcliffe) Ability() sim.Card   { return AnnalsOfSutcliffeAbility{} }
+func (AnnalsOfSutcliffe) Ability() sim.Card   { return annalsOfSutcliffeAbility }
+
+// Cached at package init — see nebula_blade.go for the alloc-free rationale.
+var annalsOfSutcliffeAbility sim.Card = AnnalsOfSutcliffeAbility{}
 
 // not implemented: draw rider and conditional Runechant rider; activation pays 3 resources
 // for zero modelled value, so the optimizer naturally avoids equipping it

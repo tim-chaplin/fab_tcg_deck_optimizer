@@ -51,6 +51,13 @@ type CarryState struct {
 	// Auras is the surviving Aura set at end of chain — including the Runechant token aura
 	// when one is live. Carries across.
 	Auras []Aura
+	// Items is the surviving Item set at end of chain — what the player owns going into
+	// the next turn. Carries across.
+	Items []Item
+	// CardsDrawn counts cards drawn during the chain — read by the partition tiebreaker
+	// to prefer chains that drew more cards. Doesn't carry semantically (each turn
+	// starts fresh) but rides on CarryState's snapshot mechanism for free.
+	CardsDrawn int
 	// Log is the per-event chain trace of the winning permutation — one entry per Play, hero
 	// trigger, aura trigger, OnHit, weapon swing. Stored as raw LogEntry
 	// structs to defer fmt.Sprintf cost until BuildTurnLog runs at end of EvaluateWith,
@@ -65,6 +72,9 @@ func (c *CarryState) Runechants() int { return tokenCountIn(c.Auras, TokenTypeRu
 
 // Ponders returns the carried Ponder token count, or zero when none are in play.
 func (c *CarryState) Ponders() int { return tokenCountIn(c.Auras, TokenTypePonder) }
+
+// Gold returns the carried Gold token count, or zero when none are in play.
+func (c *CarryState) Gold() int { return itemCountIn(c.Items, TokenTypeGold) }
 
 // TurnSummary is the result of running Best on a hand: the winning card-role assignments
 // plus the CarryState snapshot the next turn inherits.

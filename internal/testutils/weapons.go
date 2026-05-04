@@ -19,7 +19,10 @@ func (ClubWeapon) ID() ids.WeaponID    { return FakeClubWeapon }
 func (ClubWeapon) Name() string        { return "test.ClubWeapon" }
 func (ClubWeapon) Types() card.TypeSet { return clubWeaponTypes }
 func (ClubWeapon) Hands() int          { return 1 }
-func (ClubWeapon) Ability() sim.Card   { return ClubWeaponAbility{} }
+func (ClubWeapon) Ability() sim.Card   { return clubWeaponAbility }
+
+// Cached at package init so the chain runner's per-Best w.Ability() lookup is alloc-free.
+var clubWeaponAbility sim.Card = ClubWeaponAbility{}
 
 var clubWeaponAbilityTypes = card.NewTypeSet(card.TypeGeneric, card.TypeWeapon, card.TypeClub, card.TypeOneHand, card.TypeAttack)
 
@@ -49,7 +52,10 @@ func (HammerWeapon) ID() ids.WeaponID    { return FakeHammerWeapon }
 func (HammerWeapon) Name() string        { return "test.HammerWeapon" }
 func (HammerWeapon) Types() card.TypeSet { return hammerWeaponTypes }
 func (HammerWeapon) Hands() int          { return 1 }
-func (HammerWeapon) Ability() sim.Card   { return HammerWeaponAbility{} }
+func (HammerWeapon) Ability() sim.Card   { return hammerWeaponAbility }
+
+// Cached at package init so the chain runner's per-Best w.Ability() lookup is alloc-free.
+var hammerWeaponAbility sim.Card = HammerWeaponAbility{}
 
 var hammerWeaponAbilityTypes = card.NewTypeSet(card.TypeGeneric, card.TypeWeapon, card.TypeHammer, card.TypeOneHand, card.TypeAttack)
 

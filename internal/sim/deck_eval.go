@@ -233,6 +233,7 @@ type shuffleScratch struct {
 	handBuf                         []Card
 	heldBuf, nextHeld               []Card
 	auraTriggerBuf, nextAuraTrigger []Aura
+	itemBuf, nextItem               []Item
 	presentBuf                      []bool
 	marginalBuf                     []CardMarginalStats
 }
@@ -248,6 +249,8 @@ func newShuffleScratch(deckSize, handSize, numUniqueIDs int) *shuffleScratch {
 		nextHeld:        make([]Card, 0, handSize),
 		auraTriggerBuf:  make([]Aura, 0, handSize),
 		nextAuraTrigger: make([]Aura, 0, handSize),
+		itemBuf:         make([]Item, 0, 4),
+		nextItem:        make([]Item, 0, 4),
 		presentBuf:      make([]bool, numUniqueIDs),
 		marginalBuf:     make([]CardMarginalStats, numUniqueIDs),
 	}
@@ -273,8 +276,10 @@ func runOneShuffle(d *Deck, stats *Stats, scratch *shuffleScratch, idIndex map[i
 	var arsenalCard Card
 	heldBuf := scratch.heldBuf[:0]
 	auraTriggerBuf := scratch.auraTriggerBuf[:0]
+	itemBuf := scratch.itemBuf[:0]
 	nextHeld := scratch.nextHeld
 	nextAuraTrigger := scratch.nextAuraTrigger
+	nextItem := scratch.nextItem
 	handBuf := scratch.handBuf
 	maxHands := 2 * handsPerCycle
 	for handIdx < maxHands {
@@ -283,6 +288,7 @@ func runOneShuffle(d *Deck, stats *Stats, scratch *shuffleScratch, idIndex map[i
 			break
 		}
 		startingAuras := append([]Aura(nil), auraTriggerBuf...)
+		startingItems := append([]Item(nil), itemBuf...)
 		startOfTurnAuras := snapshotStartOfTurnAuras(auraTriggerBuf)
 		dealtHand := append([]Card(nil), h...)
 		var trigContribs []TriggerContribution
@@ -295,7 +301,7 @@ func runOneShuffle(d *Deck, stats *Stats, scratch *shuffleScratch, idIndex map[i
 		}
 		arsenalIn := arsenalCard
 		sortHandByID(h)
-		play := runBestForTurn(d.Hero, d.Weapons, h, mp, buf[head+drawCount:tail], arsenalCard, auraTriggerBuf, ev)
+		play := runBestForTurn(d.Hero, d.Weapons, h, mp, buf[head+drawCount:tail], arsenalCard, auraTriggerBuf, itemBuf, ev)
 		arsenalCard = play.State.Arsenal
 		play.Value += trigDamage
 		play.TriggersFromLastTurn = trigContribs
@@ -303,24 +309,28 @@ func runOneShuffle(d *Deck, stats *Stats, scratch *shuffleScratch, idIndex map[i
 		play.DealtHand = dealtHand
 
 		if recordTurnStats(stats, play, handIdx, handsPerCycle) {
-			replay := replayBestForTurnWithLog(d.Hero, d.Weapons, h, mp, buf[head+drawCount:tail], arsenalIn, auraTriggerBuf, ev)
+			replay := replayBestForTurnWithLog(d.Hero, d.Weapons, h, mp, buf[head+drawCount:tail], arsenalIn, auraTriggerBuf, itemBuf, ev)
 			replay.Value = play.Value
 			replay.TriggersFromLastTurn = trigContribs
 			replay.StartOfTurnAuras = startOfTurnAuras
 			replay.DealtHand = dealtHand
-			recordBestTurn(stats, replay, startingAuras)
+			recordBestTurn(stats, replay, startingAuras, startingItems)
 		}
 		tallyMarginalPresence(scratch.marginalBuf, idIndex, scratch.presentBuf, h, arsenalIn, float64(play.Value))
 		nextHeld = applyTurnResult(play, buf, &head, &tail, nextHeld[:0])
 		nextAuraTrigger = append(nextAuraTrigger[:0], play.State.Auras...)
+		nextItem = append(nextItem[:0], play.State.Items...)
 		handIdx++
 		heldBuf, nextHeld = nextHeld, heldBuf
 		auraTriggerBuf, nextAuraTrigger = nextAuraTrigger, auraTriggerBuf
+		itemBuf, nextItem = nextItem, itemBuf
 	}
 	scratch.heldBuf = heldBuf
 	scratch.nextHeld = nextHeld
 	scratch.auraTriggerBuf = auraTriggerBuf
 	scratch.nextAuraTrigger = nextAuraTrigger
+	scratch.itemBuf = itemBuf
+	scratch.nextItem = nextItem
 }
 
 // mergeStatsInto folds src's per-shuffle accumulators into dst. Used by the parallel path
@@ -350,7 +360,7 @@ func mergeStatsInto(dst, src *Stats) {
 // of run. JSON round-trips Log verbatim; printing routes through FormatTurnLog.
 func finalizeBestTurnLog(stats *Stats) {
 	if len(stats.Best.Summary.BestLine) > 0 {
-		stats.Best.Log = BuildTurnLog(stats.Best.Summary, stats.Best.StartingAuras)
+		stats.Best.Log = BuildTurnLog(stats.Best.Summary, stats.Best.StartingAuras, stats.Best.StartingItems)
 	}
 }
 
@@ -385,14 +395,15 @@ func runBestForTurn(
 	deck []Card,
 	arsenalCard Card,
 	priorAuras []Aura,
+	priorItems []Item,
 	ev *Evaluator,
 ) TurnSummary {
 	if ev != nil {
-		return ev.BestWithTriggersSkipLog(hero, weapons, h, mp, deck, arsenalCard, priorAuras)
+		return ev.BestWithTriggersSkipLog(hero, weapons, h, mp, deck, arsenalCard, priorAuras, priorItems)
 	}
 	// No-evaluator path retains the populated-Log behaviour for direct callers (tests, ad-hoc
 	// tools) that don't have a deck-eval loop to drive the replay step.
-	return BestWithTriggers(hero, weapons, h, mp, deck, arsenalCard, priorAuras)
+	return BestWithTriggers(hero, weapons, h, mp, deck, arsenalCard, priorAuras, priorItems)
 }
 
 // replayBestForTurnWithLog re-runs the Best search with full Log materialisation. Same
@@ -408,12 +419,13 @@ func replayBestForTurnWithLog(
 	deck []Card,
 	arsenalCard Card,
 	priorAuras []Aura,
+	priorItems []Item,
 	ev *Evaluator,
 ) TurnSummary {
 	if ev != nil {
-		return ev.BestWithTriggers(hero, weapons, h, mp, deck, arsenalCard, priorAuras)
+		return ev.BestWithTriggers(hero, weapons, h, mp, deck, arsenalCard, priorAuras, priorItems)
 	}
-	return BestWithTriggers(hero, weapons, h, mp, deck, arsenalCard, priorAuras)
+	return BestWithTriggers(hero, weapons, h, mp, deck, arsenalCard, priorAuras, priorItems)
 }
 
 // recordTurnStats folds one resolved turn's accumulators into stats: bumps Hands /
@@ -624,7 +636,7 @@ func dealNextHand(buf, handBuf, heldBuf []Card, head, tail *int, handSize int) (
 // the next call, so retaining them directly would let a later evaluation mutate the saved
 // peak. Nil-length slices skip the clone so the captured TurnSummary holds nil rather
 // than a zero-length allocation.
-func recordBestTurn(stats *Stats, play TurnSummary, startingAuras []Aura) {
+func recordBestTurn(stats *Stats, play TurnSummary, startingAuras []Aura, startingItems []Item) {
 	lineCopy := make([]CardAssignment, len(play.BestLine))
 	copy(lineCopy, play.BestLine)
 	var swungCopy []string
@@ -657,6 +669,7 @@ func recordBestTurn(stats *Stats, play TurnSummary, startingAuras []Aura) {
 			IncomingDamage:       play.IncomingDamage,
 		},
 		StartingAuras: startingAuras,
+		StartingItems: startingItems,
 	}
 }
 

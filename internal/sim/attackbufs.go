@@ -36,18 +36,24 @@ type shapeBufs struct {
 	// the partition's attackers + the weapon-mask's selected weapons before handing off to
 	// bestSequence. Sized at construction; the slice header re-slices to [:n] per call.
 	attackerBuf []Card
-	// Pre-computed per-mask weapon data. Indexed by bitmask (0 to 2^len(weapons)-1):
-	// weaponCosts[mask] sums each selected ability's Cost; weaponNames[mask] is the
-	// pre-built []string of weapon names for SwungWeapons display.
-	weaponCosts []int
+	// weaponNames[mask] is the pre-built []string of weapon names indexed by the
+	// weapon-prefix bits of the wmask, used for SwungWeapons display. Items don't
+	// contribute to swung weapons so this stays weapon-only.
 	weaponNames [][]string
-	// activatedAbilities is the per-permanent ability Card cache, materialised once at
-	// construction by walking each in-play source (weapons today; items when they land)
-	// and calling Ability(). Indexed in lockstep with the wmask: bit i selects
-	// activatedAbilities[i] for the chain. One slice keeps the wmask uniform across
-	// permanent kinds so item abilities slot in alongside weapon abilities without a
-	// parallel buffer.
-	activatedAbilities []Card
+	// activatedAbilities is the unified activated-ability list — weapons (positions
+	// 0..len(weapons)-1) materialised at construction; items appended per Best call
+	// from priorItems and ItemCreator declarations. The wmask iterates over the whole
+	// slice; index j's bit selects activatedAbilities[j]. An "activated ability" is
+	// the same chain step whether it came from a weapon or an item, so they share one
+	// list and one path. Per-Best assembly re-slices back to the weapon prefix length
+	// before appending items, leaving the cached weapon entries reusable across calls.
+	activatedAbilities    []Card
+	activatedAbilityCosts []int
+	// weaponAbilityCount is len(weapons) at construction — the size of the cached
+	// weapon prefix in activatedAbilities. Per-Best assembly re-slices both
+	// activatedAbilities and activatedAbilityCosts back to this length before
+	// appending items.
+	weaponAbilityCount int
 	// Partition-loop buffers, consumed by findBest. Sized handSize+1 to cover the optional
 	// arsenal-in slot the enumerator treats as index n. isDRBuf caches card.TypeDefenseReaction
 	// membership; canAttackBuf caches "this card can take Attack role" (Action or Weapon
@@ -98,6 +104,9 @@ type permBufs struct {
 	cardsPlayedBacking  []Card
 	logBacking          []LogEntry
 	auraTriggersBacking []Aura
+	// itemsBacking backs TurnState.Items per permutation — seeded from priorItems and
+	// freely mutated by item-ability Plays.
+	itemsBacking []Item
 	// defenderAurasBacking is the per-partition scratch for the post-defense aura set,
 	// aliased by sequenceContext.defenderAuras.
 	defenderAurasBacking []Aura
@@ -165,23 +174,28 @@ func newAttackBufs(handSize, weaponCount int, weapons []Weapon) *attackBufs {
 	// card) can extend a chain well past the starting hand size.
 	const maxDrawnExtensions = 32
 	maxAttackers := handSize + weaponCount + 1 + maxDrawnExtensions
+	// Materialise the weapon prefix of activatedAbilities once: w.Ability() returns the
+	// stable package-cached interface value (per dev-standards), and its cost flows
+	// through attackerMetaPtrFor's global cache. Per-Best assembly re-slices back to
+	// this prefix length before appending items.
 	activatedAbilities := make([]Card, len(weapons))
+	activatedAbilityCosts := make([]int, len(weapons))
 	for i, w := range weapons {
-		activatedAbilities[i] = w.Ability()
+		ab := w.Ability()
+		activatedAbilities[i] = ab
+		activatedAbilityCosts[i] = attackerMetaPtrFor(ab).maxCost
 	}
+	// weaponNames stays shape-stable since it's purely a function of the weapons loadout
+	// — the SwungWeapons display reads it per-mask without rebuilding.
 	numMasks := 1 << weaponCount
-	weaponCosts := make([]int, numMasks)
 	weaponNames := make([][]string, numMasks)
 	for mask := 0; mask < numMasks; mask++ {
-		cost := 0
 		var names []string
 		for i, w := range weapons {
 			if mask&(1<<i) != 0 {
-				cost += activatedAbilities[i].Cost(&TurnState{})
 				names = append(names, w.Name())
 			}
 		}
-		weaponCosts[mask] = cost
 		weaponNames[mask] = names
 	}
 	pcBuf := make([]CardState, maxAttackers)
@@ -196,29 +210,30 @@ func newAttackBufs(handSize, weaponCount int, weapons []Weapon) *attackBufs {
 	const logBackingCap = 64
 	return &attackBufs{
 		shapeBufs: shapeBufs{
-			pcBuf:              pcBuf,
-			ptrBuf:             ptrBuf,
-			state:              &TurnState{},
-			permMeta:           make([]*attackerMeta, maxAttackers),
-			attackerBuf:        make([]Card, maxAttackers),
-			weaponCosts:        weaponCosts,
-			weaponNames:        weaponNames,
-			activatedAbilities: activatedAbilities,
-			rolesBuf:           make([]Role, handSize+1),
-			pitchVals:          make([]int, handSize+1),
-			defenseVals:        make([]int, handSize+1),
-			isDRBuf:            make([]bool, handSize+1),
-			canAttackBuf:       make([]bool, handSize+1),
-			addsFutureValueBuf: make([]bool, handSize+1),
-			pitchedValsScratch: make([]int, 0, handSize+1),
-			pitchedBuf:         make([]Card, 0, handSize+1),
-			pitchPermBuf:       make([]Card, 0, handSize+1),
-			pitchPermValsBuf:   make([]int, 0, handSize+1),
-			pitchAttrBuf:       make([]Card, 0, handSize+1),
-			attackersBuf:       make([]Card, 0, handSize+1),
-			defendersBuf:       make([]Card, 0, handSize+1),
-			heldBuf:            make([]Card, 0, handSize+1),
-			defenseGravScratch: make([]Card, 0, handSize+1),
+			pcBuf:                 pcBuf,
+			ptrBuf:                ptrBuf,
+			state:                 &TurnState{},
+			permMeta:              make([]*attackerMeta, maxAttackers),
+			attackerBuf:           make([]Card, maxAttackers),
+			weaponNames:           weaponNames,
+			activatedAbilities:    activatedAbilities,
+			activatedAbilityCosts: activatedAbilityCosts,
+			weaponAbilityCount:    len(weapons),
+			rolesBuf:              make([]Role, handSize+1),
+			pitchVals:             make([]int, handSize+1),
+			defenseVals:           make([]int, handSize+1),
+			isDRBuf:               make([]bool, handSize+1),
+			canAttackBuf:          make([]bool, handSize+1),
+			addsFutureValueBuf:    make([]bool, handSize+1),
+			pitchedValsScratch:    make([]int, 0, handSize+1),
+			pitchedBuf:            make([]Card, 0, handSize+1),
+			pitchPermBuf:          make([]Card, 0, handSize+1),
+			pitchPermValsBuf:      make([]int, 0, handSize+1),
+			pitchAttrBuf:          make([]Card, 0, handSize+1),
+			attackersBuf:          make([]Card, 0, handSize+1),
+			defendersBuf:          make([]Card, 0, handSize+1),
+			heldBuf:               make([]Card, 0, handSize+1),
+			defenseGravScratch:    make([]Card, 0, handSize+1),
 		},
 		permBufs: permBufs{
 			handBacking:             make([]Card, 0, maxAttackers),
@@ -227,6 +242,7 @@ func newAttackBufs(handSize, weaponCount int, weapons []Weapon) *attackBufs {
 			cardsPlayedBacking:      make([]Card, 0, maxAttackers),
 			logBacking:              make([]LogEntry, 0, logBackingCap),
 			auraTriggersBacking:     make([]Aura, 0, handSize+1),
+			itemsBacking:            make([]Item, 0, 4),
 			defenderAurasBacking:    make([]Aura, 0, handSize+1),
 			nextAtkActionHitBacking: make([]NextAttackActionHitTrigger, 0, 4),
 		},

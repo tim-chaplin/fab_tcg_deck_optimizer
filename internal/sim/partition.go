@@ -11,17 +11,14 @@ package sim
 
 import ()
 
-func (e *Evaluator) findBest(hero Hero, weapons []Weapon, hand []Card, mp Matchup, deck []Card, arsenalCardIn Card, priorAuras []Aura, skipLog bool) TurnSummary {
-	// Cache fast-path. The cache is bypassed when disabled (e.cache nil) or when any of
-	// the inputs (hand, weapons, auras) overflows its fixed-size slot in the cache key.
-	// Overflow is rare in practice — adult hand sizes top out around 7, weapons at 2,
-	// auras at ~3 — but the fallback keeps correctness when an unusual deck shape pushes
-	// past those bounds.
+func (e *Evaluator) findBest(hero Hero, weapons []Weapon, hand []Card, mp Matchup, deck []Card, arsenalCardIn Card, priorAuras []Aura, priorItems []Item, skipLog bool) TurnSummary {
+	// Cache fast-path. Bypassed when disabled (e.cache nil) or when any input overflows
+	// a fixed-size cache-key slot (hand size, weapons, auras, items).
 	var cacheKey evalCacheKey
 	cacheUsable := e.cache != nil
 	if cacheUsable {
 		var keyOK bool
-		cacheKey, keyOK = makeCacheKey(hero, weapons, hand, arsenalCardIn, priorAuras)
+		cacheKey, keyOK = makeCacheKey(hero, weapons, hand, arsenalCardIn, priorAuras, priorItems)
 		if !keyOK {
 			cacheUsable = false
 		}
@@ -29,7 +26,7 @@ func (e *Evaluator) findBest(hero Hero, weapons []Weapon, hand []Card, mp Matchu
 	if cacheUsable {
 		if entry, ok := e.cache.lookup(cacheKey); ok {
 			e.cache.hits.Add(1)
-			return e.replayBest(entry, hero, weapons, hand, mp, deck, arsenalCardIn, priorAuras, skipLog)
+			return e.replayBest(entry, hero, weapons, hand, mp, deck, arsenalCardIn, priorAuras, priorItems, skipLog)
 		}
 		e.cache.misses.Add(1)
 	}
@@ -59,6 +56,7 @@ func (e *Evaluator) findBest(hero Hero, weapons []Weapon, hand []Card, mp Matchu
 			Deck:    append([]Card(nil), deck...),
 			Arsenal: arsenalCardIn,
 			Auras:   append([]Aura(nil), priorAuras...),
+			Items:   append([]Item(nil), priorItems...),
 		},
 	}
 	cacheable := true
@@ -81,11 +79,15 @@ func (e *Evaluator) findBest(hero Hero, weapons []Weapon, hand []Card, mp Matchu
 	// hand card Held so a post-hoc promotion would fill arsenal) so the tiebreaker treats
 	// the seed as a valid baseline. Finalize clones the scratch into best.State once at
 	// the end so the returned TurnSummary owns independent backing.
+	// Seed the running carry's scratch with the no-feasible-line fallback's hand —
+	// the partition recurse's "all Held" baseline — so willOccupy reads the seed
+	// state correctly when no chain has been promoted yet.
+	bufs.findBestCarryScratch.Reset()
+	bufs.findBestCarryScratch.Hand = append(bufs.findBestCarryScratch.Hand[:0], hand...)
 	running := runningCarry{
 		scratch:            &bufs.findBestCarryScratch,
 		leftoverRunechants: tokenCountIn(priorAuras, TokenTypeRunechant),
 		arsenal:            arsenalCardIn,
-		hasHeld:            n > 0,
 	}
 	rolesBuf := bufs.rolesBuf[:totalN]
 	pvals := bufs.pitchVals[:totalN]
@@ -103,7 +105,7 @@ func (e *Evaluator) findBest(hero Hero, weapons []Weapon, hand []Card, mp Matchu
 				hero, weapons, hand, deck, arsenalCardIn,
 				rolesBuf, n, bufs,
 				mp, defenseSum,
-				priorAuras, skipLog,
+				priorAuras, priorItems, skipLog,
 			)
 			// Aggregate per leaf — an infeasible attack chain still surfaces its DR-side
 			// reads (defendersDamage runs before the feasibility gate inside
@@ -118,14 +120,8 @@ func (e *Evaluator) findBest(hero Hero, weapons []Weapon, hand []Card, mp Matchu
 
 			v := attackDealt + defenseDealt
 			arsenalCard := arsenalAtChainStart
-			// Hand cards never take Arsenal role during enumeration, so arsenalCard is only set
-			// when arsenal-in stayed; post-hoc promotion potential is tracked via hasHeld.
-			hasHeld := false
 			futureValuePlayed := 0
 			for j := 0; j < n; j++ {
-				if rolesBuf[j] == Held {
-					hasHeld = true
-				}
 				if rolesBuf[j] == Attack && addsFutureValue[j] {
 					futureValuePlayed++
 				}
@@ -133,11 +129,15 @@ func (e *Evaluator) findBest(hero Hero, weapons []Weapon, hand []Card, mp Matchu
 			if arsenalCardIn != nil && rolesBuf[n] == Attack && addsFutureValue[n] {
 				futureValuePlayed++
 			}
-			willOccupy := arsenalCard != nil || hasHeld
-			if !running.Beats(v, leftoverRunechants, futureValuePlayed, willOccupy) {
+			// willOccupy reads end-of-chain carry rather than rolesBuf so chains that drew
+			// a card mid-chain (Pitch + Gold-spend) register the drawn card as filling
+			// next turn's arsenal — same outcome as a Held card promoting via the post-hoc
+			// step.
+			willOccupy := arsenalCard != nil || len(carry.Hand) > 0
+			if !running.Beats(v, leftoverRunechants, futureValuePlayed, carry.CardsDrawn, willOccupy) {
 				return
 			}
-			running.Promote(v, leftoverRunechants, futureValuePlayed, hasHeld, arsenalCard, &carry)
+			running.Promote(v, leftoverRunechants, futureValuePlayed, carry.CardsDrawn, arsenalCard, &carry)
 			best.Value = v
 			bestSwung = swung
 			// Cards and FromArsenal flags were populated at construction; Role is the only

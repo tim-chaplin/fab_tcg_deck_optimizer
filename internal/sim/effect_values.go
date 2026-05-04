@@ -13,8 +13,9 @@ package sim
 // card — one card they won't get to play. A typical FaB card is worth ~3 points of tempo.
 const DiscardValue = 3
 
-// GoldTokenValue is the damage-equivalent credited when a card creates a Gold token. A Gold
-// token is is one future card draw, at the expense of two resource.
+// GoldTokenValue is the placeholder credit for NotImplemented Gold-creating cards.
+// Value 0 because Gold pays out only on activation (see GoldTokenAbility), not at
+// creation.
 const GoldTokenValue = 0
 
 // OverpowerValue is the damage-equivalent credited when an attack has the Overpower keyword.

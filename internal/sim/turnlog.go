@@ -9,17 +9,17 @@ import (
 )
 
 // BuildTurnLog converts a TurnSummary into the four-section TurnLog shape.
-// startingAuras is the carryover aura set entering this turn — token counts get pulled
-// from it for the StartOfTurn "Auras: ..." line, surfaced alongside any sigils /
-// incantations in play (those come from t.StartOfTurnAuras). MyTurn's chain content
-// comes from t.State.Log; pitches and defense lines come from BestLine; ending zone
-// state comes from t.State.
-func BuildTurnLog(t TurnSummary, startingAuras []Aura) TurnLog {
+// startingAuras / startingItems are the carryover aura / item sets entering this turn;
+// token counts get pulled from them for the StartOfTurn "Auras: ..." / "Items: ..."
+// lines. MyTurn's chain content comes from t.State.Log; pitches and defense lines come
+// from BestLine; ending zone state comes from t.State.
+func BuildTurnLog(t TurnSummary, startingAuras []Aura, startingItems []Item) TurnLog {
 	var log TurnLog
 	parts := partitionBestLineForDisplay(t.BestLine)
 	defensePitches, attackPitches := splitPitchesByPhase(parts.pitched, parts.drCost)
 	startingRunechants := tokenCountIn(startingAuras, TokenTypeRunechant)
 	startingPonders := tokenCountIn(startingAuras, TokenTypePonder)
+	startingGold := itemCountIn(startingItems, TokenTypeGold)
 
 	// Start of turn: dealt hand, arsenal-in card, auras / tokens in play. Carryover
 	// Aura fires (Sigil reveals, +N damage credits) belong to MyTurn — they're
@@ -31,6 +31,9 @@ func BuildTurnLog(t TurnSummary, startingAuras []Aura) TurnLog {
 		log.StartOfTurn = append(log.StartOfTurn, line)
 	}
 	if line := startingAurasLine(t.StartOfTurnAuras, startingRunechants, startingPonders); line != "" {
+		log.StartOfTurn = append(log.StartOfTurn, line)
+	}
+	if line := itemsLine(startingGold); line != "" {
 		log.StartOfTurn = append(log.StartOfTurn, line)
 	}
 
@@ -72,6 +75,9 @@ func BuildTurnLog(t TurnSummary, startingAuras []Aura) TurnLog {
 		log.EndOfTurn = append(log.EndOfTurn, line)
 	}
 	if line := endingAurasLine(t.State.Auras, t.State.Runechants(), t.State.Ponders()); line != "" {
+		log.EndOfTurn = append(log.EndOfTurn, line)
+	}
+	if line := itemsLine(t.State.Gold()); line != "" {
 		log.EndOfTurn = append(log.EndOfTurn, line)
 	}
 
@@ -264,6 +270,25 @@ func ponderPhrase(n int) string {
 		return "1 Ponder"
 	}
 	return fmt.Sprintf("%d Ponders", n)
+}
+
+// goldPhrase pluralises the Gold noun: "1 Gold" vs "N Gold" (Gold doesn't pluralise
+// in FaB rules text — "5 Gold tokens" reads as bare count + noun).
+func goldPhrase(n int) string {
+	return fmt.Sprintf("%d Gold", n)
+}
+
+// itemsLine builds the "Items: ..." printout line from the per-token-type counts. Returns
+// "" when no item is in play so the caller skips the line.
+func itemsLine(gold int) string {
+	var items []string
+	if gold > 0 {
+		items = append(items, goldPhrase(gold))
+	}
+	if len(items) == 0 {
+		return ""
+	}
+	return "Items: " + strings.Join(items, ", ")
 }
 
 // childEntryPrefix tags MyTurn entries that are trigger lines grouped beneath a parent chain

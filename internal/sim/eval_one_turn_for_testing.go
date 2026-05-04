@@ -25,6 +25,13 @@ type TurnStartState struct {
 	// of this turn's chain plus any token bumps made by next-turn start-of-turn handlers.
 	// Tests query specific token counts via Runechants and friends.
 	StartOfNextTurnAuras []Aura
+	// StartOfNextTurnItems is the live item set at the start of the next turn — items
+	// carried over from this turn's chain.
+	StartOfNextTurnItems []Item
+	// CardsDrawn is the count of mid-chain card draws that resolved during the tested
+	// turn (DrawOne calls). Surfaced for tests that want to assert on draw behaviour
+	// directly without inferring it from arsenal / hand carryover.
+	CardsDrawn int
 	// StartOfNextTurnTriggerDamage is the damage credited by the next turn's start-of-turn
 	// Aura handlers (triggers registered this turn that fired at the top of next).
 	// Zero when no trigger survived. Production folds this into next turn's Value.
@@ -42,6 +49,11 @@ func (t TurnStartState) Runechants() int {
 // Ponders returns the live Ponder token count at the start of the next turn.
 func (t TurnStartState) Ponders() int {
 	return tokenCountIn(t.StartOfNextTurnAuras, TokenTypePonder)
+}
+
+// Gold returns the live Gold token count at the start of the next turn.
+func (t TurnStartState) Gold() int {
+	return itemCountIn(t.StartOfNextTurnItems, TokenTypeGold)
 }
 
 // EvalOneTurnForTesting runs one turn against d.Cards in source order (no shuffle) and returns
@@ -79,6 +91,7 @@ func (d *Deck) EvalOneTurnForTesting(mp Matchup, arsenalIn Card, initialHand []C
 	// to advance past mid-turn draws.
 	nextHeld := applyTurnResult(play, buf, &head, &tail, nil)
 	auraQueue := append([]Aura(nil), play.State.Auras...)
+	itemQueue := append([]Item(nil), play.State.Items...)
 
 	// Deal turn 2's hand but stop short of running Best — the caller wants the pre-Best state.
 	turn2Hand, drawCount2, ok := dealNextHand(buf, handBuf, nextHeld, &head, &tail, handSize)
@@ -88,6 +101,8 @@ func (d *Deck) EvalOneTurnForTesting(mp Matchup, arsenalIn Card, initialHand []C
 			Graveyard:              append([]Card(nil), play.State.Graveyard...),
 			StartOfNextTurnArsenal: play.State.Arsenal,
 			StartOfNextTurnAuras:   append([]Aura(nil), play.State.Auras...),
+			StartOfNextTurnItems:   append([]Item(nil), play.State.Items...),
+			CardsDrawn:             play.State.CardsDrawn,
 		}
 	}
 	// Process turn-1 Auras at the turn-2 boundary the same way Evaluate does:
@@ -111,6 +126,8 @@ func (d *Deck) EvalOneTurnForTesting(mp Matchup, arsenalIn Card, initialHand []C
 		StartOfNextTurnArsenal:       play.State.Arsenal,
 		StartOfNextTurnDeck:          deckLeft,
 		StartOfNextTurnAuras:         append([]Aura(nil), survivors...),
+		StartOfNextTurnItems:         append([]Item(nil), itemQueue...),
+		CardsDrawn:                   play.State.CardsDrawn,
 		StartOfNextTurnTriggerDamage: trigDamage,
 		StartOfNextTurnGraveyard:     trigGraveyarded,
 	}

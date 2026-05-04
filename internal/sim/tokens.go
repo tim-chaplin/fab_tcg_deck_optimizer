@@ -1,19 +1,24 @@
 package sim
 
-// Aura tokens are auras with no originating card: when destroyed they just disappear
-// (no graveyard append). Each token type has one fixed handler defined here, since
-// behaviour is independent of the card that created the token.
-//
-// Invariant: at most one Aura per token type per TurnState — helpers bump Count on the
-// existing entry rather than appending duplicates. Keeps cache keys and the trigger-fire
-// loop compact.
+import (
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
+)
 
-// TokenType identifies an aura token kind. TokenTypeNone is the zero value used by card
-// auras (which set Aura.Self.Card instead).
+// Tokens are persistent-in-play entries with no originating card: destroying one just
+// removes the entry (no graveyard append). Each token type has one fixed Aura handler or
+// Item Ability defined here — behaviour is independent of the card that created it.
+//
+// Invariant: at most one entry per token type per TurnState (Auras and Items enforce this
+// independently); helpers bump Count on the existing entry rather than appending. Keeps
+// cache keys and the per-token loops compact.
+
+// TokenType identifies a token kind. TokenTypeNone is the zero value used by card-based
+// auras / items (which set Self.Card instead).
 type TokenType int
 
 const (
-	// TokenTypeNone marks a non-token aura (Aura.Self.Card is set instead).
+	// TokenTypeNone marks a non-token entry (Self.Card is set instead).
 	TokenTypeNone TokenType = iota
 	// TokenTypeRunechant is the runechant aura token. Consumed by the next attack or
 	// weapon swing the controller resolves (see runechantAuraHandler).
@@ -22,16 +27,21 @@ const (
 	// was created, drawing a card before the arsenal-promotion step (see
 	// ponderAuraHandler).
 	TokenTypePonder
+	// TokenTypeGold is the Gold item token. Activated ability: pay {2}, destroy this
+	// token, draw a card (see GoldTokenAbility).
+	TokenTypeGold
 )
 
 // tokenDisplayName returns the printed name shown in logs and "(from previous turn)"
-// summaries for the given token type. Mirrors DisplayName(Card) for card auras.
+// summaries for the given token type. Mirrors DisplayName(Card) for card-based entries.
 func tokenDisplayName(t TokenType) string {
 	switch t {
 	case TokenTypeRunechant:
 		return "Runechant"
 	case TokenTypePonder:
 		return "Ponder"
+	case TokenTypeGold:
+		return "Gold"
 	}
 	return ""
 }
@@ -95,4 +105,44 @@ func tokenCountIn(auras []Aura, t TokenType) int {
 		}
 	}
 	return 0
+}
+
+var goldTokenAbilityTypes = card.NewTypeSet(card.TypeGeneric, card.TypeItem)
+
+// GoldTokenAbility is the activated ability of a Gold token: cost {2}, draw a card,
+// destroy one Gold token. Carries Go again so the action chain can fold gold-spending
+// in alongside an attack. Token items don't head to the graveyard on destroy.
+type GoldTokenAbility struct{}
+
+func (GoldTokenAbility) ID() ids.CardID      { return ids.GoldTokenAbilityID }
+func (GoldTokenAbility) Name() string        { return "Gold" }
+func (GoldTokenAbility) Cost(*TurnState) int { return 2 }
+func (GoldTokenAbility) Pitch() int          { return 0 }
+func (GoldTokenAbility) Attack() int         { return 0 }
+func (GoldTokenAbility) Defense() int        { return 0 }
+func (GoldTokenAbility) Types() card.TypeSet { return goldTokenAbilityTypes }
+func (GoldTokenAbility) GoAgain() bool       { return true }
+
+// PlayPrecondition gates the activated ability on having a Gold token to spend. Rejects
+// permutations that order the ability before the card / OnHit that creates the token —
+// the chain runner finds the legal ordering (token created first) via Heap's algorithm.
+func (GoldTokenAbility) PlayPrecondition(s *TurnState, self *CardState) bool {
+	return s.Gold() > 0
+}
+
+func (GoldTokenAbility) Play(s *TurnState, self *CardState) {
+	s.ConsumeItem(TokenTypeGold, 1)
+	s.DrawOne()
+	s.Log(self, 0)
+	s.LogRider(self, 0, "Spent 1 gold to draw a card")
+}
+
+// NewGoldItem returns a fresh Gold token Item with the given count. Production code calls
+// s.CreateGold instead — it bumps an existing entry. Test seeding only.
+func NewGoldItem(n int) Item {
+	return Item{
+		Self:    CardOrTokenType{TokenType: TokenTypeGold},
+		Count:   n,
+		Ability: GoldTokenAbility{},
+	}
 }

@@ -21,8 +21,12 @@ func (RosettaThorn) ID() ids.WeaponID    { return ids.RosettaThornID }
 func (RosettaThorn) Name() string        { return "Rosetta Thorn" }
 func (RosettaThorn) Types() card.TypeSet { return rosettaThornTypes }
 func (RosettaThorn) Hands() int          { return 2 }
-func (RosettaThorn) Ability() sim.Card   { return RosettaThornAbility{} }
-func (RosettaThorn) NotSilverAgeLegal()  {}
+func (RosettaThorn) Ability() sim.Card   { return rosettaThornAbility }
+
+// Cached at package init — see nebula_blade.go for the alloc-free rationale.
+var rosettaThornAbility sim.Card = RosettaThornAbility{}
+
+func (RosettaThorn) NotSilverAgeLegal() {}
 
 // not implemented: on-attack 2 arcane damage rider gated on having played an attack action AND
 // a non-attack action this turn
