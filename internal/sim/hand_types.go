@@ -60,16 +60,8 @@ type CarryState struct {
 	Log []LogEntry
 }
 
-// Runechants returns the carried Runechant token count by scanning Auras for the
-// runechant token aura. Zero when no runechants are in play.
-func (c *CarryState) Runechants() int {
-	for i := range c.Auras {
-		if c.Auras[i].Self.TokenType == TokenTypeRunechant {
-			return c.Auras[i].Count
-		}
-	}
-	return 0
-}
+// Runechants returns the carried Runechant token count, or zero when none are in play.
+func (c *CarryState) Runechants() int { return runechantCountIn(c.Auras) }
 
 // TurnSummary is the result of running Best on a hand: the winning card-role assignments
 // plus the CarryState snapshot the next turn inherits.

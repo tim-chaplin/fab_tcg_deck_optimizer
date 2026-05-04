@@ -99,7 +99,7 @@ func (d *Deck) EvalOneTurnForTesting(mp Matchup, arsenalIn Card, initialHand []C
 		StartOfNextTurnHand:          handCopy,
 		StartOfNextTurnArsenal:       play.State.Arsenal,
 		StartOfNextTurnDeck:          deckLeft,
-		StartOfNextTurnRunechants:    priorRunechantCount(survivors),
+		StartOfNextTurnRunechants:    runechantCountIn(survivors),
 		StartOfNextTurnTriggerDamage: trigDamage,
 		StartOfNextTurnGraveyard:     trigGraveyarded,
 	}

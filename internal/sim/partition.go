@@ -83,7 +83,7 @@ func (e *Evaluator) findBest(hero Hero, weapons []Weapon, hand []Card, mp Matchu
 	// the end so the returned TurnSummary owns independent backing.
 	running := runningCarry{
 		scratch:            &bufs.findBestCarryScratch,
-		leftoverRunechants: priorRunechantCount(priorAuras),
+		leftoverRunechants: runechantCountIn(priorAuras),
 		arsenal:            arsenalCardIn,
 		hasHeld:            n > 0,
 	}

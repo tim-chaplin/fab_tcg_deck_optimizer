@@ -16,9 +16,9 @@ import ()
 // phases since resources don't carry between turns.
 //
 // arsenalCardIn is the card sitting in the arsenal slot at start of turn (nil if empty).
-// Runechants carry across turns via priorAuras (BestWithTriggers): the runechant token
-// aura is one entry in that slice when carryover is non-zero. TurnSummary.State.Auras
-// surfaces the surviving auras from this turn for next turn's carryover.
+// Runechants carry across turns via priorAuras on BestWithTriggers — the runechant
+// token aura sits in that slice. TurnSummary.State.Auras feeds back as next turn's
+// priorAuras.
 //
 // Test convention: end-to-end tests should drive the chain runner through
 // (*Deck).EvalOneTurnForTesting (deck-level entry point, mirrors production's per-turn
@@ -28,10 +28,9 @@ func Best(hero Hero, weapons []Weapon, hand []Card, mp Matchup, deck []Card, ars
 	return sharedEvaluator.BestWithTriggers(hero, weapons, hand, mp, deck, arsenalCardIn, nil)
 }
 
-// BestWithTriggers is Best plus an explicit priorAuras input — the Auras (card auras +
-// the runechant token aura when one is live) carrying in from the previous turn.
-// Mid-chain triggers (Malefic Incantation's TriggerAttackAction rune, runechant tokens'
-// TriggerAttack, …) may fire and contribute damage to this turn's Value.
+// BestWithTriggers is Best plus an explicit priorAuras input — the Auras carrying in
+// from the previous turn (card auras and the runechant token aura). Mid-chain triggers
+// may fire and contribute damage to this turn's Value.
 func BestWithTriggers(hero Hero, weapons []Weapon, hand []Card, mp Matchup, deck []Card, arsenalCardIn Card, priorAuras []Aura) TurnSummary {
 	return sharedEvaluator.BestWithTriggers(hero, weapons, hand, mp, deck, arsenalCardIn, priorAuras)
 }

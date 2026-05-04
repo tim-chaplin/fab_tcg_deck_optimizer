@@ -1,14 +1,12 @@
 package sim
 
-// Aura tokens — auras that don't belong to a card and just disappear when destroyed
-// (no graveyard, no card to attribute). Each token type has a fixed handler defined here
-// rather than per-card, since a Runechant on the table behaves the same regardless of who
-// created it.
+// Aura tokens are auras with no originating card: when destroyed they just disappear
+// (no graveyard append). Each token type has one fixed handler defined here, since
+// behaviour is independent of the card that created the token.
 //
-// One Aura per token type per TurnState: helpers like CreateRunechants find the existing
-// entry and bump its Count instead of appending duplicates. The single-aura invariant
-// keeps cache keys (and the trigger-fire loop) compact — n runechants is "Count = n", not
-// n separate entries.
+// Invariant: at most one Aura per token type per TurnState — helpers bump Count on the
+// existing entry rather than appending duplicates. Keeps cache keys and the trigger-fire
+// loop compact.
 
 // TokenType identifies an aura token kind. TokenTypeNone is the zero value used by card
 // auras (which set Aura.Self.Card instead).
@@ -17,9 +15,8 @@ type TokenType int
 const (
 	// TokenTypeNone marks a non-token aura (Aura.Self.Card is set instead).
 	TokenTypeNone TokenType = iota
-	// TokenTypeRunechant is the runechant aura token. Created by Viserai's hero ability,
-	// Sigil of Deadwood, Malefic Incantation, Read the Runes, …; consumed by the next
-	// attack or weapon swing the controller resolves (see runechantAuraHandler).
+	// TokenTypeRunechant is the runechant aura token. Consumed by the next attack or
+	// weapon swing the controller resolves (see runechantAuraHandler).
 	TokenTypeRunechant
 )
 
@@ -33,11 +30,10 @@ func tokenDisplayName(t TokenType) string {
 	return ""
 }
 
-// runechantAuraHandler is the TriggerAttack handler shared by every Runechant aura. The
-// chain runner fires it before each attack / weapon swing resolves; the handler flips
-// ArcaneDamageDealt when t.Count hits the LikelyDamageHits window and destroys the aura
-// (token, no graveyard). Damage was credited at creation time inside CreateRunechants —
-// this handler does not re-credit, it's pure state cleanup.
+// runechantAuraHandler is the TriggerAttack handler shared by every Runechant aura.
+// Fires before each attack / weapon swing resolves: flips ArcaneDamageDealt when
+// t.Count clears the LikelyDamageHits window and destroys the aura. Damage was credited
+// at creation time in CreateRunechants — this handler is pure state cleanup.
 func runechantAuraHandler(s *TurnState, t *Aura) {
 	if LikelyDamageHits(t.Count, false) {
 		s.ArcaneDamageDealt = true
@@ -46,9 +42,8 @@ func runechantAuraHandler(s *TurnState, t *Aura) {
 }
 
 // NewRunechantAura returns a runechant token aura at count n. Production code calls
-// s.CreateRunechants which both creates the aura (or bumps an existing one) and credits
-// +n damage at creation time; tests that want to seed a runechant aura without crediting
-// damage build the aura via this factory and append directly to TurnState.Auras.
+// s.CreateRunechants instead — it bumps an existing aura and credits +n damage. This
+// factory is for tests that need to seed a runechant aura without the damage credit.
 func NewRunechantAura(n int) Aura {
 	return Aura{
 		Self:        CardOrTokenType{TokenType: TokenTypeRunechant},
@@ -58,13 +53,13 @@ func NewRunechantAura(n int) Aura {
 	}
 }
 
-// priorRunechantCount returns the runechant count in a priorAuras carryover slice. The
-// chain runner uses this to seed bestLeftoverRunechants — the tiebreaker for "no chain
-// played, fall back to whatever was already there".
-func priorRunechantCount(priorAuras []Aura) int {
-	for i := range priorAuras {
-		if priorAuras[i].Self.TokenType == TokenTypeRunechant {
-			return priorAuras[i].Count
+// runechantCountIn scans an aura slice for the runechant token aura and returns its
+// count. Shared by TurnState.Runechants, CarryState.Runechants, and the chain runner's
+// priorAuras lookup so the single-aura-per-token-type invariant has one read site.
+func runechantCountIn(auras []Aura) int {
+	for i := range auras {
+		if auras[i].Self.TokenType == TokenTypeRunechant {
+			return auras[i].Count
 		}
 	}
 	return 0

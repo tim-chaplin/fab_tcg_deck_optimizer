@@ -34,7 +34,7 @@ func FormatLogEntry(e LogEntry) string {
 // when the partition assigned arsenalCardIn the Arsenal role (it's staying), nil otherwise
 // (no arsenal-in, or arsenal-in is playing as Attack/Defend).
 func bestAttackWithWeapons(hero Hero, weapons []Weapon, attackers, defenders, pitched, held, deck []Card, bufs *attackBufs, mp Matchup, blockTotal, arsenalInIdx, arsenalDefenderIdx int, arsenalAtChainStart Card, priorAuras []Aura, skipLog bool) (int, int, int, chainBudget, []string, CarryState, bool, bool) {
-	runechantCarryover := priorRunechantCount(priorAuras)
+	runechantCarryover := runechantCountIn(priorAuras)
 	ctx := &sequenceContext{
 		hero:                hero,
 		pitched:             pitched,
@@ -146,11 +146,11 @@ func bestAttackWithWeapons(hero Hero, weapons []Weapon, attackers, defenders, pi
 			if !legal {
 				continue
 			}
-			// Cost the DRs against the chain's final runechant count. DRs with variable cost
-			// (Reduce to Runechant) read s.Runechants() inside their Cost; static DRs return a
-			// constant. Reuse bufs.drScratch instead of allocating a fresh TurnState per mask
-			// iteration — the interface call boxes the pointer, so a stack allocation would
-			// escape and heap-alloc every loop. drScratchAuras holds the runechant aura when
+			// Cost the DRs against the chain's final runechant count. Variable-cost DRs read
+			// s.Runechants() inside their Cost; static DRs return a constant. Reuse
+			// bufs.drScratch instead of allocating a fresh TurnState per mask iteration — the
+			// interface call boxes the pointer, so a stack allocation would escape and
+			// heap-alloc every loop. drScratchAuras holds the runechant aura when
 			// leftoverRunechants > 0 so s.Runechants() reads back the count.
 			bufs.drScratch = TurnState{}
 			if leftoverRunechants > 0 {
@@ -317,9 +317,8 @@ func fireAttackActionAuras(state *TurnState, triggeringCard Card) {
 
 // fireAttackAuras is the TriggerAttack counterpart to fireAttackActionAuras: walks
 // state.Auras when ANY attack resolves (attack action OR weapon swing) and invokes every
-// TriggerAttack entry. The runechant token aura uses this trigger; future per-attack
-// token auras can register the same way. Same cursor / splice semantics as
-// fireAttackActionAuras.
+// TriggerAttack entry. The runechant token aura uses this trigger. Same cursor / splice
+// semantics as fireAttackActionAuras.
 func fireAttackAuras(state *TurnState, triggeringCard Card) {
 	for i := 0; i < len(state.Auras); {
 		t := &state.Auras[i]
@@ -559,12 +558,10 @@ func (ctx *sequenceContext) bestSequence(attackers []Card) (int, int, bool) {
 //
 // Runechant flow:
 //   - state.Runechants() starts at ctx.runechantCarryover.
-//   - Play / OnCardPlayed calling CreateRunechants increments the count AND returns n damage
-//     — tokens are credited exactly once, at creation.
-//   - After each Attack / Weapon card resolves, all current tokens fire and are destroyed;
-//     state.Runechants() is zeroed but damage is NOT re-added (tokens were credited at
-//     creation).
-//   - At end of the sequence, state.Runechants() is the leftover count carrying into next turn.
+//   - CreateRunechants bumps the count and credits +n damage at creation time.
+//   - Each Attack / Weapon resolution fires all current tokens and destroys them; no
+//     re-credit (tokens were credited at creation).
+//   - End-of-sequence state.Runechants() is the leftover count carrying into next turn.
 //
 // Resource flow lives on playSequenceWithMeta; this wrapper just forwards.
 //
@@ -751,11 +748,8 @@ func (ctx *sequenceContext) playSequenceWithMeta(n int) (damage int, leftoverRun
 		state.CardsRemaining = played[i+1:]
 
 		// Fire TriggerAttack auras (Runechant token, …) before the card resolves so its
-		// damage step sees the flags they flip — e.g. ArcaneDamageDealt = true once
-		// runechants destroy themselves on this attack. Runechant tokens were credited +1
-		// damage at creation time, so the handler doesn't re-credit; it just flips the flag
-		// and destroys the aura. fireAttackAuras is a no-op when no TriggerAttack auras are
-		// live.
+		// damage step sees the flags they flip — e.g. ArcaneDamageDealt once runechants
+		// destroy themselves on this attack. No-op when no TriggerAttack auras are live.
 		isAttackOrWeapon := m.isAttackOrWeapon
 		if isAttackOrWeapon {
 			fireAttackAuras(state, pc.Card)

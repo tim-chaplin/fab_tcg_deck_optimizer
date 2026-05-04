@@ -7,9 +7,8 @@ import "github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
 // common shape is centralised. Lives in a sim test file (rather than sim_test) so
 // exports_test.go's NewSequenceContextForTest wrapper can reach it.
 //
-// runechantCarryover is converted to a priorAuras slice carrying a Runechant token aura so
-// the chain runner sees the same starting state production code produces from a real
-// previous-turn carryover.
+// runechantCarryover is wrapped into a priorAuras slice carrying a Runechant token aura,
+// matching what production builds from a real previous-turn carryover.
 func newSequenceContextForTest(h Hero, pitched, deck []Card, resourceBudget, runechantCarryover, chainLen int) *sequenceContext {
 	bufs := newAttackBufs(chainLen, 0, nil)
 	var priorAuras []Aura

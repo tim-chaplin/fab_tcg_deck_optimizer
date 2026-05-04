@@ -1,13 +1,13 @@
 package sim
 
-// An Aura is a persistent hook attached to a card or a token in play. The sim walks each
+import "github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
+
+// Aura is a persistent hook attached to a card or a token in play. The sim walks each
 // TurnState's Auras list on every Trigger condition and fires the matching handlers;
 // lifecycle (when to decrement Count, when to send Self to the graveyard, when to
 // deregister) belongs to the handler. Used for start-of-turn upkeep auras (sigils,
 // Blessing of Occult, Runeblood Incantation), per-attack-action triggers (Malefic
 // Incantation), and aura tokens (Runechants — see tokens.go).
-
-import "github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
 
 // TriggerType categorises when an Aura's Handler fires.
 type TriggerType int
@@ -27,12 +27,10 @@ const (
 	TriggerAttack
 )
 
-// CardOrTokenType identifies what an Aura belongs to: a specific card in play, or a
-// generic aura token (Runechant, Ponder, etc.). Exactly one of Card / TokenType is set;
-// the other carries its zero value.
+// CardOrTokenType identifies what an Aura belongs to: a specific card in play, or an
+// aura token. Exactly one of Card / TokenType is set; the other carries its zero value.
 type CardOrTokenType struct {
-	// Card is the originating card for non-token auras (sigils, incantations, …). nil for
-	// token auras.
+	// Card is the originating card for non-token auras. nil for token auras.
 	Card Card
 	// TokenType identifies the token kind for token auras. TokenTypeNone for card auras.
 	TokenType TokenType
@@ -71,9 +69,8 @@ type AuraHandler func(s *TurnState, t *Aura)
 // TriggerType's condition fires — and, when OncePerTurn is set, at most once per turn —
 // the sim calls Handler. The Aura survives until its handler calls s.DestroyAura.
 type Aura struct {
-	// Self identifies what this Aura belongs to — a card (Sigil of Deadwood, Malefic
-	// Incantation, …) or a token type (Runechant, …). Surfaced in per-turn summaries via
-	// CardOrTokenType.DisplayName.
+	// Self identifies what this Aura belongs to — a card or a token type. Surfaced in
+	// per-turn summaries via CardOrTokenType.DisplayName.
 	Self CardOrTokenType
 	// TriggerType is the trigger condition that fires this Aura's Handler.
 	TriggerType TriggerType

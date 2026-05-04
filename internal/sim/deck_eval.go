@@ -282,7 +282,7 @@ func runOneShuffle(d *Deck, stats *Stats, scratch *shuffleScratch, idIndex map[i
 		if !ok {
 			break
 		}
-		startingRunechants := priorRunechantCount(auraTriggerBuf)
+		startingRunechants := runechantCountIn(auraTriggerBuf)
 		startOfTurnAuras := snapshotStartOfTurnAuras(auraTriggerBuf)
 		dealtHand := append([]Card(nil), h...)
 		var trigContribs []TriggerContribution

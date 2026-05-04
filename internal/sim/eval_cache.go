@@ -49,20 +49,14 @@ const maxCachedWeapons = 4
 // stack more.
 const maxCachedAuras = 8
 
-// auraCacheKey is one fingerprinted entry in the evalCacheKey.auras array. SelfID is the
-// CardID of the aura the trigger belongs to — Handler closures aren't comparable, but
-// each card type's Play always registers the same handler logic, so SelfID determines
-// the per-fire behaviour. Count is the per-Aura counter (fires remaining for card auras,
-// token copy count for token auras).
+// auraCacheKey is one fingerprinted entry in the evalCacheKey.auras array. Card auras
+// fingerprint via SelfID (Handler closures aren't comparable, but each card type
+// registers the same handler logic). Token auras carry SelfID = ids.InvalidCard and
+// identify via TokenType. Count is the per-Aura counter.
 //
-// Token auras (Runechant, …) carry SelfID = ids.InvalidCard and identify themselves via
-// TokenType — the per-token Handler is keyed off TokenType too, so (TokenType, Count) is
-// the full fingerprint for a token aura. Card auras carry TokenType = TokenTypeNone.
-//
-// Caveats this minimal shape doesn't capture today: TriggerType, OncePerTurn /
-// FiredThisTurn flags. No production card registers multiple triggers from the same Self
-// with different types or gates, so the simpler tuple is enough — but if a future card
-// needs to disambiguate, this is the place to extend the key.
+// TriggerType, OncePerTurn, and FiredThisTurn aren't captured: no production card
+// registers multiple triggers from the same Self with different types or gates. Extend
+// the key here if a future card needs to disambiguate.
 type auraCacheKey struct {
 	SelfID    ids.CardID
 	TokenType TokenType

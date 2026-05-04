@@ -218,9 +218,9 @@ func endingArsenalLine(arsenal []CardAssignment) string {
 }
 
 // endingAurasLine builds "Auras: A, B, 2 Runechants" from the Auras surviving into the
-// next turn. The runechant token is one of those Auras (TokenType=Runechant); render it
-// pluralised via runechantPhrase rather than repeating the bare "Runechant" token name.
-// Aura names sort alphabetically. Returns "" when no auras survived.
+// next turn. The runechant token aura renders pluralised via runechantPhrase rather
+// than as the bare token name. Names sort alphabetically. Returns "" when nothing
+// survived.
 func endingAurasLine(triggers []Aura, runechants int) string {
 	if len(triggers) == 0 && runechants == 0 {
 		return ""
