@@ -61,6 +61,10 @@ var cardsByID = []sim.Card{
 	ids.DeathlyDuetYellow: cards.DeathlyDuetYellow{},
 	ids.DeathlyDuetBlue:   cards.DeathlyDuetBlue{},
 
+	ids.DestructiveDeliberationRed:    cards.DestructiveDeliberationRed{},
+	ids.DestructiveDeliberationYellow: cards.DestructiveDeliberationYellow{},
+	ids.DestructiveDeliberationBlue:   cards.DestructiveDeliberationBlue{},
+
 	ids.DrawnToTheDarkDimensionRed:    cards.DrawnToTheDarkDimensionRed{},
 	ids.DrawnToTheDarkDimensionYellow: cards.DrawnToTheDarkDimensionYellow{},
 	ids.DrawnToTheDarkDimensionBlue:   cards.DrawnToTheDarkDimensionBlue{},
