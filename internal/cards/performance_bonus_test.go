@@ -6,10 +6,8 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 )
 
-// Tests that Performance Bonus registers an OnHit handler — the actual Gold-token
-// creation fires through the chain runner's finalizeActiveAttack, exercised by the
-// e2e suite (e2etest/performance_bonus_test.go-style coverage of the Strike Gold
-// pattern applies here too).
+// Tests that Performance Bonus registers an OnHit handler. End-to-end Gold creation is
+// covered by the e2e suite.
 func TestPerformanceBonus_RegistersOnHit(t *testing.T) {
 	s := sim.NewTurnState(nil, nil)
 	self := &sim.CardState{Card: PerformanceBonusBlue{}}
