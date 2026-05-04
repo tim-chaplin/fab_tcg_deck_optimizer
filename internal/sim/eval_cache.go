@@ -32,12 +32,11 @@ import (
 )
 
 // maxCachedHandSize caps how big a hand the cache will fingerprint. Adult heroes deal up
-// to 4 cards plus the arsenal-in slot (5) plus mid-turn-draw extensions; 24 covers the
-// fattest plausible mid-chain growth. Hands beyond this size skip the cache (treated as
-// always-miss and never stored) — should never happen in practice because the per-leaf
-// hand size (the partition input) is bounded by the dealt hand size, which never exceeds
-// hero intelligence.
-const maxCachedHandSize = 24
+// to 4 cards plus the arsenal-in slot (5); 10 leaves headroom for any reveal handler that
+// pads the hand at start of turn. Hands beyond this size skip the cache (treated as
+// always-miss and never stored) — the cache key is the dealt hand, which is bounded by
+// hero intelligence, so the cap doesn't apply to mid-chain growth.
+const maxCachedHandSize = 10
 
 // maxCachedWeapons caps the weapon slot count the cache fingerprints. Heroes carry at most
 // 2 weapons (1H + 1H) plus the occasional off-hand item; 4 leaves headroom.
@@ -49,10 +48,10 @@ const maxCachedWeapons = 4
 // stack more.
 const maxCachedAuras = 8
 
-// maxCachedItems caps how many items the cache will fingerprint. Item counts grow
-// slowly across a game (one Gold per Strike Gold hit, etc.) — 4 covers a heavy gold
-// economy across multiple token types without bloating the key.
-const maxCachedItems = 4
+// maxCachedItems caps how many items the cache will fingerprint. Matches maxCachedAuras
+// since both fingerprint the same persistent-in-play surface; 8 leaves headroom for an
+// archetype that stacks multiple token types alongside any card-based items.
+const maxCachedItems = 8
 
 // auraCacheKey is one fingerprinted entry in the evalCacheKey.auras array. Card auras
 // fingerprint via SelfID (Handler closures aren't comparable, but each card type
