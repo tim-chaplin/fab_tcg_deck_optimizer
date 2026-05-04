@@ -4,7 +4,7 @@
 // Text: "Drawn to the Dark Dimension costs {r} less to play for each Runechant you control.
 // Draw a card."
 //
-// Cost reads s.Runechants to return max(0, printed - Runechants) at play time; implements
+// Cost reads s.Runechants() to return max(0, printed - Runechants) at play time; implements
 // sim.VariableCost with bounds [0, printed].
 //
 // The "Draw a card" rider fires unconditionally on play.
@@ -22,7 +22,7 @@ var drawnToTheDarkDimensionTypes = card.NewTypeSet(card.TypeRuneblade, card.Type
 const drawnToTheDarkDimensionPrintedCost = 2
 
 func drawnToTheDarkDimensionCost(s *sim.TurnState) int {
-	eff := drawnToTheDarkDimensionPrintedCost - s.Runechants
+	eff := drawnToTheDarkDimensionPrintedCost - s.Runechants()
 	if eff < 0 {
 		return 0
 	}

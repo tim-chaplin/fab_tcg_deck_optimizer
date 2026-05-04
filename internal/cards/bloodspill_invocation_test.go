@@ -65,7 +65,7 @@ func TestBloodspillInvocation_WeaponDoesNotPop(t *testing.T) {
 	s := sim.TurnState{
 		IncomingDamage: 3,
 		BlockTotal:     0,
-		Runechants:     1,
+		Auras:          []sim.Aura{sim.NewRunechantAura(1)},
 		CardsRemaining: []*sim.CardState{{Card: testutils.RunebladeWeapon{}}},
 	}
 	(BloodspillInvocationRed{}).Play(&s, &sim.CardState{Card: BloodspillInvocationRed{}})
@@ -80,7 +80,7 @@ func TestBloodspillInvocation_SameTurnPopByRunechant(t *testing.T) {
 	s := sim.TurnState{
 		IncomingDamage: 3,
 		BlockTotal:     0,
-		Runechants:     1,
+		Auras:          []sim.Aura{sim.NewRunechantAura(1)},
 		CardsRemaining: []*sim.CardState{{Card: testutils.AttackWithPower{Power: 6}}},
 	}
 	(BloodspillInvocationRed{}).Play(&s, &sim.CardState{Card: BloodspillInvocationRed{}})

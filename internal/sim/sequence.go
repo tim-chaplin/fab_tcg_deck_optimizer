@@ -33,7 +33,8 @@ func FormatLogEntry(e LogEntry) string {
 // arsenalAtChainStart is the card sitting in the arsenal slot at the start of the chain — set
 // when the partition assigned arsenalCardIn the Arsenal role (it's staying), nil otherwise
 // (no arsenal-in, or arsenal-in is playing as Attack/Defend).
-func bestAttackWithWeapons(hero Hero, weapons []Weapon, attackers, defenders, pitched, held, deck []Card, bufs *attackBufs, runechantCarryover int, mp Matchup, blockTotal, arsenalInIdx, arsenalDefenderIdx int, arsenalAtChainStart Card, priorAuras []Aura, skipLog bool) (int, int, int, chainBudget, []string, CarryState, bool, bool) {
+func bestAttackWithWeapons(hero Hero, weapons []Weapon, attackers, defenders, pitched, held, deck []Card, bufs *attackBufs, mp Matchup, blockTotal, arsenalInIdx, arsenalDefenderIdx int, arsenalAtChainStart Card, priorAuras []Aura, skipLog bool) (int, int, int, chainBudget, []string, CarryState, bool, bool) {
+	runechantCarryover := runechantCountIn(priorAuras)
 	ctx := &sequenceContext{
 		hero:                hero,
 		pitched:             pitched,
@@ -145,12 +146,22 @@ func bestAttackWithWeapons(hero Hero, weapons []Weapon, attackers, defenders, pi
 			if !legal {
 				continue
 			}
-			// Cost the DRs against the chain's final runechant count. DRs with variable cost
-			// read state.Runechants inside their Cost; static DRs return a constant. Reuse
+			// Cost the DRs against the chain's final runechant count. Variable-cost DRs read
+			// s.Runechants() inside their Cost; static DRs return a constant. Reuse
 			// bufs.drScratch instead of allocating a fresh TurnState per mask iteration — the
-			// interface call boxes the pointer, so a stack allocation would escape and heap-alloc
-			// every loop.
-			bufs.drScratch = TurnState{Runechants: leftoverRunechants}
+			// interface call boxes the pointer, so a stack allocation would escape and
+			// heap-alloc every loop. drScratchAuras holds the runechant aura when
+			// leftoverRunechants > 0 so s.Runechants() reads back the count.
+			bufs.drScratch = TurnState{}
+			if leftoverRunechants > 0 {
+				bufs.drScratchAuras = append(bufs.drScratchAuras[:0], Aura{
+					Self:        CardOrTokenType{TokenType: TokenTypeRunechant},
+					TriggerType: TriggerAttack,
+					Count:       leftoverRunechants,
+					Handler:     runechantAuraHandler,
+				})
+				bufs.drScratch.Auras = bufs.drScratchAuras
+			}
 			drCost := 0
 			for _, d := range defenders {
 				if !attackerMetaPtrFor(d).actsAsDR {
@@ -291,17 +302,40 @@ func fireAttackActionAuras(state *TurnState, triggeringCard Card) {
 			i++
 			continue
 		}
-		preLen := len(state.Auras)
 		state.TriggeringCard = triggeringCard
 		state.currentAuraIdx = i
+		state.currentAuraDestroyed = false
 		t.Handler(state, t)
 		state.currentAuraIdx = -1
 		state.TriggeringCard = nil
-		if len(state.Auras) == preLen {
-			t.FiredThisTurn = true
+		if !state.currentAuraDestroyed {
+			state.Auras[i].FiredThisTurn = true
 			i++
 		}
-		// else: handler called DestroyAura; t is gone, leave the cursor where it is.
+	}
+}
+
+// fireAttackAuras is the TriggerAttack counterpart to fireAttackActionAuras: walks
+// state.Auras when ANY attack resolves (attack action OR weapon swing) and invokes every
+// TriggerAttack entry. The runechant token aura uses this trigger. Same cursor / splice
+// semantics as fireAttackActionAuras.
+func fireAttackAuras(state *TurnState, triggeringCard Card) {
+	for i := 0; i < len(state.Auras); {
+		t := &state.Auras[i]
+		if t.TriggerType != TriggerAttack || (t.OncePerTurn && t.FiredThisTurn) {
+			i++
+			continue
+		}
+		state.TriggeringCard = triggeringCard
+		state.currentAuraIdx = i
+		state.currentAuraDestroyed = false
+		t.Handler(state, t)
+		state.currentAuraIdx = -1
+		state.TriggeringCard = nil
+		if !state.currentAuraDestroyed {
+			state.Auras[i].FiredThisTurn = true
+			i++
+		}
 	}
 }
 
@@ -336,7 +370,6 @@ func (ctx *sequenceContext) resetStateForPermutation() {
 	s.Arsenal = ctx.arsenalAtChainStart
 	s.graveyard = bufs.graveBacking[:0]
 	s.Banish = bufs.banishBacking[:0]
-	s.Runechants = ctx.runechantCarryover
 	s.ActionPoints = 1
 	s.ArcaneDamageDealt = false
 	s.Auras = append(bufs.auraTriggersBacking[:0], ctx.priorAuras...)
@@ -524,13 +557,11 @@ func (ctx *sequenceContext) bestSequence(attackers []Card) (int, int, bool) {
 // Buffers are mutated in place; the caller must not read them concurrently.
 //
 // Runechant flow:
-//   - state.Runechants starts at ctx.runechantCarryover.
-//   - Play / OnCardPlayed calling CreateRunechants increments the count AND returns n damage
-//     — tokens are credited exactly once, at creation.
-//   - After each Attack / Weapon card resolves, all current tokens fire and are destroyed;
-//     state.Runechants is zeroed but damage is NOT re-added (tokens were credited at
-//     creation).
-//   - At end of the sequence, state.Runechants is the leftover count carrying into next turn.
+//   - state.Runechants() starts at ctx.runechantCarryover.
+//   - CreateRunechants bumps the count and credits +n damage at creation time.
+//   - Each Attack / Weapon resolution fires all current tokens and destroys them; no
+//     re-credit (tokens were credited at creation).
+//   - End-of-sequence state.Runechants() is the leftover count carrying into next turn.
 //
 // Resource flow lives on playSequenceWithMeta; this wrapper just forwards.
 //
@@ -716,16 +747,12 @@ func (ctx *sequenceContext) playSequenceWithMeta(n int) (damage int, leftoverRun
 
 		state.CardsRemaining = played[i+1:]
 
-		// If this card is an attack or weapon and any Runechant is live, those tokens fire on
-		// its damage step. Set ArcaneDamageDealt now — before Play and OnCardPlayed — so Play
-		// effects that read "if you've dealt arcane damage this turn" see the flag for same-hand
-		// triggers. Cards that deal arcane damage via their Play text flip the flag themselves
-		// through DealArcaneDamage. The flip is gated on LikelyDamageHits — same hit-likelihood
-		// model the rest of the arcane plumbing uses — so a single live runechant on an attack
-		// satisfies the gate but a live cluster the model treats as blockable doesn't.
+		// Fire TriggerAttack auras (Runechant token, …) before the card resolves so its
+		// damage step sees the flags they flip — e.g. ArcaneDamageDealt once runechants
+		// destroy themselves on this attack. No-op when no TriggerAttack auras are live.
 		isAttackOrWeapon := m.isAttackOrWeapon
-		if isAttackOrWeapon && state.Runechants > 0 && LikelyDamageHits(state.Runechants, false) {
-			state.ArcaneDamageDealt = true
+		if isAttackOrWeapon {
+			fireAttackAuras(state, pc.Card)
 		}
 
 		// Hero ability fires BEFORE the card's own Play so "aura created this turn" checks
@@ -757,12 +784,6 @@ func (ctx *sequenceContext) playSequenceWithMeta(n int) (damage int, leftoverRun
 			state.graveyard = append(state.graveyard, pc.Card)
 		}
 
-		// Attacks and weapon swings consume all runechants in play. Damage isn't re-added: each
-		// token was credited +1 at creation time, so this is pure state cleanup.
-		if isAttackOrWeapon {
-			state.Runechants = 0
-		}
-
 		// Go again grants 1 AP after the card resolves. EffectiveGoAgain folds in both
 		// printed Go again and mid-chain conditional grants — by the time we get here the
 		// card's Play has had a chance to flip GrantedGoAgain on itself.
@@ -780,5 +801,5 @@ func (ctx *sequenceContext) playSequenceWithMeta(n int) (damage int, leftoverRun
 	if pool.idx < pool.n {
 		return 0, 0, 0, false
 	}
-	return state.Value, state.Runechants, pool.remaining, true
+	return state.Value, state.Runechants(), pool.remaining, true
 }

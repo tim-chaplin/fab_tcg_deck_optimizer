@@ -28,7 +28,7 @@ func (SigilOfFyendalBlue) GoAgain() bool           { return true }
 func (SigilOfFyendalBlue) AddsFutureValue()        {}
 func (c SigilOfFyendalBlue) Play(s *sim.TurnState, self *sim.CardState) {
 	s.AddAura(sim.Aura{
-		Self:        c,
+		Self:        sim.CardOrTokenType{Card: c},
 		TriggerType: sim.TriggerStartOfTurn,
 		Count:       1,
 		Handler:     sigilOfFyendalAuraHandler,
@@ -40,6 +40,6 @@ func (c SigilOfFyendalBlue) Play(s *sim.TurnState, self *sim.CardState) {
 // and destroys the aura. Top-level so Aura.Handler doesn't allocate a closure.
 func sigilOfFyendalAuraHandler(s *sim.TurnState, t *sim.Aura) {
 	s.AddValue(1)
-	s.LogPostTrigger(sim.DisplayName(t.Self), "Gained 1 health", 1)
+	s.LogPostTrigger(t.Self.DisplayName(), "Gained 1 health", 1)
 	s.DestroyAura(t, true)
 }

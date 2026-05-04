@@ -48,9 +48,8 @@ type CarryState struct {
 	Graveyard []Card
 	// Banish is cards moved into the banished zone this turn.
 	Banish []Card
-	// Runechants is the live token count at end of chain. Carries across.
-	Runechants int
-	// Auras is the surviving Aura set at end of chain. Carries across.
+	// Auras is the surviving Aura set at end of chain — including the Runechant token aura
+	// when one is live. Carries across.
 	Auras []Aura
 	// Log is the per-event chain trace of the winning permutation — one entry per Play, hero
 	// trigger, aura trigger, OnHit, weapon swing. Stored as raw LogEntry
@@ -60,6 +59,9 @@ type CarryState struct {
 	// turns semantically but rides on CarryState's snapshot mechanism for free.
 	Log []LogEntry
 }
+
+// Runechants returns the carried Runechant token count, or zero when none are in play.
+func (c *CarryState) Runechants() int { return runechantCountIn(c.Auras) }
 
 // TurnSummary is the result of running Best on a hand: the winning card-role assignments
 // plus the CarryState snapshot the next turn inherits.

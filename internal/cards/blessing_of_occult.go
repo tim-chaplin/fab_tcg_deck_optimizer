@@ -78,15 +78,15 @@ func (c BlessingOfOccultBlue) Play(s *sim.TurnState, self *sim.CardState) {
 // Count's "fires remaining" interpretation collapses to "runechants to create on the
 // only fire".
 func blessingOfOccultHandler(s *sim.TurnState, t *sim.Aura) {
-	created := s.CreateRunechants(t.Count)
-	s.AddValue(created)
-	s.LogPostTrigger(sim.DisplayName(t.Self), blessingOfOccultTriggerText[t.Count], created)
+	n := t.Count
+	s.CreateRunechants(n)
+	s.LogPostTrigger(t.Self.DisplayName(), blessingOfOccultTriggerText[n], n)
 	s.DestroyAura(t, true)
 }
 
 func blessingOfOccultPlay(s *sim.TurnState, selfState *sim.CardState, selfCard sim.Card, n int) {
 	s.AddAura(sim.Aura{
-		Self:        selfCard,
+		Self:        sim.CardOrTokenType{Card: selfCard},
 		TriggerType: sim.TriggerStartOfTurn,
 		Count:       n,
 		Handler:     blessingOfOccultHandler,

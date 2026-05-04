@@ -15,7 +15,7 @@ func TestFireAttackActionAuras_FiresOnceWhenGated(t *testing.T) {
 	aura := testutils.RedAttack{}
 	calls := 0
 	state := &TurnState{Auras: []Aura{{
-		Self:        aura,
+		Self:        CardOrTokenType{Card: aura},
 		TriggerType: TriggerAttackAction,
 		Count:       3,
 		OncePerTurn: true,
@@ -50,7 +50,7 @@ func TestFireAttackActionAuras_FiresOnceWhenGated(t *testing.T) {
 func TestFireAttackActionAuras_GraveyardsExhaustedAura(t *testing.T) {
 	aura := testutils.RedAttack{}
 	state := &TurnState{Auras: []Aura{{
-		Self:        aura,
+		Self:        CardOrTokenType{Card: aura},
 		TriggerType: TriggerAttackAction,
 		Count:       1,
 		Handler: func(s *TurnState, t *Aura) {
@@ -75,7 +75,7 @@ func TestFireAttackActionAuras_PassesThroughNonAttackActionTriggers(t *testing.T
 	aura := testutils.RedAttack{}
 	calls := 0
 	state := &TurnState{Auras: []Aura{{
-		Self:        aura,
+		Self:        CardOrTokenType{Card: aura},
 		TriggerType: TriggerStartOfTurn,
 		Count:       1,
 		Handler:     func(*TurnState, *Aura) { calls++ },

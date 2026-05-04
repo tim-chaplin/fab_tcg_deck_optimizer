@@ -63,7 +63,7 @@ func TestConsumingVolition_BlockableBaseSuppressesDiscard(t *testing.T) {
 // Tests that co-firing runechants don't rescue a blockable variant — "this hits" reads only
 // this card's own damage.
 func TestConsumingVolition_RunechantsDontRescue(t *testing.T) {
-	s := sim.TurnState{ArcaneDamageDealt: true, Runechants: 1}
+	s := sim.TurnState{ArcaneDamageDealt: true, Auras: []sim.Aura{sim.NewRunechantAura(1)}}
 	c := ConsumingVolitionYellow{}
 	c.Play(&s, &sim.CardState{Card: c})
 	if got := s.Value; got != 3 {

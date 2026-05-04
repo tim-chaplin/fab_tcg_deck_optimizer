@@ -57,7 +57,7 @@ func popsThisTurn(s *sim.TurnState, attackActionOnly bool) bool {
 		}
 		runechants := 0
 		if firstAttacker {
-			runechants = s.Runechants
+			runechants = s.Runechants()
 			firstAttacker = false
 		}
 		if sim.LikelyToHit(pc) || sim.LikelyDamageHits(runechants, false) {

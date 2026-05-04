@@ -6,8 +6,8 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 )
 
-// Tests that the on-play "create N Runechant tokens" rider increments TurnState.Runechants
-// by N, sets AuraCreated, and credits N damage to Value.
+// Tests that the on-play "create N Runechant tokens" rider raises s.Runechants() by N,
+// sets AuraCreated, and credits N damage to Value.
 func TestRunechantOnPlay_CreatesNTokens(t *testing.T) {
 	cases := []struct {
 		c sim.Card
@@ -29,8 +29,8 @@ func TestRunechantOnPlay_CreatesNTokens(t *testing.T) {
 	for _, tc := range cases {
 		var s sim.TurnState
 		tc.c.Play(&s, &sim.CardState{Card: tc.c})
-		if s.Runechants != tc.n {
-			t.Errorf("%s: Runechants = %d, want %d", tc.c.Name(), s.Runechants, tc.n)
+		if s.Runechants() != tc.n {
+			t.Errorf("%s: Runechants = %d, want %d", tc.c.Name(), s.Runechants(), tc.n)
 		}
 		if !s.AuraCreated {
 			t.Errorf("%s: AuraCreated = false, want true", tc.c.Name())

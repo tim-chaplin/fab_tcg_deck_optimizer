@@ -36,9 +36,8 @@ func sutcliffesResearchNotesPlay(s *sim.TurnState, self *sim.CardState, revealCo
 			count++
 		}
 	}
-	created := s.CreateRunechants(count)
-	s.AddValue(created)
-	s.LogRiderf(self, created, "Created %d runechants", count)
+	s.CreateRunechants(count)
+	s.LogRiderf(self, count, "Created %d runechants", count)
 }
 
 type SutcliffesResearchNotesRed struct{}

@@ -68,7 +68,7 @@ func BuildTurnLog(t TurnSummary, startingRunechants int) TurnLog {
 	if line := endingArsenalLine(parts.arsenal); line != "" {
 		log.EndOfTurn = append(log.EndOfTurn, line)
 	}
-	if line := endingAurasLine(t.State.Auras, t.State.Runechants); line != "" {
+	if line := endingAurasLine(t.State.Auras, t.State.Runechants()); line != "" {
 		log.EndOfTurn = append(log.EndOfTurn, line)
 	}
 
@@ -217,23 +217,22 @@ func endingArsenalLine(arsenal []CardAssignment) string {
 	return "Arsenal: " + strings.Join(parts, ", ")
 }
 
-// endingAurasLine builds "Auras: A, B, 2 Runechants" from the Auras surviving into
-// the next turn plus the live Runechant count. Aura names sort alphabetically (one entry
-// per trigger source — duplicates collapse via the trigger list's natural counts).
-// Returns "" when no auras survived and the runechant count is zero.
+// endingAurasLine builds "Auras: A, B, 2 Runechants" from the Auras surviving into the
+// next turn. The runechant token aura renders pluralised via runechantPhrase rather
+// than as the bare token name. Names sort alphabetically. Returns "" when nothing
+// survived.
 func endingAurasLine(triggers []Aura, runechants int) string {
 	if len(triggers) == 0 && runechants == 0 {
 		return ""
 	}
 	var items []string
-	if len(triggers) > 0 {
-		names := make([]string, len(triggers))
-		for i, t := range triggers {
-			names[i] = DisplayName(t.Self)
+	for _, t := range triggers {
+		if t.Self.TokenType == TokenTypeRunechant {
+			continue // collapsed into runechantPhrase below
 		}
-		sort.Strings(names)
-		items = append(items, names...)
+		items = append(items, t.Self.DisplayName())
 	}
+	sort.Strings(items)
 	if runechants > 0 {
 		items = append(items, runechantPhrase(runechants))
 	}

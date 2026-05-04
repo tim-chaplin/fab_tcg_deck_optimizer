@@ -26,7 +26,7 @@ func skyFireLanternsPlay(s *sim.TurnState, self *sim.CardState, selfPitch int) {
 	if len(deck) == 0 || deck[0].Pitch() != selfPitch {
 		return
 	}
-	s.AddValue(s.CreateRunechants(1))
+	s.CreateRunechants(1)
 	s.LogRider(self, 1, "Created a runechant")
 }
 

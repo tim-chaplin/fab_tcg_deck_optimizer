@@ -25,7 +25,7 @@ func (HocusPocusRed) GoAgain() bool           { return false }
 func (HocusPocusRed) Play(s *sim.TurnState, self *sim.CardState) {
 	n := self.DealEffectiveAttack(s)
 	s.Log(self, n)
-	s.AddValue(s.CreateRunechants(1))
+	s.CreateRunechants(1)
 	s.LogRider(self, 1, "Created a runechant")
 }
 
@@ -42,7 +42,7 @@ func (HocusPocusYellow) GoAgain() bool           { return false }
 func (HocusPocusYellow) Play(s *sim.TurnState, self *sim.CardState) {
 	n := self.DealEffectiveAttack(s)
 	s.Log(self, n)
-	s.AddValue(s.CreateRunechants(1))
+	s.CreateRunechants(1)
 	s.LogRider(self, 1, "Created a runechant")
 }
 
@@ -59,6 +59,6 @@ func (HocusPocusBlue) GoAgain() bool           { return false }
 func (HocusPocusBlue) Play(s *sim.TurnState, self *sim.CardState) {
 	n := self.DealEffectiveAttack(s)
 	s.Log(self, n)
-	s.AddValue(s.CreateRunechants(1))
+	s.CreateRunechants(1)
 	s.LogRider(self, 1, "Created a runechant")
 }

@@ -61,7 +61,7 @@ func BeatsBest(v, leftoverRunechants, futureValuePlayed int, willOccupyArsenal b
 	r := runningCarry{
 		seen:               true,
 		value:              best.Value,
-		leftoverRunechants: best.State.Runechants,
+		leftoverRunechants: best.State.Runechants(),
 		futureValuePlayed:  bestFutureValuePlayed,
 		hasHeld:            bestWillOccupyArsenal,
 	}
@@ -181,7 +181,6 @@ func ProcessAurasAtStartOfTurn(queued []Aura, postDrawDeck []Card) (
 	survivors []Aura,
 	contribs []TriggerContribution,
 	damage int,
-	runes int,
 	revealed []Card,
 	graveyarded []Card,
 ) {

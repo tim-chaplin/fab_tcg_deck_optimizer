@@ -136,6 +136,10 @@ type attackBufs struct {
 	// interface-call escape. Doesn't fit a sub-struct cleanly — it's a one-off TurnState
 	// rather than a slice backing or a winner scratch.
 	drScratch TurnState
+	// drScratchAuras backs drScratch.Auras with the runechant aura entry when leftover
+	// runechants > 0, so DR Cost reads s.Runechants() off this aura. Reused across
+	// (pmask × wmask) iterations to avoid per-iter allocs.
+	drScratchAuras []Aura
 	// drCardStateScratch is a pooled *CardState handed to DR Card.Play calls. Each Play
 	// takes a *CardState through an interface boundary so a literal &CardState{} would
 	// escape and heap-alloc once per DR per partition — reusing this slot keeps the

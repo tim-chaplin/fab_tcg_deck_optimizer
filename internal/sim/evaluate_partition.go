@@ -20,7 +20,7 @@ func (e *Evaluator) evaluatePartition(
 	hero Hero, weapons []Weapon, hand []Card,
 	deck []Card, arsenalCardIn Card,
 	rolesBuf []Role, n int, bufs *attackBufs,
-	runechantCarryover int, mp Matchup, defenseSum int,
+	mp Matchup, defenseSum int,
 	priorAuras []Aura, skipLog bool,
 ) (
 	attackDealt, defenseDealt, leftoverRunechants int,
@@ -63,7 +63,7 @@ func (e *Evaluator) evaluatePartition(
 	// the extraction.
 	attackDealt, defenseDealt, leftoverRunechants, _, swung, carry, ok, cacheable = bestAttackWithWeapons(
 		hero, weapons, a, d, p, h, deck, bufs,
-		runechantCarryover, mp, defenseSum,
+		mp, defenseSum,
 		arsenalInIdx, arsenalDefenderIdx, arsenalAtChainStart,
 		priorAuras, skipLog,
 	)

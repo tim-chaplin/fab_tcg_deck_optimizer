@@ -32,7 +32,7 @@ func (SigilOfTheArknightBlue) GoAgain() bool           { return true }
 func (SigilOfTheArknightBlue) AddsFutureValue()        {}
 func (c SigilOfTheArknightBlue) Play(s *sim.TurnState, self *sim.CardState) {
 	s.AddAura(sim.Aura{
-		Self:        c,
+		Self:        sim.CardOrTokenType{Card: c},
 		TriggerType: sim.TriggerStartOfTurn,
 		Count:       1,
 		Handler:     sigilOfTheArknightReveal,

@@ -48,9 +48,8 @@ func mauvrionSkiesPlay(s *sim.TurnState, selfState *sim.CardState, source sim.Ca
 // line off the handler so registration stays alloc-free; self is the targeted attack
 // (whose name credits the trigger line).
 func onHitCreateRunechants(s *sim.TurnState, self *sim.CardState, h *sim.OnHitHandler) {
-	created := s.CreateRunechants(h.N)
-	s.AddValue(created)
-	s.LogPostTrigger(sim.DisplayName(self.Card), h.LogText, created)
+	s.CreateRunechants(h.N)
+	s.LogPostTrigger(sim.DisplayName(self.Card), h.LogText, h.N)
 }
 
 // onHitRunechantText is the precomputed rider line for each Mauvrion Skies / Runic Reaping
