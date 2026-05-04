@@ -18,8 +18,9 @@ const (
 	// TokenTypeRunechant is the runechant aura token. Consumed by the next attack or
 	// weapon swing the controller resolves (see runechantAuraHandler).
 	TokenTypeRunechant
-	// TokenTypePonder is the ponder aura token. Destroys itself at the start of the
-	// owner's next turn (see ponderAuraHandler).
+	// TokenTypePonder is the ponder aura token. Destroys itself at end of the turn it
+	// was created, drawing a card before the arsenal-promotion step (see
+	// ponderAuraHandler).
 	TokenTypePonder
 )
 
@@ -58,11 +59,19 @@ func NewRunechantAura(n int) Aura {
 	}
 }
 
-// ponderAuraHandler is the TriggerStartOfTurn handler shared by every Ponder aura.
-// Reduces FaB's "destroy this and draw a card" to a bare destroy: the next-turn fill
-// step draws back to hand size, so the printed draw is absorbed and yields zero net
-// card advantage.
+// ponderAuraHandler is the TriggerEndOfTurn handler shared by every Ponder aura. For
+// each token in play it pops the deck top into the held pile (s.Hand), letting the
+// post-hoc arsenal-promotion step fill an otherwise-empty arsenal slot. Pops past
+// deck-end are silently skipped — empty deck just means no draw. Reading the deck top
+// flips s.cacheable (PopDeckTop's contract).
 func ponderAuraHandler(s *TurnState, t *Aura) {
+	for i := 0; i < t.Count; i++ {
+		c, ok := s.PopDeckTop()
+		if !ok {
+			break
+		}
+		s.Hand = append(s.Hand, c)
+	}
 	s.DestroyAura(t, false)
 }
 
@@ -71,7 +80,7 @@ func ponderAuraHandler(s *TurnState, t *Aura) {
 func NewPonderAura(n int) Aura {
 	return Aura{
 		Self:        CardOrTokenType{TokenType: TokenTypePonder},
-		TriggerType: TriggerStartOfTurn,
+		TriggerType: TriggerEndOfTurn,
 		Count:       n,
 		Handler:     ponderAuraHandler,
 	}

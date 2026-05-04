@@ -354,6 +354,9 @@ func defendersDamage(defenders, pitched, deck []Card, state *TurnState, gravBuf 
 	total := 0
 	remaining := incomingDamage
 	cacheable := true
+	// Accumulate Auras the DRs create across the per-DR resets so callers can fold
+	// them into the chain state (e.g. Peace of Mind's Ponder fires end-of-turn).
+	state.Auras = state.Auras[:0]
 	for i, d := range defenders {
 		if !attackerMetaPtrFor(d).actsAsDR {
 			continue
@@ -361,7 +364,9 @@ func defendersDamage(defenders, pitched, deck []Card, state *TurnState, gravBuf 
 		gravBuf = append(gravBuf[:0], defenders...)
 		// Per-DR seed starts cacheable; the DR's Play flips it via accessors if it reads
 		// deck or graveyard. Set explicitly because TurnState's zero-value is uncacheable.
-		*state = TurnState{Pitched: pitched, deck: deck, graveyard: gravBuf, IncomingDamage: remaining, cacheable: true, Defenders: defenders}
+		// Auras carry across the per-DR reset so created auras persist for the caller.
+		preservedAuras := state.Auras
+		*state = TurnState{Pitched: pitched, deck: deck, graveyard: gravBuf, IncomingDamage: remaining, cacheable: true, Defenders: defenders, Auras: preservedAuras}
 		*cs = CardState{Card: d, FromArsenal: i == arsenalDefenderIdx}
 		d.Play(state, cs)
 		total += state.Value

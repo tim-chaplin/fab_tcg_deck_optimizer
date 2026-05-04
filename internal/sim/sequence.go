@@ -66,6 +66,9 @@ func bestAttackWithWeapons(hero Hero, weapons []Weapon, attackers, defenders, pi
 	defenseCacheableConst := true
 	if !hasModalBlocker && len(defenders) > 0 {
 		defenseDealtConst, bufs.defenseGravScratch, defenseCacheableConst = defendersDamage(defenders, pitched, deck, bufs.state, bufs.defenseGravScratch, &bufs.drCardStateScratch, mp.IncomingDamage, noBlockBudgetCap, arsenalDefenderIdx)
+		// Capture DR-created auras (e.g. Peace of Mind's Ponder) so the chain runner's
+		// per-permutation reset can seed them into state.Auras for the end-of-turn fire.
+		ctx.defenderAuras = append(ctx.defenderAuras[:0], bufs.state.Auras...)
 	}
 	defenseDealt := defenseDealtConst
 	defenseCacheable := defenseCacheableConst
@@ -178,6 +181,7 @@ func bestAttackWithWeapons(hero Hero, weapons []Weapon, attackers, defenders, pi
 			// the once-per-leaf defenseDealtConst computed above.
 			if hasModalBlocker {
 				defenseDealt, bufs.defenseGravScratch, defenseCacheable = defendersDamage(defenders, pitched, deck, bufs.state, bufs.defenseGravScratch, &bufs.drCardStateScratch, mp.IncomingDamage, phase.defendBudget-drCost, arsenalDefenderIdx)
+				ctx.defenderAuras = append(ctx.defenderAuras[:0], bufs.state.Auras...)
 			}
 			if phase.hasDefendPitches && phase.defendBudget-drCost >= phase.maxDefendPitch {
 				continue
@@ -264,6 +268,11 @@ type sequenceContext struct {
 	// seeds state.Auras with a fresh copy of this slice so mid-chain firing can
 	// decrement Count / set FiredThisTurn without leaking those mutations across permutations.
 	priorAuras []Aura
+	// defenderAuras are the Auras created during this partition's defense phase
+	// (e.g. Peace of Mind's Ponder via DefensiveInstant). resetStateForPermutation seeds
+	// them alongside priorAuras so end-of-turn fires see them; they don't fire mid-chain
+	// because TriggerEndOfTurn is post-chain only.
+	defenderAuras []Aura
 	// carryWinner is a slice header POINTING into bufs.carryWinnerScratch — the persistent
 	// snapshot buffer that survives across Best calls via the Evaluator's cached attackBufs.
 	// Heap's algorithm keeps iterating past the winner and the shared state.* fields reflect
@@ -308,6 +317,29 @@ func fireAttackActionAuras(state *TurnState, triggeringCard Card) {
 		t.Handler(state, t)
 		state.currentAuraIdx = -1
 		state.TriggeringCard = nil
+		if !state.currentAuraDestroyed {
+			state.Auras[i].FiredThisTurn = true
+			i++
+		}
+	}
+}
+
+// fireEndOfTurnAuras runs after the chain has finished resolving (and the legality
+// gates have passed) but before snapshotCarry captures the next-turn state. Ponder
+// uses this to draw a card into the held pile, so the post-hoc arsenal-promotion step
+// can fill an empty arsenal from the drawn card. Same cursor / splice semantics as the
+// other fire helpers.
+func fireEndOfTurnAuras(state *TurnState) {
+	for i := 0; i < len(state.Auras); {
+		t := &state.Auras[i]
+		if t.TriggerType != TriggerEndOfTurn || (t.OncePerTurn && t.FiredThisTurn) {
+			i++
+			continue
+		}
+		state.currentAuraIdx = i
+		state.currentAuraDestroyed = false
+		t.Handler(state, t)
+		state.currentAuraIdx = -1
 		if !state.currentAuraDestroyed {
 			state.Auras[i].FiredThisTurn = true
 			i++
@@ -417,8 +449,14 @@ func (ctx *sequenceContext) bestSequence(attackers []Card) (int, int, bool) {
 		// state.Hand so post-hoc arsenal promotion has something to pick from. Reset+snapshot
 		// mirrors the per-permutation work eval() does for n>0 chains.
 		ctx.resetStateForPermutation()
+		// Capture leftover runechants pre-defender-aura-fold for DR-cost honesty (see
+		// playSequenceWithMeta), then fire end-of-turn so defender Ponders draw their
+		// card before snapshot.
+		leftover := ctx.bufs.state.Runechants()
+		ctx.bufs.state.Auras = append(ctx.bufs.state.Auras, ctx.defenderAuras...)
+		fireEndOfTurnAuras(ctx.bufs.state)
 		ctx.carryWinner.SnapshotFromTurn(ctx.bufs.state)
-		return 0, ctx.runechantCarryover, true
+		return 0, leftover, true
 	}
 	pcBuf := ctx.bufs.pcBuf[:n]
 	permMeta := ctx.bufs.permMeta[:n]
@@ -801,5 +839,13 @@ func (ctx *sequenceContext) playSequenceWithMeta(n int) (damage int, leftoverRun
 	if pool.idx < pool.n {
 		return 0, 0, 0, false
 	}
-	return state.Value, state.Runechants(), pool.remaining, true
+	// Capture leftover runechants BEFORE folding in defender auras: the partition's
+	// DR-cost loop sees this count, and defender-created runechants mustn't retroactively
+	// fund the same defenders that created them.
+	leftover := state.Runechants()
+	// Fold defender auras into state.Auras for end-of-turn fires (Ponder draws). They
+	// were kept out during the chain so the chain's runechant view stayed honest.
+	state.Auras = append(state.Auras, ctx.defenderAuras...)
+	fireEndOfTurnAuras(state)
+	return state.Value, leftover, pool.remaining, true
 }

@@ -85,3 +85,26 @@ func TestDefensiveInstant_DefendsFromArsenal(t *testing.T) {
 		t.Fatalf("Value = %d, want 3 (Brush Off plays from arsenal as defender)", got)
 	}
 }
+
+// Tests that Peace of Mind's Ponder fires end-of-turn and fills an empty arsenal: with
+// an empty arsenal-in and a hand that ends the turn empty (Peace of Mind defends, Blue
+// pitches to fund the cost), turn 2 starts with an arsenal-occupied slot — the deck
+// top, popped by the Ponder draw, fed into the post-hoc arsenal-promotion step.
+func TestPonder_PeaceOfMindFillsEmptyArsenalNextTurn(t *testing.T) {
+	beacon := testutils.RedAttack{}
+	deck := []sim.Card{
+		beacon,
+		testutils.BlueAttack{}, testutils.BlueAttack{}, testutils.BlueAttack{},
+		testutils.BlueAttack{}, testutils.BlueAttack{}, testutils.BlueAttack{},
+	}
+	d := sim.New(heroes.Viserai{}, nil, deck)
+	hand := []sim.Card{cards.PeaceOfMindRed{}, testutils.BluePitch{}}
+	state := d.EvalOneTurnForTesting(sim.Matchup{IncomingDamage: 4}, nil, hand)
+	if state.StartOfNextTurnArsenal != beacon {
+		t.Errorf("turn 2 arsenal = %v, want %v (Ponder draw should fill empty arsenal from deck top)",
+			state.StartOfNextTurnArsenal, beacon)
+	}
+	if state.Ponders() != 0 {
+		t.Errorf("Ponders carryover = %d, want 0 (Ponder destroys at end of turn 1)", state.Ponders())
+	}
+}
