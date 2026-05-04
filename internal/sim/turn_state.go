@@ -280,6 +280,17 @@ func (s *TurnState) PopDeckTop() (Card, bool) {
 	return top, true
 }
 
+// PeekDeck returns the top card of the deck without removing it. Returns (nil, false) on
+// an empty deck. Flips IsCacheable to false — observing the deck top makes the chain's
+// output depend on hidden shuffle order, same as PopDeckTop.
+func (s *TurnState) PeekDeck() (Card, bool) {
+	s.cacheable = false
+	if len(s.deck) == 0 {
+		return nil, false
+	}
+	return s.deck[0], true
+}
+
 // PrependToDeck inserts c at the top of the deck. Flips IsCacheable to false. Allocates a
 // fresh backing slice so subsequent mid-chain mutations don't poison sibling permutations
 // that share the per-leaf deck reference.
