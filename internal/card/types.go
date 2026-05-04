@@ -82,7 +82,7 @@ func (s TypeSet) IsAttack() bool {
 // TypeAttack present. Backs "weapon attack" riders (e.g. Pummel's "club or hammer
 // weapon attack").
 func (s TypeSet) IsWeaponAttack() bool {
-	return s&(TypeSet(TypeWeapon)|TypeSet(TypeAttack)) == TypeSet(TypeWeapon)|TypeSet(TypeAttack)
+	return s&TypeSet(TypeWeapon) != 0 && s&TypeSet(TypeAttack) != 0
 }
 
 // IsRunebladeAttack reports whether s is a Runeblade attack — TypeRuneblade and
