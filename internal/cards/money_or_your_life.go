@@ -4,7 +4,7 @@
 //
 // Opponent items aren't modelled, so the "give a Gold token" branch never fires and the
 // rider resolves as +2 on hit. The Thief repeat doubles the rider to +4 when the current
-// hero's Class is Thief.
+// hero's Types include TypeThief.
 
 package cards
 
@@ -18,7 +18,7 @@ var moneyOrYourLifeTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, ca
 
 func moneyOrYourLifeOnHit(s *sim.TurnState, self *sim.CardState, _ *sim.OnHitHandler) {
 	n := 2
-	if sim.CurrentHero != nil && sim.CurrentHero.Class() == card.TypeThief {
+	if sim.CurrentHero != nil && sim.CurrentHero.Types().Has(card.TypeThief) {
 		n = 4
 	}
 	s.AddValue(n)
