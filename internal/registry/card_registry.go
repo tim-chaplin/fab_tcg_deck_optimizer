@@ -370,6 +370,10 @@ var cardsByID = []sim.Card{
 	ids.StonyWoottonhogYellow: cards.StonyWoottonhogYellow{},
 	ids.StonyWoottonhogBlue:   cards.StonyWoottonhogBlue{},
 
+	ids.StrikeGoldRed:    cards.StrikeGoldRed{},
+	ids.StrikeGoldYellow: cards.StrikeGoldYellow{},
+	ids.StrikeGoldBlue:   cards.StrikeGoldBlue{},
+
 	ids.SunKissRed:    cards.SunKissRed{},
 	ids.SunKissYellow: cards.SunKissYellow{},
 	ids.SunKissBlue:   cards.SunKissBlue{},

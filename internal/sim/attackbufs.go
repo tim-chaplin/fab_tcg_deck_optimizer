@@ -41,13 +41,17 @@ type shapeBufs struct {
 	// pre-built []string of weapon names for SwungWeapons display.
 	weaponCosts []int
 	weaponNames [][]string
-	// activatedAbilities is the per-permanent ability Card cache, materialised once at
-	// construction by walking each in-play source (weapons today; items when they land)
-	// and calling Ability(). Indexed in lockstep with the wmask: bit i selects
-	// activatedAbilities[i] for the chain. One slice keeps the wmask uniform across
-	// permanent kinds so item abilities slot in alongside weapon abilities without a
-	// parallel buffer.
+	// activatedAbilities caches each weapon's Ability() Card once at construction. Indexed
+	// directly by the wmask's low (per-weapon) bits.
 	activatedAbilities []Card
+	// itemAbilitiesScratch backs the per-Best item-ability list — bestAttackWithWeapons
+	// flattens each Item's Ability into this buffer (min(Count, perItemAbilityCap) copies
+	// per item). Reused across calls via [:0] re-slice; backing grows on first sizing only.
+	itemAbilitiesScratch []Card
+	// itemAbilityCostsScratch parallels itemAbilitiesScratch with each instance's cached
+	// Cost — sourced from Cost(s) at materialisation time so a future variable-cost item
+	// ability still routes through Card.Cost for pre-screen accuracy.
+	itemAbilityCostsScratch []int
 	// Partition-loop buffers, consumed by findBest. Sized handSize+1 to cover the optional
 	// arsenal-in slot the enumerator treats as index n. isDRBuf caches card.TypeDefenseReaction
 	// membership; canAttackBuf caches "this card can take Attack role" (Action or Weapon
@@ -98,6 +102,9 @@ type permBufs struct {
 	cardsPlayedBacking  []Card
 	logBacking          []LogEntry
 	auraTriggersBacking []Aura
+	// itemsBacking backs TurnState.Items per permutation — seeded from priorItems and
+	// freely mutated by item-ability Plays.
+	itemsBacking []Item
 	// defenderAurasBacking is the per-partition scratch for the post-defense aura set,
 	// aliased by sequenceContext.defenderAuras.
 	defenderAurasBacking []Aura
@@ -227,6 +234,7 @@ func newAttackBufs(handSize, weaponCount int, weapons []Weapon) *attackBufs {
 			cardsPlayedBacking:      make([]Card, 0, maxAttackers),
 			logBacking:              make([]LogEntry, 0, logBackingCap),
 			auraTriggersBacking:     make([]Aura, 0, handSize+1),
+			itemsBacking:            make([]Item, 0, 4),
 			defenderAurasBacking:    make([]Aura, 0, handSize+1),
 			nextAtkActionHitBacking: make([]NextAttackActionHitTrigger, 0, 4),
 		},

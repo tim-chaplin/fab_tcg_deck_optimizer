@@ -233,6 +233,7 @@ type shuffleScratch struct {
 	handBuf                         []Card
 	heldBuf, nextHeld               []Card
 	auraTriggerBuf, nextAuraTrigger []Aura
+	itemBuf, nextItem               []Item
 	presentBuf                      []bool
 	marginalBuf                     []CardMarginalStats
 }
@@ -248,6 +249,8 @@ func newShuffleScratch(deckSize, handSize, numUniqueIDs int) *shuffleScratch {
 		nextHeld:        make([]Card, 0, handSize),
 		auraTriggerBuf:  make([]Aura, 0, handSize),
 		nextAuraTrigger: make([]Aura, 0, handSize),
+		itemBuf:         make([]Item, 0, 4),
+		nextItem:        make([]Item, 0, 4),
 		presentBuf:      make([]bool, numUniqueIDs),
 		marginalBuf:     make([]CardMarginalStats, numUniqueIDs),
 	}
@@ -273,8 +276,10 @@ func runOneShuffle(d *Deck, stats *Stats, scratch *shuffleScratch, idIndex map[i
 	var arsenalCard Card
 	heldBuf := scratch.heldBuf[:0]
 	auraTriggerBuf := scratch.auraTriggerBuf[:0]
+	itemBuf := scratch.itemBuf[:0]
 	nextHeld := scratch.nextHeld
 	nextAuraTrigger := scratch.nextAuraTrigger
+	nextItem := scratch.nextItem
 	handBuf := scratch.handBuf
 	maxHands := 2 * handsPerCycle
 	for handIdx < maxHands {
@@ -295,7 +300,7 @@ func runOneShuffle(d *Deck, stats *Stats, scratch *shuffleScratch, idIndex map[i
 		}
 		arsenalIn := arsenalCard
 		sortHandByID(h)
-		play := runBestForTurn(d.Hero, d.Weapons, h, mp, buf[head+drawCount:tail], arsenalCard, auraTriggerBuf, ev)
+		play := runBestForTurn(d.Hero, d.Weapons, h, mp, buf[head+drawCount:tail], arsenalCard, auraTriggerBuf, itemBuf, ev)
 		arsenalCard = play.State.Arsenal
 		play.Value += trigDamage
 		play.TriggersFromLastTurn = trigContribs
@@ -303,7 +308,7 @@ func runOneShuffle(d *Deck, stats *Stats, scratch *shuffleScratch, idIndex map[i
 		play.DealtHand = dealtHand
 
 		if recordTurnStats(stats, play, handIdx, handsPerCycle) {
-			replay := replayBestForTurnWithLog(d.Hero, d.Weapons, h, mp, buf[head+drawCount:tail], arsenalIn, auraTriggerBuf, ev)
+			replay := replayBestForTurnWithLog(d.Hero, d.Weapons, h, mp, buf[head+drawCount:tail], arsenalIn, auraTriggerBuf, itemBuf, ev)
 			replay.Value = play.Value
 			replay.TriggersFromLastTurn = trigContribs
 			replay.StartOfTurnAuras = startOfTurnAuras
@@ -313,14 +318,18 @@ func runOneShuffle(d *Deck, stats *Stats, scratch *shuffleScratch, idIndex map[i
 		tallyMarginalPresence(scratch.marginalBuf, idIndex, scratch.presentBuf, h, arsenalIn, float64(play.Value))
 		nextHeld = applyTurnResult(play, buf, &head, &tail, nextHeld[:0])
 		nextAuraTrigger = append(nextAuraTrigger[:0], play.State.Auras...)
+		nextItem = append(nextItem[:0], play.State.Items...)
 		handIdx++
 		heldBuf, nextHeld = nextHeld, heldBuf
 		auraTriggerBuf, nextAuraTrigger = nextAuraTrigger, auraTriggerBuf
+		itemBuf, nextItem = nextItem, itemBuf
 	}
 	scratch.heldBuf = heldBuf
 	scratch.nextHeld = nextHeld
 	scratch.auraTriggerBuf = auraTriggerBuf
 	scratch.nextAuraTrigger = nextAuraTrigger
+	scratch.itemBuf = itemBuf
+	scratch.nextItem = nextItem
 }
 
 // mergeStatsInto folds src's per-shuffle accumulators into dst. Used by the parallel path
@@ -385,14 +394,15 @@ func runBestForTurn(
 	deck []Card,
 	arsenalCard Card,
 	priorAuras []Aura,
+	priorItems []Item,
 	ev *Evaluator,
 ) TurnSummary {
 	if ev != nil {
-		return ev.BestWithTriggersSkipLog(hero, weapons, h, mp, deck, arsenalCard, priorAuras)
+		return ev.BestWithTriggersSkipLog(hero, weapons, h, mp, deck, arsenalCard, priorAuras, priorItems)
 	}
 	// No-evaluator path retains the populated-Log behaviour for direct callers (tests, ad-hoc
 	// tools) that don't have a deck-eval loop to drive the replay step.
-	return BestWithTriggers(hero, weapons, h, mp, deck, arsenalCard, priorAuras)
+	return BestWithTriggers(hero, weapons, h, mp, deck, arsenalCard, priorAuras, priorItems)
 }
 
 // replayBestForTurnWithLog re-runs the Best search with full Log materialisation. Same
@@ -408,12 +418,13 @@ func replayBestForTurnWithLog(
 	deck []Card,
 	arsenalCard Card,
 	priorAuras []Aura,
+	priorItems []Item,
 	ev *Evaluator,
 ) TurnSummary {
 	if ev != nil {
-		return ev.BestWithTriggers(hero, weapons, h, mp, deck, arsenalCard, priorAuras)
+		return ev.BestWithTriggers(hero, weapons, h, mp, deck, arsenalCard, priorAuras, priorItems)
 	}
-	return BestWithTriggers(hero, weapons, h, mp, deck, arsenalCard, priorAuras)
+	return BestWithTriggers(hero, weapons, h, mp, deck, arsenalCard, priorAuras, priorItems)
 }
 
 // recordTurnStats folds one resolved turn's accumulators into stats: bumps Hands /

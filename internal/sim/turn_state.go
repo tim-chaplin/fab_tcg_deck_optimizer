@@ -114,6 +114,10 @@ type TurnState struct {
 	// AddAura; the sim fires matching entries on each TriggerType condition and drops
 	// entries whose handler called s.DestroyAura. Carries across turns.
 	Auras []Aura
+	// Items is the list of items currently in play. Cards add entries via the
+	// per-token-type Create helper (CreateGold); the chain runner enqueues each item's
+	// Ability as a playable activated ability each turn. Carries across turns.
+	Items []Item
 	// currentAuraIdx is the index in Auras of the handler currently running. DestroyAura
 	// uses it as a fast-path hint to skip the linear scan in the common "handler destroys
 	// its own aura" case; a Self comparison guards against stale hints.
@@ -659,6 +663,41 @@ func (s *TurnState) Runechants() int { return tokenCountIn(s.Auras, TokenTypeRun
 
 // Ponders returns the current Ponder token count, or zero when none are in play.
 func (s *TurnState) Ponders() int { return tokenCountIn(s.Auras, TokenTypePonder) }
+
+// CreateGold creates n Gold tokens, bumping the existing item entry's Count or adding a
+// new one. No Value credit — Gold only pays out when the player spends one via
+// GoldTokenAbility (which decrements Count and draws a card).
+func (s *TurnState) CreateGold(n int) {
+	if n <= 0 {
+		return
+	}
+	for i := range s.Items {
+		if s.Items[i].Self.TokenType == TokenTypeGold {
+			s.Items[i].Count += n
+			return
+		}
+	}
+	s.Items = append(s.Items, NewGoldItem(n))
+}
+
+// Gold returns the current Gold token count, or zero when none are in play.
+func (s *TurnState) Gold() int { return itemCountIn(s.Items, TokenTypeGold) }
+
+// ConsumeItem decrements the matching item's Count by n and removes the entry when
+// Count reaches zero. Token items don't head to the graveyard on destroy. No-op when
+// no item matches t.
+func (s *TurnState) ConsumeItem(t TokenType, n int) {
+	for i := range s.Items {
+		if s.Items[i].Self.TokenType != t {
+			continue
+		}
+		s.Items[i].Count -= n
+		if s.Items[i].Count <= 0 {
+			s.Items = append(s.Items[:i], s.Items[i+1:]...)
+		}
+		return
+	}
+}
 
 // DealArcaneDamage credits n arcane damage and, when LikelyDamageHits(n, false) approves,
 // flips ArcaneDamageDealt so same-turn triggers reading "if you've dealt arcane damage this

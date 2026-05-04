@@ -11,14 +11,13 @@ package sim
 
 import ()
 
-func (e *Evaluator) findBest(hero Hero, weapons []Weapon, hand []Card, mp Matchup, deck []Card, arsenalCardIn Card, priorAuras []Aura, skipLog bool) TurnSummary {
-	// Cache fast-path. The cache is bypassed when disabled (e.cache nil) or when any of
-	// the inputs (hand, weapons, auras) overflows its fixed-size slot in the cache key.
-	// Overflow is rare in practice — adult hand sizes top out around 7, weapons at 2,
-	// auras at ~3 — but the fallback keeps correctness when an unusual deck shape pushes
-	// past those bounds.
+func (e *Evaluator) findBest(hero Hero, weapons []Weapon, hand []Card, mp Matchup, deck []Card, arsenalCardIn Card, priorAuras []Aura, priorItems []Item, skipLog bool) TurnSummary {
+	// Cache fast-path. Bypassed when disabled (e.cache nil), when any input overflows a
+	// fixed-size cache-key slot, or when the call carries items (the key doesn't
+	// fingerprint Items — any priorItems shifts the optimal partition, so caching
+	// across different item sets would be unsound).
 	var cacheKey evalCacheKey
-	cacheUsable := e.cache != nil
+	cacheUsable := e.cache != nil && len(priorItems) == 0
 	if cacheUsable {
 		var keyOK bool
 		cacheKey, keyOK = makeCacheKey(hero, weapons, hand, arsenalCardIn, priorAuras)
@@ -29,7 +28,7 @@ func (e *Evaluator) findBest(hero Hero, weapons []Weapon, hand []Card, mp Matchu
 	if cacheUsable {
 		if entry, ok := e.cache.lookup(cacheKey); ok {
 			e.cache.hits.Add(1)
-			return e.replayBest(entry, hero, weapons, hand, mp, deck, arsenalCardIn, priorAuras, skipLog)
+			return e.replayBest(entry, hero, weapons, hand, mp, deck, arsenalCardIn, priorAuras, priorItems, skipLog)
 		}
 		e.cache.misses.Add(1)
 	}
@@ -59,6 +58,7 @@ func (e *Evaluator) findBest(hero Hero, weapons []Weapon, hand []Card, mp Matchu
 			Deck:    append([]Card(nil), deck...),
 			Arsenal: arsenalCardIn,
 			Auras:   append([]Aura(nil), priorAuras...),
+			Items:   append([]Item(nil), priorItems...),
 		},
 	}
 	cacheable := true
@@ -103,7 +103,7 @@ func (e *Evaluator) findBest(hero Hero, weapons []Weapon, hand []Card, mp Matchu
 				hero, weapons, hand, deck, arsenalCardIn,
 				rolesBuf, n, bufs,
 				mp, defenseSum,
-				priorAuras, skipLog,
+				priorAuras, priorItems, skipLog,
 			)
 			// Aggregate per leaf — an infeasible attack chain still surfaces its DR-side
 			// reads (defendersDamage runs before the feasibility gate inside

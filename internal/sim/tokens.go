@@ -1,19 +1,19 @@
 package sim
 
-// Aura tokens are auras with no originating card: when destroyed they just disappear
-// (no graveyard append). Each token type has one fixed handler defined here, since
-// behaviour is independent of the card that created the token.
+// Tokens are persistent-in-play entries with no originating card: destroying one just
+// removes the entry (no graveyard append). Each token type has one fixed Aura handler or
+// Item Ability defined here — behaviour is independent of the card that created it.
 //
-// Invariant: at most one Aura per token type per TurnState — helpers bump Count on the
-// existing entry rather than appending duplicates. Keeps cache keys and the trigger-fire
-// loop compact.
+// Invariant: at most one entry per token type per TurnState (Auras and Items enforce this
+// independently); helpers bump Count on the existing entry rather than appending. Keeps
+// cache keys and the per-token loops compact.
 
-// TokenType identifies an aura token kind. TokenTypeNone is the zero value used by card
-// auras (which set Aura.Self.Card instead).
+// TokenType identifies a token kind. TokenTypeNone is the zero value used by card-based
+// auras / items (which set Self.Card instead).
 type TokenType int
 
 const (
-	// TokenTypeNone marks a non-token aura (Aura.Self.Card is set instead).
+	// TokenTypeNone marks a non-token entry (Self.Card is set instead).
 	TokenTypeNone TokenType = iota
 	// TokenTypeRunechant is the runechant aura token. Consumed by the next attack or
 	// weapon swing the controller resolves (see runechantAuraHandler).
@@ -22,16 +22,21 @@ const (
 	// was created, drawing a card before the arsenal-promotion step (see
 	// ponderAuraHandler).
 	TokenTypePonder
+	// TokenTypeGold is the Gold item token. Activated ability: pay {2}, destroy this
+	// token, draw a card (see GoldTokenAbility).
+	TokenTypeGold
 )
 
 // tokenDisplayName returns the printed name shown in logs and "(from previous turn)"
-// summaries for the given token type. Mirrors DisplayName(Card) for card auras.
+// summaries for the given token type. Mirrors DisplayName(Card) for card-based entries.
 func tokenDisplayName(t TokenType) string {
 	switch t {
 	case TokenTypeRunechant:
 		return "Runechant"
 	case TokenTypePonder:
 		return "Ponder"
+	case TokenTypeGold:
+		return "Gold"
 	}
 	return ""
 }
