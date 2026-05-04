@@ -9,7 +9,7 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
 )
 
-// Tests that Wage Gold's on-hit rider lands a Gold token in Items when the attack hits.
+// Tests that Wage Gold's on-hit rider creates a Gold token when the attack hits.
 func TestWageGold_OnHitCreatesGoldToken(t *testing.T) {
 	d := sim.New(heroes.Viserai{}, nil, fillerDeck())
 	hand := []sim.Card{
@@ -28,7 +28,7 @@ func TestWageGold_OnHitCreatesGoldToken(t *testing.T) {
 	}
 }
 
-// Tests that Wage Gold's on-hit rider does not fire when the attack misses LikelyToHit.
+// Tests that Wage Gold's on-hit rider skips Gold when the attack misses LikelyToHit.
 func TestWageGold_BlockableMissDoesNotCreateGold(t *testing.T) {
 	d := sim.New(heroes.Viserai{}, nil, fillerDeck())
 	hand := []sim.Card{

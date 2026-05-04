@@ -1,8 +1,8 @@
 // Wage Gold — Generic Action - Attack. Cost 3.
 // Text: "**Universal** When this attacks a hero, you may **wager** a Gold token with them."
 //
-// The wager is "may", so we assume the player only opts in when the attack is likely to
-// hit and model the win — gaining a Gold token — via the on-hit rider.
+// The wager is "may", so opt-in is assumed only when likely-to-hit; the win (a Gold token)
+// resolves on hit.
 
 package cards
 
@@ -16,7 +16,7 @@ var wageGoldTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.Type
 
 func wageGoldOnHit(s *sim.TurnState, self *sim.CardState, _ *sim.OnHitHandler) {
 	s.CreateGold(1)
-	s.LogRider(self, 0, "On-hit won wager: created a gold token")
+	s.LogRider(self, 0, "On-hit won wager")
 }
 
 func wageGoldPlay(s *sim.TurnState, self *sim.CardState) {

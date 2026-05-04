@@ -6,8 +6,7 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 )
 
-// Tests that Performance Bonus registers an OnHit handler. End-to-end Gold creation is
-// covered by the e2e suite.
+// Tests that Performance Bonus registers an OnHit handler.
 func TestPerformanceBonus_RegistersOnHit(t *testing.T) {
 	s := sim.NewTurnState(nil, nil)
 	self := &sim.CardState{Card: PerformanceBonusBlue{}}
