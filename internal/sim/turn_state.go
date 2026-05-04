@@ -468,6 +468,18 @@ func (s *TurnState) AddValue(n int) {
 	}
 }
 
+// AddOpponentValue subtracts n from s.Value, modelling that the opponent gained n value
+// worth of resource (a token they'll spend, an extra card draw, etc.). Used by cards that
+// explicitly hand value over (Wage Gold's wager loss). n must be non-negative. Pair with a
+// Log helper the same way AddValue does. Unlike AddValue this can drive the running total
+// negative — the comparator still picks the highest permutation, and the "Held" baseline
+// of 0 dominates a strictly-worse-than-zero play, so negative values resolve correctly.
+func (s *TurnState) AddOpponentValue(n int) {
+	if n > 0 {
+		s.Value -= n
+	}
+}
+
 // LogEntries returns the per-event chain trace accumulated by the Log family. External
 // readers (tests, format layer) use this; package-internal code reads the underlying field.
 func (s *TurnState) LogEntries() []LogEntry { return s.turnLog }

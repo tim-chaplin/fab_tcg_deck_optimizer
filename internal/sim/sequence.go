@@ -808,7 +808,9 @@ func (ctx *sequenceContext) playSequenceWithMeta(n int) (damage int, leftoverRun
 		if LikelyToHit(activeAttack) {
 			for i := range activeAttack.OnHit {
 				h := &activeAttack.OnHit[i]
-				h.Fire(state, activeAttack, h)
+				if h.Fire != nil {
+					h.Fire(state, activeAttack, h)
+				}
 			}
 			// Drain pending triggers only when the active attack is an attack action card
 			// (weapon swings don't satisfy the printed wording). All queued listeners fire
@@ -819,6 +821,16 @@ func (ctx *sequenceContext) playSequenceWithMeta(n int) (damage int, leftoverRun
 					t.Fire(state, activeAttack, t)
 				}
 				state.pendingNextAttackActionHit = state.pendingNextAttackActionHit[:0]
+			}
+		} else {
+			// Fully blocked: fire the FireBlocked branch on any handler that registered one
+			// (Wage Gold's wager-loss). pendingNextAttackActionHit triggers don't have a
+			// blocked branch — they're "next time it hits" by wording.
+			for i := range activeAttack.OnHit {
+				h := &activeAttack.OnHit[i]
+				if h.FireBlocked != nil {
+					h.FireBlocked(state, activeAttack, h)
+				}
 			}
 		}
 		activeAttack = nil

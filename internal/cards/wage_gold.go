@@ -1,7 +1,10 @@
 // Wage Gold — Generic Action - Attack. Cost 3.
 // Text: "**Universal** When this attacks a hero, you may **wager** a Gold token with them."
 //
-// Wager isn't modelled; resolves as a plain attack.
+// Wager modelling: opt in only when we hold a Gold at Play time. On hit, the wager is a
+// no-op in our model — we don't track opponent's tokens, so "take theirs" is uncredited.
+// On a fully-blocked attack, we credit the printed loss: the opponent gains our wagered
+// Gold, modelled per the framework rule as ConsumeItem(Gold,1) + AddOpponentValue(1).
 
 package cards
 
@@ -13,9 +16,24 @@ import (
 
 var wageGoldTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeAttack)
 
+// wageGoldOnFullyBlocked fires when the attack is fully blocked: opponent collects our
+// wagered Gold. Re-checks Gold > 0 because intermediate cards may have spent it between
+// Play and finalize-active-attack — in that case there's nothing to give over.
+func wageGoldOnFullyBlocked(s *sim.TurnState, self *sim.CardState, _ *sim.OnHitHandler) {
+	if s.Gold() == 0 {
+		return
+	}
+	s.ConsumeItem(sim.TokenTypeGold, 1)
+	s.AddOpponentValue(1)
+	s.LogRider(self, 0, "Lost wager — opponent gained 1 Gold")
+}
+
 func wageGoldPlay(s *sim.TurnState, self *sim.CardState) {
 	n := self.DealEffectiveAttack(s)
 	s.Log(self, n)
+	if s.Gold() > 0 {
+		self.OnHit = append(self.OnHit, sim.OnHitHandler{FireBlocked: wageGoldOnFullyBlocked})
+	}
 }
 
 type WageGoldRed struct{}

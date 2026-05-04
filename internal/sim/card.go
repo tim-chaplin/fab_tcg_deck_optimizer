@@ -71,15 +71,19 @@ type CardState struct {
 }
 
 // OnHitHandler is one registered on-hit rider on a CardState. The chain runner fires Fire
-// at finalize-active-attack time when LikelyToHit(self) is true; self is the buffed
-// attack's CardState. Source names the card that registered the handler so log attribution
-// stays correct when the handler was added to a different card's OnHit (Mauvrion Skies,
-// Runic Reaping). N and LogText are optional small payloads cards use to avoid closures.
+// at finalize-active-attack time when LikelyToHit(self) is true, and FireBlocked when it's
+// false; self is the buffed attack's CardState. Either callback may be nil — Fire-only
+// covers the usual "if this hits" rider; FireBlocked covers the rarer "if this is fully
+// blocked" path (Wage Gold's wager-loss). Source names the card that registered the handler
+// so log attribution stays correct when the handler was added to a different card's OnHit
+// (Mauvrion Skies, Runic Reaping). N and LogText are optional small payloads cards use to
+// avoid closures.
 type OnHitHandler struct {
-	Fire    func(s *TurnState, self *CardState, h *OnHitHandler)
-	Source  Card
-	LogText string
-	N       int
+	Fire        func(s *TurnState, self *CardState, h *OnHitHandler)
+	FireBlocked func(s *TurnState, self *CardState, h *OnHitHandler)
+	Source      Card
+	LogText     string
+	N           int
 }
 
 // EffectiveGoAgain reports whether this card has Go again this turn — from printed text or a
