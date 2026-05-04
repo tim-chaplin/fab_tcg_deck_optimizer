@@ -90,6 +90,11 @@ type permBufs struct {
 	cardsPlayedBacking  []Card
 	logBacking          []LogEntry
 	auraTriggersBacking []Aura
+	// defenderAurasBacking is the per-partition scratch for the post-defense aura set
+	// (priorAuras consolidated with DR-created auras). Re-used across partitions to
+	// avoid the per-bestAttackWithWeapons alloc; sequenceContext.defenderAuras aliases
+	// this backing.
+	defenderAurasBacking []Aura
 	// nextAtkActionHitBacking backs TurnState.pendingNextAttackActionHit. Sized small —
 	// having more than a couple of these riders queued at once is exotic.
 	nextAtkActionHitBacking []NextAttackActionHitTrigger
@@ -211,6 +216,7 @@ func newAttackBufs(handSize, weaponCount int, weapons []Weapon) *attackBufs {
 			cardsPlayedBacking:      make([]Card, 0, maxAttackers),
 			logBacking:              make([]LogEntry, 0, logBackingCap),
 			auraTriggersBacking:     make([]Aura, 0, handSize+1),
+			defenderAurasBacking:    make([]Aura, 0, handSize+1),
 			nextAtkActionHitBacking: make([]NextAttackActionHitTrigger, 0, 4),
 		},
 		// carryWinnerBufs starts zero-valued — the slice backings grow on first use.

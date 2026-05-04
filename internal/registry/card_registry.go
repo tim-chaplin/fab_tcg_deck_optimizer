@@ -407,6 +407,10 @@ var cardsByID = []sim.Card{
 	ids.WoundingBlowYellow: cards.WoundingBlowYellow{},
 	ids.WoundingBlowBlue:   cards.WoundingBlowBlue{},
 
+	ids.YintiYantiRed:    cards.YintiYantiRed{},
+	ids.YintiYantiYellow: cards.YintiYantiYellow{},
+	ids.YintiYantiBlue:   cards.YintiYantiBlue{},
+
 	ids.ZealousBeltingRed:    cards.ZealousBeltingRed{},
 	ids.ZealousBeltingYellow: cards.ZealousBeltingYellow{},
 	ids.ZealousBeltingBlue:   cards.ZealousBeltingBlue{},

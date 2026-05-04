@@ -47,8 +47,11 @@ func bestAttackWithWeapons(hero Hero, weapons []Weapon, attackers, defenders, pi
 		blockTotal:          blockTotal,
 		arsenalInIdx:        arsenalInIdx,
 		priorAuras:          priorAuras,
-		skipLog:             skipLog,
-		cacheable:           true,
+		// defenderAuras shares backing with bufs.defenderAurasBacking so the per-partition
+		// capture below reuses the same heap allocation across every Best call.
+		defenderAuras: bufs.defenderAurasBacking[:0],
+		skipLog:       skipLog,
+		cacheable:     true,
 		// Point carryWinner at the bufs-persistent scratch so SnapshotFromTurn reuses
 		// backing arrays across leaves and Best calls (bufs is Evaluator-cached).
 		carryWinner: &bufs.carryWinnerScratch,
@@ -65,8 +68,16 @@ func bestAttackWithWeapons(hero Hero, weapons []Weapon, attackers, defenders, pi
 	// so nothing in the defense phase reads hidden state.
 	defenseCacheableConst := true
 	if !hasModalBlocker && len(defenders) > 0 {
+		// Seed state.Auras directly with the defenderAuras backing so DR Plays write
+		// their consolidated post-defense set into the buffer ctx.defenderAuras
+		// already aliases. Avoids a per-partition copy after defendersDamage.
+		bufs.state.Auras = append(ctx.defenderAuras[:0], priorAuras...)
 		defenseDealtConst, bufs.defenseGravScratch, defenseCacheableConst = defendersDamage(defenders, pitched, deck, bufs.state, bufs.defenseGravScratch, &bufs.drCardStateScratch, mp.IncomingDamage, noBlockBudgetCap, arsenalDefenderIdx)
-		ctx.defenderAuras = filterEndOfTurnAuras(ctx.defenderAuras[:0], bufs.state.Auras)
+		// Update the slice header in case appends inside defendersDamage grew the
+		// underlying array. Per FaB, defense resolves before our action phase, so
+		// chain cards reading s.Auras / s.Runechants / s.Ponders see all auras.
+		ctx.defenderAuras = bufs.state.Auras
+		bufs.defenderAurasBacking = bufs.state.Auras
 	}
 	defenseDealt := defenseDealtConst
 	defenseCacheable := defenseCacheableConst
@@ -147,20 +158,17 @@ func bestAttackWithWeapons(hero Hero, weapons []Weapon, attackers, defenders, pi
 			if !legal {
 				continue
 			}
-			// Cost the DRs against the chain's final runechant count. Variable-cost DRs read
-			// s.Runechants() inside their Cost; static DRs return a constant. Reuse
-			// bufs.drScratch instead of allocating a fresh TurnState per mask iteration — the
-			// interface call boxes the pointer, so a stack allocation would escape and
-			// heap-alloc every loop. drScratchAuras holds the runechant aura when
-			// leftoverRunechants > 0 so s.Runechants() reads back the count.
+			// Cost the DRs against the pre-defense (= prior-turn carryover) runechant
+			// count: per FaB, costs are paid before the card resolves, so a DR that
+			// creates a Runechant on Play can't fund itself, and chain-created Runechants
+			// don't retroactively fund DRs played in the same turn's defense. Variable-
+			// cost DRs read s.Runechants() inside their Cost; static DRs return a
+			// constant. Reuse bufs.drScratch instead of allocating a fresh TurnState per
+			// mask iteration — the interface call boxes the pointer, so a stack
+			// allocation would escape and heap-alloc every loop.
 			bufs.drScratch = TurnState{}
-			if leftoverRunechants > 0 {
-				bufs.drScratchAuras = append(bufs.drScratchAuras[:0], Aura{
-					Self:        CardOrTokenType{TokenType: TokenTypeRunechant},
-					TriggerType: TriggerAttack,
-					Count:       leftoverRunechants,
-					Handler:     runechantAuraHandler,
-				})
+			if ctx.runechantCarryover > 0 {
+				bufs.drScratchAuras = append(bufs.drScratchAuras[:0], NewRunechantAura(ctx.runechantCarryover))
 				bufs.drScratch.Auras = bufs.drScratchAuras
 			}
 			drCost := 0
@@ -178,8 +186,10 @@ func bestAttackWithWeapons(hero Hero, weapons []Weapon, attackers, defenders, pi
 			// candidate sees the right spare budget. Non-modal-blocker partitions stick with
 			// the once-per-leaf defenseDealtConst computed above.
 			if hasModalBlocker {
+				bufs.state.Auras = append(ctx.defenderAuras[:0], priorAuras...)
 				defenseDealt, bufs.defenseGravScratch, defenseCacheable = defendersDamage(defenders, pitched, deck, bufs.state, bufs.defenseGravScratch, &bufs.drCardStateScratch, mp.IncomingDamage, phase.defendBudget-drCost, arsenalDefenderIdx)
-				ctx.defenderAuras = filterEndOfTurnAuras(ctx.defenderAuras[:0], bufs.state.Auras)
+				ctx.defenderAuras = bufs.state.Auras
+				bufs.defenderAurasBacking = bufs.state.Auras
 			}
 			if phase.hasDefendPitches && phase.defendBudget-drCost >= phase.maxDefendPitch {
 				continue
@@ -266,14 +276,12 @@ type sequenceContext struct {
 	// seeds state.Auras with a fresh copy of this slice so mid-chain firing can
 	// decrement Count / set FiredThisTurn without leaking those mutations across permutations.
 	priorAuras []Aura
-	// defenderAuras are the TriggerEndOfTurn auras created during this partition's
-	// defense phase (e.g. Peace of Mind's Ponder via DefensiveInstant). FaB resolves
-	// defense before our action phase, so resetStateForPermutation seeds them into
-	// state.Auras alongside priorAuras and the chain runs with them visible — cards
-	// reading s.Ponders() / s.Auras during action see them too. The TriggerEndOfTurn
-	// filter is applied upstream so other DR-created auras (e.g. Runechants from
-	// Reduce to Runechant) don't retroactively fund the same defenders that created
-	// them via the chain's leftoverRunechants.
+	// defenderAuras is the post-defense aura set: priorAuras consolidated with every
+	// aura DR / plain-block Plays created during defendersDamage. FaB resolves defense
+	// before our action phase, so resetStateForPermutation seeds the chain from this
+	// instead of priorAuras. DR-created Runechants don't retroactively fund the same
+	// defenders that created them because the cost loop reads ctx.runechantCarryover
+	// (= priorRunechants) directly, not chain end-state.
 	defenderAuras []Aura
 	// carryWinner is a slice header POINTING into bufs.carryWinnerScratch — the persistent
 	// snapshot buffer that survives across Best calls via the Evaluator's cached attackBufs.
@@ -324,19 +332,6 @@ func fireAttackActionAuras(state *TurnState, triggeringCard Card) {
 			i++
 		}
 	}
-}
-
-// filterEndOfTurnAuras appends every TriggerEndOfTurn entry in src to out and returns
-// the result. Used to thread defender-created end-of-turn auras (Ponder) into the
-// chain's per-permutation reset; non-end-of-turn DR-created auras (e.g. Runechant
-// from Reduce to Runechant) drop here, matching pre-Ponder discard behaviour.
-func filterEndOfTurnAuras(out, src []Aura) []Aura {
-	for _, a := range src {
-		if a.TriggerType == TriggerEndOfTurn {
-			out = append(out, a)
-		}
-	}
-	return out
 }
 
 // hasEndOfTurnAura reports whether any aura in the slice is a TriggerEndOfTurn entry.
@@ -431,16 +426,17 @@ func (ctx *sequenceContext) resetStateForPermutation() {
 	s.Banish = bufs.banishBacking[:0]
 	s.ActionPoints = 1
 	s.ArcaneDamageDealt = false
-	s.Auras = append(bufs.auraTriggersBacking[:0], ctx.priorAuras...)
-	// Defender-created end-of-turn auras (Peace of Mind's Ponder) are part of the
-	// pre-action-phase state in FaB's turn order: defense resolves on the opponent's
-	// turn, then our action phase sees the resulting auras. Filtered to
-	// TriggerEndOfTurn upstream so other DR-created auras don't retroactively fund
-	// the same defenders that created them. Length-guarded because most partitions
-	// have no defender end-of-turn auras and this runs per permutation.
+	// Per FaB's turn order, defense resolves before our action phase, so chain cards
+	// reading s.Auras / s.Runechants / s.Ponders need to see auras created during
+	// defense (Reduce's Runechant, Peace of Mind's Ponder, …). When defendersDamage
+	// ran for this leaf, ctx.defenderAuras carries the post-defense aura set —
+	// already includes priorAuras consolidated with DR creates via the single-aura-
+	// per-token-type invariant. Otherwise just seed from priorAuras.
+	auraSeed := ctx.priorAuras
 	if len(ctx.defenderAuras) > 0 {
-		s.Auras = append(s.Auras, ctx.defenderAuras...)
+		auraSeed = ctx.defenderAuras
 	}
+	s.Auras = append(bufs.auraTriggersBacking[:0], auraSeed...)
 	s.currentAuraIdx = -1
 	s.pendingNextAttackActionHit = bufs.nextAtkActionHitBacking[:0]
 	s.Value = 0
@@ -819,14 +815,6 @@ func (ctx *sequenceContext) playSequenceWithMeta(n int) (damage int, leftoverRun
 
 		state.CardsRemaining = played[i+1:]
 
-		// Fire TriggerAttack auras (Runechant token, …) before the card resolves so its
-		// damage step sees the flags they flip — e.g. ArcaneDamageDealt once runechants
-		// destroy themselves on this attack. No-op when no TriggerAttack auras are live.
-		isAttackOrWeapon := m.isAttackOrWeapon
-		if isAttackOrWeapon {
-			fireAttackAuras(state, pc.Card)
-		}
-
 		// Hero ability fires BEFORE the card's own Play so "aura created this turn" checks
 		// inside the card's Play see the runechant (or other aura) the hero just made.
 		// Viserai's "another non-attack action" gate still excludes the current card because
@@ -836,7 +824,15 @@ func (ctx *sequenceContext) playSequenceWithMeta(n int) (damage int, leftoverRun
 		ctx.hero.OnCardPlayed(pc.Card, state)
 		// Card.Play owns its chain-step log line and pre-buff damage contribution. ARs top
 		// up the parent chain step's delta; OnHit funcs fire later via finalizeActiveAttack.
+		// Continuous "while you control an aura" modifiers (Yinti Yanti +1{p}) read s.Auras
+		// during Play; they need to see live token auras BEFORE TriggerAttack handlers
+		// consume them. So fireAttackAuras runs after Play, matching the FaB order
+		// (continuous modifiers → triggers fire on attack → damage step).
 		pc.Card.Play(state, pc)
+		isAttackOrWeapon := m.isAttackOrWeapon
+		if isAttackOrWeapon {
+			fireAttackAuras(state, pc.Card)
+		}
 		if m.isAttackAction {
 			fireAttackActionAuras(state, pc.Card)
 		}

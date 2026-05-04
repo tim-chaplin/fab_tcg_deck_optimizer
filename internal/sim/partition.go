@@ -354,9 +354,10 @@ func defendersDamage(defenders, pitched, deck []Card, state *TurnState, gravBuf 
 	total := 0
 	remaining := incomingDamage
 	cacheable := true
-	// Accumulate Auras the DRs create across the per-DR resets so callers can fold
-	// them into the chain state (e.g. Peace of Mind's Ponder fires end-of-turn).
-	state.Auras = state.Auras[:0]
+	// state.Auras is caller-seeded with priorAuras so DR Plays' CreateRunechants /
+	// CreatePonder / etc. consolidate against the existing carryover entries via
+	// the single-aura-per-token-type invariant. The per-DR reset below preserves
+	// the running list across iterations.
 	for i, d := range defenders {
 		if !attackerMetaPtrFor(d).actsAsDR {
 			continue
