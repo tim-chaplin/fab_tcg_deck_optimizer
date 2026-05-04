@@ -79,11 +79,16 @@ func (e *Evaluator) findBest(hero Hero, weapons []Weapon, hand []Card, mp Matchu
 	// hand card Held so a post-hoc promotion would fill arsenal) so the tiebreaker treats
 	// the seed as a valid baseline. Finalize clones the scratch into best.State once at
 	// the end so the returned TurnSummary owns independent backing.
+	// Seed the running carry's scratch with the no-feasible-line fallback's hand —
+	// the partition recurse's "all Held" baseline — so willOccupy reads the seed
+	// state correctly when no chain has been promoted yet.
+	bufs.findBestCarryScratch.Reset()
+	bufs.findBestCarryScratch.Hand = append(bufs.findBestCarryScratch.Hand[:0], hand...)
 	running := runningCarry{
 		scratch:            &bufs.findBestCarryScratch,
 		leftoverRunechants: tokenCountIn(priorAuras, TokenTypeRunechant),
 		arsenal:            arsenalCardIn,
-		hasHeld:            n > 0,
+		itemCarry:          totalItemCount(priorItems),
 	}
 	rolesBuf := bufs.rolesBuf[:totalN]
 	pvals := bufs.pitchVals[:totalN]
@@ -116,14 +121,8 @@ func (e *Evaluator) findBest(hero Hero, weapons []Weapon, hand []Card, mp Matchu
 
 			v := attackDealt + defenseDealt
 			arsenalCard := arsenalAtChainStart
-			// Hand cards never take Arsenal role during enumeration, so arsenalCard is only set
-			// when arsenal-in stayed; post-hoc promotion potential is tracked via hasHeld.
-			hasHeld := false
 			futureValuePlayed := 0
 			for j := 0; j < n; j++ {
-				if rolesBuf[j] == Held {
-					hasHeld = true
-				}
 				if rolesBuf[j] == Attack && addsFutureValue[j] {
 					futureValuePlayed++
 				}
@@ -131,11 +130,16 @@ func (e *Evaluator) findBest(hero Hero, weapons []Weapon, hand []Card, mp Matchu
 			if arsenalCardIn != nil && rolesBuf[n] == Attack && addsFutureValue[n] {
 				futureValuePlayed++
 			}
-			willOccupy := arsenalCard != nil || hasHeld
-			if !running.Beats(v, leftoverRunechants, futureValuePlayed, willOccupy) {
+			// willOccupy reads end-of-chain carry rather than rolesBuf so chains that drew
+			// a card mid-chain (Pitch + Gold-spend) register the drawn card as filling
+			// next turn's arsenal — same outcome as a Held card promoting via the post-hoc
+			// step.
+			willOccupy := arsenalCard != nil || len(carry.Hand) > 0
+			itemCarry := totalItemCount(carry.Items)
+			if !running.Beats(v, leftoverRunechants, futureValuePlayed, willOccupy, itemCarry) {
 				return
 			}
-			running.Promote(v, leftoverRunechants, futureValuePlayed, hasHeld, arsenalCard, &carry)
+			running.Promote(v, leftoverRunechants, futureValuePlayed, arsenalCard, &carry, itemCarry)
 			best.Value = v
 			bestSwung = swung
 			// Cards and FromArsenal flags were populated at construction; Role is the only

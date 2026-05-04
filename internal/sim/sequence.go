@@ -81,6 +81,27 @@ func bestAttackWithWeapons(hero Hero, weapons []Weapon, attackers, defenders, pi
 			itemAbilityCosts = append(itemAbilityCosts, cost)
 		}
 	}
+	// Add one ability instance per attacker-declared ItemCreator type that priorItems
+	// doesn't already cover. This lets the wmask enumerate spending a token created
+	// mid-chain (Strike Gold's on-hit Gold popped same turn); GoldTokenAbility's
+	// PlayPrecondition rejects any permutation where the ability fires before the token
+	// exists, so the chain runner's Heap permutation loop finds the legal order.
+	for _, a := range attackers {
+		creator, ok := a.(ItemCreator)
+		if !ok {
+			continue
+		}
+		t := creator.CreatesItem()
+		if t == TokenTypeNone || itemCountIn(priorItems, t) > 0 {
+			continue
+		}
+		ability := tokenItemAbilityFor(t)
+		if ability == nil {
+			continue
+		}
+		itemAbilities = append(itemAbilities, ability)
+		itemAbilityCosts = append(itemAbilityCosts, ability.Cost(&TurnState{}))
+	}
 	bufs.itemAbilitiesScratch = itemAbilities
 	bufs.itemAbilityCostsScratch = itemAbilityCosts
 	ctx.itemAbilities = itemAbilities
@@ -843,21 +864,18 @@ func (ctx *sequenceContext) playSequenceWithMeta(n int) (damage int, leftoverRun
 				}
 			}
 		}
-		// Cards with non-resource additional costs (PlayPrecondition opt-in) get one more
-		// gate: a false return means the additional cost can't be paid AT THIS HAND, so
-		// the play is illegal in FaB rules and the permutation is rejected. The check
-		// runs after pitch popping so the precondition reads only cards genuinely still
-		// in hand — a pitch source can't double as a reveal target.
-		if pre, ok := pc.Card.(PlayPrecondition); ok {
-			if !pre.PlayPrecondition(state, pc) {
-				return 0, 0, 0, false
-			}
-		}
-
-		// Attack Reactions target the most recent active attack. Reject the permutation
-		// if no preceding active attack matches the AR's predicate; the search naturally
-		// finds the legal ordering on another permutation.
+		// PlayPrecondition for ARs: ARs don't trigger finalizeActiveAttack (the AR needs
+		// the active attack alive), so any AR precondition runs against the pre-OnHit
+		// state — the AR's own predicate (ARTargetAllowed) handles target-shape gates.
+		// Non-AR preconditions wait until after finalizeActiveAttack fires below so the
+		// check reads OnHit-mutated state (e.g. an Item created by the previous attack's
+		// hit).
 		if m.types.IsAttackReaction() {
+			if pre, ok := pc.Card.(PlayPrecondition); ok {
+				if !pre.PlayPrecondition(state, pc) {
+					return 0, 0, 0, false
+				}
+			}
 			ar, ok := pc.Card.(AttackReaction)
 			if !ok || activeAttack == nil || !ar.ARTargetAllowed(activeAttack.Card, pc.Mode) {
 				return 0, 0, 0, false
@@ -876,8 +894,15 @@ func (ctx *sequenceContext) playSequenceWithMeta(n int) (damage int, leftoverRun
 		}
 
 		// Non-AR card: flush any pending OnHit (uses the previous attack's post-buff
-		// EffectiveAttack) before the new card resolves.
+		// EffectiveAttack) before the new card's precondition runs — so a precondition
+		// gating on Items / Auras created by the previous attack's OnHit (Gold ability
+		// after Strike Gold) reads the post-OnHit state.
 		finalizeActiveAttack()
+		if pre, ok := pc.Card.(PlayPrecondition); ok {
+			if !pre.PlayPrecondition(state, pc) {
+				return 0, 0, 0, false
+			}
+		}
 
 		state.CardsRemaining = played[i+1:]
 

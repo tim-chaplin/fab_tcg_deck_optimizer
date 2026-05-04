@@ -122,6 +122,14 @@ func (GoldTokenAbility) Attack() int         { return 0 }
 func (GoldTokenAbility) Defense() int        { return 0 }
 func (GoldTokenAbility) Types() card.TypeSet { return goldTokenAbilityTypes }
 func (GoldTokenAbility) GoAgain() bool       { return true }
+
+// PlayPrecondition gates the activated ability on having a Gold token to spend. Rejects
+// permutations that order the ability before the card / OnHit that creates the token —
+// the chain runner finds the legal ordering (token created first) via Heap's algorithm.
+func (GoldTokenAbility) PlayPrecondition(s *TurnState, self *CardState) bool {
+	return s.Gold() > 0
+}
+
 func (GoldTokenAbility) Play(s *TurnState, self *CardState) {
 	s.ConsumeItem(TokenTypeGold, 1)
 	s.DrawOne()

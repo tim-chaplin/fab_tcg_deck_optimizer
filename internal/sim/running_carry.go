@@ -42,10 +42,10 @@ type runningCarry struct {
 	// arsenal is the running winner's end-of-chain arsenal slot — read by Beats's
 	// willOccupy tiebreaker, written by Promote with the leaf's arsenalAtChainStart.
 	arsenal Card
-	// hasHeld reports whether the running winner has at least one Held hand card —
-	// the willOccupy tiebreaker treats Held cards as candidates for post-hoc arsenal
-	// promotion, so a hand with hasHeld=true counts as "arsenal will be filled."
-	hasHeld bool
+	// itemCarry sums end-of-chain Item.Count across all token types — used as the
+	// final tiebreaker to prefer chains that spent items (drew cards now) over chains
+	// that hoarded them. Symmetric to "use it or lose it" without forbidding carry.
+	itemCarry int
 
 	// seen flips true on the first Promote. Finalize uses it to decide between
 	// "clone the scratch into out" and "leave out's seed value alone."
@@ -58,7 +58,7 @@ type runningCarry struct {
 // futureValuePlayed wins; equal all three, only displace if the candidate ends with
 // arsenal occupied AND the running winner doesn't.
 func (r *runningCarry) Beats(
-	value, leftoverRunechants, futureValuePlayed int, willOccupy bool,
+	value, leftoverRunechants, futureValuePlayed int, willOccupy bool, itemCarry int,
 ) bool {
 	if !r.seen {
 		// No candidate yet — any feasible leaf wins, regardless of stats.
@@ -73,8 +73,18 @@ func (r *runningCarry) Beats(
 	if futureValuePlayed != r.futureValuePlayed {
 		return futureValuePlayed > r.futureValuePlayed
 	}
-	bestWillOccupy := r.arsenal != nil || r.hasHeld
-	return willOccupy && !bestWillOccupy
+	// Both willOccupy bits read end-of-chain carry (arsenal slot or Hand cards a
+	// post-hoc promotion can pull from); reading r.scratch keeps the comparison
+	// symmetric across the running winner and the candidate.
+	bestWillOccupy := r.arsenal != nil || len(r.scratch.Hand) > 0
+	if willOccupy != bestWillOccupy {
+		return willOccupy
+	}
+	// Final tiebreaker: chain that spent more items (left fewer in the carry) wins.
+	// Symmetric to "use it or lose it" — both chains have equal damage and equal
+	// next-turn surface area, so the one that cashed in a Gold token now (drew a
+	// card into arsenal) outranks the one that hoarded it for next turn.
+	return itemCarry < r.itemCarry
 }
 
 // Promote records the candidate as the new running winner. carry's slice contents are
@@ -82,7 +92,7 @@ func (r *runningCarry) Beats(
 // the snapshot's Arsenal so an arsenal-in card that stayed is preserved.
 func (r *runningCarry) Promote(
 	value, leftoverRunechants, futureValuePlayed int,
-	hasHeld bool, arsenal Card, carry *CarryState,
+	arsenal Card, carry *CarryState, itemCarry int,
 ) {
 	r.scratch.CopyFrom(carry)
 	r.scratch.Arsenal = arsenal
@@ -90,7 +100,7 @@ func (r *runningCarry) Promote(
 	r.leftoverRunechants = leftoverRunechants
 	r.futureValuePlayed = futureValuePlayed
 	r.arsenal = arsenal
-	r.hasHeld = hasHeld
+	r.itemCarry = itemCarry
 	r.seen = true
 }
 

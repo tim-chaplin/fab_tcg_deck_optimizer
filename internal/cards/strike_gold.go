@@ -25,6 +25,12 @@ func strikeGoldPlay(s *sim.TurnState, self *sim.CardState) {
 	self.OnHit = append(self.OnHit, sim.OnHitHandler{Fire: strikeGoldOnHit})
 }
 
+// CreatesItem reserves a Gold ability slot in the chain runner's wmask so the
+// optimizer can enumerate "spend the on-hit Gold token in this same chain."
+func (StrikeGoldRed) CreatesItem() sim.TokenType    { return sim.TokenTypeGold }
+func (StrikeGoldYellow) CreatesItem() sim.TokenType { return sim.TokenTypeGold }
+func (StrikeGoldBlue) CreatesItem() sim.TokenType   { return sim.TokenTypeGold }
+
 type StrikeGoldRed struct{}
 
 func (StrikeGoldRed) ID() ids.CardID                             { return ids.StrikeGoldRed }
