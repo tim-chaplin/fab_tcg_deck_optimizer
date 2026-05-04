@@ -13,10 +13,6 @@ package sim
 // card — one card they won't get to play. A typical FaB card is worth ~3 points of tempo.
 const DiscardValue = 3
 
-// DrawValue is the damage-equivalent credited when a card / ability draws a card for us
-// — one extra play we wouldn't have had. A typical FaB card is worth ~3 points of tempo.
-const DrawValue = 3
-
 // GoldTokenValue is the placeholder credit for NotImplemented Gold-creating cards.
 // Value 0 because Gold pays out only on activation (see GoldTokenAbility), not at
 // creation.

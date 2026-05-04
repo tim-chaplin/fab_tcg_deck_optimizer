@@ -49,6 +49,11 @@ const maxCachedWeapons = 4
 // stack more.
 const maxCachedAuras = 8
 
+// maxCachedItems caps how many items the cache will fingerprint. Item counts grow
+// slowly across a game (one Gold per Strike Gold hit, etc.) — 4 covers a heavy gold
+// economy across multiple token types without bloating the key.
+const maxCachedItems = 4
+
 // auraCacheKey is one fingerprinted entry in the evalCacheKey.auras array. Card auras
 // fingerprint via SelfID (Handler closures aren't comparable, but each card type
 // registers the same handler logic). Token auras carry SelfID = ids.InvalidCard and
@@ -58,6 +63,16 @@ const maxCachedAuras = 8
 // registers multiple triggers from the same Self with different types or gates. Extend
 // the key here if a future card needs to disambiguate.
 type auraCacheKey struct {
+	SelfID    ids.CardID
+	TokenType TokenType
+	Count     int
+}
+
+// itemCacheKey is one fingerprinted entry in the evalCacheKey.items array. Same shape
+// as auraCacheKey: card items fingerprint via SelfID (when card-based items land);
+// token items carry SelfID = ids.InvalidCard and identify via TokenType. Count is the
+// number of charges / copies in play.
+type itemCacheKey struct {
 	SelfID    ids.CardID
 	TokenType TokenType
 	Count     int
@@ -82,9 +97,11 @@ type evalCacheKey struct {
 	handIDs   [maxCachedHandSize]ids.CardID
 	weaponIDs [maxCachedWeapons]ids.WeaponID
 	auras     [maxCachedAuras]auraCacheKey
+	items     [maxCachedItems]itemCacheKey
 	handLen   int
 	weaponLen int
 	auraLen   int
+	itemLen   int
 	heroID    ids.HeroID
 	arsenalID ids.CardID
 }
@@ -157,11 +174,12 @@ func newEvalCache() *evalCache {
 func makeCacheKey(
 	hero Hero, weapons []Weapon, hand []Card,
 	arsenalCardIn Card,
-	priorAuras []Aura,
+	priorAuras []Aura, priorItems []Item,
 ) (evalCacheKey, bool) {
 	if len(hand) > maxCachedHandSize ||
 		len(weapons) > maxCachedWeapons ||
-		len(priorAuras) > maxCachedAuras {
+		len(priorAuras) > maxCachedAuras ||
+		len(priorItems) > maxCachedItems {
 		return evalCacheKey{}, false
 	}
 	var key evalCacheKey
@@ -186,6 +204,18 @@ func makeCacheKey(
 		}
 		key.auras[j] = entry
 	}
+	// Item entries: same insertion-sort shape as auras for the same multiset-invariance
+	// reason. Item set is also small in practice (one Gold entry plus future card items).
+	key.itemLen = len(priorItems)
+	for i, it := range priorItems {
+		entry := itemCacheKey{SelfID: it.Self.CardID(), TokenType: it.Self.TokenType, Count: it.Count}
+		j := i
+		for j > 0 && itemEntryLess(entry, key.items[j-1]) {
+			key.items[j] = key.items[j-1]
+			j--
+		}
+		key.items[j] = entry
+	}
 	if hero != nil {
 		key.heroID = hero.ID()
 	}
@@ -198,6 +228,17 @@ func makeCacheKey(
 // auraEntryLess orders auraCacheKey entries by SelfID, then TokenType, then Count. Used
 // by makeCacheKey's insertion sort so the auras[..auraLen] prefix is canonically ordered.
 func auraEntryLess(a, b auraCacheKey) bool {
+	if a.SelfID != b.SelfID {
+		return a.SelfID < b.SelfID
+	}
+	if a.TokenType != b.TokenType {
+		return a.TokenType < b.TokenType
+	}
+	return a.Count < b.Count
+}
+
+// itemEntryLess mirrors auraEntryLess for item entries.
+func itemEntryLess(a, b itemCacheKey) bool {
 	if a.SelfID != b.SelfID {
 		return a.SelfID < b.SelfID
 	}

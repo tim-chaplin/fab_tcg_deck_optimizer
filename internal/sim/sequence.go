@@ -232,8 +232,16 @@ func bestAttackWithWeapons(hero Hero, weapons []Weapon, attackers, defenders, pi
 			if phase.hasDefendPitches && phase.defendBudget-drCost >= phase.maxDefendPitch {
 				continue
 			}
+			// Tertiary tiebreaker: chain whose end-of-chain hand has more cards wins
+			// equal Value+leftoverRunechants ties — captures "spend a Gold token to draw"
+			// preferring spending over hoarding when neither chain credits damage. The
+			// drawn card lands in state.Hand and post-hoc-promotes into arsenal, so a
+			// chain that drew strictly outranks one that didn't on next-turn tempo.
+			candidateHand := len(ctx.carryWinner.Hand)
+			bestHand := len(bufs.bestCarryScratch.Hand)
 			if !foundFeasible || dealt > bestDealt ||
-				(dealt == bestDealt && leftoverRunechants > bestLeftoverRunechants) {
+				(dealt == bestDealt && leftoverRunechants > bestLeftoverRunechants) ||
+				(dealt == bestDealt && leftoverRunechants == bestLeftoverRunechants && candidateHand > bestHand) {
 				bestDealt = dealt
 				bestLeftoverRunechants = leftoverRunechants
 				bestSwung = bufs.weaponNames[weaponBits]

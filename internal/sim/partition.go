@@ -12,15 +12,13 @@ package sim
 import ()
 
 func (e *Evaluator) findBest(hero Hero, weapons []Weapon, hand []Card, mp Matchup, deck []Card, arsenalCardIn Card, priorAuras []Aura, priorItems []Item, skipLog bool) TurnSummary {
-	// Cache fast-path. Bypassed when disabled (e.cache nil), when any input overflows a
-	// fixed-size cache-key slot, or when the call carries items (the key doesn't
-	// fingerprint Items — any priorItems shifts the optimal partition, so caching
-	// across different item sets would be unsound).
+	// Cache fast-path. Bypassed when disabled (e.cache nil) or when any input overflows
+	// a fixed-size cache-key slot (hand size, weapons, auras, items).
 	var cacheKey evalCacheKey
-	cacheUsable := e.cache != nil && len(priorItems) == 0
+	cacheUsable := e.cache != nil
 	if cacheUsable {
 		var keyOK bool
-		cacheKey, keyOK = makeCacheKey(hero, weapons, hand, arsenalCardIn, priorAuras)
+		cacheKey, keyOK = makeCacheKey(hero, weapons, hand, arsenalCardIn, priorAuras, priorItems)
 		if !keyOK {
 			cacheUsable = false
 		}
