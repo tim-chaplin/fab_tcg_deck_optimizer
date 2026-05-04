@@ -6,7 +6,6 @@
 package cards
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 )
 
@@ -70,7 +69,7 @@ func popsThisTurn(s *sim.TurnState, attackActionOnly bool) bool {
 func qualifiesAsAttacker(c sim.Card, attackActionOnly bool) bool {
 	ts := c.Types()
 	if attackActionOnly {
-		return ts.Has(card.TypeAttack)
+		return ts.IsAttackAction()
 	}
-	return ts.Has(card.TypeAttack) || ts.Has(card.TypeWeapon)
+	return ts.IsAttack()
 }

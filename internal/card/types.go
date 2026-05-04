@@ -71,25 +71,24 @@ func (s TypeSet) IsAttackAction() bool {
 	return s&TypeSet(TypeAction) != 0 && s&TypeSet(TypeAttack) != 0
 }
 
-// IsAttack reports whether s represents an attack — an attack action card OR a weapon
-// swing. Used by riders whose printed text says "your next attack" with no "action card"
-// qualifier; weapons are eligible alongside attack action cards in that wording.
+// IsAttack reports whether s represents an attack — an attack action card or a weapon
+// swing. Backs riders whose printed text says "your next attack" with no "action card"
+// qualifier.
 func (s TypeSet) IsAttack() bool {
-	return s&(TypeSet(TypeAttack)|TypeSet(TypeWeapon)) != 0
+	return s&TypeSet(TypeAttack) != 0
 }
 
-// IsWeaponAttack reports whether s represents a weapon attack — a card with the Weapon
-// type. Used by riders whose printed text says "weapon attack" (e.g. Pummel's "club or
-// hammer weapon attack"), which gates a weapon swing only and excludes attack action
-// cards that happen to share the weapon's type subtag.
+// IsWeaponAttack reports whether s represents a weapon attack — both TypeWeapon and
+// TypeAttack present. Backs "weapon attack" riders (e.g. Pummel's "club or hammer
+// weapon attack").
 func (s TypeSet) IsWeaponAttack() bool {
-	return s&TypeSet(TypeWeapon) != 0
+	return s&(TypeSet(TypeWeapon)|TypeSet(TypeAttack)) == TypeSet(TypeWeapon)|TypeSet(TypeAttack)
 }
 
-// IsRunebladeAttack reports whether s is a Runeblade attack — an attack action card OR a
-// weapon swing. Used by "next Runeblade attack this turn" riders that peek CardsRemaining.
+// IsRunebladeAttack reports whether s is a Runeblade attack — TypeRuneblade and
+// TypeAttack both present. Backs "next Runeblade attack this turn" riders.
 func (s TypeSet) IsRunebladeAttack() bool {
-	return s&TypeSet(TypeRuneblade) != 0 && s&(TypeSet(TypeAttack)|TypeSet(TypeWeapon)) != 0
+	return s&TypeSet(TypeRuneblade) != 0 && s&TypeSet(TypeAttack) != 0
 }
 
 // IsDefenseReaction reports whether s has the Defense Reaction subtype.

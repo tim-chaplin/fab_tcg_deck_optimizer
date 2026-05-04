@@ -172,7 +172,7 @@ func TestIsLegalOrder_MauvrionCantSaveShrillWhenRuneragerIsAhead(t *testing.T) {
 		cards.MauvrionSkiesRed{},
 		cards.RuneragerSwarmRed{},
 		cards.ShrillOfSkullformRed{},
-		weapons.ReapingBlade{},
+		weapons.ReapingBlade{}.Ability(),
 	}
 	ctx := NewSequenceContextForTest(heroes.Viserai{}, nil, nil, 1_000_000, 0, len(order))
 	if _, _, _, legal := ctx.PlaySequence(order); legal {

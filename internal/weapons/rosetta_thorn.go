@@ -17,21 +17,30 @@ var rosettaThornTypes = card.NewTypeSet(card.TypeRuneblade, card.TypeWeapon, car
 
 type RosettaThorn struct{}
 
-func (RosettaThorn) ID() ids.WeaponID        { return ids.RosettaThornID }
-func (RosettaThorn) Name() string            { return "Rosetta Thorn" }
-func (RosettaThorn) Cost(*sim.TurnState) int { return 1 }
-func (RosettaThorn) Pitch() int              { return 0 }
-func (RosettaThorn) Attack() int             { return 2 }
-func (RosettaThorn) Defense() int            { return 0 }
-func (RosettaThorn) Types() card.TypeSet     { return rosettaThornTypes }
-func (RosettaThorn) GoAgain() bool           { return false }
-func (RosettaThorn) Hands() int              { return 2 }
-func (RosettaThorn) NotSilverAgeLegal()      {}
+func (RosettaThorn) ID() ids.WeaponID    { return ids.RosettaThornID }
+func (RosettaThorn) Name() string        { return "Rosetta Thorn" }
+func (RosettaThorn) Types() card.TypeSet { return rosettaThornTypes }
+func (RosettaThorn) Hands() int          { return 2 }
+func (RosettaThorn) Ability() sim.Card   { return RosettaThornAbility{} }
+func (RosettaThorn) NotSilverAgeLegal()  {}
 
 // not implemented: on-attack 2 arcane damage rider gated on having played an attack action AND
 // a non-attack action this turn
 func (RosettaThorn) NotImplemented() {}
-func (RosettaThorn) Play(s *sim.TurnState, self *sim.CardState) {
+
+var rosettaThornAbilityTypes = card.NewTypeSet(card.TypeRuneblade, card.TypeWeapon, card.TypeSword, card.TypeTwoHand, card.TypeAttack)
+
+type RosettaThornAbility struct{}
+
+func (RosettaThornAbility) ID() ids.CardID          { return ids.RosettaThornAbilityID }
+func (RosettaThornAbility) Name() string            { return "Rosetta Thorn" }
+func (RosettaThornAbility) Cost(*sim.TurnState) int { return 1 }
+func (RosettaThornAbility) Pitch() int              { return 0 }
+func (RosettaThornAbility) Attack() int             { return 2 }
+func (RosettaThornAbility) Defense() int            { return 0 }
+func (RosettaThornAbility) Types() card.TypeSet     { return rosettaThornAbilityTypes }
+func (RosettaThornAbility) GoAgain() bool           { return false }
+func (RosettaThornAbility) Play(s *sim.TurnState, self *sim.CardState) {
 	n := self.DealEffectiveAttack(s)
 	s.Log(self, n)
 }

@@ -15,16 +15,25 @@ var nebulaBladeTypes = card.NewTypeSet(card.TypeRuneblade, card.TypeWeapon, card
 
 type NebulaBlade struct{}
 
-func (NebulaBlade) ID() ids.WeaponID        { return ids.NebulaBladeID }
-func (NebulaBlade) Name() string            { return "Nebula Blade" }
-func (NebulaBlade) Cost(*sim.TurnState) int { return 2 }
-func (NebulaBlade) Pitch() int              { return 0 }
-func (NebulaBlade) Attack() int             { return 1 }
-func (NebulaBlade) Defense() int            { return 0 }
-func (NebulaBlade) Types() card.TypeSet     { return nebulaBladeTypes }
-func (NebulaBlade) GoAgain() bool           { return false }
-func (NebulaBlade) Hands() int              { return 2 }
-func (c NebulaBlade) Play(s *sim.TurnState, self *sim.CardState) {
+func (NebulaBlade) ID() ids.WeaponID    { return ids.NebulaBladeID }
+func (NebulaBlade) Name() string        { return "Nebula Blade" }
+func (NebulaBlade) Types() card.TypeSet { return nebulaBladeTypes }
+func (NebulaBlade) Hands() int          { return 2 }
+func (NebulaBlade) Ability() sim.Card   { return NebulaBladeAbility{} }
+
+var nebulaBladeAbilityTypes = card.NewTypeSet(card.TypeRuneblade, card.TypeWeapon, card.TypeSword, card.TypeTwoHand, card.TypeAttack)
+
+type NebulaBladeAbility struct{}
+
+func (NebulaBladeAbility) ID() ids.CardID          { return ids.NebulaBladeAbilityID }
+func (NebulaBladeAbility) Name() string            { return "Nebula Blade" }
+func (NebulaBladeAbility) Cost(*sim.TurnState) int { return 2 }
+func (NebulaBladeAbility) Pitch() int              { return 0 }
+func (NebulaBladeAbility) Attack() int             { return 1 }
+func (NebulaBladeAbility) Defense() int            { return 0 }
+func (NebulaBladeAbility) Types() card.TypeSet     { return nebulaBladeAbilityTypes }
+func (NebulaBladeAbility) GoAgain() bool           { return false }
+func (NebulaBladeAbility) Play(s *sim.TurnState, self *sim.CardState) {
 	if s.NonAttackActionPlayed {
 		self.BonusAttack += 3
 	}

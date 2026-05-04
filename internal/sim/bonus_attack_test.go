@@ -56,9 +56,10 @@ func (g grantBonusAttack) Play(s *TurnState, self *CardState) {
 	s.Log(self, 0)
 }
 
-// grantBonusAttackWeapon scans CardsRemaining for the first weapon swing (card.TypeWeapon, no
-// card.TypeAction) and adds n to its BonusAttack. Mirrors the production shape of Brandish's
-// "next weapon attack +1{p}" rider — the target is a weapon, not an attack action.
+// grantBonusAttackWeapon scans CardsRemaining for the first weapon swing (a weapon
+// activated ability, identified by IsWeaponAttack — TypeWeapon + TypeAttack) and adds n
+// to its BonusAttack. Mirrors the production shape of Brandish's "next weapon attack
+// +1{p}" rider — the target is a weapon swing, not an attack action.
 type grantBonusAttackWeapon struct{ n int }
 
 func (grantBonusAttackWeapon) ID() ids.CardID      { return ids.InvalidCard }
@@ -73,7 +74,7 @@ func (grantBonusAttackWeapon) Types() card.TypeSet {
 func (grantBonusAttackWeapon) GoAgain() bool { return true }
 func (g grantBonusAttackWeapon) Play(s *TurnState, self *CardState) {
 	for _, pc := range s.CardsRemaining {
-		if pc.Card.Types().Has(card.TypeWeapon) {
+		if pc.Card.Types().IsWeaponAttack() {
 			pc.BonusAttack += g.n
 			break
 		}
@@ -133,7 +134,7 @@ func TestPlaySequence_BonusAttackStacksAcrossGranters(t *testing.T) {
 // not just attack action cards. Brandish, Razor Reflex's sword/dagger branch, Thrust, and
 // Visit the Blacksmith all target weapon attacks.
 func TestPlaySequence_BonusAttackAppliesToWeapon(t *testing.T) {
-	order := []Card{grantBonusAttackWeapon{n: 2}, weapons.ReapingBlade{}}
+	order := []Card{grantBonusAttackWeapon{n: 2}, weapons.ReapingBlade{}.Ability()}
 	ctx := NewSequenceContextForTest(testutils.Hero{Intel: 4}, nil, nil, 10, 0, len(order))
 	dmg, _, _, legal := ctx.PlaySequence(order)
 	if !legal {

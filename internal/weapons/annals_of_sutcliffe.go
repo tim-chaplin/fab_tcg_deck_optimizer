@@ -15,20 +15,29 @@ var annalsOfSutcliffeTypes = card.NewTypeSet(card.TypeRuneblade, card.TypeWeapon
 
 type AnnalsOfSutcliffe struct{}
 
-func (AnnalsOfSutcliffe) ID() ids.WeaponID        { return ids.AnnalsOfSutcliffeID }
-func (AnnalsOfSutcliffe) Name() string            { return "Annals of Sutcliffe" }
-func (AnnalsOfSutcliffe) Cost(*sim.TurnState) int { return 3 }
-func (AnnalsOfSutcliffe) Pitch() int              { return 0 }
-func (AnnalsOfSutcliffe) Attack() int             { return 0 }
-func (AnnalsOfSutcliffe) Defense() int            { return 0 }
-func (AnnalsOfSutcliffe) Types() card.TypeSet     { return annalsOfSutcliffeTypes }
-func (AnnalsOfSutcliffe) GoAgain() bool           { return false }
-func (AnnalsOfSutcliffe) Hands() int              { return 2 }
+func (AnnalsOfSutcliffe) ID() ids.WeaponID    { return ids.AnnalsOfSutcliffeID }
+func (AnnalsOfSutcliffe) Name() string        { return "Annals of Sutcliffe" }
+func (AnnalsOfSutcliffe) Types() card.TypeSet { return annalsOfSutcliffeTypes }
+func (AnnalsOfSutcliffe) Hands() int          { return 2 }
+func (AnnalsOfSutcliffe) Ability() sim.Card   { return AnnalsOfSutcliffeAbility{} }
 
 // not implemented: draw rider and conditional Runechant rider; activation pays 3 resources
 // for zero modelled value, so the optimizer naturally avoids equipping it
 func (AnnalsOfSutcliffe) NotImplemented() {}
-func (AnnalsOfSutcliffe) Play(s *sim.TurnState, self *sim.CardState) {
+
+var annalsOfSutcliffeAbilityTypes = card.NewTypeSet(card.TypeRuneblade, card.TypeWeapon, card.TypeBook, card.TypeTwoHand, card.TypeAttack)
+
+type AnnalsOfSutcliffeAbility struct{}
+
+func (AnnalsOfSutcliffeAbility) ID() ids.CardID          { return ids.AnnalsOfSutcliffeAbilityID }
+func (AnnalsOfSutcliffeAbility) Name() string            { return "Annals of Sutcliffe" }
+func (AnnalsOfSutcliffeAbility) Cost(*sim.TurnState) int { return 3 }
+func (AnnalsOfSutcliffeAbility) Pitch() int              { return 0 }
+func (AnnalsOfSutcliffeAbility) Attack() int             { return 0 }
+func (AnnalsOfSutcliffeAbility) Defense() int            { return 0 }
+func (AnnalsOfSutcliffeAbility) Types() card.TypeSet     { return annalsOfSutcliffeAbilityTypes }
+func (AnnalsOfSutcliffeAbility) GoAgain() bool           { return false }
+func (AnnalsOfSutcliffeAbility) Play(s *sim.TurnState, self *sim.CardState) {
 	n := self.DealEffectiveAttack(s)
 	s.Log(self, n)
 }

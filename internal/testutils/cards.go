@@ -106,7 +106,7 @@ func (RunebladeWeapon) Pitch() int              { return 0 }
 func (RunebladeWeapon) Attack() int             { return 0 }
 func (RunebladeWeapon) Defense() int            { return 0 }
 func (RunebladeWeapon) Types() card.TypeSet {
-	return card.NewTypeSet(card.TypeRuneblade, card.TypeWeapon)
+	return card.NewTypeSet(card.TypeRuneblade, card.TypeWeapon, card.TypeAttack)
 }
 func (RunebladeWeapon) GoAgain() bool                       { return false }
 func (RunebladeWeapon) Play(*sim.TurnState, *sim.CardState) {}

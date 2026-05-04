@@ -16,12 +16,12 @@ func TestBladeFlash_AcceptsSwordAttackAction(t *testing.T) {
 	}
 }
 
-// Tests that Blade Flash's predicate accepts a Sword weapon.
+// Tests that Blade Flash's predicate accepts a Sword weapon swing.
 func TestBladeFlash_AcceptsSwordWeapon(t *testing.T) {
-	swordWeapon := testutils.NewStubCard("SwordWeapon").
-		WithTypes(card.NewTypeSet(card.TypeGeneric, card.TypeWeapon, card.TypeSword))
-	if !(BladeFlashBlue{}).ARTargetAllowed(swordWeapon, 0) {
-		t.Error("sword weapon should be a legal target")
+	swordSwing := testutils.NewStubCard("SwordWeaponAbility").
+		WithTypes(card.NewTypeSet(card.TypeGeneric, card.TypeWeapon, card.TypeSword, card.TypeAttack))
+	if !(BladeFlashBlue{}).ARTargetAllowed(swordSwing, 0) {
+		t.Error("sword weapon swing should be a legal target")
 	}
 }
 
