@@ -242,23 +242,23 @@ func TestAddToGraveyard_AppendsInOrder(t *testing.T) {
 	}
 }
 
-// TestClashValue_WinTieLose: rule 8.5.45 models the clash by comparing our top card's attack
-// to the opponent's (approximated at 5). 6+ wins (credit bonus), 5 ties (0), <5 loses
-// (−bonus). Empty deck short-circuits to 0 per rule 8.5.45d.
-func TestClashValue_WinTieLose(t *testing.T) {
+// TestClash_WinTieLose: rule 8.5.45 models the clash by comparing our top card's attack
+// to the opponent's (approximated at 5). 6+ fires win, 5 ties (neither callback), <5 fires
+// lose. Empty deck short-circuits to neither callback per rule 8.5.45d.
+func TestClash_WinTieLose(t *testing.T) {
 	cases := []struct {
-		name    string
-		topAtk  int
-		deckLen int
-		bonus   int
-		want    int
+		name     string
+		topAtk   int
+		deckLen  int
+		wantWin  int
+		wantLose int
 	}{
-		{"win on 6", 6, 1, 2, 2},
-		{"win on 7", 7, 1, 2, 2},
-		{"tie on 5", 5, 1, 2, 0},
-		{"lose on 4", 4, 1, 2, -2},
-		{"lose on 0", 0, 1, 3, -3},
-		{"empty deck short-circuits", 99, 0, 5, 0},
+		{"win on 6", 6, 1, 1, 0},
+		{"win on 7", 7, 1, 1, 0},
+		{"tie on 5", 5, 1, 0, 0},
+		{"lose on 4", 4, 1, 0, 1},
+		{"lose on 0", 0, 1, 0, 1},
+		{"empty deck short-circuits", 99, 0, 0, 0},
 	}
 	for _, tc := range cases {
 		var s *TurnState
@@ -267,8 +267,10 @@ func TestClashValue_WinTieLose(t *testing.T) {
 		} else {
 			s = &TurnState{}
 		}
-		if got := s.ClashValue(tc.bonus); got != tc.want {
-			t.Errorf("%s: ClashValue = %d, want %d", tc.name, got, tc.want)
+		var winN, loseN int
+		s.Clash(func() { winN++ }, func() { loseN++ })
+		if winN != tc.wantWin || loseN != tc.wantLose {
+			t.Errorf("%s: win=%d/%d lose=%d/%d", tc.name, winN, tc.wantWin, loseN, tc.wantLose)
 		}
 	}
 }
@@ -435,15 +437,17 @@ func TestIsCacheable_DrawOneFlipsThroughPopDeckTop(t *testing.T) {
 	}
 }
 
-// TestIsCacheable_ClashValueFlipsThroughDeck: ClashValue reads s.Deck() to peek the top
-// card; the call should propagate the flip.
-func TestIsCacheable_ClashValueFlipsThroughDeck(t *testing.T) {
+// TestIsCacheable_ClashFlipsThroughDeck: Clash reads s.Deck() to peek the top card; the
+// call should propagate the flip.
+func TestIsCacheable_ClashFlipsThroughDeck(t *testing.T) {
 	s := NewTurnState([]Card{testutils.NewStubCard("top").WithAttack(7)}, nil)
-	if got := s.ClashValue(1); got != 1 {
-		t.Errorf("ClashValue = %d, want 1 (top atk 7 wins)", got)
+	var won bool
+	s.Clash(func() { won = true }, nil)
+	if !won {
+		t.Errorf("Clash didn't fire win on top atk 7")
 	}
 	if s.IsCacheable() {
-		t.Error("ClashValue should flip IsCacheable to false (inherits via Deck())")
+		t.Error("Clash should flip IsCacheable to false (inherits via Deck())")
 	}
 }
 

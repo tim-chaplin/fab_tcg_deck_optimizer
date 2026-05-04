@@ -28,14 +28,19 @@ func TestTestOfStrength_TieNoGold(t *testing.T) {
 	}
 }
 
-// Tests that a lost clash (top power ≤ 4) creates no Gold token (opponent's gold isn't
-// modelled).
-func TestTestOfStrength_LossNoGold(t *testing.T) {
+// Tests that a lost clash (top power ≤ 4) creates no Gold token and subtracts one Value
+// to reflect the opponent's Gold token.
+func TestTestOfStrength_LossNoGoldAndDocksValue(t *testing.T) {
 	for _, power := range []int{0, 1, 2, 3, 4} {
 		s := sim.NewTurnState([]sim.Card{testutils.GenericAttack(0, power)}, nil)
+		valueBefore := s.Value
 		(TestOfStrengthRed{}).Play(s, &sim.CardState{Card: TestOfStrengthRed{}})
 		if s.Gold() != 0 {
 			t.Errorf("top power %d: Gold = %d, want 0 (clash loss)", power, s.Gold())
+		}
+		if s.Value-valueBefore != -1 {
+			t.Errorf("top power %d: Value delta = %d, want -1 (Clash loss costs 1)",
+				power, s.Value-valueBefore)
 		}
 	}
 }

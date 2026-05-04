@@ -2,7 +2,9 @@
 // Text: "Your next attack this turn gets +N{p} and "When this attacks a hero, you may
 // **wager** a Gold token with them."" (Red N=3, Yellow N=2, Blue N=1.)
 //
-// Wager isn't modelled; only the +N{p} grant on the next attack action card resolves.
+// Filter: "your next attack" includes weapon swings, so IsAttack — not IsAttackAction. The
+// granted wager is "may", so we assume opt-in only when the attack is likely to hit; the
+// win (a Gold token) resolves on hit, mirroring Wage Gold.
 
 package cards
 
@@ -14,10 +16,29 @@ import (
 
 var moneyWhereYaMouthIsTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction)
 
+func moneyWhereYaMouthIsWagerOnHit(s *sim.TurnState, target *sim.CardState, _ *sim.OnHitHandler) {
+	s.CreateGold(1)
+	s.LogPostTriggerf(sim.DisplayName(target.Card), 0, "Money Where Ya Mouth Is won wager")
+}
+
 func moneyWhereYaMouthIsPlay(s *sim.TurnState, self *sim.CardState, n int) {
-	GrantNextAttackActionBonus(s, n)
+	GrantNextCardBonusAttack(s, n, card.TypeSet.IsAttack)
+	for _, pc := range s.CardsRemaining {
+		if pc.Card.Types().IsAttack() {
+			pc.OnHit = append(pc.OnHit, sim.OnHitHandler{Fire: moneyWhereYaMouthIsWagerOnHit})
+			break
+		}
+	}
 	s.Log(self, 0)
 }
+
+func (MoneyWhereYaMouthIsRed) CreatesItem() sim.TokenType    { return sim.TokenTypeGold }
+func (MoneyWhereYaMouthIsYellow) CreatesItem() sim.TokenType { return sim.TokenTypeGold }
+func (MoneyWhereYaMouthIsBlue) CreatesItem() sim.TokenType   { return sim.TokenTypeGold }
+
+func (MoneyWhereYaMouthIsRed) AddsFutureValue()    {}
+func (MoneyWhereYaMouthIsYellow) AddsFutureValue() {}
+func (MoneyWhereYaMouthIsBlue) AddsFutureValue()   {}
 
 type MoneyWhereYaMouthIsRed struct{}
 

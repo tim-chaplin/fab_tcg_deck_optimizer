@@ -12,18 +12,19 @@ import (
 
 var highStrikerTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction)
 
-func highStrikerOnHit(s *sim.TurnState, target *sim.CardState, t *sim.NextAttackActionHitTrigger, n int) {
+func highStrikerOnHit(s *sim.TurnState, target *sim.CardState, t *sim.NextHitTrigger, n int) {
 	s.CreateCopper(n)
 	s.LogPostTriggerf(sim.DisplayName(target.Card), 0,
-		"%s created %d copper tokens on attack-action hit", sim.DisplayName(t.Source), n)
+		"%s created %d copper tokens on attack hit", sim.DisplayName(t.Source), n)
 }
 
 func highStrikerPlay(s *sim.TurnState, self *sim.CardState, source sim.Card, n int) {
-	s.RegisterNextAttackActionHit(sim.NextAttackActionHitTrigger{
-		Fire: func(s *sim.TurnState, target *sim.CardState, t *sim.NextAttackActionHitTrigger) {
+	s.RegisterNextHit(sim.NextHitTrigger{
+		Fire: func(s *sim.TurnState, target *sim.CardState, t *sim.NextHitTrigger) {
 			highStrikerOnHit(s, target, t, n)
 		},
-		Source: source,
+		TypeFilter: card.TypeSet.IsAttack,
+		Source:     source,
 	})
 	s.Log(self, 0)
 }

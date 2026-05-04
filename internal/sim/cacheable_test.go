@@ -98,7 +98,7 @@ func TestBest_UncacheableSnatchHitDrawsViaDrawOne(t *testing.T) {
 }
 
 // TestBest_UncacheableTestOfStrengthClash: Test of Strength's clash reads the deck top via
-// ClashValue, which inherits the flip from s.Deck(). Incoming = 1 to give the partition an
+// Clash, which inherits the flip from s.Deck(). Incoming = 1 to give the partition an
 // actual defend step where the DR can fire (the partition skips Defend assignments at 0
 // incoming since FaB has no defense step without an attack).
 func TestBest_UncacheableTestOfStrengthClash(t *testing.T) {
@@ -106,7 +106,7 @@ func TestBest_UncacheableTestOfStrengthClash(t *testing.T) {
 	deck := []Card{testutils.GenericAttack(0, 7)}
 	got := Best(testutils.Hero{Intel: 4}, nil, h, Matchup{IncomingDamage: 1}, deck, nil)
 	if got.Cacheable {
-		t.Errorf("Test of Strength hand: Cacheable = true, want false (ClashValue flips via Deck())")
+		t.Errorf("Test of Strength hand: Cacheable = true, want false (Clash flips via Deck())")
 	}
 }
 

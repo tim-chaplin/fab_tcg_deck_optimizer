@@ -26,6 +26,7 @@ const (
 	TypeRuneblade                            // "Runeblade"
 	TypeScepter                              // "Scepter"
 	TypeSword                                // "Sword"
+	TypeThief                                // "Thief"
 	TypeTwoHand                              // "2H"
 	TypeWeapon                               // "Weapon"
 	TypeYoung                                // "Young"

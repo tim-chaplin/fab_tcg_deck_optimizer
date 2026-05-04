@@ -1,8 +1,9 @@
 // Wage Gold — Generic Action - Attack. Cost 3.
 // Text: "**Universal** When this attacks a hero, you may **wager** a Gold token with them."
 //
-// The wager is "may", so opt-in is assumed only when likely-to-hit; the win (a Gold token)
-// resolves on hit.
+// Universal folds the current hero's class into Types() so class-gated triggers fire (e.g.
+// Viserai's "Runeblade card" hero ability). The wager is "may", so opt-in is assumed only
+// when likely-to-hit; the win (a Gold token) resolves on hit.
 
 package cards
 
@@ -41,7 +42,7 @@ func (WageGoldRed) Cost(*sim.TurnState) int                    { return 3 }
 func (WageGoldRed) Pitch() int                                 { return 1 }
 func (WageGoldRed) Attack() int                                { return 7 }
 func (WageGoldRed) Defense() int                               { return 2 }
-func (WageGoldRed) Types() card.TypeSet                        { return wageGoldTypes }
+func (WageGoldRed) Types() card.TypeSet                        { return wageGoldTypes | sim.Universal() }
 func (WageGoldRed) GoAgain() bool                              { return false }
 func (WageGoldRed) Play(s *sim.TurnState, self *sim.CardState) { wageGoldPlay(s, self) }
 
@@ -53,7 +54,7 @@ func (WageGoldYellow) Cost(*sim.TurnState) int                    { return 3 }
 func (WageGoldYellow) Pitch() int                                 { return 2 }
 func (WageGoldYellow) Attack() int                                { return 6 }
 func (WageGoldYellow) Defense() int                               { return 2 }
-func (WageGoldYellow) Types() card.TypeSet                        { return wageGoldTypes }
+func (WageGoldYellow) Types() card.TypeSet                        { return wageGoldTypes | sim.Universal() }
 func (WageGoldYellow) GoAgain() bool                              { return false }
 func (WageGoldYellow) Play(s *sim.TurnState, self *sim.CardState) { wageGoldPlay(s, self) }
 
@@ -65,6 +66,6 @@ func (WageGoldBlue) Cost(*sim.TurnState) int                    { return 3 }
 func (WageGoldBlue) Pitch() int                                 { return 3 }
 func (WageGoldBlue) Attack() int                                { return 5 }
 func (WageGoldBlue) Defense() int                               { return 2 }
-func (WageGoldBlue) Types() card.TypeSet                        { return wageGoldTypes }
+func (WageGoldBlue) Types() card.TypeSet                        { return wageGoldTypes | sim.Universal() }
 func (WageGoldBlue) GoAgain() bool                              { return false }
 func (WageGoldBlue) Play(s *sim.TurnState, self *sim.CardState) { wageGoldPlay(s, self) }

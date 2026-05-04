@@ -523,7 +523,7 @@ func (ctx *sequenceContext) resetStateForPermutation() {
 	s.Items = append(bufs.itemsBacking[:0], ctx.priorItems...)
 	s.CardsDrawn = 0
 	s.currentAuraIdx = -1
-	s.pendingNextAttackActionHit = bufs.nextAtkActionHitBacking[:0]
+	s.pendingNextHit = bufs.nextHitBacking[:0]
 	s.Value = 0
 	s.turnLog = bufs.logBacking[:0]
 	s.CardsPlayed = bufs.cardsPlayedBacking[:0]
@@ -810,15 +810,22 @@ func (ctx *sequenceContext) playSequenceWithMeta(n int) (damage int, leftoverRun
 				h := &activeAttack.OnHit[i]
 				h.Fire(state, activeAttack, h)
 			}
-			// Drain pending triggers only when the active attack is an attack action card
-			// (weapon swings don't satisfy the printed wording). All queued listeners fire
-			// together — every one sees this hit as "the next time".
-			if len(state.pendingNextAttackActionHit) > 0 && activeAttack.Card.Types().IsAttackAction() {
-				for i := range state.pendingNextAttackActionHit {
-					t := &state.pendingNextAttackActionHit[i]
-					t.Fire(state, activeAttack, t)
+			// Drain matching pending triggers — each rider's TypeFilter narrows the
+			// qualifying hits (e.g. "attack action card" vs broader "attack" wording).
+			// Triggers that don't match stay queued for a later qualifying hit.
+			if len(state.pendingNextHit) > 0 {
+				types := activeAttack.Card.Types()
+				kept := 0
+				for i := range state.pendingNextHit {
+					t := &state.pendingNextHit[i]
+					if t.TypeFilter == nil || t.TypeFilter(types) {
+						t.Fire(state, activeAttack, t)
+						continue
+					}
+					state.pendingNextHit[kept] = state.pendingNextHit[i]
+					kept++
 				}
-				state.pendingNextAttackActionHit = state.pendingNextAttackActionHit[:0]
+				state.pendingNextHit = state.pendingNextHit[:kept]
 			}
 		}
 		activeAttack = nil

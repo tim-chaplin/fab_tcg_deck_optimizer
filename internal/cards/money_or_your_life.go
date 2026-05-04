@@ -3,8 +3,8 @@
 // they control. If you are a Thief, repeat this process once."
 //
 // Opponent items aren't modelled, so the "give a Gold token" branch never fires and the
-// rider resolves as +2 on hit. Thief-repeats isn't modelled (deck construction doesn't
-// enforce class), so non-Thief decks running this are credited slightly conservatively.
+// rider resolves as +2 on hit. The Thief repeat doubles the rider to +4 when the current
+// hero's Class is Thief.
 
 package cards
 
@@ -17,8 +17,12 @@ import (
 var moneyOrYourLifeTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeAttack)
 
 func moneyOrYourLifeOnHit(s *sim.TurnState, self *sim.CardState, _ *sim.OnHitHandler) {
-	s.AddValue(2)
-	s.LogRider(self, 2, "On-hit dealt 2 (opponent surrendered no Gold)")
+	n := 2
+	if sim.CurrentHero != nil && sim.CurrentHero.Class() == card.TypeThief {
+		n = 4
+	}
+	s.AddValue(n)
+	s.LogRider(self, n, "On-hit dealt damage (opponent surrendered no Gold)")
 }
 
 func moneyOrYourLifePlay(s *sim.TurnState, self *sim.CardState) {

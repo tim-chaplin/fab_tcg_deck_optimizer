@@ -1,6 +1,9 @@
 // Test of Strength — Generic Defense Reaction. Cost 0, Pitch 1, Defense 4. Red only.
 // Text: "When this defends, **clash** with the attacking hero. The winner creates a Gold
 // token."
+//
+// Loss is modelled as -1 Value: opponent gets the Gold token, which we approximate as
+// one resource handed over.
 
 package cards
 
@@ -27,14 +30,16 @@ func (TestOfStrengthRed) AddsFutureValue()           {}
 func (TestOfStrengthRed) Play(s *sim.TurnState, self *sim.CardState) {
 	n := self.DealEffectiveDefense(s)
 	s.Log(self, n)
-	// Clash: opponent's top is modelled at 5-power. Our top ≥ 6 wins the Gold; ties
-	// (top == 5) and losses (top ≤ 4) award nothing (opponent Gold isn't modelled).
-	deck := s.Deck()
-	if len(deck) == 0 {
-		return
-	}
-	if deck[0].Attack() >= 6 {
-		s.CreateGold(1)
-		s.LogRider(self, 0, "Clash win created a gold token")
-	}
+	s.Clash(
+		func() {
+			s.CreateGold(1)
+			s.LogRider(self, 0, "Clash win created a gold token")
+		},
+		func() {
+			// AddValue clamps negatives, so write directly: opponent gains the Gold token,
+			// netting us roughly one resource of opposing tempo.
+			s.Value--
+			s.LogRider(self, -1, "Clash loss conceded gold to opponent")
+		},
+	)
 }

@@ -60,14 +60,16 @@ type LogEntry struct {
 	N      int
 }
 
-// NextAttackActionHitTrigger is a one-shot rider queued by a card whose printed text reads
-// "the next time an attack action card you control hits this turn, do X". The chain runner
-// drains the queue inside finalizeActiveAttack on the first attack action that lands
-// (IsAttackAction + LikelyToHit); every pending trigger fires together on that hit (the
-// "next time" event resolves all listeners simultaneously) and the queue empties.
-type NextAttackActionHitTrigger struct {
-	Fire   func(s *TurnState, target *CardState, t *NextAttackActionHitTrigger)
-	Source Card
+// NextHitTrigger is a one-shot rider queued by a card whose printed text reads "the next
+// time an X you control hits this turn, do Y". TypeFilter narrows the qualifying hits —
+// e.g. card.TypeSet.IsAttackAction for "attack action card" wording, card.TypeSet.IsAttack
+// for the broader "attack" wording (which includes weapon swings). The chain runner drains
+// matching triggers inside finalizeActiveAttack on each LikelyToHit attack; non-matching
+// triggers stay queued for a future qualifying hit.
+type NextHitTrigger struct {
+	Fire       func(s *TurnState, target *CardState, t *NextHitTrigger)
+	TypeFilter func(card.TypeSet) bool
+	Source     Card
 }
 
 // TurnState is the shared turn-level context passed to Card.Play alongside the per-card
@@ -132,9 +134,9 @@ type TurnState struct {
 	// currentAuraIdx. The aura-loop reads it to decide whether to advance the cursor
 	// (false) or stay (true — the next entry shifted into position i).
 	currentAuraDestroyed bool
-	// pendingNextAttackActionHit queues NextAttackActionHitTriggers; reset per permutation.
-	// Lowercase so cards register through RegisterNextAttackActionHit instead of appending.
-	pendingNextAttackActionHit []NextAttackActionHitTrigger
+	// pendingNextHit queues NextHitTriggers; reset per permutation. Lowercase so cards
+	// register through RegisterNextHit instead of appending.
+	pendingNextHit []NextHitTrigger
 
 	// --- Transient: reset by the sim per turn / chain step ---
 
@@ -214,7 +216,7 @@ type TurnState struct {
 	// cacheable is true while the chain hasn't read or mutated deck / graveyard through any
 	// public accessor (Deck / Graveyard / PopDeckTop / PrependToDeck / TutorFromDeck /
 	// BanishFromGraveyard / AddToGraveyard) or framework helper built on them (DrawOne,
-	// ClashValue). Set to false by the accessor on first card-driven access; never restored
+	// Clash). Set to false by the accessor on first card-driven access; never restored
 	// within a permutation. Constructors (NewTurnState, resetStateForPermutation,
 	// defendersDamage's per-DR seed) explicitly set cacheable=true so a fresh state starts
 	// cacheable; a zero-value `var s TurnState{}` defaults to false (uncacheable) — the more
@@ -231,14 +233,14 @@ func (s *TurnState) IsCacheable() bool { return s.cacheable }
 // no AR is resolving.
 func (s *TurnState) AttackReactionTarget() *CardState { return s.attackReactionTarget }
 
-// RegisterNextAttackActionHit queues t. See NextAttackActionHitTrigger for resolution.
-func (s *TurnState) RegisterNextAttackActionHit(t NextAttackActionHitTrigger) {
-	s.pendingNextAttackActionHit = append(s.pendingNextAttackActionHit, t)
+// RegisterNextHit queues t. See NextHitTrigger for resolution.
+func (s *TurnState) RegisterNextHit(t NextHitTrigger) {
+	s.pendingNextHit = append(s.pendingNextHit, t)
 }
 
-// PendingNextAttackActionHits returns the number of currently queued triggers. For tests.
-func (s *TurnState) PendingNextAttackActionHits() int {
-	return len(s.pendingNextAttackActionHit)
+// PendingNextHitTriggers returns the number of currently queued triggers. For tests.
+func (s *TurnState) PendingNextHitTriggers() int {
+	return len(s.pendingNextHit)
 }
 
 // AmendLastChainStepN adds n to the most recent ChainStep entry's N field. ARs use this to
@@ -609,25 +611,27 @@ func (s *TurnState) HasPlayedOrCreatedAura() bool {
 	return s.AuraCreated || s.HasPlayedType(card.TypeAura)
 }
 
-// ClashValue returns the net damage-equivalent of a clash (see comprehensive rules 8.5.45):
-// we and the opponent reveal the top card of our decks and the higher {p} wins. We model
-// from our side only — our deck's top card is read via s.Deck(); the opponent's top is
-// approximated as 5-power. So our {p} of 6-7 wins (credit +bonus), 5 ties (credit 0), and
-// anything below 5 loses (credit -bonus). Returns 0 when the deck is empty. Reading the
-// deck top through Deck() flips IsCacheable to false — a clash result depends on hidden
-// shuffle order.
-func (s *TurnState) ClashValue(bonus int) int {
+// Clash models a clash (rule 8.5.45): we and the opponent reveal the top card of our decks
+// and the higher {p} wins. We model from our side only — our deck's top is read via
+// s.Deck(); the opponent's top is approximated as 5-power. On a win (our top ≥ 6), win
+// fires; on a loss (our top ≤ 4), lose fires; ties (top == 5) and an empty deck fire
+// neither. Either callback may be nil. Reading the deck top through Deck() flips
+// IsCacheable to false — a clash result depends on hidden shuffle order.
+func (s *TurnState) Clash(win, lose func()) {
 	deck := s.Deck()
 	if len(deck) == 0 {
-		return 0
+		return
 	}
-	switch top := deck[0].Attack(); {
+	top := deck[0].Attack()
+	switch {
 	case top >= 6:
-		return bonus
-	case top == 5:
-		return 0
-	default:
-		return -bonus
+		if win != nil {
+			win()
+		}
+	case top <= 4:
+		if lose != nil {
+			lose()
+		}
 	}
 }
 

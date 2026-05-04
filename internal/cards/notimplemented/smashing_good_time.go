@@ -35,7 +35,7 @@ func (SmashingGoodTimeRed) GoAgain() bool           { return true }
 func (SmashingGoodTimeRed) NotImplemented() {}
 func (SmashingGoodTimeRed) Play(s *sim.TurnState, self *sim.CardState) {
 	if self.FromArsenal {
-		cards.GrantNextAttackActionBonus(s, 3)
+		cards.GrantNextCardBonusAttack(s, 3, card.TypeSet.IsAttackAction)
 	}
 	s.Log(self, 0)
 }
@@ -55,7 +55,7 @@ func (SmashingGoodTimeYellow) GoAgain() bool           { return true }
 func (SmashingGoodTimeYellow) NotImplemented() {}
 func (SmashingGoodTimeYellow) Play(s *sim.TurnState, self *sim.CardState) {
 	if self.FromArsenal {
-		cards.GrantNextAttackActionBonus(s, 2)
+		cards.GrantNextCardBonusAttack(s, 2, card.TypeSet.IsAttackAction)
 	}
 	s.Log(self, 0)
 }
@@ -75,7 +75,7 @@ func (SmashingGoodTimeBlue) GoAgain() bool           { return true }
 func (SmashingGoodTimeBlue) NotImplemented() {}
 func (SmashingGoodTimeBlue) Play(s *sim.TurnState, self *sim.CardState) {
 	if self.FromArsenal {
-		cards.GrantNextAttackActionBonus(s, 1)
+		cards.GrantNextCardBonusAttack(s, 1, card.TypeSet.IsAttackAction)
 	}
 	s.Log(self, 0)
 }
