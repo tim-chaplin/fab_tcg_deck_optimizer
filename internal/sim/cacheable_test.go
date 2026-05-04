@@ -12,7 +12,6 @@ import (
 	"testing"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/cards"
-	notimpl "github.com/tim-chaplin/fab-deck-optimizer/internal/cards/notimplemented"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
 )
 
@@ -103,7 +102,7 @@ func TestBest_UncacheableSnatchHitDrawsViaDrawOne(t *testing.T) {
 // actual defend step where the DR can fire (the partition skips Defend assignments at 0
 // incoming since FaB has no defense step without an attack).
 func TestBest_UncacheableTestOfStrengthClash(t *testing.T) {
-	h := []Card{notimpl.TestOfStrengthRed{}}
+	h := []Card{cards.TestOfStrengthRed{}}
 	deck := []Card{testutils.GenericAttack(0, 7)}
 	got := Best(testutils.Hero{Intel: 4}, nil, h, Matchup{IncomingDamage: 1}, deck, nil)
 	if got.Cacheable {

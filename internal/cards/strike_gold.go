@@ -31,6 +31,10 @@ func (StrikeGoldRed) CreatesItem() sim.TokenType    { return sim.TokenTypeGold }
 func (StrikeGoldYellow) CreatesItem() sim.TokenType { return sim.TokenTypeGold }
 func (StrikeGoldBlue) CreatesItem() sim.TokenType   { return sim.TokenTypeGold }
 
+func (StrikeGoldRed) AddsFutureValue()    {}
+func (StrikeGoldYellow) AddsFutureValue() {}
+func (StrikeGoldBlue) AddsFutureValue()   {}
+
 type StrikeGoldRed struct{}
 
 func (StrikeGoldRed) ID() ids.CardID                             { return ids.StrikeGoldRed }

@@ -1,13 +1,8 @@
-// Performance Bonus — Generic Action - Attack. Cost 0. Printed power: Red 3, Yellow 2, Blue 1.
-// Printed pitch variants: Red 1, Yellow 2, Blue 3. Defense 2.
-//
-// Text: "When this hits, create a Gold token. If this was played from arsenal, it gets **Go
-// again**."
-//
-// Standard played-from-arsenal go-again (docs/dev-standards.md). Gold-token creation isn't
-// modelled.
+// Performance Bonus — Generic Action - Attack.
+// Text: "When this hits, create a Gold token. If this was played from arsenal, it gets
+// **Go again**."
 
-package notimplemented
+package cards
 
 import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
@@ -17,18 +12,16 @@ import (
 
 var performanceBonusTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeAttack)
 
+func performanceBonusOnHit(s *sim.TurnState, self *sim.CardState, _ *sim.OnHitHandler) {
+	s.CreateGold(1)
+	s.LogRider(self, 0, "On-hit created a gold token")
+}
+
 func performanceBonusPlay(s *sim.TurnState, self *sim.CardState) {
 	self.GrantGoAgainIfFromArsenal()
 	n := self.DealEffectiveAttack(s)
 	s.Log(self, n)
 	self.OnHit = append(self.OnHit, sim.OnHitHandler{Fire: performanceBonusOnHit})
-}
-
-// performanceBonusOnHit fires the printed "When this hits, create a Gold token" rider.
-// Top-level so registration stays alloc-free.
-func performanceBonusOnHit(s *sim.TurnState, self *sim.CardState, _ *sim.OnHitHandler) {
-	s.AddValue(sim.GoldTokenValue)
-	s.LogRider(self, sim.GoldTokenValue, "On-hit created a gold token")
 }
 
 type PerformanceBonusRed struct{}
@@ -41,9 +34,11 @@ func (PerformanceBonusRed) Attack() int             { return 3 }
 func (PerformanceBonusRed) Defense() int            { return 2 }
 func (PerformanceBonusRed) Types() card.TypeSet     { return performanceBonusTypes }
 func (PerformanceBonusRed) GoAgain() bool           { return false }
-
-// not implemented: gold tokens
-func (PerformanceBonusRed) NotImplemented() {}
+func (PerformanceBonusRed) ConditionalGoAgain()     {}
+func (PerformanceBonusRed) AddsFutureValue()        {}
+func (PerformanceBonusRed) CreatesItem() sim.TokenType {
+	return sim.TokenTypeGold
+}
 func (PerformanceBonusRed) Play(s *sim.TurnState, self *sim.CardState) {
 	performanceBonusPlay(s, self)
 }
@@ -58,9 +53,11 @@ func (PerformanceBonusYellow) Attack() int             { return 2 }
 func (PerformanceBonusYellow) Defense() int            { return 2 }
 func (PerformanceBonusYellow) Types() card.TypeSet     { return performanceBonusTypes }
 func (PerformanceBonusYellow) GoAgain() bool           { return false }
-
-// not implemented: gold tokens
-func (PerformanceBonusYellow) NotImplemented() {}
+func (PerformanceBonusYellow) ConditionalGoAgain()     {}
+func (PerformanceBonusYellow) AddsFutureValue()        {}
+func (PerformanceBonusYellow) CreatesItem() sim.TokenType {
+	return sim.TokenTypeGold
+}
 func (PerformanceBonusYellow) Play(s *sim.TurnState, self *sim.CardState) {
 	performanceBonusPlay(s, self)
 }
@@ -75,13 +72,11 @@ func (PerformanceBonusBlue) Attack() int             { return 1 }
 func (PerformanceBonusBlue) Defense() int            { return 2 }
 func (PerformanceBonusBlue) Types() card.TypeSet     { return performanceBonusTypes }
 func (PerformanceBonusBlue) GoAgain() bool           { return false }
-
-// not implemented: gold tokens
-func (PerformanceBonusBlue) NotImplemented() {}
+func (PerformanceBonusBlue) ConditionalGoAgain()     {}
+func (PerformanceBonusBlue) AddsFutureValue()        {}
+func (PerformanceBonusBlue) CreatesItem() sim.TokenType {
+	return sim.TokenTypeGold
+}
 func (PerformanceBonusBlue) Play(s *sim.TurnState, self *sim.CardState) {
 	performanceBonusPlay(s, self)
 }
-
-func (PerformanceBonusRed) ConditionalGoAgain()    {}
-func (PerformanceBonusYellow) ConditionalGoAgain() {}
-func (PerformanceBonusBlue) ConditionalGoAgain()   {}

@@ -1,9 +1,10 @@
-// Cash In — Generic Action. Cost 4, Pitch 2, Defense 2. Only printed in Yellow.
+// Cash In — Generic Action. Cost 4, Pitch 2, Defense 2. Yellow only.
+// Text: "You may destroy 4 Coppers, 2 Silvers, or 1 Gold you control rather than pay
+// Cash In's {r} cost. Draw 2 cards. **Go again**"
 //
-// Text: "You may destroy 4 Coppers, 2 Silvers, or 1 Gold you control rather than pay Cash In's {r}
-// cost. Draw 2 cards. **Go again**"
+// Token-destroy alt-cost isn't modelled; always resolves the printed {4} pay path.
 
-package notimplemented
+package cards
 
 import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
@@ -25,6 +26,9 @@ func (CashInYellow) Types() card.TypeSet     { return cashInTypes }
 func (CashInYellow) GoAgain() bool           { return true }
 func (CashInYellow) NotSilverAgeLegal()      {}
 
-// not implemented: gold/silver/copper tokens, card draw
-func (CashInYellow) NotImplemented()                            {}
-func (CashInYellow) Play(s *sim.TurnState, self *sim.CardState) { s.Log(self, 0) }
+func (CashInYellow) Play(s *sim.TurnState, self *sim.CardState) {
+	s.DrawOne()
+	s.DrawOne()
+	s.Log(self, 0)
+	s.LogRider(self, 0, "Drew 2 cards")
+}
