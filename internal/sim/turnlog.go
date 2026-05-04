@@ -8,17 +8,20 @@ import (
 	"strings"
 )
 
-// BuildTurnLog converts a TurnSummary into the four-section TurnLog shape. startingRunechants
-// is the Runechant carryover entering this turn — surfaced in the StartOfTurn auras line
-// alongside any sigils / incantations in play. The chain content for MyTurn comes from
-// t.State.Log (the dispatcher's per-event trace); pitches and defense lines come from
-// BestLine; ending zone state comes from t.State.{Hand, Arsenal, Auras, Runechants}.
-func BuildTurnLog(t TurnSummary, startingRunechants int) TurnLog {
+// BuildTurnLog converts a TurnSummary into the four-section TurnLog shape.
+// startingAuras is the carryover aura set entering this turn — token counts get pulled
+// from it for the StartOfTurn "Auras: ..." line, surfaced alongside any sigils /
+// incantations in play (those come from t.StartOfTurnAuras). MyTurn's chain content
+// comes from t.State.Log; pitches and defense lines come from BestLine; ending zone
+// state comes from t.State.
+func BuildTurnLog(t TurnSummary, startingAuras []Aura) TurnLog {
 	var log TurnLog
 	parts := partitionBestLineForDisplay(t.BestLine)
 	defensePitches, attackPitches := splitPitchesByPhase(parts.pitched, parts.drCost)
+	startingRunechants := tokenCountIn(startingAuras, TokenTypeRunechant)
+	startingPonders := tokenCountIn(startingAuras, TokenTypePonder)
 
-	// Start of turn: dealt hand, arsenal-in card, auras / runechants in play. Carryover
+	// Start of turn: dealt hand, arsenal-in card, auras / tokens in play. Carryover
 	// Aura fires (Sigil reveals, +N damage credits) belong to MyTurn — they're
 	// actions resolving at the top of the action phase, not pre-existing state.
 	if line := startingHandLine(t.DealtHand); line != "" {
@@ -27,7 +30,7 @@ func BuildTurnLog(t TurnSummary, startingRunechants int) TurnLog {
 	if line := startingArsenalLine(t.BestLine); line != "" {
 		log.StartOfTurn = append(log.StartOfTurn, line)
 	}
-	if line := startingAurasLine(t.StartOfTurnAuras, startingRunechants); line != "" {
+	if line := startingAurasLine(t.StartOfTurnAuras, startingRunechants, startingPonders); line != "" {
 		log.StartOfTurn = append(log.StartOfTurn, line)
 	}
 
@@ -68,7 +71,7 @@ func BuildTurnLog(t TurnSummary, startingRunechants int) TurnLog {
 	if line := endingArsenalLine(parts.arsenal); line != "" {
 		log.EndOfTurn = append(log.EndOfTurn, line)
 	}
-	if line := endingAurasLine(t.State.Auras, t.State.Runechants()); line != "" {
+	if line := endingAurasLine(t.State.Auras, t.State.Runechants(), t.State.Ponders()); line != "" {
 		log.EndOfTurn = append(log.EndOfTurn, line)
 	}
 
@@ -103,11 +106,12 @@ func startingArsenalLine(line []CardAssignment) string {
 	return ""
 }
 
-// startingAurasLine builds "Auras: A, B, 1 Runechant" from auras in play at the top of the
-// turn plus the Runechant carryover. Aura names sort alphabetically; runechants append last.
-// Returns "" when both are zero so the caller skips the line entirely.
-func startingAurasLine(auras []Card, startingRunechants int) string {
-	if len(auras) == 0 && startingRunechants == 0 {
+// startingAurasLine builds "Auras: A, B, 1 Runechant, 2 Ponders" from auras in play at
+// the top of the turn plus the per-token carryovers. Card-aura names sort alphabetically;
+// token phrases append last in token-declaration order. Returns "" when nothing is in
+// play so the caller skips the line entirely.
+func startingAurasLine(auras []Card, startingRunechants, startingPonders int) string {
+	if len(auras) == 0 && startingRunechants == 0 && startingPonders == 0 {
 		return ""
 	}
 	var items []string
@@ -121,6 +125,9 @@ func startingAurasLine(auras []Card, startingRunechants int) string {
 	}
 	if startingRunechants > 0 {
 		items = append(items, runechantPhrase(startingRunechants))
+	}
+	if startingPonders > 0 {
+		items = append(items, ponderPhrase(startingPonders))
 	}
 	return "Auras: " + strings.Join(items, ", ")
 }
@@ -217,18 +224,16 @@ func endingArsenalLine(arsenal []CardAssignment) string {
 	return "Arsenal: " + strings.Join(parts, ", ")
 }
 
-// endingAurasLine builds "Auras: A, B, 2 Runechants" from the Auras surviving into the
-// next turn. The runechant token aura renders pluralised via runechantPhrase rather
-// than as the bare token name. Names sort alphabetically. Returns "" when nothing
-// survived.
-func endingAurasLine(triggers []Aura, runechants int) string {
-	if len(triggers) == 0 && runechants == 0 {
-		return ""
-	}
+// endingAurasLine builds "Auras: A, B, 2 Runechants, 1 Ponder" from the Auras surviving
+// into the next turn plus the live token counts. Token auras are filtered out and
+// re-rendered as count phrases so pluralisation lives in one place. Card-aura names
+// sort alphabetically; token phrases append last in declaration order. Returns "" when
+// nothing survived.
+func endingAurasLine(triggers []Aura, runechants, ponders int) string {
 	var items []string
 	for _, t := range triggers {
-		if t.Self.TokenType == TokenTypeRunechant {
-			continue // collapsed into runechantPhrase below
+		if t.Self.IsToken() {
+			continue // collapsed into the token phrases below
 		}
 		items = append(items, t.Self.DisplayName())
 	}
@@ -236,16 +241,29 @@ func endingAurasLine(triggers []Aura, runechants int) string {
 	if runechants > 0 {
 		items = append(items, runechantPhrase(runechants))
 	}
+	if ponders > 0 {
+		items = append(items, ponderPhrase(ponders))
+	}
+	if len(items) == 0 {
+		return ""
+	}
 	return "Auras: " + strings.Join(items, ", ")
 }
 
-// runechantPhrase pluralises the Runechant noun based on count: "1 Runechant" vs
-// "N Runechants". Used by both starting and ending auras lines.
+// runechantPhrase pluralises the Runechant noun: "1 Runechant" vs "N Runechants".
 func runechantPhrase(n int) string {
 	if n == 1 {
 		return "1 Runechant"
 	}
 	return fmt.Sprintf("%d Runechants", n)
+}
+
+// ponderPhrase pluralises the Ponder noun: "1 Ponder" vs "N Ponders".
+func ponderPhrase(n int) string {
+	if n == 1 {
+		return "1 Ponder"
+	}
+	return fmt.Sprintf("%d Ponders", n)
 }
 
 // childEntryPrefix tags MyTurn entries that are trigger lines grouped beneath a parent chain

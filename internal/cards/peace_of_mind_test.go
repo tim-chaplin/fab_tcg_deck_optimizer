@@ -6,8 +6,7 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 )
 
-// Tests that each printing prevents its full Defense() amount (4/3/2). The Ponder token
-// rider is intentionally not credited — token economies aren't modelled.
+// Tests that each printing prevents its full Defense() amount (4/3/2).
 func TestPeaceOfMind_PreventsByPrinting(t *testing.T) {
 	cases := []struct {
 		card sim.Card
@@ -27,12 +26,17 @@ func TestPeaceOfMind_PreventsByPrinting(t *testing.T) {
 	}
 }
 
-// Tests that the printed cost is 2 across all printings.
-func TestPeaceOfMind_CostIsTwo(t *testing.T) {
-	cases := []sim.Card{PeaceOfMindRed{}, PeaceOfMindYellow{}, PeaceOfMindBlue{}}
-	for _, c := range cases {
-		if got := c.Cost(&sim.TurnState{}); got != 2 {
-			t.Errorf("%s: Cost = %d, want 2", c.Name(), got)
+// Tests that each printing creates one Ponder token on play.
+func TestPeaceOfMind_CreatesPonder(t *testing.T) {
+	for _, c := range []sim.Card{PeaceOfMindRed{}, PeaceOfMindYellow{}, PeaceOfMindBlue{}} {
+		s := sim.TurnState{IncomingDamage: 10}
+		self := &sim.CardState{Card: c}
+		c.Play(&s, self)
+		if got := s.Ponders(); got != 1 {
+			t.Errorf("%s: Ponders = %d, want 1", c.Name(), got)
+		}
+		if !s.AuraCreated {
+			t.Errorf("%s: AuraCreated = false, want true after creating a Ponder", c.Name())
 		}
 	}
 }

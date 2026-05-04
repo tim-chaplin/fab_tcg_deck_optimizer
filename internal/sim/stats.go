@@ -47,9 +47,9 @@ type Stats struct {
 // FormatTurnLog so saved decks produce the same output as live runs.
 type BestTurn struct {
 	Summary TurnSummary
-	// StartingRunechants is the Runechant count carried in from the previous turn when this hand
-	// was played. Only meaningful for Runeblade heroes.
-	StartingRunechants int
+	// StartingAuras is the carryover aura set entering this turn — sigils, incantations,
+	// and token auras in play when the hand was dealt.
+	StartingAuras []Aura
 	// Log is the four-section structured record (StartOfTurn / MyTurn / OpponentTurn /
 	// EndOfTurn) of the best turn's printout. Each entry is content-only; the formatter
 	// owns indentation, section headers, and chain numbering. EvaluateWith populates it

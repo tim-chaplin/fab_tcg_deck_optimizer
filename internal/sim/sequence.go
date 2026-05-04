@@ -34,7 +34,7 @@ func FormatLogEntry(e LogEntry) string {
 // when the partition assigned arsenalCardIn the Arsenal role (it's staying), nil otherwise
 // (no arsenal-in, or arsenal-in is playing as Attack/Defend).
 func bestAttackWithWeapons(hero Hero, weapons []Weapon, attackers, defenders, pitched, held, deck []Card, bufs *attackBufs, mp Matchup, blockTotal, arsenalInIdx, arsenalDefenderIdx int, arsenalAtChainStart Card, priorAuras []Aura, skipLog bool) (int, int, int, chainBudget, []string, CarryState, bool, bool) {
-	runechantCarryover := runechantCountIn(priorAuras)
+	runechantCarryover := tokenCountIn(priorAuras, TokenTypeRunechant)
 	ctx := &sequenceContext{
 		hero:                hero,
 		pitched:             pitched,
@@ -66,6 +66,7 @@ func bestAttackWithWeapons(hero Hero, weapons []Weapon, attackers, defenders, pi
 	defenseCacheableConst := true
 	if !hasModalBlocker && len(defenders) > 0 {
 		defenseDealtConst, bufs.defenseGravScratch, defenseCacheableConst = defendersDamage(defenders, pitched, deck, bufs.state, bufs.defenseGravScratch, &bufs.drCardStateScratch, mp.IncomingDamage, noBlockBudgetCap, arsenalDefenderIdx)
+		ctx.defenderAuras = filterEndOfTurnAuras(ctx.defenderAuras[:0], bufs.state.Auras)
 	}
 	defenseDealt := defenseDealtConst
 	defenseCacheable := defenseCacheableConst
@@ -178,6 +179,7 @@ func bestAttackWithWeapons(hero Hero, weapons []Weapon, attackers, defenders, pi
 			// the once-per-leaf defenseDealtConst computed above.
 			if hasModalBlocker {
 				defenseDealt, bufs.defenseGravScratch, defenseCacheable = defendersDamage(defenders, pitched, deck, bufs.state, bufs.defenseGravScratch, &bufs.drCardStateScratch, mp.IncomingDamage, phase.defendBudget-drCost, arsenalDefenderIdx)
+				ctx.defenderAuras = filterEndOfTurnAuras(ctx.defenderAuras[:0], bufs.state.Auras)
 			}
 			if phase.hasDefendPitches && phase.defendBudget-drCost >= phase.maxDefendPitch {
 				continue
@@ -264,6 +266,15 @@ type sequenceContext struct {
 	// seeds state.Auras with a fresh copy of this slice so mid-chain firing can
 	// decrement Count / set FiredThisTurn without leaking those mutations across permutations.
 	priorAuras []Aura
+	// defenderAuras are the TriggerEndOfTurn auras created during this partition's
+	// defense phase (e.g. Peace of Mind's Ponder via DefensiveInstant). FaB resolves
+	// defense before our action phase, so resetStateForPermutation seeds them into
+	// state.Auras alongside priorAuras and the chain runs with them visible — cards
+	// reading s.Ponders() / s.Auras during action see them too. The TriggerEndOfTurn
+	// filter is applied upstream so other DR-created auras (e.g. Runechants from
+	// Reduce to Runechant) don't retroactively fund the same defenders that created
+	// them via the chain's leftoverRunechants.
+	defenderAuras []Aura
 	// carryWinner is a slice header POINTING into bufs.carryWinnerScratch — the persistent
 	// snapshot buffer that survives across Best calls via the Evaluator's cached attackBufs.
 	// Heap's algorithm keeps iterating past the winner and the shared state.* fields reflect
@@ -308,6 +319,54 @@ func fireAttackActionAuras(state *TurnState, triggeringCard Card) {
 		t.Handler(state, t)
 		state.currentAuraIdx = -1
 		state.TriggeringCard = nil
+		if !state.currentAuraDestroyed {
+			state.Auras[i].FiredThisTurn = true
+			i++
+		}
+	}
+}
+
+// filterEndOfTurnAuras appends every TriggerEndOfTurn entry in src to out and returns
+// the result. Used to thread defender-created end-of-turn auras (Ponder) into the
+// chain's per-permutation reset; non-end-of-turn DR-created auras (e.g. Runechant
+// from Reduce to Runechant) drop here, matching pre-Ponder discard behaviour.
+func filterEndOfTurnAuras(out, src []Aura) []Aura {
+	for _, a := range src {
+		if a.TriggerType == TriggerEndOfTurn {
+			out = append(out, a)
+		}
+	}
+	return out
+}
+
+// hasEndOfTurnAura reports whether any aura in the slice is a TriggerEndOfTurn entry.
+// Used by the chain runner to skip the end-of-turn fire when nothing in state.Auras
+// would actually trigger.
+func hasEndOfTurnAura(auras []Aura) bool {
+	for _, a := range auras {
+		if a.TriggerType == TriggerEndOfTurn {
+			return true
+		}
+	}
+	return false
+}
+
+// fireEndOfTurnAuras runs after the chain has finished resolving (and the legality
+// gates have passed) but before snapshotCarry captures the next-turn state. Ponder
+// uses this to draw a card into the held pile, so the post-hoc arsenal-promotion step
+// can fill an empty arsenal from the drawn card. Same cursor / splice semantics as the
+// other fire helpers.
+func fireEndOfTurnAuras(state *TurnState) {
+	for i := 0; i < len(state.Auras); {
+		t := &state.Auras[i]
+		if t.TriggerType != TriggerEndOfTurn || (t.OncePerTurn && t.FiredThisTurn) {
+			i++
+			continue
+		}
+		state.currentAuraIdx = i
+		state.currentAuraDestroyed = false
+		t.Handler(state, t)
+		state.currentAuraIdx = -1
 		if !state.currentAuraDestroyed {
 			state.Auras[i].FiredThisTurn = true
 			i++
@@ -373,6 +432,15 @@ func (ctx *sequenceContext) resetStateForPermutation() {
 	s.ActionPoints = 1
 	s.ArcaneDamageDealt = false
 	s.Auras = append(bufs.auraTriggersBacking[:0], ctx.priorAuras...)
+	// Defender-created end-of-turn auras (Peace of Mind's Ponder) are part of the
+	// pre-action-phase state in FaB's turn order: defense resolves on the opponent's
+	// turn, then our action phase sees the resulting auras. Filtered to
+	// TriggerEndOfTurn upstream so other DR-created auras don't retroactively fund
+	// the same defenders that created them. Length-guarded because most partitions
+	// have no defender end-of-turn auras and this runs per permutation.
+	if len(ctx.defenderAuras) > 0 {
+		s.Auras = append(s.Auras, ctx.defenderAuras...)
+	}
 	s.currentAuraIdx = -1
 	s.pendingNextAttackActionHit = bufs.nextAtkActionHitBacking[:0]
 	s.Value = 0
@@ -417,8 +485,12 @@ func (ctx *sequenceContext) bestSequence(attackers []Card) (int, int, bool) {
 		// state.Hand so post-hoc arsenal promotion has something to pick from. Reset+snapshot
 		// mirrors the per-permutation work eval() does for n>0 chains.
 		ctx.resetStateForPermutation()
+		leftover := ctx.bufs.state.Runechants()
+		if hasEndOfTurnAura(ctx.bufs.state.Auras) {
+			fireEndOfTurnAuras(ctx.bufs.state)
+		}
 		ctx.carryWinner.SnapshotFromTurn(ctx.bufs.state)
-		return 0, ctx.runechantCarryover, true
+		return 0, leftover, true
 	}
 	pcBuf := ctx.bufs.pcBuf[:n]
 	permMeta := ctx.bufs.permMeta[:n]
@@ -801,5 +873,12 @@ func (ctx *sequenceContext) playSequenceWithMeta(n int) (damage int, leftoverRun
 	if pool.idx < pool.n {
 		return 0, 0, 0, false
 	}
-	return state.Value, state.Runechants(), pool.remaining, true
+	leftover := state.Runechants()
+	// End-of-turn fire after the chain settles: defender Ponders (folded in at chain
+	// start) and any chain-created end-of-turn aura draw their card before snapshot.
+	// Skip the walk when no end-of-turn aura is in play.
+	if hasEndOfTurnAura(state.Auras) {
+		fireEndOfTurnAuras(state)
+	}
+	return state.Value, leftover, pool.remaining, true
 }

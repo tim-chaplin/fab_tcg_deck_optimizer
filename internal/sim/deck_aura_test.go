@@ -89,6 +89,53 @@ func TestProcessAurasAtStartOfTurn_GraveyardsExhaustedAura(t *testing.T) {
 	}
 }
 
+// TestProcessAurasAtStartOfTurn_IgnoresPonder: Ponder fires at end-of-turn (not
+// start), so a carried-in Ponder is left untouched by the start-of-turn pass — no
+// other framework piece should accidentally drain it.
+func TestProcessAurasAtStartOfTurn_IgnoresPonder(t *testing.T) {
+	survivors, _, _, _, _ := ProcessAurasAtStartOfTurn([]Aura{NewPonderAura(1)}, nil)
+	if len(survivors) != 1 || survivors[0].Self.TokenType != TokenTypePonder {
+		t.Errorf("survivors = %+v, want one Ponder aura intact", survivors)
+	}
+}
+
+// TestFireEndOfTurnAuras_PonderPopsDeckTopIntoHand: the end-of-turn fire pops one card
+// per Ponder count, appends each to s.Hand, and removes the aura. The drawn card lets
+// the post-hoc arsenal-promotion step fill an empty arsenal.
+func TestFireEndOfTurnAuras_PonderPopsDeckTopIntoHand(t *testing.T) {
+	a, b, c := testutils.NewStubCard("a"), testutils.NewStubCard("b"), testutils.NewStubCard("c")
+	s := NewTurnState([]Card{a, b, c}, nil)
+	s.Auras = append(s.Auras, NewPonderAura(2))
+
+	FireEndOfTurnAuras(s)
+
+	if len(s.Hand) != 2 || s.Hand[0] != a || s.Hand[1] != b {
+		t.Errorf("Hand = %v, want [a, b]", s.Hand)
+	}
+	if got := len(s.Deck()); got != 1 {
+		t.Errorf("len(Deck) = %d, want 1 (two cards popped)", got)
+	}
+	if len(s.Auras) != 0 {
+		t.Errorf("Auras = %+v, want empty (Ponder destroyed itself)", s.Auras)
+	}
+}
+
+// TestFireEndOfTurnAuras_PonderEmptyDeckIsNoOp: the handler skips the draw step
+// silently when the deck is empty — destruction still happens.
+func TestFireEndOfTurnAuras_PonderEmptyDeckIsNoOp(t *testing.T) {
+	s := NewTurnState(nil, nil)
+	s.Auras = append(s.Auras, NewPonderAura(1))
+
+	FireEndOfTurnAuras(s)
+
+	if len(s.Hand) != 0 {
+		t.Errorf("Hand = %v, want empty (no deck to draw from)", s.Hand)
+	}
+	if len(s.Auras) != 0 {
+		t.Errorf("Auras = %+v, want empty (Ponder still destroys with empty deck)", s.Auras)
+	}
+}
+
 // TestEvalOneTurn_SigilOfFyendalQueuesTrigger: turn 1 starts with Sigil of Fyendal alone in
 // hand. The solver plays it (the beatsBest tiebreaker prefers playing trigger-creating
 // auras at equal Value over Held → arsenal promotion). Turn 2's start-of-turn pass fires

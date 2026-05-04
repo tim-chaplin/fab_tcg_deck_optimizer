@@ -282,7 +282,7 @@ func runOneShuffle(d *Deck, stats *Stats, scratch *shuffleScratch, idIndex map[i
 		if !ok {
 			break
 		}
-		startingRunechants := runechantCountIn(auraTriggerBuf)
+		startingAuras := append([]Aura(nil), auraTriggerBuf...)
 		startOfTurnAuras := snapshotStartOfTurnAuras(auraTriggerBuf)
 		dealtHand := append([]Card(nil), h...)
 		var trigContribs []TriggerContribution
@@ -308,7 +308,7 @@ func runOneShuffle(d *Deck, stats *Stats, scratch *shuffleScratch, idIndex map[i
 			replay.TriggersFromLastTurn = trigContribs
 			replay.StartOfTurnAuras = startOfTurnAuras
 			replay.DealtHand = dealtHand
-			recordBestTurn(stats, replay, startingRunechants)
+			recordBestTurn(stats, replay, startingAuras)
 		}
 		tallyMarginalPresence(scratch.marginalBuf, idIndex, scratch.presentBuf, h, arsenalIn, float64(play.Value))
 		nextHeld = applyTurnResult(play, buf, &head, &tail, nextHeld[:0])
@@ -350,7 +350,7 @@ func mergeStatsInto(dst, src *Stats) {
 // of run. JSON round-trips Log verbatim; printing routes through FormatTurnLog.
 func finalizeBestTurnLog(stats *Stats) {
 	if len(stats.Best.Summary.BestLine) > 0 {
-		stats.Best.Log = BuildTurnLog(stats.Best.Summary, stats.Best.StartingRunechants)
+		stats.Best.Log = BuildTurnLog(stats.Best.Summary, stats.Best.StartingAuras)
 	}
 }
 
@@ -624,7 +624,7 @@ func dealNextHand(buf, handBuf, heldBuf []Card, head, tail *int, handSize int) (
 // the next call, so retaining them directly would let a later evaluation mutate the saved
 // peak. Nil-length slices skip the clone so the captured TurnSummary holds nil rather
 // than a zero-length allocation.
-func recordBestTurn(stats *Stats, play TurnSummary, startingRunechants int) {
+func recordBestTurn(stats *Stats, play TurnSummary, startingAuras []Aura) {
 	lineCopy := make([]CardAssignment, len(play.BestLine))
 	copy(lineCopy, play.BestLine)
 	var swungCopy []string
@@ -656,7 +656,7 @@ func recordBestTurn(stats *Stats, play TurnSummary, startingRunechants int) {
 			DealtHand:            dealtCopy,
 			IncomingDamage:       play.IncomingDamage,
 		},
-		StartingRunechants: startingRunechants,
+		StartingAuras: startingAuras,
 	}
 }
 

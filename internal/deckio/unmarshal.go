@@ -96,17 +96,17 @@ func perCardMarginalFromJSON(entries []CardMarginalStatsJSON) (map[ids.CardID]si
 	return out, nil
 }
 
-// bestTurnFromJSON restores the structured TurnLog plus the headline Value /
-// StartingRunechants ints. The structured TurnSummary fields (BestLine, SwungWeapons,
-// StartOfTurnAuras, TriggersFromLastTurn, State) aren't reconstructed — fabsim's print path
-// renders Log via sim.FormatTurnLog. Returns a zero BestTurn when the JSON has no log.
+// bestTurnFromJSON restores the structured TurnLog plus the headline Value. Carryover
+// Auras and the structured TurnSummary fields (BestLine, SwungWeapons, StartOfTurnAuras,
+// TriggersFromLastTurn, State) aren't reconstructed — fabsim's print path renders Log
+// via sim.FormatTurnLog, which already encodes the rendered "Auras: ..." line.
+// Returns a zero BestTurn when the JSON has no log.
 func bestTurnFromJSON(bj BestTurnJSON) (sim.BestTurn, error) {
 	if bj.Log.IsEmpty() {
 		return sim.BestTurn{}, nil
 	}
 	return sim.BestTurn{
-		Summary:            sim.TurnSummary{Value: bj.Value},
-		StartingRunechants: bj.StartingRunechants,
-		Log:                bj.Log,
+		Summary: sim.TurnSummary{Value: bj.Value},
+		Log:     bj.Log,
 	}, nil
 }

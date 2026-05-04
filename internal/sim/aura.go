@@ -25,6 +25,10 @@ const (
 	// TriggerAttack fires when ANY attack resolves — attack action card or weapon swing.
 	// The runechant aura uses this so each attack consumes the runechants in play.
 	TriggerAttack
+	// TriggerEndOfTurn fires after the chain finishes, before the carry-state snapshot
+	// and the post-hoc arsenal-promotion step. Ponder uses this to draw a card into the
+	// held pile so the existing arsenal-promotion logic fills an otherwise-empty slot.
+	TriggerEndOfTurn
 )
 
 // CardOrTokenType identifies what an Aura belongs to: a specific card in play, or an

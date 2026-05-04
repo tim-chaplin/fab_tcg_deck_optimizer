@@ -18,6 +18,10 @@ const (
 	// TokenTypeRunechant is the runechant aura token. Consumed by the next attack or
 	// weapon swing the controller resolves (see runechantAuraHandler).
 	TokenTypeRunechant
+	// TokenTypePonder is the ponder aura token. Destroys itself at end of the turn it
+	// was created, drawing a card before the arsenal-promotion step (see
+	// ponderAuraHandler).
+	TokenTypePonder
 )
 
 // tokenDisplayName returns the printed name shown in logs and "(from previous turn)"
@@ -26,6 +30,8 @@ func tokenDisplayName(t TokenType) string {
 	switch t {
 	case TokenTypeRunechant:
 		return "Runechant"
+	case TokenTypePonder:
+		return "Ponder"
 	}
 	return ""
 }
@@ -53,12 +59,38 @@ func NewRunechantAura(n int) Aura {
 	}
 }
 
-// runechantCountIn scans an aura slice for the runechant token aura and returns its
-// count. Shared by TurnState.Runechants, CarryState.Runechants, and the chain runner's
-// priorAuras lookup so the single-aura-per-token-type invariant has one read site.
-func runechantCountIn(auras []Aura) int {
+// ponderAuraHandler is the TriggerEndOfTurn handler shared by every Ponder aura. For
+// each token in play it pops the deck top into the held pile (s.Hand), letting the
+// post-hoc arsenal-promotion step fill an otherwise-empty arsenal slot. Pops past
+// deck-end are silently skipped — empty deck just means no draw. Reading the deck top
+// flips s.cacheable (PopDeckTop's contract).
+func ponderAuraHandler(s *TurnState, t *Aura) {
+	for i := 0; i < t.Count; i++ {
+		c, ok := s.PopDeckTop()
+		if !ok {
+			break
+		}
+		s.Hand = append(s.Hand, c)
+	}
+	s.DestroyAura(t, false)
+}
+
+// NewPonderAura returns a ponder token aura at count n. Production code calls
+// s.CreatePonder instead; this factory is for tests that need to seed the aura directly.
+func NewPonderAura(n int) Aura {
+	return Aura{
+		Self:        CardOrTokenType{TokenType: TokenTypePonder},
+		TriggerType: TriggerEndOfTurn,
+		Count:       n,
+		Handler:     ponderAuraHandler,
+	}
+}
+
+// tokenCountIn scans an aura slice for a token aura of the given type and returns its
+// count. Single read site for the at-most-one-aura-per-token-type invariant.
+func tokenCountIn(auras []Aura, t TokenType) int {
 	for i := range auras {
-		if auras[i].Self.TokenType == TokenTypeRunechant {
+		if auras[i].Self.TokenType == t {
 			return auras[i].Count
 		}
 	}

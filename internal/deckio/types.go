@@ -69,7 +69,6 @@ type CardMarginalStatsJSON struct {
 // the "Best turn played (value N):" header, section headers, indentation, and chain
 // numbering at print time.
 type BestTurnJSON struct {
-	Value              int         `json:"value"`
-	StartingRunechants int         `json:"starting_runechants,omitempty"`
-	Log                sim.TurnLog `json:"log,omitempty"`
+	Value int         `json:"value"`
+	Log   sim.TurnLog `json:"log,omitempty"`
 }

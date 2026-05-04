@@ -1,8 +1,7 @@
 // Peace of Mind — Generic Instant. Cost 2. Printed pitch variants: Red 1, Yellow 2, Blue 3.
 //
 // Text (Red): "The next time you would be dealt {p} damage, prevent 4 of that damage.
-// Create a Ponder token." Yellow caps prevention at 3, Blue at 2. The Ponder token rider
-// is dropped — token economies aren't modelled.
+// Create a Ponder token." Yellow caps prevention at 3, Blue at 2.
 
 package cards
 
@@ -17,6 +16,7 @@ var peaceOfMindTypes = card.NewTypeSet(card.TypeGeneric, card.TypeInstant)
 func peaceOfMindPlay(s *sim.TurnState, self *sim.CardState) {
 	n := self.DealEffectiveDefense(s)
 	s.Log(self, n)
+	s.CreatePonder(1)
 }
 
 type PeaceOfMindRed struct{}

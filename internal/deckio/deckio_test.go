@@ -128,9 +128,8 @@ func TestRoundTrip_PreservesBestTurnLog(t *testing.T) {
 		},
 	}
 	d.Stats.Best = sim.BestTurn{
-		Summary:            sim.TurnSummary{Value: 21},
-		StartingRunechants: 0,
-		Log:                want,
+		Summary: sim.TurnSummary{Value: 21},
+		Log:     want,
 	}
 
 	data, err := Marshal(d)

@@ -635,16 +635,30 @@ func (s *TurnState) CreateRunechants(n int) {
 			return
 		}
 	}
-	s.AddAura(Aura{
-		Self:        CardOrTokenType{TokenType: TokenTypeRunechant},
-		TriggerType: TriggerAttack,
-		Count:       n,
-		Handler:     runechantAuraHandler,
-	})
+	s.AddAura(NewRunechantAura(n))
+}
+
+// CreatePonder creates n Ponder tokens, bumping the existing aura entry's Count or
+// adding a new one, and flips AuraCreated. No Value credit — see ponderAuraHandler.
+func (s *TurnState) CreatePonder(n int) {
+	if n <= 0 {
+		return
+	}
+	s.AuraCreated = true
+	for i := range s.Auras {
+		if s.Auras[i].Self.TokenType == TokenTypePonder {
+			s.Auras[i].Count += n
+			return
+		}
+	}
+	s.AddAura(NewPonderAura(n))
 }
 
 // Runechants returns the current Runechant token count, or zero when none are in play.
-func (s *TurnState) Runechants() int { return runechantCountIn(s.Auras) }
+func (s *TurnState) Runechants() int { return tokenCountIn(s.Auras, TokenTypeRunechant) }
+
+// Ponders returns the current Ponder token count, or zero when none are in play.
+func (s *TurnState) Ponders() int { return tokenCountIn(s.Auras, TokenTypePonder) }
 
 // DealArcaneDamage credits n arcane damage and, when LikelyDamageHits(n, false) approves,
 // flips ArcaneDamageDealt so same-turn triggers reading "if you've dealt arcane damage this
