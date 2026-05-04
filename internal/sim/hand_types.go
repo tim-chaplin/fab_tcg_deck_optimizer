@@ -61,7 +61,10 @@ type CarryState struct {
 }
 
 // Runechants returns the carried Runechant token count, or zero when none are in play.
-func (c *CarryState) Runechants() int { return runechantCountIn(c.Auras) }
+func (c *CarryState) Runechants() int { return tokenCountIn(c.Auras, TokenTypeRunechant) }
+
+// Ponders returns the carried Ponder token count, or zero when none are in play.
+func (c *CarryState) Ponders() int { return tokenCountIn(c.Auras, TokenTypePonder) }
 
 // TurnSummary is the result of running Best on a hand: the winning card-role assignments
 // plus the CarryState snapshot the next turn inherits.

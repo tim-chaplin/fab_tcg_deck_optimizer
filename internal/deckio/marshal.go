@@ -110,8 +110,7 @@ func bestTurnToJSON(b sim.BestTurn) BestTurnJSON {
 		return BestTurnJSON{}
 	}
 	return BestTurnJSON{
-		Value:              b.Summary.Value,
-		StartingRunechants: b.StartingRunechants,
-		Log:                b.Log,
+		Value: b.Summary.Value,
+		Log:   b.Log,
 	}
 }

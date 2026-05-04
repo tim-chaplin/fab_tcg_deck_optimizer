@@ -13,30 +13,29 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/weapons"
 )
 
-// TestEvaluate_BestTurnStartingRunechantsIsPreHandCarryover pins the contract of
-// BestTurn.StartingRunechants: it's the Runechant count carried in from the previous turn when
-// the hand was played, so for the first hand of a run it's always 0 — even if the hand itself
-// creates runechants that carry out into the next turn.
-func TestEvaluate_BestTurnStartingRunechantsIsPreHandCarryover(t *testing.T) {
+// TestEvaluate_BestTurnStartingAurasIsPreHandCarryover pins the contract of
+// BestTurn.StartingAuras: it's the carryover from the previous turn when the hand was
+// played, so for the first hand of a run nothing is in play — runechants the hand
+// itself creates are reflected in the End-of-turn state, not the starting auras.
+func TestEvaluate_BestTurnStartingAurasIsPreHandCarryover(t *testing.T) {
 	// Viserai has Intelligence 4. A 4-card deck gives exactly one hand per run, so the Best
 	// record always reflects that first hand — no previous turn ever existed.
 	read := GetCard(ids.ReadTheRunesRed)
 	d := New(heroes.Viserai{}, nil, []Card{read, read, read, read})
 
-	// Seed doesn't matter (all cards identical), but fix it for determinism.
 	d.Evaluate(1, Matchup{}, rand.New(rand.NewSource(1)))
 
 	if len(d.Stats.Best.Summary.BestLine) == 0 {
 		t.Fatalf("expected Best to be populated after Evaluate")
 	}
-	// Sanity: the hand should have left runechants on the table (otherwise the bug couldn't
-	// manifest — pre-hand and post-hand counts would both be 0).
+	// Sanity: the hand creates runechants — without that, the assertion below couldn't
+	// distinguish "no carryover" from "no token tracking happening at all".
 	if d.Stats.Best.Summary.Value == 0 {
 		t.Fatalf("expected nonzero Value from a hand of Read the Runes; got 0")
 	}
-	if d.Stats.Best.StartingRunechants != 0 {
-		t.Errorf("StartingRunechants = %d, want 0 (first hand of the run has no previous-turn carryover)",
-			d.Stats.Best.StartingRunechants)
+	if len(d.Stats.Best.StartingAuras) != 0 {
+		t.Errorf("StartingAuras = %v, want empty (first hand of the run has no previous-turn carryover)",
+			d.Stats.Best.StartingAuras)
 	}
 }
 

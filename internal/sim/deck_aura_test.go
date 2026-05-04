@@ -89,6 +89,19 @@ func TestProcessAurasAtStartOfTurn_GraveyardsExhaustedAura(t *testing.T) {
 	}
 }
 
+// TestProcessAurasAtStartOfTurn_DestroysCarriedPonder: a Ponder token aura carried in from
+// the previous turn fires on TriggerStartOfTurn and self-destructs, leaving no survivor.
+// Token tokens never go to graveyard, so the destroyed-pass slice stays empty.
+func TestProcessAurasAtStartOfTurn_DestroysCarriedPonder(t *testing.T) {
+	survivors, _, _, _, graveyarded := ProcessAurasAtStartOfTurn([]Aura{NewPonderAura(2)}, nil)
+	if len(survivors) != 0 {
+		t.Errorf("survivors = %+v, want empty (Ponder destroys itself at start of turn)", survivors)
+	}
+	if len(graveyarded) != 0 {
+		t.Errorf("graveyarded = %v, want empty (token auras don't graveyard)", graveyarded)
+	}
+}
+
 // TestEvalOneTurn_SigilOfFyendalQueuesTrigger: turn 1 starts with Sigil of Fyendal alone in
 // hand. The solver plays it (the beatsBest tiebreaker prefers playing trigger-creating
 // auras at equal Value over Held → arsenal promotion). Turn 2's start-of-turn pass fires

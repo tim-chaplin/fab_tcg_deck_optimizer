@@ -27,10 +27,12 @@ implemented` riders across the card roster.
   hero-attribute proxy: the rider fires for heroes that opt in and never fires otherwise.
   Life-gain effects are credited 1-to-1 with damage at trigger time. Modelling real life
   totals would let conditional grants fire correctly per-turn instead of per-hero.
-- **Gold / Silver / Copper / Quicken / Ponder / Frailty / Inertia / Bloodrot Pox token
-  economies.** None are tracked. Cards that mint or consume these tokens collapse to base
-  stats or a flat damage-equivalent. Adding a per-token counter on `TurnState` plus a
-  destroy-and-redeem hook would unblock the bulk of the affected riders.
+- **Gold / Silver / Copper / Quicken / Frailty / Inertia / Bloodrot Pox token economies.**
+  None are tracked. Cards that mint or consume these tokens collapse to base stats or a
+  flat damage-equivalent. The Aura framework's `TokenType` slot now hosts Runechants and
+  Ponders (see `internal/sim/tokens.go`); each new token kind needs the same treatment —
+  a `TokenType` enum entry, a handler describing the destroy condition, and a `s.CreateX`
+  helper paired with the relevant card-mint sites.
 - **Action-point tracking.** The sim doesn't track action points; cards that grant them
   drop the tempo payoff entirely.
 - **Marks and "attacked them this turn" tracking.** No per-hero mark state. Cards that gate

@@ -199,6 +199,37 @@ func TestCreateRunechants_OneToken(t *testing.T) {
 	}
 }
 
+// TestCreatePonder_BumpsCountAndFlag: bumps Ponders by n, flips AuraCreated, and
+// credits NO Value (Ponder's draw nets zero card advantage in our turn model). n=0 is
+// a no-op (no flag flip, no aura entry). Second call accumulates onto the same aura.
+func TestCreatePonder_BumpsCountAndFlag(t *testing.T) {
+	var s TurnState
+	s.CreatePonder(0)
+	if s.AuraCreated {
+		t.Error("AuraCreated should stay false for n=0")
+	}
+	if s.Ponders() != 0 {
+		t.Errorf("Ponders = %d, want 0", s.Ponders())
+	}
+
+	s.CreatePonder(2)
+	if !s.AuraCreated {
+		t.Error("AuraCreated should flip to true")
+	}
+	if s.Ponders() != 2 {
+		t.Errorf("Ponders = %d, want 2", s.Ponders())
+	}
+	if s.Value != 0 {
+		t.Errorf("Value = %d, want 0 (Ponder is zero-value at creation)", s.Value)
+	}
+
+	// Second call accumulates rather than replacing.
+	s.CreatePonder(3)
+	if s.Ponders() != 5 {
+		t.Errorf("Ponders after second call = %d, want 5", s.Ponders())
+	}
+}
+
 // TestAddToGraveyard_AppendsInOrder: graveyard entries appear in append order so downstream
 // readers (aura-banish handlers, leave-trigger scanners) see a stable destroy sequence.
 func TestAddToGraveyard_AppendsInOrder(t *testing.T) {

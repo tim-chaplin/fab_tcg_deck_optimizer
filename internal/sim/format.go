@@ -90,10 +90,10 @@ func splitPitchesByPhase(pitched []CardAssignment, drCost int) (defensePitches, 
 }
 
 // FormatBestTurn renders a TurnSummary's best-turn printout in one call, equivalent to
-// FormatTurnLog(BuildTurnLog(t, startingRunechants)). Convenient for one-shot callers
+// FormatTurnLog(BuildTurnLog(t, startingAuras)). Convenient for one-shot callers
 // (tests, ad-hoc tools) that don't need to retain the TurnLog separately.
-func FormatBestTurn(t TurnSummary, startingRunechants int) string {
-	return FormatTurnLog(BuildTurnLog(t, startingRunechants))
+func FormatBestTurn(t TurnSummary, startingAuras []Aura) string {
+	return FormatTurnLog(BuildTurnLog(t, startingAuras))
 }
 
 // bestLineDisplayParts groups BestLine entries by the display section each belongs to. Pitches

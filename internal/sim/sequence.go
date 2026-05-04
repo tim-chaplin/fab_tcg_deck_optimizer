@@ -34,7 +34,7 @@ func FormatLogEntry(e LogEntry) string {
 // when the partition assigned arsenalCardIn the Arsenal role (it's staying), nil otherwise
 // (no arsenal-in, or arsenal-in is playing as Attack/Defend).
 func bestAttackWithWeapons(hero Hero, weapons []Weapon, attackers, defenders, pitched, held, deck []Card, bufs *attackBufs, mp Matchup, blockTotal, arsenalInIdx, arsenalDefenderIdx int, arsenalAtChainStart Card, priorAuras []Aura, skipLog bool) (int, int, int, chainBudget, []string, CarryState, bool, bool) {
-	runechantCarryover := runechantCountIn(priorAuras)
+	runechantCarryover := tokenCountIn(priorAuras, TokenTypeRunechant)
 	ctx := &sequenceContext{
 		hero:                hero,
 		pitched:             pitched,

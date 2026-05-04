@@ -35,7 +35,14 @@ type TurnStartState struct {
 }
 
 // Runechants returns the live Runechant token count at the start of the next turn.
-func (t TurnStartState) Runechants() int { return runechantCountIn(t.StartOfNextTurnAuras) }
+func (t TurnStartState) Runechants() int {
+	return tokenCountIn(t.StartOfNextTurnAuras, TokenTypeRunechant)
+}
+
+// Ponders returns the live Ponder token count at the start of the next turn.
+func (t TurnStartState) Ponders() int {
+	return tokenCountIn(t.StartOfNextTurnAuras, TokenTypePonder)
+}
 
 // EvalOneTurnForTesting runs one turn against d.Cards in source order (no shuffle) and returns
 // the tested turn's outcome plus the start-of-next-turn state. arsenalIn seeds turn 1's arsenal
