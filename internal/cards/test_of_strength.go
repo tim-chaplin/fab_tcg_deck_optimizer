@@ -1,15 +1,13 @@
-// Test of Strength — Generic Block. Cost 0, Pitch 1, Defense 4. Only printed in Red.
-//
-// Text: "When this defends, **clash** with the attacking hero. The winner creates a Gold token."
+// Test of Strength — Generic Defense Reaction. Cost 0, Pitch 1, Defense 4. Red only.
+// Text: "When this defends, **clash** with the attacking hero. The winner creates a Gold
+// token."
 
-package notimplemented
+package cards
 
 import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
-
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/cards"
 )
 
 type TestOfStrengthRed struct{}
@@ -20,13 +18,23 @@ func (TestOfStrengthRed) Cost(*sim.TurnState) int { return 0 }
 func (TestOfStrengthRed) Pitch() int              { return 1 }
 func (TestOfStrengthRed) Attack() int             { return 0 }
 func (TestOfStrengthRed) Defense() int            { return 4 }
-func (TestOfStrengthRed) Types() card.TypeSet     { return cards.DefenseReactionTypes }
+func (TestOfStrengthRed) Types() card.TypeSet     { return DefenseReactionTypes }
 func (TestOfStrengthRed) GoAgain() bool           { return false }
 
-// not implemented: gold tokens
-func (TestOfStrengthRed) NotImplemented() {}
+func (TestOfStrengthRed) CreatesItem() sim.TokenType { return sim.TokenTypeGold }
+func (TestOfStrengthRed) AddsFutureValue()           {}
+
 func (TestOfStrengthRed) Play(s *sim.TurnState, self *sim.CardState) {
 	n := self.DealEffectiveDefense(s)
 	s.Log(self, n)
-	s.ClashValue(sim.GoldTokenValue)
+	// Clash: opponent's top is modelled at 5-power. Our top ≥ 6 wins the Gold; ties
+	// (top == 5) and losses (top ≤ 4) award nothing (opponent Gold isn't modelled).
+	deck := s.Deck()
+	if len(deck) == 0 {
+		return
+	}
+	if deck[0].Attack() >= 6 {
+		s.CreateGold(1)
+		s.LogRider(self, 0, "Clash win created a gold token")
+	}
 }
