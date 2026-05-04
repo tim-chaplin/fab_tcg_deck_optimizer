@@ -54,6 +54,10 @@ type CarryState struct {
 	// Items is the surviving Item set at end of chain — what the player owns going into
 	// the next turn. Carries across.
 	Items []Item
+	// CardsDrawn counts cards drawn during the chain — read by the partition tiebreaker
+	// to prefer chains that drew more cards. Doesn't carry semantically (each turn
+	// starts fresh) but rides on CarryState's snapshot mechanism for free.
+	CardsDrawn int
 	// Log is the per-event chain trace of the winning permutation — one entry per Play, hero
 	// trigger, aura trigger, OnHit, weapon swing. Stored as raw LogEntry
 	// structs to defer fmt.Sprintf cost until BuildTurnLog runs at end of EvaluateWith,

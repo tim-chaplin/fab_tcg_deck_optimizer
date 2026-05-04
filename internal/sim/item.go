@@ -30,16 +30,6 @@ func itemCountIn(items []Item, t TokenType) int {
 	return 0
 }
 
-// totalItemCount sums Count across every Item entry — the "items still in play" tally
-// used by the partition tiebreaker to prefer chains that spent more items.
-func totalItemCount(items []Item) int {
-	n := 0
-	for i := range items {
-		n += items[i].Count
-	}
-	return n
-}
-
 // ItemCreator is an optional Card marker. Cards whose Play / OnHit creates a token item
 // (Strike Gold creating Gold, Performance Bonus creating Gold) declare so via this
 // interface; bestAttackWithWeapons unions the declared types with priorItems' types and

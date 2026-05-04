@@ -42,10 +42,10 @@ type runningCarry struct {
 	// arsenal is the running winner's end-of-chain arsenal slot — read by Beats's
 	// willOccupy tiebreaker, written by Promote with the leaf's arsenalAtChainStart.
 	arsenal Card
-	// itemCarry sums end-of-chain Item.Count across all token types — used as the
-	// final tiebreaker to prefer chains that spent items (drew cards now) over chains
-	// that hoarded them. Symmetric to "use it or lose it" without forbidding carry.
-	itemCarry int
+	// cardsDrawn is the number of cards drawn during this chain. Read by Beats as a
+	// high-priority tiebreaker (right after leftoverRunechants) — drawing a card is a
+	// pretty good effect, comparable in tempo to a future runechant arcane.
+	cardsDrawn int
 
 	// seen flips true on the first Promote. Finalize uses it to decide between
 	// "clone the scratch into out" and "leave out's seed value alone."
@@ -58,7 +58,7 @@ type runningCarry struct {
 // futureValuePlayed wins; equal all three, only displace if the candidate ends with
 // arsenal occupied AND the running winner doesn't.
 func (r *runningCarry) Beats(
-	value, leftoverRunechants, futureValuePlayed int, willOccupy bool, itemCarry int,
+	value, leftoverRunechants, futureValuePlayed, cardsDrawn int, willOccupy bool,
 ) bool {
 	if !r.seen {
 		// No candidate yet — any feasible leaf wins, regardless of stats.
@@ -70,6 +70,12 @@ func (r *runningCarry) Beats(
 	if leftoverRunechants != r.leftoverRunechants {
 		return leftoverRunechants > r.leftoverRunechants
 	}
+	// Drawing a card is a pretty good effect — sits high in the tiebreaker order so a
+	// chain that drew (Gold ability spend, future card-draw cards) outranks an
+	// equal-damage chain that didn't.
+	if cardsDrawn != r.cardsDrawn {
+		return cardsDrawn > r.cardsDrawn
+	}
 	if futureValuePlayed != r.futureValuePlayed {
 		return futureValuePlayed > r.futureValuePlayed
 	}
@@ -77,22 +83,15 @@ func (r *runningCarry) Beats(
 	// post-hoc promotion can pull from); reading r.scratch keeps the comparison
 	// symmetric across the running winner and the candidate.
 	bestWillOccupy := r.arsenal != nil || len(r.scratch.Hand) > 0
-	if willOccupy != bestWillOccupy {
-		return willOccupy
-	}
-	// Final tiebreaker: chain that spent more items (left fewer in the carry) wins.
-	// Symmetric to "use it or lose it" — both chains have equal damage and equal
-	// next-turn surface area, so the one that cashed in a Gold token now (drew a
-	// card into arsenal) outranks the one that hoarded it for next turn.
-	return itemCarry < r.itemCarry
+	return willOccupy && !bestWillOccupy
 }
 
 // Promote records the candidate as the new running winner. carry's slice contents are
 // copied into the scratch (allocation-free after the first sizing); arsenal overrides
 // the snapshot's Arsenal so an arsenal-in card that stayed is preserved.
 func (r *runningCarry) Promote(
-	value, leftoverRunechants, futureValuePlayed int,
-	arsenal Card, carry *CarryState, itemCarry int,
+	value, leftoverRunechants, futureValuePlayed, cardsDrawn int,
+	arsenal Card, carry *CarryState,
 ) {
 	r.scratch.CopyFrom(carry)
 	r.scratch.Arsenal = arsenal
@@ -100,7 +99,7 @@ func (r *runningCarry) Promote(
 	r.leftoverRunechants = leftoverRunechants
 	r.futureValuePlayed = futureValuePlayed
 	r.arsenal = arsenal
-	r.itemCarry = itemCarry
+	r.cardsDrawn = cardsDrawn
 	r.seen = true
 }
 

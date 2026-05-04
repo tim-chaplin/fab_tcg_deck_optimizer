@@ -72,7 +72,7 @@ func BeatsBest(v, leftoverRunechants, futureValuePlayed int, willOccupyArsenal b
 		leftoverRunechants: best.State.Runechants(),
 		futureValuePlayed:  bestFutureValuePlayed,
 	}
-	return r.Beats(v, leftoverRunechants, futureValuePlayed, willOccupyArsenal, 0)
+	return r.Beats(v, leftoverRunechants, futureValuePlayed, 0, willOccupyArsenal)
 }
 
 // PairSwapMutations re-exports pairSwapMutations for sim_test consumers.

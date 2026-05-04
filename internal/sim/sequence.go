@@ -524,6 +524,7 @@ func (ctx *sequenceContext) resetStateForPermutation() {
 	}
 	s.Auras = append(bufs.auraTriggersBacking[:0], auraSeed...)
 	s.Items = append(bufs.itemsBacking[:0], ctx.priorItems...)
+	s.CardsDrawn = 0
 	s.currentAuraIdx = -1
 	s.pendingNextAttackActionHit = bufs.nextAtkActionHitBacking[:0]
 	s.Value = 0

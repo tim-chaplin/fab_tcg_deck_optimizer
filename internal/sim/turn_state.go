@@ -118,6 +118,12 @@ type TurnState struct {
 	// per-token-type Create helper (CreateGold); the chain runner enqueues each item's
 	// Ability as a playable activated ability each turn. Carries across turns.
 	Items []Item
+	// CardsDrawn counts mid-chain card draws this turn — incremented by DrawOne and
+	// any future tutor-into-hand helper. The partition tiebreaker prefers chains that
+	// drew more cards: a draw is one extra play available next turn, comparable in
+	// tempo to a future runechant. Reset per permutation; snapshotted into CarryState
+	// so the partition recurse compares end-of-chain draw counts across leaves.
+	CardsDrawn int
 	// currentAuraIdx is the index in Auras of the handler currently running. DestroyAura
 	// uses it as a fast-path hint to skip the linear scan in the common "handler destroys
 	// its own aura" case; a Self comparison guards against stale hints.
@@ -575,13 +581,15 @@ func (s *TurnState) LogPostTriggerf(source string, n int, format string, args ..
 // DrawOne models a mid-turn draw: pop the top of the deck and append it to Hand. No-op on
 // an empty deck. Every draw-rider card routes through this helper. Inherits the flip via
 // PopDeckTop — a card that draws makes the chain's output depend on hidden shuffle order,
-// same as a card that reads the deck top.
+// same as a card that reads the deck top. Bumps CardsDrawn so the partition tiebreaker
+// can prefer chains with more draws.
 func (s *TurnState) DrawOne() {
 	c, ok := s.PopDeckTop()
 	if !ok {
 		return
 	}
 	s.Hand = append(s.Hand, c)
+	s.CardsDrawn++
 }
 
 // HasPlayedType reports whether any card played this turn has the given type in its Types() set.

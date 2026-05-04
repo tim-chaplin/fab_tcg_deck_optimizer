@@ -88,7 +88,6 @@ func (e *Evaluator) findBest(hero Hero, weapons []Weapon, hand []Card, mp Matchu
 		scratch:            &bufs.findBestCarryScratch,
 		leftoverRunechants: tokenCountIn(priorAuras, TokenTypeRunechant),
 		arsenal:            arsenalCardIn,
-		itemCarry:          totalItemCount(priorItems),
 	}
 	rolesBuf := bufs.rolesBuf[:totalN]
 	pvals := bufs.pitchVals[:totalN]
@@ -135,11 +134,10 @@ func (e *Evaluator) findBest(hero Hero, weapons []Weapon, hand []Card, mp Matchu
 			// next turn's arsenal — same outcome as a Held card promoting via the post-hoc
 			// step.
 			willOccupy := arsenalCard != nil || len(carry.Hand) > 0
-			itemCarry := totalItemCount(carry.Items)
-			if !running.Beats(v, leftoverRunechants, futureValuePlayed, willOccupy, itemCarry) {
+			if !running.Beats(v, leftoverRunechants, futureValuePlayed, carry.CardsDrawn, willOccupy) {
 				return
 			}
-			running.Promote(v, leftoverRunechants, futureValuePlayed, arsenalCard, &carry, itemCarry)
+			running.Promote(v, leftoverRunechants, futureValuePlayed, carry.CardsDrawn, arsenalCard, &carry)
 			best.Value = v
 			bestSwung = swung
 			// Cards and FromArsenal flags were populated at construction; Role is the only
