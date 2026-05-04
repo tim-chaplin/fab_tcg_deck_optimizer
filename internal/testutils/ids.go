@@ -24,4 +24,5 @@ const (
 	FakeNoGoAgainAttack
 	FakeClubWeapon
 	FakeHammerWeapon
+	FakeRedPitch
 )

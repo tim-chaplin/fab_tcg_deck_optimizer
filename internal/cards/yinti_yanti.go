@@ -1,10 +1,8 @@
-// Yinti Yanti — Generic Action - Attack. Cost 0. Printed power: Red 3, Yellow 2, Blue 1. Printed
-// pitch variants: Red 1, Yellow 2, Blue 3. Defense 2.
-//
-// Text: "While Yinti Yanti is attacking and you control an aura, it has +1{p}. While Yinti Yanti is
-// defending and you control an aura, it has +1{d}."
+// Yinti Yanti: "While Yinti Yanti is attacking and you control an aura, it has +1{p}.
+// While Yinti Yanti is defending and you control an aura, it has +1{d}." Both bonuses
+// gate on len(s.Auras) > 0 — any aura type qualifies.
 
-package notimplemented
+package cards
 
 import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
@@ -14,13 +12,22 @@ import (
 
 var yintiYantiTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeAttack)
 
-// yintiYantiBonus returns the +1{p} power buff when any aura is in play (either created
-// this turn or played earlier), else 0.
+// yintiYantiBonus returns +1 when any aura is in play, else 0.
 func yintiYantiBonus(s *sim.TurnState) int {
-	if s != nil && s.HasPlayedOrCreatedAura() {
+	if len(s.Auras) > 0 {
 		return 1
 	}
 	return 0
+}
+
+func yintiYantiPlay(s *sim.TurnState, self *sim.CardState) {
+	self.BonusAttack += yintiYantiBonus(s)
+	n := self.DealEffectiveAttack(s)
+	s.Log(self, n)
+}
+
+func yintiYantiBlock(s *sim.TurnState, self *sim.CardState) {
+	self.BonusDefense += yintiYantiBonus(s)
 }
 
 type YintiYantiRed struct{}
@@ -33,14 +40,11 @@ func (YintiYantiRed) Attack() int             { return 3 }
 func (YintiYantiRed) Defense() int            { return 2 }
 func (YintiYantiRed) Types() card.TypeSet     { return yintiYantiTypes }
 func (YintiYantiRed) GoAgain() bool           { return false }
-
-// not implemented: defending-side +1{d} buff (defence consumed before Play); aura-attack
-// +1{p} is modelled
-func (YintiYantiRed) NotImplemented() {}
 func (YintiYantiRed) Play(s *sim.TurnState, self *sim.CardState) {
-	self.BonusAttack += yintiYantiBonus(s)
-	n := self.DealEffectiveAttack(s)
-	s.Log(self, n)
+	yintiYantiPlay(s, self)
+}
+func (YintiYantiRed) Block(s *sim.TurnState, self *sim.CardState) {
+	yintiYantiBlock(s, self)
 }
 
 type YintiYantiYellow struct{}
@@ -53,14 +57,11 @@ func (YintiYantiYellow) Attack() int             { return 2 }
 func (YintiYantiYellow) Defense() int            { return 2 }
 func (YintiYantiYellow) Types() card.TypeSet     { return yintiYantiTypes }
 func (YintiYantiYellow) GoAgain() bool           { return false }
-
-// not implemented: defending-side +1{d} buff (defence consumed before Play); aura-attack
-// +1{p} is modelled
-func (YintiYantiYellow) NotImplemented() {}
 func (YintiYantiYellow) Play(s *sim.TurnState, self *sim.CardState) {
-	self.BonusAttack += yintiYantiBonus(s)
-	n := self.DealEffectiveAttack(s)
-	s.Log(self, n)
+	yintiYantiPlay(s, self)
+}
+func (YintiYantiYellow) Block(s *sim.TurnState, self *sim.CardState) {
+	yintiYantiBlock(s, self)
 }
 
 type YintiYantiBlue struct{}
@@ -73,12 +74,9 @@ func (YintiYantiBlue) Attack() int             { return 1 }
 func (YintiYantiBlue) Defense() int            { return 2 }
 func (YintiYantiBlue) Types() card.TypeSet     { return yintiYantiTypes }
 func (YintiYantiBlue) GoAgain() bool           { return false }
-
-// not implemented: defending-side +1{d} buff (defence consumed before Play); aura-attack
-// +1{p} is modelled
-func (YintiYantiBlue) NotImplemented() {}
 func (YintiYantiBlue) Play(s *sim.TurnState, self *sim.CardState) {
-	self.BonusAttack += yintiYantiBonus(s)
-	n := self.DealEffectiveAttack(s)
-	s.Log(self, n)
+	yintiYantiPlay(s, self)
+}
+func (YintiYantiBlue) Block(s *sim.TurnState, self *sim.CardState) {
+	yintiYantiBlock(s, self)
 }

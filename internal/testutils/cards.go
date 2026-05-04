@@ -175,6 +175,23 @@ func (Aura) Play(*sim.TurnState, *sim.CardState) {}
 // genericAttackTypes is the type line shared by every attack-action fake below.
 var genericAttackTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeAttack)
 
+// RedPitch is a pure-pitch generic non-attack action: pitches 1, no attack, no defense,
+// no go again. Mirrors BluePitch but at the red-pitch tier so tests can fund a single
+// resource without the partition having to repurpose the card as an attacker or blocker.
+type RedPitch struct{}
+
+func (RedPitch) ID() ids.CardID          { return FakeRedPitch }
+func (RedPitch) Name() string            { return "cardtest.RedPitch" }
+func (RedPitch) Cost(*sim.TurnState) int { return 0 }
+func (RedPitch) Pitch() int              { return 1 }
+func (RedPitch) Attack() int             { return 0 }
+func (RedPitch) Defense() int            { return 0 }
+func (RedPitch) Types() card.TypeSet {
+	return card.NewTypeSet(card.TypeGeneric, card.TypeAction)
+}
+func (RedPitch) GoAgain() bool                              { return false }
+func (RedPitch) Play(s *sim.TurnState, self *sim.CardState) { s.Log(self, 0) }
+
 // BluePitch is a pure-pitch generic non-attack action: pitches 3, no attack, no defense,
 // no go again. Useful as a "blue pitch source" in tests where the optimal line should be
 // unambiguous — the optimizer can't repurpose it as an attacker or blocker, so the only
