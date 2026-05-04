@@ -203,8 +203,6 @@ var cardsByID = []sim.Card{
 	ids.CaptainsCallYellow: cards.CaptainsCallYellow{},
 	ids.CaptainsCallBlue:   cards.CaptainsCallBlue{},
 
-	ids.CashInYellow: cards.CashInYellow{},
-
 	ids.ChestPuffRed: cards.ChestPuffRed{},
 
 	ids.ComeToFightRed:    cards.ComeToFightRed{},
