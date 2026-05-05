@@ -58,6 +58,10 @@ type CarryState struct {
 	// to prefer chains that drew more cards. Doesn't carry semantically (each turn
 	// starts fresh) but rides on CarryState's snapshot mechanism for free.
 	CardsDrawn int
+	// OpponentMarked snapshots the end-of-chain TurnState.OpponentMarked. Carries across
+	// turns: the deck loop feeds it back into next turn's seed so a Mark applied this
+	// turn survives until next turn's first attack action / weapon swing strips it.
+	OpponentMarked bool
 	// Log is the per-event chain trace of the winning permutation — one entry per Play, hero
 	// trigger, aura trigger, OnHit, weapon swing. Stored as raw LogEntry
 	// structs to defer fmt.Sprintf cost until BuildTurnLog runs at end of EvaluateWith,

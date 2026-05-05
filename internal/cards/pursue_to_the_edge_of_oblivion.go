@@ -3,7 +3,7 @@
 //
 // Text: "When this hits a hero, **mark** them."
 
-package notimplemented
+package cards
 
 import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
@@ -23,10 +23,8 @@ func (PursueToTheEdgeOfOblivionRed) Attack() int             { return 4 }
 func (PursueToTheEdgeOfOblivionRed) Defense() int            { return 3 }
 func (PursueToTheEdgeOfOblivionRed) Types() card.TypeSet     { return pursueToTheEdgeOfOblivionTypes }
 func (PursueToTheEdgeOfOblivionRed) GoAgain() bool           { return false }
-
-// not implemented: on-hit mark
-func (PursueToTheEdgeOfOblivionRed) NotImplemented() {}
 func (PursueToTheEdgeOfOblivionRed) Play(s *sim.TurnState, self *sim.CardState) {
 	n := self.DealEffectiveAttack(s)
 	s.Log(self, n)
+	self.OnHit = append(self.OnHit, sim.OnHitHandler{Fire: markOpponentOnHit})
 }

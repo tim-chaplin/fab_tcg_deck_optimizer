@@ -3,21 +3,22 @@
 //
 // Text: "**Mark** target opposing hero. The next time you attack a **marked** hero this turn, the
 // attack gets +N{p}. **Go again**" (Red N=3, Yellow N=2, Blue N=1.)
-//
-// Mark isn't tracked, so the +N{p} grant lands unconditionally on the next attack
-// (IsAttack — "you attack a marked hero" includes weapon swings).
 
-package notimplemented
+package cards
 
 import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
-
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/cards"
 )
 
 var publicBountyTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction)
+
+func publicBountyPlay(s *sim.TurnState, self *sim.CardState, n int) {
+	s.OpponentMarked = true
+	GrantNextCardBonusAttack(s, n, card.TypeSet.IsAttack)
+	s.Log(self, 0)
+}
 
 type PublicBountyRed struct{}
 
@@ -29,13 +30,8 @@ func (PublicBountyRed) Attack() int             { return 0 }
 func (PublicBountyRed) Defense() int            { return 2 }
 func (PublicBountyRed) Types() card.TypeSet     { return publicBountyTypes }
 func (PublicBountyRed) GoAgain() bool           { return true }
-
-// not implemented: mark not tracked; +3{p} 'marked defender' rider fires unconditionally
-func (PublicBountyRed) NotImplemented() {}
 func (PublicBountyRed) Play(s *sim.TurnState, self *sim.CardState) {
-	cards.GrantNextCardBonusAttack(s, 3, card.TypeSet.IsAttack)
-	n := self.DealEffectiveAttack(s)
-	s.Log(self, n)
+	publicBountyPlay(s, self, 3)
 }
 
 type PublicBountyYellow struct{}
@@ -48,13 +44,8 @@ func (PublicBountyYellow) Attack() int             { return 0 }
 func (PublicBountyYellow) Defense() int            { return 2 }
 func (PublicBountyYellow) Types() card.TypeSet     { return publicBountyTypes }
 func (PublicBountyYellow) GoAgain() bool           { return true }
-
-// not implemented: mark not tracked; +3{p} 'marked defender' rider fires unconditionally
-func (PublicBountyYellow) NotImplemented() {}
 func (PublicBountyYellow) Play(s *sim.TurnState, self *sim.CardState) {
-	cards.GrantNextCardBonusAttack(s, 2, card.TypeSet.IsAttack)
-	n := self.DealEffectiveAttack(s)
-	s.Log(self, n)
+	publicBountyPlay(s, self, 2)
 }
 
 type PublicBountyBlue struct{}
@@ -67,11 +58,6 @@ func (PublicBountyBlue) Attack() int             { return 0 }
 func (PublicBountyBlue) Defense() int            { return 2 }
 func (PublicBountyBlue) Types() card.TypeSet     { return publicBountyTypes }
 func (PublicBountyBlue) GoAgain() bool           { return true }
-
-// not implemented: mark not tracked; +3{p} 'marked defender' rider fires unconditionally
-func (PublicBountyBlue) NotImplemented() {}
 func (PublicBountyBlue) Play(s *sim.TurnState, self *sim.CardState) {
-	cards.GrantNextCardBonusAttack(s, 1, card.TypeSet.IsAttack)
-	n := self.DealEffectiveAttack(s)
-	s.Log(self, n)
+	publicBountyPlay(s, self, 1)
 }

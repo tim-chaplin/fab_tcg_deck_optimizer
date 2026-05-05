@@ -24,6 +24,9 @@ func (RelentlessPursuitBlue) Defense() int            { return 3 }
 func (RelentlessPursuitBlue) Types() card.TypeSet     { return relentlessPursuitTypes }
 func (RelentlessPursuitBlue) GoAgain() bool           { return true }
 
-// not implemented: marked-target gate + 'attacked them this turn' chain rider
-func (RelentlessPursuitBlue) NotImplemented()                            {}
-func (RelentlessPursuitBlue) Play(s *sim.TurnState, self *sim.CardState) { s.Log(self, 0) }
+// not implemented: 'attacked them this turn → put this on the bottom of its owner's deck' recycle
+func (RelentlessPursuitBlue) NotImplemented() {}
+func (RelentlessPursuitBlue) Play(s *sim.TurnState, self *sim.CardState) {
+	s.OpponentMarked = true
+	s.Log(self, 0)
+}

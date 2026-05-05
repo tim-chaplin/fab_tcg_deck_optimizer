@@ -54,6 +54,7 @@ func bestAttackWithWeapons(hero Hero, weapons []Weapon, attackers, defenders, pi
 		arsenalInIdx:        arsenalInIdx,
 		priorAuras:          prior.Auras,
 		priorItems:          prior.Items,
+		priorOpponentMarked: prior.OpponentMarked,
 		// defenderAuras shares backing with bufs.defenderAurasBacking so the per-partition
 		// capture is alloc-free across Best calls.
 		defenderAuras: bufs.defenderAurasBacking[:0],
@@ -322,6 +323,9 @@ type sequenceContext struct {
 	// state.Items with a fresh copy so mid-chain ability plays (decrementing Count,
 	// destroying items) don't leak across permutations.
 	priorItems []Item
+	// priorOpponentMarked seeds TurnState.OpponentMarked at each permutation's start —
+	// non-zero when the previous turn's chain left a Mark on the opposing hero.
+	priorOpponentMarked bool
 	// activatedAbilities is the unified weapon + item ability list materialised at the
 	// top of bestAttackWithWeapons — weapons' Ability() Cards followed by per-priorItem
 	// ability instances (one per Count, capped at perItemAbilityCap). The wmask iterates
@@ -491,6 +495,7 @@ func (ctx *sequenceContext) resetStateForPermutation() {
 	s.Banish = bufs.banishBacking[:0]
 	s.ActionPoints = 1
 	s.ArcaneDamageDealt = false
+	s.OpponentMarked = ctx.priorOpponentMarked
 	// Seed from defenderAuras when defendersDamage ran for this leaf (it already
 	// includes priorAuras consolidated with DR-created auras); fall back to priorAuras
 	// otherwise.
@@ -921,6 +926,10 @@ func (ctx *sequenceContext) playSequenceWithMeta(n int) (damage int, futureValue
 		pc.Card.Play(state, pc)
 		if m.isAttack {
 			fireAttackAuras(state, pc.Card)
+			// Clear after Play so any "if defending hero is marked" rider on this card
+			// already read the pre-clear flag. OnHit handlers fire later via
+			// finalizeActiveAttack, after this clear, so on-hit Mark riders survive.
+			state.OpponentMarked = false
 		}
 		if m.isAttackAction {
 			fireAttackActionAuras(state, pc.Card)
