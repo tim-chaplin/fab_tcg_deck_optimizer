@@ -18,7 +18,7 @@ func TestWageGold_OnHitCreatesGoldToken(t *testing.T) {
 		testutils.BluePitch{},
 		testutils.BluePitch{},
 	}
-	state := d.EvalOneTurnForTesting(sim.Matchup{IncomingDamage: 0}, nil, hand)
+	state := d.EvalOneTurnForTesting(sim.Matchup{IncomingDamage: 0}, sim.TurnState{}, hand)
 	if state.Value != 7 {
 		t.Fatalf("Value = %d, want 7 (Wage Gold Red 7 power)\nBestLine: %s",
 			state.Value, formatBestLine(state.BestLine))
@@ -37,7 +37,7 @@ func TestWageGold_BlockableMissDoesNotCreateGold(t *testing.T) {
 		testutils.BluePitch{},
 		testutils.BluePitch{},
 	}
-	state := d.EvalOneTurnForTesting(sim.Matchup{IncomingDamage: 0}, nil, hand)
+	state := d.EvalOneTurnForTesting(sim.Matchup{IncomingDamage: 0}, sim.TurnState{}, hand)
 	if state.Value != 5 {
 		t.Fatalf("Value = %d, want 5 (Wage Gold Blue 5 power)\nBestLine: %s",
 			state.Value, formatBestLine(state.BestLine))

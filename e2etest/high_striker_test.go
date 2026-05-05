@@ -30,7 +30,7 @@ func TestHighStriker_TriggersOnNextAttackActionHit(t *testing.T) {
 				cards.CriticalStrikeYellow{},
 				testutils.BluePitch{},
 			}
-			state := d.EvalOneTurnForTesting(sim.Matchup{IncomingDamage: 0}, nil, hand)
+			state := d.EvalOneTurnForTesting(sim.Matchup{IncomingDamage: 0}, sim.TurnState{}, hand)
 			if state.Copper() != tc.wantCopper {
 				t.Fatalf("Copper = %d, want %d (next attack hit fires the rider)\nBestLine: %s",
 					state.Copper(), tc.wantCopper, formatBestLine(state.BestLine))
