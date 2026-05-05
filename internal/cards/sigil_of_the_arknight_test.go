@@ -75,12 +75,3 @@ func TestSigilOfTheArknight_TriggerEmptyDeck(t *testing.T) {
 		t.Errorf("Hand = %v, want nil (empty deck)", next.Hand)
 	}
 }
-
-// TestSigilOfTheArknight_ImplementsAddsFutureValue pins the marker so the solver's
-// beatsBest tiebreaker counts this card as future-value-adding.
-func TestSigilOfTheArknight_ImplementsAddsFutureValue(t *testing.T) {
-	var c sim.Card = SigilOfTheArknightBlue{}
-	if _, ok := c.(sim.AddsFutureValue); !ok {
-		t.Error("SigilOfTheArknightBlue should implement sim.AddsFutureValue")
-	}
-}

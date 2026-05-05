@@ -29,10 +29,6 @@ func (WageGoldRed) CreatesItem() sim.TokenType    { return sim.TokenTypeGold }
 func (WageGoldYellow) CreatesItem() sim.TokenType { return sim.TokenTypeGold }
 func (WageGoldBlue) CreatesItem() sim.TokenType   { return sim.TokenTypeGold }
 
-func (WageGoldRed) AddsFutureValue()    {}
-func (WageGoldYellow) AddsFutureValue() {}
-func (WageGoldBlue) AddsFutureValue()   {}
-
 type WageGoldRed struct{}
 
 func (WageGoldRed) ID() ids.CardID                             { return ids.WageGoldRed }

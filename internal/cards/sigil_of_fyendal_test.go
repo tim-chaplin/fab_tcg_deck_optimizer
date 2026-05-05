@@ -37,12 +37,3 @@ func TestSigilOfFyendal_TriggerHandlerCredits1Damage(t *testing.T) {
 		t.Errorf("Handler Value = %d, want 1", fire.Value)
 	}
 }
-
-// TestSigilOfFyendal_AddsFutureValue pins the marker so the solver's beatsBest tiebreaker
-// favours playing the sigil over Held → arsenal at equal Value.
-func TestSigilOfFyendal_AddsFutureValue(t *testing.T) {
-	var c sim.Card = SigilOfFyendalBlue{}
-	if _, ok := c.(sim.AddsFutureValue); !ok {
-		t.Error("SigilOfFyendalBlue should implement sim.AddsFutureValue")
-	}
-}

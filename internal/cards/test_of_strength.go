@@ -25,7 +25,6 @@ func (TestOfStrengthRed) Types() card.TypeSet     { return DefenseReactionTypes 
 func (TestOfStrengthRed) GoAgain() bool           { return false }
 
 func (TestOfStrengthRed) CreatesItem() sim.TokenType { return sim.TokenTypeGold }
-func (TestOfStrengthRed) AddsFutureValue()           {}
 
 func (TestOfStrengthRed) Play(s *sim.TurnState, self *sim.CardState) {
 	n := self.DealEffectiveDefense(s)

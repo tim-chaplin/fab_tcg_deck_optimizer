@@ -27,7 +27,6 @@ func (SigilOfSilphidaeBlue) Attack() int             { return 0 }
 func (SigilOfSilphidaeBlue) Defense() int            { return 3 }
 func (SigilOfSilphidaeBlue) Types() card.TypeSet     { return sigilOfSilphidaeTypes }
 func (SigilOfSilphidaeBlue) GoAgain() bool           { return true }
-func (SigilOfSilphidaeBlue) AddsFutureValue()        {}
 func (c SigilOfSilphidaeBlue) Play(s *sim.TurnState, self *sim.CardState) {
 	enterDamage := banishAuraFromGraveyard(s)
 	s.AddAura(sim.Aura{

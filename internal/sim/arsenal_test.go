@@ -305,10 +305,11 @@ func TestBeatsBest_ArsenalOccupancyTiebreaker(t *testing.T) {
 }
 
 // TestBeatsBest_FutureValueTiebreaker pins the future-value bias: at equal Value and
-// leftover Runechants, a partition that plays more AddsFutureValue cards wins over one
-// that plays fewer, regardless of arsenal occupancy. This corrects for the hidden later-turn
-// value those cards carry — without the bias, a lone sigil ends up Held → promoted to
-// arsenal because same-turn Value is 0 and arsenal occupancy wins the fallback tiebreak.
+// leftover Runechants, a partition with more end-of-chain non-token aura Counts wins
+// over one with fewer, regardless of arsenal occupancy. This corrects for the hidden
+// later-turn value those auras carry — without the bias, a lone sigil ends up Held →
+// promoted to arsenal because same-turn Value is 0 and arsenal occupancy wins the
+// fallback tiebreak.
 func TestBeatsBest_FutureValueTiebreaker(t *testing.T) {
 	best := TurnSummary{Value: 5, State: CarryState{Auras: []Aura{NewRunechantAura(0)}}}
 	// Candidate plays 1 future-value card, best plays 0 — candidate wins even though arsenal

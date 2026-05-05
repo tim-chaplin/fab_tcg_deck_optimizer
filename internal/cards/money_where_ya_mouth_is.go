@@ -35,12 +35,6 @@ func moneyWhereYaMouthIsPlay(s *sim.TurnState, self *sim.CardState, source sim.C
 	s.Log(self, 0)
 }
 
-// AddsFutureValue (no CreatesItem) — the Gold creator is whichever downstream attack the
-// wager rider grafts onto, so the wmask slot belongs to that attack's marker, not ours.
-func (MoneyWhereYaMouthIsRed) AddsFutureValue()    {}
-func (MoneyWhereYaMouthIsYellow) AddsFutureValue() {}
-func (MoneyWhereYaMouthIsBlue) AddsFutureValue()   {}
-
 type MoneyWhereYaMouthIsRed struct{}
 
 func (MoneyWhereYaMouthIsRed) ID() ids.CardID          { return ids.MoneyWhereYaMouthIsRed }

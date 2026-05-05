@@ -52,11 +52,12 @@ type runningCarry struct {
 	seen bool
 }
 
-// Beats reports whether (value, leftoverRunechants, futureValuePlayed, willOccupy)
-// describes a candidate that should displace the running winner. Tiebreaker order:
-// higher Value wins; equal Value, higher leftoverRunechants wins; equal both, more
-// futureValuePlayed wins; equal all three, only displace if the candidate ends with
-// arsenal occupied AND the running winner doesn't.
+// Beats reports whether (value, leftoverRunechants, cardsDrawn, futureValuePlayed,
+// willOccupy) describes a candidate that should displace the running winner. Tiebreaker
+// order: higher Value wins; equal Value, higher leftoverRunechants wins; equal both,
+// more cardsDrawn wins; equal all three, higher futureValuePlayed wins; equal all four,
+// displace only if the candidate ends with arsenal occupied AND the running winner
+// doesn't.
 func (r *runningCarry) Beats(
 	value, leftoverRunechants, futureValuePlayed, cardsDrawn int, willOccupy bool,
 ) bool {

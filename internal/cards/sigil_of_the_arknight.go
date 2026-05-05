@@ -29,7 +29,6 @@ func (SigilOfTheArknightBlue) Attack() int             { return 0 }
 func (SigilOfTheArknightBlue) Defense() int            { return 2 }
 func (SigilOfTheArknightBlue) Types() card.TypeSet     { return sigilOfTheArknightTypes }
 func (SigilOfTheArknightBlue) GoAgain() bool           { return true }
-func (SigilOfTheArknightBlue) AddsFutureValue()        {}
 func (c SigilOfTheArknightBlue) Play(s *sim.TurnState, self *sim.CardState) {
 	s.AddAura(sim.Aura{
 		Self:        sim.CardOrTokenType{Card: c},

@@ -1,10 +1,10 @@
 // Package card defines the Card interface used by the simulator and basic/test implementations.
 //
 // The per-card CardState wrapper, the Card interface itself, and the optional markers cards
-// opt into (VariableCost, Dominator, AddsFutureValue, ArsenalDefenseBonus, …) live in this
-// file. Cohesive concern groups are split across sibling files in this package:
-// types.go (card.CardType + card.TypeSet bitfield), turn_state.go (TurnState and its mutation
-// helpers), triggers.go (Aura).
+// opt into (VariableCost, Dominator, ArsenalDefenseBonus, …) live in this file. Cohesive
+// concern groups are split across sibling files in this package: types.go (card.CardType +
+// card.TypeSet bitfield), turn_state.go (TurnState and its mutation helpers), triggers.go
+// (Aura).
 package sim
 
 import (
@@ -321,20 +321,6 @@ func HasDominate(c Card) bool {
 // fires for anyone else — a coarse proxy that skips per-turn life tracking.
 type LowerHealthWanter interface {
 	WantsLowerHealth()
-}
-
-// AddsFutureValue is an optional marker for cards whose printed effect delivers value on a
-// LATER turn rather than the one they're played — next-turn triggers, cross-turn counters,
-// and the like. The solver uses it as a beatsBest tiebreaker: at equal current-turn Value
-// and equal leftover-runechants, a partition that plays more AddsFutureValue cards wins,
-// because their hidden future payoff isn't reflected in this turn's score. Without the
-// bias, a lone future-value aura loses to Held → arsenal promotion on the arsenal-occupancy
-// tiebreak.
-//
-// The marker is intentionally decoupled from Aura so future hidden-value mechanisms
-// can opt in without piggybacking on the trigger system.
-type AddsFutureValue interface {
-	AddsFutureValue()
 }
 
 // ArsenalDefenseBonus is an optional marker for Defense Reactions whose printed text grants

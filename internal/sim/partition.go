@@ -5,9 +5,10 @@ package sim
 // bestAttackWithWeapons. Post-enumeration helpers decide how an empty arsenal slot gets
 // filled, plus the roleAllowed policy function that shapes the partition tree. Tiebreak
 // order across partition leaves lives on runningCarry (see running_carry.go): Value →
-// leftover runechants (future arcane) → more AddsFutureValue cards played (hidden
-// later-turn payoff the current-turn Value misses) → arsenal slot ending occupied
-// (saves a hand slot next refill; covers both arsenal-in-stayed and Held-for-promotion).
+// leftover runechants (future arcane) → cards drawn → more pending future value at end
+// of chain (non-token aura Counts plus unspent item Counts — hidden later-turn payoff
+// the current-turn Value misses) → arsenal slot ending occupied (saves a hand slot next
+// refill; covers both arsenal-in-stayed and Held-for-promotion).
 
 import ()
 
@@ -94,9 +95,8 @@ func (e *Evaluator) findBest(hero Hero, weapons []Weapon, hand []Card, mp Matchu
 	dvals := bufs.defenseVals[:totalN]
 	isDR := bufs.isDRBuf[:totalN]
 	canAttack := bufs.canAttackBuf[:totalN]
-	addsFutureValue := bufs.addsFutureValueBuf[:totalN]
 
-	fillPartitionPerCardBufs(hand, n, totalN, arsenalCardIn, pvals, dvals, isDR, canAttack, addsFutureValue)
+	fillPartitionPerCardBufs(hand, n, totalN, arsenalCardIn, pvals, dvals, isDR, canAttack)
 
 	var recurse func(i, pitchSum, defenseSum int)
 	recurse = func(i, pitchSum, defenseSum int) {
@@ -120,15 +120,7 @@ func (e *Evaluator) findBest(hero Hero, weapons []Weapon, hand []Card, mp Matchu
 
 			v := attackDealt + defenseDealt
 			arsenalCard := arsenalAtChainStart
-			futureValuePlayed := 0
-			for j := 0; j < n; j++ {
-				if rolesBuf[j] == Attack && addsFutureValue[j] {
-					futureValuePlayed++
-				}
-			}
-			if arsenalCardIn != nil && rolesBuf[n] == Attack && addsFutureValue[n] {
-				futureValuePlayed++
-			}
+			futureValuePlayed := pendingFutureValue(carry.Auras, carry.Items)
 			// willOccupy reads end-of-chain carry rather than rolesBuf so chains that drew
 			// a card mid-chain (Pitch + Gold-spend) register the drawn card as filling
 			// next turn's arsenal — same outcome as a Held card promoting via the post-hoc
@@ -522,3 +514,25 @@ func containsModalBlocker(cards []Card) bool {
 // be obviously beyond any real defense budget without depending on math.MaxInt overflow
 // arithmetic the budget arithmetic might do.
 const noBlockBudgetCap = 1 << 30
+
+// pendingFutureValue sums the Count of every non-token Aura plus every Item at end of
+// chain — the partition tiebreaker's "hidden later-turn payoff" signal. Token auras
+// (Runechant) credit Value at creation, so they're dropped. Card auras carry Count ==
+// fires-remaining for counters and == 1 for one-shots. Items only credit Value when the
+// activated ability is spent (drawing a card, consuming a Gold), so unspent items at end
+// of chain represent payoff the partition is saving for later — counted here so a
+// partition that leaves a Gold token in play beats one that arsenaled the creator and
+// made nothing.
+func pendingFutureValue(auras []Aura, items []Item) int {
+	total := 0
+	for _, a := range auras {
+		if a.Self.IsToken() {
+			continue
+		}
+		total += a.Count
+	}
+	for _, it := range items {
+		total += it.Count
+	}
+	return total
+}
