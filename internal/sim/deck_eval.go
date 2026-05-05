@@ -474,7 +474,7 @@ const startOfTurnRevealRoom = 8
 //   - Leaves non-start-of-turn auras in place so they can fire mid-chain.
 //
 // Returns the survivor list, per-aura contributions for FormatBestTurn, the summed damage
-// to fold into Value, cards the handlers drew into the hand (ts.Hand) in draw order, and
+// to fold into Value, cards the handlers drew into the hand (ts.hand) in draw order, and
 // auras destroyed this pass in destroy order.
 //
 // Cascading reveals: a handler that pops s.Deck shrinks the view for the next handler, so
@@ -506,7 +506,7 @@ func processAurasAtStartOfTurn(queued []Aura, postDrawDeck []Card) (
 			continue
 		}
 		self := t.Self.Card
-		preHand := len(ts.Hand)
+		preHand := len(ts.hand)
 		preLog := len(ts.turnLog)
 		preValue := ts.Value
 		ts.currentAuraIdx = i
@@ -517,11 +517,11 @@ func processAurasAtStartOfTurn(queued []Aura, postDrawDeck []Card) (
 		damage += d
 		// Attribute any newly-drawn card to this trigger so the best-turn printout can
 		// show what the handler drew (e.g. Sigil of the Arknight: "drew X into hand"). Taking
-		// ts.Hand[preHand] instead of counting from the end handles cascading draws where
+		// ts.hand[preHand] instead of counting from the end handles cascading draws where
 		// a later handler also draws — each trigger sees its own first-drawn card.
 		var rev Card
-		if len(ts.Hand) > preHand {
-			rev = ts.Hand[preHand]
+		if len(ts.hand) > preHand {
+			rev = ts.hand[preHand]
 		}
 		// Capture the handler's first authored log line, if any — Text takes precedence
 		// over the inferred "drew X into hand" / "START OF ACTION PHASE" suffix at format
@@ -537,7 +537,7 @@ func processAurasAtStartOfTurn(queued []Aura, postDrawDeck []Card) (
 			i++
 		}
 	}
-	return ts.Auras, contribs, damage, ts.Hand, ts.graveyard
+	return ts.Auras, contribs, damage, ts.hand, ts.graveyard
 }
 
 // applyTurnResult folds a completed turn's outcome into cross-turn state. The deck loop

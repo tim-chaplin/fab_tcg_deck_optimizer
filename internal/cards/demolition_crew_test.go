@@ -10,7 +10,8 @@ import (
 // Tests that PlayPrecondition passes when a cost-2-or-greater card sits in hand.
 func TestDemolitionCrew_PreconditionPassesWithEligibleReveal(t *testing.T) {
 	for _, c := range []sim.Card{DemolitionCrewRed{}, DemolitionCrewYellow{}, DemolitionCrewBlue{}} {
-		s := sim.TurnState{Hand: []sim.Card{testutils.GenericAttack(2, 0)}}
+		var s sim.TurnState
+		s.SetHandForTesting([]sim.Card{testutils.GenericAttack(2, 0)})
 		if ok := c.(sim.PlayPrecondition).PlayPrecondition(&s, &sim.CardState{Card: c}); !ok {
 			t.Errorf("%s: PlayPrecondition with cost-2 card in hand returned false, want true", c.Name())
 		}
@@ -20,7 +21,8 @@ func TestDemolitionCrew_PreconditionPassesWithEligibleReveal(t *testing.T) {
 // Tests that PlayPrecondition fails when only sub-cost-2 cards sit in hand.
 func TestDemolitionCrew_PreconditionFailsWithoutEligibleReveal(t *testing.T) {
 	for _, c := range []sim.Card{DemolitionCrewRed{}, DemolitionCrewYellow{}, DemolitionCrewBlue{}} {
-		s := sim.TurnState{Hand: []sim.Card{testutils.GenericAttack(1, 0)}}
+		var s sim.TurnState
+		s.SetHandForTesting([]sim.Card{testutils.GenericAttack(1, 0)})
 		if ok := c.(sim.PlayPrecondition).PlayPrecondition(&s, &sim.CardState{Card: c}); ok {
 			t.Errorf("%s: PlayPrecondition with no cost-2 card returned true, want false", c.Name())
 		}

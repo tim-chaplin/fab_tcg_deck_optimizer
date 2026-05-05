@@ -15,7 +15,7 @@ var springLoadTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.Ty
 
 // springLoadPlay applies the +3{p} 'no cards in hand' rider, then emits the chain step.
 func springLoadPlay(s *sim.TurnState, self *sim.CardState) {
-	if len(s.Hand) == 0 {
+	if len(s.Hand()) == 0 {
 		self.BonusAttack += 3
 	}
 	n := self.DealEffectiveAttack(s)

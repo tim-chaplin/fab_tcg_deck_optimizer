@@ -31,7 +31,7 @@ const moonWishPrintedCost = 2
 // else the printed cost. Shared across all three pitch variants since the alt cost is
 // identical.
 func moonWishCost(s *sim.TurnState) int {
-	if s != nil && len(s.Hand) > 0 {
+	if s != nil && len(s.Hand()) > 0 {
 		return 0
 	}
 	return moonWishPrintedCost
@@ -44,9 +44,8 @@ func moonWishPlay(c sim.Card, s *sim.TurnState, self *sim.CardState) {
 	name := sim.DisplayName(c)
 	// Alt cost: pop a hand card and prepend it to the deck (PrependToDeck flips cacheable).
 	var returned sim.Card
-	if len(s.Hand) > 0 {
-		returned = s.Hand[0]
-		s.Hand = s.Hand[1:]
+	if len(s.Hand()) > 0 {
+		returned = s.PopHandAt(0)
 		s.PrependToDeck(returned)
 	}
 
@@ -76,7 +75,7 @@ func moonWishOnHit(s *sim.TurnState, self *sim.CardState, _ *sim.OnHitHandler) {
 
 	if !self.EffectiveGoAgain() {
 		// Tutor lands the card in hand for next turn.
-		s.Hand = append(s.Hand, sk)
+		s.AppendHand(sk)
 		s.LogPostTriggerf(name, 0, "%s tutored %s", name, sim.DisplayName(sk))
 		return
 	}

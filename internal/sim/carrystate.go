@@ -22,7 +22,7 @@ package sim
 // overwrite them. Reads s.deck / s.graveyard directly so the snapshot itself doesn't
 // poison cacheable.
 func (c *CarryState) SnapshotFromTurn(s *TurnState) {
-	c.Hand = append(c.Hand[:0], s.Hand...)
+	c.Hand = append(c.Hand[:0], s.hand...)
 	c.Deck = append(c.Deck[:0], s.deck...)
 	c.Arsenal = s.Arsenal
 	c.Graveyard = append(c.Graveyard[:0], s.graveyard...)

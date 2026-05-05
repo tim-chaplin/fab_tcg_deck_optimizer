@@ -36,8 +36,8 @@ func TestSigilOfTheArknight_TriggerRevealsAttackActionIntoHand(t *testing.T) {
 	if next.Value != 0 {
 		t.Errorf("handler Value = %d, want 0 (tempo credited via the draw, not damage)", next.Value)
 	}
-	if len(next.Hand) != 1 || next.Hand[0] != top {
-		t.Errorf("Hand = %v, want [%v] (top of post-draw deck)", next.Hand, top)
+	if h := next.Hand(); len(h) != 1 || h[0] != top {
+		t.Errorf("Hand = %v, want [%v] (top of post-draw deck)", h, top)
 	}
 	if d := next.Deck(); len(d) != 1 || d[0] != (testutils.NonAttack{}) {
 		t.Errorf("Deck = %v, want top popped leaving [testutils.NonAttack]", d)
@@ -54,8 +54,8 @@ func TestSigilOfTheArknight_TriggerRevealsNonAttack(t *testing.T) {
 	if next.Value != 0 {
 		t.Errorf("handler Value = %d, want 0", next.Value)
 	}
-	if next.Hand != nil {
-		t.Errorf("Hand = %v, want nil (non-attack top, no draw)", next.Hand)
+	if h := next.Hand(); h != nil {
+		t.Errorf("Hand = %v, want nil (non-attack top, no draw)", h)
 	}
 	if d := next.Deck(); len(d) != 2 {
 		t.Errorf("Deck len = %d, want 2 (non-attack tops aren't moved)", len(d))
@@ -71,7 +71,7 @@ func TestSigilOfTheArknight_TriggerEmptyDeck(t *testing.T) {
 	if next.Value != 0 {
 		t.Errorf("handler Value = %d, want 0", next.Value)
 	}
-	if next.Hand != nil {
-		t.Errorf("Hand = %v, want nil (empty deck)", next.Hand)
+	if h := next.Hand(); h != nil {
+		t.Errorf("Hand = %v, want nil (empty deck)", h)
 	}
 }

@@ -21,13 +21,13 @@ func TestDrawOne_AppendsTopAndAdvancesDeck(t *testing.T) {
 	if s.Deck()[0] != b {
 		t.Errorf("Deck[0] = %v, want b (top advanced past a)", s.Deck()[0])
 	}
-	if len(s.Hand) != 1 || s.Hand[0] != a {
-		t.Errorf("Hand = %v, want [a]", s.Hand)
+	if h := s.Hand(); len(h) != 1 || h[0] != a {
+		t.Errorf("Hand = %v, want [a]", h)
 	}
 
 	s.DrawOne()
-	if len(s.Hand) != 2 || s.Hand[1] != b {
-		t.Errorf("Hand after second draw = %v, want [a, b]", s.Hand)
+	if h := s.Hand(); len(h) != 2 || h[1] != b {
+		t.Errorf("Hand after second draw = %v, want [a, b]", h)
 	}
 }
 
@@ -36,8 +36,8 @@ func TestDrawOne_AppendsTopAndAdvancesDeck(t *testing.T) {
 func TestDrawOne_EmptyDeckIsNoOp(t *testing.T) {
 	s := &TurnState{}
 	s.DrawOne()
-	if len(s.Hand) != 0 {
-		t.Errorf("Hand = %v, want empty on no-deck draw", s.Hand)
+	if h := s.Hand(); len(h) != 0 {
+		t.Errorf("Hand = %v, want empty on no-deck draw", h)
 	}
 	if s.Deck() != nil {
 		t.Errorf("Deck = %v, want nil", s.Deck())

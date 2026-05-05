@@ -11,11 +11,11 @@ import (
 )
 
 // TestPlaySequence_DrawDoesNotPoisonSubsequentPermutations pins the per-permutation reset of
-// state.Deck and state.Hand. Two back-to-back playSequence calls share one sequenceContext —
+// state.deck and state.hand. Two back-to-back playSequence calls share one sequenceContext —
 // the first fires a draw-rider card (Snatch), the second plays a plain attack. After the
-// second call finishes, state.Deck must be back to the original and state.Hand empty; if the
+// second call finishes, state.deck must be back to the original and state.hand empty; if the
 // reset weren't wired in, the second permutation would start from an already-consumed deck
-// and an inherited Hand slice.
+// and an inherited hand slice.
 func TestPlaySequence_DrawDoesNotPoisonSubsequentPermutations(t *testing.T) {
 	top := testutils.RedAttack{}
 	deck := []Card{top, testutils.BlueAttack{}, testutils.RedAttack{}}
@@ -23,8 +23,8 @@ func TestPlaySequence_DrawDoesNotPoisonSubsequentPermutations(t *testing.T) {
 
 	// First permutation: Snatch fires, DrawOne pops the top of the deck into Hand.
 	_, _, _, _ = ctx.PlaySequence([]Card{cards.SnatchRed{}})
-	if len(ctx.Bufs().State().Hand) != 1 || ctx.Bufs().State().Hand[0] != top {
-		t.Fatalf("after first permutation: Hand = %v, want [top]", ctx.Bufs().State().Hand)
+	if h := ctx.Bufs().State().Hand(); len(h) != 1 || h[0] != top {
+		t.Fatalf("after first permutation: Hand = %v, want [top]", h)
 	}
 	if len(ctx.Bufs().State().Deck()) != len(deck)-1 {
 		t.Fatalf("after first permutation: Deck len = %d, want %d (top consumed)",
@@ -32,10 +32,10 @@ func TestPlaySequence_DrawDoesNotPoisonSubsequentPermutations(t *testing.T) {
 	}
 
 	// Second permutation: plain attack, no draw. The reset at the top of playSequenceWithMeta
-	// must restore state.Deck to the original and clear state.Hand before this call runs.
+	// must restore state.deck to the original and clear state.hand before this call runs.
 	_, _, _, _ = ctx.PlaySequence([]Card{testutils.RedAttack{}})
-	if len(ctx.Bufs().State().Hand) != 0 {
-		t.Errorf("after second permutation: Hand = %v, want empty (reset lost)", ctx.Bufs().State().Hand)
+	if h := ctx.Bufs().State().Hand(); len(h) != 0 {
+		t.Errorf("after second permutation: Hand = %v, want empty (reset lost)", h)
 	}
 	if len(ctx.Bufs().State().Deck()) != len(deck) {
 		t.Errorf("after second permutation: Deck len = %d, want %d (reset lost)",
