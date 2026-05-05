@@ -29,34 +29,3 @@ func itemCountIn(items []Item, t TokenType) int {
 	}
 	return 0
 }
-
-// ItemCreator is an optional Card marker. Cards whose Play / OnHit creates a token item
-// (Strike Gold creating Gold, Performance Bonus creating Gold) declare so via this
-// interface; bestAttackWithWeapons unions the declared types with priorItems' types and
-// adds one ability instance per resulting type to the wmask. Without the marker the
-// optimizer can't enumerate a chain that spends an item created mid-turn — the wmask
-// is built once at chain start.
-//
-// CreatesItem returns TokenTypeNone when the card sometimes creates one and sometimes
-// doesn't (e.g. on-hit gated). The marker is conservative: declaring true reserves a
-// wmask bit that PlayPrecondition rejects when the token never materialises, so a
-// blockable Strike Gold variant doesn't pin a useless ability into every permutation.
-type ItemCreator interface {
-	CreatesItem() TokenType
-}
-
-// tokenItemAbilityFor returns the activated-ability Card for token-item type t, or nil
-// when t isn't a token-item type. Single read site for the (TokenType, Ability) mapping
-// — bestAttackWithWeapons reads it when assembling itemAbilities for ItemCreator
-// declarations that aren't already covered by priorItems' Ability field.
-func tokenItemAbilityFor(t TokenType) Card {
-	switch t {
-	case TokenTypeGold:
-		return GoldTokenAbility{}
-	case TokenTypeSilver:
-		return SilverTokenAbility{}
-	case TokenTypeCopper:
-		return CopperTokenAbility{}
-	}
-	return nil
-}

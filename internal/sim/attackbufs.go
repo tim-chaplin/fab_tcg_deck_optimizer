@@ -42,11 +42,11 @@ type shapeBufs struct {
 	weaponNames [][]string
 	// activatedAbilities is the unified activated-ability list — weapons (positions
 	// 0..len(weapons)-1) materialised at construction; items appended per Best call
-	// from priorItems and ItemCreator declarations. The wmask iterates over the whole
-	// slice; index j's bit selects activatedAbilities[j]. An "activated ability" is
-	// the same chain step whether it came from a weapon or an item, so they share one
-	// list and one path. Per-Best assembly re-slices back to the weapon prefix length
-	// before appending items, leaving the cached weapon entries reusable across calls.
+	// from priorItems. The wmask iterates over the whole slice; index j's bit selects
+	// activatedAbilities[j]. An "activated ability" is the same chain step whether it
+	// came from a weapon or an item, so they share one list and one path. Per-Best
+	// assembly re-slices back to the weapon prefix length before appending items,
+	// leaving the cached weapon entries reusable across calls.
 	activatedAbilities    []Card
 	activatedAbilityCosts []int
 	// weaponAbilityCount is len(weapons) at construction — the size of the cached

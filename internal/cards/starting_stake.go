@@ -22,8 +22,6 @@ func (StartingStakeYellow) Defense() int            { return 3 }
 func (StartingStakeYellow) Types() card.TypeSet     { return startingStakeTypes }
 func (StartingStakeYellow) GoAgain() bool           { return false }
 
-func (StartingStakeYellow) CreatesItem() sim.TokenType { return sim.TokenTypeGold }
-
 func (StartingStakeYellow) Play(s *sim.TurnState, self *sim.CardState) {
 	if s.Gold() == 0 {
 		s.CreateGold(1)

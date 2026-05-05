@@ -34,9 +34,6 @@ func (PerformanceBonusRed) Attack() int             { return 3 }
 func (PerformanceBonusRed) Defense() int            { return 2 }
 func (PerformanceBonusRed) Types() card.TypeSet     { return performanceBonusTypes }
 func (PerformanceBonusRed) GoAgain() bool           { return false }
-func (PerformanceBonusRed) CreatesItem() sim.TokenType {
-	return sim.TokenTypeGold
-}
 func (PerformanceBonusRed) Play(s *sim.TurnState, self *sim.CardState) {
 	performanceBonusPlay(s, self)
 }
@@ -51,9 +48,6 @@ func (PerformanceBonusYellow) Attack() int             { return 2 }
 func (PerformanceBonusYellow) Defense() int            { return 2 }
 func (PerformanceBonusYellow) Types() card.TypeSet     { return performanceBonusTypes }
 func (PerformanceBonusYellow) GoAgain() bool           { return false }
-func (PerformanceBonusYellow) CreatesItem() sim.TokenType {
-	return sim.TokenTypeGold
-}
 func (PerformanceBonusYellow) Play(s *sim.TurnState, self *sim.CardState) {
 	performanceBonusPlay(s, self)
 }
@@ -68,9 +62,6 @@ func (PerformanceBonusBlue) Attack() int             { return 1 }
 func (PerformanceBonusBlue) Defense() int            { return 2 }
 func (PerformanceBonusBlue) Types() card.TypeSet     { return performanceBonusTypes }
 func (PerformanceBonusBlue) GoAgain() bool           { return false }
-func (PerformanceBonusBlue) CreatesItem() sim.TokenType {
-	return sim.TokenTypeGold
-}
 func (PerformanceBonusBlue) Play(s *sim.TurnState, self *sim.CardState) {
 	performanceBonusPlay(s, self)
 }
