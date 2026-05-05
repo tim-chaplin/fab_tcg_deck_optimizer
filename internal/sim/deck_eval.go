@@ -382,11 +382,11 @@ func snapshotStartOfTurnAuras(queued []Aura) []Card {
 	return out
 }
 
-// runBestForTurn dispatches to ev.BestWithTriggersSkipLog when an evaluator is supplied (the
-// hot-path goroutine-local case used by EvaluateWith / IterateParallel) and falls back to
-// the package-level BestWithTriggers when ev is nil. The returned TurnSummary has
-// State.Log empty for the SkipLog path; callers that want a populated Log (the rare new-
-// deck-best case) call replayBestForTurnWithLog with the same inputs.
+// runBestForTurn dispatches to ev.BestSkipLog when an evaluator is supplied (the hot-path
+// goroutine-local case used by EvaluateWith / IterateParallel) and falls back to the
+// package-level Best when ev is nil. The returned TurnSummary has State.Log empty for the
+// SkipLog path; callers that want a populated Log (the rare new-deck-best case) call
+// replayBestForTurnWithLog with the same inputs.
 func runBestForTurn(
 	hero Hero,
 	weapons []Weapon,
@@ -399,11 +399,11 @@ func runBestForTurn(
 	ev *Evaluator,
 ) TurnSummary {
 	if ev != nil {
-		return ev.BestWithTriggersSkipLog(hero, weapons, h, mp, deck, arsenalCard, priorAuras, priorItems)
+		return ev.BestSkipLog(hero, weapons, h, mp, deck, arsenalCard, priorAuras, priorItems)
 	}
 	// No-evaluator path retains the populated-Log behaviour for direct callers (tests, ad-hoc
 	// tools) that don't have a deck-eval loop to drive the replay step.
-	return BestWithTriggers(hero, weapons, h, mp, deck, arsenalCard, priorAuras, priorItems)
+	return best(hero, weapons, h, mp, deck, arsenalCard, priorAuras, priorItems)
 }
 
 // replayBestForTurnWithLog re-runs the Best search with full Log materialisation. Same
@@ -423,9 +423,9 @@ func replayBestForTurnWithLog(
 	ev *Evaluator,
 ) TurnSummary {
 	if ev != nil {
-		return ev.BestWithTriggers(hero, weapons, h, mp, deck, arsenalCard, priorAuras, priorItems)
+		return ev.Best(hero, weapons, h, mp, deck, arsenalCard, priorAuras, priorItems)
 	}
-	return BestWithTriggers(hero, weapons, h, mp, deck, arsenalCard, priorAuras, priorItems)
+	return best(hero, weapons, h, mp, deck, arsenalCard, priorAuras, priorItems)
 }
 
 // recordTurnStats folds one resolved turn's accumulators into stats: bumps Hands /

@@ -17,9 +17,15 @@ import (
 // pool-exclusion marker contract directly.
 func IsExcludedFromPool(c Card) bool { return isExcludedFromPool(c) }
 
+// Best re-exports the package-private best for sim_test consumers. External-package
+// (e2etest) callers don't see this — only sim_test files in the same directory do.
+func Best(hero Hero, weapons []Weapon, hand []Card, mp Matchup, deck []Card, arsenalCardIn Card, priorAuras []Aura, priorItems []Item) TurnSummary {
+	return best(hero, weapons, hand, mp, deck, arsenalCardIn, priorAuras, priorItems)
+}
+
 // SequenceContextForTest wraps *sequenceContext so sim_test files can drive
 // playSequence / bestSequence without touching the unexported type directly. Production
-// callers go through Best / BestWithTriggers instead.
+// callers go through best / Evaluator.Best instead.
 type SequenceContextForTest struct{ ctx *sequenceContext }
 
 // NewSequenceContextForTest builds a sequenceContext with the same shape as the

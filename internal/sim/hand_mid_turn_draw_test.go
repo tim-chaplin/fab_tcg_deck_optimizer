@@ -51,8 +51,8 @@ func TestBest_DrawRiderSeesActualDeck(t *testing.T) {
 	deckA := []Card{testutils.RedAttack{}}
 	deckB := []Card{testutils.BlueAttack{}}
 
-	resA := Best(heroes.Viserai{}, nil, h, Matchup{IncomingDamage: 0}, deckA, nil)
-	resB := Best(heroes.Viserai{}, nil, h, Matchup{IncomingDamage: 0}, deckB, nil)
+	resA := Best(heroes.Viserai{}, nil, h, Matchup{IncomingDamage: 0}, deckA, nil, nil, nil)
+	resB := Best(heroes.Viserai{}, nil, h, Matchup{IncomingDamage: 0}, deckB, nil, nil, nil)
 
 	containsID := func(cs []Card, id ids.CardID) bool {
 		for _, c := range cs {
@@ -101,8 +101,8 @@ func TestBest_DeckOrderDoesNotAffectHandRoles(t *testing.T) {
 		return m
 	}
 
-	resA := Best(testutils.Hero{Intel: 4}, nil, h, Matchup{IncomingDamage: 0}, deckA, nil)
-	resB := Best(testutils.Hero{Intel: 4}, nil, h, Matchup{IncomingDamage: 0}, deckB, nil)
+	resA := Best(testutils.Hero{Intel: 4}, nil, h, Matchup{IncomingDamage: 0}, deckA, nil, nil, nil)
+	resB := Best(testutils.Hero{Intel: 4}, nil, h, Matchup{IncomingDamage: 0}, deckB, nil, nil, nil)
 
 	rolesA := rolesFor(resA)
 	rolesB := rolesFor(resB)

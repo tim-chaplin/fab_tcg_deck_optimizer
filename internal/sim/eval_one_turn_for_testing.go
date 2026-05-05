@@ -67,11 +67,14 @@ func (t TurnStartState) Copper() int {
 }
 
 // EvalOneTurnForTesting runs one turn against d.Cards in source order (no shuffle) and returns
-// the tested turn's outcome plus the start-of-next-turn state. arsenalIn seeds turn 1's arsenal
-// slot (nil for empty). initialHand sets turn 1's starting hand; nil takes d.Cards[:handSize] as
-// the hand and treats the rest as the deck, non-nil uses the slice directly (may be shorter than
-// handSize) and treats d.Cards as the deck entirely. Test-only — production callers use Evaluate.
-func (d *Deck) EvalOneTurnForTesting(mp Matchup, arsenalIn Card, initialHand []Card) TurnStartState {
+// the tested turn's outcome plus the start-of-next-turn state. initial seeds the start-of-turn
+// state — Arsenal, Auras, Items — modelling carryover from a hypothetical previous turn; the
+// other TurnState fields are ignored (transient mid-chain state, hand / deck / graveyard which
+// are seeded from this method's own inputs). initialHand sets turn 1's starting hand; nil takes
+// d.Cards[:handSize] as the hand and treats the rest as the deck, non-nil uses the slice
+// directly (may be shorter than handSize) and treats d.Cards as the deck entirely. Test-only —
+// production callers use Evaluate.
+func (d *Deck) EvalOneTurnForTesting(mp Matchup, initial TurnState, initialHand []Card) TurnStartState {
 	CurrentHero = d.Hero
 	handSize := d.Hero.Intelligence()
 	if handSize <= 0 {
@@ -96,7 +99,7 @@ func (d *Deck) EvalOneTurnForTesting(mp Matchup, arsenalIn Card, initialHand []C
 	h := handBuf[:len(turn1Hand)]
 	copy(h, turn1Hand)
 	sortHandByID(h)
-	play := Best(d.Hero, d.Weapons, h, mp, buf[head:tail], arsenalIn)
+	play := best(d.Hero, d.Weapons, h, mp, buf[head:tail], initial.Arsenal, initial.Auras, initial.Items)
 	// drawCount=0: head already points past the starting hand, so applyTurnResult only needs
 	// to advance past mid-turn draws.
 	nextHeld := applyTurnResult(play, buf, &head, &tail, nil)

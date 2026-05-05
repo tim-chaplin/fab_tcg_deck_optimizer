@@ -151,7 +151,7 @@ func TestEvalOneTurn_SigilOfFyendalQueuesTrigger(t *testing.T) {
 		testutils.BlueAttack{},
 	}
 	d := New(heroes.Viserai{}, nil, deckCards)
-	state := d.EvalOneTurnForTesting(Matchup{IncomingDamage: 0}, nil, []Card{sigil})
+	state := d.EvalOneTurnForTesting(Matchup{IncomingDamage: 0}, TurnState{}, []Card{sigil})
 
 	sigilPlayed := false
 	for _, a := range state.BestLine {
@@ -299,7 +299,7 @@ func TestEvalOneTurn_SigilOfTheArknightRevealsIntoHand(t *testing.T) {
 		testutils.BlueAttack{},
 	}
 	d := New(heroes.Viserai{}, nil, deckCards)
-	state := d.EvalOneTurnForTesting(Matchup{IncomingDamage: 0}, nil, []Card{sigil})
+	state := d.EvalOneTurnForTesting(Matchup{IncomingDamage: 0}, TurnState{}, []Card{sigil})
 
 	sigilPlayed := false
 	for _, a := range state.BestLine {
@@ -349,7 +349,7 @@ func TestEvalOneTurn_BlessingOfOccultCreatesRunesAtStartOfNextTurn(t *testing.T)
 		testutils.BlueAttack{},
 	}
 	d := New(heroes.Viserai{}, nil, deckCards)
-	state := d.EvalOneTurnForTesting(Matchup{IncomingDamage: 0}, nil, []Card{blessing, pitch})
+	state := d.EvalOneTurnForTesting(Matchup{IncomingDamage: 0}, TurnState{}, []Card{blessing, pitch})
 
 	if state.Value != 0 {
 		t.Errorf("Value = %d, want 0 (Blessing's rune credit is deferred)", state.Value)
@@ -470,7 +470,7 @@ func TestEvalOneTurn_MaleficIncantationOncePerTurnLimitsToOneRune(t *testing.T) 
 		testutils.BlueAttack{},
 	}
 	d := New(heroes.Viserai{}, nil, deckCards)
-	state := d.EvalOneTurnForTesting(Matchup{IncomingDamage: 0}, nil, []Card{malefic, hocus})
+	state := d.EvalOneTurnForTesting(Matchup{IncomingDamage: 0}, TurnState{}, []Card{malefic, hocus})
 
 	maleficPlayed, hocusPlayed := false, false
 	for _, a := range state.BestLine {
@@ -518,7 +518,7 @@ func TestEvalOneTurn_RunebloodIncantationTicksAcrossTurns(t *testing.T) {
 		testutils.BlueAttack{},
 	}
 	d := New(heroes.Viserai{}, nil, deckCards)
-	state := d.EvalOneTurnForTesting(Matchup{IncomingDamage: 0}, nil, []Card{runeblood, pitch})
+	state := d.EvalOneTurnForTesting(Matchup{IncomingDamage: 0}, TurnState{}, []Card{runeblood, pitch})
 
 	runebloodPlayed := false
 	for _, a := range state.BestLine {

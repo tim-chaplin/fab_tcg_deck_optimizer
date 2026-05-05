@@ -22,22 +22,22 @@ func TestSilverAbility_SpendsToFillArsenal(t *testing.T) {
 	d := sim.New(heroes.Viserai{}, nil, deck)
 	hand := []sim.Card{testutils.BluePitch{}}
 	priorItems := []sim.Item{sim.NewSilverItem(1)}
-	got := sim.BestWithTriggers(heroes.Viserai{}, nil, hand, sim.Matchup{IncomingDamage: 0}, deck, nil, nil, priorItems)
+	got := d.EvalOneTurnForTesting(sim.Matchup{IncomingDamage: 0}, sim.TurnState{Items: priorItems}, hand)
 	if got.Value != 0 {
 		t.Fatalf("Value = %d, want 0 (Silver ability has no damage)", got.Value)
 	}
-	if got.State.Silver() != 0 {
-		t.Fatalf("Silver after turn = %d, want 0 (the only token spent)", got.State.Silver())
+	if got.Silver() != 0 {
+		t.Fatalf("Silver after turn = %d, want 0 (the only token spent)", got.Silver())
 	}
-	if got.State.CardsDrawn != 1 {
-		t.Fatalf("CardsDrawn = %d, want 1 (Silver ability draws one card)", got.State.CardsDrawn)
+	if got.CardsDrawn != 1 {
+		t.Fatalf("CardsDrawn = %d, want 1 (Silver ability draws one card)", got.CardsDrawn)
 	}
-	if got.State.Arsenal == nil {
-		t.Fatalf("Arsenal = nil, want the drawn card promoted into the slot")
+	if got.StartOfNextTurnArsenal == nil {
+		t.Fatalf("StartOfNextTurnArsenal = nil, want the drawn card promoted into the slot")
 	}
-	if len(got.State.Deck) < d.Hero.Intelligence() {
-		t.Fatalf("State.Deck has %d cards, want >= %d so next turn deals a full hand",
-			len(got.State.Deck), d.Hero.Intelligence())
+	if len(got.StartOfNextTurnHand) != d.Hero.Intelligence() {
+		t.Fatalf("StartOfNextTurnHand size = %d, want %d (Silver-spend draw should leave enough deck for next turn's full deal)",
+			len(got.StartOfNextTurnHand), d.Hero.Intelligence())
 	}
 }
 
@@ -53,18 +53,17 @@ func TestSilverAbility_SpendsAndSwings(t *testing.T) {
 	d := sim.New(heroes.Viserai{}, []sim.Weapon{weapons.ReapingBlade{}}, deck)
 	hand := []sim.Card{testutils.BluePitch{}, testutils.BluePitch{}}
 	priorItems := []sim.Item{sim.NewSilverItem(1)}
-	got := sim.BestWithTriggers(heroes.Viserai{}, []sim.Weapon{weapons.ReapingBlade{}}, hand, sim.Matchup{IncomingDamage: 0}, deck, nil, nil, priorItems)
+	got := d.EvalOneTurnForTesting(sim.Matchup{IncomingDamage: 0}, sim.TurnState{Items: priorItems}, hand)
 	if got.Value != 3 {
 		t.Fatalf("Value = %d, want 3 (Reaping Blade swing power 3)", got.Value)
 	}
-	if got.State.Silver() != 0 {
-		t.Fatalf("Silver after turn = %d, want 0 (the only token spent)", got.State.Silver())
+	if got.Silver() != 0 {
+		t.Fatalf("Silver after turn = %d, want 0 (the only token spent)", got.Silver())
 	}
-	if got.State.CardsDrawn != 1 {
-		t.Fatalf("CardsDrawn = %d, want 1 (Silver ability draws one card)", got.State.CardsDrawn)
+	if got.CardsDrawn != 1 {
+		t.Fatalf("CardsDrawn = %d, want 1 (Silver ability draws one card)", got.CardsDrawn)
 	}
-	if got.State.Arsenal == nil {
-		t.Fatalf("Arsenal = nil, want the drawn card promoted into the slot")
+	if got.StartOfNextTurnArsenal == nil {
+		t.Fatalf("StartOfNextTurnArsenal = nil, want the drawn card promoted into the slot")
 	}
-	_ = d
 }
