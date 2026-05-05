@@ -301,7 +301,7 @@ func runOneShuffle(d *Deck, stats *Stats, scratch *shuffleScratch, idIndex map[i
 		}
 		arsenalIn := arsenalCard
 		sortHandByID(h)
-		play := runBestForTurn(d.Hero, d.Weapons, h, mp, buf[head+drawCount:tail], arsenalCard, auraTriggerBuf, itemBuf, ev)
+		play := runBestForTurn(d.Hero, d.Weapons, h, mp, buf[head+drawCount:tail], TurnState{Arsenal: arsenalCard, Auras: auraTriggerBuf, Items: itemBuf}, ev)
 		arsenalCard = play.State.Arsenal
 		play.Value += trigDamage
 		play.TriggersFromLastTurn = trigContribs
@@ -309,7 +309,7 @@ func runOneShuffle(d *Deck, stats *Stats, scratch *shuffleScratch, idIndex map[i
 		play.DealtHand = dealtHand
 
 		if recordTurnStats(stats, play, handIdx, handsPerCycle) {
-			replay := replayBestForTurnWithLog(d.Hero, d.Weapons, h, mp, buf[head+drawCount:tail], arsenalIn, auraTriggerBuf, itemBuf, ev)
+			replay := replayBestForTurnWithLog(d.Hero, d.Weapons, h, mp, buf[head+drawCount:tail], TurnState{Arsenal: arsenalIn, Auras: auraTriggerBuf, Items: itemBuf}, ev)
 			replay.Value = play.Value
 			replay.TriggersFromLastTurn = trigContribs
 			replay.StartOfTurnAuras = startOfTurnAuras
@@ -393,17 +393,15 @@ func runBestForTurn(
 	h []Card,
 	mp Matchup,
 	deck []Card,
-	arsenalCard Card,
-	priorAuras []Aura,
-	priorItems []Item,
+	prior TurnState,
 	ev *Evaluator,
 ) TurnSummary {
 	if ev != nil {
-		return ev.BestSkipLog(hero, weapons, h, mp, deck, arsenalCard, priorAuras, priorItems)
+		return ev.BestSkipLog(hero, weapons, h, mp, deck, prior)
 	}
 	// No-evaluator path retains the populated-Log behaviour for direct callers (tests, ad-hoc
 	// tools) that don't have a deck-eval loop to drive the replay step.
-	return best(hero, weapons, h, mp, deck, arsenalCard, priorAuras, priorItems)
+	return best(hero, weapons, h, mp, deck, prior)
 }
 
 // replayBestForTurnWithLog re-runs the Best search with full Log materialisation. Same
@@ -417,15 +415,13 @@ func replayBestForTurnWithLog(
 	h []Card,
 	mp Matchup,
 	deck []Card,
-	arsenalCard Card,
-	priorAuras []Aura,
-	priorItems []Item,
+	prior TurnState,
 	ev *Evaluator,
 ) TurnSummary {
 	if ev != nil {
-		return ev.Best(hero, weapons, h, mp, deck, arsenalCard, priorAuras, priorItems)
+		return ev.Best(hero, weapons, h, mp, deck, prior)
 	}
-	return best(hero, weapons, h, mp, deck, arsenalCard, priorAuras, priorItems)
+	return best(hero, weapons, h, mp, deck, prior)
 }
 
 // recordTurnStats folds one resolved turn's accumulators into stats: bumps Hands /

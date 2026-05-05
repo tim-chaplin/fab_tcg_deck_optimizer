@@ -39,8 +39,8 @@ func FormatLogEntry(e LogEntry) string {
 // arsenalAtChainStart is the card sitting in the arsenal slot at the start of the chain — set
 // when the partition assigned arsenalCardIn the Arsenal role (it's staying), nil otherwise
 // (no arsenal-in, or arsenal-in is playing as Attack/Defend).
-func bestAttackWithWeapons(hero Hero, weapons []Weapon, attackers, defenders, pitched, held, deck []Card, bufs *attackBufs, mp Matchup, blockTotal, arsenalInIdx, arsenalDefenderIdx int, arsenalAtChainStart Card, priorAuras []Aura, priorItems []Item, skipLog bool) (int, int, chainBudget, []string, CarryState, bool, bool) {
-	runechantCarryover := tokenCountIn(priorAuras, TokenTypeRunechant)
+func bestAttackWithWeapons(hero Hero, weapons []Weapon, attackers, defenders, pitched, held, deck []Card, bufs *attackBufs, mp Matchup, blockTotal, arsenalInIdx, arsenalDefenderIdx int, arsenalAtChainStart Card, prior TurnState, skipLog bool) (int, int, chainBudget, []string, CarryState, bool, bool) {
+	runechantCarryover := tokenCountIn(prior.Auras, TokenTypeRunechant)
 	ctx := &sequenceContext{
 		hero:                hero,
 		pitched:             pitched,
@@ -52,8 +52,8 @@ func bestAttackWithWeapons(hero Hero, weapons []Weapon, attackers, defenders, pi
 		matchup:             mp,
 		blockTotal:          blockTotal,
 		arsenalInIdx:        arsenalInIdx,
-		priorAuras:          priorAuras,
-		priorItems:          priorItems,
+		priorAuras:          prior.Auras,
+		priorItems:          prior.Items,
 		// defenderAuras shares backing with bufs.defenderAurasBacking so the per-partition
 		// capture is alloc-free across Best calls.
 		defenderAuras: bufs.defenderAurasBacking[:0],
@@ -77,7 +77,7 @@ func bestAttackWithWeapons(hero Hero, weapons []Weapon, attackers, defenders, pi
 	abilityCosts := bufs.activatedAbilityCosts[:bufs.weaponAbilityCount]
 	// In-play items contribute min(Count, perItemAbilityCap) ability instances each so
 	// the wmask can pick "play it 0..N times this turn".
-	for _, it := range priorItems {
+	for _, it := range prior.Items {
 		copies := it.Count
 		if copies > perItemAbilityCap {
 			copies = perItemAbilityCap
@@ -104,7 +104,7 @@ func bestAttackWithWeapons(hero Hero, weapons []Weapon, attackers, defenders, pi
 	// so nothing in the defense phase reads hidden state.
 	defenseCacheableConst := true
 	if !hasModalBlocker && len(defenders) > 0 {
-		defenseDealtConst, defenseCacheableConst = ctx.runDefense(defenders, pitched, deck, priorAuras, mp.IncomingDamage, noBlockBudgetCap, arsenalDefenderIdx)
+		defenseDealtConst, defenseCacheableConst = ctx.runDefense(defenders, pitched, deck, prior.Auras, mp.IncomingDamage, noBlockBudgetCap, arsenalDefenderIdx)
 	}
 	defenseDealt := defenseDealtConst
 	defenseCacheable := defenseCacheableConst
@@ -223,7 +223,7 @@ func bestAttackWithWeapons(hero Hero, weapons []Weapon, attackers, defenders, pi
 			// candidate sees the right spare budget. Non-modal-blocker partitions stick with
 			// the once-per-leaf defenseDealtConst computed above.
 			if hasModalBlocker {
-				defenseDealt, defenseCacheable = ctx.runDefense(defenders, pitched, deck, priorAuras, mp.IncomingDamage, phase.defendBudget-drCost, arsenalDefenderIdx)
+				defenseDealt, defenseCacheable = ctx.runDefense(defenders, pitched, deck, prior.Auras, mp.IncomingDamage, phase.defendBudget-drCost, arsenalDefenderIdx)
 			}
 			if phase.hasDefendPitches && phase.defendBudget-drCost >= phase.maxDefendPitch {
 				continue

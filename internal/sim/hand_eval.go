@@ -14,31 +14,31 @@ import ()
 // stays in the arsenal slot at end of turn). Pitch resources split across attack / defense
 // phases since resources don't carry between turns.
 //
-// arsenalCardIn is the card sitting in the arsenal slot at start of turn (nil if empty).
-// priorAuras / priorItems are the persistent state carrying in from the previous turn:
-// mid-chain triggers may fire and contribute damage; item activated abilities become
-// playable chain steps. TurnSummary.State.Auras / .Items feed back as next turn's
-// priorAuras / priorItems.
+// prior is the start-of-turn carryover from the previous turn — Arsenal (the card sitting
+// in the arsenal slot, nil if empty), Auras (mid-chain triggers may fire and contribute
+// damage), and Items (activated abilities become playable chain steps). The other
+// TurnState fields are ignored. TurnSummary.State.Arsenal / .Auras / .Items feed back as
+// next turn's prior.
 //
 // Package-private so external packages can't bypass (*Deck).EvalOneTurnForTesting — the
 // e2etest convention is to drive the chain runner through that deck-level entry point so
 // every test exercises the same per-turn pipeline production runs through Evaluate.
-func best(hero Hero, weapons []Weapon, hand []Card, mp Matchup, deck []Card, arsenalCardIn Card, priorAuras []Aura, priorItems []Item) TurnSummary {
-	return sharedEvaluator.Best(hero, weapons, hand, mp, deck, arsenalCardIn, priorAuras, priorItems)
+func best(hero Hero, weapons []Weapon, hand []Card, mp Matchup, deck []Card, prior TurnState) TurnSummary {
+	return sharedEvaluator.Best(hero, weapons, hand, mp, deck, prior)
 }
 
 // Best is the method form of the package-level Best. Returns a TurnSummary with
 // State.Log fully populated.
-func (e *Evaluator) Best(hero Hero, weapons []Weapon, hand []Card, mp Matchup, deck []Card, arsenalCardIn Card, priorAuras []Aura, priorItems []Item) TurnSummary {
-	return e.findBest(hero, weapons, hand, mp, deck, arsenalCardIn, priorAuras, priorItems, false)
+func (e *Evaluator) Best(hero Hero, weapons []Weapon, hand []Card, mp Matchup, deck []Card, prior TurnState) TurnSummary {
+	return e.findBest(hero, weapons, hand, mp, deck, prior, false)
 }
 
 // BestSkipLog is Best without populating State.Log. Same Value and non-Log carry-state
 // fields; State.Log comes back empty. The deck-eval loop uses this for every turn to skip
 // the per-chain Log slice copy that dominates allocation bytes; only turns that become the
 // new deck-best are replayed via Best to recover Log.
-func (e *Evaluator) BestSkipLog(hero Hero, weapons []Weapon, hand []Card, mp Matchup, deck []Card, arsenalCardIn Card, priorAuras []Aura, priorItems []Item) TurnSummary {
-	return e.findBest(hero, weapons, hand, mp, deck, arsenalCardIn, priorAuras, priorItems, true)
+func (e *Evaluator) BestSkipLog(hero Hero, weapons []Weapon, hand []Card, mp Matchup, deck []Card, prior TurnState) TurnSummary {
+	return e.findBest(hero, weapons, hand, mp, deck, prior, true)
 }
 
 // Evaluator caches per-goroutine scratch state across Best calls. The first call allocates
