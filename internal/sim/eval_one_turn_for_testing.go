@@ -99,7 +99,7 @@ func (d *Deck) EvalOneTurnForTesting(mp Matchup, initial TurnState, initialHand 
 	h := handBuf[:len(turn1Hand)]
 	copy(h, turn1Hand)
 	sortHandByID(h)
-	play := best(d.Hero, d.Weapons, h, mp, buf[head:tail], initial.Arsenal, initial.Auras, initial.Items)
+	play := best(d.Hero, d.Weapons, h, mp, buf[head:tail], initial)
 	// drawCount=0: head already points past the starting hand, so applyTurnResult only needs
 	// to advance past mid-turn draws.
 	nextHeld := applyTurnResult(play, buf, &head, &tail, nil)

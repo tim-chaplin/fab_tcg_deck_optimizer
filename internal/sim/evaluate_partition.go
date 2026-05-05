@@ -18,16 +18,17 @@ package sim
 // place; both callers feed pooled scratch through bufs and tolerate the rewrite.
 func (e *Evaluator) evaluatePartition(
 	hero Hero, weapons []Weapon, hand []Card,
-	deck []Card, arsenalCardIn Card,
+	deck []Card,
 	rolesBuf []Role, n int, bufs *attackBufs,
 	mp Matchup, defenseSum int,
-	priorAuras []Aura, priorItems []Item, skipLog bool,
+	prior TurnState, skipLog bool,
 ) (
 	attackDealt, defenseDealt int,
 	swung []string, carry CarryState,
 	ok, cacheable bool,
 	arsenalAtChainStart Card,
 ) {
+	arsenalCardIn := prior.Arsenal
 	// Group hand cards into played / pitched / defending buckets, then fold in the
 	// arsenal-in card based on its slot's role.
 	p, a, d := groupByRoleInto(
@@ -65,7 +66,7 @@ func (e *Evaluator) evaluatePartition(
 		hero, weapons, a, d, p, h, deck, bufs,
 		mp, defenseSum,
 		arsenalInIdx, arsenalDefenderIdx, arsenalAtChainStart,
-		priorAuras, priorItems, skipLog,
+		prior, skipLog,
 	)
 	return
 }

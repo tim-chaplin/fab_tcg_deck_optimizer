@@ -13,14 +13,14 @@ package sim
 
 import ()
 
-func (e *Evaluator) findBest(hero Hero, weapons []Weapon, hand []Card, mp Matchup, deck []Card, arsenalCardIn Card, priorAuras []Aura, priorItems []Item, skipLog bool) TurnSummary {
+func (e *Evaluator) findBest(hero Hero, weapons []Weapon, hand []Card, mp Matchup, deck []Card, prior TurnState, skipLog bool) TurnSummary {
 	// Cache fast-path. Bypassed when disabled (e.cache nil) or when any input overflows
 	// a fixed-size cache-key slot (hand size, weapons, auras, items).
 	var cacheKey evalCacheKey
 	cacheUsable := e.cache != nil
 	if cacheUsable {
 		var keyOK bool
-		cacheKey, keyOK = makeCacheKey(hero, weapons, hand, arsenalCardIn, priorAuras, priorItems)
+		cacheKey, keyOK = makeCacheKey(hero, weapons, hand, prior)
 		if !keyOK {
 			cacheUsable = false
 		}
@@ -28,11 +28,12 @@ func (e *Evaluator) findBest(hero Hero, weapons []Weapon, hand []Card, mp Matchu
 	if cacheUsable {
 		if entry, ok := e.cache.lookup(cacheKey); ok {
 			e.cache.hits.Add(1)
-			return e.replayBest(entry, hero, weapons, hand, mp, deck, arsenalCardIn, priorAuras, priorItems, skipLog)
+			return e.replayBest(entry, hero, weapons, hand, mp, deck, prior, skipLog)
 		}
 		e.cache.misses.Add(1)
 	}
 
+	arsenalCardIn := prior.Arsenal
 	n := len(hand)
 	// The partition recurse treats the arsenal-in card as an extra entry at index n with a
 	// restricted role menu (Arsenal / Attack / Defend), so everything about it is decided inside
@@ -57,8 +58,8 @@ func (e *Evaluator) findBest(hero Hero, weapons []Weapon, hand []Card, mp Matchu
 			Hand:    append([]Card(nil), hand...),
 			Deck:    append([]Card(nil), deck...),
 			Arsenal: arsenalCardIn,
-			Auras:   append([]Aura(nil), priorAuras...),
-			Items:   append([]Item(nil), priorItems...),
+			Auras:   append([]Aura(nil), prior.Auras...),
+			Items:   append([]Item(nil), prior.Items...),
 		},
 	}
 	cacheable := true
@@ -102,10 +103,10 @@ func (e *Evaluator) findBest(hero Hero, weapons []Weapon, hand []Card, mp Matchu
 	recurse = func(i, pitchSum, defenseSum int) {
 		if i == totalN {
 			attackDealt, defenseDealt, swung, carry, ok, leafCacheable, arsenalAtChainStart := e.evaluatePartition(
-				hero, weapons, hand, deck, arsenalCardIn,
+				hero, weapons, hand, deck,
 				rolesBuf, n, bufs,
 				mp, defenseSum,
-				priorAuras, priorItems, skipLog,
+				prior, skipLog,
 			)
 			// Aggregate per leaf — an infeasible attack chain still surfaces its DR-side
 			// reads (defendersDamage runs before the feasibility gate inside
