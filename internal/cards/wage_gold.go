@@ -25,10 +25,6 @@ func wageGoldPlay(s *sim.TurnState, self *sim.CardState) {
 	self.OnHit = append(self.OnHit, sim.OnHitHandler{Fire: wageGoldOnHit})
 }
 
-func (WageGoldRed) CreatesItem() sim.TokenType    { return sim.TokenTypeGold }
-func (WageGoldYellow) CreatesItem() sim.TokenType { return sim.TokenTypeGold }
-func (WageGoldBlue) CreatesItem() sim.TokenType   { return sim.TokenTypeGold }
-
 type WageGoldRed struct{}
 
 func (WageGoldRed) ID() ids.CardID                             { return ids.WageGoldRed }

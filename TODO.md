@@ -83,6 +83,16 @@ implemented` riders across the card roster.
   damage-equivalent at creation rather than on fire; leftover tokens at end-of-sim are
   slightly over-credited (rare in practice).
 
+### Same-turn item activation
+
+Items created mid-chain can't be spent the same turn — only items carried in via
+`priorItems` participate in the wmask's activated-ability enumeration. So a chain like
+"Strike Gold creates Gold on hit → spend Gold for {2}, draw a card" doesn't get found:
+the Gold lands in `s.Items` for next turn but no chain step in the current turn fires
+its ability. Items are slightly underpowered as a result. Fixing this means letting the
+chain runner's activated-ability list mutate dynamically with token creates rather than
+being committed at chain start.
+
 ### Weapons are Cards
 
 The Weapon interface includes the Card interface; weapons are sometimes cardlike (they

@@ -88,27 +88,6 @@ func bestAttackWithWeapons(hero Hero, weapons []Weapon, attackers, defenders, pi
 			abilityCosts = append(abilityCosts, cost)
 		}
 	}
-	// Add one ability instance per attacker-declared ItemCreator type that priorItems
-	// doesn't already cover. This lets the wmask enumerate spending a token created
-	// mid-chain (Strike Gold's on-hit Gold popped same turn); GoldTokenAbility's
-	// PlayPrecondition rejects any permutation where the ability fires before the token
-	// exists, so the chain runner's Heap permutation loop finds the legal order.
-	for _, a := range attackers {
-		creator, ok := a.(ItemCreator)
-		if !ok {
-			continue
-		}
-		t := creator.CreatesItem()
-		if t == TokenTypeNone || itemCountIn(priorItems, t) > 0 {
-			continue
-		}
-		ability := tokenItemAbilityFor(t)
-		if ability == nil {
-			continue
-		}
-		abilities = append(abilities, ability)
-		abilityCosts = append(abilityCosts, attackerMetaPtrFor(ability).maxCost)
-	}
 	bufs.activatedAbilities = abilities
 	bufs.activatedAbilityCosts = abilityCosts
 	ctx.activatedAbilities = abilities
@@ -344,9 +323,9 @@ type sequenceContext struct {
 	// destroying items) don't leak across permutations.
 	priorItems []Item
 	// activatedAbilities is the unified weapon + item ability list materialised at the
-	// top of bestAttackWithWeapons — weapons' Ability() Cards followed by item ability
-	// instances (priorItems × Count plus one per attacker-declared ItemCreator type).
-	// The wmask iterates over this slice; index j's bit selects activatedAbilities[j].
+	// top of bestAttackWithWeapons — weapons' Ability() Cards followed by per-priorItem
+	// ability instances (one per Count, capped at perItemAbilityCap). The wmask iterates
+	// over this slice; index j's bit selects activatedAbilities[j].
 	activatedAbilities []Card
 	// activatedAbilityCosts parallels activatedAbilities — cached cost for each entry
 	// so the per-wmask budget check reads ints rather than re-entering Card.Cost.

@@ -40,37 +40,34 @@ func (HighStrikerRed) Defense() int            { return 2 }
 func (HighStrikerRed) Types() card.TypeSet     { return highStrikerTypes }
 func (HighStrikerRed) GoAgain() bool           { return true }
 
-func (HighStrikerRed) CreatesItem() sim.TokenType { return sim.TokenTypeCopper }
 func (c HighStrikerRed) Play(s *sim.TurnState, self *sim.CardState) {
 	highStrikerPlay(s, self, c, 6)
 }
 
 type HighStrikerYellow struct{}
 
-func (HighStrikerYellow) ID() ids.CardID             { return ids.HighStrikerYellow }
-func (HighStrikerYellow) Name() string               { return "High Striker" }
-func (HighStrikerYellow) Cost(*sim.TurnState) int    { return 0 }
-func (HighStrikerYellow) Pitch() int                 { return 2 }
-func (HighStrikerYellow) Attack() int                { return 0 }
-func (HighStrikerYellow) Defense() int               { return 2 }
-func (HighStrikerYellow) Types() card.TypeSet        { return highStrikerTypes }
-func (HighStrikerYellow) GoAgain() bool              { return true }
-func (HighStrikerYellow) CreatesItem() sim.TokenType { return sim.TokenTypeCopper }
+func (HighStrikerYellow) ID() ids.CardID          { return ids.HighStrikerYellow }
+func (HighStrikerYellow) Name() string            { return "High Striker" }
+func (HighStrikerYellow) Cost(*sim.TurnState) int { return 0 }
+func (HighStrikerYellow) Pitch() int              { return 2 }
+func (HighStrikerYellow) Attack() int             { return 0 }
+func (HighStrikerYellow) Defense() int            { return 2 }
+func (HighStrikerYellow) Types() card.TypeSet     { return highStrikerTypes }
+func (HighStrikerYellow) GoAgain() bool           { return true }
 func (c HighStrikerYellow) Play(s *sim.TurnState, self *sim.CardState) {
 	highStrikerPlay(s, self, c, 4)
 }
 
 type HighStrikerBlue struct{}
 
-func (HighStrikerBlue) ID() ids.CardID             { return ids.HighStrikerBlue }
-func (HighStrikerBlue) Name() string               { return "High Striker" }
-func (HighStrikerBlue) Cost(*sim.TurnState) int    { return 0 }
-func (HighStrikerBlue) Pitch() int                 { return 3 }
-func (HighStrikerBlue) Attack() int                { return 0 }
-func (HighStrikerBlue) Defense() int               { return 2 }
-func (HighStrikerBlue) Types() card.TypeSet        { return highStrikerTypes }
-func (HighStrikerBlue) GoAgain() bool              { return true }
-func (HighStrikerBlue) CreatesItem() sim.TokenType { return sim.TokenTypeCopper }
+func (HighStrikerBlue) ID() ids.CardID          { return ids.HighStrikerBlue }
+func (HighStrikerBlue) Name() string            { return "High Striker" }
+func (HighStrikerBlue) Cost(*sim.TurnState) int { return 0 }
+func (HighStrikerBlue) Pitch() int              { return 3 }
+func (HighStrikerBlue) Attack() int             { return 0 }
+func (HighStrikerBlue) Defense() int            { return 2 }
+func (HighStrikerBlue) Types() card.TypeSet     { return highStrikerTypes }
+func (HighStrikerBlue) GoAgain() bool           { return true }
 func (c HighStrikerBlue) Play(s *sim.TurnState, self *sim.CardState) {
 	highStrikerPlay(s, self, c, 2)
 }
