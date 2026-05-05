@@ -39,7 +39,7 @@ func FormatLogEntry(e LogEntry) string {
 // arsenalAtChainStart is the card sitting in the arsenal slot at the start of the chain — set
 // when the partition assigned arsenalCardIn the Arsenal role (it's staying), nil otherwise
 // (no arsenal-in, or arsenal-in is playing as Attack/Defend).
-func bestAttackWithWeapons(hero Hero, weapons []Weapon, attackers, defenders, pitched, held, deck []Card, bufs *attackBufs, mp Matchup, blockTotal, arsenalInIdx, arsenalDefenderIdx int, arsenalAtChainStart Card, priorAuras []Aura, priorItems []Item, skipLog bool) (int, int, int, chainBudget, []string, CarryState, bool, bool) {
+func bestAttackWithWeapons(hero Hero, weapons []Weapon, attackers, defenders, pitched, held, deck []Card, bufs *attackBufs, mp Matchup, blockTotal, arsenalInIdx, arsenalDefenderIdx int, arsenalAtChainStart Card, priorAuras []Aura, priorItems []Item, skipLog bool) (int, int, chainBudget, []string, CarryState, bool, bool) {
 	runechantCarryover := tokenCountIn(priorAuras, TokenTypeRunechant)
 	ctx := &sequenceContext{
 		hero:                hero,
@@ -159,7 +159,7 @@ func bestAttackWithWeapons(hero Hero, weapons []Weapon, attackers, defenders, pi
 	copy(bufs.attackerBuf, attackers)
 
 	bestDealt := 0
-	bestLeftoverRunechants := runechantCarryover
+	bestFutureValue := 0
 	var bestSwung []string
 	var bestBudget chainBudget
 	foundFeasible := false
@@ -215,7 +215,7 @@ func bestAttackWithWeapons(hero Hero, weapons []Weapon, attackers, defenders, pi
 					allAttackers = append(allAttackers, ab)
 				}
 			}
-			dealt, leftoverRunechants, legal := ctx.bestSequence(allAttackers)
+			dealt, futureValue, legal := ctx.bestSequence(allAttackers)
 			if !legal {
 				continue
 			}
@@ -249,18 +249,18 @@ func bestAttackWithWeapons(hero Hero, weapons []Weapon, attackers, defenders, pi
 			if phase.hasDefendPitches && phase.defendBudget-drCost >= phase.maxDefendPitch {
 				continue
 			}
-			// Tertiary tiebreaker: chain whose end-of-chain hand has more cards wins
-			// equal Value+leftoverRunechants ties — captures "spend a Gold token to draw"
-			// preferring spending over hoarding when neither chain credits damage. The
-			// drawn card lands in state.Hand and post-hoc-promotes into arsenal, so a
-			// chain that drew strictly outranks one that didn't on next-turn tempo.
+			// Tiebreaker order across (pmask, wmask) candidates: chainScoreCmp on
+			// (dealt, cardsDrawn, futureValue) → end-of-chain hand size. The hand-size
+			// fallback breaks "spend or hoard" ties at zero damage by preferring the chain
+			// that drew an extra card into Hand (which post-hoc-promotes into arsenal).
+			candidateDrawn := ctx.carryWinner.CardsDrawn
+			bestDrawn := bufs.bestCarryScratch.CardsDrawn
 			candidateHand := len(ctx.carryWinner.Hand)
 			bestHand := len(bufs.bestCarryScratch.Hand)
-			if !foundFeasible || dealt > bestDealt ||
-				(dealt == bestDealt && leftoverRunechants > bestLeftoverRunechants) ||
-				(dealt == bestDealt && leftoverRunechants == bestLeftoverRunechants && candidateHand > bestHand) {
+			cmp := chainScoreCmp(dealt, candidateDrawn, futureValue, bestDealt, bestDrawn, bestFutureValue)
+			if !foundFeasible || cmp > 0 || (cmp == 0 && candidateHand > bestHand) {
 				bestDealt = dealt
-				bestLeftoverRunechants = leftoverRunechants
+				bestFutureValue = futureValue
 				bestSwung = bufs.weaponNames[wmask&weaponBitsMask]
 				bestBudget = chainBudget{resource: phase.attackBudget, maxPitch: phase.maxAttackPitch, hasAttackPitches: phase.hasAttackPitches}
 				// Reuse bufs.bestCarryScratch's backing arrays so the per-mask-combo
@@ -277,14 +277,14 @@ func bestAttackWithWeapons(hero Hero, weapons []Weapon, attackers, defenders, pi
 		// No-feasible-line leaves still surface the defense-phase cacheable bit — DR Plays
 		// ran independently of the (rejected) attack chain so a DR that read graveyard
 		// poisons the result regardless of attack-feasibility.
-		return 0, 0, 0, chainBudget{}, nil, CarryState{}, false, defenseCacheable
+		return 0, 0, chainBudget{}, nil, CarryState{}, false, defenseCacheable
 	}
 	// Return bestCarryScratch as an alias — the caller (findBest's recurse, replayBest)
 	// must copy or clone before the next bestAttackWithWeapons call against the same bufs.
 	// findBest's recurse calls bufs.findBestCarryScratch.CopyFrom(carry) on a new-best
 	// leaf and clones once at end of findBest; the replayBest path consumes the alias
 	// before any second call to bestAttackWithWeapons.
-	return bestDealt, defenseDealt, bestLeftoverRunechants, bestBudget, bestSwung, bufs.bestCarryScratch, true, ctx.cacheable && defenseCacheable
+	return bestDealt, defenseDealt, bestBudget, bestSwung, bufs.bestCarryScratch, true, ctx.cacheable && defenseCacheable
 }
 
 // sequenceContext carries the stable per-partition-leaf environment: hero (for OnCardPlayed
@@ -544,10 +544,10 @@ func (ctx *sequenceContext) resetStateForPermutation() {
 }
 
 // bestSequence tries every ordering of attackers and returns the max total damage plus the
-// runechant count at the end of the winning permutation. Between each card's Play() and its
-// append to CardsPlayed, the hero's OnCardPlayed hook fires so triggered abilities contribute.
-// legal=true when at least one ordering is playable; false when every permutation is rejected
-// by playSequenceWithMeta's resource / go-again / pitch-waste checks.
+// pendingFutureValue at the end of the winning permutation. Between each card's Play() and
+// its append to CardsPlayed, the hero's OnCardPlayed hook fires so triggered abilities
+// contribute. legal=true when at least one ordering is playable; false when every permutation
+// is rejected by playSequenceWithMeta's resource / go-again / pitch-waste checks.
 //
 // Uses Heap's algorithm (iterative) — no closure/callback alloc, no recursive call per perm.
 // The winning permutation's end-of-chain CarryState lands in ctx.carryWinner so callers can
@@ -566,12 +566,12 @@ func (ctx *sequenceContext) bestSequence(attackers []Card) (int, int, bool) {
 		// state.Hand so post-hoc arsenal promotion has something to pick from. Reset+snapshot
 		// mirrors the per-permutation work eval() does for n>0 chains.
 		ctx.resetStateForPermutation()
-		leftover := ctx.bufs.state.Runechants()
-		if hasEndOfTurnAura(ctx.bufs.state.Auras) {
-			fireEndOfTurnAuras(ctx.bufs.state)
+		st := ctx.bufs.state
+		if hasEndOfTurnAura(st.Auras) {
+			fireEndOfTurnAuras(st)
 		}
-		ctx.carryWinner.SnapshotFromTurn(ctx.bufs.state)
-		return 0, leftover, true
+		ctx.carryWinner.SnapshotFromTurn(st)
+		return 0, pendingFutureValue(st.Auras, st.Items), true
 	}
 	pcBuf := ctx.bufs.pcBuf[:n]
 	permMeta := ctx.bufs.permMeta[:n]
@@ -593,7 +593,7 @@ func (ctx *sequenceContext) bestSequence(attackers []Card) (int, int, bool) {
 	}
 
 	best := 0
-	bestLeftoverRunechants := ctx.runechantCarryover
+	bestFutureValue := 0
 	foundLegal := false
 	// Zero ctx.carryWinner's contents (preserving slice backing arrays) so a stale value
 	// from a previous Best call's leaf can't leak through when no permutation lands a new
@@ -614,20 +614,31 @@ func (ctx *sequenceContext) bestSequence(attackers []Card) (int, int, bool) {
 		tupleCount *= int(permMeta[i].modes)
 	}
 	hasModal := tupleCount > 1
+	bestCardsDrawn := 0
 	// tryPitchOrdering plays the chain against the current attack-permutation × pitch-
-	// permutation pair, threads cacheable, and folds a legal result into the running best.
-	// Modal chains additionally enumerate the cartesian product of ModalCard mode indices
-	// via a mixed-radix decode of `tuple` over permMeta[i].modes.
+	// permutation pair, threads cacheable, and folds a legal result into the running
+	// best via chainScoreCmp on (dmg, cardsDrawn, futureValue). cardsDrawn varies across
+	// permutations because PlayPrecondition can reject in some orderings (Gold ability
+	// fires only when the order resolves a token-creator first); ranking by it makes
+	// the chain runner prefer a perm that drew over one that didn't at equal damage.
+	// Modal chains additionally enumerate the cartesian product of ModalCard mode
+	// indices via a mixed-radix decode of `tuple` over permMeta[i].modes. The per-perm
+	// resolve+fold body is inlined into both branches: hoisting into a closure spills
+	// the capture set to the heap on every call inside Heap's permutation loop.
 	tryPitchOrdering := func() {
 		if !hasModal {
-			dmg, leftoverRunechants, _, legal := ctx.playSequenceWithMeta(n)
+			dmg, futureValue, _, legal := ctx.playSequenceWithMeta(n)
 			if ctx.cacheable && !state.IsCacheable() {
 				ctx.cacheable = false
 			}
-			if legal && (!foundLegal || dmg > best ||
-				(dmg == best && leftoverRunechants > bestLeftoverRunechants)) {
+			if !legal {
+				return
+			}
+			cmp := chainScoreCmp(dmg, state.CardsDrawn, futureValue, best, bestCardsDrawn, bestFutureValue)
+			if !foundLegal || cmp > 0 {
 				best = dmg
-				bestLeftoverRunechants = leftoverRunechants
+				bestCardsDrawn = state.CardsDrawn
+				bestFutureValue = futureValue
 				foundLegal = true
 				ctx.carryWinner.SnapshotFromTurn(state)
 			}
@@ -640,14 +651,18 @@ func (ctx *sequenceContext) bestSequence(attackers []Card) (int, int, bool) {
 				pcBuf[i].Mode = int8(rem % modes)
 				rem /= modes
 			}
-			dmg, leftoverRunechants, _, legal := ctx.playSequenceWithMeta(n)
+			dmg, futureValue, _, legal := ctx.playSequenceWithMeta(n)
 			if ctx.cacheable && !state.IsCacheable() {
 				ctx.cacheable = false
 			}
-			if legal && (!foundLegal || dmg > best ||
-				(dmg == best && leftoverRunechants > bestLeftoverRunechants)) {
+			if !legal {
+				continue
+			}
+			cmp := chainScoreCmp(dmg, state.CardsDrawn, futureValue, best, bestCardsDrawn, bestFutureValue)
+			if !foundLegal || cmp > 0 {
 				best = dmg
-				bestLeftoverRunechants = leftoverRunechants
+				bestCardsDrawn = state.CardsDrawn
+				bestFutureValue = futureValue
 				foundLegal = true
 				ctx.carryWinner.SnapshotFromTurn(state)
 			}
@@ -703,7 +718,7 @@ func (ctx *sequenceContext) bestSequence(attackers []Card) (int, int, bool) {
 			i++
 		}
 	}
-	return best, bestLeftoverRunechants, foundLegal
+	return best, bestFutureValue, foundLegal
 }
 
 // playSequence plays `order` as a sequence of cards, reusing ctx.bufs' pooled buffers.
@@ -714,14 +729,15 @@ func (ctx *sequenceContext) bestSequence(attackers []Card) (int, int, bool) {
 //   - CreateRunechants bumps the count and credits +n damage at creation time.
 //   - Each Attack / Weapon resolution fires all current tokens and destroys them; no
 //     re-credit (tokens were credited at creation).
-//   - End-of-sequence state.Runechants() is the leftover count carrying into next turn.
+//   - Surviving runechants at end of chain feed into pendingFutureValue along with
+//     other auras and items.
 //
 // Resource flow lives on playSequenceWithMeta; this wrapper just forwards.
 //
 // Populates permMeta from order and then calls playSequenceWithMeta. The hot path
 // (bestSequence) builds meta once and calls playSequenceWithMeta directly to amortise
 // interface dispatch across the N! permutations.
-func (ctx *sequenceContext) playSequence(order []Card) (damage int, leftoverRunechants int, residualBudget int, legal bool) {
+func (ctx *sequenceContext) playSequence(order []Card) (damage int, futureValue int, residualBudget int, legal bool) {
 	n := len(order)
 	pcBuf := ctx.bufs.pcBuf
 	meta := ctx.bufs.permMeta[:n]
@@ -759,7 +775,7 @@ func (ctx *sequenceContext) playSequence(order []Card) (damage int, leftoverRune
 // credit themselves through AddPreTriggerLogEntry, post-trigger handlers (OnHit, AR
 // buffs) through AddPostTriggerLogEntry. The returned damage is just state.Value at end
 // of chain.
-func (ctx *sequenceContext) playSequenceWithMeta(n int) (damage int, leftoverRunechants int, residualBudget int, legal bool) {
+func (ctx *sequenceContext) playSequenceWithMeta(n int) (damage int, futureValue int, residualBudget int, legal bool) {
 	pcBuf := ctx.bufs.pcBuf
 	ptrBuf := ctx.bufs.ptrBuf
 	meta := ctx.bufs.permMeta[:n]
@@ -963,12 +979,11 @@ func (ctx *sequenceContext) playSequenceWithMeta(n int) (damage int, leftoverRun
 	if pool.idx < pool.n {
 		return 0, 0, 0, false
 	}
-	leftover := state.Runechants()
 	// End-of-turn fire after the chain settles: defender Ponders (folded in at chain
 	// start) and any chain-created end-of-turn aura draw their card before snapshot.
 	// Skip the walk when no end-of-turn aura is in play.
 	if hasEndOfTurnAura(state.Auras) {
 		fireEndOfTurnAuras(state)
 	}
-	return state.Value, leftover, pool.remaining, true
+	return state.Value, pendingFutureValue(state.Auras, state.Items), pool.remaining, true
 }

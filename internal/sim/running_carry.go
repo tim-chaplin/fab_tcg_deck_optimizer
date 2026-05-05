@@ -5,22 +5,17 @@ package sim
 //
 //   - the per-iteration scratch buffer (so updates are allocation-free via
 //     CarryState.CopyFrom);
-//   - the tiebreaker scalars (Value, leftoverRunechants, futureValuePlayed) so callers
-//     don't materialise the running TurnSummary on every leaf;
+//   - the tiebreaker scalars (value, futureValuePlayed, cardsDrawn) so callers don't
+//     materialise the running TurnSummary on every leaf;
 //   - the "any candidate promoted yet" flag so Finalize knows whether to clone the
 //     scratch into the caller's output or leave the seed in place.
 //
 // Use:
 //
-//	r := runningCarry{
-//	    scratch:            &bufs.findBestCarryScratch,
-//	    arsenal:            arsenalSeed,
-//	    hasHeld:            n > 0,
-//	    leftoverRunechants: runechantCarryover,
-//	}
+//	r := runningCarry{scratch: &bufs.findBestCarryScratch, arsenal: arsenalSeed}
 //	for each candidate {
-//	    if !r.Beats(value, leftoverRunechants, futureValuePlayed, willOccupy) { continue }
-//	    r.Promote(value, leftoverRunechants, futureValuePlayed, hasHeld, arsenal, &carry)
+//	    if !r.Beats(value, futureValuePlayed, cardsDrawn, willOccupy) { continue }
+//	    r.Promote(value, futureValuePlayed, cardsDrawn, arsenal, &carry)
 //	    // ... record any caller-side state (BestLine roles, swung weapons) keyed off this
 //	    // promotion ...
 //	}
@@ -38,13 +33,12 @@ type runningCarry struct {
 	// Tiebreaker scalars maintained per Promote. Compared against the candidate's
 	// equivalents in Beats. Threading these as scalars avoids materialising a full
 	// running TurnSummary inside the recurse.
-	value, leftoverRunechants, futureValuePlayed int
+	value, futureValuePlayed int
 	// arsenal is the running winner's end-of-chain arsenal slot — read by Beats's
 	// willOccupy tiebreaker, written by Promote with the leaf's arsenalAtChainStart.
 	arsenal Card
 	// cardsDrawn is the number of cards drawn during this chain. Read by Beats as a
-	// high-priority tiebreaker (right after leftoverRunechants) — drawing a card is a
-	// pretty good effect, comparable in tempo to a future runechant arcane.
+	// tiebreaker just under value — drawing a card is a pretty good effect.
 	cardsDrawn int
 
 	// seen flips true on the first Promote. Finalize uses it to decide between
@@ -52,33 +46,19 @@ type runningCarry struct {
 	seen bool
 }
 
-// Beats reports whether (value, leftoverRunechants, cardsDrawn, futureValuePlayed,
-// willOccupy) describes a candidate that should displace the running winner. Tiebreaker
-// order: higher Value wins; equal Value, higher leftoverRunechants wins; equal both,
-// more cardsDrawn wins; equal all three, higher futureValuePlayed wins; equal all four,
-// displace only if the candidate ends with arsenal occupied AND the running winner
-// doesn't.
+// Beats reports whether (value, futureValuePlayed, cardsDrawn, willOccupy) describes a
+// candidate that should displace the running winner. Defers the lexicographic tuple
+// comparison to chainScoreCmp; on a tie there, displaces only when the candidate ends
+// with the arsenal slot occupied AND the running winner doesn't.
 func (r *runningCarry) Beats(
-	value, leftoverRunechants, futureValuePlayed, cardsDrawn int, willOccupy bool,
+	value, futureValuePlayed, cardsDrawn int, willOccupy bool,
 ) bool {
 	if !r.seen {
 		// No candidate yet — any feasible leaf wins, regardless of stats.
 		return true
 	}
-	if value != r.value {
-		return value > r.value
-	}
-	if leftoverRunechants != r.leftoverRunechants {
-		return leftoverRunechants > r.leftoverRunechants
-	}
-	// Drawing a card is a pretty good effect — sits high in the tiebreaker order so a
-	// chain that drew (Gold ability spend, future card-draw cards) outranks an
-	// equal-damage chain that didn't.
-	if cardsDrawn != r.cardsDrawn {
-		return cardsDrawn > r.cardsDrawn
-	}
-	if futureValuePlayed != r.futureValuePlayed {
-		return futureValuePlayed > r.futureValuePlayed
+	if cmp := chainScoreCmp(value, cardsDrawn, futureValuePlayed, r.value, r.cardsDrawn, r.futureValuePlayed); cmp != 0 {
+		return cmp > 0
 	}
 	// Both willOccupy bits read end-of-chain carry (arsenal slot or Hand cards a
 	// post-hoc promotion can pull from); reading r.scratch keeps the comparison
@@ -91,13 +71,12 @@ func (r *runningCarry) Beats(
 // copied into the scratch (allocation-free after the first sizing); arsenal overrides
 // the snapshot's Arsenal so an arsenal-in card that stayed is preserved.
 func (r *runningCarry) Promote(
-	value, leftoverRunechants, futureValuePlayed, cardsDrawn int,
+	value, futureValuePlayed, cardsDrawn int,
 	arsenal Card, carry *CarryState,
 ) {
 	r.scratch.CopyFrom(carry)
 	r.scratch.Arsenal = arsenal
 	r.value = value
-	r.leftoverRunechants = leftoverRunechants
 	r.futureValuePlayed = futureValuePlayed
 	r.arsenal = arsenal
 	r.cardsDrawn = cardsDrawn

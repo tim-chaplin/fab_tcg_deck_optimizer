@@ -5,10 +5,11 @@ package sim
 // bestAttackWithWeapons. Post-enumeration helpers decide how an empty arsenal slot gets
 // filled, plus the roleAllowed policy function that shapes the partition tree. Tiebreak
 // order across partition leaves lives on runningCarry (see running_carry.go): Value →
-// leftover runechants (future arcane) → cards drawn → more pending future value at end
-// of chain (non-token aura Counts plus unspent item Counts — hidden later-turn payoff
-// the current-turn Value misses) → arsenal slot ending occupied (saves a hand slot next
-// refill; covers both arsenal-in-stayed and Held-for-promotion).
+// cards drawn → more pending future value at end of chain (every Aura.Count plus every
+// Item.Count — hidden later-turn payoff the current-turn Value misses, including
+// runechants saved for next turn's arcane and unspent token items) → arsenal slot
+// ending occupied (saves a hand slot next refill; covers both arsenal-in-stayed and
+// Held-for-promotion).
 
 import ()
 
@@ -86,9 +87,8 @@ func (e *Evaluator) findBest(hero Hero, weapons []Weapon, hand []Card, mp Matchu
 	bufs.findBestCarryScratch.Reset()
 	bufs.findBestCarryScratch.Hand = append(bufs.findBestCarryScratch.Hand[:0], hand...)
 	running := runningCarry{
-		scratch:            &bufs.findBestCarryScratch,
-		leftoverRunechants: tokenCountIn(priorAuras, TokenTypeRunechant),
-		arsenal:            arsenalCardIn,
+		scratch: &bufs.findBestCarryScratch,
+		arsenal: arsenalCardIn,
 	}
 	rolesBuf := bufs.rolesBuf[:totalN]
 	pvals := bufs.pitchVals[:totalN]
@@ -101,7 +101,7 @@ func (e *Evaluator) findBest(hero Hero, weapons []Weapon, hand []Card, mp Matchu
 	var recurse func(i, pitchSum, defenseSum int)
 	recurse = func(i, pitchSum, defenseSum int) {
 		if i == totalN {
-			attackDealt, defenseDealt, leftoverRunechants, swung, carry, ok, leafCacheable, arsenalAtChainStart := e.evaluatePartition(
+			attackDealt, defenseDealt, swung, carry, ok, leafCacheable, arsenalAtChainStart := e.evaluatePartition(
 				hero, weapons, hand, deck, arsenalCardIn,
 				rolesBuf, n, bufs,
 				mp, defenseSum,
@@ -126,10 +126,10 @@ func (e *Evaluator) findBest(hero Hero, weapons []Weapon, hand []Card, mp Matchu
 			// next turn's arsenal — same outcome as a Held card promoting via the post-hoc
 			// step.
 			willOccupy := arsenalCard != nil || len(carry.Hand) > 0
-			if !running.Beats(v, leftoverRunechants, futureValuePlayed, carry.CardsDrawn, willOccupy) {
+			if !running.Beats(v, futureValuePlayed, carry.CardsDrawn, willOccupy) {
 				return
 			}
-			running.Promote(v, leftoverRunechants, futureValuePlayed, carry.CardsDrawn, arsenalCard, &carry)
+			running.Promote(v, futureValuePlayed, carry.CardsDrawn, arsenalCard, &carry)
 			best.Value = v
 			bestSwung = swung
 			// Cards and FromArsenal flags were populated at construction; Role is the only
@@ -515,20 +515,47 @@ func containsModalBlocker(cards []Card) bool {
 // arithmetic the budget arithmetic might do.
 const noBlockBudgetCap = 1 << 30
 
-// pendingFutureValue sums the Count of every non-token Aura plus every Item at end of
-// chain — the partition tiebreaker's "hidden later-turn payoff" signal. Token auras
-// (Runechant) credit Value at creation, so they're dropped. Card auras carry Count ==
-// fires-remaining for counters and == 1 for one-shots. Items only credit Value when the
-// activated ability is spent (drawing a card, consuming a Gold), so unspent items at end
-// of chain represent payoff the partition is saving for later — counted here so a
-// partition that leaves a Gold token in play beats one that arsenaled the creator and
-// made nothing.
+// chainScoreCmp lexicographically compares two leaf scores by (value, cardsDrawn,
+// futureValue). Higher value wins; tied value goes to more cardsDrawn (a drawn card is
+// same-turn tempo a hoarded resource can't match); tied on both goes to higher
+// futureValue (pendingFutureValue at end of chain — every Aura.Count + Item.Count, the
+// partition's hidden later-turn payoff). Returns 1 if a ranks strictly above b, -1 if
+// strictly below, 0 if equal on all three. Callers handle their own scope-specific
+// fallback under an explicit cmp == 0 branch.
+func chainScoreCmp(aValue, aCardsDrawn, aFutureValue, bValue, bCardsDrawn, bFutureValue int) int {
+	if aValue != bValue {
+		if aValue > bValue {
+			return 1
+		}
+		return -1
+	}
+	if aCardsDrawn != bCardsDrawn {
+		if aCardsDrawn > bCardsDrawn {
+			return 1
+		}
+		return -1
+	}
+	if aFutureValue != bFutureValue {
+		if aFutureValue > bFutureValue {
+			return 1
+		}
+		return -1
+	}
+	return 0
+}
+
+// pendingFutureValue sums the Count of every Aura plus every Item at end of chain —
+// the partition tiebreaker's "hidden later-turn payoff" signal. Includes token auras
+// (Runechant): a runechant credits Value when it fires, so end-of-chain runechants are
+// the ones that survived the chain unspent and carry into next turn's arcane budget.
+// Card auras carry Count == fires-remaining for counters and == 1 for one-shots. Items
+// only credit Value when the activated ability is spent (drawing a card, consuming a
+// Gold), so unspent items at end of chain represent payoff the partition is saving for
+// later — counted here so a partition that leaves a Gold token in play beats one that
+// arsenaled the creator and made nothing.
 func pendingFutureValue(auras []Aura, items []Item) int {
 	total := 0
 	for _, a := range auras {
-		if a.Self.IsToken() {
-			continue
-		}
 		total += a.Count
 	}
 	for _, it := range items {

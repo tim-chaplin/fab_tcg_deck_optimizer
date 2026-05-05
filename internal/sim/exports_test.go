@@ -29,7 +29,7 @@ func NewSequenceContextForTest(h Hero, pitched, deck []Card, resourceBudget, run
 }
 
 // PlaySequence wraps (*sequenceContext).playSequence.
-func (s *SequenceContextForTest) PlaySequence(order []Card) (damage int, leftoverRunechants int, residualBudget int, legal bool) {
+func (s *SequenceContextForTest) PlaySequence(order []Card) (damage int, futureValue int, residualBudget int, legal bool) {
 	return s.ctx.playSequence(order)
 }
 
@@ -60,19 +60,18 @@ func PromoteRandomHandCardToArsenal(best *TurnSummary, startingHand []Card, arse
 // bestWillOccupyArsenal is plumbed through r.scratch.Hand: stuffing a placeholder card
 // into the scratch's Hand makes the running winner's willOccupy compute as true; an
 // empty scratch.Hand with a nil arsenal makes it false.
-func BeatsBest(v, leftoverRunechants, futureValuePlayed int, willOccupyArsenal bool, best TurnSummary, bestFutureValuePlayed int, bestWillOccupyArsenal bool) bool {
+func BeatsBest(v, futureValuePlayed int, willOccupyArsenal bool, best TurnSummary, bestFutureValuePlayed int, bestWillOccupyArsenal bool) bool {
 	scratch := &CarryState{}
 	if bestWillOccupyArsenal {
 		scratch.Hand = []Card{nil}
 	}
 	r := runningCarry{
-		seen:               true,
-		scratch:            scratch,
-		value:              best.Value,
-		leftoverRunechants: best.State.Runechants(),
-		futureValuePlayed:  bestFutureValuePlayed,
+		seen:              true,
+		scratch:           scratch,
+		value:             best.Value,
+		futureValuePlayed: bestFutureValuePlayed,
 	}
-	return r.Beats(v, leftoverRunechants, futureValuePlayed, 0, willOccupyArsenal)
+	return r.Beats(v, futureValuePlayed, 0, willOccupyArsenal)
 }
 
 // PairSwapMutations re-exports pairSwapMutations for sim_test consumers.
