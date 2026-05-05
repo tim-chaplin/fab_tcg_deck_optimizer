@@ -21,8 +21,8 @@ func TestGoldAbility_PlaysDecrementsAndDestroys(t *testing.T) {
 	if len(s.Items) != 0 {
 		t.Fatalf("Items still has %d entries after destroy, want 0", len(s.Items))
 	}
-	if len(s.Hand) != 1 {
-		t.Fatalf("Hand size = %d, want 1 (drew one card)", len(s.Hand))
+	if h := s.Hand(); len(h) != 1 {
+		t.Fatalf("Hand size = %d, want 1 (drew one card)", len(h))
 	}
 }
 
@@ -47,8 +47,8 @@ func TestSilverAbility_PlaysDecrementsAndDestroys(t *testing.T) {
 	if len(s.Items) != 0 {
 		t.Fatalf("Items still has %d entries after destroy, want 0", len(s.Items))
 	}
-	if len(s.Hand) != 1 {
-		t.Fatalf("Hand size = %d, want 1 (drew one card)", len(s.Hand))
+	if h := s.Hand(); len(h) != 1 {
+		t.Fatalf("Hand size = %d, want 1 (drew one card)", len(h))
 	}
 }
 
@@ -63,8 +63,8 @@ func TestCopperAbility_PlaysDecrementsAndDestroys(t *testing.T) {
 	if len(s.Items) != 0 {
 		t.Fatalf("Items still has %d entries after destroy, want 0", len(s.Items))
 	}
-	if len(s.Hand) != 1 {
-		t.Fatalf("Hand size = %d, want 1 (drew one card)", len(s.Hand))
+	if h := s.Hand(); len(h) != 1 {
+		t.Fatalf("Hand size = %d, want 1 (drew one card)", len(h))
 	}
 }
 

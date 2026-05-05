@@ -301,7 +301,7 @@ type Dominator interface {
 // can't legally happen (e.g. Demolition Crew's "reveal a card in your hand with cost 2 or
 // greater" with no eligible target); the chain runner rejects the permutation and the
 // card's Play is not called. The check runs after the chain runner has removed the
-// playing card and popped this card's funding pitches from s.Hand, so scans see only
+// playing card and popped this card's funding pitches from s.hand, so scans see only
 // cards that genuinely remain in hand — a pitch source can't double as a reveal target.
 type PlayPrecondition interface {
 	PlayPrecondition(s *TurnState, self *CardState) bool

@@ -19,8 +19,8 @@ func TestSnatch_LikelyHitFiresDrawOne(t *testing.T) {
 	if got := s.Value; got != 4 {
 		t.Errorf("Red: Play() = %d, want 4", got)
 	}
-	if len(s.Hand) != 1 || s.Hand[0] != top {
-		t.Errorf("Hand = %v, want [top-of-deck]", s.Hand)
+	if h := s.Hand(); len(h) != 1 || h[0] != top {
+		t.Errorf("Hand = %v, want [top-of-deck]", h)
 	}
 	if d := s.Deck(); len(d) != 0 {
 		t.Errorf("Deck len = %d, want 0 (top consumed)", len(d))
@@ -43,8 +43,8 @@ func TestSnatch_BlockableSuppressesDraw(t *testing.T) {
 		if got := s.Value; got != tc.want {
 			t.Errorf("%s: Play() = %d, want %d (blockable, no draw)", tc.c.Name(), got, tc.want)
 		}
-		if len(s.Hand) != 0 {
-			t.Errorf("%s: Hand = %v, want empty (no draw fired)", tc.c.Name(), s.Hand)
+		if h := s.Hand(); len(h) != 0 {
+			t.Errorf("%s: Hand = %v, want empty (no draw fired)", tc.c.Name(), h)
 		}
 		if d := s.Deck(); len(d) != 1 {
 			t.Errorf("%s: Deck len = %d, want 1 (top preserved)", tc.c.Name(), len(d))

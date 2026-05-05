@@ -8,22 +8,22 @@ import (
 )
 
 // Per-turn shared context threaded through Card.Play. Cards mutate state directly — moving
-// cards between Hand / Deck / Graveyard / Banish, registering triggers, creating runechants
+// cards between hand / deck / graveyard / Banish, registering triggers, creating runechants
 // — and the sim copies the winning permutation's final state into next-turn state. There's
-// no diff-signal indirection: a card that wants to draw appends to s.Hand and pops via
-// PopDeckTop, full stop.
+// no diff-signal indirection: a card that wants to draw goes through AppendHand and pops
+// via PopDeckTop, full stop.
 //
-// Persistent fields (Hand, deck, Arsenal, graveyard, Banish, Runechants, Auras)
+// Persistent fields (hand, deck, Arsenal, graveyard, Banish, Runechants, Auras)
 // carry across turns when the sim adopts the winner's snapshot. Transient fields
 // (CardsPlayed, Pitched, IncomingDamage, etc.) are seeded by the sim per chain-step and
 // reset at the turn boundary.
 //
-// deck and graveyard are unexported so card subpackages (internal/cards) can only reach them
-// through the accessor methods below. Every accessor clears cacheable so a future hand-eval
-// cache can key on the inputs and store only when IsCacheable() is true at chain end. The
-// framework (this package) accesses the slices directly to seed and snapshot state without
-// poisoning the bit; card code in a different package can't see the unexported field name,
-// which is the language-level enforcement that the cacheable signal is sound.
+// hand, deck, and graveyard are unexported so card subpackages (internal/cards) can only
+// reach them through the accessor methods below. Every accessor clears cacheable so the
+// hand-eval cache can store results only when IsCacheable() is true at chain end. The
+// framework (this package) accesses the slices directly to seed and snapshot state
+// without poisoning the bit; card code in a different package can't see the unexported
+// field name, which is the language-level enforcement that the cacheable signal is sound.
 
 // LogEntryKind classifies a LogEntry. Triggers come in two flavours because they fire on
 // opposite sides of their parent in the FaB stack — the format layer needs to know which
@@ -75,11 +75,12 @@ type NextHitTrigger struct {
 // TurnState is the shared turn-level context passed to Card.Play alongside the per-card
 // CardState wrapper.
 type TurnState struct {
-	// Hand is the cards currently in hand. Starts as the dealt hand minus pitched / attacker
-	// / defender cards (those have been routed by the partition). Cards that draw or tutor
-	// append to Hand; alt-cost effects pop from Hand. Whatever's in Hand at end of chain
-	// becomes next turn's Held cards.
-	Hand []Card
+	// hand is the cards currently in hand. Starts as the dealt hand minus pitched /
+	// attacker / defender cards (routed by the partition); cards drawn or tutored mid-
+	// chain land here too. Whatever's left at end of chain becomes next turn's Held set.
+	// Card subpackages reach hand only through Hand() / AppendHand / PopHandAt — see the
+	// package-level docstring for the framework-vs-card boundary rationale.
+	hand []Card
 	// deck is the deck top-to-bottom. Unexported so card subpackages can only reach it via
 	// the public Deck() / PopDeckTop / PrependToDeck / TutorFromDeck accessors, each of
 	// which clears cacheable. Framework code in this package reads / writes deck directly
@@ -265,6 +266,45 @@ func (s *TurnState) AmendLastChainStepN(n int) {
 func (s *TurnState) Deck() []Card {
 	s.cacheable = false
 	return s.deck
+}
+
+// Hand returns the live hand slice and flips IsCacheable to false. Cards must not mutate
+// the returned slice; use AppendHand / PopHandAt for mutations. Read-only callers that
+// only inspect length / contents still flip — the cache key can't depend on what the
+// hand-content read produced.
+func (s *TurnState) Hand() []Card {
+	s.cacheable = false
+	return s.hand
+}
+
+// AppendHand appends c to the hand, flipping IsCacheable to false. Cards that draw / tutor
+// into hand mid-chain use this so the cache invalidation is automatic. Framework code in
+// this package writes s.hand directly (resetStateForPermutation seeds, applyChainStep
+// removes the playing card) and doesn't go through here — those mutations aren't
+// card-driven and shouldn't poison the cacheable bit.
+func (s *TurnState) AppendHand(c Card) {
+	s.cacheable = false
+	s.hand = append(s.hand, c)
+}
+
+// PopHandAt removes and returns the card at index i, flipping IsCacheable to false. Cards
+// that pop hand cards (alt-cost effects, Moon Wish's "return a hand card to top of deck")
+// use this so the cache invalidation is automatic. Panics on out-of-range i — callers
+// should len-check via Hand() first.
+func (s *TurnState) PopHandAt(i int) Card {
+	s.cacheable = false
+	c := s.hand[i]
+	s.hand = append(s.hand[:i], s.hand[i+1:]...)
+	return c
+}
+
+// SetHandForTesting replaces the hand with the supplied cards. Test-only — production
+// hand seeding goes through resetStateForPermutation (framework) or AppendHand (cards).
+// Doesn't flip cacheable: tests that assert on hand state typically don't care about the
+// cache, and a NewTurnState-then-SetHandForTesting flow shouldn't poison the bit before
+// the test has run a single Play.
+func (s *TurnState) SetHandForTesting(cards []Card) {
+	s.hand = cards
 }
 
 // Graveyard returns the live graveyard slice and flips IsCacheable to false. Cards must
@@ -590,7 +630,7 @@ func (s *TurnState) DrawOne() {
 	if !ok {
 		return
 	}
-	s.Hand = append(s.Hand, c)
+	s.hand = append(s.hand, c)
 	s.CardsDrawn++
 }
 

@@ -24,7 +24,7 @@ var demolitionCrewTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, car
 // popped this card's pitches by the time PlayPrecondition runs, so the scan only sees
 // cards that genuinely remain in hand.
 func demolitionCrewPrecondition(s *sim.TurnState) bool {
-	for _, c := range s.Hand {
+	for _, c := range s.Hand() {
 		if c.Cost(s) >= 2 {
 			return true
 		}

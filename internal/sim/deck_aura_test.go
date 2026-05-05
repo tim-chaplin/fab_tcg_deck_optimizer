@@ -100,7 +100,7 @@ func TestProcessAurasAtStartOfTurn_IgnoresPonder(t *testing.T) {
 }
 
 // TestFireEndOfTurnAuras_PonderPopsDeckTopIntoHand: the end-of-turn fire pops one card
-// per Ponder count, appends each to s.Hand, and removes the aura. The drawn card lets
+// per Ponder count, appends each to s.hand, and removes the aura. The drawn card lets
 // the post-hoc arsenal-promotion step fill an empty arsenal.
 func TestFireEndOfTurnAuras_PonderPopsDeckTopIntoHand(t *testing.T) {
 	a, b, c := testutils.NewStubCard("a"), testutils.NewStubCard("b"), testutils.NewStubCard("c")
@@ -109,8 +109,9 @@ func TestFireEndOfTurnAuras_PonderPopsDeckTopIntoHand(t *testing.T) {
 
 	FireEndOfTurnAuras(s)
 
-	if len(s.Hand) != 2 || s.Hand[0] != a || s.Hand[1] != b {
-		t.Errorf("Hand = %v, want [a, b]", s.Hand)
+	h := s.Hand()
+	if len(h) != 2 || h[0] != a || h[1] != b {
+		t.Errorf("Hand = %v, want [a, b]", h)
 	}
 	if got := len(s.Deck()); got != 1 {
 		t.Errorf("len(Deck) = %d, want 1 (two cards popped)", got)
@@ -128,8 +129,8 @@ func TestFireEndOfTurnAuras_PonderEmptyDeckIsNoOp(t *testing.T) {
 
 	FireEndOfTurnAuras(s)
 
-	if len(s.Hand) != 0 {
-		t.Errorf("Hand = %v, want empty (no deck to draw from)", s.Hand)
+	if h := s.Hand(); len(h) != 0 {
+		t.Errorf("Hand = %v, want empty (no deck to draw from)", h)
 	}
 	if len(s.Auras) != 0 {
 		t.Errorf("Auras = %+v, want empty (Ponder still destroys with empty deck)", s.Auras)

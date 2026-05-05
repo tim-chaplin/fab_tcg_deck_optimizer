@@ -90,7 +90,7 @@ func ponderAuraHandler(s *TurnState, t *Aura) {
 		if !ok {
 			break
 		}
-		s.Hand = append(s.Hand, c)
+		s.hand = append(s.hand, c)
 	}
 	s.DestroyAura(t, false)
 }

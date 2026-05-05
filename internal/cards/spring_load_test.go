@@ -10,7 +10,8 @@ import (
 // Tests that Spring Load with a non-empty hand attacks for printed power only.
 func TestSpringLoad_BasePower(t *testing.T) {
 	for _, c := range []sim.Card{SpringLoadRed{}, SpringLoadYellow{}, SpringLoadBlue{}} {
-		s := sim.TurnState{Hand: []sim.Card{testutils.GenericAttack(0, 0)}}
+		var s sim.TurnState
+		s.SetHandForTesting([]sim.Card{testutils.GenericAttack(0, 0)})
 		c.Play(&s, &sim.CardState{Card: c})
 		if got := s.Value; got != 2 {
 			t.Errorf("%s: Play() with non-empty hand = %d, want 2", c.Name(), got)
