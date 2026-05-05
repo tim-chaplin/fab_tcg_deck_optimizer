@@ -271,62 +271,52 @@ func TestPromoteRandomHandCardToArsenal_EmptyHandIsNoop(t *testing.T) {
 }
 
 // TestBeatsBest_ArsenalOccupancyTiebreaker pins the tiebreaker contract used by the partition
-// enumerator: when two candidates tie on Value and leftover Runechants, the one that will end
+// enumerator: when two candidates tie on Value and pendingFutureValue, the one that will end
 // the turn with the arsenal slot occupied (either via arsenal-in staying OR a post-hoc Held →
 // Arsenal promotion) beats the one that won't. Exercised directly so a comparison-inversion
 // regression can't hide behind enumeration order at the Best() level.
 func TestBeatsBest_ArsenalOccupancyTiebreaker(t *testing.T) {
-	// Seed best: Value=10, Leftover=0, arsenal NOT occupied, no future-value plays.
-	best := TurnSummary{Value: 10, State: CarryState{Auras: []Aura{NewRunechantAura(0)}}}
-	// Candidate with equal V/L/future-value but arsenal WILL be occupied — should beat.
-	if !BeatsBest(10, 0, 0, true, best, 0, false) {
+	// Seed best: Value=10, no future-value plays, arsenal NOT occupied.
+	best := TurnSummary{Value: 10}
+	// Candidate with equal V/future-value but arsenal WILL be occupied — should beat.
+	if !BeatsBest(10, 0, true, best, 0, false) {
 		t.Error("willOccupy=true should beat a tied best with willOccupy=false")
 	}
-	// Candidate with equal V/L and arsenal NOT occupied — same as best, should NOT beat.
-	if BeatsBest(10, 0, 0, false, best, 0, false) {
+	// Candidate with equal V and arsenal NOT occupied — same as best, should NOT beat.
+	if BeatsBest(10, 0, false, best, 0, false) {
 		t.Error("willOccupy=false should not beat a tied best with willOccupy=false")
 	}
 	// Best already occupies; candidate also occupies — no advantage, should NOT beat.
-	if BeatsBest(10, 0, 0, true, best, 0, true) {
+	if BeatsBest(10, 0, true, best, 0, true) {
 		t.Error("willOccupy=true should not beat a tied best that also has willOccupy=true")
 	}
 	// Strict-wins on Value still takes precedence over the occupancy tiebreaker.
-	if !BeatsBest(11, 0, 0, false, best, 0, true) {
+	if !BeatsBest(11, 0, false, best, 0, true) {
 		t.Error("higher Value should beat even when the candidate has no occupancy advantage")
 	}
 	// Strict-loses on Value — can't be rescued by occupancy.
-	if BeatsBest(9, 0, 0, true, best, 0, false) {
+	if BeatsBest(9, 0, true, best, 0, false) {
 		t.Error("lower Value should lose regardless of occupancy advantage")
-	}
-	// Strict-wins on leftover takes precedence over occupancy.
-	if !BeatsBest(10, 1, 0, false, best, 0, true) {
-		t.Error("higher leftover Runechants should beat even without occupancy advantage")
 	}
 }
 
-// TestBeatsBest_FutureValueTiebreaker pins the future-value bias: at equal Value and
-// leftover Runechants, a partition that plays more AddsFutureValue cards wins over one
-// that plays fewer, regardless of arsenal occupancy. This corrects for the hidden later-turn
-// value those cards carry — without the bias, a lone sigil ends up Held → promoted to
-// arsenal because same-turn Value is 0 and arsenal occupancy wins the fallback tiebreak.
+// TestBeatsBest_FutureValueTiebreaker pins the future-value bias: at equal Value, a
+// partition with more end-of-chain pendingFutureValue (every Aura.Count + every Item.Count,
+// including runechants saved for next turn's arcane) wins over one with less, regardless
+// of arsenal occupancy. This corrects for hidden later-turn payoff that the current-turn
+// Value misses.
 func TestBeatsBest_FutureValueTiebreaker(t *testing.T) {
-	best := TurnSummary{Value: 5, State: CarryState{Auras: []Aura{NewRunechantAura(0)}}}
-	// Candidate plays 1 future-value card, best plays 0 — candidate wins even though arsenal
-	// occupancy favours the best.
-	if !BeatsBest(5, 0, 1, false, best, 0, true) {
-		t.Error("more future-value cards should beat a tied best with occupancy advantage")
+	best := TurnSummary{Value: 5}
+	// Candidate has higher pendingFutureValue, best has occupancy — candidate wins.
+	if !BeatsBest(5, 1, false, best, 0, true) {
+		t.Error("more pendingFutureValue should beat a tied best with occupancy advantage")
 	}
-	// Reverse: best plays 1 future-value, candidate plays 0 — candidate loses even when
-	// candidate has the occupancy advantage.
-	if BeatsBest(5, 0, 0, true, best, 1, false) {
-		t.Error("fewer future-value cards should lose even with occupancy advantage")
+	// Reverse: best has higher pendingFutureValue, candidate has occupancy — candidate loses.
+	if BeatsBest(5, 0, true, best, 1, false) {
+		t.Error("less pendingFutureValue should lose even with occupancy advantage")
 	}
 	// Strict-wins on Value still takes precedence over the future-value tiebreaker.
-	if !BeatsBest(6, 0, 0, false, best, 5, false) {
-		t.Error("higher Value should beat even when the candidate plays fewer future-value cards")
-	}
-	// Strict-wins on leftover Runechants still takes precedence over future-value.
-	if !BeatsBest(5, 1, 0, false, best, 5, false) {
-		t.Error("higher leftover Runechants should beat even when the candidate plays fewer future-value cards")
+	if !BeatsBest(6, 0, false, best, 5, false) {
+		t.Error("higher Value should beat even when the candidate has less pendingFutureValue")
 	}
 }

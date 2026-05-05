@@ -41,7 +41,6 @@ func (HighStrikerRed) Types() card.TypeSet     { return highStrikerTypes }
 func (HighStrikerRed) GoAgain() bool           { return true }
 
 func (HighStrikerRed) CreatesItem() sim.TokenType { return sim.TokenTypeCopper }
-func (HighStrikerRed) AddsFutureValue()           {}
 func (c HighStrikerRed) Play(s *sim.TurnState, self *sim.CardState) {
 	highStrikerPlay(s, self, c, 6)
 }
@@ -57,7 +56,6 @@ func (HighStrikerYellow) Defense() int               { return 2 }
 func (HighStrikerYellow) Types() card.TypeSet        { return highStrikerTypes }
 func (HighStrikerYellow) GoAgain() bool              { return true }
 func (HighStrikerYellow) CreatesItem() sim.TokenType { return sim.TokenTypeCopper }
-func (HighStrikerYellow) AddsFutureValue()           {}
 func (c HighStrikerYellow) Play(s *sim.TurnState, self *sim.CardState) {
 	highStrikerPlay(s, self, c, 4)
 }
@@ -73,7 +71,6 @@ func (HighStrikerBlue) Defense() int               { return 2 }
 func (HighStrikerBlue) Types() card.TypeSet        { return highStrikerTypes }
 func (HighStrikerBlue) GoAgain() bool              { return true }
 func (HighStrikerBlue) CreatesItem() sim.TokenType { return sim.TokenTypeCopper }
-func (HighStrikerBlue) AddsFutureValue()           {}
 func (c HighStrikerBlue) Play(s *sim.TurnState, self *sim.CardState) {
 	highStrikerPlay(s, self, c, 2)
 }

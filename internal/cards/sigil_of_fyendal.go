@@ -25,7 +25,6 @@ func (SigilOfFyendalBlue) Attack() int             { return 0 }
 func (SigilOfFyendalBlue) Defense() int            { return 2 }
 func (SigilOfFyendalBlue) Types() card.TypeSet     { return sigilOfFyendalTypes }
 func (SigilOfFyendalBlue) GoAgain() bool           { return true }
-func (SigilOfFyendalBlue) AddsFutureValue()        {}
 func (c SigilOfFyendalBlue) Play(s *sim.TurnState, self *sim.CardState) {
 	s.AddAura(sim.Aura{
 		Self:        sim.CardOrTokenType{Card: c},

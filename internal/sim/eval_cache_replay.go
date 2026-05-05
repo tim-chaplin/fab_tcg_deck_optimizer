@@ -60,7 +60,7 @@ func (e *Evaluator) replayBest(
 	// assignment directly.
 	defenseSum := defenseSumFromRoles(hand, arsenalCardIn, rolesBuf, n)
 
-	attackDealt, defenseDealt, _, swung, carry, ok, _, arsenalAtChainStart := e.evaluatePartition(
+	attackDealt, defenseDealt, swung, carry, ok, _, arsenalAtChainStart := e.evaluatePartition(
 		hero, weapons, hand, deck, arsenalCardIn,
 		rolesBuf, n, bufs,
 		mp, defenseSum,

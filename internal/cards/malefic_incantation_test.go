@@ -65,14 +65,3 @@ func TestMaleficIncantation_HandlerCreatesOneRunechantPerFire(t *testing.T) {
 		}
 	}
 }
-
-// TestMaleficIncantation_ImplementsAddsFutureValue pins the marker so the solver's
-// beatsBest tiebreaker counts this card as future-value-adding — without it a lone Malefic
-// loses to Held → arsenal promotion at equal current-turn Value.
-func TestMaleficIncantation_ImplementsAddsFutureValue(t *testing.T) {
-	for _, c := range []sim.Card{MaleficIncantationRed{}, MaleficIncantationYellow{}, MaleficIncantationBlue{}} {
-		if _, ok := c.(sim.AddsFutureValue); !ok {
-			t.Errorf("%s should implement sim.AddsFutureValue", c.Name())
-		}
-	}
-}

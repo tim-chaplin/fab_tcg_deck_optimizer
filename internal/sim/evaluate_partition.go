@@ -23,7 +23,7 @@ func (e *Evaluator) evaluatePartition(
 	mp Matchup, defenseSum int,
 	priorAuras []Aura, priorItems []Item, skipLog bool,
 ) (
-	attackDealt, defenseDealt, leftoverRunechants int,
+	attackDealt, defenseDealt int,
 	swung []string, carry CarryState,
 	ok, cacheable bool,
 	arsenalAtChainStart Card,
@@ -61,7 +61,7 @@ func (e *Evaluator) evaluatePartition(
 
 	// Hand off to the chain dispatcher — same call shape both callers used inline before
 	// the extraction.
-	attackDealt, defenseDealt, leftoverRunechants, _, swung, carry, ok, cacheable = bestAttackWithWeapons(
+	attackDealt, defenseDealt, _, swung, carry, ok, cacheable = bestAttackWithWeapons(
 		hero, weapons, a, d, p, h, deck, bufs,
 		mp, defenseSum,
 		arsenalInIdx, arsenalDefenderIdx, arsenalAtChainStart,

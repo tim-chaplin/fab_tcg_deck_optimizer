@@ -8,7 +8,7 @@ Cards live in `internal/cards/`. A card file typically:
 
 1. Declares a shared `TypeSet` var for the card's type line.
 2. Declares one struct per printed pitch variant (`FooRed`, `FooYellow`, `FooBlue`).
-3. Implements `card.Card` plus optional markers (`AddsFutureValue`, `VariableCost`, …) on each variant.
+3. Implements `card.Card` plus optional markers (`VariableCost`, …) on each variant.
 4. Shares a `fooPlay(...)` helper when variants differ only by a numeric parameter.
 
 Card data (name, cost, pitch, attack, defense, type line, printed text) is transcribed from `github.com/the-fab-cube/flesh-and-blood-cards`; no per-file `Source:` line.
@@ -73,8 +73,6 @@ The plumbing below is uniform; card docstrings call out the printed rider and an
 - **Modal blockers** (Brothers in Arms, …): plain blockers with mode-dependent block-time cost implement `sim.ModalCard.Modes()` + `sim.Blocker.Block(s, self)` + `sim.BlockCost(mode int8) int`. `defendersDamage` enumerates modes within spare defense budget (`phase.defendBudget − drCost`) and picks the highest-`BonusDefense` mode that fits. Mode 0 is conventionally the printed default (cost 0, no extra effect). Card docstrings call out each (cost, effect) pair.
 - **`DefensiveInstant`** (Brush Off, Calming Breeze, Oasis Respite, Peace of Mind, …): `TypeInstant` cards whose printed effect prevents damage opt in via `sim.DefensiveInstant`. Partition treats them as defenders; `Cost()` is summed against the defense budget; `Play` calls `self.DealEffectiveDefense(s)` so prevention is `min(Defense(), IncomingDamage)`. Damage prevention collapses against the single `IncomingDamage` bucket: "the next N damage" and "the next K times … prevent 1 each" both reduce to `Defense() = N`; "next damage of M or less" credits `min(M, IncomingDamage)`. Card docstrings note the printed prevention amount and any rider that's dropped.
 - **`CreatesItem`** (Strike Gold, Performance Bonus, Starting Stake, High Striker, Test of Strength, …): cards whose printed effect creates a token implement `CreatesItem() sim.TokenType`. The chain runner reserves an ability slot in the wmask so the same-turn create-and-spend chain is reachable. Defense Reactions resolve outside the action chain so the spend lands via `priorItems` next turn — flag the creator anyway to keep the framework symmetric. Card docstrings name the token created and any modelling fudge.
-- **`AddsFutureValue`** (Strike Gold, Performance Bonus, Starting Stake, High Striker, Test of Strength, …): marks the card as primarily providing next-turn value (a token's eventual payoff) so the partition tiebreaker prefers it over an equal-damage alternative that doesn't create one. Card docstrings name the source of the future value when it isn't obvious from the printed text.
-
 ## Logging idioms
 
 `Card.Play` uses two orthogonal `TurnState` primitives: `AddValue(n)` mutates `s.Value`; `Log` / `LogRider` / `LogPreTrigger` / `LogPostTrigger` (plus `f` variants) append a `LogEntry`. The `skipLog` gate lives inside the Log helpers — cards never check it.
