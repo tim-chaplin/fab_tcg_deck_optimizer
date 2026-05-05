@@ -73,7 +73,3 @@ func (ScourTheBattlescapeBlue) NotImplemented() {}
 func (ScourTheBattlescapeBlue) Play(s *sim.TurnState, self *sim.CardState) {
 	scourTheBattlescapePlay(s, self)
 }
-
-func (ScourTheBattlescapeRed) ConditionalGoAgain()    {}
-func (ScourTheBattlescapeYellow) ConditionalGoAgain() {}
-func (ScourTheBattlescapeBlue) ConditionalGoAgain()   {}

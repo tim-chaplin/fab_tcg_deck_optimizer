@@ -37,7 +37,6 @@ func (FerventForerunnerRed) Attack() int             { return 3 }
 func (FerventForerunnerRed) Defense() int            { return 2 }
 func (FerventForerunnerRed) Types() card.TypeSet     { return ferventForerunnerTypes }
 func (FerventForerunnerRed) GoAgain() bool           { return false }
-func (FerventForerunnerRed) ConditionalGoAgain()     {}
 func (FerventForerunnerRed) Play(s *sim.TurnState, self *sim.CardState) {
 	ferventForerunnerPlay(s, self)
 }
@@ -52,7 +51,6 @@ func (FerventForerunnerYellow) Attack() int             { return 2 }
 func (FerventForerunnerYellow) Defense() int            { return 2 }
 func (FerventForerunnerYellow) Types() card.TypeSet     { return ferventForerunnerTypes }
 func (FerventForerunnerYellow) GoAgain() bool           { return false }
-func (FerventForerunnerYellow) ConditionalGoAgain()     {}
 func (FerventForerunnerYellow) Play(s *sim.TurnState, self *sim.CardState) {
 	ferventForerunnerPlay(s, self)
 }
@@ -67,7 +65,6 @@ func (FerventForerunnerBlue) Attack() int             { return 1 }
 func (FerventForerunnerBlue) Defense() int            { return 2 }
 func (FerventForerunnerBlue) Types() card.TypeSet     { return ferventForerunnerTypes }
 func (FerventForerunnerBlue) GoAgain() bool           { return false }
-func (FerventForerunnerBlue) ConditionalGoAgain()     {}
 func (FerventForerunnerBlue) Play(s *sim.TurnState, self *sim.CardState) {
 	ferventForerunnerPlay(s, self)
 }

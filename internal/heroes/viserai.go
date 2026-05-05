@@ -47,10 +47,8 @@ func (Viserai) OnCardPlayed(played sim.Card, s *sim.TurnState) int {
 //     have played another non-attack action card this turn" before the next Runeblade
 //     attack drops a runechant.
 //   - Action without Go again: an Action card that doesn't extend the chain — one is
-//     enough to close out a chain; further copies just sit in hand. The Go again check
-//     routes through mightHaveGoAgain so cards carrying ConditionalGoAgain (printed
-//     GoAgain() == false but reliably granted at play time in this archetype) DON'T fall
-//     in this slot.
+//     enough to close out a chain; further copies just sit in hand. Uses printed
+//     GoAgain() only.
 //   - Block-only defender: a card whose only role is defending — Defense Reaction or
 //     Block subtype. Most cards carry a non-zero printed Defense value as a secondary
 //     option, so Defense > 0 alone is too broad — we only count cards that are
@@ -112,29 +110,13 @@ func (s viseraiOptSlots) union(other viseraiOptSlots) viseraiOptSlots {
 	}
 }
 
-// viseraiSlotsFor classifies c into Viserai's Opt-heuristic slots. The Go-again check
-// routes through mightHaveGoAgain so cards carrying ConditionalGoAgain (printed
-// GoAgain() == false but conditionally granted at play time) aren't treated as
-// one-per-hand finishers.
+// viseraiSlotsFor classifies c into Viserai's Opt-heuristic slots.
 func viseraiSlotsFor(c sim.Card) viseraiOptSlots {
 	t := c.Types()
 	return viseraiOptSlots{
 		nonAttackEnabler: t.IsNonAttackAction(),
-		nonGoAgainAction: t.Has(card.TypeAction) && !mightHaveGoAgain(c),
+		nonGoAgainAction: t.Has(card.TypeAction) && !c.GoAgain(),
 		defender:         t.IsDefenseReaction() || t.Has(card.TypeBlock),
 		bluePitch:        c.Pitch() == 3,
 	}
-}
-
-// mightHaveGoAgain reports whether c could resolve with Go again at play time —
-// printed Go again, or the sim.ConditionalGoAgain marker indicating the card grants
-// itself under some runtime condition. Deliberately scoped to this slot heuristic and
-// named "might" rather than "has" so callers don't accidentally treat the result as
-// proof of go-again on the next play.
-func mightHaveGoAgain(c sim.Card) bool {
-	if c.GoAgain() {
-		return true
-	}
-	_, ok := c.(sim.ConditionalGoAgain)
-	return ok
 }

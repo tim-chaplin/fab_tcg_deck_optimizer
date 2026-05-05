@@ -65,7 +65,3 @@ func (VigorRushBlue) GoAgain() bool           { return false }
 func (VigorRushBlue) Play(s *sim.TurnState, self *sim.CardState) {
 	vigorRushPlay(s, self)
 }
-
-func (VigorRushRed) ConditionalGoAgain()    {}
-func (VigorRushYellow) ConditionalGoAgain() {}
-func (VigorRushBlue) ConditionalGoAgain()   {}

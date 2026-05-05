@@ -65,7 +65,3 @@ func (OverloadBlue) Dominate()               {}
 func (OverloadBlue) Play(s *sim.TurnState, self *sim.CardState) {
 	overloadPlay(s, self)
 }
-
-func (OverloadRed) ConditionalGoAgain()    {}
-func (OverloadYellow) ConditionalGoAgain() {}
-func (OverloadBlue) ConditionalGoAgain()   {}

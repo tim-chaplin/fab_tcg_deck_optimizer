@@ -5,7 +5,6 @@ import (
 	"testing"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/cards"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
@@ -228,22 +227,6 @@ func TestViseraiOpt_NoSlotCardsStayTop(t *testing.T) {
 	top, bottom := (Viserai{}).Opt([]sim.Card{a, b, c})
 	if !reflect.DeepEqual(top, []sim.Card{a, b, c}) {
 		t.Errorf("top = %v, want [%v %v %v]", top, a, b, c)
-	}
-	if len(bottom) != 0 {
-		t.Errorf("bottom = %v, want empty", bottom)
-	}
-}
-
-// Tests that three Runerager Swarms stay on top — Runerager Swarm has only conditional
-// Go again (printed GoAgain() == false) but in Viserai's deck it almost always extends
-// the chain via the runechant condition, so we don't bottom it for over-filling a
-// "non-go-again" slot. Pinned via the real card; if Runerager Swarm's profile ever
-// shifts into a Viserai-Opt slot, this test trips.
-func TestViseraiOpt_ThreeRuneragerSwarmsAllKept(t *testing.T) {
-	a, b, c := cards.RuneragerSwarmRed{}, cards.RuneragerSwarmRed{}, cards.RuneragerSwarmRed{}
-	top, bottom := (Viserai{}).Opt([]sim.Card{a, b, c})
-	if len(top) != 3 {
-		t.Errorf("top = %v, want 3 Runerager Swarms", top)
 	}
 	if len(bottom) != 0 {
 		t.Errorf("bottom = %v, want empty", bottom)
