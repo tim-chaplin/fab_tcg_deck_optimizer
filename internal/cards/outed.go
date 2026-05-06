@@ -3,7 +3,7 @@
 // Text: "If you are **marked**, you can't play this. If the defending hero is **marked**, this gets
 // +1{p}. **Go again**"
 
-package notimplemented
+package cards
 
 import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
@@ -23,10 +23,10 @@ func (OutedRed) Attack() int             { return 3 }
 func (OutedRed) Defense() int            { return 0 }
 func (OutedRed) Types() card.TypeSet     { return outedTypes }
 func (OutedRed) GoAgain() bool           { return true }
-
-// not implemented: marked-hero state not tracked; +1{p}-vs-marked-defender rider never fires
-func (OutedRed) NotImplemented() {}
-func (c OutedRed) Play(s *sim.TurnState, self *sim.CardState) {
+func (OutedRed) Play(s *sim.TurnState, self *sim.CardState) {
+	if s.OpponentMarked {
+		self.BonusAttack++
+	}
 	n := self.DealEffectiveAttack(s)
 	s.Log(self, n)
 }

@@ -85,16 +85,17 @@ type persistentCacheKey struct {
 // must use NewEvaluatorWithoutCache (sharedEvaluator already does for that reason) —
 // otherwise a cached entry from one matchup would silently apply to a query under another.
 type evalCacheKey struct {
-	handIDs   [maxCachedHandSize]ids.CardID
-	weaponIDs [maxCachedWeapons]ids.WeaponID
-	auras     [maxCachedAuras]persistentCacheKey
-	items     [maxCachedItems]persistentCacheKey
-	handLen   int
-	weaponLen int
-	auraLen   int
-	itemLen   int
-	heroID    ids.HeroID
-	arsenalID ids.CardID
+	handIDs        [maxCachedHandSize]ids.CardID
+	weaponIDs      [maxCachedWeapons]ids.WeaponID
+	auras          [maxCachedAuras]persistentCacheKey
+	items          [maxCachedItems]persistentCacheKey
+	handLen        int
+	weaponLen      int
+	auraLen        int
+	itemLen        int
+	heroID         ids.HeroID
+	arsenalID      ids.CardID
+	opponentMarked bool
 }
 
 // evalCacheEntry is the cached winning-partition shape. Stores only what's needed to
@@ -203,6 +204,7 @@ func makeCacheKey(
 	if prior.Arsenal != nil {
 		key.arsenalID = prior.Arsenal.ID()
 	}
+	key.opponentMarked = prior.OpponentMarked
 	return key, true
 }
 

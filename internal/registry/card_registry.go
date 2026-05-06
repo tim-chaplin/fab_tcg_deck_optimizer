@@ -231,6 +231,8 @@ var cardsByID = []sim.Card{
 	ids.EvasiveLeapYellow: cards.EvasiveLeapYellow{},
 	ids.EvasiveLeapBlue:   cards.EvasiveLeapBlue{},
 
+	ids.ExposedBlue: cards.ExposedBlue{},
+
 	ids.FateForeseenRed:    cards.FateForeseenRed{},
 	ids.FateForeseenYellow: cards.FateForeseenYellow{},
 	ids.FateForeseenBlue:   cards.FateForeseenBlue{},
@@ -314,6 +316,8 @@ var cardsByID = []sim.Card{
 	ids.OutMuscleYellow: cards.OutMuscleYellow{},
 	ids.OutMuscleBlue:   cards.OutMuscleBlue{},
 
+	ids.OutedRed: cards.OutedRed{},
+
 	ids.OverloadRed:    cards.OverloadRed{},
 	ids.OverloadYellow: cards.OverloadYellow{},
 	ids.OverloadBlue:   cards.OverloadBlue{},
@@ -334,9 +338,16 @@ var cardsByID = []sim.Card{
 	ids.PoundForPoundYellow: cards.PoundForPoundYellow{},
 	ids.PoundForPoundBlue:   cards.PoundForPoundBlue{},
 
+	ids.PublicBountyRed:    cards.PublicBountyRed{},
+	ids.PublicBountyYellow: cards.PublicBountyYellow{},
+	ids.PublicBountyBlue:   cards.PublicBountyBlue{},
+
 	ids.PummelRed:    cards.PummelRed{},
 	ids.PummelYellow: cards.PummelYellow{},
 	ids.PummelBlue:   cards.PummelBlue{},
+
+	ids.PursueToTheEdgeOfOblivionRed: cards.PursueToTheEdgeOfOblivionRed{},
+	ids.PursueToThePitsOfDespairRed:  cards.PursueToThePitsOfDespairRed{},
 
 	ids.RagingOnslaughtRed:    cards.RagingOnslaughtRed{},
 	ids.RagingOnslaughtYellow: cards.RagingOnslaughtYellow{},

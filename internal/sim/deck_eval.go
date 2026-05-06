@@ -274,6 +274,7 @@ func runOneShuffle(d *Deck, stats *Stats, scratch *shuffleScratch, idIndex map[i
 	head, tail := 0, deckSize
 	handIdx := 0
 	var arsenalCard Card
+	var opponentMarked bool
 	heldBuf := scratch.heldBuf[:0]
 	auraTriggerBuf := scratch.auraTriggerBuf[:0]
 	itemBuf := scratch.itemBuf[:0]
@@ -301,7 +302,7 @@ func runOneShuffle(d *Deck, stats *Stats, scratch *shuffleScratch, idIndex map[i
 		}
 		arsenalIn := arsenalCard
 		sortHandByID(h)
-		play := runBestForTurn(d.Hero, d.Weapons, h, mp, buf[head+drawCount:tail], TurnState{Arsenal: arsenalCard, Auras: auraTriggerBuf, Items: itemBuf}, ev)
+		play := runBestForTurn(d.Hero, d.Weapons, h, mp, buf[head+drawCount:tail], TurnState{Arsenal: arsenalCard, Auras: auraTriggerBuf, Items: itemBuf, OpponentMarked: opponentMarked}, ev)
 		arsenalCard = play.State.Arsenal
 		play.Value += trigDamage
 		play.TriggersFromLastTurn = trigContribs
@@ -309,7 +310,7 @@ func runOneShuffle(d *Deck, stats *Stats, scratch *shuffleScratch, idIndex map[i
 		play.DealtHand = dealtHand
 
 		if recordTurnStats(stats, play, handIdx, handsPerCycle) {
-			replay := replayBestForTurnWithLog(d.Hero, d.Weapons, h, mp, buf[head+drawCount:tail], TurnState{Arsenal: arsenalIn, Auras: auraTriggerBuf, Items: itemBuf}, ev)
+			replay := replayBestForTurnWithLog(d.Hero, d.Weapons, h, mp, buf[head+drawCount:tail], TurnState{Arsenal: arsenalIn, Auras: auraTriggerBuf, Items: itemBuf, OpponentMarked: opponentMarked}, ev)
 			replay.Value = play.Value
 			replay.TriggersFromLastTurn = trigContribs
 			replay.StartOfTurnAuras = startOfTurnAuras
@@ -320,6 +321,7 @@ func runOneShuffle(d *Deck, stats *Stats, scratch *shuffleScratch, idIndex map[i
 		nextHeld = applyTurnResult(play, buf, &head, &tail, nextHeld[:0])
 		nextAuraTrigger = append(nextAuraTrigger[:0], play.State.Auras...)
 		nextItem = append(nextItem[:0], play.State.Items...)
+		opponentMarked = play.State.OpponentMarked
 		handIdx++
 		heldBuf, nextHeld = nextHeld, heldBuf
 		auraTriggerBuf, nextAuraTrigger = nextAuraTrigger, auraTriggerBuf
