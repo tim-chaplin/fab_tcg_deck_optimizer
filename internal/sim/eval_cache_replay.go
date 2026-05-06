@@ -83,10 +83,18 @@ func (e *Evaluator) replayBest(
 		rolesBuf[postPromotedFromHeld] = Arsenal
 	}
 
-	// Build the TurnSummary. BestLine cards come from the new call's hand (so the printout
-	// names the right Card values) but roles come from the cached entry. Mirror findBest's
-	// final wiring: adopt CarryState, override Arsenal from arsenalAtChainStart so an
-	// arsenal-in card that stayed is preserved, then re-do the post-hoc promotion.
+	return assembleReplaySummary(hand, arsenalCardIn, rolesBuf, n, totalN, mp,
+		attackDealt, defenseDealt, swung, carry, arsenalAtChainStart)
+}
+
+// assembleReplaySummary builds the TurnSummary from a cache-hit chain run. BestLine cards come
+// from the new call's hand (so the printout names the right Card values) but roles come from
+// the cached entry. Mirrors findBest's final wiring: adopt CarryState, override Arsenal from
+// arsenalAtChainStart so an arsenal-in card that stayed is preserved, then re-do the post-hoc
+// promotion when arsenal ended empty.
+func assembleReplaySummary(hand []Card, arsenalCardIn Card, rolesBuf []Role, n, totalN int,
+	mp Matchup, attackDealt, defenseDealt int, swung []string, carry CarryState,
+	arsenalAtChainStart Card) TurnSummary {
 	best := TurnSummary{
 		BestLine:       make([]CardAssignment, totalN),
 		Value:          attackDealt + defenseDealt,
