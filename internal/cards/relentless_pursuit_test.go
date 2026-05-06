@@ -22,20 +22,20 @@ func TestRelentlessPursuit_NoRecycleWithoutPriorAttack(t *testing.T) {
 	self := &sim.CardState{Card: RelentlessPursuitBlue{}}
 	s := sim.NewTurnState(nil, nil)
 	(RelentlessPursuitBlue{}).Play(s, self)
-	if self.RecycledToDeck {
-		t.Error("RecycledToDeck = true without a prior attack, want false")
+	if self.SkipGraveyard {
+		t.Error("SkipGraveyard = true without a prior attack, want false")
 	}
 }
 
 // Tests that Play after an attack-typed CardsPlayed entry recycles to the bottom of the
-// deck and flips RecycledToDeck so the dispatcher will skip the graveyard append.
+// deck and flips SkipGraveyard so the dispatcher will skip the graveyard append.
 func TestRelentlessPursuit_RecyclesAfterPriorAttack(t *testing.T) {
 	self := &sim.CardState{Card: RelentlessPursuitBlue{}}
 	s := sim.NewTurnState(nil, nil)
 	s.CardsPlayed = []sim.Card{testutils.GenericAttack(0, 3)}
 	(RelentlessPursuitBlue{}).Play(s, self)
-	if !self.RecycledToDeck {
-		t.Fatal("RecycledToDeck = false after prior attack, want true")
+	if !self.SkipGraveyard {
+		t.Fatal("SkipGraveyard = false after prior attack, want true")
 	}
 	deck := s.Deck()
 	if len(deck) != 1 || deck[0] != (RelentlessPursuitBlue{}) {

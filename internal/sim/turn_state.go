@@ -358,7 +358,7 @@ func (s *TurnState) PrependToDeck(c Card) {
 }
 
 // RecycleToDeckBottom appends self.Card to the bottom of the deck and flips
-// self.RecycledToDeck so the chain dispatcher skips the usual non-persistent → graveyard
+// self.SkipGraveyard so the chain dispatcher skips the usual non-persistent → graveyard
 // append. Models the FaB clause "put this on the bottom of its owner's deck"
 // (Relentless Pursuit). Flips IsCacheable to false. Allocates a fresh deck backing slice
 // so the per-leaf deck reference shared across permutations stays untouched.
@@ -368,7 +368,7 @@ func (s *TurnState) RecycleToDeckBottom(self *CardState) {
 	newDeck = append(newDeck, s.deck...)
 	newDeck = append(newDeck, self.Card)
 	s.deck = newDeck
-	self.RecycledToDeck = true
+	self.SkipGraveyard = true
 }
 
 // Opt resolves the FaB "Opt N" keyword: pops up to n cards from the top of the deck and

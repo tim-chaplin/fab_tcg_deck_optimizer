@@ -68,11 +68,12 @@ type CardState struct {
 	// doesn't allocate per registration. See docs/dev-standards.md "OnHit registrations"
 	// for the wiring contract.
 	OnHit []OnHitHandler
-	// RecycledToDeck is set by TurnState.RecycleToDeckBottom when this card opts to bypass
-	// the dispatcher's "non-persistent → graveyard" rule and live at the bottom of the
-	// deck instead. Models the FaB clause "put this on the bottom of its owner's deck"
-	// (Relentless Pursuit).
-	RecycledToDeck bool
+	// SkipGraveyard is set by Play helpers that route this card to a non-graveyard zone —
+	// e.g. TurnState.RecycleToDeckBottom for Relentless Pursuit's "put this on the bottom
+	// of its owner's deck" clause. The chain dispatcher's "non-persistent → graveyard"
+	// append checks this flag and skips the append when set, so the helper that moved
+	// the card owns its destination zone fully.
+	SkipGraveyard bool
 }
 
 // OnHitHandler is one registered on-hit rider on a CardState. The chain runner fires Fire
