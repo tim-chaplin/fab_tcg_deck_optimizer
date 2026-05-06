@@ -114,12 +114,13 @@ type TurnState struct {
 	// consult this flag rather than Runechants. Reset at turn boundary.
 	ArcaneDamageDealt bool
 	// OpponentMarked tracks Mark on the opposing hero. Set by a Mark effect, cleared
-	// when an attack action card or weapon swing resolves — modelled as the opponent's
-	// first incoming physical damage stripping the mark. Arcane damage (Runechants,
-	// arcane riders) doesn't clear the mark. Read by "if the defending hero is marked"
-	// riders. Our own hero is never modelled as marked, so "if you are marked, can't
-	// play" gates on opposing cards drop out. Carries across turns via CarryState so
-	// next turn's chain seed sees a Mark applied late in the previous turn.
+	// when an attack or weapon swing actually lands (LikelyToHit) — modelled as the
+	// opponent's first incoming physical damage stripping the mark. Arcane damage
+	// (Runechants, arcane riders) and non-landing swings don't clear the mark. Read by
+	// "if the defending hero is marked" riders. Our own hero is never modelled as marked,
+	// so "if you are marked, can't play" gates on opposing cards drop out. Carries across
+	// turns via CarryState so next turn's chain seed sees a Mark applied late in the
+	// previous turn.
 	OpponentMarked bool
 	// Auras is the list of auras currently in play. Cards add entries during Play via
 	// AddAura; the sim fires matching entries on each TriggerType condition and drops

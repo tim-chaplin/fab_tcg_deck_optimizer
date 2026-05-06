@@ -6,6 +6,7 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/cards"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/heroes"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
 )
 
 // Tests that Pursue to the Edge of Oblivion's on-hit rider marks the opposing hero.
@@ -47,5 +48,22 @@ func TestOuted_BonusWhenOpponentAlreadyMarked(t *testing.T) {
 	state := d.EvalOneTurnForTesting(sim.Matchup{IncomingDamage: 0}, sim.TurnState{OpponentMarked: true}, hand)
 	if state.Value != 4 {
 		t.Fatalf("Value = %d, want 4 (Outed printed 3{p} + 1 marked-defender)", state.Value)
+	}
+}
+
+// Tests that an attack unlikely to land does not strip the opposing hero's Mark.
+func TestMark_NonHittingAttackDoesNotClearMark(t *testing.T) {
+	d := sim.New(heroes.Viserai{}, nil, fillerDeck())
+	hand := []sim.Card{
+		testutils.BluePitch{},
+		cards.PublicBountyRed{},
+		testutils.RedAttack{},
+	}
+	state := d.EvalOneTurnForTesting(sim.Matchup{IncomingDamage: 0}, sim.TurnState{}, hand)
+	if state.Value != 6 {
+		t.Fatalf("Value = %d, want 6 (Public Bounty 0 + Red Attack 3 + grant 3)", state.Value)
+	}
+	if !state.OpponentMarked {
+		t.Fatalf("OpponentMarked = false at end of chain, want true (6{p} swing doesn't land, mark survives)")
 	}
 }

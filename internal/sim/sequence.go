@@ -815,6 +815,9 @@ func (ctx *sequenceContext) playSequenceWithMeta(n int) (damage int, futureValue
 			return
 		}
 		if LikelyToHit(activeAttack) {
+			// Mark is stripped when the marked hero is dealt damage. Cleared before OnHit so
+			// on-hit Mark riders can re-mark atop the stripped state.
+			state.OpponentMarked = false
 			for i := range activeAttack.OnHit {
 				h := &activeAttack.OnHit[i]
 				h.Fire(state, activeAttack, h)
@@ -935,10 +938,6 @@ func (ctx *sequenceContext) playSequenceWithMeta(n int) (damage int, futureValue
 		pc.Card.Play(state, pc)
 		if m.isAttack {
 			fireAttackAuras(state, pc.Card)
-			// Clear after Play so any "if defending hero is marked" rider on this card
-			// already read the pre-clear flag. OnHit handlers fire later via
-			// finalizeActiveAttack, after this clear, so on-hit Mark riders survive.
-			state.OpponentMarked = false
 		}
 		if m.isAttackAction {
 			fireAttackActionAuras(state, pc.Card)
