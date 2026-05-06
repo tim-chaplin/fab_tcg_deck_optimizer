@@ -13,19 +13,9 @@ import (
 
 var nimblismTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction)
 
-// nimblismApplySideEffect grants +n to the first scheduled attack action card whose cost is 1
-// or less, by adding to its BonusAttack. The +n attributes to the buffed attack (so
-// EffectiveAttack picks it up in LikelyToHit) rather than to Nimblism itself.
-func nimblismApplySideEffect(s *sim.TurnState, n int) {
-	for _, pc := range s.CardsRemaining {
-		if !pc.Card.Types().IsAttackAction() {
-			continue
-		}
-		if pc.Card.Cost(s) <= 1 {
-			pc.BonusAttack += n
-			return
-		}
-	}
+// nimblismIsTarget gates the rider on attack action cards whose cost is 1 or less.
+func nimblismIsTarget(s *sim.TurnState, pc *sim.CardState) bool {
+	return pc.Card.Types().IsAttackAction() && pc.Card.Cost(s) <= 1
 }
 
 type NimblismRed struct{}
@@ -39,7 +29,7 @@ func (NimblismRed) Defense() int            { return 2 }
 func (NimblismRed) Types() card.TypeSet     { return nimblismTypes }
 func (NimblismRed) GoAgain() bool           { return true }
 func (NimblismRed) Play(s *sim.TurnState, self *sim.CardState) {
-	nimblismApplySideEffect(s, 3)
+	GrantNextCardBonusAttack(s, 3, nimblismIsTarget)
 	n := self.DealEffectiveAttack(s)
 	s.Log(self, n)
 }
@@ -55,7 +45,7 @@ func (NimblismYellow) Defense() int            { return 2 }
 func (NimblismYellow) Types() card.TypeSet     { return nimblismTypes }
 func (NimblismYellow) GoAgain() bool           { return true }
 func (NimblismYellow) Play(s *sim.TurnState, self *sim.CardState) {
-	nimblismApplySideEffect(s, 2)
+	GrantNextCardBonusAttack(s, 2, nimblismIsTarget)
 	n := self.DealEffectiveAttack(s)
 	s.Log(self, n)
 }
@@ -71,7 +61,7 @@ func (NimblismBlue) Defense() int            { return 2 }
 func (NimblismBlue) Types() card.TypeSet     { return nimblismTypes }
 func (NimblismBlue) GoAgain() bool           { return true }
 func (NimblismBlue) Play(s *sim.TurnState, self *sim.CardState) {
-	nimblismApplySideEffect(s, 1)
+	GrantNextCardBonusAttack(s, 1, nimblismIsTarget)
 	n := self.DealEffectiveAttack(s)
 	s.Log(self, n)
 }

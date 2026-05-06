@@ -13,19 +13,9 @@ import (
 
 var minnowismTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction)
 
-// minnowismApplySideEffect grants +n to the first scheduled attack action card whose printed
-// power is 3 or less, by adding to its BonusAttack. The +n attributes to the buffed attack (so
-// EffectiveAttack picks it up in LikelyToHit) rather than to Minnowism itself.
-func minnowismApplySideEffect(s *sim.TurnState, n int) {
-	for _, pc := range s.CardsRemaining {
-		if !pc.Card.Types().IsAttackAction() {
-			continue
-		}
-		if pc.Card.Attack() <= 3 {
-			pc.BonusAttack += n
-			return
-		}
-	}
+// minnowismIsTarget gates the rider on attack action cards with printed power 3 or less.
+func minnowismIsTarget(_ *sim.TurnState, pc *sim.CardState) bool {
+	return pc.Card.Types().IsAttackAction() && pc.Card.Attack() <= 3
 }
 
 type MinnowismRed struct{}
@@ -39,7 +29,7 @@ func (MinnowismRed) Defense() int            { return 2 }
 func (MinnowismRed) Types() card.TypeSet     { return minnowismTypes }
 func (MinnowismRed) GoAgain() bool           { return true }
 func (MinnowismRed) Play(s *sim.TurnState, self *sim.CardState) {
-	minnowismApplySideEffect(s, 3)
+	GrantNextCardBonusAttack(s, 3, minnowismIsTarget)
 	n := self.DealEffectiveAttack(s)
 	s.Log(self, n)
 }
@@ -55,7 +45,7 @@ func (MinnowismYellow) Defense() int            { return 2 }
 func (MinnowismYellow) Types() card.TypeSet     { return minnowismTypes }
 func (MinnowismYellow) GoAgain() bool           { return true }
 func (MinnowismYellow) Play(s *sim.TurnState, self *sim.CardState) {
-	minnowismApplySideEffect(s, 2)
+	GrantNextCardBonusAttack(s, 2, minnowismIsTarget)
 	n := self.DealEffectiveAttack(s)
 	s.Log(self, n)
 }
@@ -71,7 +61,7 @@ func (MinnowismBlue) Defense() int            { return 2 }
 func (MinnowismBlue) Types() card.TypeSet     { return minnowismTypes }
 func (MinnowismBlue) GoAgain() bool           { return true }
 func (MinnowismBlue) Play(s *sim.TurnState, self *sim.CardState) {
-	minnowismApplySideEffect(s, 1)
+	GrantNextCardBonusAttack(s, 1, minnowismIsTarget)
 	n := self.DealEffectiveAttack(s)
 	s.Log(self, n)
 }

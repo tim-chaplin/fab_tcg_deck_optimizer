@@ -29,7 +29,7 @@ func (SapwoodElixirRed) GoAgain() bool           { return true }
 // not implemented: Frailty health-gain rider dropped (status tokens not tracked)
 func (SapwoodElixirRed) NotImplemented() {}
 func (SapwoodElixirRed) Play(s *sim.TurnState, self *sim.CardState) {
-	cards.GrantNextCardBonusAttack(s, 3, card.TypeSet.IsAttack)
+	cards.GrantNextCardBonusAttack(s, 3, cards.IsAttack)
 	n := self.DealEffectiveAttack(s)
 	s.Log(self, n)
 }

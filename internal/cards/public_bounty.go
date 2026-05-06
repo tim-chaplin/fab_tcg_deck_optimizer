@@ -16,7 +16,7 @@ var publicBountyTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction)
 
 func publicBountyPlay(s *sim.TurnState, self *sim.CardState, n int) {
 	s.OpponentMarked = true
-	GrantNextCardBonusAttack(s, n, card.TypeSet.IsAttack)
+	GrantNextCardBonusAttack(s, n, IsAttack)
 	s.Log(self, 0)
 }
 

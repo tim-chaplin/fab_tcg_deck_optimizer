@@ -17,21 +17,10 @@ import (
 
 var waterTheSeedsTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeAttack)
 
-// grantWaterTheSeedsBonus adds +1 to the first scheduled attack with base {p} of 1 or
-// less — attack action card OR weapon swing per the "your next attack" wording. The buff
-// lands on that card's BonusAttack so EffectiveAttack and LikelyToHit see the buffed
-// power on the buffed card, not on the granter. Fizzles silently when no qualifying
-// target follows.
-func grantWaterTheSeedsBonus(s *sim.TurnState) {
-	for _, pc := range s.CardsRemaining {
-		if !pc.Card.Types().IsAttack() {
-			continue
-		}
-		if pc.Card.Attack() <= 1 {
-			pc.BonusAttack += 1
-			return
-		}
-	}
+// waterTheSeedsIsTarget gates the rider on attacks (action cards or weapon swings — "your
+// next attack") with base power 1 or less.
+func waterTheSeedsIsTarget(_ *sim.TurnState, pc *sim.CardState) bool {
+	return pc.Card.Types().IsAttack() && pc.Card.Attack() <= 1
 }
 
 type WaterTheSeedsRed struct{}
@@ -45,7 +34,7 @@ func (WaterTheSeedsRed) Defense() int            { return 2 }
 func (WaterTheSeedsRed) Types() card.TypeSet     { return waterTheSeedsTypes }
 func (WaterTheSeedsRed) GoAgain() bool           { return true }
 func (WaterTheSeedsRed) Play(s *sim.TurnState, self *sim.CardState) {
-	grantWaterTheSeedsBonus(s)
+	GrantNextCardBonusAttack(s, 1, waterTheSeedsIsTarget)
 	n := self.DealEffectiveAttack(s)
 	s.Log(self, n)
 }
@@ -61,7 +50,7 @@ func (WaterTheSeedsYellow) Defense() int            { return 2 }
 func (WaterTheSeedsYellow) Types() card.TypeSet     { return waterTheSeedsTypes }
 func (WaterTheSeedsYellow) GoAgain() bool           { return true }
 func (WaterTheSeedsYellow) Play(s *sim.TurnState, self *sim.CardState) {
-	grantWaterTheSeedsBonus(s)
+	GrantNextCardBonusAttack(s, 1, waterTheSeedsIsTarget)
 	n := self.DealEffectiveAttack(s)
 	s.Log(self, n)
 }
@@ -77,7 +66,7 @@ func (WaterTheSeedsBlue) Defense() int            { return 2 }
 func (WaterTheSeedsBlue) Types() card.TypeSet     { return waterTheSeedsTypes }
 func (WaterTheSeedsBlue) GoAgain() bool           { return true }
 func (WaterTheSeedsBlue) Play(s *sim.TurnState, self *sim.CardState) {
-	grantWaterTheSeedsBonus(s)
+	GrantNextCardBonusAttack(s, 1, waterTheSeedsIsTarget)
 	n := self.DealEffectiveAttack(s)
 	s.Log(self, n)
 }
