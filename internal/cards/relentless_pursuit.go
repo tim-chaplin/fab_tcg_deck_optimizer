@@ -3,7 +3,7 @@
 // Text: "**Mark** target opposing hero. If you've attacked them this turn, put this on the bottom
 // of its owner's deck. **Go again**"
 
-package notimplemented
+package cards
 
 import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
@@ -23,10 +23,14 @@ func (RelentlessPursuitBlue) Attack() int             { return 0 }
 func (RelentlessPursuitBlue) Defense() int            { return 3 }
 func (RelentlessPursuitBlue) Types() card.TypeSet     { return relentlessPursuitTypes }
 func (RelentlessPursuitBlue) GoAgain() bool           { return true }
-
-// not implemented: 'attacked them this turn → put this on the bottom of its owner's deck' recycle
-func (RelentlessPursuitBlue) NotImplemented() {}
 func (RelentlessPursuitBlue) Play(s *sim.TurnState, self *sim.CardState) {
 	s.OpponentMarked = true
+	recycled := s.HasPlayedType(card.TypeAttack)
+	if recycled {
+		s.RecycleToDeckBottom(self)
+	}
 	s.Log(self, 0)
+	if recycled {
+		s.LogRider(self, 0, "Recycled to bottom of deck")
+	}
 }

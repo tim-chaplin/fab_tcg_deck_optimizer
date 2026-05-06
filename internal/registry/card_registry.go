@@ -357,6 +357,8 @@ var cardsByID = []sim.Card{
 	ids.RavenousRabbleYellow: cards.RavenousRabbleYellow{},
 	ids.RavenousRabbleBlue:   cards.RavenousRabbleBlue{},
 
+	ids.RelentlessPursuitBlue: cards.RelentlessPursuitBlue{},
+
 	ids.RazorReflexRed:    cards.RazorReflexRed{},
 	ids.RazorReflexYellow: cards.RazorReflexYellow{},
 	ids.RazorReflexBlue:   cards.RazorReflexBlue{},
