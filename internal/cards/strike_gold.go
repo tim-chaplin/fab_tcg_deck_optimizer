@@ -19,7 +19,7 @@ func strikeGoldOnHit(s *sim.TurnState, self *sim.CardState, _ *sim.OnHitHandler)
 func strikeGoldPlay(s *sim.TurnState, self *sim.CardState) {
 	n := self.DealEffectiveAttack(s)
 	s.Log(self, n)
-	self.OnHit = append(self.OnHit, sim.OnHitHandler{Fire: strikeGoldOnHit})
+	self.RegisterOnHit(strikeGoldOnHit)
 }
 
 type StrikeGoldRed struct{}

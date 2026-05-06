@@ -26,5 +26,5 @@ func (PursueToTheEdgeOfOblivionRed) GoAgain() bool           { return false }
 func (PursueToTheEdgeOfOblivionRed) Play(s *sim.TurnState, self *sim.CardState) {
 	n := self.DealEffectiveAttack(s)
 	s.Log(self, n)
-	self.OnHit = append(self.OnHit, sim.OnHitHandler{Fire: markOpponentOnHit})
+	self.RegisterOnHit(markOpponentOnHit)
 }

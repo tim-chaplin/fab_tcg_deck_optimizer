@@ -21,7 +21,7 @@ func performanceBonusPlay(s *sim.TurnState, self *sim.CardState) {
 	self.GrantGoAgainIfFromArsenal()
 	n := self.DealEffectiveAttack(s)
 	s.Log(self, n)
-	self.OnHit = append(self.OnHit, sim.OnHitHandler{Fire: performanceBonusOnHit})
+	self.RegisterOnHit(performanceBonusOnHit)
 }
 
 type PerformanceBonusRed struct{}

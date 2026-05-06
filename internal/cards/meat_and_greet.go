@@ -22,7 +22,7 @@ func meatAndGreetPlay(s *sim.TurnState, self *sim.CardState) {
 	}
 	n := self.DealEffectiveAttack(s)
 	s.Log(self, n)
-	self.OnHit = append(self.OnHit, sim.OnHitHandler{Fire: meatAndGreetOnHit})
+	self.RegisterOnHit(meatAndGreetOnHit)
 }
 
 // meatAndGreetOnHit fires the printed "When this hits, create a Runechant token" rider.

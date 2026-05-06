@@ -22,7 +22,7 @@ func reekOfCorruptionApplyRider(s *sim.TurnState, self *sim.CardState) {
 	if !s.HasPlayedOrCreatedAura() {
 		return
 	}
-	self.OnHit = append(self.OnHit, sim.OnHitHandler{Fire: reekOfCorruptionOnHit})
+	self.RegisterOnHit(reekOfCorruptionOnHit)
 }
 
 // reekOfCorruptionOnHit fires the conditional "When this hits a hero, they discard a card"

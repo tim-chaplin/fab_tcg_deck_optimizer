@@ -88,6 +88,13 @@ type OnHitHandler struct {
 	N       int
 }
 
+// RegisterOnHit appends a fire-only on-hit handler — the common case for "if this hits, do
+// X" riders. Cards needing Source / N / LogText payloads on the handler append an
+// OnHitHandler literal directly.
+func (p *CardState) RegisterOnHit(fire func(s *TurnState, self *CardState, h *OnHitHandler)) {
+	p.OnHit = append(p.OnHit, OnHitHandler{Fire: fire})
+}
+
 // EffectiveGoAgain reports whether this card has Go again this turn — from printed text or a
 // grant by a prior card's effect.
 func (p *CardState) EffectiveGoAgain() bool {

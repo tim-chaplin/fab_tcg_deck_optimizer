@@ -18,7 +18,7 @@ func ferventForerunnerPlay(s *sim.TurnState, self *sim.CardState) {
 	self.GrantGoAgainIfFromArsenal()
 	n := self.DealEffectiveAttack(s)
 	s.Log(self, n)
-	self.OnHit = append(self.OnHit, sim.OnHitHandler{Fire: ferventForerunnerOnHit})
+	self.RegisterOnHit(ferventForerunnerOnHit)
 }
 
 // ferventForerunnerOnHit fires the printed "If this hits, opt 2" rider. Top-level so
