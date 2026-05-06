@@ -7,10 +7,8 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
 )
 
-// TestNotImplementedMarker pins the type-assertion contract: a plain Card does NOT satisfy the
-// NotImplemented interface, and a Card whose type carries a NotImplemented() method does.
-// That's the exact check the deck legal-pool filter performs when deciding whether to skip a
-// card in random generation or mutation pools.
+// Tests the NotImplemented type-assertion contract: opt-in via a NotImplemented() method;
+// plain Cards don't satisfy the interface.
 func TestNotImplementedMarker(t *testing.T) {
 	var plain Card = testutils.NewStubCard("plain")
 	if _, ok := plain.(NotImplemented); ok {
@@ -120,10 +118,7 @@ func TestHasDominate_MatchesMarker(t *testing.T) {
 	}
 }
 
-// TestCardState_EffectiveAttack: printed Attack plus any granted BonusAttack from a prior
-// card's "next attack +N{p}" rider. Default BonusAttack of 0 leaves EffectiveAttack equal to
-// the printed power. Negative bonuses (defender-side -N{p} debuffs like Drag Down) clamp at
-// 0 — an attack's power can't be reduced below 0 in FaB.
+// Tests EffectiveAttack: printed Attack + BonusAttack, clamped at 0 for negative bonuses.
 func TestCardState_EffectiveAttack(t *testing.T) {
 	cases := []struct {
 		name        string

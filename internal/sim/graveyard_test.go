@@ -115,10 +115,7 @@ func TestGraveyard_PlainBlockEntersGraveyardRegardlessOfType(t *testing.T) {
 	}
 }
 
-// TestGraveyard_PermutationReset: running playSequence twice must reset Graveyard between
-// calls. Without the reset, the second call's list would double-up. A changing chain length
-// between runs makes the leak obvious — the second graveyard's length should match the second
-// order.
+// Tests that Graveyard resets between back-to-back playSequence calls (no double-up).
 func TestGraveyard_PermutationReset(t *testing.T) {
 	first := []Card{testutils.RedAttack{}, testutils.RedAttack{}, testutils.RedAttack{}}
 	second := []Card{testutils.RedAttack{}}

@@ -7,10 +7,8 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
 )
 
-// TestFireAttackActionAuras_FiresOnceWhenGated: a single OncePerTurn AttackAction
-// trigger fires on the first call and is gated on the second within the same turn —
-// FiredThisTurn latches. Count is opaque to the sim, so a handler that doesn't decrement
-// keeps it at its registered value.
+// Tests that an OncePerTurn AttackAction trigger fires on the first call and is gated by
+// FiredThisTurn on the second within the same turn.
 func TestFireAttackActionAuras_FiresOnceWhenGated(t *testing.T) {
 	aura := testutils.RedAttack{}
 	calls := 0

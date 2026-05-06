@@ -70,10 +70,8 @@ func TestLegalPool_ExcludesTaggedCardsByID(t *testing.T) {
 	}
 }
 
-// TestLegalPool_ExcludesUnplayableByID is the Unplayable-side counterpart of
-// TestLegalPool_ExcludesTaggedCardsByID: picks a concrete registered card we know currently
-// carries the Unplayable marker (Potion of Seeing [B], opponent-info-only effect) and asserts
-// it's absent from LegalPool's output. Self-retires if the card ever loses the tag.
+// Tests that Potion of Seeing [B] (a known-tagged Unplayable card) is absent from LegalPool.
+// Self-retires when the card loses the tag.
 func TestLegalPool_ExcludesUnplayableByID(t *testing.T) {
 	if _, ok := GetCard(ids.PotionOfSeeingBlue).(Unplayable); !ok {
 		t.Skip("Potion of Seeing [B] no longer Unplayable; pick another tagged card or drop test")
@@ -154,10 +152,7 @@ func TestSanitizeNotImplemented_NoOpOnCleanDeck(t *testing.T) {
 	}
 }
 
-// TestAllMutations_ExcludesNotImplementedAdditions confirms no single-slot mutation can
-// introduce a NotImplemented card. Starting deck must contain only implemented cards so any
-// NotImplemented copy in a mutation output must have come from the add pool;
-// ArcanicCrackleRed is the chosen sentinel (no NotImplemented marker).
+// Tests that no single-slot mutation introduces a NotImplemented card.
 func TestAllMutations_ExcludesNotImplementedAdditions(t *testing.T) {
 	a := GetCard(ids.ArcanicCrackleRed)
 	if _, tagged := a.(NotImplemented); tagged {
@@ -198,10 +193,8 @@ func TestRandom_ExcludesNotImplementedWeapons(t *testing.T) {
 	}
 }
 
-// TestLegalWeapons_ExcludesTaggedWeaponByID gives TestLegalWeapons_SkipsNotImplemented teeth
-// by picking a concrete registered weapon we know currently carries the marker (Annals of
-// Sutcliffe) and asserting it's absent from LegalWeapons. Self-retires if Annals ever loses
-// the tag so maintenance is only a delete.
+// Tests that Annals of Sutcliffe (a known-tagged NotImplemented weapon) is absent from
+// LegalWeapons. Self-retires when the weapon loses the tag.
 func TestLegalWeapons_ExcludesTaggedWeaponByID(t *testing.T) {
 	tagged := weapons.AnnalsOfSutcliffe{}
 	if _, ok := any(tagged).(NotImplemented); !ok {
@@ -214,10 +207,8 @@ func TestLegalWeapons_ExcludesTaggedWeaponByID(t *testing.T) {
 	}
 }
 
-// TestAllMutations_ExcludesNotImplementedWeaponLoadouts confirms no weapon-loadout mutation
-// proposes a loadout that contains a NotImplemented weapon. Starting deck equips the
-// implemented Nebula Blade so any NotImplemented weapon in a mutation output came from the
-// loadout pool, not the starting deck.
+// Tests that no weapon-loadout mutation proposes a loadout containing a NotImplemented
+// weapon.
 func TestAllMutations_ExcludesNotImplementedWeaponLoadouts(t *testing.T) {
 	a := GetCard(ids.ArcanicCrackleRed)
 	if _, tagged := a.(NotImplemented); tagged {

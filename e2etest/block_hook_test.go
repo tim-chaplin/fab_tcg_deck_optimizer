@@ -19,10 +19,8 @@ func TestBlock_BattlefrontBastionAloneFiresBonus(t *testing.T) {
 	}
 }
 
-// Tests that a Defense Reaction (Toughen Up) blocking alongside doesn't cancel
-// Battlefront Bastion's alone-bonus — only a simultaneous additional plain block does.
-// Toughen Up's cost 2 plus BB's cost 3 sums above the hand's pitch supply, so neither
-// can attack and the optimizer commits both to defense.
+// Tests that a DR blocking alongside Battlefront Bastion doesn't cancel its alone-bonus —
+// only a second simultaneous plain block does.
 func TestBlock_BattlefrontBastionAloneFiresBesideDR(t *testing.T) {
 	d := sim.New(heroes.Viserai{}, nil, fillerDeck())
 	hand := []sim.Card{

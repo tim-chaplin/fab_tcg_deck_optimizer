@@ -48,10 +48,8 @@ func TestBest_UncacheableSkyFireLanterns(t *testing.T) {
 	}
 }
 
-// TestBest_UncacheableSutcliffesResearchNotes: the top-N runeblade-attack scan calls
-// s.Deck() so Cacheable=false for any chain that includes a Sutcliffe's printing. Need
-// a second pitchable card to fund Sutcliffe's cost-1 — solo it's never feasible to play
-// and Play never fires.
+// Tests that Sutcliffe's Research Notes pins Cacheable=false because its top-N scan
+// reads s.Deck().
 func TestBest_UncacheableSutcliffesResearchNotes(t *testing.T) {
 	h := []Card{cards.SutcliffesResearchNotesRed{}, testutils.BlueAttack{}}
 	deck := []Card{testutils.RunebladeAttack{}}
@@ -84,10 +82,7 @@ func TestBest_UncacheableRavenousRabble(t *testing.T) {
 	}
 }
 
-// TestBest_UncacheableSnatchHitDrawsViaDrawOne: Snatch Red's printed 4 attack lands in the
-// hit window, so its on-hit DrawOne fires — that's a PopDeckTop call and the chain's output
-// depends on what got drawn. Cacheable=false even though Snatch never names s.Deck()
-// directly; the framework helper inherits the flip.
+// Tests that DrawOne's PopDeckTop flips Cacheable when an on-hit DrawOne fires (Snatch hits).
 func TestBest_UncacheableSnatchHitDrawsViaDrawOne(t *testing.T) {
 	h := []Card{cards.SnatchRed{}}
 	deck := []Card{testutils.RedAttack{}}
@@ -97,10 +92,7 @@ func TestBest_UncacheableSnatchHitDrawsViaDrawOne(t *testing.T) {
 	}
 }
 
-// TestBest_UncacheableTestOfStrengthClash: Test of Strength's clash reads the deck top via
-// Clash, which inherits the flip from s.Deck(). Incoming = 1 to give the partition an
-// actual defend step where the DR can fire (the partition skips Defend assignments at 0
-// incoming since FaB has no defense step without an attack).
+// Tests that Test of Strength's Clash flips Cacheable via s.Deck().
 func TestBest_UncacheableTestOfStrengthClash(t *testing.T) {
 	h := []Card{cards.TestOfStrengthRed{}}
 	deck := []Card{testutils.GenericAttack(0, 7)}
@@ -110,14 +102,9 @@ func TestBest_UncacheableTestOfStrengthClash(t *testing.T) {
 	}
 }
 
-// TestBest_UncacheableWeepingBattlegroundDR: Weeping Battleground is a Defense Reaction; its
-// banish-from-graveyard rider routes through BanishFromGraveyard and reads the graveyard
-// contents. The DR Play runs even when the partition's chain rejects, so the leaf-level
-// uncacheable bit pings the propagation through defendersDamage.
+// Tests that Weeping Battleground's BanishFromGraveyard call propagates the Cacheable flip
+// through defendersDamage.
 func TestBest_UncacheableWeepingBattlegroundDR(t *testing.T) {
-	// Pair Weeping Battleground with a Malefic Incantation Blue (cost 0 / pitch 3) so the DR
-	// has a pitched card funding its 0 cost. Incoming damage > 0 forces the partition to
-	// actually run defenders.
 	h := []Card{cards.WeepingBattlegroundRed{}, cards.MaleficIncantationBlue{}}
 	got := Best(testutils.Hero{Intel: 4}, nil, h, Matchup{IncomingDamage: 3}, nil, TurnState{})
 	if got.Cacheable {

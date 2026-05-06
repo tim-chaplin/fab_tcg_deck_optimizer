@@ -44,10 +44,8 @@ func TestDrawOne_EmptyDeckIsNoOp(t *testing.T) {
 	}
 }
 
-// TestAddAura_FlipsAuraCreatedAndAppends: AddAura MUST flip AuraCreated (so
-// same-turn "if you've played or created an aura" riders see the entry) AND push each
-// trigger onto s.Auras in call order. Pairing both in one method is what stops a
-// card from registering a trigger without advertising the aura (or vice versa).
+// Tests that AddAura flips AuraCreated and appends to s.Auras in call order — bundling
+// the flip with the append prevents a trigger registered without advertising the aura.
 func TestAddAura_FlipsAuraCreatedAndAppends(t *testing.T) {
 	self := testutils.NewStubCard("self")
 	s := &TurnState{}
@@ -275,11 +273,7 @@ func TestClash_WinTieLose(t *testing.T) {
 	}
 }
 
-// TestIsCacheable_NewTurnStateSeedsCacheable: NewTurnState explicitly seeds cacheable=true
-// so a fresh state starts cacheable. A bare `var s TurnState` zero-values to cacheable=false
-// (the conservative default) — production framework paths that want a cacheable seed
-// (NewTurnState, resetStateForPermutation, defendersDamage's per-DR seed) initialize the
-// field explicitly.
+// Tests that NewTurnState seeds cacheable=true (the zero-value default is false).
 func TestIsCacheable_NewTurnStateSeedsCacheable(t *testing.T) {
 	s := NewTurnState(nil, nil)
 	if !s.IsCacheable() {
@@ -412,12 +406,8 @@ func TestIsCacheable_BanishFromGraveyardNoMatchFlips(t *testing.T) {
 	}
 }
 
-// TestIsCacheable_AddToGraveyardFlips: card-driven graveyard adds flip cacheable so the
-// universal "every public deck/graveyard accessor flips" convention holds. The only card
-// that calls AddToGraveyard today (Moon Wish's go-again Sun Kiss play) already flipped
-// via TutorFromDeck, so the additional flip is benign — but pinning it here keeps the
-// convention consistent for future cards. Start from a NewTurnState'd seed (cacheable=true)
-// so the assertion observes the flip rather than the zero-value default.
+// Tests that AddToGraveyard flips IsCacheable to false (per the "every public accessor
+// flips" convention).
 func TestIsCacheable_AddToGraveyardFlips(t *testing.T) {
 	s := NewTurnState(nil, nil)
 	s.AddToGraveyard(testutils.NewStubCard("x"))
@@ -451,10 +441,8 @@ func TestIsCacheable_ClashFlipsThroughDeck(t *testing.T) {
 	}
 }
 
-// TestIsCacheable_NewTurnStateSeedingDoesNotFlip: the constructor seeds the private deck /
-// graveyard fields without going through the accessor path, so the bit stays default-true
-// after construction. Pins that the seeding contract can't accidentally start a state in
-// uncacheable mode just because the test wrote a deck.
+// Tests that NewTurnState's seeding doesn't flip IsCacheable — the constructor writes deck
+// and graveyard directly, bypassing the accessor flip.
 func TestIsCacheable_NewTurnStateSeedingDoesNotFlip(t *testing.T) {
 	s := NewTurnState(
 		[]Card{testutils.NewStubCard("x")},

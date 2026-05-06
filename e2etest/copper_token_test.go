@@ -9,10 +9,7 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/weapons"
 )
 
-// Tests the Copper token activated ability end-to-end. {4} cost is the highest of
-// the three token tiers — needs two blue pitches (3+3=6 res) to fund. With a single
-// blue pitch (3 res), the chain is infeasible; the optimizer should leave the
-// Copper alone and just hold the blue.
+// Tests that the Copper token ability stays unspent when the chain can't fund its {4} cost.
 func TestCopperAbility_NotEnoughResourceSkipsSpend(t *testing.T) {
 	deck := []sim.Card{
 		testutils.RedAttack{}, testutils.RedAttack{}, testutils.RedAttack{},

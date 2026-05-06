@@ -48,10 +48,7 @@ func TestFormatBestLine_Compact(t *testing.T) {
 	}
 }
 
-// TestFormatBestTurn_AttackAndPitch verifies the basic numbered-list shape: pitches and the
-// attack chain both fall under the "My turn:" section header. Hand: 2 Red Attacks + 2 Blues.
-// One Blue pitches for 3 resource, funding the 3-cost chain (Blue + Red + Red, all cost 1
-// each, all go-again).
+// Tests that pitches and the attack chain both render under the "My turn:" section header.
 func TestFormatBestTurn_AttackAndPitch(t *testing.T) {
 	h := []Card{testutils.BlueAttack{}, testutils.BlueAttack{}, testutils.RedAttack{}, testutils.RedAttack{}}
 	got := Best(testutils.Hero{Intel: 4}, nil, h, Matchup{IncomingDamage: 0}, nil, TurnState{})
@@ -261,10 +258,8 @@ func TestFormatBestTurn_ArsenalInPlayedOnChain(t *testing.T) {
 	}
 }
 
-// TestFormatBestTurn_WeaponSwingInChain makes sure a swung weapon shows up in the chain with
-// a WEAPON ATTACK label, sourced from the dispatcher's Log entry. The State.Log assertion
-// pins the dispatcher → log → format pipeline for weapons; FormatBestTurn reads weapon
-// swings from State.Log rather than SwungWeapons.
+// Tests that a swung weapon shows up in the chain as "WEAPON ATTACK" sourced from
+// State.Log (FormatBestTurn reads weapon swings from State.Log, not SwungWeapons).
 func TestFormatBestTurn_WeaponSwingInChain(t *testing.T) {
 	h := []Card{testutils.RedAttack{}}
 	weapons := []Weapon{weapons.ReapingBlade{}}
@@ -285,10 +280,7 @@ func TestFormatBestTurn_WeaponSwingInChain(t *testing.T) {
 	}
 }
 
-// TestFormatBestTurn_EndOfTurnArsenalNew pins the End of turn section's arsenal entry tagged
-// "(new)" when a Held hand card got promoted into an empty arsenal slot post-hoc. A lone DR
-// (no way to pay its cost, no incoming) is Held in the partition but then promoted to
-// Arsenal, so End of turn shows "Arsenal: Toughen Up [B] (new)".
+// Tests that the End of turn section tags a post-hoc-promoted Held → Arsenal card as "(new)".
 func TestFormatBestTurn_EndOfTurnArsenalNew(t *testing.T) {
 	h := []Card{cards.ToughenUpBlue{}}
 	got := Best(testutils.Hero{Intel: 4}, nil, h, Matchup{IncomingDamage: 4}, nil, TurnState{})

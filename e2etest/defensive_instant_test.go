@@ -81,10 +81,8 @@ func TestDefensiveInstant_DefendsFromArsenal(t *testing.T) {
 	}
 }
 
-// Tests that Peace of Mind's Ponder fires end-of-turn and fills an empty arsenal: with
-// an empty arsenal-in and a hand that ends the turn empty (Peace of Mind defends, Blue
-// pitches to fund the cost), turn 2 starts with an arsenal-occupied slot — the deck
-// top, popped by the Ponder draw, fed into the post-hoc arsenal-promotion step.
+// Tests that Peace of Mind's end-of-turn Ponder draws a card that fills an empty arsenal
+// via post-hoc promotion.
 func TestPonder_PeaceOfMindFillsEmptyArsenalNextTurn(t *testing.T) {
 	beacon := testutils.RedAttack{}
 	deck := []sim.Card{
