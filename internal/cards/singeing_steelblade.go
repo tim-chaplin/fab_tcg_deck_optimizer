@@ -28,8 +28,7 @@ func (SingeingSteelbladeRed) GoAgain() bool           { return false }
 func (SingeingSteelbladeRed) Play(s *sim.TurnState, self *sim.CardState) {
 	n := self.DealEffectiveAttack(s)
 	s.Log(self, n)
-	s.AddValue(s.DealArcaneDamage(1))
-	s.LogRider(self, 1, "Dealt 1 arcane damage")
+	s.DealArcaneDamage(self, 1)
 }
 
 type SingeingSteelbladeYellow struct{}
@@ -45,8 +44,7 @@ func (SingeingSteelbladeYellow) GoAgain() bool           { return false }
 func (SingeingSteelbladeYellow) Play(s *sim.TurnState, self *sim.CardState) {
 	n := self.DealEffectiveAttack(s)
 	s.Log(self, n)
-	s.AddValue(s.DealArcaneDamage(1))
-	s.LogRider(self, 1, "Dealt 1 arcane damage")
+	s.DealArcaneDamage(self, 1)
 }
 
 type SingeingSteelbladeBlue struct{}
@@ -62,6 +60,5 @@ func (SingeingSteelbladeBlue) GoAgain() bool           { return false }
 func (SingeingSteelbladeBlue) Play(s *sim.TurnState, self *sim.CardState) {
 	n := self.DealEffectiveAttack(s)
 	s.Log(self, n)
-	s.AddValue(s.DealArcaneDamage(1))
-	s.LogRider(self, 1, "Dealt 1 arcane damage")
+	s.DealArcaneDamage(self, 1)
 }

@@ -13,12 +13,16 @@ import (
 // BEFORE AddToGraveyard'ing the source so the printed "another aura" restriction is
 // satisfied naturally. Routes through s.BanishFromGraveyard so the cacheable bit flips —
 // reading the graveyard contents (which may include cards from prior turns) makes the
-// chain output depend on hidden state.
+// chain output depend on hidden state. Each caller owns its own AddValue + LogRider
+// because the printed wording differs ("Banished an aura, dealt 1 arcane damage").
 func banishAuraFromGraveyard(s *sim.TurnState) int {
 	if _, ok := s.BanishFromGraveyard(func(c sim.Card) bool {
 		return c.Types().Has(card.TypeAura)
 	}); !ok {
 		return 0
 	}
-	return s.DealArcaneDamage(1)
+	if sim.LikelyDamageHits(1, false) {
+		s.ArcaneDamageDealt = true
+	}
+	return 1
 }

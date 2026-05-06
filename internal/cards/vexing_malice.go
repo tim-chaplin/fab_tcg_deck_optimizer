@@ -28,8 +28,7 @@ func (VexingMaliceRed) GoAgain() bool           { return false }
 func (VexingMaliceRed) Play(s *sim.TurnState, self *sim.CardState) {
 	n := self.DealEffectiveAttack(s)
 	s.Log(self, n)
-	s.AddValue(s.DealArcaneDamage(2))
-	s.LogRider(self, 2, "Dealt 2 arcane damage")
+	s.DealArcaneDamage(self, 2)
 }
 
 type VexingMaliceYellow struct{}
@@ -45,8 +44,7 @@ func (VexingMaliceYellow) GoAgain() bool           { return false }
 func (VexingMaliceYellow) Play(s *sim.TurnState, self *sim.CardState) {
 	n := self.DealEffectiveAttack(s)
 	s.Log(self, n)
-	s.AddValue(s.DealArcaneDamage(2))
-	s.LogRider(self, 2, "Dealt 2 arcane damage")
+	s.DealArcaneDamage(self, 2)
 }
 
 type VexingMaliceBlue struct{}
@@ -62,6 +60,5 @@ func (VexingMaliceBlue) GoAgain() bool           { return false }
 func (VexingMaliceBlue) Play(s *sim.TurnState, self *sim.CardState) {
 	n := self.DealEffectiveAttack(s)
 	s.Log(self, n)
-	s.AddValue(s.DealArcaneDamage(2))
-	s.LogRider(self, 2, "Dealt 2 arcane damage")
+	s.DealArcaneDamage(self, 2)
 }

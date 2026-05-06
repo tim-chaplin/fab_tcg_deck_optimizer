@@ -69,8 +69,7 @@ func (AetherSlashBlue) Play(s *sim.TurnState, self *sim.CardState) {
 func aetherSlashApplyRider(s *sim.TurnState, self *sim.CardState) {
 	for _, p := range self.PitchedToPlay {
 		if p.Types().IsNonAttackAction() {
-			s.AddValue(s.DealArcaneDamage(1))
-			s.LogRider(self, 1, "Dealt 1 arcane damage")
+			s.DealArcaneDamage(self, 1)
 			return
 		}
 	}
