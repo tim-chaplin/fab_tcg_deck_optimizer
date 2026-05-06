@@ -1,6 +1,6 @@
-// Test-only Weapon stubs. The card pool currently lacks Club and Hammer weapons, but ARs
-// like Pummel mode 0 gate on those types — these stubs let e2e tests pin the predicate
-// and the buff plumbing end-to-end without waiting on a real Club/Hammer printing.
+// Test-only Weapon and weapon-ability stubs. The card pool currently lacks Club and Hammer
+// printings, but ARs like Pummel mode 0 gate on those types — these stubs let e2e tests pin
+// the predicate and the buff plumbing end-to-end without waiting on a real printing.
 
 package testutils
 
@@ -42,24 +42,11 @@ func (ClubWeaponAbility) Play(s *sim.TurnState, self *sim.CardState) {
 	s.Log(self, n)
 }
 
-var hammerWeaponTypes = card.NewTypeSet(card.TypeGeneric, card.TypeWeapon, card.TypeHammer, card.TypeOneHand)
-
-// HammerWeapon is a 1-handed Hammer weapon mirroring ClubWeapon's shape so Hammer-gated
-// tests have a parallel target.
-type HammerWeapon struct{}
-
-func (HammerWeapon) ID() ids.WeaponID    { return FakeHammerWeapon }
-func (HammerWeapon) Name() string        { return "test.HammerWeapon" }
-func (HammerWeapon) Types() card.TypeSet { return hammerWeaponTypes }
-func (HammerWeapon) Hands() int          { return 1 }
-func (HammerWeapon) Ability() sim.Card   { return hammerWeaponAbility }
-
-// Cached at package init so the chain runner's per-Best w.Ability() lookup is alloc-free.
-var hammerWeaponAbility sim.Card = HammerWeaponAbility{}
-
 var hammerWeaponAbilityTypes = card.NewTypeSet(card.TypeGeneric, card.TypeWeapon, card.TypeHammer, card.TypeOneHand, card.TypeAttack)
 
-// HammerWeaponAbility is the activated-ability Card for HammerWeapon: cost 0, power 1, no rider.
+// HammerWeaponAbility is a stand-alone activated-ability Card with the Hammer + Weapon type
+// line so Hammer-gated AR predicates (e.g. Pummel mode 0) can be exercised without a real
+// weapon printing to back it.
 type HammerWeaponAbility struct{}
 
 func (HammerWeaponAbility) ID() ids.CardID          { return FakeHammerWeaponAbility }

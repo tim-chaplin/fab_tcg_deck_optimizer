@@ -23,7 +23,6 @@ const (
 	FakeInstant
 	FakeNoGoAgainAttack
 	FakeClubWeapon
-	FakeHammerWeapon
 	FakeRedPitch
 	FakeClubWeaponAbility
 	FakeHammerWeaponAbility
