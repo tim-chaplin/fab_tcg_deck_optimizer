@@ -371,6 +371,10 @@ type sequenceContext struct {
 func (ctx *sequenceContext) runDefense(defenders, pitched, deck []Card, priorAuras []Aura, incomingDamage, blockBudget, arsenalDefenderIdx int) (int, bool) {
 	bufs := ctx.bufs
 	bufs.state.Auras = append(ctx.defenderAuras[:0], priorAuras...)
+	// Seed skipLog so the first DR's per-defender reset (and the plain-block phase that
+	// reuses bufs.state afterwards) sees the chain-level gate; defendersDamage preserves
+	// it through its struct-literal reset.
+	bufs.state.skipLog = ctx.skipLog
 	dealt, gravScratch, cacheable := defendersDamage(defenders, pitched, deck, bufs.state, bufs.defenseGravScratch, &bufs.drCardStateScratch, incomingDamage, blockBudget, arsenalDefenderIdx)
 	bufs.defenseGravScratch = gravScratch
 	ctx.defenderAuras = bufs.state.Auras
