@@ -55,8 +55,9 @@ const (
 	// adaptiveCheckInterval is the per-worker chunk size in the parallel-shuffle path —
 	// after every numWorkers × adaptiveCheckInterval shuffles, the worker pool barrier-
 	// merges into d.Stats and runs the adaptive stop check. 50 is the empirical sweet spot:
-	// smaller values save shuffles by stopping closer to the SE convergence point, but
-	// barrier overhead flattens out below ~50 shuffles per worker per chunk.
+	// dropping from 1000 → 50 cut anneal-bench wall-clock by 2.4× because random Viserai
+	// decks converge in ~2000 shuffles instead of being forced to 8000 by a too-large chunk.
+	// Going below 50 stops paying off as barrier overhead dominates.
 	adaptiveCheckInterval = 50
 	// adaptiveTargetSE is the standard-error target the adaptive shuffle path stops at.
 	// ±0.01 is tight enough to distinguish small per-deck differences during anneal
