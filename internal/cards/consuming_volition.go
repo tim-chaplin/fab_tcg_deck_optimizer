@@ -19,7 +19,7 @@ var consumingVolitionTypes = card.NewTypeSet(card.TypeRuneblade, card.TypeAction
 // consumingVolitionApplyRider registers the on-hit discard rider; the ArcaneDamageDealt
 // gate runs at hit time so a Runechant firing on this same attack can satisfy it.
 func consumingVolitionApplyRider(_ *sim.TurnState, self *sim.CardState) {
-	self.OnHit = append(self.OnHit, sim.OnHitHandler{Fire: consumingVolitionOnHit})
+	self.RegisterOnHit(consumingVolitionOnHit)
 }
 
 // consumingVolitionOnHit fires the "When this hits a hero, they discard a card" rider

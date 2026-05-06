@@ -28,7 +28,7 @@ func moneyOrYourLifeOnHit(s *sim.TurnState, self *sim.CardState, _ *sim.OnHitHan
 func moneyOrYourLifePlay(s *sim.TurnState, self *sim.CardState) {
 	n := self.DealEffectiveAttack(s)
 	s.Log(self, n)
-	self.OnHit = append(self.OnHit, sim.OnHitHandler{Fire: moneyOrYourLifeOnHit})
+	self.RegisterOnHit(moneyOrYourLifeOnHit)
 }
 
 type MoneyOrYourLifeRed struct{}

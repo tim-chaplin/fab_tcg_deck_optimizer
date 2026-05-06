@@ -44,7 +44,7 @@ func (NebulaBladeAbility) Play(s *sim.TurnState, self *sim.CardState) {
 	}
 	n := self.DealEffectiveAttack(s)
 	s.Log(self, n)
-	self.OnHit = append(self.OnHit, sim.OnHitHandler{Fire: nebulaBladeOnHit})
+	self.RegisterOnHit(nebulaBladeOnHit)
 }
 
 // nebulaBladeOnHit fires the printed "If Nebula Blade hits, create a Runechant token"

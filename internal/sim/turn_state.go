@@ -807,15 +807,31 @@ func (s *TurnState) ConsumeItem(t TokenType, n int) {
 	}
 }
 
-// DealArcaneDamage credits n arcane damage and, when LikelyDamageHits(n, false) approves,
-// flips ArcaneDamageDealt so same-turn triggers reading "if you've dealt arcane damage this
-// turn" fire. Pair with AddValue to credit the damage-equivalent. Returns n so callers can
-// fold the call into a single AddValue argument.
-func (s *TurnState) DealArcaneDamage(n int) int {
+// DealArcaneDamage credits n arcane damage to Value, writes a "Dealt n arcane damage" rider
+// line under self's chain entry, and flips ArcaneDamageDealt when LikelyDamageHits(n, false)
+// approves so same-turn triggers reading "if you've dealt arcane damage this turn" fire.
+// Routes through dealtArcaneText[n] so the hot path avoids per-call fmt.Sprintf and
+// variadic-int boxing.
+func (s *TurnState) DealArcaneDamage(self *CardState, n int) {
+	s.AddValue(n)
 	if LikelyDamageHits(n, false) {
 		s.ArcaneDamageDealt = true
 	}
-	return n
+	if n >= 0 && n < len(dealtArcaneText) {
+		s.LogRider(self, n, dealtArcaneText[n])
+		return
+	}
+	s.LogRiderf(self, n, "Dealt %d arcane damage", n)
+}
+
+// dealtArcaneText is the pre-built rider-line cache indexed by arcane-damage count, keeping
+// DealArcaneDamage alloc-free on the hot path. Extend if a new card prints higher arcane.
+var dealtArcaneText = [...]string{
+	0: "Dealt 0 arcane damage",
+	1: "Dealt 1 arcane damage",
+	2: "Dealt 2 arcane damage",
+	3: "Dealt 3 arcane damage",
+	4: "Dealt 4 arcane damage",
 }
 
 // AddToGraveyard appends c to graveyard so later-resolving cards see it. Used by cards

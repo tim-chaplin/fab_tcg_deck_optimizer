@@ -16,7 +16,7 @@ var snatchTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeAt
 func snatchPlay(s *sim.TurnState, self *sim.CardState) {
 	n := self.DealEffectiveAttack(s)
 	s.Log(self, n)
-	self.OnHit = append(self.OnHit, sim.OnHitHandler{Fire: snatchOnHit})
+	self.RegisterOnHit(snatchOnHit)
 }
 
 // snatchOnHit fires the printed "When this hits, draw a card" rider. Top-level so

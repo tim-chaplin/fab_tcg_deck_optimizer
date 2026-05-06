@@ -22,7 +22,7 @@ func wageGoldOnHit(s *sim.TurnState, self *sim.CardState, _ *sim.OnHitHandler) {
 func wageGoldPlay(s *sim.TurnState, self *sim.CardState) {
 	n := self.DealEffectiveAttack(s)
 	s.Log(self, n)
-	self.OnHit = append(self.OnHit, sim.OnHitHandler{Fire: wageGoldOnHit})
+	self.RegisterOnHit(wageGoldOnHit)
 }
 
 type WageGoldRed struct{}

@@ -33,7 +33,7 @@ func (BlowForABlowRed) GoAgain() bool           { return sim.HeroWantsLowerHealt
 func (BlowForABlowRed) Play(s *sim.TurnState, self *sim.CardState) {
 	n := self.DealEffectiveAttack(s)
 	s.Log(self, n)
-	self.OnHit = append(self.OnHit, sim.OnHitHandler{Fire: blowForABlowOnHit})
+	self.RegisterOnHit(blowForABlowOnHit)
 }
 
 // blowForABlowOnHit fires the printed "When this hits, deal 1 damage" rider. Top-level so

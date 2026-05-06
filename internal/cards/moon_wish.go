@@ -57,7 +57,7 @@ func moonWishPlay(c sim.Card, s *sim.TurnState, self *sim.CardState) {
 		s.LogPostTriggerf(name, 0, "%s returned %s to top of deck", name, sim.DisplayName(returned))
 	}
 
-	self.OnHit = append(self.OnHit, sim.OnHitHandler{Fire: moonWishOnHit})
+	self.RegisterOnHit(moonWishOnHit)
 }
 
 // moonWishOnHit fires the printed "If this hits, search for Sun Kiss" rider. Top-level so

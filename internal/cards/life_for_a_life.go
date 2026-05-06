@@ -40,7 +40,7 @@ func (LifeForALifeRed) GoAgain() bool           { return sim.HeroWantsLowerHealt
 func (LifeForALifeRed) Play(s *sim.TurnState, self *sim.CardState) {
 	n := self.DealEffectiveAttack(s)
 	s.Log(self, n)
-	self.OnHit = append(self.OnHit, sim.OnHitHandler{Fire: lifeForALifeOnHit})
+	self.RegisterOnHit(lifeForALifeOnHit)
 }
 
 type LifeForALifeYellow struct{}
@@ -56,7 +56,7 @@ func (LifeForALifeYellow) GoAgain() bool           { return sim.HeroWantsLowerHe
 func (LifeForALifeYellow) Play(s *sim.TurnState, self *sim.CardState) {
 	n := self.DealEffectiveAttack(s)
 	s.Log(self, n)
-	self.OnHit = append(self.OnHit, sim.OnHitHandler{Fire: lifeForALifeOnHit})
+	self.RegisterOnHit(lifeForALifeOnHit)
 }
 
 type LifeForALifeBlue struct{}
@@ -72,5 +72,5 @@ func (LifeForALifeBlue) GoAgain() bool           { return sim.HeroWantsLowerHeal
 func (LifeForALifeBlue) Play(s *sim.TurnState, self *sim.CardState) {
 	n := self.DealEffectiveAttack(s)
 	s.Log(self, n)
-	self.OnHit = append(self.OnHit, sim.OnHitHandler{Fire: lifeForALifeOnHit})
+	self.RegisterOnHit(lifeForALifeOnHit)
 }
