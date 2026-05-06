@@ -579,6 +579,7 @@ func (ctx *sequenceContext) bestSequence(attackers []Card) (int, int, bool) {
 		pcBuf[idx].BonusDefense = 0
 		pcBuf[idx].PitchedToPlay = nil
 		pcBuf[idx].OnHit = pcBuf[idx].OnHit[:0]
+		pcBuf[idx].RecycledToDeck = false
 		pcBuf[idx].Mode = 0
 	}
 
@@ -743,6 +744,7 @@ func (ctx *sequenceContext) playSequence(order []Card) (damage int, futureValue 
 		pcBuf[i].PitchedToPlay = nil
 		pcBuf[i].OnHit = pcBuf[i].OnHit[:0]
 		pcBuf[i].Mode = 0
+		pcBuf[i].RecycledToDeck = false
 	}
 	return ctx.playSequenceWithMeta(n)
 }
@@ -774,6 +776,7 @@ func (ctx *sequenceContext) playSequenceWithMeta(n int) (damage int, futureValue
 		pcBuf[i].BonusAttack = 0
 		pcBuf[i].PitchedToPlay = nil
 		pcBuf[i].OnHit = pcBuf[i].OnHit[:0]
+		pcBuf[i].RecycledToDeck = false
 	}
 	played := ptrBuf[:n]
 	// Per-permutation reset: full-state rewrite. Hand and Deck are deep-copied so cards can
@@ -950,9 +953,11 @@ func (ctx *sequenceContext) playSequenceWithMeta(n int) (damage int, futureValue
 		// Weapons and persistent card types (Auras, Items) stay in their zone when they
 		// resolve; any destroy event that should send them to the graveyard is a separate
 		// trigger. Everything else — Actions, Attack Reactions, Defense Reactions, Blocks,
-		// Instants — heads to the graveyard immediately. Direct field write — the framework
-		// driving the chain isn't a card-driven content read, so no cacheable flip.
-		if !m.types.PersistsInPlay() {
+		// Instants — heads to the graveyard immediately, unless the card's Play opted into
+		// RecycleToDeckBottom and lives at the bottom of the deck instead. Direct field
+		// write — the framework driving the chain isn't a card-driven content read, so no
+		// cacheable flip.
+		if !m.types.PersistsInPlay() && !pc.RecycledToDeck {
 			state.graveyard = append(state.graveyard, pc.Card)
 		}
 
