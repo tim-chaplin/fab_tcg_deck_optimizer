@@ -52,13 +52,8 @@ func TestDefensiveInstant_PreventionCapsAtIncoming(t *testing.T) {
 	}
 }
 
-// Tests that a defensive instant with a real cost requires defense-phase pitch funding,
-// AND that pitch resources can't carry between phases. The hand has one BluePitch (3 res)
-// that has to fund either Peace of Mind (defend, cost 2) OR Critical Strike (attack,
-// cost 1) — not both. Incoming = 4 lets PoM's 4 prevention cap the damage bucket exactly,
-// so a Critical-Strike-as-plain-block can't add leftover credit. The optimizer's only
-// way past Value 4 would be to play CS as an attack — which requires the BluePitch to
-// have funded both phases. If pitch leaked across phases, Value would jump to 7.
+// Tests that a defensive instant with a real cost requires defense-phase pitch funding, and
+// that pitch resources can't carry between attack and defense phases.
 func TestDefensiveInstant_PeaceOfMindWithCost(t *testing.T) {
 	d := sim.New(heroes.Viserai{}, nil, fillerDeck())
 	hand := []sim.Card{cards.PeaceOfMindRed{}, testutils.BluePitch{}, cards.CriticalStrikeBlue{}}

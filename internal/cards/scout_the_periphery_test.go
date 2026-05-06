@@ -38,10 +38,8 @@ func TestScoutThePeriphery_HandPlayedAttackFizzles(t *testing.T) {
 	}
 }
 
-// TestScoutThePeriphery_NextArsenalAttackReturnsBonus: when the queued attack action is
-// itself played from arsenal the per-variant bonus lands on that card's BonusAttack so
-// the buffed attack's EffectiveAttack picks up the +N (Red +3, Yellow +2, Blue +1). The
-// granter itself credits 0 — the bonus rides on the target.
+// Tests that the per-variant bonus lands on the next arsenal-played attack's BonusAttack
+// (granter credits 0; bonus rides on the target).
 func TestScoutThePeriphery_NextArsenalAttackReturnsBonus(t *testing.T) {
 	cases := []struct {
 		c    sim.Card

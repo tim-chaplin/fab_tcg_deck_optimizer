@@ -54,10 +54,8 @@ func TestDrowningDire_AuraPlayedThisTurnGrantsDominate(t *testing.T) {
 	}
 }
 
-// TestDrowningDire_NotImplemented: every variant carries sim.NotImplemented because the
-// on-hit "may put a non-attack action card from your graveyard on the bottom of your deck"
-// rider isn't modelled. Without the marker the optimizer would happily mutate Drowning Dire
-// into decks at face value, under-crediting the recycle.
+// Tests that every Drowning Dire variant carries sim.NotImplemented (on-hit recycle rider
+// is not modelled).
 func TestDrowningDire_NotImplemented(t *testing.T) {
 	cards := []sim.Card{DrowningDireRed{}, DrowningDireYellow{}, DrowningDireBlue{}}
 	for _, c := range cards {

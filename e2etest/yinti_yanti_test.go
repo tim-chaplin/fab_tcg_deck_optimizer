@@ -35,11 +35,8 @@ func TestYintiYanti_SeesPonderFromPeaceOfMindInDefense(t *testing.T) {
 	}
 }
 
-// Defense-side mirror of TestYintiYanti_SeesRunechantFromReduceInDefense: Yinti Yanti
-// Blue plain-blocks alongside Reduce as DR. defendersDamage runs DRs first, so the
-// Runechant is in s.Auras when Yinti's Block runs, gating the +1{d}. Bumped incoming
-// up by 3 so blocking with Yinti is the optimal partition (Reduce 4 + Yinti 3 = 7
-// covers the full IncomingDamage exactly).
+// Tests that Yinti Yanti Blue plain-blocking alongside Reduce as DR sees Reduce's
+// Runechant when its Block runs (DRs run first, populating s.Auras).
 func TestYintiYanti_BlueBlockSeesRunechantFromReduceInDefense(t *testing.T) {
 	d := sim.New(heroes.Viserai{}, nil, fillerDeck())
 	hand := []sim.Card{cards.YintiYantiBlue{}, cards.ReduceToRunechantRed{}, testutils.RedPitch{}}

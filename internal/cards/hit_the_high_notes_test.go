@@ -45,11 +45,8 @@ func TestHitTheHighNotes_AuraCreatedTriggersBonus(t *testing.T) {
 	}
 }
 
-// TestHitTheHighNotes_BonusFlowsThroughBonusAttack: the +2{p} rider is a power buff, not a
-// damage rider — it must land on self.BonusAttack so EffectiveAttack and LikelyToHit see
-// the buffed power. A 4-power Red with the rider becomes a 6-power attack, which falls
-// outside the {1,4,7} likely-to-hit window; on-hit triggers from sibling cards (Mauvrion
-// Skies's "if this hits, create N runechants") must not fire on a 6-power attack.
+// Tests that the +2{p} rider flows through self.BonusAttack so EffectiveAttack and
+// LikelyToHit see the buffed power.
 func TestHitTheHighNotes_BonusFlowsThroughBonusAttack(t *testing.T) {
 	s := sim.TurnState{AuraCreated: true}
 	self := &sim.CardState{Card: HitTheHighNotesRed{}}

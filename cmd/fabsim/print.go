@@ -243,13 +243,9 @@ func formatCardMargin(v float64, has bool) string {
 	return fmt.Sprintf("%+.2f", v)
 }
 
-// Dimensions of the hand-value histogram chart body. histWidth is the chart width in the
-// compress regime; histHeight is the row count; histStretchSlot is the per-bar column budget
-// (1 bar + slot-1 gap chars) in the stretch regime — every bar gets exactly slot cols of
-// horizontal space so the spacing reads uniformly. histMaxStretchWidth caps how wide a
-// stretched chart is allowed to grow before the chart compresses to histWidth and bins
-// instead, so absurd hand-value spreads can't balloon the chart past terminal-friendly
-// widths.
+// Histogram chart body: histWidth in compress regime, histHeight rows, histStretchSlot cols
+// per bar in stretch regime (1 bar + slot-1 gap chars). histMaxStretchWidth caps stretched
+// width so wide hand-value spreads compress to histWidth and bin instead.
 const (
 	histWidth           = 60
 	histHeight          = 12
@@ -284,14 +280,9 @@ func unionHistogramScale(d1, d2 *sim.Deck) histogramScale {
 	return histogramScale{minV, maxV, max(peak1, peak2)}
 }
 
-// printHistogram renders Stats.Histogram as an ASCII bar chart under the supplied title line.
-// The chart body is always histWidth x histHeight characters regardless of how many distinct
-// hand values the deck produced — sparse data stretches across the width, dense data bins into
-// it — so the rendered output has predictable size and the axis labels alone carry the scale.
-// title is printed verbatim above the chart so the caller can identify the deck the chart is
-// for. The scale fixes both axes; values outside scale.minV..scale.maxV contribute nothing,
-// and bars scale against scale.peak rather than this deck's natural peak. No-ops when
-// scale.peak == 0.
+// printHistogram renders Stats.Histogram as an ASCII bar chart of fixed histWidth × histHeight.
+// title prints above the chart; scale fixes both axes (values outside scale.minV..scale.maxV
+// drop, bars scale against scale.peak). No-op when scale.peak == 0.
 func printHistogram(d *sim.Deck, title string, scale histogramScale) {
 	if scale.peak == 0 {
 		return

@@ -36,10 +36,8 @@ func TestSunKiss_SoloIsHealOnly(t *testing.T) {
 	}
 }
 
-// TestSunKiss_SynergyFiresOnPriorMoonWish: with any Moon Wish printing earlier in CardsPlayed,
-// Play returns the printed heal AND draws a card AND grants self go again. Covers all three
-// (Sun Kiss variant × Moon Wish variant) cross-products with one representative each so a
-// future Moon Wish printing renaming would surface as a clear failure.
+// Tests that a prior Moon Wish printing makes Sun Kiss credit the heal, draw a card, and
+// grant self go again — across all (Sun Kiss × Moon Wish) variant combinations.
 func TestSunKiss_SynergyFiresOnPriorMoonWish(t *testing.T) {
 	moonWishVariants := []sim.Card{MoonWishRed{}, MoonWishYellow{}, MoonWishBlue{}}
 	for _, mw := range moonWishVariants {
@@ -71,10 +69,7 @@ func TestSunKiss_SynergyFiresOnPriorMoonWish(t *testing.T) {
 	}
 }
 
-// TestSunKiss_SynergyDoesNotFireOnUnrelatedAttacks: only a Moon Wish printing should trigger
-// the synergy. A different attack (Arcanic Spike) earlier in CardsPlayed must not fire it.
-// Sentinel for the name-prefix scan: if the predicate ever loosens to "any attack with 'wish'
-// in the name" or similar, this catches it.
+// Tests that the Sun Kiss synergy only fires on a Moon Wish printing, not any prior attack.
 func TestSunKiss_SynergyDoesNotFireOnUnrelatedAttacks(t *testing.T) {
 	notMoonWish := testutils.GenericAttackPitch(0, 0, 1)
 	s := sim.NewTurnState([]sim.Card{testutils.GenericAttack(0, 0)}, nil)

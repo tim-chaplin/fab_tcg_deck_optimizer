@@ -77,10 +77,8 @@ func TestWaterTheSeeds_NonAttackInRemainingIgnored(t *testing.T) {
 	}
 }
 
-// TestWaterTheSeeds_BonusLandsOnWeaponSwing pins the "your next attack" wording: a
-// weapon swing (TypeWeapon, no TypeAction) with base power ≤ 1 qualifies for the +1
-// rider just like an attack action card does. RunebladeWeapon's Attack() is 0 so the
-// power gate trivially passes.
+// Tests that the +1 rider lands on a weapon swing target ("your next attack" has no action-card
+// qualifier).
 func TestWaterTheSeeds_BonusLandsOnWeaponSwing(t *testing.T) {
 	target := &sim.CardState{Card: testutils.RunebladeWeapon{}}
 	s := &sim.TurnState{CardsRemaining: []*sim.CardState{target}}

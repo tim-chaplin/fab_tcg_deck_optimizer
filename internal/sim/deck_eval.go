@@ -15,19 +15,14 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
 )
 
-// Evaluate simulates runs shuffles of the deck. For each run it assembles successive hands of
-// d.Hero.Intelligence() cards (Held cards from last turn plus fresh top-of-deck draws), computes
-// the optimal play against the matchup mp, and recycles Pitched cards to the bottom of the
-// deck in hand order. Played and defended cards are spent; Held cards carry into the next
-// hand. A run ends when the deck can't fill the next hand.
+// Evaluate simulates `runs` shuffles. Each run assembles successive hands of
+// d.Hero.Intelligence() cards (Held + fresh top-of-deck draws), computes the optimal play
+// against mp, and recycles Pitched cards to deck bottom. A run ends when the deck can't fill
+// the next hand. A "cycle" is one pass through the original deck size.
 //
-// A "cycle" is one pass through the original deck size: hands 0..(deckSize/handSize - 1) are
-// cycle 1, the next deckSize/handSize are cycle 2.
-//
-// Results accumulate into d.Stats and are returned for convenience.
-//
-// Uses the package-level shared Evaluator. Concurrent callers must use EvaluateWith with a
-// goroutine-local Evaluator — the shared buffers have no internal synchronisation.
+// Results accumulate into d.Stats. Uses the package-level shared Evaluator; concurrent
+// callers must use EvaluateWith with a goroutine-local Evaluator (shared buffers aren't
+// synchronised).
 func (d *Deck) Evaluate(runs int, mp Matchup, rng *rand.Rand) Stats {
 	return d.EvaluateWith(runs, mp, rng, nil)
 }
@@ -39,14 +34,10 @@ func (d *Deck) EvaluateWith(runs int, mp Matchup, rng *rand.Rand, ev *Evaluator)
 }
 
 // EvaluateAdaptive runs shuffles until the standard error of the per-turn mean Value drops
-// below adaptiveTargetSE, capped at adaptiveShufflesCap. The SE check fires every
-// adaptiveCheckInterval shuffles to amortise the histogram walk; there's no minimum
-// shuffle floor — typical Viserai decks converge in 200-400 shuffles. Returns the same
-// Stats shape as Evaluate; Stats.Runs reflects the actual number of shuffles run.
-//
-// Use when "knowing the mean to ±adaptiveTargetSE" is enough — e.g. fabsim eval / anneal
-// default runs. Modes that need apples-to-apples shuffle counts across runs (compare,
-// explicit -shuffles) should keep using EvaluateWith with a fixed runs count.
+// below adaptiveTargetSE, capped at adaptiveShufflesCap. SE is checked every
+// adaptiveCheckInterval shuffles. Use when knowing the mean to ±adaptiveTargetSE is enough;
+// modes that need apples-to-apples shuffle counts (compare, explicit -shuffles) should use
+// EvaluateWith with a fixed runs count.
 func (d *Deck) EvaluateAdaptive(mp Matchup, rng *rand.Rand) Stats {
 	return d.EvaluateAdaptiveWith(mp, rng, nil)
 }
@@ -63,13 +54,9 @@ type shuffleStopper func(stats *Stats, runs int) bool
 const (
 	// adaptiveCheckInterval is the per-worker chunk size in the parallel-shuffle path —
 	// after every numWorkers × adaptiveCheckInterval shuffles, the worker pool barrier-
-	// merges into d.Stats and runs the adaptive stop check. 50 is the empirical sweet
-	// spot: smaller values save shuffles by stopping closer to the SE convergence point
-	// (overshoot-cost decreases linearly with chunk size), but the barrier overhead
-	// flattens out below ~50 shuffles per worker per chunk. Going from 1000 → 50 cut
-	// the anneal-bench wall-clock by 2.4× because random Viserai decks converge in
-	// ~2000 shuffles instead of being forced to 8000 by a too-large chunk; going below
-	// 50 saves another few percent but the barrier-frequency tradeoff stops paying off.
+	// merges into d.Stats and runs the adaptive stop check. 50 is the empirical sweet spot:
+	// smaller values save shuffles by stopping closer to the SE convergence point, but
+	// barrier overhead flattens out below ~50 shuffles per worker per chunk.
 	adaptiveCheckInterval = 50
 	// adaptiveTargetSE is the standard-error target the adaptive shuffle path stops at.
 	// ±0.01 is tight enough to distinguish small per-deck differences during anneal
