@@ -202,13 +202,7 @@ func runAnneal(cfg annealConfig) annealResult {
 	startingAvg := currentAvg
 	fmt.Println("Press Enter to abort.")
 
-	var ctx context.Context
-	var cancel context.CancelFunc
-	if cfg.maxDuration > 0 {
-		ctx, cancel = context.WithTimeout(context.Background(), cfg.maxDuration)
-	} else {
-		ctx, cancel = context.WithCancel(context.Background())
-	}
+	ctx, cancel := newAnnealContext(cfg.maxDuration)
 	defer cancel()
 	watchStdinForAbort(cancel)
 
@@ -218,10 +212,7 @@ func runAnneal(cfg annealConfig) annealResult {
 	// annealing they flood the terminal with hundreds of near-identical lines, so they're
 	// suppressed unless -debug asked for them.
 	verbose := temperature == 0 || cfg.debug
-	if temperature > 0 {
-		fmt.Fprintf(os.Stderr, "Simulated annealing: startTemp=%.3f decay=%.3f minTemp=%.3f\n",
-			cfg.startTemp, cfg.tempDecay, cfg.minTemp)
-	}
+	announceAnnealStart(cfg, temperature)
 
 	round := 0
 	acceptances := 0
@@ -230,23 +221,10 @@ func runAnneal(cfg annealConfig) annealResult {
 		round++
 		mutations := buildRoundMutations(cfg, rng, current)
 		tempLabel := formatTempLabel(temperature)
-		if verbose {
-			fmt.Fprintf(os.Stderr, "\n[round %d] evaluating %d mutations of avg %.3f%s (best ever %.3f)\n",
-				round, len(mutations), currentAvg, tempLabel, bestEverAvg)
-		}
+		logRoundHeader(verbose, round, len(mutations), currentAvg, tempLabel, bestEverAvg)
 
-		// Round-scoped start so the ticker's elapsed/ETA reflect this round's progress
-		// rather than the cumulative session.
-		var completed atomic.Int64
-		roundStart := time.Now()
-		stopTicker := startRoundTicker(round, len(mutations), roundStart, &completed,
+		d, avg, idx, found := evaluateAnnealRound(ctx, cfg, rng, mutations, round,
 			temperature, currentAvg, bestEverAvg)
-		d, avg, idx, found := sim.IterateParallel(
-			ctx, mutations, currentAvg, temperature, cfg.minImprovement,
-			cfg.shuffles, cfg.matchup, 0, 0,
-			rng.Int63(), &completed, cfg.adaptive,
-		)
-		stopTicker()
 
 		if ctx.Err() != nil {
 			return finishAnnealRun(cfg, bestEver, bestEverAvg, startingAvg,
@@ -272,6 +250,55 @@ func runAnneal(cfg annealConfig) annealResult {
 		currentAvg = avg
 		temperature = coolDown(temperature, cfg.tempDecay, cfg.minTemp)
 	}
+}
+
+// newAnnealContext returns the run-scoped context. A non-zero maxDuration installs a deadline
+// that aborts the same way the stdin watcher does (cancel propagates into IterateParallel);
+// zero leaves the run open-ended until the user hits Enter.
+func newAnnealContext(maxDuration time.Duration) (context.Context, context.CancelFunc) {
+	if maxDuration > 0 {
+		return context.WithTimeout(context.Background(), maxDuration)
+	}
+	return context.WithCancel(context.Background())
+}
+
+// announceAnnealStart prints the SA-knob header that prefaces every annealing session. Skipped
+// in classical hill-climb mode (T==0) since none of the knobs apply there.
+func announceAnnealStart(cfg annealConfig, temperature float64) {
+	if temperature <= 0 {
+		return
+	}
+	fmt.Fprintf(os.Stderr, "Simulated annealing: startTemp=%.3f decay=%.3f minTemp=%.3f\n",
+		cfg.startTemp, cfg.tempDecay, cfg.minTemp)
+}
+
+// logRoundHeader prints the per-round preamble naming the mutation count and current avg.
+// Suppressed under -no-verbose annealing mode where the rich progress ticker is the only
+// running indicator.
+func logRoundHeader(verbose bool, round, mutationCount int, currentAvg float64, tempLabel string, bestEverAvg float64) {
+	if !verbose {
+		return
+	}
+	fmt.Fprintf(os.Stderr, "\n[round %d] evaluating %d mutations of avg %.3f%s (best ever %.3f)\n",
+		round, mutationCount, currentAvg, tempLabel, bestEverAvg)
+}
+
+// evaluateAnnealRound runs IterateParallel against the round's mutation pool with a 500ms
+// progress ticker overlay. Returns the IterateParallel result tuple unchanged. Owns the
+// per-round atomic counter and roundStart so the ticker's elapsed/ETA reflect just this round.
+func evaluateAnnealRound(ctx context.Context, cfg annealConfig, rng *rand.Rand, mutations []sim.Mutation,
+	round int, temperature, currentAvg, bestEverAvg float64) (*sim.Deck, float64, int, bool) {
+	var completed atomic.Int64
+	roundStart := time.Now()
+	stopTicker := startRoundTicker(round, len(mutations), roundStart, &completed,
+		temperature, currentAvg, bestEverAvg)
+	d, avg, idx, found := sim.IterateParallel(
+		ctx, mutations, currentAvg, temperature, cfg.minImprovement,
+		cfg.shuffles, cfg.matchup, 0, 0,
+		rng.Int63(), &completed, cfg.adaptive,
+	)
+	stopTicker()
+	return d, avg, idx, found
 }
 
 // buildRoundMutations produces the per-round mutation list: enumerates every
