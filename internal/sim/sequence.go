@@ -58,6 +58,7 @@ func bestAttackWithWeapons(hero Hero, weapons []Weapon, attackers, defenders, pi
 		// defenderAuras shares backing with bufs.defenderAurasBacking so the per-partition
 		// capture is alloc-free across Best calls.
 		defenderAuras: bufs.defenderAurasBacking[:0],
+		defenders:     defenders,
 		skipLog:       skipLog,
 		cacheable:     true,
 		// Point carryWinner at the bufs-persistent scratch so SnapshotFromTurn reuses
@@ -338,6 +339,11 @@ type sequenceContext struct {
 	// auras DR / plain-block Plays create during defendersDamage. resetStateForPermutation
 	// seeds state.Auras from this so chain cards see auras created during defense.
 	defenderAuras []Aura
+	// defenders is the partition's defender slice (DRs + plain blocks together). After
+	// the defense phase resolves, every defender lands in the graveyard;
+	// resetStateForPermutation seeds the chain's state.graveyard from this so chain cards
+	// that scan the graveyard (e.g. recycle riders) see defender cards already there.
+	defenders []Card
 	// carryWinner is a slice header POINTING into bufs.carryWinnerScratch — the persistent
 	// snapshot buffer that survives across Best calls via the Evaluator's cached attackBufs.
 	// Heap's algorithm keeps iterating past the winner and the shared state.* fields reflect
@@ -491,7 +497,7 @@ func (ctx *sequenceContext) resetStateForPermutation() {
 	s.hand = append(bufs.handBacking[:0], ctx.handStart...)
 	s.deck = ctx.deck
 	s.Arsenal = ctx.arsenalAtChainStart
-	s.graveyard = bufs.graveBacking[:0]
+	s.graveyard = append(bufs.graveBacking[:0], ctx.defenders...)
 	s.Banish = bufs.banishBacking[:0]
 	s.ActionPoints = 1
 	s.ArcaneDamageDealt = false
