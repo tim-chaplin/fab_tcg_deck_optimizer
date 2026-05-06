@@ -49,8 +49,8 @@ func FireAttackActionAuras(state *TurnState, triggeringCard Card) {
 	fireAttackActionAuras(state, triggeringCard)
 }
 
-// FireEndOfTurnAuras re-exports fireEndOfTurnAuras for sim_test consumers.
-func FireEndOfTurnAuras(state *TurnState) { fireEndOfTurnAuras(state) }
+// FireEndOfTurn re-exports fireEndOfTurn for sim_test consumers.
+func FireEndOfTurn(state *TurnState) { fireEndOfTurn(state) }
 
 // PromoteRandomHandCardToArsenal re-exports promoteRandomHandCardToArsenal for sim_test
 // consumers exercising the post-hoc arsenal-promotion path in isolation.

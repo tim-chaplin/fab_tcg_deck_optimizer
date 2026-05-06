@@ -13,7 +13,7 @@ func TestPlunderRun_FromHandQueuesTriggerNoBonus(t *testing.T) {
 	s := sim.TurnState{CardsRemaining: []*sim.CardState{target}}
 	self := &sim.CardState{Card: PlunderRunRed{}}
 	(PlunderRunRed{}).Play(&s, self)
-	if got := s.PendingNextHitTriggers(); got != 1 {
+	if got := triggerHitCount(&s); got != 1 {
 		t.Errorf("queued triggers = %d, want 1", got)
 	}
 	if target.BonusAttack != 0 {
@@ -37,7 +37,7 @@ func TestPlunderRun_FromArsenalAddsBonusAttack(t *testing.T) {
 		s := sim.TurnState{CardsRemaining: []*sim.CardState{target}}
 		self := &sim.CardState{Card: tc.c, FromArsenal: true}
 		tc.c.Play(&s, self)
-		if got := s.PendingNextHitTriggers(); got != 1 {
+		if got := triggerHitCount(&s); got != 1 {
 			t.Errorf("%s: queued triggers = %d, want 1", tc.c.Name(), got)
 		}
 		if target.BonusAttack != tc.wantBoon {
@@ -51,7 +51,7 @@ func TestPlunderRun_TriggersStack(t *testing.T) {
 	s := sim.TurnState{}
 	(PlunderRunRed{}).Play(&s, &sim.CardState{Card: PlunderRunRed{}})
 	(PlunderRunBlue{}).Play(&s, &sim.CardState{Card: PlunderRunBlue{}})
-	if got := s.PendingNextHitTriggers(); got != 2 {
+	if got := triggerHitCount(&s); got != 2 {
 		t.Errorf("queued triggers = %d, want 2 (two independent listeners)", got)
 	}
 }

@@ -16,14 +16,16 @@ import (
 // firing counts.
 func damageTrigger(self Card, damage int, calls *int) Aura {
 	return Aura{
-		Self:        CardOrTokenType{Card: self},
-		TriggerType: TriggerStartOfTurn,
-		Count:       1,
-		Handler: func(s *TurnState, t *Aura) {
-			*calls++
-			s.AddValue(damage)
-			s.DestroyAura(t, true)
+		Trigger: Trigger{
+			TriggerType: TriggerStartOfTurn,
+			Count:       1,
+			Handler: func(s *TurnState, t *Trigger) {
+				*calls++
+				s.AddValue(damage)
+				s.DestroyAura(t, true)
+			},
 		},
+		Self: CardOrTokenType{Card: self},
 	}
 }
 
@@ -70,17 +72,22 @@ func TestProcessAurasAtStartOfTurn_GraveyardsExhaustedAura(t *testing.T) {
 	// Second trigger's handler records what's currently in the graveyard so we can check the
 	// first trigger's destroy happened BEFORE the second fires.
 	watcher := Aura{
-		Self:        CardOrTokenType{Card: testutils.YellowAttack{}},
-		TriggerType: TriggerStartOfTurn,
-		Count:       1,
-		Handler: func(s *TurnState, _ *Aura) {
-			seen = append([]Card(nil), s.Graveyard()...)
+		Trigger: Trigger{
+			TriggerType: TriggerStartOfTurn,
+			Count:       1,
+			Handler: func(s *TurnState, _ *Trigger) {
+				seen = append([]Card(nil), s.Graveyard()...)
+			},
 		},
+		Self: CardOrTokenType{Card: testutils.YellowAttack{}},
 	}
 	_, _, _, _, _ = ProcessAurasAtStartOfTurn([]Aura{
-		{Self: CardOrTokenType{Card: aura}, TriggerType: TriggerStartOfTurn, Count: 1, Handler: func(s *TurnState, t *Aura) {
-			s.DestroyAura(t, true)
-		}},
+		{
+			Trigger: Trigger{TriggerType: TriggerStartOfTurn, Count: 1, Handler: func(s *TurnState, t *Trigger) {
+				s.DestroyAura(t, true)
+			}},
+			Self: CardOrTokenType{Card: aura},
+		},
 		watcher,
 	}, nil)
 	if len(seen) != 1 || seen[0] != aura {
@@ -99,15 +106,15 @@ func TestProcessAurasAtStartOfTurn_IgnoresPonder(t *testing.T) {
 	}
 }
 
-// TestFireEndOfTurnAuras_PonderPopsDeckTopIntoHand: the end-of-turn fire pops one card
+// TestFireEndOfTurn_PonderPopsDeckTopIntoHand: the end-of-turn fire pops one card
 // per Ponder count, appends each to s.hand, and removes the aura. The drawn card lets
 // the post-hoc arsenal-promotion step fill an empty arsenal.
-func TestFireEndOfTurnAuras_PonderPopsDeckTopIntoHand(t *testing.T) {
+func TestFireEndOfTurn_PonderPopsDeckTopIntoHand(t *testing.T) {
 	a, b, c := testutils.NewStubCard("a"), testutils.NewStubCard("b"), testutils.NewStubCard("c")
 	s := NewTurnState([]Card{a, b, c}, nil)
 	s.Auras = append(s.Auras, NewPonderAura(2))
 
-	FireEndOfTurnAuras(s)
+	FireEndOfTurn(s)
 
 	h := s.Hand()
 	if len(h) != 2 || h[0] != a || h[1] != b {
@@ -121,13 +128,13 @@ func TestFireEndOfTurnAuras_PonderPopsDeckTopIntoHand(t *testing.T) {
 	}
 }
 
-// TestFireEndOfTurnAuras_PonderEmptyDeckIsNoOp: the handler skips the draw step
+// TestFireEndOfTurn_PonderEmptyDeckIsNoOp: the handler skips the draw step
 // silently when the deck is empty — destruction still happens.
-func TestFireEndOfTurnAuras_PonderEmptyDeckIsNoOp(t *testing.T) {
+func TestFireEndOfTurn_PonderEmptyDeckIsNoOp(t *testing.T) {
 	s := NewTurnState(nil, nil)
 	s.Auras = append(s.Auras, NewPonderAura(1))
 
-	FireEndOfTurnAuras(s)
+	FireEndOfTurn(s)
 
 	if h := s.Hand(); len(h) != 0 {
 		t.Errorf("Hand = %v, want empty (no deck to draw from)", h)
@@ -407,12 +414,14 @@ func TestEvaluate_TriggersFromLastTurnSurfacesInBest(t *testing.T) {
 func TestProcessAurasAtStartOfTurn_ReArmsOncePerTurnGate(t *testing.T) {
 	aura := testutils.RedAttack{}
 	exhausted := Aura{
+		Trigger: Trigger{
+			TriggerType: TriggerAttackAction,
+			Count:       2,
+			Handler:     func(*TurnState, *Trigger) {},
+		},
 		Self:          CardOrTokenType{Card: aura},
-		TriggerType:   TriggerAttackAction,
-		Count:         2,
 		OncePerTurn:   true,
 		FiredThisTurn: true,
-		Handler:       func(*TurnState, *Aura) {},
 	}
 	survivors, _, _, _, _ := ProcessAurasAtStartOfTurn([]Aura{exhausted}, nil)
 	if len(survivors) != 1 {

@@ -12,19 +12,22 @@ import (
 
 var highStrikerTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction)
 
-func highStrikerOnHit(s *sim.TurnState, target *sim.CardState, t *sim.NextHitTrigger, n int) {
-	s.CreateCopper(n)
-	s.LogPostTriggerf(sim.DisplayName(target.Card), 0,
-		"%s created %d copper tokens on attack hit", sim.DisplayName(t.Source), n)
+// highStrikerOnHit fires on the next hit matching the trigger's TypeFilter (any attack
+// per the printed wording). The per-variant token count rides on Trigger.Count so the
+// handler stays a top-level function value (no per-variant closure allocation).
+func highStrikerOnHit(s *sim.TurnState, t *sim.Trigger) {
+	s.CreateCopper(t.Count)
+	s.LogPostTriggerf(sim.DisplayName(s.TriggeringCard), 0,
+		"%s created %d copper tokens on attack hit", sim.DisplayName(t.Source), t.Count)
 }
 
 func highStrikerPlay(s *sim.TurnState, self *sim.CardState, source sim.Card, n int) {
-	s.RegisterNextHit(sim.NextHitTrigger{
-		Fire: func(s *sim.TurnState, target *sim.CardState, t *sim.NextHitTrigger) {
-			highStrikerOnHit(s, target, t, n)
-		},
-		TypeFilter: card.TypeSet.IsAttack,
-		Source:     source,
+	s.AddTrigger(sim.Trigger{
+		Source:      source,
+		TriggerType: sim.TriggerHit,
+		TypeFilter:  card.TypeSet.IsAttack,
+		Count:       n,
+		Handler:     highStrikerOnHit,
 	})
 	s.Log(self, 0)
 }

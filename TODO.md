@@ -85,10 +85,11 @@ implemented` riders across the card roster.
 
 ### Unimplemented cards by feature
 
-The 68 cards left in `internal/cards/notimplemented/` grouped by the systemic feature
+The 67 cards left in `internal/cards/notimplemented/` grouped by the systemic feature
 that gates them. Counts are by file (one card-name; each file typically holds 1–3
 pitch-color variants). Landing one bullet typically lets every card in the bucket come
 out of `notimplemented/` together.
+
 - **Arsenal / item permanent manipulation** (9): on-hit opponent-arsenal poke,
   arsenal-fill-from-deck-top end-phase, arsenal-wipe on hit, on-hit item destruction,
   defense-reaction lockout. Needs a write-side "destroy / replace permanents in play"

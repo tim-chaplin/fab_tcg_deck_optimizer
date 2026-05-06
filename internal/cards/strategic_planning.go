@@ -4,7 +4,7 @@
 // Text: "Put an action card with cost 2 or less from a graveyard on the bottom of its owner's deck.
 // At the beginning of the end phase, draw a card. **Go again**"
 
-package notimplemented
+package cards
 
 import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
@@ -13,6 +13,27 @@ import (
 )
 
 var strategicPlanningTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction)
+
+// drawOneAtEndOfTurn is the end-of-turn TriggerHandler that fires Strategic Planning's
+// deferred draw. Top-level so the registration stays alloc-free.
+func drawOneAtEndOfTurn(s *sim.TurnState, _ *sim.Trigger) {
+	s.DrawOne()
+}
+
+func strategicPlanningPlay(s *sim.TurnState, self *sim.CardState) {
+	if _, ok := s.RecycleFromGraveyardToBottom(func(c sim.Card) bool {
+		return c.Types().Has(card.TypeAction) && c.Cost(s) <= 2
+	}); ok {
+		s.LogRider(self, 0, "Recycled an action card to bottom of deck")
+	}
+	s.AddTrigger(sim.Trigger{
+		Source:      self.Card,
+		TriggerType: sim.TriggerEndOfTurn,
+		Handler:     drawOneAtEndOfTurn,
+	})
+	s.LogRider(self, 0, "End-phase draw queued")
+	s.Log(self, 0)
+}
 
 type StrategicPlanningRed struct{}
 
@@ -24,10 +45,9 @@ func (StrategicPlanningRed) Attack() int             { return 0 }
 func (StrategicPlanningRed) Defense() int            { return 2 }
 func (StrategicPlanningRed) Types() card.TypeSet     { return strategicPlanningTypes }
 func (StrategicPlanningRed) GoAgain() bool           { return true }
-
-// not implemented: graveyard recovery, end-phase draw
-func (StrategicPlanningRed) NotImplemented()                            {}
-func (StrategicPlanningRed) Play(s *sim.TurnState, self *sim.CardState) { s.Log(self, 0) }
+func (StrategicPlanningRed) Play(s *sim.TurnState, self *sim.CardState) {
+	strategicPlanningPlay(s, self)
+}
 
 type StrategicPlanningYellow struct{}
 
@@ -39,10 +59,9 @@ func (StrategicPlanningYellow) Attack() int             { return 0 }
 func (StrategicPlanningYellow) Defense() int            { return 2 }
 func (StrategicPlanningYellow) Types() card.TypeSet     { return strategicPlanningTypes }
 func (StrategicPlanningYellow) GoAgain() bool           { return true }
-
-// not implemented: graveyard recovery, end-phase draw
-func (StrategicPlanningYellow) NotImplemented()                            {}
-func (StrategicPlanningYellow) Play(s *sim.TurnState, self *sim.CardState) { s.Log(self, 0) }
+func (StrategicPlanningYellow) Play(s *sim.TurnState, self *sim.CardState) {
+	strategicPlanningPlay(s, self)
+}
 
 type StrategicPlanningBlue struct{}
 
@@ -54,7 +73,6 @@ func (StrategicPlanningBlue) Attack() int             { return 0 }
 func (StrategicPlanningBlue) Defense() int            { return 2 }
 func (StrategicPlanningBlue) Types() card.TypeSet     { return strategicPlanningTypes }
 func (StrategicPlanningBlue) GoAgain() bool           { return true }
-
-// not implemented: graveyard recovery, end-phase draw
-func (StrategicPlanningBlue) NotImplemented()                            {}
-func (StrategicPlanningBlue) Play(s *sim.TurnState, self *sim.CardState) { s.Log(self, 0) }
+func (StrategicPlanningBlue) Play(s *sim.TurnState, self *sim.CardState) {
+	strategicPlanningPlay(s, self)
+}

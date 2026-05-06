@@ -31,10 +31,8 @@ func (SigilOfTheArknightBlue) Types() card.TypeSet     { return sigilOfTheArknig
 func (SigilOfTheArknightBlue) GoAgain() bool           { return true }
 func (c SigilOfTheArknightBlue) Play(s *sim.TurnState, self *sim.CardState) {
 	s.AddAura(sim.Aura{
-		Self:        sim.CardOrTokenType{Card: c},
-		TriggerType: sim.TriggerStartOfTurn,
-		Count:       1,
-		Handler:     sigilOfTheArknightReveal,
+		Trigger: sim.Trigger{TriggerType: sim.TriggerStartOfTurn, Count: 1, Handler: sigilOfTheArknightReveal},
+		Self:    sim.CardOrTokenType{Card: c},
 	})
 	s.Log(self, 0)
 }
@@ -44,7 +42,7 @@ func (c SigilOfTheArknightBlue) Play(s *sim.TurnState, self *sim.CardState) {
 // it" on a whiff — so the printout makes the random reveal visible either way. Empty deck
 // is the silent edge case (no card to name). PeekDeck flips the cacheable bit either way
 // since the reveal outcome depends on shuffle order.
-func sigilOfTheArknightReveal(s *sim.TurnState, t *sim.Aura) {
+func sigilOfTheArknightReveal(s *sim.TurnState, t *sim.Trigger) {
 	s.DestroyAura(t, true)
 	top, ok := s.PeekDeck()
 	if !ok {

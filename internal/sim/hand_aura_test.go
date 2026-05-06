@@ -13,15 +13,17 @@ func TestFireAttackActionAuras_FiresOnceWhenGated(t *testing.T) {
 	aura := testutils.RedAttack{}
 	calls := 0
 	state := &TurnState{Auras: []Aura{{
-		Self:        CardOrTokenType{Card: aura},
-		TriggerType: TriggerAttackAction,
-		Count:       3,
-		OncePerTurn: true,
-		Handler: func(s *TurnState, _ *Aura) {
-			calls++
-			s.AddValue(1)
-			s.LogPreTriggerf("TestCard", 1, "test trigger fired")
+		Trigger: Trigger{
+			TriggerType: TriggerAttackAction,
+			Count:       3,
+			Handler: func(s *TurnState, _ *Trigger) {
+				calls++
+				s.AddValue(1)
+				s.LogPreTriggerf("TestCard", 1, "test trigger fired")
+			},
 		},
+		Self:        CardOrTokenType{Card: aura},
+		OncePerTurn: true,
 	}}}
 	trigger := testutils.RedAttack{}
 	FireAttackActionAuras(state, trigger)
@@ -48,13 +50,15 @@ func TestFireAttackActionAuras_FiresOnceWhenGated(t *testing.T) {
 func TestFireAttackActionAuras_GraveyardsExhaustedAura(t *testing.T) {
 	aura := testutils.RedAttack{}
 	state := &TurnState{Auras: []Aura{{
-		Self:        CardOrTokenType{Card: aura},
-		TriggerType: TriggerAttackAction,
-		Count:       1,
-		Handler: func(s *TurnState, t *Aura) {
-			s.AddValue(1)
-			s.DestroyAura(t, true)
+		Trigger: Trigger{
+			TriggerType: TriggerAttackAction,
+			Count:       1,
+			Handler: func(s *TurnState, t *Trigger) {
+				s.AddValue(1)
+				s.DestroyAura(t, true)
+			},
 		},
+		Self: CardOrTokenType{Card: aura},
 	}}}
 	FireAttackActionAuras(state, testutils.RedAttack{})
 	if len(state.Auras) != 0 {
@@ -73,10 +77,12 @@ func TestFireAttackActionAuras_PassesThroughNonAttackActionTriggers(t *testing.T
 	aura := testutils.RedAttack{}
 	calls := 0
 	state := &TurnState{Auras: []Aura{{
-		Self:        CardOrTokenType{Card: aura},
-		TriggerType: TriggerStartOfTurn,
-		Count:       1,
-		Handler:     func(*TurnState, *Aura) { calls++ },
+		Trigger: Trigger{
+			TriggerType: TriggerStartOfTurn,
+			Count:       1,
+			Handler:     func(*TurnState, *Trigger) { calls++ },
+		},
+		Self: CardOrTokenType{Card: aura},
 	}}}
 	FireAttackActionAuras(state, testutils.RedAttack{})
 	if state.Value != 0 {

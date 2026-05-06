@@ -49,8 +49,10 @@ func TestSigilOfSilphidae_PlayBanishesAuraForOneArcane(t *testing.T) {
 func TestSigilOfSilphidae_StartOfTurnHandlerFizzlesWithoutAnotherAura(t *testing.T) {
 	var play sim.TurnState
 	(SigilOfSilphidaeBlue{}).Play(&play, &sim.CardState{Card: SigilOfSilphidaeBlue{}})
-	var next sim.TurnState
-	play.Auras[0].Handler(&next, &play.Auras[0])
+	next := sim.NewTurnState(nil, nil)
+	next.Auras = append(next.Auras, play.Auras[0])
+	next.SetCurrentAuraIdxForTesting(0)
+	next.Auras[0].Handler(next, &next.Auras[0].Trigger)
 	if next.Value != 0 {
 		t.Errorf("handler Value = %d, want 0 (no other aura to banish)", next.Value)
 	}
@@ -63,7 +65,9 @@ func TestSigilOfSilphidae_StartOfTurnHandlerBanishesAnotherAura(t *testing.T) {
 	(SigilOfSilphidaeBlue{}).Play(&play, &sim.CardState{Card: SigilOfSilphidaeBlue{}})
 	other := BlessingOfOccultRed{}
 	next := sim.NewTurnState(nil, []sim.Card{other})
-	play.Auras[0].Handler(next, &play.Auras[0])
+	next.Auras = append(next.Auras, play.Auras[0])
+	next.SetCurrentAuraIdxForTesting(0)
+	next.Auras[0].Handler(next, &next.Auras[0].Trigger)
 	if next.Value != 1 {
 		t.Errorf("handler Value = %d, want 1 (banished another aura)", next.Value)
 	}

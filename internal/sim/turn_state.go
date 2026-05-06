@@ -60,18 +60,6 @@ type LogEntry struct {
 	N      int
 }
 
-// NextHitTrigger is a one-shot rider queued by a card whose printed text reads "the next
-// time an X you control hits this turn, do Y". TypeFilter narrows the qualifying hits —
-// e.g. card.TypeSet.IsAttackAction for "attack action card" wording, card.TypeSet.IsAttack
-// for the broader "attack" wording (which includes weapon swings). The chain runner drains
-// matching triggers inside finalizeActiveAttack on each LikelyToHit attack; non-matching
-// triggers stay queued for a future qualifying hit.
-type NextHitTrigger struct {
-	Fire       func(s *TurnState, target *CardState, t *NextHitTrigger)
-	TypeFilter func(card.TypeSet) bool
-	Source     Card
-}
-
 // TurnState is the shared turn-level context passed to Card.Play alongside the per-card
 // CardState wrapper.
 type TurnState struct {
@@ -125,6 +113,11 @@ type TurnState struct {
 	// AddAura; the sim fires matching entries on each TriggerType condition and drops
 	// entries whose handler called s.DestroyAura. Carries across turns.
 	Auras []Aura
+	// Triggers is the list of one-shot deferred handlers keyed to a TriggerType. Cards
+	// add entries during Play via AddTrigger; the sim fires matching entries on each
+	// TriggerType condition and removes them after firing. Reset per permutation; not
+	// snapshotted into CarryState (TriggerEndOfTurn fires before the carry snapshot).
+	Triggers []Trigger
 	// Items is the list of items currently in play. Cards add entries via the
 	// per-token-type Create helper (CreateGold); the chain runner enqueues each item's
 	// Ability as a playable activated ability each turn. Carries across turns.
@@ -143,9 +136,6 @@ type TurnState struct {
 	// currentAuraIdx. The aura-loop reads it to decide whether to advance the cursor
 	// (false) or stay (true — the next entry shifted into position i).
 	currentAuraDestroyed bool
-	// pendingNextHit queues NextHitTriggers; reset per permutation. Lowercase so cards
-	// register through RegisterNextHit instead of appending.
-	pendingNextHit []NextHitTrigger
 
 	// --- Transient: reset by the sim per turn / chain step ---
 
@@ -242,16 +232,6 @@ func (s *TurnState) IsCacheable() bool { return s.cacheable }
 // no AR is resolving.
 func (s *TurnState) AttackReactionTarget() *CardState { return s.attackReactionTarget }
 
-// RegisterNextHit queues t. See NextHitTrigger for resolution.
-func (s *TurnState) RegisterNextHit(t NextHitTrigger) {
-	s.pendingNextHit = append(s.pendingNextHit, t)
-}
-
-// PendingNextHitTriggers returns the number of currently queued triggers. For tests.
-func (s *TurnState) PendingNextHitTriggers() int {
-	return len(s.pendingNextHit)
-}
-
 // AmendLastChainStepN adds n to the most recent ChainStep entry's N field. ARs use this to
 // fold their +{p} buff into the buffed attack's display delta. No-op when skipLog elided
 // log entries.
@@ -313,6 +293,13 @@ func (s *TurnState) PopHandAt(i int) Card {
 // the test has run a single Play.
 func (s *TurnState) SetHandForTesting(cards []Card) {
 	s.hand = cards
+}
+
+// SetCurrentAuraIdxForTesting sets currentAuraIdx so AuraFor / DestroyAura resolve
+// inside a manually-fired aura handler. Test-only — production fire loops maintain
+// currentAuraIdx themselves.
+func (s *TurnState) SetCurrentAuraIdxForTesting(i int) {
+	s.currentAuraIdx = i
 }
 
 // Graveyard returns the live graveyard slice and flips IsCacheable to false. Cards must
@@ -891,36 +878,55 @@ func (s *TurnState) AddAura(t Aura) {
 	s.Auras = append(s.Auras, t)
 }
 
+// AddTrigger appends t to s.Triggers. The sim fires t once on its matching TriggerType
+// condition then removes it.
+func (s *TurnState) AddTrigger(t Trigger) {
+	s.Triggers = append(s.Triggers, t)
+}
+
 // DestroyAura splices t out of s.Auras and, when addToGraveyard, appends t.Self.Card to
-// s.graveyard. Token-style auras (Card == nil) skip the graveyard append unconditionally.
+// s.graveyard. Token-style auras (Self.Card == nil) skip the graveyard append
+// unconditionally. During the aura fire walk the destroy uses currentAuraIdx directly
+// (the fire loop maintains it through any mid-handler s.Auras realloc); off-fire callers
+// fall back to a pointer-equality scan.
 //
 // Direct graveyard append (no cacheable flip): destruction is deterministic from the
 // triggering event the sim already accounts for, not from hidden state.
-//
-// Pointer comparison is the primary identity check: when t still points into s.Auras
-// (no mid-handler realloc), &s.Auras[i] == t is unambiguous even if two auras share the
-// same Self. Self-equality is the fallback for the post-realloc case where the pointer
-// no longer aliases the slice — currently safe because no card registers two auras with
-// identical Self, an invariant code adding a second-of-a-kind aura must preserve.
-func (s *TurnState) DestroyAura(t *Aura, addToGraveyard bool) {
-	if addToGraveyard && t.Self.Card != nil {
-		s.graveyard = append(s.graveyard, t.Self.Card)
-	}
-	if i := s.currentAuraIdx; i >= 0 && i < len(s.Auras) && &s.Auras[i] == t {
-		s.Auras = append(s.Auras[:i], s.Auras[i+1:]...)
-		s.currentAuraDestroyed = true
+func (s *TurnState) DestroyAura(t *Trigger, addToGraveyard bool) {
+	a := s.AuraFor(t)
+	if a == nil {
 		return
 	}
-	target := t.Self
-	if i := s.currentAuraIdx; i >= 0 && i < len(s.Auras) && s.Auras[i].Self == target {
+	if addToGraveyard && a.Self.Card != nil {
+		s.graveyard = append(s.graveyard, a.Self.Card)
+	}
+	if i := s.currentAuraIdx; i >= 0 && i < len(s.Auras) && &s.Auras[i] == a {
 		s.Auras = append(s.Auras[:i], s.Auras[i+1:]...)
 		s.currentAuraDestroyed = true
 		return
 	}
 	for i := range s.Auras {
-		if s.Auras[i].Self == target {
+		if &s.Auras[i] == a {
 			s.Auras = append(s.Auras[:i], s.Auras[i+1:]...)
 			return
 		}
 	}
+}
+
+// AuraFor returns the Aura whose embedded Trigger is t — used by aura handlers to
+// recover Self / Count given the *Trigger they were called with. During an aura fire
+// walk currentAuraIdx points at the firing aura (the fire loop maintains it through
+// any mid-handler s.Auras realloc); the index path always wins inside a handler. The
+// pointer-equality scan is the off-fire-path fallback for callers without
+// currentAuraIdx context. Returns nil for standalone Triggers (no parent Aura).
+func (s *TurnState) AuraFor(t *Trigger) *Aura {
+	if i := s.currentAuraIdx; i >= 0 && i < len(s.Auras) {
+		return &s.Auras[i]
+	}
+	for i := range s.Auras {
+		if &s.Auras[i].Trigger == t {
+			return &s.Auras[i]
+		}
+	}
+	return nil
 }

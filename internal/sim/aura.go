@@ -5,11 +5,11 @@ import "github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
 // Aura is a persistent hook attached to a card or a token in play. The sim walks each
 // TurnState's Auras list on every Trigger condition and fires the matching handlers;
 // lifecycle (when to decrement Count, when to send Self to the graveyard, when to
-// deregister) belongs to the handler. Used for start-of-turn upkeep auras (sigils,
-// Blessing of Occult, Runeblood Incantation), per-attack-action triggers (Malefic
-// Incantation), and aura tokens (Runechants — see tokens.go).
+// deregister) belongs to the handler. Auras compose a Trigger by embed: an Aura is a
+// Trigger plus persistent-instance state. Standalone (one-shot) Triggers live on
+// TurnState.Triggers and are removed by the sim after firing — see trigger.go.
 
-// TriggerType categorises when an Aura's Handler fires.
+// TriggerType categorises when a Trigger / Aura's Handler fires.
 type TriggerType int
 
 const (
@@ -29,6 +29,11 @@ const (
 	// and the post-hoc arsenal-promotion step. Ponder uses this to draw a card into the
 	// held pile so the existing arsenal-promotion logic fills an otherwise-empty slot.
 	TriggerEndOfTurn
+	// TriggerHit fires when an attack hits (LikelyToHit on the post-AR-buff EffectiveAttack).
+	// Used by "the next time an X you control hits this turn, do Y" printed text (Plunder
+	// Run, High Striker). Trigger.TypeFilter narrows qualifying hits to a card-type
+	// predicate. Standalone-trigger only — auras don't currently use this trigger type.
+	TriggerHit
 )
 
 // CardOrTokenType identifies what an Aura belongs to: a specific card in play, or an
@@ -61,30 +66,20 @@ func (c CardOrTokenType) DisplayName() string {
 	return tokenDisplayName(c.TokenType)
 }
 
-// AuraHandler is the business-logic callback attached to an Aura. Called when the Aura's
-// TriggerType condition fires — it's where the printed effect lives. Handlers mutate the
-// passed TurnState directly, crediting damage / life gain via s.AddValue. Same shape as
-// Card.Play — no return. Lifecycle is the handler's responsibility: call
-// s.DestroyAura(t, addToGraveyard) when done. Token-style auras pass false for
-// addToGraveyard since the underlying token isn't a card and just disappears.
-type AuraHandler func(s *TurnState, t *Aura)
-
-// Aura is one persistent hook attached to a card or a token in play. Each time
-// TriggerType's condition fires — and, when OncePerTurn is set, at most once per turn —
-// the sim calls Handler. The Aura survives until its handler calls s.DestroyAura.
+// Aura is one persistent hook attached to a card or a token in play. The embedded
+// Trigger carries the firing-data (Source, TriggerType, TypeFilter, Handler); the
+// fields below add per-instance state that distinguishes a long-lived aura from a
+// one-shot trigger. Each time TriggerType's condition fires — and, when OncePerTurn
+// is set, at most once per turn — the sim invokes Handler. The Aura survives until
+// its handler calls s.DestroyAura.
 type Aura struct {
+	// Trigger embeds the firing-data shared with standalone Triggers (see trigger.go),
+	// including Count. Aura handlers receive *Trigger; aura-specific fields below are
+	// reached via s.AuraFor(t).
+	Trigger
 	// Self identifies what this Aura belongs to — a card or a token type. Surfaced in
 	// per-turn summaries via CardOrTokenType.DisplayName.
 	Self CardOrTokenType
-	// TriggerType is the trigger condition that fires this Aura's Handler.
-	TriggerType TriggerType
-	// Count is a per-Aura counter. Its meaning is card-specific: Malefic Incantation and
-	// Runeblood Incantation read it as fires remaining and decrement themselves; one-shot
-	// sigils ignore it; token auras (Runechant) use it as a copy count. The sim treats
-	// Count as opaque storage and never mutates it.
-	Count int
-	// Handler runs when TriggerType fires.
-	Handler AuraHandler
 	// OncePerTurn caps the Handler at a single fire per turn regardless of how many matching
 	// events occur. The sim sets FiredThisTurn the first time Handler runs each turn and
 	// clears it at the next turn boundary.

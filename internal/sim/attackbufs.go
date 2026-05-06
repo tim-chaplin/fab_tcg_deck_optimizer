@@ -107,9 +107,9 @@ type permBufs struct {
 	// defenderAurasBacking is the per-partition scratch for the post-defense aura set,
 	// aliased by sequenceContext.defenderAuras.
 	defenderAurasBacking []Aura
-	// nextHitBacking backs TurnState.pendingNextHit. Sized small — having more than a
-	// couple of these riders queued at once is exotic.
-	nextHitBacking []NextHitTrigger
+	// triggersBacking backs TurnState.Triggers. Sized small — Triggers are one-shot, so
+	// the typical queue depth is one or two riders.
+	triggersBacking []Trigger
 }
 
 // carryWinnerBufs holds the running-winner CarryState scratches — one per nesting level
@@ -240,7 +240,7 @@ func newAttackBufs(handSize, weaponCount int, weapons []Weapon) *attackBufs {
 			auraTriggersBacking:  make([]Aura, 0, handSize+1),
 			itemsBacking:         make([]Item, 0, 4),
 			defenderAurasBacking: make([]Aura, 0, handSize+1),
-			nextHitBacking:       make([]NextHitTrigger, 0, 4),
+			triggersBacking:      make([]Trigger, 0, 4),
 		},
 		// carryWinnerBufs starts zero-valued — the slice backings grow on first use.
 	}

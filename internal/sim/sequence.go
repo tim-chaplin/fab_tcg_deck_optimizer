@@ -403,7 +403,7 @@ func fireAttackActionAuras(state *TurnState, triggeringCard Card) {
 		state.TriggeringCard = triggeringCard
 		state.currentAuraIdx = i
 		state.currentAuraDestroyed = false
-		t.Handler(state, t)
+		t.Handler(state, &t.Trigger)
 		state.currentAuraIdx = -1
 		state.TriggeringCard = nil
 		if !state.currentAuraDestroyed {
@@ -413,39 +413,64 @@ func fireAttackActionAuras(state *TurnState, triggeringCard Card) {
 	}
 }
 
-// hasEndOfTurnAura reports whether any aura in the slice is a TriggerEndOfTurn entry.
-// Used by the chain runner to skip the end-of-turn fire when nothing in state.Auras
-// would actually trigger.
-func hasEndOfTurnAura(auras []Aura) bool {
-	for _, a := range auras {
+// hasEndOfTurnFire reports whether either Auras or Triggers carries a TriggerEndOfTurn
+// entry. Lets the chain runner skip the end-of-turn walk when nothing would fire.
+func hasEndOfTurnFire(state *TurnState) bool {
+	for _, a := range state.Auras {
 		if a.TriggerType == TriggerEndOfTurn {
+			return true
+		}
+	}
+	for _, t := range state.Triggers {
+		if t.TriggerType == TriggerEndOfTurn {
 			return true
 		}
 	}
 	return false
 }
 
-// fireEndOfTurnAuras runs after the chain has finished resolving (and the legality
-// gates have passed) but before snapshotCarry captures the next-turn state. Ponder
-// uses this to draw a card into the held pile, so the post-hoc arsenal-promotion step
-// can fill an empty arsenal from the drawn card. Same cursor / splice semantics as the
-// other fire helpers.
-func fireEndOfTurnAuras(state *TurnState) {
+// fireEndOfTurn runs after the chain has finished resolving (and the legality gates
+// have passed) but before snapshotCarry captures the next-turn state. Walks Auras and
+// Triggers in one pass each:
+//
+//   - Aura entries respect OncePerTurn / FiredThisTurn semantics; the handler owns
+//     destruction via s.DestroyAura.
+//   - Trigger entries are one-shot; the sim removes each fired entry afterward.
+//     Snapshotting len(state.Triggers) before iterating keeps a handler that calls
+//     AddTrigger from firing its newcomer on the same pass — newcomers stay queued for
+//     the next matching event.
+func fireEndOfTurn(state *TurnState) {
 	for i := 0; i < len(state.Auras); {
-		t := &state.Auras[i]
-		if t.TriggerType != TriggerEndOfTurn || (t.OncePerTurn && t.FiredThisTurn) {
+		a := &state.Auras[i]
+		if a.TriggerType != TriggerEndOfTurn || (a.OncePerTurn && a.FiredThisTurn) {
 			i++
 			continue
 		}
 		state.currentAuraIdx = i
 		state.currentAuraDestroyed = false
-		t.Handler(state, t)
+		a.Handler(state, &a.Trigger)
 		state.currentAuraIdx = -1
 		if !state.currentAuraDestroyed {
 			state.Auras[i].FiredThisTurn = true
 			i++
 		}
 	}
+	n := len(state.Triggers)
+	for i := 0; i < n; i++ {
+		tr := state.Triggers[i]
+		if tr.TriggerType != TriggerEndOfTurn {
+			continue
+		}
+		tr.Handler(state, &tr)
+	}
+	kept := state.Triggers[:0]
+	for i, tr := range state.Triggers {
+		if i < n && tr.TriggerType == TriggerEndOfTurn {
+			continue
+		}
+		kept = append(kept, tr)
+	}
+	state.Triggers = kept
 }
 
 // fireAttackAuras is the TriggerAttack counterpart to fireAttackActionAuras: walks
@@ -462,7 +487,7 @@ func fireAttackAuras(state *TurnState, triggeringCard Card) {
 		state.TriggeringCard = triggeringCard
 		state.currentAuraIdx = i
 		state.currentAuraDestroyed = false
-		t.Handler(state, t)
+		t.Handler(state, &t.Trigger)
 		state.currentAuraIdx = -1
 		state.TriggeringCard = nil
 		if !state.currentAuraDestroyed {
@@ -514,10 +539,12 @@ func (ctx *sequenceContext) resetStateForPermutation() {
 		auraSeed = ctx.defenderAuras
 	}
 	s.Auras = append(bufs.auraTriggersBacking[:0], auraSeed...)
+	// Triggers are one-shot and don't carry across permutations — reset to empty so a
+	// prior permutation's Triggers don't leak.
+	s.Triggers = bufs.triggersBacking[:0]
 	s.Items = append(bufs.itemsBacking[:0], ctx.priorItems...)
 	s.CardsDrawn = 0
 	s.currentAuraIdx = -1
-	s.pendingNextHit = bufs.nextHitBacking[:0]
 	s.Value = 0
 	s.turnLog = bufs.logBacking[:0]
 	s.CardsPlayed = bufs.cardsPlayedBacking[:0]
@@ -561,8 +588,8 @@ func (ctx *sequenceContext) bestSequence(attackers []Card) (int, int, bool) {
 		// mirrors the per-permutation work eval() does for n>0 chains.
 		ctx.resetStateForPermutation()
 		st := ctx.bufs.state
-		if hasEndOfTurnAura(st.Auras) {
-			fireEndOfTurnAuras(st)
+		if hasEndOfTurnFire(st) {
+			fireEndOfTurn(st)
 		}
 		ctx.carryWinner.SnapshotFromTurn(st)
 		return 0, pendingFutureValue(st.Auras, st.Items), true
@@ -823,22 +850,26 @@ func (ctx *sequenceContext) playSequenceWithMeta(n int) (damage int, futureValue
 				h := &activeAttack.OnHit[i]
 				h.Fire(state, activeAttack, h)
 			}
-			// Drain matching pending triggers — each rider's TypeFilter narrows the
+			// Drain matching TriggerHit Triggers — each rider's TypeFilter narrows the
 			// qualifying hits (e.g. "attack action card" vs broader "attack" wording).
-			// Triggers that don't match stay queued for a later qualifying hit.
-			if len(state.pendingNextHit) > 0 {
+			// Triggers that don't match stay queued for a later qualifying hit. The
+			// firing handler reads state.TriggeringCard for attack identity.
+			if len(state.Triggers) > 0 {
 				types := activeAttack.Card.Types()
-				kept := 0
-				for i := range state.pendingNextHit {
-					t := &state.pendingNextHit[i]
-					if t.TypeFilter == nil || t.TypeFilter(types) {
-						t.Fire(state, activeAttack, t)
+				prevTriggering := state.TriggeringCard
+				state.TriggeringCard = activeAttack.Card
+				kept := state.Triggers[:0]
+				for i := range state.Triggers {
+					t := state.Triggers[i]
+					if t.TriggerType != TriggerHit ||
+						(t.TypeFilter != nil && !t.TypeFilter(types)) {
+						kept = append(kept, t)
 						continue
 					}
-					state.pendingNextHit[kept] = state.pendingNextHit[i]
-					kept++
+					t.Handler(state, &t)
 				}
-				state.pendingNextHit = state.pendingNextHit[:kept]
+				state.Triggers = kept
+				state.TriggeringCard = prevTriggering
 			}
 		}
 		activeAttack = nil
@@ -982,11 +1013,10 @@ func (ctx *sequenceContext) playSequenceWithMeta(n int) (damage int, futureValue
 	if pool.idx < pool.n {
 		return 0, 0, 0, false
 	}
-	// End-of-turn fire after the chain settles: defender Ponders (folded in at chain
-	// start) and any chain-created end-of-turn aura draw their card before snapshot.
-	// Skip the walk when no end-of-turn aura is in play.
-	if hasEndOfTurnAura(state.Auras) {
-		fireEndOfTurnAuras(state)
+	// End-of-turn fire after the chain settles, before snapshot: aura entries
+	// (Ponders, chain-created end-of-turn auras) and one-shot Triggers.
+	if hasEndOfTurnFire(state) {
+		fireEndOfTurn(state)
 	}
 	return state.Value, pendingFutureValue(state.Auras, state.Items), pool.remaining, true
 }

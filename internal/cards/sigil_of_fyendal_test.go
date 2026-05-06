@@ -31,8 +31,10 @@ func TestSigilOfFyendal_PlayRegistersStartOfTurnTrigger(t *testing.T) {
 func TestSigilOfFyendal_TriggerHandlerCredits1Damage(t *testing.T) {
 	var s sim.TurnState
 	(SigilOfFyendalBlue{}).Play(&s, &sim.CardState{Card: SigilOfFyendalBlue{}})
-	var fire sim.TurnState
-	s.Auras[0].Handler(&fire, &s.Auras[0])
+	fire := sim.NewTurnState(nil, nil)
+	fire.Auras = append(fire.Auras, s.Auras[0])
+	fire.SetCurrentAuraIdxForTesting(0)
+	fire.Auras[0].Handler(fire, &fire.Auras[0].Trigger)
 	if fire.Value != 1 {
 		t.Errorf("Handler Value = %d, want 1", fire.Value)
 	}

@@ -58,10 +58,11 @@ func tokenDisplayName(t TokenType) string {
 
 // runechantAuraHandler is the TriggerAttack handler shared by every Runechant aura.
 // Fires before each attack / weapon swing resolves: flips ArcaneDamageDealt when
-// t.Count clears the LikelyDamageHits window and destroys the aura. Damage was credited
-// at creation time in CreateRunechants — this handler is pure state cleanup.
-func runechantAuraHandler(s *TurnState, t *Aura) {
-	if LikelyDamageHits(t.Count, false) {
+// aura.Count clears the LikelyDamageHits window and destroys the aura. Damage was
+// credited at creation time in CreateRunechants — this handler is pure state cleanup.
+func runechantAuraHandler(s *TurnState, t *Trigger) {
+	a := s.AuraFor(t)
+	if LikelyDamageHits(a.Count, false) {
 		s.ArcaneDamageDealt = true
 	}
 	s.DestroyAura(t, false)
@@ -72,10 +73,8 @@ func runechantAuraHandler(s *TurnState, t *Aura) {
 // factory is for tests that need to seed a runechant aura without the damage credit.
 func NewRunechantAura(n int) Aura {
 	return Aura{
-		Self:        CardOrTokenType{TokenType: TokenTypeRunechant},
-		TriggerType: TriggerAttack,
-		Count:       n,
-		Handler:     runechantAuraHandler,
+		Trigger: Trigger{TriggerType: TriggerAttack, Count: n, Handler: runechantAuraHandler},
+		Self:    CardOrTokenType{TokenType: TokenTypeRunechant},
 	}
 }
 
@@ -84,8 +83,9 @@ func NewRunechantAura(n int) Aura {
 // post-hoc arsenal-promotion step fill an otherwise-empty arsenal slot. Pops past
 // deck-end are silently skipped — empty deck just means no draw. Reading the deck top
 // flips s.cacheable (PopDeckTop's contract).
-func ponderAuraHandler(s *TurnState, t *Aura) {
-	for i := 0; i < t.Count; i++ {
+func ponderAuraHandler(s *TurnState, t *Trigger) {
+	a := s.AuraFor(t)
+	for i := 0; i < a.Count; i++ {
 		c, ok := s.PopDeckTop()
 		if !ok {
 			break
@@ -99,10 +99,8 @@ func ponderAuraHandler(s *TurnState, t *Aura) {
 // s.CreatePonder instead; this factory is for tests that need to seed the aura directly.
 func NewPonderAura(n int) Aura {
 	return Aura{
-		Self:        CardOrTokenType{TokenType: TokenTypePonder},
-		TriggerType: TriggerEndOfTurn,
-		Count:       n,
-		Handler:     ponderAuraHandler,
+		Trigger: Trigger{TriggerType: TriggerEndOfTurn, Count: n, Handler: ponderAuraHandler},
+		Self:    CardOrTokenType{TokenType: TokenTypePonder},
 	}
 }
 
