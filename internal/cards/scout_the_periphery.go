@@ -19,19 +19,9 @@ import (
 
 var scoutThePeripheryTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction)
 
-// grantNextArsenalAttackActionBonus adds n to the first scheduled attack action played
-// from arsenal via its BonusAttack so the buff lands on the buffed card. Fizzles silently
-// when no qualifying target follows.
-func grantNextArsenalAttackActionBonus(s *sim.TurnState, n int) {
-	for _, pc := range s.CardsRemaining {
-		if !pc.FromArsenal {
-			continue
-		}
-		if pc.Card.Types().IsAttackAction() {
-			pc.BonusAttack += n
-			return
-		}
-	}
+// scoutThePeripheryIsTarget gates the rider on attack action cards played from arsenal.
+func scoutThePeripheryIsTarget(_ *sim.TurnState, pc *sim.CardState) bool {
+	return pc.FromArsenal && pc.Card.Types().IsAttackAction()
 }
 
 type ScoutThePeripheryRed struct{}
@@ -45,7 +35,7 @@ func (ScoutThePeripheryRed) Defense() int            { return 2 }
 func (ScoutThePeripheryRed) Types() card.TypeSet     { return scoutThePeripheryTypes }
 func (ScoutThePeripheryRed) GoAgain() bool           { return true }
 func (ScoutThePeripheryRed) Play(s *sim.TurnState, self *sim.CardState) {
-	grantNextArsenalAttackActionBonus(s, 3)
+	GrantNextCardBonusAttack(s, 3, scoutThePeripheryIsTarget)
 	n := self.DealEffectiveAttack(s)
 	s.Log(self, n)
 }
@@ -61,7 +51,7 @@ func (ScoutThePeripheryYellow) Defense() int            { return 2 }
 func (ScoutThePeripheryYellow) Types() card.TypeSet     { return scoutThePeripheryTypes }
 func (ScoutThePeripheryYellow) GoAgain() bool           { return true }
 func (ScoutThePeripheryYellow) Play(s *sim.TurnState, self *sim.CardState) {
-	grantNextArsenalAttackActionBonus(s, 2)
+	GrantNextCardBonusAttack(s, 2, scoutThePeripheryIsTarget)
 	n := self.DealEffectiveAttack(s)
 	s.Log(self, n)
 }
@@ -77,7 +67,7 @@ func (ScoutThePeripheryBlue) Defense() int            { return 2 }
 func (ScoutThePeripheryBlue) Types() card.TypeSet     { return scoutThePeripheryTypes }
 func (ScoutThePeripheryBlue) GoAgain() bool           { return true }
 func (ScoutThePeripheryBlue) Play(s *sim.TurnState, self *sim.CardState) {
-	grantNextArsenalAttackActionBonus(s, 1)
+	GrantNextCardBonusAttack(s, 1, scoutThePeripheryIsTarget)
 	n := self.DealEffectiveAttack(s)
 	s.Log(self, n)
 }

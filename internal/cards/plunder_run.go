@@ -31,7 +31,7 @@ func plunderRunPlay(s *sim.TurnState, self *sim.CardState, source sim.Card, n in
 		Source:     source,
 	})
 	if self.FromArsenal {
-		GrantNextCardBonusAttack(s, n, card.TypeSet.IsAttackAction)
+		GrantNextCardBonusAttack(s, n, IsAttackAction)
 	}
 	s.Log(self, 0)
 }

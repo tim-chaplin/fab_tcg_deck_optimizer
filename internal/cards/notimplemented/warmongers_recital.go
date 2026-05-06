@@ -30,7 +30,7 @@ func (WarmongersRecitalRed) GoAgain() bool           { return true }
 // not implemented: bottom-of-deck rider on next-attack-action target
 func (WarmongersRecitalRed) NotImplemented() {}
 func (WarmongersRecitalRed) Play(s *sim.TurnState, self *sim.CardState) {
-	cards.GrantNextCardBonusAttack(s, 3, card.TypeSet.IsAttackAction)
+	cards.GrantNextCardBonusAttack(s, 3, cards.IsAttackAction)
 	n := self.DealEffectiveAttack(s)
 	s.Log(self, n)
 }
@@ -49,7 +49,7 @@ func (WarmongersRecitalYellow) GoAgain() bool           { return true }
 // not implemented: bottom-of-deck rider on next-attack-action target
 func (WarmongersRecitalYellow) NotImplemented() {}
 func (WarmongersRecitalYellow) Play(s *sim.TurnState, self *sim.CardState) {
-	cards.GrantNextCardBonusAttack(s, 2, card.TypeSet.IsAttackAction)
+	cards.GrantNextCardBonusAttack(s, 2, cards.IsAttackAction)
 	n := self.DealEffectiveAttack(s)
 	s.Log(self, n)
 }
@@ -68,7 +68,7 @@ func (WarmongersRecitalBlue) GoAgain() bool           { return true }
 // not implemented: bottom-of-deck rider on next-attack-action target
 func (WarmongersRecitalBlue) NotImplemented() {}
 func (WarmongersRecitalBlue) Play(s *sim.TurnState, self *sim.CardState) {
-	cards.GrantNextCardBonusAttack(s, 1, card.TypeSet.IsAttackAction)
+	cards.GrantNextCardBonusAttack(s, 1, cards.IsAttackAction)
 	n := self.DealEffectiveAttack(s)
 	s.Log(self, n)
 }
