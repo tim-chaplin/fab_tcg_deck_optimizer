@@ -68,14 +68,6 @@ func GenericAction() Card {
 	}
 }
 
-// GenericAura returns a Generic Aura stub — covers Yinti Yanti's HasPlayedType(TypeAura) check.
-func GenericAura() Card {
-	return Card{
-		name:  "GenericAura",
-		types: card.NewTypeSet(card.TypeGeneric, card.TypeAura),
-	}
-}
-
 // Shared stub Cards. Each is a zero-value struct with a fixed type line; tests mix and match to
 // exercise lookahead / predicate logic on card effects.
 
