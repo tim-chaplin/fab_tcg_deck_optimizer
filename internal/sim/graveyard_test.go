@@ -84,10 +84,8 @@ func (auraDefender) Types() card.TypeSet         { return card.NewTypeSet(card.T
 func (auraDefender) GoAgain() bool               { return false }
 func (auraDefender) Play(*TurnState, *CardState) {}
 
-// TestGraveyard_PlainBlockEntersGraveyardRegardlessOfType: a defender whose type mask
-// normally keeps it in play still lands in the graveyard the instant it's used to block.
-// The test pairs an aura-typed plain blocker with a DR whose Play snapshots state.Graveyard
-// — confirming the DR sees the plain blocker in the graveyard alongside itself.
+// Tests that a plain blocker enters the graveyard regardless of PersistsInPlay — a paired
+// DR snapshotting state.Graveyard sees the blocker.
 func TestGraveyard_PlainBlockEntersGraveyardRegardlessOfType(t *testing.T) {
 	blocker := auraDefender{}
 	if !blocker.Types().PersistsInPlay() {

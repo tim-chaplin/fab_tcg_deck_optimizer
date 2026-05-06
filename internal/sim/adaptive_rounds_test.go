@@ -15,14 +15,8 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/heroes"
 )
 
-// TestAdaptive_RoundsToConverge reports Stats.Runs (the actual shuffle count adaptive
-// stopped at) for several deck shapes. Results vs the per-fan-out chunk size of
-// numWorkers × adaptiveCheckInterval tell us whether the barrier-merge ever fires:
-//   - Stats.Runs <= chunkSize → adaptive converged inside the first chunk, no barrier
-//   - Stats.Runs > chunkSize  → at least one barrier fired
-//
-// Run with: `go test -run TestAdaptive_RoundsToConverge -v`. Logged output is the
-// deliverable — no assertion, just data.
+// Logs Stats.Runs for various deck shapes — `Runs <= numWorkers × adaptiveCheckInterval`
+// means adaptive converged inside the first chunk (no barrier-merge). Data-only, no asserts.
 func TestAdaptive_RoundsToConverge(t *testing.T) {
 	if testing.Short() {
 		t.Skip("adaptive convergence experiment is slow; -short skips it")

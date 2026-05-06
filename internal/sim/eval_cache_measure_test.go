@@ -93,13 +93,8 @@ func max1(n int) int {
 	return n
 }
 
-// TestEvalCache_ParallelEquivalentToSequential pins that the parallel-shuffle path
-// produces the same per-turn-mean within a small tolerance as the single-threaded path.
-// Same fixed-seed deck on both, run once with NewEvaluatorParallel(N) and once with
-// NewEvaluator(); the per-turn-mean should agree at the same shuffle count modulo the
-// expected RNG-distribution drift (parallel path derives per-worker seeds from the input
-// rng, so the actual sequence of shuffled decks differs from sequential — but the mean
-// over enough shuffles converges to the same number).
+// Tests that the parallel-shuffle and sequential paths agree on per-turn-mean within a
+// small tolerance — parallel derives per-worker seeds, so the streams differ but converge.
 func TestEvalCache_ParallelEquivalentToSequential(t *testing.T) {
 	const (
 		deckSize  = 40
@@ -134,9 +129,7 @@ func TestEvalCache_ParallelEquivalentToSequential(t *testing.T) {
 	}
 }
 
-// TestEvalCache_ResetCache pins that ResetCache drops cached entries while leaving the
-// stats counters intact, so the iterate-mode worker pool can clear the cache between
-// mutations without losing the running hit/miss tally for diagnostics.
+// Tests that ResetCache drops cache entries while preserving the hit/miss counters.
 func TestEvalCache_ResetCache(t *testing.T) {
 	ev := NewEvaluator()
 	hand := []Card{cards.MaleficIncantationBlue{}, cards.MaleficIncantationBlue{}}
@@ -172,11 +165,7 @@ func TestEvalCache_ResetCache(t *testing.T) {
 	}
 }
 
-// TestEvalCache_PerHandEquivalence pins that for the same hand inputs, the cache-replay
-// path produces a TurnSummary whose Value matches a from-scratch search. Walks several
-// runs of a fixed-shape Viserai hand sequence, asserting Value equality on every Best
-// call. This is the unit-level equivalence — the deck-eval-loop integration test below
-// catches the same drift through the aggregate Stats.
+// Tests that cached and uncached Best produce equal Value for the same hand inputs.
 func TestEvalCache_PerHandEquivalence(t *testing.T) {
 	hands := [][]Card{
 		{cards.SkyFireLanternsRed{}, cards.MaleficIncantationBlue{}},
@@ -198,14 +187,8 @@ func TestEvalCache_PerHandEquivalence(t *testing.T) {
 	}
 }
 
-// TestEvalCache_EquivalenceWithUncached pins that the cache-replay path produces summary
-// numbers WITHIN A SMALL TOLERANCE of a from-scratch search. The cache stores the winning
-// partition's role multiset; replay applies that multiset to the new call. The deck-eval
-// pipeline sorts each drawn hand by Card.ID() before search (sortHandByID), so fresh
-// search and replay both enumerate against the same canonical hand order — Hands and
-// per-turn Values match exactly under normal conditions. driftTolerance is kept as a
-// safety net for any future tie-breaker that depends on transient state the cache key
-// doesn't capture.
+// Tests that the cache-replay path produces summary numbers equal (within driftTolerance)
+// to a from-scratch search at the deck-eval-loop level.
 func TestEvalCache_EquivalenceWithUncached(t *testing.T) {
 	const (
 		deckSize  = 40
