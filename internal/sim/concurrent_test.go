@@ -13,11 +13,8 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/heroes"
 )
 
-// TestEvaluateWith_ConcurrentNoMapPanic hammers EvaluateWith from many goroutines with
-// each holding its own Evaluator. Shared state includes the card-meta lookup table;
-// unsynchronised access would panic with "concurrent map read and map write" or "concurrent
-// map writes" and fail the test. Catches common race regressions without depending on -race
-// (which requires cgo).
+// Tests that concurrent EvaluateWith from many goroutines (each with its own Evaluator)
+// doesn't panic on the shared card-meta lookup table.
 func TestEvaluateWith_ConcurrentNoMapPanic(t *testing.T) {
 	numWorkers := runtime.GOMAXPROCS(0)
 	if numWorkers < 2 {
@@ -50,10 +47,8 @@ func TestEvaluateWith_ConcurrentNoMapPanic(t *testing.T) {
 	wg.Wait()
 }
 
-// TestIterateParallel_RunsWithoutPanic is a smoke test for the parallel iterate entry
-// point: verifies the worker pool, cancellation signalling, and ready-channel coordination
-// complete without deadlock or panic on a realistic mutation list. Whether an improvement is
-// found is seed-dependent, so the test only asserts invariants.
+// Tests IterateParallel as a smoke test: completes without deadlock and reports invariant
+// shapes regardless of whether an improvement is found.
 func TestIterateParallel_RunsWithoutPanic(t *testing.T) {
 	rng := rand.New(rand.NewSource(42))
 	baseline := Random(heroes.Viserai{}, 40, 2, rng, nil)
@@ -93,14 +88,8 @@ func TestIterateParallel_RunsWithoutPanic(t *testing.T) {
 	}
 }
 
-// TestIterateParallel_AbortsOnContextCancel pins the abort path that iterate's stdin-listener
-// depends on: a context cancellation must unblock both the worker pool and the main-goroutine
-// select on ready[i], and IterateParallel must return promptly with found=false and ctx.Err()
-// set.
-//
-// Pre-cancels the context so the outcome is deterministic regardless of which worker happens to
-// deep-confirm first — the interesting assertion is "returns promptly with abort semantics,"
-// not "cancel races vs shallow completion."
+// Tests that IterateParallel returns promptly with abort semantics on context cancellation.
+// Pre-cancels for deterministic behaviour.
 func TestIterateParallel_AbortsOnContextCancel(t *testing.T) {
 	rng := rand.New(rand.NewSource(42))
 	baseline := Random(heroes.Viserai{}, 40, 2, rng, nil)
@@ -139,11 +128,8 @@ func TestIterateParallel_AbortsOnContextCancel(t *testing.T) {
 	}
 }
 
-// TestIterateParallel_TerminatesWithNoImprovement pins prompt return when no mutation
-// confirms: workers drain the shared queue with no serial deep-confirm bottleneck. Uses an
-// artificially high bestAvg so every mutation fails the shallow screen cleanly AND any
-// noise-driven shallow passer fails deep confirmation too — reliably hits the
-// "drain-queue-no-improvement-found" path.
+// Tests that IterateParallel terminates promptly with no improvement when bestAvg is
+// unreachable — workers drain the queue without a serial deep-confirm bottleneck.
 func TestIterateParallel_TerminatesWithNoImprovement(t *testing.T) {
 	rng := rand.New(rand.NewSource(42))
 	baseline := Random(heroes.Viserai{}, 40, 2, rng, nil)

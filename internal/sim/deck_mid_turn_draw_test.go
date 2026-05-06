@@ -11,19 +11,8 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
 )
 
-// TestEvalOneTurn_MidTurnDrawArsenalsWhenSlotEmpty pins the ARSENAL disposition for mid-turn-
-// drawn cards: when the arsenal slot is empty at end of turn 1, the card Snatch drew mid-turn
-// becomes turn 2's arsenal-in. Turn 2's hand is then a full handSize refill from the top of
-// the deck — including a Yellow tripwire at position 8 — rather than the beacon at slot 0
-// plus three fresh Blues (which would indicate the drawn card was held instead of arsenaled).
-//
-// Deck layout (consumed in source order):
-//   - positions 0..3 = turn 1's hand: Snatch Red (cost 0, attack 4, on-hit DrawOne) + three
-//     Blues that chain for Value 6 (pitch 1 Blue, Blue + Blue + Snatch for 1 + 1 + 4 damage).
-//   - position 4 = the beacon (testutils.RedAttack) that Snatch draws mid-turn.
-//   - positions 5..7 = Blues that make up turn 2's refill.
-//   - positions 8..9 = Yellow tripwires — a Yellow only shows up in turn 2's hand when the
-//     sim over-draws past the expected refill count.
+// Tests that a mid-turn-drawn card fills an empty arsenal slot at end of turn rather than
+// being held into turn 2.
 func TestEvalOneTurn_MidTurnDrawArsenalsWhenSlotEmpty(t *testing.T) {
 	beacon := testutils.RedAttack{}
 	deckCards := []Card{
@@ -70,22 +59,8 @@ func TestEvalOneTurn_MidTurnDrawArsenalsWhenSlotEmpty(t *testing.T) {
 	}
 }
 
-// TestEvalOneTurn_TwoMidTurnDraws_OneArsenalsOneHeld pins the arsenal pool's behaviour when
-// more drawn cards exist than slots: with 2 mid-turn draws and an empty arsenal, exactly one
-// drawn card takes the slot and the other stays HELD, carrying into turn 2's hand.
-//
-// Turn 1's chain is Flying High → Snatch → Flying High → Snatch: each Flying High grants go
-// again to the next attack (and +1 power when the pitch matches — both Reds here), letting
-// the two Snatches both fire and consume the top two cards of the deck via their on-hit
-// DrawOne. The winning partition has no Held hand cards (all four played), so the arsenal
-// pool is just the two drawn cards.
-//
-// Deck layout (consumed in source order):
-//   - positions 0..3 = turn 1's hand: Flying High Red + Flying High Red + Snatch Red + Snatch Red.
-//   - positions 4..5 = two identical Red beacons that Snatch's on-hit DrawOne consumes mid-turn.
-//   - positions 6..8 = Blues that make up turn 2's refill behind the held beacon.
-//   - position 9 = Yellow tripwire — showing up in turn 2's hand would indicate the sim
-//     pulled more than handSize - 1 refill cards.
+// Tests that with 2 mid-turn draws and an empty arsenal, exactly one drawn card arsenals and
+// the other stays Held into turn 2.
 func TestEvalOneTurn_TwoMidTurnDraws_OneArsenalsOneHeld(t *testing.T) {
 	beacon := testutils.RedAttack{}
 	deckCards := []Card{
@@ -133,20 +108,7 @@ func TestEvalOneTurn_TwoMidTurnDraws_OneArsenalsOneHeld(t *testing.T) {
 	}
 }
 
-// TestEvalOneTurn_ThreeMidTurnDraws_ArsenalFromDrawnPool pins the arsenal pool's behaviour
-// when a starting arsenal-in card plays out and the drawn cards fill the vacated slot: with
-// an arsenal-in Snatch plus two Flying Highs and two Snatches in hand, all three Snatches
-// fire their on-hit DrawOne (the two hand Snatches inherit go again from the Flying Highs;
-// the arsenal-in Snatch plays last, no chain constraint past it). That's three mid-turn
-// draws. One drawn card takes the arsenal slot (vacated when arsenal-in played), the other
-// two carry HELD into turn 2's hand — so turn 2 refills only handSize - 2 = 2 cards.
-//
-// Deck layout (consumed in source order):
-//   - positions 0..3 = turn 1's hand: Flying High Red + Flying High Red + Snatch Red + Snatch Red.
-//   - positions 4..6 = three identical Red beacons consumed by the three Snatch on-hit draws.
-//   - positions 7..8 = Blues that make up turn 2's refill behind the two held beacons.
-//   - position 9 = Yellow tripwire — appearing in turn 2's hand would mean the sim over-drew
-//     past the 2-card refill budget.
+// Tests 3 mid-turn draws filling a slot vacated by arsenal-in: one arsenals, two stay Held.
 func TestEvalOneTurn_ThreeMidTurnDraws_ArsenalFromDrawnPool(t *testing.T) {
 	beacon := testutils.RedAttack{}
 	arsenalIn := cards.SnatchRed{}
@@ -193,18 +155,7 @@ func TestEvalOneTurn_ThreeMidTurnDraws_ArsenalFromDrawnPool(t *testing.T) {
 	}
 }
 
-// TestEvalOneTurn_MidTurnDrawHeldWhenArsenalFull pins the fallback disposition: with the
-// arsenal slot already occupied (and not displaced), the drawn card can't arsenal, so it stays
-// HELD and carries into turn 2's hand. Turn 2 then refills handSize - 1 = 3 cards from the top
-// of the deck behind the held beacon. The Yellow tripwires at positions 8..9 should NOT show
-// up in turn 2's hand — if they do, the sim pulled too many refill cards.
-//
-// Deck layout (consumed in source order) — same shape as the arsenal-empty variant so the
-// difference between the two tests is purely the starting arsenal slot:
-//   - positions 0..3 = turn 1's hand (Snatch + three Blues; chains for Value 6).
-//   - position 4 = the beacon Snatch draws mid-turn.
-//   - positions 5..7 = Blues that make up turn 2's refill behind the held beacon.
-//   - positions 8..9 = Yellow tripwires that should stay in the deck.
+// Tests that with an occupied arsenal slot, a mid-turn-drawn card stays Held into turn 2.
 func TestEvalOneTurn_MidTurnDrawHeldWhenArsenalFull(t *testing.T) {
 	beacon := testutils.RedAttack{}
 	arsenalIn := cards.ToughenUpBlue{} // DR, cost 2, defense 4 — stays in arsenal with incoming 0
@@ -253,14 +204,8 @@ func TestEvalOneTurn_MidTurnDrawHeldWhenArsenalFull(t *testing.T) {
 	}
 }
 
-// TestEvalOneTurn_MidTurnDrawSansGoAgainStaysHeld: hand is Snatch + Toughen Up Blue, top of
-// deck is Aether Slash. Snatch has no baseline Go again and nothing grants it, so the chain
-// ends right after Snatch — the Slash is drawn but not played. Turn 1 Value = 4 (Snatch
-// alone). Toughen Up and the drawn Slash share the post-chain hand pool that feeds arsenal
-// promotion; the deterministic hash picks one for the arsenal slot, leaving the other to
-// carry into turn 2's hand alongside three fresh Blues. The test accepts either outcome of
-// the hash modulo so it stays stable across hash-input changes; the contract is "exactly one
-// of the two lands in arsenal, the other anchors turn 2's hand."
+// Tests that without go-again the drawn card and a Held card share the post-chain pool —
+// exactly one arsenals, the other anchors turn 2's hand (either outcome is accepted).
 func TestEvalOneTurn_MidTurnDrawSansGoAgainStaysHeld(t *testing.T) {
 	initialHand := []Card{
 		cards.SnatchRed{},
@@ -318,11 +263,7 @@ func TestEvalOneTurn_MidTurnDrawSansGoAgainStaysHeld(t *testing.T) {
 	}
 }
 
-// TestEvalOneTurn_DrawOneOnEmptyDeckIsNoop pins the degenerate case: Snatch fires DrawOne
-// against an empty deck and nothing happens — no panic, no spurious entry in state.Drawn, no
-// index math goes sideways downstream. Hand is just Snatch; d.Cards is empty. Turn 2 can't
-// deal (deck stays empty through the turn), so the sim returns a TurnStartState with just
-// the previous-turn value and the arsenal/live runechants.
+// Tests that DrawOne against an empty deck is a no-op (no panic, no spurious draw).
 func TestEvalOneTurn_DrawOneOnEmptyDeckIsNoop(t *testing.T) {
 	initialHand := []Card{cards.SnatchRed{}}
 	d := New(heroes.Viserai{}, nil, nil)

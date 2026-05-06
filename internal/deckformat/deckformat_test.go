@@ -40,10 +40,9 @@ func TestParse(t *testing.T) {
 	}
 }
 
-// TestSilverAgeBanlistParity pins the banlist file against the code tags: every card in
-// data_sources/silver_age_banlist.txt that has an implementation must tag every variant with
-// NotSilverAgeLegal. Names are matched after stripping the color suffix and normalising
-// curly apostrophes (U+2019) to ASCII.
+// Tests that every implemented card on the silver_age_banlist.txt file has its variants
+// tagged with NotSilverAgeLegal (matched after stripping color suffix + normalising
+// curly apostrophes).
 func TestSilverAgeBanlistParity(t *testing.T) {
 	// Banlist lives at the repo root; tests run from this package dir, so two levels up.
 	data, err := os.ReadFile("../../data_sources/silver_age_banlist.txt")

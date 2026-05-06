@@ -84,10 +84,8 @@ func (auraDefender) Types() card.TypeSet         { return card.NewTypeSet(card.T
 func (auraDefender) GoAgain() bool               { return false }
 func (auraDefender) Play(*TurnState, *CardState) {}
 
-// TestGraveyard_PlainBlockEntersGraveyardRegardlessOfType: a defender whose type mask
-// normally keeps it in play still lands in the graveyard the instant it's used to block.
-// The test pairs an aura-typed plain blocker with a DR whose Play snapshots state.Graveyard
-// — confirming the DR sees the plain blocker in the graveyard alongside itself.
+// Tests that a plain blocker enters the graveyard regardless of PersistsInPlay — a paired
+// DR snapshotting state.Graveyard sees the blocker.
 func TestGraveyard_PlainBlockEntersGraveyardRegardlessOfType(t *testing.T) {
 	blocker := auraDefender{}
 	if !blocker.Types().PersistsInPlay() {
@@ -117,10 +115,7 @@ func TestGraveyard_PlainBlockEntersGraveyardRegardlessOfType(t *testing.T) {
 	}
 }
 
-// TestGraveyard_PermutationReset: running playSequence twice must reset Graveyard between
-// calls. Without the reset, the second call's list would double-up. A changing chain length
-// between runs makes the leak obvious — the second graveyard's length should match the second
-// order.
+// Tests that Graveyard resets between back-to-back playSequence calls (no double-up).
 func TestGraveyard_PermutationReset(t *testing.T) {
 	first := []Card{testutils.RedAttack{}, testutils.RedAttack{}, testutils.RedAttack{}}
 	second := []Card{testutils.RedAttack{}}

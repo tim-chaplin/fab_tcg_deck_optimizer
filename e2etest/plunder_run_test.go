@@ -9,12 +9,8 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
 )
 
-// Pins Plunder Run's "next time an attack action card you control hits" rider waiting
-// across a missed attack and firing on the next one that lands. Hand: pitch-only Blue,
-// Plunder Run R, Runerager Swarm R, Critical Strike Y. Pitched Blue funds CS's 1 cost;
-// Plunder Run sets NonAttackActionPlayed so Runerager triggers Viserai's runechant (+1);
-// Runerager misses the LikelyToHit window at power 3 so the trigger stays queued; CS at
-// 4 lands the queue → DrawOne fires.
+// Tests that Plunder Run's "next time an attack action card hits" trigger waits across a
+// missed attack and fires on the next attack action card that lands.
 func TestPlunderRun_TriggerWaitsAcrossMissAndFiresOnHit(t *testing.T) {
 	d := sim.New(heroes.Viserai{}, nil, fillerDeck())
 	hand := []sim.Card{

@@ -52,13 +52,8 @@ func TestDefensiveInstant_PreventionCapsAtIncoming(t *testing.T) {
 	}
 }
 
-// Tests that a defensive instant with a real cost requires defense-phase pitch funding,
-// AND that pitch resources can't carry between phases. The hand has one BluePitch (3 res)
-// that has to fund either Peace of Mind (defend, cost 2) OR Critical Strike (attack,
-// cost 1) — not both. Incoming = 4 lets PoM's 4 prevention cap the damage bucket exactly,
-// so a Critical-Strike-as-plain-block can't add leftover credit. The optimizer's only
-// way past Value 4 would be to play CS as an attack — which requires the BluePitch to
-// have funded both phases. If pitch leaked across phases, Value would jump to 7.
+// Tests that a defensive instant with a real cost requires defense-phase pitch funding, and
+// that pitch resources can't carry between attack and defense phases.
 func TestDefensiveInstant_PeaceOfMindWithCost(t *testing.T) {
 	d := sim.New(heroes.Viserai{}, nil, fillerDeck())
 	hand := []sim.Card{cards.PeaceOfMindRed{}, testutils.BluePitch{}, cards.CriticalStrikeBlue{}}
@@ -86,10 +81,8 @@ func TestDefensiveInstant_DefendsFromArsenal(t *testing.T) {
 	}
 }
 
-// Tests that Peace of Mind's Ponder fires end-of-turn and fills an empty arsenal: with
-// an empty arsenal-in and a hand that ends the turn empty (Peace of Mind defends, Blue
-// pitches to fund the cost), turn 2 starts with an arsenal-occupied slot — the deck
-// top, popped by the Ponder draw, fed into the post-hoc arsenal-promotion step.
+// Tests that Peace of Mind's end-of-turn Ponder draws a card that fills an empty arsenal
+// via post-hoc promotion.
 func TestPonder_PeaceOfMindFillsEmptyArsenalNextTurn(t *testing.T) {
 	beacon := testutils.RedAttack{}
 	deck := []sim.Card{

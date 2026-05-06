@@ -7,10 +7,8 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
 )
 
-// Tests that GoldTokenAbility.Play decrements Count and removes the entry at zero.
-// Drives Play directly because the optimizer credits no Value for spending Gold (the
-// drawn card's value lands in the carry state for the next turn) and so wouldn't
-// reliably select the spend over the no-op.
+// Tests that GoldTokenAbility.Play decrements Count and removes the entry at zero. Drives
+// Play directly because the optimizer credits no Value for spending Gold.
 func TestGoldAbility_PlaysDecrementsAndDestroys(t *testing.T) {
 	s := NewTurnState([]Card{testutils.RedAttack{}}, nil)
 	s.Items = []Item{NewGoldItem(1)}

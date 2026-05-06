@@ -133,23 +133,8 @@ func TestBest_ViseraiMauvrionGrantsGoAgainToShrill(t *testing.T) {
 	}
 }
 
-// TestBest_ViseraiMauvrionPredictsDrowningDireDominate pins the full resolution stack each
-// card's grants need to settle in the right order:
-//
-//	(1) target plays → hero ability fires (Viserai creates a Runechant → AuraCreated=true)
-//	(2) target's Dominate clause resolves (Drowning Dire sees the aura → gains Dominate)
-//	(3) Mauvrion's OnAttack trigger fires against the fully-resolved target state and
-//	    credits its Runechant rider iff the attack is now likely to hit.
-//
-// Requires hero.OnCardPlayed running before Play (so DD's aura check sees Viserai's
-// Runechant), DD's conditional Dominate grant, and Mauvrion's OnHit reading
-// target.EffectiveDominate() at fire time. If any of those regresses, this test drops to 6
-// (no Mauvrion rider) or less.
-//
-// Line: pitch YellowAttack (2 res), play Mauvrion Red (cost 0, grants go-again + "if hits,
-// create 3 Runechants" to the next Runeblade attack action), play Drowning Dire Red (cost 2,
-// attack 5). Viserai creates a Runechant → Drowning Dire has Dominate → 5+ dominating
-// attack lands → Mauvrion's rider fires for 3 Runechants. Value = 3 + 5 + 1 = 9.
+// Tests the resolution order: Viserai creates a Runechant on Drowning Dire's play →
+// DD gains Dominate → Mauvrion's OnAttack fires against the now-likely-to-hit attack.
 func TestBest_ViseraiMauvrionPredictsDrowningDireDominate(t *testing.T) {
 	h := []Card{
 		cards.MauvrionSkiesRed{},
@@ -198,10 +183,7 @@ func TestBest_ViseraiMauvrionChainsShrillIntoRuneragerIntoWeapon(t *testing.T) {
 	}
 }
 
-// TestBest_StateValueMatchesSummedReturns pins that state.Value equals the explicit-summation
-// total a hand's Plays would produce. Hand: 2 Blues + 2 Reds vs no incoming damage. The optimal
-// chain pitches one Blue (3 resource) and chains the other Blue + 2 Reds — total 1 + 3 + 3 = 7
-// damage.
+// Tests that state.Value equals the summed Play returns (no double-counting or drops).
 func TestBest_StateValueMatchesSummedReturns(t *testing.T) {
 	h := []Card{testutils.BlueAttack{}, testutils.BlueAttack{}, testutils.RedAttack{}, testutils.RedAttack{}}
 	got := Best(testutils.Hero{Intel: 4}, nil, h, Matchup{IncomingDamage: 0}, nil, TurnState{})
@@ -211,17 +193,8 @@ func TestBest_StateValueMatchesSummedReturns(t *testing.T) {
 	}
 }
 
-// TestBestSequence_CardStateGrantsDontLeakAcrossPermutations pins the per-permutation reset
-// contract: the permutation loop in bestSequence must allocate fresh *CardState wrappers per
-// permutation so a grant applied by one permutation's Play() can't bleed into a later
-// permutation's legality/effect checks.
-//
-// Setup: attackers = [GrantAll, GrantSpy, GrantAll]. The permute order emits GrantAll-first
-// permutations before the first GrantSpy-first permutation. Each GrantAll-first permutation
-// mutates GrantedGoAgain on the wrappers for the cards behind it. When GrantSpy later plays
-// FIRST in its own permutation, its CardsRemaining contains the other two cards' wrappers —
-// which must be fresh (GrantedGoAgain=false), since no card has played yet in this permutation.
-// If the wrappers were reused across permutations the spy would see leaked grants and trip.
+// Tests that bestSequence allocates fresh *CardState wrappers per permutation so a grant
+// applied in one permutation can't leak into a later permutation's checks.
 func TestBestSequence_CardStateGrantsDontLeakAcrossPermutations(t *testing.T) {
 	var sawLeak bool
 	attackers := []Card{testutils.GrantAll{}, testutils.GrantSpy{Saw: &sawLeak}, testutils.GrantAll{}}

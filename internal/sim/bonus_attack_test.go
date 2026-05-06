@@ -82,9 +82,7 @@ func (g grantBonusAttackWeapon) Play(s *TurnState, self *CardState) {
 	s.Log(self, 0)
 }
 
-// TestPlaySequence_BonusAttackAppliedToTargetDamage pins the core wiring: a granter scheduled
-// before an attack action sets BonusAttack on the target's CardState; playSequence folds the
-// buff into damage at the target's Play step rather than the granter's, so the chain total
+// Tests that a granter writes BonusAttack on the target's CardState and the chain total
 // reflects printed-attack + bonus.
 func TestPlaySequence_BonusAttackAppliedToTargetDamage(t *testing.T) {
 	order := []Card{grantBonusAttack{n: 3}, testutils.RedAttack{}}
@@ -130,9 +128,8 @@ func TestPlaySequence_BonusAttackStacksAcrossGranters(t *testing.T) {
 	}
 }
 
-// TestPlaySequence_BonusAttackAppliesToWeapon pins that BonusAttack works on weapon swings,
-// not just attack action cards. Brandish, Razor Reflex's sword/dagger branch, Thrust, and
-// Visit the Blacksmith all target weapon attacks.
+// Tests that BonusAttack applies to weapon swings (TypeWeapon + TypeAttack), not just
+// attack action cards.
 func TestPlaySequence_BonusAttackAppliesToWeapon(t *testing.T) {
 	order := []Card{grantBonusAttackWeapon{n: 2}, weapons.ReapingBlade{}.Ability()}
 	ctx := NewSequenceContextForTest(testutils.Hero{Intel: 4}, nil, nil, 10, 0, len(order))
@@ -147,10 +144,8 @@ func TestPlaySequence_BonusAttackAppliesToWeapon(t *testing.T) {
 	}
 }
 
-// TestPlaySequence_BonusAttackNegativeClampsAtZero pins the FaB attack-power floor: a
-// negative grant (defender-side -N{p} debuff like Drag Down's printed text) reduces the
-// target attack's contribution but never drives it below 0. A 1-power attack with a -3
-// grant deals 0, not -2 — the chain total is unchanged below the floor.
+// Tests that a negative BonusAttack clamps the target's contribution at 0 (FaB attack-power
+// floor) — a 1-power attack with a -3 grant deals 0, not -2.
 func TestPlaySequence_BonusAttackNegativeClampsAtZero(t *testing.T) {
 	order := []Card{grantBonusAttack{n: -3}, testutils.BlueAttack{}}
 	ctx := NewSequenceContextForTest(testutils.Hero{Intel: 4}, nil, nil, 10, 0, len(order))
@@ -195,12 +190,8 @@ func TestPlaySequence_BonusAttackNoAttackTargetFizzles(t *testing.T) {
 	}
 }
 
-// TestPlaySequence_BonusAttackPerPermutationReset pins the per-permutation reset contract.
-// playSequence rebuilds CardState wrappers fresh per call, but inside one call the
-// re-entrant playSequenceWithMeta must zero BonusAttack before reading the chain — otherwise
-// a wrapper carried in via pcBuf could leak from a previous run. We verify by running the
-// same hand twice through one playSequence (which re-enters playSequenceWithMeta): each run
-// must start with BonusAttack = 0 and the totals must match.
+// Tests the per-permutation BonusAttack reset: two back-to-back playSequence calls produce
+// the same total, never a leaked-bonus regression.
 func TestPlaySequence_BonusAttackPerPermutationReset(t *testing.T) {
 	order := []Card{grantBonusAttack{n: 3}, testutils.RedAttack{}}
 	ctx := NewSequenceContextForTest(testutils.Hero{Intel: 4}, nil, nil, 10, 0, len(order))
@@ -211,31 +202,8 @@ func TestPlaySequence_BonusAttackPerPermutationReset(t *testing.T) {
 	}
 }
 
-// TestBest_NimblismGrantsConsumingVolitionDiscardRider exercises the full BonusAttack flow
-// end-to-end through Best(): a Nimblism grant pushes Consuming Volition past the
+// Tests end-to-end that a Nimblism BonusAttack grant pushes Consuming Volition past the
 // likely-to-hit threshold so its arcane-damage discard rider fires.
-//
-// Setup:
-//   - Hand: Consuming Volition [Y] + Nimblism [B] + a pitch-1 red.
-//   - 1 Runechant carrying over from the previous turn.
-//
-// Best chain:
-//  1. Pitch the red (1 resource) to fund Volition.
-//  2. Play Nimblism Blue (cost 0, go again) — scans CardsRemaining, finds Volition Yellow
-//     (cost 1, satisfies the cost-≤1 filter), and writes pc.BonusAttack += 1.
-//  3. Play Consuming Volition Yellow:
-//     - The runechant carryover fires when the attack starts, flipping
-//     state.ArcaneDamageDealt = true.
-//     - self.EffectiveAttack() = printed 3 + BonusAttack 1 = 4. LikelyToHit(self) is
-//     true (4 ∈ {1,4,7}), so the discard rider returns +DiscardValue (3).
-//     - Volition's Play returns 3 (printed) + 3 (discard rider) = 6.
-//     - Solver folds in BonusAttack: cardContrib = 6 + 1 = 7.
-//
-// Total Value = 7 = 3 (Volition base) + 1 (Nimblism's grant via BonusAttack) + 3 (discard
-// rider, gated on ArcaneDamageDealt + LikelyToHit firing on the buffed attack).
-//
-// The runechant fires for 1 arcane damage but it was already credited last turn at token
-// creation, so it doesn't appear in this turn's Value.
 func TestBest_NimblismGrantsConsumingVolitionDiscardRider(t *testing.T) {
 	h := []Card{
 		cards.ConsumingVolitionYellow{},

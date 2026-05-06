@@ -6,10 +6,8 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 )
 
-// TestBlessingOfOccult_PlayCreatesAuraNoThisTurnRunes: Play flips AuraCreated so same-turn
-// readers see an aura was created; no runes are made this turn (deferred to the trigger).
-// Aura.Count carries the per-variant rune count (R=3 / Y=2 / B=1) — the handler reads it
-// to size the next-turn CreateRunechants call.
+// Tests that Play flips AuraCreated, makes no runes this turn, and registers an aura with
+// the per-variant Count for the deferred trigger.
 func TestBlessingOfOccult_PlayCreatesAuraNoThisTurnRunes(t *testing.T) {
 	cases := []struct {
 		c         sim.Card

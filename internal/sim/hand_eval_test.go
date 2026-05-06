@@ -101,10 +101,8 @@ func TestBest_RespectsResourceConstraint(t *testing.T) {
 	}
 }
 
-// TestBest_AllHeldWhenNoLegalPlay covers the "hand does nothing this turn" case. A single
-// Toughen Up Blue DR (cost 2) with no pitched cards to pay it has Value = 0. The partition
-// leaves the card Held; post-hoc the empty arsenal slot claims it, so Role becomes Arsenal
-// and got.State.Arsenal records the card for next turn's carryover.
+// Tests the "hand does nothing this turn" case: a Held card with an empty arsenal gets
+// post-hoc promoted to Arsenal.
 func TestBest_AllHeldWhenNoLegalPlay(t *testing.T) {
 	h := []Card{cards.ToughenUpBlue{}}
 	got := Best(testutils.Hero{Intel: 4}, nil, h, Matchup{IncomingDamage: 4}, nil, TurnState{})
@@ -119,14 +117,8 @@ func TestBest_AllHeldWhenNoLegalPlay(t *testing.T) {
 	}
 }
 
-// TestBest_AttackPitchCantCoverDefense enforces that attack-phase and defense-phase pitches
-// draw from disjoint pools (resources don't cross turns). Hand: Malefic Blue (cost 0, pitch 3,
-// defense 2), Toughen Up Blue (DR, cost 2, pitch 3, defense 4), Red Attack (cost 1, pitch 1,
-// attack 3). Against incoming 4: only one pitched card (pitch 3) can be paired with Toughen Up
-// as DR, and that single pitch can cover either the 1-cost Red OR the 2-cost Toughen Up — not
-// both. The solver takes the better single-phase line: pitch Toughen Up to pay Red's cost,
-// plain-block with Malefic. Value = 3 (Red attack) + 2 (Malefic block) = 5. A single-pool
-// fallback would score 7 by funding both phases from one pitch — illegal, locked out here.
+// Tests that attack-phase and defense-phase pitches draw from disjoint pools — a single
+// pitched card can't fund both phases.
 func TestBest_AttackPitchCantCoverDefense(t *testing.T) {
 	h := []Card{cards.MaleficIncantationBlue{}, cards.ToughenUpBlue{}, testutils.RedAttack{}}
 	got := Best(testutils.Hero{Intel: 4}, nil, h, Matchup{IncomingDamage: 4}, nil, TurnState{})
@@ -136,10 +128,7 @@ func TestBest_AttackPitchCantCoverDefense(t *testing.T) {
 	}
 }
 
-// TestBest_DRPitchNeedsSecondPitchedCard confirms that adding a second pitched card unlocks the
-// split: Malefic Blue (pitch 3) + second Malefic Blue (pitch 3) is enough to fund Red's 1-cost
-// attack from one Malefic and Toughen Up's 2-cost defense from the other. Value = 3 (attack) +
-// 4 (full prevent) = 7.
+// Tests that two pitched cards unlock the attack/defense split — one pitch funds each phase.
 func TestBest_DRPitchNeedsSecondPitchedCard(t *testing.T) {
 	h := []Card{
 		cards.MaleficIncantationBlue{},
@@ -154,12 +143,8 @@ func TestBest_DRPitchNeedsSecondPitchedCard(t *testing.T) {
 	}
 }
 
-// TestBest_AllAttackHandPlusArsenalNoWeapons guards attackBufs scratch sizing against slice-
-// bounds panics when a full 4-card hand of 0-cost attackers plus an arsenal-in attacker (5
-// entries) goes through bestAttackWithWeapons with no weapons. Wounding Blow Red is 0-cost
-// attack 4, so the all-Attack partition is phase-feasible with zero pitches and enumerates the
-// 5-attacker path. The winning line only chains one (no GoAgain), but the enumerator still
-// evaluates the 5-attacker partition — the buffer must survive that.
+// Tests attackBufs scratch sizing on a full 4-card hand of 0-cost attackers plus an
+// arsenal-in attacker (5 attackers, no weapons) — guards against slice-bounds panics.
 func TestBest_AllAttackHandPlusArsenalNoWeapons(t *testing.T) {
 	h := []Card{
 		cards.WoundingBlowRed{}, cards.WoundingBlowRed{},

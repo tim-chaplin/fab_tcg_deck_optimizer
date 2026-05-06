@@ -9,10 +9,7 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/weapons"
 )
 
-// Tests the Silver token activated ability end-to-end via the chain runner. Same
-// shape as TestGoldAbility_SpendsToFillArsenalAndSwings: blue pitch (3) funds the
-// Silver ability ({3}) — leaves 0 for a Reaping Blade swing, so we'd need pitch=4
-// to cover both. Here we test the simpler case: spend Silver alone, verify the
+// Tests the Silver token activated ability end-to-end: spend Silver alone, verify the
 // drawn card promotes into arsenal.
 func TestSilverAbility_SpendsToFillArsenal(t *testing.T) {
 	deck := []sim.Card{
@@ -41,10 +38,8 @@ func TestSilverAbility_SpendsToFillArsenal(t *testing.T) {
 	}
 }
 
-// Tests the Silver ability composes with a weapon swing when the pitch budget covers
-// both. Two blue pitches (3+3=6 res) fund the Silver ability ({3}) plus a Reaping
-// Blade swing ({1}); chain order doesn't matter since Silver and the swing both
-// have go again.
+// Tests that the Silver ability composes with a weapon swing when the pitch budget covers
+// both costs.
 func TestSilverAbility_SpendsAndSwings(t *testing.T) {
 	deck := []sim.Card{
 		testutils.RedAttack{}, testutils.RedAttack{}, testutils.RedAttack{},

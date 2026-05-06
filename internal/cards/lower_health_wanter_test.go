@@ -106,10 +106,8 @@ func TestLowerHealthWanter_NilHeroIsOff(t *testing.T) {
 	}
 }
 
-// TestLowerHealthWanter_PoundForPoundDominateGrant: Pound for Pound's conditional Dominate
-// fires via self.GrantedDominate iff the current hero opts into LowerHealthWanter. Damage
-// itself is unchanged — the grant feeds EffectiveDominate for downstream scanners / future
-// on-hit riders.
+// Tests that Pound for Pound flips self.GrantedDominate iff the current hero opts into
+// LowerHealthWanter (no damage change).
 func TestLowerHealthWanter_PoundForPoundDominateGrant(t *testing.T) {
 	cards := []sim.Card{PoundForPoundRed{}, PoundForPoundYellow{}, PoundForPoundBlue{}}
 

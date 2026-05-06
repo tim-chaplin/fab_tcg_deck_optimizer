@@ -1,11 +1,5 @@
 // Package deck represents a candidate FaB deck and the hand-value stats accumulated from
 // simulating it. Search code creates many Decks, evaluates each, and compares their Stats.
-//
-// The Deck type and its construction live in this file. Cohesive concern groups are split
-// across sibling files in this package: weapon_loadouts.go (loadout helpers + validation),
-// stats.go (Stats / BestTurn / CardPlayStats / CycleStats), mutations.go (iterate-mode
-// candidate generation), evaluate.go (hand-by-hand simulation), iterate.go (parallel
-// simulated-annealing round runner).
 package sim
 
 import (
@@ -60,14 +54,9 @@ type defaultSideboardEntry struct {
 	count int
 }
 
-// defaultSideboard items are appended to Sideboard by ApplyDefaults. For each entry, the
-// merger tops the sideboard count up toward `count`, but never past sideboardCopyCap (2 per
-// card across main + sideboard). Equipment-slot items (Crown of Dichotomy, Nullrune
-// boots/gloves, Runebleed Robe) target 1 copy; deck cards target 2.
-//
-// Card names must match DisplayName format ("Read the Runes [R]") since ApplyDefaults
-// dedupes via DisplayName-keyed counts. Equipment slots stay bare since they're not pitch-
-// varying cards.
+// defaultSideboard entries are appended to Sideboard by ApplyDefaults, capped per entry by
+// sideboardCopyCap (2 per card across main + sideboard). Card names must match DisplayName
+// format ("Read the Runes [R]") since ApplyDefaults dedupes via DisplayName-keyed counts.
 var defaultSideboard = []defaultSideboardEntry{
 	{"Crown of Dichotomy", 1},
 	{"Nullrune Boots", 1},
@@ -168,19 +157,10 @@ type NotImplementedReplacement struct {
 	To   Card
 }
 
-// SanitizeNotImplemented scans d.Cards in order and replaces every card excluded from the
-// pool (NotImplemented or Unplayable) with a random legal replacement drawn from
-// legalPool(legal), rolling again if the pick would exceed maxCopies for that printing.
-// Weapons and hero are untouched. The sanitized deck stays size-stable and copy-cap-legal
-// so the caller can re-evaluate directly.
-//
-// Returns the ordered list of swaps made (one entry per replaced slot; duplicates of the
-// same tagged ID produce one entry each since each slot is picked independently). Returns
-// an empty slice when nothing needed replacement.
-//
-// Panics when maxCopies < 1 or when the legal/excluded pool is smaller than the
-// per-printing maxCopies budget d already uses — both indicate a config so degenerate that
-// there's no sensible recovery.
+// SanitizeNotImplemented replaces every card excluded from the pool (NotImplemented or
+// Unplayable) with a random legal replacement, respecting maxCopies. Returns the ordered
+// list of swaps (empty when nothing needed replacement). Panics when maxCopies < 1 or the
+// remaining pool can't satisfy the per-printing budget already used by d.
 func (d *Deck) SanitizeNotImplemented(maxCopies int, rng *rand.Rand, legal func(Card) bool) []NotImplementedReplacement {
 	if maxCopies < 1 {
 		panic(fmt.Sprintf("deck: SanitizeNotImplemented requires maxCopies >= 1 (got %d)", maxCopies))
@@ -223,11 +203,9 @@ func (d *Deck) SanitizeNotImplemented(maxCopies int, rng *rand.Rand, legal func(
 }
 
 // legalPool returns DeckableCards() filtered by legal, with any card carrying a pool-
-// exclusion marker (NotImplemented or Unplayable) removed. The exclusion filter is always
-// applied — a card the sim can't model faithfully or one whose effect is too weak to ever
-// pick shouldn't land in a random deck or become a mutation candidate regardless of format
-// legality. Pass nil for legal to apply only the exclusion filter. Shared by Random and
-// AllMutations so both agree on the pool.
+// exclusion marker (NotImplemented or Unplayable) removed. The exclusion filter always
+// applies regardless of format legality. Pass nil for legal to apply only the exclusion
+// filter. Shared by Random and AllMutations.
 func legalPool(legal func(Card) bool) []ids.CardID {
 	pool := DeckableCards()
 	filtered := pool[:0]

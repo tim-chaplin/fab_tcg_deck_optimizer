@@ -52,11 +52,8 @@ func TestMarshalUnmarshalRoundTrip(t *testing.T) {
 	}
 }
 
-// TestRoundTrip_PreservesPerCardMarginal pins that the per-card marginal-stats accumulator
-// (PresentTotal/PresentHands and AbsentTotal/AbsentHands per unique ids.CardID) survives a
-// Marshal/Unmarshal so a re-loaded deck can render the marginal-value table without a
-// fresh sim. Compared via the public Marginal() so a regression in any of the four
-// underlying fields surfaces.
+// Tests that PerCardMarginal (Present/Absent totals and hand counts per CardID) survives
+// Marshal/Unmarshal.
 func TestRoundTrip_PreservesPerCardMarginal(t *testing.T) {
 	rng := rand.New(rand.NewSource(13))
 	d := sim.Random(heroes.Viserai{}, 40, 2, rng, nil)
@@ -103,10 +100,7 @@ func TestRoundTrip_PreservesPerCardMarginal(t *testing.T) {
 	}
 }
 
-// TestRoundTrip_PreservesBestTurnLog pins the on-disk best-turn round-trip: Marshal/Unmarshal
-// carry sim.BestTurn.Log verbatim, so a reloaded TurnLog matches section-for-section. Since
-// the formatter consumes Log at print time, pinning the structured shape implicitly pins the
-// printout shape.
+// Tests that sim.BestTurn.Log round-trips through Marshal/Unmarshal verbatim.
 func TestRoundTrip_PreservesBestTurnLog(t *testing.T) {
 	rng := rand.New(rand.NewSource(7))
 	d := sim.Random(heroes.Viserai{}, 40, 2, rng, nil)
@@ -149,10 +143,8 @@ func TestRoundTrip_PreservesBestTurnLog(t *testing.T) {
 	}
 }
 
-// TestRoundTrip_PreservesSideboard verifies the user-managed Sideboard field survives a
-// Marshal/Unmarshal cycle as a multiset of card names. Sideboard contents don't affect the
-// sim — this test pins that the IO layer still round-trips them so `fabsim eval` / `anneal`
-// can preserve them across runs even when they'd otherwise drop the data.
+// Tests that the user-managed Sideboard field round-trips through Marshal/Unmarshal as a
+// multiset of names.
 func TestRoundTrip_PreservesSideboard(t *testing.T) {
 	rng := rand.New(rand.NewSource(42))
 	d := sim.Random(heroes.Viserai{}, 40, 2, rng, nil)
@@ -192,10 +184,8 @@ func TestMarshal_OmitsEmptySideboard(t *testing.T) {
 	}
 }
 
-// TestUnmarshal_SideboardAcceptsAnyName pins the lenient behaviour of Sideboard: it's a
-// name-only list the sim never reads, so any string the user wrote — including equipment
-// pieces and yet-to-be-implemented cards — round-trips verbatim instead of aborting the
-// parse.
+// Tests that Sideboard accepts any name verbatim — the sim never reads it, so unknown
+// names don't abort Unmarshal.
 func TestUnmarshal_SideboardAcceptsAnyName(t *testing.T) {
 	const raw = `{
   "hero": "Viserai",

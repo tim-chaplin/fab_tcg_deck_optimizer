@@ -10,11 +10,8 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/weapons"
 )
 
-// TestPlaySequence_SetsArcaneDamageDealtWhenRunechantsFire pins the sim-wide contract: when an
-// attack or weapon plays with Runechants live, playSequence flips ArcaneDamageDealt on before
-// calling the card's Play (so same-hand triggers reading the flag see it). A chain with no
-// runechants leaves the flag false. Uses the fake generic attack (package fake) so the test
-// observes the playSequence pre-Play hook, not a card's own flag-setting inside its Play.
+// Tests that playSequence flips ArcaneDamageDealt before calling Play when Runechants are
+// live, and leaves it false otherwise.
 func TestPlaySequence_SetsArcaneDamageDealtWhenRunechantsFire(t *testing.T) {
 	order := []Card{testutils.RedAttack{}}
 
@@ -111,12 +108,8 @@ func withRunechants(n int) []Aura {
 	return []Aura{NewRunechantAura(n)}
 }
 
-// TestBest_MauvrionReadNoCarryover exercises carryover bookkeeping end-to-end. Hand is Red
-// Mauvrion Skies + Red Read the Runes with Viserai and no starting runechants. Optimal line:
-// attack with Mauvrion then Read the Runes — Mauvrion's rider doesn't match (Read isn't an
-// attack action), so Mauvrion contributes 0 tokens; Read then creates 3 tokens, and Viserai
-// fires on Read (prior Mauvrion is a non-attack action) for +1 more. Total tokens created = 4,
-// Value = 4 (each token credited +1 at creation), no attack consumes them → leftover = 4.
+// Tests carryover bookkeeping end-to-end with no starting runechants — every created token
+// is credited once and persists as leftover.
 func TestBest_MauvrionReadNoCarryover(t *testing.T) {
 	h := []Card{cards.MauvrionSkiesRed{}, cards.ReadTheRunesRed{}}
 	got := Best(heroes.Viserai{}, nil, h, Matchup{IncomingDamage: 0}, nil, TurnState{})
@@ -140,11 +133,7 @@ func TestBest_MauvrionReadWithCarryover(t *testing.T) {
 	}
 }
 
-// TestBest_AetherSlashAloneConsumesCarryover covers the attack-consumes case. Hand is a single
-// Red Aether Slash with Reaping Blade equipped and 1 runechant carried in. Pitching Aether Slash
-// (pitch 1) and swinging the weapon (cost 1, attack 3) is the only legal line. The weapon's
-// attack consumes the 1 carryover token without re-crediting damage (the token was credited on
-// the turn it was created), so Value = 3 and leftover = 0.
+// Tests that an attack consumes a carryover runechant without re-crediting damage.
 func TestBest_AetherSlashAloneConsumesCarryover(t *testing.T) {
 	h := []Card{cards.AetherSlashRed{}}
 	weapons := []Weapon{weapons.ReapingBlade{}}
@@ -157,11 +146,7 @@ func TestBest_AetherSlashAloneConsumesCarryover(t *testing.T) {
 	}
 }
 
-// TestBest_BlessingOfOccultTokensDoNotAffectSameTurnChain: Blessing's runes materialise on
-// next turn via its TriggerStartOfTurn Aura, so Play returns 0 and nothing lands in
-// this turn's live Runechants. Hand: Red Malefic + Red Blessing. With no attack action
-// played this turn, Malefic's AttackAction trigger never fires either — same-turn Value is
-// 0. Both auras carry forward as triggers for future turns to consume.
+// Tests that Blessing's start-of-turn-deferred runes don't appear in the same-turn chain.
 func TestBest_BlessingOfOccultTokensDoNotAffectSameTurnChain(t *testing.T) {
 	h := []Card{
 		cards.MaleficIncantationRed{},
@@ -177,9 +162,8 @@ func TestBest_BlessingOfOccultTokensDoNotAffectSameTurnChain(t *testing.T) {
 	}
 }
 
-// TestBest_ReduceToRunechantAffordableWithCarryover: a solo Reduce in hand with one Runechant
-// already in play can defend — the single carryover discounts PrintedCost 1 down to 0, so the
-// partition is affordable with no pitch. Value = 4 prevented + 1 from the token Reduce creates.
+// Tests that a single carryover runechant covers Reduce's printed cost so it can defend with
+// no pitch.
 func TestBest_ReduceToRunechantAffordableWithCarryover(t *testing.T) {
 	h := []Card{cards.ReduceToRunechantRed{}}
 	got := Best(heroes.Viserai{}, nil, h, Matchup{IncomingDamage: 4}, nil, TurnState{Auras: withRunechants(1)})
@@ -188,9 +172,8 @@ func TestBest_ReduceToRunechantAffordableWithCarryover(t *testing.T) {
 	}
 }
 
-// TestBest_ReduceToRunechantUnaffordableWithoutCarryover: the same solo Reduce with zero
-// Runechants in play can't be played at all — effective cost is 1 and there's no pitch to cover
-// it. The Defend partition is rejected and the best feasible line is pitching Reduce (value 0).
+// Tests that solo Reduce with no carryover and no pitch source is unplayable, falling back to
+// a pitch (Value 0).
 func TestBest_ReduceToRunechantUnaffordableWithoutCarryover(t *testing.T) {
 	h := []Card{cards.ReduceToRunechantRed{}}
 	got := Best(heroes.Viserai{}, nil, h, Matchup{IncomingDamage: 4}, nil, TurnState{})
@@ -199,9 +182,8 @@ func TestBest_ReduceToRunechantUnaffordableWithoutCarryover(t *testing.T) {
 	}
 }
 
-// TestBest_DiscountAttackerPaysByPitchWithoutCarryover: a variable-cost attack can be
-// played by pitching for the full printed cost when no Runechants are available. Amplify
-// (PrintedCost 3, Attack 6) + a pitch-3 card with zero carryover should land for 6.
+// Tests that a variable-cost attack pays its full printed cost by pitch when no runechants
+// are available.
 func TestBest_DiscountAttackerPaysByPitchWithoutCarryover(t *testing.T) {
 	h := []Card{cards.AmplifyTheArknightRed{}, testutils.BlueAttack{}}
 	got := Best(testutils.Hero{Intel: 4}, nil, h, Matchup{IncomingDamage: 0}, nil, TurnState{})
@@ -210,9 +192,7 @@ func TestBest_DiscountAttackerPaysByPitchWithoutCarryover(t *testing.T) {
 	}
 }
 
-// TestBest_DiscountAttackerPaysByPartialCarryoverAndTightPitch: Runechants cover part of the
-// printed cost, and a tight pitch covers the remainder. Amplify (PrintedCost 3, Attack 6) with
-// 2 carryover Runechants (effective cost 1) and a fake pitch-1 card should land for 6.
+// Tests that runechants cover part of the printed cost and a tight pitch covers the rest.
 func TestBest_DiscountAttackerPaysByPartialCarryoverAndTightPitch(t *testing.T) {
 	h := []Card{cards.AmplifyTheArknightRed{}, testutils.RedAttack{}}
 	got := Best(testutils.Hero{Intel: 4}, nil, h, Matchup{IncomingDamage: 0}, nil, TurnState{Auras: withRunechants(2)})
@@ -221,10 +201,8 @@ func TestBest_DiscountAttackerPaysByPartialCarryoverAndTightPitch(t *testing.T) 
 	}
 }
 
-// TestBest_DiscountDefenderPaysByPitchWithoutCarryover: a variable-cost defense
-// reaction can be played by pitching for the full printed cost when no Runechants are
-// available. Reduce (PrintedCost 1, Defense 4, creates one Runechant) + a fake pitch-1 card,
-// zero carryover, against 4 incoming should land for 5 (4 prevented + 1 for the created token).
+// Tests that a variable-cost defense reaction pays its full printed cost by pitch when no
+// runechants are available.
 func TestBest_DiscountDefenderPaysByPitchWithoutCarryover(t *testing.T) {
 	h := []Card{cards.ReduceToRunechantRed{}, testutils.RedAttack{}}
 	got := Best(testutils.Hero{Intel: 4}, nil, h, Matchup{IncomingDamage: 4}, nil, TurnState{})
@@ -233,12 +211,9 @@ func TestBest_DiscountDefenderPaysByPitchWithoutCarryover(t *testing.T) {
 	}
 }
 
-// TestBest_CarryoverFeedsDiscount verifies end-to-end: a hand containing a discount attacker is
-// playable when the previous turn left enough runechants behind.
+// Tests end-to-end that a hand containing a discount attacker is playable iff carryover
+// runechants cover the printed cost.
 func TestBest_CarryoverFeedsDiscount(t *testing.T) {
-	// Single Amplify the Arknight [R]: printed cost 3, MinCost 0, Attack 6. With no pitch,
-	// resource budget is 0. Without any runechants, effective cost 3 exceeds the budget — so
-	// attacking is illegal and Value should be 0.
 	h := []Card{cards.AmplifyTheArknightRed{}}
 	got := Best(testutils.Hero{Intel: 4}, nil, h, Matchup{IncomingDamage: 0}, nil, TurnState{})
 	if got.Value != 0 {

@@ -6,10 +6,7 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 )
 
-// TestSigilOfSuffering_FullCreditWhenIncomingAbsorbsBoost: with enough IncomingDamage to consume
-// the printed Defense plus the +1{d} bonus, total Value reflects every component: printed
-// Defense + 1 (the +1{d} rider folded into BonusDefense) + 1 (arcane sub-line). Each variant
-// scales by its printed Defense (Red 3, Yellow 2, Blue 1).
+// Tests that with enough IncomingDamage Value sums printed Defense + +1{d} boost + 1 arcane.
 func TestSigilOfSuffering_FullCreditWhenIncomingAbsorbsBoost(t *testing.T) {
 	cases := []struct {
 		c    sim.Card
@@ -29,10 +26,8 @@ func TestSigilOfSuffering_FullCreditWhenIncomingAbsorbsBoost(t *testing.T) {
 	}
 }
 
-// TestSigilOfSuffering_BoostWastedWhenIncomingMatchesDefense: with IncomingDamage exactly equal
-// to the printed Defense, the +1{d} bonus is over-block — ApplyAndLogEffectiveDefense's clamp
-// drops the extra point. Total Value collapses to printed Defense + 1 (arcane) — the boost
-// adds nothing because there's no more incoming for it to consume.
+// Tests that when IncomingDamage equals printed Defense the +1{d} boost is clamped away;
+// Value collapses to printed Defense + 1 arcane.
 func TestSigilOfSuffering_BoostWastedWhenIncomingMatchesDefense(t *testing.T) {
 	cases := []struct {
 		c        sim.Card

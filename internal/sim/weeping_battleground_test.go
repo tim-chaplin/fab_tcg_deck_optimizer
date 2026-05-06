@@ -25,10 +25,8 @@ func (zeroDefenseAura) Types() card.TypeSet         { return card.NewTypeSet(car
 func (zeroDefenseAura) GoAgain() bool               { return false }
 func (zeroDefenseAura) Play(*TurnState, *CardState) {}
 
-// TestBest_WeepingBattlegroundBanishesAuraFromGraveyard: hand is Weeping Battleground + an
-// aura filler. The filler plain-blocks (0 defense, but lands in the graveyard via the
-// defense-phase seeding), WB plays as DR, banishes the filler for 1 arcane, and blocks 3 of
-// the 4 incoming. Value = 3 prevented + 1 arcane = 4.
+// Tests that Weeping Battleground banishes a same-turn-blocked aura from the graveyard
+// for 1 arcane while also defending.
 func TestBest_WeepingBattlegroundBanishesAuraFromGraveyard(t *testing.T) {
 	h := []Card{cards.WeepingBattlegroundRed{}, zeroDefenseAura{}}
 	got := Best(testutils.Hero{Intel: 4}, nil, h, Matchup{IncomingDamage: 4}, nil, TurnState{})

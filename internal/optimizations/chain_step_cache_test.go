@@ -8,10 +8,8 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
 )
 
-// TestWarmChainStepCache_PopulatesBothFromArsenalRows: WarmChainStepCache must fill both
-// the (id, false) and (id, true) cells for every non-nil card so the runtime hot path is
-// pure reads. Sample a known card and confirm both entries are present and produce the
-// expected "<DisplayName>: <VERB>[ from arsenal]" string.
+// Tests that WarmChainStepCache fills both the (id, false) and (id, true) cells per card
+// so the runtime hot path is pure reads.
 func TestWarmChainStepCache_PopulatesBothFromArsenalRows(t *testing.T) {
 	c := testutils.NewStubCard("Test").
 		WithID(testutils.FakeRedAttack).

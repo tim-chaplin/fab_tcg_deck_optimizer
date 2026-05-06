@@ -1,28 +1,19 @@
 package sim
 
 // Hand-eval cache. Keyed on the (hand multiset, runechantCarryover, arsenalCardIn, auras)
-// tuple — the inputs that fully determine Best's output WHEN the chain hasn't read hidden
-// state. Cache stores only the winning partition's role assignments (BestLine +
-// SwungWeapons); on a hit, the chain is replayed against that one partition to recover
-// full TurnSummary state. That replay skips the partition search (the dominant cost —
-// exponential in hand size) but still runs the per-leaf chain dispatcher to rebuild
-// State / Log / Value, so the result matches a from-scratch Best call exactly.
+// tuple. Stores the winning partition's role assignments only; on a hit the chain replays
+// against that one partition to rebuild the full TurnSummary, skipping the exponential
+// partition search.
 //
-// Caching is gated on best.Cacheable=true at end of search. If any sibling partition read
-// deck or graveyard via an accessor, the result depends on hidden shuffle / prior-turn-
-// graveyard contents and the cache can't safely reuse it.
+// Caching is gated on best.Cacheable=true: if any sibling partition read deck or graveyard
+// via an accessor, the result depends on hidden state and can't be reused.
 //
-// Hand order doesn't affect Best's optimal result (the search is exhaustive over role
-// assignments). The cache key sorts hand IDs into a canonical multiset so the same hand
-// in any order hits the same entry. On a hit, the cached BestLine's role-multiset is
-// remapped onto the new hand's ordering so downstream consumers (deck-eval loop, printout)
-// see roles attached to the right slice positions.
+// Hand order doesn't affect Best's optimal result. The cache key sorts hand IDs into a
+// canonical multiset so any ordering hits the same entry; on a hit, the cached role-multiset
+// is remapped onto the new hand's ordering.
 //
-// Aura entries (priorAuras carrying in from the previous turn) feed into the key
-// as a sorted multiset of (SelfID, Count) pairs — the trigger Handler closures aren't
-// hashable, but Handler behaviour is fully determined by SelfID (each card type's Play
-// always registers the same handler logic), so SelfID + Count captures everything that
-// affects chain output. See auraCacheKey for caveats.
+// Auras feed into the key as a sorted multiset of (SelfID, Count) pairs — Handler closures
+// aren't hashable, but Handler behaviour is fully determined by SelfID.
 
 import (
 	"sync"
@@ -69,21 +60,13 @@ type persistentCacheKey struct {
 	Count     int
 }
 
-// evalCacheKey is the comparable map key for the hand-eval cache. handIDs is the sorted
-// multiset of hand-card IDs zero-padded to maxCachedHandSize so the array is fixed-size
-// (slices aren't comparable). handLen records the actual count so a 3-card hand and a
-// 4-card hand whose first 3 IDs match can't collide on the trailing zero pad. heroID and
-// weaponIDs[..weaponLen] capture the player's loadout — different heroes / weapon sets
-// can produce different optimal partitions for the same hand, so they must key the cache.
-// auras[..auraLen] is the sorted multiset of (SelfID, Count) tuples for the priorAura-
-// Triggers passed in — same fixed-size-array trick.
+// evalCacheKey is the comparable map key for the hand-eval cache. Fixed-size arrays are
+// zero-padded with explicit length fields so a shorter input can't collide with a longer one
+// on its prefix. heroID and weaponIDs key the loadout (different loadouts produce different
+// optimal partitions for the same hand).
 //
-// Matchup is intentionally NOT in the key. An Evaluator's lifetime spans calls at a constant
-// Matchup in production (the iterate-mode worker pool, fabsim eval, and fabsim compare each
-// fix the matchup up front and reuse one Evaluator across many decks). Adding it would just
-// bloat the key for no real-world hit-rate gain. Tests that mix matchup values across calls
-// must use NewEvaluatorWithoutCache (sharedEvaluator already does for that reason) —
-// otherwise a cached entry from one matchup would silently apply to a query under another.
+// Matchup is intentionally NOT in the key — an Evaluator's lifetime spans calls at a constant
+// Matchup in production. Tests that mix matchup values must use NewEvaluatorWithoutCache.
 type evalCacheKey struct {
 	handIDs        [maxCachedHandSize]ids.CardID
 	weaponIDs      [maxCachedWeapons]ids.WeaponID

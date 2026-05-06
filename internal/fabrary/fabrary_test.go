@@ -60,14 +60,8 @@ func TestMarshalFormat(t *testing.T) {
 	}
 }
 
-// TestMarshalRendersAppliedDefaults pins that when a caller runs ApplyDefaults (as
-// writeDeck does), Marshal's output carries the default equipment in Arena and the default
-// sideboard entries in Sideboard. The default lists themselves are pinned in the deck
-// package's tests; this one only checks the fabrary text picks them up verbatim.
-//
-// Builds a Deck directly instead of going through sim.Random so the test is stable across
-// pool changes (e.g. cards getting tagged NotImplemented and dropping out of the random pool,
-// causing a seed-1 deck to roll different cards that collide with sideboard-default cap).
+// Tests that Marshal carries ApplyDefaults' equipment in Arena and sideboard entries in
+// Sideboard verbatim.
 func TestMarshalRendersAppliedDefaults(t *testing.T) {
 	d := &sim.Deck{Hero: heroes.Viserai{}}
 	d.ApplyDefaults()
@@ -87,10 +81,8 @@ func TestMarshalRendersAppliedDefaults(t *testing.T) {
 	}
 }
 
-// TestUnmarshalSample parses the exact sample the user supplied (verbatim from fabrary.net's
-// plain-text export) to prove the parser tolerates the real output, including the footer and the
-// mix of weapons + non-weapon equipment in the Arena section. Non-weapon arena entries land
-// in Deck.Equipment so they round-trip on re-export.
+// Tests Unmarshal against a verbatim fabrary.net plain-text export (footer, weapon mix,
+// non-weapon Arena entries → Deck.Equipment).
 func TestUnmarshalSample(t *testing.T) {
 	const sample = `Name: Viserai
 Hero: Viserai
@@ -186,10 +178,7 @@ See the full deck @ https://fabrary.net/decks/01KP1AZ5SAS425YN30WB779M41
 	}
 }
 
-// TestUnmarshalUnknownCardSkipped pins the lenient behaviour: unknown deck-section cards do NOT
-// abort the parse; they're reported in the returned skip map so the caller can warn. fabrary
-// decks routinely reference cards the optimizer hasn't implemented yet, so a strict failure would
-// make import unusable in practice.
+// Tests that unknown deck-section cards are reported in the skip map without aborting Unmarshal.
 func TestUnmarshalUnknownCardSkipped(t *testing.T) {
 	const text = `Name: Viserai
 Hero: Viserai

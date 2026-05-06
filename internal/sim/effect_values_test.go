@@ -7,9 +7,7 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
 )
 
-// TestLikelyDamageHits_OnlyAwkwardAmounts: without Dominate, 1 / 4 / 7 damage slip past
-// typical blocks (cards are ~3 points of value, so opponents won't over-pay with a 3-block
-// to soak 1 damage, etc.); everything else the sim treats as reliably blockable.
+// Tests that without Dominate only 1/4/7 damage are treated as likely-to-hit.
 func TestLikelyDamageHits_OnlyAwkwardAmounts(t *testing.T) {
 	for _, n := range []int{1, 4, 7} {
 		if !LikelyDamageHits(n, false) {
@@ -23,9 +21,7 @@ func TestLikelyDamageHits_OnlyAwkwardAmounts(t *testing.T) {
 	}
 }
 
-// TestLikelyDamageHits_DominateClearsFive: a Dominate attack caps the defender at one
-// blocking card, so 5+ power slips past that one block. The awkward-amount rule still
-// applies below 5.
+// Tests that Dominate makes 5+ power likely-to-hit; 0/2/3 stay blockable.
 func TestLikelyDamageHits_DominateClearsFive(t *testing.T) {
 	for _, n := range []int{5, 6, 8, 10} {
 		if !LikelyDamageHits(n, true) {
@@ -40,12 +36,8 @@ func TestLikelyDamageHits_DominateClearsFive(t *testing.T) {
 	}
 }
 
-// TestLikelyToHit_FoldsEffectiveAttackAndDominate: the CardState-typed wrapper threads
-// EffectiveAttack (printed + BonusAttack, clamp at 0) and EffectiveDominate (printed marker
-// OR granted) into LikelyDamageHits. A +1 BonusAttack bumping a 3-power attack to 4 makes
-// the rider fire even though the printed value alone would have been blocked; a -3
-// BonusAttack flooring a 4-power attack at 0 turns the hit off; a Dominate grant on a
-// 5-power attack clears the 5+ threshold.
+// Tests that LikelyToHit folds EffectiveAttack (printed + BonusAttack, clamp 0) and
+// EffectiveDominate (printed marker OR granted) into LikelyDamageHits.
 func TestLikelyToHit_FoldsEffectiveAttackAndDominate(t *testing.T) {
 	cases := []struct {
 		name        string

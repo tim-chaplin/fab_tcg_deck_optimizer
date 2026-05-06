@@ -34,11 +34,8 @@ func TestAcceptMutation_StrictGateRequiresMinImprovement(t *testing.T) {
 	}
 }
 
-// TestAcceptMutation_AnnealingBypassesMinImprovement: at T>0 the probabilistic gate ignores
-// minImprovement so SA can still walk through ties / shallow dips to escape local maxima.
-// Verifies by running many trials at deepAvg == baseline (a tie) with a substantial T —
-// acceptances should occur regardless of how high minImprovement is set, because the gate
-// math reduces to exp(0/T) = 1.
+// Tests that at T>0 the probabilistic gate ignores minImprovement (exp(0/T) = 1), letting
+// SA walk through ties and shallow dips.
 func TestAcceptMutation_AnnealingBypassesMinImprovement(t *testing.T) {
 	rng := rand.New(rand.NewSource(1))
 	const baseline = 10.0

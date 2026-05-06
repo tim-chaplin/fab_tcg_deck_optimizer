@@ -31,10 +31,7 @@ func TestRandom_FilterExcludesRejected(t *testing.T) {
 	}
 }
 
-// TestLegalPool_SkipsNotImplemented pins the contract that cards tagged with
-// NotImplemented never land in the search pool, with or without a legal predicate. The
-// property holds regardless of which registered cards carry the tag today, so it doubles as
-// a regression guard against accidental weakening of the filter.
+// Tests that NotImplemented cards never land in LegalPool, with or without a legal predicate.
 func TestLegalPool_SkipsNotImplemented(t *testing.T) {
 	for _, pred := range []func(Card) bool{nil, func(Card) bool { return true }} {
 		for _, id := range LegalPool(pred) {
@@ -46,9 +43,7 @@ func TestLegalPool_SkipsNotImplemented(t *testing.T) {
 	}
 }
 
-// TestRandom_ExcludesNotImplemented confirms no sampled random deck contains a card tagged
-// with NotImplemented. Drives Random over many seeds so a leak into the pool would show
-// up as a failure even when the tagged set is small relative to the full pool.
+// Tests that Random never samples a NotImplemented card across many seeds.
 func TestRandom_ExcludesNotImplemented(t *testing.T) {
 	rng := rand.New(rand.NewSource(1))
 	for i := 0; i < 20; i++ {
@@ -61,12 +56,9 @@ func TestRandom_ExcludesNotImplemented(t *testing.T) {
 	}
 }
 
-// TestLegalPool_ExcludesTaggedCardsByID gives TestLegalPool_SkipsNotImplemented teeth: it
-// picks a concrete registered card we know currently carries the NotImplemented marker
-// (Strike Gold [R], gold-token rider) and asserts it's absent from LegalPool's output.
-// Without at least one real tagged card the property test is vacuous, so this guards against
-// a regression where the marker interface itself silently breaks. Self-retires if Strike Gold
-// ever loses the tag (gold-token economy gets modelled) so maintenance is only a delete.
+// Tests that a known-tagged NotImplemented card (Strike Gold [R]) is absent from LegalPool —
+// gives the property test teeth so a broken marker interface fails loudly. Self-retires when
+// the card loses the tag.
 func TestLegalPool_ExcludesTaggedCardsByID(t *testing.T) {
 	if _, ok := GetCard(ids.StrikeGoldRed).(NotImplemented); !ok {
 		t.Skip("Strike Gold [R] is no longer NotImplemented — pick another tagged card or drop this test")
@@ -78,10 +70,8 @@ func TestLegalPool_ExcludesTaggedCardsByID(t *testing.T) {
 	}
 }
 
-// TestLegalPool_ExcludesUnplayableByID is the Unplayable-side counterpart of
-// TestLegalPool_ExcludesTaggedCardsByID: picks a concrete registered card we know currently
-// carries the Unplayable marker (Potion of Seeing [B], opponent-info-only effect) and asserts
-// it's absent from LegalPool's output. Self-retires if the card ever loses the tag.
+// Tests that Potion of Seeing [B] (a known-tagged Unplayable card) is absent from LegalPool.
+// Self-retires when the card loses the tag.
 func TestLegalPool_ExcludesUnplayableByID(t *testing.T) {
 	if _, ok := GetCard(ids.PotionOfSeeingBlue).(Unplayable); !ok {
 		t.Skip("Potion of Seeing [B] no longer Unplayable; pick another tagged card or drop test")
@@ -93,11 +83,8 @@ func TestLegalPool_ExcludesUnplayableByID(t *testing.T) {
 	}
 }
 
-// TestSanitizeNotImplemented_ReplacesTaggedSlotsAndKeepsSizeLegal drives the sanitizer
-// against a deck that starts with two NotImplemented copies in it (Strike Gold Red is a real
-// tagged card). After sanitization the deck must: (a) have zero NotImplemented cards, (b)
-// be the same size, (c) respect maxCopies across the post-sanitize distribution, (d) report
-// exactly two swaps, each naming the original tagged card.
+// Tests SanitizeNotImplemented: replaces tagged slots, preserves deck size, respects
+// maxCopies, and reports one swap per replaced card.
 func TestSanitizeNotImplemented_ReplacesTaggedSlotsAndKeepsSizeLegal(t *testing.T) {
 	if _, ok := GetCard(ids.StrikeGoldRed).(NotImplemented); !ok {
 		t.Skip("Strike Gold [R] is no longer NotImplemented — pick another tagged card or drop this test")
@@ -165,10 +152,7 @@ func TestSanitizeNotImplemented_NoOpOnCleanDeck(t *testing.T) {
 	}
 }
 
-// TestAllMutations_ExcludesNotImplementedAdditions confirms no single-slot mutation can
-// introduce a NotImplemented card. Starting deck must contain only implemented cards so any
-// NotImplemented copy in a mutation output must have come from the add pool;
-// ArcanicCrackleRed is the chosen sentinel (no NotImplemented marker).
+// Tests that no single-slot mutation introduces a NotImplemented card.
 func TestAllMutations_ExcludesNotImplementedAdditions(t *testing.T) {
 	a := GetCard(ids.ArcanicCrackleRed)
 	if _, tagged := a.(NotImplemented); tagged {
@@ -209,10 +193,8 @@ func TestRandom_ExcludesNotImplementedWeapons(t *testing.T) {
 	}
 }
 
-// TestLegalWeapons_ExcludesTaggedWeaponByID gives TestLegalWeapons_SkipsNotImplemented teeth
-// by picking a concrete registered weapon we know currently carries the marker (Annals of
-// Sutcliffe) and asserting it's absent from LegalWeapons. Self-retires if Annals ever loses
-// the tag so maintenance is only a delete.
+// Tests that Annals of Sutcliffe (a known-tagged NotImplemented weapon) is absent from
+// LegalWeapons. Self-retires when the weapon loses the tag.
 func TestLegalWeapons_ExcludesTaggedWeaponByID(t *testing.T) {
 	tagged := weapons.AnnalsOfSutcliffe{}
 	if _, ok := any(tagged).(NotImplemented); !ok {
@@ -225,10 +207,8 @@ func TestLegalWeapons_ExcludesTaggedWeaponByID(t *testing.T) {
 	}
 }
 
-// TestAllMutations_ExcludesNotImplementedWeaponLoadouts confirms no weapon-loadout mutation
-// proposes a loadout that contains a NotImplemented weapon. Starting deck equips the
-// implemented Nebula Blade so any NotImplemented weapon in a mutation output came from the
-// loadout pool, not the starting deck.
+// Tests that no weapon-loadout mutation proposes a loadout containing a NotImplemented
+// weapon.
 func TestAllMutations_ExcludesNotImplementedWeaponLoadouts(t *testing.T) {
 	a := GetCard(ids.ArcanicCrackleRed)
 	if _, tagged := a.(NotImplemented); tagged {
@@ -244,14 +224,8 @@ func TestAllMutations_ExcludesNotImplementedWeaponLoadouts(t *testing.T) {
 	}
 }
 
-// TestAllMutations_FilterExcludesRejectedAdditions confirms banned cards never appear as
-// swap-in candidates. A banned card already in the deck IS still a valid removal target — the
-// hill climb must be able to swap it out — so we assert that the starting deck's banned card is
-// never in the post-mutation card list either (which would require it to have been added back).
-//
-// Critical Strike [R] is the chosen sentinel: it's registered (so the test can put two copies in
-// the starting deck) and the legal predicate bans it — exercising the "banned but already in
-// deck" branch of the mutation generator.
+// Tests that banned cards never appear as swap-in candidates, while remaining valid removal
+// targets when present in the starting deck.
 func TestAllMutations_FilterExcludesRejectedAdditions(t *testing.T) {
 	bannedIDs := map[ids.CardID]bool{
 		ids.CriticalStrikeRed: true,

@@ -48,10 +48,8 @@ func TestBest_UncacheableSkyFireLanterns(t *testing.T) {
 	}
 }
 
-// TestBest_UncacheableSutcliffesResearchNotes: the top-N runeblade-attack scan calls
-// s.Deck() so Cacheable=false for any chain that includes a Sutcliffe's printing. Need
-// a second pitchable card to fund Sutcliffe's cost-1 — solo it's never feasible to play
-// and Play never fires.
+// Tests that Sutcliffe's Research Notes pins Cacheable=false because its top-N scan
+// reads s.Deck().
 func TestBest_UncacheableSutcliffesResearchNotes(t *testing.T) {
 	h := []Card{cards.SutcliffesResearchNotesRed{}, testutils.BlueAttack{}}
 	deck := []Card{testutils.RunebladeAttack{}}
@@ -84,10 +82,7 @@ func TestBest_UncacheableRavenousRabble(t *testing.T) {
 	}
 }
 
-// TestBest_UncacheableSnatchHitDrawsViaDrawOne: Snatch Red's printed 4 attack lands in the
-// hit window, so its on-hit DrawOne fires — that's a PopDeckTop call and the chain's output
-// depends on what got drawn. Cacheable=false even though Snatch never names s.Deck()
-// directly; the framework helper inherits the flip.
+// Tests that DrawOne's PopDeckTop flips Cacheable when an on-hit DrawOne fires (Snatch hits).
 func TestBest_UncacheableSnatchHitDrawsViaDrawOne(t *testing.T) {
 	h := []Card{cards.SnatchRed{}}
 	deck := []Card{testutils.RedAttack{}}
@@ -97,10 +92,7 @@ func TestBest_UncacheableSnatchHitDrawsViaDrawOne(t *testing.T) {
 	}
 }
 
-// TestBest_UncacheableTestOfStrengthClash: Test of Strength's clash reads the deck top via
-// Clash, which inherits the flip from s.Deck(). Incoming = 1 to give the partition an
-// actual defend step where the DR can fire (the partition skips Defend assignments at 0
-// incoming since FaB has no defense step without an attack).
+// Tests that Test of Strength's Clash flips Cacheable via s.Deck().
 func TestBest_UncacheableTestOfStrengthClash(t *testing.T) {
 	h := []Card{cards.TestOfStrengthRed{}}
 	deck := []Card{testutils.GenericAttack(0, 7)}
@@ -110,14 +102,9 @@ func TestBest_UncacheableTestOfStrengthClash(t *testing.T) {
 	}
 }
 
-// TestBest_UncacheableWeepingBattlegroundDR: Weeping Battleground is a Defense Reaction; its
-// banish-from-graveyard rider routes through BanishFromGraveyard and reads the graveyard
-// contents. The DR Play runs even when the partition's chain rejects, so the leaf-level
-// uncacheable bit pings the propagation through defendersDamage.
+// Tests that Weeping Battleground's BanishFromGraveyard call propagates the Cacheable flip
+// through defendersDamage.
 func TestBest_UncacheableWeepingBattlegroundDR(t *testing.T) {
-	// Pair Weeping Battleground with a Malefic Incantation Blue (cost 0 / pitch 3) so the DR
-	// has a pitched card funding its 0 cost. Incoming damage > 0 forces the partition to
-	// actually run defenders.
 	h := []Card{cards.WeepingBattlegroundRed{}, cards.MaleficIncantationBlue{}}
 	got := Best(testutils.Hero{Intel: 4}, nil, h, Matchup{IncomingDamage: 3}, nil, TurnState{})
 	if got.Cacheable {
@@ -125,15 +112,9 @@ func TestBest_UncacheableWeepingBattlegroundDR(t *testing.T) {
 	}
 }
 
-// TestBest_AggregationDeckReaderInHandPoisonsResultEvenWhenPitched: a deck-reading card
-// pitched in the winning line still pins Cacheable=false because the search explored every
-// partition and the partition that played the deck-reader (a sibling, not the winner) ran a
-// chain that touched hidden state. The cacheable signal is "did any leaf the search visited
-// touch hidden state", not "did the winner".
+// Tests that any sibling partition's hidden-state read pins Cacheable=false even when the
+// deck-reading card is only pitched in the winning line.
 func TestBest_AggregationDeckReaderInHandPoisonsResultEvenWhenPitched(t *testing.T) {
-	// Sky Fire Lanterns Blue (pitch 3) + 3 Red Attacks lets the partition pitch the Sky Fire
-	// to fund 3 Red Attacks (3 res for 3× cost-1). The winner doesn't play Sky Fire — but a
-	// sibling partition that did would've called s.Deck(), pinning the leaf uncacheable.
 	h := []Card{cards.SkyFireLanternsBlue{}, testutils.RedAttack{}, testutils.RedAttack{}, testutils.RedAttack{}}
 	deck := []Card{testutils.RedAttack{}}
 	got := Best(testutils.Hero{Intel: 4}, nil, h, Matchup{IncomingDamage: 0}, deck, TurnState{})
@@ -142,10 +123,8 @@ func TestBest_AggregationDeckReaderInHandPoisonsResultEvenWhenPitched(t *testing
 	}
 }
 
-// TestBest_ResetBetweenCallsClearsCacheableState: a single Evaluator reused across two
-// independent Best calls must report each call's cacheable state on its own merits — the
-// uncacheable bit must reset per call. Otherwise a deck-eval loop's first uncacheable hand
-// would falsely pin every subsequent hand.
+// Tests that an Evaluator's uncacheable bit resets between Best calls so a prior uncacheable
+// hand can't poison a later cacheable one.
 func TestBest_ResetBetweenCallsClearsCacheableState(t *testing.T) {
 	ev := NewEvaluator()
 	deck := []Card{testutils.RedAttack{}}
@@ -164,11 +143,8 @@ func TestBest_ResetBetweenCallsClearsCacheableState(t *testing.T) {
 	}
 }
 
-// TestBest_RuntimeGatedNonFlipSnatchYellowMisses: Snatch Yellow's printed attack 3 isn't in
-// the LikelyToHit set, so the on-hit DrawOne branch never fires. With Snatch Yellow alone
-// in hand every partition path either runs Play-without-DrawOne (Attack) or runs no Play at
-// all (Pitch / Held). The deck is never read — Cacheable=true even though Snatch is "in the
-// uncacheableCards family". Pins that cacheability tracks ACTUAL reads, not card identity.
+// Tests that cacheability tracks ACTUAL reads, not card identity: Snatch Yellow misses
+// LikelyToHit so DrawOne never fires and the result stays cacheable.
 func TestBest_RuntimeGatedNonFlipSnatchYellowMisses(t *testing.T) {
 	h := []Card{cards.SnatchYellow{}}
 	deck := []Card{testutils.RedAttack{}}
@@ -178,11 +154,7 @@ func TestBest_RuntimeGatedNonFlipSnatchYellowMisses(t *testing.T) {
 	}
 }
 
-// TestBest_RuntimeGatedNonFlipMoonWishBlockedAtCostCheck: Red Moon Wish's printed cost is 2
-// and the alt cost requires another hand card. Solo in hand it fails the cost check before
-// Play runs — the tutor's TutorFromDeck never fires. Cacheable=true. Pins that pre-Play
-// resource gates protect cacheability when partition enumeration tries would-be-uncacheable
-// cards in infeasible roles.
+// Tests that pre-Play cost rejection stops a would-be-uncacheable card from running Play.
 func TestBest_RuntimeGatedNonFlipMoonWishBlockedAtCostCheck(t *testing.T) {
 	h := []Card{cards.MoonWishRed{}}
 	deck := []Card{cards.SunKissRed{}}

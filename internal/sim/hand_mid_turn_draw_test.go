@@ -10,12 +10,8 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
 )
 
-// TestPlaySequence_DrawDoesNotPoisonSubsequentPermutations pins the per-permutation reset of
-// state.deck and state.hand. Two back-to-back playSequence calls share one sequenceContext —
-// the first fires a draw-rider card (Snatch), the second plays a plain attack. After the
-// second call finishes, state.deck must be back to the original and state.hand empty; if the
-// reset weren't wired in, the second permutation would start from an already-consumed deck
-// and an inherited hand slice.
+// Tests that state.deck and state.hand are reset between permutations so a draw in one
+// permutation doesn't poison the next.
 func TestPlaySequence_DrawDoesNotPoisonSubsequentPermutations(t *testing.T) {
 	top := testutils.RedAttack{}
 	deck := []Card{top, testutils.BlueAttack{}, testutils.RedAttack{}}
@@ -72,22 +68,8 @@ func TestBest_DrawRiderSeesActualDeck(t *testing.T) {
 	}
 }
 
-// TestBest_DeckOrderDoesNotAffectHandRoles pins an information-leak invariant in the solver.
-//
-// Problem: when a hand contains a "draw a card" action, the evaluator doesn't know which card
-// the player will see on top of the deck until the draw actually fires. In the real game the
-// player has to commit to a line first — play the draw hoping for something useful, or don't —
-// then live with whatever comes off the top. The current solver, though, evaluates every
-// permutation with full visibility into Deck[0] and lets mid-turn-drawn cards be pitched or
-// played as chain extensions (bestSequence's extension loop in playSequenceWithMeta). That
-// means the best line it picks can genuinely depend on the identity of the top card: with a
-// fantastic attack on top it'll play the draw, with a defense reaction on top it'll skip the
-// draw and play something else instead. The player, reordering what's in the same deck, would
-// see the same choice offered up — the evaluator has effectively cheated by peeking.
-//
-// The test: fix the hand and flip two deck orderings. The hand roles have to match. The draw
-// card is allowed to be played or not; the invariant is that the choice can't flip as a
-// function of deck order alone.
+// Tests an information-leak invariant: with a hand containing a "draw a card" action, the
+// chosen hand roles must not depend on Deck[0] — the player commits before seeing the draw.
 func TestBest_DeckOrderDoesNotAffectHandRoles(t *testing.T) {
 	h := []Card{testutils.CostlyDraw{}, testutils.CostlyAttack{}, testutils.PitchOneDR{}}
 	deckA := []Card{testutils.HugeAttack{}, testutils.PitchOneDR{}}

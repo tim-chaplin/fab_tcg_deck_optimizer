@@ -50,12 +50,8 @@ func TestAllMutations_CountsAndShape(t *testing.T) {
 	}
 }
 
-// TestAllMutations_OddCountsAllowed exercises the single-card-swap semantics: a mutation may leave
-// the deck with an odd number of any given printing (e.g. 1×A + 3×B at maxCopies=3), and raising
-// maxCopies should open up adds to cards already in the deck that are below the cap. Both
-// starter cards must be implemented so the diff math holds (NotImplemented removals are absent
-// from the addID pool, which suppresses the "swap to in-deck other" mutation pair the diff
-// expects).
+// Tests single-card-swap semantics: odd-count distributions are legal and raising maxCopies
+// opens adds to in-deck cards below the cap.
 func TestAllMutations_OddCountsAllowed(t *testing.T) {
 	a := GetCard(ids.ArcanicCrackleRed)
 	b := GetCard(ids.ArcanicSpikeRed)
