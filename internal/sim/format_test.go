@@ -88,17 +88,8 @@ func TestFormatBestTurn_NonAttackCardUsesPlayLabel(t *testing.T) {
 	}
 }
 
-// Tests phase-2 log attribution: each chain event (card Play, hero trigger, aura trigger,
-// OnHit) gets its own line grouped under the triggering card's chain entry.
-//
-// Hand: Nimblism (Generic non-attack action) + Mauvrion (registers an "if hits, +3"
-// OnHit) + Consuming Volition (Runeblade attack action). Prior aura: a Malefic
-// Incantation TriggerAttackAction. The chain log should hit:
-//   - Mauvrion: PLAY (+0)             — non-attack action, no own damage
-//   - Consuming Volition: ATTACK (+N) — printed power, with the three triggers it fires
-//     attached as indented children. Each handler authors its own line (Viserai /
-//     Malefic / Mauvrion all create runechants); the "(from ...)" suffix is dropped
-//     since indentation conveys attribution.
+// Tests log attribution: each chain event (Play, hero trigger, aura trigger, OnHit) gets its
+// own line grouped under the triggering card; "(from ...)" suffix is dropped under indentation.
 func TestFormatBestTurn_LogAttributesEachTriggerSeparately(t *testing.T) {
 	h := []Card{cards.NimblismRed{}, cards.MauvrionSkiesRed{}, cards.ConsumingVolitionRed{}}
 	// Use the real Malefic Incantation card's Play to register the prior trigger so the
@@ -137,15 +128,9 @@ func TestFormatBestTurn_LogAttributesEachTriggerSeparately(t *testing.T) {
 	}
 }
 
-// TestFormatBestTurn_LogSuppressesZeroTriggers pins that handlers returning 0 don't add a
-// "(+0)" line for the trigger — log entries for triggers gate on positive contribution to
-// avoid noise. Card-Play lines render unconditionally because the card resolved (the line
-// proves the chain step happened); trigger lines only render when the trigger actually
-// credited damage.
+// Tests that trigger handlers returning 0 don't render a "(+0)" line; card-Play lines always
+// render, trigger lines only render on positive contribution.
 func TestFormatBestTurn_LogSuppressesZeroTriggers(t *testing.T) {
-	// Hand: a single Red attack with no go-again. Viserai's OnCardPlayed contributes nothing
-	// (the gate needs another non-attack action played first), no priors, no OnHit — so
-	// the chain log should be exactly one card-Play line, no trigger spam.
 	h := []Card{testutils.RedAttack{}}
 	got := Best(heroes.Viserai{}, nil, h, Matchup{IncomingDamage: 0}, nil, TurnState{})
 	if strings.Contains(FormatBestTurn(got, nil, nil), "Viserai created") {
@@ -154,12 +139,8 @@ func TestFormatBestTurn_LogSuppressesZeroTriggers(t *testing.T) {
 	}
 }
 
-// TestFormatBestTurn_MoonWishTutorAndPlayLogsAsPostTrigger: the go-again branch tutors
-// Sun Kiss and immediately plays it. Moon Wish's chain step shows only its printed
-// attack; the tutor narration line renders as a post-trigger child grouped beneath Moon
-// Wish, Sun Kiss authors its own "PLAY" chain entry, and the heal lands as a "Gained 3
-// health (+3)" sub-line under Sun Kiss. The third hand card is the alt-cost target so
-// Flying High [R] stays in the chain to grant go-again.
+// Tests Moon Wish go-again log shape: tutor line groups under Moon Wish, Sun Kiss authors
+// its own PLAY chain entry, heal renders as a "Gained 3 health" child under Sun Kiss.
 func TestFormatBestTurn_MoonWishTutorAndPlayLogsAsPostTrigger(t *testing.T) {
 	h := []Card{cards.FlyingHighRed{}, cards.MoonWishYellow{}, testutils.BlueAttack{}}
 	deck := []Card{cards.SunKissRed{}}
@@ -186,10 +167,8 @@ func TestFormatBestTurn_MoonWishTutorAndPlayLogsAsPostTrigger(t *testing.T) {
 	}
 }
 
-// TestFormatBestTurn_MoonWishTutorOnlyLogsAsPostTrigger: the no-go-again branch tutors
-// Sun Kiss but doesn't play it (it lands in hand for next turn). The post-trigger line
-// "Moon Wish [Y] tutored Sun Kiss [R]" renders without a (+N) since no damage credits.
-// The Blue attack is held to satisfy Moon Wish's alt cost.
+// Tests Moon Wish tutor-only log: post-trigger line renders without a (+N) when nothing
+// is credited.
 func TestFormatBestTurn_MoonWishTutorOnlyLogsAsPostTrigger(t *testing.T) {
 	h := []Card{cards.MoonWishYellow{}, testutils.BlueAttack{}}
 	deck := []Card{cards.SunKissRed{}}
@@ -209,11 +188,8 @@ func TestFormatBestTurn_MoonWishTutorOnlyLogsAsPostTrigger(t *testing.T) {
 	}
 }
 
-// TestFormatBestTurn_ArsenalInPlayedAsDR checks the combined "arsenal-in played from the slot"
-// + "defense reaction prevented" rendering. Hand: one Malefic Blue (pitch 3). Arsenal-in:
-// Toughen Up Blue (DR cost 2). Malefic pitches to fund the DR, Toughen Up blocks 4 of 4 incoming.
-// Display puts the pitch and DR lines under the "Opponent's turn:" section; the role label
-// reads "DEFENSE REACTION from arsenal" since Toughen Up came out of the arsenal slot.
+// Tests rendering of an arsenal-in DR played: section "Opponent's turn:" with role label
+// "DEFENSE REACTION from arsenal".
 func TestFormatBestTurn_ArsenalInPlayedAsDR(t *testing.T) {
 	h := []Card{cards.MaleficIncantationBlue{}}
 	got := Best(testutils.Hero{Intel: 4}, nil, h, Matchup{IncomingDamage: 4}, nil, TurnState{Arsenal: cards.ToughenUpBlue{}})
@@ -229,12 +205,8 @@ func TestFormatBestTurn_ArsenalInPlayedAsDR(t *testing.T) {
 	}
 }
 
-// TestFormatBestTurn_DefenseReactionLinesAndRiders pins the per-DR rendering: the chain step's
-// "(+N)" folds in BonusDefense (the +1{d} bonus is rolled in just like BonusAttack feeds the
-// attack chain step), and separable riders like the arcane ping each land as their own indented
-// sub-line under the parent. Sigil of Suffering Red against incoming 4 has the Sigil block 4
-// (printed 3 + 1 from the arcane-conditional bonus) and deal 1 arcane on a sub-line. Dodge has
-// no riders or bonuses, so it renders as a single chain step with "(+2)" — the printed Defense.
+// Tests DR rendering: chain step's (+N) folds in BonusDefense; separable riders render
+// as indented sub-lines.
 func TestFormatBestTurn_DefenseReactionLinesAndRiders(t *testing.T) {
 	cases := []struct {
 		name     string
@@ -271,11 +243,8 @@ func TestFormatBestTurn_DefenseReactionLinesAndRiders(t *testing.T) {
 	}
 }
 
-// TestFormatBestTurn_ArsenalInPlayedOnChain checks the role-label tag for an arsenal-in
-// card played as part of the my-turn chain. Hand: one BlueAttack (pitch 3, cost 1).
-// Arsenal-in: RedAttack (cost 1, attack 3). The solver pitches the Blue to pay the Red's
-// cost and attacks from arsenal for 3; the chain line reads "cardtest.RedAttack [R]: ATTACK
-// from arsenal" — tag on the role, not on the card name.
+// Tests that an arsenal-in card played on the my-turn chain renders as "ATTACK from arsenal"
+// (role tag, not card-name tag).
 func TestFormatBestTurn_ArsenalInPlayedOnChain(t *testing.T) {
 	h := []Card{testutils.BlueAttack{}}
 	got := Best(testutils.Hero{Intel: 4}, nil, h, Matchup{IncomingDamage: 0}, nil, TurnState{Arsenal: testutils.RedAttack{}})
@@ -350,11 +319,8 @@ func TestFormatBestTurn_EmptyBestLine(t *testing.T) {
 	}
 }
 
-// TestFormatBestTurn_TriggersFromLastTurnLine surfaces cross-turn Aura contributions
-// at the top of the "My turn:" section as numbered entries — the reveal / damage fires at
-// the top of the action phase before the chain runs, but it's an action, not pre-existing
-// state, so it belongs to the action-phase numbering rather than the unnumbered Start of
-// turn block.
+// Tests that cross-turn Aura contributions render as numbered entries at the top of "My turn:",
+// not in the unnumbered Start of turn block.
 func TestFormatBestTurn_TriggersFromLastTurnLine(t *testing.T) {
 	summary := TurnSummary{
 		TriggersFromLastTurn: []TriggerContribution{
@@ -374,12 +340,8 @@ func TestFormatBestTurn_TriggersFromLastTurnLine(t *testing.T) {
 	}
 }
 
-// TestFormatBestTurn_StartOfTurnHandReadsDealtHand: the printout's "Start of turn → Hand:"
-// line must reflect the cards dealt at end of last turn — NOT the augmented hand a Sigil
-// reveal produces by appending its drawn card. The deck loop snapshots TurnSummary.DealtHand
-// before processAurasAtStartOfTurn modifies the working hand, and the formatter reads
-// only that snapshot. The Sigil-revealed card appears under MyTurn (where it actually
-// resolves), never in the start-of-turn hand line.
+// Tests that "Start of turn → Hand:" reads from DealtHand (not an augmented hand from a
+// Sigil reveal); the revealed card appears under MyTurn instead.
 func TestFormatBestTurn_StartOfTurnHandReadsDealtHand(t *testing.T) {
 	summary := TurnSummary{
 		DealtHand: []Card{testutils.RedAttack{}},
@@ -406,10 +368,7 @@ func TestFormatBestTurn_StartOfTurnHandReadsDealtHand(t *testing.T) {
 	}
 }
 
-// TestFormatBestTurn_TriggersFromLastTurnRevealedLine surfaces the card a trigger handler
-// revealed into the hand. Sigil of the Arknight fires at start of action phase with
-// Damage=0 but reveals the deck top; the My turn section's first numbered entry names the
-// card it drew.
+// Tests that a trigger's Revealed card surfaces in the My turn section's first numbered entry.
 func TestFormatBestTurn_TriggersFromLastTurnRevealedLine(t *testing.T) {
 	summary := TurnSummary{
 		TriggersFromLastTurn: []TriggerContribution{
@@ -423,10 +382,8 @@ func TestFormatBestTurn_TriggersFromLastTurnRevealedLine(t *testing.T) {
 	}
 }
 
-// TestFormatBestTurn_TriggersFromLastTurnHandlerAuthoredText: when the handler authors a
-// custom log line via state.AddPostTriggerLogEntry, the format layer renders Text verbatim
-// and skips the synthesised "Aura Name: drew X into hand" / "(+N)" suffix. Cards keep
-// full ownership of their printout wording.
+// Tests that a TriggerContribution.Text override renders verbatim, skipping the synthesised
+// "drew X into hand" suffix.
 func TestFormatBestTurn_TriggersFromLastTurnHandlerAuthoredText(t *testing.T) {
 	summary := TurnSummary{
 		TriggersFromLastTurn: []TriggerContribution{
@@ -448,9 +405,7 @@ func TestFormatBestTurn_TriggersFromLastTurnHandlerAuthoredText(t *testing.T) {
 	}
 }
 
-// TestFormatBestTurn_TriggersFromLastTurnZeroEffectDropped suppresses lines for carryover
-// triggers that did nothing visible this turn (zero damage, no reveal). Output has no
-// numbered entries at all — the My turn section is empty so its header elides too.
+// Tests that zero-effect carryover triggers (no damage, no reveal) render no line at all.
 func TestFormatBestTurn_TriggersFromLastTurnZeroEffectDropped(t *testing.T) {
 	summary := TurnSummary{
 		TriggersFromLastTurn: []TriggerContribution{
@@ -463,12 +418,8 @@ func TestFormatBestTurn_TriggersFromLastTurnZeroEffectDropped(t *testing.T) {
 	}
 }
 
-// TestAppendGroupedChainEntries_ClustersTriggersUnderTheirParent drives the grouping
-// helper directly with a synthesised LogEntry slice — covers the three placement cases
-// (pre-trigger before its parent, post-trigger after, trigger from card B interleaved
-// before card B's chain entry) without needing a full Best invocation. Trigger Texts are
-// freeform card-authored phrases ("Viserai created a runechant"); the grouping helper
-// matches each trigger's Source field against the chain entry's "<Name>:" prefix.
+// Tests AppendGroupedChainEntries clusters pre-/post-triggers under their Source-matched
+// chain parent.
 func TestAppendGroupedChainEntries_ClustersTriggersUnderTheirParent(t *testing.T) {
 	log := []LogEntry{
 		// Card A's pre-trigger fires from a hero/aura before A's chain entry resolves.
@@ -497,13 +448,8 @@ func TestAppendGroupedChainEntries_ClustersTriggersUnderTheirParent(t *testing.T
 	}
 }
 
-// TestAppendGroupedChainEntries_PreTriggerAttachesToNextSameNameParent guards the
-// duplicate-name disambiguation: when two chain entries share a display name (e.g. two
-// copies of Mauvrion Skies in one chain), a pre-trigger between them belongs to the
-// SECOND parent — it fires before the second card's Play. Source-name match alone is
-// ambiguous in this case; Kind==LogEntryPreTrigger is what tells the grouping algorithm
-// to skip the first parent's post-trigger lookforward and let the entry fall through to
-// the next matching chain step.
+// Tests duplicate-name disambiguation: a pre-trigger between two same-name chain entries
+// attaches to the SECOND (its real parent), not the first.
 func TestAppendGroupedChainEntries_PreTriggerAttachesToNextSameNameParent(t *testing.T) {
 	log := []LogEntry{
 		// First Mauvrion plays (no triggers).
@@ -526,10 +472,8 @@ func TestAppendGroupedChainEntries_PreTriggerAttachesToNextSameNameParent(t *tes
 	}
 }
 
-// TestAppendGroupedChainEntries_OrphanTriggerSurfacesAtTopLevel guards the defensive
-// fallback: a trigger whose Source matches no chain entry shouldn't be silently dropped.
-// Currently impossible in practice (playSequenceWithMeta emits triggers immediately around
-// their parent) but the fallback keeps the data visible if that invariant ever loosens.
+// Tests the defensive fallback: a trigger whose Source matches no chain entry surfaces as
+// a top-level line rather than being dropped.
 func TestAppendGroupedChainEntries_OrphanTriggerSurfacesAtTopLevel(t *testing.T) {
 	log := []LogEntry{
 		{Text: "Card A: ATTACK", N: 5},
@@ -546,10 +490,7 @@ func TestAppendGroupedChainEntries_OrphanTriggerSurfacesAtTopLevel(t *testing.T)
 	}
 }
 
-// TestFormatBestTurn_BlockLineCarriesDefenseValue pins the "(+N)" suffix on plain BLOCK
-// lines. Each block line shows the defender's effective Defense so the reader can sum the
-// wall against the incoming attack without re-checking each card. testutils.RedAttack has
-// printed Defense=1; a synthesised BestLine drives the renderer directly.
+// Tests that plain BLOCK lines render the defender's effective Defense as a "(+N)" suffix.
 func TestFormatBestTurn_BlockLineCarriesDefenseValue(t *testing.T) {
 	summary := TurnSummary{
 		BestLine: []CardAssignment{

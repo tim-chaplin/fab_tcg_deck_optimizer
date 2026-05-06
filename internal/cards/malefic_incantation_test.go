@@ -6,10 +6,8 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 )
 
-// TestMaleficIncantation_PlayRegistersAttackActionTrigger: Play credits 0 same-turn damage —
-// every rune comes from the trigger firing on each turn's first attack action. AuraCreated
-// fires so same-turn aura-readers see Malefic. The registered trigger is TriggerAttackAction
-// + OncePerTurn with Count=N (Red 3, Yellow 2, Blue 1).
+// Tests that Play credits 0 immediately and registers an OncePerTurn TriggerAttackAction
+// aura with the variant's Count.
 func TestMaleficIncantation_PlayRegistersAttackActionTrigger(t *testing.T) {
 	cases := []struct {
 		c sim.Card
@@ -47,10 +45,7 @@ func TestMaleficIncantation_PlayRegistersAttackActionTrigger(t *testing.T) {
 	}
 }
 
-// TestMaleficIncantation_HandlerCreatesOneRunechantPerFire: invoking the handler creates one
-// live Runechant and credits 1 damage. Count tick + OncePerTurn gate are sim-managed, not
-// the handler's job. chain.TriggeringCard is seeded to mimic the sim — the handler reads it
-// to source-attribute the log entry it writes.
+// Tests that one handler invocation creates one Runechant and credits 1 damage.
 func TestMaleficIncantation_HandlerCreatesOneRunechantPerFire(t *testing.T) {
 	for _, c := range []sim.Card{MaleficIncantationRed{}, MaleficIncantationYellow{}, MaleficIncantationBlue{}} {
 		var s sim.TurnState

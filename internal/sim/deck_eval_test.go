@@ -13,13 +13,9 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/weapons"
 )
 
-// TestEvaluate_BestTurnStartingAurasIsPreHandCarryover pins the contract of
-// BestTurn.StartingAuras: it's the carryover from the previous turn when the hand was
-// played, so for the first hand of a run nothing is in play — runechants the hand
-// itself creates are reflected in the End-of-turn state, not the starting auras.
+// Tests that BestTurn.StartingAuras reflects pre-hand carryover (empty on the first hand).
 func TestEvaluate_BestTurnStartingAurasIsPreHandCarryover(t *testing.T) {
-	// Viserai has Intelligence 4. A 4-card deck gives exactly one hand per run, so the Best
-	// record always reflects that first hand — no previous turn ever existed.
+	// 4-card deck + Viserai Intel=4 gives exactly one hand per run.
 	read := GetCard(ids.ReadTheRunesRed)
 	d := New(heroes.Viserai{}, nil, []Card{read, read, read, read})
 
@@ -39,13 +35,8 @@ func TestEvaluate_BestTurnStartingAurasIsPreHandCarryover(t *testing.T) {
 	}
 }
 
-// TestEvaluate_BestTurnSnapshotsState pins the BestTurn snapshot's completeness: the winning
-// turn's CarryState (Hand, Deck, Graveyard, Arsenal, Runechants, etc.) must be deep-copied
-// into Stats.Best.Summary.State. A Snatch-heavy Viserai hand attacks with at least one Snatch
-// (its draw-rider fires DrawOne, pulling another Snatch off the deck), so at least one drawn
-// card surfaces in State.Hand or State.Arsenal alongside the played Snatch in State.Graveyard.
-// The total card count across the three surfaces must exceed handSize (4) — proof the snapshot
-// carried the mid-chain draw rather than just the partition's static slice.
+// Tests that BestTurn deep-copies the winning turn's full CarryState (Hand, Deck, Graveyard,
+// Arsenal, Log, etc.) — including mid-chain draws.
 func TestEvaluate_BestTurnSnapshotsState(t *testing.T) {
 	snatch := GetCard(ids.SnatchRed)
 	d := New(heroes.Viserai{}, nil, []Card{snatch, snatch, snatch, snatch, snatch, snatch, snatch, snatch})
@@ -76,11 +67,7 @@ func TestEvaluate_BestTurnSnapshotsState(t *testing.T) {
 	}
 }
 
-// TestEvaluate_PerCardMarginalCoversEveryHand pins the marginal-stats invariant: for every
-// unique ids.CardID in the deck, PresentHands + AbsentHands equals Stats.Hands. The bucket sums
-// are also non-negative and reflect the per-turn hand-value tally so a regression that
-// double-counts (or skips) a hand surfaces immediately. A multi-card deck mixes "present
-// every turn" vs "present some turns" so both buckets are exercised.
+// Tests the marginal-stats invariant: PresentHands + AbsentHands == Stats.Hands per card.
 func TestEvaluate_PerCardMarginalCoversEveryHand(t *testing.T) {
 	read := GetCard(ids.ReadTheRunesRed)
 	snatch := GetCard(ids.SnatchRed)
@@ -109,10 +96,7 @@ func TestEvaluate_PerCardMarginalCoversEveryHand(t *testing.T) {
 	}
 }
 
-// TestEvaluate_PerCardMarginalAlwaysPresent pins the singleton case: a deck containing only
-// one unique card never registers an absent bucket. PresentMean equals the deck's overall
-// Mean, and Marginal is 0 (no comparison possible). Single-card decks are a degenerate but
-// realistic test fixture.
+// Tests the singleton-deck case: AbsentHands == 0, Marginal() == 0 (no comparison possible).
 func TestEvaluate_PerCardMarginalAlwaysPresent(t *testing.T) {
 	read := GetCard(ids.ReadTheRunesRed)
 	d := New(heroes.Viserai{}, nil, []Card{read, read, read, read, read, read, read, read})
@@ -131,15 +115,10 @@ func TestEvaluate_PerCardMarginalAlwaysPresent(t *testing.T) {
 	}
 }
 
-// TestEvaluate_HeldCardDefersDrawToNextTurn pins the "up to Intelligence" draw rule plus arsenal
-// carryover. Intelligence-1 hero, deck of Toughen Up Blue (DR, cost 2, defense 4): the lone
-// card has no legal play (can't pay its 2-cost, can't pitch with nothing on the stack, DRs
-// can't Attack). Turn 1 holds then promotes it to Arsenal (empty slot). Turn 2 draws a new DR;
-// the arsenal card stays on tie, the new card goes Held, so drawCount = 0 next turn and the
-// loop halts at Stats.Hands = 2.
+// Tests that a Held DR carries into the next turn and reduces the next draw count, halting
+// the loop when no further plays are possible.
 func TestEvaluate_HeldCardDefersDrawToNextTurn(t *testing.T) {
-	// 40 copies of the DR so we have enough deck to fill many hands if held carryover weren't
-	// wired up — the assertion would fail catastrophically (loop or much larger Hands count).
+	// 40 copies so a missing held-carryover regression would loop or run far longer than 2 hands.
 	deckCards := make([]Card, 40)
 	for i := range deckCards {
 		deckCards[i] = cards.ToughenUpBlue{}
@@ -160,13 +139,7 @@ func TestEvaluate_HeldCardDefersDrawToNextTurn(t *testing.T) {
 	}
 }
 
-// TestEvaluate_ArsenalPersistsAcrossTurns confirms the arsenal slot threads through Evaluate's
-// per-turn loop: a card promoted to Arsenal on one turn becomes arsenalCardIn on the next.
-// Intelligence-1 hero, 2-card deck of two Toughen Up Blue. Turn 1 arsenals the drawn TU.
-// Turn 2 draws the second TU and against incoming 4 plays the arsenal-in DR, pitching the
-// drawn card to fund its 2-cost — Value = 4 (prevents the full attack). Turn 3 re-draws the
-// pitched card (returned to deck bottom) and arsenals it again. Loop stops when the deck's
-// empty and nothing new can be drawn.
+// Tests that a card promoted to Arsenal on one turn becomes arsenalCardIn on the next.
 func TestEvaluate_ArsenalPersistsAcrossTurns(t *testing.T) {
 	d := New(testutils.Hero{Intel: 1}, nil, []Card{cards.ToughenUpBlue{}, cards.ToughenUpBlue{}})
 	d.Evaluate(1, Matchup{IncomingDamage: 4}, rand.New(rand.NewSource(1)))
@@ -182,11 +155,8 @@ func TestEvaluate_ArsenalPersistsAcrossTurns(t *testing.T) {
 	}
 }
 
-// TestEvaluate_TerminatesAfterTwoCycles pins the infinite-loop guard on Evaluate's per-run loop.
-// 40 Toughen Up Blue DRs with Reaping Blade equipped, incoming=0, reaches a steady state after
-// turn 1 (pitch one TU, swing Reaping Blade for +3, hold the other 3). From then on every turn
-// draws and pitches one card — net deck change zero, Best returns the same TurnSummary.
-// Without the cap the loop would spin forever; with it, Stats.Hands halts at 2 × handsPerCycle.
+// Tests Evaluate's infinite-loop guard: a steady-state pitched-pitch cycle halts at
+// 2 × handsPerCycle.
 func TestEvaluate_TerminatesAfterTwoCycles(t *testing.T) {
 	deckCards := make([]Card, 40)
 	for i := range deckCards {
@@ -212,9 +182,8 @@ func TestEvaluate_TerminatesAfterTwoCycles(t *testing.T) {
 	}
 }
 
-// TestEvaluateAdaptive_StopsBeforeMaxRunsWhenSEMet runs a deck whose per-turn variance is
-// low enough that the SE target is met well before the cap. The actual run count should
-// land on a multiple of AdaptiveCheckInterval and be strictly less than AdaptiveShufflesCap.
+// Tests that EvaluateAdaptive stops on a multiple of AdaptiveCheckInterval, below the cap,
+// when the SE target is met.
 func TestEvaluateAdaptive_StopsBeforeMaxRunsWhenSEMet(t *testing.T) {
 	deckCards := append([]Card{},
 		GetCard(ids.ReadTheRunesRed), GetCard(ids.ReadTheRunesRed),
@@ -233,10 +202,8 @@ func TestEvaluateAdaptive_StopsBeforeMaxRunsWhenSEMet(t *testing.T) {
 	}
 }
 
-// TestEvaluateAdaptive_RespectsMaxRunsCapWhenSEUnreachable pins the cap behavior: when the
-// SE target is structurally unreachable, the loop runs to the cap rather than overshooting.
-// Goes through evaluateImpl directly so the test can use a small cap (production uses
-// AdaptiveShufflesCap=50000 which is too slow for a unit test).
+// Tests that EvaluateAdaptive runs to the cap when the SE target is structurally unreachable.
+// Drives evaluateImpl directly so the cap can be small.
 func TestEvaluateAdaptive_RespectsMaxRunsCapWhenSEUnreachable(t *testing.T) {
 	deckCards := append([]Card{},
 		GetCard(ids.ReadTheRunesRed), GetCard(ids.ReadTheRunesRed),

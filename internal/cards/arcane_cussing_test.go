@@ -69,10 +69,7 @@ func TestArcaneCussing_SameTurnPopBySalientAttack(t *testing.T) {
 	}
 }
 
-// TestArcaneCussing_SameTurnPopByWeaponSwing: Cussing's "deal damage" trigger fires off weapon
-// swings as well as attack actions, so a following weapon whose swing amount is likely to hit
-// pops the aura. Weapon stub has Attack=0, so the weapon swing alone can't pop it — we use a
-// carryover Runechant to satisfy the likely-to-hit check.
+// Tests that Cussing's pop trigger fires off a likely-to-hit weapon swing.
 func TestArcaneCussing_SameTurnPopByWeaponSwing(t *testing.T) {
 	s := sim.TurnState{
 		IncomingDamage: 3,

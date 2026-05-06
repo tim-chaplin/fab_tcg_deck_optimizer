@@ -137,11 +137,8 @@ func TestFireEndOfTurnAuras_PonderEmptyDeckIsNoOp(t *testing.T) {
 	}
 }
 
-// TestEvalOneTurn_SigilOfFyendalQueuesTrigger: turn 1 starts with Sigil of Fyendal alone in
-// hand. The solver plays it (the beatsBest tiebreaker prefers playing trigger-creating
-// auras at equal Value over Held → arsenal promotion). Turn 2's start-of-turn pass fires
-// the registered trigger: credit 1 damage-equivalent (the 1{h} gain) and graveyard the
-// sigil (Count hits zero).
+// Tests that Sigil of Fyendal plays turn 1 and its start-of-turn trigger fires on turn 2 —
+// crediting 1 damage-equivalent and landing the sigil in graveyard.
 func TestEvalOneTurn_SigilOfFyendalQueuesTrigger(t *testing.T) {
 	sigil := cards.SigilOfFyendalBlue{}
 	deckCards := []Card{
@@ -173,10 +170,7 @@ func TestEvalOneTurn_SigilOfFyendalQueuesTrigger(t *testing.T) {
 	}
 }
 
-// TestProcessAurasAtStartOfTurn_RevealsAttackActionIntoHand: Sigil of the Arknight's handler
-// peeks the post-draw deck top, pops it, and appends to ts.Revealed when it's an attack
-// action. The helper surfaces ts.Revealed so the deck loop can forward the revealed card
-// into the hand.
+// Tests that Sigil of the Arknight's handler reveals an attack action into ts.Revealed.
 func TestProcessAurasAtStartOfTurn_RevealsAttackActionIntoHand(t *testing.T) {
 	var play TurnState
 	(cards.SigilOfTheArknightBlue{}).Play(&play, &CardState{Card: cards.SigilOfTheArknightBlue{}})
@@ -193,10 +187,8 @@ func TestProcessAurasAtStartOfTurn_RevealsAttackActionIntoHand(t *testing.T) {
 	}
 }
 
-// TestProcessAurasAtStartOfTurn_AttributesRevealedToContribution: the per-trigger
-// TriggerContribution carries the card the handler appended so FormatBestTurn can render a
-// "drew X into hand" line attributed to the specific aura. Without this attribution the
-// printout would know a reveal happened but not which aura caused it.
+// Tests that the TriggerContribution carries the revealed card so the printout can attribute
+// "drew X into hand" to the specific aura.
 func TestProcessAurasAtStartOfTurn_AttributesRevealedToContribution(t *testing.T) {
 	var play TurnState
 	(cards.SigilOfTheArknightBlue{}).Play(&play, &CardState{Card: cards.SigilOfTheArknightBlue{}})
@@ -278,13 +270,8 @@ func TestProcessAurasAtStartOfTurn_SigilWhiffStillLogs(t *testing.T) {
 	}
 }
 
-// TestEvalOneTurn_SigilOfTheArknightRevealsIntoHand is the end-to-end 2-turn check: turn 1
-// starts with a Sigil of the Arknight as the ONLY card in hand. The solver plays it (the
-// beatsBest tiebreaker prefers playing trigger-creating auras at equal Value over Held →
-// arsenal promotion, crediting their hidden next-turn payoff). The sigil registers a
-// start-of-turn Aura; on turn 2 the handler peeks the post-draw top (an attack
-// action) and moves it into the hand. The returned turn-2 hand should have 5 cards:
-// 4 normal refills plus the revealed Aether Slash appended at the tail.
+// Tests end-to-end Sigil of the Arknight: plays turn 1, on turn 2 reveals an attack action
+// off the deck top into hand alongside the normal refill.
 func TestEvalOneTurn_SigilOfTheArknightRevealsIntoHand(t *testing.T) {
 	sigil := cards.SigilOfTheArknightBlue{}
 	reveal := cards.AetherSlashRed{}
@@ -376,11 +363,8 @@ func TestEvalOneTurn_BlessingOfOccultCreatesRunesAtStartOfNextTurn(t *testing.T)
 	}
 }
 
-// TestEvaluate_TriggersFromLastTurnSurfacesInBest runs a full Evaluate with Red Blessing of
-// Occult in the deck and asserts the start-of-turn trigger lands a TriggersFromLastTurn
-// entry on at least some hand's TurnSummary. Blessing's +3-rune trigger pads next turn's
-// Value directly, so a turn with Blessing queued from the prior turn reliably beats a turn
-// without — guaranteeing the best-turn picker selects a trigger-fired hand.
+// Tests that Evaluate surfaces a start-of-turn trigger as a TriggersFromLastTurn entry on
+// the best-scoring hand and lists the source aura under StartOfTurnAuras.
 func TestEvaluate_TriggersFromLastTurnSurfacesInBest(t *testing.T) {
 	blessing := cards.BlessingOfOccultRed{}
 	slash := cards.AetherSlashRed{}
@@ -418,10 +402,8 @@ func TestEvaluate_TriggersFromLastTurnSurfacesInBest(t *testing.T) {
 	}
 }
 
-// TestProcessAurasAtStartOfTurn_ReArmsOncePerTurnGate: every trigger's FiredThisTurn is
-// cleared at every turn boundary regardless of Type, so an AttackAction trigger that
-// fired last turn can fire again this turn. Asserts the re-arm contract through the helper
-// rather than waiting for the end-to-end multi-turn path to surface a regression.
+// Tests that the OncePerTurn FiredThisTurn flag is cleared at every turn boundary so the
+// trigger can fire again next turn (no Count tick during re-arm).
 func TestProcessAurasAtStartOfTurn_ReArmsOncePerTurnGate(t *testing.T) {
 	aura := testutils.RedAttack{}
 	exhausted := Aura{
@@ -444,21 +426,8 @@ func TestProcessAurasAtStartOfTurn_ReArmsOncePerTurnGate(t *testing.T) {
 	}
 }
 
-// TestEvalOneTurn_MaleficIncantationOncePerTurnLimitsToOneRune: turn 1 plays Red Malefic
-// (Count=3, OncePerTurn) followed by Red Hocus Pocus (an attack action card). Hocus is the
-// only attack action this turn so the trigger fires exactly once — verifying the gate
-// doesn't *prevent* the first fire (a separate hand-package test exercises the gate
-// closing on a same-turn second attack action). Turn 1 Value breaks down as:
-//
-//	+3 Hocus Pocus attack (printed power)
-//	+1 Hocus Pocus's own Runechant-creation rider
-//	+1 Viserai trigger (Hocus is a Runeblade card; Malefic was a prior non-attack action)
-//	+1 Malefic AttackAction trigger (creates one Runechant)
-//	= 6
-//
-// Turn 2's start-of-turn pass clears FiredThisTurn so the trigger can fire again next
-// turn, but doesn't itself credit damage (Malefic is AttackAction-typed, not StartOfTurn).
-// Malefic survives with Count=2.
+// Tests that Malefic's OncePerTurn AttackAction trigger fires exactly once on the lone
+// attack action and survives into next turn with Count decremented.
 func TestEvalOneTurn_MaleficIncantationOncePerTurnLimitsToOneRune(t *testing.T) {
 	malefic := cards.MaleficIncantationRed{}
 	hocus := cards.HocusPocusRed{}
@@ -503,11 +472,8 @@ func TestEvalOneTurn_MaleficIncantationOncePerTurnLimitsToOneRune(t *testing.T) 
 	}
 }
 
-// TestEvalOneTurn_RunebloodIncantationTicksAcrossTurns: turn 1 plays Red Runeblood
-// Incantation (Count=3 verse counters). Turn 2's start-of-turn pass fires the trigger once
-// — credits 1 Runechant, decrements Count to 2, leaves the aura alive. The surviving
-// trigger is what carries forward; this test pins the multi-turn fire shape end-to-end at
-// the deck-loop boundary.
+// Tests that Runeblood Incantation's start-of-turn trigger fires once per turn and survives
+// while Count > 0.
 func TestEvalOneTurn_RunebloodIncantationTicksAcrossTurns(t *testing.T) {
 	runeblood := cards.RunebloodIncantationRed{}
 	pitch := testutils.PitchOneDR{}

@@ -11,10 +11,7 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
 )
 
-// TestBest_EmptyArsenalClaimsHeldCard confirms the post-hoc Arsenal promotion fires when the
-// slot is empty and the winning partition has Held cards. A hand that can't play Toughen Up as
-// DR (no other card to pitch for the 2-cost) leaves the DR Held; with arsenalCardIn=nil the
-// slot is empty so the DR becomes Arsenal and rides into next turn as got.State.Arsenal.
+// Tests post-hoc Arsenal promotion of a Held card when the slot is empty.
 func TestBest_EmptyArsenalClaimsHeldCard(t *testing.T) {
 	h := []Card{cards.ToughenUpBlue{}}
 	got := Best(testutils.Hero{Intel: 4}, nil, h, Matchup{IncomingDamage: 4}, nil, TurnState{})
@@ -26,10 +23,7 @@ func TestBest_EmptyArsenalClaimsHeldCard(t *testing.T) {
 	}
 }
 
-// TestBest_ArsenalInPlayDR covers the "arsenal card played as DR" branch. Previous turn left a
-// Toughen Up Blue in arsenal; this turn we draw a Blue Malefic (pitch 3, cost 0). The pitched
-// Malefic funds Toughen Up's 2-cost defense out of the arsenal, preventing 4 damage. Value = 4.
-// got.State.Arsenal is nil because the slot was vacated and no hand card ends up Held.
+// Tests an arsenal-in DR being played (funded by a hand pitch) and vacating the slot.
 func TestBest_ArsenalInPlayDR(t *testing.T) {
 	h := []Card{cards.MaleficIncantationBlue{}}
 	got := Best(testutils.Hero{Intel: 4}, nil, h, Matchup{IncomingDamage: 4}, nil, TurnState{Arsenal: cards.ToughenUpBlue{}})
@@ -51,11 +45,7 @@ func TestBest_ArsenalInPlayDR(t *testing.T) {
 	}
 }
 
-// TestBest_ArsenalInStayBlocksNewArsenal locks in that while the arsenal slot is occupied, a
-// hand card that would otherwise be promoted to Arsenal (because it's Held) stays Held instead —
-// one arsenal slot, no replacement until the old card is played. A lone DR in hand is Held;
-// the arsenal-in Toughen Up Blue stays (incoming=0 makes defending pointless, and the hand
-// can't fund a DR anyway); post-hoc the slot is occupied so no promotion happens.
+// Tests that an occupied arsenal slot blocks Held → Arsenal post-hoc promotion.
 func TestBest_ArsenalInStayBlocksNewArsenal(t *testing.T) {
 	h := []Card{cards.ToughenUpBlue{}}
 	got := Best(testutils.Hero{Intel: 4}, nil, h, Matchup{IncomingDamage: 0}, nil, TurnState{Arsenal: cards.ToughenUpBlue{}})
@@ -67,12 +57,7 @@ func TestBest_ArsenalInStayBlocksNewArsenal(t *testing.T) {
 	}
 }
 
-// TestBest_ArsenalInPlayAttack covers the "arsenal card played as attack" branch. A Red attack
-// sits in arsenal from a previous turn; this turn we draw a single Red Attack which pitches
-// (pitch 1) to fund both the hand Red's 1-cost and the arsenal Red's 1-cost... wait, one pitch
-// can't pay two costs. Instead, the winning line plays the arsenal Red (funded by pitching the
-// hand Red) and leaves the hand slot consumed. Value = 3 (arsenal Red's attack). With the
-// arsenal slot now empty and no Held cards, ArsenalCard is nil.
+// Tests the arsenal-card-played-as-attack branch (arsenal Red funded by pitching hand Red).
 func TestBest_ArsenalInPlayAttack(t *testing.T) {
 	h := []Card{testutils.RedAttack{}}
 	got := Best(testutils.Hero{Intel: 4}, nil, h, Matchup{IncomingDamage: 0}, nil, TurnState{Arsenal: testutils.RedAttack{}})
@@ -85,12 +70,7 @@ func TestBest_ArsenalInPlayAttack(t *testing.T) {
 	}
 }
 
-// TestBest_ArsenalInNonAttackActionPlays covers the "arsenal card isn't tagged Attack but can
-// still be played on your turn" rule — non-attack actions (auras, item cards, etc.) are playable
-// from arsenal. Hand: Malefic Incantation Blue (cost 0, pitch 3, Play returns 1 flat with no
-// follow-up attack). Arsenal: Arcane Cussing Red (cost 1, pitch 1, Play returns 3 when we
-// block all incoming). The winning line pitches Malefic to fund Cussing's 1-cost and plays
-// Cussing from arsenal for a flat 3.
+// Tests that a non-Attack action card in arsenal is playable.
 func TestBest_ArsenalInNonAttackActionPlays(t *testing.T) {
 	h := []Card{cards.MaleficIncantationBlue{}}
 	got := Best(testutils.Hero{Intel: 4}, nil, h, Matchup{IncomingDamage: 0}, nil, TurnState{Arsenal: cards.ArcaneCussingRed{}})
@@ -103,11 +83,7 @@ func TestBest_ArsenalInNonAttackActionPlays(t *testing.T) {
 	}
 }
 
-// TestBest_ArsenalInUnmovableGrantsDefenseBonus pins the DR-from-arsenal +N{d} rider:
-// Unmovable Red printed Defense() is 7 and grants +1{d} when played from arsenal. Hand: Blue
-// Malefic (pitch 3, cost 0). Arsenal: Unmovable Red. Pitched Malefic funds Unmovable's 3-cost
-// defense; effective defense is 7 + 1 (from-arsenal) = 8, fully blocking 8 incoming. Value = 8.
-// If the rider didn't fire, prevented would cap at 7.
+// Tests that Unmovable's +1{d} arsenal-defense rider fires when played from arsenal.
 func TestBest_ArsenalInUnmovableGrantsDefenseBonus(t *testing.T) {
 	h := []Card{cards.MaleficIncantationBlue{}}
 	got := Best(testutils.Hero{Intel: 4}, nil, h, Matchup{IncomingDamage: 8}, nil, TurnState{Arsenal: cards.UnmovableRed{}})
@@ -117,10 +93,7 @@ func TestBest_ArsenalInUnmovableGrantsDefenseBonus(t *testing.T) {
 	}
 }
 
-// TestBest_HandUnmovableNoDefenseBonus confirms the +1{d} rider does NOT fire when Unmovable
-// is played from hand. Hand: Blue Malefic + Unmovable Red, no arsenal. Pitched Malefic funds
-// Unmovable's 3-cost; effective defense stays at printed 7, so 8 incoming caps prevented at 7.
-// If the rider mistakenly fired from hand, prevented would be 8.
+// Tests that Unmovable's arsenal-defense rider does NOT fire when played from hand.
 func TestBest_HandUnmovableNoDefenseBonus(t *testing.T) {
 	h := []Card{cards.MaleficIncantationBlue{}, cards.UnmovableRed{}}
 	got := Best(testutils.Hero{Intel: 4}, nil, h, Matchup{IncomingDamage: 8}, nil, TurnState{})
@@ -130,15 +103,7 @@ func TestBest_HandUnmovableNoDefenseBonus(t *testing.T) {
 	}
 }
 
-// TestBest_ArsenalInSmashingGoodTimeGatesOnlyArsenalCopy pins the from-arsenal gate: only the
-// SGT that came from the arsenal grants its +3 rider; the hand copy returns 0. Hero = Viserai.
-// Arsenal: SGT Red. Hand: SGT Red + Hocus Pocus Red. Best line plays both SGTs (non-attack
-// actions, go again) ahead of Hocus Pocus. Arsenal SGT's Play scans CardsRemaining, finds Hocus
-// (attack action) and credits +3; hand SGT's Play fails the FromArsenal check and returns 0.
-// Hocus Pocus contributes 3 base + 1 from its own Runechant + 1 from Viserai's hero ability
-// (fires because two non-attack actions were already played). Value = 3 + 0 + 3 + 1 + 1 = 8.
-// If the from-arsenal gate weren't enforced, both SGTs would grant their rider and value would
-// be 11.
+// Tests that Smashing Good Time's +3 rider only fires for the arsenal copy, not the hand copy.
 func TestBest_ArsenalInSmashingGoodTimeGatesOnlyArsenalCopy(t *testing.T) {
 	h := []Card{
 		notimpl.SmashingGoodTimeRed{},
@@ -151,15 +116,10 @@ func TestBest_ArsenalInSmashingGoodTimeGatesOnlyArsenalCopy(t *testing.T) {
 	}
 }
 
-// TestPromoteRandomHandCardToArsenal_SpreadsAcrossHands pins the post-hoc Hand→Arsenal
-// promotion's anti-bias property: the selection hashes the input identifiers so different
-// hands land on different positions rather than always picking slot 0. Drives the helper
-// directly with synthesised State.Hand contents — all candidates equivalent — so only the
-// hash-based index selection is under test.
+// Tests that PromoteRandomHandCardToArsenal's hash-based selection lands on different slots
+// across distinct hands (no bias toward slot 0).
 func TestPromoteRandomHandCardToArsenal_SpreadsAcrossHands(t *testing.T) {
-	// 20 different 4-card hands using Wounding Blow Red/Yellow/Blue as "arbitrary cards with
-	// distinct IDs". Varying which card sits in which slot is enough to exercise the hash
-	// across different inputs.
+	// 20 different 4-card hands; varying which card sits in which slot exercises the hash.
 	wbR := cards.WoundingBlowRed{}
 	wbY := cards.WoundingBlowYellow{}
 	wbB := cards.WoundingBlowBlue{}
@@ -192,9 +152,7 @@ func TestPromoteRandomHandCardToArsenal_SpreadsAcrossHands(t *testing.T) {
 	}
 }
 
-// TestPromoteRandomHandCardToArsenal_DeterministicPerHand pins the other half of the contract:
-// a given hand produces the SAME picked card every call so repeated simulations of the same
-// deck stay reproducible.
+// Tests that the same hand produces the same picked card across runs (reproducibility).
 func TestPromoteRandomHandCardToArsenal_DeterministicPerHand(t *testing.T) {
 	hand := []Card{
 		cards.WoundingBlowRed{}, cards.WoundingBlowYellow{},
@@ -227,9 +185,7 @@ func TestPromoteRandomHandCardToArsenal_DeterministicPerHand(t *testing.T) {
 	}
 }
 
-// TestPromoteRandomHandCardToArsenal_SingleCandidateAlwaysPicked covers the n=1 edge of the
-// hash-modulo selection: with exactly one State.Hand entry the modulo is deterministic
-// (always 0), so the only candidate gets promoted.
+// Tests the n=1 edge: with one State.Hand entry the only candidate gets promoted.
 func TestPromoteRandomHandCardToArsenal_SingleCandidateAlwaysPicked(t *testing.T) {
 	hand := []Card{cards.WoundingBlowRed{}, cards.WoundingBlowBlue{}}
 	line := []CardAssignment{
@@ -249,9 +205,7 @@ func TestPromoteRandomHandCardToArsenal_SingleCandidateAlwaysPicked(t *testing.T
 	}
 }
 
-// TestPromoteRandomHandCardToArsenal_EmptyHandIsNoop covers the other end: a partition where
-// every hand card plays/pitches/defends leaves State.Hand empty, so the promotion is a no-op
-// and the arsenal slot stays empty.
+// Tests that an empty State.Hand makes the promotion a no-op.
 func TestPromoteRandomHandCardToArsenal_EmptyHandIsNoop(t *testing.T) {
 	hand := []Card{cards.WoundingBlowRed{}, cards.WoundingBlowBlue{}}
 	line := []CardAssignment{
@@ -270,11 +224,7 @@ func TestPromoteRandomHandCardToArsenal_EmptyHandIsNoop(t *testing.T) {
 	}
 }
 
-// TestBeatsBest_ArsenalOccupancyTiebreaker pins the tiebreaker contract used by the partition
-// enumerator: when two candidates tie on Value and pendingFutureValue, the one that will end
-// the turn with the arsenal slot occupied (either via arsenal-in staying OR a post-hoc Held →
-// Arsenal promotion) beats the one that won't. Exercised directly so a comparison-inversion
-// regression can't hide behind enumeration order at the Best() level.
+// Tests the BeatsBest tiebreaker: at equal Value+pendingFutureValue, arsenal-occupied wins.
 func TestBeatsBest_ArsenalOccupancyTiebreaker(t *testing.T) {
 	// Seed best: Value=10, no future-value plays, arsenal NOT occupied.
 	best := TurnSummary{Value: 10}
@@ -300,11 +250,8 @@ func TestBeatsBest_ArsenalOccupancyTiebreaker(t *testing.T) {
 	}
 }
 
-// TestBeatsBest_FutureValueTiebreaker pins the future-value bias: at equal Value, a
-// partition with more end-of-chain pendingFutureValue (every Aura.Count + every Item.Count,
-// including runechants saved for next turn's arcane) wins over one with less, regardless
-// of arsenal occupancy. This corrects for hidden later-turn payoff that the current-turn
-// Value misses.
+// Tests the BeatsBest tiebreaker: at equal Value, higher pendingFutureValue wins regardless
+// of arsenal occupancy.
 func TestBeatsBest_FutureValueTiebreaker(t *testing.T) {
 	best := TurnSummary{Value: 5}
 	// Candidate has higher pendingFutureValue, best has occupancy — candidate wins.

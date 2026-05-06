@@ -31,10 +31,7 @@ func TestFlyingHigh_NonAttackInRemainingFizzles(t *testing.T) {
 	}
 }
 
-// TestFlyingHigh_ColorMatchGrantsBonus: each variant's '+1{p} if matching color' rider only
-// fires when the granted target's pitch matches this card's own pitch. Every variant grants
-// go again to any attack target regardless. Granter returns 0; the +1 (when applicable)
-// rides on the target's BonusAttack.
+// Tests that the +1{p} rider only fires on a colour-matched target; go again is unconditional.
 func TestFlyingHigh_ColorMatchGrantsBonus(t *testing.T) {
 	cases := []struct {
 		name       string
@@ -71,10 +68,8 @@ func TestFlyingHigh_ColorMatchGrantsBonus(t *testing.T) {
 	}
 }
 
-// TestFlyingHigh_GrantsGoAgainToWeaponSwing pins the "your next attack" wording: the next
-// scheduled attack can be a weapon swing (TypeWeapon, no TypeAction), and Flying High
-// must grant go again to it. Weapons have no printed pitch so the "+1{p} if matching
-// colour" rider never fires; only the go-again grant lands.
+// Tests that "your next attack" grants go again to a weapon swing target, with no +1{p}
+// rider (weapons have no pitch).
 func TestFlyingHigh_GrantsGoAgainToWeaponSwing(t *testing.T) {
 	pc := &sim.CardState{Card: testutils.RunebladeWeapon{}}
 	s := sim.TurnState{CardsRemaining: []*sim.CardState{pc}}

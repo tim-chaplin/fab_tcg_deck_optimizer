@@ -10,15 +10,8 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/weapons"
 )
 
-// TestCardPairMutations_EnumeratesAllVariantCrossProducts: with neither pair half present,
-// the generator emits a candidate per (firstVariant, secondVariant) cross-product per
-// distinct removed-ID combo from the deck. For a [a, a, b, b] deck the unique removed-ID
-// combos are {(a,a), (a,b), (b,b)} = 3; with 9 cross-products per implemented pair that's
-// 3 × 9 = 27 mutations per implemented pair.
-//
-// Pairs whose halves carry NotImplemented don't contribute — PairAddAllowed gates them
-// out — so the expected total scales with the count of fully-implemented pairs, not the
-// raw len(CardPairs).
+// Tests that PairSwapMutations enumerates every (firstVariant, secondVariant) cross-product
+// per distinct removed-ID combo, gated to implemented pairs.
 func TestCardPairMutations_EnumeratesAllVariantCrossProducts(t *testing.T) {
 	a := GetCard(ids.ArcanicCrackleRed)
 	b := GetCard(ids.ArcanicSpikeRed)
@@ -55,9 +48,7 @@ func TestCardPairMutations_EnumeratesAllVariantCrossProducts(t *testing.T) {
 
 // countImplementedPairCombos returns the total number of (firstVariant, secondVariant)
 // cross-product entries across CardPairs whose both halves are pool-eligible — exactly
-// the combos PairAddAllowed lets through. Tests that compute expected mutation counts
-// use this so future churn (a card dropping its NotImplemented marker, a card moving
-// between subpackages) doesn't silently make the assertion stale.
+// the combos PairAddAllowed lets through.
 func countImplementedPairCombos() int {
 	n := 0
 	for _, p := range CardPairs {
@@ -66,10 +57,9 @@ func countImplementedPairCombos() int {
 	return n
 }
 
-// countImplementedInGroup returns how many variants in g are pool-eligible: registered
-// (GetCard returns non-nil) and free of the NotImplemented marker. Unregistered IDs
-// belong to cards in internal/cards/notimplemented/ or internal/cards/unplayable/, both
-// of which PairAddAllowed rejects, so they don't count.
+// countImplementedInGroup returns how many variants in g are pool-eligible — registered and
+// free of the NotImplemented marker. Cards in notimplemented/ or unplayable/ are unregistered
+// and don't count.
 func countImplementedInGroup(g CardGroup) int {
 	n := 0
 	for _, id := range g {
@@ -84,11 +74,8 @@ func countImplementedInGroup(g CardGroup) int {
 	return n
 }
 
-// TestCardPairMutations_RemovesBothCopiesOfDuplicate is the pilot for the index-based
-// generator: a 2-card deck of [HocusPocusBlue, HocusPocusBlue] must yield mutations that
-// remove BOTH copies of HocusPocusBlue and add a Moon Wish / Sun Kiss pair. A unique-ID
-// generator would skip this (only one unique ID, no inter-ID pair exists); index-based
-// iteration over (0, 1) reaches it directly.
+// Tests that PairSwapMutations on a duplicate-ID deck removes BOTH copies of the duplicate
+// and adds the new pair (index-based iteration, not unique-ID).
 func TestCardPairMutations_RemovesBothCopiesOfDuplicate(t *testing.T) {
 	hp := GetCard(ids.HocusPocusBlue)
 	d := New(heroes.Viserai{}, []Weapon{weapons.NebulaBlade{}}, []Card{hp, hp})
@@ -119,16 +106,8 @@ func TestCardPairMutations_RemovesBothCopiesOfDuplicate(t *testing.T) {
 	}
 }
 
-// TestCardPairMutations_FiresWhenOneHalfAlreadyPresent: pair mutations fire whenever the
-// removal-pair / add-pair don't overlap on a card ID. With one half partially present, the
-// climber can still grow the OTHER variant of that side as a pair-shape mutation rather than
-// two sequential single-slot swaps.
-//
-// Same-ID overlap suppression (e.g. -1 SunKissRed + +1 SunKissRed reducing to a single-slot)
-// is the orthogonal optimisation tested in
-// TestCardPairMutations_OverlapSuppressionSkipsRedundantSwaps; here we check that
-// non-overlapping variant combinations still emit despite Sun Kiss [R] being a removal
-// candidate.
+// Tests that pair mutations still emit when one pair half is already present, as long as
+// the add side picks a non-overlapping variant.
 func TestCardPairMutations_FiresWhenOneHalfAlreadyPresent(t *testing.T) {
 	a := GetCard(ids.ArcanicCrackleRed)
 	sk := GetCard(ids.SunKissRed)
@@ -152,10 +131,8 @@ func TestCardPairMutations_FiresWhenOneHalfAlreadyPresent(t *testing.T) {
 	}
 }
 
-// TestCardPairMutations_GeneratesCapViolatingCandidates pins the cap-blind contract:
-// PairSwapMutations enumerates every (i, j) × (firstVariant, secondVariant) tuple that
-// survives overlap suppression — even ones whose result deck would violate maxCopies.
-// FilterMaxCopiesViolations is the gate that strips violators downstream.
+// Tests that PairSwapMutations is cap-blind — emits maxCopies-violating candidates that
+// FilterMaxCopiesViolations strips downstream.
 func TestCardPairMutations_GeneratesCapViolatingCandidates(t *testing.T) {
 	skR := GetCard(ids.SunKissRed)
 	a := GetCard(ids.ArcanicCrackleRed)
@@ -196,11 +173,8 @@ func TestCardPairMutations_GeneratesCapViolatingCandidates(t *testing.T) {
 	}
 }
 
-// TestCardPairMutations_HandlesUnbalancedHalfCounts: the generator should work with arbitrary
-// per-variant counts of each half. Drives this with a deck holding 5 Moon Wish (across
-// variants) and 3 Sun Kiss (across variants) — a realistic mid-climb state. cap-blind
-// enumeration emits candidates regardless of saturation; the resulting decks must remain at
-// the original card count.
+// Tests that PairSwapMutations works with unbalanced per-variant counts and the result
+// decks stay at the original card count.
 func TestCardPairMutations_HandlesUnbalancedHalfCounts(t *testing.T) {
 	mwR := GetCard(ids.MoonWishRed)
 	mwY := GetCard(ids.MoonWishYellow)
@@ -244,11 +218,8 @@ func TestCardPairMutations_ResultDifferentFromSource(t *testing.T) {
 	}
 }
 
-// TestCardPairMutations_OverlapSuppressionSkipsRedundantSwaps: when a removal target is
-// itself a pair member, the resulting mutation reduces to a single-slot swap (the matching
-// pair member's count is unchanged after -1 +1). Single-slot already covers that, so the
-// pair generator skips those combos. Drives this with a deck containing Sun Kiss [R] as a
-// removal candidate and verifies no mutation removes and re-adds Sun Kiss [R].
+// Tests that PairSwapMutations suppresses combos that reduce to a single-slot swap (a -1/+1
+// of the same card), which the single-slot generator already covers.
 func TestCardPairMutations_OverlapSuppressionSkipsRedundantSwaps(t *testing.T) {
 	skR := GetCard(ids.SunKissRed)
 	a := GetCard(ids.ArcanicCrackleRed)
@@ -262,11 +233,8 @@ func TestCardPairMutations_OverlapSuppressionSkipsRedundantSwaps(t *testing.T) {
 	}
 }
 
-// TestCardPairMutations_SkipsNotImplementedHalves: pair mutations never name a card that
-// carries NotImplemented as one of the +1 adds. CardPairs registers pairings whose
-// halves aren't all modelled yet (e.g. Belittle / Minnowism, Amulet of Havencall / Rally
-// the Rearguard); those entries shouldn't leak NotImplemented printings into the search
-// pool just because they're listed.
+// Tests that PairSwapMutations never adds a NotImplemented card, even when CardPairs lists
+// pairings whose halves aren't all modelled.
 func TestCardPairMutations_SkipsNotImplementedHalves(t *testing.T) {
 	a := GetCard(ids.ArcanicCrackleRed)
 	b := GetCard(ids.ArcanicSpikeRed)
@@ -282,10 +250,8 @@ func TestCardPairMutations_SkipsNotImplementedHalves(t *testing.T) {
 	}
 }
 
-// TestCardPairMutations_RespectsLegalFilter: a legal predicate that rejects a single pair
-// variant suppresses only that variant's combos, not the whole pair. Sun Kiss [Y] gets
-// rejected; the remaining 3 × 2 = 6 cross-products still emit per unique removal combo —
-// matches how singleSwapMutations treats per-printing legality.
+// Tests that a legal predicate rejecting one pair variant suppresses only that variant's
+// combos, not the whole pair.
 func TestCardPairMutations_RespectsLegalFilter(t *testing.T) {
 	a := GetCard(ids.ArcanicCrackleRed)
 	b := GetCard(ids.ArcanicSpikeRed)
@@ -305,9 +271,8 @@ func TestCardPairMutations_RespectsLegalFilter(t *testing.T) {
 	}
 }
 
-// TestCardPairMutations_DeterministicOrdering: two back-to-back calls must produce the same
-// mutation sequence. AllMutations consumers (the iterate-mode worker pool) rely on stable
-// indexing for reproducibility under a fixed seed.
+// Tests that PairSwapMutations is deterministic: two back-to-back calls produce the same
+// mutation sequence.
 func TestCardPairMutations_DeterministicOrdering(t *testing.T) {
 	a := GetCard(ids.ArcanicCrackleRed)
 	b := GetCard(ids.ArcanicSpikeRed)
@@ -326,10 +291,8 @@ func TestCardPairMutations_DeterministicOrdering(t *testing.T) {
 	}
 }
 
-// TestFilterMaxCopiesViolations_StripsCapViolators: the post-filter must drop any mutation
-// whose result deck holds more than maxCopies of a card. Built two synthetic mutations: one
-// clean (deck 4 cards, all distinct) and one violator (5 copies of Moon Wish [R] at
-// maxCopies=2). Filter keeps the clean one, drops the violator.
+// Tests that FilterMaxCopiesViolations drops any mutation whose result deck exceeds maxCopies
+// of any card.
 func TestFilterMaxCopiesViolations_StripsCapViolators(t *testing.T) {
 	a := GetCard(ids.ArcanicCrackleRed)
 	b := GetCard(ids.ArcanicSpikeRed)
