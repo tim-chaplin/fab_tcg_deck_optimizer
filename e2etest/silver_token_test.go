@@ -38,10 +38,8 @@ func TestSilverAbility_SpendsToFillArsenal(t *testing.T) {
 	}
 }
 
-// Tests the Silver ability composes with a weapon swing when the pitch budget covers
-// both. Two blue pitches (3+3=6 res) fund the Silver ability ({3}) plus a Reaping
-// Blade swing ({1}); chain order doesn't matter since Silver and the swing both
-// have go again.
+// Tests that the Silver ability composes with a weapon swing when the pitch budget covers
+// both costs.
 func TestSilverAbility_SpendsAndSwings(t *testing.T) {
 	deck := []sim.Card{
 		testutils.RedAttack{}, testutils.RedAttack{}, testutils.RedAttack{},

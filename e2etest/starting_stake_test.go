@@ -22,10 +22,8 @@ func TestStartingStake_CreatesGoldViaChain(t *testing.T) {
 	}
 }
 
-// Tests the no-op branch: with prior Gold already in play, Starting Stake doesn't
-// stack a second token. Asserts via Play() directly because the optimizer might
-// also fund the Gold ability spend in the same chain (which would also leave Gold
-// at 0) — we want to isolate the "if you control no Gold tokens, create one" gate.
+// Tests Starting Stake's "if you control no Gold tokens" gate: with prior Gold in play, Play
+// is a no-op and doesn't stack a second token. Drives Play directly to isolate the gate.
 func TestStartingStake_NoOpWhenGoldInPlay(t *testing.T) {
 	s := sim.NewTurnState(nil, nil)
 	s.CreateGold(2)

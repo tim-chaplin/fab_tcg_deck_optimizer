@@ -34,9 +34,7 @@ func TestRelentlessPursuit_RecyclesToDeckBottomAfterAttack(t *testing.T) {
 }
 
 // Tests that Relentless Pursuit goes to the graveyard normally when it resolves before any
-// attack this turn — the optimizer picks the order that maximises value, which here is
-// RP→Outed (mark first, then Outed reads it for +1{p}); RP itself has no prior attack and
-// shouldn't recycle.
+// attack this turn (no prior attack to recycle).
 func TestRelentlessPursuit_GoesToGraveyardWithoutPriorAttack(t *testing.T) {
 	d := sim.New(heroes.Viserai{}, nil, fillerDeck())
 	hand := []sim.Card{cards.RelentlessPursuitBlue{}, cards.OutedRed{}}
