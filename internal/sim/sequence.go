@@ -585,6 +585,8 @@ func (ctx *sequenceContext) bestSequence(attackers []Card) (int, int, bool) {
 		pcBuf[idx].OnHit = pcBuf[idx].OnHit[:0]
 		pcBuf[idx].SkipGraveyard = false
 		pcBuf[idx].Mode = 0
+		_, hasPP := c.(PlayPrecondition)
+		pcBuf[idx].HasPlayPre = hasPP
 	}
 
 	best := 0
@@ -753,6 +755,44 @@ func (ctx *sequenceContext) playSequence(order []Card) (damage int, futureValue 
 	return ctx.playSequenceWithMeta(n)
 }
 
+// finalizeActiveAttack flushes the chain's pending OnHit / NextHitTrigger riders against
+// activeAttack — fires them when LikelyToHit on the post-buff CardState returns true and
+// drains matching pendingNextHit triggers (preserving non-matching ones for a later
+// qualifying hit). Returns nil so the caller can rebind its own activeAttack pointer in
+// one statement (`activeAttack = finalizeActiveAttack(state, activeAttack)`).
+//
+// Free function so the per-permutation hot loop doesn't stage a closure capture set;
+// arguments are explicit.
+func finalizeActiveAttack(state *TurnState, activeAttack *CardState) *CardState {
+	if activeAttack == nil {
+		return nil
+	}
+	if LikelyToHit(activeAttack) {
+		for i := range activeAttack.OnHit {
+			h := &activeAttack.OnHit[i]
+			h.Fire(state, activeAttack, h)
+		}
+		// Drain matching pending triggers — each rider's TypeFilter narrows the
+		// qualifying hits (e.g. "attack action card" vs broader "attack" wording).
+		// Triggers that don't match stay queued for a later qualifying hit.
+		if len(state.pendingNextHit) > 0 {
+			types := activeAttack.Card.Types()
+			kept := 0
+			for i := range state.pendingNextHit {
+				t := &state.pendingNextHit[i]
+				if t.TypeFilter == nil || t.TypeFilter(types) {
+					t.Fire(state, activeAttack, t)
+					continue
+				}
+				state.pendingNextHit[kept] = state.pendingNextHit[i]
+				kept++
+			}
+			state.pendingNextHit = state.pendingNextHit[:kept]
+		}
+	}
+	return nil
+}
+
 // playSequenceWithMeta runs the permutation currently held in ctx.bufs.pcBuf[:n] with
 // aligned permMeta[:n]. CardState (Card + FromArsenal) persists across permutations, so any
 // field a prior card's Play flips on a future card needs a per-permutation reset:
@@ -787,22 +827,32 @@ func (ctx *sequenceContext) playSequenceWithMeta(n int) (damage int, futureValue
 	// mutate them freely without leaking to the next permutation. state.Value resets to 0.
 	ctx.resetStateForPermutation()
 	state := ctx.bufs.state
-	// Seed state.hand with the upcoming chain attackers so each chain step's Play sees an
-	// accurate "in hand right now" snapshot — committed cards (pitched, defending, already
-	// played, the playing card) are out, but cards going to be played later in this chain
-	// stay in. The current card gets removed at the top of each iteration. handStart (Held
-	// cards) is already in state.hand from resetStateForPermutation; mid-chain DrawOne
-	// continues to append; chain attackers join here.
+	// Seed state.hand with the upcoming chain attackers and the unconsumed pitches so each
+	// chain step's Play sees an accurate "in hand right now" snapshot — committed cards
+	// (pitched, defending, already played, the playing card) are out, but cards going to be
+	// played later in this chain stay in. The current card gets removed at the top of each
+	// iteration. handStart (Held cards) is already in state.hand from
+	// resetStateForPermutation; mid-chain DrawOne / AppendHand continues to append. Pitched
+	// cards stay in hand until the pool actually pops them to fund a cost — a card in the
+	// partition's Pitch role isn't "pitched" yet, just queued. Single grow + indexed writes
+	// avoid the per-append capacity check that the chained appends below would do (the
+	// handBacking cap is sized for the worst-case maxAttackers prefix at attackBufs
+	// construction, so the slice never reallocates here).
+	pitchN := len(ctx.attackPitchPerm)
+	oldLen := len(state.hand)
+	state.hand = state.hand[:oldLen+n+pitchN]
 	for k := 0; k < n; k++ {
-		state.hand = append(state.hand, played[k].Card)
+		state.hand[oldLen+k] = played[k].Card
 	}
-	// Pitched cards stay in hand until the pool actually pops them to fund a cost — a card
-	// in the partition's Pitch role isn't "pitched" yet, just queued. Mid-chain cards
-	// reading state.hand should see the as-yet-unconsumed pitches alongside upcoming chain
-	// steps and the Held cards.
-	for _, c := range ctx.attackPitchPerm {
-		state.hand = append(state.hand, c)
-	}
+	copy(state.hand[oldLen+n:], ctx.attackPitchPerm)
+	// chainHandStart is the index of the currently-resolving chain attacker — len(handStart)
+	// because handStart's Held cards sit at [0..len(handStart)). After resetStateForPermutation
+	// seeds handStart and the chain attackers/pitches got appended above, the first chain
+	// attacker (played[0].Card) lives at index len(handStart). Each iteration's "remove
+	// playing card" splices at this same index; the next chain attacker slides in. Card-driven
+	// PopHandAt updates the pair (Moon Wish-style steals) so subsequent splices stay aligned.
+	state.chainHandStart = len(ctx.handStart)
+	state.chainAttackersInHand = n
 	pool := pitchPool{
 		perm:      ctx.attackPitchPerm,
 		vals:      ctx.attackPitchVals,
@@ -814,35 +864,6 @@ func (ctx *sequenceContext) playSequenceWithMeta(n int) (damage int, futureValue
 	// played later buff it; finalizeActiveAttack flushes it (fires OnHit when LikelyToHit
 	// is true on the post-buff EffectiveAttack) on the next non-AR card or at end of chain.
 	var activeAttack *CardState
-	finalizeActiveAttack := func() {
-		if activeAttack == nil {
-			return
-		}
-		if LikelyToHit(activeAttack) {
-			for i := range activeAttack.OnHit {
-				h := &activeAttack.OnHit[i]
-				h.Fire(state, activeAttack, h)
-			}
-			// Drain matching pending triggers — each rider's TypeFilter narrows the
-			// qualifying hits (e.g. "attack action card" vs broader "attack" wording).
-			// Triggers that don't match stay queued for a later qualifying hit.
-			if len(state.pendingNextHit) > 0 {
-				types := activeAttack.Card.Types()
-				kept := 0
-				for i := range state.pendingNextHit {
-					t := &state.pendingNextHit[i]
-					if t.TypeFilter == nil || t.TypeFilter(types) {
-						t.Fire(state, activeAttack, t)
-						continue
-					}
-					state.pendingNextHit[kept] = state.pendingNextHit[i]
-					kept++
-				}
-				state.pendingNextHit = state.pendingNextHit[:kept]
-			}
-		}
-		activeAttack = nil
-	}
 	for i, pc := range played {
 		m := meta[i]
 		// Action Point gate: paying chain steps cost 1 AP; free steps (Instants, Attack
@@ -855,14 +876,15 @@ func (ctx *sequenceContext) playSequenceWithMeta(n int) (damage int, futureValue
 			state.ActionPoints--
 		}
 		// Remove the playing card from state.hand before resolving — it's leaving the hand
-		// to enter the chain. Linear search by interface equality works because every card
-		// implementation is a zero-sized struct, so two copies compare equal and any one of
-		// them is fine to drop.
-		for j := range state.hand {
-			if state.hand[j] == pc.Card {
-				state.hand = append(state.hand[:j], state.hand[j+1:]...)
-				break
-			}
+		// to enter the chain. Direct-index splice at chainHandStart: handStart sits at
+		// [0..chainHandStart), then the remaining chain attackers (with the current one at
+		// chainHandStart), then the unconsumed pitches, then any DrawOne / AppendHand
+		// arrivals. The iface-equality guard skips the splice when Moon Wish.PopHandAt(0)
+		// already stole the next chain attacker (PopHandAt has already decremented
+		// chainAttackersInHand for us).
+		if state.chainHandStart < len(state.hand) && state.hand[state.chainHandStart] == pc.Card {
+			state.hand = append(state.hand[:state.chainHandStart], state.hand[state.chainHandStart+1:]...)
+			state.chainAttackersInHand--
 		}
 		prevPitchIdx := pool.idx
 		contrib, ok := pool.pay(m.costAt(state, pc.Mode))
@@ -870,17 +892,14 @@ func (ctx *sequenceContext) playSequenceWithMeta(n int) (damage int, futureValue
 			return 0, 0, 0, false
 		}
 		pc.PitchedToPlay = contrib
-		// Drop pitches the pool freshly popped on this card's behalf. Same interface-equality
-		// removal as the playing-card drop above; Carry-from-prior-step pitches were already
-		// removed when their own pay call popped them.
-		for k := prevPitchIdx; k < pool.idx; k++ {
-			popped := pool.perm[k]
-			for j := range state.hand {
-				if state.hand[j] == popped {
-					state.hand = append(state.hand[:j], state.hand[j+1:]...)
-					break
-				}
-			}
+		// Drop pitches the pool freshly popped on this card's behalf. Pitches sit
+		// contiguously at [chainHandStart+chainAttackersInHand..) — past the chain
+		// attackers still in front and in the pool.perm order they were popped. One bulk
+		// splice replaces K linear-scan + iface-equality compares plus K shifts with a
+		// single slide of the suffix.
+		if k := pool.idx - prevPitchIdx; k > 0 {
+			start := state.chainHandStart + state.chainAttackersInHand
+			state.hand = append(state.hand[:start], state.hand[start+k:]...)
 		}
 		// PlayPrecondition for ARs: ARs don't trigger finalizeActiveAttack (the AR needs
 		// the active attack alive), so any AR precondition runs against the pre-OnHit
@@ -889,8 +908,8 @@ func (ctx *sequenceContext) playSequenceWithMeta(n int) (damage int, futureValue
 		// check reads OnHit-mutated state (e.g. an Item created by the previous attack's
 		// hit).
 		if m.types.IsAttackReaction() {
-			if pre, ok := pc.Card.(PlayPrecondition); ok {
-				if !pre.PlayPrecondition(state, pc) {
+			if pc.HasPlayPre {
+				if !pc.Card.(PlayPrecondition).PlayPrecondition(state, pc) {
 					return 0, 0, 0, false
 				}
 			}
@@ -915,9 +934,9 @@ func (ctx *sequenceContext) playSequenceWithMeta(n int) (damage int, futureValue
 		// EffectiveAttack) before the new card's precondition runs — so a precondition
 		// gating on Items / Auras created by the previous attack's OnHit (Gold ability
 		// after Strike Gold) reads the post-OnHit state.
-		finalizeActiveAttack()
-		if pre, ok := pc.Card.(PlayPrecondition); ok {
-			if !pre.PlayPrecondition(state, pc) {
+		activeAttack = finalizeActiveAttack(state, activeAttack)
+		if pc.HasPlayPre {
+			if !pc.Card.(PlayPrecondition).PlayPrecondition(state, pc) {
 				return 0, 0, 0, false
 			}
 		}
@@ -973,7 +992,7 @@ func (ctx *sequenceContext) playSequenceWithMeta(n int) (damage int, futureValue
 		}
 	}
 	// Flush any attack still pending OnHit at end of chain.
-	finalizeActiveAttack()
+	finalizeActiveAttack(state, activeAttack)
 
 	// Pitch-timing rule: every Pitch-role card must have paid for something on the stack. If
 	// the chain finished with pitches still queued, one of them was held back without funding

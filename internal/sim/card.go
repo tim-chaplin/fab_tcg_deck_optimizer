@@ -74,6 +74,10 @@ type CardState struct {
 	// append checks this flag and skips the append when set, so the helper that moved
 	// the card owns its destination zone fully.
 	SkipGraveyard bool
+	// HasPlayPre caches `_, ok := Card.(PlayPrecondition)` so the chain dispatcher can
+	// skip the per-step interface assertion on cards that don't opt in. Set in
+	// bestSequence's pcBuf seeding before the Heap permutation loop.
+	HasPlayPre bool
 }
 
 // OnHitHandler is one registered on-hit rider on a CardState. The chain runner fires Fire

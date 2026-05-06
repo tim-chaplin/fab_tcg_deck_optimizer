@@ -146,6 +146,21 @@ type TurnState struct {
 	// pendingNextHit queues NextHitTriggers; reset per permutation. Lowercase so cards
 	// register through RegisterNextHit instead of appending.
 	pendingNextHit []NextHitTrigger
+	// chainHandStart is the index in s.hand where the currently-resolving chain attacker
+	// sits, set by playSequenceWithMeta before each iteration. The chain dispatcher pops
+	// the playing card at this index (a one iface-equality guard catches Moon Wish-style
+	// steals where the chain attacker was already removed by a prior Play) and the
+	// funding pitches at chainHandStart + chainAttackersInHand. PopHandAt decrements
+	// chainHandStart when card-driven Plays remove an entry from the held-card prefix
+	// (Moon Wish PopHandAt(0) when handStart was non-empty), and decrements
+	// chainAttackersInHand when the popped index sits in the chain-attacker block.
+	chainHandStart int
+	// chainAttackersInHand is the count of yet-to-play chain attackers currently in
+	// s.hand, between [chainHandStart..chainHandStart+chainAttackersInHand). Pitches
+	// follow at [chainHandStart+chainAttackersInHand..). Maintained alongside
+	// chainHandStart so the chain dispatcher's bulk-pitch-removal lands on the right
+	// offset across iterations and across Moon Wish-style steals.
+	chainAttackersInHand int
 
 	// --- Transient: reset by the sim per turn / chain step ---
 
@@ -298,11 +313,19 @@ func (s *TurnState) AppendHand(c Card) {
 // PopHandAt removes and returns the card at index i, flipping IsCacheable to false. Cards
 // that pop hand cards (alt-cost effects, Moon Wish's "return a hand card to top of deck")
 // use this so the cache invalidation is automatic. Panics on out-of-range i — callers
-// should len-check via Hand() first.
+// should len-check via Hand() first. Maintains chainHandStart / chainAttackersInHand so
+// the chain dispatcher's direct-index splices stay aligned across card-driven hand mutations:
+// a pop at i < chainHandStart shrinks the held-card prefix; a pop within the chain-attacker
+// block shrinks that block (covers Moon Wish's PopHandAt(0) when handStart was empty).
 func (s *TurnState) PopHandAt(i int) Card {
 	s.cacheable = false
 	c := s.hand[i]
 	s.hand = append(s.hand[:i], s.hand[i+1:]...)
+	if i < s.chainHandStart {
+		s.chainHandStart--
+	} else if i < s.chainHandStart+s.chainAttackersInHand {
+		s.chainAttackersInHand--
+	}
 	return c
 }
 
