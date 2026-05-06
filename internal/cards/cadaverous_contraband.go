@@ -4,7 +4,7 @@
 // Text: "If Cadaverous Contraband hits, you may put a 'non-attack' action card from your graveyard
 // on top of your deck."
 
-package notimplemented
+package cards
 
 import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
@@ -13,6 +13,20 @@ import (
 )
 
 var cadaverousContrabandTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeAttack)
+
+func cadaverousContrabandOnHitRecycle(s *sim.TurnState, self *sim.CardState, _ *sim.OnHitHandler) {
+	if _, ok := s.RecycleFromGraveyardToTop(isNonAttackAction); ok {
+		s.LogRider(self, 0, "Recycled a non-attack action card to top of deck")
+	}
+}
+
+func isNonAttackAction(c sim.Card) bool { return c.Types().IsNonAttackAction() }
+
+func cadaverousContrabandPlay(s *sim.TurnState, self *sim.CardState) {
+	n := self.DealEffectiveAttack(s)
+	s.Log(self, n)
+	self.RegisterOnHit(cadaverousContrabandOnHitRecycle)
+}
 
 type CadaverousContrabandRed struct{}
 
@@ -24,12 +38,8 @@ func (CadaverousContrabandRed) Attack() int             { return 6 }
 func (CadaverousContrabandRed) Defense() int            { return 2 }
 func (CadaverousContrabandRed) Types() card.TypeSet     { return cadaverousContrabandTypes }
 func (CadaverousContrabandRed) GoAgain() bool           { return false }
-
-// not implemented: on-hit graveyard → top-of-deck rider
-func (CadaverousContrabandRed) NotImplemented() {}
-func (c CadaverousContrabandRed) Play(s *sim.TurnState, self *sim.CardState) {
-	n := self.DealEffectiveAttack(s)
-	s.Log(self, n)
+func (CadaverousContrabandRed) Play(s *sim.TurnState, self *sim.CardState) {
+	cadaverousContrabandPlay(s, self)
 }
 
 type CadaverousContrabandYellow struct{}
@@ -42,12 +52,8 @@ func (CadaverousContrabandYellow) Attack() int             { return 5 }
 func (CadaverousContrabandYellow) Defense() int            { return 2 }
 func (CadaverousContrabandYellow) Types() card.TypeSet     { return cadaverousContrabandTypes }
 func (CadaverousContrabandYellow) GoAgain() bool           { return false }
-
-// not implemented: on-hit graveyard → top-of-deck rider
-func (CadaverousContrabandYellow) NotImplemented() {}
-func (c CadaverousContrabandYellow) Play(s *sim.TurnState, self *sim.CardState) {
-	n := self.DealEffectiveAttack(s)
-	s.Log(self, n)
+func (CadaverousContrabandYellow) Play(s *sim.TurnState, self *sim.CardState) {
+	cadaverousContrabandPlay(s, self)
 }
 
 type CadaverousContrabandBlue struct{}
@@ -60,10 +66,6 @@ func (CadaverousContrabandBlue) Attack() int             { return 4 }
 func (CadaverousContrabandBlue) Defense() int            { return 2 }
 func (CadaverousContrabandBlue) Types() card.TypeSet     { return cadaverousContrabandTypes }
 func (CadaverousContrabandBlue) GoAgain() bool           { return false }
-
-// not implemented: on-hit graveyard → top-of-deck rider
-func (CadaverousContrabandBlue) NotImplemented() {}
-func (c CadaverousContrabandBlue) Play(s *sim.TurnState, self *sim.CardState) {
-	n := self.DealEffectiveAttack(s)
-	s.Log(self, n)
+func (CadaverousContrabandBlue) Play(s *sim.TurnState, self *sim.CardState) {
+	cadaverousContrabandPlay(s, self)
 }

@@ -3,7 +3,7 @@
 // Text: "Put target attack action card with cost 2 or less from your graveyard on top of your
 // deck."
 
-package notimplemented
+package cards
 
 import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
@@ -12,6 +12,16 @@ import (
 )
 
 var memorialGroundTypes = card.NewTypeSet(card.TypeGeneric, card.TypeInstant)
+
+// Cost predicate reads s so variable-cost targets are gated on their current cost.
+func memorialGroundPlay(s *sim.TurnState, self *sim.CardState) {
+	if _, ok := s.RecycleFromGraveyardToTop(func(c sim.Card) bool {
+		return c.Types().IsAttackAction() && c.Cost(s) <= 2
+	}); ok {
+		s.LogRider(self, 0, "Recycled an attack action card to top of deck")
+	}
+	s.Log(self, 0)
+}
 
 type MemorialGroundRed struct{}
 
@@ -23,10 +33,9 @@ func (MemorialGroundRed) Attack() int             { return 0 }
 func (MemorialGroundRed) Defense() int            { return 0 }
 func (MemorialGroundRed) Types() card.TypeSet     { return memorialGroundTypes }
 func (MemorialGroundRed) GoAgain() bool           { return false }
-
-// not implemented: Instant 'graveyard → top of deck' for low-cost attack action card
-func (MemorialGroundRed) NotImplemented()                            {}
-func (MemorialGroundRed) Play(s *sim.TurnState, self *sim.CardState) { s.Log(self, 0) }
+func (MemorialGroundRed) Play(s *sim.TurnState, self *sim.CardState) {
+	memorialGroundPlay(s, self)
+}
 
 type MemorialGroundYellow struct{}
 
@@ -38,10 +47,9 @@ func (MemorialGroundYellow) Attack() int             { return 0 }
 func (MemorialGroundYellow) Defense() int            { return 0 }
 func (MemorialGroundYellow) Types() card.TypeSet     { return memorialGroundTypes }
 func (MemorialGroundYellow) GoAgain() bool           { return false }
-
-// not implemented: Instant 'graveyard → top of deck' for low-cost attack action card
-func (MemorialGroundYellow) NotImplemented()                            {}
-func (MemorialGroundYellow) Play(s *sim.TurnState, self *sim.CardState) { s.Log(self, 0) }
+func (MemorialGroundYellow) Play(s *sim.TurnState, self *sim.CardState) {
+	memorialGroundPlay(s, self)
+}
 
 type MemorialGroundBlue struct{}
 
@@ -53,7 +61,6 @@ func (MemorialGroundBlue) Attack() int             { return 0 }
 func (MemorialGroundBlue) Defense() int            { return 0 }
 func (MemorialGroundBlue) Types() card.TypeSet     { return memorialGroundTypes }
 func (MemorialGroundBlue) GoAgain() bool           { return false }
-
-// not implemented: Instant 'graveyard → top of deck' for low-cost attack action card
-func (MemorialGroundBlue) NotImplemented()                            {}
-func (MemorialGroundBlue) Play(s *sim.TurnState, self *sim.CardState) { s.Log(self, 0) }
+func (MemorialGroundBlue) Play(s *sim.TurnState, self *sim.CardState) {
+	memorialGroundPlay(s, self)
+}

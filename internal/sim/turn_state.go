@@ -511,6 +511,43 @@ func (s *TurnState) BanishFromGraveyard(pred func(Card) bool) (Card, bool) {
 	return nil, false
 }
 
+// RecycleFromGraveyardToTop removes the first graveyard card matching pred, prepends it to
+// the deck, and returns it. Returns (nil, false) when no card matches. Flips IsCacheable to
+// false (reading graveyard + mutating deck). The deck mutation IS the model — the recycled
+// card resurfaces in next turn's deal naturally, so callers don't credit Value here. Pair
+// with a rider log line so the trace records the recycle.
+func (s *TurnState) RecycleFromGraveyardToTop(pred func(Card) bool) (Card, bool) {
+	return s.recycleFromGraveyard(pred, true)
+}
+
+// RecycleFromGraveyardToBottom is RecycleFromGraveyardToTop's bottom-of-deck variant: same
+// IsCacheable flip, same no-Value-credit contract; the recycled card lands at the bottom of
+// the deck instead of the top.
+func (s *TurnState) RecycleFromGraveyardToBottom(pred func(Card) bool) (Card, bool) {
+	return s.recycleFromGraveyard(pred, false)
+}
+
+func (s *TurnState) recycleFromGraveyard(pred func(Card) bool, toTop bool) (Card, bool) {
+	s.cacheable = false
+	for i, c := range s.graveyard {
+		if !pred(c) {
+			continue
+		}
+		s.graveyard = append(s.graveyard[:i], s.graveyard[i+1:]...)
+		newDeck := make([]Card, 0, len(s.deck)+1)
+		if toTop {
+			newDeck = append(newDeck, c)
+			newDeck = append(newDeck, s.deck...)
+		} else {
+			newDeck = append(newDeck, s.deck...)
+			newDeck = append(newDeck, c)
+		}
+		s.deck = newDeck
+		return c, true
+	}
+	return nil, false
+}
+
 // NewTurnState constructs a *TurnState with the given deck and graveyard seed. Test /
 // utility constructor: the unexported deck / graveyard fields aren't reachable via a
 // composite literal from outside this package, so callers in card subpackages and other
