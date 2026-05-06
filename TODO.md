@@ -83,6 +83,79 @@ implemented` riders across the card roster.
   damage-equivalent at creation rather than on fire; leftover tokens at end-of-sim are
   slightly over-credited (rare in practice).
 
+### Unimplemented cards by feature
+
+The 78 cards left in `internal/cards/notimplemented/` grouped by the systemic feature
+that gates them. Counts are by file (one card-name; each file typically holds 1–3
+pitch-color variants). Landing one bullet typically lets every card in the bucket come
+out of `notimplemented/` together.
+
+- **Graveyard manipulation** (10 cards): banish-from-own-graveyard as additional cost,
+  on-hit graveyard → top/bottom of deck, opponent-graveyard banish, end-phase recovery.
+- **Arsenal / item permanent manipulation** (9): on-hit opponent-arsenal poke,
+  arsenal-fill-from-deck-top end-phase, arsenal-wipe on hit, on-hit item destruction,
+  defense-reaction lockout. Needs a write-side "destroy / replace permanents in play"
+  hook beyond what `DestroyAura` covers, plus an opposing-arsenal model.
+- **Status tokens** (9): Frailty, Inertia, Bloodrot Pox, freeze / unfreeze, Crowd
+  cheers / boos, passive-tap pirates. Each is a stateful counter on a hero / card that
+  riders read or destroy. Mirrors the existing token plumbing (Runechant, Gold, …) but
+  on a per-hero / per-card axis instead of a global pool.
+- **Hand cycling** (6): "discard a card from hand, draw a card" mid-chain, with riders
+  that fire conditional on the discard happening. Needs a `DiscardFromHand` primitive
+  and a way to gate "if you cycled a card" riders.
+- **Defense-time activated abilities / DR refinements** (5): defense-time instants
+  (Rally the Coast Guard / Rearguard), Instant +N{d} grants to a defending attack
+  action card, base-power caps on what a Block can defend, Instant arcane-prevention
+  scaled by deck reveal. Defenders today resolve as one-shot Plays inside
+  `defendersDamage`; landing this would give the defense phase its own chain.
+- **Reactive talismans** (4): Spellvoid passive, AR-buff-event react, opponent-draw-event
+  react, pitch-1-event react. All four self-destroy on a specific event; the sim has no
+  passive event hook today, so the talismans collapse to base stats.
+- **Weapon-chain inspection** (3): "next sword / weapon attack +N{p} or go again". Today
+  `CardsRemaining` only carries action cards; weapon swings aren't visible to look-ahead
+  riders. Needs to extend the look-ahead view past the action portion of the chain.
+- **Opponent state observation** (3): peek opponent hand / arsenal / equipment. The sim
+  doesn't model the opposing player's private zones at all, so peek riders collapse.
+- **Token economies** (3): Gold / Silver / Landmark mints by trigger (discard creates
+  Gold, etc.). Slots into the existing token-creation plumbing; each new mint site is
+  a small addition.
+- **Action-point-from-deck-reveal** (2): cards that grant a free chain step gated on
+  the top card of the deck. Needs a deck-top-reveal-into-AP path.
+- **Aura-trade / aura-destroy-opponent** (2): "destroy an opposing aura" or "trade aura
+  for aura". Opposing-aura state isn't modelled.
+- **Banished-zone count** (2): "+N{p} per card in your banished zone", "self-destroys on
+  play-from-banished". Needs to count cards banished this game (not just this turn).
+- **Hand-as-alt-cost** (2): "put a card on top of deck instead of paying {r}". Today the
+  partition only knows the printed cost; an alt-cost evaluator would have to consider
+  hand-card alt-costs alongside pitch.
+- **Modal pay-extra-for-bonus** (2): pay {r}{r} for +2{p}, pay {r}{r}{r} for +5{p}. The
+  existing `ModalCost` framework supports per-mode costs but the upstream cards aren't
+  wired through; landing this is mostly per-card work.
+- **Mark mechanic remnants** (2): Lay Low's marked-defender attacker debuff, Tip-Off's
+  instant-discard-to-mark activation. Both need state we don't have (our hero being
+  marked / discard-from-hand-as-cost).
+- **Hero-ability suppression / global debuffs** (2): "opponent loses all colors", "hero
+  ability does nothing this turn". Needs a turn-scoped opt-out flag the hero ability
+  pipeline reads.
+- **Quicken tokens** (2): Opt-and-quicken-on-reveal, reveal-cost-with-quicken.
+- **No-effect placeholders** (2): cards whose printed text is just a stat line (e.g.
+  Cracked / Titanium Bauble in draft contexts). Mostly a marker-removal / re-categorisation
+  pass.
+- **Ward (opponent damage prevention)** (1): aura that reduces opponent's incoming
+  damage to our hero. New persistent state; one card.
+- **Damage-prevention triggers** (1): "when you prevent damage this turn, fire X".
+- **Deck-top reveal compare + destroy** (1): Crash Down the Gates' reveal-and-cap rider.
+- **Health / Overpower / agility-might-vigor tokens** (1): Down But Not Out's stack of
+  tokens-and-Overpower comparisons.
+- **Chain-history-readable Play** (1): Push the Point's "+2{p} if a card has been played"
+  rider. `CardsPlayed` is read-after-the-fact; the rider needs a mid-chain history pipe.
+- **Self-destroying sigils with leave-arena triggers** (1): Sigil of Cycles' "destroy at
+  start of action phase, leaves arena → discard then draw".
+- **Recycle-to-deck-bottom on next attack** (1): Warmonger's Recital. Implementable today
+  using `CardState.SkipGraveyard` + `RecycleToDeckBottom` from the Relentless Pursuit PR.
+  Just needs the Play wired up.
+- **Misc unique mechanics** (1): on-hit Wizard instant-casting grant (Rifting).
+
 ### Same-turn item activation
 
 Items created mid-chain can't be spent the same turn — only items carried in via
