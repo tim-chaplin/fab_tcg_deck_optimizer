@@ -106,7 +106,6 @@ func runAnnealCmd(args []string) {
 	// noise floor so sub-0.1 wins land that the default 0.1 -min-improvement gate would reject.
 	// Applied as a post-parse override so it composes cleanly with explicit per-flag values.
 	if *finalize {
-		*shuffles = 100000
 		*minImprovement = 0.01
 	}
 
