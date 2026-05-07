@@ -62,7 +62,7 @@ func TestIterateParallel_RunsWithoutPanic(t *testing.T) {
 	d, avg, idx, found := IterateParallel(
 		context.Background(), mutations, baseAvg, 0, 0,
 		30, Matchup{}, 0, 0,
-		rng.Int63(), nil, false,
+		rng.Int63(), nil, false, 0.1,
 	)
 
 	if found {
@@ -104,7 +104,7 @@ func TestIterateParallel_AbortsOnContextCancel(t *testing.T) {
 	d, avg, idx, found := IterateParallel(
 		ctx, mutations, baseAvg, 0, 0,
 		1000, Matchup{}, 0, 0,
-		rng.Int63(), &tested, false,
+		rng.Int63(), &tested, false, 0.1,
 	)
 	elapsed := time.Since(start)
 
@@ -144,7 +144,7 @@ func TestIterateParallel_TerminatesWithNoImprovement(t *testing.T) {
 	d, avg, idx, found := IterateParallel(
 		context.Background(), mutations, 1_000_000.0, 0, 0, // unreachable baseline, T=0
 		100, Matchup{}, 0, 0,
-		rng.Int63(), nil, false,
+		rng.Int63(), nil, false, 0.1,
 	)
 	elapsed := time.Since(start)
 

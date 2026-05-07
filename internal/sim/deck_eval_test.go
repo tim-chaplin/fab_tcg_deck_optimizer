@@ -193,7 +193,7 @@ func TestEvaluateAdaptive_StopsBeforeMaxRunsWhenSEMet(t *testing.T) {
 		deckCards = append(deckCards, GetCard(ids.ReadTheRunesBlue))
 	}
 	d := New(heroes.Viserai{}, []Weapon{weapons.ReapingBlade{}}, deckCards)
-	stats := d.EvaluateAdaptive(Matchup{}, rand.New(rand.NewSource(42)))
+	stats := d.EvaluateAdaptive(0.1, Matchup{}, rand.New(rand.NewSource(42)))
 	if stats.Runs >= AdaptiveShufflesCap {
 		t.Errorf("Runs = %d; expected adaptive stop well before cap=%d", stats.Runs, AdaptiveShufflesCap)
 	}

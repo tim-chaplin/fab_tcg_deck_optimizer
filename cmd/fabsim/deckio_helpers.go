@@ -148,12 +148,13 @@ func resolveDeckPath(name string) string {
 
 // evaluateParallel spins up a DefaultWorkers-wide parallel-shuffle Evaluator and runs d's
 // eval against it, dispatching on shuffles<0 to use the adaptive-stop path or the fixed
-// budget otherwise. Returns the Evaluator alongside the stats so callers that want
-// cache-stats telemetry (eval -debug) can read it off the returned ev.
-func evaluateParallel(d *sim.Deck, shuffles int, mp sim.Matchup, rng *rand.Rand) (sim.Stats, *sim.Evaluator) {
+// budget otherwise. precision is the adaptive target (SE ≤ precision/4); ignored when
+// shuffles >= 0. Returns the Evaluator alongside the stats so callers that want cache-stats
+// telemetry (eval -debug) can read it off the returned ev.
+func evaluateParallel(d *sim.Deck, shuffles int, precision float64, mp sim.Matchup, rng *rand.Rand) (sim.Stats, *sim.Evaluator) {
 	ev := sim.NewEvaluatorParallel(sim.DefaultWorkers())
 	if shuffles < 0 {
-		return d.EvaluateAdaptiveWith(mp, rng, ev), ev
+		return d.EvaluateAdaptiveWith(precision, mp, rng, ev), ev
 	}
 	return d.EvaluateWith(shuffles, mp, rng, ev), ev
 }
