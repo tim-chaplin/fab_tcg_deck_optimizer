@@ -884,22 +884,22 @@ func (s *TurnState) AddTrigger(t Trigger) {
 	s.Triggers = append(s.Triggers, t)
 }
 
-// DestroyAura removes the firing aura from s.Auras and, when addToGraveyard, appends
-// its Self card to s.graveyard. Token-style auras (Self.Card == nil) skip the graveyard
-// append unconditionally. currentAuraIdx names the firing slot — the fire loop maintains
-// it through any mid-handler s.Auras realloc, so the splice resolves to the correct live
-// aura even when CreateRunechants has appended a new aura since the handler started.
+// DestroyAura removes a from s.Auras and, when addToGraveyard, appends a.Self.Card to
+// s.graveyard. Token-style auras (Self.Card == nil) skip the graveyard append
+// unconditionally. The splice uses currentAuraIdx (the fire loop maintains it through
+// any mid-handler s.Auras realloc), so it resolves to the correct live slot even when
+// CreateRunechants has appended a new aura since the handler started; a is read for
+// Self only and may legitimately point at the pre-realloc backing.
 //
 // Direct graveyard append (no cacheable flip): destruction is deterministic from the
 // triggering event the sim already accounts for, not from hidden state.
-func (s *TurnState) DestroyAura(addToGraveyard bool) {
+func (s *TurnState) DestroyAura(a *Aura, addToGraveyard bool) {
+	if addToGraveyard && a.Self.Card != nil {
+		s.graveyard = append(s.graveyard, a.Self.Card)
+	}
 	i := s.currentAuraIdx
 	if i < 0 || i >= len(s.Auras) {
 		return
-	}
-	a := &s.Auras[i]
-	if addToGraveyard && a.Self.Card != nil {
-		s.graveyard = append(s.graveyard, a.Self.Card)
 	}
 	s.Auras = append(s.Auras[:i], s.Auras[i+1:]...)
 	s.currentAuraDestroyed = true

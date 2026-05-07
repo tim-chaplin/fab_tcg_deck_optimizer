@@ -39,5 +39,5 @@ func sigilOfDeadwoodAuraHandler(s *sim.TurnState, _ *sim.Trigger, a *sim.Aura) {
 	name := a.Self.DisplayName()
 	s.CreateRunechants(1)
 	s.LogPostTrigger(name, "Created a runechant", 1)
-	s.DestroyAura(true)
+	s.DestroyAura(a, true)
 }

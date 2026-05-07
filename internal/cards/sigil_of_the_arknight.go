@@ -42,8 +42,8 @@ func (c SigilOfTheArknightBlue) Play(s *sim.TurnState, self *sim.CardState) {
 // it" on a whiff — so the printout makes the random reveal visible either way. Empty deck
 // is the silent edge case (no card to name). PeekDeck flips the cacheable bit either way
 // since the reveal outcome depends on shuffle order.
-func sigilOfTheArknightReveal(s *sim.TurnState, _ *sim.Trigger, _ *sim.Aura) {
-	s.DestroyAura(true)
+func sigilOfTheArknightReveal(s *sim.TurnState, _ *sim.Trigger, a *sim.Aura) {
+	s.DestroyAura(a, true)
 	top, ok := s.PeekDeck()
 	if !ok {
 		return

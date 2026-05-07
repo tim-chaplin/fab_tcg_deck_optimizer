@@ -19,10 +19,10 @@ func damageTrigger(self Card, damage int, calls *int) Aura {
 		Trigger: Trigger{
 			TriggerType: TriggerStartOfTurn,
 			Count:       1,
-			Handler: func(s *TurnState, _ *Trigger, _ *Aura) {
+			Handler: func(s *TurnState, _ *Trigger, a *Aura) {
 				*calls++
 				s.AddValue(damage)
-				s.DestroyAura(true)
+				s.DestroyAura(a, true)
 			},
 		},
 		Self: CardOrTokenType{Card: self},
@@ -83,8 +83,8 @@ func TestProcessAurasAtStartOfTurn_GraveyardsExhaustedAura(t *testing.T) {
 	}
 	_, _, _, _, _ = ProcessAurasAtStartOfTurn([]Aura{
 		{
-			Trigger: Trigger{TriggerType: TriggerStartOfTurn, Count: 1, Handler: func(s *TurnState, _ *Trigger, _ *Aura) {
-				s.DestroyAura(true)
+			Trigger: Trigger{TriggerType: TriggerStartOfTurn, Count: 1, Handler: func(s *TurnState, _ *Trigger, a *Aura) {
+				s.DestroyAura(a, true)
 			}},
 			Self: CardOrTokenType{Card: aura},
 		},

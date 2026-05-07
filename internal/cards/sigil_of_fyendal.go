@@ -38,5 +38,5 @@ func (c SigilOfFyendalBlue) Play(s *sim.TurnState, self *sim.CardState) {
 func sigilOfFyendalAuraHandler(s *sim.TurnState, _ *sim.Trigger, a *sim.Aura) {
 	s.AddValue(1)
 	s.LogPostTrigger(a.Self.DisplayName(), "Gained 1 health", 1)
-	s.DestroyAura(true)
+	s.DestroyAura(a, true)
 }

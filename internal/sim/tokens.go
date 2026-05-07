@@ -64,7 +64,7 @@ func runechantAuraHandler(s *TurnState, _ *Trigger, a *Aura) {
 	if LikelyDamageHits(a.Count, false) {
 		s.ArcaneDamageDealt = true
 	}
-	s.DestroyAura(false)
+	s.DestroyAura(a, false)
 }
 
 // NewRunechantAura returns a runechant token aura at count n. Production code calls
@@ -90,7 +90,7 @@ func ponderAuraHandler(s *TurnState, _ *Trigger, a *Aura) {
 		}
 		s.hand = append(s.hand, c)
 	}
-	s.DestroyAura(false)
+	s.DestroyAura(a, false)
 }
 
 // NewPonderAura returns a ponder token aura at count n. Production code calls

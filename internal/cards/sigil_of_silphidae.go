@@ -49,5 +49,5 @@ func sigilOfSilphidaeAuraHandler(s *sim.TurnState, _ *sim.Trigger, a *sim.Aura) 
 		s.AddValue(n)
 		s.LogPostTrigger(a.Self.DisplayName(), "Banished an aura, dealt 1 arcane damage", n)
 	}
-	s.DestroyAura(true)
+	s.DestroyAura(a, true)
 }

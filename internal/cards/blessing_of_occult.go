@@ -80,7 +80,7 @@ func blessingOfOccultHandler(s *sim.TurnState, _ *sim.Trigger, a *sim.Aura) {
 	name := a.Self.DisplayName()
 	s.CreateRunechants(n)
 	s.LogPostTrigger(name, blessingOfOccultTriggerText[n], n)
-	s.DestroyAura(true)
+	s.DestroyAura(a, true)
 }
 
 func blessingOfOccultPlay(s *sim.TurnState, selfState *sim.CardState, selfCard sim.Card, n int) {
