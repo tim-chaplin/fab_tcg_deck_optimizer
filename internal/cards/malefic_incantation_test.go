@@ -50,8 +50,11 @@ func TestMaleficIncantation_HandlerCreatesOneRunechantPerFire(t *testing.T) {
 	for _, c := range []sim.Card{MaleficIncantationRed{}, MaleficIncantationYellow{}, MaleficIncantationBlue{}} {
 		var s sim.TurnState
 		c.Play(&s, &sim.CardState{Card: c})
-		chain := sim.TurnState{TriggeringCard: c}
-		s.Auras[0].Handler(&chain, &s.Auras[0])
+		chain := sim.NewTurnState(nil, nil)
+		chain.TriggeringCard = c
+		chain.Auras = append(chain.Auras, s.Auras[0])
+		chain.SetCurrentAuraIdxForTesting(0)
+		chain.Auras[0].Handler(chain, &chain.Auras[0].Trigger, &chain.Auras[0])
 		if chain.Value != 1 {
 			t.Errorf("%s: handler Value = %d, want 1", c.Name(), chain.Value)
 		}

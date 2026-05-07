@@ -60,12 +60,14 @@ func (c RunebloodIncantationBlue) Play(s *sim.TurnState, self *sim.CardState) {
 
 // runebloodAuraHandler creates 1 runechant per fire and decrements the verse counter.
 // When the last verse fires, destroys the aura and graveyards the card.
-func runebloodAuraHandler(s *sim.TurnState, t *sim.Aura) {
+func runebloodAuraHandler(s *sim.TurnState, _ *sim.Trigger, a *sim.Aura) {
+	name := a.Self.DisplayName()
+	a.Count--
+	lastVerse := a.Count <= 0
 	s.CreateRunechants(1)
-	s.LogPostTrigger(t.Self.DisplayName(), "Created a runechant (verse counter)", 1)
-	t.Count--
-	if t.Count <= 0 {
-		s.DestroyAura(t, true)
+	s.LogPostTrigger(name, "Created a runechant (verse counter)", 1)
+	if lastVerse {
+		s.DestroyAura(a, true)
 	}
 }
 
@@ -73,10 +75,9 @@ func runebloodAuraHandler(s *sim.TurnState, t *sim.Aura) {
 // chain step (no value contribution; every rune is credited at its future-turn fire).
 func runebloodPlay(s *sim.TurnState, selfState *sim.CardState, selfCard sim.Card, n int) {
 	s.AddAura(sim.Aura{
-		Self:        sim.CardOrTokenType{Card: selfCard},
-		TriggerType: sim.TriggerStartOfTurn,
-		Count:       n,
-		Handler:     runebloodAuraHandler,
+		Trigger: sim.Trigger{TriggerType: sim.TriggerStartOfTurn, Handler: runebloodAuraHandler},
+		Self:    sim.CardOrTokenType{Card: selfCard},
+		Count:   n,
 	})
 	s.Log(selfState, 0)
 }

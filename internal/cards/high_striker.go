@@ -12,19 +12,31 @@ import (
 
 var highStrikerTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction)
 
-func highStrikerOnHit(s *sim.TurnState, target *sim.CardState, t *sim.NextHitTrigger, n int) {
+// highStrikerOnHit{6,4,2} fire on the next hit matching the trigger's TypeFilter (any
+// attack per the printed wording). One top-level function per variant keeps the handler
+// a static function value — no closure allocation per Play.
+func highStrikerOnHit6(s *sim.TurnState, t *sim.Trigger, _ *sim.Aura) {
+	highStrikerCreate(s, t, 6)
+}
+func highStrikerOnHit4(s *sim.TurnState, t *sim.Trigger, _ *sim.Aura) {
+	highStrikerCreate(s, t, 4)
+}
+func highStrikerOnHit2(s *sim.TurnState, t *sim.Trigger, _ *sim.Aura) {
+	highStrikerCreate(s, t, 2)
+}
+
+func highStrikerCreate(s *sim.TurnState, t *sim.Trigger, n int) {
 	s.CreateCopper(n)
-	s.LogPostTriggerf(sim.DisplayName(target.Card), 0,
+	s.LogPostTriggerf(sim.DisplayName(s.TriggeringCard), 0,
 		"%s created %d copper tokens on attack hit", sim.DisplayName(t.Source), n)
 }
 
-func highStrikerPlay(s *sim.TurnState, self *sim.CardState, source sim.Card, n int) {
-	s.RegisterNextHit(sim.NextHitTrigger{
-		Fire: func(s *sim.TurnState, target *sim.CardState, t *sim.NextHitTrigger) {
-			highStrikerOnHit(s, target, t, n)
-		},
-		TypeFilter: card.TypeSet.IsAttack,
-		Source:     source,
+func highStrikerPlay(s *sim.TurnState, self *sim.CardState, source sim.Card, handler sim.TriggerHandler) {
+	s.AddTrigger(sim.Trigger{
+		Source:      source,
+		TriggerType: sim.TriggerHit,
+		TypeFilter:  card.TypeSet.IsAttack,
+		Handler:     handler,
 	})
 	s.Log(self, 0)
 }
@@ -41,7 +53,7 @@ func (HighStrikerRed) Types() card.TypeSet     { return highStrikerTypes }
 func (HighStrikerRed) GoAgain() bool           { return true }
 
 func (c HighStrikerRed) Play(s *sim.TurnState, self *sim.CardState) {
-	highStrikerPlay(s, self, c, 6)
+	highStrikerPlay(s, self, c, highStrikerOnHit6)
 }
 
 type HighStrikerYellow struct{}
@@ -55,7 +67,7 @@ func (HighStrikerYellow) Defense() int            { return 2 }
 func (HighStrikerYellow) Types() card.TypeSet     { return highStrikerTypes }
 func (HighStrikerYellow) GoAgain() bool           { return true }
 func (c HighStrikerYellow) Play(s *sim.TurnState, self *sim.CardState) {
-	highStrikerPlay(s, self, c, 4)
+	highStrikerPlay(s, self, c, highStrikerOnHit4)
 }
 
 type HighStrikerBlue struct{}
@@ -69,5 +81,5 @@ func (HighStrikerBlue) Defense() int            { return 2 }
 func (HighStrikerBlue) Types() card.TypeSet     { return highStrikerTypes }
 func (HighStrikerBlue) GoAgain() bool           { return true }
 func (c HighStrikerBlue) Play(s *sim.TurnState, self *sim.CardState) {
-	highStrikerPlay(s, self, c, 2)
+	highStrikerPlay(s, self, c, highStrikerOnHit2)
 }

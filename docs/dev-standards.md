@@ -27,15 +27,15 @@ Defined in `internal/sim/aura.go`. For cards that "create an aura that fires lat
 
 - `Play` calls `s.AddAura(sim.Aura{...})` with `Self`, `TriggerType`, `Count`, `Handler`. `AddAura` sets `s.AuraCreated = true` for same-turn aura-readers.
 - Sim walks `s.Auras` per matching `TriggerType` and invokes every matching `Handler`. `OncePerTurn` caps an Aura at one fire per turn.
-- **Lifecycle is the handler's job.** When done, the handler calls `s.DestroyAura(t, addToGraveyard)` to splice itself out of `s.Auras` and (when `addToGraveyard`) land `Self` in the graveyard. Counter-based auras decrement `t.Count` and call `DestroyAura` at zero. The sim never mutates `Count` or graveyards on its own.
-- Handlers parallel `Card.Play` — `func(s *sim.TurnState, t *sim.Aura)`, no return. Credit damage / life via `s.AddValue(n)`; emit log via `s.LogPostTrigger`.
+- **Lifecycle is the handler's job.** When done, the handler calls `s.DestroyAura(a, addToGraveyard)` to splice itself out of `s.Auras` and (when `addToGraveyard`) land `Self` in the graveyard. Counter-based auras decrement `a.Count` and call `DestroyAura` at zero. The sim never mutates `Count` or graveyards on its own.
+- Handlers parallel `Card.Play` — `func(s *sim.TurnState, t *sim.Trigger, a *sim.Aura)`, no return. Aura fires pass the firing aura as `a`; standalone trigger fires pass `nil`. Credit damage / life via `s.AddValue(n)`; emit log via `s.LogPostTrigger`.
 
 **Handlers must be top-level functions, not inline closures.** Closures assigned to `Aura.Handler` escape to the heap (`go build -gcflags='-m'` shows `func literal escapes to heap`), allocating one per Play; top-level handlers are static function pointers. Per-variant payloads (R/Y/B rune counts) thread through `Aura.Count` so the handler stays shared:
 
 ```go
-func mySigilAuraHandler(s *sim.TurnState, t *sim.Aura) {
+func mySigilAuraHandler(s *sim.TurnState, _ *sim.Trigger, a *sim.Aura) {
     s.AddValue(1)
-    s.DestroyAura(t, true)
+    s.DestroyAura(a, true)
 }
 
 func (c MySigil) Play(s *sim.TurnState, self *sim.CardState) {

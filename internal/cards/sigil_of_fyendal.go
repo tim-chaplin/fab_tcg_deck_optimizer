@@ -27,18 +27,17 @@ func (SigilOfFyendalBlue) Types() card.TypeSet     { return sigilOfFyendalTypes 
 func (SigilOfFyendalBlue) GoAgain() bool           { return true }
 func (c SigilOfFyendalBlue) Play(s *sim.TurnState, self *sim.CardState) {
 	s.AddAura(sim.Aura{
-		Self:        sim.CardOrTokenType{Card: c},
-		TriggerType: sim.TriggerStartOfTurn,
-		Count:       1,
-		Handler:     sigilOfFyendalAuraHandler,
+		Trigger: sim.Trigger{TriggerType: sim.TriggerStartOfTurn, Handler: sigilOfFyendalAuraHandler},
+		Self:    sim.CardOrTokenType{Card: c},
+		Count:   1,
 	})
 	s.Log(self, 0)
 }
 
 // sigilOfFyendalAuraHandler credits the +1 health (valued 1-to-1 with damage) next turn
 // and destroys the aura. Top-level so Aura.Handler doesn't allocate a closure.
-func sigilOfFyendalAuraHandler(s *sim.TurnState, t *sim.Aura) {
+func sigilOfFyendalAuraHandler(s *sim.TurnState, _ *sim.Trigger, a *sim.Aura) {
 	s.AddValue(1)
-	s.LogPostTrigger(t.Self.DisplayName(), "Gained 1 health", 1)
-	s.DestroyAura(t, true)
+	s.LogPostTrigger(a.Self.DisplayName(), "Gained 1 health", 1)
+	s.DestroyAura(a, true)
 }

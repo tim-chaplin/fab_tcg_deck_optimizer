@@ -32,7 +32,7 @@ func TestSigilOfTheArknight_TriggerRevealsAttackActionIntoHand(t *testing.T) {
 	(SigilOfTheArknightBlue{}).Play(&play, &sim.CardState{Card: SigilOfTheArknightBlue{}})
 	top := testutils.RunebladeAttack{}
 	next := sim.NewTurnState([]sim.Card{top, testutils.NonAttack{}}, nil)
-	play.Auras[0].Handler(next, &play.Auras[0])
+	play.Auras[0].Handler(next, &play.Auras[0].Trigger, &play.Auras[0])
 	if next.Value != 0 {
 		t.Errorf("handler Value = %d, want 0 (tempo credited via the draw, not damage)", next.Value)
 	}
@@ -50,7 +50,7 @@ func TestSigilOfTheArknight_TriggerRevealsNonAttack(t *testing.T) {
 	var play sim.TurnState
 	(SigilOfTheArknightBlue{}).Play(&play, &sim.CardState{Card: SigilOfTheArknightBlue{}})
 	next := sim.NewTurnState([]sim.Card{testutils.Aura{}, testutils.RunebladeAttack{}}, nil)
-	play.Auras[0].Handler(next, &play.Auras[0])
+	play.Auras[0].Handler(next, &play.Auras[0].Trigger, &play.Auras[0])
 	if next.Value != 0 {
 		t.Errorf("handler Value = %d, want 0", next.Value)
 	}
@@ -67,7 +67,7 @@ func TestSigilOfTheArknight_TriggerEmptyDeck(t *testing.T) {
 	var play sim.TurnState
 	(SigilOfTheArknightBlue{}).Play(&play, &sim.CardState{Card: SigilOfTheArknightBlue{}})
 	var next sim.TurnState
-	play.Auras[0].Handler(&next, &play.Auras[0])
+	play.Auras[0].Handler(&next, &play.Auras[0].Trigger, &play.Auras[0])
 	if next.Value != 0 {
 		t.Errorf("handler Value = %d, want 0", next.Value)
 	}

@@ -52,8 +52,8 @@ func TestAddAura_FlipsAuraCreatedAndAppends(t *testing.T) {
 	if s.AuraCreated {
 		t.Fatal("pre: AuraCreated should be false")
 	}
-	s.AddAura(Aura{Self: CardOrTokenType{Card: self}, TriggerType: TriggerStartOfTurn, Count: 2})
-	s.AddAura(Aura{Self: CardOrTokenType{Card: self}, TriggerType: TriggerStartOfTurn, Count: 1})
+	s.AddAura(Aura{Trigger: Trigger{TriggerType: TriggerStartOfTurn}, Self: CardOrTokenType{Card: self}, Count: 2})
+	s.AddAura(Aura{Trigger: Trigger{TriggerType: TriggerStartOfTurn}, Self: CardOrTokenType{Card: self}, Count: 1})
 	if !s.AuraCreated {
 		t.Error("AuraCreated = false, want true")
 	}

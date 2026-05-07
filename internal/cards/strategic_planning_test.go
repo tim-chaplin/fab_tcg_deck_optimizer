@@ -1,0 +1,40 @@
+package cards
+
+import (
+	"testing"
+
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
+)
+
+// Tests that Strategic Planning queues a TriggerEndOfTurn keyed to itself, not a Ponder.
+func TestStrategicPlanning_QueuesEndOfTurnTrigger(t *testing.T) {
+	for _, c := range []sim.Card{StrategicPlanningRed{}, StrategicPlanningYellow{}, StrategicPlanningBlue{}} {
+		s := sim.NewTurnState(nil, nil)
+		c.Play(s, &sim.CardState{Card: c})
+		matching := 0
+		for _, tr := range s.Triggers {
+			if tr.TriggerType == sim.TriggerEndOfTurn && tr.Source == c {
+				matching++
+			}
+		}
+		if matching != 1 {
+			t.Errorf("%s [%d{p}]: end-of-turn triggers keyed to self = %d, want 1", c.Name(), c.Pitch(), matching)
+		}
+		if s.Ponders() != 0 {
+			t.Errorf("%s [%d{p}]: Ponders = %d, want 0 (trigger is standalone, not a Ponder token)", c.Name(), c.Pitch(), s.Ponders())
+		}
+	}
+}
+
+// Tests that an eligible graveyard action is recycled to the bottom of the deck.
+func TestStrategicPlanning_RecyclesEligibleActionToBottom(t *testing.T) {
+	target := testutils.GenericAction()
+	deck := []sim.Card{testutils.BlueAttack{}}
+	s := sim.NewTurnState(deck, []sim.Card{target})
+	(StrategicPlanningRed{}).Play(s, &sim.CardState{Card: StrategicPlanningRed{}})
+	gotDeck := s.Deck()
+	if len(gotDeck) != 2 || gotDeck[1] != sim.Card(target) {
+		t.Errorf("deck after recycle = %v, want target at bottom under BlueAttack", gotDeck)
+	}
+}
