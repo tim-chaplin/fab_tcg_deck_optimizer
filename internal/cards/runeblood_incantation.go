@@ -75,8 +75,9 @@ func runebloodAuraHandler(s *sim.TurnState, _ *sim.Trigger, a *sim.Aura) {
 // chain step (no value contribution; every rune is credited at its future-turn fire).
 func runebloodPlay(s *sim.TurnState, selfState *sim.CardState, selfCard sim.Card, n int) {
 	s.AddAura(sim.Aura{
-		Trigger: sim.Trigger{TriggerType: sim.TriggerStartOfTurn, Count: n, Handler: runebloodAuraHandler},
+		Trigger: sim.Trigger{TriggerType: sim.TriggerStartOfTurn, Handler: runebloodAuraHandler},
 		Self:    sim.CardOrTokenType{Card: selfCard},
+		Count:   n,
 	})
 	s.Log(selfState, 0)
 }

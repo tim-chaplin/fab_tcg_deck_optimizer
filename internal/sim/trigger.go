@@ -8,8 +8,8 @@ import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 // TriggerHit hit-riders today, nil = no filter); Handler runs when the trigger fires.
 //
 // Aura embeds Trigger by value (see aura.go) and adds persistent-instance state
-// (Self, OncePerTurn, FiredThisTurn). Standalone Triggers — the sim removes them after
-// firing — are stored on TurnState.Triggers and added via AddTrigger.
+// (Self, OncePerTurn, FiredThisTurn, Count). Standalone Triggers — the sim removes them
+// after firing — are stored on TurnState.Triggers and added via AddTrigger.
 //
 // Handlers receive (s, t, a): for aura fires a is the firing aura, for standalone
 // trigger fires a is nil. Handlers that mutate s.Auras (e.g. via CreateRunechants, which
@@ -28,11 +28,6 @@ type Trigger struct {
 	TriggerType TriggerType
 	// TypeFilter optionally narrows TriggerHit to a card-type predicate. nil = no filter.
 	TypeFilter func(card.TypeSet) bool
-	// Count is a handler-defined counter — Malefic / Runeblood read it as fires remaining
-	// and decrement themselves; Runechant reads it as a copy count; standalone triggers
-	// like High Striker store the per-variant payload (e.g. token count). Sim treats it
-	// as opaque storage.
-	Count int
 	// Handler runs when TriggerType (and TypeFilter, if set) match.
 	Handler TriggerHandler
 }

@@ -27,8 +27,9 @@ func (SigilOfDeadwoodBlue) Types() card.TypeSet     { return sigilOfDeadwoodType
 func (SigilOfDeadwoodBlue) GoAgain() bool           { return true }
 func (c SigilOfDeadwoodBlue) Play(s *sim.TurnState, self *sim.CardState) {
 	s.AddAura(sim.Aura{
-		Trigger: sim.Trigger{TriggerType: sim.TriggerStartOfTurn, Count: 1, Handler: sigilOfDeadwoodAuraHandler},
+		Trigger: sim.Trigger{TriggerType: sim.TriggerStartOfTurn, Handler: sigilOfDeadwoodAuraHandler},
 		Self:    sim.CardOrTokenType{Card: c},
+		Count:   1,
 	})
 	s.Log(self, 0)
 }

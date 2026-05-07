@@ -85,8 +85,9 @@ func blessingOfOccultHandler(s *sim.TurnState, _ *sim.Trigger, a *sim.Aura) {
 
 func blessingOfOccultPlay(s *sim.TurnState, selfState *sim.CardState, selfCard sim.Card, n int) {
 	s.AddAura(sim.Aura{
-		Trigger: sim.Trigger{TriggerType: sim.TriggerStartOfTurn, Count: n, Handler: blessingOfOccultHandler},
+		Trigger: sim.Trigger{TriggerType: sim.TriggerStartOfTurn, Handler: blessingOfOccultHandler},
 		Self:    sim.CardOrTokenType{Card: selfCard},
+		Count:   n,
 	})
 	s.Log(selfState, 0)
 }

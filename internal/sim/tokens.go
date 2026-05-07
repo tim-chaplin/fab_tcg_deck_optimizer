@@ -72,8 +72,9 @@ func runechantAuraHandler(s *TurnState, _ *Trigger, a *Aura) {
 // factory is for tests that need to seed a runechant aura without the damage credit.
 func NewRunechantAura(n int) Aura {
 	return Aura{
-		Trigger: Trigger{TriggerType: TriggerAttack, Count: n, Handler: runechantAuraHandler},
+		Trigger: Trigger{TriggerType: TriggerAttack, Handler: runechantAuraHandler},
 		Self:    CardOrTokenType{TokenType: TokenTypeRunechant},
+		Count:   n,
 	}
 }
 
@@ -97,8 +98,9 @@ func ponderAuraHandler(s *TurnState, _ *Trigger, a *Aura) {
 // s.CreatePonder instead; this factory is for tests that need to seed the aura directly.
 func NewPonderAura(n int) Aura {
 	return Aura{
-		Trigger: Trigger{TriggerType: TriggerEndOfTurn, Count: n, Handler: ponderAuraHandler},
+		Trigger: Trigger{TriggerType: TriggerEndOfTurn, Handler: ponderAuraHandler},
 		Self:    CardOrTokenType{TokenType: TokenTypePonder},
+		Count:   n,
 	}
 }
 

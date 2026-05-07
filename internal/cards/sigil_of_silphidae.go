@@ -30,8 +30,9 @@ func (SigilOfSilphidaeBlue) GoAgain() bool           { return true }
 func (c SigilOfSilphidaeBlue) Play(s *sim.TurnState, self *sim.CardState) {
 	enterDamage := banishAuraFromGraveyard(s)
 	s.AddAura(sim.Aura{
-		Trigger: sim.Trigger{TriggerType: sim.TriggerStartOfTurn, Count: 1, Handler: sigilOfSilphidaeAuraHandler},
+		Trigger: sim.Trigger{TriggerType: sim.TriggerStartOfTurn, Handler: sigilOfSilphidaeAuraHandler},
 		Self:    sim.CardOrTokenType{Card: c},
+		Count:   1,
 	})
 	n := self.DealEffectiveAttack(s)
 	s.Log(self, n)

@@ -73,12 +73,19 @@ func (c CardOrTokenType) DisplayName() string {
 // is set, at most once per turn — the sim invokes Handler. The Aura survives until
 // its handler calls s.DestroyAura.
 type Aura struct {
-	// Trigger embeds the firing-data (Source, TriggerType, TypeFilter, Count, Handler).
-	// Aura handlers receive (s, t, a); the aura-specific fields below are reached via a.
+	// Trigger embeds the firing-data (Source, TriggerType, TypeFilter, Handler). Aura
+	// handlers receive (s, t, a); the aura-specific fields below are reached via a.
 	Trigger
 	// Self identifies what this Aura belongs to — a card or a token type. Surfaced in
 	// per-turn summaries via CardOrTokenType.DisplayName.
 	Self CardOrTokenType
+	// Count is a per-aura counter the handler defines: Malefic / Runeblood read it as
+	// fires remaining and decrement themselves; Runechant / Ponder read it as a stack
+	// count; Blessing reads it as runes to create on the only fire. The partition
+	// tiebreak (pendingFutureValue) also sums Count across all live auras as an
+	// estimate of unrealised next-turn value, so even single-fire auras with no
+	// counter semantics set Count: 1 to advertise their pending payoff.
+	Count int
 	// OncePerTurn caps the Handler at a single fire per turn regardless of how many matching
 	// events occur. The sim sets FiredThisTurn the first time Handler runs each turn and
 	// clears it at the next turn boundary.
