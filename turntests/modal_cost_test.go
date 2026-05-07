@@ -6,7 +6,6 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/cards"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/heroes"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
 )
 
 // Tests that Bluster Buff picks mode 1 (pay extra {r} for full 6{p}) when the partition's
@@ -15,7 +14,7 @@ func TestModalCost_BlusterBuffPicksMode1WhenAffordable(t *testing.T) {
 	d := sim.New(heroes.Viserai{}, nil, fillerDeck())
 	hand := []sim.Card{
 		cards.BlusterBuffRed{},
-		testutils.BluePitch{},
+		cards.TitaniumBaubleBlue{},
 	}
 	got := d.EvalOneTurnForTesting(sim.Matchup{IncomingDamage: 0}, sim.TurnState{}, hand).Value
 	if got != 6 {
@@ -44,7 +43,7 @@ func TestModalCost_LookTuffPicksMode1WhenAffordable(t *testing.T) {
 	d := sim.New(heroes.Viserai{}, nil, fillerDeck())
 	hand := []sim.Card{
 		cards.LookTuffRed{},
-		testutils.BluePitch{},
+		cards.TitaniumBaubleBlue{},
 		cards.LookTuffRed{}, // pitch supply: BluePitch 3 + 1 = 4
 	}
 	got := d.EvalOneTurnForTesting(sim.Matchup{IncomingDamage: 0}, sim.TurnState{}, hand).Value

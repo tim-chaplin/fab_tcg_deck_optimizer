@@ -168,8 +168,9 @@ func (Aura) Play(*sim.TurnState, *sim.CardState) {}
 var genericAttackTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeAttack)
 
 // RedPitch is a pure-pitch generic non-attack action: pitches 1, no attack, no defense,
-// no go again. Mirrors BluePitch but at the red-pitch tier so tests can fund a single
-// resource without the partition having to repurpose the card as an attacker or blocker.
+// no go again. Tests use it to fund a single red resource without the partition being
+// able to repurpose the card as an attacker or blocker. (Tests at the blue-pitch tier
+// use cards.TitaniumBaubleBlue, the printed Resource-typed bauble.)
 type RedPitch struct{}
 
 func (RedPitch) ID() ids.CardID          { return FakeRedPitch }
@@ -183,24 +184,6 @@ func (RedPitch) Types() card.TypeSet {
 }
 func (RedPitch) GoAgain() bool                              { return false }
 func (RedPitch) Play(s *sim.TurnState, self *sim.CardState) { s.Log(self, 0) }
-
-// BluePitch is a pure-pitch generic non-attack action: pitches 3, no attack, no defense,
-// no go again. Useful as a "blue pitch source" in tests where the optimal line should be
-// unambiguous — the optimizer can't repurpose it as an attacker or blocker, so the only
-// reasonable use is to pitch it.
-type BluePitch struct{}
-
-func (BluePitch) ID() ids.CardID          { return FakeBluePitch }
-func (BluePitch) Name() string            { return "cardtest.BluePitch" }
-func (BluePitch) Cost(*sim.TurnState) int { return 0 }
-func (BluePitch) Pitch() int              { return 3 }
-func (BluePitch) Attack() int             { return 0 }
-func (BluePitch) Defense() int            { return 0 }
-func (BluePitch) Types() card.TypeSet {
-	return card.NewTypeSet(card.TypeGeneric, card.TypeAction)
-}
-func (BluePitch) GoAgain() bool                              { return false }
-func (BluePitch) Play(s *sim.TurnState, self *sim.CardState) { s.Log(self, 0) }
 
 // BlueAttack is a generic blue attack action: pitches 3, defends 3, attacks 1, costs 1.
 type BlueAttack struct{}

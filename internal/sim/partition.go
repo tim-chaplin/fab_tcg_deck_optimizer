@@ -96,8 +96,9 @@ func (e *Evaluator) findBest(hero Hero, weapons []Weapon, hand []Card, mp Matchu
 	dvals := bufs.defenseVals[:totalN]
 	isDR := bufs.isDRBuf[:totalN]
 	canAttack := bufs.canAttackBuf[:totalN]
+	canBlock := bufs.canBlockBuf[:totalN]
 
-	fillPartitionPerCardBufs(hand, n, totalN, arsenalCardIn, pvals, dvals, isDR, canAttack)
+	fillPartitionPerCardBufs(hand, n, totalN, arsenalCardIn, pvals, dvals, isDR, canAttack, canBlock)
 
 	var recurse func(i, pitchSum, defenseSum int)
 	recurse = func(i, pitchSum, defenseSum int) {
@@ -148,7 +149,7 @@ func (e *Evaluator) findBest(hero Hero, weapons []Weapon, hand []Card, mp Matchu
 			maxRole = Arsenal
 		}
 		for r := Role(0); r <= maxRole; r++ {
-			if !roleAllowed(r, isArsenalSlot, isDR[i], canAttack[i]) {
+			if !roleAllowed(r, isArsenalSlot, isDR[i], canAttack[i], canBlock[i]) {
 				continue
 			}
 			// FaB rule: defense reactions and plain blocks only happen during the defend step
@@ -207,7 +208,11 @@ func (e *Evaluator) findBest(hero Hero, weapons []Weapon, hand []Card, mp Matchu
 // hand — partition Held cards plus anything tutored mid-chain) and moves it into
 // best.State.Arsenal, removing it from State.Hand. Deterministic per-hand pick (hashed from
 // sorted starting-hand IDs + Hand IDs + arsenal-in ID) so equivalent inputs always promote
-// the same card. No-op when State.Hand is empty.
+// the same card. No-op when State.Hand has no arsenal-eligible cards.
+//
+// Resource-typed cards (baubles) are skipped — Resources can't be played from arsenal, so
+// arsenaling one would just lock it in the slot forever. Pure-Resource hands leave the
+// arsenal empty.
 //
 // When the promoted card matches a Held entry in BestLine, that entry's Role flips to
 // Arsenal so the per-card display still attributes the slot. Tutored cards (not in BestLine)
@@ -216,7 +221,17 @@ func promoteRandomHandCardToArsenal(best *TurnSummary, startingHand []Card, arse
 	if len(best.State.Hand) == 0 {
 		return
 	}
-	pick := int(arsenalPromotionHash(startingHand, best.State.Hand, arsenalCardIn) % uint64(len(best.State.Hand)))
+	// Build the pool of arsenal-eligible Hand indices, skipping Resources.
+	eligible := make([]int, 0, len(best.State.Hand))
+	for i, c := range best.State.Hand {
+		if !c.Types().IsResource() {
+			eligible = append(eligible, i)
+		}
+	}
+	if len(eligible) == 0 {
+		return
+	}
+	pick := eligible[int(arsenalPromotionHash(startingHand, best.State.Hand, arsenalCardIn)%uint64(len(eligible)))]
 	chosen := best.State.Hand[pick]
 	best.State.Arsenal = chosen
 	best.State.Hand = append(best.State.Hand[:pick:pick], best.State.Hand[pick+1:]...)
@@ -301,8 +316,9 @@ func findArsenalCard(rolesBuf []Role, arsenalCardIn Card, n int) Card {
 // blocking from arsenal isn't legal). Hand cards take any role except Attack for cards that
 // can't take Attack role at all (DRs and Block-typed cards lack the Action / Weapon subtype);
 // their role loop caps at Held, so the "which Held card gets arsenaled" choice happens
-// post-hoc and doesn't bias toward low-ID slots.
-func roleAllowed(r Role, isArsenalSlot, isDefenseReaction, canAttack bool) bool {
+// post-hoc and doesn't bias toward low-ID slots. Resource-typed cards (canBlock=false) also
+// reject Defend so the only roles they can take are Pitch and Held.
+func roleAllowed(r Role, isArsenalSlot, isDefenseReaction, canAttack, canBlock bool) bool {
 	if isArsenalSlot {
 		switch r {
 		case Pitch, Held:
@@ -314,7 +330,13 @@ func roleAllowed(r Role, isArsenalSlot, isDefenseReaction, canAttack bool) bool 
 		}
 		return true // Arsenal is always allowed on the arsenal-in slot.
 	}
-	return r != Attack || canAttack
+	if r == Attack {
+		return canAttack
+	}
+	if r == Defend {
+		return canBlock
+	}
+	return true
 }
 
 // defendersDamage tallies the total Value contribution of the partition's defense phase. DRs

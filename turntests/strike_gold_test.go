@@ -14,9 +14,9 @@ func TestStrikeGold_OnHitCreatesGoldToken(t *testing.T) {
 	d := sim.New(heroes.Viserai{}, nil, fillerDeck())
 	hand := []sim.Card{
 		cards.StrikeGoldRed{},
-		testutils.BluePitch{},
-		testutils.BluePitch{},
-		testutils.BluePitch{},
+		cards.TitaniumBaubleBlue{},
+		cards.TitaniumBaubleBlue{},
+		cards.TitaniumBaubleBlue{},
 	}
 	state := d.EvalOneTurnForTesting(sim.Matchup{IncomingDamage: 0}, sim.TurnState{}, hand)
 	if state.Value != 4 {
@@ -33,9 +33,9 @@ func TestStrikeGold_BlockableMissDoesNotCreateGold(t *testing.T) {
 	d := sim.New(heroes.Viserai{}, nil, fillerDeck())
 	hand := []sim.Card{
 		cards.StrikeGoldYellow{},
-		testutils.BluePitch{},
-		testutils.BluePitch{},
-		testutils.BluePitch{},
+		cards.TitaniumBaubleBlue{},
+		cards.TitaniumBaubleBlue{},
+		cards.TitaniumBaubleBlue{},
 	}
 	state := d.EvalOneTurnForTesting(sim.Matchup{IncomingDamage: 0}, sim.TurnState{}, hand)
 	if state.Value != 3 {
@@ -52,9 +52,9 @@ func TestStrikeGold_GoldAbilityPlayableNextTurn(t *testing.T) {
 	deck := []sim.Card{
 		// Turn 1 hand.
 		cards.StrikeGoldRed{},
-		testutils.BluePitch{},
-		testutils.BluePitch{},
-		testutils.BluePitch{},
+		cards.TitaniumBaubleBlue{},
+		cards.TitaniumBaubleBlue{},
+		cards.TitaniumBaubleBlue{},
 		// Turn 2 hand: red pitches to fund the Gold ability ({2}).
 		testutils.RedAttack{},
 		testutils.RedAttack{},

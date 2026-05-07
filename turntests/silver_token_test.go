@@ -3,6 +3,7 @@ package turntests
 import (
 	"testing"
 
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/cards"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/heroes"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
@@ -17,7 +18,7 @@ func TestSilverAbility_SpendsToFillArsenal(t *testing.T) {
 		testutils.RedAttack{}, testutils.RedAttack{},
 	}
 	d := sim.New(heroes.Viserai{}, nil, deck)
-	hand := []sim.Card{testutils.BluePitch{}}
+	hand := []sim.Card{cards.TitaniumBaubleBlue{}}
 	priorItems := []sim.Item{sim.NewSilverItem(1)}
 	got := d.EvalOneTurnForTesting(sim.Matchup{IncomingDamage: 0}, sim.TurnState{Items: priorItems}, hand)
 	if got.Value != 0 {
@@ -46,7 +47,7 @@ func TestSilverAbility_SpendsAndSwings(t *testing.T) {
 		testutils.RedAttack{}, testutils.RedAttack{},
 	}
 	d := sim.New(heroes.Viserai{}, []sim.Weapon{weapons.ReapingBlade{}}, deck)
-	hand := []sim.Card{testutils.BluePitch{}, testutils.BluePitch{}}
+	hand := []sim.Card{cards.TitaniumBaubleBlue{}, cards.TitaniumBaubleBlue{}}
 	priorItems := []sim.Item{sim.NewSilverItem(1)}
 	got := d.EvalOneTurnForTesting(sim.Matchup{IncomingDamage: 0}, sim.TurnState{Items: priorItems}, hand)
 	if got.Value != 3 {

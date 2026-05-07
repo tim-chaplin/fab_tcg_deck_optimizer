@@ -28,7 +28,7 @@ func TestYintiYanti_SeesRunechantFromReduceInDefense(t *testing.T) {
 // credits +1{p}. Blue pitch funds Peace of Mind's cost.
 func TestYintiYanti_SeesPonderFromPeaceOfMindInDefense(t *testing.T) {
 	d := sim.New(heroes.Viserai{}, nil, fillerDeck())
-	hand := []sim.Card{cards.YintiYantiRed{}, cards.PeaceOfMindRed{}, testutils.BluePitch{}}
+	hand := []sim.Card{cards.YintiYantiRed{}, cards.PeaceOfMindRed{}, cards.TitaniumBaubleBlue{}}
 	got := d.EvalOneTurnForTesting(sim.Matchup{IncomingDamage: 4}, sim.TurnState{}, hand).Value
 	if got != 8 {
 		t.Fatalf("Value = %d, want 8 (Peace of Mind defense 4 + Yinti Yanti 4 with +1 aura bonus from Ponder)", got)
@@ -50,7 +50,7 @@ func TestYintiYanti_BlueBlockSeesRunechantFromReduceInDefense(t *testing.T) {
 // DR puts in s.Auras (DR runs first, populating auras before the plain-block hook).
 func TestYintiYanti_BlueBlockSeesPonderFromPeaceOfMindInDefense(t *testing.T) {
 	d := sim.New(heroes.Viserai{}, nil, fillerDeck())
-	hand := []sim.Card{cards.YintiYantiBlue{}, cards.PeaceOfMindRed{}, testutils.BluePitch{}}
+	hand := []sim.Card{cards.YintiYantiBlue{}, cards.PeaceOfMindRed{}, cards.TitaniumBaubleBlue{}}
 	got := d.EvalOneTurnForTesting(sim.Matchup{IncomingDamage: 7}, sim.TurnState{}, hand).Value
 	if got != 7 {
 		t.Fatalf("Value = %d, want 7 (Peace of Mind defense 4 + Yinti Yanti block 3 with +1 aura bonus from Ponder)", got)

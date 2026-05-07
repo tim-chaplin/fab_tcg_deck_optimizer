@@ -8,9 +8,8 @@ package testutils
 import "github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
 
 // FakeRedAttack and friends are the Fake-prefix synthetic IDs the StubCard, GenericAttack,
-// and named-fixture fakes (BluePitch, BlueAttack, RedAttack, …) hand back from ID().
-// Anchored past the last token-ability ID so fakes don't collide with any production
-// printing.
+// and named-fixture fakes (BlueAttack, RedAttack, …) hand back from ID(). Anchored past
+// the last token-ability ID so fakes don't collide with any production printing.
 const (
 	FakeRedAttack ids.CardID = ids.CopperTokenAbilityID + iota + 1
 	FakeBlueAttack
@@ -19,7 +18,6 @@ const (
 	FakeCostlyAttack
 	FakePitchOneDR
 	FakeHugeAttack
-	FakeBluePitch
 	FakeInstant
 	FakeNoGoAgainAttack
 	FakeClubWeapon

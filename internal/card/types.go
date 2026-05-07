@@ -23,6 +23,7 @@ const (
 	TypeInstant                              // "Instant"
 	TypeItem                                 // "Item"
 	TypeOneHand                              // "1H"
+	TypeResource                             // "Resource"
 	TypeRuneblade                            // "Runeblade"
 	TypeScepter                              // "Scepter"
 	TypeSword                                // "Sword"
@@ -100,4 +101,12 @@ func (s TypeSet) IsDefenseReaction() bool {
 // IsAttackReaction reports whether s has the Attack Reaction subtype.
 func (s TypeSet) IsAttackReaction() bool {
 	return s&TypeSet(TypeAttackReaction) != 0
+}
+
+// IsResource reports whether s carries the Resource type. Resource cards are pitch-only
+// — the partition rejects them as attackers, blockers, defense reactions, and post-hoc
+// arsenal-promotion targets so the only role they can take is Pitch (or Held to be
+// discarded).
+func (s TypeSet) IsResource() bool {
+	return s&TypeSet(TypeResource) != 0
 }
