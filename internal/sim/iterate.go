@@ -54,6 +54,7 @@ type iterateWorkerConfig struct {
 	completed      *atomic.Int64
 	cache          *Cache
 	adaptive       bool
+	precision      float64
 }
 
 // IterateParallel runs one iterate-mode round. mutationWorkers goroutines pull mutation
@@ -95,8 +96,9 @@ type iterateWorkerConfig struct {
 //
 // bestAvg is the current deck's avg (SA "current state", not the all-time best). seed is
 // a base; worker w uses a derived stream. completed is an optional live-progress counter.
-// adaptive=true makes per-mutation evals stop early when the SE target is met (capped by
-// the deck package's adaptiveShufflesCap, ignoring the shuffles arg).
+// adaptive=true makes per-mutation evals stop early at the requested precision (SE ≤
+// precision/4), capped by the deck package's adaptiveShufflesCap. precision is ignored
+// when adaptive=false.
 //
 // Returns (acceptedDeck, acceptedAvg, acceptedIndex, true) on first acceptance, or
 // (nil, bestAvg, -1, false) if nothing cleared the gate or ctx was cancelled.
@@ -112,6 +114,7 @@ func IterateParallel(
 	seed int64,
 	completed *atomic.Int64,
 	adaptive bool,
+	precision float64,
 ) (*Deck, float64, int, bool) {
 	if mutationWorkers <= 0 {
 		// 1 mutation worker is the empirical default — see the BenchmarkAnnealWorkerSweep
@@ -152,6 +155,7 @@ func IterateParallel(
 		completed:      completed,
 		cache:          NewCache(),
 		adaptive:       adaptive,
+		precision:      precision,
 	}
 
 	var wg sync.WaitGroup
@@ -211,7 +215,7 @@ func runIterateWorker(
 		d := New(mut.Deck.Hero, mut.Deck.Weapons, mut.Deck.Cards)
 		var avg float64
 		if cfg.adaptive {
-			avg = d.EvaluateAdaptiveWith(cfg.matchup, rng, ev).Mean()
+			avg = d.EvaluateAdaptiveWith(cfg.precision, cfg.matchup, rng, ev).Mean()
 		} else {
 			avg = d.EvaluateWith(cfg.shuffles, cfg.matchup, rng, ev).Mean()
 		}

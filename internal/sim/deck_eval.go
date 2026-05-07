@@ -33,18 +33,20 @@ func (d *Deck) EvaluateWith(runs int, mp Matchup, rng *rand.Rand, ev *Evaluator)
 	return d.evaluateImpl(runs, mp, rng, ev, nil)
 }
 
-// EvaluateAdaptive runs shuffles until the standard error of the per-turn mean Value drops
-// below adaptiveTargetSE, capped at adaptiveShufflesCap. SE is checked every
-// adaptiveCheckInterval shuffles. Use when knowing the mean to ±adaptiveTargetSE is enough;
-// modes that need apples-to-apples shuffle counts (compare, explicit -shuffles) should use
-// EvaluateWith with a fixed runs count.
-func (d *Deck) EvaluateAdaptive(mp Matchup, rng *rand.Rand) Stats {
-	return d.EvaluateAdaptiveWith(mp, rng, nil)
+// EvaluateAdaptive runs shuffles until the per-turn mean's standard error drops to
+// precision/4 — a ~95% confidence interval of ±precision/2 around the running mean — capped
+// at adaptiveShufflesCap. SE is checked every adaptiveCheckInterval shuffles. Use when
+// knowing the mean to within precision is enough; modes that need apples-to-apples shuffle
+// counts (compare, explicit -shuffles) should use EvaluateWith with a fixed runs count.
+// Order-of-magnitude scale on a Viserai deck: precision=0.1 ≈ 1k shuffles, precision=0.01
+// ≈ 80k shuffles.
+func (d *Deck) EvaluateAdaptive(precision float64, mp Matchup, rng *rand.Rand) Stats {
+	return d.EvaluateAdaptiveWith(precision, mp, rng, nil)
 }
 
 // EvaluateAdaptiveWith is EvaluateAdaptive using the given Evaluator.
-func (d *Deck) EvaluateAdaptiveWith(mp Matchup, rng *rand.Rand, ev *Evaluator) Stats {
-	return d.evaluateImpl(adaptiveShufflesCap, mp, rng, ev, makeAdaptiveStop(adaptiveTargetSE))
+func (d *Deck) EvaluateAdaptiveWith(precision float64, mp Matchup, rng *rand.Rand, ev *Evaluator) Stats {
+	return d.evaluateImpl(adaptiveShufflesCap, mp, rng, ev, makeAdaptiveStop(precision/4))
 }
 
 // shuffleStopper is the early-stop policy for the eval shuffle loop. Called once after each
@@ -59,15 +61,11 @@ const (
 	// decks converge in ~2000 shuffles instead of being forced to 8000 by a too-large chunk.
 	// Going below 50 stops paying off as barrier overhead dominates.
 	adaptiveCheckInterval = 50
-	// adaptiveTargetSE is the standard-error target the adaptive shuffle path stops at.
-	// ±0.01 is tight enough to distinguish small per-deck differences during anneal
-	// optimisation. Hand-value sigma sits around 4-6, so SE = 0.01 typically takes
-	// 5-7k shuffles to converge.
-	adaptiveTargetSE = 0.05
 	// adaptiveShufflesCap is the upper bound on the adaptive shuffle path. Caps a
-	// pathological high-variance regime that doesn't converge to adaptiveTargetSE — the
-	// run still terminates at this many shuffles even if the SE target was never hit.
-	adaptiveShufflesCap = 50000
+	// pathological high-variance regime that doesn't converge — the run terminates at this
+	// many shuffles even if the SE target was never hit. Sized for precision=0.01 (~82k
+	// shuffles on a baseline Viserai deck) with headroom for higher-variance heroes.
+	adaptiveShufflesCap = 200000
 )
 
 // makeAdaptiveStop returns a shuffleStopper that fires when the per-turn mean's standard

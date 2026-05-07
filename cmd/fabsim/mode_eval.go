@@ -21,7 +21,8 @@ func runEvalCmd(args []string) {
 		fmt.Fprintln(fs.Output(), "Flags:")
 		fs.PrintDefaults()
 	}
-	shuffles := fs.Int("shuffles", -1, "per-eval shuffle budget. -1 (default) runs adaptively, stopping once the per-turn mean's standard error drops below the built-in target. Any non-negative value runs exactly that many shuffles (apples-to-apples re-scores, repro flows).")
+	shuffles := fs.Int("shuffles", -1, "per-eval shuffle budget. -1 (default) runs adaptively to -precision. Any non-negative value runs exactly that many shuffles (apples-to-apples re-scores, repro flows).")
+	precision := fs.Float64("precision", 0.1, "adaptive-eval precision target — stop once the per-turn mean's standard error falls to precision/4 (≈ ±precision/2 on the reported value with 95% confidence). Only relevant when -shuffles is negative (adaptive mode).")
 	incoming := fs.Int("incoming", 0, "opponent damage per turn (required unless -print-only is set — must match the value the deck was annealed at for comparable numbers)")
 	arcaneIncoming := fs.Int("arcane-incoming", 0, "opponent arcane damage per turn (defaults to 0 — the non-arcane matchup; raise it to score cards that gate on incoming arcane)")
 	seed := fs.Int64("seed", time.Now().UnixNano(), "RNG seed")
@@ -42,7 +43,7 @@ func runEvalCmd(args []string) {
 		die("%v", err)
 	}
 	sim.OptDebug = *debug
-	runEval(resolveDeckPath(fs.Arg(0)), *shuffles, sim.Matchup{IncomingDamage: *incoming, ArcaneIncomingDamage: *arcaneIncoming}, *maxCopies, *seed, fmtValue, *printOnly, *brief, *debug)
+	runEval(resolveDeckPath(fs.Arg(0)), *shuffles, *precision, sim.Matchup{IncomingDamage: *incoming, ArcaneIncomingDamage: *arcaneIncoming}, *maxCopies, *seed, fmtValue, *printOnly, *brief, *debug)
 }
 
 // runEval loads the deck at outPath and prints its stats. Default behaviour (printOnly=false)
@@ -62,9 +63,9 @@ func runEvalCmd(args []string) {
 // debug=true prints extra telemetry to stderr after the run — currently the hand-eval
 // cache hit rate. Only meaningful when a fresh simulation actually ran (printOnly=false);
 // otherwise the Evaluator never spun up.
-func runEval(outPath string, shuffles int, mp sim.Matchup, maxCopies int, seed int64, fmtValue deckformat.Format, printOnly, brief, debug bool) {
+func runEval(outPath string, shuffles int, precision float64, mp sim.Matchup, maxCopies int, seed int64, fmtValue deckformat.Format, printOnly, brief, debug bool) {
 	if !printOnly {
-		evaluateAndPersist(outPath, shuffles, mp, maxCopies, seed, fmtValue, debug)
+		evaluateAndPersist(outPath, shuffles, precision, mp, maxCopies, seed, fmtValue, debug)
 	}
 	printLoadedDeck(mustLoadDeck(outPath), brief)
 }
@@ -81,7 +82,7 @@ func runEval(outPath string, shuffles int, mp sim.Matchup, maxCopies int, seed i
 // per-Evaluator cache stats are always available. debug=true prints them after the run;
 // otherwise they're computed-but-discarded — the cache itself runs unconditionally because
 // it speeds up the eval regardless of whether the operator wants the telemetry.
-func evaluateAndPersist(outPath string, shuffles int, mp sim.Matchup, maxCopies int, seed int64, fmtValue deckformat.Format, debug bool) *sim.Deck {
+func evaluateAndPersist(outPath string, shuffles int, precision float64, mp sim.Matchup, maxCopies int, seed int64, fmtValue deckformat.Format, debug bool) *sim.Deck {
 	loaded := mustLoadDeck(outPath)
 	// Wrap the loaded hero/weapons/cards in a fresh Deck so the eval's stats start from zero
 	// instead of accumulating on top of the persisted Stats. Sideboard and Equipment carry
@@ -98,7 +99,7 @@ func evaluateAndPersist(outPath string, shuffles int, mp sim.Matchup, maxCopies 
 	// flagship single-deck workload — getting from 1.8s to ~0.5s on 8 workers cuts
 	// re-score wall-clock noticeably.
 	start := time.Now()
-	_, ev := evaluateParallel(d, shuffles, mp, rng)
+	_, ev := evaluateParallel(d, shuffles, precision, mp, rng)
 	elapsed := time.Since(start)
 	fmt.Fprintf(os.Stderr, "eval: avg %.3f → %.3f (delta %+.3f) in %s (%s shuffles); rewriting %s\n",
 		savedAvg, d.Stats.Mean(), d.Stats.Mean()-savedAvg, elapsed.Round(time.Millisecond), commaInt(d.Stats.Runs), outPath)
