@@ -1,0 +1,38 @@
+package cards
+
+import (
+	"testing"
+
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
+)
+
+// Tests that with no banishable graveyard target the rider stays off.
+func TestLookingForAScrap_NoBanishableRiderOff(t *testing.T) {
+	for _, c := range []sim.Card{LookingForAScrapRed{}, LookingForAScrapYellow{}, LookingForAScrapBlue{}} {
+		self := &sim.CardState{Card: c}
+		c.Play(sim.NewTurnState(nil, nil), self)
+		if self.GrantedGoAgain {
+			t.Errorf("%s [%d{p}]: GrantedGoAgain = true with empty graveyard, want false", c.Name(), c.Pitch())
+		}
+		if self.BonusAttack != 0 {
+			t.Errorf("%s [%d{p}]: BonusAttack = %d with empty graveyard, want 0", c.Name(), c.Pitch(), self.BonusAttack)
+		}
+	}
+}
+
+// Tests that a 1-power graveyard card lets Looking for a Scrap banish for the +1{p} /
+// go-again rider.
+func TestLookingForAScrap_BanishesOnePowerForBonus(t *testing.T) {
+	for _, c := range []sim.Card{LookingForAScrapRed{}, LookingForAScrapYellow{}, LookingForAScrapBlue{}} {
+		s := sim.NewTurnState(nil, []sim.Card{testutils.GenericAttack(0, 1)})
+		self := &sim.CardState{Card: c}
+		c.Play(s, self)
+		if !self.GrantedGoAgain {
+			t.Errorf("%s [%d{p}]: GrantedGoAgain = false after banish, want true", c.Name(), c.Pitch())
+		}
+		if self.BonusAttack != 1 {
+			t.Errorf("%s [%d{p}]: BonusAttack = %d after banish, want 1", c.Name(), c.Pitch(), self.BonusAttack)
+		}
+	}
+}

@@ -3,12 +3,8 @@
 //
 // Text: "As an additional cost to play Regurgitating Slog, you may banish a card named Sloggism
 // from your graveyard. If you do, Regurgitating Slog gains **dominate**."
-//
-// Modelling: the Dominate grant is gated on banishing a Sloggism — an additional cost the sim
-// doesn't evaluate, so the card neither implements sim.Dominator nor sets
-// self.GrantedDominate. Wiring it would over-credit lines without a Sloggism to banish.
 
-package notimplemented
+package cards
 
 import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
@@ -17,6 +13,17 @@ import (
 )
 
 var regurgitatingSlogTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeAttack)
+
+func regurgitatingSlogPlay(s *sim.TurnState, self *sim.CardState) {
+	if _, ok := s.BanishFromGraveyard(isSloggism); ok {
+		self.GrantedDominate = true
+		s.LogRider(self, 0, "Banished a Sloggism, gained dominate")
+	}
+	n := self.DealEffectiveAttack(s)
+	s.Log(self, n)
+}
+
+func isSloggism(c sim.Card) bool { return c.Name() == "Sloggism" }
 
 type RegurgitatingSlogRed struct{}
 
@@ -28,13 +35,8 @@ func (RegurgitatingSlogRed) Attack() int             { return 6 }
 func (RegurgitatingSlogRed) Defense() int            { return 2 }
 func (RegurgitatingSlogRed) Types() card.TypeSet     { return regurgitatingSlogTypes }
 func (RegurgitatingSlogRed) GoAgain() bool           { return false }
-
-// not implemented: Sloggism graveyard-banish Dominate grant (additional cost not evaluated,
-// so the grant never fires)
-func (RegurgitatingSlogRed) NotImplemented() {}
-func (c RegurgitatingSlogRed) Play(s *sim.TurnState, self *sim.CardState) {
-	n := self.DealEffectiveAttack(s)
-	s.Log(self, n)
+func (RegurgitatingSlogRed) Play(s *sim.TurnState, self *sim.CardState) {
+	regurgitatingSlogPlay(s, self)
 }
 
 type RegurgitatingSlogYellow struct{}
@@ -47,13 +49,8 @@ func (RegurgitatingSlogYellow) Attack() int             { return 5 }
 func (RegurgitatingSlogYellow) Defense() int            { return 2 }
 func (RegurgitatingSlogYellow) Types() card.TypeSet     { return regurgitatingSlogTypes }
 func (RegurgitatingSlogYellow) GoAgain() bool           { return false }
-
-// not implemented: Sloggism graveyard-banish Dominate grant (additional cost not evaluated,
-// so the grant never fires)
-func (RegurgitatingSlogYellow) NotImplemented() {}
-func (c RegurgitatingSlogYellow) Play(s *sim.TurnState, self *sim.CardState) {
-	n := self.DealEffectiveAttack(s)
-	s.Log(self, n)
+func (RegurgitatingSlogYellow) Play(s *sim.TurnState, self *sim.CardState) {
+	regurgitatingSlogPlay(s, self)
 }
 
 type RegurgitatingSlogBlue struct{}
@@ -66,11 +63,6 @@ func (RegurgitatingSlogBlue) Attack() int             { return 4 }
 func (RegurgitatingSlogBlue) Defense() int            { return 2 }
 func (RegurgitatingSlogBlue) Types() card.TypeSet     { return regurgitatingSlogTypes }
 func (RegurgitatingSlogBlue) GoAgain() bool           { return false }
-
-// not implemented: Sloggism graveyard-banish Dominate grant (additional cost not evaluated,
-// so the grant never fires)
-func (RegurgitatingSlogBlue) NotImplemented() {}
-func (c RegurgitatingSlogBlue) Play(s *sim.TurnState, self *sim.CardState) {
-	n := self.DealEffectiveAttack(s)
-	s.Log(self, n)
+func (RegurgitatingSlogBlue) Play(s *sim.TurnState, self *sim.CardState) {
+	regurgitatingSlogPlay(s, self)
 }
