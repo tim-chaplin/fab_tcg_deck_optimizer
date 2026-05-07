@@ -16,7 +16,7 @@ var strategicPlanningTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction)
 
 // drawOneAtEndOfTurn is the end-of-turn TriggerHandler that fires Strategic Planning's
 // deferred draw. Top-level so the registration stays alloc-free.
-func drawOneAtEndOfTurn(s *sim.TurnState, _ *sim.Trigger) {
+func drawOneAtEndOfTurn(s *sim.TurnState, _ *sim.Trigger, _ *sim.Aura) {
 	s.DrawOne()
 }
 

@@ -12,7 +12,7 @@ func TestFireEndOfTurn_FiresOnceAndRemoves(t *testing.T) {
 	calls := 0
 	s.AddTrigger(Trigger{
 		TriggerType: TriggerEndOfTurn,
-		Handler:     func(_ *TurnState, _ *Trigger) { calls++ },
+		Handler:     func(_ *TurnState, _ *Trigger, _ *Aura) { calls++ },
 	})
 	FireEndOfTurn(s)
 	if calls != 1 {
@@ -29,7 +29,7 @@ func TestFireEndOfTurn_LeavesNonMatchingType(t *testing.T) {
 	calls := 0
 	s.AddTrigger(Trigger{
 		TriggerType: TriggerAttack,
-		Handler:     func(_ *TurnState, _ *Trigger) { calls++ },
+		Handler:     func(_ *TurnState, _ *Trigger, _ *Aura) { calls++ },
 	})
 	FireEndOfTurn(s)
 	if calls != 0 {
@@ -47,11 +47,11 @@ func TestFireEndOfTurn_HandlerAddTriggerSafeReentry(t *testing.T) {
 	calls := 0
 	s.AddTrigger(Trigger{
 		TriggerType: TriggerEndOfTurn,
-		Handler: func(s *TurnState, _ *Trigger) {
+		Handler: func(s *TurnState, _ *Trigger, _ *Aura) {
 			calls++
 			s.AddTrigger(Trigger{
 				TriggerType: TriggerEndOfTurn,
-				Handler:     func(_ *TurnState, _ *Trigger) { calls++ },
+				Handler:     func(_ *TurnState, _ *Trigger, _ *Aura) { calls++ },
 			})
 		},
 	})

@@ -92,13 +92,13 @@ func maleficPlay(s *sim.TurnState, selfState *sim.CardState, selfCard sim.Card, 
 // Malefic Incantation variants. Per-variant rider text is read off the table by
 // aura.Self.CardID() so the hot fire path runs zero string allocations. Decrements
 // aura.Count (the verse counter) and destroys the aura when the last verse fires.
-func maleficAuraHandler(s *sim.TurnState, t *sim.Trigger) {
-	cardID := t.Aura.Self.CardID()
-	t.Aura.Count--
-	lastVerse := t.Aura.Count <= 0
+func maleficAuraHandler(s *sim.TurnState, _ *sim.Trigger, a *sim.Aura) {
+	cardID := a.Self.CardID()
+	a.Count--
+	lastVerse := a.Count <= 0
 	s.CreateRunechants(1)
 	s.LogPostTrigger(sim.DisplayName(s.TriggeringCard), maleficCreatedRunechantText[cardID], 1)
 	if lastVerse {
-		s.DestroyAura(t, true)
+		s.DestroyAura(true)
 	}
 }

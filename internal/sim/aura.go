@@ -73,9 +73,8 @@ func (c CardOrTokenType) DisplayName() string {
 // is set, at most once per turn — the sim invokes Handler. The Aura survives until
 // its handler calls s.DestroyAura.
 type Aura struct {
-	// Trigger embeds the firing-data shared with standalone Triggers (see trigger.go),
-	// including Count. Aura handlers receive *Trigger; aura-specific fields below are
-	// reached via t.Aura, the back-pointer the fire loop sets before invoking Handler.
+	// Trigger embeds the firing-data (Source, TriggerType, TypeFilter, Count, Handler).
+	// Aura handlers receive (s, t, a); the aura-specific fields below are reached via a.
 	Trigger
 	// Self identifies what this Aura belongs to — a card or a token type. Surfaced in
 	// per-turn summaries via CardOrTokenType.DisplayName.

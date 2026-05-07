@@ -43,12 +43,11 @@ func (c SigilOfSilphidaeBlue) Play(s *sim.TurnState, self *sim.CardState) {
 
 // sigilOfSilphidaeAuraHandler runs the leave trigger on the next turn: scans the graveyard
 // for an aura to banish, credits 1 arcane damage on a hit, then destroys the aura.
-func sigilOfSilphidaeAuraHandler(s *sim.TurnState, t *sim.Trigger) {
-	name := t.Aura.Self.DisplayName()
+func sigilOfSilphidaeAuraHandler(s *sim.TurnState, _ *sim.Trigger, a *sim.Aura) {
 	n := banishAuraFromGraveyard(s)
 	if n > 0 {
 		s.AddValue(n)
-		s.LogPostTrigger(name, "Banished an aura, dealt 1 arcane damage", n)
+		s.LogPostTrigger(a.Self.DisplayName(), "Banished an aura, dealt 1 arcane damage", n)
 	}
-	s.DestroyAura(t, true)
+	s.DestroyAura(true)
 }

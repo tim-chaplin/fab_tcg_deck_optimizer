@@ -35,9 +35,8 @@ func (c SigilOfFyendalBlue) Play(s *sim.TurnState, self *sim.CardState) {
 
 // sigilOfFyendalAuraHandler credits the +1 health (valued 1-to-1 with damage) next turn
 // and destroys the aura. Top-level so Aura.Handler doesn't allocate a closure.
-func sigilOfFyendalAuraHandler(s *sim.TurnState, t *sim.Trigger) {
-	name := t.Aura.Self.DisplayName()
+func sigilOfFyendalAuraHandler(s *sim.TurnState, _ *sim.Trigger, a *sim.Aura) {
 	s.AddValue(1)
-	s.LogPostTrigger(name, "Gained 1 health", 1)
-	s.DestroyAura(t, true)
+	s.LogPostTrigger(a.Self.DisplayName(), "Gained 1 health", 1)
+	s.DestroyAura(true)
 }

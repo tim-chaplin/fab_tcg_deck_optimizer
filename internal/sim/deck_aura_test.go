@@ -19,10 +19,10 @@ func damageTrigger(self Card, damage int, calls *int) Aura {
 		Trigger: Trigger{
 			TriggerType: TriggerStartOfTurn,
 			Count:       1,
-			Handler: func(s *TurnState, t *Trigger) {
+			Handler: func(s *TurnState, _ *Trigger, _ *Aura) {
 				*calls++
 				s.AddValue(damage)
-				s.DestroyAura(t, true)
+				s.DestroyAura(true)
 			},
 		},
 		Self: CardOrTokenType{Card: self},
@@ -75,7 +75,7 @@ func TestProcessAurasAtStartOfTurn_GraveyardsExhaustedAura(t *testing.T) {
 		Trigger: Trigger{
 			TriggerType: TriggerStartOfTurn,
 			Count:       1,
-			Handler: func(s *TurnState, _ *Trigger) {
+			Handler: func(s *TurnState, _ *Trigger, _ *Aura) {
 				seen = append([]Card(nil), s.Graveyard()...)
 			},
 		},
@@ -83,8 +83,8 @@ func TestProcessAurasAtStartOfTurn_GraveyardsExhaustedAura(t *testing.T) {
 	}
 	_, _, _, _, _ = ProcessAurasAtStartOfTurn([]Aura{
 		{
-			Trigger: Trigger{TriggerType: TriggerStartOfTurn, Count: 1, Handler: func(s *TurnState, t *Trigger) {
-				s.DestroyAura(t, true)
+			Trigger: Trigger{TriggerType: TriggerStartOfTurn, Count: 1, Handler: func(s *TurnState, _ *Trigger, _ *Aura) {
+				s.DestroyAura(true)
 			}},
 			Self: CardOrTokenType{Card: aura},
 		},
@@ -417,7 +417,7 @@ func TestProcessAurasAtStartOfTurn_ReArmsOncePerTurnGate(t *testing.T) {
 		Trigger: Trigger{
 			TriggerType: TriggerAttackAction,
 			Count:       2,
-			Handler:     func(*TurnState, *Trigger) {},
+			Handler:     func(*TurnState, *Trigger, *Aura) {},
 		},
 		Self:          CardOrTokenType{Card: aura},
 		OncePerTurn:   true,

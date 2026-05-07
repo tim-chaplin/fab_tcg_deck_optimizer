@@ -60,11 +60,11 @@ func tokenDisplayName(t TokenType) string {
 // Fires before each attack / weapon swing resolves: flips ArcaneDamageDealt when
 // aura.Count clears the LikelyDamageHits window and destroys the aura. Damage was
 // credited at creation time in CreateRunechants — this handler is pure state cleanup.
-func runechantAuraHandler(s *TurnState, t *Trigger) {
-	if LikelyDamageHits(t.Aura.Count, false) {
+func runechantAuraHandler(s *TurnState, _ *Trigger, a *Aura) {
+	if LikelyDamageHits(a.Count, false) {
 		s.ArcaneDamageDealt = true
 	}
-	s.DestroyAura(t, false)
+	s.DestroyAura(false)
 }
 
 // NewRunechantAura returns a runechant token aura at count n. Production code calls
@@ -82,16 +82,15 @@ func NewRunechantAura(n int) Aura {
 // post-hoc arsenal-promotion step fill an otherwise-empty arsenal slot. Pops past
 // deck-end are silently skipped — empty deck just means no draw. Reading the deck top
 // flips s.cacheable (PopDeckTop's contract).
-func ponderAuraHandler(s *TurnState, t *Trigger) {
-	count := t.Aura.Count
-	for i := 0; i < count; i++ {
+func ponderAuraHandler(s *TurnState, _ *Trigger, a *Aura) {
+	for i := 0; i < a.Count; i++ {
 		c, ok := s.PopDeckTop()
 		if !ok {
 			break
 		}
 		s.hand = append(s.hand, c)
 	}
-	s.DestroyAura(t, false)
+	s.DestroyAura(false)
 }
 
 // NewPonderAura returns a ponder token aura at count n. Production code calls

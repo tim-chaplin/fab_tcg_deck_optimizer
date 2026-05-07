@@ -35,9 +35,9 @@ func (c SigilOfDeadwoodBlue) Play(s *sim.TurnState, self *sim.CardState) {
 
 // sigilOfDeadwoodAuraHandler creates 1 runechant on the next-turn fire and destroys the
 // aura. Top-level so the Aura.Handler assignment doesn't allocate a closure.
-func sigilOfDeadwoodAuraHandler(s *sim.TurnState, t *sim.Trigger) {
-	name := t.Aura.Self.DisplayName()
+func sigilOfDeadwoodAuraHandler(s *sim.TurnState, _ *sim.Trigger, a *sim.Aura) {
+	name := a.Self.DisplayName()
 	s.CreateRunechants(1)
 	s.LogPostTrigger(name, "Created a runechant", 1)
-	s.DestroyAura(t, true)
+	s.DestroyAura(true)
 }

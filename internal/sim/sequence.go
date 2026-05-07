@@ -403,8 +403,7 @@ func fireAttackActionAuras(state *TurnState, triggeringCard Card) {
 		state.TriggeringCard = triggeringCard
 		state.currentAuraIdx = i
 		state.currentAuraDestroyed = false
-		t.Trigger.Aura = t
-		t.Handler(state, &t.Trigger)
+		t.Handler(state, &t.Trigger, t)
 		state.currentAuraIdx = -1
 		state.TriggeringCard = nil
 		if !state.currentAuraDestroyed {
@@ -449,8 +448,7 @@ func fireEndOfTurn(state *TurnState) {
 		}
 		state.currentAuraIdx = i
 		state.currentAuraDestroyed = false
-		a.Trigger.Aura = a
-		a.Handler(state, &a.Trigger)
+		a.Handler(state, &a.Trigger, a)
 		state.currentAuraIdx = -1
 		if !state.currentAuraDestroyed {
 			state.Auras[i].FiredThisTurn = true
@@ -463,7 +461,7 @@ func fireEndOfTurn(state *TurnState) {
 		if tr.TriggerType != TriggerEndOfTurn {
 			continue
 		}
-		tr.Handler(state, &tr)
+		tr.Handler(state, &tr, nil)
 	}
 	kept := state.Triggers[:0]
 	for i, tr := range state.Triggers {
@@ -489,8 +487,7 @@ func fireAttackAuras(state *TurnState, triggeringCard Card) {
 		state.TriggeringCard = triggeringCard
 		state.currentAuraIdx = i
 		state.currentAuraDestroyed = false
-		t.Trigger.Aura = t
-		t.Handler(state, &t.Trigger)
+		t.Handler(state, &t.Trigger, t)
 		state.currentAuraIdx = -1
 		state.TriggeringCard = nil
 		if !state.currentAuraDestroyed {
@@ -869,7 +866,7 @@ func (ctx *sequenceContext) playSequenceWithMeta(n int) (damage int, futureValue
 						kept = append(kept, t)
 						continue
 					}
-					t.Handler(state, &t)
+					t.Handler(state, &t, nil)
 				}
 				state.Triggers = kept
 				state.TriggeringCard = prevTriggering

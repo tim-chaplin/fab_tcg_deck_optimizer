@@ -15,7 +15,7 @@ var highStrikerTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction)
 // highStrikerOnHit fires on the next hit matching the trigger's TypeFilter (any attack
 // per the printed wording). The per-variant token count rides on Trigger.Count so the
 // handler stays a top-level function value (no per-variant closure allocation).
-func highStrikerOnHit(s *sim.TurnState, t *sim.Trigger) {
+func highStrikerOnHit(s *sim.TurnState, t *sim.Trigger, _ *sim.Aura) {
 	s.CreateCopper(t.Count)
 	s.LogPostTriggerf(sim.DisplayName(s.TriggeringCard), 0,
 		"%s created %d copper tokens on attack hit", sim.DisplayName(t.Source), t.Count)

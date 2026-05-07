@@ -18,7 +18,7 @@ import (
 
 var plunderRunTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction)
 
-func plunderRunOnHitDraw(s *sim.TurnState, t *sim.Trigger) {
+func plunderRunOnHitDraw(s *sim.TurnState, t *sim.Trigger, _ *sim.Aura) {
 	s.DrawOne()
 	s.LogPostTriggerf(sim.DisplayName(s.TriggeringCard), 0,
 		"%s drew a card on attack-action hit", sim.DisplayName(t.Source))

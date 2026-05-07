@@ -75,12 +75,12 @@ func (c BlessingOfOccultBlue) Play(s *sim.TurnState, self *sim.CardState) {
 // carries the per-variant rune count (R=3 / Y=2 / B=1) — the handler is one-shot, so
 // Count's "fires remaining" interpretation collapses to "runechants to create on the
 // only fire".
-func blessingOfOccultHandler(s *sim.TurnState, t *sim.Trigger) {
-	n := t.Aura.Count
-	name := t.Aura.Self.DisplayName()
+func blessingOfOccultHandler(s *sim.TurnState, _ *sim.Trigger, a *sim.Aura) {
+	n := a.Count
+	name := a.Self.DisplayName()
 	s.CreateRunechants(n)
 	s.LogPostTrigger(name, blessingOfOccultTriggerText[n], n)
-	s.DestroyAura(t, true)
+	s.DestroyAura(true)
 }
 
 func blessingOfOccultPlay(s *sim.TurnState, selfState *sim.CardState, selfCard sim.Card, n int) {

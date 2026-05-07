@@ -295,14 +295,11 @@ func (s *TurnState) SetHandForTesting(cards []Card) {
 	s.hand = cards
 }
 
-// PrepareAuraFireForTesting sets currentAuraIdx and the aura's Trigger.Aura back-pointer
-// so a manually-invoked aura handler sees the same state the production fire loop sets
-// up just before calling Handler. Test-only — production loops handle this themselves.
-func (s *TurnState) PrepareAuraFireForTesting(i int) {
+// SetCurrentAuraIdxForTesting sets currentAuraIdx so DestroyAura resolves to the
+// expected slot when a test invokes an aura handler directly. Test-only — production
+// fire loops maintain currentAuraIdx themselves.
+func (s *TurnState) SetCurrentAuraIdxForTesting(i int) {
 	s.currentAuraIdx = i
-	if i >= 0 && i < len(s.Auras) {
-		s.Auras[i].Trigger.Aura = &s.Auras[i]
-	}
 }
 
 // Graveyard returns the live graveyard slice and flips IsCacheable to false. Cards must
@@ -889,34 +886,21 @@ func (s *TurnState) AddTrigger(t Trigger) {
 
 // DestroyAura removes the firing aura from s.Auras and, when addToGraveyard, appends
 // its Self card to s.graveyard. Token-style auras (Self.Card == nil) skip the graveyard
-// append unconditionally. During the aura fire walk currentAuraIdx names the firing
-// slot — the fire loop maintains it through any mid-handler s.Auras realloc, so this
-// path resolves to the correct live aura even when a CreateRunechants realloc has
-// moved s.Auras out from under t.Aura. Off-fire callers fall back to scanning for t.Aura.
+// append unconditionally. currentAuraIdx names the firing slot — the fire loop maintains
+// it through any mid-handler s.Auras realloc, so the splice resolves to the correct live
+// aura even when CreateRunechants has appended a new aura since the handler started.
 //
 // Direct graveyard append (no cacheable flip): destruction is deterministic from the
 // triggering event the sim already accounts for, not from hidden state.
-func (s *TurnState) DestroyAura(t *Trigger, addToGraveyard bool) {
-	if i := s.currentAuraIdx; i >= 0 && i < len(s.Auras) {
-		a := &s.Auras[i]
-		if addToGraveyard && a.Self.Card != nil {
-			s.graveyard = append(s.graveyard, a.Self.Card)
-		}
-		s.Auras = append(s.Auras[:i], s.Auras[i+1:]...)
-		s.currentAuraDestroyed = true
+func (s *TurnState) DestroyAura(addToGraveyard bool) {
+	i := s.currentAuraIdx
+	if i < 0 || i >= len(s.Auras) {
 		return
 	}
-	a := t.Aura
-	if a == nil {
-		return
-	}
+	a := &s.Auras[i]
 	if addToGraveyard && a.Self.Card != nil {
 		s.graveyard = append(s.graveyard, a.Self.Card)
 	}
-	for i := range s.Auras {
-		if &s.Auras[i] == a {
-			s.Auras = append(s.Auras[:i], s.Auras[i+1:]...)
-			return
-		}
-	}
+	s.Auras = append(s.Auras[:i], s.Auras[i+1:]...)
+	s.currentAuraDestroyed = true
 }
