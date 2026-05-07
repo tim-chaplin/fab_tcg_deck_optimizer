@@ -1,4 +1,4 @@
-package e2etest
+package turntests
 
 // These tests pin the semantics of TurnState.Hand at chain-step Play time: Hand reflects
 // the cards in hand AT THIS MOMENT — committed-to-the-turn cards (pitched, used to block,

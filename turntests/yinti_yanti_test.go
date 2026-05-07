@@ -1,4 +1,4 @@
-package e2etest
+package turntests
 
 // End-to-end tests for Yinti Yanti's "while you control an aura, +1{p}" rider seeing
 // auras created by defenders earlier in the same turn.

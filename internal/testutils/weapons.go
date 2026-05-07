@@ -1,6 +1,6 @@
 // Test-only Weapon and weapon-ability stubs. The card pool currently lacks Club and Hammer
-// printings, but ARs like Pummel mode 0 gate on those types — these stubs let e2e tests pin
-// the predicate and the buff plumbing end-to-end without waiting on a real printing.
+// printings, but ARs like Pummel mode 0 gate on those types — these stubs let turntests
+// pin the predicate and the buff plumbing end-to-end without waiting on a real printing.
 
 package testutils
 

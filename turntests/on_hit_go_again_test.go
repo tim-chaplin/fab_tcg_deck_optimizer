@@ -1,4 +1,4 @@
-package e2etest
+package turntests
 
 import (
 	"strings"

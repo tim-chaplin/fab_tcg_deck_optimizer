@@ -135,10 +135,10 @@ If a comment's rationale would otherwise cite "matches the pattern in foo.go, ba
 Two homes:
 
 - **Unit tests** next to the code (`internal/sim/foo_test.go` for `internal/sim/foo.go`, `internal/cards/foo_test.go` for `internal/cards/foo.go`). May use `package sim` or black-box `package sim_test`. May exercise unexported helpers via test exports — but only when no public entry point reaches the same behaviour. Each card under `internal/cards/` covers its own rider via a unit test calling `Play` directly.
-- **End-to-end tests** in top-level `e2etest/`. Public entry points only: `(*Deck).EvalOneTurnForTesting` for chain evaluation, `(*Deck).EvaluateWith` for full multi-turn runs. Use real heroes from `internal/heroes` (e.g. `heroes.Viserai{}`) rather than package-private stubs. Anything that would otherwise need an `exports_test.go` re-export goes here.
+- **Turn-level tests** in top-level `turntests/`. Public entry points only: `(*Deck).EvalOneTurnForTesting` for chain evaluation, `(*Deck).EvaluateWith` for full multi-turn runs. Use real heroes from `internal/heroes` (e.g. `heroes.Viserai{}`) rather than package-private stubs. Anything that would otherwise need an `exports_test.go` re-export goes here.
 
 `sim.Best` and `sim.BestWithTriggers` carry a "Test convention" doc paragraph pointing at `EvalOneTurnForTesting`. Not `// Deprecated:` because the simulator itself calls them; the convention is for new test code only.
 
 ### Test docstrings
 
-A test's doc comment is a single brief sentence stating the behavior under test, e.g. `// Tests that a single pitch paying for multiple Aether Slashes activates the bonus on each.` Inputs, expected values, and chain shape are visible in the test body. Same rule for unit and e2e tests.
+A test's doc comment is a single brief sentence stating the behavior under test, e.g. `// Tests that a single pitch paying for multiple Aether Slashes activates the bonus on each.` Inputs, expected values, and chain shape are visible in the test body. Same rule for unit and turn-level tests.

@@ -18,7 +18,7 @@ import (
 func IsExcludedFromPool(c Card) bool { return isExcludedFromPool(c) }
 
 // Best re-exports the package-private best for sim_test consumers. External-package
-// (e2etest) callers don't see this — only sim_test files in the same directory do.
+// (turntests) callers don't see this — only sim_test files in the same directory do.
 func Best(hero Hero, weapons []Weapon, hand []Card, mp Matchup, deck []Card, prior TurnState) TurnSummary {
 	return best(hero, weapons, hand, mp, deck, prior)
 }
