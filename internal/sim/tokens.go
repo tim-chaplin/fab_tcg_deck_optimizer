@@ -61,8 +61,7 @@ func tokenDisplayName(t TokenType) string {
 // aura.Count clears the LikelyDamageHits window and destroys the aura. Damage was
 // credited at creation time in CreateRunechants — this handler is pure state cleanup.
 func runechantAuraHandler(s *TurnState, t *Trigger) {
-	a := s.AuraFor(t)
-	if LikelyDamageHits(a.Count, false) {
+	if LikelyDamageHits(t.Aura.Count, false) {
 		s.ArcaneDamageDealt = true
 	}
 	s.DestroyAura(t, false)
@@ -84,8 +83,8 @@ func NewRunechantAura(n int) Aura {
 // deck-end are silently skipped — empty deck just means no draw. Reading the deck top
 // flips s.cacheable (PopDeckTop's contract).
 func ponderAuraHandler(s *TurnState, t *Trigger) {
-	a := s.AuraFor(t)
-	for i := 0; i < a.Count; i++ {
+	count := t.Aura.Count
+	for i := 0; i < count; i++ {
 		c, ok := s.PopDeckTop()
 		if !ok {
 			break

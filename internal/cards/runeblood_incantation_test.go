@@ -52,7 +52,7 @@ func TestRunebloodIncantation_HandlerCreatesOneRunechantPerFire(t *testing.T) {
 		c.Play(&play, &sim.CardState{Card: c})
 		fire := sim.NewTurnState(nil, nil)
 		fire.Auras = append(fire.Auras, play.Auras[0])
-		fire.SetCurrentAuraIdxForTesting(0)
+		fire.PrepareAuraFireForTesting(0)
 		fire.Auras[0].Handler(fire, &fire.Auras[0].Trigger)
 		if fire.Value != 1 {
 			t.Errorf("%s: handler Value = %d, want 1", c.Name(), fire.Value)

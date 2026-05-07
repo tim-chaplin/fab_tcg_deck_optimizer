@@ -51,7 +51,7 @@ func TestSigilOfSilphidae_StartOfTurnHandlerFizzlesWithoutAnotherAura(t *testing
 	(SigilOfSilphidaeBlue{}).Play(&play, &sim.CardState{Card: SigilOfSilphidaeBlue{}})
 	next := sim.NewTurnState(nil, nil)
 	next.Auras = append(next.Auras, play.Auras[0])
-	next.SetCurrentAuraIdxForTesting(0)
+	next.PrepareAuraFireForTesting(0)
 	next.Auras[0].Handler(next, &next.Auras[0].Trigger)
 	if next.Value != 0 {
 		t.Errorf("handler Value = %d, want 0 (no other aura to banish)", next.Value)
@@ -66,7 +66,7 @@ func TestSigilOfSilphidae_StartOfTurnHandlerBanishesAnotherAura(t *testing.T) {
 	other := BlessingOfOccultRed{}
 	next := sim.NewTurnState(nil, []sim.Card{other})
 	next.Auras = append(next.Auras, play.Auras[0])
-	next.SetCurrentAuraIdxForTesting(0)
+	next.PrepareAuraFireForTesting(0)
 	next.Auras[0].Handler(next, &next.Auras[0].Trigger)
 	if next.Value != 1 {
 		t.Errorf("handler Value = %d, want 1 (banished another aura)", next.Value)

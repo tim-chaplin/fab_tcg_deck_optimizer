@@ -403,6 +403,7 @@ func fireAttackActionAuras(state *TurnState, triggeringCard Card) {
 		state.TriggeringCard = triggeringCard
 		state.currentAuraIdx = i
 		state.currentAuraDestroyed = false
+		t.Trigger.Aura = t
 		t.Handler(state, &t.Trigger)
 		state.currentAuraIdx = -1
 		state.TriggeringCard = nil
@@ -448,6 +449,7 @@ func fireEndOfTurn(state *TurnState) {
 		}
 		state.currentAuraIdx = i
 		state.currentAuraDestroyed = false
+		a.Trigger.Aura = a
 		a.Handler(state, &a.Trigger)
 		state.currentAuraIdx = -1
 		if !state.currentAuraDestroyed {
@@ -487,6 +489,7 @@ func fireAttackAuras(state *TurnState, triggeringCard Card) {
 		state.TriggeringCard = triggeringCard
 		state.currentAuraIdx = i
 		state.currentAuraDestroyed = false
+		t.Trigger.Aura = t
 		t.Handler(state, &t.Trigger)
 		state.currentAuraIdx = -1
 		state.TriggeringCard = nil

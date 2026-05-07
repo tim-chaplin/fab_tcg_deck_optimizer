@@ -57,7 +57,7 @@ func TestBlessingOfOccult_TriggerHandlerCreatesNRunes(t *testing.T) {
 		tc.c.Play(&play, &sim.CardState{Card: tc.c})
 		next := sim.NewTurnState(nil, nil)
 		next.Auras = append(next.Auras, play.Auras[0])
-		next.SetCurrentAuraIdxForTesting(0)
+		next.PrepareAuraFireForTesting(0)
 		next.Auras[0].Handler(next, &next.Auras[0].Trigger)
 		if next.Value != tc.n {
 			t.Errorf("%s: handler Value = %d, want %d", tc.c.Name(), next.Value, tc.n)

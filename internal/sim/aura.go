@@ -75,7 +75,7 @@ func (c CardOrTokenType) DisplayName() string {
 type Aura struct {
 	// Trigger embeds the firing-data shared with standalone Triggers (see trigger.go),
 	// including Count. Aura handlers receive *Trigger; aura-specific fields below are
-	// reached via s.AuraFor(t).
+	// reached via t.Aura, the back-pointer the fire loop sets before invoking Handler.
 	Trigger
 	// Self identifies what this Aura belongs to — a card or a token type. Surfaced in
 	// per-turn summaries via CardOrTokenType.DisplayName.

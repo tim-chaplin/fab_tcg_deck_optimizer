@@ -93,11 +93,12 @@ func maleficPlay(s *sim.TurnState, selfState *sim.CardState, selfCard sim.Card, 
 // aura.Self.CardID() so the hot fire path runs zero string allocations. Decrements
 // aura.Count (the verse counter) and destroys the aura when the last verse fires.
 func maleficAuraHandler(s *sim.TurnState, t *sim.Trigger) {
-	a := s.AuraFor(t)
+	cardID := t.Aura.Self.CardID()
+	t.Aura.Count--
+	lastVerse := t.Aura.Count <= 0
 	s.CreateRunechants(1)
-	s.LogPostTrigger(sim.DisplayName(s.TriggeringCard), maleficCreatedRunechantText[a.Self.CardID()], 1)
-	a.Count--
-	if a.Count <= 0 {
+	s.LogPostTrigger(sim.DisplayName(s.TriggeringCard), maleficCreatedRunechantText[cardID], 1)
+	if lastVerse {
 		s.DestroyAura(t, true)
 	}
 }

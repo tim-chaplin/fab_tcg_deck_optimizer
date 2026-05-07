@@ -8,11 +8,14 @@ import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 // TriggerHit hit-riders today, nil = no filter); Handler runs when the trigger fires.
 //
 // Aura embeds Trigger by value (see aura.go) and adds persistent-instance state
-// (Self, Count, OncePerTurn, FiredThisTurn). Standalone Triggers — the sim removes
-// them after firing — are stored on TurnState.Triggers and added via AddTrigger.
+// (Self, OncePerTurn, FiredThisTurn). Standalone Triggers — the sim removes them after
+// firing — are stored on TurnState.Triggers and added via AddTrigger.
 //
-// Handlers receive a *Trigger; aura-bound handlers recover the parent Aura via
-// s.AuraFor(t) when they need Self / Count.
+// Handlers receive a *Trigger; aura-bound handlers reach the parent Aura through
+// t.Aura. The fire loop sets t.Aura just before invoking the handler, so the pointer
+// is valid for the duration of the handler — handlers that mutate s.Auras (e.g. via
+// CreateRunechants, which appends a Runechant aura) MUST read aura state via t.Aura
+// BEFORE the mutating call, since a slice realloc would invalidate the back-pointer.
 //
 // Handlers MUST NOT call AddTrigger from within a fire walk: the firing helper
 // snapshots len(s.Triggers) before iterating, so a trigger added during fire stays
@@ -33,9 +36,12 @@ type Trigger struct {
 	Count int
 	// Handler runs when TriggerType (and TypeFilter, if set) match.
 	Handler TriggerHandler
+	// Aura points at the parent Aura when this Trigger is an aura's embedded firing-data;
+	// nil for standalone Triggers. The fire loop sets it before invoking Handler.
+	Aura *Aura
 }
 
 // TriggerHandler is the business-logic callback for a Trigger. The same signature is
-// used for both standalone Triggers and Aura-embedded Triggers — aura handlers call
-// s.AuraFor(t) to recover the parent Aura when they need Self / Count.
+// used for both standalone Triggers and Aura-embedded Triggers — aura handlers reach
+// the parent Aura via t.Aura.
 type TriggerHandler func(s *TurnState, t *Trigger)

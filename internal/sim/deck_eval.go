@@ -497,6 +497,7 @@ func processAurasAtStartOfTurn(queued []Aura, postDrawDeck []Card) (
 		preValue := ts.Value
 		ts.currentAuraIdx = i
 		ts.currentAuraDestroyed = false
+		t.Trigger.Aura = t
 		t.Handler(ts, &t.Trigger)
 		ts.currentAuraIdx = -1
 		d := ts.Value - preValue

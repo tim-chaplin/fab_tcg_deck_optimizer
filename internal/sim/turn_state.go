@@ -295,11 +295,14 @@ func (s *TurnState) SetHandForTesting(cards []Card) {
 	s.hand = cards
 }
 
-// SetCurrentAuraIdxForTesting sets currentAuraIdx so AuraFor / DestroyAura resolve
-// inside a manually-fired aura handler. Test-only — production fire loops maintain
-// currentAuraIdx themselves.
-func (s *TurnState) SetCurrentAuraIdxForTesting(i int) {
+// PrepareAuraFireForTesting sets currentAuraIdx and the aura's Trigger.Aura back-pointer
+// so a manually-invoked aura handler sees the same state the production fire loop sets
+// up just before calling Handler. Test-only — production loops handle this themselves.
+func (s *TurnState) PrepareAuraFireForTesting(i int) {
 	s.currentAuraIdx = i
+	if i >= 0 && i < len(s.Auras) {
+		s.Auras[i].Trigger.Aura = &s.Auras[i]
+	}
 }
 
 // Graveyard returns the live graveyard slice and flips IsCacheable to false. Cards must
@@ -884,26 +887,31 @@ func (s *TurnState) AddTrigger(t Trigger) {
 	s.Triggers = append(s.Triggers, t)
 }
 
-// DestroyAura splices t out of s.Auras and, when addToGraveyard, appends t.Self.Card to
-// s.graveyard. Token-style auras (Self.Card == nil) skip the graveyard append
-// unconditionally. During the aura fire walk the destroy uses currentAuraIdx directly
-// (the fire loop maintains it through any mid-handler s.Auras realloc); off-fire callers
-// fall back to a pointer-equality scan.
+// DestroyAura removes the firing aura from s.Auras and, when addToGraveyard, appends
+// its Self card to s.graveyard. Token-style auras (Self.Card == nil) skip the graveyard
+// append unconditionally. During the aura fire walk currentAuraIdx names the firing
+// slot — the fire loop maintains it through any mid-handler s.Auras realloc, so this
+// path resolves to the correct live aura even when a CreateRunechants realloc has
+// moved s.Auras out from under t.Aura. Off-fire callers fall back to scanning for t.Aura.
 //
 // Direct graveyard append (no cacheable flip): destruction is deterministic from the
 // triggering event the sim already accounts for, not from hidden state.
 func (s *TurnState) DestroyAura(t *Trigger, addToGraveyard bool) {
-	a := s.AuraFor(t)
+	if i := s.currentAuraIdx; i >= 0 && i < len(s.Auras) {
+		a := &s.Auras[i]
+		if addToGraveyard && a.Self.Card != nil {
+			s.graveyard = append(s.graveyard, a.Self.Card)
+		}
+		s.Auras = append(s.Auras[:i], s.Auras[i+1:]...)
+		s.currentAuraDestroyed = true
+		return
+	}
+	a := t.Aura
 	if a == nil {
 		return
 	}
 	if addToGraveyard && a.Self.Card != nil {
 		s.graveyard = append(s.graveyard, a.Self.Card)
-	}
-	if i := s.currentAuraIdx; i >= 0 && i < len(s.Auras) && &s.Auras[i] == a {
-		s.Auras = append(s.Auras[:i], s.Auras[i+1:]...)
-		s.currentAuraDestroyed = true
-		return
 	}
 	for i := range s.Auras {
 		if &s.Auras[i] == a {
@@ -911,22 +919,4 @@ func (s *TurnState) DestroyAura(t *Trigger, addToGraveyard bool) {
 			return
 		}
 	}
-}
-
-// AuraFor returns the Aura whose embedded Trigger is t — used by aura handlers to
-// recover Self / Count given the *Trigger they were called with. During an aura fire
-// walk currentAuraIdx points at the firing aura (the fire loop maintains it through
-// any mid-handler s.Auras realloc); the index path always wins inside a handler. The
-// pointer-equality scan is the off-fire-path fallback for callers without
-// currentAuraIdx context. Returns nil for standalone Triggers (no parent Aura).
-func (s *TurnState) AuraFor(t *Trigger) *Aura {
-	if i := s.currentAuraIdx; i >= 0 && i < len(s.Auras) {
-		return &s.Auras[i]
-	}
-	for i := range s.Auras {
-		if &s.Auras[i].Trigger == t {
-			return &s.Auras[i]
-		}
-	}
-	return nil
 }
