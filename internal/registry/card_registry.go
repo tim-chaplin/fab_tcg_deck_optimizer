@@ -423,6 +423,10 @@ var cardsByID = []sim.Card{
 
 	ids.ToughenUpBlue: cards.ToughenUpBlue{},
 
+	ids.TremorOfIArathaelRed:    cards.TremorOfIArathaelRed{},
+	ids.TremorOfIArathaelYellow: cards.TremorOfIArathaelYellow{},
+	ids.TremorOfIArathaelBlue:   cards.TremorOfIArathaelBlue{},
+
 	ids.TrotAlongBlue: cards.TrotAlongBlue{},
 
 	ids.UnmovableRed:    cards.UnmovableRed{},
@@ -440,6 +444,10 @@ var cardsByID = []sim.Card{
 	ids.WageGoldRed:    cards.WageGoldRed{},
 	ids.WageGoldYellow: cards.WageGoldYellow{},
 	ids.WageGoldBlue:   cards.WageGoldBlue{},
+
+	ids.WarmongersRecitalRed:    cards.WarmongersRecitalRed{},
+	ids.WarmongersRecitalYellow: cards.WarmongersRecitalYellow{},
+	ids.WarmongersRecitalBlue:   cards.WarmongersRecitalBlue{},
 
 	ids.WaterTheSeedsRed:    cards.WaterTheSeedsRed{},
 	ids.WaterTheSeedsYellow: cards.WaterTheSeedsYellow{},

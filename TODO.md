@@ -85,7 +85,7 @@ implemented` riders across the card roster.
 
 ### Unimplemented cards by feature
 
-The 66 cards left in `internal/cards/notimplemented/` grouped by the systemic feature
+The 64 cards left in `internal/cards/notimplemented/` grouped by the systemic feature
 that gates them. Counts are by file (one card-name; each file typically holds 1–3
 pitch-color variants). Landing one bullet typically lets every card in the bucket come
 out of `notimplemented/` together.
@@ -121,8 +121,9 @@ out of `notimplemented/` together.
   the top card of the deck. Needs a deck-top-reveal-into-AP path.
 - **Aura-trade / aura-destroy-opponent** (2): "destroy an opposing aura" or "trade aura
   for aura". Opposing-aura state isn't modelled.
-- **Banished-zone count** (2): "+N{p} per card in your banished zone", "self-destroys on
-  play-from-banished". Needs to count cards banished this game (not just this turn).
+- **Banished-zone count** (1): "+N{p} per card in your banished zone" needs a per-game
+  banish counter (not just this-turn `s.Banish`); self-destroys-on-play-from-banished
+  needs a was-played-from-banished marker on `CardState`.
 - **Hand-as-alt-cost** (2): "put a card on top of deck instead of paying {r}". Today the
   partition only knows the printed cost; an alt-cost evaluator would have to consider
   hand-card alt-costs alongside pitch.
@@ -146,9 +147,6 @@ out of `notimplemented/` together.
   rider. `CardsPlayed` is read-after-the-fact; the rider needs a mid-chain history pipe.
 - **Self-destroying sigils with leave-arena triggers** (1): Sigil of Cycles' "destroy at
   start of action phase, leaves arena → discard then draw".
-- **Recycle-to-deck-bottom on next attack** (1): Warmonger's Recital. Implementable today
-  using `CardState.SkipGraveyard` + `RecycleToDeckBottom` from the Relentless Pursuit PR.
-  Just needs the Play wired up.
 - **Misc unique mechanics** (1): on-hit Wizard instant-casting grant (Rifting).
 
 ### Same-turn item activation
