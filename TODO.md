@@ -198,7 +198,7 @@ lines across `card/`, `weapon/`, `hand/` plus every weapon impl.
 
 ### Tech debt
 
-- sim_test package: get rid of these functional tests that are almost e2e tests, but require exposing internals of the sim (in exports_test.go; get rid of this too). instead, just have one well-defined interface for full e2e tests, and migrate all larger-than-unit tests to it. move all those tests to their own e2etests package
+- sim_test package: get rid of these functional tests that require exposing internals of the sim (in exports_test.go; get rid of this too). The well-defined interface for larger-than-unit tests already exists (`(*Deck).EvalOneTurnForTesting` driving `turntests/`); migrate the remaining sim_test cases over and drop the re-exports.
 - TurnState, CarryState, and TurnSummary are all very conceptually overlapping; do we really need all 3?
 - move all the serialization, I/O type stuff into one package (deckformat, deckio, fabrary, mydecks)
 - move all the card definitions into one folder (cards, weapons, heroes)

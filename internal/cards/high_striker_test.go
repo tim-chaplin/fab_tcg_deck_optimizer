@@ -7,8 +7,8 @@ import (
 )
 
 // Tests that High Striker queues a TriggerHit Trigger so a later attack hit creates
-// Copper tokens. Per-pitch Copper count (6/4/2 for R/Y/B) is covered by the e2e tests
-// since it requires the chain runner to actually fire.
+// Copper tokens. Per-pitch Copper count (6/4/2 for R/Y/B) is covered by turntests since
+// it requires the chain runner to actually fire.
 func TestHighStriker_QueuesTriggerHit(t *testing.T) {
 	s := sim.NewTurnState(nil, nil)
 	(HighStrikerRed{}).Play(s, &sim.CardState{Card: HighStrikerRed{}})

@@ -1,4 +1,4 @@
-package e2etest
+package turntests
 
 import (
 	"testing"
@@ -9,18 +9,19 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
 )
 
-// Tests that Wage Gold's Universal keyword triggers Viserai's Runeblade hero ability.
-func TestWageGold_UniversalTriggersViseraiOnPlay(t *testing.T) {
+// Tests that Plunder Run's "next time an attack action card hits" trigger waits across a
+// missed attack and fires on the next attack action card that lands.
+func TestPlunderRun_TriggerWaitsAcrossMissAndFiresOnHit(t *testing.T) {
 	d := sim.New(heroes.Viserai{}, nil, fillerDeck())
 	hand := []sim.Card{
-		cards.HighStrikerBlue{},
-		cards.WageGoldRed{},
 		testutils.BluePitch{},
-		testutils.BluePitch{},
+		cards.PlunderRunRed{},
+		cards.RuneragerSwarmRed{},
+		cards.CriticalStrikeYellow{},
 	}
 	state := d.EvalOneTurnForTesting(sim.Matchup{IncomingDamage: 0}, sim.TurnState{}, hand)
 	if state.Value != 8 {
-		t.Fatalf("Value = %d, want 8 (Wage Gold 7 + Viserai-via-Universal runechant +1)\nBestLine: %s",
+		t.Fatalf("Value = %d, want 8 (Runerager 3 + Viserai runechant 1 + CS 4)\nBestLine: %s",
 			state.Value, formatBestLine(state.BestLine))
 	}
 }

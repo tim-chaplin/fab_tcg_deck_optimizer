@@ -1,4 +1,4 @@
-package e2etest
+package turntests
 
 // End-to-end tests for the DefensiveInstant marker. See sim.DefensiveInstant for the
 // contract; docs/dev-standards.md for the rider wiring.
