@@ -104,9 +104,10 @@ func (s TypeSet) IsAttackReaction() bool {
 }
 
 // IsResource reports whether s carries the Resource type. Resource cards have no Action
-// subtype so they can't be played, and the post-hoc arsenal-promotion skips them since a
-// Resource in arsenal would have no legal way out of the slot. They CAN still be used to
-// block, contributing their printed Defense like any non-Action hand card.
+// subtype so they can't be played, but their printed Defense is still a legal block like
+// any non-Action hand card. Sharing the no-Action / no-DR shape with pure Block cards,
+// they're skipped by the post-hoc arsenal promotion (the partition's canLeaveArsenal
+// predicate, not this one).
 func (s TypeSet) IsResource() bool {
 	return s&TypeSet(TypeResource) != 0
 }

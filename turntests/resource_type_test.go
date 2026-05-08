@@ -29,3 +29,15 @@ func TestResource_DoesNotPromoteToArsenal(t *testing.T) {
 		t.Fatalf("Arsenal = %v, want nil (Resource cards skip post-hoc promotion)", got.StartOfNextTurnArsenal)
 	}
 }
+
+// Tests that a sole Block-typed card (no Action / DR) isn't promoted to arsenal — the
+// arsenal-in slot's only legal Block move is via Defense Reaction, so a pure Block card
+// would lock there forever.
+func TestArsenalPromotion_SkipsPureBlock(t *testing.T) {
+	d := sim.New(heroes.Viserai{}, nil, fillerDeck())
+	hand := []sim.Card{cards.OnTheHorizonRed{}}
+	got := d.EvalOneTurnForTesting(sim.Matchup{IncomingDamage: 0}, sim.TurnState{}, hand)
+	if got.StartOfNextTurnArsenal != nil {
+		t.Fatalf("Arsenal = %v, want nil (pure Block cards skip post-hoc promotion)", got.StartOfNextTurnArsenal)
+	}
+}

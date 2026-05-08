@@ -11,7 +11,9 @@ package sim
 // ending occupied (saves a hand slot next refill; covers both arsenal-in-stayed and
 // Held-for-promotion).
 
-import ()
+import (
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+)
 
 func (e *Evaluator) findBest(hero Hero, weapons []Weapon, hand []Card, mp Matchup, deck []Card, prior TurnState, skipLog bool) TurnSummary {
 	// Cache fast-path. Bypassed when disabled (e.cache nil) or when any input overflows
@@ -209,9 +211,10 @@ func (e *Evaluator) findBest(hero Hero, weapons []Weapon, hand []Card, mp Matchu
 // sorted starting-hand IDs + Hand IDs + arsenal-in ID) so equivalent inputs always promote
 // the same card. No-op when State.Hand has no arsenal-eligible cards.
 //
-// Resource-typed cards (baubles) are skipped — Resources can't be played from arsenal, so
-// arsenaling one would just lock it in the slot forever. Pure-Resource hands leave the
-// arsenal empty.
+// Cards that can't leave arsenal (no Action / Attack Reaction / Defense Reaction subtype)
+// are skipped — promoting one would lock the slot. Catches Resource-typed baubles and
+// pure Block-typed cards (e.g. On the Horizon). Hands made entirely of stuck cards leave
+// the arsenal empty.
 //
 // When the promoted card matches a Held entry in BestLine, that entry's Role flips to
 // Arsenal so the per-card display still attributes the slot. Tutored cards (not in BestLine)
@@ -220,10 +223,9 @@ func promoteRandomHandCardToArsenal(best *TurnSummary, startingHand []Card, arse
 	if len(best.State.Hand) == 0 {
 		return
 	}
-	// Build the pool of arsenal-eligible Hand indices, skipping Resources.
 	eligible := make([]int, 0, len(best.State.Hand))
 	for i, c := range best.State.Hand {
-		if !c.Types().IsResource() {
+		if canLeaveArsenal(c) {
 			eligible = append(eligible, i)
 		}
 	}
@@ -244,6 +246,16 @@ func promoteRandomHandCardToArsenal(best *TurnSummary, startingHand []Card, arse
 			break
 		}
 	}
+}
+
+// canLeaveArsenal reports whether c, placed in arsenal, has any legal way to play out of
+// the slot. Mirrors roleAllowed's arsenal-slot policy: Action / Weapon subtype lets Attack
+// fire (canAttack); Attack Reaction is the same free-chain-step path; Defense Reaction
+// lets the arsenal card defend. Plain blocks aren't legal from arsenal, so a Block-only
+// card is stuck. Resource-typed baubles also lack all three so they qualify as stuck.
+func canLeaveArsenal(c Card) bool {
+	t := c.Types()
+	return t.Has(card.TypeAction) || t.Has(card.TypeAttackReaction) || t.IsDefenseReaction()
 }
 
 // arsenalPromotionHash computes the deterministic bucket seed that picks which hand card
