@@ -1,11 +1,10 @@
-package sim_test
+package sim
 
 import (
 	"testing"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
-	. "github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 )
 
 // soloBlocker fires +1{d} when no other plain block shares the defenders slot — the

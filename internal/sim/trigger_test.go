@@ -1,9 +1,7 @@
-package sim_test
+package sim
 
 import (
 	"testing"
-
-	. "github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 )
 
 // Tests that an end-of-turn Trigger fires once and is removed.
