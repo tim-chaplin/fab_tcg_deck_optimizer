@@ -1,11 +1,11 @@
-package sim_test
+package turntests
 
 import (
-	. "github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 	"testing"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/cards"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
 )
 
@@ -15,13 +15,13 @@ import (
 // Tests Moon Wish alt-cost: hand DR returned to deck, on-hit tutors Sun Kiss; without
 // go-again, Sun Kiss is post-hoc-promoted to Arsenal as the only Held candidate.
 func TestEvalOneTurn_MoonWishAltCostTutorsSunKissAndConsumesDeck(t *testing.T) {
-	deckCards := []Card{
+	deckCards := []sim.Card{
 		cards.SunKissRed{},
 		testutils.RedAttack{}, testutils.RedAttack{}, testutils.RedAttack{},
 		testutils.RedAttack{}, testutils.RedAttack{},
 	}
-	d := New(testutils.Hero{Intel: 4}, nil, deckCards)
-	state := d.EvalOneTurnForTesting(Matchup{IncomingDamage: 0}, TurnState{}, []Card{
+	d := sim.New(testutils.Hero{Intel: 4}, nil, deckCards)
+	state := d.EvalOneTurnForTesting(sim.Matchup{IncomingDamage: 0}, sim.TurnState{}, []sim.Card{
 		cards.MoonWishYellow{},
 		cards.WeepingBattlegroundRed{},
 	})
@@ -48,12 +48,12 @@ func TestEvalOneTurn_MoonWishAltCostTutorsSunKissAndConsumesDeck(t *testing.T) {
 // Tests Moon Wish alt-cost when the deck has no Sun Kiss: tutor fizzles, alt cost still
 // recycles the DR, and arsenal stays empty.
 func TestEvalOneTurn_MoonWishAltCostTutorFizzlesWithoutSunKiss(t *testing.T) {
-	deckCards := []Card{
+	deckCards := []sim.Card{
 		testutils.RedAttack{}, testutils.RedAttack{}, testutils.RedAttack{},
 		testutils.RedAttack{}, testutils.RedAttack{}, testutils.RedAttack{},
 	}
-	d := New(testutils.Hero{Intel: 4}, nil, deckCards)
-	state := d.EvalOneTurnForTesting(Matchup{IncomingDamage: 0}, TurnState{}, []Card{
+	d := sim.New(testutils.Hero{Intel: 4}, nil, deckCards)
+	state := d.EvalOneTurnForTesting(sim.Matchup{IncomingDamage: 0}, sim.TurnState{}, []sim.Card{
 		cards.MoonWishYellow{},
 		cards.WeepingBattlegroundRed{},
 	})
@@ -77,13 +77,13 @@ func TestEvalOneTurn_MoonWishAltCostTutorFizzlesWithoutSunKiss(t *testing.T) {
 // plays the same turn and lands in graveyard. Sun Kiss is at deck index 2 (not top) so the
 // buf-removal path is exercised — a blind head-advance would consume the wrong slot.
 func TestEvalOneTurn_MoonWishWithFlyingHighPlaysTutoredSunKiss(t *testing.T) {
-	deckCards := []Card{
+	deckCards := []sim.Card{
 		testutils.RedAttack{}, testutils.RedAttack{},
 		cards.SunKissRed{},
 		testutils.RedAttack{}, testutils.RedAttack{}, testutils.RedAttack{}, testutils.RedAttack{},
 	}
-	d := New(testutils.Hero{Intel: 4}, nil, deckCards)
-	state := d.EvalOneTurnForTesting(Matchup{IncomingDamage: 0}, TurnState{}, []Card{
+	d := sim.New(testutils.Hero{Intel: 4}, nil, deckCards)
+	state := d.EvalOneTurnForTesting(sim.Matchup{IncomingDamage: 0}, sim.TurnState{}, []sim.Card{
 		cards.FlyingHighRed{},
 		cards.MoonWishYellow{},
 		cards.WeepingBattlegroundRed{},
@@ -116,7 +116,7 @@ func TestEvalOneTurn_MoonWishWithFlyingHighPlaysTutoredSunKiss(t *testing.T) {
 
 // countAcrossSurfaces totals occurrences of id across the start-of-next-turn Hand, Deck, and
 // Arsenal. Asserts "exists / doesn't exist" without pinning a specific position.
-func countAcrossSurfaces(state TurnStartState, id ids.CardID) int {
+func countAcrossSurfaces(state sim.TurnStartState, id ids.CardID) int {
 	n := 0
 	for _, c := range state.StartOfNextTurnHand {
 		if c.ID() == id {
