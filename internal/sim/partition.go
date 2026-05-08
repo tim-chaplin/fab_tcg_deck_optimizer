@@ -211,10 +211,9 @@ func (e *Evaluator) findBest(hero Hero, weapons []Weapon, hand []Card, mp Matchu
 // sorted starting-hand IDs + Hand IDs + arsenal-in ID) so equivalent inputs always promote
 // the same card. No-op when State.Hand has no arsenal-eligible cards.
 //
-// Cards that can't leave arsenal (no Action / Attack Reaction / Defense Reaction subtype)
-// are skipped — promoting one would lock the slot. Catches Resource-typed baubles and
-// pure Block-typed cards (e.g. On the Horizon). Hands made entirely of stuck cards leave
-// the arsenal empty.
+// Resource-typed cards (baubles) and pure Block-typed cards (On the Horizon) are skipped —
+// they can only Pitch / Block, neither of which is legal from the arsenal slot, so
+// promoting one would lock the slot.
 //
 // When the promoted card matches a Held entry in BestLine, that entry's Role flips to
 // Arsenal so the per-card display still attributes the slot. Tutored cards (not in BestLine)
@@ -225,9 +224,11 @@ func promoteRandomHandCardToArsenal(best *TurnSummary, startingHand []Card, arse
 	}
 	eligible := make([]int, 0, len(best.State.Hand))
 	for i, c := range best.State.Hand {
-		if canLeaveArsenal(c) {
-			eligible = append(eligible, i)
+		t := c.Types()
+		if t.Has(card.TypeBlock) || t.IsResource() {
+			continue
 		}
+		eligible = append(eligible, i)
 	}
 	if len(eligible) == 0 {
 		return
@@ -246,16 +247,6 @@ func promoteRandomHandCardToArsenal(best *TurnSummary, startingHand []Card, arse
 			break
 		}
 	}
-}
-
-// canLeaveArsenal reports whether c, placed in arsenal, has any legal way to play out of
-// the slot. Mirrors roleAllowed's arsenal-slot policy: Action / Weapon subtype lets Attack
-// fire (canAttack); Attack Reaction is the same free-chain-step path; Defense Reaction
-// lets the arsenal card defend. Plain blocks aren't legal from arsenal, so a Block-only
-// card is stuck. Resource-typed baubles also lack all three so they qualify as stuck.
-func canLeaveArsenal(c Card) bool {
-	t := c.Types()
-	return t.Has(card.TypeAction) || t.Has(card.TypeAttackReaction) || t.IsDefenseReaction()
 }
 
 // arsenalPromotionHash computes the deterministic bucket seed that picks which hand card
