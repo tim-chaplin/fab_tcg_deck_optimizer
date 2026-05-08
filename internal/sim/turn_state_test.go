@@ -1,17 +1,15 @@
-package sim_test
+package sim
 
 import (
 	"testing"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
-	. "github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
 )
 
 // TestDrawOne_AppendsTopAndAdvancesDeck: DrawOne pops the top of the deck and appends it to
 // Hand, preserving draw order for downstream effects.
 func TestDrawOne_AppendsTopAndAdvancesDeck(t *testing.T) {
-	a, b, c := testutils.NewStubCard("a"), testutils.NewStubCard("b"), testutils.NewStubCard("c")
+	a, b, c := NewFakeCard("a"), NewFakeCard("b"), NewFakeCard("c")
 	s := NewTurnState([]Card{a, b, c}, nil)
 
 	s.DrawOne()
@@ -47,7 +45,7 @@ func TestDrawOne_EmptyDeckIsNoOp(t *testing.T) {
 // Tests that AddAura flips AuraCreated and appends to s.Auras in call order — bundling
 // the flip with the append prevents a trigger registered without advertising the aura.
 func TestAddAura_FlipsAuraCreatedAndAppends(t *testing.T) {
-	self := testutils.NewStubCard("self")
+	self := NewFakeCard("self")
 	s := &TurnState{}
 	if s.AuraCreated {
 		t.Fatal("pre: AuraCreated should be false")
@@ -73,8 +71,8 @@ func TestAddAura_FlipsAuraCreatedAndAppends(t *testing.T) {
 // in its set, false on empty list or no matches. Pins the scan for every "if you've played
 // an X this turn" rider.
 func TestHasPlayedType_ScansCardsPlayed(t *testing.T) {
-	aura := testutils.NewStubCard("aura").WithTypes(card.NewTypeSet(card.TypeAura))
-	attack := testutils.NewStubCard("attack").WithTypes(card.NewTypeSet(card.TypeAttack, card.TypeAction))
+	aura := NewFakeCard("aura").WithTypes(card.NewTypeSet(card.TypeAura))
+	attack := NewFakeCard("attack").WithTypes(card.NewTypeSet(card.TypeAttack, card.TypeAction))
 
 	var s TurnState
 	if s.HasPlayedType(card.TypeAura) {
@@ -106,7 +104,7 @@ func TestHasPlayedOrCreatedAura_FlagOrScan(t *testing.T) {
 	}
 
 	playedAura := TurnState{
-		CardsPlayed: []Card{testutils.NewStubCard("aura").WithTypes(card.NewTypeSet(card.TypeAura))},
+		CardsPlayed: []Card{NewFakeCard("aura").WithTypes(card.NewTypeSet(card.TypeAura))},
 	}
 	if !playedAura.HasPlayedOrCreatedAura() {
 		t.Error("played aura card → should be true")
@@ -230,7 +228,7 @@ func TestCreatePonder_BumpsCountAndFlag(t *testing.T) {
 // TestAddToGraveyard_AppendsInOrder: graveyard entries appear in append order so downstream
 // readers (aura-banish handlers, leave-trigger scanners) see a stable destroy sequence.
 func TestAddToGraveyard_AppendsInOrder(t *testing.T) {
-	a, b := testutils.NewStubCard("a"), testutils.NewStubCard("b")
+	a, b := NewFakeCard("a"), NewFakeCard("b")
 	var s TurnState
 	s.AddToGraveyard(a)
 	s.AddToGraveyard(b)
@@ -261,7 +259,7 @@ func TestClash_WinTieLose(t *testing.T) {
 	for _, tc := range cases {
 		var s *TurnState
 		if tc.deckLen > 0 {
-			s = NewTurnState([]Card{testutils.NewStubCard("top").WithAttack(tc.topAtk)}, nil)
+			s = NewTurnState([]Card{NewFakeCard("top").WithAttack(tc.topAtk)}, nil)
 		} else {
 			s = &TurnState{}
 		}
@@ -285,7 +283,7 @@ func TestIsCacheable_NewTurnStateSeedsCacheable(t *testing.T) {
 // the slice — a card that reads deck contents binds the chain output to hidden shuffle
 // order regardless of whether it modifies the deck.
 func TestIsCacheable_DeckReadFlips(t *testing.T) {
-	s := NewTurnState([]Card{testutils.NewStubCard("x")}, nil)
+	s := NewTurnState([]Card{NewFakeCard("x")}, nil)
 	_ = s.Deck()
 	if s.IsCacheable() {
 		t.Error("Deck() read should flip IsCacheable to false")
@@ -295,7 +293,7 @@ func TestIsCacheable_DeckReadFlips(t *testing.T) {
 // TestIsCacheable_GraveyardReadFlips: same as Deck — Graveyard() reads prior-turn graveyard
 // contents, so the read alone makes the chain output uncacheable.
 func TestIsCacheable_GraveyardReadFlips(t *testing.T) {
-	s := NewTurnState(nil, []Card{testutils.NewStubCard("g")})
+	s := NewTurnState(nil, []Card{NewFakeCard("g")})
 	_ = s.Graveyard()
 	if s.IsCacheable() {
 		t.Error("Graveyard() read should flip IsCacheable to false")
@@ -305,8 +303,8 @@ func TestIsCacheable_GraveyardReadFlips(t *testing.T) {
 // TestIsCacheable_PopDeckTopFlips: the verb-based mutator flips the bit + mutates atomically
 // so a card that pops the top can't sneak past the cacheable signal.
 func TestIsCacheable_PopDeckTopFlips(t *testing.T) {
-	a := testutils.NewStubCard("a")
-	s := NewTurnState([]Card{a, testutils.NewStubCard("b")}, nil)
+	a := NewFakeCard("a")
+	s := NewTurnState([]Card{a, NewFakeCard("b")}, nil)
 	got, ok := s.PopDeckTop()
 	if !ok || got != a {
 		t.Errorf("PopDeckTop = (%v, %v), want (a, true)", got, ok)
@@ -331,8 +329,8 @@ func TestIsCacheable_PopDeckTopEmptyFlips(t *testing.T) {
 // TestIsCacheable_PrependToDeckFlips: writes to deck order make the next deck-top reader's
 // answer depend on this chain step, so the bit flips as soon as any deck mutation lands.
 func TestIsCacheable_PrependToDeckFlips(t *testing.T) {
-	s := NewTurnState([]Card{testutils.NewStubCard("x")}, nil)
-	added := testutils.NewStubCard("y")
+	s := NewTurnState([]Card{NewFakeCard("x")}, nil)
+	added := NewFakeCard("y")
 	s.PrependToDeck(added)
 	if s.IsCacheable() {
 		t.Error("PrependToDeck should flip IsCacheable to false")
@@ -345,8 +343,8 @@ func TestIsCacheable_PrependToDeckFlips(t *testing.T) {
 // TestIsCacheable_TutorFromDeckFlips: tutoring scans deck contents — even a no-match scan
 // flips because the result's "no card found" answer depends on shuffle.
 func TestIsCacheable_TutorFromDeckFlips(t *testing.T) {
-	target := testutils.NewStubCard("target")
-	deck := []Card{testutils.NewStubCard("a"), target, testutils.NewStubCard("b")}
+	target := NewFakeCard("target")
+	deck := []Card{NewFakeCard("a"), target, NewFakeCard("b")}
 	s := NewTurnState(append([]Card(nil), deck...), nil)
 	got, ok := s.TutorFromDeck(func(c Card) int {
 		if c == target {
@@ -369,7 +367,7 @@ func TestIsCacheable_TutorFromDeckFlips(t *testing.T) {
 // TestIsCacheable_TutorFromDeckNoMatchFlips: the score function returning 0 for every entry
 // still flips — the scan ran, the answer depended on the deck contents.
 func TestIsCacheable_TutorFromDeckNoMatchFlips(t *testing.T) {
-	s := NewTurnState([]Card{testutils.NewStubCard("a"), testutils.NewStubCard("b")}, nil)
+	s := NewTurnState([]Card{NewFakeCard("a"), NewFakeCard("b")}, nil)
 	if got, ok := s.TutorFromDeck(func(Card) int { return 0 }); got != nil || ok {
 		t.Errorf("TutorFromDeck no-match = (%v, %v), want (nil, false)", got, ok)
 	}
@@ -381,8 +379,8 @@ func TestIsCacheable_TutorFromDeckNoMatchFlips(t *testing.T) {
 // TestIsCacheable_BanishFromGraveyardFlips: banishing scans the graveyard — even a pred
 // that never matches still flips.
 func TestIsCacheable_BanishFromGraveyardFlips(t *testing.T) {
-	target := testutils.NewStubCard("target")
-	s := NewTurnState(nil, []Card{testutils.NewStubCard("a"), target})
+	target := NewFakeCard("target")
+	s := NewTurnState(nil, []Card{NewFakeCard("a"), target})
 	got, ok := s.BanishFromGraveyard(func(c Card) bool { return c == target })
 	if !ok || got != target {
 		t.Errorf("BanishFromGraveyard = (%v, %v), want (target, true)", got, ok)
@@ -397,7 +395,7 @@ func TestIsCacheable_BanishFromGraveyardFlips(t *testing.T) {
 
 // TestIsCacheable_BanishFromGraveyardNoMatchFlips: same scan-flip rule on the no-match path.
 func TestIsCacheable_BanishFromGraveyardNoMatchFlips(t *testing.T) {
-	s := NewTurnState(nil, []Card{testutils.NewStubCard("a")})
+	s := NewTurnState(nil, []Card{NewFakeCard("a")})
 	if got, ok := s.BanishFromGraveyard(func(Card) bool { return false }); got != nil || ok {
 		t.Errorf("BanishFromGraveyard no-match = (%v, %v), want (nil, false)", got, ok)
 	}
@@ -410,7 +408,7 @@ func TestIsCacheable_BanishFromGraveyardNoMatchFlips(t *testing.T) {
 // flips" convention).
 func TestIsCacheable_AddToGraveyardFlips(t *testing.T) {
 	s := NewTurnState(nil, nil)
-	s.AddToGraveyard(testutils.NewStubCard("x"))
+	s.AddToGraveyard(NewFakeCard("x"))
 	if s.IsCacheable() {
 		t.Error("AddToGraveyard should flip IsCacheable to false")
 	}
@@ -420,7 +418,7 @@ func TestIsCacheable_AddToGraveyardFlips(t *testing.T) {
 // so it inherits the flip — pins that the framework helper doesn't cheat by reading the
 // private slice directly.
 func TestIsCacheable_DrawOneFlipsThroughPopDeckTop(t *testing.T) {
-	s := NewTurnState([]Card{testutils.NewStubCard("x")}, nil)
+	s := NewTurnState([]Card{NewFakeCard("x")}, nil)
 	s.DrawOne()
 	if s.IsCacheable() {
 		t.Error("DrawOne should flip IsCacheable to false (inherits via PopDeckTop)")
@@ -430,7 +428,7 @@ func TestIsCacheable_DrawOneFlipsThroughPopDeckTop(t *testing.T) {
 // TestIsCacheable_ClashFlipsThroughDeck: Clash reads s.Deck() to peek the top card; the
 // call should propagate the flip.
 func TestIsCacheable_ClashFlipsThroughDeck(t *testing.T) {
-	s := NewTurnState([]Card{testutils.NewStubCard("top").WithAttack(7)}, nil)
+	s := NewTurnState([]Card{NewFakeCard("top").WithAttack(7)}, nil)
 	var won bool
 	s.Clash(func() { won = true }, nil)
 	if !won {
@@ -445,8 +443,8 @@ func TestIsCacheable_ClashFlipsThroughDeck(t *testing.T) {
 // and graveyard directly, bypassing the accessor flip.
 func TestIsCacheable_NewTurnStateSeedingDoesNotFlip(t *testing.T) {
 	s := NewTurnState(
-		[]Card{testutils.NewStubCard("x")},
-		[]Card{testutils.NewStubCard("y")},
+		[]Card{NewFakeCard("x")},
+		[]Card{NewFakeCard("y")},
 	)
 	if !s.IsCacheable() {
 		t.Error("NewTurnState seeding should not flip IsCacheable")

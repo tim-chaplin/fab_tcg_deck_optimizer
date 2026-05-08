@@ -1,13 +1,10 @@
-package sim_test
+package sim
 
 import (
 	"io"
 	"os"
 	"strings"
 	"testing"
-
-	. "github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
 )
 
 // captureStdout redirects os.Stdout into a pipe for the duration of fn and returns whatever
@@ -36,12 +33,12 @@ func captureStdout(t *testing.T, fn func()) string {
 // Tests that OptDebug=true makes Opt print a one-line summary of the outcome to stdout,
 // and OptDebug=false stays quiet.
 func TestOptDebug_PrintsOnlyWhenSet(t *testing.T) {
-	a := testutils.NewStubCard("a")
-	b := testutils.NewStubCard("b")
+	a := NewFakeCard("a")
+	b := NewFakeCard("b")
 	prev := OptDebug
 	defer func() { OptDebug = prev }()
 
-	withOptHero(t, testutils.Hero{
+	withOptHero(t, FakeHero{
 		OptStrategy: func(cards []Card) (top, bottom []Card) {
 			return []Card{cards[1]}, []Card{cards[0]} // swap: bottom a, keep b on top
 		},

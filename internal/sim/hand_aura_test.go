@@ -1,16 +1,13 @@
-package sim_test
+package sim
 
 import (
-	. "github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 	"testing"
-
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
 )
 
 // Tests that an OncePerTurn AttackAction trigger fires on the first call and is gated by
 // FiredThisTurn on the second within the same turn.
 func TestFireAttackActionAuras_FiresOnceWhenGated(t *testing.T) {
-	aura := testutils.RedAttack{}
+	aura := FakeRedAttack{}
 	calls := 0
 	state := &TurnState{Auras: []Aura{{
 		Trigger: Trigger{
@@ -25,12 +22,12 @@ func TestFireAttackActionAuras_FiresOnceWhenGated(t *testing.T) {
 		Count:       3,
 		OncePerTurn: true,
 	}}}
-	trigger := testutils.RedAttack{}
-	FireAttackActionAuras(state, trigger)
+	trigger := FakeRedAttack{}
+	fireAttackActionAuras(state, trigger)
 	if state.Value != 1 {
 		t.Errorf("first fire Value = %d, want 1", state.Value)
 	}
-	FireAttackActionAuras(state, trigger)
+	fireAttackActionAuras(state, trigger)
 	if state.Value != 1 {
 		t.Errorf("second fire Value = %d, want 1 (OncePerTurn gate kept second fire from crediting)", state.Value)
 	}
@@ -48,7 +45,7 @@ func TestFireAttackActionAuras_FiresOnceWhenGated(t *testing.T) {
 // TestFireAttackActionAuras_GraveyardsExhaustedAura: a handler that calls DestroyAura
 // drops the entry from Auras and lands Self in the graveyard.
 func TestFireAttackActionAuras_GraveyardsExhaustedAura(t *testing.T) {
-	aura := testutils.RedAttack{}
+	aura := FakeRedAttack{}
 	state := &TurnState{Auras: []Aura{{
 		Trigger: Trigger{
 			TriggerType: TriggerAttackAction,
@@ -60,7 +57,7 @@ func TestFireAttackActionAuras_GraveyardsExhaustedAura(t *testing.T) {
 		Self:  CardOrTokenType{Card: aura},
 		Count: 1,
 	}}}
-	FireAttackActionAuras(state, testutils.RedAttack{})
+	fireAttackActionAuras(state, FakeRedAttack{})
 	if len(state.Auras) != 0 {
 		t.Errorf("Auras = %+v, want empty (handler called DestroyAura)", state.Auras)
 	}
@@ -74,7 +71,7 @@ func TestFireAttackActionAuras_GraveyardsExhaustedAura(t *testing.T) {
 // trigger is left untouched by FireAttackActionAuras — only AttackAction-typed entries
 // fire here.
 func TestFireAttackActionAuras_PassesThroughNonAttackActionTriggers(t *testing.T) {
-	aura := testutils.RedAttack{}
+	aura := FakeRedAttack{}
 	calls := 0
 	state := &TurnState{Auras: []Aura{{
 		Trigger: Trigger{
@@ -84,7 +81,7 @@ func TestFireAttackActionAuras_PassesThroughNonAttackActionTriggers(t *testing.T
 		Self:  CardOrTokenType{Card: aura},
 		Count: 1,
 	}}}
-	FireAttackActionAuras(state, testutils.RedAttack{})
+	fireAttackActionAuras(state, FakeRedAttack{})
 	if state.Value != 0 {
 		t.Errorf("Value = %d, want 0 (start-of-turn trigger doesn't fire on attack action)", state.Value)
 	}

@@ -1,10 +1,7 @@
-package sim_test
+package sim
 
 import (
 	"testing"
-
-	. "github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
 )
 
 // Tests that without Dominate only 1/4/7 damage are treated as likely-to-hit.
@@ -56,10 +53,10 @@ func TestLikelyToHit_FoldsEffectiveAttackAndDominate(t *testing.T) {
 		{"printed 4, +1 bonus, granted Dominate → still in 1/4/7 OR 5+", 4, 1, true, false, true},
 	}
 	for _, tc := range cases {
-		base := testutils.NewStubCard(tc.name).WithAttack(tc.printed)
+		base := NewFakeCard(tc.name).WithAttack(tc.printed)
 		var c Card = base
 		if tc.printedDom {
-			c = testutils.DominatingStubCard{StubCard: base}
+			c = DominatingFakeCard{FakeCard: base}
 		}
 		p := &CardState{Card: c, BonusAttack: tc.bonusAttack, GrantedDominate: tc.grantedDom}
 		if got := LikelyToHit(p); got != tc.want {

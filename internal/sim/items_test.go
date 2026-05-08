@@ -1,16 +1,13 @@
-package sim_test
+package sim
 
 import (
 	"testing"
-
-	. "github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
 )
 
 // Tests that GoldTokenAbility.Play decrements Count and removes the entry at zero. Drives
 // Play directly because the optimizer credits no Value for spending Gold.
 func TestGoldAbility_PlaysDecrementsAndDestroys(t *testing.T) {
-	s := NewTurnState([]Card{testutils.RedAttack{}}, nil)
+	s := NewTurnState([]Card{FakeRedAttack{}}, nil)
 	s.Items = []Item{NewGoldItem(1)}
 	(GoldTokenAbility{}).Play(s, &CardState{Card: GoldTokenAbility{}})
 	if s.Gold() != 0 {
@@ -26,7 +23,7 @@ func TestGoldAbility_PlaysDecrementsAndDestroys(t *testing.T) {
 
 // Tests that spending one of multiple Gold tokens leaves the entry at decremented Count.
 func TestGoldAbility_PlayDecrementsCountWhenMultiple(t *testing.T) {
-	s := NewTurnState([]Card{testutils.RedAttack{}}, nil)
+	s := NewTurnState([]Card{FakeRedAttack{}}, nil)
 	s.Items = []Item{NewGoldItem(3)}
 	(GoldTokenAbility{}).Play(s, &CardState{Card: GoldTokenAbility{}})
 	if s.Gold() != 2 {
@@ -36,7 +33,7 @@ func TestGoldAbility_PlayDecrementsCountWhenMultiple(t *testing.T) {
 
 // Tests SilverTokenAbility.Play decrement + draw behaviour, mirroring the Gold case.
 func TestSilverAbility_PlaysDecrementsAndDestroys(t *testing.T) {
-	s := NewTurnState([]Card{testutils.RedAttack{}}, nil)
+	s := NewTurnState([]Card{FakeRedAttack{}}, nil)
 	s.Items = []Item{NewSilverItem(1)}
 	(SilverTokenAbility{}).Play(s, &CardState{Card: SilverTokenAbility{}})
 	if s.Silver() != 0 {
@@ -52,7 +49,7 @@ func TestSilverAbility_PlaysDecrementsAndDestroys(t *testing.T) {
 
 // Tests CopperTokenAbility.Play decrement + draw behaviour, mirroring the Gold case.
 func TestCopperAbility_PlaysDecrementsAndDestroys(t *testing.T) {
-	s := NewTurnState([]Card{testutils.RedAttack{}}, nil)
+	s := NewTurnState([]Card{FakeRedAttack{}}, nil)
 	s.Items = []Item{NewCopperItem(1)}
 	(CopperTokenAbility{}).Play(s, &CardState{Card: CopperTokenAbility{}})
 	if s.Copper() != 0 {
@@ -86,11 +83,11 @@ func TestCreateSilverCopper_BumpsExistingEntry(t *testing.T) {
 // Tests that the eval cache fingerprints priorItems so calls with different gold
 // counts don't collide.
 func TestEvalCache_PriorItemsKeyedDistinctly(t *testing.T) {
-	hand := []Card{testutils.RedAttack{}}
+	hand := []Card{FakeRedAttack{}}
 	ev := NewEvaluator()
 	mp := Matchup{IncomingDamage: 0}
-	_ = ev.Best(testutils.Hero{Intel: 4}, nil, hand, mp, nil, TurnState{Items: []Item{NewGoldItem(1)}})
-	_ = ev.Best(testutils.Hero{Intel: 4}, nil, hand, mp, nil, TurnState{Items: []Item{NewGoldItem(2)}})
+	_ = ev.Best(FakeHero{Intel: 4}, nil, hand, mp, nil, TurnState{Items: []Item{NewGoldItem(1)}})
+	_ = ev.Best(FakeHero{Intel: 4}, nil, hand, mp, nil, TurnState{Items: []Item{NewGoldItem(2)}})
 	stats := ev.CacheStats()
 	// Two distinct item-count keys → both miss; neither hits.
 	if stats.Hits != 0 {
@@ -100,7 +97,7 @@ func TestEvalCache_PriorItemsKeyedDistinctly(t *testing.T) {
 		t.Errorf("misses = %d, want 2 (one per distinct item key)", stats.Misses)
 	}
 	// Repeating the second call should hit.
-	_ = ev.Best(testutils.Hero{Intel: 4}, nil, hand, mp, nil, TurnState{Items: []Item{NewGoldItem(2)}})
+	_ = ev.Best(FakeHero{Intel: 4}, nil, hand, mp, nil, TurnState{Items: []Item{NewGoldItem(2)}})
 	stats = ev.CacheStats()
 	if stats.Hits != 1 {
 		t.Errorf("hits after repeat = %d, want 1 (matching item key should hit)", stats.Hits)
