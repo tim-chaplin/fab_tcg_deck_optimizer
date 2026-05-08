@@ -4,12 +4,11 @@ package sim
 // Held / Arsenal assignment) and delegates each leaf's chain-feasibility check to
 // bestAttackWithWeapons. Post-enumeration helpers decide how an empty arsenal slot gets
 // filled, plus the roleAllowed policy function that shapes the partition tree. Tiebreak
-// order across partition leaves lives on runningCarry (see running_carry.go): Value →
-// cards drawn → more pending future value at end of chain (every Aura.Count plus every
-// Item.Count — hidden later-turn payoff the current-turn Value misses, including
-// runechants saved for next turn's arcane and unspent token items) → arsenal slot
-// ending occupied (saves a hand slot next refill; covers both arsenal-in-stayed and
-// Held-for-promotion).
+// order across partition leaves: Value → cards drawn → more pending future value at end
+// of chain (every Aura.Count plus every Item.Count — hidden later-turn payoff the
+// current-turn Value misses, including runechants saved for next turn's arcane and
+// unspent token items) → arsenal slot ending occupied (saves a hand slot next refill;
+// covers both arsenal-in-stayed and Held-for-promotion).
 
 import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
@@ -79,20 +78,10 @@ func (e *Evaluator) findBest(hero Hero, weapons []Weapon, hand []Card, mp Matchu
 	// handSize+1, big enough for totalN when an arsenal-in card inflates the effective hand.
 	// Each field is re-sliced and rewritten below, so carry-over from prior calls can't leak.
 	bufs := e.getAttackBufs(n, weapons)
-	// running tracks the new-best leaf as the recurse explores partitions. It seeds with
-	// the no-feasible-leaf fallback's state (arsenal-in stays, runechant carryover, every
-	// hand card Held so a post-hoc promotion would fill arsenal) so the tiebreaker treats
-	// the seed as a valid baseline. Finalize clones the scratch into best.State once at
-	// the end so the returned TurnSummary owns independent backing.
-	// Seed the running carry's scratch with the no-feasible-line fallback's hand —
-	// the partition recurse's "all Held" baseline — so willOccupy reads the seed
-	// state correctly when no chain has been promoted yet.
-	bufs.findBestCarryScratch.Reset()
-	bufs.findBestCarryScratch.Hand = append(bufs.findBestCarryScratch.Hand[:0], hand...)
-	running := runningCarry{
-		scratch: &bufs.findBestCarryScratch,
-		arsenal: arsenalCardIn,
-	}
+	// best.State doubles as the running-winner scratch — its slice backings get reused
+	// across promotions via CopyFrom (allocation-free after the first sizing).
+	var runningSeen bool
+	var runningFutureValue int
 	rolesBuf := bufs.rolesBuf[:totalN]
 	pvals := bufs.pitchVals[:totalN]
 	dvals := bufs.defenseVals[:totalN]
@@ -128,12 +117,27 @@ func (e *Evaluator) findBest(hero Hero, weapons []Weapon, hand []Card, mp Matchu
 			// a card mid-chain (Pitch + Gold-spend) register the drawn card as filling
 			// next turn's arsenal — same outcome as a Held card promoting via the post-hoc
 			// step.
-			willOccupy := arsenalCard != nil || len(carry.Hand) > 0
-			if !running.Beats(v, futureValuePlayed, carry.CardsDrawn, willOccupy) {
-				return
+			if runningSeen {
+				cmp := chainScoreCmp(v, carry.CardsDrawn, futureValuePlayed,
+					best.Value, best.State.CardsDrawn, runningFutureValue)
+				if cmp < 0 {
+					return
+				}
+				if cmp == 0 {
+					// Tiebreak: end-of-chain arsenal slot or Held cards (a post-hoc
+					// promotion can pull from Hand) both count as occupying.
+					willOccupy := arsenalCard != nil || len(carry.Hand) > 0
+					runningWillOccupy := best.State.Arsenal != nil || len(best.State.Hand) > 0
+					if !willOccupy || runningWillOccupy {
+						return
+					}
+				}
 			}
-			running.Promote(v, futureValuePlayed, carry.CardsDrawn, arsenalCard, &carry)
+			best.State.CopyFrom(&carry)
+			best.State.Arsenal = arsenalCard
 			best.Value = v
+			runningFutureValue = futureValuePlayed
+			runningSeen = true
 			bestSwung = swung
 			// Cards and FromArsenal flags were populated at construction; Role is the only
 			// field that varies per-permutation.
@@ -173,10 +177,6 @@ func (e *Evaluator) findBest(hero Hero, weapons []Weapon, hand []Card, mp Matchu
 	}
 	recurse(0, 0, 0)
 	best.SwungWeapons = bestSwung
-	// Promote the running winner's CarryState into best.State. Finalize clones the scratch
-	// once so best.State owns independent backing, or leaves the seed in place when no
-	// leaf produced a feasible chain.
-	running.Finalize(&best.State)
 	// Stamp Cacheable last from the AND-aggregated sticky bit so every leaf the search
 	// touched (feasible or rejected) contributes. The post-hoc arsenal promotion below
 	// doesn't run a chain, so it doesn't move the bit.

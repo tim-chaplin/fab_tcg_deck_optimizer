@@ -132,13 +132,6 @@ type carryWinnerBufs struct {
 	// bestAttackWithWeapons against the same bufs, so callers that need the data to
 	// outlive the next call must copy it out.
 	bestCarryScratch CarryState
-	// findBestCarryScratch is findBest's running-winner sliding window. When the recurse
-	// promotes a new-best leaf, runningCarry.Promote calls CarryState.CopyFrom on the
-	// leaf's CarryState (an alias to bestCarryScratch) so later (non-winning) leaves
-	// whose bestAttackWithWeapons call clobbers bestCarryScratch can't disturb the
-	// running winner. findBest clones this scratch once at exit so the returned
-	// TurnSummary's State owns independent backing.
-	findBestCarryScratch CarryState
 }
 
 // attackBufs is the pooled scratch the attack-evaluation pipeline threads through every

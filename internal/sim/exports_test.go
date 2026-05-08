@@ -58,26 +58,12 @@ func PromoteRandomHandCardToArsenal(best *TurnSummary, startingHand []Card, arse
 	promoteRandomHandCardToArsenal(best, startingHand, arsenalCardIn)
 }
 
-// BeatsBest is the test-only entry point for the partition-tiebreaker policy. The shim
-// builds a runningCarry seeded with the comparison's "current best" stats and asks
-// whether the candidate would displace it; that's the same path findBest's recurse
-// takes, so the tiebreak order under test is the production order.
-//
-// bestWillOccupyArsenal is plumbed through r.scratch.Hand: stuffing a placeholder card
-// into the scratch's Hand makes the running winner's willOccupy compute as true; an
-// empty scratch.Hand with a nil arsenal makes it false.
+// BeatsBest exposes findBest's partition-tiebreaker policy for direct testing.
 func BeatsBest(v, futureValuePlayed int, willOccupyArsenal bool, best TurnSummary, bestFutureValuePlayed int, bestWillOccupyArsenal bool) bool {
-	scratch := &CarryState{}
-	if bestWillOccupyArsenal {
-		scratch.Hand = []Card{nil}
+	if cmp := chainScoreCmp(v, 0, futureValuePlayed, best.Value, 0, bestFutureValuePlayed); cmp != 0 {
+		return cmp > 0
 	}
-	r := runningCarry{
-		seen:              true,
-		scratch:           scratch,
-		value:             best.Value,
-		futureValuePlayed: bestFutureValuePlayed,
-	}
-	return r.Beats(v, futureValuePlayed, 0, willOccupyArsenal)
+	return willOccupyArsenal && !bestWillOccupyArsenal
 }
 
 // PairSwapMutations re-exports pairSwapMutations for sim_test consumers.

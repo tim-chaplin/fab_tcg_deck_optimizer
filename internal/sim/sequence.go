@@ -262,11 +262,8 @@ func bestAttackWithWeapons(hero Hero, weapons []Weapon, attackers, defenders, pi
 		// poisons the result regardless of attack-feasibility.
 		return 0, 0, chainBudget{}, nil, CarryState{}, false, defenseCacheable
 	}
-	// Return bestCarryScratch as an alias — the caller (findBest's recurse, replayBest)
-	// must copy or clone before the next bestAttackWithWeapons call against the same bufs.
-	// findBest's recurse calls bufs.findBestCarryScratch.CopyFrom(carry) on a new-best
-	// leaf and clones once at end of findBest; the replayBest path consumes the alias
-	// before any second call to bestAttackWithWeapons.
+	// Return bestCarryScratch as an alias — the caller must copy or clone before the
+	// next bestAttackWithWeapons call against the same bufs.
 	return bestDealt, defenseDealt, bestBudget, bestSwung, bufs.bestCarryScratch, true, ctx.cacheable && defenseCacheable
 }
 
