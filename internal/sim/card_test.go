@@ -1,20 +1,17 @@
-package sim_test
+package sim
 
 import (
 	"testing"
-
-	. "github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
 )
 
 // Tests the NotImplemented type-assertion contract: opt-in via a NotImplemented() method;
 // plain Cards don't satisfy the interface.
 func TestNotImplementedMarker(t *testing.T) {
-	var plain Card = testutils.NewStubCard("plain")
+	var plain Card = NewFakeCard("plain")
 	if _, ok := plain.(NotImplemented); ok {
 		t.Error("plain stub satisfied NotImplemented — the marker must be opt-in, not implicit")
 	}
-	var tagged Card = testutils.NotImplementedStubCard{StubCard: testutils.NewStubCard("tagged")}
+	var tagged Card = NotImplementedFakeCard{FakeCard: NewFakeCard("tagged")}
 	if _, ok := tagged.(NotImplemented); !ok {
 		t.Error("tagged stub failed NotImplemented assertion — defining NotImplemented() must opt in")
 	}
@@ -24,11 +21,11 @@ func TestNotImplementedMarker(t *testing.T) {
 // not implicit, and orthogonal to NotImplemented (a plain stub satisfies neither, an
 // Unplayable stub satisfies Unplayable but not NotImplemented).
 func TestUnplayableMarker(t *testing.T) {
-	var plain Card = testutils.NewStubCard("plain")
+	var plain Card = NewFakeCard("plain")
 	if _, ok := plain.(Unplayable); ok {
 		t.Error("plain stub satisfied Unplayable — the marker must be opt-in, not implicit")
 	}
-	var tagged Card = testutils.UnplayableStubCard{StubCard: testutils.NewStubCard("tagged")}
+	var tagged Card = UnplayableFakeCard{FakeCard: NewFakeCard("tagged")}
 	if _, ok := tagged.(Unplayable); !ok {
 		t.Error("tagged stub failed Unplayable assertion — defining Unplayable() must opt in")
 	}
@@ -45,9 +42,9 @@ func TestIsExcludedFromPool_BothMarkers(t *testing.T) {
 		card Card
 		want bool
 	}{
-		{"plain", testutils.NewStubCard("plain"), false},
-		{"NotImplemented", testutils.NotImplementedStubCard{StubCard: testutils.NewStubCard("ni")}, true},
-		{"Unplayable", testutils.UnplayableStubCard{StubCard: testutils.NewStubCard("up")}, true},
+		{"plain", NewFakeCard("plain"), false},
+		{"NotImplemented", NotImplementedFakeCard{FakeCard: NewFakeCard("ni")}, true},
+		{"Unplayable", UnplayableFakeCard{FakeCard: NewFakeCard("up")}, true},
 	}
 	for _, tc := range cases {
 		if got := IsExcludedFromPool(tc.card); got != tc.want {
@@ -71,7 +68,7 @@ func TestCardState_EffectiveGoAgain(t *testing.T) {
 		{"both", true, true, true},
 	}
 	for _, tc := range cases {
-		base := testutils.NewStubCard(tc.name)
+		base := NewFakeCard(tc.name)
 		if tc.printed {
 			base = base.WithGoAgain()
 		}
@@ -85,8 +82,8 @@ func TestCardState_EffectiveGoAgain(t *testing.T) {
 // TestCardState_EffectiveDominate: the Dominator marker OR a mid-chain grant (a "gains
 // dominate" rider flipping self.GrantedDominate) each qualifies the attack as dominating.
 func TestCardState_EffectiveDominate(t *testing.T) {
-	plain := testutils.NewStubCard("plain")
-	dominator := testutils.DominatingStubCard{StubCard: testutils.NewStubCard("printed")}
+	plain := NewFakeCard("plain")
+	dominator := DominatingFakeCard{FakeCard: NewFakeCard("printed")}
 
 	cases := []struct {
 		name    string
@@ -110,10 +107,10 @@ func TestCardState_EffectiveDominate(t *testing.T) {
 // TestHasDominate_MatchesMarker: the free helper is the static printed-keyword check;
 // type assertion to Dominator decides.
 func TestHasDominate_MatchesMarker(t *testing.T) {
-	if HasDominate(testutils.NewStubCard("plain")) {
+	if HasDominate(NewFakeCard("plain")) {
 		t.Error("HasDominate(plain) = true, want false")
 	}
-	if !HasDominate(testutils.DominatingStubCard{}) {
+	if !HasDominate(DominatingFakeCard{}) {
 		t.Error("HasDominate(dominator) = false, want true")
 	}
 }
@@ -136,7 +133,7 @@ func TestCardState_EffectiveAttack(t *testing.T) {
 	}
 	for _, tc := range cases {
 		p := &CardState{
-			Card:        testutils.NewStubCard(tc.name).WithAttack(tc.printed),
+			Card:        NewFakeCard(tc.name).WithAttack(tc.printed),
 			BonusAttack: tc.bonusAttack,
 		}
 		if got := p.EffectiveAttack(); got != tc.want {
