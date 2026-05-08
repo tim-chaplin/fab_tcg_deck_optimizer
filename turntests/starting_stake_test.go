@@ -15,10 +15,11 @@ import (
 func TestStartingStake_CreatesGoldViaChain(t *testing.T) {
 	d := sim.New(heroes.Viserai{}, nil, fillerDeck())
 	hand := []sim.Card{cards.StartingStakeYellow{}}
-	state := d.EvalOneTurnForTesting(sim.Matchup{IncomingDamage: 0}, sim.TurnState{}, hand)
+	summary := d.EvalOneTurnForTesting(sim.Matchup{IncomingDamage: 0}, sim.TurnState{}, hand)
+	state := summary.State
 	if state.Gold() != 1 {
 		t.Fatalf("Gold = %d, want 1 (Starting Stake creates one)\nBestLine: %s",
-			state.Gold(), formatBestLine(state.BestLine))
+			state.Gold(), formatBestLine(summary.BestLine))
 	}
 }
 

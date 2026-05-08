@@ -19,8 +19,8 @@ func TestCopperAbility_NotEnoughResourceSkipsSpend(t *testing.T) {
 	hand := []sim.Card{testutils.BluePitch{}}
 	priorItems := []sim.Item{sim.NewCopperItem(1)}
 	got := d.EvalOneTurnForTesting(sim.Matchup{IncomingDamage: 0}, sim.TurnState{Items: priorItems}, hand)
-	if got.Copper() != 1 {
-		t.Fatalf("Copper after turn = %d, want 1 (single blue pitch can't fund {4})", got.Copper())
+	if got.State.Copper() != 1 {
+		t.Fatalf("Copper after turn = %d, want 1 (single blue pitch can't fund {4})", got.State.Copper())
 	}
 }
 
@@ -39,13 +39,13 @@ func TestCopperAbility_SpendsAndSwings(t *testing.T) {
 	if got.Value != 3 {
 		t.Fatalf("Value = %d, want 3 (Reaping Blade swing power 3)", got.Value)
 	}
-	if got.Copper() != 0 {
-		t.Fatalf("Copper after turn = %d, want 0 (the only token spent)", got.Copper())
+	if got.State.Copper() != 0 {
+		t.Fatalf("Copper after turn = %d, want 0 (the only token spent)", got.State.Copper())
 	}
-	if got.CardsDrawn != 1 {
-		t.Fatalf("CardsDrawn = %d, want 1 (Copper ability draws one card)", got.CardsDrawn)
+	if got.State.CardsDrawn != 1 {
+		t.Fatalf("CardsDrawn = %d, want 1 (Copper ability draws one card)", got.State.CardsDrawn)
 	}
-	if got.StartOfNextTurnArsenal == nil {
-		t.Fatalf("StartOfNextTurnArsenal = nil, want the drawn card promoted into the slot")
+	if got.State.Arsenal == nil {
+		t.Fatalf("Arsenal = nil, want the drawn card promoted into the slot")
 	}
 }

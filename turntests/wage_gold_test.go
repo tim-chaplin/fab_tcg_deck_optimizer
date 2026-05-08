@@ -18,10 +18,11 @@ func TestWageGold_OnHitCreatesGoldToken(t *testing.T) {
 		testutils.BluePitch{},
 		testutils.BluePitch{},
 	}
-	state := d.EvalOneTurnForTesting(sim.Matchup{IncomingDamage: 0}, sim.TurnState{}, hand)
-	if state.Value != 7 {
+	summary := d.EvalOneTurnForTesting(sim.Matchup{IncomingDamage: 0}, sim.TurnState{}, hand)
+	state := summary.State
+	if summary.Value != 7 {
 		t.Fatalf("Value = %d, want 7 (Wage Gold Red 7 power)\nBestLine: %s",
-			state.Value, formatBestLine(state.BestLine))
+			summary.Value, formatBestLine(summary.BestLine))
 	}
 	if got := state.Gold(); got != 1 {
 		t.Fatalf("Gold count at start of next turn = %d, want 1 (on-hit token)", got)
@@ -37,10 +38,11 @@ func TestWageGold_BlockableMissDoesNotCreateGold(t *testing.T) {
 		testutils.BluePitch{},
 		testutils.BluePitch{},
 	}
-	state := d.EvalOneTurnForTesting(sim.Matchup{IncomingDamage: 0}, sim.TurnState{}, hand)
-	if state.Value != 5 {
+	summary := d.EvalOneTurnForTesting(sim.Matchup{IncomingDamage: 0}, sim.TurnState{}, hand)
+	state := summary.State
+	if summary.Value != 5 {
 		t.Fatalf("Value = %d, want 5 (Wage Gold Blue 5 power)\nBestLine: %s",
-			state.Value, formatBestLine(state.BestLine))
+			summary.Value, formatBestLine(summary.BestLine))
 	}
 	if got := state.Gold(); got != 0 {
 		t.Fatalf("Gold count = %d, want 0 (power-5 attack misses LikelyToHit window)", got)

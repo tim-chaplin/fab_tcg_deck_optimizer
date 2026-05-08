@@ -92,10 +92,11 @@ func TestPonder_PeaceOfMindFillsEmptyArsenalNextTurn(t *testing.T) {
 	}
 	d := sim.New(heroes.Viserai{}, nil, deck)
 	hand := []sim.Card{cards.PeaceOfMindRed{}, testutils.BluePitch{}}
-	state := d.EvalOneTurnForTesting(sim.Matchup{IncomingDamage: 4}, sim.TurnState{}, hand)
-	if state.StartOfNextTurnArsenal != beacon {
+	summary := d.EvalOneTurnForTesting(sim.Matchup{IncomingDamage: 4}, sim.TurnState{}, hand)
+	state := summary.State
+	if state.Arsenal != beacon {
 		t.Errorf("turn 2 arsenal = %v, want %v (Ponder draw should fill empty arsenal from deck top)",
-			state.StartOfNextTurnArsenal, beacon)
+			state.Arsenal, beacon)
 	}
 	if state.Ponders() != 0 {
 		t.Errorf("Ponders carryover = %d, want 0 (Ponder destroys at end of turn 1)", state.Ponders())

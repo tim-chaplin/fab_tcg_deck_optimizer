@@ -21,18 +21,18 @@ func TestEvalOneTurn_MoonWishAltCostTutorsSunKissAndConsumesDeck(t *testing.T) {
 		testutils.RedAttack{}, testutils.RedAttack{},
 	}
 	d := New(testutils.Hero{Intel: 4}, nil, deckCards)
-	state := d.EvalOneTurnForTesting(Matchup{IncomingDamage: 0}, TurnState{}, []Card{
+	summary := d.EvalOneTurnForTesting(Matchup{IncomingDamage: 0}, TurnState{}, []Card{
 		cards.MoonWishYellow{},
 		cards.WeepingBattlegroundRed{},
 	})
+	state := summary.State
 
-	if state.Value != 4 {
+	if summary.Value != 4 {
 		t.Errorf("turn-1 Value = %d, want 4 (Moon Wish base attack; Sun Kiss tutored, not played)",
-			state.Value)
+			summary.Value)
 	}
-	if state.StartOfNextTurnArsenal == nil || state.StartOfNextTurnArsenal.ID() != ids.SunKissRed {
-		t.Errorf("StartOfNextTurnArsenal = %v, want Sun Kiss [R] (post-hoc promoted from State.Hand)",
-			state.StartOfNextTurnArsenal)
+	if state.Arsenal == nil || state.Arsenal.ID() != ids.SunKissRed {
+		t.Errorf("Arsenal = %v, want Sun Kiss [R] (post-hoc promoted from State.Hand)", state.Arsenal)
 	}
 	if got := countAcrossSurfaces(state, ids.SunKissRed); got != 1 {
 		t.Errorf("Sun Kiss [R] total across turn-2 Hand/Deck/Arsenal = %d, want 1 (in Arsenal)",
@@ -53,18 +53,18 @@ func TestEvalOneTurn_MoonWishAltCostTutorFizzlesWithoutSunKiss(t *testing.T) {
 		testutils.RedAttack{}, testutils.RedAttack{}, testutils.RedAttack{},
 	}
 	d := New(testutils.Hero{Intel: 4}, nil, deckCards)
-	state := d.EvalOneTurnForTesting(Matchup{IncomingDamage: 0}, TurnState{}, []Card{
+	summary := d.EvalOneTurnForTesting(Matchup{IncomingDamage: 0}, TurnState{}, []Card{
 		cards.MoonWishYellow{},
 		cards.WeepingBattlegroundRed{},
 	})
+	state := summary.State
 
-	if state.Value != 4 {
+	if summary.Value != 4 {
 		t.Errorf("turn-1 Value = %d, want 4 (Moon Wish base attack; tutor fizzles)",
-			state.Value)
+			summary.Value)
 	}
-	if state.StartOfNextTurnArsenal != nil {
-		t.Errorf("StartOfNextTurnArsenal = %v, want nil (DR was the only Held; alt cost consumed it)",
-			state.StartOfNextTurnArsenal)
+	if state.Arsenal != nil {
+		t.Errorf("Arsenal = %v, want nil (DR was the only Held; alt cost consumed it)", state.Arsenal)
 	}
 	if got := countAcrossSurfaces(state, ids.WeepingBattlegroundRed); got != 1 {
 		t.Errorf("Weeping Battleground [R] total across turn-2 surfaces = %d, want 1 "+
@@ -83,15 +83,16 @@ func TestEvalOneTurn_MoonWishWithFlyingHighPlaysTutoredSunKiss(t *testing.T) {
 		testutils.RedAttack{}, testutils.RedAttack{}, testutils.RedAttack{}, testutils.RedAttack{},
 	}
 	d := New(testutils.Hero{Intel: 4}, nil, deckCards)
-	state := d.EvalOneTurnForTesting(Matchup{IncomingDamage: 0}, TurnState{}, []Card{
+	summary := d.EvalOneTurnForTesting(Matchup{IncomingDamage: 0}, TurnState{}, []Card{
 		cards.FlyingHighRed{},
 		cards.MoonWishYellow{},
 		cards.WeepingBattlegroundRed{},
 	})
+	state := summary.State
 
-	if state.Value != 7 {
+	if summary.Value != 7 {
 		t.Errorf("turn-1 Value = %d, want 7 (Moon Wish 4 + Sun Kiss 3 via Flying High go-again)",
-			state.Value)
+			summary.Value)
 	}
 	skInGraveyard := false
 	for _, c := range state.Graveyard {
@@ -108,27 +109,27 @@ func TestEvalOneTurn_MoonWishWithFlyingHighPlaysTutoredSunKiss(t *testing.T) {
 		t.Errorf("Sun Kiss [R] total across turn-2 surfaces = %d, want 0 (it's in the graveyard)",
 			got)
 	}
-	if state.StartOfNextTurnArsenal == nil {
-		t.Error("StartOfNextTurnArsenal = nil; want any card (Sun Kiss's DrawOne pulled one card into " +
+	if state.Arsenal == nil {
+		t.Error("Arsenal = nil; want any card (Sun Kiss's DrawOne pulled one card into " +
 			"State.Hand → Arsenal promotion is the only candidate)")
 	}
 }
 
-// countAcrossSurfaces totals occurrences of id across the start-of-next-turn Hand, Deck, and
+// countAcrossSurfaces totals occurrences of id across the post-chain Hand, Deck, and
 // Arsenal. Asserts "exists / doesn't exist" without pinning a specific position.
-func countAcrossSurfaces(state TurnStartState, id ids.CardID) int {
+func countAcrossSurfaces(state CarryState, id ids.CardID) int {
 	n := 0
-	for _, c := range state.StartOfNextTurnHand {
+	for _, c := range state.Hand {
 		if c.ID() == id {
 			n++
 		}
 	}
-	for _, c := range state.StartOfNextTurnDeck {
+	for _, c := range state.Deck {
 		if c.ID() == id {
 			n++
 		}
 	}
-	if state.StartOfNextTurnArsenal != nil && state.StartOfNextTurnArsenal.ID() == id {
+	if state.Arsenal != nil && state.Arsenal.ID() == id {
 		n++
 	}
 	return n

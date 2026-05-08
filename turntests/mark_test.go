@@ -12,7 +12,7 @@ import (
 func TestPursueToTheEdgeOfOblivion_MarksOpponentOnHit(t *testing.T) {
 	d := sim.New(heroes.Viserai{}, nil, fillerDeck())
 	hand := []sim.Card{cards.PursueToTheEdgeOfOblivionRed{}}
-	state := d.EvalOneTurnForTesting(sim.Matchup{IncomingDamage: 0}, sim.TurnState{}, hand)
+	state := d.EvalOneTurnForTesting(sim.Matchup{IncomingDamage: 0}, sim.TurnState{}, hand).State
 	if !state.OpponentMarked {
 		t.Fatalf("OpponentMarked = false after Pursue resolved, want true")
 	}
@@ -23,7 +23,7 @@ func TestPursueToTheEdgeOfOblivion_MarksOpponentOnHit(t *testing.T) {
 func TestPursueToTheEdgeOfOblivion_PreservesMarkWhenOpponentAlreadyMarked(t *testing.T) {
 	d := sim.New(heroes.Viserai{}, nil, fillerDeck())
 	hand := []sim.Card{cards.PursueToTheEdgeOfOblivionRed{}}
-	state := d.EvalOneTurnForTesting(sim.Matchup{IncomingDamage: 0}, sim.TurnState{OpponentMarked: true}, hand)
+	state := d.EvalOneTurnForTesting(sim.Matchup{IncomingDamage: 0}, sim.TurnState{OpponentMarked: true}, hand).State
 	if !state.OpponentMarked {
 		t.Fatalf("OpponentMarked = false after Pursue resolved against pre-marked opponent, want true")
 	}

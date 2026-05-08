@@ -175,7 +175,7 @@ func TestEvalTwoTurns_SigilOfFyendalQueuesTrigger(t *testing.T) {
 			got.Turn2.TriggersFromLastTurn)
 	}
 	foundInGy := false
-	for _, c := range got.Turn2.Graveyard {
+	for _, c := range got.Turn2.State.Graveyard {
 		if c.ID() == ids.SigilOfFyendalBlue {
 			foundInGy = true
 			break
@@ -183,7 +183,7 @@ func TestEvalTwoTurns_SigilOfFyendalQueuesTrigger(t *testing.T) {
 	}
 	if !foundInGy {
 		t.Errorf("Turn2.Graveyard missing Sigil of Fyendal (Count hit zero after firing); got %v",
-			got.Turn2.Graveyard)
+			got.Turn2.State.Graveyard)
 	}
 }
 
@@ -323,18 +323,18 @@ func TestEvalTwoTurns_SigilOfTheArknightRevealsIntoHand(t *testing.T) {
 		t.Errorf("Turn2.TriggersFromLastTurn = %+v, want one Sigil entry revealing Aether Slash",
 			got.Turn2.TriggersFromLastTurn)
 	}
-	if len(got.Turn1.StartOfNextTurnHand) != 4 {
-		t.Errorf("Turn1.StartOfNextTurnHand size = %d, want 4 (pre-reveal deal)", len(got.Turn1.StartOfNextTurnHand))
+	if len(got.Turn2.DealtHand) != 4 {
+		t.Errorf("Turn2.DealtHand size = %d, want 4 (pre-reveal deal)", len(got.Turn2.DealtHand))
 	}
 	foundInGy := false
-	for _, c := range got.Turn2.Graveyard {
+	for _, c := range got.Turn2.State.Graveyard {
 		if c.ID() == ids.SigilOfTheArknightBlue {
 			foundInGy = true
 			break
 		}
 	}
 	if !foundInGy {
-		t.Errorf("Turn2.Graveyard missing Sigil of the Arknight; got %v", got.Turn2.Graveyard)
+		t.Errorf("Turn2.Graveyard missing Sigil of the Arknight; got %v", got.Turn2.State.Graveyard)
 	}
 }
 
@@ -371,14 +371,14 @@ func TestEvalTwoTurns_BlessingOfOccultCreatesRunesAtStartOfNextTurn(t *testing.T
 			got.Turn2.TriggersFromLastTurn)
 	}
 	foundInGy := false
-	for _, c := range got.Turn2.Graveyard {
+	for _, c := range got.Turn2.State.Graveyard {
 		if c.ID() == ids.BlessingOfOccultRed {
 			foundInGy = true
 			break
 		}
 	}
 	if !foundInGy {
-		t.Errorf("Turn2.Graveyard missing Blessing [R]; got %v", got.Turn2.Graveyard)
+		t.Errorf("Turn2.Graveyard missing Blessing [R]; got %v", got.Turn2.State.Graveyard)
 	}
 }
 
@@ -486,7 +486,7 @@ func TestEvalTwoTurns_MaleficIncantationOncePerTurnLimitsToOneRune(t *testing.T)
 			t.Errorf("Turn2.TriggersFromLastTurn includes Malefic (%+v); Malefic is AttackAction-typed, not start-of-turn", c)
 		}
 	}
-	for _, c := range got.Turn2.Graveyard {
+	for _, c := range got.Turn2.State.Graveyard {
 		if c.ID() == ids.MaleficIncantationRed {
 			t.Errorf("Turn2.Graveyard includes Malefic; want empty (Malefic still has Count>0)")
 		}
@@ -527,7 +527,7 @@ func TestEvalTwoTurns_RunebloodIncantationTicksAcrossTurns(t *testing.T) {
 		t.Errorf("Turn2.TriggersFromLastTurn = %+v, want one Runeblood entry with Damage=1 (one tick per turn)",
 			got.Turn2.TriggersFromLastTurn)
 	}
-	for _, c := range got.Turn2.Graveyard {
+	for _, c := range got.Turn2.State.Graveyard {
 		if c.ID() == ids.RunebloodIncantationRed {
 			t.Errorf("Turn2.Graveyard includes Runeblood; want absent (Red has Count=3, only one tick fired)")
 		}

@@ -25,8 +25,8 @@ func TestResource_DoesNotPromoteToArsenal(t *testing.T) {
 	d := sim.New(heroes.Viserai{}, nil, fillerDeck())
 	hand := []sim.Card{cards.TitaniumBaubleBlue{}}
 	got := d.EvalOneTurnForTesting(sim.Matchup{IncomingDamage: 0}, sim.TurnState{}, hand)
-	if got.StartOfNextTurnArsenal != nil {
-		t.Fatalf("Arsenal = %v, want nil (Resource cards skip post-hoc promotion)", got.StartOfNextTurnArsenal)
+	if got.State.Arsenal != nil {
+		t.Fatalf("Arsenal = %v, want nil (Resource cards skip post-hoc promotion)", got.State.Arsenal)
 	}
 }
 
@@ -37,7 +37,7 @@ func TestArsenalPromotion_SkipsPureBlock(t *testing.T) {
 	d := sim.New(heroes.Viserai{}, nil, fillerDeck())
 	hand := []sim.Card{cards.OnTheHorizonRed{}}
 	got := d.EvalOneTurnForTesting(sim.Matchup{IncomingDamage: 0}, sim.TurnState{}, hand)
-	if got.StartOfNextTurnArsenal != nil {
-		t.Fatalf("Arsenal = %v, want nil (pure Block cards skip post-hoc promotion)", got.StartOfNextTurnArsenal)
+	if got.State.Arsenal != nil {
+		t.Fatalf("Arsenal = %v, want nil (pure Block cards skip post-hoc promotion)", got.State.Arsenal)
 	}
 }
