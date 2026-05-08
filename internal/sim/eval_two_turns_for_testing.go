@@ -46,14 +46,14 @@ func (d *Deck) EvalTwoTurnsForTesting(mp Matchup, initial TurnState, initialHand
 	// Turn 1: caller-supplied hand, drawCount=0.
 	h := handBuf[:len(turn1Hand)]
 	copy(h, turn1Hand)
-	art1 := runChainAfterDeal(&carry, buf, h, 0, d.Hero, d.Weapons, mp, nil)
-	carry.applyTurnAndRotate(art1.play, buf)
+	turn1, _, _ := runChainAfterDeal(&carry, buf, h, 0, d.Hero, d.Weapons, mp, nil)
+	carry.applyTurnAndRotate(turn1, buf)
 
 	// Turn 2: dealt through runOneTurnInShuffle so cross-turn wiring (recycle, held
 	// carry, banished / graveyard / aura propagation) matches the deck loop.
-	art2, ok := runOneTurnInShuffle(&carry, buf, handBuf, d.Hero, d.Weapons, mp, nil, handSize)
+	turn2, _, _, ok := runOneTurnInShuffle(&carry, buf, handBuf, d.Hero, d.Weapons, mp, nil, handSize)
 	if !ok {
-		return TwoTurnSummary{Turn1: art1.play}
+		return TwoTurnSummary{Turn1: turn1}
 	}
-	return TwoTurnSummary{Turn1: art1.play, Turn2: art2.play}
+	return TwoTurnSummary{Turn1: turn1, Turn2: turn2}
 }

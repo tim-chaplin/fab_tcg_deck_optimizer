@@ -42,8 +42,8 @@ func (d *Deck) EvalOneTurnForTesting(mp Matchup, initial TurnState, initialHand 
 	// the cushioned capacity. drawCount=0: the hand came from the caller, not from buf.
 	h := handBuf[:len(turn1Hand)]
 	copy(h, turn1Hand)
-	art := runChainAfterDeal(&carry, buf, h, 0, d.Hero, d.Weapons, mp, nil)
-	return art.play
+	play, _, _ := runChainAfterDeal(&carry, buf, h, 0, d.Hero, d.Weapons, mp, nil)
+	return play
 }
 
 // turnCarryFromInitial builds a turnCarry seeded with caller-supplied prior-turn state.

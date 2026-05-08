@@ -266,20 +266,36 @@ func runOneShuffle(d *Deck, stats *Stats, scratch *shuffleScratch, idIndex map[i
 	carry := newTurnCarryFromScratch(scratch, deckSize)
 	maxHands := 2 * handsPerCycle
 	for handIdx := 0; handIdx < maxHands; handIdx++ {
-		art, ok := runOneTurnInShuffle(&carry, buf, scratch.handBuf, d.Hero, d.Weapons, mp, ev, handSize)
+		// Snapshot the carry-in aura / item lists for recordBestTurn before
+		// runOneTurnInShuffle mutates them via processAurasAtStartOfTurn.
+		startingAuras := append([]Aura(nil), carry.auras...)
+		startingItems := append([]Item(nil), carry.items...)
+		arsenalIn := carry.arsenal
+
+		play, hand, drawCount, ok := runOneTurnInShuffle(&carry, buf, scratch.handBuf, d.Hero, d.Weapons, mp, ev, handSize)
 		if !ok {
 			break
 		}
-		play := art.play
 		if recordTurnStats(stats, play, handIdx, handsPerCycle) {
-			replay := replayBestForTurnWithLog(d.Hero, d.Weapons, art.handAfterReveal, mp, art.deckAfterDraws, art.priorPostAura, ev)
+			// Reconstruct the chain inputs from the post-process carry — replay matches
+			// the SkipLog run byte-for-byte and recovers a fully-logged TurnSummary.
+			chainPrior := TurnState{
+				Arsenal:        arsenalIn,
+				Auras:          carry.auras,
+				Items:          carry.items,
+				banished:       carry.banish,
+				graveyard:      carry.graveyard,
+				OpponentMarked: carry.opponentMarked,
+			}
+			chainDeck := buf[carry.head+drawCount : carry.tail]
+			replay := replayBestForTurnWithLog(d.Hero, d.Weapons, hand, mp, chainDeck, chainPrior, ev)
 			replay.Value = play.Value
 			replay.TriggersFromLastTurn = play.TriggersFromLastTurn
 			replay.StartOfTurnAuras = play.StartOfTurnAuras
 			replay.DealtHand = play.DealtHand
-			recordBestTurn(stats, replay, art.startingAuras, art.startingItems)
+			recordBestTurn(stats, replay, startingAuras, startingItems)
 		}
-		tallyMarginalPresence(scratch.marginalBuf, idIndex, scratch.presentBuf, art.handAfterReveal, art.arsenalIn, float64(play.Value))
+		tallyMarginalPresence(scratch.marginalBuf, idIndex, scratch.presentBuf, hand, arsenalIn, float64(play.Value))
 		carry.applyTurnAndRotate(play, buf)
 	}
 	carry.writeBackTo(scratch)
@@ -352,45 +368,28 @@ func (c *turnCarry) applyTurnAndRotate(play TurnSummary, buf []Card) {
 	c.graveyard, c.nextGraveyard = c.nextGraveyard, c.graveyard
 }
 
-// turnArtefacts captures the per-turn outputs the shuffle loop folds into stats / replay
-// / marginal accounting. handAfterReveal, deckAfterDraws and priorPostAura are the exact
-// inputs runBestForTurn saw — replay reuses them so the Best search produces a
-// byte-identical winning line with full Log materialised. arsenalIn is the pre-turn
-// arsenal for marginal presence tallying. startingAuras / startingItems are
-// pre-aura-processing snapshots stored on BestTurn.
-type turnArtefacts struct {
-	play            TurnSummary
-	handAfterReveal []Card
-	deckAfterDraws  []Card
-	priorPostAura   TurnState
-	arsenalIn       Card
-	startingAuras   []Aura
-	startingItems   []Item
-}
-
 // runOneTurnInShuffle deals the next hand from buf[head:tail] (prefixed by carry.held)
-// and delegates to runChainAfterDeal. The returned artefact slices stay valid through
-// stats / replay / marginal accounting — the caller must invoke applyTurnAndRotate
-// afterwards to recycle buf and advance the carry. Returns ok=false when dealNextHand
-// can't fill a hand.
-func runOneTurnInShuffle(carry *turnCarry, buf, handBuf []Card, hero Hero, weapons []Weapon, mp Matchup, ev *Evaluator, handSize int) (turnArtefacts, bool) {
+// and runs the chain. Returns the chain TurnSummary plus the post-reveal hand and
+// drawCount — production's deck-loop driver uses those to reconstruct chain inputs for
+// replay (see runOneShuffle). The caller must invoke applyTurnAndRotate afterwards to
+// recycle buf and advance the carry. ok=false when dealNextHand can't fill a hand.
+func runOneTurnInShuffle(carry *turnCarry, buf, handBuf []Card, hero Hero, weapons []Weapon, mp Matchup, ev *Evaluator, handSize int) (TurnSummary, []Card, int, bool) {
 	h, drawCount, ok := dealNextHand(buf, handBuf, carry.held, &carry.head, &carry.tail, handSize)
 	if !ok {
-		return turnArtefacts{}, false
+		return TurnSummary{}, nil, 0, false
 	}
-	return runChainAfterDeal(carry, buf, h, drawCount, hero, weapons, mp, ev), true
+	play, hand, drawCount := runChainAfterDeal(carry, buf, h, drawCount, hero, weapons, mp, ev)
+	return play, hand, drawCount, true
 }
 
-// runChainAfterDeal runs the post-deal portion of a turn: snapshot start-of-turn aura /
-// item state, fire start-of-turn-aura processing against carry.auras (resliced to
-// survivors), run Best, and stamp start-of-turn metadata on the returned summary.
-// drawCount is how many cards have already come off buf[carry.head:] so reveal indexing
-// and the post-draw-deck slice line up — pass 0 when hand was supplied verbatim and
-// didn't consume the deck.
-func runChainAfterDeal(carry *turnCarry, buf []Card, hand []Card, drawCount int, hero Hero, weapons []Weapon, mp Matchup, ev *Evaluator) turnArtefacts {
+// runChainAfterDeal runs the post-deal portion of a turn: fire start-of-turn-aura
+// processing against carry.auras (resliced to survivors), append revealed cards to the
+// hand, and run Best. drawCount is how many cards have already come off buf[carry.head:]
+// so reveal indexing and the post-draw-deck slice line up — pass 0 when hand was supplied
+// verbatim and didn't consume the deck. Returns the chain TurnSummary, the post-reveal
+// hand, and the updated drawCount.
+func runChainAfterDeal(carry *turnCarry, buf []Card, hand []Card, drawCount int, hero Hero, weapons []Weapon, mp Matchup, ev *Evaluator) (TurnSummary, []Card, int) {
 	h := hand
-	startingAuras := append([]Aura(nil), carry.auras...)
-	startingItems := append([]Item(nil), carry.items...)
 	startOfTurnAuras := snapshotStartOfTurnAuras(carry.auras)
 	dealtHand := append([]Card(nil), h...)
 
@@ -407,7 +406,6 @@ func runChainAfterDeal(carry *turnCarry, buf []Card, hand []Card, drawCount int,
 		drawCount++
 	}
 	sortHandByID(h)
-	deckAfterDraws := buf[carry.head+drawCount : carry.tail]
 	prior := TurnState{
 		Arsenal:        carry.arsenal,
 		Auras:          carry.auras,
@@ -416,36 +414,12 @@ func runChainAfterDeal(carry *turnCarry, buf []Card, hand []Card, drawCount int,
 		graveyard:      carry.graveyard,
 		OpponentMarked: carry.opponentMarked,
 	}
-	play := runBestForTurn(hero, weapons, h, mp, deckAfterDraws, prior, ev)
+	play := runBestForTurn(hero, weapons, h, mp, buf[carry.head+drawCount:carry.tail], prior, ev)
 	play.Value += trigDamage
 	play.TriggersFromLastTurn = trigContribs
 	play.StartOfTurnAuras = startOfTurnAuras
 	play.DealtHand = dealtHand
-	return turnArtefacts{
-		play:            play,
-		handAfterReveal: h,
-		deckAfterDraws:  deckAfterDraws,
-		priorPostAura:   prior,
-		arsenalIn:       carry.arsenal,
-		startingAuras:   startingAuras,
-		startingItems:   startingItems,
-	}
-}
-
-// peekNextTurnLayout returns the hand and remaining-deck slices the next dealNextHand
-// would produce against (head, tail, held), without mutating buf or the cursors.
-// Returned slices own fresh backing storage. ok=false matches dealNextHand's exhaustion
-// conditions.
-func peekNextTurnLayout(buf []Card, head, tail int, held []Card, handSize int) (hand, deck []Card, ok bool) {
-	drawCount := handSize - len(held)
-	if drawCount <= 0 || tail-head < drawCount {
-		return nil, nil, false
-	}
-	hand = make([]Card, 0, handSize)
-	hand = append(hand, held...)
-	hand = append(hand, buf[head:head+drawCount]...)
-	deck = append([]Card(nil), buf[head+drawCount:tail]...)
-	return hand, deck, true
+	return play, h, drawCount
 }
 
 // mergeStatsInto folds src's per-shuffle accumulators into dst. Used by the parallel path
