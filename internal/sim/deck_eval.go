@@ -263,80 +263,189 @@ func runOneShuffle(d *Deck, stats *Stats, scratch *shuffleScratch, idIndex map[i
 		buf[i], buf[j] = buf[j], buf[i]
 	}
 
-	head, tail := 0, deckSize
-	handIdx := 0
-	var arsenalCard Card
-	var opponentMarked bool
-	heldBuf := scratch.heldBuf[:0]
-	auraTriggerBuf := scratch.auraTriggerBuf[:0]
-	itemBuf := scratch.itemBuf[:0]
-	banishBuf := scratch.banishBuf[:0]
-	graveyardBuf := scratch.graveyardBuf[:0]
-	nextHeld := scratch.nextHeld
-	nextAuraTrigger := scratch.nextAuraTrigger
-	nextItem := scratch.nextItem
-	nextBanish := scratch.nextBanish
-	nextGraveyard := scratch.nextGraveyard
-	handBuf := scratch.handBuf
+	carry := newTurnCarryFromScratch(scratch, deckSize)
 	maxHands := 2 * handsPerCycle
-	for handIdx < maxHands {
-		h, drawCount, ok := dealNextHand(buf, handBuf, heldBuf, &head, &tail, handSize)
+	for handIdx := 0; handIdx < maxHands; handIdx++ {
+		art, ok := runOneTurnInShuffle(&carry, buf, scratch.handBuf, d.Hero, d.Weapons, mp, ev, handSize)
 		if !ok {
 			break
 		}
-		startingAuras := append([]Aura(nil), auraTriggerBuf...)
-		startingItems := append([]Item(nil), itemBuf...)
-		startOfTurnAuras := snapshotStartOfTurnAuras(auraTriggerBuf)
-		dealtHand := append([]Card(nil), h...)
-		var trigContribs []TriggerContribution
-		var trigDamage int
-		var trigRevealed []Card
-		auraTriggerBuf, trigContribs, trigDamage, trigRevealed, _ = processAurasAtStartOfTurn(auraTriggerBuf, buf[head+drawCount:tail])
-		for range trigRevealed {
-			h = append(h, buf[head+drawCount])
-			drawCount++
-		}
-		arsenalIn := arsenalCard
-		sortHandByID(h)
-		play := runBestForTurn(d.Hero, d.Weapons, h, mp, buf[head+drawCount:tail], TurnState{Arsenal: arsenalCard, Auras: auraTriggerBuf, Items: itemBuf, banished: banishBuf, graveyard: graveyardBuf, OpponentMarked: opponentMarked}, ev)
-		arsenalCard = play.State.Arsenal
-		play.Value += trigDamage
-		play.TriggersFromLastTurn = trigContribs
-		play.StartOfTurnAuras = startOfTurnAuras
-		play.DealtHand = dealtHand
-
+		play := art.play
 		if recordTurnStats(stats, play, handIdx, handsPerCycle) {
-			replay := replayBestForTurnWithLog(d.Hero, d.Weapons, h, mp, buf[head+drawCount:tail], TurnState{Arsenal: arsenalIn, Auras: auraTriggerBuf, Items: itemBuf, banished: banishBuf, graveyard: graveyardBuf, OpponentMarked: opponentMarked}, ev)
+			replay := replayBestForTurnWithLog(d.Hero, d.Weapons, art.handAfterReveal, mp, art.deckAfterDraws, art.priorPostAura, ev)
 			replay.Value = play.Value
-			replay.TriggersFromLastTurn = trigContribs
-			replay.StartOfTurnAuras = startOfTurnAuras
-			replay.DealtHand = dealtHand
-			recordBestTurn(stats, replay, startingAuras, startingItems)
+			replay.TriggersFromLastTurn = play.TriggersFromLastTurn
+			replay.StartOfTurnAuras = play.StartOfTurnAuras
+			replay.DealtHand = play.DealtHand
+			recordBestTurn(stats, replay, art.startingAuras, art.startingItems)
 		}
-		tallyMarginalPresence(scratch.marginalBuf, idIndex, scratch.presentBuf, h, arsenalIn, float64(play.Value))
-		nextHeld = applyTurnResult(play, buf, &head, &tail, nextHeld[:0])
-		nextAuraTrigger = append(nextAuraTrigger[:0], play.State.Auras...)
-		nextItem = append(nextItem[:0], play.State.Items...)
-		nextBanish = append(nextBanish[:0], play.State.Banish...)
-		nextGraveyard = append(nextGraveyard[:0], play.State.Graveyard...)
-		opponentMarked = play.State.OpponentMarked
-		handIdx++
-		heldBuf, nextHeld = nextHeld, heldBuf
-		auraTriggerBuf, nextAuraTrigger = nextAuraTrigger, auraTriggerBuf
-		itemBuf, nextItem = nextItem, itemBuf
-		banishBuf, nextBanish = nextBanish, banishBuf
-		graveyardBuf, nextGraveyard = nextGraveyard, graveyardBuf
+		tallyMarginalPresence(scratch.marginalBuf, idIndex, scratch.presentBuf, art.handAfterReveal, art.arsenalIn, float64(play.Value))
+		carry.applyTurnAndRotate(play, buf)
 	}
-	scratch.heldBuf = heldBuf
-	scratch.nextHeld = nextHeld
-	scratch.auraTriggerBuf = auraTriggerBuf
-	scratch.nextAuraTrigger = nextAuraTrigger
-	scratch.itemBuf = itemBuf
-	scratch.nextItem = nextItem
-	scratch.banishBuf = banishBuf
-	scratch.nextBanish = nextBanish
-	scratch.graveyardBuf = graveyardBuf
-	scratch.nextGraveyard = nextGraveyard
+	carry.writeBackTo(scratch)
+}
+
+// turnCarry holds the cross-turn state threaded between consecutive turns inside a
+// shuffle. head / tail point into the active deck region of the loop's buf; every slice
+// field is paired with a next* scratch so applyTurnAndRotate builds the next-turn
+// snapshot via append([:0], ...) and promotes it to current without allocating.
+type turnCarry struct {
+	head, tail               int
+	arsenal                  Card
+	opponentMarked           bool
+	held, nextHeld           []Card
+	auras, nextAuras         []Aura
+	items, nextItems         []Item
+	banish, nextBanish       []Card
+	graveyard, nextGraveyard []Card
+}
+
+// newTurnCarryFromScratch initialises a turnCarry aliasing scratch's slabs; the deck
+// loop's current/next swap reuses all backing arrays.
+func newTurnCarryFromScratch(scratch *shuffleScratch, deckSize int) turnCarry {
+	return turnCarry{
+		tail:          deckSize,
+		held:          scratch.heldBuf[:0],
+		nextHeld:      scratch.nextHeld,
+		auras:         scratch.auraTriggerBuf[:0],
+		nextAuras:     scratch.nextAuraTrigger,
+		items:         scratch.itemBuf[:0],
+		nextItems:     scratch.nextItem,
+		banish:        scratch.banishBuf[:0],
+		nextBanish:    scratch.nextBanish,
+		graveyard:     scratch.graveyardBuf[:0],
+		nextGraveyard: scratch.nextGraveyard,
+	}
+}
+
+// writeBackTo stamps the carry's slice fields back onto scratch so the next shuffle
+// reuses the backing arrays.
+func (c *turnCarry) writeBackTo(scratch *shuffleScratch) {
+	scratch.heldBuf = c.held
+	scratch.nextHeld = c.nextHeld
+	scratch.auraTriggerBuf = c.auras
+	scratch.nextAuraTrigger = c.nextAuras
+	scratch.itemBuf = c.items
+	scratch.nextItem = c.nextItems
+	scratch.banishBuf = c.banish
+	scratch.nextBanish = c.nextBanish
+	scratch.graveyardBuf = c.graveyard
+	scratch.nextGraveyard = c.nextGraveyard
+}
+
+// applyTurnAndRotate folds play's outcome into the next-turn buffers and promotes them
+// to current; arsenal / opponentMarked update directly. Must be called after stats /
+// replay / marginal accounting consume this turn's artefacts — applyTurnResult overwrites
+// buf wholesale with play.State.Deck + pitched recycle.
+func (c *turnCarry) applyTurnAndRotate(play TurnSummary, buf []Card) {
+	c.nextHeld = applyTurnResult(play, buf, &c.head, &c.tail, c.nextHeld[:0])
+	c.nextAuras = append(c.nextAuras[:0], play.State.Auras...)
+	c.nextItems = append(c.nextItems[:0], play.State.Items...)
+	c.nextBanish = append(c.nextBanish[:0], play.State.Banish...)
+	c.nextGraveyard = append(c.nextGraveyard[:0], play.State.Graveyard...)
+	c.arsenal = play.State.Arsenal
+	c.opponentMarked = play.State.OpponentMarked
+	c.held, c.nextHeld = c.nextHeld, c.held
+	c.auras, c.nextAuras = c.nextAuras, c.auras
+	c.items, c.nextItems = c.nextItems, c.items
+	c.banish, c.nextBanish = c.nextBanish, c.banish
+	c.graveyard, c.nextGraveyard = c.nextGraveyard, c.graveyard
+}
+
+// turnArtefacts captures the per-turn outputs the shuffle loop folds into stats / replay
+// / marginal accounting. handAfterReveal, deckAfterDraws and priorPostAura are the exact
+// inputs runBestForTurn saw — replay reuses them so the Best search produces a
+// byte-identical winning line with full Log materialised. arsenalIn is the pre-turn
+// arsenal for marginal presence tallying. startingAuras / startingItems are
+// pre-aura-processing snapshots stored on BestTurn.
+type turnArtefacts struct {
+	play            TurnSummary
+	handAfterReveal []Card
+	deckAfterDraws  []Card
+	priorPostAura   TurnState
+	arsenalIn       Card
+	startingAuras   []Aura
+	startingItems   []Item
+}
+
+// runOneTurnInShuffle deals the next hand from buf[head:tail] (prefixed by carry.held)
+// and delegates to runChainAfterDeal. The returned artefact slices stay valid through
+// stats / replay / marginal accounting — the caller must invoke applyTurnAndRotate
+// afterwards to recycle buf and advance the carry. Returns ok=false when dealNextHand
+// can't fill a hand.
+func runOneTurnInShuffle(carry *turnCarry, buf, handBuf []Card, hero Hero, weapons []Weapon, mp Matchup, ev *Evaluator, handSize int) (turnArtefacts, bool) {
+	h, drawCount, ok := dealNextHand(buf, handBuf, carry.held, &carry.head, &carry.tail, handSize)
+	if !ok {
+		return turnArtefacts{}, false
+	}
+	return runChainAfterDeal(carry, buf, h, drawCount, hero, weapons, mp, ev), true
+}
+
+// runChainAfterDeal runs the post-deal portion of a turn: snapshot start-of-turn aura /
+// item state, fire start-of-turn-aura processing against carry.auras (resliced to
+// survivors), run Best, and stamp start-of-turn metadata on the returned summary.
+// drawCount is how many cards have already come off buf[carry.head:] so reveal indexing
+// and the post-draw-deck slice line up — pass 0 when hand was supplied verbatim and
+// didn't consume the deck.
+func runChainAfterDeal(carry *turnCarry, buf []Card, hand []Card, drawCount int, hero Hero, weapons []Weapon, mp Matchup, ev *Evaluator) turnArtefacts {
+	h := hand
+	startingAuras := append([]Aura(nil), carry.auras...)
+	startingItems := append([]Item(nil), carry.items...)
+	startOfTurnAuras := snapshotStartOfTurnAuras(carry.auras)
+	dealtHand := append([]Card(nil), h...)
+
+	var trigContribs []TriggerContribution
+	var trigDamage int
+	var trigRevealed []Card
+	var trigGraveyarded []Card
+	carry.auras, trigContribs, trigDamage, trigRevealed, trigGraveyarded = processAurasAtStartOfTurn(carry.auras, buf[carry.head+drawCount:carry.tail])
+	// FaB rule: a destroyed aura's source card lands in graveyard for the rest of the
+	// turn (queryable by chain cards) and persists into next turn's carry.
+	carry.graveyard = append(carry.graveyard, trigGraveyarded...)
+	for range trigRevealed {
+		h = append(h, buf[carry.head+drawCount])
+		drawCount++
+	}
+	sortHandByID(h)
+	deckAfterDraws := buf[carry.head+drawCount : carry.tail]
+	prior := TurnState{
+		Arsenal:        carry.arsenal,
+		Auras:          carry.auras,
+		Items:          carry.items,
+		banished:       carry.banish,
+		graveyard:      carry.graveyard,
+		OpponentMarked: carry.opponentMarked,
+	}
+	play := runBestForTurn(hero, weapons, h, mp, deckAfterDraws, prior, ev)
+	play.Value += trigDamage
+	play.TriggersFromLastTurn = trigContribs
+	play.StartOfTurnAuras = startOfTurnAuras
+	play.DealtHand = dealtHand
+	return turnArtefacts{
+		play:            play,
+		handAfterReveal: h,
+		deckAfterDraws:  deckAfterDraws,
+		priorPostAura:   prior,
+		arsenalIn:       carry.arsenal,
+		startingAuras:   startingAuras,
+		startingItems:   startingItems,
+	}
+}
+
+// peekNextTurnLayout returns the hand and remaining-deck slices the next dealNextHand
+// would produce against (head, tail, held), without mutating buf or the cursors.
+// Returned slices own fresh backing storage. ok=false matches dealNextHand's exhaustion
+// conditions.
+func peekNextTurnLayout(buf []Card, head, tail int, held []Card, handSize int) (hand, deck []Card, ok bool) {
+	drawCount := handSize - len(held)
+	if drawCount <= 0 || tail-head < drawCount {
+		return nil, nil, false
+	}
+	hand = make([]Card, 0, handSize)
+	hand = append(hand, held...)
+	hand = append(hand, buf[head:head+drawCount]...)
+	deck = append([]Card(nil), buf[head+drawCount:tail]...)
+	return hand, deck, true
 }
 
 // mergeStatsInto folds src's per-shuffle accumulators into dst. Used by the parallel path
