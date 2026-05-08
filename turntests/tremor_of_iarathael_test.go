@@ -35,7 +35,7 @@ func TestTremorOfIArathael_PriorTurnBanishedZoneDoesNotActivate(t *testing.T) {
 	d := sim.New(heroes.Viserai{}, nil, fillerDeck())
 	hand := []sim.Card{cards.TremorOfIArathaelRed{}, cards.TitaniumBaubleBlue{}}
 	initial := sim.NewTurnStateFromSpec(sim.TurnStateSpec{
-		Banish: []sim.Card{cards.NimblismRed{}},
+		Banished: []sim.Card{cards.NimblismRed{}},
 	})
 	got := d.EvalOneTurnForTesting(sim.Matchup{IncomingDamage: 0}, initial, hand).Value
 	if got != 4 {

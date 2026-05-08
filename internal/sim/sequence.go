@@ -55,7 +55,7 @@ func bestAttackWithWeapons(hero Hero, weapons []Weapon, attackers, defenders, pi
 		priorAuras:          prior.Auras,
 		priorItems:          prior.Items,
 		priorOpponentMarked: prior.OpponentMarked,
-		priorBanish:         prior.banish,
+		priorBanish:         prior.banished,
 		priorGraveyard:      prior.graveyard,
 		// defenderAuras shares backing with bufs.defenderAurasBacking so the per-partition
 		// capture is alloc-free across Best calls.
@@ -330,7 +330,7 @@ type sequenceContext struct {
 	// non-zero when the previous turn's chain left a Mark on the opposing hero.
 	priorOpponentMarked bool
 	// priorBanish is the cards-already-in-banished-zone snapshot from the previous turn.
-	// Each permutation seeds state.banish with a fresh copy so "count cards in your
+	// Each permutation seeds state.banished with a fresh copy so "count cards in your
 	// banished zone" readers see the carried entries; CardBanished stays reset so
 	// "did anything banish THIS turn" stays false until BanishFromGraveyard fires.
 	priorBanish []Card
@@ -541,7 +541,7 @@ func (ctx *sequenceContext) resetStateForPermutation() {
 	s.Arsenal = ctx.arsenalAtChainStart
 	s.graveyard = append(bufs.graveBacking[:0], ctx.priorGraveyard...)
 	s.graveyard = append(s.graveyard, ctx.defenders...)
-	s.banish = append(bufs.banishBacking[:0], ctx.priorBanish...)
+	s.banished = append(bufs.banishBacking[:0], ctx.priorBanish...)
 	s.CardBanished = false
 	s.ActionPoints = 1
 	s.ArcaneDamageDealt = false

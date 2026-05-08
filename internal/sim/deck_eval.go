@@ -298,7 +298,7 @@ func runOneShuffle(d *Deck, stats *Stats, scratch *shuffleScratch, idIndex map[i
 		}
 		arsenalIn := arsenalCard
 		sortHandByID(h)
-		play := runBestForTurn(d.Hero, d.Weapons, h, mp, buf[head+drawCount:tail], TurnState{Arsenal: arsenalCard, Auras: auraTriggerBuf, Items: itemBuf, banish: banishBuf, graveyard: graveyardBuf, OpponentMarked: opponentMarked}, ev)
+		play := runBestForTurn(d.Hero, d.Weapons, h, mp, buf[head+drawCount:tail], TurnState{Arsenal: arsenalCard, Auras: auraTriggerBuf, Items: itemBuf, banished: banishBuf, graveyard: graveyardBuf, OpponentMarked: opponentMarked}, ev)
 		arsenalCard = play.State.Arsenal
 		play.Value += trigDamage
 		play.TriggersFromLastTurn = trigContribs
@@ -306,7 +306,7 @@ func runOneShuffle(d *Deck, stats *Stats, scratch *shuffleScratch, idIndex map[i
 		play.DealtHand = dealtHand
 
 		if recordTurnStats(stats, play, handIdx, handsPerCycle) {
-			replay := replayBestForTurnWithLog(d.Hero, d.Weapons, h, mp, buf[head+drawCount:tail], TurnState{Arsenal: arsenalIn, Auras: auraTriggerBuf, Items: itemBuf, banish: banishBuf, graveyard: graveyardBuf, OpponentMarked: opponentMarked}, ev)
+			replay := replayBestForTurnWithLog(d.Hero, d.Weapons, h, mp, buf[head+drawCount:tail], TurnState{Arsenal: arsenalIn, Auras: auraTriggerBuf, Items: itemBuf, banished: banishBuf, graveyard: graveyardBuf, OpponentMarked: opponentMarked}, ev)
 			replay.Value = play.Value
 			replay.TriggersFromLastTurn = trigContribs
 			replay.StartOfTurnAuras = startOfTurnAuras
