@@ -14,12 +14,13 @@ import (
 	notimpl "github.com/tim-chaplin/fab-deck-optimizer/internal/cards/notimplemented"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/heroes"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
 )
 
 // Tests that pitching a single blue and playing Spring Load fires the +3{p} rider.
 func TestHandState_SpringLoadAlonePitchEmptiesHand(t *testing.T) {
 	d := sim.New(heroes.Viserai{}, nil, fillerDeck())
-	hand := []sim.Card{cards.TitaniumBaubleBlue{}, cards.SpringLoadRed{}}
+	hand := []sim.Card{testutils.BluePitch{}, cards.SpringLoadRed{}}
 	if got := d.EvalOneTurnForTesting(sim.Matchup{IncomingDamage: 0}, sim.TurnState{}, hand).Value; got != 5 {
 		t.Fatalf("Value = %d, want 5 (Spring Load 2 + rider 3)", got)
 	}
@@ -28,7 +29,7 @@ func TestHandState_SpringLoadAlonePitchEmptiesHand(t *testing.T) {
 // Tests that a card committed to blocking counts as out-of-hand for Spring Load's rider.
 func TestHandState_BlockerEmptiesHandForSpringLoad(t *testing.T) {
 	d := sim.New(heroes.Viserai{}, nil, fillerDeck())
-	hand := []sim.Card{cards.TitaniumBaubleBlue{}, cards.DodgeBlue{}, cards.SpringLoadRed{}}
+	hand := []sim.Card{testutils.BluePitch{}, cards.DodgeBlue{}, cards.SpringLoadRed{}}
 	// Incoming = 3 → BluePitch pitched (3 res), Dodge played as DR for 2 prevented,
 	// Spring Load resolves with empty hand. Value = 5 (Spring Load + rider) + 2 (Dodge).
 	if got := d.EvalOneTurnForTesting(sim.Matchup{IncomingDamage: 3}, sim.TurnState{}, hand).Value; got != 7 {
@@ -40,7 +41,7 @@ func TestHandState_BlockerEmptiesHandForSpringLoad(t *testing.T) {
 func TestHandState_UpcomingChainStepBlocksFirstSpringLoadRider(t *testing.T) {
 	d := sim.New(heroes.Viserai{}, nil, fillerDeck())
 	hand := []sim.Card{
-		cards.TitaniumBaubleBlue{},
+		testutils.BluePitch{},
 		cards.FlyingHighBlue{},
 		cards.SpringLoadRed{}, cards.SpringLoadRed{},
 	}
@@ -57,7 +58,7 @@ func TestHandState_UpcomingChainStepBlocksFirstSpringLoadRider(t *testing.T) {
 func TestHandState_MidChainDrawBlocksSpringLoadRider(t *testing.T) {
 	d := sim.New(heroes.Viserai{}, nil, fillerDeck())
 	hand := []sim.Card{
-		cards.TitaniumBaubleBlue{},
+		testutils.BluePitch{},
 		cards.FlyingHighBlue{},
 		cards.SnatchRed{},
 		cards.SpringLoadRed{},
@@ -76,7 +77,7 @@ func TestHandState_MidChainDrawBlocksSpringLoadRider(t *testing.T) {
 // Tests that a card stuck in hand (no profitable role) keeps Spring Load's rider off.
 func TestHandState_HeldCardBlocksSpringLoadRider(t *testing.T) {
 	d := sim.New(heroes.Viserai{}, nil, fillerDeck())
-	hand := []sim.Card{cards.TitaniumBaubleBlue{}, cards.DodgeBlue{}, cards.SpringLoadRed{}}
+	hand := []sim.Card{testutils.BluePitch{}, cards.DodgeBlue{}, cards.SpringLoadRed{}}
 	// Same hand as TestHandState_BlockerEmptiesHandForSpringLoad but with incoming = 0
 	// so there's no damage for Dodge to defend against. Per the test's stated intent,
 	// Dodge sits Held → hand non-empty at Spring Load's Play → rider blocked. Value = 2.

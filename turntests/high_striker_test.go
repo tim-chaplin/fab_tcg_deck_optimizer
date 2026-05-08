@@ -6,6 +6,7 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/cards"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/heroes"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
 )
 
 // Tests the High Striker → Critical Strike chain: High Striker's on-attack-action-hit
@@ -27,7 +28,7 @@ func TestHighStriker_TriggersOnNextAttackActionHit(t *testing.T) {
 			hand := []sim.Card{
 				tc.striker,
 				cards.CriticalStrikeYellow{},
-				cards.TitaniumBaubleBlue{},
+				testutils.BluePitch{},
 			}
 			state := d.EvalOneTurnForTesting(sim.Matchup{IncomingDamage: 0}, sim.TurnState{}, hand)
 			if state.Copper() != tc.wantCopper {

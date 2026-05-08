@@ -8,15 +8,15 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 )
 
-// Tests that Titanium Bauble's printed 3{d} is rejected at block time — Resource-typed
-// cards can only Pitch, never Defend, even when their printed Defense would otherwise
-// absorb incoming damage.
-func TestResource_TitaniumBaubleCannotBlock(t *testing.T) {
+// Tests that Titanium Bauble's printed 3{d} blocks at block time — Resources have no
+// Action subtype so they can't be played, but they can still defend like any non-Action
+// hand card.
+func TestResource_TitaniumBaubleBlocks(t *testing.T) {
 	d := sim.New(heroes.Viserai{}, nil, fillerDeck())
 	hand := []sim.Card{cards.TitaniumBaubleBlue{}}
 	got := d.EvalOneTurnForTesting(sim.Matchup{IncomingDamage: 5}, sim.TurnState{}, hand).Value
-	if got != 0 {
-		t.Fatalf("Value = %d, want 0 (Resource Titanium Bauble can't block, hand has nothing else)", got)
+	if got != 3 {
+		t.Fatalf("Value = %d, want 3 (Titanium blocks 3 of 5 incoming)", got)
 	}
 }
 

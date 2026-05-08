@@ -6,6 +6,7 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/cards"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/heroes"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
 )
 
 // Tests that Brothers in Arms picks mode 1 (pay 1{r} for +2{d}) when the partition's
@@ -16,7 +17,7 @@ func TestModalBlock_BrothersInArmsPicksMode1WhenAffordable(t *testing.T) {
 	hand := []sim.Card{
 		cards.BrothersInArmsRed{},
 		cards.ToughenUpBlue{},
-		cards.TitaniumBaubleBlue{},
+		testutils.BluePitch{},
 	}
 	got := d.EvalOneTurnForTesting(sim.Matchup{IncomingDamage: 10}, sim.TurnState{}, hand).Value
 	// Toughen Up DR: 4{d}; BIA mode 1: 2 + 2 = 4{d}; pitch supply 3{r} covers 2 (TU) + 1 (BIA mode 1).

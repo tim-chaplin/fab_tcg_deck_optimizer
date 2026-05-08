@@ -7,6 +7,7 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/cards"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/heroes"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/weapons"
 )
 
@@ -15,7 +16,7 @@ import (
 func TestOnHitGoAgain_RazorReflexExtendsToWeaponSwing(t *testing.T) {
 	d := sim.New(heroes.Viserai{}, []sim.Weapon{weapons.ReapingBlade{}}, fillerDeck())
 	hand := []sim.Card{
-		cards.TitaniumBaubleBlue{},
+		testutils.BluePitch{},
 		cards.CriticalStrikeRed{},
 		cards.RazorReflexBlue{},
 		cards.NimblismBlue{},
@@ -32,7 +33,7 @@ func TestOnHitGoAgain_RazorReflexExtendsToWeaponSwing(t *testing.T) {
 func TestOnHitGoAgain_TwoConsecutiveARsExtendToWeaponSwing(t *testing.T) {
 	d := sim.New(heroes.Viserai{}, []sim.Weapon{weapons.ReapingBlade{}}, fillerDeck())
 	hand := []sim.Card{
-		cards.TitaniumBaubleBlue{},
+		testutils.BluePitch{},
 		cards.SnatchBlue{},
 		cards.RazorReflexBlue{},
 		cards.RazorReflexBlue{},

@@ -3,7 +3,6 @@ package turntests
 import (
 	"testing"
 
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/cards"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/heroes"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
@@ -17,7 +16,7 @@ func TestGoldAbility_SpendsToFillArsenalAndSwings(t *testing.T) {
 		testutils.RedAttack{}, testutils.RedAttack{},
 	}
 	d := sim.New(heroes.Viserai{}, []sim.Weapon{weapons.ReapingBlade{}}, deck)
-	hand := []sim.Card{cards.TitaniumBaubleBlue{}}
+	hand := []sim.Card{testutils.BluePitch{}}
 	priorItems := []sim.Item{sim.NewGoldItem(1)}
 	got := d.EvalOneTurnForTesting(sim.Matchup{IncomingDamage: 0}, sim.TurnState{Items: priorItems}, hand)
 	if got.Value != 3 {

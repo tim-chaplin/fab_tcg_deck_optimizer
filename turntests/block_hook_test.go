@@ -6,6 +6,7 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/cards"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/heroes"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
 )
 
 // Tests that Battlefront Bastion's +1 alone-bonus fires when it's the only plain blocker.
@@ -25,7 +26,7 @@ func TestBlock_BattlefrontBastionAloneFiresBesideDR(t *testing.T) {
 	hand := []sim.Card{
 		cards.BattlefrontBastionRed{},
 		cards.ToughenUpBlue{},
-		cards.TitaniumBaubleBlue{},
+		testutils.BluePitch{},
 	}
 	got := d.EvalOneTurnForTesting(sim.Matchup{IncomingDamage: 10}, sim.TurnState{}, hand).Value
 	if got != 7 {

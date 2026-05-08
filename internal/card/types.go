@@ -103,10 +103,10 @@ func (s TypeSet) IsAttackReaction() bool {
 	return s&TypeSet(TypeAttackReaction) != 0
 }
 
-// IsResource reports whether s carries the Resource type. Resource cards are pitch-only
-// — the partition rejects them as attackers, blockers, defense reactions, and post-hoc
-// arsenal-promotion targets so the only role they can take is Pitch (or Held to be
-// discarded).
+// IsResource reports whether s carries the Resource type. Resource cards have no Action
+// subtype so they can't be played, and the post-hoc arsenal-promotion skips them since a
+// Resource in arsenal would have no legal way out of the slot. They CAN still be used to
+// block, contributing their printed Defense like any non-Action hand card.
 func (s TypeSet) IsResource() bool {
 	return s&TypeSet(TypeResource) != 0
 }

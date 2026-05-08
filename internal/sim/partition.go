@@ -96,9 +96,8 @@ func (e *Evaluator) findBest(hero Hero, weapons []Weapon, hand []Card, mp Matchu
 	dvals := bufs.defenseVals[:totalN]
 	isDR := bufs.isDRBuf[:totalN]
 	canAttack := bufs.canAttackBuf[:totalN]
-	canBlock := bufs.canBlockBuf[:totalN]
 
-	fillPartitionPerCardBufs(hand, n, totalN, arsenalCardIn, pvals, dvals, isDR, canAttack, canBlock)
+	fillPartitionPerCardBufs(hand, n, totalN, arsenalCardIn, pvals, dvals, isDR, canAttack)
 
 	var recurse func(i, pitchSum, defenseSum int)
 	recurse = func(i, pitchSum, defenseSum int) {
@@ -149,7 +148,7 @@ func (e *Evaluator) findBest(hero Hero, weapons []Weapon, hand []Card, mp Matchu
 			maxRole = Arsenal
 		}
 		for r := Role(0); r <= maxRole; r++ {
-			if !roleAllowed(r, isArsenalSlot, isDR[i], canAttack[i], canBlock[i]) {
+			if !roleAllowed(r, isArsenalSlot, isDR[i], canAttack[i]) {
 				continue
 			}
 			// FaB rule: defense reactions and plain blocks only happen during the defend step
@@ -316,9 +315,8 @@ func findArsenalCard(rolesBuf []Role, arsenalCardIn Card, n int) Card {
 // blocking from arsenal isn't legal). Hand cards take any role except Attack for cards that
 // can't take Attack role at all (DRs and Block-typed cards lack the Action / Weapon subtype);
 // their role loop caps at Held, so the "which Held card gets arsenaled" choice happens
-// post-hoc and doesn't bias toward low-ID slots. Resource-typed cards (canBlock=false) also
-// reject Defend so the only roles they can take are Pitch and Held.
-func roleAllowed(r Role, isArsenalSlot, isDefenseReaction, canAttack, canBlock bool) bool {
+// post-hoc and doesn't bias toward low-ID slots.
+func roleAllowed(r Role, isArsenalSlot, isDefenseReaction, canAttack bool) bool {
 	if isArsenalSlot {
 		switch r {
 		case Pitch, Held:
@@ -330,13 +328,7 @@ func roleAllowed(r Role, isArsenalSlot, isDefenseReaction, canAttack, canBlock b
 		}
 		return true // Arsenal is always allowed on the arsenal-in slot.
 	}
-	if r == Attack {
-		return canAttack
-	}
-	if r == Defend {
-		return canBlock
-	}
-	return true
+	return r != Attack || canAttack
 }
 
 // defendersDamage tallies the total Value contribution of the partition's defense phase. DRs

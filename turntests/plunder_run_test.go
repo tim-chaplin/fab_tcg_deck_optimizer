@@ -6,6 +6,7 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/cards"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/heroes"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
 )
 
 // Tests that Plunder Run's "next time an attack action card hits" trigger waits across a
@@ -13,7 +14,7 @@ import (
 func TestPlunderRun_TriggerWaitsAcrossMissAndFiresOnHit(t *testing.T) {
 	d := sim.New(heroes.Viserai{}, nil, fillerDeck())
 	hand := []sim.Card{
-		cards.TitaniumBaubleBlue{},
+		testutils.BluePitch{},
 		cards.PlunderRunRed{},
 		cards.RuneragerSwarmRed{},
 		cards.CriticalStrikeYellow{},

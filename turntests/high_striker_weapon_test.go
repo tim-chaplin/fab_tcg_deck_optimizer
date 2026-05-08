@@ -14,9 +14,9 @@ func TestHighStriker_WeaponHitCreatesCopper(t *testing.T) {
 	d := sim.New(heroes.Viserai{}, []sim.Weapon{testutils.ClubWeapon{}}, fillerDeck())
 	hand := []sim.Card{
 		cards.HighStrikerRed{},
-		cards.TitaniumBaubleBlue{},
-		cards.TitaniumBaubleBlue{},
-		cards.TitaniumBaubleBlue{},
+		testutils.BluePitch{},
+		testutils.BluePitch{},
+		testutils.BluePitch{},
 	}
 	state := d.EvalOneTurnForTesting(sim.Matchup{IncomingDamage: 0}, sim.TurnState{}, hand)
 	if got := state.Copper(); got != 6 {

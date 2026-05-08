@@ -6,6 +6,7 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/cards"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/heroes"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
 )
 
 // Tests that Wage Gold's on-hit rider creates a Gold token when the attack hits.
@@ -13,9 +14,9 @@ func TestWageGold_OnHitCreatesGoldToken(t *testing.T) {
 	d := sim.New(heroes.Viserai{}, nil, fillerDeck())
 	hand := []sim.Card{
 		cards.WageGoldRed{},
-		cards.TitaniumBaubleBlue{},
-		cards.TitaniumBaubleBlue{},
-		cards.TitaniumBaubleBlue{},
+		testutils.BluePitch{},
+		testutils.BluePitch{},
+		testutils.BluePitch{},
 	}
 	state := d.EvalOneTurnForTesting(sim.Matchup{IncomingDamage: 0}, sim.TurnState{}, hand)
 	if state.Value != 7 {
@@ -32,9 +33,9 @@ func TestWageGold_BlockableMissDoesNotCreateGold(t *testing.T) {
 	d := sim.New(heroes.Viserai{}, nil, fillerDeck())
 	hand := []sim.Card{
 		cards.WageGoldBlue{},
-		cards.TitaniumBaubleBlue{},
-		cards.TitaniumBaubleBlue{},
-		cards.TitaniumBaubleBlue{},
+		testutils.BluePitch{},
+		testutils.BluePitch{},
+		testutils.BluePitch{},
 	}
 	state := d.EvalOneTurnForTesting(sim.Matchup{IncomingDamage: 0}, sim.TurnState{}, hand)
 	if state.Value != 5 {
