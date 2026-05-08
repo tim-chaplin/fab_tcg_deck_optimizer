@@ -4,7 +4,8 @@
 // Text: "When this attacks, you may banish an aura from your graveyard. If you do, deal 1 arcane
 // damage to target hero."
 //
-// Play credits Attack() plus 1 arcane when banishAuraFromGraveyard lands an aura in s.banish.
+// Play credits Attack() plus 1 arcane when banishAuraFromGraveyard lands an aura in
+// the banished zone.
 // No aura in the graveyard → the banish rider fizzles and Play returns just Attack().
 
 package cards
