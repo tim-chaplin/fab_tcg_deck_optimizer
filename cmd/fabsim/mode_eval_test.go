@@ -59,13 +59,11 @@ func TestRunEval_DefaultRewritesFile(t *testing.T) {
 	dir := t.TempDir()
 	path := filepath.Join(dir, "deck.json")
 
-	// Seed a deck with a stale Stats.Avg the fresh sim is guaranteed to overwrite. 40
-	// random Viserai cards gives the sim enough to produce non-zero Value.
+	// Seed a deck with empty stats; the fresh sim is guaranteed to overwrite. 40 random
+	// Viserai cards gives the sim enough to produce non-zero Value.
 	rng := rand.New(rand.NewSource(1))
 	d := sim.Random(heroes.Viserai{}, 40, 2, rng, nil)
-	d.Stats.TotalValue = 0
-	d.Stats.Hands = 0
-	if err := writeDeck(d, path); err != nil {
+	if err := writeDeck(d, sim.DeckStats{}, path); err != nil {
 		t.Fatalf("seed writeDeck: %v", err)
 	}
 
@@ -108,8 +106,8 @@ func TestRunEval_PrintOnlyLeavesFileUnchanged(t *testing.T) {
 	// byte-for-byte.
 	rng := rand.New(rand.NewSource(1))
 	d := sim.Random(heroes.Viserai{}, 40, 2, rng, nil)
-	d.Evaluate(20, sim.Matchup{}, rng)
-	if err := writeDeck(d, path); err != nil {
+	stats := d.Evaluate(20, sim.Matchup{}, rng)
+	if err := writeDeck(d, stats, path); err != nil {
 		t.Fatalf("seed writeDeck: %v", err)
 	}
 	beforeJSON, err := os.ReadFile(path)
@@ -155,7 +153,7 @@ func TestRunEval_DefaultPrintsFullDump(t *testing.T) {
 
 	rng := rand.New(rand.NewSource(1))
 	d := sim.Random(heroes.Viserai{}, 40, 2, rng, nil)
-	if err := writeDeck(d, path); err != nil {
+	if err := writeDeck(d, sim.DeckStats{}, path); err != nil {
 		t.Fatalf("seed writeDeck: %v", err)
 	}
 
@@ -188,7 +186,7 @@ func TestRunEval_BriefSkipsBestTurnAndCardList(t *testing.T) {
 
 	rng := rand.New(rand.NewSource(1))
 	d := sim.Random(heroes.Viserai{}, 40, 2, rng, nil)
-	if err := writeDeck(d, path); err != nil {
+	if err := writeDeck(d, sim.DeckStats{}, path); err != nil {
 		t.Fatalf("seed writeDeck: %v", err)
 	}
 

@@ -1,5 +1,6 @@
-// Package deck represents a candidate FaB deck and the hand-value stats accumulated from
-// simulating it. Search code creates many Decks, evaluates each, and compares their Stats.
+// Package deck represents a candidate FaB deck — hero, weapons, cards, plus the user's
+// sideboard / equipment lists. Search code creates many Decks, runs Evaluate against each,
+// and compares the returned DeckStats values to pick the best.
 package sim
 
 import (
@@ -9,22 +10,24 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
 )
 
-// Deck is a hero, equipped weapons, a deck of cards, and the simulated hand-value stats.
-// Sideboard is the reserve-card list the user manages for sideboarding between games;
-// Equipment is the non-weapon arena loadout (head, chest, arms, legs). Both round-trip
-// through deckio and fabrary; the simulator never reads either, so mutations and Evaluate
-// leave them alone.
+// Deck is a hero, equipped weapons, and a deck of cards. Sideboard is the reserve-card
+// list the user manages for sideboarding between games; Equipment is the non-weapon arena
+// loadout (head, chest, arms, legs). Both round-trip through deckio and fabrary; the
+// simulator never reads either, so mutations and Evaluate leave them alone.
 //
 // Both are []string rather than []Card: equipment pieces and other items the user
 // wants on their sideboard list (e.g. Nullrune cycle) aren't in the card registry, so a
 // registry-backed field would force the user's data through a lossy lookup.
+//
+// Hand-value statistics live on a separate DeckStats value the caller maintains —
+// Evaluate returns one fresh per call. Keeping stats off Deck lets the optimizer
+// mix and match deck content against the stats accumulated for it.
 type Deck struct {
 	Hero      Hero
 	Weapons   []Weapon
 	Cards     []Card
 	Sideboard []string
 	Equipment []string
-	Stats     Stats
 }
 
 // New constructs a Deck. Panics if the weapon loadout violates the "0–2 weapons; if 2, both 1H"

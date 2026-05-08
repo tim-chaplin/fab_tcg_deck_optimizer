@@ -51,9 +51,8 @@ func runCompare(name1, name2 string, shuffles int, mp sim.Matchup, maxCopies int
 	// compare always uses a fixed -shuffles count so the two decks are scored under matched
 	// conditions. Adaptive stop would let one deck terminate at a different shuffle count
 	// than the other, breaking the apples-to-apples invariant the per-stat comparison rests on.
-	d1 := evaluateAndPersist(resolveDeckPath(name1), shuffles, 0, mp, maxCopies, seed, fmtValue, false)
-	d2 := evaluateAndPersist(resolveDeckPath(name2), shuffles, 0, mp, maxCopies, seed, fmtValue, false)
-	s1, s2 := d1.Stats, d2.Stats
+	d1, s1 := evaluateAndPersist(resolveDeckPath(name1), shuffles, 0, mp, maxCopies, seed, fmtValue, false)
+	d2, s2 := evaluateAndPersist(resolveDeckPath(name2), shuffles, 0, mp, maxCopies, seed, fmtValue, false)
 
 	fmt.Printf("compare: -shuffles=%s -incoming=%d -arcane-incoming=%d\n", commaInt(shuffles), mp.IncomingDamage, mp.ArcaneIncomingDamage)
 	fmt.Println()
@@ -68,11 +67,11 @@ func runCompare(name1, name2 string, shuffles int, mp sim.Matchup, maxCopies int
 	if len(s1.Histogram) > 0 && len(s2.Histogram) > 0 {
 		// Both decks render against the same axis ranges so values, bar widths, and tick
 		// labels line up between the two charts and a side-by-side read is meaningful.
-		scale := unionHistogramScale(d1, d2)
+		scale := unionHistogramScale(s1, s2)
 		fmt.Println()
 		fmt.Println("Hand-value distributions:")
-		printHistogram(d1, fmt.Sprintf("  %s:", name1), scale)
-		printHistogram(d2, fmt.Sprintf("  %s:", name2), scale)
+		printHistogram(s1.Histogram, fmt.Sprintf("  %s:", name1), scale)
+		printHistogram(s2.Histogram, fmt.Sprintf("  %s:", name2), scale)
 	}
 
 	fmt.Println()

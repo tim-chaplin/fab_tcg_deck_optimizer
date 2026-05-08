@@ -10,8 +10,8 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
 )
 
-// Stats holds aggregate hand-value statistics across all simulated runs.
-type Stats struct {
+// DeckStats holds aggregate hand-value statistics across all simulated runs of a Deck.
+type DeckStats struct {
 	Runs        int
 	Hands       int
 	TotalValue  float64
@@ -116,7 +116,7 @@ func (c CycleStats) Mean() float64 {
 }
 
 // Mean returns the overall arithmetic mean hand value.
-func (s Stats) Mean() float64 {
+func (s DeckStats) Mean() float64 {
 	if s.Hands == 0 {
 		return 0
 	}
@@ -124,7 +124,7 @@ func (s Stats) Mean() float64 {
 }
 
 // Min returns the lowest Value any simulated hand produced. Zero when no hands have been seen.
-func (s Stats) Min() int {
+func (s DeckStats) Min() int {
 	if len(s.Histogram) == 0 {
 		return 0
 	}
@@ -140,7 +140,7 @@ func (s Stats) Min() int {
 }
 
 // Max returns the highest Value any simulated hand produced. Zero when no hands have been seen.
-func (s Stats) Max() int {
+func (s DeckStats) Max() int {
 	m := 0
 	for v := range s.Histogram {
 		if v > m {
@@ -152,7 +152,7 @@ func (s Stats) Max() int {
 
 // Median returns the median hand value. With an even number of hands it's the mean of the two
 // middle values (so it can be fractional). Zero when no hands have been seen.
-func (s Stats) Median() float64 {
+func (s DeckStats) Median() float64 {
 	if s.Hands == 0 || len(s.Histogram) == 0 {
 		return 0
 	}

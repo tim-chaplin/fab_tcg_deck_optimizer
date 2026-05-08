@@ -134,7 +134,7 @@ func BenchmarkAnnealWorkerSweep(b *testing.B) {
 				b.StopTimer()
 				iterRNG := rand.New(rand.NewSource(42))
 				b.StartTimer()
-				_, _, _, found := IterateParallel(
+				_, _, _, _, found := IterateParallel(
 					context.Background(), mutations, unreachableBaseline, 0, 0,
 					0, Matchup{IncomingDamage: incoming}, c.mut, c.shuf,
 					iterRNG.Int63(), nil, true, 0.1,

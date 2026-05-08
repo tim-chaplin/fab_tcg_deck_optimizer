@@ -39,7 +39,7 @@ func loadRealDeck(tb testing.TB) *Deck {
 	for i := 0; i < 5; i++ {
 		candidate := filepath.Join(dir, rel)
 		if data, err := os.ReadFile(candidate); err == nil {
-			loaded, err := deckio.Unmarshal(data)
+			loaded, _, err := deckio.Unmarshal(data)
 			if err != nil {
 				tb.Fatalf("unmarshal %s: %v", candidate, err)
 			}
@@ -110,22 +110,22 @@ func TestEvalCache_ParallelEquivalentToSequential(t *testing.T) {
 	baseline := Random(heroes.Viserai{}, deckSize, maxCopies, setupRNG, nil)
 
 	seq := New(baseline.Hero, baseline.Weapons, baseline.Cards)
-	seq.EvaluateWith(shuffles, Matchup{IncomingDamage: incoming}, rand.New(rand.NewSource(99)), NewEvaluator())
+	seqStats := seq.EvaluateWith(shuffles, Matchup{IncomingDamage: incoming}, rand.New(rand.NewSource(99)), NewEvaluator())
 
 	par := New(baseline.Hero, baseline.Weapons, baseline.Cards)
-	par.EvaluateWith(shuffles, Matchup{IncomingDamage: incoming}, rand.New(rand.NewSource(99)), NewEvaluatorParallel(4))
+	parStats := par.EvaluateWith(shuffles, Matchup{IncomingDamage: incoming}, rand.New(rand.NewSource(99)), NewEvaluatorParallel(4))
 
 	// Hands counts can differ slightly because parallel and sequential consume different
 	// per-shuffle RNG streams: a shuffle that runs out of deck cards on hand 7 in one
 	// stream might deal hand 8 in the other. Empirically <1% drift on 1k-shuffle runs.
-	handsRatio := float64(seq.Stats.Hands-par.Stats.Hands) / float64(seq.Stats.Hands)
+	handsRatio := float64(seqStats.Hands-parStats.Hands) / float64(seqStats.Hands)
 	if handsRatio < -0.02 || handsRatio > 0.02 {
-		t.Errorf("Hands count drift %.4f exceeds 2%% (seq=%d par=%d)", handsRatio, seq.Stats.Hands, par.Stats.Hands)
+		t.Errorf("Hands count drift %.4f exceeds 2%% (seq=%d par=%d)", handsRatio, seqStats.Hands, parStats.Hands)
 	}
-	drift := seq.Stats.Mean() - par.Stats.Mean()
+	drift := seqStats.Mean() - parStats.Mean()
 	if drift < -driftTolerance || drift > driftTolerance {
 		t.Errorf("mean drift %.6f exceeds tolerance %.6f (seq=%.6f par=%.6f)",
-			drift, driftTolerance, seq.Stats.Mean(), par.Stats.Mean())
+			drift, driftTolerance, seqStats.Mean(), parStats.Mean())
 	}
 }
 
@@ -204,18 +204,18 @@ func TestEvalCache_EquivalenceWithUncached(t *testing.T) {
 	baseline := Random(heroes.Viserai{}, deckSize, maxCopies, setupRNG, nil)
 
 	cached := New(baseline.Hero, baseline.Weapons, baseline.Cards)
-	cached.EvaluateWith(shuffles, Matchup{IncomingDamage: incoming}, rand.New(rand.NewSource(99)), NewEvaluator())
+	cachedStats := cached.EvaluateWith(shuffles, Matchup{IncomingDamage: incoming}, rand.New(rand.NewSource(99)), NewEvaluator())
 
 	uncached := New(baseline.Hero, baseline.Weapons, baseline.Cards)
-	uncached.EvaluateWith(shuffles, Matchup{IncomingDamage: incoming}, rand.New(rand.NewSource(99)), NewEvaluatorWithoutCache())
+	uncachedStats := uncached.EvaluateWith(shuffles, Matchup{IncomingDamage: incoming}, rand.New(rand.NewSource(99)), NewEvaluatorWithoutCache())
 
-	if cached.Stats.Hands != uncached.Stats.Hands {
-		t.Errorf("Hands: cached=%d uncached=%d", cached.Stats.Hands, uncached.Stats.Hands)
+	if cachedStats.Hands != uncachedStats.Hands {
+		t.Errorf("Hands: cached=%d uncached=%d", cachedStats.Hands, uncachedStats.Hands)
 	}
-	drift := cached.Stats.Mean() - uncached.Stats.Mean()
+	drift := cachedStats.Mean() - uncachedStats.Mean()
 	if drift < -driftTolerance || drift > driftTolerance {
 		t.Errorf("mean drift %.6f exceeds tolerance %.6f (cached=%.6f uncached=%.6f)",
-			drift, driftTolerance, cached.Stats.Mean(), uncached.Stats.Mean())
+			drift, driftTolerance, cachedStats.Mean(), uncachedStats.Mean())
 	}
 }
 

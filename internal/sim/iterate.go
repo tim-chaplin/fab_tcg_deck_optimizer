@@ -32,12 +32,13 @@ import (
 )
 
 // iterateImprovement is the per-acceptance message a worker sends to the coordinator: the
-// mutation index that won, its evaluated average, and the deck-after-mutation that
-// produced it.
+// mutation index that won, its evaluated average, the deck-after-mutation that produced
+// it, and the full DeckStats from that mutation's evaluation.
 type iterateImprovement struct {
-	idx  int
-	avg  float64
-	deck *Deck
+	idx   int
+	avg   float64
+	deck  *Deck
+	stats DeckStats
 }
 
 // iterateWorkerConfig bundles every read-only parameter a worker shares with its peers so
@@ -100,8 +101,9 @@ type iterateWorkerConfig struct {
 // precision/4), capped by the deck package's adaptiveShufflesCap. precision is ignored
 // when adaptive=false.
 //
-// Returns (acceptedDeck, acceptedAvg, acceptedIndex, true) on first acceptance, or
-// (nil, bestAvg, -1, false) if nothing cleared the gate or ctx was cancelled.
+// Returns (acceptedDeck, acceptedStats, acceptedAvg, acceptedIndex, true) on first
+// acceptance, or (nil, zero, bestAvg, -1, false) if nothing cleared the gate or ctx was
+// cancelled.
 func IterateParallel(
 	ctx context.Context,
 	mutations []Mutation,
@@ -115,7 +117,7 @@ func IterateParallel(
 	completed *atomic.Int64,
 	adaptive bool,
 	precision float64,
-) (*Deck, float64, int, bool) {
+) (*Deck, DeckStats, float64, int, bool) {
 	if mutationWorkers <= 0 {
 		// 1 mutation worker is the empirical default — see the BenchmarkAnnealWorkerSweep
 		// table on the IterateParallel docstring for the rationale.
@@ -125,7 +127,7 @@ func IterateParallel(
 		shuffleWorkers = defaultWorkers()
 	}
 	if len(mutations) == 0 {
-		return nil, bestAvg, -1, false
+		return nil, DeckStats{}, bestAvg, -1, false
 	}
 
 	innerCtx, cancel := context.WithCancel(ctx)
@@ -176,15 +178,15 @@ func IterateParallel(
 	select {
 	case imp := <-improvementCh:
 		<-workersDone
-		return imp.deck, imp.avg, imp.idx, true
+		return imp.deck, imp.stats, imp.avg, imp.idx, true
 	case <-workersDone:
 		// A last-moment acceptance may have landed just before all senders returned.
 		select {
 		case imp := <-improvementCh:
-			return imp.deck, imp.avg, imp.idx, true
+			return imp.deck, imp.stats, imp.avg, imp.idx, true
 		default:
 		}
-		return nil, bestAvg, -1, false
+		return nil, DeckStats{}, bestAvg, -1, false
 	}
 }
 
@@ -213,12 +215,13 @@ func runIterateWorker(
 		}
 		mut := cfg.mutations[i]
 		d := New(mut.Deck.Hero, mut.Deck.Weapons, mut.Deck.Cards)
-		var avg float64
+		var stats DeckStats
 		if cfg.adaptive {
-			avg = d.EvaluateAdaptiveWith(cfg.precision, cfg.matchup, rng, ev).Mean()
+			stats = d.EvaluateAdaptiveWith(cfg.precision, cfg.matchup, rng, ev)
 		} else {
-			avg = d.EvaluateWith(cfg.shuffles, cfg.matchup, rng, ev).Mean()
+			stats = d.EvaluateWith(cfg.shuffles, cfg.matchup, rng, ev)
 		}
+		avg := stats.Mean()
 		if cfg.completed != nil {
 			cfg.completed.Add(1)
 		}
@@ -226,7 +229,7 @@ func runIterateWorker(
 			continue
 		}
 		select {
-		case improvementCh <- iterateImprovement{idx: i, avg: avg, deck: d}:
+		case improvementCh <- iterateImprovement{idx: i, avg: avg, deck: d, stats: stats}:
 		default:
 			// Buffer is sized to mutationWorkers, so this default fires only if every
 			// peer already filled the channel — coordinator drains exactly one anyway.

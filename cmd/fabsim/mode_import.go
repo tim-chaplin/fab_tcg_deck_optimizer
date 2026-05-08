@@ -43,7 +43,7 @@ func runImport() {
 	if err != nil {
 		die("parse fabrary text: %v", err)
 	}
-	out, err := deckio.Marshal(d)
+	out, err := deckio.Marshal(d, sim.DeckStats{})
 	if err != nil {
 		die("encode deck JSON: %v", err)
 	}

@@ -13,13 +13,13 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 )
 
-// Marshal returns the JSON encoding of `d` (indented) with card/weapon/hero names in place of
-// interface values.
-func Marshal(d *sim.Deck) ([]byte, error) {
-	return json.MarshalIndent(toJSON(d), "", "  ")
+// Marshal returns the JSON encoding of `d` and its accumulated `stats` (indented) with
+// card/weapon/hero names in place of interface values.
+func Marshal(d *sim.Deck, stats sim.DeckStats) ([]byte, error) {
+	return json.MarshalIndent(toJSON(d, stats), "", "  ")
 }
 
-func toJSON(d *sim.Deck) *DeckJSON {
+func toJSON(d *sim.Deck, stats sim.DeckStats) *DeckJSON {
 	weapons := make([]string, len(d.Weapons))
 	for i, w := range d.Weapons {
 		weapons[i] = w.Name()
@@ -45,7 +45,7 @@ func toJSON(d *sim.Deck) *DeckJSON {
 		Sideboard: sortedStrings(d.Sideboard),
 		Equipment: sortedStrings(d.Equipment),
 		Pitch:     pitchCounts,
-		Stats:     statsToJSON(d.Stats),
+		Stats:     statsToJSON(stats),
 	}
 }
 
@@ -61,7 +61,7 @@ func sortedStrings(ss []string) []string {
 	return out
 }
 
-func statsToJSON(s sim.Stats) StatsJSON {
+func statsToJSON(s sim.DeckStats) StatsJSON {
 	return StatsJSON{
 		Runs:            s.Runs,
 		Hands:           s.Hands,

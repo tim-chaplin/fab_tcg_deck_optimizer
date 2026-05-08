@@ -67,8 +67,7 @@ func printGroupedStrings(ss []string) {
 // printBestDeck wraps this with the card list, best-turn block, and per-card stats;
 // `fabsim eval -brief` calls printDeckSummary directly so a scripted re-score gets just the
 // numbers without the card-list scroll.
-func printDeckSummary(d *sim.Deck) {
-	s := d.Stats
+func printDeckSummary(d *sim.Deck, s sim.DeckStats) {
 	fmt.Printf("Hero:    %s\n", d.Hero.Name())
 	fmt.Printf("Weapons: %s\n", weaponNames(d.Weapons))
 	fmt.Printf("Pitch:   %s\n", pitchCountsLine(d.Cards))
@@ -87,7 +86,7 @@ func pitchCountsLine(cs []sim.Card) string {
 
 // meanValueLine returns "14.041 (10,000 shuffles)" — the deck's overall mean plus the run
 // count that produced it.
-func meanValueLine(s sim.Stats) string {
+func meanValueLine(s sim.DeckStats) string {
 	return fmt.Sprintf("%.3f (%s shuffles)", s.Mean(), commaInt(s.Runs))
 }
 
@@ -144,31 +143,31 @@ func pitchCounts(cs []sim.Card) (red, yellow, blue int) {
 // printBestDeck dumps the full deck report: summary, card list, best turn played, the
 // hand-value histogram, and the per-card value table pairing each card's role-based avg
 // contribution with its correlational marginal hand-value lift. Sections silently skip
-// themselves when the underlying Stats slice/map is empty so unscored decks still render
+// themselves when their backing slice/map on s is empty so unscored decks still render
 // the parts that do exist.
-func printBestDeck(d *sim.Deck) {
-	printDeckSummary(d)
+func printBestDeck(d *sim.Deck, s sim.DeckStats) {
+	printDeckSummary(d, s)
 	fmt.Println()
 	printCardList(d)
-	printBestTurn(d)
-	if len(d.Stats.Histogram) > 0 {
-		printHistogram(d, histogramTitle(d), naturalHistogramScale(d))
+	printBestTurn(s)
+	if len(s.Histogram) > 0 {
+		printHistogram(s.Histogram, histogramTitle(s), naturalHistogramScale(s))
 	}
-	if len(d.Stats.PerCardMarginal) > 0 {
-		printCardValues(d)
+	if len(s.PerCardMarginal) > 0 {
+		printCardValues(d, s)
 	}
 }
 
 // histogramTitle returns the standard "Hand-value distribution (N hands):" header.
-func histogramTitle(d *sim.Deck) string {
-	return fmt.Sprintf("Hand-value distribution (%s hands):", commaInt(d.Stats.Hands))
+func histogramTitle(s sim.DeckStats) string {
+	return fmt.Sprintf("Hand-value distribution (%s hands):", commaInt(s.Hands))
 }
 
 // printBestTurn renders the persisted peak-Value turn from its structured TurnLog —
 // "Best turn played (value N):" header plus sim.FormatTurnLog's per-section body. No-ops
 // on an unscored deck (empty TurnLog).
-func printBestTurn(d *sim.Deck) {
-	b := d.Stats.Best
+func printBestTurn(s sim.DeckStats) {
+	b := s.Best
 	if b.Log.IsEmpty() {
 		return
 	}
@@ -184,16 +183,16 @@ func printBestTurn(d *sim.Deck) {
 //
 // Sorted by marginal descending so suspected above-curve cards surface at the top and the
 // drags sit at the bottom — the spread is a smell test for buggy implementations or
-// oversimplified mechanics. See sim.Stats.PerCardMarginal for the cross-turn caveat that
-// limits this view's reach for next-turn-payoff cards.
-func printCardValues(d *sim.Deck) {
+// oversimplified mechanics. See sim.DeckStats.PerCardMarginal for the cross-turn caveat
+// that limits this view's reach for next-turn-payoff cards.
+func printCardValues(d *sim.Deck, s sim.DeckStats) {
 	type row struct {
 		name      string
 		margin    float64
 		hasMargin bool
 	}
-	rows := make([]row, 0, len(d.Stats.PerCardMarginal))
-	for id, m := range d.Stats.PerCardMarginal {
+	rows := make([]row, 0, len(s.PerCardMarginal))
+	for id, m := range s.PerCardMarginal {
 		r := row{name: sim.DisplayName(registry.GetCard(id))}
 		if m.PresentHands > 0 && m.AbsentHands > 0 {
 			r.margin = m.Marginal()
@@ -259,36 +258,36 @@ type histogramScale struct {
 	minV, maxV, peak int
 }
 
-// naturalHistogramScale returns the histogramScale derived from d's own min/max/peak — what to
+// naturalHistogramScale returns the histogramScale derived from s's own min/max/peak — what to
 // pass to printHistogram for a single-deck chart at its native resolution.
-func naturalHistogramScale(d *sim.Deck) histogramScale {
-	minV := d.Stats.Min()
-	maxV := d.Stats.Max()
-	_, peak := buildHistogramColumns(d.Stats.Histogram, minV, maxV, histChartWidth(maxV-minV+1))
+func naturalHistogramScale(s sim.DeckStats) histogramScale {
+	minV := s.Min()
+	maxV := s.Max()
+	_, peak := buildHistogramColumns(s.Histogram, minV, maxV, histChartWidth(maxV-minV+1))
 	return histogramScale{minV, maxV, peak}
 }
 
 // unionHistogramScale returns the smallest scale that fits both decks' data, so the two
 // charts can be rendered with matching x and y axes. The peak is computed under the union
 // range and width because binning shifts when the range widens.
-func unionHistogramScale(d1, d2 *sim.Deck) histogramScale {
-	minV := min(d1.Stats.Min(), d2.Stats.Min())
-	maxV := max(d1.Stats.Max(), d2.Stats.Max())
+func unionHistogramScale(s1, s2 sim.DeckStats) histogramScale {
+	minV := min(s1.Min(), s2.Min())
+	maxV := max(s1.Max(), s2.Max())
 	width := histChartWidth(maxV - minV + 1)
-	_, peak1 := buildHistogramColumns(d1.Stats.Histogram, minV, maxV, width)
-	_, peak2 := buildHistogramColumns(d2.Stats.Histogram, minV, maxV, width)
+	_, peak1 := buildHistogramColumns(s1.Histogram, minV, maxV, width)
+	_, peak2 := buildHistogramColumns(s2.Histogram, minV, maxV, width)
 	return histogramScale{minV, maxV, max(peak1, peak2)}
 }
 
-// printHistogram renders Stats.Histogram as an ASCII bar chart of fixed histWidth × histHeight.
-// title prints above the chart; scale fixes both axes (values outside scale.minV..scale.maxV
-// drop, bars scale against scale.peak). No-op when scale.peak == 0.
-func printHistogram(d *sim.Deck, title string, scale histogramScale) {
+// printHistogram renders a hand-value histogram as an ASCII bar chart of fixed histWidth ×
+// histHeight. title prints above the chart; scale fixes both axes (values outside
+// scale.minV..scale.maxV drop, bars scale against scale.peak). No-op when scale.peak == 0.
+func printHistogram(hist map[int]int, title string, scale histogramScale) {
 	if scale.peak == 0 {
 		return
 	}
 	width := histChartWidth(scale.maxV - scale.minV + 1)
-	counts, _ := buildHistogramColumns(d.Stats.Histogram, scale.minV, scale.maxV, width)
+	counts, _ := buildHistogramColumns(hist, scale.minV, scale.maxV, width)
 	bars := scaleBarHeights(counts, scale.peak, histHeight)
 	yLabelW := len(strconv.Itoa(scale.peak))
 	// bodyIndent is the number of spaces before the first bar column so every row (y-label,

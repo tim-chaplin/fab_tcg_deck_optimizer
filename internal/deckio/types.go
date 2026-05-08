@@ -31,10 +31,10 @@ type PitchCountsJSON struct {
 	Blue   int `json:"blue"`
 }
 
-// StatsJSON mirrors sim.Stats with card references flattened to names.
+// StatsJSON mirrors sim.DeckStats with card references flattened to names.
 type StatsJSON struct {
 	// Avg is TotalValue/Hands, emitted for human readability when skimming the JSON. Loaders
-	// ignore it — Unmarshal rederives via Stats.Mean() so the canonical state is always
+	// ignore it — Unmarshal rederives via DeckStats.Mean() so the canonical state is always
 	// (Runs, Hands, TotalValue). Kept first so it's the first number a human sees.
 	Avg             float64                 `json:"avg"`
 	Runs            int                     `json:"runs"`

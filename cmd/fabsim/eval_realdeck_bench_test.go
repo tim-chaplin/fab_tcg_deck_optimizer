@@ -31,7 +31,7 @@ func BenchmarkEvalRealDeck(b *testing.B) {
 	if err != nil {
 		b.Fatalf("read deck: %v", err)
 	}
-	loaded, err := deckio.Unmarshal(data)
+	loaded, _, err := deckio.Unmarshal(data)
 	if err != nil {
 		b.Fatalf("unmarshal deck: %v", err)
 	}

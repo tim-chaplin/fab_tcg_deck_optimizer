@@ -41,7 +41,7 @@ func TestUnmarshal_RejectsUnknownNamesAndBadJSON(t *testing.T) {
 	}
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
-			_, err := Unmarshal([]byte(tc.input))
+			_, _, err := Unmarshal([]byte(tc.input))
 			if err == nil {
 				t.Fatalf("Unmarshal(%q): err = nil, want error containing %q", tc.input, tc.wantError)
 			}

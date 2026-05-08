@@ -192,11 +192,13 @@ type annealResult struct {
 func runAnneal(cfg annealConfig) annealResult {
 	rng := rand.New(rand.NewSource(cfg.seed))
 
-	current, currentAvg := prepareBaseline(cfg, rng)
-	// All-time best tracks the highest-avg deck seen since runAnneal started. The saved JSON
-	// mirrors this — simulated annealing intentionally walks through worse states to escape
-	// local maxima, but the on-disk artifact should always reflect the peak reached so far.
+	current, currentStats, currentAvg := prepareBaseline(cfg, rng)
+	// All-time best tracks the highest-avg deck (and its stats) seen since runAnneal started.
+	// The saved JSON mirrors this — simulated annealing intentionally walks through worse
+	// states to escape local maxima, but the on-disk artifact should always reflect the peak
+	// reached so far.
 	bestEver := current
+	bestEverStats := currentStats
 	bestEverAvg := currentAvg
 	startingAvg := currentAvg
 	fmt.Println("Press Enter to abort.")
@@ -240,7 +242,7 @@ func runAnneal(cfg annealConfig) annealResult {
 		roundStart := time.Now()
 		stopTicker := startRoundTicker(round, len(mutations), roundStart, &completed,
 			temperature, currentAvg, bestEverAvg)
-		d, avg, idx, found := sim.IterateParallel(
+		d, dStats, avg, idx, found := sim.IterateParallel(
 			ctx, mutations, currentAvg, temperature, cfg.minImprovement,
 			cfg.shuffles, cfg.matchup, 0, 0,
 			rng.Int63(), &completed, cfg.adaptive, cfg.minImprovement,
@@ -248,7 +250,7 @@ func runAnneal(cfg annealConfig) annealResult {
 		stopTicker()
 
 		if ctx.Err() != nil {
-			return finishAnnealRun(cfg, bestEver, bestEverAvg, startingAvg,
+			return finishAnnealRun(cfg, bestEver, bestEverStats, bestEverAvg, startingAvg,
 				fmt.Sprintf("Aborted mid-round after %d rounds / %d acceptances in %s",
 					round, acceptances, time.Since(start).Truncate(time.Second)),
 				true)
@@ -258,15 +260,15 @@ func runAnneal(cfg annealConfig) annealResult {
 			// probabilistically-accepted worse ones — failed the gate. At any T > 0 with
 			// thousands of mutations this is vanishingly unlikely unless we've genuinely
 			// converged, so treat it as a local maximum regardless of the current temperature.
-			return finishAnnealRun(cfg, bestEver, bestEverAvg, startingAvg,
+			return finishAnnealRun(cfg, bestEver, bestEverStats, bestEverAvg, startingAvg,
 				fmt.Sprintf("Local maximum reached after %d rounds / %d acceptances in %s",
 					round, acceptances, time.Since(start).Truncate(time.Second)),
 				false)
 		}
 
 		acceptances++
-		bestEver, bestEverAvg = applyAcceptedMutation(cfg, round, verbose, tempLabel,
-			idx, len(mutations), mutations[idx], d, avg, currentAvg, bestEver, bestEverAvg)
+		bestEver, bestEverStats, bestEverAvg = applyAcceptedMutation(cfg, round, verbose, tempLabel,
+			idx, len(mutations), mutations[idx], d, dStats, avg, currentAvg, bestEver, bestEverStats, bestEverAvg)
 		current = d
 		currentAvg = avg
 		temperature = coolDown(temperature, cfg.tempDecay, cfg.minTemp)
@@ -303,8 +305,8 @@ func formatTempLabel(temperature float64) string {
 // the deck to disk when avg exceeds bestEverAvg, and returns the possibly-updated bestEver /
 // bestEverAvg. The current deck and its avg stay owned by the caller.
 func applyAcceptedMutation(cfg annealConfig, round int, verbose bool, tempLabel string,
-	idx, total int, mut sim.Mutation, d *sim.Deck, avg, currentAvg float64,
-	bestEver *sim.Deck, bestEverAvg float64) (*sim.Deck, float64) {
+	idx, total int, mut sim.Mutation, d *sim.Deck, dStats sim.DeckStats, avg, currentAvg float64,
+	bestEver *sim.Deck, bestEverStats sim.DeckStats, bestEverAvg float64) (*sim.Deck, sim.DeckStats, float64) {
 	verb := "improvement"
 	if avg <= currentAvg {
 		verb = "annealing step"
@@ -314,7 +316,7 @@ func applyAcceptedMutation(cfg annealConfig, round int, verbose bool, tempLabel 
 			round, verb, idx+1, total, avg, currentAvg, mut.Description, tempLabel)
 	}
 	if avg <= bestEverAvg {
-		return bestEver, bestEverAvg
+		return bestEver, bestEverStats, bestEverAvg
 	}
 	if !verbose {
 		// Surface every new all-time best in non-verbose annealing mode so long
@@ -324,22 +326,22 @@ func applyAcceptedMutation(cfg annealConfig, round int, verbose bool, tempLabel 
 		fmt.Fprintf(os.Stderr, "\r[round %d] new best %.3f (was %.3f, +%.3f)%s                                \n",
 			round, avg, bestEverAvg, avg-bestEverAvg, tempLabel)
 	}
-	if err := writeDeck(d, cfg.outPath); err != nil {
+	if err := writeDeck(d, dStats, cfg.outPath); err != nil {
 		die("%v", err)
 	}
-	return d, avg
+	return d, dStats, avg
 }
 
 // finishAnnealRun emits the terminal status line (abort / converged), optionally prints the
 // full best-ever deck listing, and builds the annealResult the top-level command surfaces as
 // exit code and session summary. aborted is threaded through as-is because runAnnealCmd keys
 // exit code 130 off it.
-func finishAnnealRun(cfg annealConfig, bestEver *sim.Deck, bestEverAvg, startingAvg float64,
+func finishAnnealRun(cfg annealConfig, bestEver *sim.Deck, bestEverStats sim.DeckStats, bestEverAvg, startingAvg float64,
 	statusLine string, aborted bool) annealResult {
 	fmt.Fprintln(os.Stderr, "\n"+statusLine)
 	fmt.Println()
 	if shouldPrintFinalDeck(cfg.startTemp, bestEverAvg, startingAvg) {
-		printBestDeck(bestEver)
+		printBestDeck(bestEver, bestEverStats)
 	}
 	return annealResult{bestEverAvg: bestEverAvg, startingAvg: startingAvg, aborted: aborted}
 }
@@ -365,12 +367,12 @@ func coolDown(temperature, decay, minTemp float64) float64 {
 
 // baselineEvaluate runs the eval used for every prepareBaseline path. Adaptive when
 // cfg.adaptive is true (no -shuffles pinned); fixed-shuffles otherwise. The two paths
-// return the same Stats shape; Stats.Runs reflects the actual shuffle count so the next
-// prepareBaseline call's "already evaluated" check still works (an adaptive run may finish
-// below the cap and prompt a re-evaluation next session, which is fine — adaptive runs
-// are cheap). Routes through evaluateParallel so the once-per-session baseline benefits
-// from the same DefaultWorkers fan-out as iterate's per-mutation evals.
-func baselineEvaluate(d *sim.Deck, cfg annealConfig, rng *rand.Rand) sim.Stats {
+// return the same DeckStats shape; DeckStats.Runs reflects the actual shuffle count so
+// the next prepareBaseline call's "already evaluated" check still works (an adaptive run
+// may finish below the cap and prompt a re-evaluation next session, which is fine —
+// adaptive runs are cheap). Routes through evaluateParallel so the once-per-session
+// baseline benefits from the same DefaultWorkers fan-out as iterate's per-mutation evals.
+func baselineEvaluate(d *sim.Deck, cfg annealConfig, rng *rand.Rand) sim.DeckStats {
 	shuffles := cfg.shuffles
 	if cfg.adaptive {
 		shuffles = -1
@@ -390,53 +392,57 @@ func baselineEvaluate(d *sim.Deck, cfg annealConfig, rng *rand.Rand) sim.Stats {
 // from disk) is sanitized before any of the above branches: the tagged slots are replaced
 // with random legal picks and the run always takes the re-evaluate path so the baseline
 // reflects the new card list.
-func prepareBaseline(cfg annealConfig, rng *rand.Rand) (*sim.Deck, float64) {
-	best, bestAvg, err := loadExisting(cfg.outPath)
+func prepareBaseline(cfg annealConfig, rng *rand.Rand) (*sim.Deck, sim.DeckStats, float64) {
+	best, bestStats, err := loadExisting(cfg.outPath)
 	if err != nil {
 		die("%v", err)
 	}
 	if best == nil {
 		fmt.Fprintf(os.Stderr, "no deck at %s; generating a random starting deck\n", cfg.outPath)
 		best = sim.Random(heroes.Viserai{}, cfg.deckSize, cfg.maxCopies, rng, cfg.legalFilter())
-		bestAvg = baselineEvaluate(best, cfg, rng).Mean()
-		if err := writeDeck(best, cfg.outPath); err != nil {
+		bestStats = baselineEvaluate(best, cfg, rng)
+		bestAvg := bestStats.Mean()
+		if err := writeDeck(best, bestStats, cfg.outPath); err != nil {
 			die("%v", err)
 		}
 		fmt.Printf("Starting deck avg %.3f, saved to %s\n", bestAvg, cfg.outPath)
 		maybePrintBaselineCards(cfg, best)
-		return best, bestAvg
+		return best, bestStats, bestAvg
 	}
+	bestAvg := bestStats.Mean()
 	// Sanitize in place before the evaluation-branch decision. Any swap forces the
-	// re-evaluate path below by zeroing Stats.Runs so the saved run count can't satisfy
-	// the "already deep-evaluated" check against a now-different card list. bestAvg stays
-	// at the loaded value for the "saved avg → current avg" delta display below.
+	// re-evaluate path below by zeroing Runs in our local stats copy so the saved run
+	// count can't satisfy the "already deep-evaluated" check against a now-different
+	// card list. bestAvg stays at the loaded value for the "saved avg → current avg"
+	// delta display below.
 	sanitized := sanitizeLoadedDeck(best, cfg.maxCopies, rng, cfg.legalFilter())
 	if len(sanitized) > 0 {
-		best.Stats.Runs = 0
+		bestStats.Runs = 0
 	}
 	// Re-evaluate when the saved deck was scored at fewer shuffles than the current budget,
 	// or when -reevaluate forces it. Adaptive runs always take the re-evaluate path because
-	// the recorded Stats.Runs reflects whatever count the previous adaptive run terminated
-	// at, which carries no precision guarantee for the new run's target.
-	needReeval := cfg.adaptive || cfg.reevaluate || best.Stats.Runs < cfg.shuffles
+	// the recorded Runs reflects whatever count the previous adaptive run terminated at,
+	// which carries no precision guarantee for the new run's target.
+	needReeval := cfg.adaptive || cfg.reevaluate || bestStats.Runs < cfg.shuffles
 	if needReeval {
-		best, bestAvg = reevaluateBaseline(cfg, rng, best, bestAvg, sanitized)
+		var freshStats sim.DeckStats
+		best, freshStats, bestAvg = reevaluateBaseline(cfg, rng, best, bestStats, bestAvg, sanitized)
 		maybePrintBaselineCards(cfg, best)
-		return best, bestAvg
+		return best, freshStats, bestAvg
 	}
 	fmt.Printf("Loaded best deck (avg %.3f) from %s\n", bestAvg, cfg.outPath)
 	maybePrintBaselineCards(cfg, best)
-	return best, bestAvg
+	return best, bestStats, bestAvg
 }
 
 // reevaluateBaseline rebuilds the loaded deck against the current shuffle budget and writes
-// the refreshed Stats back to disk. Picks an explanatory reason label (sanitized cards
-// replaced, -reevaluate forced, or stale shuffle count), reconstructs the deck so any saved
-// Stats are dropped (Sideboard and Equipment are preserved), runs baselineEvaluate, and
-// persists the result. Returns the rebuilt deck and its fresh avg.
-func reevaluateBaseline(cfg annealConfig, rng *rand.Rand, loaded *sim.Deck, savedAvg float64, sanitized []sim.NotImplementedReplacement) (*sim.Deck, float64) {
-	reason := fmt.Sprintf("from %d shuffles", loaded.Stats.Runs)
-	if cfg.reevaluate && loaded.Stats.Runs >= cfg.shuffles {
+// the refreshed stats back to disk. Picks an explanatory reason label (sanitized cards
+// replaced, -reevaluate forced, or stale shuffle count), reconstructs the deck (Sideboard and
+// Equipment preserved), runs baselineEvaluate, and persists the result. Returns the rebuilt
+// deck, its fresh stats, and avg.
+func reevaluateBaseline(cfg annealConfig, rng *rand.Rand, loaded *sim.Deck, loadedStats sim.DeckStats, savedAvg float64, sanitized []sim.NotImplementedReplacement) (*sim.Deck, sim.DeckStats, float64) {
+	reason := fmt.Sprintf("from %d shuffles", loadedStats.Runs)
+	if cfg.reevaluate && loadedStats.Runs >= cfg.shuffles {
 		reason = "-reevaluate forced"
 	}
 	if len(sanitized) > 0 {
@@ -458,14 +464,15 @@ func reevaluateBaseline(cfg annealConfig, rng *rand.Rand, loaded *sim.Deck, save
 	rebuilt := sim.New(loaded.Hero, loaded.Weapons, loaded.Cards)
 	rebuilt.Sideboard = sideboard
 	rebuilt.Equipment = equipment
-	freshAvg := baselineEvaluate(rebuilt, cfg, rng).Mean()
-	if err := writeDeck(rebuilt, cfg.outPath); err != nil {
+	freshStats := baselineEvaluate(rebuilt, cfg, rng)
+	freshAvg := freshStats.Mean()
+	if err := writeDeck(rebuilt, freshStats, cfg.outPath); err != nil {
 		die("%v", err)
 	}
 	// Show saved→current so the delta from any simulation-logic drift is visible at a glance,
 	// instead of the user guessing which of the two printed numbers is the fresh one.
 	fmt.Printf("Re-evaluated baseline: %.3f → %.3f, saved to %s\n", savedAvg, freshAvg, cfg.outPath)
-	return rebuilt, freshAvg
+	return rebuilt, freshStats, freshAvg
 }
 
 // maybePrintBaselineCards emits the startup card-list dump unless -quiet-load suppressed it. The
