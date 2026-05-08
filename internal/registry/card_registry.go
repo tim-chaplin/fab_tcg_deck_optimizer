@@ -57,6 +57,8 @@ var cardsByID = []sim.Card{
 	ids.ConsumingVolitionYellow: cards.ConsumingVolitionYellow{},
 	ids.ConsumingVolitionBlue:   cards.ConsumingVolitionBlue{},
 
+	ids.CrackedBaubleYellow: cards.CrackedBaubleYellow{},
+
 	ids.DeathlyDuetRed:    cards.DeathlyDuetRed{},
 	ids.DeathlyDuetYellow: cards.DeathlyDuetYellow{},
 	ids.DeathlyDuetBlue:   cards.DeathlyDuetBlue{},
@@ -415,7 +417,10 @@ var cardsByID = []sim.Card{
 
 	ids.TestOfStrengthRed: cards.TestOfStrengthRed{},
 
-	ids.ThrustRed:     cards.ThrustRed{},
+	ids.ThrustRed: cards.ThrustRed{},
+
+	ids.TitaniumBaubleBlue: cards.TitaniumBaubleBlue{},
+
 	ids.ToughenUpBlue: cards.ToughenUpBlue{},
 
 	ids.TrotAlongBlue: cards.TrotAlongBlue{},

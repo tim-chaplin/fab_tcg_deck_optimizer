@@ -85,7 +85,7 @@ implemented` riders across the card roster.
 
 ### Unimplemented cards by feature
 
-The 67 cards left in `internal/cards/notimplemented/` grouped by the systemic feature
+The 66 cards left in `internal/cards/notimplemented/` grouped by the systemic feature
 that gates them. Counts are by file (one card-name; each file typically holds 1–3
 pitch-color variants). Landing one bullet typically lets every card in the bucket come
 out of `notimplemented/` together.
@@ -136,9 +136,6 @@ out of `notimplemented/` together.
   ability does nothing this turn". Needs a turn-scoped opt-out flag the hero ability
   pipeline reads.
 - **Quicken tokens** (2): Opt-and-quicken-on-reveal, reveal-cost-with-quicken.
-- **No-effect placeholders** (2): cards whose printed text is just a stat line (e.g.
-  Cracked / Titanium Bauble in draft contexts). Mostly a marker-removal / re-categorisation
-  pass.
 - **Ward (opponent damage prevention)** (1): aura that reduces opponent's incoming
   damage to our hero. New persistent state; one card.
 - **Damage-prevention triggers** (1): "when you prevent damage this turn, fire X".

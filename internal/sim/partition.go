@@ -11,7 +11,9 @@ package sim
 // ending occupied (saves a hand slot next refill; covers both arsenal-in-stayed and
 // Held-for-promotion).
 
-import ()
+import (
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+)
 
 func (e *Evaluator) findBest(hero Hero, weapons []Weapon, hand []Card, mp Matchup, deck []Card, prior TurnState, skipLog bool) TurnSummary {
 	// Cache fast-path. Bypassed when disabled (e.cache nil) or when any input overflows
@@ -207,7 +209,11 @@ func (e *Evaluator) findBest(hero Hero, weapons []Weapon, hand []Card, mp Matchu
 // hand — partition Held cards plus anything tutored mid-chain) and moves it into
 // best.State.Arsenal, removing it from State.Hand. Deterministic per-hand pick (hashed from
 // sorted starting-hand IDs + Hand IDs + arsenal-in ID) so equivalent inputs always promote
-// the same card. No-op when State.Hand is empty.
+// the same card. No-op when State.Hand has no arsenal-eligible cards.
+//
+// Resource-typed cards (baubles) and pure Block-typed cards (On the Horizon) are skipped —
+// they can only Pitch / Block, neither of which is legal from the arsenal slot, so
+// promoting one would lock the slot.
 //
 // When the promoted card matches a Held entry in BestLine, that entry's Role flips to
 // Arsenal so the per-card display still attributes the slot. Tutored cards (not in BestLine)
@@ -216,7 +222,18 @@ func promoteRandomHandCardToArsenal(best *TurnSummary, startingHand []Card, arse
 	if len(best.State.Hand) == 0 {
 		return
 	}
-	pick := int(arsenalPromotionHash(startingHand, best.State.Hand, arsenalCardIn) % uint64(len(best.State.Hand)))
+	eligible := make([]int, 0, len(best.State.Hand))
+	for i, c := range best.State.Hand {
+		t := c.Types()
+		if t.Has(card.TypeBlock) || t.IsResource() {
+			continue
+		}
+		eligible = append(eligible, i)
+	}
+	if len(eligible) == 0 {
+		return
+	}
+	pick := eligible[int(arsenalPromotionHash(startingHand, best.State.Hand, arsenalCardIn)%uint64(len(eligible)))]
 	chosen := best.State.Hand[pick]
 	best.State.Arsenal = chosen
 	best.State.Hand = append(best.State.Hand[:pick:pick], best.State.Hand[pick+1:]...)

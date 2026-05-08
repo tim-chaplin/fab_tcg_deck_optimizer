@@ -23,6 +23,7 @@ const (
 	TypeInstant                              // "Instant"
 	TypeItem                                 // "Item"
 	TypeOneHand                              // "1H"
+	TypeResource                             // "Resource"
 	TypeRuneblade                            // "Runeblade"
 	TypeScepter                              // "Scepter"
 	TypeSword                                // "Sword"
@@ -100,4 +101,12 @@ func (s TypeSet) IsDefenseReaction() bool {
 // IsAttackReaction reports whether s has the Attack Reaction subtype.
 func (s TypeSet) IsAttackReaction() bool {
 	return s&TypeSet(TypeAttackReaction) != 0
+}
+
+// IsResource reports whether s carries the Resource type. Resource cards have no Action
+// subtype so they can't be played, but their printed Defense is still a legal block like
+// any non-Action hand card. The post-hoc arsenal promotion skips them (alongside pure
+// Block cards) since neither has a legal play from arsenal.
+func (s TypeSet) IsResource() bool {
+	return s&TypeSet(TypeResource) != 0
 }

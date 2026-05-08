@@ -185,9 +185,10 @@ func (RedPitch) GoAgain() bool                              { return false }
 func (RedPitch) Play(s *sim.TurnState, self *sim.CardState) { s.Log(self, 0) }
 
 // BluePitch is a pure-pitch generic non-attack action: pitches 3, no attack, no defense,
-// no go again. Useful as a "blue pitch source" in tests where the optimal line should be
-// unambiguous — the optimizer can't repurpose it as an attacker or blocker, so the only
-// reasonable use is to pitch it.
+// no go again. Tests at the blue-pitch tier prefer cards.TitaniumBaubleBlue (the printed
+// Resource-typed bauble), but a few tests need a pitch source with no defense — Titanium's
+// printed 3{d} would change the optimal partition. Use this when the test relies on the
+// pitch source being block-irrelevant.
 type BluePitch struct{}
 
 func (BluePitch) ID() ids.CardID          { return FakeBluePitch }
