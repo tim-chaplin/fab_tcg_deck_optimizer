@@ -203,3 +203,4 @@ lines across `card/`, `weapon/`, `hand/` plus every weapon impl.
 - combine hand_aura_trigger_test.go and deck_aura_trigger_test.go into just aura_trigger_test.go, ditto for "mid_turn_draw_test"
 - fix all the docstrings that say "Package Foo is..." but are no longer in package Foo
 - get rid of the "dot import" eg: . "github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+- remove the local `zeroDefenseAura` fake from `turntests/weeping_battleground_test.go` once `defendersDamage` seeds the defense-phase state graveyard from `priorGraveyard + defenders` (currently defenders-only, asymmetric with the attack-phase seed). After that, the test can put a real aura in `prior.Graveyard` instead of routing one through a 0-defense plain block.
