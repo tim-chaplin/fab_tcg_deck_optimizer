@@ -34,10 +34,10 @@ func (c *CarryState) SnapshotFromTurn(s *TurnState) {
 	c.Log = append(c.Log[:0], s.turnLog...)
 }
 
-// CopyFrom copies every field of src into c, reusing c's slice backings. Used to
-// promote one already-built CarryState into a different scratch (e.g.
-// bestCarryScratch → findBestCarryScratch when a leaf wins) without paying a fresh
-// allocation per promotion.
+// CopyFrom copies every field of src into c, reusing c's slice backings via
+// append([:0], ...). Allocation-free after the first sizing — callers that promote
+// one already-built CarryState into a different destination avoid the per-promotion
+// allocation a fresh value-assign would pay.
 func (c *CarryState) CopyFrom(src *CarryState) {
 	c.Hand = append(c.Hand[:0], src.Hand...)
 	c.Deck = append(c.Deck[:0], src.Deck...)
