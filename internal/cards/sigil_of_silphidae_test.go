@@ -38,8 +38,8 @@ func TestSigilOfSilphidae_PlayBanishesAuraForOneArcane(t *testing.T) {
 	if !s.ArcaneDamageDealt {
 		t.Errorf("ArcaneDamageDealt should be set")
 	}
-	if len(s.Banish) != 1 || s.Banish[0].ID() != aura.ID() {
-		t.Errorf("Banish = %v, want [Blessing]", s.Banish)
+	if len(s.Banished()) != 1 || s.Banished()[0].ID() != aura.ID() {
+		t.Errorf("Banish = %v, want [Blessing]", s.Banished())
 	}
 }
 
@@ -71,7 +71,7 @@ func TestSigilOfSilphidae_StartOfTurnHandlerBanishesAnotherAura(t *testing.T) {
 	if next.Value != 1 {
 		t.Errorf("handler Value = %d, want 1 (banished another aura)", next.Value)
 	}
-	if len(next.Banish) != 1 || next.Banish[0].ID() != other.ID() {
-		t.Errorf("Banish = %v, want [Blessing]", next.Banish)
+	if len(next.Banished()) != 1 || next.Banished()[0].ID() != other.ID() {
+		t.Errorf("Banish = %v, want [Blessing]", next.Banished())
 	}
 }

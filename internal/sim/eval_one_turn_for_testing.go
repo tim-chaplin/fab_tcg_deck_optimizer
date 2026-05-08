@@ -114,8 +114,10 @@ func (d *Deck) EvalOneTurnForTesting(mp Matchup, initial TurnState, initialHand 
 	if !ok {
 		return TurnStartState{
 			Value:                  play.Value,
+			BestLine:               append([]CardAssignment(nil), play.BestLine...),
 			Graveyard:              append([]Card(nil), play.State.Graveyard...),
 			StartOfNextTurnArsenal: play.State.Arsenal,
+			StartOfNextTurnDeck:    append([]Card(nil), play.State.Deck...),
 			StartOfNextTurnAuras:   append([]Aura(nil), play.State.Auras...),
 			StartOfNextTurnItems:   append([]Item(nil), play.State.Items...),
 			CardsDrawn:             play.State.CardsDrawn,

@@ -220,6 +220,8 @@ type shuffleScratch struct {
 	heldBuf, nextHeld               []Card
 	auraTriggerBuf, nextAuraTrigger []Aura
 	itemBuf, nextItem               []Item
+	banishBuf, nextBanish           []Card
+	graveyardBuf, nextGraveyard     []Card
 	presentBuf                      []bool
 	marginalBuf                     []CardMarginalStats
 }
@@ -237,6 +239,10 @@ func newShuffleScratch(deckSize, handSize, numUniqueIDs int) *shuffleScratch {
 		nextAuraTrigger: make([]Aura, 0, handSize),
 		itemBuf:         make([]Item, 0, 4),
 		nextItem:        make([]Item, 0, 4),
+		banishBuf:       make([]Card, 0, 4),
+		nextBanish:      make([]Card, 0, 4),
+		graveyardBuf:    make([]Card, 0, deckSize),
+		nextGraveyard:   make([]Card, 0, deckSize),
 		presentBuf:      make([]bool, numUniqueIDs),
 		marginalBuf:     make([]CardMarginalStats, numUniqueIDs),
 	}
@@ -264,9 +270,13 @@ func runOneShuffle(d *Deck, stats *Stats, scratch *shuffleScratch, idIndex map[i
 	heldBuf := scratch.heldBuf[:0]
 	auraTriggerBuf := scratch.auraTriggerBuf[:0]
 	itemBuf := scratch.itemBuf[:0]
+	banishBuf := scratch.banishBuf[:0]
+	graveyardBuf := scratch.graveyardBuf[:0]
 	nextHeld := scratch.nextHeld
 	nextAuraTrigger := scratch.nextAuraTrigger
 	nextItem := scratch.nextItem
+	nextBanish := scratch.nextBanish
+	nextGraveyard := scratch.nextGraveyard
 	handBuf := scratch.handBuf
 	maxHands := 2 * handsPerCycle
 	for handIdx < maxHands {
@@ -288,7 +298,7 @@ func runOneShuffle(d *Deck, stats *Stats, scratch *shuffleScratch, idIndex map[i
 		}
 		arsenalIn := arsenalCard
 		sortHandByID(h)
-		play := runBestForTurn(d.Hero, d.Weapons, h, mp, buf[head+drawCount:tail], TurnState{Arsenal: arsenalCard, Auras: auraTriggerBuf, Items: itemBuf, OpponentMarked: opponentMarked}, ev)
+		play := runBestForTurn(d.Hero, d.Weapons, h, mp, buf[head+drawCount:tail], TurnState{Arsenal: arsenalCard, Auras: auraTriggerBuf, Items: itemBuf, banished: banishBuf, graveyard: graveyardBuf, OpponentMarked: opponentMarked}, ev)
 		arsenalCard = play.State.Arsenal
 		play.Value += trigDamage
 		play.TriggersFromLastTurn = trigContribs
@@ -296,7 +306,7 @@ func runOneShuffle(d *Deck, stats *Stats, scratch *shuffleScratch, idIndex map[i
 		play.DealtHand = dealtHand
 
 		if recordTurnStats(stats, play, handIdx, handsPerCycle) {
-			replay := replayBestForTurnWithLog(d.Hero, d.Weapons, h, mp, buf[head+drawCount:tail], TurnState{Arsenal: arsenalIn, Auras: auraTriggerBuf, Items: itemBuf, OpponentMarked: opponentMarked}, ev)
+			replay := replayBestForTurnWithLog(d.Hero, d.Weapons, h, mp, buf[head+drawCount:tail], TurnState{Arsenal: arsenalIn, Auras: auraTriggerBuf, Items: itemBuf, banished: banishBuf, graveyard: graveyardBuf, OpponentMarked: opponentMarked}, ev)
 			replay.Value = play.Value
 			replay.TriggersFromLastTurn = trigContribs
 			replay.StartOfTurnAuras = startOfTurnAuras
@@ -307,11 +317,15 @@ func runOneShuffle(d *Deck, stats *Stats, scratch *shuffleScratch, idIndex map[i
 		nextHeld = applyTurnResult(play, buf, &head, &tail, nextHeld[:0])
 		nextAuraTrigger = append(nextAuraTrigger[:0], play.State.Auras...)
 		nextItem = append(nextItem[:0], play.State.Items...)
+		nextBanish = append(nextBanish[:0], play.State.Banish...)
+		nextGraveyard = append(nextGraveyard[:0], play.State.Graveyard...)
 		opponentMarked = play.State.OpponentMarked
 		handIdx++
 		heldBuf, nextHeld = nextHeld, heldBuf
 		auraTriggerBuf, nextAuraTrigger = nextAuraTrigger, auraTriggerBuf
 		itemBuf, nextItem = nextItem, itemBuf
+		banishBuf, nextBanish = nextBanish, banishBuf
+		graveyardBuf, nextGraveyard = nextGraveyard, graveyardBuf
 	}
 	scratch.heldBuf = heldBuf
 	scratch.nextHeld = nextHeld
@@ -319,6 +333,10 @@ func runOneShuffle(d *Deck, stats *Stats, scratch *shuffleScratch, idIndex map[i
 	scratch.nextAuraTrigger = nextAuraTrigger
 	scratch.itemBuf = itemBuf
 	scratch.nextItem = nextItem
+	scratch.banishBuf = banishBuf
+	scratch.nextBanish = nextBanish
+	scratch.graveyardBuf = graveyardBuf
+	scratch.nextGraveyard = nextGraveyard
 }
 
 // mergeStatsInto folds src's per-shuffle accumulators into dst. Used by the parallel path

@@ -28,7 +28,7 @@ func TestRunicFellingsong_AuraInGraveyardFiresBanishRider(t *testing.T) {
 	if got := s.Value; got != want {
 		t.Errorf("Play() = %d, want %d (Attack + banish rider)", got, want)
 	}
-	if len(s.Banish) != 1 || s.Banish[0].ID() != aura.ID() {
-		t.Errorf("Banish = %v, want [Blessing]", s.Banish)
+	if len(s.Banished()) != 1 || s.Banished()[0].ID() != aura.ID() {
+		t.Errorf("Banish = %v, want [Blessing]", s.Banished())
 	}
 }

@@ -88,9 +88,19 @@ type TurnState struct {
 	// non-persistent goes to graveyard" rule, DestroyAura's aura-card append) so the
 	// non-card-driven append doesn't poison cacheable.
 	graveyard []Card
-	// Banish holds cards moved into the banished zone this turn (e.g. an aura-banish-for-
-	// arcane rider).
-	Banish []Card
+	// banished holds every card in the banished zone — both prior-turn carryover and
+	// this-turn appends. Per FaB rules cards stay banished forever by default, so the
+	// per-permutation reset re-seeds from the priorBanish snapshot rather than starting
+	// empty. Unexported so the only mid-chain writer is BanishFromGraveyard, which
+	// flips CardBanished alongside the append; cross-turn carry assigns the field
+	// directly via the same-package next-turn construction. External readers consult
+	// Banished() / CardBanished; external constructors go through TurnStateSpec.
+	banished []Card
+	// CardBanished is the per-turn flag BanishFromGraveyard sets the first time it
+	// appends a card. Reset (alongside banished's per-permutation re-seed) in
+	// resetStateForPermutation so "any card banished this turn" reads true only for
+	// the current chain. Tremor of íArathael's +2{p} rider is the canary.
+	CardBanished bool
 	// ActionPoints is the chain runner's running AP pool. Seeded to 1 per permutation,
 	// decremented before each paying chain step, incremented after a Go-again card resolves.
 	// Free chain steps (Instants, Attack Reactions) cost 0; Action cards and weapon swings
@@ -284,6 +294,43 @@ func (s *TurnState) PopHandAt(i int) Card {
 	c := s.hand[i]
 	s.hand = append(s.hand[:i], s.hand[i+1:]...)
 	return c
+}
+
+// TurnStateSpec is the cross-turn input shape: every field a fresh-turn TurnState reads
+// as prior-turn state. Mirrors the unexported TurnState fields outside-package callers
+// (turntests, anything assembling a prior state) need to seed without reaching into
+// TurnState's unexported fields directly. Construct via NewTurnStateFromSpec.
+type TurnStateSpec struct {
+	// Arsenal is the card in the arsenal slot at start of turn (nil if empty).
+	Arsenal Card
+	// Auras is the live aura set carried in from the previous turn.
+	Auras []Aura
+	// Items is the live item set carried in from the previous turn.
+	Items []Item
+	// Banished is the cards-already-in-banished-zone snapshot. Cards stay banished forever
+	// by default, so this slice grows monotonically across the game.
+	Banished []Card
+	// Graveyard is the cards-already-in-graveyard snapshot from the previous turn.
+	Graveyard []Card
+	// OpponentMarked carries the Mark state on the opposing hero into this turn.
+	OpponentMarked bool
+}
+
+// NewTurnStateFromSpec builds a TurnState from a TurnStateSpec, sealing the unexported
+// fields (banish, graveyard) inside the package. Use this when an external caller needs
+// to construct a prior-turn state for EvalOneTurnForTesting; production code in package
+// sim that already has the cross-turn buffers in hand can construct TurnState directly.
+func NewTurnStateFromSpec(spec TurnStateSpec) TurnState {
+	return TurnState{
+		Arsenal:        spec.Arsenal,
+		Auras:          spec.Auras,
+		Items:          spec.Items,
+		banished:       spec.Banished,
+		graveyard:      spec.Graveyard,
+		OpponentMarked: spec.OpponentMarked,
+		cacheable:      true,
+		currentAuraIdx: -1,
+	}
 }
 
 // SetHandForTesting replaces the hand with the supplied cards. Test-only — production
@@ -482,20 +529,31 @@ func (s *TurnState) TutorFromDeck(score func(Card) int) (Card, bool) {
 }
 
 // BanishFromGraveyard removes the first graveyard card matching pred, appends it to
-// s.Banish, and returns it. Returns (nil, false) when no card matches. Flips IsCacheable
-// to false. Reads graveyard contents from a previous turn (or from this turn's plain
-// blocks the partition put there) — the chain output depends on hidden prior-turn state.
+// s.banished, and returns it. Returns (nil, false) when no card matches. Flips
+// IsCacheable to false. Reads graveyard contents from a previous turn (or from this
+// turn's plain blocks the partition put there) — the chain output depends on hidden
+// prior-turn state. Sets CardBanished so this-turn-banish riders fire correctly without
+// scanning a slice that may contain prior-turn entries.
 func (s *TurnState) BanishFromGraveyard(pred func(Card) bool) (Card, bool) {
 	s.cacheable = false
 	for i, c := range s.graveyard {
 		if !pred(c) {
 			continue
 		}
-		s.Banish = append(s.Banish, c)
+		s.banished = append(s.banished, c)
+		s.CardBanished = true
 		s.graveyard = append(s.graveyard[:i], s.graveyard[i+1:]...)
 		return c, true
 	}
 	return nil, false
+}
+
+// Banished returns the slice of cards in the banished zone, top-to-bottom (in landing
+// order). Read-only — mutate via BanishFromGraveyard. Includes prior-turn entries since
+// banished cards stay banished by default; "did anything banish THIS turn" readers
+// must use CardBanished instead.
+func (s *TurnState) Banished() []Card {
+	return s.banished
 }
 
 // RecycleFromGraveyardToTop removes the first graveyard card matching pred, prepends it to
