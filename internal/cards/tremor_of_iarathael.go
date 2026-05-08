@@ -4,8 +4,10 @@
 // Text: "If a card has been put into your banished zone this turn, Tremor of íArathael gains
 // +2{p}."
 //
-// Snapshot at Play: only banishes earlier in the chain trigger the +2{p}; later banishes don't
-// retroactively buff this attack (matches the past-tense "has been put").
+// Snapshot at Play: only banishes earlier in the chain trigger the +2{p}; later banishes
+// don't retroactively buff this attack (matches the past-tense "has been put"). Reads the
+// CardBanished flag rather than len(s.Banished()) so prior-turn entries that carry through
+// the snapshot path don't pollute the check.
 
 package cards
 
@@ -18,7 +20,7 @@ import (
 var tremorOfIArathaelTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeAttack)
 
 func tremorOfIArathaelPlay(s *sim.TurnState, self *sim.CardState) {
-	if len(s.Banish) > 0 {
+	if s.CardBanished {
 		self.BonusAttack += 2
 	}
 	n := self.DealEffectiveAttack(s)

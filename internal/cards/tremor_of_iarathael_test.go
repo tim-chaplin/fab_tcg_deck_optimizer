@@ -5,7 +5,6 @@ import (
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/cards"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
 )
 
 // TestTremorOfIArathael_NoBanishReturnsBaseAttack: empty Banish → printed power, no rider.
@@ -27,7 +26,7 @@ func TestTremorOfIArathael_NoBanishReturnsBaseAttack(t *testing.T) {
 	}
 }
 
-// TestTremorOfIArathael_BanishGrantsPlusTwo: any card in Banish flips +2{p}.
+// TestTremorOfIArathael_BanishGrantsPlusTwo: CardBanished set flips +2{p}.
 func TestTremorOfIArathael_BanishGrantsPlusTwo(t *testing.T) {
 	cases := []struct {
 		c    sim.Card
@@ -38,10 +37,10 @@ func TestTremorOfIArathael_BanishGrantsPlusTwo(t *testing.T) {
 		{cards.TremorOfIArathaelBlue{}, 2},
 	}
 	for _, tc := range cases {
-		s := sim.TurnState{Banish: []sim.Card{testutils.RedAttack{}}}
+		s := sim.TurnState{CardBanished: true}
 		tc.c.Play(&s, &sim.CardState{Card: tc.c})
 		if want := tc.base + 2; s.Value != want {
-			t.Errorf("%s: Value = %d, want %d (banish present, +2{p} rider on)", tc.c.Name(), s.Value, want)
+			t.Errorf("%s: Value = %d, want %d (CardBanished set, +2{p} rider on)", tc.c.Name(), s.Value, want)
 		}
 	}
 }

@@ -390,8 +390,8 @@ func TestIsCacheable_BanishFromGraveyardFlips(t *testing.T) {
 	if s.IsCacheable() {
 		t.Error("BanishFromGraveyard should flip IsCacheable to false")
 	}
-	if len(s.Banish) != 1 || s.Banish[0] != target {
-		t.Errorf("Banish = %v, want [target]", s.Banish)
+	if len(s.Banished()) != 1 || s.Banished()[0] != target {
+		t.Errorf("Banish = %v, want [target]", s.Banished())
 	}
 }
 

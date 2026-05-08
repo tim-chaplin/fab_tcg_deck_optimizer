@@ -88,9 +88,19 @@ type TurnState struct {
 	// non-persistent goes to graveyard" rule, DestroyAura's aura-card append) so the
 	// non-card-driven append doesn't poison cacheable.
 	graveyard []Card
-	// Banish holds cards moved into the banished zone this turn (e.g. an aura-banish-for-
-	// arcane rider).
-	Banish []Card
+	// banish holds cards moved into the banished zone this turn (e.g. an aura-banish-for-
+	// arcane rider). Unexported so card subpackages can only reach it through the
+	// Banished() / BanishFromGraveyard accessors. The slice is reset per permutation but
+	// CarryState ferries the winning permutation's contents across to the next turn's
+	// snapshot — readers that need "did anything banish THIS turn" should consult the
+	// CardBanished bool below, not len(banish), since prior-turn entries can land here
+	// via future seeding paths.
+	banish []Card
+	// CardBanished is the per-turn flag the BanishFromGraveyard accessor sets the first
+	// time it appends a card. Reset alongside banish in resetStateForPermutation so
+	// "any card banished this turn" reads true only for the current chain. Tremor of
+	// íArathael's +2{p} rider is the canary.
+	CardBanished bool
 	// ActionPoints is the chain runner's running AP pool. Seeded to 1 per permutation,
 	// decremented before each paying chain step, incremented after a Go-again card resolves.
 	// Free chain steps (Instants, Attack Reactions) cost 0; Action cards and weapon swings
@@ -295,6 +305,14 @@ func (s *TurnState) SetHandForTesting(cards []Card) {
 	s.hand = cards
 }
 
+// SetBanishedForTesting replaces the banish slice with the supplied cards and leaves
+// CardBanished alone. Test-only — production banishes go through BanishFromGraveyard
+// (which appends and sets CardBanished). Lets tests stage a "card already in banished
+// zone from a prior turn" scenario.
+func (s *TurnState) SetBanishedForTesting(cards []Card) {
+	s.banish = cards
+}
+
 // SetCurrentAuraIdxForTesting sets currentAuraIdx so DestroyAura resolves to the
 // expected slot when a test invokes an aura handler directly. Test-only — production
 // fire loops maintain currentAuraIdx themselves.
@@ -482,20 +500,31 @@ func (s *TurnState) TutorFromDeck(score func(Card) int) (Card, bool) {
 }
 
 // BanishFromGraveyard removes the first graveyard card matching pred, appends it to
-// s.Banish, and returns it. Returns (nil, false) when no card matches. Flips IsCacheable
+// s.banish, and returns it. Returns (nil, false) when no card matches. Flips IsCacheable
 // to false. Reads graveyard contents from a previous turn (or from this turn's plain
 // blocks the partition put there) — the chain output depends on hidden prior-turn state.
+// Sets CardBanished so this-turn-banish riders fire correctly without scanning a slice
+// that may contain prior-turn entries.
 func (s *TurnState) BanishFromGraveyard(pred func(Card) bool) (Card, bool) {
 	s.cacheable = false
 	for i, c := range s.graveyard {
 		if !pred(c) {
 			continue
 		}
-		s.Banish = append(s.Banish, c)
+		s.banish = append(s.banish, c)
+		s.CardBanished = true
 		s.graveyard = append(s.graveyard[:i], s.graveyard[i+1:]...)
 		return c, true
 	}
 	return nil, false
+}
+
+// Banished returns the slice of cards moved into the banished zone, top-to-bottom (in
+// landing order). Read-only — mutate via BanishFromGraveyard. May contain prior-turn
+// entries depending on how the carry path is wired; "did anything banish THIS turn"
+// readers should consult CardBanished instead.
+func (s *TurnState) Banished() []Card {
+	return s.banish
 }
 
 // RecycleFromGraveyardToTop removes the first graveyard card matching pred, prepends it to

@@ -55,6 +55,8 @@ func bestAttackWithWeapons(hero Hero, weapons []Weapon, attackers, defenders, pi
 		priorAuras:          prior.Auras,
 		priorItems:          prior.Items,
 		priorOpponentMarked: prior.OpponentMarked,
+		priorBanish:         prior.banish,
+		priorGraveyard:      prior.graveyard,
 		// defenderAuras shares backing with bufs.defenderAurasBacking so the per-partition
 		// capture is alloc-free across Best calls.
 		defenderAuras: bufs.defenderAurasBacking[:0],
@@ -327,6 +329,17 @@ type sequenceContext struct {
 	// priorOpponentMarked seeds TurnState.OpponentMarked at each permutation's start —
 	// non-zero when the previous turn's chain left a Mark on the opposing hero.
 	priorOpponentMarked bool
+	// priorBanish is the cards-already-in-banished-zone snapshot from the previous turn.
+	// Each permutation seeds state.banish with a fresh copy so "count cards in your
+	// banished zone" readers see the carried entries; CardBanished stays reset so
+	// "did anything banish THIS turn" stays false until BanishFromGraveyard fires.
+	priorBanish []Card
+	// priorGraveyard is the cards-already-in-graveyard snapshot from the previous turn.
+	// Each permutation seeds state.graveyard with a fresh copy AHEAD of this turn's
+	// defenders (which the partition's defendersDamage loop has already deposited) so
+	// graveyard-scanning riders (BanishFromGraveyard, Sigil of Silphidae's enter
+	// trigger) see prior-turn entries alongside same-turn blocks.
+	priorGraveyard []Card
 	// activatedAbilities is the unified weapon + item ability list materialised at the
 	// top of bestAttackWithWeapons — weapons' Ability() Cards followed by per-priorItem
 	// ability instances (one per Count, capped at perItemAbilityCap). The wmask iterates
@@ -526,8 +539,10 @@ func (ctx *sequenceContext) resetStateForPermutation() {
 	s.hand = append(bufs.handBacking[:0], ctx.handStart...)
 	s.deck = ctx.deck
 	s.Arsenal = ctx.arsenalAtChainStart
-	s.graveyard = append(bufs.graveBacking[:0], ctx.defenders...)
-	s.Banish = bufs.banishBacking[:0]
+	s.graveyard = append(bufs.graveBacking[:0], ctx.priorGraveyard...)
+	s.graveyard = append(s.graveyard, ctx.defenders...)
+	s.banish = append(bufs.banishBacking[:0], ctx.priorBanish...)
+	s.CardBanished = false
 	s.ActionPoints = 1
 	s.ArcaneDamageDealt = false
 	s.OpponentMarked = ctx.priorOpponentMarked

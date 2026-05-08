@@ -54,8 +54,8 @@ func TestWeepingBattleground_BanishesAura(t *testing.T) {
 	if len(g) != 1 || g[0].ID() != nonAura.ID() {
 		t.Errorf("want graveyard with only non-aura left, got %+v", g)
 	}
-	if len(s.Banish) != 1 || s.Banish[0].ID() != aura.ID() {
-		t.Errorf("want banish = [aura], got %+v", s.Banish)
+	if len(s.Banished()) != 1 || s.Banished()[0].ID() != aura.ID() {
+		t.Errorf("want banish = [aura], got %+v", s.Banished())
 	}
 }
 
@@ -70,8 +70,8 @@ func TestWeepingBattleground_OnlyOneAuraBanished(t *testing.T) {
 	if g := s.Graveyard(); len(g) != 1 {
 		t.Fatalf("want one aura left in graveyard, got %d", len(g))
 	}
-	if len(s.Banish) != 1 {
-		t.Fatalf("want one aura banished, got %d", len(s.Banish))
+	if len(s.Banished()) != 1 {
+		t.Fatalf("want one aura banished, got %d", len(s.Banished()))
 	}
 }
 
@@ -93,8 +93,8 @@ func TestWeepingBattleground_SecondCopyAlsoFires(t *testing.T) {
 	if g := s.Graveyard(); len(g) != 0 {
 		t.Errorf("want empty graveyard after two banishes, got %d", len(g))
 	}
-	if len(s.Banish) != 2 {
-		t.Errorf("want 2 banished, got %d", len(s.Banish))
+	if len(s.Banished()) != 2 {
+		t.Errorf("want 2 banished, got %d", len(s.Banished()))
 	}
 }
 
