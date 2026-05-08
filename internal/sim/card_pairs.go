@@ -109,7 +109,7 @@ type pairDedupeKey struct {
 // maxCopies enforcement is NOT applied here; AllMutations runs filterMaxCopiesViolations on
 // the combined output so single-slot and pair candidates share one cap-checking pass.
 //
-// Returned decks have zero Stats and share no backing slices with d or each other.
+// Returned decks share no backing slices with d or each other.
 func pairSwapMutations(d *Deck, legal func(Card) bool) []Mutation {
 	if len(cardPairs) == 0 || len(d.Cards) < 2 {
 		return nil

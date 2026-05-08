@@ -43,7 +43,7 @@ type Mutation struct {
 // candidate list — both single-slot and pair generators emit cap-blind candidates and the
 // shared filter strips any whose result deck exceeds the per-printing limit.
 //
-// Returned decks have zero Stats and share no backing slices with d or each other.
+// Returned decks share no backing slices with d or each other.
 func AllMutations(d *Deck, maxCopies int, legal func(Card) bool) []Mutation {
 	out := weaponLoadoutMutations(d)
 	out = append(out, singleSwapMutations(d, legal)...)

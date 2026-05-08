@@ -67,7 +67,8 @@ func runEval(outPath string, shuffles int, precision float64, mp sim.Matchup, ma
 	if !printOnly {
 		evaluateAndPersist(outPath, shuffles, precision, mp, maxCopies, seed, fmtValue, debug)
 	}
-	printLoadedDeck(mustLoadDeck(outPath), brief)
+	d, stats := mustLoadDeck(outPath)
+	printLoadedDeck(d, stats, brief)
 }
 
 // evaluateAndPersist runs the deck eval — adaptive when shuffles is negative (capped at
@@ -82,34 +83,35 @@ func runEval(outPath string, shuffles int, precision float64, mp sim.Matchup, ma
 // per-Evaluator cache stats are always available. debug=true prints them after the run;
 // otherwise they're computed-but-discarded — the cache itself runs unconditionally because
 // it speeds up the eval regardless of whether the operator wants the telemetry.
-func evaluateAndPersist(outPath string, shuffles int, precision float64, mp sim.Matchup, maxCopies int, seed int64, fmtValue deckformat.Format, debug bool) *sim.Deck {
-	loaded := mustLoadDeck(outPath)
+func evaluateAndPersist(outPath string, shuffles int, precision float64, mp sim.Matchup, maxCopies int, seed int64, fmtValue deckformat.Format, debug bool) (*sim.Deck, sim.DeckStats) {
+	loaded, loadedStats := mustLoadDeck(outPath)
 	// Wrap the loaded hero/weapons/cards in a fresh Deck so the eval's stats start from zero
-	// instead of accumulating on top of the persisted Stats. Sideboard and Equipment carry
+	// instead of accumulating on top of the persisted ones. Sideboard and Equipment carry
 	// over verbatim — the sim ignores both, but the post-eval writeDeck round-trips them
 	// back to disk so the user's hand-managed lists aren't dropped by a re-score.
 	d := sim.New(loaded.Hero, loaded.Weapons, loaded.Cards)
 	d.Sideboard = loaded.Sideboard
 	d.Equipment = loaded.Equipment
 	rng := rand.New(rand.NewSource(seed))
-	savedAvg := loaded.Stats.Mean()
+	savedAvg := loadedStats.Mean()
 	sanitizeLoadedDeck(d, maxCopies, rng, fmtValue.IsLegal)
 	// Parallel-shuffle eval: workers fan the shuffle loop across all available cores,
 	// sharing the cache via the RWMutex-protected lookup path. fabsim eval is the
 	// flagship single-deck workload — getting from 1.8s to ~0.5s on 8 workers cuts
 	// re-score wall-clock noticeably.
 	start := time.Now()
-	_, ev := evaluateParallel(d, shuffles, precision, mp, rng)
+	stats, ev := evaluateParallel(d, shuffles, precision, mp, rng)
 	elapsed := time.Since(start)
+	freshAvg := stats.Mean()
 	fmt.Fprintf(os.Stderr, "eval: avg %.3f → %.3f (delta %+.3f) in %s (%s shuffles); rewriting %s\n",
-		savedAvg, d.Stats.Mean(), d.Stats.Mean()-savedAvg, elapsed.Round(time.Millisecond), commaInt(d.Stats.Runs), outPath)
+		savedAvg, freshAvg, freshAvg-savedAvg, elapsed.Round(time.Millisecond), commaInt(stats.Runs), outPath)
 	if debug {
 		printCacheStats(ev.CacheStats())
 	}
-	if err := writeDeck(d, outPath); err != nil {
+	if err := writeDeck(d, stats, outPath); err != nil {
 		die("%v", err)
 	}
-	return d
+	return d, stats
 }
 
 // printCacheStats writes the hand-eval cache counters to stderr as a single annotated
@@ -142,10 +144,10 @@ func safePct(num, denom int) float64 {
 
 // printLoadedDeck dispatches between the brief summary and the full printBestDeck dump;
 // used by both the simulate path and -print-only.
-func printLoadedDeck(d *sim.Deck, brief bool) {
+func printLoadedDeck(d *sim.Deck, s sim.DeckStats, brief bool) {
 	if brief {
-		printDeckSummary(d)
+		printDeckSummary(d, s)
 		return
 	}
-	printBestDeck(d)
+	printBestDeck(d, s)
 }

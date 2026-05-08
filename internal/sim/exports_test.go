@@ -152,7 +152,7 @@ func PairAddAllowed(c Card, legal func(Card) bool) bool { return pairAddAllowed(
 
 // EvaluateImplForTest re-exports the unexported (*Deck).evaluateImpl as an exported method
 // for sim_test consumers exercising the eval-with-stop-condition path directly.
-func (d *Deck) EvaluateImplForTest(maxRuns int, mp Matchup, rng *rand.Rand, ev *Evaluator, stop func(stats *Stats, runs int) bool) Stats {
+func (d *Deck) EvaluateImplForTest(maxRuns int, mp Matchup, rng *rand.Rand, ev *Evaluator, stop func(stats *DeckStats, runs int) bool) DeckStats {
 	return d.evaluateImpl(maxRuns, mp, rng, ev, stop)
 }
 
@@ -166,12 +166,12 @@ const AdaptiveCheckInterval = adaptiveCheckInterval
 const AdaptiveShufflesCap = adaptiveShufflesCap
 
 // MakeAdaptiveStop re-exports makeAdaptiveStop for sim_test consumers.
-func MakeAdaptiveStop(targetSE float64) func(stats *Stats, runs int) bool {
+func MakeAdaptiveStop(targetSE float64) func(stats *DeckStats, runs int) bool {
 	return makeAdaptiveStop(targetSE)
 }
 
 // MeanStandardError re-exports meanStandardError for sim_test consumers.
-func MeanStandardError(stats *Stats) float64 { return meanStandardError(stats) }
+func MeanStandardError(stats *DeckStats) float64 { return meanStandardError(stats) }
 
 // ProcessAurasAtStartOfTurn re-exports processAurasAtStartOfTurn for sim_test
 // consumers exercising the start-of-turn aura-trigger pipeline in isolation.

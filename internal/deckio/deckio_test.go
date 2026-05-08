@@ -14,13 +14,13 @@ import (
 func TestMarshalUnmarshalRoundTrip(t *testing.T) {
 	rng := rand.New(rand.NewSource(1))
 	d := sim.Random(heroes.Viserai{}, 40, 2, rng, nil)
-	d.Evaluate(50, sim.Matchup{IncomingDamage: 4}, rng)
+	stats := d.Evaluate(50, sim.Matchup{IncomingDamage: 4}, rng)
 
-	data, err := Marshal(d)
+	data, err := Marshal(d, stats)
 	if err != nil {
 		t.Fatalf("Marshal: %v", err)
 	}
-	got, err := Unmarshal(data)
+	got, gotStats, err := Unmarshal(data)
 	if err != nil {
 		t.Fatalf("Unmarshal: %v", err)
 	}
@@ -44,11 +44,11 @@ func TestMarshalUnmarshalRoundTrip(t *testing.T) {
 	if !reflect.DeepEqual(gotCounts, wantCounts) {
 		t.Errorf("card counts: got %v want %v", gotCounts, wantCounts)
 	}
-	if !reflect.DeepEqual(got.Stats.FirstCycle, d.Stats.FirstCycle) {
-		t.Errorf("first cycle: got %+v want %+v", got.Stats.FirstCycle, d.Stats.FirstCycle)
+	if !reflect.DeepEqual(gotStats.FirstCycle, stats.FirstCycle) {
+		t.Errorf("first cycle: got %+v want %+v", gotStats.FirstCycle, stats.FirstCycle)
 	}
-	if got.Stats.Best.Summary.Value != d.Stats.Best.Summary.Value {
-		t.Errorf("best value: got %d want %d", got.Stats.Best.Summary.Value, d.Stats.Best.Summary.Value)
+	if gotStats.Best.Summary.Value != stats.Best.Summary.Value {
+		t.Errorf("best value: got %d want %d", gotStats.Best.Summary.Value, stats.Best.Summary.Value)
 	}
 }
 
@@ -57,26 +57,26 @@ func TestMarshalUnmarshalRoundTrip(t *testing.T) {
 func TestRoundTrip_PreservesPerCardMarginal(t *testing.T) {
 	rng := rand.New(rand.NewSource(13))
 	d := sim.Random(heroes.Viserai{}, 40, 2, rng, nil)
-	d.Evaluate(50, sim.Matchup{IncomingDamage: 4}, rng)
-	if len(d.Stats.PerCardMarginal) == 0 {
+	stats := d.Evaluate(50, sim.Matchup{IncomingDamage: 4}, rng)
+	if len(stats.PerCardMarginal) == 0 {
 		t.Fatalf("baseline deck produced no PerCardMarginal entries; test can't differentiate good from bad")
 	}
 
-	data, err := Marshal(d)
+	data, err := Marshal(d, stats)
 	if err != nil {
 		t.Fatalf("Marshal: %v", err)
 	}
-	got, err := Unmarshal(data)
+	_, gotStats, err := Unmarshal(data)
 	if err != nil {
 		t.Fatalf("Unmarshal: %v", err)
 	}
 
-	if len(got.Stats.PerCardMarginal) != len(d.Stats.PerCardMarginal) {
+	if len(gotStats.PerCardMarginal) != len(stats.PerCardMarginal) {
 		t.Fatalf("PerCardMarginal entry count: got %d want %d",
-			len(got.Stats.PerCardMarginal), len(d.Stats.PerCardMarginal))
+			len(gotStats.PerCardMarginal), len(stats.PerCardMarginal))
 	}
-	for id, want := range d.Stats.PerCardMarginal {
-		gotEntry, ok := got.Stats.PerCardMarginal[id]
+	for id, want := range stats.PerCardMarginal {
+		gotEntry, ok := gotStats.PerCardMarginal[id]
 		if !ok {
 			t.Errorf("PerCardMarginal missing entry for %s after round trip", registry.GetCard(id).Name())
 			continue
@@ -121,25 +121,27 @@ func TestRoundTrip_PreservesBestTurnLog(t *testing.T) {
 			"Auras: 1 Runechant",
 		},
 	}
-	d.Stats.Best = sim.BestTurn{
-		Summary: sim.TurnSummary{Value: 21},
-		Log:     want,
+	stats := sim.DeckStats{
+		Best: sim.BestTurn{
+			Summary: sim.TurnSummary{Value: 21},
+			Log:     want,
+		},
 	}
 
-	data, err := Marshal(d)
+	data, err := Marshal(d, stats)
 	if err != nil {
 		t.Fatalf("Marshal: %v", err)
 	}
-	got, err := Unmarshal(data)
+	_, gotStats, err := Unmarshal(data)
 	if err != nil {
 		t.Fatalf("Unmarshal: %v", err)
 	}
 
-	if !reflect.DeepEqual(got.Stats.Best.Log, want) {
-		t.Errorf("Log: got %+v\n want %+v", got.Stats.Best.Log, want)
+	if !reflect.DeepEqual(gotStats.Best.Log, want) {
+		t.Errorf("Log: got %+v\n want %+v", gotStats.Best.Log, want)
 	}
-	if got.Stats.Best.Summary.Value != 21 {
-		t.Errorf("Value: got %d want 21", got.Stats.Best.Summary.Value)
+	if gotStats.Best.Summary.Value != 21 {
+		t.Errorf("Value: got %d want 21", gotStats.Best.Summary.Value)
 	}
 }
 
@@ -150,11 +152,11 @@ func TestRoundTrip_PreservesSideboard(t *testing.T) {
 	d := sim.Random(heroes.Viserai{}, 40, 2, rng, nil)
 	d.Sideboard = []string{"Aether Slash [R]", "Aether Slash [R]", "Arcanic Spike [B]"}
 
-	data, err := Marshal(d)
+	data, err := Marshal(d, sim.DeckStats{})
 	if err != nil {
 		t.Fatalf("Marshal: %v", err)
 	}
-	got, err := Unmarshal(data)
+	got, _, err := Unmarshal(data)
 	if err != nil {
 		t.Fatalf("Unmarshal: %v", err)
 	}
@@ -175,7 +177,7 @@ func TestRoundTrip_PreservesSideboard(t *testing.T) {
 func TestMarshal_OmitsEmptySideboard(t *testing.T) {
 	rng := rand.New(rand.NewSource(1))
 	d := sim.Random(heroes.Viserai{}, 40, 2, rng, nil)
-	data, err := Marshal(d)
+	data, err := Marshal(d, sim.DeckStats{})
 	if err != nil {
 		t.Fatalf("Marshal: %v", err)
 	}
@@ -195,7 +197,7 @@ func TestUnmarshal_SideboardAcceptsAnyName(t *testing.T) {
   "pitch": {"red": 0, "yellow": 0, "blue": 0},
   "stats": {"avg": 0, "runs": 0, "hands": 0, "total_value": 0, "first_cycle": {"Hands": 0, "Total": 0}, "second_cycle": {"Hands": 0, "Total": 0}, "best": {"hand": [], "roles": [], "weapons": [], "value": 0, "starting_runechants": 0}}
 }`
-	d, err := Unmarshal([]byte(raw))
+	d, _, err := Unmarshal([]byte(raw))
 	if err != nil {
 		t.Fatalf("Unmarshal: %v", err)
 	}
@@ -213,11 +215,11 @@ func TestRoundTrip_PreservesEquipment(t *testing.T) {
 	d := sim.Random(heroes.Viserai{}, 40, 2, rng, nil)
 	d.Equipment = []string{"Beckoning Haunt", "Nullrune Boots", "Blade Beckoner Helm"}
 
-	data, err := Marshal(d)
+	data, err := Marshal(d, sim.DeckStats{})
 	if err != nil {
 		t.Fatalf("Marshal: %v", err)
 	}
-	got, err := Unmarshal(data)
+	got, _, err := Unmarshal(data)
 	if err != nil {
 		t.Fatalf("Unmarshal: %v", err)
 	}
@@ -233,7 +235,7 @@ func TestRoundTrip_PreservesEquipment(t *testing.T) {
 func TestMarshal_OmitsEmptyEquipment(t *testing.T) {
 	rng := rand.New(rand.NewSource(1))
 	d := sim.Random(heroes.Viserai{}, 40, 2, rng, nil)
-	data, err := Marshal(d)
+	data, err := Marshal(d, sim.DeckStats{})
 	if err != nil {
 		t.Fatalf("Marshal: %v", err)
 	}

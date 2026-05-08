@@ -19,19 +19,19 @@ func TestEvaluate_BestTurnStartingAurasIsPreHandCarryover(t *testing.T) {
 	read := GetCard(ids.ReadTheRunesRed)
 	d := New(heroes.Viserai{}, nil, []Card{read, read, read, read})
 
-	d.Evaluate(1, Matchup{}, rand.New(rand.NewSource(1)))
+	stats := d.Evaluate(1, Matchup{}, rand.New(rand.NewSource(1)))
 
-	if len(d.Stats.Best.Summary.BestLine) == 0 {
+	if len(stats.Best.Summary.BestLine) == 0 {
 		t.Fatalf("expected Best to be populated after Evaluate")
 	}
 	// Sanity: the hand creates runechants — without that, the assertion below couldn't
 	// distinguish "no carryover" from "no token tracking happening at all".
-	if d.Stats.Best.Summary.Value == 0 {
+	if stats.Best.Summary.Value == 0 {
 		t.Fatalf("expected nonzero Value from a hand of Read the Runes; got 0")
 	}
-	if len(d.Stats.Best.StartingAuras) != 0 {
+	if len(stats.Best.StartingAuras) != 0 {
 		t.Errorf("StartingAuras = %v, want empty (first hand of the run has no previous-turn carryover)",
-			d.Stats.Best.StartingAuras)
+			stats.Best.StartingAuras)
 	}
 }
 
@@ -40,12 +40,12 @@ func TestEvaluate_BestTurnStartingAurasIsPreHandCarryover(t *testing.T) {
 func TestEvaluate_BestTurnSnapshotsState(t *testing.T) {
 	snatch := GetCard(ids.SnatchRed)
 	d := New(heroes.Viserai{}, nil, []Card{snatch, snatch, snatch, snatch, snatch, snatch, snatch, snatch})
-	d.Evaluate(1, Matchup{}, rand.New(rand.NewSource(1)))
+	stats := d.Evaluate(1, Matchup{}, rand.New(rand.NewSource(1)))
 
-	if len(d.Stats.Best.Summary.BestLine) == 0 {
+	if len(stats.Best.Summary.BestLine) == 0 {
 		t.Fatalf("expected Best to be populated after Evaluate")
 	}
-	state := d.Stats.Best.Summary.State
+	state := stats.Best.Summary.State
 	if len(state.Graveyard) == 0 {
 		t.Errorf("State.Graveyard is empty; want the played Snatch in graveyard")
 	}
@@ -74,20 +74,20 @@ func TestEvaluate_PerCardMarginalCoversEveryHand(t *testing.T) {
 	// 4 of each so Snatch isn't pinned to a single hand and the absent bucket gets exercised.
 	deckCards := []Card{read, read, read, read, snatch, snatch, snatch, snatch}
 	d := New(heroes.Viserai{}, nil, deckCards)
-	d.Evaluate(20, Matchup{}, rand.New(rand.NewSource(1)))
+	stats := d.Evaluate(20, Matchup{}, rand.New(rand.NewSource(1)))
 
-	if d.Stats.PerCardMarginal == nil {
+	if stats.PerCardMarginal == nil {
 		t.Fatalf("PerCardMarginal should be initialised after Evaluate")
 	}
 	for _, id := range []ids.CardID{ids.ReadTheRunesRed, ids.SnatchRed} {
-		m, ok := d.Stats.PerCardMarginal[id]
+		m, ok := stats.PerCardMarginal[id]
 		if !ok {
 			t.Errorf("PerCardMarginal missing entry for %s", GetCard(id).Name())
 			continue
 		}
-		if got := m.PresentHands + m.AbsentHands; got != d.Stats.Hands {
+		if got := m.PresentHands + m.AbsentHands; got != stats.Hands {
 			t.Errorf("%s: PresentHands+AbsentHands = %d, want Stats.Hands = %d (every hand must end up in exactly one bucket)",
-				GetCard(id).Name(), got, d.Stats.Hands)
+				GetCard(id).Name(), got, stats.Hands)
 		}
 		if m.PresentHands == 0 {
 			t.Errorf("%s: PresentHands = 0 — this card should have been in at least one dealt hand across 20 shuffles",
@@ -100,15 +100,15 @@ func TestEvaluate_PerCardMarginalCoversEveryHand(t *testing.T) {
 func TestEvaluate_PerCardMarginalAlwaysPresent(t *testing.T) {
 	read := GetCard(ids.ReadTheRunesRed)
 	d := New(heroes.Viserai{}, nil, []Card{read, read, read, read, read, read, read, read})
-	d.Evaluate(5, Matchup{}, rand.New(rand.NewSource(1)))
+	stats := d.Evaluate(5, Matchup{}, rand.New(rand.NewSource(1)))
 
-	m := d.Stats.PerCardMarginal[ids.ReadTheRunesRed]
+	m := stats.PerCardMarginal[ids.ReadTheRunesRed]
 	if m.AbsentHands != 0 {
 		t.Errorf("AbsentHands = %d, want 0 (single-card deck means card is always present)", m.AbsentHands)
 	}
-	if m.PresentHands != d.Stats.Hands {
+	if m.PresentHands != stats.Hands {
 		t.Errorf("PresentHands = %d, want %d (every hand contains the only card in the deck)",
-			m.PresentHands, d.Stats.Hands)
+			m.PresentHands, stats.Hands)
 	}
 	if m.Marginal() != 0 {
 		t.Errorf("Marginal() = %v, want 0 (no absent comparison possible)", m.Marginal())
@@ -124,34 +124,34 @@ func TestEvaluate_HeldCardDefersDrawToNextTurn(t *testing.T) {
 		deckCards[i] = cards.ToughenUpBlue{}
 	}
 	d := New(testutils.Hero{Intel: 1}, nil, deckCards)
-	d.Evaluate(1, Matchup{}, rand.New(rand.NewSource(1)))
+	stats := d.Evaluate(1, Matchup{}, rand.New(rand.NewSource(1)))
 
-	if d.Stats.Hands != 2 {
-		t.Errorf("Stats.Hands = %d, want 2 (turn 1 arsenals the card, turn 2 holds its successor, turn 3 can't draw)", d.Stats.Hands)
+	if stats.Hands != 2 {
+		t.Errorf("Stats.Hands = %d, want 2 (turn 1 arsenals the card, turn 2 holds its successor, turn 3 can't draw)", stats.Hands)
 	}
 	// Best captures turn 1 (first hand with a recorded play). That hand's single card got
 	// promoted from Held to Arsenal by the post-hoc upgrade.
-	if len(d.Stats.Best.Summary.BestLine) == 0 {
+	if len(stats.Best.Summary.BestLine) == 0 {
 		t.Fatalf("expected Best to be populated after at least one hand")
 	}
-	if d.Stats.Best.Summary.BestLine[0].Role != Arsenal {
-		t.Errorf("Best.Play.Roles[0] = %s, want ARSENAL (empty slot on turn 1 → Held promoted)", d.Stats.Best.Summary.BestLine[0].Role)
+	if stats.Best.Summary.BestLine[0].Role != Arsenal {
+		t.Errorf("Best.Play.Roles[0] = %s, want ARSENAL (empty slot on turn 1 → Held promoted)", stats.Best.Summary.BestLine[0].Role)
 	}
 }
 
 // Tests that a card promoted to Arsenal on one turn becomes arsenalCardIn on the next.
 func TestEvaluate_ArsenalPersistsAcrossTurns(t *testing.T) {
 	d := New(testutils.Hero{Intel: 1}, nil, []Card{cards.ToughenUpBlue{}, cards.ToughenUpBlue{}})
-	d.Evaluate(1, Matchup{IncomingDamage: 4}, rand.New(rand.NewSource(1)))
+	stats := d.Evaluate(1, Matchup{IncomingDamage: 4}, rand.New(rand.NewSource(1)))
 
 	// Best captures turn 2 — only turn with Value > 0 (arsenal DR fires).
-	if d.Stats.Best.Summary.Value != 4 {
-		t.Errorf("Best.Play.Value = %d, want 4 (turn 2 plays arsenal DR, pitches hand DR to pay; prevents 4)", d.Stats.Best.Summary.Value)
+	if stats.Best.Summary.Value != 4 {
+		t.Errorf("Best.Play.Value = %d, want 4 (turn 2 plays arsenal DR, pitches hand DR to pay; prevents 4)", stats.Best.Summary.Value)
 	}
 	// Turn 1: arsenal the drawn card. Turn 2: play arsenal DR (paid by pitching drawn card).
 	// Turn 3: draw the recycled pitched card, arsenal it (deck is then empty). Loop ends.
-	if d.Stats.Hands != 3 {
-		t.Errorf("Stats.Hands = %d, want 3", d.Stats.Hands)
+	if stats.Hands != 3 {
+		t.Errorf("Stats.Hands = %d, want 3", stats.Hands)
 	}
 }
 
@@ -164,8 +164,9 @@ func TestEvaluate_TerminatesAfterTwoCycles(t *testing.T) {
 	}
 	d := New(heroes.Viserai{}, []Weapon{weapons.ReapingBlade{}}, deckCards)
 	done := make(chan struct{})
+	var stats DeckStats
 	go func() {
-		d.Evaluate(1, Matchup{}, rand.New(rand.NewSource(1)))
+		stats = d.Evaluate(1, Matchup{}, rand.New(rand.NewSource(1)))
 		close(done)
 	}()
 	select {
@@ -176,9 +177,9 @@ func TestEvaluate_TerminatesAfterTwoCycles(t *testing.T) {
 	// Two cycles of a 40-card / 4-hand-size deck is exactly 20 hands.
 	handsPerCycle := len(deckCards) / heroes.Viserai{}.Intelligence()
 	maxHands := 2 * handsPerCycle
-	if d.Stats.Hands != maxHands {
+	if stats.Hands != maxHands {
 		t.Errorf("Stats.Hands = %d, want exactly %d (steady-state pitched-pitch loop hits the cap)",
-			d.Stats.Hands, maxHands)
+			stats.Hands, maxHands)
 	}
 }
 
@@ -227,7 +228,7 @@ func TestEvaluateAdaptive_RespectsMaxRunsCapWhenSEUnreachable(t *testing.T) {
 func TestMeanStandardError_FromHistogram(t *testing.T) {
 	// Three turns: values 10, 12, 14. Mean = 12, sample variance = ((10-12)^2 + (12-12)^2 +
 	// (14-12)^2) / (3-1) = 8/2 = 4. SE = sqrt(4/3) ≈ 1.1547.
-	stats := &Stats{
+	stats := &DeckStats{
 		Hands:      3,
 		TotalValue: 36,
 		Histogram:  map[int]int{10: 1, 12: 1, 14: 1},

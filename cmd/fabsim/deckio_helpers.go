@@ -19,30 +19,31 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 )
 
-// loadExisting reads and deserializes the deck at path. Returns (nil, 0, nil) when the file
-// doesn't exist — the caller treats that as "no previous best, generate a fresh deck."
-// Returns (nil, 0, err) when the file exists but can't be read or parsed: callers must NOT
+// loadExisting reads and deserializes the deck at path. Returns (nil, zero, nil) when the
+// file doesn't exist — the caller treats that as "no previous best, generate a fresh deck."
+// Returns (nil, zero, err) when the file exists but can't be read or parsed: callers must NOT
 // treat that as "missing" or they'd silently overwrite a corrupt file with a random deck
 // (looping wrapper scripts would clobber a converged deck after a Ctrl-C mid-write).
-func loadExisting(path string) (*sim.Deck, float64, error) {
+func loadExisting(path string) (*sim.Deck, sim.DeckStats, error) {
 	data, err := os.ReadFile(path)
 	if err != nil {
 		if errors.Is(err, os.ErrNotExist) {
-			return nil, 0, nil
+			return nil, sim.DeckStats{}, nil
 		}
-		return nil, 0, fmt.Errorf("read %s: %w", path, err)
+		return nil, sim.DeckStats{}, fmt.Errorf("read %s: %w", path, err)
 	}
-	d, err := deckio.Unmarshal(data)
+	d, stats, err := deckio.Unmarshal(data)
 	if err != nil {
-		return nil, 0, fmt.Errorf("parse %s: %w (file exists but isn't a valid deck — "+
+		return nil, sim.DeckStats{}, fmt.Errorf("parse %s: %w (file exists but isn't a valid deck — "+
 			"refusing to silently overwrite; inspect the file and delete it manually if you "+
 			"want a fresh start)", path, err)
 	}
-	return d, d.Stats.Mean(), nil
+	return d, stats, nil
 }
 
-// writeDeck persists d as JSON at path plus a sibling fabrary-format .txt ("x.json" →
-// "x.txt") so the saved deck is ready to paste into fabrary.net without a second export step.
+// writeDeck persists d (with the supplied accumulated stats) as JSON at path plus a sibling
+// fabrary-format .txt ("x.json" → "x.txt") so the saved deck is ready to paste into
+// fabrary.net without a second export step.
 //
 // ApplyDefaults runs first so both files carry the hardcoded default equipment / sideboard
 // loadout the user runs on every deck. Persisting the defaults into the JSON (not just the
@@ -52,9 +53,9 @@ func loadExisting(path string) (*sim.Deck, float64, error) {
 // Both files are written atomically via writeFileAtomic: data lands in <path>.tmp first,
 // then os.Rename swaps it into place, so a Ctrl-C mid-write can never leave the destination
 // empty or partially written.
-func writeDeck(d *sim.Deck, path string) error {
+func writeDeck(d *sim.Deck, stats sim.DeckStats, path string) error {
 	d.ApplyDefaults()
-	data, err := deckio.Marshal(d)
+	data, err := deckio.Marshal(d, stats)
 	if err != nil {
 		return fmt.Errorf("marshal: %w", err)
 	}
@@ -120,19 +121,19 @@ func sanitizeLoadedDeck(d *sim.Deck, maxCopies int, rng *rand.Rand, legal func(s
 	return replaced
 }
 
-// mustLoadDeck loads the deck at path or dies. For subcommands that always operate on an
-// existing deck (eval, diff), both "missing" and "corrupt" are fatal. anneal handles the
-// distinction itself: "missing" is a valid input ("no deck yet, generate one") while
-// "corrupt" needs the loud refusal to overwrite.
-func mustLoadDeck(path string) *sim.Deck {
-	d, _, err := loadExisting(path)
+// mustLoadDeck loads the deck (and its persisted stats) at path or dies. For subcommands
+// that always operate on an existing deck (eval, diff), both "missing" and "corrupt" are
+// fatal. anneal handles the distinction itself: "missing" is a valid input ("no deck yet,
+// generate one") while "corrupt" needs the loud refusal to overwrite.
+func mustLoadDeck(path string) (*sim.Deck, sim.DeckStats) {
+	d, stats, err := loadExisting(path)
 	if err != nil {
 		die("%v", err)
 	}
 	if d == nil {
 		die("could not load deck from %s (file not found)", path)
 	}
-	return d
+	return d, stats
 }
 
 // resolveDeckPath is the positional-arg counterpart to anneal's -deck flag. Subcommands that
@@ -151,7 +152,7 @@ func resolveDeckPath(name string) string {
 // budget otherwise. precision is the adaptive target (SE ≤ precision/4); ignored when
 // shuffles >= 0. Returns the Evaluator alongside the stats so callers that want cache-stats
 // telemetry (eval -debug) can read it off the returned ev.
-func evaluateParallel(d *sim.Deck, shuffles int, precision float64, mp sim.Matchup, rng *rand.Rand) (sim.Stats, *sim.Evaluator) {
+func evaluateParallel(d *sim.Deck, shuffles int, precision float64, mp sim.Matchup, rng *rand.Rand) (sim.DeckStats, *sim.Evaluator) {
 	ev := sim.NewEvaluatorParallel(sim.DefaultWorkers())
 	if shuffles < 0 {
 		return d.EvaluateAdaptiveWith(precision, mp, rng, ev), ev

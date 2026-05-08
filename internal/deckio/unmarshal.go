@@ -14,26 +14,26 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 )
 
-// Unmarshal decodes JSON produced by Marshal into a *sim.Deck. Returns an error if any card,
-// weapon, or hero name isn't recognized.
-func Unmarshal(data []byte) (*sim.Deck, error) {
+// Unmarshal decodes JSON produced by Marshal into a *sim.Deck and the associated DeckStats.
+// Returns an error if any card, weapon, or hero name isn't recognized.
+func Unmarshal(data []byte) (*sim.Deck, sim.DeckStats, error) {
 	var dj DeckJSON
 	if err := json.Unmarshal(data, &dj); err != nil {
-		return nil, err
+		return nil, sim.DeckStats{}, err
 	}
 	return fromJSON(&dj)
 }
 
-func fromJSON(dj *DeckJSON) (*sim.Deck, error) {
+func fromJSON(dj *DeckJSON) (*sim.Deck, sim.DeckStats, error) {
 	h, ok := registry.HeroByName(dj.Hero)
 	if !ok {
-		return nil, fmt.Errorf("deckio: unknown hero %q", dj.Hero)
+		return nil, sim.DeckStats{}, fmt.Errorf("deckio: unknown hero %q", dj.Hero)
 	}
 	weapons := make([]sim.Weapon, len(dj.Weapons))
 	for i, name := range dj.Weapons {
 		w, ok := registry.WeaponByName(name)
 		if !ok {
-			return nil, fmt.Errorf("deckio: unknown weapon %q", name)
+			return nil, sim.DeckStats{}, fmt.Errorf("deckio: unknown weapon %q", name)
 		}
 		weapons[i] = w
 	}
@@ -41,17 +41,17 @@ func fromJSON(dj *DeckJSON) (*sim.Deck, error) {
 	for i, name := range dj.Cards {
 		id, ok := registry.CardByName(name)
 		if !ok {
-			return nil, fmt.Errorf("deckio: unknown card %q", name)
+			return nil, sim.DeckStats{}, fmt.Errorf("deckio: unknown card %q", name)
 		}
 		cs[i] = registry.GetCard(id)
 	}
 	best, err := bestTurnFromJSON(dj.Stats.Best)
 	if err != nil {
-		return nil, err
+		return nil, sim.DeckStats{}, err
 	}
 	perCardMarginal, err := perCardMarginalFromJSON(dj.Stats.PerCardMarginal)
 	if err != nil {
-		return nil, err
+		return nil, sim.DeckStats{}, err
 	}
 	d := sim.New(h, weapons, cs)
 	// Sideboard and Equipment are name-only lists — the optimizer doesn't read them and the
@@ -63,7 +63,7 @@ func fromJSON(dj *DeckJSON) (*sim.Deck, error) {
 	if len(dj.Equipment) > 0 {
 		d.Equipment = append([]string(nil), dj.Equipment...)
 	}
-	d.Stats = sim.Stats{
+	stats := sim.DeckStats{
 		Runs:            dj.Stats.Runs,
 		Hands:           dj.Stats.Hands,
 		TotalValue:      dj.Stats.TotalValue,
@@ -73,7 +73,7 @@ func fromJSON(dj *DeckJSON) (*sim.Deck, error) {
 		PerCardMarginal: perCardMarginal,
 		Histogram:       dj.Stats.Histogram,
 	}
-	return d, nil
+	return d, stats, nil
 }
 
 func perCardMarginalFromJSON(entries []CardMarginalStatsJSON) (map[ids.CardID]sim.CardMarginalStats, error) {

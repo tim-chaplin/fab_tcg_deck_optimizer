@@ -262,17 +262,17 @@ func TestEvaluate_TriggersFromLastTurnSurfacesInBest(t *testing.T) {
 	}
 	d := New(heroes.Viserai{}, nil, deckCards)
 	rng := rand.New(rand.NewSource(42))
-	d.Evaluate(20, Matchup{}, rng)
+	stats := d.Evaluate(20, Matchup{}, rng)
 
-	if len(d.Stats.Best.Summary.TriggersFromLastTurn) == 0 {
+	if len(stats.Best.Summary.TriggersFromLastTurn) == 0 {
 		t.Errorf("Stats.Best.Summary.TriggersFromLastTurn is empty; Best.Value=%d",
-			d.Stats.Best.Summary.Value)
+			stats.Best.Summary.Value)
 	}
 	// The best-turn snapshot must also list Blessing under StartOfTurnAuras — Blessing
 	// registers a carryover Aura on the turn it's played, and the best-scoring turn
 	// is the one where that trigger fires, so the aura has to be in play at the top.
 	foundBlessing := false
-	for _, a := range d.Stats.Best.Summary.StartOfTurnAuras {
+	for _, a := range stats.Best.Summary.StartOfTurnAuras {
 		if a.ID() == ids.BlessingOfOccultRed {
 			foundBlessing = true
 			break
@@ -280,7 +280,7 @@ func TestEvaluate_TriggersFromLastTurnSurfacesInBest(t *testing.T) {
 	}
 	if !foundBlessing {
 		t.Errorf("Stats.Best.Summary.StartOfTurnAuras missing Blessing; got %+v",
-			d.Stats.Best.Summary.StartOfTurnAuras)
+			stats.Best.Summary.StartOfTurnAuras)
 	}
 }
 

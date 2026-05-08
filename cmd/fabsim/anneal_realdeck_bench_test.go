@@ -39,7 +39,7 @@ func BenchmarkAnnealRoundOnViseraiV4(b *testing.B) {
 	if err != nil {
 		b.Fatalf("read deck: %v", err)
 	}
-	loaded, err := deckio.Unmarshal(data)
+	loaded, _, err := deckio.Unmarshal(data)
 	if err != nil {
 		b.Fatalf("unmarshal deck: %v", err)
 	}
@@ -56,7 +56,7 @@ func BenchmarkAnnealRoundOnViseraiV4(b *testing.B) {
 		b.StopTimer()
 		iterRNG := rand.New(rand.NewSource(42))
 		b.StartTimer()
-		_, _, _, found := sim.IterateParallel(
+		_, _, _, _, found := sim.IterateParallel(
 			context.Background(), mutations, unreachableBaseline, 0, 0,
 			0, sim.Matchup{IncomingDamage: incoming}, 0, 0,
 			iterRNG.Int63(), nil, true, 0.1,
