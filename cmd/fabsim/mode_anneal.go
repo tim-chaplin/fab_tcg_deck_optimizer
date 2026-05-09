@@ -464,7 +464,7 @@ func reevaluateBaseline(cfg annealConfig, rng *rand.Rand, loaded *deck.Deck, loa
 	// the stats reset so the re-evaluated deck writes back unchanged.
 	sideboard := loaded.Sideboard
 	equipment := loaded.Equipment
-	rebuilt := deck.New(loaded.Hero, loaded.Weapons, loaded.Cards)
+	rebuilt := loaded.Copy()
 	rebuilt.Sideboard = sideboard
 	rebuilt.Equipment = equipment
 	freshStats := baselineEvaluate(rebuilt, cfg, rng)

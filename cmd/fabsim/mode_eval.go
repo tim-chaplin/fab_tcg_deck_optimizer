@@ -90,7 +90,7 @@ func evaluateAndPersist(outPath string, shuffles int, precision float64, mp sim.
 	// instead of accumulating on top of the persisted ones. Sideboard and Equipment carry
 	// over verbatim — the sim ignores both, but the post-eval writeDeck round-trips them
 	// back to disk so the user's hand-managed lists aren't dropped by a re-score.
-	d := deck.New(loaded.Hero, loaded.Weapons, loaded.Cards)
+	d := loaded.Copy()
 	d.Sideboard = loaded.Sideboard
 	d.Equipment = loaded.Equipment
 	rng := rand.New(rand.NewSource(seed))

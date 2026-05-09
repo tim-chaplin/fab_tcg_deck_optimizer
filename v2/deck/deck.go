@@ -36,6 +36,31 @@ func New(h Hero, weapons []Weapon, cards []Card) *Deck {
 	return &Deck{Hero: h, Weapons: weapons, Cards: cards}
 }
 
+// Size reports the number of cards in the deck. Excludes Sideboard and Equipment, which are
+// reserve / arena lists the simulator never reads.
+func (d *Deck) Size() int { return len(d.Cards) }
+
+// Copy returns a fresh Deck with independent backing slices for Weapons, Cards, Sideboard,
+// and Equipment. Hero is shared (heroes are stateless concrete types). Used by the parallel
+// evaluator so each worker can shuffle and draw through its own copy without disturbing the
+// caller's deck.
+func (d *Deck) Copy() *Deck {
+	out := &Deck{Hero: d.Hero}
+	if len(d.Weapons) > 0 {
+		out.Weapons = append(make([]Weapon, 0, len(d.Weapons)), d.Weapons...)
+	}
+	if len(d.Cards) > 0 {
+		out.Cards = append(make([]Card, 0, len(d.Cards)), d.Cards...)
+	}
+	if len(d.Sideboard) > 0 {
+		out.Sideboard = append(make([]string, 0, len(d.Sideboard)), d.Sideboard...)
+	}
+	if len(d.Equipment) > 0 {
+		out.Equipment = append(make([]string, 0, len(d.Equipment)), d.Equipment...)
+	}
+	return out
+}
+
 // SideboardDefault is one "always include in the sideboard" entry the caller passes to
 // ApplyDefaults: a card display name plus the target copy count to top the sideboard up
 // toward. Count must be in [1, SideboardCopyCap]; a larger target silently clamps when the

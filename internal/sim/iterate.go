@@ -216,7 +216,7 @@ func runIterateWorker(
 			return
 		}
 		mut := cfg.mutations[i]
-		d := deck.New(mut.Deck.Hero, mut.Deck.Weapons, mut.Deck.Cards)
+		d := mut.Deck.Copy()
 		var stats DeckStats
 		if cfg.adaptive {
 			stats = ev.EvaluateAdaptive(d, cfg.precision, cfg.matchup, rng)

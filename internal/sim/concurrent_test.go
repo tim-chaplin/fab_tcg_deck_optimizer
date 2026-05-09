@@ -34,7 +34,7 @@ func TestEvaluate_ConcurrentNoMapPanic(t *testing.T) {
 			ev := NewEvaluator()
 			rng := rand.New(rand.NewSource(int64(id)*7919 + 1))
 			for i := 0; i < iterations; i++ {
-				d := deck.New(baseline.Hero, baseline.Weapons, baseline.Cards)
+				d := baseline.Copy()
 				// Small shuffle count per iteration keeps the test fast while still exercising
 				// many Best calls per goroutine: 10 shuffles × handsPerCycle * 2 hands each =
 				// ~200 Best invocations per goroutine, per iteration.

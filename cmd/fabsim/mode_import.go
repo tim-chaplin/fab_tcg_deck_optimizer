@@ -92,7 +92,7 @@ func summarizeImportedDeck(d *deck.Deck) {
 	for i, w := range d.Weapons {
 		weapons[i] = w.Name()
 	}
-	fmt.Fprintf(os.Stderr, "  hero: %s, weapons: %v, cards: %d", d.Hero.(sim.Hero).Name(), weapons, len(d.Cards))
+	fmt.Fprintf(os.Stderr, "  hero: %s, weapons: %v, cards: %d", d.Hero.(sim.Hero).Name(), weapons, d.Size())
 	if len(d.Sideboard) > 0 {
 		fmt.Fprintf(os.Stderr, ", sideboard: %d", len(d.Sideboard))
 	}

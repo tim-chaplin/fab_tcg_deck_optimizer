@@ -71,7 +71,7 @@ func TestEvalCache_HitRateMeasurement(t *testing.T) {
 	if loaded == nil {
 		t.Skip("mydecks/viserai_v4.json not found — saved deck is needed to measure realistic hit rate")
 	}
-	baseline := deck.New(loaded.Hero, loaded.Weapons, loaded.Cards)
+	baseline := loaded.Copy()
 
 	// Use a dedicated Evaluator so we can read its cache stats after the run.
 	ev := NewEvaluator()
@@ -110,10 +110,10 @@ func TestEvalCache_ParallelEquivalentToSequential(t *testing.T) {
 	setupRNG := rand.New(rand.NewSource(123))
 	baseline := deck.Random(heroes.Viserai{}, deckSize, maxCopies, setupRNG, nil, registry.Registry{})
 
-	seq := deck.New(baseline.Hero, baseline.Weapons, baseline.Cards)
+	seq := baseline.Copy()
 	seqStats := NewEvaluator().Evaluate(seq, shuffles, Matchup{IncomingDamage: incoming}, rand.New(rand.NewSource(99)))
 
-	par := deck.New(baseline.Hero, baseline.Weapons, baseline.Cards)
+	par := baseline.Copy()
 	parStats := NewEvaluatorParallel(4).Evaluate(par, shuffles, Matchup{IncomingDamage: incoming}, rand.New(rand.NewSource(99)))
 
 	// Hands counts can differ slightly because parallel and sequential consume different
@@ -204,10 +204,10 @@ func TestEvalCache_EquivalenceWithUncached(t *testing.T) {
 	setupRNG := rand.New(rand.NewSource(123))
 	baseline := deck.Random(heroes.Viserai{}, deckSize, maxCopies, setupRNG, nil, registry.Registry{})
 
-	cached := deck.New(baseline.Hero, baseline.Weapons, baseline.Cards)
+	cached := baseline.Copy()
 	cachedStats := NewEvaluator().Evaluate(cached, shuffles, Matchup{IncomingDamage: incoming}, rand.New(rand.NewSource(99)))
 
-	uncached := deck.New(baseline.Hero, baseline.Weapons, baseline.Cards)
+	uncached := baseline.Copy()
 	uncachedStats := NewEvaluatorWithoutCache().Evaluate(uncached, shuffles, Matchup{IncomingDamage: incoming}, rand.New(rand.NewSource(99)))
 
 	if cachedStats.Hands != uncachedStats.Hands {
@@ -242,7 +242,7 @@ func BenchmarkEvalCache_SingleDeck(b *testing.B) {
 			b.StopTimer()
 			ev := NewEvaluator()
 			rng := rand.New(rand.NewSource(42))
-			d := deck.New(loaded.Hero, loaded.Weapons, loaded.Cards)
+			d := loaded.Copy()
 			b.StartTimer()
 			ev.Evaluate(d, shuffles, Matchup{IncomingDamage: incoming}, rng)
 		}
@@ -254,7 +254,7 @@ func BenchmarkEvalCache_SingleDeck(b *testing.B) {
 			b.StopTimer()
 			ev := NewEvaluatorWithoutCache()
 			rng := rand.New(rand.NewSource(42))
-			d := deck.New(loaded.Hero, loaded.Weapons, loaded.Cards)
+			d := loaded.Copy()
 			b.StartTimer()
 			ev.Evaluate(d, shuffles, Matchup{IncomingDamage: incoming}, rng)
 		}
@@ -282,7 +282,7 @@ func BenchmarkEvalCache_ParallelDeck(b *testing.B) {
 				b.StopTimer()
 				ev := NewEvaluatorParallel(w)
 				rng := rand.New(rand.NewSource(42))
-				d := deck.New(loaded.Hero, loaded.Weapons, loaded.Cards)
+				d := loaded.Copy()
 				b.StartTimer()
 				ev.Evaluate(d, shuffles, Matchup{IncomingDamage: incoming}, rng)
 			}

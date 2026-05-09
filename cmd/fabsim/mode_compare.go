@@ -134,7 +134,7 @@ func printCardDelta(name1, name2 string, d1, d2 *deck.Deck) {
 	fmt.Println("Card / weapon differences:")
 	if len(minuses) == 0 && len(pluses) == 0 {
 		fmt.Printf("  %s and %s have identical card and weapon lists (%d cards, %d weapons)\n",
-			name1, name2, len(d1.Cards), len(d1.Weapons))
+			name1, name2, d1.Size(), len(d1.Weapons))
 		return
 	}
 	for _, e := range minuses {

@@ -117,7 +117,7 @@ func singleSwapMutations(d *deck.Deck, pool CardPool, legal func(deck.Card) bool
 				continue // no-op: remove one and add one of the same card.
 			}
 			replacement := GetCard(addID)
-			newCards := make([]deck.Card, 0, len(d.Cards))
+			newCards := make([]deck.Card, 0, d.Size())
 			removed1 := false
 			for _, c := range d.Cards {
 				if !removed1 && c.ID() == removeID {
