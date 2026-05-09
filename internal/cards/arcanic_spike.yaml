@@ -1,0 +1,20 @@
+name: Arcanic Spike
+types:
+    - Runeblade
+    - Action
+    - Attack
+cost: 2
+text: If you've dealt arcane damage this turn, this gets +2{p}.
+variants:
+    - id: ArcanicSpikeRed
+      pitch: 1
+      attack: 5
+      defense: 3
+    - id: ArcanicSpikeYellow
+      pitch: 2
+      attack: 4
+      defense: 3
+    - id: ArcanicSpikeBlue
+      pitch: 3
+      attack: 3
+      defense: 3

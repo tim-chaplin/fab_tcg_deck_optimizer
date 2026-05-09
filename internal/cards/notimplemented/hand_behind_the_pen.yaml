@@ -1,0 +1,16 @@
+name: Hand Behind the Pen
+types:
+    - Generic
+    - Action
+    - Attack
+cost: 2
+markers:
+    - NotImplemented
+text: |-
+    When this hits a hero, turn a card in their arsenal face-up, then banish a non-attack
+    action card from their arsenal.
+variants:
+    - id: HandBehindThePenRed
+      pitch: 1
+      attack: 6
+      defense: 2

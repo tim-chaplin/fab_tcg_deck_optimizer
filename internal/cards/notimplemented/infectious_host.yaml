@@ -1,0 +1,24 @@
+name: Infectious Host
+types:
+    - Generic
+    - Action
+    - Attack
+cost: 0
+markers:
+    - NotImplemented
+text: |-
+    When this attacks a hero, if you control a Frailty token, create a Frailty token under
+    their control, then repeat for Inertia and Bloodrot Pox.
+variants:
+    - id: InfectiousHostRed
+      pitch: 1
+      attack: 4
+      defense: 2
+    - id: InfectiousHostYellow
+      pitch: 2
+      attack: 3
+      defense: 2
+    - id: InfectiousHostBlue
+      pitch: 3
+      attack: 2
+      defense: 2

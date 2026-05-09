@@ -1,0 +1,20 @@
+name: Battlefront Bastion
+types:
+    - Generic
+    - Action
+    - Attack
+cost: 3
+text: When this defends alone, prevent the next 1 damage that would be dealt to you this turn.
+variants:
+    - id: BattlefrontBastionRed
+      pitch: 1
+      attack: 7
+      defense: 2
+    - id: BattlefrontBastionYellow
+      pitch: 2
+      attack: 6
+      defense: 2
+    - id: BattlefrontBastionBlue
+      pitch: 3
+      attack: 5
+      defense: 2

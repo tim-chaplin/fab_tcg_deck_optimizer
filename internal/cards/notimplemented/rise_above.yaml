@@ -1,0 +1,21 @@
+name: Rise Above
+types: []
+cost: 2
+markers:
+    - NotImplemented
+text: |-
+    You may put a card from your hand on top of your deck rather than pay Rise Above's {r}
+    cost.
+variants:
+    - id: RiseAboveRed
+      pitch: 1
+      attack: 0
+      defense: 4
+    - id: RiseAboveYellow
+      pitch: 2
+      attack: 0
+      defense: 3
+    - id: RiseAboveBlue
+      pitch: 3
+      attack: 0
+      defense: 2

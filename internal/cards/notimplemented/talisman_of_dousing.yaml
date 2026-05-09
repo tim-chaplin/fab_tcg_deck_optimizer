@@ -1,0 +1,15 @@
+name: Talisman of Dousing
+types:
+    - Generic
+    - Action
+    - Item
+cost: 0
+goAgain: true
+markers:
+    - NotImplemented
+text: '**Go again** **Spellvoid 1**'
+variants:
+    - id: TalismanOfDousingYellow
+      pitch: 2
+      attack: 0
+      defense: 0

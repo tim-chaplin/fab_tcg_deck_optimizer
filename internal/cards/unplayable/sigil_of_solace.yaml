@@ -1,0 +1,22 @@
+name: Sigil of Solace
+types:
+    - Generic
+    - Instant
+cost: 0
+markers:
+    - NotSilverAgeLegal
+    - Unplayable
+text: Gain 3{h}
+variants:
+    - id: SigilOfSolaceRed
+      pitch: 1
+      attack: 0
+      defense: 0
+    - id: SigilOfSolaceYellow
+      pitch: 2
+      attack: 0
+      defense: 0
+    - id: SigilOfSolaceBlue
+      pitch: 3
+      attack: 0
+      defense: 0

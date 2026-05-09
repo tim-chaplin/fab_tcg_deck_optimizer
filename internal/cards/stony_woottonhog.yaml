@@ -1,0 +1,20 @@
+name: Stony Woottonhog
+types:
+    - Generic
+    - Action
+    - Attack
+cost: 2
+text: While Stony Woottonhog is defended by less than 2 non-equipment cards, it has +1{p}.
+variants:
+    - id: StonyWoottonhogRed
+      pitch: 1
+      attack: 6
+      defense: 2
+    - id: StonyWoottonhogYellow
+      pitch: 2
+      attack: 5
+      defense: 2
+    - id: StonyWoottonhogBlue
+      pitch: 3
+      attack: 4
+      defense: 2

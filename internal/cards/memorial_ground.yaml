@@ -1,0 +1,21 @@
+name: Memorial Ground
+types:
+    - Generic
+    - Instant
+cost: 0
+text: |-
+    Put target attack action card with cost 2 or less from your graveyard on top of your
+    deck.
+variants:
+    - id: MemorialGroundRed
+      pitch: 1
+      attack: 0
+      defense: 0
+    - id: MemorialGroundYellow
+      pitch: 2
+      attack: 0
+      defense: 0
+    - id: MemorialGroundBlue
+      pitch: 3
+      attack: 0
+      defense: 0

@@ -1,0 +1,23 @@
+name: Fiddler's Green
+types:
+    - Generic
+    - DefenseReaction
+cost: 0
+markers:
+    - NotSilverAgeLegal
+text: |-
+    When this is put into your graveyard from anywhere, gain N{h}." (N is the printed
+    variant value above.)
+variants:
+    - id: FiddlersGreenRed
+      pitch: 1
+      attack: 0
+      defense: 1
+    - id: FiddlersGreenYellow
+      pitch: 2
+      attack: 0
+      defense: 1
+    - id: FiddlersGreenBlue
+      pitch: 3
+      attack: 0
+      defense: 1

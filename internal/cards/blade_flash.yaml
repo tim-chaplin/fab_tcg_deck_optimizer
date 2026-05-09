@@ -1,0 +1,11 @@
+name: Blade Flash
+types:
+    - Generic
+    - AttackReaction
+cost: 1
+text: Target sword attack gains **go again**.
+variants:
+    - id: BladeFlashBlue
+      pitch: 3
+      attack: 0
+      defense: 2

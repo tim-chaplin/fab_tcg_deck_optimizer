@@ -1,0 +1,13 @@
+name: Cracked Bauble
+types:
+    - Generic
+    - Resource
+cost: 0
+text: |-
+    *(A player may add any number of Cracked Baubles to their card-pool in sealed deck or
+    booster draft formats.)*
+variants:
+    - id: CrackedBaubleYellow
+      pitch: 2
+      attack: 0
+      defense: 0

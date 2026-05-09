@@ -6,28 +6,13 @@
 package notimplemented
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/cards"
 )
 
-var clearwaterElixirTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction)
-
-type ClearwaterElixirRed struct{}
-
-func (ClearwaterElixirRed) ID() ids.CardID          { return ids.ClearwaterElixirRed }
-func (ClearwaterElixirRed) Name() string            { return "Clearwater Elixir" }
-func (ClearwaterElixirRed) Cost(*sim.TurnState) int { return 1 }
-func (ClearwaterElixirRed) Pitch() int              { return 1 }
-func (ClearwaterElixirRed) Attack() int             { return 0 }
-func (ClearwaterElixirRed) Defense() int            { return 3 }
-func (ClearwaterElixirRed) Types() card.TypeSet     { return clearwaterElixirTypes }
-func (ClearwaterElixirRed) GoAgain() bool           { return true }
-
 // not implemented: Bloodrot Pox health-gain rider dropped (status tokens not tracked)
-func (ClearwaterElixirRed) NotImplemented() {}
+
 func (ClearwaterElixirRed) Play(s *sim.TurnState, self *sim.CardState) {
 	cards.GrantNextCardBonusAttack(s, 3, cards.IsAttack)
 	n := self.DealEffectiveAttack(s)

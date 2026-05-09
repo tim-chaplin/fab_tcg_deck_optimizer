@@ -1,0 +1,22 @@
+name: Fervent Forerunner
+types:
+    - Generic
+    - Action
+    - Attack
+cost: 0
+text: |-
+    If Fervent Forerunner hits, **opt 2**. If Fervent Forerunner is played from arsenal, it
+    gains **go again**.
+variants:
+    - id: FerventForerunnerRed
+      pitch: 1
+      attack: 3
+      defense: 2
+    - id: FerventForerunnerYellow
+      pitch: 2
+      attack: 2
+      defense: 2
+    - id: FerventForerunnerBlue
+      pitch: 3
+      attack: 1
+      defense: 2

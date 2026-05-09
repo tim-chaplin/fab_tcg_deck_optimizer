@@ -1,0 +1,22 @@
+name: Flying High
+types:
+    - Generic
+    - Action
+cost: 0
+goAgain: true
+text: |-
+    Your next attack this turn gets **go again**. If it's <matching color>, it gets +1{p}.
+    **Go again**" (Red checks for a red attack, Yellow for a yellow attack, Blue for a blue attack.)
+variants:
+    - id: FlyingHighRed
+      pitch: 1
+      attack: 0
+      defense: 2
+    - id: FlyingHighYellow
+      pitch: 2
+      attack: 0
+      defense: 2
+    - id: FlyingHighBlue
+      pitch: 3
+      attack: 0
+      defense: 2

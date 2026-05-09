@@ -1,0 +1,22 @@
+name: Looking for a Scrap
+types:
+    - Generic
+    - Action
+    - Attack
+cost: 1
+text: |-
+    As an additional cost to play Looking for a Scrap, you may banish a card with 1{p} from
+    your graveyard. When you do, this gains +1{p} and **go again**.
+variants:
+    - id: LookingForAScrapRed
+      pitch: 1
+      attack: 4
+      defense: 2
+    - id: LookingForAScrapYellow
+      pitch: 2
+      attack: 3
+      defense: 2
+    - id: LookingForAScrapBlue
+      pitch: 3
+      attack: 2
+      defense: 2

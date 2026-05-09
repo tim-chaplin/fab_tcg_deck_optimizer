@@ -1,0 +1,23 @@
+name: Moon Wish
+types:
+    - Generic
+    - Action
+    - Attack
+cost: variable
+text: |-
+    You may put a card from your hand on top of your deck rather than pay Moon Wish's {r}
+    cost. If Moon Wish hits, search your deck for a card named Sun Kiss, reveal it, put it into
+    your hand, then shuffle your deck.
+variants:
+    - id: MoonWishRed
+      pitch: 1
+      attack: 5
+      defense: 2
+    - id: MoonWishYellow
+      pitch: 2
+      attack: 4
+      defense: 2
+    - id: MoonWishBlue
+      pitch: 3
+      attack: 3
+      defense: 2

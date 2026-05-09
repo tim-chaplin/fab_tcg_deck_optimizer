@@ -1,0 +1,20 @@
+name: Wounded Bull
+types:
+    - Generic
+    - Action
+    - Attack
+cost: 3
+text: When you play this, if you have less {h} than an opposing hero, this gains +1{p}.
+variants:
+    - id: WoundedBullRed
+      pitch: 1
+      attack: 7
+      defense: 2
+    - id: WoundedBullYellow
+      pitch: 2
+      attack: 6
+      defense: 2
+    - id: WoundedBullBlue
+      pitch: 3
+      attack: 5
+      defense: 2

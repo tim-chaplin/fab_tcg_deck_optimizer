@@ -1,0 +1,20 @@
+name: Singeing Steelblade
+types:
+    - Runeblade
+    - Action
+    - Attack
+cost: 1
+text: When you attack with Singeing Steelblade, deal 1 arcane damage to target hero.
+variants:
+    - id: SingeingSteelbladeRed
+      pitch: 1
+      attack: 4
+      defense: 3
+    - id: SingeingSteelbladeYellow
+      pitch: 2
+      attack: 3
+      defense: 3
+    - id: SingeingSteelbladeBlue
+      pitch: 3
+      attack: 2
+      defense: 3

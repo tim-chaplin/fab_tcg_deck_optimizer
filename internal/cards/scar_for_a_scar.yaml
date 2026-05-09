@@ -1,0 +1,21 @@
+name: Scar for a Scar
+types:
+    - Generic
+    - Action
+    - Attack
+cost: 0
+dynamicGoAgain: true
+text: When this is played, if you have less {h} than an opposing hero, it gets **go again**.
+variants:
+    - id: ScarForAScarRed
+      pitch: 1
+      attack: 4
+      defense: 2
+    - id: ScarForAScarYellow
+      pitch: 2
+      attack: 3
+      defense: 2
+    - id: ScarForAScarBlue
+      pitch: 3
+      attack: 2
+      defense: 2

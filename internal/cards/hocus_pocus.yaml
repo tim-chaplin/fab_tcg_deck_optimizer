@@ -1,0 +1,20 @@
+name: Hocus Pocus
+types:
+    - Runeblade
+    - Action
+    - Attack
+cost: 0
+text: When this attacks, create a Runechant token.
+variants:
+    - id: HocusPocusRed
+      pitch: 1
+      attack: 3
+      defense: 3
+    - id: HocusPocusYellow
+      pitch: 2
+      attack: 2
+      defense: 3
+    - id: HocusPocusBlue
+      pitch: 3
+      attack: 1
+      defense: 3

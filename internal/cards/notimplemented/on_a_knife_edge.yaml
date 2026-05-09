@@ -1,0 +1,14 @@
+name: On a Knife Edge
+types:
+    - Generic
+    - Action
+cost: 0
+goAgain: true
+markers:
+    - NotImplemented
+text: Your next sword attack this turn gains **go again**. **Go again**
+variants:
+    - id: OnAKnifeEdgeYellow
+      pitch: 2
+      attack: 0
+      defense: 2

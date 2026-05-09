@@ -1,0 +1,24 @@
+name: Bloodspill Invocation
+types:
+    - Runeblade
+    - Action
+    - Aura
+cost: 1
+goAgain: true
+text: |-
+    Go again. When an attack action card you control hits, destroy Bloodspill Invocation
+    then create N Runechant tokens. When your hero is dealt damage, destroy Bloodspill
+    Invocation." (Red N=3, Yellow N=2, Blue N=1.)
+variants:
+    - id: BloodspillInvocationRed
+      pitch: 1
+      attack: 0
+      defense: 2
+    - id: BloodspillInvocationYellow
+      pitch: 2
+      attack: 0
+      defense: 2
+    - id: BloodspillInvocationBlue
+      pitch: 3
+      attack: 0
+      defense: 2

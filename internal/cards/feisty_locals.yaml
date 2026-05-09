@@ -1,0 +1,20 @@
+name: Feisty Locals
+types:
+    - Generic
+    - Action
+    - Attack
+cost: 0
+text: If this is defended by an action card, this gets +2{p}.
+variants:
+    - id: FeistyLocalsRed
+      pitch: 1
+      attack: 3
+      defense: 2
+    - id: FeistyLocalsYellow
+      pitch: 2
+      attack: 2
+      defense: 2
+    - id: FeistyLocalsBlue
+      pitch: 3
+      attack: 1
+      defense: 2

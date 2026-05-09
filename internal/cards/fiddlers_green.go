@@ -11,9 +11,6 @@
 package cards
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
-
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 )
 
@@ -26,47 +23,14 @@ func fiddlersGreenPlay(s *sim.TurnState, self *sim.CardState, heal int) {
 	s.LogRiderf(self, heal, "Gained %d health (graveyard trigger)", heal)
 }
 
-type FiddlersGreenRed struct{}
-
-func (FiddlersGreenRed) ID() ids.CardID          { return ids.FiddlersGreenRed }
-func (FiddlersGreenRed) Name() string            { return "Fiddler's Green" }
-func (FiddlersGreenRed) Cost(*sim.TurnState) int { return 0 }
-func (FiddlersGreenRed) Pitch() int              { return 1 }
-func (FiddlersGreenRed) Attack() int             { return 0 }
-func (FiddlersGreenRed) Defense() int            { return 1 }
-func (FiddlersGreenRed) Types() card.TypeSet     { return DefenseReactionTypes }
-func (FiddlersGreenRed) GoAgain() bool           { return false }
-func (FiddlersGreenRed) NotSilverAgeLegal()      {}
 func (FiddlersGreenRed) Play(s *sim.TurnState, self *sim.CardState) {
 	fiddlersGreenPlay(s, self, 3)
 }
 
-type FiddlersGreenYellow struct{}
-
-func (FiddlersGreenYellow) ID() ids.CardID          { return ids.FiddlersGreenYellow }
-func (FiddlersGreenYellow) Name() string            { return "Fiddler's Green" }
-func (FiddlersGreenYellow) Cost(*sim.TurnState) int { return 0 }
-func (FiddlersGreenYellow) Pitch() int              { return 2 }
-func (FiddlersGreenYellow) Attack() int             { return 0 }
-func (FiddlersGreenYellow) Defense() int            { return 1 }
-func (FiddlersGreenYellow) Types() card.TypeSet     { return DefenseReactionTypes }
-func (FiddlersGreenYellow) GoAgain() bool           { return false }
-func (FiddlersGreenYellow) NotSilverAgeLegal()      {}
 func (FiddlersGreenYellow) Play(s *sim.TurnState, self *sim.CardState) {
 	fiddlersGreenPlay(s, self, 2)
 }
 
-type FiddlersGreenBlue struct{}
-
-func (FiddlersGreenBlue) ID() ids.CardID          { return ids.FiddlersGreenBlue }
-func (FiddlersGreenBlue) Name() string            { return "Fiddler's Green" }
-func (FiddlersGreenBlue) Cost(*sim.TurnState) int { return 0 }
-func (FiddlersGreenBlue) Pitch() int              { return 3 }
-func (FiddlersGreenBlue) Attack() int             { return 0 }
-func (FiddlersGreenBlue) Defense() int            { return 1 }
-func (FiddlersGreenBlue) Types() card.TypeSet     { return DefenseReactionTypes }
-func (FiddlersGreenBlue) GoAgain() bool           { return false }
-func (FiddlersGreenBlue) NotSilverAgeLegal()      {}
 func (FiddlersGreenBlue) Play(s *sim.TurnState, self *sim.CardState) {
 	fiddlersGreenPlay(s, self, 1)
 }

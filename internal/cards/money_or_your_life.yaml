@@ -1,0 +1,22 @@
+name: Money or Your Life?
+types:
+    - Generic
+    - Action
+    - Attack
+cost: 3
+text: |-
+    When this hits a hero, deal 2 damage to them unless they give you a Gold token
+    they control. If you are a Thief, repeat this process once.
+variants:
+    - id: MoneyOrYourLifeRed
+      pitch: 1
+      attack: 6
+      defense: 2
+    - id: MoneyOrYourLifeYellow
+      pitch: 2
+      attack: 5
+      defense: 2
+    - id: MoneyOrYourLifeBlue
+      pitch: 3
+      attack: 4
+      defense: 2

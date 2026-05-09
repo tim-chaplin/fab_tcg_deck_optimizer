@@ -1,0 +1,16 @@
+name: Sigil of Silphidae
+types:
+    - Runeblade
+    - Action
+    - Aura
+cost: 0
+goAgain: true
+text: |-
+    When this enters or leaves the arena, you may banish another aura from your graveyard.
+    If you do, deal 1 arcane damage to target hero. At the beginning of your action phase, destroy
+    this.
+variants:
+    - id: SigilOfSilphidaeBlue
+      pitch: 3
+      attack: 0
+      defense: 3

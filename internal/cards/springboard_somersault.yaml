@@ -1,0 +1,11 @@
+name: Springboard Somersault
+types:
+    - Generic
+    - DefenseReaction
+cost: 0
+text: If Springboard Somersault is played from arsenal, it gains +2{d}.
+variants:
+    - id: SpringboardSomersaultYellow
+      pitch: 2
+      attack: 0
+      defense: 2

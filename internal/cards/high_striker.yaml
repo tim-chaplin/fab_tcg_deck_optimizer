@@ -1,0 +1,22 @@
+name: High Striker
+types:
+    - Generic
+    - Action
+cost: 0
+goAgain: true
+text: |-
+    The next time an attack you control hits this turn, create N Copper tokens.
+    **Go again**" — N = 6 (Red) / 4 (Yellow) / 2 (Blue).
+variants:
+    - id: HighStrikerRed
+      pitch: 1
+      attack: 0
+      defense: 2
+    - id: HighStrikerYellow
+      pitch: 2
+      attack: 0
+      defense: 2
+    - id: HighStrikerBlue
+      pitch: 3
+      attack: 0
+      defense: 2

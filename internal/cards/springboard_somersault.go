@@ -7,21 +7,9 @@
 package cards
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 )
 
-type SpringboardSomersaultYellow struct{}
-
-func (SpringboardSomersaultYellow) ID() ids.CardID          { return ids.SpringboardSomersaultYellow }
-func (SpringboardSomersaultYellow) Name() string            { return "Springboard Somersault" }
-func (SpringboardSomersaultYellow) Cost(*sim.TurnState) int { return 0 }
-func (SpringboardSomersaultYellow) Pitch() int              { return 2 }
-func (SpringboardSomersaultYellow) Attack() int             { return 0 }
-func (SpringboardSomersaultYellow) Defense() int            { return 2 }
-func (SpringboardSomersaultYellow) Types() card.TypeSet     { return DefenseReactionTypes }
-func (SpringboardSomersaultYellow) GoAgain() bool           { return false }
 func (SpringboardSomersaultYellow) Play(s *sim.TurnState, self *sim.CardState) {
 	n := self.DealEffectiveDefense(s)
 	s.Log(self, n)

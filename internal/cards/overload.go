@@ -6,12 +6,8 @@
 package cards
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 )
-
-var overloadTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeAttack)
 
 func overloadPlay(s *sim.TurnState, self *sim.CardState) {
 	n := self.DealEffectiveAttack(s)
@@ -21,47 +17,17 @@ func overloadPlay(s *sim.TurnState, self *sim.CardState) {
 	}
 }
 
-type OverloadRed struct{}
-
-func (OverloadRed) ID() ids.CardID          { return ids.OverloadRed }
-func (OverloadRed) Name() string            { return "Overload" }
-func (OverloadRed) Cost(*sim.TurnState) int { return 0 }
-func (OverloadRed) Pitch() int              { return 1 }
-func (OverloadRed) Attack() int             { return 3 }
-func (OverloadRed) Defense() int            { return 2 }
-func (OverloadRed) Types() card.TypeSet     { return overloadTypes }
-func (OverloadRed) GoAgain() bool           { return false }
-func (OverloadRed) Dominate()               {}
+func (OverloadRed) Dominate() {}
 func (OverloadRed) Play(s *sim.TurnState, self *sim.CardState) {
 	overloadPlay(s, self)
 }
 
-type OverloadYellow struct{}
-
-func (OverloadYellow) ID() ids.CardID          { return ids.OverloadYellow }
-func (OverloadYellow) Name() string            { return "Overload" }
-func (OverloadYellow) Cost(*sim.TurnState) int { return 0 }
-func (OverloadYellow) Pitch() int              { return 2 }
-func (OverloadYellow) Attack() int             { return 2 }
-func (OverloadYellow) Defense() int            { return 2 }
-func (OverloadYellow) Types() card.TypeSet     { return overloadTypes }
-func (OverloadYellow) GoAgain() bool           { return false }
-func (OverloadYellow) Dominate()               {}
+func (OverloadYellow) Dominate() {}
 func (OverloadYellow) Play(s *sim.TurnState, self *sim.CardState) {
 	overloadPlay(s, self)
 }
 
-type OverloadBlue struct{}
-
-func (OverloadBlue) ID() ids.CardID          { return ids.OverloadBlue }
-func (OverloadBlue) Name() string            { return "Overload" }
-func (OverloadBlue) Cost(*sim.TurnState) int { return 0 }
-func (OverloadBlue) Pitch() int              { return 3 }
-func (OverloadBlue) Attack() int             { return 1 }
-func (OverloadBlue) Defense() int            { return 2 }
-func (OverloadBlue) Types() card.TypeSet     { return overloadTypes }
-func (OverloadBlue) GoAgain() bool           { return false }
-func (OverloadBlue) Dominate()               {}
+func (OverloadBlue) Dominate() {}
 func (OverloadBlue) Play(s *sim.TurnState, self *sim.CardState) {
 	overloadPlay(s, self)
 }

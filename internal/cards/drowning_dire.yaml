@@ -1,0 +1,20 @@
+name: Drowning Dire
+types:
+    - Runeblade
+    - Action
+    - Attack
+cost: 2
+text: If you have played or created an aura this turn, Drowning Dire gains **dominate**.
+variants:
+    - id: DrowningDireRed
+      pitch: 1
+      attack: 5
+      defense: 3
+    - id: DrowningDireYellow
+      pitch: 2
+      attack: 4
+      defense: 3
+    - id: DrowningDireBlue
+      pitch: 3
+      attack: 3
+      defense: 3

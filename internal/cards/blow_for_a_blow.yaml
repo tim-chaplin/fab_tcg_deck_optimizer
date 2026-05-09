@@ -1,0 +1,15 @@
+name: Blow for a Blow
+types:
+    - Generic
+    - Action
+    - Attack
+cost: 2
+dynamicGoAgain: true
+text: |-
+    When this is played, if you have less {h} than an opposing hero, it gets **go again**.
+    When this hits, deal 1 damage to any target.
+variants:
+    - id: BlowForABlowRed
+      pitch: 1
+      attack: 4
+      defense: 2

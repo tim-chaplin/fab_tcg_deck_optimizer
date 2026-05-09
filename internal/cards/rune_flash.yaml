@@ -1,0 +1,21 @@
+name: Rune Flash
+types:
+    - Runeblade
+    - Action
+    - Attack
+cost: variable
+goAgain: true
+text: Rune Flash costs {r} less to play for each Runechant you control.
+variants:
+    - id: RuneFlashRed
+      pitch: 1
+      attack: 4
+      defense: 3
+    - id: RuneFlashYellow
+      pitch: 2
+      attack: 3
+      defense: 3
+    - id: RuneFlashBlue
+      pitch: 3
+      attack: 2
+      defense: 3

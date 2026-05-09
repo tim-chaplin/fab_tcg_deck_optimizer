@@ -1,0 +1,19 @@
+name: Raging Onslaught
+types:
+    - Generic
+    - Action
+    - Attack
+cost: 3
+variants:
+    - id: RagingOnslaughtRed
+      pitch: 1
+      attack: 7
+      defense: 3
+    - id: RagingOnslaughtYellow
+      pitch: 2
+      attack: 6
+      defense: 3
+    - id: RagingOnslaughtBlue
+      pitch: 3
+      attack: 5
+      defense: 3

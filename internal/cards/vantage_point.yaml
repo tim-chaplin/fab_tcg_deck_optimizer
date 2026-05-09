@@ -1,0 +1,20 @@
+name: Vantage Point
+types:
+    - Runeblade
+    - Action
+    - Attack
+cost: 3
+text: If you've played or created an aura this turn, this gets **overpower**.
+variants:
+    - id: VantagePointRed
+      pitch: 1
+      attack: 7
+      defense: 3
+    - id: VantagePointYellow
+      pitch: 2
+      attack: 6
+      defense: 3
+    - id: VantagePointBlue
+      pitch: 3
+      attack: 5
+      defense: 3

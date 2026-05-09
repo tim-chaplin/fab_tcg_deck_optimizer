@@ -1,0 +1,23 @@
+name: Life for a Life
+types:
+    - Generic
+    - Action
+    - Attack
+cost: 1
+dynamicGoAgain: true
+text: |-
+    When this is played, if you have less {h} than an opposing hero, it gets **go again**.
+    When this hits, gain 1{h}.
+variants:
+    - id: LifeForALifeRed
+      pitch: 1
+      attack: 4
+      defense: 2
+    - id: LifeForALifeYellow
+      pitch: 2
+      attack: 3
+      defense: 2
+    - id: LifeForALifeBlue
+      pitch: 3
+      attack: 2
+      defense: 2

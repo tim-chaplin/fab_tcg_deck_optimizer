@@ -1,0 +1,11 @@
+name: Lunging Press
+types:
+    - Generic
+    - AttackReaction
+cost: 0
+text: Target attack action card gains +1{p}.
+variants:
+    - id: LungingPressBlue
+      pitch: 3
+      attack: 0
+      defense: 2

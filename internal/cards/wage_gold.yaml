@@ -1,0 +1,21 @@
+name: Wage Gold
+types:
+    - Generic
+    - Action
+    - Attack
+universal: true
+cost: 3
+text: '**Universal** When this attacks a hero, you may **wager** a Gold token with them.'
+variants:
+    - id: WageGoldRed
+      pitch: 1
+      attack: 7
+      defense: 2
+    - id: WageGoldYellow
+      pitch: 2
+      attack: 6
+      defense: 2
+    - id: WageGoldBlue
+      pitch: 3
+      attack: 5
+      defense: 2

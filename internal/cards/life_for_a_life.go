@@ -10,12 +10,8 @@
 package cards
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 )
-
-var lifeForALifeTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeAttack)
 
 // lifeForALifeHealValue is the damage-equivalent credited when the on-hit 1{h} gain fires.
 const lifeForALifeHealValue = 1
@@ -27,48 +23,21 @@ func lifeForALifeOnHit(s *sim.TurnState, self *sim.CardState, _ *sim.OnHitHandle
 	s.LogRider(self, lifeForALifeHealValue, "On-hit gained 1 health")
 }
 
-type LifeForALifeRed struct{}
-
-func (LifeForALifeRed) ID() ids.CardID          { return ids.LifeForALifeRed }
-func (LifeForALifeRed) Name() string            { return "Life for a Life" }
-func (LifeForALifeRed) Cost(*sim.TurnState) int { return 1 }
-func (LifeForALifeRed) Pitch() int              { return 1 }
-func (LifeForALifeRed) Attack() int             { return 4 }
-func (LifeForALifeRed) Defense() int            { return 2 }
-func (LifeForALifeRed) Types() card.TypeSet     { return lifeForALifeTypes }
-func (LifeForALifeRed) GoAgain() bool           { return sim.HeroWantsLowerHealth() }
+func (LifeForALifeRed) GoAgain() bool { return sim.HeroWantsLowerHealth() }
 func (LifeForALifeRed) Play(s *sim.TurnState, self *sim.CardState) {
 	n := self.DealEffectiveAttack(s)
 	s.Log(self, n)
 	self.RegisterOnHit(lifeForALifeOnHit)
 }
 
-type LifeForALifeYellow struct{}
-
-func (LifeForALifeYellow) ID() ids.CardID          { return ids.LifeForALifeYellow }
-func (LifeForALifeYellow) Name() string            { return "Life for a Life" }
-func (LifeForALifeYellow) Cost(*sim.TurnState) int { return 1 }
-func (LifeForALifeYellow) Pitch() int              { return 2 }
-func (LifeForALifeYellow) Attack() int             { return 3 }
-func (LifeForALifeYellow) Defense() int            { return 2 }
-func (LifeForALifeYellow) Types() card.TypeSet     { return lifeForALifeTypes }
-func (LifeForALifeYellow) GoAgain() bool           { return sim.HeroWantsLowerHealth() }
+func (LifeForALifeYellow) GoAgain() bool { return sim.HeroWantsLowerHealth() }
 func (LifeForALifeYellow) Play(s *sim.TurnState, self *sim.CardState) {
 	n := self.DealEffectiveAttack(s)
 	s.Log(self, n)
 	self.RegisterOnHit(lifeForALifeOnHit)
 }
 
-type LifeForALifeBlue struct{}
-
-func (LifeForALifeBlue) ID() ids.CardID          { return ids.LifeForALifeBlue }
-func (LifeForALifeBlue) Name() string            { return "Life for a Life" }
-func (LifeForALifeBlue) Cost(*sim.TurnState) int { return 1 }
-func (LifeForALifeBlue) Pitch() int              { return 3 }
-func (LifeForALifeBlue) Attack() int             { return 2 }
-func (LifeForALifeBlue) Defense() int            { return 2 }
-func (LifeForALifeBlue) Types() card.TypeSet     { return lifeForALifeTypes }
-func (LifeForALifeBlue) GoAgain() bool           { return sim.HeroWantsLowerHealth() }
+func (LifeForALifeBlue) GoAgain() bool { return sim.HeroWantsLowerHealth() }
 func (LifeForALifeBlue) Play(s *sim.TurnState, self *sim.CardState) {
 	n := self.DealEffectiveAttack(s)
 	s.Log(self, n)

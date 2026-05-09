@@ -1,0 +1,14 @@
+name: Ransack and Raze
+types:
+    - Generic
+    - Action
+cost: 0
+goAgain: true
+markers:
+    - NotImplemented
+text: Destroy target landmark with cost X. Create X Gold tokens. **Go again**
+variants:
+    - id: RansackAndRazeBlue
+      pitch: 3
+      attack: 0
+      defense: 3

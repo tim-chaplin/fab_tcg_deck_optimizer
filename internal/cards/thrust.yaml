@@ -1,0 +1,11 @@
+name: Thrust
+types:
+    - Generic
+    - AttackReaction
+cost: 1
+text: Target sword attack gains +3{p}.
+variants:
+    - id: ThrustRed
+      pitch: 1
+      attack: 0
+      defense: 2

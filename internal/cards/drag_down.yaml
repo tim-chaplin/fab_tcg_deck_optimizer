@@ -1,0 +1,19 @@
+name: Drag Down
+types:
+    - Generic
+    - DefenseReaction
+cost: 0
+text: When this defends an attack, it gets -3{p}.
+variants:
+    - id: DragDownRed
+      pitch: 1
+      attack: 0
+      defense: 3
+    - id: DragDownYellow
+      pitch: 2
+      attack: 0
+      defense: 2
+    - id: DragDownBlue
+      pitch: 3
+      attack: 0
+      defense: 1

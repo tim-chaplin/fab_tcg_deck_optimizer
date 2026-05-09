@@ -1,0 +1,17 @@
+name: Sound the Alarm
+types:
+    - Generic
+    - Action
+    - Attack
+cost: 1
+markers:
+    - NotImplemented
+text: |-
+    When this attacks a hero, they reveal their hand. If an attack reaction card is revealed
+    this way, you may search your deck for a defense reaction card, reveal it, then shuffle and put
+    it on top.
+variants:
+    - id: SoundTheAlarmRed
+      pitch: 1
+      attack: 5
+      defense: 3

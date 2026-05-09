@@ -1,0 +1,22 @@
+name: Blessing of Occult
+types:
+    - Runeblade
+    - Action
+    - Aura
+cost: 1
+text: |-
+    At the start of your turn, destroy Blessing of Occult then create N Runechant tokens."
+    (Red N=3, Yellow N=2, Blue N=1.)
+variants:
+    - id: BlessingOfOccultRed
+      pitch: 1
+      attack: 0
+      defense: 2
+    - id: BlessingOfOccultYellow
+      pitch: 2
+      attack: 0
+      defense: 2
+    - id: BlessingOfOccultBlue
+      pitch: 3
+      attack: 0
+      defense: 2

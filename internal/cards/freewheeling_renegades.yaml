@@ -1,0 +1,20 @@
+name: Freewheeling Renegades
+types:
+    - Generic
+    - Action
+    - Attack
+cost: 1
+text: If this is defended by an action card, this has -2{p}.
+variants:
+    - id: FreewheelingRenegadesRed
+      pitch: 1
+      attack: 6
+      defense: 2
+    - id: FreewheelingRenegadesYellow
+      pitch: 2
+      attack: 5
+      defense: 2
+    - id: FreewheelingRenegadesBlue
+      pitch: 3
+      attack: 4
+      defense: 2

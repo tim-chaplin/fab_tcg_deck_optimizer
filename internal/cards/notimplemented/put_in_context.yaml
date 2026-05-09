@@ -1,0 +1,11 @@
+name: Put in Context
+types: []
+cost: 0
+markers:
+    - NotImplemented
+text: This can only defend an attack with 3 or less base {p}.
+variants:
+    - id: PutInContextBlue
+      pitch: 3
+      attack: 0
+      defense: 3

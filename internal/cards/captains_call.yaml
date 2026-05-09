@@ -1,0 +1,23 @@
+name: Captain's Call
+types:
+    - Generic
+    - Action
+cost: 0
+goAgain: true
+text: |-
+    Choose 1; The next attack action card with cost N or less you play this turn gains
+    +2{p}. The next attack action card with cost N or less you play this turn gains **go
+    again**. **Go again**" (Red N=2, Yellow N=1, Blue N=0.)
+variants:
+    - id: CaptainsCallRed
+      pitch: 1
+      attack: 0
+      defense: 2
+    - id: CaptainsCallYellow
+      pitch: 2
+      attack: 0
+      defense: 2
+    - id: CaptainsCallBlue
+      pitch: 3
+      attack: 0
+      defense: 2

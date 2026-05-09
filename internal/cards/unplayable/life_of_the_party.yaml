@@ -1,0 +1,27 @@
+name: Life of the Party
+types:
+    - Generic
+    - Action
+    - Attack
+cost: 2
+markers:
+    - Unplayable
+text: |-
+    You may discard or destroy a card you control named Crazy Brew rather than pay
+    Life of the Party's {r} cost. If you do, choose all modes, otherwise choose 1 at random;
+    - This gets 'When this hits, gain life 2{h}.'
+    - This gets +2{p}.
+    - This gets **go again**.
+variants:
+    - id: LifeOfThePartyRed
+      pitch: 1
+      attack: 4
+      defense: 2
+    - id: LifeOfThePartyYellow
+      pitch: 2
+      attack: 3
+      defense: 2
+    - id: LifeOfThePartyBlue
+      pitch: 3
+      attack: 2
+      defense: 2

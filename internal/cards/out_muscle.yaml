@@ -1,0 +1,20 @@
+name: Out Muscle
+types:
+    - Generic
+    - Action
+    - Attack
+cost: 3
+text: While Out Muscle isn't defended by a card with equal or greater {p}, it has **go again**.
+variants:
+    - id: OutMuscleRed
+      pitch: 1
+      attack: 6
+      defense: 2
+    - id: OutMuscleYellow
+      pitch: 2
+      attack: 5
+      defense: 2
+    - id: OutMuscleBlue
+      pitch: 3
+      attack: 4
+      defense: 2

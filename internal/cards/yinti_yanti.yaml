@@ -1,0 +1,19 @@
+name: Yinti Yanti
+types:
+    - Generic
+    - Action
+    - Attack
+cost: 0
+variants:
+    - id: YintiYantiRed
+      pitch: 1
+      attack: 3
+      defense: 2
+    - id: YintiYantiYellow
+      pitch: 2
+      attack: 2
+      defense: 2
+    - id: YintiYantiBlue
+      pitch: 3
+      attack: 1
+      defense: 2

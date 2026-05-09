@@ -1,0 +1,18 @@
+name: Amulet of Havencall
+types:
+    - Generic
+    - Action
+    - Item
+cost: 0
+goAgain: true
+markers:
+    - Unplayable
+text: |-
+    **Go again** **Defense Reaction** - Destroy Amulet of Havencall: Search your deck for a
+    card named Rally the Rearguard, add it to this chain link as a defending card, then shuffle.
+    Activate this ability only if you have no cards in hand.
+variants:
+    - id: AmuletOfHavencallBlue
+      pitch: 3
+      attack: 0
+      defense: 0

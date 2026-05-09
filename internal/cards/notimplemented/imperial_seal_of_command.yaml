@@ -1,0 +1,17 @@
+name: Imperial Seal of Command
+types:
+    - Generic
+    - Action
+    - Item
+cost: 0
+markers:
+    - NotImplemented
+text: |-
+    **Legendary** **Action** - Destroy this: Defense reaction cards can't be played this turn.
+    If you are Royal, the next time you hit a hero this turn, destroy all cards in their arsenal.
+    **Go again**
+variants:
+    - id: ImperialSealOfCommandRed
+      pitch: 1
+      attack: 0
+      defense: 0

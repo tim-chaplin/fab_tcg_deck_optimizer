@@ -1,0 +1,16 @@
+name: Emissary of Moon
+types:
+    - Generic
+    - Action
+    - Attack
+cost: 0
+markers:
+    - NotImplemented
+text: |-
+    When this attacks, you may put a card from your hand on the bottom of your deck. If you
+    do, draw a card.
+variants:
+    - id: EmissaryOfMoonRed
+      pitch: 1
+      attack: 4
+      defense: 2

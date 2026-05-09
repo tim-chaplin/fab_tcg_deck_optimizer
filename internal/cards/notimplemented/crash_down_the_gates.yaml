@@ -1,0 +1,25 @@
+name: Crash Down the Gates
+types:
+    - Generic
+    - Action
+    - Attack
+cost: 3
+markers:
+    - NotImplemented
+text: |-
+    When this attacks a hero, they reveal the top card of their deck. If this has {p} greater
+    than the revealed card, this gets +2{p}. When this hits a hero, destroy the top card of their
+    deck.
+variants:
+    - id: CrashDownTheGatesRed
+      pitch: 1
+      attack: 6
+      defense: 2
+    - id: CrashDownTheGatesYellow
+      pitch: 2
+      attack: 5
+      defense: 2
+    - id: CrashDownTheGatesBlue
+      pitch: 3
+      attack: 4
+      defense: 2

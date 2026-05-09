@@ -14,11 +14,9 @@ package cards
 
 import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
+
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 )
-
-var razorReflexTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAttackReaction)
 
 // razorReflexAccepts is the per-mode target predicate. Mode 0 gates on sword weapon
 // attack; mode 1 gates on cost-≤1 attack action. The chain runner runs this for the
@@ -52,17 +50,7 @@ func razorReflexPlay(s *sim.TurnState, self *sim.CardState, n int) {
 	}
 }
 
-type RazorReflexRed struct{}
-
-func (RazorReflexRed) ID() ids.CardID          { return ids.RazorReflexRed }
-func (RazorReflexRed) Name() string            { return "Razor Reflex" }
-func (RazorReflexRed) Cost(*sim.TurnState) int { return 1 }
-func (RazorReflexRed) Pitch() int              { return 1 }
-func (RazorReflexRed) Attack() int             { return 0 }
-func (RazorReflexRed) Defense() int            { return 2 }
-func (RazorReflexRed) Types() card.TypeSet     { return razorReflexTypes }
-func (RazorReflexRed) GoAgain() bool           { return false }
-func (RazorReflexRed) Modes() int              { return 2 }
+func (RazorReflexRed) Modes() int { return 2 }
 func (RazorReflexRed) ARTargetAllowed(c sim.Card, mode int8) bool {
 	return razorReflexAccepts(c, mode)
 }
@@ -70,17 +58,7 @@ func (RazorReflexRed) Play(s *sim.TurnState, self *sim.CardState) {
 	razorReflexPlay(s, self, 3)
 }
 
-type RazorReflexYellow struct{}
-
-func (RazorReflexYellow) ID() ids.CardID          { return ids.RazorReflexYellow }
-func (RazorReflexYellow) Name() string            { return "Razor Reflex" }
-func (RazorReflexYellow) Cost(*sim.TurnState) int { return 1 }
-func (RazorReflexYellow) Pitch() int              { return 2 }
-func (RazorReflexYellow) Attack() int             { return 0 }
-func (RazorReflexYellow) Defense() int            { return 2 }
-func (RazorReflexYellow) Types() card.TypeSet     { return razorReflexTypes }
-func (RazorReflexYellow) GoAgain() bool           { return false }
-func (RazorReflexYellow) Modes() int              { return 2 }
+func (RazorReflexYellow) Modes() int { return 2 }
 func (RazorReflexYellow) ARTargetAllowed(c sim.Card, mode int8) bool {
 	return razorReflexAccepts(c, mode)
 }
@@ -88,17 +66,7 @@ func (RazorReflexYellow) Play(s *sim.TurnState, self *sim.CardState) {
 	razorReflexPlay(s, self, 2)
 }
 
-type RazorReflexBlue struct{}
-
-func (RazorReflexBlue) ID() ids.CardID          { return ids.RazorReflexBlue }
-func (RazorReflexBlue) Name() string            { return "Razor Reflex" }
-func (RazorReflexBlue) Cost(*sim.TurnState) int { return 1 }
-func (RazorReflexBlue) Pitch() int              { return 3 }
-func (RazorReflexBlue) Attack() int             { return 0 }
-func (RazorReflexBlue) Defense() int            { return 2 }
-func (RazorReflexBlue) Types() card.TypeSet     { return razorReflexTypes }
-func (RazorReflexBlue) GoAgain() bool           { return false }
-func (RazorReflexBlue) Modes() int              { return 2 }
+func (RazorReflexBlue) Modes() int { return 2 }
 func (RazorReflexBlue) ARTargetAllowed(c sim.Card, mode int8) bool {
 	return razorReflexAccepts(c, mode)
 }

@@ -1,0 +1,22 @@
+name: Force Sight
+types:
+    - Generic
+    - Action
+cost: 1
+goAgain: true
+text: |-
+    The next attack action card you play this turn gains +N{p}. If Force Sight is played from
+    arsenal, **opt 2**. **Go again**" (Red N=3, Yellow N=2, Blue N=1.)
+variants:
+    - id: ForceSightRed
+      pitch: 1
+      attack: 0
+      defense: 2
+    - id: ForceSightYellow
+      pitch: 2
+      attack: 0
+      defense: 2
+    - id: ForceSightBlue
+      pitch: 3
+      attack: 0
+      defense: 2

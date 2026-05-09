@@ -1,0 +1,22 @@
+name: Demolition Crew
+types:
+    - Generic
+    - Action
+    - Attack
+cost: 2
+text: |-
+    As an additional cost to play Demolition Crew, reveal a card in your hand with cost 2 or
+    greater. **Dominate**
+variants:
+    - id: DemolitionCrewRed
+      pitch: 1
+      attack: 6
+      defense: 2
+    - id: DemolitionCrewYellow
+      pitch: 2
+      attack: 5
+      defense: 2
+    - id: DemolitionCrewBlue
+      pitch: 3
+      attack: 4
+      defense: 2

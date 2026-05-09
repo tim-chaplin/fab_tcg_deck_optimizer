@@ -11,28 +11,13 @@
 package notimplemented
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/cards"
 )
 
-var smashingGoodTimeTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction)
-
-type SmashingGoodTimeRed struct{}
-
-func (SmashingGoodTimeRed) ID() ids.CardID          { return ids.SmashingGoodTimeRed }
-func (SmashingGoodTimeRed) Name() string            { return "Smashing Good Time" }
-func (SmashingGoodTimeRed) Cost(*sim.TurnState) int { return 0 }
-func (SmashingGoodTimeRed) Pitch() int              { return 1 }
-func (SmashingGoodTimeRed) Attack() int             { return 0 }
-func (SmashingGoodTimeRed) Defense() int            { return 2 }
-func (SmashingGoodTimeRed) Types() card.TypeSet     { return smashingGoodTimeTypes }
-func (SmashingGoodTimeRed) GoAgain() bool           { return true }
-
 // not implemented: on-hit item-destruction rider
-func (SmashingGoodTimeRed) NotImplemented() {}
+
 func (SmashingGoodTimeRed) Play(s *sim.TurnState, self *sim.CardState) {
 	if self.FromArsenal {
 		cards.GrantNextCardBonusAttack(s, 3, cards.IsAttackAction)
@@ -40,19 +25,8 @@ func (SmashingGoodTimeRed) Play(s *sim.TurnState, self *sim.CardState) {
 	s.Log(self, 0)
 }
 
-type SmashingGoodTimeYellow struct{}
-
-func (SmashingGoodTimeYellow) ID() ids.CardID          { return ids.SmashingGoodTimeYellow }
-func (SmashingGoodTimeYellow) Name() string            { return "Smashing Good Time" }
-func (SmashingGoodTimeYellow) Cost(*sim.TurnState) int { return 0 }
-func (SmashingGoodTimeYellow) Pitch() int              { return 2 }
-func (SmashingGoodTimeYellow) Attack() int             { return 0 }
-func (SmashingGoodTimeYellow) Defense() int            { return 2 }
-func (SmashingGoodTimeYellow) Types() card.TypeSet     { return smashingGoodTimeTypes }
-func (SmashingGoodTimeYellow) GoAgain() bool           { return true }
-
 // not implemented: on-hit item-destruction rider
-func (SmashingGoodTimeYellow) NotImplemented() {}
+
 func (SmashingGoodTimeYellow) Play(s *sim.TurnState, self *sim.CardState) {
 	if self.FromArsenal {
 		cards.GrantNextCardBonusAttack(s, 2, cards.IsAttackAction)
@@ -60,19 +34,8 @@ func (SmashingGoodTimeYellow) Play(s *sim.TurnState, self *sim.CardState) {
 	s.Log(self, 0)
 }
 
-type SmashingGoodTimeBlue struct{}
-
-func (SmashingGoodTimeBlue) ID() ids.CardID          { return ids.SmashingGoodTimeBlue }
-func (SmashingGoodTimeBlue) Name() string            { return "Smashing Good Time" }
-func (SmashingGoodTimeBlue) Cost(*sim.TurnState) int { return 0 }
-func (SmashingGoodTimeBlue) Pitch() int              { return 3 }
-func (SmashingGoodTimeBlue) Attack() int             { return 0 }
-func (SmashingGoodTimeBlue) Defense() int            { return 2 }
-func (SmashingGoodTimeBlue) Types() card.TypeSet     { return smashingGoodTimeTypes }
-func (SmashingGoodTimeBlue) GoAgain() bool           { return true }
-
 // not implemented: on-hit item-destruction rider
-func (SmashingGoodTimeBlue) NotImplemented() {}
+
 func (SmashingGoodTimeBlue) Play(s *sim.TurnState, self *sim.CardState) {
 	if self.FromArsenal {
 		cards.GrantNextCardBonusAttack(s, 1, cards.IsAttackAction)

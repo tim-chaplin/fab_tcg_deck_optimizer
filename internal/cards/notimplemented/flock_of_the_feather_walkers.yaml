@@ -1,0 +1,24 @@
+name: Flock of the Feather Walkers
+types:
+    - Generic
+    - Action
+    - Attack
+cost: 1
+markers:
+    - NotImplemented
+text: |-
+    As an additional cost to play Flock of the Feather Walkers, reveal a card in your hand
+    with cost 1 or less. When you attack with Flock of the Feather Walkers, create a Quicken token.
+variants:
+    - id: FlockOfTheFeatherWalkersRed
+      pitch: 1
+      attack: 5
+      defense: 2
+    - id: FlockOfTheFeatherWalkersYellow
+      pitch: 2
+      attack: 4
+      defense: 2
+    - id: FlockOfTheFeatherWalkersBlue
+      pitch: 3
+      attack: 3
+      defense: 2

@@ -1,0 +1,22 @@
+name: Performance Bonus
+types:
+    - Generic
+    - Action
+    - Attack
+cost: 0
+text: |-
+    When this hits, create a Gold token. If this was played from arsenal, it gets
+    **Go again**.
+variants:
+    - id: PerformanceBonusRed
+      pitch: 1
+      attack: 3
+      defense: 2
+    - id: PerformanceBonusYellow
+      pitch: 2
+      attack: 2
+      defense: 2
+    - id: PerformanceBonusBlue
+      pitch: 3
+      attack: 1
+      defense: 2

@@ -1,0 +1,21 @@
+name: Fate Foreseen
+types:
+    - Generic
+    - DefenseReaction
+cost: 0
+markers:
+    - NotSilverAgeLegal
+text: Opt 1
+variants:
+    - id: FateForeseenRed
+      pitch: 1
+      attack: 0
+      defense: 4
+    - id: FateForeseenYellow
+      pitch: 2
+      attack: 0
+      defense: 3
+    - id: FateForeseenBlue
+      pitch: 3
+      attack: 0
+      defense: 2

@@ -1,0 +1,22 @@
+name: Pound for Pound
+types:
+    - Generic
+    - Action
+    - Attack
+cost: 3
+text: |-
+    When you play Pound for Pound, if you have less {h} than an opposing hero, it gains
+    **dominate**.
+variants:
+    - id: PoundForPoundRed
+      pitch: 1
+      attack: 6
+      defense: 2
+    - id: PoundForPoundYellow
+      pitch: 2
+      attack: 5
+      defense: 2
+    - id: PoundForPoundBlue
+      pitch: 3
+      attack: 4
+      defense: 2

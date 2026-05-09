@@ -1,0 +1,22 @@
+name: Sloggism
+types:
+    - Generic
+    - Action
+cost: 3
+goAgain: true
+text: |-
+    The next attack action card with cost 2 or greater you play this turn gains +N{p}. **Go
+    again**" (Red N=6, Yellow N=5, Blue N=4.)
+variants:
+    - id: SloggismRed
+      pitch: 1
+      attack: 0
+      defense: 2
+    - id: SloggismYellow
+      pitch: 2
+      attack: 0
+      defense: 2
+    - id: SloggismBlue
+      pitch: 3
+      attack: 0
+      defense: 2

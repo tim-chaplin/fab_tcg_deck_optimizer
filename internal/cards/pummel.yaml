@@ -1,0 +1,22 @@
+name: Pummel
+types:
+    - Generic
+    - AttackReaction
+cost: 2
+text: |-
+    Choose 1; Target club or hammer weapon attack gains +N{p}. Target attack action
+    card with cost 2 or more gets +N{p} and 'When this hits a hero, they discard a card.'"
+    (Red N=4, Yellow N=3, Blue N=2.)
+variants:
+    - id: PummelRed
+      pitch: 1
+      attack: 0
+      defense: 2
+    - id: PummelYellow
+      pitch: 2
+      attack: 0
+      defense: 2
+    - id: PummelBlue
+      pitch: 3
+      attack: 0
+      defense: 2

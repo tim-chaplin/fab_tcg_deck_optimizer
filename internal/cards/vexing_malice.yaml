@@ -1,0 +1,20 @@
+name: Vexing Malice
+types:
+    - Runeblade
+    - Action
+    - Attack
+cost: 1
+text: Deal 2 arcane damage to target hero.
+variants:
+    - id: VexingMaliceRed
+      pitch: 1
+      attack: 3
+      defense: 3
+    - id: VexingMaliceYellow
+      pitch: 2
+      attack: 2
+      defense: 3
+    - id: VexingMaliceBlue
+      pitch: 3
+      attack: 1
+      defense: 3

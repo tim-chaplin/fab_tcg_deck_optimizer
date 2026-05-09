@@ -1,0 +1,22 @@
+name: Tremor of íArathael
+types:
+    - Generic
+    - Action
+    - Attack
+cost: 1
+text: |-
+    If a card has been put into your banished zone this turn, Tremor of íArathael gains
+    +2{p}.
+variants:
+    - id: TremorOfIArathaelRed
+      pitch: 1
+      attack: 4
+      defense: 2
+    - id: TremorOfIArathaelYellow
+      pitch: 2
+      attack: 3
+      defense: 2
+    - id: TremorOfIArathaelBlue
+      pitch: 3
+      attack: 2
+      defense: 2

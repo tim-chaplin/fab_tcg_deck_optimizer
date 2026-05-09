@@ -1,0 +1,22 @@
+name: Sky Fire Lanterns
+types:
+    - Runeblade
+    - Action
+cost: 0
+goAgain: true
+text: |-
+    Reveal the top card of your deck. If it's <same color as this variant>, create a
+    Runechant token.
+variants:
+    - id: SkyFireLanternsRed
+      pitch: 1
+      attack: 0
+      defense: 2
+    - id: SkyFireLanternsYellow
+      pitch: 2
+      attack: 0
+      defense: 2
+    - id: SkyFireLanternsBlue
+      pitch: 3
+      attack: 0
+      defense: 2

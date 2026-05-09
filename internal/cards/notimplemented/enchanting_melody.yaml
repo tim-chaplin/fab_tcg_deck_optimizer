@@ -1,0 +1,26 @@
+name: Enchanting Melody
+types:
+    - Generic
+    - Action
+    - Aura
+cost: 2
+goAgain: true
+markers:
+    - NotImplemented
+text: |-
+    **Go again** If your hero would be dealt damage, instead destroy Enchanting Melody and
+    prevent 4 damage that source would deal. At the beginning of your end phase, destroy Enchanting
+    Melody unless you have played a 'non-attack' action card this turn.
+variants:
+    - id: EnchantingMelodyRed
+      pitch: 1
+      attack: 0
+      defense: 2
+    - id: EnchantingMelodyYellow
+      pitch: 2
+      attack: 0
+      defense: 2
+    - id: EnchantingMelodyBlue
+      pitch: 3
+      attack: 0
+      defense: 2

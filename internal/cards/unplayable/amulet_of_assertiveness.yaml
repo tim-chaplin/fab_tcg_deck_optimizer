@@ -1,0 +1,18 @@
+name: Amulet of Assertiveness
+types:
+    - Generic
+    - Action
+    - Item
+cost: 0
+goAgain: true
+markers:
+    - Unplayable
+text: |-
+    **Go again** **Attack Reaction** - Destroy Amulet of Assertiveness: Target attack gains
+    "When this hits, banish the top card of your deck. If it's an attack action card, you may play it
+    this turn." Activate this ability only if you have 4 or more cards in hand.
+variants:
+    - id: AmuletOfAssertivenessYellow
+      pitch: 2
+      attack: 0
+      defense: 0

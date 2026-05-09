@@ -1,0 +1,22 @@
+name: Aether Slash
+types:
+    - Runeblade
+    - Action
+    - Attack
+cost: 1
+text: |-
+    When Aether Slash attacks, if a 'non-attack' action card was pitched to play it, deal 1
+    arcane damage to any target.
+variants:
+    - id: AetherSlashRed
+      pitch: 1
+      attack: 4
+      defense: 3
+    - id: AetherSlashYellow
+      pitch: 2
+      attack: 3
+      defense: 3
+    - id: AetherSlashBlue
+      pitch: 3
+      attack: 2
+      defense: 3

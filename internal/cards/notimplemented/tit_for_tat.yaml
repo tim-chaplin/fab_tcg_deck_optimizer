@@ -1,0 +1,14 @@
+name: Tit for Tat
+types:
+    - Generic
+    - Action
+cost: 0
+goAgain: true
+markers:
+    - NotImplemented
+text: '{t} target hero. {u} another target hero. **Go again**'
+variants:
+    - id: TitForTatBlue
+      pitch: 3
+      attack: 0
+      defense: 2

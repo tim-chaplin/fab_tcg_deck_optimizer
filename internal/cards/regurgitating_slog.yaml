@@ -1,0 +1,22 @@
+name: Regurgitating Slog
+types:
+    - Generic
+    - Action
+    - Attack
+cost: 2
+text: |-
+    As an additional cost to play Regurgitating Slog, you may banish a card named Sloggism
+    from your graveyard. If you do, Regurgitating Slog gains **dominate**.
+variants:
+    - id: RegurgitatingSlogRed
+      pitch: 1
+      attack: 6
+      defense: 2
+    - id: RegurgitatingSlogYellow
+      pitch: 2
+      attack: 5
+      defense: 2
+    - id: RegurgitatingSlogBlue
+      pitch: 3
+      attack: 4
+      defense: 2

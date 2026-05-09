@@ -1,0 +1,22 @@
+name: Scout the Periphery
+types:
+    - Generic
+    - Action
+cost: 0
+goAgain: true
+text: |-
+    Look at the top card of target hero's deck. The next attack action card you play from
+    arsenal this turn gains +N{p}. **Go again**" (Red N=3, Yellow N=2, Blue N=1.)
+variants:
+    - id: ScoutThePeripheryRed
+      pitch: 1
+      attack: 0
+      defense: 2
+    - id: ScoutThePeripheryYellow
+      pitch: 2
+      attack: 0
+      defense: 2
+    - id: ScoutThePeripheryBlue
+      pitch: 3
+      attack: 0
+      defense: 2

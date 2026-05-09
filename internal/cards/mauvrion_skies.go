@@ -16,8 +16,6 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 )
 
-var mauvrionSkiesTypes = card.NewTypeSet(card.TypeRuneblade, card.TypeAction)
-
 // mauvrionTargetMatches accepts Runeblade attack action cards (weapons don't qualify).
 func mauvrionTargetMatches(target *sim.CardState) bool {
 	t := target.Card.Types()
@@ -72,44 +70,14 @@ var onHitRunechantText = func() map[ids.CardID]string {
 	return out
 }()
 
-type MauvrionSkiesRed struct{}
-
-func (MauvrionSkiesRed) ID() ids.CardID          { return ids.MauvrionSkiesRed }
-func (MauvrionSkiesRed) Name() string            { return "Mauvrion Skies" }
-func (MauvrionSkiesRed) Cost(*sim.TurnState) int { return 0 }
-func (MauvrionSkiesRed) Pitch() int              { return 1 }
-func (MauvrionSkiesRed) Attack() int             { return 0 }
-func (MauvrionSkiesRed) Defense() int            { return 2 }
-func (MauvrionSkiesRed) Types() card.TypeSet     { return mauvrionSkiesTypes }
-func (MauvrionSkiesRed) GoAgain() bool           { return true }
 func (c MauvrionSkiesRed) Play(s *sim.TurnState, self *sim.CardState) {
 	mauvrionSkiesPlay(s, self, c, 3)
 }
 
-type MauvrionSkiesYellow struct{}
-
-func (MauvrionSkiesYellow) ID() ids.CardID          { return ids.MauvrionSkiesYellow }
-func (MauvrionSkiesYellow) Name() string            { return "Mauvrion Skies" }
-func (MauvrionSkiesYellow) Cost(*sim.TurnState) int { return 0 }
-func (MauvrionSkiesYellow) Pitch() int              { return 2 }
-func (MauvrionSkiesYellow) Attack() int             { return 0 }
-func (MauvrionSkiesYellow) Defense() int            { return 2 }
-func (MauvrionSkiesYellow) Types() card.TypeSet     { return mauvrionSkiesTypes }
-func (MauvrionSkiesYellow) GoAgain() bool           { return true }
 func (c MauvrionSkiesYellow) Play(s *sim.TurnState, self *sim.CardState) {
 	mauvrionSkiesPlay(s, self, c, 2)
 }
 
-type MauvrionSkiesBlue struct{}
-
-func (MauvrionSkiesBlue) ID() ids.CardID          { return ids.MauvrionSkiesBlue }
-func (MauvrionSkiesBlue) Name() string            { return "Mauvrion Skies" }
-func (MauvrionSkiesBlue) Cost(*sim.TurnState) int { return 0 }
-func (MauvrionSkiesBlue) Pitch() int              { return 3 }
-func (MauvrionSkiesBlue) Attack() int             { return 0 }
-func (MauvrionSkiesBlue) Defense() int            { return 2 }
-func (MauvrionSkiesBlue) Types() card.TypeSet     { return mauvrionSkiesTypes }
-func (MauvrionSkiesBlue) GoAgain() bool           { return true }
 func (c MauvrionSkiesBlue) Play(s *sim.TurnState, self *sim.CardState) {
 	mauvrionSkiesPlay(s, self, c, 1)
 }

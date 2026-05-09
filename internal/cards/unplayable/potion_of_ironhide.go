@@ -6,22 +6,7 @@
 package unplayable
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 )
 
-var potionOfIronhideTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeItem)
-
-type PotionOfIronhideBlue struct{}
-
-func (PotionOfIronhideBlue) ID() ids.CardID                             { return ids.PotionOfIronhideBlue }
-func (PotionOfIronhideBlue) Name() string                               { return "Potion of Ironhide" }
-func (PotionOfIronhideBlue) Cost(*sim.TurnState) int                    { return 0 }
-func (PotionOfIronhideBlue) Pitch() int                                 { return 3 }
-func (PotionOfIronhideBlue) Attack() int                                { return 0 }
-func (PotionOfIronhideBlue) Defense() int                               { return 0 }
-func (PotionOfIronhideBlue) Types() card.TypeSet                        { return potionOfIronhideTypes }
-func (PotionOfIronhideBlue) GoAgain() bool                              { return false }
-func (PotionOfIronhideBlue) Unplayable()                                {}
 func (PotionOfIronhideBlue) Play(s *sim.TurnState, self *sim.CardState) { s.Log(self, 0) }

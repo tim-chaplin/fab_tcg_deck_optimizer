@@ -1,0 +1,24 @@
+name: Frontline Scout
+types:
+    - Generic
+    - Action
+    - Attack
+cost: 0
+markers:
+    - NotImplemented
+text: |-
+    You may look at the defending hero's hand. If Frontline Scout is played from arsenal, it
+    gains **go again**.
+variants:
+    - id: FrontlineScoutRed
+      pitch: 1
+      attack: 3
+      defense: 2
+    - id: FrontlineScoutYellow
+      pitch: 2
+      attack: 2
+      defense: 2
+    - id: FrontlineScoutBlue
+      pitch: 3
+      attack: 1
+      defense: 2

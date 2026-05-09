@@ -1,0 +1,25 @@
+name: Nimby
+types:
+    - Generic
+    - Action
+    - Attack
+cost: 0
+markers:
+    - NotSilverAgeLegal
+    - Unplayable
+text: |-
+    When this attacks, you may search your deck for a Nimblism, reveal it, put it into your
+    hand, then shuffle.
+variants:
+    - id: NimbyRed
+      pitch: 1
+      attack: 3
+      defense: 2
+    - id: NimbyYellow
+      pitch: 2
+      attack: 2
+      defense: 2
+    - id: NimbyBlue
+      pitch: 3
+      attack: 1
+      defense: 2

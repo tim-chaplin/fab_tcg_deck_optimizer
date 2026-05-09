@@ -1,0 +1,16 @@
+name: Potion of Ironhide
+types:
+    - Generic
+    - Action
+    - Item
+cost: 0
+markers:
+    - Unplayable
+text: |-
+    **Instant** - Destroy Potion of Ironhide: Attack action cards you own gain +1{d} this
+    turn.
+variants:
+    - id: PotionOfIronhideBlue
+      pitch: 3
+      attack: 0
+      defense: 0

@@ -1,0 +1,14 @@
+name: Potion of Strength
+types:
+    - Generic
+    - Action
+    - Item
+cost: 0
+markers:
+    - Unplayable
+text: '**Action** - Destroy this: Your next attack this turn gains +2{p}. **Go again**'
+variants:
+    - id: PotionOfStrengthBlue
+      pitch: 3
+      attack: 0
+      defense: 0

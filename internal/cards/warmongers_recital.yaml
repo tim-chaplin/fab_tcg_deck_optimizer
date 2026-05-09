@@ -1,0 +1,22 @@
+name: Warmonger's Recital
+types:
+    - Generic
+    - Action
+cost: 1
+goAgain: true
+text: |-
+    The next attack action card you play this turn gains +N{p} and "When this hits, put it on
+    the bottom of its owner's deck." **Go again**" (Red N=3, Yellow N=2, Blue N=1.)
+variants:
+    - id: WarmongersRecitalRed
+      pitch: 1
+      attack: 0
+      defense: 2
+    - id: WarmongersRecitalYellow
+      pitch: 2
+      attack: 0
+      defense: 2
+    - id: WarmongersRecitalBlue
+      pitch: 3
+      attack: 0
+      defense: 2

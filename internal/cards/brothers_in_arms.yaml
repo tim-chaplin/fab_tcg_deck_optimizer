@@ -1,0 +1,20 @@
+name: Brothers in Arms
+types:
+    - Generic
+    - Action
+    - Attack
+cost: 2
+text: When this defends, you may pay {r}. If you do, it gets +2{d}.
+variants:
+    - id: BrothersInArmsRed
+      pitch: 1
+      attack: 6
+      defense: 2
+    - id: BrothersInArmsYellow
+      pitch: 2
+      attack: 5
+      defense: 2
+    - id: BrothersInArmsBlue
+      pitch: 3
+      attack: 4
+      defense: 2

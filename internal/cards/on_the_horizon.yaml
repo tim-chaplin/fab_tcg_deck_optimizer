@@ -1,0 +1,19 @@
+name: On the Horizon
+types:
+    - Generic
+    - Block
+cost: 0
+text: When this defends, look at the top card of your deck.
+variants:
+    - id: OnTheHorizonRed
+      pitch: 1
+      attack: 0
+      defense: 4
+    - id: OnTheHorizonYellow
+      pitch: 2
+      attack: 0
+      defense: 3
+    - id: OnTheHorizonBlue
+      pitch: 3
+      attack: 0
+      defense: 2

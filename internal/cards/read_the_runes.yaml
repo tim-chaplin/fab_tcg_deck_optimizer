@@ -1,0 +1,19 @@
+name: Read the Runes
+types:
+    - Runeblade
+    - Action
+cost: 0
+text: Create N Runechant tokens." (Red N=3, Yellow N=2, Blue N=1.)
+variants:
+    - id: ReadTheRunesRed
+      pitch: 1
+      attack: 0
+      defense: 2
+    - id: ReadTheRunesYellow
+      pitch: 2
+      attack: 0
+      defense: 2
+    - id: ReadTheRunesBlue
+      pitch: 3
+      attack: 0
+      defense: 2

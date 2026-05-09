@@ -1,0 +1,22 @@
+name: Cadaverous Contraband
+types:
+    - Generic
+    - Action
+    - Attack
+cost: 2
+text: |-
+    If Cadaverous Contraband hits, you may put a 'non-attack' action card from your graveyard
+    on top of your deck.
+variants:
+    - id: CadaverousContrabandRed
+      pitch: 1
+      attack: 6
+      defense: 2
+    - id: CadaverousContrabandYellow
+      pitch: 2
+      attack: 5
+      defense: 2
+    - id: CadaverousContrabandBlue
+      pitch: 3
+      attack: 4
+      defense: 2

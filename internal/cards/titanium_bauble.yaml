@@ -1,0 +1,10 @@
+name: Titanium Bauble
+types:
+    - Generic
+    - Resource
+cost: 0
+variants:
+    - id: TitaniumBaubleBlue
+      pitch: 3
+      attack: 0
+      defense: 3

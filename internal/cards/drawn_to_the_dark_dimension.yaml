@@ -1,0 +1,22 @@
+name: Drawn to the Dark Dimension
+types:
+    - Runeblade
+    - Action
+    - Attack
+cost: variable
+text: |-
+    Drawn to the Dark Dimension costs {r} less to play for each Runechant you control.
+    Draw a card.
+variants:
+    - id: DrawnToTheDarkDimensionRed
+      pitch: 1
+      attack: 3
+      defense: 3
+    - id: DrawnToTheDarkDimensionYellow
+      pitch: 2
+      attack: 2
+      defense: 3
+    - id: DrawnToTheDarkDimensionBlue
+      pitch: 3
+      attack: 1
+      defense: 3

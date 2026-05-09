@@ -1,0 +1,17 @@
+name: Cash In
+types:
+    - Generic
+    - Action
+cost: 4
+goAgain: true
+markers:
+    - NotSilverAgeLegal
+    - Unplayable
+text: |-
+    You may destroy 4 Coppers, 2 Silvers, or 1 Gold you control rather than pay Cash In's {r}
+    cost. Draw 2 cards. **Go again**
+variants:
+    - id: CashInYellow
+      pitch: 2
+      attack: 0
+      defense: 2

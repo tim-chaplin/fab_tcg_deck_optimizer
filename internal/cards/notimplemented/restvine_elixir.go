@@ -6,28 +6,13 @@
 package notimplemented
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/cards"
 )
 
-var restvineElixirTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction)
-
-type RestvineElixirRed struct{}
-
-func (RestvineElixirRed) ID() ids.CardID          { return ids.RestvineElixirRed }
-func (RestvineElixirRed) Name() string            { return "Restvine Elixir" }
-func (RestvineElixirRed) Cost(*sim.TurnState) int { return 1 }
-func (RestvineElixirRed) Pitch() int              { return 1 }
-func (RestvineElixirRed) Attack() int             { return 0 }
-func (RestvineElixirRed) Defense() int            { return 3 }
-func (RestvineElixirRed) Types() card.TypeSet     { return restvineElixirTypes }
-func (RestvineElixirRed) GoAgain() bool           { return true }
-
 // not implemented: Inertia health-gain rider dropped (status tokens not tracked)
-func (RestvineElixirRed) NotImplemented() {}
+
 func (RestvineElixirRed) Play(s *sim.TurnState, self *sim.CardState) {
 	cards.GrantNextCardBonusAttack(s, 3, cards.IsAttack)
 	n := self.DealEffectiveAttack(s)

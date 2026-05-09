@@ -1,0 +1,25 @@
+name: Condemn to Slaughter
+types:
+    - Runeblade
+    - Action
+cost: 1
+goAgain: true
+markers:
+    - NotImplemented
+text: |-
+    Your next Runeblade attack this turn gets +N{p}. You may destroy an aura you control. If
+    you do, each opponent destroys an aura permanent they control. Go again."
+    (Red N=3, Yellow N=2, Blue N=1.)
+variants:
+    - id: CondemnToSlaughterRed
+      pitch: 1
+      attack: 0
+      defense: 3
+    - id: CondemnToSlaughterYellow
+      pitch: 2
+      attack: 0
+      defense: 3
+    - id: CondemnToSlaughterBlue
+      pitch: 3
+      attack: 0
+      defense: 3

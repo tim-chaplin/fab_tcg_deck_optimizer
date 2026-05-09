@@ -1,0 +1,15 @@
+name: Sigil of Fyendal
+types:
+    - Generic
+    - Action
+    - Aura
+cost: 0
+goAgain: true
+text: |-
+    **Go again** At the beginning of your action phase, destroy this. When this leaves the
+    arena, gain 1{h}.
+variants:
+    - id: SigilOfFyendalBlue
+      pitch: 3
+      attack: 0
+      defense: 2

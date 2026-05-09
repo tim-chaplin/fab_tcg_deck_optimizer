@@ -1,0 +1,23 @@
+name: Brandish
+types:
+    - Generic
+    - Action
+    - Attack
+cost: 1
+goAgain: true
+markers:
+    - NotImplemented
+text: If Brandish hits, your next weapon attack this turn gains +1{p}. **Go again**
+variants:
+    - id: BrandishRed
+      pitch: 1
+      attack: 3
+      defense: 2
+    - id: BrandishYellow
+      pitch: 2
+      attack: 2
+      defense: 2
+    - id: BrandishBlue
+      pitch: 3
+      attack: 1
+      defense: 2

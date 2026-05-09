@@ -1,0 +1,16 @@
+name: Potion of Luck
+types:
+    - Generic
+    - Action
+    - Item
+cost: 0
+markers:
+    - Unplayable
+text: |-
+    **Instant** - Destroy Potion of Luck: Shuffle your hand and arsenal into your deck then
+    draw that many cards.
+variants:
+    - id: PotionOfLuckBlue
+      pitch: 3
+      attack: 0
+      defense: 0

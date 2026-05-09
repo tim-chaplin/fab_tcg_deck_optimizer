@@ -1,0 +1,22 @@
+name: Count Your Blessings
+types:
+    - Generic
+    - Instant
+cost: 2
+markers:
+    - NotSilverAgeLegal
+    - Unplayable
+text: Gain X{h}, where X is 3 plus the number of Count Your Blessings in your graveyard.
+variants:
+    - id: CountYourBlessingsRed
+      pitch: 1
+      attack: 0
+      defense: 0
+    - id: CountYourBlessingsYellow
+      pitch: 2
+      attack: 0
+      defense: 0
+    - id: CountYourBlessingsBlue
+      pitch: 3
+      attack: 0
+      defense: 0

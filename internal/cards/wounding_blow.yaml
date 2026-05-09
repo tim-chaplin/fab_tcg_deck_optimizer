@@ -1,0 +1,19 @@
+name: Wounding Blow
+types:
+    - Generic
+    - Action
+    - Attack
+cost: 0
+variants:
+    - id: WoundingBlowRed
+      pitch: 1
+      attack: 4
+      defense: 3
+    - id: WoundingBlowYellow
+      pitch: 2
+      attack: 3
+      defense: 3
+    - id: WoundingBlowBlue
+      pitch: 3
+      attack: 2
+      defense: 3

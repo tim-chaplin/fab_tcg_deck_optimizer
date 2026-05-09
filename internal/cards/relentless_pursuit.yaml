@@ -1,0 +1,14 @@
+name: Relentless Pursuit
+types:
+    - Generic
+    - Action
+cost: 0
+goAgain: true
+text: |-
+    **Mark** target opposing hero. If you've attacked them this turn, put this on the bottom
+    of its owner's deck. **Go again**
+variants:
+    - id: RelentlessPursuitBlue
+      pitch: 3
+      attack: 0
+      defense: 3

@@ -1,0 +1,15 @@
+name: Destructive Tendencies
+types:
+    - Generic
+    - Instant
+cost: 0
+markers:
+    - Unplayable
+text: |-
+    Choose 1 or both; - Remove all counters from target item token. - Remove all
+    counters from target aura token.
+variants:
+    - id: DestructiveTendenciesBlue
+      pitch: 3
+      attack: 0
+      defense: 0

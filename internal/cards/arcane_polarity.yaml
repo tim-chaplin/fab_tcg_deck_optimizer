@@ -1,0 +1,21 @@
+name: Arcane Polarity
+types:
+    - Generic
+    - Instant
+cost: 0
+text: |-
+    Gain 1{h} If you've been dealt arcane damage this turn, instead gain N{h}."
+    (Red N=4, Yellow N=3, Blue N=2.)
+variants:
+    - id: ArcanePolarityRed
+      pitch: 1
+      attack: 0
+      defense: 0
+    - id: ArcanePolarityYellow
+      pitch: 2
+      attack: 0
+      defense: 0
+    - id: ArcanePolarityBlue
+      pitch: 3
+      attack: 0
+      defense: 0

@@ -1,0 +1,20 @@
+name: Shrill of Skullform
+types:
+    - Runeblade
+    - Action
+    - Attack
+cost: 2
+text: If you have played or created an aura this turn, Shrill of Skullform gains +3{p}.
+variants:
+    - id: ShrillOfSkullformRed
+      pitch: 1
+      attack: 4
+      defense: 3
+    - id: ShrillOfSkullformYellow
+      pitch: 2
+      attack: 3
+      defense: 3
+    - id: ShrillOfSkullformBlue
+      pitch: 3
+      attack: 2
+      defense: 3

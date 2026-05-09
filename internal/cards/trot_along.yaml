@@ -1,0 +1,12 @@
+name: Trot Along
+types:
+    - Generic
+    - Action
+cost: 0
+goAgain: true
+text: Your next attack with 3 or less base {p} this turn gets **go again**. **Go again**
+variants:
+    - id: TrotAlongBlue
+      pitch: 3
+      attack: 0
+      defense: 3

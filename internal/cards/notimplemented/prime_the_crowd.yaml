@@ -1,0 +1,25 @@
+name: Prime the Crowd
+types:
+    - Generic
+    - Action
+cost: 2
+goAgain: true
+markers:
+    - NotImplemented
+text: |-
+    The next attack action card you play this turn gets +N{p}. **The crowd cheers** each
+    Revered hero. **The crowd boos** each Reviled hero. **Go again**" (Red N=4, Yellow N=3, Blue
+    N=2.)
+variants:
+    - id: PrimeTheCrowdRed
+      pitch: 1
+      attack: 0
+      defense: 2
+    - id: PrimeTheCrowdYellow
+      pitch: 2
+      attack: 0
+      defense: 2
+    - id: PrimeTheCrowdBlue
+      pitch: 3
+      attack: 0
+      defense: 2

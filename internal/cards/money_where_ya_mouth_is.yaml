@@ -1,0 +1,22 @@
+name: Money Where Ya Mouth Is
+types:
+    - Generic
+    - Action
+cost: 1
+goAgain: true
+text: |-
+    Your next attack this turn gets +N{p} and "When this attacks a hero, you may
+    **wager** a Gold token with them."" (Red N=3, Yellow N=2, Blue N=1.)
+variants:
+    - id: MoneyWhereYaMouthIsRed
+      pitch: 1
+      attack: 0
+      defense: 2
+    - id: MoneyWhereYaMouthIsYellow
+      pitch: 2
+      attack: 0
+      defense: 2
+    - id: MoneyWhereYaMouthIsBlue
+      pitch: 3
+      attack: 0
+      defense: 2

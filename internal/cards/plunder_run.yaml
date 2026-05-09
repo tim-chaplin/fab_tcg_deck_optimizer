@@ -1,0 +1,25 @@
+name: Plunder Run
+types:
+    - Generic
+    - Action
+cost: 0
+goAgain: true
+markers:
+    - NotSilverAgeLegal
+text: |-
+    The next time an attack action card you control hits this turn, draw a card. If
+    Plunder Run is played from arsenal, the next attack action card you play this turn gains
+    +N{p}. **Go again**" (Red N=3, Yellow N=2, Blue N=1.)
+variants:
+    - id: PlunderRunRed
+      pitch: 1
+      attack: 0
+      defense: 2
+    - id: PlunderRunYellow
+      pitch: 2
+      attack: 0
+      defense: 2
+    - id: PlunderRunBlue
+      pitch: 3
+      attack: 0
+      defense: 2

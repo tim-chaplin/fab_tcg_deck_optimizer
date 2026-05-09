@@ -1,0 +1,22 @@
+name: Blanch
+types:
+    - Generic
+    - Action
+    - Attack
+cost: 3
+markers:
+    - NotImplemented
+text: When this hits a hero, cards they own lose all colors until the end of their next turn.
+variants:
+    - id: BlanchRed
+      pitch: 1
+      attack: 7
+      defense: 2
+    - id: BlanchYellow
+      pitch: 2
+      attack: 6
+      defense: 2
+    - id: BlanchBlue
+      pitch: 3
+      attack: 5
+      defense: 2

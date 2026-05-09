@@ -1,0 +1,16 @@
+name: Sapwood Elixir
+types:
+    - Generic
+    - Action
+cost: 1
+goAgain: true
+markers:
+    - NotImplemented
+text: |-
+    Your next attack this turn gets +3{p}. You may destroy a Frailty token you control. If you
+    do, gain 1{h}. **Go again**
+variants:
+    - id: SapwoodElixirRed
+      pitch: 1
+      attack: 0
+      defense: 3

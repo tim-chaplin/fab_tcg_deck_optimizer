@@ -1,0 +1,20 @@
+name: Arcanic Crackle
+types:
+    - Runeblade
+    - Action
+    - Attack
+cost: 0
+text: Deal 1 arcane damage to target hero.
+variants:
+    - id: ArcanicCrackleRed
+      pitch: 1
+      attack: 3
+      defense: 3
+    - id: ArcanicCrackleYellow
+      pitch: 2
+      attack: 2
+      defense: 3
+    - id: ArcanicCrackleBlue
+      pitch: 3
+      attack: 1
+      defense: 3

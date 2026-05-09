@@ -1,0 +1,24 @@
+name: Sift
+types:
+    - Generic
+    - Action
+cost: 0
+goAgain: true
+markers:
+    - NotImplemented
+text: |-
+    Put up to 4 cards from your hand on the bottom of your deck, then draw that many cards.
+    **Go again**
+variants:
+    - id: SiftRed
+      pitch: 1
+      attack: 0
+      defense: 3
+    - id: SiftYellow
+      pitch: 2
+      attack: 0
+      defense: 3
+    - id: SiftBlue
+      pitch: 3
+      attack: 0
+      defense: 3

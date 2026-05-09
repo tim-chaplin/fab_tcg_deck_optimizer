@@ -1,0 +1,16 @@
+name: Tongue Tied
+types:
+    - Generic
+    - Action
+    - Attack
+cost: 3
+markers:
+    - NotImplemented
+text: |-
+    When this hits a hero, turn a card in their arsenal face-up, then banish an instant card
+    from their arsenal.
+variants:
+    - id: TongueTiedRed
+      pitch: 1
+      attack: 7
+      defense: 2
