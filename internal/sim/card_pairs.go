@@ -21,6 +21,7 @@ import (
 	"sort"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/deck"
 )
 
 // CardGroup is a set of card IDs that share a printed name (i.e. all pitch variants of one
@@ -142,7 +143,7 @@ func pairSwapMutations(d *Deck, legal func(Card) bool) []Mutation {
 						}
 						seen[key] = true
 						newCards := pairSwapByIndex(d.Cards, i, j, first, second)
-						nd := New(d.Hero, d.Weapons, newCards)
+						nd := deck.New(d.Hero, d.Weapons, newCards)
 						nd.Sideboard = d.Sideboard
 						nd.Equipment = d.Equipment
 						out = append(out, Mutation{
@@ -185,9 +186,11 @@ func sortedIDPair(a, b ids.CardID) (ids.CardID, ids.CardID) {
 
 // pairSwapByIndex returns a fresh slice equal to src with positions i and j removed and
 // first and second appended. i and j must be distinct and in range; callers guarantee this
-// via i < j enumeration over a sized loop.
-func pairSwapByIndex(src []Card, i, j int, first, second Card) []Card {
-	out := make([]Card, 0, len(src))
+// via i < j enumeration over a sized loop. Operates entirely in deck.Card terms — no
+// rich-method calls — so callers can pass *Deck.Cards verbatim and feed the result into
+// deck.New.
+func pairSwapByIndex(src []deck.Card, i, j int, first, second deck.Card) []deck.Card {
+	out := make([]deck.Card, 0, len(src))
 	for k, c := range src {
 		if k == i || k == j {
 			continue
@@ -201,7 +204,7 @@ func pairSwapByIndex(src []Card, i, j int, first, second Card) []Card {
 // cardMultisetKey returns a comparable string summarising a card slice's ID histogram. Two
 // slices with the same IDs in different orders produce equal keys. Tests use it to assert
 // pair mutations never produce a deck whose composition equals the source.
-func cardMultisetKey(cs []Card) string {
+func cardMultisetKey(cs []deck.Card) string {
 	counts := map[ids.CardID]int{}
 	for _, c := range cs {
 		counts[c.ID()]++

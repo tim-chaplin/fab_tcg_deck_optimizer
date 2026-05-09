@@ -73,19 +73,18 @@ func (t TurnStartState) Copper() int {
 // the tested turn's outcome plus the start-of-next-turn state. initial seeds the start-of-turn
 // state — Arsenal, Auras, Items — modelling carryover from a hypothetical previous turn; the
 // other TurnState fields are ignored (transient mid-chain state, hand / deck / graveyard which
-// are seeded from this method's own inputs). initialHand sets turn 1's starting hand; nil takes
-// d.Cards[:handSize] as the hand and treats the rest as the deck, non-nil uses the slice
+// are seeded from this function's own inputs). initialHand sets turn 1's starting hand; nil
+// takes d.Cards[:handSize] as the hand and treats the rest as the deck, non-nil uses the slice
 // directly (may be shorter than handSize) and treats d.Cards as the deck entirely. Test-only —
 // production callers use Evaluate.
-func (d *Deck) EvalOneTurnForTesting(mp Matchup, initial TurnState, initialHand []Card) TurnStartState {
-	CurrentHero = d.Hero
-	handSize := d.Hero.Intelligence()
+//
+// Free function (not a method) because Deck aliases v2/deck.Deck; Go disallows methods on
+// types from other packages.
+func EvalOneTurnForTesting(d *Deck, mp Matchup, initial TurnState, initialHand []Card) TurnStartState {
+	hero := d.Hero.(Hero)
+	CurrentHero = hero
+	handSize := hero.Intelligence()
 	if handSize <= 0 {
-		return TurnStartState{}
-	}
-
-	turn1Hand, head, ok := resolveTurn1Hand(d.Cards, initialHand, handSize)
-	if !ok {
 		return TurnStartState{}
 	}
 
@@ -93,7 +92,15 @@ func (d *Deck) EvalOneTurnForTesting(mp Matchup, initial TurnState, initialHand 
 	// Oversized buf: 2×deckSize matches Evaluate's layout. Add a handSize cushion so small
 	// decks still have room for mid-turn pitches (hand + drawn) without overflowing tail.
 	buf := make([]Card, deckSize*2+handSize*2)
-	copy(buf, d.Cards)
+	for i, c := range d.Cards {
+		buf[i] = c.(Card)
+	}
+
+	turn1Hand, head, ok := resolveTurn1Hand(buf[:deckSize], initialHand, handSize)
+	if !ok {
+		return TurnStartState{}
+	}
+
 	// handBuf capacity matches Evaluate's so start-of-turn Aura reveals can append
 	// without realloc.
 	handBuf := make([]Card, handSize, handSize+startOfTurnRevealRoom)
@@ -102,7 +109,11 @@ func (d *Deck) EvalOneTurnForTesting(mp Matchup, initial TurnState, initialHand 
 	h := handBuf[:len(turn1Hand)]
 	copy(h, turn1Hand)
 	sortHandByID(h)
-	play := best(d.Hero, d.Weapons, h, mp, buf[head:tail], initial)
+	weapons := make([]Weapon, len(d.Weapons))
+	for i, w := range d.Weapons {
+		weapons[i] = w.(Weapon)
+	}
+	play := best(hero, weapons, h, mp, buf[head:tail], initial)
 	// drawCount=0: head already points past the starting hand, so applyTurnResult only needs
 	// to advance past mid-turn draws.
 	nextHeld := applyTurnResult(play, buf, &head, &tail, nil)

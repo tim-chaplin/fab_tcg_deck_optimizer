@@ -25,8 +25,8 @@ func TestMarshalUnmarshalRoundTrip(t *testing.T) {
 		t.Fatalf("Unmarshal: %v", err)
 	}
 
-	if got.Hero.Name() != d.Hero.Name() {
-		t.Errorf("hero: got %q want %q", got.Hero.Name(), d.Hero.Name())
+	if got.Hero.(sim.Hero).Name() != d.Hero.(sim.Hero).Name() {
+		t.Errorf("hero: got %q want %q", got.Hero.(sim.Hero).Name(), d.Hero.(sim.Hero).Name())
 	}
 	if len(got.Cards) != len(d.Cards) {
 		t.Fatalf("cards len: got %d want %d", len(got.Cards), len(d.Cards))
@@ -35,11 +35,11 @@ func TestMarshalUnmarshalRoundTrip(t *testing.T) {
 	// round trip. What matters is that the same cards (with the same counts) come back.
 	wantCounts := map[string]int{}
 	for _, c := range d.Cards {
-		wantCounts[c.Name()]++
+		wantCounts[c.(sim.Card).Name()]++
 	}
 	gotCounts := map[string]int{}
 	for _, c := range got.Cards {
-		gotCounts[c.Name()]++
+		gotCounts[c.(sim.Card).Name()]++
 	}
 	if !reflect.DeepEqual(gotCounts, wantCounts) {
 		t.Errorf("card counts: got %v want %v", gotCounts, wantCounts)

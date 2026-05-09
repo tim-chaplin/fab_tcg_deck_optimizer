@@ -9,6 +9,7 @@ import (
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/deckio"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/deck"
 )
 
 // BenchmarkAnnealRoundOnViseraiV4 mimics anneal's per-round workload anchored on
@@ -43,7 +44,7 @@ func BenchmarkAnnealRoundOnViseraiV4(b *testing.B) {
 	if err != nil {
 		b.Fatalf("unmarshal deck: %v", err)
 	}
-	baseline := sim.New(loaded.Hero, loaded.Weapons, loaded.Cards)
+	baseline := deck.New(loaded.Hero, loaded.Weapons, loaded.Cards)
 	all := sim.AllMutations(baseline, maxCopies, nil)
 	if len(all) < sampleSize {
 		b.Fatalf("mutation pool size %d < sample size %d", len(all), sampleSize)

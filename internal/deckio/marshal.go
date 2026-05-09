@@ -28,7 +28,7 @@ func toJSON(d *sim.Deck, stats sim.DeckStats) *DeckJSON {
 	var pitchCounts PitchCountsJSON
 	for i, c := range d.Cards {
 		cardNames[i] = c.DisplayName()
-		switch c.Pitch() {
+		switch c.(sim.Card).Pitch() {
 		case 1:
 			pitchCounts.Red++
 		case 2:
@@ -39,7 +39,7 @@ func toJSON(d *sim.Deck, stats sim.DeckStats) *DeckJSON {
 	}
 	sort.Strings(cardNames)
 	return &DeckJSON{
-		Hero:      d.Hero.Name(),
+		Hero:      d.Hero.(sim.Hero).Name(),
 		Weapons:   weapons,
 		Cards:     cardNames,
 		Sideboard: sortedStrings(d.Sideboard),

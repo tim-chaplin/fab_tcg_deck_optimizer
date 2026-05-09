@@ -16,7 +16,7 @@ import (
 func TestBest_MauvrionAloneFizzlesWithoutDamage(t *testing.T) {
 	h := []sim.Card{cards.MauvrionSkiesRed{}}
 	d := sim.New(testutils.Hero{Intel: 4}, nil, nil)
-	got := d.EvalOneTurnForTesting(sim.Matchup{IncomingDamage: 0}, sim.TurnState{}, h)
+	got := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 0}, sim.TurnState{}, h)
 	if got.Value != 0 {
 		t.Fatalf("want value 0 (trigger has no target), got %d (roles=[%s])",
 			got.Value, sim.FormatBestLine(got.BestLine))
@@ -29,7 +29,7 @@ func TestBest_MauvrionBladeOnlyFizzles(t *testing.T) {
 	h := []sim.Card{cards.MauvrionSkiesRed{}, testutils.YellowAttack{}}
 	ws := []sim.Weapon{weapons.ReapingBlade{}}
 	d := sim.New(testutils.Hero{Intel: 4}, ws, nil)
-	got := d.EvalOneTurnForTesting(sim.Matchup{IncomingDamage: 0}, sim.TurnState{}, h)
+	got := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 0}, sim.TurnState{}, h)
 	// Pitch YellowAttack (2 res) → play Mauvrion (cost 0, go again) → Blade swing (cost 1,
 	// 3 damage). Mauvrion's trigger doesn't match the weapon, so no Runechants.
 	if got.Value != 3 {
@@ -42,7 +42,7 @@ func TestBest_MauvrionBladeOnlyFizzles(t *testing.T) {
 func TestBest_MauvrionNonRunebladeAttackFizzles(t *testing.T) {
 	h := []sim.Card{cards.MauvrionSkiesRed{}, testutils.RedAttack{}, testutils.YellowAttack{}}
 	d := sim.New(testutils.Hero{Intel: 4}, nil, nil)
-	got := d.EvalOneTurnForTesting(sim.Matchup{IncomingDamage: 0}, sim.TurnState{}, h)
+	got := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 0}, sim.TurnState{}, h)
 	// Pitch YellowAttack (2 res) → play Mauvrion (cost 0, go again) → play fake RedAttack
 	// (cost 1, 3 damage, go again). The Generic attack action doesn't qualify for
 	// Mauvrion's rider, so Runechants never fire.
@@ -60,7 +60,7 @@ func TestBest_MauvrionLikelyHitRunebladeAttackCreditsRider(t *testing.T) {
 		testutils.YellowAttack{},
 	}
 	d := sim.New(testutils.Hero{Intel: 4}, nil, nil)
-	got := d.EvalOneTurnForTesting(sim.Matchup{IncomingDamage: 0}, sim.TurnState{}, h)
+	got := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 0}, sim.TurnState{}, h)
 	// Pitch YellowAttack (2 res) → Mauvrion (cost 0, go again, grants go-again to Shrill +
 	// appends OnHit) → Shrill (cost 2, power 4). No aura when Shrill's Play runs, so its
 	// own +3 "aura played" bonus stays off. Shrill's OnHit fires: LikelyToHit(4) is true,
@@ -80,7 +80,7 @@ func TestBest_MauvrionBlockableRunebladeAttackDropsRider(t *testing.T) {
 		testutils.YellowAttack{},
 	}
 	d := sim.New(testutils.Hero{Intel: 4}, nil, nil)
-	got := d.EvalOneTurnForTesting(sim.Matchup{IncomingDamage: 0}, sim.TurnState{}, h)
+	got := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 0}, sim.TurnState{}, h)
 	// Pitch YellowAttack (2 res) → Mauvrion (cost 0) → Shrill Blue (cost 2, power 2).
 	// LikelyToHit(2) is false, so the OnHit doesn't fire. Total: 2.
 	if got.Value != 2 {

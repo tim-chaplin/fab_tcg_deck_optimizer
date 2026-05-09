@@ -13,6 +13,7 @@ import (
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/deck"
 )
 
 // printCardList writes the deck's card list in canonical "Card list:" form: one
@@ -37,7 +38,7 @@ func printCardList(d *sim.Deck) {
 // Shared between the main card list and the sideboard block so formatting stays consistent.
 // Card.DisplayName keeps pitch printings as distinct entries so the card list shows e.g.
 // "2x Aether Slash [R]" alongside "1x Aether Slash [Y]".
-func printGroupedCards(cs []sim.Card) {
+func printGroupedCards(cs []deck.Card) {
 	names := make([]string, len(cs))
 	for i, c := range cs {
 		names[i] = c.DisplayName()
@@ -68,7 +69,7 @@ func printGroupedStrings(ss []string) {
 // `fabsim eval -brief` calls printDeckSummary directly so a scripted re-score gets just the
 // numbers without the card-list scroll.
 func printDeckSummary(d *sim.Deck, s sim.DeckStats) {
-	fmt.Printf("Hero:    %s\n", d.Hero.Name())
+	fmt.Printf("Hero:    %s\n", d.Hero.(sim.Hero).Name())
 	fmt.Printf("Weapons: %s\n", weaponNames(d.Weapons))
 	fmt.Printf("Pitch:   %s\n", pitchCountsLine(d.Cards))
 	fmt.Println()
@@ -79,7 +80,7 @@ func printDeckSummary(d *sim.Deck, s sim.DeckStats) {
 
 // pitchCountsLine returns the "20 red / 8 yellow / 12 blue" rendering of the deck's pitch
 // distribution.
-func pitchCountsLine(cs []sim.Card) string {
+func pitchCountsLine(cs []deck.Card) string {
 	red, yellow, blue := pitchCounts(cs)
 	return fmt.Sprintf("%d red / %d yellow / %d blue", red, yellow, blue)
 }
@@ -125,10 +126,11 @@ func printSideBySideStats(name1, name2 string, sections []statSection) {
 }
 
 // pitchCounts tallies red/yellow/blue copies by Pitch() value. Cards with pitch outside 1-3
-// contribute to no bucket.
-func pitchCounts(cs []sim.Card) (red, yellow, blue int) {
+// contribute to no bucket. Asserts to sim.Card per element since Pitch lives on the rich
+// interface, not on deck.Card.
+func pitchCounts(cs []deck.Card) (red, yellow, blue int) {
 	for _, c := range cs {
-		switch c.Pitch() {
+		switch c.(sim.Card).Pitch() {
 		case 1:
 			red++
 		case 2:
@@ -576,7 +578,7 @@ func centerLabel(s string, width int) string {
 // maxNameLen returns the length of the longest DisplayName across cs, or 0 when empty.
 // Used to size fixed-width card-name columns in printed tables — DisplayName so the column
 // reserves room for the pitch tag.
-func maxNameLen(cs []sim.Card) int {
+func maxNameLen(cs []deck.Card) int {
 	m := 0
 	for _, c := range cs {
 		if n := len(c.DisplayName()); n > m {
@@ -589,7 +591,7 @@ func maxNameLen(cs []sim.Card) int {
 // weaponNames joins the deck's weapon names with ", " for the summary's "Weapons:" line.
 // A single-weapon loadout prints the name bare; an empty loadout prints "none" so the column
 // stays filled rather than rendering as a trailing blank.
-func weaponNames(ws []sim.Weapon) string {
+func weaponNames(ws []deck.Weapon) string {
 	if len(ws) == 0 {
 		return "none"
 	}

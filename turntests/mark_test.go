@@ -12,7 +12,7 @@ import (
 func TestPursueToTheEdgeOfOblivion_MarksOpponentOnHit(t *testing.T) {
 	d := sim.New(heroes.Viserai{}, nil, fillerDeck())
 	hand := []sim.Card{cards.PursueToTheEdgeOfOblivionRed{}}
-	state := d.EvalOneTurnForTesting(sim.Matchup{IncomingDamage: 0}, sim.TurnState{}, hand)
+	state := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 0}, sim.TurnState{}, hand)
 	if !state.OpponentMarked {
 		t.Fatalf("OpponentMarked = false after Pursue resolved, want true")
 	}
@@ -23,7 +23,7 @@ func TestPursueToTheEdgeOfOblivion_MarksOpponentOnHit(t *testing.T) {
 func TestPursueToTheEdgeOfOblivion_PreservesMarkWhenOpponentAlreadyMarked(t *testing.T) {
 	d := sim.New(heroes.Viserai{}, nil, fillerDeck())
 	hand := []sim.Card{cards.PursueToTheEdgeOfOblivionRed{}}
-	state := d.EvalOneTurnForTesting(sim.Matchup{IncomingDamage: 0}, sim.TurnState{OpponentMarked: true}, hand)
+	state := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 0}, sim.TurnState{OpponentMarked: true}, hand)
 	if !state.OpponentMarked {
 		t.Fatalf("OpponentMarked = false after Pursue resolved against pre-marked opponent, want true")
 	}
@@ -33,7 +33,7 @@ func TestPursueToTheEdgeOfOblivion_PreservesMarkWhenOpponentAlreadyMarked(t *tes
 func TestOuted_NoBonusWhenOpponentUnmarked(t *testing.T) {
 	d := sim.New(heroes.Viserai{}, nil, fillerDeck())
 	hand := []sim.Card{cards.OutedRed{}}
-	state := d.EvalOneTurnForTesting(sim.Matchup{IncomingDamage: 0}, sim.TurnState{}, hand)
+	state := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 0}, sim.TurnState{}, hand)
 	if state.Value != 3 {
 		t.Fatalf("Value = %d, want 3 (Outed printed 3{p}, no marked-defender bonus)", state.Value)
 	}
@@ -44,7 +44,7 @@ func TestOuted_NoBonusWhenOpponentUnmarked(t *testing.T) {
 func TestOuted_BonusWhenOpponentAlreadyMarked(t *testing.T) {
 	d := sim.New(heroes.Viserai{}, nil, fillerDeck())
 	hand := []sim.Card{cards.OutedRed{}}
-	state := d.EvalOneTurnForTesting(sim.Matchup{IncomingDamage: 0}, sim.TurnState{OpponentMarked: true}, hand)
+	state := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 0}, sim.TurnState{OpponentMarked: true}, hand)
 	if state.Value != 4 {
 		t.Fatalf("Value = %d, want 4 (Outed printed 3{p} + 1 marked-defender)", state.Value)
 	}

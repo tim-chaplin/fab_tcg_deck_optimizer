@@ -16,7 +16,9 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/deckio"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/fabrary"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/mydecks"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/deck"
 )
 
 // loadExisting reads and deserializes the deck at path. Returns (nil, zero, nil) when the
@@ -54,7 +56,7 @@ func loadExisting(path string) (*sim.Deck, sim.DeckStats, error) {
 // then os.Rename swaps it into place, so a Ctrl-C mid-write can never leave the destination
 // empty or partially written.
 func writeDeck(d *sim.Deck, stats sim.DeckStats, path string) error {
-	d.ApplyDefaults()
+	d.ApplyDefaults(deck.ViseraiDefaults)
 	data, err := deckio.Marshal(d, stats)
 	if err != nil {
 		return fmt.Errorf("marshal: %w", err)
@@ -110,7 +112,13 @@ func fabraryPathFor(jsonPath string) string {
 // The sanitizer mutates d.Cards in place. Callers that care about the pre-sanitize score
 // for a delta warning should capture it before calling this.
 func sanitizeLoadedDeck(d *sim.Deck, maxCopies int, rng *rand.Rand, legal func(sim.Card) bool) []sim.NotImplementedReplacement {
-	replaced := d.SanitizeNotImplemented(maxCopies, rng, legal)
+	// Wrap legal so the deck-package callback receives deck.Card; the predicate sees its
+	// rich sim.Card surface via the assertion every concrete card already satisfies.
+	var legalDeck func(deck.Card) bool
+	if legal != nil {
+		legalDeck = func(c deck.Card) bool { return legal(c.(sim.Card)) }
+	}
+	replaced := d.SanitizeNotImplemented(maxCopies, rng, legalDeck, registry.Registry{})
 	if len(replaced) == 0 {
 		return nil
 	}
