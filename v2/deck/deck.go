@@ -173,7 +173,7 @@ func Random(h Hero, size, maxCopies int, rng *rand.Rand, legal func(Card) bool, 
 	if maxCopies < 1 {
 		panic(fmt.Sprintf("deck: Random requires maxCopies >= 1 (got %d)", maxCopies))
 	}
-	loadouts := WeaponLoadouts(reg.LegalWeapons())
+	loadouts := weaponLoadouts(reg.LegalWeapons())
 	if len(loadouts) == 0 {
 		panic("deck: Random has no legal weapon loadouts — registry rejected every weapon")
 	}

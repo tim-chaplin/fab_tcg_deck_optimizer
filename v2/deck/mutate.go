@@ -66,7 +66,7 @@ func AllMutations(d *Deck, maxCopies int, reg Registry, legal func(Card) bool) [
 	out := weaponLoadoutMutations(d, reg)
 	out = append(out, singleSwapMutations(d, pool)...)
 	out = append(out, pairSwapMutations(d, CardPairs, pool)...)
-	return FilterMaxCopiesViolations(out, maxCopies)
+	return filterMaxCopiesViolations(out, maxCopies)
 }
 
 // buildLegalByID materialises the registry's legal pool as an ID→Card map filtered by
@@ -101,15 +101,15 @@ type legalCardPool struct {
 // current one. Loadouts are canonicalised by weaponKey (names sorted) and processed in key
 // order so the output is deterministic regardless of map-iteration randomness.
 func weaponLoadoutMutations(d *Deck, reg Registry) []Mutation {
-	loadouts := WeaponLoadouts(reg.LegalWeapons())
-	currentKey := WeaponKey(d.Weapons)
+	loadouts := weaponLoadouts(reg.LegalWeapons())
+	currentKey := weaponKey(d.Weapons)
 	type keyedLoadout struct {
 		key     string
 		weapons []Weapon
 	}
 	sortedLoadouts := make([]keyedLoadout, 0, len(loadouts))
 	for _, l := range loadouts {
-		sortedLoadouts = append(sortedLoadouts, keyedLoadout{key: WeaponKey(l), weapons: l})
+		sortedLoadouts = append(sortedLoadouts, keyedLoadout{key: weaponKey(l), weapons: l})
 	}
 	sort.Slice(sortedLoadouts, func(i, j int) bool { return sortedLoadouts[i].key < sortedLoadouts[j].key })
 	var out []Mutation
@@ -286,7 +286,7 @@ func pairSwapMutations(d *Deck, pairs []CardPair, pool legalCardPool) []Mutation
 				if !ok {
 					continue
 				}
-				addA, addB := SortedIDPair(firstID, secondID)
+				addA, addB := sortedIDPair(firstID, secondID)
 				for i := 0; i < len(d.Cards); i++ {
 					for j := i + 1; j < len(d.Cards); j++ {
 						idI, idJ := d.Cards[i].ID(), d.Cards[j].ID()
@@ -294,7 +294,7 @@ func pairSwapMutations(d *Deck, pairs []CardPair, pool legalCardPool) []Mutation
 							idJ == firstID || idJ == secondID {
 							continue
 						}
-						rmA, rmB := SortedIDPair(idI, idJ)
+						rmA, rmB := sortedIDPair(idI, idJ)
 						key := pairDedupeKey{rmA, rmB, addA, addB}
 						if seen[key] {
 							continue
@@ -318,17 +318,9 @@ func pairSwapMutations(d *Deck, pairs []CardPair, pool legalCardPool) []Mutation
 	return out
 }
 
-// PairSwapMutations returns just the synergy-pair "swap two for two" mutations of d for
-// the supplied pairs registry, without the single-card-swap or weapon-loadout candidates.
-// Exported for tests that exercise pair behaviour with their own fake CardPair fixture;
-// production callers go through AllMutations (which uses the package-level CardPairs).
-func PairSwapMutations(d *Deck, pairs []CardPair, reg Registry, legal func(Card) bool) []Mutation {
-	return pairSwapMutations(d, pairs, buildLegalByID(reg, legal))
-}
-
-// SortedIDPair returns (a, b) sorted ascending so callers can build canonical
+// sortedIDPair returns (a, b) sorted ascending so callers can build canonical
 // order-independent keys.
-func SortedIDPair(a, b ids.CardID) (ids.CardID, ids.CardID) {
+func sortedIDPair(a, b ids.CardID) (ids.CardID, ids.CardID) {
 	if b < a {
 		return b, a
 	}
@@ -350,10 +342,10 @@ func pairSwapByIndex(src []Card, i, j int, first, second Card) []Card {
 	return out
 }
 
-// CardMultisetKey returns a comparable string summarising a card slice's ID histogram. Two
+// cardMultisetKey returns a comparable string summarising a card slice's ID histogram. Two
 // slices with the same IDs in different orders produce equal keys. Tests use it to assert
 // pair mutations never produce a deck whose composition equals the source.
-func CardMultisetKey(cs []Card) string {
+func cardMultisetKey(cs []Card) string {
 	counts := map[ids.CardID]int{}
 	for _, c := range cs {
 		counts[c.ID()]++
@@ -370,7 +362,7 @@ func CardMultisetKey(cs []Card) string {
 	return string(b)
 }
 
-// FilterMaxCopiesViolations returns a fresh slice holding the subset of muts whose
+// filterMaxCopiesViolations returns a fresh slice holding the subset of muts whose
 // post-mutation deck respects the per-printing maxCopies cap. Centralising the cap check
 // here keeps the per-mutation generators free to enumerate cap-blind candidates; the shared
 // post-pass guarantees no downstream consumer ever sees a candidate that violates the
@@ -383,22 +375,22 @@ func CardMultisetKey(cs []Card) string {
 // The returned slice does not share storage with the input — callers can keep the original
 // muts slice intact for diagnostics if they want.
 //
-// Production callers go through AllMutations; FilterMaxCopiesViolations is exported for
+// Production callers go through AllMutations; filterMaxCopiesViolations is exported for
 // tests that exercise the cap filter directly.
-func FilterMaxCopiesViolations(muts []Mutation, maxCopies int) []Mutation {
+func filterMaxCopiesViolations(muts []Mutation, maxCopies int) []Mutation {
 	out := make([]Mutation, 0, len(muts))
 	for _, m := range muts {
-		if RespectsMaxCopies(m.Deck.Cards, maxCopies) {
+		if respectsMaxCopies(m.Deck.Cards, maxCopies) {
 			out = append(out, m)
 		}
 	}
 	return out
 }
 
-// RespectsMaxCopies reports whether every distinct ID in cs appears at most maxCopies
+// respectsMaxCopies reports whether every distinct ID in cs appears at most maxCopies
 // times. Returns false at the first overshoot so a single hot card short-circuits the
 // count. Exported for tests pinning the short-circuit behaviour.
-func RespectsMaxCopies(cs []Card, maxCopies int) bool {
+func respectsMaxCopies(cs []Card, maxCopies int) bool {
 	counts := map[ids.CardID]int{}
 	for _, c := range cs {
 		counts[c.ID()]++

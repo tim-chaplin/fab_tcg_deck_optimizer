@@ -21,12 +21,12 @@ func validateWeapons(weapons []Weapon) {
 	}
 }
 
-// WeaponLoadouts enumerates every legal equip combination from ws: each 2H weapon as a
+// weaponLoadouts enumerates every legal equip combination from ws: each 2H weapon as a
 // solo loadout, plus every unordered pair of 1H weapons (including dual-wielding the same
 // weapon). Used by Random to pick a starting loadout uniformly across all legal shapes,
 // and by the mutation enumerator to surface every alternative loadout for an existing
-// deck. Exported so tests can compute the expected loadout count for an arbitrary roster.
-func WeaponLoadouts(ws []Weapon) [][]Weapon {
+// deck.
+func weaponLoadouts(ws []Weapon) [][]Weapon {
 	var oneHand, twoHand []Weapon
 	for _, w := range ws {
 		if w.Hands() == 1 {
@@ -68,8 +68,8 @@ func loadoutLabel(ws []Weapon) string {
 	return "[" + strings.Join(sortedWeaponNames(ws), ", ") + "]"
 }
 
-// WeaponKey returns a comparable string for a weapon loadout so callers can check equality
-// (e.g. tests asserting that two mutations produced identical loadouts).
-func WeaponKey(ws []Weapon) string {
+// weaponKey returns a comparable string for a weapon loadout so callers can check
+// equality (e.g. tests asserting that two mutations produced identical loadouts).
+func weaponKey(ws []Weapon) string {
 	return strings.Join(sortedWeaponNames(ws), ",")
 }
