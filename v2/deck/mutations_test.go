@@ -1,12 +1,12 @@
-﻿package sim_test
+package deck_test
 
 import (
-	. "github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 	"testing"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/heroes"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/weapons"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/deck"
 )
@@ -15,8 +15,8 @@ func TestAllMutations_CountsAndShape(t *testing.T) {
 	// Build a tiny deck: 2 unique cards × 2 copies = 4 cards, plus one weapon. Both starter
 	// cards must be implemented (NOT carrying NotImplemented) so the LegalPool / removal-
 	// counting math below holds. ArcanicCrackleRed and ArcanicSpikeRed are stable picks.
-	a := GetCard(ids.ArcanicCrackleRed)
-	b := GetCard(ids.ArcanicSpikeRed)
+	a := registry.GetCard(ids.ArcanicCrackleRed)
+	b := registry.GetCard(ids.ArcanicSpikeRed)
 	d := deck.New(heroes.Viserai{}, []deck.Weapon{weapons.NebulaBlade{}}, []deck.Card{a, a, b, b})
 
 	muts := deck.AllMutations(d, 2, registry.Registry{}, nil)
@@ -44,7 +44,7 @@ func TestAllMutations_CountsAndShape(t *testing.T) {
 		if len(m.Deck.Cards) != 4 {
 			t.Errorf("mutation %d: card count %d, want 4", i, len(m.Deck.Cards))
 		}
-		if m.Deck.Hero.(Hero).Name() != d.Hero.(Hero).Name() {
+		if m.Deck.Hero.(sim.Hero).Name() != d.Hero.(sim.Hero).Name() {
 			t.Errorf("mutation %d: hero changed", i)
 		}
 		if m.Description == "" {
@@ -56,8 +56,8 @@ func TestAllMutations_CountsAndShape(t *testing.T) {
 // Tests single-card-swap semantics: odd-count distributions are legal and raising maxCopies
 // opens adds to in-deck cards below the cap.
 func TestAllMutations_OddCountsAllowed(t *testing.T) {
-	a := GetCard(ids.ArcanicCrackleRed)
-	b := GetCard(ids.ArcanicSpikeRed)
+	a := registry.GetCard(ids.ArcanicCrackleRed)
+	b := registry.GetCard(ids.ArcanicSpikeRed)
 	d := deck.New(heroes.Viserai{}, []deck.Weapon{weapons.NebulaBlade{}}, []deck.Card{a, a, b, b})
 
 	// At maxCopies=3, each of the 2 in-deck cards (a, b) is below the cap, so "remove a, add b"
@@ -98,8 +98,8 @@ func TestAllMutations_OddCountsAllowed(t *testing.T) {
 // deck's Sideboard verbatim. Without this guarantee an anneal round would silently drop the
 // user's hand-managed sideboard as soon as it accepted a mutation and wrote the deck back.
 func TestAllMutations_PreservesSideboard(t *testing.T) {
-	a := GetCard(ids.AetherSlashRed)
-	b := GetCard(ids.ArcanicSpikeRed)
+	a := registry.GetCard(ids.AetherSlashRed)
+	b := registry.GetCard(ids.ArcanicSpikeRed)
 	d := deck.New(heroes.Viserai{}, []deck.Weapon{weapons.NebulaBlade{}}, []deck.Card{a, a, b, b})
 	d.Sideboard = []string{a.Name(), b.Name(), b.Name()}
 
@@ -125,8 +125,8 @@ func TestAllMutations_PreservesSideboard(t *testing.T) {
 }
 
 func TestAllMutations_Deterministic(t *testing.T) {
-	a := GetCard(ids.AetherSlashRed)
-	b := GetCard(ids.ArcanicSpikeRed)
+	a := registry.GetCard(ids.AetherSlashRed)
+	b := registry.GetCard(ids.ArcanicSpikeRed)
 	d := deck.New(heroes.Viserai{}, []deck.Weapon{weapons.NebulaBlade{}}, []deck.Card{a, a, b, b})
 
 	first := deck.AllMutations(d, 2, registry.Registry{}, nil)
@@ -153,11 +153,11 @@ func TestAllMutations_Deterministic(t *testing.T) {
 }
 
 func TestAllMutations_NoDuplicateOfSource(t *testing.T) {
-	a := GetCard(ids.ArcanicCrackleRed)
+	a := registry.GetCard(ids.ArcanicCrackleRed)
 	d := deck.New(heroes.Viserai{}, []deck.Weapon{weapons.NebulaBlade{}}, []deck.Card{a, a, a, a})
-	srcKey := DeckFingerprint(d)
+	srcKey := d.Fingerprint()
 	for i, m := range deck.AllMutations(d, 2, registry.Registry{}, nil) {
-		if DeckFingerprint(m.Deck) == srcKey {
+		if m.Deck.Fingerprint() == srcKey {
 			t.Errorf("mutation %d equals the source deck", i)
 		}
 	}
@@ -187,11 +187,11 @@ func expectedPairMutCount(d *deck.Deck, maxCopies int) int {
 	total := 0
 	for _, p := range deck.CardPairs {
 		for _, fID := range p.First {
-			if !deck.PairAddAllowed(GetCard(fID), registry.Registry{}, nil) {
+			if !deck.PairAddAllowed(registry.GetCard(fID), registry.Registry{}, nil) {
 				continue
 			}
 			for _, sID := range p.Second {
-				if !deck.PairAddAllowed(GetCard(sID), registry.Registry{}, nil) {
+				if !deck.PairAddAllowed(registry.GetCard(sID), registry.Registry{}, nil) {
 					continue
 				}
 				for combo := range combos {

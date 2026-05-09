@@ -1,4 +1,4 @@
-﻿package sim_test
+package sim_test
 
 // Worker-count sweeps for the two production parallelism dimensions:
 //

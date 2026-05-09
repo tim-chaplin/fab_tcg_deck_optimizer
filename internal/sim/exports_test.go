@@ -109,10 +109,6 @@ func (b *attackBufs) State() *TurnState              { return b.state }
 func (b *attackBufs) DefenseGravScratch() []Card     { return b.defenseGravScratch }
 func (b *attackBufs) DRCardStateScratch() *CardState { return &b.drCardStateScratch }
 
-// DeckFingerprint re-exports deckFingerprint, the deck-equality helper used by sim_test
-// files. Lives in package sim because it reads sim's unexported weaponKey... well, used to.
-func DeckFingerprint(d *deck.Deck) string { return deckFingerprint(d) }
-
 // EvaluateImplForTest re-exports the unexported (*Evaluator).evaluateImpl as an exported
 // method for sim_test consumers exercising the eval-with-stop-condition path directly.
 func (ev *Evaluator) EvaluateImplForTest(d *deck.Deck, maxRuns int, mp Matchup, rng *rand.Rand, stop func(stats *DeckStats, runs int) bool) DeckStats {

@@ -8,6 +8,8 @@ package deck
 import (
 	"fmt"
 	"math/rand"
+	"sort"
+	"strings"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
 )
@@ -39,6 +41,36 @@ func New(h Hero, weapons []Weapon, cards []Card) *Deck {
 // Size reports the number of cards in the deck. Excludes Sideboard and Equipment, which are
 // reserve / arena lists the simulator never reads.
 func (d *Deck) Size() int { return len(d.Cards) }
+
+// Fingerprint returns a comparable summary of the deck for equality checks: the weapon
+// loadout (names sorted) and a sorted card-count histogram. Two decks with the same cards
+// in different orders, or with weapons listed in different orders, produce equal
+// fingerprints — so callers can compare a mutation result against a baseline without
+// caring about positional shuffles.
+func (d *Deck) Fingerprint() string {
+	var b strings.Builder
+	weaponNames := sortedWeaponNames(d.Weapons)
+	for i, name := range weaponNames {
+		if i > 0 {
+			b.WriteByte(',')
+		}
+		b.WriteString(name)
+	}
+	b.WriteByte('|')
+	counts := map[ids.CardID]int{}
+	for _, c := range d.Cards {
+		counts[c.ID()]++
+	}
+	cardIDs := make([]int, 0, len(counts))
+	for id := range counts {
+		cardIDs = append(cardIDs, int(id))
+	}
+	sort.Ints(cardIDs)
+	for _, id := range cardIDs {
+		fmt.Fprintf(&b, "%d:%d,", id, counts[ids.CardID(id)])
+	}
+	return b.String()
+}
 
 // Copy returns a fresh Deck with independent backing slices for Weapons, Cards, Sideboard,
 // and Equipment. Hero is shared (heroes are stateless concrete types). Used by the parallel
