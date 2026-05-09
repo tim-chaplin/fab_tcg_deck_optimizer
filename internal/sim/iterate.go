@@ -46,7 +46,7 @@ type iterateImprovement struct {
 // iterateWorkerConfig bundles every read-only parameter a worker shares with its peers so
 // the goroutine body can take a single struct instead of a long argument list.
 type iterateWorkerConfig struct {
-	mutations      []Mutation
+	mutations      []deck.Mutation
 	bestAvg        float64
 	temperature    float64
 	minImprovement float64
@@ -108,7 +108,7 @@ type iterateWorkerConfig struct {
 // cancelled.
 func IterateParallel(
 	ctx context.Context,
-	mutations []Mutation,
+	mutations []deck.Mutation,
 	bestAvg float64,
 	temperature float64,
 	minImprovement float64,

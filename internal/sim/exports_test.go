@@ -3,7 +3,6 @@ package sim
 import (
 	"math/rand"
 
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/deck"
 )
 
@@ -67,29 +66,6 @@ func BeatsBest(v, futureValuePlayed int, willOccupyArsenal bool, best TurnSummar
 	return willOccupyArsenal && !bestWillOccupyArsenal
 }
 
-// PairSwapMutations re-exports pairSwapMutations for sim_test consumers.
-func PairSwapMutations(d *deck.Deck, legal func(deck.Card) bool) []Mutation {
-	return pairSwapMutations(d, legal)
-}
-
-// CardMultisetKey re-exports cardMultisetKey for sim_test consumers. Takes []deck.Card so
-// callers pass *deck.Deck.Cards directly; cardMultisetKey only reads .ID() so the narrow
-// interface suffices.
-func CardMultisetKey(cs []deck.Card) string { return cardMultisetKey(cs) }
-
-// CardPairs re-exports the cardPairs registry for sim_test consumers.
-var CardPairs = cardPairs
-
-// FilterMaxCopiesViolations re-exports filterMaxCopiesViolations for sim_test consumers.
-func FilterMaxCopiesViolations(muts []Mutation, maxCopies int) []Mutation {
-	return filterMaxCopiesViolations(muts, maxCopies)
-}
-
-// RespectsMaxCopies re-exports respectsMaxCopies for sim_test consumers.
-func RespectsMaxCopies(cs []deck.Card, maxCopies int) bool {
-	return respectsMaxCopies(cs, maxCopies)
-}
-
 // AppendGroupedChainEntries re-exports appendGroupedChainEntries for sim_test consumers.
 func AppendGroupedChainEntries(out []string, log []LogEntry) []string {
 	return appendGroupedChainEntries(out, log)
@@ -132,22 +108,6 @@ func (s *SequenceContextForTest) Bufs() *AttackBufs { return s.ctx.bufs }
 func (b *attackBufs) State() *TurnState              { return b.state }
 func (b *attackBufs) DefenseGravScratch() []Card     { return b.defenseGravScratch }
 func (b *attackBufs) DRCardStateScratch() *CardState { return &b.drCardStateScratch }
-
-// WeaponLoadouts re-exports weaponLoadouts for sim_test consumers.
-func WeaponLoadouts(ws []deck.Weapon) [][]deck.Weapon { return weaponLoadouts(ws) }
-
-// WeaponKey re-exports weaponKey for sim_test consumers.
-func WeaponKey(ws []deck.Weapon) string { return weaponKey(ws) }
-
-// SortedIDPair re-exports sortedIDPair for sim_test consumers.
-func SortedIDPair(a, b ids.CardID) (ids.CardID, ids.CardID) { return sortedIDPair(a, b) }
-
-// DeckFingerprint re-exports deckFingerprint, the deck-equality helper used by sim_test
-// files. The underlying helper is in package sim because it reads the unexported weaponKey.
-func DeckFingerprint(d *deck.Deck) string { return deckFingerprint(d) }
-
-// PairAddAllowed re-exports pairAddAllowed for sim_test consumers.
-func PairAddAllowed(c Card, legal func(deck.Card) bool) bool { return pairAddAllowed(c, legal) }
 
 // EvaluateImplForTest re-exports the unexported (*Evaluator).evaluateImpl as an exported
 // method for sim_test consumers exercising the eval-with-stop-condition path directly.

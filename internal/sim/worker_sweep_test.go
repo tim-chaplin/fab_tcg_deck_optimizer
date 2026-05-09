@@ -28,6 +28,7 @@ import (
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry"
 	. "github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/deck"
 )
 
 // BenchmarkEvalWorkerSweep measures one Evaluate call on viserai_v4 across a range of
@@ -65,7 +66,7 @@ func BenchmarkEvalWorkerSweep(b *testing.B) {
 
 // BenchmarkAnnealWorkerSweep measures one IterateParallel call across a 2D grid of
 // (mutationWorkers, shuffleWorkers) on viserai_v4. The mutation list is the first
-// mutationSampleSize entries of AllMutations(viserai_v4), evaluated against an unreachable
+// mutationSampleSize entries of deck.AllMutations(viserai_v4), evaluated against an unreachable
 // baseline so the worker pool drains every sampled mutation (production rounds short-
 // circuit on the first improvement, but the per-mutation cost is the same; full-drain
 // just exposes that cost cleanly).
@@ -105,7 +106,7 @@ func BenchmarkAnnealWorkerSweep(b *testing.B) {
 	if loaded == nil {
 		b.Skip("mydecks/viserai_v4.json not found — saved deck needed for realistic bench")
 	}
-	all := AllMutations(loaded, 2, registry.Registry{}, nil)
+	all := deck.AllMutations(loaded, 2, registry.Registry{}, nil)
 	if len(all) < mutationSampleSize {
 		b.Fatalf("mutation pool size %d < sample size %d", len(all), mutationSampleSize)
 	}

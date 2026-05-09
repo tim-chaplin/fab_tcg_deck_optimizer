@@ -284,8 +284,8 @@ func runAnneal(cfg annealConfig) annealResult {
 // is what keeps the first-improvement classical climb from sampling the head of the slice
 // disproportionately, and what keeps the probabilistic SA gate from concentrating its
 // acceptances on a fixed slice of the solution space.
-func buildRoundMutations(cfg annealConfig, rng *rand.Rand, current *deck.Deck) []sim.Mutation {
-	mutations := sim.AllMutations(current, cfg.maxCopies, registry.Registry{}, cfg.legalFilter())
+func buildRoundMutations(cfg annealConfig, rng *rand.Rand, current *deck.Deck) []deck.Mutation {
+	mutations := deck.AllMutations(current, cfg.maxCopies, registry.Registry{}, cfg.legalFilter())
 	rng.Shuffle(len(mutations), func(i, j int) {
 		mutations[i], mutations[j] = mutations[j], mutations[i]
 	})
@@ -307,7 +307,7 @@ func formatTempLabel(temperature float64) string {
 // the deck to disk when avg exceeds bestEverAvg, and returns the possibly-updated bestEver /
 // bestEverAvg. The current deck and its avg stay owned by the caller.
 func applyAcceptedMutation(cfg annealConfig, round int, verbose bool, tempLabel string,
-	idx, total int, mut sim.Mutation, d *deck.Deck, dStats sim.DeckStats, avg, currentAvg float64,
+	idx, total int, mut deck.Mutation, d *deck.Deck, dStats sim.DeckStats, avg, currentAvg float64,
 	bestEver *deck.Deck, bestEverStats sim.DeckStats, bestEverAvg float64) (*deck.Deck, sim.DeckStats, float64) {
 	verb := "improvement"
 	if avg <= currentAvg {
