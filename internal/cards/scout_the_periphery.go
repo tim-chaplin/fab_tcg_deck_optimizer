@@ -12,60 +12,26 @@
 package cards
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 )
-
-var scoutThePeripheryTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction)
 
 // scoutThePeripheryIsTarget gates the rider on attack action cards played from arsenal.
 func scoutThePeripheryIsTarget(_ *sim.TurnState, pc *sim.CardState) bool {
 	return pc.FromArsenal && pc.Card.Types().IsAttackAction()
 }
 
-type ScoutThePeripheryRed struct{}
-
-func (ScoutThePeripheryRed) ID() ids.CardID          { return ids.ScoutThePeripheryRed }
-func (ScoutThePeripheryRed) Name() string            { return "Scout the Periphery" }
-func (ScoutThePeripheryRed) Cost(*sim.TurnState) int { return 0 }
-func (ScoutThePeripheryRed) Pitch() int              { return 1 }
-func (ScoutThePeripheryRed) Attack() int             { return 0 }
-func (ScoutThePeripheryRed) Defense() int            { return 2 }
-func (ScoutThePeripheryRed) Types() card.TypeSet     { return scoutThePeripheryTypes }
-func (ScoutThePeripheryRed) GoAgain() bool           { return true }
 func (ScoutThePeripheryRed) Play(s *sim.TurnState, self *sim.CardState) {
 	GrantNextCardBonusAttack(s, 3, scoutThePeripheryIsTarget)
 	n := self.DealEffectiveAttack(s)
 	s.Log(self, n)
 }
 
-type ScoutThePeripheryYellow struct{}
-
-func (ScoutThePeripheryYellow) ID() ids.CardID          { return ids.ScoutThePeripheryYellow }
-func (ScoutThePeripheryYellow) Name() string            { return "Scout the Periphery" }
-func (ScoutThePeripheryYellow) Cost(*sim.TurnState) int { return 0 }
-func (ScoutThePeripheryYellow) Pitch() int              { return 2 }
-func (ScoutThePeripheryYellow) Attack() int             { return 0 }
-func (ScoutThePeripheryYellow) Defense() int            { return 2 }
-func (ScoutThePeripheryYellow) Types() card.TypeSet     { return scoutThePeripheryTypes }
-func (ScoutThePeripheryYellow) GoAgain() bool           { return true }
 func (ScoutThePeripheryYellow) Play(s *sim.TurnState, self *sim.CardState) {
 	GrantNextCardBonusAttack(s, 2, scoutThePeripheryIsTarget)
 	n := self.DealEffectiveAttack(s)
 	s.Log(self, n)
 }
 
-type ScoutThePeripheryBlue struct{}
-
-func (ScoutThePeripheryBlue) ID() ids.CardID          { return ids.ScoutThePeripheryBlue }
-func (ScoutThePeripheryBlue) Name() string            { return "Scout the Periphery" }
-func (ScoutThePeripheryBlue) Cost(*sim.TurnState) int { return 0 }
-func (ScoutThePeripheryBlue) Pitch() int              { return 3 }
-func (ScoutThePeripheryBlue) Attack() int             { return 0 }
-func (ScoutThePeripheryBlue) Defense() int            { return 2 }
-func (ScoutThePeripheryBlue) Types() card.TypeSet     { return scoutThePeripheryTypes }
-func (ScoutThePeripheryBlue) GoAgain() bool           { return true }
 func (ScoutThePeripheryBlue) Play(s *sim.TurnState, self *sim.CardState) {
 	GrantNextCardBonusAttack(s, 1, scoutThePeripheryIsTarget)
 	n := self.DealEffectiveAttack(s)

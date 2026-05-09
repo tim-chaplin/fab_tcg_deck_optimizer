@@ -1,0 +1,14 @@
+name: Energy Potion
+types:
+    - Generic
+    - Action
+    - Item
+cost: 0
+markers:
+    - Unplayable
+text: '**Instant** - Destroy this: Gain {r}{r}'
+variants:
+    - id: EnergyPotionBlue
+      pitch: 3
+      attack: 0
+      defense: 0

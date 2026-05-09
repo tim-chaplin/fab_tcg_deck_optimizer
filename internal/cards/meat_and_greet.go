@@ -9,12 +9,8 @@
 package cards
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 )
-
-var meatAndGreetTypes = card.NewTypeSet(card.TypeRuneblade, card.TypeAction, card.TypeAttack)
 
 func meatAndGreetPlay(s *sim.TurnState, self *sim.CardState) {
 	if s.ArcaneDamageDealt {
@@ -32,44 +28,14 @@ func meatAndGreetOnHit(s *sim.TurnState, self *sim.CardState, _ *sim.OnHitHandle
 	s.LogRider(self, 1, "On-hit created a runechant")
 }
 
-type MeatAndGreetRed struct{}
-
-func (MeatAndGreetRed) ID() ids.CardID          { return ids.MeatAndGreetRed }
-func (MeatAndGreetRed) Name() string            { return "Meat and Greet" }
-func (MeatAndGreetRed) Cost(*sim.TurnState) int { return 1 }
-func (MeatAndGreetRed) Pitch() int              { return 1 }
-func (MeatAndGreetRed) Attack() int             { return 4 }
-func (MeatAndGreetRed) Defense() int            { return 3 }
-func (MeatAndGreetRed) Types() card.TypeSet     { return meatAndGreetTypes }
-func (MeatAndGreetRed) GoAgain() bool           { return false }
 func (MeatAndGreetRed) Play(s *sim.TurnState, self *sim.CardState) {
 	meatAndGreetPlay(s, self)
 }
 
-type MeatAndGreetYellow struct{}
-
-func (MeatAndGreetYellow) ID() ids.CardID          { return ids.MeatAndGreetYellow }
-func (MeatAndGreetYellow) Name() string            { return "Meat and Greet" }
-func (MeatAndGreetYellow) Cost(*sim.TurnState) int { return 1 }
-func (MeatAndGreetYellow) Pitch() int              { return 2 }
-func (MeatAndGreetYellow) Attack() int             { return 3 }
-func (MeatAndGreetYellow) Defense() int            { return 3 }
-func (MeatAndGreetYellow) Types() card.TypeSet     { return meatAndGreetTypes }
-func (MeatAndGreetYellow) GoAgain() bool           { return false }
 func (MeatAndGreetYellow) Play(s *sim.TurnState, self *sim.CardState) {
 	meatAndGreetPlay(s, self)
 }
 
-type MeatAndGreetBlue struct{}
-
-func (MeatAndGreetBlue) ID() ids.CardID          { return ids.MeatAndGreetBlue }
-func (MeatAndGreetBlue) Name() string            { return "Meat and Greet" }
-func (MeatAndGreetBlue) Cost(*sim.TurnState) int { return 1 }
-func (MeatAndGreetBlue) Pitch() int              { return 3 }
-func (MeatAndGreetBlue) Attack() int             { return 2 }
-func (MeatAndGreetBlue) Defense() int            { return 3 }
-func (MeatAndGreetBlue) Types() card.TypeSet     { return meatAndGreetTypes }
-func (MeatAndGreetBlue) GoAgain() bool           { return false }
 func (MeatAndGreetBlue) Play(s *sim.TurnState, self *sim.CardState) {
 	meatAndGreetPlay(s, self)
 }

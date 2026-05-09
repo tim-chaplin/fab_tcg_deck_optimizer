@@ -4,27 +4,12 @@
 package notimplemented
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
-
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/cards"
 )
-
-type PutInContextBlue struct{}
-
-func (PutInContextBlue) ID() ids.CardID          { return ids.PutInContextBlue }
-func (PutInContextBlue) Name() string            { return "Put in Context" }
-func (PutInContextBlue) Cost(*sim.TurnState) int { return 0 }
-func (PutInContextBlue) Pitch() int              { return 3 }
-func (PutInContextBlue) Attack() int             { return 0 }
-func (PutInContextBlue) Defense() int            { return 3 }
-func (PutInContextBlue) Types() card.TypeSet     { return cards.DefenseReactionTypes }
-func (PutInContextBlue) GoAgain() bool           { return false }
 
 // not implemented: base-power cap on what this can defend is ignored; treated as legal vs every
 // attack
-func (PutInContextBlue) NotImplemented() {}
+
 func (PutInContextBlue) Play(s *sim.TurnState, self *sim.CardState) {
 	n := self.DealEffectiveDefense(s)
 	s.Log(self, n)

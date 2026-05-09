@@ -1,0 +1,18 @@
+name: Amulet of Oblation
+types:
+    - Generic
+    - Action
+    - Item
+cost: 0
+goAgain: true
+markers:
+    - Unplayable
+text: |-
+    **Go again** **Instant** - Destroy Amulet of Oblation: Until end of turn, target attack
+    action gains "If this would be put into a graveyard, instead put it on the bottom of its owner's
+    deck." Activate this ability only if a card has entered a graveyard this turn.
+variants:
+    - id: AmuletOfOblationBlue
+      pitch: 3
+      attack: 0
+      defense: 0

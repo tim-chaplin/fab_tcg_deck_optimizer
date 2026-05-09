@@ -1,0 +1,27 @@
+name: Belittle
+types:
+    - Generic
+    - Action
+    - Attack
+cost: 1
+goAgain: true
+markers:
+    - NotSilverAgeLegal
+    - Unplayable
+text: |-
+    As an additional cost to play Belittle, you may reveal an attack action card with 3 or
+    less base {p} from your hand. If you do, search your deck for a card named Minnowism, reveal it,
+    put it into your hand, then shuffle your deck. **Go again**
+variants:
+    - id: BelittleRed
+      pitch: 1
+      attack: 3
+      defense: 2
+    - id: BelittleYellow
+      pitch: 2
+      attack: 2
+      defense: 2
+    - id: BelittleBlue
+      pitch: 3
+      attack: 1
+      defense: 2

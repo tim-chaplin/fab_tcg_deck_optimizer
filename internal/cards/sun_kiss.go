@@ -10,13 +10,8 @@
 package cards
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
-
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 )
-
-var sunKissTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction)
 
 // sunKissPlay emits the chain step ("Sun Kiss [R]: PLAY"), writes the heal as a sub-line
 // "Gained N health" under it, and — when Moon Wish has already played this turn — fires
@@ -43,44 +38,14 @@ func playedMoonWishThisTurn(s *sim.TurnState) bool {
 	return false
 }
 
-type SunKissRed struct{}
-
-func (SunKissRed) ID() ids.CardID          { return ids.SunKissRed }
-func (SunKissRed) Name() string            { return "Sun Kiss" }
-func (SunKissRed) Cost(*sim.TurnState) int { return 0 }
-func (SunKissRed) Pitch() int              { return 1 }
-func (SunKissRed) Attack() int             { return 0 }
-func (SunKissRed) Defense() int            { return 2 }
-func (SunKissRed) Types() card.TypeSet     { return sunKissTypes }
-func (SunKissRed) GoAgain() bool           { return false }
 func (SunKissRed) Play(s *sim.TurnState, self *sim.CardState) {
 	sunKissPlay(3, s, self)
 }
 
-type SunKissYellow struct{}
-
-func (SunKissYellow) ID() ids.CardID          { return ids.SunKissYellow }
-func (SunKissYellow) Name() string            { return "Sun Kiss" }
-func (SunKissYellow) Cost(*sim.TurnState) int { return 0 }
-func (SunKissYellow) Pitch() int              { return 2 }
-func (SunKissYellow) Attack() int             { return 0 }
-func (SunKissYellow) Defense() int            { return 2 }
-func (SunKissYellow) Types() card.TypeSet     { return sunKissTypes }
-func (SunKissYellow) GoAgain() bool           { return false }
 func (SunKissYellow) Play(s *sim.TurnState, self *sim.CardState) {
 	sunKissPlay(2, s, self)
 }
 
-type SunKissBlue struct{}
-
-func (SunKissBlue) ID() ids.CardID          { return ids.SunKissBlue }
-func (SunKissBlue) Name() string            { return "Sun Kiss" }
-func (SunKissBlue) Cost(*sim.TurnState) int { return 0 }
-func (SunKissBlue) Pitch() int              { return 3 }
-func (SunKissBlue) Attack() int             { return 0 }
-func (SunKissBlue) Defense() int            { return 2 }
-func (SunKissBlue) Types() card.TypeSet     { return sunKissTypes }
-func (SunKissBlue) GoAgain() bool           { return false }
 func (SunKissBlue) Play(s *sim.TurnState, self *sim.CardState) {
 	sunKissPlay(1, s, self)
 }

@@ -1,0 +1,22 @@
+name: Oath of the Arknight
+types:
+    - Runeblade
+    - Action
+cost: 2
+goAgain: true
+text: |-
+    Your next Runeblade attack this turn gains +N{p}. Create a Runechant token. Go again."
+    (Red N=3, Yellow N=2, Blue N=1.)
+variants:
+    - id: OathOfTheArknightRed
+      pitch: 1
+      attack: 0
+      defense: 3
+    - id: OathOfTheArknightYellow
+      pitch: 2
+      attack: 0
+      defense: 3
+    - id: OathOfTheArknightBlue
+      pitch: 3
+      attack: 0
+      defense: 3

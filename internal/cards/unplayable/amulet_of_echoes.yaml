@@ -1,0 +1,17 @@
+name: Amulet of Echoes
+types:
+    - Generic
+    - Action
+    - Item
+cost: 0
+goAgain: true
+markers:
+    - Unplayable
+text: |-
+    **Go again** **Instant** - Destroy Amulet of Echoes: Target hero discards 2 cards.
+    Activate this ability only if they have played 2 or more cards with the same name this turn.
+variants:
+    - id: AmuletOfEchoesBlue
+      pitch: 3
+      attack: 0
+      defense: 0

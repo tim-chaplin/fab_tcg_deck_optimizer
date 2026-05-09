@@ -1,0 +1,20 @@
+name: Cut Down to Size
+types:
+    - Generic
+    - Action
+    - Attack
+cost: 2
+text: When this hits a hero, if they have 4 or more cards in hand, they discard a card.
+variants:
+    - id: CutDownToSizeRed
+      pitch: 1
+      attack: 6
+      defense: 2
+    - id: CutDownToSizeYellow
+      pitch: 2
+      attack: 5
+      defense: 2
+    - id: CutDownToSizeBlue
+      pitch: 3
+      attack: 4
+      defense: 2

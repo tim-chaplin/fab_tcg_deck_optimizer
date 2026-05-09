@@ -1,0 +1,24 @@
+name: Seek Horizon
+types:
+    - Generic
+    - Action
+    - Attack
+cost: 0
+markers:
+    - NotImplemented
+text: |-
+    As an additional cost to play Seek Horizon, you may put a card from your hand on top of
+    your deck. If you do, Seek Horizon gains **go again**.
+variants:
+    - id: SeekHorizonRed
+      pitch: 1
+      attack: 4
+      defense: 2
+    - id: SeekHorizonYellow
+      pitch: 2
+      attack: 3
+      defense: 2
+    - id: SeekHorizonBlue
+      pitch: 3
+      attack: 2
+      defense: 2

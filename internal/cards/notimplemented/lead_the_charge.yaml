@@ -1,0 +1,24 @@
+name: Lead the Charge
+types:
+    - Generic
+    - Action
+cost: 0
+goAgain: true
+markers:
+    - NotImplemented
+text: |-
+    The next time you play an action card with cost 0 or greater this turn, gain 1 action
+    point. **Go again**
+variants:
+    - id: LeadTheChargeRed
+      pitch: 1
+      attack: 0
+      defense: 2
+    - id: LeadTheChargeYellow
+      pitch: 2
+      attack: 0
+      defense: 2
+    - id: LeadTheChargeBlue
+      pitch: 3
+      attack: 0
+      defense: 2

@@ -1,0 +1,24 @@
+name: Runic Reaping
+types:
+    - Runeblade
+    - Action
+cost: 1
+goAgain: true
+text: |-
+    The next Runeblade attack action card you play this turn gains 'When this hits, create N
+    Runechant tokens'. If an attack card was pitched to play Runic Reaping, the next Runeblade
+    attack action card you play this turn gains +1{p}. Go again."
+    (Red N=3, Yellow N=2, Blue N=1.)
+variants:
+    - id: RunicReapingRed
+      pitch: 1
+      attack: 0
+      defense: 2
+    - id: RunicReapingYellow
+      pitch: 2
+      attack: 0
+      defense: 2
+    - id: RunicReapingBlue
+      pitch: 3
+      attack: 0
+      defense: 2

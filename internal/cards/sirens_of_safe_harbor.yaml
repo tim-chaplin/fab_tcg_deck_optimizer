@@ -1,0 +1,22 @@
+name: Sirens of Safe Harbor
+types:
+    - Generic
+    - Action
+    - Attack
+cost: 2
+markers:
+    - NotSilverAgeLegal
+text: When this is put into your graveyard from anywhere, gain 1{h}.
+variants:
+    - id: SirensOfSafeHarborRed
+      pitch: 1
+      attack: 6
+      defense: 2
+    - id: SirensOfSafeHarborYellow
+      pitch: 2
+      attack: 5
+      defense: 2
+    - id: SirensOfSafeHarborBlue
+      pitch: 3
+      attack: 4
+      defense: 2

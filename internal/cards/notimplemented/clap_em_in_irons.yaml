@@ -1,0 +1,17 @@
+name: Clap 'Em in Irons
+types:
+    - Generic
+    - Action
+    - Item
+cost: 0
+goAgain: true
+markers:
+    - NotImplemented
+text: |-
+    **Go again** When this enters the arena, {t} target Pirate hero or ally. It can't {u}
+    while this is in the arena. At the start of your turn, destroy this.
+variants:
+    - id: ClapEmInIronsBlue
+      pitch: 3
+      attack: 0
+      defense: 0

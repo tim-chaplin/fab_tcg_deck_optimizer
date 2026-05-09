@@ -1,0 +1,14 @@
+name: Visit the Blacksmith
+types:
+    - Generic
+    - Action
+cost: 0
+goAgain: true
+markers:
+    - NotImplemented
+text: Your next sword attack this turn gains +1{p}. **Go again**
+variants:
+    - id: VisitTheBlacksmithBlue
+      pitch: 3
+      attack: 0
+      defense: 2

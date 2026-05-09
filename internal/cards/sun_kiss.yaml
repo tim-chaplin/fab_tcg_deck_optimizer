@@ -1,0 +1,21 @@
+name: Sun Kiss
+types:
+    - Generic
+    - Action
+cost: 0
+text: |-
+    Gain N{h}. If you have played a card named Moon Wish this turn, draw a card and Sun Kiss
+    gains **go again**." (N is the printed variant value above.)
+variants:
+    - id: SunKissRed
+      pitch: 1
+      attack: 0
+      defense: 2
+    - id: SunKissYellow
+      pitch: 2
+      attack: 0
+      defense: 2
+    - id: SunKissBlue
+      pitch: 3
+      attack: 0
+      defense: 2

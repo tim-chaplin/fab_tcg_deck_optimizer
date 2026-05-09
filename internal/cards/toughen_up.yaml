@@ -1,0 +1,10 @@
+name: Toughen Up
+types:
+    - Generic
+    - DefenseReaction
+cost: 2
+variants:
+    - id: ToughenUpBlue
+      pitch: 3
+      attack: 0
+      defense: 4

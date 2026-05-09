@@ -1,0 +1,23 @@
+name: Water the Seeds
+types:
+    - Generic
+    - Action
+    - Attack
+cost: 1
+goAgain: true
+text: |-
+    When this attacks, your next attack this combat chain with 1 or less base {p} gets +1{p}.
+    **Go again**
+variants:
+    - id: WaterTheSeedsRed
+      pitch: 1
+      attack: 3
+      defense: 2
+    - id: WaterTheSeedsYellow
+      pitch: 2
+      attack: 2
+      defense: 2
+    - id: WaterTheSeedsBlue
+      pitch: 3
+      attack: 1
+      defense: 2

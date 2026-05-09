@@ -1,0 +1,24 @@
+name: Splintering Deadwood
+types:
+    - Runeblade
+    - Action
+    - Attack
+cost: 3
+markers:
+    - NotImplemented
+text: |-
+    When this attacks or hits, you may destroy an aura you control. If you do, create a
+    Runechant token.
+variants:
+    - id: SplinteringDeadwoodRed
+      pitch: 1
+      attack: 7
+      defense: 3
+    - id: SplinteringDeadwoodYellow
+      pitch: 2
+      attack: 6
+      defense: 3
+    - id: SplinteringDeadwoodBlue
+      pitch: 3
+      attack: 5
+      defense: 3

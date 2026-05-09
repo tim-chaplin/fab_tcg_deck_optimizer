@@ -1,0 +1,14 @@
+name: Timesnap Potion
+types:
+    - Generic
+    - Action
+    - Item
+cost: 0
+markers:
+    - Unplayable
+text: '**Action** - Destroy this: Gain 2 action points.'
+variants:
+    - id: TimesnapPotionBlue
+      pitch: 3
+      attack: 0
+      defense: 0

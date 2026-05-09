@@ -5,27 +5,12 @@
 package notimplemented
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
-
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/cards"
 )
-
-type LayLowYellow struct{}
-
-func (LayLowYellow) ID() ids.CardID          { return ids.LayLowYellow }
-func (LayLowYellow) Name() string            { return "Lay Low" }
-func (LayLowYellow) Cost(*sim.TurnState) int { return 0 }
-func (LayLowYellow) Pitch() int              { return 2 }
-func (LayLowYellow) Attack() int             { return 0 }
-func (LayLowYellow) Defense() int            { return 3 }
-func (LayLowYellow) Types() card.TypeSet     { return cards.DefenseReactionTypes }
-func (LayLowYellow) GoAgain() bool           { return false }
 
 // not implemented: marked-defender state not tracked; treated as always legal and the -1{p}
 // attacker debuff is dropped
-func (LayLowYellow) NotImplemented() {}
+
 func (LayLowYellow) Play(s *sim.TurnState, self *sim.CardState) {
 	n := self.DealEffectiveDefense(s)
 	s.Log(self, n)

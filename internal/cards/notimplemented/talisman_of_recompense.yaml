@@ -1,0 +1,17 @@
+name: Talisman of Recompense
+types:
+    - Generic
+    - Action
+    - Item
+cost: 0
+goAgain: true
+markers:
+    - NotImplemented
+text: |-
+    **Go again** Whenever you pitch a card, if you would gain exactly one {r}, instead destroy
+    Talisman of Recompense and gain {r}{r}{r}.
+variants:
+    - id: TalismanOfRecompenseYellow
+      pitch: 2
+      attack: 0
+      defense: 0

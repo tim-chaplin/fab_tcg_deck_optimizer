@@ -1,0 +1,14 @@
+name: Potion of Seeing
+types:
+    - Generic
+    - Action
+    - Item
+cost: 0
+markers:
+    - Unplayable
+text: '**Instant** - Destroy Potion of Seeing: Look at target hero''s hand.'
+variants:
+    - id: PotionOfSeeingBlue
+      pitch: 3
+      attack: 0
+      defense: 0

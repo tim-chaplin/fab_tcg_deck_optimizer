@@ -1,0 +1,20 @@
+name: Gravekeeping
+types:
+    - Generic
+    - Action
+    - Attack
+cost: 1
+text: When this attacks a hero, you may banish a card from their graveyard.
+variants:
+    - id: GravekeepingRed
+      pitch: 1
+      attack: 5
+      defense: 2
+    - id: GravekeepingYellow
+      pitch: 2
+      attack: 4
+      defense: 2
+    - id: GravekeepingBlue
+      pitch: 3
+      attack: 3
+      defense: 2

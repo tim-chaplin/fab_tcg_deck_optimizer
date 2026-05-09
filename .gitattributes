@@ -7,3 +7,9 @@ fabsim text eol=lf
 
 # Windows batch files stay CRLF.
 *.bat text eol=crlf
+
+# Generated card files are auto-produced by cmd/cardgen from cards.yaml. Mark them as
+# generated so GitHub collapses them in PR diffs by default.
+internal/cards/*_gen.go                linguist-generated=true
+internal/cards/notimplemented/*_gen.go linguist-generated=true
+internal/cards/unplayable/*_gen.go     linguist-generated=true

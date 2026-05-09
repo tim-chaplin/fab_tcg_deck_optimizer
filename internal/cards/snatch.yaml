@@ -1,0 +1,20 @@
+name: Snatch
+types:
+    - Generic
+    - Action
+    - Attack
+cost: 0
+text: When this hits, draw a card.
+variants:
+    - id: SnatchRed
+      pitch: 1
+      attack: 4
+      defense: 2
+    - id: SnatchYellow
+      pitch: 2
+      attack: 3
+      defense: 2
+    - id: SnatchBlue
+      pitch: 3
+      attack: 2
+      defense: 2

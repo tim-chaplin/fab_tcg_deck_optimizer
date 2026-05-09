@@ -9,12 +9,8 @@
 package cards
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 )
-
-var oasisRespiteTypes = card.NewTypeSet(card.TypeGeneric, card.TypeInstant)
 
 func oasisRespitePlay(s *sim.TurnState, self *sim.CardState) {
 	n := self.DealEffectiveDefense(s)
@@ -25,47 +21,17 @@ func oasisRespitePlay(s *sim.TurnState, self *sim.CardState) {
 	s.Log(self, n)
 }
 
-type OasisRespiteRed struct{}
-
-func (OasisRespiteRed) ID() ids.CardID          { return ids.OasisRespiteRed }
-func (OasisRespiteRed) Name() string            { return "Oasis Respite" }
-func (OasisRespiteRed) Cost(*sim.TurnState) int { return 1 }
-func (OasisRespiteRed) Pitch() int              { return 1 }
-func (OasisRespiteRed) Attack() int             { return 0 }
-func (OasisRespiteRed) Defense() int            { return 4 }
-func (OasisRespiteRed) Types() card.TypeSet     { return oasisRespiteTypes }
-func (OasisRespiteRed) GoAgain() bool           { return false }
-func (OasisRespiteRed) DefensiveInstant()       {}
+func (OasisRespiteRed) DefensiveInstant() {}
 func (OasisRespiteRed) Play(s *sim.TurnState, self *sim.CardState) {
 	oasisRespitePlay(s, self)
 }
 
-type OasisRespiteYellow struct{}
-
-func (OasisRespiteYellow) ID() ids.CardID          { return ids.OasisRespiteYellow }
-func (OasisRespiteYellow) Name() string            { return "Oasis Respite" }
-func (OasisRespiteYellow) Cost(*sim.TurnState) int { return 1 }
-func (OasisRespiteYellow) Pitch() int              { return 2 }
-func (OasisRespiteYellow) Attack() int             { return 0 }
-func (OasisRespiteYellow) Defense() int            { return 3 }
-func (OasisRespiteYellow) Types() card.TypeSet     { return oasisRespiteTypes }
-func (OasisRespiteYellow) GoAgain() bool           { return false }
-func (OasisRespiteYellow) DefensiveInstant()       {}
+func (OasisRespiteYellow) DefensiveInstant() {}
 func (OasisRespiteYellow) Play(s *sim.TurnState, self *sim.CardState) {
 	oasisRespitePlay(s, self)
 }
 
-type OasisRespiteBlue struct{}
-
-func (OasisRespiteBlue) ID() ids.CardID          { return ids.OasisRespiteBlue }
-func (OasisRespiteBlue) Name() string            { return "Oasis Respite" }
-func (OasisRespiteBlue) Cost(*sim.TurnState) int { return 1 }
-func (OasisRespiteBlue) Pitch() int              { return 3 }
-func (OasisRespiteBlue) Attack() int             { return 0 }
-func (OasisRespiteBlue) Defense() int            { return 2 }
-func (OasisRespiteBlue) Types() card.TypeSet     { return oasisRespiteTypes }
-func (OasisRespiteBlue) GoAgain() bool           { return false }
-func (OasisRespiteBlue) DefensiveInstant()       {}
+func (OasisRespiteBlue) DefensiveInstant() {}
 func (OasisRespiteBlue) Play(s *sim.TurnState, self *sim.CardState) {
 	oasisRespitePlay(s, self)
 }

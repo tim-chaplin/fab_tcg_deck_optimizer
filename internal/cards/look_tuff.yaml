@@ -1,0 +1,12 @@
+name: Look Tuff
+types:
+    - Generic
+    - Action
+    - Attack
+cost: 3
+text: When this attacks, it gets -1{p} unless you pay {r}.
+variants:
+    - id: LookTuffRed
+      pitch: 1
+      attack: 8
+      defense: 3

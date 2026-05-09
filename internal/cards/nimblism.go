@@ -6,60 +6,26 @@
 package cards
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 )
-
-var nimblismTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction)
 
 // nimblismIsTarget gates the rider on attack action cards whose cost is 1 or less.
 func nimblismIsTarget(s *sim.TurnState, pc *sim.CardState) bool {
 	return pc.Card.Types().IsAttackAction() && pc.Card.Cost(s) <= 1
 }
 
-type NimblismRed struct{}
-
-func (NimblismRed) ID() ids.CardID          { return ids.NimblismRed }
-func (NimblismRed) Name() string            { return "Nimblism" }
-func (NimblismRed) Cost(*sim.TurnState) int { return 0 }
-func (NimblismRed) Pitch() int              { return 1 }
-func (NimblismRed) Attack() int             { return 0 }
-func (NimblismRed) Defense() int            { return 2 }
-func (NimblismRed) Types() card.TypeSet     { return nimblismTypes }
-func (NimblismRed) GoAgain() bool           { return true }
 func (NimblismRed) Play(s *sim.TurnState, self *sim.CardState) {
 	GrantNextCardBonusAttack(s, 3, nimblismIsTarget)
 	n := self.DealEffectiveAttack(s)
 	s.Log(self, n)
 }
 
-type NimblismYellow struct{}
-
-func (NimblismYellow) ID() ids.CardID          { return ids.NimblismYellow }
-func (NimblismYellow) Name() string            { return "Nimblism" }
-func (NimblismYellow) Cost(*sim.TurnState) int { return 0 }
-func (NimblismYellow) Pitch() int              { return 2 }
-func (NimblismYellow) Attack() int             { return 0 }
-func (NimblismYellow) Defense() int            { return 2 }
-func (NimblismYellow) Types() card.TypeSet     { return nimblismTypes }
-func (NimblismYellow) GoAgain() bool           { return true }
 func (NimblismYellow) Play(s *sim.TurnState, self *sim.CardState) {
 	GrantNextCardBonusAttack(s, 2, nimblismIsTarget)
 	n := self.DealEffectiveAttack(s)
 	s.Log(self, n)
 }
 
-type NimblismBlue struct{}
-
-func (NimblismBlue) ID() ids.CardID          { return ids.NimblismBlue }
-func (NimblismBlue) Name() string            { return "Nimblism" }
-func (NimblismBlue) Cost(*sim.TurnState) int { return 0 }
-func (NimblismBlue) Pitch() int              { return 3 }
-func (NimblismBlue) Attack() int             { return 0 }
-func (NimblismBlue) Defense() int            { return 2 }
-func (NimblismBlue) Types() card.TypeSet     { return nimblismTypes }
-func (NimblismBlue) GoAgain() bool           { return true }
 func (NimblismBlue) Play(s *sim.TurnState, self *sim.CardState) {
 	GrantNextCardBonusAttack(s, 1, nimblismIsTarget)
 	n := self.DealEffectiveAttack(s)

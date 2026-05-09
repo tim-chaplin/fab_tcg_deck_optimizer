@@ -11,12 +11,8 @@
 package cards
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 )
-
-var jackBeNimbleTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeAttack)
 
 func jackBeNimblePlay(s *sim.TurnState, self *sim.CardState) {
 	if _, ok := s.BanishFromGraveyard(isNimblism); ok {
@@ -28,16 +24,6 @@ func jackBeNimblePlay(s *sim.TurnState, self *sim.CardState) {
 	s.Log(self, n)
 }
 
-type JackBeNimbleRed struct{}
-
-func (JackBeNimbleRed) ID() ids.CardID          { return ids.JackBeNimbleRed }
-func (JackBeNimbleRed) Name() string            { return "Jack Be Nimble" }
-func (JackBeNimbleRed) Cost(*sim.TurnState) int { return 0 }
-func (JackBeNimbleRed) Pitch() int              { return 1 }
-func (JackBeNimbleRed) Attack() int             { return 3 }
-func (JackBeNimbleRed) Defense() int            { return 3 }
-func (JackBeNimbleRed) Types() card.TypeSet     { return jackBeNimbleTypes }
-func (JackBeNimbleRed) GoAgain() bool           { return false }
 func (JackBeNimbleRed) Play(s *sim.TurnState, self *sim.CardState) {
 	jackBeNimblePlay(s, self)
 }

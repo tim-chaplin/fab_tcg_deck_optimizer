@@ -1,0 +1,15 @@
+name: Shatter Sorcery
+types:
+    - Generic
+    - Instant
+cost: 0
+markers:
+    - Unplayable
+text: |-
+    Choose 1 or both; - Destroy target aura permanent with Sigil in its name.
+    - Prevent the next 1 arcane damage that would be dealt to target hero this turn.
+variants:
+    - id: ShatterSorceryBlue
+      pitch: 3
+      attack: 0
+      defense: 0

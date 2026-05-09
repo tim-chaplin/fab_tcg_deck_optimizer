@@ -12,11 +12,9 @@ package cards
 
 import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
+
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 )
-
-var pummelTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAttackReaction)
 
 // pummelAccepts is the per-mode target predicate. Mode 0 gates on club/hammer weapon
 // attack; mode 1 gates on cost-≥2 attack action. The chain runner runs this for the
@@ -60,17 +58,7 @@ func pummelPlay(s *sim.TurnState, self *sim.CardState, n int) {
 	}
 }
 
-type PummelRed struct{}
-
-func (PummelRed) ID() ids.CardID          { return ids.PummelRed }
-func (PummelRed) Name() string            { return "Pummel" }
-func (PummelRed) Cost(*sim.TurnState) int { return 2 }
-func (PummelRed) Pitch() int              { return 1 }
-func (PummelRed) Attack() int             { return 0 }
-func (PummelRed) Defense() int            { return 2 }
-func (PummelRed) Types() card.TypeSet     { return pummelTypes }
-func (PummelRed) GoAgain() bool           { return false }
-func (PummelRed) Modes() int              { return 2 }
+func (PummelRed) Modes() int { return 2 }
 func (PummelRed) ARTargetAllowed(c sim.Card, mode int8) bool {
 	return pummelAccepts(c, mode)
 }
@@ -78,17 +66,7 @@ func (PummelRed) Play(s *sim.TurnState, self *sim.CardState) {
 	pummelPlay(s, self, 4)
 }
 
-type PummelYellow struct{}
-
-func (PummelYellow) ID() ids.CardID          { return ids.PummelYellow }
-func (PummelYellow) Name() string            { return "Pummel" }
-func (PummelYellow) Cost(*sim.TurnState) int { return 2 }
-func (PummelYellow) Pitch() int              { return 2 }
-func (PummelYellow) Attack() int             { return 0 }
-func (PummelYellow) Defense() int            { return 2 }
-func (PummelYellow) Types() card.TypeSet     { return pummelTypes }
-func (PummelYellow) GoAgain() bool           { return false }
-func (PummelYellow) Modes() int              { return 2 }
+func (PummelYellow) Modes() int { return 2 }
 func (PummelYellow) ARTargetAllowed(c sim.Card, mode int8) bool {
 	return pummelAccepts(c, mode)
 }
@@ -96,17 +74,7 @@ func (PummelYellow) Play(s *sim.TurnState, self *sim.CardState) {
 	pummelPlay(s, self, 3)
 }
 
-type PummelBlue struct{}
-
-func (PummelBlue) ID() ids.CardID          { return ids.PummelBlue }
-func (PummelBlue) Name() string            { return "Pummel" }
-func (PummelBlue) Cost(*sim.TurnState) int { return 2 }
-func (PummelBlue) Pitch() int              { return 3 }
-func (PummelBlue) Attack() int             { return 0 }
-func (PummelBlue) Defense() int            { return 2 }
-func (PummelBlue) Types() card.TypeSet     { return pummelTypes }
-func (PummelBlue) GoAgain() bool           { return false }
-func (PummelBlue) Modes() int              { return 2 }
+func (PummelBlue) Modes() int { return 2 }
 func (PummelBlue) ARTargetAllowed(c sim.Card, mode int8) bool {
 	return pummelAccepts(c, mode)
 }

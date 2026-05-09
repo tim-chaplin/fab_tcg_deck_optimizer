@@ -1,0 +1,21 @@
+name: Sigil of Suffering
+types:
+    - Runeblade
+    - DefenseReaction
+cost: 0
+text: |-
+    Deal 1 arcane damage to the attacking hero. If you have dealt arcane damage this turn,
+    Sigil of Suffering gains +1{d}.
+variants:
+    - id: SigilOfSufferingRed
+      pitch: 1
+      attack: 0
+      defense: 3
+    - id: SigilOfSufferingYellow
+      pitch: 2
+      attack: 0
+      defense: 2
+    - id: SigilOfSufferingBlue
+      pitch: 3
+      attack: 0
+      defense: 1

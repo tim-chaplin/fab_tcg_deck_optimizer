@@ -1,0 +1,20 @@
+name: Overload
+types:
+    - Generic
+    - Action
+    - Attack
+cost: 0
+text: '**Dominate** If Overload hits, it gains **go again**.'
+variants:
+    - id: OverloadRed
+      pitch: 1
+      attack: 3
+      defense: 2
+    - id: OverloadYellow
+      pitch: 2
+      attack: 2
+      defense: 2
+    - id: OverloadBlue
+      pitch: 3
+      attack: 1
+      defense: 2

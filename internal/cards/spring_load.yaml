@@ -1,0 +1,20 @@
+name: Spring Load
+types:
+    - Generic
+    - Action
+    - Attack
+cost: 1
+text: When this attacks, if you have no cards in hand, it gains +3{p}.
+variants:
+    - id: SpringLoadRed
+      pitch: 1
+      attack: 2
+      defense: 2
+    - id: SpringLoadYellow
+      pitch: 2
+      attack: 2
+      defense: 2
+    - id: SpringLoadBlue
+      pitch: 3
+      attack: 2
+      defense: 2

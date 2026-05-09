@@ -1,0 +1,22 @@
+name: Strategic Planning
+types:
+    - Generic
+    - Action
+cost: 1
+goAgain: true
+text: |-
+    Put an action card with cost 2 or less from a graveyard on the bottom of its owner's deck.
+    At the beginning of the end phase, draw a card. **Go again**
+variants:
+    - id: StrategicPlanningRed
+      pitch: 1
+      attack: 0
+      defense: 2
+    - id: StrategicPlanningYellow
+      pitch: 2
+      attack: 0
+      defense: 2
+    - id: StrategicPlanningBlue
+      pitch: 3
+      attack: 0
+      defense: 2

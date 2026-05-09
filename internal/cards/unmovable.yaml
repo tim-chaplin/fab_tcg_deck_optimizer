@@ -1,0 +1,19 @@
+name: Unmovable
+types:
+    - Generic
+    - DefenseReaction
+cost: 3
+text: If Unmovable is played from arsenal, it gains +1{d}.
+variants:
+    - id: UnmovableRed
+      pitch: 1
+      attack: 0
+      defense: 7
+    - id: UnmovableYellow
+      pitch: 2
+      attack: 0
+      defense: 6
+    - id: UnmovableBlue
+      pitch: 3
+      attack: 0
+      defense: 5

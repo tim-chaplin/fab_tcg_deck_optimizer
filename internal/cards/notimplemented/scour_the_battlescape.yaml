@@ -1,0 +1,24 @@
+name: Scour the Battlescape
+types:
+    - Generic
+    - Action
+    - Attack
+cost: 0
+markers:
+    - NotImplemented
+text: |-
+    You may put a card from your hand on the bottom of your deck. If you do, draw a card. If
+    Scour the Battlescape is played from arsenal, it gains **go again**.
+variants:
+    - id: ScourTheBattlescapeRed
+      pitch: 1
+      attack: 3
+      defense: 2
+    - id: ScourTheBattlescapeYellow
+      pitch: 2
+      attack: 2
+      defense: 2
+    - id: ScourTheBattlescapeBlue
+      pitch: 3
+      attack: 1
+      defense: 2

@@ -1,0 +1,23 @@
+name: Eirina's Prayer
+types:
+    - Generic
+    - Instant
+cost: 1
+markers:
+    - NotImplemented
+text: |-
+    Reveal the top card of your deck. Prevent the next X arcane damage that would be dealt to
+    your hero this turn, where X is 6 minus the pitch value of the card revealed this way.
+variants:
+    - id: EirinasPrayerRed
+      pitch: 1
+      attack: 0
+      defense: 0
+    - id: EirinasPrayerYellow
+      pitch: 2
+      attack: 0
+      defense: 0
+    - id: EirinasPrayerBlue
+      pitch: 3
+      attack: 0
+      defense: 0

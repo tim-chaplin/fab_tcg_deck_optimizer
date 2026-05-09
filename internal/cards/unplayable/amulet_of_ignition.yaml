@@ -1,0 +1,18 @@
+name: Amulet of Ignition
+types:
+    - Generic
+    - Action
+    - Item
+cost: 0
+goAgain: true
+markers:
+    - Unplayable
+text: |-
+    **Go again** **Instant** - Destroy Amulet of Ignition: The next ability you activate this
+    turn costs {r} less. Activate this ability only if you haven't played a card or activated an
+    ability this turn.
+variants:
+    - id: AmuletOfIgnitionYellow
+      pitch: 2
+      attack: 0
+      defense: 0

@@ -11,11 +11,9 @@ package cards
 
 import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
+
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 )
-
-var runicReapingTypes = card.NewTypeSet(card.TypeRuneblade, card.TypeAction)
 
 // runicReapingTargetMatches accepts Runeblade attack action cards (weapons don't qualify).
 func runicReapingTargetMatches(target *sim.CardState) bool {
@@ -23,44 +21,14 @@ func runicReapingTargetMatches(target *sim.CardState) bool {
 	return t.Has(card.TypeRuneblade) && t.IsAttackAction()
 }
 
-type RunicReapingRed struct{}
-
-func (RunicReapingRed) ID() ids.CardID          { return ids.RunicReapingRed }
-func (RunicReapingRed) Name() string            { return "Runic Reaping" }
-func (RunicReapingRed) Cost(*sim.TurnState) int { return 1 }
-func (RunicReapingRed) Pitch() int              { return 1 }
-func (RunicReapingRed) Attack() int             { return 0 }
-func (RunicReapingRed) Defense() int            { return 2 }
-func (RunicReapingRed) Types() card.TypeSet     { return runicReapingTypes }
-func (RunicReapingRed) GoAgain() bool           { return true }
 func (c RunicReapingRed) Play(s *sim.TurnState, self *sim.CardState) {
 	runicReapingPlay(s, self, c, 3)
 }
 
-type RunicReapingYellow struct{}
-
-func (RunicReapingYellow) ID() ids.CardID          { return ids.RunicReapingYellow }
-func (RunicReapingYellow) Name() string            { return "Runic Reaping" }
-func (RunicReapingYellow) Cost(*sim.TurnState) int { return 1 }
-func (RunicReapingYellow) Pitch() int              { return 2 }
-func (RunicReapingYellow) Attack() int             { return 0 }
-func (RunicReapingYellow) Defense() int            { return 2 }
-func (RunicReapingYellow) Types() card.TypeSet     { return runicReapingTypes }
-func (RunicReapingYellow) GoAgain() bool           { return true }
 func (c RunicReapingYellow) Play(s *sim.TurnState, self *sim.CardState) {
 	runicReapingPlay(s, self, c, 2)
 }
 
-type RunicReapingBlue struct{}
-
-func (RunicReapingBlue) ID() ids.CardID          { return ids.RunicReapingBlue }
-func (RunicReapingBlue) Name() string            { return "Runic Reaping" }
-func (RunicReapingBlue) Cost(*sim.TurnState) int { return 1 }
-func (RunicReapingBlue) Pitch() int              { return 3 }
-func (RunicReapingBlue) Attack() int             { return 0 }
-func (RunicReapingBlue) Defense() int            { return 2 }
-func (RunicReapingBlue) Types() card.TypeSet     { return runicReapingTypes }
-func (RunicReapingBlue) GoAgain() bool           { return true }
 func (c RunicReapingBlue) Play(s *sim.TurnState, self *sim.CardState) {
 	runicReapingPlay(s, self, c, 1)
 }

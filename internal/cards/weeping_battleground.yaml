@@ -1,0 +1,21 @@
+name: Weeping Battleground
+types:
+    - Runeblade
+    - DefenseReaction
+cost: 0
+text: |-
+    You may banish an aura from your graveyard. If you do, deal 1 arcane damage to target
+    hero.
+variants:
+    - id: WeepingBattlegroundRed
+      pitch: 1
+      attack: 0
+      defense: 3
+    - id: WeepingBattlegroundYellow
+      pitch: 2
+      attack: 0
+      defense: 3
+    - id: WeepingBattlegroundBlue
+      pitch: 3
+      attack: 0
+      defense: 3

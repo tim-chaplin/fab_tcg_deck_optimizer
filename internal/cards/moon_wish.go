@@ -17,12 +17,9 @@
 package cards
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 )
-
-var moonWishTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeAttack)
 
 // moonWishPrintedCost is the un-discounted resource cost (also the VariableCost MaxCost bound).
 const moonWishPrintedCost = 2
@@ -105,50 +102,26 @@ func sunKissTutorPriority(c sim.Card) int {
 	}
 }
 
-type MoonWishRed struct{}
-
-func (MoonWishRed) ID() ids.CardID            { return ids.MoonWishRed }
-func (MoonWishRed) Name() string              { return "Moon Wish" }
 func (MoonWishRed) Cost(s *sim.TurnState) int { return moonWishCost(s) }
 func (MoonWishRed) MinCost() int              { return 0 }
 func (MoonWishRed) MaxCost() int              { return moonWishPrintedCost }
-func (MoonWishRed) Pitch() int                { return 1 }
-func (MoonWishRed) Attack() int               { return 5 }
-func (MoonWishRed) Defense() int              { return 2 }
-func (MoonWishRed) Types() card.TypeSet       { return moonWishTypes }
-func (MoonWishRed) GoAgain() bool             { return false }
+
 func (c MoonWishRed) Play(s *sim.TurnState, self *sim.CardState) {
 	moonWishPlay(c, s, self)
 }
 
-type MoonWishYellow struct{}
-
-func (MoonWishYellow) ID() ids.CardID            { return ids.MoonWishYellow }
-func (MoonWishYellow) Name() string              { return "Moon Wish" }
 func (MoonWishYellow) Cost(s *sim.TurnState) int { return moonWishCost(s) }
 func (MoonWishYellow) MinCost() int              { return 0 }
 func (MoonWishYellow) MaxCost() int              { return moonWishPrintedCost }
-func (MoonWishYellow) Pitch() int                { return 2 }
-func (MoonWishYellow) Attack() int               { return 4 }
-func (MoonWishYellow) Defense() int              { return 2 }
-func (MoonWishYellow) Types() card.TypeSet       { return moonWishTypes }
-func (MoonWishYellow) GoAgain() bool             { return false }
+
 func (c MoonWishYellow) Play(s *sim.TurnState, self *sim.CardState) {
 	moonWishPlay(c, s, self)
 }
 
-type MoonWishBlue struct{}
-
-func (MoonWishBlue) ID() ids.CardID            { return ids.MoonWishBlue }
-func (MoonWishBlue) Name() string              { return "Moon Wish" }
 func (MoonWishBlue) Cost(s *sim.TurnState) int { return moonWishCost(s) }
 func (MoonWishBlue) MinCost() int              { return 0 }
 func (MoonWishBlue) MaxCost() int              { return moonWishPrintedCost }
-func (MoonWishBlue) Pitch() int                { return 3 }
-func (MoonWishBlue) Attack() int               { return 3 }
-func (MoonWishBlue) Defense() int              { return 2 }
-func (MoonWishBlue) Types() card.TypeSet       { return moonWishTypes }
-func (MoonWishBlue) GoAgain() bool             { return false }
+
 func (c MoonWishBlue) Play(s *sim.TurnState, self *sim.CardState) {
 	moonWishPlay(c, s, self)
 }

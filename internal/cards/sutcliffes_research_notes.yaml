@@ -1,0 +1,23 @@
+name: Sutcliffe's Research Notes
+types:
+    - Runeblade
+    - Action
+cost: 1
+goAgain: true
+text: |-
+    Reveal the top N cards of your deck. Create a Runechant token for each Runeblade attack
+    action card revealed this way, then put the cards on top of your deck in any order." (N = 3
+    Red / 2 Yellow / 1 Blue.)
+variants:
+    - id: SutcliffesResearchNotesRed
+      pitch: 1
+      attack: 0
+      defense: 2
+    - id: SutcliffesResearchNotesYellow
+      pitch: 2
+      attack: 0
+      defense: 2
+    - id: SutcliffesResearchNotesBlue
+      pitch: 3
+      attack: 0
+      defense: 2

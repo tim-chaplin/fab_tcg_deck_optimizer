@@ -8,12 +8,8 @@
 package cards
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 )
-
-var chestPuffTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeAttack)
 
 func chestPuffPlay(s *sim.TurnState, self *sim.CardState) {
 	if self.Mode == 0 {
@@ -23,16 +19,6 @@ func chestPuffPlay(s *sim.TurnState, self *sim.CardState) {
 	s.Log(self, n)
 }
 
-type ChestPuffRed struct{}
-
-func (ChestPuffRed) ID() ids.CardID          { return ids.ChestPuffRed }
-func (ChestPuffRed) Name() string            { return "Chest Puff" }
-func (ChestPuffRed) Cost(*sim.TurnState) int { return 2 }
-func (ChestPuffRed) Pitch() int              { return 1 }
-func (ChestPuffRed) Attack() int             { return 7 }
-func (ChestPuffRed) Defense() int            { return 3 }
-func (ChestPuffRed) Types() card.TypeSet     { return chestPuffTypes }
-func (ChestPuffRed) GoAgain() bool           { return false }
 func (ChestPuffRed) Modes() int              { return 2 }
 func (ChestPuffRed) ModalCost(mode int8) int { return 2 + int(mode) }
 func (ChestPuffRed) Play(s *sim.TurnState, self *sim.CardState) {

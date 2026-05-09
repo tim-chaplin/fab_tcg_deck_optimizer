@@ -7,51 +7,11 @@
 package unplayable
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 )
 
-var droneOfBrutalityTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeAttack)
-
-type DroneOfBrutalityRed struct{}
-
-func (DroneOfBrutalityRed) ID() ids.CardID                             { return ids.DroneOfBrutalityRed }
-func (DroneOfBrutalityRed) Name() string                               { return "Drone of Brutality" }
-func (DroneOfBrutalityRed) Cost(*sim.TurnState) int                    { return 2 }
-func (DroneOfBrutalityRed) Pitch() int                                 { return 1 }
-func (DroneOfBrutalityRed) Attack() int                                { return 6 }
-func (DroneOfBrutalityRed) Defense() int                               { return 2 }
-func (DroneOfBrutalityRed) Types() card.TypeSet                        { return droneOfBrutalityTypes }
-func (DroneOfBrutalityRed) GoAgain() bool                              { return false }
-func (DroneOfBrutalityRed) NotSilverAgeLegal()                         {}
-func (DroneOfBrutalityRed) Unplayable()                                {}
 func (DroneOfBrutalityRed) Play(s *sim.TurnState, self *sim.CardState) { s.Log(self, 0) }
 
-type DroneOfBrutalityYellow struct{}
-
-func (DroneOfBrutalityYellow) ID() ids.CardID                             { return ids.DroneOfBrutalityYellow }
-func (DroneOfBrutalityYellow) Name() string                               { return "Drone of Brutality" }
-func (DroneOfBrutalityYellow) Cost(*sim.TurnState) int                    { return 2 }
-func (DroneOfBrutalityYellow) Pitch() int                                 { return 2 }
-func (DroneOfBrutalityYellow) Attack() int                                { return 5 }
-func (DroneOfBrutalityYellow) Defense() int                               { return 2 }
-func (DroneOfBrutalityYellow) Types() card.TypeSet                        { return droneOfBrutalityTypes }
-func (DroneOfBrutalityYellow) GoAgain() bool                              { return false }
-func (DroneOfBrutalityYellow) NotSilverAgeLegal()                         {}
-func (DroneOfBrutalityYellow) Unplayable()                                {}
 func (DroneOfBrutalityYellow) Play(s *sim.TurnState, self *sim.CardState) { s.Log(self, 0) }
 
-type DroneOfBrutalityBlue struct{}
-
-func (DroneOfBrutalityBlue) ID() ids.CardID                             { return ids.DroneOfBrutalityBlue }
-func (DroneOfBrutalityBlue) Name() string                               { return "Drone of Brutality" }
-func (DroneOfBrutalityBlue) Cost(*sim.TurnState) int                    { return 2 }
-func (DroneOfBrutalityBlue) Pitch() int                                 { return 3 }
-func (DroneOfBrutalityBlue) Attack() int                                { return 4 }
-func (DroneOfBrutalityBlue) Defense() int                               { return 2 }
-func (DroneOfBrutalityBlue) Types() card.TypeSet                        { return droneOfBrutalityTypes }
-func (DroneOfBrutalityBlue) GoAgain() bool                              { return false }
-func (DroneOfBrutalityBlue) NotSilverAgeLegal()                         {}
-func (DroneOfBrutalityBlue) Unplayable()                                {}
 func (DroneOfBrutalityBlue) Play(s *sim.TurnState, self *sim.CardState) { s.Log(self, 0) }

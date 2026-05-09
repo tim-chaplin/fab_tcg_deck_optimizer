@@ -1,0 +1,23 @@
+name: Ravenous Rabble
+types:
+    - Generic
+    - Action
+    - Attack
+cost: 0
+goAgain: true
+text: |-
+    When this attacks, reveal the top card of your deck. This gets -X{p}, where X is the pitch
+    value of the card revealed this way. **Go again**
+variants:
+    - id: RavenousRabbleRed
+      pitch: 1
+      attack: 5
+      defense: 2
+    - id: RavenousRabbleYellow
+      pitch: 2
+      attack: 4
+      defense: 2
+    - id: RavenousRabbleBlue
+      pitch: 3
+      attack: 3
+      defense: 2

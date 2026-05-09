@@ -1,0 +1,16 @@
+name: Smash Up
+types:
+    - Generic
+    - Action
+    - Attack
+cost: 1
+markers:
+    - NotImplemented
+text: |-
+    When this hits a hero, turn a card in their arsenal face-up, then banish an attack action
+    card from their arsenal.
+variants:
+    - id: SmashUpRed
+      pitch: 1
+      attack: 5
+      defense: 2

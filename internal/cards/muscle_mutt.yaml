@@ -1,0 +1,11 @@
+name: Muscle Mutt
+types:
+    - Generic
+    - Action
+    - Attack
+cost: 3
+variants:
+    - id: MuscleMuttYellow
+      pitch: 2
+      attack: 6
+      defense: 2

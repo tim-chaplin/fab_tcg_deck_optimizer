@@ -9,12 +9,8 @@
 package cards
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 )
-
-var vigorRushTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeAttack)
 
 func vigorRushPlay(s *sim.TurnState, self *sim.CardState) {
 	if s.NonAttackActionPlayed {
@@ -24,44 +20,14 @@ func vigorRushPlay(s *sim.TurnState, self *sim.CardState) {
 	s.Log(self, n)
 }
 
-type VigorRushRed struct{}
-
-func (VigorRushRed) ID() ids.CardID          { return ids.VigorRushRed }
-func (VigorRushRed) Name() string            { return "Vigor Rush" }
-func (VigorRushRed) Cost(*sim.TurnState) int { return 1 }
-func (VigorRushRed) Pitch() int              { return 1 }
-func (VigorRushRed) Attack() int             { return 4 }
-func (VigorRushRed) Defense() int            { return 2 }
-func (VigorRushRed) Types() card.TypeSet     { return vigorRushTypes }
-func (VigorRushRed) GoAgain() bool           { return false }
 func (VigorRushRed) Play(s *sim.TurnState, self *sim.CardState) {
 	vigorRushPlay(s, self)
 }
 
-type VigorRushYellow struct{}
-
-func (VigorRushYellow) ID() ids.CardID          { return ids.VigorRushYellow }
-func (VigorRushYellow) Name() string            { return "Vigor Rush" }
-func (VigorRushYellow) Cost(*sim.TurnState) int { return 1 }
-func (VigorRushYellow) Pitch() int              { return 2 }
-func (VigorRushYellow) Attack() int             { return 3 }
-func (VigorRushYellow) Defense() int            { return 2 }
-func (VigorRushYellow) Types() card.TypeSet     { return vigorRushTypes }
-func (VigorRushYellow) GoAgain() bool           { return false }
 func (VigorRushYellow) Play(s *sim.TurnState, self *sim.CardState) {
 	vigorRushPlay(s, self)
 }
 
-type VigorRushBlue struct{}
-
-func (VigorRushBlue) ID() ids.CardID          { return ids.VigorRushBlue }
-func (VigorRushBlue) Name() string            { return "Vigor Rush" }
-func (VigorRushBlue) Cost(*sim.TurnState) int { return 1 }
-func (VigorRushBlue) Pitch() int              { return 3 }
-func (VigorRushBlue) Attack() int             { return 2 }
-func (VigorRushBlue) Defense() int            { return 2 }
-func (VigorRushBlue) Types() card.TypeSet     { return vigorRushTypes }
-func (VigorRushBlue) GoAgain() bool           { return false }
 func (VigorRushBlue) Play(s *sim.TurnState, self *sim.CardState) {
 	vigorRushPlay(s, self)
 }

@@ -8,12 +8,8 @@
 package cards
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 )
-
-var lookTuffTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeAttack)
 
 func lookTuffPlay(s *sim.TurnState, self *sim.CardState) {
 	if self.Mode == 0 {
@@ -23,16 +19,6 @@ func lookTuffPlay(s *sim.TurnState, self *sim.CardState) {
 	s.Log(self, n)
 }
 
-type LookTuffRed struct{}
-
-func (LookTuffRed) ID() ids.CardID          { return ids.LookTuffRed }
-func (LookTuffRed) Name() string            { return "Look Tuff" }
-func (LookTuffRed) Cost(*sim.TurnState) int { return 3 }
-func (LookTuffRed) Pitch() int              { return 1 }
-func (LookTuffRed) Attack() int             { return 8 }
-func (LookTuffRed) Defense() int            { return 3 }
-func (LookTuffRed) Types() card.TypeSet     { return lookTuffTypes }
-func (LookTuffRed) GoAgain() bool           { return false }
 func (LookTuffRed) Modes() int              { return 2 }
 func (LookTuffRed) ModalCost(mode int8) int { return 3 + int(mode) }
 func (LookTuffRed) Play(s *sim.TurnState, self *sim.CardState) {

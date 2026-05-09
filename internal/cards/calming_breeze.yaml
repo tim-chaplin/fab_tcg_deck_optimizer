@@ -1,0 +1,13 @@
+name: Calming Breeze
+types:
+    - Generic
+    - Instant
+cost: 0
+text: |-
+    The next 3 times you would be dealt damage this turn, prevent 1 of that damage."
+    The 3-event split is dropped — prevention is credited as a flat 3 against the next hit.
+variants:
+    - id: CalmingBreezeRed
+      pitch: 1
+      attack: 0
+      defense: 3

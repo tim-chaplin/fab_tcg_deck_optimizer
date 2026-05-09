@@ -6,53 +6,22 @@
 package cards
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 )
 
-var scarForAScarTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeAttack)
-
-type ScarForAScarRed struct{}
-
-func (ScarForAScarRed) ID() ids.CardID          { return ids.ScarForAScarRed }
-func (ScarForAScarRed) Name() string            { return "Scar for a Scar" }
-func (ScarForAScarRed) Cost(*sim.TurnState) int { return 0 }
-func (ScarForAScarRed) Pitch() int              { return 1 }
-func (ScarForAScarRed) Attack() int             { return 4 }
-func (ScarForAScarRed) Defense() int            { return 2 }
-func (ScarForAScarRed) Types() card.TypeSet     { return scarForAScarTypes }
-func (ScarForAScarRed) GoAgain() bool           { return sim.HeroWantsLowerHealth() }
+func (ScarForAScarRed) GoAgain() bool { return sim.HeroWantsLowerHealth() }
 func (c ScarForAScarRed) Play(s *sim.TurnState, self *sim.CardState) {
 	n := self.DealEffectiveAttack(s)
 	s.Log(self, n)
 }
 
-type ScarForAScarYellow struct{}
-
-func (ScarForAScarYellow) ID() ids.CardID          { return ids.ScarForAScarYellow }
-func (ScarForAScarYellow) Name() string            { return "Scar for a Scar" }
-func (ScarForAScarYellow) Cost(*sim.TurnState) int { return 0 }
-func (ScarForAScarYellow) Pitch() int              { return 2 }
-func (ScarForAScarYellow) Attack() int             { return 3 }
-func (ScarForAScarYellow) Defense() int            { return 2 }
-func (ScarForAScarYellow) Types() card.TypeSet     { return scarForAScarTypes }
-func (ScarForAScarYellow) GoAgain() bool           { return sim.HeroWantsLowerHealth() }
+func (ScarForAScarYellow) GoAgain() bool { return sim.HeroWantsLowerHealth() }
 func (c ScarForAScarYellow) Play(s *sim.TurnState, self *sim.CardState) {
 	n := self.DealEffectiveAttack(s)
 	s.Log(self, n)
 }
 
-type ScarForAScarBlue struct{}
-
-func (ScarForAScarBlue) ID() ids.CardID          { return ids.ScarForAScarBlue }
-func (ScarForAScarBlue) Name() string            { return "Scar for a Scar" }
-func (ScarForAScarBlue) Cost(*sim.TurnState) int { return 0 }
-func (ScarForAScarBlue) Pitch() int              { return 3 }
-func (ScarForAScarBlue) Attack() int             { return 2 }
-func (ScarForAScarBlue) Defense() int            { return 2 }
-func (ScarForAScarBlue) Types() card.TypeSet     { return scarForAScarTypes }
-func (ScarForAScarBlue) GoAgain() bool           { return sim.HeroWantsLowerHealth() }
+func (ScarForAScarBlue) GoAgain() bool { return sim.HeroWantsLowerHealth() }
 func (c ScarForAScarBlue) Play(s *sim.TurnState, self *sim.CardState) {
 	n := self.DealEffectiveAttack(s)
 	s.Log(self, n)

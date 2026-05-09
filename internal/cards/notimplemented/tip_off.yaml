@@ -1,0 +1,22 @@
+name: Tip-Off
+types:
+    - Generic
+    - Action
+    - Attack
+cost: 1
+markers:
+    - NotImplemented
+text: '**Instant** - Discard this: **Mark** target opposing hero.'
+variants:
+    - id: TipOffRed
+      pitch: 1
+      attack: 5
+      defense: 2
+    - id: TipOffYellow
+      pitch: 2
+      attack: 4
+      defense: 2
+    - id: TipOffBlue
+      pitch: 3
+      attack: 3
+      defense: 2

@@ -1,0 +1,15 @@
+name: Jack Be Quick
+types:
+    - Generic
+    - Action
+    - Attack
+cost: 0
+text: |-
+    When this attacks, you may banish a Nimblism from your graveyard. If you do, this gets
+    +1{p} and **go again**. When this hits a hero, {u} an ally they control, then steal it until the
+    end of this action phase.
+variants:
+    - id: JackBeQuickRed
+      pitch: 1
+      attack: 3
+      defense: 3

@@ -1,0 +1,25 @@
+name: Drone of Brutality
+types:
+    - Generic
+    - Action
+    - Attack
+cost: 2
+markers:
+    - NotSilverAgeLegal
+    - Unplayable
+text: |-
+    If Drone of Brutality would be put into your graveyard from anywhere, instead put it on
+    the bottom of your deck.
+variants:
+    - id: DroneOfBrutalityRed
+      pitch: 1
+      attack: 6
+      defense: 2
+    - id: DroneOfBrutalityYellow
+      pitch: 2
+      attack: 5
+      defense: 2
+    - id: DroneOfBrutalityBlue
+      pitch: 3
+      attack: 4
+      defense: 2

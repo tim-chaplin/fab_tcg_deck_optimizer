@@ -1,0 +1,25 @@
+name: Pick a Card, Any Card
+types:
+    - Generic
+    - Action
+cost: 0
+goAgain: true
+markers:
+    - NotImplemented
+text: |-
+    Look at target opponent's hand then name a card. Choose a random card from their hand and
+    reveal it. If it's the named card, create a Silver token. Repeat this process thrice. **Go
+    again**
+variants:
+    - id: PickACardAnyCardRed
+      pitch: 1
+      attack: 0
+      defense: 2
+    - id: PickACardAnyCardYellow
+      pitch: 2
+      attack: 0
+      defense: 2
+    - id: PickACardAnyCardBlue
+      pitch: 3
+      attack: 0
+      defense: 2

@@ -6,24 +6,9 @@
 package unplayable
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 )
 
-var destructiveTendenciesTypes = card.NewTypeSet(card.TypeGeneric, card.TypeInstant)
-
-type DestructiveTendenciesBlue struct{}
-
-func (DestructiveTendenciesBlue) ID() ids.CardID          { return ids.DestructiveTendenciesBlue }
-func (DestructiveTendenciesBlue) Name() string            { return "Destructive Tendencies" }
-func (DestructiveTendenciesBlue) Cost(*sim.TurnState) int { return 0 }
-func (DestructiveTendenciesBlue) Pitch() int              { return 3 }
-func (DestructiveTendenciesBlue) Attack() int             { return 0 }
-func (DestructiveTendenciesBlue) Defense() int            { return 0 }
-func (DestructiveTendenciesBlue) Types() card.TypeSet     { return destructiveTendenciesTypes }
-func (DestructiveTendenciesBlue) GoAgain() bool           { return false }
-func (DestructiveTendenciesBlue) Unplayable()             {}
 func (DestructiveTendenciesBlue) Play(s *sim.TurnState, self *sim.CardState) {
 	s.Log(self, 0)
 }

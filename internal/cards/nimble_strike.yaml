@@ -1,0 +1,22 @@
+name: Nimble Strike
+types:
+    - Generic
+    - Action
+    - Attack
+cost: 1
+text: |-
+    As an additional cost to play Nimble Strike, you may banish a card named Nimblism from
+    your graveyard. If you do, Nimble Strike gain +1{p} and **go again**.
+variants:
+    - id: NimbleStrikeRed
+      pitch: 1
+      attack: 4
+      defense: 2
+    - id: NimbleStrikeYellow
+      pitch: 2
+      attack: 3
+      defense: 2
+    - id: NimbleStrikeBlue
+      pitch: 3
+      attack: 2
+      defense: 2

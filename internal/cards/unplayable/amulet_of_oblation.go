@@ -7,23 +7,7 @@
 package unplayable
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 )
 
-var amuletOfOblationTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeItem)
-
-type AmuletOfOblationBlue struct{}
-
-func (AmuletOfOblationBlue) ID() ids.CardID          { return ids.AmuletOfOblationBlue }
-func (AmuletOfOblationBlue) Name() string            { return "Amulet of Oblation" }
-func (AmuletOfOblationBlue) Cost(*sim.TurnState) int { return 0 }
-func (AmuletOfOblationBlue) Pitch() int              { return 3 }
-func (AmuletOfOblationBlue) Attack() int             { return 0 }
-func (AmuletOfOblationBlue) Defense() int            { return 0 }
-func (AmuletOfOblationBlue) Types() card.TypeSet     { return amuletOfOblationTypes }
-func (AmuletOfOblationBlue) GoAgain() bool           { return true }
-
-func (AmuletOfOblationBlue) Unplayable()                                {}
 func (AmuletOfOblationBlue) Play(s *sim.TurnState, self *sim.CardState) { s.Log(self, 0) }

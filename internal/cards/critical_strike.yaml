@@ -1,0 +1,19 @@
+name: Critical Strike
+types:
+    - Generic
+    - Action
+    - Attack
+cost: 1
+variants:
+    - id: CriticalStrikeRed
+      pitch: 1
+      attack: 5
+      defense: 3
+    - id: CriticalStrikeYellow
+      pitch: 2
+      attack: 4
+      defense: 3
+    - id: CriticalStrikeBlue
+      pitch: 3
+      attack: 3
+      defense: 3

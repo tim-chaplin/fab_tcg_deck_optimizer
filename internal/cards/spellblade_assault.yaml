@@ -1,0 +1,20 @@
+name: Spellblade Assault
+types:
+    - Runeblade
+    - Action
+    - Attack
+cost: 2
+text: When you attack with Spellblade Assault, create 2 Runechant tokens.
+variants:
+    - id: SpellbladeAssaultRed
+      pitch: 1
+      attack: 4
+      defense: 3
+    - id: SpellbladeAssaultYellow
+      pitch: 2
+      attack: 3
+      defense: 3
+    - id: SpellbladeAssaultBlue
+      pitch: 3
+      attack: 2
+      defense: 3

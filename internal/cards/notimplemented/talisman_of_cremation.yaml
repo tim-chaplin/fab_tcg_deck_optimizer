@@ -1,0 +1,17 @@
+name: Talisman of Cremation
+types:
+    - Generic
+    - Action
+    - Item
+cost: 0
+goAgain: true
+markers:
+    - NotImplemented
+text: |-
+    **Go again** When you play a card from your banished zone, destroy Talisman of Cremation
+    and name a card. Banish all cards with the chosen name from each opposing hero's graveyard.
+variants:
+    - id: TalismanOfCremationBlue
+      pitch: 3
+      attack: 0
+      defense: 0

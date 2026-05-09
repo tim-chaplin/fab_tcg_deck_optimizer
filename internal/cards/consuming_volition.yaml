@@ -1,0 +1,22 @@
+name: Consuming Volition
+types:
+    - Runeblade
+    - Action
+    - Attack
+cost: 1
+text: |-
+    If you've dealt arcane damage this turn, this gets 'When this hits a hero, they discard
+    a card.'
+variants:
+    - id: ConsumingVolitionRed
+      pitch: 1
+      attack: 4
+      defense: 3
+    - id: ConsumingVolitionYellow
+      pitch: 2
+      attack: 3
+      defense: 3
+    - id: ConsumingVolitionBlue
+      pitch: 3
+      attack: 2
+      defense: 3

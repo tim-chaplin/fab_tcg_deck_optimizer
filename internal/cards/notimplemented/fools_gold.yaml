@@ -1,0 +1,12 @@
+name: Fool's Gold
+types:
+    - Generic
+cost: 0
+markers:
+    - NotImplemented
+text: When this is discarded, create a Gold token.
+variants:
+    - id: FoolsGoldYellow
+      pitch: 2
+      attack: 0
+      defense: 0

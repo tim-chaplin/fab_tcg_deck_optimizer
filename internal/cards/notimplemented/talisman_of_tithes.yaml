@@ -1,0 +1,17 @@
+name: Talisman of Tithes
+types:
+    - Generic
+    - Action
+    - Item
+cost: 0
+goAgain: true
+markers:
+    - NotImplemented
+text: |-
+    **Go again** If an opponent would draw 1 or more cards during your action phase, instead
+    destroy Talisman of Tithes and they draw that many cards minus 1.
+variants:
+    - id: TalismanOfTithesBlue
+      pitch: 3
+      attack: 0
+      defense: 0

@@ -1,0 +1,20 @@
+name: Barraging Brawnhide
+types:
+    - Generic
+    - Action
+    - Attack
+cost: 3
+text: While Barraging Brawnhide is defended by less than 2 non-equipment cards, it has +1{p}.
+variants:
+    - id: BarragingBrawnhideRed
+      pitch: 1
+      attack: 7
+      defense: 2
+    - id: BarragingBrawnhideYellow
+      pitch: 2
+      attack: 6
+      defense: 2
+    - id: BarragingBrawnhideBlue
+      pitch: 3
+      attack: 5
+      defense: 2

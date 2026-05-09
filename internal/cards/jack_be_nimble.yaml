@@ -1,0 +1,15 @@
+name: Jack Be Nimble
+types:
+    - Generic
+    - Action
+    - Attack
+cost: 0
+text: |-
+    When this attacks, you may banish a Nimblism from your graveyard. If you do, this gets
+    +1{p} and **go again**. When this hits a hero, steal an item they control until the end of this
+    action phase.
+variants:
+    - id: JackBeNimbleRed
+      pitch: 1
+      attack: 3
+      defense: 3

@@ -1,0 +1,24 @@
+name: Rifting
+types:
+    - Generic
+    - Action
+    - Attack
+cost: 2
+markers:
+    - NotImplemented
+text: |-
+    If Rifting hits, you may play your next 'non-attack' action card this turn as though it
+    were an instant.
+variants:
+    - id: RiftingRed
+      pitch: 1
+      attack: 6
+      defense: 2
+    - id: RiftingYellow
+      pitch: 2
+      attack: 5
+      defense: 2
+    - id: RiftingBlue
+      pitch: 3
+      attack: 4
+      defense: 2

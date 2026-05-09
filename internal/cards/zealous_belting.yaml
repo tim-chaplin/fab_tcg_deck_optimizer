@@ -1,0 +1,22 @@
+name: Zealous Belting
+types:
+    - Generic
+    - Action
+    - Attack
+cost: 2
+text: |-
+    While there is a card in your pitch zone with {p} greater than Zealous Belting's base {p},
+    Zealous Belting has **go again**.
+variants:
+    - id: ZealousBeltingRed
+      pitch: 1
+      attack: 5
+      defense: 2
+    - id: ZealousBeltingYellow
+      pitch: 2
+      attack: 4
+      defense: 2
+    - id: ZealousBeltingBlue
+      pitch: 3
+      attack: 3
+      defense: 2

@@ -1,0 +1,22 @@
+name: Nimblism
+types:
+    - Generic
+    - Action
+cost: 0
+goAgain: true
+text: |-
+    The next attack action card with cost 1 or less you play this turn gains +N{p}. **Go
+    again**" (Red N=3, Yellow N=2, Blue N=1.)
+variants:
+    - id: NimblismRed
+      pitch: 1
+      attack: 0
+      defense: 2
+    - id: NimblismYellow
+      pitch: 2
+      attack: 0
+      defense: 2
+    - id: NimblismBlue
+      pitch: 3
+      attack: 0
+      defense: 2

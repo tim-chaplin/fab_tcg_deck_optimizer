@@ -1,0 +1,24 @@
+name: Back Alley Breakline
+types:
+    - Generic
+    - Action
+    - Attack
+cost: 1
+markers:
+    - NotImplemented
+text: |-
+    If an activated ability or action card effect puts Back Alley Breakline face up into a
+    zone from your deck, gain 1 action point.
+variants:
+    - id: BackAlleyBreaklineRed
+      pitch: 1
+      attack: 5
+      defense: 2
+    - id: BackAlleyBreaklineYellow
+      pitch: 2
+      attack: 4
+      defense: 2
+    - id: BackAlleyBreaklineBlue
+      pitch: 3
+      attack: 3
+      defense: 2

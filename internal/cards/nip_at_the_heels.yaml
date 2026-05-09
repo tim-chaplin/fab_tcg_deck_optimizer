@@ -1,0 +1,11 @@
+name: Nip at the Heels
+types:
+    - Generic
+    - AttackReaction
+cost: 0
+text: Target attack with 3 or less base {p} gets +1{p}.
+variants:
+    - id: NipAtTheHeelsBlue
+      pitch: 3
+      attack: 0
+      defense: 3

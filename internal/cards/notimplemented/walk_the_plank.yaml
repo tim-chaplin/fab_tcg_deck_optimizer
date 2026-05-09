@@ -1,0 +1,22 @@
+name: Walk the Plank
+types:
+    - Generic
+    - Action
+    - Attack
+cost: 3
+markers:
+    - NotImplemented
+text: When this hits a Pirate hero, {t} them or an ally they control.
+variants:
+    - id: WalkThePlankRed
+      pitch: 1
+      attack: 7
+      defense: 2
+    - id: WalkThePlankYellow
+      pitch: 2
+      attack: 6
+      defense: 2
+    - id: WalkThePlankBlue
+      pitch: 3
+      attack: 5
+      defense: 2

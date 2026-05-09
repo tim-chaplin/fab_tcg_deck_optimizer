@@ -10,51 +10,18 @@
 package cards
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 )
 
-var maleficTypes = card.NewTypeSet(card.TypeRuneblade, card.TypeAction, card.TypeAura)
-
-type MaleficIncantationRed struct{}
-
-func (MaleficIncantationRed) ID() ids.CardID          { return ids.MaleficIncantationRed }
-func (MaleficIncantationRed) Name() string            { return "Malefic Incantation" }
-func (MaleficIncantationRed) Cost(*sim.TurnState) int { return 0 }
-func (MaleficIncantationRed) Pitch() int              { return 1 }
-func (MaleficIncantationRed) Attack() int             { return 0 }
-func (MaleficIncantationRed) Defense() int            { return 2 }
-func (MaleficIncantationRed) Types() card.TypeSet     { return maleficTypes }
-func (MaleficIncantationRed) GoAgain() bool           { return true }
 func (c MaleficIncantationRed) Play(s *sim.TurnState, self *sim.CardState) {
 	maleficPlay(s, self, c, 3)
 }
 
-type MaleficIncantationYellow struct{}
-
-func (MaleficIncantationYellow) ID() ids.CardID          { return ids.MaleficIncantationYellow }
-func (MaleficIncantationYellow) Name() string            { return "Malefic Incantation" }
-func (MaleficIncantationYellow) Cost(*sim.TurnState) int { return 0 }
-func (MaleficIncantationYellow) Pitch() int              { return 2 }
-func (MaleficIncantationYellow) Attack() int             { return 0 }
-func (MaleficIncantationYellow) Defense() int            { return 2 }
-func (MaleficIncantationYellow) Types() card.TypeSet     { return maleficTypes }
-func (MaleficIncantationYellow) GoAgain() bool           { return true }
 func (c MaleficIncantationYellow) Play(s *sim.TurnState, self *sim.CardState) {
 	maleficPlay(s, self, c, 2)
 }
 
-type MaleficIncantationBlue struct{}
-
-func (MaleficIncantationBlue) ID() ids.CardID          { return ids.MaleficIncantationBlue }
-func (MaleficIncantationBlue) Name() string            { return "Malefic Incantation" }
-func (MaleficIncantationBlue) Cost(*sim.TurnState) int { return 0 }
-func (MaleficIncantationBlue) Pitch() int              { return 3 }
-func (MaleficIncantationBlue) Attack() int             { return 0 }
-func (MaleficIncantationBlue) Defense() int            { return 2 }
-func (MaleficIncantationBlue) Types() card.TypeSet     { return maleficTypes }
-func (MaleficIncantationBlue) GoAgain() bool           { return true }
 func (c MaleficIncantationBlue) Play(s *sim.TurnState, self *sim.CardState) {
 	maleficPlay(s, self, c, 1)
 }

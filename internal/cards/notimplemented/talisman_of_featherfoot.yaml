@@ -1,0 +1,17 @@
+name: Talisman of Featherfoot
+types:
+    - Generic
+    - Action
+    - Item
+cost: 0
+goAgain: true
+markers:
+    - NotImplemented
+text: |-
+    **Go again** When an attack you control gains exactly +1{p} from an effect during the
+    reaction step, destroy Talisman of Featherfoot and the attack gains **go again**.
+variants:
+    - id: TalismanOfFeatherfootYellow
+      pitch: 2
+      attack: 0
+      defense: 0

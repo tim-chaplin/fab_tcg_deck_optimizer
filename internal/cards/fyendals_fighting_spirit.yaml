@@ -1,0 +1,20 @@
+name: Fyendal's Fighting Spirit
+types:
+    - Generic
+    - Action
+    - Attack
+cost: 3
+text: When this attacks or defends, if you have less {h} than an opposing hero, gain 1{h}.
+variants:
+    - id: FyendalsFightingSpiritRed
+      pitch: 1
+      attack: 7
+      defense: 2
+    - id: FyendalsFightingSpiritYellow
+      pitch: 2
+      attack: 6
+      defense: 2
+    - id: FyendalsFightingSpiritBlue
+      pitch: 3
+      attack: 5
+      defense: 2

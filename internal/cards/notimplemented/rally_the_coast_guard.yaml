@@ -1,0 +1,24 @@
+name: Rally the Coast Guard
+types:
+    - Generic
+    - Action
+    - Attack
+cost: 3
+markers:
+    - NotImplemented
+text: |-
+    **Once per Turn Instant** - Discard a card: This gets +3{d}. Activate this only while this
+    card is defending.
+variants:
+    - id: RallyTheCoastGuardRed
+      pitch: 1
+      attack: 7
+      defense: 2
+    - id: RallyTheCoastGuardYellow
+      pitch: 2
+      attack: 6
+      defense: 2
+    - id: RallyTheCoastGuardBlue
+      pitch: 3
+      attack: 5
+      defense: 2

@@ -1,0 +1,22 @@
+name: Deathly Duet
+types:
+    - Runeblade
+    - Action
+    - Attack
+cost: 2
+text: |-
+    When Deathly Duet attacks, if an attack action card was pitched to play it, it gains
+    +2{p}. If a 'non-attack' action card was pitched to play it, create 2 Runechant tokens.
+variants:
+    - id: DeathlyDuetRed
+      pitch: 1
+      attack: 4
+      defense: 3
+    - id: DeathlyDuetYellow
+      pitch: 2
+      attack: 3
+      defense: 3
+    - id: DeathlyDuetBlue
+      pitch: 3
+      attack: 2
+      defense: 3

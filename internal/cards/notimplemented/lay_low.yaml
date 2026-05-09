@@ -1,0 +1,13 @@
+name: Lay Low
+types: []
+cost: 0
+markers:
+    - NotImplemented
+text: |-
+    If you are marked, you can't play this. If the defending hero is marked, their next attack
+    this turn gets -1{p}.
+variants:
+    - id: LayLowYellow
+      pitch: 2
+      attack: 0
+      defense: 3

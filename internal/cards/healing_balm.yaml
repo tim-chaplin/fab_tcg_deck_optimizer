@@ -1,0 +1,19 @@
+name: Healing Balm
+types:
+    - Generic
+    - Action
+cost: 0
+text: Gain N{h}." (N is the printed variant value above.)
+variants:
+    - id: HealingBalmRed
+      pitch: 1
+      attack: 0
+      defense: 2
+    - id: HealingBalmYellow
+      pitch: 2
+      attack: 0
+      defense: 2
+    - id: HealingBalmBlue
+      pitch: 3
+      attack: 0
+      defense: 2

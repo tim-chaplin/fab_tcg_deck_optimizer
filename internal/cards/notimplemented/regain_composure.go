@@ -5,28 +5,13 @@
 package notimplemented
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/cards"
 )
 
-var regainComposureTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction)
-
-type RegainComposureBlue struct{}
-
-func (RegainComposureBlue) ID() ids.CardID          { return ids.RegainComposureBlue }
-func (RegainComposureBlue) Name() string            { return "Regain Composure" }
-func (RegainComposureBlue) Cost(*sim.TurnState) int { return 0 }
-func (RegainComposureBlue) Pitch() int              { return 3 }
-func (RegainComposureBlue) Attack() int             { return 0 }
-func (RegainComposureBlue) Defense() int            { return 2 }
-func (RegainComposureBlue) Types() card.TypeSet     { return regainComposureTypes }
-func (RegainComposureBlue) GoAgain() bool           { return true }
-
 // not implemented: on-hit unfreeze rider (freeze/unfreeze state not tracked)
-func (RegainComposureBlue) NotImplemented() {}
+
 func (RegainComposureBlue) Play(s *sim.TurnState, self *sim.CardState) {
 	cards.GrantNextCardBonusAttack(s, 1, cards.IsAttack)
 	n := self.DealEffectiveAttack(s)

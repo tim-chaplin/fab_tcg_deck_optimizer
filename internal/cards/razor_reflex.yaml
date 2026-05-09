@@ -1,0 +1,22 @@
+name: Razor Reflex
+types:
+    - Generic
+    - AttackReaction
+cost: 1
+text: |-
+    Choose 1; Target dagger or sword weapon attack gets +N{p}. Target attack action
+    card with cost 1 or less gets +N{p} and 'When this hits, it gets **go again**.'"
+    (Red N=3, Yellow N=2, Blue N=1.)
+variants:
+    - id: RazorReflexRed
+      pitch: 1
+      attack: 0
+      defense: 2
+    - id: RazorReflexYellow
+      pitch: 2
+      attack: 0
+      defense: 2
+    - id: RazorReflexBlue
+      pitch: 3
+      attack: 0
+      defense: 2

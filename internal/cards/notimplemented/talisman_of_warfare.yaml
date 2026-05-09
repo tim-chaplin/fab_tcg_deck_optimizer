@@ -1,0 +1,17 @@
+name: Talisman of Warfare
+types:
+    - Generic
+    - Action
+    - Item
+cost: 0
+goAgain: true
+markers:
+    - NotImplemented
+text: |-
+    **Go again** When a source you control deals exactly 2 damage to an opposing hero, destroy
+    Talisman of Warfare and all cards in all arsenals.
+variants:
+    - id: TalismanOfWarfareYellow
+      pitch: 2
+      attack: 0
+      defense: 0

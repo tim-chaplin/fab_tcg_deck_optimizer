@@ -1,0 +1,20 @@
+name: Adrenaline Rush
+types:
+    - Generic
+    - Action
+    - Attack
+cost: 2
+text: When you play this, if you have less {h} than an opposing hero, this gets +3{p}.
+variants:
+    - id: AdrenalineRushRed
+      pitch: 1
+      attack: 4
+      defense: 2
+    - id: AdrenalineRushYellow
+      pitch: 2
+      attack: 3
+      defense: 2
+    - id: AdrenalineRushBlue
+      pitch: 3
+      attack: 2
+      defense: 2

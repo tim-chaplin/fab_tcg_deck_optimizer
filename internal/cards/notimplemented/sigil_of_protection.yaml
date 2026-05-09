@@ -1,0 +1,22 @@
+name: Sigil of Protection
+types:
+    - Generic
+    - Action
+    - Aura
+cost: 1
+markers:
+    - NotImplemented
+text: '**Ward 4** At the beginning of your action phase, destroy Sigil of Protection.'
+variants:
+    - id: SigilOfProtectionRed
+      pitch: 1
+      attack: 0
+      defense: 2
+    - id: SigilOfProtectionYellow
+      pitch: 2
+      attack: 0
+      defense: 2
+    - id: SigilOfProtectionBlue
+      pitch: 3
+      attack: 0
+      defense: 2

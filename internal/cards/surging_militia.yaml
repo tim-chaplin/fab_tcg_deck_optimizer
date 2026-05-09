@@ -1,0 +1,20 @@
+name: Surging Militia
+types:
+    - Generic
+    - Action
+    - Attack
+cost: 2
+text: Surging Militia has +1{p} for each non-equipment card defending it.
+variants:
+    - id: SurgingMilitiaRed
+      pitch: 1
+      attack: 5
+      defense: 2
+    - id: SurgingMilitiaYellow
+      pitch: 2
+      attack: 4
+      defense: 2
+    - id: SurgingMilitiaBlue
+      pitch: 3
+      attack: 3
+      defense: 2

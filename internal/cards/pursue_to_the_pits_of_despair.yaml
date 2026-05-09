@@ -1,0 +1,12 @@
+name: Pursue to the Pits of Despair
+types:
+    - Generic
+    - Action
+    - Attack
+cost: 1
+text: When this hits a hero, **mark** them.
+variants:
+    - id: PursueToThePitsOfDespairRed
+      pitch: 1
+      attack: 5
+      defense: 3

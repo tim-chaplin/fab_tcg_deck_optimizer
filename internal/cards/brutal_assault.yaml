@@ -1,0 +1,19 @@
+name: Brutal Assault
+types:
+    - Generic
+    - Action
+    - Attack
+cost: 2
+variants:
+    - id: BrutalAssaultRed
+      pitch: 1
+      attack: 6
+      defense: 3
+    - id: BrutalAssaultYellow
+      pitch: 2
+      attack: 5
+      defense: 3
+    - id: BrutalAssaultBlue
+      pitch: 3
+      attack: 4
+      defense: 3

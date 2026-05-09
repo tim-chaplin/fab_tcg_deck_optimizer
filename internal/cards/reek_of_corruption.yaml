@@ -1,0 +1,22 @@
+name: Reek of Corruption
+types:
+    - Runeblade
+    - Action
+    - Attack
+cost: 2
+text: |-
+    If you have played or created an aura this turn, Reek of Corruption gains 'When this
+    hits a hero, they discard a card.'
+variants:
+    - id: ReekOfCorruptionRed
+      pitch: 1
+      attack: 4
+      defense: 3
+    - id: ReekOfCorruptionYellow
+      pitch: 2
+      attack: 3
+      defense: 3
+    - id: ReekOfCorruptionBlue
+      pitch: 3
+      attack: 2
+      defense: 3

@@ -1,0 +1,22 @@
+name: Runic Fellingsong
+types:
+    - Runeblade
+    - Action
+    - Attack
+cost: 3
+text: |-
+    When this attacks, you may banish an aura from your graveyard. If you do, deal 1 arcane
+    damage to target hero.
+variants:
+    - id: RunicFellingsongRed
+      pitch: 1
+      attack: 7
+      defense: 3
+    - id: RunicFellingsongYellow
+      pitch: 2
+      attack: 6
+      defense: 3
+    - id: RunicFellingsongBlue
+      pitch: 3
+      attack: 5
+      defense: 3

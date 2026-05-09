@@ -1,0 +1,20 @@
+name: Sink Below
+types: []
+cost: 0
+markers:
+    - NotSilverAgeLegal
+    - Unplayable
+text: You may put a card from your hand on the bottom of your deck. If you do, draw a card.
+variants:
+    - id: SinkBelowRed
+      pitch: 1
+      attack: 0
+      defense: 4
+    - id: SinkBelowYellow
+      pitch: 2
+      attack: 0
+      defense: 3
+    - id: SinkBelowBlue
+      pitch: 3
+      attack: 0
+      defense: 2

@@ -1,0 +1,20 @@
+name: Amplify the Arknight
+types:
+    - Runeblade
+    - Action
+    - Attack
+cost: variable
+text: Amplify the Arknight costs {r} less to play for each Runechant you control.
+variants:
+    - id: AmplifyTheArknightRed
+      pitch: 1
+      attack: 6
+      defense: 3
+    - id: AmplifyTheArknightYellow
+      pitch: 2
+      attack: 5
+      defense: 3
+    - id: AmplifyTheArknightBlue
+      pitch: 3
+      attack: 4
+      defense: 3

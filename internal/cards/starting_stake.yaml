@@ -1,0 +1,11 @@
+name: Starting Stake
+types:
+    - Generic
+    - Action
+cost: 0
+text: If you control no Gold tokens, create a Gold token.
+variants:
+    - id: StartingStakeYellow
+      pitch: 2
+      attack: 0
+      defense: 3

@@ -1,0 +1,25 @@
+name: Down But Not Out
+types:
+    - Generic
+    - Action
+    - Attack
+cost: 3
+markers:
+    - NotImplemented
+text: |-
+    When this attacks a hero, if you have less {h} and control fewer equipment and tokens than
+    them, this gets +3{p}, **overpower**, and "When this hits, create an Agility, Might, and Vigor
+    token."
+variants:
+    - id: DownButNotOutRed
+      pitch: 1
+      attack: 5
+      defense: 3
+    - id: DownButNotOutYellow
+      pitch: 2
+      attack: 4
+      defense: 3
+    - id: DownButNotOutBlue
+      pitch: 3
+      attack: 3
+      defense: 3
