@@ -71,11 +71,10 @@ func TestEvalCache_HitRateMeasurement(t *testing.T) {
 	}
 	baseline := New(loaded.Hero, loaded.Weapons, loaded.Cards)
 
-	// Wire a dedicated Evaluator into Evaluate via EvaluateWith so we can read its cache
-	// stats after the run.
+	// Use a dedicated Evaluator so we can read its cache stats after the run.
 	ev := NewEvaluator()
 	rng := rand.New(rand.NewSource(42))
-	baseline.EvaluateWith(shuffles, Matchup{IncomingDamage: incoming}, rng, ev)
+	ev.Evaluate(baseline, shuffles, Matchup{IncomingDamage: incoming}, rng)
 
 	stats := ev.CacheStats()
 	total := stats.Hits + stats.Misses
@@ -110,10 +109,10 @@ func TestEvalCache_ParallelEquivalentToSequential(t *testing.T) {
 	baseline := Random(heroes.Viserai{}, deckSize, maxCopies, setupRNG, nil)
 
 	seq := New(baseline.Hero, baseline.Weapons, baseline.Cards)
-	seqStats := seq.EvaluateWith(shuffles, Matchup{IncomingDamage: incoming}, rand.New(rand.NewSource(99)), NewEvaluator())
+	seqStats := NewEvaluator().Evaluate(seq, shuffles, Matchup{IncomingDamage: incoming}, rand.New(rand.NewSource(99)))
 
 	par := New(baseline.Hero, baseline.Weapons, baseline.Cards)
-	parStats := par.EvaluateWith(shuffles, Matchup{IncomingDamage: incoming}, rand.New(rand.NewSource(99)), NewEvaluatorParallel(4))
+	parStats := NewEvaluatorParallel(4).Evaluate(par, shuffles, Matchup{IncomingDamage: incoming}, rand.New(rand.NewSource(99)))
 
 	// Hands counts can differ slightly because parallel and sequential consume different
 	// per-shuffle RNG streams: a shuffle that runs out of deck cards on hand 7 in one
@@ -204,10 +203,10 @@ func TestEvalCache_EquivalenceWithUncached(t *testing.T) {
 	baseline := Random(heroes.Viserai{}, deckSize, maxCopies, setupRNG, nil)
 
 	cached := New(baseline.Hero, baseline.Weapons, baseline.Cards)
-	cachedStats := cached.EvaluateWith(shuffles, Matchup{IncomingDamage: incoming}, rand.New(rand.NewSource(99)), NewEvaluator())
+	cachedStats := NewEvaluator().Evaluate(cached, shuffles, Matchup{IncomingDamage: incoming}, rand.New(rand.NewSource(99)))
 
 	uncached := New(baseline.Hero, baseline.Weapons, baseline.Cards)
-	uncachedStats := uncached.EvaluateWith(shuffles, Matchup{IncomingDamage: incoming}, rand.New(rand.NewSource(99)), NewEvaluatorWithoutCache())
+	uncachedStats := NewEvaluatorWithoutCache().Evaluate(uncached, shuffles, Matchup{IncomingDamage: incoming}, rand.New(rand.NewSource(99)))
 
 	if cachedStats.Hands != uncachedStats.Hands {
 		t.Errorf("Hands: cached=%d uncached=%d", cachedStats.Hands, uncachedStats.Hands)
@@ -243,7 +242,7 @@ func BenchmarkEvalCache_SingleDeck(b *testing.B) {
 			rng := rand.New(rand.NewSource(42))
 			d := New(loaded.Hero, loaded.Weapons, loaded.Cards)
 			b.StartTimer()
-			d.EvaluateWith(shuffles, Matchup{IncomingDamage: incoming}, rng, ev)
+			ev.Evaluate(d, shuffles, Matchup{IncomingDamage: incoming}, rng)
 		}
 	})
 	b.Run("without-cache", func(b *testing.B) {
@@ -255,7 +254,7 @@ func BenchmarkEvalCache_SingleDeck(b *testing.B) {
 			rng := rand.New(rand.NewSource(42))
 			d := New(loaded.Hero, loaded.Weapons, loaded.Cards)
 			b.StartTimer()
-			d.EvaluateWith(shuffles, Matchup{IncomingDamage: incoming}, rng, ev)
+			ev.Evaluate(d, shuffles, Matchup{IncomingDamage: incoming}, rng)
 		}
 	})
 }
@@ -283,7 +282,7 @@ func BenchmarkEvalCache_ParallelDeck(b *testing.B) {
 				rng := rand.New(rand.NewSource(42))
 				d := New(loaded.Hero, loaded.Weapons, loaded.Cards)
 				b.StartTimer()
-				d.EvaluateWith(shuffles, Matchup{IncomingDamage: incoming}, rng, ev)
+				ev.Evaluate(d, shuffles, Matchup{IncomingDamage: incoming}, rng)
 			}
 		})
 	}

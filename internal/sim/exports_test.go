@@ -150,10 +150,10 @@ func DeckFingerprint(d *Deck) string { return deckFingerprint(d) }
 // PairAddAllowed re-exports pairAddAllowed for sim_test consumers.
 func PairAddAllowed(c Card, legal func(Card) bool) bool { return pairAddAllowed(c, legal) }
 
-// EvaluateImplForTest re-exports the unexported (*Deck).evaluateImpl as an exported method
-// for sim_test consumers exercising the eval-with-stop-condition path directly.
-func (d *Deck) EvaluateImplForTest(maxRuns int, mp Matchup, rng *rand.Rand, ev *Evaluator, stop func(stats *DeckStats, runs int) bool) DeckStats {
-	return d.evaluateImpl(maxRuns, mp, rng, ev, stop)
+// EvaluateImplForTest re-exports the unexported (*Evaluator).evaluateImpl as an exported
+// method for sim_test consumers exercising the eval-with-stop-condition path directly.
+func (ev *Evaluator) EvaluateImplForTest(d *Deck, maxRuns int, mp Matchup, rng *rand.Rand, stop func(stats *DeckStats, runs int) bool) DeckStats {
+	return ev.evaluateImpl(d, maxRuns, mp, rng, stop)
 }
 
 // DefaultEquipment re-exports defaultEquipment for sim_test consumers.

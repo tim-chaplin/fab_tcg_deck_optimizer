@@ -155,7 +155,7 @@ func resolveDeckPath(name string) string {
 func evaluateParallel(d *sim.Deck, shuffles int, precision float64, mp sim.Matchup, rng *rand.Rand) (sim.DeckStats, *sim.Evaluator) {
 	ev := sim.NewEvaluatorParallel(sim.DefaultWorkers())
 	if shuffles < 0 {
-		return d.EvaluateAdaptiveWith(precision, mp, rng, ev), ev
+		return ev.EvaluateAdaptive(d, precision, mp, rng), ev
 	}
-	return d.EvaluateWith(shuffles, mp, rng, ev), ev
+	return ev.Evaluate(d, shuffles, mp, rng), ev
 }

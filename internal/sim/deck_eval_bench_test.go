@@ -9,8 +9,8 @@ import (
 )
 
 // BenchmarkEvaluate drives the single-threaded hot path: generate a random Viserai deck and
-// run a fixed number of shuffles through EvaluateWith. Deterministic (fixed seed, fixed
-// evaluator) for reproducible benchstat comparisons.
+// run a fixed number of shuffles through (*Evaluator).Evaluate. Deterministic (fixed seed,
+// fixed evaluator) for reproducible benchstat comparisons.
 func BenchmarkEvaluate(b *testing.B) {
 	const (
 		deckSize  = 40
@@ -29,6 +29,6 @@ func BenchmarkEvaluate(b *testing.B) {
 		b.StopTimer()
 		evalRNG = rand.New(rand.NewSource(42))
 		b.StartTimer()
-		d.EvaluateWith(shuffles, Matchup{IncomingDamage: incoming}, evalRNG, ev)
+		ev.Evaluate(d, shuffles, Matchup{IncomingDamage: incoming}, evalRNG)
 	}
 }

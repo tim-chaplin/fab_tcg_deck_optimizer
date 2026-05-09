@@ -106,7 +106,7 @@ func TestRunEval_PrintOnlyLeavesFileUnchanged(t *testing.T) {
 	// byte-for-byte.
 	rng := rand.New(rand.NewSource(1))
 	d := sim.Random(heroes.Viserai{}, 40, 2, rng, nil)
-	stats := d.Evaluate(20, sim.Matchup{}, rng)
+	stats := sim.NewEvaluator().Evaluate(d, 20, sim.Matchup{}, rng)
 	if err := writeDeck(d, stats, path); err != nil {
 		t.Fatalf("seed writeDeck: %v", err)
 	}

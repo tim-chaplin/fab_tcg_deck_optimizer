@@ -217,9 +217,9 @@ func runIterateWorker(
 		d := New(mut.Deck.Hero, mut.Deck.Weapons, mut.Deck.Cards)
 		var stats DeckStats
 		if cfg.adaptive {
-			stats = d.EvaluateAdaptiveWith(cfg.precision, cfg.matchup, rng, ev)
+			stats = ev.EvaluateAdaptive(d, cfg.precision, cfg.matchup, rng)
 		} else {
-			stats = d.EvaluateWith(cfg.shuffles, cfg.matchup, rng, ev)
+			stats = ev.Evaluate(d, cfg.shuffles, cfg.matchup, rng)
 		}
 		avg := stats.Mean()
 		if cfg.completed != nil {

@@ -60,7 +60,7 @@ type Evaluator struct {
 	cachedHandSize int
 	cachedWeapons  []Weapon
 	cache          *evalCache
-	// numWorkers tells EvaluateWith how many goroutines to fan the shuffle loop across.
+	// numWorkers tells Evaluate how many goroutines to fan the shuffle loop across.
 	// 0 or 1 runs sequentially in the calling goroutine, reusing cachedBufs as the per-
 	// call scratch — the original single-threaded behaviour and the right default for
 	// tests that want deterministic single-RNG runs. > 1 spawns N workers that share the
