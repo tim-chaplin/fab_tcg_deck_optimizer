@@ -15,8 +15,8 @@ import (
 func TestRegistry_DrivesDeckRandom(t *testing.T) {
 	rng := rand.New(rand.NewSource(7))
 	d := deck.Random(heroes.Viserai{}, 40, 2, rng, nil, registry.Registry{})
-	if len(d.Cards) != 40 {
-		t.Errorf("len(Cards) = %d, want 40", len(d.Cards))
+	if d.Size() != 40 {
+		t.Errorf("len(Cards) = %d, want 40", d.Size())
 	}
 	if n := len(d.Weapons); n == 0 || n > 2 {
 		t.Errorf("len(Weapons) = %d, want 1 or 2", n)

@@ -112,7 +112,7 @@ type pairDedupeKey struct {
 //
 // Returned decks share no backing slices with d or each other.
 func pairSwapMutations(d *deck.Deck, legal func(deck.Card) bool) []Mutation {
-	if len(cardPairs) == 0 || len(d.Cards) < 2 {
+	if len(cardPairs) == 0 || d.Size() < 2 {
 		return nil
 	}
 	seen := map[pairDedupeKey]bool{}

@@ -8,7 +8,6 @@ import (
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/deckio"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
-	"github.com/tim-chaplin/fab-deck-optimizer/v2/deck"
 )
 
 // BenchmarkEvalRealDeck mimics what `fabsim eval <deck> -incoming 5 -deep-shuffles 10000`
@@ -42,7 +41,7 @@ func BenchmarkEvalRealDeck(b *testing.B) {
 	b.ResetTimer()
 	for n := 0; n < b.N; n++ {
 		b.StopTimer()
-		d := deck.New(loaded.Hero, loaded.Weapons, loaded.Cards)
+		d := loaded.Copy()
 		evalRNG := rand.New(rand.NewSource(42))
 		b.StartTimer()
 		ev.Evaluate(d, shuffles, sim.Matchup{IncomingDamage: incoming}, evalRNG)

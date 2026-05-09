@@ -29,8 +29,8 @@ func TestMarshalUnmarshalRoundTrip(t *testing.T) {
 	if got.Hero.(sim.Hero).Name() != d.Hero.(sim.Hero).Name() {
 		t.Errorf("hero: got %q want %q", got.Hero.(sim.Hero).Name(), d.Hero.(sim.Hero).Name())
 	}
-	if len(got.Cards) != len(d.Cards) {
-		t.Fatalf("cards len: got %d want %d", len(got.Cards), len(d.Cards))
+	if got.Size() != d.Size() {
+		t.Fatalf("cards len: got %d want %d", got.Size(), d.Size())
 	}
 	// Compare as multisets — the JSON form sorts card names, so order isn't preserved across a
 	// round trip. What matters is that the same cards (with the same counts) come back.

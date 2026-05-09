@@ -108,8 +108,8 @@ func TestSanitizeNotImplemented_ReplacesTaggedSlotsAndKeepsSizeLegal(t *testing.
 	if len(replaced) != 2 {
 		t.Errorf("replaced %d slots, want 2", len(replaced))
 	}
-	if len(d.Cards) != 4 {
-		t.Errorf("card count after sanitize = %d, want 4", len(d.Cards))
+	if d.Size() != 4 {
+		t.Errorf("card count after sanitize = %d, want 4", d.Size())
 	}
 	for i, c := range d.Cards {
 		if _, ok := c.(NotImplemented); ok {

@@ -90,7 +90,7 @@ func EvalOneTurnForTesting(d *deck.Deck, mp Matchup, initial TurnState, initialH
 		return TurnStartState{}
 	}
 
-	deckSize := len(d.Cards)
+	deckSize := d.Size()
 	// Oversized buf: 2×deckSize matches Evaluate's layout. Add a handSize cushion so small
 	// decks still have room for mid-turn pitches (hand + drawn) without overflowing tail.
 	buf := make([]Card, deckSize*2+handSize*2)

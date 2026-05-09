@@ -164,7 +164,7 @@ See the full deck @ https://fabrary.net/decks/01KP1AZ5SAS425YN30WB779M41
 			t.Errorf("equipment[%q] = %d, want 1", want, gotEquipment[want])
 		}
 	}
-	if len(d.Cards) == 0 {
+	if d.Size() == 0 {
 		t.Fatalf("expected deck cards, got none")
 	}
 	// NotImplemented cards live in internal/cards/notimplemented/ and aren't imported by the
@@ -203,8 +203,8 @@ Deck cards
 	if err != nil {
 		t.Fatalf("Unmarshal: %v", err)
 	}
-	if len(d.Cards) != 0 {
-		t.Errorf("expected 0 known cards, got %d", len(d.Cards))
+	if d.Size() != 0 {
+		t.Errorf("expected 0 known cards, got %d", d.Size())
 	}
 	if skipped["Not A Real Card [R]"] != 2 {
 		t.Errorf("skipped should contain Not A Real Card [R] x2; got %v", skipped)
