@@ -238,3 +238,134 @@ func TestSanitizeNotImplemented_PanicsWhenPoolSaturated(t *testing.T) {
 	}()
 	d.SanitizeNotImplemented(1, rand.New(rand.NewSource(1)), nil, reg)
 }
+
+// TestShuffle_RandomisesCardsInPlace pins Shuffle's two-part contract: the post-shuffle
+// multiset equals the pre-shuffle multiset (no card additions or losses), and at least
+// one position changes between two seeds (proving the shuffle isn't a no-op). Mutation
+// in place means callers expecting the old order must Copy() first.
+func TestShuffle_RandomisesCardsInPlace(t *testing.T) {
+	master := New(nil, nil, []Card{
+		fakeCard{id: 1}, fakeCard{id: 2}, fakeCard{id: 3}, fakeCard{id: 4},
+		fakeCard{id: 5}, fakeCard{id: 6}, fakeCard{id: 7}, fakeCard{id: 8},
+	})
+	beforeCounts := map[ids.CardID]int{}
+	for _, c := range master.Cards {
+		beforeCounts[c.ID()]++
+	}
+	d := master.Copy()
+	d.Shuffle(rand.New(rand.NewSource(1)))
+	afterCounts := map[ids.CardID]int{}
+	for _, c := range d.Cards {
+		afterCounts[c.ID()]++
+	}
+	if !reflect.DeepEqual(beforeCounts, afterCounts) {
+		t.Errorf("multiset changed across Shuffle: before=%v after=%v", beforeCounts, afterCounts)
+	}
+
+	d2 := master.Copy()
+	d2.Shuffle(rand.New(rand.NewSource(2)))
+	if reflect.DeepEqual(d.Cards, d2.Cards) {
+		t.Errorf("two seeds produced identical orderings: %v", d.Cards)
+	}
+}
+
+// TestCopy_IsolatesShuffleFromMaster pins the master / copy split: after Copy + Shuffle on
+// the copy, the master's Cards order is unchanged. Single-test cover for the contract the
+// per-shuffle eval loop relies on (master shared across goroutines, each worker mutates
+// its own Copy).
+func TestCopy_IsolatesShuffleFromMaster(t *testing.T) {
+	master := New(nil, nil, []Card{
+		fakeCard{id: 1}, fakeCard{id: 2}, fakeCard{id: 3}, fakeCard{id: 4},
+	})
+	before := append([]Card(nil), master.Cards...)
+	worker := master.Copy()
+	worker.Shuffle(rand.New(rand.NewSource(99)))
+	if !reflect.DeepEqual(master.Cards, before) {
+		t.Errorf("master mutated by worker.Shuffle: got %v, want %v", master.Cards, before)
+	}
+}
+
+// TestDraw_ConsumesFromTop pins the contract: Draw(n) returns the top n cards in deck
+// order and advances the pile so Size = original − n. Asserts against the first card via
+// PeekTop so the test doesn't reach for the (test-only) Cards backing slice.
+func TestDraw_ConsumesFromTop(t *testing.T) {
+	d := New(nil, nil, []Card{
+		fakeCard{id: 1}, fakeCard{id: 2}, fakeCard{id: 3}, fakeCard{id: 4},
+	})
+	top := d.PeekTop()
+	drawn := d.Draw(2)
+	if len(drawn) != 2 || drawn[0] != top {
+		t.Errorf("Draw(2) = %v, want first card to match PeekTop %v", drawn, top)
+	}
+	if d.Size() != 2 {
+		t.Errorf("Size after Draw(2) of a 4-card deck = %d, want 2", d.Size())
+	}
+}
+
+// PeekTop returns nil when the deck is empty, and the top card otherwise. Drawing the
+// whole pile and Peeking should give nil; PutBottom-ing one and re-Peeking gives that
+// card back.
+func TestPeekTop_ReturnsTopOrNil(t *testing.T) {
+	d := New(nil, nil, []Card{fakeCard{id: 1}, fakeCard{id: 2}})
+	if got := d.PeekTop(); got == nil || got.ID() != 1 {
+		t.Errorf("PeekTop on full deck = %v, want card id 1", got)
+	}
+	d.Draw(2)
+	if got := d.PeekTop(); got != nil {
+		t.Errorf("PeekTop on empty deck = %v, want nil", got)
+	}
+	d.PutBottom([]Card{fakeCard{id: 9}})
+	if got := d.PeekTop(); got == nil || got.ID() != 9 {
+		t.Errorf("PeekTop after PutBottom on empty deck = %v, want card id 9", got)
+	}
+}
+
+// TestDraw_PanicsOnOverdraw confirms Draw(n) panics when n exceeds Size instead of
+// returning a partial slice. Production callers check Size first.
+func TestDraw_PanicsOnOverdraw(t *testing.T) {
+	d := New(nil, nil, []Card{fakeCard{id: 1}, fakeCard{id: 2}})
+	defer func() {
+		if recover() == nil {
+			t.Errorf("Draw(3) on a 2-card deck didn't panic")
+		}
+	}()
+	d.Draw(3)
+}
+
+// TestReset_ReplacesPile pins that Reset installs a brand new draw pile, discarding the
+// prior order. Asserts via Size + PeekTop + Draw rather than reaching into the backing
+// slice.
+func TestReset_ReplacesPile(t *testing.T) {
+	d := New(nil, nil, []Card{
+		fakeCard{id: 1}, fakeCard{id: 2}, fakeCard{id: 3},
+	})
+	d.Draw(2)
+	newPile := []Card{fakeCard{id: 9}, fakeCard{id: 8}}
+	d.Reset(newPile)
+	if d.Size() != len(newPile) {
+		t.Errorf("Size after Reset = %d, want %d", d.Size(), len(newPile))
+	}
+	for i, want := range newPile {
+		got := d.Draw(1)[0]
+		if got != want {
+			t.Errorf("Reset card[%d] = %v, want %v", i, got, want)
+		}
+	}
+}
+
+// TestPutBottom_AppendsToBottom confirms PutBottom puts cards at the bottom of the pile
+// in the order passed, preserving the existing top.
+func TestPutBottom_AppendsToBottom(t *testing.T) {
+	d := New(nil, nil, []Card{fakeCard{id: 1}, fakeCard{id: 2}, fakeCard{id: 3}})
+	d.PutBottom([]Card{fakeCard{id: 99}})
+	if d.Size() != 4 {
+		t.Fatalf("Size after PutBottom = %d, want 4", d.Size())
+	}
+	wantOrder := []ids.CardID{1, 2, 3, 99}
+	for i, want := range wantOrder {
+		got := d.Draw(1)[0]
+		if got.ID() != want {
+			t.Errorf("PutBottom card[%d] = %d, want %d", i, got.ID(), want)
+		}
+	}
+}

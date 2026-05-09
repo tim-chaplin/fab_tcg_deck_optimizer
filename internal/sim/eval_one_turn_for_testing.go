@@ -76,13 +76,13 @@ func (t TurnStartState) Copper() int {
 // state — Arsenal, Auras, Items — modelling carryover from a hypothetical previous turn; the
 // other TurnState fields are ignored (transient mid-chain state, hand / deck / graveyard which
 // are seeded from this function's own inputs). initialHand sets turn 1's starting hand; nil
-// takes d.Cards[:handSize] as the hand and treats the rest as the deck, non-nil uses the slice
-// directly (may be shorter than handSize) and treats d.Cards as the deck entirely. Test-only —
-// production callers use Evaluate.
+// draws the hand off the top of the deck, non-nil uses the slice directly (may be shorter
+// than handSize) and leaves the deck untouched. Test-only — production callers use Evaluate.
 //
 // Free function (not a method) because deck.Deck lives in another package; Go disallows
 // methods on imported types.
-func EvalOneTurnForTesting(d *deck.Deck, mp Matchup, initial TurnState, initialHand []deck.Card) TurnStartState {
+func EvalOneTurnForTesting(master *deck.Deck, mp Matchup, initial TurnState, initialHand []deck.Card) TurnStartState {
+	d := master.Copy()
 	hero := d.Hero.(Hero)
 	CurrentHero = hero
 	handSize := hero.Intelligence()
@@ -90,112 +90,121 @@ func EvalOneTurnForTesting(d *deck.Deck, mp Matchup, initial TurnState, initialH
 		return TurnStartState{}
 	}
 
-	deckSize := d.Size()
-	// Oversized buf: 2×deckSize matches Evaluate's layout. Add a handSize cushion so small
-	// decks still have room for mid-turn pitches (hand + drawn) without overflowing tail.
-	buf := make([]Card, deckSize*2+handSize*2)
-	for i, c := range d.Cards {
-		buf[i] = c.(Card)
-	}
-
-	var simHand []Card
-	if initialHand != nil {
-		simHand = make([]Card, len(initialHand))
-		for i, c := range initialHand {
-			simHand[i] = c.(Card)
-		}
-	}
-	turn1Hand, head, ok := resolveTurn1Hand(buf[:deckSize], simHand, handSize)
-	if !ok {
+	// Build turn 1's hand. Caller-supplied initialHand is used verbatim and the deck stays
+	// untouched; otherwise draw handSize cards off the top.
+	if initialHand == nil && d.Size() < handSize {
 		return TurnStartState{}
 	}
-
-	// handBuf capacity matches Evaluate's so start-of-turn Aura reveals can append
-	// without realloc.
+	if initialHand != nil && (len(initialHand) == 0 || len(initialHand) > handSize) {
+		return TurnStartState{}
+	}
 	handBuf := make([]Card, handSize, handSize+startOfTurnRevealRoom)
-	tail := deckSize
-
-	h := handBuf[:len(turn1Hand)]
-	copy(h, turn1Hand)
+	var h []Card
+	if initialHand != nil {
+		h = handBuf[:len(initialHand)]
+		for i, c := range initialHand {
+			h[i] = c.(Card)
+		}
+	} else {
+		h = handBuf[:handSize]
+		for i, c := range d.Draw(handSize) {
+			h[i] = c.(Card)
+		}
+	}
 	sortHandByID(h)
 	weapons := make([]Weapon, len(d.Weapons))
 	for i, w := range d.Weapons {
 		weapons[i] = w.(Weapon)
 	}
-	play := best(hero, weapons, h, mp, buf[head:tail], initial)
-	// drawCount=0: head already points past the starting hand, so applyTurnResult only needs
-	// to advance past mid-turn draws.
-	nextHeld := applyTurnResult(play, buf, &head, &tail, nil)
+	// Snapshot the post-deal pile in sim's typed view for the chain runner. This is the
+	// same TODO as runOneShuffle: the chain runner needs the whole remaining deck so it can
+	// seed TurnState.deck and run mid-chain mutations against it.
+	remaining := make([]Card, len(d.Cards))
+	for i, c := range d.Cards {
+		remaining[i] = c.(Card)
+	}
+	play := best(hero, weapons, h, mp, remaining, initial)
+	// Install the chain's post-mutation deck and recycle pitched cards onto the bottom.
+	newDeck := make([]deck.Card, len(play.State.Deck))
+	for i, c := range play.State.Deck {
+		newDeck[i] = c
+	}
+	d.Reset(newDeck)
+	pitched := pitchedFromBestLine(play.BestLine)
+	recycled := make([]deck.Card, len(pitched))
+	for i, c := range pitched {
+		recycled[i] = c
+	}
+	d.PutBottom(recycled)
+
 	auraQueue := append([]Aura(nil), play.State.Auras...)
 	itemQueue := append([]Item(nil), play.State.Items...)
 
-	// Deal turn 2's hand but stop short of running Best — the caller wants the pre-Best state.
-	turn2Hand, drawCount2, ok := dealNextHand(buf, handBuf, nextHeld, &head, &tail, handSize)
-	if !ok {
+	// Deal turn 2's hand off the top, with the chain's leftover hand as the held prefix.
+	// Stop short of running Best — the caller wants the pre-Best state.
+	held := append([]Card(nil), play.State.Hand...)
+	graveyardOut := make([]deck.Card, len(play.State.Graveyard))
+	for i, c := range play.State.Graveyard {
+		graveyardOut[i] = c
+	}
+	if len(held) >= handSize || d.Size() < handSize-len(held) {
+		nextDeck := make([]deck.Card, len(play.State.Deck))
+		for i, c := range play.State.Deck {
+			nextDeck[i] = c
+		}
 		return TurnStartState{
 			Value:                  play.Value,
 			BestLine:               append([]CardAssignment(nil), play.BestLine...),
-			Graveyard:              widenCards(play.State.Graveyard),
+			Graveyard:              graveyardOut,
 			StartOfNextTurnArsenal: play.State.Arsenal,
-			StartOfNextTurnDeck:    widenCards(play.State.Deck),
+			StartOfNextTurnDeck:    nextDeck,
 			StartOfNextTurnAuras:   append([]Aura(nil), play.State.Auras...),
 			StartOfNextTurnItems:   append([]Item(nil), play.State.Items...),
 			CardsDrawn:             play.State.CardsDrawn,
 			OpponentMarked:         play.State.OpponentMarked,
 		}
 	}
+	turn2Hand := append([]Card(nil), held...)
+	for _, c := range d.Draw(handSize - len(held)) {
+		turn2Hand = append(turn2Hand, c.(Card))
+	}
 	// Process turn-1 Auras at the turn-2 boundary the same way Evaluate does:
 	// fire start-of-turn handlers, re-arm OncePerTurn gates, drop exhausted entries.
 	// Reveals into the hand are consumed here so the returned turn-2 Hand matches what
 	// Best would see.
-	survivors, _, trigDamage, trigRevealed, trigGraveyarded := processAurasAtStartOfTurn(auraQueue, buf[head+drawCount2:tail])
-	for range trigRevealed {
-		turn2Hand = append(turn2Hand, buf[head+drawCount2])
-		drawCount2++
+	turn2Remaining := make([]Card, len(d.Cards))
+	for i, c := range d.Cards {
+		turn2Remaining[i] = c.(Card)
 	}
-	lineCopy := append([]CardAssignment(nil), play.BestLine...)
+	survivors, _, trigDamage, trigRevealed, trigGraveyarded := processAurasAtStartOfTurn(auraQueue, turn2Remaining)
+	for range trigRevealed {
+		turn2Hand = append(turn2Hand, d.Draw(1)[0].(Card))
+	}
+	deckOut := make([]deck.Card, len(d.Cards))
+	for i, c := range d.Cards {
+		deckOut[i] = c
+	}
+	handOut := make([]deck.Card, len(turn2Hand))
+	for i, c := range turn2Hand {
+		handOut[i] = c
+	}
+	graveyardedOut := make([]deck.Card, len(trigGraveyarded))
+	for i, c := range trigGraveyarded {
+		graveyardedOut[i] = c
+	}
 
 	return TurnStartState{
 		Value:                        play.Value,
-		BestLine:                     lineCopy,
-		Graveyard:                    widenCards(play.State.Graveyard),
-		StartOfNextTurnHand:          widenCards(turn2Hand),
+		BestLine:                     append([]CardAssignment(nil), play.BestLine...),
+		Graveyard:                    graveyardOut,
+		StartOfNextTurnHand:          handOut,
 		StartOfNextTurnArsenal:       play.State.Arsenal,
-		StartOfNextTurnDeck:          widenCards(buf[head+drawCount2 : tail]),
+		StartOfNextTurnDeck:          deckOut,
 		StartOfNextTurnAuras:         append([]Aura(nil), survivors...),
 		StartOfNextTurnItems:         append([]Item(nil), itemQueue...),
 		CardsDrawn:                   play.State.CardsDrawn,
 		OpponentMarked:               play.State.OpponentMarked,
 		StartOfNextTurnTriggerDamage: trigDamage,
-		StartOfNextTurnGraveyard:     widenCards(trigGraveyarded),
+		StartOfNextTurnGraveyard:     graveyardedOut,
 	}
-}
-
-// widenCards copies a sim []Card slice into a fresh []deck.Card. Used when surfacing chain
-// state to the test boundary, where TurnStartState carries the narrow deck.Card slot.
-func widenCards(cs []Card) []deck.Card {
-	out := make([]deck.Card, len(cs))
-	for i, c := range cs {
-		out[i] = c
-	}
-	return out
-}
-
-// resolveTurn1Hand picks turn 1's starting hand and the head offset into deckCards. With
-// initialHand nil the default layout takes deckCards[:handSize] as the hand and points
-// head past it; with a caller-supplied hand the deck stays untouched and the supplied
-// slice is used verbatim (head=0). ok=false signals the caller's inputs can't yield a
-// playable opening hand: deck shorter than handSize in default mode, or a supplied hand
-// that's empty or longer than handSize.
-func resolveTurn1Hand(deckCards, initialHand []Card, handSize int) (hand []Card, head int, ok bool) {
-	if initialHand == nil {
-		if len(deckCards) < handSize {
-			return nil, 0, false
-		}
-		return deckCards[:handSize], handSize, true
-	}
-	if len(initialHand) == 0 || len(initialHand) > handSize {
-		return nil, 0, false
-	}
-	return initialHand, 0, true
 }
