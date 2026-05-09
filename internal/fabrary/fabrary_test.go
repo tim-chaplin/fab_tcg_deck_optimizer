@@ -8,6 +8,7 @@ import (
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/heroes"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/deck"
 )
 
 // TestMarshalUnmarshalRoundTrip exercises a random deck through Marshal → Unmarshal and checks
@@ -25,8 +26,8 @@ func TestMarshalUnmarshalRoundTrip(t *testing.T) {
 		t.Errorf("unexpected skipped cards on registered-only round trip: %v", skipped)
 	}
 
-	if got.Hero.Name() != d.Hero.Name() {
-		t.Errorf("hero: got %q want %q", got.Hero.Name(), d.Hero.Name())
+	if got.Hero.(sim.Hero).Name() != d.Hero.(sim.Hero).Name() {
+		t.Errorf("hero: got %q want %q", got.Hero.(sim.Hero).Name(), d.Hero.(sim.Hero).Name())
 	}
 	gotW, wantW := weaponNameCounts(got), weaponNameCounts(d)
 	if !reflect.DeepEqual(gotW, wantW) {
@@ -61,14 +62,21 @@ func TestMarshalFormat(t *testing.T) {
 }
 
 // Tests that Marshal carries ApplyDefaults' equipment in Arena and sideboard entries in
-// Sideboard verbatim.
+// Sideboard verbatim. The defaults here are a fixture local to the test — fabsim's real
+// Viserai defaults live alongside the writeDeck call site, but Marshal's job is simply to
+// surface whatever defaults a caller applied, so test coverage here only needs an arbitrary
+// non-empty Defaults to exercise the pass-through.
 func TestMarshalRendersAppliedDefaults(t *testing.T) {
 	d := &sim.Deck{Hero: heroes.Viserai{}}
-	d.ApplyDefaults()
+	d.ApplyDefaults(deck.Defaults{
+		Equipment: []string{"Beckoning Haunt", "Blade Beckoner Helm"},
+		Sideboard: []deck.SideboardDefault{
+			{Name: "Crown of Dichotomy", Count: 1},
+			{Name: "Read the Runes [R]", Count: 2},
+		},
+	})
 	text := Marshal(d)
 
-	// Pick representative entries from each default list — full-list coverage belongs in
-	// sim.TestApplyDefaults_*.
 	for _, want := range []string{
 		"1x Beckoning Haunt\n",
 		"1x Blade Beckoner Helm\n",
@@ -131,8 +139,8 @@ See the full deck @ https://fabrary.net/decks/01KP1AZ5SAS425YN30WB779M41
 	if err != nil {
 		t.Fatalf("Unmarshal: %v", err)
 	}
-	if d.Hero.Name() != "Viserai" {
-		t.Errorf("hero: got %q want %q", d.Hero.Name(), "Viserai")
+	if d.Hero.(sim.Hero).Name() != "Viserai" {
+		t.Errorf("hero: got %q want %q", d.Hero.(sim.Hero).Name(), "Viserai")
 	}
 	// Exactly one weapon in the sample maps to a registered weapon ("Reaping Blade"); the
 	// other non-weapon Arena lines are equipment the optimizer doesn't model — they land in

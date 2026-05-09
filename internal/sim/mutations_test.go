@@ -41,7 +41,7 @@ func TestAllMutations_CountsAndShape(t *testing.T) {
 		if len(m.Deck.Cards) != 4 {
 			t.Errorf("mutation %d: card count %d, want 4", i, len(m.Deck.Cards))
 		}
-		if m.Deck.Hero.Name() != d.Hero.Name() {
+		if m.Deck.Hero.(Hero).Name() != d.Hero.(Hero).Name() {
 			t.Errorf("mutation %d: hero changed", i)
 		}
 		if m.Description == "" {

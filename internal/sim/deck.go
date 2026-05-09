@@ -1,241 +1,87 @@
-// Package deck represents a candidate FaB deck — hero, weapons, cards, plus the user's
-// sideboard / equipment lists. Search code creates many Decks, runs Evaluate against each,
-// and compares the returned DeckStats values to pick the best.
 package sim
 
 import (
-	"fmt"
 	"math/rand"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/deck"
 )
 
-// Deck is a hero, equipped weapons, and a deck of cards. Sideboard is the reserve-card
-// list the user manages for sideboarding between games; Equipment is the non-weapon arena
-// loadout (head, chest, arms, legs). Both round-trip through deckio and fabrary; the
-// simulator never reads either, so mutations and Evaluate leave them alone.
-//
-// Both are []string rather than []Card: equipment pieces and other items the user
-// wants on their sideboard list (e.g. Nullrune cycle) aren't in the card registry, so a
-// registry-backed field would force the user's data through a lossy lookup.
-//
-// Hand-value statistics live on a separate DeckStats value the caller maintains —
-// Evaluate returns one fresh per call. Keeping stats off Deck lets the optimizer
-// mix and match deck content against the stats accumulated for it.
-type Deck struct {
-	Hero      Hero
-	Weapons   []Weapon
-	Cards     []Card
-	Sideboard []string
-	Equipment []string
-}
+// Deck is a candidate deck the simulator evaluates. Aliased to v2/deck.Deck so existing
+// sim consumers continue to compile against *sim.Deck while the canonical type lives in
+// the deck package. Cards / Weapons hold deck.Card / deck.Weapon — sim's hot paths assert
+// to the richer sim.Card / sim.Weapon at the read site.
+type Deck = deck.Deck
 
-// New constructs a Deck. Panics if the weapon loadout violates the "0–2 weapons; if 2, both 1H"
-// equipment rule. Sideboard and Equipment start empty; callers assign them directly when
-// carrying them over.
+// NotImplementedReplacement aliases v2/deck.NotImplementedReplacement so the
+// SanitizeNotImplemented return type stays accessible under the sim namespace for the
+// handful of consumers that surface it (fabsim's sanitize warning, deckio tests).
+type NotImplementedReplacement = deck.NotImplementedReplacement
+
+// New constructs a Deck from sim's richer Hero / Weapon / Card interfaces. Mutation
+// generators and tests build cards as sim values; this wrapper widens them to deck.* slots
+// without callers hand-rolling the per-element copy.
 func New(h Hero, weapons []Weapon, cards []Card) *Deck {
-	validateWeapons(weapons)
-	return &Deck{Hero: h, Weapons: weapons, Cards: cards}
+	dw := make([]deck.Weapon, len(weapons))
+	for i, w := range weapons {
+		dw[i] = w
+	}
+	dc := make([]deck.Card, len(cards))
+	for i, c := range cards {
+		dc[i] = c
+	}
+	return deck.New(h, dw, dc)
 }
 
-// defaultEquipment lists equipment names that every persisted deck should carry in its
-// Equipment section. ApplyDefaults tops Equipment up to include each of these at least once;
-// the user can add more copies but never drops below one.
-var defaultEquipment = []string{
-	"Beckoning Haunt",
-	"Blade Beckoner Boots",
-	"Blade Beckoner Helm",
-	"Blossom of Spring",
-}
-
-// defaultSideboardEntry is one "always include in the sideboard" default: a name plus the
-// target copy count ApplyDefaults tops the sideboard up toward. Invariant: count must be in
-// [1, sideboardCopyCap] — a larger target would silently clamp when the merge respects the
-// main-deck + sideboard copy cap.
-type defaultSideboardEntry struct {
-	name  string
-	count int
-}
-
-// defaultSideboard entries are appended to Sideboard by ApplyDefaults, capped per entry by
-// sideboardCopyCap (2 per card across main + sideboard). Card names must match DisplayName
-// format ("Read the Runes [R]") since ApplyDefaults dedupes via DisplayName-keyed counts.
-var defaultSideboard = []defaultSideboardEntry{
-	{"Crown of Dichotomy", 1},
-	{"Nullrune Boots", 1},
-	{"Nullrune Gloves", 1},
-	{"Runebleed Robe", 1},
-	{"Read the Runes [R]", 2},
-	{"Reduce to Runechant [R]", 2},
-	{"Sigil of Suffering [R]", 2},
-}
-
-// sideboardCopyCap is the per-card copy limit across main deck + sideboard combined. The
-// default-sideboard merger respects this so a default addition never pushes a card past the
-// normal deck-construction max.
-const sideboardCopyCap = 2
-
-// ApplyDefaults tops d.Equipment and d.Sideboard up toward the hardcoded default loadout so
-// persisted decks always carry the common "every Viserai deck runs these" slots. Idempotent:
-// running it twice is a no-op because each entry is only added when the current count falls
-// below its target. Equipment targets 1 copy per entry; sideboard targets each entry's
-// count, but is clamped by sideboardCopyCap against main-deck + sideboard copies so the
-// merge never pushes a card past the deck-construction limit.
-func (d *Deck) ApplyDefaults() {
-	equipCounts := map[string]int{}
-	for _, name := range d.Equipment {
-		equipCounts[name]++
-	}
-	for _, name := range defaultEquipment {
-		if equipCounts[name] < 1 {
-			d.Equipment = append(d.Equipment, name)
-			equipCounts[name]++
-		}
-	}
-
-	mainCounts := map[string]int{}
-	for _, c := range d.Cards {
-		mainCounts[c.DisplayName()]++
-	}
-	sideCounts := map[string]int{}
-	for _, name := range d.Sideboard {
-		sideCounts[name]++
-	}
-	for _, entry := range defaultSideboard {
-		room := sideboardCopyCap - mainCounts[entry.name] - sideCounts[entry.name]
-		if room <= 0 {
-			continue
-		}
-		want := entry.count - sideCounts[entry.name]
-		if want <= 0 {
-			continue
-		}
-		if want > room {
-			want = room
-		}
-		for i := 0; i < want; i++ {
-			d.Sideboard = append(d.Sideboard, entry.name)
-			sideCounts[entry.name]++
-		}
-	}
-}
-
-// Random generates a random legal deck for h: a random weapon loadout from AllWeapons (one 2H
-// or two 1H; dual-wielding the same weapon allowed) and size cards drawn uniformly from
-// DeckableCards() one at a time, skipping any roll that would exceed maxCopies for the picked
-// ID. Matches the single-slot granularity of AllMutations so the hill-climb can explore
-// the space the generator actually produces.
-//
-// legal filters the card pool: only IDs for which legal(GetCard(id)) returns true are
-// candidates. Pass nil for no filtering. Callers typically wire deckformat.Format.IsLegal
-// through here to restrict generation to a constructed format's banlist.
+// Random constructs a random legal deck for h against the production registry. Wraps
+// deck.Random with sim's registry hooks so callers don't have to import the registry
+// directly (would cycle through cards → sim → registry).
 func Random(h Hero, size, maxCopies int, rng *rand.Rand, legal func(Card) bool) *Deck {
-	if maxCopies < 1 {
-		panic(fmt.Sprintf("deck: Random requires maxCopies >= 1 (got %d)", maxCopies))
+	var legalDeck func(deck.Card) bool
+	if legal != nil {
+		legalDeck = func(c deck.Card) bool { return legal(c.(Card)) }
 	}
-	loadouts := weaponLoadouts(legalWeapons())
-	weapons := loadouts[rng.Intn(len(loadouts))]
-
-	pool := legalPool(legal)
-	if len(pool) == 0 {
-		panic("deck: Random's legal filter rejected every card — cannot build a deck")
-	}
-	counts := map[ids.CardID]int{}
-	picks := make([]Card, 0, size)
-	for len(picks) < size {
-		id := pool[rng.Intn(len(pool))]
-		if counts[id]+1 > maxCopies {
-			continue
-		}
-		counts[id]++
-		picks = append(picks, GetCard(id))
-	}
-	return New(h, weapons, picks)
+	return deck.Random(h, size, maxCopies, rng, legalDeck, simRegistry{})
 }
 
-// NotImplementedReplacement records one swap made by Deck.SanitizeNotImplemented: the
-// pool-excluded card that was removed and the pool-eligible card that took its slot.
-type NotImplementedReplacement struct {
-	From Card
-	To   Card
+// simRegistry satisfies deck.Registry by routing through sim's forward-declared
+// RegistryLegal* hooks so sim-side callers don't import the registry directly.
+type simRegistry struct{}
+
+func (simRegistry) LegalCards() []deck.Card {
+	src := RegistryLegalCards()
+	out := make([]deck.Card, len(src))
+	for i, c := range src {
+		out[i] = c
+	}
+	return out
 }
 
-// SanitizeNotImplemented replaces every card excluded from the pool (NotImplemented or
-// Unplayable) with a random legal replacement, respecting maxCopies. Returns the ordered
-// list of swaps (empty when nothing needed replacement). Panics when maxCopies < 1 or the
-// remaining pool can't satisfy the per-printing budget already used by d.
-func (d *Deck) SanitizeNotImplemented(maxCopies int, rng *rand.Rand, legal func(Card) bool) []NotImplementedReplacement {
-	if maxCopies < 1 {
-		panic(fmt.Sprintf("deck: SanitizeNotImplemented requires maxCopies >= 1 (got %d)", maxCopies))
-	}
-	pool := legalPool(legal)
-	if len(pool) == 0 {
-		panic("deck: SanitizeNotImplemented's legal filter rejected every pool-eligible card — cannot build a replacement")
-	}
-	// Seed counts with the keeper cards already in the deck so replacements respect
-	// maxCopies against the surviving slots. The excluded slots we're about to overwrite
-	// don't count.
-	counts := map[ids.CardID]int{}
-	var slots []int
-	for i, c := range d.Cards {
-		if isExcludedFromPool(c) {
-			slots = append(slots, i)
-			continue
-		}
-		counts[c.ID()]++
-	}
-	if len(slots) == 0 {
-		return nil
-	}
-	replacements := make([]NotImplementedReplacement, 0, len(slots))
-	for _, idx := range slots {
-		var pick ids.CardID
-		for {
-			pick = pool[rng.Intn(len(pool))]
-			if counts[pick]+1 <= maxCopies {
-				break
-			}
-		}
-		counts[pick]++
-		from := d.Cards[idx]
-		to := GetCard(pick)
-		d.Cards[idx] = to
-		replacements = append(replacements, NotImplementedReplacement{From: from, To: to})
-	}
-	return replacements
-}
+func (simRegistry) LegalWeapons() []deck.Weapon { return RegistryLegalWeapons() }
 
-// legalPool returns DeckableCards() filtered by legal, with any card carrying a pool-
-// exclusion marker (NotImplemented or Unplayable) removed. The exclusion filter always
-// applies regardless of format legality. Pass nil for legal to apply only the exclusion
-// filter. Shared by Random and AllMutations.
+// legalPool returns the registered card IDs the deck builder can pick from, optionally
+// filtered by legal. The marker-exclusion (NotImplemented / Unplayable / NotSilverAgeLegal)
+// happens in the registry; this wrapper just maps the registry's Card slice down to IDs
+// for sim's mutation enumerator.
 func legalPool(legal func(Card) bool) []ids.CardID {
-	pool := DeckableCards()
-	filtered := pool[:0]
-	for _, id := range pool {
-		c := GetCard(id)
-		if isExcludedFromPool(c) {
-			continue
-		}
+	pool := RegistryLegalCards()
+	out := make([]ids.CardID, 0, len(pool))
+	for _, c := range pool {
 		if legal != nil && !legal(c) {
 			continue
 		}
-		filtered = append(filtered, id)
-	}
-	return filtered
-}
-
-// legalWeapons is the weapon-side analogue of legalPool: AllWeapons minus any weapon
-// carrying a pool-exclusion marker (NotImplemented or Unplayable). Shared by Random's
-// loadout pick and weaponLoadoutMutations so neither path proposes a weapon the sim can't
-// faithfully model or one whose effect is too weak to ever pick.
-func legalWeapons() []Weapon {
-	out := make([]Weapon, 0, len(AllWeapons))
-	for _, w := range AllWeapons {
-		if isExcludedWeaponFromPool(w) {
-			continue
-		}
-		out = append(out, w)
+		out = append(out, c.ID())
 	}
 	return out
+}
+
+// RegistryLegalCards / RegistryLegalWeapons are forward-declared (capitalised so the
+// providing package can rebind them — see forward_declarations.go) to break the would-be
+// sim → registry import cycle. registry.init points them at its own Registry methods.
+var RegistryLegalCards = func() []Card {
+	panic("sim.RegistryLegalCards: registry not loaded — import internal/registry blank to populate the hook")
+}
+
+var RegistryLegalWeapons = func() []deck.Weapon {
+	panic("sim.RegistryLegalWeapons: registry not loaded — import internal/registry blank to populate the hook")
 }

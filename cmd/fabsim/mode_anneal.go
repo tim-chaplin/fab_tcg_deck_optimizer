@@ -15,7 +15,9 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/deckformat"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/heroes"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/mydecks"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/deck"
 )
 
 // annealConfig bundles the knobs runAnneal needs. Built by runAnnealCmd from its flag.FlagSet.
@@ -399,7 +401,10 @@ func prepareBaseline(cfg annealConfig, rng *rand.Rand) (*sim.Deck, sim.DeckStats
 	}
 	if best == nil {
 		fmt.Fprintf(os.Stderr, "no deck at %s; generating a random starting deck\n", cfg.outPath)
-		best = sim.Random(heroes.Viserai{}, cfg.deckSize, cfg.maxCopies, rng, cfg.legalFilter())
+		legal := cfg.legalFilter()
+		best = deck.Random(heroes.Viserai{}, cfg.deckSize, cfg.maxCopies, rng,
+			func(c deck.Card) bool { return legal(c.(sim.Card)) },
+			registry.Registry{})
 		bestStats = baselineEvaluate(best, cfg, rng)
 		bestAvg := bestStats.Mean()
 		if err := writeDeck(best, bestStats, cfg.outPath); err != nil {
@@ -461,7 +466,7 @@ func reevaluateBaseline(cfg annealConfig, rng *rand.Rand, loaded *sim.Deck, load
 	// the stats reset so the re-evaluated deck writes back unchanged.
 	sideboard := loaded.Sideboard
 	equipment := loaded.Equipment
-	rebuilt := sim.New(loaded.Hero, loaded.Weapons, loaded.Cards)
+	rebuilt := deck.New(loaded.Hero, loaded.Weapons, loaded.Cards)
 	rebuilt.Sideboard = sideboard
 	rebuilt.Equipment = equipment
 	freshStats := baselineEvaluate(rebuilt, cfg, rng)

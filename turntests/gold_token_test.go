@@ -18,7 +18,7 @@ func TestGoldAbility_SpendsToFillArsenalAndSwings(t *testing.T) {
 	d := sim.New(heroes.Viserai{}, []sim.Weapon{weapons.ReapingBlade{}}, deck)
 	hand := []sim.Card{testutils.BluePitch{}}
 	priorItems := []sim.Item{sim.NewGoldItem(1)}
-	got := d.EvalOneTurnForTesting(sim.Matchup{IncomingDamage: 0}, sim.TurnState{Items: priorItems}, hand)
+	got := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 0}, sim.TurnState{Items: priorItems}, hand)
 	if got.Value != 3 {
 		t.Fatalf("Value = %d, want 3 (Reaping Blade swing power 3)", got.Value)
 	}
@@ -31,8 +31,8 @@ func TestGoldAbility_SpendsToFillArsenalAndSwings(t *testing.T) {
 	if got.StartOfNextTurnArsenal == nil {
 		t.Fatalf("StartOfNextTurnArsenal = nil, want the drawn card promoted into the slot")
 	}
-	if len(got.StartOfNextTurnHand) != d.Hero.Intelligence() {
+	if len(got.StartOfNextTurnHand) != d.Hero.(sim.Hero).Intelligence() {
 		t.Fatalf("StartOfNextTurnHand size = %d, want %d (Gold-spend draw should leave enough deck for next turn's full deal)",
-			len(got.StartOfNextTurnHand), d.Hero.Intelligence())
+			len(got.StartOfNextTurnHand), d.Hero.(sim.Hero).Intelligence())
 	}
 }

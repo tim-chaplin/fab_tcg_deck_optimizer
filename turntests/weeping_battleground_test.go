@@ -31,7 +31,7 @@ func (zeroDefenseAura) Play(*sim.TurnState, *sim.CardState) {}
 func TestBest_WeepingBattlegroundBanishesAuraFromGraveyard(t *testing.T) {
 	h := []sim.Card{cards.WeepingBattlegroundRed{}, zeroDefenseAura{}}
 	d := sim.New(testutils.Hero{Intel: 4}, nil, nil)
-	got := d.EvalOneTurnForTesting(sim.Matchup{IncomingDamage: 4}, sim.TurnState{}, h)
+	got := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 4}, sim.TurnState{}, h)
 	if got.Value != 4 {
 		t.Errorf("Value = %d, want 4 (3 block + 1 arcane from banish). Roles=[%s]",
 			got.Value, sim.FormatBestLine(got.BestLine))
@@ -43,7 +43,7 @@ func TestBest_WeepingBattlegroundBanishesAuraFromGraveyard(t *testing.T) {
 func TestBest_WeepingBattlegroundFizzlesWithoutAura(t *testing.T) {
 	h := []sim.Card{cards.WeepingBattlegroundRed{}}
 	d := sim.New(testutils.Hero{Intel: 4}, nil, nil)
-	got := d.EvalOneTurnForTesting(sim.Matchup{IncomingDamage: 4}, sim.TurnState{}, h)
+	got := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 4}, sim.TurnState{}, h)
 	if got.Value != 3 {
 		t.Errorf("Value = %d, want 3 (3 block only; banish fizzles). Roles=[%s]",
 			got.Value, sim.FormatBestLine(got.BestLine))

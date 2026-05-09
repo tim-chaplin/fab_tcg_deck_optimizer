@@ -1,19 +1,21 @@
 package sim
 
-// Weapon-loadout helpers: canonical name sorting, display labels, a comparable key for equality
-// checks, enumeration of every legal equip combination, and the 0–2 / 1H-pair validation applied
-// at construction.
+// Weapon-loadout helpers used by sim's mutation enumeration. The enum-every-combo logic
+// also lives in v2/deck (private), but the mutation generator works at the deck.Weapon
+// level too — duplicating the small helpers here keeps mutations.go from depending on
+// v2/deck internals.
 
 import (
-	"fmt"
 	"sort"
 	"strings"
+
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/deck"
 )
 
 // sortedWeaponNames returns the weapon names in ascending order. The canonical form both
-// loadoutLabel and weaponKey build on so two loadouts with the same weapons in different orders
-// compare equal.
-func sortedWeaponNames(ws []Weapon) []string {
+// loadoutLabel and weaponKey build on so two loadouts with the same weapons in different
+// orders compare equal.
+func sortedWeaponNames(ws []deck.Weapon) []string {
 	names := make([]string, len(ws))
 	for i, w := range ws {
 		names[i] = w.Name()
@@ -22,9 +24,9 @@ func sortedWeaponNames(ws []Weapon) []string {
 	return names
 }
 
-// loadoutLabel formats a weapon loadout for mutation descriptions, e.g. "[Nebula Blade]" or
-// "[Reaping Blade, Scepter of Pain]".
-func loadoutLabel(ws []Weapon) string {
+// loadoutLabel formats a weapon loadout for mutation descriptions, e.g. "[Nebula Blade]"
+// or "[Reaping Blade, Scepter of Pain]".
+func loadoutLabel(ws []deck.Weapon) string {
 	if len(ws) == 0 {
 		return "[]"
 	}
@@ -32,14 +34,14 @@ func loadoutLabel(ws []Weapon) string {
 }
 
 // weaponKey returns a comparable string for a weapon loadout so we can check equality.
-func weaponKey(ws []Weapon) string {
+func weaponKey(ws []deck.Weapon) string {
 	return strings.Join(sortedWeaponNames(ws), ",")
 }
 
 // weaponLoadouts enumerates every legal equip combination from ws: each 2H weapon as a solo
 // loadout, plus every unordered pair of 1H weapons (including dual-wielding the same weapon).
-func weaponLoadouts(ws []Weapon) [][]Weapon {
-	var oneHand, twoHand []Weapon
+func weaponLoadouts(ws []deck.Weapon) [][]deck.Weapon {
+	var oneHand, twoHand []deck.Weapon
 	for _, w := range ws {
 		if w.Hands() == 1 {
 			oneHand = append(oneHand, w)
@@ -47,27 +49,14 @@ func weaponLoadouts(ws []Weapon) [][]Weapon {
 			twoHand = append(twoHand, w)
 		}
 	}
-	var out [][]Weapon
+	var out [][]deck.Weapon
 	for _, w := range twoHand {
-		out = append(out, []Weapon{w})
+		out = append(out, []deck.Weapon{w})
 	}
 	for i := 0; i < len(oneHand); i++ {
 		for j := i; j < len(oneHand); j++ {
-			out = append(out, []Weapon{oneHand[i], oneHand[j]})
+			out = append(out, []deck.Weapon{oneHand[i], oneHand[j]})
 		}
 	}
 	return out
-}
-
-func validateWeapons(weapons []Weapon) {
-	switch len(weapons) {
-	case 0, 1:
-		return
-	case 2:
-		if weapons[0].Hands() != 1 || weapons[1].Hands() != 1 {
-			panic("deck: two-weapon loadout requires both weapons to be 1H")
-		}
-	default:
-		panic(fmt.Sprintf("deck: invalid weapon count %d (max 2)", len(weapons)))
-	}
 }

@@ -10,6 +10,7 @@ import (
 	"sort"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/deck"
 )
 
 // Mutation is one candidate single-slot change: the mutated Deck plus a human-readable summary
@@ -55,11 +56,11 @@ func AllMutations(d *Deck, maxCopies int, legal func(Card) bool) []Mutation {
 // one. Loadouts are canonicalised by weaponKey (names sorted) and processed in key order so
 // the output is deterministic regardless of map-iteration randomness.
 func weaponLoadoutMutations(d *Deck) []Mutation {
-	loadouts := weaponLoadouts(legalWeapons())
+	loadouts := weaponLoadouts(RegistryLegalWeapons())
 	currentKey := weaponKey(d.Weapons)
 	type keyedLoadout struct {
 		key     string
-		weapons []Weapon
+		weapons []deck.Weapon
 	}
 	sortedLoadouts := make([]keyedLoadout, 0, len(loadouts))
 	for _, l := range loadouts {
@@ -71,9 +72,8 @@ func weaponLoadoutMutations(d *Deck) []Mutation {
 		if l.key == currentKey {
 			continue
 		}
-		newCards := make([]Card, len(d.Cards))
-		copy(newCards, d.Cards)
-		nd := New(d.Hero, l.weapons, newCards)
+		newCards := append([]deck.Card(nil), d.Cards...)
+		nd := deck.New(d.Hero, l.weapons, newCards)
 		nd.Sideboard = d.Sideboard
 		nd.Equipment = d.Equipment
 		out = append(out, Mutation{
@@ -102,7 +102,7 @@ func singleSwapMutations(d *Deck, legal func(Card) bool) []Mutation {
 				continue // no-op: remove one and add one of the same card.
 			}
 			replacement := GetCard(addID)
-			newCards := make([]Card, 0, len(d.Cards))
+			newCards := make([]deck.Card, 0, len(d.Cards))
 			removed1 := false
 			for _, c := range d.Cards {
 				if !removed1 && c.ID() == removeID {
@@ -112,7 +112,7 @@ func singleSwapMutations(d *Deck, legal func(Card) bool) []Mutation {
 				newCards = append(newCards, c)
 			}
 			newCards = append(newCards, replacement)
-			nd := New(d.Hero, d.Weapons, newCards)
+			nd := deck.New(d.Hero, d.Weapons, newCards)
 			nd.Sideboard = d.Sideboard
 			nd.Equipment = d.Equipment
 			out = append(out, Mutation{
@@ -126,8 +126,9 @@ func singleSwapMutations(d *Deck, legal func(Card) bool) []Mutation {
 
 // sortedDeckIDs returns every distinct card ID appearing in cs, sorted ascending. Used as
 // the removal-target ordering for singleSwapMutations; the order is purely for stability since
-// the anneal driver shuffles the final mutation slice.
-func sortedDeckIDs(cs []Card) []ids.CardID {
+// the anneal driver shuffles the final mutation slice. Takes deck.Card (not sim.Card)
+// because the only method it needs is ID(), which both surfaces.
+func sortedDeckIDs(cs []deck.Card) []ids.CardID {
 	seen := map[ids.CardID]bool{}
 	ids := make([]ids.CardID, 0, len(cs))
 	for _, c := range cs {
@@ -165,8 +166,9 @@ func filterMaxCopiesViolations(muts []Mutation, maxCopies int) []Mutation {
 }
 
 // respectsMaxCopies reports whether every distinct ID in cs appears at most maxCopies times.
-// Returns false at the first overshoot so a single hot card short-circuits the count.
-func respectsMaxCopies(cs []Card, maxCopies int) bool {
+// Returns false at the first overshoot so a single hot card short-circuits the count. Takes
+// deck.Card (not sim.Card) because only .ID() is read.
+func respectsMaxCopies(cs []deck.Card, maxCopies int) bool {
 	counts := map[ids.CardID]int{}
 	for _, c := range cs {
 		counts[c.ID()]++

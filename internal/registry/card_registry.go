@@ -485,6 +485,19 @@ func init() {
 	sim.GetCard = GetCard
 	sim.DeckableCards = func() []ids.CardID { return DeckableCards() }
 	sim.AllWeapons = AllWeapons
+	// Forward sim's narrow registry hooks to the Registry struct so sim's mutation
+	// generator can read the legal pools without importing the registry directly
+	// (would cycle: registry imports sim already).
+	r := Registry{}
+	sim.RegistryLegalCards = func() []sim.Card {
+		raw := r.LegalCards()
+		out := make([]sim.Card, len(raw))
+		for i, c := range raw {
+			out[i] = c.(sim.Card)
+		}
+		return out
+	}
+	sim.RegistryLegalWeapons = r.LegalWeapons
 }
 
 // cardsByName maps c.DisplayName() → CardID for reverse lookup. Built once at init. Keyed

@@ -29,6 +29,8 @@ import (
 	"sync/atomic"
 
 	"github.com/klauspost/cpuid/v2"
+
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/deck"
 )
 
 // iterateImprovement is the per-acceptance message a worker sends to the coordinator: the
@@ -214,7 +216,7 @@ func runIterateWorker(
 			return
 		}
 		mut := cfg.mutations[i]
-		d := New(mut.Deck.Hero, mut.Deck.Weapons, mut.Deck.Cards)
+		d := deck.New(mut.Deck.Hero, mut.Deck.Weapons, mut.Deck.Cards)
 		var stats DeckStats
 		if cfg.adaptive {
 			stats = ev.EvaluateAdaptive(d, cfg.precision, cfg.matchup, rng)

@@ -18,7 +18,7 @@ func TestRelentlessPursuit_RecyclesToDeckBottomAfterAttack(t *testing.T) {
 		cards.RelentlessPursuitBlue{}, // resolves second; recycles to deck bottom
 		testutils.RedPitch{},          // funds RedAttack's cost-1
 	}
-	state := d.EvalOneTurnForTesting(sim.Matchup{IncomingDamage: 0}, sim.TurnState{}, hand)
+	state := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 0}, sim.TurnState{}, hand)
 	rpID := cards.RelentlessPursuitBlue{}.ID()
 	for _, c := range state.Graveyard {
 		if c.ID() == rpID {
@@ -38,7 +38,7 @@ func TestRelentlessPursuit_RecyclesToDeckBottomAfterAttack(t *testing.T) {
 func TestRelentlessPursuit_GoesToGraveyardWithoutPriorAttack(t *testing.T) {
 	d := sim.New(heroes.Viserai{}, nil, fillerDeck())
 	hand := []sim.Card{cards.RelentlessPursuitBlue{}, cards.OutedRed{}}
-	state := d.EvalOneTurnForTesting(sim.Matchup{IncomingDamage: 0}, sim.TurnState{}, hand)
+	state := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 0}, sim.TurnState{}, hand)
 	if state.Value != 4 {
 		t.Fatalf("Value = %d, want 4 (RP marks, Outed reads mark for 3+1=4)", state.Value)
 	}

@@ -4,6 +4,7 @@ import (
 	"math/rand"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/deck"
 )
 
 // Test-only exports. Visible to package sim_test files in this directory only — these
@@ -71,8 +72,10 @@ func PairSwapMutations(d *Deck, legal func(Card) bool) []Mutation {
 	return pairSwapMutations(d, legal)
 }
 
-// CardMultisetKey re-exports cardMultisetKey for sim_test consumers.
-func CardMultisetKey(cs []Card) string { return cardMultisetKey(cs) }
+// CardMultisetKey re-exports cardMultisetKey for sim_test consumers. Takes []deck.Card so
+// callers pass *Deck.Cards directly; cardMultisetKey only reads .ID() so the narrow
+// interface suffices.
+func CardMultisetKey(cs []deck.Card) string { return cardMultisetKey(cs) }
 
 // CardPairs re-exports the cardPairs registry for sim_test consumers.
 var CardPairs = cardPairs
@@ -83,7 +86,9 @@ func FilterMaxCopiesViolations(muts []Mutation, maxCopies int) []Mutation {
 }
 
 // RespectsMaxCopies re-exports respectsMaxCopies for sim_test consumers.
-func RespectsMaxCopies(cs []Card, maxCopies int) bool { return respectsMaxCopies(cs, maxCopies) }
+func RespectsMaxCopies(cs []deck.Card, maxCopies int) bool {
+	return respectsMaxCopies(cs, maxCopies)
+}
 
 // AppendGroupedChainEntries re-exports appendGroupedChainEntries for sim_test consumers.
 func AppendGroupedChainEntries(out []string, log []LogEntry) []string {
@@ -131,14 +136,14 @@ func (b *attackBufs) DRCardStateScratch() *CardState { return &b.drCardStateScra
 // LegalPool re-exports legalPool for sim_test consumers.
 func LegalPool(legal func(Card) bool) []ids.CardID { return legalPool(legal) }
 
-// LegalWeapons re-exports legalWeapons for sim_test consumers.
-func LegalWeapons() []Weapon { return legalWeapons() }
+// LegalWeapons re-exports the registry's legal-weapon roster for sim_test consumers.
+func LegalWeapons() []deck.Weapon { return RegistryLegalWeapons() }
 
 // WeaponLoadouts re-exports weaponLoadouts for sim_test consumers.
-func WeaponLoadouts(ws []Weapon) [][]Weapon { return weaponLoadouts(ws) }
+func WeaponLoadouts(ws []deck.Weapon) [][]deck.Weapon { return weaponLoadouts(ws) }
 
 // WeaponKey re-exports weaponKey for sim_test consumers.
-func WeaponKey(ws []Weapon) string { return weaponKey(ws) }
+func WeaponKey(ws []deck.Weapon) string { return weaponKey(ws) }
 
 // SortedIDPair re-exports sortedIDPair for sim_test consumers.
 func SortedIDPair(a, b ids.CardID) (ids.CardID, ids.CardID) { return sortedIDPair(a, b) }
@@ -155,9 +160,6 @@ func PairAddAllowed(c Card, legal func(Card) bool) bool { return pairAddAllowed(
 func (ev *Evaluator) EvaluateImplForTest(d *Deck, maxRuns int, mp Matchup, rng *rand.Rand, stop func(stats *DeckStats, runs int) bool) DeckStats {
 	return ev.evaluateImpl(d, maxRuns, mp, rng, stop)
 }
-
-// DefaultEquipment re-exports defaultEquipment for sim_test consumers.
-var DefaultEquipment = defaultEquipment
 
 // AdaptiveCheckInterval re-exports the adaptive-shuffle check interval constant.
 const AdaptiveCheckInterval = adaptiveCheckInterval

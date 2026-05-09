@@ -9,6 +9,7 @@ import (
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/deckformat"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/deck"
 )
 
 // runEvalCmd parses eval's flags and dispatches to runEval. eval always operates on an
@@ -89,7 +90,7 @@ func evaluateAndPersist(outPath string, shuffles int, precision float64, mp sim.
 	// instead of accumulating on top of the persisted ones. Sideboard and Equipment carry
 	// over verbatim — the sim ignores both, but the post-eval writeDeck round-trips them
 	// back to disk so the user's hand-managed lists aren't dropped by a re-score.
-	d := sim.New(loaded.Hero, loaded.Weapons, loaded.Cards)
+	d := deck.New(loaded.Hero, loaded.Weapons, loaded.Cards)
 	d.Sideboard = loaded.Sideboard
 	d.Equipment = loaded.Equipment
 	rng := rand.New(rand.NewSource(seed))

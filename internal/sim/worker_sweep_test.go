@@ -27,6 +27,7 @@ import (
 	"testing"
 
 	. "github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/deck"
 )
 
 // BenchmarkEvalWorkerSweep measures one Evaluate call on viserai_v4 across a range of
@@ -54,7 +55,7 @@ func BenchmarkEvalWorkerSweep(b *testing.B) {
 				b.StopTimer()
 				ev := NewEvaluatorParallel(w)
 				rng := rand.New(rand.NewSource(42))
-				d := New(loaded.Hero, loaded.Weapons, loaded.Cards)
+				d := deck.New(loaded.Hero, loaded.Weapons, loaded.Cards)
 				b.StartTimer()
 				ev.Evaluate(d, shuffles, Matchup{IncomingDamage: incoming}, rng)
 			}

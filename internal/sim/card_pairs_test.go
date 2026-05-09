@@ -8,6 +8,7 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/heroes"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/weapons"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/deck"
 )
 
 // Tests that PairSwapMutations enumerates every (firstVariant, secondVariant) cross-product
@@ -244,7 +245,7 @@ func TestCardPairMutations_SkipsNotImplementedHalves(t *testing.T) {
 		for _, c := range m.Deck.Cards {
 			if _, unimplemented := c.(NotImplemented); unimplemented {
 				t.Errorf("mutation %d (%s) introduced NotImplemented card %s",
-					i, m.Description, c.Name())
+					i, m.Description, c.(Card).Name())
 			}
 		}
 	}
@@ -319,7 +320,7 @@ func TestFilterMaxCopiesViolations_StripsCapViolators(t *testing.T) {
 // path in FilterMaxCopiesViolations.
 func TestRespectsMaxCopies_ShortCircuits(t *testing.T) {
 	a := GetCard(ids.ArcanicCrackleRed)
-	cs := []Card{a, a, a}
+	cs := []deck.Card{a, a, a}
 	if RespectsMaxCopies(cs, 2) {
 		t.Error("3 copies at maxCopies=2 should fail RespectsMaxCopies")
 	}

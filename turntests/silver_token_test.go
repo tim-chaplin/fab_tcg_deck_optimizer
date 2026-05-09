@@ -19,7 +19,7 @@ func TestSilverAbility_SpendsToFillArsenal(t *testing.T) {
 	d := sim.New(heroes.Viserai{}, nil, deck)
 	hand := []sim.Card{testutils.BluePitch{}}
 	priorItems := []sim.Item{sim.NewSilverItem(1)}
-	got := d.EvalOneTurnForTesting(sim.Matchup{IncomingDamage: 0}, sim.TurnState{Items: priorItems}, hand)
+	got := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 0}, sim.TurnState{Items: priorItems}, hand)
 	if got.Value != 0 {
 		t.Fatalf("Value = %d, want 0 (Silver ability has no damage)", got.Value)
 	}
@@ -32,9 +32,9 @@ func TestSilverAbility_SpendsToFillArsenal(t *testing.T) {
 	if got.StartOfNextTurnArsenal == nil {
 		t.Fatalf("StartOfNextTurnArsenal = nil, want the drawn card promoted into the slot")
 	}
-	if len(got.StartOfNextTurnHand) != d.Hero.Intelligence() {
+	if len(got.StartOfNextTurnHand) != d.Hero.(sim.Hero).Intelligence() {
 		t.Fatalf("StartOfNextTurnHand size = %d, want %d (Silver-spend draw should leave enough deck for next turn's full deal)",
-			len(got.StartOfNextTurnHand), d.Hero.Intelligence())
+			len(got.StartOfNextTurnHand), d.Hero.(sim.Hero).Intelligence())
 	}
 }
 
@@ -48,7 +48,7 @@ func TestSilverAbility_SpendsAndSwings(t *testing.T) {
 	d := sim.New(heroes.Viserai{}, []sim.Weapon{weapons.ReapingBlade{}}, deck)
 	hand := []sim.Card{testutils.BluePitch{}, testutils.BluePitch{}}
 	priorItems := []sim.Item{sim.NewSilverItem(1)}
-	got := d.EvalOneTurnForTesting(sim.Matchup{IncomingDamage: 0}, sim.TurnState{Items: priorItems}, hand)
+	got := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 0}, sim.TurnState{Items: priorItems}, hand)
 	if got.Value != 3 {
 		t.Fatalf("Value = %d, want 3 (Reaping Blade swing power 3)", got.Value)
 	}
