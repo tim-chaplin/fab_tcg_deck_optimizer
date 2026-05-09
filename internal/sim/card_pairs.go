@@ -148,8 +148,8 @@ func pairSwapMutations(d *Deck, legal func(Card) bool) []Mutation {
 						out = append(out, Mutation{
 							Deck: nd,
 							Description: fmt.Sprintf("-1 %s, -1 %s, +1 %s, +1 %s",
-								DisplayName(d.Cards[i]), DisplayName(d.Cards[j]),
-								DisplayName(first), DisplayName(second)),
+								d.Cards[i].DisplayName(), d.Cards[j].DisplayName(),
+								first.DisplayName(), second.DisplayName()),
 						})
 					}
 				}

@@ -13,6 +13,7 @@ type stubAR struct{}
 
 func (stubAR) ID() ids.CardID      { return ids.InvalidCard }
 func (stubAR) Name() string        { return "stubAR" }
+func (stubAR) DisplayName() string { return "stubAR [B]" }
 func (stubAR) Cost(*TurnState) int { return 0 }
 func (stubAR) Pitch() int          { return 3 }
 func (stubAR) Attack() int         { return 0 }
@@ -29,6 +30,7 @@ type stubAttack struct{}
 
 func (stubAttack) ID() ids.CardID      { return ids.InvalidCard }
 func (stubAttack) Name() string        { return "stubAttack" }
+func (stubAttack) DisplayName() string { return "stubAttack [R]" }
 func (stubAttack) Cost(*TurnState) int { return 0 }
 func (stubAttack) Pitch() int          { return 1 }
 func (stubAttack) Attack() int         { return 1 }

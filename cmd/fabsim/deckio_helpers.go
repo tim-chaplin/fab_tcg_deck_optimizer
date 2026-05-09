@@ -116,7 +116,7 @@ func sanitizeLoadedDeck(d *sim.Deck, maxCopies int, rng *rand.Rand, legal func(s
 	}
 	fmt.Fprintf(os.Stderr, "warning: loaded deck contained %d NotImplemented card(s); replacing with legal substitutes:\n", len(replaced))
 	for _, r := range replaced {
-		fmt.Fprintf(os.Stderr, "  -1 %s, +1 %s\n", sim.DisplayName(r.From), sim.DisplayName(r.To))
+		fmt.Fprintf(os.Stderr, "  -1 %s, +1 %s\n", r.From.DisplayName(), r.To.DisplayName())
 	}
 	return replaced
 }

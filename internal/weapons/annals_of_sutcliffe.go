@@ -34,6 +34,7 @@ type AnnalsOfSutcliffeAbility struct{}
 
 func (AnnalsOfSutcliffeAbility) ID() ids.CardID          { return ids.AnnalsOfSutcliffeAbilityID }
 func (AnnalsOfSutcliffeAbility) Name() string            { return "Annals of Sutcliffe" }
+func (AnnalsOfSutcliffeAbility) DisplayName() string     { return "Annals of Sutcliffe" }
 func (AnnalsOfSutcliffeAbility) Cost(*sim.TurnState) int { return 3 }
 func (AnnalsOfSutcliffeAbility) Pitch() int              { return 0 }
 func (AnnalsOfSutcliffeAbility) Attack() int             { return 0 }

@@ -193,6 +193,10 @@ type Card interface {
 	// (synergies, "if you have played a card named X this turn" effects) use this directly.
 	// For display, callers route through DisplayName which appends the pitch tag.
 	Name() string
+	// DisplayName returns the human-readable identifier including the pitch suffix —
+	// "Aether Slash [R]", "Aether Slash [Y]", "Aether Slash [B]". Use this anywhere a
+	// printout needs to disambiguate pitch printings (log lines, deck listings, debug).
+	DisplayName() string
 	// Cost returns the card's current resource cost given the turn state. Cards with a static
 	// printed cost ignore s and return a constant; cards that read s (e.g. discount-per-token
 	// effects) additionally implement VariableCost so the solver can pre-screen with cheap

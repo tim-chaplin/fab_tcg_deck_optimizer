@@ -36,7 +36,7 @@ var maleficCreatedRunechantText = func() map[ids.CardID]string {
 		MaleficIncantationYellow{},
 		MaleficIncantationBlue{},
 	} {
-		out[c.ID()] = sim.DisplayName(c) + " created a runechant"
+		out[c.ID()] = c.DisplayName() + " created a runechant"
 	}
 	return out
 }()
@@ -65,7 +65,7 @@ func maleficAuraHandler(s *sim.TurnState, _ *sim.Trigger, a *sim.Aura) {
 	a.Count--
 	lastVerse := a.Count <= 0
 	s.CreateRunechants(1)
-	s.LogPostTrigger(sim.DisplayName(s.TriggeringCard), maleficCreatedRunechantText[cardID], 1)
+	s.LogPostTrigger(s.TriggeringCard.DisplayName(), maleficCreatedRunechantText[cardID], 1)
 	if lastVerse {
 		s.DestroyAura(a, true)
 	}

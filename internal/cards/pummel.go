@@ -37,8 +37,8 @@ func pummelAccepts(c sim.Card, mode int8) bool {
 // pummelOnHitDiscard fires the printed "when this hits a hero, they discard a card" rider.
 func pummelOnHitDiscard(s *sim.TurnState, self *sim.CardState, h *sim.OnHitHandler) {
 	s.AddValue(sim.DiscardValue)
-	s.LogPostTriggerf(sim.DisplayName(self.Card), sim.DiscardValue,
-		"%s forced opponent to discard 1", sim.DisplayName(h.Source))
+	s.LogPostTriggerf(self.Card.DisplayName(), sim.DiscardValue,
+		"%s forced opponent to discard 1", h.Source.DisplayName())
 }
 
 // pummelPlay applies the chosen mode's effect. The chain runner already validated the

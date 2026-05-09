@@ -21,7 +21,7 @@ func TestSigilOfSuffering_FullCreditWhenIncomingAbsorbsBoost(t *testing.T) {
 		tc.c.Play(&s, &sim.CardState{Card: tc.c})
 		if got := s.Value; got != tc.want {
 			t.Errorf("%s: Play(IncomingDamage=10) Value = %d, want %d (block + boost + arcane)",
-				sim.DisplayName(tc.c), got, tc.want)
+				tc.c.DisplayName(), got, tc.want)
 		}
 	}
 }
@@ -43,7 +43,7 @@ func TestSigilOfSuffering_BoostWastedWhenIncomingMatchesDefense(t *testing.T) {
 		tc.c.Play(&s, &sim.CardState{Card: tc.c})
 		if got := s.Value; got != tc.want {
 			t.Errorf("%s: Play(IncomingDamage=%d) Value = %d, want %d (block at cap + arcane only)",
-				sim.DisplayName(tc.c), tc.incoming, got, tc.want)
+				tc.c.DisplayName(), tc.incoming, got, tc.want)
 		}
 	}
 }
@@ -61,7 +61,7 @@ func TestSigilOfSuffering_DefenseIsPrinted(t *testing.T) {
 	}
 	for _, tc := range cases {
 		if got := tc.c.Defense(); got != tc.want {
-			t.Errorf("%s: Defense() = %d, want %d (printed)", sim.DisplayName(tc.c), got, tc.want)
+			t.Errorf("%s: Defense() = %d, want %d (printed)", tc.c.DisplayName(), got, tc.want)
 		}
 	}
 }

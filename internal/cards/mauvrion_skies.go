@@ -47,7 +47,7 @@ func mauvrionSkiesPlay(s *sim.TurnState, selfState *sim.CardState, source sim.Ca
 // (whose name credits the trigger line).
 func onHitCreateRunechants(s *sim.TurnState, self *sim.CardState, h *sim.OnHitHandler) {
 	s.CreateRunechants(h.N)
-	s.LogPostTrigger(sim.DisplayName(self.Card), h.LogText, h.N)
+	s.LogPostTrigger(self.Card.DisplayName(), h.LogText, h.N)
 }
 
 // onHitRunechantText is the precomputed rider line for each Mauvrion Skies / Runic Reaping
@@ -65,7 +65,7 @@ var onHitRunechantText = func() map[ids.CardID]string {
 		{RunicReapingYellow{}, 2},
 		{RunicReapingBlue{}, 3},
 	} {
-		out[p.c.ID()] = fmt.Sprintf("%s created %d runechants on hit", sim.DisplayName(p.c), p.n)
+		out[p.c.ID()] = fmt.Sprintf("%s created %d runechants on hit", p.c.DisplayName(), p.n)
 	}
 	return out
 }()

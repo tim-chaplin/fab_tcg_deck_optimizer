@@ -81,7 +81,7 @@ func TestWarmongersRecital_OnHitFireRecyclesTargetFromGraveyardToDeckBottom(t *t
 	}
 	// Rider line attributes the recycle to the buffed attack, not Warmonger's Recital.
 	added := s.LogEntries()[preLog:]
-	if len(added) != 1 || added[0].Source != sim.DisplayName(target) {
-		t.Errorf("rider log = %+v, want one entry sourced to %q", added, sim.DisplayName(target))
+	if len(added) != 1 || added[0].Source != target.DisplayName() {
+		t.Errorf("rider log = %+v, want one entry sourced to %q", added, target.DisplayName())
 	}
 }

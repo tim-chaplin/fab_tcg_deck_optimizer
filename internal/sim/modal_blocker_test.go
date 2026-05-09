@@ -13,6 +13,7 @@ type modalBlocker struct{}
 
 func (modalBlocker) ID() ids.CardID      { return ids.InvalidCard }
 func (modalBlocker) Name() string        { return "modalBlocker" }
+func (modalBlocker) DisplayName() string { return "modalBlocker" }
 func (modalBlocker) Cost(*TurnState) int { return 0 }
 func (modalBlocker) Pitch() int          { return 0 }
 func (modalBlocker) Attack() int         { return 0 }

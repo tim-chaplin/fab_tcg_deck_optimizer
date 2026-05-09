@@ -2,8 +2,6 @@ package registry
 
 import (
 	"testing"
-
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 )
 
 func TestAllIDsResolve(t *testing.T) {
@@ -17,12 +15,12 @@ func TestAllIDsResolve(t *testing.T) {
 }
 
 func TestDisplayNamesAreUnique(t *testing.T) {
-	// sim.DisplayName(c) is used as the reverse-lookup key, so every registered card must
+	// c.DisplayName() is used as the reverse-lookup key, so every registered card must
 	// have a distinct display name. A collision would silently overwrite the earlier entry
 	// in byName. (Bare Name() collides intentionally — pitch variants share it.)
 	seen := map[string]CardID{}
 	for _, id := range AllCards() {
-		name := sim.DisplayName(GetCard(id))
+		name := GetCard(id).DisplayName()
 		if prev, dup := seen[name]; dup {
 			t.Errorf("duplicate DisplayName %q for IDs %d and %d", name, prev, id)
 		}
@@ -32,7 +30,7 @@ func TestDisplayNamesAreUnique(t *testing.T) {
 
 func TestByNameRoundTrip(t *testing.T) {
 	for _, id := range AllCards() {
-		name := sim.DisplayName(GetCard(id))
+		name := GetCard(id).DisplayName()
 		got, ok := CardByName(name)
 		if !ok || got != id {
 			t.Errorf("CardByName(%q) = (%d, %v), want (%d, true)", name, got, ok, id)

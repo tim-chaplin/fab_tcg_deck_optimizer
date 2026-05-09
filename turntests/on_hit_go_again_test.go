@@ -49,7 +49,7 @@ func TestOnHitGoAgain_TwoConsecutiveARsExtendToWeaponSwing(t *testing.T) {
 func formatBestLine(line []sim.CardAssignment) string {
 	var parts []string
 	for _, a := range line {
-		parts = append(parts, sim.DisplayName(a.Card)+":"+roleName(a.Role))
+		parts = append(parts, a.Card.DisplayName()+":"+roleName(a.Role))
 	}
 	return strings.Join(parts, ", ")
 }

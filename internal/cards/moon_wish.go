@@ -38,7 +38,7 @@ func moonWishCost(s *sim.TurnState) int {
 // and registers an OnHit that tutors Sun Kiss. Tutored Sun Kiss plays immediately when
 // self has go-again granted; otherwise it lands in hand for next turn.
 func moonWishPlay(c sim.Card, s *sim.TurnState, self *sim.CardState) {
-	name := sim.DisplayName(c)
+	name := c.DisplayName()
 	// Alt cost: pop a hand card and prepend it to the deck (PrependToDeck flips cacheable).
 	var returned sim.Card
 	if len(s.Hand()) > 0 {
@@ -51,7 +51,7 @@ func moonWishPlay(c sim.Card, s *sim.TurnState, self *sim.CardState) {
 	s.Log(self, n)
 
 	if returned != nil {
-		s.LogPostTriggerf(name, 0, "%s returned %s to top of deck", name, sim.DisplayName(returned))
+		s.LogPostTriggerf(name, 0, "%s returned %s to top of deck", name, returned.DisplayName())
 	}
 
 	self.RegisterOnHit(moonWishOnHit)
@@ -63,7 +63,7 @@ func moonWishPlay(c sim.Card, s *sim.TurnState, self *sim.CardState) {
 // the handler).
 func moonWishOnHit(s *sim.TurnState, self *sim.CardState, _ *sim.OnHitHandler) {
 	c := self.Card
-	name := sim.DisplayName(c)
+	name := c.DisplayName()
 	sk, ok := s.TutorFromDeck(sunKissTutorPriority)
 	if !ok {
 		s.LogPostTriggerf(name, 0, "%s found no Sun Kiss to tutor", name)
@@ -73,13 +73,13 @@ func moonWishOnHit(s *sim.TurnState, self *sim.CardState, _ *sim.OnHitHandler) {
 	if !self.EffectiveGoAgain() {
 		// Tutor lands the card in hand for next turn.
 		s.AppendHand(sk)
-		s.LogPostTriggerf(name, 0, "%s tutored %s", name, sim.DisplayName(sk))
+		s.LogPostTriggerf(name, 0, "%s tutored %s", name, sk.DisplayName())
 		return
 	}
 	// Go-again: Sun Kiss plays immediately. Pre-append Moon Wish to CardsPlayed so Sun
 	// Kiss's "if you've played Moon Wish" synergy fires; pop after so the sim's normal
 	// post-Play append doesn't double-add.
-	s.LogPostTriggerf(name, 0, "%s tutored %s and played it", name, sim.DisplayName(sk))
+	s.LogPostTriggerf(name, 0, "%s tutored %s and played it", name, sk.DisplayName())
 	s.CardsPlayed = append(s.CardsPlayed, c)
 	skSelf := &sim.CardState{Card: sk}
 	sk.Play(s, skSelf)

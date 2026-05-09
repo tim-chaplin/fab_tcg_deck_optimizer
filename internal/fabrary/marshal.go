@@ -62,7 +62,7 @@ func weaponCounts(ws []sim.Weapon) map[string]int {
 func cardCountsForExport(cs []sim.Card) map[string]int {
 	m := make(map[string]int, len(cs))
 	for _, c := range cs {
-		m[toFabraryCardName(sim.DisplayName(c))]++
+		m[toFabraryCardName(c.DisplayName())]++
 	}
 	return m
 }

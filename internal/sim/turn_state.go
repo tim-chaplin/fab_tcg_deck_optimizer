@@ -464,7 +464,7 @@ func formatCardList(cs []Card) string {
 	}
 	parts := make([]string, len(cs))
 	for i, c := range cs {
-		parts[i] = DisplayName(c)
+		parts[i] = c.DisplayName()
 	}
 	return "[" + strings.Join(parts, ", ") + "]"
 }
@@ -489,7 +489,7 @@ func panicIfOptViolatesMultiset(in, top, bottom []Card) {
 			counts[c]--
 			if counts[c] < 0 {
 				panic(fmt.Sprintf("Opt: %s list returned card %s not in input",
-					label, DisplayName(c)))
+					label, c.DisplayName()))
 			}
 		}
 	}
@@ -497,7 +497,7 @@ func panicIfOptViolatesMultiset(in, top, bottom []Card) {
 	check(bottom, "bottom")
 	for c, n := range counts {
 		if n != 0 {
-			panic(fmt.Sprintf("Opt: handler dropped %d copy of %s from input", n, DisplayName(c)))
+			panic(fmt.Sprintf("Opt: handler dropped %d copy of %s from input", n, c.DisplayName()))
 		}
 	}
 }
@@ -688,7 +688,7 @@ func (s *TurnState) LogRider(self *CardState, n int, text string) {
 	if s.skipLog {
 		return
 	}
-	s.log(LogEntryPostTrigger, DisplayName(self.Card), text, n)
+	s.log(LogEntryPostTrigger, self.Card.DisplayName(), text, n)
 }
 
 // LogRiderf is the format variant of LogRider — defers fmt.Sprintf and DisplayName into the
@@ -697,7 +697,7 @@ func (s *TurnState) LogRiderf(self *CardState, n int, format string, args ...any
 	if s.skipLog {
 		return
 	}
-	s.logf(LogEntryPostTrigger, DisplayName(self.Card), n, format, args...)
+	s.logf(LogEntryPostTrigger, self.Card.DisplayName(), n, format, args...)
 }
 
 // LogPreTrigger appends an indented pre-trigger sub-line attributed to source — a hero or

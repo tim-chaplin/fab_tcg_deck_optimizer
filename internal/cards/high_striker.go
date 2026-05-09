@@ -25,8 +25,8 @@ func highStrikerOnHit2(s *sim.TurnState, t *sim.Trigger, _ *sim.Aura) {
 
 func highStrikerCreate(s *sim.TurnState, t *sim.Trigger, n int) {
 	s.CreateCopper(n)
-	s.LogPostTriggerf(sim.DisplayName(s.TriggeringCard), 0,
-		"%s created %d copper tokens on attack hit", sim.DisplayName(t.Source), n)
+	s.LogPostTriggerf(s.TriggeringCard.DisplayName(), 0,
+		"%s created %d copper tokens on attack hit", t.Source.DisplayName(), n)
 }
 
 func highStrikerPlay(s *sim.TurnState, self *sim.CardState, source sim.Card, handler sim.TriggerHandler) {

@@ -27,9 +27,9 @@ func formatContribution(v float64) string {
 // tag to the role label instead ("PLAY from arsenal").
 func assignmentName(a CardAssignment) string {
 	if a.FromArsenal {
-		return DisplayName(a.Card) + " (from arsenal)"
+		return a.Card.DisplayName() + " (from arsenal)"
 	}
-	return DisplayName(a.Card)
+	return a.Card.DisplayName()
 }
 
 // FormatBestLine pairs each card in BestLine with its assigned role for debug output, e.g.
@@ -66,7 +66,7 @@ func formatTriggerEffect(d TriggerContribution) string {
 		parts = append(parts, fmt.Sprintf("START OF ACTION PHASE (+%d)", d.Damage))
 	}
 	if d.Revealed != nil {
-		parts = append(parts, fmt.Sprintf("drew %s into hand", DisplayName(d.Revealed)))
+		parts = append(parts, fmt.Sprintf("drew %s into hand", d.Revealed.DisplayName()))
 	}
 	return strings.Join(parts, ", ")
 }

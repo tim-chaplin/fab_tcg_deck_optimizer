@@ -27,7 +27,7 @@ func toJSON(d *sim.Deck, stats sim.DeckStats) *DeckJSON {
 	cardNames := make([]string, len(d.Cards))
 	var pitchCounts PitchCountsJSON
 	for i, c := range d.Cards {
-		cardNames[i] = sim.DisplayName(c)
+		cardNames[i] = c.DisplayName()
 		switch c.Pitch() {
 		case 1:
 			pitchCounts.Red++
@@ -85,7 +85,7 @@ func perCardMarginalToJSON(m map[ids.CardID]sim.CardMarginalStats) []CardMargina
 	out := make([]CardMarginalStatsJSON, 0, len(m))
 	for id, s := range m {
 		out = append(out, CardMarginalStatsJSON{
-			Card:         sim.DisplayName(registry.GetCard(id)),
+			Card:         registry.GetCard(id).DisplayName(),
 			PresentTotal: s.PresentTotal,
 			PresentHands: s.PresentHands,
 			AbsentTotal:  s.AbsentTotal,
