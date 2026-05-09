@@ -12,11 +12,12 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/deck"
 )
 
-// Unmarshal decodes JSON produced by Marshal into a *sim.Deck and the associated DeckStats.
+// Unmarshal decodes JSON produced by Marshal into a *deck.Deck and the associated DeckStats.
 // Returns an error if any card, weapon, or hero name isn't recognized.
-func Unmarshal(data []byte) (*sim.Deck, sim.DeckStats, error) {
+func Unmarshal(data []byte) (*deck.Deck, sim.DeckStats, error) {
 	var dj DeckJSON
 	if err := json.Unmarshal(data, &dj); err != nil {
 		return nil, sim.DeckStats{}, err
@@ -24,12 +25,12 @@ func Unmarshal(data []byte) (*sim.Deck, sim.DeckStats, error) {
 	return fromJSON(&dj)
 }
 
-func fromJSON(dj *DeckJSON) (*sim.Deck, sim.DeckStats, error) {
+func fromJSON(dj *DeckJSON) (*deck.Deck, sim.DeckStats, error) {
 	h, ok := registry.HeroByName(dj.Hero)
 	if !ok {
 		return nil, sim.DeckStats{}, fmt.Errorf("deckio: unknown hero %q", dj.Hero)
 	}
-	weapons := make([]sim.Weapon, len(dj.Weapons))
+	weapons := make([]deck.Weapon, len(dj.Weapons))
 	for i, name := range dj.Weapons {
 		w, ok := registry.WeaponByName(name)
 		if !ok {
@@ -37,7 +38,7 @@ func fromJSON(dj *DeckJSON) (*sim.Deck, sim.DeckStats, error) {
 		}
 		weapons[i] = w
 	}
-	cs := make([]sim.Card, len(dj.Cards))
+	cs := make([]deck.Card, len(dj.Cards))
 	for i, name := range dj.Cards {
 		id, ok := registry.CardByName(name)
 		if !ok {
@@ -53,7 +54,7 @@ func fromJSON(dj *DeckJSON) (*sim.Deck, sim.DeckStats, error) {
 	if err != nil {
 		return nil, sim.DeckStats{}, err
 	}
-	d := sim.New(h, weapons, cs)
+	d := deck.New(h, weapons, cs)
 	// Sideboard and Equipment are name-only lists — the optimizer doesn't read them and the
 	// registry isn't consulted (so the user can list equipment pieces or any other items
 	// the sim doesn't model). Copy the names through verbatim.

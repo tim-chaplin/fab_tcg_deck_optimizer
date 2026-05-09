@@ -7,17 +7,18 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/weapons"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/deck"
 )
 
 // Tests the Silver token activated ability end-to-end: spend Silver alone, verify the
 // drawn card promotes into arsenal.
 func TestSilverAbility_SpendsToFillArsenal(t *testing.T) {
-	deck := []sim.Card{
+	cards := []deck.Card{
 		testutils.RedAttack{}, testutils.RedAttack{}, testutils.RedAttack{},
 		testutils.RedAttack{}, testutils.RedAttack{},
 	}
-	d := sim.New(heroes.Viserai{}, nil, deck)
-	hand := []sim.Card{testutils.BluePitch{}}
+	d := deck.New(heroes.Viserai{}, nil, cards)
+	hand := []deck.Card{testutils.BluePitch{}}
 	priorItems := []sim.Item{sim.NewSilverItem(1)}
 	got := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 0}, sim.TurnState{Items: priorItems}, hand)
 	if got.Value != 0 {
@@ -41,12 +42,12 @@ func TestSilverAbility_SpendsToFillArsenal(t *testing.T) {
 // Tests that the Silver ability composes with a weapon swing when the pitch budget covers
 // both costs.
 func TestSilverAbility_SpendsAndSwings(t *testing.T) {
-	deck := []sim.Card{
+	cards := []deck.Card{
 		testutils.RedAttack{}, testutils.RedAttack{}, testutils.RedAttack{},
 		testutils.RedAttack{}, testutils.RedAttack{},
 	}
-	d := sim.New(heroes.Viserai{}, []sim.Weapon{weapons.ReapingBlade{}}, deck)
-	hand := []sim.Card{testutils.BluePitch{}, testutils.BluePitch{}}
+	d := deck.New(heroes.Viserai{}, []deck.Weapon{weapons.ReapingBlade{}}, cards)
+	hand := []deck.Card{testutils.BluePitch{}, testutils.BluePitch{}}
 	priorItems := []sim.Item{sim.NewSilverItem(1)}
 	got := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 0}, sim.TurnState{Items: priorItems}, hand)
 	if got.Value != 3 {

@@ -7,6 +7,7 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/deck"
 )
 
 // Moon Wish's on-hit tutor shuffles the deck, so assertions only check Value, total copies
@@ -15,13 +16,13 @@ import (
 // Tests Moon Wish alt-cost: hand DR returned to deck, on-hit tutors Sun Kiss; without
 // go-again, Sun Kiss is post-hoc-promoted to Arsenal as the only Held candidate.
 func TestEvalOneTurn_MoonWishAltCostTutorsSunKissAndConsumesDeck(t *testing.T) {
-	deckCards := []sim.Card{
+	deckCards := []deck.Card{
 		cards.SunKissRed{},
 		testutils.RedAttack{}, testutils.RedAttack{}, testutils.RedAttack{},
 		testutils.RedAttack{}, testutils.RedAttack{},
 	}
-	d := sim.New(testutils.Hero{Intel: 4}, nil, deckCards)
-	state := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 0}, sim.TurnState{}, []sim.Card{
+	d := deck.New(testutils.Hero{Intel: 4}, nil, deckCards)
+	state := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 0}, sim.TurnState{}, []deck.Card{
 		cards.MoonWishYellow{},
 		cards.WeepingBattlegroundRed{},
 	})
@@ -48,12 +49,12 @@ func TestEvalOneTurn_MoonWishAltCostTutorsSunKissAndConsumesDeck(t *testing.T) {
 // Tests Moon Wish alt-cost when the deck has no Sun Kiss: tutor fizzles, alt cost still
 // recycles the DR, and arsenal stays empty.
 func TestEvalOneTurn_MoonWishAltCostTutorFizzlesWithoutSunKiss(t *testing.T) {
-	deckCards := []sim.Card{
+	deckCards := []deck.Card{
 		testutils.RedAttack{}, testutils.RedAttack{}, testutils.RedAttack{},
 		testutils.RedAttack{}, testutils.RedAttack{}, testutils.RedAttack{},
 	}
-	d := sim.New(testutils.Hero{Intel: 4}, nil, deckCards)
-	state := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 0}, sim.TurnState{}, []sim.Card{
+	d := deck.New(testutils.Hero{Intel: 4}, nil, deckCards)
+	state := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 0}, sim.TurnState{}, []deck.Card{
 		cards.MoonWishYellow{},
 		cards.WeepingBattlegroundRed{},
 	})
@@ -77,13 +78,13 @@ func TestEvalOneTurn_MoonWishAltCostTutorFizzlesWithoutSunKiss(t *testing.T) {
 // plays the same turn and lands in graveyard. Sun Kiss is at deck index 2 (not top) so the
 // buf-removal path is exercised — a blind head-advance would consume the wrong slot.
 func TestEvalOneTurn_MoonWishWithFlyingHighPlaysTutoredSunKiss(t *testing.T) {
-	deckCards := []sim.Card{
+	deckCards := []deck.Card{
 		testutils.RedAttack{}, testutils.RedAttack{},
 		cards.SunKissRed{},
 		testutils.RedAttack{}, testutils.RedAttack{}, testutils.RedAttack{}, testutils.RedAttack{},
 	}
-	d := sim.New(testutils.Hero{Intel: 4}, nil, deckCards)
-	state := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 0}, sim.TurnState{}, []sim.Card{
+	d := deck.New(testutils.Hero{Intel: 4}, nil, deckCards)
+	state := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 0}, sim.TurnState{}, []deck.Card{
 		cards.FlyingHighRed{},
 		cards.MoonWishYellow{},
 		cards.WeepingBattlegroundRed{},

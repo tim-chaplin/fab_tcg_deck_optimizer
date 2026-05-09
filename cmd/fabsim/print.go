@@ -21,7 +21,7 @@ import (
 // Equipment or Sideboard sections, trailing "Equipment:" / "Sideboard:" blocks list their
 // contents in the same grouped form — empty sections are silently skipped so stock decks
 // stay untouched.
-func printCardList(d *sim.Deck) {
+func printCardList(d *deck.Deck) {
 	fmt.Println("Card list:")
 	printGroupedCards(d.Cards)
 	if len(d.Equipment) > 0 {
@@ -68,7 +68,7 @@ func printGroupedStrings(ss []string) {
 // printBestDeck wraps this with the card list, best-turn block, and per-card stats;
 // `fabsim eval -brief` calls printDeckSummary directly so a scripted re-score gets just the
 // numbers without the card-list scroll.
-func printDeckSummary(d *sim.Deck, s sim.DeckStats) {
+func printDeckSummary(d *deck.Deck, s sim.DeckStats) {
 	fmt.Printf("Hero:    %s\n", d.Hero.(sim.Hero).Name())
 	fmt.Printf("Weapons: %s\n", weaponNames(d.Weapons))
 	fmt.Printf("Pitch:   %s\n", pitchCountsLine(d.Cards))
@@ -147,7 +147,7 @@ func pitchCounts(cs []deck.Card) (red, yellow, blue int) {
 // contribution with its correlational marginal hand-value lift. Sections silently skip
 // themselves when their backing slice/map on s is empty so unscored decks still render
 // the parts that do exist.
-func printBestDeck(d *sim.Deck, s sim.DeckStats) {
+func printBestDeck(d *deck.Deck, s sim.DeckStats) {
 	printDeckSummary(d, s)
 	fmt.Println()
 	printCardList(d)
@@ -187,7 +187,7 @@ func printBestTurn(s sim.DeckStats) {
 // drags sit at the bottom — the spread is a smell test for buggy implementations or
 // oversimplified mechanics. See sim.DeckStats.PerCardMarginal for the cross-turn caveat
 // that limits this view's reach for next-turn-payoff cards.
-func printCardValues(d *sim.Deck, s sim.DeckStats) {
+func printCardValues(d *deck.Deck, s sim.DeckStats) {
 	type row struct {
 		name      string
 		margin    float64

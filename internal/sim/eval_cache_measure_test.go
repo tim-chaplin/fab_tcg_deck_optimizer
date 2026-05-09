@@ -18,6 +18,7 @@ import (
 	"path/filepath"
 	"testing"
 
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry"
 	. "github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/deck"
 
@@ -30,7 +31,7 @@ import (
 // Returns nil when the file isn't found so callers can b.Skip / t.Skip cleanly. Mirrors
 // cmd/fabsim/eval_realdeck_bench_test.go's findRepoFile helper but specialised to the
 // load path so the cache tests have one self-contained loader.
-func loadRealDeck(tb testing.TB) *Deck {
+func loadRealDeck(tb testing.TB) *deck.Deck {
 	tb.Helper()
 	dir, err := os.Getwd()
 	if err != nil {
@@ -107,7 +108,7 @@ func TestEvalCache_ParallelEquivalentToSequential(t *testing.T) {
 		driftTolerance = 0.5
 	)
 	setupRNG := rand.New(rand.NewSource(123))
-	baseline := Random(heroes.Viserai{}, deckSize, maxCopies, setupRNG, nil)
+	baseline := deck.Random(heroes.Viserai{}, deckSize, maxCopies, setupRNG, nil, registry.Registry{})
 
 	seq := deck.New(baseline.Hero, baseline.Weapons, baseline.Cards)
 	seqStats := NewEvaluator().Evaluate(seq, shuffles, Matchup{IncomingDamage: incoming}, rand.New(rand.NewSource(99)))
@@ -201,7 +202,7 @@ func TestEvalCache_EquivalenceWithUncached(t *testing.T) {
 		driftTolerance = 0.05
 	)
 	setupRNG := rand.New(rand.NewSource(123))
-	baseline := Random(heroes.Viserai{}, deckSize, maxCopies, setupRNG, nil)
+	baseline := deck.Random(heroes.Viserai{}, deckSize, maxCopies, setupRNG, nil, registry.Registry{})
 
 	cached := deck.New(baseline.Hero, baseline.Weapons, baseline.Cards)
 	cachedStats := NewEvaluator().Evaluate(cached, shuffles, Matchup{IncomingDamage: incoming}, rand.New(rand.NewSource(99)))

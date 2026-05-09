@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/heroes"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/deck"
 )
@@ -15,7 +16,7 @@ import (
 // that weapons, cards, and hero all come back intact (stats are intentionally not round-tripped).
 func TestMarshalUnmarshalRoundTrip(t *testing.T) {
 	rng := rand.New(rand.NewSource(1))
-	d := sim.Random(heroes.Viserai{}, 40, 2, rng, nil)
+	d := deck.Random(heroes.Viserai{}, 40, 2, rng, nil, registry.Registry{})
 
 	text := Marshal(d)
 	got, skipped, err := Unmarshal(text)
@@ -45,7 +46,7 @@ func TestMarshalUnmarshalRoundTrip(t *testing.T) {
 // update consciously.
 func TestMarshalFormat(t *testing.T) {
 	rng := rand.New(rand.NewSource(1))
-	d := sim.Random(heroes.Viserai{}, 40, 2, rng, nil)
+	d := deck.Random(heroes.Viserai{}, 40, 2, rng, nil, registry.Registry{})
 	text := Marshal(d)
 
 	wantPrefix := "Name: Viserai\nHero: Viserai\nFormat: Silver Age\n\nArena cards\n"
@@ -67,7 +68,7 @@ func TestMarshalFormat(t *testing.T) {
 // surface whatever defaults a caller applied, so test coverage here only needs an arbitrary
 // non-empty Defaults to exercise the pass-through.
 func TestMarshalRendersAppliedDefaults(t *testing.T) {
-	d := &sim.Deck{Hero: heroes.Viserai{}}
+	d := &deck.Deck{Hero: heroes.Viserai{}}
 	d.ApplyDefaults(deck.Defaults{
 		Equipment: []string{"Beckoning Haunt", "Blade Beckoner Helm"},
 		Sideboard: []deck.SideboardDefault{
@@ -215,7 +216,7 @@ Deck cards
 // placed after Deck cards.
 func TestMarshalSideboardSection(t *testing.T) {
 	rng := rand.New(rand.NewSource(1))
-	d := sim.Random(heroes.Viserai{}, 40, 2, rng, nil)
+	d := deck.Random(heroes.Viserai{}, 40, 2, rng, nil, registry.Registry{})
 
 	// Use Mauvrion Skies [R] — its pitch-color suffix exercises the toFabraryCardName
 	// lowercase conversion. Sideboard is a string list; names are stored in canonical form.
@@ -287,7 +288,7 @@ Deck cards
 	}
 }
 
-func cardNameCounts(d *sim.Deck) map[string]int {
+func cardNameCounts(d *deck.Deck) map[string]int {
 	m := map[string]int{}
 	for _, c := range d.Cards {
 		m[c.DisplayName()]++
@@ -295,7 +296,7 @@ func cardNameCounts(d *sim.Deck) map[string]int {
 	return m
 }
 
-func weaponNameCounts(d *sim.Deck) map[string]int {
+func weaponNameCounts(d *deck.Deck) map[string]int {
 	m := map[string]int{}
 	for _, w := range d.Weapons {
 		m[w.Name()]++

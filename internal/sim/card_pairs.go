@@ -111,7 +111,7 @@ type pairDedupeKey struct {
 // the combined output so single-slot and pair candidates share one cap-checking pass.
 //
 // Returned decks share no backing slices with d or each other.
-func pairSwapMutations(d *Deck, legal func(Card) bool) []Mutation {
+func pairSwapMutations(d *deck.Deck, legal func(deck.Card) bool) []Mutation {
 	if len(cardPairs) == 0 || len(d.Cards) < 2 {
 		return nil
 	}
@@ -165,7 +165,7 @@ func pairSwapMutations(d *Deck, legal func(Card) bool) []Mutation {
 // whose subpackages the registry doesn't import) and anything carrying a pool-exclusion
 // marker, then applies the caller's legal filter when present. legal=nil keeps every
 // pool-eligible card eligible.
-func pairAddAllowed(c Card, legal func(Card) bool) bool {
+func pairAddAllowed(c Card, legal func(deck.Card) bool) bool {
 	if c == nil || isExcludedFromPool(c) {
 		return false
 	}
@@ -187,7 +187,7 @@ func sortedIDPair(a, b ids.CardID) (ids.CardID, ids.CardID) {
 // pairSwapByIndex returns a fresh slice equal to src with positions i and j removed and
 // first and second appended. i and j must be distinct and in range; callers guarantee this
 // via i < j enumeration over a sized loop. Operates entirely in deck.Card terms — no
-// rich-method calls — so callers can pass *Deck.Cards verbatim and feed the result into
+// rich-method calls — so callers can pass *deck.Deck.Cards verbatim and feed the result into
 // deck.New.
 func pairSwapByIndex(src []deck.Card, i, j int, first, second deck.Card) []deck.Card {
 	out := make([]deck.Card, 0, len(src))

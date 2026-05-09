@@ -161,7 +161,7 @@ func TestIsLegalOrder_MauvrionCantSaveShrillWhenRuneragerIsAhead(t *testing.T) {
 	ctx := NewSequenceContextForTest(heroes.Viserai{}, nil, nil, 1_000_000, 0, len(order))
 	if _, _, _, legal := ctx.PlaySequence(order); legal {
 		t.Fatalf("ordering %v should be illegal (Shrill has no go-again and Mauvrion granted Runerager instead)",
-			testutils.CardNames(order))
+			testutils.CardNamesSim(order))
 	}
 }
 
@@ -210,7 +210,7 @@ func TestPlaySequence_NonGoAgainStopsChain(t *testing.T) {
 	order := []Card{testutils.NoGoAgainAttackStub{}, testutils.NoGoAgainAttackStub{}}
 	ctx := NewSequenceContextForTest(testutils.Hero{Intel: 4}, nil, nil, 1_000_000, 0, len(order))
 	if _, _, _, legal := ctx.PlaySequence(order); legal {
-		t.Fatalf("ordering %v should be illegal (no Go again grant after card 0)", testutils.CardNames(order))
+		t.Fatalf("ordering %v should be illegal (no Go again grant after card 0)", testutils.CardNamesSim(order))
 	}
 }
 
@@ -221,7 +221,7 @@ func TestPlaySequence_InstantBypassesAPRequirement(t *testing.T) {
 	ctx := NewSequenceContextForTest(testutils.Hero{Intel: 4}, nil, nil, 1_000_000, 0, len(order))
 	dmg, _, _, legal := ctx.PlaySequence(order)
 	if !legal {
-		t.Fatalf("ordering %v should be legal (Instant costs 0 AP)", testutils.CardNames(order))
+		t.Fatalf("ordering %v should be legal (Instant costs 0 AP)", testutils.CardNamesSim(order))
 	}
 	if dmg != 1 {
 		t.Errorf("dmg = %d, want 1 (NoGoAgainAttack 1 + Instant 0)", dmg)
@@ -236,7 +236,7 @@ func TestPlaySequence_InstantsDontConsumeAP(t *testing.T) {
 	ctx := NewSequenceContextForTest(testutils.Hero{Intel: 4}, nil, nil, 1_000_000, 0, len(order))
 	dmg, _, _, legal := ctx.PlaySequence(order)
 	if !legal {
-		t.Fatalf("ordering %v should be legal (Instants cost 0 AP)", testutils.CardNames(order))
+		t.Fatalf("ordering %v should be legal (Instants cost 0 AP)", testutils.CardNamesSim(order))
 	}
 	if dmg != 1 {
 		t.Errorf("dmg = %d, want 1 (two Instants at 0 + NoGoAgainAttack 1)", dmg)

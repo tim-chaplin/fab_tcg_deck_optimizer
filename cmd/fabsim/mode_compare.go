@@ -8,6 +8,7 @@ import (
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/deckformat"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/deck"
 )
 
 // runCompareCmd parses compare's flags and dispatches to runCompare. Both decks are positional
@@ -85,7 +86,7 @@ func runCompare(name1, name2 string, shuffles int, mp sim.Matchup, maxCopies int
 // are sim-relevant loadout choices a comparison reader needs to see. Hero, Equipment, and
 // Sideboard are out of scope. When the two loadouts match exactly an explicit confirmation
 // line replaces the empty body so silence can't be mistaken for a failure.
-func printCardDelta(name1, name2 string, d1, d2 *sim.Deck) {
+func printCardDelta(name1, name2 string, d1, d2 *deck.Deck) {
 	counts1 := loadoutCounts(d1)
 	counts2 := loadoutCounts(d2)
 	weaponNames := loadoutWeaponNames(d1, d2)
@@ -149,7 +150,7 @@ func printCardDelta(name1, name2 string, d1, d2 *sim.Deck) {
 // name-keyed map cleanly captures both lists for diffing. Card.DisplayName keeps pitch
 // printings as distinct entries so a "-1 Aether Slash [R], +1 Aether Slash [Y]" diff is
 // legible.
-func loadoutCounts(d *sim.Deck) map[string]int {
+func loadoutCounts(d *deck.Deck) map[string]int {
 	out := make(map[string]int, len(d.Cards)+len(d.Weapons))
 	for _, c := range d.Cards {
 		out[c.DisplayName()]++
@@ -162,7 +163,7 @@ func loadoutCounts(d *sim.Deck) map[string]int {
 
 // loadoutWeaponNames returns the set of weapon display names appearing in either deck,
 // used to flag which diff entries should sort first within their +/- block.
-func loadoutWeaponNames(decks ...*sim.Deck) map[string]struct{} {
+func loadoutWeaponNames(decks ...*deck.Deck) map[string]struct{} {
 	out := map[string]struct{}{}
 	for _, d := range decks {
 		for _, w := range d.Weapons {

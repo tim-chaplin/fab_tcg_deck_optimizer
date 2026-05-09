@@ -68,12 +68,12 @@ func BeatsBest(v, futureValuePlayed int, willOccupyArsenal bool, best TurnSummar
 }
 
 // PairSwapMutations re-exports pairSwapMutations for sim_test consumers.
-func PairSwapMutations(d *Deck, legal func(Card) bool) []Mutation {
+func PairSwapMutations(d *deck.Deck, legal func(deck.Card) bool) []Mutation {
 	return pairSwapMutations(d, legal)
 }
 
 // CardMultisetKey re-exports cardMultisetKey for sim_test consumers. Takes []deck.Card so
-// callers pass *Deck.Cards directly; cardMultisetKey only reads .ID() so the narrow
+// callers pass *deck.Deck.Cards directly; cardMultisetKey only reads .ID() so the narrow
 // interface suffices.
 func CardMultisetKey(cs []deck.Card) string { return cardMultisetKey(cs) }
 
@@ -133,12 +133,6 @@ func (b *attackBufs) State() *TurnState              { return b.state }
 func (b *attackBufs) DefenseGravScratch() []Card     { return b.defenseGravScratch }
 func (b *attackBufs) DRCardStateScratch() *CardState { return &b.drCardStateScratch }
 
-// LegalPool re-exports legalPool for sim_test consumers.
-func LegalPool(legal func(Card) bool) []ids.CardID { return legalPool(legal) }
-
-// LegalWeapons re-exports the registry's legal-weapon roster for sim_test consumers.
-func LegalWeapons() []deck.Weapon { return RegistryLegalWeapons() }
-
 // WeaponLoadouts re-exports weaponLoadouts for sim_test consumers.
 func WeaponLoadouts(ws []deck.Weapon) [][]deck.Weapon { return weaponLoadouts(ws) }
 
@@ -150,14 +144,14 @@ func SortedIDPair(a, b ids.CardID) (ids.CardID, ids.CardID) { return sortedIDPai
 
 // DeckFingerprint re-exports deckFingerprint, the deck-equality helper used by sim_test
 // files. The underlying helper is in package sim because it reads the unexported weaponKey.
-func DeckFingerprint(d *Deck) string { return deckFingerprint(d) }
+func DeckFingerprint(d *deck.Deck) string { return deckFingerprint(d) }
 
 // PairAddAllowed re-exports pairAddAllowed for sim_test consumers.
-func PairAddAllowed(c Card, legal func(Card) bool) bool { return pairAddAllowed(c, legal) }
+func PairAddAllowed(c Card, legal func(deck.Card) bool) bool { return pairAddAllowed(c, legal) }
 
 // EvaluateImplForTest re-exports the unexported (*Evaluator).evaluateImpl as an exported
 // method for sim_test consumers exercising the eval-with-stop-condition path directly.
-func (ev *Evaluator) EvaluateImplForTest(d *Deck, maxRuns int, mp Matchup, rng *rand.Rand, stop func(stats *DeckStats, runs int) bool) DeckStats {
+func (ev *Evaluator) EvaluateImplForTest(d *deck.Deck, maxRuns int, mp Matchup, rng *rand.Rand, stop func(stats *DeckStats, runs int) bool) DeckStats {
 	return ev.evaluateImpl(d, maxRuns, mp, rng, stop)
 }
 

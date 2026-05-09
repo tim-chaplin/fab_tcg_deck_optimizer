@@ -7,12 +7,13 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/heroes"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/deck"
 )
 
 // Tests that Wage Gold's Universal keyword triggers Viserai's Runeblade hero ability.
 func TestWageGold_UniversalTriggersViseraiOnPlay(t *testing.T) {
-	d := sim.New(heroes.Viserai{}, nil, fillerDeck())
-	hand := []sim.Card{
+	d := deck.New(heroes.Viserai{}, nil, fillerDeck())
+	hand := []deck.Card{
 		cards.HighStrikerBlue{},
 		cards.WageGoldRed{},
 		testutils.BluePitch{},

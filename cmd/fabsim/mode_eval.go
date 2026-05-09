@@ -84,7 +84,7 @@ func runEval(outPath string, shuffles int, precision float64, mp sim.Matchup, ma
 // per-Evaluator cache stats are always available. debug=true prints them after the run;
 // otherwise they're computed-but-discarded — the cache itself runs unconditionally because
 // it speeds up the eval regardless of whether the operator wants the telemetry.
-func evaluateAndPersist(outPath string, shuffles int, precision float64, mp sim.Matchup, maxCopies int, seed int64, fmtValue deckformat.Format, debug bool) (*sim.Deck, sim.DeckStats) {
+func evaluateAndPersist(outPath string, shuffles int, precision float64, mp sim.Matchup, maxCopies int, seed int64, fmtValue deckformat.Format, debug bool) (*deck.Deck, sim.DeckStats) {
 	loaded, loadedStats := mustLoadDeck(outPath)
 	// Wrap the loaded hero/weapons/cards in a fresh Deck so the eval's stats start from zero
 	// instead of accumulating on top of the persisted ones. Sideboard and Equipment carry
@@ -145,7 +145,7 @@ func safePct(num, denom int) float64 {
 
 // printLoadedDeck dispatches between the brief summary and the full printBestDeck dump;
 // used by both the simulate path and -print-only.
-func printLoadedDeck(d *sim.Deck, s sim.DeckStats, brief bool) {
+func printLoadedDeck(d *deck.Deck, s sim.DeckStats, brief bool) {
 	if brief {
 		printDeckSummary(d, s)
 		return

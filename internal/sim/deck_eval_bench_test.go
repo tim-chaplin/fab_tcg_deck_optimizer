@@ -1,7 +1,9 @@
 package sim_test
 
 import (
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry"
 	. "github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/deck"
 	"math/rand"
 	"testing"
 
@@ -19,7 +21,7 @@ func BenchmarkEvaluate(b *testing.B) {
 		incoming  = 0
 	)
 	setupRNG := rand.New(rand.NewSource(42))
-	d := Random(heroes.Viserai{}, deckSize, maxCopies, setupRNG, nil)
+	d := deck.Random(heroes.Viserai{}, deckSize, maxCopies, setupRNG, nil, registry.Registry{})
 	ev := NewEvaluator()
 	evalRNG := rand.New(rand.NewSource(42))
 

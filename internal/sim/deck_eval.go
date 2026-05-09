@@ -24,7 +24,7 @@ import (
 //
 // Returns a fresh DeckStats — callers that want to accumulate across multiple Evaluate
 // calls maintain their own DeckStats and merge returned values in.
-func (ev *Evaluator) Evaluate(d *Deck, runs int, mp Matchup, rng *rand.Rand) DeckStats {
+func (ev *Evaluator) Evaluate(d *deck.Deck, runs int, mp Matchup, rng *rand.Rand) DeckStats {
 	return ev.evaluateImpl(d, runs, mp, rng, nil)
 }
 
@@ -35,7 +35,7 @@ func (ev *Evaluator) Evaluate(d *Deck, runs int, mp Matchup, rng *rand.Rand) Dec
 // counts (compare, explicit -shuffles) should use Evaluate with a fixed runs count.
 // Order-of-magnitude scale on a Viserai deck: precision=0.1 ≈ 1k shuffles, precision=0.01
 // ≈ 80k shuffles.
-func (ev *Evaluator) EvaluateAdaptive(d *Deck, precision float64, mp Matchup, rng *rand.Rand) DeckStats {
+func (ev *Evaluator) EvaluateAdaptive(d *deck.Deck, precision float64, mp Matchup, rng *rand.Rand) DeckStats {
 	return ev.evaluateImpl(d, adaptiveShufflesCap, mp, rng, makeAdaptiveStop(precision/4))
 }
 
@@ -90,7 +90,7 @@ func meanStandardError(stats *DeckStats) float64 {
 	return math.Sqrt(variance / n)
 }
 
-func (ev *Evaluator) evaluateImpl(d *Deck, maxRuns int, mp Matchup, rng *rand.Rand, stop shuffleStopper) DeckStats {
+func (ev *Evaluator) evaluateImpl(d *deck.Deck, maxRuns int, mp Matchup, rng *rand.Rand, stop shuffleStopper) DeckStats {
 	CurrentHero = d.Hero.(Hero)
 	handSize := d.Hero.(Hero).Intelligence()
 	deckSize := len(d.Cards)
@@ -105,7 +105,7 @@ func (ev *Evaluator) evaluateImpl(d *Deck, maxRuns int, mp Matchup, rng *rand.Ra
 
 // evaluateSequentialImpl runs the shuffle loop in the calling goroutine, using ev's
 // cachedBufs scratch directly. This is the deterministic-RNG path tests rely on.
-func (ev *Evaluator) evaluateSequentialImpl(d *Deck, maxRuns int, mp Matchup, rng *rand.Rand, stop shuffleStopper, handSize, deckSize int) DeckStats {
+func (ev *Evaluator) evaluateSequentialImpl(d *deck.Deck, maxRuns int, mp Matchup, rng *rand.Rand, stop shuffleStopper, handSize, deckSize int) DeckStats {
 	handsPerCycle := deckSize / handSize
 	uniqueIDs, idIndex := uniqueDeckIDs(d.Cards)
 	scratch := newShuffleScratch(len(d.Weapons), deckSize, handSize, len(uniqueIDs))
@@ -131,7 +131,7 @@ func (ev *Evaluator) evaluateSequentialImpl(d *Deck, maxRuns int, mp Matchup, rn
 // goroutine merges every worker's local DeckStats into the running aggregate and runs the
 // adaptive stop check. Per-worker RNG seeds are derived from rng.Int63() so the chunk
 // distribution is deterministic given the input rng.
-func (ev *Evaluator) evaluateParallelImpl(d *Deck, maxRuns int, mp Matchup, rng *rand.Rand, stop shuffleStopper, handSize, deckSize int) DeckStats {
+func (ev *Evaluator) evaluateParallelImpl(d *deck.Deck, maxRuns int, mp Matchup, rng *rand.Rand, stop shuffleStopper, handSize, deckSize int) DeckStats {
 	numWorkers := ev.numWorkers
 	handsPerCycle := deckSize / handSize
 	uniqueIDs, idIndex := uniqueDeckIDs(d.Cards)
@@ -248,7 +248,7 @@ func newShuffleScratch(weaponCount, deckSize, handSize, numUniqueIDs int) *shuff
 // record stats). Accumulates results into the caller-owned *DeckStats. Both the sequential
 // and parallel paths pass a local DeckStats here; the parallel path merges per-worker
 // totals at chunk boundaries via mergeStatsInto.
-func runOneShuffle(d *Deck, scratch *shuffleScratch, stats *DeckStats, idIndex map[ids.CardID]int, ev *Evaluator, rng *rand.Rand, mp Matchup, handsPerCycle, deckSize, handSize int) {
+func runOneShuffle(d *deck.Deck, scratch *shuffleScratch, stats *DeckStats, idIndex map[ids.CardID]int, ev *Evaluator, rng *rand.Rand, mp Matchup, handsPerCycle, deckSize, handSize int) {
 	hero := d.Hero.(Hero)
 	weapons := scratch.weaponsBuf
 	for i, w := range d.Weapons {

@@ -6,12 +6,13 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/cards"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/heroes"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/deck"
 )
 
 // Tests that a plain-block card lands in the graveyard after defending.
 func TestPlainBlock_LandsInGraveyard(t *testing.T) {
-	d := sim.New(heroes.Viserai{}, nil, fillerDeck())
-	hand := []sim.Card{cards.OnTheHorizonRed{}}
+	d := deck.New(heroes.Viserai{}, nil, fillerDeck())
+	hand := []deck.Card{cards.OnTheHorizonRed{}}
 	state := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 4}, sim.TurnState{}, hand)
 	if state.Value != 4 {
 		t.Fatalf("Value = %d, want 4 (On the Horizon Red blocks 4)", state.Value)

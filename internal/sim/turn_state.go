@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/deck"
 )
 
 // Per-turn shared context threaded through Card.Play. Cards mutate state directly — moving
@@ -309,9 +310,9 @@ type TurnStateSpec struct {
 	Items []Item
 	// Banished is the cards-already-in-banished-zone snapshot. Cards stay banished forever
 	// by default, so this slice grows monotonically across the game.
-	Banished []Card
+	Banished []deck.Card
 	// Graveyard is the cards-already-in-graveyard snapshot from the previous turn.
-	Graveyard []Card
+	Graveyard []deck.Card
 	// OpponentMarked carries the Mark state on the opposing hero into this turn.
 	OpponentMarked bool
 }
@@ -321,12 +322,20 @@ type TurnStateSpec struct {
 // to construct a prior-turn state for EvalOneTurnForTesting; production code in package
 // sim that already has the cross-turn buffers in hand can construct TurnState directly.
 func NewTurnStateFromSpec(spec TurnStateSpec) TurnState {
+	banished := make([]Card, len(spec.Banished))
+	for i, c := range spec.Banished {
+		banished[i] = c.(Card)
+	}
+	graveyard := make([]Card, len(spec.Graveyard))
+	for i, c := range spec.Graveyard {
+		graveyard[i] = c.(Card)
+	}
 	return TurnState{
 		Arsenal:        spec.Arsenal,
 		Auras:          spec.Auras,
 		Items:          spec.Items,
-		banished:       spec.Banished,
-		graveyard:      spec.Graveyard,
+		banished:       banished,
+		graveyard:      graveyard,
 		OpponentMarked: spec.OpponentMarked,
 		cacheable:      true,
 		currentAuraIdx: -1,

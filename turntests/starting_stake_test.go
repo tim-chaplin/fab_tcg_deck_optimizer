@@ -7,14 +7,15 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/heroes"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/deck"
 )
 
 // Tests that Starting Stake creates a Gold token via the deck-eval path when no Gold
 // is in play and the hand has nothing more profitable to do — solo Starting Stake in
 // hand picks the create line over the Held alternative.
 func TestStartingStake_CreatesGoldViaChain(t *testing.T) {
-	d := sim.New(heroes.Viserai{}, nil, fillerDeck())
-	hand := []sim.Card{cards.StartingStakeYellow{}}
+	d := deck.New(heroes.Viserai{}, nil, fillerDeck())
+	hand := []deck.Card{cards.StartingStakeYellow{}}
 	state := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 0}, sim.TurnState{}, hand)
 	if state.Gold() != 1 {
 		t.Fatalf("Gold = %d, want 1 (Starting Stake creates one)\nBestLine: %s",

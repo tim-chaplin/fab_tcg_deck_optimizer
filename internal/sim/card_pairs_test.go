@@ -16,7 +16,7 @@ import (
 func TestCardPairMutations_EnumeratesAllVariantCrossProducts(t *testing.T) {
 	a := GetCard(ids.ArcanicCrackleRed)
 	b := GetCard(ids.ArcanicSpikeRed)
-	d := New(heroes.Viserai{}, []Weapon{weapons.NebulaBlade{}}, []Card{a, a, b, b})
+	d := deck.New(heroes.Viserai{}, []deck.Weapon{weapons.NebulaBlade{}}, []deck.Card{a, a, b, b})
 
 	muts := PairSwapMutations(d, nil)
 	const dedupedRemovalCombos = 3 // (a,a), (a,b), (b,b)
@@ -79,7 +79,7 @@ func countImplementedInGroup(g CardGroup) int {
 // and adds the new pair (index-based iteration, not unique-ID).
 func TestCardPairMutations_RemovesBothCopiesOfDuplicate(t *testing.T) {
 	hp := GetCard(ids.HocusPocusBlue)
-	d := New(heroes.Viserai{}, []Weapon{weapons.NebulaBlade{}}, []Card{hp, hp})
+	d := deck.New(heroes.Viserai{}, []deck.Weapon{weapons.NebulaBlade{}}, []deck.Card{hp, hp})
 
 	muts := PairSwapMutations(d, nil)
 	// Exactly one removed-ID combo (HocusPocusBlue, HocusPocusBlue) × 9 variant combos.
@@ -112,7 +112,7 @@ func TestCardPairMutations_RemovesBothCopiesOfDuplicate(t *testing.T) {
 func TestCardPairMutations_FiresWhenOneHalfAlreadyPresent(t *testing.T) {
 	a := GetCard(ids.ArcanicCrackleRed)
 	sk := GetCard(ids.SunKissRed)
-	d := New(heroes.Viserai{}, []Weapon{weapons.NebulaBlade{}}, []Card{a, a, a, sk})
+	d := deck.New(heroes.Viserai{}, []deck.Weapon{weapons.NebulaBlade{}}, []deck.Card{a, a, a, sk})
 
 	muts := PairSwapMutations(d, nil)
 	if len(muts) == 0 {
@@ -137,8 +137,8 @@ func TestCardPairMutations_FiresWhenOneHalfAlreadyPresent(t *testing.T) {
 func TestCardPairMutations_GeneratesCapViolatingCandidates(t *testing.T) {
 	skR := GetCard(ids.SunKissRed)
 	a := GetCard(ids.ArcanicCrackleRed)
-	d := New(heroes.Viserai{}, []Weapon{weapons.NebulaBlade{}},
-		[]Card{skR, skR, a, a})
+	d := deck.New(heroes.Viserai{}, []deck.Weapon{weapons.NebulaBlade{}},
+		[]deck.Card{skR, skR, a, a})
 
 	// 3 unique removed-ID combos after dedupe: (skR, skR), (skR, a), (a, a). Overlap
 	// suppression skips a combo when one of its removed IDs equals one of the add IDs;
@@ -185,12 +185,12 @@ func TestCardPairMutations_HandlesUnbalancedHalfCounts(t *testing.T) {
 	skB := GetCard(ids.SunKissBlue)
 	a := GetCard(ids.ArcanicCrackleRed)
 	b := GetCard(ids.ArcanicSpikeRed)
-	cardsList := []Card{
+	cardsList := []deck.Card{
 		mwR, mwR, mwY, mwY, mwB,
 		skR, skY, skB,
 		a, a, a, b, b, b,
 	}
-	d := New(heroes.Viserai{}, []Weapon{weapons.NebulaBlade{}}, cardsList)
+	d := deck.New(heroes.Viserai{}, []deck.Weapon{weapons.NebulaBlade{}}, cardsList)
 
 	muts := PairSwapMutations(d, nil)
 	if len(muts) == 0 {
@@ -210,7 +210,7 @@ func TestCardPairMutations_HandlesUnbalancedHalfCounts(t *testing.T) {
 func TestCardPairMutations_ResultDifferentFromSource(t *testing.T) {
 	a := GetCard(ids.ArcanicCrackleRed)
 	b := GetCard(ids.ArcanicSpikeRed)
-	d := New(heroes.Viserai{}, []Weapon{weapons.NebulaBlade{}}, []Card{a, a, b, b})
+	d := deck.New(heroes.Viserai{}, []deck.Weapon{weapons.NebulaBlade{}}, []deck.Card{a, a, b, b})
 	srcKey := CardMultisetKey(d.Cards)
 	for i, m := range PairSwapMutations(d, nil) {
 		if CardMultisetKey(m.Deck.Cards) == srcKey {
@@ -224,7 +224,7 @@ func TestCardPairMutations_ResultDifferentFromSource(t *testing.T) {
 func TestCardPairMutations_OverlapSuppressionSkipsRedundantSwaps(t *testing.T) {
 	skR := GetCard(ids.SunKissRed)
 	a := GetCard(ids.ArcanicCrackleRed)
-	d := New(heroes.Viserai{}, []Weapon{weapons.NebulaBlade{}}, []Card{skR, a, a, a})
+	d := deck.New(heroes.Viserai{}, []deck.Weapon{weapons.NebulaBlade{}}, []deck.Card{skR, a, a, a})
 	for i, m := range PairSwapMutations(d, nil) {
 		if strings.Contains(m.Description, "-1 Sun Kiss [R]") &&
 			strings.Contains(m.Description, "+1 Sun Kiss [R]") {
@@ -239,7 +239,7 @@ func TestCardPairMutations_OverlapSuppressionSkipsRedundantSwaps(t *testing.T) {
 func TestCardPairMutations_SkipsNotImplementedHalves(t *testing.T) {
 	a := GetCard(ids.ArcanicCrackleRed)
 	b := GetCard(ids.ArcanicSpikeRed)
-	d := New(heroes.Viserai{}, []Weapon{weapons.NebulaBlade{}}, []Card{a, a, b, b})
+	d := deck.New(heroes.Viserai{}, []deck.Weapon{weapons.NebulaBlade{}}, []deck.Card{a, a, b, b})
 
 	for i, m := range PairSwapMutations(d, nil) {
 		for _, c := range m.Deck.Cards {
@@ -256,9 +256,9 @@ func TestCardPairMutations_SkipsNotImplementedHalves(t *testing.T) {
 func TestCardPairMutations_RespectsLegalFilter(t *testing.T) {
 	a := GetCard(ids.ArcanicCrackleRed)
 	b := GetCard(ids.ArcanicSpikeRed)
-	d := New(heroes.Viserai{}, []Weapon{weapons.NebulaBlade{}}, []Card{a, a, b, b})
+	d := deck.New(heroes.Viserai{}, []deck.Weapon{weapons.NebulaBlade{}}, []deck.Card{a, a, b, b})
 
-	legal := func(c Card) bool { return c.ID() != ids.SunKissYellow }
+	legal := func(c deck.Card) bool { return c.ID() != ids.SunKissYellow }
 	muts := PairSwapMutations(d, legal)
 	for i, m := range muts {
 		if strings.Contains(m.Description, "Sun Kiss [Y]") {
@@ -277,7 +277,7 @@ func TestCardPairMutations_RespectsLegalFilter(t *testing.T) {
 func TestCardPairMutations_DeterministicOrdering(t *testing.T) {
 	a := GetCard(ids.ArcanicCrackleRed)
 	b := GetCard(ids.ArcanicSpikeRed)
-	d := New(heroes.Viserai{}, []Weapon{weapons.NebulaBlade{}}, []Card{a, a, b, b})
+	d := deck.New(heroes.Viserai{}, []deck.Weapon{weapons.NebulaBlade{}}, []deck.Card{a, a, b, b})
 
 	first := PairSwapMutations(d, nil)
 	second := PairSwapMutations(d, nil)
@@ -298,9 +298,9 @@ func TestFilterMaxCopiesViolations_StripsCapViolators(t *testing.T) {
 	a := GetCard(ids.ArcanicCrackleRed)
 	b := GetCard(ids.ArcanicSpikeRed)
 	mw := GetCard(ids.MoonWishRed)
-	clean := New(heroes.Viserai{}, []Weapon{weapons.NebulaBlade{}}, []Card{a, b, mw, mw})
-	violator := New(heroes.Viserai{}, []Weapon{weapons.NebulaBlade{}},
-		[]Card{mw, mw, mw, mw, mw})
+	clean := deck.New(heroes.Viserai{}, []deck.Weapon{weapons.NebulaBlade{}}, []deck.Card{a, b, mw, mw})
+	violator := deck.New(heroes.Viserai{}, []deck.Weapon{weapons.NebulaBlade{}},
+		[]deck.Card{mw, mw, mw, mw, mw})
 
 	muts := []Mutation{
 		{Deck: clean, Description: "clean"},

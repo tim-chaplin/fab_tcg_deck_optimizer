@@ -14,6 +14,7 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/fabrary"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/mydecks"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/deck"
 )
 
 // runImport interactively pastes a fabrary.net plain-text deck from stdin, asks for a deck
@@ -86,7 +87,7 @@ func readUntilFabraryFooter(r *bufio.Reader) ([]byte, error) {
 // summarizeImportedDeck prints a short stderr confirmation (hero, weapons, card count,
 // optional sideboard count) so the user can sanity-check the paste without opening the file.
 // The sideboard count only appears when non-empty so typical imports stay one-line.
-func summarizeImportedDeck(d *sim.Deck) {
+func summarizeImportedDeck(d *deck.Deck) {
 	weapons := make([]string, len(d.Weapons))
 	for i, w := range d.Weapons {
 		weapons[i] = w.Name()

@@ -20,9 +20,9 @@ import ()
 // TurnState fields are ignored. TurnSummary.State.Arsenal / .Auras / .Items feed back as
 // next turn's prior.
 //
-// Package-private so external packages can't bypass (*Deck).EvalOneTurnForTesting — the
-// turntests convention is to drive the chain runner through that deck-level entry point
-// so every test exercises the same per-turn pipeline production runs through Evaluate.
+// Package-private so external packages can't bypass EvalOneTurnForTesting — the turntests
+// convention is to drive the chain runner through that deck-level entry point so every test
+// exercises the same per-turn pipeline production runs through Evaluate.
 func best(hero Hero, weapons []Weapon, hand []Card, mp Matchup, deck []Card, prior TurnState) TurnSummary {
 	return sharedEvaluator.Best(hero, weapons, hand, mp, deck, prior)
 }

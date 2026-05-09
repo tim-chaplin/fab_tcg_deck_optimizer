@@ -476,7 +476,7 @@ var cardsByID = []sim.Card{
 
 // init eagerly populates package sim's chain-step text and DisplayName caches so the
 // per-Play hot path is pure cache reads, and wires the sim → registry forward-declared
-// hooks (sim.GetCard / sim.DeckableCards / sim.AllWeapons) so sim's deck builder can
+// hooks (sim.GetCard / sim.DeckableCards / sim.AllWeapons) so sim's chain runner can
 // reach the registry without importing it (would cycle through cards → sim → registry).
 // Done at registration time because the registry is the only place that knows the full
 // card set, and the caches are sized for the full ID space.
@@ -485,19 +485,6 @@ func init() {
 	sim.GetCard = GetCard
 	sim.DeckableCards = func() []ids.CardID { return DeckableCards() }
 	sim.AllWeapons = AllWeapons
-	// Forward sim's narrow registry hooks to the Registry struct so sim's mutation
-	// generator can read the legal pools without importing the registry directly
-	// (would cycle: registry imports sim already).
-	r := Registry{}
-	sim.RegistryLegalCards = func() []sim.Card {
-		raw := r.LegalCards()
-		out := make([]sim.Card, len(raw))
-		for i, c := range raw {
-			out[i] = c.(sim.Card)
-		}
-		return out
-	}
-	sim.RegistryLegalWeapons = r.LegalWeapons
 }
 
 // cardsByName maps c.DisplayName() → CardID for reverse lookup. Built once at init. Keyed

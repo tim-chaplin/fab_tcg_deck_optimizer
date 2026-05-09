@@ -7,12 +7,13 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/heroes"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/deck"
 )
 
 // Tests that Wage Gold's on-hit rider creates a Gold token when the attack hits.
 func TestWageGold_OnHitCreatesGoldToken(t *testing.T) {
-	d := sim.New(heroes.Viserai{}, nil, fillerDeck())
-	hand := []sim.Card{
+	d := deck.New(heroes.Viserai{}, nil, fillerDeck())
+	hand := []deck.Card{
 		cards.WageGoldRed{},
 		testutils.BluePitch{},
 		testutils.BluePitch{},
@@ -30,8 +31,8 @@ func TestWageGold_OnHitCreatesGoldToken(t *testing.T) {
 
 // Tests that Wage Gold's on-hit rider skips Gold when the attack misses LikelyToHit.
 func TestWageGold_BlockableMissDoesNotCreateGold(t *testing.T) {
-	d := sim.New(heroes.Viserai{}, nil, fillerDeck())
-	hand := []sim.Card{
+	d := deck.New(heroes.Viserai{}, nil, fillerDeck())
+	hand := []deck.Card{
 		cards.WageGoldBlue{},
 		testutils.BluePitch{},
 		testutils.BluePitch{},

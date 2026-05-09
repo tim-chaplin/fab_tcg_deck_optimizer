@@ -7,14 +7,15 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/heroes"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/deck"
 )
 
 // Tests that Brothers in Arms picks mode 1 (pay 1{r} for +2{d}) when the partition's
 // defense pitch supply has the spare resource — Toughen Up's printed 2{r} cost plus BIA's
 // extra {r} fits the 3{r} from the Blue Pitch.
 func TestModalBlock_BrothersInArmsPicksMode1WhenAffordable(t *testing.T) {
-	d := sim.New(heroes.Viserai{}, nil, fillerDeck())
-	hand := []sim.Card{
+	d := deck.New(heroes.Viserai{}, nil, fillerDeck())
+	hand := []deck.Card{
 		cards.BrothersInArmsRed{},
 		cards.ToughenUpBlue{},
 		testutils.BluePitch{},
@@ -29,8 +30,8 @@ func TestModalBlock_BrothersInArmsPicksMode1WhenAffordable(t *testing.T) {
 // Tests that Brothers in Arms falls back to mode 0 when no spare {r} is available — the
 // hand has no pitch source besides BIA itself, and pitching BIA would forfeit the block.
 func TestModalBlock_BrothersInArmsFallsBackToMode0(t *testing.T) {
-	d := sim.New(heroes.Viserai{}, nil, fillerDeck())
-	hand := []sim.Card{cards.BrothersInArmsRed{}}
+	d := deck.New(heroes.Viserai{}, nil, fillerDeck())
+	hand := []deck.Card{cards.BrothersInArmsRed{}}
 	got := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 10}, sim.TurnState{}, hand).Value
 	if got != 2 {
 		t.Fatalf("Value = %d, want 2 (BIA mode 0: printed 2{d}, no spare {r} for mode 1)", got)

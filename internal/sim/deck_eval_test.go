@@ -2,6 +2,7 @@ package sim_test
 
 import (
 	. "github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/deck"
 	"math/rand"
 	"testing"
 	"time"
@@ -17,7 +18,7 @@ import (
 func TestEvaluate_BestTurnStartingAurasIsPreHandCarryover(t *testing.T) {
 	// 4-card deck + Viserai Intel=4 gives exactly one hand per run.
 	read := GetCard(ids.ReadTheRunesRed)
-	d := New(heroes.Viserai{}, nil, []Card{read, read, read, read})
+	d := deck.New(heroes.Viserai{}, nil, []deck.Card{read, read, read, read})
 
 	stats := NewEvaluator().Evaluate(d, 1, Matchup{}, rand.New(rand.NewSource(1)))
 
@@ -39,7 +40,7 @@ func TestEvaluate_BestTurnStartingAurasIsPreHandCarryover(t *testing.T) {
 // Arsenal, Log, etc.) — including mid-chain draws.
 func TestEvaluate_BestTurnSnapshotsState(t *testing.T) {
 	snatch := GetCard(ids.SnatchRed)
-	d := New(heroes.Viserai{}, nil, []Card{snatch, snatch, snatch, snatch, snatch, snatch, snatch, snatch})
+	d := deck.New(heroes.Viserai{}, nil, []deck.Card{snatch, snatch, snatch, snatch, snatch, snatch, snatch, snatch})
 	stats := NewEvaluator().Evaluate(d, 1, Matchup{}, rand.New(rand.NewSource(1)))
 
 	if len(stats.Best.Summary.BestLine) == 0 {
@@ -72,8 +73,8 @@ func TestEvaluate_PerCardMarginalCoversEveryHand(t *testing.T) {
 	read := GetCard(ids.ReadTheRunesRed)
 	snatch := GetCard(ids.SnatchRed)
 	// 4 of each so Snatch isn't pinned to a single hand and the absent bucket gets exercised.
-	deckCards := []Card{read, read, read, read, snatch, snatch, snatch, snatch}
-	d := New(heroes.Viserai{}, nil, deckCards)
+	deckCards := []deck.Card{read, read, read, read, snatch, snatch, snatch, snatch}
+	d := deck.New(heroes.Viserai{}, nil, deckCards)
 	stats := NewEvaluator().Evaluate(d, 20, Matchup{}, rand.New(rand.NewSource(1)))
 
 	if stats.PerCardMarginal == nil {
@@ -99,7 +100,7 @@ func TestEvaluate_PerCardMarginalCoversEveryHand(t *testing.T) {
 // Tests the singleton-deck case: AbsentHands == 0, Marginal() == 0 (no comparison possible).
 func TestEvaluate_PerCardMarginalAlwaysPresent(t *testing.T) {
 	read := GetCard(ids.ReadTheRunesRed)
-	d := New(heroes.Viserai{}, nil, []Card{read, read, read, read, read, read, read, read})
+	d := deck.New(heroes.Viserai{}, nil, []deck.Card{read, read, read, read, read, read, read, read})
 	stats := NewEvaluator().Evaluate(d, 5, Matchup{}, rand.New(rand.NewSource(1)))
 
 	m := stats.PerCardMarginal[ids.ReadTheRunesRed]
@@ -119,11 +120,11 @@ func TestEvaluate_PerCardMarginalAlwaysPresent(t *testing.T) {
 // the loop when no further plays are possible.
 func TestEvaluate_HeldCardDefersDrawToNextTurn(t *testing.T) {
 	// 40 copies so a missing held-carryover regression would loop or run far longer than 2 hands.
-	deckCards := make([]Card, 40)
+	deckCards := make([]deck.Card, 40)
 	for i := range deckCards {
 		deckCards[i] = cards.ToughenUpBlue{}
 	}
-	d := New(testutils.Hero{Intel: 1}, nil, deckCards)
+	d := deck.New(testutils.Hero{Intel: 1}, nil, deckCards)
 	stats := NewEvaluator().Evaluate(d, 1, Matchup{}, rand.New(rand.NewSource(1)))
 
 	if stats.Hands != 2 {
@@ -141,7 +142,7 @@ func TestEvaluate_HeldCardDefersDrawToNextTurn(t *testing.T) {
 
 // Tests that a card promoted to Arsenal on one turn becomes arsenalCardIn on the next.
 func TestEvaluate_ArsenalPersistsAcrossTurns(t *testing.T) {
-	d := New(testutils.Hero{Intel: 1}, nil, []Card{cards.ToughenUpBlue{}, cards.ToughenUpBlue{}})
+	d := deck.New(testutils.Hero{Intel: 1}, nil, []deck.Card{cards.ToughenUpBlue{}, cards.ToughenUpBlue{}})
 	stats := NewEvaluator().Evaluate(d, 1, Matchup{IncomingDamage: 4}, rand.New(rand.NewSource(1)))
 
 	// Best captures turn 2 — only turn with Value > 0 (arsenal DR fires).
@@ -158,11 +159,11 @@ func TestEvaluate_ArsenalPersistsAcrossTurns(t *testing.T) {
 // Tests Evaluate's infinite-loop guard: a steady-state pitched-pitch cycle halts at
 // 2 × handsPerCycle.
 func TestEvaluate_TerminatesAfterTwoCycles(t *testing.T) {
-	deckCards := make([]Card, 40)
+	deckCards := make([]deck.Card, 40)
 	for i := range deckCards {
 		deckCards[i] = cards.ToughenUpBlue{}
 	}
-	d := New(heroes.Viserai{}, []Weapon{weapons.ReapingBlade{}}, deckCards)
+	d := deck.New(heroes.Viserai{}, []deck.Weapon{weapons.ReapingBlade{}}, deckCards)
 	done := make(chan struct{})
 	var stats DeckStats
 	go func() {
@@ -186,14 +187,14 @@ func TestEvaluate_TerminatesAfterTwoCycles(t *testing.T) {
 // Tests that EvaluateAdaptive stops on a multiple of AdaptiveCheckInterval, below the cap,
 // when the SE target is met.
 func TestEvaluateAdaptive_StopsBeforeMaxRunsWhenSEMet(t *testing.T) {
-	deckCards := append([]Card{},
+	deckCards := append([]deck.Card{},
 		GetCard(ids.ReadTheRunesRed), GetCard(ids.ReadTheRunesRed),
 		GetCard(ids.ReadTheRunesYellow), GetCard(ids.ReadTheRunesYellow),
 	)
 	for len(deckCards) < 40 {
 		deckCards = append(deckCards, GetCard(ids.ReadTheRunesBlue))
 	}
-	d := New(heroes.Viserai{}, []Weapon{weapons.ReapingBlade{}}, deckCards)
+	d := deck.New(heroes.Viserai{}, []deck.Weapon{weapons.ReapingBlade{}}, deckCards)
 	stats := NewEvaluator().EvaluateAdaptive(d, 0.1, Matchup{}, rand.New(rand.NewSource(42)))
 	if stats.Runs >= AdaptiveShufflesCap {
 		t.Errorf("Runs = %d; expected adaptive stop well before cap=%d", stats.Runs, AdaptiveShufflesCap)
@@ -206,14 +207,14 @@ func TestEvaluateAdaptive_StopsBeforeMaxRunsWhenSEMet(t *testing.T) {
 // Tests that EvaluateAdaptive runs to the cap when the SE target is structurally unreachable.
 // Drives evaluateImpl directly so the cap can be small.
 func TestEvaluateAdaptive_RespectsMaxRunsCapWhenSEUnreachable(t *testing.T) {
-	deckCards := append([]Card{},
+	deckCards := append([]deck.Card{},
 		GetCard(ids.ReadTheRunesRed), GetCard(ids.ReadTheRunesRed),
 		GetCard(ids.ReadTheRunesYellow), GetCard(ids.ReadTheRunesYellow),
 	)
 	for len(deckCards) < 40 {
 		deckCards = append(deckCards, GetCard(ids.ReadTheRunesBlue))
 	}
-	d := New(heroes.Viserai{}, []Weapon{weapons.ReapingBlade{}}, deckCards)
+	d := deck.New(heroes.Viserai{}, []deck.Weapon{weapons.ReapingBlade{}}, deckCards)
 	// Negative targetSE is structurally unreachable — MeanStandardError is always >= 0, so
 	// the `<= targetSE` predicate never fires. Loop should exhaust at maxRuns regardless of
 	// the deck's actual variance (which can be zero for trivially-identical-card decks).

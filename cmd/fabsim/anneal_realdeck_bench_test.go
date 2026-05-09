@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/deckio"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/deck"
 )
@@ -45,7 +46,7 @@ func BenchmarkAnnealRoundOnViseraiV4(b *testing.B) {
 		b.Fatalf("unmarshal deck: %v", err)
 	}
 	baseline := deck.New(loaded.Hero, loaded.Weapons, loaded.Cards)
-	all := sim.AllMutations(baseline, maxCopies, nil)
+	all := sim.AllMutations(baseline, maxCopies, registry.Registry{}, nil)
 	if len(all) < sampleSize {
 		b.Fatalf("mutation pool size %d < sample size %d", len(all), sampleSize)
 	}

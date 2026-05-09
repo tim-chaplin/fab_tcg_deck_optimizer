@@ -2,6 +2,7 @@ package sim_test
 
 import (
 	. "github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/deck"
 	"math/rand"
 	"testing"
 
@@ -250,7 +251,7 @@ func TestProcessAurasAtStartOfTurn_SigilWhiffStillLogs(t *testing.T) {
 func TestEvaluate_TriggersFromLastTurnSurfacesInBest(t *testing.T) {
 	blessing := cards.BlessingOfOccultRed{}
 	slash := cards.AetherSlashRed{}
-	deckCards := make([]Card, 0, 20)
+	deckCards := make([]deck.Card, 0, 20)
 	for i := 0; i < 8; i++ {
 		deckCards = append(deckCards, blessing)
 	}
@@ -260,7 +261,7 @@ func TestEvaluate_TriggersFromLastTurnSurfacesInBest(t *testing.T) {
 	for i := 0; i < 6; i++ {
 		deckCards = append(deckCards, testutils.BlueAttack{})
 	}
-	d := New(heroes.Viserai{}, nil, deckCards)
+	d := deck.New(heroes.Viserai{}, nil, deckCards)
 	rng := rand.New(rand.NewSource(42))
 	stats := NewEvaluator().Evaluate(d, 20, Matchup{}, rng)
 
