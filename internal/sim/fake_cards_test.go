@@ -35,6 +35,7 @@ func (c FakeCard) WithGoAgain() FakeCard             { c.goAgain = true; return 
 
 func (c FakeCard) ID() ids.CardID            { return c.id }
 func (c FakeCard) Name() string              { return c.name }
+func (c FakeCard) DisplayName() string       { return c.name }
 func (FakeCard) Cost(*TurnState) int         { return 0 }
 func (c FakeCard) Pitch() int                { return c.pitch }
 func (c FakeCard) Attack() int               { return c.attack }
@@ -50,6 +51,7 @@ type FakeRedAttack struct{}
 
 func (FakeRedAttack) ID() ids.CardID      { return ids.InvalidCard }
 func (FakeRedAttack) Name() string        { return "FakeRedAttack" }
+func (FakeRedAttack) DisplayName() string { return "FakeRedAttack [R]" }
 func (FakeRedAttack) Cost(*TurnState) int { return 1 }
 func (FakeRedAttack) Pitch() int          { return 1 }
 func (FakeRedAttack) Attack() int         { return 3 }
@@ -88,6 +90,7 @@ type FakeHero struct {
 
 func (FakeHero) ID() ids.HeroID                    { return ids.InvalidHero }
 func (FakeHero) Name() string                      { return "FakeHero" }
+func (FakeHero) DisplayName() string               { return "FakeHero" }
 func (FakeHero) Health() int                       { return 20 }
 func (h FakeHero) Intelligence() int               { return h.Intel }
 func (FakeHero) Types() card.TypeSet               { return 0 }

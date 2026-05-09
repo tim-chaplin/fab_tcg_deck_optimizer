@@ -17,6 +17,7 @@ type ClubWeapon struct{}
 
 func (ClubWeapon) ID() ids.WeaponID    { return FakeClubWeapon }
 func (ClubWeapon) Name() string        { return "test.ClubWeapon" }
+func (ClubWeapon) DisplayName() string { return "test.ClubWeapon" }
 func (ClubWeapon) Types() card.TypeSet { return clubWeaponTypes }
 func (ClubWeapon) Hands() int          { return 1 }
 func (ClubWeapon) Ability() sim.Card   { return clubWeaponAbility }
@@ -31,6 +32,7 @@ type ClubWeaponAbility struct{}
 
 func (ClubWeaponAbility) ID() ids.CardID          { return FakeClubWeaponAbility }
 func (ClubWeaponAbility) Name() string            { return "test.ClubWeapon" }
+func (ClubWeaponAbility) DisplayName() string     { return "test.ClubWeapon" }
 func (ClubWeaponAbility) Cost(*sim.TurnState) int { return 0 }
 func (ClubWeaponAbility) Pitch() int              { return 0 }
 func (ClubWeaponAbility) Attack() int             { return 1 }
@@ -51,6 +53,7 @@ type HammerWeaponAbility struct{}
 
 func (HammerWeaponAbility) ID() ids.CardID          { return FakeHammerWeaponAbility }
 func (HammerWeaponAbility) Name() string            { return "test.HammerWeapon" }
+func (HammerWeaponAbility) DisplayName() string     { return "test.HammerWeapon" }
 func (HammerWeaponAbility) Cost(*sim.TurnState) int { return 0 }
 func (HammerWeaponAbility) Pitch() int              { return 0 }
 func (HammerWeaponAbility) Attack() int             { return 1 }

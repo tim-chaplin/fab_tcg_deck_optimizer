@@ -146,13 +146,13 @@ func printCardDelta(name1, name2 string, d1, d2 *sim.Deck) {
 
 // loadoutCounts tallies the deck's cards and weapons by display name in a single map.
 // Weapon names don't collide with card names in the current registry, so a flat
-// name-keyed map cleanly captures both lists for diffing. sim.DisplayName keeps pitch
+// name-keyed map cleanly captures both lists for diffing. Card.DisplayName keeps pitch
 // printings as distinct entries so a "-1 Aether Slash [R], +1 Aether Slash [Y]" diff is
 // legible.
 func loadoutCounts(d *sim.Deck) map[string]int {
 	out := make(map[string]int, len(d.Cards)+len(d.Weapons))
 	for _, c := range d.Cards {
-		out[sim.DisplayName(c)]++
+		out[c.DisplayName()]++
 	}
 	for _, w := range d.Weapons {
 		out[w.Name()]++

@@ -35,11 +35,11 @@ func sigilOfTheArknightReveal(s *sim.TurnState, _ *sim.Trigger, a *sim.Aura) {
 	if !ok {
 		return
 	}
-	self := sim.DisplayName(SigilOfTheArknightBlue{})
+	self := SigilOfTheArknightBlue{}.DisplayName()
 	if top.Types().IsAttackAction() {
 		s.DrawOne()
-		s.LogPostTriggerf(self, 0, "%s drew %s into hand", self, sim.DisplayName(top))
+		s.LogPostTriggerf(self, 0, "%s drew %s into hand", self, top.DisplayName())
 		return
 	}
-	s.LogPostTriggerf(self, 0, "%s revealed %s but didn't draw it", self, sim.DisplayName(top))
+	s.LogPostTriggerf(self, 0, "%s revealed %s but didn't draw it", self, top.DisplayName())
 }

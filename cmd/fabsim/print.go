@@ -35,12 +35,12 @@ func printCardList(d *sim.Deck) {
 
 // printGroupedCards writes one count-and-name line per unique card in cs, sorted by name.
 // Shared between the main card list and the sideboard block so formatting stays consistent.
-// sim.DisplayName keeps pitch printings as distinct entries so the card list shows e.g.
+// Card.DisplayName keeps pitch printings as distinct entries so the card list shows e.g.
 // "2x Aether Slash [R]" alongside "1x Aether Slash [Y]".
 func printGroupedCards(cs []sim.Card) {
 	names := make([]string, len(cs))
 	for i, c := range cs {
-		names[i] = sim.DisplayName(c)
+		names[i] = c.DisplayName()
 	}
 	printGroupedStrings(names)
 }
@@ -193,7 +193,7 @@ func printCardValues(d *sim.Deck, s sim.DeckStats) {
 	}
 	rows := make([]row, 0, len(s.PerCardMarginal))
 	for id, m := range s.PerCardMarginal {
-		r := row{name: sim.DisplayName(registry.GetCard(id))}
+		r := row{name: registry.GetCard(id).DisplayName()}
 		if m.PresentHands > 0 && m.AbsentHands > 0 {
 			r.margin = m.Marginal()
 			r.hasMargin = true
@@ -579,7 +579,7 @@ func centerLabel(s string, width int) string {
 func maxNameLen(cs []sim.Card) int {
 	m := 0
 	for _, c := range cs {
-		if n := len(sim.DisplayName(c)); n > m {
+		if n := len(c.DisplayName()); n > m {
 			m = n
 		}
 	}

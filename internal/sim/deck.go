@@ -95,7 +95,7 @@ func (d *Deck) ApplyDefaults() {
 
 	mainCounts := map[string]int{}
 	for _, c := range d.Cards {
-		mainCounts[DisplayName(c)]++
+		mainCounts[c.DisplayName()]++
 	}
 	sideCounts := map[string]int{}
 	for _, name := range d.Sideboard {

@@ -24,8 +24,9 @@ type Card struct {
 	types card.TypeSet
 }
 
-func (s Card) ID() ids.CardID { return ids.InvalidCard }
-func (s Card) Name() string   { return s.name }
+func (s Card) ID() ids.CardID      { return ids.InvalidCard }
+func (s Card) Name() string        { return s.name }
+func (s Card) DisplayName() string { return s.name }
 
 // WithName returns a copy of s with its display name overridden. Lets cross-package tests
 // distinguish multiple Card stubs in log assertions even though `name` is unexported.
@@ -77,6 +78,7 @@ type RunebladeAttack struct{}
 
 func (RunebladeAttack) ID() ids.CardID          { return ids.InvalidCard }
 func (RunebladeAttack) Name() string            { return "RunebladeAttack" }
+func (RunebladeAttack) DisplayName() string     { return "RunebladeAttack" }
 func (RunebladeAttack) Cost(*sim.TurnState) int { return 0 }
 func (RunebladeAttack) Pitch() int              { return 0 }
 func (RunebladeAttack) Attack() int             { return 0 }
@@ -93,6 +95,7 @@ type RunebladeWeapon struct{}
 
 func (RunebladeWeapon) ID() ids.CardID          { return ids.InvalidCard }
 func (RunebladeWeapon) Name() string            { return "RunebladeWeapon" }
+func (RunebladeWeapon) DisplayName() string     { return "RunebladeWeapon" }
 func (RunebladeWeapon) Cost(*sim.TurnState) int { return 0 }
 func (RunebladeWeapon) Pitch() int              { return 0 }
 func (RunebladeWeapon) Attack() int             { return 0 }
@@ -109,6 +112,7 @@ type NonAttack struct{}
 
 func (NonAttack) ID() ids.CardID                      { return ids.InvalidCard }
 func (NonAttack) Name() string                        { return "NonAttack" }
+func (NonAttack) DisplayName() string                 { return "NonAttack" }
 func (NonAttack) Cost(*sim.TurnState) int             { return 0 }
 func (NonAttack) Pitch() int                          { return 0 }
 func (NonAttack) Attack() int                         { return 0 }
@@ -123,6 +127,7 @@ type NonRunebladeAttack struct{}
 
 func (NonRunebladeAttack) ID() ids.CardID          { return ids.InvalidCard }
 func (NonRunebladeAttack) Name() string            { return "NonRunebladeAttack" }
+func (NonRunebladeAttack) DisplayName() string     { return "NonRunebladeAttack" }
 func (NonRunebladeAttack) Cost(*sim.TurnState) int { return 0 }
 func (NonRunebladeAttack) Pitch() int              { return 0 }
 func (NonRunebladeAttack) Attack() int             { return 0 }
@@ -141,6 +146,7 @@ type AttackWithPower struct {
 
 func (AttackWithPower) ID() ids.CardID          { return ids.InvalidCard }
 func (AttackWithPower) Name() string            { return "AttackWithPower" }
+func (AttackWithPower) DisplayName() string     { return "AttackWithPower" }
 func (AttackWithPower) Cost(*sim.TurnState) int { return 0 }
 func (AttackWithPower) Pitch() int              { return 0 }
 func (s AttackWithPower) Attack() int           { return s.Power }
@@ -156,6 +162,7 @@ type Aura struct{}
 
 func (Aura) ID() ids.CardID                      { return ids.InvalidCard }
 func (Aura) Name() string                        { return "Aura" }
+func (Aura) DisplayName() string                 { return "Aura" }
 func (Aura) Cost(*sim.TurnState) int             { return 0 }
 func (Aura) Pitch() int                          { return 0 }
 func (Aura) Attack() int                         { return 0 }
@@ -174,6 +181,7 @@ type RedPitch struct{}
 
 func (RedPitch) ID() ids.CardID          { return FakeRedPitch }
 func (RedPitch) Name() string            { return "cardtest.RedPitch" }
+func (RedPitch) DisplayName() string     { return "cardtest.RedPitch [R]" }
 func (RedPitch) Cost(*sim.TurnState) int { return 0 }
 func (RedPitch) Pitch() int              { return 1 }
 func (RedPitch) Attack() int             { return 0 }
@@ -193,6 +201,7 @@ type BluePitch struct{}
 
 func (BluePitch) ID() ids.CardID          { return FakeBluePitch }
 func (BluePitch) Name() string            { return "cardtest.BluePitch" }
+func (BluePitch) DisplayName() string     { return "cardtest.BluePitch [B]" }
 func (BluePitch) Cost(*sim.TurnState) int { return 0 }
 func (BluePitch) Pitch() int              { return 3 }
 func (BluePitch) Attack() int             { return 0 }
@@ -208,6 +217,7 @@ type BlueAttack struct{}
 
 func (BlueAttack) ID() ids.CardID          { return FakeBlueAttack }
 func (BlueAttack) Name() string            { return "cardtest.BlueAttack" }
+func (BlueAttack) DisplayName() string     { return "cardtest.BlueAttack [B]" }
 func (BlueAttack) Cost(*sim.TurnState) int { return 1 }
 func (BlueAttack) Pitch() int              { return 3 }
 func (BlueAttack) Attack() int             { return 1 }
@@ -224,6 +234,7 @@ type RedAttack struct{}
 
 func (RedAttack) ID() ids.CardID          { return FakeRedAttack }
 func (RedAttack) Name() string            { return "cardtest.RedAttack" }
+func (RedAttack) DisplayName() string     { return "cardtest.RedAttack [R]" }
 func (RedAttack) Cost(*sim.TurnState) int { return 1 }
 func (RedAttack) Pitch() int              { return 1 }
 func (RedAttack) Attack() int             { return 3 }
@@ -240,6 +251,7 @@ type YellowAttack struct{}
 
 func (YellowAttack) ID() ids.CardID          { return FakeYellowAttack }
 func (YellowAttack) Name() string            { return "cardtest.YellowAttack" }
+func (YellowAttack) DisplayName() string     { return "cardtest.YellowAttack [Y]" }
 func (YellowAttack) Cost(*sim.TurnState) int { return 1 }
 func (YellowAttack) Pitch() int              { return 2 }
 func (YellowAttack) Attack() int             { return 2 }
@@ -263,6 +275,7 @@ type CostlyDraw struct{}
 
 func (CostlyDraw) ID() ids.CardID          { return FakeCostlyDraw }
 func (CostlyDraw) Name() string            { return "cardtest.CostlyDraw" }
+func (CostlyDraw) DisplayName() string     { return "cardtest.CostlyDraw [R]" }
 func (CostlyDraw) Cost(*sim.TurnState) int { return 1 }
 func (CostlyDraw) Pitch() int              { return 1 }
 func (CostlyDraw) Attack() int             { return 0 }
@@ -280,6 +293,7 @@ type CostlyAttack struct{}
 
 func (CostlyAttack) ID() ids.CardID          { return FakeCostlyAttack }
 func (CostlyAttack) Name() string            { return "cardtest.CostlyAttack" }
+func (CostlyAttack) DisplayName() string     { return "cardtest.CostlyAttack [R]" }
 func (CostlyAttack) Cost(*sim.TurnState) int { return 1 }
 func (CostlyAttack) Pitch() int              { return 1 }
 func (CostlyAttack) Attack() int             { return 3 }
@@ -299,6 +313,7 @@ type PitchOneDR struct{}
 
 func (PitchOneDR) ID() ids.CardID          { return FakePitchOneDR }
 func (PitchOneDR) Name() string            { return "cardtest.PitchOneDR" }
+func (PitchOneDR) DisplayName() string     { return "cardtest.PitchOneDR [R]" }
 func (PitchOneDR) Cost(*sim.TurnState) int { return 0 }
 func (PitchOneDR) Pitch() int              { return 1 }
 func (PitchOneDR) Attack() int             { return 0 }
@@ -320,6 +335,7 @@ const hugeAttackDamage = 1_000_000
 
 func (HugeAttack) ID() ids.CardID          { return FakeHugeAttack }
 func (HugeAttack) Name() string            { return "cardtest.HugeAttack" }
+func (HugeAttack) DisplayName() string     { return "cardtest.HugeAttack [R]" }
 func (HugeAttack) Cost(*sim.TurnState) int { return 0 }
 func (HugeAttack) Pitch() int              { return 1 }
 func (HugeAttack) Attack() int             { return hugeAttackDamage }
@@ -370,6 +386,7 @@ func (c StubCard) WithGoAgain() StubCard { c.goAgain = true; return c }
 
 func (c StubCard) ID() ids.CardID                    { return c.id }
 func (c StubCard) Name() string                      { return c.name }
+func (c StubCard) DisplayName() string               { return c.name }
 func (StubCard) Cost(*sim.TurnState) int             { return 0 }
 func (c StubCard) Pitch() int                        { return c.pitch }
 func (c StubCard) Attack() int                       { return c.attack }
@@ -403,6 +420,7 @@ type InstantStub struct{}
 
 func (InstantStub) ID() ids.CardID          { return FakeInstant }
 func (InstantStub) Name() string            { return "InstantStub" }
+func (InstantStub) DisplayName() string     { return "InstantStub" }
 func (InstantStub) Cost(*sim.TurnState) int { return 0 }
 func (InstantStub) Pitch() int              { return 0 }
 func (InstantStub) Attack() int             { return 0 }
@@ -420,6 +438,7 @@ type NoGoAgainAttackStub struct{}
 
 func (NoGoAgainAttackStub) ID() ids.CardID          { return FakeNoGoAgainAttack }
 func (NoGoAgainAttackStub) Name() string            { return "NoGoAgainAttack" }
+func (NoGoAgainAttackStub) DisplayName() string     { return "NoGoAgainAttack" }
 func (NoGoAgainAttackStub) Cost(*sim.TurnState) int { return 0 }
 func (NoGoAgainAttackStub) Pitch() int              { return 0 }
 func (NoGoAgainAttackStub) Attack() int             { return 1 }
@@ -439,6 +458,7 @@ type GrantAll struct{}
 
 func (GrantAll) ID() ids.CardID          { return ids.InvalidCard }
 func (GrantAll) Name() string            { return "GrantAll" }
+func (GrantAll) DisplayName() string     { return "GrantAll" }
 func (GrantAll) Cost(*sim.TurnState) int { return 0 }
 func (GrantAll) Pitch() int              { return 0 }
 func (GrantAll) Attack() int             { return 0 }
@@ -463,6 +483,7 @@ type GrantSpy struct{ Saw *bool }
 
 func (GrantSpy) ID() ids.CardID          { return ids.InvalidCard }
 func (GrantSpy) Name() string            { return "GrantSpy" }
+func (GrantSpy) DisplayName() string     { return "GrantSpy" }
 func (GrantSpy) Cost(*sim.TurnState) int { return 0 }
 func (GrantSpy) Pitch() int              { return 0 }
 func (GrantSpy) Attack() int             { return 0 }

@@ -482,13 +482,12 @@ var cardsByID = []sim.Card{
 // card set, and the caches are sized for the full ID space.
 func init() {
 	optimizations.WarmChainStepCache(cardsByID)
-	optimizations.WarmDisplayNameCache(cardsByID)
 	sim.GetCard = GetCard
 	sim.DeckableCards = func() []ids.CardID { return DeckableCards() }
 	sim.AllWeapons = AllWeapons
 }
 
-// cardsByName maps sim.DisplayName(c) → CardID for reverse lookup. Built once at init. Keyed
+// cardsByName maps c.DisplayName() → CardID for reverse lookup. Built once at init. Keyed
 // on DisplayName (not bare Name) so each pitch variant gets a distinct entry — Card.Name()
 // collapses all three printings to the same base string, so it's not a unique key.
 var cardsByName = func() map[string]CardID {
@@ -497,7 +496,7 @@ var cardsByName = func() map[string]CardID {
 		if c == nil {
 			continue
 		}
-		m[sim.DisplayName(c)] = CardID(id)
+		m[c.DisplayName()] = CardID(id)
 	}
 	return m
 }()

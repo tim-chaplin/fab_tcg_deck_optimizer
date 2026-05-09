@@ -10,29 +10,12 @@ package sim
 // imported by every entry point), so the defaults are only seen in narrowly-scoped tests.
 //
 // Keeping these in one file makes the cycle-breaking surface easy to audit:
-// `grep -r '\bsim\.\(GetCard\|DeckableCards\|AllWeapons\|DisplayName\|ChainStepText\)\b'` lights
-// up every consumer.
+// `grep -r '\bsim\.\(GetCard\|DeckableCards\|AllWeapons\|ChainStepText\)\b'` lights up
+// every consumer.
 
 import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
 )
-
-// DisplayName returns the card name with a pitch-color suffix — "Mauvrion Skies [Y]" for
-// a pitch-2 yellow printing. Use anywhere a human-readable identifier needs to
-// disambiguate pitch variants (log lines, deck listings, debug printouts).
-//
-// optimizations.init swaps in a memoised version that hits a per-CardID cache.
-var DisplayName = func(c Card) string {
-	switch c.Pitch() {
-	case 1:
-		return c.Name() + " [R]"
-	case 2:
-		return c.Name() + " [Y]"
-	case 3:
-		return c.Name() + " [B]"
-	}
-	return c.Name()
-}
 
 // ChainStepText returns the "<DisplayName>: <VERB>[ from arsenal]" prefix the chain-step
 // log line is built from. VERB picks WEAPON ATTACK for weapon activated-ability cards
@@ -58,7 +41,7 @@ var ChainStepText = func(self *CardState) string {
 	if self.FromArsenal {
 		verb += " from arsenal"
 	}
-	return DisplayName(self.Card) + ": " + verb
+	return self.Card.DisplayName() + ": " + verb
 }
 
 // GetCard returns the registered card.Card for id. Populated by registry.init; default

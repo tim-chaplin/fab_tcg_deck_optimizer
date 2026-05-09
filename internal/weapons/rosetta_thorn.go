@@ -38,6 +38,7 @@ type RosettaThornAbility struct{}
 
 func (RosettaThornAbility) ID() ids.CardID          { return ids.RosettaThornAbilityID }
 func (RosettaThornAbility) Name() string            { return "Rosetta Thorn" }
+func (RosettaThornAbility) DisplayName() string     { return "Rosetta Thorn" }
 func (RosettaThornAbility) Cost(*sim.TurnState) int { return 1 }
 func (RosettaThornAbility) Pitch() int              { return 0 }
 func (RosettaThornAbility) Attack() int             { return 2 }

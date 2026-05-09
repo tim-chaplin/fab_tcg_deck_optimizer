@@ -55,6 +55,7 @@ type gravSpyDR struct{ saw *[]Card }
 
 func (gravSpyDR) ID() ids.CardID      { return ids.InvalidCard }
 func (gravSpyDR) Name() string        { return "gravSpyDR" }
+func (gravSpyDR) DisplayName() string { return "gravSpyDR" }
 func (gravSpyDR) Cost(*TurnState) int { return 0 }
 func (gravSpyDR) Pitch() int          { return 0 }
 func (gravSpyDR) Attack() int         { return 0 }
@@ -76,6 +77,7 @@ type auraDefender struct{}
 
 func (auraDefender) ID() ids.CardID              { return ids.InvalidCard }
 func (auraDefender) Name() string                { return "auraDefender" }
+func (auraDefender) DisplayName() string         { return "auraDefender" }
 func (auraDefender) Cost(*TurnState) int         { return 0 }
 func (auraDefender) Pitch() int                  { return 0 }
 func (auraDefender) Attack() int                 { return 0 }

@@ -15,6 +15,7 @@ type stubRuneAttack struct{}
 
 func (stubRuneAttack) ID() ids.CardID          { return ids.InvalidCard }
 func (stubRuneAttack) Name() string            { return "StubRuneAttack" }
+func (stubRuneAttack) DisplayName() string     { return "StubRuneAttack" }
 func (stubRuneAttack) Cost(*sim.TurnState) int { return 0 }
 func (stubRuneAttack) Pitch() int              { return 0 }
 func (stubRuneAttack) Attack() int             { return 0 }
@@ -30,6 +31,7 @@ type stubRuneAura struct{}
 
 func (stubRuneAura) ID() ids.CardID          { return ids.InvalidCard }
 func (stubRuneAura) Name() string            { return "StubRuneAura" }
+func (stubRuneAura) DisplayName() string     { return "StubRuneAura" }
 func (stubRuneAura) Cost(*sim.TurnState) int { return 0 }
 func (stubRuneAura) Pitch() int              { return 0 }
 func (stubRuneAura) Attack() int             { return 0 }
@@ -45,6 +47,7 @@ type stubNonRuneblade struct{}
 
 func (stubNonRuneblade) ID() ids.CardID          { return ids.InvalidCard }
 func (stubNonRuneblade) Name() string            { return "StubGeneric" }
+func (stubNonRuneblade) DisplayName() string     { return "StubGeneric" }
 func (stubNonRuneblade) Cost(*sim.TurnState) int { return 0 }
 func (stubNonRuneblade) Pitch() int              { return 0 }
 func (stubNonRuneblade) Attack() int             { return 0 }
@@ -92,6 +95,7 @@ type stubRuneWeapon struct{}
 
 func (stubRuneWeapon) ID() ids.CardID          { return ids.InvalidCard }
 func (stubRuneWeapon) Name() string            { return "StubRuneWeapon" }
+func (stubRuneWeapon) DisplayName() string     { return "StubRuneWeapon" }
 func (stubRuneWeapon) Cost(*sim.TurnState) int { return 0 }
 func (stubRuneWeapon) Pitch() int              { return 0 }
 func (stubRuneWeapon) Attack() int             { return 0 }

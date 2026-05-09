@@ -61,7 +61,7 @@ func (c CardOrTokenType) CardID() ids.CardID {
 // or the token's printed name (e.g. "Runechant") for token auras.
 func (c CardOrTokenType) DisplayName() string {
 	if c.Card != nil {
-		return DisplayName(c.Card)
+		return c.Card.DisplayName()
 	}
 	return tokenDisplayName(c.TokenType)
 }

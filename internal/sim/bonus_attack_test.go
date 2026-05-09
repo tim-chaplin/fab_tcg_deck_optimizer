@@ -20,6 +20,7 @@ type pitchOnlyRed struct{}
 
 func (pitchOnlyRed) ID() ids.CardID      { return ids.InvalidCard }
 func (pitchOnlyRed) Name() string        { return "pitchOnlyRed" }
+func (pitchOnlyRed) DisplayName() string { return "pitchOnlyRed [R]" }
 func (pitchOnlyRed) Cost(*TurnState) int { return 0 }
 func (pitchOnlyRed) Pitch() int          { return 1 }
 func (pitchOnlyRed) Attack() int         { return 0 }
@@ -38,6 +39,7 @@ type grantBonusAttack struct{ n int }
 
 func (grantBonusAttack) ID() ids.CardID      { return ids.InvalidCard }
 func (grantBonusAttack) Name() string        { return "grantBonusAttack" }
+func (grantBonusAttack) DisplayName() string { return "grantBonusAttack" }
 func (grantBonusAttack) Cost(*TurnState) int { return 0 }
 func (grantBonusAttack) Pitch() int          { return 0 }
 func (grantBonusAttack) Attack() int         { return 0 }
@@ -64,6 +66,7 @@ type grantBonusAttackWeapon struct{ n int }
 
 func (grantBonusAttackWeapon) ID() ids.CardID      { return ids.InvalidCard }
 func (grantBonusAttackWeapon) Name() string        { return "grantBonusAttackWeapon" }
+func (grantBonusAttackWeapon) DisplayName() string { return "grantBonusAttackWeapon" }
 func (grantBonusAttackWeapon) Cost(*TurnState) int { return 0 }
 func (grantBonusAttackWeapon) Pitch() int          { return 0 }
 func (grantBonusAttackWeapon) Attack() int         { return 0 }

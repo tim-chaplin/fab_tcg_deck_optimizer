@@ -282,7 +282,7 @@ Deck cards
 func cardNameCounts(d *sim.Deck) map[string]int {
 	m := map[string]int{}
 	for _, c := range d.Cards {
-		m[sim.DisplayName(c)]++
+		m[c.DisplayName()]++
 	}
 	return m
 }

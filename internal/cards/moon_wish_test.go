@@ -53,7 +53,7 @@ func TestMoonWish_AltCostMovesHandCardToDeckTop(t *testing.T) {
 			[]string{d[0].Name(), d[1].Name()})
 	}
 	// One of the post-trigger log entries should name the returned card.
-	wantSuffix := "returned " + sim.DisplayName(dr) + " to top of deck"
+	wantSuffix := "returned " + dr.DisplayName() + " to top of deck"
 	found := false
 	for _, e := range s.LogEntries() {
 		if e.Source == "Moon Wish [Y]" && strings.HasSuffix(e.Text, wantSuffix) {

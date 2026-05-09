@@ -16,7 +16,7 @@ func warmongersRecitalRecycleOnHit(s *sim.TurnState, self *sim.CardState, _ *sim
 	if _, ok := s.RecycleFromGraveyardToBottom(func(c sim.Card) bool { return c == target }); !ok {
 		return
 	}
-	s.LogPostTrigger(sim.DisplayName(self.Card), "Recycled to bottom of deck on hit", 0)
+	s.LogPostTrigger(self.Card.DisplayName(), "Recycled to bottom of deck on hit", 0)
 }
 
 // warmongersRecitalPlay grants the next attack action +n{p} and the on-hit recycle rider.

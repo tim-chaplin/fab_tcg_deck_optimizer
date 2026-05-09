@@ -47,7 +47,7 @@ func BuildTurnLog(t TurnSummary, startingAuras []Aura, startingItems []Item) Tur
 		}
 	}
 	for _, p := range attackPitches {
-		log.MyTurn = append(log.MyTurn, DisplayName(p.Card)+": "+roleLabelWithArsenal(p, "PITCH"))
+		log.MyTurn = append(log.MyTurn, p.Card.DisplayName()+": "+roleLabelWithArsenal(p, "PITCH"))
 	}
 	// Chain entries are stored as LogEntry structs on State.Log to defer fmt cost off the
 	// per-permutation hot path — they're formatted (and grouped) here, in the
@@ -58,7 +58,7 @@ func BuildTurnLog(t TurnSummary, startingAuras []Aura, startingItems []Item) Tur
 
 	// Opponent's turn: defense pitches, plain blocks, then Defense Reactions.
 	for _, p := range defensePitches {
-		log.OpponentTurn = append(log.OpponentTurn, DisplayName(p.Card)+": "+roleLabelWithArsenal(p, "PITCH"))
+		log.OpponentTurn = append(log.OpponentTurn, p.Card.DisplayName()+": "+roleLabelWithArsenal(p, "PITCH"))
 	}
 	for _, b := range parts.plainBlocks {
 		log.OpponentTurn = append(log.OpponentTurn, formatBlockLine(b))
@@ -98,7 +98,7 @@ func startingHandLine(dealtHand []Card) string {
 	}
 	names := make([]string, len(dealtHand))
 	for i, c := range dealtHand {
-		names[i] = DisplayName(c)
+		names[i] = c.DisplayName()
 	}
 	return "Hand: " + strings.Join(names, ", ")
 }
@@ -108,7 +108,7 @@ func startingHandLine(dealtHand []Card) string {
 func startingArsenalLine(line []CardAssignment) string {
 	for _, a := range line {
 		if a.FromArsenal {
-			return "Arsenal: " + DisplayName(a.Card)
+			return "Arsenal: " + a.Card.DisplayName()
 		}
 	}
 	return ""
@@ -126,7 +126,7 @@ func startingAurasLine(auras []Card, startingRunechants, startingPonders int) st
 	if len(auras) > 0 {
 		names := make([]string, len(auras))
 		for i, a := range auras {
-			names[i] = DisplayName(a)
+			names[i] = a.DisplayName()
 		}
 		sort.Strings(names)
 		items = append(items, names...)
@@ -153,7 +153,7 @@ func startOfTurnTriggerLine(d TriggerContribution) string {
 	if suffix == "" {
 		return ""
 	}
-	return DisplayName(d.Card) + ": " + suffix
+	return d.Card.DisplayName() + ": " + suffix
 }
 
 // formatBlockLine renders a plain-block content line with the card's effective defense as a
@@ -165,7 +165,7 @@ func formatBlockLine(a CardAssignment) string {
 	if a.FromArsenal {
 		def += arsenalDefenseBonusOf(a.Card)
 	}
-	return fmt.Sprintf("%s: %s (+%d)", DisplayName(a.Card), roleLabelWithArsenal(a, "BLOCK"), def)
+	return fmt.Sprintf("%s: %s (+%d)", a.Card.DisplayName(), roleLabelWithArsenal(a, "BLOCK"), def)
 }
 
 // appendDefenseReactionLines re-Plays the DR with the same fresh state shape defendersDamage
@@ -206,7 +206,7 @@ func endingHandLine(handHeld []Card) string {
 	}
 	names := make([]string, len(handHeld))
 	for i, c := range handHeld {
-		names[i] = DisplayName(c)
+		names[i] = c.DisplayName()
 	}
 	return "Hand: " + strings.Join(names, ", ")
 }
@@ -221,7 +221,7 @@ func endingArsenalLine(arsenal []CardAssignment) string {
 	}
 	parts := make([]string, len(arsenal))
 	for i, a := range arsenal {
-		label := DisplayName(a.Card)
+		label := a.Card.DisplayName()
 		if a.FromArsenal {
 			label += " (stayed)"
 		} else {

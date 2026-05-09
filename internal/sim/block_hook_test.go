@@ -13,6 +13,7 @@ type soloBlocker struct{}
 
 func (soloBlocker) ID() ids.CardID      { return ids.InvalidCard }
 func (soloBlocker) Name() string        { return "soloBlocker" }
+func (soloBlocker) DisplayName() string { return "soloBlocker" }
 func (soloBlocker) Cost(*TurnState) int { return 0 }
 func (soloBlocker) Pitch() int          { return 0 }
 func (soloBlocker) Attack() int         { return 0 }
@@ -42,6 +43,7 @@ type togetherBlocker struct{}
 
 func (togetherBlocker) ID() ids.CardID      { return ids.InvalidCard }
 func (togetherBlocker) Name() string        { return "togetherBlocker" }
+func (togetherBlocker) DisplayName() string { return "togetherBlocker" }
 func (togetherBlocker) Cost(*TurnState) int { return 0 }
 func (togetherBlocker) Pitch() int          { return 0 }
 func (togetherBlocker) Attack() int         { return 0 }
@@ -70,6 +72,7 @@ type plainBlocker struct{}
 
 func (plainBlocker) ID() ids.CardID      { return ids.InvalidCard }
 func (plainBlocker) Name() string        { return "plainBlocker" }
+func (plainBlocker) DisplayName() string { return "plainBlocker" }
 func (plainBlocker) Cost(*TurnState) int { return 0 }
 func (plainBlocker) Pitch() int          { return 0 }
 func (plainBlocker) Attack() int         { return 0 }
@@ -86,6 +89,7 @@ type blockOneDR struct{}
 
 func (blockOneDR) ID() ids.CardID      { return ids.InvalidCard }
 func (blockOneDR) Name() string        { return "blockOneDR" }
+func (blockOneDR) DisplayName() string { return "blockOneDR" }
 func (blockOneDR) Cost(*TurnState) int { return 0 }
 func (blockOneDR) Pitch() int          { return 0 }
 func (blockOneDR) Attack() int         { return 0 }

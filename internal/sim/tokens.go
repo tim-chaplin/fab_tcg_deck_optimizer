@@ -39,7 +39,7 @@ const (
 )
 
 // tokenDisplayName returns the printed name shown in logs and "(from previous turn)"
-// summaries for the given token type. Mirrors DisplayName(Card) for card-based entries.
+// summaries for the given token type. Mirrors Card.DisplayName() for card-based entries.
 func tokenDisplayName(t TokenType) string {
 	switch t {
 	case TokenTypeRunechant:
@@ -124,6 +124,7 @@ type GoldTokenAbility struct{}
 
 func (GoldTokenAbility) ID() ids.CardID      { return ids.GoldTokenAbilityID }
 func (GoldTokenAbility) Name() string        { return "Gold" }
+func (GoldTokenAbility) DisplayName() string { return "Gold" }
 func (GoldTokenAbility) Cost(*TurnState) int { return 2 }
 func (GoldTokenAbility) Pitch() int          { return 0 }
 func (GoldTokenAbility) Attack() int         { return 0 }
@@ -164,6 +165,7 @@ type SilverTokenAbility struct{}
 
 func (SilverTokenAbility) ID() ids.CardID      { return ids.SilverTokenAbilityID }
 func (SilverTokenAbility) Name() string        { return "Silver" }
+func (SilverTokenAbility) DisplayName() string { return "Silver" }
 func (SilverTokenAbility) Cost(*TurnState) int { return 3 }
 func (SilverTokenAbility) Pitch() int          { return 0 }
 func (SilverTokenAbility) Attack() int         { return 0 }
@@ -202,6 +204,7 @@ type CopperTokenAbility struct{}
 
 func (CopperTokenAbility) ID() ids.CardID      { return ids.CopperTokenAbilityID }
 func (CopperTokenAbility) Name() string        { return "Copper" }
+func (CopperTokenAbility) DisplayName() string { return "Copper" }
 func (CopperTokenAbility) Cost(*TurnState) int { return 4 }
 func (CopperTokenAbility) Pitch() int          { return 0 }
 func (CopperTokenAbility) Attack() int         { return 0 }

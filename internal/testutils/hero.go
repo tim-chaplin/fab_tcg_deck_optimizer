@@ -22,6 +22,7 @@ type Hero struct {
 
 func (Hero) ID() ids.HeroID                            { return ids.InvalidHero }
 func (Hero) Name() string                              { return "testutils.Hero" }
+func (Hero) DisplayName() string                       { return "testutils.Hero" }
 func (Hero) Health() int                               { return 20 }
 func (h Hero) Intelligence() int                       { return h.Intel }
 func (Hero) Types() card.TypeSet                       { return 0 }
