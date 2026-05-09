@@ -56,7 +56,7 @@ func BenchmarkEvalWorkerSweep(b *testing.B) {
 				rng := rand.New(rand.NewSource(42))
 				d := New(loaded.Hero, loaded.Weapons, loaded.Cards)
 				b.StartTimer()
-				d.EvaluateWith(shuffles, Matchup{IncomingDamage: incoming}, rng, ev)
+				ev.Evaluate(d, shuffles, Matchup{IncomingDamage: incoming}, rng)
 			}
 		})
 	}

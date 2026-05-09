@@ -1,9 +1,10 @@
 package sim
 
-// Hand-by-hand simulation of a Deck: Evaluate / EvaluateWith shuffle, walk two cycles of hands per
-// run, and fold each turn's outcome into a fresh DeckStats. All cross-turn bookkeeping (held cards,
-// arsenal, runechant carryover, start-of-turn Aura handling) lives here. The single-turn
-// assertion-style entry point EvalOneTurnForTesting lives in eval_one_turn_for_testing.go.
+// Hand-by-hand simulation of a Deck: (*Evaluator).Evaluate shuffles, walks two cycles of hands
+// per run, and folds each turn's outcome into a fresh DeckStats. All cross-turn bookkeeping
+// (held cards, arsenal, runechant carryover, start-of-turn Aura handling) lives here. The
+// single-turn assertion-style entry point EvalOneTurnForTesting lives in
+// eval_one_turn_for_testing.go.
 
 import (
 	"fmt"
@@ -15,37 +16,26 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
 )
 
-// Evaluate simulates `runs` shuffles. Each run assembles successive hands of
+// Evaluate simulates `runs` shuffles of d. Each run assembles successive hands of
 // d.Hero.Intelligence() cards (Held + fresh top-of-deck draws), computes the optimal play
-// against mp, and recycles Pitched cards to deck bottom. A run ends when the deck can't fill
-// the next hand. A "cycle" is one pass through the original deck size.
+// against mp, and recycles Pitched cards to deck bottom. A run ends when the deck can't
+// fill the next hand. A "cycle" is one pass through the original deck size.
 //
 // Returns a fresh DeckStats — callers that want to accumulate across multiple Evaluate
 // calls maintain their own DeckStats and merge returned values in.
-func (d *Deck) Evaluate(runs int, mp Matchup, rng *rand.Rand) DeckStats {
-	return d.EvaluateWith(runs, mp, rng, nil)
-}
-
-// EvaluateWith is Evaluate using the given Evaluator. Pass a dedicated Evaluator per
-// goroutine for parallel runs; nil reuses the package-level shared Evaluator.
-func (d *Deck) EvaluateWith(runs int, mp Matchup, rng *rand.Rand, ev *Evaluator) DeckStats {
-	return d.evaluateImpl(runs, mp, rng, ev, nil)
+func (ev *Evaluator) Evaluate(d *Deck, runs int, mp Matchup, rng *rand.Rand) DeckStats {
+	return ev.evaluateImpl(d, runs, mp, rng, nil)
 }
 
 // EvaluateAdaptive runs shuffles until the per-turn mean's standard error drops to
 // precision/4 — a ~95% confidence interval of ±precision/2 around the running mean — capped
 // at adaptiveShufflesCap. SE is checked every adaptiveCheckInterval shuffles. Use when
 // knowing the mean to within precision is enough; modes that need apples-to-apples shuffle
-// counts (compare, explicit -shuffles) should use EvaluateWith with a fixed runs count.
+// counts (compare, explicit -shuffles) should use Evaluate with a fixed runs count.
 // Order-of-magnitude scale on a Viserai deck: precision=0.1 ≈ 1k shuffles, precision=0.01
 // ≈ 80k shuffles.
-func (d *Deck) EvaluateAdaptive(precision float64, mp Matchup, rng *rand.Rand) DeckStats {
-	return d.EvaluateAdaptiveWith(precision, mp, rng, nil)
-}
-
-// EvaluateAdaptiveWith is EvaluateAdaptive using the given Evaluator.
-func (d *Deck) EvaluateAdaptiveWith(precision float64, mp Matchup, rng *rand.Rand, ev *Evaluator) DeckStats {
-	return d.evaluateImpl(adaptiveShufflesCap, mp, rng, ev, makeAdaptiveStop(precision/4))
+func (ev *Evaluator) EvaluateAdaptive(d *Deck, precision float64, mp Matchup, rng *rand.Rand) DeckStats {
+	return ev.evaluateImpl(d, adaptiveShufflesCap, mp, rng, makeAdaptiveStop(precision/4))
 }
 
 // shuffleStopper is the early-stop policy for the eval shuffle loop. Called once after each
@@ -99,22 +89,22 @@ func meanStandardError(stats *DeckStats) float64 {
 	return math.Sqrt(variance / n)
 }
 
-func (d *Deck) evaluateImpl(maxRuns int, mp Matchup, rng *rand.Rand, ev *Evaluator, stop shuffleStopper) DeckStats {
+func (ev *Evaluator) evaluateImpl(d *Deck, maxRuns int, mp Matchup, rng *rand.Rand, stop shuffleStopper) DeckStats {
 	CurrentHero = d.Hero
 	handSize := d.Hero.Intelligence()
 	deckSize := len(d.Cards)
 	if handSize <= 0 || deckSize < handSize {
 		return DeckStats{}
 	}
-	if ev != nil && ev.numWorkers > 1 {
-		return d.evaluateParallelImpl(maxRuns, mp, rng, ev, stop, handSize, deckSize)
+	if ev.numWorkers > 1 {
+		return ev.evaluateParallelImpl(d, maxRuns, mp, rng, stop, handSize, deckSize)
 	}
-	return d.evaluateSequentialImpl(maxRuns, mp, rng, ev, stop, handSize, deckSize)
+	return ev.evaluateSequentialImpl(d, maxRuns, mp, rng, stop, handSize, deckSize)
 }
 
 // evaluateSequentialImpl runs the shuffle loop in the calling goroutine, using ev's
 // cachedBufs scratch directly. This is the deterministic-RNG path tests rely on.
-func (d *Deck) evaluateSequentialImpl(maxRuns int, mp Matchup, rng *rand.Rand, ev *Evaluator, stop shuffleStopper, handSize, deckSize int) DeckStats {
+func (ev *Evaluator) evaluateSequentialImpl(d *Deck, maxRuns int, mp Matchup, rng *rand.Rand, stop shuffleStopper, handSize, deckSize int) DeckStats {
 	handsPerCycle := deckSize / handSize
 	uniqueIDs, idIndex := uniqueDeckIDs(d.Cards)
 	scratch := newShuffleScratch(deckSize, handSize, len(uniqueIDs))
@@ -140,7 +130,7 @@ func (d *Deck) evaluateSequentialImpl(maxRuns int, mp Matchup, rng *rand.Rand, e
 // goroutine merges every worker's local DeckStats into the running aggregate and runs the
 // adaptive stop check. Per-worker RNG seeds are derived from rng.Int63() so the chunk
 // distribution is deterministic given the input rng.
-func (d *Deck) evaluateParallelImpl(maxRuns int, mp Matchup, rng *rand.Rand, ev *Evaluator, stop shuffleStopper, handSize, deckSize int) DeckStats {
+func (ev *Evaluator) evaluateParallelImpl(d *Deck, maxRuns int, mp Matchup, rng *rand.Rand, stop shuffleStopper, handSize, deckSize int) DeckStats {
 	numWorkers := ev.numWorkers
 	handsPerCycle := deckSize / handSize
 	uniqueIDs, idIndex := uniqueDeckIDs(d.Cards)
@@ -388,11 +378,9 @@ func snapshotStartOfTurnAuras(queued []Aura) []Card {
 	return out
 }
 
-// runBestForTurn dispatches to ev.BestSkipLog when an evaluator is supplied (the hot-path
-// goroutine-local case used by EvaluateWith / IterateParallel) and falls back to the
-// package-level Best when ev is nil. The returned TurnSummary has State.Log empty for the
-// SkipLog path; callers that want a populated Log (the rare new-deck-best case) call
-// replayBestForTurnWithLog with the same inputs.
+// runBestForTurn dispatches to ev.BestSkipLog — the hot-path goroutine-local case. The
+// returned TurnSummary has State.Log empty; replayBestForTurnWithLog re-runs with full
+// Log materialisation when a turn becomes the new deck-best.
 func runBestForTurn(
 	hero Hero,
 	weapons []Weapon,
@@ -402,12 +390,7 @@ func runBestForTurn(
 	prior TurnState,
 	ev *Evaluator,
 ) TurnSummary {
-	if ev != nil {
-		return ev.BestSkipLog(hero, weapons, h, mp, deck, prior)
-	}
-	// No-evaluator path retains the populated-Log behaviour for direct callers (tests, ad-hoc
-	// tools) that don't have a deck-eval loop to drive the replay step.
-	return best(hero, weapons, h, mp, deck, prior)
+	return ev.BestSkipLog(hero, weapons, h, mp, deck, prior)
 }
 
 // replayBestForTurnWithLog re-runs the Best search with full Log materialisation. Same
@@ -424,10 +407,7 @@ func replayBestForTurnWithLog(
 	prior TurnState,
 	ev *Evaluator,
 ) TurnSummary {
-	if ev != nil {
-		return ev.Best(hero, weapons, h, mp, deck, prior)
-	}
-	return best(hero, weapons, h, mp, deck, prior)
+	return ev.Best(hero, weapons, h, mp, deck, prior)
 }
 
 // recordTurnStats folds one resolved turn's accumulators into stats: bumps Hands /

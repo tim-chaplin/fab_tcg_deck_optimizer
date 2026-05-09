@@ -36,7 +36,7 @@ func TestAdaptive_RoundsToConverge(t *testing.T) {
 		baseline := Random(heroes.Viserai{}, deckSize, maxCopies, setupRNG, nil)
 		d := New(baseline.Hero, baseline.Weapons, baseline.Cards)
 		ev := NewEvaluatorParallel(numWorkers)
-		stats := d.EvaluateAdaptiveWith(0.1, Matchup{IncomingDamage: incoming}, rand.New(rand.NewSource(99)), ev)
+		stats := ev.EvaluateAdaptive(d, 0.1, Matchup{IncomingDamage: incoming}, rand.New(rand.NewSource(99)))
 		t.Logf("random Viserai seed=%d: Runs=%d, mean=%.4f", seed, stats.Runs, stats.Mean())
 	}
 
@@ -45,7 +45,7 @@ func TestAdaptive_RoundsToConverge(t *testing.T) {
 	if loaded := loadRealDeck(t); loaded != nil {
 		d := New(loaded.Hero, loaded.Weapons, loaded.Cards)
 		ev := NewEvaluatorParallel(numWorkers)
-		stats := d.EvaluateAdaptiveWith(0.1, Matchup{IncomingDamage: incoming}, rand.New(rand.NewSource(99)), ev)
+		stats := ev.EvaluateAdaptive(d, 0.1, Matchup{IncomingDamage: incoming}, rand.New(rand.NewSource(99)))
 		t.Logf("viserai_v4 (annealed): Runs=%d, mean=%.4f", stats.Runs, stats.Mean())
 	}
 }

@@ -42,7 +42,7 @@ type DeckStats struct {
 
 // BestTurn records a single hand and its optimal turn — the peak draw a deck saw during
 // simulation. Summary.BestLine carries the cards and roles in canonical order; Log is the
-// structured per-section trace assembled at end of EvaluateWith via BuildTurnLog and
+// structured per-section trace assembled at end of Evaluate via BuildTurnLog and
 // round-tripped through the JSON layer verbatim. fabsim's print path renders Log via
 // FormatTurnLog so saved decks produce the same output as live runs.
 type BestTurn struct {
@@ -55,7 +55,7 @@ type BestTurn struct {
 	StartingItems []Item
 	// Log is the four-section structured record (StartOfTurn / MyTurn / OpponentTurn /
 	// EndOfTurn) of the best turn's printout. Each entry is content-only; the formatter
-	// owns indentation, section headers, and chain numbering. EvaluateWith populates it
+	// owns indentation, section headers, and chain numbering. Evaluate populates it
 	// once at end of run via BuildTurnLog.
 	Log TurnLog
 }

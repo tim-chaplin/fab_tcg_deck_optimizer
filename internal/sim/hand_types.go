@@ -64,7 +64,7 @@ type CarryState struct {
 	OpponentMarked bool
 	// Log is the per-event chain trace of the winning permutation — one entry per Play, hero
 	// trigger, aura trigger, OnHit, weapon swing. Stored as raw LogEntry
-	// structs to defer fmt.Sprintf cost until BuildTurnLog runs at end of EvaluateWith,
+	// structs to defer fmt.Sprintf cost until BuildTurnLog runs at end of Evaluate,
 	// keeping the snapshot path allocation-light (only the winning permutation's log gets
 	// formatted, and only when the deck-level Best actually changes). Doesn't carry across
 	// turns semantically but rides on CarryState's snapshot mechanism for free.

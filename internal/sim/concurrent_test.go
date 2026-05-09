@@ -13,9 +13,9 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/heroes"
 )
 
-// Tests that concurrent EvaluateWith from many goroutines (each with its own Evaluator)
+// Tests that concurrent Evaluate from many goroutines (each with its own Evaluator)
 // doesn't panic on the shared card-meta lookup table.
-func TestEvaluateWith_ConcurrentNoMapPanic(t *testing.T) {
+func TestEvaluate_ConcurrentNoMapPanic(t *testing.T) {
 	numWorkers := runtime.GOMAXPROCS(0)
 	if numWorkers < 2 {
 		t.Skip("need GOMAXPROCS >= 2 to exercise concurrent access")
@@ -36,7 +36,7 @@ func TestEvaluateWith_ConcurrentNoMapPanic(t *testing.T) {
 				// Small shuffle count per iteration keeps the test fast while still exercising
 				// many Best calls per goroutine: 10 shuffles × handsPerCycle * 2 hands each =
 				// ~200 Best invocations per goroutine, per iteration.
-				stats := d.EvaluateWith(10, Matchup{}, rng, ev)
+				stats := ev.Evaluate(d, 10, Matchup{}, rng)
 				if stats.Hands == 0 {
 					t.Errorf("worker %d iter %d: Evaluate returned zero hands", id, i)
 					return
@@ -52,7 +52,7 @@ func TestEvaluateWith_ConcurrentNoMapPanic(t *testing.T) {
 func TestIterateParallel_RunsWithoutPanic(t *testing.T) {
 	rng := rand.New(rand.NewSource(42))
 	baseline := Random(heroes.Viserai{}, 40, 2, rng, nil)
-	baseAvg := baseline.Evaluate(10, Matchup{}, rng).Mean()
+	baseAvg := NewEvaluator().Evaluate(baseline, 10, Matchup{}, rng).Mean()
 	mutations := AllMutations(baseline, 2, nil)
 	// Cap mutations so the test stays under a second; full list is thousands of entries.
 	if len(mutations) > 40 {
@@ -93,7 +93,7 @@ func TestIterateParallel_RunsWithoutPanic(t *testing.T) {
 func TestIterateParallel_AbortsOnContextCancel(t *testing.T) {
 	rng := rand.New(rand.NewSource(42))
 	baseline := Random(heroes.Viserai{}, 40, 2, rng, nil)
-	baseAvg := baseline.Evaluate(10, Matchup{}, rng).Mean()
+	baseAvg := NewEvaluator().Evaluate(baseline, 10, Matchup{}, rng).Mean()
 	mutations := AllMutations(baseline, 2, nil)
 
 	ctx, cancel := context.WithCancel(context.Background())

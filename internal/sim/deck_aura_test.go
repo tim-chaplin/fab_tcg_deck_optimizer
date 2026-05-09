@@ -262,7 +262,7 @@ func TestEvaluate_TriggersFromLastTurnSurfacesInBest(t *testing.T) {
 	}
 	d := New(heroes.Viserai{}, nil, deckCards)
 	rng := rand.New(rand.NewSource(42))
-	stats := d.Evaluate(20, Matchup{}, rng)
+	stats := NewEvaluator().Evaluate(d, 20, Matchup{}, rng)
 
 	if len(stats.Best.Summary.TriggersFromLastTurn) == 0 {
 		t.Errorf("Stats.Best.Summary.TriggersFromLastTurn is empty; Best.Value=%d",
