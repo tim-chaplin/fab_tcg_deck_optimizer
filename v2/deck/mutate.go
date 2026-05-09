@@ -65,7 +65,7 @@ func AllMutations(d *Deck, maxCopies int, reg Registry, legal func(Card) bool) [
 	pool := buildLegalByID(reg, legal)
 	out := weaponLoadoutMutations(d, reg)
 	out = append(out, singleSwapMutations(d, pool)...)
-	out = append(out, pairSwapMutations(d, pool)...)
+	out = append(out, pairSwapMutations(d, CardPairs, pool)...)
 	return FilterMaxCopiesViolations(out, maxCopies)
 }
 
@@ -269,13 +269,13 @@ type pairDedupeKey struct {
 // the combined output so single-slot and pair candidates share one cap-checking pass.
 //
 // Returned decks share no backing slices with d or each other.
-func pairSwapMutations(d *Deck, pool legalCardPool) []Mutation {
-	if len(CardPairs) == 0 || d.Size() < 2 {
+func pairSwapMutations(d *Deck, pairs []CardPair, pool legalCardPool) []Mutation {
+	if len(pairs) == 0 || d.Size() < 2 {
 		return nil
 	}
 	seen := map[pairDedupeKey]bool{}
 	var out []Mutation
-	for _, pair := range CardPairs {
+	for _, pair := range pairs {
 		for _, firstID := range pair.First {
 			first, ok := pool.byID[firstID]
 			if !ok {
@@ -318,24 +318,12 @@ func pairSwapMutations(d *Deck, pool legalCardPool) []Mutation {
 	return out
 }
 
-// PairSwapMutations returns just the synergy-pair "swap two for two" mutations of d,
-// without the single-card-swap or weapon-loadout candidates. Exported for tests that
-// exercise pair behaviour in isolation; production callers go through AllMutations.
-func PairSwapMutations(d *Deck, reg Registry, legal func(Card) bool) []Mutation {
-	return pairSwapMutations(d, buildLegalByID(reg, legal))
-}
-
-// PairAddAllowed reports whether c is eligible as a pair-mutation add target under reg's
-// legal pool and the optional caller-supplied filter. Exported for tests that count
-// expected pair emissions without re-implementing the gating logic.
-func PairAddAllowed(c Card, reg Registry, legal func(Card) bool) bool {
-	if c == nil {
-		return false
-	}
-	if _, ok := buildLegalByID(reg, legal).byID[c.ID()]; !ok {
-		return false
-	}
-	return true
+// PairSwapMutations returns just the synergy-pair "swap two for two" mutations of d for
+// the supplied pairs registry, without the single-card-swap or weapon-loadout candidates.
+// Exported for tests that exercise pair behaviour with their own fake CardPair fixture;
+// production callers go through AllMutations (which uses the package-level CardPairs).
+func PairSwapMutations(d *Deck, pairs []CardPair, reg Registry, legal func(Card) bool) []Mutation {
+	return pairSwapMutations(d, pairs, buildLegalByID(reg, legal))
 }
 
 // SortedIDPair returns (a, b) sorted ascending so callers can build canonical
