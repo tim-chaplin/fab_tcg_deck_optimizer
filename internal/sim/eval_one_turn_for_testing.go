@@ -1,5 +1,7 @@
 package sim
 
+import "github.com/tim-chaplin/fab-deck-optimizer/v2/deck"
+
 // Test-only entry point: drives one turn against a fixed deck order so tests can assert
 // chain outcomes plus the start-of-next-turn state without running the full multi-shuffle
 // Evaluate loop. The ForTesting suffix marks the contract; production callers use Evaluate.
@@ -14,13 +16,13 @@ type TurnStartState struct {
 	BestLine []CardAssignment
 	// Graveyard is the cards in the graveyard at end of the tested turn, in landing order.
 	// Distinguishes "in graveyard" from "absent from next-turn surfaces".
-	Graveyard []Card
+	Graveyard []deck.Card
 	// StartOfNextTurnHand is the hand dealt for the turn after the tested turn.
-	StartOfNextTurnHand []Card
+	StartOfNextTurnHand []deck.Card
 	// StartOfNextTurnArsenal is the card in the arsenal slot at the start of the next turn.
-	StartOfNextTurnArsenal Card
+	StartOfNextTurnArsenal deck.Card
 	// StartOfNextTurnDeck is the remaining deck at the start of the next turn, top-to-bottom.
-	StartOfNextTurnDeck []Card
+	StartOfNextTurnDeck []deck.Card
 	// StartOfNextTurnAuras is the live aura set at the start of the next turn: survivors
 	// of this turn's chain plus any token bumps made by next-turn start-of-turn handlers.
 	// Tests query specific token counts via Runechants and friends.
@@ -41,7 +43,7 @@ type TurnStartState struct {
 	StartOfNextTurnTriggerDamage int
 	// StartOfNextTurnGraveyard is the auras destroyed during the next turn's start-of-turn
 	// Aura pass, in destroy order.
-	StartOfNextTurnGraveyard []Card
+	StartOfNextTurnGraveyard []deck.Card
 }
 
 // Runechants returns the live Runechant token count at the start of the next turn.
@@ -78,9 +80,9 @@ func (t TurnStartState) Copper() int {
 // directly (may be shorter than handSize) and treats d.Cards as the deck entirely. Test-only —
 // production callers use Evaluate.
 //
-// Free function (not a method) because Deck aliases v2/deck.Deck; Go disallows methods on
-// types from other packages.
-func EvalOneTurnForTesting(d *Deck, mp Matchup, initial TurnState, initialHand []Card) TurnStartState {
+// Free function (not a method) because deck.Deck lives in another package; Go disallows
+// methods on imported types.
+func EvalOneTurnForTesting(d *deck.Deck, mp Matchup, initial TurnState, initialHand []deck.Card) TurnStartState {
 	hero := d.Hero.(Hero)
 	CurrentHero = hero
 	handSize := hero.Intelligence()
@@ -96,7 +98,14 @@ func EvalOneTurnForTesting(d *Deck, mp Matchup, initial TurnState, initialHand [
 		buf[i] = c.(Card)
 	}
 
-	turn1Hand, head, ok := resolveTurn1Hand(buf[:deckSize], initialHand, handSize)
+	var simHand []Card
+	if initialHand != nil {
+		simHand = make([]Card, len(initialHand))
+		for i, c := range initialHand {
+			simHand[i] = c.(Card)
+		}
+	}
+	turn1Hand, head, ok := resolveTurn1Hand(buf[:deckSize], simHand, handSize)
 	if !ok {
 		return TurnStartState{}
 	}
@@ -126,9 +135,9 @@ func EvalOneTurnForTesting(d *Deck, mp Matchup, initial TurnState, initialHand [
 		return TurnStartState{
 			Value:                  play.Value,
 			BestLine:               append([]CardAssignment(nil), play.BestLine...),
-			Graveyard:              append([]Card(nil), play.State.Graveyard...),
+			Graveyard:              widenCards(play.State.Graveyard),
 			StartOfNextTurnArsenal: play.State.Arsenal,
-			StartOfNextTurnDeck:    append([]Card(nil), play.State.Deck...),
+			StartOfNextTurnDeck:    widenCards(play.State.Deck),
 			StartOfNextTurnAuras:   append([]Aura(nil), play.State.Auras...),
 			StartOfNextTurnItems:   append([]Item(nil), play.State.Items...),
 			CardsDrawn:             play.State.CardsDrawn,
@@ -144,24 +153,32 @@ func EvalOneTurnForTesting(d *Deck, mp Matchup, initial TurnState, initialHand [
 		turn2Hand = append(turn2Hand, buf[head+drawCount2])
 		drawCount2++
 	}
-	handCopy := append([]Card(nil), turn2Hand...)
-	deckLeft := append([]Card(nil), buf[head+drawCount2:tail]...)
 	lineCopy := append([]CardAssignment(nil), play.BestLine...)
 
 	return TurnStartState{
 		Value:                        play.Value,
 		BestLine:                     lineCopy,
-		Graveyard:                    append([]Card(nil), play.State.Graveyard...),
-		StartOfNextTurnHand:          handCopy,
+		Graveyard:                    widenCards(play.State.Graveyard),
+		StartOfNextTurnHand:          widenCards(turn2Hand),
 		StartOfNextTurnArsenal:       play.State.Arsenal,
-		StartOfNextTurnDeck:          deckLeft,
+		StartOfNextTurnDeck:          widenCards(buf[head+drawCount2 : tail]),
 		StartOfNextTurnAuras:         append([]Aura(nil), survivors...),
 		StartOfNextTurnItems:         append([]Item(nil), itemQueue...),
 		CardsDrawn:                   play.State.CardsDrawn,
 		OpponentMarked:               play.State.OpponentMarked,
 		StartOfNextTurnTriggerDamage: trigDamage,
-		StartOfNextTurnGraveyard:     trigGraveyarded,
+		StartOfNextTurnGraveyard:     widenCards(trigGraveyarded),
 	}
+}
+
+// widenCards copies a sim []Card slice into a fresh []deck.Card. Used when surfacing chain
+// state to the test boundary, where TurnStartState carries the narrow deck.Card slot.
+func widenCards(cs []Card) []deck.Card {
+	out := make([]deck.Card, len(cs))
+	for i, c := range cs {
+		out[i] = c
+	}
+	return out
 }
 
 // resolveTurn1Hand picks turn 1's starting hand and the head offset into deckCards. With

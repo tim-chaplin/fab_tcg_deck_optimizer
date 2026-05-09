@@ -7,12 +7,13 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/heroes"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/deck"
 )
 
 // Tests that a non-attack pitch funding Aether Slash activates the +1 arcane rider.
 func TestPitchAttribution_AetherSlashSingleNonAttackPitchFiresRider(t *testing.T) {
-	hand := []sim.Card{cards.AetherSlashRed{}, cards.MaleficIncantationBlue{}}
-	d := sim.New(heroes.Viserai{}, nil, fillerDeck())
+	hand := []deck.Card{cards.AetherSlashRed{}, cards.MaleficIncantationBlue{}}
+	d := deck.New(heroes.Viserai{}, nil, fillerDeck())
 	state := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 0}, sim.TurnState{}, hand)
 	if state.Value != 5 {
 		t.Fatalf("Value = %d, want 5 (Aether Slash 4 + rider 1)", state.Value)
@@ -21,8 +22,8 @@ func TestPitchAttribution_AetherSlashSingleNonAttackPitchFiresRider(t *testing.T
 
 // Tests that an attack-typed pitch funding Aether Slash does not activate the rider.
 func TestPitchAttribution_AetherSlashAttackPitchDoesNotFireRider(t *testing.T) {
-	hand := []sim.Card{cards.AetherSlashRed{}, testutils.YellowAttack{}}
-	d := sim.New(heroes.Viserai{}, nil, fillerDeck())
+	hand := []deck.Card{cards.AetherSlashRed{}, testutils.YellowAttack{}}
+	d := deck.New(heroes.Viserai{}, nil, fillerDeck())
 	state := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 0}, sim.TurnState{}, hand)
 	if state.Value != 4 {
 		t.Fatalf("Value = %d, want 4 (Aether Slash base power, no rider)", state.Value)
@@ -31,8 +32,8 @@ func TestPitchAttribution_AetherSlashAttackPitchDoesNotFireRider(t *testing.T) {
 
 // Tests that Deathly Duet fires both riders when funded by one attack and one non-attack action.
 func TestPitchAttribution_DeathlyDuetBothRidersFireFromMixedFunding(t *testing.T) {
-	d := sim.New(heroes.Viserai{}, nil, fillerDeck())
-	hand := []sim.Card{
+	d := deck.New(heroes.Viserai{}, nil, fillerDeck())
+	hand := []deck.Card{
 		cards.DeathlyDuetRed{},
 		cards.AetherSlashRed{},
 		cards.MaleficIncantationBlue{},
@@ -44,9 +45,9 @@ func TestPitchAttribution_DeathlyDuetBothRidersFireFromMixedFunding(t *testing.T
 
 // Tests that a single pitch paying for multiple Aether Slashes activates the bonus on each.
 func TestPitchAttribution_OneNonAttackPitchFundsMultipleAetherSlashes(t *testing.T) {
-	d := sim.New(heroes.Viserai{}, nil, fillerDeck())
+	d := deck.New(heroes.Viserai{}, nil, fillerDeck())
 
-	withNonAttack := []sim.Card{
+	withNonAttack := []deck.Card{
 		cards.MauvrionSkiesRed{},
 		cards.AetherSlashRed{}, cards.AetherSlashRed{},
 		cards.MaleficIncantationBlue{},
@@ -55,7 +56,7 @@ func TestPitchAttribution_OneNonAttackPitchFundsMultipleAetherSlashes(t *testing
 		t.Errorf("non-attack pitch: Value = %d, want 15", got)
 	}
 
-	withAttack := []sim.Card{
+	withAttack := []deck.Card{
 		cards.MauvrionSkiesRed{},
 		cards.AetherSlashRed{}, cards.AetherSlashRed{},
 		testutils.BlueAttack{},
@@ -69,8 +70,8 @@ func TestPitchAttribution_OneNonAttackPitchFundsMultipleAetherSlashes(t *testing
 // initialHand. The cards never enter play this turn (the caller's hand is the only thing
 // the chain runner sees) but EvalOneTurnForTesting still wants a non-empty Deck.Cards so
 // the post-turn deal can pull a turn-2 hand without short-circuiting to a zero state.
-func fillerDeck() []sim.Card {
-	return []sim.Card{
+func fillerDeck() []deck.Card {
+	return []deck.Card{
 		testutils.BlueAttack{}, testutils.BlueAttack{},
 		testutils.BlueAttack{}, testutils.BlueAttack{},
 		testutils.BlueAttack{}, testutils.BlueAttack{},

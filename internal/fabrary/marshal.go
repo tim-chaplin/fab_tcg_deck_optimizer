@@ -26,7 +26,7 @@ const defaultFormat = "Silver Age"
 // Callers that want the hardcoded default equipment / sideboard loadout baked in should run
 // d.ApplyDefaults(defaults) before Marshal. writeDeck does that automatically so the
 // persisted .txt always carries the full loadout.
-func Marshal(d *sim.Deck) string {
+func Marshal(d *deck.Deck) string {
 	var b strings.Builder
 	name := d.Hero.(sim.Hero).Name()
 	fmt.Fprintf(&b, "Name: %s\n", name)

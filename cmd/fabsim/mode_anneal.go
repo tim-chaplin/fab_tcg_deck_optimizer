@@ -57,7 +57,7 @@ type annealConfig struct {
 
 // legalFilter returns the card-pool predicate for this run's format. anneal always runs under a
 // format, so this is non-nil; the deck package accepts nil for "no filtering" generally.
-func (c annealConfig) legalFilter() func(sim.Card) bool {
+func (c annealConfig) legalFilter() func(deck.Card) bool {
 	return c.format.IsLegal
 }
 
@@ -284,8 +284,8 @@ func runAnneal(cfg annealConfig) annealResult {
 // is what keeps the first-improvement classical climb from sampling the head of the slice
 // disproportionately, and what keeps the probabilistic SA gate from concentrating its
 // acceptances on a fixed slice of the solution space.
-func buildRoundMutations(cfg annealConfig, rng *rand.Rand, current *sim.Deck) []sim.Mutation {
-	mutations := sim.AllMutations(current, cfg.maxCopies, cfg.legalFilter())
+func buildRoundMutations(cfg annealConfig, rng *rand.Rand, current *deck.Deck) []sim.Mutation {
+	mutations := sim.AllMutations(current, cfg.maxCopies, registry.Registry{}, cfg.legalFilter())
 	rng.Shuffle(len(mutations), func(i, j int) {
 		mutations[i], mutations[j] = mutations[j], mutations[i]
 	})
@@ -307,8 +307,8 @@ func formatTempLabel(temperature float64) string {
 // the deck to disk when avg exceeds bestEverAvg, and returns the possibly-updated bestEver /
 // bestEverAvg. The current deck and its avg stay owned by the caller.
 func applyAcceptedMutation(cfg annealConfig, round int, verbose bool, tempLabel string,
-	idx, total int, mut sim.Mutation, d *sim.Deck, dStats sim.DeckStats, avg, currentAvg float64,
-	bestEver *sim.Deck, bestEverStats sim.DeckStats, bestEverAvg float64) (*sim.Deck, sim.DeckStats, float64) {
+	idx, total int, mut sim.Mutation, d *deck.Deck, dStats sim.DeckStats, avg, currentAvg float64,
+	bestEver *deck.Deck, bestEverStats sim.DeckStats, bestEverAvg float64) (*deck.Deck, sim.DeckStats, float64) {
 	verb := "improvement"
 	if avg <= currentAvg {
 		verb = "annealing step"
@@ -338,7 +338,7 @@ func applyAcceptedMutation(cfg annealConfig, round int, verbose bool, tempLabel 
 // full best-ever deck listing, and builds the annealResult the top-level command surfaces as
 // exit code and session summary. aborted is threaded through as-is because runAnnealCmd keys
 // exit code 130 off it.
-func finishAnnealRun(cfg annealConfig, bestEver *sim.Deck, bestEverStats sim.DeckStats, bestEverAvg, startingAvg float64,
+func finishAnnealRun(cfg annealConfig, bestEver *deck.Deck, bestEverStats sim.DeckStats, bestEverAvg, startingAvg float64,
 	statusLine string, aborted bool) annealResult {
 	fmt.Fprintln(os.Stderr, "\n"+statusLine)
 	fmt.Println()
@@ -374,7 +374,7 @@ func coolDown(temperature, decay, minTemp float64) float64 {
 // may finish below the cap and prompt a re-evaluation next session, which is fine —
 // adaptive runs are cheap). Routes through evaluateParallel so the once-per-session
 // baseline benefits from the same DefaultWorkers fan-out as iterate's per-mutation evals.
-func baselineEvaluate(d *sim.Deck, cfg annealConfig, rng *rand.Rand) sim.DeckStats {
+func baselineEvaluate(d *deck.Deck, cfg annealConfig, rng *rand.Rand) sim.DeckStats {
 	shuffles := cfg.shuffles
 	if cfg.adaptive {
 		shuffles = -1
@@ -394,17 +394,15 @@ func baselineEvaluate(d *sim.Deck, cfg annealConfig, rng *rand.Rand) sim.DeckSta
 // from disk) is sanitized before any of the above branches: the tagged slots are replaced
 // with random legal picks and the run always takes the re-evaluate path so the baseline
 // reflects the new card list.
-func prepareBaseline(cfg annealConfig, rng *rand.Rand) (*sim.Deck, sim.DeckStats, float64) {
+func prepareBaseline(cfg annealConfig, rng *rand.Rand) (*deck.Deck, sim.DeckStats, float64) {
 	best, bestStats, err := loadExisting(cfg.outPath)
 	if err != nil {
 		die("%v", err)
 	}
 	if best == nil {
 		fmt.Fprintf(os.Stderr, "no deck at %s; generating a random starting deck\n", cfg.outPath)
-		legal := cfg.legalFilter()
 		best = deck.Random(heroes.Viserai{}, cfg.deckSize, cfg.maxCopies, rng,
-			func(c deck.Card) bool { return legal(c.(sim.Card)) },
-			registry.Registry{})
+			cfg.legalFilter(), registry.Registry{})
 		bestStats = baselineEvaluate(best, cfg, rng)
 		bestAvg := bestStats.Mean()
 		if err := writeDeck(best, bestStats, cfg.outPath); err != nil {
@@ -445,7 +443,7 @@ func prepareBaseline(cfg annealConfig, rng *rand.Rand) (*sim.Deck, sim.DeckStats
 // replaced, -reevaluate forced, or stale shuffle count), reconstructs the deck (Sideboard and
 // Equipment preserved), runs baselineEvaluate, and persists the result. Returns the rebuilt
 // deck, its fresh stats, and avg.
-func reevaluateBaseline(cfg annealConfig, rng *rand.Rand, loaded *sim.Deck, loadedStats sim.DeckStats, savedAvg float64, sanitized []sim.NotImplementedReplacement) (*sim.Deck, sim.DeckStats, float64) {
+func reevaluateBaseline(cfg annealConfig, rng *rand.Rand, loaded *deck.Deck, loadedStats sim.DeckStats, savedAvg float64, sanitized []deck.NotImplementedReplacement) (*deck.Deck, sim.DeckStats, float64) {
 	reason := fmt.Sprintf("from %d shuffles", loadedStats.Runs)
 	if cfg.reevaluate && loadedStats.Runs >= cfg.shuffles {
 		reason = "-reevaluate forced"
@@ -483,7 +481,7 @@ func reevaluateBaseline(cfg annealConfig, rng *rand.Rand, loaded *sim.Deck, load
 // maybePrintBaselineCards emits the startup card-list dump unless -quiet-load suppressed it. The
 // leading blank line is part of the listing block, so it's also gated — otherwise -quiet-load
 // would leave a lone empty line hanging after the baseline avg summary.
-func maybePrintBaselineCards(cfg annealConfig, d *sim.Deck) {
+func maybePrintBaselineCards(cfg annealConfig, d *deck.Deck) {
 	if cfg.quietLoad {
 		return
 	}

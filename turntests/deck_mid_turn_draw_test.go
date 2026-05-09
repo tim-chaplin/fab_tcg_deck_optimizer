@@ -9,13 +9,14 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/deck"
 )
 
 // Tests that a mid-turn-drawn card fills an empty arsenal slot at end of turn rather than
 // being held into turn 2.
 func TestEvalOneTurn_MidTurnDrawArsenalsWhenSlotEmpty(t *testing.T) {
 	beacon := testutils.RedAttack{}
-	deckCards := []sim.Card{
+	deckCards := []deck.Card{
 		cards.SnatchRed{},
 		testutils.BlueAttack{},
 		testutils.BlueAttack{},
@@ -27,10 +28,10 @@ func TestEvalOneTurn_MidTurnDrawArsenalsWhenSlotEmpty(t *testing.T) {
 		testutils.YellowAttack{},
 		testutils.YellowAttack{},
 	}
-	d := sim.New(heroes.Viserai{}, nil, deckCards)
+	d := deck.New(heroes.Viserai{}, nil, deckCards)
 	state := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 0}, sim.TurnState{}, nil)
 
-	wantHand := []sim.Card{
+	wantHand := []deck.Card{
 		testutils.BlueAttack{},
 		testutils.BlueAttack{},
 		testutils.BlueAttack{},
@@ -46,7 +47,7 @@ func TestEvalOneTurn_MidTurnDrawArsenalsWhenSlotEmpty(t *testing.T) {
 
 	// Remaining deck: one untouched Yellow from source position 9, then the pitched Blue
 	// recycled to the bottom on turn 1.
-	wantDeck := []sim.Card{
+	wantDeck := []deck.Card{
 		testutils.YellowAttack{},
 		testutils.BlueAttack{},
 	}
@@ -63,7 +64,7 @@ func TestEvalOneTurn_MidTurnDrawArsenalsWhenSlotEmpty(t *testing.T) {
 // the other stays Held into turn 2.
 func TestEvalOneTurn_TwoMidTurnDraws_OneArsenalsOneHeld(t *testing.T) {
 	beacon := testutils.RedAttack{}
-	deckCards := []sim.Card{
+	deckCards := []deck.Card{
 		cards.FlyingHighRed{},
 		cards.FlyingHighRed{},
 		cards.SnatchRed{},
@@ -75,12 +76,12 @@ func TestEvalOneTurn_TwoMidTurnDraws_OneArsenalsOneHeld(t *testing.T) {
 		testutils.BlueAttack{},
 		testutils.YellowAttack{},
 	}
-	d := sim.New(heroes.Viserai{}, nil, deckCards)
+	d := deck.New(heroes.Viserai{}, nil, deckCards)
 	state := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 0}, sim.TurnState{}, nil)
 
 	// One beacon arsenaled, the other held at slot 0; the remaining three slots are the fresh
 	// refill from deck positions 6..8.
-	wantHand := []sim.Card{
+	wantHand := []deck.Card{
 		beacon,
 		testutils.BlueAttack{},
 		testutils.BlueAttack{},
@@ -96,7 +97,7 @@ func TestEvalOneTurn_TwoMidTurnDraws_OneArsenalsOneHeld(t *testing.T) {
 
 	// Remaining deck: only the Yellow tripwire at source position 9. Turn 1 had no pitches
 	// (all four cards played as attacks), so nothing recycled to the bottom.
-	wantDeck := []sim.Card{
+	wantDeck := []deck.Card{
 		testutils.YellowAttack{},
 	}
 	if !reflect.DeepEqual(state.StartOfNextTurnDeck, wantDeck) {
@@ -112,7 +113,7 @@ func TestEvalOneTurn_TwoMidTurnDraws_OneArsenalsOneHeld(t *testing.T) {
 func TestEvalOneTurn_ThreeMidTurnDraws_ArsenalFromDrawnPool(t *testing.T) {
 	beacon := testutils.RedAttack{}
 	arsenalIn := cards.SnatchRed{}
-	deckCards := []sim.Card{
+	deckCards := []deck.Card{
 		cards.FlyingHighRed{},
 		cards.FlyingHighRed{},
 		cards.SnatchRed{},
@@ -124,11 +125,11 @@ func TestEvalOneTurn_ThreeMidTurnDraws_ArsenalFromDrawnPool(t *testing.T) {
 		testutils.BlueAttack{},
 		testutils.YellowAttack{},
 	}
-	d := sim.New(heroes.Viserai{}, nil, deckCards)
+	d := deck.New(heroes.Viserai{}, nil, deckCards)
 	state := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 0}, sim.TurnState{Arsenal: arsenalIn}, nil)
 
 	// Two held beacons plus two fresh Blues from deck positions 7..8.
-	wantHand := []sim.Card{
+	wantHand := []deck.Card{
 		beacon,
 		beacon,
 		testutils.BlueAttack{},
@@ -143,7 +144,7 @@ func TestEvalOneTurn_ThreeMidTurnDraws_ArsenalFromDrawnPool(t *testing.T) {
 	}
 
 	// Remaining deck: only the Yellow tripwire. Turn 1 had no pitches.
-	wantDeck := []sim.Card{
+	wantDeck := []deck.Card{
 		testutils.YellowAttack{},
 	}
 	if !reflect.DeepEqual(state.StartOfNextTurnDeck, wantDeck) {
@@ -159,7 +160,7 @@ func TestEvalOneTurn_ThreeMidTurnDraws_ArsenalFromDrawnPool(t *testing.T) {
 func TestEvalOneTurn_MidTurnDrawHeldWhenArsenalFull(t *testing.T) {
 	beacon := testutils.RedAttack{}
 	arsenalIn := cards.ToughenUpBlue{} // DR, cost 2, defense 4 — stays in arsenal with incoming 0
-	deckCards := []sim.Card{
+	deckCards := []deck.Card{
 		cards.SnatchRed{},
 		testutils.BlueAttack{},
 		testutils.BlueAttack{},
@@ -171,10 +172,10 @@ func TestEvalOneTurn_MidTurnDrawHeldWhenArsenalFull(t *testing.T) {
 		testutils.YellowAttack{},
 		testutils.YellowAttack{},
 	}
-	d := sim.New(heroes.Viserai{}, nil, deckCards)
+	d := deck.New(heroes.Viserai{}, nil, deckCards)
 	state := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 0}, sim.TurnState{Arsenal: arsenalIn}, nil)
 
-	wantHand := []sim.Card{
+	wantHand := []deck.Card{
 		beacon,
 		testutils.BlueAttack{},
 		testutils.BlueAttack{},
@@ -190,7 +191,7 @@ func TestEvalOneTurn_MidTurnDrawHeldWhenArsenalFull(t *testing.T) {
 
 	// Remaining deck: two untouched Yellows from positions 8..9, then the pitched Blue
 	// recycled to the bottom on turn 1.
-	wantDeck := []sim.Card{
+	wantDeck := []deck.Card{
 		testutils.YellowAttack{},
 		testutils.YellowAttack{},
 		testutils.BlueAttack{},
@@ -207,17 +208,17 @@ func TestEvalOneTurn_MidTurnDrawHeldWhenArsenalFull(t *testing.T) {
 // Tests that without go-again the drawn card and a Held card share the post-chain pool —
 // exactly one arsenals, the other anchors turn 2's hand (either outcome is accepted).
 func TestEvalOneTurn_MidTurnDrawSansGoAgainStaysHeld(t *testing.T) {
-	initialHand := []sim.Card{
+	initialHand := []deck.Card{
 		cards.SnatchRed{},
 		cards.ToughenUpBlue{},
 	}
-	deckCards := []sim.Card{
+	deckCards := []deck.Card{
 		cards.AetherSlashRed{},
 		testutils.BlueAttack{},
 		testutils.BlueAttack{},
 		testutils.BlueAttack{},
 	}
-	d := sim.New(heroes.Viserai{}, nil, deckCards)
+	d := deck.New(heroes.Viserai{}, nil, deckCards)
 	state := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 0}, sim.TurnState{}, initialHand)
 
 	// Turn 1 damage: Snatch alone for 4 (no chain extension, no Viserai trigger — Snatch isn't
@@ -242,7 +243,7 @@ func TestEvalOneTurn_MidTurnDrawSansGoAgainStaysHeld(t *testing.T) {
 	if arsenalIsTU {
 		wantAnchor = cards.AetherSlashRed{}
 	}
-	wantHand := []sim.Card{
+	wantHand := []deck.Card{
 		wantAnchor,
 		testutils.BlueAttack{},
 		testutils.BlueAttack{},
@@ -265,8 +266,8 @@ func TestEvalOneTurn_MidTurnDrawSansGoAgainStaysHeld(t *testing.T) {
 
 // Tests that DrawOne against an empty deck is a no-op (no panic, no spurious draw).
 func TestEvalOneTurn_DrawOneOnEmptyDeckIsNoop(t *testing.T) {
-	initialHand := []sim.Card{cards.SnatchRed{}}
-	d := sim.New(heroes.Viserai{}, nil, nil)
+	initialHand := []deck.Card{cards.SnatchRed{}}
+	d := deck.New(heroes.Viserai{}, nil, nil)
 	state := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 0}, sim.TurnState{}, initialHand)
 
 	if state.Value != 4 {

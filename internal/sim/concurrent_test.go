@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/heroes"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry"
 )
 
 // Tests that concurrent Evaluate from many goroutines (each with its own Evaluator)
@@ -23,7 +24,7 @@ func TestEvaluate_ConcurrentNoMapPanic(t *testing.T) {
 	}
 	const iterations = 25
 
-	baseline := Random(heroes.Viserai{}, 40, 2, rand.New(rand.NewSource(42)), nil)
+	baseline := deck.Random(heroes.Viserai{}, 40, 2, rand.New(rand.NewSource(42)), nil, registry.Registry{})
 
 	var wg sync.WaitGroup
 	for w := 0; w < numWorkers; w++ {
@@ -52,9 +53,9 @@ func TestEvaluate_ConcurrentNoMapPanic(t *testing.T) {
 // shapes regardless of whether an improvement is found.
 func TestIterateParallel_RunsWithoutPanic(t *testing.T) {
 	rng := rand.New(rand.NewSource(42))
-	baseline := Random(heroes.Viserai{}, 40, 2, rng, nil)
+	baseline := deck.Random(heroes.Viserai{}, 40, 2, rng, nil, registry.Registry{})
 	baseAvg := NewEvaluator().Evaluate(baseline, 10, Matchup{}, rng).Mean()
-	mutations := AllMutations(baseline, 2, nil)
+	mutations := AllMutations(baseline, 2, registry.Registry{}, nil)
 	// Cap mutations so the test stays under a second; full list is thousands of entries.
 	if len(mutations) > 40 {
 		mutations = mutations[:40]
@@ -93,9 +94,9 @@ func TestIterateParallel_RunsWithoutPanic(t *testing.T) {
 // Pre-cancels for deterministic behaviour.
 func TestIterateParallel_AbortsOnContextCancel(t *testing.T) {
 	rng := rand.New(rand.NewSource(42))
-	baseline := Random(heroes.Viserai{}, 40, 2, rng, nil)
+	baseline := deck.Random(heroes.Viserai{}, 40, 2, rng, nil, registry.Registry{})
 	baseAvg := NewEvaluator().Evaluate(baseline, 10, Matchup{}, rng).Mean()
-	mutations := AllMutations(baseline, 2, nil)
+	mutations := AllMutations(baseline, 2, registry.Registry{}, nil)
 
 	ctx, cancel := context.WithCancel(context.Background())
 	cancel() // pre-cancel so no mutation ever completes its shallow eval
@@ -133,8 +134,8 @@ func TestIterateParallel_AbortsOnContextCancel(t *testing.T) {
 // unreachable — workers drain the queue without a serial deep-confirm bottleneck.
 func TestIterateParallel_TerminatesWithNoImprovement(t *testing.T) {
 	rng := rand.New(rand.NewSource(42))
-	baseline := Random(heroes.Viserai{}, 40, 2, rng, nil)
-	mutations := AllMutations(baseline, 2, nil)
+	baseline := deck.Random(heroes.Viserai{}, 40, 2, rng, nil, registry.Registry{})
+	mutations := AllMutations(baseline, 2, registry.Registry{}, nil)
 	// Cap the mutation list so the test stays well under the hang-regression threshold even on
 	// slower CI runners. Full mutation list is thousands of entries.
 	if len(mutations) > 40 {

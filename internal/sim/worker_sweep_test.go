@@ -26,6 +26,7 @@ import (
 	"math/rand"
 	"testing"
 
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry"
 	. "github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/deck"
 )
@@ -105,7 +106,7 @@ func BenchmarkAnnealWorkerSweep(b *testing.B) {
 	if loaded == nil {
 		b.Skip("mydecks/viserai_v4.json not found — saved deck needed for realistic bench")
 	}
-	all := AllMutations(loaded, 2, nil)
+	all := AllMutations(loaded, 2, registry.Registry{}, nil)
 	if len(all) < mutationSampleSize {
 		b.Fatalf("mutation pool size %d < sample size %d", len(all), mutationSampleSize)
 	}

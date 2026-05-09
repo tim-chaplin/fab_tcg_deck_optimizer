@@ -13,11 +13,19 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/deck"
 )
 
+// CardPool is the registry view the mutation enumerator needs: the legal card and weapon
+// rosters it draws swap-in candidates and alternative loadouts from. internal/registry's
+// Registry struct satisfies it directly; tests can pass any equivalent stub.
+type CardPool interface {
+	LegalCards() []deck.Card
+	LegalWeapons() []deck.Weapon
+}
+
 // Mutation is one candidate single-slot change: the mutated Deck plus a human-readable summary
 // (e.g. "swapped Aether Slash [R] for Arcanic Spike [R]"). Consumers use Deck to evaluate
 // and Description for logging.
 type Mutation struct {
-	Deck        *Deck
+	Deck        *deck.Deck
 	Description string
 }
 
@@ -36,18 +44,18 @@ type Mutation struct {
 // synergies whose halves are individually weaker than competitors and would never enter the
 // deck via single-slot mutations alone — see cardPairs in card_pairs.go.
 //
-// legal filters the addition pool: only accepted IDs become swap-in candidates, so format-banned
-// cards can't be introduced. Removal targets aren't filtered — a deck that entered the climb
-// holding a banned card can still have it swapped out. Pass nil to skip filtering.
+// pool supplies the legal card and weapon rosters; legal optionally filters pool's cards
+// (format ban check). Removal targets aren't filtered — a deck that entered the climb holding
+// a banned card can still have it swapped out. legal=nil disables the format filter.
 //
 // maxCopies is enforced by filterMaxCopiesViolations as a final post-pass over the combined
 // candidate list — both single-slot and pair generators emit cap-blind candidates and the
 // shared filter strips any whose result deck exceeds the per-printing limit.
 //
 // Returned decks share no backing slices with d or each other.
-func AllMutations(d *Deck, maxCopies int, legal func(Card) bool) []Mutation {
-	out := weaponLoadoutMutations(d)
-	out = append(out, singleSwapMutations(d, legal)...)
+func AllMutations(d *deck.Deck, maxCopies int, pool CardPool, legal func(deck.Card) bool) []Mutation {
+	out := weaponLoadoutMutations(d, pool)
+	out = append(out, singleSwapMutations(d, pool, legal)...)
 	out = append(out, pairSwapMutations(d, legal)...)
 	return filterMaxCopiesViolations(out, maxCopies)
 }
@@ -55,8 +63,8 @@ func AllMutations(d *Deck, maxCopies int, legal func(Card) bool) []Mutation {
 // weaponLoadoutMutations emits one Mutation per distinct weapon loadout that isn't the current
 // one. Loadouts are canonicalised by weaponKey (names sorted) and processed in key order so
 // the output is deterministic regardless of map-iteration randomness.
-func weaponLoadoutMutations(d *Deck) []Mutation {
-	loadouts := weaponLoadouts(RegistryLegalWeapons())
+func weaponLoadoutMutations(d *deck.Deck, pool CardPool) []Mutation {
+	loadouts := weaponLoadouts(pool.LegalWeapons())
 	currentKey := weaponKey(d.Weapons)
 	type keyedLoadout struct {
 		key     string
@@ -88,16 +96,23 @@ func weaponLoadoutMutations(d *Deck) []Mutation {
 // targets iterate in ascending ids.CardID for stability (no value-based bias; the anneal driver
 // shuffles afterward). Add candidates skip no-ops (same ID); the maxCopies cap is enforced
 // by filterMaxCopiesViolations downstream so this generator stays cap-blind.
-func singleSwapMutations(d *Deck, legal func(Card) bool) []Mutation {
+func singleSwapMutations(d *deck.Deck, pool CardPool, legal func(deck.Card) bool) []Mutation {
 	uniqueIDs := sortedDeckIDs(d.Cards)
 
-	// legalPool returns IDs in ascending order (DeckableCards() iterates byID).
-	pool := legalPool(legal)
+	// pool.LegalCards returns cards in ascending ID order (registry iterates byID).
+	cards := pool.LegalCards()
+	addIDs := make([]ids.CardID, 0, len(cards))
+	for _, c := range cards {
+		if legal != nil && !legal(c) {
+			continue
+		}
+		addIDs = append(addIDs, c.ID())
+	}
 
 	var out []Mutation
 	for _, removeID := range uniqueIDs {
 		removed := GetCard(removeID)
-		for _, addID := range pool {
+		for _, addID := range addIDs {
 			if addID == removeID {
 				continue // no-op: remove one and add one of the same card.
 			}

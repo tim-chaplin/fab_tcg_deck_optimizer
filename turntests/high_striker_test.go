@@ -7,6 +7,7 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/heroes"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/deck"
 )
 
 // Tests the High Striker → Critical Strike chain: High Striker's on-attack-action-hit
@@ -24,8 +25,8 @@ func TestHighStriker_TriggersOnNextAttackActionHit(t *testing.T) {
 	}
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
-			d := sim.New(heroes.Viserai{}, nil, fillerDeck())
-			hand := []sim.Card{
+			d := deck.New(heroes.Viserai{}, nil, fillerDeck())
+			hand := []deck.Card{
 				tc.striker,
 				cards.CriticalStrikeYellow{},
 				testutils.BluePitch{},

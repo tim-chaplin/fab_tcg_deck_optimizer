@@ -5,8 +5,10 @@ import (
 	"testing"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/heroes"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/weapons"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/deck"
 )
 
 func TestAllMutations_CountsAndShape(t *testing.T) {
@@ -15,9 +17,9 @@ func TestAllMutations_CountsAndShape(t *testing.T) {
 	// counting math below holds. ArcanicCrackleRed and ArcanicSpikeRed are stable picks.
 	a := GetCard(ids.ArcanicCrackleRed)
 	b := GetCard(ids.ArcanicSpikeRed)
-	d := New(heroes.Viserai{}, []Weapon{weapons.NebulaBlade{}}, []Card{a, a, b, b})
+	d := deck.New(heroes.Viserai{}, []deck.Weapon{weapons.NebulaBlade{}}, []deck.Card{a, a, b, b})
 
-	muts := AllMutations(d, 2, nil)
+	muts := AllMutations(d, 2, registry.Registry{}, nil)
 
 	// Weapon mutations: every loadout except the current one. Card mutations at maxCopies=2:
 	// for each of the 2 unique removals, every pool entry except self (no-op) and the other
@@ -26,8 +28,9 @@ func TestAllMutations_CountsAndShape(t *testing.T) {
 	// — with 2 unique deck IDs that's 1 per absent pair. Both halves absent ⇒ all pairs
 	// contribute. Use LegalPool / LegalWeapons so the counts track AllMutations's own
 	// filtering (NotImplemented cards and weapons are skipped on both sides).
-	loadouts := WeaponLoadouts(LegalWeapons())
-	pool := LegalPool(nil)
+	reg := registry.Registry{}
+	loadouts := WeaponLoadouts(reg.LegalWeapons())
+	pool := reg.LegalCards()
 	wantWeaponMuts := len(loadouts) - 1
 	wantCardMuts := 2 * (len(pool) - 2)
 	wantPairMuts := expectedPairMutCount(d, 2)
@@ -55,12 +58,12 @@ func TestAllMutations_CountsAndShape(t *testing.T) {
 func TestAllMutations_OddCountsAllowed(t *testing.T) {
 	a := GetCard(ids.ArcanicCrackleRed)
 	b := GetCard(ids.ArcanicSpikeRed)
-	d := New(heroes.Viserai{}, []Weapon{weapons.NebulaBlade{}}, []Card{a, a, b, b})
+	d := deck.New(heroes.Viserai{}, []deck.Weapon{weapons.NebulaBlade{}}, []deck.Card{a, a, b, b})
 
 	// At maxCopies=3, each of the 2 in-deck cards (a, b) is below the cap, so "remove a, add b"
 	// (and the mirror) become legal. That's 2 more card mutations than the maxCopies=2 case.
-	mutsLow := AllMutations(d, 2, nil)
-	mutsHigh := AllMutations(d, 3, nil)
+	mutsLow := AllMutations(d, 2, registry.Registry{}, nil)
+	mutsHigh := AllMutations(d, 3, registry.Registry{}, nil)
 	if len(mutsHigh)-len(mutsLow) != 2 {
 		t.Errorf("maxCopies=3 should produce exactly 2 more mutations than maxCopies=2; got diff=%d",
 			len(mutsHigh)-len(mutsLow))
@@ -97,10 +100,10 @@ func TestAllMutations_OddCountsAllowed(t *testing.T) {
 func TestAllMutations_PreservesSideboard(t *testing.T) {
 	a := GetCard(ids.AetherSlashRed)
 	b := GetCard(ids.ArcanicSpikeRed)
-	d := New(heroes.Viserai{}, []Weapon{weapons.NebulaBlade{}}, []Card{a, a, b, b})
+	d := deck.New(heroes.Viserai{}, []deck.Weapon{weapons.NebulaBlade{}}, []deck.Card{a, a, b, b})
 	d.Sideboard = []string{a.Name(), b.Name(), b.Name()}
 
-	muts := AllMutations(d, 2, nil)
+	muts := AllMutations(d, 2, registry.Registry{}, nil)
 	if len(muts) == 0 {
 		t.Fatal("expected at least one mutation")
 	}
@@ -124,10 +127,10 @@ func TestAllMutations_PreservesSideboard(t *testing.T) {
 func TestAllMutations_Deterministic(t *testing.T) {
 	a := GetCard(ids.AetherSlashRed)
 	b := GetCard(ids.ArcanicSpikeRed)
-	d := New(heroes.Viserai{}, []Weapon{weapons.NebulaBlade{}}, []Card{a, a, b, b})
+	d := deck.New(heroes.Viserai{}, []deck.Weapon{weapons.NebulaBlade{}}, []deck.Card{a, a, b, b})
 
-	first := AllMutations(d, 2, nil)
-	second := AllMutations(d, 2, nil)
+	first := AllMutations(d, 2, registry.Registry{}, nil)
+	second := AllMutations(d, 2, registry.Registry{}, nil)
 
 	if len(first) != len(second) {
 		t.Fatalf("mutation counts differ between calls: %d vs %d", len(first), len(second))
@@ -151,9 +154,9 @@ func TestAllMutations_Deterministic(t *testing.T) {
 
 func TestAllMutations_NoDuplicateOfSource(t *testing.T) {
 	a := GetCard(ids.ArcanicCrackleRed)
-	d := New(heroes.Viserai{}, []Weapon{weapons.NebulaBlade{}}, []Card{a, a, a, a})
+	d := deck.New(heroes.Viserai{}, []deck.Weapon{weapons.NebulaBlade{}}, []deck.Card{a, a, a, a})
 	srcKey := DeckFingerprint(d)
-	for i, m := range AllMutations(d, 2, nil) {
+	for i, m := range AllMutations(d, 2, registry.Registry{}, nil) {
 		if DeckFingerprint(m.Deck) == srcKey {
 			t.Errorf("mutation %d equals the source deck", i)
 		}
@@ -165,7 +168,7 @@ func TestAllMutations_NoDuplicateOfSource(t *testing.T) {
 // generator. For each registered pair × variant cross-product, counts the distinct
 // (sorted-removed-IDs) combos that survive overlap suppression. Combos rejected by the
 // shared maxCopies post-filter are dropped at the end.
-func expectedPairMutCount(d *Deck, maxCopies int) int {
+func expectedPairMutCount(d *deck.Deck, maxCopies int) int {
 	// Build the deduped removed-ID combo set the index-based generator collapses into.
 	type idPair struct{ a, b ids.CardID }
 	combos := map[idPair]bool{}

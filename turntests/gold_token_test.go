@@ -7,16 +7,17 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/weapons"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/deck"
 )
 
 func TestGoldAbility_SpendsToFillArsenalAndSwings(t *testing.T) {
-	deck := []sim.Card{
+	cards := []deck.Card{
 		// Five fillers covers the gold-spend draw plus next-turn's 4 dealt cards.
 		testutils.RedAttack{}, testutils.RedAttack{}, testutils.RedAttack{},
 		testutils.RedAttack{}, testutils.RedAttack{},
 	}
-	d := sim.New(heroes.Viserai{}, []sim.Weapon{weapons.ReapingBlade{}}, deck)
-	hand := []sim.Card{testutils.BluePitch{}}
+	d := deck.New(heroes.Viserai{}, []deck.Weapon{weapons.ReapingBlade{}}, cards)
+	hand := []deck.Card{testutils.BluePitch{}}
 	priorItems := []sim.Item{sim.NewGoldItem(1)}
 	got := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 0}, sim.TurnState{Items: priorItems}, hand)
 	if got.Value != 3 {

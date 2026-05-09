@@ -7,16 +7,17 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/weapons"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/deck"
 )
 
 // Tests that the Copper token ability stays unspent when the chain can't fund its {4} cost.
 func TestCopperAbility_NotEnoughResourceSkipsSpend(t *testing.T) {
-	deck := []sim.Card{
+	cards := []deck.Card{
 		testutils.RedAttack{}, testutils.RedAttack{}, testutils.RedAttack{},
 		testutils.RedAttack{}, testutils.RedAttack{},
 	}
-	d := sim.New(heroes.Viserai{}, nil, deck)
-	hand := []sim.Card{testutils.BluePitch{}}
+	d := deck.New(heroes.Viserai{}, nil, cards)
+	hand := []deck.Card{testutils.BluePitch{}}
 	priorItems := []sim.Item{sim.NewCopperItem(1)}
 	got := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 0}, sim.TurnState{Items: priorItems}, hand)
 	if got.Copper() != 1 {
@@ -28,12 +29,12 @@ func TestCopperAbility_NotEnoughResourceSkipsSpend(t *testing.T) {
 // both. Two blue pitches (3+3=6 res) fund the Copper ability ({4}) plus a Reaping
 // Blade swing ({1}), with 1 res to spare.
 func TestCopperAbility_SpendsAndSwings(t *testing.T) {
-	deck := []sim.Card{
+	cards := []deck.Card{
 		testutils.RedAttack{}, testutils.RedAttack{}, testutils.RedAttack{},
 		testutils.RedAttack{}, testutils.RedAttack{},
 	}
-	d := sim.New(heroes.Viserai{}, []sim.Weapon{weapons.ReapingBlade{}}, deck)
-	hand := []sim.Card{testutils.BluePitch{}, testutils.BluePitch{}}
+	d := deck.New(heroes.Viserai{}, []deck.Weapon{weapons.ReapingBlade{}}, cards)
+	hand := []deck.Card{testutils.BluePitch{}, testutils.BluePitch{}}
 	priorItems := []sim.Item{sim.NewCopperItem(1)}
 	got := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 0}, sim.TurnState{Items: priorItems}, hand)
 	if got.Value != 3 {

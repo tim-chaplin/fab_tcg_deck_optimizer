@@ -11,15 +11,16 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/deck"
 )
 
 // Marshal returns the JSON encoding of `d` and its accumulated `stats` (indented) with
 // card/weapon/hero names in place of interface values.
-func Marshal(d *sim.Deck, stats sim.DeckStats) ([]byte, error) {
+func Marshal(d *deck.Deck, stats sim.DeckStats) ([]byte, error) {
 	return json.MarshalIndent(toJSON(d, stats), "", "  ")
 }
 
-func toJSON(d *sim.Deck, stats sim.DeckStats) *DeckJSON {
+func toJSON(d *deck.Deck, stats sim.DeckStats) *DeckJSON {
 	weapons := make([]string, len(d.Weapons))
 	for i, w := range d.Weapons {
 		weapons[i] = w.Name()

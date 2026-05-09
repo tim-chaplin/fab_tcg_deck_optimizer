@@ -10,6 +10,7 @@ import (
 	"fmt"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/deck"
 )
 
 // Format identifies a deck-construction format. Every fabsim run is scoped to one format —
@@ -34,7 +35,7 @@ func Parse(s string) (Format, error) {
 
 // IsLegal reports whether c may appear in a deck built for this format. Silver Age rejects
 // cards tagged with the sim.NotSilverAgeLegal marker; other formats (when added) plug in here.
-func (f Format) IsLegal(c sim.Card) bool {
+func (f Format) IsLegal(c deck.Card) bool {
 	switch f {
 	case SilverAge:
 		_, banned := c.(sim.NotSilverAgeLegal)

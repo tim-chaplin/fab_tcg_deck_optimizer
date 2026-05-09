@@ -7,6 +7,7 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/weapons"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/deck"
 )
 
 // End-to-end coverage for Mauvrion Skies's on-hit Runechant rider via Best. Pins both
@@ -14,8 +15,8 @@ import (
 
 // Tests that Mauvrion alone (no matching target) deals zero damage.
 func TestBest_MauvrionAloneFizzlesWithoutDamage(t *testing.T) {
-	h := []sim.Card{cards.MauvrionSkiesRed{}}
-	d := sim.New(testutils.Hero{Intel: 4}, nil, nil)
+	h := []deck.Card{cards.MauvrionSkiesRed{}}
+	d := deck.New(testutils.Hero{Intel: 4}, nil, nil)
 	got := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 0}, sim.TurnState{}, h)
 	if got.Value != 0 {
 		t.Fatalf("want value 0 (trigger has no target), got %d (roles=[%s])",
@@ -26,9 +27,9 @@ func TestBest_MauvrionAloneFizzlesWithoutDamage(t *testing.T) {
 // Tests that a Runeblade weapon swing doesn't satisfy Mauvrion's predicate (attack action
 // only).
 func TestBest_MauvrionBladeOnlyFizzles(t *testing.T) {
-	h := []sim.Card{cards.MauvrionSkiesRed{}, testutils.YellowAttack{}}
-	ws := []sim.Weapon{weapons.ReapingBlade{}}
-	d := sim.New(testutils.Hero{Intel: 4}, ws, nil)
+	h := []deck.Card{cards.MauvrionSkiesRed{}, testutils.YellowAttack{}}
+	ws := []deck.Weapon{weapons.ReapingBlade{}}
+	d := deck.New(testutils.Hero{Intel: 4}, ws, nil)
 	got := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 0}, sim.TurnState{}, h)
 	// Pitch YellowAttack (2 res) → play Mauvrion (cost 0, go again) → Blade swing (cost 1,
 	// 3 damage). Mauvrion's trigger doesn't match the weapon, so no Runechants.
@@ -40,8 +41,8 @@ func TestBest_MauvrionBladeOnlyFizzles(t *testing.T) {
 
 // Tests that a Generic (non-Runeblade) attack action doesn't satisfy Mauvrion's predicate.
 func TestBest_MauvrionNonRunebladeAttackFizzles(t *testing.T) {
-	h := []sim.Card{cards.MauvrionSkiesRed{}, testutils.RedAttack{}, testutils.YellowAttack{}}
-	d := sim.New(testutils.Hero{Intel: 4}, nil, nil)
+	h := []deck.Card{cards.MauvrionSkiesRed{}, testutils.RedAttack{}, testutils.YellowAttack{}}
+	d := deck.New(testutils.Hero{Intel: 4}, nil, nil)
 	got := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 0}, sim.TurnState{}, h)
 	// Pitch YellowAttack (2 res) → play Mauvrion (cost 0, go again) → play fake RedAttack
 	// (cost 1, 3 damage, go again). The Generic attack action doesn't qualify for
@@ -54,12 +55,12 @@ func TestBest_MauvrionNonRunebladeAttackFizzles(t *testing.T) {
 
 // Tests that a likely-hit Runeblade attack action picks up Mauvrion's +3 Runechant rider.
 func TestBest_MauvrionLikelyHitRunebladeAttackCreditsRider(t *testing.T) {
-	h := []sim.Card{
+	h := []deck.Card{
 		cards.MauvrionSkiesRed{},
 		cards.ShrillOfSkullformRed{},
 		testutils.YellowAttack{},
 	}
-	d := sim.New(testutils.Hero{Intel: 4}, nil, nil)
+	d := deck.New(testutils.Hero{Intel: 4}, nil, nil)
 	got := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 0}, sim.TurnState{}, h)
 	// Pitch YellowAttack (2 res) → Mauvrion (cost 0, go again, grants go-again to Shrill +
 	// appends OnHit) → Shrill (cost 2, power 4). No aura when Shrill's Play runs, so its
@@ -74,12 +75,12 @@ func TestBest_MauvrionLikelyHitRunebladeAttackCreditsRider(t *testing.T) {
 // Tests that a blockable Runeblade attack drops Mauvrion's Runechant rider but keeps the
 // go-again grant.
 func TestBest_MauvrionBlockableRunebladeAttackDropsRider(t *testing.T) {
-	h := []sim.Card{
+	h := []deck.Card{
 		cards.MauvrionSkiesRed{},
 		cards.ShrillOfSkullformBlue{},
 		testutils.YellowAttack{},
 	}
-	d := sim.New(testutils.Hero{Intel: 4}, nil, nil)
+	d := deck.New(testutils.Hero{Intel: 4}, nil, nil)
 	got := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 0}, sim.TurnState{}, h)
 	// Pitch YellowAttack (2 res) → Mauvrion (cost 0) → Shrill Blue (cost 2, power 2).
 	// LikelyToHit(2) is false, so the OnHit doesn't fire. Total: 2.

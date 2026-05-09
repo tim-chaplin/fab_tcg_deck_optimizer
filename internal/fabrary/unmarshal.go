@@ -13,22 +13,22 @@ import (
 	"strings"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/deck"
 )
 
-// Unmarshal parses fabrary-style deck text and returns a *sim.Deck plus a count-keyed map of
+// Unmarshal parses fabrary-style deck text and returns a *deck.Deck plus a count-keyed map of
 // deck cards whose names aren't in the optimizer's registry. Callers should surface the skipped
 // map so users aren't surprised by a silently-reduced deck. Stats aren't round-tripped.
 //
 // Arena-section entries split by lookup: weapon names land in d.Weapons, everything else lands
 // in d.Equipment (the user-managed arena list) so the round-trip preserves the full loadout.
 // A missing hero aborts: the deck can't be constructed without one.
-func Unmarshal(text string) (*sim.Deck, map[string]int, error) {
+func Unmarshal(text string) (*deck.Deck, map[string]int, error) {
 	var (
 		heroName  string
 		section   string
-		weapons   []sim.Weapon
-		cardList  []sim.Card
+		weapons   []deck.Weapon
+		cardList  []deck.Card
 		sideboard []string
 		equipment []string
 		skipped   = map[string]int{}
@@ -84,7 +84,7 @@ func Unmarshal(text string) (*sim.Deck, map[string]int, error) {
 	if !ok {
 		return nil, nil, fmt.Errorf("fabrary: unknown hero %q", heroName)
 	}
-	d := sim.New(h, weapons, cardList)
+	d := deck.New(h, weapons, cardList)
 	d.Sideboard = sideboard
 	d.Equipment = equipment
 	return d, skipped, nil
@@ -122,7 +122,7 @@ func isFooter(line string) bool {
 // appendArenaEntry routes one arena-section line. Weapons land in the weapons slice; everything
 // else lands in the equipment slice as a raw name (the optimizer doesn't model head / chest /
 // arms / legs gear). Returns the (possibly grown) weapons and equipment slices.
-func appendArenaEntry(weapons []sim.Weapon, equipment []string, name string, qty int) ([]sim.Weapon, []string) {
+func appendArenaEntry(weapons []deck.Weapon, equipment []string, name string, qty int) ([]deck.Weapon, []string) {
 	if w, ok := registry.WeaponByName(name); ok {
 		for i := 0; i < qty; i++ {
 			weapons = append(weapons, w)
@@ -141,7 +141,7 @@ func appendArenaEntry(weapons []sim.Weapon, equipment []string, name string, qty
 // appendDeckEntry routes one deck-section line. Names canonicalised through
 // fromFabraryCardName; unknown names accumulate into the skipped map (mutated in place) so
 // the caller can surface them. Returns the (possibly grown) cardList slice.
-func appendDeckEntry(cardList []sim.Card, skipped map[string]int, name string, qty int) []sim.Card {
+func appendDeckEntry(cardList []deck.Card, skipped map[string]int, name string, qty int) []deck.Card {
 	canon := fromFabraryCardName(name)
 	id, ok := registry.CardByName(canon)
 	if !ok {

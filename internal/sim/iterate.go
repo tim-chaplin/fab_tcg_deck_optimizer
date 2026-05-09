@@ -37,10 +37,10 @@ import (
 // mutation index that won, its evaluated average, the deck-after-mutation that produced
 // it, and the full DeckStats from that mutation's evaluation.
 type iterateImprovement struct {
-	idx   int
-	avg   float64
-	deck  *Deck
-	stats DeckStats
+	idx       int
+	avg       float64
+	candidate *deck.Deck
+	stats     DeckStats
 }
 
 // iterateWorkerConfig bundles every read-only parameter a worker shares with its peers so
@@ -119,7 +119,7 @@ func IterateParallel(
 	completed *atomic.Int64,
 	adaptive bool,
 	precision float64,
-) (*Deck, DeckStats, float64, int, bool) {
+) (*deck.Deck, DeckStats, float64, int, bool) {
 	if mutationWorkers <= 0 {
 		// 1 mutation worker is the empirical default — see the BenchmarkAnnealWorkerSweep
 		// table on the IterateParallel docstring for the rationale.
@@ -180,12 +180,12 @@ func IterateParallel(
 	select {
 	case imp := <-improvementCh:
 		<-workersDone
-		return imp.deck, imp.stats, imp.avg, imp.idx, true
+		return imp.candidate, imp.stats, imp.avg, imp.idx, true
 	case <-workersDone:
 		// A last-moment acceptance may have landed just before all senders returned.
 		select {
 		case imp := <-improvementCh:
-			return imp.deck, imp.stats, imp.avg, imp.idx, true
+			return imp.candidate, imp.stats, imp.avg, imp.idx, true
 		default:
 		}
 		return nil, DeckStats{}, bestAvg, -1, false
@@ -231,7 +231,7 @@ func runIterateWorker(
 			continue
 		}
 		select {
-		case improvementCh <- iterateImprovement{idx: i, avg: avg, deck: d, stats: stats}:
+		case improvementCh <- iterateImprovement{idx: i, avg: avg, candidate: d, stats: stats}:
 		default:
 			// Buffer is sized to mutationWorkers, so this default fires only if every
 			// peer already filled the channel — coordinator drains exactly one anyway.

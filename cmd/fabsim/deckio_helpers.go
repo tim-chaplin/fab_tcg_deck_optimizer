@@ -26,7 +26,7 @@ import (
 // Returns (nil, zero, err) when the file exists but can't be read or parsed: callers must NOT
 // treat that as "missing" or they'd silently overwrite a corrupt file with a random deck
 // (looping wrapper scripts would clobber a converged deck after a Ctrl-C mid-write).
-func loadExisting(path string) (*sim.Deck, sim.DeckStats, error) {
+func loadExisting(path string) (*deck.Deck, sim.DeckStats, error) {
 	data, err := os.ReadFile(path)
 	if err != nil {
 		if errors.Is(err, os.ErrNotExist) {
@@ -55,7 +55,7 @@ func loadExisting(path string) (*sim.Deck, sim.DeckStats, error) {
 // Both files are written atomically via writeFileAtomic: data lands in <path>.tmp first,
 // then os.Rename swaps it into place, so a Ctrl-C mid-write can never leave the destination
 // empty or partially written.
-func writeDeck(d *sim.Deck, stats sim.DeckStats, path string) error {
+func writeDeck(d *deck.Deck, stats sim.DeckStats, path string) error {
 	d.ApplyDefaults(deck.ViseraiDefaults)
 	data, err := deckio.Marshal(d, stats)
 	if err != nil {
@@ -111,14 +111,8 @@ func fabraryPathFor(jsonPath string) string {
 //
 // The sanitizer mutates d.Cards in place. Callers that care about the pre-sanitize score
 // for a delta warning should capture it before calling this.
-func sanitizeLoadedDeck(d *sim.Deck, maxCopies int, rng *rand.Rand, legal func(sim.Card) bool) []sim.NotImplementedReplacement {
-	// Wrap legal so the deck-package callback receives deck.Card; the predicate sees its
-	// rich sim.Card surface via the assertion every concrete card already satisfies.
-	var legalDeck func(deck.Card) bool
-	if legal != nil {
-		legalDeck = func(c deck.Card) bool { return legal(c.(sim.Card)) }
-	}
-	replaced := d.SanitizeNotImplemented(maxCopies, rng, legalDeck, registry.Registry{})
+func sanitizeLoadedDeck(d *deck.Deck, maxCopies int, rng *rand.Rand, legal func(deck.Card) bool) []deck.NotImplementedReplacement {
+	replaced := d.SanitizeNotImplemented(maxCopies, rng, legal, registry.Registry{})
 	if len(replaced) == 0 {
 		return nil
 	}
@@ -133,7 +127,7 @@ func sanitizeLoadedDeck(d *sim.Deck, maxCopies int, rng *rand.Rand, legal func(s
 // that always operate on an existing deck (eval, diff), both "missing" and "corrupt" are
 // fatal. anneal handles the distinction itself: "missing" is a valid input ("no deck yet,
 // generate one") while "corrupt" needs the loud refusal to overwrite.
-func mustLoadDeck(path string) (*sim.Deck, sim.DeckStats) {
+func mustLoadDeck(path string) (*deck.Deck, sim.DeckStats) {
 	d, stats, err := loadExisting(path)
 	if err != nil {
 		die("%v", err)
@@ -160,7 +154,7 @@ func resolveDeckPath(name string) string {
 // budget otherwise. precision is the adaptive target (SE ≤ precision/4); ignored when
 // shuffles >= 0. Returns the Evaluator alongside the stats so callers that want cache-stats
 // telemetry (eval -debug) can read it off the returned ev.
-func evaluateParallel(d *sim.Deck, shuffles int, precision float64, mp sim.Matchup, rng *rand.Rand) (sim.DeckStats, *sim.Evaluator) {
+func evaluateParallel(d *deck.Deck, shuffles int, precision float64, mp sim.Matchup, rng *rand.Rand) (sim.DeckStats, *sim.Evaluator) {
 	ev := sim.NewEvaluatorParallel(sim.DefaultWorkers())
 	if shuffles < 0 {
 		return ev.EvaluateAdaptive(d, precision, mp, rng), ev

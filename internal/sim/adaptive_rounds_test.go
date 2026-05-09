@@ -10,6 +10,7 @@ import (
 	"math/rand"
 	"testing"
 
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry"
 	. "github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/deck"
 
@@ -34,7 +35,7 @@ func TestAdaptive_RoundsToConverge(t *testing.T) {
 	// different variance profiles).
 	for _, seed := range []int64{1, 2, 3, 42, 123, 999} {
 		setupRNG := rand.New(rand.NewSource(seed))
-		baseline := Random(heroes.Viserai{}, deckSize, maxCopies, setupRNG, nil)
+		baseline := deck.Random(heroes.Viserai{}, deckSize, maxCopies, setupRNG, nil, registry.Registry{})
 		d := deck.New(baseline.Hero, baseline.Weapons, baseline.Cards)
 		ev := NewEvaluatorParallel(numWorkers)
 		stats := ev.EvaluateAdaptive(d, 0.1, Matchup{IncomingDamage: incoming}, rand.New(rand.NewSource(99)))

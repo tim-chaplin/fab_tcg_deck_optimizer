@@ -11,6 +11,7 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/deck"
 )
 
 // Card is a configurable Card implementation used across tests to build CardsRemaining /
@@ -505,7 +506,17 @@ func (g GrantSpy) Play(s *sim.TurnState, self *sim.CardState) {
 }
 
 // CardNames renders a slice of Card names for test failure messages.
-func CardNames(cs []sim.Card) []string {
+func CardNames(cs []deck.Card) []string {
+	out := make([]string, len(cs))
+	for i, c := range cs {
+		out[i] = c.(sim.Card).Name()
+	}
+	return out
+}
+
+// CardNamesSim is the []sim.Card overload of CardNames so tests holding sim slices
+// don't have to widen at the call site.
+func CardNamesSim(cs []sim.Card) []string {
 	out := make([]string, len(cs))
 	for i, c := range cs {
 		out[i] = c.Name()
