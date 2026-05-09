@@ -1,6 +1,9 @@
 package sim
 
 import (
+	"sort"
+	"strings"
+
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/deck"
 )
@@ -32,10 +35,14 @@ func newSequenceContextForTest(h Hero, pitched, deckCards []Card, resourceBudget
 
 // deckFingerprint builds a comparable summary of a deck for equality checks in tests. Hashes
 // the weapon loadout and a sorted card-count histogram so decks compare equal iff they would
-// produce identical simulations. Lives in package sim (rather than testutils) because it
-// uses the unexported weaponKey helper.
+// produce identical simulations.
 func deckFingerprint(d *deck.Deck) string {
-	s := weaponKey(d.Weapons) + "|"
+	weaponNames := make([]string, len(d.Weapons))
+	for i, w := range d.Weapons {
+		weaponNames[i] = w.Name()
+	}
+	sort.Strings(weaponNames)
+	s := strings.Join(weaponNames, ",") + "|"
 	counts := map[ids.CardID]int{}
 	for _, c := range d.Cards {
 		counts[c.ID()]++

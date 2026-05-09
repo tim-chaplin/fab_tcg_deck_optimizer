@@ -164,7 +164,7 @@ func TestAllMutations_ExcludesNotImplementedAdditions(t *testing.T) {
 		t.Fatal("ArcanicCrackleRed gained a NotImplemented marker — pick another implemented sentinel for this test")
 	}
 	d := deck.New(heroes.Viserai{}, []deck.Weapon{weapons.NebulaBlade{}}, []deck.Card{a, a, a, a})
-	for _, m := range AllMutations(d, 2, registry.Registry{}, nil) {
+	for _, m := range deck.AllMutations(d, 2, registry.Registry{}, nil) {
 		for _, c := range m.Deck.Cards {
 			if _, ok := c.(NotImplemented); ok {
 				t.Errorf("%s introduced NotImplemented card %s", m.Description, c.(Card).Name())
@@ -220,7 +220,7 @@ func TestAllMutations_ExcludesNotImplementedWeaponLoadouts(t *testing.T) {
 		t.Fatal("ArcanicCrackleRed gained a NotImplemented marker — pick another implemented sentinel for this test")
 	}
 	d := deck.New(heroes.Viserai{}, []deck.Weapon{weapons.NebulaBlade{}}, []deck.Card{a, a, a, a})
-	for _, m := range AllMutations(d, 2, registry.Registry{}, nil) {
+	for _, m := range deck.AllMutations(d, 2, registry.Registry{}, nil) {
 		for _, w := range m.Deck.Weapons {
 			if _, ok := w.(NotImplemented); ok {
 				t.Errorf("%s introduced NotImplemented weapon %s", m.Description, w.Name())
@@ -241,7 +241,7 @@ func TestAllMutations_FilterExcludesRejectedAdditions(t *testing.T) {
 	other := GetCard(ids.AetherSlashRed)
 	d := deck.New(heroes.Viserai{}, []deck.Weapon{weapons.NebulaBlade{}}, []deck.Card{cs, cs, other, other})
 
-	for i, m := range AllMutations(d, 2, registry.Registry{}, legal) {
+	for i, m := range deck.AllMutations(d, 2, registry.Registry{}, legal) {
 		bannedIn := 0
 		for _, c := range m.Deck.Cards {
 			if bannedIDs[c.ID()] {

@@ -1,4 +1,4 @@
-package sim_test
+﻿package sim_test
 
 import (
 	. "github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
@@ -19,7 +19,7 @@ func TestAllMutations_CountsAndShape(t *testing.T) {
 	b := GetCard(ids.ArcanicSpikeRed)
 	d := deck.New(heroes.Viserai{}, []deck.Weapon{weapons.NebulaBlade{}}, []deck.Card{a, a, b, b})
 
-	muts := AllMutations(d, 2, registry.Registry{}, nil)
+	muts := deck.AllMutations(d, 2, registry.Registry{}, nil)
 
 	// Weapon mutations: every loadout except the current one. Card mutations at maxCopies=2:
 	// for each of the 2 unique removals, every pool entry except self (no-op) and the other
@@ -29,7 +29,7 @@ func TestAllMutations_CountsAndShape(t *testing.T) {
 	// contribute. Use LegalPool / LegalWeapons so the counts track AllMutations's own
 	// filtering (NotImplemented cards and weapons are skipped on both sides).
 	reg := registry.Registry{}
-	loadouts := WeaponLoadouts(reg.LegalWeapons())
+	loadouts := deck.WeaponLoadouts(reg.LegalWeapons())
 	pool := reg.LegalCards()
 	wantWeaponMuts := len(loadouts) - 1
 	wantCardMuts := 2 * (len(pool) - 2)
@@ -62,8 +62,8 @@ func TestAllMutations_OddCountsAllowed(t *testing.T) {
 
 	// At maxCopies=3, each of the 2 in-deck cards (a, b) is below the cap, so "remove a, add b"
 	// (and the mirror) become legal. That's 2 more card mutations than the maxCopies=2 case.
-	mutsLow := AllMutations(d, 2, registry.Registry{}, nil)
-	mutsHigh := AllMutations(d, 3, registry.Registry{}, nil)
+	mutsLow := deck.AllMutations(d, 2, registry.Registry{}, nil)
+	mutsHigh := deck.AllMutations(d, 3, registry.Registry{}, nil)
 	if len(mutsHigh)-len(mutsLow) != 2 {
 		t.Errorf("maxCopies=3 should produce exactly 2 more mutations than maxCopies=2; got diff=%d",
 			len(mutsHigh)-len(mutsLow))
@@ -94,7 +94,7 @@ func TestAllMutations_OddCountsAllowed(t *testing.T) {
 	}
 }
 
-// TestAllMutations_PreservesSideboard pins that every derived Mutation inherits the source
+// TestAllMutations_PreservesSideboard pins that every derived mutation inherits the source
 // deck's Sideboard verbatim. Without this guarantee an anneal round would silently drop the
 // user's hand-managed sideboard as soon as it accepted a mutation and wrote the deck back.
 func TestAllMutations_PreservesSideboard(t *testing.T) {
@@ -103,7 +103,7 @@ func TestAllMutations_PreservesSideboard(t *testing.T) {
 	d := deck.New(heroes.Viserai{}, []deck.Weapon{weapons.NebulaBlade{}}, []deck.Card{a, a, b, b})
 	d.Sideboard = []string{a.Name(), b.Name(), b.Name()}
 
-	muts := AllMutations(d, 2, registry.Registry{}, nil)
+	muts := deck.AllMutations(d, 2, registry.Registry{}, nil)
 	if len(muts) == 0 {
 		t.Fatal("expected at least one mutation")
 	}
@@ -129,14 +129,14 @@ func TestAllMutations_Deterministic(t *testing.T) {
 	b := GetCard(ids.ArcanicSpikeRed)
 	d := deck.New(heroes.Viserai{}, []deck.Weapon{weapons.NebulaBlade{}}, []deck.Card{a, a, b, b})
 
-	first := AllMutations(d, 2, registry.Registry{}, nil)
-	second := AllMutations(d, 2, registry.Registry{}, nil)
+	first := deck.AllMutations(d, 2, registry.Registry{}, nil)
+	second := deck.AllMutations(d, 2, registry.Registry{}, nil)
 
 	if len(first) != len(second) {
 		t.Fatalf("mutation counts differ between calls: %d vs %d", len(first), len(second))
 	}
 	for i := range first {
-		if WeaponKey(first[i].Deck.Weapons) != WeaponKey(second[i].Deck.Weapons) {
+		if deck.WeaponKey(first[i].Deck.Weapons) != deck.WeaponKey(second[i].Deck.Weapons) {
 			t.Errorf("mutation %d weapons differ between calls", i)
 		}
 		if first[i].Description != second[i].Description {
@@ -156,7 +156,7 @@ func TestAllMutations_NoDuplicateOfSource(t *testing.T) {
 	a := GetCard(ids.ArcanicCrackleRed)
 	d := deck.New(heroes.Viserai{}, []deck.Weapon{weapons.NebulaBlade{}}, []deck.Card{a, a, a, a})
 	srcKey := DeckFingerprint(d)
-	for i, m := range AllMutations(d, 2, registry.Registry{}, nil) {
+	for i, m := range deck.AllMutations(d, 2, registry.Registry{}, nil) {
 		if DeckFingerprint(m.Deck) == srcKey {
 			t.Errorf("mutation %d equals the source deck", i)
 		}
@@ -174,7 +174,7 @@ func expectedPairMutCount(d *deck.Deck, maxCopies int) int {
 	combos := map[idPair]bool{}
 	for i := 0; i < len(d.Cards); i++ {
 		for j := i + 1; j < len(d.Cards); j++ {
-			a, b := SortedIDPair(d.Cards[i].ID(), d.Cards[j].ID())
+			a, b := deck.SortedIDPair(d.Cards[i].ID(), d.Cards[j].ID())
 			combos[idPair{a, b}] = true
 		}
 	}
@@ -185,13 +185,13 @@ func expectedPairMutCount(d *deck.Deck, maxCopies int) int {
 	}
 
 	total := 0
-	for _, p := range CardPairs {
+	for _, p := range deck.CardPairs {
 		for _, fID := range p.First {
-			if !PairAddAllowed(GetCard(fID), nil) {
+			if !deck.PairAddAllowed(GetCard(fID), registry.Registry{}, nil) {
 				continue
 			}
 			for _, sID := range p.Second {
-				if !PairAddAllowed(GetCard(sID), nil) {
+				if !deck.PairAddAllowed(GetCard(sID), registry.Registry{}, nil) {
 					continue
 				}
 				for combo := range combos {
