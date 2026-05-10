@@ -20,13 +20,16 @@ func (w fakeWeapon) Name() string { return w.name }
 func (w fakeWeapon) Hands() int   { return w.hands }
 
 // fakeCard is a tiny Card implementation. ID is the per-printing key the copy-budget
-// arithmetic operates on; DisplayName is the canonical sideboard-merge key.
+// arithmetic operates on; DisplayName is the canonical sideboard-merge key. Name fills
+// the contract slot but no test in this package reads it.
 type fakeCard struct {
 	id      ids.CardID
+	name    string
 	display string
 }
 
 func (c fakeCard) ID() ids.CardID      { return c.id }
+func (c fakeCard) Name() string        { return c.name }
 func (c fakeCard) DisplayName() string { return c.display }
 
 // fakeRegistry is the in-memory registry the tests build against.

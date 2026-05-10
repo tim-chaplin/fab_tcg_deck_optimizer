@@ -4,29 +4,17 @@
 // hooks are wired.
 package registry
 
-import "github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
+import "github.com/tim-chaplin/fab-deck-optimizer/v2/contracts"
 
-// Card is the registry-side view of a printed card: identity + display name, the bits
-// needed to index, name, and dedupe printings. Name is the printed name without pitch
-// suffix ("Aether Slash"); DisplayName includes it ("Aether Slash [R]") so all three
-// printings of one card map to distinct entries in the byName index.
-type Card interface {
-	ID() ids.CardID
-	Name() string
-	DisplayName() string
-}
+// Card and Weapon are the shared minimal contracts; concrete card / weapon types also
+// implement sim.Card / sim.Weapon's richer surface, asserted at the read site.
+type Card = contracts.Card
+type Weapon = contracts.Weapon
 
 // Hero is the registry-side view of a hero: just the printed name, used as the byName
 // lookup key.
 type Hero interface {
 	Name() string
-}
-
-// Weapon is the registry-side view of a weapon: enough to index by name and validate
-// loadouts.
-type Weapon interface {
-	Name() string
-	Hands() int
 }
 
 // NotImplemented opts a card or weapon out of the deck-construction pool because the
