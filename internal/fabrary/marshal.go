@@ -20,7 +20,7 @@ const defaultFormat = "Silver Age"
 // "Import deck" tab. The output sections are:
 //
 //   - Arena cards: weapons + d.Equipment.
-//   - Deck cards: d.Cards, pitch color suffix lowercased to match fabrary.
+//   - Deck cards: deck composition with pitch color suffix lowercased to match fabrary.
 //   - Sideboard: d.Sideboard, lowercased pitch suffix. Empty when d.Sideboard is empty.
 //
 // Callers that want the hardcoded default equipment / sideboard loadout baked in should run
@@ -42,7 +42,7 @@ func Marshal(d *deck.Deck) string {
 	b.WriteString("\n")
 
 	b.WriteString("Deck cards\n")
-	writeCounts(&b, cardCountsForExport(d.Cards))
+	writeCounts(&b, d.NameCountsTransformed(toFabraryCardName))
 
 	sideboardCounts := sideboardCountsForExport(d.Sideboard)
 	if len(sideboardCounts) > 0 {
@@ -56,14 +56,6 @@ func weaponCounts(ws []deck.Weapon) map[string]int {
 	m := make(map[string]int, len(ws))
 	for _, w := range ws {
 		m[w.Name()]++
-	}
-	return m
-}
-
-func cardCountsForExport(cs []deck.Card) map[string]int {
-	m := make(map[string]int, len(cs))
-	for _, c := range cs {
-		m[toFabraryCardName(c.DisplayName())]++
 	}
 	return m
 }
